@@ -1,14 +1,20 @@
+//
+// Copyright (C) 2011 Mark Wiebe (mwwiebe@gmail.com)
+// All rights reserved.
+//
+// This is unreleased proprietary software.
+//
 #include <dnd/dtype.hpp>
 
 #define DND_MAX_DTYPES (64)
 // The number of type IDs that have a fixed size
-#define DND_NUM_FIXEDSIZE_TYPE_IDS (float64_type_id + 1)
+#define DND_NUM_FIXEDSIZE_TYPE_IDS (sse128d_type_id + 1)
 // A bitmask that the itemsize must fit in to allow a trivial dtype
 #define DND_TRIVIAL_ITEMSIZE_MASK ((intptr_t)(((uintptr_t)(-1)) >> 18))
 
 using namespace dnd;
 
-static intptr_t static_trivial_dtype_data[] = {
+static intptr_t static_fixedsize_dtype_data[] = {
     1 + (bool_type_id << 2) +    (bool_kind << 11) +  (0 << 15) + (1 << 18),
     3 + (bool_type_id << 2) +    (bool_kind << 11) +  (0 << 15) + (1 << 18),
     1 + (int8_type_id << 2) +    (int_kind << 11) +   (0 << 15) + (1 << 18),
@@ -31,12 +37,35 @@ static intptr_t static_trivial_dtype_data[] = {
     3 + (float32_type_id << 2) + (float_kind << 11) + (2 << 15) + (4 << 18),
     1 + (float64_type_id << 2) + (float_kind << 11) + (3 << 15) + (8 << 18),
     3 + (float64_type_id << 2) + (float_kind << 11) + (3 << 15) + (8 << 18),
+    1 + (sse128f_type_id << 2) + (float_kind << 11) + (4 << 15) + (16 << 18),
+    3 + (sse128f_type_id << 2) + (float_kind << 11) + (4 << 15) + (16 << 18),
+    1 + (sse128d_type_id << 2) + (float_kind << 11) + (4 << 15) + (16 << 18),
+    3 + (sse128d_type_id << 2) + (float_kind << 11) + (4 << 15) + (16 << 18),
 };
+
+dtype::dtype(const dtype& rhs)
+    : m_data(rhs.m_data)
+{
+    // Increase the reference count to the extended data
+    if (!is_trivial()) {
+        ++m_data->m_refcount;
+    }
+}
+
+dtype::~dtype()
+{
+    // Decrease the reference count to the extended data
+    if (!is_trivial()) {
+        if (--m_data->m_refcount == 0) {
+                delete m_data;
+        }
+    }
+}
 
 dtype::dtype(int type_id)
 {
-    if (type_id >= 0 && type_id < DND_NUM_TRIVIAL_TYPE_IDS) {
-        m_data = static_trivial_dtype_data[2*type_id];
+    if (type_id >= 0 && type_id < DND_NUM_FIXEDSIZE_TYPE_IDS) {
+        m_data = static_fixedsize_dtype_data[2*type_id];
     }
     else {
         throw std::runtime_error("custom dtypes not supported yet");
@@ -45,8 +74,8 @@ dtype::dtype(int type_id)
 
 dtype::dtype(int type_id, intptr_t size)
 {
-    if (type_id >= 0 && type_id < DND_NUM_TRIVIAL_TYPE_IDS) {
-        m_data = static_trivial_dtype_data[2*type_id];
+    if (type_id >= 0 && type_id < DND_NUM_FIXEDSIZE_TYPE_IDS) {
+        m_data = static_fixedsize_dtype_data[2*type_id];
         if (itemsize() != size) {
             throw std::runtime_error("invalid itemsize for given type ID");
         }
@@ -63,6 +92,7 @@ dtype::dtype(int type_id, intptr_t size)
         // Otherwise allocate an extended_dtype
         else {
             m_data = new extended_dtype();
+            m_data->m_refcount = 1;
             m_data->m_type_id = utf8_type_id;
             m_data->m_kind = string_kind;
             m_data->m_itemsize = size;

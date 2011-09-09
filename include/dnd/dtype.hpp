@@ -1,3 +1,9 @@
+//
+// Copyright (C) 2011 Mark Wiebe (mwwiebe@gmail.com)
+// All rights reserved.
+//
+// This is unreleased proprietary software.
+//
 #ifndef _DTYPE_HPP_
 #define _DTYPE_HPP_
 
@@ -12,23 +18,37 @@ enum dtype_kind {
     float_kind,
     complex_kind,
     string_kind,
+    // For struct_type_id and subarray_type_id
+    composite_kind,
     // For use when it becomes possible to register custom dtypes
     custom_kind
 };
 
 enum {
+    // A 1-byte boolean type
     bool_type_id,
+    // Signed integer types
     int8_type_id,
     int16_type_id,
     int32_type_id,
     int64_type_id,
+    // Unsigned integer types
     uint8_type_id,
     uint16_type_id,
     uint32_type_id,
     uint64_type_id,
+    // Floating point types
     float32_type_id,
     float64_type_id,
+    // SSE vector of 4 floats
+    sse128f_type_id,
+    // SSE2 vector of 2 doubles
+    sse128d_type_id,
+    // UTF8 strings
     utf8_type_id,
+    // Composite dtypes
+    struct_type_id,
+    subarray_type_id
 };
 
 // Type trait for the type numbers
@@ -73,6 +93,9 @@ template <> struct type_id_of<double> {
 // than a type_id, kind, and itemsize, and endianness.
 class extended_dtype {
 public:
+    // TODO: should be replaced by C++11 atomic<int>
+    int m_refcount;
+
     int m_type_id;
     dtype_kind m_kind;
     intptr_t m_itemsize;
@@ -89,12 +112,16 @@ public:
 //   * An extended dtype mode, where m_data points to an object
 //     of type 'extended_dtype', which contains extra data about
 //     the dtype.
-//     
 class dtype {
 private:
+    // NOTE: Could perhaps use an anonymous union of this pointer
+    //       and a bitfield, but it seems that the bitfield doesn't
+    //       guarantee the layout of its members, which is important here.
     extended_dtype *m_data;
 
 public:
+    dtype(const dtype& rhs);
+
     // Construct from a type ID
     explicit dtype(int type_id);
     // Construct from a type ID and itemsize
@@ -103,11 +130,7 @@ public:
     // created with 'new', and the dtype assumes ownership of it.
     explicit dtype(extended_dtype *exdata);
 
-    ~dtype() {
-        if (!is_trivial()) {
-            delete m_data;
-        }
-    }
+    ~dtype();
 
     // Trivial mode is signaled by an odd pointer, something
     // which never occurs by default.
@@ -172,10 +195,11 @@ public:
 
     /*
      * When the dtype isn't trivial, returns a const pointer
-     * to an extended_dtype object which contains information
-     * about the dtype.
+     * to the extended_dtype object which contains information
+     * about the dtype. This pointer is only valid during
+     * the lifetime of the dtype.
      */
-    const extended_dtype& extended() const;
+    const extended_dtype* extended() const;
 };
 
 }
