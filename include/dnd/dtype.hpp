@@ -54,6 +54,23 @@ enum {
     subarray_type_id
 };
 
+namespace detail {
+    // Simple metaprogram taking log base 2 of 1, 2, 4, and 8
+    template <int I> struct log2_x;
+    template <> struct log2_x<1> {
+        enum {value = 0};
+    };
+    template <> struct log2_x<2> {
+        enum {value = 1};
+    };
+    template <> struct log2_x<4> {
+        enum {value = 2};
+    };
+    template <> struct log2_x<8> {
+        enum {value = 3};
+    };
+}
+
 // Type trait for the type numbers
 template <typename T> struct type_id_of;
 
@@ -61,16 +78,19 @@ template <typename T> struct type_id_of;
 //template <> struct type_id_of<bool> {
 //    enum {value = bool_type_id};
 //};
-template <> struct type_id_of<int8_t> {
+template <> struct type_id_of<signed char> {
     enum {value = int8_type_id};
 };
-template <> struct type_id_of<int16_t> {
+template <> struct type_id_of<short> {
     enum {value = int16_type_id};
 };
-template <> struct type_id_of<int32_t> {
+template <> struct type_id_of<int> {
     enum {value = int32_type_id};
 };
-template <> struct type_id_of<int64_t> {
+template <> struct type_id_of<long> {
+    enum {value = int8_type_id + detail::log2_x<sizeof(long)>::value};
+};
+template <> struct type_id_of<long long> {
     enum {value = int64_type_id};
 };
 template <> struct type_id_of<uint8_t> {
@@ -79,10 +99,13 @@ template <> struct type_id_of<uint8_t> {
 template <> struct type_id_of<uint16_t> {
     enum {value = uint16_type_id};
 };
-template <> struct type_id_of<uint32_t> {
+template <> struct type_id_of<unsigned int> {
     enum {value = uint32_type_id};
 };
-template <> struct type_id_of<uint64_t> {
+template <> struct type_id_of<unsigned long> {
+    enum {value = uint8_type_id + detail::log2_x<sizeof(unsigned long)>::value};
+};
+template <> struct type_id_of<unsigned long long> {
     enum {value = uint64_type_id};
 };
 template <> struct type_id_of<float> {
@@ -147,7 +170,7 @@ public:
     bool is_byteswapped() const {
         // In the trivial case, bit 1 indicates whether it's byte-swapped
         if (is_trivial()) {
-            return (bool)(((intptr_t)m_data) >> 1);
+            return (bool)((((intptr_t)m_data) >> 1) & 1);
         }
         else {
             return m_data->m_itemsize;
@@ -208,6 +231,12 @@ public:
     const extended_dtype* extended() const;
 };
 
+// Convenience function which makes a dtype object from a template parameter
+template<class T>
+dtype mkdtype() {
+    return dtype(type_id_of<T>::value);
 }
+
+} // namespace dnd
 
 #endif//_DTYPE_HPP_
