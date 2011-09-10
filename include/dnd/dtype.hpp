@@ -12,6 +12,7 @@
 namespace dnd {
 
 enum dtype_kind {
+    generic_kind,
     bool_kind,
     int_kind,
     uint_kind,
@@ -25,6 +26,8 @@ enum dtype_kind {
 };
 
 enum {
+    // A type which can convert into anything - cannot be instantiated
+    generic_type_id,
     // A 1-byte boolean type
     bool_type_id,
     // Signed integer types
@@ -120,8 +123,8 @@ private:
     extended_dtype *m_data;
 
 public:
-    dtype(const dtype& rhs);
-
+    // Default constructor
+    dtype();
     // Construct from a type ID
     explicit dtype(int type_id);
     // Construct from a type ID and itemsize
@@ -131,6 +134,9 @@ public:
     explicit dtype(extended_dtype *exdata);
 
     ~dtype();
+
+    dtype(const dtype& rhs);
+    dtype& operator=(const dtype& rhs);
 
     // Trivial mode is signaled by an odd pointer, something
     // which never occurs by default.

@@ -6,6 +6,8 @@
 //
 #include <dnd/dtype.hpp>
 
+#include <stdexcept>
+
 #define DND_MAX_DTYPES (64)
 // The number of type IDs that have a fixed size
 #define DND_NUM_FIXEDSIZE_TYPE_IDS (sse128d_type_id + 1)
@@ -14,7 +16,14 @@
 
 using namespace dnd;
 
+// Default destructor for the extended dtype does nothing
+extended_dtype::~extended_dtype()
+{
+}
+
 static intptr_t static_fixedsize_dtype_data[] = {
+    1 + (generic_type_id << 2) + (generic_kind << 11) + (0 << 15) + (0 << 18),
+    3 + (generic_type_id << 2) + (generic_kind << 11) + (0 << 15) + (0 << 18),
     1 + (bool_type_id << 2) +    (bool_kind << 11) +  (0 << 15) + (1 << 18),
     3 + (bool_type_id << 2) +    (bool_kind << 11) +  (0 << 15) + (1 << 18),
     1 + (int8_type_id << 2) +    (int_kind << 11) +   (0 << 15) + (1 << 18),
@@ -52,6 +61,23 @@ dtype::dtype(const dtype& rhs)
     }
 }
 
+dtype& dtype::operator=(const dtype& rhs)
+{
+    // Decrease the reference count to the old extended data
+    if (!is_trivial()) {
+        if (--m_data->m_refcount == 0) {
+                delete m_data;
+        }
+    }
+
+    m_data = rhs.m_data;
+
+    // Increase the reference count to the new extended data
+    if (!rhs.is_trivial()) {
+        ++m_data->m_refcount;
+    }
+}
+
 dtype::~dtype()
 {
     // Decrease the reference count to the extended data
@@ -62,10 +88,17 @@ dtype::~dtype()
     }
 }
 
+dtype::dtype()
+{
+    // Default to a generic type
+    m_data = (extended_dtype *)(1 + (generic_type_id << 2) +
+                (generic_kind << 11) + (0 << 15) + (0 << 18));
+}
+
 dtype::dtype(int type_id)
 {
     if (type_id >= 0 && type_id < DND_NUM_FIXEDSIZE_TYPE_IDS) {
-        m_data = static_fixedsize_dtype_data[2*type_id];
+        m_data = (extended_dtype *)static_fixedsize_dtype_data[2*type_id];
     }
     else {
         throw std::runtime_error("custom dtypes not supported yet");
@@ -75,7 +108,7 @@ dtype::dtype(int type_id)
 dtype::dtype(int type_id, intptr_t size)
 {
     if (type_id >= 0 && type_id < DND_NUM_FIXEDSIZE_TYPE_IDS) {
-        m_data = static_fixedsize_dtype_data[2*type_id];
+        m_data = (extended_dtype *)static_fixedsize_dtype_data[2*type_id];
         if (itemsize() != size) {
             throw std::runtime_error("invalid itemsize for given type ID");
         }
@@ -106,7 +139,7 @@ dtype::dtype(int type_id, intptr_t size)
 }
 
 dtype::dtype(extended_dtype *exdata)
-    : m_data(exdata);
+    : m_data(exdata)
 {
 }
 

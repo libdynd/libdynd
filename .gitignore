@@ -1,0 +1,9 @@
+CMakeCache.txt
+CMakeFiles
+*.cmake
+Makefile
+
+*.swp
+
+*.a
+tests/dnd_tests
