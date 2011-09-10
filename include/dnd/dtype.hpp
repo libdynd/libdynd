@@ -173,7 +173,7 @@ public:
             return (bool)((((intptr_t)m_data) >> 1) & 1);
         }
         else {
-            return m_data->m_itemsize;
+            return m_data->m_byteswapped;
         }
     }
 
