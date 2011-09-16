@@ -8,8 +8,20 @@
 #define _DTYPE_HPP_
 
 #include <stdint.h>
+#include <iostream>
 
 namespace dnd {
+
+// A boolean class for dynamicndarray which is one-byte big
+class dnd_bool {
+    char m_value;
+public:
+    dnd_bool() {}
+    dnd_bool(bool value) : m_value(value) {}
+    operator bool() const {
+        return (bool)m_value;
+    }
+};
 
 enum dtype_kind {
     generic_kind,
@@ -54,6 +66,7 @@ enum {
     subarray_type_id
 };
 
+
 namespace detail {
     // Simple metaprogram taking log base 2 of 1, 2, 4, and 8
     template <int I> struct log2_x;
@@ -71,6 +84,7 @@ namespace detail {
     };
 }
 
+
 // Type trait for the type numbers
 template <typename T> struct type_id_of;
 
@@ -78,6 +92,9 @@ template <typename T> struct type_id_of;
 //template <> struct type_id_of<bool> {
 //    enum {value = bool_type_id};
 //};
+template <> struct type_id_of<dnd_bool> {
+    enum {value = bool_type_id};
+};
 template <> struct type_id_of<signed char> {
     enum {value = int8_type_id};
 };
@@ -114,6 +131,7 @@ template <> struct type_id_of<float> {
 template <> struct type_id_of<double> {
     enum {value = float64_type_id};
 };
+
 
 // The extended_dtype class is for dtypes which require more data
 // than a type_id, kind, and itemsize, and endianness.
@@ -170,7 +188,7 @@ public:
     bool is_byteswapped() const {
         // In the trivial case, bit 1 indicates whether it's byte-swapped
         if (is_trivial()) {
-            return (bool)((((intptr_t)m_data) >> 1) & 1);
+            return is_byteswapped_trivial();
         }
         else {
             return m_data->m_byteswapped;
@@ -184,7 +202,7 @@ public:
     int type_id() const {
         // In the trivial case, bits 2 through 10 store the type number
         if (is_trivial()) {
-            return (int)((((intptr_t)m_data) >> 2) & 0xff);
+            return type_id_trivial();
         }
         else {
             return m_data->m_type_id;
@@ -194,7 +212,7 @@ public:
     dtype_kind kind() const {
         // In the trivial case, bits 11 through 14 store the kind
         if (is_trivial()) {
-            return (dtype_kind)((((intptr_t)m_data) >> 11) & 0x0f);
+            return kind_trivial();
         }
         else {
             return m_data->m_kind;
@@ -205,7 +223,7 @@ public:
         // In the trivial case, bits 15 through 17 store the alignment,
         // which may be 1, 2, 4, 8, or 16
         if (is_trivial()) {
-            return 1 << ((((intptr_t)m_data) >> 15) & 0x07);
+            return alignment_trivial();
         }
         else {
             return m_data->m_alignment;
@@ -215,20 +233,37 @@ public:
     intptr_t itemsize() const {
         // In the trivial case, bits 18 and up store the item size
         if (is_trivial()) {
-            return (intptr_t)(((uintptr_t)m_data) >> 18);
+            return itemsize_trivial();
         }
         else {
             return m_data->m_itemsize;
         }
     }
 
-    /*
-     * When the dtype isn't trivial, returns a const pointer
-     * to the extended_dtype object which contains information
-     * about the dtype. This pointer is only valid during
-     * the lifetime of the dtype.
-     */
+    // When the dtype isn't trivial, returns a const pointer
+    // to the extended_dtype object which contains information
+    // about the dtype. This pointer is only valid during
+    // the lifetime of the dtype.
     const extended_dtype* extended() const;
+
+    // Versions of the getters which are only valid
+    // when is_trivial() returns true. Can call these
+    // to skip redundant is_trivial checks.
+    bool is_byteswapped_trivial() const {
+        return (bool)((((intptr_t)m_data) >> 1) & 1);
+    }
+    int type_id_trivial() const {
+        return (int)((((intptr_t)m_data) >> 2) & 0xff);
+    }
+    dtype_kind kind_trivial() const {
+        return (dtype_kind)((((intptr_t)m_data) >> 11) & 0x0f);
+    }
+    int alignment_trivial() const {
+        return 1 << ((((intptr_t)m_data) >> 15) & 0x07);
+    }
+    intptr_t itemsize_trivial() const {
+        return (intptr_t)(((uintptr_t)m_data) >> 18);
+    }
 };
 
 // Convenience function which makes a dtype object from a template parameter

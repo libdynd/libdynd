@@ -5,7 +5,9 @@ set(CMAKE_VERBOSE_MAKEFILE 1)
 
 set(dnd_SRC
     src/dnd/dtype.cpp
+    src/dnd/dtype_assign.cpp
     include/dnd/dtype.hpp
+    include/dnd/dtype_assign.hpp
     )
 
 include_directories(

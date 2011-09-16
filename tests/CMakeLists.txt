@@ -3,6 +3,7 @@ project(dnd_tests)
 
 set(tests_SRC
     dtype_test.cpp
+    dtype_assign_test.cpp
     )
 
 # TODO: this is awkwardly hardcoded
