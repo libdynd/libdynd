@@ -71,6 +71,8 @@ dtype& dtype::operator=(const dtype& rhs)
     if (!rhs.is_trivial()) {
         ++m_data->m_refcount;
     }
+
+    return *this;
 }
 
 dtype::~dtype()

@@ -47,11 +47,6 @@ template<> struct byteswapper<8> {
 };
 
 
-void dnd::dtype_assign(void *dst, const void *src, dtype dt)
-{
-    memcpy(dst, src, dt.itemsize());
-}
-
 // The single_assigner class assigns a single item of the known dtypes, doing casting
 // and byte swapping as necessary.
 

@@ -11,10 +11,10 @@
 
 namespace dnd {
 
-// Assign one element where src and dst have the same dtype
-void dtype_assign(void *dst, const void *src, dtype dt);
-// Assign one element where src and dst have different dtypes
+// Assign one element where src and dst may have different dtypes
 void dtype_assign(void *dst, const void *src, dtype dst_dt, dtype src_dt);
+
+// Assign 
 
 } // namespace dnd
 

@@ -3,6 +3,8 @@ project(dynamicndarray)
 
 set(CMAKE_VERBOSE_MAKEFILE 1)
 
+set(LINK_FLAGS -Wall -Wextra -Werror)
+
 set(dnd_SRC
     src/dnd/dtype.cpp
     src/dnd/dtype_assign.cpp
