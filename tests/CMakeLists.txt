@@ -2,8 +2,9 @@ cmake_minimum_required(VERSION 2.8)
 project(dnd_tests)
 
 set(tests_SRC
-    dtype_test.cpp
     dtype_assign_test.cpp
+    dtype_casting_test.cpp
+    dtype_test.cpp
     )
 
 # TODO: this is awkwardly hardcoded

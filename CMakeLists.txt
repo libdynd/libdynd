@@ -8,8 +8,10 @@ set(LINK_FLAGS -Wall -Wextra -Werror)
 set(dnd_SRC
     src/dnd/dtype.cpp
     src/dnd/dtype_assign.cpp
+    src/dnd/dtype_casting.cpp
     include/dnd/dtype.hpp
     include/dnd/dtype_assign.hpp
+    include/dnd/dtype_casting.hpp
     )
 
 include_directories(
