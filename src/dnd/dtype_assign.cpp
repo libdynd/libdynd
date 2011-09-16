@@ -67,7 +67,7 @@ template<> struct is_boolean<dnd_bool> {enum {value = true};};
 
 template<class dst_type, class src_type>
 struct single_assigner_base {
-    static void assign_unchecked(void *dst, const void *src) {
+    static void assign_noexcept(void *dst, const void *src) {
         const src_type *s = reinterpret_cast<const src_type *>(src);
         dst_type *d = reinterpret_cast<dst_type *>(dst);
 
@@ -283,7 +283,7 @@ struct single_assigner<dst_type, src_type, false, false> :
 // Specializations of single_assigner with different variants of byte-swapping
 template<class dst_type, class src_type>
 struct single_assigner<dst_type, src_type, false, true> {
-    static void assign_unchecked(void *dst, const void *src) {
+    static void assign_noexcept(void *dst, const void *src) {
         src_type s;
         dst_type *d = reinterpret_cast<dst_type *>(dst);
 
@@ -304,7 +304,7 @@ struct single_assigner<dst_type, src_type, false, true> {
 
 template<class dst_type, class src_type>
 struct single_assigner<dst_type, src_type, true, false> {
-    static void assign_unchecked(void *dst, const void *src) {
+    static void assign_noexcept(void *dst, const void *src) {
         const src_type *s = reinterpret_cast<const src_type *>(src);
         dst_type d;
 
@@ -325,7 +325,7 @@ struct single_assigner<dst_type, src_type, true, false> {
 
 template<class dst_type, class src_type>
 struct single_assigner<dst_type, src_type, true, true> {
-    static void assign_unchecked(void *dst, const void *src) {
+    static void assign_noexcept(void *dst, const void *src) {
         src_type s;
         dst_type d;
 
@@ -348,136 +348,58 @@ struct single_assigner<dst_type, src_type, true, true> {
     }
 };
 
-#define DTYPE_ASSIGN_SRC_TO_ANY(src_type, src_byteswapped, ASSIGN_FN) \
-    switch (dst_dt.type_id()) { \
-        case bool_type_id: \
-            single_assigner<dnd_bool, src_type, false, src_byteswapped>::ASSIGN_FN(dst, src); \
-            break; \
-        case int8_type_id: \
-            single_assigner<int8_t, src_type, false, src_byteswapped>::ASSIGN_FN(dst, src); \
-            break; \
-        case int16_type_id: \
-            if (dst_dt.is_byteswapped()) \
-                single_assigner<int16_t, src_type, true, src_byteswapped>::ASSIGN_FN(dst, src); \
-            else \
-                single_assigner<int16_t, src_type, false, src_byteswapped>::ASSIGN_FN(dst, src); \
-            break; \
-        case int32_type_id: \
-            if (dst_dt.is_byteswapped()) \
-                single_assigner<int32_t, src_type, true, src_byteswapped>::ASSIGN_FN(dst, src); \
-            else \
-                single_assigner<int32_t, src_type, false, src_byteswapped>::ASSIGN_FN(dst, src); \
-            break; \
-        case int64_type_id: \
-            if (dst_dt.is_byteswapped()) \
-                single_assigner<int64_t, src_type, true, src_byteswapped>::ASSIGN_FN(dst, src); \
-            else \
-                single_assigner<int64_t, src_type, false, src_byteswapped>::ASSIGN_FN(dst, src); \
-            break; \
-        case uint8_type_id: \
-            single_assigner<uint8_t, src_type, false, src_byteswapped>::ASSIGN_FN(dst, src); \
-            break; \
-        case uint16_type_id: \
-            if (dst_dt.is_byteswapped()) \
-                single_assigner<uint16_t, src_type, true, src_byteswapped>::ASSIGN_FN(dst, src); \
-            else \
-                single_assigner<uint16_t, src_type, false, src_byteswapped>::ASSIGN_FN(dst, src); \
-            break; \
-        case uint32_type_id: \
-            if (dst_dt.is_byteswapped()) \
-                single_assigner<uint32_t, src_type, true, src_byteswapped>::ASSIGN_FN(dst, src); \
-            else \
-                single_assigner<uint32_t, src_type, false, src_byteswapped>::ASSIGN_FN(dst, src); \
-            break; \
-        case uint64_type_id: \
-            if (dst_dt.is_byteswapped()) \
-                single_assigner<uint64_t, src_type, true, src_byteswapped>::ASSIGN_FN(dst, src); \
-            else \
-                single_assigner<uint64_t, src_type, false, src_byteswapped>::ASSIGN_FN(dst, src); \
-            break; \
-        case float32_type_id: \
-            if (dst_dt.is_byteswapped()) \
-                single_assigner<float, src_type, true, src_byteswapped>::ASSIGN_FN(dst, src); \
-            else \
-                single_assigner<float, src_type, false, src_byteswapped>::ASSIGN_FN(dst, src); \
-            break; \
-        case float64_type_id: \
-            if (dst_dt.is_byteswapped()) \
-                single_assigner<double, src_type, true, src_byteswapped>::ASSIGN_FN(dst, src); \
-            else \
-                single_assigner<double, src_type, false, src_byteswapped>::ASSIGN_FN(dst, src); \
-            break; \
+#define DTYPE_ASSIGN_SRC_TO_DST_ONE_CASE(dst_type, src_type, \
+                                dst_byteswapped, src_byteswapped, ASSIGN_FN) \
+    case type_id_of<dst_type>::value: \
+        single_assigner<dst_type, src_type, dst_byteswapped, src_byteswapped>::ASSIGN_FN(dst, src); \
+        return
+
+#define DTYPE_ASSIGN_SRC_TO_ANY_CASE(src_type, dst_byteswapped, src_byteswapped, ASSIGN_FN) \
+    case type_id_of<src_type>::value: \
+        switch (dst_dt.type_id()) { \
+            DTYPE_ASSIGN_SRC_TO_DST_ONE_CASE(dnd_bool, src_type, dst_byteswapped, src_byteswapped, ASSIGN_FN); \
+            DTYPE_ASSIGN_SRC_TO_DST_ONE_CASE(int8_t, src_type, dst_byteswapped, src_byteswapped, ASSIGN_FN); \
+            DTYPE_ASSIGN_SRC_TO_DST_ONE_CASE(int16_t, src_type, dst_byteswapped, src_byteswapped, ASSIGN_FN); \
+            DTYPE_ASSIGN_SRC_TO_DST_ONE_CASE(int32_t, src_type, dst_byteswapped, src_byteswapped, ASSIGN_FN); \
+            DTYPE_ASSIGN_SRC_TO_DST_ONE_CASE(int64_t, src_type, dst_byteswapped, src_byteswapped, ASSIGN_FN); \
+            DTYPE_ASSIGN_SRC_TO_DST_ONE_CASE(uint8_t, src_type, dst_byteswapped, src_byteswapped, ASSIGN_FN); \
+            DTYPE_ASSIGN_SRC_TO_DST_ONE_CASE(uint16_t, src_type, dst_byteswapped, src_byteswapped, ASSIGN_FN); \
+            DTYPE_ASSIGN_SRC_TO_DST_ONE_CASE(uint32_t, src_type, dst_byteswapped, src_byteswapped, ASSIGN_FN); \
+            DTYPE_ASSIGN_SRC_TO_DST_ONE_CASE(uint64_t, src_type, dst_byteswapped, src_byteswapped, ASSIGN_FN); \
+            DTYPE_ASSIGN_SRC_TO_DST_ONE_CASE(float, src_type, dst_byteswapped, src_byteswapped, ASSIGN_FN); \
+            DTYPE_ASSIGN_SRC_TO_DST_ONE_CASE(double, src_type, dst_byteswapped, src_byteswapped, ASSIGN_FN); \
+        } \
+        break
+
+#define DTYPE_ASSIGN_ANY_TO_ANY_SWITCH(src_byteswapped, dst_byteswapped, ASSIGN_FN) \
+    switch (src_dt.type_id()) { \
+        DTYPE_ASSIGN_SRC_TO_ANY_CASE(dnd_bool, dst_byteswapped, src_byteswapped, ASSIGN_FN); \
+        DTYPE_ASSIGN_SRC_TO_ANY_CASE(int8_t, dst_byteswapped, src_byteswapped, ASSIGN_FN); \
+        DTYPE_ASSIGN_SRC_TO_ANY_CASE(int16_t, dst_byteswapped, src_byteswapped, ASSIGN_FN); \
+        DTYPE_ASSIGN_SRC_TO_ANY_CASE(int32_t, dst_byteswapped, src_byteswapped, ASSIGN_FN); \
+        DTYPE_ASSIGN_SRC_TO_ANY_CASE(int64_t, dst_byteswapped, src_byteswapped, ASSIGN_FN); \
+        DTYPE_ASSIGN_SRC_TO_ANY_CASE(uint8_t, dst_byteswapped, src_byteswapped, ASSIGN_FN); \
+        DTYPE_ASSIGN_SRC_TO_ANY_CASE(uint16_t, dst_byteswapped, src_byteswapped, ASSIGN_FN); \
+        DTYPE_ASSIGN_SRC_TO_ANY_CASE(uint32_t, dst_byteswapped, src_byteswapped, ASSIGN_FN); \
+        DTYPE_ASSIGN_SRC_TO_ANY_CASE(uint64_t, dst_byteswapped, src_byteswapped, ASSIGN_FN); \
+        DTYPE_ASSIGN_SRC_TO_ANY_CASE(float, dst_byteswapped, src_byteswapped, ASSIGN_FN); \
+        DTYPE_ASSIGN_SRC_TO_ANY_CASE(double, dst_byteswapped, src_byteswapped, ASSIGN_FN); \
     }
 
 void dnd::dtype_assign_noexcept(void *dst, const void *src, dtype dst_dt, dtype src_dt)
 {
-    // Do the simple case if the dtypes match
-    switch (src_dt.type_id()) {
-        case bool_type_id:
-            DTYPE_ASSIGN_SRC_TO_ANY(dnd_bool, false, assign_unchecked);
-            return;
-        case int8_type_id:
-            DTYPE_ASSIGN_SRC_TO_ANY(int8_t, false, assign_unchecked);
-            return;
-        case int16_type_id:
-            if (src_dt.is_byteswapped()) {
-                DTYPE_ASSIGN_SRC_TO_ANY(int16_t, true, assign_unchecked);
-            } else {
-                DTYPE_ASSIGN_SRC_TO_ANY(int16_t, false, assign_unchecked);
-            }
-            return;
-        case int32_type_id:
-            if (src_dt.is_byteswapped()) {
-                DTYPE_ASSIGN_SRC_TO_ANY(int32_t, true, assign_unchecked);
-            } else {
-                DTYPE_ASSIGN_SRC_TO_ANY(int32_t, false, assign_unchecked);
-            }
-            return;
-        case int64_type_id:
-            if (src_dt.is_byteswapped()) {
-                DTYPE_ASSIGN_SRC_TO_ANY(int64_t, true, assign_unchecked);
-            } else {
-                DTYPE_ASSIGN_SRC_TO_ANY(int64_t, false, assign_unchecked);
-            }
-            return;
-        case uint8_type_id:
-            DTYPE_ASSIGN_SRC_TO_ANY(uint8_t, false, assign_unchecked);
-            return;
-        case uint16_type_id:
-            if (src_dt.is_byteswapped()) {
-                DTYPE_ASSIGN_SRC_TO_ANY(uint16_t, true, assign_unchecked);
-            } else {
-                DTYPE_ASSIGN_SRC_TO_ANY(uint16_t, false, assign_unchecked);
-            }
-            return;
-        case uint32_type_id:
-            if (src_dt.is_byteswapped()) {
-                DTYPE_ASSIGN_SRC_TO_ANY(uint32_t, true, assign_unchecked);
-            } else {
-                DTYPE_ASSIGN_SRC_TO_ANY(uint32_t, false, assign_unchecked);
-            }
-            return;
-        case uint64_type_id:
-            if (src_dt.is_byteswapped()) {
-                DTYPE_ASSIGN_SRC_TO_ANY(uint64_t, true, assign_unchecked);
-            } else {
-                DTYPE_ASSIGN_SRC_TO_ANY(uint64_t, false, assign_unchecked);
-            }
-            return;
-        case float32_type_id:
-            if (src_dt.is_byteswapped()) {
-                DTYPE_ASSIGN_SRC_TO_ANY(float, true, assign_unchecked);
-            } else {
-                DTYPE_ASSIGN_SRC_TO_ANY(float, false, assign_unchecked);
-            }
-            return;
-        case float64_type_id:
-            if (src_dt.is_byteswapped()) {
-                DTYPE_ASSIGN_SRC_TO_ANY(double, true, assign_unchecked);
-            } else {
-                DTYPE_ASSIGN_SRC_TO_ANY(double, false, assign_unchecked);
-            }
-            return;
+    if (src_dt.is_byteswapped()) {
+        if (dst_dt.is_byteswapped()) {
+            DTYPE_ASSIGN_ANY_TO_ANY_SWITCH(true, true, assign_noexcept);
+        } else {
+            DTYPE_ASSIGN_ANY_TO_ANY_SWITCH(false, true, assign_noexcept);
+        }
+    } else {
+        if (dst_dt.is_byteswapped()) {
+            DTYPE_ASSIGN_ANY_TO_ANY_SWITCH(true, false, assign_noexcept);
+        } else {
+            DTYPE_ASSIGN_ANY_TO_ANY_SWITCH(false, false, assign_noexcept);
+        }
     }
 
     throw std::runtime_error("this dtype assignment isn't yet supported");
@@ -491,74 +413,330 @@ void dnd::dtype_assign(void *dst, const void *src, dtype dst_dt, dtype src_dt)
         return;
     }
 
-    // Do the simple case if the dtypes match
-    switch (src_dt.type_id()) {
-        case bool_type_id:
-            DTYPE_ASSIGN_SRC_TO_ANY(dnd_bool, false, assign);
-            return;
-        case int8_type_id:
-            DTYPE_ASSIGN_SRC_TO_ANY(int8_t, false, assign);
-            return;
-        case int16_type_id:
-            if (src_dt.is_byteswapped()) {
-                DTYPE_ASSIGN_SRC_TO_ANY(int16_t, true, assign);
-            } else {
-                DTYPE_ASSIGN_SRC_TO_ANY(int16_t, false, assign);
-            }
-            return;
-        case int32_type_id:
-            if (src_dt.is_byteswapped()) {
-                DTYPE_ASSIGN_SRC_TO_ANY(int32_t, true, assign);
-            } else {
-                DTYPE_ASSIGN_SRC_TO_ANY(int32_t, false, assign);
-            }
-            return;
-        case int64_type_id:
-            if (src_dt.is_byteswapped()) {
-                DTYPE_ASSIGN_SRC_TO_ANY(int64_t, true, assign);
-            } else {
-                DTYPE_ASSIGN_SRC_TO_ANY(int64_t, false, assign);
-            }
-            return;
-        case uint8_type_id:
-            DTYPE_ASSIGN_SRC_TO_ANY(uint8_t, false, assign);
-            return;
-        case uint16_type_id:
-            if (src_dt.is_byteswapped()) {
-                DTYPE_ASSIGN_SRC_TO_ANY(uint16_t, true, assign);
-            } else {
-                DTYPE_ASSIGN_SRC_TO_ANY(uint16_t, false, assign);
-            }
-            return;
-        case uint32_type_id:
-            if (src_dt.is_byteswapped()) {
-                DTYPE_ASSIGN_SRC_TO_ANY(uint32_t, true, assign);
-            } else {
-                DTYPE_ASSIGN_SRC_TO_ANY(uint32_t, false, assign);
-            }
-            return;
-        case uint64_type_id:
-            if (src_dt.is_byteswapped()) {
-                DTYPE_ASSIGN_SRC_TO_ANY(uint64_t, true, assign);
-            } else {
-                DTYPE_ASSIGN_SRC_TO_ANY(uint64_t, false, assign);
-            }
-            return;
-        case float32_type_id:
-            if (src_dt.is_byteswapped()) {
-                DTYPE_ASSIGN_SRC_TO_ANY(float, true, assign);
-            } else {
-                DTYPE_ASSIGN_SRC_TO_ANY(float, false, assign);
-            }
-            return;
-        case float64_type_id:
-            if (src_dt.is_byteswapped()) {
-                DTYPE_ASSIGN_SRC_TO_ANY(double, true, assign);
-            } else {
-                DTYPE_ASSIGN_SRC_TO_ANY(double, false, assign);
-            }
-            return;
+    if (src_dt.is_byteswapped()) {
+        if (dst_dt.is_byteswapped()) {
+            DTYPE_ASSIGN_ANY_TO_ANY_SWITCH(true, true, assign);
+        } else {
+            DTYPE_ASSIGN_ANY_TO_ANY_SWITCH(false, true, assign);
+        }
+    } else {
+        if (dst_dt.is_byteswapped()) {
+            DTYPE_ASSIGN_ANY_TO_ANY_SWITCH(true, false, assign);
+        } else {
+            DTYPE_ASSIGN_ANY_TO_ANY_SWITCH(false, false, assign);
+        }
     }
 
     throw std::runtime_error("this dtype assignment isn't yet supported");
 }
+
+#undef DTYPE_ASSIGN_SRC_TO_DST_ONE_CASE
+#undef DTYPE_ASSIGN_SRC_TO_ANY_CASE
+#undef DTYPE_ASSIGN_ANY_TO_ANY_SWITCH
+
+// Most general assignment functions, with possibly aligned and/or byte-swapped data
+template<class dst_type, class src_type, bool aligned,
+                        bool dst_byteswapped, bool src_byteswapped>
+struct multiple_assigner {
+    static void assign_noexcept(void *dst, intptr_t dst_stride,
+                                const void *src, intptr_t src_stride,
+                                intptr_t count,
+                                auxiliary_data *)
+    {
+        char *dst_cached = reinterpret_cast<char *>(dst);
+        const char *src_cached = reinterpret_cast<const char *>(src);
+        dst_type d;
+        src_type s;
+
+        for (intptr_t i = 0; i < count; ++i) {
+            memcpy(&s, src_cached, sizeof(src_type));
+            single_assigner<dst_type, src_type, dst_byteswapped, src_byteswapped>::
+                                                            assign_noexcept(&d, &s);
+            memcpy(dst_cached, &d, sizeof(dst_type));
+            dst_cached += dst_stride;
+            src_cached += src_stride;
+        }
+    }
+
+    static void assign(void *dst, intptr_t dst_stride,
+                                const void *src, intptr_t src_stride,
+                                intptr_t count,
+                                auxiliary_data *)
+    {
+        char *dst_cached = reinterpret_cast<char *>(dst);
+        const char *src_cached = reinterpret_cast<const char *>(src);
+        dst_type d;
+        src_type s;
+
+        for (intptr_t i = 0; i < count; ++i) {
+            memcpy(&s, src_cached, sizeof(src_type));
+            single_assigner<dst_type, src_type, dst_byteswapped, src_byteswapped>::
+                                                            assign(&d, &s);
+            memcpy(dst_cached, &d, sizeof(dst_type));
+            dst_cached += dst_stride;
+            src_cached += src_stride;
+        }
+    }
+};
+
+// Aligned versions, with more specializations
+template<class dst_type, class src_type>
+struct multiple_assigner<dst_type, src_type, true, false, false> {
+    static void assign_noexcept(void *dst, intptr_t dst_stride,
+                                const void *src, intptr_t src_stride,
+                                intptr_t count,
+                                auxiliary_data *)
+    {
+        const src_type *src_cached = reinterpret_cast<const src_type *>(src);
+        dst_type *dst_cached = reinterpret_cast<dst_type *>(dst);
+        src_stride /= sizeof(src_type);
+        dst_stride /= sizeof(dst_type);
+
+        for (intptr_t i = 0; i < count; ++i) {
+            *dst_cached = static_cast<dst_type>(*src_cached);
+            dst_cached += dst_stride;
+            src_cached += src_stride;
+        }
+    }
+
+    static void assign(void *dst, intptr_t dst_stride,
+                                const void *src, intptr_t src_stride,
+                                intptr_t count,
+                                auxiliary_data *)
+    {
+        const src_type *src_cached = reinterpret_cast<const src_type *>(src);
+        dst_type *dst_cached = reinterpret_cast<dst_type *>(dst);
+        src_stride /= sizeof(src_type);
+        dst_stride /= sizeof(dst_type);
+
+        for (intptr_t i = 0; i < count; ++i) {
+            *dst_cached = static_cast<dst_type>(*src_cached);
+            single_assigner<dst_type, src_type, false, false>::assign(dst_cached, src_cached);
+            dst_cached += dst_stride;
+            src_cached += src_stride;
+        }
+    }
+
+    static void assign_noexcept_anystride_zerostride(void *dst, intptr_t dst_stride,
+                                const void *src, intptr_t,
+                                intptr_t count,
+                                auxiliary_data *)
+    {
+        dst_type src_cached = static_cast<dst_type>(*reinterpret_cast<const src_type *>(src));
+        dst_type *dst_cached = reinterpret_cast<dst_type *>(dst);
+        dst_stride /= sizeof(dst_type);
+
+        for (intptr_t i = 0; i < count; ++i) {
+            *dst_cached = src_cached;
+            dst_cached += dst_stride;
+        }
+    }
+
+    static void assign_noexcept_contigstride_zerostride(void *dst, intptr_t,
+                                const void *src, intptr_t,
+                                intptr_t count,
+                                auxiliary_data *)
+    {
+        dst_type src_cached = static_cast<dst_type>(*reinterpret_cast<const src_type *>(src));
+        dst_type *dst_cached = reinterpret_cast<dst_type *>(dst);
+
+        for (intptr_t i = 0; i < count; ++i, ++dst_cached) {
+            *dst_cached = src_cached;
+        }
+    }
+
+    static void assign_noexcept_contigstride_contigstride(void *dst, intptr_t,
+                                const void *src, intptr_t,
+                                intptr_t count,
+                                auxiliary_data *)
+    {
+        const src_type *src_cached = reinterpret_cast<const src_type *>(src);
+        dst_type *dst_cached = reinterpret_cast<dst_type *>(dst);
+
+        for (intptr_t i = 0; i < count; ++i, ++dst_cached, ++src_cached) {
+            *dst_cached = static_cast<dst_type>(*src_cached);
+        }
+    }
+};
+
+#define DTYPE_ASSIGN_SRC_TO_DST_SINGLE_CASE(dst_type, src_type, \
+                                dst_byteswapped, src_byteswapped, is_aligned, ASSIGN_FN) \
+    case type_id_of<dst_type>::value: \
+        return make_pair( \
+            &multiple_assigner<dst_type, src_type, is_aligned, dst_byteswapped, src_byteswapped>::ASSIGN_FN, \
+            (auxiliary_data *)NULL); \
+        break
+
+#define DTYPE_ASSIGN_SRC_TO_ANY_CASE(src_type, is_aligned, dst_byteswapped, src_byteswapped, ASSIGN_FN) \
+    case type_id_of<src_type>::value: \
+        switch (dst_dt.type_id()) { \
+            DTYPE_ASSIGN_SRC_TO_DST_SINGLE_CASE(dnd_bool, src_type, \
+                                    dst_byteswapped, src_byteswapped, is_aligned, ASSIGN_FN); \
+            DTYPE_ASSIGN_SRC_TO_DST_SINGLE_CASE(int8_t,   src_type, \
+                                    dst_byteswapped, src_byteswapped, is_aligned, ASSIGN_FN); \
+            DTYPE_ASSIGN_SRC_TO_DST_SINGLE_CASE(int16_t,  src_type, \
+                                    dst_byteswapped, src_byteswapped, is_aligned, ASSIGN_FN); \
+            DTYPE_ASSIGN_SRC_TO_DST_SINGLE_CASE(int32_t,  src_type, \
+                                    dst_byteswapped, src_byteswapped, is_aligned, ASSIGN_FN); \
+            DTYPE_ASSIGN_SRC_TO_DST_SINGLE_CASE(int64_t,  src_type, \
+                                    dst_byteswapped, src_byteswapped, is_aligned, ASSIGN_FN); \
+            DTYPE_ASSIGN_SRC_TO_DST_SINGLE_CASE(uint8_t,  src_type, \
+                                    dst_byteswapped, src_byteswapped, is_aligned, ASSIGN_FN); \
+            DTYPE_ASSIGN_SRC_TO_DST_SINGLE_CASE(uint16_t, src_type, \
+                                    dst_byteswapped, src_byteswapped, is_aligned, ASSIGN_FN); \
+            DTYPE_ASSIGN_SRC_TO_DST_SINGLE_CASE(uint32_t, src_type, \
+                                    dst_byteswapped, src_byteswapped, is_aligned, ASSIGN_FN); \
+            DTYPE_ASSIGN_SRC_TO_DST_SINGLE_CASE(uint64_t, src_type, \
+                                    dst_byteswapped, src_byteswapped, is_aligned, ASSIGN_FN); \
+            DTYPE_ASSIGN_SRC_TO_DST_SINGLE_CASE(float,    src_type, \
+                                    dst_byteswapped, src_byteswapped, is_aligned, ASSIGN_FN); \
+            DTYPE_ASSIGN_SRC_TO_DST_SINGLE_CASE(double,   src_type, \
+                                    dst_byteswapped, src_byteswapped, is_aligned, ASSIGN_FN); \
+        } \
+        break
+
+#define DTYPE_ASSIGN_ANY_TO_ANY_SWITCH(is_aligned, src_byteswapped, dst_byteswapped, ASSIGN_FN) \
+    switch (src_dt.type_id()) { \
+        DTYPE_ASSIGN_SRC_TO_ANY_CASE(dnd_bool, is_aligned, dst_byteswapped, src_byteswapped, ASSIGN_FN); \
+        DTYPE_ASSIGN_SRC_TO_ANY_CASE(int8_t, is_aligned, dst_byteswapped, src_byteswapped, ASSIGN_FN); \
+        DTYPE_ASSIGN_SRC_TO_ANY_CASE(int16_t, is_aligned, dst_byteswapped, src_byteswapped, ASSIGN_FN); \
+        DTYPE_ASSIGN_SRC_TO_ANY_CASE(int32_t, is_aligned, dst_byteswapped, src_byteswapped, ASSIGN_FN); \
+        DTYPE_ASSIGN_SRC_TO_ANY_CASE(int64_t, is_aligned, dst_byteswapped, src_byteswapped, ASSIGN_FN); \
+        DTYPE_ASSIGN_SRC_TO_ANY_CASE(uint8_t, is_aligned, dst_byteswapped, src_byteswapped, ASSIGN_FN); \
+        DTYPE_ASSIGN_SRC_TO_ANY_CASE(uint16_t, is_aligned, dst_byteswapped, src_byteswapped, ASSIGN_FN); \
+        DTYPE_ASSIGN_SRC_TO_ANY_CASE(uint32_t, is_aligned, dst_byteswapped, src_byteswapped, ASSIGN_FN); \
+        DTYPE_ASSIGN_SRC_TO_ANY_CASE(uint64_t, is_aligned, dst_byteswapped, src_byteswapped, ASSIGN_FN); \
+        DTYPE_ASSIGN_SRC_TO_ANY_CASE(float, is_aligned, dst_byteswapped, src_byteswapped, ASSIGN_FN); \
+        DTYPE_ASSIGN_SRC_TO_ANY_CASE(double, is_aligned, dst_byteswapped, src_byteswapped, ASSIGN_FN); \
+    }
+
+std::pair<unary_operation_t, auxiliary_data *> dnd::get_dtype_strided_assign_noexcept_operation(
+                    dtype dst_dt, intptr_t dst_fixedstride,
+                    dtype src_dt, intptr_t src_fixedstride,
+                    char align_test)
+{
+    bool is_aligned = dst_dt.is_data_aligned(align_test) && src_dt.is_data_aligned(align_test);
+    bool src_byteswapped, dst_byteswapped;
+
+    if (is_aligned && src_dt.is_trivial() && dst_dt.is_trivial()) {
+        src_byteswapped = src_dt.is_byteswapped_trivial();
+        dst_byteswapped = dst_dt.is_byteswapped_trivial();
+
+        if (!src_byteswapped && !dst_byteswapped) {
+            if (src_fixedstride == 0) {
+                if (dst_fixedstride == dst_dt.itemsize_trivial()) {
+                    DTYPE_ASSIGN_ANY_TO_ANY_SWITCH(true, false, false,
+                                        assign_noexcept_contigstride_zerostride);
+                } else {
+                    DTYPE_ASSIGN_ANY_TO_ANY_SWITCH(true, false, false,
+                                        assign_noexcept_anystride_zerostride);
+                }
+            } else if (dst_fixedstride == dst_dt.itemsize_trivial() &&
+                                src_fixedstride == src_dt.itemsize_trivial()) {
+                DTYPE_ASSIGN_ANY_TO_ANY_SWITCH(true, false, false, assign_noexcept_contigstride_contigstride);
+            }
+        }
+    } else {
+        src_byteswapped = src_dt.is_byteswapped();
+        dst_byteswapped = dst_dt.is_byteswapped();
+    }
+
+    if (is_aligned) {
+        if (dst_byteswapped) {
+            if (src_byteswapped) {
+                DTYPE_ASSIGN_ANY_TO_ANY_SWITCH(true, true, true, assign_noexcept);
+            } else {
+                DTYPE_ASSIGN_ANY_TO_ANY_SWITCH(true, true, false, assign_noexcept);
+            }
+        } else {
+            if (src_byteswapped) {
+                DTYPE_ASSIGN_ANY_TO_ANY_SWITCH(true, false, true, assign_noexcept);
+            } else {
+                DTYPE_ASSIGN_ANY_TO_ANY_SWITCH(true, false, false, assign_noexcept);
+            }
+        }
+    } else {
+        if (dst_byteswapped) {
+            if (src_byteswapped) {
+                DTYPE_ASSIGN_ANY_TO_ANY_SWITCH(false, true, true, assign_noexcept);
+            } else {
+                DTYPE_ASSIGN_ANY_TO_ANY_SWITCH(false, true, false, assign_noexcept);
+            }
+        } else {
+            if (src_byteswapped) {
+                DTYPE_ASSIGN_ANY_TO_ANY_SWITCH(false, false, true, assign_noexcept);
+            } else {
+                DTYPE_ASSIGN_ANY_TO_ANY_SWITCH(false, false, false, assign_noexcept);
+            }
+        }
+    }
+
+    throw std::runtime_error("this dtype assignment isn't yet supported");
+}
+
+std::pair<unary_operation_t, auxiliary_data *> dnd::get_dtype_strided_assign_operation(
+                    dtype dst_dt, intptr_t dst_fixedstride,
+                    dtype src_dt, intptr_t src_fixedstride,
+                    char align_test)
+{
+    bool is_aligned = dst_dt.is_data_aligned(align_test) && src_dt.is_data_aligned(align_test);
+    bool src_byteswapped, dst_byteswapped;
+
+    src_byteswapped = src_dt.is_byteswapped();
+    dst_byteswapped = dst_dt.is_byteswapped();
+
+    if (is_aligned) {
+        if (dst_byteswapped) {
+            if (src_byteswapped) {
+                DTYPE_ASSIGN_ANY_TO_ANY_SWITCH(true, true, true, assign);
+            } else {
+                DTYPE_ASSIGN_ANY_TO_ANY_SWITCH(true, true, false, assign);
+            }
+        } else {
+            if (src_byteswapped) {
+                DTYPE_ASSIGN_ANY_TO_ANY_SWITCH(true, false, true, assign);
+            } else {
+                DTYPE_ASSIGN_ANY_TO_ANY_SWITCH(true, false, false, assign);
+            }
+        }
+    } else {
+        if (dst_byteswapped) {
+            if (src_byteswapped) {
+                DTYPE_ASSIGN_ANY_TO_ANY_SWITCH(false, true, true, assign);
+            } else {
+                DTYPE_ASSIGN_ANY_TO_ANY_SWITCH(false, true, false, assign);
+            }
+        } else {
+            if (src_byteswapped) {
+                DTYPE_ASSIGN_ANY_TO_ANY_SWITCH(false, false, true, assign);
+            } else {
+                DTYPE_ASSIGN_ANY_TO_ANY_SWITCH(false, false, false, assign);
+            }
+        }
+    }
+
+    throw std::runtime_error("this dtype assignment isn't yet supported");
+}
+
+void dnd::dtype_strided_assign(void *dst, intptr_t dst_stride,
+                            void *src, intptr_t src_stride,
+                            intptr_t count,
+                            dtype dst_dt, dtype src_dt)
+{
+    std::pair<unary_operation_t, auxiliary_data *> op;
+    op = get_dtype_strided_assign_operation(dst_dt, dst_stride, src_dt, src_stride,
+                                (char)((intptr_t)dst | dst_stride | (intptr_t)src | src_stride));
+    op.first(dst, dst_stride, src, src_stride, count, op.second);
+}
+
+void dnd::dtype_strided_assign_noexcept(void *dst, intptr_t dst_stride,
+                            void *src, intptr_t src_stride,
+                            intptr_t count,
+                            dtype dst_dt, dtype src_dt)
+{
+    std::pair<unary_operation_t, auxiliary_data *> op;
+    op = get_dtype_strided_assign_noexcept_operation(dst_dt, dst_stride, src_dt, src_stride,
+                                (char)((intptr_t)dst | dst_stride | (intptr_t)src | src_stride));
+    op.first(dst, dst_stride, src, src_stride, count, op.second);
+}
+

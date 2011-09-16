@@ -189,8 +189,7 @@ public:
         // In the trivial case, bit 1 indicates whether it's byte-swapped
         if (is_trivial()) {
             return is_byteswapped_trivial();
-        }
-        else {
+        } else {
             return m_data->m_byteswapped;
         }
     }
@@ -203,8 +202,7 @@ public:
         // In the trivial case, bits 2 through 10 store the type number
         if (is_trivial()) {
             return type_id_trivial();
-        }
-        else {
+        } else {
             return m_data->m_type_id;
         }
     }
@@ -213,8 +211,7 @@ public:
         // In the trivial case, bits 11 through 14 store the kind
         if (is_trivial()) {
             return kind_trivial();
-        }
-        else {
+        } else {
             return m_data->m_kind;
         }
     }
@@ -224,8 +221,7 @@ public:
         // which may be 1, 2, 4, 8, or 16
         if (is_trivial()) {
             return alignment_trivial();
-        }
-        else {
+        } else {
             return m_data->m_alignment;
         }
     }
@@ -234,10 +230,19 @@ public:
         // In the trivial case, bits 18 and up store the item size
         if (is_trivial()) {
             return itemsize_trivial();
-        }
-        else {
+        } else {
             return m_data->m_itemsize;
         }
+    }
+
+    // Returns true if the data will always be aligned
+    // for this data type.
+    //
+    // The value in align_test should be the bitwise-OR (|)
+    // of the origin data pointer and all the strides
+    // that may be added to the data.
+    bool is_data_aligned(char align_test) const {
+        return ((char)(alignment() - 1) & align_test) == 0;
     }
 
     // When the dtype isn't trivial, returns a const pointer
