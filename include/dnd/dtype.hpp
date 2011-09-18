@@ -172,16 +172,25 @@ public:
     /** Default copy constructor */
     dtype(const dtype& rhs) = default;
     /** Default move constructor */
-    dtype(dtype&& rhs) = default;
+    //dtype(dtype&& rhs) = default;
     /** Default assignment operator */
     dtype& operator=(const dtype& rhs) = default;
     /** Default move assignment operator */
-    dtype& operator=(dtype&& rhs) = default;
+    //dtype& operator=(dtype&& rhs) = default;
 
     /** Construct from a type ID */
     explicit dtype(int type_id);
     /** Construct from a type ID and itemsize */
     explicit dtype(int type_id, intptr_t size);
+
+    void swap(dtype& rhs) {
+        std::swap(m_type_id, rhs.m_type_id);
+        std::swap(m_kind, rhs.m_kind);
+        std::swap(m_alignment, rhs.m_alignment);
+        std::swap(m_byteswapped, rhs.m_byteswapped);
+        std::swap(m_itemsize, rhs.m_itemsize);
+        m_data.swap(rhs.m_data);
+    }
 
     /** Whether the dtype is byte-swapped */
     bool is_byteswapped() const {

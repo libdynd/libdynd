@@ -1,0 +1,79 @@
+//
+// Copyright (C) 2011 Mark Wiebe (mwwiebe@gmail.com)
+// All rights reserved.
+//
+// This is unreleased proprietary software.
+//
+#include <dnd/ndarray.hpp>
+
+#include <stdexcept>
+
+using namespace std;
+using namespace dnd;
+
+dnd::ndarray::ndarray(const dtype& dt, int ndim, const dimvector& shape,
+        const dimvector& strides, intptr_t baseoffset,
+        const std::shared_ptr<membuffer>& buffer)
+    : m_dtype(dt), m_ndim(ndim), m_shape(ndim), m_strides(ndim),
+      m_baseoffset(baseoffset), m_buffer(buffer)
+{
+    memcpy(m_shape.get(), shape.get(), ndim * sizeof(intptr_t));
+    memcpy(m_strides.get(), strides.get(), ndim * sizeof(intptr_t));
+}
+
+dnd::ndarray::ndarray(const dtype& dt)
+    : m_dtype(dt), m_ndim(0), m_shape(0), m_strides(0),
+      m_baseoffset(0), m_buffer(new membuffer(dt, 1))
+{
+}
+
+dnd::ndarray::ndarray(intptr_t dim0, const dtype& dt)
+    : m_dtype(dt), m_ndim(1), m_shape(1), m_strides(1),
+      m_baseoffset(0), m_buffer(new membuffer(dt, dim0))
+{
+    m_shape[0] = dim0;
+    m_strides[0] = dt.itemsize();
+}
+
+dnd::ndarray::ndarray(intptr_t dim0, intptr_t dim1, const dtype& dt)
+    : m_dtype(dt), m_ndim(2), m_shape(2), m_strides(2),
+      m_baseoffset(0), m_buffer(new membuffer(dt, dim0*dim1))
+{
+    m_shape[0] = dim0;
+    m_shape[1] = dim1;
+    m_strides[1] = dt.itemsize();
+    m_strides[0] = m_strides[1] * dim1;
+}
+
+dnd::ndarray::ndarray(intptr_t dim0, intptr_t dim1, intptr_t dim2, const dtype& dt)
+    : m_dtype(dt), m_ndim(3), m_shape(3), m_strides(3),
+      m_baseoffset(0), m_buffer(new membuffer(dt, dim0*dim1*dim2))
+{
+    m_shape[0] = dim0;
+    m_shape[1] = dim1;
+    m_shape[1] = dim2;
+    m_strides[2] = dt.itemsize();
+    m_strides[1] = m_strides[2] * dim2;
+    m_strides[0] = m_strides[1] * dim1;
+}
+
+ndarray& dnd::ndarray::operator=(const ndarray& rhs)
+{
+    if (this != &rhs) {
+        // Create a temporary and swap, for exception safety
+        ndarray tmp(rhs.m_dtype, rhs.m_ndim, rhs.m_shape, rhs.m_strides,
+                    rhs.m_baseoffset, rhs.m_buffer);
+        tmp.swap(*this);
+    }
+    return *this;
+}
+
+void dnd::ndarray::swap(ndarray& rhs)
+{
+    m_dtype.swap(rhs.m_dtype);
+    std::swap(m_ndim, rhs.m_ndim);
+    m_shape.swap(rhs.m_shape);
+    m_strides.swap(rhs.m_strides);
+    std::swap(m_baseoffset, rhs.m_baseoffset);
+    m_buffer.swap(rhs.m_buffer);
+}

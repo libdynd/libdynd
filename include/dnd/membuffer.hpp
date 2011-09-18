@@ -39,7 +39,7 @@ public:
      *              greater than zero.
      * @param size  The number of elements in the buffer.
      */
-    membuffer(const dtype& d, intptr_t size);
+    membuffer(const dtype& dt, intptr_t size);
 
     ~membuffer();
     
