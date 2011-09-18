@@ -1,0 +1,40 @@
+Dynamic ND-Array Library Design
+-------------------------------
+
+This is a library that I (Mark Wiebe) am developing in a proprietary
+fashion, within the spirit of NumPy, but designed to be comfortable
+in C++. It's main goals are:
+
+* Have a flexible and high-performance data type mechanism, which can
+  be extended to have new data types with POD or object semantics.
+* A simple strided memory layout like NumPy, with KEEPORDER semantics
+  by default.
+* A design that's flexible enough to allow the data to be stored
+  in CPU memory, GPU memory, or distributed across a cluster in a global
+  array.
+* Delayed execution by default - all operations return views or
+  arrays with their computation deferred.
+* Include a compiler technology to take the deferred expression trees
+  and create optimized execution plans. Either directly executing the
+  expression tree, creating a compact block-based execution engine along
+  the lines of numexpr, or JITting with LLVM.
+
+Some Notes
+----------
+
+* When output parameters are used, exception safety is not guaranteed.
+  Since some operations could fail half-way through the operation,
+  guaranteeing exception safety would require making a temporary copy.
+  In the interests of efficiency, this is not done. For exception safety,
+  use just functional-style operations.
+
+Licensing
+---------
+
+Currently, I intend to control the copyright of all the code, not
+granting any licenses to anyone else. I'd like to retain the ability
+to use it freely as I'd like or open source it in a BSD or GPL license,
+so incorporating 3rd party code under non-liberal licenses is unacceptable.
+Probably I will incorporate some parts of NumPy, namely ones that I have
+contributed, but which will need to be heavily modified to become pleasant
+for C++.
