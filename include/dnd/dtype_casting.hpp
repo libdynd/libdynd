@@ -11,7 +11,7 @@
 
 namespace dnd {
 
-bool can_cast_losslessly(dtype dst_dt, dtype src_dt);
+bool can_cast_losslessly(const dtype& dst_dt, const dtype& src_dt);
 
 } // namespace dnd
 

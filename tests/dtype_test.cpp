@@ -12,7 +12,6 @@ TEST(DType, BasicConstructor) {
     dtype d;
 
     // Default-constructed dtype properties
-    EXPECT_TRUE(d.is_trivial());
     EXPECT_FALSE(d.is_byteswapped());
     EXPECT_EQ(generic_type_id, d.type_id());
     EXPECT_EQ(generic_kind, d.kind());
@@ -22,7 +21,6 @@ TEST(DType, BasicConstructor) {
 
     // bool dtype
     d = dtype(bool_type_id);
-    EXPECT_TRUE(d.is_trivial());
     EXPECT_FALSE(d.is_byteswapped());
     EXPECT_EQ(bool_type_id, d.type_id());
     EXPECT_EQ(bool_kind, d.kind());
@@ -32,7 +30,6 @@ TEST(DType, BasicConstructor) {
 
     // int8 dtype
     d = dtype(int8_type_id);
-    EXPECT_TRUE(d.is_trivial());
     EXPECT_FALSE(d.is_byteswapped());
     EXPECT_EQ(int8_type_id, d.type_id());
     EXPECT_EQ(int_kind, d.kind());
@@ -42,7 +39,6 @@ TEST(DType, BasicConstructor) {
 
     // int16 dtype
     d = dtype(int16_type_id);
-    EXPECT_TRUE(d.is_trivial());
     EXPECT_FALSE(d.is_byteswapped());
     EXPECT_EQ(int16_type_id, d.type_id());
     EXPECT_EQ(int_kind, d.kind());
@@ -52,7 +48,6 @@ TEST(DType, BasicConstructor) {
 
     // int32 dtype
     d = dtype(int32_type_id, 4);
-    EXPECT_TRUE(d.is_trivial());
     EXPECT_FALSE(d.is_byteswapped());
     EXPECT_EQ(int32_type_id, d.type_id());
     EXPECT_EQ(int_kind, d.kind());
@@ -61,8 +56,7 @@ TEST(DType, BasicConstructor) {
     EXPECT_EQ(NULL, d.extended());
 
     // int
-    d = mkdtype<int>();
-    EXPECT_TRUE(d.is_trivial());
+    d = make_dtype<int>();
     EXPECT_FALSE(d.is_byteswapped());
     EXPECT_EQ(int32_type_id, d.type_id());
     EXPECT_EQ(int_kind, d.kind());
@@ -71,8 +65,7 @@ TEST(DType, BasicConstructor) {
     EXPECT_EQ(NULL, d.extended());
 
     // long
-    d = mkdtype<long>();
-    EXPECT_TRUE(d.is_trivial());
+    d = make_dtype<long>();
     EXPECT_FALSE(d.is_byteswapped());
     EXPECT_EQ(int_kind, d.kind());
     EXPECT_EQ(sizeof(long), d.alignment());
@@ -80,8 +73,7 @@ TEST(DType, BasicConstructor) {
     EXPECT_EQ(NULL, d.extended());
 
     // long long
-    d = mkdtype<long long>();
-    EXPECT_TRUE(d.is_trivial());
+    d = make_dtype<long long>();
     EXPECT_FALSE(d.is_byteswapped());
     EXPECT_EQ(int64_type_id, d.type_id());
     EXPECT_EQ(int_kind, d.kind());
@@ -90,8 +82,7 @@ TEST(DType, BasicConstructor) {
     EXPECT_EQ(NULL, d.extended());
 
     // unsigned int
-    d = mkdtype<unsigned int>();
-    EXPECT_TRUE(d.is_trivial());
+    d = make_dtype<unsigned int>();
     EXPECT_FALSE(d.is_byteswapped());
     EXPECT_EQ(uint32_type_id, d.type_id());
     EXPECT_EQ(uint_kind, d.kind());
@@ -100,8 +91,7 @@ TEST(DType, BasicConstructor) {
     EXPECT_EQ(NULL, d.extended());
 
     // unsigned long
-    d = mkdtype<unsigned long>();
-    EXPECT_TRUE(d.is_trivial());
+    d = make_dtype<unsigned long>();
     EXPECT_FALSE(d.is_byteswapped());
     EXPECT_EQ(uint_kind, d.kind());
     EXPECT_EQ(sizeof(unsigned long), d.alignment());
@@ -109,8 +99,7 @@ TEST(DType, BasicConstructor) {
     EXPECT_EQ(NULL, d.extended());
 
     // unsigned long long
-    d = mkdtype<unsigned long long>();
-    EXPECT_TRUE(d.is_trivial());
+    d = make_dtype<unsigned long long>();
     EXPECT_FALSE(d.is_byteswapped());
     EXPECT_EQ(uint64_type_id, d.type_id());
     EXPECT_EQ(uint_kind, d.kind());
@@ -127,7 +116,6 @@ TEST(DType, UTF8Constructor) {
 
     // UTF8 with various string sizes
     d = dtype(utf8_type_id, 3);
-    EXPECT_TRUE(d.is_trivial());
     EXPECT_FALSE(d.is_byteswapped());
     EXPECT_EQ(utf8_type_id, d.type_id());
     EXPECT_EQ(string_kind, d.kind());
@@ -136,7 +124,6 @@ TEST(DType, UTF8Constructor) {
     EXPECT_EQ(NULL, d.extended());
 
     d = dtype(utf8_type_id, 129);
-    EXPECT_TRUE(d.is_trivial());
     EXPECT_FALSE(d.is_byteswapped());
     EXPECT_EQ(utf8_type_id, d.type_id());
     EXPECT_EQ(string_kind, d.kind());
@@ -146,13 +133,12 @@ TEST(DType, UTF8Constructor) {
 
     // If the size is big enough, needs to use an extended_dtype
     d = dtype(utf8_type_id, ((intptr_t)1 << (8*sizeof(intptr_t)-2)));
-    EXPECT_FALSE(d.is_trivial());
     EXPECT_FALSE(d.is_byteswapped());
     EXPECT_EQ(utf8_type_id, d.type_id());
     EXPECT_EQ(string_kind, d.kind());
     EXPECT_EQ(1, d.alignment());
     EXPECT_EQ(((intptr_t)1 << (8*sizeof(intptr_t)-2)), d.itemsize());
-    EXPECT_NE((void *)NULL, d.extended());
+    EXPECT_EQ(NULL, d.extended());
 
     // Can't specify a negative size
     EXPECT_THROW(dtype(utf8_type_id, -13), runtime_error);

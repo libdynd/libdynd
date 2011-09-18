@@ -10,16 +10,22 @@
 #include <stdexcept>
 #include <cstring>
 
+using namespace std;
 using namespace dnd;
 
 // Returns true if the destination dtype can represent *all* the values
 // of the source dtype, false otherwise.
-bool dnd::can_cast_losslessly(dtype dst_dt, dtype src_dt)
+bool dnd::can_cast_losslessly(const dtype& dst_dt, const dtype& src_dt)
 {
-    if (dst_dt.is_trivial() && src_dt.is_trivial()) {
-        switch (src_dt.kind_trivial()) {
+    const extended_dtype *dst_ext, *src_ext;
+
+    dst_ext = dst_dt.extended();
+    src_ext = src_dt.extended();
+
+    if (dst_ext == NULL && src_ext == NULL) {
+        switch (src_dt.kind()) {
             case bool_kind:
-                switch (dst_dt.kind_trivial()) {
+                switch (dst_dt.kind()) {
                     case bool_kind:
                     case int_kind:
                     case uint_kind:
@@ -27,92 +33,101 @@ bool dnd::can_cast_losslessly(dtype dst_dt, dtype src_dt)
                     case complex_kind:
                         return true;
                     case string_kind:
-                        return dst_dt.itemsize_trivial() > 0;
+                        return dst_dt.itemsize() > 0;
                     default:
                         break;
                 }
                 break;
             case int_kind:
-                switch (dst_dt.kind_trivial()) {
+                switch (dst_dt.kind()) {
+                    case bool_kind:
+                        return false;
                     case int_kind:
-                        return dst_dt.itemsize_trivial() >= src_dt.itemsize_trivial();
+                        return dst_dt.itemsize() >= src_dt.itemsize();
                     case uint_kind:
                         return false;
                     case float_kind:
-                        return dst_dt.itemsize_trivial() > src_dt.itemsize_trivial();
+                        return dst_dt.itemsize() > src_dt.itemsize();
                     case complex_kind:
-                        return dst_dt.itemsize_trivial() > 2 * src_dt.itemsize_trivial();
+                        return dst_dt.itemsize() > 2 * src_dt.itemsize();
                     case string_kind:
                         // Conservative value for 64-bit, could
                         // check speciifically based on the type_id.
-                        return dst_dt.itemsize_trivial() >= 21;
+                        return dst_dt.itemsize() >= 21;
                     default:
                         break;
                 }
                 break;
             case uint_kind:
-                switch (dst_dt.kind_trivial()) {
+                switch (dst_dt.kind()) {
+                    case bool_kind:
+                        return false;
                     case int_kind:
-                        return dst_dt.itemsize_trivial() > src_dt.itemsize_trivial();
+                        return dst_dt.itemsize() > src_dt.itemsize();
                     case uint_kind:
-                        return dst_dt.itemsize_trivial() >= src_dt.itemsize_trivial();
+                        return dst_dt.itemsize() >= src_dt.itemsize();
                     case float_kind:
-                        return dst_dt.itemsize_trivial() > src_dt.itemsize_trivial();
+                        return dst_dt.itemsize() > src_dt.itemsize();
                     case complex_kind:
-                        return dst_dt.itemsize_trivial() > 2 * src_dt.itemsize_trivial();
+                        return dst_dt.itemsize() > 2 * src_dt.itemsize();
                     case string_kind:
                         // Conservative value for 64-bit, could
                         // check speciifically based on the type_id.
-                        return dst_dt.itemsize_trivial() >= 21;
+                        return dst_dt.itemsize() >= 21;
                     default:
                         break;
                 }
                 break;
             case float_kind:
-                switch (dst_dt.kind_trivial()) {
+                switch (dst_dt.kind()) {
+                    case bool_kind:
                     case int_kind:
                     case uint_kind:
                         return false;
                     case float_kind:
-                        return dst_dt.itemsize_trivial() >= src_dt.itemsize_trivial();
+                        return dst_dt.itemsize() >= src_dt.itemsize();
                     case complex_kind:
-                        return dst_dt.itemsize_trivial() >= 2 * src_dt.itemsize_trivial();
+                        return dst_dt.itemsize() >= 2 * src_dt.itemsize();
                     case string_kind:
-                        return dst_dt.itemsize_trivial() >= 32;
+                        return dst_dt.itemsize() >= 32;
                     default:
                         break;
                 }
             case complex_kind:
-                switch (dst_dt.kind_trivial()) {
+                switch (dst_dt.kind()) {
+                    case bool_kind:
                     case int_kind:
                     case uint_kind:
                     case float_kind:
                         return false;
                     case complex_kind:
-                        return dst_dt.itemsize_trivial() >= src_dt.itemsize_trivial();
+                        return dst_dt.itemsize() >= src_dt.itemsize();
                     case string_kind:
-                        return dst_dt.itemsize_trivial() >= 64;
+                        return dst_dt.itemsize() >= 64;
                     default:
                         break;
                 }
             case string_kind:
-                switch (dst_dt.kind_trivial()) {
+                switch (dst_dt.kind()) {
+                    case bool_kind:
                     case int_kind:
                     case uint_kind:
                     case float_kind:
                     case complex_kind:
                         return false;
                     case string_kind:
-                        return src_dt.type_id_trivial() == dst_dt.type_id_trivial() &&
-                                dst_dt.itemsize_trivial() >= src_dt.itemsize_trivial();
+                        return src_dt.type_id() == dst_dt.type_id() &&
+                                dst_dt.itemsize() >= src_dt.itemsize();
                     default:
                         break;
                 }
             default:
                 break;
         }
+
+        throw std::runtime_error("unhandled built-in case in can_cast_losslessly");
     }
 
-    // TODO: Add more rules, mechanism for custom dtypes
+    // TODO: Add virtual method to the extended_dtype to deal with other cases
     return false;
 }

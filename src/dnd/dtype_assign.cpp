@@ -618,21 +618,20 @@ std::pair<unary_operation_t, auxiliary_data *> dnd::get_dtype_strided_assign_noe
     bool is_aligned = dst_dt.is_data_aligned(align_test) && src_dt.is_data_aligned(align_test);
     bool src_byteswapped, dst_byteswapped;
 
-    if (is_aligned && src_dt.is_trivial() && dst_dt.is_trivial()) {
-        src_byteswapped = src_dt.is_byteswapped_trivial();
-        dst_byteswapped = dst_dt.is_byteswapped_trivial();
+    if (is_aligned && src_dt.extended() == NULL && dst_dt.extended() == NULL) {
+        src_byteswapped = src_dt.is_byteswapped();
+        dst_byteswapped = dst_dt.is_byteswapped();
 
         if (!src_byteswapped && !dst_byteswapped) {
             if (src_fixedstride == 0) {
-                if (dst_fixedstride == dst_dt.itemsize_trivial()) {
+                if (dst_fixedstride == dst_dt.itemsize()) {
                     DTYPE_ASSIGN_ANY_TO_ANY_SWITCH(true, false, false,
                                         assign_noexcept_contigstride_zerostride);
                 } else {
                     DTYPE_ASSIGN_ANY_TO_ANY_SWITCH(true, false, false,
                                         assign_noexcept_anystride_zerostride);
                 }
-            } else if (dst_fixedstride == dst_dt.itemsize_trivial() &&
-                                src_fixedstride == src_dt.itemsize_trivial()) {
+            } else if (dst_fixedstride == dst_dt.itemsize() && src_fixedstride == src_dt.itemsize()) {
                 DTYPE_ASSIGN_ANY_TO_ANY_SWITCH(true, false, false, assign_noexcept_contigstride_contigstride);
             }
         }

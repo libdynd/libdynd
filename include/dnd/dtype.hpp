@@ -9,6 +9,8 @@
 
 #include <stdint.h>
 #include <iostream>
+// For shared_ptr
+#include <memory>
 
 namespace dnd {
 
@@ -140,140 +142,103 @@ public:
     // TODO: should be replaced by C++11 atomic<int>
     int m_refcount;
 
-    int m_type_id;
-    dtype_kind m_kind;
-    intptr_t m_itemsize;
-    int m_alignment;
-    bool m_byteswapped;
-
     virtual ~extended_dtype();
 };
 
-//
-// The dtype class operates in two ways:
-//   * Trivial mode, where the type info is encoded
-//     in 'm_data' directly.
-//   * An extended dtype mode, where m_data points to an object
-//     of type 'extended_dtype', which contains extra data about
-//     the dtype.
+/**
+ * This class represents a data type.
+ *
+ * The purpose of this data type is to describe the data layout
+ * of elements in ndarrays. The class stores a number of common
+ * properties, like a type id, a kind, an alignment, a byte-swapped
+ * flag, and an itemsize. Some data types have additional data
+ * which is stored as a dynamically allocated extended_dtype object.
+ *
+ * For the simple built-in dtypes, no extended data is needed, in
+ * which case this is entirely a value type with no allocated memory.
+ *
+ */
 class dtype {
 private:
-    // NOTE: Could perhaps use an anonymous union of this pointer
-    //       and a bitfield, but it seems that the bitfield doesn't
-    //       guarantee the layout of its members, which is important here.
-    extended_dtype *m_data;
+    unsigned char m_type_id, m_kind, m_alignment, m_byteswapped;
+    intptr_t m_itemsize;
+    std::shared_ptr<extended_dtype> m_data;
+
+    bool set_to_type_id(int type_id);
 
 public:
-    // Default constructor
+    /** Constructor */
     dtype();
-    // Construct from a type ID
+    /** Default copy constructor */
+    dtype(const dtype& rhs) = default;
+    /** Default move constructor */
+    dtype(dtype&& rhs) = default;
+    /** Default assignment operator */
+    dtype& operator=(const dtype& rhs) = default;
+    /** Default move assignment operator */
+    dtype& operator=(dtype&& rhs) = default;
+
+    /** Construct from a type ID */
     explicit dtype(int type_id);
-    // Construct from a type ID and itemsize
+    /** Construct from a type ID and itemsize */
     explicit dtype(int type_id, intptr_t size);
-    // Construct from extended_dtype data. 'exdata' must have been
-    // created with 'new', and the dtype assumes ownership of it.
-    explicit dtype(extended_dtype *exdata);
 
-    ~dtype();
-
-    dtype(const dtype& rhs);
-    dtype& operator=(const dtype& rhs);
-
-    // Trivial mode is signaled by an odd pointer, something
-    // which never occurs by default.
-    bool is_trivial() const {
-        return ((intptr_t)m_data & 1) == 1;
-    }
-
+    /** Whether the dtype is byte-swapped */
     bool is_byteswapped() const {
-        // In the trivial case, bit 1 indicates whether it's byte-swapped
-        if (is_trivial()) {
-            return is_byteswapped_trivial();
-        } else {
-            return m_data->m_byteswapped;
-        }
+        return (bool)m_byteswapped;
     }
 
-    // The type number is an enumeration of data types, starting
-    // at 0, with one value for each unique data type. This is
-    // inspired by the approach in NumPy, and the intention is
-    // to have the default
+    /**
+     * The type number is an enumeration of data types, starting
+     * at 0, with one value for each unique data type. This is
+     * inspired by the approach in NumPy, and the intention is
+     * to have the default
+     */
     int type_id() const {
-        // In the trivial case, bits 2 through 10 store the type number
-        if (is_trivial()) {
-            return type_id_trivial();
-        } else {
-            return m_data->m_type_id;
-        }
+        return m_type_id;
     }
 
+    /** The 'kind' of the dtype (int, uint, float, etc) */
     dtype_kind kind() const {
-        // In the trivial case, bits 11 through 14 store the kind
-        if (is_trivial()) {
-            return kind_trivial();
-        } else {
-            return m_data->m_kind;
-        }
+        return (dtype_kind)m_kind;
     }
 
+    /** The alignment of the dtype */
     int alignment() const {
-        // In the trivial case, bits 15 through 17 store the alignment,
-        // which may be 1, 2, 4, 8, or 16
-        if (is_trivial()) {
-            return alignment_trivial();
-        } else {
-            return m_data->m_alignment;
-        }
+        return m_alignment;
     }
 
+    /** The item size of the dtype */
     intptr_t itemsize() const {
-        // In the trivial case, bits 18 and up store the item size
-        if (is_trivial()) {
-            return itemsize_trivial();
-        } else {
-            return m_data->m_itemsize;
-        }
+        return m_itemsize;
     }
 
-    // Returns true if the data will always be aligned
-    // for this data type.
-    //
-    // The value in align_test should be the bitwise-OR (|)
-    // of the origin data pointer and all the strides
-    // that may be added to the data.
+    /**
+     * Returns true if the data will always be aligned
+     * for this data type.
+     *
+     * @param align_test  This value should be the bitwise-OR (|)
+     *                    of the origin data pointer and all the strides
+     *                    that may be added to the data.
+     */
     bool is_data_aligned(char align_test) const {
-        return ((char)(alignment() - 1) & align_test) == 0;
+        return ((char)(m_alignment - 1) & align_test) == 0;
     }
 
-    // When the dtype isn't trivial, returns a const pointer
-    // to the extended_dtype object which contains information
-    // about the dtype. This pointer is only valid during
-    // the lifetime of the dtype.
-    const extended_dtype* extended() const;
-
-    // Versions of the getters which are only valid
-    // when is_trivial() returns true. Can call these
-    // to skip redundant is_trivial checks.
-    bool is_byteswapped_trivial() const {
-        return (bool)((((intptr_t)m_data) >> 1) & 1);
-    }
-    int type_id_trivial() const {
-        return (int)((((intptr_t)m_data) >> 2) & 0xff);
-    }
-    dtype_kind kind_trivial() const {
-        return (dtype_kind)((((intptr_t)m_data) >> 11) & 0x0f);
-    }
-    int alignment_trivial() const {
-        return 1 << ((((intptr_t)m_data) >> 15) & 0x07);
-    }
-    intptr_t itemsize_trivial() const {
-        return (intptr_t)(((uintptr_t)m_data) >> 18);
+    /**
+     * Returns a const pointer to the extended_dtype object which
+     * contains information about the dtype, or NULL if no extended
+     * dtype information exists. The returned pointer is only valid during
+     * the lifetime of the dtype.
+     */
+    const extended_dtype* extended() const {
+        return m_data.get();
     }
 };
 
 // Convenience function which makes a dtype object from a template parameter
 template<class T>
-dtype mkdtype() {
+dtype make_dtype() {
     return dtype(type_id_of<T>::value);
 }
 
