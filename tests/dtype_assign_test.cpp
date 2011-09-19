@@ -27,74 +27,56 @@ TEST(DTypeAssign, FixedSizeTestsNoExcept) {
     s_dt = dtype(bool_type_id);
     s_ptr = &v_b;
     v_b = true;
-    dtype_assign_noexcept(&v_i8, s_ptr, dtype(int8_type_id), s_dt);
-    EXPECT_EQ(1, v_i8);
-    dtype_assign_noexcept(&v_i16, s_ptr, dtype(int16_type_id), s_dt);
-    EXPECT_EQ(1, v_i16);
-    dtype_assign_noexcept(&v_i32, s_ptr, dtype(int32_type_id), s_dt);
-    EXPECT_EQ(1, v_i32);
-    dtype_assign_noexcept(&v_i64, s_ptr, dtype(int64_type_id), s_dt);
-    EXPECT_EQ(1, v_i64);
-    dtype_assign_noexcept(&v_u8, s_ptr, dtype(uint8_type_id), s_dt);
-    EXPECT_EQ(1, v_u8);
-    dtype_assign_noexcept(&v_u16, s_ptr, dtype(uint16_type_id), s_dt);
-    EXPECT_EQ(1, v_u16);
-    dtype_assign_noexcept(&v_u32, s_ptr, dtype(uint32_type_id), s_dt);
-    EXPECT_EQ(1, v_u32);
-    dtype_assign_noexcept(&v_u64, s_ptr, dtype(uint64_type_id), s_dt);
-    EXPECT_EQ(1, v_u64);
-    dtype_assign_noexcept(&v_f32, s_ptr, dtype(float32_type_id), s_dt);
-    EXPECT_EQ(1, v_f32);
-    dtype_assign_noexcept(&v_f64, s_ptr, dtype(float64_type_id), s_dt);
-    EXPECT_EQ(1, v_f64);
+#define ONE_TEST(tid, v) \
+            dtype_assign_noexcept(dtype(tid), &v, s_dt, s_ptr); \
+            EXPECT_EQ(1, v)
+    ONE_TEST(int8_type_id, v_i8);
+    ONE_TEST(int16_type_id, v_i16);
+    ONE_TEST(int32_type_id, v_i32);
+    ONE_TEST(int64_type_id, v_i64);
+    ONE_TEST(uint8_type_id, v_u8);
+    ONE_TEST(uint16_type_id, v_u16);
+    ONE_TEST(uint32_type_id, v_u32);
+    ONE_TEST(uint64_type_id, v_u64);
+    ONE_TEST(float32_type_id, v_f32);
+    ONE_TEST(float64_type_id, v_f64);
+#undef ONE_TEST
 
     s_dt = dtype(int8_type_id);
     s_ptr = &v_i8;
     v_i8 = 127;
-    dtype_assign_noexcept(&v_b, s_ptr, dtype(bool_type_id), s_dt);
-    EXPECT_EQ(true, v_b);
-    dtype_assign_noexcept(&v_i16, s_ptr, dtype(int16_type_id), s_dt);
-    EXPECT_EQ(127, v_i16);
-    dtype_assign_noexcept(&v_i32, s_ptr, dtype(int32_type_id), s_dt);
-    EXPECT_EQ(127, v_i32);
-    dtype_assign_noexcept(&v_i64, s_ptr, dtype(int64_type_id), s_dt);
-    EXPECT_EQ(127, v_i64);
-    dtype_assign_noexcept(&v_u8, s_ptr, dtype(uint8_type_id), s_dt);
-    EXPECT_EQ(127, v_u8);
-    dtype_assign_noexcept(&v_u16, s_ptr, dtype(uint16_type_id), s_dt);
-    EXPECT_EQ(127, v_u16);
-    dtype_assign_noexcept(&v_u32, s_ptr, dtype(uint32_type_id), s_dt);
-    EXPECT_EQ(127, v_u32);
-    dtype_assign_noexcept(&v_u64, s_ptr, dtype(uint64_type_id), s_dt);
-    EXPECT_EQ(127, v_u64);
-    dtype_assign_noexcept(&v_f32, s_ptr, dtype(float32_type_id), s_dt);
-    EXPECT_EQ(127, v_f32);
-    dtype_assign_noexcept(&v_f64, s_ptr, dtype(float64_type_id), s_dt);
-    EXPECT_EQ(127, v_f64);
+#define ONE_TEST(tid, v, m) \
+            dtype_assign_noexcept(dtype(tid), &v, s_dt, s_ptr); \
+            EXPECT_EQ(m, v)
+    ONE_TEST(bool_type_id, v_b, true);
+    ONE_TEST(int16_type_id, v_i16, 127);
+    ONE_TEST(int32_type_id, v_i32, 127);
+    ONE_TEST(int64_type_id, v_i64, 127);
+    ONE_TEST(uint8_type_id, v_u8, 127);
+    ONE_TEST(uint16_type_id, v_u16, 127);
+    ONE_TEST(uint32_type_id, v_u32, 127);
+    ONE_TEST(uint64_type_id, v_u64, 127);
+    ONE_TEST(float32_type_id, v_f32, 127);
+    ONE_TEST(float64_type_id, v_f64, 127);
+#undef ONE_TEST
 
     s_dt = dtype(float64_type_id);
     s_ptr = &v_f64;
     v_f64 = -10.25;
-    dtype_assign_noexcept(&v_b, s_ptr, dtype(bool_type_id), s_dt);
-    EXPECT_EQ(v_b, true);
-    dtype_assign_noexcept(&v_i16, s_ptr, dtype(int16_type_id), s_dt);
-    EXPECT_EQ(v_i16, -10);
-    dtype_assign_noexcept(&v_i32, s_ptr, dtype(int32_type_id), s_dt);
-    EXPECT_EQ(v_i32, -10);
-    dtype_assign_noexcept(&v_i64, s_ptr, dtype(int64_type_id), s_dt);
-    EXPECT_EQ(v_i64, -10);
-    dtype_assign_noexcept(&v_u8, s_ptr, dtype(uint8_type_id), s_dt);
-    EXPECT_EQ(v_u8, (uint8_t)-10);
-    dtype_assign_noexcept(&v_u16, s_ptr, dtype(uint16_type_id), s_dt);
-    EXPECT_EQ(v_u16, (uint16_t)-10);
-    dtype_assign_noexcept(&v_u32, s_ptr, dtype(uint32_type_id), s_dt);
-    EXPECT_EQ(v_u32, (uint32_t)-10);
-    dtype_assign_noexcept(&v_u64, s_ptr, dtype(uint64_type_id), s_dt);
-    EXPECT_EQ(v_u64, (uint64_t)-10);
-    dtype_assign_noexcept(&v_f32, s_ptr, dtype(float32_type_id), s_dt);
-    EXPECT_EQ(v_f32, -10.25);
-    dtype_assign_noexcept(&v_f64, s_ptr, dtype(float64_type_id), s_dt);
-    EXPECT_EQ(v_f64, -10.25);
+#define ONE_TEST(tid, v, m) \
+            dtype_assign_noexcept(dtype(tid), &v, s_dt, s_ptr); \
+            EXPECT_EQ(m, v)
+    ONE_TEST(bool_type_id, v_b, true);
+    ONE_TEST(int8_type_id, v_i8, -10);
+    ONE_TEST(int16_type_id, v_i16, -10);
+    ONE_TEST(int32_type_id, v_i32, -10);
+    ONE_TEST(int64_type_id, v_i64, -10);
+    ONE_TEST(uint8_type_id, v_u8, (uint8_t)-10);
+    ONE_TEST(uint16_type_id, v_u16, (uint16_t)-10);
+    ONE_TEST(uint32_type_id, v_u32, (uint32_t)-10);
+    ONE_TEST(uint64_type_id, v_u64, (uint64_t)-10);
+    ONE_TEST(float32_type_id, v_f32, -10.25);
+#undef ONE_TEST
 }
 
 TEST(DTypeAssign, FixedSizeTests) {
@@ -116,85 +98,78 @@ TEST(DTypeAssign, FixedSizeTests) {
     s_dt = dtype(bool_type_id);
     s_ptr = &v_b;
     v_b = true;
-    dtype_assign(&v_i8, s_ptr, dtype(int8_type_id), s_dt);
-    EXPECT_EQ(1, v_i8);
-    dtype_assign(&v_i16, s_ptr, dtype(int16_type_id), s_dt);
-    EXPECT_EQ(1, v_i16);
-    dtype_assign(&v_i32, s_ptr, dtype(int32_type_id), s_dt);
-    EXPECT_EQ(1, v_i32);
-    dtype_assign(&v_i64, s_ptr, dtype(int64_type_id), s_dt);
-    EXPECT_EQ(1, v_i64);
-    dtype_assign(&v_u8, s_ptr, dtype(uint8_type_id), s_dt);
-    EXPECT_EQ(1, v_u8);
-    dtype_assign(&v_u16, s_ptr, dtype(uint16_type_id), s_dt);
-    EXPECT_EQ(1, v_u16);
-    dtype_assign(&v_u32, s_ptr, dtype(uint32_type_id), s_dt);
-    EXPECT_EQ(1, v_u32);
-    dtype_assign(&v_u64, s_ptr, dtype(uint64_type_id), s_dt);
-    EXPECT_EQ(1, v_u64);
-    dtype_assign(&v_f32, s_ptr, dtype(float32_type_id), s_dt);
-    EXPECT_EQ(1, v_f32);
-    dtype_assign(&v_f64, s_ptr, dtype(float64_type_id), s_dt);
-    EXPECT_EQ(1, v_f64);
+#define ONE_TEST(tid, v) \
+            dtype_assign(dtype(tid), &v, s_dt, s_ptr); \
+            EXPECT_EQ(1, v)
+    ONE_TEST(int8_type_id, v_i8);
+    ONE_TEST(int16_type_id, v_i16);
+    ONE_TEST(int32_type_id, v_i32);
+    ONE_TEST(int64_type_id, v_i64);
+    ONE_TEST(uint8_type_id, v_u8);
+    ONE_TEST(uint16_type_id, v_u16);
+    ONE_TEST(uint32_type_id, v_u32);
+    ONE_TEST(uint64_type_id, v_u64);
+    ONE_TEST(float32_type_id, v_f32);
+    ONE_TEST(float64_type_id, v_f64);
+#undef ONE_TEST
 
     s_dt = dtype(int8_type_id);
     s_ptr = &v_i8;
     v_i8 = 127;
-    EXPECT_THROW(dtype_assign(&v_b, s_ptr, dtype(bool_type_id), s_dt), runtime_error);
-    dtype_assign(&v_i16, s_ptr, dtype(int16_type_id), s_dt);
-    EXPECT_EQ(127, v_i16);
-    dtype_assign(&v_i32, s_ptr, dtype(int32_type_id), s_dt);
-    EXPECT_EQ(127, v_i32);
-    dtype_assign(&v_i64, s_ptr, dtype(int64_type_id), s_dt);
-    EXPECT_EQ(127, v_i64);
-    dtype_assign(&v_u8, s_ptr, dtype(uint8_type_id), s_dt);
-    EXPECT_EQ(127, v_u8);
-    dtype_assign(&v_u16, s_ptr, dtype(uint16_type_id), s_dt);
-    EXPECT_EQ(127, v_u16);
-    dtype_assign(&v_u32, s_ptr, dtype(uint32_type_id), s_dt);
-    EXPECT_EQ(127, v_u32);
-    dtype_assign(&v_u64, s_ptr, dtype(uint64_type_id), s_dt);
-    EXPECT_EQ(127, v_u64);
-    dtype_assign(&v_f32, s_ptr, dtype(float32_type_id), s_dt);
-    EXPECT_EQ(127, v_f32);
-    dtype_assign(&v_f64, s_ptr, dtype(float64_type_id), s_dt);
-    EXPECT_EQ(127, v_f64);
+#define ONE_TEST(tid, v, m) \
+            dtype_assign(dtype(tid), &v, s_dt, s_ptr); \
+            EXPECT_EQ(m, v)
+    EXPECT_THROW(dtype_assign(dtype(bool_type_id), &v_b, s_dt, s_ptr), runtime_error);
+    ONE_TEST(int16_type_id, v_i16, 127);
+    ONE_TEST(int32_type_id, v_i32, 127);
+    ONE_TEST(int64_type_id, v_i64, 127);
+    ONE_TEST(uint8_type_id, v_u8, 127);
+    ONE_TEST(uint16_type_id, v_u16, 127);
+    ONE_TEST(uint32_type_id, v_u32, 127);
+    ONE_TEST(uint64_type_id, v_u64, 127);
+    ONE_TEST(float32_type_id, v_f32, 127);
+    ONE_TEST(float64_type_id, v_f64, 127);
+#undef ONE_TEST
 
     v_i8 = -33;
-    EXPECT_THROW(dtype_assign(&v_b, s_ptr, dtype(bool_type_id), s_dt), runtime_error);
+    EXPECT_THROW(dtype_assign(dtype(bool_type_id), &v_b, s_dt, s_ptr), runtime_error);
     v_i8 = -1;
-    EXPECT_THROW(dtype_assign(&v_b, s_ptr, dtype(bool_type_id), s_dt), runtime_error);
+    EXPECT_THROW(dtype_assign(dtype(bool_type_id), &v_b, s_dt, s_ptr), runtime_error);
     v_i8 = 2;
-    EXPECT_THROW(dtype_assign(&v_b, s_ptr, dtype(bool_type_id), s_dt), runtime_error);
+    EXPECT_THROW(dtype_assign(dtype(bool_type_id), &v_b, s_dt, s_ptr), runtime_error);
     v_i8 = 0;
-    dtype_assign(&v_b, s_ptr, dtype(bool_type_id), s_dt);
+    dtype_assign(dtype(bool_type_id), &v_b, s_dt, s_ptr);
     EXPECT_EQ(false, v_b);
     v_i8 = 1;
-    dtype_assign(&v_b, s_ptr, dtype(bool_type_id), s_dt);
+    dtype_assign(dtype(bool_type_id), &v_b, s_dt, s_ptr);
     EXPECT_EQ(true, v_b);
 
     s_dt = dtype(float64_type_id);
     s_ptr = &v_f64;
     v_f64 = -10.25;
-    EXPECT_THROW(dtype_assign(&v_b, s_ptr, dtype(bool_type_id), s_dt), runtime_error);
-    EXPECT_THROW(dtype_assign(&v_i8, s_ptr, dtype(int8_type_id), s_dt), runtime_error);
-    EXPECT_THROW(dtype_assign(&v_i16, s_ptr, dtype(int16_type_id), s_dt), runtime_error);
-    EXPECT_THROW(dtype_assign(&v_i32, s_ptr, dtype(int32_type_id), s_dt), runtime_error);
-    EXPECT_THROW(dtype_assign(&v_i64, s_ptr, dtype(int64_type_id), s_dt), runtime_error);
-    EXPECT_THROW(dtype_assign(&v_u8, s_ptr, dtype(uint8_type_id), s_dt), runtime_error);
-    EXPECT_THROW(dtype_assign(&v_u16, s_ptr, dtype(uint16_type_id), s_dt), runtime_error);
-    EXPECT_THROW(dtype_assign(&v_u32, s_ptr, dtype(uint32_type_id), s_dt), runtime_error);
-    EXPECT_THROW(dtype_assign(&v_u64, s_ptr, dtype(uint64_type_id), s_dt), runtime_error);
-    dtype_assign(&v_f32, s_ptr, dtype(float32_type_id), s_dt);
-    EXPECT_EQ(-10.25, v_f32);
-    dtype_assign(&v_f64, s_ptr, dtype(float64_type_id), s_dt);
-    EXPECT_EQ(-10.25, v_f64);
+#define ONE_TEST(tid, v, m) \
+            dtype_assign(dtype(tid), &v, s_dt, s_ptr); \
+            EXPECT_EQ(m, v)
+#define ONE_TEST_THROW(tid, v) \
+            EXPECT_THROW(dtype_assign(dtype(tid), &v, s_dt, s_ptr), runtime_error)
+    ONE_TEST_THROW(bool_type_id, v_b);
+    ONE_TEST_THROW(int8_type_id, v_i8);
+    ONE_TEST_THROW(int16_type_id, v_i16);
+    ONE_TEST_THROW(int32_type_id, v_i32);
+    ONE_TEST_THROW(int64_type_id, v_i64);
+    ONE_TEST_THROW(uint8_type_id, v_u8);
+    ONE_TEST_THROW(uint16_type_id, v_u16);
+    ONE_TEST_THROW(uint32_type_id, v_u32);
+    ONE_TEST_THROW(uint64_type_id, v_u64);
+    ONE_TEST(float32_type_id, v_f32, -10.25);
+#undef ONE_TEST
+#undef ONE_TEST_THROW
 
     // dtype_assign checks that the float64 -> float32value gets converted exactly
     v_f64 = 1 / 3.0;
-    EXPECT_THROW(dtype_assign(&v_f32, s_ptr, dtype(float32_type_id), s_dt), runtime_error);
+    EXPECT_THROW(dtype_assign(dtype(float32_type_id), &v_f32, s_dt, s_ptr), runtime_error);
     v_f64 = 1 / 3.0f;
-    dtype_assign(&v_f32, s_ptr, dtype(float32_type_id), s_dt);
+    dtype_assign(dtype(float32_type_id), &v_f32, s_dt, s_ptr);
     EXPECT_EQ(v_f64, v_f32);
 }
 
@@ -219,99 +194,61 @@ TEST(DTypeAssign, FixedSizeTestsStridedNoExcept) {
     s_ptr = v_b;
     s_stride = sizeof(v_b[0]);
     v_b[0] = true; v_b[1] = true; v_b[2] = false; v_b[3] = true;
-    dtype_strided_assign_noexcept(v_i8, sizeof(v_i8[0]), s_ptr, s_stride, 4, dtype(int8_type_id), s_dt);
-    EXPECT_EQ(1, v_i8[0]); EXPECT_EQ(1, v_i8[1]);
-    EXPECT_EQ(0, v_i8[2]); EXPECT_EQ(1, v_i8[3]);
-    dtype_strided_assign_noexcept(v_i16, sizeof(v_i16[0]), s_ptr, s_stride, 4, dtype(int16_type_id), s_dt);
-    EXPECT_EQ(1, v_i16[0]); EXPECT_EQ(1, v_i16[1]);
-    EXPECT_EQ(0, v_i16[2]); EXPECT_EQ(1, v_i16[3]);
-    dtype_strided_assign_noexcept(v_i32, sizeof(v_i32[0]), s_ptr, s_stride, 4, dtype(int32_type_id), s_dt);
-    EXPECT_EQ(1, v_i32[0]); EXPECT_EQ(1, v_i32[1]);
-    EXPECT_EQ(0, v_i32[2]); EXPECT_EQ(1, v_i32[3]);
-    dtype_strided_assign_noexcept(v_i64, sizeof(v_i64[0]), s_ptr, s_stride, 4, dtype(int64_type_id), s_dt);
-    EXPECT_EQ(1, v_i64[0]); EXPECT_EQ(1, v_i64[1]);
-    EXPECT_EQ(0, v_i64[2]); EXPECT_EQ(1, v_i64[3]);
-    dtype_strided_assign_noexcept(v_u8, sizeof(v_u8[0]), s_ptr, s_stride, 4, dtype(uint8_type_id), s_dt);
-    EXPECT_EQ(1, v_u8[0]); EXPECT_EQ(1, v_u8[1]);
-    EXPECT_EQ(0, v_u8[2]); EXPECT_EQ(1, v_u8[3]);
-    dtype_strided_assign_noexcept(v_u16, sizeof(v_u16[0]), s_ptr, s_stride, 4, dtype(uint16_type_id), s_dt);
-    EXPECT_EQ(1, v_u16[0]); EXPECT_EQ(1, v_u16[1]);
-    EXPECT_EQ(0, v_u16[2]); EXPECT_EQ(1, v_u16[3]);
-    dtype_strided_assign_noexcept(v_u32, sizeof(v_u32[0]), s_ptr, s_stride, 4, dtype(uint32_type_id), s_dt);
-    EXPECT_EQ(1, v_u32[0]); EXPECT_EQ(1, v_u32[1]);
-    EXPECT_EQ(0, v_u32[2]); EXPECT_EQ(1, v_u32[3]);
-    dtype_strided_assign_noexcept(v_u64, sizeof(v_u64[0]), s_ptr, s_stride, 4, dtype(uint64_type_id), s_dt);
-    EXPECT_EQ(1, v_u64[0]); EXPECT_EQ(1, v_u64[1]);
-    EXPECT_EQ(0, v_u64[2]); EXPECT_EQ(1, v_u64[3]);
-    dtype_strided_assign_noexcept(v_f32, sizeof(v_f32[0]), s_ptr, s_stride, 4, dtype(float32_type_id), s_dt);
-    EXPECT_EQ(1, v_f32[0]); EXPECT_EQ(1, v_f32[1]);
-    EXPECT_EQ(0, v_f32[2]); EXPECT_EQ(1, v_f32[3]);
-    dtype_strided_assign_noexcept(v_f64, sizeof(v_f64[0]), s_ptr, s_stride, 4, dtype(float64_type_id), s_dt);
-    EXPECT_EQ(1, v_f64[0]); EXPECT_EQ(1, v_f64[1]);
-    EXPECT_EQ(0, v_f64[2]); EXPECT_EQ(1, v_f64[3]);
+#define ONE_TEST(tid, v) \
+            dtype_strided_assign_noexcept(dtype(tid), v, sizeof(v[0]), s_dt, s_ptr, s_stride, 4); \
+            EXPECT_EQ(1, v[0]); EXPECT_EQ(1, v[1]); \
+            EXPECT_EQ(0, v[2]); EXPECT_EQ(1, v[3])
+    ONE_TEST(int8_type_id, v_i8);
+    ONE_TEST(int16_type_id, v_i16);
+    ONE_TEST(int32_type_id, v_i32);
+    ONE_TEST(int64_type_id, v_i64);
+    ONE_TEST(uint8_type_id, v_u8);
+    ONE_TEST(uint16_type_id, v_u16);
+    ONE_TEST(uint32_type_id, v_u32);
+    ONE_TEST(uint64_type_id, v_u64);
+    ONE_TEST(float32_type_id, v_f32);
+    ONE_TEST(float64_type_id, v_f64);
+#undef ONE_TEST
 
     s_dt = dtype(int8_type_id);
     s_ptr = v_i8;
     s_stride = sizeof(v_i8[0]);
     v_i8[0] = 127; v_i8[1] = 0; v_i8[2] = -128; v_i8[3] = -10;
-    dtype_strided_assign_noexcept(v_b, sizeof(v_b[0]), s_ptr, s_stride, 4, dtype(bool_type_id), s_dt);
-    EXPECT_EQ(true, v_b[0]); EXPECT_EQ(false, v_b[1]);
-    EXPECT_EQ(true, v_b[2]); EXPECT_EQ(true, v_b[3]);
-    dtype_strided_assign_noexcept(v_i16, sizeof(v_i16[0]), s_ptr, s_stride, 4, dtype(int16_type_id), s_dt);
-    EXPECT_EQ(127, v_i16[0]); EXPECT_EQ(0, v_i16[1]);
-    EXPECT_EQ(-128, v_i16[2]); EXPECT_EQ(-10, v_i16[3]);
-    dtype_strided_assign_noexcept(v_i32, sizeof(v_i32[0]), s_ptr, s_stride, 4, dtype(int32_type_id), s_dt);
-    EXPECT_EQ(127, v_i32[0]); EXPECT_EQ(0, v_i32[1]);
-    EXPECT_EQ(-128, v_i32[2]); EXPECT_EQ(-10, v_i32[3]);
-    dtype_strided_assign_noexcept(v_i64, sizeof(v_i64[0]), s_ptr, s_stride, 4, dtype(int64_type_id), s_dt);
-    EXPECT_EQ(127, v_i64[0]); EXPECT_EQ(0, v_i64[1]);
-    EXPECT_EQ(-128, v_i64[2]); EXPECT_EQ(-10, v_i64[3]);
-    dtype_strided_assign_noexcept(v_u8, sizeof(v_u8[0]), s_ptr, s_stride, 4, dtype(uint8_type_id), s_dt);
-    EXPECT_EQ(127, v_u8[0]); EXPECT_EQ(0, v_u8[1]);
-    EXPECT_EQ((uint8_t)-128, v_u8[2]); EXPECT_EQ((uint8_t)-10, v_u8[3]);
-    dtype_strided_assign_noexcept(v_u16, sizeof(v_u16[0]), s_ptr, s_stride, 4, dtype(uint16_type_id), s_dt);
-    EXPECT_EQ(127, v_u16[0]); EXPECT_EQ(0, v_u16[1]);
-    EXPECT_EQ((uint16_t)-128, v_u16[2]); EXPECT_EQ((uint16_t)-10, v_u16[3]);
-    dtype_strided_assign_noexcept(v_u32, sizeof(v_u32[0]), s_ptr, s_stride, 4, dtype(uint32_type_id), s_dt);
-    EXPECT_EQ(127, v_u32[0]); EXPECT_EQ(0, v_u32[1]);
-    EXPECT_EQ((uint32_t)-128, v_u32[2]); EXPECT_EQ((uint32_t)-10, v_u32[3]);
-    dtype_strided_assign_noexcept(v_u64, sizeof(v_u64[0]), s_ptr, s_stride, 4, dtype(uint64_type_id), s_dt);
-    EXPECT_EQ(127, v_u64[0]); EXPECT_EQ(0, v_u64[1]);
-    EXPECT_EQ((uint64_t)-128, v_u64[2]); EXPECT_EQ((uint64_t)-10, v_u64[3]);
-    dtype_strided_assign_noexcept(v_f32, sizeof(v_f32[0]), s_ptr, s_stride, 4, dtype(float32_type_id), s_dt);
-    EXPECT_EQ(127, v_f32[0]); EXPECT_EQ(0, v_f32[1]);
-    EXPECT_EQ(-128, v_f32[2]); EXPECT_EQ(-10, v_f32[3]);
-    dtype_strided_assign_noexcept(v_f64, sizeof(v_f64[0]), s_ptr, s_stride, 4, dtype(float64_type_id), s_dt);
-    EXPECT_EQ(127, v_f64[0]); EXPECT_EQ(0, v_f64[1]);
-    EXPECT_EQ(-128, v_f64[2]); EXPECT_EQ(-10, v_f64[3]);
+#define ONE_TEST(tid, v, m0, m1, m2, m3) \
+            dtype_strided_assign_noexcept(dtype(tid), v, sizeof(v[0]), s_dt, s_ptr, s_stride, 4); \
+            EXPECT_EQ(m0, v[0]); EXPECT_EQ(m1, v[1]); \
+            EXPECT_EQ(m2, v[2]); EXPECT_EQ(m3, v[3])
+    ONE_TEST(bool_type_id, v_b, true, false, true, true);
+    ONE_TEST(int16_type_id, v_i16, 127, 0, -128, -10);
+    ONE_TEST(int32_type_id, v_i32, 127, 0, -128, -10);
+    ONE_TEST(int64_type_id, v_i64, 127, 0, -128, -10);
+    ONE_TEST(uint8_type_id, v_u8, 127, 0, (uint8_t)-128, (uint8_t)-10);
+    ONE_TEST(uint16_type_id, v_u16, 127, 0, (uint16_t)-128, (uint16_t)-10);
+    ONE_TEST(uint32_type_id, v_u32, 127, 0, (uint32_t)-128, (uint32_t)-10);
+    ONE_TEST(uint64_type_id, v_u64, 127, 0, (uint64_t)-128, (uint64_t)-10);
+    ONE_TEST(float32_type_id, v_f32, 127, 0, -128, -10);
+    ONE_TEST(float64_type_id, v_f64, 127, 0, -128, -10);
+#undef ONE_TEST
 
     s_dt = dtype(float64_type_id);
     s_ptr = v_f64;
     s_stride = 2*sizeof(v_f64[0]);
     v_f64[0] = -10.25; v_f64[1] = 2.25;
     v_f64[2] = 0.0; v_f64[3] = -5.5;
-    dtype_strided_assign_noexcept(v_b, sizeof(v_b[0]), s_ptr, s_stride, 2, dtype(bool_type_id), s_dt);
-    EXPECT_EQ(true, v_b[0]); EXPECT_EQ(false, v_b[1]);
-    dtype_strided_assign_noexcept(v_i8, sizeof(v_i8[0]), s_ptr, s_stride, 2, dtype(int8_type_id), s_dt);
-    EXPECT_EQ(-10, v_i8[0]); EXPECT_EQ(0, v_i8[1]);
-    dtype_strided_assign_noexcept(v_i16, sizeof(v_i16[0]), s_ptr, s_stride, 2, dtype(int16_type_id), s_dt);
-    EXPECT_EQ(-10, v_i16[0]); EXPECT_EQ(0, v_i16[1]);
-    dtype_strided_assign_noexcept(v_i32, sizeof(v_i32[0]), s_ptr, s_stride, 2, dtype(int32_type_id), s_dt);
-    EXPECT_EQ(-10, v_i32[0]); EXPECT_EQ(0, v_i32[1]);
-    dtype_strided_assign_noexcept(v_i64, sizeof(v_i64[0]), s_ptr, s_stride, 2, dtype(int64_type_id), s_dt);
-    EXPECT_EQ(-10, v_i64[0]); EXPECT_EQ(0, v_i64[1]);
-    dtype_strided_assign_noexcept(v_u8, sizeof(v_u8[0]), s_ptr, s_stride, 2, dtype(uint8_type_id), s_dt);
-    EXPECT_EQ((uint8_t)-10, v_u8[0]); EXPECT_EQ(0, v_u8[1]);
-    dtype_strided_assign_noexcept(v_u16, sizeof(v_u16[0]), s_ptr, s_stride, 2, dtype(uint16_type_id), s_dt);
-    EXPECT_EQ((uint16_t)-10, v_u16[0]); EXPECT_EQ(0, v_u16[1]);
-    dtype_strided_assign_noexcept(v_u32, sizeof(v_u32[0]), s_ptr, s_stride, 2, dtype(uint32_type_id), s_dt);
-    EXPECT_EQ((uint32_t)-10, v_u32[0]); EXPECT_EQ(0, v_u32[1]);
-    dtype_strided_assign_noexcept(v_u64, sizeof(v_u64[0]), s_ptr, s_stride, 2, dtype(uint64_type_id), s_dt);
-    EXPECT_EQ((uint64_t)-10, v_u64[0]); EXPECT_EQ(0, v_u64[1]);
-    dtype_strided_assign_noexcept(v_f32, sizeof(v_f32[0]), s_ptr, s_stride, 2, dtype(float32_type_id), s_dt);
-    EXPECT_EQ(-10.25, v_f32[0]); EXPECT_EQ(0, v_f32[1]);
-    dtype_strided_assign_noexcept(v_f64, sizeof(v_f64[0]), s_ptr, s_stride, 2, dtype(float64_type_id), s_dt);
-    EXPECT_EQ(-10.25, v_f64[0]); EXPECT_EQ(0, v_f64[1]);
+#define ONE_TEST(tid, v, m0, m1) \
+            dtype_strided_assign_noexcept(dtype(tid), v, sizeof(v[0]), s_dt, s_ptr, s_stride, 2); \
+            EXPECT_EQ(m0, v[0]); EXPECT_EQ(m1, v[1])
+    ONE_TEST(bool_type_id, v_b, true, false);
+    ONE_TEST(int8_type_id, v_i8, -10, 0);
+    ONE_TEST(int16_type_id, v_i16, -10, 0);
+    ONE_TEST(int32_type_id, v_i32, -10, 0);
+    ONE_TEST(int64_type_id, v_i64, -10, 0);
+    ONE_TEST(uint8_type_id, v_u8, (uint8_t)-10, 0);
+    ONE_TEST(uint16_type_id, v_u16, (uint16_t)-10, 0);
+    ONE_TEST(uint32_type_id, v_u32, (uint32_t)-10, 0);
+    ONE_TEST(uint64_type_id, v_u64, (uint64_t)-10, 0);
+    ONE_TEST(float32_type_id, v_f32, -10.25, 0);
+#undef ONE_TEST
 }
 
 

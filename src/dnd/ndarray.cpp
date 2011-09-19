@@ -77,3 +77,11 @@ void dnd::ndarray::swap(ndarray& rhs)
     std::swap(m_baseoffset, rhs.m_baseoffset);
     m_buffer.swap(rhs.m_buffer);
 }
+
+void dnd::ndarray::vassign(const ndarray& rhs)
+{
+}
+
+void dnd::ndarray::vassign(const dtype& dt, const void *data)
+{
+}

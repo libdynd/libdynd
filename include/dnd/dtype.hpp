@@ -183,14 +183,35 @@ private:
 public:
     /** Constructor */
     dtype();
-    /** Default copy constructor */
-    dtype(const dtype& rhs) = default;
-    /** Default move constructor */
-    //dtype(dtype&& rhs) = default;
-    /** Default assignment operator */
-    dtype& operator=(const dtype& rhs) = default;
-    /** Default move assignment operator */
-    //dtype& operator=(dtype&& rhs) = default;
+    /** Copy constructor (should be "= default" in C++11) */
+    dtype(const dtype& rhs)
+        : m_type_id(rhs.m_type_id), m_kind(rhs.m_kind), m_alignment(rhs.m_alignment),
+          m_byteswapped(rhs.m_byteswapped), m_itemsize(rhs.m_itemsize), m_data(rhs.m_data) {}
+    /** Move constructor (should be "= default" in C++11) */
+    dtype(dtype&& rhs)
+        : m_type_id(rhs.m_type_id), m_kind(rhs.m_kind), m_alignment(rhs.m_alignment),
+          m_byteswapped(rhs.m_byteswapped), m_itemsize(rhs.m_itemsize),
+          m_data(std::move(rhs.m_data)) {}
+    /** Assignment operator (should be "= default" in C++11) */
+    dtype& operator=(const dtype& rhs) {
+        m_type_id = rhs.m_type_id;
+        m_kind = rhs.m_kind;
+        m_alignment = rhs.m_alignment;
+        m_byteswapped = rhs.m_byteswapped;
+        m_itemsize = rhs.m_itemsize;
+        m_data = rhs.m_data;
+        return *this;
+    }
+    /** Move assignment operator (should be "= default" in C++11) */
+    dtype& operator=(dtype&& rhs) {
+        m_type_id = rhs.m_type_id;
+        m_kind = rhs.m_kind;
+        m_alignment = rhs.m_alignment;
+        m_byteswapped = rhs.m_byteswapped;
+        m_itemsize = rhs.m_itemsize;
+        m_data = std::move(rhs.m_data);
+        return *this;
+    }
 
     /** Construct from a type ID */
     explicit dtype(int type_id);

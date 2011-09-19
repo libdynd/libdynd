@@ -386,7 +386,7 @@ struct single_assigner<dst_type, src_type, true, true> {
         DTYPE_ASSIGN_SRC_TO_ANY_CASE(double, dst_byteswapped, src_byteswapped, ASSIGN_FN); \
     }
 
-void dnd::dtype_assign_noexcept(void *dst, const void *src, dtype dst_dt, dtype src_dt)
+void dnd::dtype_assign_noexcept(const dtype& dst_dt, void *dst, const dtype& src_dt, const void *src)
 {
     if (src_dt.is_byteswapped()) {
         if (dst_dt.is_byteswapped()) {
@@ -405,11 +405,11 @@ void dnd::dtype_assign_noexcept(void *dst, const void *src, dtype dst_dt, dtype 
     throw std::runtime_error("this dtype assignment isn't yet supported");
 }
 
-void dnd::dtype_assign(void *dst, const void *src, dtype dst_dt, dtype src_dt)
+void dnd::dtype_assign(const dtype& dst_dt, void *dst, const dtype& src_dt, const void *src)
 {
     // Do an unchecked assignment if possible
     if (can_cast_losslessly(dst_dt, src_dt)) {
-        dtype_assign_noexcept(dst, src, dst_dt, src_dt);
+        dtype_assign_noexcept(dst_dt, dst, src_dt, src);
         return;
     }
 
@@ -611,8 +611,8 @@ struct multiple_assigner<dst_type, src_type, true, false, false> {
     }
 
 std::pair<unary_operation_t, auxiliary_data *> dnd::get_dtype_strided_assign_noexcept_operation(
-                    dtype dst_dt, intptr_t dst_fixedstride,
-                    dtype src_dt, intptr_t src_fixedstride,
+                    const dtype& dst_dt, intptr_t dst_fixedstride,
+                    const dtype& src_dt, intptr_t src_fixedstride,
                     char align_test)
 {
     bool is_aligned = dst_dt.is_data_aligned(align_test) && src_dt.is_data_aligned(align_test);
@@ -674,8 +674,8 @@ std::pair<unary_operation_t, auxiliary_data *> dnd::get_dtype_strided_assign_noe
 }
 
 std::pair<unary_operation_t, auxiliary_data *> dnd::get_dtype_strided_assign_operation(
-                    dtype dst_dt, intptr_t dst_fixedstride,
-                    dtype src_dt, intptr_t src_fixedstride,
+                    const dtype& dst_dt, intptr_t dst_fixedstride,
+                    const dtype& src_dt, intptr_t src_fixedstride,
                     char align_test)
 {
     bool is_aligned = dst_dt.is_data_aligned(align_test) && src_dt.is_data_aligned(align_test);
@@ -717,10 +717,9 @@ std::pair<unary_operation_t, auxiliary_data *> dnd::get_dtype_strided_assign_ope
     throw std::runtime_error("this dtype assignment isn't yet supported");
 }
 
-void dnd::dtype_strided_assign(void *dst, intptr_t dst_stride,
-                            void *src, intptr_t src_stride,
-                            intptr_t count,
-                            dtype dst_dt, dtype src_dt)
+void dnd::dtype_strided_assign(const dtype& dst_dt, void *dst, intptr_t dst_stride,
+                            const dtype& src_dt, const void *src, intptr_t src_stride,
+                            intptr_t count)
 {
     std::pair<unary_operation_t, auxiliary_data *> op;
     op = get_dtype_strided_assign_operation(dst_dt, dst_stride, src_dt, src_stride,
@@ -728,10 +727,9 @@ void dnd::dtype_strided_assign(void *dst, intptr_t dst_stride,
     op.first(dst, dst_stride, src, src_stride, count, op.second);
 }
 
-void dnd::dtype_strided_assign_noexcept(void *dst, intptr_t dst_stride,
-                            void *src, intptr_t src_stride,
-                            intptr_t count,
-                            dtype dst_dt, dtype src_dt)
+void dnd::dtype_strided_assign_noexcept(const dtype& dst_dt, void *dst, intptr_t dst_stride,
+                            const dtype& src_dt, const void *src, intptr_t src_stride,
+                            intptr_t count)
 {
     std::pair<unary_operation_t, auxiliary_data *> op;
     op = get_dtype_strided_assign_noexcept_operation(dst_dt, dst_stride, src_dt, src_stride,

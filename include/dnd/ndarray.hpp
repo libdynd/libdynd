@@ -10,6 +10,8 @@
 #include <dnd/dtype.hpp>
 #include <dnd/membuffer.hpp>
 
+#include <boost/utility/enable_if.hpp>
+
 // For std::memcpy
 #include <cstring>
 
@@ -178,6 +180,9 @@ public:
           m_shape(std::move(rhs.m_shape)), m_strides(std::move(rhs.m_strides)),
           m_baseoffset(rhs.m_baseoffset), m_buffer(std::move(rhs.m_buffer)) {}
 
+    /** Swap operation (should be "noexcept" in C++11) */
+    void swap(ndarray& rhs);
+
     /**
      * Assignment operator (should be just "= default" in C++11).
      *
@@ -190,8 +195,15 @@ public:
     /** Move assignment operator (should be just "= default" in C++11) */
     ndarray& operator=(ndarray&& rhs);
 
-    /** Swap operation (should be "noexcept" in C++11) */
-    void swap(ndarray& rhs);
+    /** Does a value-assignment from the rhs array. */
+    void vassign(const ndarray& rhs);
+    /** Does a value-assignment from the rhs raw scalar */
+    void vassign(const dtype& dt, const void *data);
+    /** Does a value-assignment from the rhs C++ scalar. */
+    template<class T>
+    typename boost::enable_if<is_dtype_scalar<T>, void>::type vassign(const T& rhs) {
+        vassign(make_dtype<T>(), &rhs);
+    }
 };
 
 } // namespace dnd
