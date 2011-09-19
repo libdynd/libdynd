@@ -178,7 +178,14 @@ public:
           m_shape(std::move(rhs.m_shape)), m_strides(std::move(rhs.m_strides)),
           m_baseoffset(rhs.m_baseoffset), m_buffer(std::move(rhs.m_buffer)) {}
 
-    /** Assignment operator (should be just "= default" in C++11) */
+    /**
+     * Assignment operator (should be just "= default" in C++11).
+     *
+     * TODO: This assignment operation copies 'rhs' with reference-like
+     *       semantics. Should it instead copy the values of 'rhs' into
+     *       'this'? The current way seems nicer for passing around arguments
+     *       and making copies of arrays.
+     */
     ndarray& operator=(const ndarray& rhs);
     /** Move assignment operator (should be just "= default" in C++11) */
     ndarray& operator=(ndarray&& rhs);

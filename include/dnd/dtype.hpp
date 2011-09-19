@@ -90,10 +90,7 @@ namespace detail {
 // Type trait for the type numbers
 template <typename T> struct type_id_of;
 
-// This is dodgy - need sizeof(bool) == 1 consistently for this to be valid...
-//template <> struct type_id_of<bool> {
-//    enum {value = bool_type_id};
-//};
+// Can't use bool, because it doesn't have a guaranteed sizeof
 template <> struct type_id_of<dnd_bool> {
     enum {value = bool_type_id};
 };
@@ -133,6 +130,23 @@ template <> struct type_id_of<float> {
 template <> struct type_id_of<double> {
     enum {value = float64_type_id};
 };
+
+// Metaprogram for determining if a type is a valid C++ scalar
+// of a particular dtype.
+template<typename T> struct is_dtype_scalar {enum {value = false};};
+template <> struct is_dtype_scalar<dnd_bool> {enum {value = true};};
+template <> struct is_dtype_scalar<signed char> {enum {value = true};};
+template <> struct is_dtype_scalar<short> {enum {value = true};};
+template <> struct is_dtype_scalar<int> {enum {value = true};};
+template <> struct is_dtype_scalar<long> {enum {value = true};};
+template <> struct is_dtype_scalar<long long> {enum {value = true};};
+template <> struct is_dtype_scalar<unsigned char> {enum {value = true};};
+template <> struct is_dtype_scalar<unsigned short> {enum {value = true};};
+template <> struct is_dtype_scalar<unsigned int> {enum {value = true};};
+template <> struct is_dtype_scalar<unsigned long> {enum {value = true};};
+template <> struct is_dtype_scalar<unsigned long long> {enum {value = true};};
+template <> struct is_dtype_scalar<float> {enum {value = true};};
+template <> struct is_dtype_scalar<double> {enum {value = true};};
 
 
 // The extended_dtype class is for dtypes which require more data
