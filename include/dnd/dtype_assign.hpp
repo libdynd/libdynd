@@ -10,16 +10,22 @@
 #include <utility>
 
 #include <dnd/dtype.hpp>
+#include <dnd/dtype_casting.hpp>
 
 namespace dnd {
 
 /**
- * A set of flags for what kind of errors to raise when assigning
- * values from one dtype to another.
+ * An enumeration for the error checks during assignment.
  */
-enum assign_error_flags {
-    assign_error_overflow = 1,
-    assign_error_inexact = 2
+enum assign_error_mode {
+    /** No error checking during assignment */
+    assign_error_none,
+    /** Overflow checking, but loss of precision ok. This checks loss of imaginary component  */
+    assign_error_overflow,
+    /** Overflow and loss of fractional part (for float -> int) checking */
+    assign_error_fractional,
+    /** Overflow and floating point precision loss checking */
+    assign_error_inexact
 };
 
 /** A base class for auxiliary data used by the unary_operation function pointers. */
@@ -38,7 +44,8 @@ public:
  *
  * The src and dst data must be aligned.
  */
-void dtype_assign(const dtype& dst_dt, void *dst, const dtype& src_dt, const void *src);
+void dtype_assign(const dtype& dst_dt, void *dst, const dtype& src_dt, const void *src,
+                                assign_error_mode errmode = assign_error_fractional);
 
 // Assign one element where src and dst may have different dtypes.
 // This function does lossy casts if necessary without raising an
@@ -50,19 +57,14 @@ void dtype_assign_noexcept(const dtype& dst_dt, void *dst, const dtype& src_dt, 
 // Like dtype_assign, but for strided assignment
 void dtype_strided_assign(const dtype& dst_dt, void *dst, intptr_t dst_stride,
                             const dtype& src_dt, const void *src, intptr_t src_stride,
-                            intptr_t count);
-
-// Like dtype_assign_noexcept, but for strided assignment
-void dtype_strided_assign_noexcept(const dtype& dst_dt, void *dst, intptr_t dst_stride,
-                            const dtype& src_dt, const void *src, intptr_t src_stride,
-                            intptr_t count);
+                            intptr_t count, assign_error_mode errmode);
 
 // The function pointer type for a unary operation, for example a casting function
 // from one dtype to another.
 typedef void (*unary_operation_t)(void *dst, intptr_t dst_stride,
                                 const void *src, intptr_t src_stride,
                                 intptr_t count,
-                                auxiliary_data *auxdata);
+                                const auxiliary_data *auxdata);
 
 // Returns a function for assigning from the source data type
 // to the destination data type, optionally specialized based on
@@ -74,15 +76,10 @@ typedef void (*unary_operation_t)(void *dst, intptr_t dst_stride,
 // of both src and dst to align_test. If this is not possible,
 // pass the value 1 to indicate the data may be aligned or not,
 // or the value 0 to indicate the data is definitely aligned.
-std::pair<unary_operation_t, auxiliary_data *> get_dtype_strided_assign_operation(
-                    const dtype& dst_dt, intptr_t dst_fixedstride,
-                    const dtype& src_dt, intptr_t src_fixedstride,
-                    char align_test);
-
-std::pair<unary_operation_t, auxiliary_data *> get_dtype_strided_assign_noexcept_operation(
-                    const dtype& dst_dt, intptr_t dst_fixedstride,
-                    const dtype& src_dt, intptr_t src_fixedstride,
-                    char align_test);
+std::pair<unary_operation_t, std::shared_ptr<auxiliary_data> > get_dtype_strided_assign_operation(
+                    const dtype& dst_dt, intptr_t dst_fixedstride, char dst_align_test,
+                    const dtype& src_dt, intptr_t src_fixedstride, char src_align_test,
+                    assign_error_mode errmode);
 
 } // namespace dnd
 

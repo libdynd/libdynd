@@ -87,49 +87,45 @@ namespace detail {
 }
 
 
-// Type trait for the type numbers
+// Type trait for the type id
 template <typename T> struct type_id_of;
 
 // Can't use bool, because it doesn't have a guaranteed sizeof
-template <> struct type_id_of<dnd_bool> {
-    enum {value = bool_type_id};
-};
-template <> struct type_id_of<signed char> {
-    enum {value = int8_type_id};
-};
-template <> struct type_id_of<short> {
-    enum {value = int16_type_id};
-};
-template <> struct type_id_of<int> {
-    enum {value = int32_type_id};
-};
+template <> struct type_id_of<dnd_bool> {enum {value = bool_type_id};};
+template <> struct type_id_of<signed char> {enum {value = int8_type_id};};
+template <> struct type_id_of<short> {enum {value = int16_type_id};};
+template <> struct type_id_of<int> {enum {value = int32_type_id};};
 template <> struct type_id_of<long> {
     enum {value = int8_type_id + detail::log2_x<sizeof(long)>::value};
 };
-template <> struct type_id_of<long long> {
-    enum {value = int64_type_id};
-};
-template <> struct type_id_of<uint8_t> {
-    enum {value = uint8_type_id};
-};
-template <> struct type_id_of<uint16_t> {
-    enum {value = uint16_type_id};
-};
-template <> struct type_id_of<unsigned int> {
-    enum {value = uint32_type_id};
-};
+template <> struct type_id_of<long long> {enum {value = int64_type_id};};
+template <> struct type_id_of<uint8_t> {enum {value = uint8_type_id};};
+template <> struct type_id_of<uint16_t> {enum {value = uint16_type_id};};
+template <> struct type_id_of<unsigned int> {enum {value = uint32_type_id};};
 template <> struct type_id_of<unsigned long> {
     enum {value = uint8_type_id + detail::log2_x<sizeof(unsigned long)>::value};
 };
-template <> struct type_id_of<unsigned long long> {
-    enum {value = uint64_type_id};
-};
-template <> struct type_id_of<float> {
-    enum {value = float32_type_id};
-};
-template <> struct type_id_of<double> {
-    enum {value = float64_type_id};
-};
+template <> struct type_id_of<unsigned long long>{enum {value = uint64_type_id};};
+template <> struct type_id_of<float> {enum {value = float32_type_id};};
+template <> struct type_id_of<double> {enum {value = float64_type_id};};
+
+// Type trait for the kind
+template <typename T> struct kind_of;
+
+// Can't use bool, because it doesn't have a guaranteed sizeof
+template <> struct kind_of<dnd_bool> {static const dtype_kind value = bool_kind;};
+template <> struct kind_of<signed char> {static const dtype_kind value = int_kind;};
+template <> struct kind_of<short> {static const dtype_kind value = int_kind;};
+template <> struct kind_of<int> {static const dtype_kind value = int_kind;};
+template <> struct kind_of<long> {static const dtype_kind value = int_kind;};
+template <> struct kind_of<long long> {static const dtype_kind value = int_kind;};
+template <> struct kind_of<uint8_t> {static const dtype_kind value = uint_kind;};
+template <> struct kind_of<uint16_t> {static const dtype_kind value = uint_kind;};
+template <> struct kind_of<unsigned int> {static const dtype_kind value = uint_kind;};
+template <> struct kind_of<unsigned long> {static const dtype_kind value = uint_kind;};
+template <> struct kind_of<unsigned long long>{static const dtype_kind value = uint_kind;};
+template <> struct kind_of<float> {static const dtype_kind value = float_kind;};
+template <> struct kind_of<double> {static const dtype_kind value = float_kind;};
 
 // Metaprogram for determining if a type is a valid C++ scalar
 // of a particular dtype.
@@ -148,15 +144,38 @@ template <> struct is_dtype_scalar<unsigned long long> {enum {value = true};};
 template <> struct is_dtype_scalar<float> {enum {value = true};};
 template <> struct is_dtype_scalar<double> {enum {value = true};};
 
+class dtype;
 
 // The extended_dtype class is for dtypes which require more data
 // than a type_id, kind, and itemsize, and endianness.
 class extended_dtype {
 public:
-    // TODO: should be replaced by C++11 atomic<int>
-    int m_refcount;
-
     virtual ~extended_dtype();
+
+    /**
+     * Tests that the two dtypes have identical binary layouts. This method
+     * should only be called when this is the extended_dtype for one of the
+     * two dtypes.
+     */
+    virtual bool can_cast_exact(const dtype& dst_dt, const dtype& src_dt) const = 0;
+    /**
+     * Tests that the two dtypes have identical binary layouts up to byte order.
+     * This method should only be called when this is the extended_dtype for one
+     * of the two dtypes.
+     */
+    virtual bool can_cast_equiv(const dtype& dst_dt, const dtype& src_dt) const = 0;
+    /**
+     * Tests that the 'src' values can be cast to 'dst' losslessly. This method
+     * should only be called when this is the extended_dtype for one of the
+     * two dtypes.
+     */
+    virtual bool can_cast_lossless(const dtype& dst_dt, const dtype& src_dt) const = 0;
+    /**
+     * Tests that the 'src' values can be cast to 'dst' without going to a lesser
+     * dtype kind. This method should only be called when this is the extended_dtype
+     * for one of the two dtypes.
+     */
+    virtual bool can_cast_same_kind(const dtype& dst_dt, const dtype& src_dt) const = 0;
 };
 
 /**
@@ -288,4 +307,4 @@ dtype make_dtype() {
 
 } // namespace dnd
 
-#endif//_DTYPE_HPP_
+#endif // _DTYPE_HPP_

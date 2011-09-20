@@ -1,5 +1,6 @@
 #include <iostream>
 #include <stdexcept>
+#include <cmath>
 #include <stdint.h>
 #include <gtest/gtest.h>
 
@@ -28,7 +29,7 @@ TEST(DTypeAssign, FixedSizeTestsNoExcept) {
     s_ptr = &v_b;
     v_b = true;
 #define ONE_TEST(tid, v) \
-            dtype_assign_noexcept(dtype(tid), &v, s_dt, s_ptr); \
+            dtype_assign(dtype(tid), &v, s_dt, s_ptr, assign_error_none); \
             EXPECT_EQ(1, v)
     ONE_TEST(int8_type_id, v_i8);
     ONE_TEST(int16_type_id, v_i16);
@@ -46,7 +47,7 @@ TEST(DTypeAssign, FixedSizeTestsNoExcept) {
     s_ptr = &v_i8;
     v_i8 = 127;
 #define ONE_TEST(tid, v, m) \
-            dtype_assign_noexcept(dtype(tid), &v, s_dt, s_ptr); \
+            dtype_assign(dtype(tid), &v, s_dt, s_ptr, assign_error_none); \
             EXPECT_EQ(m, v)
     ONE_TEST(bool_type_id, v_b, true);
     ONE_TEST(int16_type_id, v_i16, 127);
@@ -64,7 +65,7 @@ TEST(DTypeAssign, FixedSizeTestsNoExcept) {
     s_ptr = &v_f64;
     v_f64 = -10.25;
 #define ONE_TEST(tid, v, m) \
-            dtype_assign_noexcept(dtype(tid), &v, s_dt, s_ptr); \
+            dtype_assign(dtype(tid), &v, s_dt, s_ptr, assign_error_none); \
             EXPECT_EQ(m, v)
     ONE_TEST(bool_type_id, v_b, true);
     ONE_TEST(int8_type_id, v_i8, -10);
@@ -166,11 +167,29 @@ TEST(DTypeAssign, FixedSizeTests) {
 #undef ONE_TEST_THROW
 
     // dtype_assign checks that the float64 -> float32value gets converted exactly
+    // when using the assign_error_inexact mode
     v_f64 = 1 / 3.0;
-    EXPECT_THROW(dtype_assign(dtype(float32_type_id), &v_f32, s_dt, s_ptr), runtime_error);
+    EXPECT_THROW(dtype_assign(dtype(float32_type_id), &v_f32, s_dt, s_ptr, assign_error_inexact),
+                                                                                runtime_error);
+    dtype_assign(dtype(float32_type_id), &v_f32, s_dt, s_ptr, assign_error_fractional);
+    EXPECT_EQ((float)v_f64, v_f32);
+
+    // Since this is a float -> double conversion, it should be exact coming back to float
     v_f64 = 1 / 3.0f;
-    dtype_assign(dtype(float32_type_id), &v_f32, s_dt, s_ptr);
+    dtype_assign(dtype(float32_type_id), &v_f32, s_dt, s_ptr, assign_error_inexact);
     EXPECT_EQ(v_f64, v_f32);
+
+    // This should overflow converting to float
+    v_f64 = -1.5e250;
+    EXPECT_THROW(dtype_assign(dtype(float32_type_id), &v_f32, s_dt, s_ptr, assign_error_inexact),
+                                                                                runtime_error);
+    EXPECT_THROW(dtype_assign(dtype(float32_type_id), &v_f32, s_dt, s_ptr, assign_error_fractional),
+                                                                                runtime_error);
+    EXPECT_THROW(dtype_assign(dtype(float32_type_id), &v_f32, s_dt, s_ptr, assign_error_overflow),
+                                                                                runtime_error);
+    dtype_assign(dtype(float32_type_id), &v_f32, s_dt, s_ptr, assign_error_none);
+    EXPECT_TRUE(isinf(v_f32));
+    EXPECT_TRUE(v_f32 < 0);
 }
 
 TEST(DTypeAssign, FixedSizeTestsStridedNoExcept) {
@@ -195,7 +214,7 @@ TEST(DTypeAssign, FixedSizeTestsStridedNoExcept) {
     s_stride = sizeof(v_b[0]);
     v_b[0] = true; v_b[1] = true; v_b[2] = false; v_b[3] = true;
 #define ONE_TEST(tid, v) \
-            dtype_strided_assign_noexcept(dtype(tid), v, sizeof(v[0]), s_dt, s_ptr, s_stride, 4); \
+            dtype_strided_assign(dtype(tid), v, sizeof(v[0]), s_dt, s_ptr, s_stride, 4, assign_error_none); \
             EXPECT_EQ(1, v[0]); EXPECT_EQ(1, v[1]); \
             EXPECT_EQ(0, v[2]); EXPECT_EQ(1, v[3])
     ONE_TEST(int8_type_id, v_i8);
@@ -215,7 +234,7 @@ TEST(DTypeAssign, FixedSizeTestsStridedNoExcept) {
     s_stride = sizeof(v_i8[0]);
     v_i8[0] = 127; v_i8[1] = 0; v_i8[2] = -128; v_i8[3] = -10;
 #define ONE_TEST(tid, v, m0, m1, m2, m3) \
-            dtype_strided_assign_noexcept(dtype(tid), v, sizeof(v[0]), s_dt, s_ptr, s_stride, 4); \
+            dtype_strided_assign(dtype(tid), v, sizeof(v[0]), s_dt, s_ptr, s_stride, 4, assign_error_none); \
             EXPECT_EQ(m0, v[0]); EXPECT_EQ(m1, v[1]); \
             EXPECT_EQ(m2, v[2]); EXPECT_EQ(m3, v[3])
     ONE_TEST(bool_type_id, v_b, true, false, true, true);
@@ -236,7 +255,7 @@ TEST(DTypeAssign, FixedSizeTestsStridedNoExcept) {
     v_f64[0] = -10.25; v_f64[1] = 2.25;
     v_f64[2] = 0.0; v_f64[3] = -5.5;
 #define ONE_TEST(tid, v, m0, m1) \
-            dtype_strided_assign_noexcept(dtype(tid), v, sizeof(v[0]), s_dt, s_ptr, s_stride, 2); \
+            dtype_strided_assign(dtype(tid), v, sizeof(v[0]), s_dt, s_ptr, s_stride, 2, assign_error_none); \
             EXPECT_EQ(m0, v[0]); EXPECT_EQ(m1, v[1])
     ONE_TEST(bool_type_id, v_b, true, false);
     ONE_TEST(int8_type_id, v_i8, -10, 0);

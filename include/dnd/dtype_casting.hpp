@@ -13,6 +13,9 @@ namespace dnd {
 
 /**
  * An enumeration for controlling what kind of casting is permitted.
+ *
+ * In an assignment, this pairs up with a set of assign_error_flags,
+ * which control whether exceptions are raised on overflow or inexact-ness.
  */
 enum dtype_casting {
     /** Permit only exact dtype equality */
@@ -30,7 +33,17 @@ enum dtype_casting {
     any_casting
 };
 
-bool can_cast_losslessly(const dtype& dst_dt, const dtype& src_dt);
+/** If the dtypes are exactly the same */
+bool can_cast_exact(const dtype& dst_dt, const dtype& src_dt);
+/** If the dtypes are exactly the same, up to byte order differences */
+bool can_cast_equiv(const dtype& dst_dt, const dtype& src_dt);
+/** If 'src' can be cast to 'dst' with no loss of information */
+bool can_cast_lossless(const dtype& dst_dt, const dtype& src_dt);
+/** If 'src' can be cast to 'dst' without switching to a lesser kind */
+bool can_cast_same_kind(const dtype& dst_dt, const dtype& src_dt);
+
+/** Whether the casting is permitted according to the enum rule given */
+bool can_cast(const dtype& dst_dt, const dtype& src_dt, dtype_casting rule);
 
 } // namespace dnd
 
