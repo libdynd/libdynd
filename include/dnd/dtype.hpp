@@ -92,6 +92,7 @@ template <typename T> struct type_id_of;
 
 // Can't use bool, because it doesn't have a guaranteed sizeof
 template <> struct type_id_of<dnd_bool> {enum {value = bool_type_id};};
+template <> struct type_id_of<char> {enum {value = ((char)-1) < 0 ? int8_type_id : uint8_type_id};};
 template <> struct type_id_of<signed char> {enum {value = int8_type_id};};
 template <> struct type_id_of<short> {enum {value = int16_type_id};};
 template <> struct type_id_of<int> {enum {value = int32_type_id};};
@@ -114,6 +115,9 @@ template <typename T> struct kind_of;
 
 // Can't use bool, because it doesn't have a guaranteed sizeof
 template <> struct kind_of<dnd_bool> {static const dtype_kind value = bool_kind;};
+template <> struct kind_of<char> {
+    static const dtype_kind value = ((char)-1) < 0 ? int_kind : uint_kind;
+};
 template <> struct kind_of<signed char> {static const dtype_kind value = int_kind;};
 template <> struct kind_of<short> {static const dtype_kind value = int_kind;};
 template <> struct kind_of<int> {static const dtype_kind value = int_kind;};
@@ -131,6 +135,7 @@ template <> struct kind_of<double> {static const dtype_kind value = float_kind;}
 // of a particular dtype.
 template<typename T> struct is_dtype_scalar {enum {value = false};};
 template <> struct is_dtype_scalar<dnd_bool> {enum {value = true};};
+template <> struct is_dtype_scalar<char> {enum {value = true};};
 template <> struct is_dtype_scalar<signed char> {enum {value = true};};
 template <> struct is_dtype_scalar<short> {enum {value = true};};
 template <> struct is_dtype_scalar<int> {enum {value = true};};
@@ -324,6 +329,8 @@ public:
     const extended_dtype* extended() const {
         return m_data.get();
     }
+
+    friend std::ostream& operator<<(std::ostream& o, const dtype& rhs);
 };
 
 // Convenience function which makes a dtype object from a template parameter
@@ -331,6 +338,8 @@ template<class T>
 dtype make_dtype() {
     return dtype(type_id_of<T>::value);
 }
+
+std::ostream& operator<<(std::ostream& o, const dtype& rhs);
 
 } // namespace dnd
 

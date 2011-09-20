@@ -91,17 +91,19 @@ void dnd::ndarray::vassign(const ndarray& rhs, assign_error_mode errmode)
 
 void dnd::ndarray::vassign(const dtype& dt, const void *data, assign_error_mode errmode)
 {
+    cout << "scalar vassign\n";
     scalar_copied_if_necessary src(m_dtype, dt, data, errmode);
     raw_ndarray_iter<1> iter(*this);
     
     intptr_t innersize = iter.innersize(), innerstride = iter.innerstride();
 
     std::pair<unary_operation_t, std::shared_ptr<auxiliary_data> > assign =
-                get_dtype_strided_assign_operation(dt, innerstride, iter.get_align_test(),
+                get_dtype_strided_assign_operation(m_dtype, innerstride, iter.get_align_test(),
                                                     0, 0);
 
     if (innersize > 0) {
         do {
+            cout << "scalar vassign inner loop with size " << innersize << "\n";
             assign.first(iter.data(), innerstride, src.data(), 0, innersize, assign.second.get());
         } while(iter.iternext());
     }

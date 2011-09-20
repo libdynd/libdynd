@@ -7,12 +7,14 @@
 #ifndef _NDARRAY_HPP_
 #define _NDARRAY_HPP_
 
+#include <iostream> // FOR DEBUG
+
+#include <boost/utility/enable_if.hpp>
+
 #include <dnd/dtype.hpp>
 #include <dnd/dtype_assign.hpp>
 #include <dnd/membuffer.hpp>
 #include <dnd/shortvector.hpp>
-
-#include <boost/utility/enable_if.hpp>
 
 namespace dnd {
 
@@ -117,9 +119,11 @@ public:
     template<class T>
     typename boost::enable_if<is_dtype_scalar<T>, void>::type vassign(const T& rhs,
                                                 assign_error_mode errmode = assign_error_fractional) {
+        std::cout << "vassign C++ scalar\n";
         vassign(make_dtype<T>(), &rhs, errmode);
     }
     void vassign(const bool& rhs, assign_error_mode errmode = assign_error_fractional) {
+        std::cout << "vassign bool\n";
         vassign(dnd_bool(rhs), errmode);
     }
 };

@@ -129,3 +129,53 @@ dtype::dtype(int type_id, intptr_t size)
     }
 }
 
+std::ostream& dnd::operator<<(std::ostream& o, const dtype& rhs)
+{
+    switch (rhs.type_id()) {
+        case generic_type_id:
+            o << "generic";
+            break;
+        case bool_type_id:
+            o << "bool";
+            break;
+        case int8_type_id:
+            o << "int8";
+            break;
+        case int16_type_id:
+            o << "int16";
+            break;
+        case int32_type_id:
+            o << "int32";
+            break;
+        case int64_type_id:
+            o << "int64";
+            break;
+        case uint8_type_id:
+            o << "uint8";
+            break;
+        case uint16_type_id:
+            o << "uint16";
+            break;
+        case uint32_type_id:
+            o << "uint32";
+            break;
+        case uint64_type_id:
+            o << "uint64";
+            break;
+        case float32_type_id:
+            o << "float32";
+            break;
+        case float64_type_id:
+            o << "float64";
+            break;
+        case utf8_type_id:
+            o << "utf8[" << rhs.itemsize() << "]";
+            break;
+        default:
+            o << "<dtype without formatting support>";
+            break;
+    }
+
+    return o;
+}
+
