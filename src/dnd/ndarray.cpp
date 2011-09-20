@@ -5,6 +5,8 @@
 // This is unreleased proprietary software.
 //
 #include <dnd/ndarray.hpp>
+#include <dnd/scalars.hpp>
+#include <dnd/raw_iteration.hpp>
 
 #include <stdexcept>
 
@@ -78,10 +80,20 @@ void dnd::ndarray::swap(ndarray& rhs)
     m_buffer.swap(rhs.m_buffer);
 }
 
-void dnd::ndarray::vassign(const ndarray& rhs)
+void dnd::ndarray::vassign(const ndarray& rhs, assign_error_mode errmode)
 {
 }
 
-void dnd::ndarray::vassign(const dtype& dt, const void *data)
+void dnd::ndarray::vassign(const dtype& dt, const void *data, assign_error_mode errmode)
 {
+    scalar_copied_if_necessary src(m_dtype, dt, data, errmode);
+    raw_ndarray_iter<1> iter(*this);
+    
+    intptr_t innersize = iter.innersize(), innerstride = iter.innerstride();
+
+    if (innersize > 0) {
+        do {
+            
+        } while(iter.iternext());
+    }
 }

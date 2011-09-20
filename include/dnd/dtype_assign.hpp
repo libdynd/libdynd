@@ -42,44 +42,53 @@ public:
  * otherwise it will do a checked assignment which may raise
  * an exception.
  *
- * The src and dst data must be aligned.
+ * The src and dst data must be aligned. TODO: Relax this restriction.
  */
 void dtype_assign(const dtype& dst_dt, void *dst, const dtype& src_dt, const void *src,
                                 assign_error_mode errmode = assign_error_fractional);
 
-// Assign one element where src and dst may have different dtypes.
-// This function does lossy casts if necessary without raising an
-// exception.
-//
-// The src and dst data must be aligned.
-void dtype_assign_noexcept(const dtype& dst_dt, void *dst, const dtype& src_dt, const void *src);
-
-// Like dtype_assign, but for strided assignment
+/**
+ * Like dtype_assign, but for strided assignment. Does not require that the data
+ * be aligned.
+ */
 void dtype_strided_assign(const dtype& dst_dt, void *dst, intptr_t dst_stride,
                             const dtype& src_dt, const void *src, intptr_t src_stride,
                             intptr_t count, assign_error_mode errmode);
 
-// The function pointer type for a unary operation, for example a casting function
-// from one dtype to another.
+/**
+ * The function pointer type for a unary operation, for example a casting function
+ * from one dtype to another.
+ */
 typedef void (*unary_operation_t)(void *dst, intptr_t dst_stride,
                                 const void *src, intptr_t src_stride,
                                 intptr_t count,
                                 const auxiliary_data *auxdata);
 
-// Returns a function for assigning from the source data type
-// to the destination data type, optionally specialized based on
-// the fixed strides provided.
-//
-// If a stride is unknown or non-fixed, pass INTPTR_MAX for that stride.
-//
-// Pass the bitwise-OR (|) of all the input array strides and origin pointers
-// of both src and dst to align_test. If this is not possible,
-// pass the value 1 to indicate the data may be aligned or not,
-// or the value 0 to indicate the data is definitely aligned.
+/**
+ * Returns a function for assigning from the source data type
+ * to the destination data type, optionally specialized based on
+ * the fixed strides provided.
+ *
+ * If a stride is unknown or non-fixed, pass INTPTR_MAX for that stride.
+ *
+ * Pass the bitwise-OR (|) of all the input array strides and origin pointers
+ * of both src and dst to align_test. If this is not possible,
+ * pass the value 1 to indicate the data may be aligned or not,
+ * or the value 0 to indicate the data is definitely aligned.
+ */
 std::pair<unary_operation_t, std::shared_ptr<auxiliary_data> > get_dtype_strided_assign_operation(
                     const dtype& dst_dt, intptr_t dst_fixedstride, char dst_align_test,
                     const dtype& src_dt, intptr_t src_fixedstride, char src_align_test,
                     assign_error_mode errmode);
+
+/**
+ * Returns a function for assigning from the source data to the dest data, with
+ * a fixed data type.
+ */
+std::pair<unary_operation_t, std::shared_ptr<auxiliary_data> > get_dtype_strided_assign_operation(
+                    const dtype& dt,
+                    intptr_t dst_fixedstride, char dst_align_test,
+                    intptr_t src_fixedstride, char src_align_test);
 
 } // namespace dnd
 

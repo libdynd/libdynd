@@ -42,12 +42,24 @@ for C++.
 Development Log
 ---------------
 
+Sept 9, 2011
+
 * Initial work on 'dtype' object design/implementation. The dtype is
   an object which once constructed, should never be modified, so it
   only has 'getter' functions, not setters. For more complex dtypes,
   the lifetime is managed by a reference count.
+
+Sept 15, 2011
+
 * Raw casting/assignment functions for converting data. This includes
   "immediate mode" versions for single and multiple elements, and
   "delayed mode" versions which return a function pointer with auxiliary
   data.
+
+Sept 19, 2011
+
+* Added error mode to raw casting/assignment, which can check for
+  overflow, truncation of floating point fractional part, or floating
+  point inexact conversion.
+
 

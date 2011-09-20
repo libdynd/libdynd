@@ -176,6 +176,9 @@ public:
      * for one of the two dtypes.
      */
     virtual bool can_cast_same_kind(const dtype& dst_dt, const dtype& src_dt) const = 0;
+
+    /** Should return true if the type has construct/copy/move/destruct semantics */
+    virtual bool is_object_type() const = 0;
 };
 
 /**
@@ -246,6 +249,17 @@ public:
         m_data.swap(rhs.m_data);
     }
 
+    bool operator==(const dtype& rhs) const {
+        return m_type_id == rhs.m_type_id &&
+                m_itemsize == rhs.m_itemsize &&
+                m_kind == rhs.m_kind &&
+                m_alignment == rhs.m_alignment &&
+                m_byteswapped == rhs.m_byteswapped &&
+                (m_data != NULL ? m_data->can_cast_exact(*this, rhs)
+                                : (rhs.m_data != NULL ? rhs.m_data->can_cast_exact(*this, rhs)
+                                                      : true));
+    }
+
     /** Whether the dtype is byte-swapped */
     bool is_byteswapped() const {
         return (bool)m_byteswapped;
@@ -274,6 +288,19 @@ public:
     /** The item size of the dtype */
     intptr_t itemsize() const {
         return m_itemsize;
+    }
+
+    bool is_object_type() const {
+        return m_data != NULL && m_data->is_object_type();
+    }
+
+    /**
+     * Returns true if the data pointer is aligned
+     *
+     * @param dataptr  The pointer to the data.
+     */
+    bool is_data_aligned(const void* dataptr) const {
+        return ((m_alignment - 1) & reinterpret_cast<intptr_t>(dataptr)) == 0;
     }
 
     /**

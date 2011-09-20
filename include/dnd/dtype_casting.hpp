@@ -47,4 +47,4 @@ bool can_cast(const dtype& dst_dt, const dtype& src_dt, dtype_casting rule);
 
 } // namespace dnd
 
-#endif//_DTYPE_CASTING_HPP_
+#endif // _DTYPE_CASTING_HPP_

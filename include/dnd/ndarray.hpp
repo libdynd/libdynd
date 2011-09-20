@@ -8,6 +8,7 @@
 #define _NDARRAY_HPP_
 
 #include <dnd/dtype.hpp>
+#include <dnd/dtype_assign.hpp>
 #include <dnd/membuffer.hpp>
 #include <dnd/shortvector.hpp>
 
@@ -75,14 +76,35 @@ public:
     /** Move assignment operator (should be just "= default" in C++11) */
     ndarray& operator=(ndarray&& rhs);
 
+    int ndim() const {
+        return m_ndim;
+    }
+
+    const intptr_t *shape() const {
+        return m_shape.get();
+    }
+
+    const intptr_t *strides() const {
+        return m_strides.get();
+    }
+
+    char *data() {
+        return m_buffer->data();
+    }
+
+    const char *data() const {
+        return m_buffer->data();
+    }
+
     /** Does a value-assignment from the rhs array. */
-    void vassign(const ndarray& rhs);
+    void vassign(const ndarray& rhs, assign_error_mode errmode = assign_error_fractional);
     /** Does a value-assignment from the rhs raw scalar */
-    void vassign(const dtype& dt, const void *data);
+    void vassign(const dtype& dt, const void *data, assign_error_mode errmode = assign_error_fractional);
     /** Does a value-assignment from the rhs C++ scalar. */
     template<class T>
-    typename boost::enable_if<is_dtype_scalar<T>, void>::type vassign(const T& rhs) {
-        vassign(make_dtype<T>(), &rhs);
+    typename boost::enable_if<is_dtype_scalar<T>, void>::type vassign(const T& rhs,
+                                                assign_error_mode errmode = assign_error_fractional) {
+        vassign(make_dtype<T>(), &rhs, errmode);
     }
 };
 
