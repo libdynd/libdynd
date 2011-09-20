@@ -71,7 +71,7 @@ public:
     }
 
     /** Gets the scalar data pointer */
-    const void *get() const {
+    const void *data() const {
         return m_data;
     }
 };

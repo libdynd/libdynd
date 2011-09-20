@@ -138,6 +138,18 @@ public:
         return m_data;
     }
 
+    /**
+     * Gets a byte suitable for the 'align_test' argument in dtype's
+     * is_data_aligned function.
+     */
+    char get_align_test() const {
+        char result = static_cast<char>(reinterpret_cast<intptr_t>(m_data));
+        for (int i = 0; i < m_ndim; ++i) {
+            result |= m_strides[i];
+        }
+        return result;
+    }
+
     bool iternext() {
         int i = 1;
         for (; i < m_ndim; ++i) {

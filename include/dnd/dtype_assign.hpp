@@ -83,7 +83,7 @@ std::pair<unary_operation_t, std::shared_ptr<auxiliary_data> > get_dtype_strided
 
 /**
  * Returns a function for assigning from the source data to the dest data, with
- * a fixed data type.
+ * just one dtype.
  */
 std::pair<unary_operation_t, std::shared_ptr<auxiliary_data> > get_dtype_strided_assign_operation(
                     const dtype& dt,

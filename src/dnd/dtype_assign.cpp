@@ -430,3 +430,136 @@ void dnd::dtype_strided_assign(const dtype& dst_dt, void *dst, intptr_t dst_stri
     op.first(dst, dst_stride, src, src_stride, count, op.second.get());
 }
 
+// Fixed and unknown size contiguous copy assignment functions
+template<int N>
+static void contig_fixedsize_copy_assign(void *dst, intptr_t, const void *src, intptr_t,
+                            intptr_t count, const auxiliary_data *) {
+    memcpy(dst, src, N * count);
+}
+namespace {
+    class assign_itemsize_auxiliary_data : public auxiliary_data {
+    public:
+        intptr_t itemsize;
+
+        virtual ~assign_itemsize_auxiliary_data() {
+        }
+    };
+
+    template<class T>
+    struct fixed_size_copy_assign_type {
+        static void assign(void *dst, intptr_t dst_stride, const void *src, intptr_t src_stride,
+                            intptr_t count, const auxiliary_data *) {
+            T *dst_cached = reinterpret_cast<T *>(dst);
+            const T *src_cached = reinterpret_cast<const T *>(src);
+            dst_stride /= sizeof(T);
+            src_stride /= sizeof(T);
+
+            for (intptr_t i = 0; i < count; ++i) {
+                *dst_cached = *src_cached;
+                
+                dst_cached += dst_stride;
+                src_cached += src_stride;
+            }
+        }
+    };
+
+    template<int N>
+    struct fixed_size_copy_assign;
+    template<>
+    struct fixed_size_copy_assign<1> : public fixed_size_copy_assign_type<char> {};
+    template<>
+    struct fixed_size_copy_assign<2> : public fixed_size_copy_assign_type<int16_t> {};
+    template<>
+    struct fixed_size_copy_assign<4> : public fixed_size_copy_assign_type<int32_t> {};
+    template<>
+    struct fixed_size_copy_assign<8> : public fixed_size_copy_assign_type<int64_t> {};
+}
+static void contig_copy_assign(void *dst, intptr_t, const void *src, intptr_t,
+                            intptr_t count, const auxiliary_data *auxdata) {
+    const assign_itemsize_auxiliary_data *data = static_cast<const assign_itemsize_auxiliary_data *>(auxdata);
+    memcpy(dst, src, data->itemsize * count);
+}
+static void strided_copy_assign(void *dst, intptr_t dst_stride, const void *src, intptr_t src_stride,
+                            intptr_t count, const auxiliary_data *auxdata) {
+    char *dst_cached = reinterpret_cast<char *>(dst);
+    const char *src_cached = reinterpret_cast<const char *>(src);
+    const assign_itemsize_auxiliary_data *data = static_cast<const assign_itemsize_auxiliary_data *>(auxdata);
+    intptr_t itemsize = data->itemsize;
+
+    for (intptr_t i = 0; i < count; ++i) {
+        memcpy(dst_cached, src_cached, itemsize);
+        dst_cached += dst_stride;
+        src_cached += src_stride;
+    }
+}
+
+
+std::pair<unary_operation_t, std::shared_ptr<auxiliary_data> > get_dtype_strided_assign_operation(
+                    const dtype& dt,
+                    intptr_t dst_fixedstride, char dst_align_test,
+                    intptr_t src_fixedstride, char src_align_test)
+{
+    if (!dt.is_object_type()) {
+        std::pair<unary_operation_t, std::shared_ptr<auxiliary_data> > result;
+
+        if (dst_fixedstride == dt.itemsize() && src_fixedstride == dt.itemsize()) {
+            // contig -> contig uses memcpy, works with unaligned data
+            switch (dt.itemsize()) {
+                case 1:
+                    result.first = &contig_fixedsize_copy_assign<1>;
+                    break;
+                case 2:
+                    result.first = &contig_fixedsize_copy_assign<2>;
+                    break;
+                case 4:
+                    result.first = &contig_fixedsize_copy_assign<4>;
+                    break;
+                case 8:
+                    result.first = &contig_fixedsize_copy_assign<8>;
+                    break;
+                case 16:
+                    result.first = &contig_fixedsize_copy_assign<16>;
+                    break;
+                default:
+                    result.first = &contig_copy_assign;
+                    assign_itemsize_auxiliary_data *auxdata = new assign_itemsize_auxiliary_data();
+                    result.second.reset(auxdata);
+                    auxdata->itemsize = dt.itemsize();
+                    break;
+            }
+        } else {
+            result.first = NULL;
+            switch (dt.itemsize()) {
+                case 1:
+                    result.first = &fixed_size_copy_assign<1>::assign;
+                    break;
+                case 2:
+                    if (((dst_align_test | src_align_test) & 0x1) == 0) {
+                        result.first = &fixed_size_copy_assign<2>::assign;
+                    }
+                    break;
+                case 4:
+                    if (((dst_align_test | src_align_test) & 0x3) == 0) {
+                        result.first = &fixed_size_copy_assign<4>::assign;
+                    }
+                    break;
+                case 8:
+                    if (((dst_align_test | src_align_test) & 0x7) == 0) {
+                        result.first = &fixed_size_copy_assign<8>::assign;
+                    }
+                    break;
+            }
+
+            if (result.first == NULL) {
+                result.first = &strided_copy_assign;
+                assign_itemsize_auxiliary_data *auxdata = new assign_itemsize_auxiliary_data();
+                result.second.reset(auxdata);
+                auxdata->itemsize = dt.itemsize();
+            }
+        }
+
+        return std::move(result);
+    } else {
+        throw std::runtime_error("cannot assign object dtypes yet");
+    }
+}

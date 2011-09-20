@@ -91,9 +91,13 @@ void dnd::ndarray::vassign(const dtype& dt, const void *data, assign_error_mode 
     
     intptr_t innersize = iter.innersize(), innerstride = iter.innerstride();
 
+    std::pair<unary_operation_t, std::shared_ptr<auxiliary_data> > assign =
+                get_dtype_strided_assign_operation(dt, innerstride, iter.get_align_test(),
+                                                    0, 0);
+
     if (innersize > 0) {
         do {
-            
+            assign.first(iter.data(), innerstride, src.data(), 0, innersize, assign.second.get());
         } while(iter.iternext());
     }
 }
