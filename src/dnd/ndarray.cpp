@@ -23,6 +23,11 @@ dnd::ndarray::ndarray(const dtype& dt, int ndim, const dimvector& shape,
     memcpy(m_strides.get(), strides.get(), ndim * sizeof(intptr_t));
 }
 
+dnd::ndarray::ndarray()
+    : m_dtype(), m_ndim(0), m_shape(0), m_strides(0), m_baseoffset(0), m_buffer()
+{
+}
+
 dnd::ndarray::ndarray(const dtype& dt)
     : m_dtype(dt), m_ndim(0), m_shape(0), m_strides(0),
       m_baseoffset(0), m_buffer(new membuffer(dt, 1))

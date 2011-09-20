@@ -84,7 +84,7 @@ public:
                 m_data = m_shortdata;
             } else {
                 // In the long case, move the long allocated pointer
-                m_data = rhs.m_ddata;
+                m_data = rhs.m_data;
                 rhs.m_data = rhs.m_shortdata;
             }
         }

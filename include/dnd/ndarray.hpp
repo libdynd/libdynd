@@ -40,6 +40,8 @@ class ndarray {
             const std::shared_ptr<membuffer>& buffer);
 
 public:
+    /** Constructs an array with no buffer (NULL state) */
+    ndarray();
     /** Constructs a zero-dimensional scalar array */
     explicit ndarray(const dtype& dt);
     /** Constructs a one-dimensional array */
@@ -74,7 +76,18 @@ public:
      */
     ndarray& operator=(const ndarray& rhs);
     /** Move assignment operator (should be just "= default" in C++11) */
-    ndarray& operator=(ndarray&& rhs);
+    ndarray& operator=(ndarray&& rhs) {
+        if (this != &rhs) {
+            m_dtype = std::move(rhs.m_dtype);
+            m_ndim = rhs.m_ndim;
+            m_shape = std::move(rhs.m_shape);
+            m_strides = std::move(rhs.m_strides);
+            m_baseoffset = rhs.m_baseoffset;
+            m_buffer = std::move(rhs.m_buffer);
+        }
+
+        return *this;
+    }
 
     int ndim() const {
         return m_ndim;
@@ -105,6 +118,9 @@ public:
     typename boost::enable_if<is_dtype_scalar<T>, void>::type vassign(const T& rhs,
                                                 assign_error_mode errmode = assign_error_fractional) {
         vassign(make_dtype<T>(), &rhs, errmode);
+    }
+    void vassign(const bool& rhs, assign_error_mode errmode = assign_error_fractional) {
+        vassign(dnd_bool(rhs), errmode);
     }
 };
 
