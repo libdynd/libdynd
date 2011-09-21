@@ -8,6 +8,7 @@
 #include <iostream> // FOR DEBUG
 #include <typeinfo> // FOR DEBUG
 
+#include <sstream>
 #include <stdexcept>
 #include <cstring>
 #include <limits>
@@ -66,7 +67,7 @@ struct single_assigner;
 template <class dst_type, class src_type, assign_error_mode errmode>
 struct single_assigner<dst_type, src_type, false, false, errmode> {
     static void assign(void *dst, const void *src) {
-        cout << "single_assigner::assign no byte-swap (" << typeid(src_type).name() << " -> " << typeid(dst_type).name() << ", error mode " << errmode << ")\n";
+        //DEBUG_COUT << "single_assigner::assign no byte-swap (" << typeid(src_type).name() << " -> " << typeid(dst_type).name() << ", error mode " << errmode << ")\n";
         single_assigner_simple<dst_type, src_type, errmode>::assign(reinterpret_cast<dst_type *>(dst),
                                                                 reinterpret_cast<const src_type *>(src));
     }
@@ -272,7 +273,7 @@ struct multiple_assigner {
                                 intptr_t count,
                                 const auxiliary_data *)
     {
-        cout << "multiple_assigner::assign_noexcept (" << typeid(src_type).name() << " -> " << typeid(dst_type).name() << ")\n";
+        //DEBUG_COUT << "multiple_assigner::assign_noexcept (" << typeid(src_type).name() << " -> " << typeid(dst_type).name() << ")\n";
         const src_type *src_cached = reinterpret_cast<const src_type *>(src);
         dst_type *dst_cached = reinterpret_cast<dst_type *>(dst);
         src_stride /= sizeof(src_type);
@@ -290,7 +291,7 @@ struct multiple_assigner {
                                 intptr_t count,
                                 const auxiliary_data *)
     {
-        cout << "multiple_assigner::assign_noexcept_anystride_zerostride (" << typeid(src_type).name() << " -> " << typeid(dst_type).name() << ")\n";
+        //DEBUG_COUT << "multiple_assigner::assign_noexcept_anystride_zerostride (" << typeid(src_type).name() << " -> " << typeid(dst_type).name() << ")\n";
         dst_type src_cached = static_cast<dst_type>(*reinterpret_cast<const src_type *>(src));
         dst_type *dst_cached = reinterpret_cast<dst_type *>(dst);
         dst_stride /= sizeof(dst_type);
@@ -306,7 +307,7 @@ struct multiple_assigner {
                                 intptr_t count,
                                 const auxiliary_data *)
     {
-        cout << "multiple_assigner::assign_noexcept_contigstride_zerostride (" << typeid(src_type).name() << " -> " << typeid(dst_type).name() << ")\n";
+        //DEBUG_COUT << "multiple_assigner::assign_noexcept_contigstride_zerostride (" << typeid(src_type).name() << " -> " << typeid(dst_type).name() << ")\n";
         dst_type src_cached = static_cast<dst_type>(*reinterpret_cast<const src_type *>(src));
         dst_type *dst_cached = reinterpret_cast<dst_type *>(dst);
 
@@ -320,7 +321,7 @@ struct multiple_assigner {
                                 intptr_t count,
                                 const auxiliary_data *)
     {
-        cout << "multiple_assigner::assign_noexcept_contigstride_contigstride (" << typeid(src_type).name() << " -> " << typeid(dst_type).name() << ")\n";
+        //DEBUG_COUT << "multiple_assigner::assign_noexcept_contigstride_contigstride (" << typeid(src_type).name() << " -> " << typeid(dst_type).name() << ")\n";
         const src_type *src_cached = reinterpret_cast<const src_type *>(src);
         dst_type *dst_cached = reinterpret_cast<dst_type *>(dst);
 
@@ -335,11 +336,10 @@ struct multiple_assigner {
 
 #define DTYPE_ASSIGN_SRC_TO_DST_SINGLE_CASE(dst_type, src_type, ASSIGN_FN) \
     case type_id_of<dst_type>::value: \
-        cout << "returning " << DND_STRINGIFY(dst_type) << " " << DND_STRINGIFY(src_type) << " " << DND_STRINGIFY(ASSIGN_FN) << "\n"; \
+        /*DEBUG_COUT << "returning " << DND_STRINGIFY(dst_type) << " " << DND_STRINGIFY(src_type) << " " << DND_STRINGIFY(ASSIGN_FN) << "\n";*/ \
         return std::pair<unary_operation_t, shared_ptr<auxiliary_data> >( \
             &multiple_assigner<dst_type, src_type>::ASSIGN_FN, \
-            NULL); \
-        break
+            NULL);
 
 #define DTYPE_ASSIGN_SRC_TO_ANY_CASE(src_type, ASSIGN_FN) \
     case type_id_of<src_type>::value: \
@@ -378,7 +378,7 @@ std::pair<unary_operation_t, shared_ptr<auxiliary_data> > dnd::get_dtype_strided
                     const dtype& src_dt, intptr_t src_fixedstride, char src_align_test,
                     assign_error_mode errmode)
 {
-    cout << "get_dtype_strided_assign_operation (different dtype " << dst_dt << ", " << src_dt << ")\n";
+    //DEBUG_COUT << "get_dtype_strided_assign_operation (different dtype " << dst_dt << ", " << src_dt << ", error mode " << errmode << ")\n";
     bool is_aligned = dst_dt.is_data_aligned(dst_align_test) && src_dt.is_data_aligned(src_align_test);
     bool dst_byteswapped = dst_dt.is_byteswapped(), src_byteswapped = src_dt.is_byteswapped();
 
@@ -425,11 +425,11 @@ std::pair<unary_operation_t, shared_ptr<auxiliary_data> > dnd::get_dtype_strided
                 DTYPE_ASSIGN_ANY_TO_ANY_SWITCH(assign_noexcept);
             }
         }
-
-        throw std::runtime_error("this dtype assignment isn't yet supported");
     }
 
-    throw std::runtime_error("this dtype assignment isn't yet supported");
+    stringstream ss;
+    ss << "strided assignment from " << src_dt << " to " << dst_dt << " isn't yet supported";
+    throw std::runtime_error(ss.str());
 }
 
 void dnd::dtype_strided_assign(const dtype& dst_dt, void *dst, intptr_t dst_stride,
@@ -559,7 +559,7 @@ std::pair<unary_operation_t, std::shared_ptr<auxiliary_data> > dnd::get_dtype_st
                     intptr_t dst_fixedstride, char dst_align_test,
                     intptr_t src_fixedstride, char src_align_test)
 {
-    cout << "get_dtype_strided_assign_operation (single dtype " << dt << ")\n";
+    //DEBUG_COUT << "get_dtype_strided_assign_operation (single dtype " << dt << ")\n";
     if (!dt.is_object_type()) {
         std::pair<unary_operation_t, std::shared_ptr<auxiliary_data> > result;
 

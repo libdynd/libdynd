@@ -80,7 +80,7 @@ TEST(DTypeAssign, FixedSizeTestsNoExcept) {
 #undef ONE_TEST
 }
 
-TEST(DTypeAssign, FixedSizeTests) {
+TEST(DTypeAssign, FixedSizeTests_Bool) {
     dnd_bool v_b;
     int8_t v_i8;
     int16_t v_i16;
@@ -113,6 +113,23 @@ TEST(DTypeAssign, FixedSizeTests) {
     ONE_TEST(float32_type_id, v_f32);
     ONE_TEST(float64_type_id, v_f64);
 #undef ONE_TEST
+}
+
+TEST(DTypeAssign, FixedSizeTests_Int8) {
+    dnd_bool v_b;
+    int8_t v_i8;
+    int16_t v_i16;
+    int32_t v_i32;
+    int64_t v_i64;
+    uint8_t v_u8;
+    uint16_t v_u16;
+    uint32_t v_u32;
+    uint64_t v_u64;
+    float v_f32;
+    double v_f64;
+
+    dtype s_dt, d_dt;
+    void *s_ptr;
 
     s_dt = dtype(int8_type_id);
     s_ptr = &v_i8;
@@ -144,6 +161,23 @@ TEST(DTypeAssign, FixedSizeTests) {
     v_i8 = 1;
     dtype_assign(dtype(bool_type_id), &v_b, s_dt, s_ptr);
     EXPECT_EQ(true, v_b);
+}
+
+TEST(DTypeAssign, FixedSizeTests_Float64) {
+    dnd_bool v_b;
+    int8_t v_i8;
+    int16_t v_i16;
+    int32_t v_i32;
+    int64_t v_i64;
+    uint8_t v_u8;
+    uint16_t v_u16;
+    uint32_t v_u32;
+    uint64_t v_u64;
+    float v_f32;
+    double v_f64;
+
+    dtype s_dt, d_dt;
+    void *s_ptr;
 
     s_dt = dtype(float64_type_id);
     s_ptr = &v_f64;
@@ -192,7 +226,7 @@ TEST(DTypeAssign, FixedSizeTests) {
     EXPECT_TRUE(v_f32 < 0);
 }
 
-TEST(DTypeAssign, FixedSizeTestsStridedNoExcept) {
+TEST(DTypeAssign, FixedSizeTestsStridedNoExcept_Bool) {
     dnd_bool v_b[4];
     int8_t v_i8[4];
     int16_t v_i16[4];
@@ -228,6 +262,24 @@ TEST(DTypeAssign, FixedSizeTestsStridedNoExcept) {
     ONE_TEST(float32_type_id, v_f32);
     ONE_TEST(float64_type_id, v_f64);
 #undef ONE_TEST
+}
+
+TEST(DTypeAssign, FixedSizeTestsStridedNoExcept_Int8) {
+    dnd_bool v_b[4];
+    int8_t v_i8[4];
+    int16_t v_i16[4];
+    int32_t v_i32[4];
+    int64_t v_i64[4];
+    uint8_t v_u8[4];
+    uint16_t v_u16[4];
+    uint32_t v_u32[4];
+    uint64_t v_u64[4];
+    float v_f32[4];
+    double v_f64[4];
+
+    dtype s_dt, d_dt;
+    void *s_ptr;
+    intptr_t s_stride;
 
     s_dt = dtype(int8_type_id);
     s_ptr = v_i8;
@@ -248,6 +300,24 @@ TEST(DTypeAssign, FixedSizeTestsStridedNoExcept) {
     ONE_TEST(float32_type_id, v_f32, 127, 0, -128, -10);
     ONE_TEST(float64_type_id, v_f64, 127, 0, -128, -10);
 #undef ONE_TEST
+}
+
+TEST(DTypeAssign, FixedSizeTestsStridedNoExcept_Float64) {
+    dnd_bool v_b[4];
+    int8_t v_i8[4];
+    int16_t v_i16[4];
+    int32_t v_i32[4];
+    int64_t v_i64[4];
+    uint8_t v_u8[4];
+    uint16_t v_u16[4];
+    uint32_t v_u32[4];
+    uint64_t v_u64[4];
+    float v_f32[4];
+    double v_f64[4];
+
+    dtype s_dt, d_dt;
+    void *s_ptr;
+    intptr_t s_stride;
 
     s_dt = dtype(float64_type_id);
     s_ptr = v_f64;

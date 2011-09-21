@@ -91,7 +91,7 @@ void dnd::ndarray::vassign(const ndarray& rhs, assign_error_mode errmode)
 
 void dnd::ndarray::vassign(const dtype& dt, const void *data, assign_error_mode errmode)
 {
-    cout << "scalar vassign\n";
+    //DEBUG_COUT << "scalar vassign\n";
     scalar_copied_if_necessary src(m_dtype, dt, data, errmode);
     raw_ndarray_iter<1> iter(*this);
     
@@ -103,7 +103,7 @@ void dnd::ndarray::vassign(const dtype& dt, const void *data, assign_error_mode 
 
     if (innersize > 0) {
         do {
-            cout << "scalar vassign inner loop with size " << innersize << "\n";
+            //DEBUG_COUT << "scalar vassign inner loop with size " << innersize << "\n";
             assign.first(iter.data(), innerstride, src.data(), 0, innersize, assign.second.get());
         } while(iter.iternext());
     }

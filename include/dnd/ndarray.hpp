@@ -119,11 +119,11 @@ public:
     template<class T>
     typename boost::enable_if<is_dtype_scalar<T>, void>::type vassign(const T& rhs,
                                                 assign_error_mode errmode = assign_error_fractional) {
-        std::cout << "vassign C++ scalar\n";
+        //DEBUG_COUT << "vassign C++ scalar\n";
         vassign(make_dtype<T>(), &rhs, errmode);
     }
     void vassign(const bool& rhs, assign_error_mode errmode = assign_error_fractional) {
-        std::cout << "vassign bool\n";
+        //DEBUG_COUT << "vassign bool\n";
         vassign(dnd_bool(rhs), errmode);
     }
 };
