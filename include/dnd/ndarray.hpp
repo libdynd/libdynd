@@ -8,6 +8,7 @@
 #define _NDARRAY_HPP_
 
 #include <iostream> // FOR DEBUG
+#include <stdexcept>
 
 #include <boost/utility/enable_if.hpp>
 
@@ -126,6 +127,24 @@ public:
         //DEBUG_COUT << "vassign bool\n";
         vassign(dnd_bool(rhs), errmode);
     }
+
+    /**
+     * When this is a zero-dimensional array, converts it to a C++ scalar of the
+     * requested template type.
+     *
+     * @param errmode  The assignment error mode to use.
+     */
+    template<class T>
+    typename boost::enable_if<is_dtype_scalar<T>, T>::type as_scalar(
+                                        assign_error_mode errmode = assign_error_fractional) {
+        T result;
+        if (ndim() != 0) {
+            throw std::runtime_error("can only convert ndarrays with 0 dimensions to scalars");
+        }
+        dtype_assign(make_dtype<T>(), &result, m_dtype, m_buffer->data(), errmode);
+        return result;
+    }
+    
 };
 
 } // namespace dnd

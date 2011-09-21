@@ -6,6 +6,7 @@ set(tests_SRC
     dtype_casting_test.cpp
     dtype_test.cpp
     ndarray_assign_test.cpp
+    ndarray_test.cpp
     )
 
 # TODO: this is awkwardly hardcoded
