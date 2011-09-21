@@ -149,6 +149,9 @@ template <> struct is_dtype_scalar<unsigned long long> {enum {value = true};};
 template <> struct is_dtype_scalar<float> {enum {value = true};};
 template <> struct is_dtype_scalar<double> {enum {value = true};};
 
+/** Typedef for dtype endian byte-swapping operation */
+typedef void (*byteswap_operation_t)(void *dst, const void *src, intptr_t itemsize);
+
 class dtype;
 
 // The extended_dtype class is for dtypes which require more data
@@ -156,6 +159,14 @@ class dtype;
 class extended_dtype {
 public:
     virtual ~extended_dtype();
+
+    /**
+     * For dtypes which are primitive and can support either native or swapped
+     * byte endianness, this returns a function to do the swap. Byte-swapping of
+     * more complex aggregate dtypes is only supported by assignment operations,
+     * where the destination dtype has a different byte-order than the source.
+     */
+    virtual byteswap_operation_t get_byteswap_operation() const;
 
     /**
      * Tests that the two dtypes have identical binary layouts. This method
@@ -329,6 +340,8 @@ public:
     const extended_dtype* extended() const {
         return m_data.get();
     }
+
+    byteswap_operation_t get_byteswap_operation() const;
 
     friend std::ostream& operator<<(std::ostream& o, const dtype& rhs);
 };

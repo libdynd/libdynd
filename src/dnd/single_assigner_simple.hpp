@@ -364,8 +364,15 @@ struct single_assigner_simple_base<float, double, float_kind, float_kind, assign
 template <class dst_type, class src_type, assign_error_mode errmode>
 struct single_assigner_simple
     : public single_assigner_simple_base<dst_type, src_type,
-                                kind_of<dst_type>::value, kind_of<src_type>::value, errmode>
+                        kind_of<dst_type>::value, kind_of<src_type>::value, errmode>
 {};
+template <class same_type, assign_error_mode errmode>
+struct single_assigner_simple<same_type, same_type, errmode>
+{
+    static void assign(same_type *dst, const same_type *src) {
+        *dst = *src;
+    }
+};
 
 } // anonymous namespace
 

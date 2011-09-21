@@ -62,4 +62,11 @@ Sept 19, 2011
   overflow, truncation of floating point fractional part, or floating
   point inexact conversion.
 
+Sept 20, 2011
 
+* Wrote ndarray.vassign function for scalar inputs. This allows you
+  to assign a scalar (including a native C++ scalar) to arrays, with
+  a customizable assignment error mode. While I could also make the
+  C++ scalar assignment work with ndarray.operator=, I think the ndarray
+  assignment operator should be reserved for ndarray reference assignment
+  semantics, overloading it would be confusing.
