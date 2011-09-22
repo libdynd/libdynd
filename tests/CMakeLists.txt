@@ -2,11 +2,11 @@ cmake_minimum_required(VERSION 2.8)
 project(dnd_tests)
 
 set(tests_SRC
-    dtype_assign_test.cpp
-    dtype_casting_test.cpp
-    dtype_test.cpp
-    ndarray_assign_test.cpp
-    ndarray_test.cpp
+    test_dtype_assign.cpp
+    test_dtype_casting.cpp
+    test_dtype.cpp
+    test_ndarray_assign.cpp
+    test_ndarray.cpp
     )
 
 # TODO: this is awkwardly hardcoded
