@@ -72,6 +72,12 @@ public:
     template<class T>
     ndarray(std::initializer_list<std::initializer_list<std::initializer_list<T> > > il);
 
+    /**
+     * Constructs an array from a multi-dimensional C-style array.
+     */
+    template<class T, int N>
+    ndarray(const T (&rhs)[N]);
+
     /** Copy constructor */
     ndarray(const ndarray& rhs)
         : m_dtype(rhs.m_dtype), m_ndim(rhs.m_ndim),
@@ -175,6 +181,7 @@ public:
     
 };
 
+///////////// Initializer list constructor implementation /////////////////////////
 namespace detail {
     // Computes the number of dimensions in a nested initializer list constructor
     template<class T>
@@ -308,6 +315,56 @@ dnd::ndarray::ndarray(std::initializer_list<std::initializer_list<std::initializ
         // Populate the storage buffer from the nested initializer list
         T *dataptr = reinterpret_cast<T *>(m_buffer->data());
         detail::initializer_list_shape<S>::copy_data(&dataptr, il);
+    }
+}
+
+///////////// C-style array constructor implementation /////////////////////////
+namespace detail {
+    template<class T> struct type_from_array {
+        typedef T type;
+        static const int itemsize = sizeof(T);
+        static const int type_id = type_id_of<T>::value;
+    };
+    template<class T, int N> struct type_from_array<T[N]> {
+        typedef typename type_from_array<T>::type type;
+        static const int itemsize = type_from_array<T>::itemsize;
+        static const int type_id = type_from_array<T>::type_id;
+    };
+
+    template<class T> struct ndim_from_array {static const int value = 0;};
+    template<class T, int N> struct ndim_from_array<T[N]> {
+        static const int value = ndim_from_array<T>::value + 1;
+    };
+
+    template<class T> struct fill_shape_and_strides_from_array {
+        static intptr_t fill(intptr_t *, intptr_t *) {
+            return sizeof(T);
+        }
+    };
+    template<class T, int N> struct fill_shape_and_strides_from_array<T[N]> {
+        static intptr_t fill(intptr_t *out_shape, intptr_t *out_strides) {
+            intptr_t stride = fill_shape_and_strides_from_array<T>::
+                                            fill(out_shape + 1, out_strides + 1);
+            out_strides[0] = stride;
+            out_shape[0] = N;
+            return N * stride;
+        }
+    };
+};
+
+template<class T, int N>
+dnd::ndarray::ndarray(const T (&rhs)[N])
+    : m_dtype(detail::type_from_array<T>::type_id), m_ndim(detail::ndim_from_array<T[N]>::value),
+      m_shape(m_ndim), m_strides(m_ndim), m_baseoffset(0)
+{
+    intptr_t size = detail::fill_shape_and_strides_from_array<T[N]>::
+                                            fill(m_shape.get(), m_strides.get());
+    size /= detail::type_from_array<T>::itemsize;
+    if (size > 0) {
+        // Allocate the storage buffer
+        m_buffer.reset(new membuffer(m_dtype, size));
+        // Populate the storage buffer from the nested initializer list
+        memcpy(m_buffer->data(), &rhs[0], detail::type_from_array<T>::itemsize * size);
     }
 }
 
