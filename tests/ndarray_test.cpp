@@ -13,6 +13,7 @@ TEST(NDArray, AsScalar) {
     ndarray a;
 
     a = ndarray(make_dtype<float>());
+    EXPECT_EQ(1, a.size());
     a.vassign(3.14f);
     EXPECT_EQ(3.14f, a.as_scalar<float>());
     EXPECT_EQ(3.14f, a.as_scalar<double>());
@@ -31,6 +32,7 @@ TEST(NDArray, AsScalar) {
 
 TEST(NDArray, InitializerLists) {
     ndarray a = {1, 2, 3, 4, 5};
+    EXPECT_EQ(5, a.size());
     EXPECT_EQ(make_dtype<int>(), a.get_dtype());
     EXPECT_EQ(1, a.ndim());
     EXPECT_EQ(5, a.shape()[0]);
@@ -43,6 +45,7 @@ TEST(NDArray, InitializerLists) {
     EXPECT_EQ(5, ptr_i[4]);
 
     ndarray b = {{1., 2., 3.}, {4., 5., 6.25}};
+    EXPECT_EQ(6, b.size());
     EXPECT_EQ(make_dtype<double>(), b.get_dtype());
     EXPECT_EQ(2, b.ndim());
     EXPECT_EQ(2, b.shape()[0]);
@@ -59,6 +62,7 @@ TEST(NDArray, InitializerLists) {
 
     // Testing assignment operator with initializer list (and 3D nested list)
     a = {{{1LL, 2LL}, {-1LL, -2LL}}, {{4LL, 5LL}, {6LL, 1LL}}};
+    EXPECT_EQ(8, a.size());
     EXPECT_EQ(make_dtype<long long>(), a.get_dtype());
     EXPECT_EQ(3, a.ndim());
     EXPECT_EQ(2, a.shape()[0]);
@@ -85,6 +89,7 @@ TEST(NDArray, InitializerLists) {
 TEST(NDArray, InitFromNestedCArray) {
     int i0[2][3] = {{1,2,3}, {4,5,6}};
     ndarray a = i0;
+    EXPECT_EQ(6, a.size());
     EXPECT_EQ(make_dtype<int>(), a.get_dtype());
     EXPECT_EQ(2, a.ndim());
     EXPECT_EQ(2, a.shape()[0]);
@@ -101,6 +106,7 @@ TEST(NDArray, InitFromNestedCArray) {
 
     float i1[2][2][3] = {{{1,2,3}, {1.5f, 2.5f, 3.5f}}, {{-10, 0, -3.1f}, {9,8,7}}};
     a = i1;
+    EXPECT_EQ(12, a.size());
     EXPECT_EQ(make_dtype<float>(), a.get_dtype());
     EXPECT_EQ(3, a.ndim());
     EXPECT_EQ(2, a.shape()[0]);

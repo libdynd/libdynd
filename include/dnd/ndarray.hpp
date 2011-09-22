@@ -23,12 +23,21 @@ namespace dnd {
 /** Typedef for vector of dimensions or strides */
 typedef shortvector<intptr_t, 3> dimvector;
 
+class ndarray;
+
+/**
+ * This function constructs an array with the same shape and memory layout
+ * of the one given, but with a different dtype.
+ */
+ndarray empty_like(const ndarray& rhs, const dtype& dt);
+
 /**
  * This is the primary multi-dimensional array class.
  */
 class ndarray {
     dtype m_dtype;
     int m_ndim;
+    intptr_t m_size;
     dimvector m_shape;
     dimvector m_strides;
     intptr_t m_baseoffset;
@@ -39,7 +48,7 @@ class ndarray {
      * function does not validate that the strides/baseoffset stay within
      * the buffer's bounds.
      */
-    ndarray(const dtype& dt, int ndim, const dimvector& shape,
+    ndarray(const dtype& dt, int ndim, intptr_t size, const dimvector& shape,
             const dimvector& strides, intptr_t baseoffset,
             const std::shared_ptr<membuffer>& buffer);
 
@@ -80,13 +89,13 @@ public:
 
     /** Copy constructor */
     ndarray(const ndarray& rhs)
-        : m_dtype(rhs.m_dtype), m_ndim(rhs.m_ndim),
+        : m_dtype(rhs.m_dtype), m_ndim(rhs.m_ndim), m_size(rhs.m_size),
           m_shape(rhs.m_ndim, rhs.m_shape),
           m_strides(rhs.m_ndim, rhs.m_strides),
           m_baseoffset(rhs.m_baseoffset), m_buffer(rhs.m_buffer) {}
     /** Move constructor (should just be "= default" in C++11) */
     ndarray(ndarray&& rhs)
-        : m_dtype(std::move(rhs.m_dtype)), m_ndim(rhs.m_ndim),
+        : m_dtype(std::move(rhs.m_dtype)), m_ndim(rhs.m_ndim), m_size(rhs.m_size),
           m_shape(std::move(rhs.m_shape)), m_strides(std::move(rhs.m_strides)),
           m_baseoffset(rhs.m_baseoffset), m_buffer(std::move(rhs.m_buffer)) {}
 
@@ -107,6 +116,7 @@ public:
         if (this != &rhs) {
             m_dtype = std::move(rhs.m_dtype);
             m_ndim = rhs.m_ndim;
+            m_size = rhs.m_size;
             m_shape = std::move(rhs.m_shape);
             m_strides = std::move(rhs.m_strides);
             m_baseoffset = rhs.m_baseoffset;
@@ -130,6 +140,10 @@ public:
 
     const intptr_t *strides() const {
         return m_strides.get();
+    }
+
+    intptr_t size() const {
+        return m_size;
     }
 
     char *data() {
@@ -157,6 +171,12 @@ public:
     }
 
     /**
+     * Converts the array into the specified dtype. This function always makes a copy
+     * even if the dtype is the same as the one for 'this'
+     */
+    ndarray as_dtype(const dtype& dt, assign_error_mode errmode = assign_error_fractional) const;
+
+    /**
      * When this is a zero-dimensional array, converts it to a C++ scalar of the
      * requested template type.
      *
@@ -164,7 +184,7 @@ public:
      */
     template<class T>
     typename boost::enable_if<is_dtype_scalar<T>, T>::type as_scalar(
-                                        assign_error_mode errmode = assign_error_fractional) {
+                                        assign_error_mode errmode = assign_error_fractional) const {
         T result;
         if (ndim() != 0) {
             throw std::runtime_error("can only convert ndarrays with 0 dimensions to scalars");
@@ -172,7 +192,8 @@ public:
         dtype_assign(make_dtype<T>(), &result, m_dtype, m_buffer->data(), errmode);
         return result;
     }
-    
+
+    friend ndarray empty_like(const ndarray& rhs, const dtype& dt);
 };
 
 ///////////// Initializer list constructor implementation /////////////////////////
@@ -258,6 +279,7 @@ dnd::ndarray::ndarray(std::initializer_list<T> il)
 {
     intptr_t size = il.size();
     m_shape[0] = size;
+    m_size = size;
     m_strides[0] = (size == 1) ? 0 : sizeof(T);
     if (size > 0) {
         // Allocate the storage buffer and copy the data
@@ -280,6 +302,7 @@ dnd::ndarray::ndarray(std::initializer_list<std::initializer_list<T> > il)
         size *= m_shape[i];
         stride *= m_shape[i];
     }
+    m_size = size;
     if (size > 0) {
         // Allocate the storage buffer
         m_buffer.reset(new membuffer(m_dtype, size));
@@ -303,6 +326,7 @@ dnd::ndarray::ndarray(std::initializer_list<std::initializer_list<std::initializ
         size *= m_shape[i];
         stride *= m_shape[i];
     }
+    m_size = size;
     if (size > 0) {
         // Allocate the storage buffer
         m_buffer.reset(new membuffer(m_dtype, size));
@@ -354,6 +378,7 @@ dnd::ndarray::ndarray(const T (&rhs)[N])
     intptr_t size = detail::fill_shape_and_strides_from_array<T[N]>::
                                             fill(m_shape.get(), m_strides.get());
     size /= detail::type_from_array<T>::itemsize;
+    m_size = size;
     if (size > 0) {
         // Allocate the storage buffer
         m_buffer.reset(new membuffer(m_dtype, size));
