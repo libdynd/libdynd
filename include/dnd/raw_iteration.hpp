@@ -99,7 +99,7 @@ namespace detail {
             for (int i = 0; i < m_ndim; ++i) {
                 strideperm[i] = i;
             }
-            intptr_t *strides0 = m_strides[0];
+            const intptr_t *strides0 = strides[0];
             std::sort(strideperm.get(), strideperm.get() + m_ndim,
                             [&strides0](int i, int j) -> bool {
                 intptr_t astride = strides0[i], bstride = strides0[j];

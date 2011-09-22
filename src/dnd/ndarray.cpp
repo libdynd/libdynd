@@ -70,9 +70,13 @@ dnd::ndarray::ndarray(intptr_t dim0, intptr_t dim1, intptr_t dim2, const dtype& 
 
 ndarray dnd::empty_like(const ndarray& rhs, const dtype& dt)
 {
+    //DEBUG_COUT << "empty_like " << rhs << " --- but with dtype " << dt << "\n";
     // Sort the strides to get the memory layout ordering
     const intptr_t *shape = rhs.shape(), *strides = rhs.strides();
     shortvector<int, 3> strideperm(rhs.ndim());
+    for (int i = 0; i < rhs.ndim(); ++i) {
+        strideperm[i] = i;
+    }
     std::sort(strideperm.get(), strideperm.get() + rhs.ndim(),
                             [&strides](int i, int j) -> bool {
         intptr_t astride = strides[i], bstride = strides[j];
@@ -127,6 +131,7 @@ void dnd::ndarray::swap(ndarray& rhs)
 
 static void vassign_unequal_dtypes(ndarray& lhs, const ndarray& rhs, assign_error_mode errmode)
 {
+    //DEBUG_COUT << "vassign_unequal_dtypes\n";
     // First broadcast the 'rhs' shape to 'this'
     dimvector rhs_strides(lhs.ndim());
     broadcast_to_shape(lhs.ndim(), lhs.shape(), rhs.ndim(), rhs.shape(), rhs.strides(), rhs_strides.get());
@@ -134,6 +139,7 @@ static void vassign_unequal_dtypes(ndarray& lhs, const ndarray& rhs, assign_erro
     // Create the raw iterator
     raw_ndarray_iter<2> iter(lhs.ndim(), lhs.shape(), lhs.data(), lhs.strides(),
                                 const_cast<char *>(rhs.data()), rhs_strides.get());
+    //iter.debug_dump(cout);
 
     intptr_t innersize = iter.innersize();
     intptr_t dst_innerstride = iter.innerstride<0>(), src_innerstride = iter.innerstride<1>();
@@ -154,6 +160,7 @@ static void vassign_unequal_dtypes(ndarray& lhs, const ndarray& rhs, assign_erro
 
 static void vassign_equal_dtypes(ndarray& lhs, const ndarray& rhs)
 {
+    //DEBUG_COUT << "vassign_equal_dtypes\n";
     // First broadcast the 'rhs' shape to 'this'
     dimvector rhs_strides(lhs.ndim());
     broadcast_to_shape(lhs.ndim(), lhs.shape(), rhs.ndim(), rhs.shape(), rhs.strides(), rhs_strides.get());
@@ -161,6 +168,7 @@ static void vassign_equal_dtypes(ndarray& lhs, const ndarray& rhs)
     // Create the raw iterator
     raw_ndarray_iter<2> iter(lhs.ndim(), lhs.shape(), lhs.data(), lhs.strides(),
                                 const_cast<char *>(rhs.data()), rhs_strides.get());
+    //iter.debug_dump(cout);
 
     intptr_t innersize = iter.innersize();
     intptr_t dst_innerstride = iter.innerstride<0>(), src_innerstride = iter.innerstride<1>();

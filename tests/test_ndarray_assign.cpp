@@ -150,8 +150,8 @@ TEST(NDArrayAssign, ScalarAssignment_Float64) {
 
 TEST(DTypeAssign, BroadcastAssign) {
     ndarray a(2,3,4,make_dtype<float>());
-    int v4[4] = {3,4,5,6};
-    ndarray b = v4;
+    int v0[4] = {3,4,5,6};
+    ndarray b = v0;
 
     // Broadcasts the 4-vector by a factor of 6,
     // converting the dtype
@@ -163,4 +163,34 @@ TEST(DTypeAssign, BroadcastAssign) {
         EXPECT_EQ(5, *ptr_f++);
         EXPECT_EQ(6, *ptr_f++);
     }
+
+    float v1[4] = {1.5, 2.5, 1.25, 2.25};
+    b = v1;
+
+    // Broadcasts the 4-vector by a factor of 6,
+    // doesn't convert the dtype
+    a.vassign(b);
+    ptr_f = (float *)a.data();
+    for (int i = 0; i < 6; ++i) {
+        EXPECT_EQ(1.5, *ptr_f++);
+        EXPECT_EQ(2.5, *ptr_f++);
+        EXPECT_EQ(1.25, *ptr_f++);
+        EXPECT_EQ(2.25, *ptr_f++);
+    }
+
+    double v2[3][1] = {{1.5}, {3.125}, {7.5}};
+    b = v2;
+    // Broadcasts the (3,1)-array by a factor of 8,
+    // converting the dtype
+    a.vassign(b);
+    ptr_f = (float *)a.data();
+    for (int i = 0; i < 2; ++i) {
+        for (int j = 0; j < 4; ++j)
+            EXPECT_EQ(1.5, *ptr_f++);
+        for (int j = 0; j < 4; ++j)
+            EXPECT_EQ(3.125, *ptr_f++);
+        for (int j = 0; j < 4; ++j)
+            EXPECT_EQ(7.5, *ptr_f++);
+    }
+
 }
