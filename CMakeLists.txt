@@ -10,13 +10,17 @@ set(dnd_SRC
     src/dnd/dtype.cpp
     src/dnd/dtype_assign.cpp
     src/dnd/dtype_casting.cpp
+    src/dnd/exceptions.cpp
     src/dnd/membuffer.cpp
     src/dnd/ndarray.cpp
+    src/dnd/shape_tools.cpp
     include/dnd/dtype.hpp
     include/dnd/dtype_assign.hpp
     include/dnd/dtype_casting.hpp
+    include/dnd/exceptions.hpp
     include/dnd/membuffer.hpp
     include/dnd/ndarray.hpp
+    include/dnd/shape_tools.hpp
     )
 
 include_directories(

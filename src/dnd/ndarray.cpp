@@ -4,11 +4,12 @@
 //
 // This is unreleased proprietary software.
 //
+
+#include <stdexcept>
+
 #include <dnd/ndarray.hpp>
 #include <dnd/scalars.hpp>
 #include <dnd/raw_iteration.hpp>
-
-#include <stdexcept>
 
 using namespace std;
 using namespace dnd;
