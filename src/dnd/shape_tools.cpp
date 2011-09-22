@@ -23,11 +23,11 @@ void dnd::broadcast_to_shape(int dst_ndim, const intptr_t *dst_shape,
     for (int i = dimdelta; i < dst_ndim; ++i) {
         int src_i = i - dimdelta;
         if (src_shape[src_i] == 1) {
-            out_strides[src_i] = 0;
+            out_strides[i] = 0;
         } else if (src_shape[src_i] != dst_shape[i]) {
             throw broadcast_error(dst_ndim, dst_shape, src_ndim, src_shape);
         } else {
-            out_strides[src_i] = src_strides[src_i];
+            out_strides[i] = src_strides[src_i];
         }
     }
 }

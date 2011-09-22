@@ -30,6 +30,8 @@ class ndarray;
  * of the one given, but with a different dtype.
  */
 ndarray empty_like(const ndarray& rhs, const dtype& dt);
+/** Stream printing function */
+std::ostream& operator<<(std::ostream& o, const ndarray& rhs);
 
 /**
  * This is the primary multi-dimensional array class.
@@ -138,8 +140,16 @@ public:
         return m_shape.get();
     }
 
+    intptr_t shape(int i) const {
+        return m_shape.get()[i];
+    }
+
     const intptr_t *strides() const {
         return m_strides.get();
+    }
+
+    intptr_t strides(int i) const {
+        return m_strides.get()[i];
     }
 
     intptr_t size() const {
@@ -194,6 +204,7 @@ public:
     }
 
     friend ndarray empty_like(const ndarray& rhs, const dtype& dt);
+    friend std::ostream& operator<<(std::ostream& o, const ndarray& rhs);
 };
 
 ///////////// Initializer list constructor implementation /////////////////////////

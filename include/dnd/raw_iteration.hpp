@@ -70,6 +70,7 @@ namespace detail {
                 m_ndim = 1;
                 // NOTE: This is ok, because shortvectors always have
                 //       at least 1 element even if initialized with size = 0.
+                m_iterindex[0] = 0;
                 m_itershape[0] = 1;
                 for (int k = 0; k < N; ++k) {
                     m_strides[k][0] = 0;
@@ -77,6 +78,7 @@ namespace detail {
                 return;
             } else if (m_ndim == 1) {
                 intptr_t size = shape[0];
+                m_iterindex[0] = 0;
                 m_itershape[0] = size;
                 // Always make the stride positive
                 if (strides[0][0] >= 0) {
@@ -212,6 +214,37 @@ namespace detail {
                 result |= m_strides[K][i];
             }
             return result;
+        }
+
+        /*
+        int m_ndim;
+        dimvector m_iterindex;
+        dimvector m_itershape;
+        char *m_data[N];
+        intptr_t *m_strides[N];
+        */
+
+        /**
+         * Prints out a debug dump of the object.
+         */
+        void debug_dump(std::ostream& o) {
+            o << "------ raw_ndarray_iter<" << N << ">\n";
+            o << " ndim: " << m_ndim << "\n";
+            o << " iterindex: ";
+            for (int i = 0; i < m_ndim; ++i) o << m_iterindex[i] << " ";
+            o << "\n";
+            o << " itershape: ";
+            for (int i = 0; i < m_ndim; ++i) o << m_itershape[i] << " ";
+            o << "\n";
+            o << " data: ";
+            for (int k = 0; k < N; ++k) o << (void *)m_data[k] << " ";
+            o << "\n";
+            for (int k = 0; k < N; ++k) {
+                o << " strides[" << k << "]: ";
+                for (int i = 0; i < m_ndim; ++i) o << m_strides[k][i] << " ";
+                o << "\n";
+            }
+            o << "------\n";
         }
     };
 } // namespace detail

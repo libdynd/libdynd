@@ -147,3 +147,20 @@ TEST(NDArrayAssign, ScalarAssignment_Float64) {
     EXPECT_EQ(36028797018963968LL, *ptr_f64);
     EXPECT_THROW(a.vassign(36028797018963969LL, assign_error_inexact), runtime_error);
 }
+
+TEST(DTypeAssign, BroadcastAssign) {
+    ndarray a(2,3,4,make_dtype<float>());
+    int v4[4] = {3,4,5,6};
+    ndarray b = v4;
+
+    // Broadcasts the 4-vector by a factor of 6,
+    // converting the dtype
+    a.vassign(b);
+    float *ptr_f = (float *)a.data();
+    for (int i = 0; i < 6; ++i) {
+        EXPECT_EQ(3, *ptr_f++);
+        EXPECT_EQ(4, *ptr_f++);
+        EXPECT_EQ(5, *ptr_f++);
+        EXPECT_EQ(6, *ptr_f++);
+    }
+}

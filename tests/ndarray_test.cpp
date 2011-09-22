@@ -9,6 +9,106 @@
 using namespace std;
 using namespace dnd;
 
+TEST(NDArray, Constructors) {
+    ndarray a;
+
+    // Default-constructed ndarray has size zero
+    EXPECT_EQ(0, a.size());
+    EXPECT_EQ(1, a.ndim());
+    EXPECT_EQ(0, a.shape()[0]);
+    EXPECT_EQ(0, a.strides()[0]);
+
+    // Scalar ndarray
+    a = ndarray(make_dtype<float>());
+    EXPECT_EQ(1, a.size());
+    EXPECT_EQ(0, a.ndim());
+
+    // One-dimensional ndarray with one element
+    a = ndarray(1, make_dtype<float>());
+    EXPECT_EQ(1, a.size());
+    EXPECT_EQ(1, a.ndim());
+    EXPECT_EQ(1, a.shape()[0]);
+    EXPECT_EQ(0, a.strides()[0]);
+
+    // One-dimensional ndarray
+    a = ndarray(3, make_dtype<float>());
+    EXPECT_EQ(3, a.size());
+    EXPECT_EQ(1, a.ndim());
+    EXPECT_EQ(3, a.shape()[0]);
+    EXPECT_EQ(sizeof(float), a.strides()[0]);
+
+    // Two-dimensional ndarray with a size-one dimension
+    a = ndarray(3, 1, make_dtype<float>());
+    EXPECT_EQ(3, a.size());
+    EXPECT_EQ(2, a.ndim());
+    EXPECT_EQ(3, a.shape()[0]);
+    EXPECT_EQ(1, a.shape()[1]);
+    EXPECT_EQ(sizeof(float), a.strides()[0]);
+    EXPECT_EQ(0, a.strides()[1]);
+
+    // Two-dimensional ndarray with a size-one dimension
+    a = ndarray(1, 3, make_dtype<float>());
+    EXPECT_EQ(3, a.size());
+    EXPECT_EQ(2, a.ndim());
+    EXPECT_EQ(1, a.shape()[0]);
+    EXPECT_EQ(3, a.shape()[1]);
+    EXPECT_EQ(0, a.strides()[0]);
+    EXPECT_EQ(sizeof(float), a.strides()[1]);
+
+    // Two-dimensional ndarray
+    a = ndarray(3, 5, make_dtype<float>());
+    EXPECT_EQ(15, a.size());
+    EXPECT_EQ(2, a.ndim());
+    EXPECT_EQ(3, a.shape()[0]);
+    EXPECT_EQ(5, a.shape()[1]);
+    EXPECT_EQ(5*sizeof(float), a.strides()[0]);
+    EXPECT_EQ(sizeof(float), a.strides()[1]);
+
+    // Three-dimensional ndarray with size-one dimension
+    a = ndarray(1, 5, 4, make_dtype<float>());
+    EXPECT_EQ(20, a.size());
+    EXPECT_EQ(3, a.ndim());
+    EXPECT_EQ(1, a.shape()[0]);
+    EXPECT_EQ(5, a.shape()[1]);
+    EXPECT_EQ(4, a.shape()[2]);
+    EXPECT_EQ(0, a.strides()[0]);
+    EXPECT_EQ(4*sizeof(float), a.strides()[1]);
+    EXPECT_EQ(sizeof(float), a.strides()[2]);
+
+    // Three-dimensional ndarray with size-one dimension
+    a = ndarray(3, 1, 4, make_dtype<float>());
+    EXPECT_EQ(12, a.size());
+    EXPECT_EQ(3, a.ndim());
+    EXPECT_EQ(3, a.shape()[0]);
+    EXPECT_EQ(1, a.shape()[1]);
+    EXPECT_EQ(4, a.shape()[2]);
+    EXPECT_EQ(4*sizeof(float), a.strides()[0]);
+    EXPECT_EQ(0, a.strides()[1]);
+    EXPECT_EQ(sizeof(float), a.strides()[2]);
+
+    // Three-dimensional ndarray with size-one dimension
+    a = ndarray(3, 5, 1, make_dtype<float>());
+    EXPECT_EQ(15, a.size());
+    EXPECT_EQ(3, a.ndim());
+    EXPECT_EQ(3, a.shape()[0]);
+    EXPECT_EQ(5, a.shape()[1]);
+    EXPECT_EQ(1, a.shape()[2]);
+    EXPECT_EQ(5*sizeof(float), a.strides()[0]);
+    EXPECT_EQ(sizeof(float), a.strides()[1]);
+    EXPECT_EQ(0, a.strides()[2]);
+
+    // Three-dimensional ndarray
+    a = ndarray(3, 5, 4, make_dtype<float>());
+    EXPECT_EQ(60, a.size());
+    EXPECT_EQ(3, a.ndim());
+    EXPECT_EQ(3, a.shape()[0]);
+    EXPECT_EQ(5, a.shape()[1]);
+    EXPECT_EQ(4, a.shape()[2]);
+    EXPECT_EQ(5*4*sizeof(float), a.strides()[0]);
+    EXPECT_EQ(4*sizeof(float), a.strides()[1]);
+    EXPECT_EQ(sizeof(float), a.strides()[2]);
+}
+
 TEST(NDArray, AsScalar) {
     ndarray a;
 

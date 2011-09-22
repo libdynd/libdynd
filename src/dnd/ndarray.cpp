@@ -62,7 +62,7 @@ dnd::ndarray::ndarray(intptr_t dim0, intptr_t dim1, intptr_t dim2, const dtype& 
 {
     m_shape[0] = dim0;
     m_shape[1] = dim1;
-    m_shape[1] = dim2;
+    m_shape[2] = dim2;
     m_strides[0] = (dim0 == 1) ? 0 : dt.itemsize() * dim1 * dim2;
     m_strides[1] = (dim1 == 1) ? 0 : dt.itemsize() * dim2;
     m_strides[2] = (dim2 == 1) ? 0 : dt.itemsize();
@@ -218,4 +218,36 @@ void dnd::ndarray::vassign(const dtype& dt, const void *data, assign_error_mode 
             assign.first(iter.data<0>(), innerstride, src.data(), 0, innersize, assign.second.get());
         } while (iter.iternext());
     }
+}
+
+static void nested_ndarray_print(std::ostream& o, const ndarray& rhs, const char *data, int i)
+{
+    o << "{";
+    if (i + 1 == rhs.ndim()) {
+        rhs.get_dtype().print(o, data, rhs.strides(i), rhs.shape(i), ", ");
+    } else {
+        intptr_t size = rhs.shape(i);
+        intptr_t stride = rhs.strides(i);
+        for (intptr_t k = 0; k < size; ++k) {
+            nested_ndarray_print(o, rhs, data, i+1);
+            if (k + 1 != size) {
+                o << ", ";
+            }
+            data += stride;
+        }
+    }
+    o << "}";
+}
+
+std::ostream& dnd::operator<<(std::ostream& o, const ndarray& rhs)
+{
+    o << "ndarray(" << rhs.get_dtype() << ", ";
+    if (rhs.ndim() == 0) {
+        rhs.get_dtype().print(o, rhs.data(), 0, 1, "");
+    } else {
+        nested_ndarray_print(o, rhs, rhs.data(), 0);
+    }
+    o << ")";
+
+    return o;
 }

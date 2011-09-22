@@ -3,7 +3,7 @@ project(dynamicndarray)
 
 set(CMAKE_VERBOSE_MAKEFILE 1)
 
-set(CMAKE_CXX_FLAGS "-std=c++0x")
+set(CMAKE_CXX_FLAGS "-std=c++0x -g")
 set(LINK_FLAGS -Wall -Wextra -Werror)
 
 set(dnd_SRC

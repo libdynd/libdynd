@@ -8,6 +8,7 @@
 
 #include <sstream>
 #include <stdexcept>
+#include <cstring>
 
 #define DND_MAX_DTYPES (64)
 // The number of type IDs that have a fixed size
@@ -270,3 +271,121 @@ std::ostream& dnd::operator<<(std::ostream& o, const dtype& rhs)
     return o;
 }
 
+void dnd::dtype::print(std::ostream& o, const void *data, intptr_t stride, intptr_t size, const char *separator) const
+{
+    if (size > 0) {
+        if (extended() != NULL) {
+            extended()->print(o, *this, data, stride, size, separator);
+        } else {
+            const char *d = reinterpret_cast<const char *>(data);
+            // TODO: Handle byte-swapped dtypes
+            switch (type_id()) {
+                case bool_type_id:
+                    o << (*d ? "true" : "false");
+                    for (intptr_t i = 1; i < size; ++i) {
+                        d += stride;
+                        o << separator << (*d ? "true" : "false");
+                    }
+                    break;
+                case int8_type_id:
+                    o << (int)(*(int8_t *)d);
+                    for (intptr_t i = 1; i < size; ++i) {
+                        d += stride;
+                        o << separator << (int)(*(int8_t *)d);
+                    }
+                    break;
+                case int16_type_id:
+                    int16_t i16;
+                    memcpy(&i16, d, 2);
+                    o << i16;
+                    for (intptr_t i = 1; i < size; ++i) {
+                        d += stride;
+                        memcpy(&i16, d, 2);
+                        o << separator << i16;
+                    }
+                    break;
+                case int32_type_id:
+                    int32_t i32;
+                    memcpy(&i32, d, 4);
+                    o << i32;
+                    for (intptr_t i = 1; i < size; ++i) {
+                        d += stride;
+                        memcpy(&i32, d, 4);
+                        o << separator << i32;
+                    }
+                    break;
+                case int64_type_id:
+                    int64_t i64;
+                    memcpy(&i64, d, 8);
+                    o << i64;
+                    for (intptr_t i = 1; i < size; ++i) {
+                        d += stride;
+                        memcpy(&i64, d, 8);
+                        o << separator << i64;
+                    }
+                    break;
+                case uint8_type_id:
+                    o << (int)(*(uint8_t *)d);
+                    for (intptr_t i = 1; i < size; ++i) {
+                        d += stride;
+                        o << separator << (int)(*(uint8_t *)d);
+                    }
+                    break;
+                case uint16_type_id:
+                    uint16_t u16;
+                    memcpy(&u16, d, 2);
+                    o << u16;
+                    for (intptr_t i = 1; i < size; ++i) {
+                        d += stride;
+                        memcpy(&u16, d, 2);
+                        o << separator << u16;
+                    }
+                    break;
+                case uint32_type_id:
+                    uint32_t u32;
+                    memcpy(&u32, d, 4);
+                    o << u32;
+                    for (intptr_t i = 1; i < size; ++i) {
+                        d += stride;
+                        memcpy(&u32, d, 4);
+                        o << separator << u32;
+                    }
+                    break;
+                case uint64_type_id:
+                    uint64_t u64;
+                    memcpy(&u64, d, 8);
+                    o << u64;
+                    for (intptr_t i = 1; i < size; ++i) {
+                        d += stride;
+                        memcpy(&u64, d, 8);
+                        o << separator << u64;
+                    }
+                    break;
+                case float32_type_id:
+                    float f32;
+                    memcpy(&f32, d, 8);
+                    o << f32;
+                    for (intptr_t i = 1; i < size; ++i) {
+                        d += stride;
+                        memcpy(&f32, d, 8);
+                        o << separator << f32;
+                    }
+                    break;
+                case float64_type_id:
+                    double f64;
+                    memcpy(&f64, d, 8);
+                    o << f64;
+                    for (intptr_t i = 1; i < size; ++i) {
+                        d += stride;
+                        memcpy(&f64, d, 8);
+                        o << separator << f64;
+                    }
+                    break;
+                default:
+                    stringstream ss;
+                    ss << "printing of dtype " << *this << " isn't supported yet";
+                    throw std::runtime_error(ss.str());
+            }
+        }
+    }
+}

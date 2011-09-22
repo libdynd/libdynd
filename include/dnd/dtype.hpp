@@ -168,6 +168,9 @@ public:
      */
     virtual byteswap_operation_t get_byteswap_operation() const;
 
+    virtual void print(std::ostream& o, const dtype& dt, const void *data, intptr_t stride, intptr_t size,
+                        const char *separator) const = 0;
+
     /**
      * Tests that the two dtypes have identical binary layouts. This method
      * should only be called when this is the extended_dtype for one of the
@@ -342,6 +345,8 @@ public:
     }
 
     byteswap_operation_t get_byteswap_operation() const;
+
+    void print(std::ostream& o, const void *data, intptr_t stride, intptr_t size, const char *separator) const;
 
     friend std::ostream& operator<<(std::ostream& o, const dtype& rhs);
 };
