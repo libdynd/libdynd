@@ -39,7 +39,7 @@ dnd::ndarray::ndarray(intptr_t dim0, const dtype& dt)
       m_baseoffset(0), m_buffer(new membuffer(dt, dim0))
 {
     m_shape[0] = dim0;
-    m_strides[0] = dt.itemsize();
+    m_strides[0] = (dim0 == 1) ? 0 : dt.itemsize();
 }
 
 dnd::ndarray::ndarray(intptr_t dim0, intptr_t dim1, const dtype& dt)
@@ -48,8 +48,8 @@ dnd::ndarray::ndarray(intptr_t dim0, intptr_t dim1, const dtype& dt)
 {
     m_shape[0] = dim0;
     m_shape[1] = dim1;
-    m_strides[1] = dt.itemsize();
-    m_strides[0] = m_strides[1] * dim1;
+    m_strides[0] = (dim0 == 1) ? 0 : (dt.itemsize() * dim1);
+    m_strides[1] = (dim1 == 1) ? 0 : dt.itemsize();
 }
 
 dnd::ndarray::ndarray(intptr_t dim0, intptr_t dim1, intptr_t dim2, const dtype& dt)
@@ -59,9 +59,9 @@ dnd::ndarray::ndarray(intptr_t dim0, intptr_t dim1, intptr_t dim2, const dtype& 
     m_shape[0] = dim0;
     m_shape[1] = dim1;
     m_shape[1] = dim2;
-    m_strides[2] = dt.itemsize();
-    m_strides[1] = m_strides[2] * dim2;
-    m_strides[0] = m_strides[1] * dim1;
+    m_strides[0] = (dim0 == 1) ? 0 : dt.itemsize() * dim1 * dim2;
+    m_strides[1] = (dim1 == 1) ? 0 : dt.itemsize() * dim2;
+    m_strides[2] = (dim2 == 1) ? 0 : dt.itemsize();
 }
 
 ndarray& dnd::ndarray::operator=(const ndarray& rhs)
@@ -87,6 +87,7 @@ void dnd::ndarray::swap(ndarray& rhs)
 
 void dnd::ndarray::vassign(const ndarray& rhs, assign_error_mode errmode)
 {
+    //raw_ndarray_iter<2> iter(*this, rhs);
 }
 
 void dnd::ndarray::vassign(const dtype& dt, const void *data, assign_error_mode errmode)
@@ -95,16 +96,15 @@ void dnd::ndarray::vassign(const dtype& dt, const void *data, assign_error_mode 
     scalar_copied_if_necessary src(m_dtype, dt, data, errmode);
     raw_ndarray_iter<1> iter(*this);
     
-    intptr_t innersize = iter.innersize(), innerstride = iter.innerstride();
+    intptr_t innersize = iter.innersize(), innerstride = iter.innerstride<0>();
 
     std::pair<unary_operation_t, std::shared_ptr<auxiliary_data> > assign =
-                get_dtype_strided_assign_operation(m_dtype, innerstride, iter.get_align_test(),
-                                                    0, 0);
+                get_dtype_strided_assign_operation(m_dtype, innerstride, iter.get_align_test<0>(), 0, 0);
 
     if (innersize > 0) {
         do {
             //DEBUG_COUT << "scalar vassign inner loop with size " << innersize << "\n";
-            assign.first(iter.data(), innerstride, src.data(), 0, innersize, assign.second.get());
+            assign.first(iter.data<0>(), innerstride, src.data(), 0, innersize, assign.second.get());
         } while(iter.iternext());
     }
 }
