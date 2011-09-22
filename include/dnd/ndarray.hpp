@@ -115,12 +115,6 @@ public:
 
         return *this;
     }
-    /** Initializer list assignment operator */
-    template <class T>
-    ndarray& operator=(const std::initializer_list<T>& il) {
-        *this = ndarray(il);
-        return *this;
-    }
 
     const dtype& get_dtype() const {
         return m_dtype;
