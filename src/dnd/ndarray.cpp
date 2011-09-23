@@ -122,15 +122,15 @@ ndarray dnd::ndarray::index(int nindex, const irange *indices) const
             end -= start;
             if (end > 0) {
                 if (step == 1) {
-                    new_shape[i] = end;
-                    new_strides[i] = m_strides[i];
+                    new_shape[new_i] = end;
+                    new_strides[new_i] = m_strides[i];
                 } else {
-                    new_shape[i] = (end + step - 1) / step;
-                    new_strides[i] = m_strides[i] * step;
+                    new_shape[new_i] = (end + step - 1) / step;
+                    new_strides[new_i] = m_strides[i] * step;
                 }
             } else {
-                new_shape[i] = 0;
-                new_strides[i] = 0;
+                new_shape[new_i] = 0;
+                new_strides[new_i] = 0;
             }
             ++new_i;
         } else {
@@ -154,18 +154,24 @@ ndarray dnd::ndarray::index(int nindex, const irange *indices) const
             end -= start;
             if (end < 0) {
                 if (step == -1) {
-                    new_shape[i] = -end;
-                    new_strides[i] = -m_strides[i];
+                    new_shape[new_i] = -end;
+                    new_strides[new_i] = -m_strides[i];
                 } else {
-                    new_shape[i] = (-end - step - 1) / (-step);
-                    new_strides[i] = m_strides[i] * step;
+                    new_shape[new_i] = (-end - step - 1) / (-step);
+                    new_strides[new_i] = m_strides[i] * step;
                 }
             } else {
-                new_shape[i] = 0;
-                new_strides[i] = 0;
+                new_shape[new_i] = 0;
+                new_strides[new_i] = 0;
             }
             ++new_i;
         }
+    }
+    // Copy the info for the rest of the dimensions which remain as is
+    for (int i = nindex; i < ndim(); ++i) {
+        new_shape[new_i] = m_shape[i];
+        new_strides[new_i] = m_strides[i];
+        ++new_i;
     }
 
     intptr_t new_num_elements = 1;

@@ -190,7 +190,7 @@ public:
     /** Indexing with three index values */
     ndarray operator()(const irange& i0, const irange& i1, const irange& i2) const {
         irange i[3] = {i0, i1, i2};
-        return index(2, i);
+        return index(3, i);
     }
     /** Indexing with four index values */
     ndarray operator()(const irange& i0, const irange& i1, const irange& i2, const irange& i3) const {
@@ -237,7 +237,7 @@ public:
         if (ndim() != 0) {
             throw std::runtime_error("can only convert ndarrays with 0 dimensions to scalars");
         }
-        dtype_assign(make_dtype<T>(), &result, m_dtype, m_buffer->data(), errmode);
+        dtype_assign(make_dtype<T>(), &result, m_dtype, m_originptr, errmode);
         return result;
     }
 

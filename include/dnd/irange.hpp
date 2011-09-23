@@ -24,6 +24,9 @@ namespace dnd {
  * is less than m_finish when m_step is positive, or greater than
  * m_finish when m_step is negative.
  *
+ * The ways to construct this class do no error checking, in order
+ * to fit the requirements of C++ constexpr.
+ *
  * Typical ways to construct ranges are as follows:
  *
  * irange()                 // The full index range [begin, end)
@@ -72,7 +75,7 @@ public:
 
     /**
      * The notation "irange() < finish" is a way to specify
-     * the end of the range.
+     * the end of a range with a positive step.
      */
     constexpr irange operator<(intptr_t finish) {
         return irange(m_start, finish, m_step);
@@ -80,21 +83,63 @@ public:
 
     /**
      * The notation "irange() <= last" is a way to specify
-     * the end of the range.
+     * the end of a range with a positive step.
      */
     constexpr irange operator<=(intptr_t last) {
         return irange(m_start, last+1, m_step);
     }
 
-    friend constexpr irange operator<(intptr_t start, const irange& i);
+    /**
+     * The notation "irange() > finish" is a way to specify
+     * the end of a range with a negative step.
+     */
+    constexpr irange operator>(intptr_t finish) {
+        return irange(m_start, finish, m_step);
+    }
+
+    /**
+     * The notation "irange() >= last" is a way to specify
+     * the end of a range with a negative step.
+     */
+    constexpr irange operator>=(intptr_t last) {
+        return irange(m_start, last-1, m_step);
+    }
+
+    friend constexpr irange operator<(intptr_t start_minus_one, const irange& i);
     friend constexpr irange operator<=(intptr_t start, const irange& i);
+    friend constexpr irange operator>(intptr_t start_plus_one, const irange& i);
+    friend constexpr irange operator>=(intptr_t start, const irange& i);
 };
 
+/**
+ * The notation "lower < irange()" is a way to specify
+ * the beginning of a range with a positive step.
+ */
 inline constexpr irange operator<(intptr_t start_minus_one, const irange& i) {
     return irange(start_minus_one + 1, i.m_finish, i.m_step);
 }
 
+/**
+ * The notation "start <= irange()" is a way to specify
+ * the beginning of a range with a positive step.
+ */
 inline constexpr irange operator<=(intptr_t start, const irange& i) {
+    return irange(start, i.m_finish, i.m_step);
+}
+
+/**
+ * The notation "upper > irange()" is a way to specify
+ * the beginning of a range with a negative step.
+ */
+inline constexpr irange operator>(intptr_t start_plus_one, const irange& i) {
+    return irange(start_plus_one - 1, i.m_finish, i.m_step);
+}
+
+/**
+ * The notation "start >= irange()" is a way to specify
+ * the beginning of a range with a negative step.
+ */
+inline constexpr irange operator>=(intptr_t start, const irange& i) {
     return irange(start, i.m_finish, i.m_step);
 }
 
