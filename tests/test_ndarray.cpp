@@ -13,33 +13,33 @@ TEST(NDArray, Constructors) {
     ndarray a;
 
     // Default-constructed ndarray has size zero
-    EXPECT_EQ(0, a.size());
+    EXPECT_EQ(0, a.num_elements());
     EXPECT_EQ(1, a.ndim());
     EXPECT_EQ(0, a.shape()[0]);
     EXPECT_EQ(0, a.strides()[0]);
 
     // Scalar ndarray
     a = ndarray(make_dtype<float>());
-    EXPECT_EQ(1, a.size());
+    EXPECT_EQ(1, a.num_elements());
     EXPECT_EQ(0, a.ndim());
 
     // One-dimensional ndarray with one element
     a = ndarray(1, make_dtype<float>());
-    EXPECT_EQ(1, a.size());
+    EXPECT_EQ(1, a.num_elements());
     EXPECT_EQ(1, a.ndim());
     EXPECT_EQ(1, a.shape()[0]);
     EXPECT_EQ(0, a.strides()[0]);
 
     // One-dimensional ndarray
     a = ndarray(3, make_dtype<float>());
-    EXPECT_EQ(3, a.size());
+    EXPECT_EQ(3, a.num_elements());
     EXPECT_EQ(1, a.ndim());
     EXPECT_EQ(3, a.shape()[0]);
     EXPECT_EQ(sizeof(float), a.strides()[0]);
 
     // Two-dimensional ndarray with a size-one dimension
     a = ndarray(3, 1, make_dtype<float>());
-    EXPECT_EQ(3, a.size());
+    EXPECT_EQ(3, a.num_elements());
     EXPECT_EQ(2, a.ndim());
     EXPECT_EQ(3, a.shape()[0]);
     EXPECT_EQ(1, a.shape()[1]);
@@ -48,7 +48,7 @@ TEST(NDArray, Constructors) {
 
     // Two-dimensional ndarray with a size-one dimension
     a = ndarray(1, 3, make_dtype<float>());
-    EXPECT_EQ(3, a.size());
+    EXPECT_EQ(3, a.num_elements());
     EXPECT_EQ(2, a.ndim());
     EXPECT_EQ(1, a.shape()[0]);
     EXPECT_EQ(3, a.shape()[1]);
@@ -57,7 +57,7 @@ TEST(NDArray, Constructors) {
 
     // Two-dimensional ndarray
     a = ndarray(3, 5, make_dtype<float>());
-    EXPECT_EQ(15, a.size());
+    EXPECT_EQ(15, a.num_elements());
     EXPECT_EQ(2, a.ndim());
     EXPECT_EQ(3, a.shape()[0]);
     EXPECT_EQ(5, a.shape()[1]);
@@ -66,7 +66,7 @@ TEST(NDArray, Constructors) {
 
     // Three-dimensional ndarray with size-one dimension
     a = ndarray(1, 5, 4, make_dtype<float>());
-    EXPECT_EQ(20, a.size());
+    EXPECT_EQ(20, a.num_elements());
     EXPECT_EQ(3, a.ndim());
     EXPECT_EQ(1, a.shape()[0]);
     EXPECT_EQ(5, a.shape()[1]);
@@ -77,7 +77,7 @@ TEST(NDArray, Constructors) {
 
     // Three-dimensional ndarray with size-one dimension
     a = ndarray(3, 1, 4, make_dtype<float>());
-    EXPECT_EQ(12, a.size());
+    EXPECT_EQ(12, a.num_elements());
     EXPECT_EQ(3, a.ndim());
     EXPECT_EQ(3, a.shape()[0]);
     EXPECT_EQ(1, a.shape()[1]);
@@ -88,7 +88,7 @@ TEST(NDArray, Constructors) {
 
     // Three-dimensional ndarray with size-one dimension
     a = ndarray(3, 5, 1, make_dtype<float>());
-    EXPECT_EQ(15, a.size());
+    EXPECT_EQ(15, a.num_elements());
     EXPECT_EQ(3, a.ndim());
     EXPECT_EQ(3, a.shape()[0]);
     EXPECT_EQ(5, a.shape()[1]);
@@ -99,7 +99,7 @@ TEST(NDArray, Constructors) {
 
     // Three-dimensional ndarray
     a = ndarray(3, 5, 4, make_dtype<float>());
-    EXPECT_EQ(60, a.size());
+    EXPECT_EQ(60, a.num_elements());
     EXPECT_EQ(3, a.ndim());
     EXPECT_EQ(3, a.shape()[0]);
     EXPECT_EQ(5, a.shape()[1]);
@@ -113,7 +113,7 @@ TEST(NDArray, AsScalar) {
     ndarray a;
 
     a = ndarray(make_dtype<float>());
-    EXPECT_EQ(1, a.size());
+    EXPECT_EQ(1, a.num_elements());
     a.vassign(3.14f);
     EXPECT_EQ(3.14f, a.as_scalar<float>());
     EXPECT_EQ(3.14f, a.as_scalar<double>());
@@ -132,12 +132,12 @@ TEST(NDArray, AsScalar) {
 
 TEST(NDArray, InitializerLists) {
     ndarray a = {1, 2, 3, 4, 5};
-    EXPECT_EQ(5, a.size());
+    EXPECT_EQ(5, a.num_elements());
     EXPECT_EQ(make_dtype<int>(), a.get_dtype());
     EXPECT_EQ(1, a.ndim());
     EXPECT_EQ(5, a.shape()[0]);
     EXPECT_EQ(sizeof(int), a.strides()[0]);
-    int *ptr_i = (int *)a.data();
+    int *ptr_i = (int *)a.originptr();
     EXPECT_EQ(1, ptr_i[0]);
     EXPECT_EQ(2, ptr_i[1]);
     EXPECT_EQ(3, ptr_i[2]);
@@ -145,14 +145,14 @@ TEST(NDArray, InitializerLists) {
     EXPECT_EQ(5, ptr_i[4]);
 
     ndarray b = {{1., 2., 3.}, {4., 5., 6.25}};
-    EXPECT_EQ(6, b.size());
+    EXPECT_EQ(6, b.num_elements());
     EXPECT_EQ(make_dtype<double>(), b.get_dtype());
     EXPECT_EQ(2, b.ndim());
     EXPECT_EQ(2, b.shape()[0]);
     EXPECT_EQ(3, b.shape()[1]);
     EXPECT_EQ(3*sizeof(double), b.strides()[0]);
     EXPECT_EQ(sizeof(double), b.strides()[1]);
-    double *ptr_d = (double *)b.data();
+    double *ptr_d = (double *)b.originptr();
     EXPECT_EQ(1, ptr_d[0]);
     EXPECT_EQ(2, ptr_d[1]);
     EXPECT_EQ(3, ptr_d[2]);
@@ -162,7 +162,7 @@ TEST(NDArray, InitializerLists) {
 
     // Testing assignment operator with initializer list (and 3D nested list)
     a = {{{1LL, 2LL}, {-1LL, -2LL}}, {{4LL, 5LL}, {6LL, 1LL}}};
-    EXPECT_EQ(8, a.size());
+    EXPECT_EQ(8, a.num_elements());
     EXPECT_EQ(make_dtype<long long>(), a.get_dtype());
     EXPECT_EQ(3, a.ndim());
     EXPECT_EQ(2, a.shape()[0]);
@@ -171,7 +171,7 @@ TEST(NDArray, InitializerLists) {
     EXPECT_EQ(4*sizeof(long long), a.strides()[0]);
     EXPECT_EQ(2*sizeof(long long), a.strides()[1]);
     EXPECT_EQ(sizeof(long long), a.strides()[2]);
-    long long *ptr_ll = (long long *)a.data();
+    long long *ptr_ll = (long long *)a.originptr();
     EXPECT_EQ(1, ptr_ll[0]);
     EXPECT_EQ(2, ptr_ll[1]);
     EXPECT_EQ(-1, ptr_ll[2]);
@@ -189,14 +189,14 @@ TEST(NDArray, InitializerLists) {
 TEST(NDArray, InitFromNestedCArray) {
     int i0[2][3] = {{1,2,3}, {4,5,6}};
     ndarray a = i0;
-    EXPECT_EQ(6, a.size());
+    EXPECT_EQ(6, a.num_elements());
     EXPECT_EQ(make_dtype<int>(), a.get_dtype());
     EXPECT_EQ(2, a.ndim());
     EXPECT_EQ(2, a.shape()[0]);
     EXPECT_EQ(3, a.shape()[1]);
     EXPECT_EQ(3*sizeof(int), a.strides()[0]);
     EXPECT_EQ(sizeof(int), a.strides()[1]);
-    int *ptr_i = (int *)a.data();
+    int *ptr_i = (int *)a.originptr();
     EXPECT_EQ(1, ptr_i[0]);
     EXPECT_EQ(2, ptr_i[1]);
     EXPECT_EQ(3, ptr_i[2]);
@@ -206,7 +206,7 @@ TEST(NDArray, InitFromNestedCArray) {
 
     float i1[2][2][3] = {{{1,2,3}, {1.5f, 2.5f, 3.5f}}, {{-10, 0, -3.1f}, {9,8,7}}};
     a = i1;
-    EXPECT_EQ(12, a.size());
+    EXPECT_EQ(12, a.num_elements());
     EXPECT_EQ(make_dtype<float>(), a.get_dtype());
     EXPECT_EQ(3, a.ndim());
     EXPECT_EQ(2, a.shape()[0]);
@@ -215,7 +215,7 @@ TEST(NDArray, InitFromNestedCArray) {
     EXPECT_EQ(6*sizeof(float), a.strides()[0]);
     EXPECT_EQ(3*sizeof(float), a.strides()[1]);
     EXPECT_EQ(sizeof(float), a.strides()[2]);
-    float *ptr_f = (float *)a.data();
+    float *ptr_f = (float *)a.originptr();
     EXPECT_EQ(1, ptr_f[0]);
     EXPECT_EQ(2, ptr_f[1]);
     EXPECT_EQ(3, ptr_f[2]);

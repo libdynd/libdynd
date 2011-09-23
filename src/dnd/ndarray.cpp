@@ -5,51 +5,53 @@
 // This is unreleased proprietary software.
 //
 
-#include <stdexcept>
-
 #include <dnd/ndarray.hpp>
 #include <dnd/scalars.hpp>
 #include <dnd/raw_iteration.hpp>
 #include <dnd/shape_tools.hpp>
+#include <dnd/exceptions.hpp>
 
 using namespace std;
 using namespace dnd;
 
-dnd::ndarray::ndarray(const dtype& dt, int ndim, intptr_t size, const dimvector& shape,
-        const dimvector& strides, intptr_t baseoffset,
+dnd::ndarray::ndarray(const dtype& dt, int ndim, intptr_t num_elements, const dimvector& shape,
+        const dimvector& strides, char *originptr,
         const std::shared_ptr<membuffer>& buffer)
-    : m_dtype(dt), m_ndim(ndim), m_size(size), m_shape(ndim), m_strides(ndim),
-      m_baseoffset(baseoffset), m_buffer(buffer)
+    : m_dtype(dt), m_ndim(ndim), m_num_elements(num_elements), m_shape(ndim), m_strides(ndim),
+      m_originptr(originptr), m_buffer(buffer)
 {
     memcpy(m_shape.get(), shape.get(), ndim * sizeof(intptr_t));
     memcpy(m_strides.get(), strides.get(), ndim * sizeof(intptr_t));
 }
 
 dnd::ndarray::ndarray()
-    : m_dtype(), m_ndim(1), m_size(0), m_shape(1), m_strides(1), m_baseoffset(0), m_buffer()
+    : m_dtype(), m_ndim(1), m_num_elements(0), m_shape(1), m_strides(1), m_originptr(NULL), m_buffer()
 {
     m_shape[0] = 0;
     m_strides[0] = 0;
 }
 
 dnd::ndarray::ndarray(const dtype& dt)
-    : m_dtype(dt), m_ndim(0), m_size(1), m_shape(0), m_strides(0),
-      m_baseoffset(0), m_buffer(new membuffer(dt, 1))
+    : m_dtype(dt), m_ndim(0), m_num_elements(1), m_shape(0), m_strides(0),
+      m_buffer(new membuffer(dt, 1))
 {
+    m_originptr = m_buffer->data();
 }
 
 dnd::ndarray::ndarray(intptr_t dim0, const dtype& dt)
-    : m_dtype(dt), m_ndim(1), m_size(dim0), m_shape(1), m_strides(1),
-      m_baseoffset(0), m_buffer(new membuffer(dt, dim0))
+    : m_dtype(dt), m_ndim(1), m_num_elements(dim0), m_shape(1), m_strides(1),
+      m_buffer(new membuffer(dt, dim0))
 {
+    m_originptr = m_buffer->data();
     m_shape[0] = dim0;
     m_strides[0] = (dim0 == 1) ? 0 : dt.itemsize();
 }
 
 dnd::ndarray::ndarray(intptr_t dim0, intptr_t dim1, const dtype& dt)
-    : m_dtype(dt), m_ndim(2), m_size(dim0 * dim1), m_shape(2), m_strides(2),
-      m_baseoffset(0), m_buffer(new membuffer(dt, dim0*dim1))
+    : m_dtype(dt), m_ndim(2), m_num_elements(dim0 * dim1), m_shape(2), m_strides(2),
+      m_buffer(new membuffer(dt, dim0*dim1))
 {
+    m_originptr = m_buffer->data();
     m_shape[0] = dim0;
     m_shape[1] = dim1;
     m_strides[0] = (dim0 == 1) ? 0 : (dt.itemsize() * dim1);
@@ -57,9 +59,10 @@ dnd::ndarray::ndarray(intptr_t dim0, intptr_t dim1, const dtype& dt)
 }
 
 dnd::ndarray::ndarray(intptr_t dim0, intptr_t dim1, intptr_t dim2, const dtype& dt)
-    : m_dtype(dt), m_ndim(3), m_size(dim0 * dim1 * dim2), m_shape(3), m_strides(3),
-      m_baseoffset(0), m_buffer(new membuffer(dt, dim0*dim1*dim2))
+    : m_dtype(dt), m_ndim(3), m_num_elements(dim0 * dim1 * dim2), m_shape(3), m_strides(3),
+      m_buffer(new membuffer(dt, dim0*dim1*dim2))
 {
+    m_originptr = m_buffer->data();
     m_shape[0] = dim0;
     m_shape[1] = dim1;
     m_shape[2] = dim2;
@@ -68,12 +71,133 @@ dnd::ndarray::ndarray(intptr_t dim0, intptr_t dim1, intptr_t dim2, const dtype& 
     m_strides[2] = (dim2 == 1) ? 0 : dt.itemsize();
 }
 
+ndarray dnd::ndarray::index(int nindex, const irange *indices) const
+{
+    // Validate the number of indices
+    if (nindex > ndim()) {
+        throw too_many_indices(nindex, ndim());
+    }
+
+    // Determine how many dimensions the new array will have
+    int new_ndim = ndim();
+    for (int i = 0; i < nindex; ++i) {
+        if (indices[i].step() == 0) {
+            --new_ndim;
+        }
+    }
+
+    // For each irange, adjust the originptr, shape, and strides
+    char *new_originptr = m_originptr;
+    dimvector new_shape(new_ndim), new_strides(new_ndim);
+    int new_i = 0;
+    for (int i = 0; i < nindex; ++i) {
+        intptr_t step = indices[i].step();
+        if (step == 0) {
+            // A single index
+            intptr_t idx = indices[i].start();
+            if (idx < 0 || idx >= m_shape[i]) {
+                throw index_out_of_bounds(idx, 0, m_shape[i]);
+            }
+            new_originptr += idx * m_strides[i];
+        } else if (step > 0) {
+            // A range with a positive step
+            intptr_t start = indices[i].start();
+            if (start < 0 || start >= m_shape[i]) {
+                if (start == INTPTR_MIN) {
+                    start = 0;
+                } else {
+                    throw irange_out_of_bounds(indices[i], 0, m_shape[i]);
+                }
+            }
+            new_originptr += start * m_strides[i];
+
+            intptr_t end = indices[i].finish();
+            if (end > m_shape[i]) {
+                if (end == INTPTR_MAX) {
+                    end = m_shape[i];
+                } else {
+                    throw irange_out_of_bounds(indices[i], 0, m_shape[i]);
+                }
+            }
+            end -= start;
+            if (end > 0) {
+                if (step == 1) {
+                    new_shape[i] = end;
+                    new_strides[i] = m_strides[i];
+                } else {
+                    new_shape[i] = (end + step - 1) / step;
+                    new_strides[i] = m_strides[i] * step;
+                }
+            } else {
+                new_shape[i] = 0;
+                new_strides[i] = 0;
+            }
+            ++new_i;
+        } else {
+            // A range with a negative step
+            intptr_t start = indices[i].start();
+            if (start < 0 || start >= m_shape[i]) {
+                if (start == INTPTR_MIN) {
+                    start = m_shape[i] - 1;
+                } else {
+                    throw irange_out_of_bounds(indices[i], 0, m_shape[i]);
+                }
+            }
+            new_originptr += start * m_strides[i];
+
+            intptr_t end = indices[i].finish();
+            if (end == INTPTR_MAX) {
+                end = -1;
+            } else if (end < -1) {
+                throw irange_out_of_bounds(indices[i], 0, m_shape[i]);
+            }
+            end -= start;
+            if (end < 0) {
+                if (step == -1) {
+                    new_shape[i] = -end;
+                    new_strides[i] = -m_strides[i];
+                } else {
+                    new_shape[i] = (-end - step - 1) / (-step);
+                    new_strides[i] = m_strides[i] * step;
+                }
+            } else {
+                new_shape[i] = 0;
+                new_strides[i] = 0;
+            }
+            ++new_i;
+        }
+    }
+
+    intptr_t new_num_elements = 1;
+    for (int i = 0; i < new_ndim; ++i) {
+        new_num_elements *= new_shape[i];
+    }
+
+    return ndarray(get_dtype(), new_ndim, new_num_elements,
+                    std::move(new_shape), std::move(new_strides), new_originptr, m_buffer);
+}
+
+ndarray dnd::ndarray::operator()(intptr_t idx) const
+{
+    if (1 > ndim()) {
+        throw too_many_indices(1, ndim());
+    }
+
+    if (idx < 0 || idx >= m_shape[0]) {
+        throw index_out_of_bounds(idx, 0, m_shape[0]);
+    }
+
+    return ndarray(get_dtype(), ndim()-1, num_elements()/m_shape[0],
+                    dimvector(ndim() - 1, shape() + 1), dimvector(ndim() - 1, strides() + 1),
+                    m_originptr + idx * m_strides[0], m_buffer);
+}
+
 ndarray dnd::empty_like(const ndarray& rhs, const dtype& dt)
 {
     //DEBUG_COUT << "empty_like " << rhs << " --- but with dtype " << dt << "\n";
     // Sort the strides to get the memory layout ordering
     const intptr_t *shape = rhs.shape(), *strides = rhs.strides();
-    shortvector<int, 3> strideperm(rhs.ndim());
+    shortvector<int> strideperm(rhs.ndim());
     for (int i = 0; i < rhs.ndim(); ++i) {
         strideperm[i] = i;
     }
@@ -102,17 +226,17 @@ ndarray dnd::empty_like(const ndarray& rhs, const dtype& dt)
     }
 
     // Construct the new array
-    return ndarray(dt, rhs.ndim(), rhs.size(), dimvector(rhs.ndim(), rhs.shape()),
-                    std::move(res_strides), 0,
-                    shared_ptr<membuffer>(new membuffer(dt, rhs.size())));
+    shared_ptr<membuffer> buf(new membuffer(dt, rhs.num_elements()));
+    return ndarray(dt, rhs.ndim(), rhs.num_elements(), dimvector(rhs.ndim(), rhs.shape()),
+                    std::move(res_strides), buf->data(), std::move(buf));
 }
 
 ndarray& dnd::ndarray::operator=(const ndarray& rhs)
 {
     if (this != &rhs) {
         // Create a temporary and swap, for exception safety
-        ndarray tmp(rhs.m_dtype, rhs.m_ndim, rhs.m_size, rhs.m_shape, rhs.m_strides,
-                    rhs.m_baseoffset, rhs.m_buffer);
+        ndarray tmp(rhs.m_dtype, rhs.m_ndim, rhs.m_num_elements, rhs.m_shape, rhs.m_strides,
+                    rhs.m_originptr, rhs.m_buffer);
         tmp.swap(*this);
     }
     return *this;
@@ -122,10 +246,10 @@ void dnd::ndarray::swap(ndarray& rhs)
 {
     m_dtype.swap(rhs.m_dtype);
     std::swap(m_ndim, rhs.m_ndim);
-    std::swap(m_size, rhs.m_size);
+    std::swap(m_num_elements, rhs.m_num_elements);
     m_shape.swap(rhs.m_shape);
     m_strides.swap(rhs.m_strides);
-    std::swap(m_baseoffset, rhs.m_baseoffset);
+    std::swap(m_originptr, rhs.m_originptr);
     m_buffer.swap(rhs.m_buffer);
 }
 
@@ -137,8 +261,8 @@ static void vassign_unequal_dtypes(ndarray& lhs, const ndarray& rhs, assign_erro
     broadcast_to_shape(lhs.ndim(), lhs.shape(), rhs.ndim(), rhs.shape(), rhs.strides(), rhs_strides.get());
 
     // Create the raw iterator
-    raw_ndarray_iter<2> iter(lhs.ndim(), lhs.shape(), lhs.data(), lhs.strides(),
-                                const_cast<char *>(rhs.data()), rhs_strides.get());
+    raw_ndarray_iter<2> iter(lhs.ndim(), lhs.shape(), lhs.originptr(), lhs.strides(),
+                                const_cast<char *>(rhs.originptr()), rhs_strides.get());
     //iter.debug_dump(cout);
 
     intptr_t innersize = iter.innersize();
@@ -166,8 +290,8 @@ static void vassign_equal_dtypes(ndarray& lhs, const ndarray& rhs)
     broadcast_to_shape(lhs.ndim(), lhs.shape(), rhs.ndim(), rhs.shape(), rhs.strides(), rhs_strides.get());
 
     // Create the raw iterator
-    raw_ndarray_iter<2> iter(lhs.ndim(), lhs.shape(), lhs.data(), lhs.strides(),
-                                const_cast<char *>(rhs.data()), rhs_strides.get());
+    raw_ndarray_iter<2> iter(lhs.ndim(), lhs.shape(), lhs.originptr(), lhs.strides(),
+                                const_cast<char *>(rhs.originptr()), rhs_strides.get());
     //iter.debug_dump(cout);
 
     intptr_t innersize = iter.innersize();
@@ -198,7 +322,7 @@ void dnd::ndarray::vassign(const ndarray& rhs, assign_error_mode errmode)
     if (get_dtype() == rhs.get_dtype()) {
         // The dtypes match, simpler case
         vassign_equal_dtypes(*this, rhs);
-    } else if (size() > 5 * rhs.size()) {
+    } else if (num_elements() > 5 * rhs.num_elements()) {
         // If the data is being duplicated more than 5 times, make a temporary copy of rhs
         // converted to the dtype of 'this'
         ndarray tmp = rhs.as_dtype(get_dtype(), errmode);
@@ -251,9 +375,9 @@ std::ostream& dnd::operator<<(std::ostream& o, const ndarray& rhs)
 {
     o << "ndarray(" << rhs.get_dtype() << ", ";
     if (rhs.ndim() == 0) {
-        rhs.get_dtype().print(o, rhs.data(), 0, 1, "");
+        rhs.get_dtype().print(o, rhs.originptr(), 0, 1, "");
     } else {
-        nested_ndarray_print(o, rhs, rhs.data(), 0);
+        nested_ndarray_print(o, rhs, rhs.originptr(), 0);
     }
     o << ")";
 

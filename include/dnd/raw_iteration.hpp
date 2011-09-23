@@ -16,7 +16,7 @@
 namespace dnd {
 
 namespace detail {
-    template<int N, int staticNDIM>
+    template<int N, int staticNDIM = 3>
     class raw_ndarray_iter_base {
         intptr_t *m_strides_alloc_data;
         intptr_t m_strides_static_data[staticNDIM*N];
@@ -254,18 +254,18 @@ template<int N>
 class raw_ndarray_iter;
 
 template<>
-class raw_ndarray_iter<1> : public detail::raw_ndarray_iter_base<1, 3> {
+class raw_ndarray_iter<1> : public detail::raw_ndarray_iter_base<1> {
 public:
     raw_ndarray_iter(int ndim, const intptr_t *shape, char *data, const intptr_t *strides)
-        : detail::raw_ndarray_iter_base<1, 3>(ndim)
+        : detail::raw_ndarray_iter_base<1>(ndim)
     {
         init(shape, &data, &strides);
     }
 
     raw_ndarray_iter(ndarray& arr)
-        : detail::raw_ndarray_iter_base<1, 3>(arr.ndim())
+        : detail::raw_ndarray_iter_base<1>(arr.ndim())
     {
-        char *data = arr.data();
+        char *data = arr.originptr();
         const intptr_t *strides = arr.strides();
         init(arr.shape(), &data, &strides);
     }
@@ -273,12 +273,12 @@ public:
 };
 
 template<>
-class raw_ndarray_iter<2> : public detail::raw_ndarray_iter_base<2, 3> {
+class raw_ndarray_iter<2> : public detail::raw_ndarray_iter_base<2> {
 public:
     raw_ndarray_iter(int ndim, const intptr_t *shape,
                                 char *dataA, const intptr_t *stridesA,
                                 char *dataB, const intptr_t *stridesB)
-        : detail::raw_ndarray_iter_base<2, 3>(ndim)
+        : detail::raw_ndarray_iter_base<2>(ndim)
     {
         char *data[2] = {dataA, dataB};
         const intptr_t *strides[2] = {stridesA, stridesB};

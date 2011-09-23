@@ -13,8 +13,10 @@ using namespace std;
 using namespace dnd;
 
 dnd::broadcast_error::broadcast_error(int dst_ndim, const intptr_t *dst_shape,
-                    int src_ndim, const intptr_t *src_shape) {
+                    int src_ndim, const intptr_t *src_shape)
+{
     std::stringstream ss;
+
     ss << "broadcast error: cannot broadcast shape (";
     for (int i = 0; i < src_ndim; ++i) {
         ss << src_shape[i];
@@ -30,6 +32,40 @@ dnd::broadcast_error::broadcast_error(int dst_ndim, const intptr_t *dst_shape,
         }
     }
     ss << ")";
+
+    m_what = ss.str();
+}
+
+dnd::too_many_indices::too_many_indices(int nindex, int ndim)
+{
+    std::stringstream ss;
+
+    ss << "too many indices: provided " << nindex << " indices, but object has only ";
+    ss << ndim << " dimensions";
+
+    m_what = ss.str();
+}
+
+dnd::index_out_of_bounds::index_out_of_bounds(intptr_t i, intptr_t start, intptr_t end)
+{
+    std::stringstream ss;
+
+    ss << "index out of bounds: index " << i << " is not in the half-open range [";
+    ss << start << ", " << end << ")";
+
+    m_what = ss.str();
+}
+
+dnd::irange_out_of_bounds::irange_out_of_bounds(const irange& i, intptr_t start, intptr_t end)
+{
+    std::stringstream ss;
+
+    ss << "irange out of bounds: index range (" << i.start() << " to " << i.finish();
+    if (i.step() != 1) {
+        ss << " step " << i.step();
+    }
+    ss << ") is not in the half-open range [";
+    ss << start << ", " << end << ")";
 
     m_what = ss.str();
 }

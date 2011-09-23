@@ -23,7 +23,7 @@ namespace dnd {
  * for the shape and strides, but without sacrificing full generality
  * in the number of dimensions.
  */
-template<class T, int N>
+template<class T, int N = 3>
 class shortvector {
     T *m_data;
     T m_shortdata[N];

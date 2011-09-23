@@ -4,8 +4,8 @@
 //
 // This is unreleased proprietary software.
 //
-#ifndef _NDARRAY_HPP_
-#define _NDARRAY_HPP_
+#ifndef _DND__NDARRAY_HPP_
+#define _DND__NDARRAY_HPP_
 
 #include <iostream> // FOR DEBUG
 #include <stdexcept>
@@ -17,11 +17,12 @@
 #include <dnd/dtype_assign.hpp>
 #include <dnd/membuffer.hpp>
 #include <dnd/shortvector.hpp>
+#include <dnd/irange.hpp>
 
 namespace dnd {
 
 /** Typedef for vector of dimensions or strides */
-typedef shortvector<intptr_t, 3> dimvector;
+typedef shortvector<intptr_t> dimvector;
 
 class ndarray;
 
@@ -39,20 +40,27 @@ std::ostream& operator<<(std::ostream& o, const ndarray& rhs);
 class ndarray {
     dtype m_dtype;
     int m_ndim;
-    intptr_t m_size;
+    intptr_t m_num_elements;
     dimvector m_shape;
     dimvector m_strides;
-    intptr_t m_baseoffset;
+    char *m_originptr;
     std::shared_ptr<membuffer> m_buffer;
 
     /**
      * Private method which constructs an array from all the members. This
-     * function does not validate that the strides/baseoffset stay within
+     * function does not validate that the originptr/strides stay within
      * the buffer's bounds.
      */
     ndarray(const dtype& dt, int ndim, intptr_t size, const dimvector& shape,
-            const dimvector& strides, intptr_t baseoffset,
+            const dimvector& strides, char *originptr,
             const std::shared_ptr<membuffer>& buffer);
+
+    /**
+     * Private method for general indexing based on a raw array of irange
+     * objects. Maybe this method should be public?
+     */
+    ndarray index(int nindex, const irange *indices) const;
+
 
 public:
     /** Constructs an array with no buffer (NULL state) */
@@ -91,15 +99,15 @@ public:
 
     /** Copy constructor */
     ndarray(const ndarray& rhs)
-        : m_dtype(rhs.m_dtype), m_ndim(rhs.m_ndim), m_size(rhs.m_size),
+        : m_dtype(rhs.m_dtype), m_ndim(rhs.m_ndim), m_num_elements(rhs.m_num_elements),
           m_shape(rhs.m_ndim, rhs.m_shape),
           m_strides(rhs.m_ndim, rhs.m_strides),
-          m_baseoffset(rhs.m_baseoffset), m_buffer(rhs.m_buffer) {}
+          m_originptr(rhs.m_originptr), m_buffer(rhs.m_buffer) {}
     /** Move constructor (should just be "= default" in C++11) */
     ndarray(ndarray&& rhs)
-        : m_dtype(std::move(rhs.m_dtype)), m_ndim(rhs.m_ndim), m_size(rhs.m_size),
+        : m_dtype(std::move(rhs.m_dtype)), m_ndim(rhs.m_ndim), m_num_elements(rhs.m_num_elements),
           m_shape(std::move(rhs.m_shape)), m_strides(std::move(rhs.m_strides)),
-          m_baseoffset(rhs.m_baseoffset), m_buffer(std::move(rhs.m_buffer)) {}
+          m_originptr(rhs.m_originptr), m_buffer(std::move(rhs.m_buffer)) {}
 
     /** Swap operation (should be "noexcept" in C++11) */
     void swap(ndarray& rhs);
@@ -118,10 +126,10 @@ public:
         if (this != &rhs) {
             m_dtype = std::move(rhs.m_dtype);
             m_ndim = rhs.m_ndim;
-            m_size = rhs.m_size;
+            m_num_elements = rhs.m_num_elements;
             m_shape = std::move(rhs.m_shape);
             m_strides = std::move(rhs.m_strides);
-            m_baseoffset = rhs.m_baseoffset;
+            m_originptr = rhs.m_originptr;
             m_buffer = std::move(rhs.m_buffer);
         }
 
@@ -152,17 +160,45 @@ public:
         return m_strides.get()[i];
     }
 
-    intptr_t size() const {
-        return m_size;
+    intptr_t num_elements() const {
+        return m_num_elements;
     }
 
-    char *data() {
-        return m_buffer->data() + m_baseoffset;
+    char *originptr() {
+        return m_originptr;
     }
 
-    const char *data() const {
-        return m_buffer->data() + m_baseoffset;
+    // TODO: Should this return the non-const pointer?
+    const char *originptr() const {
+        return m_originptr;
     }
+
+    /**
+     * The ndarray uses the function call operator to do indexing. The [] operator
+     * only supports one index object at a time, and while there are tricks that can be
+     * done by overloading the comma operator, this doesn't produce a fool-proof result.
+     * The function call operator behaves more consistently.
+     */
+    ndarray operator()(const irange& i0) const {
+        return index(1, &i0);
+    }
+    /** Indexing with two index values */
+    ndarray operator()(const irange& i0, const irange& i1) const {
+        irange i[2] = {i0, i1};
+        return index(2, i);
+    }
+    /** Indexing with three index values */
+    ndarray operator()(const irange& i0, const irange& i1, const irange& i2) const {
+        irange i[3] = {i0, i1, i2};
+        return index(2, i);
+    }
+    /** Indexing with four index values */
+    ndarray operator()(const irange& i0, const irange& i1, const irange& i2, const irange& i3) const {
+        irange i[4] = {i0, i1, i2, i3};
+        return index(4, i);
+    }
+    /** Indexing with one integer index */
+    ndarray operator()(intptr_t idx) const;
 
     /** Does a value-assignment from the rhs array. */
     void vassign(const ndarray& rhs, assign_error_mode errmode = assign_error_fractional);
@@ -189,6 +225,8 @@ public:
     /**
      * When this is a zero-dimensional array, converts it to a C++ scalar of the
      * requested template type.
+     *
+     * TODO: Support ndarray.as_scalar<bool>()
      *
      * @param errmode  The assignment error mode to use.
      */
@@ -286,64 +324,73 @@ namespace detail {
 // Implementation of initializer list construction
 template<class T>
 dnd::ndarray::ndarray(std::initializer_list<T> il)
-    : m_dtype(type_id_of<T>::value), m_ndim(1), m_shape(1), m_strides(1), m_baseoffset(0)
+    : m_dtype(type_id_of<T>::value), m_ndim(1), m_shape(1), m_strides(1)
 {
     intptr_t size = il.size();
     m_shape[0] = size;
-    m_size = size;
+    m_num_elements = size;
     m_strides[0] = (size == 1) ? 0 : sizeof(T);
     if (size > 0) {
         // Allocate the storage buffer and copy the data
         m_buffer.reset(new membuffer(m_dtype, size));
-        memcpy(m_buffer->data(), il.begin(), sizeof(T)*size);
+        m_originptr = m_buffer->data();
+        memcpy(m_originptr, il.begin(), sizeof(T)*size);
+    } else {
+        m_originptr = NULL;
     }
 }
 template<class T>
 dnd::ndarray::ndarray(std::initializer_list<std::initializer_list<T> > il)
-    : m_dtype(type_id_of<T>::value), m_ndim(2), m_shape(2), m_strides(2), m_baseoffset(0)
+    : m_dtype(type_id_of<T>::value), m_ndim(2), m_shape(2), m_strides(2)
 {
     typedef std::initializer_list<std::initializer_list<T> > S;
 
     // Get and validate that the shape is regular
     detail::initializer_list_shape<S>::compute(m_shape.get(), il);
     // Compute the number of elements in the array, and the strides at the same time
-    intptr_t size = 1, stride = sizeof(T);
+    intptr_t num_elements = 1, stride = sizeof(T);
     for (int i = m_ndim-1; i >= 0; --i) {
         m_strides[i] = (m_shape[i] == 1) ? 0 : stride;
-        size *= m_shape[i];
+        num_elements *= m_shape[i];
         stride *= m_shape[i];
     }
-    m_size = size;
-    if (size > 0) {
+    m_num_elements = num_elements;
+    if (num_elements > 0) {
         // Allocate the storage buffer
-        m_buffer.reset(new membuffer(m_dtype, size));
+        m_buffer.reset(new membuffer(m_dtype, num_elements));
+        m_originptr = m_buffer->data();
         // Populate the storage buffer from the nested initializer list
-        T *dataptr = reinterpret_cast<T *>(m_buffer->data());
+        T *dataptr = reinterpret_cast<T *>(m_originptr);
         detail::initializer_list_shape<S>::copy_data(&dataptr, il);
+    } else {
+        m_originptr = NULL;
     }
 }
 template<class T>
 dnd::ndarray::ndarray(std::initializer_list<std::initializer_list<std::initializer_list<T> > > il)
-    : m_dtype(type_id_of<T>::value), m_ndim(3), m_shape(3), m_strides(3), m_baseoffset(0)
+    : m_dtype(type_id_of<T>::value), m_ndim(3), m_shape(3), m_strides(3)
 {
     typedef std::initializer_list<std::initializer_list<std::initializer_list<T> > > S;
 
     // Get and validate that the shape is regular
     detail::initializer_list_shape<S>::compute(m_shape.get(), il);
     // Compute the number of elements in the array, and the strides at the same time
-    intptr_t size = 1, stride = sizeof(T);
+    intptr_t num_elements = 1, stride = sizeof(T);
     for (int i = m_ndim-1; i >= 0; --i) {
         m_strides[i] = (m_shape[i] == 1) ? 0 : stride;
-        size *= m_shape[i];
+        num_elements *= m_shape[i];
         stride *= m_shape[i];
     }
-    m_size = size;
-    if (size > 0) {
+    m_num_elements = num_elements;
+    if (num_elements > 0) {
         // Allocate the storage buffer
-        m_buffer.reset(new membuffer(m_dtype, size));
+        m_buffer.reset(new membuffer(m_dtype, num_elements));
+        m_originptr = m_buffer->data();
         // Populate the storage buffer from the nested initializer list
-        T *dataptr = reinterpret_cast<T *>(m_buffer->data());
+        T *dataptr = reinterpret_cast<T *>(m_originptr);
         detail::initializer_list_shape<S>::copy_data(&dataptr, il);
+    } else {
+        m_originptr = NULL;
     }
 }
 
@@ -384,20 +431,22 @@ namespace detail {
 template<class T, int N>
 dnd::ndarray::ndarray(const T (&rhs)[N])
     : m_dtype(detail::type_from_array<T>::type_id), m_ndim(detail::ndim_from_array<T[N]>::value),
-      m_shape(m_ndim), m_strides(m_ndim), m_baseoffset(0)
+      m_shape(m_ndim), m_strides(m_ndim)
 {
-    intptr_t size = detail::fill_shape_and_strides_from_array<T[N]>::
+    intptr_t num_bytes = detail::fill_shape_and_strides_from_array<T[N]>::
                                             fill(m_shape.get(), m_strides.get());
-    size /= detail::type_from_array<T>::itemsize;
-    m_size = size;
-    if (size > 0) {
+    m_num_elements = num_bytes / detail::type_from_array<T>::itemsize;
+    if (m_num_elements > 0) {
         // Allocate the storage buffer
-        m_buffer.reset(new membuffer(m_dtype, size));
+        m_buffer.reset(new membuffer(m_dtype, m_num_elements));
+        m_originptr = m_buffer->data();
         // Populate the storage buffer from the nested initializer list
-        memcpy(m_buffer->data(), &rhs[0], detail::type_from_array<T>::itemsize * size);
+        memcpy(m_originptr, &rhs[0], num_bytes);
+    } else {
+        m_originptr = NULL;
     }
 }
 
 } // namespace dnd
 
-#endif//_NDARRAY_HPP_
+#endif // _DND__NDARRAY_HPP_

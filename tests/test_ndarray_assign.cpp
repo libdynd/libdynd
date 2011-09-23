@@ -15,7 +15,7 @@ TEST(NDArrayAssign, ScalarAssignment_Bool) {
 
     // assignment to a bool scalar
     a = ndarray(make_dtype<dnd_bool>());
-    ptr_b = (dnd_bool *)a.data();
+    ptr_b = (dnd_bool *)a.originptr();
     a.vassign(true);
     EXPECT_EQ(true, *ptr_b);
     a.vassign(false);
@@ -48,7 +48,7 @@ TEST(NDArrayAssign, ScalarAssignment_Int8) {
 
     // Assignment to an int8_t scalar
     a = ndarray(make_dtype<int8_t>());
-    ptr_i8 = (int8_t *)a.data();
+    ptr_i8 = (int8_t *)a.originptr();
     a.vassign(true);
     EXPECT_EQ(1, *ptr_i8);
     a.vassign(false);
@@ -84,7 +84,7 @@ TEST(NDArrayAssign, ScalarAssignment_UInt16) {
 
     // Assignment to a uint16_t scalar
     a = ndarray(make_dtype<uint16_t>());
-    ptr_u16 = (uint16_t *)a.data();
+    ptr_u16 = (uint16_t *)a.originptr();
     a.vassign(true);
     EXPECT_EQ(1, *ptr_u16);
     a.vassign(false);
@@ -105,7 +105,7 @@ TEST(NDArrayAssign, ScalarAssignment_Float32) {
 
     // Assignment to a float scalar
     a = ndarray(make_dtype<float>());
-    ptr_f32 = (float *)a.data();
+    ptr_f32 = (float *)a.originptr();
     a.vassign(true);
     EXPECT_EQ(1, *ptr_f32);
     a.vassign(false);
@@ -132,7 +132,7 @@ TEST(NDArrayAssign, ScalarAssignment_Float64) {
 
     // Assignment to a double scalar
     a = ndarray(make_dtype<double>());
-    ptr_f64 = (double *)a.data();
+    ptr_f64 = (double *)a.originptr();
     a.vassign(true);
     EXPECT_EQ(1, *ptr_f64);
     a.vassign(false);
@@ -156,7 +156,7 @@ TEST(DTypeAssign, BroadcastAssign) {
     // Broadcasts the 4-vector by a factor of 6,
     // converting the dtype
     a.vassign(b);
-    float *ptr_f = (float *)a.data();
+    float *ptr_f = (float *)a.originptr();
     for (int i = 0; i < 6; ++i) {
         EXPECT_EQ(3, *ptr_f++);
         EXPECT_EQ(4, *ptr_f++);
@@ -170,7 +170,7 @@ TEST(DTypeAssign, BroadcastAssign) {
     // Broadcasts the 4-vector by a factor of 6,
     // doesn't convert the dtype
     a.vassign(b);
-    ptr_f = (float *)a.data();
+    ptr_f = (float *)a.originptr();
     for (int i = 0; i < 6; ++i) {
         EXPECT_EQ(1.5, *ptr_f++);
         EXPECT_EQ(2.5, *ptr_f++);
@@ -183,7 +183,7 @@ TEST(DTypeAssign, BroadcastAssign) {
     // Broadcasts the (3,1)-array by a factor of 8,
     // converting the dtype
     a.vassign(b);
-    ptr_f = (float *)a.data();
+    ptr_f = (float *)a.originptr();
     for (int i = 0; i < 2; ++i) {
         for (int j = 0; j < 4; ++j)
             EXPECT_EQ(1.5, *ptr_f++);
