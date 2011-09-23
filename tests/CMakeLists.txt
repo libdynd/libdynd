@@ -5,6 +5,7 @@ set(tests_SRC
     test_dtype.cpp
     test_dtype_assign.cpp
     test_dtype_casting.cpp
+    test_dtype_promotion.cpp
     test_ndarray.cpp
     test_ndarray_assign.cpp
     test_ndarray_index.cpp

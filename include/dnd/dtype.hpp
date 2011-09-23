@@ -4,13 +4,15 @@
 //
 // This is unreleased proprietary software.
 //
-#ifndef _DTYPE_HPP_
-#define _DTYPE_HPP_
+#ifndef _DND__DTYPE_HPP_
+#define _DND__DTYPE_HPP_
 
 #include <stdint.h>
 #include <iostream>
 // For shared_ptr
 #include <memory>
+
+#include <boost/utility/enable_if.hpp>
 
 namespace dnd {
 
@@ -361,4 +363,4 @@ std::ostream& operator<<(std::ostream& o, const dtype& rhs);
 
 } // namespace dnd
 
-#endif // _DTYPE_HPP_
+#endif // _DND__DTYPE_HPP_
