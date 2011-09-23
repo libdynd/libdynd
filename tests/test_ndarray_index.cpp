@@ -17,25 +17,25 @@ TEST(NDArrayIndex, BasicInteger) {
 
     // Indexing in two steps
     b = a(0);
-    EXPECT_EQ(1, b(0).as_scalar<int>());
-    EXPECT_EQ(2, b(1).as_scalar<int>());
+    EXPECT_EQ(1, b(0).as<int>());
+    EXPECT_EQ(2, b(1).as<int>());
     b = a(1);
-    EXPECT_EQ(3, b(0).as_scalar<int>());
-    EXPECT_EQ(4, b(1).as_scalar<int>());
+    EXPECT_EQ(3, b(0).as<int>());
+    EXPECT_EQ(4, b(1).as<int>());
     b = a(2);
-    EXPECT_EQ(5, b(0).as_scalar<int>());
-    EXPECT_EQ(6, b(1).as_scalar<int>());
+    EXPECT_EQ(5, b(0).as<int>());
+    EXPECT_EQ(6, b(1).as<int>());
     EXPECT_THROW(b(-1), index_out_of_bounds);
     EXPECT_THROW(b(2), index_out_of_bounds);
     EXPECT_THROW(b(0,0), too_many_indices);
 
     // Indexing in one step
-    EXPECT_EQ(1, a(0,0).as_scalar<int>());
-    EXPECT_EQ(2, a(0,1).as_scalar<int>());
-    EXPECT_EQ(3, a(1,0).as_scalar<int>());
-    EXPECT_EQ(4, a(1,1).as_scalar<int>());
-    EXPECT_EQ(5, a(2,0).as_scalar<int>());
-    EXPECT_EQ(6, a(2,1).as_scalar<int>());
+    EXPECT_EQ(1, a(0,0).as<int>());
+    EXPECT_EQ(2, a(0,1).as<int>());
+    EXPECT_EQ(3, a(1,0).as<int>());
+    EXPECT_EQ(4, a(1,1).as<int>());
+    EXPECT_EQ(5, a(2,0).as<int>());
+    EXPECT_EQ(6, a(2,1).as<int>());
     EXPECT_THROW(a(-1,0), index_out_of_bounds);
     EXPECT_THROW(a(3,0), index_out_of_bounds);
     EXPECT_THROW(a(0,-1), index_out_of_bounds);
@@ -47,27 +47,27 @@ TEST(NDArrayIndex, BasicInteger) {
 
     // Indexing in two steps
     b = a(0,0);
-    EXPECT_EQ(1, b(0).as_scalar<int>());
-    EXPECT_EQ(2, b(1).as_scalar<int>());
+    EXPECT_EQ(1, b(0).as<int>());
+    EXPECT_EQ(2, b(1).as<int>());
     b = a(0,1);
-    EXPECT_EQ(3, b(0).as_scalar<int>());
-    EXPECT_EQ(4, b(1).as_scalar<int>());
+    EXPECT_EQ(3, b(0).as<int>());
+    EXPECT_EQ(4, b(1).as<int>());
     b = a(1,0);
-    EXPECT_EQ(5, b(0).as_scalar<int>());
-    EXPECT_EQ(6, b(1).as_scalar<int>());
+    EXPECT_EQ(5, b(0).as<int>());
+    EXPECT_EQ(6, b(1).as<int>());
     b = a(1,1);
-    EXPECT_EQ(7, b(0).as_scalar<int>());
-    EXPECT_EQ(8, b(1).as_scalar<int>());
+    EXPECT_EQ(7, b(0).as<int>());
+    EXPECT_EQ(8, b(1).as<int>());
 
     // Indexing in one step
-    EXPECT_EQ(1, a(0,0,0).as_scalar<int>());
-    EXPECT_EQ(2, a(0,0,1).as_scalar<int>());
-    EXPECT_EQ(3, a(0,1,0).as_scalar<int>());
-    EXPECT_EQ(4, a(0,1,1).as_scalar<int>());
-    EXPECT_EQ(5, a(1,0,0).as_scalar<int>());
-    EXPECT_EQ(6, a(1,0,1).as_scalar<int>());
-    EXPECT_EQ(7, a(1,1,0).as_scalar<int>());
-    EXPECT_EQ(8, a(1,1,1).as_scalar<int>());
+    EXPECT_EQ(1, a(0,0,0).as<int>());
+    EXPECT_EQ(2, a(0,0,1).as<int>());
+    EXPECT_EQ(3, a(0,1,0).as<int>());
+    EXPECT_EQ(4, a(0,1,1).as<int>());
+    EXPECT_EQ(5, a(1,0,0).as<int>());
+    EXPECT_EQ(6, a(1,0,1).as<int>());
+    EXPECT_EQ(7, a(1,1,0).as<int>());
+    EXPECT_EQ(8, a(1,1,1).as<int>());
     EXPECT_THROW(a(-1,0,0), index_out_of_bounds);
     EXPECT_THROW(a(2,0,0), index_out_of_bounds);
     EXPECT_THROW(a(0,-1,0), index_out_of_bounds);
@@ -84,69 +84,69 @@ TEST(NDArrayIndex, OneDimensionalRange) {
     // full range
     b = a(irange());
     EXPECT_EQ(6, b.shape(0));
-    EXPECT_EQ(1, b(0).as_scalar<int>());
-    EXPECT_EQ(2, b(1).as_scalar<int>());
-    EXPECT_EQ(3, b(2).as_scalar<int>());
-    EXPECT_EQ(4, b(3).as_scalar<int>());
-    EXPECT_EQ(5, b(4).as_scalar<int>());
-    EXPECT_EQ(6, b(5).as_scalar<int>());
+    EXPECT_EQ(1, b(0).as<int>());
+    EXPECT_EQ(2, b(1).as<int>());
+    EXPECT_EQ(3, b(2).as<int>());
+    EXPECT_EQ(4, b(3).as<int>());
+    EXPECT_EQ(5, b(4).as<int>());
+    EXPECT_EQ(6, b(5).as<int>());
 
     // selected range
     b = a(1 <= irange() < 3);
     EXPECT_EQ(2, b.shape(0));
-    EXPECT_EQ(2, b(0).as_scalar<int>());
-    EXPECT_EQ(3, b(1).as_scalar<int>());
+    EXPECT_EQ(2, b(0).as<int>());
+    EXPECT_EQ(3, b(1).as<int>());
 
     // lower-bound only
     b = a(3 <= irange());
     EXPECT_EQ(3, b.shape(0));
-    EXPECT_EQ(4, b(0).as_scalar<int>());
-    EXPECT_EQ(5, b(1).as_scalar<int>());
-    EXPECT_EQ(6, b(2).as_scalar<int>());
+    EXPECT_EQ(4, b(0).as<int>());
+    EXPECT_EQ(5, b(1).as<int>());
+    EXPECT_EQ(6, b(2).as<int>());
 
     // upper-bound only
     b = a(irange() < 3);
     EXPECT_EQ(3, b.shape(0));
-    EXPECT_EQ(1, b(0).as_scalar<int>());
-    EXPECT_EQ(2, b(1).as_scalar<int>());
-    EXPECT_EQ(3, b(2).as_scalar<int>());
+    EXPECT_EQ(1, b(0).as<int>());
+    EXPECT_EQ(2, b(1).as<int>());
+    EXPECT_EQ(3, b(2).as<int>());
 
     // different step
     b = a(irange() / 2);
     EXPECT_EQ(3, b.shape(0));
-    EXPECT_EQ(1, b(0).as_scalar<int>());
-    EXPECT_EQ(3, b(1).as_scalar<int>());
-    EXPECT_EQ(5, b(2).as_scalar<int>());
+    EXPECT_EQ(1, b(0).as<int>());
+    EXPECT_EQ(3, b(1).as<int>());
+    EXPECT_EQ(5, b(2).as<int>());
 
     // full reversed range
     b = a(irange() / -1);
     EXPECT_EQ(6, b.shape(0));
-    EXPECT_EQ(6, b(0).as_scalar<int>());
-    EXPECT_EQ(5, b(1).as_scalar<int>());
-    EXPECT_EQ(4, b(2).as_scalar<int>());
-    EXPECT_EQ(3, b(3).as_scalar<int>());
-    EXPECT_EQ(2, b(4).as_scalar<int>());
-    EXPECT_EQ(1, b(5).as_scalar<int>());
+    EXPECT_EQ(6, b(0).as<int>());
+    EXPECT_EQ(5, b(1).as<int>());
+    EXPECT_EQ(4, b(2).as<int>());
+    EXPECT_EQ(3, b(3).as<int>());
+    EXPECT_EQ(2, b(4).as<int>());
+    EXPECT_EQ(1, b(5).as<int>());
 
     // partial reversed range
     b = a(3 >= irange() / -1 >= 0);
     EXPECT_EQ(4, b.shape(0));
-    EXPECT_EQ(4, b(0).as_scalar<int>());
-    EXPECT_EQ(3, b(1).as_scalar<int>());
-    EXPECT_EQ(2, b(2).as_scalar<int>());
-    EXPECT_EQ(1, b(3).as_scalar<int>());
+    EXPECT_EQ(4, b(0).as<int>());
+    EXPECT_EQ(3, b(1).as<int>());
+    EXPECT_EQ(2, b(2).as<int>());
+    EXPECT_EQ(1, b(3).as<int>());
 
     // reversed range with different step
     b = a(irange() / -3);
     EXPECT_EQ(2, b.shape(0));
-    EXPECT_EQ(6, b(0).as_scalar<int>());
-    EXPECT_EQ(3, b(1).as_scalar<int>());
+    EXPECT_EQ(6, b(0).as<int>());
+    EXPECT_EQ(3, b(1).as<int>());
 
     // partial reversed range with different step
     b = a(2 >= irange() / -2);
     EXPECT_EQ(2, b.shape(0));
-    EXPECT_EQ(3, b(0).as_scalar<int>());
-    EXPECT_EQ(1, b(1).as_scalar<int>());
+    EXPECT_EQ(3, b(0).as<int>());
+    EXPECT_EQ(1, b(1).as<int>());
 
     // empty range
     b = a(2 <= irange() < 2);
@@ -155,9 +155,9 @@ TEST(NDArrayIndex, OneDimensionalRange) {
     // applying two ranges, one after another
     b = a(1 <= irange() <= 5)(irange() / -2);
     EXPECT_EQ(3, b.shape(0));
-    EXPECT_EQ(6, b(0).as_scalar<int>());
-    EXPECT_EQ(4, b(1).as_scalar<int>());
-    EXPECT_EQ(2, b(2).as_scalar<int>());
+    EXPECT_EQ(6, b(0).as<int>());
+    EXPECT_EQ(4, b(1).as<int>());
+    EXPECT_EQ(2, b(2).as<int>());
 
     // exceptions for out-of-bounds ranges
     EXPECT_THROW(a(-1 <= irange()), irange_out_of_bounds);

@@ -115,19 +115,22 @@ TEST(NDArray, AsScalar) {
     a = ndarray(make_dtype<float>());
     EXPECT_EQ(1, a.num_elements());
     a.vassign(3.14f);
-    EXPECT_EQ(3.14f, a.as_scalar<float>());
-    EXPECT_EQ(3.14f, a.as_scalar<double>());
-    EXPECT_THROW(a.as_scalar<int64_t>(), runtime_error);
-    EXPECT_EQ(3, a.as_scalar<int64_t>(assign_error_overflow));
-    EXPECT_THROW(a.as_scalar<dnd_bool>(), runtime_error);
-    EXPECT_THROW(a.as_scalar<dnd_bool>(assign_error_overflow), runtime_error);
-    EXPECT_EQ(true, a.as_scalar<dnd_bool>(assign_error_none));
+    EXPECT_EQ(3.14f, a.as<float>());
+    EXPECT_EQ(3.14f, a.as<double>());
+    EXPECT_THROW(a.as<int64_t>(), runtime_error);
+    EXPECT_EQ(3, a.as<int64_t>(assign_error_overflow));
+    EXPECT_THROW(a.as<dnd_bool>(), runtime_error);
+    EXPECT_THROW(a.as<dnd_bool>(assign_error_overflow), runtime_error);
+    EXPECT_EQ(true, a.as<dnd_bool>(assign_error_none));
+    EXPECT_THROW(a.as<bool>(), runtime_error);
+    EXPECT_THROW(a.as<bool>(assign_error_overflow), runtime_error);
+    EXPECT_EQ(true, a.as<bool>(assign_error_none));
 
     a = ndarray(make_dtype<double>());
     a.vassign(3.141592653589);
-    EXPECT_EQ(3.141592653589, a.as_scalar<double>());
-    EXPECT_THROW(a.as_scalar<float>(assign_error_inexact), runtime_error);
-    EXPECT_EQ(3.141592653589f, a.as_scalar<float>());
+    EXPECT_EQ(3.141592653589, a.as<double>());
+    EXPECT_THROW(a.as<float>(assign_error_inexact), runtime_error);
+    EXPECT_EQ(3.141592653589f, a.as<float>());
 }
 
 TEST(NDArray, InitializerLists) {

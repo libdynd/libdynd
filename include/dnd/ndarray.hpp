@@ -224,22 +224,13 @@ public:
 
     /**
      * When this is a zero-dimensional array, converts it to a C++ scalar of the
-     * requested template type.
-     *
-     * TODO: Support ndarray.as_scalar<bool>()
+     * requested template type. This function may be extended in the future for
+     * 1D vectors (as<std::vector<T>>), matrices, etc.
      *
      * @param errmode  The assignment error mode to use.
      */
     template<class T>
-    typename boost::enable_if<is_dtype_scalar<T>, T>::type as_scalar(
-                                        assign_error_mode errmode = assign_error_fractional) const {
-        T result;
-        if (ndim() != 0) {
-            throw std::runtime_error("can only convert ndarrays with 0 dimensions to scalars");
-        }
-        dtype_assign(make_dtype<T>(), &result, m_dtype, m_originptr, errmode);
-        return result;
-    }
+    T as(assign_error_mode errmode = assign_error_fractional) const;
 
     friend ndarray empty_like(const ndarray& rhs, const dtype& dt);
     friend std::ostream& operator<<(std::ostream& o, const ndarray& rhs);
@@ -446,6 +437,37 @@ dnd::ndarray::ndarray(const T (&rhs)[N])
         m_originptr = NULL;
     }
 }
+
+///////////// The ndarray.as<type>() templated function /////////////////////////
+namespace detail {
+    template <class T>
+    struct ndarray_as_helper {
+        static typename boost::enable_if<is_dtype_scalar<T>, T>::type as(const ndarray& lhs,
+                                                                    assign_error_mode errmode) {
+            T result;
+            if (lhs.ndim() != 0) {
+                throw std::runtime_error("can only convert ndarrays with 0 dimensions to scalars");
+            }
+            dtype_assign(make_dtype<T>(), &result, lhs.get_dtype(), lhs.originptr(), errmode);
+            return result;
+        }
+    };
+
+    template <>
+    struct ndarray_as_helper<bool> {
+        static bool as(const ndarray& lhs, assign_error_mode errmode) {
+            return ndarray_as_helper<dnd_bool>::as(lhs, errmode);
+        }
+    };
+
+    // Could do as<std::vector<T>> for 1D arrays, and other similiar conversions
+} // namespace detail;
+
+template<class T>
+T dnd::ndarray::as(assign_error_mode errmode) const {
+    return detail::ndarray_as_helper<T>::as(*this, errmode);
+}
+
 
 } // namespace dnd
 

@@ -70,3 +70,14 @@ Sept 20, 2011
   C++ scalar assignment work with ndarray.operator=, I think the ndarray
   assignment operator should be reserved for ndarray reference assignment
   semantics, overloading it would be confusing.
+
+Sept 22, 2011
+
+* Wrote an irange() class, similar to Boost MultiArray's index_range(),
+  to support range-based indexing. This is like slice-based indexing in
+  Python. Also implemented the indexing in ndarray using operator(). Thought
+  about how operator[] might work - Boost MultiArray uses it and can
+  do it because whether an index is an integer or a tuple of ranges is
+  determined at compile time. In irange() I've allowed it to represent
+  an integer index by setting step to zero, something which simplifies the
+  implementation for multiple indexing.
