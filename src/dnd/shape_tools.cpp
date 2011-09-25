@@ -64,3 +64,81 @@ void dnd::broadcast_input_shapes(int noperands, const ndarray **operands,
 
     out_ndim = ndim;
 }
+
+static inline intptr_t intptr_abs(intptr_t x) {
+    return x >= 0 ? x : -x;
+}
+
+void dnd::make_sorted_stride_perm(int ndim, const intptr_t *strides, int *out_strideperm)
+{
+    switch (ndim) {
+        case 0: {
+            break;
+        }
+        case 1: {
+            out_strideperm[0] = 0;
+            break;
+        }
+        case 2: {
+            if (intptr_abs(strides[0]) >= intptr_abs(strides[1])) {
+                out_strideperm[0] = 1;
+                out_strideperm[1] = 0;
+            } else {
+                out_strideperm[0] = 0;
+                out_strideperm[1] = 1;
+            }
+            break;
+        }
+        case 3: {
+            intptr_t abs_strides[3] = {intptr_abs(strides[0]),
+                                    intptr_abs(strides[1]),
+                                    intptr_abs(strides[2])};
+            if (abs_strides[0] >= abs_strides[1]) {
+                if (abs_strides[1] >= abs_strides[2]) {
+                    out_strideperm[0] = 2;
+                    out_strideperm[1] = 1;
+                    out_strideperm[2] = 0;
+                } else { // abs_strides[1] < abs_strides[2]
+                    if (abs_strides[0] >= abs_strides[2]) {
+                        out_strideperm[0] = 1;
+                        out_strideperm[1] = 2;
+                        out_strideperm[2] = 0;
+                    } else { // abs_strides[0] < abs_strides[2]
+                        out_strideperm[0] = 1;
+                        out_strideperm[1] = 0;
+                        out_strideperm[2] = 2;
+                    }
+                }
+            } else { // abs_strides[0] < abs_strides[1]
+                if (abs_strides[1] >= abs_strides[2]) {
+                    if (abs_strides[0] >= abs_strides[2]) {
+                        out_strideperm[0] = 2;
+                        out_strideperm[1] = 0;
+                        out_strideperm[2] = 1;
+                    } else { // abs_strides[0] < abs_strides[2]
+                        out_strideperm[0] = 0;
+                        out_strideperm[1] = 2;
+                        out_strideperm[2] = 1;
+                    }
+                } else { // strides[1] < strides[2]
+                    out_strideperm[0] = 0;
+                    out_strideperm[1] = 1;
+                    out_strideperm[2] = 2;
+                }
+            }
+            break;
+        }
+        default: {
+            // Initialize to a reversal perm (i.e. so C-order is a no-op)
+            for (int i = 0; i < ndim; ++i) {
+                out_strideperm[i] = ndim - i - 1;
+            }
+            // Sort based on the absolute value of the strides
+            std::sort(out_strideperm, out_strideperm + ndim,
+                        [&strides](int i, int j) -> bool {
+                return intptr_abs(strides[i]) < intptr_abs(strides[j]);
+            });
+            break;
+        }
+    }
+}

@@ -52,6 +52,13 @@ inline void broadcast_input_shapes(const ndarray& op0, const ndarray& op1,
     broadcast_input_shapes(2, operands, out_ndim, out_shape);
 }
 
+/**
+ * This function creates a permutation based on the strides of 'op'.
+ * The value strides(out_strideperm[0]) is the smallest stride,
+ * and strides(out_strideperm[ndim-1]) is the largest stride.
+ */
+void make_sorted_stride_perm(int ndim, const intptr_t *strides, int *out_strideperm);
+
 } // namespace dnd
 
 #endif // _DND__SHAPE_TOOLS_HPP_

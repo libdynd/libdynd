@@ -100,21 +100,10 @@ namespace detail {
                 return;
             }
 
-            // Sort the strides in C order according to the first operand, and copy into 'this'
+            // Sort the strides in ascending order according to the first operand
             shortvector<int,staticNDIM> strideperm(m_ndim);
-            for (int i = 0; i < m_ndim; ++i) {
-                strideperm[i] = i;
-            }
-            const intptr_t *strides0 = in_strides[0];
-            std::sort(strideperm.get(), strideperm.get() + m_ndim,
-                            [&strides0](int i, int j) -> bool {
-                intptr_t astride = strides0[i], bstride = strides0[j];
-                // Take the absolute value
-                if (astride < 0) astride = -astride;
-                if (bstride < 0) bstride = -bstride;
-
-                return astride < bstride;
-            });
+            make_sorted_stride_perm(m_ndim, in_strides[0], strideperm.get());
+            // Copy the strides/shape into the iterator's internal variables
             for (int i = 0; i < m_ndim; ++i) {
                 int p = strideperm[i];
                 itershape(i) = shape[p];
@@ -287,6 +276,9 @@ public:
 
 };
 
+/**
+ * Iterator with one output operand.
+ */
 template<>
 class raw_ndarray_iter<1,0> : public detail::raw_ndarray_iter_base<1,0> {
 public:
@@ -306,6 +298,9 @@ public:
 
 };
 
+/**
+ * Iterator with one output operand and one input operand.
+ */
 template<>
 class raw_ndarray_iter<1,1> : public detail::raw_ndarray_iter_base<1,1> {
 public:
@@ -320,6 +315,9 @@ public:
     }
 };
 
+/**
+ * Iterator with one output operand and two input operand.
+ */
 template<>
 class raw_ndarray_iter<1,2> : public detail::raw_ndarray_iter_base<1,2> {
 public:
@@ -333,6 +331,8 @@ public:
         const intptr_t *strides[3] = {stridesA, stridesB, stridesC};
         init(shape, data, strides);
     }
+
+
 };
 
 } // namespace dnd
