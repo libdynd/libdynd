@@ -267,8 +267,8 @@ static void vassign_unequal_dtypes(ndarray& lhs, const ndarray& rhs, assign_erro
     broadcast_to_shape(lhs.ndim(), lhs.shape(), rhs, rhs_strides.get());
 
     // Create the raw iterator
-    raw_ndarray_iter<2> iter(lhs.ndim(), lhs.shape(), lhs.originptr(), lhs.strides(),
-                                const_cast<char *>(rhs.originptr()), rhs_strides.get());
+    raw_ndarray_iter<1,1> iter(lhs.ndim(), lhs.shape(), lhs.originptr(), lhs.strides(),
+                                rhs.originptr(), rhs_strides.get());
     //iter.debug_dump(cout);
 
     intptr_t innersize = iter.innersize();
@@ -296,8 +296,8 @@ static void vassign_equal_dtypes(ndarray& lhs, const ndarray& rhs)
     broadcast_to_shape(lhs.ndim(), lhs.shape(), rhs, rhs_strides.get());
 
     // Create the raw iterator
-    raw_ndarray_iter<2> iter(lhs.ndim(), lhs.shape(), lhs.originptr(), lhs.strides(),
-                                const_cast<char *>(rhs.originptr()), rhs_strides.get());
+    raw_ndarray_iter<1,1> iter(lhs.ndim(), lhs.shape(), lhs.originptr(), lhs.strides(),
+                                rhs.originptr(), rhs_strides.get());
     //iter.debug_dump(cout);
 
     intptr_t innersize = iter.innersize();
@@ -343,7 +343,7 @@ void dnd::ndarray::vassign(const dtype& dt, const void *data, assign_error_mode 
 {
     //DEBUG_COUT << "scalar vassign\n";
     scalar_copied_if_necessary src(m_dtype, dt, data, errmode);
-    raw_ndarray_iter<1> iter(*this);
+    raw_ndarray_iter<1,0> iter(*this);
     
     intptr_t innersize = iter.innersize(), innerstride = iter.innerstride<0>();
 
