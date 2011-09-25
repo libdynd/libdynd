@@ -31,3 +31,36 @@ void dnd::broadcast_to_shape(int dst_ndim, const intptr_t *dst_shape,
         }
     }
 }
+
+void dnd::broadcast_input_shapes(int noperands, const ndarray **operands,
+                        int& out_ndim, dimvector& out_shape)
+{
+    // Get the number of broadcast dimensions
+    int ndim = operands[0]->ndim();
+    for (int i = 0; i < noperands; ++i) {
+        if (operands[i]->ndim() > ndim) {
+            ndim = operands[i]->ndim();
+        }
+    }
+
+    out_shape.init(ndim);
+
+    // Fill in the broadcast shape
+    for (int k = 0; k < ndim; ++k) {
+        out_shape[k] = 1;
+    }
+    for (int i = 0; i < noperands; ++i) {
+        int dimdelta = ndim - operands[i]->ndim();
+        for (int k = dimdelta; k < ndim; ++k) {
+            intptr_t size = operands[i]->shape(k - dimdelta);
+            intptr_t itershape_size = out_shape[k];
+            if (itershape_size == 1) {
+                out_shape[k] = size;
+            } else if (itershape_size != size) {
+                throw broadcast_error(noperands, operands);
+            }
+        }
+    }
+
+    out_ndim = ndim;
+}

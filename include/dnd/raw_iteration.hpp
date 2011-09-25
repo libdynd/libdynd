@@ -18,48 +18,54 @@ namespace dnd {
 namespace detail {
     template<int N, int staticNDIM = 3>
     class raw_ndarray_iter_base {
-        intptr_t *m_strides_alloc_data;
-        intptr_t m_strides_static_data[staticNDIM*N];
+        // contains all the ndim-sized vectors
+        // 0: iterindex
+        // 1: itershape
+        // 2 ... N + 1: all the operand strides
+        multi_shortvector<intptr_t, N + 2, staticNDIM> m_vectors;
     protected:
         int m_ndim;
-        dimvector m_iterindex;
-        dimvector m_itershape;
         char *m_data[N];
-        intptr_t *m_strides[N];
 
         raw_ndarray_iter_base(int ndim)
-          : m_ndim(ndim), m_iterindex(ndim), m_itershape(ndim)
-        {
-            if (ndim <= staticNDIM) {
-                m_strides_alloc_data = NULL;
-                for (int i = 0; i < N; ++i) {
-                    m_strides[i] = &m_strides_static_data[ndim*i];
-                }
-            } else {
-                m_strides_alloc_data = new intptr_t[ndim*N];
-                for (int i = 0; i < N; ++i) {
-                    m_strides[i] = &m_strides_alloc_data[ndim*i];
-                }
-            }
+          : m_ndim(ndim), m_vectors(ndim) {
         }
 
-        ~raw_ndarray_iter_base() {
-            if (m_strides_alloc_data != NULL) {
-                delete[] m_strides_alloc_data;
-            }
+        intptr_t& iterindex(int i) {
+            return m_vectors.get(0, i);
+        }
+
+        const intptr_t& iterindex(int i) const {
+            return m_vectors.get(0, i);
+        }
+
+        intptr_t& itershape(int i) {
+            return m_vectors.get(1, i);
+        }
+
+        const intptr_t& itershape(int i) const {
+            return m_vectors.get(1, i);
+        }
+
+        intptr_t* strides(int k) {
+            return m_vectors.get_all()[k+2];
+        }
+
+        const intptr_t* strides(int k) const {
+            return m_vectors.get_all()[k+2];
         }
 
         inline bool strides_can_coalesce(int i, int j) {
-            intptr_t size = m_itershape[i];
+            intptr_t size = itershape(i);
             for (int k = 0; k < N; ++k) {
-                if (m_strides[k][i] * size != m_strides[k][j]) {
+                if (strides(k)[i] * size != strides(k)[j]) {
                     return false;
                 }
             }
             return true;
         }
 
-        void init(const intptr_t *shape, char **data, const intptr_t **strides)
+        void init(const intptr_t *shape, char **data, const intptr_t **in_strides)
         {
             for (int k = 0; k < N; ++k) {
                 m_data[k] = data[k];
@@ -70,25 +76,25 @@ namespace detail {
                 m_ndim = 1;
                 // NOTE: This is ok, because shortvectors always have
                 //       at least 1 element even if initialized with size = 0.
-                m_iterindex[0] = 0;
-                m_itershape[0] = 1;
+                iterindex(0) = 0;
+                itershape(0) = 1;
                 for (int k = 0; k < N; ++k) {
-                    m_strides[k][0] = 0;
+                    strides(k)[0] = 0;
                 }
                 return;
             } else if (m_ndim == 1) {
                 intptr_t size = shape[0];
-                m_iterindex[0] = 0;
-                m_itershape[0] = size;
+                iterindex(0) = 0;
+                itershape(0) = size;
                 // Always make the stride positive
-                if (strides[0][0] >= 0) {
+                if (in_strides[0][0] >= 0) {
                     for (int k = 0; k < N; ++k) {
-                        m_strides[k][0] = strides[k][0];
+                        strides(k)[0] = in_strides[k][0];
                     }
                 } else {
                     for (int k = 0; k < N; ++k) {
-                        m_data[k][0] += strides[k][0] * (size - 1);
-                        m_strides[k][0] = -strides[k][0];
+                        m_data[k][0] += in_strides[k][0] * (size - 1);
+                        strides(k)[0] = -in_strides[k][0];
                     }
                 }
                 return;
@@ -99,7 +105,7 @@ namespace detail {
             for (int i = 0; i < m_ndim; ++i) {
                 strideperm[i] = i;
             }
-            const intptr_t *strides0 = strides[0];
+            const intptr_t *strides0 = in_strides[0];
             std::sort(strideperm.get(), strideperm.get() + m_ndim,
                             [&strides0](int i, int j) -> bool {
                 intptr_t astride = strides0[i], bstride = strides0[j];
@@ -111,31 +117,31 @@ namespace detail {
             });
             for (int i = 0; i < m_ndim; ++i) {
                 int p = strideperm[i];
-                m_itershape[i] = shape[p];
+                itershape(i) = shape[p];
                 for (int k = 0; k < N; ++k) {
-                    m_strides[k][i] = strides[k][p];
+                    strides(k)[i] = in_strides[k][p];
                 }
             }
 
             // Reverse any axes where the first operand has a negative stride
             for (int i = 0; i < m_ndim; ++i) {
-                intptr_t stride = m_strides[0][i], size = m_itershape[i];
+                intptr_t stride = strides(0)[i], size = itershape(i);
 
                 if (stride < 0) {
                     m_data[0] += stride * (size - 1);
-                    m_strides[0][i] = -stride;
+                    strides(0)[i] = -stride;
                     for (int k = 1; k < N; ++k) {
-                        m_data[k] += m_strides[k][i] * (size - 1);
-                        m_strides[k][i] = -m_strides[k][i];
+                        m_data[k] += strides(k)[i] * (size - 1);
+                        strides(k)[i] = -strides(k)[i];
                     }
                 }
 
                 // Detect and handle a zero-size array
                 if (size == 0) {
                     m_ndim = 1;
-                    m_itershape[0] = 0;
+                    itershape(0) = 0;
                     for (int k = 0; k < N; ++k) {
-                        m_strides[k][0] = 0;
+                        strides(k)[0] = 0;
                     }
                     return;
                 }
@@ -144,43 +150,43 @@ namespace detail {
             // Coalesce axes where possible
             int i = 0;
             for (int j = 1; j < m_ndim; ++j) {
-                if (m_itershape[i] == 1) {
+                if (itershape(i) == 1) {
                     // Remove axis i
-                    m_itershape[i] = m_itershape[j];
+                    itershape(i) = itershape(j);
                     for (int k = 0; k < N; ++k) {
-                        m_strides[k][i] = m_strides[k][j];
+                        strides(k)[i] = strides(k)[j];
                     }
-                } else if (m_itershape[j] == 1) {
+                } else if (itershape(j) == 1) {
                     // Remove axis j
                 } else if (strides_can_coalesce(i, j)) {
                     // Coalesce axes i and j
-                    m_itershape[i] *= m_itershape[j];
+                    itershape(i) *= itershape(j);
                 } else {
                     // Can't coalesce, go to the next i
                     ++i;
-                    m_itershape[i] = m_itershape[j];
+                    itershape(i) = itershape(j);
                     for (int k = 0; k < N; ++k) {
-                        m_strides[k][i] = m_strides[k][j];
+                        strides(k)[i] = strides(k)[j];
                     }
                 }
             }
             m_ndim = i+1;
-            memset(m_iterindex.get(), 0, m_ndim * sizeof(intptr_t));
+            memset(&iterindex(0), 0, m_ndim * sizeof(intptr_t));
         }
 
     public:
         bool iternext() {
             int i = 1;
             for (; i < m_ndim; ++i) {
-                intptr_t size = m_itershape[i];
-                if (++m_iterindex[i] == size) {
-                    m_iterindex[i] = 0;
+                intptr_t size = itershape(i);
+                if (++iterindex(i) == size) {
+                    iterindex(i) = 0;
                     for (int k = 0; k < N; ++k) {
-                        m_data[k] -= (size - 1) * m_strides[k][i];
+                        m_data[k] -= (size - 1) * strides(k)[i];
                     }
                 } else {
                     for (int k = 0; k < N; ++k) {
-                        m_data[k] += m_strides[k][i];
+                        m_data[k] += strides(k)[i];
                     }
                     break;
                 }
@@ -190,12 +196,12 @@ namespace detail {
         }
 
         intptr_t innersize() const {
-            return m_itershape[0];
+            return itershape(0);
         }
 
         template<int K>
         typename boost::enable_if_c<(K >= 0 && K < N), intptr_t>::type innerstride() const {
-            return m_strides[K][0];
+            return strides(K)[0];
         }
 
         template<int K>
@@ -211,18 +217,10 @@ namespace detail {
         typename boost::enable_if_c<(K >= 0 && K < N), char>::type get_align_test() const {
             char result = static_cast<char>(reinterpret_cast<intptr_t>(m_data[K]));
             for (int i = 0; i < m_ndim; ++i) {
-                result |= m_strides[K][i];
+                result |= strides(K)[i];
             }
             return result;
         }
-
-        /*
-        int m_ndim;
-        dimvector m_iterindex;
-        dimvector m_itershape;
-        char *m_data[N];
-        intptr_t *m_strides[N];
-        */
 
         /**
          * Prints out a debug dump of the object.
@@ -231,17 +229,17 @@ namespace detail {
             o << "------ raw_ndarray_iter<" << N << ">\n";
             o << " ndim: " << m_ndim << "\n";
             o << " iterindex: ";
-            for (int i = 0; i < m_ndim; ++i) o << m_iterindex[i] << " ";
+            for (int i = 0; i < m_ndim; ++i) o << iterindex(i) << " ";
             o << "\n";
             o << " itershape: ";
-            for (int i = 0; i < m_ndim; ++i) o << m_itershape[i] << " ";
+            for (int i = 0; i < m_ndim; ++i) o << itershape(i) << " ";
             o << "\n";
             o << " data: ";
             for (int k = 0; k < N; ++k) o << (void *)m_data[k] << " ";
             o << "\n";
             for (int k = 0; k < N; ++k) {
                 o << " strides[" << k << "]: ";
-                for (int i = 0; i < m_ndim; ++i) o << m_strides[k][i] << " ";
+                for (int i = 0; i < m_ndim; ++i) o << strides(k)[i] << " ";
                 o << "\n";
             }
             o << "------\n";

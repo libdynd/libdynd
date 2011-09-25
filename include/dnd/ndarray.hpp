@@ -21,9 +21,6 @@
 
 namespace dnd {
 
-/** Typedef for vector of dimensions or strides */
-typedef shortvector<intptr_t> dimvector;
-
 class ndarray;
 
 /**

@@ -9,30 +9,47 @@
 #include <iostream> // for DEBUG
 
 #include <dnd/exceptions.hpp>
+#include <dnd/ndarray.hpp>
 
 using namespace std;
 using namespace dnd;
 
+static void print_shape(std::ostream& o, int ndim, const intptr_t *shape)
+{
+    o << "(";
+    for (int i = 0; i < ndim; ++i) {
+        o << shape[i];
+        if (i != ndim - 1) {
+            o << ", ";
+        }
+    }
+    o << ")";
+}
+
 dnd::broadcast_error::broadcast_error(int dst_ndim, const intptr_t *dst_shape,
                     int src_ndim, const intptr_t *src_shape)
 {
-    std::stringstream ss;
+    stringstream ss;
 
-    ss << "broadcast error: cannot broadcast shape (";
-    for (int i = 0; i < src_ndim; ++i) {
-        ss << src_shape[i];
-        if (i != src_ndim - 1) {
+    ss << "broadcast error: cannot broadcast shape ";
+    print_shape(ss, src_ndim, src_shape);
+    ss << " to shape ";
+    print_shape(ss, dst_ndim, dst_shape);
+
+    m_what = ss.str();
+}
+
+dnd::broadcast_error::broadcast_error(int noperands, const ndarray **operands)
+{
+    stringstream ss;
+
+    ss << "broadcast error: cannot broadcast input operand shapes ";
+    for (int i = 0; i < noperands; ++i) {
+        print_shape(ss, operands[i]->ndim(), operands[i]->shape());
+        if (i != noperands - 1) {
             ss << " ";
         }
     }
-    ss << ") to shape (";
-    for (int i = 0; i < dst_ndim; ++i) {
-        ss << dst_shape[i];
-        if (i != dst_ndim - 1) {
-            ss << " ";
-        }
-    }
-    ss << ")";
 
     m_what = ss.str();
 }
@@ -51,7 +68,7 @@ dnd::too_many_indices::too_many_indices(int nindex, int ndim)
 dnd::index_out_of_bounds::index_out_of_bounds(intptr_t i, intptr_t start, intptr_t end)
 {
     //cout << "throwing index_out_of_bounds\n";
-    std::stringstream ss;
+    stringstream ss;
 
     ss << "index out of bounds: index " << i << " is not in the half-open range [";
     ss << start << ", " << end << ")";
@@ -62,7 +79,7 @@ dnd::index_out_of_bounds::index_out_of_bounds(intptr_t i, intptr_t start, intptr
 dnd::irange_out_of_bounds::irange_out_of_bounds(const irange& i, intptr_t start, intptr_t end)
 {
     //cout << "throwing irange_out_of_bounds\n";
-    std::stringstream ss;
+    stringstream ss;
 
     ss << "irange out of bounds: index range (" << i.start() << " to " << i.finish();
     if (i.step() != 1) {

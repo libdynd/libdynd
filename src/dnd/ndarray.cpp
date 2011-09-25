@@ -261,10 +261,10 @@ void dnd::ndarray::swap(ndarray& rhs)
 
 static void vassign_unequal_dtypes(ndarray& lhs, const ndarray& rhs, assign_error_mode errmode)
 {
-    //DEBUG_COUT << "vassign_unequal_dtypes\n";
+    //cout << "vassign_unequal_dtypes\n";
     // First broadcast the 'rhs' shape to 'this'
     dimvector rhs_strides(lhs.ndim());
-    broadcast_to_shape(lhs.ndim(), lhs.shape(), rhs.ndim(), rhs.shape(), rhs.strides(), rhs_strides.get());
+    broadcast_to_shape(lhs.ndim(), lhs.shape(), rhs, rhs_strides.get());
 
     // Create the raw iterator
     raw_ndarray_iter<2> iter(lhs.ndim(), lhs.shape(), lhs.originptr(), lhs.strides(),
@@ -290,10 +290,10 @@ static void vassign_unequal_dtypes(ndarray& lhs, const ndarray& rhs, assign_erro
 
 static void vassign_equal_dtypes(ndarray& lhs, const ndarray& rhs)
 {
-    //DEBUG_COUT << "vassign_equal_dtypes\n";
+    //cout << "vassign_equal_dtypes\n";
     // First broadcast the 'rhs' shape to 'this'
     dimvector rhs_strides(lhs.ndim());
-    broadcast_to_shape(lhs.ndim(), lhs.shape(), rhs.ndim(), rhs.shape(), rhs.strides(), rhs_strides.get());
+    broadcast_to_shape(lhs.ndim(), lhs.shape(), rhs, rhs_strides.get());
 
     // Create the raw iterator
     raw_ndarray_iter<2> iter(lhs.ndim(), lhs.shape(), lhs.originptr(), lhs.strides(),
