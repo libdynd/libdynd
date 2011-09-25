@@ -12,6 +12,7 @@
 #include <boost/utility/enable_if.hpp>
 
 #include <dnd/ndarray.hpp>
+#include <dnd/shape_tools.hpp>
 
 namespace dnd {
 
@@ -65,7 +66,7 @@ namespace detail {
             return true;
         }
 
-        void init(const intptr_t *shape, char **data, const intptr_t **in_strides)
+        void init(const intptr_t *shape, char **data, const intptr_t **in_strides, const int *strideperm)
         {
             for (int k = 0; k < Nwrite + Nread; ++k) {
                 m_data[k] = data[k];
@@ -100,9 +101,6 @@ namespace detail {
                 return;
             }
 
-            // Sort the strides in ascending order according to the first operand
-            shortvector<int,staticNDIM> strideperm(m_ndim);
-            make_sorted_stride_perm(m_ndim, in_strides[0], strideperm.get());
             // Copy the strides/shape into the iterator's internal variables
             for (int i = 0; i < m_ndim; ++i) {
                 int p = strideperm[i];
@@ -263,15 +261,24 @@ public:
     raw_ndarray_iter(int ndim, const intptr_t *shape, const char *data, const intptr_t *strides)
         : detail::raw_ndarray_iter_base<0,1>(ndim)
     {
-        init(shape, const_cast<char **>(&data), &strides);
+        // Sort the strides in ascending order according to the first operand
+        shortvector<int> strideperm(m_ndim);
+        make_sorted_stride_perm(m_ndim, strides, strideperm.get());
+
+        init(shape, const_cast<char **>(&data), &strides, strideperm.get());
     }
 
-    raw_ndarray_iter(ndarray& arr)
+    raw_ndarray_iter(const ndarray& arr)
         : detail::raw_ndarray_iter_base<0,1>(arr.ndim())
     {
-        char *data = arr.originptr();
+        const char *data = arr.originptr();
         const intptr_t *strides = arr.strides();
-        init(arr.shape(), const_cast<char **>(&data), &strides);
+
+        // Sort the strides in ascending order according to the first operand
+        shortvector<int> strideperm(m_ndim);
+        make_sorted_stride_perm(m_ndim, strides, strideperm.get());
+
+        init(arr.shape(), const_cast<char **>(&data), &strides, strideperm.get());
     }
 
 };
@@ -285,7 +292,11 @@ public:
     raw_ndarray_iter(int ndim, const intptr_t *shape, const char *data, const intptr_t *strides)
         : detail::raw_ndarray_iter_base<1,0>(ndim)
     {
-        init(shape, const_cast<char **>(&data), &strides);
+        // Sort the strides in ascending order according to the first operand
+        shortvector<int> strideperm(m_ndim);
+        make_sorted_stride_perm(m_ndim, strides, strideperm.get());
+
+        init(shape, const_cast<char **>(&data), &strides, strideperm.get());
     }
 
     raw_ndarray_iter(ndarray& arr)
@@ -293,7 +304,12 @@ public:
     {
         char *data = arr.originptr();
         const intptr_t *strides = arr.strides();
-        init(arr.shape(), const_cast<char **>(&data), &strides);
+
+        // Sort the strides in ascending order according to the first operand
+        shortvector<int> strideperm(m_ndim);
+        make_sorted_stride_perm(m_ndim, strides, strideperm.get());
+
+        init(arr.shape(), const_cast<char **>(&data), &strides, strideperm.get());
     }
 
 };
@@ -311,7 +327,12 @@ public:
     {
         char *data[2] = {dataA, const_cast<char *>(dataB)};
         const intptr_t *strides[2] = {stridesA, stridesB};
-        init(shape, data, strides);
+
+        // Sort the strides in ascending order according to the first operand
+        shortvector<int> strideperm(m_ndim);
+        make_sorted_stride_perm(m_ndim, stridesA, strideperm.get());
+
+        init(shape, data, strides, strideperm.get());
     }
 };
 
@@ -329,7 +350,12 @@ public:
     {
         char *data[3] = {dataA, const_cast<char *>(dataB), const_cast<char *>(dataC)};
         const intptr_t *strides[3] = {stridesA, stridesB, stridesC};
-        init(shape, data, strides);
+
+        // Sort the strides in ascending order according to the first operand
+        shortvector<int> strideperm(m_ndim);
+        make_sorted_stride_perm(m_ndim, stridesA, strideperm.get());
+
+        init(shape, data, strides, strideperm.get());
     }
 
 
