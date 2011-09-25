@@ -1,5 +1,6 @@
 #include <iostream>
 #include <stdexcept>
+#include <algorithm>
 #include <cmath>
 #include <stdint.h>
 #include <gtest/gtest.h>
@@ -107,6 +108,67 @@ TEST(NDArray, Constructors) {
     EXPECT_EQ(5*4*sizeof(float), a.strides()[0]);
     EXPECT_EQ(4*sizeof(float), a.strides()[1]);
     EXPECT_EQ(sizeof(float), a.strides()[2]);
+}
+
+TEST(NDArray, ConstructorMemoryLayouts) {
+    ndarray a, b;
+    dtype dt(int16_type_id), dt2(int32_type_id);
+    intptr_t shape[6];
+    int axisperm[6];
+
+    // The strides are set to zero for size-one dimensions
+    shape[0] = 1;
+    shape[1] = 1;
+    shape[2] = 1;
+    axisperm[0] = 0;
+    axisperm[1] = 1;
+    axisperm[2] = 2;
+    a = ndarray(dt, 3, shape, axisperm);
+    EXPECT_EQ(1, a.num_elements());
+    EXPECT_EQ(0, a.strides(0));
+    EXPECT_EQ(0, a.strides(1));
+    EXPECT_EQ(0, a.strides(2));
+    b = empty_like(a);
+    EXPECT_EQ(1, b.num_elements());
+    EXPECT_EQ(0, b.strides(0));
+    EXPECT_EQ(0, b.strides(1));
+    EXPECT_EQ(0, b.strides(2));
+
+    // Test all permutations of memory layouts from 1 through 6 dimensions
+    for (int ndim = 1; ndim <= 6; ++ndim) {
+        // Go through all the permutations on ndim elements
+        // to check every memory layout
+        intptr_t num_elements = 1;
+        for (int i = 0; i < ndim; ++i) {
+            shape[i] = i + 2;
+            axisperm[i] = i;
+            num_elements *= shape[i];
+        }
+        do {
+            // Test constructing the array using the perm
+            a = ndarray(dt, ndim, shape, axisperm);
+            EXPECT_EQ(num_elements, a.num_elements());
+            intptr_t s = dt.itemsize();
+            for (int i = 0; i < ndim; ++i) {
+                EXPECT_EQ(s, a.strides(axisperm[i]));
+                s *= shape[axisperm[i]];
+            }
+            // Test constructing the array using empty_like, which preserves the memory layout
+            b = empty_like(a);
+            EXPECT_EQ(num_elements, b.num_elements());
+            for (int i = 0; i < ndim; ++i) {
+                EXPECT_EQ(a.strides(i), b.strides(i));
+            }
+            // Test constructing the array using empty_like with a different dtype, which preserves the memory layout
+            b = empty_like(a, dt2);
+            EXPECT_EQ(num_elements, b.num_elements());
+            for (int i = 0; i < ndim; ++i) {
+                EXPECT_EQ(2 * a.strides(i), b.strides(i));
+            }
+            //cout << "perm " << axisperm[0] << " " << axisperm[1] << " " << axisperm[2] << "\n";
+            //cout << "strides " << a.strides(0) << " " << a.strides(1) << " " << a.strides(2) << "\n";
+        } while(next_permutation(&axisperm[0], &axisperm[0] + ndim));
+    }
 }
 
 TEST(NDArray, AsScalar) {

@@ -23,11 +23,6 @@ namespace dnd {
 
 class ndarray;
 
-/**
- * This function constructs an array with the same shape and memory layout
- * of the one given, but with a different dtype.
- */
-ndarray empty_like(const ndarray& rhs, const dtype& dt);
 /** Stream printing function */
 std::ostream& operator<<(std::ostream& o, const ndarray& rhs);
 
@@ -64,6 +59,8 @@ public:
     ndarray();
     /** Constructs a zero-dimensional scalar array */
     explicit ndarray(const dtype& dt);
+    /** Constructs an array with the given dtype, shape, and axisperm (for memory layout) */
+    explicit ndarray(const dtype& dt, int ndim, const intptr_t *shape, const int *axisperm);
     /** Constructs a one-dimensional array */
     ndarray(intptr_t dim0, const dtype& dt);
     /** Constructs a two-dimensional array */
@@ -229,7 +226,8 @@ public:
     template<class T>
     T as(assign_error_mode errmode = assign_error_fractional) const;
 
-    friend ndarray empty_like(const ndarray& rhs, const dtype& dt);
+    void debug_dump(std::ostream& o) const;
+
     friend std::ostream& operator<<(std::ostream& o, const ndarray& rhs);
 };
 
@@ -465,6 +463,18 @@ T dnd::ndarray::as(assign_error_mode errmode) const {
     return detail::ndarray_as_helper<T>::as(*this, errmode);
 }
 
+/**
+ * Constructs an array with the same shape and memory layout
+ * of the one given, but with a different dtype.
+ */
+ndarray empty_like(const ndarray& rhs, const dtype& dt);
+
+/**
+ * Constructs an empty array matching the parameters of 'rhs'
+ */
+inline ndarray empty_like(const ndarray& rhs) {
+    return empty_like(rhs, rhs.get_dtype());
+}
 
 } // namespace dnd
 

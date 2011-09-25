@@ -38,6 +38,32 @@ dnd::ndarray::ndarray(const dtype& dt)
     m_originptr = m_buffer->data();
 }
 
+dnd::ndarray::ndarray(const dtype& dt, int ndim, const intptr_t *shape, const int *axisperm)
+    : m_dtype(dt), m_ndim(ndim), m_shape(ndim), m_strides(ndim)
+{
+    // Build the new strides using the ordering and shape
+    m_num_elements = 1;
+    intptr_t stride = dt.itemsize();
+    for (int i = 0; i < ndim; ++i) {
+        int p = axisperm[i];
+        intptr_t size = shape[p];
+        if (size == 1) {
+            m_strides[p] = 0;
+        } else {
+            m_strides[p] = stride;
+            stride *= size;
+            m_num_elements *= size;
+        }
+    }
+
+    // Copy the shape
+    memcpy(m_shape.get(), shape, ndim * sizeof(intptr_t));
+
+    // Allocate the buffer
+    m_buffer.reset(new membuffer(dt, m_num_elements));
+    m_originptr = m_buffer->data();
+}
+
 dnd::ndarray::ndarray(intptr_t dim0, const dtype& dt)
     : m_dtype(dt), m_ndim(1), m_num_elements(dim0), m_shape(1), m_strides(1),
       m_buffer(new membuffer(dt, dim0))
@@ -198,45 +224,6 @@ ndarray dnd::ndarray::operator()(intptr_t idx) const
                     m_originptr + idx * m_strides[0], m_buffer);
 }
 
-ndarray dnd::empty_like(const ndarray& rhs, const dtype& dt)
-{
-    //DEBUG_COUT << "empty_like " << rhs << " --- but with dtype " << dt << "\n";
-    // Sort the strides to get the memory layout ordering
-    const intptr_t *shape = rhs.shape(), *strides = rhs.strides();
-    shortvector<int> strideperm(rhs.ndim());
-    for (int i = 0; i < rhs.ndim(); ++i) {
-        strideperm[i] = i;
-    }
-    std::sort(strideperm.get(), strideperm.get() + rhs.ndim(),
-                            [&strides](int i, int j) -> bool {
-        intptr_t astride = strides[i], bstride = strides[j];
-        // Take the absolute value
-        if (astride < 0) astride = -astride;
-        if (bstride < 0) bstride = -bstride;
-
-        return astride < bstride;
-    });
-
-    // Build the new strides using the ordering
-    dimvector res_strides(rhs.ndim());
-    intptr_t stride = dt.itemsize();
-    for (int i = 0; i < rhs.ndim(); ++i) {
-        int p = strideperm[i];
-        intptr_t size = shape[p];
-        if (size == 1) {
-            res_strides[i] = 0;
-        } else {
-            res_strides[i] = stride;
-            stride *= size;
-        }
-    }
-
-    // Construct the new array
-    shared_ptr<membuffer> buf(new membuffer(dt, rhs.num_elements()));
-    return ndarray(dt, rhs.ndim(), rhs.num_elements(), dimvector(rhs.ndim(), rhs.shape()),
-                    std::move(res_strides), buf->data(), std::move(buf));
-}
-
 ndarray& dnd::ndarray::operator=(const ndarray& rhs)
 {
     if (this != &rhs) {
@@ -258,6 +245,17 @@ void dnd::ndarray::swap(ndarray& rhs)
     std::swap(m_originptr, rhs.m_originptr);
     m_buffer.swap(rhs.m_buffer);
 }
+
+ndarray dnd::empty_like(const ndarray& rhs, const dtype& dt)
+{
+    // Sort the strides to get the memory layout ordering
+    shortvector<int> axisperm(rhs.ndim());
+    strides_to_axisperm(rhs.ndim(), rhs.strides(), axisperm.get());
+
+    // Construct the new array
+    return ndarray(dt, rhs.ndim(), rhs.shape(), axisperm.get());
+}
+
 
 static void vassign_unequal_dtypes(ndarray& lhs, const ndarray& rhs, assign_error_mode errmode)
 {
@@ -356,6 +354,26 @@ void dnd::ndarray::vassign(const dtype& dt, const void *data, assign_error_mode 
             assign.first(iter.data<0>(), innerstride, src.data(), 0, innersize, assign.second.get());
         } while (iter.iternext());
     }
+}
+
+void dnd::ndarray::debug_dump(std::ostream& o) const
+{
+    o << "------ ndarray\n";
+    o << " dtype: " << m_dtype << "\n";
+    o << " ndim: " << m_ndim << "\n";
+    o << " num_elements: " << m_num_elements << "\n";
+    o << " shape: ";
+    for (int i = 0; i < m_ndim; ++i) {
+        o << m_shape[i] << " ";
+    }
+    o << "\n";
+    o << " strides: ";
+    for (int i = 0; i < m_ndim; ++i) {
+        o << m_strides[i] << " ";
+    }
+    o << "\n";
+    o << " originptr: " << (void *)m_originptr << "\n";
+    o << "------" << endl;
 }
 
 static void nested_ndarray_print(std::ostream& o, const ndarray& rhs, const char *data, int i)

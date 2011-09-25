@@ -28,10 +28,6 @@ namespace detail {
         int m_ndim;
         char *m_data[Nwrite + Nread];
 
-        raw_ndarray_iter_base(int ndim)
-          : m_ndim(ndim), m_vectors(ndim) {
-        }
-
         intptr_t& iterindex(int i) {
             return m_vectors.get(0, i);
         }
@@ -66,8 +62,12 @@ namespace detail {
             return true;
         }
 
-        void init(const intptr_t *shape, char **data, const intptr_t **in_strides, const int *strideperm)
+        void init(int ndim, const intptr_t *shape, char **data,
+                                const intptr_t **in_strides, const int *axisperm)
         {
+            m_ndim = ndim;
+            m_vectors.init(ndim);
+
             for (int k = 0; k < Nwrite + Nread; ++k) {
                 m_data[k] = data[k];
             }
@@ -103,7 +103,7 @@ namespace detail {
 
             // Copy the strides/shape into the iterator's internal variables
             for (int i = 0; i < m_ndim; ++i) {
-                int p = strideperm[i];
+                int p = axisperm[i];
                 itershape(i) = shape[p];
                 for (int k = 0; k < Nwrite + Nread; ++k) {
                     strides(k)[i] = in_strides[k][p];
@@ -243,7 +243,7 @@ namespace detail {
                 for (int i = 0; i < m_ndim; ++i) o << strides(k)[i] << " ";
                 o << "\n";
             }
-            o << "------\n";
+            o << "------" << std::endl;
         }
     };
 } // namespace detail
@@ -259,26 +259,24 @@ template<>
 class raw_ndarray_iter<0,1> : public detail::raw_ndarray_iter_base<0,1> {
 public:
     raw_ndarray_iter(int ndim, const intptr_t *shape, const char *data, const intptr_t *strides)
-        : detail::raw_ndarray_iter_base<0,1>(ndim)
     {
         // Sort the strides in ascending order according to the first operand
-        shortvector<int> strideperm(m_ndim);
-        make_sorted_stride_perm(m_ndim, strides, strideperm.get());
+        shortvector<int> axisperm(m_ndim);
+        strides_to_axisperm(m_ndim, strides, axisperm.get());
 
-        init(shape, const_cast<char **>(&data), &strides, strideperm.get());
+        init(ndim, shape, const_cast<char **>(&data), &strides, axisperm.get());
     }
 
     raw_ndarray_iter(const ndarray& arr)
-        : detail::raw_ndarray_iter_base<0,1>(arr.ndim())
     {
         const char *data = arr.originptr();
         const intptr_t *strides = arr.strides();
 
         // Sort the strides in ascending order according to the first operand
-        shortvector<int> strideperm(m_ndim);
-        make_sorted_stride_perm(m_ndim, strides, strideperm.get());
+        shortvector<int> axisperm(arr.ndim());
+        strides_to_axisperm(arr.ndim(), strides, axisperm.get());
 
-        init(arr.shape(), const_cast<char **>(&data), &strides, strideperm.get());
+        init(arr.ndim(), arr.shape(), const_cast<char **>(&data), &strides, axisperm.get());
     }
 
 };
@@ -290,26 +288,24 @@ template<>
 class raw_ndarray_iter<1,0> : public detail::raw_ndarray_iter_base<1,0> {
 public:
     raw_ndarray_iter(int ndim, const intptr_t *shape, const char *data, const intptr_t *strides)
-        : detail::raw_ndarray_iter_base<1,0>(ndim)
     {
         // Sort the strides in ascending order according to the first operand
-        shortvector<int> strideperm(m_ndim);
-        make_sorted_stride_perm(m_ndim, strides, strideperm.get());
+        shortvector<int> axisperm(ndim);
+        strides_to_axisperm(ndim, strides, axisperm.get());
 
-        init(shape, const_cast<char **>(&data), &strides, strideperm.get());
+        init(ndim, shape, const_cast<char **>(&data), &strides, axisperm.get());
     }
 
     raw_ndarray_iter(ndarray& arr)
-        : detail::raw_ndarray_iter_base<1,0>(arr.ndim())
     {
         char *data = arr.originptr();
         const intptr_t *strides = arr.strides();
 
         // Sort the strides in ascending order according to the first operand
-        shortvector<int> strideperm(m_ndim);
-        make_sorted_stride_perm(m_ndim, strides, strideperm.get());
+        shortvector<int> axisperm(arr.ndim());
+        strides_to_axisperm(arr.ndim(), strides, axisperm.get());
 
-        init(arr.shape(), const_cast<char **>(&data), &strides, strideperm.get());
+        init(arr.ndim(), arr.shape(), const_cast<char **>(&data), &strides, axisperm.get());
     }
 
 };
@@ -323,16 +319,15 @@ public:
     raw_ndarray_iter(int ndim, const intptr_t *shape,
                                 char *dataA, const intptr_t *stridesA,
                                 const char *dataB, const intptr_t *stridesB)
-        : detail::raw_ndarray_iter_base<1,1>(ndim)
     {
         char *data[2] = {dataA, const_cast<char *>(dataB)};
         const intptr_t *strides[2] = {stridesA, stridesB};
 
         // Sort the strides in ascending order according to the first operand
-        shortvector<int> strideperm(m_ndim);
-        make_sorted_stride_perm(m_ndim, stridesA, strideperm.get());
+        shortvector<int> axisperm(ndim);
+        strides_to_axisperm(ndim, stridesA, axisperm.get());
 
-        init(shape, data, strides, strideperm.get());
+        init(ndim, shape, data, strides, axisperm.get());
     }
 };
 
@@ -346,19 +341,43 @@ public:
                                 char *dataA, const intptr_t *stridesA,
                                 const char *dataB, const intptr_t *stridesB,
                                 const char *dataC, const intptr_t *stridesC)
-        : detail::raw_ndarray_iter_base<1,2>(ndim)
     {
         char *data[3] = {dataA, const_cast<char *>(dataB), const_cast<char *>(dataC)};
         const intptr_t *strides[3] = {stridesA, stridesB, stridesC};
 
         // Sort the strides in ascending order according to the first operand
-        shortvector<int> strideperm(m_ndim);
-        make_sorted_stride_perm(m_ndim, stridesA, strideperm.get());
+        shortvector<int> axisperm(ndim);
+        strides_to_axisperm(ndim, stridesA, axisperm.get());
 
-        init(shape, data, strides, strideperm.get());
+        init(ndim, shape, data, strides, axisperm.get());
     }
 
+    /**
+     * Constructs the iterator with output 'op0' and two inputs 'op1' and 'op2'. This constructor
+     * resets op0 to a new array with the dtype 'op0_dt', a shape matching the input broadcast
+     * shape, and a memory layout matching the inputs as closely as possible.
+     */
+    raw_ndarray_iter(const dtype& op0_dt, ndarray& op0, const ndarray& op1, const ndarray& op2) {
+        // Broadcast the input shapes together
+        int ndim;
+        dimvector op0shape;
+        broadcast_input_shapes(op1, op2, &ndim, &op0shape);
 
+        // Create the broadcast strides
+        multi_shortvector<intptr_t, 3> strides_vec(ndim);
+        intptr_t **strides = strides_vec.get_all();
+        broadcast_to_shape(ndim, op0shape.get(), op1, strides[1]);
+        broadcast_to_shape(ndim, op0shape.get(), op2, strides[2]);
+
+        // Generate the axisperm from the inputs, and use it to allocate the output
+        shortvector<int> axisperm(ndim);
+
+        char *data[3] = {op0.originptr(),
+                        const_cast<char *>(op1.originptr()),
+                        const_cast<char *>(op2.originptr())};
+
+        init(ndim, op0shape.get(), data, const_cast<const intptr_t **>(strides), axisperm.get());
+    }
 };
 
 } // namespace dnd

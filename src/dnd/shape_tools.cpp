@@ -5,13 +5,26 @@
 // This is unreleased proprietary software.
 //
 
+#include <iostream>
+
 #include <dnd/shape_tools.hpp>
 #include <dnd/exceptions.hpp>
+
+using namespace std;
+using namespace dnd;
 
 void dnd::broadcast_to_shape(int dst_ndim, const intptr_t *dst_shape,
                 int src_ndim, const intptr_t *src_shape, const intptr_t *src_strides,
                 intptr_t *out_strides)
 {
+    //cout << "broadcast_to_shape(" << dst_ndim << ", (";
+    //for (int i = 0; i < dst_ndim; ++i) cout << dst_shape[i] << " ";
+    //cout << "), " << src_ndim << ", (";
+    //for (int i = 0; i < src_ndim; ++i) cout << src_shape[i] << " ";
+    //cout << "), (";
+    //for (int i = 0; i < src_ndim; ++i) cout << src_strides[i] << " ";
+    //cout << ")\n";
+
     if (src_ndim > dst_ndim) {
         throw broadcast_error(dst_ndim, dst_shape, src_ndim, src_shape);
     }
@@ -24,16 +37,20 @@ void dnd::broadcast_to_shape(int dst_ndim, const intptr_t *dst_shape,
         int src_i = i - dimdelta;
         if (src_shape[src_i] == 1) {
             out_strides[i] = 0;
-        } else if (src_shape[src_i] != dst_shape[i]) {
-            throw broadcast_error(dst_ndim, dst_shape, src_ndim, src_shape);
-        } else {
+        } else if (src_shape[src_i] == dst_shape[i]) {
             out_strides[i] = src_strides[src_i];
+        } else {
+            throw broadcast_error(dst_ndim, dst_shape, src_ndim, src_shape);
         }
     }
+
+    //cout << "output strides: ";
+    //for (int i = 0; i < dst_ndim; ++i) cout << out_strides[i] << " ";
+    //cout << "\n";
 }
 
 void dnd::broadcast_input_shapes(int noperands, const ndarray **operands,
-                        int& out_ndim, dimvector& out_shape)
+                        int* out_ndim, dimvector* out_shape)
 {
     // Get the number of broadcast dimensions
     int ndim = operands[0]->ndim();
@@ -43,49 +60,50 @@ void dnd::broadcast_input_shapes(int noperands, const ndarray **operands,
         }
     }
 
-    out_shape.init(ndim);
+    out_shape->init(ndim);
+    intptr_t *shape = out_shape->get();
 
     // Fill in the broadcast shape
     for (int k = 0; k < ndim; ++k) {
-        out_shape[k] = 1;
+        shape[k] = 1;
     }
     for (int i = 0; i < noperands; ++i) {
         int dimdelta = ndim - operands[i]->ndim();
         for (int k = dimdelta; k < ndim; ++k) {
             intptr_t size = operands[i]->shape(k - dimdelta);
-            intptr_t itershape_size = out_shape[k];
+            intptr_t itershape_size = shape[k];
             if (itershape_size == 1) {
-                out_shape[k] = size;
+                shape[k] = size;
             } else if (itershape_size != size) {
                 throw broadcast_error(noperands, operands);
             }
         }
     }
 
-    out_ndim = ndim;
+    *out_ndim = ndim;
 }
 
 static inline intptr_t intptr_abs(intptr_t x) {
     return x >= 0 ? x : -x;
 }
 
-void dnd::make_sorted_stride_perm(int ndim, const intptr_t *strides, int *out_strideperm)
+void dnd::strides_to_axisperm(int ndim, const intptr_t *strides, int *out_axisperm)
 {
     switch (ndim) {
         case 0: {
             break;
         }
         case 1: {
-            out_strideperm[0] = 0;
+            out_axisperm[0] = 0;
             break;
         }
         case 2: {
             if (intptr_abs(strides[0]) >= intptr_abs(strides[1])) {
-                out_strideperm[0] = 1;
-                out_strideperm[1] = 0;
+                out_axisperm[0] = 1;
+                out_axisperm[1] = 0;
             } else {
-                out_strideperm[0] = 0;
-                out_strideperm[1] = 1;
+                out_axisperm[0] = 0;
+                out_axisperm[1] = 1;
             }
             break;
         }
@@ -95,35 +113,35 @@ void dnd::make_sorted_stride_perm(int ndim, const intptr_t *strides, int *out_st
                                     intptr_abs(strides[2])};
             if (abs_strides[0] >= abs_strides[1]) {
                 if (abs_strides[1] >= abs_strides[2]) {
-                    out_strideperm[0] = 2;
-                    out_strideperm[1] = 1;
-                    out_strideperm[2] = 0;
+                    out_axisperm[0] = 2;
+                    out_axisperm[1] = 1;
+                    out_axisperm[2] = 0;
                 } else { // abs_strides[1] < abs_strides[2]
                     if (abs_strides[0] >= abs_strides[2]) {
-                        out_strideperm[0] = 1;
-                        out_strideperm[1] = 2;
-                        out_strideperm[2] = 0;
+                        out_axisperm[0] = 1;
+                        out_axisperm[1] = 2;
+                        out_axisperm[2] = 0;
                     } else { // abs_strides[0] < abs_strides[2]
-                        out_strideperm[0] = 1;
-                        out_strideperm[1] = 0;
-                        out_strideperm[2] = 2;
+                        out_axisperm[0] = 1;
+                        out_axisperm[1] = 0;
+                        out_axisperm[2] = 2;
                     }
                 }
             } else { // abs_strides[0] < abs_strides[1]
                 if (abs_strides[1] >= abs_strides[2]) {
                     if (abs_strides[0] >= abs_strides[2]) {
-                        out_strideperm[0] = 2;
-                        out_strideperm[1] = 0;
-                        out_strideperm[2] = 1;
+                        out_axisperm[0] = 2;
+                        out_axisperm[1] = 0;
+                        out_axisperm[2] = 1;
                     } else { // abs_strides[0] < abs_strides[2]
-                        out_strideperm[0] = 0;
-                        out_strideperm[1] = 2;
-                        out_strideperm[2] = 1;
+                        out_axisperm[0] = 0;
+                        out_axisperm[1] = 2;
+                        out_axisperm[2] = 1;
                     }
                 } else { // strides[1] < strides[2]
-                    out_strideperm[0] = 0;
-                    out_strideperm[1] = 1;
-                    out_strideperm[2] = 2;
+                    out_axisperm[0] = 0;
+                    out_axisperm[1] = 1;
+                    out_axisperm[2] = 2;
                 }
             }
             break;
@@ -131,10 +149,10 @@ void dnd::make_sorted_stride_perm(int ndim, const intptr_t *strides, int *out_st
         default: {
             // Initialize to a reversal perm (i.e. so C-order is a no-op)
             for (int i = 0; i < ndim; ++i) {
-                out_strideperm[i] = ndim - i - 1;
+                out_axisperm[i] = ndim - i - 1;
             }
             // Sort based on the absolute value of the strides
-            std::sort(out_strideperm, out_strideperm + ndim,
+            std::sort(out_axisperm, out_axisperm + ndim,
                         [&strides](int i, int j) -> bool {
                 return intptr_abs(strides[i]) < intptr_abs(strides[j]);
             });

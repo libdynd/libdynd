@@ -41,23 +41,23 @@ inline void broadcast_to_shape(int ndim, const intptr_t *shape, const ndarray& o
  * @param out_shape   The broadcast shape is populated here.
  */
 void broadcast_input_shapes(int noperands, const ndarray **operands,
-                        int& out_ndim, dimvector& out_shape);
+                        int* out_ndim, dimvector* out_shape);
 
 /**
  * Convenience function for broadcasting two operands.
  */
 inline void broadcast_input_shapes(const ndarray& op0, const ndarray& op1,
-                        int& out_ndim, dimvector& out_shape) {
+                        int* out_ndim, dimvector* out_shape) {
     const ndarray *operands[2] = {&op0, &op1};
     broadcast_input_shapes(2, operands, out_ndim, out_shape);
 }
 
 /**
  * This function creates a permutation based on the strides of 'op'.
- * The value strides(out_strideperm[0]) is the smallest stride,
- * and strides(out_strideperm[ndim-1]) is the largest stride.
+ * The value strides(out_axisperm[0]) is the smallest stride,
+ * and strides(out_axisperm[ndim-1]) is the largest stride.
  */
-void make_sorted_stride_perm(int ndim, const intptr_t *strides, int *out_strideperm);
+void strides_to_axisperm(int ndim, const intptr_t *strides, int *out_axisperm);
 
 } // namespace dnd
 
