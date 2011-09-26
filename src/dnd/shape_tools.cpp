@@ -153,9 +153,106 @@ void dnd::strides_to_axisperm(int ndim, const intptr_t *strides, int *out_axispe
             }
             // Sort based on the absolute value of the strides
             std::sort(out_axisperm, out_axisperm + ndim,
-                        [&strides](int i, int j) -> bool {
+                        [strides](int i, int j) -> bool {
                 return intptr_abs(strides[i]) < intptr_abs(strides[j]);
             });
+            break;
+        }
+    }
+}
+
+/**
+ * Compares the strides of the operands for axes 'i' and 'j', and returns whether
+ * the comparison is ambiguous and, when it's not ambiguous, whether 'i' should occur
+ * before 'j'.
+ */
+static inline void compare_strides(int i, int j, int noperands, intptr_t **operstrides,
+                                bool* out_ambiguous, bool* out_lessthan)
+{
+    *out_ambiguous = true;
+    for (int ioperand = 0; ioperand < noperands; ++ioperand) {
+        intptr_t stride_i = operstrides[ioperand][i];
+        intptr_t stride_j = operstrides[ioperand][j];
+        if (stride_i != 0 && stride_j != 0) {
+            if (intptr_abs(stride_i) <= intptr_abs(stride_j)) {
+                // Set 'lessthan' even if it's already not ambiguous, since
+                // less than beats greater than when there's a conflict
+                *out_lessthan = true;
+            } else if (*out_ambiguous) {
+                // Only set greater than when the comparison is still ambiguous
+                *out_lessthan = false;
+            }
+
+            // Since both strides were non-zero, a comparison has been done
+            // and it is not ambiguous any more
+            *out_ambiguous = false;
+        }
+    }
+}
+
+void dnd::multistrides_to_axisperm(int ndim, int noperands, intptr_t **operstrides, int *out_axisperm)
+{
+    switch (ndim) {
+        case 0: {
+            break;
+        }
+        case 1: {
+            out_axisperm[0] = 0;
+            break;
+        }
+        case 2: {
+            bool ambiguous = true, lessthan = false;
+
+            // TODO: The comparison function is quite complicated, maybe there's a way to
+            //       simplify all this while retaining the generality?
+            compare_strides(0, 1, noperands, operstrides, &ambiguous, &lessthan);
+
+            if (ambiguous || !lessthan) {
+                out_axisperm[0] = 1;
+                out_axisperm[1] = 0;
+            } else {
+                out_axisperm[0] = 0;
+                out_axisperm[1] = 1;
+            }
+            break;
+        }
+        default: {
+            // Initialize to a reversal perm (i.e. so C-order is a no-op)
+            for (int i = 0; i < ndim; ++i) {
+                out_axisperm[i] = ndim - i - 1;
+            }
+            // Here we do a custom stable insertion sort, which avoids a swap when a comparison
+            // is ambiguous
+            for (int i0 = 1; i0 < ndim; ++i0) {
+                // 'ipos' is the position where axisperm[i0] will get inserted
+                int ipos = i0;
+                int perm_i0 = out_axisperm[i0];
+
+                for (int i1 = i0 - 1; i1 >= 0; --i1) {
+                    bool ambiguous = true, lessthan = false;
+                    int perm_i1 = out_axisperm[i1];
+
+                    compare_strides(perm_i1, perm_i0, noperands, operstrides, &ambiguous, &lessthan);
+
+                    // If the comparison was unambiguous, either shift 'ipos' to 'i1', or
+                    // stop looking for an insertion point
+                    if (!ambiguous) {
+                        if (!lessthan) {
+                            ipos = i1;
+                        } else {
+                            break;
+                        }
+                    }
+                }
+
+                // Insert axisperm[i0] into axisperm[ipos]
+                if (ipos != i0) {
+                    for (int i = i0; i > ipos; --i) {
+                        out_axisperm[i] = out_axisperm[i - 1];
+                    }
+                    out_axisperm[ipos] = perm_i0;
+                }
+            }
             break;
         }
     }

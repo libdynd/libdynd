@@ -59,6 +59,13 @@ inline void broadcast_input_shapes(const ndarray& op0, const ndarray& op1,
  */
 void strides_to_axisperm(int ndim, const intptr_t *strides, int *out_axisperm);
 
+/**
+ * This function creates a permutation based on the array of operand strides,
+ * trying to match the memory ordering of both where possible and defaulting to
+ * C-order where not possible.
+ */
+void multistrides_to_axisperm(int ndim, int noperands, intptr_t **operstrides, int *out_axisperm);
+
 } // namespace dnd
 
 #endif // _DND__SHAPE_TOOLS_HPP_
