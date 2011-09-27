@@ -376,6 +376,7 @@ public:
         shortvector<int> axis_perm(ndim);
         multistrides_to_axis_perm(ndim, 2, strides + 1, axis_perm.get());
         op0 = ndarray(op0_dt, ndim, op0shape.get(), axis_perm.get());
+        copy_input_strides(op0, ndim, strides[0]);
 
         char *data[3] = {op0.originptr(),
                         const_cast<char *>(op1.originptr()),

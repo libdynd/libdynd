@@ -14,7 +14,7 @@ set(dnd_SRC
     src/dnd/exceptions.cpp
     src/dnd/membuffer.cpp
     src/dnd/ndarray.cpp
-    src/dnd/op_add.cpp
+    src/dnd/arithmetic_op.cpp
     src/dnd/shape_tools.cpp
     include/dnd/dtype.hpp
     include/dnd/dtype_assign.hpp
@@ -24,7 +24,7 @@ set(dnd_SRC
     include/dnd/irange.hpp
     include/dnd/membuffer.hpp
     include/dnd/ndarray.hpp
-    include/dnd/op_add.hpp
+    include/dnd/arithmetic_op.hpp
     include/dnd/shape_tools.hpp
     )
 

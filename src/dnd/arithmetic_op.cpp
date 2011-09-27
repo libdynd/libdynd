@@ -5,10 +5,12 @@
 // This is unreleased proprietary software.
 //
 
+#include <sstream>
+
 #include <dnd/ndarray.hpp>
 #include <dnd/raw_iteration.hpp>
 #include <dnd/dtype_promotion.hpp>
-#include <dnd/op_add.hpp>
+#include <dnd/arithmetic_op.hpp>
 
 using namespace std;
 using namespace dnd;
@@ -52,107 +54,126 @@ namespace {
     };
 
     template<class operation>
-    static void loop_general_general_general(typename operation::type *dst, intptr_t dst_stride,
+    struct loop_general_general_general {
+        static void func(typename operation::type *dst, intptr_t dst_stride,
                                     const typename operation::type *src0, intptr_t src0_stride,
                                     const typename operation::type *src1, intptr_t src1_stride,
                                     intptr_t count, const auxiliary_data *)
-    {
-        dst_stride /= sizeof(typename operation::type);
-        src0_stride /= sizeof(typename operation::type);
-        src1_stride /= sizeof(typename operation::type);
+        {
+            dst_stride /= sizeof(typename operation::type);
+            src0_stride /= sizeof(typename operation::type);
+            src1_stride /= sizeof(typename operation::type);
 
-        for (intptr_t i = 0; i < count; ++i) {
-            *dst = operation::operate(*src0, *src1);
-            dst += dst_stride;
-            src0 += src0_stride;
-            src1 += src1_stride;
+            for (intptr_t i = 0; i < count; ++i) {
+                *dst = operation::operate(*src0, *src1);
+                dst += dst_stride;
+                src0 += src0_stride;
+                src1 += src1_stride;
+            }
         }
-    }
+    };
 
     template<class operation>
-    static void loop_general_stride0_general(typename operation::type *dst, intptr_t dst_stride,
-                                    const typename operation::type *src0, intptr_t,
-                                    const typename operation::type *src1, intptr_t src1_stride,
-                                    intptr_t count, const auxiliary_data *)
-    {
-        dst_stride /= sizeof(typename operation::type);
-        src1_stride /= sizeof(typename operation::type);
+    struct loop_general_stride0_general {
+        static void func(typename operation::type *dst, intptr_t dst_stride,
+                                        const typename operation::type *src0, intptr_t,
+                                        const typename operation::type *src1, intptr_t src1_stride,
+                                        intptr_t count, const auxiliary_data *)
+        {
+            dst_stride /= sizeof(typename operation::type);
+            src1_stride /= sizeof(typename operation::type);
 
-        typename operation::type src0_value = *src0;
-        for (intptr_t i = 0; i < count; ++i) {
-            *dst = operation::operate(src0_value, *src1);
-            dst += dst_stride;
-            src1 += src1_stride;
+            typename operation::type src0_value = *src0;
+            for (intptr_t i = 0; i < count; ++i) {
+                *dst = operation::operate(src0_value, *src1);
+                dst += dst_stride;
+                src1 += src1_stride;
+            }
         }
-    }
+    };
 
     template<class operation>
-    static void loop_general_general_stride0(typename operation::type *dst, intptr_t dst_stride,
-                                    const typename operation::type *src0, intptr_t src0_stride,
-                                    const typename operation::type *src1, intptr_t,
-                                    intptr_t count, const auxiliary_data *)
-    {
-        dst_stride /= sizeof(typename operation::type);
-        src0_stride /= sizeof(typename operation::type);
+    struct loop_general_general_stride0 {
+        static void func(typename operation::type *dst, intptr_t dst_stride,
+                                        const typename operation::type *src0, intptr_t src0_stride,
+                                        const typename operation::type *src1, intptr_t,
+                                        intptr_t count, const auxiliary_data *)
+        {
+            dst_stride /= sizeof(typename operation::type);
+            src0_stride /= sizeof(typename operation::type);
 
-        typename operation::type src1_value = *src1;
-        for (intptr_t i = 0; i < count; ++i) {
-            *dst = operation::operate(*src0, src1_value);
-            dst += dst_stride;
-            src0 += src0_stride;
+            typename operation::type src1_value = *src1;
+            for (intptr_t i = 0; i < count; ++i) {
+                *dst = operation::operate(*src0, src1_value);
+                dst += dst_stride;
+                src0 += src0_stride;
+            }
         }
-    }
-
-    template<class operation>
-    static void loop_contig_contig_contig(typename operation::type *dst, intptr_t,
-                                    const typename operation::type *src0, intptr_t,
-                                    const typename operation::type *src1, intptr_t,
-                                    intptr_t count, const auxiliary_data *)
-    {
-        for (intptr_t i = 0; i < count; ++i) {
-            *dst = operation::operate(*src0, *src1);
-            ++dst;
-            ++src0;
-            ++src1;
-        }
-    }
+    };
 
     template<class operation>
-    static void loop_contig_stride0_contig(typename operation::type *dst, intptr_t,
-                                    const typename operation::type *src0, intptr_t,
-                                    const typename operation::type *src1, intptr_t,
-                                    intptr_t count, const auxiliary_data *)
-    {
-        typename operation::type src0_value = *src0;
-        for (intptr_t i = 0; i < count; ++i) {
-            *dst = operation::operate(src0_value, *src1);
-            ++dst;
-            ++src1;
+    struct loop_contig_contig_contig {
+        static void func(typename operation::type *dst, intptr_t,
+                                        const typename operation::type *src0, intptr_t,
+                                        const typename operation::type *src1, intptr_t,
+                                        intptr_t count, const auxiliary_data *)
+        {
+            for (intptr_t i = 0; i < count; ++i) {
+                //cout << "Inner op c c c " << (void *)dst << " <- " << (void *)src0 << " <oper> " << (void *)src1 << endl;
+                //cout << "values " << *src0 << ", " << *src1 << endl;
+                *dst = operation::operate(*src0, *src1);
+                ++dst;
+                ++src0;
+                ++src1;
+            }
         }
-    }
+    };
 
     template<class operation>
-    static void loop_contig_contig_stride0(typename operation::type *dst, intptr_t,
-                                    const typename operation::type *src0, intptr_t,
-                                    const typename operation::type *src1, intptr_t,
-                                    intptr_t count, const auxiliary_data *)
-    {
-        typename operation::type src1_value = *src1;
-        for (intptr_t i = 0; i < count; ++i) {
-            *dst = operation::operate(*src0, src1_value);
-            ++dst;
-            ++src0;
+    struct loop_contig_stride0_contig {
+        static void func(typename operation::type *dst, intptr_t,
+                                        const typename operation::type *src0, intptr_t,
+                                        const typename operation::type *src1, intptr_t,
+                                        intptr_t count, const auxiliary_data *)
+        {
+            typename operation::type src0_value = *src0;
+            for (intptr_t i = 0; i < count; ++i) {
+                //cout << "Inner op c s0 c " << (void *)dst << " <- " << (void *)src0 << " <oper> " << (void *)src1 << endl;
+                //cout << "values " << *src0 << ", " << *src1 << endl;
+                *dst = operation::operate(src0_value, *src1);
+                ++dst;
+                ++src1;
+            }
         }
-    }
+    };
+
+    template<class operation>
+    struct loop_contig_contig_stride0 {
+        static void func(typename operation::type *dst, intptr_t,
+                                        const typename operation::type *src0, intptr_t,
+                                        const typename operation::type *src1, intptr_t,
+                                        intptr_t count, const auxiliary_data *)
+        {
+            typename operation::type src1_value = *src1;
+            for (intptr_t i = 0; i < count; ++i) {
+                //cout << "Inner op c c s0 " << (void *)dst << " <- " << (void *)src0 << " <oper> " << (void *)src1 << endl;
+                //cout << "values " << *src0 << ", " << *src1 << endl;
+                *dst = operation::operate(*src0, src1_value);
+                ++dst;
+                ++src0;
+            }
+        }
+    };
+
 } // anonymous namespace
 
 #define SPECIALIZATION_LEVEL(type, operation) { \
-    (binary_operation_t)&loop_general_general_general<operation<type> >, \
-    (binary_operation_t)&loop_general_stride0_general<operation<type> >, \
-    (binary_operation_t)&loop_general_general_stride0<operation<type> >, \
-    (binary_operation_t)&loop_contig_contig_contig<operation<type> >, \
-    (binary_operation_t)&loop_contig_stride0_contig<operation<type> >, \
-    (binary_operation_t)&loop_contig_contig_stride0<operation<type> > \
+    (binary_operation_t)&loop_general_general_general<operation<type> >::func, \
+    (binary_operation_t)&loop_general_stride0_general<operation<type> >::func, \
+    (binary_operation_t)&loop_general_general_stride0<operation<type> >::func, \
+    (binary_operation_t)&loop_contig_contig_contig<operation<type> >::func, \
+    (binary_operation_t)&loop_contig_stride0_contig<operation<type> >::func, \
+    (binary_operation_t)&loop_contig_contig_stride0<operation<type> >::func \
     }
 #define TYPE_LEVEL(operation) { \
     SPECIALIZATION_LEVEL(int32_t, operation), \
@@ -179,7 +200,7 @@ static binary_operation_t get_builtin_operation_function(binary_operation_t buil
                                 const dtype& dt, intptr_t dst_stride,
                                 intptr_t src0_stride, intptr_t src1_stride)
 {
-    static int compress_type_id[11] = {-1, -1, -1, 0, 1, -1, -1, 2, 3, 4, 5};
+    static int compress_type_id[12] = {-1, -1, -1, -1, 0, 1, -1, -1, 2, 3, 4, 5};
     intptr_t itemsize = dt.itemsize();
     int cid = compress_type_id[dt.type_id()];
 
@@ -213,6 +234,16 @@ static ndarray arithmetic_op(const ndarray& op0, const ndarray& op1,
     raw_ndarray_iter<1,2> iter(dt, result, op0, op1);
     bool buffered = false;
 
+    //cout << "src0:\n" << op0 << "\n";
+    //op0.debug_dump(cout);
+    //cout << "\n";
+    //cout << "src1:\n" << op1 << "\n";
+    //op1.debug_dump(cout);
+    //cout << "\n";
+    //cout << "dst:\n";
+    //result.debug_dump(cout);
+    //cout << "\n";
+
     if (dt.extended() != NULL) {
         throw std::runtime_error("arithmetic operations for extended dtypes isn't implemented yet");
     }
@@ -222,7 +253,10 @@ static ndarray arithmetic_op(const ndarray& op0, const ndarray& op1,
     if (dt != op0.get_dtype() || dt != op1.get_dtype() || 
                 !dt.is_data_aligned(iter.get_align_test<1>()) ||
                 !dt.is_data_aligned(iter.get_align_test<2>())) {
-        throw std::runtime_error("arithmetic operation buffering isn't implemented yet");
+        stringstream ss;
+        ss << "arithmetic operation buffering isn't implemented yet, dtypes ";
+        ss << op0.get_dtype() << " " << op1.get_dtype();
+        throw std::runtime_error(ss.str());
     } else {
         intptr_t innersize = iter.innersize();
         intptr_t dst_stride = iter.innerstride<0>();

@@ -57,6 +57,82 @@ class ndarray {
 public:
     /** Constructs an array with no buffer (NULL state) */
     ndarray();
+    /**
+     * Constructs a zero-dimensional scalar array from a C++ scalar.
+     *
+     * TODO: Figure out why enable_if with is_dtype_scalar didn't work for this constructor
+     *       in g++ 4.6.0.
+     */
+    ndarray(int8_t value)
+        : m_dtype(int8_type_id), m_ndim(0), m_num_elements(1), m_shape(0), m_strides(0),
+          m_buffer(new membuffer(m_dtype, 1))
+    {
+        m_originptr = m_buffer->data();
+        *reinterpret_cast<int8_t *>(m_originptr) = value;
+    }
+    ndarray(int16_t value)
+        : m_dtype(int16_type_id), m_ndim(0), m_num_elements(1), m_shape(0), m_strides(0),
+          m_buffer(new membuffer(m_dtype, 1))
+    {
+        m_originptr = m_buffer->data();
+        *reinterpret_cast<int16_t *>(m_originptr) = value;
+    }
+    ndarray(int32_t value)
+        : m_dtype(int32_type_id), m_ndim(0), m_num_elements(1), m_shape(0), m_strides(0),
+          m_buffer(new membuffer(m_dtype, 1))
+    {
+        m_originptr = m_buffer->data();
+        *reinterpret_cast<int32_t *>(m_originptr) = value;
+    }
+    ndarray(int64_t value)
+        : m_dtype(int64_type_id), m_ndim(0), m_num_elements(1), m_shape(0), m_strides(0),
+          m_buffer(new membuffer(m_dtype, 1))
+    {
+        m_originptr = m_buffer->data();
+        *reinterpret_cast<int64_t *>(m_originptr) = value;
+    }
+    ndarray(uint8_t value)
+        : m_dtype(uint8_type_id), m_ndim(0), m_num_elements(1), m_shape(0), m_strides(0),
+          m_buffer(new membuffer(m_dtype, 1))
+    {
+        m_originptr = m_buffer->data();
+        *reinterpret_cast<uint8_t *>(m_originptr) = value;
+    }
+    ndarray(uint16_t value)
+        : m_dtype(uint16_type_id), m_ndim(0), m_num_elements(1), m_shape(0), m_strides(0),
+          m_buffer(new membuffer(m_dtype, 1))
+    {
+        m_originptr = m_buffer->data();
+        *reinterpret_cast<uint16_t *>(m_originptr) = value;
+    }
+    ndarray(uint32_t value)
+        : m_dtype(uint32_type_id), m_ndim(0), m_num_elements(1), m_shape(0), m_strides(0),
+          m_buffer(new membuffer(m_dtype, 1))
+    {
+        m_originptr = m_buffer->data();
+        *reinterpret_cast<uint32_t *>(m_originptr) = value;
+    }
+    ndarray(uint64_t value)
+        : m_dtype(uint64_type_id), m_ndim(0), m_num_elements(1), m_shape(0), m_strides(0),
+          m_buffer(new membuffer(m_dtype, 1))
+    {
+        m_originptr = m_buffer->data();
+        *reinterpret_cast<uint64_t *>(m_originptr) = value;
+    }
+    ndarray(float value)
+        : m_dtype(float32_type_id), m_ndim(0), m_num_elements(1), m_shape(0), m_strides(0),
+          m_buffer(new membuffer(m_dtype, 1))
+    {
+        m_originptr = m_buffer->data();
+        *reinterpret_cast<float *>(m_originptr) = value;
+    }
+    ndarray(double value)
+        : m_dtype(float64_type_id), m_ndim(0), m_num_elements(1), m_shape(0), m_strides(0),
+          m_buffer(new membuffer(m_dtype, 1))
+    {
+        m_originptr = m_buffer->data();
+        *reinterpret_cast<double *>(m_originptr) = value;
+    }
     /** Constructs a zero-dimensional scalar array */
     explicit ndarray(const dtype& dt);
     /** Constructs an array with the given dtype, shape, and axis_perm (for memory layout) */
