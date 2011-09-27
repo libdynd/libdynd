@@ -53,18 +53,28 @@ inline void broadcast_input_shapes(const ndarray& op0, const ndarray& op1,
 }
 
 /**
- * This function creates a permutation based on the strides of 'op'.
- * The value strides(out_axisperm[0]) is the smallest stride,
- * and strides(out_axisperm[ndim-1]) is the largest stride.
+ * After broadcasting some input operands with broadcast_input_shapes, this function can
+ * be used to copy the input strides into stride arrays where each has the same length,
+ * for futher processing by strides_to_axis_perm, for instance.
+ *
+ * It is similar to 'broadcast_to_shape', but does not validate that the operand's shape
+ * broadcasts, it merely copies the strides and pads them with zeros appropriately.
  */
-void strides_to_axisperm(int ndim, const intptr_t *strides, int *out_axisperm);
+void copy_input_strides(const ndarray& op, int ndim, intptr_t *out_strides);
+
+/**
+ * This function creates a permutation based on one ndarray's strides.
+ * The value strides(out_axis_perm[0]) is the smallest stride,
+ * and strides(out_axis_perm[ndim-1]) is the largest stride.
+ */
+void strides_to_axis_perm(int ndim, const intptr_t *strides, int *out_axis_perm);
 
 /**
  * This function creates a permutation based on the array of operand strides,
  * trying to match the memory ordering of both where possible and defaulting to
  * C-order where not possible.
  */
-void multistrides_to_axisperm(int ndim, int noperands, intptr_t **operstrides, int *out_axisperm);
+void multistrides_to_axis_perm(int ndim, int noperands, intptr_t **operstrides, int *out_axis_perm);
 
 } // namespace dnd
 

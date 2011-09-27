@@ -4,8 +4,8 @@
 //
 // This is unreleased proprietary software.
 //
-#ifndef _DTYPE_ASSIGN_HPP_
-#define _DTYPE_ASSIGN_HPP_
+#ifndef _DND__DTYPE_ASSIGN_HPP_
+#define _DND__DTYPE_ASSIGN_HPP_
 
 #include <utility>
 
@@ -92,4 +92,4 @@ std::pair<unary_operation_t, std::shared_ptr<auxiliary_data> > get_dtype_strided
 
 } // namespace dnd
 
-#endif//_DTYPE_ASSIGN_HPP_
+#endif // _DND__DTYPE_ASSIGN_HPP_

@@ -59,14 +59,17 @@ public:
     ndarray();
     /** Constructs a zero-dimensional scalar array */
     explicit ndarray(const dtype& dt);
-    /** Constructs an array with the given dtype, shape, and axisperm (for memory layout) */
-    explicit ndarray(const dtype& dt, int ndim, const intptr_t *shape, const int *axisperm);
+    /** Constructs an array with the given dtype, shape, and axis_perm (for memory layout) */
+    explicit ndarray(const dtype& dt, int ndim, const intptr_t *shape, const int *axis_perm);
+
     /** Constructs a one-dimensional array */
     ndarray(intptr_t dim0, const dtype& dt);
     /** Constructs a two-dimensional array */
     ndarray(intptr_t dim0, intptr_t dim1, const dtype& dt);
     /** Constructs a three-dimensional array */
     ndarray(intptr_t dim0, intptr_t dim1, intptr_t dim2, const dtype& dt);
+    /** Constructs a four-dimensional array */
+    ndarray(intptr_t dim0, intptr_t dim1, intptr_t dim2, intptr_t dim3, const dtype& dt);
 
     /**
      * Constructs an array from an initializer list.

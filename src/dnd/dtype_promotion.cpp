@@ -45,33 +45,37 @@ dtype dnd::promote_dtypes_arithmetic(const dtype& dt0, const dtype& dt1)
                         return make_dtype<int>();
                     case int_kind:
                     case uint_kind:
-                        return (dt1.itemsize() >= sizeof(int)) ? dt1 : make_dtype<int>();
+                        return (dt1.itemsize() >= sizeof(int)) ? dt1.as_nbo()
+                                                               : make_dtype<int>();
                     default:
                         return dt1;
                 }
             case int_kind:
                 switch (dt1.kind()) {
                     case bool_kind:
-                        return (dt0.itemsize() >= sizeof(int)) ? dt0 : make_dtype<int>();
+                        return (dt0.itemsize() >= sizeof(int)) ? dt0.as_nbo()
+                                                               : make_dtype<int>();
                     case int_kind:
                         if (dt0.itemsize() < sizeof(int) && dt1.itemsize() < sizeof(int)) {
                             return make_dtype<int>();
                         } else {
-                            return (dt0.itemsize() >= dt1.itemsize()) ? dt0 : dt1;
+                            return (dt0.itemsize() >= dt1.itemsize()) ? dt0.as_nbo()
+                                                                      : dt1.as_nbo();
                         }
                     case uint_kind:
                         if (dt0.itemsize() < sizeof(int) && dt1.itemsize() < sizeof(int)) {
                             return make_dtype<int>();
                         } else {
                             // When the itemsizes are equal, the uint kind wins
-                            return (dt0.itemsize() > dt1.itemsize()) ? dt0 : dt1;
+                            return (dt0.itemsize() > dt1.itemsize()) ? dt0.as_nbo()
+                                                                     : dt1.as_nbo();
                         }
                     case float_kind:
                         // Integer type sizes don't affect float type sizes
-                        return dt1;
+                        return dt1.as_nbo();
                     case complex_kind:
                         // Integer type sizes don't affect complex type sizes
-                        return dt1;
+                        return dt1.as_nbo();
                     case string_kind:
                         // Presently UTF8 is the only built-in string type
                         itemsize = min_strlen_for_builtin_kind(dt0.kind());
@@ -86,26 +90,29 @@ dtype dnd::promote_dtypes_arithmetic(const dtype& dt0, const dtype& dt1)
             case uint_kind:
                 switch (dt1.kind()) {
                     case bool_kind:
-                        return (dt0.itemsize() >= sizeof(int)) ? dt0 : make_dtype<int>();
+                        return (dt0.itemsize() >= sizeof(int)) ? dt0.as_nbo()
+                                                               : make_dtype<int>();
                     case int_kind:
                         if (dt0.itemsize() < sizeof(int) && dt1.itemsize() < sizeof(int)) {
                             return make_dtype<int>();
                         } else {
                             // When the itemsizes are equal, the uint kind wins
-                            return (dt0.itemsize() >= dt1.itemsize()) ? dt0 : dt1;
+                            return (dt0.itemsize() >= dt1.itemsize()) ? dt0.as_nbo()
+                                                                      : dt1.as_nbo();
                         }
                     case uint_kind:
                         if (dt0.itemsize() < sizeof(int) && dt1.itemsize() < sizeof(int)) {
                             return make_dtype<int>();
                         } else {
-                            return (dt0.itemsize() >= dt1.itemsize()) ? dt0 : dt1;
+                            return (dt0.itemsize() >= dt1.itemsize()) ? dt0.as_nbo()
+                                                                      : dt1.as_nbo();
                         }
                     case float_kind:
                         // Integer type sizes don't affect float type sizes
-                        return dt1;
+                        return dt1.as_nbo();
                     case complex_kind:
                         // Integer type sizes don't affect complex type sizes
-                        return dt1;
+                        return dt1.as_nbo();
                     case string_kind:
                         // Presently UTF8 is the only built-in string type
                         itemsize = min_strlen_for_builtin_kind(dt0.kind());
@@ -123,12 +130,13 @@ dtype dnd::promote_dtypes_arithmetic(const dtype& dt0, const dtype& dt1)
                     case bool_kind:
                     case int_kind:
                     case uint_kind:
-                        return dt0;
+                        return dt0.as_nbo();
                     case float_kind:
-                        return (dt0.itemsize() >= dt1.itemsize()) ? dt0 : dt1;
+                        return (dt0.itemsize() >= dt1.itemsize()) ? dt0.as_nbo()
+                                                                  : dt1.as_nbo();
                     case complex_kind:
                         // Float type sizes don't affect complex type sizes
-                        return dt1;
+                        return dt1.as_nbo();
                     case string_kind:
                         // Presently UTF8 is the only built-in string type
                         itemsize = min_strlen_for_builtin_kind(dt0.kind());
@@ -149,7 +157,8 @@ dtype dnd::promote_dtypes_arithmetic(const dtype& dt0, const dtype& dt1)
                     case float_kind:
                         return dt0;
                     case complex_kind:
-                        return (dt0.itemsize() >= dt1.itemsize()) ? dt0 : dt1;
+                        return (dt0.itemsize() >= dt1.itemsize()) ? dt0.as_nbo()
+                                                                  : dt1.as_nbo();
                     case string_kind:
                         // Presently UTF8 is the only built-in string type
                         itemsize = min_strlen_for_builtin_kind(dt0.kind());
@@ -175,7 +184,8 @@ dtype dnd::promote_dtypes_arithmetic(const dtype& dt0, const dtype& dt1)
                         }
                         return dtype(utf8_type_id, itemsize);
                     case string_kind:
-                        return (dt0.itemsize() >= dt1.itemsize()) ? dt0 : dt1;
+                        return (dt0.itemsize() >= dt1.itemsize()) ? dt0.as_nbo()
+                                                                  : dt1.as_nbo();
                     default:
                         break;
                 }

@@ -157,10 +157,10 @@ TEST(DTypeAssign, FixedSizeTests_Int8) {
     EXPECT_THROW(dtype_assign(dtype(bool_type_id), &v_b, s_dt, s_ptr), runtime_error);
     v_i8 = 0;
     dtype_assign(dtype(bool_type_id), &v_b, s_dt, s_ptr);
-    EXPECT_EQ(false, v_b);
+    EXPECT_FALSE(v_b);
     v_i8 = 1;
     dtype_assign(dtype(bool_type_id), &v_b, s_dt, s_ptr);
-    EXPECT_EQ(true, v_b);
+    EXPECT_TRUE(v_b);
 }
 
 TEST(DTypeAssign, FixedSizeTests_Float64) {

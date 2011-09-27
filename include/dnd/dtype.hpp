@@ -163,6 +163,18 @@ public:
     virtual ~extended_dtype();
 
     /**
+     * This should make a clone of the extended_dtype information, with
+     * everything in native byte-order.
+     */
+    virtual extended_dtype *clone_as_nbo() const = 0;
+
+    /**
+     * Should return true if everything in the dtype is native byte-order,
+     * false if the dtype is partially or fully byte-swapped.
+     */
+    virtual bool is_nbo() const = 0;
+
+    /**
      * For dtypes which are primitive and can support either native or swapped
      * byte endianness, this returns a function to do the swap. Byte-swapping of
      * more complex aggregate dtypes is only supported by assignment operations,
@@ -280,10 +292,35 @@ public:
                                 : (rhs.m_data != NULL ? rhs.m_data->can_cast_exact(*this, rhs)
                                                       : true));
     }
+    bool operator!=(const dtype& rhs) const {
+        return !(operator==(rhs));
+    }
+
+    /**
+     * Returns a version of the dtype in native byte order.
+     */
+    dtype as_nbo() const {
+        if (m_data == NULL || m_data->is_nbo()) {
+            // In this case, a simple copy with byteswapped set to false is enough
+            if (m_byteswapped) {
+                dtype result(*this);
+                result.m_byteswapped = false;
+                return std::move(result);
+            } else {
+                return *this;
+            }
+        } else {
+            // Must copy m_data to be NBO as well
+            dtype result(*this);
+            result.m_byteswapped = false;
+            result.m_data.reset(m_data->clone_as_nbo());
+            return std::move(result);
+        }
+    }
 
     /** Whether the dtype is byte-swapped */
     bool is_byteswapped() const {
-        return (bool)m_byteswapped;
+        return m_byteswapped;
     }
 
     /**

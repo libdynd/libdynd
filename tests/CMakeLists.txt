@@ -9,6 +9,7 @@ set(tests_SRC
     test_ndarray.cpp
     test_ndarray_assign.cpp
     test_ndarray_index.cpp
+    test_shape_tools.cpp
     )
 
 # TODO: this is awkwardly hardcoded

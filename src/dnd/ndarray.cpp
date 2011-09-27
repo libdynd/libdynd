@@ -38,14 +38,14 @@ dnd::ndarray::ndarray(const dtype& dt)
     m_originptr = m_buffer->data();
 }
 
-dnd::ndarray::ndarray(const dtype& dt, int ndim, const intptr_t *shape, const int *axisperm)
+dnd::ndarray::ndarray(const dtype& dt, int ndim, const intptr_t *shape, const int *axis_perm)
     : m_dtype(dt), m_ndim(ndim), m_shape(ndim), m_strides(ndim)
 {
     // Build the new strides using the ordering and shape
     m_num_elements = 1;
     intptr_t stride = dt.itemsize();
     for (int i = 0; i < ndim; ++i) {
-        int p = axisperm[i];
+        int p = axis_perm[i];
         intptr_t size = shape[p];
         if (size == 1) {
             m_strides[p] = 0;
@@ -75,7 +75,7 @@ dnd::ndarray::ndarray(intptr_t dim0, const dtype& dt)
 
 dnd::ndarray::ndarray(intptr_t dim0, intptr_t dim1, const dtype& dt)
     : m_dtype(dt), m_ndim(2), m_num_elements(dim0 * dim1), m_shape(2), m_strides(2),
-      m_buffer(new membuffer(dt, dim0*dim1))
+      m_buffer(new membuffer(dt, m_num_elements))
 {
     m_originptr = m_buffer->data();
     m_shape[0] = dim0;
@@ -86,7 +86,7 @@ dnd::ndarray::ndarray(intptr_t dim0, intptr_t dim1, const dtype& dt)
 
 dnd::ndarray::ndarray(intptr_t dim0, intptr_t dim1, intptr_t dim2, const dtype& dt)
     : m_dtype(dt), m_ndim(3), m_num_elements(dim0 * dim1 * dim2), m_shape(3), m_strides(3),
-      m_buffer(new membuffer(dt, dim0*dim1*dim2))
+      m_buffer(new membuffer(dt, m_num_elements))
 {
     m_originptr = m_buffer->data();
     m_shape[0] = dim0;
@@ -95,6 +95,21 @@ dnd::ndarray::ndarray(intptr_t dim0, intptr_t dim1, intptr_t dim2, const dtype& 
     m_strides[0] = (dim0 == 1) ? 0 : dt.itemsize() * dim1 * dim2;
     m_strides[1] = (dim1 == 1) ? 0 : dt.itemsize() * dim2;
     m_strides[2] = (dim2 == 1) ? 0 : dt.itemsize();
+}
+
+dnd::ndarray::ndarray(intptr_t dim0, intptr_t dim1, intptr_t dim2, intptr_t dim3, const dtype& dt)
+    : m_dtype(dt), m_ndim(4), m_num_elements(dim0 * dim1 * dim2 * dim3), m_shape(4), m_strides(4),
+      m_buffer(new membuffer(dt, m_num_elements))
+{
+    m_originptr = m_buffer->data();
+    m_shape[0] = dim0;
+    m_shape[1] = dim1;
+    m_shape[2] = dim2;
+    m_shape[3] = dim3;
+    m_strides[0] = (dim0 == 1) ? 0 : dt.itemsize() * dim1 * dim2 * dim3;
+    m_strides[1] = (dim1 == 1) ? 0 : dt.itemsize() * dim2 * dim3;
+    m_strides[2] = (dim2 == 1) ? 0 : dt.itemsize() * dim3;
+    m_strides[3] = (dim3 == 1) ? 0 : dt.itemsize();
 }
 
 ndarray dnd::ndarray::index(int nindex, const irange *indices) const
@@ -249,11 +264,11 @@ void dnd::ndarray::swap(ndarray& rhs)
 ndarray dnd::empty_like(const ndarray& rhs, const dtype& dt)
 {
     // Sort the strides to get the memory layout ordering
-    shortvector<int> axisperm(rhs.ndim());
-    strides_to_axisperm(rhs.ndim(), rhs.strides(), axisperm.get());
+    shortvector<int> axis_perm(rhs.ndim());
+    strides_to_axis_perm(rhs.ndim(), rhs.strides(), axis_perm.get());
 
     // Construct the new array
-    return ndarray(dt, rhs.ndim(), rhs.shape(), axisperm.get());
+    return ndarray(dt, rhs.ndim(), rhs.shape(), axis_perm.get());
 }
 
 
