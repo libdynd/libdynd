@@ -177,10 +177,10 @@ TEST(DTypeAssign, FixedSizeTests_Float64) {
     double v_f64;
 
     dtype s_dt, d_dt;
-    void *s_ptr;
+    const char *s_ptr;
 
     s_dt = dtype(float64_type_id);
-    s_ptr = &v_f64;
+    s_ptr = reinterpret_cast<char *>(&v_f64);
     v_f64 = -10.25;
 #define ONE_TEST(tid, v, m) \
             dtype_assign(dtype(tid), &v, s_dt, s_ptr); \

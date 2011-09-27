@@ -24,7 +24,7 @@ namespace {
     template<class T>
     struct addition {
         typedef T type;
-        static T operate(T x, T y) {
+        static inline T operate(T x, T y) {
             return x + y;
         }
     };
@@ -32,7 +32,7 @@ namespace {
     template<class T>
     struct subtraction {
         typedef T type;
-        static T operate(T x, T y) {
+        static inline T operate(T x, T y) {
             return x - y;
         }
     };
@@ -40,7 +40,7 @@ namespace {
     template<class T>
     struct multiplication {
         typedef T type;
-        static T operate(T x, T y) {
+        static inline T operate(T x, T y) {
             return x * y;
         }
     };
@@ -48,24 +48,23 @@ namespace {
     template<class T>
     struct division {
         typedef T type;
-        static T operate(T x, T y) {
+        static inline T operate(T x, T y) {
             return x / y;
         }
     };
 
     template<class operation>
     struct loop_general_general_general {
-        static void func(typename operation::type *dst, intptr_t dst_stride,
-                                    const typename operation::type *src0, intptr_t src0_stride,
-                                    const typename operation::type *src1, intptr_t src1_stride,
+        static void func(char *dst, intptr_t dst_stride,
+                                    const char *src0, intptr_t src0_stride,
+                                    const char *src1, intptr_t src1_stride,
                                     intptr_t count, const auxiliary_data *)
         {
-            dst_stride /= sizeof(typename operation::type);
-            src0_stride /= sizeof(typename operation::type);
-            src1_stride /= sizeof(typename operation::type);
+            typedef typename operation::type T;
 
             for (intptr_t i = 0; i < count; ++i) {
-                *dst = operation::operate(*src0, *src1);
+                *reinterpret_cast<T *>(dst) = operation::operate(*reinterpret_cast<const T *>(src0),
+                                                                *reinterpret_cast<const T *>(src1));
                 dst += dst_stride;
                 src0 += src0_stride;
                 src1 += src1_stride;
@@ -75,17 +74,16 @@ namespace {
 
     template<class operation>
     struct loop_general_stride0_general {
-        static void func(typename operation::type *dst, intptr_t dst_stride,
-                                        const typename operation::type *src0, intptr_t,
-                                        const typename operation::type *src1, intptr_t src1_stride,
+        static void func(char * *dst, intptr_t dst_stride,
+                                        const char * *src0, intptr_t,
+                                        const char * *src1, intptr_t src1_stride,
                                         intptr_t count, const auxiliary_data *)
         {
-            dst_stride /= sizeof(typename operation::type);
-            src1_stride /= sizeof(typename operation::type);
+            typedef typename operation::type T;
 
-            typename operation::type src0_value = *src0;
+            T src0_value = *reinterpret_cast<const T *>(src0);
             for (intptr_t i = 0; i < count; ++i) {
-                *dst = operation::operate(src0_value, *src1);
+                *reinterpret_cast<T *>(dst) = operation::operate(src0_value, *reinterpret_cast<const T *>(src1));
                 dst += dst_stride;
                 src1 += src1_stride;
             }
@@ -94,17 +92,16 @@ namespace {
 
     template<class operation>
     struct loop_general_general_stride0 {
-        static void func(typename operation::type *dst, intptr_t dst_stride,
-                                        const typename operation::type *src0, intptr_t src0_stride,
-                                        const typename operation::type *src1, intptr_t,
+        static void func(char *dst, intptr_t dst_stride,
+                                        const char *src0, intptr_t src0_stride,
+                                        const char *src1, intptr_t,
                                         intptr_t count, const auxiliary_data *)
         {
-            dst_stride /= sizeof(typename operation::type);
-            src0_stride /= sizeof(typename operation::type);
+            typedef typename operation::type T;
 
-            typename operation::type src1_value = *src1;
+            T src1_value = *reinterpret_cast<const T *>(src1);
             for (intptr_t i = 0; i < count; ++i) {
-                *dst = operation::operate(*src0, src1_value);
+                *reinterpret_cast<T *>(dst) = operation::operate(*reinterpret_cast<const T *>(src0), src1_value);
                 dst += dst_stride;
                 src0 += src0_stride;
             }
@@ -183,16 +180,16 @@ namespace {
     SPECIALIZATION_LEVEL(float, operation), \
     SPECIALIZATION_LEVEL(double, operation) \
     }
-#define OPERATION_TABLE(operation) \
+#define BUILTIN_OPERATION_TABLE(operation) \
     static binary_operation_t builtin_##operation##_table[6][6] = \
         TYPE_LEVEL(operation)
 
-OPERATION_TABLE(addition);
-OPERATION_TABLE(subtraction);
-OPERATION_TABLE(multiplication);
-OPERATION_TABLE(division);
+BUILTIN_OPERATION_TABLE(addition);
+BUILTIN_OPERATION_TABLE(subtraction);
+BUILTIN_OPERATION_TABLE(multiplication);
+BUILTIN_OPERATION_TABLE(division);
 
-#undef OPERATION_TABLE
+#undef BUILTIN_OPERATION_TABLE
 #undef TYPE_LEVEL
 #undef SPECIALIZATION_LEVEL
 

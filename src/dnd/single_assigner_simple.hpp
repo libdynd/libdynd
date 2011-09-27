@@ -355,6 +355,7 @@ struct single_assigner_simple_base<float, double, float_kind, float_kind, assign
         if (d != s) {
             throw std::runtime_error("inexact precision loss while assigning double to float");
         }
+        *dst = d;
     }
 };
 
