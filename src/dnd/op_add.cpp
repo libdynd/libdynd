@@ -27,6 +27,30 @@ namespace {
         }
     };
 
+    template<class T>
+    struct subtraction {
+        typedef T type;
+        static T operate(T x, T y) {
+            return x - y;
+        }
+    };
+
+    template<class T>
+    struct multiplication {
+        typedef T type;
+        static T operate(T x, T y) {
+            return x * y;
+        }
+    };
+
+    template<class T>
+    struct division {
+        typedef T type;
+        static T operate(T x, T y) {
+            return x / y;
+        }
+    };
+
     template<class operation>
     static void loop_general_general_general(typename operation::type *dst, intptr_t dst_stride,
                                     const typename operation::type *src0, intptr_t src0_stride,
@@ -143,12 +167,15 @@ namespace {
         TYPE_LEVEL(operation)
 
 OPERATION_TABLE(addition);
+OPERATION_TABLE(subtraction);
+OPERATION_TABLE(multiplication);
+OPERATION_TABLE(division);
 
 #undef OPERATION_TABLE
 #undef TYPE_LEVEL
 #undef SPECIALIZATION_LEVEL
 
-static binary_operation_t get_builtin_operation_function(binary_operation_t optable[][6],
+static binary_operation_t get_builtin_operation_function(binary_operation_t builtin_optable[][6],
                                 const dtype& dt, intptr_t dst_stride,
                                 intptr_t src0_stride, intptr_t src1_stride)
 {
@@ -160,25 +187,26 @@ static binary_operation_t get_builtin_operation_function(binary_operation_t opta
     if (dst_stride == itemsize) {
         if (src0_stride == itemsize) {
             if (src1_stride == itemsize) {
-                return optable[cid][3];
+                return builtin_optable[cid][3];
             } else if (src1_stride == 0) {
-                return optable[cid][5];
+                return builtin_optable[cid][5];
             }
         } else if (src0_stride == 0 && src1_stride == itemsize) {
-            return optable[cid][4];
+            return builtin_optable[cid][4];
         }
     }
 
     if (src0_stride == 0) {
-        return optable[cid][1];
+        return builtin_optable[cid][1];
     } else if (src1_stride == 0) {
-        return optable[cid][2];
+        return builtin_optable[cid][2];
     }
 
-    return optable[cid][0];
+    return builtin_optable[cid][0];
 }
 
-ndarray dnd::add(const ndarray& op0, const ndarray& op1)
+static ndarray arithmetic_op(const ndarray& op0, const ndarray& op1,
+                                            binary_operation_t builtin_optable[][6])
 {
     dtype dt = promote_dtypes_arithmetic(op0.get_dtype(), op1.get_dtype());
     ndarray result;
@@ -186,7 +214,7 @@ ndarray dnd::add(const ndarray& op0, const ndarray& op1)
     bool buffered = false;
 
     if (dt.extended() != NULL) {
-        throw std::runtime_error("addition for extended dtypes isn't implemented yet");
+        throw std::runtime_error("arithmetic operations for extended dtypes isn't implemented yet");
     }
 
     // Use buffering if a dtype conversion or alignment operation
@@ -194,13 +222,13 @@ ndarray dnd::add(const ndarray& op0, const ndarray& op1)
     if (dt != op0.get_dtype() || dt != op1.get_dtype() || 
                 !dt.is_data_aligned(iter.get_align_test<1>()) ||
                 !dt.is_data_aligned(iter.get_align_test<2>())) {
-        throw std::runtime_error("addition buffering isn't implemented yet");
+        throw std::runtime_error("arithmetic operation buffering isn't implemented yet");
     } else {
         intptr_t innersize = iter.innersize();
         intptr_t dst_stride = iter.innerstride<0>();
         intptr_t src0_stride = iter.innerstride<1>();
         intptr_t src1_stride = iter.innerstride<2>();
-        binary_operation_t operation = get_builtin_operation_function(builtin_addition_table,
+        binary_operation_t operation = get_builtin_operation_function(builtin_optable,
                                             dt, dst_stride, src0_stride, src1_stride);
         if (innersize > 0) {
             do {
@@ -213,4 +241,20 @@ ndarray dnd::add(const ndarray& op0, const ndarray& op1)
     }
 
     return std::move(result);
+}
+
+ndarray dnd::add(const ndarray& op0, const ndarray& op1) {
+    return arithmetic_op(op0, op1, builtin_addition_table);
+}
+
+ndarray dnd::subtract(const ndarray& op0, const ndarray& op1) {
+    return arithmetic_op(op0, op1, builtin_subtraction_table);
+}
+
+ndarray dnd::multiply(const ndarray& op0, const ndarray& op1) {
+    return arithmetic_op(op0, op1, builtin_multiplication_table);
+}
+
+ndarray dnd::divide(const ndarray& op0, const ndarray& op1) {
+    return arithmetic_op(op0, op1, builtin_division_table);
 }

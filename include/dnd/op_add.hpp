@@ -12,6 +12,9 @@ namespace dnd {
 class ndarray;
 
 ndarray add(const ndarray& op0, const ndarray& op1);
+ndarray subtract(const ndarray& op0, const ndarray& op1);
+ndarray multiply(const ndarray& op0, const ndarray& op1);
+ndarray divide(const ndarray& op0, const ndarray& op1);
 
 } // namespace dnd;
 
