@@ -19,4 +19,13 @@ TEST(NDArrayArange, Basic) {
     a = arange(1., 10., 0.5);
     cout << a << "\n";
     cout << arange(25.f) << "\n";
+    cout << arange(0.,1.,0.1) << "\n";
+    cout << arange(0.f,1.f,0.1f) << "\n";
+    cout << arange(0.f,1.f,0.01f) << "\n";
+
+    cout << 2 * arange(20) << "\n";
+    cout << arange(3 <= irange() <= 20) << "\n";
+
+    cout << linspace(10, 20) << "\n";
+    cout << linspace(0, 5.0, 10) << "\n";
 }

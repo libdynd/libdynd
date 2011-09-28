@@ -21,9 +21,9 @@ namespace {
             T begin = *reinterpret_cast<const T *>(beginval);
             T step = *reinterpret_cast<const T *>(stepval);
             intptr_t count = result.shape(0), stride = result.strides(0);
-            cout << "arange with count " << count << endl;
+            //cout << "arange with count " << count << endl;
             char *dst = result.originptr();
-            for (int i = 0; i < count; ++i, dst += stride) {
+            for (intptr_t i = 0; i < count; ++i, dst += stride) {
                 *reinterpret_cast<T *>(dst) = begin + i * step;
             }
         }
@@ -35,7 +35,7 @@ namespace {
             T begin = *reinterpret_cast<const T *>(beginval);
             T end = *reinterpret_cast<const T *>(endval);
             T step = *reinterpret_cast<const T *>(stepval);
-            cout << "arange params " << begin << "  " << end << "  " << step << "\n";
+            //cout << "arange params " << begin << "  " << end << "  " << step << "\n";
             if (step > 0) {
                 if (end <= begin) {
                     return 0;
@@ -59,7 +59,7 @@ namespace {
             T begin = *reinterpret_cast<const T *>(beginval);
             T end = *reinterpret_cast<const T *>(endval);
             T step = *reinterpret_cast<const T *>(stepval);
-            cout << "arange params " << begin << "  " << end << "  " << step << "\n";
+            //cout << "arange params " << begin << "  " << end << "  " << step << "\n";
             if (step > 0) {
                 if (end <= begin) {
                     return 0;
@@ -77,7 +77,7 @@ namespace {
             T begin = *reinterpret_cast<const T *>(beginval);
             T end = *reinterpret_cast<const T *>(endval);
             T step = *reinterpret_cast<const T *>(stepval);
-            cout << "arange params " << begin << "  " << end << "  " << step << "\n";
+            //cout << "arange params " << begin << "  " << end << "  " << step << "\n";
             if (step > 0) {
                 if (end <= begin) {
                     return 0;
@@ -105,14 +105,14 @@ namespace {
 
 ndarray dnd::arange(const dtype& dt, const void *beginval, const void *endval, const void *stepval)
 {
-    if (dt.extended() == NULL) {
+    if (dt.extended() == NULL && !dt.is_byteswapped()) {
 
 #define ONE_ARANGE_SPECIALIZATION(type) \
-    case type_id_of<type>::value: { \
-        ndarray result(arange_counter<type, dtype_kind_of<type>::value>::count(beginval, endval, stepval), dt); \
-        arange_specialization<type>::arange(beginval, stepval, result); \
-        return std::move(result); \
-    }
+        case type_id_of<type>::value: { \
+            ndarray result(arange_counter<type, dtype_kind_of<type>::value>::count(beginval, endval, stepval), dt); \
+            arange_specialization<type>::arange(beginval, stepval, result); \
+            return std::move(result); \
+        }
 
         switch (dt.type_id()) {
             ONE_ARANGE_SPECIALIZATION(int8_t);
@@ -135,6 +135,62 @@ ndarray dnd::arange(const dtype& dt, const void *beginval, const void *endval, c
         ss << "arange doesn't support built-in dtype " << dt;
         throw runtime_error(ss.str());
     } else {
-        throw runtime_error("arange doesn't support extended dtype info");
+        stringstream ss;
+        ss << "arange doesn't support extended dtype " << dt;
+        throw runtime_error(ss.str());
+    }
+}
+
+static void linspace_specialization(float start, float stop, intptr_t count, ndarray& result)
+{
+    intptr_t stride = result.strides(0);
+    char *dst = result.originptr();
+    for (intptr_t i = 0; i < count; ++i, dst += stride) {
+        float alpha = float(double(i) / double(count - 1));
+        *reinterpret_cast<float *>(dst) = (1 - alpha) * start + alpha * stop;
+    }
+}
+
+static void linspace_specialization(double start, double stop, intptr_t count, ndarray& result)
+{
+    intptr_t stride = result.strides(0);
+    char *dst = result.originptr();
+    for (intptr_t i = 0; i < count; ++i, dst += stride) {
+        double alpha = double(i) / double(count - 1);
+        *reinterpret_cast<double *>(dst) = (1 - alpha) * start + alpha * stop;
+    }
+}
+
+ndarray dnd::linspace(const dtype& dt, const void *startval, const void *stopval, intptr_t count)
+{
+    if (count < 2) {
+        throw runtime_error("linspace needs a count of at least 2");
+    }
+
+    if (dt.extended() == NULL && !dt.is_byteswapped()) {
+        switch (dt.type_id()) {
+            case float32_type_id: {
+                ndarray result(count, dt);
+                linspace_specialization(*reinterpret_cast<const float *>(startval),
+                                *reinterpret_cast<const float *>(stopval), count, result);
+                return std::move(result);
+            }
+            case float64_type_id: {
+                ndarray result(count, dt);
+                linspace_specialization(*reinterpret_cast<const double *>(startval),
+                                *reinterpret_cast<const double *>(stopval), count, result);
+                return std::move(result);
+            }
+            default:
+                break;
+        }
+
+        stringstream ss;
+        ss << "linspace doesn't support built-in dtype " << dt;
+        throw runtime_error(ss.str());
+    } else {
+        stringstream ss;
+        ss << "linspace doesn't support extended dtype " << dt;
+        throw runtime_error(ss.str());
     }
 }

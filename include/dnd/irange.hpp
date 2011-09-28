@@ -53,15 +53,15 @@ public:
         : m_start(start), m_finish(finish), m_step(step) {
     }
 
-    constexpr intptr_t start() const {
+    constexpr const intptr_t& start() const {
         return m_start;
     }
 
-    constexpr intptr_t finish() const {
+    constexpr const intptr_t& finish() const {
         return m_finish;
     }
 
-    constexpr intptr_t step() const {
+    constexpr const intptr_t& step() const {
         return m_step;
     }
 
