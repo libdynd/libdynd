@@ -229,8 +229,6 @@ static ndarray arithmetic_op(const ndarray& op0, const ndarray& op1,
     dtype dt = promote_dtypes_arithmetic(op0.get_dtype(), op1.get_dtype());
     ndarray result;
     raw_ndarray_iter<1,2> iter(dt, result, op0, op1);
-    bool buffered = false;
-
     //cout << "src0:\n" << op0 << "\n";
     //op0.debug_dump(cout);
     //cout << "\n";
@@ -287,5 +285,23 @@ ndarray dnd::multiply(const ndarray& op0, const ndarray& op1) {
 }
 
 ndarray dnd::divide(const ndarray& op0, const ndarray& op1) {
+    return arithmetic_op(op0, op1, builtin_division_table);
+}
+
+// These operators are declared in ndarray.hpp
+
+ndarray dnd::operator+(const ndarray& op0, const ndarray& op1) {
+    return arithmetic_op(op0, op1, builtin_addition_table);
+}
+
+ndarray dnd::operator-(const ndarray& op0, const ndarray& op1) {
+    return arithmetic_op(op0, op1, builtin_subtraction_table);
+}
+
+ndarray dnd::operator*(const ndarray& op0, const ndarray& op1) {
+    return arithmetic_op(op0, op1, builtin_multiplication_table);
+}
+
+ndarray dnd::operator/(const ndarray& op0, const ndarray& op1) {
     return arithmetic_op(op0, op1, builtin_division_table);
 }

@@ -113,25 +113,25 @@ template <> struct type_id_of<float> {enum {value = float32_type_id};};
 template <> struct type_id_of<double> {enum {value = float64_type_id};};
 
 // Type trait for the kind
-template <typename T> struct kind_of;
+template <typename T> struct dtype_kind_of;
 
 // Can't use bool, because it doesn't have a guaranteed sizeof
-template <> struct kind_of<dnd_bool> {static const dtype_kind value = bool_kind;};
-template <> struct kind_of<char> {
+template <> struct dtype_kind_of<dnd_bool> {static const dtype_kind value = bool_kind;};
+template <> struct dtype_kind_of<char> {
     static const dtype_kind value = ((char)-1) < 0 ? int_kind : uint_kind;
 };
-template <> struct kind_of<signed char> {static const dtype_kind value = int_kind;};
-template <> struct kind_of<short> {static const dtype_kind value = int_kind;};
-template <> struct kind_of<int> {static const dtype_kind value = int_kind;};
-template <> struct kind_of<long> {static const dtype_kind value = int_kind;};
-template <> struct kind_of<long long> {static const dtype_kind value = int_kind;};
-template <> struct kind_of<uint8_t> {static const dtype_kind value = uint_kind;};
-template <> struct kind_of<uint16_t> {static const dtype_kind value = uint_kind;};
-template <> struct kind_of<unsigned int> {static const dtype_kind value = uint_kind;};
-template <> struct kind_of<unsigned long> {static const dtype_kind value = uint_kind;};
-template <> struct kind_of<unsigned long long>{static const dtype_kind value = uint_kind;};
-template <> struct kind_of<float> {static const dtype_kind value = float_kind;};
-template <> struct kind_of<double> {static const dtype_kind value = float_kind;};
+template <> struct dtype_kind_of<signed char> {static const dtype_kind value = int_kind;};
+template <> struct dtype_kind_of<short> {static const dtype_kind value = int_kind;};
+template <> struct dtype_kind_of<int> {static const dtype_kind value = int_kind;};
+template <> struct dtype_kind_of<long> {static const dtype_kind value = int_kind;};
+template <> struct dtype_kind_of<long long> {static const dtype_kind value = int_kind;};
+template <> struct dtype_kind_of<uint8_t> {static const dtype_kind value = uint_kind;};
+template <> struct dtype_kind_of<uint16_t> {static const dtype_kind value = uint_kind;};
+template <> struct dtype_kind_of<unsigned int> {static const dtype_kind value = uint_kind;};
+template <> struct dtype_kind_of<unsigned long> {static const dtype_kind value = uint_kind;};
+template <> struct dtype_kind_of<unsigned long long>{static const dtype_kind value = uint_kind;};
+template <> struct dtype_kind_of<float> {static const dtype_kind value = float_kind;};
+template <> struct dtype_kind_of<double> {static const dtype_kind value = float_kind;};
 
 // Metaprogram for determining if a type is a valid C++ scalar
 // of a particular dtype.
@@ -152,7 +152,7 @@ template <> struct is_dtype_scalar<float> {enum {value = true};};
 template <> struct is_dtype_scalar<double> {enum {value = true};};
 
 /** Typedef for dtype endian byte-swapping operation */
-typedef void (*byteswap_operation_t)(void *dst, const void *src, intptr_t itemsize);
+typedef void (*byteswap_operation_t)(void *dst, const void *src, uintptr_t itemsize);
 
 class dtype;
 
@@ -230,7 +230,7 @@ public:
 class dtype {
 private:
     unsigned char m_type_id, m_kind, m_alignment, m_byteswapped;
-    intptr_t m_itemsize;
+    uintptr_t m_itemsize;
     std::shared_ptr<extended_dtype> m_data;
 
     bool set_to_type_id(int type_id);
@@ -271,7 +271,7 @@ public:
     /** Construct from a type ID */
     explicit dtype(int type_id);
     /** Construct from a type ID and itemsize */
-    explicit dtype(int type_id, intptr_t size);
+    explicit dtype(int type_id, uintptr_t size);
 
     void swap(dtype& rhs) {
         std::swap(m_type_id, rhs.m_type_id);
@@ -344,7 +344,7 @@ public:
     }
 
     /** The item size of the dtype */
-    intptr_t itemsize() const {
+    uintptr_t itemsize() const {
         return m_itemsize;
     }
 

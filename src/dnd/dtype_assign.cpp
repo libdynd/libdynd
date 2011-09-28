@@ -106,7 +106,7 @@ void dnd::dtype_assign(const dtype& dst_dt, void *dst, const dtype& src_dt, cons
     throw std::runtime_error("this dtype assignment isn't yet supported");
 }
 
-static void dont_byteswap(void *dst, const void *src, intptr_t size)
+static void dont_byteswap(void *dst, const void *src, uintptr_t size)
 {
     memcpy(dst, src, size);
 }
@@ -342,7 +342,7 @@ std::pair<unary_operation_t, shared_ptr<auxiliary_data> > dnd::get_dtype_strided
             if (asn != NULL) {
                 std::pair<unary_operation_t, shared_ptr<auxiliary_data> > result;
                 if (src_byteswapped || dst_byteswapped) {
-                    result.first = &assign_multiple_unaligned;
+                    result.first = &assign_multiple_byteswap_unaligned;
                     multiple_byteswap_unaligned_auxiliary_data *auxdata =
                                             new multiple_byteswap_unaligned_auxiliary_data();
                     result.second.reset(auxdata);
@@ -381,12 +381,13 @@ std::pair<unary_operation_t, shared_ptr<auxiliary_data> > dnd::get_dtype_strided
             }
         } else {
             if (src_fixedstride == 0) {
-                if (dst_fixedstride == dst_dt.itemsize()) {
+                if (dst_fixedstride == (intptr_t)dst_dt.itemsize()) {
                     DTYPE_ASSIGN_ANY_TO_ANY_SWITCH(assign_noexcept_contigstride_zerostride);
                 } else {
                     DTYPE_ASSIGN_ANY_TO_ANY_SWITCH(assign_noexcept_anystride_zerostride);
                 }
-            } else if (dst_fixedstride == dst_dt.itemsize() && src_fixedstride == src_dt.itemsize()) {
+            } else if (dst_fixedstride == (intptr_t)dst_dt.itemsize() &&
+                                src_fixedstride == (intptr_t)src_dt.itemsize()) {
                 DTYPE_ASSIGN_ANY_TO_ANY_SWITCH(assign_noexcept_contigstride_contigstride);
             } else {
                 DTYPE_ASSIGN_ANY_TO_ANY_SWITCH(assign_noexcept);
@@ -530,7 +531,8 @@ std::pair<unary_operation_t, std::shared_ptr<auxiliary_data> > dnd::get_dtype_st
     if (!dt.is_object_type()) {
         std::pair<unary_operation_t, std::shared_ptr<auxiliary_data> > result;
 
-        if (dst_fixedstride == dt.itemsize() && src_fixedstride == dt.itemsize()) {
+        if (dst_fixedstride == (intptr_t)dt.itemsize() &&
+                                    src_fixedstride == (intptr_t)dt.itemsize()) {
             // contig -> contig uses memcpy, works with unaligned data
             switch (dt.itemsize()) {
                 case 1:

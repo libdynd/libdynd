@@ -36,7 +36,7 @@ TEST(NDArray, Constructors) {
     EXPECT_EQ(3, a.num_elements());
     EXPECT_EQ(1, a.ndim());
     EXPECT_EQ(3, a.shape()[0]);
-    EXPECT_EQ(sizeof(float), a.strides()[0]);
+    EXPECT_EQ((int)sizeof(float), a.strides()[0]);
 
     // Two-dimensional ndarray with a size-one dimension
     a = ndarray(3, 1, make_dtype<float>());
@@ -44,7 +44,7 @@ TEST(NDArray, Constructors) {
     EXPECT_EQ(2, a.ndim());
     EXPECT_EQ(3, a.shape()[0]);
     EXPECT_EQ(1, a.shape()[1]);
-    EXPECT_EQ(sizeof(float), a.strides()[0]);
+    EXPECT_EQ((int)sizeof(float), a.strides()[0]);
     EXPECT_EQ(0, a.strides()[1]);
 
     // Two-dimensional ndarray with a size-one dimension
@@ -54,7 +54,7 @@ TEST(NDArray, Constructors) {
     EXPECT_EQ(1, a.shape()[0]);
     EXPECT_EQ(3, a.shape()[1]);
     EXPECT_EQ(0, a.strides()[0]);
-    EXPECT_EQ(sizeof(float), a.strides()[1]);
+    EXPECT_EQ((int)sizeof(float), a.strides()[1]);
 
     // Two-dimensional ndarray
     a = ndarray(3, 5, make_dtype<float>());
@@ -62,8 +62,8 @@ TEST(NDArray, Constructors) {
     EXPECT_EQ(2, a.ndim());
     EXPECT_EQ(3, a.shape()[0]);
     EXPECT_EQ(5, a.shape()[1]);
-    EXPECT_EQ(5*sizeof(float), a.strides()[0]);
-    EXPECT_EQ(sizeof(float), a.strides()[1]);
+    EXPECT_EQ(5*(int)sizeof(float), a.strides()[0]);
+    EXPECT_EQ((int)sizeof(float), a.strides()[1]);
 
     // Three-dimensional ndarray with size-one dimension
     a = ndarray(1, 5, 4, make_dtype<float>());
@@ -73,8 +73,8 @@ TEST(NDArray, Constructors) {
     EXPECT_EQ(5, a.shape()[1]);
     EXPECT_EQ(4, a.shape()[2]);
     EXPECT_EQ(0, a.strides()[0]);
-    EXPECT_EQ(4*sizeof(float), a.strides()[1]);
-    EXPECT_EQ(sizeof(float), a.strides()[2]);
+    EXPECT_EQ(4*(int)sizeof(float), a.strides()[1]);
+    EXPECT_EQ((int)sizeof(float), a.strides()[2]);
 
     // Three-dimensional ndarray with size-one dimension
     a = ndarray(3, 1, 4, make_dtype<float>());
@@ -83,9 +83,9 @@ TEST(NDArray, Constructors) {
     EXPECT_EQ(3, a.shape()[0]);
     EXPECT_EQ(1, a.shape()[1]);
     EXPECT_EQ(4, a.shape()[2]);
-    EXPECT_EQ(4*sizeof(float), a.strides()[0]);
+    EXPECT_EQ(4*(int)sizeof(float), a.strides()[0]);
     EXPECT_EQ(0, a.strides()[1]);
-    EXPECT_EQ(sizeof(float), a.strides()[2]);
+    EXPECT_EQ((int)sizeof(float), a.strides()[2]);
 
     // Three-dimensional ndarray with size-one dimension
     a = ndarray(3, 5, 1, make_dtype<float>());
@@ -94,8 +94,8 @@ TEST(NDArray, Constructors) {
     EXPECT_EQ(3, a.shape()[0]);
     EXPECT_EQ(5, a.shape()[1]);
     EXPECT_EQ(1, a.shape()[2]);
-    EXPECT_EQ(5*sizeof(float), a.strides()[0]);
-    EXPECT_EQ(sizeof(float), a.strides()[1]);
+    EXPECT_EQ(5*(int)sizeof(float), a.strides()[0]);
+    EXPECT_EQ((int)sizeof(float), a.strides()[1]);
     EXPECT_EQ(0, a.strides()[2]);
 
     // Three-dimensional ndarray
@@ -105,9 +105,9 @@ TEST(NDArray, Constructors) {
     EXPECT_EQ(3, a.shape()[0]);
     EXPECT_EQ(5, a.shape()[1]);
     EXPECT_EQ(4, a.shape()[2]);
-    EXPECT_EQ(5*4*sizeof(float), a.strides()[0]);
-    EXPECT_EQ(4*sizeof(float), a.strides()[1]);
-    EXPECT_EQ(sizeof(float), a.strides()[2]);
+    EXPECT_EQ(5*4*(int)sizeof(float), a.strides()[0]);
+    EXPECT_EQ(4*(int)sizeof(float), a.strides()[1]);
+    EXPECT_EQ((int)sizeof(float), a.strides()[2]);
 }
 
 TEST(NDArray, ConstructorMemoryLayouts) {
@@ -201,7 +201,7 @@ TEST(NDArray, InitializerLists) {
     EXPECT_EQ(make_dtype<int>(), a.get_dtype());
     EXPECT_EQ(1, a.ndim());
     EXPECT_EQ(5, a.shape()[0]);
-    EXPECT_EQ(sizeof(int), a.strides()[0]);
+    EXPECT_EQ((int)sizeof(int), a.strides()[0]);
     int *ptr_i = (int *)a.originptr();
     EXPECT_EQ(1, ptr_i[0]);
     EXPECT_EQ(2, ptr_i[1]);
@@ -215,8 +215,8 @@ TEST(NDArray, InitializerLists) {
     EXPECT_EQ(2, b.ndim());
     EXPECT_EQ(2, b.shape()[0]);
     EXPECT_EQ(3, b.shape()[1]);
-    EXPECT_EQ(3*sizeof(double), b.strides()[0]);
-    EXPECT_EQ(sizeof(double), b.strides()[1]);
+    EXPECT_EQ(3*(int)sizeof(double), b.strides()[0]);
+    EXPECT_EQ((int)sizeof(double), b.strides()[1]);
     double *ptr_d = (double *)b.originptr();
     EXPECT_EQ(1, ptr_d[0]);
     EXPECT_EQ(2, ptr_d[1]);
@@ -233,9 +233,9 @@ TEST(NDArray, InitializerLists) {
     EXPECT_EQ(2, a.shape()[0]);
     EXPECT_EQ(2, a.shape()[1]);
     EXPECT_EQ(2, a.shape()[2]);
-    EXPECT_EQ(4*sizeof(long long), a.strides()[0]);
-    EXPECT_EQ(2*sizeof(long long), a.strides()[1]);
-    EXPECT_EQ(sizeof(long long), a.strides()[2]);
+    EXPECT_EQ(4*(int)sizeof(long long), a.strides()[0]);
+    EXPECT_EQ(2*(int)sizeof(long long), a.strides()[1]);
+    EXPECT_EQ((int)sizeof(long long), a.strides()[2]);
     long long *ptr_ll = (long long *)a.originptr();
     EXPECT_EQ(1, ptr_ll[0]);
     EXPECT_EQ(2, ptr_ll[1]);
@@ -259,8 +259,8 @@ TEST(NDArray, InitFromNestedCArray) {
     EXPECT_EQ(2, a.ndim());
     EXPECT_EQ(2, a.shape()[0]);
     EXPECT_EQ(3, a.shape()[1]);
-    EXPECT_EQ(3*sizeof(int), a.strides()[0]);
-    EXPECT_EQ(sizeof(int), a.strides()[1]);
+    EXPECT_EQ(3*(int)sizeof(int), a.strides()[0]);
+    EXPECT_EQ((int)sizeof(int), a.strides()[1]);
     int *ptr_i = (int *)a.originptr();
     EXPECT_EQ(1, ptr_i[0]);
     EXPECT_EQ(2, ptr_i[1]);
@@ -277,9 +277,9 @@ TEST(NDArray, InitFromNestedCArray) {
     EXPECT_EQ(2, a.shape()[0]);
     EXPECT_EQ(2, a.shape()[1]);
     EXPECT_EQ(3, a.shape()[2]);
-    EXPECT_EQ(6*sizeof(float), a.strides()[0]);
-    EXPECT_EQ(3*sizeof(float), a.strides()[1]);
-    EXPECT_EQ(sizeof(float), a.strides()[2]);
+    EXPECT_EQ(6*(int)sizeof(float), a.strides()[0]);
+    EXPECT_EQ(3*(int)sizeof(float), a.strides()[1]);
+    EXPECT_EQ((int)sizeof(float), a.strides()[2]);
     float *ptr_f = (float *)a.originptr();
     EXPECT_EQ(1, ptr_f[0]);
     EXPECT_EQ(2, ptr_f[1]);

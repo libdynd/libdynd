@@ -10,12 +10,6 @@
 #include <stdexcept>
 #include <cstring>
 
-#define DND_MAX_DTYPES (64)
-// The number of type IDs that have a fixed size
-#define DND_NUM_FIXEDSIZE_TYPE_IDS (sse128d_type_id + 1)
-// A bitmask that the itemsize must fit in to allow a trivial dtype
-#define DND_TRIVIAL_ITEMSIZE_MASK ((intptr_t)(((uintptr_t)(-1)) >> 18))
-
 using namespace std;
 using namespace dnd;
 
@@ -115,16 +109,13 @@ dtype::dtype(int type_id)
     }
 }
 
-dtype::dtype(int type_id, intptr_t size)
+dtype::dtype(int type_id, uintptr_t size)
 {
     if (set_to_type_id(type_id)) {
         if (m_itemsize != size) {
             throw std::runtime_error("invalid itemsize for given type ID");
         }
     } else if (type_id == utf8_type_id) {
-        if (size < 0) {
-            throw std::runtime_error("negative dtype itemsize is not allowed");
-        }
         m_type_id = type_id;
         m_kind = string_kind;
         m_alignment = 1;
@@ -139,7 +130,7 @@ dtype::dtype(int type_id, intptr_t size)
 namespace {
     template<int size> struct sized_byteswapper;
     template<> struct sized_byteswapper<2> {
-        static void byteswap(void *dst, const void *src, intptr_t) {
+        static void byteswap(void *dst, const void *src, uintptr_t) {
             char *d = reinterpret_cast<char *>(dst);
             const char *s = reinterpret_cast<const char *>(src);
             char tmp[2];
@@ -152,7 +143,7 @@ namespace {
         }
     };
     template<> struct sized_byteswapper<4> {
-        static void byteswap(void *dst, const void *src, intptr_t) {
+        static void byteswap(void *dst, const void *src, uintptr_t) {
             char *d = reinterpret_cast<char *>(dst);
             const char *s = reinterpret_cast<const char *>(src);
             char tmp[4];
@@ -169,7 +160,7 @@ namespace {
         }
     };
     template<> struct sized_byteswapper<8> {
-        static void byteswap(void *dst, const void *src, intptr_t) {
+        static void byteswap(void *dst, const void *src, uintptr_t) {
             char *d = reinterpret_cast<char *>(dst);
             const char *s = reinterpret_cast<const char *>(src);
             char tmp[8];

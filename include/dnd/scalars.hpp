@@ -23,7 +23,7 @@ class scalar_copied_if_necessary {
     bool m_allocated;
 
 
-    char *allocate_data(intptr_t size) {
+    char *allocate_data(uintptr_t size) {
         char *result;
         if (size <= sizeof(m_shortbuffer)) {
             m_data = result = reinterpret_cast<char *>(&m_shortbuffer[0]);

@@ -3,8 +3,8 @@ project(dynamicndarray)
 
 set(CMAKE_VERBOSE_MAKEFILE 1)
 
-set(CMAKE_CXX_FLAGS "-std=c++0x -g -O3")
-set(LINK_FLAGS -Wall -Wextra -Werror)
+set(CMAKE_CXX_FLAGS "-std=c++0x -g -O3 -Wall -Wextra -Werror")
+set(LINK_FLAGS)
 
 set(dnd_SRC
     src/dnd/dtype.cpp
@@ -14,6 +14,7 @@ set(dnd_SRC
     src/dnd/exceptions.cpp
     src/dnd/membuffer.cpp
     src/dnd/ndarray.cpp
+    src/dnd/ndarray_arange.cpp
     src/dnd/arithmetic_op.cpp
     src/dnd/shape_tools.cpp
     include/dnd/dtype.hpp
@@ -24,6 +25,7 @@ set(dnd_SRC
     include/dnd/irange.hpp
     include/dnd/membuffer.hpp
     include/dnd/ndarray.hpp
+    include/dnd/ndarray_arange.hpp
     include/dnd/arithmetic_op.hpp
     include/dnd/shape_tools.hpp
     )

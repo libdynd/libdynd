@@ -32,7 +32,7 @@ static intptr_t min_strlen_for_builtin_kind(dtype_kind kind)
 dtype dnd::promote_dtypes_arithmetic(const dtype& dt0, const dtype& dt1)
 {
     const extended_dtype *dt0_ext, *dt1_ext;
-    intptr_t itemsize = 0;
+    uintptr_t itemsize = 0;
 
     dt0_ext = dt0.extended();
     dt1_ext = dt1.extended();

@@ -98,19 +98,26 @@ template<class dst_type, class src_type>
 struct single_assigner_simple_base<dst_type, src_type, int_kind, int_kind, assign_error_inexact>
     : public single_assigner_simple_base<dst_type, src_type, int_kind, int_kind, assign_error_overflow> {};
 
-// Unsigned int -> signed int with overflow checking
+// Unsigned int -> signed int with overflow checking just when sizeof(dst) <= sizeof(src)
+template<class dst_type, class src_type, bool dst_le>
+struct single_assigner_simple_unsigned_to_signed_overflow_base
+    : public single_assigner_simple_base<dst_type, src_type, int_kind, uint_kind, assign_error_none> {};
 template<class dst_type, class src_type>
-struct single_assigner_simple_base<dst_type, src_type, int_kind, uint_kind, assign_error_overflow>
+struct single_assigner_simple_unsigned_to_signed_overflow_base<dst_type, src_type, true>
 {
     static void assign(dst_type *dst, const src_type *src) {
         src_type s = *src;
 
-        if (s > std::numeric_limits<dst_type>::max()) {
+        if (s > static_cast<src_type>(std::numeric_limits<dst_type>::max())) {
             throw std::runtime_error("overflow while assigning unsigned integer signed integer");
         }
         *dst = static_cast<dst_type>(s);
     }
 };
+template<class dst_type, class src_type>
+struct single_assigner_simple_base<dst_type, src_type, int_kind, uint_kind, assign_error_overflow>
+    : public single_assigner_simple_unsigned_to_signed_overflow_base<dst_type,
+                                                    src_type, sizeof(dst_type) <= sizeof(src_type)> {};
 
 // Unsigned int -> signed int with other error checking
 template<class dst_type, class src_type>
@@ -120,19 +127,35 @@ template<class dst_type, class src_type>
 struct single_assigner_simple_base<dst_type, src_type, int_kind, uint_kind, assign_error_inexact>
     : public single_assigner_simple_base<dst_type, src_type, int_kind, uint_kind, assign_error_overflow> {};
 
-// Signed int -> unsigned int with overflow checking
-template<class dst_type, class src_type>
-struct single_assigner_simple_base<dst_type, src_type, uint_kind, int_kind, assign_error_overflow>
+// Signed int -> unsigned int with positive overflow checking just when sizeof(dst) < sizeof(src)
+template<class dst_type, class src_type, bool dst_lt>
+struct single_assigner_simple_signed_to_unsigned_overflow_base
 {
     static void assign(dst_type *dst, const src_type *src) {
         src_type s = *src;
 
-        if (s < 0 || s > std::numeric_limits<dst_type>::max()) {
+        if (s < 0) {
             throw std::runtime_error("overflow while assigning signed integer to unsigned integer");
         }
         *dst = static_cast<dst_type>(s);
     }
 };
+template<class dst_type, class src_type>
+struct single_assigner_simple_signed_to_unsigned_overflow_base<dst_type, src_type, true>
+{
+    static void assign(dst_type *dst, const src_type *src) {
+        src_type s = *src;
+
+        if (s < 0 || s > static_cast<src_type>(std::numeric_limits<dst_type>::max())) {
+            throw std::runtime_error("overflow while assigning signed integer to unsigned integer");
+        }
+        *dst = static_cast<dst_type>(s);
+    }
+};
+template<class dst_type, class src_type>
+struct single_assigner_simple_base<dst_type, src_type, uint_kind, int_kind, assign_error_overflow>
+    : public single_assigner_simple_signed_to_unsigned_overflow_base<dst_type,
+                                                    src_type, sizeof(dst_type) < sizeof(src_type)> {};
 
 // Signed int -> unsigned int with other error checking
 template<class dst_type, class src_type>
@@ -365,7 +388,7 @@ struct single_assigner_simple_base<float, double, float_kind, float_kind, assign
 template <class dst_type, class src_type, assign_error_mode errmode>
 struct single_assigner_simple
     : public single_assigner_simple_base<dst_type, src_type,
-                        kind_of<dst_type>::value, kind_of<src_type>::value, errmode>
+                        dtype_kind_of<dst_type>::value, dtype_kind_of<src_type>::value, errmode>
 {};
 template <class same_type, assign_error_mode errmode>
 struct single_assigner_simple<same_type, same_type, errmode>

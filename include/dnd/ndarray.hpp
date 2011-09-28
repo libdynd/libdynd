@@ -310,6 +310,11 @@ public:
     friend std::ostream& operator<<(std::ostream& o, const ndarray& rhs);
 };
 
+ndarray operator+(const ndarray& op0, const ndarray& op1);
+ndarray operator-(const ndarray& op0, const ndarray& op1);
+ndarray operator/(const ndarray& op0, const ndarray& op1);
+ndarray operator*(const ndarray& op0, const ndarray& op1);
+
 ///////////// Initializer list constructor implementation /////////////////////////
 namespace detail {
     // Computes the number of dimensions in a nested initializer list constructor
@@ -339,7 +344,7 @@ namespace detail {
             out_shape[0] = il.size();
         }
         static void validate(const intptr_t *shape, const std::initializer_list<T>& il) {
-            if (il.size() != shape[0]) {
+            if ((intptr_t)il.size() != shape[0]) {
                 throw std::runtime_error("initializer list for ndarray is ragged, must be "
                                         "nested in a regular fashion");
             }
@@ -368,7 +373,7 @@ namespace detail {
         }
         static void validate(const intptr_t *shape,
                         const std::initializer_list<std::initializer_list<T> >& il) {
-            if (il.size() != shape[0]) {
+            if ((intptr_t)il.size() != shape[0]) {
                 throw std::runtime_error("initializer list for ndarray is ragged, must be "
                                         "nested in a regular fashion");
             }
