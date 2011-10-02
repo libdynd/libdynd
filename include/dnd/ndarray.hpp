@@ -54,9 +54,18 @@ class ndarray {
      * function does not validate that the originptr/strides stay within
      * the buffer's bounds.
      */
-    ndarray(const dtype& dt, int ndim, intptr_t size, const dimvector& shape,
-            const dimvector& strides, char *originptr,
+    ndarray(const dtype& dt, int ndim, intptr_t size, const intptr_t *shape,
+            const intptr_t *strides, char *originptr,
             const std::shared_ptr<void>& buffer_owner);
+    ndarray(const dtype& dt, int ndim, intptr_t size, const intptr_t *shape,
+            const intptr_t *strides, char *originptr,
+            std::shared_ptr<void>&& buffer_owner);
+    ndarray(const dtype& dt, int ndim, intptr_t size, dimvector&& shape,
+            dimvector&& strides, char *originptr,
+            const std::shared_ptr<void>& buffer_owner);
+    ndarray(const dtype& dt, int ndim, intptr_t size, dimvector&& shape,
+            dimvector&& strides, char *originptr,
+            std::shared_ptr<void>&& buffer_owner);
 
     /**
      * Private method for general indexing based on a raw array of irange
@@ -255,6 +264,18 @@ public:
     // TODO: Should this return the non-const pointer?
     const char *originptr() const {
         return m_originptr;
+    }
+
+    std::shared_ptr<void> buffer_owner() const {
+        return m_buffer_owner;
+    }
+
+    /**
+     * Returns true if this is an array which owns its own data,
+     * with no other views into the same data.
+     */
+    bool unique() const {
+        return m_originptr != NULL && m_buffer_owner.unique();
     }
 
     /**

@@ -26,14 +26,40 @@ void dnd::detail::ndarray_buffer_deleter(void *ptr)
     delete[] reinterpret_cast<char *>(ptr);
 }
 
-dnd::ndarray::ndarray(const dtype& dt, int ndim, intptr_t num_elements, const dimvector& shape,
-        const dimvector& strides, char *originptr,
+dnd::ndarray::ndarray(const dtype& dt, int ndim, intptr_t num_elements, const intptr_t *shape,
+        const intptr_t *strides, char *originptr,
         const std::shared_ptr<void>& buffer_owner)
     : m_dtype(dt), m_ndim(ndim), m_num_elements(num_elements), m_shape(ndim), m_strides(ndim),
       m_originptr(originptr), m_buffer_owner(buffer_owner)
 {
-    memcpy(m_shape.get(), shape.get(), ndim * sizeof(intptr_t));
-    memcpy(m_strides.get(), strides.get(), ndim * sizeof(intptr_t));
+    memcpy(m_shape.get(), shape, ndim * sizeof(intptr_t));
+    memcpy(m_strides.get(), strides, ndim * sizeof(intptr_t));
+}
+
+dnd::ndarray::ndarray(const dtype& dt, int ndim, intptr_t num_elements, const intptr_t *shape,
+        const intptr_t *strides, char *originptr,
+        std::shared_ptr<void>&& buffer_owner)
+    : m_dtype(dt), m_ndim(ndim), m_num_elements(num_elements), m_shape(ndim), m_strides(ndim),
+      m_originptr(originptr), m_buffer_owner(std::move(buffer_owner))
+{
+    memcpy(m_shape.get(), shape, ndim * sizeof(intptr_t));
+    memcpy(m_strides.get(), strides, ndim * sizeof(intptr_t));
+}
+
+dnd::ndarray::ndarray(const dtype& dt, int ndim, intptr_t num_elements, dimvector&& shape,
+        dimvector&& strides, char *originptr,
+        std::shared_ptr<void>&& buffer_owner)
+    : m_dtype(dt), m_ndim(ndim), m_num_elements(num_elements), m_shape(std::move(shape)),
+        m_strides(std::move(strides)), m_originptr(originptr), m_buffer_owner(std::move(buffer_owner))
+{
+}
+
+dnd::ndarray::ndarray(const dtype& dt, int ndim, intptr_t num_elements, dimvector&& shape,
+        dimvector&& strides, char *originptr,
+        const std::shared_ptr<void>& buffer_owner)
+    : m_dtype(dt), m_ndim(ndim), m_num_elements(num_elements), m_shape(std::move(shape)),
+        m_strides(std::move(strides)), m_originptr(originptr), m_buffer_owner(buffer_owner)
+{
 }
 
 dnd::ndarray::ndarray()
@@ -261,7 +287,7 @@ ndarray& dnd::ndarray::operator=(const ndarray& rhs)
 {
     if (this != &rhs) {
         // Create a temporary and swap, for exception safety
-        ndarray tmp(rhs.m_dtype, rhs.m_ndim, rhs.m_num_elements, rhs.m_shape, rhs.m_strides,
+        ndarray tmp(rhs.m_dtype, rhs.m_ndim, rhs.m_num_elements, rhs.m_shape.get(), rhs.m_strides.get(),
                     rhs.m_originptr, rhs.m_buffer_owner);
         tmp.swap(*this);
     }
