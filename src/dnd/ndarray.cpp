@@ -14,18 +14,31 @@
 using namespace std;
 using namespace dnd;
 
+// Default buffer allocator for ndarray
+void *dnd::detail::ndarray_buffer_allocator(intptr_t size)
+{
+    return new char[size];
+}
+
+// Default buffer deleter for ndarray
+void dnd::detail::ndarray_buffer_deleter(void *ptr)
+{
+    delete[] reinterpret_cast<char *>(ptr);
+}
+
 dnd::ndarray::ndarray(const dtype& dt, int ndim, intptr_t num_elements, const dimvector& shape,
         const dimvector& strides, char *originptr,
-        const std::shared_ptr<membuffer>& buffer)
+        const std::shared_ptr<void>& buffer_owner)
     : m_dtype(dt), m_ndim(ndim), m_num_elements(num_elements), m_shape(ndim), m_strides(ndim),
-      m_originptr(originptr), m_buffer(buffer)
+      m_originptr(originptr), m_buffer_owner(buffer_owner)
 {
     memcpy(m_shape.get(), shape.get(), ndim * sizeof(intptr_t));
     memcpy(m_strides.get(), strides.get(), ndim * sizeof(intptr_t));
 }
 
 dnd::ndarray::ndarray()
-    : m_dtype(), m_ndim(1), m_num_elements(0), m_shape(1), m_strides(1), m_originptr(NULL), m_buffer()
+    : m_dtype(), m_ndim(1), m_num_elements(0), m_shape(1), m_strides(1),
+      m_originptr(NULL), m_buffer_owner()
 {
     m_shape[0] = 0;
     m_strides[0] = 0;
@@ -33,9 +46,9 @@ dnd::ndarray::ndarray()
 
 dnd::ndarray::ndarray(const dtype& dt)
     : m_dtype(dt), m_ndim(0), m_num_elements(1), m_shape(0), m_strides(0),
-      m_buffer(new membuffer(dt, 1))
+      m_buffer_owner(detail::ndarray_buffer_allocator(dt.itemsize()), detail::ndarray_buffer_deleter)
 {
-    m_originptr = m_buffer->data();
+    m_originptr = reinterpret_cast<char *>(m_buffer_owner.get());
 }
 
 dnd::ndarray::ndarray(const dtype& dt, int ndim, const intptr_t *shape, const int *axis_perm)
@@ -60,24 +73,27 @@ dnd::ndarray::ndarray(const dtype& dt, int ndim, const intptr_t *shape, const in
     memcpy(m_shape.get(), shape, ndim * sizeof(intptr_t));
 
     // Allocate the buffer
-    m_buffer.reset(new membuffer(dt, m_num_elements));
-    m_originptr = m_buffer->data();
+    m_buffer_owner.reset(detail::ndarray_buffer_allocator(dt.itemsize() * m_num_elements),
+    detail::ndarray_buffer_deleter);
+    m_originptr = reinterpret_cast<char *>(m_buffer_owner.get());
 }
 
 dnd::ndarray::ndarray(intptr_t dim0, const dtype& dt)
     : m_dtype(dt), m_ndim(1), m_num_elements(dim0), m_shape(1), m_strides(1),
-      m_buffer(new membuffer(dt, dim0))
+      m_buffer_owner(detail::ndarray_buffer_allocator(dt.itemsize() * dim0),
+      detail::ndarray_buffer_deleter)
 {
-    m_originptr = m_buffer->data();
+    m_originptr = reinterpret_cast<char *>(m_buffer_owner.get());
     m_shape[0] = dim0;
     m_strides[0] = (dim0 == 1) ? 0 : dt.itemsize();
 }
 
 dnd::ndarray::ndarray(intptr_t dim0, intptr_t dim1, const dtype& dt)
     : m_dtype(dt), m_ndim(2), m_num_elements(dim0 * dim1), m_shape(2), m_strides(2),
-      m_buffer(new membuffer(dt, m_num_elements))
+      m_buffer_owner(detail::ndarray_buffer_allocator(dt.itemsize() * m_num_elements),
+      detail::ndarray_buffer_deleter)
 {
-    m_originptr = m_buffer->data();
+    m_originptr = reinterpret_cast<char *>(m_buffer_owner.get());
     m_shape[0] = dim0;
     m_shape[1] = dim1;
     m_strides[0] = (dim0 == 1) ? 0 : (dt.itemsize() * dim1);
@@ -86,9 +102,10 @@ dnd::ndarray::ndarray(intptr_t dim0, intptr_t dim1, const dtype& dt)
 
 dnd::ndarray::ndarray(intptr_t dim0, intptr_t dim1, intptr_t dim2, const dtype& dt)
     : m_dtype(dt), m_ndim(3), m_num_elements(dim0 * dim1 * dim2), m_shape(3), m_strides(3),
-      m_buffer(new membuffer(dt, m_num_elements))
+      m_buffer_owner(detail::ndarray_buffer_allocator(dt.itemsize() * m_num_elements),
+      detail::ndarray_buffer_deleter)
 {
-    m_originptr = m_buffer->data();
+    m_originptr = reinterpret_cast<char *>(m_buffer_owner.get());
     m_shape[0] = dim0;
     m_shape[1] = dim1;
     m_shape[2] = dim2;
@@ -99,9 +116,10 @@ dnd::ndarray::ndarray(intptr_t dim0, intptr_t dim1, intptr_t dim2, const dtype& 
 
 dnd::ndarray::ndarray(intptr_t dim0, intptr_t dim1, intptr_t dim2, intptr_t dim3, const dtype& dt)
     : m_dtype(dt), m_ndim(4), m_num_elements(dim0 * dim1 * dim2 * dim3), m_shape(4), m_strides(4),
-      m_buffer(new membuffer(dt, m_num_elements))
+      m_buffer_owner(detail::ndarray_buffer_allocator(dt.itemsize() * m_num_elements),
+      detail::ndarray_buffer_deleter)
 {
-    m_originptr = m_buffer->data();
+    m_originptr = reinterpret_cast<char *>(m_buffer_owner.get());
     m_shape[0] = dim0;
     m_shape[1] = dim1;
     m_shape[2] = dim2;
@@ -221,7 +239,7 @@ ndarray dnd::ndarray::index(int nindex, const irange *indices) const
     }
 
     return ndarray(get_dtype(), new_ndim, new_num_elements,
-                    std::move(new_shape), std::move(new_strides), new_originptr, m_buffer);
+                    std::move(new_shape), std::move(new_strides), new_originptr, m_buffer_owner);
 }
 
 ndarray dnd::ndarray::operator()(intptr_t idx) const
@@ -236,7 +254,7 @@ ndarray dnd::ndarray::operator()(intptr_t idx) const
 
     return ndarray(get_dtype(), ndim()-1, num_elements()/m_shape[0],
                     dimvector(ndim() - 1, shape() + 1), dimvector(ndim() - 1, strides() + 1),
-                    m_originptr + idx * m_strides[0], m_buffer);
+                    m_originptr + idx * m_strides[0], m_buffer_owner);
 }
 
 ndarray& dnd::ndarray::operator=(const ndarray& rhs)
@@ -244,7 +262,7 @@ ndarray& dnd::ndarray::operator=(const ndarray& rhs)
     if (this != &rhs) {
         // Create a temporary and swap, for exception safety
         ndarray tmp(rhs.m_dtype, rhs.m_ndim, rhs.m_num_elements, rhs.m_shape, rhs.m_strides,
-                    rhs.m_originptr, rhs.m_buffer);
+                    rhs.m_originptr, rhs.m_buffer_owner);
         tmp.swap(*this);
     }
     return *this;
@@ -258,7 +276,7 @@ void dnd::ndarray::swap(ndarray& rhs)
     m_shape.swap(rhs.m_shape);
     m_strides.swap(rhs.m_strides);
     std::swap(m_originptr, rhs.m_originptr);
-    m_buffer.swap(rhs.m_buffer);
+    m_buffer_owner.swap(rhs.m_buffer_owner);
 }
 
 ndarray dnd::empty_like(const ndarray& rhs, const dtype& dt)
@@ -288,7 +306,8 @@ static void vassign_unequal_dtypes(ndarray& lhs, const ndarray& rhs, assign_erro
     intptr_t dst_innerstride = iter.innerstride<0>(), src_innerstride = iter.innerstride<1>();
 
     std::pair<unary_operation_t, std::shared_ptr<auxiliary_data> > assign =
-                get_dtype_strided_assign_operation(lhs.get_dtype(), dst_innerstride, iter.get_align_test<0>(),
+                get_dtype_strided_assign_operation(
+                                            lhs.get_dtype(), dst_innerstride, iter.get_align_test<0>(),
                                             rhs.get_dtype(), src_innerstride, iter.get_align_test<1>(),
                                             errmode);
 
@@ -317,7 +336,8 @@ static void vassign_equal_dtypes(ndarray& lhs, const ndarray& rhs)
     intptr_t dst_innerstride = iter.innerstride<0>(), src_innerstride = iter.innerstride<1>();
 
     std::pair<unary_operation_t, std::shared_ptr<auxiliary_data> > assign =
-                get_dtype_strided_assign_operation(lhs.get_dtype(), dst_innerstride, iter.get_align_test<0>(),
+                get_dtype_strided_assign_operation(
+                                            lhs.get_dtype(), dst_innerstride, iter.get_align_test<0>(),
                                             src_innerstride, iter.get_align_test<1>());
 
     if (innersize > 0) {

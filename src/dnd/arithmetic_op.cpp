@@ -193,7 +193,8 @@ BUILTIN_OPERATION_TABLE(division);
 #undef TYPE_LEVEL
 #undef SPECIALIZATION_LEVEL
 
-static binary_operation_t get_builtin_operation_function(binary_operation_t builtin_optable[][6],
+static binary_operation_t get_builtin_operation_function(
+                                binary_operation_t builtin_optable[][6],
                                 const dtype& dt, intptr_t dst_stride,
                                 intptr_t src0_stride, intptr_t src1_stride)
 {

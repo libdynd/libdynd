@@ -15,7 +15,6 @@
 
 #include <dnd/dtype.hpp>
 #include <dnd/dtype_assign.hpp>
-#include <dnd/membuffer.hpp>
 #include <dnd/shortvector.hpp>
 #include <dnd/irange.hpp>
 
@@ -26,17 +25,29 @@ class ndarray;
 /** Stream printing function */
 std::ostream& operator<<(std::ostream& o, const ndarray& rhs);
 
+namespace detail {
+    void *ndarray_buffer_allocator(intptr_t size);
+    void ndarray_buffer_deleter(void *ptr);
+} // namespace detail
+
 /**
  * This is the primary multi-dimensional array class.
  */
 class ndarray {
+    /** The data type of the array */
     dtype m_dtype;
+    /** The number of dimensions */
     int m_ndim;
+    /** A cached version of the number of elements (product of shape[i]) */
     intptr_t m_num_elements;
+    /** The shape of the array (has ndim elements) */
     dimvector m_shape;
+    /** The strides of the array (has ndim elements) when originptr != NULL */
     dimvector m_strides;
+    /** The address of the element with an index of all zeros */
     char *m_originptr;
-    std::shared_ptr<membuffer> m_buffer;
+    /** Pointer to the object which owns the array's memory */
+    std::shared_ptr<void> m_buffer_owner;
 
     /**
      * Private method which constructs an array from all the members. This
@@ -45,7 +56,7 @@ class ndarray {
      */
     ndarray(const dtype& dt, int ndim, intptr_t size, const dimvector& shape,
             const dimvector& strides, char *originptr,
-            const std::shared_ptr<membuffer>& buffer);
+            const std::shared_ptr<void>& buffer_owner);
 
     /**
      * Private method for general indexing based on a raw array of irange
@@ -65,72 +76,72 @@ public:
      */
     ndarray(int8_t value)
         : m_dtype(int8_type_id), m_ndim(0), m_num_elements(1), m_shape(0), m_strides(0),
-          m_buffer(new membuffer(m_dtype, 1))
+          m_buffer_owner(detail::ndarray_buffer_allocator(1), detail::ndarray_buffer_deleter)
     {
-        m_originptr = m_buffer->data();
+        m_originptr = reinterpret_cast<char *>(m_buffer_owner.get());
         *reinterpret_cast<int8_t *>(m_originptr) = value;
     }
     ndarray(int16_t value)
         : m_dtype(int16_type_id), m_ndim(0), m_num_elements(1), m_shape(0), m_strides(0),
-          m_buffer(new membuffer(m_dtype, 1))
+          m_buffer_owner(detail::ndarray_buffer_allocator(2), detail::ndarray_buffer_deleter)
     {
-        m_originptr = m_buffer->data();
+        m_originptr = reinterpret_cast<char *>(m_buffer_owner.get());
         *reinterpret_cast<int16_t *>(m_originptr) = value;
     }
     ndarray(int32_t value)
         : m_dtype(int32_type_id), m_ndim(0), m_num_elements(1), m_shape(0), m_strides(0),
-          m_buffer(new membuffer(m_dtype, 1))
+          m_buffer_owner(detail::ndarray_buffer_allocator(4), detail::ndarray_buffer_deleter)
     {
-        m_originptr = m_buffer->data();
+        m_originptr = reinterpret_cast<char *>(m_buffer_owner.get());
         *reinterpret_cast<int32_t *>(m_originptr) = value;
     }
     ndarray(int64_t value)
         : m_dtype(int64_type_id), m_ndim(0), m_num_elements(1), m_shape(0), m_strides(0),
-          m_buffer(new membuffer(m_dtype, 1))
+          m_buffer_owner(detail::ndarray_buffer_allocator(8), detail::ndarray_buffer_deleter)
     {
-        m_originptr = m_buffer->data();
+        m_originptr = reinterpret_cast<char *>(m_buffer_owner.get());
         *reinterpret_cast<int64_t *>(m_originptr) = value;
     }
     ndarray(uint8_t value)
         : m_dtype(uint8_type_id), m_ndim(0), m_num_elements(1), m_shape(0), m_strides(0),
-          m_buffer(new membuffer(m_dtype, 1))
+          m_buffer_owner(detail::ndarray_buffer_allocator(1), detail::ndarray_buffer_deleter)
     {
-        m_originptr = m_buffer->data();
+        m_originptr = reinterpret_cast<char *>(m_buffer_owner.get());
         *reinterpret_cast<uint8_t *>(m_originptr) = value;
     }
     ndarray(uint16_t value)
         : m_dtype(uint16_type_id), m_ndim(0), m_num_elements(1), m_shape(0), m_strides(0),
-          m_buffer(new membuffer(m_dtype, 1))
+          m_buffer_owner(detail::ndarray_buffer_allocator(2), detail::ndarray_buffer_deleter)
     {
-        m_originptr = m_buffer->data();
+        m_originptr = reinterpret_cast<char *>(m_buffer_owner.get());
         *reinterpret_cast<uint16_t *>(m_originptr) = value;
     }
     ndarray(uint32_t value)
         : m_dtype(uint32_type_id), m_ndim(0), m_num_elements(1), m_shape(0), m_strides(0),
-          m_buffer(new membuffer(m_dtype, 1))
+          m_buffer_owner(detail::ndarray_buffer_allocator(4), detail::ndarray_buffer_deleter)
     {
-        m_originptr = m_buffer->data();
+        m_originptr = reinterpret_cast<char *>(m_buffer_owner.get());
         *reinterpret_cast<uint32_t *>(m_originptr) = value;
     }
     ndarray(uint64_t value)
         : m_dtype(uint64_type_id), m_ndim(0), m_num_elements(1), m_shape(0), m_strides(0),
-          m_buffer(new membuffer(m_dtype, 1))
+          m_buffer_owner(detail::ndarray_buffer_allocator(8), detail::ndarray_buffer_deleter)
     {
-        m_originptr = m_buffer->data();
+        m_originptr = reinterpret_cast<char *>(m_buffer_owner.get());
         *reinterpret_cast<uint64_t *>(m_originptr) = value;
     }
     ndarray(float value)
         : m_dtype(float32_type_id), m_ndim(0), m_num_elements(1), m_shape(0), m_strides(0),
-          m_buffer(new membuffer(m_dtype, 1))
+          m_buffer_owner(detail::ndarray_buffer_allocator(4), detail::ndarray_buffer_deleter)
     {
-        m_originptr = m_buffer->data();
+        m_originptr = reinterpret_cast<char *>(m_buffer_owner.get());
         *reinterpret_cast<float *>(m_originptr) = value;
     }
     ndarray(double value)
         : m_dtype(float64_type_id), m_ndim(0), m_num_elements(1), m_shape(0), m_strides(0),
-          m_buffer(new membuffer(m_dtype, 1))
+          m_buffer_owner(detail::ndarray_buffer_allocator(8), detail::ndarray_buffer_deleter)
     {
-        m_originptr = m_buffer->data();
+        m_originptr = reinterpret_cast<char *>(m_buffer_owner.get());
         *reinterpret_cast<double *>(m_originptr) = value;
     }
     /** Constructs a zero-dimensional scalar array */
@@ -175,12 +186,12 @@ public:
         : m_dtype(rhs.m_dtype), m_ndim(rhs.m_ndim), m_num_elements(rhs.m_num_elements),
           m_shape(rhs.m_ndim, rhs.m_shape),
           m_strides(rhs.m_ndim, rhs.m_strides),
-          m_originptr(rhs.m_originptr), m_buffer(rhs.m_buffer) {}
+          m_originptr(rhs.m_originptr), m_buffer_owner(rhs.m_buffer_owner) {}
     /** Move constructor (should just be "= default" in C++11) */
     ndarray(ndarray&& rhs)
         : m_dtype(std::move(rhs.m_dtype)), m_ndim(rhs.m_ndim), m_num_elements(rhs.m_num_elements),
           m_shape(std::move(rhs.m_shape)), m_strides(std::move(rhs.m_strides)),
-          m_originptr(rhs.m_originptr), m_buffer(std::move(rhs.m_buffer)) {}
+          m_originptr(rhs.m_originptr), m_buffer_owner(std::move(rhs.m_buffer_owner)) {}
 
     /** Swap operation (should be "noexcept" in C++11) */
     void swap(ndarray& rhs);
@@ -203,7 +214,7 @@ public:
             m_shape = std::move(rhs.m_shape);
             m_strides = std::move(rhs.m_strides);
             m_originptr = rhs.m_originptr;
-            m_buffer = std::move(rhs.m_buffer);
+            m_buffer_owner = std::move(rhs.m_buffer_owner);
         }
 
         return *this;
@@ -402,8 +413,9 @@ dnd::ndarray::ndarray(std::initializer_list<T> il)
     m_strides[0] = (size == 1) ? 0 : sizeof(T);
     if (size > 0) {
         // Allocate the storage buffer and copy the data
-        m_buffer.reset(new membuffer(m_dtype, size));
-        m_originptr = m_buffer->data();
+        m_buffer_owner.reset(detail::ndarray_buffer_allocator(sizeof(T) * size),
+                                                                detail::ndarray_buffer_deleter);
+        m_originptr = reinterpret_cast<char *>(m_buffer_owner.get());
         memcpy(m_originptr, il.begin(), sizeof(T)*size);
     } else {
         m_originptr = NULL;
@@ -427,8 +439,9 @@ dnd::ndarray::ndarray(std::initializer_list<std::initializer_list<T> > il)
     m_num_elements = num_elements;
     if (num_elements > 0) {
         // Allocate the storage buffer
-        m_buffer.reset(new membuffer(m_dtype, num_elements));
-        m_originptr = m_buffer->data();
+        m_buffer_owner.reset(detail::ndarray_buffer_allocator(sizeof(T) * num_elements),
+                                                                    detail::ndarray_buffer_deleter);
+        m_originptr = reinterpret_cast<char *>(m_buffer_owner.get());
         // Populate the storage buffer from the nested initializer list
         T *dataptr = reinterpret_cast<T *>(m_originptr);
         detail::initializer_list_shape<S>::copy_data(&dataptr, il);
@@ -454,8 +467,9 @@ dnd::ndarray::ndarray(std::initializer_list<std::initializer_list<std::initializ
     m_num_elements = num_elements;
     if (num_elements > 0) {
         // Allocate the storage buffer
-        m_buffer.reset(new membuffer(m_dtype, num_elements));
-        m_originptr = m_buffer->data();
+        m_buffer_owner.reset(detail::ndarray_buffer_allocator(sizeof(T) * num_elements),
+                                                                    detail::ndarray_buffer_deleter);
+        m_originptr = reinterpret_cast<char *>(m_buffer_owner.get());
         // Populate the storage buffer from the nested initializer list
         T *dataptr = reinterpret_cast<T *>(m_originptr);
         detail::initializer_list_shape<S>::copy_data(&dataptr, il);
@@ -508,8 +522,9 @@ dnd::ndarray::ndarray(const T (&rhs)[N])
     m_num_elements = num_bytes / detail::type_from_array<T>::itemsize;
     if (m_num_elements > 0) {
         // Allocate the storage buffer
-        m_buffer.reset(new membuffer(m_dtype, m_num_elements));
-        m_originptr = m_buffer->data();
+        m_buffer_owner.reset(detail::ndarray_buffer_allocator(sizeof(T) * m_num_elements),
+                                                                    detail::ndarray_buffer_deleter);
+        m_originptr = reinterpret_cast<char *>(m_buffer_owner.get());
         // Populate the storage buffer from the nested initializer list
         memcpy(m_originptr, &rhs[0], num_bytes);
     } else {

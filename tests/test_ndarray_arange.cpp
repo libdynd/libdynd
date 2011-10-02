@@ -23,6 +23,8 @@ TEST(NDArrayArange, Basic) {
     cout << arange(0.f,1.f,0.1f) << "\n";
     cout << arange(0.f,1.f,0.01f) << "\n";
 
+    cout << ndarray(2) << "\n";
+    cout << ndarray(2) * arange(20) << "\n";
     cout << 2 * arange(20) << "\n";
     cout << arange(3 <= irange() <= 20) << "\n";
 

@@ -4,6 +4,7 @@ project(dynamicndarray)
 set(CMAKE_VERBOSE_MAKEFILE 1)
 
 set(CMAKE_CXX_FLAGS "-std=c++0x -g -O3 -Wall -Wextra -Werror")
+#set(CMAKE_CXX_FLAGS "-std=c++0x -g -fprofile-arcs -ftest-coverage -Wall -Wextra -Werror")
 set(LINK_FLAGS)
 
 set(dnd_SRC
