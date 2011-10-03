@@ -17,6 +17,13 @@ namespace dnd {
 /**
  * This function broadcasts the dimensions and strides of 'src' to a given
  * shape, raising an error if it cannot be broadcast.
+ *
+ * @param ndim        The number of dimensions being broadcast to.
+ * @param shape       The shape being broadcast to.
+ * @param src_ndim    The number of dimensions of the input which is to be broadcast.
+ * @param src_shape   The shape of the input which is to be broadcast.
+ * @param src_strides The strides of the input which is to be broadcast.
+ * @param out_strides The resulting strides after broadcasting (with length 'ndim').
  */
 void broadcast_to_shape(int ndim, const intptr_t *shape,
                 int src_ndim, const intptr_t *src_shape, const intptr_t *src_strides,

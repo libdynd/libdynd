@@ -279,6 +279,30 @@ public:
     }
 
     /**
+     * Returns true if this is an array which owns its own data,
+     * and all the data elements are aligned according to the needs
+     * of the data type.
+     *
+     * This operation loops through all the strides to compute whether it is aligned.
+     */
+    bool is_aligned() const {
+        if (m_originptr != NULL) {
+            int alignment = m_dtype.alignment();
+            if (alignment == 1) {
+                return true;
+            } else {
+                int align_test = static_cast<int>(reinterpret_cast<intptr_t>(m_originptr));
+                for (int i = 0; i < m_ndim; ++i) {
+                    align_test |= static_cast<int>(m_strides[i]);
+                }
+                return ((alignment - 1) & align_test) == 0;
+            }
+        } else {
+            return false;
+        }
+    }
+
+    /**
      * The ndarray uses the function call operator to do indexing. The [] operator
      * only supports one index object at a time, and while there are tricks that can be
      * done by overloading the comma operator, this doesn't produce a fool-proof result.
