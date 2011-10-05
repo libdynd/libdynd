@@ -11,14 +11,10 @@
 #include <dnd/raw_iteration.hpp>
 #include <dnd/dtype_promotion.hpp>
 #include <dnd/arithmetic_op.hpp>
+#include "ndarray_expr_node_instances.hpp"
 
 using namespace std;
 using namespace dnd;
-
-typedef void (*binary_operation_t)(void *dst, intptr_t dst_stride,
-                        const void *src0, intptr_t src0_stride,
-                        const void *src1, intptr_t src1_stride,
-                        intptr_t count, const auxiliary_data *auxdata);
 
 namespace {
     template<class T>
@@ -193,8 +189,10 @@ BUILTIN_OPERATION_TABLE(division);
 #undef TYPE_LEVEL
 #undef SPECIALIZATION_LEVEL
 
+typedef binary_operation_t binary_operation_table_t[6];
+
 static binary_operation_t get_builtin_operation_function(
-                                binary_operation_t builtin_optable[][6],
+                                binary_operation_table_t *builtin_optable,
                                 const dtype& dt, intptr_t dst_stride,
                                 intptr_t src0_stride, intptr_t src1_stride)
 {
@@ -219,10 +217,52 @@ static binary_operation_t get_builtin_operation_function(
         return builtin_optable[cid][1];
     } else if (src1_stride == 0) {
         return builtin_optable[cid][2];
+    } else {
+        return builtin_optable[cid][0];
     }
-
-    return builtin_optable[cid][0];
 }
+
+namespace {
+
+    class binary_operator_factory {
+    protected:
+        dtype m_dtype;
+        binary_operation_table_t *m_builtin_optable;
+
+    public:
+        binary_operator_factory() {
+        }
+
+        binary_operator_factory(binary_operation_table_t *builtin_optable)
+            : m_builtin_optable(builtin_optable)
+        {
+        }
+
+        void promote_types(const dtype& dt1, const dtype& dt2) {
+            m_dtype = promote_dtypes_arithmetic(dt1, dt2);
+        }
+
+        const dtype& get_dtype(int) {
+            return m_dtype;
+        }
+
+        void swap(binary_operator_factory& that) {
+            m_dtype.swap(that.m_dtype);
+            std::swap(m_builtin_optable, that.m_builtin_optable);
+        }
+
+        std::pair<binary_operation_t, std::shared_ptr<auxiliary_data> >
+                get_binary_operation(intptr_t dst_fixedstride, intptr_t src1_fixedstride,
+                                    intptr_t src2_fixedstride) {
+            return std::pair<binary_operation_t, std::shared_ptr<auxiliary_data> >(
+                        get_builtin_operation_function(m_builtin_optable,
+                                m_dtype, dst_fixedstride,
+                                src1_fixedstride, src2_fixedstride),
+                        NULL);
+        }
+    };
+
+} // anonymous namespace
 
 static ndarray arithmetic_op(const ndarray& op0, const ndarray& op1,
                                             binary_operation_t builtin_optable[][6])

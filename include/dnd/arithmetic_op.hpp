@@ -9,6 +9,11 @@
 
 namespace dnd {
 
+typedef void (*binary_operation_t)(void *dst, intptr_t dst_stride,
+                        const void *src0, intptr_t src0_stride,
+                        const void *src1, intptr_t src1_stride,
+                        intptr_t count, const auxiliary_data *auxdata);
+
 class ndarray;
 
 ndarray add(const ndarray& op0, const ndarray& op1);

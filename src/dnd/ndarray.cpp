@@ -104,6 +104,22 @@ dnd::ndarray::ndarray(const dtype& dt, int ndim, const intptr_t *shape, const in
     m_originptr = reinterpret_cast<char *>(m_buffer_owner.get());
 }
 
+dnd::ndarray::ndarray(const ndarray_expr_node_ptr& expr_tree)
+    : m_dtype(expr_tree->get_dtype()), m_ndim(expr_tree->ndim()),
+        m_shape(m_ndim), m_strides(m_ndim), m_originptr(NULL),
+        m_expr_tree(expr_tree)
+{
+    memcpy(m_shape.get(), expr_tree->shape(), m_ndim * sizeof(intptr_t));
+}
+
+dnd::ndarray::ndarray(ndarray_expr_node_ptr&& expr_tree)
+    : m_dtype(expr_tree->get_dtype()), m_ndim(expr_tree->ndim()),
+        m_shape(m_ndim), m_strides(m_ndim), m_originptr(NULL),
+        m_expr_tree(std::move(expr_tree))
+{
+    memcpy(m_shape.get(), expr_tree->shape(), m_ndim * sizeof(intptr_t));
+}
+
 dnd::ndarray::ndarray(intptr_t dim0, const dtype& dt)
     : m_dtype(dt), m_ndim(1), m_num_elements(dim0), m_shape(1), m_strides(1),
       m_buffer_owner(detail::ndarray_buffer_allocator(dt.itemsize() * dim0),

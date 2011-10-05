@@ -17,6 +17,7 @@
 #include <dnd/dtype_assign.hpp>
 #include <dnd/shortvector.hpp>
 #include <dnd/irange.hpp>
+#include <dnd/ndarray_expr_node.hpp>
 
 namespace dnd {
 
@@ -48,6 +49,8 @@ class ndarray {
     char *m_originptr;
     /** Pointer to the object which owns the array's memory */
     std::shared_ptr<void> m_buffer_owner;
+    /** When m_originptr is NULL, this contains the expression tree for this array */
+    ndarray_expr_node_ptr m_expr_tree;
 
     /**
      * Private method which constructs an array from all the members. This
@@ -157,6 +160,11 @@ public:
     explicit ndarray(const dtype& dt);
     /** Constructs an array with the given dtype, shape, and axis_perm (for memory layout) */
     explicit ndarray(const dtype& dt, int ndim, const intptr_t *shape, const int *axis_perm);
+
+    /** Constructs an ndaray from an expr node */
+    explicit ndarray(const ndarray_expr_node_ptr& expr_tree);
+    /** Constructs an ndaray from an expr node */
+    explicit ndarray(ndarray_expr_node_ptr&& expr_tree);
 
     /** Constructs a one-dimensional array */
     ndarray(intptr_t dim0, const dtype& dt);

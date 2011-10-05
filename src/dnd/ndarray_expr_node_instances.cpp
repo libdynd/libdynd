@@ -9,8 +9,8 @@
 #include <sstream>
 
 #include <dnd/ndarray.hpp>
-#include <dnd/ndarray_expr_node.hpp>
 #include <dnd/shape_tools.hpp>
+#include "ndarray_expr_node_instances.hpp"
 
 using namespace std;
 using namespace dnd;
@@ -64,7 +64,7 @@ dnd::convert_dtype_expr_node::convert_dtype_expr_node(const dtype& dt,
 
 // broadcast_shape_expr_node
 
-dnd::broadcast_shape_expr_node::broadcast_shape_expr_node(int ndim, intptr_t *shape,
+dnd::broadcast_shape_expr_node::broadcast_shape_expr_node(int ndim, const intptr_t *shape,
                                                 const ndarray_expr_node_ptr& op)
     : ndarray_expr_node(op->get_dtype(), ndim, 1, shape,
         op->node_category() == strided_array_node_category ? strided_array_node_category
@@ -74,7 +74,7 @@ dnd::broadcast_shape_expr_node::broadcast_shape_expr_node(int ndim, intptr_t *sh
     m_opnodes[0] = op;
 }
 
-dnd::broadcast_shape_expr_node::broadcast_shape_expr_node(int ndim, intptr_t *shape,
+dnd::broadcast_shape_expr_node::broadcast_shape_expr_node(int ndim, const intptr_t *shape,
                                                 ndarray_expr_node_ptr&& op)
     : ndarray_expr_node(op->get_dtype(), ndim, 1, shape,
         op->node_category() == strided_array_node_category ? strided_array_node_category
@@ -93,6 +93,7 @@ void dnd::broadcast_shape_expr_node::as_data_and_strides(char **out_originptr,
     op->as_data_and_strides(out_originptr, out_strides + dimdelta);
     memset(out_strides, 0, dimdelta * sizeof(intptr_t));
 }
+
 
 // Node factory functions
 
@@ -147,7 +148,7 @@ ndarray_expr_node_ptr dnd::make_broadcast_strided_array_expr_node(ndarray& a,
                             "ndarray which is an expression view");
     }
 
-    // Broadcast to the desired shape
+    // Broadcast the array's strides to the desired shape (may raise a broadcast error)
     dimvector strides(ndim);
     broadcast_to_shape(ndim, shape, a, strides.get());
 

@@ -16,9 +16,11 @@ set(dnd_SRC
     src/dnd/membuffer.cpp
     src/dnd/ndarray.cpp
     src/dnd/ndarray_arange.cpp
-    src/dnd/ndarray_expr_node.cpp
+    src/dnd/ndarray_expr_node_instances.cpp
     src/dnd/arithmetic_op.cpp
     src/dnd/shape_tools.cpp
+    src/dnd/ndarray_expr_node_instances.hpp
+    src/dnd/single_assigner_simple.hpp
     include/dnd/dtype.hpp
     include/dnd/dtype_assign.hpp
     include/dnd/dtype_casting.hpp

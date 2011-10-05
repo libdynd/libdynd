@@ -365,7 +365,6 @@ public:
         dimvector op0shape;
         broadcast_input_shapes(op1, op2, &ndim, &op0shape);
 
-
         // Create the broadcast strides
         multi_shortvector<intptr_t, 3> strides_vec(ndim);
         intptr_t **strides = strides_vec.get_all();
