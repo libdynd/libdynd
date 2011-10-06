@@ -11,6 +11,7 @@
 #include <boost/intrusive_ptr.hpp>
 
 #include <dnd/dtype.hpp>
+#include <dnd/operations.hpp>
 #include <dnd/shortvector.hpp>
 
 namespace dnd {
@@ -96,17 +97,32 @@ public:
     }
 
     /**
-     * Nodes with the category strided_array_node_cateogry should override this function,
+     * Nodes with the category strided_array_node_category should override this function,
      * and fill the outputs.
      *
      * The default implementation raises an exception.
      */
     virtual void as_data_and_strides(char **out_originptr, intptr_t *out_strides) const;
 
+    virtual std::pair<nullary_operation_t, std::shared_ptr<auxiliary_data> >
+                get_nullary_operation(intptr_t dst_fixedstride) const;
+    virtual std::pair<unary_operation_t, std::shared_ptr<auxiliary_data> >
+                get_unary_operation(intptr_t dst_fixedstride, intptr_t src1_fixedstride) const;
+    virtual std::pair<binary_operation_t, std::shared_ptr<auxiliary_data> >
+                get_binary_operation(intptr_t dst_fixedstride, intptr_t src1_fixedstride,
+                                      intptr_t src2_fixedstride) const;
+
     /**
      * Evaluates the expression tree into a new ndarry.
      */
     ndarray evaluate() const;
+
+    /** Debug printing of the tree */
+    void debug_dump(std::ostream& o, const std::string& indent) const;
+    /** Debug printing of the data from the derived class */
+    virtual void debug_dump_extra(std::ostream& o, const std::string& indent) const;
+
+    virtual const char *node_name() const = 0;
 
     friend void intrusive_ptr_add_ref(const ndarray_expr_node *node);
     friend void intrusive_ptr_release(const ndarray_expr_node *node);

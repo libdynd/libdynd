@@ -352,6 +352,28 @@ public:
         init(ndim, shape, data, strides, axis_perm.get());
     }
 
+    raw_ndarray_iter(int ndim, const intptr_t *shape,
+                                const dtype& op0_dt, ndarray& op0,
+                                const ndarray_expr_node *op1,
+                                const ndarray_expr_node *op2)
+    {
+        multi_shortvector<intptr_t, 2> strides_vec(ndim);
+        char *data[3];
+
+        // Get the two operands as strided arrays
+        op1->as_data_and_strides(&data[1], strides_vec.get(0));
+        op2->as_data_and_strides(&data[2], strides_vec.get(1));
+
+        // Generate the axis_perm from the input strides, and use it to allocate the output
+        shortvector<int> axis_perm(ndim);
+        multistrides_to_axis_perm(ndim, 2, strides_vec.get_all(), axis_perm.get());
+        op0 = ndarray(op0_dt, ndim, shape, axis_perm.get());
+        data[0] = op0.originptr();
+
+        const intptr_t *strides_ptrs[3] = {op0.strides(), strides_vec.get(0), strides_vec.get(1)};
+        init(ndim, shape, data, strides_ptrs, axis_perm.get());
+    }
+
     /**
      * Iterator for 2 input operands, output allocated by the iterator.
      *

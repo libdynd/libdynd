@@ -5,7 +5,6 @@
 #include <gtest/gtest.h>
 
 #include "dnd/ndarray.hpp"
-#include "dnd/arithmetic_op.hpp"
 
 using namespace std;
 using namespace dnd;
@@ -18,7 +17,7 @@ TEST(ArithmeticOp, MatchingDTypes) {
     int v1[][3] = {{0,1,1}, {2,5,-10}};
     a = v0;
     b = v1;
-    c = add(a, b);
+    c = (a + b).as_strided();
     EXPECT_EQ(make_dtype<int>(), c.get_dtype());
     EXPECT_EQ(1, c(0,0).as<int>());
     EXPECT_EQ(3, c(0,1).as<int>());
@@ -26,7 +25,7 @@ TEST(ArithmeticOp, MatchingDTypes) {
     EXPECT_EQ(3, c(1,0).as<int>());
     EXPECT_EQ(7, c(1,1).as<int>());
     EXPECT_EQ(-7, c(1,2).as<int>());
-    c = subtract(a, b);
+    c = (a - b).as_strided();
     EXPECT_EQ(make_dtype<int>(), c.get_dtype());
     EXPECT_EQ(1, c(0,0).as<int>());
     EXPECT_EQ(1, c(0,1).as<int>());
@@ -34,7 +33,7 @@ TEST(ArithmeticOp, MatchingDTypes) {
     EXPECT_EQ(-1, c(1,0).as<int>());
     EXPECT_EQ(-3, c(1,1).as<int>());
     EXPECT_EQ(13, c(1,2).as<int>());
-    c = multiply(b, a);
+    c = (b * a).as_strided();
     EXPECT_EQ(make_dtype<int>(), c.get_dtype());
     EXPECT_EQ(0, c(0,0).as<int>());
     EXPECT_EQ(2, c(0,1).as<int>());
@@ -42,7 +41,7 @@ TEST(ArithmeticOp, MatchingDTypes) {
     EXPECT_EQ(2, c(1,0).as<int>());
     EXPECT_EQ(10, c(1,1).as<int>());
     EXPECT_EQ(-30, c(1,2).as<int>());
-    c = divide(b, a);
+    c = (b / a).as_strided();
     EXPECT_EQ(make_dtype<int>(), c.get_dtype());
     EXPECT_EQ(0, c(0,0).as<int>());
     EXPECT_EQ(0, c(0,1).as<int>());
@@ -52,38 +51,43 @@ TEST(ArithmeticOp, MatchingDTypes) {
     EXPECT_EQ(-3, c(1,2).as<int>());
 
     // A scalar on the right
-    c = add(a, 12);
+    c = (a + 12).as_strided();
     EXPECT_EQ(13, c(0).as<int>());
     EXPECT_EQ(14, c(1).as<int>());
     EXPECT_EQ(15, c(2).as<int>());
-    c = subtract(a, 12);
+    c = (a - 12).as_strided();
     EXPECT_EQ(-11, c(0).as<int>());
     EXPECT_EQ(-10, c(1).as<int>());
     EXPECT_EQ(-9, c(2).as<int>());
-    c = multiply(a, 3);
+    c = (a * 3).as_strided();
     EXPECT_EQ(3, c(0).as<int>());
     EXPECT_EQ(6, c(1).as<int>());
     EXPECT_EQ(9, c(2).as<int>());
-    c = divide(a, 2);
+    c = (a / 2).as_strided();
     EXPECT_EQ(0, c(0).as<int>());
     EXPECT_EQ(1, c(1).as<int>());
     EXPECT_EQ(1, c(2).as<int>());
 
-    // A scalar on the right
-    c = add(-1, a);
+    // A scalar on the left
+    c = ((-1) + a).as_strided();
     EXPECT_EQ(0, c(0).as<int>());
     EXPECT_EQ(1, c(1).as<int>());
     EXPECT_EQ(2, c(2).as<int>());
-    c = subtract(-1, a);
+    c = ((-1) - a).as_strided();
     EXPECT_EQ(-2, c(0).as<int>());
     EXPECT_EQ(-3, c(1).as<int>());
     EXPECT_EQ(-4, c(2).as<int>());
-    c = multiply(5, a);
+    c = (5 * a).as_strided();
     EXPECT_EQ(5, c(0).as<int>());
     EXPECT_EQ(10, c(1).as<int>());
     EXPECT_EQ(15, c(2).as<int>());
-    c = divide(-6, a);
+    c = (-6 / a).as_strided();
     EXPECT_EQ(-6, c(0).as<int>());
     EXPECT_EQ(-3, c(1).as<int>());
     EXPECT_EQ(-2, c(2).as<int>());
+
+    (a + b).debug_dump(cout);
+    (a - b).debug_dump(cout);
+    (a * 2).debug_dump(cout);
+    (b / 5).debug_dump(cout);
 }

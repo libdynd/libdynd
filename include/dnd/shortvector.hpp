@@ -228,6 +228,14 @@ public:
         return m_shortvectors;
     }
 
+    T *get(int i) {
+        return m_shortvectors[i];
+    }
+
+    const T *get(int i) const {
+        return m_shortvectors[i];
+    }
+
     T& get(int i, int j) {
         return m_shortvectors[i][j];
     }

@@ -10,7 +10,6 @@
 #include <dnd/ndarray.hpp>
 #include <dnd/raw_iteration.hpp>
 #include <dnd/dtype_promotion.hpp>
-#include <dnd/arithmetic_op.hpp>
 #include "ndarray_expr_node_instances.hpp"
 
 using namespace std;
@@ -224,21 +223,22 @@ static binary_operation_t get_builtin_operation_function(
 
 namespace {
 
-    class binary_operator_factory {
+    class arithmetic_operator_factory {
     protected:
         dtype m_dtype;
         binary_operation_table_t *m_builtin_optable;
+        const char *m_node_name;
 
     public:
-        binary_operator_factory() {
+        arithmetic_operator_factory() {
         }
 
-        binary_operator_factory(binary_operation_table_t *builtin_optable)
-            : m_builtin_optable(builtin_optable)
+        arithmetic_operator_factory(binary_operation_table_t *builtin_optable, const char *node_name)
+            : m_builtin_optable(builtin_optable), m_node_name(node_name)
         {
         }
 
-        void promote_types(const dtype& dt1, const dtype& dt2) {
+        void promote_dtypes(const dtype& dt1, const dtype& dt2) {
             m_dtype = promote_dtypes_arithmetic(dt1, dt2);
         }
 
@@ -246,24 +246,30 @@ namespace {
             return m_dtype;
         }
 
-        void swap(binary_operator_factory& that) {
+        void swap(arithmetic_operator_factory& that) {
             m_dtype.swap(that.m_dtype);
             std::swap(m_builtin_optable, that.m_builtin_optable);
+            std::swap(m_node_name, that.m_node_name);
         }
 
         std::pair<binary_operation_t, std::shared_ptr<auxiliary_data> >
                 get_binary_operation(intptr_t dst_fixedstride, intptr_t src1_fixedstride,
-                                    intptr_t src2_fixedstride) {
+                                    intptr_t src2_fixedstride) const {
             return std::pair<binary_operation_t, std::shared_ptr<auxiliary_data> >(
                         get_builtin_operation_function(m_builtin_optable,
                                 m_dtype, dst_fixedstride,
                                 src1_fixedstride, src2_fixedstride),
                         NULL);
         }
+
+        const char *node_name() const {
+            return m_node_name;
+        }
     };
 
 } // anonymous namespace
 
+/*
 static ndarray arithmetic_op(const ndarray& op0, const ndarray& op1,
                                             binary_operation_t builtin_optable[][6])
 {
@@ -312,37 +318,30 @@ static ndarray arithmetic_op(const ndarray& op0, const ndarray& op1,
 
     return std::move(result);
 }
-
-ndarray dnd::add(const ndarray& op0, const ndarray& op1) {
-    return arithmetic_op(op0, op1, builtin_addition_table);
-}
-
-ndarray dnd::subtract(const ndarray& op0, const ndarray& op1) {
-    return arithmetic_op(op0, op1, builtin_subtraction_table);
-}
-
-ndarray dnd::multiply(const ndarray& op0, const ndarray& op1) {
-    return arithmetic_op(op0, op1, builtin_multiplication_table);
-}
-
-ndarray dnd::divide(const ndarray& op0, const ndarray& op1) {
-    return arithmetic_op(op0, op1, builtin_division_table);
-}
+*/
 
 // These operators are declared in ndarray.hpp
 
-ndarray dnd::operator+(const ndarray& op0, const ndarray& op1) {
-    return arithmetic_op(op0, op1, builtin_addition_table);
+ndarray dnd::operator+(const ndarray& op1, const ndarray& op2)
+{
+    arithmetic_operator_factory op_factory(builtin_addition_table, "add");
+    return ndarray(make_elementwise_binary_op_expr_node(op1, op2, op_factory));
 }
 
-ndarray dnd::operator-(const ndarray& op0, const ndarray& op1) {
-    return arithmetic_op(op0, op1, builtin_subtraction_table);
+ndarray dnd::operator-(const ndarray& op1, const ndarray& op2)
+{
+    arithmetic_operator_factory op_factory(builtin_subtraction_table, "subtract");
+    return ndarray(make_elementwise_binary_op_expr_node(op1, op2, op_factory));
 }
 
-ndarray dnd::operator*(const ndarray& op0, const ndarray& op1) {
-    return arithmetic_op(op0, op1, builtin_multiplication_table);
+ndarray dnd::operator*(const ndarray& op1, const ndarray& op2)
+{
+    arithmetic_operator_factory op_factory(builtin_multiplication_table, "multiply");
+    return ndarray(make_elementwise_binary_op_expr_node(op1, op2, op_factory));
 }
 
-ndarray dnd::operator/(const ndarray& op0, const ndarray& op1) {
-    return arithmetic_op(op0, op1, builtin_division_table);
+ndarray dnd::operator/(const ndarray& op1, const ndarray& op2)
+{
+    arithmetic_operator_factory op_factory(builtin_division_table, "divide");
+    return ndarray(make_elementwise_binary_op_expr_node(op1, op2, op_factory));
 }

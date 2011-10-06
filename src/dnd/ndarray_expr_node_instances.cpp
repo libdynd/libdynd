@@ -15,15 +15,6 @@
 using namespace std;
 using namespace dnd;
 
-// ndarray_expr_node
-
-void dnd::ndarray_expr_node::as_data_and_strides(char ** /*out_data*/,
-                                                intptr_t * /*out_strides*/) const
-{
-    throw std::runtime_error("as_data_and_strides is only valid for "
-                             "nodes with an expr_node_strided_array category");
-}
-
 // strided_array_expr_node
 
 dnd::strided_array_expr_node::strided_array_expr_node(const dtype& dt, int ndim,
@@ -44,6 +35,17 @@ void dnd::strided_array_expr_node::as_data_and_strides(char **out_originptr,
     memcpy(out_strides, m_strides.get(), ndim() * sizeof(intptr_t));
 }
 
+void dnd::strided_array_expr_node::debug_dump_extra(ostream& o, const string& indent) const
+{
+    o << indent << " strides: ";
+    for (int i = 0; i < m_ndim; ++i) {
+        o << m_strides[i] << " ";
+    }
+    o << "\n";
+    o << indent << " originptr: " << (void *)m_originptr << "\n";
+    o << indent << " buffer owner: " << m_buffer_owner.get() << "\n";
+}
+
 // convert_dtype_expr_node
 
 dnd::convert_dtype_expr_node::convert_dtype_expr_node(const dtype& dt,
@@ -61,6 +63,30 @@ dnd::convert_dtype_expr_node::convert_dtype_expr_node(const dtype& dt,
 {
     m_opnodes[0] = std::move(op);
 }
+
+void dnd::convert_dtype_expr_node::debug_dump_extra(ostream& o, const string& indent) const
+{
+    o << indent << " error mode: ";
+    switch (m_errmode) {
+        case assign_error_none:
+            o << "assign_error_none";
+            break;
+        case assign_error_overflow:
+            o << "assign_error_overflow";
+            break;
+        case assign_error_fractional:
+            o << "assign_error_fractional";
+            break;
+        case assign_error_inexact:
+            o << "assign_error_inexact";
+            break;
+        default:
+            o << "unknown error mode (" << (int)m_errmode << ")";
+            break;
+    }
+    o << "\n";
+}
+
 
 // broadcast_shape_expr_node
 
@@ -94,10 +120,9 @@ void dnd::broadcast_shape_expr_node::as_data_and_strides(char **out_originptr,
     memset(out_strides, 0, dimdelta * sizeof(intptr_t));
 }
 
-
 // Node factory functions
 
-ndarray_expr_node_ptr dnd::make_strided_array_expr_node(ndarray& a)
+ndarray_expr_node_ptr dnd::make_strided_array_expr_node(const ndarray& a)
 {
     if (a.originptr() == NULL) {
         throw std::runtime_error("cannot create a strided_array_expr_node from an "
@@ -118,7 +143,7 @@ ndarray_expr_node_ptr dnd::make_strided_array_expr_node(ndarray& a)
     }
 }
 
-ndarray_expr_node_ptr dnd::make_strided_array_expr_node(ndarray& a, const dtype& dt,
+ndarray_expr_node_ptr dnd::make_strided_array_expr_node(const ndarray& a, const dtype& dt,
                                         assign_error_mode errmode)
 {
     if (a.originptr() == NULL) {
@@ -139,7 +164,7 @@ ndarray_expr_node_ptr dnd::make_strided_array_expr_node(ndarray& a, const dtype&
     }
 }
 
-ndarray_expr_node_ptr dnd::make_broadcast_strided_array_expr_node(ndarray& a,
+ndarray_expr_node_ptr dnd::make_broadcast_strided_array_expr_node(const ndarray& a,
                                 int ndim, const intptr_t *shape,
                                 const dtype& dt, assign_error_mode errmode)
 {

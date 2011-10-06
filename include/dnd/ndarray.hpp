@@ -265,12 +265,7 @@ public:
         return m_num_elements;
     }
 
-    char *originptr() {
-        return m_originptr;
-    }
-
-    // TODO: Should this return the non-const pointer?
-    const char *originptr() const {
+    char *originptr() const {
         return m_originptr;
     }
 
@@ -606,7 +601,12 @@ namespace detail {
             if (lhs.ndim() != 0) {
                 throw std::runtime_error("can only convert ndarrays with 0 dimensions to scalars");
             }
-            dtype_assign(make_dtype<T>(), &result, lhs.get_dtype(), lhs.originptr(), errmode);
+            if (lhs.originptr() != NULL) {
+                dtype_assign(make_dtype<T>(), &result, lhs.get_dtype(), lhs.originptr(), errmode);
+            } else {
+                ndarray tmp = lhs.as_strided();
+                dtype_assign(make_dtype<T>(), &result, tmp.get_dtype(), tmp.originptr(), errmode);
+            }
             return result;
         }
     };

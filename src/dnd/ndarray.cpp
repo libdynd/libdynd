@@ -105,19 +105,25 @@ dnd::ndarray::ndarray(const dtype& dt, int ndim, const intptr_t *shape, const in
 }
 
 dnd::ndarray::ndarray(const ndarray_expr_node_ptr& expr_tree)
-    : m_dtype(expr_tree->get_dtype()), m_ndim(expr_tree->ndim()),
+    : m_dtype(expr_tree->get_dtype()), m_ndim(expr_tree->ndim()), m_num_elements(1),
         m_shape(m_ndim), m_strides(m_ndim), m_originptr(NULL),
         m_expr_tree(expr_tree)
 {
-    memcpy(m_shape.get(), expr_tree->shape(), m_ndim * sizeof(intptr_t));
+    memcpy(m_shape.get(), m_expr_tree->shape(), m_ndim * sizeof(intptr_t));
+    for (int i = 0; i < m_ndim; ++i) {
+        m_num_elements *= m_shape[i];
+    }
 }
 
 dnd::ndarray::ndarray(ndarray_expr_node_ptr&& expr_tree)
-    : m_dtype(expr_tree->get_dtype()), m_ndim(expr_tree->ndim()),
+    : m_dtype(expr_tree->get_dtype()), m_ndim(expr_tree->ndim()), m_num_elements(1),
         m_shape(m_ndim), m_strides(m_ndim), m_originptr(NULL),
-        m_expr_tree(std::move(expr_tree))
+        m_expr_tree(static_cast<ndarray_expr_node_ptr&&>(expr_tree))
 {
-    memcpy(m_shape.get(), expr_tree->shape(), m_ndim * sizeof(intptr_t));
+    memcpy(m_shape.get(), m_expr_tree->shape(), m_ndim * sizeof(intptr_t));
+    for (int i = 0; i < m_ndim; ++i) {
+        m_num_elements *= m_shape[i];
+    }
 }
 
 dnd::ndarray::ndarray(intptr_t dim0, const dtype& dt)
@@ -409,6 +415,11 @@ ndarray dnd::ndarray::as_dtype(const dtype& dt, assign_error_mode errmode) const
 
 void dnd::ndarray::vassign(const ndarray& rhs, assign_error_mode errmode)
 {
+    if (m_originptr == NULL) {
+        throw std::runtime_error("cannot vassign to an expression-view ndarray, must "
+                                 "first convert it to a strided array with as_strided");
+    }
+
     if (get_dtype() == rhs.get_dtype()) {
         // The dtypes match, simpler case
         vassign_equal_dtypes(*this, rhs);
@@ -453,12 +464,18 @@ void dnd::ndarray::debug_dump(std::ostream& o) const
         o << m_shape[i] << " ";
     }
     o << "\n";
-    o << " strides: ";
-    for (int i = 0; i < m_ndim; ++i) {
-        o << m_strides[i] << " ";
+    if (m_originptr != NULL) {
+        o << " strides: ";
+        for (int i = 0; i < m_ndim; ++i) {
+            o << m_strides[i] << " ";
+        }
+        o << "\n";
+        o << " originptr: " << (void *)m_originptr << "\n";
+        o << " buffer owner: " << m_buffer_owner.get() << "\n";
+    } else {
+        o << " expression tree:\n";
+        m_expr_tree->debug_dump(o, "  ");
     }
-    o << "\n";
-    o << " originptr: " << (void *)m_originptr << "\n";
     o << "------" << endl;
 }
 
@@ -483,13 +500,17 @@ static void nested_ndarray_print(std::ostream& o, const ndarray& rhs, const char
 
 std::ostream& dnd::operator<<(std::ostream& o, const ndarray& rhs)
 {
-    o << "ndarray(" << rhs.get_dtype() << ", ";
-    if (rhs.ndim() == 0) {
-        rhs.get_dtype().print(o, rhs.originptr(), 0, 1, "");
+    if (rhs.originptr() != NULL) {
+        o << "ndarray(" << rhs.get_dtype() << ", ";
+        if (rhs.ndim() == 0) {
+            rhs.get_dtype().print(o, rhs.originptr(), 0, 1, "");
+        } else {
+            nested_ndarray_print(o, rhs, rhs.originptr(), 0);
+        }
+        o << ")";
     } else {
-        nested_ndarray_print(o, rhs, rhs.originptr(), 0);
+        o << rhs.as_strided();
     }
-    o << ")";
 
     return o;
 }

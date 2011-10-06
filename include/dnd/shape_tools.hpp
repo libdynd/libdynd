@@ -81,7 +81,14 @@ void strides_to_axis_perm(int ndim, const intptr_t *strides, int *out_axis_perm)
  * trying to match the memory ordering of both where possible and defaulting to
  * C-order where not possible.
  */
-void multistrides_to_axis_perm(int ndim, int noperands, intptr_t **operstrides, int *out_axis_perm);
+void multistrides_to_axis_perm(int ndim, int noperands, const intptr_t **operstrides, int *out_axis_perm);
+
+// For some reason casting 'intptr_t **' to 'const intptr_t **' causes
+// a warning in g++ 4.6.1, this overload works around that.
+inline void multistrides_to_axis_perm(int ndim, int noperands, intptr_t **operstrides, int *out_axis_perm) {
+    multistrides_to_axis_perm(ndim, noperands,
+                const_cast<const intptr_t **>(operstrides), out_axis_perm);
+}
 
 } // namespace dnd
 

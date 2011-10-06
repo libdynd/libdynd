@@ -182,7 +182,7 @@ void dnd::strides_to_axis_perm(int ndim, const intptr_t *strides, int *out_axis_
  * the comparison is ambiguous and, when it's not ambiguous, whether 'i' should occur
  * before 'j'.
  */
-static inline void compare_strides(int i, int j, int noperands, intptr_t **operstrides,
+static inline void compare_strides(int i, int j, int noperands, const intptr_t **operstrides,
                                 bool* out_ambiguous, bool* out_lessthan)
 {
     *out_ambiguous = true;
@@ -207,7 +207,7 @@ static inline void compare_strides(int i, int j, int noperands, intptr_t **opers
     }
 }
 
-void dnd::multistrides_to_axis_perm(int ndim, int noperands, intptr_t **operstrides, int *out_axis_perm)
+void dnd::multistrides_to_axis_perm(int ndim, int noperands, const intptr_t **operstrides, int *out_axis_perm)
 {
     switch (ndim) {
         case 0: {
