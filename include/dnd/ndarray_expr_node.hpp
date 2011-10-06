@@ -103,6 +103,11 @@ public:
      */
     virtual void as_data_and_strides(char **out_originptr, intptr_t *out_strides) const;
 
+    /**
+     * Evaluates the expression tree into a new ndarry.
+     */
+    ndarray evaluate() const;
+
     friend void intrusive_ptr_add_ref(const ndarray_expr_node *node);
     friend void intrusive_ptr_release(const ndarray_expr_node *node);
 };

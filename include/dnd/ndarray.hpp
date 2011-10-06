@@ -278,6 +278,11 @@ public:
         return m_buffer_owner;
     }
 
+    /** When originptr() == NULL, this is the expression tree for creating this array */
+    ndarray_expr_node_ptr expr_tree() const {
+        return m_expr_tree;
+    }
+
     /**
      * Returns true if this is an array which owns its own data,
      * with no other views into the same data.
@@ -352,6 +357,12 @@ public:
         //DEBUG_COUT << "vassign bool\n";
         vassign(dnd_bool(rhs), errmode);
     }
+
+    /**
+     * When the array is an expression-based view, creates a new ndarray and evaluates the
+     * expression into that array. When the array is a strided array, simply returns the array.
+     */
+    ndarray as_strided() const;
 
     /**
      * Converts the array into the specified dtype. This function always makes a copy

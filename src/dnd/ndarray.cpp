@@ -391,6 +391,15 @@ static void vassign_equal_dtypes(ndarray& lhs, const ndarray& rhs)
     }
 }
 
+ndarray dnd::ndarray::as_strided() const
+{
+    if (m_originptr != NULL) {
+        return *this;
+    } else {
+        return m_expr_tree->evaluate();
+    }
+}
+
 ndarray dnd::ndarray::as_dtype(const dtype& dt, assign_error_mode errmode) const
 {
     ndarray result = empty_like(*this, dt);

@@ -13,9 +13,9 @@ set(dnd_SRC
     src/dnd/dtype_casting.cpp
     src/dnd/dtype_promotion.cpp
     src/dnd/exceptions.cpp
-    src/dnd/membuffer.cpp
     src/dnd/ndarray.cpp
     src/dnd/ndarray_arange.cpp
+    src/dnd/ndarray_expr_node.cpp
     src/dnd/ndarray_expr_node_instances.cpp
     src/dnd/arithmetic_op.cpp
     src/dnd/shape_tools.cpp
@@ -27,7 +27,6 @@ set(dnd_SRC
     include/dnd/dtype_promotion.hpp
     include/dnd/exceptions.hpp
     include/dnd/irange.hpp
-    include/dnd/membuffer.hpp
     include/dnd/ndarray.hpp
     include/dnd/ndarray_arange.hpp
     include/dnd/ndarray_expr_node.hpp
