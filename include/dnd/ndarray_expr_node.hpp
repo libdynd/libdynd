@@ -11,6 +11,7 @@
 #include <boost/intrusive_ptr.hpp>
 
 #include <dnd/dtype.hpp>
+#include <dnd/irange.hpp>
 #include <dnd/operations.hpp>
 #include <dnd/shortvector.hpp>
 
@@ -22,14 +23,18 @@ enum expr_node_category {
     // The node points a simple strided array in memory
     strided_array_node_category,
     // The node represents an elementwise nop() to 1 transformation
-    elementwise_node_category
+    elementwise_node_category,
+    // The node represents an arbitrary computation node, which will generally
+    // require evaluation to a temporary.
+    arbitrary_node_category
 };
 
 enum expr_node_type {
     strided_array_node_type,
     convert_dtype_node_type,
     broadcast_shape_node_type,
-    elementwise_binary_op_node_type
+    elementwise_binary_op_node_type,
+    linear_index_node_type
 };
 
 
@@ -69,6 +74,12 @@ protected:
     }
 
 public:
+    bool unique() const {
+        // If a single intrusive_ptr has been created, the use count will
+        // be one. If a raw pointer is being used, the use count will be zero.
+        return m_use_count <= 1;
+    }
+
     virtual ~ndarray_expr_node() {
     }
 
@@ -116,6 +127,20 @@ public:
      * Evaluates the expression tree into a new ndarry.
      */
     ndarray evaluate() const;
+
+    /**
+     * Applies a linear index to the node, returning either the current node (for do-nothing
+     * indexes), or a new node with the index applied. This may apply the indexing up
+     * the tree, or in cases where this is not possible, returning a node which applies the
+     * indexing.
+     *
+     * IMPORTANT: The input ndim, shape, etc are not validated, their correctness must
+     *            be ensured by the caller.
+     */
+    virtual boost::intrusive_ptr<ndarray_expr_node> apply_linear_index(
+                    int ndim, const intptr_t *shape, const int *axis_map,
+                    const intptr_t *index_strides, const intptr_t *start_index, bool allow_in_place);
+
 
     /** Debug printing of the tree */
     void debug_dump(std::ostream& o, const std::string& indent) const;

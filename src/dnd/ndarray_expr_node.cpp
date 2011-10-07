@@ -14,6 +14,8 @@
 #include <dnd/ndarray_expr_node.hpp>
 #include <dnd/raw_iteration.hpp>
 
+#include "ndarray_expr_node_instances.hpp"
+
 using namespace std;
 using namespace dnd;
 
@@ -53,8 +55,8 @@ ndarray dnd::ndarray_expr_node::evaluate() const
         case 1:
             break;
         case 2: {
-            ndarray_expr_node *op1 = m_opnodes[0].get();
-            ndarray_expr_node *op2 = m_opnodes[1].get();
+            const ndarray_expr_node *op1 = m_opnodes[0].get();
+            const ndarray_expr_node *op2 = m_opnodes[1].get();
 
             if (m_node_category == elementwise_node_category) {
                 // Special case of two strided sub-operands, requiring no intermediate buffers
@@ -93,6 +95,16 @@ ndarray dnd::ndarray_expr_node::evaluate() const
     throw std::runtime_error("expr_node with this many operands is not yet supported");
 }
 
+ndarray_expr_node_ptr dnd::ndarray_expr_node::apply_linear_index(
+                    int new_ndim, const intptr_t *new_shape, const int *axis_map,
+                    const intptr_t *index_strides, const intptr_t *start_index, bool /*allow_in_place*/)
+{
+
+    return ndarray_expr_node_ptr(
+            new linear_index_expr_node(new_ndim, new_shape, axis_map,
+                        index_strides, start_index, this));
+}
+
 static void print_node_category(ostream& o, expr_node_category cat)
 {
     switch (cat) {
@@ -101,6 +113,9 @@ static void print_node_category(ostream& o, expr_node_category cat)
             break;
         case elementwise_node_category:
             o << "elementwise_node_category";
+            break;
+        case arbitrary_node_category:
+            o << "arbitrary_node_category";
             break;
         default:
             o << "unknown category (" << (int)cat << ")";
@@ -122,6 +137,9 @@ static void print_node_type(ostream& o, expr_node_type type)
             break;
         case elementwise_binary_op_node_type:
             o << "elementwise_binary_op_node_type";
+            break;
+        case linear_index_node_type:
+            o << "linear_index_node_type";
             break;
         default:
             o << "unknown type (" << (int)type << ")";

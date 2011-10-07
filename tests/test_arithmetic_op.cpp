@@ -86,8 +86,8 @@ TEST(ArithmeticOp, MatchingDTypes) {
     EXPECT_EQ(-3, c(1).as<int>());
     EXPECT_EQ(-2, c(2).as<int>());
 
-    (a + b).debug_dump(cout);
-    (a - b).debug_dump(cout);
-    (a * 2).debug_dump(cout);
-    (b / 5).debug_dump(cout);
+    //(a + b).debug_dump(cout);
+    //(a - b).debug_dump(cout);
+    //(a * 2).debug_dump(cout);
+    //(b / 5).debug_dump(cout);
 }

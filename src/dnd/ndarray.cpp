@@ -11,6 +11,8 @@
 #include <dnd/shape_tools.hpp>
 #include <dnd/exceptions.hpp>
 
+#include "ndarray_expr_node_instances.hpp"
+
 using namespace std;
 using namespace dnd;
 
@@ -180,6 +182,14 @@ dnd::ndarray::ndarray(intptr_t dim0, intptr_t dim1, intptr_t dim2, intptr_t dim3
 
 ndarray dnd::ndarray::index(int nindex, const irange *indices) const
 {
+    // If this array is an expression-based view, index using the tree
+    if (m_originptr == NULL) {
+        // Casting away const is ok here, because we pass 'false' to 'allow_in_place'
+        return ndarray(make_linear_index_expr_node(
+                            const_cast<ndarray_expr_node *>(m_expr_tree.get()),
+                            nindex, indices, false));
+    }
+
     // Validate the number of indices
     if (nindex > ndim()) {
         throw too_many_indices(nindex, ndim());
@@ -292,6 +302,15 @@ ndarray dnd::ndarray::index(int nindex, const irange *indices) const
 
 ndarray dnd::ndarray::operator()(intptr_t idx) const
 {
+    // If this array is an expression-based view, index using the tree
+    if (m_originptr == NULL) {
+        irange i(idx);
+        // Casting away const is ok here, because we pass 'false' to 'allow_in_place'
+        return ndarray(make_linear_index_expr_node(
+                            const_cast<ndarray_expr_node *>(m_expr_tree.get()),
+                            1, &i, false));
+    }
+
     if (1 > ndim()) {
         throw too_many_indices(1, ndim());
     }

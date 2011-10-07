@@ -31,6 +31,9 @@ public:
     /** Provides the data pointer and strides array for the tree evaluation code */
     void as_data_and_strides(char **out_originptr, intptr_t *out_strides) const;
 
+    ndarray_expr_node_ptr apply_linear_index(int ndim, const intptr_t *shape, const int *axis_map,
+                    const intptr_t *index_strides, const intptr_t *start_index, bool allow_in_place);
+
     const char *node_name() const {
         return "strided_array";
     }
@@ -58,6 +61,9 @@ public:
 
     virtual ~convert_dtype_expr_node() {
     }
+
+    ndarray_expr_node_ptr apply_linear_index(int ndim, const intptr_t *shape, const int *axis_map,
+                    const intptr_t *index_strides, const intptr_t *start_index, bool allow_in_place);
 
     const char *node_name() const {
         return "convert_dtype";
@@ -95,12 +101,48 @@ public:
     virtual ~broadcast_shape_expr_node() {
     }
 
+    ndarray_expr_node_ptr apply_linear_index(int ndim, const intptr_t *shape, const int *axis_map,
+                    const intptr_t *index_strides, const intptr_t *start_index, bool allow_in_place);
+
     /** Provides the data pointer and strides array for the tree evaluation code */
     void as_data_and_strides(char **out_originptr, intptr_t *out_strides) const;
 
     const char *node_name() const {
         return "broadcast_shape_expr_node";
     }
+};
+
+/**
+ * NDArray expression node which applies linear indexing.
+ *
+ * This is an operation core to strided multi-dimensional arrays, so
+ * there is also a corresponding function apply_linear_index, which is
+ * used to move linear indexing operations as far to the leaves as possible,
+ * hopefully absorbing them into the representations of the leaf nodes.
+ */
+class linear_index_expr_node : public ndarray_expr_node {
+    /** For each result axis, gives the corresponding axis in the operand */
+    shortvector<int> m_axis_map;
+    /** For each result axis, gives the index stride */
+    shortvector<intptr_t> m_index_strides;
+    /** For each operand axis, gives the start index */
+    shortvector<intptr_t> m_start_index;
+
+    /** Creates a linear index node from all the raw components */
+    linear_index_expr_node(int ndim, const intptr_t *shape, const int *axis_map,
+                    const intptr_t *index_strides, const intptr_t *start_index, ndarray_expr_node *op);
+public:
+
+    ndarray_expr_node_ptr apply_linear_index(int ndim, const intptr_t *shape, const int *axis_map,
+                    const intptr_t *index_strides, const intptr_t *start_index, bool allow_in_place);
+
+    const char *node_name() const {
+        return "linear_index_expr_node";
+    }
+
+    friend ndarray_expr_node_ptr make_linear_index_expr_node(ndarray_expr_node *node,
+                                    int nindex, const irange *indices, bool allow_in_place);
+    friend class ndarray_expr_node;
 };
 
 /**
@@ -137,16 +179,45 @@ class elementwise_binary_op_expr_node : public ndarray_expr_node {
         m_op_factory.swap(op_factory);
     }
 
+public:
+
+    virtual ~elementwise_binary_op_expr_node() {
+    }
+
     std::pair<binary_operation_t, std::shared_ptr<auxiliary_data> >
             get_binary_operation(intptr_t dst_fixedstride, intptr_t src1_fixedstride,
                                 intptr_t src2_fixedstride) const {
         return m_op_factory.get_binary_operation(dst_fixedstride, src1_fixedstride, src2_fixedstride);
     }
 
-public:
+    /**
+     * Application of a linear index to an elementwise binary operation is propagated to both
+     * the input operands.
+     */
+    ndarray_expr_node_ptr apply_linear_index(int ndim, const intptr_t *shape, const int *axis_map,
+                    const intptr_t *index_strides, const intptr_t *start_index, bool allow_in_place)
+    {
+        if (allow_in_place) {
+            m_ndim = ndim;
+            memcpy(m_shape.get(), shape, ndim * sizeof(intptr_t));
+            m_opnodes[0] = m_opnodes[0]->apply_linear_index(ndim, shape, axis_map,
+                                            index_strides, start_index, m_opnodes[0]->unique());
+            m_opnodes[1] = m_opnodes[1]->apply_linear_index(ndim, shape, axis_map,
+                                            index_strides, start_index, m_opnodes[1]->unique());
+            return ndarray_expr_node_ptr(this);
+        } else {
+            ndarray_expr_node_ptr node1, node2;
+            node1 = m_opnodes[0]->apply_linear_index(ndim, shape, axis_map,
+                                            index_strides, start_index, false);
+            node2 = m_opnodes[1]->apply_linear_index(ndim, shape, axis_map,
+                                            index_strides, start_index, false);
 
-    virtual ~elementwise_binary_op_expr_node() {
+            BinaryOperatorFactory op_factory_copy(m_op_factory);
+            return ndarray_expr_node_ptr(
+                        new elementwise_binary_op_expr_node(node1, node2, op_factory_copy));
+        }
     }
+
 
     const char *node_name() const {
         return m_op_factory.node_name();
@@ -190,6 +261,13 @@ ndarray_expr_node_ptr make_strided_array_expr_node(const ndarray& a, const dtype
  */
 ndarray_expr_node_ptr make_broadcast_strided_array_expr_node(const ndarray& a, int ndim, const intptr_t *shape,
                                     const dtype& dt, assign_error_mode errmode = assign_error_fractional);
+
+/**
+ * Creates a linear_index_expr_node applied to the given node.
+ */
+ndarray_expr_node_ptr make_linear_index_expr_node(ndarray_expr_node *node,
+                                int nindex, const irange *indices, bool allow_in_place);
+
 
 /**
  * Creates an elementwise binary operator node from the two input ndarrays.
