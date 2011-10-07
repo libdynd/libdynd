@@ -59,16 +59,16 @@ class ndarray {
      */
     ndarray(const dtype& dt, int ndim, intptr_t size, const intptr_t *shape,
             const intptr_t *strides, char *originptr,
-            const std::shared_ptr<void>& buffer_owner);
+            const std::shared_ptr<void>& buffer_owner, const ndarray_expr_node_ptr& expr_tree);
     ndarray(const dtype& dt, int ndim, intptr_t size, const intptr_t *shape,
             const intptr_t *strides, char *originptr,
-            std::shared_ptr<void>&& buffer_owner);
+            std::shared_ptr<void>&& buffer_owner, const ndarray_expr_node_ptr& expr_tree);
     ndarray(const dtype& dt, int ndim, intptr_t size, dimvector&& shape,
             dimvector&& strides, char *originptr,
-            const std::shared_ptr<void>& buffer_owner);
+            const std::shared_ptr<void>& buffer_owner, const ndarray_expr_node_ptr& expr_tree);
     ndarray(const dtype& dt, int ndim, intptr_t size, dimvector&& shape,
             dimvector&& strides, char *originptr,
-            std::shared_ptr<void>&& buffer_owner);
+            std::shared_ptr<void>&& buffer_owner, const ndarray_expr_node_ptr& expr_tree);
 
     /**
      * Private method for general indexing based on a raw array of irange
@@ -203,12 +203,14 @@ public:
         : m_dtype(rhs.m_dtype), m_ndim(rhs.m_ndim), m_num_elements(rhs.m_num_elements),
           m_shape(rhs.m_ndim, rhs.m_shape),
           m_strides(rhs.m_ndim, rhs.m_strides),
-          m_originptr(rhs.m_originptr), m_buffer_owner(rhs.m_buffer_owner) {}
+          m_originptr(rhs.m_originptr), m_buffer_owner(rhs.m_buffer_owner),
+          m_expr_tree(rhs.m_expr_tree) {}
     /** Move constructor (should just be "= default" in C++11) */
     ndarray(ndarray&& rhs)
         : m_dtype(std::move(rhs.m_dtype)), m_ndim(rhs.m_ndim), m_num_elements(rhs.m_num_elements),
           m_shape(std::move(rhs.m_shape)), m_strides(std::move(rhs.m_strides)),
-          m_originptr(rhs.m_originptr), m_buffer_owner(std::move(rhs.m_buffer_owner)) {}
+          m_originptr(rhs.m_originptr), m_buffer_owner(std::move(rhs.m_buffer_owner)),
+          m_expr_tree(std::move(rhs.m_expr_tree)) {}
 
     /** Swap operation (should be "noexcept" in C++11) */
     void swap(ndarray& rhs);
@@ -232,6 +234,7 @@ public:
             m_strides = std::move(rhs.m_strides);
             m_originptr = rhs.m_originptr;
             m_buffer_owner = std::move(rhs.m_buffer_owner);
+            m_expr_tree = std::move(rhs.m_expr_tree);
         }
 
         return *this;

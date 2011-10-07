@@ -418,6 +418,7 @@ ndarray_expr_node_ptr dnd::make_linear_index_expr_node(ndarray_expr_node *node,
                 new_shape[new_i] = 0;
                 index_strides[new_i] = 0;
             }
+            axis_map[new_i] = i;
             ++new_i;
         } else {
             // A range with a negative step
@@ -450,6 +451,7 @@ ndarray_expr_node_ptr dnd::make_linear_index_expr_node(ndarray_expr_node *node,
                 new_shape[new_i] = 0;
                 index_strides[new_i] = 0;
             }
+            axis_map[new_i] = i;
             ++new_i;
         }
     }
@@ -458,9 +460,27 @@ ndarray_expr_node_ptr dnd::make_linear_index_expr_node(ndarray_expr_node *node,
         start_index[i] = 0;
     }
     for (int i = new_i; i < new_ndim; ++i) {
-        new_shape[i] = shape[i - new_i + nindex];
+        int old_i = i - new_i + nindex;
+        new_shape[i] = shape[old_i];
         index_strides[i] = 1;
+        axis_map[i] = old_i;
     }
+
+    /*
+    cout << "new_ndim: " << new_ndim << "\n";
+    cout << "new_shape: ";
+    for (int i = 0; i < new_ndim; ++i) cout << new_shape[i] << " ";
+    cout << "\n";
+    cout << "axis_map: ";
+    for (int i = 0; i < new_ndim; ++i) cout << axis_map[i] << " ";
+    cout << "\n";
+    cout << "index_strides: ";
+    for (int i = 0; i < new_ndim; ++i) cout << index_strides[i] << " ";
+    cout << "\n";
+    cout << "start_index: ";
+    for (int i = 0; i < node->ndim(); ++i) cout << start_index[i] << " ";
+    cout << "\n";
+    */
 
     return node->apply_linear_index(new_ndim, new_shape.get(), axis_map.get(),
                     index_strides.get(), start_index.get(), allow_in_place);

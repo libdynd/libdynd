@@ -44,6 +44,7 @@ enum expr_node_type {
  * TODO: Model this after how LLVM does this kind of thing?
  */
 class ndarray_expr_node {
+    /** Embedded reference counting using boost::intrusive_ptr */
     mutable boost::detail::atomic_count m_use_count;
 
     // Non-copyable
@@ -51,6 +52,8 @@ class ndarray_expr_node {
     ndarray_expr_node& operator=(const ndarray_expr_node&);
 
 protected:
+    expr_node_type m_node_type;
+    expr_node_category m_node_category;
     /* The data type of this node's result */
     dtype m_dtype;
     /* The number of dimensions in the result array */
@@ -59,8 +62,6 @@ protected:
     int m_nop;
     /* The shape of the result array */
     dimvector m_shape;
-    expr_node_category m_node_category;
-    expr_node_type m_node_type;
     /* Pointers to the child nodes */
     shortvector<boost::intrusive_ptr<ndarray_expr_node> > m_opnodes;
 
@@ -69,8 +70,9 @@ protected:
      */
     ndarray_expr_node(const dtype& dt, int ndim, int nop, const intptr_t *shape,
                         expr_node_category node_category, expr_node_type node_type)
-        : m_use_count(0), m_dtype(dt), m_ndim(ndim), m_nop(nop), m_shape(ndim, shape),
-            m_node_category(node_category), m_node_type(node_type), m_opnodes(nop) {
+        : m_use_count(0), m_node_type(node_type), m_node_category(node_category),
+            m_dtype(dt), m_ndim(ndim), m_nop(nop), m_shape(ndim, shape),
+            m_opnodes(nop) {
     }
 
 public:

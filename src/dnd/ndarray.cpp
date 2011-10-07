@@ -30,9 +30,10 @@ void dnd::detail::ndarray_buffer_deleter(void *ptr)
 
 dnd::ndarray::ndarray(const dtype& dt, int ndim, intptr_t num_elements, const intptr_t *shape,
         const intptr_t *strides, char *originptr,
-        const std::shared_ptr<void>& buffer_owner)
+        const std::shared_ptr<void>& buffer_owner, const ndarray_expr_node_ptr& expr_tree)
     : m_dtype(dt), m_ndim(ndim), m_num_elements(num_elements), m_shape(ndim), m_strides(ndim),
-      m_originptr(originptr), m_buffer_owner(buffer_owner)
+      m_originptr(originptr), m_buffer_owner(buffer_owner),
+      m_expr_tree(expr_tree)
 {
     memcpy(m_shape.get(), shape, ndim * sizeof(intptr_t));
     memcpy(m_strides.get(), strides, ndim * sizeof(intptr_t));
@@ -40,9 +41,10 @@ dnd::ndarray::ndarray(const dtype& dt, int ndim, intptr_t num_elements, const in
 
 dnd::ndarray::ndarray(const dtype& dt, int ndim, intptr_t num_elements, const intptr_t *shape,
         const intptr_t *strides, char *originptr,
-        std::shared_ptr<void>&& buffer_owner)
+        std::shared_ptr<void>&& buffer_owner, const ndarray_expr_node_ptr& expr_tree)
     : m_dtype(dt), m_ndim(ndim), m_num_elements(num_elements), m_shape(ndim), m_strides(ndim),
-      m_originptr(originptr), m_buffer_owner(std::move(buffer_owner))
+      m_originptr(originptr), m_buffer_owner(std::move(buffer_owner)),
+      m_expr_tree(expr_tree)
 {
     memcpy(m_shape.get(), shape, ndim * sizeof(intptr_t));
     memcpy(m_strides.get(), strides, ndim * sizeof(intptr_t));
@@ -50,17 +52,19 @@ dnd::ndarray::ndarray(const dtype& dt, int ndim, intptr_t num_elements, const in
 
 dnd::ndarray::ndarray(const dtype& dt, int ndim, intptr_t num_elements, dimvector&& shape,
         dimvector&& strides, char *originptr,
-        std::shared_ptr<void>&& buffer_owner)
+        std::shared_ptr<void>&& buffer_owner, const ndarray_expr_node_ptr& expr_tree)
     : m_dtype(dt), m_ndim(ndim), m_num_elements(num_elements), m_shape(std::move(shape)),
-        m_strides(std::move(strides)), m_originptr(originptr), m_buffer_owner(std::move(buffer_owner))
+        m_strides(std::move(strides)), m_originptr(originptr), m_buffer_owner(std::move(buffer_owner)),
+        m_expr_tree(expr_tree)
 {
 }
 
 dnd::ndarray::ndarray(const dtype& dt, int ndim, intptr_t num_elements, dimvector&& shape,
         dimvector&& strides, char *originptr,
-        const std::shared_ptr<void>& buffer_owner)
+        const std::shared_ptr<void>& buffer_owner, const ndarray_expr_node_ptr& expr_tree)
     : m_dtype(dt), m_ndim(ndim), m_num_elements(num_elements), m_shape(std::move(shape)),
-        m_strides(std::move(strides)), m_originptr(originptr), m_buffer_owner(buffer_owner)
+        m_strides(std::move(strides)), m_originptr(originptr), m_buffer_owner(buffer_owner),
+        m_expr_tree(expr_tree)
 {
 }
 
@@ -297,7 +301,8 @@ ndarray dnd::ndarray::index(int nindex, const irange *indices) const
     }
 
     return ndarray(get_dtype(), new_ndim, new_num_elements,
-                    std::move(new_shape), std::move(new_strides), new_originptr, m_buffer_owner);
+                    std::move(new_shape), std::move(new_strides), new_originptr, m_buffer_owner,
+                    ndarray_expr_node_ptr());
 }
 
 ndarray dnd::ndarray::operator()(intptr_t idx) const
@@ -321,7 +326,8 @@ ndarray dnd::ndarray::operator()(intptr_t idx) const
 
     return ndarray(get_dtype(), ndim()-1, num_elements()/m_shape[0],
                     dimvector(ndim() - 1, shape() + 1), dimvector(ndim() - 1, strides() + 1),
-                    m_originptr + idx * m_strides[0], m_buffer_owner);
+                    m_originptr + idx * m_strides[0], m_buffer_owner,
+                    ndarray_expr_node_ptr());
 }
 
 ndarray& dnd::ndarray::operator=(const ndarray& rhs)
@@ -329,7 +335,7 @@ ndarray& dnd::ndarray::operator=(const ndarray& rhs)
     if (this != &rhs) {
         // Create a temporary and swap, for exception safety
         ndarray tmp(rhs.m_dtype, rhs.m_ndim, rhs.m_num_elements, rhs.m_shape.get(), rhs.m_strides.get(),
-                    rhs.m_originptr, rhs.m_buffer_owner);
+                    rhs.m_originptr, rhs.m_buffer_owner, rhs.m_expr_tree);
         tmp.swap(*this);
     }
     return *this;
