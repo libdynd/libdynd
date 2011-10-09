@@ -89,23 +89,23 @@ public:
         return m_dtype;
     }
 
-    int ndim() const {
+    int get_ndim() const {
         return m_ndim;
     }
 
-    int nop() const {
+    int get_nop() const {
         return m_nop;
     }
 
-    expr_node_category node_category() const {
+    expr_node_category get_node_category() const {
         return m_node_category;
     }
 
-    expr_node_type node_type() const {
+    expr_node_type get_node_type() const {
         return m_node_type;
     }
 
-    const intptr_t *shape() const {
+    const intptr_t *get_shape() const {
         return m_shape.get();
     }
 
@@ -126,9 +126,9 @@ public:
                                       intptr_t src2_fixedstride) const;
 
     /**
-     * Evaluates the expression tree into a new ndarry.
+     * Evaluates the expression tree into a strided array
      */
-    ndarray evaluate() const;
+    boost::intrusive_ptr<ndarray_expr_node>  evaluate() const;
 
     /**
      * Applies a linear index to the node, returning either the current node (for do-nothing
@@ -142,6 +142,18 @@ public:
     virtual boost::intrusive_ptr<ndarray_expr_node> apply_linear_index(
                     int ndim, const intptr_t *shape, const int *axis_map,
                     const intptr_t *index_strides, const intptr_t *start_index, bool allow_in_place);
+    /**
+     * Applies a single integer index to the node. See apply_linear_index for more details.
+     *
+     * IMPORTANT: The input axis and idx are not validated, their correctness must
+     *            be ensured by the caller.
+     *
+     * @param axis  Which axis to index
+     * @param idx   The index to apply
+     * @param allow_in_place  The operation is permitted mutate the node data and return 'this'.
+     */
+    virtual boost::intrusive_ptr<ndarray_expr_node> apply_integer_index(
+                                        int axis, intptr_t idx, bool allow_in_place);
 
 
     /** Debug printing of the tree */
@@ -155,6 +167,73 @@ public:
     friend void intrusive_ptr_release(const ndarray_expr_node *node);
 };
 
+/**
+ * Use boost::intrusive_ptr as the smart pointer implementation.
+ */
+typedef boost::intrusive_ptr<ndarray_expr_node> ndarray_expr_node_ptr;
+
+/**
+ * NDArray expression node which holds a raw strided array.
+ */
+class strided_array_expr_node : public ndarray_expr_node {
+    char *m_originptr;
+    dimvector m_strides;
+    std::shared_ptr<void> m_buffer_owner;
+
+public:
+    /** Creates a strided array node from the raw values */
+    strided_array_expr_node(const dtype& dt, int ndim, const intptr_t *shape,
+            const intptr_t *strides, char *originptr, const std::shared_ptr<void>& buffer_owner);
+    /** Constructs a strided array node with the given dtype, shape, and axis_perm (for memory layout) */
+    strided_array_expr_node(const dtype& dt, int ndim, const intptr_t *shape, const int *axis_perm);
+
+
+    virtual ~strided_array_expr_node() {
+    }
+
+    char *get_originptr() const {
+        return m_originptr;
+    }
+
+    const intptr_t *get_strides() const {
+        return m_strides.get();
+    }
+
+    std::shared_ptr<void> get_buffer_owner() const {
+        return m_buffer_owner;
+    }
+
+    bool is_aligned() const {
+        int alignment = get_dtype().alignment();
+        if (alignment == 1) {
+            return true;
+        } else {
+            const intptr_t *strides = get_strides();
+            int ndim = get_ndim();
+            int align_test = static_cast<int>(reinterpret_cast<intptr_t>(get_originptr()));
+
+            for (int i = 0; i < ndim; ++i) {
+                align_test |= static_cast<int>(strides[i]);
+            }
+            return ((alignment - 1) & align_test) == 0;
+        }
+    }
+
+    /** Provides the data pointer and strides array for the tree evaluation code */
+    void as_data_and_strides(char **out_originptr, intptr_t *out_strides) const;
+
+    ndarray_expr_node_ptr apply_linear_index(int ndim, const intptr_t *shape, const int *axis_map,
+                    const intptr_t *index_strides, const intptr_t *start_index, bool allow_in_place);
+    // TODO: Implement apply_integer_index
+
+    const char *node_name() const {
+        return "strided_array";
+    }
+
+    void debug_dump_extra(std::ostream& o, const std::string& indent) const;
+};
+
+
 /** Adds a reference, for intrusive_ptr<ndarray_expr_node> to use */
 inline void intrusive_ptr_add_ref(const ndarray_expr_node *node) {
     ++node->m_use_count;
@@ -166,11 +245,6 @@ inline void intrusive_ptr_release(const ndarray_expr_node *node) {
         delete node;
     }
 }
-
-/**
- * Use boost::intrusive_ptr as the smart pointer implementation.
- */
-typedef boost::intrusive_ptr<ndarray_expr_node> ndarray_expr_node_ptr;
 
 } // namespace dnd
 

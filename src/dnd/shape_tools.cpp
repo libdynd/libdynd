@@ -49,14 +49,14 @@ void dnd::broadcast_to_shape(int dst_ndim, const intptr_t *dst_shape,
     //cout << "\n";
 }
 
-void dnd::broadcast_input_shapes(int noperands, const ndarray **operands,
+void dnd::broadcast_input_shapes(int noperands, ndarray_expr_node **operands,
                         int* out_ndim, dimvector* out_shape)
 {
     // Get the number of broadcast dimensions
-    int ndim = operands[0]->ndim();
+    int ndim = operands[0]->get_ndim();
     for (int i = 0; i < noperands; ++i) {
-        if (operands[i]->ndim() > ndim) {
-            ndim = operands[i]->ndim();
+        if (operands[i]->get_ndim() > ndim) {
+            ndim = operands[i]->get_ndim();
         }
     }
 
@@ -68,9 +68,9 @@ void dnd::broadcast_input_shapes(int noperands, const ndarray **operands,
         shape[k] = 1;
     }
     for (int i = 0; i < noperands; ++i) {
-        int dimdelta = ndim - operands[i]->ndim();
+        int dimdelta = ndim - operands[i]->get_ndim();
         for (int k = dimdelta; k < ndim; ++k) {
-            intptr_t size = operands[i]->shape(k - dimdelta);
+            intptr_t size = operands[i]->get_shape()[k - dimdelta];
             intptr_t itershape_size = shape[k];
             if (itershape_size == 1) {
                 shape[k] = size;
@@ -87,9 +87,9 @@ void dnd::broadcast_input_shapes(int noperands, const ndarray **operands,
 void dnd::copy_input_strides(const ndarray& op, int ndim, intptr_t *out_strides)
 {
     // Process op
-    int dimdelta = ndim - op.ndim();
-    const intptr_t *in_strides = op.strides();
-    const intptr_t *in_shape = op.shape();
+    int dimdelta = ndim - op.get_ndim();
+    const intptr_t *in_strides = op.get_strides();
+    const intptr_t *in_shape = op.get_shape();
 
     for (int i = 0; i < dimdelta; ++i) {
         out_strides[i] = 0;

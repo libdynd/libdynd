@@ -20,9 +20,9 @@ namespace {
         static void arange(const void *beginval, const void *stepval, ndarray& result) {
             T begin = *reinterpret_cast<const T *>(beginval);
             T step = *reinterpret_cast<const T *>(stepval);
-            intptr_t count = result.shape(0), stride = result.strides(0);
+            intptr_t count = result.get_shape(0), stride = result.get_strides(0);
             //cout << "arange with count " << count << endl;
-            char *dst = result.originptr();
+            char *dst = result.get_originptr();
             for (intptr_t i = 0; i < count; ++i, dst += stride) {
                 *reinterpret_cast<T *>(dst) = begin + i * step;
             }
@@ -143,8 +143,8 @@ ndarray dnd::arange(const dtype& dt, const void *beginval, const void *endval, c
 
 static void linspace_specialization(float start, float stop, intptr_t count, ndarray& result)
 {
-    intptr_t stride = result.strides(0);
-    char *dst = result.originptr();
+    intptr_t stride = result.get_strides(0);
+    char *dst = result.get_originptr();
     for (intptr_t i = 0; i < count; ++i, dst += stride) {
         float alpha = float(double(i) / double(count - 1));
         *reinterpret_cast<float *>(dst) = (1 - alpha) * start + alpha * stop;
@@ -153,8 +153,8 @@ static void linspace_specialization(float start, float stop, intptr_t count, nda
 
 static void linspace_specialization(double start, double stop, intptr_t count, ndarray& result)
 {
-    intptr_t stride = result.strides(0);
-    char *dst = result.originptr();
+    intptr_t stride = result.get_strides(0);
+    char *dst = result.get_originptr();
     for (intptr_t i = 0; i < count; ++i, dst += stride) {
         double alpha = double(i) / double(count - 1);
         *reinterpret_cast<double *>(dst) = (1 - alpha) * start + alpha * stop;

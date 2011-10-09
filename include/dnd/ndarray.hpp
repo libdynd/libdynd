@@ -35,40 +35,11 @@ namespace detail {
  * This is the primary multi-dimensional array class.
  */
 class ndarray {
-    /** The data type of the array */
-    dtype m_dtype;
-    /** The number of dimensions */
-    int m_ndim;
-    /** A cached version of the number of elements (product of shape[i]) */
-    intptr_t m_num_elements;
-    /** The shape of the array (has ndim elements) */
-    dimvector m_shape;
-    /** The strides of the array (has ndim elements) when originptr != NULL */
-    dimvector m_strides;
-    /** The address of the element with an index of all zeros */
-    char *m_originptr;
-    /** Pointer to the object which owns the array's memory */
-    std::shared_ptr<void> m_buffer_owner;
-    /** When m_originptr is NULL, this contains the expression tree for this array */
-    ndarray_expr_node_ptr m_expr_tree;
-
     /**
-     * Private method which constructs an array from all the members. This
-     * function does not validate that the originptr/strides stay within
-     * the buffer's bounds.
+     * The ndarray is fully contained in an expression tree, this is the root node, a
+     * boost_intrusive_ptr, to make the ndarray size equivalent to a single pointer.
      */
-    ndarray(const dtype& dt, int ndim, intptr_t size, const intptr_t *shape,
-            const intptr_t *strides, char *originptr,
-            const std::shared_ptr<void>& buffer_owner, const ndarray_expr_node_ptr& expr_tree);
-    ndarray(const dtype& dt, int ndim, intptr_t size, const intptr_t *shape,
-            const intptr_t *strides, char *originptr,
-            std::shared_ptr<void>&& buffer_owner, const ndarray_expr_node_ptr& expr_tree);
-    ndarray(const dtype& dt, int ndim, intptr_t size, dimvector&& shape,
-            dimvector&& strides, char *originptr,
-            const std::shared_ptr<void>& buffer_owner, const ndarray_expr_node_ptr& expr_tree);
-    ndarray(const dtype& dt, int ndim, intptr_t size, dimvector&& shape,
-            dimvector&& strides, char *originptr,
-            std::shared_ptr<void>&& buffer_owner, const ndarray_expr_node_ptr& expr_tree);
+    ndarray_expr_node_ptr m_expr_tree;
 
     /**
      * Private method for general indexing based on a raw array of irange
@@ -86,80 +57,22 @@ public:
      * TODO: Figure out why enable_if with is_dtype_scalar didn't work for this constructor
      *       in g++ 4.6.0.
      */
-    ndarray(int8_t value)
-        : m_dtype(int8_type_id), m_ndim(0), m_num_elements(1), m_shape(0), m_strides(0),
-          m_buffer_owner(detail::ndarray_buffer_allocator(1), detail::ndarray_buffer_deleter)
-    {
-        m_originptr = reinterpret_cast<char *>(m_buffer_owner.get());
-        *reinterpret_cast<int8_t *>(m_originptr) = value;
-    }
-    ndarray(int16_t value)
-        : m_dtype(int16_type_id), m_ndim(0), m_num_elements(1), m_shape(0), m_strides(0),
-          m_buffer_owner(detail::ndarray_buffer_allocator(2), detail::ndarray_buffer_deleter)
-    {
-        m_originptr = reinterpret_cast<char *>(m_buffer_owner.get());
-        *reinterpret_cast<int16_t *>(m_originptr) = value;
-    }
-    ndarray(int32_t value)
-        : m_dtype(int32_type_id), m_ndim(0), m_num_elements(1), m_shape(0), m_strides(0),
-          m_buffer_owner(detail::ndarray_buffer_allocator(4), detail::ndarray_buffer_deleter)
-    {
-        m_originptr = reinterpret_cast<char *>(m_buffer_owner.get());
-        *reinterpret_cast<int32_t *>(m_originptr) = value;
-    }
-    ndarray(int64_t value)
-        : m_dtype(int64_type_id), m_ndim(0), m_num_elements(1), m_shape(0), m_strides(0),
-          m_buffer_owner(detail::ndarray_buffer_allocator(8), detail::ndarray_buffer_deleter)
-    {
-        m_originptr = reinterpret_cast<char *>(m_buffer_owner.get());
-        *reinterpret_cast<int64_t *>(m_originptr) = value;
-    }
-    ndarray(uint8_t value)
-        : m_dtype(uint8_type_id), m_ndim(0), m_num_elements(1), m_shape(0), m_strides(0),
-          m_buffer_owner(detail::ndarray_buffer_allocator(1), detail::ndarray_buffer_deleter)
-    {
-        m_originptr = reinterpret_cast<char *>(m_buffer_owner.get());
-        *reinterpret_cast<uint8_t *>(m_originptr) = value;
-    }
-    ndarray(uint16_t value)
-        : m_dtype(uint16_type_id), m_ndim(0), m_num_elements(1), m_shape(0), m_strides(0),
-          m_buffer_owner(detail::ndarray_buffer_allocator(2), detail::ndarray_buffer_deleter)
-    {
-        m_originptr = reinterpret_cast<char *>(m_buffer_owner.get());
-        *reinterpret_cast<uint16_t *>(m_originptr) = value;
-    }
-    ndarray(uint32_t value)
-        : m_dtype(uint32_type_id), m_ndim(0), m_num_elements(1), m_shape(0), m_strides(0),
-          m_buffer_owner(detail::ndarray_buffer_allocator(4), detail::ndarray_buffer_deleter)
-    {
-        m_originptr = reinterpret_cast<char *>(m_buffer_owner.get());
-        *reinterpret_cast<uint32_t *>(m_originptr) = value;
-    }
-    ndarray(uint64_t value)
-        : m_dtype(uint64_type_id), m_ndim(0), m_num_elements(1), m_shape(0), m_strides(0),
-          m_buffer_owner(detail::ndarray_buffer_allocator(8), detail::ndarray_buffer_deleter)
-    {
-        m_originptr = reinterpret_cast<char *>(m_buffer_owner.get());
-        *reinterpret_cast<uint64_t *>(m_originptr) = value;
-    }
-    ndarray(float value)
-        : m_dtype(float32_type_id), m_ndim(0), m_num_elements(1), m_shape(0), m_strides(0),
-          m_buffer_owner(detail::ndarray_buffer_allocator(4), detail::ndarray_buffer_deleter)
-    {
-        m_originptr = reinterpret_cast<char *>(m_buffer_owner.get());
-        *reinterpret_cast<float *>(m_originptr) = value;
-    }
-    ndarray(double value)
-        : m_dtype(float64_type_id), m_ndim(0), m_num_elements(1), m_shape(0), m_strides(0),
-          m_buffer_owner(detail::ndarray_buffer_allocator(8), detail::ndarray_buffer_deleter)
-    {
-        m_originptr = reinterpret_cast<char *>(m_buffer_owner.get());
-        *reinterpret_cast<double *>(m_originptr) = value;
-    }
+    ndarray(int8_t value);
+    ndarray(int16_t value);
+    ndarray(int32_t value);
+    ndarray(int64_t value);
+    ndarray(uint8_t value);
+    ndarray(uint16_t value);
+    ndarray(uint32_t value);
+    ndarray(uint64_t value);
+    ndarray(float value);
+    ndarray(double value);
     /** Constructs a zero-dimensional scalar array */
     explicit ndarray(const dtype& dt);
     /** Constructs an array with the given dtype, shape, and axis_perm (for memory layout) */
-    explicit ndarray(const dtype& dt, int ndim, const intptr_t *shape, const int *axis_perm);
+    ndarray(const dtype& dt, int ndim, const intptr_t *shape, const int *axis_perm)
+        : m_expr_tree(new strided_array_expr_node(dt, ndim, shape, axis_perm)) {
+    }
 
     /** Constructs an ndaray from an expr node */
     explicit ndarray(const ndarray_expr_node_ptr& expr_tree);
@@ -200,17 +113,10 @@ public:
 
     /** Copy constructor */
     ndarray(const ndarray& rhs)
-        : m_dtype(rhs.m_dtype), m_ndim(rhs.m_ndim), m_num_elements(rhs.m_num_elements),
-          m_shape(rhs.m_ndim, rhs.m_shape),
-          m_strides(rhs.m_ndim, rhs.m_strides),
-          m_originptr(rhs.m_originptr), m_buffer_owner(rhs.m_buffer_owner),
-          m_expr_tree(rhs.m_expr_tree) {}
+        : m_expr_tree(rhs.m_expr_tree) {}
     /** Move constructor (should just be "= default" in C++11) */
     ndarray(ndarray&& rhs)
-        : m_dtype(std::move(rhs.m_dtype)), m_ndim(rhs.m_ndim), m_num_elements(rhs.m_num_elements),
-          m_shape(std::move(rhs.m_shape)), m_strides(std::move(rhs.m_strides)),
-          m_originptr(rhs.m_originptr), m_buffer_owner(std::move(rhs.m_buffer_owner)),
-          m_expr_tree(std::move(rhs.m_expr_tree)) {}
+        : m_expr_tree(std::move(rhs.m_expr_tree)) {}
 
     /** Swap operation (should be "noexcept" in C++11) */
     void swap(ndarray& rhs);
@@ -226,67 +132,70 @@ public:
     ndarray& operator=(const ndarray& rhs);
     /** Move assignment operator (should be just "= default" in C++11) */
     ndarray& operator=(ndarray&& rhs) {
-        if (this != &rhs) {
-            m_dtype = std::move(rhs.m_dtype);
-            m_ndim = rhs.m_ndim;
-            m_num_elements = rhs.m_num_elements;
-            m_shape = std::move(rhs.m_shape);
-            m_strides = std::move(rhs.m_strides);
-            m_originptr = rhs.m_originptr;
-            m_buffer_owner = std::move(rhs.m_buffer_owner);
-            m_expr_tree = std::move(rhs.m_expr_tree);
-        }
+        m_expr_tree = std::move(rhs.m_expr_tree);
 
         return *this;
     }
 
     const dtype& get_dtype() const {
-        return m_dtype;
+        return m_expr_tree->get_dtype();
     }
 
-    int ndim() const {
-        return m_ndim;
+    int get_ndim() const {
+        return m_expr_tree->get_ndim();
     }
 
-    const intptr_t *shape() const {
-        return m_shape.get();
+    const intptr_t *get_shape() const {
+        return m_expr_tree->get_shape();
     }
 
-    intptr_t shape(int i) const {
-        return m_shape.get()[i];
+    intptr_t get_shape(int i) const {
+        return m_expr_tree->get_shape()[i];
     }
 
-    const intptr_t *strides() const {
-        return m_strides.get();
+    const intptr_t *get_strides() const {
+        if (m_expr_tree->get_node_type() == strided_array_node_type) {
+            return static_cast<const strided_array_expr_node *>(m_expr_tree.get())->get_strides();
+        } else {
+            throw std::runtime_error("cannot get the strides of an expression view ndarray");
+        }
     }
 
-    intptr_t strides(int i) const {
-        return m_strides.get()[i];
+    intptr_t get_strides(int i) const {
+        if (m_expr_tree->get_node_type() == strided_array_node_type) {
+            return static_cast<const strided_array_expr_node *>(m_expr_tree.get())->get_strides()[i];
+        } else {
+            throw std::runtime_error("cannot get the strides of an expression view ndarray");
+        }
     }
 
-    intptr_t num_elements() const {
-        return m_num_elements;
+    intptr_t get_num_elements() const {
+        intptr_t nelem = 1, ndim = get_ndim();
+        const intptr_t *shape = get_shape();
+        for (int i = 0; i < ndim; ++i) {
+            nelem *= shape[i];
+        }
+        return nelem;
     }
 
-    char *originptr() const {
-        return m_originptr;
+    char *get_originptr() const {
+        if (m_expr_tree->get_node_type() == strided_array_node_type) {
+            return static_cast<const strided_array_expr_node *>(m_expr_tree.get())->get_originptr();
+        } else {
+            throw std::runtime_error("cannot get the origin pointer of an expression view ndarray");
+        }
     }
 
-    std::shared_ptr<void> buffer_owner() const {
-        return m_buffer_owner;
+    std::shared_ptr<void> get_buffer_owner() const {
+        if (m_expr_tree->get_node_type() == strided_array_node_type) {
+            return static_cast<const strided_array_expr_node *>(m_expr_tree.get())->get_buffer_owner();
+        } else {
+            throw std::runtime_error("cannot get the buffer owner of an expression view ndarray");
+        }
     }
 
-    /** When originptr() == NULL, this is the expression tree for creating this array */
-    ndarray_expr_node_ptr expr_tree() const {
-        return m_expr_tree;
-    }
-
-    /**
-     * Returns true if this is an array which owns its own data,
-     * with no other views into the same data.
-     */
-    bool unique() const {
-        return m_originptr != NULL && m_buffer_owner.unique();
+    ndarray_expr_node *get_expr_tree() const {
+        return m_expr_tree.get();
     }
 
     /**
@@ -297,17 +206,10 @@ public:
      * This operation loops through all the strides to compute whether it is aligned.
      */
     bool is_aligned() const {
-        if (m_originptr != NULL) {
-            int alignment = m_dtype.alignment();
-            if (alignment == 1) {
-                return true;
-            } else {
-                int align_test = static_cast<int>(reinterpret_cast<intptr_t>(m_originptr));
-                for (int i = 0; i < m_ndim; ++i) {
-                    align_test |= static_cast<int>(m_strides[i]);
-                }
-                return ((alignment - 1) & align_test) == 0;
-            }
+        if (m_expr_tree->get_node_type() == strided_array_node_type) {
+            const strided_array_expr_node *node =
+                            static_cast<const strided_array_expr_node *>(m_expr_tree.get());
+            return node->is_aligned();
         } else {
             return false;
         }
@@ -467,77 +369,61 @@ namespace detail {
 // Implementation of initializer list construction
 template<class T>
 dnd::ndarray::ndarray(std::initializer_list<T> il)
-    : m_dtype(type_id_of<T>::value), m_ndim(1), m_shape(1), m_strides(1)
 {
-    intptr_t size = il.size();
-    m_shape[0] = size;
-    m_num_elements = size;
-    m_strides[0] = (size == 1) ? 0 : sizeof(T);
-    if (size > 0) {
-        // Allocate the storage buffer and copy the data
-        m_buffer_owner.reset(detail::ndarray_buffer_allocator(sizeof(T) * size),
-                                                                detail::ndarray_buffer_deleter);
-        m_originptr = reinterpret_cast<char *>(m_buffer_owner.get());
-        memcpy(m_originptr, il.begin(), sizeof(T)*size);
-    } else {
-        m_originptr = NULL;
-    }
+    intptr_t dim0 = il.size();
+    intptr_t stride = (dim0 == 1) ? 0 : sizeof(T);
+    std::shared_ptr<void> buffer_owner(
+                    ::dnd::detail::ndarray_buffer_allocator(sizeof(T) * dim0),
+                    ::dnd::detail::ndarray_buffer_deleter);
+    memcpy(buffer_owner.get(), il.begin(), sizeof(T) * dim0);
+    m_expr_tree.reset(new strided_array_expr_node(make_dtype<T>(), 1, &dim0, &stride,
+                            reinterpret_cast<char *>(buffer_owner.get()), std::move(buffer_owner)));
 }
 template<class T>
 dnd::ndarray::ndarray(std::initializer_list<std::initializer_list<T> > il)
-    : m_dtype(type_id_of<T>::value), m_ndim(2), m_shape(2), m_strides(2)
 {
     typedef std::initializer_list<std::initializer_list<T> > S;
+    intptr_t shape[2], strides[2];
 
     // Get and validate that the shape is regular
-    detail::initializer_list_shape<S>::compute(m_shape.get(), il);
+    detail::initializer_list_shape<S>::compute(shape, il);
     // Compute the number of elements in the array, and the strides at the same time
     intptr_t num_elements = 1, stride = sizeof(T);
-    for (int i = m_ndim-1; i >= 0; --i) {
-        m_strides[i] = (m_shape[i] == 1) ? 0 : stride;
-        num_elements *= m_shape[i];
-        stride *= m_shape[i];
+    for (int i = 1; i >= 0; --i) {
+        strides[i] = (shape[i] == 1) ? 0 : stride;
+        num_elements *= shape[i];
+        stride *= shape[i];
     }
-    m_num_elements = num_elements;
-    if (num_elements > 0) {
-        // Allocate the storage buffer
-        m_buffer_owner.reset(detail::ndarray_buffer_allocator(sizeof(T) * num_elements),
-                                                                    detail::ndarray_buffer_deleter);
-        m_originptr = reinterpret_cast<char *>(m_buffer_owner.get());
-        // Populate the storage buffer from the nested initializer list
-        T *dataptr = reinterpret_cast<T *>(m_originptr);
-        detail::initializer_list_shape<S>::copy_data(&dataptr, il);
-    } else {
-        m_originptr = NULL;
-    }
+    std::shared_ptr<void> buffer_owner(
+                    ::dnd::detail::ndarray_buffer_allocator(sizeof(T) * num_elements),
+                    ::dnd::detail::ndarray_buffer_deleter);
+    T *dataptr = reinterpret_cast<T *>(buffer_owner.get());
+    detail::initializer_list_shape<S>::copy_data(&dataptr, il);
+    m_expr_tree.reset(new strided_array_expr_node(make_dtype<T>(), 2, shape, strides,
+                            reinterpret_cast<char *>(buffer_owner.get()), std::move(buffer_owner)));
 }
 template<class T>
 dnd::ndarray::ndarray(std::initializer_list<std::initializer_list<std::initializer_list<T> > > il)
-    : m_dtype(type_id_of<T>::value), m_ndim(3), m_shape(3), m_strides(3)
 {
     typedef std::initializer_list<std::initializer_list<std::initializer_list<T> > > S;
+    intptr_t shape[3], strides[3];
 
     // Get and validate that the shape is regular
-    detail::initializer_list_shape<S>::compute(m_shape.get(), il);
+    detail::initializer_list_shape<S>::compute(shape, il);
     // Compute the number of elements in the array, and the strides at the same time
     intptr_t num_elements = 1, stride = sizeof(T);
-    for (int i = m_ndim-1; i >= 0; --i) {
-        m_strides[i] = (m_shape[i] == 1) ? 0 : stride;
-        num_elements *= m_shape[i];
-        stride *= m_shape[i];
+    for (int i = 2; i >= 0; --i) {
+        strides[i] = (shape[i] == 1) ? 0 : stride;
+        num_elements *= shape[i];
+        stride *= shape[i];
     }
-    m_num_elements = num_elements;
-    if (num_elements > 0) {
-        // Allocate the storage buffer
-        m_buffer_owner.reset(detail::ndarray_buffer_allocator(sizeof(T) * num_elements),
-                                                                    detail::ndarray_buffer_deleter);
-        m_originptr = reinterpret_cast<char *>(m_buffer_owner.get());
-        // Populate the storage buffer from the nested initializer list
-        T *dataptr = reinterpret_cast<T *>(m_originptr);
-        detail::initializer_list_shape<S>::copy_data(&dataptr, il);
-    } else {
-        m_originptr = NULL;
-    }
+    std::shared_ptr<void> buffer_owner(
+                    ::dnd::detail::ndarray_buffer_allocator(sizeof(T) * num_elements),
+                    ::dnd::detail::ndarray_buffer_deleter);
+    T *dataptr = reinterpret_cast<T *>(buffer_owner.get());
+    detail::initializer_list_shape<S>::copy_data(&dataptr, il);
+    m_expr_tree.reset(new strided_array_expr_node(make_dtype<T>(), 3, shape, strides,
+                            reinterpret_cast<char *>(buffer_owner.get()), std::move(buffer_owner)));
 }
 
 ///////////// C-style array constructor implementation /////////////////////////
@@ -576,22 +462,25 @@ namespace detail {
 
 template<class T, int N>
 dnd::ndarray::ndarray(const T (&rhs)[N])
-    : m_dtype(detail::type_from_array<T>::type_id), m_ndim(detail::ndim_from_array<T[N]>::value),
-      m_shape(m_ndim), m_strides(m_ndim)
 {
-    intptr_t num_bytes = detail::fill_shape_and_strides_from_array<T[N]>::
-                                            fill(m_shape.get(), m_strides.get());
-    m_num_elements = num_bytes / detail::type_from_array<T>::itemsize;
-    if (m_num_elements > 0) {
-        // Allocate the storage buffer
-        m_buffer_owner.reset(detail::ndarray_buffer_allocator(sizeof(T) * m_num_elements),
-                                                                    detail::ndarray_buffer_deleter);
-        m_originptr = reinterpret_cast<char *>(m_buffer_owner.get());
-        // Populate the storage buffer from the nested initializer list
-        memcpy(m_originptr, &rhs[0], num_bytes);
-    } else {
-        m_originptr = NULL;
+    intptr_t shape[detail::ndim_from_array<T[N]>::value], strides[detail::ndim_from_array<T[N]>::value];
+    const int ndim = detail::ndim_from_array<T[N]>::value;
+    intptr_t num_bytes = detail::fill_shape_and_strides_from_array<T[N]>::fill(shape, strides);
+
+    // Compute the number of elements in the array, and the strides at the same time
+    intptr_t num_elements = 1, stride = detail::type_from_array<T>::itemsize;
+    for (int i = ndim-1; i >= 0; --i) {
+        strides[i] = (shape[i] == 1) ? 0 : stride;
+        num_elements *= shape[i];
+        stride *= shape[i];
     }
+    std::shared_ptr<void> buffer_owner(
+                    ::dnd::detail::ndarray_buffer_allocator(num_bytes),
+                    ::dnd::detail::ndarray_buffer_deleter);
+    memcpy(buffer_owner.get(), &rhs[0], num_bytes);
+    m_expr_tree.reset(new strided_array_expr_node(dtype(detail::type_from_array<T>::type_id),
+                            ndim, shape, strides,
+                            reinterpret_cast<char *>(buffer_owner.get()), std::move(buffer_owner)));
 }
 
 ///////////// The ndarray.as<type>() templated function /////////////////////////
@@ -601,14 +490,18 @@ namespace detail {
         static typename boost::enable_if<is_dtype_scalar<T>, T>::type as(const ndarray& lhs,
                                                                     assign_error_mode errmode) {
             T result;
-            if (lhs.ndim() != 0) {
+            if (lhs.get_ndim() != 0) {
                 throw std::runtime_error("can only convert ndarrays with 0 dimensions to scalars");
             }
-            if (lhs.originptr() != NULL) {
-                dtype_assign(make_dtype<T>(), &result, lhs.get_dtype(), lhs.originptr(), errmode);
+            if (lhs.get_expr_tree()->get_node_type() == strided_array_node_type) {
+                const strided_array_expr_node *node =
+                        static_cast<const strided_array_expr_node *>(lhs.get_expr_tree());
+                dtype_assign(make_dtype<T>(), &result, node->get_dtype(), node->get_originptr(), errmode);
             } else {
                 ndarray tmp = lhs.as_strided();
-                dtype_assign(make_dtype<T>(), &result, tmp.get_dtype(), tmp.originptr(), errmode);
+                const strided_array_expr_node *node =
+                        static_cast<const strided_array_expr_node *>(tmp.get_expr_tree());
+                dtype_assign(make_dtype<T>(), &result, node->get_dtype(), node->get_originptr(), errmode);
             }
             return result;
         }

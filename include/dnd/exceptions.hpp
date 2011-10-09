@@ -16,6 +16,7 @@ namespace dnd {
 
 // Forward declaration of ndarray class, for broadcast_error
 class ndarray;
+class ndarray_expr_node;
 
 class dnd_exception : public std::exception {
 public:
@@ -44,6 +45,12 @@ public:
      * together.
      */
     broadcast_error(int noperands, const ndarray **operands);
+
+    /**
+     * An exception for when a number of input operands can't be broadcast
+     * together.
+     */
+    broadcast_error(int noperands, ndarray_expr_node **operands);
 
     virtual ~broadcast_error() throw() {
     }
@@ -83,6 +90,23 @@ public:
     index_out_of_bounds(intptr_t i, intptr_t start, intptr_t end);
 
     virtual ~index_out_of_bounds() throw() {
+    }
+};
+
+class axis_out_of_bounds : public dnd_exception {
+    std::string m_what;
+public:
+    virtual const char* what() const throw() {
+        return m_what.c_str();
+    }
+
+    /**
+     * An exception for when 'i' isn't in the half-open range
+     * [start, end).
+     */
+    axis_out_of_bounds(intptr_t i, intptr_t start, intptr_t end);
+
+    virtual ~axis_out_of_bounds() throw() {
     }
 };
 

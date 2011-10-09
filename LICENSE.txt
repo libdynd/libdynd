@@ -36,3 +36,8 @@ following license:
     THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
     (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
     OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+Regarding the portions from NumPy, as of October 8, 2011,
+the only part taken from NumPy is the iterator stride sorting algorithm,
+and that was something I contributed independently, so I own the copyright
+to it anyway and could easily relicense it under another license.

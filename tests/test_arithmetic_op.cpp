@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include <gtest/gtest.h>
 
-#include "dnd/ndarray.hpp"
+#include <dnd/ndarray.hpp>
 
 using namespace std;
 using namespace dnd;
@@ -117,8 +117,8 @@ TEST(ArithmeticOp, MatchingDTypes_View) {
 
     // Check also partial indexing through another temporary
     d = c(0);
-    EXPECT_EQ(1, d.ndim());
-    EXPECT_EQ(3, d.shape(0));
+    EXPECT_EQ(1, d.get_ndim());
+    EXPECT_EQ(3, d.get_shape(0));
     a.vassign(ndarray(v0));
     EXPECT_EQ(1, d(0).as<int>());
     EXPECT_EQ(3, d(1).as<int>());

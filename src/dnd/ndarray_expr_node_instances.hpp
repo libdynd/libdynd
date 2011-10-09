@@ -12,41 +12,7 @@
 
 namespace dnd {
 
-/**
- * NDArray expression node which holds a raw strided array.
- */
-class strided_array_expr_node : public ndarray_expr_node {
-    char *m_originptr;
-    dimvector m_strides;
-    std::shared_ptr<void> m_buffer_owner;
-
-    /** Creates a strided array node from the raw values */
-    strided_array_expr_node(const dtype& dt, int ndim, const intptr_t *shape,
-            const intptr_t *strides, char *originptr, const std::shared_ptr<void>& buffer_owner);
-public:
-
-    virtual ~strided_array_expr_node() {
-    }
-
-    /** Provides the data pointer and strides array for the tree evaluation code */
-    void as_data_and_strides(char **out_originptr, intptr_t *out_strides) const;
-
-    ndarray_expr_node_ptr apply_linear_index(int ndim, const intptr_t *shape, const int *axis_map,
-                    const intptr_t *index_strides, const intptr_t *start_index, bool allow_in_place);
-
-    const char *node_name() const {
-        return "strided_array";
-    }
-
-    void debug_dump_extra(std::ostream& o, const std::string& indent) const;
-
-    friend ndarray_expr_node_ptr make_strided_array_expr_node(const ndarray& a);
-    friend ndarray_expr_node_ptr make_strided_array_expr_node(const ndarray& a, const dtype& dt,
-                                        assign_error_mode errmode);
-    friend ndarray_expr_node_ptr make_broadcast_strided_array_expr_node(const ndarray& a,
-                                        int ndim, const intptr_t *shape,
-                                        const dtype& dt, assign_error_mode errmode);
-};
+class ndarray;
 
 /**
  * NDArray expression node which copies the input array as a new data type. As a side
@@ -71,19 +37,18 @@ public:
 
     void debug_dump_extra(std::ostream& o, const std::string& indent) const;
 
-    friend ndarray_expr_node_ptr make_strided_array_expr_node(const ndarray& a);
-    friend ndarray_expr_node_ptr make_strided_array_expr_node(const ndarray& a, const dtype& dt,
-                                        assign_error_mode);
-    friend ndarray_expr_node_ptr make_broadcast_strided_array_expr_node(const ndarray& a,
-                                        int ndim, const intptr_t *shape,
-                                        const dtype& dt, assign_error_mode errmode);
+    friend ndarray_expr_node_ptr make_aligned_expr_node(ndarray_expr_node *node, const dtype& dt,
+                                        assign_error_mode errmode);
+    friend ndarray_expr_node_ptr make_broadcast_strided_array_expr_node(ndarray_expr_node *node,
+                                int ndim, const intptr_t *shape,
+                                const dtype& dt, assign_error_mode errmode);
 };
 
 
 template <class BinaryOperatorFactory>
-ndarray_expr_node_ptr make_elementwise_binary_op_expr_node(
-                                                        const ndarray& op1, const ndarray& op2,
-                                                        BinaryOperatorFactory& op_factory);
+ndarray_expr_node_ptr make_elementwise_binary_op_expr_node(ndarray_expr_node *node1,
+                                            ndarray_expr_node *node2, BinaryOperatorFactory& op_factory,
+                                            assign_error_mode errmode);
 
 /**
  * NDArray expression node which broadcasts its input to the output.
@@ -140,6 +105,8 @@ public:
         return "linear_index_expr_node";
     }
 
+    void debug_dump_extra(std::ostream& o, const std::string& indent) const;
+
     friend ndarray_expr_node_ptr make_linear_index_expr_node(ndarray_expr_node *node,
                                     int nindex, const irange *indices, bool allow_in_place);
     friend class ndarray_expr_node;
@@ -160,7 +127,7 @@ class elementwise_binary_op_expr_node : public ndarray_expr_node {
      */
     elementwise_binary_op_expr_node(const ndarray_expr_node_ptr& op0, const ndarray_expr_node_ptr& op1,
                                     BinaryOperatorFactory& op_factory)
-            : ndarray_expr_node(op0->get_dtype(), op0->ndim(), 2, op0->shape(),
+            : ndarray_expr_node(op0->get_dtype(), op0->get_ndim(), 2, op0->get_shape(),
                 elementwise_node_category, elementwise_binary_op_node_type) {
         m_opnodes[0] = op0;
         m_opnodes[1] = op1;
@@ -170,7 +137,7 @@ class elementwise_binary_op_expr_node : public ndarray_expr_node {
     }
     elementwise_binary_op_expr_node(ndarray_expr_node_ptr&& op0, ndarray_expr_node_ptr&& op1,
                                     BinaryOperatorFactory& op_factory)
-            : ndarray_expr_node(op0->get_dtype(), op0->ndim(), 2, op0->shape(),
+            : ndarray_expr_node(op0->get_dtype(), op0->get_ndim(), 2, op0->get_shape(),
                 elementwise_node_category, elementwise_binary_op_node_type) {
         m_opnodes[0] = std::move(op0);
         m_opnodes[1] = std::move(op1);
@@ -224,17 +191,16 @@ public:
     }
 
     friend ndarray_expr_node_ptr make_elementwise_binary_op_expr_node<BinaryOperatorFactory>(
-                                                            const ndarray& op1, const ndarray& op2,
-                                                            BinaryOperatorFactory& op_factory);
+                                            ndarray_expr_node *node1,
+                                            ndarray_expr_node *node2, BinaryOperatorFactory& op_factory,
+                                            assign_error_mode errmode);
 };
 
-/**
- * Creates an aligned strided_array_expr_node, possibly with a follow-on node to make
- * the data aligned if it is not.
- *
- * @param a  The array to expose as an expr node.
- */
-ndarray_expr_node_ptr make_strided_array_expr_node(const ndarray& a);
+/** Creates an expr node out of the raw data for a strided array */
+ndarray_expr_node_ptr make_strided_array_expr_node(
+            const dtype& dt, int ndim, const intptr_t *shape,
+            const intptr_t *strides, char *originptr,
+            const std::shared_ptr<void>& buffer_owner);
 
 /**
  * Creates an aligned strided_array_expr_node, possibly with a follow-on node to make
@@ -245,28 +211,35 @@ ndarray_expr_node_ptr make_strided_array_expr_node(const ndarray& a);
  *           node to be added.
  * @param errmode  The error mode to be used during dtype conversion.
  */
-ndarray_expr_node_ptr make_strided_array_expr_node(const ndarray& a, const dtype& dt,
-                                        assign_error_mode errmode = assign_error_fractional);
+ndarray_expr_node_ptr make_aligned_expr_node(ndarray_expr_node *node, const dtype& dt,
+                                        assign_error_mode errmode);
 
 /**
  * Creates an aligned strided_array_expr_node, possibly with a follow-on node to make
  * the data aligned if it is not, baking the shape broadcasting into the strided_array_expr_node.
  *
- * @param a      The array to expose as an expr node.
+ * @param node   The strided array node to process.
  * @param ndim   The number of dimensions to broadcast to.
  * @param shape  The shape to broadcast to.
  * @param dt     The data type the node should be. This may cause a dtype conversion
  *               node to be added.
  * @param errmode  The error mode to be used during dtype conversion.
  */
-ndarray_expr_node_ptr make_broadcast_strided_array_expr_node(const ndarray& a, int ndim, const intptr_t *shape,
-                                    const dtype& dt, assign_error_mode errmode = assign_error_fractional);
+ndarray_expr_node_ptr make_broadcast_strided_array_expr_node(ndarray_expr_node *node,
+                                int ndim, const intptr_t *shape,
+                                const dtype& dt, assign_error_mode errmode);
 
 /**
- * Creates a linear_index_expr_node applied to the given node.
+ * Applies a linear index to the ndarray node.
  */
 ndarray_expr_node_ptr make_linear_index_expr_node(ndarray_expr_node *node,
                                 int nindex, const irange *indices, bool allow_in_place);
+
+/**
+ * Applies an integer index to the ndarray node.
+ */
+ndarray_expr_node_ptr make_integer_index_expr_node(ndarray_expr_node *node,
+                                int axis, intptr_t idx, bool allow_in_place);
 
 
 /**
@@ -275,35 +248,34 @@ ndarray_expr_node_ptr make_linear_index_expr_node(ndarray_expr_node *node,
  * The contents of op_factory are stolen via a swap() operation.
  */
 template<class BinaryOperatorFactory>
-ndarray_expr_node_ptr make_elementwise_binary_op_expr_node(const ndarray& op1, const ndarray& op2,
-                                                        BinaryOperatorFactory& op_factory)
+ndarray_expr_node_ptr make_elementwise_binary_op_expr_node(ndarray_expr_node *node1,
+                                            ndarray_expr_node *node2, BinaryOperatorFactory& op_factory,
+                                            assign_error_mode errmode)
 {
-    if (op1.originptr() == NULL || op2.originptr() == NULL) {
-        throw std::runtime_error("cannot yet create an elementwise_binary_op_expr_node from an "
-                            "ndarray which is an expression view");
-    }
-
     // This caches the dtype promotion information in op_factory
-    op_factory.promote_dtypes(op1.get_dtype(), op2.get_dtype());
+    op_factory.promote_dtypes(node1->get_dtype(), node2->get_dtype());
 
-    ndarray_expr_node_ptr node1, node2;
+    ndarray_expr_node_ptr broadcast_node1, broadcast_node2;
 
     // If the shapes match exactly, no need to broadcast.
-    if (op1.ndim() == op2.ndim() && memcmp(op1.shape(), op2.shape(), op1.ndim() * sizeof(intptr_t)) == 0) {
-        node1 = make_strided_array_expr_node(op1, op_factory.get_dtype(1));
-        node2 = make_strided_array_expr_node(op2, op_factory.get_dtype(2));
+    if (node1->get_ndim() == node2->get_ndim() &&
+                    memcmp(node1->get_shape(), node2->get_shape(), node1->get_ndim() * sizeof(intptr_t)) == 0) {
+        broadcast_node1 = make_aligned_expr_node(node1, op_factory.get_dtype(1), errmode);
+        broadcast_node2 = make_aligned_expr_node(node2, op_factory.get_dtype(2), errmode);
     } else {
         int op0_ndim;
         dimvector op0_shape;
-        broadcast_input_shapes(op1, op2, &op0_ndim, &op0_shape);
+        broadcast_input_shapes(node1, node2, &op0_ndim, &op0_shape);
 
-        node1 = make_broadcast_strided_array_expr_node(op1, op0_ndim, op0_shape.get(), op_factory.get_dtype(1));
-        node2 = make_broadcast_strided_array_expr_node(op2, op0_ndim, op0_shape.get(), op_factory.get_dtype(2));
+        broadcast_node1 = make_broadcast_strided_array_expr_node(node1, op0_ndim,
+                                                        op0_shape.get(), op_factory.get_dtype(1), errmode);
+        broadcast_node2 = make_broadcast_strided_array_expr_node(node2, op0_ndim,
+                                                        op0_shape.get(), op_factory.get_dtype(2), errmode);
     }
 
     boost::intrusive_ptr<elementwise_binary_op_expr_node<BinaryOperatorFactory> > result(
                 new elementwise_binary_op_expr_node<BinaryOperatorFactory>(
-                                std::move(node1), std::move(node2), op_factory));
+                                std::move(broadcast_node1), std::move(broadcast_node2), op_factory));
     
     return result;
 }

@@ -85,6 +85,17 @@ would indicate 2*n for each output element.
 To start, we consider two computational models for evaluating an ndarray expression
 tree. 
 
+All Data Should Be Aligned and in Native Byte Order
+---------------------------------------------------
+
+NumPy supports misaligned data, and data in both big-endian and little-endian
+formats. This library should too, but allowing this flexibility everywhere adds
+complexity and degrades performance. Instead, data which is not aligned and
+in NBO will be exposed in the style of a "generator array". This works nicely
+with the expression tree basis for the ndarray, allowing the evaluation code
+to assume the data is well-behaved when provided with a strided array, and
+enable buffering otherwise.
+
 Some Notes
 ----------
 

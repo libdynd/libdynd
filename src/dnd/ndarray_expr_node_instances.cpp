@@ -17,83 +17,11 @@
 using namespace std;
 using namespace dnd;
 
-// strided_array_expr_node
-
-dnd::strided_array_expr_node::strided_array_expr_node(const dtype& dt, int ndim,
-                                const intptr_t *shape, const intptr_t *strides,
-                                char *originptr, const std::shared_ptr<void>& buffer_owner)
-    : ndarray_expr_node(dt, ndim, 0, shape,
-        strided_array_node_category, strided_array_node_type),
-      m_originptr(originptr), m_strides(ndim, strides),
-      m_buffer_owner(buffer_owner)
-{
-}
-
-
-void dnd::strided_array_expr_node::as_data_and_strides(char **out_originptr,
-                                                    intptr_t *out_strides) const
-{
-    *out_originptr = m_originptr;
-    memcpy(out_strides, m_strides.get(), ndim() * sizeof(intptr_t));
-}
-
-ndarray_expr_node_ptr dnd::strided_array_expr_node::apply_linear_index(
-                    int new_ndim, const intptr_t *new_shape, const int *axis_map,
-                    const intptr_t *index_strides, const intptr_t *start_index, bool allow_in_place)
-{
-    if (allow_in_place) {
-        // Apply the start_index to m_originptr
-        for (int i = 0; i < m_ndim; ++i) {
-            m_originptr += m_strides[i] * start_index[i];
-        }
-
-        // Adopt the new shape
-        m_ndim = new_ndim;
-        memcpy(m_shape.get(), new_shape, new_ndim * sizeof(intptr_t));
-
-        // Construct the new strides
-        dimvector new_strides(m_ndim);
-        for (int i = 0; i < new_ndim; ++i) {
-            new_strides[i] = m_strides[axis_map[i]] * index_strides[i];
-        }
-        m_strides.swap(new_strides);
-
-        return ndarray_expr_node_ptr(this);
-    } else {
-        // Apply the start_index to m_originptr
-        char *new_originptr = m_originptr;
-        for (int i = 0; i < m_ndim; ++i) {
-            new_originptr += m_strides[i] * start_index[i];
-        }
-
-        // Construct the new strides
-        dimvector new_strides(m_ndim);
-        for (int i = 0; i < new_ndim; ++i) {
-            new_strides[i] = m_strides[axis_map[i]] * index_strides[i];
-        }
-
-        return ndarray_expr_node_ptr(
-            new strided_array_expr_node(m_dtype, new_ndim, new_shape, new_strides.get(),
-                                        new_originptr, m_buffer_owner));
-    }
-}
-
-void dnd::strided_array_expr_node::debug_dump_extra(ostream& o, const string& indent) const
-{
-    o << indent << " strides: ";
-    for (int i = 0; i < m_ndim; ++i) {
-        o << m_strides[i] << " ";
-    }
-    o << "\n";
-    o << indent << " originptr: " << (void *)m_originptr << "\n";
-    o << indent << " buffer owner: " << m_buffer_owner.get() << "\n";
-}
-
 // convert_dtype_expr_node
 
 dnd::convert_dtype_expr_node::convert_dtype_expr_node(const dtype& dt,
                                     assign_error_mode errmode, const ndarray_expr_node_ptr& op)
-    : ndarray_expr_node(dt, op->ndim(), 1, op->shape(), elementwise_node_category,
+    : ndarray_expr_node(dt, op->get_ndim(), 1, op->get_shape(), elementwise_node_category,
         convert_dtype_node_type), m_errmode(errmode)
 {
     m_opnodes[0] = op;
@@ -101,7 +29,7 @@ dnd::convert_dtype_expr_node::convert_dtype_expr_node(const dtype& dt,
 
 dnd::convert_dtype_expr_node::convert_dtype_expr_node(const dtype& dt,
                                     assign_error_mode errmode, ndarray_expr_node_ptr&& op)
-    : ndarray_expr_node(dt, op->ndim(), 1, op->shape(), elementwise_node_category,
+    : ndarray_expr_node(dt, op->get_ndim(), 1, op->get_shape(), elementwise_node_category,
         convert_dtype_node_type), m_errmode(errmode)
 {
     m_opnodes[0] = std::move(op);
@@ -158,7 +86,7 @@ ndarray_expr_node_ptr dnd::convert_dtype_expr_node::apply_linear_index(
 dnd::broadcast_shape_expr_node::broadcast_shape_expr_node(int ndim, const intptr_t *shape,
                                                 const ndarray_expr_node_ptr& op)
     : ndarray_expr_node(op->get_dtype(), ndim, 1, shape,
-        op->node_category() == strided_array_node_category ? strided_array_node_category
+        op->get_node_category() == strided_array_node_category ? strided_array_node_category
                                                            : elementwise_node_category,
         broadcast_shape_node_type)
 {
@@ -168,7 +96,7 @@ dnd::broadcast_shape_expr_node::broadcast_shape_expr_node(int ndim, const intptr
 dnd::broadcast_shape_expr_node::broadcast_shape_expr_node(int ndim, const intptr_t *shape,
                                                 ndarray_expr_node_ptr&& op)
     : ndarray_expr_node(op->get_dtype(), ndim, 1, shape,
-        op->node_category() == strided_array_node_category ? strided_array_node_category
+        op->get_node_category() == strided_array_node_category ? strided_array_node_category
                                                            : elementwise_node_category,
         broadcast_shape_node_type)
 {
@@ -183,7 +111,7 @@ ndarray_expr_node_ptr dnd::broadcast_shape_expr_node::apply_linear_index(
 
     if (allow_in_place) {
         // If the broadcasting doesn't add more dimensions, it's pretty simple
-        if (m_ndim == node->ndim()) {
+        if (m_ndim == node->get_ndim()) {
             // Adopt the new shape
             m_ndim = ndim;
             memcpy(m_shape.get(), shape, ndim * sizeof(intptr_t));
@@ -203,7 +131,7 @@ void dnd::broadcast_shape_expr_node::as_data_and_strides(char **out_originptr,
                                                     intptr_t *out_strides) const
 {
     ndarray_expr_node *op = m_opnodes[0].get();
-    int dimdelta = ndim() - op->ndim();
+    int dimdelta = get_ndim() - op->get_ndim();
 
     op->as_data_and_strides(out_originptr, out_strides + dimdelta);
     memset(out_strides, 0, dimdelta * sizeof(intptr_t));
@@ -214,14 +142,15 @@ void dnd::broadcast_shape_expr_node::as_data_and_strides(char **out_originptr,
 dnd::linear_index_expr_node::linear_index_expr_node(int ndim, const intptr_t *shape, const int *axis_map,
                     const intptr_t *index_strides, const intptr_t *start_index, ndarray_expr_node *op)
     : ndarray_expr_node(op->get_dtype(), ndim, 1, shape,
-        op->node_category() == strided_array_node_category ? strided_array_node_category
+        op->get_node_category() == strided_array_node_category ? strided_array_node_category
                                                            : arbitrary_node_category,
-        linear_index_node_type), m_axis_map(ndim), m_index_strides(ndim), m_start_index(op->ndim())
+        linear_index_node_type),
+        m_axis_map(ndim), m_index_strides(ndim), m_start_index(op->get_ndim())
 {
     m_opnodes[0].reset(op);
     memcpy(m_axis_map.get(), axis_map, ndim * sizeof(int));
     memcpy(m_index_strides.get(), index_strides, ndim * sizeof(intptr_t));
-    memcpy(m_start_index.get(), start_index, op->ndim() * sizeof(intptr_t));
+    memcpy(m_start_index.get(), start_index, op->get_ndim() * sizeof(intptr_t));
 }
 
 // Since this is a linear_index_expr_node, it absorbs any further linear indexing
@@ -258,8 +187,8 @@ ndarray_expr_node_ptr dnd::linear_index_expr_node::apply_linear_index(
         return ndarray_expr_node_ptr(this);
     } else {
         // Create the new start_index
-        shortvector<intptr_t> new_start_index(node->ndim());
-        memcpy(new_start_index.get(), m_start_index.get(), node->ndim() * sizeof(intptr_t));
+        shortvector<intptr_t> new_start_index(node->get_ndim());
+        memcpy(new_start_index.get(), m_start_index.get(), node->get_ndim() * sizeof(intptr_t));
         for (int i = 0; i < m_ndim; ++i) {
             new_start_index[m_axis_map[i]] += start_index[i];
         }
@@ -283,73 +212,95 @@ ndarray_expr_node_ptr dnd::linear_index_expr_node::apply_linear_index(
     }
 }
 
+void dnd::linear_index_expr_node::debug_dump_extra(ostream& o, const string& indent) const
+{
+    int op_ndim = m_opnodes[0]->get_ndim();
+    shortvector<char> op_useddims(op_ndim);
+    memset(op_useddims.get(), 0, op_ndim);
+
+    o << indent << " axis map: (";
+    for (int i = 0; i < m_ndim; ++i) {
+        o << m_axis_map[i];
+        if (i != m_ndim - 1) {
+            o << " ";
+        }
+        op_useddims[i] = 1;
+    }
+    o << ")\n";
+    o << indent << " index strides: (";
+    for (int i = 0; i < m_ndim; ++i) {
+        o << m_index_strides[i];
+        if (i != m_ndim - 1) {
+            o << " ";
+        }
+    }
+    o << ")\n";
+    o << indent << " start index: (";
+    for (int i = 0; i < op_ndim; ++i) {
+        // Put the dims which aren't used (i.e. which were eliminated by an integer index)
+        // in brackets
+        if (op_useddims[i]) {
+            o << m_index_strides[i];
+        } else {
+            o << "[" << m_index_strides[i] << "]";
+        }
+        if (i != op_ndim - 1) {
+            o << " ";
+        }
+    }
+    o << ")\n";
+}
+
+
 // Node factory functions
 
-ndarray_expr_node_ptr dnd::make_strided_array_expr_node(const ndarray& a)
+ndarray_expr_node_ptr dnd::make_strided_array_expr_node(
+            const dtype& dt, int ndim, const intptr_t *shape,
+            const intptr_t *strides, char *originptr,
+            const std::shared_ptr<void>& buffer_owner)
 {
-    if (a.originptr() == NULL) {
-        throw std::runtime_error("cannot create a strided_array_expr_node from an "
-                            "ndarray which is an expression view");
-    }
-
-    // Create the strided array node
-    ndarray_expr_node_ptr a_node(new strided_array_expr_node(a.get_dtype(), a.ndim(),
-                                        a.shape(), a.strides(), a.originptr(), a.buffer_owner()));
-
-    // Add an alignment node if necessary (the convert_dtype node with equal dtype
-    // will cause alignment)
-    if (a.is_aligned()) {
-        return std::move(a_node);
-    } else {
-        return ndarray_expr_node_ptr(
-                new convert_dtype_expr_node(a.get_dtype(), assign_error_none, std::move(a_node)));
-    }
+    return ndarray_expr_node_ptr(new strided_array_expr_node(dt, ndim,
+                                        shape, strides, originptr, buffer_owner));
 }
 
-ndarray_expr_node_ptr dnd::make_strided_array_expr_node(const ndarray& a, const dtype& dt,
+ndarray_expr_node_ptr dnd::make_aligned_expr_node(ndarray_expr_node *node, const dtype& dt,
                                         assign_error_mode errmode)
 {
-    if (a.originptr() == NULL) {
-        throw std::runtime_error("cannot create a strided_array_expr_node from an "
-                            "ndarray which is an expression view");
-    }
-
-    // Create the strided array node
-    ndarray_expr_node_ptr a_node(new strided_array_expr_node(a.get_dtype(), a.ndim(),
-                                        a.shape(), a.strides(), a.originptr(), a.buffer_owner()));
-
-    // Add an conversion/alignment node if necessary
-    if (dt == a.get_dtype() && a.is_aligned()) {
-        return std::move(a_node);
+    if (dt == node->get_dtype()) {
+        if (node->get_node_type() != strided_array_node_type ||
+                        static_cast<strided_array_expr_node *>(node)->is_aligned()) {
+            return ndarray_expr_node_ptr(node);
+        } else {
+            return ndarray_expr_node_ptr(new convert_dtype_expr_node(dt, errmode, ndarray_expr_node_ptr(node)));
+        }
     } else {
-        return ndarray_expr_node_ptr(
-                new convert_dtype_expr_node(dt, errmode, std::move(a_node)));
+        return ndarray_expr_node_ptr(new convert_dtype_expr_node(dt, errmode, ndarray_expr_node_ptr(node)));
     }
 }
 
-ndarray_expr_node_ptr dnd::make_broadcast_strided_array_expr_node(const ndarray& a,
+ndarray_expr_node_ptr dnd::make_broadcast_strided_array_expr_node(ndarray_expr_node *node,
                                 int ndim, const intptr_t *shape,
                                 const dtype& dt, assign_error_mode errmode)
 {
-    if (a.originptr() == NULL) {
-        throw std::runtime_error("cannot create a strided_array_expr_node from an "
-                            "ndarray which is an expression view");
+    if (node->get_node_type() != strided_array_node_type) {
+        throw std::runtime_error("broadcasting only supports strided arrays so far");
     }
+
+    strided_array_expr_node *snode = static_cast<strided_array_expr_node *>(node);
 
     // Broadcast the array's strides to the desired shape (may raise a broadcast error)
     dimvector strides(ndim);
-    broadcast_to_shape(ndim, shape, a, strides.get());
+    broadcast_to_shape(ndim, shape, snode, strides.get());
 
     // Create the strided array node
-    ndarray_expr_node_ptr a_node(new strided_array_expr_node(a.get_dtype(), ndim,
-                                        shape, strides.get(), a.originptr(), a.buffer_owner()));
+    ndarray_expr_node_ptr new_node(new strided_array_expr_node(snode->get_dtype(), ndim,
+                                    shape, strides.get(), snode->get_originptr(), snode->get_buffer_owner()));
 
     // Add an conversion/alignment node if necessary
-    if (dt == a.get_dtype() && a.is_aligned()) {
-        return std::move(a_node);
+    if (dt == snode->get_dtype() && snode->is_aligned()) {
+        return std::move(new_node);
     } else {
-        return ndarray_expr_node_ptr(
-                new convert_dtype_expr_node(dt, errmode, std::move(a_node)));
+        return ndarray_expr_node_ptr(new convert_dtype_expr_node(dt, errmode, std::move(new_node)));
     }
 }
 
@@ -357,24 +308,24 @@ ndarray_expr_node_ptr dnd::make_linear_index_expr_node(ndarray_expr_node *node,
                                 int nindex, const irange *indices, bool allow_in_place)
 {
     // Validate the number of indices
-    if (nindex > node->ndim()) {
-        throw too_many_indices(nindex, node->ndim());
+    if (nindex > node->get_ndim()) {
+        throw too_many_indices(nindex, node->get_ndim());
     }
 
     // Determine how many dimensions the new array will have
-    int new_ndim = node->ndim();
+    int new_ndim = node->get_ndim();
     for (int i = 0; i < nindex; ++i) {
         if (indices[i].step() == 0) {
             --new_ndim;
         }
     }
 
-    const intptr_t *shape = node->shape();
+    const intptr_t *shape = node->get_shape();
 
     // Convert the indices into the form used by linear_index_expr_node
     dimvector new_shape(new_ndim);
     shortvector<int> axis_map(new_ndim);
-    shortvector<intptr_t> index_strides(new_ndim), start_index(node->ndim());
+    shortvector<intptr_t> index_strides(new_ndim), start_index(node->get_ndim());
     int new_i = 0;
     for (int i = 0; i < nindex; ++i) {
         intptr_t step = indices[i].step();
@@ -445,7 +396,7 @@ ndarray_expr_node_ptr dnd::make_linear_index_expr_node(ndarray_expr_node *node,
                     index_strides[new_i] = -1;
                 } else {
                     new_shape[new_i] = (-end - step - 1) / (-step);
-                    index_strides[new_i] = -step;
+                    index_strides[new_i] = step;
                 }
             } else {
                 new_shape[new_i] = 0;
@@ -456,7 +407,7 @@ ndarray_expr_node_ptr dnd::make_linear_index_expr_node(ndarray_expr_node *node,
         }
     }
     // Initialize the info for the rest of the dimensions which remain as is
-    for (int i = nindex; i < node->ndim(); ++i) {
+    for (int i = nindex; i < node->get_ndim(); ++i) {
         start_index[i] = 0;
     }
     for (int i = new_i; i < new_ndim; ++i) {
@@ -478,10 +429,26 @@ ndarray_expr_node_ptr dnd::make_linear_index_expr_node(ndarray_expr_node *node,
     for (int i = 0; i < new_ndim; ++i) cout << index_strides[i] << " ";
     cout << "\n";
     cout << "start_index: ";
-    for (int i = 0; i < node->ndim(); ++i) cout << start_index[i] << " ";
+    for (int i = 0; i < node->get_ndim(); ++i) cout << start_index[i] << " ";
     cout << "\n";
     */
 
     return node->apply_linear_index(new_ndim, new_shape.get(), axis_map.get(),
                     index_strides.get(), start_index.get(), allow_in_place);
+}
+
+ndarray_expr_node_ptr dnd::make_integer_index_expr_node(ndarray_expr_node *node,
+                                int axis, intptr_t idx, bool allow_in_place)
+{
+    // Validate the axis
+    if (axis < 0 || axis >= node->get_ndim()) {
+        throw axis_out_of_bounds(axis, 0, node->get_ndim());
+    }
+
+    // Validate the index
+    if (idx < 0 || idx >= node->get_shape()[axis]) {
+        throw index_out_of_bounds(idx, 0, node->get_shape()[axis]);
+    }
+
+    return node->apply_integer_index(axis, idx, allow_in_place);
 }

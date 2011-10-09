@@ -42,7 +42,8 @@ TEST(ShapeTools, BroadcastInputShapes) {
     ndarray c(3, 2, 1, make_dtype<double>());
     ndarray d(5, 1, make_dtype<char>());
 
-    const ndarray *operands[] = {&a, &b, &c, &d};
+    ndarray_expr_node *operands[] = {a.get_expr_tree(), b.get_expr_tree(),
+                                    c.get_expr_tree(), d.get_expr_tree()};
 
     // Broadcast the first three shapes together
     int ndim = 0;
@@ -62,11 +63,11 @@ TEST(ShapeTools, CopyInputStrides) {
     ndarray a(2,3,2,1,make_dtype<int16_t>());
     intptr_t strides[6];
 
-    EXPECT_EQ(4, a.ndim());
-    EXPECT_EQ(12, a.strides(0));
-    EXPECT_EQ(4, a.strides(1));
-    EXPECT_EQ(2, a.strides(2));
-    EXPECT_EQ(0, a.strides(3));
+    EXPECT_EQ(4, a.get_ndim());
+    EXPECT_EQ(12, a.get_strides(0));
+    EXPECT_EQ(4, a.get_strides(1));
+    EXPECT_EQ(2, a.get_strides(2));
+    EXPECT_EQ(0, a.get_strides(3));
 
     copy_input_strides(a, 6, strides);
     EXPECT_EQ(0, strides[0]);

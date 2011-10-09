@@ -34,7 +34,16 @@ void broadcast_to_shape(int ndim, const intptr_t *shape,
  * shape, raising an error if it cannot be broadcast.
  */
 inline void broadcast_to_shape(int ndim, const intptr_t *shape, const ndarray& op, intptr_t *out_strides) {
-    broadcast_to_shape(ndim, shape, op.ndim(), op.shape(), op.strides(), out_strides);
+    broadcast_to_shape(ndim, shape, op.get_ndim(), op.get_shape(), op.get_strides(), out_strides);
+}
+
+/**
+ * This function broadcasts the dimensions and strides of 'src' to a given
+ * shape, raising an error if it cannot be broadcast.
+ */
+inline void broadcast_to_shape(int ndim, const intptr_t *shape, const strided_array_expr_node *op,
+                                    intptr_t *out_strides) {
+    broadcast_to_shape(ndim, shape, op->get_ndim(), op->get_shape(), op->get_strides(), out_strides);
 }
 
 
@@ -47,15 +56,15 @@ inline void broadcast_to_shape(int ndim, const intptr_t *shape, const ndarray& o
  * @param out_ndim    The number of broadcast dimensions is placed here.
  * @param out_shape   The broadcast shape is populated here.
  */
-void broadcast_input_shapes(int noperands, const ndarray **operands,
+void broadcast_input_shapes(int noperands, ndarray_expr_node **operands,
                         int* out_ndim, dimvector* out_shape);
 
 /**
  * Convenience function for broadcasting two operands.
  */
-inline void broadcast_input_shapes(const ndarray& op0, const ndarray& op1,
+inline void broadcast_input_shapes(ndarray_expr_node *node0, ndarray_expr_node *node1,
                         int* out_ndim, dimvector* out_shape) {
-    const ndarray *operands[2] = {&op0, &op1};
+    ndarray_expr_node *operands[2] = {node0, node1};
     broadcast_input_shapes(2, operands, out_ndim, out_shape);
 }
 

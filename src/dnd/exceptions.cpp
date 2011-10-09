@@ -45,7 +45,22 @@ dnd::broadcast_error::broadcast_error(int noperands, const ndarray **operands)
 
     ss << "broadcast error: cannot broadcast input operand shapes ";
     for (int i = 0; i < noperands; ++i) {
-        print_shape(ss, operands[i]->ndim(), operands[i]->shape());
+        print_shape(ss, operands[i]->get_ndim(), operands[i]->get_shape());
+        if (i != noperands - 1) {
+            ss << " ";
+        }
+    }
+
+    m_what = ss.str();
+}
+
+dnd::broadcast_error::broadcast_error(int noperands, ndarray_expr_node **operands)
+{
+    stringstream ss;
+
+    ss << "broadcast error: cannot broadcast input operand shapes ";
+    for (int i = 0; i < noperands; ++i) {
+        print_shape(ss, operands[i]->get_ndim(), operands[i]->get_shape());
         if (i != noperands - 1) {
             ss << " ";
         }
@@ -59,7 +74,7 @@ dnd::too_many_indices::too_many_indices(int nindex, int ndim)
     //cout << "throwing too_many_indices\n";
     std::stringstream ss;
 
-    ss << "too many indices: provided " << nindex << " indices, but object has only ";
+    ss << "too many indices: provided " << nindex << " indices, but array has only ";
     ss << ndim << " dimensions";
 
     m_what = ss.str();
@@ -71,6 +86,17 @@ dnd::index_out_of_bounds::index_out_of_bounds(intptr_t i, intptr_t start, intptr
     stringstream ss;
 
     ss << "index out of bounds: index " << i << " is not in the half-open range [";
+    ss << start << ", " << end << ")";
+
+    m_what = ss.str();
+}
+
+dnd::axis_out_of_bounds::axis_out_of_bounds(intptr_t i, intptr_t start, intptr_t end)
+{
+    //cout << "throwing axis_out_of_bounds\n";
+    stringstream ss;
+
+    ss << "axis out of bounds: axis " << i << " is not in the half-open range [";
     ss << start << ", " << end << ")";
 
     m_what = ss.str();
