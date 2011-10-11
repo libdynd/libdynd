@@ -5,10 +5,13 @@
 // This is unreleased proprietary software.
 //
 #include <dnd/dtype.hpp>
+#include <dnd/exceptions.hpp>
 
 #include <sstream>
-#include <stdexcept>
 #include <cstring>
+
+/** The maximum number of type ids which can be defined */
+#define DND_MAX_NUM_TYPE_IDS 64
 
 using namespace std;
 using namespace dnd;
@@ -22,108 +25,111 @@ dnd::extended_dtype::~extended_dtype()
 {
 }
 
-bool dtype::set_to_type_id(int type_id)
-{
-    m_type_id = type_id;
-    m_byteswapped = 0;
-    switch (type_id) {
-        case generic_type_id:
-            m_kind = generic_kind;
-            m_alignment = 1;
-            m_itemsize = 0;
-            return true;
-        case bool_type_id:
-            m_kind = bool_kind;
-            m_alignment = 1;
-            m_itemsize = 1;
-            return true;
-        case int8_type_id:
-            m_kind = int_kind;
-            m_alignment = 1;
-            m_itemsize = 1;
-            return true;
-        case int16_type_id:
-            m_kind = int_kind;
-            m_alignment = 2;
-            m_itemsize = 2;
-            return true;
-        case int32_type_id:
-            m_kind = int_kind;
-            m_alignment = 4;
-            m_itemsize = 4;
-            return true;
-        case int64_type_id:
-            m_kind = int_kind;
-            m_alignment = 8;
-            m_itemsize = 8;
-            return true;
-        case uint8_type_id:
-            m_kind = uint_kind;
-            m_alignment = 1;
-            m_itemsize = 1;
-            return true;
-        case uint16_type_id:
-            m_kind = uint_kind;
-            m_alignment = 2;
-            m_itemsize = 2;
-            return true;
-        case uint32_type_id:
-            m_kind = uint_kind;
-            m_alignment = 4;
-            m_itemsize = 4;
-            return true;
-        case uint64_type_id:
-            m_kind = uint_kind;
-            m_alignment = 8;
-            m_itemsize = 8;
-            return true;
-        case float32_type_id:
-            m_kind = float_kind;
-            m_alignment = 4;
-            m_itemsize = 4;
-            return true;
-        case float64_type_id:
-            m_kind = float_kind;
-            m_alignment = 8;
-            m_itemsize = 8;
-            return true;
-    }
+/**
+ * A static look-up table structure which contains data about the type ids.
+ * This must match up with the type id enumeration, and has space that
+ * is intended to be filled up with more data when custom dtypes are added.
+ */
+static struct {
+    unsigned char kind, alignment, itemsize;
+} basic_type_id_info[DND_MAX_NUM_TYPE_IDS] = {
+    {generic_kind, 1, 0},      // generic
+    {bool_kind, 1, 1},         // bool
+    {int_kind, 1, 1},          // int8
+    {int_kind, 2, 2},          // int16
+    {int_kind, 4, 4},          // int32
+    {int_kind, 8, 8},          // int64
+    {uint_kind, 1, 1},         // uint8
+    {uint_kind, 2, 2},         // uint16
+    {uint_kind, 4, 4},         // uint32
+    {uint_kind, 8, 8},         // uint64
+    {float_kind, 4, 4},        // float32
+    {float_kind, 8, 8},        // float64
+    {composite_kind, 16, 16},  // sse128f
+    {composite_kind, 16, 16},  // sse128d
+    {string_kind, 1, 0},       // utf8
+    {composite_kind, 1, 0},    // struct
+    {composite_kind, 1, 0}     // subarray
+};
 
-    return false;
+/**
+ * A static look-up table which contains the names of all the type ids.
+ * This must match up with the type id enumeration, and has space that
+ * is intended to be filled up with more data when custom dtypes are added.
+ */
+static char type_id_names[DND_MAX_NUM_TYPE_IDS][32] = {
+    "generic",
+    "bool",
+    "int8",
+    "int16",
+    "int32",
+    "int64",
+    "uint8",
+    "uint16",
+    "uint32",
+    "uint64",
+    "float32",
+    "float64",
+    "sse128f",
+    "sse128d",
+    "utf8",
+    "struct",
+    "subarray"
+};
+
+/**
+ * Validates that the given type ID is a proper ID. Throws
+ * an exception if not.
+ *
+ * @param type_id  The type id to validate.
+ */
+static inline int validate_type_id(int type_id)
+{
+    // 0 <= type_id <= utf8_type_id
+    if ((unsigned int)type_id <= utf8_type_id) {
+        return type_id;
+    } else {
+        throw invalid_type_id(type_id);
+    }
+}
+
+const char *dnd::get_type_id_basename(int type_id)
+{
+    return type_id_names[validate_type_id(type_id)];
 }
 
 dtype::dtype()
+    : m_type_id(generic_type_id), m_kind(generic_kind), m_alignment(1),
+      m_byteswapped(0), m_itemsize(0), m_data()
 {
     // Default to a generic type with zero size
-    m_type_id = generic_type_id;
-    m_kind = generic_kind;
-    m_alignment = 1;
-    m_byteswapped = 0;
-    m_itemsize = 0;
 }
 
 dtype::dtype(int type_id)
+    : m_type_id(validate_type_id(type_id)),
+      m_kind(basic_type_id_info[type_id].kind),
+      m_alignment(basic_type_id_info[type_id].alignment),
+      m_byteswapped(0),
+      m_itemsize(basic_type_id_info[type_id].itemsize),
+      m_data()
 {
-    if (!set_to_type_id(type_id)) {
-        throw std::runtime_error("custom dtypes not supported yet");
-    }
 }
 
 dtype::dtype(int type_id, uintptr_t size)
+    : m_type_id(validate_type_id(type_id)),
+      m_kind(basic_type_id_info[type_id].kind),
+      m_alignment(basic_type_id_info[type_id].alignment),
+      m_byteswapped(0),
+      m_itemsize(basic_type_id_info[type_id].itemsize),
+      m_data()
 {
-    if (set_to_type_id(type_id)) {
+    if (m_itemsize != 0) {
         if (m_itemsize != size) {
-            throw std::runtime_error("invalid itemsize for given type ID");
+            throw std::runtime_error(std::string() + "invalid itemsize for type id "
+                                                    + get_type_id_basename(type_id));
         }
-    } else if (type_id == utf8_type_id) {
-        m_type_id = type_id;
-        m_kind = string_kind;
-        m_alignment = 1;
-        m_byteswapped = 0;
+    } else {
         m_itemsize = size;
-    }
-    else {
-        throw std::runtime_error("custom dtypes not supported yet");
     }
 }
 

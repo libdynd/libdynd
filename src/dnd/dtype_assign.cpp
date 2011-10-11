@@ -18,6 +18,16 @@
 
 #include "single_assigner_simple.hpp"
 
+#ifdef __GNUC__
+// The -Weffc++ flag warns about derived classes not having a virtual destructor.
+// Here, this is explicitly done, because we are only using derived classes
+// to inherit a static function, they are never instantiated.
+//
+// NOTE: The documentation says this is only for g++ 4.6.0 and up.
+#pragma GCC diagnostic ignored "-Weffc++"
+#endif
+
+
 using namespace std;
 using namespace dnd;
 
@@ -118,6 +128,10 @@ namespace {
         assign_function_t assign;
         byteswap_operation_t src_byteswap, dst_byteswap;
         int dst_itemsize, src_itemsize;
+        multiple_byteswap_unaligned_auxiliary_data()
+            : assign(NULL), src_byteswap(NULL), dst_byteswap(NULL),
+              dst_itemsize(0), src_itemsize(0) {
+        }
 
         virtual ~multiple_byteswap_unaligned_auxiliary_data() {
         }
@@ -157,6 +171,10 @@ namespace {
         assign_function_t assign;
         int dst_itemsize, src_itemsize;
 
+        multiple_unaligned_auxiliary_data()
+            : assign(NULL), dst_itemsize(0), src_itemsize(0) {
+        }
+
         virtual ~multiple_unaligned_auxiliary_data() {
         }
     };
@@ -190,6 +208,10 @@ namespace {
     class multiple_aligned_auxiliary_data : public auxiliary_data {
     public:
         assign_function_t assign;
+
+        multiple_aligned_auxiliary_data()
+            : assign(NULL) {
+        }
 
         virtual ~multiple_aligned_auxiliary_data() {
         }

@@ -230,12 +230,28 @@ namespace {
         const char *m_node_name;
 
     public:
-        arithmetic_operator_factory() {
+        arithmetic_operator_factory()
+            : m_dtype(), m_builtin_optable(NULL), m_node_name("")
+        {
+        }
+
+        arithmetic_operator_factory(const arithmetic_operator_factory& rhs)
+            : m_dtype(rhs.m_dtype), m_builtin_optable(rhs.m_builtin_optable), m_node_name(rhs.m_node_name)
+        {
         }
 
         arithmetic_operator_factory(binary_operation_table_t *builtin_optable, const char *node_name)
-            : m_builtin_optable(builtin_optable), m_node_name(node_name)
+            : m_dtype(), m_builtin_optable(builtin_optable), m_node_name(node_name)
         {
+        }
+
+        arithmetic_operator_factory& operator=(arithmetic_operator_factory& rhs)
+        {
+            m_dtype = rhs.m_dtype;
+            m_builtin_optable = rhs.m_builtin_optable;
+            m_node_name = rhs.m_node_name;
+
+            return *this;
         }
 
         void promote_dtypes(const dtype& dt1, const dtype& dt2) {

@@ -1,7 +1,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <stdint.h>
-#include <gtest/gtest.h>
+#include "inc_gtest.hpp"
 
 #include "dnd/dtype.hpp"
 
@@ -105,6 +105,24 @@ TEST(DType, BasicConstructor) {
     EXPECT_EQ(uint_kind, d.kind());
     EXPECT_EQ((int)sizeof(unsigned long long), d.alignment());
     EXPECT_EQ(sizeof(unsigned long long), d.itemsize());
+    EXPECT_EQ(NULL, d.extended());
+
+    // float
+    d = make_dtype<float>();
+    EXPECT_FALSE(d.is_byteswapped());
+    EXPECT_EQ(float32_type_id, d.type_id());
+    EXPECT_EQ(float_kind, d.kind());
+    EXPECT_EQ((int)sizeof(float), d.alignment());
+    EXPECT_EQ(sizeof(float), d.itemsize());
+    EXPECT_EQ(NULL, d.extended());
+
+    // double
+    d = make_dtype<double>();
+    EXPECT_FALSE(d.is_byteswapped());
+    EXPECT_EQ(float64_type_id, d.type_id());
+    EXPECT_EQ(float_kind, d.kind());
+    EXPECT_EQ((int)sizeof(double), d.alignment());
+    EXPECT_EQ(sizeof(double), d.itemsize());
     EXPECT_EQ(NULL, d.extended());
 
     // For fixed-size types, can't specify a bad size

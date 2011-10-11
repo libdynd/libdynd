@@ -48,31 +48,20 @@ public:
     }
 
     /** Construct the shortvector with a specified size */
-    explicit shortvector(int size) {
-        if (size <= staticN) {
-            m_data = m_shortdata;
-        } else {
-            m_data = new T[size];
-        }
+    explicit shortvector(int size)
+        : m_data((size <= staticN) ? m_shortdata : new T[size])
+    {
     }
     /** Construct the shortvector with a specified size and initial data */
-    shortvector(int size, const shortvector& rhs) {
-        // Could use C++11 delegating constructor for the first part
-        if (size <= staticN) {
-            m_data = m_shortdata;
-        } else {
-            m_data = new T[size];
-        }
+    shortvector(int size, const shortvector& rhs)
+        : m_data((size <= staticN) ? m_shortdata : new T[size])
+    {
         std::memcpy(m_data, rhs.m_data, size * sizeof(T));
     }
     /** Construct the shortvector with a specified size and initial data */
-    shortvector(int size, const T* data) {
-        // Could use C++11 delegating constructor for the first part
-        if (size <= staticN) {
-            m_data = m_shortdata;
-        } else {
-            m_data = new T[size];
-        }
+    shortvector(int size, const T* data)
+        : m_data((size <= staticN) ? m_shortdata : new T[size])
+    {
         std::memcpy(m_data, data, size * sizeof(T));
     }
     /** Non-copyable */
@@ -198,6 +187,10 @@ class multi_shortvector {
             }
         }
     }
+
+    // Non-copyable
+    multi_shortvector(const multi_shortvector&);
+    multi_shortvector& operator=(const multi_shortvector&);
 public:
     multi_shortvector()
         : m_alloc_data(NULL) {

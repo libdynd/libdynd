@@ -20,7 +20,7 @@ namespace dnd {
 class dnd_bool {
     char m_value;
 public:
-    dnd_bool() {}
+    dnd_bool() : m_value(0) {}
     dnd_bool(bool value) : m_value(value) {}
     operator bool() const {
         return (bool)m_value;
@@ -215,6 +215,15 @@ public:
 };
 
 /**
+ * This function returns a C-string of the base name for
+ * the given type id. Raises an exception if the type id
+ * is invalid.
+ *
+ * @param type_id  The type id for which to get the name.
+ */
+const char *get_type_id_basename(int type_id);
+
+/**
  * This class represents a data type.
  *
  * The purpose of this data type is to describe the data layout
@@ -232,8 +241,6 @@ private:
     unsigned char m_type_id, m_kind, m_alignment, m_byteswapped;
     uintptr_t m_itemsize;
     std::shared_ptr<extended_dtype> m_data;
-
-    bool set_to_type_id(int type_id);
 
 public:
     /** Constructor */

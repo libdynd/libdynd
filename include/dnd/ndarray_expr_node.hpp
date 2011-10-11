@@ -180,6 +180,9 @@ class strided_array_expr_node : public ndarray_expr_node {
     dimvector m_strides;
     std::shared_ptr<void> m_buffer_owner;
 
+    // Non-copyable
+    strided_array_expr_node(const strided_array_expr_node&);
+    strided_array_expr_node& operator=(const strided_array_expr_node&);
 public:
     /** Creates a strided array node from the raw values */
     strided_array_expr_node(const dtype& dt, int ndim, const intptr_t *shape,

@@ -1,7 +1,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <stdint.h>
-#include <gtest/gtest.h>
+#include "inc_gtest.hpp"
 
 #include "dnd/dtype_casting.hpp"
 

@@ -128,7 +128,9 @@ class elementwise_binary_op_expr_node : public ndarray_expr_node {
     elementwise_binary_op_expr_node(const ndarray_expr_node_ptr& op0, const ndarray_expr_node_ptr& op1,
                                     BinaryOperatorFactory& op_factory)
             : ndarray_expr_node(op0->get_dtype(), op0->get_ndim(), 2, op0->get_shape(),
-                elementwise_node_category, elementwise_binary_op_node_type) {
+                elementwise_node_category, elementwise_binary_op_node_type),
+                m_op_factory()
+    {
         m_opnodes[0] = op0;
         m_opnodes[1] = op1;
 
@@ -137,8 +139,10 @@ class elementwise_binary_op_expr_node : public ndarray_expr_node {
     }
     elementwise_binary_op_expr_node(ndarray_expr_node_ptr&& op0, ndarray_expr_node_ptr&& op1,
                                     BinaryOperatorFactory& op_factory)
-            : ndarray_expr_node(op0->get_dtype(), op0->get_ndim(), 2, op0->get_shape(),
-                elementwise_node_category, elementwise_binary_op_node_type) {
+        : ndarray_expr_node(op0->get_dtype(), op0->get_ndim(), 2, op0->get_shape(),
+                elementwise_node_category, elementwise_binary_op_node_type),
+                m_op_factory()
+    {
         m_opnodes[0] = std::move(op0);
         m_opnodes[1] = std::move(op1);
 

@@ -26,7 +26,7 @@ static void print_shape(std::ostream& o, int ndim, const intptr_t *shape)
     o << ")";
 }
 
-dnd::broadcast_error::broadcast_error(int dst_ndim, const intptr_t *dst_shape,
+inline string broadcast_error_message(int dst_ndim, const intptr_t *dst_shape,
                     int src_ndim, const intptr_t *src_shape)
 {
     stringstream ss;
@@ -36,10 +36,36 @@ dnd::broadcast_error::broadcast_error(int dst_ndim, const intptr_t *dst_shape,
     ss << " to shape ";
     print_shape(ss, dst_ndim, dst_shape);
 
-    m_what = ss.str();
+    return ss.str();
+}
+
+dnd::broadcast_error::broadcast_error(int dst_ndim, const intptr_t *dst_shape,
+                    int src_ndim, const intptr_t *src_shape)
+    : m_what(broadcast_error_message(dst_ndim, dst_shape, src_ndim, src_shape))
+{
+}
+
+inline string broadcast_error_message(int noperands, const ndarray **operands)
+{
+    stringstream ss;
+
+    ss << "broadcast error: cannot broadcast input operand shapes ";
+    for (int i = 0; i < noperands; ++i) {
+        print_shape(ss, operands[i]->get_ndim(), operands[i]->get_shape());
+        if (i != noperands - 1) {
+            ss << " ";
+        }
+    }
+
+    return ss.str();
 }
 
 dnd::broadcast_error::broadcast_error(int noperands, const ndarray **operands)
+    : m_what(broadcast_error_message(noperands, operands))
+{
+}
+
+inline string broadcast_error_message(int noperands, ndarray_expr_node **operands)
 {
     stringstream ss;
 
@@ -51,60 +77,64 @@ dnd::broadcast_error::broadcast_error(int noperands, const ndarray **operands)
         }
     }
 
-    m_what = ss.str();
+    return ss.str();
 }
 
 dnd::broadcast_error::broadcast_error(int noperands, ndarray_expr_node **operands)
+    : m_what(broadcast_error_message(noperands, operands))
 {
-    stringstream ss;
-
-    ss << "broadcast error: cannot broadcast input operand shapes ";
-    for (int i = 0; i < noperands; ++i) {
-        print_shape(ss, operands[i]->get_ndim(), operands[i]->get_shape());
-        if (i != noperands - 1) {
-            ss << " ";
-        }
-    }
-
-    m_what = ss.str();
 }
 
-dnd::too_many_indices::too_many_indices(int nindex, int ndim)
+inline string too_many_indices_message(int nindex, int ndim)
 {
-    //cout << "throwing too_many_indices\n";
     std::stringstream ss;
 
     ss << "too many indices: provided " << nindex << " indices, but array has only ";
     ss << ndim << " dimensions";
 
-    m_what = ss.str();
+    return ss.str();
 }
 
-dnd::index_out_of_bounds::index_out_of_bounds(intptr_t i, intptr_t start, intptr_t end)
+dnd::too_many_indices::too_many_indices(int nindex, int ndim)
+    : m_what(too_many_indices_message(nindex, ndim))
 {
-    //cout << "throwing index_out_of_bounds\n";
+    //cout << "throwing too_many_indices\n";
+}
+
+inline string index_out_of_bounds_message(intptr_t i, intptr_t start, intptr_t end)
+{
     stringstream ss;
 
     ss << "index out of bounds: index " << i << " is not in the half-open range [";
     ss << start << ", " << end << ")";
 
-    m_what = ss.str();
+    return ss.str();
 }
 
-dnd::axis_out_of_bounds::axis_out_of_bounds(intptr_t i, intptr_t start, intptr_t end)
+dnd::index_out_of_bounds::index_out_of_bounds(intptr_t i, intptr_t start, intptr_t end)
+    : m_what(index_out_of_bounds_message(i, start, end))
 {
-    //cout << "throwing axis_out_of_bounds\n";
+    //cout << "throwing index_out_of_bounds\n";
+}
+
+inline string axis_out_of_bounds_message(intptr_t i, intptr_t start, intptr_t end)
+{
     stringstream ss;
 
     ss << "axis out of bounds: axis " << i << " is not in the half-open range [";
     ss << start << ", " << end << ")";
 
-    m_what = ss.str();
+    return ss.str();
 }
 
-dnd::irange_out_of_bounds::irange_out_of_bounds(const irange& i, intptr_t start, intptr_t end)
+dnd::axis_out_of_bounds::axis_out_of_bounds(intptr_t i, intptr_t start, intptr_t end)
+    : m_what(axis_out_of_bounds_message(i, start, end))
 {
-    //cout << "throwing irange_out_of_bounds\n";
+    //cout << "throwing axis_out_of_bounds\n";
+}
+
+inline string irange_out_of_bounds_message(const irange& i, intptr_t start, intptr_t end)
+{
     stringstream ss;
 
     ss << "irange out of bounds: index range (" << i.start() << " to " << i.finish();
@@ -114,6 +144,27 @@ dnd::irange_out_of_bounds::irange_out_of_bounds(const irange& i, intptr_t start,
     ss << ") is not in the half-open range [";
     ss << start << ", " << end << ")";
 
-    m_what = ss.str();
+    return ss.str();
+}
+
+dnd::irange_out_of_bounds::irange_out_of_bounds(const irange& i, intptr_t start, intptr_t end)
+    : m_what(irange_out_of_bounds_message(i, start, end))
+{
+    //cout << "throwing irange_out_of_bounds\n";
+}
+
+inline string invalid_type_id_message(int type_id)
+{
+    stringstream ss;
+
+    ss << "invalid type id: the id " << type_id << " is not valid";
+
+    return ss.str();
+}
+
+dnd::invalid_type_id::invalid_type_id(int type_id)
+    : m_what(invalid_type_id_message(type_id))
+{
+    //cout << "throwing invalid_type_id\n";
 }
 

@@ -369,6 +369,7 @@ namespace detail {
 // Implementation of initializer list construction
 template<class T>
 dnd::ndarray::ndarray(std::initializer_list<T> il)
+    : m_expr_tree()
 {
     intptr_t dim0 = il.size();
     intptr_t stride = (dim0 == 1) ? 0 : sizeof(T);
@@ -381,6 +382,7 @@ dnd::ndarray::ndarray(std::initializer_list<T> il)
 }
 template<class T>
 dnd::ndarray::ndarray(std::initializer_list<std::initializer_list<T> > il)
+    : m_expr_tree()
 {
     typedef std::initializer_list<std::initializer_list<T> > S;
     intptr_t shape[2], strides[2];
@@ -404,6 +406,7 @@ dnd::ndarray::ndarray(std::initializer_list<std::initializer_list<T> > il)
 }
 template<class T>
 dnd::ndarray::ndarray(std::initializer_list<std::initializer_list<std::initializer_list<T> > > il)
+    : m_expr_tree()
 {
     typedef std::initializer_list<std::initializer_list<std::initializer_list<T> > > S;
     intptr_t shape[3], strides[3];
@@ -462,6 +465,7 @@ namespace detail {
 
 template<class T, int N>
 dnd::ndarray::ndarray(const T (&rhs)[N])
+    : m_expr_tree()
 {
     intptr_t shape[detail::ndim_from_array<T[N]>::value], strides[detail::ndim_from_array<T[N]>::value];
     const int ndim = detail::ndim_from_array<T[N]>::value;

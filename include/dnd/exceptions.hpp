@@ -111,7 +111,7 @@ public:
 };
 
 /**
- * An exception for a range out of bounds
+ * An exception for a range out of bounds.
  */
 class irange_out_of_bounds : public dnd_exception {
     std::string m_what;
@@ -127,6 +127,22 @@ public:
     irange_out_of_bounds(const irange& i, intptr_t start, intptr_t end);
 
     virtual ~irange_out_of_bounds() throw() {
+    }
+};
+
+/**
+ * An exception for an invalid type ID.
+ */
+class invalid_type_id : public dnd_exception {
+    std::string m_what;
+public:
+    virtual const char* what() const throw() {
+        return m_what.c_str();
+    }
+
+    invalid_type_id(int type_id);
+
+    virtual ~invalid_type_id() throw() {
     }
 };
 

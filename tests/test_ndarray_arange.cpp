@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <cmath>
 #include <stdint.h>
-#include <gtest/gtest.h>
+#include <inc_gtest.hpp>
 
 #include "dnd/ndarray.hpp"
 #include "dnd/ndarray_arange.hpp"

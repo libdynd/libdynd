@@ -18,6 +18,7 @@ set(tests_SRC
 include_directories(
     ../../AnimPhys/gtest/include
     ../include
+    .
     )
 
 add_executable(dnd_tests ${tests_SRC})

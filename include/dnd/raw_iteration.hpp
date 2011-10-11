@@ -14,6 +14,16 @@
 #include <dnd/ndarray.hpp>
 #include <dnd/shape_tools.hpp>
 
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+// The -Weffc++ flag warns about member variables not being initialized by
+// the member initialization list. In this case, I didn't see a nice way
+// to do this (maybe making {m_data, m_allocated} into a separate class...).
+//
+// NOTE: The documentation says this is only for g++ 4.6.0 and up.
+#pragma GCC diagnostic ignored "-Weffc++"
+#endif
+
 namespace dnd {
 
 namespace detail {
@@ -411,5 +421,9 @@ public:
 };
 
 } // namespace dnd
+
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
 
 #endif // _RAW_ITERATION_HPP_

@@ -29,10 +29,12 @@ void dnd::detail::ndarray_buffer_deleter(void *ptr)
 }
 
 dnd::ndarray::ndarray()
+    : m_expr_tree()
 {
 }
 
 dnd::ndarray::ndarray(int8_t value)
+    : m_expr_tree()
 {
     shared_ptr<void> buffer_owner(::dnd::detail::ndarray_buffer_allocator(1),
                                 ::dnd::detail::ndarray_buffer_deleter);
@@ -41,6 +43,7 @@ dnd::ndarray::ndarray(int8_t value)
                             reinterpret_cast<char *>(buffer_owner.get()), std::move(buffer_owner)));
 }
 dnd::ndarray::ndarray(int16_t value)
+    : m_expr_tree()
 {
     shared_ptr<void> buffer_owner(::dnd::detail::ndarray_buffer_allocator(2),
                                 ::dnd::detail::ndarray_buffer_deleter);
@@ -49,6 +52,7 @@ dnd::ndarray::ndarray(int16_t value)
                             reinterpret_cast<char *>(buffer_owner.get()), std::move(buffer_owner)));
 }
 dnd::ndarray::ndarray(int32_t value)
+    : m_expr_tree()
 {
     shared_ptr<void> buffer_owner(::dnd::detail::ndarray_buffer_allocator(4),
                                 ::dnd::detail::ndarray_buffer_deleter);
@@ -57,6 +61,7 @@ dnd::ndarray::ndarray(int32_t value)
                             reinterpret_cast<char *>(buffer_owner.get()), std::move(buffer_owner)));
 }
 dnd::ndarray::ndarray(int64_t value)
+    : m_expr_tree()
 {
     shared_ptr<void> buffer_owner(::dnd::detail::ndarray_buffer_allocator(8),
                                 ::dnd::detail::ndarray_buffer_deleter);
@@ -65,6 +70,7 @@ dnd::ndarray::ndarray(int64_t value)
                             reinterpret_cast<char *>(buffer_owner.get()), std::move(buffer_owner)));
 }
 dnd::ndarray::ndarray(uint8_t value)
+    : m_expr_tree()
 {
     shared_ptr<void> buffer_owner(::dnd::detail::ndarray_buffer_allocator(1),
                                 ::dnd::detail::ndarray_buffer_deleter);
@@ -73,6 +79,7 @@ dnd::ndarray::ndarray(uint8_t value)
                             reinterpret_cast<char *>(buffer_owner.get()), std::move(buffer_owner)));
 }
 dnd::ndarray::ndarray(uint16_t value)
+    : m_expr_tree()
 {
     shared_ptr<void> buffer_owner(::dnd::detail::ndarray_buffer_allocator(2),
                                 ::dnd::detail::ndarray_buffer_deleter);
@@ -81,6 +88,7 @@ dnd::ndarray::ndarray(uint16_t value)
                             reinterpret_cast<char *>(buffer_owner.get()), std::move(buffer_owner)));
 }
 dnd::ndarray::ndarray(uint32_t value)
+    : m_expr_tree()
 {
     shared_ptr<void> buffer_owner(::dnd::detail::ndarray_buffer_allocator(4),
                                 ::dnd::detail::ndarray_buffer_deleter);
@@ -89,6 +97,7 @@ dnd::ndarray::ndarray(uint32_t value)
                             reinterpret_cast<char *>(buffer_owner.get()), std::move(buffer_owner)));
 }
 dnd::ndarray::ndarray(uint64_t value)
+    : m_expr_tree()
 {
     shared_ptr<void> buffer_owner(::dnd::detail::ndarray_buffer_allocator(8),
                                 ::dnd::detail::ndarray_buffer_deleter);
@@ -97,6 +106,7 @@ dnd::ndarray::ndarray(uint64_t value)
                             reinterpret_cast<char *>(buffer_owner.get()), std::move(buffer_owner)));
 }
 dnd::ndarray::ndarray(float value)
+    : m_expr_tree()
 {
     shared_ptr<void> buffer_owner(::dnd::detail::ndarray_buffer_allocator(4),
                                 ::dnd::detail::ndarray_buffer_deleter);
@@ -105,6 +115,7 @@ dnd::ndarray::ndarray(float value)
                             reinterpret_cast<char *>(buffer_owner.get()), std::move(buffer_owner)));
 }
 dnd::ndarray::ndarray(double value)
+    : m_expr_tree()
 {
     shared_ptr<void> buffer_owner(::dnd::detail::ndarray_buffer_allocator(8),
                                 ::dnd::detail::ndarray_buffer_deleter);
@@ -115,6 +126,7 @@ dnd::ndarray::ndarray(double value)
 
 
 dnd::ndarray::ndarray(const dtype& dt)
+    : m_expr_tree()
 {
     shared_ptr<void> buffer_owner(::dnd::detail::ndarray_buffer_allocator(dt.itemsize()),
                                 ::dnd::detail::ndarray_buffer_deleter);
@@ -133,6 +145,7 @@ dnd::ndarray::ndarray(ndarray_expr_node_ptr&& expr_tree)
 }
 
 dnd::ndarray::ndarray(intptr_t dim0, const dtype& dt)
+    : m_expr_tree()
 {
     intptr_t stride = (dim0 <= 1) ? 0 : dt.itemsize();
     shared_ptr<void> buffer_owner(
@@ -143,6 +156,7 @@ dnd::ndarray::ndarray(intptr_t dim0, const dtype& dt)
 }
 
 dnd::ndarray::ndarray(intptr_t dim0, intptr_t dim1, const dtype& dt)
+    : m_expr_tree()
 {
     intptr_t shape[2] = {dim0, dim1};
     intptr_t strides[2] = {(dim0 <= 1) ? 0 : dt.itemsize() * dim1,
@@ -155,6 +169,7 @@ dnd::ndarray::ndarray(intptr_t dim0, intptr_t dim1, const dtype& dt)
 }
 
 dnd::ndarray::ndarray(intptr_t dim0, intptr_t dim1, intptr_t dim2, const dtype& dt)
+    : m_expr_tree()
 {
     intptr_t shape[3] = {dim0, dim1, dim2};
     intptr_t strides[3] = {(dim0 <= 1) ? 0 : dt.itemsize() * dim1 * dim2,
@@ -168,6 +183,7 @@ dnd::ndarray::ndarray(intptr_t dim0, intptr_t dim1, intptr_t dim2, const dtype& 
 }
 
 dnd::ndarray::ndarray(intptr_t dim0, intptr_t dim1, intptr_t dim2, intptr_t dim3, const dtype& dt)
+    : m_expr_tree()
 {
     intptr_t shape[4] = {dim0, dim1, dim2, dim3};
     intptr_t strides[4] = {(dim0 <= 1) ? 0 : dt.itemsize() * dim1 * dim2 * dim3,

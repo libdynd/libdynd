@@ -2,7 +2,7 @@
 #include <stdexcept>
 #include <cmath>
 #include <stdint.h>
-#include <gtest/gtest.h>
+#include "inc_gtest.hpp"
 
 #include "dnd/ndarray.hpp"
 

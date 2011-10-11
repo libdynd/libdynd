@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <cmath>
 #include <stdint.h>
-#include <gtest/gtest.h>
+#include "inc_gtest.hpp"
 
 #include "dnd/shape_tools.hpp"
 #include "dnd/exceptions.hpp"

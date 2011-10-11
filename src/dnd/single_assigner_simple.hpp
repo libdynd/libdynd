@@ -11,6 +11,15 @@
 #include <dnd/fpstatus.hpp>
 #include <cmath>
 
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+// The -Weffc++ flag warns about derived classes not having a virtual destructor.
+// Here, this is explicitly done, because we are only using derived classes
+// to inherit a static function, they are never instantiated.
+//
+// NOTE: The documentation says this is only for g++ 4.6.0 and up.
+#pragma GCC diagnostic ignored "-Weffc++"
+#endif
 
 // Put it in an anonymous namespace
 namespace {
@@ -397,6 +406,10 @@ struct single_assigner_simple<same_type, same_type, errmode>
         *dst = *src;
     }
 };
+
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
 
 } // anonymous namespace
 

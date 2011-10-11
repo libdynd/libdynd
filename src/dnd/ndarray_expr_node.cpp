@@ -239,7 +239,7 @@ dnd::strided_array_expr_node::strided_array_expr_node(const dtype& dt, int ndim,
 dnd::strided_array_expr_node::strided_array_expr_node(const dtype& dt, int ndim,
                                 const intptr_t *shape, const int *axis_perm)
     : ndarray_expr_node(dt, ndim, 0, shape, strided_array_node_category, strided_array_node_type),
-      m_strides(ndim)
+      m_originptr(NULL), m_strides(ndim), m_buffer_owner()
 {
     // Build the strides using the ordering and shape
     intptr_t num_elements = 1;
