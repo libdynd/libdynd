@@ -30,7 +30,11 @@ enum expr_node_category {
 };
 
 enum expr_node_type {
+    // This node represents an NBO, aligned, strided array
     strided_array_node_type,
+    // This node represents a strided array which is either not NBO, or is misaligned,
+    // i.e. requires buffering
+    misbehaved_strided_array_node_type,
     convert_dtype_node_type,
     broadcast_shape_node_type,
     elementwise_binary_op_node_type,
@@ -183,13 +187,22 @@ class strided_array_expr_node : public ndarray_expr_node {
     // Non-copyable
     strided_array_expr_node(const strided_array_expr_node&);
     strided_array_expr_node& operator=(const strided_array_expr_node&);
-public:
-    /** Creates a strided array node from the raw values */
+
+    /**
+     * Creates a strided array node from the raw values.
+     *
+     * This object can only be constructed by the node factory function or the ndarray, so
+     * the constructor is private. This is because the dtype must be NBO, and the data
+     * must all be aligned, but this constructor does not validate these constraints.
+     */
     strided_array_expr_node(const dtype& dt, int ndim, const intptr_t *shape,
             const intptr_t *strides, char *originptr, const std::shared_ptr<void>& buffer_owner);
-    /** Constructs a strided array node with the given dtype, shape, and axis_perm (for memory layout) */
-    strided_array_expr_node(const dtype& dt, int ndim, const intptr_t *shape, const int *axis_perm);
 
+public:
+    /**
+     * Constructs a strided array node with the given dtype, shape, and axis_perm (for memory layout)
+     */
+    strided_array_expr_node(const dtype& dt, int ndim, const intptr_t *shape, const int *axis_perm);
 
     virtual ~strided_array_expr_node() {
     }
@@ -206,6 +219,76 @@ public:
         return m_buffer_owner;
     }
 
+    /** Provides the data pointer and strides array for the tree evaluation code */
+    void as_data_and_strides(char **out_originptr, intptr_t *out_strides) const;
+
+    ndarray_expr_node_ptr apply_linear_index(int ndim, const intptr_t *shape, const int *axis_map,
+                    const intptr_t *index_strides, const intptr_t *start_index, bool allow_in_place);
+    // TODO: Implement apply_integer_index
+
+    const char *node_name() const {
+        return "strided_array";
+    }
+
+    void debug_dump_extra(std::ostream& o, const std::string& indent) const;
+
+    friend class ndarray;
+    friend ndarray_expr_node_ptr make_strided_array_expr_node(
+                    const dtype& dt, int ndim, const intptr_t *shape,
+                    const intptr_t *strides, char *originptr,
+                    const std::shared_ptr<void>& buffer_owner);
+    // TODO: Add a virtual broadcast function to the base node type, then remove this friend function
+    friend ndarray_expr_node_ptr dnd::make_broadcast_strided_array_expr_node(ndarray_expr_node *node,
+                                int ndim, const intptr_t *shape,
+                                const dtype& dt, assign_error_mode errmode);
+};
+
+/**
+ * NDArray expression node which holds a raw strided array that is either not in NBO,
+ * or is misaligned.
+ */
+class misbehaved_strided_array_expr_node : public ndarray_expr_node {
+    dtype m_inner_dtype;
+    char *m_originptr;
+    dimvector m_strides;
+    std::shared_ptr<void> m_buffer_owner;
+
+    // Non-copyable
+    misbehaved_strided_array_expr_node(const misbehaved_strided_array_expr_node&);
+    misbehaved_strided_array_expr_node& operator=(const misbehaved_strided_array_expr_node&);
+
+    /** Creates a strided array node from the raw values */
+    misbehaved_strided_array_expr_node(const dtype& dt, int ndim, const intptr_t *shape,
+            const intptr_t *strides, char *originptr, const std::shared_ptr<void>& buffer_owner);
+
+public:
+
+    virtual ~misbehaved_strided_array_expr_node() {
+    }
+
+    /** Returns the dtype of the actual binary data */
+    const dtype& get_inner_dtype() const {
+        return m_inner_dtype;
+    }
+
+    char *get_originptr() const {
+        return m_originptr;
+    }
+
+    const intptr_t *get_strides() const {
+        return m_strides.get();
+    }
+
+    std::shared_ptr<void> get_buffer_owner() const {
+        return m_buffer_owner;
+    }
+
+    /** Returns true if every data member in the dtype is NBO (in native byte order) */
+    bool is_nbo() const {
+        return m_inner_dtype.is_nbo();
+    }
+
+    /** Returns true if every element is aligned */
     bool is_aligned() const {
         int alignment = get_dtype().alignment();
         if (alignment == 1) {
@@ -222,7 +305,11 @@ public:
         }
     }
 
-    /** Provides the data pointer and strides array for the tree evaluation code */
+    /**
+     * Provides the data pointer and strides array for the tree evaluation code. Note that
+     * the data may be in a different byte-order, so use the dtype returned by get_inner_dtype().
+     * The data may also be misaligned, so don't use operations requiring alignment.
+     */
     void as_data_and_strides(char **out_originptr, intptr_t *out_strides) const;
 
     ndarray_expr_node_ptr apply_linear_index(int ndim, const intptr_t *shape, const int *axis_map,
@@ -230,12 +317,16 @@ public:
     // TODO: Implement apply_integer_index
 
     const char *node_name() const {
-        return "strided_array";
+        return "misbehaved_strided_array";
     }
 
     void debug_dump_extra(std::ostream& o, const std::string& indent) const;
-};
 
+    friend ndarray_expr_node_ptr make_strided_array_expr_node(
+                    const dtype& dt, int ndim, const intptr_t *shape,
+                    const intptr_t *strides, char *originptr,
+                    const std::shared_ptr<void>& buffer_owner);
+};
 
 /** Adds a reference, for intrusive_ptr<ndarray_expr_node> to use */
 inline void intrusive_ptr_add_ref(const ndarray_expr_node *node) {

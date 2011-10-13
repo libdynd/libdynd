@@ -17,6 +17,10 @@ namespace dnd {
  *
  * For the built-in types, this is generally following the
  * rules for C/C++, with a unit test validating the results.
+ *
+ * If the inputs are in NBO (native byte order), the result will
+ * be in NBO. If the inputs are not, the output may or may not
+ * be in NBO, the function makes no effort to follow a convention.
  */
 dtype promote_dtypes_arithmetic(const dtype& dt0, const dtype& dt1);
 

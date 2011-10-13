@@ -199,23 +199,6 @@ public:
     }
 
     /**
-     * Returns true if this is an array which owns its own data,
-     * and all the data elements are aligned according to the needs
-     * of the data type.
-     *
-     * This operation loops through all the strides to compute whether it is aligned.
-     */
-    bool is_aligned() const {
-        if (m_expr_tree->get_node_type() == strided_array_node_type) {
-            const strided_array_expr_node *node =
-                            static_cast<const strided_array_expr_node *>(m_expr_tree.get());
-            return node->is_aligned();
-        } else {
-            return false;
-        }
-    }
-
-    /**
      * The ndarray uses the function call operator to do indexing. The [] operator
      * only supports one index object at a time, and while there are tricks that can be
      * done by overloading the comma operator, this doesn't produce a fool-proof result.

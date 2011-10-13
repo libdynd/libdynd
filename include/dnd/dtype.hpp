@@ -325,6 +325,17 @@ public:
         }
     }
 
+    /**
+     * Returns true if every data member of the dtype is in NBO.
+     */
+    bool is_nbo() const {
+        if (m_data == NULL) {
+            return !m_byteswapped;
+        } else {
+            return m_data->is_nbo();
+        }
+    }
+
     /** Whether the dtype is byte-swapped */
     bool is_byteswapped() const {
         return m_byteswapped;
@@ -392,7 +403,8 @@ public:
 
     byteswap_operation_t get_byteswap_operation() const;
 
-    void print(std::ostream& o, const void *data, intptr_t stride, intptr_t size, const char *separator) const;
+    void print(std::ostream& o, const void *data, intptr_t stride, intptr_t size,
+                                                            const char *separator) const;
 
     friend std::ostream& operator<<(std::ostream& o, const dtype& rhs);
 };

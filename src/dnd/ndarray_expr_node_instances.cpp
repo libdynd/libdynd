@@ -259,23 +259,35 @@ ndarray_expr_node_ptr dnd::make_strided_array_expr_node(
             const intptr_t *strides, char *originptr,
             const std::shared_ptr<void>& buffer_owner)
 {
+    // If the data type isn't NBO, return a misbehaved strided node
+    if (!dt.is_nbo()) {
+        return ndarray_expr_node_ptr(new misbehaved_strided_array_expr_node(dt, ndim,
+                                            shape, strides, originptr, buffer_owner));
+    }
+
+    intptr_t align_bits = (dt.alignment() - 1);
+    if (align_bits != 0) {
+        intptr_t align_check = reinterpret_cast<intptr_t>(originptr);
+        for (int i = 0; i < ndim; ++i) {
+            align_check |= strides[i];
+        }
+
+        // If the data isn't aligned, return a misbehaved strided node
+        if ((align_check & align_bits) != 0) {
+            return ndarray_expr_node_ptr(new misbehaved_strided_array_expr_node(dt, ndim,
+                                                shape, strides, originptr, buffer_owner));
+        }
+    }
+
+    // The data type is NBO and the data is aligned, return a strided node
     return ndarray_expr_node_ptr(new strided_array_expr_node(dt, ndim,
                                         shape, strides, originptr, buffer_owner));
 }
 
-ndarray_expr_node_ptr dnd::make_aligned_expr_node(ndarray_expr_node *node, const dtype& dt,
-                                        assign_error_mode errmode)
+ndarray_expr_node_ptr dnd::make_convert_dtype_expr_node(
+            ndarray_expr_node *node, const dtype& dt, assign_error_mode errmode)
 {
-    if (dt == node->get_dtype()) {
-        if (node->get_node_type() != strided_array_node_type ||
-                        static_cast<strided_array_expr_node *>(node)->is_aligned()) {
-            return ndarray_expr_node_ptr(node);
-        } else {
-            return ndarray_expr_node_ptr(new convert_dtype_expr_node(dt, errmode, ndarray_expr_node_ptr(node)));
-        }
-    } else {
-        return ndarray_expr_node_ptr(new convert_dtype_expr_node(dt, errmode, ndarray_expr_node_ptr(node)));
-    }
+    return ndarray_expr_node_ptr(new convert_dtype_expr_node(dt, errmode, node));
 }
 
 ndarray_expr_node_ptr dnd::make_broadcast_strided_array_expr_node(ndarray_expr_node *node,
@@ -297,7 +309,7 @@ ndarray_expr_node_ptr dnd::make_broadcast_strided_array_expr_node(ndarray_expr_n
                                     shape, strides.get(), snode->get_originptr(), snode->get_buffer_owner()));
 
     // Add an conversion/alignment node if necessary
-    if (dt == snode->get_dtype() && snode->is_aligned()) {
+    if (dt == snode->get_dtype()) {
         return std::move(new_node);
     } else {
         return ndarray_expr_node_ptr(new convert_dtype_expr_node(dt, errmode, std::move(new_node)));
