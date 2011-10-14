@@ -26,21 +26,21 @@ void dnd::ndarray_expr_node::as_data_and_strides(char ** /*out_data*/,
                              "nodes with an expr_node_strided_array category");
 }
 
-pair<nullary_operation_t, shared_ptr<auxiliary_data> >
+pair<nullary_operation_t, dnd::shared_ptr<auxiliary_data> >
                 dnd::ndarray_expr_node::get_nullary_operation(intptr_t) const
 {
     throw std::runtime_error("get_nullary_operation is only valid for "
                              "generator nodes which provide an implementation");
 }
 
-pair<unary_operation_t, shared_ptr<auxiliary_data> >
+pair<unary_operation_t, dnd::shared_ptr<auxiliary_data> >
                 dnd::ndarray_expr_node::get_unary_operation(intptr_t, intptr_t) const
 {
     throw std::runtime_error("get_unary_operation is only valid for "
                              "unary nodes which provide an implementation");
 }
 
-pair<binary_operation_t, shared_ptr<auxiliary_data> >
+pair<binary_operation_t, dnd::shared_ptr<auxiliary_data> >
                 dnd::ndarray_expr_node::get_binary_operation(intptr_t, intptr_t, intptr_t) const
 {
     throw std::runtime_error("get_binary_operation is only valid for "
@@ -72,7 +72,7 @@ ndarray_expr_node_ptr dnd::ndarray_expr_node::evaluate() const
                     intptr_t dst_stride = iter.innerstride<0>();
                     intptr_t src0_stride = iter.innerstride<1>();
                     intptr_t src1_stride = iter.innerstride<2>();
-                    pair<binary_operation_t, shared_ptr<auxiliary_data> > operation =
+                    pair<binary_operation_t, dnd::shared_ptr<auxiliary_data> > operation =
                                 get_binary_operation(dst_stride, src0_stride, src1_stride);
                     if (innersize > 0) {
                         do {
@@ -233,7 +233,7 @@ void dnd::ndarray_expr_node::debug_dump_extra(ostream&, const string&) const
 
 dnd::strided_array_expr_node::strided_array_expr_node(const dtype& dt, int ndim,
                                 const intptr_t *shape, const intptr_t *strides,
-                                char *originptr, const std::shared_ptr<void>& buffer_owner)
+                                char *originptr, const dnd::shared_ptr<void>& buffer_owner)
     : ndarray_expr_node(dt, ndim, 0, shape, strided_array_node_category, strided_array_node_type),
       m_originptr(originptr), m_strides(ndim, strides), m_buffer_owner(buffer_owner)
 {
@@ -331,7 +331,7 @@ void dnd::strided_array_expr_node::debug_dump_extra(ostream& o, const string& in
 
 dnd::misbehaved_strided_array_expr_node::misbehaved_strided_array_expr_node(const dtype& dt, int ndim,
                                 const intptr_t *shape, const intptr_t *strides,
-                                char *originptr, const std::shared_ptr<void>& buffer_owner)
+                                char *originptr, const dnd::shared_ptr<void>& buffer_owner)
     : ndarray_expr_node(dt.as_nbo(), ndim, 0, shape,
                         arbitrary_node_category, misbehaved_strided_array_node_type),
       m_inner_dtype(dt), m_originptr(originptr), m_strides(ndim, strides), m_buffer_owner(buffer_owner)

@@ -9,7 +9,6 @@
 
 #include <iostream> // FOR DEBUG
 #include <stdexcept>
-#include <initializer_list>
 
 #include <boost/utility/enable_if.hpp>
 
@@ -88,6 +87,7 @@ public:
     /** Constructs a four-dimensional array */
     ndarray(intptr_t dim0, intptr_t dim1, intptr_t dim2, intptr_t dim3, const dtype& dt);
 
+#ifdef DND_INIT_LIST
     /**
      * Constructs an array from an initializer list.
      *
@@ -104,6 +104,7 @@ public:
     /** Constructs an array from a three-level nested initializer list */
     template<class T>
     ndarray(std::initializer_list<std::initializer_list<std::initializer_list<T> > > il);
+#endif // DND_INIT_LIST
 
     /**
      * Constructs an array from a multi-dimensional C-style array.
@@ -186,7 +187,7 @@ public:
         }
     }
 
-    std::shared_ptr<void> get_buffer_owner() const {
+    dnd::shared_ptr<void> get_buffer_owner() const {
         if (m_expr_tree->get_node_type() == strided_array_node_type) {
             return static_cast<const strided_array_expr_node *>(m_expr_tree.get())->get_buffer_owner();
         } else {
@@ -248,8 +249,7 @@ public:
     ndarray as_strided() const;
 
     /**
-     * Converts the array into the specified dtype. This function always makes a copy
-     * even if the dtype is the same as the one for 'this'
+     * Converts the array into the specified dtype.
      */
     ndarray as_dtype(const dtype& dt, assign_error_mode errmode = assign_error_fractional) const;
 
@@ -274,6 +274,7 @@ ndarray operator/(const ndarray& op0, const ndarray& op1);
 ndarray operator*(const ndarray& op0, const ndarray& op1);
 
 ///////////// Initializer list constructor implementation /////////////////////////
+#ifdef DND_INIT_LIST
 namespace detail {
     // Computes the number of dimensions in a nested initializer list constructor
     template<class T>
@@ -356,7 +357,7 @@ dnd::ndarray::ndarray(std::initializer_list<T> il)
 {
     intptr_t dim0 = il.size();
     intptr_t stride = (dim0 == 1) ? 0 : sizeof(T);
-    std::shared_ptr<void> buffer_owner(
+    dnd::shared_ptr<void> buffer_owner(
                     ::dnd::detail::ndarray_buffer_allocator(sizeof(T) * dim0),
                     ::dnd::detail::ndarray_buffer_deleter);
     memcpy(buffer_owner.get(), il.begin(), sizeof(T) * dim0);
@@ -379,7 +380,7 @@ dnd::ndarray::ndarray(std::initializer_list<std::initializer_list<T> > il)
         num_elements *= shape[i];
         stride *= shape[i];
     }
-    std::shared_ptr<void> buffer_owner(
+    dnd::shared_ptr<void> buffer_owner(
                     ::dnd::detail::ndarray_buffer_allocator(sizeof(T) * num_elements),
                     ::dnd::detail::ndarray_buffer_deleter);
     T *dataptr = reinterpret_cast<T *>(buffer_owner.get());
@@ -403,7 +404,7 @@ dnd::ndarray::ndarray(std::initializer_list<std::initializer_list<std::initializ
         num_elements *= shape[i];
         stride *= shape[i];
     }
-    std::shared_ptr<void> buffer_owner(
+    dnd::shared_ptr<void> buffer_owner(
                     ::dnd::detail::ndarray_buffer_allocator(sizeof(T) * num_elements),
                     ::dnd::detail::ndarray_buffer_deleter);
     T *dataptr = reinterpret_cast<T *>(buffer_owner.get());
@@ -411,6 +412,7 @@ dnd::ndarray::ndarray(std::initializer_list<std::initializer_list<std::initializ
     m_expr_tree.reset(new strided_array_expr_node(make_dtype<T>(), 3, shape, strides,
                             reinterpret_cast<char *>(buffer_owner.get()), std::move(buffer_owner)));
 }
+#endif // DND_INIT_LIST
 
 ///////////// C-style array constructor implementation /////////////////////////
 namespace detail {
@@ -461,7 +463,7 @@ dnd::ndarray::ndarray(const T (&rhs)[N])
         num_elements *= shape[i];
         stride *= shape[i];
     }
-    std::shared_ptr<void> buffer_owner(
+    dnd::shared_ptr<void> buffer_owner(
                     ::dnd::detail::ndarray_buffer_allocator(num_bytes),
                     ::dnd::detail::ndarray_buffer_deleter);
     memcpy(buffer_owner.get(), &rhs[0], num_bytes);

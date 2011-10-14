@@ -118,11 +118,8 @@ an estimate of how many source node accesses are required for each result
 element. For example, a matrix multiply node for an m by n times an n by r matrix,
 would indicate 2*n for each output element.
 
-To start, we consider two computational models for evaluating an ndarray expression
-tree. 
-
-All Data Should Be Aligned and in Native Byte Order
----------------------------------------------------
+All Data Is Aligned and in Native Byte Order
+--------------------------------------------
 
 NumPy supports misaligned data, and data in both big-endian and little-endian
 formats. This library should too, but allowing this flexibility everywhere adds
@@ -132,14 +129,114 @@ with the expression tree basis for the ndarray, allowing the evaluation code
 to assume the data is well-behaved when provided with a strided array, and
 enable buffering otherwise.
 
-Some Notes
-----------
+Output Parameters
+-----------------
 
-* When output parameters are used, exception safety is not guaranteed.
-  Since some operations could fail half-way through the operation,
-  guaranteeing exception safety would require making a temporary copy.
-  In the interests of efficiency, this is not done. For exception safety,
-  use just functional-style operations.
+When output parameters are used, exception safety is not guaranteed.
+Since operations can fail part-way through, guaranteeing exception safety
+would require making a temporary copy.  In the interests of efficiency,
+this is not done. When exception safety is required, the functional-style
+operations are recommended.
+
+Indirect Indexing
+-----------------
+
+
+
+Boolean Indexing
+----------------
+
+Because an ndarray has a specific shape, and the design principle was
+chosen that there is no implicit "flat" perspective of an ndarray, an
+ndarray "a" boolean indexed with "a>0" cannot produce an ndarray if the
+shape of an array must always be fixed. Even in the one-dimensional case,
+assigning a negative value to an element of 'a' which was previously
+positiv ewould require that the shape of the saved result ndarray change.
+
+To tackle this problem, likely two new facilities need to be added to
+the ndarray library.
+
+1. The possibility of an array having a selection mask.
+2. The ability for one or more dimensions of the shape to be indeterminate,
+   signaled with the value -1.
+
+The selection mask can't be an NA mask like the one introduced recently
+into NumPy, but rather one which corresponds to the IGNORE missing value
+semantics described in the NumPy missing value NEP.
+
+In NumPy, the boolean index can apply to one, some, or all of the dimensions
+of the array. In this library, I propose to restrict that to just one or
+all of the dimensions. This mostly works out, but there are some serious
+conflicts between facility 1 and facility 2, so they must be separated
+into different functions.
+
+To understand why conflating the two mechanisms is problematic, consider
+the following C++11 code in a hypothetical C++ REPL (they do exist, for
+example cling is one). In each case, the alternative interpretations of
+the arrays produce vastly different results.
+
+    :> ndarray a, b, c;
+    :> a = arange(5);
+    :> b = a((a % 2) == 1);
+    :> cout << b << "\n";
+    'b' AS SELECTION MASK) ndarray(int32, {IGNORE, 1, IGNORE, 3, IGNORE})?
+    'b' AS COMPRESSED)     ndarray(int32, {1, 3})
+
+    :> c = zeros(5, make_dtype<int>());
+    :> c.vassign(b);
+    'b' AS COMPRESSED)     broadcast error: cannot broadcast shape (2) to (5)
+    :> cout << c << "\n";
+    'b' AS SELECTION MASK) ndarray(int32, {0, 1, 0, 3, 0})
+
+    :> c = zeros(5, make_dtype<int>());
+    :> c({true, true, false, false, false}).vassign(b)
+    :> cout << c << "\n";
+    'b' AND 'c[...]' AS SELECTION MASK) ndarray(int32, {0, 1, 0, 0, 0})
+    'b' AND 'c[...]' AS COMPRESSED)     ndarray(int32, {1, 3, 0, 0, 0})
+
+I propose the selection mask be created by the function ndarray::where,
+and the indeterminate dimensions be created by the indexing operator,
+which is operator() in C++.  The proposed resolution looks like this:
+
+    :> ndarray a, b, c;
+    :> a = arange(5);
+    :> b_ix = a((a % 2) == 1);
+    :> b_wr = a.where((a % 2) == 1);
+    :> cout << b_ix << "\n";
+    ndarray(int32, {1, 3})
+    :> cout << b_wr << "\n";
+    ndarray(int32, {IGNORE, 1, IGNORE, 3, IGNORE})
+
+    :> c = zeros(5, make_dtype<int>());
+    :> c.vassign(b_ix);
+    broadcast error: cannot broadcast shape (2) to (5)
+    :> c.vassign(b_wr):
+    :> cout << c << "\n";
+    ndarray(int32, {0, 1, 0, 3, 0})
+
+    :> c = zeros(5, make_dtype<int>());
+    :> c({true, true, false, false, false}).vassign(b_ix)
+    :> cout << c << "\n";
+    ndarray(int32, {1, 3, 0, 0, 0})
+    :> c = zeros(5, make_dtype<int>());
+    :> c.where({true, true, false, false, false}).vassign(b_wr)
+    ndarray(int32, {0, 1, 0, 0, 0})
+
+One nice property of this is that for boolean indexing, the programmer
+can be sure that each index entry lines up with a particular axis, instead
+of having it change if the boolean index object has more than one dimension.
+
+Rejected Boolean Indexing Ideas
+-------------------------------
+
+A bad way to handle boolean indexing would be to turn boolean indexing
+into an immediate operation like in NumPy. This would create an
+inconsistency in the system, and require programmers to parse expressions
+in their head to determine which parts of them remain views and which
+parts get baked into copies. Another reason this wouldn't be good is that
+"a[a>0] + b[a>0]" is forced to evaluate the subexpression "a>0" twice. If
+it remains as an expression graph, the expression evaluation code can
+notice that it is a common subexpression, and only evaluate it once.
 
 Licensing
 ---------

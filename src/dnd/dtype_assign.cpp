@@ -307,9 +307,9 @@ struct multiple_assigner {
 #define DTYPE_ASSIGN_SRC_TO_DST_SINGLE_CASE(dst_type, src_type, ASSIGN_FN) \
     case type_id_of<dst_type>::value: \
         /*DEBUG_COUT << "returning " << DND_STRINGIFY(dst_type) << " " << DND_STRINGIFY(src_type) << " " << DND_STRINGIFY(ASSIGN_FN) << "\n";*/ \
-        return std::pair<unary_operation_t, shared_ptr<auxiliary_data> >( \
+        return std::pair<unary_operation_t, dnd::shared_ptr<auxiliary_data> >( \
             &multiple_assigner<dst_type, src_type>::ASSIGN_FN, \
-            NULL);
+            dnd::shared_ptr<auxiliary_data>());
 
 #define DTYPE_ASSIGN_SRC_TO_ANY_CASE(src_type, ASSIGN_FN) \
     case type_id_of<src_type>::value: \
@@ -343,7 +343,7 @@ struct multiple_assigner {
         DTYPE_ASSIGN_SRC_TO_ANY_CASE(double, ASSIGN_FN); \
     }
 
-std::pair<unary_operation_t, shared_ptr<auxiliary_data> > dnd::get_dtype_strided_assign_operation(
+std::pair<unary_operation_t, dnd::shared_ptr<auxiliary_data> > dnd::get_dtype_strided_assign_operation(
                     const dtype& dst_dt, intptr_t dst_fixedstride, char dst_align_test,
                     const dtype& src_dt, intptr_t src_fixedstride, char src_align_test,
                     assign_error_mode errmode)
@@ -362,7 +362,7 @@ std::pair<unary_operation_t, shared_ptr<auxiliary_data> > dnd::get_dtype_strided
         if (!is_aligned || src_byteswapped || dst_byteswapped || errmode != assign_error_none) {
             assign_function_t asn = get_single_assign_function(dst_dt, src_dt, errmode);
             if (asn != NULL) {
-                std::pair<unary_operation_t, shared_ptr<auxiliary_data> > result;
+                std::pair<unary_operation_t, dnd::shared_ptr<auxiliary_data> > result;
                 if (src_byteswapped || dst_byteswapped) {
                     result.first = &assign_multiple_byteswap_unaligned;
                     multiple_byteswap_unaligned_auxiliary_data *auxdata =
@@ -426,7 +426,7 @@ void dnd::dtype_strided_assign(const dtype& dst_dt, void *dst, intptr_t dst_stri
                             const dtype& src_dt, const void *src, intptr_t src_stride,
                             intptr_t count, assign_error_mode errmode)
 {
-    std::pair<unary_operation_t, shared_ptr<auxiliary_data> > op;
+    std::pair<unary_operation_t, dnd::shared_ptr<auxiliary_data> > op;
     op = get_dtype_strided_assign_operation(dst_dt, dst_stride, (char)((intptr_t)dst | dst_stride),
                                             src_dt, src_stride, (char)((intptr_t)src | src_stride),
                                             errmode);
@@ -544,14 +544,14 @@ static void strided_copy_zerostride_assign(void *dst, intptr_t dst_stride, const
 }
 
 
-std::pair<unary_operation_t, std::shared_ptr<auxiliary_data> > dnd::get_dtype_strided_assign_operation(
+std::pair<unary_operation_t, dnd::shared_ptr<auxiliary_data> > dnd::get_dtype_strided_assign_operation(
                     const dtype& dt,
                     intptr_t dst_fixedstride, char dst_align_test,
                     intptr_t src_fixedstride, char src_align_test)
 {
     //DEBUG_COUT << "get_dtype_strided_assign_operation (single dtype " << dt << ")\n";
     if (!dt.is_object_type()) {
-        std::pair<unary_operation_t, std::shared_ptr<auxiliary_data> > result;
+        std::pair<unary_operation_t, dnd::shared_ptr<auxiliary_data> > result;
 
         if (dst_fixedstride == (intptr_t)dt.itemsize() &&
                                     src_fixedstride == (intptr_t)dt.itemsize()) {

@@ -19,16 +19,16 @@ using namespace dnd;
 
 // convert_dtype_expr_node
 
-dnd::convert_dtype_expr_node::convert_dtype_expr_node(const dtype& dt,
-                                    assign_error_mode errmode, const ndarray_expr_node_ptr& op)
+dnd::convert_dtype_expr_node::convert_dtype_expr_node(const ndarray_expr_node_ptr& op, const dtype& dt,
+                                    assign_error_mode errmode)
     : ndarray_expr_node(dt, op->get_ndim(), 1, op->get_shape(), elementwise_node_category,
         convert_dtype_node_type), m_errmode(errmode)
 {
     m_opnodes[0] = op;
 }
 
-dnd::convert_dtype_expr_node::convert_dtype_expr_node(const dtype& dt,
-                                    assign_error_mode errmode, ndarray_expr_node_ptr&& op)
+dnd::convert_dtype_expr_node::convert_dtype_expr_node(ndarray_expr_node_ptr&& op, const dtype& dt,
+                                    assign_error_mode errmode)
     : ndarray_expr_node(dt, op->get_ndim(), 1, op->get_shape(), elementwise_node_category,
         convert_dtype_node_type), m_errmode(errmode)
 {
@@ -74,9 +74,8 @@ ndarray_expr_node_ptr dnd::convert_dtype_expr_node::apply_linear_index(
         return ndarray_expr_node_ptr(this);
     } else {
         return ndarray_expr_node_ptr(
-            new convert_dtype_expr_node(m_dtype, m_errmode,
-                                node->apply_linear_index(ndim, shape, axis_map,
-                                    index_strides, start_index, false)));
+            new convert_dtype_expr_node(node->apply_linear_index(ndim, shape, axis_map,
+                                    index_strides, start_index, false), m_dtype, m_errmode));
     }
 }
 
@@ -257,7 +256,7 @@ void dnd::linear_index_expr_node::debug_dump_extra(ostream& o, const string& ind
 ndarray_expr_node_ptr dnd::make_strided_array_expr_node(
             const dtype& dt, int ndim, const intptr_t *shape,
             const intptr_t *strides, char *originptr,
-            const std::shared_ptr<void>& buffer_owner)
+            const dnd::shared_ptr<void>& buffer_owner)
 {
     // If the data type isn't NBO, return a misbehaved strided node
     if (!dt.is_nbo()) {
@@ -287,7 +286,7 @@ ndarray_expr_node_ptr dnd::make_strided_array_expr_node(
 ndarray_expr_node_ptr dnd::make_convert_dtype_expr_node(
             ndarray_expr_node *node, const dtype& dt, assign_error_mode errmode)
 {
-    return ndarray_expr_node_ptr(new convert_dtype_expr_node(dt, errmode, node));
+    return ndarray_expr_node_ptr(new convert_dtype_expr_node(node, dt, errmode));
 }
 
 ndarray_expr_node_ptr dnd::make_broadcast_strided_array_expr_node(ndarray_expr_node *node,
@@ -312,7 +311,7 @@ ndarray_expr_node_ptr dnd::make_broadcast_strided_array_expr_node(ndarray_expr_n
     if (dt == snode->get_dtype()) {
         return std::move(new_node);
     } else {
-        return ndarray_expr_node_ptr(new convert_dtype_expr_node(dt, errmode, std::move(new_node)));
+        return ndarray_expr_node_ptr(new convert_dtype_expr_node(std::move(new_node), dt, errmode));
     }
 }
 

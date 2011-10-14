@@ -76,7 +76,7 @@ typedef void (*unary_operation_t)(void *dst, intptr_t dst_stride,
  * pass the value 1 to indicate the data may be aligned or not,
  * or the value 0 to indicate the data is definitely aligned.
  */
-std::pair<unary_operation_t, std::shared_ptr<auxiliary_data> > get_dtype_strided_assign_operation(
+std::pair<unary_operation_t, dnd::shared_ptr<auxiliary_data> > get_dtype_strided_assign_operation(
                     const dtype& dst_dt, intptr_t dst_fixedstride, char dst_align_test,
                     const dtype& src_dt, intptr_t src_fixedstride, char src_align_test,
                     assign_error_mode errmode);
@@ -85,7 +85,7 @@ std::pair<unary_operation_t, std::shared_ptr<auxiliary_data> > get_dtype_strided
  * Returns a function for assigning from the source data to the dest data, with
  * just one dtype.
  */
-std::pair<unary_operation_t, std::shared_ptr<auxiliary_data> > get_dtype_strided_assign_operation(
+std::pair<unary_operation_t, dnd::shared_ptr<auxiliary_data> > get_dtype_strided_assign_operation(
                     const dtype& dt,
                     intptr_t dst_fixedstride, char dst_align_test,
                     intptr_t src_fixedstride, char src_align_test);

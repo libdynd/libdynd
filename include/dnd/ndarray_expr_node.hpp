@@ -121,11 +121,11 @@ public:
      */
     virtual void as_data_and_strides(char **out_originptr, intptr_t *out_strides) const;
 
-    virtual std::pair<nullary_operation_t, std::shared_ptr<auxiliary_data> >
+    virtual std::pair<nullary_operation_t, dnd::shared_ptr<auxiliary_data> >
                 get_nullary_operation(intptr_t dst_fixedstride) const;
-    virtual std::pair<unary_operation_t, std::shared_ptr<auxiliary_data> >
+    virtual std::pair<unary_operation_t, dnd::shared_ptr<auxiliary_data> >
                 get_unary_operation(intptr_t dst_fixedstride, intptr_t src1_fixedstride) const;
-    virtual std::pair<binary_operation_t, std::shared_ptr<auxiliary_data> >
+    virtual std::pair<binary_operation_t, dnd::shared_ptr<auxiliary_data> >
                 get_binary_operation(intptr_t dst_fixedstride, intptr_t src1_fixedstride,
                                       intptr_t src2_fixedstride) const;
 
@@ -182,7 +182,7 @@ typedef boost::intrusive_ptr<ndarray_expr_node> ndarray_expr_node_ptr;
 class strided_array_expr_node : public ndarray_expr_node {
     char *m_originptr;
     dimvector m_strides;
-    std::shared_ptr<void> m_buffer_owner;
+    dnd::shared_ptr<void> m_buffer_owner;
 
     // Non-copyable
     strided_array_expr_node(const strided_array_expr_node&);
@@ -196,7 +196,7 @@ class strided_array_expr_node : public ndarray_expr_node {
      * must all be aligned, but this constructor does not validate these constraints.
      */
     strided_array_expr_node(const dtype& dt, int ndim, const intptr_t *shape,
-            const intptr_t *strides, char *originptr, const std::shared_ptr<void>& buffer_owner);
+            const intptr_t *strides, char *originptr, const dnd::shared_ptr<void>& buffer_owner);
 
 public:
     /**
@@ -215,7 +215,7 @@ public:
         return m_strides.get();
     }
 
-    std::shared_ptr<void> get_buffer_owner() const {
+    dnd::shared_ptr<void> get_buffer_owner() const {
         return m_buffer_owner;
     }
 
@@ -236,9 +236,9 @@ public:
     friend ndarray_expr_node_ptr make_strided_array_expr_node(
                     const dtype& dt, int ndim, const intptr_t *shape,
                     const intptr_t *strides, char *originptr,
-                    const std::shared_ptr<void>& buffer_owner);
+                    const dnd::shared_ptr<void>& buffer_owner);
     // TODO: Add a virtual broadcast function to the base node type, then remove this friend function
-    friend ndarray_expr_node_ptr dnd::make_broadcast_strided_array_expr_node(ndarray_expr_node *node,
+    friend ndarray_expr_node_ptr make_broadcast_strided_array_expr_node(ndarray_expr_node *node,
                                 int ndim, const intptr_t *shape,
                                 const dtype& dt, assign_error_mode errmode);
 };
@@ -251,7 +251,7 @@ class misbehaved_strided_array_expr_node : public ndarray_expr_node {
     dtype m_inner_dtype;
     char *m_originptr;
     dimvector m_strides;
-    std::shared_ptr<void> m_buffer_owner;
+    dnd::shared_ptr<void> m_buffer_owner;
 
     // Non-copyable
     misbehaved_strided_array_expr_node(const misbehaved_strided_array_expr_node&);
@@ -259,7 +259,7 @@ class misbehaved_strided_array_expr_node : public ndarray_expr_node {
 
     /** Creates a strided array node from the raw values */
     misbehaved_strided_array_expr_node(const dtype& dt, int ndim, const intptr_t *shape,
-            const intptr_t *strides, char *originptr, const std::shared_ptr<void>& buffer_owner);
+            const intptr_t *strides, char *originptr, const dnd::shared_ptr<void>& buffer_owner);
 
 public:
 
@@ -279,7 +279,7 @@ public:
         return m_strides.get();
     }
 
-    std::shared_ptr<void> get_buffer_owner() const {
+    dnd::shared_ptr<void> get_buffer_owner() const {
         return m_buffer_owner;
     }
 
@@ -325,7 +325,7 @@ public:
     friend ndarray_expr_node_ptr make_strided_array_expr_node(
                     const dtype& dt, int ndim, const intptr_t *shape,
                     const intptr_t *strides, char *originptr,
-                    const std::shared_ptr<void>& buffer_owner);
+                    const dnd::shared_ptr<void>& buffer_owner);
 };
 
 /** Adds a reference, for intrusive_ptr<ndarray_expr_node> to use */

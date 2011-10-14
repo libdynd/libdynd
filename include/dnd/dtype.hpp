@@ -9,10 +9,10 @@
 
 #include <stdint.h>
 #include <iostream>
-// For shared_ptr
-#include <memory>
 
 #include <boost/utility/enable_if.hpp>
+
+#include <dnd/config.hpp>
 
 namespace dnd {
 
@@ -240,7 +240,7 @@ class dtype {
 private:
     unsigned char m_type_id, m_kind, m_alignment, m_byteswapped;
     uintptr_t m_itemsize;
-    std::shared_ptr<extended_dtype> m_data;
+    shared_ptr<extended_dtype> m_data;
 
 public:
     /** Constructor */
@@ -249,11 +249,6 @@ public:
     dtype(const dtype& rhs)
         : m_type_id(rhs.m_type_id), m_kind(rhs.m_kind), m_alignment(rhs.m_alignment),
           m_byteswapped(rhs.m_byteswapped), m_itemsize(rhs.m_itemsize), m_data(rhs.m_data) {}
-    /** Move constructor (should be "= default" in C++11) */
-    dtype(dtype&& rhs)
-        : m_type_id(rhs.m_type_id), m_kind(rhs.m_kind), m_alignment(rhs.m_alignment),
-          m_byteswapped(rhs.m_byteswapped), m_itemsize(rhs.m_itemsize),
-          m_data(std::move(rhs.m_data)) {}
     /** Assignment operator (should be "= default" in C++11) */
     dtype& operator=(const dtype& rhs) {
         m_type_id = rhs.m_type_id;
@@ -264,6 +259,12 @@ public:
         m_data = rhs.m_data;
         return *this;
     }
+#ifdef DND_RVALUE_REFS
+    /** Move constructor (should be "= default" in C++11) */
+    dtype(dtype&& rhs)
+        : m_type_id(rhs.m_type_id), m_kind(rhs.m_kind), m_alignment(rhs.m_alignment),
+          m_byteswapped(rhs.m_byteswapped), m_itemsize(rhs.m_itemsize),
+          m_data(std::move(rhs.m_data)) {}
     /** Move assignment operator (should be "= default" in C++11) */
     dtype& operator=(dtype&& rhs) {
         m_type_id = rhs.m_type_id;
@@ -274,6 +275,7 @@ public:
         m_data = std::move(rhs.m_data);
         return *this;
     }
+#endif // DND_RVALUE_REFS
 
     /** Construct from a type ID */
     explicit dtype(int type_id);
@@ -312,7 +314,7 @@ public:
             if (m_byteswapped) {
                 dtype result(*this);
                 result.m_byteswapped = false;
-                return std::move(result);
+                return DND_MOVE(result);
             } else {
                 return *this;
             }
@@ -321,7 +323,7 @@ public:
             dtype result(*this);
             result.m_byteswapped = false;
             result.m_data.reset(m_data->clone_as_nbo());
-            return std::move(result);
+            return DND_MOVE(result);
         }
     }
 

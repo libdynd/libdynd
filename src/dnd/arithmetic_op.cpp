@@ -268,14 +268,14 @@ namespace {
             std::swap(m_node_name, that.m_node_name);
         }
 
-        std::pair<binary_operation_t, std::shared_ptr<auxiliary_data> >
+        std::pair<binary_operation_t, dnd::shared_ptr<auxiliary_data> >
                 get_binary_operation(intptr_t dst_fixedstride, intptr_t src1_fixedstride,
                                     intptr_t src2_fixedstride) const {
-            return std::pair<binary_operation_t, std::shared_ptr<auxiliary_data> >(
+            return std::pair<binary_operation_t, dnd::shared_ptr<auxiliary_data> >(
                         get_builtin_operation_function(m_builtin_optable,
                                 m_dtype, dst_fixedstride,
                                 src1_fixedstride, src2_fixedstride),
-                        NULL);
+                        dnd::shared_ptr<auxiliary_data>());
         }
 
         const char *node_name() const {

@@ -103,6 +103,21 @@ static inline intptr_t intptr_abs(intptr_t x) {
     return x >= 0 ? x : -x;
 }
 
+namespace {
+
+    class abs_intptr_compare {
+        const intptr_t *m_strides;
+    public:
+        abs_intptr_compare(const intptr_t *strides)
+            : m_strides(strides) {}
+
+        bool operator()(int i, int j) {
+            return intptr_abs(m_strides[i]) < intptr_abs(m_strides[j]);
+        }
+    };
+
+} // anonymous namespace
+
 void dnd::strides_to_axis_perm(int ndim, const intptr_t *strides, int *out_axis_perm)
 {
     switch (ndim) {
@@ -168,10 +183,7 @@ void dnd::strides_to_axis_perm(int ndim, const intptr_t *strides, int *out_axis_
                 out_axis_perm[i] = ndim - i - 1;
             }
             // Sort based on the absolute value of the strides
-            std::sort(out_axis_perm, out_axis_perm + ndim,
-                        [strides](int i, int j) -> bool {
-                return intptr_abs(strides[i]) < intptr_abs(strides[j]);
-            });
+            std::sort(out_axis_perm, out_axis_perm + ndim, abs_intptr_compare(strides));
             break;
         }
     }

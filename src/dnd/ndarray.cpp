@@ -159,8 +159,10 @@ dnd::ndarray::ndarray(intptr_t dim0, intptr_t dim1, const dtype& dt)
     : m_expr_tree()
 {
     intptr_t shape[2] = {dim0, dim1};
-    intptr_t strides[2] = {(dim0 <= 1) ? 0 : dt.itemsize() * dim1,
-                           (dim1 <= 1) ? 0 : dt.itemsize()};
+    intptr_t strides[2];
+    strides[0] = (dim0 <= 1) ? 0 : dt.itemsize() * dim1;
+    strides[1] = (dim1 <= 1) ? 0 : dt.itemsize();
+
     shared_ptr<void> buffer_owner(
                     ::dnd::detail::ndarray_buffer_allocator(dt.itemsize() * dim0 * dim1),
                     ::dnd::detail::ndarray_buffer_deleter);
@@ -172,9 +174,11 @@ dnd::ndarray::ndarray(intptr_t dim0, intptr_t dim1, intptr_t dim2, const dtype& 
     : m_expr_tree()
 {
     intptr_t shape[3] = {dim0, dim1, dim2};
-    intptr_t strides[3] = {(dim0 <= 1) ? 0 : dt.itemsize() * dim1 * dim2,
-                           (dim1 <= 1) ? 0 : dt.itemsize() * dim2,
-                           (dim2 <= 1) ? 0 : dt.itemsize()};
+    intptr_t strides[3];
+    strides[0] = (dim0 <= 1) ? 0 : dt.itemsize() * dim1 * dim2;
+    strides[1] = (dim1 <= 1) ? 0 : dt.itemsize() * dim2;
+    strides[2] = (dim2 <= 1) ? 0 : dt.itemsize();
+
     shared_ptr<void> buffer_owner(
                     ::dnd::detail::ndarray_buffer_allocator(dt.itemsize() * dim0 * dim1 * dim2),
                     ::dnd::detail::ndarray_buffer_deleter);
@@ -186,10 +190,12 @@ dnd::ndarray::ndarray(intptr_t dim0, intptr_t dim1, intptr_t dim2, intptr_t dim3
     : m_expr_tree()
 {
     intptr_t shape[4] = {dim0, dim1, dim2, dim3};
-    intptr_t strides[4] = {(dim0 <= 1) ? 0 : dt.itemsize() * dim1 * dim2 * dim3,
-                           (dim1 <= 1) ? 0 : dt.itemsize() * dim2 * dim3,
-                           (dim2 <= 1) ? 0 : dt.itemsize() * dim3,
-                           (dim3 <= 1) ? 0 : dt.itemsize()};
+    intptr_t strides[4];
+    strides[0] = (dim0 <= 1) ? 0 : dt.itemsize() * dim1 * dim2 * dim3;
+    strides[1] = (dim1 <= 1) ? 0 : dt.itemsize() * dim2 * dim3;
+    strides[2] = (dim2 <= 1) ? 0 : dt.itemsize() * dim3;
+    strides[3] = (dim3 <= 1) ? 0 : dt.itemsize();
+
     shared_ptr<void> buffer_owner(
                     ::dnd::detail::ndarray_buffer_allocator(dt.itemsize() * dim0 * dim1 * dim2 * dim3),
                     ::dnd::detail::ndarray_buffer_deleter);
@@ -247,7 +253,7 @@ static void vassign_unequal_dtypes(ndarray& lhs, const ndarray& rhs, assign_erro
     intptr_t innersize = iter.innersize();
     intptr_t dst_innerstride = iter.innerstride<0>(), src_innerstride = iter.innerstride<1>();
 
-    std::pair<unary_operation_t, std::shared_ptr<auxiliary_data> > assign =
+    std::pair<unary_operation_t, dnd::shared_ptr<auxiliary_data> > assign =
                 get_dtype_strided_assign_operation(
                                             lhs.get_dtype(), dst_innerstride, iter.get_align_test<0>(),
                                             rhs.get_dtype(), src_innerstride, iter.get_align_test<1>(),
@@ -277,7 +283,7 @@ static void vassign_equal_dtypes(ndarray& lhs, const ndarray& rhs)
     intptr_t innersize = iter.innersize();
     intptr_t dst_innerstride = iter.innerstride<0>(), src_innerstride = iter.innerstride<1>();
 
-    std::pair<unary_operation_t, std::shared_ptr<auxiliary_data> > assign =
+    std::pair<unary_operation_t, dnd::shared_ptr<auxiliary_data> > assign =
                 get_dtype_strided_assign_operation(
                                             lhs.get_dtype(), dst_innerstride, iter.get_align_test<0>(),
                                             src_innerstride, iter.get_align_test<1>());
@@ -302,9 +308,11 @@ ndarray dnd::ndarray::as_strided() const
 
 ndarray dnd::ndarray::as_dtype(const dtype& dt, assign_error_mode errmode) const
 {
-    ndarray result = empty_like(*this, dt);
-    vassign_unequal_dtypes(result, *this, errmode);
-    return std::move(result);
+    if (dt == get_dtype()) {
+        return *this;
+    } else {
+        return ndarray(new convert_dtype_expr_node(m_expr_tree, dt, errmode));
+    }
 }
 
 void dnd::ndarray::vassign(const ndarray& rhs, assign_error_mode errmode)
@@ -319,8 +327,9 @@ void dnd::ndarray::vassign(const ndarray& rhs, assign_error_mode errmode)
         vassign_equal_dtypes(*this, rhs);
     } else if (get_num_elements() > 5 * rhs.get_num_elements()) {
         // If the data is being duplicated more than 5 times, make a temporary copy of rhs
-        // converted to the dtype of 'this'
-        ndarray tmp = rhs.as_dtype(get_dtype(), errmode);
+        // converted to the dtype of 'this', then do the broadcasting.
+        ndarray tmp = empty_like(rhs, get_dtype());
+        vassign_unequal_dtypes(tmp, rhs, errmode);
         vassign_equal_dtypes(*this, tmp);
     } else {
         // Assignment with casting
@@ -336,7 +345,7 @@ void dnd::ndarray::vassign(const dtype& dt, const void *data, assign_error_mode 
     
     intptr_t innersize = iter.innersize(), innerstride = iter.innerstride<0>();
 
-    std::pair<unary_operation_t, std::shared_ptr<auxiliary_data> > assign =
+    std::pair<unary_operation_t, dnd::shared_ptr<auxiliary_data> > assign =
                 get_dtype_strided_assign_operation(get_dtype(), innerstride, iter.get_align_test<0>(), 0, 0);
 
     if (innersize > 0) {

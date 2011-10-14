@@ -22,8 +22,8 @@ class ndarray;
 class convert_dtype_expr_node : public ndarray_expr_node {
     assign_error_mode m_errmode;
 
-    convert_dtype_expr_node(const dtype& dt, assign_error_mode errmode, const ndarray_expr_node_ptr& op);
-    convert_dtype_expr_node(const dtype& dt, assign_error_mode errmode, ndarray_expr_node_ptr&& op);
+    convert_dtype_expr_node(const ndarray_expr_node_ptr& op, const dtype& dt, assign_error_mode errmode);
+    convert_dtype_expr_node(ndarray_expr_node_ptr&& op, const dtype& dt, assign_error_mode errmode);
 public:
 
     virtual ~convert_dtype_expr_node() {
@@ -38,6 +38,7 @@ public:
 
     void debug_dump_extra(std::ostream& o, const std::string& indent) const;
 
+    friend class ndarray;
     friend ndarray_expr_node_ptr make_convert_dtype_expr_node(
                         ndarray_expr_node *node, const dtype& dt, assign_error_mode errmode);
     friend ndarray_expr_node_ptr make_broadcast_strided_array_expr_node(ndarray_expr_node *node,
@@ -156,7 +157,7 @@ public:
     virtual ~elementwise_binary_op_expr_node() {
     }
 
-    std::pair<binary_operation_t, std::shared_ptr<auxiliary_data> >
+    std::pair<binary_operation_t, dnd::shared_ptr<auxiliary_data> >
             get_binary_operation(intptr_t dst_fixedstride, intptr_t src1_fixedstride,
                                 intptr_t src2_fixedstride) const {
         return m_op_factory.get_binary_operation(dst_fixedstride, src1_fixedstride, src2_fixedstride);
@@ -216,7 +217,7 @@ public:
 ndarray_expr_node_ptr make_strided_array_expr_node(
             const dtype& dt, int ndim, const intptr_t *shape,
             const intptr_t *strides, char *originptr,
-            const std::shared_ptr<void>& buffer_owner);
+            const dnd::shared_ptr<void>& buffer_owner);
 
 ndarray_expr_node_ptr make_convert_dtype_expr_node(
             ndarray_expr_node *node, const dtype& dt, assign_error_mode errmode);
