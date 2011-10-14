@@ -258,7 +258,11 @@ std::ostream& dnd::operator<<(std::ostream& o, const dtype& rhs)
             o << "float64";
             break;
         case utf8_type_id:
-            o << "utf8[" << rhs.itemsize() << "]";
+            if (rhs.itemsize() == 0) {
+                o << "utf8";
+            } else {
+                o << "utf8[" << rhs.itemsize() << "]";
+            }
             break;
         default:
             o << "<dtype without formatting support>";

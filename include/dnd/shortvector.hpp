@@ -7,8 +7,6 @@
 #ifndef _SHORTVECTOR_HPP_
 #define _SHORTVECTOR_HPP_
 
-// For std::memcpy
-#include <cstring>
 #include <algorithm>
 #include <type_traits>
 
@@ -56,13 +54,13 @@ public:
     shortvector(int size, const shortvector& rhs)
         : m_data((size <= staticN) ? m_shortdata : new T[size])
     {
-        std::memcpy(m_data, rhs.m_data, size * sizeof(T));
+        DND_MEMCPY(m_data, rhs.m_data, size * sizeof(T));
     }
     /** Construct the shortvector with a specified size and initial data */
     shortvector(int size, const T* data)
         : m_data((size <= staticN) ? m_shortdata : new T[size])
     {
-        std::memcpy(m_data, data, size * sizeof(T));
+        DND_MEMCPY(m_data, data, size * sizeof(T));
     }
     /** Non-copyable */
     shortvector(const shortvector& rhs) = delete;
@@ -70,7 +68,7 @@ public:
     shortvector(shortvector&& rhs) {
         if (rhs.m_data == rhs.m_shortdata) {
             // In the short case, copy the full shortdata vector
-            std::memcpy(m_shortdata, rhs.m_shortdata, staticN * sizeof(T));
+            DND_MEMCPY(m_shortdata, rhs.m_shortdata, staticN * sizeof(T));
             m_data = m_shortdata;
         } else {
             // In the long case, move the long allocated pointer
@@ -88,7 +86,7 @@ public:
             }
             if (rhs.m_data == rhs.m_shortdata) {
                 // In the short case, copy the full shortdata vector
-                std::memcpy(m_shortdata, rhs.m_shortdata, staticN * sizeof(T));
+                DND_MEMCPY(m_shortdata, rhs.m_shortdata, staticN * sizeof(T));
                 m_data = m_shortdata;
             } else {
                 // In the long case, move the long allocated pointer
@@ -117,17 +115,17 @@ public:
                 // Both data's were pointing to their shortdata
                 T tmp[staticN];
                 rhs.m_data = rhs.m_shortdata;
-                std::memcpy(tmp, m_shortdata, staticN * sizeof(T));
-                std::memcpy(m_shortdata, rhs.m_shortdata, staticN * sizeof(T));
-                std::memcpy(rhs.m_shortdata, tmp, staticN * sizeof(T));
+                DND_MEMCPY(tmp, m_shortdata, staticN * sizeof(T));
+                DND_MEMCPY(m_shortdata, rhs.m_shortdata, staticN * sizeof(T));
+                DND_MEMCPY(rhs.m_shortdata, tmp, staticN * sizeof(T));
             } else {
                 // Just the rhs data was pointing to shortdata
-                std::memcpy(m_shortdata, rhs.m_shortdata, staticN * sizeof(T));
+                DND_MEMCPY(m_shortdata, rhs.m_shortdata, staticN * sizeof(T));
             }
         } else if (rhs.m_data == m_shortdata) {
             // Just this data was pointing to shortdata
             rhs.m_data = rhs.m_shortdata;
-            std::memcpy(rhs.m_shortdata, m_shortdata, staticN * sizeof(T));
+            DND_MEMCPY(rhs.m_shortdata, m_shortdata, staticN * sizeof(T));
         }
     }
 

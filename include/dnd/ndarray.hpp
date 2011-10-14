@@ -309,7 +309,7 @@ namespace detail {
             }
         }
         static void copy_data(T **dataptr, const std::initializer_list<T>& il) {
-            memcpy(*dataptr, il.begin(), il.size() * sizeof(T));
+            DND_MEMCPY(*dataptr, il.begin(), il.size() * sizeof(T));
             *dataptr += il.size();
         }
     };
@@ -360,7 +360,7 @@ dnd::ndarray::ndarray(std::initializer_list<T> il)
     dnd::shared_ptr<void> buffer_owner(
                     ::dnd::detail::ndarray_buffer_allocator(sizeof(T) * dim0),
                     ::dnd::detail::ndarray_buffer_deleter);
-    memcpy(buffer_owner.get(), il.begin(), sizeof(T) * dim0);
+    DND_MEMCPY(buffer_owner.get(), il.begin(), sizeof(T) * dim0);
     m_expr_tree.reset(new strided_array_expr_node(make_dtype<T>(), 1, &dim0, &stride,
                             reinterpret_cast<char *>(buffer_owner.get()), std::move(buffer_owner)));
 }
@@ -466,7 +466,7 @@ dnd::ndarray::ndarray(const T (&rhs)[N])
     dnd::shared_ptr<void> buffer_owner(
                     ::dnd::detail::ndarray_buffer_allocator(num_bytes),
                     ::dnd::detail::ndarray_buffer_deleter);
-    memcpy(buffer_owner.get(), &rhs[0], num_bytes);
+    DND_MEMCPY(buffer_owner.get(), &rhs[0], num_bytes);
     m_expr_tree.reset(new strided_array_expr_node(dtype(detail::type_from_array<T>::type_id),
                             ndim, shape, strides,
                             reinterpret_cast<char *>(buffer_owner.get()), std::move(buffer_owner)));

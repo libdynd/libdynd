@@ -48,8 +48,13 @@ enum expr_node_type {
  * TODO: Model this after how LLVM does this kind of thing?
  */
 class ndarray_expr_node {
+#ifdef DND_CLING
+    // A hack avoiding boost atomic_count, since that creates inline assembly which LLVM JIT doesn't like!
+    mutable long m_use_count;
+#else
     /** Embedded reference counting using boost::intrusive_ptr */
     mutable boost::detail::atomic_count m_use_count;
+#endif
 
     // Non-copyable
     ndarray_expr_node(const ndarray_expr_node&);

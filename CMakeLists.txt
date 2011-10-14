@@ -2,8 +2,9 @@ cmake_minimum_required(VERSION 2.8)
 project(dynamicndarray)
 
 set(CMAKE_VERBOSE_MAKEFILE 1)
+set(BUILD_SHARED_LIBS 1)
 
-set(CMAKE_CXX_FLAGS "-std=c++0x -g -O0 -Wall -Wextra -Werror -Weffc++ -fmax-errors=20")
+set(CMAKE_CXX_FLAGS "-std=c++0x -g -O0 -fPIC -Wall -Wextra -Werror -Weffc++ -fmax-errors=20")
 #set(CMAKE_CXX_FLAGS "-std=c++0x -g -O3 -Wall -Wextra -Werror -Weffc++ -fmax-errors=20")
 #set(CMAKE_CXX_FLAGS "-std=c++0x -g -fprofile-arcs -ftest-coverage -Wall -Wextra -Werror")
 set(LINK_FLAGS)
@@ -38,6 +39,6 @@ include_directories(
     include
     )
 
-add_library(dynamicndarray ${dnd_SRC})
+add_library(dynamicndarray SHARED ${dnd_SRC})
 
 add_subdirectory(tests)

@@ -1,0 +1,3 @@
+#!/bin/sh
+
+cling -std=c++0x -fexceptions -fcxx-exceptions -l ./libdynamicndarray.so -I ./include -l dnd/cling_all.hpp

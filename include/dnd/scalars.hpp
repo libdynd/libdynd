@@ -69,7 +69,7 @@ public:
             } else {
                 // Make a copy into an aligned buffer
                 char *tmp = allocate_data(dst_dtype.itemsize());
-                memcpy(tmp, src_data, dst_dtype.itemsize());
+                DND_MEMCPY(tmp, src_data, dst_dtype.itemsize());
             }
         } else {
             // Make a converted copy into an aligned buffer
