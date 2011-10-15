@@ -1,0 +1,8 @@
+// Commands for cling:
+
+#define P(x) cout << x << "\n"
+ndarray a, b, c;
+
+{int tmp[6] = {300,1,6,4,2,0}; a = tmp;}
+P(a);
+

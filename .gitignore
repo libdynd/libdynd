@@ -2,8 +2,10 @@ CMakeCache.txt
 CMakeFiles
 *.cmake
 Makefile
+.cling_history
 
 *.swp
 
 *.a
+*.so
 tests/dnd_tests

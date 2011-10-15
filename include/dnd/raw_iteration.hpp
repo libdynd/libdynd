@@ -341,6 +341,27 @@ public:
 
         init(ndim, shape, data, strides, axis_perm.get());
     }
+    raw_ndarray_iter(int ndim, const intptr_t *shape,
+                                const dtype& op0_dt, ndarray_expr_node_ptr& op0,
+                                const ndarray_expr_node *op1)
+    {
+        shortvector<intptr_t> strides(ndim);
+        char *data[3];
+
+        // Get the two operands as strided arrays
+        op1->as_data_and_strides(&data[1], strides.get());
+
+        // Generate the axis_perm from the input strides, and use it to allocate the output
+        shortvector<int> axis_perm(ndim);
+        strides_to_axis_perm(ndim, strides.get(), axis_perm.get());
+        strided_array_expr_node *node = new strided_array_expr_node(op0_dt, ndim, shape, axis_perm.get());
+        op0.reset(node);
+        data[0] = node->get_originptr();
+
+        const intptr_t *strides_ptrs[2] = {node->get_strides(), strides.get()};
+        init(ndim, shape, data, strides_ptrs, axis_perm.get());
+    }
+
 };
 
 /**

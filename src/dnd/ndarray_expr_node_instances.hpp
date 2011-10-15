@@ -36,6 +36,9 @@ public:
         return "convert_dtype";
     }
 
+    std::pair<unary_operation_t, dnd::shared_ptr<auxiliary_data> >
+                get_unary_operation(intptr_t dst_fixedstride, intptr_t src_fixedstride) const;
+
     void debug_dump_extra(std::ostream& o, const std::string& indent) const;
 
     friend class ndarray;

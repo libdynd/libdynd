@@ -52,8 +52,32 @@ ndarray_expr_node_ptr dnd::ndarray_expr_node::evaluate() const
     switch (m_nop) {
         case 0:
             break;
-        case 1:
+        case 1: {
+            const ndarray_expr_node *op1 = m_opnodes[0].get();
+
+            if (m_node_category == elementwise_node_category) {
+                if (op1->get_node_category() == strided_array_node_category) {
+                    ndarray_expr_node_ptr result;
+                    raw_ndarray_iter<1,1> iter(m_ndim, m_shape.get(), m_dtype, result, op1);
+
+                    intptr_t innersize = iter.innersize();
+                    intptr_t dst_stride = iter.innerstride<0>();
+                    intptr_t src0_stride = iter.innerstride<1>();
+                    pair<unary_operation_t, dnd::shared_ptr<auxiliary_data> > operation =
+                                get_unary_operation(dst_stride, src0_stride);
+                    if (innersize > 0) {
+                        do {
+                            operation.first(iter.data<0>(), dst_stride,
+                                        iter.data<1>(), src0_stride,
+                                        innersize, operation.second.get());
+                        } while (iter.iternext());
+                    }
+
+                    return DND_MOVE(result);
+                }
+            }
             break;
+        }
         case 2: {
             const ndarray_expr_node *op1 = m_opnodes[0].get();
             const ndarray_expr_node *op2 = m_opnodes[1].get();
@@ -83,7 +107,7 @@ ndarray_expr_node_ptr dnd::ndarray_expr_node::evaluate() const
                         } while (iter.iternext());
                     }
 
-                    return std::move(result);
+                    return DND_MOVE(result);
                 }
             }
             break;
@@ -93,7 +117,7 @@ ndarray_expr_node_ptr dnd::ndarray_expr_node::evaluate() const
     }
 
     debug_dump(cout, "");
-    throw std::runtime_error("expr_node with this many operands is not yet supported");
+    throw std::runtime_error("evaluating this expression graph is not yet supported");
 }
 
 ndarray_expr_node_ptr dnd::ndarray_expr_node::apply_linear_index(
