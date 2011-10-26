@@ -30,6 +30,8 @@ namespace detail {
     void ndarray_buffer_deleter(void *ptr);
 } // namespace detail
 
+class ndarray_vals;
+
 /**
  * This is the primary multi-dimensional array class.
  */
@@ -56,14 +58,16 @@ public:
      * TODO: Figure out why enable_if with is_dtype_scalar didn't work for this constructor
      *       in g++ 4.6.0.
      */
-    ndarray(int8_t value);
-    ndarray(int16_t value);
-    ndarray(int32_t value);
-    ndarray(int64_t value);
-    ndarray(uint8_t value);
-    ndarray(uint16_t value);
-    ndarray(uint32_t value);
-    ndarray(uint64_t value);
+    ndarray(signed char value);
+    ndarray(short value);
+    ndarray(int value);
+    ndarray(long value);
+    ndarray(long long value);
+    ndarray(unsigned char value);
+    ndarray(unsigned short value);
+    ndarray(unsigned int value);
+    ndarray(unsigned long value);
+    ndarray(unsigned long long value);
     ndarray(float value);
     ndarray(double value);
     /** Constructs a zero-dimensional scalar array */
@@ -138,6 +142,15 @@ public:
         return *this;
     }
 
+    /**
+     * Assignment operator from an ndarray_vals object. This converts the
+     * array 'rhs' has a reference to into a strided array, evaluating
+     * it from the expression tree if necessary. If 'rhs' contains a
+     * strided array, this copies it by reference, use the function 'copy'
+     * when a copy is required.
+     */
+    ndarray& operator=(const ndarray_vals& rhs);
+
     const dtype& get_dtype() const {
         return m_expr_tree->get_dtype();
     }
@@ -200,58 +213,56 @@ public:
     }
 
     /**
+     * Returns a value-exposing helper object, which allows one to assign to
+     * the values of the ndarray, or collapse the expression tree of the
+     * ndarray into a strided array.
+     */
+    ndarray_vals vals() const;
+
+    /**
      * The ndarray uses the function call operator to do indexing. The [] operator
      * only supports one index object at a time, and while there are tricks that can be
      * done by overloading the comma operator, this doesn't produce a fool-proof result.
      * The function call operator behaves more consistently.
      */
-    ndarray operator()(const irange& i0) const {
+    const ndarray operator()(const irange& i0) const {
         return index(1, &i0);
     }
     /** Indexing with two index values */
-    ndarray operator()(const irange& i0, const irange& i1) const {
+    const ndarray operator()(const irange& i0, const irange& i1) const {
         irange i[2] = {i0, i1};
         return index(2, i);
     }
     /** Indexing with three index values */
-    ndarray operator()(const irange& i0, const irange& i1, const irange& i2) const {
+    const ndarray operator()(const irange& i0, const irange& i1, const irange& i2) const {
         irange i[3] = {i0, i1, i2};
         return index(3, i);
     }
     /** Indexing with four index values */
-    ndarray operator()(const irange& i0, const irange& i1, const irange& i2, const irange& i3) const {
+    const ndarray operator()(const irange& i0, const irange& i1, const irange& i2, const irange& i3) const {
         irange i[4] = {i0, i1, i2, i3};
         return index(4, i);
     }
     /** Indexing with one integer index */
-    ndarray operator()(intptr_t idx) const;
+    const ndarray operator()(intptr_t idx) const;
 
     /** Does a value-assignment from the rhs array. */
-    void vassign(const ndarray& rhs, assign_error_mode errmode = assign_error_fractional);
+    void vassign(const ndarray& rhs, assign_error_mode errmode = assign_error_fractional) const;
     /** Does a value-assignment from the rhs raw scalar */
-    void vassign(const dtype& dt, const void *data, assign_error_mode errmode = assign_error_fractional);
-    /** Does a value-assignment from the rhs C++ scalar. */
-    template<class T>
-    typename boost::enable_if<is_dtype_scalar<T>, void>::type vassign(const T& rhs,
-                                                assign_error_mode errmode = assign_error_fractional) {
-        //DEBUG_COUT << "vassign C++ scalar\n";
-        vassign(make_dtype<T>(), &rhs, errmode);
-    }
-    void vassign(const bool& rhs, assign_error_mode errmode = assign_error_fractional) {
-        //DEBUG_COUT << "vassign bool\n";
-        vassign(dnd_bool(rhs), errmode);
-    }
-
-    /**
-     * When the array is an expression-based view, creates a new ndarray and evaluates the
-     * expression into that array. When the array is a strided array, simply returns the array.
-     */
-    ndarray as_strided() const;
+    void vassign(const dtype& dt, const void *data, assign_error_mode errmode = assign_error_fractional) const;
 
     /**
      * Converts the array into the specified dtype.
      */
     ndarray as_dtype(const dtype& dt, assign_error_mode errmode = assign_error_fractional) const;
+
+    /**
+     * Converts the array into the specified explicit template dtype.
+     */
+    template<class T>
+    ndarray as_dtype(assign_error_mode errmode = assign_error_fractional) const {
+        return as_dtype(make_dtype<T>(), errmode);
+    }
 
     /**
      * When this is a zero-dimensional array, converts it to a C++ scalar of the
@@ -266,12 +277,80 @@ public:
     void debug_dump(std::ostream& o) const;
 
     friend std::ostream& operator<<(std::ostream& o, const ndarray& rhs);
+    friend class ndarray_vals;
 };
 
 ndarray operator+(const ndarray& op0, const ndarray& op1);
 ndarray operator-(const ndarray& op0, const ndarray& op1);
 ndarray operator/(const ndarray& op0, const ndarray& op1);
 ndarray operator*(const ndarray& op0, const ndarray& op1);
+
+/**
+ * This is a helper class for dealing with value assignment and collapsing
+ * a view-based ndarray into a strided array. Only the ndarray class itself
+ * is permitted to construct this helper object, and it is non-copyable.
+ *
+ * All that can be done is assigning the values of the referenced array
+ * to another array, or assigning values from another array into the elements
+ * the referenced array.
+ */
+class ndarray_vals {
+    const ndarray& m_arr;
+    ndarray_vals(const ndarray& arr)
+        : m_arr(arr) {
+    }
+
+    // Non-copyable, not default-constructable
+    ndarray_vals(const ndarray_vals&);
+    ndarray_vals& operator=(const ndarray_vals&);
+public:
+    /**
+     * Assigns values from an array to the internally referenced array.
+     * this does a vassign with the default assignment error mode.
+     */
+    ndarray_vals& operator=(const ndarray& rhs) {
+        m_arr.vassign(rhs);
+        return *this;
+    }
+
+    /** Does a value-assignment from the rhs C++ scalar. */
+    template<class T>
+    typename boost::enable_if<is_dtype_scalar<T>, ndarray_vals&>::type operator=(const T& rhs) {
+        //DEBUG_COUT << "vassign C++ scalar\n";
+        m_arr.vassign(make_dtype<T>(), &rhs);
+        return *this;
+    }
+    /** Does a value-assignment from the rhs C++ boolean scalar. */
+    ndarray_vals& operator=(const bool& rhs) {
+        //DEBUG_COUT << "vassign bool\n";
+        dnd_bool v = rhs;
+        m_arr.vassign(make_dtype<dnd_bool>(), &v);
+        return *this;
+    }
+
+    // TODO: Could also do +=, -=, *=, etc.
+
+    // Can implicitly convert to an ndarray, by collapsing to a strided array
+    operator ndarray() const {
+        return ndarray((m_arr.m_expr_tree->get_node_type() == strided_array_node_type)
+                        ? m_arr.m_expr_tree
+                        : m_arr.m_expr_tree->evaluate());
+    }
+
+    friend class ndarray;
+};
+
+inline ndarray_vals ndarray::vals() const {
+    return ndarray_vals(*this);
+}
+
+inline ndarray& ndarray::operator=(const ndarray_vals& rhs) {
+    // No copy if the rhs is already a strided array
+    m_expr_tree = (rhs.m_arr.m_expr_tree->get_node_type() == strided_array_node_type)
+                        ? rhs.m_arr.m_expr_tree
+                        : rhs.m_arr.m_expr_tree->evaluate();
+    return *this;
+}
 
 ///////////// Initializer list constructor implementation /////////////////////////
 #ifdef DND_INIT_LIST
@@ -487,7 +566,7 @@ namespace detail {
                         static_cast<const strided_array_expr_node *>(lhs.get_expr_tree());
                 dtype_assign(make_dtype<T>(), &result, node->get_dtype(), node->get_originptr(), errmode);
             } else {
-                ndarray tmp = lhs.as_strided();
+                ndarray tmp = lhs.vals();
                 const strided_array_expr_node *node =
                         static_cast<const strided_array_expr_node *>(tmp.get_expr_tree());
                 dtype_assign(make_dtype<T>(), &result, node->get_dtype(), node->get_originptr(), errmode);

@@ -193,17 +193,20 @@ class strided_array_expr_node : public ndarray_expr_node {
     strided_array_expr_node(const strided_array_expr_node&);
     strided_array_expr_node& operator=(const strided_array_expr_node&);
 
+public:
     /**
      * Creates a strided array node from the raw values.
      *
-     * This object can only be constructed by the node factory function or the ndarray, so
-     * the constructor is private. This is because the dtype must be NBO, and the data
-     * must all be aligned, but this constructor does not validate these constraints.
+     * The dtype must be NBO, and the data must all be aligned, but this
+     * constructor does not validate these constraints. Failure to enforce
+     * these contraints will result in undefined behavior.
+     *
+     * It's prefereable to use the function make_strided_array_expr_node function,
+     * as it does the parameter validation.
      */
     strided_array_expr_node(const dtype& dt, int ndim, const intptr_t *shape,
             const intptr_t *strides, char *originptr, const dnd::shared_ptr<void>& buffer_owner);
 
-public:
     /**
      * Constructs a strided array node with the given dtype, shape, and axis_perm (for memory layout)
      */

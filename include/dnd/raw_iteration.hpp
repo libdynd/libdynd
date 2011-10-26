@@ -307,7 +307,7 @@ public:
         init(ndim, shape, const_cast<char **>(&data), &strides, axis_perm.get());
     }
 
-    raw_ndarray_iter(ndarray& arr)
+    raw_ndarray_iter(const ndarray& arr)
     {
         char *data = arr.get_originptr();
         const intptr_t *strides = arr.get_strides();

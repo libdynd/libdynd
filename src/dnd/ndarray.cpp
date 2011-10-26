@@ -33,95 +33,63 @@ dnd::ndarray::ndarray()
 {
 }
 
-dnd::ndarray::ndarray(int8_t value)
-    : m_expr_tree()
+template<class T>
+ndarray_expr_node *make_expr_tree_from_scalar(T value)
 {
     shared_ptr<void> buffer_owner(::dnd::detail::ndarray_buffer_allocator(1),
                                 ::dnd::detail::ndarray_buffer_deleter);
-    *reinterpret_cast<int8_t *>(buffer_owner.get()) = value;
-    m_expr_tree.reset(new strided_array_expr_node(dtype(int8_type_id), 0, NULL, NULL, 
-                            reinterpret_cast<char *>(buffer_owner.get()), std::move(buffer_owner)));
+    *reinterpret_cast<T *>(buffer_owner.get()) = value;
+    return new strided_array_expr_node(make_dtype<T>(), 0, NULL, NULL,
+                        reinterpret_cast<char *>(buffer_owner.get()), std::move(buffer_owner));
 }
-dnd::ndarray::ndarray(int16_t value)
-    : m_expr_tree()
+
+dnd::ndarray::ndarray(signed char value)
+    : m_expr_tree(make_expr_tree_from_scalar(value))
 {
-    shared_ptr<void> buffer_owner(::dnd::detail::ndarray_buffer_allocator(2),
-                                ::dnd::detail::ndarray_buffer_deleter);
-    *reinterpret_cast<int16_t *>(buffer_owner.get()) = value;
-    m_expr_tree.reset(new strided_array_expr_node(dtype(int16_type_id), 0, NULL, NULL, 
-                            reinterpret_cast<char *>(buffer_owner.get()), std::move(buffer_owner)));
 }
-dnd::ndarray::ndarray(int32_t value)
-    : m_expr_tree()
+dnd::ndarray::ndarray(short value)
+    : m_expr_tree(make_expr_tree_from_scalar(value))
 {
-    shared_ptr<void> buffer_owner(::dnd::detail::ndarray_buffer_allocator(4),
-                                ::dnd::detail::ndarray_buffer_deleter);
-    *reinterpret_cast<int32_t *>(buffer_owner.get()) = value;
-    m_expr_tree.reset(new strided_array_expr_node(dtype(int32_type_id), 0, NULL, NULL, 
-                            reinterpret_cast<char *>(buffer_owner.get()), std::move(buffer_owner)));
 }
-dnd::ndarray::ndarray(int64_t value)
-    : m_expr_tree()
+dnd::ndarray::ndarray(int value)
+    : m_expr_tree(make_expr_tree_from_scalar(value))
 {
-    shared_ptr<void> buffer_owner(::dnd::detail::ndarray_buffer_allocator(8),
-                                ::dnd::detail::ndarray_buffer_deleter);
-    *reinterpret_cast<int64_t *>(buffer_owner.get()) = value;
-    m_expr_tree.reset(new strided_array_expr_node(dtype(int64_type_id), 0, NULL, NULL, 
-                            reinterpret_cast<char *>(buffer_owner.get()), std::move(buffer_owner)));
 }
-dnd::ndarray::ndarray(uint8_t value)
-    : m_expr_tree()
+dnd::ndarray::ndarray(long value)
+    : m_expr_tree(make_expr_tree_from_scalar(value))
 {
-    shared_ptr<void> buffer_owner(::dnd::detail::ndarray_buffer_allocator(1),
-                                ::dnd::detail::ndarray_buffer_deleter);
-    *reinterpret_cast<uint8_t *>(buffer_owner.get()) = value;
-    m_expr_tree.reset(new strided_array_expr_node(dtype(uint8_type_id), 0, NULL, NULL, 
-                            reinterpret_cast<char *>(buffer_owner.get()), std::move(buffer_owner)));
 }
-dnd::ndarray::ndarray(uint16_t value)
-    : m_expr_tree()
+dnd::ndarray::ndarray(long long value)
+    : m_expr_tree(make_expr_tree_from_scalar(value))
 {
-    shared_ptr<void> buffer_owner(::dnd::detail::ndarray_buffer_allocator(2),
-                                ::dnd::detail::ndarray_buffer_deleter);
-    *reinterpret_cast<uint16_t *>(buffer_owner.get()) = value;
-    m_expr_tree.reset(new strided_array_expr_node(dtype(uint16_type_id), 0, NULL, NULL, 
-                            reinterpret_cast<char *>(buffer_owner.get()), std::move(buffer_owner)));
 }
-dnd::ndarray::ndarray(uint32_t value)
-    : m_expr_tree()
+dnd::ndarray::ndarray(unsigned char value)
+    : m_expr_tree(make_expr_tree_from_scalar(value))
 {
-    shared_ptr<void> buffer_owner(::dnd::detail::ndarray_buffer_allocator(4),
-                                ::dnd::detail::ndarray_buffer_deleter);
-    *reinterpret_cast<uint32_t *>(buffer_owner.get()) = value;
-    m_expr_tree.reset(new strided_array_expr_node(dtype(uint32_type_id), 0, NULL, NULL, 
-                            reinterpret_cast<char *>(buffer_owner.get()), std::move(buffer_owner)));
 }
-dnd::ndarray::ndarray(uint64_t value)
-    : m_expr_tree()
+dnd::ndarray::ndarray(unsigned short value)
+    : m_expr_tree(make_expr_tree_from_scalar(value))
 {
-    shared_ptr<void> buffer_owner(::dnd::detail::ndarray_buffer_allocator(8),
-                                ::dnd::detail::ndarray_buffer_deleter);
-    *reinterpret_cast<uint64_t *>(buffer_owner.get()) = value;
-    m_expr_tree.reset(new strided_array_expr_node(dtype(uint64_type_id), 0, NULL, NULL, 
-                            reinterpret_cast<char *>(buffer_owner.get()), std::move(buffer_owner)));
+}
+dnd::ndarray::ndarray(unsigned int value)
+    : m_expr_tree(make_expr_tree_from_scalar(value))
+{
+}
+dnd::ndarray::ndarray(unsigned long value)
+    : m_expr_tree(make_expr_tree_from_scalar(value))
+{
+}
+dnd::ndarray::ndarray(unsigned long long value)
+    : m_expr_tree(make_expr_tree_from_scalar(value))
+{
 }
 dnd::ndarray::ndarray(float value)
-    : m_expr_tree()
+    : m_expr_tree(make_expr_tree_from_scalar(value))
 {
-    shared_ptr<void> buffer_owner(::dnd::detail::ndarray_buffer_allocator(4),
-                                ::dnd::detail::ndarray_buffer_deleter);
-    *reinterpret_cast<float *>(buffer_owner.get()) = value;
-    m_expr_tree.reset(new strided_array_expr_node(dtype(float32_type_id), 0, NULL, NULL, 
-                            reinterpret_cast<char *>(buffer_owner.get()), std::move(buffer_owner)));
 }
 dnd::ndarray::ndarray(double value)
-    : m_expr_tree()
+    : m_expr_tree(make_expr_tree_from_scalar(value))
 {
-    shared_ptr<void> buffer_owner(::dnd::detail::ndarray_buffer_allocator(8),
-                                ::dnd::detail::ndarray_buffer_deleter);
-    *reinterpret_cast<double *>(buffer_owner.get()) = value;
-    m_expr_tree.reset(new strided_array_expr_node(dtype(float64_type_id), 0, NULL, NULL, 
-                            reinterpret_cast<char *>(buffer_owner.get()), std::move(buffer_owner)));
 }
 
 
@@ -130,7 +98,7 @@ dnd::ndarray::ndarray(const dtype& dt)
 {
     shared_ptr<void> buffer_owner(::dnd::detail::ndarray_buffer_allocator(dt.itemsize()),
                                 ::dnd::detail::ndarray_buffer_deleter);
-    m_expr_tree.reset(new strided_array_expr_node(dt, 0, NULL, NULL, 
+    m_expr_tree.reset(new strided_array_expr_node(dt, 0, NULL, NULL,
                             reinterpret_cast<char *>(buffer_owner.get()), std::move(buffer_owner)));
 }
 
@@ -151,7 +119,7 @@ dnd::ndarray::ndarray(intptr_t dim0, const dtype& dt)
     shared_ptr<void> buffer_owner(
                     ::dnd::detail::ndarray_buffer_allocator(dt.itemsize() * dim0),
                     ::dnd::detail::ndarray_buffer_deleter);
-    m_expr_tree.reset(new strided_array_expr_node(dt, 1, &dim0, &stride, 
+    m_expr_tree.reset(new strided_array_expr_node(dt, 1, &dim0, &stride,
                             reinterpret_cast<char *>(buffer_owner.get()), std::move(buffer_owner)));
 }
 
@@ -166,7 +134,7 @@ dnd::ndarray::ndarray(intptr_t dim0, intptr_t dim1, const dtype& dt)
     shared_ptr<void> buffer_owner(
                     ::dnd::detail::ndarray_buffer_allocator(dt.itemsize() * dim0 * dim1),
                     ::dnd::detail::ndarray_buffer_deleter);
-    m_expr_tree.reset(new strided_array_expr_node(dt, 2, shape, strides, 
+    m_expr_tree.reset(new strided_array_expr_node(dt, 2, shape, strides,
                             reinterpret_cast<char *>(buffer_owner.get()), std::move(buffer_owner)));
 }
 
@@ -182,7 +150,7 @@ dnd::ndarray::ndarray(intptr_t dim0, intptr_t dim1, intptr_t dim2, const dtype& 
     shared_ptr<void> buffer_owner(
                     ::dnd::detail::ndarray_buffer_allocator(dt.itemsize() * dim0 * dim1 * dim2),
                     ::dnd::detail::ndarray_buffer_deleter);
-    m_expr_tree.reset(new strided_array_expr_node(dt, 3, shape, strides, 
+    m_expr_tree.reset(new strided_array_expr_node(dt, 3, shape, strides,
                             reinterpret_cast<char *>(buffer_owner.get()), std::move(buffer_owner)));
 }
 
@@ -199,7 +167,7 @@ dnd::ndarray::ndarray(intptr_t dim0, intptr_t dim1, intptr_t dim2, intptr_t dim3
     shared_ptr<void> buffer_owner(
                     ::dnd::detail::ndarray_buffer_allocator(dt.itemsize() * dim0 * dim1 * dim2 * dim3),
                     ::dnd::detail::ndarray_buffer_deleter);
-    m_expr_tree.reset(new strided_array_expr_node(dt, 4, shape, strides, 
+    m_expr_tree.reset(new strided_array_expr_node(dt, 4, shape, strides,
                             reinterpret_cast<char *>(buffer_owner.get()), std::move(buffer_owner)));
 }
 
@@ -211,7 +179,7 @@ ndarray dnd::ndarray::index(int nindex, const irange *indices) const
                         nindex, indices, false));
 }
 
-ndarray dnd::ndarray::operator()(intptr_t idx) const
+const ndarray dnd::ndarray::operator()(intptr_t idx) const
 {
     // Casting away const is ok here, because we pass 'false' to 'allow_in_place'
     return ndarray(make_integer_index_expr_node(get_expr_tree(), 0, idx, false));
@@ -238,7 +206,7 @@ ndarray dnd::empty_like(const ndarray& rhs, const dtype& dt)
     return ndarray(dt, rhs.get_ndim(), rhs.get_shape(), axis_perm.get());
 }
 
-static void vassign_unequal_dtypes(ndarray& lhs, const ndarray& rhs, assign_error_mode errmode)
+static void vassign_unequal_dtypes(const ndarray& lhs, const ndarray& rhs, assign_error_mode errmode)
 {
     //cout << "vassign_unequal_dtypes\n";
     // First broadcast the 'rhs' shape to 'this'
@@ -268,7 +236,7 @@ static void vassign_unequal_dtypes(ndarray& lhs, const ndarray& rhs, assign_erro
     }
 }
 
-static void vassign_equal_dtypes(ndarray& lhs, const ndarray& rhs)
+static void vassign_equal_dtypes(const ndarray& lhs, const ndarray& rhs)
 {
     //cout << "vassign_equal_dtypes\n";
     // First broadcast the 'rhs' shape to 'this'
@@ -297,15 +265,6 @@ static void vassign_equal_dtypes(ndarray& lhs, const ndarray& rhs)
     }
 }
 
-ndarray dnd::ndarray::as_strided() const
-{
-    if (m_expr_tree->get_node_type() == strided_array_node_type) {
-        return *this;
-    } else {
-        return ndarray(m_expr_tree->evaluate());
-    }
-}
-
 ndarray dnd::ndarray::as_dtype(const dtype& dt, assign_error_mode errmode) const
 {
     if (dt == get_dtype()) {
@@ -315,7 +274,7 @@ ndarray dnd::ndarray::as_dtype(const dtype& dt, assign_error_mode errmode) const
     }
 }
 
-void dnd::ndarray::vassign(const ndarray& rhs, assign_error_mode errmode)
+void dnd::ndarray::vassign(const ndarray& rhs, assign_error_mode errmode) const
 {
     if (m_expr_tree->get_node_type() != strided_array_node_type) {
         throw std::runtime_error("cannot vassign to an expression-view ndarray, must "
@@ -337,16 +296,17 @@ void dnd::ndarray::vassign(const ndarray& rhs, assign_error_mode errmode)
     }
 }
 
-void dnd::ndarray::vassign(const dtype& dt, const void *data, assign_error_mode errmode)
+void dnd::ndarray::vassign(const dtype& dt, const void *data, assign_error_mode errmode) const
 {
     //DEBUG_COUT << "scalar vassign\n";
     scalar_copied_if_necessary src(get_dtype(), dt, data, errmode);
     raw_ndarray_iter<1,0> iter(*this);
-    
+
     intptr_t innersize = iter.innersize(), innerstride = iter.innerstride<0>();
 
     std::pair<unary_operation_t, dnd::shared_ptr<auxiliary_data> > assign =
-                get_dtype_strided_assign_operation(get_dtype(), innerstride, iter.get_align_test<0>(), 0, 0);
+                get_dtype_strided_assign_operation(
+                                get_dtype(), innerstride, iter.get_align_test<0>(), 0, 0);
 
     if (innersize > 0) {
         do {
@@ -384,16 +344,20 @@ static void nested_ndarray_print(std::ostream& o, const ndarray& rhs, const char
 
 std::ostream& dnd::operator<<(std::ostream& o, const ndarray& rhs)
 {
-    if (rhs.get_expr_tree()->get_node_type() == strided_array_node_type) {
-        o << "ndarray(" << rhs.get_dtype() << ", ";
-        if (rhs.get_ndim() == 0) {
-            rhs.get_dtype().print(o, rhs.get_originptr(), 0, 1, "");
+    if (rhs.get_expr_tree() != NULL) {
+        if (rhs.get_expr_tree()->get_node_type() == strided_array_node_type) {
+            o << "ndarray(" << rhs.get_dtype() << ", ";
+            if (rhs.get_ndim() == 0) {
+                rhs.get_dtype().print(o, rhs.get_originptr(), 0, 1, "");
+            } else {
+                nested_ndarray_print(o, rhs, rhs.get_originptr(), 0);
+            }
+            o << ")";
         } else {
-            nested_ndarray_print(o, rhs, rhs.get_originptr(), 0);
+            o << rhs.vals();
         }
-        o << ")";
     } else {
-        o << rhs.as_strided();
+        o << "ndarray()";
     }
 
     return o;

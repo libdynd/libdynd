@@ -1,8 +1,64 @@
 // Commands for cling:
 
 #define P(x) cout << x << "\n"
-ndarray a, b, c;
+ndarray a, b;
 
-{int tmp[6] = {300,1,6,4,2,0}; a = tmp;}
+// In C++11 with initializer lists, this can be written as
+// a = {{300,1,6}, {4,2,0}};
+{int tmp[2][3] = {{300,1,6}, {4,2,0}}; a = tmp;}
+
+// Print the array
 P(a);
+
+// Print the array as a different dtype
+P(a.as_dtype<float>());
+
+// The value 300 overflows
+P(a.as_dtype<int8_t>());
+
+// Can override assignment error policy to force the cast
+P(a.as_dtype<int8_t>(assign_error_none));
+
+// But as_dtype returns a view, which doesn't throw immediately!
+b = a.as_dtype<int8_t>();
+
+// Printing triggers evaluation of the view, so it overflows here
+P(b);
+
+// It's a view, so changing the value in 'a' removes the overflow
+a(0,0).vassign(-100);
+P(b);
+
+// Behind the scenes, there's an expression graph
+b.debug_dump(cout);
+
+// ndarray is fully dynamic, so can assign a new dtype and shape
+{float tmp[6] = {300,1,6,4,2,0}; a = tmp;}
+
+// Some basic arithmetic is implemented
+P(a + 100.f);
+P(a * arange(6.f));
+
+// Evaluation of anything but trivial expression graphs isn't done yet
+P(a * (arange(6.0) + 1));
+
+// NumPy broadcasting rules:
+P(a + b);
+
+// In C++11, would be able to say:
+// P(a + {1,2,3,1,2,3});
+
+{float tmp[2][3][4] = {{{300,1.5,2,6},{1,2,3,4},{6,1,1,1}}, {{4,-1.25,9,2.0},{2,2,2,2},{0,9,19,-9}}}; a = tmp;}
+
+// indexing with index ranges is done similar to boost multiarray
+P(a(1,2,3));        // Like NumPy a[1,2,3]
+P(a(1,2));          // Like NumPy a[1,2]
+P(a(irange(),2,3)); // Like NumPy a[:,1,2]
+P(a(irange(),1 <= irange(),2 <= irange())); // Like NumPy a[:,1:,2:]
+P(a(1,2,irange() / 2)); // Like NumPy a[1,1,::2]
+
+// Linear indexing propagates down through the tree where possible
+b = a + a * 3.5f;
+b.debug_dump(cout);
+b(irange(),irange() < 3, 2).debug_dump(cout);
 

@@ -118,6 +118,78 @@ an estimate of how many source node accesses are required for each result
 element. For example, a matrix multiply node for an m by n times an n by r matrix,
 would indicate 2*n for each output element.
 
+Reference Assignment vs Value Assignment
+----------------------------------------
+
+This library has two types of assignment operations, assigning by
+reference and assigning by value. This is similar to NumPy, where
+this distinction can trip up programmers fairly easily:
+
+    a = np.arange(10)
+    for x in np.nditer(a):
+        # Oops! Wanted value assignment, not reference assignment
+        x = np.sin(x)
+        # Should have been this:
+        x[...] = np.sin(x)
+
+In a C++ library, assignment is usually done by value, and the language
+has lvalue and rvalue references built in. The ndarray object references
+data in a buffer, however, which means a C++ assignment of an ndarray
+could either copy values into its buffer, or turn the destination object
+into a reference pointing at the array being assigned. User code needs the
+ability to do both of these operations.
+
+My initial design choice was to make operator= be reference assignment, and
+write a function called vassign for value assignment. This can lead to a
+big surprise as follows:
+
+    ndarray a = arange(10).as_strided();
+    // Oops! Wanted value assignment, not reference assignment
+    // This turns into a NOP, because a(3) produces a temporary ndarray,
+    // which becomes a reference to an array containing the value 2, then
+    // gets destroyed. The programmer gets no signal that this happens!
+    a(3) = 2;
+    // Should have been this:
+    a(3).vassign(2);
+
+To retain programmer sanity, the above should produce an error, an
+exception, or should be a value assignment. I haven't been able to think
+of a good way to detect this case, as a(3) must return a non-const reference,
+the value 2 is convertible to an ndarray. This assignment works fine as far
+as the compiler is concerned. A difference with Python is that in python,
+"a[3] = 2" is a different operation than "a = 2", but here in C++, they are
+identical.
+
+On the other hand, an assignment like "c = a + b" is much more natural
+as a reference assignment, for the "everything is a view" philosophy
+of the library. Some kind of design compromise needs to be found which
+balances the requirements of value assignment and reference assignment.
+
+One way to do this is to make indexing and other similar operations return
+a const ndarray, which would make "a(3) = 2" become a compile error. I
+believe this adds a small efficiency cost, because "b = a(3)" could no
+longer use a move assignment operator, but protecting from this error is vital.
+
+A better syntax for the vassign function would be nice as well. One possibility
+would be to introduce an object which collapses to a strided array when
+its values are read, and assigns by value when being assigned. This could
+work as follows:
+
+    ndarray a = {1, 2, 3, 4, 5};
+    ndarray b;
+
+    // Compile error
+    a(3) = 2;
+    // This assigns to the values in 'a'
+    a(3).vals() = 2;
+    // These two statements are equivalent. It is likely
+    // be desireable to remove the as_strided function so
+    // that there is one canonical way of doing this...
+    b = (a + 2).vals();
+    b = (a + 2).as_strided();
+
+
+
 All Data Is Aligned and in Native Byte Order
 --------------------------------------------
 
@@ -137,6 +209,54 @@ Since operations can fail part-way through, guaranteeing exception safety
 would require making a temporary copy.  In the interests of efficiency,
 this is not done. When exception safety is required, the functional-style
 operations are recommended.
+
+Label-based Indexing
+--------------------
+
+At the data array summit in Austin, a design was hammered to allow for
+names of the axes and labels along each axis. There were many use-cases
+people wanted for this functionality, some conflicting with each other.
+
+I think there needs to be a big distinction between an ordered mapping,
+for instance thinking of the array as a position or time instant with
+associated data. For this library, I'd like to restrict the labels
+to be strings only, so integer-based and label-based indexing can
+live together comfortably.
+
+The axis names and labels should themselves be one-dimensional ndarrays
+of UTF8 strings.
+
+Arrays with ndarrays as the Data Type
+-------------------------------------
+
+In J, there is an idea of a "boxed" array, which is basically having
+the dtype itself consist of arrays. This is a way to support ragged
+arrays, and it is natural to extend the indexing operation so that
+when more indices are specified than there are dimensions, the
+rest of the indices get passed on to index into the elements which
+are themselves arrays.
+
+For the dynamic ndarray library, we can treat this mechanism as a
+"late binding" idea. Consider an array of strings, where the size
+of the string is 0, indicating a "flexible" (this is NumPy's terminology,
+perhaps a better name can be found) dtype. Behind the scenes, this
+becomes a concrete dtype during each iteration step, so that the strings
+themselves may be stored in a packed form along with an array of byte-ranges
+to go with it. This would need corresponding API which give a dtype
+that could hold all the data in a uniform fashion, which would take the maximum
+length of one of the strings.
+
+The way that having ndarray as a dtype should affect
+
+Struct Data Types
+-----------------
+
+A data type which is a struct can be considered equivalent to an ndarray
+of ndarrays, with the restriction that the subarray shapes and dtypes do
+not vary across different elements. Considered in full generality, we can
+imagine more ways aspects of the array are static or dynamic, For instance,
+a ragged array could be imagined with a uniform dtype, but varying sizes
+in the subarray.
 
 Indirect Indexing
 -----------------

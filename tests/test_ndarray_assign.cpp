@@ -202,11 +202,11 @@ TEST(NDArrayAssign, Casting) {
     b = a.as_dtype(make_dtype<int>());
     // This triggers the conversion from float to int,
     // but the default assign policy is 'fractional'
-    EXPECT_THROW(b.as_strided(), runtime_error);
+    EXPECT_THROW(ndarray(b.vals()), runtime_error);
 
     // Allow truncation of fractional part
     b = a.as_dtype(make_dtype<int>(), assign_error_overflow);
-    b = b.as_strided();
+    b = b.vals();
     EXPECT_EQ(3, b(0).as<int>());
     EXPECT_EQ(1, b(1).as<int>());
     EXPECT_EQ(0, b(2).as<int>());
@@ -215,12 +215,12 @@ TEST(NDArrayAssign, Casting) {
     b = a.as_dtype(make_dtype<int8_t>(), assign_error_overflow);
     // This triggers conversion from float to int8,
     // which overflows
-    EXPECT_THROW(b.as_strided(), runtime_error);
+    EXPECT_THROW(ndarray(b.vals()), runtime_error);
 
-    // Remove the overflowing value in 'a', so b.as_strided() no
+    // Remove the overflowing value in 'a', so b.vals() no
     // longer triggers an overflow.
     a(3).vassign(-120);
-    b = b.as_strided();
+    b = b.vals();
     EXPECT_EQ(3, b(0).as<int>());
     EXPECT_EQ(1, b(1).as<int>());
     EXPECT_EQ(0, b(2).as<int>());
