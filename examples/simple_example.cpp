@@ -27,10 +27,10 @@ int main()
     c.debug_dump(cout);
     cout << "\n";
 
+    // This produces a compile error! TODO: Need tests to confirm this.
+    //a(1,0) = 1000;
+
     // 'c' is a view of 'a+b', so changing 'a' changes 'c'
     a(1,0).vals() = 1000;
     cout << c << "\n";
-
-    // This produces a compile error! TODO: Need tests to confirm stuff like this, too!
-    //a(1,0) = 1000;
 }

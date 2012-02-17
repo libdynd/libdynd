@@ -107,7 +107,7 @@ TEST(ArithmeticOp, MatchingDTypes_View) {
     // Note: 'c' contains an expression tree with an 'add' node,
     // so editing the values of 'a' or 'b' changes the values of 'c'
     int v2[] = {6,4,2};
-    a.vassign(ndarray(v2));
+    a.val_assign(ndarray(v2));
     EXPECT_EQ(6, c(0,0).as<int>());
     EXPECT_EQ(5, c(0,1).as<int>());
     EXPECT_EQ(3, c(0,2).as<int>());
@@ -119,12 +119,12 @@ TEST(ArithmeticOp, MatchingDTypes_View) {
     d = c(0);
     EXPECT_EQ(1, d.get_ndim());
     EXPECT_EQ(3, d.get_shape(0));
-    a.vassign(ndarray(v0));
+    a.val_assign(ndarray(v0));
     EXPECT_EQ(1, d(0).as<int>());
     EXPECT_EQ(3, d(1).as<int>());
     EXPECT_EQ(4, d(2).as<int>());
     d = c(1);
-    a.vassign(ndarray(v2));
+    a.val_assign(ndarray(v2));
     EXPECT_EQ(8, d(0).as<int>());
     EXPECT_EQ(9, d(1).as<int>());
     EXPECT_EQ(-8, d(2).as<int>());

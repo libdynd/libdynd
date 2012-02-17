@@ -130,50 +130,41 @@ this distinction can trip up programmers fairly easily:
         # Oops! Wanted value assignment, not reference assignment
         x = np.sin(x)
         # Should have been this:
-        x[...] = np.sin(x)
+        # x[...] = np.sin(x)
 
 In a C++ library, assignment is usually done by value, and the language
-has lvalue and rvalue references built in. The ndarray object references
-data in a buffer, however, which means a C++ assignment of an ndarray
-could either copy values into its buffer, or turn the destination object
-into a reference pointing at the array being assigned. User code needs the
-ability to do both of these operations.
+has lvalue and rvalue references built in. The dynamic nature of ndarray,
+in particular the idea that "everything is a view", makes it much more
+natural for assignment of ndarrays to be done by reference in the default
+case. At the same time, it is imperative that there be a simple, convenient
+way to do value assignment.
 
-My initial design choice was to make operator= be reference assignment, and
-write a function called vassign for value assignment. This can lead to a
+The initial design with operator= for reference assignment had a
+troublesome special case that could trip up programmers. Assigning
+a C++ scalar to an indexed subset of an array can lead to a
 big surprise as follows:
 
     ndarray a = arange(10).as_strided();
+    a(3) = 2;
     // Oops! Wanted value assignment, not reference assignment
     // This turns into a NOP, because a(3) produces a temporary ndarray,
     // which becomes a reference to an array containing the value 2, then
-    // gets destroyed. The programmer gets no signal that this happens!
-    a(3) = 2;
-    // Should have been this:
-    a(3).vassign(2);
+    // gets destroyed. The ndarray 'a' remains untouched, and the programmer
+    // gets no signal that this happens!
 
-To retain programmer sanity, the above should produce an error, an
-exception, or should be a value assignment. I haven't been able to think
-of a good way to detect this case, as a(3) must return a non-const reference,
-the value 2 is convertible to an ndarray. This assignment works fine as far
-as the compiler is concerned. A difference with Python is that in python,
-"a[3] = 2" is a different operation than "a = 2", but here in C++, they are
-identical.
+To retain programmer sanity, the above should produce a compile error, an
+exception, or should be a value assignment. The solution I have found is to
+turn it into a compile error, by having the indexing operation return a
+const ndarray. Here, we view the ndarray reference as const, not the values
+it points to. Since assignment is supposed to cause the ndarray to reference
+a new array, it is only defined for non-const ndarrays. The function val_assign
+is defined for const ndarrays, because it is modifying the values the ndarray
+points at, not the ndarray reference itself.
 
-On the other hand, an assignment like "c = a + b" is much more natural
-as a reference assignment, for the "everything is a view" philosophy
-of the library. Some kind of design compromise needs to be found which
-balances the requirements of value assignment and reference assignment.
-
-One way to do this is to make indexing and other similar operations return
-a const ndarray, which would make "a(3) = 2" become a compile error. I
-believe this adds a small efficiency cost, because "b = a(3)" could no
-longer use a move assignment operator, but protecting from this error is vital.
-
-A better syntax for the vassign function would be nice as well. One possibility
-would be to introduce an object which collapses to a strided array when
-its values are read, and assigns by value when being assigned. This could
-work as follows:
+A more intuitive syntax for the val_assign function would be nice as well. This has been
+done by introducing an object which collapses to a strided array when
+its values are read, and assigns by value when being assigned to. This
+works as follows:
 
     ndarray a = {1, 2, 3, 4, 5};
     ndarray b;
@@ -182,13 +173,12 @@ work as follows:
     a(3) = 2;
     // This assigns to the values in 'a'
     a(3).vals() = 2;
-    // These two statements are equivalent. It is likely
-    // be desireable to remove the as_strided function so
-    // that there is one canonical way of doing this...
+    // This turns 'b' into a strided array containing the
+    // values produced by the expression 'a+2'.
     b = (a + 2).vals();
-    b = (a + 2).as_strided();
 
-
+It is worth keeping the val_assign function as well, since it has another
+parameter for the assignment error checking rule.
 
 All Data Is Aligned and in Native Byte Order
 --------------------------------------------
@@ -303,13 +293,13 @@ the arrays produce vastly different results.
     'b' AS COMPRESSED)     ndarray(int32, {1, 3})
 
     :> c = zeros(5, make_dtype<int>());
-    :> c.vassign(b);
+    :> c.val_assign(b);
     'b' AS COMPRESSED)     broadcast error: cannot broadcast shape (2) to (5)
     :> cout << c << "\n";
     'b' AS SELECTION MASK) ndarray(int32, {0, 1, 0, 3, 0})
 
     :> c = zeros(5, make_dtype<int>());
-    :> c({true, true, false, false, false}).vassign(b)
+    :> c({true, true, false, false, false}).val_assign(b)
     :> cout << c << "\n";
     'b' AND 'c[...]' AS SELECTION MASK) ndarray(int32, {0, 1, 0, 0, 0})
     'b' AND 'c[...]' AS COMPRESSED)     ndarray(int32, {1, 3, 0, 0, 0})
@@ -328,18 +318,18 @@ which is operator() in C++.  The proposed resolution looks like this:
     ndarray(int32, {IGNORE, 1, IGNORE, 3, IGNORE})
 
     :> c = zeros(5, make_dtype<int>());
-    :> c.vassign(b_ix);
+    :> c.val_assign(b_ix);
     broadcast error: cannot broadcast shape (2) to (5)
-    :> c.vassign(b_wr):
+    :> c.val_assign(b_wr):
     :> cout << c << "\n";
     ndarray(int32, {0, 1, 0, 3, 0})
 
     :> c = zeros(5, make_dtype<int>());
-    :> c({true, true, false, false, false}).vassign(b_ix)
+    :> c({true, true, false, false, false}).val_assign(b_ix)
     :> cout << c << "\n";
     ndarray(int32, {1, 3, 0, 0, 0})
     :> c = zeros(5, make_dtype<int>());
-    :> c.where({true, true, false, false, false}).vassign(b_wr)
+    :> c.where({true, true, false, false, false}).val_assign(b_wr)
     ndarray(int32, {0, 1, 0, 0, 0})
 
 One nice property of this is that for boolean indexing, the programmer
@@ -394,7 +384,7 @@ Sept 19, 2011
 
 Sept 20, 2011
 
-* Wrote ndarray.vassign function for scalar inputs. This allows you
+* Wrote ndarray.val_assign function for scalar inputs. This allows you
   to assign a scalar (including a native C++ scalar) to arrays, with
   a customizable assignment error mode. While I could also make the
   C++ scalar assignment work with ndarray.operator=, I think the ndarray

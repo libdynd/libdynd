@@ -222,7 +222,7 @@ TEST(NDArray, AsScalar) {
 
     a = ndarray(make_dtype<float>());
     EXPECT_EQ(1, a.get_num_elements());
-    a.vassign(3.14f);
+    a.val_assign(3.14f);
     EXPECT_EQ(3.14f, a.as<float>());
     EXPECT_EQ(3.14f, a.as<double>());
     EXPECT_THROW(a.as<int64_t>(), runtime_error);
@@ -235,7 +235,7 @@ TEST(NDArray, AsScalar) {
     EXPECT_EQ(true, a.as<bool>(assign_error_none));
 
     a = ndarray(make_dtype<double>());
-    a.vassign(3.141592653589);
+    a.val_assign(3.141592653589);
     EXPECT_EQ(3.141592653589, a.as<double>());
     EXPECT_THROW(a.as<float>(assign_error_inexact), runtime_error);
     EXPECT_EQ(3.141592653589f, a.as<float>());

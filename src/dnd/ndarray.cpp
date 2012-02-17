@@ -206,9 +206,9 @@ ndarray dnd::empty_like(const ndarray& rhs, const dtype& dt)
     return ndarray(dt, rhs.get_ndim(), rhs.get_shape(), axis_perm.get());
 }
 
-static void vassign_unequal_dtypes(const ndarray& lhs, const ndarray& rhs, assign_error_mode errmode)
+static void val_assign_unequal_dtypes(const ndarray& lhs, const ndarray& rhs, assign_error_mode errmode)
 {
-    //cout << "vassign_unequal_dtypes\n";
+    //cout << "val_assign_unequal_dtypes\n";
     // First broadcast the 'rhs' shape to 'this'
     dimvector rhs_strides(lhs.get_ndim());
     broadcast_to_shape(lhs.get_ndim(), lhs.get_shape(), rhs, rhs_strides.get());
@@ -236,9 +236,9 @@ static void vassign_unequal_dtypes(const ndarray& lhs, const ndarray& rhs, assig
     }
 }
 
-static void vassign_equal_dtypes(const ndarray& lhs, const ndarray& rhs)
+static void val_assign_equal_dtypes(const ndarray& lhs, const ndarray& rhs)
 {
-    //cout << "vassign_equal_dtypes\n";
+    //cout << "val_assign_equal_dtypes\n";
     // First broadcast the 'rhs' shape to 'this'
     dimvector rhs_strides(lhs.get_ndim());
     broadcast_to_shape(lhs.get_ndim(), lhs.get_shape(), rhs, rhs_strides.get());
@@ -274,31 +274,31 @@ ndarray dnd::ndarray::as_dtype(const dtype& dt, assign_error_mode errmode) const
     }
 }
 
-void dnd::ndarray::vassign(const ndarray& rhs, assign_error_mode errmode) const
+void dnd::ndarray::val_assign(const ndarray& rhs, assign_error_mode errmode) const
 {
     if (m_expr_tree->get_node_type() != strided_array_node_type) {
-        throw std::runtime_error("cannot vassign to an expression-view ndarray, must "
+        throw std::runtime_error("cannot val_assign to an expression-view ndarray, must "
                                  "first convert it to a strided array with as_strided");
     }
 
     if (get_dtype() == rhs.get_dtype()) {
         // The dtypes match, simpler case
-        vassign_equal_dtypes(*this, rhs);
+        val_assign_equal_dtypes(*this, rhs);
     } else if (get_num_elements() > 5 * rhs.get_num_elements()) {
         // If the data is being duplicated more than 5 times, make a temporary copy of rhs
         // converted to the dtype of 'this', then do the broadcasting.
         ndarray tmp = empty_like(rhs, get_dtype());
-        vassign_unequal_dtypes(tmp, rhs, errmode);
-        vassign_equal_dtypes(*this, tmp);
+        val_assign_unequal_dtypes(tmp, rhs, errmode);
+        val_assign_equal_dtypes(*this, tmp);
     } else {
         // Assignment with casting
-        vassign_unequal_dtypes(*this, rhs, errmode);
+        val_assign_unequal_dtypes(*this, rhs, errmode);
     }
 }
 
-void dnd::ndarray::vassign(const dtype& dt, const void *data, assign_error_mode errmode) const
+void dnd::ndarray::val_assign(const dtype& dt, const void *data, assign_error_mode errmode) const
 {
-    //DEBUG_COUT << "scalar vassign\n";
+    //DEBUG_COUT << "scalar val_assign\n";
     scalar_copied_if_necessary src(get_dtype(), dt, data, errmode);
     raw_ndarray_iter<1,0> iter(*this);
 
@@ -310,7 +310,7 @@ void dnd::ndarray::vassign(const dtype& dt, const void *data, assign_error_mode 
 
     if (innersize > 0) {
         do {
-            //DEBUG_COUT << "scalar vassign inner loop with size " << innersize << "\n";
+            //DEBUG_COUT << "scalar val_assign inner loop with size " << innersize << "\n";
             assign.first(iter.data<0>(), innerstride, src.data(), 0, innersize, assign.second.get());
         } while (iter.iternext());
     }

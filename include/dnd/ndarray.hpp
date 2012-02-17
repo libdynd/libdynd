@@ -247,9 +247,9 @@ public:
     const ndarray operator()(intptr_t idx) const;
 
     /** Does a value-assignment from the rhs array. */
-    void vassign(const ndarray& rhs, assign_error_mode errmode = assign_error_fractional) const;
+    void val_assign(const ndarray& rhs, assign_error_mode errmode = assign_error_fractional) const;
     /** Does a value-assignment from the rhs raw scalar */
-    void vassign(const dtype& dt, const void *data, assign_error_mode errmode = assign_error_fractional) const;
+    void val_assign(const dtype& dt, const void *data, assign_error_mode errmode = assign_error_fractional) const;
 
     /**
      * Converts the array into the specified dtype.
@@ -306,25 +306,23 @@ class ndarray_vals {
 public:
     /**
      * Assigns values from an array to the internally referenced array.
-     * this does a vassign with the default assignment error mode.
+     * this does a val_assign with the default assignment error mode.
      */
     ndarray_vals& operator=(const ndarray& rhs) {
-        m_arr.vassign(rhs);
+        m_arr.val_assign(rhs);
         return *this;
     }
 
     /** Does a value-assignment from the rhs C++ scalar. */
     template<class T>
     typename boost::enable_if<is_dtype_scalar<T>, ndarray_vals&>::type operator=(const T& rhs) {
-        //DEBUG_COUT << "vassign C++ scalar\n";
-        m_arr.vassign(make_dtype<T>(), &rhs);
+        m_arr.val_assign(make_dtype<T>(), &rhs);
         return *this;
     }
     /** Does a value-assignment from the rhs C++ boolean scalar. */
     ndarray_vals& operator=(const bool& rhs) {
-        //DEBUG_COUT << "vassign bool\n";
         dnd_bool v = rhs;
-        m_arr.vassign(make_dtype<dnd_bool>(), &v);
+        m_arr.val_assign(make_dtype<dnd_bool>(), &v);
         return *this;
     }
 

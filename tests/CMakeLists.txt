@@ -34,3 +34,13 @@ target_link_libraries(dnd_tests
     /home/mwiebe/Develop/AnimPhys/gtest/make/gtest-all.o
     /home/mwiebe/Develop/AnimPhys/gtest/make/gtest_main.o
     )
+
+
+# Compile-time tests: test code that is supposed to produce compile errors
+# I couldn't find a properly specified way to do this, so hacked together
+# this function.
+#set(TEST_BUILDERROR_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/../include)
+#include(TestExpectedCompileError.cmake)
+
+#test_expected_compile_succeed(builderror_includendarray.cpp)
+#test_expected_compile_error(builderror_badassignment.cpp)

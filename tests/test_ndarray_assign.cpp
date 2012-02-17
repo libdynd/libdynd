@@ -16,30 +16,30 @@ TEST(NDArrayAssign, ScalarAssignment_Bool) {
     // assignment to a bool scalar
     a = ndarray(make_dtype<dnd_bool>());
     ptr_b = (dnd_bool *)a.get_originptr();
-    a.vassign(true);
+    a.val_assign(true);
     EXPECT_TRUE(*ptr_b);
-    a.vassign(false);
+    a.val_assign(false);
     EXPECT_FALSE( *ptr_b);
-    a.vassign(1);
+    a.val_assign(1);
     EXPECT_TRUE(*ptr_b);
-    a.vassign(0);
+    a.val_assign(0);
     EXPECT_FALSE(*ptr_b);
-    a.vassign(1.0);
+    a.val_assign(1.0);
     EXPECT_TRUE(*ptr_b);
-    a.vassign(0.0);
+    a.val_assign(0.0);
     EXPECT_FALSE(*ptr_b);
-    a.vassign(1.5, assign_error_none);
+    a.val_assign(1.5, assign_error_none);
     EXPECT_TRUE(*ptr_b);
-    a.vassign(-3.5f, assign_error_none);
+    a.val_assign(-3.5f, assign_error_none);
     EXPECT_TRUE(*ptr_b);
-    a.vassign(22, assign_error_none);
+    a.val_assign(22, assign_error_none);
     EXPECT_TRUE(*ptr_b);
-    EXPECT_THROW(a.vassign(2), runtime_error);
-    EXPECT_THROW(a.vassign(-1), runtime_error);
-    EXPECT_THROW(a.vassign(1.5), runtime_error);
-    EXPECT_THROW(a.vassign(1.5, assign_error_overflow), runtime_error);
-    EXPECT_THROW(a.vassign(1.5, assign_error_fractional), runtime_error);
-    EXPECT_THROW(a.vassign(1.5, assign_error_inexact), runtime_error);
+    EXPECT_THROW(a.val_assign(2), runtime_error);
+    EXPECT_THROW(a.val_assign(-1), runtime_error);
+    EXPECT_THROW(a.val_assign(1.5), runtime_error);
+    EXPECT_THROW(a.val_assign(1.5, assign_error_overflow), runtime_error);
+    EXPECT_THROW(a.val_assign(1.5, assign_error_fractional), runtime_error);
+    EXPECT_THROW(a.val_assign(1.5, assign_error_inexact), runtime_error);
 }
 
 TEST(NDArrayAssign, ScalarAssignment_Int8) {
@@ -49,32 +49,32 @@ TEST(NDArrayAssign, ScalarAssignment_Int8) {
     // Assignment to an int8_t scalar
     a = ndarray(make_dtype<int8_t>());
     ptr_i8 = (int8_t *)a.get_originptr();
-    a.vassign(true);
+    a.val_assign(true);
     EXPECT_EQ(1, *ptr_i8);
-    a.vassign(false);
+    a.val_assign(false);
     EXPECT_EQ(0, *ptr_i8);
-    a.vassign(-10);
+    a.val_assign(-10);
     EXPECT_EQ(-10, *ptr_i8);
-    a.vassign(-128);
+    a.val_assign(-128);
     EXPECT_EQ(-128, *ptr_i8);
-    a.vassign(127);
+    a.val_assign(127);
     EXPECT_EQ(127, *ptr_i8);
-    EXPECT_THROW(a.vassign(-129), runtime_error);
-    EXPECT_THROW(a.vassign(128), runtime_error);
-    a.vassign(5.0);
+    EXPECT_THROW(a.val_assign(-129), runtime_error);
+    EXPECT_THROW(a.val_assign(128), runtime_error);
+    a.val_assign(5.0);
     EXPECT_EQ(5, *ptr_i8);
-    a.vassign(-100.0f);
+    a.val_assign(-100.0f);
     EXPECT_EQ(-100, *ptr_i8);
-    EXPECT_THROW(a.vassign(1.25), runtime_error);
-    EXPECT_THROW(a.vassign(128.0), runtime_error);
-    EXPECT_THROW(a.vassign(128.0, assign_error_inexact), runtime_error);
-    EXPECT_THROW(a.vassign(1e30), runtime_error);
-    a.vassign(1.25, assign_error_overflow);
+    EXPECT_THROW(a.val_assign(1.25), runtime_error);
+    EXPECT_THROW(a.val_assign(128.0), runtime_error);
+    EXPECT_THROW(a.val_assign(128.0, assign_error_inexact), runtime_error);
+    EXPECT_THROW(a.val_assign(1e30), runtime_error);
+    a.val_assign(1.25, assign_error_overflow);
     EXPECT_EQ(1, *ptr_i8);
-    EXPECT_THROW(a.vassign(-129.0, assign_error_overflow), runtime_error);
-    a.vassign(1.25, assign_error_none);
+    EXPECT_THROW(a.val_assign(-129.0, assign_error_overflow), runtime_error);
+    a.val_assign(1.25, assign_error_none);
     EXPECT_EQ(1, *ptr_i8);
-    a.vassign(-129.0, assign_error_none);
+    a.val_assign(-129.0, assign_error_none);
     //EXPECT_EQ((int8_t)-129.0, *ptr_i8); // < this is undefined behavior
 }
 
@@ -85,17 +85,17 @@ TEST(NDArrayAssign, ScalarAssignment_UInt16) {
     // Assignment to a uint16_t scalar
     a = ndarray(make_dtype<uint16_t>());
     ptr_u16 = (uint16_t *)a.get_originptr();
-    a.vassign(true);
+    a.val_assign(true);
     EXPECT_EQ(1, *ptr_u16);
-    a.vassign(false);
+    a.val_assign(false);
     EXPECT_EQ(0, *ptr_u16);
-    EXPECT_THROW(a.vassign(-1), runtime_error);
-    EXPECT_THROW(a.vassign(-1, assign_error_overflow), runtime_error);
-    a.vassign(-1, assign_error_none);
+    EXPECT_THROW(a.val_assign(-1), runtime_error);
+    EXPECT_THROW(a.val_assign(-1, assign_error_overflow), runtime_error);
+    a.val_assign(-1, assign_error_none);
     EXPECT_EQ(65535, *ptr_u16);
-    a.vassign(1234);
+    a.val_assign(1234);
     EXPECT_EQ(1234, *ptr_u16);
-    a.vassign(65535.0f);
+    a.val_assign(65535.0f);
     EXPECT_EQ(65535, *ptr_u16);
 }
 
@@ -106,24 +106,24 @@ TEST(NDArrayAssign, ScalarAssignment_Float32) {
     // Assignment to a float scalar
     a = ndarray(make_dtype<float>());
     ptr_f32 = (float *)a.get_originptr();
-    a.vassign(true);
+    a.val_assign(true);
     EXPECT_EQ(1, *ptr_f32);
-    a.vassign(false);
+    a.val_assign(false);
     EXPECT_EQ(0, *ptr_f32);
-    a.vassign(-10);
+    a.val_assign(-10);
     EXPECT_EQ(-10, *ptr_f32);
-    a.vassign((char)30);
+    a.val_assign((char)30);
     EXPECT_EQ(30, *ptr_f32);
-    a.vassign((uint16_t)58000);
+    a.val_assign((uint16_t)58000);
     EXPECT_EQ(58000, *ptr_f32);
-    a.vassign(1.25);
+    a.val_assign(1.25);
     EXPECT_EQ(1.25, *ptr_f32);
-    a.vassign(1/3.0);
+    a.val_assign(1/3.0);
     EXPECT_EQ((float)(1/3.0), *ptr_f32);
-    EXPECT_THROW(a.vassign(1/3.0, assign_error_inexact), runtime_error);
-    a.vassign(33554433);
+    EXPECT_THROW(a.val_assign(1/3.0, assign_error_inexact), runtime_error);
+    a.val_assign(33554433);
     EXPECT_EQ(33554432, *ptr_f32);
-    EXPECT_THROW(a.vassign(33554433, assign_error_inexact), runtime_error);
+    EXPECT_THROW(a.val_assign(33554433, assign_error_inexact), runtime_error);
 }
 
 TEST(NDArrayAssign, ScalarAssignment_Float64) {
@@ -133,19 +133,19 @@ TEST(NDArrayAssign, ScalarAssignment_Float64) {
     // Assignment to a double scalar
     a = ndarray(make_dtype<double>());
     ptr_f64 = (double *)a.get_originptr();
-    a.vassign(true);
+    a.val_assign(true);
     EXPECT_EQ(1, *ptr_f64);
-    a.vassign(false);
+    a.val_assign(false);
     EXPECT_EQ(0, *ptr_f64);
-    a.vassign(1/3.0f);
+    a.val_assign(1/3.0f);
     EXPECT_EQ(1/3.0f, *ptr_f64);
-    a.vassign(1/3.0);
+    a.val_assign(1/3.0);
     EXPECT_EQ(1/3.0, *ptr_f64);
-    a.vassign(33554433, assign_error_inexact);
+    a.val_assign(33554433, assign_error_inexact);
     EXPECT_EQ(33554433, *ptr_f64);
-    a.vassign(36028797018963969LL);
+    a.val_assign(36028797018963969LL);
     EXPECT_EQ(36028797018963968LL, *ptr_f64);
-    EXPECT_THROW(a.vassign(36028797018963969LL, assign_error_inexact), runtime_error);
+    EXPECT_THROW(a.val_assign(36028797018963969LL, assign_error_inexact), runtime_error);
 }
 
 TEST(NDArrayAssign, BroadcastAssign) {
@@ -155,7 +155,7 @@ TEST(NDArrayAssign, BroadcastAssign) {
 
     // Broadcasts the 4-vector by a factor of 6,
     // converting the dtype
-    a.vassign(b);
+    a.val_assign(b);
     float *ptr_f = (float *)a.get_originptr();
     for (int i = 0; i < 6; ++i) {
         EXPECT_EQ(3, *ptr_f++);
@@ -169,7 +169,7 @@ TEST(NDArrayAssign, BroadcastAssign) {
 
     // Broadcasts the 4-vector by a factor of 6,
     // doesn't convert the dtype
-    a.vassign(b);
+    a.val_assign(b);
     ptr_f = (float *)a.get_originptr();
     for (int i = 0; i < 6; ++i) {
         EXPECT_EQ(1.5, *ptr_f++);
@@ -182,7 +182,7 @@ TEST(NDArrayAssign, BroadcastAssign) {
     b = v2;
     // Broadcasts the (3,1)-array by a factor of 8,
     // converting the dtype
-    a.vassign(b);
+    a.val_assign(b);
     ptr_f = (float *)a.get_originptr();
     for (int i = 0; i < 2; ++i) {
         for (int j = 0; j < 4; ++j)
@@ -219,7 +219,7 @@ TEST(NDArrayAssign, Casting) {
 
     // Remove the overflowing value in 'a', so b.vals() no
     // longer triggers an overflow.
-    a(3).vassign(-120);
+    a(3).val_assign(-120);
     b = b.vals();
     EXPECT_EQ(3, b(0).as<int>());
     EXPECT_EQ(1, b(1).as<int>());
