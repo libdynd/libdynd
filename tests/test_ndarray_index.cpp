@@ -77,7 +77,7 @@ TEST(NDArrayIndex, BasicInteger) {
     EXPECT_THROW(a(0,0,0,0), too_many_indices);
 }
 
-TEST(NDArrayIndex, OneDimensionalRange) {
+TEST(NDArrayIndex, SimpleOneDimensionalRange) {
     int i0[] = {1,2,3,4,5,6};
     ndarray a = i0, b;
 
@@ -110,6 +110,11 @@ TEST(NDArrayIndex, OneDimensionalRange) {
     EXPECT_EQ(1, b(0).as<int>());
     EXPECT_EQ(2, b(1).as<int>());
     EXPECT_EQ(3, b(2).as<int>());
+}
+
+TEST(NDArrayIndex, SteppedOneDimensionalRange) {
+    int i0[] = {1,2,3,4,5,6};
+    ndarray a = i0, b;
 
     // different step
     b = a(irange() / 2);
@@ -158,6 +163,11 @@ TEST(NDArrayIndex, OneDimensionalRange) {
     EXPECT_EQ(6, b(0).as<int>());
     EXPECT_EQ(4, b(1).as<int>());
     EXPECT_EQ(2, b(2).as<int>());
+}
+
+TEST(NDArrayIndex, ExceptionsOneDimensionalRange) {
+    int i0[] = {1,2,3,4,5,6};
+    ndarray a = i0, b;
 
     // exceptions for out-of-bounds ranges
     EXPECT_THROW(a(-1 <= irange()), irange_out_of_bounds);

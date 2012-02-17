@@ -363,7 +363,7 @@ ndarray_expr_node_ptr dnd::make_linear_index_expr_node(ndarray_expr_node *node,
             // A range with a positive step
             intptr_t start = indices[i].start();
             if (start < 0 || start >= shape[i]) {
-                if (start == INTPTR_MIN) {
+                if (start == std::numeric_limits<intptr_t>::min()) {
                     start = 0;
                 } else {
                     throw irange_out_of_bounds(indices[i], 0, shape[i]);
@@ -373,7 +373,7 @@ ndarray_expr_node_ptr dnd::make_linear_index_expr_node(ndarray_expr_node *node,
 
             intptr_t end = indices[i].finish();
             if (end > shape[i]) {
-                if (end == INTPTR_MAX) {
+                if (end == std::numeric_limits<intptr_t>::max()) {
                     end = shape[i];
                 } else {
                     throw irange_out_of_bounds(indices[i], 0, shape[i]);
@@ -398,7 +398,7 @@ ndarray_expr_node_ptr dnd::make_linear_index_expr_node(ndarray_expr_node *node,
             // A range with a negative step
             intptr_t start = indices[i].start();
             if (start < 0 || start >= shape[i]) {
-                if (start == INTPTR_MIN) {
+                if (start == std::numeric_limits<intptr_t>::min()) {
                     start = shape[i] - 1;
                 } else {
                     throw irange_out_of_bounds(indices[i], 0, shape[i]);
@@ -407,7 +407,7 @@ ndarray_expr_node_ptr dnd::make_linear_index_expr_node(ndarray_expr_node *node,
             start_index[i] = start;
 
             intptr_t end = indices[i].finish();
-            if (end == INTPTR_MAX) {
+            if (end == std::numeric_limits<intptr_t>::max()) {
                 end = -1;
             } else if (end < -1) {
                 throw irange_out_of_bounds(indices[i], 0, shape[i]);

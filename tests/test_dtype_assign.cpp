@@ -223,7 +223,7 @@ TEST(DTypeAssign, FixedSizeTests_Float64) {
                                                                                 runtime_error);
     dtype_assign(dtype(float32_type_id), &v_f32, s_dt, s_ptr, assign_error_none);
 #ifdef _WIN32
-    EXPECT_TRUE(_fpclass(v_f32) == _FPCLASS_PINF);
+    EXPECT_TRUE(_fpclass(v_f32) == _FPCLASS_NINF);
 #else
     EXPECT_TRUE(isinf(v_f32));
 #endif
