@@ -3,7 +3,7 @@
 using namespace std;
 using namespace dnd;
 
-int main()
+void simple1()
 {
     ndarray a, b, c;
 
@@ -33,4 +33,11 @@ int main()
     // 'c' is a view of 'a+b', so changing 'a' changes 'c'
     a(1,0).vals() = 1000;
     cout << c << "\n";
+}
+
+int main()
+{
+    simple1();
+
+    return 0;
 }

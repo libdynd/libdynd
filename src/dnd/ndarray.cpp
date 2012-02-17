@@ -36,7 +36,7 @@ dnd::ndarray::ndarray()
 template<class T>
 ndarray_expr_node *make_expr_tree_from_scalar(T value)
 {
-    shared_ptr<void> buffer_owner(::dnd::detail::ndarray_buffer_allocator(1),
+    shared_ptr<void> buffer_owner(::dnd::detail::ndarray_buffer_allocator(sizeof(T)),
                                 ::dnd::detail::ndarray_buffer_deleter);
     *reinterpret_cast<T *>(buffer_owner.get()) = value;
     return new strided_array_expr_node(make_dtype<T>(), 0, NULL, NULL,

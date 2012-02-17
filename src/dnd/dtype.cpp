@@ -297,31 +297,31 @@ void dnd::dtype::print(std::ostream& o, const void *data, intptr_t stride, intpt
                     break;
                 case int16_type_id:
                     int16_t i16;
-                    memcpy(&i16, d, 2);
+                    memcpy(&i16, d, sizeof(i16));
                     o << i16;
                     for (intptr_t i = 1; i < size; ++i) {
                         d += stride;
-                        memcpy(&i16, d, 2);
+                        memcpy(&i16, d, sizeof(i16));
                         o << separator << i16;
                     }
                     break;
                 case int32_type_id:
                     int32_t i32;
-                    memcpy(&i32, d, 4);
+                    memcpy(&i32, d, sizeof(i32));
                     o << i32;
                     for (intptr_t i = 1; i < size; ++i) {
                         d += stride;
-                        memcpy(&i32, d, 4);
+                        memcpy(&i32, d, sizeof(i32));
                         o << separator << i32;
                     }
                     break;
                 case int64_type_id:
                     int64_t i64;
-                    memcpy(&i64, d, 8);
+                    memcpy(&i64, d, sizeof(i64));
                     o << i64;
                     for (intptr_t i = 1; i < size; ++i) {
                         d += stride;
-                        memcpy(&i64, d, 8);
+                        memcpy(&i64, d, sizeof(i64));
                         o << separator << i64;
                     }
                     break;
@@ -334,51 +334,51 @@ void dnd::dtype::print(std::ostream& o, const void *data, intptr_t stride, intpt
                     break;
                 case uint16_type_id:
                     uint16_t u16;
-                    memcpy(&u16, d, 2);
+                    memcpy(&u16, d, sizeof(u16));
                     o << u16;
                     for (intptr_t i = 1; i < size; ++i) {
                         d += stride;
-                        memcpy(&u16, d, 2);
+                        memcpy(&u16, d, sizeof(u16));
                         o << separator << u16;
                     }
                     break;
                 case uint32_type_id:
                     uint32_t u32;
-                    memcpy(&u32, d, 4);
+                    memcpy(&u32, d, sizeof(u32));
                     o << u32;
                     for (intptr_t i = 1; i < size; ++i) {
                         d += stride;
-                        memcpy(&u32, d, 4);
+                        memcpy(&u32, d, sizeof(u32));
                         o << separator << u32;
                     }
                     break;
                 case uint64_type_id:
                     uint64_t u64;
-                    memcpy(&u64, d, 8);
+                    memcpy(&u64, d, sizeof(u64));
                     o << u64;
                     for (intptr_t i = 1; i < size; ++i) {
                         d += stride;
-                        memcpy(&u64, d, 8);
+                        memcpy(&u64, d, sizeof(u64));
                         o << separator << u64;
                     }
                     break;
                 case float32_type_id:
                     float f32;
-                    memcpy(&f32, d, 8);
+                    memcpy(&f32, d, sizeof(f32));
                     o << f32;
                     for (intptr_t i = 1; i < size; ++i) {
                         d += stride;
-                        memcpy(&f32, d, 8);
+                        memcpy(&f32, d, sizeof(f32));
                         o << separator << f32;
                     }
                     break;
                 case float64_type_id:
                     double f64;
-                    memcpy(&f64, d, 8);
+                    memcpy(&f64, d, sizeof(f64));
                     o << f64;
                     for (intptr_t i = 1; i < size; ++i) {
                         d += stride;
-                        memcpy(&f64, d, 8);
+                        memcpy(&f64, d, sizeof(f64));
                         o << separator << f64;
                     }
                     break;

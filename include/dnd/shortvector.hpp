@@ -27,6 +27,10 @@ template<class T, int staticN = 3>
 class shortvector {
     T *m_data;
     T m_shortdata[staticN];
+    /** Non-copyable */
+    shortvector(const shortvector& rhs); // = delete;
+    /** Non-copyable (this object wouldn't know how much to allocate anyway) */
+    shortvector& operator=(const shortvector& rhs); // = delete;
 public:
     /** Construct an uninitialized shortvector */
     shortvector()
@@ -62,8 +66,6 @@ public:
     {
         DND_MEMCPY(m_data, data, size * sizeof(T));
     }
-    /** Non-copyable */
-    shortvector(const shortvector& rhs) = delete;
     /** Move constructor */
     shortvector(shortvector&& rhs) {
         if (rhs.m_data == rhs.m_shortdata) {
@@ -76,8 +78,6 @@ public:
             rhs.m_data = rhs.m_shortdata;
         }
     }
-    /** Non-copyable (this object wouldn't know how much to allocate anyway) */
-    shortvector& operator=(const shortvector& rhs) = delete;
     /** Move assignment operator */
     shortvector& operator=(shortvector&& rhs) {
         if (this != &rhs) {

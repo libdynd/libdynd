@@ -10,8 +10,6 @@
 #include <stdint.h>
 #include <iostream>
 
-#include <boost/utility/enable_if.hpp>
-
 #include <dnd/config.hpp>
 
 namespace dnd {

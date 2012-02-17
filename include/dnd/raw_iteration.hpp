@@ -9,8 +9,6 @@
 
 #include <algorithm>
 
-#include <boost/utility/enable_if.hpp>
-
 #include <dnd/ndarray.hpp>
 #include <dnd/shape_tools.hpp>
 
@@ -27,6 +25,13 @@
 namespace dnd {
 
 namespace detail {
+
+    /** A simple metaprogram to indicate whether a value is within the bounds or not */
+    template<int V, int V_START, int V_END>
+    struct is_value_within_bounds {
+        enum {value = (V >= V_START) && V < V_END};
+    };
+
     template<int Nwrite, int Nread, int staticNDIM = 3>
     class raw_ndarray_iter_base {
         // contains all the ndim-sized vectors
@@ -197,7 +202,7 @@ namespace detail {
         }
 
         template<int K>
-        typename boost::enable_if_c<(K >= 0 && K < Nwrite + Nread), intptr_t>::type
+        typename enable_if<is_value_within_bounds<K, 0, Nwrite + Nread>::value, intptr_t>::type
                                                                         innerstride() const {
             return strides(K)[0];
         }
@@ -206,7 +211,7 @@ namespace detail {
          * Provide non-const access to the 'write' operands.
          */
         template<int K>
-        typename boost::enable_if_c<(K >= 0 && K < Nwrite), char *>::type data() {
+        typename enable_if<is_value_within_bounds<K, 0, Nwrite>::value, char *>::type data() {
             return m_data[K];
         }
 
@@ -214,7 +219,7 @@ namespace detail {
          * Provide const access to all the operands.
          */
         template<int K>
-        typename boost::enable_if_c<(K >= 0 && K < Nwrite + Nread), const char *>::type
+        typename enable_if<is_value_within_bounds<K, 0, Nwrite + Nread>::value, const char *>::type
                                                                         data() const {
             return m_data[K];
         }
@@ -224,7 +229,7 @@ namespace detail {
          * is_data_aligned function.
          */
         template<int K>
-        typename boost::enable_if_c<(K >= 0 && K < Nwrite + Nread), char>::type
+        typename enable_if<is_value_within_bounds<K, 0, Nwrite + Nread>::value, char>::type
                                                                         get_align_test() const {
             char result = static_cast<char>(reinterpret_cast<intptr_t>(m_data[K]));
             for (int i = 0; i < m_ndim; ++i) {

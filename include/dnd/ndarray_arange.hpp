@@ -7,8 +7,6 @@
 #ifndef _DND__NDARRAY_ARANGE_HPP_
 #define _DND__NDARRAY_ARANGE_HPP_
 
-#include <boost/utility/enable_if.hpp>
-
 #include <dnd/ndarray.hpp>
 
 namespace dnd {
@@ -25,7 +23,7 @@ ndarray arange(const dtype& dt, const void *beginval, const void *endval, const 
  * Version of arange templated for C++ scalar types.
  */
 template<class T>
-typename boost::enable_if<is_dtype_scalar<T>, ndarray>::type arange(T beginval, T endval,
+typename enable_if<is_dtype_scalar<T>::value, ndarray>::type arange(T beginval, T endval,
                                                                     T stepval = T(1)) {
     return arange(make_dtype<T>(), &beginval, &endval, &stepval);
 }
@@ -34,7 +32,7 @@ typename boost::enable_if<is_dtype_scalar<T>, ndarray>::type arange(T beginval, 
  * Version of arange templated for C++ scalar types, with just the end parameter.
  */
 template<class T>
-typename boost::enable_if<is_dtype_scalar<T>, ndarray>::type arange(T endval) {
+typename enable_if<is_dtype_scalar<T>::value, ndarray>::type arange(T endval) {
     T beginval = T(0), stepval = T(1);
     return arange(make_dtype<T>(), &beginval, &endval, &stepval);
 }
@@ -63,7 +61,7 @@ inline ndarray linspace(double start, double stop, intptr_t count = 50) {
 }
 
 template <class T>
-typename boost::enable_if_c<dtype_kind_of<T>::value == int_kind ||
+typename enable_if<dtype_kind_of<T>::value == int_kind ||
                 dtype_kind_of<T>::value == uint_kind, ndarray>::type linspace(
                                                     T start, T stop, intptr_t count = 50) {
     return linspace((double)start, (double)stop, count);

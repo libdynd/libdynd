@@ -15,25 +15,42 @@ set(tests_SRC
     )
 
 # TODO: this is awkwardly hardcoded
+if(WIN32)
+include_directories(
+    ../../../googletest/include
+    ../include
+    .
+    )
+else(WIN32)
 include_directories(
     ../../AnimPhys/gtest/include
     ../include
     .
     )
+endif(WIN32)
 
 add_executable(dnd_tests ${tests_SRC})
 
 # gtest generates "unnamed-type-template-args" warnings with clang
-set_target_properties(dnd_tests
+if(WIN32)
+    # TODO: Make this not be hardcoded
+    target_link_libraries(dnd_tests
+        dynamicndarray
+        ../../../googletest/build-vc10/Debug/gtest
+        ../../../googletest/build-vc10/Debug/gtest_main
+        )
+else(WIN32)
+    set_target_properties(dnd_tests
                 PROPERTIES COMPILE_FLAGS
                 "-Wno-unnamed-type-template-args -pthread")
 
-target_link_libraries(dnd_tests
-    dynamicndarray
-    pthread
-    /home/mwiebe/Develop/AnimPhys/gtest/make/gtest-all.o
-    /home/mwiebe/Develop/AnimPhys/gtest/make/gtest_main.o
-    )
+    target_link_libraries(dnd_tests
+        dynamicndarray
+        pthread
+        /home/mwiebe/Develop/AnimPhys/gtest/make/gtest-all.o
+        /home/mwiebe/Develop/AnimPhys/gtest/make/gtest_main.o
+        )
+endif(WIN32)
 
 
 # Compile-time tests: test code that is supposed to produce compile errors

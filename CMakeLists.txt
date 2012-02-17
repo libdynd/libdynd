@@ -9,7 +9,12 @@ set(BUILD_SHARED_LIBS 1)
 #cmake_force_c_compiler(/usr/local/bin/clang CLang)
 #cmake_force_cxx_compiler(/usr/local/bin/clang++ CLang)
 
-set(CMAKE_CXX_FLAGS "-std=c++0x -g -O0 -fPIC -Wall -Wextra -Werror -Weffc++ -fmax-errors=20")
+if(WIN32)
+	# Treat warnings as errors (-WX does this)
+	set(CMAKE_CXX_FLAGS "-WX -EHsc")
+else(WIN32)
+	set(CMAKE_CXX_FLAGS "-std=c++0x -g -O0 -fPIC -Wall -Wextra -Werror -Weffc++ -fmax-errors=20")
+endif(WIN32)
 #set(CMAKE_CXX_FLAGS "-std=c++0x -g -O3 -Wall -Wextra -Werror -Weffc++ -fmax-errors=20")
 #set(CMAKE_CXX_FLAGS "-std=c++0x -g -fprofile-arcs -ftest-coverage -Wall -Wextra -Werror")
 set(LINK_FLAGS)
@@ -42,11 +47,22 @@ set(dnd_SRC
     include/dnd/shape_tools.hpp
     )
 
+if(WIN32)
+# This is my hardcoded boost path
+include_directories(
+    D:/Develop/boost_1_48_0/
+    )
+endif(WIN32)
+
 include_directories(
     include
     )
 
-add_library(dynamicndarray SHARED ${dnd_SRC})
+if(WIN32)
+    add_library(dynamicndarray STATIC ${dnd_SRC})
+else(WIN32)
+    add_library(dynamicndarray SHARED ${dnd_SRC})
+endif(WIN32)
 
 add_subdirectory(tests)
 

@@ -10,7 +10,7 @@
 #include <iostream> // FOR DEBUG
 #include <stdexcept>
 
-#include <boost/utility/enable_if.hpp>
+#include <dnd/config.hpp>
 
 #include <dnd/dtype.hpp>
 #include <dnd/dtype_assign.hpp>
@@ -315,7 +315,7 @@ public:
 
     /** Does a value-assignment from the rhs C++ scalar. */
     template<class T>
-    typename boost::enable_if<is_dtype_scalar<T>, ndarray_vals&>::type operator=(const T& rhs) {
+    typename enable_if<is_dtype_scalar<T>::value, ndarray_vals&>::type operator=(const T& rhs) {
         m_arr.val_assign(make_dtype<T>(), &rhs);
         return *this;
     }
@@ -553,7 +553,7 @@ dnd::ndarray::ndarray(const T (&rhs)[N])
 namespace detail {
     template <class T>
     struct ndarray_as_helper {
-        static typename boost::enable_if<is_dtype_scalar<T>, T>::type as(const ndarray& lhs,
+        static typename enable_if<is_dtype_scalar<T>::value, T>::type as(const ndarray& lhs,
                                                                     assign_error_mode errmode) {
             T result;
             if (lhs.get_ndim() != 0) {
