@@ -71,6 +71,11 @@ public:
     bool operator==(const extended_dtype& rhs) const;
 };
 
+template<class T>
+dtype make_array_dtype(int ndim, intptr_t *shape) {
+    return dtype(make_shared<array_dtype>(ndim, shape, make_dtype<T>()));
+}
+
 } // namespace dnd
 
 #endif // _DND__ARRAY_DTYPE_HPP_
