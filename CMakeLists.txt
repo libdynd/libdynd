@@ -20,6 +20,7 @@ endif(WIN32)
 set(LINK_FLAGS)
 
 set(dnd_SRC
+    src/dnd/array_dtype.cpp
     src/dnd/dtype.cpp
     src/dnd/dtype_assign.cpp
     src/dnd/dtype_casting.cpp
@@ -33,6 +34,7 @@ set(dnd_SRC
     src/dnd/shape_tools.cpp
     src/dnd/ndarray_expr_node_instances.hpp
     src/dnd/single_assigner_simple.hpp
+    include/dnd/array_dtype.hpp
     include/dnd/config.hpp
     include/dnd/dtype.hpp
     include/dnd/dtype_assign.hpp

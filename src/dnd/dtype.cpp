@@ -261,122 +261,74 @@ std::ostream& dnd::operator<<(std::ostream& o, const dtype& rhs)
             }
             break;
         default:
-            o << "<dtype without formatting support>";
+            if (rhs.extended()) {
+                rhs.extended()->print(o);
+            } else {
+                o << "<dtype without formatting support>";
+            }
             break;
     }
 
     return o;
 }
 
-void dnd::dtype::print(std::ostream& o, const void *data, intptr_t stride, intptr_t size, const char *separator) const
+template<class T>
+static void strided_print(std::ostream& o, const char *data, intptr_t stride, intptr_t size, const char *separator)
+{
+    T value;
+    memcpy(&value, data, sizeof(value));
+    o << value;
+    for (intptr_t i = 1; i < size; ++i) {
+        data += stride;
+        memcpy(&value, data, sizeof(value));
+        o << separator << value;
+    }
+}
+
+void dnd::dtype::print_data(std::ostream& o, const char *data, intptr_t stride, intptr_t size, const char *separator) const
 {
     if (size > 0) {
         if (extended() != NULL) {
-            extended()->print(o, *this, data, stride, size, separator);
+            extended()->print_data(o, data, stride, size, separator);
         } else {
-            const char *d = reinterpret_cast<const char *>(data);
             // TODO: Handle byte-swapped dtypes
             switch (type_id()) {
                 case bool_type_id:
-                    o << (*d ? "true" : "false");
+                    o << (*data ? "true" : "false");
                     for (intptr_t i = 1; i < size; ++i) {
-                        d += stride;
-                        o << separator << (*d ? "true" : "false");
+                        data += stride;
+                        o << separator << (*data ? "true" : "false");
                     }
                     break;
                 case int8_type_id:
-                    o << (int)(*(int8_t *)d);
-                    for (intptr_t i = 1; i < size; ++i) {
-                        d += stride;
-                        o << separator << (int)(*(int8_t *)d);
-                    }
+                    strided_print<int8_t>(o, data, stride, size, separator);
                     break;
                 case int16_type_id:
-                    int16_t i16;
-                    memcpy(&i16, d, sizeof(i16));
-                    o << i16;
-                    for (intptr_t i = 1; i < size; ++i) {
-                        d += stride;
-                        memcpy(&i16, d, sizeof(i16));
-                        o << separator << i16;
-                    }
+                    strided_print<int16_t>(o, data, stride, size, separator);
                     break;
                 case int32_type_id:
-                    int32_t i32;
-                    memcpy(&i32, d, sizeof(i32));
-                    o << i32;
-                    for (intptr_t i = 1; i < size; ++i) {
-                        d += stride;
-                        memcpy(&i32, d, sizeof(i32));
-                        o << separator << i32;
-                    }
+                    strided_print<int32_t>(o, data, stride, size, separator);
                     break;
                 case int64_type_id:
-                    int64_t i64;
-                    memcpy(&i64, d, sizeof(i64));
-                    o << i64;
-                    for (intptr_t i = 1; i < size; ++i) {
-                        d += stride;
-                        memcpy(&i64, d, sizeof(i64));
-                        o << separator << i64;
-                    }
+                    strided_print<int64_t>(o, data, stride, size, separator);
                     break;
                 case uint8_type_id:
-                    o << (int)(*(uint8_t *)d);
-                    for (intptr_t i = 1; i < size; ++i) {
-                        d += stride;
-                        o << separator << (int)(*(uint8_t *)d);
-                    }
+                    strided_print<uint8_t>(o, data, stride, size, separator);
                     break;
                 case uint16_type_id:
-                    uint16_t u16;
-                    memcpy(&u16, d, sizeof(u16));
-                    o << u16;
-                    for (intptr_t i = 1; i < size; ++i) {
-                        d += stride;
-                        memcpy(&u16, d, sizeof(u16));
-                        o << separator << u16;
-                    }
+                    strided_print<uint16_t>(o, data, stride, size, separator);
                     break;
                 case uint32_type_id:
-                    uint32_t u32;
-                    memcpy(&u32, d, sizeof(u32));
-                    o << u32;
-                    for (intptr_t i = 1; i < size; ++i) {
-                        d += stride;
-                        memcpy(&u32, d, sizeof(u32));
-                        o << separator << u32;
-                    }
+                    strided_print<uint32_t>(o, data, stride, size, separator);
                     break;
                 case uint64_type_id:
-                    uint64_t u64;
-                    memcpy(&u64, d, sizeof(u64));
-                    o << u64;
-                    for (intptr_t i = 1; i < size; ++i) {
-                        d += stride;
-                        memcpy(&u64, d, sizeof(u64));
-                        o << separator << u64;
-                    }
+                    strided_print<uint64_t>(o, data, stride, size, separator);
                     break;
                 case float32_type_id:
-                    float f32;
-                    memcpy(&f32, d, sizeof(f32));
-                    o << f32;
-                    for (intptr_t i = 1; i < size; ++i) {
-                        d += stride;
-                        memcpy(&f32, d, sizeof(f32));
-                        o << separator << f32;
-                    }
+                    strided_print<float>(o, data, stride, size, separator);
                     break;
                 case float64_type_id:
-                    double f64;
-                    memcpy(&f64, d, sizeof(f64));
-                    o << f64;
-                    for (intptr_t i = 1; i < size; ++i) {
-                        d += stride;
-                        memcpy(&f64, d, sizeof(f64));
-                        o << separator << f64;
-                    }
+                    strided_print<double>(o, data, stride, size, separator);
                     break;
                 default:
                     stringstream ss;

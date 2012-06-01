@@ -49,11 +49,13 @@
 #include <boost/shared_ptr.hpp>
 namespace dnd {
     using ::boost::shared_ptr;
+    using ::boost::make_shared;
 }
 #else
 #include <memory>
 namespace dnd {
     using ::std::shared_ptr;
+    using ::std::make_shared;
 }
 #endif
 

@@ -1,5 +1,6 @@
 //
 // Copyright (C) 2011 Mark Wiebe (mwwiebe@gmail.com)
+// Copyright (C) 2012 Continuum Analytics
 // All rights reserved.
 //
 // This is unreleased proprietary software.
@@ -33,7 +34,7 @@ enum dtype_kind {
     float_kind,
     complex_kind,
     string_kind,
-    // For struct_type_id and subarray_type_id
+    // For struct_type_id and array_type_id
     composite_kind,
     // For use when it becomes possible to register custom dtypes
     custom_kind
@@ -65,7 +66,8 @@ enum {
     utf8_type_id,
     // Composite dtypes
     struct_type_id,
-    subarray_type_id
+    tuple_type_id,
+    array_type_id
 };
 
 
@@ -160,27 +162,30 @@ class extended_dtype {
 public:
     virtual ~extended_dtype();
 
-    /**
-     * This should make a clone of the extended_dtype information, with
-     * everything in native byte-order.
-     */
-    virtual extended_dtype *clone_as_nbo() const = 0;
+    virtual int type_id() const = 0;
+    virtual unsigned char kind() const = 0;
+    virtual unsigned char alignment() const = 0;
+    virtual uintptr_t itemsize() const = 0;
 
     /**
-     * Should return true if everything in the dtype is native byte-order,
-     * false if the dtype is partially or fully byte-swapped.
+     * Should return a reference to the dtype representing the value which
+     * is for calculation.
+     *
+     * @param self    The dtype which holds the shared_ptr<extended_dtype> containing this.
      */
-    virtual bool is_nbo() const = 0;
-
+    virtual const dtype& value_dtype(const dtype& self) const = 0;
     /**
-     * Should return references to a dtype representing the "value" which
-     * is for calculation, and the "native" which is how it's stored.
+     * Should return a reference to a dtype representing the memory which
+     * is under the hood.
+     *
+     * @param self    The dtype which holds the shared_ptr<extended_dtype> containing this.
      */
-    virtual const dtype& value_dtype() const = 0;
-    virtual const dtype& native_dtype() const = 0;
+    virtual const dtype& storage_dtype(const dtype& self) const = 0;
 
-    virtual void print(std::ostream& o, const dtype& dt, const void *data, intptr_t stride, intptr_t size,
+    virtual void print_data(std::ostream& o, const char *data, intptr_t stride, intptr_t size,
                         const char *separator) const = 0;
+
+    virtual void print(std::ostream& o) const = 0;
 
     /** Should return true if the type has construct/copy/move/destruct semantics */
     virtual bool is_object_type() const = 0;
@@ -221,6 +226,10 @@ private:
 public:
     /** Constructor */
     dtype();
+    /** Constructor from an extended_dtype */
+    dtype(const shared_ptr<extended_dtype>& data)
+        : m_type_id(data->type_id()), m_kind(data->kind()), m_alignment(data->alignment()),
+        m_itemsize(data->itemsize()), m_data(data) {}
     /** Copy constructor (should be "= default" in C++11) */
     dtype(const dtype& rhs)
         : m_type_id(rhs.m_type_id), m_kind(rhs.m_kind), m_alignment(rhs.m_alignment),
@@ -235,6 +244,10 @@ public:
         return *this;
     }
 #ifdef DND_RVALUE_REFS
+    /** Constructor from an rvalue extended_dtype */
+    dtype(const shared_ptr<extended_dtype>&& data)
+        : m_type_id(data->type_id(), m_kind(data->kind()), m_alignment(data->alignment()),
+        m_itemsize(data->itemsize()), m_data(std::move(data)) {}
     /** Move constructor (should be "= default" in C++11) */
     dtype(dtype&& rhs)
         : m_type_id(rhs.m_type_id), m_kind(rhs.m_kind), m_alignment(rhs.m_alignment),
@@ -282,15 +295,15 @@ public:
         if (m_data == NULL) {
             return *this;
         } else {
-            return m_data->value_dtype();
+            return m_data->value_dtype(*this);
         }
     }
 
-    const dtype& native_dtype() const {
+    const dtype& storage_dtype() const {
         if (m_data == NULL) {
             return *this;
         } else {
-            return m_data->native_dtype();
+            return m_data->storage_dtype(*this);
         }
     }
 
@@ -354,7 +367,7 @@ public:
         return m_data.get();
     }
 
-    void print(std::ostream& o, const void *data, intptr_t stride, intptr_t size,
+    void print_data(std::ostream& o, const char *data, intptr_t stride, intptr_t size,
                                                             const char *separator) const;
 
     friend std::ostream& operator<<(std::ostream& o, const dtype& rhs);
