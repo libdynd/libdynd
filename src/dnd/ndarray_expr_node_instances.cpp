@@ -270,12 +270,6 @@ ndarray_expr_node_ptr dnd::make_strided_array_expr_node(
             const intptr_t *strides, char *originptr,
             const dnd::shared_ptr<void>& buffer_owner)
 {
-    // If the data type isn't NBO, return a misbehaved strided node
-    if (!dt.is_nbo()) {
-        return ndarray_expr_node_ptr(new misbehaved_strided_array_expr_node(dt, ndim,
-                                            shape, strides, originptr, buffer_owner));
-    }
-
     intptr_t align_bits = (dt.alignment() - 1);
     if (align_bits != 0) {
         intptr_t align_check = reinterpret_cast<intptr_t>(originptr);

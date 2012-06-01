@@ -16,10 +16,6 @@
 using namespace std;
 using namespace dnd;
 
-byteswap_operation_t dnd::extended_dtype::get_byteswap_operation() const {
-    throw std::runtime_error("this dtype does not support byte-swapping");
-}
-
 // Default destructor for the extended dtype does nothing
 dnd::extended_dtype::~extended_dtype()
 {
@@ -100,7 +96,7 @@ const char *dnd::get_type_id_basename(int type_id)
 
 dtype::dtype()
     : m_type_id(generic_type_id), m_kind(generic_kind), m_alignment(1),
-      m_byteswapped(0), m_itemsize(0), m_data()
+      m_itemsize(0), m_data()
 {
     // Default to a generic type with zero size
 }
@@ -109,7 +105,6 @@ dtype::dtype(int type_id)
     : m_type_id(validate_type_id(type_id)),
       m_kind(basic_type_id_info[type_id].kind),
       m_alignment(basic_type_id_info[type_id].alignment),
-      m_byteswapped(0),
       m_itemsize(basic_type_id_info[type_id].itemsize),
       m_data()
 {
@@ -119,7 +114,6 @@ dtype::dtype(int type_id, uintptr_t size)
     : m_type_id(validate_type_id(type_id)),
       m_kind(basic_type_id_info[type_id].kind),
       m_alignment(basic_type_id_info[type_id].alignment),
-      m_byteswapped(0),
       m_itemsize(basic_type_id_info[type_id].itemsize),
       m_data()
 {
@@ -133,6 +127,7 @@ dtype::dtype(int type_id, uintptr_t size)
     }
 }
 
+/*
 namespace {
     template<int size> struct sized_byteswapper;
     template<> struct sized_byteswapper<2> {
@@ -216,6 +211,7 @@ byteswap_operation_t dnd::dtype::get_byteswap_operation() const
     ss << "dtype " << *this << " does not support byte-swapping";
     throw std::runtime_error(ss.str());
 }
+*/
 
 
 std::ostream& dnd::operator<<(std::ostream& o, const dtype& rhs)

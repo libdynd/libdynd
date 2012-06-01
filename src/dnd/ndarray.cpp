@@ -316,7 +316,7 @@ void dnd::ndarray::val_assign(const dtype& dt, const void *data, assign_error_mo
     }
 }
 
-void dnd::ndarray::debug_dump(std::ostream& o) const
+void dnd::ndarray::debug_dump(std::ostream& o = std::cerr) const
 {
     o << "------ ndarray\n";
     m_expr_tree->debug_dump(o, " ");

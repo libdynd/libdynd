@@ -105,7 +105,7 @@ namespace {
 
 ndarray dnd::arange(const dtype& dt, const void *beginval, const void *endval, const void *stepval)
 {
-    if (dt.extended() == NULL && !dt.is_byteswapped()) {
+    if (dt.extended() == NULL) {
 
 #define ONE_ARANGE_SPECIALIZATION(type) \
         case type_id_of<type>::value: { \
@@ -167,7 +167,7 @@ ndarray dnd::linspace(const dtype& dt, const void *startval, const void *stopval
         throw runtime_error("linspace needs a count of at least 2");
     }
 
-    if (dt.extended() == NULL && !dt.is_byteswapped()) {
+    if (dt.extended() == NULL) {
         switch (dt.type_id()) {
             case float32_type_id: {
                 ndarray result(count, dt);

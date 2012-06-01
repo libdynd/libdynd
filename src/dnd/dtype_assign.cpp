@@ -68,8 +68,6 @@ static assign_function_t single_assign_table[11][11][4] =
     SRC_TYPE_LEVEL(float),
     SRC_TYPE_LEVEL(double)
 #undef SRC_TYPE_LEVEL
-#undef DST_BYTESWAP_LEVEL
-#undef SRC_BYTESWAP_LEVEL
 #undef ERROR_MODE_LEVEL
 };
 
@@ -91,22 +89,14 @@ void dnd::dtype_assign(const dtype& dst_dt, void *dst, const dtype& src_dt, cons
 {
     if (dst_dt.extended() == NULL && src_dt.extended() == NULL) {
         // None of the built-in scalars are more than 64-bits (currently...) so use two 64-bit
-        // integers as temporary buffers for alignment and byteswapping.
+        // integers as temporary buffers for alignment
         int64_t s, d;
 
         assign_function_t asn = get_single_assign_function(dst_dt, src_dt, errmode);
         if (asn != NULL) {
-            if (src_dt.is_byteswapped()) {
-                src_dt.get_byteswap_operation()(&s, src, src_dt.itemsize());
-            } else {
-                memcpy(&s, src, src_dt.itemsize());
-            }
+            memcpy(&s, src, src_dt.itemsize());
             asn(&d, &s);
-            if (dst_dt.is_byteswapped()) {
-                dst_dt.get_byteswap_operation()(dst, &d, dst_dt.itemsize());
-            } else {
-                memcpy(dst, &d, dst_dt.itemsize());
-            }
+            memcpy(dst, &d, dst_dt.itemsize());
             return;
         }
 
@@ -114,11 +104,6 @@ void dnd::dtype_assign(const dtype& dst_dt, void *dst, const dtype& src_dt, cons
     }
 
     throw std::runtime_error("this dtype assignment isn't yet supported");
-}
-
-static void dont_byteswap(void *dst, const void *src, uintptr_t size)
-{
-    memcpy(dst, src, size);
 }
 
 // A multiple unaligned byteswap assignment function which uses one of the single assignment functions as proxy
@@ -350,39 +335,19 @@ std::pair<unary_operation_t, dnd::shared_ptr<auxiliary_data> > dnd::get_dtype_st
 {
     //DEBUG_COUT << "get_dtype_strided_assign_operation (different dtype " << dst_dt << ", " << src_dt << ", error mode " << errmode << ")\n";
     bool is_aligned = dst_dt.is_data_aligned(dst_align_test) && src_dt.is_data_aligned(src_align_test);
-    bool dst_byteswapped = dst_dt.is_byteswapped(), src_byteswapped = src_dt.is_byteswapped();
 
     // If the casting can be done losslessly, disable the error check to find faster code paths
-    if (can_cast_lossless(dst_dt, src_dt)) {
+    if (casting_is_lossless(dst_dt, src_dt)) {
         errmode = assign_error_none;
     }
 
     if (dst_dt.extended() == NULL && src_dt.extended() == NULL) {
         // When there's misaligned or byte-swapped data, go the slow path
-        if (!is_aligned || src_byteswapped || dst_byteswapped || errmode != assign_error_none) {
+        if (!is_aligned || errmode != assign_error_none) {
             assign_function_t asn = get_single_assign_function(dst_dt, src_dt, errmode);
             if (asn != NULL) {
                 std::pair<unary_operation_t, dnd::shared_ptr<auxiliary_data> > result;
-                if (src_byteswapped || dst_byteswapped) {
-                    result.first = &assign_multiple_byteswap_unaligned;
-                    multiple_byteswap_unaligned_auxiliary_data *auxdata =
-                                            new multiple_byteswap_unaligned_auxiliary_data();
-                    result.second.reset(auxdata);
-
-                    auxdata->assign = asn;
-                    auxdata->dst_itemsize = dst_dt.itemsize();
-                    auxdata->src_itemsize = src_dt.itemsize();
-                    if (dst_byteswapped) {
-                        auxdata->dst_byteswap = dst_dt.get_byteswap_operation();
-                    } else {
-                        auxdata->dst_byteswap = &dont_byteswap;
-                    }
-                    if (src_byteswapped) {
-                        auxdata->src_byteswap = src_dt.get_byteswap_operation();
-                    } else {
-                        auxdata->src_byteswap = &dont_byteswap;
-                    }
-                } else if (!is_aligned) {
+                if (!is_aligned) {
                     result.first = &assign_multiple_unaligned;
                     multiple_unaligned_auxiliary_data *auxdata = new multiple_unaligned_auxiliary_data();
                     result.second.reset(auxdata);

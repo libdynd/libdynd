@@ -173,43 +173,21 @@ public:
     virtual bool is_nbo() const = 0;
 
     /**
-     * For dtypes which are primitive and can support either native or swapped
-     * byte endianness, this returns a function to do the swap. Byte-swapping of
-     * more complex aggregate dtypes is only supported by assignment operations,
-     * where the destination dtype has a different byte-order than the source.
+     * Should return references to a dtype representing the "value" which
+     * is for calculation, and the "native" which is how it's stored.
      */
-    virtual byteswap_operation_t get_byteswap_operation() const;
+    virtual const dtype& value_dtype() const = 0;
+    virtual const dtype& native_dtype() const = 0;
 
     virtual void print(std::ostream& o, const dtype& dt, const void *data, intptr_t stride, intptr_t size,
                         const char *separator) const = 0;
 
-    /**
-     * Tests that the two dtypes have identical binary layouts. This method
-     * should only be called when this is the extended_dtype for one of the
-     * two dtypes.
-     */
-    virtual bool can_cast_exact(const dtype& dst_dt, const dtype& src_dt) const = 0;
-    /**
-     * Tests that the two dtypes have identical binary layouts up to byte order.
-     * This method should only be called when this is the extended_dtype for one
-     * of the two dtypes.
-     */
-    virtual bool can_cast_equiv(const dtype& dst_dt, const dtype& src_dt) const = 0;
-    /**
-     * Tests that the 'src' values can be cast to 'dst' losslessly. This method
-     * should only be called when this is the extended_dtype for one of the
-     * two dtypes.
-     */
-    virtual bool can_cast_lossless(const dtype& dst_dt, const dtype& src_dt) const = 0;
-    /**
-     * Tests that the 'src' values can be cast to 'dst' without going to a lesser
-     * dtype kind. This method should only be called when this is the extended_dtype
-     * for one of the two dtypes.
-     */
-    virtual bool can_cast_same_kind(const dtype& dst_dt, const dtype& src_dt) const = 0;
-
     /** Should return true if the type has construct/copy/move/destruct semantics */
     virtual bool is_object_type() const = 0;
+
+    virtual bool casting_is_lossless(const dtype& dst_dt, const dtype& src_dt) const = 0;
+
+    virtual bool operator==(const extended_dtype& rhs) const = 0;
 };
 
 /**
@@ -236,7 +214,7 @@ const char *get_type_id_basename(int type_id);
  */
 class dtype {
 private:
-    unsigned char m_type_id, m_kind, m_alignment, m_byteswapped;
+    unsigned char m_type_id, m_kind, m_alignment;
     uintptr_t m_itemsize;
     shared_ptr<extended_dtype> m_data;
 
@@ -246,13 +224,12 @@ public:
     /** Copy constructor (should be "= default" in C++11) */
     dtype(const dtype& rhs)
         : m_type_id(rhs.m_type_id), m_kind(rhs.m_kind), m_alignment(rhs.m_alignment),
-          m_byteswapped(rhs.m_byteswapped), m_itemsize(rhs.m_itemsize), m_data(rhs.m_data) {}
+          m_itemsize(rhs.m_itemsize), m_data(rhs.m_data) {}
     /** Assignment operator (should be "= default" in C++11) */
     dtype& operator=(const dtype& rhs) {
         m_type_id = rhs.m_type_id;
         m_kind = rhs.m_kind;
         m_alignment = rhs.m_alignment;
-        m_byteswapped = rhs.m_byteswapped;
         m_itemsize = rhs.m_itemsize;
         m_data = rhs.m_data;
         return *this;
@@ -261,14 +238,13 @@ public:
     /** Move constructor (should be "= default" in C++11) */
     dtype(dtype&& rhs)
         : m_type_id(rhs.m_type_id), m_kind(rhs.m_kind), m_alignment(rhs.m_alignment),
-          m_byteswapped(rhs.m_byteswapped), m_itemsize(rhs.m_itemsize),
+          m_itemsize(rhs.m_itemsize),
           m_data(std::move(rhs.m_data)) {}
     /** Move assignment operator (should be "= default" in C++11) */
     dtype& operator=(dtype&& rhs) {
         m_type_id = rhs.m_type_id;
         m_kind = rhs.m_kind;
         m_alignment = rhs.m_alignment;
-        m_byteswapped = rhs.m_byteswapped;
         m_itemsize = rhs.m_itemsize;
         m_data = std::move(rhs.m_data);
         return *this;
@@ -284,61 +260,38 @@ public:
         std::swap(m_type_id, rhs.m_type_id);
         std::swap(m_kind, rhs.m_kind);
         std::swap(m_alignment, rhs.m_alignment);
-        std::swap(m_byteswapped, rhs.m_byteswapped);
         std::swap(m_itemsize, rhs.m_itemsize);
         m_data.swap(rhs.m_data);
     }
 
     bool operator==(const dtype& rhs) const {
+        if (m_data && rhs.m_data) {
+            return *m_data == *rhs.m_data;
+        }
         return m_type_id == rhs.m_type_id &&
                 m_itemsize == rhs.m_itemsize &&
                 m_kind == rhs.m_kind &&
                 m_alignment == rhs.m_alignment &&
-                m_byteswapped == rhs.m_byteswapped &&
-                (m_data != NULL ? m_data->can_cast_exact(*this, rhs)
-                                : (rhs.m_data != NULL ? rhs.m_data->can_cast_exact(*this, rhs)
-                                                      : true));
+                m_data == rhs.m_data;
     }
     bool operator!=(const dtype& rhs) const {
         return !(operator==(rhs));
     }
 
-    /**
-     * Returns a version of the dtype in native byte order.
-     */
-    dtype as_nbo() const {
-        if (m_data == NULL || m_data->is_nbo()) {
-            // In this case, a simple copy with byteswapped set to false is enough
-            if (m_byteswapped) {
-                dtype result(*this);
-                result.m_byteswapped = false;
-                return DND_MOVE(result);
-            } else {
-                return *this;
-            }
-        } else {
-            // Must copy m_data to be NBO as well
-            dtype result(*this);
-            result.m_byteswapped = false;
-            result.m_data.reset(m_data->clone_as_nbo());
-            return DND_MOVE(result);
-        }
-    }
-
-    /**
-     * Returns true if every data member of the dtype is in NBO.
-     */
-    bool is_nbo() const {
+    const dtype& value_dtype() const {
         if (m_data == NULL) {
-            return !m_byteswapped;
+            return *this;
         } else {
-            return m_data->is_nbo();
+            return m_data->value_dtype();
         }
     }
 
-    /** Whether the dtype is byte-swapped */
-    bool is_byteswapped() const {
-        return m_byteswapped;
+    const dtype& native_dtype() const {
+        if (m_data == NULL) {
+            return *this;
+        } else {
+            return m_data->native_dtype();
+        }
     }
 
     /**
@@ -400,8 +353,6 @@ public:
     const extended_dtype* extended() const {
         return m_data.get();
     }
-
-    byteswap_operation_t get_byteswap_operation() const;
 
     void print(std::ostream& o, const void *data, intptr_t stride, intptr_t size,
                                                             const char *separator) const;

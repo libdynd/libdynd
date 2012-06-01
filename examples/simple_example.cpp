@@ -3,41 +3,32 @@
 using namespace std;
 using namespace dnd;
 
-void simple1()
-{
-    ndarray a, b, c;
-
-#ifdef DND_INIT_LIST
-    // C++11 Initializer lists!
-    a = {{3,2,1}, {4,5,6}};
-    b = {1,-1,1};
-#else
-    {int tmp[2][3] = {{3,2,1}, {4,5,6}}; a = tmp;}
-    {int tmp[3] = {1,-1,1}; b = tmp;}
-#endif
-
-    c = a + b;
-
-    cout << "a: " << a << "\n";
-    cout << "b: " << b << "\n";
-    cout << "c (a+b): " << c << "\n";
-
-    // 'c' contains an expression tree
-    cout << "\ndump of c:\n";
-    c.debug_dump(cout);
-    cout << "\n";
-
-    // This produces a compile error! TODO: Need tests to confirm this.
-    //a(1,0) = 1000;
-
-    // 'c' is a view of 'a+b', so changing 'a' changes 'c'
-    a(1,0).vals() = 1000;
-    cout << c << "\n";
-}
-
 int main()
 {
-    simple1();
+    try {
+        ndarray a;
 
-    return 0;
+        //a = {1, 5, 7};
+        int avals[] = {1, 5, 7};
+        a = avals;
+
+        cout << a << endl;
+
+        float avals2[2][3] = {{1,2,3}, {3,2,9}};
+        ndarray b = avals2;
+
+        ndarray c = a + b;
+
+        c.debug_dump(cout);
+        cout << c << endl;
+
+        cout << c(0,1) << endl;
+        a(1).val_assign(1.5f);
+        cout << c(0,1) << endl;
+
+        return 0;
+    } catch(std::exception& e) {
+        cout << "Error: " << e.what() << "\n";
+        return 1;
+    }
 }

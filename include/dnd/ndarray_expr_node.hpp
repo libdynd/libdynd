@@ -252,8 +252,7 @@ public:
 };
 
 /**
- * NDArray expression node which holds a raw strided array that is either not in NBO,
- * or is misaligned.
+ * NDArray expression node which holds a raw strided array that is misaligned.
  */
 class misbehaved_strided_array_expr_node : public ndarray_expr_node {
     dtype m_inner_dtype;
@@ -289,11 +288,6 @@ public:
 
     dnd::shared_ptr<void> get_buffer_owner() const {
         return m_buffer_owner;
-    }
-
-    /** Returns true if every data member in the dtype is NBO (in native byte order) */
-    bool is_nbo() const {
-        return m_inner_dtype.is_nbo();
     }
 
     /** Returns true if every element is aligned */

@@ -356,7 +356,7 @@ void dnd::strided_array_expr_node::debug_dump_extra(ostream& o, const string& in
 dnd::misbehaved_strided_array_expr_node::misbehaved_strided_array_expr_node(const dtype& dt, int ndim,
                                 const intptr_t *shape, const intptr_t *strides,
                                 char *originptr, const dnd::shared_ptr<void>& buffer_owner)
-    : ndarray_expr_node(dt.as_nbo(), ndim, 0, shape,
+    : ndarray_expr_node(dt, ndim, 0, shape,
                         arbitrary_node_category, misbehaved_strided_array_node_type),
       m_inner_dtype(dt), m_originptr(originptr), m_strides(ndim, strides), m_buffer_owner(buffer_owner)
 {
