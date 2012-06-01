@@ -1,3 +1,6 @@
+Copyright (C) 2011-2012, Mark Wiebe
+All rights reserved.
+
 Dynamic ND-Array Library Design
 -------------------------------
 
@@ -41,9 +44,13 @@ Some performance-oriented design features:
    a virtual base class with additional information is added as well,
    and is reference counted which works because the extended info is
    treated as an immutable object once created.
+   NOTE: After seeing Bryan's enum NEP proposal, it might be good
+         to relax the immutable restriction in some way to support the
+         "open"/"closed" idea.
 2. The ndarray always exposes arrays that are aligned and in NBO. The only
    way to see a non-NBO array is to dig into the expression tree itself,
-   behind the veil of buffering.
+   behind the veil of buffering. This allows fast default operations
+   which don't have to check that the data is sane every time.
 3. Computations have inner loop functions that can be specialized based on
    the striding of the data in that inner loop. Important special cases
    are constant strides and strides equal to the dtype itemsize. I've confirmed
@@ -161,8 +168,8 @@ a new array, it is only defined for non-const ndarrays. The function val_assign
 is defined for const ndarrays, because it is modifying the values the ndarray
 points at, not the ndarray reference itself.
 
-A more intuitive syntax for the val_assign function would be nice as well. This has been
-done by introducing an object which collapses to a strided array when
+A more intuitive syntax for the val_assign function would be nice as well. This
+has been done by introducing an object which collapses to a strided array when
 its values are read, and assigns by value when being assigned to. This
 works as follows:
 
@@ -178,7 +185,22 @@ works as follows:
     b = (a + 2).vals();
 
 It is worth keeping the val_assign function as well, since it has another
-parameter for the assignment error checking rule.
+parameter for the assignment error checking rule. ... Or, the vals
+function itself could take the assignment error checking rule as a parameter,
+and the rule would be bound to this temporary value-assignment object.
+
+There is a gotcha that the C++11 'auto' adds, which applies to any
+template expression code like this.
+
+    // Turns 'b' into a strided array with the values copied in
+    ndarray b = (a + 2).vals()
+    // Turns 'c' into the unspecified value assignment type that
+    // was just supposed to have a short, temporary lifetime.
+    auto c = (a + 2).vals()
+
+Here's a taste of what can be weird when doing this kind of stuff:
+
+http://stackoverflow.com/questions/9527820/prevent-expression-templates-binding-to-rvalue-references
 
 All Data Is Aligned and in Native Byte Order
 --------------------------------------------
@@ -271,8 +293,8 @@ the ndarray library.
    signaled with the value -1.
 
 The selection mask can't be an NA mask like the one introduced recently
-into NumPy, but rather one which corresponds to the IGNORE missing value
-semantics described in the NumPy missing value NEP.
+into NumPy, but rather one which corresponds loosely to the IGNORE missing
+value semantics described in the NumPy missing value NEP.
 
 In NumPy, the boolean index can apply to one, some, or all of the dimensions
 of the array. In this library, I propose to restrict that to just one or
@@ -358,6 +380,14 @@ so incorporating 3rd party code under non-liberal licenses is unacceptable.
 Probably I will incorporate some parts of NumPy, namely ones that I have
 contributed, but which will need to be heavily modified to become pleasant
 for C++.
+
+In an ideal world, this would eventually get submitted as a boost
+library, because I think it would complement boost::multi_array and
+boost::ublas very nicely. This requires that everything be licensed
+under the boost license, which is less restrictive than BSD. For this
+reason I want to avoid pulling in third-party BSD code without first
+approaching the appropriate copyright holders to ensure the more
+liberal license first.
 
 Development Log
 ---------------
