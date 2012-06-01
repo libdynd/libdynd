@@ -66,7 +66,7 @@ public:
         return m_shape_and_strides.get(1);
     }
 
-    bool casting_is_lossless(const dtype& dst_dt, const dtype& src_dt) const;
+    bool is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const;
 
     bool operator==(const extended_dtype& rhs) const;
 };

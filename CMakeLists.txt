@@ -23,7 +23,6 @@ set(dnd_SRC
     src/dnd/array_dtype.cpp
     src/dnd/dtype.cpp
     src/dnd/dtype_assign.cpp
-    src/dnd/dtype_casting.cpp
     src/dnd/dtype_promotion.cpp
     src/dnd/exceptions.cpp
     src/dnd/ndarray.cpp
@@ -38,7 +37,6 @@ set(dnd_SRC
     include/dnd/config.hpp
     include/dnd/dtype.hpp
     include/dnd/dtype_assign.hpp
-    include/dnd/dtype_casting.hpp
     include/dnd/dtype_promotion.hpp
     include/dnd/exceptions.hpp
     include/dnd/irange.hpp

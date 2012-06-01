@@ -10,7 +10,6 @@
 #include <utility>
 
 #include <dnd/dtype.hpp>
-#include <dnd/dtype_casting.hpp>
 
 namespace dnd {
 
@@ -28,6 +27,9 @@ enum assign_error_mode {
     assign_error_inexact
 };
 
+/** If 'src' can always be cast to 'dst' with no loss of information */
+bool is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt);
+
 /** A base class for auxiliary data used by the unary_operation function pointers. */
 class auxiliary_data {
 public:
@@ -36,7 +38,7 @@ public:
     }
 };
 
-/**
+/** 
  * Assign one element where src and dst may have different dtypes.
  * If the cast can be done losslessly, calls dtype_assign_noexcept,
  * otherwise it will do a checked assignment which may raise

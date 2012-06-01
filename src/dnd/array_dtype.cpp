@@ -102,7 +102,7 @@ static bool can_broadcast(int dst_ndim, const intptr_t *dst_shape, int src_ndim,
 }
 
 
-bool array_dtype::casting_is_lossless(const dtype& dst_dt, const dtype& src_dt) const
+bool array_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const
 {
     if (src_dt.extended() == this) {
         if (dst_dt.extended() == this) {
@@ -113,7 +113,7 @@ bool array_dtype::casting_is_lossless(const dtype& dst_dt, const dtype& src_dt) 
             // element dtype can cast losslessly
             const array_dtype *dst_adt = static_cast<const array_dtype *>(dst_dt.extended());
             return can_broadcast(dst_adt->m_ndim, dst_adt->get_shape(), m_ndim, get_shape()) &&
-                ::casting_is_lossless(dst_adt->m_element_dtype, m_element_dtype);
+                ::is_lossless_assignment(dst_adt->m_element_dtype, m_element_dtype);
         } else {
             return false;
         }
@@ -121,7 +121,7 @@ bool array_dtype::casting_is_lossless(const dtype& dst_dt, const dtype& src_dt) 
     } else {
         // If the src element can losslessly cast to the element, then
         // can broadcast it to everywhere.
-        return ::casting_is_lossless(m_element_dtype, src_dt);
+        return ::is_lossless_assignment(m_element_dtype, src_dt);
     }
 }
 

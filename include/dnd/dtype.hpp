@@ -190,7 +190,7 @@ public:
     /** Should return true if the type has construct/copy/move/destruct semantics */
     virtual bool is_object_type() const = 0;
 
-    virtual bool casting_is_lossless(const dtype& dst_dt, const dtype& src_dt) const = 0;
+    virtual bool is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const = 0;
 
     virtual bool operator==(const extended_dtype& rhs) const = 0;
 };
