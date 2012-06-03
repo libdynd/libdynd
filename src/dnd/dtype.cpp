@@ -40,12 +40,14 @@ static struct {
     {uint_kind, 8, 8},         // uint64
     {float_kind, 4, 4},        // float32
     {float_kind, 8, 8},        // float64
+    {complex_kind, 4, 8},      // complex<float32>
+    {complex_kind, 8, 16},     // complex<float64>
     {composite_kind, 16, 16},  // sse128f
     {composite_kind, 16, 16},  // sse128d
     {string_kind, 1, 0},       // utf8
     {composite_kind, 1, 0},    // struct
     {composite_kind, 1, 0},    // subarray
-    {pattern_kind, 1, 0}      // generic
+    {pattern_kind, 1, 0}       // pattern
 };
 
 /**
@@ -66,6 +68,8 @@ static char type_id_names[DND_MAX_NUM_TYPE_IDS][32] = {
     "uint64",
     "float32",
     "float64",
+    "complex<float32>",
+    "complex<float64>",
     "sse128f",
     "sse128d",
     "utf8",
@@ -250,6 +254,12 @@ std::ostream& dnd::operator<<(std::ostream& o, const dtype& rhs)
         case float64_type_id:
             o << "float64";
             break;
+        case complex_float32_type_id:
+            o << "complex<float32>";
+            break;
+        case complex_float64_type_id:
+            o << "complex<float64>";
+            break;
         case utf8_type_id:
             if (rhs.itemsize() == 0) {
                 o << "utf8";
@@ -329,6 +339,12 @@ void dnd::dtype::print_data(std::ostream& o, const char *data, intptr_t stride, 
                     break;
                 case float64_type_id:
                     strided_print<double>(o, data, stride, size, separator);
+                    break;
+                case complex_float32_type_id:
+                    strided_print<complex<float> >(o, data, stride, size, separator);
+                    break;
+                case complex_float64_type_id:
+                    strided_print<complex<double> >(o, data, stride, size, separator);
                     break;
                 default:
                     stringstream ss;

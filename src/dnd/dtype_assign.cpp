@@ -181,7 +181,9 @@ static assign_function_t single_assign_table[builtin_type_id_count][builtin_type
         ERROR_MODE_LEVEL(dst_type, uint32_t), \
         ERROR_MODE_LEVEL(dst_type, uint64_t), \
         ERROR_MODE_LEVEL(dst_type, float), \
-        ERROR_MODE_LEVEL(dst_type, double) \
+        ERROR_MODE_LEVEL(dst_type, double), \
+        ERROR_MODE_LEVEL(dst_type, complex<float>), \
+        ERROR_MODE_LEVEL(dst_type, complex<double>) \
     }
     
     SRC_TYPE_LEVEL(dnd_bool),
@@ -194,7 +196,9 @@ static assign_function_t single_assign_table[builtin_type_id_count][builtin_type
     SRC_TYPE_LEVEL(uint32_t),
     SRC_TYPE_LEVEL(uint64_t),
     SRC_TYPE_LEVEL(float),
-    SRC_TYPE_LEVEL(double)
+    SRC_TYPE_LEVEL(double),
+    SRC_TYPE_LEVEL(complex<float>),
+    SRC_TYPE_LEVEL(complex<double>)
 #undef SRC_TYPE_LEVEL
 #undef ERROR_MODE_LEVEL
 };
@@ -205,8 +209,8 @@ static inline assign_function_t get_single_assign_function(const dtype& dst_dt, 
     int dst_type_id = dst_dt.type_id(), src_type_id = src_dt.type_id();
 
     // Do a table lookup for the built-in range of dtypes
-    if (dst_type_id >= bool_type_id && dst_type_id <= float64_type_id &&
-            src_type_id >= bool_type_id && src_type_id <= float64_type_id) {
+    if (dst_type_id >= bool_type_id && dst_type_id <= complex_float64_type_id &&
+            src_type_id >= bool_type_id && src_type_id <= complex_float64_type_id) {
         return single_assign_table[dst_type_id][src_type_id][errmode];
     } else {
         return NULL;
@@ -216,9 +220,9 @@ static inline assign_function_t get_single_assign_function(const dtype& dst_dt, 
 void dnd::dtype_assign(const dtype& dst_dt, void *dst, const dtype& src_dt, const void *src, assign_error_mode errmode)
 {
     if (dst_dt.extended() == NULL && src_dt.extended() == NULL) {
-        // None of the built-in scalars are more than 64-bits (currently...) so use two 64-bit
-        // integers as temporary buffers for alignment
-        int64_t s, d;
+        // None of the built-in scalars are more than 128-bits with 64-bit alignment (currently...) so use two 64-bit
+        // integer arrays as temporary buffers for alignment
+        int64_t s[2], d[2];
 
         assign_function_t asn = get_single_assign_function(dst_dt, src_dt, errmode);
         if (asn != NULL) {
@@ -227,11 +231,11 @@ void dnd::dtype_assign(const dtype& dst_dt, void *dst, const dtype& src_dt, cons
             memcpy(dst, &d, dst_dt.itemsize());
             return;
         }
-
-        throw std::runtime_error("this dtype assignment isn't yet supported");
     }
 
-    throw std::runtime_error("this dtype assignment isn't yet supported");
+    stringstream ss;
+    ss << "assignment from " << src_dt << " to " << dst_dt << " isn't yet supported";
+    throw std::runtime_error(ss.str());
 }
 
 // A multiple unaligned byteswap assignment function which uses one of the single assignment functions as proxy
@@ -363,7 +367,8 @@ struct multiple_assigner {
         dst_stride /= sizeof(dst_type);
 
         for (intptr_t i = 0; i < count; ++i) {
-            *dst_cached = static_cast<dst_type>(*src_cached);
+            // Use the single-assigner template, so complex -> int can be handled, for instance
+            single_assigner_builtin<dst_type, src_type, assign_error_none>::assign(dst_cached, src_cached);
             dst_cached += dst_stride;
             src_cached += src_stride;
         }
@@ -375,12 +380,15 @@ struct multiple_assigner {
                                 const auxiliary_data *)
     {
         //DEBUG_COUT << "multiple_assigner::assign_noexcept_anystride_zerostride (" << typeid(src_type).name() << " -> " << typeid(dst_type).name() << ")\n";
-        dst_type src_cached = static_cast<dst_type>(*reinterpret_cast<const src_type *>(src));
+        dst_type src_value_cached;
         dst_type *dst_cached = reinterpret_cast<dst_type *>(dst);
         dst_stride /= sizeof(dst_type);
 
+        // Use the single-assigner template, so complex -> int can be handled, for instance
+        single_assigner_builtin<dst_type, src_type, assign_error_none>::assign(&src_value_cached, (const src_type *)src);
+
         for (intptr_t i = 0; i < count; ++i) {
-            *dst_cached = src_cached;
+            *dst_cached = src_value_cached;
             dst_cached += dst_stride;
         }
     }
@@ -391,11 +399,14 @@ struct multiple_assigner {
                                 const auxiliary_data *)
     {
         //DEBUG_COUT << "multiple_assigner::assign_noexcept_contigstride_zerostride (" << typeid(src_type).name() << " -> " << typeid(dst_type).name() << ")\n";
-        dst_type src_cached = static_cast<dst_type>(*reinterpret_cast<const src_type *>(src));
+        dst_type src_value_cached;
         dst_type *dst_cached = reinterpret_cast<dst_type *>(dst);
 
+        // Use the single-assigner template, so complex -> int can be handled, for instance
+        single_assigner_builtin<dst_type, src_type, assign_error_none>::assign(&src_value_cached, (const src_type *)src);
+
         for (intptr_t i = 0; i < count; ++i, ++dst_cached) {
-            *dst_cached = src_cached;
+            *dst_cached = src_value_cached;
         }
     }
 
@@ -409,7 +420,8 @@ struct multiple_assigner {
         dst_type *dst_cached = reinterpret_cast<dst_type *>(dst);
 
         for (intptr_t i = 0; i < count; ++i, ++dst_cached, ++src_cached) {
-            *dst_cached = static_cast<dst_type>(*src_cached);
+            // Use the single-assigner template, so complex -> int can be handled, for instance
+            single_assigner_builtin<dst_type, src_type, assign_error_none>::assign(dst_cached, src_cached);
         }
     }
 };
@@ -438,6 +450,8 @@ struct multiple_assigner {
             DTYPE_ASSIGN_SRC_TO_DST_SINGLE_CASE(uint64_t, src_type, ASSIGN_FN); \
             DTYPE_ASSIGN_SRC_TO_DST_SINGLE_CASE(float,    src_type, ASSIGN_FN); \
             DTYPE_ASSIGN_SRC_TO_DST_SINGLE_CASE(double,   src_type, ASSIGN_FN); \
+            DTYPE_ASSIGN_SRC_TO_DST_SINGLE_CASE(std::complex<float>,    src_type, ASSIGN_FN); \
+            DTYPE_ASSIGN_SRC_TO_DST_SINGLE_CASE(std::complex<double>,   src_type, ASSIGN_FN); \
         } \
         break
 
@@ -454,6 +468,8 @@ struct multiple_assigner {
         DTYPE_ASSIGN_SRC_TO_ANY_CASE(uint64_t, ASSIGN_FN); \
         DTYPE_ASSIGN_SRC_TO_ANY_CASE(float, ASSIGN_FN); \
         DTYPE_ASSIGN_SRC_TO_ANY_CASE(double, ASSIGN_FN); \
+        DTYPE_ASSIGN_SRC_TO_ANY_CASE(std::complex<float>, ASSIGN_FN); \
+        DTYPE_ASSIGN_SRC_TO_ANY_CASE(std::complex<double>, ASSIGN_FN); \
     }
 
 std::pair<unary_operation_t, dnd::shared_ptr<auxiliary_data> > dnd::get_dtype_strided_assign_operation(

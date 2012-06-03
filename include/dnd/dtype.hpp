@@ -10,6 +10,7 @@
 
 #include <stdint.h>
 #include <iostream>
+#include <complex>
 
 #include <dnd/config.hpp>
 
@@ -20,7 +21,13 @@ class dnd_bool {
     char m_value;
 public:
     dnd_bool() : m_value(0) {}
+    
     dnd_bool(bool value) : m_value(value) {}
+    
+    // Special case complex conversion to avoid ambiguous overload
+    template<class T>
+    dnd_bool(std::complex<T> value) : m_value(value != std::complex<T>(0)) {}
+
     operator bool() const {
         return (bool)m_value;
     }
@@ -57,6 +64,9 @@ enum {
     // Floating point types
     float32_type_id,
     float64_type_id,
+    // Complex floating-point types
+    complex_float32_type_id,
+    complex_float64_type_id,
     // SSE vector of 4 floats
     sse128f_type_id,
     // SSE2 vector of 2 doubles
@@ -72,7 +82,7 @@ enum {
     pattern_type_id,
 
     // The number of built-in, atomic types
-    builtin_type_id_count = 11
+    builtin_type_id_count = 13
 };
 
 
@@ -116,6 +126,8 @@ template <> struct type_id_of<unsigned long> {
 template <> struct type_id_of<unsigned long long>{enum {value = uint64_type_id};};
 template <> struct type_id_of<float> {enum {value = float32_type_id};};
 template <> struct type_id_of<double> {enum {value = float64_type_id};};
+template <> struct type_id_of<std::complex<float> > {enum {value = complex_float32_type_id};};
+template <> struct type_id_of<std::complex<double> > {enum {value = complex_float64_type_id};};
 
 // Type trait for the kind
 template <typename T> struct dtype_kind_of;
@@ -137,6 +149,7 @@ template <> struct dtype_kind_of<unsigned long> {static const dtype_kind value =
 template <> struct dtype_kind_of<unsigned long long>{static const dtype_kind value = uint_kind;};
 template <> struct dtype_kind_of<float> {static const dtype_kind value = float_kind;};
 template <> struct dtype_kind_of<double> {static const dtype_kind value = float_kind;};
+template <typename T> struct dtype_kind_of<std::complex<T> > {static const dtype_kind value = complex_kind;};
 
 // Metaprogram for determining if a type is a valid C++ scalar
 // of a particular dtype.
@@ -155,6 +168,8 @@ template <> struct is_dtype_scalar<unsigned long> {enum {value = true};};
 template <> struct is_dtype_scalar<unsigned long long> {enum {value = true};};
 template <> struct is_dtype_scalar<float> {enum {value = true};};
 template <> struct is_dtype_scalar<double> {enum {value = true};};
+template <> struct is_dtype_scalar<std::complex<float> > {enum {value = true};};
+template <> struct is_dtype_scalar<std::complex<double> > {enum {value = true};};
 
 /** Typedef for dtype endian byte-swapping operation */
 typedef void (*byteswap_operation_t)(void *dst, const void *src, uintptr_t itemsize);

@@ -38,6 +38,29 @@ struct single_assigner_builtin_base<dst_type, src_type, dst_kind, src_kind, assi
     }
 };
 
+// Complex floating point -> non-complex with no error checking
+template<class dst_type, class src_real_type>
+struct single_assigner_builtin_base<dst_type, std::complex<src_real_type>, int_kind, complex_kind, assign_error_none>
+{
+    static void assign(dst_type *dst, const std::complex<src_real_type> *src) {
+        *dst = static_cast<dst_type>(src->real());
+    }
+};
+template<class dst_type, class src_real_type>
+struct single_assigner_builtin_base<dst_type, std::complex<src_real_type>, uint_kind, complex_kind, assign_error_none>
+{
+    static void assign(dst_type *dst, const std::complex<src_real_type> *src) {
+        *dst = static_cast<dst_type>(src->real());
+    }
+};
+template<class dst_type, class src_real_type>
+struct single_assigner_builtin_base<dst_type, std::complex<src_real_type>, float_kind, complex_kind, assign_error_none>
+{
+    static void assign(dst_type *dst, const std::complex<src_real_type> *src) {
+        *dst = static_cast<dst_type>(src->real());
+    }
+};
+
 // Anything -> boolean with overflow checking
 template<class src_type, dtype_kind src_kind>
 struct single_assigner_builtin_base<dnd_bool, src_type, bool_kind, src_kind, assign_error_overflow>
@@ -45,9 +68,9 @@ struct single_assigner_builtin_base<dnd_bool, src_type, bool_kind, src_kind, ass
     static void assign(dnd_bool *dst, const src_type *src) {
         src_type s = *src;
 
-        if (s == 0) {
+        if (s == src_type(0)) {
             *dst = false;
-        } else if (s == 1) {
+        } else if (s == src_type(1)) {
             *dst = true;
         } else {
             throw std::runtime_error("overflow while assigning to boolean value");
@@ -219,6 +242,29 @@ template<class dst_type, class src_type>
 struct single_assigner_builtin_base<dst_type, src_type, float_kind, int_kind, assign_error_fractional>
     : public single_assigner_builtin_base<dst_type, src_type, float_kind, int_kind, assign_error_none> {};
 
+// Signed int -> complex floating point with inexact checking
+template<class dst_real_type, class src_type>
+struct single_assigner_builtin_base<std::complex<dst_real_type>, src_type, complex_kind, int_kind, assign_error_inexact>
+{
+    static void assign(std::complex<dst_real_type> *dst, const src_type *src) {
+        src_type s = *src;
+        dst_real_type d = static_cast<dst_real_type>(s);
+
+        if (static_cast<src_type>(d) != s) {
+            throw std::runtime_error("inexact value while assigning signed integer to complex floating point");
+        }
+        *dst = d;
+    }
+};
+
+// Signed int -> complex floating point with other checking
+template<class dst_real_type, class src_type>
+struct single_assigner_builtin_base<std::complex<dst_real_type>, src_type, complex_kind, int_kind, assign_error_overflow>
+    : public single_assigner_builtin_base<std::complex<dst_real_type>, src_type, complex_kind, int_kind, assign_error_none> {};
+template<class dst_real_type, class src_type>
+struct single_assigner_builtin_base<std::complex<dst_real_type>, src_type, complex_kind, int_kind, assign_error_fractional>
+    : public single_assigner_builtin_base<std::complex<dst_real_type>, src_type, complex_kind, int_kind, assign_error_none> {};
+
 // Unsigned int -> floating point with inexact checking
 template<class dst_type, class src_type>
 struct single_assigner_builtin_base<dst_type, src_type, float_kind, uint_kind, assign_error_inexact>
@@ -241,6 +287,29 @@ struct single_assigner_builtin_base<dst_type, src_type, float_kind, uint_kind, a
 template<class dst_type, class src_type>
 struct single_assigner_builtin_base<dst_type, src_type, float_kind, uint_kind, assign_error_fractional>
     : public single_assigner_builtin_base<dst_type, src_type, float_kind, uint_kind, assign_error_none> {};
+
+// Unsigned int -> complex floating point with inexact checking
+template<class dst_real_type, class src_type>
+struct single_assigner_builtin_base<std::complex<dst_real_type>, src_type, complex_kind, uint_kind, assign_error_inexact>
+{
+    static void assign(std::complex<dst_real_type> *dst, const src_type *src) {
+        src_type s = *src;
+        dst_real_type d = static_cast<dst_real_type>(s);
+
+        if (static_cast<src_type>(d) != s) {
+            throw std::runtime_error("inexact value while assigning unsigned integer to floating point");
+        }
+        *dst = d;
+    }
+};
+
+// Unsigned int -> complex floating point with other checking
+template<class dst_real_type, class src_type>
+struct single_assigner_builtin_base<std::complex<dst_real_type>, src_type, complex_kind, uint_kind, assign_error_overflow>
+    : public single_assigner_builtin_base<std::complex<dst_real_type>, src_type, complex_kind, uint_kind, assign_error_none> {};
+template<class dst_real_type, class src_type>
+struct single_assigner_builtin_base<std::complex<dst_real_type>, src_type, complex_kind, uint_kind, assign_error_fractional>
+    : public single_assigner_builtin_base<std::complex<dst_real_type>, src_type, complex_kind, uint_kind, assign_error_none> {};
 
 // Floating point -> signed int with overflow checking
 template<class dst_type, class src_type>
@@ -279,6 +348,51 @@ template<class dst_type, class src_type>
 struct single_assigner_builtin_base<dst_type, src_type, int_kind, float_kind, assign_error_inexact>
     : public single_assigner_builtin_base<dst_type, src_type, int_kind, float_kind, assign_error_fractional> {};
 
+// Complex floating point -> signed int with overflow checking
+template<class dst_type, class src_real_type>
+struct single_assigner_builtin_base<dst_type, std::complex<src_real_type>, int_kind, complex_kind, assign_error_overflow>
+{
+    static void assign(dst_type *dst, const std::complex<src_real_type> *src) {
+        std::complex<src_real_type> s = *src;
+
+        if (s.imag() != 0) {
+            throw std::runtime_error("loss of imaginary component while assigning complex floating point to signed integer");
+        }
+
+        if (s.real() < std::numeric_limits<dst_type>::min() || s.real() > std::numeric_limits<dst_type>::max()) {
+            throw std::runtime_error("overflow while assigning complex floating point to signed integer");
+        }
+        *dst = static_cast<dst_type>(s.real());
+    }
+};
+
+// Complex floating point -> signed int with fractional checking
+template<class dst_type, class src_real_type>
+struct single_assigner_builtin_base<dst_type, std::complex<src_real_type>, int_kind, complex_kind, assign_error_fractional>
+{
+    static void assign(dst_type *dst, const std::complex<src_real_type> *src) {
+        std::complex<src_real_type> s = *src;
+
+        if (s.imag() != 0) {
+            throw std::runtime_error("loss of imaginary component while assigning complex floating point to signed integer");
+        }
+
+        if (s.real() < std::numeric_limits<dst_type>::min() || s.real() > std::numeric_limits<dst_type>::max()) {
+            throw std::runtime_error("overflow while assigning complex floating point to signed integer");
+        }
+
+        if (std::floor(s.real()) != s.real()) {
+            throw std::runtime_error("fractional part lost while assigning complex floating point to signed integer");
+        }
+        *dst = static_cast<dst_type>(s.real());
+    }
+};
+
+// Complex floating point -> signed int with other checking
+template<class dst_type, class src_real_type>
+struct single_assigner_builtin_base<dst_type, std::complex<src_real_type>, int_kind, complex_kind, assign_error_inexact>
+    : public single_assigner_builtin_base<dst_type, std::complex<src_real_type>, int_kind, complex_kind, assign_error_fractional> {};
+
 // Floating point -> unsigned int with overflow checking
 template<class dst_type, class src_type>
 struct single_assigner_builtin_base<dst_type, src_type, uint_kind, float_kind, assign_error_overflow>
@@ -286,7 +400,7 @@ struct single_assigner_builtin_base<dst_type, src_type, uint_kind, float_kind, a
     static void assign(dst_type *dst, const src_type *src) {
         src_type s = *src;
 
-        if (s < std::numeric_limits<dst_type>::min() || s > std::numeric_limits<dst_type>::max()) {
+        if (s < 0 || s > std::numeric_limits<dst_type>::max()) {
             throw std::runtime_error("overflow while assigning floating point to unsigned integer");
         }
         *dst = static_cast<dst_type>(s);
@@ -316,6 +430,51 @@ template<class dst_type, class src_type>
 struct single_assigner_builtin_base<dst_type, src_type, uint_kind, float_kind, assign_error_inexact>
     : public single_assigner_builtin_base<dst_type, src_type, uint_kind, float_kind, assign_error_fractional> {};
 
+// Complex floating point -> unsigned int with overflow checking
+template<class dst_type, class src_real_type>
+struct single_assigner_builtin_base<dst_type, std::complex<src_real_type>, uint_kind, complex_kind, assign_error_overflow>
+{
+    static void assign(dst_type *dst, const std::complex<src_real_type> *src) {
+        std::complex<src_real_type> s = *src;
+
+        if (s.imag() != 0) {
+            throw std::runtime_error("loss of imaginary component while assigning complex floating point to unsigned integer");
+        }
+
+        if (s.real() < 0 || s.real() > std::numeric_limits<dst_type>::max()) {
+            throw std::runtime_error("overflow while assigning complex floating point to unsigned integer");
+        }
+        *dst = static_cast<dst_type>(s.real());
+    }
+};
+
+// Complex floating point -> unsigned int with fractional checking
+template<class dst_type, class src_real_type>
+struct single_assigner_builtin_base<dst_type, std::complex<src_real_type>, uint_kind, complex_kind, assign_error_fractional>
+{
+    static void assign(dst_type *dst, const std::complex<src_real_type> *src) {
+        std::complex<src_real_type> s = *src;
+
+        if (s.imag() != 0) {
+            throw std::runtime_error("loss of imaginary component while assigning complex floating point to unsigned integer");
+        }
+
+        if (s.real() < 0 || s.real() > std::numeric_limits<dst_type>::max()) {
+            throw std::runtime_error("overflow while assigning complex floating point to unsigned integer");
+        }
+
+        if (std::floor(s.real()) != s.real()) {
+            throw std::runtime_error("fractional part lost while assigning complex floating point to unsigned integer");
+        }
+        *dst = static_cast<dst_type>(s.real());
+    }
+};
+
+// Complex floating point -> unsigned int with other checking
+template<class dst_type, class src_real_type>
+struct single_assigner_builtin_base<dst_type, std::complex<src_real_type>, uint_kind, complex_kind, assign_error_inexact>
+    : public single_assigner_builtin_base<dst_type, std::complex<src_real_type>, uint_kind, complex_kind, assign_error_fractional> {};
+
 // float -> float with no checking
 template<>
 struct single_assigner_builtin_base<float, float, float_kind, float_kind, assign_error_overflow>
@@ -327,6 +486,17 @@ template<>
 struct single_assigner_builtin_base<float, float, float_kind, float_kind, assign_error_inexact>
     : public single_assigner_builtin_base<float, float, float_kind, float_kind, assign_error_none> {};
 
+// complex<float> -> complex<float> with no checking
+template<>
+struct single_assigner_builtin_base<std::complex<float>, std::complex<float>, complex_kind, complex_kind, assign_error_overflow>
+    : public single_assigner_builtin_base<std::complex<float>, std::complex<float>, complex_kind, complex_kind, assign_error_none> {};
+template<>
+struct single_assigner_builtin_base<std::complex<float>, std::complex<float>, complex_kind, complex_kind, assign_error_fractional>
+    : public single_assigner_builtin_base<std::complex<float>, std::complex<float>, complex_kind, complex_kind, assign_error_none> {};
+template<>
+struct single_assigner_builtin_base<std::complex<float>, std::complex<float>, complex_kind, complex_kind, assign_error_inexact>
+    : public single_assigner_builtin_base<std::complex<float>, std::complex<float>, complex_kind, complex_kind, assign_error_none> {};
+
 // float -> double with no checking
 template<>
 struct single_assigner_builtin_base<double, float, float_kind, float_kind, assign_error_overflow>
@@ -337,7 +507,18 @@ struct single_assigner_builtin_base<double, float, float_kind, float_kind, assig
 template<>
 struct single_assigner_builtin_base<double, float, float_kind, float_kind, assign_error_inexact>
     : public single_assigner_builtin_base<double, float, float_kind, float_kind, assign_error_none> {};
-//
+
+// complex<float> -> complex<double> with no checking
+template<>
+struct single_assigner_builtin_base<std::complex<double>, std::complex<float>, complex_kind, complex_kind, assign_error_overflow>
+    : public single_assigner_builtin_base<std::complex<double>, std::complex<float>, complex_kind, complex_kind, assign_error_none> {};
+template<>
+struct single_assigner_builtin_base<std::complex<double>, std::complex<float>, complex_kind, complex_kind, assign_error_fractional>
+    : public single_assigner_builtin_base<std::complex<double>, std::complex<float>, complex_kind, complex_kind, assign_error_none> {};
+template<>
+struct single_assigner_builtin_base<std::complex<double>, std::complex<float>, complex_kind, complex_kind, assign_error_inexact>
+    : public single_assigner_builtin_base<std::complex<double>, std::complex<float>, complex_kind, complex_kind, assign_error_none> {};
+
 // double -> double with no checking
 template<>
 struct single_assigner_builtin_base<double, double, float_kind, float_kind, assign_error_overflow>
@@ -348,6 +529,17 @@ struct single_assigner_builtin_base<double, double, float_kind, float_kind, assi
 template<>
 struct single_assigner_builtin_base<double, double, float_kind, float_kind, assign_error_inexact>
     : public single_assigner_builtin_base<double, double, float_kind, float_kind, assign_error_none> {};
+
+// complex<double> -> complex<double> with no checking
+template<>
+struct single_assigner_builtin_base<std::complex<double>, std::complex<double>, complex_kind, complex_kind, assign_error_overflow>
+    : public single_assigner_builtin_base<std::complex<double>, std::complex<double>, complex_kind, complex_kind, assign_error_none> {};
+template<>
+struct single_assigner_builtin_base<std::complex<double>, std::complex<double>, complex_kind, complex_kind, assign_error_fractional>
+    : public single_assigner_builtin_base<std::complex<double>, std::complex<double>, complex_kind, complex_kind, assign_error_none> {};
+template<>
+struct single_assigner_builtin_base<std::complex<double>, std::complex<double>, complex_kind, complex_kind, assign_error_inexact>
+    : public single_assigner_builtin_base<std::complex<double>, std::complex<double>, complex_kind, complex_kind, assign_error_none> {};
 
 // double -> float with overflow checking
 template<>
@@ -361,7 +553,7 @@ struct single_assigner_builtin_base<float, double, float_kind, float_kind, assig
         }
     }
 };
-//
+
 // double -> float with fractional checking
 template<>
 struct single_assigner_builtin_base<float, double, float_kind, float_kind, assign_error_fractional>
@@ -390,6 +582,222 @@ struct single_assigner_builtin_base<float, double, float_kind, float_kind, assig
         *dst = d;
     }
 };
+
+// complex<double> -> complex<float> with overflow checking
+template<>
+struct single_assigner_builtin_base<std::complex<float>, std::complex<double>, complex_kind, complex_kind, assign_error_overflow>
+{
+    static void assign(std::complex<float> *dst, const std::complex<double> *src) {
+        clear_fp_status();
+        *dst = static_cast<std::complex<float> >(*src);
+        if (is_overflow_fp_status()) {
+            throw std::runtime_error("overflow while assigning complex double to complex float");
+        }
+    }
+};
+
+// complex<double> -> complex<float> with fractional checking
+template<>
+struct single_assigner_builtin_base<std::complex<float>, std::complex<double>, complex_kind, complex_kind, assign_error_fractional>
+    : public single_assigner_builtin_base<std::complex<float>, std::complex<double>, complex_kind, complex_kind, assign_error_overflow> {};
+
+
+// complex<double> -> complex<float> with inexact checking
+template<>
+struct single_assigner_builtin_base<std::complex<float>, std::complex<double>, complex_kind, complex_kind, assign_error_inexact>
+{
+    static void assign(std::complex<float> *dst, const std::complex<double> *src) {
+        std::complex<double> s = *src;
+        std::complex<float> d;
+        clear_fp_status();
+        d = static_cast<std::complex<float> >(s);
+        if (is_overflow_fp_status()) {
+            throw std::runtime_error("overflow while assigning complex double to complex float");
+        }
+        // The inexact status didn't work as it should have, so converting back to double and comparing
+        //if (is_inexact_fp_status()) {
+        //    throw std::runtime_error("inexact precision loss while assigning double to float");
+        //}
+        if (d.real() != s.real() || d.imag() != s.imag()) {
+            throw std::runtime_error("inexact precision loss while assigning complex double to complex float");
+        }
+        *dst = d;
+    }
+};
+
+// complex<T> -> T with overflow checking
+template<typename real_type>
+struct single_assigner_builtin_base<real_type, std::complex<real_type>, float_kind, complex_kind, assign_error_overflow>
+{
+    static void assign(real_type *dst, const std::complex<real_type> *src) {
+        std::complex<real_type> s = *src;
+
+        if (s.imag() != 0) {
+            throw std::runtime_error("loss of imaginary component while assigning complex floating point to real floating point");
+        }
+
+        *dst = s.real();
+    }
+};
+
+// complex<T> -> T with fractional checking
+template<typename real_type>
+struct single_assigner_builtin_base<real_type, std::complex<real_type>, float_kind, complex_kind, assign_error_fractional>
+    : public single_assigner_builtin_base<real_type, std::complex<real_type>, float_kind, complex_kind, assign_error_overflow> {};
+
+// complex<T> -> T with inexact checking
+template<typename real_type>
+struct single_assigner_builtin_base<real_type, std::complex<real_type>, float_kind, complex_kind, assign_error_inexact>
+    : public single_assigner_builtin_base<real_type, std::complex<real_type>, float_kind, complex_kind, assign_error_overflow> {};
+
+// T -> complex<T>
+template<typename real_type>
+struct single_assigner_builtin_base<std::complex<real_type>, real_type, complex_kind, float_kind, assign_error_none>
+{
+    static void assign(std::complex<real_type> *dst, const real_type *src) {
+        *dst = *src;
+    }
+};
+template<typename real_type, assign_error_mode errmode>
+struct single_assigner_builtin_base<std::complex<real_type>, real_type, complex_kind, float_kind, errmode>
+    : public single_assigner_builtin_base<std::complex<real_type>, real_type, complex_kind, float_kind, assign_error_none> {};
+
+// float -> complex<double>
+template<>
+struct single_assigner_builtin_base<std::complex<double>, float, complex_kind, float_kind, assign_error_none>
+{
+    static void assign(std::complex<double> *dst, const float *src) {
+        *dst = *src;
+    }
+};
+template<assign_error_mode errmode>
+struct single_assigner_builtin_base<std::complex<double>, float, complex_kind, float_kind, errmode>
+    : public single_assigner_builtin_base<std::complex<double>, float, complex_kind, float_kind, assign_error_none> {};
+
+// complex<float> -> double with overflow checking
+template<>
+struct single_assigner_builtin_base<double, std::complex<float>, float_kind, complex_kind, assign_error_overflow>
+{
+    static void assign(double *dst, const std::complex<float> *src) {
+        std::complex<float> s = *src;
+
+        if (s.imag() != 0) {
+            throw std::runtime_error("loss of imaginary component while assigning complex floating point to real floating point");
+        }
+
+        *dst = s.real();
+    }
+};
+
+// complex<float> -> double with fractional checking
+template<>
+struct single_assigner_builtin_base<double, std::complex<float>, float_kind, complex_kind, assign_error_fractional>
+    : public single_assigner_builtin_base<double, std::complex<float>, float_kind, complex_kind, assign_error_overflow> {};
+
+// complex<float> -> double with inexact checking
+template<>
+struct single_assigner_builtin_base<double, std::complex<float>, float_kind, complex_kind, assign_error_inexact>
+    : public single_assigner_builtin_base<double, std::complex<float>, float_kind, complex_kind, assign_error_overflow> {};
+
+// complex<double> -> float with overflow checking
+template<>
+struct single_assigner_builtin_base<float, std::complex<double>, float_kind, complex_kind, assign_error_overflow>
+{
+    static void assign(float *dst, const std::complex<double> *src) {
+        std::complex<double> s = *src;
+        float d;
+
+        if (s.imag() != 0) {
+            throw std::runtime_error("loss of imaginary component while assigning complex floating point to real floating point");
+        }
+
+        clear_fp_status();
+        d = static_cast<float>(s.real());
+        if (is_overflow_fp_status()) {
+            throw std::runtime_error("overflow while assigning complex floating point to real floating point");
+        }
+
+        *dst = d;
+    }
+};
+
+// complex<double> -> float with fractional checking
+template<>
+struct single_assigner_builtin_base<float, std::complex<double>, float_kind, complex_kind, assign_error_fractional>
+    : public single_assigner_builtin_base<float, std::complex<double>, float_kind, complex_kind, assign_error_overflow> {};
+
+// complex<double> -> float with inexact checking
+template<>
+struct single_assigner_builtin_base<float, std::complex<double>, float_kind, complex_kind, assign_error_inexact>
+{
+    static void assign(float *dst, const std::complex<double> *src) {
+        std::complex<double> s = *src;
+        float d;
+
+        if (s.imag() != 0) {
+            throw std::runtime_error("loss of imaginary component while assigning complex floating point to real floating point");
+        }
+
+        clear_fp_status();
+        d = static_cast<float>(s.real());
+        if (is_overflow_fp_status()) {
+            throw std::runtime_error("overflow while assigning complex floating point to real floating point");
+        }
+
+        if (d != s.real()) {
+            throw std::runtime_error("inexact precision loss while assigning complex floating point to real floating point");
+        }
+
+        *dst = d;
+    }
+};
+
+// double -> complex<float> with overflow checking
+template<>
+struct single_assigner_builtin_base<std::complex<float>, double, complex_kind, float_kind, assign_error_overflow>
+{
+    static void assign(std::complex<float> *dst, const double *src) {
+        double s = *src;
+        float d;
+
+        clear_fp_status();
+        d = static_cast<float>(s);
+        if (is_overflow_fp_status()) {
+            throw std::runtime_error("overflow while assigning real floating point to complex floating point");
+        }
+
+        *dst = d;
+    }
+};
+
+// double -> complex<float> with fractional checking
+template<>
+struct single_assigner_builtin_base<std::complex<float>, double, complex_kind, float_kind, assign_error_fractional>
+    : public single_assigner_builtin_base<std::complex<float>, double, complex_kind, float_kind, assign_error_overflow> {};
+
+// double -> complex<float> with inexact checking
+template<>
+struct single_assigner_builtin_base<std::complex<float>, double, complex_kind, float_kind, assign_error_inexact>
+{
+    static void assign(std::complex<float> *dst, const double *src) {
+        double s = *src;
+        float d;
+
+        clear_fp_status();
+        d = static_cast<float>(s);
+        if (is_overflow_fp_status()) {
+            throw std::runtime_error("overflow while assigning real floating point to complex floating point");
+        }
+
+        if (d != s) {
+            throw std::runtime_error("inexact precision loss while assigning complex floating point to real floating point");
+        }
+
+        *dst = d;
+    }
+};
+
+
 
 
 
