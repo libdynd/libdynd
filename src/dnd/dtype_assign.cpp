@@ -50,7 +50,7 @@ bool dnd::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt)
                     case bool_kind:
                     case int_kind:
                     case uint_kind:
-                    case float_kind:
+                    case real_kind:
                     case complex_kind:
                         return true;
                     case string_kind:
@@ -67,7 +67,7 @@ bool dnd::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt)
                         return dst_dt.itemsize() >= src_dt.itemsize();
                     case uint_kind:
                         return false;
-                    case float_kind:
+                    case real_kind:
                         return dst_dt.itemsize() > src_dt.itemsize();
                     case complex_kind:
                         return dst_dt.itemsize() > 2 * src_dt.itemsize();
@@ -87,7 +87,7 @@ bool dnd::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt)
                         return dst_dt.itemsize() > src_dt.itemsize();
                     case uint_kind:
                         return dst_dt.itemsize() >= src_dt.itemsize();
-                    case float_kind:
+                    case real_kind:
                         return dst_dt.itemsize() > src_dt.itemsize();
                     case complex_kind:
                         return dst_dt.itemsize() > 2 * src_dt.itemsize();
@@ -99,13 +99,13 @@ bool dnd::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt)
                         break;
                 }
                 break;
-            case float_kind:
+            case real_kind:
                 switch (dst_dt.kind()) {
                     case bool_kind:
                     case int_kind:
                     case uint_kind:
                         return false;
-                    case float_kind:
+                    case real_kind:
                         return dst_dt.itemsize() >= src_dt.itemsize();
                     case complex_kind:
                         return dst_dt.itemsize() >= 2 * src_dt.itemsize();
@@ -119,7 +119,7 @@ bool dnd::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt)
                     case bool_kind:
                     case int_kind:
                     case uint_kind:
-                    case float_kind:
+                    case real_kind:
                         return false;
                     case complex_kind:
                         return dst_dt.itemsize() >= src_dt.itemsize();
@@ -133,7 +133,7 @@ bool dnd::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt)
                     case bool_kind:
                     case int_kind:
                     case uint_kind:
-                    case float_kind:
+                    case real_kind:
                     case complex_kind:
                         return false;
                     case string_kind:

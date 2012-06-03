@@ -38,8 +38,8 @@ static struct {
     {uint_kind, 2, 2},         // uint16
     {uint_kind, 4, 4},         // uint32
     {uint_kind, 8, 8},         // uint64
-    {float_kind, 4, 4},        // float32
-    {float_kind, 8, 8},        // float64
+    {real_kind, 4, 4},        // float32
+    {real_kind, 8, 8},        // float64
     {complex_kind, 4, 8},      // complex<float32>
     {complex_kind, 8, 16},     // complex<float64>
     {composite_kind, 16, 16},  // sse128f

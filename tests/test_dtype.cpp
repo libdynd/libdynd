@@ -98,7 +98,7 @@ TEST(DType, BasicConstructor) {
     // float
     d = make_dtype<float>();
     EXPECT_EQ(float32_type_id, d.type_id());
-    EXPECT_EQ(float_kind, d.kind());
+    EXPECT_EQ(real_kind, d.kind());
     EXPECT_EQ((int)sizeof(float), d.alignment());
     EXPECT_EQ(sizeof(float), d.itemsize());
     EXPECT_EQ(NULL, d.extended());
@@ -106,7 +106,7 @@ TEST(DType, BasicConstructor) {
     // double
     d = make_dtype<double>();
     EXPECT_EQ(float64_type_id, d.type_id());
-    EXPECT_EQ(float_kind, d.kind());
+    EXPECT_EQ(real_kind, d.kind());
     EXPECT_EQ((int)sizeof(double), d.alignment());
     EXPECT_EQ(sizeof(double), d.itemsize());
     EXPECT_EQ(NULL, d.extended());

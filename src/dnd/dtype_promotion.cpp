@@ -20,7 +20,7 @@ static intptr_t min_strlen_for_builtin_kind(dtype_kind kind)
         case int_kind:
         case uint_kind:
             return 24;
-        case float_kind:
+        case real_kind:
             return 32;
         case complex_kind:
             return 64;
@@ -70,7 +70,7 @@ dtype dnd::promote_dtypes_arithmetic(const dtype& dt0, const dtype& dt1)
                             return (dt0.itemsize() > dt1.itemsize()) ? dt0
                                                                      : dt1;
                         }
-                    case float_kind:
+                    case real_kind:
                         // Integer type sizes don't affect float type sizes
                         return dt1;
                     case complex_kind:
@@ -107,7 +107,7 @@ dtype dnd::promote_dtypes_arithmetic(const dtype& dt0, const dtype& dt1)
                             return (dt0.itemsize() >= dt1.itemsize()) ? dt0
                                                                       : dt1;
                         }
-                    case float_kind:
+                    case real_kind:
                         // Integer type sizes don't affect float type sizes
                         return dt1;
                     case complex_kind:
@@ -124,14 +124,14 @@ dtype dnd::promote_dtypes_arithmetic(const dtype& dt0, const dtype& dt1)
                         break;
                 }
                 break;
-            case float_kind:
+            case real_kind:
                 switch (dt1.kind()) {
                     // Integer type sizes don't affect float type sizes
                     case bool_kind:
                     case int_kind:
                     case uint_kind:
                         return dt0;
-                    case float_kind:
+                    case real_kind:
                         return (dt0.itemsize() >= dt1.itemsize()) ? dt0
                                                                   : dt1;
                     case complex_kind:
@@ -154,7 +154,7 @@ dtype dnd::promote_dtypes_arithmetic(const dtype& dt0, const dtype& dt1)
                     case bool_kind:
                     case int_kind:
                     case uint_kind:
-                    case float_kind:
+                    case real_kind:
                         return dt0;
                     case complex_kind:
                         return (dt0.itemsize() >= dt1.itemsize()) ? dt0
@@ -175,7 +175,7 @@ dtype dnd::promote_dtypes_arithmetic(const dtype& dt0, const dtype& dt1)
                     case bool_kind:
                     case int_kind:
                     case uint_kind:
-                    case float_kind:
+                    case real_kind:
                     case complex_kind:
                         // Presently UTF8 is the only built-in string type
                         itemsize = min_strlen_for_builtin_kind(dt1.kind());

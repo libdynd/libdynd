@@ -37,7 +37,7 @@ enum dtype_kind {
     bool_kind,
     int_kind,
     uint_kind,
-    float_kind,
+    real_kind,
     complex_kind,
     string_kind,
     // For struct_type_id and array_type_id
@@ -147,8 +147,8 @@ template <> struct dtype_kind_of<uint16_t> {static const dtype_kind value = uint
 template <> struct dtype_kind_of<unsigned int> {static const dtype_kind value = uint_kind;};
 template <> struct dtype_kind_of<unsigned long> {static const dtype_kind value = uint_kind;};
 template <> struct dtype_kind_of<unsigned long long>{static const dtype_kind value = uint_kind;};
-template <> struct dtype_kind_of<float> {static const dtype_kind value = float_kind;};
-template <> struct dtype_kind_of<double> {static const dtype_kind value = float_kind;};
+template <> struct dtype_kind_of<float> {static const dtype_kind value = real_kind;};
+template <> struct dtype_kind_of<double> {static const dtype_kind value = real_kind;};
 template <typename T> struct dtype_kind_of<std::complex<T> > {static const dtype_kind value = complex_kind;};
 
 // Metaprogram for determining if a type is a valid C++ scalar

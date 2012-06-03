@@ -72,7 +72,7 @@ namespace {
     };
 
     template<class T>
-    struct arange_counter<T, float_kind> {
+    struct arange_counter<T, real_kind> {
         static intptr_t count(const void *beginval, const void *endval, const void *stepval) {
             T begin = *reinterpret_cast<const T *>(beginval);
             T end = *reinterpret_cast<const T *>(endval);

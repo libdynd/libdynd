@@ -54,7 +54,7 @@ struct single_assigner_builtin_base<dst_type, std::complex<src_real_type>, uint_
     }
 };
 template<class dst_type, class src_real_type>
-struct single_assigner_builtin_base<dst_type, std::complex<src_real_type>, float_kind, complex_kind, assign_error_none>
+struct single_assigner_builtin_base<dst_type, std::complex<src_real_type>, real_kind, complex_kind, assign_error_none>
 {
     static void assign(dst_type *dst, const std::complex<src_real_type> *src) {
         *dst = static_cast<dst_type>(src->real());
@@ -221,7 +221,7 @@ struct single_assigner_builtin_base<dst_type, src_type, uint_kind, uint_kind, as
 
 // Signed int -> floating point with inexact checking
 template<class dst_type, class src_type>
-struct single_assigner_builtin_base<dst_type, src_type, float_kind, int_kind, assign_error_inexact>
+struct single_assigner_builtin_base<dst_type, src_type, real_kind, int_kind, assign_error_inexact>
 {
     static void assign(dst_type *dst, const src_type *src) {
         src_type s = *src;
@@ -236,11 +236,11 @@ struct single_assigner_builtin_base<dst_type, src_type, float_kind, int_kind, as
 
 // Signed int -> floating point with other checking
 template<class dst_type, class src_type>
-struct single_assigner_builtin_base<dst_type, src_type, float_kind, int_kind, assign_error_overflow>
-    : public single_assigner_builtin_base<dst_type, src_type, float_kind, int_kind, assign_error_none> {};
+struct single_assigner_builtin_base<dst_type, src_type, real_kind, int_kind, assign_error_overflow>
+    : public single_assigner_builtin_base<dst_type, src_type, real_kind, int_kind, assign_error_none> {};
 template<class dst_type, class src_type>
-struct single_assigner_builtin_base<dst_type, src_type, float_kind, int_kind, assign_error_fractional>
-    : public single_assigner_builtin_base<dst_type, src_type, float_kind, int_kind, assign_error_none> {};
+struct single_assigner_builtin_base<dst_type, src_type, real_kind, int_kind, assign_error_fractional>
+    : public single_assigner_builtin_base<dst_type, src_type, real_kind, int_kind, assign_error_none> {};
 
 // Signed int -> complex floating point with inexact checking
 template<class dst_real_type, class src_type>
@@ -267,7 +267,7 @@ struct single_assigner_builtin_base<std::complex<dst_real_type>, src_type, compl
 
 // Unsigned int -> floating point with inexact checking
 template<class dst_type, class src_type>
-struct single_assigner_builtin_base<dst_type, src_type, float_kind, uint_kind, assign_error_inexact>
+struct single_assigner_builtin_base<dst_type, src_type, real_kind, uint_kind, assign_error_inexact>
 {
     static void assign(dst_type *dst, const src_type *src) {
         src_type s = *src;
@@ -282,11 +282,11 @@ struct single_assigner_builtin_base<dst_type, src_type, float_kind, uint_kind, a
 
 // Unsigned int -> floating point with other checking
 template<class dst_type, class src_type>
-struct single_assigner_builtin_base<dst_type, src_type, float_kind, uint_kind, assign_error_overflow>
-    : public single_assigner_builtin_base<dst_type, src_type, float_kind, uint_kind, assign_error_none> {};
+struct single_assigner_builtin_base<dst_type, src_type, real_kind, uint_kind, assign_error_overflow>
+    : public single_assigner_builtin_base<dst_type, src_type, real_kind, uint_kind, assign_error_none> {};
 template<class dst_type, class src_type>
-struct single_assigner_builtin_base<dst_type, src_type, float_kind, uint_kind, assign_error_fractional>
-    : public single_assigner_builtin_base<dst_type, src_type, float_kind, uint_kind, assign_error_none> {};
+struct single_assigner_builtin_base<dst_type, src_type, real_kind, uint_kind, assign_error_fractional>
+    : public single_assigner_builtin_base<dst_type, src_type, real_kind, uint_kind, assign_error_none> {};
 
 // Unsigned int -> complex floating point with inexact checking
 template<class dst_real_type, class src_type>
@@ -313,7 +313,7 @@ struct single_assigner_builtin_base<std::complex<dst_real_type>, src_type, compl
 
 // Floating point -> signed int with overflow checking
 template<class dst_type, class src_type>
-struct single_assigner_builtin_base<dst_type, src_type, int_kind, float_kind, assign_error_overflow>
+struct single_assigner_builtin_base<dst_type, src_type, int_kind, real_kind, assign_error_overflow>
 {
     static void assign(dst_type *dst, const src_type *src) {
         src_type s = *src;
@@ -327,7 +327,7 @@ struct single_assigner_builtin_base<dst_type, src_type, int_kind, float_kind, as
 
 // Floating point -> signed int with fractional checking
 template<class dst_type, class src_type>
-struct single_assigner_builtin_base<dst_type, src_type, int_kind, float_kind, assign_error_fractional>
+struct single_assigner_builtin_base<dst_type, src_type, int_kind, real_kind, assign_error_fractional>
 {
     static void assign(dst_type *dst, const src_type *src) {
         src_type s = *src;
@@ -345,8 +345,8 @@ struct single_assigner_builtin_base<dst_type, src_type, int_kind, float_kind, as
 
 // Floating point -> signed int with other checking
 template<class dst_type, class src_type>
-struct single_assigner_builtin_base<dst_type, src_type, int_kind, float_kind, assign_error_inexact>
-    : public single_assigner_builtin_base<dst_type, src_type, int_kind, float_kind, assign_error_fractional> {};
+struct single_assigner_builtin_base<dst_type, src_type, int_kind, real_kind, assign_error_inexact>
+    : public single_assigner_builtin_base<dst_type, src_type, int_kind, real_kind, assign_error_fractional> {};
 
 // Complex floating point -> signed int with overflow checking
 template<class dst_type, class src_real_type>
@@ -395,7 +395,7 @@ struct single_assigner_builtin_base<dst_type, std::complex<src_real_type>, int_k
 
 // Floating point -> unsigned int with overflow checking
 template<class dst_type, class src_type>
-struct single_assigner_builtin_base<dst_type, src_type, uint_kind, float_kind, assign_error_overflow>
+struct single_assigner_builtin_base<dst_type, src_type, uint_kind, real_kind, assign_error_overflow>
 {
     static void assign(dst_type *dst, const src_type *src) {
         src_type s = *src;
@@ -409,7 +409,7 @@ struct single_assigner_builtin_base<dst_type, src_type, uint_kind, float_kind, a
 
 // Floating point -> unsigned int with fractional checking
 template<class dst_type, class src_type>
-struct single_assigner_builtin_base<dst_type, src_type, uint_kind, float_kind, assign_error_fractional>
+struct single_assigner_builtin_base<dst_type, src_type, uint_kind, real_kind, assign_error_fractional>
 {
     static void assign(dst_type *dst, const src_type *src) {
         src_type s = *src;
@@ -427,8 +427,8 @@ struct single_assigner_builtin_base<dst_type, src_type, uint_kind, float_kind, a
 
 // Floating point -> unsigned int with other checking
 template<class dst_type, class src_type>
-struct single_assigner_builtin_base<dst_type, src_type, uint_kind, float_kind, assign_error_inexact>
-    : public single_assigner_builtin_base<dst_type, src_type, uint_kind, float_kind, assign_error_fractional> {};
+struct single_assigner_builtin_base<dst_type, src_type, uint_kind, real_kind, assign_error_inexact>
+    : public single_assigner_builtin_base<dst_type, src_type, uint_kind, real_kind, assign_error_fractional> {};
 
 // Complex floating point -> unsigned int with overflow checking
 template<class dst_type, class src_real_type>
@@ -477,14 +477,14 @@ struct single_assigner_builtin_base<dst_type, std::complex<src_real_type>, uint_
 
 // float -> float with no checking
 template<>
-struct single_assigner_builtin_base<float, float, float_kind, float_kind, assign_error_overflow>
-    : public single_assigner_builtin_base<float, float, float_kind, float_kind, assign_error_none> {};
+struct single_assigner_builtin_base<float, float, real_kind, real_kind, assign_error_overflow>
+    : public single_assigner_builtin_base<float, float, real_kind, real_kind, assign_error_none> {};
 template<>
-struct single_assigner_builtin_base<float, float, float_kind, float_kind, assign_error_fractional>
-    : public single_assigner_builtin_base<float, float, float_kind, float_kind, assign_error_none> {};
+struct single_assigner_builtin_base<float, float, real_kind, real_kind, assign_error_fractional>
+    : public single_assigner_builtin_base<float, float, real_kind, real_kind, assign_error_none> {};
 template<>
-struct single_assigner_builtin_base<float, float, float_kind, float_kind, assign_error_inexact>
-    : public single_assigner_builtin_base<float, float, float_kind, float_kind, assign_error_none> {};
+struct single_assigner_builtin_base<float, float, real_kind, real_kind, assign_error_inexact>
+    : public single_assigner_builtin_base<float, float, real_kind, real_kind, assign_error_none> {};
 
 // complex<float> -> complex<float> with no checking
 template<>
@@ -499,14 +499,14 @@ struct single_assigner_builtin_base<std::complex<float>, std::complex<float>, co
 
 // float -> double with no checking
 template<>
-struct single_assigner_builtin_base<double, float, float_kind, float_kind, assign_error_overflow>
-    : public single_assigner_builtin_base<double, float, float_kind, float_kind, assign_error_none> {};
+struct single_assigner_builtin_base<double, float, real_kind, real_kind, assign_error_overflow>
+    : public single_assigner_builtin_base<double, float, real_kind, real_kind, assign_error_none> {};
 template<>
-struct single_assigner_builtin_base<double, float, float_kind, float_kind, assign_error_fractional>
-    : public single_assigner_builtin_base<double, float, float_kind, float_kind, assign_error_none> {};
+struct single_assigner_builtin_base<double, float, real_kind, real_kind, assign_error_fractional>
+    : public single_assigner_builtin_base<double, float, real_kind, real_kind, assign_error_none> {};
 template<>
-struct single_assigner_builtin_base<double, float, float_kind, float_kind, assign_error_inexact>
-    : public single_assigner_builtin_base<double, float, float_kind, float_kind, assign_error_none> {};
+struct single_assigner_builtin_base<double, float, real_kind, real_kind, assign_error_inexact>
+    : public single_assigner_builtin_base<double, float, real_kind, real_kind, assign_error_none> {};
 
 // complex<float> -> complex<double> with no checking
 template<>
@@ -521,14 +521,14 @@ struct single_assigner_builtin_base<std::complex<double>, std::complex<float>, c
 
 // double -> double with no checking
 template<>
-struct single_assigner_builtin_base<double, double, float_kind, float_kind, assign_error_overflow>
-    : public single_assigner_builtin_base<double, double, float_kind, float_kind, assign_error_none> {};
+struct single_assigner_builtin_base<double, double, real_kind, real_kind, assign_error_overflow>
+    : public single_assigner_builtin_base<double, double, real_kind, real_kind, assign_error_none> {};
 template<>
-struct single_assigner_builtin_base<double, double, float_kind, float_kind, assign_error_fractional>
-    : public single_assigner_builtin_base<double, double, float_kind, float_kind, assign_error_none> {};
+struct single_assigner_builtin_base<double, double, real_kind, real_kind, assign_error_fractional>
+    : public single_assigner_builtin_base<double, double, real_kind, real_kind, assign_error_none> {};
 template<>
-struct single_assigner_builtin_base<double, double, float_kind, float_kind, assign_error_inexact>
-    : public single_assigner_builtin_base<double, double, float_kind, float_kind, assign_error_none> {};
+struct single_assigner_builtin_base<double, double, real_kind, real_kind, assign_error_inexact>
+    : public single_assigner_builtin_base<double, double, real_kind, real_kind, assign_error_none> {};
 
 // complex<double> -> complex<double> with no checking
 template<>
@@ -543,7 +543,7 @@ struct single_assigner_builtin_base<std::complex<double>, std::complex<double>, 
 
 // double -> float with overflow checking
 template<>
-struct single_assigner_builtin_base<float, double, float_kind, float_kind, assign_error_overflow>
+struct single_assigner_builtin_base<float, double, real_kind, real_kind, assign_error_overflow>
 {
     static void assign(float *dst, const double *src) {
         clear_fp_status();
@@ -556,13 +556,13 @@ struct single_assigner_builtin_base<float, double, float_kind, float_kind, assig
 
 // double -> float with fractional checking
 template<>
-struct single_assigner_builtin_base<float, double, float_kind, float_kind, assign_error_fractional>
-    : public single_assigner_builtin_base<float, double, float_kind, float_kind, assign_error_overflow> {};
+struct single_assigner_builtin_base<float, double, real_kind, real_kind, assign_error_fractional>
+    : public single_assigner_builtin_base<float, double, real_kind, real_kind, assign_error_overflow> {};
 
 
 // double -> float with inexact checking
 template<>
-struct single_assigner_builtin_base<float, double, float_kind, float_kind, assign_error_inexact>
+struct single_assigner_builtin_base<float, double, real_kind, real_kind, assign_error_inexact>
 {
     static void assign(float *dst, const double *src) {
         double s = *src;
@@ -627,7 +627,7 @@ struct single_assigner_builtin_base<std::complex<float>, std::complex<double>, c
 
 // complex<T> -> T with overflow checking
 template<typename real_type>
-struct single_assigner_builtin_base<real_type, std::complex<real_type>, float_kind, complex_kind, assign_error_overflow>
+struct single_assigner_builtin_base<real_type, std::complex<real_type>, real_kind, complex_kind, assign_error_overflow>
 {
     static void assign(real_type *dst, const std::complex<real_type> *src) {
         std::complex<real_type> s = *src;
@@ -642,41 +642,41 @@ struct single_assigner_builtin_base<real_type, std::complex<real_type>, float_ki
 
 // complex<T> -> T with fractional checking
 template<typename real_type>
-struct single_assigner_builtin_base<real_type, std::complex<real_type>, float_kind, complex_kind, assign_error_fractional>
-    : public single_assigner_builtin_base<real_type, std::complex<real_type>, float_kind, complex_kind, assign_error_overflow> {};
+struct single_assigner_builtin_base<real_type, std::complex<real_type>, real_kind, complex_kind, assign_error_fractional>
+    : public single_assigner_builtin_base<real_type, std::complex<real_type>, real_kind, complex_kind, assign_error_overflow> {};
 
 // complex<T> -> T with inexact checking
 template<typename real_type>
-struct single_assigner_builtin_base<real_type, std::complex<real_type>, float_kind, complex_kind, assign_error_inexact>
-    : public single_assigner_builtin_base<real_type, std::complex<real_type>, float_kind, complex_kind, assign_error_overflow> {};
+struct single_assigner_builtin_base<real_type, std::complex<real_type>, real_kind, complex_kind, assign_error_inexact>
+    : public single_assigner_builtin_base<real_type, std::complex<real_type>, real_kind, complex_kind, assign_error_overflow> {};
 
 // T -> complex<T>
 template<typename real_type>
-struct single_assigner_builtin_base<std::complex<real_type>, real_type, complex_kind, float_kind, assign_error_none>
+struct single_assigner_builtin_base<std::complex<real_type>, real_type, complex_kind, real_kind, assign_error_none>
 {
     static void assign(std::complex<real_type> *dst, const real_type *src) {
         *dst = *src;
     }
 };
 template<typename real_type, assign_error_mode errmode>
-struct single_assigner_builtin_base<std::complex<real_type>, real_type, complex_kind, float_kind, errmode>
-    : public single_assigner_builtin_base<std::complex<real_type>, real_type, complex_kind, float_kind, assign_error_none> {};
+struct single_assigner_builtin_base<std::complex<real_type>, real_type, complex_kind, real_kind, errmode>
+    : public single_assigner_builtin_base<std::complex<real_type>, real_type, complex_kind, real_kind, assign_error_none> {};
 
 // float -> complex<double>
 template<>
-struct single_assigner_builtin_base<std::complex<double>, float, complex_kind, float_kind, assign_error_none>
+struct single_assigner_builtin_base<std::complex<double>, float, complex_kind, real_kind, assign_error_none>
 {
     static void assign(std::complex<double> *dst, const float *src) {
         *dst = *src;
     }
 };
 template<assign_error_mode errmode>
-struct single_assigner_builtin_base<std::complex<double>, float, complex_kind, float_kind, errmode>
-    : public single_assigner_builtin_base<std::complex<double>, float, complex_kind, float_kind, assign_error_none> {};
+struct single_assigner_builtin_base<std::complex<double>, float, complex_kind, real_kind, errmode>
+    : public single_assigner_builtin_base<std::complex<double>, float, complex_kind, real_kind, assign_error_none> {};
 
 // complex<float> -> double with overflow checking
 template<>
-struct single_assigner_builtin_base<double, std::complex<float>, float_kind, complex_kind, assign_error_overflow>
+struct single_assigner_builtin_base<double, std::complex<float>, real_kind, complex_kind, assign_error_overflow>
 {
     static void assign(double *dst, const std::complex<float> *src) {
         std::complex<float> s = *src;
@@ -691,17 +691,17 @@ struct single_assigner_builtin_base<double, std::complex<float>, float_kind, com
 
 // complex<float> -> double with fractional checking
 template<>
-struct single_assigner_builtin_base<double, std::complex<float>, float_kind, complex_kind, assign_error_fractional>
-    : public single_assigner_builtin_base<double, std::complex<float>, float_kind, complex_kind, assign_error_overflow> {};
+struct single_assigner_builtin_base<double, std::complex<float>, real_kind, complex_kind, assign_error_fractional>
+    : public single_assigner_builtin_base<double, std::complex<float>, real_kind, complex_kind, assign_error_overflow> {};
 
 // complex<float> -> double with inexact checking
 template<>
-struct single_assigner_builtin_base<double, std::complex<float>, float_kind, complex_kind, assign_error_inexact>
-    : public single_assigner_builtin_base<double, std::complex<float>, float_kind, complex_kind, assign_error_overflow> {};
+struct single_assigner_builtin_base<double, std::complex<float>, real_kind, complex_kind, assign_error_inexact>
+    : public single_assigner_builtin_base<double, std::complex<float>, real_kind, complex_kind, assign_error_overflow> {};
 
 // complex<double> -> float with overflow checking
 template<>
-struct single_assigner_builtin_base<float, std::complex<double>, float_kind, complex_kind, assign_error_overflow>
+struct single_assigner_builtin_base<float, std::complex<double>, real_kind, complex_kind, assign_error_overflow>
 {
     static void assign(float *dst, const std::complex<double> *src) {
         std::complex<double> s = *src;
@@ -723,12 +723,12 @@ struct single_assigner_builtin_base<float, std::complex<double>, float_kind, com
 
 // complex<double> -> float with fractional checking
 template<>
-struct single_assigner_builtin_base<float, std::complex<double>, float_kind, complex_kind, assign_error_fractional>
-    : public single_assigner_builtin_base<float, std::complex<double>, float_kind, complex_kind, assign_error_overflow> {};
+struct single_assigner_builtin_base<float, std::complex<double>, real_kind, complex_kind, assign_error_fractional>
+    : public single_assigner_builtin_base<float, std::complex<double>, real_kind, complex_kind, assign_error_overflow> {};
 
 // complex<double> -> float with inexact checking
 template<>
-struct single_assigner_builtin_base<float, std::complex<double>, float_kind, complex_kind, assign_error_inexact>
+struct single_assigner_builtin_base<float, std::complex<double>, real_kind, complex_kind, assign_error_inexact>
 {
     static void assign(float *dst, const std::complex<double> *src) {
         std::complex<double> s = *src;
@@ -754,7 +754,7 @@ struct single_assigner_builtin_base<float, std::complex<double>, float_kind, com
 
 // double -> complex<float> with overflow checking
 template<>
-struct single_assigner_builtin_base<std::complex<float>, double, complex_kind, float_kind, assign_error_overflow>
+struct single_assigner_builtin_base<std::complex<float>, double, complex_kind, real_kind, assign_error_overflow>
 {
     static void assign(std::complex<float> *dst, const double *src) {
         double s = *src;
@@ -772,12 +772,12 @@ struct single_assigner_builtin_base<std::complex<float>, double, complex_kind, f
 
 // double -> complex<float> with fractional checking
 template<>
-struct single_assigner_builtin_base<std::complex<float>, double, complex_kind, float_kind, assign_error_fractional>
-    : public single_assigner_builtin_base<std::complex<float>, double, complex_kind, float_kind, assign_error_overflow> {};
+struct single_assigner_builtin_base<std::complex<float>, double, complex_kind, real_kind, assign_error_fractional>
+    : public single_assigner_builtin_base<std::complex<float>, double, complex_kind, real_kind, assign_error_overflow> {};
 
 // double -> complex<float> with inexact checking
 template<>
-struct single_assigner_builtin_base<std::complex<float>, double, complex_kind, float_kind, assign_error_inexact>
+struct single_assigner_builtin_base<std::complex<float>, double, complex_kind, real_kind, assign_error_inexact>
 {
     static void assign(std::complex<float> *dst, const double *src) {
         double s = *src;
