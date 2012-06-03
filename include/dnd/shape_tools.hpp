@@ -15,6 +15,16 @@
 namespace dnd {
 
 /**
+ * This function returns true if the src_shape can broadcast to the dst_shape
+ * It's following the same rules as numpy. The
+ * destination ndim must be greator or equal, and each
+ * dimension size must be broadcastable with everything
+ * shoved to the right.
+ */
+bool shape_can_broadcast(int dst_ndim, const intptr_t *dst_shape,
+                        int src_ndim, const intptr_t *src_shape);
+
+/**
  * This function broadcasts the dimensions and strides of 'src' to a given
  * shape, raising an error if it cannot be broadcast.
  *

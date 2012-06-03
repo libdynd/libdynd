@@ -15,7 +15,7 @@
 
 #include <dnd/dtype_assign.hpp>
 
-#include "single_assigner_simple.hpp"
+#include "single_assigner_builtin.hpp"
 
 #ifdef __GNUC__
 // The -Weffc++ flag warns about derived classes not having a virtual destructor.
@@ -43,7 +43,7 @@ bool dnd::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt)
 
     if (dst_ext == NULL && src_ext == NULL) {
         switch (src_dt.kind()) {
-            case generic_kind:
+            case pattern_kind: // TODO: raise an error?
                 return true;
             case bool_kind:
                 switch (dst_dt.kind()) {
@@ -161,13 +161,13 @@ bool dnd::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt)
 
 typedef void (*assign_function_t)(void *dst, const void *src);
 
-static assign_function_t single_assign_table[11][11][4] =
+static assign_function_t single_assign_table[builtin_type_id_count][builtin_type_id_count][4] =
 {
 #define ERROR_MODE_LEVEL(dst_type, src_type) { \
-        (assign_function_t)&single_assigner_simple<dst_type, src_type, assign_error_none>::assign, \
-        (assign_function_t)&single_assigner_simple<dst_type, src_type, assign_error_overflow>::assign, \
-        (assign_function_t)&single_assigner_simple<dst_type, src_type, assign_error_fractional>::assign, \
-        (assign_function_t)&single_assigner_simple<dst_type, src_type, assign_error_inexact>::assign \
+        (assign_function_t)&single_assigner_builtin<dst_type, src_type, assign_error_none>::assign, \
+        (assign_function_t)&single_assigner_builtin<dst_type, src_type, assign_error_overflow>::assign, \
+        (assign_function_t)&single_assigner_builtin<dst_type, src_type, assign_error_fractional>::assign, \
+        (assign_function_t)&single_assigner_builtin<dst_type, src_type, assign_error_inexact>::assign \
     }
 
 #define SRC_TYPE_LEVEL(dst_type) { \
@@ -207,7 +207,7 @@ static inline assign_function_t get_single_assign_function(const dtype& dst_dt, 
     // Do a table lookup for the built-in range of dtypes
     if (dst_type_id >= bool_type_id && dst_type_id <= float64_type_id &&
             src_type_id >= bool_type_id && src_type_id <= float64_type_id) {
-        return single_assign_table[dst_type_id-1][src_type_id-1][errmode];
+        return single_assign_table[dst_type_id][src_type_id][errmode];
     } else {
         return NULL;
     }

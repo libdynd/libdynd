@@ -195,7 +195,7 @@ static binary_operation_t get_builtin_operation_function(
                                 const dtype& dt, intptr_t dst_stride,
                                 intptr_t src0_stride, intptr_t src1_stride)
 {
-    static int compress_type_id[12] = {-1, -1, -1, -1, 0, 1, -1, -1, 2, 3, 4, 5};
+    static int compress_type_id[builtin_type_id_count] = {-1, -1, -1, 0, 1, -1, -1, 2, 3, 4, 5};
     intptr_t itemsize = dt.itemsize();
     int cid = compress_type_id[dt.type_id()];
 

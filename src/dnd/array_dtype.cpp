@@ -85,22 +85,6 @@ void array_dtype::print(std::ostream& o) const
     o << ")>";
 }
 
-static bool can_broadcast(int dst_ndim, const intptr_t *dst_shape, int src_ndim, const intptr_t *src_shape)
-{
-    if (dst_ndim < src_ndim) {
-        return false;
-    } else {
-        dst_shape += (dst_ndim - src_ndim);
-        for (int i = 0; i < src_ndim; ++i) {
-            if (src_shape[i] != 1 && src_shape[i] != dst_shape[i]) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-}
-
 
 bool array_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const
 {
@@ -112,7 +96,7 @@ bool array_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_d
             // Casting array to array, check that it can broadcast, and that the
             // element dtype can cast losslessly
             const array_dtype *dst_adt = static_cast<const array_dtype *>(dst_dt.extended());
-            return can_broadcast(dst_adt->m_ndim, dst_adt->get_shape(), m_ndim, get_shape()) &&
+            return shape_can_broadcast(dst_adt->m_ndim, dst_adt->get_shape(), m_ndim, get_shape()) &&
                 ::is_lossless_assignment(dst_adt->m_element_dtype, m_element_dtype);
         } else {
             return false;

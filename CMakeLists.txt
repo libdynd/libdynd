@@ -32,7 +32,7 @@ set(dnd_SRC
     src/dnd/arithmetic_op.cpp
     src/dnd/shape_tools.cpp
     src/dnd/ndarray_expr_node_instances.hpp
-    src/dnd/single_assigner_simple.hpp
+    src/dnd/single_assigner_builtin.hpp
     include/dnd/array_dtype.hpp
     include/dnd/config.hpp
     include/dnd/dtype.hpp

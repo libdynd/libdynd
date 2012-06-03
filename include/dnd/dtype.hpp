@@ -27,7 +27,6 @@ public:
 };
 
 enum dtype_kind {
-    generic_kind,
     bool_kind,
     int_kind,
     uint_kind,
@@ -36,13 +35,13 @@ enum dtype_kind {
     string_kind,
     // For struct_type_id and array_type_id
     composite_kind,
+    // For pattern-matching dtypes
+    pattern_kind,
     // For use when it becomes possible to register custom dtypes
     custom_kind
 };
 
 enum {
-    // A type which can convert into anything - cannot be instantiated
-    generic_type_id,
     // A 1-byte boolean type
     bool_type_id,
     // Signed integer types
@@ -67,7 +66,13 @@ enum {
     // Composite dtypes
     struct_type_id,
     tuple_type_id,
-    array_type_id
+    array_type_id,
+
+    // pattern matches against other types - cannot instantiate
+    pattern_type_id,
+
+    // The number of built-in, atomic types
+    builtin_type_id_count = 11
 };
 
 

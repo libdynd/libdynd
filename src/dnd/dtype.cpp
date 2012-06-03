@@ -29,7 +29,6 @@ dnd::extended_dtype::~extended_dtype()
 static struct {
     unsigned char kind, alignment, itemsize;
 } basic_type_id_info[DND_MAX_NUM_TYPE_IDS] = {
-    {generic_kind, 1, 0},      // generic
     {bool_kind, 1, 1},         // bool
     {int_kind, 1, 1},          // int8
     {int_kind, 2, 2},          // int16
@@ -45,7 +44,8 @@ static struct {
     {composite_kind, 16, 16},  // sse128d
     {string_kind, 1, 0},       // utf8
     {composite_kind, 1, 0},    // struct
-    {composite_kind, 1, 0}     // subarray
+    {composite_kind, 1, 0},    // subarray
+    {pattern_kind, 1, 0}      // generic
 };
 
 /**
@@ -95,7 +95,7 @@ const char *dnd::get_type_id_basename(int type_id)
 }
 
 dtype::dtype()
-    : m_type_id(generic_type_id), m_kind(generic_kind), m_alignment(1),
+    : m_type_id(pattern_type_id), m_kind(pattern_kind), m_alignment(1),
       m_itemsize(0), m_data()
 {
     // Default to a generic type with zero size
@@ -217,9 +217,6 @@ byteswap_operation_t dnd::dtype::get_byteswap_operation() const
 std::ostream& dnd::operator<<(std::ostream& o, const dtype& rhs)
 {
     switch (rhs.type_id()) {
-        case generic_type_id:
-            o << "generic";
-            break;
         case bool_type_id:
             o << "bool";
             break;
@@ -259,6 +256,9 @@ std::ostream& dnd::operator<<(std::ostream& o, const dtype& rhs)
             } else {
                 o << "utf8[" << rhs.itemsize() << "]";
             }
+            break;
+        case pattern_type_id:
+            o << "pattern";
             break;
         default:
             if (rhs.extended()) {

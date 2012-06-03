@@ -13,6 +13,23 @@
 using namespace std;
 using namespace dnd;
 
+bool dnd::shape_can_broadcast(int dst_ndim, const intptr_t *dst_shape,
+                            int src_ndim, const intptr_t *src_shape)
+{
+    if (dst_ndim >= src_ndim) {
+        dst_shape += (dst_ndim - src_ndim);
+        for (int i = 0; i < src_ndim; ++i) {
+            if (src_shape[i] != 1 && src_shape[i] != dst_shape[i]) {
+                return false;
+            }
+        }
+
+        return true;
+    } else {
+        return false;
+    }
+}
+
 void dnd::broadcast_to_shape(int dst_ndim, const intptr_t *dst_shape,
                 int src_ndim, const intptr_t *src_shape, const intptr_t *src_strides,
                 intptr_t *out_strides)
