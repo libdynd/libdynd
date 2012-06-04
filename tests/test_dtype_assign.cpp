@@ -1,3 +1,7 @@
+//
+// This tests the raw-memory dtype assignment functions.
+//
+
 #include <iostream>
 #include <stdexcept>
 #include <cmath>

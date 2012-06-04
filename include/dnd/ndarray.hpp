@@ -70,6 +70,8 @@ public:
     ndarray(unsigned long long value);
     ndarray(float value);
     ndarray(double value);
+    ndarray(std::complex<float> value);
+    ndarray(std::complex<double> value);
     /** Constructs a zero-dimensional scalar array */
     explicit ndarray(const dtype& dt);
     /** Constructs an array with the given dtype, shape, and axis_perm (for memory layout) */

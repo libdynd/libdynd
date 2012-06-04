@@ -121,6 +121,7 @@ TEST(NDArrayAssign, ScalarAssignment_Float32) {
     a.val_assign(1/3.0);
     EXPECT_EQ((float)(1/3.0), *ptr_f32);
     EXPECT_THROW(a.val_assign(1/3.0, assign_error_inexact), runtime_error);
+    // Float32 can't represent this value exactly
     a.val_assign(33554433);
     EXPECT_EQ(33554432, *ptr_f32);
     EXPECT_THROW(a.val_assign(33554433, assign_error_inexact), runtime_error);
@@ -143,9 +144,69 @@ TEST(NDArrayAssign, ScalarAssignment_Float64) {
     EXPECT_EQ(1/3.0, *ptr_f64);
     a.val_assign(33554433, assign_error_inexact);
     EXPECT_EQ(33554433, *ptr_f64);
+    // Float64 can't represent this integer value exactly
     a.val_assign(36028797018963969LL);
     EXPECT_EQ(36028797018963968LL, *ptr_f64);
     EXPECT_THROW(a.val_assign(36028797018963969LL, assign_error_inexact), runtime_error);
+}
+
+TEST(NDArrayAssign, ScalarAssignment_Complex_Float32) {
+    ndarray a;
+    complex<float> *ptr_cf32;
+
+    // Assignment to a complex float scalar
+    a = ndarray(make_dtype<complex<float> >());
+    ptr_cf32 = (complex<float> *)a.get_originptr();
+    a.val_assign(true);
+    EXPECT_EQ(complex<float>(1), *ptr_cf32);
+    a.val_assign(false);
+    EXPECT_EQ(complex<float>(0), *ptr_cf32);
+    a.val_assign(1/3.0f);
+    EXPECT_EQ(complex<float>(1/3.0f), *ptr_cf32);
+    a.val_assign(1/3.0);
+    EXPECT_EQ(complex<float>(float(1/3.0)), *ptr_cf32);
+    EXPECT_THROW(a.val_assign(1/3.0, assign_error_inexact), runtime_error);
+    // Float32 can't represent this integer value exactly
+    a.val_assign(33554433);
+    EXPECT_EQ(33554432., ptr_cf32->real());
+    EXPECT_EQ(0., ptr_cf32->imag());
+    EXPECT_THROW(a.val_assign(33554433, assign_error_inexact), runtime_error);
+
+    a.val_assign(complex<float>(1.5f, 2.75f));
+    EXPECT_EQ(complex<float>(1.5f, 2.75f), *ptr_cf32);
+    a.val_assign(complex<double>(1/3.0, -1/7.0));
+    EXPECT_EQ(complex<float>(float(1/3.0), float(-1/7.0)), *ptr_cf32);
+    EXPECT_THROW(a.val_assign(complex<double>(1/3.0, -1/7.0), assign_error_inexact), runtime_error);
+}
+
+TEST(NDArrayAssign, ScalarAssignment_Complex_Float64) {
+    ndarray a;
+    complex<double> *ptr_cf64;
+
+    // Assignment to a complex float scalar
+    a = ndarray(make_dtype<complex<double> >());
+    ptr_cf64 = (complex<double> *)a.get_originptr();
+    a.val_assign(true);
+    EXPECT_EQ(complex<double>(1), *ptr_cf64);
+    a.val_assign(false);
+    EXPECT_EQ(complex<double>(0), *ptr_cf64);
+    a.val_assign(1/3.0f);
+    EXPECT_EQ(complex<double>(1/3.0f), *ptr_cf64);
+    a.val_assign(1/3.0);
+    EXPECT_EQ(complex<double>(1/3.0), *ptr_cf64);
+    a.val_assign(33554433, assign_error_inexact);
+    EXPECT_EQ(33554433., ptr_cf64->real());
+    EXPECT_EQ(0., ptr_cf64->imag());
+    // Float64 can't represent this integer value exactly
+    a.val_assign(36028797018963969LL);
+    EXPECT_EQ(36028797018963968LL, ptr_cf64->real());
+    EXPECT_EQ(0, ptr_cf64->imag());
+    EXPECT_THROW(a.val_assign(36028797018963969LL, assign_error_inexact), runtime_error);
+
+    a.val_assign(complex<float>(1.5f, 2.75f));
+    EXPECT_EQ(complex<double>(1.5f, 2.75f), *ptr_cf64);
+    a.val_assign(complex<double>(1/3.0, -1/7.0), assign_error_inexact);
+    EXPECT_EQ(complex<double>(1/3.0, -1/7.0), *ptr_cf64);
 }
 
 TEST(NDArrayAssign, BroadcastAssign) {

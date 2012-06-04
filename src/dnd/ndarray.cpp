@@ -91,6 +91,14 @@ dnd::ndarray::ndarray(double value)
     : m_expr_tree(make_expr_tree_from_scalar(value))
 {
 }
+dnd::ndarray::ndarray(complex<float> value)
+    : m_expr_tree(make_expr_tree_from_scalar(value))
+{
+}
+dnd::ndarray::ndarray(complex<double> value)
+    : m_expr_tree(make_expr_tree_from_scalar(value))
+{
+}
 
 
 dnd::ndarray::ndarray(const dtype& dt)
