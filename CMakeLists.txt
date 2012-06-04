@@ -21,6 +21,9 @@ set(LINK_FLAGS)
 
 set(dnd_SRC
     src/dnd/dtypes/array_dtype.cpp
+    src/dnd/dtypes/conversion_dtype.cpp
+    include/dnd/dtypes/array_dtype.hpp
+    include/dnd/dtypes/conversion_dtype.hpp
     src/dnd/dtype.cpp
     src/dnd/dtype_assign.cpp
     src/dnd/dtype_promotion.cpp
@@ -33,7 +36,7 @@ set(dnd_SRC
     src/dnd/shape_tools.cpp
     src/dnd/ndarray_expr_node_instances.hpp
     src/dnd/single_assigner_builtin.hpp
-    include/dnd/dtypes/array_dtype.hpp
+    include/dnd/buffer_storage.hpp
     include/dnd/config.hpp
     include/dnd/dtype.hpp
     include/dnd/dtype_assign.hpp
@@ -60,6 +63,7 @@ include_directories(
 
 source_group("DTypes Source" REGULAR_EXPRESSION ".*/dtypes/.*cpp")
 source_group("DTypes Headers" REGULAR_EXPRESSION ".*/dtypes/.*hpp")
+source_group("Internal Headers" REGULAR_EXPRESSION "^src/.*hpp")
 
 if(WIN32)
     add_library(dynamicndarray STATIC ${dnd_SRC})

@@ -27,6 +27,10 @@ enum assign_error_mode {
     assign_error_inexact
 };
 
+const assign_error_mode default_error_mode = assign_error_fractional;
+
+std::ostream& operator<<(std::ostream& o, assign_error_mode errmode);
+
 /** If 'src' can always be cast to 'dst' with no loss of information */
 bool is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt);
 

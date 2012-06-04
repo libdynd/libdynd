@@ -34,8 +34,8 @@ dtype dnd::promote_dtypes_arithmetic(const dtype& dt0, const dtype& dt1)
     const extended_dtype *dt0_ext, *dt1_ext;
     uintptr_t itemsize = 0;
 
-    dt0_ext = dt0.extended();
-    dt1_ext = dt1.extended();
+    dt0_ext = dt0.value_dtype().extended();
+    dt1_ext = dt1.value_dtype().extended();
 
     if (dt0_ext == NULL && dt1_ext == NULL) {
         switch (dt0.kind()) {

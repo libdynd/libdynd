@@ -49,7 +49,7 @@ public:
     const dtype& storage_dtype(const dtype& self) const {
         return self;
     }
-    void print_data(std::ostream& o, const char *data, intptr_t stride, intptr_t size,
+    void print_data(std::ostream& o, const dtype& dt, const char *data, intptr_t stride, intptr_t size,
                         const char *separator) const;
 
     void print(std::ostream& o) const;

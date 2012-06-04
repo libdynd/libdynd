@@ -299,7 +299,7 @@ void dnd::dtype::print_data(std::ostream& o, const char *data, intptr_t stride, 
 {
     if (size > 0) {
         if (extended() != NULL) {
-            extended()->print_data(o, data, stride, size, separator);
+            extended()->print_data(o, *this, data, stride, size, separator);
         } else {
             // TODO: Handle byte-swapped dtypes
             switch (type_id()) {

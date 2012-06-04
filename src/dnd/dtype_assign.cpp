@@ -30,6 +30,29 @@
 using namespace std;
 using namespace dnd;
 
+std::ostream& dnd::operator<<(ostream& o, assign_error_mode errmode)
+{
+    switch (errmode) {
+    case assign_error_none:
+        o << "none";
+        break;
+    case assign_error_overflow:
+        o << "overflow";
+        break;
+    case assign_error_fractional:
+        o << "fractional";
+        break;
+    case assign_error_inexact:
+        o << "inexact";
+        break;
+    default:
+        o << "invalid error mode(" << (int)errmode << ")";
+        break;
+    }
+
+    return o;
+}
+
 // Returns true if the destination dtype can represent *all* the values
 // of the source dtype, false otherwise. This is used, for example,
 // to skip any overflow checks when doing value assignments between differing

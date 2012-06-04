@@ -42,6 +42,10 @@ enum dtype_kind {
     string_kind,
     // For struct_type_id and array_type_id
     composite_kind,
+    // For dtypes whose value_dtype != the dtype, signals
+    // that calculations should look at the value_dtype for
+    // type promotion, etc.
+    expression_kind,
     // For pattern-matching dtypes
     pattern_kind,
     // For use when it becomes possible to register custom dtypes
@@ -77,6 +81,9 @@ enum {
     struct_type_id,
     tuple_type_id,
     array_type_id,
+
+    // Adapter dtypes
+    conversion_type_id,
 
     // pattern matches against other types - cannot instantiate
     pattern_type_id,
@@ -202,7 +209,7 @@ public:
      */
     virtual const dtype& storage_dtype(const dtype& self) const = 0;
 
-    virtual void print_data(std::ostream& o, const char *data, intptr_t stride, intptr_t size,
+    virtual void print_data(std::ostream& o, const dtype& dt, const char *data, intptr_t stride, intptr_t size,
                         const char *separator) const = 0;
 
     virtual void print(std::ostream& o) const = 0;
