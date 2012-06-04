@@ -173,10 +173,12 @@ namespace {
     SPECIALIZATION_LEVEL(uint32_t, operation), \
     SPECIALIZATION_LEVEL(uint64_t, operation), \
     SPECIALIZATION_LEVEL(float, operation), \
-    SPECIALIZATION_LEVEL(double, operation) \
+    SPECIALIZATION_LEVEL(double, operation), \
+    SPECIALIZATION_LEVEL(complex<float>, operation), \
+    SPECIALIZATION_LEVEL(complex<double>, operation) \
     }
 #define BUILTIN_OPERATION_TABLE(operation) \
-    static binary_operation_t builtin_##operation##_table[6][6] = \
+    static binary_operation_t builtin_##operation##_table[8][8] = \
         TYPE_LEVEL(operation)
 
 BUILTIN_OPERATION_TABLE(addition);
@@ -188,14 +190,14 @@ BUILTIN_OPERATION_TABLE(division);
 #undef TYPE_LEVEL
 #undef SPECIALIZATION_LEVEL
 
-typedef binary_operation_t binary_operation_table_t[6];
+typedef binary_operation_t binary_operation_table_t[8];
 
 static binary_operation_t get_builtin_operation_function(
                                 binary_operation_table_t *builtin_optable,
                                 const dtype& dt, intptr_t dst_stride,
                                 intptr_t src0_stride, intptr_t src1_stride)
 {
-    static int compress_type_id[builtin_type_id_count] = {-1, -1, -1, 0, 1, -1, -1, 2, 3, 4, 5};
+    static int compress_type_id[builtin_type_id_count] = {-1, -1, -1, 0, 1, -1, -1, 2, 3, 4, 5, 6, 7};
     intptr_t itemsize = dt.itemsize();
     int cid = compress_type_id[dt.type_id()];
 

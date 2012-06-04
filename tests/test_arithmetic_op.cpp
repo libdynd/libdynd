@@ -85,6 +85,16 @@ TEST(ArithmeticOp, MatchingDTypes) {
     EXPECT_EQ(-6, c(0).as<int>());
     EXPECT_EQ(-3, c(1).as<int>());
     EXPECT_EQ(-2, c(2).as<int>());
+
+    // A complex scalar
+    c = (a + complex<float>(1, 2)).vals();
+    EXPECT_EQ(complex<float>(2,2), c(0).as<complex<float> >());
+    EXPECT_EQ(complex<float>(3,2), c(1).as<complex<float> >());
+    EXPECT_EQ(complex<float>(4,2), c(2).as<complex<float> >());
+    c = (complex<float>(0, -1) * a).vals();
+    EXPECT_EQ(complex<float>(0,-1), c(0).as<complex<float> >());
+    EXPECT_EQ(complex<float>(0,-2), c(1).as<complex<float> >());
+    EXPECT_EQ(complex<float>(0,-3), c(2).as<complex<float> >());
 }
 
 TEST(ArithmeticOp, MatchingDTypes_View) {

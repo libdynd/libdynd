@@ -5,7 +5,7 @@
 #include "inc_gtest.hpp"
 
 #include "dnd/dtype_assign.hpp"
-#include "dnd/array_dtype.hpp"
+#include "dnd/dtypes/array_dtype.hpp"
 
 using namespace std;
 using namespace dnd;

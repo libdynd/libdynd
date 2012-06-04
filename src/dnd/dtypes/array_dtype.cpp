@@ -2,7 +2,7 @@
 // Copyright (C) 2012 Continuum Analytics
 //
 
-#include <dnd/array_dtype.hpp>
+#include <dnd/dtypes/array_dtype.hpp>
 #include <dnd/raw_iteration.hpp>
 
 using namespace dnd;

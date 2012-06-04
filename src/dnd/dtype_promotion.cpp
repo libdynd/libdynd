@@ -135,8 +135,11 @@ dtype dnd::promote_dtypes_arithmetic(const dtype& dt0, const dtype& dt1)
                         return (dt0.itemsize() >= dt1.itemsize()) ? dt0
                                                                   : dt1;
                     case complex_kind:
-                        // Float type sizes don't affect complex type sizes
-                        return dt1;
+                        if (dt0.type_id() == float64_type_id && dt1.type_id() == complex_float32_type_id) {
+                            return dtype(complex_float64_type_id);
+                        } else {
+                            return dt1;
+                        }
                     case string_kind:
                         // Presently UTF8 is the only built-in string type
                         itemsize = min_strlen_for_builtin_kind(dt0.kind());
@@ -155,7 +158,11 @@ dtype dnd::promote_dtypes_arithmetic(const dtype& dt0, const dtype& dt1)
                     case int_kind:
                     case uint_kind:
                     case real_kind:
-                        return dt0;
+                        if (dt0.type_id() == complex_float32_type_id && dt1.type_id() == float64_type_id) {
+                            return dtype(complex_float64_type_id);
+                        } else {
+                            return dt0;
+                        }
                     case complex_kind:
                         return (dt0.itemsize() >= dt1.itemsize()) ? dt0
                                                                   : dt1;
