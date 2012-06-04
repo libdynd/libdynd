@@ -11,6 +11,7 @@
 #include <dnd/ndarray.hpp>
 #include <dnd/shape_tools.hpp>
 #include <dnd/exceptions.hpp>
+#include <dnd/dtypes/conversion_dtype.hpp>
 
 #include "ndarray_expr_node_instances.hpp"
 
@@ -42,8 +43,8 @@ dnd::convert_dtype_expr_node::get_unary_operation(
     // TODO: change the dtype_assign functions to always assume aligned and NBO,
     //       and add new functions for the general case.
     return get_dtype_strided_assign_operation(
-                    m_dtype, dst_fixedstride, 0,
-                    m_opnodes[0]->get_dtype(), src_fixedstride, 0,
+                    m_dtype, dst_fixedstride,
+                    m_opnodes[0]->get_dtype(), src_fixedstride,
                     m_errmode);
 }
 
@@ -292,7 +293,16 @@ ndarray_expr_node_ptr dnd::make_strided_array_expr_node(
 ndarray_expr_node_ptr dnd::make_convert_dtype_expr_node(
             ndarray_expr_node *node, const dtype& dt, assign_error_mode errmode)
 {
-    return ndarray_expr_node_ptr(new convert_dtype_expr_node(node, dt, errmode));
+    if (node->get_node_type() == strided_array_node_type) {
+        return ndarray_expr_node_ptr(new strided_array_expr_node(make_conversion_dtype(dt, node->get_dtype(), errmode),
+                    node->get_ndim(), node->get_shape(),
+                    static_cast<const strided_array_expr_node *>(node)->get_strides(),
+                    static_cast<const strided_array_expr_node *>(node)->get_originptr(),
+                    static_cast<const strided_array_expr_node *>(node)->get_buffer_owner()));
+    } else {
+        // TODO: Remove convert_dtype_expr_node, just use the conversion_dtype
+        return ndarray_expr_node_ptr(new convert_dtype_expr_node(node, dt, errmode));
+    }
 }
 
 ndarray_expr_node_ptr dnd::make_broadcast_strided_array_expr_node(ndarray_expr_node *node,
@@ -313,12 +323,7 @@ ndarray_expr_node_ptr dnd::make_broadcast_strided_array_expr_node(ndarray_expr_n
     ndarray_expr_node_ptr new_node(new strided_array_expr_node(snode->get_dtype(), ndim,
                                     shape, strides.get(), snode->get_originptr(), snode->get_buffer_owner()));
 
-    // Add an conversion/alignment node if necessary
-    if (dt == snode->get_dtype()) {
-        return std::move(new_node);
-    } else {
-        return ndarray_expr_node_ptr(new convert_dtype_expr_node(std::move(new_node), dt, errmode));
-    }
+    return std::move(new_node);
 }
 
 ndarray_expr_node_ptr dnd::make_linear_index_expr_node(ndarray_expr_node *node,

@@ -20,10 +20,17 @@ namespace dnd {
 class conversion_dtype : public extended_dtype {
     dtype m_value_dtype, m_storage_dtype;
     assign_error_mode m_errmode;
+    bool m_no_errors_to_value, m_no_errors_to_storage;
 public:
     conversion_dtype(const dtype& value_dtype, const dtype& storage_dtype, assign_error_mode errmode)
-        : m_value_dtype(value_dtype.value_dtype()), m_storage_dtype(storage_dtype), m_errmode(errmode)
-    {}
+        : m_value_dtype(value_dtype.value_dtype()), m_storage_dtype(storage_dtype), m_errmode(errmode),
+          m_no_errors_to_value(errmode == assign_error_none || is_lossless_assignment(m_value_dtype, m_storage_dtype)),
+          m_no_errors_to_storage(errmode == assign_error_none || is_lossless_assignment(m_storage_dtype, m_value_dtype))
+    {
+        if (m_value_dtype.kind() == expression_kind) {
+            throw std::runtime_error("conversion_dtype: The value dtype cannot be an expression_kind");
+        }
+    }
 
     int type_id() const {
         return conversion_type_id;
@@ -59,6 +66,10 @@ public:
     bool is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const;
 
     bool operator==(const extended_dtype& rhs) const;
+
+    // For expression_kind dtypes - converts to/from the storage's value dtype
+    std::pair<unary_operation_t, dnd::shared_ptr<auxiliary_data> > get_expression_to_value(intptr_t dst_fixedstride, intptr_t src_fixedstride);
+    std::pair<unary_operation_t, dnd::shared_ptr<auxiliary_data> > get_expression_from_value(intptr_t dst_fixedstride, intptr_t src_fixedstride);
 };
 
 inline dtype make_conversion_dtype(const dtype& value_dtype, const dtype& storage_dtype, assign_error_mode errmode = default_error_mode) {

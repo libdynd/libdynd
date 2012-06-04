@@ -178,8 +178,23 @@ template <> struct is_dtype_scalar<double> {enum {value = true};};
 template <> struct is_dtype_scalar<std::complex<float> > {enum {value = true};};
 template <> struct is_dtype_scalar<std::complex<double> > {enum {value = true};};
 
-/** Typedef for dtype endian byte-swapping operation */
-typedef void (*byteswap_operation_t)(void *dst, const void *src, uintptr_t itemsize);
+/** A base class for auxiliary data used by the unary_operation function pointers. */
+class auxiliary_data {
+public:
+
+    virtual ~auxiliary_data() {
+    }
+};
+
+/**
+ * The function pointer type for a unary operation, for example a casting function
+ * from one dtype to another.
+ */
+typedef void (*unary_operation_t)(void *dst, intptr_t dst_stride,
+                                const void *src, intptr_t src_stride,
+                                intptr_t count,
+                                const auxiliary_data *auxdata);
+
 
 class dtype;
 
@@ -220,6 +235,11 @@ public:
     virtual bool is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const = 0;
 
     virtual bool operator==(const extended_dtype& rhs) const = 0;
+
+    // For expression_kind dtypes - converts from (storage_dtype().value_dtype()) to (value_dtype())
+    std::pair<unary_operation_t, dnd::shared_ptr<auxiliary_data> > get_expression_to_value(intptr_t dst_fixedstride, intptr_t src_fixedstride);
+    // For expression_kind dtypes - converts from (value_dtype()) to (storage_dtype().value_dtype())
+    std::pair<unary_operation_t, dnd::shared_ptr<auxiliary_data> > get_expression_from_value(intptr_t dst_fixedstride, intptr_t src_fixedstride);
 };
 
 /**

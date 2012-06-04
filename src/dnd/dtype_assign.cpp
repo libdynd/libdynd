@@ -261,6 +261,7 @@ void dnd::dtype_assign(const dtype& dst_dt, void *dst, const dtype& src_dt, cons
     throw std::runtime_error(ss.str());
 }
 
+/*
 // A multiple unaligned byteswap assignment function which uses one of the single assignment functions as proxy
 namespace {
     class multiple_byteswap_unaligned_auxiliary_data : public auxiliary_data {
@@ -303,6 +304,7 @@ static void assign_multiple_byteswap_unaligned(void *dst, intptr_t dst_stride,
         src_cached += src_stride;
     }
 }
+*/
 
 // A multiple unaligned assignment function which uses one of the single assignment functions as proxy
 namespace {
@@ -496,40 +498,26 @@ struct multiple_assigner {
     }
 
 std::pair<unary_operation_t, dnd::shared_ptr<auxiliary_data> > dnd::get_dtype_strided_assign_operation(
-                    const dtype& dst_dt, intptr_t dst_fixedstride, char dst_align_test,
-                    const dtype& src_dt, intptr_t src_fixedstride, char src_align_test,
+                    const dtype& dst_dt, intptr_t dst_fixedstride,
+                    const dtype& src_dt, intptr_t src_fixedstride,
                     assign_error_mode errmode)
 {
-    //DEBUG_COUT << "get_dtype_strided_assign_operation (different dtype " << dst_dt << ", " << src_dt << ", error mode " << errmode << ")\n";
-    bool is_aligned = dst_dt.is_data_aligned(dst_align_test) && src_dt.is_data_aligned(src_align_test);
-
     // If the casting can be done losslessly, disable the error check to find faster code paths
-    if (is_lossless_assignment(dst_dt, src_dt)) {
+    if (errmode != assign_error_none && is_lossless_assignment(dst_dt, src_dt)) {
         errmode = assign_error_none;
     }
 
     if (dst_dt.extended() == NULL && src_dt.extended() == NULL) {
         // When there's misaligned or byte-swapped data, go the slow path
-        if (!is_aligned || errmode != assign_error_none) {
+        if (errmode != assign_error_none) {
             assign_function_t asn = get_single_assign_function(dst_dt, src_dt, errmode);
             if (asn != NULL) {
                 std::pair<unary_operation_t, dnd::shared_ptr<auxiliary_data> > result;
-                if (!is_aligned) {
-                    result.first = &assign_multiple_unaligned;
-                    multiple_unaligned_auxiliary_data *auxdata = new multiple_unaligned_auxiliary_data();
-                    result.second.reset(auxdata);
+                result.first = &assign_multiple_aligned;
+                multiple_aligned_auxiliary_data *auxdata = new multiple_aligned_auxiliary_data();
+                result.second.reset(auxdata);
 
-                    auxdata->assign = asn;
-                    auxdata->dst_itemsize = dst_dt.itemsize();
-                    auxdata->src_itemsize = src_dt.itemsize();
-                }
-                else {
-                    result.first = &assign_multiple_aligned;
-                    multiple_aligned_auxiliary_data *auxdata = new multiple_aligned_auxiliary_data();
-                    result.second.reset(auxdata);
-
-                    auxdata->assign = asn;
-                }
+                auxdata->assign = asn;
 
                 return std::move(result);
             }
@@ -559,8 +547,8 @@ void dnd::dtype_strided_assign(const dtype& dst_dt, void *dst, intptr_t dst_stri
                             intptr_t count, assign_error_mode errmode)
 {
     std::pair<unary_operation_t, dnd::shared_ptr<auxiliary_data> > op;
-    op = get_dtype_strided_assign_operation(dst_dt, dst_stride, (char)((intptr_t)dst | dst_stride),
-                                            src_dt, src_stride, (char)((intptr_t)src | src_stride),
+    op = get_dtype_strided_assign_operation(dst_dt, dst_stride,
+                                            src_dt, src_stride,
                                             errmode);
     op.first(dst, dst_stride, src, src_stride, count, op.second.get());
 }
@@ -678,8 +666,8 @@ static void strided_copy_zerostride_assign(void *dst, intptr_t dst_stride, const
 
 std::pair<unary_operation_t, dnd::shared_ptr<auxiliary_data> > dnd::get_dtype_strided_assign_operation(
                     const dtype& dt,
-                    intptr_t dst_fixedstride, char dst_align_test,
-                    intptr_t src_fixedstride, char src_align_test)
+                    intptr_t dst_fixedstride,
+                    intptr_t src_fixedstride)
 {
     //DEBUG_COUT << "get_dtype_strided_assign_operation (single dtype " << dt << ")\n";
     if (!dt.is_object_type()) {
@@ -722,19 +710,13 @@ std::pair<unary_operation_t, dnd::shared_ptr<auxiliary_data> > dnd::get_dtype_st
                     }
                     break;
                 case 2:
-                    if (((dst_align_test | src_align_test) & 0x1) == 0) {
-                        result.first = &fixed_size_copy_zerostride_assign<2>::assign;
-                    }
+                    result.first = &fixed_size_copy_zerostride_assign<2>::assign;
                     break;
                 case 4:
-                    if (((dst_align_test | src_align_test) & 0x3) == 0) {
-                        result.first = &fixed_size_copy_zerostride_assign<4>::assign;
-                    }
+                    result.first = &fixed_size_copy_zerostride_assign<4>::assign;
                     break;
                 case 8:
-                    if (((dst_align_test | src_align_test) & 0x7) == 0) {
-                        result.first = &fixed_size_copy_zerostride_assign<8>::assign;
-                    }
+                    result.first = &fixed_size_copy_zerostride_assign<8>::assign;
                     break;
             }
 
@@ -751,19 +733,13 @@ std::pair<unary_operation_t, dnd::shared_ptr<auxiliary_data> > dnd::get_dtype_st
                     result.first = &fixed_size_copy_assign<1>::assign;
                     break;
                 case 2:
-                    if (((dst_align_test | src_align_test) & 0x1) == 0) {
-                        result.first = &fixed_size_copy_assign<2>::assign;
-                    }
+                    result.first = &fixed_size_copy_assign<2>::assign;
                     break;
                 case 4:
-                    if (((dst_align_test | src_align_test) & 0x3) == 0) {
-                        result.first = &fixed_size_copy_assign<4>::assign;
-                    }
+                    result.first = &fixed_size_copy_assign<4>::assign;
                     break;
                 case 8:
-                    if (((dst_align_test | src_align_test) & 0x7) == 0) {
-                        result.first = &fixed_size_copy_assign<8>::assign;
-                    }
+                    result.first = &fixed_size_copy_assign<8>::assign;
                     break;
             }
 

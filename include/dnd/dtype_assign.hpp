@@ -34,14 +34,6 @@ std::ostream& operator<<(std::ostream& o, assign_error_mode errmode);
 /** If 'src' can always be cast to 'dst' with no loss of information */
 bool is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt);
 
-/** A base class for auxiliary data used by the unary_operation function pointers. */
-class auxiliary_data {
-public:
-
-    virtual ~auxiliary_data() {
-    }
-};
-
 /** 
  * Assign one element where src and dst may have different dtypes.
  * If the cast can be done losslessly, calls dtype_assign_noexcept,
@@ -62,29 +54,15 @@ void dtype_strided_assign(const dtype& dst_dt, void *dst, intptr_t dst_stride,
                             intptr_t count, assign_error_mode errmode);
 
 /**
- * The function pointer type for a unary operation, for example a casting function
- * from one dtype to another.
- */
-typedef void (*unary_operation_t)(void *dst, intptr_t dst_stride,
-                                const void *src, intptr_t src_stride,
-                                intptr_t count,
-                                const auxiliary_data *auxdata);
-
-/**
  * Returns a function for assigning from the source data type
  * to the destination data type, optionally specialized based on
  * the fixed strides provided.
  *
  * If a stride is unknown or non-fixed, pass INTPTR_MAX for that stride.
- *
- * Pass the bitwise-OR (|) of all the input array strides and origin pointers
- * of both src and dst to align_test. If this is not possible,
- * pass the value 1 to indicate the data may be aligned or not,
- * or the value 0 to indicate the data is definitely aligned.
  */
 std::pair<unary_operation_t, dnd::shared_ptr<auxiliary_data> > get_dtype_strided_assign_operation(
-                    const dtype& dst_dt, intptr_t dst_fixedstride, char dst_align_test,
-                    const dtype& src_dt, intptr_t src_fixedstride, char src_align_test,
+                    const dtype& dst_dt, intptr_t dst_fixedstride,
+                    const dtype& src_dt, intptr_t src_fixedstride,
                     assign_error_mode errmode);
 
 /**
@@ -93,8 +71,8 @@ std::pair<unary_operation_t, dnd::shared_ptr<auxiliary_data> > get_dtype_strided
  */
 std::pair<unary_operation_t, dnd::shared_ptr<auxiliary_data> > get_dtype_strided_assign_operation(
                     const dtype& dt,
-                    intptr_t dst_fixedstride, char dst_align_test,
-                    intptr_t src_fixedstride, char src_align_test);
+                    intptr_t dst_fixedstride,
+                    intptr_t src_fixedstride);
 
 } // namespace dnd
 

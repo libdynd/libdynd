@@ -10,6 +10,8 @@
 #include <dnd/raw_iteration.hpp>
 #include <dnd/shape_tools.hpp>
 #include <dnd/exceptions.hpp>
+#include <dnd/buffer_storage.hpp>
+#include <dnd/dtypes/conversion_dtype.hpp>
 
 #include "ndarray_expr_node_instances.hpp"
 
@@ -231,9 +233,9 @@ static void val_assign_unequal_dtypes(const ndarray& lhs, const ndarray& rhs, as
 
     std::pair<unary_operation_t, dnd::shared_ptr<auxiliary_data> > assign =
                 get_dtype_strided_assign_operation(
-                                            lhs.get_dtype(), dst_innerstride, iter.get_align_test<0>(),
-                                            rhs.get_dtype(), src_innerstride, iter.get_align_test<1>(),
-                                            errmode);
+                                    lhs.get_dtype(), dst_innerstride,
+                                    rhs.get_dtype(), src_innerstride,
+                                    errmode);
 
     if (innersize > 0) {
         do {
@@ -261,8 +263,8 @@ static void val_assign_equal_dtypes(const ndarray& lhs, const ndarray& rhs)
 
     std::pair<unary_operation_t, dnd::shared_ptr<auxiliary_data> > assign =
                 get_dtype_strided_assign_operation(
-                                            lhs.get_dtype(), dst_innerstride, iter.get_align_test<0>(),
-                                            src_innerstride, iter.get_align_test<1>());
+                                            lhs.get_dtype(), dst_innerstride,
+                                            src_innerstride);
 
     if (innersize > 0) {
         do {
@@ -275,10 +277,19 @@ static void val_assign_equal_dtypes(const ndarray& lhs, const ndarray& rhs)
 
 ndarray dnd::ndarray::as_dtype(const dtype& dt, assign_error_mode errmode) const
 {
-    if (dt == get_dtype()) {
+    if (dt == get_dtype().value_dtype()) {
         return *this;
     } else {
-        return ndarray(new convert_dtype_expr_node(m_expr_tree, dt, errmode));
+        if (m_expr_tree->get_node_type() == strided_array_node_type) {
+            return ndarray(new strided_array_expr_node(make_conversion_dtype(dt, m_expr_tree->get_dtype(), errmode),
+                        m_expr_tree->get_ndim(), m_expr_tree->get_shape(),
+                        static_cast<const strided_array_expr_node *>(m_expr_tree.get())->get_strides(),
+                        static_cast<const strided_array_expr_node *>(m_expr_tree.get())->get_originptr(),
+                        static_cast<const strided_array_expr_node *>(m_expr_tree.get())->get_buffer_owner()));
+        } else {
+            // TODO: this should make a conversion dtype too, the convert_dtype_expr_node should be removed
+            return ndarray(new convert_dtype_expr_node(m_expr_tree, dt, errmode));
+        }
     }
 }
 
@@ -314,7 +325,7 @@ void dnd::ndarray::val_assign(const dtype& dt, const void *data, assign_error_mo
 
     std::pair<unary_operation_t, dnd::shared_ptr<auxiliary_data> > assign =
                 get_dtype_strided_assign_operation(
-                                get_dtype(), innerstride, iter.get_align_test<0>(), 0, 0);
+                                get_dtype(), innerstride, 0);
 
     if (innersize > 0) {
         do {
@@ -331,34 +342,45 @@ void dnd::ndarray::debug_dump(std::ostream& o = std::cerr) const
     o << "------" << endl;
 }
 
-static void nested_ndarray_print(std::ostream& o, const ndarray& rhs, const char *data, int i)
+static void nested_ndarray_print(std::ostream& o, const dtype& d, const char *data, int ndim, const intptr_t *shape, const intptr_t *strides)
 {
-    o << "{";
-    if (i + 1 == rhs.get_ndim()) {
-        rhs.get_dtype().print_data(o, data, rhs.get_strides(i), rhs.get_shape(i), ", ");
+    if (ndim == 0) {
+        d.print_data(o, data, 0, 1, "");
     } else {
-        intptr_t size = rhs.get_shape(i);
-        intptr_t stride = rhs.get_strides(i);
-        for (intptr_t k = 0; k < size; ++k) {
-            nested_ndarray_print(o, rhs, data, i+1);
-            if (k + 1 != size) {
-                o << ", ";
+        o << "{";
+        if (ndim == 1) {
+            d.print_data(o, data, strides[0], shape[0], ", ");
+        } else {
+            intptr_t size = *shape;
+            intptr_t stride = *strides;
+            for (intptr_t k = 0; k < size; ++k) {
+                nested_ndarray_print(o, d, data, ndim - 1, shape + 1, strides + 1);
+                if (k + 1 != size) {
+                    o << ", ";
+                }
+                data += stride;
             }
-            data += stride;
         }
+        o << "}";
     }
-    o << "}";
 }
 
 std::ostream& dnd::operator<<(std::ostream& o, const ndarray& rhs)
 {
     if (rhs.get_expr_tree() != NULL) {
         if (rhs.get_expr_tree()->get_node_type() == strided_array_node_type) {
-            o << "ndarray(" << rhs.get_dtype() << ", ";
-            if (rhs.get_ndim() == 0) {
-                rhs.get_dtype().print_data(o, rhs.get_originptr(), 0, 1, "");
+            o << "ndarray(" << rhs.get_dtype() << ",\n";
+            if (rhs.get_dtype().kind() == expression_kind) {
+                o << "       storage = ";
+                dtype deepest_storage = rhs.get_dtype().storage_dtype();
+                while (deepest_storage.kind() == expression_kind) {
+                    deepest_storage = deepest_storage.storage_dtype();
+                }
+                nested_ndarray_print(o, deepest_storage, rhs.get_originptr(), rhs.get_ndim(), rhs.get_shape(), rhs.get_strides());
+                o << ",\n       values = ";
+                //nested_ndarray_buffered_print(o, 
             } else {
-                nested_ndarray_print(o, rhs, rhs.get_originptr(), 0);
+                nested_ndarray_print(o, rhs.get_dtype(), rhs.get_originptr(), rhs.get_ndim(), rhs.get_shape(), rhs.get_strides());
             }
             o << ")";
         } else {
