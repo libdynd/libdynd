@@ -18,15 +18,17 @@
 namespace dnd {
 
 class conversion_dtype : public extended_dtype {
-    dtype m_value_dtype, m_storage_dtype;
+    dtype m_value_dtype, m_operand_dtype;
     assign_error_mode m_errmode;
     bool m_no_errors_to_value, m_no_errors_to_storage;
 public:
-    conversion_dtype(const dtype& value_dtype, const dtype& storage_dtype, assign_error_mode errmode)
-        : m_value_dtype(value_dtype.value_dtype()), m_storage_dtype(storage_dtype), m_errmode(errmode),
-          m_no_errors_to_value(errmode == assign_error_none || is_lossless_assignment(m_value_dtype, m_storage_dtype)),
-          m_no_errors_to_storage(errmode == assign_error_none || is_lossless_assignment(m_storage_dtype, m_value_dtype))
+    conversion_dtype(const dtype& value_dtype, const dtype& operand_dtype, assign_error_mode errmode)
+        : m_value_dtype(value_dtype), m_operand_dtype(operand_dtype), m_errmode(errmode),
+          m_no_errors_to_value(errmode == assign_error_none || is_lossless_assignment(m_value_dtype, m_operand_dtype)),
+          m_no_errors_to_storage(errmode == assign_error_none || is_lossless_assignment(m_operand_dtype, m_value_dtype))
     {
+        // An alternative to this error would be to use value_dtype.value_dtype(), cutting
+        // away the expression part of the given value_dtype.
         if (m_value_dtype.kind() == expression_kind) {
             throw std::runtime_error("conversion_dtype: The value dtype cannot be an expression_kind");
         }
@@ -40,17 +42,17 @@ public:
     }
     // Expose the storage traits here
     unsigned char alignment() const {
-        return m_storage_dtype.alignment();
+        return m_operand_dtype.alignment();
     }
     uintptr_t itemsize() const {
-        return m_storage_dtype.itemsize();
+        return m_operand_dtype.itemsize();
     }
 
     const dtype& value_dtype(const dtype& self) const {
         return m_value_dtype;
     }
-    const dtype& storage_dtype(const dtype& self) const {
-        return m_storage_dtype;
+    const dtype& operand_dtype(const dtype& self) const {
+        return m_operand_dtype;
     }
     void print_data(std::ostream& o, const dtype& dt, const char *data, intptr_t stride, intptr_t size,
                         const char *separator) const;
@@ -60,7 +62,7 @@ public:
     // This is about the native storage, buffering code needs to check whether
     // the value_dtype is an object type separately.
     bool is_object_type() const {
-        return m_storage_dtype.is_object_type();
+        return m_operand_dtype.is_object_type();
     }
 
     bool is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const;
@@ -68,12 +70,12 @@ public:
     bool operator==(const extended_dtype& rhs) const;
 
     // For expression_kind dtypes - converts to/from the storage's value dtype
-    std::pair<unary_operation_t, dnd::shared_ptr<auxiliary_data> > get_expression_to_value(intptr_t dst_fixedstride, intptr_t src_fixedstride);
-    std::pair<unary_operation_t, dnd::shared_ptr<auxiliary_data> > get_expression_from_value(intptr_t dst_fixedstride, intptr_t src_fixedstride);
+    void get_operand_to_value_operation(intptr_t dst_fixedstride, intptr_t src_fixedstride, kernel_instance<unary_operation_t>& out_kernel);
+    void get_value_to_operand_operation(intptr_t dst_fixedstride, intptr_t src_fixedstride, kernel_instance<unary_operation_t>& out_kernel);
 };
 
-inline dtype make_conversion_dtype(const dtype& value_dtype, const dtype& storage_dtype, assign_error_mode errmode = default_error_mode) {
-    return dtype(make_shared<conversion_dtype>(value_dtype, storage_dtype, errmode));
+inline dtype make_conversion_dtype(const dtype& value_dtype, const dtype& operand_dtype, assign_error_mode errmode = default_error_mode) {
+    return dtype(make_shared<conversion_dtype>(value_dtype, operand_dtype, errmode));
 }
 
 template<typename Tvalue, typename Tstorage>

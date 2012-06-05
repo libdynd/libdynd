@@ -36,6 +36,7 @@ set(dnd_SRC
     src/dnd/shape_tools.cpp
     src/dnd/ndarray_expr_node_instances.hpp
     src/dnd/single_assigner_builtin.hpp
+	include/dnd/auxiliary_data.hpp
     include/dnd/buffer_storage.hpp
     include/dnd/config.hpp
     include/dnd/dtype.hpp

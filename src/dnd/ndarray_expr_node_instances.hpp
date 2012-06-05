@@ -36,8 +36,8 @@ public:
         return "convert_dtype";
     }
 
-    std::pair<unary_operation_t, dnd::shared_ptr<auxiliary_data> >
-                get_unary_operation(intptr_t dst_fixedstride, intptr_t src_fixedstride) const;
+    void get_unary_operation(intptr_t dst_fixedstride, intptr_t src_fixedstride,
+                                    kernel_instance<unary_operation_t>& out_kernel) const;
 
     void debug_dump_extra(std::ostream& o, const std::string& indent) const;
 
@@ -160,10 +160,10 @@ public:
     virtual ~elementwise_binary_op_expr_node() {
     }
 
-    std::pair<binary_operation_t, dnd::shared_ptr<auxiliary_data> >
-            get_binary_operation(intptr_t dst_fixedstride, intptr_t src1_fixedstride,
-                                intptr_t src2_fixedstride) const {
-        return m_op_factory.get_binary_operation(dst_fixedstride, src1_fixedstride, src2_fixedstride);
+    void get_binary_operation(intptr_t dst_fixedstride, intptr_t src1_fixedstride,
+                                intptr_t src2_fixedstride,
+                                kernel_instance<binary_operation_t>& out_kernel) const {
+        m_op_factory.get_binary_operation(dst_fixedstride, src1_fixedstride, src2_fixedstride, out_kernel);
     }
 
     /**

@@ -6,9 +6,11 @@
 //
 #include <dnd/dtype.hpp>
 #include <dnd/exceptions.hpp>
+#include <dnd/dtype_assign.hpp>
 
 #include <sstream>
 #include <cstring>
+#include <vector>
 
 /** The maximum number of type ids which can be defined */
 #define DND_MAX_NUM_TYPE_IDS 64
@@ -20,6 +22,19 @@ using namespace dnd;
 dnd::extended_dtype::~extended_dtype()
 {
 }
+
+void dnd::extended_dtype::get_operand_to_value_operation(intptr_t dst_fixedstride, intptr_t src_fixedstride,
+                            kernel_instance<unary_operation_t>& out_kernel)
+{
+    throw std::runtime_error("get_operand_to_value_operation: this operation is only for expression_kind dtypes");
+}
+
+void dnd::extended_dtype::get_value_to_operand_operation(intptr_t dst_fixedstride, intptr_t src_fixedstride,
+                            kernel_instance<unary_operation_t>& out_kernel)
+{
+    throw std::runtime_error("get_value_to_operand_operation: this operation is only for expression_kind dtypes");
+}
+
 
 /**
  * A static look-up table structure which contains data about the type ids.
@@ -352,5 +367,47 @@ void dnd::dtype::print_data(std::ostream& o, const char *data, intptr_t stride, 
                     throw std::runtime_error(ss.str());
             }
         }
+    }
+}
+
+void dnd::dtype::get_storage_to_value_operation(intptr_t dst_fixedstride, intptr_t src_fixedstride,
+                            kernel_instance<unary_operation_t>& out_kernel) const
+{
+    if (m_kind != expression_kind) {
+        // If it's not an expression_kind dtype, return a simple copy operation
+        get_dtype_strided_assign_operation(*this, dst_fixedstride, src_fixedstride, out_kernel);
+    } else {
+        const dtype* dt = &m_data->operand_dtype(*this);
+        if (dt->kind() != expression_kind) {
+            // If there is no chained expressions, return the function unchanged
+            m_data->get_operand_to_value_operation(dst_fixedstride, src_fixedstride, out_kernel);
+        } else {
+            // Get the chain of expression_kind dtypes
+            vector<const extended_dtype*> chain_dtypes;
+
+            chain_dtypes.push_back(m_data.get());
+            chain_dtypes.push_back(dt->m_data.get());
+            dt = &dt->m_data->operand_dtype(*dt);
+            while (dt->kind() == expression_kind) {
+                chain_dtypes.push_back(dt->m_data.get());
+                dt = &dt->m_data->operand_dtype(*dt);
+            }
+
+            // Produce a good function chaining/auxdata based on the chain length
+            switch (chain_dtypes.size()) {
+            case 2:
+                break;
+            }
+        }
+    }
+}
+
+void dnd::dtype::get_value_to_storage_operation(intptr_t dst_fixedstride, intptr_t src_fixedstride,
+                            kernel_instance<unary_operation_t>& out_kernel) const
+{
+    if (m_kind != expression_kind) {
+        // If it's not an expression_kind dtype, return a simple copy operation
+        get_dtype_strided_assign_operation(*this, dst_fixedstride, src_fixedstride, out_kernel);
+    } else {
     }
 }

@@ -36,16 +36,17 @@ dnd::convert_dtype_expr_node::convert_dtype_expr_node(ndarray_expr_node_ptr&& op
     m_opnodes[0] = std::move(op);
 }
 
-std::pair<unary_operation_t, dnd::shared_ptr<auxiliary_data> >
-dnd::convert_dtype_expr_node::get_unary_operation(
-                    intptr_t dst_fixedstride, intptr_t src_fixedstride) const
+void dnd::convert_dtype_expr_node::get_unary_operation(
+                    intptr_t dst_fixedstride, intptr_t src_fixedstride,
+                    kernel_instance<unary_operation_t>& out_kernel) const
 {
     // TODO: change the dtype_assign functions to always assume aligned and NBO,
     //       and add new functions for the general case.
-    return get_dtype_strided_assign_operation(
+    get_dtype_strided_assign_operation(
                     m_dtype, dst_fixedstride,
                     m_opnodes[0]->get_dtype(), src_fixedstride,
-                    m_errmode);
+                    m_errmode,
+                    out_kernel);
 }
 
 void dnd::convert_dtype_expr_node::debug_dump_extra(ostream& o, const string& indent) const

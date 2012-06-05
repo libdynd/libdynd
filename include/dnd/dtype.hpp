@@ -13,6 +13,7 @@
 #include <complex>
 
 #include <dnd/config.hpp>
+#include <dnd/operations.hpp>
 
 namespace dnd {
 
@@ -178,24 +179,6 @@ template <> struct is_dtype_scalar<double> {enum {value = true};};
 template <> struct is_dtype_scalar<std::complex<float> > {enum {value = true};};
 template <> struct is_dtype_scalar<std::complex<double> > {enum {value = true};};
 
-/** A base class for auxiliary data used by the unary_operation function pointers. */
-class auxiliary_data {
-public:
-
-    virtual ~auxiliary_data() {
-    }
-};
-
-/**
- * The function pointer type for a unary operation, for example a casting function
- * from one dtype to another.
- */
-typedef void (*unary_operation_t)(void *dst, intptr_t dst_stride,
-                                const void *src, intptr_t src_stride,
-                                intptr_t count,
-                                const auxiliary_data *auxdata);
-
-
 class dtype;
 
 // The extended_dtype class is for dtypes which require more data
@@ -211,18 +194,21 @@ public:
 
     /**
      * Should return a reference to the dtype representing the value which
-     * is for calculation.
+     * is for calculation. This should never be an expression dtype.
      *
      * @param self    The dtype which holds the shared_ptr<extended_dtype> containing this.
      */
     virtual const dtype& value_dtype(const dtype& self) const = 0;
     /**
-     * Should return a reference to a dtype representing the memory which
-     * is under the hood.
+     * Should return a reference to a dtype representing the data this dtype
+     * uses to produce the value. This should only be different from *this for expression_kind
+     * dtypes.
      *
      * @param self    The dtype which holds the shared_ptr<extended_dtype> containing this.
      */
-    virtual const dtype& storage_dtype(const dtype& self) const = 0;
+    virtual const dtype& operand_dtype(const dtype& self) const {
+        return self;
+    }
 
     virtual void print_data(std::ostream& o, const dtype& dt, const char *data, intptr_t stride, intptr_t size,
                         const char *separator) const = 0;
@@ -236,10 +222,12 @@ public:
 
     virtual bool operator==(const extended_dtype& rhs) const = 0;
 
-    // For expression_kind dtypes - converts from (storage_dtype().value_dtype()) to (value_dtype())
-    std::pair<unary_operation_t, dnd::shared_ptr<auxiliary_data> > get_expression_to_value(intptr_t dst_fixedstride, intptr_t src_fixedstride);
-    // For expression_kind dtypes - converts from (value_dtype()) to (storage_dtype().value_dtype())
-    std::pair<unary_operation_t, dnd::shared_ptr<auxiliary_data> > get_expression_from_value(intptr_t dst_fixedstride, intptr_t src_fixedstride);
+    // For expression_kind dtypes - converts from (operand_dtype().value_dtype()) to (value_dtype())
+    void get_operand_to_value_operation(intptr_t dst_fixedstride, intptr_t src_fixedstride,
+                                kernel_instance<unary_operation_t>& out_kernel);
+    // For expression_kind dtypes - converts from (value_dtype()) to (operand_dtype().value_dtype())
+    void get_value_to_operand_operation(intptr_t dst_fixedstride, intptr_t src_fixedstride,
+                                kernel_instance<unary_operation_t>& out_kernel);
 };
 
 /**
@@ -339,7 +327,8 @@ public:
     }
 
     const dtype& value_dtype() const {
-        if (m_data == NULL) {
+        // Only expression_kind dtypes have different value_dtype
+        if (m_kind != expression_kind) {
             return *this;
         } else {
             return m_data->value_dtype(*this);
@@ -347,10 +336,16 @@ public:
     }
 
     const dtype& storage_dtype() const {
-        if (m_data == NULL) {
+        // Only expression_kind dtypes have different storage_dtype
+        if (m_kind != expression_kind) {
             return *this;
         } else {
-            return m_data->storage_dtype(*this);
+            // Follow the operand dtype chain to get the storage dtype
+            const dtype* sdt = &m_data->operand_dtype(*this);
+            while (sdt->kind() == expression_kind) {
+                sdt = &sdt->m_data->operand_dtype(*sdt);
+            }
+            return *sdt;
         }
     }
 
@@ -416,6 +411,13 @@ public:
 
     void print_data(std::ostream& o, const char *data, intptr_t stride, intptr_t size,
                                                             const char *separator) const;
+
+    // Converts from (storage_dtype()) to (value_dtype()). Only necessary for expression_kind dtypes
+    void get_storage_to_value_operation(intptr_t dst_fixedstride, intptr_t src_fixedstride,
+                                kernel_instance<unary_operation_t>& out_kernel) const;
+    // Converts from (value_dtype()) to (storage_dtype()). Only necessary for expression_kind dtypes
+    void get_value_to_storage_operation(intptr_t dst_fixedstride, intptr_t src_fixedstride,
+                                kernel_instance<unary_operation_t>& out_kernel) const;
 
     friend std::ostream& operator<<(std::ostream& o, const dtype& rhs);
 };

@@ -17,10 +17,10 @@ void dnd::conversion_dtype::print_data(std::ostream& o, const dtype& dt, const c
     /*
     buffer_storage buf(m_value_dtype, size);
     // TODO: This doesn't work with multiple nested expression_kind dtypes
-    std::pair<unary_operation_t, dnd::shared_ptr<auxiliary_data> > assign =
+    kernel_instance<unary_operation_t> assign =
                 get_dtype_strided_assign_operation(
                                         m_value_dtype, m_value_dtype.itemsize(),
-                                        m_storage_dtype, stride,
+                                        m_operand_dtype, stride,
                                         m_errmode);
     while (size > 0) {
         intptr_t blocksize = buf.element_count();
@@ -42,7 +42,7 @@ void dnd::conversion_dtype::print_data(std::ostream& o, const dtype& dt, const c
 
 void dnd::conversion_dtype::print(std::ostream& o) const
 {
-    o << "convert<to=" << m_value_dtype << ", from=" << m_storage_dtype << ", errmode=" << m_errmode << ">";
+    o << "convert<to=" << m_value_dtype << ", from=" << m_operand_dtype << ", errmode=" << m_errmode << ">";
 }
 
 bool dnd::conversion_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const
@@ -65,21 +65,23 @@ bool dnd::conversion_dtype::operator==(const extended_dtype& rhs) const
         const conversion_dtype *dt = static_cast<const conversion_dtype*>(&rhs);
         return m_errmode == dt->m_errmode &&
             m_value_dtype == dt->m_value_dtype &&
-            m_storage_dtype == dt->m_storage_dtype;
+            m_operand_dtype == dt->m_operand_dtype;
     }
 }
 
-std::pair<unary_operation_t, dnd::shared_ptr<auxiliary_data> > dnd::conversion_dtype::get_expression_to_value(intptr_t dst_fixedstride, intptr_t src_fixedstride)
+void dnd::conversion_dtype::get_operand_to_value_operation(intptr_t dst_fixedstride, intptr_t src_fixedstride, kernel_instance<unary_operation_t>& out_kernel)
 {
-    return get_dtype_strided_assign_operation(m_value_dtype, dst_fixedstride,
-                                m_storage_dtype.value_dtype(), src_fixedstride,
-                                m_no_errors_to_value ? assign_error_none : m_errmode);
+    get_dtype_strided_assign_operation(m_value_dtype, dst_fixedstride,
+                                m_operand_dtype.value_dtype(), src_fixedstride,
+                                m_no_errors_to_value ? assign_error_none : m_errmode,
+                                out_kernel);
 }
 
-std::pair<unary_operation_t, dnd::shared_ptr<auxiliary_data> > dnd::conversion_dtype::get_expression_from_value(intptr_t dst_fixedstride, intptr_t src_fixedstride)
+void dnd::conversion_dtype::get_value_to_operand_operation(intptr_t dst_fixedstride, intptr_t src_fixedstride, kernel_instance<unary_operation_t>& out_kernel)
 {
-    return get_dtype_strided_assign_operation(m_storage_dtype.value_dtype(), dst_fixedstride,
+    get_dtype_strided_assign_operation(m_operand_dtype.value_dtype(), dst_fixedstride,
                                 m_value_dtype, src_fixedstride,
-                                m_no_errors_to_storage ? assign_error_none : m_errmode);
+                                m_no_errors_to_storage ? assign_error_none : m_errmode,
+                                out_kernel);
 }
 

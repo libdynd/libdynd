@@ -26,22 +26,19 @@ void dnd::ndarray_expr_node::as_data_and_strides(char ** /*out_data*/,
                              "nodes with an expr_node_strided_array category");
 }
 
-pair<nullary_operation_t, dnd::shared_ptr<auxiliary_data> >
-                dnd::ndarray_expr_node::get_nullary_operation(intptr_t) const
+void dnd::ndarray_expr_node::get_nullary_operation(intptr_t, kernel_instance<nullary_operation_t>&) const
 {
     throw std::runtime_error("get_nullary_operation is only valid for "
                              "generator nodes which provide an implementation");
 }
 
-pair<unary_operation_t, dnd::shared_ptr<auxiliary_data> >
-                dnd::ndarray_expr_node::get_unary_operation(intptr_t, intptr_t) const
+void dnd::ndarray_expr_node::get_unary_operation(intptr_t, intptr_t, kernel_instance<unary_operation_t>&) const
 {
     throw std::runtime_error("get_unary_operation is only valid for "
                              "unary nodes which provide an implementation");
 }
 
-pair<binary_operation_t, dnd::shared_ptr<auxiliary_data> >
-                dnd::ndarray_expr_node::get_binary_operation(intptr_t, intptr_t, intptr_t) const
+void dnd::ndarray_expr_node::get_binary_operation(intptr_t, intptr_t, intptr_t, kernel_instance<binary_operation_t>&) const
 {
     throw std::runtime_error("get_binary_operation is only valid for "
                              "binary nodes which provide an implementation");
@@ -63,13 +60,13 @@ ndarray_expr_node_ptr dnd::ndarray_expr_node::evaluate() const
                     intptr_t innersize = iter.innersize();
                     intptr_t dst_stride = iter.innerstride<0>();
                     intptr_t src0_stride = iter.innerstride<1>();
-                    pair<unary_operation_t, dnd::shared_ptr<auxiliary_data> > operation =
-                                get_unary_operation(dst_stride, src0_stride);
+                    kernel_instance<unary_operation_t> operation;
+                    get_unary_operation(dst_stride, src0_stride, operation);
                     if (innersize > 0) {
                         do {
-                            operation.first(iter.data<0>(), dst_stride,
+                            operation.kernel(iter.data<0>(), dst_stride,
                                         iter.data<1>(), src0_stride,
-                                        innersize, operation.second.get());
+                                        innersize, operation.auxdata);
                         } while (iter.iternext());
                     }
 
@@ -96,14 +93,14 @@ ndarray_expr_node_ptr dnd::ndarray_expr_node::evaluate() const
                     intptr_t dst_stride = iter.innerstride<0>();
                     intptr_t src0_stride = iter.innerstride<1>();
                     intptr_t src1_stride = iter.innerstride<2>();
-                    pair<binary_operation_t, dnd::shared_ptr<auxiliary_data> > operation =
-                                get_binary_operation(dst_stride, src0_stride, src1_stride);
+                    kernel_instance<binary_operation_t> operation;
+                    get_binary_operation(dst_stride, src0_stride, src1_stride, operation);
                     if (innersize > 0) {
                         do {
-                            operation.first(iter.data<0>(), dst_stride,
+                            operation.kernel(iter.data<0>(), dst_stride,
                                         iter.data<1>(), src0_stride,
                                         iter.data<2>(), src1_stride,
-                                        innersize, operation.second.get());
+                                        innersize, operation.auxdata);
                         } while (iter.iternext());
                     }
 

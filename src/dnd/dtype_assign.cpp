@@ -304,37 +304,28 @@ static void assign_multiple_byteswap_unaligned(void *dst, intptr_t dst_stride,
         src_cached += src_stride;
     }
 }
-*/
 
 // A multiple unaligned assignment function which uses one of the single assignment functions as proxy
 namespace {
-    class multiple_unaligned_auxiliary_data : public auxiliary_data {
-    public:
+    struct multiple_unaligned_auxiliary_data {
         assign_function_t assign;
         int dst_itemsize, src_itemsize;
-
-        multiple_unaligned_auxiliary_data()
-            : assign(NULL), dst_itemsize(0), src_itemsize(0) {
-        }
-
-        virtual ~multiple_unaligned_auxiliary_data() {
-        }
     };
 }
 static void assign_multiple_unaligned(void *dst, intptr_t dst_stride, const void *src, intptr_t src_stride,
-                                    intptr_t count, const auxiliary_data *data)
+                                    intptr_t count, const AuxDataBase *auxdata)
 {
-    const multiple_unaligned_auxiliary_data * mgdata = static_cast<const multiple_unaligned_auxiliary_data *>(data);
+    const multiple_unaligned_auxiliary_data &mgdata = get_auxiliary_data<multiple_unaligned_auxiliary_data>(auxdata);
 
     char *dst_cached = reinterpret_cast<char *>(dst);
     const char *src_cached = reinterpret_cast<const char *>(src);
 
-    int dst_itemsize = mgdata->dst_itemsize, src_itemsize = mgdata->src_itemsize;
+    int dst_itemsize = mgdata.dst_itemsize, src_itemsize = mgdata.src_itemsize;
     // TODO: Probably want to relax the assumption of at most 8 bytes
     int64_t d;
     int64_t s;
 
-    assign_function_t asn = mgdata->assign;
+    assign_function_t asn = mgdata.assign;
 
     for (intptr_t i = 0; i < count; ++i) {
         memcpy(&s, src_cached, src_itemsize);
@@ -344,30 +335,17 @@ static void assign_multiple_unaligned(void *dst, intptr_t dst_stride, const void
         src_cached += src_stride;
     }
 }
+*/
 
 // A multiple aligned assignment function which uses one of the single assignment functions as proxy
-namespace {
-    class multiple_aligned_auxiliary_data : public auxiliary_data {
-    public:
-        assign_function_t assign;
-
-        multiple_aligned_auxiliary_data()
-            : assign(NULL) {
-        }
-
-        virtual ~multiple_aligned_auxiliary_data() {
-        }
-    };
-}
 static void assign_multiple_aligned(void *dst, intptr_t dst_stride, const void *src, intptr_t src_stride,
-                                    intptr_t count, const auxiliary_data *data)
+                                    intptr_t count, const AuxDataBase *auxdata)
 {
-    const multiple_aligned_auxiliary_data * mgdata = static_cast<const multiple_aligned_auxiliary_data *>(data);
+    assign_function_t asn = get_auxiliary_data<assign_function_t>(auxdata);
+
 
     char *dst_cached = reinterpret_cast<char *>(dst);
     const char *src_cached = reinterpret_cast<const char *>(src);
-
-    assign_function_t asn = mgdata->assign;
 
     for (intptr_t i = 0; i < count; ++i) {
         asn(dst_cached, src_cached);
@@ -383,7 +361,7 @@ struct multiple_assigner {
     static void assign_noexcept(void *dst, intptr_t dst_stride,
                                 const void *src, intptr_t src_stride,
                                 intptr_t count,
-                                const auxiliary_data *)
+                                const AuxDataBase *)
     {
         //DEBUG_COUT << "multiple_assigner::assign_noexcept (" << typeid(src_type).name() << " -> " << typeid(dst_type).name() << ")\n";
         const src_type *src_cached = reinterpret_cast<const src_type *>(src);
@@ -402,7 +380,7 @@ struct multiple_assigner {
     static void assign_noexcept_anystride_zerostride(void *dst, intptr_t dst_stride,
                                 const void *src, intptr_t,
                                 intptr_t count,
-                                const auxiliary_data *)
+                                const AuxDataBase *)
     {
         //DEBUG_COUT << "multiple_assigner::assign_noexcept_anystride_zerostride (" << typeid(src_type).name() << " -> " << typeid(dst_type).name() << ")\n";
         dst_type src_value_cached;
@@ -421,7 +399,7 @@ struct multiple_assigner {
     static void assign_noexcept_contigstride_zerostride(void *dst, intptr_t,
                                 const void *src, intptr_t,
                                 intptr_t count,
-                                const auxiliary_data *)
+                                const AuxDataBase *)
     {
         //DEBUG_COUT << "multiple_assigner::assign_noexcept_contigstride_zerostride (" << typeid(src_type).name() << " -> " << typeid(dst_type).name() << ")\n";
         dst_type src_value_cached;
@@ -438,7 +416,7 @@ struct multiple_assigner {
     static void assign_noexcept_contigstride_contigstride(void *dst, intptr_t,
                                 const void *src, intptr_t,
                                 intptr_t count,
-                                const auxiliary_data *)
+                                const AuxDataBase *)
     {
         //DEBUG_COUT << "multiple_assigner::assign_noexcept_contigstride_contigstride (" << typeid(src_type).name() << " -> " << typeid(dst_type).name() << ")\n";
         const src_type *src_cached = reinterpret_cast<const src_type *>(src);
@@ -457,9 +435,7 @@ struct multiple_assigner {
 #define DTYPE_ASSIGN_SRC_TO_DST_SINGLE_CASE(dst_type, src_type, ASSIGN_FN) \
     case type_id_of<dst_type>::value: \
         /*DEBUG_COUT << "returning " << DND_STRINGIFY(dst_type) << " " << DND_STRINGIFY(src_type) << " " << DND_STRINGIFY(ASSIGN_FN) << "\n";*/ \
-        return std::pair<unary_operation_t, dnd::shared_ptr<auxiliary_data> >( \
-            &multiple_assigner<dst_type, src_type>::ASSIGN_FN, \
-            dnd::shared_ptr<auxiliary_data>());
+        out_kernel.kernel = &multiple_assigner<dst_type, src_type>::ASSIGN_FN;
 
 #define DTYPE_ASSIGN_SRC_TO_ANY_CASE(src_type, ASSIGN_FN) \
     case type_id_of<src_type>::value: \
@@ -497,29 +473,27 @@ struct multiple_assigner {
         DTYPE_ASSIGN_SRC_TO_ANY_CASE(std::complex<double>, ASSIGN_FN); \
     }
 
-std::pair<unary_operation_t, dnd::shared_ptr<auxiliary_data> > dnd::get_dtype_strided_assign_operation(
+void dnd::get_dtype_strided_assign_operation(
                     const dtype& dst_dt, intptr_t dst_fixedstride,
                     const dtype& src_dt, intptr_t src_fixedstride,
-                    assign_error_mode errmode)
+                    assign_error_mode errmode,
+                    kernel_instance<unary_operation_t>& out_kernel)
 {
     // If the casting can be done losslessly, disable the error check to find faster code paths
     if (errmode != assign_error_none && is_lossless_assignment(dst_dt, src_dt)) {
         errmode = assign_error_none;
     }
 
+    out_kernel.auxdata.free();
+
     if (dst_dt.extended() == NULL && src_dt.extended() == NULL) {
         // When there's misaligned or byte-swapped data, go the slow path
         if (errmode != assign_error_none) {
             assign_function_t asn = get_single_assign_function(dst_dt, src_dt, errmode);
             if (asn != NULL) {
-                std::pair<unary_operation_t, dnd::shared_ptr<auxiliary_data> > result;
-                result.first = &assign_multiple_aligned;
-                multiple_aligned_auxiliary_data *auxdata = new multiple_aligned_auxiliary_data();
-                result.second.reset(auxdata);
-
-                auxdata->assign = asn;
-
-                return std::move(result);
+                out_kernel.kernel = &assign_multiple_aligned;
+                make_auxiliary_data<assign_function_t>(out_kernel.auxdata, asn);
+                return;
             }
         } else {
             if (src_fixedstride == 0) {
@@ -546,32 +520,24 @@ void dnd::dtype_strided_assign(const dtype& dst_dt, void *dst, intptr_t dst_stri
                             const dtype& src_dt, const void *src, intptr_t src_stride,
                             intptr_t count, assign_error_mode errmode)
 {
-    std::pair<unary_operation_t, dnd::shared_ptr<auxiliary_data> > op;
-    op = get_dtype_strided_assign_operation(dst_dt, dst_stride,
+    kernel_instance<unary_operation_t> op;
+    get_dtype_strided_assign_operation(dst_dt, dst_stride,
                                             src_dt, src_stride,
-                                            errmode);
-    op.first(dst, dst_stride, src, src_stride, count, op.second.get());
+                                            errmode, op);
+    op.kernel(dst, dst_stride, src, src_stride, count, op.auxdata);
 }
 
 // Fixed and unknown size contiguous copy assignment functions
 template<int N>
 static void contig_fixedsize_copy_assign(void *dst, intptr_t, const void *src, intptr_t,
-                            intptr_t count, const auxiliary_data *) {
+                            intptr_t count, const AuxDataBase *) {
     memcpy(dst, src, N * count);
 }
 namespace {
-    class assign_itemsize_auxiliary_data : public auxiliary_data {
-    public:
-        intptr_t itemsize;
-
-        virtual ~assign_itemsize_auxiliary_data() {
-        }
-    };
-
     template<class T>
     struct fixed_size_copy_assign_type {
         static void assign(void *dst, intptr_t dst_stride, const void *src, intptr_t src_stride,
-                            intptr_t count, const auxiliary_data *) {
+                            intptr_t count, const AuxDataBase *) {
             T *dst_cached = reinterpret_cast<T *>(dst);
             const T *src_cached = reinterpret_cast<const T *>(src);
             dst_stride /= sizeof(T);
@@ -600,7 +566,7 @@ namespace {
     template<class T>
     struct fixed_size_copy_zerostride_assign_type {
         static void assign(void *dst, intptr_t dst_stride, const void *src, intptr_t,
-                            intptr_t count, const auxiliary_data *) {
+                            intptr_t count, const AuxDataBase *) {
             T *dst_cached = reinterpret_cast<T *>(dst);
             T s = *reinterpret_cast<const T *>(src);
             dst_stride /= sizeof(T);
@@ -625,18 +591,17 @@ namespace {
     struct fixed_size_copy_zerostride_assign<8> : public fixed_size_copy_zerostride_assign_type<int64_t> {};
 }
 static void contig_copy_assign(void *dst, intptr_t, const void *src, intptr_t,
-                            intptr_t count, const auxiliary_data *auxdata)
+                            intptr_t count, const AuxDataBase *auxdata)
 {
-    const assign_itemsize_auxiliary_data *data = static_cast<const assign_itemsize_auxiliary_data *>(auxdata);
-    memcpy(dst, src, data->itemsize * count);
+    intptr_t itemsize = get_auxiliary_data<intptr_t>(auxdata);
+    memcpy(dst, src, itemsize * count);
 }
 static void strided_copy_assign(void *dst, intptr_t dst_stride, const void *src, intptr_t src_stride,
-                            intptr_t count, const auxiliary_data *auxdata)
+                            intptr_t count, const AuxDataBase *auxdata)
 {
     char *dst_cached = reinterpret_cast<char *>(dst);
     const char *src_cached = reinterpret_cast<const char *>(src);
-    const assign_itemsize_auxiliary_data *data = static_cast<const assign_itemsize_auxiliary_data *>(auxdata);
-    intptr_t itemsize = data->itemsize;
+    intptr_t itemsize = get_auxiliary_data<intptr_t>(auxdata);
 
     for (intptr_t i = 0; i < count; ++i) {
         memcpy(dst_cached, src_cached, itemsize);
@@ -645,17 +610,16 @@ static void strided_copy_assign(void *dst, intptr_t dst_stride, const void *src,
     }
 }
 static void fixed_size_copy_contig_zerostride_assign_memset(void *dst, intptr_t, const void *src, intptr_t,
-                            intptr_t count, const auxiliary_data *)
+                            intptr_t count, const AuxDataBase *)
 {
     char s = *reinterpret_cast<const char *>(src);
     memset(dst, s, count);
 }
 static void strided_copy_zerostride_assign(void *dst, intptr_t dst_stride, const void *src, intptr_t,
-                            intptr_t count, const auxiliary_data *auxdata)
+                            intptr_t count, const AuxDataBase *auxdata)
 {
     char *dst_cached = reinterpret_cast<char *>(dst);
-    const assign_itemsize_auxiliary_data *data = static_cast<const assign_itemsize_auxiliary_data *>(auxdata);
-    intptr_t itemsize = data->itemsize;
+    intptr_t itemsize = get_auxiliary_data<intptr_t>(auxdata);
 
     for (intptr_t i = 0; i < count; ++i) {
         memcpy(dst_cached, src, itemsize);
@@ -664,94 +628,88 @@ static void strided_copy_zerostride_assign(void *dst, intptr_t dst_stride, const
 }
 
 
-std::pair<unary_operation_t, dnd::shared_ptr<auxiliary_data> > dnd::get_dtype_strided_assign_operation(
+void dnd::get_dtype_strided_assign_operation(
                     const dtype& dt,
                     intptr_t dst_fixedstride,
-                    intptr_t src_fixedstride)
+                    intptr_t src_fixedstride,
+                    kernel_instance<unary_operation_t>& out_kernel)
 {
+    // Make sure there's no stray auxiliary data
+    out_kernel.auxdata.free();
+
     //DEBUG_COUT << "get_dtype_strided_assign_operation (single dtype " << dt << ")\n";
     if (!dt.is_object_type()) {
-        std::pair<unary_operation_t, dnd::shared_ptr<auxiliary_data> > result;
-
         if (dst_fixedstride == (intptr_t)dt.itemsize() &&
                                     src_fixedstride == (intptr_t)dt.itemsize()) {
             // contig -> contig uses memcpy, works with unaligned data
             switch (dt.itemsize()) {
                 case 1:
-                    result.first = &contig_fixedsize_copy_assign<1>;
+                    out_kernel.kernel = &contig_fixedsize_copy_assign<1>;
                     break;
                 case 2:
-                    result.first = &contig_fixedsize_copy_assign<2>;
+                    out_kernel.kernel = &contig_fixedsize_copy_assign<2>;
                     break;
                 case 4:
-                    result.first = &contig_fixedsize_copy_assign<4>;
+                    out_kernel.kernel = &contig_fixedsize_copy_assign<4>;
                     break;
                 case 8:
-                    result.first = &contig_fixedsize_copy_assign<8>;
+                    out_kernel.kernel = &contig_fixedsize_copy_assign<8>;
                     break;
                 case 16:
-                    result.first = &contig_fixedsize_copy_assign<16>;
+                    out_kernel.kernel = &contig_fixedsize_copy_assign<16>;
                     break;
                 default:
-                    result.first = &contig_copy_assign;
-                    assign_itemsize_auxiliary_data *auxdata = new assign_itemsize_auxiliary_data();
-                    result.second.reset(auxdata);
-                    auxdata->itemsize = dt.itemsize();
+                    out_kernel.kernel = &contig_copy_assign;
+                    make_auxiliary_data<intptr_t>(out_kernel.auxdata, dt.itemsize());
                     break;
             }
         } else if (src_fixedstride == 0) {
-            result.first = NULL;
+            out_kernel.kernel = NULL;
             switch (dt.itemsize()) {
                 case 1:
                     if (dst_fixedstride == 1) {
-                        result.first = &fixed_size_copy_contig_zerostride_assign_memset;
+                        out_kernel.kernel = &fixed_size_copy_contig_zerostride_assign_memset;
                     } else {
-                        result.first = &fixed_size_copy_zerostride_assign<1>::assign;
+                        out_kernel.kernel = &fixed_size_copy_zerostride_assign<1>::assign;
                     }
                     break;
                 case 2:
-                    result.first = &fixed_size_copy_zerostride_assign<2>::assign;
+                    out_kernel.kernel = &fixed_size_copy_zerostride_assign<2>::assign;
                     break;
                 case 4:
-                    result.first = &fixed_size_copy_zerostride_assign<4>::assign;
+                    out_kernel.kernel = &fixed_size_copy_zerostride_assign<4>::assign;
                     break;
                 case 8:
-                    result.first = &fixed_size_copy_zerostride_assign<8>::assign;
+                    out_kernel.kernel = &fixed_size_copy_zerostride_assign<8>::assign;
                     break;
             }
 
-            if (result.first == NULL) {
-                result.first = &strided_copy_zerostride_assign;
-                assign_itemsize_auxiliary_data *auxdata = new assign_itemsize_auxiliary_data();
-                result.second.reset(auxdata);
-                auxdata->itemsize = dt.itemsize();
+            if (out_kernel.kernel == NULL) {
+                out_kernel.kernel = &strided_copy_zerostride_assign;
+                make_auxiliary_data<intptr_t>(out_kernel.auxdata, dt.itemsize());
             }
         } else {
-            result.first = NULL;
+            out_kernel.kernel = NULL;
             switch (dt.itemsize()) {
                 case 1:
-                    result.first = &fixed_size_copy_assign<1>::assign;
+                    out_kernel.kernel = &fixed_size_copy_assign<1>::assign;
                     break;
                 case 2:
-                    result.first = &fixed_size_copy_assign<2>::assign;
+                    out_kernel.kernel = &fixed_size_copy_assign<2>::assign;
                     break;
                 case 4:
-                    result.first = &fixed_size_copy_assign<4>::assign;
+                    out_kernel.kernel = &fixed_size_copy_assign<4>::assign;
                     break;
                 case 8:
-                    result.first = &fixed_size_copy_assign<8>::assign;
+                    out_kernel.kernel = &fixed_size_copy_assign<8>::assign;
                     break;
             }
 
-            if (result.first == NULL) {
-                result.first = &strided_copy_assign;
-                assign_itemsize_auxiliary_data *auxdata = new assign_itemsize_auxiliary_data();
-                result.second.reset(auxdata);
-                auxdata->itemsize = dt.itemsize();
+            if (out_kernel.kernel == NULL) {
+                out_kernel.kernel = &strided_copy_assign;
+                make_auxiliary_data<intptr_t>(out_kernel.auxdata, dt.itemsize());
             }
         }
-
-        return std::move(result);
     } else {
         throw std::runtime_error("cannot assign object dtypes yet");
     }

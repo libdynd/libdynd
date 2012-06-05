@@ -126,13 +126,13 @@ public:
      */
     virtual void as_data_and_strides(char **out_originptr, intptr_t *out_strides) const;
 
-    virtual std::pair<nullary_operation_t, dnd::shared_ptr<auxiliary_data> >
-                get_nullary_operation(intptr_t dst_fixedstride) const;
-    virtual std::pair<unary_operation_t, dnd::shared_ptr<auxiliary_data> >
-                get_unary_operation(intptr_t dst_fixedstride, intptr_t src_fixedstride) const;
-    virtual std::pair<binary_operation_t, dnd::shared_ptr<auxiliary_data> >
-                get_binary_operation(intptr_t dst_fixedstride, intptr_t src1_fixedstride,
-                                      intptr_t src2_fixedstride) const;
+    virtual void get_nullary_operation(intptr_t dst_fixedstride,
+                                    kernel_instance<nullary_operation_t>& out_kernel) const;
+    virtual void get_unary_operation(intptr_t dst_fixedstride, intptr_t src_fixedstride,
+                                    kernel_instance<unary_operation_t>& out_kernel) const;
+    virtual void get_binary_operation(intptr_t dst_fixedstride, intptr_t src1_fixedstride,
+                                    intptr_t src2_fixedstride,
+                                    kernel_instance<binary_operation_t>& out_kernel) const;
 
     /**
      * Evaluates the expression tree into a strided array

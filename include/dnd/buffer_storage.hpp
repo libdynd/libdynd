@@ -2,8 +2,6 @@
 // Copyright (C) 2012 Continuum Analytics
 // All rights reserved.
 //
-// This is unreleased proprietary software.
-//
 #ifndef _DND__BUFFER_STORAGE_HPP_
 #define _DND__BUFFER_STORAGE_HPP_
 

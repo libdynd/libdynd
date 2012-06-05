@@ -231,17 +231,17 @@ static void val_assign_unequal_dtypes(const ndarray& lhs, const ndarray& rhs, as
     intptr_t innersize = iter.innersize();
     intptr_t dst_innerstride = iter.innerstride<0>(), src_innerstride = iter.innerstride<1>();
 
-    std::pair<unary_operation_t, dnd::shared_ptr<auxiliary_data> > assign =
-                get_dtype_strided_assign_operation(
-                                    lhs.get_dtype(), dst_innerstride,
+    kernel_instance<unary_operation_t> assign;
+    get_dtype_strided_assign_operation(lhs.get_dtype(), dst_innerstride,
                                     rhs.get_dtype(), src_innerstride,
-                                    errmode);
+                                    errmode,
+                                    assign);
 
     if (innersize > 0) {
         do {
-            assign.first(iter.data<0>(), dst_innerstride,
+            assign.kernel(iter.data<0>(), dst_innerstride,
                         iter.data<1>(), src_innerstride,
-                        innersize, assign.second.get());
+                        innersize, assign.auxdata);
         } while (iter.iternext());
     }
 }
@@ -261,16 +261,16 @@ static void val_assign_equal_dtypes(const ndarray& lhs, const ndarray& rhs)
     intptr_t innersize = iter.innersize();
     intptr_t dst_innerstride = iter.innerstride<0>(), src_innerstride = iter.innerstride<1>();
 
-    std::pair<unary_operation_t, dnd::shared_ptr<auxiliary_data> > assign =
-                get_dtype_strided_assign_operation(
-                                            lhs.get_dtype(), dst_innerstride,
-                                            src_innerstride);
+    kernel_instance<unary_operation_t> assign;
+    get_dtype_strided_assign_operation(lhs.get_dtype(), dst_innerstride,
+                                        src_innerstride,
+                                        assign);
 
     if (innersize > 0) {
         do {
-            assign.first(iter.data<0>(), dst_innerstride,
+            assign.kernel(iter.data<0>(), dst_innerstride,
                         iter.data<1>(), src_innerstride,
-                        innersize, assign.second.get());
+                        innersize, assign.auxdata);
         } while (iter.iternext());
     }
 }
@@ -323,14 +323,13 @@ void dnd::ndarray::val_assign(const dtype& dt, const void *data, assign_error_mo
 
     intptr_t innersize = iter.innersize(), innerstride = iter.innerstride<0>();
 
-    std::pair<unary_operation_t, dnd::shared_ptr<auxiliary_data> > assign =
-                get_dtype_strided_assign_operation(
-                                get_dtype(), innerstride, 0);
+    kernel_instance<unary_operation_t> assign;
+    get_dtype_strided_assign_operation(get_dtype(), innerstride, 0, assign);
 
     if (innersize > 0) {
         do {
             //DEBUG_COUT << "scalar val_assign inner loop with size " << innersize << "\n";
-            assign.first(iter.data<0>(), innerstride, src.data(), 0, innersize, assign.second.get());
+            assign.kernel(iter.data<0>(), innerstride, src.data(), 0, innersize, assign.auxdata);
         } while (iter.iternext());
     }
 }
@@ -373,9 +372,6 @@ std::ostream& dnd::operator<<(std::ostream& o, const ndarray& rhs)
             if (rhs.get_dtype().kind() == expression_kind) {
                 o << "       storage = ";
                 dtype deepest_storage = rhs.get_dtype().storage_dtype();
-                while (deepest_storage.kind() == expression_kind) {
-                    deepest_storage = deepest_storage.storage_dtype();
-                }
                 nested_ndarray_print(o, deepest_storage, rhs.get_originptr(), rhs.get_ndim(), rhs.get_shape(), rhs.get_strides());
                 o << ",\n       values = ";
                 //nested_ndarray_buffered_print(o, 

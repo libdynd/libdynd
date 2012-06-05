@@ -53,7 +53,7 @@ namespace {
         static void func(char *dst, intptr_t dst_stride,
                                     const char *src0, intptr_t src0_stride,
                                     const char *src1, intptr_t src1_stride,
-                                    intptr_t count, const auxiliary_data *)
+                                    intptr_t count, const AuxDataBase *)
         {
             typedef typename operation::type T;
 
@@ -72,7 +72,7 @@ namespace {
         static void func(char * *dst, intptr_t dst_stride,
                                         const char * *src0, intptr_t,
                                         const char * *src1, intptr_t src1_stride,
-                                        intptr_t count, const auxiliary_data *)
+                                        intptr_t count, const AuxDataBase *)
         {
             typedef typename operation::type T;
 
@@ -90,7 +90,7 @@ namespace {
         static void func(char *dst, intptr_t dst_stride,
                                         const char *src0, intptr_t src0_stride,
                                         const char *src1, intptr_t,
-                                        intptr_t count, const auxiliary_data *)
+                                        intptr_t count, const AuxDataBase *)
         {
             typedef typename operation::type T;
 
@@ -108,7 +108,7 @@ namespace {
         static void func(typename operation::type *dst, intptr_t,
                                         const typename operation::type *src0, intptr_t,
                                         const typename operation::type *src1, intptr_t,
-                                        intptr_t count, const auxiliary_data *)
+                                        intptr_t count, const AuxDataBase *)
         {
             for (intptr_t i = 0; i < count; ++i) {
                 //cout << "Inner op c c c " << (void *)dst << " <- " << (void *)src0 << " <oper> " << (void *)src1 << endl;
@@ -126,7 +126,7 @@ namespace {
         static void func(typename operation::type *dst, intptr_t,
                                         const typename operation::type *src0, intptr_t,
                                         const typename operation::type *src1, intptr_t,
-                                        intptr_t count, const auxiliary_data *)
+                                        intptr_t count, const AuxDataBase *)
         {
             typename operation::type src0_value = *src0;
             for (intptr_t i = 0; i < count; ++i) {
@@ -144,7 +144,7 @@ namespace {
         static void func(typename operation::type *dst, intptr_t,
                                         const typename operation::type *src0, intptr_t,
                                         const typename operation::type *src1, intptr_t,
-                                        intptr_t count, const auxiliary_data *)
+                                        intptr_t count, const AuxDataBase *)
         {
             typename operation::type src1_value = *src1;
             for (intptr_t i = 0; i < count; ++i) {
@@ -270,14 +270,14 @@ namespace {
             std::swap(m_node_name, that.m_node_name);
         }
 
-        std::pair<binary_operation_t, dnd::shared_ptr<auxiliary_data> >
-                get_binary_operation(intptr_t dst_fixedstride, intptr_t src1_fixedstride,
-                                    intptr_t src2_fixedstride) const {
-            return std::pair<binary_operation_t, dnd::shared_ptr<auxiliary_data> >(
-                        get_builtin_operation_function(m_builtin_optable,
+        void get_binary_operation(intptr_t dst_fixedstride, intptr_t src1_fixedstride,
+                                    intptr_t src2_fixedstride,
+                                    kernel_instance<binary_operation_t>& out_kernel) const
+        {
+            out_kernel.kernel = get_builtin_operation_function(m_builtin_optable,
                                 m_dtype, dst_fixedstride,
-                                src1_fixedstride, src2_fixedstride),
-                        dnd::shared_ptr<auxiliary_data>());
+                                src1_fixedstride, src2_fixedstride);
+            out_kernel.auxdata.free();
         }
 
         const char *node_name() const {
