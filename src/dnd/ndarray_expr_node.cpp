@@ -44,10 +44,34 @@ void dnd::ndarray_expr_node::get_binary_operation(intptr_t, intptr_t, intptr_t, 
                              "binary nodes which provide an implementation");
 }
 
-ndarray_expr_node_ptr dnd::ndarray_expr_node::evaluate() const
+ndarray_expr_node_ptr dnd::ndarray_expr_node::evaluate()
 {
     switch (m_nop) {
         case 0:
+            if (m_node_category == strided_array_node_category) {
+                // Evaluate any expression dtype as well
+                if (m_dtype.kind() == expression_kind) {
+                    ndarray_expr_node_ptr result;
+                    raw_ndarray_iter<1,1> iter(m_ndim, m_shape.get(), m_dtype.value_dtype(), result, this);
+
+                    intptr_t innersize = iter.innersize();
+                    intptr_t dst_stride = iter.innerstride<0>();
+                    intptr_t src0_stride = iter.innerstride<1>();
+                    kernel_instance<unary_operation_t> operation;
+                    m_dtype.get_storage_to_value_operation(dst_stride, src0_stride, operation);
+                    if (innersize > 0) {
+                        do {
+                            operation.kernel(iter.data<0>(), dst_stride,
+                                        iter.data<1>(), src0_stride,
+                                        innersize, operation.auxdata);
+                        } while (iter.iternext());
+                    }
+
+                    return DND_MOVE(result);
+                }
+
+                return ndarray_expr_node_ptr(this);
+            }
             break;
         case 1: {
             const ndarray_expr_node *op1 = m_opnodes[0].get();
@@ -55,7 +79,7 @@ ndarray_expr_node_ptr dnd::ndarray_expr_node::evaluate() const
             if (m_node_category == elementwise_node_category) {
                 if (op1->get_node_category() == strided_array_node_category) {
                     ndarray_expr_node_ptr result;
-                    raw_ndarray_iter<1,1> iter(m_ndim, m_shape.get(), m_dtype, result, op1);
+                    raw_ndarray_iter<1,1> iter(m_ndim, m_shape.get(), m_dtype.value_dtype(), result, op1);
 
                     intptr_t innersize = iter.innersize();
                     intptr_t dst_stride = iter.innerstride<0>();

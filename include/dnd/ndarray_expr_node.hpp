@@ -135,9 +135,10 @@ public:
                                     kernel_instance<binary_operation_t>& out_kernel) const;
 
     /**
-     * Evaluates the expression tree into a strided array
+     * Evaluates the node into a strided array with a dtype that is
+     * not expression_kind.
      */
-    boost::intrusive_ptr<ndarray_expr_node>  evaluate() const;
+    boost::intrusive_ptr<ndarray_expr_node>  evaluate();
 
     /**
      * Applies a linear index to the node, returning either the current node (for do-nothing

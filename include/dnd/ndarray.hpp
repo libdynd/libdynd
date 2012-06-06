@@ -251,7 +251,7 @@ public:
     /** Does a value-assignment from the rhs array. */
     void val_assign(const ndarray& rhs, assign_error_mode errmode = assign_error_fractional) const;
     /** Does a value-assignment from the rhs raw scalar */
-    void val_assign(const dtype& dt, const void *data, assign_error_mode errmode = assign_error_fractional) const;
+    void val_assign(const dtype& dt, const char *data, assign_error_mode errmode = assign_error_fractional) const;
 
     /**
      * Converts the array into the specified dtype.
@@ -318,13 +318,13 @@ public:
     /** Does a value-assignment from the rhs C++ scalar. */
     template<class T>
     typename enable_if<is_dtype_scalar<T>::value, ndarray_vals&>::type operator=(const T& rhs) {
-        m_arr.val_assign(make_dtype<T>(), &rhs);
+        m_arr.val_assign(make_dtype<T>(), (const char *)&rhs);
         return *this;
     }
     /** Does a value-assignment from the rhs C++ boolean scalar. */
     ndarray_vals& operator=(const bool& rhs) {
         dnd_bool v = rhs;
-        m_arr.val_assign(make_dtype<dnd_bool>(), &v);
+        m_arr.val_assign(make_dtype<dnd_bool>(), (const char *)&v);
         return *this;
     }
 
@@ -332,9 +332,7 @@ public:
 
     // Can implicitly convert to an ndarray, by collapsing to a strided array
     operator ndarray() const {
-        return ndarray((m_arr.m_expr_tree->get_node_type() == strided_array_node_type)
-                        ? m_arr.m_expr_tree
-                        : m_arr.m_expr_tree->evaluate());
+        return ndarray(m_arr.m_expr_tree->evaluate());
     }
 
     friend class ndarray;
@@ -345,10 +343,7 @@ inline ndarray_vals ndarray::vals() const {
 }
 
 inline ndarray& ndarray::operator=(const ndarray_vals& rhs) {
-    // No copy if the rhs is already a strided array
-    m_expr_tree = (rhs.m_arr.m_expr_tree->get_node_type() == strided_array_node_type)
-                        ? rhs.m_arr.m_expr_tree
-                        : rhs.m_arr.m_expr_tree->evaluate();
+    m_expr_tree = rhs.m_arr.m_expr_tree->evaluate();
     return *this;
 }
 
@@ -564,12 +559,12 @@ namespace detail {
             if (lhs.get_expr_tree()->get_node_type() == strided_array_node_type) {
                 const strided_array_expr_node *node =
                         static_cast<const strided_array_expr_node *>(lhs.get_expr_tree());
-                dtype_assign(make_dtype<T>(), &result, node->get_dtype(), node->get_originptr(), errmode);
+                dtype_assign(make_dtype<T>(), (char *)&result, node->get_dtype(), node->get_originptr(), errmode);
             } else {
                 ndarray tmp = lhs.vals();
                 const strided_array_expr_node *node =
                         static_cast<const strided_array_expr_node *>(tmp.get_expr_tree());
-                dtype_assign(make_dtype<T>(), &result, node->get_dtype(), node->get_originptr(), errmode);
+                dtype_assign(make_dtype<T>(), (char *)&result, node->get_dtype(), node->get_originptr(), errmode);
             }
             return result;
         }

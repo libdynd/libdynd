@@ -267,7 +267,9 @@ TEST(NDArrayAssign, Casting) {
 
     // Allow truncation of fractional part
     b = a.as_dtype(make_dtype<int>(), assign_error_overflow);
+    b.debug_dump(cout);
     b = b.vals();
+    b.debug_dump(cout);
     EXPECT_EQ(3, b(0).as<int>());
     EXPECT_EQ(1, b(1).as<int>());
     EXPECT_EQ(0, b(2).as<int>());

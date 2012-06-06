@@ -223,10 +223,10 @@ public:
     virtual bool operator==(const extended_dtype& rhs) const = 0;
 
     // For expression_kind dtypes - converts from (operand_dtype().value_dtype()) to (value_dtype())
-    void get_operand_to_value_operation(intptr_t dst_fixedstride, intptr_t src_fixedstride,
+    virtual void get_operand_to_value_operation(intptr_t dst_fixedstride, intptr_t src_fixedstride,
                                 kernel_instance<unary_operation_t>& out_kernel);
     // For expression_kind dtypes - converts from (value_dtype()) to (operand_dtype().value_dtype())
-    void get_value_to_operand_operation(intptr_t dst_fixedstride, intptr_t src_fixedstride,
+    virtual void get_value_to_operand_operation(intptr_t dst_fixedstride, intptr_t src_fixedstride,
                                 kernel_instance<unary_operation_t>& out_kernel);
 };
 

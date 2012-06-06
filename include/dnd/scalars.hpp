@@ -58,7 +58,7 @@ public:
      * @param src_data    The data for the input scalar.
      * @param errmode     What kind of error checking to do when converting data types.
      */
-    scalar_copied_if_necessary(const dtype& dst_dtype, const dtype& src_dtype, const void *src_data,
+    scalar_copied_if_necessary(const dtype& dst_dtype, const dtype& src_dtype, const char *src_data,
                                     assign_error_mode errmode = assign_error_fractional) {
 
         if (dst_dtype == src_dtype) {
@@ -85,7 +85,7 @@ public:
     }
 
     /** Gets the scalar data pointer */
-    const void *data() const {
+    const char *data() const {
         return m_data;
     }
 };

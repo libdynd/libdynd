@@ -11,26 +11,42 @@
 
 namespace dnd {
 
-typedef void (*nullary_operation_t)(void *dst, intptr_t dst_stride,
+typedef void (*nullary_operation_t)(char *dst, intptr_t dst_stride,
                         intptr_t count, const AuxDataBase *auxdata);
 
-typedef void (*unary_operation_t)(void *dst, intptr_t dst_stride,
-                        const void *src0, intptr_t src0_stride,
+typedef void (*unary_operation_t)(char *dst, intptr_t dst_stride,
+                        const char *src0, intptr_t src0_stride,
                         intptr_t count, const AuxDataBase *auxdata);
 
-typedef void (*binary_operation_t)(void *dst, intptr_t dst_stride,
-                        const void *src0, intptr_t src0_stride,
-                        const void *src1, intptr_t src1_stride,
+typedef void (*binary_operation_t)(char *dst, intptr_t dst_stride,
+                        const char *src0, intptr_t src0_stride,
+                        const char *src1, intptr_t src1_stride,
                         intptr_t count, const AuxDataBase *auxdata);
 
 /**
  * This class holds an instance of a kernel function, with its
  * associated auxiliary data. The object is non-copyable, just
  * like the auxiliary_data object, to avoid inefficient copies.
- * Non-copyability is implicit because auxiliary_data is non-copyable.
  */
 template<typename FT>
-struct kernel_instance {
+class kernel_instance {
+    kernel_instance& operator=(const kernel_instance&);
+public:
+    kernel_instance() {
+    }
+    // Copying a kernel_instance clones the auxiliary data
+    kernel_instance(const kernel_instance& rhs)
+        : kernel(rhs.kernel)
+    {
+        rhs.auxdata.clone_into(auxdata);
+    }
+
+    void swap(kernel_instance& rhs) {
+        using namespace std;
+        swap(kernel, rhs.kernel);
+        auxdata.swap(rhs.auxdata);
+    }
+
     FT kernel;
     auxiliary_data auxdata;
 };

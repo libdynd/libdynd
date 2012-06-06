@@ -137,7 +137,7 @@ public:
         }
     }
 
-    void clone(auxiliary_data& out_cloned) {
+    void clone_into(auxiliary_data& out_cloned) const {
         out_cloned.free();
         if (m_auxdata != 0) {
             out_cloned.m_auxdata = m_auxdata->clone(m_auxdata);
@@ -145,6 +145,10 @@ public:
                 throw std::bad_alloc();
             }
         }
+    }
+
+    void swap(auxiliary_data& rhs) {
+        std::swap(m_auxdata, rhs.m_auxdata);
     }
 
     // When the auxiliary_data was created with make_auxiliary_data<T>, this
@@ -157,7 +161,7 @@ public:
 
     // Allow implicit conversion to const AuxDataBase *, so that this
     // can be passed as a parameter to kernel functions.
-    operator const AuxDataBase *() {
+    operator const AuxDataBase *() const {
         return m_auxdata;
     }
 

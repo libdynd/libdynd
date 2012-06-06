@@ -321,8 +321,9 @@ ndarray_expr_node_ptr dnd::make_broadcast_strided_array_expr_node(ndarray_expr_n
     broadcast_to_shape(ndim, shape, snode, strides.get());
 
     // Create the strided array node
-    ndarray_expr_node_ptr new_node(new strided_array_expr_node(snode->get_dtype(), ndim,
-                                    shape, strides.get(), snode->get_originptr(), snode->get_buffer_owner()));
+    ndarray_expr_node_ptr new_node(new strided_array_expr_node(
+                    (dt == snode->get_dtype()) ? snode->get_dtype() : make_conversion_dtype(dt, snode->get_dtype(), errmode),
+                    ndim, shape, strides.get(), snode->get_originptr(), snode->get_buffer_owner()));
 
     return std::move(new_node);
 }

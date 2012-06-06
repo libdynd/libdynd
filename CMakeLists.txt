@@ -47,6 +47,7 @@ set(dnd_SRC
     include/dnd/ndarray.hpp
     include/dnd/ndarray_arange.hpp
     include/dnd/ndarray_expr_node.hpp
+	include/dnd/operations.hpp
     include/dnd/raw_iteration.hpp
     include/dnd/shape_tools.hpp
     )

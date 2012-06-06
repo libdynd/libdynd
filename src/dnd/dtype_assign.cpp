@@ -14,6 +14,7 @@
 #include <limits>
 
 #include <dnd/dtype_assign.hpp>
+#include <dnd/dtypes/conversion_dtype.hpp>
 
 #include "single_assigner_builtin.hpp"
 
@@ -240,25 +241,26 @@ static inline assign_function_t get_single_assign_function(const dtype& dst_dt, 
     }
 }
 
-void dnd::dtype_assign(const dtype& dst_dt, void *dst, const dtype& src_dt, const void *src, assign_error_mode errmode)
+void dnd::dtype_assign(const dtype& dst_dt, char *dst, const dtype& src_dt, const char *src, assign_error_mode errmode)
 {
     if (dst_dt.extended() == NULL && src_dt.extended() == NULL) {
-        // None of the built-in scalars are more than 128-bits with 64-bit alignment (currently...) so use two 64-bit
-        // integer arrays as temporary buffers for alignment
-        int64_t s[2], d[2];
-
+        // Try to use the simple single-value assignment for built-in types
         assign_function_t asn = get_single_assign_function(dst_dt, src_dt, errmode);
         if (asn != NULL) {
-            memcpy(&s, src, src_dt.itemsize());
-            asn(&d, &s);
-            memcpy(dst, &d, dst_dt.itemsize());
+            asn(dst, src);
             return;
         }
-    }
 
-    stringstream ss;
-    ss << "assignment from " << src_dt << " to " << dst_dt << " isn't yet supported";
-    throw std::runtime_error(ss.str());
+        stringstream ss;
+        ss << "assignment from " << src_dt << " to " << dst_dt << " isn't yet supported";
+        throw std::runtime_error(ss.str());
+    } else {
+        // Fall back to the strided assignment functions for the extended dtypes
+        kernel_instance<unary_operation_t> op;
+        get_dtype_strided_assign_operation(dst_dt, 0, src_dt, 0, errmode, op);
+        op.kernel(dst, 0, src, 0, 1, op.auxdata);
+        return;
+    }
 }
 
 /*
@@ -278,8 +280,8 @@ namespace {
         }
     };
 }
-static void assign_multiple_byteswap_unaligned(void *dst, intptr_t dst_stride,
-                                    const void *src, intptr_t src_stride,
+static void assign_multiple_byteswap_unaligned(char *dst, intptr_t dst_stride,
+                                    const char *src, intptr_t src_stride,
                                     intptr_t count, const auxiliary_data *data)
 {
     const multiple_byteswap_unaligned_auxiliary_data * mgdata =
@@ -312,7 +314,7 @@ namespace {
         int dst_itemsize, src_itemsize;
     };
 }
-static void assign_multiple_unaligned(void *dst, intptr_t dst_stride, const void *src, intptr_t src_stride,
+static void assign_multiple_unaligned(char *dst, intptr_t dst_stride, const char *src, intptr_t src_stride,
                                     intptr_t count, const AuxDataBase *auxdata)
 {
     const multiple_unaligned_auxiliary_data &mgdata = get_auxiliary_data<multiple_unaligned_auxiliary_data>(auxdata);
@@ -338,7 +340,7 @@ static void assign_multiple_unaligned(void *dst, intptr_t dst_stride, const void
 */
 
 // A multiple aligned assignment function which uses one of the single assignment functions as proxy
-static void assign_multiple_aligned(void *dst, intptr_t dst_stride, const void *src, intptr_t src_stride,
+static void assign_multiple_aligned(char *dst, intptr_t dst_stride, const char *src, intptr_t src_stride,
                                     intptr_t count, const AuxDataBase *auxdata)
 {
     assign_function_t asn = get_auxiliary_data<assign_function_t>(auxdata);
@@ -358,8 +360,8 @@ static void assign_multiple_aligned(void *dst, intptr_t dst_stride, const void *
 // Some specialized multiple assignment functions
 template<class dst_type, class src_type>
 struct multiple_assigner {
-    static void assign_noexcept(void *dst, intptr_t dst_stride,
-                                const void *src, intptr_t src_stride,
+    static void assign_noexcept(char *dst, intptr_t dst_stride,
+                                const char *src, intptr_t src_stride,
                                 intptr_t count,
                                 const AuxDataBase *)
     {
@@ -377,8 +379,8 @@ struct multiple_assigner {
         }
     }
 
-    static void assign_noexcept_anystride_zerostride(void *dst, intptr_t dst_stride,
-                                const void *src, intptr_t,
+    static void assign_noexcept_anystride_zerostride(char *dst, intptr_t dst_stride,
+                                const char *src, intptr_t,
                                 intptr_t count,
                                 const AuxDataBase *)
     {
@@ -396,8 +398,8 @@ struct multiple_assigner {
         }
     }
 
-    static void assign_noexcept_contigstride_zerostride(void *dst, intptr_t,
-                                const void *src, intptr_t,
+    static void assign_noexcept_contigstride_zerostride(char *dst, intptr_t,
+                                const char *src, intptr_t,
                                 intptr_t count,
                                 const AuxDataBase *)
     {
@@ -413,8 +415,8 @@ struct multiple_assigner {
         }
     }
 
-    static void assign_noexcept_contigstride_contigstride(void *dst, intptr_t,
-                                const void *src, intptr_t,
+    static void assign_noexcept_contigstride_contigstride(char *dst, intptr_t,
+                                const char *src, intptr_t,
                                 intptr_t count,
                                 const AuxDataBase *)
     {
@@ -435,7 +437,8 @@ struct multiple_assigner {
 #define DTYPE_ASSIGN_SRC_TO_DST_SINGLE_CASE(dst_type, src_type, ASSIGN_FN) \
     case type_id_of<dst_type>::value: \
         /*DEBUG_COUT << "returning " << DND_STRINGIFY(dst_type) << " " << DND_STRINGIFY(src_type) << " " << DND_STRINGIFY(ASSIGN_FN) << "\n";*/ \
-        out_kernel.kernel = &multiple_assigner<dst_type, src_type>::ASSIGN_FN;
+        out_kernel.kernel = &multiple_assigner<dst_type, src_type>::ASSIGN_FN; \
+        return;
 
 #define DTYPE_ASSIGN_SRC_TO_ANY_CASE(src_type, ASSIGN_FN) \
     case type_id_of<src_type>::value: \
@@ -486,8 +489,11 @@ void dnd::get_dtype_strided_assign_operation(
 
     out_kernel.auxdata.free();
 
+    // Assignment of built-in types
     if (dst_dt.extended() == NULL && src_dt.extended() == NULL) {
-        // When there's misaligned or byte-swapped data, go the slow path
+        // When there's error-checking, use single-assignment functions to avoid too
+        // much code bloat. Maybe we can add strided specializations to get a bit
+        // better speed.
         if (errmode != assign_error_none) {
             assign_function_t asn = get_single_assign_function(dst_dt, src_dt, errmode);
             if (asn != NULL) {
@@ -511,13 +517,37 @@ void dnd::get_dtype_strided_assign_operation(
         }
     }
 
+    // Assignment of expression dtypes
+    if (src_dt.kind() == expression_kind) {
+        if (src_dt.value_dtype() == dst_dt) {
+            // If the source dtype's value_dtype matches the destination, it's easy
+            src_dt.get_storage_to_value_operation(dst_fixedstride, src_fixedstride, out_kernel);
+            return;
+        } else if (dst_dt.kind() != expression_kind) {
+            // Need to also chain a conversion to the destination
+            dtype dtcombined = make_conversion_dtype(dst_dt, src_dt, errmode);
+            dtcombined.get_storage_to_value_operation(dst_fixedstride, src_fixedstride, out_kernel);
+            return;
+        } else {
+            // TODO
+            stringstream ss;
+            ss << "strided assignment from " << src_dt << " to " << dst_dt << " (expression dtype to expression dtype) isn't yet supported";
+            throw std::runtime_error(ss.str());
+        }
+    } else if (dst_dt.kind() == expression_kind) {
+        // TODO
+        stringstream ss;
+        ss << "strided assignment from " << src_dt << " to " << dst_dt << " (dtype to expression dtype) isn't yet supported";
+        throw std::runtime_error(ss.str());
+    }
+
     stringstream ss;
     ss << "strided assignment from " << src_dt << " to " << dst_dt << " isn't yet supported";
     throw std::runtime_error(ss.str());
 }
 
-void dnd::dtype_strided_assign(const dtype& dst_dt, void *dst, intptr_t dst_stride,
-                            const dtype& src_dt, const void *src, intptr_t src_stride,
+void dnd::dtype_strided_assign(const dtype& dst_dt, char *dst, intptr_t dst_stride,
+                            const dtype& src_dt, const char *src, intptr_t src_stride,
                             intptr_t count, assign_error_mode errmode)
 {
     kernel_instance<unary_operation_t> op;
@@ -529,14 +559,14 @@ void dnd::dtype_strided_assign(const dtype& dst_dt, void *dst, intptr_t dst_stri
 
 // Fixed and unknown size contiguous copy assignment functions
 template<int N>
-static void contig_fixedsize_copy_assign(void *dst, intptr_t, const void *src, intptr_t,
+static void contig_fixedsize_copy_assign(char *dst, intptr_t, const char *src, intptr_t,
                             intptr_t count, const AuxDataBase *) {
     memcpy(dst, src, N * count);
 }
 namespace {
     template<class T>
     struct fixed_size_copy_assign_type {
-        static void assign(void *dst, intptr_t dst_stride, const void *src, intptr_t src_stride,
+        static void assign(char *dst, intptr_t dst_stride, const char *src, intptr_t src_stride,
                             intptr_t count, const AuxDataBase *) {
             T *dst_cached = reinterpret_cast<T *>(dst);
             const T *src_cached = reinterpret_cast<const T *>(src);
@@ -565,7 +595,7 @@ namespace {
 
     template<class T>
     struct fixed_size_copy_zerostride_assign_type {
-        static void assign(void *dst, intptr_t dst_stride, const void *src, intptr_t,
+        static void assign(char *dst, intptr_t dst_stride, const char *src, intptr_t,
                             intptr_t count, const AuxDataBase *) {
             T *dst_cached = reinterpret_cast<T *>(dst);
             T s = *reinterpret_cast<const T *>(src);
@@ -590,13 +620,13 @@ namespace {
     template<>
     struct fixed_size_copy_zerostride_assign<8> : public fixed_size_copy_zerostride_assign_type<int64_t> {};
 }
-static void contig_copy_assign(void *dst, intptr_t, const void *src, intptr_t,
+static void contig_copy_assign(char *dst, intptr_t, const char *src, intptr_t,
                             intptr_t count, const AuxDataBase *auxdata)
 {
     intptr_t itemsize = get_auxiliary_data<intptr_t>(auxdata);
     memcpy(dst, src, itemsize * count);
 }
-static void strided_copy_assign(void *dst, intptr_t dst_stride, const void *src, intptr_t src_stride,
+static void strided_copy_assign(char *dst, intptr_t dst_stride, const char *src, intptr_t src_stride,
                             intptr_t count, const AuxDataBase *auxdata)
 {
     char *dst_cached = reinterpret_cast<char *>(dst);
@@ -609,13 +639,13 @@ static void strided_copy_assign(void *dst, intptr_t dst_stride, const void *src,
         src_cached += src_stride;
     }
 }
-static void fixed_size_copy_contig_zerostride_assign_memset(void *dst, intptr_t, const void *src, intptr_t,
+static void fixed_size_copy_contig_zerostride_assign_memset(char *dst, intptr_t, const char *src, intptr_t,
                             intptr_t count, const AuxDataBase *)
 {
     char s = *reinterpret_cast<const char *>(src);
     memset(dst, s, count);
 }
-static void strided_copy_zerostride_assign(void *dst, intptr_t dst_stride, const void *src, intptr_t,
+static void strided_copy_zerostride_assign(char *dst, intptr_t dst_stride, const char *src, intptr_t,
                             intptr_t count, const AuxDataBase *auxdata)
 {
     char *dst_cached = reinterpret_cast<char *>(dst);

@@ -85,6 +85,16 @@ TEST(ArithmeticOp, MatchingDTypes) {
     EXPECT_EQ(-6, c(0).as<int>());
     EXPECT_EQ(-3, c(1).as<int>());
     EXPECT_EQ(-2, c(2).as<int>());
+}
+
+TEST(ArithmeticOp, ComplexScalar) {
+    return;
+
+    ndarray a, c;
+
+    // Two arrays with broadcasting
+    int v0[] = {1,2,3};
+    a = v0;
 
     // A complex scalar
     (a + complex<float>(1, 2)).debug_dump(cout);

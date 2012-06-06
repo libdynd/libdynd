@@ -42,15 +42,15 @@ bool is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt);
  *
  * The src and dst data must be aligned. TODO: Relax this restriction.
  */
-void dtype_assign(const dtype& dst_dt, void *dst, const dtype& src_dt, const void *src,
+void dtype_assign(const dtype& dst_dt, char *dst, const dtype& src_dt, const char *src,
                                 assign_error_mode errmode = assign_error_fractional);
 
 /**
  * Like dtype_assign, but for strided assignment. Does not require that the data
  * be aligned.
  */
-void dtype_strided_assign(const dtype& dst_dt, void *dst, intptr_t dst_stride,
-                            const dtype& src_dt, const void *src, intptr_t src_stride,
+void dtype_strided_assign(const dtype& dst_dt, char *dst, intptr_t dst_stride,
+                            const dtype& src_dt, const char *src, intptr_t src_stride,
                             intptr_t count, assign_error_mode errmode);
 
 /**

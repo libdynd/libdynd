@@ -70,7 +70,7 @@ namespace dnd {
 //    This allowed dtypes to be created in cling!
 // 2) Don't use the memcpy function (it has inline assembly).
 
-inline void DND_MEMCPY(void *dst, const void *src, intptr_t count)
+inline void DND_MEMCPY(char *dst, const char *src, intptr_t count)
 {
     char *cdst = (char *)dst;
     const char *csrc = (const char *)src;

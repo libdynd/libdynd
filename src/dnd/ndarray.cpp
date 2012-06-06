@@ -315,7 +315,7 @@ void dnd::ndarray::val_assign(const ndarray& rhs, assign_error_mode errmode) con
     }
 }
 
-void dnd::ndarray::val_assign(const dtype& dt, const void *data, assign_error_mode errmode) const
+void dnd::ndarray::val_assign(const dtype& dt, const char *data, assign_error_mode errmode) const
 {
     //DEBUG_COUT << "scalar val_assign\n";
     scalar_copied_if_necessary src(get_dtype(), dt, data, errmode);
