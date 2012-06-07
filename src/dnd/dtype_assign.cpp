@@ -535,10 +535,13 @@ void dnd::get_dtype_strided_assign_operation(
             throw std::runtime_error(ss.str());
         }
     } else if (dst_dt.kind() == expression_kind) {
-        // TODO
-        stringstream ss;
-        ss << "strided assignment from " << src_dt << " to " << dst_dt << " (dtype to expression dtype) isn't yet supported";
-        throw std::runtime_error(ss.str());
+        if (src_dt == dst_dt.storage_dtype()) {
+            // If the destination dtype's storage matches the source, it's easy
+            src_dt.get_value_to_storage_operation(dst_fixedstride, src_fixedstride, out_kernel);
+            return;
+        } else {
+            // TODO
+        }
     }
 
     stringstream ss;

@@ -38,8 +38,8 @@ if(WIN32)
     # TODO: Make this not be hardcoded
     target_link_libraries(dnd_tests
         dynamicndarray
-        ../../../googletest/build-vc10/Debug/gtest
-        ../../../googletest/build-vc10/Debug/gtest_main
+        ../../../googletest/build-vc10/RelWithDebInfo/gtest
+        ../../../googletest/build-vc10/RelWithDebInfo/gtest_main
         )
 else(WIN32)
     set_target_properties(dnd_tests

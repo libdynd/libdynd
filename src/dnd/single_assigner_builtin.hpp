@@ -21,6 +21,11 @@
 #pragma GCC diagnostic ignored "-Weffc++"
 #endif
 
+#if defined(_MSC_VER)
+// Tell the visual studio compiler we're accessing the FPU flags
+#pragma fenv_access(on)
+#endif
+
 // Put it in an anonymous namespace
 namespace {
 

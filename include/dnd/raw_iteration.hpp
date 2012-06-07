@@ -2,8 +2,6 @@
 // Copyright (C) 2011 Mark Wiebe (mwwiebe@gmail.com)
 // All rights reserved.
 //
-// This is unreleased proprietary software.
-//
 #ifndef _RAW_ITERATION_HPP_
 #define _RAW_ITERATION_HPP_
 

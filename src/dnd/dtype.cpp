@@ -8,6 +8,7 @@
 #include <dnd/exceptions.hpp>
 #include <dnd/dtype_assign.hpp>
 #include <dnd/buffer_storage.hpp>
+#include <dnd/unary_operations.hpp>
 
 #include <sstream>
 #include <cstring>
@@ -54,8 +55,8 @@ static struct {
     {uint_kind, 2, 2},         // uint16
     {uint_kind, 4, 4},         // uint32
     {uint_kind, 8, 8},         // uint64
-    {real_kind, 4, 4},        // float32
-    {real_kind, 8, 8},        // float64
+    {real_kind, 4, 4},         // float32
+    {real_kind, 8, 8},         // float64
     {complex_kind, 4, 8},      // complex<float32>
     {complex_kind, 8, 16},     // complex<float64>
     {composite_kind, 16, 16},  // sse128f
@@ -371,34 +372,6 @@ void dnd::dtype::print_data(std::ostream& o, const char *data, intptr_t stride, 
     }
 }
 
-namespace {
-    struct assign_2chain_auxdata {
-        kernel_instance<unary_operation_t> chain[2];
-        buffer_storage buf;
-    };
-
-    void assign_2chain(char *dst, intptr_t dst_stride, const char *src, intptr_t src_stride,
-                            intptr_t count, const AuxDataBase *auxdata)
-    {
-        const assign_2chain_auxdata& ad = get_auxiliary_data<assign_2chain_auxdata>(auxdata);
-        do {
-            intptr_t block_count = ad.buf.element_count();
-            if (count < block_count) {
-                block_count = count;
-            }
-
-            // First link of the chain
-            ad.chain[0].kernel(ad.buf.storage(), ad.buf.element_size(), src, src_stride, block_count, ad.chain[0].auxdata);
-            // Second link of the chain
-            ad.chain[1].kernel(dst, dst_stride, ad.buf.storage(), ad.buf.element_size(), block_count, ad.chain[1].auxdata);
-
-            src += block_count * src_stride;
-            dst += block_count * dst_stride;
-            count -= block_count;
-        } while (count > 0);
-    }
-} // anonymous namespace
-
 void dnd::dtype::get_storage_to_value_operation(intptr_t dst_fixedstride, intptr_t src_fixedstride,
                             kernel_instance<unary_operation_t>& out_kernel) const
 {
@@ -426,10 +399,15 @@ void dnd::dtype::get_storage_to_value_operation(intptr_t dst_fixedstride, intptr
             // Produce a good function chaining/auxdata based on the chain length
             switch (chain_dtypes.size()) {
             case 2: {
-                out_kernel.kernel = &assign_2chain;
-                make_auxiliary_data<assign_2chain_auxdata>(out_kernel.auxdata);
-                assign_2chain_auxdata &auxdata = out_kernel.auxdata.get<assign_2chain_auxdata>();
+                out_kernel.kernel = &unary_2chain_kernel;
+                make_auxiliary_data<unary_2chain_auxdata>(out_kernel.auxdata);
+                unary_2chain_auxdata &auxdata = out_kernel.auxdata.get<unary_2chain_auxdata>();
+                // Allocate the buffer
+                // TODO: Should get_storage_to_value_operation get information about how much buffer space to allow?
                 auxdata.buf.allocate(chain_dtypes[1]->value_dtype().itemsize());
+                // Get the two kernel functions to chain
+                chain_dtypes[1]->m_data->get_operand_to_value_operation(auxdata.buf.element_size(), src_fixedstride, auxdata.kernels[0]);
+                chain_dtypes[0]->m_data->get_operand_to_value_operation(dst_fixedstride, auxdata.buf.element_size(), auxdata.kernels[1]);
                 return;
                 }
             default:
@@ -445,6 +423,41 @@ void dnd::dtype::get_value_to_storage_operation(intptr_t dst_fixedstride, intptr
     if (m_kind != expression_kind) {
         // If it's not an expression_kind dtype, return a simple copy operation
         get_dtype_strided_assign_operation(*this, dst_fixedstride, src_fixedstride, out_kernel);
+        return;
     } else {
+        const dtype* dt = &m_data->operand_dtype(*this);
+        if (dt->kind() != expression_kind) {
+            // If there is no chained expressions, return the function unchanged
+            m_data->get_value_to_operand_operation(dst_fixedstride, src_fixedstride, out_kernel);
+        } else {
+            // Get the chain of expression_kind dtypes
+            vector<const dtype*> chain_dtypes;
+
+            chain_dtypes.push_back(this);
+            chain_dtypes.push_back(dt);
+            dt = &dt->m_data->operand_dtype(*dt);
+            while (dt->kind() == expression_kind) {
+                chain_dtypes.push_back(dt);
+                dt = &dt->m_data->operand_dtype(*dt);
+            }
+
+            // Produce a good function chaining/auxdata based on the chain length
+            switch (chain_dtypes.size()) {
+            case 2: {
+                out_kernel.kernel = &unary_2chain_kernel;
+                make_auxiliary_data<unary_2chain_auxdata>(out_kernel.auxdata);
+                unary_2chain_auxdata &auxdata = out_kernel.auxdata.get<unary_2chain_auxdata>();
+                // Allocate the buffer
+                // TODO: Should get_storage_to_value_operation get information about how much buffer space to allow?
+                auxdata.buf.allocate(chain_dtypes[1]->value_dtype().itemsize());
+                // Get the two kernel functions to chain
+                chain_dtypes[0]->m_data->get_value_to_operand_operation(auxdata.buf.element_size(), src_fixedstride, auxdata.kernels[0]);
+                chain_dtypes[1]->m_data->get_value_to_operand_operation(dst_fixedstride, auxdata.buf.element_size(), auxdata.kernels[1]);
+                return;
+                }
+            default:
+                throw std::runtime_error("unsupported conversion chain!");
+            }
+        }
     }
 }

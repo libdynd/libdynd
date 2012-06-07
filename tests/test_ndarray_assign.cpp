@@ -5,6 +5,7 @@
 #include "inc_gtest.hpp"
 
 #include "dnd/ndarray.hpp"
+#include "dnd/dtypes/conversion_dtype.hpp"
 
 using namespace std;
 using namespace dnd;
@@ -267,9 +268,15 @@ TEST(NDArrayAssign, Casting) {
 
     // Allow truncation of fractional part
     b = a.as_dtype(make_dtype<int>(), assign_error_overflow);
-    b.debug_dump(cout);
     b = b.vals();
-    b.debug_dump(cout);
+    EXPECT_EQ(3, b(0).as<int>());
+    EXPECT_EQ(1, b(1).as<int>());
+    EXPECT_EQ(0, b(2).as<int>());
+    EXPECT_EQ(1000, b(3).as<int>());
+
+    // as_dtype<int>() should be equivalent to as_dtype(make_dtype<int>())
+    b = a.as_dtype<int>(assign_error_overflow);
+    b = b.vals();
     EXPECT_EQ(3, b(0).as<int>());
     EXPECT_EQ(1, b(1).as<int>());
     EXPECT_EQ(0, b(2).as<int>());
@@ -288,4 +295,49 @@ TEST(NDArrayAssign, Casting) {
     EXPECT_EQ(1, b(1).as<int>());
     EXPECT_EQ(0, b(2).as<int>());
     EXPECT_EQ(-120, b(3).as<int>());
+}
+
+TEST(NDArrayAssign, ChainedCastingRead) {
+    float v0[5] = {3.5f, 1.3f, -2.4999f, -2.999, 1000.50001f};
+    ndarray a = v0, b;
+
+    b = a.as_dtype<int>(assign_error_overflow);
+    b = b.as_dtype<float>(assign_error_inexact);
+    // Multiple as_dtype operations should make a chained conversion dtype
+    EXPECT_EQ(make_conversion_dtype(make_dtype<float>(),
+                                    make_conversion_dtype<int, float>(assign_error_overflow), assign_error_inexact),
+              b.get_dtype());
+
+    // Evaluating the values should truncate them to integers
+    b = b.vals();
+    // Now it's just the value dtype, no chaining
+    EXPECT_EQ(make_dtype<float>(), b.get_dtype());
+    EXPECT_EQ(3, b(0).as<float>());
+    EXPECT_EQ(1, b(1).as<float>());
+    EXPECT_EQ(-2, b(2).as<float>());
+    EXPECT_EQ(-2, b(3).as<float>());
+    EXPECT_EQ(1000, b(4).as<float>());
+}
+
+TEST(NDArrayAssign, ChainedCastingWrite) {
+    float v0[3] = {0, 0, 0};
+    ndarray a = v0, b;
+
+    b = a.as_dtype<int>(assign_error_inexact);
+    b = b.as_dtype<float>(assign_error_overflow);
+    // Multiple as_dtype operations should make a chained conversion dtype
+    EXPECT_EQ(make_conversion_dtype(make_dtype<float>(),
+                                    make_conversion_dtype<int, float>(assign_error_inexact), assign_error_overflow),
+              b.get_dtype());
+
+    b(0).vals() = 6.8f;
+    b(1).vals() = -3.1;
+    b(2).vals() = 1000.5;
+    // Assigning should trigger the overflow
+    EXPECT_THROW(b(2).vals() = 1e25f, runtime_error);
+
+    // Check that the values in a got assigned as expected
+    EXPECT_EQ(6, a(0).as<float>());
+    EXPECT_EQ(-3, a(1).as<float>());
+    EXPECT_EQ(1000, a(2).as<float>());
 }

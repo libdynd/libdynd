@@ -36,6 +36,7 @@ set(dnd_SRC
     src/dnd/shape_tools.cpp
     src/dnd/ndarray_expr_node_instances.hpp
     src/dnd/single_assigner_builtin.hpp
+	src/dnd/unary_operations.cpp
 	include/dnd/auxiliary_data.hpp
     include/dnd/buffer_storage.hpp
     include/dnd/config.hpp
@@ -50,6 +51,7 @@ set(dnd_SRC
 	include/dnd/operations.hpp
     include/dnd/raw_iteration.hpp
     include/dnd/shape_tools.hpp
+	include/dnd/unary_operations.hpp
     )
 
 if(WIN32)
@@ -63,9 +65,9 @@ include_directories(
     include
     )
 
-source_group("DTypes Source" REGULAR_EXPRESSION ".*/dtypes/.*cpp")
-source_group("DTypes Headers" REGULAR_EXPRESSION ".*/dtypes/.*hpp")
-source_group("Internal Headers" REGULAR_EXPRESSION "^src/.*hpp")
+source_group("DTypes Source" REGULAR_EXPRESSION "src/dnd/dtypes/.*cpp")
+source_group("DTypes Headers" REGULAR_EXPRESSION "include/dnd/dtypes/.*hpp")
+source_group("Internal Headers" REGULAR_EXPRESSION "src/dnd/.*hpp")
 
 if(WIN32)
     add_library(dynamicndarray STATIC ${dnd_SRC})
@@ -76,3 +78,5 @@ endif()
 add_subdirectory(tests)
 
 add_subdirectory(examples)
+
+add_subdirectory(python)

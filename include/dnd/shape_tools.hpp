@@ -2,8 +2,6 @@
 // Copyright (C) 2011 Mark Wiebe (mwwiebe@gmail.com)
 // All rights reserved.
 //
-// This is unreleased proprietary software.
-//
 #ifndef _DND__SHAPE_TOOLS_HPP_
 #define _DND__SHAPE_TOOLS_HPP_
 
