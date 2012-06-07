@@ -25,6 +25,12 @@ inline void dtype_placement_new(dtype_placement_wrapper& v)
     new (&v) dnd::dtype();
 }
 
+inline void dtype_placement_new(dtype_placement_wrapper& v, const char* rep)
+{
+    // Call placement new
+    new (&v) dnd::dtype(rep);
+}
+
 inline void dtype_placement_delete(dtype_placement_wrapper& v)
 {
     // Call the destructor
@@ -35,11 +41,6 @@ inline void dtype_placement_delete(dtype_placement_wrapper& v)
 inline dnd::dtype& dpc(dtype_placement_wrapper& v)
 {
     return *(dnd::dtype *)&v;
-}
-
-inline void dtype_print(dnd::dtype& d)
-{
-    std::cout << d << "\n";
 }
 
 ///////////////////////////////////

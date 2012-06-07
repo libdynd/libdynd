@@ -7,13 +7,16 @@ cdef class w_dtype:
     # which returns a reference to the dtype.
     cdef dtype_placement_wrapper d
 
-    def __cinit__(self):
-        dtype_placement_new(self.d)
+    def __cinit__(self, char* val):
+        dtype_placement_new(self.d, val)
     def __dealloc__(self):
         dtype_placement_delete(self.d)
 
-    def printval(self):
-        dtype_print(dpc(self.d))
+    def __str__(self):
+        return str(dtype_str(dpc(self.d)).c_str())
+
+    def __repr__(self):
+        return str(dtype_repr(dpc(self.d)).c_str())
 
 cdef class w_ndarray:
     # To access the embedded dtype, use "npc(self.n)",

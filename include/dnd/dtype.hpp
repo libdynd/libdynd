@@ -72,10 +72,6 @@ enum type_id_t {
     // Complex floating-point types
     complex_float32_type_id,
     complex_float64_type_id,
-    // SSE vector of 4 floats
-    sse128f_type_id,
-    // SSE2 vector of 2 doubles
-    sse128d_type_id,
     // UTF8 strings
     utf8_type_id,
     // Composite dtypes
@@ -305,6 +301,9 @@ public:
     /** Construct from a type ID and itemsize */
     explicit dtype(type_id_t type_id, uintptr_t size);
     explicit dtype(int type_id, uintptr_t size);
+
+    /** Construct from a string representation */
+    explicit dtype(const std::string& rep);
 
     void swap(dtype& rhs) {
         std::swap(m_type_id, rhs.m_type_id);

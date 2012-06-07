@@ -7,6 +7,8 @@
 # * Cython files may not contain UTF8
 # * Overloading operator= is not supported
 
+include "libcpp/string.pxd"
+
 cdef extern from "<stdint.h>":
     # From the Cython docs:
     #   If the header file uses typedef names such as word to refer
@@ -78,8 +80,9 @@ cdef extern from "dnd/dtype.hpp" namespace "dnd":
 
     cdef cppclass dtype:
         dtype()
-        dtype(type_id_t)
-        dtype(type_id_t, uintptr_t)
+        dtype(type_id_t) except +
+        dtype(type_id_t, uintptr_t) except +
+        dtype(string&) except +
         bint operator==(dtype&)
         bint operator!=(dtype&)
         
@@ -92,6 +95,9 @@ cdef extern from "dnd/dtype.hpp" namespace "dnd":
         bint is_object_type()
         extended_dtype* extended()
 
+cdef extern from "dtype_functions.hpp" namespace "pydnd":
+    string dtype_str(dtype&)
+    string dtype_repr(dtype&)
 
 cdef extern from "dnd/dtype_assign.hpp" namespace "dnd":
     cdef enum assign_error_mode:
@@ -102,7 +108,7 @@ cdef extern from "dnd/dtype_assign.hpp" namespace "dnd":
 
 cdef extern from "dnd/ndarray.hpp" namespace "dnd":
     cdef cppclass ndarray:
-        ndarray()
+        ndarray() except +
         ndarray(signed char value)
         ndarray(short value)
         ndarray(int value)
@@ -141,6 +147,7 @@ cdef extern from "placement_wrappers.hpp" namespace "pydnd":
     cdef struct dtype_placement_wrapper:
         pass
     void dtype_placement_new(dtype_placement_wrapper&)
+    void dtype_placement_new(dtype_placement_wrapper&, char*) except +
     void dtype_placement_delete(dtype_placement_wrapper&)
     # dtype placement cast
     dtype& dpc(dtype_placement_wrapper&)
@@ -151,5 +158,3 @@ cdef extern from "placement_wrappers.hpp" namespace "pydnd":
     void ndarray_placement_delete(ndarray_placement_wrapper&)
     # ndarray placement cast
     ndarray& npc(ndarray_placement_wrapper&)
-
-    void dtype_print(dtype&)

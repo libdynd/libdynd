@@ -340,7 +340,7 @@ void dnd::ndarray::debug_dump(std::ostream& o = std::cerr) const
     if (m_expr_tree) {
         m_expr_tree->debug_dump(o, " ");
     } else {
-        o << "EMPTY\n";
+        o << "NULL\n";
     }
     o << "------" << endl;
 }

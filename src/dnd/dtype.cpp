@@ -73,7 +73,6 @@ static struct {
  * is intended to be filled up with more data when custom dtypes are added.
  */
 static char type_id_names[DND_MAX_NUM_TYPE_IDS][32] = {
-    "generic",
     "bool",
     "int8",
     "int16",
@@ -91,7 +90,9 @@ static char type_id_names[DND_MAX_NUM_TYPE_IDS][32] = {
     "sse128d",
     "utf8",
     "struct",
-    "subarray"
+    "array",
+    "convert",
+    "pattern"
 };
 
 /**
@@ -173,6 +174,23 @@ dtype::dtype(int type_id, uintptr_t size)
         m_itemsize = size;
     }
 }
+
+dtype::dtype(const std::string& rep)
+    : m_data()
+{
+    for (int id = 0; id < builtin_type_id_count; ++id) {
+        if (rep == type_id_names[id]) {
+            m_type_id = (type_id_t)id;
+            m_kind = basic_type_id_info[id].kind;
+            m_alignment = basic_type_id_info[id].alignment;
+            m_itemsize = basic_type_id_info[id].itemsize;
+            return;
+        }
+    }
+
+    throw std::runtime_error(std::string() + "invalid type string \"" + rep + "\"");
+}
+
 
 /*
 namespace {
