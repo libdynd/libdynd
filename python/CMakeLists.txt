@@ -35,16 +35,20 @@ include_directories(
     ${PYTHON_INCLUDE_DIRS}
     ${NUMPY_INCLUDE_DIRS}
     ../../include
+    src
     )
 
 set(pydnd_CPP_SRC
+    src/placement_wrappers.hpp
     )
 set(pydnd_CYTHON_SRC
     src/_pydnd.pyx
+    src/dnd.pxd
     )
 set_source_files_properties(${pydnd_CYTHON_SRC} PROPERTIES CYTHON_IS_CXX 1)
 
 source_group("Cython Source" REGULAR_EXPRESSION ".*pyx$")
+source_group("Cython Headers" REGULAR_EXPRESSION ".*pxd$")
 source_group("Python Source" REGULAR_EXPRESSION ".*py$")
 
 cython_add_module(_pydnd ${pydnd_CPP_SRC} ${pydnd_CYTHON_SRC})

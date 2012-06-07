@@ -12,7 +12,7 @@
 using namespace std;
 using namespace dnd;
 
-static intptr_t min_strlen_for_builtin_kind(dtype_kind kind)
+static intptr_t min_strlen_for_builtin_kind(dtype_kind_t kind)
 {
     switch (kind) {
         case bool_kind:

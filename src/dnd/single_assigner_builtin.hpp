@@ -31,11 +31,11 @@ namespace {
 
 using namespace dnd;
 
-template<class dst_type, class src_type, dtype_kind dst_kind, dtype_kind src_kind, assign_error_mode errmode>
+template<class dst_type, class src_type, dtype_kind_t dst_kind, dtype_kind_t src_kind, assign_error_mode errmode>
 struct single_assigner_builtin_base;
 
 // Any assignment with no error checking
-template<class dst_type, class src_type, dtype_kind dst_kind, dtype_kind src_kind>
+template<class dst_type, class src_type, dtype_kind_t dst_kind, dtype_kind_t src_kind>
 struct single_assigner_builtin_base<dst_type, src_type, dst_kind, src_kind, assign_error_none>
 {
     static void assign(dst_type *dst, const src_type *src) {
@@ -67,7 +67,7 @@ struct single_assigner_builtin_base<dst_type, std::complex<src_real_type>, real_
 };
 
 // Anything -> boolean with overflow checking
-template<class src_type, dtype_kind src_kind>
+template<class src_type, dtype_kind_t src_kind>
 struct single_assigner_builtin_base<dnd_bool, src_type, bool_kind, src_kind, assign_error_overflow>
 {
     static void assign(dnd_bool *dst, const src_type *src) {
@@ -84,21 +84,21 @@ struct single_assigner_builtin_base<dnd_bool, src_type, bool_kind, src_kind, ass
 };
 
 // Anything -> boolean with other error checking
-template<class src_type, dtype_kind src_kind>
+template<class src_type, dtype_kind_t src_kind>
 struct single_assigner_builtin_base<dnd_bool, src_type, bool_kind, src_kind, assign_error_fractional>
     : public single_assigner_builtin_base<dnd_bool, src_type, bool_kind, src_kind, assign_error_overflow> {};
-template<class src_type, dtype_kind src_kind>
+template<class src_type, dtype_kind_t src_kind>
 struct single_assigner_builtin_base<dnd_bool, src_type, bool_kind, src_kind, assign_error_inexact>
     : public single_assigner_builtin_base<dnd_bool, src_type, bool_kind, src_kind, assign_error_overflow> {};
 
 // Boolean -> anything with other error checking
-template<class dst_type, dtype_kind dst_kind>
+template<class dst_type, dtype_kind_t dst_kind>
 struct single_assigner_builtin_base<dst_type, dnd_bool, dst_kind, bool_kind, assign_error_overflow>
     : public single_assigner_builtin_base<dst_type, dnd_bool, dst_kind, bool_kind, assign_error_none> {};
-template<class dst_type, dtype_kind dst_kind>
+template<class dst_type, dtype_kind_t dst_kind>
 struct single_assigner_builtin_base<dst_type, dnd_bool, dst_kind, bool_kind, assign_error_fractional>
     : public single_assigner_builtin_base<dst_type, dnd_bool, dst_kind, bool_kind, assign_error_none> {};
-template<class dst_type, dtype_kind dst_kind>
+template<class dst_type, dtype_kind_t dst_kind>
 struct single_assigner_builtin_base<dst_type, dnd_bool, dst_kind, bool_kind, assign_error_inexact>
     : public single_assigner_builtin_base<dst_type, dnd_bool, dst_kind, bool_kind, assign_error_none> {};
 

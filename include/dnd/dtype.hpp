@@ -34,7 +34,7 @@ public:
     }
 };
 
-enum dtype_kind {
+enum dtype_kind_t {
     bool_kind,
     int_kind,
     uint_kind,
@@ -53,7 +53,7 @@ enum dtype_kind {
     custom_kind
 };
 
-enum {
+enum type_id_t {
     // A 1-byte boolean type
     bool_type_id,
     // Signed integer types
@@ -141,23 +141,23 @@ template <> struct type_id_of<std::complex<double> > {enum {value = complex_floa
 template <typename T> struct dtype_kind_of;
 
 // Can't use bool, because it doesn't have a guaranteed sizeof
-template <> struct dtype_kind_of<dnd_bool> {static const dtype_kind value = bool_kind;};
+template <> struct dtype_kind_of<dnd_bool> {static const dtype_kind_t value = bool_kind;};
 template <> struct dtype_kind_of<char> {
-    static const dtype_kind value = ((char)-1) < 0 ? int_kind : uint_kind;
+    static const dtype_kind_t value = ((char)-1) < 0 ? int_kind : uint_kind;
 };
-template <> struct dtype_kind_of<signed char> {static const dtype_kind value = int_kind;};
-template <> struct dtype_kind_of<short> {static const dtype_kind value = int_kind;};
-template <> struct dtype_kind_of<int> {static const dtype_kind value = int_kind;};
-template <> struct dtype_kind_of<long> {static const dtype_kind value = int_kind;};
-template <> struct dtype_kind_of<long long> {static const dtype_kind value = int_kind;};
-template <> struct dtype_kind_of<uint8_t> {static const dtype_kind value = uint_kind;};
-template <> struct dtype_kind_of<uint16_t> {static const dtype_kind value = uint_kind;};
-template <> struct dtype_kind_of<unsigned int> {static const dtype_kind value = uint_kind;};
-template <> struct dtype_kind_of<unsigned long> {static const dtype_kind value = uint_kind;};
-template <> struct dtype_kind_of<unsigned long long>{static const dtype_kind value = uint_kind;};
-template <> struct dtype_kind_of<float> {static const dtype_kind value = real_kind;};
-template <> struct dtype_kind_of<double> {static const dtype_kind value = real_kind;};
-template <typename T> struct dtype_kind_of<std::complex<T> > {static const dtype_kind value = complex_kind;};
+template <> struct dtype_kind_of<signed char> {static const dtype_kind_t value = int_kind;};
+template <> struct dtype_kind_of<short> {static const dtype_kind_t value = int_kind;};
+template <> struct dtype_kind_of<int> {static const dtype_kind_t value = int_kind;};
+template <> struct dtype_kind_of<long> {static const dtype_kind_t value = int_kind;};
+template <> struct dtype_kind_of<long long> {static const dtype_kind_t value = int_kind;};
+template <> struct dtype_kind_of<uint8_t> {static const dtype_kind_t value = uint_kind;};
+template <> struct dtype_kind_of<uint16_t> {static const dtype_kind_t value = uint_kind;};
+template <> struct dtype_kind_of<unsigned int> {static const dtype_kind_t value = uint_kind;};
+template <> struct dtype_kind_of<unsigned long> {static const dtype_kind_t value = uint_kind;};
+template <> struct dtype_kind_of<unsigned long long>{static const dtype_kind_t value = uint_kind;};
+template <> struct dtype_kind_of<float> {static const dtype_kind_t value = real_kind;};
+template <> struct dtype_kind_of<double> {static const dtype_kind_t value = real_kind;};
+template <typename T> struct dtype_kind_of<std::complex<T> > {static const dtype_kind_t value = complex_kind;};
 
 // Metaprogram for determining if a type is a valid C++ scalar
 // of a particular dtype.
@@ -187,8 +187,8 @@ class extended_dtype {
 public:
     virtual ~extended_dtype();
 
-    virtual int type_id() const = 0;
-    virtual unsigned char kind() const = 0;
+    virtual type_id_t type_id() const = 0;
+    virtual dtype_kind_t kind() const = 0;
     virtual unsigned char alignment() const = 0;
     virtual uintptr_t itemsize() const = 0;
 
@@ -237,7 +237,7 @@ public:
  *
  * @param type_id  The type id for which to get the name.
  */
-const char *get_type_id_basename(int type_id);
+const char *get_type_id_basename(type_id_t type_id);
 
 /**
  * This class represents a data type.
@@ -300,8 +300,10 @@ public:
 #endif // DND_RVALUE_REFS
 
     /** Construct from a type ID */
+    explicit dtype(type_id_t type_id);
     explicit dtype(int type_id);
     /** Construct from a type ID and itemsize */
+    explicit dtype(type_id_t type_id, uintptr_t size);
     explicit dtype(int type_id, uintptr_t size);
 
     void swap(dtype& rhs) {
@@ -355,13 +357,13 @@ public:
      * inspired by the approach in NumPy, and the intention is
      * to have the default
      */
-    int type_id() const {
-        return m_type_id;
+    type_id_t type_id() const {
+        return (type_id_t)m_type_id;
     }
 
     /** The 'kind' of the dtype (int, uint, float, etc) */
-    dtype_kind kind() const {
-        return (dtype_kind)m_kind;
+    dtype_kind_t kind() const {
+        return (dtype_kind_t)m_kind;
     }
 
     /** The alignment of the dtype */

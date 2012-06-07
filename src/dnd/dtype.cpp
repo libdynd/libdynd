@@ -100,17 +100,17 @@ static char type_id_names[DND_MAX_NUM_TYPE_IDS][32] = {
  *
  * @param type_id  The type id to validate.
  */
-static inline int validate_type_id(int type_id)
+static inline int validate_type_id(type_id_t type_id)
 {
     // 0 <= type_id <= utf8_type_id
     if ((unsigned int)type_id <= utf8_type_id) {
         return type_id;
     } else {
-        throw invalid_type_id(type_id);
+        throw invalid_type_id((int)type_id);
     }
 }
 
-const char *dnd::get_type_id_basename(int type_id)
+const char *dnd::get_type_id_basename(type_id_t type_id)
 {
     return type_id_names[validate_type_id(type_id)];
 }
@@ -122,7 +122,7 @@ dtype::dtype()
     // Default to a generic type with zero size
 }
 
-dtype::dtype(int type_id)
+dtype::dtype(type_id_t type_id)
     : m_type_id(validate_type_id(type_id)),
       m_kind(basic_type_id_info[type_id].kind),
       m_alignment(basic_type_id_info[type_id].alignment),
@@ -131,7 +131,16 @@ dtype::dtype(int type_id)
 {
 }
 
-dtype::dtype(int type_id, uintptr_t size)
+dtype::dtype(int type_id)
+    : m_type_id(validate_type_id((type_id_t)type_id)),
+      m_kind(basic_type_id_info[type_id].kind),
+      m_alignment(basic_type_id_info[type_id].alignment),
+      m_itemsize(basic_type_id_info[type_id].itemsize),
+      m_data()
+{
+}
+
+dtype::dtype(type_id_t type_id, uintptr_t size)
     : m_type_id(validate_type_id(type_id)),
       m_kind(basic_type_id_info[type_id].kind),
       m_alignment(basic_type_id_info[type_id].alignment),
@@ -142,6 +151,23 @@ dtype::dtype(int type_id, uintptr_t size)
         if (m_itemsize != size) {
             throw std::runtime_error(std::string() + "invalid itemsize for type id "
                                                     + get_type_id_basename(type_id));
+        }
+    } else {
+        m_itemsize = size;
+    }
+}
+
+dtype::dtype(int type_id, uintptr_t size)
+    : m_type_id(validate_type_id((type_id_t)type_id)),
+      m_kind(basic_type_id_info[type_id].kind),
+      m_alignment(basic_type_id_info[type_id].alignment),
+      m_itemsize(basic_type_id_info[type_id].itemsize),
+      m_data()
+{
+    if (m_itemsize != 0) {
+        if (m_itemsize != size) {
+            throw std::runtime_error(std::string() + "invalid itemsize for type id "
+                                                    + get_type_id_basename((type_id_t)type_id));
         }
     } else {
         m_itemsize = size;

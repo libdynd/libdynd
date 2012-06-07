@@ -34,10 +34,10 @@ public:
         }
     }
 
-    int type_id() const {
+    type_id_t type_id() const {
         return conversion_type_id;
     }
-    unsigned char kind() const {
+    dtype_kind_t kind() const {
         return expression_kind;
     }
     // Expose the storage traits here

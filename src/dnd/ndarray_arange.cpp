@@ -29,7 +29,7 @@ namespace {
         }
     };
 
-    template<class T, dtype_kind kind>
+    template<class T, dtype_kind_t kind>
     struct arange_counter {
         static intptr_t count(const void *beginval, const void *endval, const void *stepval) {
             T begin = *reinterpret_cast<const T *>(beginval);

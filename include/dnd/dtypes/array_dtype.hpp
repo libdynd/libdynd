@@ -30,10 +30,10 @@ public:
     // A default C-order constructor
     array_dtype(int ndim, intptr_t *shape, const dtype& element_dtype);
 
-    int type_id() const {
-        return array_type_id;
+    type_id_t type_id() const {
+        return (type_id_t)array_type_id;
     }
-    unsigned char kind() const {
+    dtype_kind_t kind() const {
         return composite_kind;
     }
     unsigned char alignment() const {
