@@ -48,27 +48,27 @@ int main1()
 
 int main()
 {
-    float v0[5] = {3.5f, 1.3f, -2.4999f, -2.999, 1000.50001f};
-    ndarray a = v0, b;
+    try {
+        float v0[3] = {0, 0, 0};
+        ndarray a = v0, b;
 
-    b = a.as_dtype<int>(assign_error_overflow);
-    b = b.as_dtype<float>(assign_error_inexact);
-    // Multiple as_dtype operations should make a chained conversion dtype
+        b = a.as_dtype<int16_t>(assign_error_inexact);
+        b = b.as_dtype<double>(assign_error_overflow);
+        // Multiple as_dtype operations should make a chained conversion dtype
 
-    // Evaluating the values should truncate them to integers
-    cout << b << endl;
-    b = b.vals();
-    cout << b << endl;
+        cout << "a: " << a << endl;
+        cout << b << endl;
+        b(0).vals() = 6.8f;
+        cout << "a: " << a << endl;
+        cout << b << endl;
+        b(1).vals() = -3.1;
+        cout << b << endl;
+        b(2).vals() = 1000.5;
+        cout << b << endl;
 
-    // Now try it with longer chaining through multiple item sizes
-    b = a.as_dtype<int16_t>(assign_error_overflow);
-    b = b.as_dtype<int32_t>(assign_error_overflow);
-    b = b.as_dtype<int16_t>(assign_error_overflow);
-    b = b.as_dtype<int64_t>(assign_error_overflow);
-    b = b.as_dtype<float>(assign_error_overflow);
-    b = b.as_dtype<int32_t>(assign_error_overflow);
-
-    cout << b << endl;
-    b = b.vals();
-    cout << b << endl;
+        cout << b.vals() << endl;
+    } catch(std::exception& e) {
+        cout << "Error: " << e.what() << "\n";
+        return 1;
+    }
 }

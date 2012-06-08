@@ -26,13 +26,13 @@ dnd::extended_dtype::~extended_dtype()
 }
 
 void dnd::extended_dtype::get_operand_to_value_operation(intptr_t dst_fixedstride, intptr_t src_fixedstride,
-                            kernel_instance<unary_operation_t>& out_kernel)
+                            kernel_instance<unary_operation_t>& out_kernel) const
 {
     throw std::runtime_error("get_operand_to_value_operation: this operation is only for expression_kind dtypes");
 }
 
 void dnd::extended_dtype::get_value_to_operand_operation(intptr_t dst_fixedstride, intptr_t src_fixedstride,
-                            kernel_instance<unary_operation_t>& out_kernel)
+                            kernel_instance<unary_operation_t>& out_kernel) const
 {
     throw std::runtime_error("get_value_to_operand_operation: this operation is only for expression_kind dtypes");
 }

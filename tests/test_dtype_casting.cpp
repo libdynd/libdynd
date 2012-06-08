@@ -123,6 +123,26 @@ TEST(DTypeCasting, IsLosslessAssignment) {
     EXPECT_TRUE( is_lossless_assignment(dtype(complex_float64_type_id), dtype(uint32_type_id)));
     EXPECT_FALSE(is_lossless_assignment(dtype(complex_float64_type_id), dtype(uint64_type_id)));
 
+    // Float -> Int casting
+    EXPECT_FALSE(is_lossless_assignment(dtype(int8_type_id),  dtype(float32_type_id)));
+    EXPECT_FALSE(is_lossless_assignment(dtype(int16_type_id), dtype(float32_type_id)));
+    EXPECT_FALSE(is_lossless_assignment(dtype(int32_type_id), dtype(float32_type_id)));
+    EXPECT_FALSE(is_lossless_assignment(dtype(int64_type_id), dtype(float32_type_id)));
+    EXPECT_FALSE(is_lossless_assignment(dtype(int8_type_id),  dtype(float64_type_id)));
+    EXPECT_FALSE(is_lossless_assignment(dtype(int16_type_id), dtype(float64_type_id)));
+    EXPECT_FALSE(is_lossless_assignment(dtype(int32_type_id), dtype(float64_type_id)));
+    EXPECT_FALSE(is_lossless_assignment(dtype(int64_type_id), dtype(float64_type_id)));
+
+    // Float -> UInt casting
+    EXPECT_FALSE(is_lossless_assignment(dtype(uint8_type_id),  dtype(float32_type_id)));
+    EXPECT_FALSE(is_lossless_assignment(dtype(uint16_type_id), dtype(float32_type_id)));
+    EXPECT_FALSE(is_lossless_assignment(dtype(uint32_type_id), dtype(float32_type_id)));
+    EXPECT_FALSE(is_lossless_assignment(dtype(uint64_type_id), dtype(float32_type_id)));
+    EXPECT_FALSE(is_lossless_assignment(dtype(uint8_type_id),  dtype(float64_type_id)));
+    EXPECT_FALSE(is_lossless_assignment(dtype(uint16_type_id), dtype(float64_type_id)));
+    EXPECT_FALSE(is_lossless_assignment(dtype(uint32_type_id), dtype(float64_type_id)));
+    EXPECT_FALSE(is_lossless_assignment(dtype(uint64_type_id), dtype(float64_type_id)));
+
     // Float -> Complex casting
     EXPECT_TRUE( is_lossless_assignment(dtype(complex_float32_type_id), dtype(float32_type_id)));
     EXPECT_FALSE(is_lossless_assignment(dtype(complex_float32_type_id), dtype(float64_type_id)));

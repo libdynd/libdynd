@@ -15,6 +15,7 @@
 
 #include <dnd/dtype_assign.hpp>
 #include <dnd/dtypes/conversion_dtype.hpp>
+#include <dnd/unary_operations.hpp>
 
 #include "single_assigner_builtin.hpp"
 
@@ -535,12 +536,50 @@ void dnd::get_dtype_strided_assign_operation(
             throw std::runtime_error(ss.str());
         }
     } else if (dst_dt.kind() == expression_kind) {
-        if (src_dt == dst_dt.storage_dtype()) {
+        if (src_dt == dst_dt.value_dtype()) {
             // If the destination dtype's storage matches the source, it's easy
-            src_dt.get_value_to_storage_operation(dst_fixedstride, src_fixedstride, out_kernel);
+            dst_dt.get_value_to_storage_operation(dst_fixedstride, src_fixedstride, out_kernel);
             return;
         } else {
-            // TODO
+            // Otherwise we have to chain a dtype casting function from src to the dst value_dtype
+            intptr_t back_src_fixedstride;
+            intptr_t back_buffer_size;
+
+            // Get the chain of expression_kind dtypes
+            std::deque<kernel_instance<unary_operation_t> > kernels;
+            std::deque<intptr_t> element_sizes;
+
+            // One link is a cast operation from src_dt to dst_dt.value_dtype()
+            back_buffer_size = dst_dt.value_dtype().itemsize();
+            // Add this kernel to the deque
+            kernels.push_back(kernel_instance<unary_operation_t>());
+            element_sizes.push_back(back_buffer_size);
+            get_dtype_strided_assign_operation(dst_dt.value_dtype(), back_buffer_size, src_dt, src_fixedstride, errmode, kernels.back());
+            
+            // Shift to the next dtype
+            back_src_fixedstride = back_buffer_size;
+
+            const dtype* back_dt = &dst_dt;
+            const dtype* next_dt = &back_dt->extended()->operand_dtype(*back_dt);
+
+            // The rest of the links go value to operand in dst_dt
+            do {
+                back_buffer_size = next_dt->value_dtype().itemsize();
+                // Add this kernel to the deque
+                kernels.push_back(kernel_instance<unary_operation_t>());
+                element_sizes.push_back(back_buffer_size);
+                back_dt->extended()->get_value_to_operand_operation(back_buffer_size, back_src_fixedstride, kernels.back());
+                // Shift to the next dtype
+                back_src_fixedstride = back_buffer_size;
+                back_dt = next_dt;
+                next_dt = &back_dt->extended()->operand_dtype(*back_dt);
+            } while (next_dt->kind() == expression_kind);
+            // Add the final kernel from the source
+            kernels.push_back(kernel_instance<unary_operation_t>());
+            back_dt->extended()->get_value_to_operand_operation(dst_fixedstride, back_src_fixedstride, kernels.back());
+
+            make_unary_chain_kernel(kernels, element_sizes, out_kernel);
+            return;
         }
     }
 

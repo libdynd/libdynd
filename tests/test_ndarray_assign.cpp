@@ -297,6 +297,17 @@ TEST(NDArrayAssign, Casting) {
     EXPECT_EQ(-120, b(3).as<int>());
 }
 
+TEST(NDArrayAssign, Overflow) {
+    int v0[4] = {0,1,2,3};
+    ndarray a = v0;
+
+    EXPECT_THROW(a.val_assign(1e25, assign_error_overflow), runtime_error);
+    EXPECT_THROW(a.val_assign(1e25f, assign_error_overflow), runtime_error);
+    EXPECT_THROW(a.val_assign(-1e25, assign_error_overflow), runtime_error);
+    EXPECT_THROW(a.val_assign(-1e25f, assign_error_overflow), runtime_error);
+}
+
+
 TEST(NDArrayAssign, ChainedCastingRead) {
     float v0[5] = {3.5f, 1.3f, -2.4999f, -2.999, 1000.50001f};
     ndarray a = v0, b;
