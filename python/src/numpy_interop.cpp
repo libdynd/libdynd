@@ -195,4 +195,61 @@ dnd::ndarray pydnd::ndarray_from_numpy_scalar(PyObject* obj)
     throw std::runtime_error("could not create a dnd::ndarray from the numpy scalar object");
 }
 
+char pydnd::numpy_kindchar_of(const dnd::dtype& d)
+{
+    switch (d.kind()) {
+    case bool_kind:
+        return 'b';
+    case int_kind:
+        return 'i';
+    case uint_kind:
+        return 'u';
+    case real_kind:
+        return 'f';
+    case complex_kind:
+        return 'c';
+    default: {
+        stringstream ss;
+        ss << "dnd::dtype \"" << d << "\" does not have an equivalent numpy kind";
+        throw runtime_error(ss.str());
+        }
+    }
+}
+
+static void free_array_interface(void *ptr, void *extra_ptr)
+{
+    PyArrayInterface* inter = (PyArrayInterface *)ptr;
+    dnd::shared_ptr<void> *extra = (dnd::shared_ptr<void> *)extra_ptr;
+    delete[] inter->shape;
+    delete[] inter->strides;
+    delete inter;
+    delete extra;
+}
+
+PyObject* pydnd::ndarray_as_numpy_struct_capsule(const dnd::ndarray& n)
+{
+    if (n.get_expr_tree()->get_node_type() != strided_array_node_type) {
+        throw runtime_error("cannot convert a dnd::ndarray that isn't a strided array into a numpy array");
+    }
+
+    PyArrayInterface inter;
+    memset(&inter, 0, sizeof(inter));
+
+    inter.two = 2;
+    inter.nd = n.get_ndim();
+    inter.typekind = numpy_kindchar_of(n.get_dtype());
+    inter.itemsize = (int)n.get_dtype().itemsize();
+    // TODO: When read-write access control is added, this must be modified
+    inter.flags = NPY_ARRAY_NOTSWAPPED | NPY_ARRAY_ALIGNED | NPY_ARRAY_WRITEABLE;
+    inter.data = n.get_originptr();
+    inter.strides = new intptr_t[n.get_ndim()];
+    inter.shape = new intptr_t[n.get_ndim()];
+
+    memcpy(inter.strides, n.get_strides(), n.get_ndim() * sizeof(intptr_t));
+    memcpy(inter.shape, n.get_shape(), n.get_ndim() * sizeof(intptr_t));
+
+    // TODO: Check for Python 3, use PyCapsule there
+    return PyCObject_FromVoidPtrAndDesc(new PyArrayInterface(inter), new dnd::shared_ptr<void>(n.get_buffer_owner()), free_array_interface);
+}
+
 #endif // DND_NUMPY_INTEROP

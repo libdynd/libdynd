@@ -72,6 +72,17 @@ dnd::ndarray ndarray_from_numpy_array(PyArrayObject* obj);
  */
 dnd::ndarray ndarray_from_numpy_scalar(PyObject* obj);
 
+/**
+ * Returns the numpy kind ('i', 'f', etc) of the array.
+ */
+char numpy_kindchar_of(const dnd::dtype& d);
+
+/**
+ * Produces a PyCapsule (or PyCObject as appropriate) which
+ * contains a __array_struct__ interface object.
+ */
+PyObject* ndarray_as_numpy_struct_capsule(const dnd::ndarray& n);
+
 } // namespace pydnd
 
 #endif // DND_NUMPY_INTEROP

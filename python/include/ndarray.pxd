@@ -40,8 +40,8 @@ cdef extern from "dnd/ndarray.hpp" namespace "dnd":
         void debug_dump(ostream&)
 
 cdef extern from "ndarray_functions.hpp" namespace "pydnd":
-    string ndarray_str(ndarray&)
-    string ndarray_repr(ndarray&)
+    string ndarray_str(ndarray&) except +
+    string ndarray_repr(ndarray&) except +
     string ndarray_debug_dump(ndarray&)
 
     void ndarray_init(ndarray&, object obj) except +

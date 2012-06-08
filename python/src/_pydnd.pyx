@@ -1,6 +1,7 @@
 cdef extern from "do_import_array.hpp":
     pass
 cdef extern from "numpy_interop.hpp" namespace "pydnd":
+    object ndarray_as_numpy_struct_capsule(ndarray&)
     void import_numpy()
 import_numpy()
 
@@ -67,11 +68,10 @@ cdef class w_ndarray:
     def __repr__(self):
         return str(ndarray_repr(a(self.v)).c_str())
 
-    def __add__(self, other):
-        cdef w_ndarray result = w_ndarray()
-        # Cython seems to lose the w_ndarray type information about "self", need to forcefully cast :P
-        a(result.v, a((<w_ndarray>self).v) + a(w_ndarray(other).v))
-        return result
+    property __array_struct__:
+        # Using the __array_struct__ mechanism to expose our data to numpy
+        def __get__(self):
+            return ndarray_as_numpy_struct_capsule(a(self.v))
 
     def __add__(self, rhs):
         cdef w_ndarray result = w_ndarray()
@@ -80,43 +80,37 @@ cdef class w_ndarray:
         return result
 
     def __radd__(self, lhs):
+        # TODO: __r<*>__ are crashing, seems to be a Cython bug. Need to investigate...
         cdef w_ndarray result = w_ndarray()
-        # Cython seems to lose the w_ndarray type information about "self", need to forcefully cast :P
         a(result.v, a(w_ndarray(lhs).v) + a((<w_ndarray>self).v))
         return result
 
     def __sub__(self, rhs):
         cdef w_ndarray result = w_ndarray()
-        # Cython seems to lose the w_ndarray type information about "self", need to forcefully cast :P
         a(result.v, a((<w_ndarray>self).v) - a(w_ndarray(rhs).v))
         return result
 
     def __rsub__(self, lhs):
         cdef w_ndarray result = w_ndarray()
-        # Cython seems to lose the w_ndarray type information about "self", need to forcefully cast :P
         a(result.v, a(w_ndarray(lhs).v) - a((<w_ndarray>self).v))
         return result
 
     def __mul__(self, rhs):
         cdef w_ndarray result = w_ndarray()
-        # Cython seems to lose the w_ndarray type information about "self", need to forcefully cast :P
         a(result.v, a((<w_ndarray>self).v) * a(w_ndarray(rhs).v))
         return result
 
     def __rmul__(self, lhs):
         cdef w_ndarray result = w_ndarray()
-        # Cython seems to lose the w_ndarray type information about "self", need to forcefully cast :P
         a(result.v, a(w_ndarray(lhs).v) * a((<w_ndarray>self).v))
         return result
 
     def __div__(self, rhs):
         cdef w_ndarray result = w_ndarray()
-        # Cython seems to lose the w_ndarray type information about "self", need to forcefully cast :P
         a(result.v, a((<w_ndarray>self).v) / a(w_ndarray(rhs).v))
         return result
 
     def __rdiv__(self, lhs):
         cdef w_ndarray result = w_ndarray()
-        # Cython seems to lose the w_ndarray type information about "self", need to forcefully cast :P
         a(result.v, a(w_ndarray(lhs).v) / a((<w_ndarray>self).v))
         return result
