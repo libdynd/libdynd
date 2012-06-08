@@ -48,16 +48,13 @@ int main1()
 
 int main()
 {
-    float v0[4] = {3.5f, 1.3f, -2.4999f, 1000.50001f};
+    float v0[5] = {3.5f, 1.3f, -2.4999f, -2.999, 1000.50001f};
     ndarray a = v0, b;
 
     b = a.as_dtype<int>(assign_error_overflow);
     b = b.as_dtype<float>(assign_error_inexact);
     // Multiple as_dtype operations should make a chained conversion dtype
-    cout << b.get_dtype() << endl;
 
-    // Evaluating the values should round them to integers
+    // Evaluating the values should truncate them to integers
     b = b.vals();
-    // Now it's just the value dtype, no chaining
-    cout << b << endl;
 }

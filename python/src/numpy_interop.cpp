@@ -216,6 +216,9 @@ char pydnd::numpy_kindchar_of(const dnd::dtype& d)
     }
 }
 
+#endif // DND_NUMPY_INTEROP
+
+// The function ndarray_as_numpy_struct_capsule is exposed even without building against numpy
 static void free_array_interface(void *ptr, void *extra_ptr)
 {
     PyArrayInterface* inter = (PyArrayInterface *)ptr;
@@ -251,5 +254,3 @@ PyObject* pydnd::ndarray_as_numpy_struct_capsule(const dnd::ndarray& n)
     // TODO: Check for Python 3, use PyCapsule there
     return PyCObject_FromVoidPtrAndDesc(new PyArrayInterface(inter), new dnd::shared_ptr<void>(n.get_buffer_owner()), free_array_interface);
 }
-
-#endif // DND_NUMPY_INTEROP

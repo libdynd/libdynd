@@ -6,6 +6,7 @@
 #define _DND__UNARY_OPERATIONS_HPP_
 
 #include <vector>
+#include <deque>
 
 #include <dnd/unary_operations.hpp>
 #include <dnd/buffer_storage.hpp>
@@ -39,14 +40,50 @@ struct unary_2chain_auxdata {
     buffer_storage buf;
 };
 
-/**
- * Given a size-N vector of kernel instances and a size-(N-1) vector
- * of the intermediate element sizes, creates a kernel which chains
- * them all together through intermediate buffers
- */
-void make_unary_chain_kernel(std::vector<kernel_instance<unary_operation_t> >& kernels,
-                    std::vector<intptr_t>& element_sizes, kernel_instance<unary_operation_t>& out_kernel);
+void unary_chain_kernel(char *dst, intptr_t dst_stride, const char *src, intptr_t src_stride,
+                        intptr_t count, const AuxDataBase *auxdata);
+struct unary_chain_auxdata {
+    kernel_instance<unary_operation_t>* kernels;
+    buffer_storage* bufs;
+    int buf_count;
 
-} // namepsace dnd
+    unary_chain_auxdata() {
+        kernels = 0;
+        bufs = 0;
+    }
+
+    ~unary_chain_auxdata() {
+        delete[] kernels;
+        delete[] bufs;
+    }
+
+    void init(int buf_count) {
+        kernels = new kernel_instance<unary_operation_t>[buf_count + 1];
+        try {
+            bufs = new buffer_storage[buf_count];
+        } catch(const std::exception&) {
+            delete[] kernels;
+            kernels = 0;
+            throw;
+        }
+    }
+};
+
+/**
+ * Given a size-N deque of kernel instances and a size-(N-1) vector
+ * of the intermediate element sizes, creates a kernel which chains
+ * them all together through intermediate buffers.
+ *
+ * The deque is used instead of vector because kernel_instance's shouldn't
+ * be copied unless you want an expensive copy operation, and we can't rely
+ * on C++11 move semantics for this library.
+ *
+ * For efficiency, the kernels are swapped out of the deque instead of copied,
+ * so the deque 'kernels' no longer contains them on exit.
+ */
+void make_unary_chain_kernel(std::deque<kernel_instance<unary_operation_t> >& kernels,
+                    std::deque<intptr_t>& element_sizes, kernel_instance<unary_operation_t>& out_kernel);
+
+} // namespace dnd
 
 #endif // _DND__UNARY_OPERATIONS_HPP_

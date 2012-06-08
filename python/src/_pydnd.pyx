@@ -62,6 +62,12 @@ cdef class w_ndarray:
         a(result.v, ndarray_vals(a(self.v)))
         return result
 
+    def val_assign(self, obj):
+        """Assigns to the ndarray by value instead of by reference."""
+        cdef w_ndarray n
+        n = w_ndarray(obj)
+        a(self.v).val_assign(a(n.v), assign_error_fractional)
+
     def __str__(self):
         return str(ndarray_str(a(self.v)).c_str())
 

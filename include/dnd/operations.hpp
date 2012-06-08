@@ -40,8 +40,7 @@ public:
     }
 
     void swap(kernel_instance& rhs) {
-        using namespace std;
-        swap(kernel, rhs.kernel);
+        std::swap(kernel, rhs.kernel);
         auxdata.swap(rhs.auxdata);
     }
 
