@@ -106,12 +106,11 @@ function( compile_pyx _name generated_file )
 
     # Get the include directories.
     get_source_file_property( pyx_location ${pyx_file} LOCATION )
-    #message( STATUS "pyx_location ${pyx_location}" )
-    get_filename_component( pyx_path ${pyx_location} PATH )
-    #message( STATUS "pyx_path ${pyx_path}" )
+    #get_filename_component( pyx_path ${pyx_location} PATH )
+    # {pyx_path} is incompatible with putting the files in a subdirectory, so just using "." instead
     #get_directory_property( cmake_include_directories DIRECTORY ${pyx_path} INCLUDE_DIRECTORIES )
-    #message( STATUS "cmake_include_directories ${cmake_include_directories}" )
-    #list( APPEND cython_include_directories ${cmake_include_directories} )
+    get_directory_property( cmake_include_directories DIRECTORY "." INCLUDE_DIRECTORIES )
+    list( APPEND cython_include_directories ${cmake_include_directories} )
     list( APPEND pyx_locations "${pyx_location}" )
 
     # Determine dependencies.

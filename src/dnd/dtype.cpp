@@ -59,8 +59,6 @@ static struct {
     {real_kind, 8, 8},         // float64
     {complex_kind, 4, 8},      // complex<float32>
     {complex_kind, 8, 16},     // complex<float64>
-    {composite_kind, 16, 16},  // sse128f
-    {composite_kind, 16, 16},  // sse128d
     {string_kind, 1, 0},       // utf8
     {composite_kind, 1, 0},    // struct
     {composite_kind, 1, 0},    // subarray
@@ -86,8 +84,6 @@ static char type_id_names[DND_MAX_NUM_TYPE_IDS][32] = {
     "float64",
     "complex<float32>",
     "complex<float64>",
-    "sse128f",
-    "sse128d",
     "utf8",
     "struct",
     "array",
