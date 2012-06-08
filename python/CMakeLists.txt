@@ -43,8 +43,10 @@ set(pydnd_CPP_SRC
     include/placement_wrappers.hpp
     include/dtype_functions.hpp
     include/ndarray_functions.hpp
+    include/numpy_interop.hpp
     src/dtype_functions.cpp
     src/ndarray_functions.cpp
+    src/numpy_interop.cpp
     )
 set(pydnd_CYTHON_SRC
     src/_pydnd.pyx

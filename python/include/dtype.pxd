@@ -61,14 +61,16 @@ cdef extern from "dnd/dtype.hpp" namespace "dnd":
         bint is_object_type()
         extended_dtype* extended()
 
-cdef extern from "dtype_functions.hpp" namespace "pydnd":
-    string dtype_str(dtype&)
-    string dtype_repr(dtype&)
-
 cdef extern from "dnd/dtype_assign.hpp" namespace "dnd":
     cdef enum assign_error_mode:
         assign_error_none
         assign_error_overflow
         assign_error_fractional
         assign_error_inexact
+
+cdef extern from "dtype_functions.hpp" namespace "pydnd":
+    string dtype_str(dtype&)
+    string dtype_repr(dtype&)
+    dtype deduce_dtype_from_object(object obj) except +
+    dtype make_dtype_from_object(object obj) except +
 

@@ -38,7 +38,6 @@ cdef extern from "placement_wrappers.hpp" namespace "pydnd":
     cdef struct dtype_placement_wrapper:
         pass
     void dtype_placement_new(dtype_placement_wrapper&)
-    void dtype_placement_new(dtype_placement_wrapper&, char*) except +
     void dtype_placement_delete(dtype_placement_wrapper&)
     # dtype placement cast
     dtype& a(dtype_placement_wrapper&)

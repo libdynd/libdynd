@@ -1,17 +1,12 @@
 cdef extern from "do_import_array.hpp":
     pass
+cdef extern from "numpy_interop.hpp" namespace "pydnd":
+    void import_numpy()
+import_numpy()
 
 include "dnd.pxd"
 include "dtype.pxd"
 include "ndarray.pxd"
-
-cdef extern from "numpy/ndarrayobject.h":
-    void import_array()
-cdef extern from "numpy/ufuncobject.h":
-    void import_umath()
-
-import_array()
-import_umath()
 
 from cython.operator import dereference
 
@@ -20,8 +15,12 @@ cdef class w_dtype:
     # which returns a reference to the dtype.
     cdef dtype_placement_wrapper v
 
-    def __cinit__(self, char* rep):
-        dtype_placement_new(self.v, rep)
+    def __cinit__(self, object rep):
+        dtype_placement_new(self.v)
+        if type(rep) is w_dtype:
+            a(self.v, a((<w_dtype>rep).v))
+        else:
+            a(self.v, make_dtype_from_object(rep))
     def __dealloc__(self):
         dtype_placement_delete(self.v)
 

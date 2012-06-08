@@ -6,21 +6,12 @@
 #ifndef _DND__DTYPE_FUNCTIONS_HPP_
 #define _DND__DTYPE_FUNCTIONS_HPP_
 
-// Don't use the deprecated Numpy functions
-#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
-#define PY_ARRAY_UNIQUE_SYMBOL pydnd_ARRAY_API
-// Invert the importing signal to match how numpy wants it
-#ifndef NUMPY_IMPORT_ARRAY
-# define NO_IMPORT_ARRAY
-#endif
-
 #include <stdint.h>
 #include <sstream>
 
 #include <dnd/dtype.hpp>
 
 #include "Python.h"
-#include <numpy/ndarrayobject.h>
 
 namespace pydnd {
 
@@ -45,14 +36,18 @@ inline std::string dtype_repr(const dnd::dtype& d)
 }
 
 /**
- * Converts a numpy dtype to a dnd::dtype.
- */
-dnd::dtype dtype_from_numpy_dtype(PyArray_Descr *d);
-
-/**
- * Produces a dnd::dtype corresponding to the object's type
+ * Produces a dnd::dtype corresponding to the object's type. This
+ * is to determine the dtype of an object that contains a value
+ * or values.
  */
 dnd::dtype deduce_dtype_from_object(PyObject* obj);
+
+/**
+ * Converts a Python type, Numpy dtype, or string
+ * into a dtype. This raises an error if given an object
+ * which contains values, it is for dtype-like things only.
+ */
+dnd::dtype make_dtype_from_object(PyObject* obj);
 
 } // namespace pydnd
 
