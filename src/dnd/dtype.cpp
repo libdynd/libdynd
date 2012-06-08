@@ -462,39 +462,35 @@ void dnd::dtype::get_value_to_storage_operation(intptr_t dst_fixedstride, intptr
         get_dtype_strided_assign_operation(*this, dst_fixedstride, src_fixedstride, out_kernel);
         return;
     } else {
-        const dtype* dt = &m_data->operand_dtype(*this);
-        if (dt->kind() != expression_kind) {
+        const dtype* back_dt = this;
+        const dtype* next_dt = &m_data->operand_dtype(*this);
+        if (next_dt->kind() != expression_kind) {
             // If there is no chained expressions, return the function unchanged
             m_data->get_value_to_operand_operation(dst_fixedstride, src_fixedstride, out_kernel);
         } else {
+            intptr_t back_src_fixedstride = src_fixedstride;
+            intptr_t back_buffer_size;
+
             // Get the chain of expression_kind dtypes
-            vector<const dtype*> chain_dtypes;
+            std::deque<kernel_instance<unary_operation_t> > kernels;
+            std::deque<intptr_t> element_sizes;
 
-            chain_dtypes.push_back(this);
-            chain_dtypes.push_back(dt);
-            dt = &dt->m_data->operand_dtype(*dt);
-            while (dt->kind() == expression_kind) {
-                chain_dtypes.push_back(dt);
-                dt = &dt->m_data->operand_dtype(*dt);
-            }
+            do {
+                back_buffer_size = next_dt->value_dtype().itemsize();
+                // Add this kernel to the deque
+                kernels.push_back(kernel_instance<unary_operation_t>());
+                element_sizes.push_back(back_buffer_size);
+                back_dt->m_data->get_value_to_operand_operation(back_buffer_size, back_src_fixedstride, kernels.back());
+                // Shift to the next dtype
+                back_src_fixedstride = back_buffer_size;
+                back_dt = next_dt;
+                next_dt = &back_dt->m_data->operand_dtype(*back_dt);
+            } while (next_dt->kind() == expression_kind);
+            // Add the final kernel from the source
+            kernels.push_back(kernel_instance<unary_operation_t>());
+            back_dt->m_data->get_value_to_operand_operation(dst_fixedstride, back_src_fixedstride, kernels.back());
 
-            // Produce a good function chaining/auxdata based on the chain length
-            switch (chain_dtypes.size()) {
-            case 2: {
-                out_kernel.kernel = &unary_2chain_kernel;
-                make_auxiliary_data<unary_2chain_auxdata>(out_kernel.auxdata);
-                unary_2chain_auxdata &auxdata = out_kernel.auxdata.get<unary_2chain_auxdata>();
-                // Allocate the buffer
-                // TODO: Should get_storage_to_value_operation get information about how much buffer space to allow?
-                auxdata.buf.allocate(chain_dtypes[1]->value_dtype().itemsize());
-                // Get the two kernel functions to chain
-                chain_dtypes[0]->m_data->get_value_to_operand_operation(auxdata.buf.element_size(), src_fixedstride, auxdata.kernels[0]);
-                chain_dtypes[1]->m_data->get_value_to_operand_operation(dst_fixedstride, auxdata.buf.element_size(), auxdata.kernels[1]);
-                return;
-                }
-            default:
-                throw std::runtime_error("unsupported conversion chain!");
-            }
+            make_unary_chain_kernel(kernels, element_sizes, out_kernel);
         }
     }
 }

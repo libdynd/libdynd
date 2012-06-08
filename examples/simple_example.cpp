@@ -56,5 +56,19 @@ int main()
     // Multiple as_dtype operations should make a chained conversion dtype
 
     // Evaluating the values should truncate them to integers
+    cout << b << endl;
     b = b.vals();
+    cout << b << endl;
+
+    // Now try it with longer chaining through multiple item sizes
+    b = a.as_dtype<int16_t>(assign_error_overflow);
+    b = b.as_dtype<int32_t>(assign_error_overflow);
+    b = b.as_dtype<int16_t>(assign_error_overflow);
+    b = b.as_dtype<int64_t>(assign_error_overflow);
+    b = b.as_dtype<float>(assign_error_overflow);
+    b = b.as_dtype<int32_t>(assign_error_overflow);
+
+    cout << b << endl;
+    b = b.vals();
+    cout << b << endl;
 }

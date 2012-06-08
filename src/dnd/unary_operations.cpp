@@ -33,21 +33,21 @@ void dnd::unary_chain_kernel(char *dst, intptr_t dst_stride, const char *src, in
                         intptr_t count, const AuxDataBase *auxdata)
 {
     const unary_chain_auxdata& ad = get_auxiliary_data<unary_chain_auxdata>(auxdata);
-    int buf_count = ad.buf_count;
+    int buf_count = ad.m_buf_count;
     do {
-        intptr_t block_count = ad.bufs[0].element_count();
+        intptr_t block_count = ad.m_bufs[0].element_count();
         if (count < block_count) {
             block_count = count;
         }
 
         // From the source into the first buffer
-        ad.kernels[0].kernel(ad.bufs[0].storage(), ad.bufs[0].element_size(), src, src_stride, block_count, ad.kernels[0].auxdata);
+        ad.m_kernels[0].kernel(ad.m_bufs[0].storage(), ad.m_bufs[0].element_size(), src, src_stride, block_count, ad.m_kernels[0].auxdata);
         // All the links from buffer to buffer
         for (int i = 1; i < buf_count; ++i) {
-            ad.kernels[i].kernel(ad.bufs[i].storage(), ad.bufs[i].element_size(), ad.bufs[i-1].storage(), ad.bufs[i-1].element_size(), block_count, ad.kernels[i].auxdata);
+            ad.m_kernels[i].kernel(ad.m_bufs[i].storage(), ad.m_bufs[i].element_size(), ad.m_bufs[i-1].storage(), ad.m_bufs[i-1].element_size(), block_count, ad.m_kernels[i].auxdata);
         }
         // From the last buffer into the destination
-        ad.kernels[buf_count].kernel(dst, dst_stride, ad.bufs[buf_count-1].storage(), ad.bufs[buf_count-1].element_size(), block_count, ad.kernels[buf_count].auxdata);
+        ad.m_kernels[buf_count].kernel(dst, dst_stride, ad.m_bufs[buf_count-1].storage(), ad.m_bufs[buf_count-1].element_size(), block_count, ad.m_kernels[buf_count].auxdata);
 
         src += block_count * src_stride;
         dst += block_count * dst_stride;
@@ -85,11 +85,11 @@ void dnd::make_unary_chain_kernel(std::deque<kernel_instance<unary_operation_t> 
         auxdata.init((int)element_sizes.size());
 
         for (size_t i = 0; i < element_sizes.size(); ++i) {
-            auxdata.bufs[i].allocate(element_sizes[i]); // TODO: pass buffering data through here
+            auxdata.m_bufs[i].allocate(element_sizes[i]); // TODO: pass buffering data through here
         }
 
         for (size_t i = 0; i < kernels.size(); ++i) {
-            auxdata.kernels[i].swap(kernels[i]);
+            auxdata.m_kernels[i].swap(kernels[i]);
         }
         }
     }

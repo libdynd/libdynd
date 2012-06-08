@@ -43,29 +43,30 @@ struct unary_2chain_auxdata {
 void unary_chain_kernel(char *dst, intptr_t dst_stride, const char *src, intptr_t src_stride,
                         intptr_t count, const AuxDataBase *auxdata);
 struct unary_chain_auxdata {
-    kernel_instance<unary_operation_t>* kernels;
-    buffer_storage* bufs;
-    int buf_count;
+    kernel_instance<unary_operation_t>* m_kernels;
+    buffer_storage* m_bufs;
+    int m_buf_count;
 
     unary_chain_auxdata() {
-        kernels = 0;
-        bufs = 0;
+        m_kernels = 0;
+        m_bufs = 0;
     }
 
     ~unary_chain_auxdata() {
-        delete[] kernels;
-        delete[] bufs;
+        delete[] m_kernels;
+        delete[] m_bufs;
     }
 
     void init(int buf_count) {
-        kernels = new kernel_instance<unary_operation_t>[buf_count + 1];
+        m_kernels = new kernel_instance<unary_operation_t>[buf_count + 1];
         try {
-            bufs = new buffer_storage[buf_count];
+            m_bufs = new buffer_storage[buf_count];
         } catch(const std::exception&) {
-            delete[] kernels;
-            kernels = 0;
+            delete[] m_kernels;
+            m_kernels = 0;
             throw;
         }
+        m_buf_count = buf_count;
     }
 };
 
