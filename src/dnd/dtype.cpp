@@ -178,6 +178,7 @@ dtype::dtype(int type_id, uintptr_t size)
 dtype::dtype(const std::string& rep)
     : m_data()
 {
+    // TODO: make a decent efficient parser
     for (int id = 0; id < builtin_type_id_count; ++id) {
         if (rep == type_id_names[id]) {
             m_type_id = (type_id_t)id;

@@ -9,6 +9,7 @@
 #include <stdint.h>
 
 #include <dnd/dtype.hpp>
+#include <dnd/ndarray.hpp>
 
 namespace pydnd {
 
@@ -38,9 +39,15 @@ inline void dtype_placement_delete(dtype_placement_wrapper& v)
 }
 
 // dtype placement cast
-inline dnd::dtype& dpc(dtype_placement_wrapper& v)
+inline dnd::dtype& a(dtype_placement_wrapper& v)
 {
     return *(dnd::dtype *)&v;
+}
+
+// dtype placement assignment
+inline void a(dtype_placement_wrapper& v, const dnd::dtype& d)
+{
+    *(dnd::dtype *)&v = d;
 }
 
 ///////////////////////////////////
@@ -63,11 +70,16 @@ inline void ndarray_placement_delete(ndarray_placement_wrapper& v)
 }
 
 // ndarray placement cast
-inline dnd::ndarray& npc(ndarray_placement_wrapper& v)
+inline dnd::ndarray& a(ndarray_placement_wrapper& v)
 {
     return *(dnd::ndarray *)&v;
 }
 
+// dtype placement assignment
+inline void a(ndarray_placement_wrapper& v, const dnd::ndarray& d)
+{
+    *(dnd::ndarray *)&v = d;
+}
 
 } // namespace pydnd
 

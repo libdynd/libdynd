@@ -372,13 +372,11 @@ std::ostream& dnd::operator<<(std::ostream& o, const ndarray& rhs)
 {
     if (rhs.get_expr_tree() != NULL) {
         if (rhs.get_expr_tree()->get_node_type() == strided_array_node_type) {
-            o << "ndarray(" << rhs.get_dtype() << ",\n";
+            o << "ndarray(" << rhs.get_dtype() << ",";
             if (rhs.get_dtype().kind() == expression_kind) {
-                o << "       storage = ";
+                o << "\n       storage = ";
                 dtype deepest_storage = rhs.get_dtype().storage_dtype();
                 nested_ndarray_print(o, deepest_storage, rhs.get_originptr(), rhs.get_ndim(), rhs.get_shape(), rhs.get_strides());
-                o << ",\n       values = ";
-                //nested_ndarray_buffered_print(o, 
             } else {
                 nested_ndarray_print(o, rhs.get_dtype(), rhs.get_originptr(), rhs.get_ndim(), rhs.get_shape(), rhs.get_strides());
             }

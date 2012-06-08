@@ -6,6 +6,8 @@
 # * Template functions are unsupported (classes: yes, functions: no)
 # * Cython files may not contain UTF8
 # * Overloading operator= is not supported
+# * BUG: The "a(self.v)" idiom doesn't work with __add__, but works
+#        with other functions.
 
 include "libcpp/string.pxd"
 
@@ -126,8 +128,6 @@ cdef extern from "dnd/ndarray.hpp" namespace "dnd":
         ndarray(dtype&)
         ndarray(dtype, int, intptr_t *, int *)
 
-        # ndarray& operator=(ndarray&)
-
         dtype& get_dtype()
         int get_ndim()
         intptr_t* get_shape()
@@ -143,6 +143,17 @@ cdef extern from "dnd/ndarray.hpp" namespace "dnd":
 
         void debug_dump(ostream&)
 
+cdef extern from "ndarray_functions.hpp" namespace "pydnd":
+    string ndarray_str(ndarray&)
+    string ndarray_repr(ndarray&)
+    string ndarray_debug_dump(ndarray&)
+
+    void ndarray_init(ndarray&, object obj) except +
+    void ndarray_init(ndarray&, object obj, dtype&) except +
+    ndarray ndarray_vals(ndarray& n) except +
+
+    ndarray ndarray_add(ndarray&, ndarray&) except +
+
 cdef extern from "placement_wrappers.hpp" namespace "pydnd":
     cdef struct dtype_placement_wrapper:
         pass
@@ -150,11 +161,15 @@ cdef extern from "placement_wrappers.hpp" namespace "pydnd":
     void dtype_placement_new(dtype_placement_wrapper&, char*) except +
     void dtype_placement_delete(dtype_placement_wrapper&)
     # dtype placement cast
-    dtype& dpc(dtype_placement_wrapper&)
+    dtype& a(dtype_placement_wrapper&)
+    # dtype placement assignment
+    void a(dtype_placement_wrapper&, dtype&)
 
     cdef struct ndarray_placement_wrapper:
         pass
     void ndarray_placement_new(ndarray_placement_wrapper&)
     void ndarray_placement_delete(ndarray_placement_wrapper&)
     # ndarray placement cast
-    ndarray& npc(ndarray_placement_wrapper&)
+    ndarray& a(ndarray_placement_wrapper&)
+    # ndarray placement assignment
+    void a(ndarray_placement_wrapper&, ndarray&)

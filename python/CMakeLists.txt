@@ -39,8 +39,12 @@ include_directories(
     )
 
 set(pydnd_CPP_SRC
+    src/do_import_array.hpp
     src/placement_wrappers.hpp
     src/dtype_functions.hpp
+    src/ndarray_functions.hpp
+    src/dtype_functions.cpp
+    src/ndarray_functions.cpp
     )
 set(pydnd_CYTHON_SRC
     src/_pydnd.pyx
