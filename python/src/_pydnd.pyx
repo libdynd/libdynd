@@ -15,7 +15,7 @@ cdef class w_dtype:
     # which returns a reference to the dtype.
     cdef dtype_placement_wrapper v
 
-    def __cinit__(self, object rep):
+    def __cinit__(self, rep):
         dtype_placement_new(self.v)
         if type(rep) is w_dtype:
             a(self.v, a((<w_dtype>rep).v))
@@ -35,13 +35,18 @@ cdef class w_ndarray:
     # which returns a reference to the ndarray
     cdef ndarray_placement_wrapper v
 
-    def __cinit__(self, obj=None, w_dtype dtype=None):
+    def __cinit__(self, obj=None, dtype=None):
         ndarray_placement_new(self.v)
         if obj is not None:
-            if dtype is None:
-                ndarray_init(a(self.v), obj)
+            # Get the array data
+            if type(obj) is w_ndarray:
+                a(self.v, a((<w_ndarray>obj).v))
             else:
-                ndarray_init(a(self.v), obj, a(dtype.v))
+                ndarray_init(a(self.v), obj)
+
+            # If a specific dtype is requested, use as_dtype to switch types
+            if dtype is not None:
+                a(self.v, a(self.v).as_dtype(a(w_dtype(dtype).v), assign_error_fractional))
     def __dealloc__(self):
         ndarray_placement_delete(self.v)
 

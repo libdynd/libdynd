@@ -50,6 +50,14 @@ inline int import_numpy()
 dnd::dtype dtype_from_numpy_dtype(PyArray_Descr *d);
 
 /**
+ * Converts a pytypeobject for a numpy scalar
+ * into a dnd::dtype.
+ *
+ * Returns 0 on success, -1 if it didn't match.
+ */
+int dtype_from_numpy_scalar_typeobject(PyTypeObject* obj, dnd::dtype& out_d);
+
+/**
  * Gets the dtype of a numpy scalar object
  */
 dnd::dtype dtype_of_numpy_scalar(PyObject* obj);
@@ -58,6 +66,11 @@ dnd::dtype dtype_of_numpy_scalar(PyObject* obj);
  * Views a Numpy PyArrayObject as a dnd::ndarray.
  */
 dnd::ndarray ndarray_from_numpy_array(PyArrayObject* obj);
+
+/**
+ * Creates a dnd::ndarray from a numpy scalar.
+ */
+dnd::ndarray ndarray_from_numpy_scalar(PyObject* obj);
 
 } // namespace pydnd
 

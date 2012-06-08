@@ -30,6 +30,7 @@ dtype pydnd::deduce_dtype_from_object(PyObject* obj)
         // Python float
         return make_dtype<double>();
     } else if (PyComplex_Check(obj)) {
+        // Python complex
         return make_dtype<complex<double> >();
     }
 
@@ -56,12 +57,6 @@ static dnd::dtype make_dtype_from_pytypeobject(PyTypeObject* obj)
 
 dnd::dtype pydnd::make_dtype_from_object(PyObject* obj)
 {
-#if DND_NUMPY_INTEROP
-    if (PyArray_DescrCheck(obj)) {
-        return dtype_from_numpy_dtype((PyArray_Descr *)obj);
-    }
-#endif // DND_NUMPY_INTEROP
-
     if (PyString_Check(obj)) {
         char *s = NULL;
         Py_ssize_t len = 0;
@@ -73,8 +68,20 @@ dnd::dtype pydnd::make_dtype_from_object(PyObject* obj)
         // TODO: Haven't implemented unicode yet.
         throw std::runtime_error("unicode to dnd::dtype conversion isn't implemented yet");
     } else if (PyType_Check(obj)) {
+#if DND_NUMPY_INTEROP
+        dtype result;
+        if (dtype_from_numpy_scalar_typeobject((PyTypeObject *)obj, result) == 0) {
+            return result;
+        }
+#endif // DND_NUMPY_INTEROP
         return make_dtype_from_pytypeobject((PyTypeObject *)obj);
     }
+
+#if DND_NUMPY_INTEROP
+    if (PyArray_DescrCheck(obj)) {
+        return dtype_from_numpy_dtype((PyArray_Descr *)obj);
+    }
+#endif // DND_NUMPY_INTEROP
 
     throw std::runtime_error("could not convert the Python Object into a dnd::dtype");
 }

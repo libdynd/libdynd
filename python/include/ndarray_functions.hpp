@@ -37,7 +37,6 @@ inline std::string ndarray_debug_dump(const dnd::ndarray& n)
 }
 
 void ndarray_init(dnd::ndarray& n, PyObject* obj);
-void ndarray_init(dnd::ndarray& n, PyObject* obj, const dnd::dtype& d);
 dnd::ndarray ndarray_vals(const dnd::ndarray& n);
 
 } // namespace pydnd
