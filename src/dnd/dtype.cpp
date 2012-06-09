@@ -421,33 +421,16 @@ void dnd::dtype::get_storage_to_value_operation(intptr_t dst_fixedstride, intptr
         get_dtype_strided_assign_operation(*this, dst_fixedstride, src_fixedstride, out_kernel);
         return;
     } else {
-        const dtype* front_dt = this;
-        const dtype* next_dt = &m_data->operand_dtype(*this);
-        if (next_dt->kind() != expression_kind) {
+        const dtype& next_dt = m_data->operand_dtype(*this);
+        if (next_dt.kind() != expression_kind) {
             // If there is no chained expressions, return the function unchanged
             m_data->get_operand_to_value_operation(dst_fixedstride, src_fixedstride, out_kernel);
         } else {
-            intptr_t front_dst_fixedstride = dst_fixedstride;
-            intptr_t front_buffer_size;
-
-            // Get the chain of expression_kind dtypes
             std::deque<kernel_instance<unary_operation_t> > kernels;
             std::deque<intptr_t> element_sizes;
 
-            do {
-                front_buffer_size = next_dt->value_dtype().itemsize();
-                // Add this kernel to the deque
-                kernels.push_front(kernel_instance<unary_operation_t>());
-                element_sizes.push_front(front_buffer_size);
-                front_dt->m_data->get_operand_to_value_operation(front_dst_fixedstride, front_buffer_size, kernels.front());
-                // Shift to the next dtype
-                front_dst_fixedstride = front_buffer_size;
-                front_dt = next_dt;
-                next_dt = &front_dt->m_data->operand_dtype(*front_dt);
-            } while (next_dt->kind() == expression_kind);
-            // Add the final kernel from the source
-            kernels.push_front(kernel_instance<unary_operation_t>());
-            front_dt->m_data->get_operand_to_value_operation(front_dst_fixedstride, src_fixedstride, kernels.front());
+            push_front_dtype_storage_to_value_kernels(*this, dst_fixedstride, src_fixedstride,
+                                kernels, element_sizes);
 
             make_unary_chain_kernel(kernels, element_sizes, out_kernel);
         }
@@ -462,33 +445,16 @@ void dnd::dtype::get_value_to_storage_operation(intptr_t dst_fixedstride, intptr
         get_dtype_strided_assign_operation(*this, dst_fixedstride, src_fixedstride, out_kernel);
         return;
     } else {
-        const dtype* back_dt = this;
-        const dtype* next_dt = &m_data->operand_dtype(*this);
-        if (next_dt->kind() != expression_kind) {
+        const dtype& next_dt = m_data->operand_dtype(*this);
+        if (next_dt.kind() != expression_kind) {
             // If there is no chained expressions, return the function unchanged
             m_data->get_value_to_operand_operation(dst_fixedstride, src_fixedstride, out_kernel);
         } else {
-            intptr_t back_src_fixedstride = src_fixedstride;
-            intptr_t back_buffer_size;
-
-            // Get the chain of expression_kind dtypes
             std::deque<kernel_instance<unary_operation_t> > kernels;
             std::deque<intptr_t> element_sizes;
 
-            do {
-                back_buffer_size = next_dt->value_dtype().itemsize();
-                // Add this kernel to the deque
-                kernels.push_back(kernel_instance<unary_operation_t>());
-                element_sizes.push_back(back_buffer_size);
-                back_dt->m_data->get_value_to_operand_operation(back_buffer_size, back_src_fixedstride, kernels.back());
-                // Shift to the next dtype
-                back_src_fixedstride = back_buffer_size;
-                back_dt = next_dt;
-                next_dt = &back_dt->m_data->operand_dtype(*back_dt);
-            } while (next_dt->kind() == expression_kind);
-            // Add the final kernel from the source
-            kernels.push_back(kernel_instance<unary_operation_t>());
-            back_dt->m_data->get_value_to_operand_operation(dst_fixedstride, back_src_fixedstride, kernels.back());
+            push_back_dtype_value_to_storage_kernels(*this, dst_fixedstride, src_fixedstride,
+                                kernels, element_sizes);
 
             make_unary_chain_kernel(kernels, element_sizes, out_kernel);
         }

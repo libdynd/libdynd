@@ -71,6 +71,34 @@ struct unary_chain_auxdata {
 };
 
 /**
+ * This uses push_front calls on the output kernels and element_sizes
+ * deques to create a chain of kernels which can transform the dtype's
+ * storage_dtype values into its value_dtype values. It assumes
+ * contiguous arrays are used for the intermediate buffers.
+ *
+ * This function assumes 'dt' is an expression_kind dtype, the
+ * caller must verify this before calling.
+ */
+void push_front_dtype_storage_to_value_kernels(const dnd::dtype& dt,
+                    intptr_t dst_fixedstride, intptr_t src_fixedstride,
+                    std::deque<kernel_instance<unary_operation_t> >& out_kernels,
+                    std::deque<intptr_t>& out_element_sizes);
+
+/**
+ * This uses push_back calls on the output kernels and element_sizes
+ * deques to create a chain of kernels which can transform the dtype's
+ * value_dtype values into its storage_dtype values. It assumes
+ * contiguous arrays are used for the intermediate buffers.
+ *
+ * This function assumes 'dt' is an expression_kind dtype, the
+ * caller must verify this before calling.
+ */
+void push_back_dtype_value_to_storage_kernels(const dnd::dtype& dt,
+                    intptr_t dst_fixedstride, intptr_t src_fixedstride,
+                    std::deque<kernel_instance<unary_operation_t> >& out_kernels,
+                    std::deque<intptr_t>& out_element_sizes);
+
+/**
  * Given a size-N deque of kernel instances and a size-(N-1) vector
  * of the intermediate element sizes, creates a kernel which chains
  * them all together through intermediate buffers.

@@ -381,3 +381,30 @@ TEST(NDArrayAssign, ChainedCastingWrite) {
     EXPECT_EQ(-3, a(1).as<float>());
     EXPECT_EQ(1000, a(2).as<float>());
 }
+
+TEST(NDArrayAssign, ChainedCastingReadWrite) {
+    float v0[3] = {0.5, -1000, -2.2};
+    int16_t v1[3] = {0, 0, 0};
+    ndarray a = v0, b = v1;
+
+    // First test with a single expression in both src and dst
+    ndarray aview = a.as_dtype<double>();
+    ndarray bview = b.as_dtype<int32_t>();
+
+    bview.val_assign(aview, assign_error_overflow);
+    EXPECT_EQ(0, b(0).as<int>());
+    EXPECT_EQ(-1000, b(1).as<int>());
+    EXPECT_EQ(-2, b(2).as<int>());
+
+    // Now test with a longer chain
+    b.vals() = 123;
+    aview = aview.as_dtype<int32_t>(assign_error_overflow);
+    aview = aview.as_dtype<int16_t>(assign_error_overflow);
+    bview = bview.as_dtype<int64_t>(assign_error_overflow);
+
+    bview.vals() = aview;
+    EXPECT_EQ(0, b(0).as<int>());
+    EXPECT_EQ(-1000, b(1).as<int>());
+    EXPECT_EQ(-2, b(2).as<int>());
+
+}

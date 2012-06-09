@@ -94,3 +94,67 @@ void dnd::make_unary_chain_kernel(std::deque<kernel_instance<unary_operation_t> 
         }
     }
 }
+
+void dnd::push_front_dtype_storage_to_value_kernels(const dnd::dtype& dt,
+                    intptr_t dst_fixedstride, intptr_t src_fixedstride,
+                    std::deque<kernel_instance<unary_operation_t> >& out_kernels,
+                    std::deque<intptr_t>& out_element_sizes)
+{
+    const dtype* front_dt = &dt;
+    const dtype* next_dt = &dt.extended()->operand_dtype(dt);
+    if (next_dt->kind() != expression_kind) {
+        // Special case when there is just one
+        out_kernels.push_front(kernel_instance<unary_operation_t>());
+        dt.extended()->get_operand_to_value_operation(dst_fixedstride, src_fixedstride, out_kernels.front());
+    } else {
+        intptr_t front_dst_fixedstride = dst_fixedstride;
+        intptr_t front_buffer_size;
+
+        do {
+            front_buffer_size = next_dt->value_dtype().itemsize();
+            // Add this kernel to the deque
+            out_kernels.push_front(kernel_instance<unary_operation_t>());
+            out_element_sizes.push_front(front_buffer_size);
+            front_dt->extended()->get_operand_to_value_operation(front_dst_fixedstride, front_buffer_size, out_kernels.front());
+            // Shift to the next dtype
+            front_dst_fixedstride = front_buffer_size;
+            front_dt = next_dt;
+            next_dt = &front_dt->extended()->operand_dtype(*front_dt);
+        } while (next_dt->kind() == expression_kind);
+        // Add the final kernel from the source
+        out_kernels.push_front(kernel_instance<unary_operation_t>());
+        front_dt->extended()->get_operand_to_value_operation(front_dst_fixedstride, src_fixedstride, out_kernels.front());
+    }
+}
+
+void dnd::push_back_dtype_value_to_storage_kernels(const dnd::dtype& dt,
+                    intptr_t dst_fixedstride, intptr_t src_fixedstride,
+                    std::deque<kernel_instance<unary_operation_t> >& out_kernels,
+                    std::deque<intptr_t>& out_element_sizes)
+{
+    const dtype* back_dt = &dt;
+    const dtype* next_dt = &dt.extended()->operand_dtype(dt);
+    if (next_dt->kind() != expression_kind) {
+        // Special case when there is just one
+        out_kernels.push_back(kernel_instance<unary_operation_t>());
+        dt.extended()->get_value_to_operand_operation(dst_fixedstride, src_fixedstride, out_kernels.back());
+    } else {
+        intptr_t back_src_fixedstride = src_fixedstride;
+        intptr_t back_buffer_size;
+
+        do {
+            back_buffer_size = next_dt->value_dtype().itemsize();
+            // Add this kernel to the deque
+            out_kernels.push_back(kernel_instance<unary_operation_t>());
+            out_element_sizes.push_back(back_buffer_size);
+            back_dt->extended()->get_value_to_operand_operation(back_buffer_size, back_src_fixedstride, out_kernels.back());
+            // Shift to the next dtype
+            back_src_fixedstride = back_buffer_size;
+            back_dt = next_dt;
+            next_dt = &back_dt->extended()->operand_dtype(*back_dt);
+        } while (next_dt->kind() == expression_kind);
+        // Add the final kernel from the source
+        out_kernels.push_back(kernel_instance<unary_operation_t>());
+        back_dt->extended()->get_value_to_operand_operation(dst_fixedstride, back_src_fixedstride, out_kernels.back());
+    }
+}
