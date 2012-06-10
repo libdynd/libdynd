@@ -15,7 +15,7 @@
 
 #include <dnd/dtype_assign.hpp>
 #include <dnd/dtypes/conversion_dtype.hpp>
-#include <dnd/unary_operations.hpp>
+#include <dnd/kernels/chained_unary_kernels.hpp>
 
 #include "single_assigner_builtin.hpp"
 

@@ -12,7 +12,7 @@
 
 #include <dnd/dtype.hpp>
 #include <dnd/irange.hpp>
-#include <dnd/operations.hpp>
+#include <dnd/kernels/kernel_instance.hpp>
 #include <dnd/shortvector.hpp>
 
 namespace dnd {

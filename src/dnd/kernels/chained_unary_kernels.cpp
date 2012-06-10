@@ -3,7 +3,7 @@
 // All rights reserved.
 //
 #include <dnd/dtype.hpp>
-#include <dnd/unary_operations.hpp>
+#include <dnd/kernels/chained_unary_kernels.hpp>
 
 using namespace std;
 using namespace dnd;

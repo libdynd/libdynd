@@ -8,7 +8,7 @@
 #include <vector>
 #include <deque>
 
-#include <dnd/unary_operations.hpp>
+#include <dnd/kernels/chained_unary_kernels.hpp>
 #include <dnd/buffer_storage.hpp>
 
 namespace dnd {

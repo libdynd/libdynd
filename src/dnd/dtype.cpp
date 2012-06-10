@@ -8,7 +8,7 @@
 #include <dnd/exceptions.hpp>
 #include <dnd/dtype_assign.hpp>
 #include <dnd/buffer_storage.hpp>
-#include <dnd/unary_operations.hpp>
+#include <dnd/kernels/chained_unary_kernels.hpp>
 
 #include <sstream>
 #include <cstring>

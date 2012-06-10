@@ -13,7 +13,7 @@
 #include <complex>
 
 #include <dnd/config.hpp>
-#include <dnd/operations.hpp>
+#include <dnd/kernels/kernel_instance.hpp>
 
 namespace dnd {
 
