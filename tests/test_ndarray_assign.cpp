@@ -396,7 +396,7 @@ TEST(NDArrayAssign, ChainedCastingReadWrite) {
     EXPECT_EQ(-1000, b(1).as<int>());
     EXPECT_EQ(-2, b(2).as<int>());
 
-    // Now test with a longer chain
+    // Now test with longer chains
     b.vals() = 123;
     aview = aview.as_dtype<int32_t>(assign_error_overflow);
     aview = aview.as_dtype<int16_t>(assign_error_overflow);

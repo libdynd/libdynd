@@ -21,8 +21,10 @@ set(LINK_FLAGS)
 
 set(dnd_SRC
     src/dnd/dtypes/array_dtype.cpp
+    src/dnd/dtypes/byteswap_dtype.cpp
     src/dnd/dtypes/conversion_dtype.cpp
     include/dnd/dtypes/array_dtype.hpp
+    include/dnd/dtypes/byteswap_dtype.hpp
     include/dnd/dtypes/conversion_dtype.hpp
     src/dnd/dtype.cpp
     src/dnd/dtype_assign.cpp
