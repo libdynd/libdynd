@@ -18,81 +18,6 @@
 using namespace std;
 using namespace dnd;
 
-// convert_dtype_expr_node
-
-dnd::convert_dtype_expr_node::convert_dtype_expr_node(const ndarray_expr_node_ptr& op, const dtype& dt,
-                                    assign_error_mode errmode)
-    : ndarray_expr_node(dt, op->get_ndim(), 1, op->get_shape(), elementwise_node_category,
-        convert_dtype_node_type), m_errmode(errmode)
-{
-    m_opnodes[0] = op;
-}
-
-dnd::convert_dtype_expr_node::convert_dtype_expr_node(ndarray_expr_node_ptr&& op, const dtype& dt,
-                                    assign_error_mode errmode)
-    : ndarray_expr_node(dt, op->get_ndim(), 1, op->get_shape(), elementwise_node_category,
-        convert_dtype_node_type), m_errmode(errmode)
-{
-    m_opnodes[0] = std::move(op);
-}
-
-void dnd::convert_dtype_expr_node::get_unary_operation(
-                    intptr_t dst_fixedstride, intptr_t src_fixedstride,
-                    kernel_instance<unary_operation_t>& out_kernel) const
-{
-    // TODO: change the dtype_assign functions to always assume aligned and NBO,
-    //       and add new functions for the general case.
-    get_dtype_strided_assign_operation(
-                    m_dtype, dst_fixedstride,
-                    m_opnodes[0]->get_dtype(), src_fixedstride,
-                    m_errmode,
-                    out_kernel);
-}
-
-void dnd::convert_dtype_expr_node::debug_dump_extra(ostream& o, const string& indent) const
-{
-    o << indent << " error mode: ";
-    switch (m_errmode) {
-        case assign_error_none:
-            o << "assign_error_none";
-            break;
-        case assign_error_overflow:
-            o << "assign_error_overflow";
-            break;
-        case assign_error_fractional:
-            o << "assign_error_fractional";
-            break;
-        case assign_error_inexact:
-            o << "assign_error_inexact";
-            break;
-        default:
-            o << "unknown error mode (" << (int)m_errmode << ")";
-            break;
-    }
-    o << "\n";
-}
-
-ndarray_expr_node_ptr dnd::convert_dtype_expr_node::apply_linear_index(
-                    int ndim, const intptr_t *shape, const int *axis_map,
-                    const intptr_t *index_strides, const intptr_t *start_index, bool allow_in_place)
-{
-    ndarray_expr_node *node = m_opnodes[0].get();
-
-    if (allow_in_place) {
-        // Adopt the new shape
-        m_ndim = ndim;
-        memcpy(m_shape.get(), shape, ndim * sizeof(intptr_t));
-
-        m_opnodes[0] = node->apply_linear_index(ndim, shape, axis_map,
-                                index_strides, start_index, m_opnodes[0]->unique());
-        return ndarray_expr_node_ptr(this);
-    } else {
-        return ndarray_expr_node_ptr(
-            new convert_dtype_expr_node(node->apply_linear_index(ndim, shape, axis_map,
-                                    index_strides, start_index, false), m_dtype, m_errmode));
-    }
-}
-
 
 // broadcast_shape_expr_node
 
@@ -302,7 +227,7 @@ ndarray_expr_node_ptr dnd::make_convert_dtype_expr_node(
                     static_cast<const strided_array_expr_node *>(node)->get_buffer_owner()));
     } else {
         // TODO: Remove convert_dtype_expr_node, just use the conversion_dtype
-        return ndarray_expr_node_ptr(new convert_dtype_expr_node(node, dt, errmode));
+        throw std::runtime_error("can only make a convert<> dtype with strided array nodes presently");
     }
 }
 

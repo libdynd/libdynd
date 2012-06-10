@@ -46,6 +46,19 @@ void get_builtin_dtype_assignment_kernel(
                     assign_error_mode errmode,
                     kernel_instance<unary_operation_t>& out_kernel);
 
+/**
+ * Returns a kernel for assigning from the source data type
+ * to the destination data type, optionally specialized based on
+ * the fixed strides provided.
+ *
+ * If a stride is unknown or non-fixed, pass INTPTR_MAX for that stride.
+ */
+void get_dtype_assignment_kernel(
+                    const dtype& dst_dt, intptr_t dst_fixedstride,
+                    const dtype& src_dt, intptr_t src_fixedstride,
+                    assign_error_mode errmode,
+                    kernel_instance<unary_operation_t>& out_kernel);
+
 } // namespace dnd
 
 #endif // _DND__ASSIGNMENT_KERNELS_HPP_

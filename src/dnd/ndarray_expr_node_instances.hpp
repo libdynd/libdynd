@@ -15,41 +15,6 @@ namespace dnd {
 class ndarray;
 
 
-/**
- * NDArray expression node which copies the input array as a new data type. As a side
- * effect, it can also be used to align the array data when it is not aligned.
- */
-class convert_dtype_expr_node : public ndarray_expr_node {
-    assign_error_mode m_errmode;
-
-    convert_dtype_expr_node(const ndarray_expr_node_ptr& op, const dtype& dt, assign_error_mode errmode);
-    convert_dtype_expr_node(ndarray_expr_node_ptr&& op, const dtype& dt, assign_error_mode errmode);
-public:
-
-    virtual ~convert_dtype_expr_node() {
-    }
-
-    ndarray_expr_node_ptr apply_linear_index(int ndim, const intptr_t *shape, const int *axis_map,
-                    const intptr_t *index_strides, const intptr_t *start_index, bool allow_in_place);
-
-    const char *node_name() const {
-        return "convert_dtype";
-    }
-
-    void get_unary_operation(intptr_t dst_fixedstride, intptr_t src_fixedstride,
-                                    kernel_instance<unary_operation_t>& out_kernel) const;
-
-    void debug_dump_extra(std::ostream& o, const std::string& indent) const;
-
-    friend class ndarray;
-    friend ndarray_expr_node_ptr make_convert_dtype_expr_node(
-                        ndarray_expr_node *node, const dtype& dt, assign_error_mode errmode);
-    friend ndarray_expr_node_ptr make_broadcast_strided_array_expr_node(ndarray_expr_node *node,
-                                int ndim, const intptr_t *shape,
-                                const dtype& dt, assign_error_mode errmode);
-};
-
-
 template <class BinaryOperatorFactory>
 ndarray_expr_node_ptr make_elementwise_binary_op_expr_node(ndarray_expr_node *node1,
                                             ndarray_expr_node *node2, BinaryOperatorFactory& op_factory,

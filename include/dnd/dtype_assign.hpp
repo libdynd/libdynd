@@ -54,19 +54,6 @@ void dtype_strided_assign(const dtype& dst_dt, char *dst, intptr_t dst_stride,
                             intptr_t count, assign_error_mode errmode);
 
 /**
- * Returns a function for assigning from the source data type
- * to the destination data type, optionally specialized based on
- * the fixed strides provided.
- *
- * If a stride is unknown or non-fixed, pass INTPTR_MAX for that stride.
- */
-void get_dtype_strided_assign_operation(
-                    const dtype& dst_dt, intptr_t dst_fixedstride,
-                    const dtype& src_dt, intptr_t src_fixedstride,
-                    assign_error_mode errmode,
-                    kernel_instance<unary_operation_t>& out_kernel);
-
-/**
  * Returns a function for assigning from the source data to the dest data, with
  * just one dtype.
  */

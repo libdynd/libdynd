@@ -5,6 +5,7 @@
 #include <dnd/dtypes/conversion_dtype.hpp>
 #include <dnd/raw_iteration.hpp>
 #include <dnd/buffer_storage.hpp>
+#include <dnd/kernels/assignment_kernels.hpp>
 
 using namespace std;
 using namespace dnd;
@@ -71,7 +72,7 @@ bool dnd::conversion_dtype::operator==(const extended_dtype& rhs) const
 
 void dnd::conversion_dtype::get_operand_to_value_operation(intptr_t dst_fixedstride, intptr_t src_fixedstride, kernel_instance<unary_operation_t>& out_kernel) const
 {
-    get_dtype_strided_assign_operation(m_value_dtype, dst_fixedstride,
+    get_dtype_assignment_kernel(m_value_dtype, dst_fixedstride,
                                 m_operand_dtype.value_dtype(), src_fixedstride,
                                 m_no_errors_to_value ? assign_error_none : m_errmode,
                                 out_kernel);
@@ -79,7 +80,7 @@ void dnd::conversion_dtype::get_operand_to_value_operation(intptr_t dst_fixedstr
 
 void dnd::conversion_dtype::get_value_to_operand_operation(intptr_t dst_fixedstride, intptr_t src_fixedstride, kernel_instance<unary_operation_t>& out_kernel) const
 {
-    get_dtype_strided_assign_operation(m_operand_dtype.value_dtype(), dst_fixedstride,
+    get_dtype_assignment_kernel(m_operand_dtype.value_dtype(), dst_fixedstride,
                                 m_value_dtype, src_fixedstride,
                                 m_no_errors_to_storage ? assign_error_none : m_errmode,
                                 out_kernel);

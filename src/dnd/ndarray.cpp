@@ -11,6 +11,7 @@
 #include <dnd/shape_tools.hpp>
 #include <dnd/exceptions.hpp>
 #include <dnd/buffer_storage.hpp>
+#include <dnd/kernels/assignment_kernels.hpp>
 #include <dnd/dtypes/conversion_dtype.hpp>
 
 #include "ndarray_expr_node_instances.hpp"
@@ -232,7 +233,7 @@ static void val_assign_unequal_dtypes(const ndarray& lhs, const ndarray& rhs, as
     intptr_t dst_innerstride = iter.innerstride<0>(), src_innerstride = iter.innerstride<1>();
 
     kernel_instance<unary_operation_t> assign;
-    get_dtype_strided_assign_operation(lhs.get_dtype(), dst_innerstride,
+    get_dtype_assignment_kernel(lhs.get_dtype(), dst_innerstride,
                                     rhs.get_dtype(), src_innerstride,
                                     errmode,
                                     assign);
@@ -288,7 +289,7 @@ ndarray dnd::ndarray::as_dtype(const dtype& dt, assign_error_mode errmode) const
                         static_cast<const strided_array_expr_node *>(m_expr_tree.get())->get_buffer_owner()));
         } else {
             // TODO: this should make a conversion dtype too, the convert_dtype_expr_node should be removed
-            return ndarray(new convert_dtype_expr_node(m_expr_tree, dt, errmode));
+            throw std::runtime_error("can only make a convert<> dtype with strided array nodes presently");
         }
     }
 }
