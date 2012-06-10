@@ -8,10 +8,10 @@
 using namespace std;
 using namespace dnd;
 
-void dnd::unary_2chain_kernel(char *dst, intptr_t dst_stride, const char *src, intptr_t src_stride,
+void dnd::chained_2_unary_kernel(char *dst, intptr_t dst_stride, const char *src, intptr_t src_stride,
                         intptr_t count, const AuxDataBase *auxdata)
 {
-    const unary_2chain_auxdata& ad = get_auxiliary_data<unary_2chain_auxdata>(auxdata);
+    const chained_2_unary_kernel_auxdata& ad = get_auxiliary_data<chained_2_unary_kernel_auxdata>(auxdata);
     do {
         intptr_t block_count = ad.buf.element_count();
         if (count < block_count) {
@@ -29,10 +29,10 @@ void dnd::unary_2chain_kernel(char *dst, intptr_t dst_stride, const char *src, i
     } while (count > 0);
 }
 
-void dnd::unary_chain_kernel(char *dst, intptr_t dst_stride, const char *src, intptr_t src_stride,
+void dnd::chained_unary_kernel(char *dst, intptr_t dst_stride, const char *src, intptr_t src_stride,
                         intptr_t count, const AuxDataBase *auxdata)
 {
-    const unary_chain_auxdata& ad = get_auxiliary_data<unary_chain_auxdata>(auxdata);
+    const chained_unary_kernel_auxdata& ad = get_auxiliary_data<chained_unary_kernel_auxdata>(auxdata);
     int buf_count = ad.m_buf_count;
     do {
         intptr_t block_count = ad.m_bufs[0].element_count();
@@ -56,11 +56,11 @@ void dnd::unary_chain_kernel(char *dst, intptr_t dst_stride, const char *src, in
 }
 
 
-void dnd::make_unary_chain_kernel(std::deque<kernel_instance<unary_operation_t> >& kernels,
+void dnd::make_chained_unary_kernel(std::deque<kernel_instance<unary_operation_t> >& kernels,
                     std::deque<intptr_t>& element_sizes, kernel_instance<unary_operation_t>& out_kernel)
 {
     if (kernels.size() != element_sizes.size() + 1) {
-        throw std::runtime_error("make_unary_chain_kernel: the size of 'kernels' must be one more than 'element_sizes'");
+        throw std::runtime_error("make_chained_unary_kernel: the size of 'kernels' must be one more than 'element_sizes'");
     }
 
     switch (kernels.size()) {
@@ -68,9 +68,9 @@ void dnd::make_unary_chain_kernel(std::deque<kernel_instance<unary_operation_t> 
         kernels[0].swap(out_kernel);
         return;
     case 2: {
-        out_kernel.kernel = &unary_2chain_kernel;
-        make_auxiliary_data<unary_2chain_auxdata>(out_kernel.auxdata);
-        unary_2chain_auxdata &auxdata = out_kernel.auxdata.get<unary_2chain_auxdata>();
+        out_kernel.kernel = &chained_2_unary_kernel;
+        make_auxiliary_data<chained_2_unary_kernel_auxdata>(out_kernel.auxdata);
+        chained_2_unary_kernel_auxdata &auxdata = out_kernel.auxdata.get<chained_2_unary_kernel_auxdata>();
 
         auxdata.buf.allocate(element_sizes[0]); // TODO: pass buffering data through here
 
@@ -79,9 +79,9 @@ void dnd::make_unary_chain_kernel(std::deque<kernel_instance<unary_operation_t> 
         return;
         }
     default: {
-        out_kernel.kernel = &unary_chain_kernel;
-        make_auxiliary_data<unary_chain_auxdata>(out_kernel.auxdata);
-        unary_chain_auxdata &auxdata = out_kernel.auxdata.get<unary_chain_auxdata>();
+        out_kernel.kernel = &chained_unary_kernel;
+        make_auxiliary_data<chained_unary_kernel_auxdata>(out_kernel.auxdata);
+        chained_unary_kernel_auxdata &auxdata = out_kernel.auxdata.get<chained_unary_kernel_auxdata>();
         auxdata.init((int)element_sizes.size());
 
         for (size_t i = 0; i < element_sizes.size(); ++i) {

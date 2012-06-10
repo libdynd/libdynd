@@ -539,7 +539,7 @@ void dnd::get_dtype_strided_assign_operation(
             push_front_dtype_storage_to_value_kernels(src_dt, dst_fixedstride, src_dt.value_dtype().itemsize(),
                                 kernels, element_sizes);
 
-            make_unary_chain_kernel(kernels, element_sizes, out_kernel);
+            make_chained_unary_kernel(kernels, element_sizes, out_kernel);
             return;
         } else {
             // Now we need a chain from src's storage to src's value,
@@ -564,7 +564,7 @@ void dnd::get_dtype_strided_assign_operation(
             push_back_dtype_value_to_storage_kernels(dst_dt, dst_fixedstride, dst_dt.value_dtype().itemsize(),
                                 kernels, element_sizes);
 
-            make_unary_chain_kernel(kernels, element_sizes, out_kernel);
+            make_chained_unary_kernel(kernels, element_sizes, out_kernel);
             return;
         }
     } else if (dst_dt.kind() == expression_kind) {
@@ -586,7 +586,7 @@ void dnd::get_dtype_strided_assign_operation(
             push_back_dtype_value_to_storage_kernels(dst_dt, dst_fixedstride, dst_dt.value_dtype().itemsize(),
                                 kernels, element_sizes);
 
-            make_unary_chain_kernel(kernels, element_sizes, out_kernel);
+            make_chained_unary_kernel(kernels, element_sizes, out_kernel);
             return;
         }
     }

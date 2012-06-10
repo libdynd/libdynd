@@ -432,7 +432,7 @@ void dnd::dtype::get_storage_to_value_operation(intptr_t dst_fixedstride, intptr
             push_front_dtype_storage_to_value_kernels(*this, dst_fixedstride, src_fixedstride,
                                 kernels, element_sizes);
 
-            make_unary_chain_kernel(kernels, element_sizes, out_kernel);
+            make_chained_unary_kernel(kernels, element_sizes, out_kernel);
         }
     }
 }
@@ -456,7 +456,7 @@ void dnd::dtype::get_value_to_storage_operation(intptr_t dst_fixedstride, intptr
             push_back_dtype_value_to_storage_kernels(*this, dst_fixedstride, src_fixedstride,
                                 kernels, element_sizes);
 
-            make_unary_chain_kernel(kernels, element_sizes, out_kernel);
+            make_chained_unary_kernel(kernels, element_sizes, out_kernel);
         }
     }
 }
