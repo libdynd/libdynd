@@ -183,6 +183,11 @@ void dnd::get_dtype_assignment_kernel(
                     assign_error_mode errmode,
                     kernel_instance<unary_operation_t>& out_kernel)
 {
+    // special-case matching src and dst dtypes
+    if (dst_dt == src_dt) {
+        return get_dtype_assignment_kernel(dst_dt, dst_fixedstride, src_fixedstride, out_kernel);
+    }
+
     // If the casting can be done losslessly, disable the error check to find faster code paths
     if (errmode != assign_error_none && is_lossless_assignment(dst_dt, src_dt)) {
         errmode = assign_error_none;
@@ -271,4 +276,208 @@ void dnd::get_dtype_assignment_kernel(
     stringstream ss;
     ss << "strided assignment from " << src_dt << " to " << dst_dt << " isn't yet supported";
     throw std::runtime_error(ss.str());
+}
+
+// Fixed and unknown size contiguous copy assignment functions
+template<int N>
+static void unaligned_contig_fixedsize_copy_assign(char *dst, intptr_t, const char *src, intptr_t,
+                            intptr_t count, const AuxDataBase *) {
+    memcpy(dst, src, N * count);
+}
+namespace {
+    template<class T>
+    struct aligned_fixed_size_copy_assign_type {
+        static void assign(char *dst, intptr_t dst_stride, const char *src, intptr_t src_stride,
+                            intptr_t count, const AuxDataBase *) {
+            T *dst_cached = reinterpret_cast<T *>(dst);
+            const T *src_cached = reinterpret_cast<const T *>(src);
+            dst_stride /= sizeof(T);
+            src_stride /= sizeof(T);
+
+            for (intptr_t i = 0; i < count; ++i) {
+                *dst_cached = *src_cached;
+                
+                dst_cached += dst_stride;
+                src_cached += src_stride;
+            }
+        }
+    };
+
+    template<int N>
+    struct aligned_fixed_size_copy_assign;
+    template<>
+    struct aligned_fixed_size_copy_assign<1> : public aligned_fixed_size_copy_assign_type<char> {};
+    template<>
+    struct aligned_fixed_size_copy_assign<2> : public aligned_fixed_size_copy_assign_type<int16_t> {};
+    template<>
+    struct aligned_fixed_size_copy_assign<4> : public aligned_fixed_size_copy_assign_type<int32_t> {};
+    template<>
+    struct aligned_fixed_size_copy_assign<8> : public aligned_fixed_size_copy_assign_type<int64_t> {};
+
+    template<class T>
+    struct aligned_fixed_size_copy_zerostride_assign_type {
+        static void assign(char *dst, intptr_t dst_stride, const char *src, intptr_t,
+                            intptr_t count, const AuxDataBase *) {
+            T *dst_cached = reinterpret_cast<T *>(dst);
+            T s = *reinterpret_cast<const T *>(src);
+            dst_stride /= sizeof(T);
+
+            for (intptr_t i = 0; i < count; ++i) {
+                *dst_cached = s;
+                
+                dst_cached += dst_stride;
+            }
+        }
+    };
+
+    template<int N>
+    struct aligned_fixed_size_copy_zerostride_assign;
+    template<>
+    struct aligned_fixed_size_copy_zerostride_assign<1> : public aligned_fixed_size_copy_zerostride_assign_type<char> {};
+    template<>
+    struct aligned_fixed_size_copy_zerostride_assign<2> : public aligned_fixed_size_copy_zerostride_assign_type<int16_t> {};
+    template<>
+    struct aligned_fixed_size_copy_zerostride_assign<4> : public aligned_fixed_size_copy_zerostride_assign_type<int32_t> {};
+    template<>
+    struct aligned_fixed_size_copy_zerostride_assign<8> : public aligned_fixed_size_copy_zerostride_assign_type<int64_t> {};
+}
+static void unaligned_contig_copy_assign_kernel(char *dst, intptr_t, const char *src, intptr_t,
+                            intptr_t count, const AuxDataBase *auxdata)
+{
+    intptr_t itemsize = get_auxiliary_data<intptr_t>(auxdata);
+    memcpy(dst, src, itemsize * count);
+}
+static void unaligned_strided_copy_assign_kernel(char *dst, intptr_t dst_stride, const char *src, intptr_t src_stride,
+                            intptr_t count, const AuxDataBase *auxdata)
+{
+    char *dst_cached = reinterpret_cast<char *>(dst);
+    const char *src_cached = reinterpret_cast<const char *>(src);
+    intptr_t itemsize = get_auxiliary_data<intptr_t>(auxdata);
+
+    for (intptr_t i = 0; i < count; ++i) {
+        memcpy(dst_cached, src_cached, itemsize);
+        dst_cached += dst_stride;
+        src_cached += src_stride;
+    }
+}
+static void fixed_size_copy_contig_zerostride_assign_memset(char *dst, intptr_t, const char *src, intptr_t,
+                            intptr_t count, const AuxDataBase *)
+{
+    char s = *reinterpret_cast<const char *>(src);
+    memset(dst, s, count);
+}
+static void strided_copy_zerostride_assign(char *dst, intptr_t dst_stride, const char *src, intptr_t,
+                            intptr_t count, const AuxDataBase *auxdata)
+{
+    char *dst_cached = reinterpret_cast<char *>(dst);
+    intptr_t itemsize = get_auxiliary_data<intptr_t>(auxdata);
+
+    for (intptr_t i = 0; i < count; ++i) {
+        memcpy(dst_cached, src, itemsize);
+        dst_cached += dst_stride;
+    }
+}
+
+void dnd::get_pod_dtype_assignment_kernel(
+                    intptr_t element_size, intptr_t alignment,
+                    intptr_t dst_fixedstride, intptr_t src_fixedstride,
+                    kernel_instance<unary_operation_t>& out_kernel)
+{
+    // Make sure there's no stray auxiliary data
+    out_kernel.auxdata.free();
+
+    if (dst_fixedstride == element_size &&
+                    src_fixedstride == element_size) {
+        // contig -> contig uses memcpy, works with unaligned data
+        switch (element_size) {
+            case 1:
+                out_kernel.kernel = &unaligned_contig_fixedsize_copy_assign<1>;
+                break;
+            case 2:
+                out_kernel.kernel = &unaligned_contig_fixedsize_copy_assign<2>;
+                break;
+            case 4:
+                out_kernel.kernel = &unaligned_contig_fixedsize_copy_assign<4>;
+                break;
+            case 8:
+                out_kernel.kernel = &unaligned_contig_fixedsize_copy_assign<8>;
+                break;
+            case 16:
+                out_kernel.kernel = &unaligned_contig_fixedsize_copy_assign<16>;
+                break;
+            default:
+                out_kernel.kernel = &unaligned_contig_copy_assign_kernel;
+                make_auxiliary_data<intptr_t>(out_kernel.auxdata, element_size);
+                break;
+        }
+    } else if (src_fixedstride == 0) {
+        if (element_size == alignment) {
+            switch (element_size) {
+                case 1:
+                    if (dst_fixedstride == 1) {
+                        out_kernel.kernel = &fixed_size_copy_contig_zerostride_assign_memset;
+                    } else {
+                        out_kernel.kernel = &aligned_fixed_size_copy_zerostride_assign<1>::assign;
+                    }
+                    break;
+                case 2:
+                    out_kernel.kernel = &aligned_fixed_size_copy_zerostride_assign<2>::assign;
+                    break;
+                case 4:
+                    out_kernel.kernel = &aligned_fixed_size_copy_zerostride_assign<4>::assign;
+                    break;
+                case 8:
+                    out_kernel.kernel = &aligned_fixed_size_copy_zerostride_assign<8>::assign;
+                    break;
+                default:
+                    out_kernel.kernel = &strided_copy_zerostride_assign;
+                    make_auxiliary_data<intptr_t>(out_kernel.auxdata, element_size);
+                    break;
+            }
+        } else {
+            out_kernel.kernel = &strided_copy_zerostride_assign;
+            make_auxiliary_data<intptr_t>(out_kernel.auxdata, element_size);
+        }
+    } else {
+        if (element_size == alignment) {
+            switch (element_size) {
+                case 1:
+                    out_kernel.kernel = &aligned_fixed_size_copy_assign<1>::assign;
+                    break;
+                case 2:
+                    out_kernel.kernel = &aligned_fixed_size_copy_assign<2>::assign;
+                    break;
+                case 4:
+                    out_kernel.kernel = &aligned_fixed_size_copy_assign<4>::assign;
+                    break;
+                case 8:
+                    out_kernel.kernel = &aligned_fixed_size_copy_assign<8>::assign;
+                    break;
+                default:
+                    out_kernel.kernel = &unaligned_strided_copy_assign_kernel;
+                    make_auxiliary_data<intptr_t>(out_kernel.auxdata, element_size);
+                    break;
+            }
+        } else {
+            out_kernel.kernel = &unaligned_strided_copy_assign_kernel;
+            make_auxiliary_data<intptr_t>(out_kernel.auxdata, element_size);
+        }
+    }
+}
+
+
+void dnd::get_dtype_assignment_kernel(
+                    const dtype& dt,
+                    intptr_t dst_fixedstride,
+                    intptr_t src_fixedstride,
+                    kernel_instance<unary_operation_t>& out_kernel)
+{
+    //DEBUG_COUT << "get_dtype_strided_assign_operation (single dtype " << dt << ")\n";
+    if (!dt.is_object_type()) {
+        get_pod_dtype_assignment_kernel(dt.itemsize(), dt.alignment(),
+                            dst_fixedstride, src_fixedstride, out_kernel);
+        return;
+    } else {
+        throw std::runtime_error("cannot assign object dtypes yet");
+    }
 }

@@ -47,6 +47,18 @@ void get_builtin_dtype_assignment_kernel(
                     kernel_instance<unary_operation_t>& out_kernel);
 
 /**
+ * Gets a unary kernel for assigning a pod dtype, i.e. a raw
+ * byte-copy. It specializes the kernel based on the element size
+ * and alignment.
+ *
+ * If a stride is unknown or non-fixed, pass INTPTR_MAX for that stride.
+ */
+void get_pod_dtype_assignment_kernel(
+                    intptr_t element_size, intptr_t alignment,
+                    intptr_t dst_fixedstride, intptr_t src_fixedstride,
+                    kernel_instance<unary_operation_t>& out_kernel);
+
+/**
  * Returns a kernel for assigning from the source data type
  * to the destination data type, optionally specialized based on
  * the fixed strides provided.
@@ -57,6 +69,18 @@ void get_dtype_assignment_kernel(
                     const dtype& dst_dt, intptr_t dst_fixedstride,
                     const dtype& src_dt, intptr_t src_fixedstride,
                     assign_error_mode errmode,
+                    kernel_instance<unary_operation_t>& out_kernel);
+
+/**
+ * Returns a kernel for assigning from the source data to the dest data, with
+ * matching source and destination dtypes.
+ *
+ * If a stride is unknown or non-fixed, pass INTPTR_MAX for that stride.
+ */
+void get_dtype_assignment_kernel(
+                    const dtype& dt,
+                    intptr_t dst_fixedstride,
+                    intptr_t src_fixedstride,
                     kernel_instance<unary_operation_t>& out_kernel);
 
 } // namespace dnd

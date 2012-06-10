@@ -8,6 +8,7 @@
 #include <dnd/exceptions.hpp>
 #include <dnd/dtype_assign.hpp>
 #include <dnd/buffer_storage.hpp>
+#include <dnd/kernels/assignment_kernels.hpp>
 #include <dnd/kernels/chained_unary_kernels.hpp>
 
 #include <sstream>
@@ -418,7 +419,7 @@ void dnd::dtype::get_storage_to_value_operation(intptr_t dst_fixedstride, intptr
 {
     if (m_kind != expression_kind) {
         // If it's not an expression_kind dtype, return a simple copy operation
-        get_dtype_strided_assign_operation(*this, dst_fixedstride, src_fixedstride, out_kernel);
+        get_dtype_assignment_kernel(*this, dst_fixedstride, src_fixedstride, out_kernel);
         return;
     } else {
         const dtype& next_dt = m_data->operand_dtype(*this);
@@ -442,7 +443,7 @@ void dnd::dtype::get_value_to_storage_operation(intptr_t dst_fixedstride, intptr
 {
     if (m_kind != expression_kind) {
         // If it's not an expression_kind dtype, return a simple copy operation
-        get_dtype_strided_assign_operation(*this, dst_fixedstride, src_fixedstride, out_kernel);
+        get_dtype_assignment_kernel(*this, dst_fixedstride, src_fixedstride, out_kernel);
         return;
     } else {
         const dtype& next_dt = m_data->operand_dtype(*this);

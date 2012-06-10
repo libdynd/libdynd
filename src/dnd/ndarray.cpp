@@ -263,7 +263,7 @@ static void val_assign_equal_dtypes(const ndarray& lhs, const ndarray& rhs)
     intptr_t dst_innerstride = iter.innerstride<0>(), src_innerstride = iter.innerstride<1>();
 
     kernel_instance<unary_operation_t> assign;
-    get_dtype_strided_assign_operation(lhs.get_dtype(), dst_innerstride,
+    get_dtype_assignment_kernel(lhs.get_dtype(), dst_innerstride,
                                         src_innerstride,
                                         assign);
 
@@ -325,7 +325,7 @@ void dnd::ndarray::val_assign(const dtype& dt, const char *data, assign_error_mo
     intptr_t innersize = iter.innersize(), innerstride = iter.innerstride<0>();
 
     kernel_instance<unary_operation_t> assign;
-    get_dtype_strided_assign_operation(get_dtype(), innerstride, 0, assign);
+    get_dtype_assignment_kernel(get_dtype(), innerstride, 0, assign);
 
     if (innersize > 0) {
         do {

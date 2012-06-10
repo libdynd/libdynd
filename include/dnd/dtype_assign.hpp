@@ -53,15 +53,6 @@ void dtype_strided_assign(const dtype& dst_dt, char *dst, intptr_t dst_stride,
                             const dtype& src_dt, const char *src, intptr_t src_stride,
                             intptr_t count, assign_error_mode errmode);
 
-/**
- * Returns a function for assigning from the source data to the dest data, with
- * just one dtype.
- */
-void get_dtype_strided_assign_operation(
-                    const dtype& dt,
-                    intptr_t dst_fixedstride,
-                    intptr_t src_fixedstride,
-                    kernel_instance<unary_operation_t>& out_kernel);
 
 } // namespace dnd
 
