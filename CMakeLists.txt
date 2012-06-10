@@ -29,6 +29,8 @@ set(dnd_SRC
     src/dnd/kernels/assignment_kernels.cpp
     src/dnd/kernels/byteswap_kernels.cpp
     src/dnd/kernels/chained_unary_kernels.cpp
+    src/dnd/kernels/single_assigner_builtin.hpp
+    src/dnd/kernels/multiple_assigner_builtin.hpp
     include/dnd/kernels/assignment_kernels.hpp
     include/dnd/kernels/byteswap_kernels.hpp
     include/dnd/kernels/kernel_instance.hpp
@@ -44,7 +46,6 @@ set(dnd_SRC
     src/dnd/arithmetic_op.cpp
     src/dnd/shape_tools.cpp
     src/dnd/ndarray_expr_node_instances.hpp
-    src/dnd/single_assigner_builtin.hpp
 	include/dnd/auxiliary_data.hpp
     include/dnd/buffer_storage.hpp
     include/dnd/config.hpp

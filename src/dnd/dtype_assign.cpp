@@ -16,8 +16,7 @@
 #include <dnd/dtype_assign.hpp>
 #include <dnd/dtypes/conversion_dtype.hpp>
 #include <dnd/kernels/chained_unary_kernels.hpp>
-
-#include "single_assigner_builtin.hpp"
+#include <dnd/kernels/assignment_kernels.hpp>
 
 #ifdef __GNUC__
 // The -Weffc++ flag warns about derived classes not having a virtual destructor.
@@ -184,69 +183,11 @@ bool dnd::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt)
 }
 
 
-typedef void (*assign_function_t)(void *dst, const void *src);
-
-static assign_function_t single_assign_table[builtin_type_id_count][builtin_type_id_count][4] =
-{
-#define ERROR_MODE_LEVEL(dst_type, src_type) { \
-        (assign_function_t)&single_assigner_builtin<dst_type, src_type, assign_error_none>::assign, \
-        (assign_function_t)&single_assigner_builtin<dst_type, src_type, assign_error_overflow>::assign, \
-        (assign_function_t)&single_assigner_builtin<dst_type, src_type, assign_error_fractional>::assign, \
-        (assign_function_t)&single_assigner_builtin<dst_type, src_type, assign_error_inexact>::assign \
-    }
-
-#define SRC_TYPE_LEVEL(dst_type) { \
-        ERROR_MODE_LEVEL(dst_type, dnd_bool), \
-        ERROR_MODE_LEVEL(dst_type, int8_t), \
-        ERROR_MODE_LEVEL(dst_type, int16_t), \
-        ERROR_MODE_LEVEL(dst_type, int32_t), \
-        ERROR_MODE_LEVEL(dst_type, int64_t), \
-        ERROR_MODE_LEVEL(dst_type, uint8_t), \
-        ERROR_MODE_LEVEL(dst_type, uint16_t), \
-        ERROR_MODE_LEVEL(dst_type, uint32_t), \
-        ERROR_MODE_LEVEL(dst_type, uint64_t), \
-        ERROR_MODE_LEVEL(dst_type, float), \
-        ERROR_MODE_LEVEL(dst_type, double), \
-        ERROR_MODE_LEVEL(dst_type, complex<float>), \
-        ERROR_MODE_LEVEL(dst_type, complex<double>) \
-    }
-    
-    SRC_TYPE_LEVEL(dnd_bool),
-    SRC_TYPE_LEVEL(int8_t),
-    SRC_TYPE_LEVEL(int16_t),
-    SRC_TYPE_LEVEL(int32_t),
-    SRC_TYPE_LEVEL(int64_t),
-    SRC_TYPE_LEVEL(uint8_t),
-    SRC_TYPE_LEVEL(uint16_t),
-    SRC_TYPE_LEVEL(uint32_t),
-    SRC_TYPE_LEVEL(uint64_t),
-    SRC_TYPE_LEVEL(float),
-    SRC_TYPE_LEVEL(double),
-    SRC_TYPE_LEVEL(complex<float>),
-    SRC_TYPE_LEVEL(complex<double>)
-#undef SRC_TYPE_LEVEL
-#undef ERROR_MODE_LEVEL
-};
-
-static inline assign_function_t get_single_assign_function(const dtype& dst_dt, const dtype& src_dt,
-                                                                assign_error_mode errmode)
-{
-    int dst_type_id = dst_dt.type_id(), src_type_id = src_dt.type_id();
-
-    // Do a table lookup for the built-in range of dtypes
-    if (dst_type_id >= bool_type_id && dst_type_id <= complex_float64_type_id &&
-            src_type_id >= bool_type_id && src_type_id <= complex_float64_type_id) {
-        return single_assign_table[dst_type_id][src_type_id][errmode];
-    } else {
-        return NULL;
-    }
-}
-
 void dnd::dtype_assign(const dtype& dst_dt, char *dst, const dtype& src_dt, const char *src, assign_error_mode errmode)
 {
     if (dst_dt.extended() == NULL && src_dt.extended() == NULL) {
         // Try to use the simple single-value assignment for built-in types
-        assign_function_t asn = get_single_assign_function(dst_dt, src_dt, errmode);
+        assignment_function_t asn = get_builtin_dtype_assignment_function(dst_dt.type_id(), src_dt.type_id(), errmode);
         if (asn != NULL) {
             asn(dst, src);
             return;
@@ -340,142 +281,6 @@ static void assign_multiple_unaligned(char *dst, intptr_t dst_stride, const char
 }
 */
 
-// A multiple aligned assignment function which uses one of the single assignment functions as proxy
-static void assign_multiple_aligned(char *dst, intptr_t dst_stride, const char *src, intptr_t src_stride,
-                                    intptr_t count, const AuxDataBase *auxdata)
-{
-    assign_function_t asn = get_auxiliary_data<assign_function_t>(auxdata);
-
-
-    char *dst_cached = reinterpret_cast<char *>(dst);
-    const char *src_cached = reinterpret_cast<const char *>(src);
-
-    for (intptr_t i = 0; i < count; ++i) {
-        asn(dst_cached, src_cached);
-        dst_cached += dst_stride;
-        src_cached += src_stride;
-    }
-}
-
-
-// Some specialized multiple assignment functions
-template<class dst_type, class src_type>
-struct multiple_assigner {
-    static void assign_noexcept(char *dst, intptr_t dst_stride,
-                                const char *src, intptr_t src_stride,
-                                intptr_t count,
-                                const AuxDataBase *)
-    {
-        //DEBUG_COUT << "multiple_assigner::assign_noexcept (" << typeid(src_type).name() << " -> " << typeid(dst_type).name() << ")\n";
-        const src_type *src_cached = reinterpret_cast<const src_type *>(src);
-        dst_type *dst_cached = reinterpret_cast<dst_type *>(dst);
-        src_stride /= sizeof(src_type);
-        dst_stride /= sizeof(dst_type);
-
-        for (intptr_t i = 0; i < count; ++i) {
-            // Use the single-assigner template, so complex -> int can be handled, for instance
-            single_assigner_builtin<dst_type, src_type, assign_error_none>::assign(dst_cached, src_cached);
-            dst_cached += dst_stride;
-            src_cached += src_stride;
-        }
-    }
-
-    static void assign_noexcept_anystride_zerostride(char *dst, intptr_t dst_stride,
-                                const char *src, intptr_t,
-                                intptr_t count,
-                                const AuxDataBase *)
-    {
-        //DEBUG_COUT << "multiple_assigner::assign_noexcept_anystride_zerostride (" << typeid(src_type).name() << " -> " << typeid(dst_type).name() << ")\n";
-        dst_type src_value_cached;
-        dst_type *dst_cached = reinterpret_cast<dst_type *>(dst);
-        dst_stride /= sizeof(dst_type);
-
-        // Use the single-assigner template, so complex -> int can be handled, for instance
-        single_assigner_builtin<dst_type, src_type, assign_error_none>::assign(&src_value_cached, (const src_type *)src);
-
-        for (intptr_t i = 0; i < count; ++i) {
-            *dst_cached = src_value_cached;
-            dst_cached += dst_stride;
-        }
-    }
-
-    static void assign_noexcept_contigstride_zerostride(char *dst, intptr_t,
-                                const char *src, intptr_t,
-                                intptr_t count,
-                                const AuxDataBase *)
-    {
-        //DEBUG_COUT << "multiple_assigner::assign_noexcept_contigstride_zerostride (" << typeid(src_type).name() << " -> " << typeid(dst_type).name() << ")\n";
-        dst_type src_value_cached;
-        dst_type *dst_cached = reinterpret_cast<dst_type *>(dst);
-
-        // Use the single-assigner template, so complex -> int can be handled, for instance
-        single_assigner_builtin<dst_type, src_type, assign_error_none>::assign(&src_value_cached, (const src_type *)src);
-
-        for (intptr_t i = 0; i < count; ++i, ++dst_cached) {
-            *dst_cached = src_value_cached;
-        }
-    }
-
-    static void assign_noexcept_contigstride_contigstride(char *dst, intptr_t,
-                                const char *src, intptr_t,
-                                intptr_t count,
-                                const AuxDataBase *)
-    {
-        //DEBUG_COUT << "multiple_assigner::assign_noexcept_contigstride_contigstride (" << typeid(src_type).name() << " -> " << typeid(dst_type).name() << ")\n";
-        const src_type *src_cached = reinterpret_cast<const src_type *>(src);
-        dst_type *dst_cached = reinterpret_cast<dst_type *>(dst);
-
-        for (intptr_t i = 0; i < count; ++i, ++dst_cached, ++src_cached) {
-            // Use the single-assigner template, so complex -> int can be handled, for instance
-            single_assigner_builtin<dst_type, src_type, assign_error_none>::assign(dst_cached, src_cached);
-        }
-    }
-};
-
-#define DND_XSTRINGIFY(s) #s
-#define DND_STRINGIFY(s) DND_XSTRINGIFY(s)
-
-#define DTYPE_ASSIGN_SRC_TO_DST_SINGLE_CASE(dst_type, src_type, ASSIGN_FN) \
-    case type_id_of<dst_type>::value: \
-        /*DEBUG_COUT << "returning " << DND_STRINGIFY(dst_type) << " " << DND_STRINGIFY(src_type) << " " << DND_STRINGIFY(ASSIGN_FN) << "\n";*/ \
-        out_kernel.kernel = &multiple_assigner<dst_type, src_type>::ASSIGN_FN; \
-        return;
-
-#define DTYPE_ASSIGN_SRC_TO_ANY_CASE(src_type, ASSIGN_FN) \
-    case type_id_of<src_type>::value: \
-        switch (dst_dt.type_id()) { \
-            DTYPE_ASSIGN_SRC_TO_DST_SINGLE_CASE(dnd_bool, src_type, ASSIGN_FN); \
-            DTYPE_ASSIGN_SRC_TO_DST_SINGLE_CASE(int8_t,   src_type, ASSIGN_FN); \
-            DTYPE_ASSIGN_SRC_TO_DST_SINGLE_CASE(int16_t,  src_type, ASSIGN_FN); \
-            DTYPE_ASSIGN_SRC_TO_DST_SINGLE_CASE(int32_t,  src_type, ASSIGN_FN); \
-            DTYPE_ASSIGN_SRC_TO_DST_SINGLE_CASE(int64_t,  src_type, ASSIGN_FN); \
-            DTYPE_ASSIGN_SRC_TO_DST_SINGLE_CASE(uint8_t,  src_type, ASSIGN_FN); \
-            DTYPE_ASSIGN_SRC_TO_DST_SINGLE_CASE(uint16_t, src_type, ASSIGN_FN); \
-            DTYPE_ASSIGN_SRC_TO_DST_SINGLE_CASE(uint32_t, src_type, ASSIGN_FN); \
-            DTYPE_ASSIGN_SRC_TO_DST_SINGLE_CASE(uint64_t, src_type, ASSIGN_FN); \
-            DTYPE_ASSIGN_SRC_TO_DST_SINGLE_CASE(float,    src_type, ASSIGN_FN); \
-            DTYPE_ASSIGN_SRC_TO_DST_SINGLE_CASE(double,   src_type, ASSIGN_FN); \
-            DTYPE_ASSIGN_SRC_TO_DST_SINGLE_CASE(std::complex<float>,    src_type, ASSIGN_FN); \
-            DTYPE_ASSIGN_SRC_TO_DST_SINGLE_CASE(std::complex<double>,   src_type, ASSIGN_FN); \
-        } \
-        break
-
-#define DTYPE_ASSIGN_ANY_TO_ANY_SWITCH(ASSIGN_FN) \
-    switch (src_dt.type_id()) { \
-        DTYPE_ASSIGN_SRC_TO_ANY_CASE(dnd_bool, ASSIGN_FN); \
-        DTYPE_ASSIGN_SRC_TO_ANY_CASE(int8_t, ASSIGN_FN); \
-        DTYPE_ASSIGN_SRC_TO_ANY_CASE(int16_t, ASSIGN_FN); \
-        DTYPE_ASSIGN_SRC_TO_ANY_CASE(int32_t, ASSIGN_FN); \
-        DTYPE_ASSIGN_SRC_TO_ANY_CASE(int64_t, ASSIGN_FN); \
-        DTYPE_ASSIGN_SRC_TO_ANY_CASE(uint8_t, ASSIGN_FN); \
-        DTYPE_ASSIGN_SRC_TO_ANY_CASE(uint16_t, ASSIGN_FN); \
-        DTYPE_ASSIGN_SRC_TO_ANY_CASE(uint32_t, ASSIGN_FN); \
-        DTYPE_ASSIGN_SRC_TO_ANY_CASE(uint64_t, ASSIGN_FN); \
-        DTYPE_ASSIGN_SRC_TO_ANY_CASE(float, ASSIGN_FN); \
-        DTYPE_ASSIGN_SRC_TO_ANY_CASE(double, ASSIGN_FN); \
-        DTYPE_ASSIGN_SRC_TO_ANY_CASE(std::complex<float>, ASSIGN_FN); \
-        DTYPE_ASSIGN_SRC_TO_ANY_CASE(std::complex<double>, ASSIGN_FN); \
-    }
 
 void dnd::get_dtype_strided_assign_operation(
                     const dtype& dst_dt, intptr_t dst_fixedstride,
@@ -488,34 +293,11 @@ void dnd::get_dtype_strided_assign_operation(
         errmode = assign_error_none;
     }
 
-    out_kernel.auxdata.free();
-
     // Assignment of built-in types
     if (dst_dt.extended() == NULL && src_dt.extended() == NULL) {
-        // When there's error-checking, use single-assignment functions to avoid too
-        // much code bloat. Maybe we can add strided specializations to get a bit
-        // better speed.
-        if (errmode != assign_error_none) {
-            assign_function_t asn = get_single_assign_function(dst_dt, src_dt, errmode);
-            if (asn != NULL) {
-                out_kernel.kernel = &assign_multiple_aligned;
-                make_auxiliary_data<assign_function_t>(out_kernel.auxdata, asn);
-                return;
-            }
-        } else {
-            if (src_fixedstride == 0) {
-                if (dst_fixedstride == (intptr_t)dst_dt.itemsize()) {
-                    DTYPE_ASSIGN_ANY_TO_ANY_SWITCH(assign_noexcept_contigstride_zerostride);
-                } else {
-                    DTYPE_ASSIGN_ANY_TO_ANY_SWITCH(assign_noexcept_anystride_zerostride);
-                }
-            } else if (dst_fixedstride == (intptr_t)dst_dt.itemsize() &&
-                                src_fixedstride == (intptr_t)src_dt.itemsize()) {
-                DTYPE_ASSIGN_ANY_TO_ANY_SWITCH(assign_noexcept_contigstride_contigstride);
-            } else {
-                DTYPE_ASSIGN_ANY_TO_ANY_SWITCH(assign_noexcept);
-            }
-        }
+        get_builtin_dtype_assignment_kernel(dst_dt.type_id(), dst_fixedstride,
+                            src_dt.type_id(), src_fixedstride, errmode, out_kernel);
+        return;
     }
 
     // Assignment of expression dtypes

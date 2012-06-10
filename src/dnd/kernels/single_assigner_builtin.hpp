@@ -10,6 +10,9 @@
 
 #include <dnd/fpstatus.hpp>
 #include <cmath>
+#include <complex>
+
+#include <dnd/dtype.hpp>
 
 #ifdef __GNUC__
 #pragma GCC diagnostic push
@@ -26,10 +29,7 @@
 #pragma fenv_access(on)
 #endif
 
-// Put it in an anonymous namespace
-namespace {
-
-using namespace dnd;
+namespace dnd {
 
 template<class dst_type, class src_type, dtype_kind_t dst_kind, dtype_kind_t src_kind, assign_error_mode errmode>
 struct single_assigner_builtin_base;
@@ -824,5 +824,5 @@ struct single_assigner_builtin<same_type, same_type, errmode>
 #pragma GCC diagnostic pop
 #endif
 
-} // anonymous namespace
+} // namespace dnd
 
