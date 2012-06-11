@@ -82,9 +82,6 @@ void dnd::multiple_assignment_kernel(char *dst, intptr_t dst_stride, const char 
 
 
 
-#define DND_XSTRINGIFY(s) #s
-#define DND_STRINGIFY(s) DND_XSTRINGIFY(s)
-
 #define DTYPE_ASSIGN_SRC_TO_DST_SINGLE_CASE(dst_type, src_type, BASE_FN, errmode) \
     case type_id_of<src_type>::value: \
         /*DEBUG_COUT << "returning " << DND_STRINGIFY(dst_type) << " " << DND_STRINGIFY(src_type) << " " << DND_STRINGIFY(ASSIGN_FN) << "\n";*/ \
@@ -478,6 +475,15 @@ void dnd::get_dtype_assignment_kernel(
                             dst_fixedstride, src_fixedstride, out_kernel);
         return;
     } else {
+        if (dt.kind() == expression_kind) {
+            // In the case of an expression dtype, just copy the storage
+            // directly instead of chaining multiple casting operations
+            // together.
+            get_dtype_assignment_kernel(dt.storage_dtype(),
+                            dst_fixedstride, src_fixedstride, out_kernel);
+            return;
+        }
+
         throw std::runtime_error("cannot assign object dtypes yet");
     }
 }

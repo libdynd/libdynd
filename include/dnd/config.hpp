@@ -95,4 +95,20 @@ namespace dnd {
 }
 #endif
 
+/////////////////////////////////////////
+// Diagnostic configurations
+//
+
+/**
+ * This preprocessor symbol enables or disables assertions
+ * that pointers are aligned as they are supposed to be. This helps
+ * test that alignment is being done correctly on platforms which
+ * do not segfault on misaligned data.
+ *
+ * An exception is thrown if an improper unalignment is detected.
+ *
+ * See diagnostics.hpp for the macros which use this.
+ */
+#define DND_ALIGNMENT_ASSERTIONS 1
+
 #endif // _DND__CONFIG_HPP_

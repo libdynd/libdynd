@@ -6,6 +6,7 @@
 #define _DND__AUXILIARY_DATA_HPP_
 
 #include <new>
+#include <algorithm>
 
 namespace dnd {
 

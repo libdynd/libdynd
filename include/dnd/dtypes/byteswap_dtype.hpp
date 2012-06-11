@@ -2,7 +2,7 @@
 // Copyright (C) 2012 Continuum Analytics
 //
 //
-// The byteswapped dtype represents one of the
+// The byteswap dtype represents one of the
 // built-in dtypes stored in non-native byte order.
 //
 // TODO: When needed, a mechanism for non built-in

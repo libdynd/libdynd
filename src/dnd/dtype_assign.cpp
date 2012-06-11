@@ -205,48 +205,6 @@ void dnd::dtype_assign(const dtype& dst_dt, char *dst, const dtype& src_dt, cons
 }
 
 /*
-// A multiple unaligned byteswap assignment function which uses one of the single assignment functions as proxy
-namespace {
-    class multiple_byteswap_unaligned_auxiliary_data : public auxiliary_data {
-    public:
-        assign_function_t assign;
-        byteswap_operation_t src_byteswap, dst_byteswap;
-        int dst_itemsize, src_itemsize;
-        multiple_byteswap_unaligned_auxiliary_data()
-            : assign(NULL), src_byteswap(NULL), dst_byteswap(NULL),
-              dst_itemsize(0), src_itemsize(0) {
-        }
-
-        virtual ~multiple_byteswap_unaligned_auxiliary_data() {
-        }
-    };
-}
-static void assign_multiple_byteswap_unaligned(char *dst, intptr_t dst_stride,
-                                    const char *src, intptr_t src_stride,
-                                    intptr_t count, const auxiliary_data *data)
-{
-    const multiple_byteswap_unaligned_auxiliary_data * mgdata =
-                            static_cast<const multiple_byteswap_unaligned_auxiliary_data *>(data);
-
-    char *dst_cached = reinterpret_cast<char *>(dst);
-    const char *src_cached = reinterpret_cast<const char *>(src);
-
-    byteswap_operation_t src_byteswap = mgdata->src_byteswap, dst_byteswap = mgdata->dst_byteswap;
-    int dst_itemsize = mgdata->dst_itemsize, src_itemsize = mgdata->src_itemsize;
-    // TODO: Probably want to relax the assumption of at most 8 bytes
-    int64_t d;
-    int64_t s;
-
-    assign_function_t asn = mgdata->assign;
-
-    for (intptr_t i = 0; i < count; ++i) {
-        src_byteswap(&s, src_cached, src_itemsize);
-        asn(&d, &s);
-        dst_byteswap(dst_cached, &d, dst_itemsize);
-        dst_cached += dst_stride;
-        src_cached += src_stride;
-    }
-}
 
 // A multiple unaligned assignment function which uses one of the single assignment functions as proxy
 namespace {

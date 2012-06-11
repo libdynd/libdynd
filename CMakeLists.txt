@@ -49,6 +49,7 @@ set(dnd_SRC
 	include/dnd/auxiliary_data.hpp
     include/dnd/buffer_storage.hpp
     include/dnd/config.hpp
+    include/dnd/diagnostics.hpp
     include/dnd/dtype.hpp
     include/dnd/dtype_assign.hpp
     include/dnd/dtype_promotion.hpp
