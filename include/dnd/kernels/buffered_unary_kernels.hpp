@@ -2,13 +2,13 @@
 // Copyright (C) 2012 Continuum Analytics
 // All rights reserved.
 //
-#ifndef _DND__buffered_nchain_unary_kernelS_HPP_
-#define _DND__buffered_nchain_unary_kernelS_HPP_
+#ifndef _DND__BUFFERED_UNARY_KERNELS_HPP_
+#define _DND__BUFFERED_UNARY_KERNELS_HPP_
 
 #include <vector>
 #include <deque>
 
-#include <dnd/kernels/buffered_unary_kernels.hpp>
+#include <dnd/kernels/kernel_instance.hpp>
 #include <dnd/buffer_storage.hpp>
 
 namespace dnd {
@@ -127,4 +127,4 @@ void push_back_dtype_value_to_storage_kernels(const dnd::dtype& dt,
 
 } // namespace dnd
 
-#endif // _DND__buffered_nchain_unary_kernelS_HPP_
+#endif // _DND__BUFFERED_UNARY_KERNELS_HPP_

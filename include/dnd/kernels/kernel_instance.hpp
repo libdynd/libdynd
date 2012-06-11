@@ -31,7 +31,9 @@ template<typename FT>
 class kernel_instance {
     kernel_instance& operator=(const kernel_instance&);
 public:
-    kernel_instance() {
+    kernel_instance()
+        : kernel(0)
+    {
     }
     // Copying a kernel_instance clones the auxiliary data
     kernel_instance(const kernel_instance& rhs)

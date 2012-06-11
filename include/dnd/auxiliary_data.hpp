@@ -119,8 +119,9 @@ class auxiliary_data {
     // Would be nice if we could rely on it being movable, like std::unique_ptr,
     // but we probably need to support pre C++11...
 public:
-    auxiliary_data() {
-        m_auxdata = 0;
+    auxiliary_data()
+        : m_auxdata(0)
+    {
     }
     ~auxiliary_data() {
         free();
