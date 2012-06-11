@@ -262,10 +262,18 @@ public:
 
     /**
      * Converts the array into the specified explicit template dtype.
+     * For example, arr.as_dtype<float>().
      */
     template<class T>
     ndarray as_dtype(assign_error_mode errmode = assign_error_fractional) const {
         return as_dtype(make_dtype<T>(), errmode);
+    }
+
+    ndarray view_as_dtype(const dtype& dt) const;
+
+    template<class T>
+    ndarray view_as_dtype() const {
+        return view_as_dtype(make_dtype<T>());
     }
 
     /**

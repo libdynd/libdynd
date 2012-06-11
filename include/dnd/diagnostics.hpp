@@ -29,9 +29,9 @@
         if ((((uintptr_t)ptr) & (alignment-1)) != 0 || (((uintptr_t)stride) & (alignment-1)) != 0) { \
             std::stringstream ss; \
             ss << "improper unalignment detected, " << __FILE__ << ": " << __LINE__ << "\n"; \
-            ss << "pointer " << DND_STRINGIFY(ptr) << " (" << ptr << \
-                    ") and stride " << DND_STRINGIFY(stride) << " (" << stride << ")\n"; \
-            ss << "expected alignment " << alignment << "\n"; \
+            ss << "pointer " << DND_STRINGIFY(ptr) << " (" << ((void *)(ptr)) << \
+                    ") and stride " << DND_STRINGIFY(stride) << " (" << ((intptr_t)(stride)) << ")\n"; \
+            ss << "expected alignment " << (alignment) << "\n"; \
             ss << extra_info; \
             throw std::runtime_error(ss.str()); \
         } \

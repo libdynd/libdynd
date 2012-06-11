@@ -3,6 +3,7 @@
 #if DND_NUMPY_INTEROP
 
 #include <dnd/dtypes/byteswap_dtype.hpp>
+#include <dnd/dtypes/unaligned_dtype.hpp>
 
 #include "dtype_functions.hpp"
 #include "ndarray_functions.hpp"
@@ -163,6 +164,21 @@ ndarray pydnd::ndarray_from_numpy_array(PyArrayObject* obj)
 {
     // Get the dtype of the array
     dtype d = pydnd::dtype_from_numpy_dtype(PyArray_DESCR(obj));
+
+    // If the array's data isn't aligned properly, make it an unaligned dtype
+    if (((uintptr_t)PyArray_DATA(obj)&(d.alignment()-1)) != 0) {
+        d = make_unaligned_dtype(d);
+    } else {
+        int ndim = PyArray_NDIM(obj);
+        intptr_t *strides = PyArray_STRIDES(obj);
+        for (int idim = 0; idim < ndim; ++idim) {
+            if (((uintptr_t)strides[idim]&(d.alignment()-1)) != 0) {
+                d = make_unaligned_dtype(d);
+                break;
+            }
+        }
+    }
+
     // Get a shared pointer that tracks buffer ownership
     PyObject *base = PyArray_BASE(obj);
     dnd::shared_ptr<void> bufowner;
@@ -173,6 +189,7 @@ ndarray pydnd::ndarray_from_numpy_array(PyArrayObject* obj)
         Py_INCREF(base);
         bufowner = dnd::shared_ptr<PyObject>(base, py_decref_function<PyObject>);
     }
+
     // Create the result ndarray
     return ndarray(new strided_array_expr_node(d, PyArray_NDIM(obj), 
                     PyArray_DIMS(obj), PyArray_STRIDES(obj), PyArray_DATA(obj), DND_MOVE(bufowner)));
@@ -245,7 +262,6 @@ static void free_array_interface(void *ptr, void *extra_ptr)
 {
     PyArrayInterface* inter = (PyArrayInterface *)ptr;
     dnd::shared_ptr<void> *extra = (dnd::shared_ptr<void> *)extra_ptr;
-    delete[] inter->shape;
     delete[] inter->strides;
     delete inter;
     delete extra;
@@ -257,18 +273,32 @@ PyObject* pydnd::ndarray_as_numpy_struct_capsule(const dnd::ndarray& n)
         throw runtime_error("cannot convert a dnd::ndarray that isn't a strided array into a numpy array");
     }
 
+    dtype dt = n.get_dtype();
+
+    bool aligned = true;
+    if (dt.type_id() == unaligned_type_id) {
+        dt = dt.value_dtype();
+        aligned = false;
+    }
+
+    bool byteswapped = false;
+    if (dt.type_id() == byteswap_type_id) {
+        dt = dt.value_dtype();
+        byteswapped = true;
+    }
+
     PyArrayInterface inter;
     memset(&inter, 0, sizeof(inter));
 
     inter.two = 2;
     inter.nd = n.get_ndim();
-    inter.typekind = numpy_kindchar_of(n.get_dtype());
+    inter.typekind = numpy_kindchar_of(dt);
     inter.itemsize = (int)n.get_dtype().itemsize();
     // TODO: When read-write access control is added, this must be modified
-    inter.flags = NPY_ARRAY_NOTSWAPPED | NPY_ARRAY_ALIGNED | NPY_ARRAY_WRITEABLE;
+    inter.flags = (byteswapped ? 0 : NPY_ARRAY_NOTSWAPPED) | (aligned ? NPY_ARRAY_ALIGNED : 0) | NPY_ARRAY_WRITEABLE;
     inter.data = n.get_originptr();
-    inter.strides = new intptr_t[n.get_ndim()];
-    inter.shape = new intptr_t[n.get_ndim()];
+    inter.strides = new intptr_t[2 * n.get_ndim()];
+    inter.shape = inter.strides + n.get_ndim();
 
     memcpy(inter.strides, n.get_strides(), n.get_ndim() * sizeof(intptr_t));
     memcpy(inter.shape, n.get_shape(), n.get_ndim() * sizeof(intptr_t));

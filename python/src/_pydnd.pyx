@@ -1,7 +1,7 @@
 cdef extern from "do_import_array.hpp":
     pass
 cdef extern from "numpy_interop.hpp" namespace "pydnd":
-    object ndarray_as_numpy_struct_capsule(ndarray&)
+    object ndarray_as_numpy_struct_capsule(ndarray&) except +
     void import_numpy()
 import_numpy()
 

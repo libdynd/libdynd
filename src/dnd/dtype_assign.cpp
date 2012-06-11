@@ -16,6 +16,7 @@
 #include <dnd/dtype_assign.hpp>
 #include <dnd/dtypes/conversion_dtype.hpp>
 #include <dnd/kernels/assignment_kernels.hpp>
+#include <dnd/diagnostics.hpp>
 
 #ifdef __GNUC__
 // The -Weffc++ flag warns about derived classes not having a virtual destructor.
@@ -184,6 +185,8 @@ bool dnd::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt)
 
 void dnd::dtype_assign(const dtype& dst_dt, char *dst, const dtype& src_dt, const char *src, assign_error_mode errmode)
 {
+    DND_ASSERT_ALIGNED(dst, 0, dst_dt.alignment(), "dst dtype: " << dst_dt << ", src dtype: " << src_dt);
+    DND_ASSERT_ALIGNED(src, 0, src_dt.alignment(), "src dtype: " << src_dt << ", dst dtype: " << dst_dt);
     if (dst_dt.extended() == NULL && src_dt.extended() == NULL) {
         // Try to use the simple single-value assignment for built-in types
         assignment_function_t asn = get_builtin_dtype_assignment_function(dst_dt.type_id(), src_dt.type_id(), errmode);

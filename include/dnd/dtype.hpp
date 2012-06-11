@@ -82,6 +82,7 @@ enum type_id_t {
     // Adapter dtypes
     conversion_type_id,
     byteswap_type_id,
+    unaligned_type_id,
 
     // pattern matches against other types - cannot instantiate
     pattern_type_id,
