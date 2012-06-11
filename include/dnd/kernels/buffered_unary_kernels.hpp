@@ -2,13 +2,13 @@
 // Copyright (C) 2012 Continuum Analytics
 // All rights reserved.
 //
-#ifndef _DND__CHAINED_UNARY_KERNELS_HPP_
-#define _DND__CHAINED_UNARY_KERNELS_HPP_
+#ifndef _DND__buffered_nchain_unary_kernelS_HPP_
+#define _DND__buffered_nchain_unary_kernelS_HPP_
 
 #include <vector>
 #include <deque>
 
-#include <dnd/kernels/chained_unary_kernels.hpp>
+#include <dnd/kernels/buffered_unary_kernels.hpp>
 #include <dnd/buffer_storage.hpp>
 
 namespace dnd {
@@ -21,11 +21,11 @@ namespace dnd {
  *   void produce_kernel(intptr_t dst_fixedstride, intptr_t src_fixedstride, kernel_instance<unary_operation_t>& out_kernel)
  *   {
  *       // Set the kernel function
- *       out_kernel.kernel = &chained_2_unary_kernel;
+ *       out_kernel.kernel = &buffered_2chain_unary_kernel;
  *       // Allocate the auxiliary data for the kernel
- *       make_auxiliary_data<chained_2_unary_kernel_auxdata>(out_kernel.auxdata);
+ *       make_auxiliary_data<buffered_2chain_unary_kernel_auxdata>(out_kernel.auxdata);
  *       // Get a reference to the auxiliary data just allocated
- *       chained_2_unary_kernel_auxdata &auxdata = out_kernel.auxdata.get<chained_2_unary_kernel_auxdata>();
+ *       buffered_2chain_unary_kernel_auxdata &auxdata = out_kernel.auxdata.get<buffered_2chain_unary_kernel_auxdata>();
  *       // Allocate the buffering memory
  *       auxdata.buf.allocate(intermediate_element_size);
  *       // Get the two kernels in the chain
@@ -33,28 +33,38 @@ namespace dnd {
  *       produce_second_kernel(dst_fixedstride, auxdata.buf.element_size(), auxdata.kernels[1]);
  *   }
  */
-void chained_2_unary_kernel(char *dst, intptr_t dst_stride, const char *src, intptr_t src_stride,
+void buffered_2chain_unary_kernel(char *dst, intptr_t dst_stride, const char *src, intptr_t src_stride,
                         intptr_t count, const AuxDataBase *auxdata);
-struct chained_2_unary_kernel_auxdata {
+struct buffered_2chain_unary_kernel_auxdata {
     kernel_instance<unary_operation_t> kernels[2];
     buffer_storage buf;
 };
 
-void chained_unary_kernel(char *dst, intptr_t dst_stride, const char *src, intptr_t src_stride,
+/**
+ * Just like the 2chain kernel, but for 3 kernels chained together.
+ */
+void buffered_3chain_unary_kernel(char *dst, intptr_t dst_stride, const char *src, intptr_t src_stride,
                         intptr_t count, const AuxDataBase *auxdata);
-struct chained_unary_kernel_auxdata {
+struct buffered_3chain_unary_kernel_auxdata {
+    kernel_instance<unary_operation_t> kernels[3];
+    buffer_storage bufs[2];
+};
+
+void buffered_nchain_unary_kernel(char *dst, intptr_t dst_stride, const char *src, intptr_t src_stride,
+                        intptr_t count, const AuxDataBase *auxdata);
+struct buffered_nchain_unary_kernel_auxdata {
     // We use raw heap-allocated arrays for performance.
     // If we were using C++11, would use unique_ptr<T[]>.
     kernel_instance<unary_operation_t>* m_kernels;
     buffer_storage* m_bufs;
     int m_buf_count;
 
-    chained_unary_kernel_auxdata() {
+    buffered_nchain_unary_kernel_auxdata() {
         m_kernels = 0;
         m_bufs = 0;
     }
 
-    ~chained_unary_kernel_auxdata() {
+    ~buffered_nchain_unary_kernel_auxdata() {
         delete[] m_kernels;
         delete[] m_bufs;
     }
@@ -84,7 +94,7 @@ struct chained_unary_kernel_auxdata {
  * For efficiency, the kernels are swapped out of the deque instead of copied,
  * so the deque 'kernels' no longer contains them on exit.
  */
-void make_chained_unary_kernel(std::deque<kernel_instance<unary_operation_t> >& kernels,
+void make_buffered_chain_unary_kernel(std::deque<kernel_instance<unary_operation_t> >& kernels,
                     std::deque<intptr_t>& element_sizes, kernel_instance<unary_operation_t>& out_kernel);
 
 /**
@@ -117,4 +127,4 @@ void push_back_dtype_value_to_storage_kernels(const dnd::dtype& dt,
 
 } // namespace dnd
 
-#endif // _DND__CHAINED_UNARY_KERNELS_HPP_
+#endif // _DND__buffered_nchain_unary_kernelS_HPP_

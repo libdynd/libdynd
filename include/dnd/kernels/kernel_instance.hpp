@@ -1,5 +1,6 @@
 //
 // Copyright (C) 2011 Mark Wiebe (mwwiebe@gmail.com)
+// Copyright (C) 2012 Continuum Analytics
 // All rights reserved.
 //
 #ifndef _DND__OPERATIONS_HPP_

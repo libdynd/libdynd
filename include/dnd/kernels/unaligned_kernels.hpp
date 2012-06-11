@@ -10,7 +10,6 @@
 
 namespace dnd {
 
-
 /**
  * Gets a kernel which does an unaligned raw byte-copy of the specified
  * element size.

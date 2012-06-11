@@ -4,7 +4,7 @@
 //
 #include <dnd/dtype.hpp>
 #include <dnd/kernels/assignment_kernels.hpp>
-#include <dnd/kernels/chained_unary_kernels.hpp>
+#include <dnd/kernels/buffered_unary_kernels.hpp>
 #include "multiple_assigner_builtin.hpp"
 
 using namespace std;
@@ -218,7 +218,7 @@ void dnd::get_dtype_assignment_kernel(
             push_front_dtype_storage_to_value_kernels(src_dt, dst_fixedstride, src_dt.value_dtype().itemsize(),
                                 kernels, element_sizes);
 
-            make_chained_unary_kernel(kernels, element_sizes, out_kernel);
+            make_buffered_chain_unary_kernel(kernels, element_sizes, out_kernel);
             return;
         } else {
             // Now we need a chain from src's storage to src's value,
@@ -243,7 +243,7 @@ void dnd::get_dtype_assignment_kernel(
             push_back_dtype_value_to_storage_kernels(dst_dt, dst_fixedstride, dst_dt.value_dtype().itemsize(),
                                 kernels, element_sizes);
 
-            make_chained_unary_kernel(kernels, element_sizes, out_kernel);
+            make_buffered_chain_unary_kernel(kernels, element_sizes, out_kernel);
             return;
         }
     } else if (dst_dt.kind() == expression_kind) {
@@ -265,7 +265,7 @@ void dnd::get_dtype_assignment_kernel(
             push_back_dtype_value_to_storage_kernels(dst_dt, dst_fixedstride, dst_dt.value_dtype().itemsize(),
                                 kernels, element_sizes);
 
-            make_chained_unary_kernel(kernels, element_sizes, out_kernel);
+            make_buffered_chain_unary_kernel(kernels, element_sizes, out_kernel);
             return;
         }
     }
