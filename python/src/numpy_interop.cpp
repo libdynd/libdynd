@@ -2,6 +2,8 @@
 
 #if DND_NUMPY_INTEROP
 
+#include <dnd/dtypes/byteswap_dtype.hpp>
+
 #include "dtype_functions.hpp"
 #include "ndarray_functions.hpp"
 
@@ -13,46 +15,66 @@ using namespace pydnd;
 
 dtype pydnd::dtype_from_numpy_dtype(PyArray_Descr *d)
 {
-    if (!PyArray_ISNBO(d->byteorder)) {
-        throw runtime_error("non-native byte order isn't supported yet by pydnd");
-    }
+    dtype dt;
 
     switch (d->type_num) {
     case NPY_BOOL:
-        return make_dtype<dnd_bool>();
+        dt = make_dtype<dnd_bool>();
+        break;
     case NPY_BYTE:
-        return make_dtype<npy_byte>();
+        dt = make_dtype<npy_byte>();
+        break;
     case NPY_UBYTE:
-        return make_dtype<npy_ubyte>();
+        dt = make_dtype<npy_ubyte>();
+        break;
     case NPY_SHORT:
-        return make_dtype<npy_short>();
+        dt = make_dtype<npy_short>();
+        break;
     case NPY_USHORT:
-        return make_dtype<npy_ushort>();
+        dt = make_dtype<npy_ushort>();
+        break;
     case NPY_INT:
-        return make_dtype<npy_int>();
+        dt = make_dtype<npy_int>();
+        break;
     case NPY_UINT:
-        return make_dtype<npy_uint>();
+        dt = make_dtype<npy_uint>();
+        break;
     case NPY_LONG:
-        return make_dtype<npy_long>();
+        dt = make_dtype<npy_long>();
+        break;
     case NPY_ULONG:
-        return make_dtype<npy_ulong>();
+        dt = make_dtype<npy_ulong>();
+        break;
     case NPY_LONGLONG:
-        return make_dtype<npy_longlong>();
+        dt = make_dtype<npy_longlong>();
+        break;
     case NPY_ULONGLONG:
-        return make_dtype<npy_ulonglong>();
+        dt = make_dtype<npy_ulonglong>();
+        break;
     case NPY_FLOAT:
-        return make_dtype<float>();
+        dt = make_dtype<float>();
+        break;
     case NPY_DOUBLE:
-        return make_dtype<double>();
+        dt = make_dtype<double>();
+        break;
     case NPY_CFLOAT:
-        return make_dtype<complex<float> >();
+        dt = make_dtype<complex<float> >();
+        break;
     case NPY_CDOUBLE:
-        return make_dtype<complex<double> >();
+        dt = make_dtype<complex<double> >();
+        break;
+    default: {
+        stringstream ss;
+        ss << "unsupported Numpy dtype with type id " << d->type_num;
+        throw runtime_error(ss.str());
+        }
     }
 
-    stringstream ss;
-    ss << "unsupported Numpy dtype with type id " << d->type_num;
-    throw runtime_error(ss.str());
+    if (!PyArray_ISNBO(d->byteorder)) {
+        dt = make_byteswap_dtype(dt);
+    }
+
+    return dt;
 }
 
 int pydnd::dtype_from_numpy_scalar_typeobject(PyTypeObject* obj, dnd::dtype& out_d)
