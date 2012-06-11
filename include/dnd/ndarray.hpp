@@ -74,6 +74,8 @@ public:
     ndarray(std::complex<double> value);
     /** Constructs a zero-dimensional scalar array */
     explicit ndarray(const dtype& dt);
+    /** Constructs a zero-dimensional scalar array, copying the raw data for the value */
+    ndarray(const dtype& dt, char *raw_data);
     /** Constructs an array with the given dtype, shape, and axis_perm (for memory layout) */
     ndarray(const dtype& dt, int ndim, const intptr_t *shape, const int *axis_perm)
         : m_expr_tree(new strided_array_expr_node(dt, ndim, shape, axis_perm)) {

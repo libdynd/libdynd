@@ -113,6 +113,19 @@ dnd::ndarray::ndarray(const dtype& dt)
                             reinterpret_cast<char *>(buffer_owner.get()), std::move(buffer_owner)));
 }
 
+dnd::ndarray::ndarray(const dtype& dt, char *raw_data)
+    : m_expr_tree()
+{
+    shared_ptr<void> buffer_owner(::dnd::detail::ndarray_buffer_allocator(dt.itemsize()),
+                                ::dnd::detail::ndarray_buffer_deleter);
+    char *allocated_data = reinterpret_cast<char *>(buffer_owner.get());
+    // Copy the value in the raw data to initialize
+    dtype_assign(dt, allocated_data, dt, raw_data);
+    m_expr_tree.reset(new strided_array_expr_node(dt, 0, NULL, NULL,
+                            allocated_data, std::move(buffer_owner)));
+}
+
+
 dnd::ndarray::ndarray(const ndarray_expr_node_ptr& expr_tree)
     : m_expr_tree(expr_tree)
 {
@@ -373,11 +386,13 @@ std::ostream& dnd::operator<<(std::ostream& o, const ndarray& rhs)
 {
     if (rhs.get_expr_tree() != NULL) {
         if (rhs.get_expr_tree()->get_node_type() == strided_array_node_type) {
-            o << "ndarray(" << rhs.get_dtype() << ",";
+            o << "ndarray(" << rhs.get_dtype() << ", ";
             if (rhs.get_dtype().kind() == expression_kind) {
-                o << "\n       storage = ";
-                dtype deepest_storage = rhs.get_dtype().storage_dtype();
-                nested_ndarray_print(o, deepest_storage, rhs.get_originptr(), rhs.get_ndim(), rhs.get_shape(), rhs.get_strides());
+                //o << "\n       storage = ";
+                //dtype deepest_storage = rhs.get_dtype().storage_dtype();
+                //nested_ndarray_print(o, deepest_storage, rhs.get_originptr(), rhs.get_ndim(), rhs.get_shape(), rhs.get_strides());
+                ndarray tmp = rhs.vals();
+                nested_ndarray_print(o, tmp.get_dtype(), tmp.get_originptr(), tmp.get_ndim(), tmp.get_shape(), tmp.get_strides());
             } else {
                 nested_ndarray_print(o, rhs.get_dtype(), rhs.get_originptr(), rhs.get_ndim(), rhs.get_shape(), rhs.get_strides());
             }

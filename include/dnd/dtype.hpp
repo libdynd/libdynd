@@ -344,7 +344,7 @@ public:
         } else {
             // Follow the operand dtype chain to get the storage dtype
             const dtype* sdt = &m_data->operand_dtype(*this);
-            while (sdt->kind() == expression_kind) {
+            while (sdt->kind() == expression_kind && sdt != &sdt->extended()->operand_dtype(*sdt)) {
                 sdt = &sdt->m_data->operand_dtype(*sdt);
             }
             return *sdt;

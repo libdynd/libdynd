@@ -102,7 +102,7 @@ void dnd::push_front_dtype_storage_to_value_kernels(const dnd::dtype& dt,
 {
     const dtype* front_dt = &dt;
     const dtype* next_dt = &dt.extended()->operand_dtype(dt);
-    if (next_dt->kind() != expression_kind) {
+    if (next_dt->kind() != expression_kind || next_dt == &next_dt->extended()->operand_dtype(*next_dt)) {
         // Special case when there is just one
         out_kernels.push_front(kernel_instance<unary_operation_t>());
         dt.extended()->get_operand_to_value_operation(dst_fixedstride, src_fixedstride, out_kernels.front());
@@ -120,7 +120,7 @@ void dnd::push_front_dtype_storage_to_value_kernels(const dnd::dtype& dt,
             front_dst_fixedstride = front_buffer_size;
             front_dt = next_dt;
             next_dt = &front_dt->extended()->operand_dtype(*front_dt);
-        } while (next_dt->kind() == expression_kind);
+        } while (next_dt->kind() == expression_kind && next_dt != &next_dt->extended()->operand_dtype(*next_dt));
         // Add the final kernel from the source
         out_kernels.push_front(kernel_instance<unary_operation_t>());
         front_dt->extended()->get_operand_to_value_operation(front_dst_fixedstride, src_fixedstride, out_kernels.front());
@@ -134,7 +134,7 @@ void dnd::push_back_dtype_value_to_storage_kernels(const dnd::dtype& dt,
 {
     const dtype* back_dt = &dt;
     const dtype* next_dt = &dt.extended()->operand_dtype(dt);
-    if (next_dt->kind() != expression_kind) {
+    if (next_dt->kind() != expression_kind || next_dt == &next_dt->extended()->operand_dtype(*next_dt)) {
         // Special case when there is just one
         out_kernels.push_back(kernel_instance<unary_operation_t>());
         dt.extended()->get_value_to_operand_operation(dst_fixedstride, src_fixedstride, out_kernels.back());
@@ -152,7 +152,7 @@ void dnd::push_back_dtype_value_to_storage_kernels(const dnd::dtype& dt,
             back_src_fixedstride = back_buffer_size;
             back_dt = next_dt;
             next_dt = &back_dt->extended()->operand_dtype(*back_dt);
-        } while (next_dt->kind() == expression_kind);
+        } while (next_dt->kind() == expression_kind && next_dt != &next_dt->extended()->operand_dtype(*next_dt));
         // Add the final kernel from the source
         out_kernels.push_back(kernel_instance<unary_operation_t>());
         back_dt->extended()->get_value_to_operand_operation(dst_fixedstride, back_src_fixedstride, out_kernels.back());

@@ -150,7 +150,7 @@ void dnd::get_byteswap_kernel(intptr_t element_size,
     }
 }
 
-void dnd::get_pairwise_biteswap_kernel(intptr_t element_size,
+void dnd::get_pairwise_byteswap_kernel(intptr_t element_size,
                 intptr_t dst_fixedstride, intptr_t src_fixedstride,
                 kernel_instance<unary_operation_t>& out_kernel)
 {

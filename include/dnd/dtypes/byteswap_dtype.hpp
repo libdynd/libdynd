@@ -74,15 +74,9 @@ public:
 
 /**
  * Makes a byteswapped dtype to view the given dtype with a swapped byte order.
- * If the given dtype is a byteswap_dtype, it gets stripped instead of
- * chaining multiple byteswap operations.
  */
 inline dtype make_byteswap_dtype(const dtype& native_dtype) {
-    if (native_dtype.type_id() != byteswap_type_id) {
-        return dtype(make_shared<byteswap_dtype>(native_dtype));
-    } else {
-        return native_dtype.extended()->operand_dtype(native_dtype);
-    }
+    return dtype(make_shared<byteswap_dtype>(native_dtype));
 }
 
 template<typename Tnative>
