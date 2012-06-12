@@ -1,4 +1,7 @@
+#include <iostream>
+
 #include <dnd/ndarray.hpp>
+#include <dnd/dtypes/conversion_dtype.hpp>
 
 using namespace std;
 using namespace dnd;
@@ -46,28 +49,80 @@ int main1()
     }
 }
 
+#define EXPECT_EQ(a, b) \
+    cout << "first   : " << (a) << endl \
+         << "second  : " << (b) << endl
+
 int main()
 {
     try {
-        float v0[3] = {0.5, -1000, -2.2};
-        int16_t v1[3] = {0, 0, 0};
-        ndarray a = v0, b = v1;
+        ndarray a;
 
-        ndarray aview = a.as_dtype<double>();
-        aview = aview.as_dtype<int32_t>(assign_error_none);
-        //aview = aview.as_dtype<int16_t>(assign_error_none);
+        // Basic case with no buffering
+        a = ndarray(2) * ndarray(3);
+        EXPECT_EQ(elementwise_binary_op_node_type, a.get_expr_tree()->get_node_type());
+        EXPECT_EQ(make_dtype<int>(), a.get_expr_tree()->get_dtype());
+        EXPECT_EQ(make_dtype<int>(), a.get_expr_tree()->get_opnode(0)->get_dtype());
+        EXPECT_EQ(make_dtype<int>(), a.get_expr_tree()->get_opnode(1)->get_dtype());
+        EXPECT_EQ(6, a.as<int>());
 
-        ndarray bview = b.as_dtype<int32_t>(assign_error_none);
-        //bview = bview.as_dtype<int64_t>(assign_error_none);
+        // Buffering the first operand
+        a = ndarray(2) * ndarray(3.f);
+        EXPECT_EQ(elementwise_binary_op_node_type, a.get_expr_tree()->get_node_type());
+        EXPECT_EQ(make_dtype<float>(), a.get_expr_tree()->get_dtype());
+        EXPECT_EQ((make_conversion_dtype<float, int>()), a.get_expr_tree()->get_opnode(0)->get_dtype());
+        EXPECT_EQ(make_dtype<float>(), a.get_expr_tree()->get_opnode(1)->get_dtype());
+        EXPECT_EQ(6, a.as<float>());
 
+        // Buffering the second operand
+        a = ndarray(2.f) * ndarray(3);
+        EXPECT_EQ(elementwise_binary_op_node_type, a.get_expr_tree()->get_node_type());
+        EXPECT_EQ(make_dtype<float>(), a.get_expr_tree()->get_dtype());
+        EXPECT_EQ(make_dtype<float>(), a.get_expr_tree()->get_opnode(0)->get_dtype());
+        EXPECT_EQ((make_conversion_dtype<float, int>()), a.get_expr_tree()->get_opnode(1)->get_dtype());
+        EXPECT_EQ(6, a.as<float>());
 
-        cout << "aview: " << aview << endl;
-        cout << "bview: " << bview << endl;
-        bview.val_assign(aview, assign_error_none);
-        cout << "aview: " << aview << endl;
-        cout << "bview: " << bview << endl;
-    } catch(std::exception& e) {
-        cout << "Error: " << e.what() << "\n";
+        // Buffering the output
+        a = (ndarray(2) * ndarray(3)).as_dtype<float>();
+        EXPECT_EQ(elementwise_binary_op_node_type, a.get_expr_tree()->get_node_type());
+        EXPECT_EQ((make_conversion_dtype<float, int>()), a.get_expr_tree()->get_dtype());
+        EXPECT_EQ(make_dtype<int>(), a.get_expr_tree()->get_opnode(0)->get_dtype());
+        EXPECT_EQ(make_dtype<int>(), a.get_expr_tree()->get_opnode(1)->get_dtype());
+        EXPECT_EQ(6, a.as<float>());
+
+        // Buffering both operands
+        a = ndarray(2) * ndarray(3u).as_dtype<float>();
+        EXPECT_EQ(elementwise_binary_op_node_type, a.get_expr_tree()->get_node_type());
+        EXPECT_EQ(make_dtype<float>(), a.get_expr_tree()->get_dtype());
+        EXPECT_EQ((make_conversion_dtype<float, int>()), a.get_expr_tree()->get_opnode(0)->get_dtype());
+        EXPECT_EQ((make_conversion_dtype<float, unsigned int>()), a.get_expr_tree()->get_opnode(1)->get_dtype());
+        EXPECT_EQ(6, a.as<float>());
+
+        // Buffering the first operand and the output
+        a = (ndarray(2) * ndarray(3.f)).as_dtype<double>();
+        EXPECT_EQ(elementwise_binary_op_node_type, a.get_expr_tree()->get_node_type());
+        EXPECT_EQ((make_conversion_dtype<double, float>()), a.get_expr_tree()->get_dtype());
+        EXPECT_EQ((make_conversion_dtype<float, int>()), a.get_expr_tree()->get_opnode(0)->get_dtype());
+        EXPECT_EQ(make_dtype<float>(), a.get_expr_tree()->get_opnode(1)->get_dtype());
+        EXPECT_EQ(6, a.as<double>());
+
+        // Buffering the second operand and the output
+        a = (ndarray(2.f) * ndarray(3)).as_dtype<double>();
+        EXPECT_EQ(elementwise_binary_op_node_type, a.get_expr_tree()->get_node_type());
+        EXPECT_EQ((make_conversion_dtype<double, float>()), a.get_expr_tree()->get_dtype());
+        EXPECT_EQ(make_dtype<float>(), a.get_expr_tree()->get_opnode(0)->get_dtype());
+        EXPECT_EQ((make_conversion_dtype<float, int>()), a.get_expr_tree()->get_opnode(1)->get_dtype());
+        EXPECT_EQ(6, a.as<double>());
+
+        // Buffering both operands and the output
+        a = (ndarray(2) * ndarray(3u).as_dtype<float>()).as_dtype<double>();
+        EXPECT_EQ(elementwise_binary_op_node_type, a.get_expr_tree()->get_node_type());
+        EXPECT_EQ((make_conversion_dtype<double, float>()), a.get_expr_tree()->get_dtype());
+        EXPECT_EQ((make_conversion_dtype<float, int>()), a.get_expr_tree()->get_opnode(0)->get_dtype());
+        EXPECT_EQ((make_conversion_dtype<float, unsigned int>()), a.get_expr_tree()->get_opnode(1)->get_dtype());
+        EXPECT_EQ(6, a.as<double>());
+
+    } catch(int){//std::exception& e) { cout << "Error: " << e.what() << "\n";
         return 1;
     }
 }

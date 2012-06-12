@@ -110,7 +110,7 @@ ndarray_expr_node_ptr dnd::ndarray_expr_node::evaluate()
                             op2->get_node_category() == strided_array_node_category) {
                     ndarray_expr_node_ptr result;
                     raw_ndarray_iter<1,2> iter(m_ndim, m_shape.get(),
-                                                m_dtype, result,
+                                                m_dtype.value_dtype(), result,
                                                 op1, op2);
                     //iter.debug_dump(std::cout);
 

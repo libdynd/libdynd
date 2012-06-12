@@ -20,9 +20,9 @@ struct multiple_assigner_builtin {
                                 const AuxDataBase *)
     {
         DND_ASSERT_ALIGNED(dst, dst_stride, sizeof(dst_type),
-                "src type id: " << dnd::type_id_of<src_type>::value << "dst type id: " << dnd::type_id_of<dst_type>::value);
+                "src type: " << dnd::dtype(dnd::type_id_of<src_type>::value) << "  dst type id: " << dnd::dtype(dnd::type_id_of<dst_type>::value));
         DND_ASSERT_ALIGNED(src, src_stride, sizeof(src_type),
-                "src type id: " << dnd::type_id_of<src_type>::value << "dst type id: " << dnd::type_id_of<dst_type>::value);
+                "src type: " << dnd::dtype(dnd::type_id_of<src_type>::value) << "  dst type id: " << dnd::dtype(dnd::type_id_of<dst_type>::value));
         //DEBUG_COUT << "multiple_assigner::assign_noexcept (" << typeid(src_type).name() << " -> " << typeid(dst_type).name() << ")\n";
         const src_type *src_cached = reinterpret_cast<const src_type *>(src);
         dst_type *dst_cached = reinterpret_cast<dst_type *>(dst);
@@ -41,10 +41,13 @@ struct multiple_assigner_builtin {
                                 intptr_t count,
                                 const AuxDataBase *)
     {
+        //std::cout << "doing cast" << " src type: " << dnd::dtype(dnd::type_id_of<src_type>::value) << "  dst type: " << dnd::dtype(dnd::type_id_of<dst_type>::value) << std::endl;
+        //std::cout << "dst ptr " << (void *)dst << ", dst stride " << dst_stride << std::endl;
+
         DND_ASSERT_ALIGNED(dst, dst_stride, sizeof(dst_type),
-                "src type id: " << dnd::type_id_of<src_type>::value << "dst type id: " << dnd::type_id_of<dst_type>::value);
+                "src type: " << dnd::dtype(dnd::type_id_of<src_type>::value) << "  dst type: " << dnd::dtype(dnd::type_id_of<dst_type>::value));
         DND_ASSERT_ALIGNED(src, 0, sizeof(src_type),
-                "src type id: " << dnd::type_id_of<src_type>::value << "dst type id: " << dnd::type_id_of<dst_type>::value);
+                "src type: " << dnd::dtype(dnd::type_id_of<src_type>::value) << "  dst type id: " << dnd::dtype(dnd::type_id_of<dst_type>::value));
         //DEBUG_COUT << "multiple_assigner::assign_noexcept_anystride_zerostride (" << typeid(src_type).name() << " -> " << typeid(dst_type).name() << ")\n";
         dst_type src_value_cached;
         dst_type *dst_cached = reinterpret_cast<dst_type *>(dst);
@@ -64,9 +67,9 @@ struct multiple_assigner_builtin {
                                 const AuxDataBase *)
     {
         DND_ASSERT_ALIGNED(dst, sizeof(dst_type), sizeof(dst_type),
-                "src type id: " << dnd::type_id_of<src_type>::value << "dst type id: " << dnd::type_id_of<dst_type>::value);
+                "src type: " << dnd::dtype(dnd::type_id_of<src_type>::value) << "  dst type id: " << dnd::dtype(dnd::type_id_of<dst_type>::value));
         DND_ASSERT_ALIGNED(src, 0, sizeof(src_type),
-                "src type id: " << dnd::type_id_of<src_type>::value << "dst type id: " << dnd::type_id_of<dst_type>::value);
+                "src type: " << dnd::dtype(dnd::type_id_of<src_type>::value) << "  dst type id: " << dnd::dtype(dnd::type_id_of<dst_type>::value));
         //DEBUG_COUT << "multiple_assigner::assign_noexcept_contigstride_zerostride (" << typeid(src_type).name() << " -> " << typeid(dst_type).name() << ")\n";
         dst_type src_value_cached;
         dst_type *dst_cached = reinterpret_cast<dst_type *>(dst);
@@ -84,9 +87,9 @@ struct multiple_assigner_builtin {
                                 const AuxDataBase *)
     {
         DND_ASSERT_ALIGNED(dst, sizeof(dst_type), sizeof(dst_type),
-                "src type id: " << dnd::type_id_of<src_type>::value << "dst type id: " << dnd::type_id_of<dst_type>::value);
+                "src type: " << dnd::dtype(dnd::type_id_of<src_type>::value) << "  dst type id: " << dnd::dtype(dnd::type_id_of<dst_type>::value));
         DND_ASSERT_ALIGNED(src, sizeof(src_type), sizeof(src_type),
-                "src type id: " << dnd::type_id_of<src_type>::value << "dst type id: " << dnd::type_id_of<dst_type>::value);
+                "src type: " << dnd::dtype(dnd::type_id_of<src_type>::value) << "  dst type id: " << dnd::dtype(dnd::type_id_of<dst_type>::value));
         //DEBUG_COUT << "multiple_assigner::assign_noexcept_contigstride_contigstride (" << typeid(src_type).name() << " -> " << typeid(dst_type).name() << ")\n";
         const src_type *src_cached = reinterpret_cast<const src_type *>(src);
         dst_type *dst_cached = reinterpret_cast<dst_type *>(dst);

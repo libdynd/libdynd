@@ -103,6 +103,18 @@ public:
         return m_nop;
     }
 
+    boost::intrusive_ptr<ndarray_expr_node> get_opnode(int i)
+    {
+        if (i >= 0 && i < m_nop) {
+            return m_opnodes[i];
+        } else {
+            std::stringstream ss;
+            ss << "tried to get ndarray_expr_node operand " << i << " from a " << m_nop << "-ary node";
+            throw std::runtime_error(ss.str());
+
+        }
+    }
+
     expr_node_category get_node_category() const {
         return m_node_category;
     }

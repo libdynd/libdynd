@@ -150,23 +150,23 @@ public:
             // Adapt the output
             if (m_dtype.kind() == expression_kind) {
                 element_sizes[0] = m_dtype.itemsize();
-                m_dtype.get_value_to_storage_operation(dst_fixedstride, element_sizes[0], adapters[0]);
+                m_dtype.get_storage_to_value_operation(dst_fixedstride, element_sizes[0], adapters[0]);
             } else {
                 element_sizes[0] = dst_fixedstride;
             }
 
             // Adapt the first operand
             if (m_opnodes[0]->get_dtype().kind() == expression_kind) {
-                element_sizes[1] = m_opnodes[0]->get_dtype().itemsize();
-                m_opnodes[0]->get_dtype().get_value_to_storage_operation(element_sizes[1], src0_fixedstride, adapters[1]);
+                element_sizes[1] = m_opnodes[0]->get_dtype().value_dtype().itemsize();
+                m_opnodes[0]->get_dtype().get_storage_to_value_operation(element_sizes[1], src0_fixedstride, adapters[1]);
             } else {
                 element_sizes[1] = src0_fixedstride;
             }
 
             // Adapt the second operand
             if (m_opnodes[1]->get_dtype().kind() == expression_kind) {
-                element_sizes[2] = m_opnodes[1]->get_dtype().itemsize();
-                m_opnodes[1]->get_dtype().get_value_to_storage_operation(element_sizes[2], src1_fixedstride, adapters[2]);
+                element_sizes[2] = m_opnodes[1]->get_dtype().value_dtype().itemsize();
+                m_opnodes[1]->get_dtype().get_storage_to_value_operation(element_sizes[2], src1_fixedstride, adapters[2]);
             } else {
                 element_sizes[2] = src0_fixedstride;
             }

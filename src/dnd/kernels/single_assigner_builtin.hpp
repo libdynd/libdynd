@@ -337,6 +337,8 @@ struct single_assigner_builtin_base<dst_type, src_type, int_kind, real_kind, ass
     static void assign(dst_type *dst, const src_type *src) {
         src_type s = *src;
 
+        //std::cout << "assigning " << s << " type " << dtype(type_id_of<src_type>::value) << " to " << dtype(type_id_of<dst_type>::value) << std::endl;
+
         if (s < std::numeric_limits<dst_type>::min() || s > std::numeric_limits<dst_type>::max()) {
             throw std::runtime_error("overflow while assigning floating point to signed integer");
         }

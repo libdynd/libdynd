@@ -65,7 +65,7 @@ static void buffered_binary_out_in0_kernel(char *dst, intptr_t dst_stride,
                     const char *src1, intptr_t src1_stride,
                     intptr_t count, const AuxDataBase *auxdata)
 {
-    const buffered_binary_out_in0_in1_kernel_auxdata& ad = get_auxiliary_data<buffered_binary_out_in0_in1_kernel_auxdata>(auxdata);
+    const buffered_binary_out_in0_kernel_auxdata& ad = get_auxiliary_data<buffered_binary_out_in0_kernel_auxdata>(auxdata);
     do {
         intptr_t block_count = ad.bufs[0].element_count();
         if (count < block_count) {
@@ -103,7 +103,7 @@ static void buffered_binary_out_in1_kernel(char *dst, intptr_t dst_stride,
                     const char *src1, intptr_t src1_stride,
                     intptr_t count, const AuxDataBase *auxdata)
 {
-    const buffered_binary_out_in0_in1_kernel_auxdata& ad = get_auxiliary_data<buffered_binary_out_in0_in1_kernel_auxdata>(auxdata);
+    const buffered_binary_out_in1_kernel_auxdata& ad = get_auxiliary_data<buffered_binary_out_in1_kernel_auxdata>(auxdata);
     do {
         intptr_t block_count = ad.bufs[0].element_count();
         if (count < block_count) {
@@ -141,7 +141,7 @@ static void buffered_binary_out_kernel(char *dst, intptr_t dst_stride,
                     const char *src1, intptr_t src1_stride,
                     intptr_t count, const AuxDataBase *auxdata)
 {
-    const buffered_binary_out_in0_in1_kernel_auxdata& ad = get_auxiliary_data<buffered_binary_out_in0_in1_kernel_auxdata>(auxdata);
+    const buffered_binary_out_kernel_auxdata& ad = get_auxiliary_data<buffered_binary_out_kernel_auxdata>(auxdata);
     do {
         intptr_t block_count = ad.bufs[0].element_count();
         if (count < block_count) {
@@ -277,6 +277,7 @@ void dnd::make_buffered_binary_kernel(kernel_instance<binary_operation_t>& kerne
                     kernel_instance<unary_operation_t>* adapters, const intptr_t *buffer_element_sizes,
                     kernel_instance<binary_operation_t>& out_kernel)
 {
+    //cout << "adapters: " << adapters[0].kernel << ", " << adapters[1].kernel << ", " << adapters[2].kernel << endl;
     if (adapters[0].kernel != 0) {
         if (adapters[1].kernel != 0) {
             if (adapters[2].kernel != 0) {

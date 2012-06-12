@@ -393,6 +393,11 @@ public:
                                 const ndarray_expr_node *op1,
                                 const ndarray_expr_node *op2)
     {
+        if (op0_dt.kind() == expression_kind) {
+            std::stringstream ss;
+            ss << "raw_ndarray_iter: to automatically allocate an output, must not use expression dtype " << op0_dt << ", should use its value dtype";
+            throw std::runtime_error(ss.str());
+        }
         multi_shortvector<intptr_t, 2> strides_vec(ndim);
         char *data[3];
 
@@ -419,6 +424,11 @@ public:
      * shape, and a memory layout matching the inputs as closely as possible.
      */
     raw_ndarray_iter(const dtype& op0_dt, ndarray& op0, const ndarray& op1, const ndarray& op2) {
+        if (op0_dt.kind() == expression_kind) {
+            std::stringstream ss;
+            ss << "raw_ndarray_iter: to automatically allocate an output, must not use expression dtype " << op0_dt << ", should use its value dtype";
+            throw std::runtime_error(ss.str());
+        }
         // Broadcast the input shapes together
         int ndim;
         dimvector op0shape;
