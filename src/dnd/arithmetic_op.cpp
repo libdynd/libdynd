@@ -2,233 +2,25 @@
 // Copyright (C) 2011 Mark Wiebe (mwwiebe@gmail.com)
 // All rights reserved.
 //
-// This is unreleased proprietary software.
-//
 
 #include <sstream>
 
 #include <dnd/ndarray.hpp>
 #include <dnd/raw_iteration.hpp>
 #include <dnd/dtype_promotion.hpp>
+#include <dnd/kernels/builtin_dtype_binary_kernel_table.hpp>
 #include "ndarray_expr_node_instances.hpp"
 
 using namespace std;
 using namespace dnd;
 
-namespace {
-    template<class T>
-    struct addition {
-        typedef T type;
-        static inline T operate(T x, T y) {
-            return x + y;
-        }
-    };
-
-    template<class T>
-    struct subtraction {
-        typedef T type;
-        static inline T operate(T x, T y) {
-            return x - y;
-        }
-    };
-
-    template<class T>
-    struct multiplication {
-        typedef T type;
-        static inline T operate(T x, T y) {
-            return x * y;
-        }
-    };
-
-    template<class T>
-    struct division {
-        typedef T type;
-        static inline T operate(T x, T y) {
-            return x / y;
-        }
-    };
-
-    template<class operation>
-    struct loop_general_general_general {
-        static void func(char *dst, intptr_t dst_stride,
-                                    const char *src0, intptr_t src0_stride,
-                                    const char *src1, intptr_t src1_stride,
-                                    intptr_t count, const AuxDataBase *)
-        {
-            typedef typename operation::type T;
-
-            for (intptr_t i = 0; i < count; ++i) {
-                *reinterpret_cast<T *>(dst) = operation::operate(*reinterpret_cast<const T *>(src0),
-                                                                *reinterpret_cast<const T *>(src1));
-                dst += dst_stride;
-                src0 += src0_stride;
-                src1 += src1_stride;
-            }
-        }
-    };
-
-    template<class operation>
-    struct loop_general_stride0_general {
-        static void func(char * *dst, intptr_t dst_stride,
-                                        const char * *src0, intptr_t,
-                                        const char * *src1, intptr_t src1_stride,
-                                        intptr_t count, const AuxDataBase *)
-        {
-            typedef typename operation::type T;
-
-            T src0_value = *reinterpret_cast<const T *>(src0);
-            for (intptr_t i = 0; i < count; ++i) {
-                *reinterpret_cast<T *>(dst) = operation::operate(src0_value, *reinterpret_cast<const T *>(src1));
-                dst += dst_stride;
-                src1 += src1_stride;
-            }
-        }
-    };
-
-    template<class operation>
-    struct loop_general_general_stride0 {
-        static void func(char *dst, intptr_t dst_stride,
-                                        const char *src0, intptr_t src0_stride,
-                                        const char *src1, intptr_t,
-                                        intptr_t count, const AuxDataBase *)
-        {
-            typedef typename operation::type T;
-
-            T src1_value = *reinterpret_cast<const T *>(src1);
-            for (intptr_t i = 0; i < count; ++i) {
-                *reinterpret_cast<T *>(dst) = operation::operate(*reinterpret_cast<const T *>(src0), src1_value);
-                dst += dst_stride;
-                src0 += src0_stride;
-            }
-        }
-    };
-
-    template<class operation>
-    struct loop_contig_contig_contig {
-        static void func(typename operation::type *dst, intptr_t,
-                                        const typename operation::type *src0, intptr_t,
-                                        const typename operation::type *src1, intptr_t,
-                                        intptr_t count, const AuxDataBase *)
-        {
-            for (intptr_t i = 0; i < count; ++i) {
-                //cout << "Inner op c c c " << (void *)dst << " <- " << (void *)src0 << " <oper> " << (void *)src1 << endl;
-                //cout << "values " << *src0 << ", " << *src1 << endl;
-                *dst = operation::operate(*src0, *src1);
-                ++dst;
-                ++src0;
-                ++src1;
-            }
-        }
-    };
-
-    template<class operation>
-    struct loop_contig_stride0_contig {
-        static void func(typename operation::type *dst, intptr_t,
-                                        const typename operation::type *src0, intptr_t,
-                                        const typename operation::type *src1, intptr_t,
-                                        intptr_t count, const AuxDataBase *)
-        {
-            typename operation::type src0_value = *src0;
-            for (intptr_t i = 0; i < count; ++i) {
-                //cout << "Inner op c s0 c " << (void *)dst << " <- " << (void *)src0 << " <oper> " << (void *)src1 << endl;
-                //cout << "values " << *src0 << ", " << *src1 << endl;
-                *dst = operation::operate(src0_value, *src1);
-                ++dst;
-                ++src1;
-            }
-        }
-    };
-
-    template<class operation>
-    struct loop_contig_contig_stride0 {
-        static void func(typename operation::type *dst, intptr_t,
-                                        const typename operation::type *src0, intptr_t,
-                                        const typename operation::type *src1, intptr_t,
-                                        intptr_t count, const AuxDataBase *)
-        {
-            typename operation::type src1_value = *src1;
-            for (intptr_t i = 0; i < count; ++i) {
-                //cout << "Inner op c c s0 " << (void *)dst << " <- " << (void *)src0 << " <oper> " << (void *)src1 << endl;
-                //cout << "values " << *src0 << ", " << *src1 << endl;
-                *dst = operation::operate(*src0, src1_value);
-                ++dst;
-                ++src0;
-            }
-        }
-    };
-
-} // anonymous namespace
-
-#define SPECIALIZATION_LEVEL(type, operation) { \
-    (binary_operation_t)&loop_general_general_general<operation<type> >::func, \
-    (binary_operation_t)&loop_general_stride0_general<operation<type> >::func, \
-    (binary_operation_t)&loop_general_general_stride0<operation<type> >::func, \
-    (binary_operation_t)&loop_contig_contig_contig<operation<type> >::func, \
-    (binary_operation_t)&loop_contig_stride0_contig<operation<type> >::func, \
-    (binary_operation_t)&loop_contig_contig_stride0<operation<type> >::func \
-    }
-#define TYPE_LEVEL(operation) { \
-    SPECIALIZATION_LEVEL(int32_t, operation), \
-    SPECIALIZATION_LEVEL(int64_t, operation), \
-    SPECIALIZATION_LEVEL(uint32_t, operation), \
-    SPECIALIZATION_LEVEL(uint64_t, operation), \
-    SPECIALIZATION_LEVEL(float, operation), \
-    SPECIALIZATION_LEVEL(double, operation), \
-    SPECIALIZATION_LEVEL(complex<float>, operation), \
-    SPECIALIZATION_LEVEL(complex<double>, operation) \
-    }
-#define BUILTIN_OPERATION_TABLE(operation) \
-    static binary_operation_t builtin_##operation##_table[8][8] = \
-        TYPE_LEVEL(operation)
-
-BUILTIN_OPERATION_TABLE(addition);
-BUILTIN_OPERATION_TABLE(subtraction);
-BUILTIN_OPERATION_TABLE(multiplication);
-BUILTIN_OPERATION_TABLE(division);
-
-#undef BUILTIN_OPERATION_TABLE
-#undef TYPE_LEVEL
-#undef SPECIALIZATION_LEVEL
-
-typedef binary_operation_t binary_operation_table_t[8];
-
-static binary_operation_t get_builtin_operation_function(
-                                binary_operation_table_t *builtin_optable,
-                                const dtype& dt, intptr_t dst_stride,
-                                intptr_t src0_stride, intptr_t src1_stride)
-{
-    static int compress_type_id[builtin_type_id_count] = {-1, -1, -1, 0, 1, -1, -1, 2, 3, 4, 5, 6, 7};
-    intptr_t itemsize = dt.itemsize();
-    int cid = compress_type_id[dt.type_id()];
-
-    // Pick out a specialized inner loop based on the strides
-    if (dst_stride == itemsize) {
-        if (src0_stride == itemsize) {
-            if (src1_stride == itemsize) {
-                return builtin_optable[cid][3];
-            } else if (src1_stride == 0) {
-                return builtin_optable[cid][5];
-            }
-        } else if (src0_stride == 0 && src1_stride == itemsize) {
-            return builtin_optable[cid][4];
-        }
-    }
-
-    if (src0_stride == 0) {
-        return builtin_optable[cid][1];
-    } else if (src1_stride == 0) {
-        return builtin_optable[cid][2];
-    } else {
-        return builtin_optable[cid][0];
-    }
-}
 
 namespace {
 
     class arithmetic_operator_factory {
     protected:
         dtype m_dtype;
-        binary_operation_table_t *m_builtin_optable;
+        specialized_binary_operation_table_t *m_builtin_optable;
         const char *m_node_name;
 
     public:
@@ -242,7 +34,7 @@ namespace {
         {
         }
 
-        arithmetic_operator_factory(binary_operation_table_t *builtin_optable, const char *node_name)
+        arithmetic_operator_factory(specialized_binary_operation_table_t *builtin_optable, const char *node_name)
             : m_dtype(), m_builtin_optable(builtin_optable), m_node_name(node_name)
         {
         }
@@ -274,7 +66,7 @@ namespace {
                                     intptr_t src2_fixedstride,
                                     kernel_instance<binary_operation_t>& out_kernel) const
         {
-            out_kernel.kernel = get_builtin_operation_function(m_builtin_optable,
+            out_kernel.kernel = get_binary_operation_from_builtin_dtype_table(m_builtin_optable,
                                 m_dtype, dst_fixedstride,
                                 src1_fixedstride, src2_fixedstride);
             out_kernel.auxdata.free();
@@ -337,6 +129,48 @@ static ndarray arithmetic_op(const ndarray& op0, const ndarray& op1,
     return std::move(result);
 }
 */
+
+namespace {
+    template<class T>
+    struct addition {
+        typedef T type;
+        static inline T operate(T x, T y) {
+            return x + y;
+        }
+    };
+
+    template<class T>
+    struct subtraction {
+        typedef T type;
+        static inline T operate(T x, T y) {
+            return x - y;
+        }
+    };
+
+    template<class T>
+    struct multiplication {
+        typedef T type;
+        static inline T operate(T x, T y) {
+            return x * y;
+        }
+    };
+
+    template<class T>
+    struct division {
+        typedef T type;
+        static inline T operate(T x, T y) {
+            return x / y;
+        }
+    };
+
+
+} // anonymous namespace
+
+
+static DND_BUILTIN_DTYPE_BINARY_OPERATION_TABLE(addition);
+static DND_BUILTIN_DTYPE_BINARY_OPERATION_TABLE(subtraction);
+static DND_BUILTIN_DTYPE_BINARY_OPERATION_TABLE(multiplication);
+static DND_BUILTIN_DTYPE_BINARY_OPERATION_TABLE(division);
 
 // These operators are declared in ndarray.hpp
 

@@ -29,6 +29,7 @@ set(dnd_SRC
     include/dnd/dtypes/conversion_dtype.hpp
     include/dnd/dtypes/unaligned_dtype.hpp
     src/dnd/kernels/assignment_kernels.cpp
+    src/dnd/kernels/builtin_dtype_binary_kernel_table.cpp
     src/dnd/kernels/buffered_unary_kernels.cpp
     src/dnd/kernels/buffered_binary_kernels.cpp
     src/dnd/kernels/byteswap_kernels.cpp
@@ -36,6 +37,7 @@ set(dnd_SRC
     src/dnd/kernels/multiple_assigner_builtin.hpp
     src/dnd/kernels/unaligned_kernels.cpp
     include/dnd/kernels/assignment_kernels.hpp
+    include/dnd/kernels/builtin_dtype_binary_kernel_table.hpp
     include/dnd/kernels/buffered_unary_kernels.hpp
     include/dnd/kernels/buffered_binary_kernels.hpp
     include/dnd/kernels/byteswap_kernels.hpp
