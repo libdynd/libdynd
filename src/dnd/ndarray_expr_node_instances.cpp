@@ -12,68 +12,12 @@
 #include <dnd/shape_tools.hpp>
 #include <dnd/exceptions.hpp>
 #include <dnd/dtypes/conversion_dtype.hpp>
+#include <dnd/diagnostics.hpp>
 
 #include "ndarray_expr_node_instances.hpp"
 
 using namespace std;
 using namespace dnd;
-
-
-// broadcast_shape_expr_node
-
-dnd::broadcast_shape_expr_node::broadcast_shape_expr_node(int ndim, const intptr_t *shape,
-                                                const ndarray_expr_node_ptr& op)
-    : ndarray_expr_node(op->get_dtype(), ndim, 1, shape,
-        op->get_node_category() == strided_array_node_category ? strided_array_node_category
-                                                           : elementwise_node_category,
-        broadcast_shape_node_type)
-{
-    m_opnodes[0] = op;
-}
-
-dnd::broadcast_shape_expr_node::broadcast_shape_expr_node(int ndim, const intptr_t *shape,
-                                                ndarray_expr_node_ptr&& op)
-    : ndarray_expr_node(op->get_dtype(), ndim, 1, shape,
-        op->get_node_category() == strided_array_node_category ? strided_array_node_category
-                                                           : elementwise_node_category,
-        broadcast_shape_node_type)
-{
-    m_opnodes[0] = std::move(op);
-}
-
-ndarray_expr_node_ptr dnd::broadcast_shape_expr_node::apply_linear_index(
-                    int ndim, const intptr_t *shape, const int *axis_map,
-                    const intptr_t *index_strides, const intptr_t *start_index, bool allow_in_place)
-{
-    ndarray_expr_node *node = m_opnodes[0].get();
-
-    if (allow_in_place) {
-        // If the broadcasting doesn't add more dimensions, it's pretty simple
-        if (m_ndim == node->get_ndim()) {
-            // Adopt the new shape
-            m_ndim = ndim;
-            memcpy(m_shape.get(), shape, ndim * sizeof(intptr_t));
-
-            m_opnodes[0] = node->apply_linear_index(ndim, shape, axis_map,
-                                    index_strides, start_index, m_opnodes[0]->unique());
-            return ndarray_expr_node_ptr(this);
-        } else {
-            throw std::runtime_error("broadcast_shape_expr::apply_linear_index is not completed yet");
-        }
-    } else {
-        throw std::runtime_error("broadcast_shape_expr::apply_linear_index is not completed yet");
-    }
-}
-
-void dnd::broadcast_shape_expr_node::as_data_and_strides(char **out_originptr,
-                                                    intptr_t *out_strides) const
-{
-    ndarray_expr_node *op = m_opnodes[0].get();
-    int dimdelta = get_ndim() - op->get_ndim();
-
-    op->as_data_and_strides(out_originptr, out_strides + dimdelta);
-    memset(out_strides, 0, dimdelta * sizeof(intptr_t));
-}
 
 // linear_index_expr_node
 
@@ -89,6 +33,25 @@ dnd::linear_index_expr_node::linear_index_expr_node(int ndim, const intptr_t *sh
     memcpy(m_axis_map.get(), axis_map, ndim * sizeof(int));
     memcpy(m_index_strides.get(), index_strides, ndim * sizeof(intptr_t));
     memcpy(m_start_index.get(), start_index, op->get_ndim() * sizeof(intptr_t));
+}
+
+ndarray_expr_node_ptr dnd::linear_index_expr_node::as_dtype(const dtype& dt,
+                    dnd::assign_error_mode errmode, bool allow_in_place)
+{
+    ndarray_expr_node *node = m_opnodes[0].get();
+
+    // Forward the dtype conversion to the child node
+    ndarray_expr_node_ptr newnode(node->as_dtype(dt, errmode, allow_in_place));
+
+    if (allow_in_place) {
+        m_opnodes[0] = newnode;
+        m_dtype = m_opnodes[0]->get_dtype();
+        return ndarray_expr_node_ptr(this);
+    } else {
+        return ndarray_expr_node_ptr(
+                    new linear_index_expr_node(m_ndim, m_shape.get(), m_axis_map.get(),
+                                m_index_strides.get(), m_start_index.get(), newnode.get()));
+    }
 }
 
 // Since this is a linear_index_expr_node, it absorbs any further linear indexing
@@ -197,38 +160,9 @@ ndarray_expr_node_ptr dnd::make_strided_array_expr_node(
             const intptr_t *strides, char *originptr,
             const dnd::shared_ptr<void>& buffer_owner)
 {
-    intptr_t align_bits = (dt.alignment() - 1);
-    if (align_bits != 0) {
-        intptr_t align_check = reinterpret_cast<intptr_t>(originptr);
-        for (int i = 0; i < ndim; ++i) {
-            align_check |= strides[i];
-        }
-
-        // If the data isn't aligned, return a misbehaved strided node
-        if ((align_check & align_bits) != 0) {
-            return ndarray_expr_node_ptr(new misbehaved_strided_array_expr_node(dt, ndim,
-                                                shape, strides, originptr, buffer_owner));
-        }
-    }
-
-    // The data type is NBO and the data is aligned, return a strided node
+    // TODO: Add a multidimensional DND_ASSERT_ALIGNED check here
     return ndarray_expr_node_ptr(new strided_array_expr_node(dt, ndim,
                                         shape, strides, originptr, buffer_owner));
-}
-
-ndarray_expr_node_ptr dnd::make_convert_dtype_expr_node(
-            ndarray_expr_node *node, const dtype& dt, assign_error_mode errmode)
-{
-    if (node->get_node_type() == strided_array_node_type) {
-        return ndarray_expr_node_ptr(new strided_array_expr_node(make_conversion_dtype(dt, node->get_dtype(), errmode),
-                    node->get_ndim(), node->get_shape(),
-                    static_cast<const strided_array_expr_node *>(node)->get_strides(),
-                    static_cast<const strided_array_expr_node *>(node)->get_originptr(),
-                    static_cast<const strided_array_expr_node *>(node)->get_buffer_owner()));
-    } else {
-        // TODO: Remove convert_dtype_expr_node, just use the conversion_dtype
-        throw std::runtime_error("can only make a convert<> dtype with strided array nodes presently");
-    }
 }
 
 ndarray_expr_node_ptr dnd::make_broadcast_strided_array_expr_node(ndarray_expr_node *node,

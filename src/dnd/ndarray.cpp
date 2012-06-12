@@ -294,16 +294,7 @@ ndarray dnd::ndarray::as_dtype(const dtype& dt, assign_error_mode errmode) const
     if (dt == get_dtype().value_dtype()) {
         return *this;
     } else {
-        if (m_expr_tree->get_node_type() == strided_array_node_type) {
-            return ndarray(new strided_array_expr_node(make_conversion_dtype(dt, m_expr_tree->get_dtype(), errmode),
-                        m_expr_tree->get_ndim(), m_expr_tree->get_shape(),
-                        static_cast<const strided_array_expr_node *>(m_expr_tree.get())->get_strides(),
-                        static_cast<const strided_array_expr_node *>(m_expr_tree.get())->get_originptr(),
-                        static_cast<const strided_array_expr_node *>(m_expr_tree.get())->get_buffer_owner()));
-        } else {
-            // TODO: this should make a conversion dtype too, the convert_dtype_expr_node should be removed
-            throw std::runtime_error("can only make a convert<> dtype with strided array nodes presently");
-        }
+        return ndarray(m_expr_tree->as_dtype(dt, errmode, false));
     }
 }
 

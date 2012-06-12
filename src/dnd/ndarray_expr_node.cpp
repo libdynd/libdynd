@@ -13,6 +13,7 @@
 #include <dnd/shape_tools.hpp>
 #include <dnd/ndarray_expr_node.hpp>
 #include <dnd/raw_iteration.hpp>
+#include <dnd/dtypes/conversion_dtype.hpp>
 
 #include "ndarray_expr_node_instances.hpp"
 
@@ -215,9 +216,6 @@ static void print_node_type(ostream& o, expr_node_type type)
         case strided_array_node_type:
             o << "strided_array_node_type";
             break;
-        case misbehaved_strided_array_node_type:
-            o << "misbehaved_strided_array_node_type";
-            break;
         case convert_dtype_node_type:
             o << "convert_dtype_node_type";
             break;
@@ -317,6 +315,23 @@ void dnd::strided_array_expr_node::as_data_and_strides(char **out_originptr,
     memcpy(out_strides, m_strides.get(), get_ndim() * sizeof(intptr_t));
 }
 
+ndarray_expr_node_ptr dnd::strided_array_expr_node::as_dtype(const dtype& dt,
+                    dnd::assign_error_mode errmode, bool allow_in_place)
+{
+    if (allow_in_place) {
+        m_dtype = make_conversion_dtype(dt, m_dtype, errmode);
+        return ndarray_expr_node_ptr(this);
+    } else {
+        return ndarray_expr_node_ptr(new strided_array_expr_node(
+                        make_conversion_dtype(dt, m_dtype, errmode),
+                        m_ndim, m_shape.get(), m_strides.get(), m_originptr, m_buffer_owner));
+
+    }
+}
+
+
+
+
 ndarray_expr_node_ptr dnd::strided_array_expr_node::apply_linear_index(
                     int new_ndim, const intptr_t *new_shape, const int *axis_map,
                     const intptr_t *index_strides, const intptr_t *start_index, bool allow_in_place)
@@ -360,80 +375,6 @@ ndarray_expr_node_ptr dnd::strided_array_expr_node::apply_linear_index(
 
 void dnd::strided_array_expr_node::debug_dump_extra(ostream& o, const string& indent) const
 {
-    o << indent << " strides: (";
-    for (int i = 0; i < m_ndim; ++i) {
-        o << m_strides[i];
-        if (i != m_ndim - 1) {
-            o << ", ";
-        }
-    }
-    o << ")\n";
-    o << indent << " originptr: " << (void *)m_originptr << "\n";
-    o << indent << " buffer owner: " << m_buffer_owner.get() << "\n";
-}
-
-// misbehaved_strided_array_expr_node
-
-dnd::misbehaved_strided_array_expr_node::misbehaved_strided_array_expr_node(const dtype& dt, int ndim,
-                                const intptr_t *shape, const intptr_t *strides,
-                                char *originptr, const dnd::shared_ptr<void>& buffer_owner)
-    : ndarray_expr_node(dt, ndim, 0, shape,
-                        arbitrary_node_category, misbehaved_strided_array_node_type),
-      m_inner_dtype(dt), m_originptr(originptr), m_strides(ndim, strides), m_buffer_owner(buffer_owner)
-{
-}
-
-void dnd::misbehaved_strided_array_expr_node::as_data_and_strides(char **out_originptr,
-                                                    intptr_t *out_strides) const
-{
-    *out_originptr = m_originptr;
-    memcpy(out_strides, m_strides.get(), get_ndim() * sizeof(intptr_t));
-}
-
-ndarray_expr_node_ptr dnd::misbehaved_strided_array_expr_node::apply_linear_index(
-                    int new_ndim, const intptr_t *new_shape, const int *axis_map,
-                    const intptr_t *index_strides, const intptr_t *start_index, bool allow_in_place)
-{
-    if (allow_in_place) {
-        // Apply the start_index to m_originptr
-        for (int i = 0; i < m_ndim; ++i) {
-            m_originptr += m_strides[i] * start_index[i];
-        }
-
-        // Adopt the new shape
-        m_ndim = new_ndim;
-        memcpy(m_shape.get(), new_shape, new_ndim * sizeof(intptr_t));
-
-        // Construct the new strides
-        dimvector new_strides(m_ndim);
-        for (int i = 0; i < new_ndim; ++i) {
-            new_strides[i] = m_strides[axis_map[i]] * index_strides[i];
-        }
-        m_strides.swap(new_strides);
-
-        return ndarray_expr_node_ptr(this);
-    } else {
-        // Apply the start_index to m_originptr
-        char *new_originptr = m_originptr;
-        for (int i = 0; i < m_ndim; ++i) {
-            new_originptr += m_strides[i] * start_index[i];
-        }
-
-        // Construct the new strides
-        dimvector new_strides(m_ndim);
-        for (int i = 0; i < new_ndim; ++i) {
-            new_strides[i] = m_strides[axis_map[i]] * index_strides[i];
-        }
-
-        return ndarray_expr_node_ptr(
-            new misbehaved_strided_array_expr_node(m_dtype, new_ndim, new_shape, new_strides.get(),
-                                        new_originptr, m_buffer_owner));
-    }
-}
-
-void dnd::misbehaved_strided_array_expr_node::debug_dump_extra(ostream& o, const string& indent) const
-{
-    o << indent << " inner dtype: " << m_inner_dtype << "\n";
     o << indent << " strides: (";
     for (int i = 0; i < m_ndim; ++i) {
         o << m_strides[i];

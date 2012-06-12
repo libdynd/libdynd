@@ -32,9 +32,6 @@ enum expr_node_category {
 enum expr_node_type {
     // This node represents an NBO, aligned, strided array
     strided_array_node_type,
-    // This node represents a strided array which is either not NBO, or is misaligned,
-    // i.e. requires buffering
-    misbehaved_strided_array_node_type,
     convert_dtype_node_type,
     broadcast_shape_node_type,
     elementwise_binary_op_node_type,
@@ -141,6 +138,12 @@ public:
     boost::intrusive_ptr<ndarray_expr_node>  evaluate();
 
     /**
+     * Converts this node to a new dtype. This uses a conversion_dtype.
+     */
+    virtual boost::intrusive_ptr<ndarray_expr_node> as_dtype(const dtype& dt,
+                        dnd::assign_error_mode errmode, bool allow_in_place) = 0;
+
+    /**
      * Applies a linear index to the node, returning either the current node (for do-nothing
      * indexes), or a new node with the index applied. This may apply the indexing up
      * the tree, or in cases where this is not possible, returning a node which applies the
@@ -231,6 +234,9 @@ public:
     /** Provides the data pointer and strides array for the tree evaluation code */
     void as_data_and_strides(char **out_originptr, intptr_t *out_strides) const;
 
+    ndarray_expr_node_ptr as_dtype(const dtype& dt,
+                        dnd::assign_error_mode errmode, bool allow_in_place);
+
     ndarray_expr_node_ptr apply_linear_index(int ndim, const intptr_t *shape, const int *axis_map,
                     const intptr_t *index_strides, const intptr_t *start_index, bool allow_in_place);
     // TODO: Implement apply_integer_index
@@ -252,84 +258,6 @@ public:
                                 const dtype& dt, assign_error_mode errmode);
 };
 
-/**
- * NDArray expression node which holds a raw strided array that is misaligned.
- */
-class misbehaved_strided_array_expr_node : public ndarray_expr_node {
-    dtype m_inner_dtype;
-    char *m_originptr;
-    dimvector m_strides;
-    dnd::shared_ptr<void> m_buffer_owner;
-
-    // Non-copyable
-    misbehaved_strided_array_expr_node(const misbehaved_strided_array_expr_node&);
-    misbehaved_strided_array_expr_node& operator=(const misbehaved_strided_array_expr_node&);
-
-    /** Creates a strided array node from the raw values */
-    misbehaved_strided_array_expr_node(const dtype& dt, int ndim, const intptr_t *shape,
-            const intptr_t *strides, char *originptr, const dnd::shared_ptr<void>& buffer_owner);
-
-public:
-
-    virtual ~misbehaved_strided_array_expr_node() {
-    }
-
-    /** Returns the dtype of the actual binary data */
-    const dtype& get_inner_dtype() const {
-        return m_inner_dtype;
-    }
-
-    char *get_originptr() const {
-        return m_originptr;
-    }
-
-    const intptr_t *get_strides() const {
-        return m_strides.get();
-    }
-
-    dnd::shared_ptr<void> get_buffer_owner() const {
-        return m_buffer_owner;
-    }
-
-    /** Returns true if every element is aligned */
-    bool is_aligned() const {
-        int alignment = get_dtype().alignment();
-        if (alignment == 1) {
-            return true;
-        } else {
-            const intptr_t *strides = get_strides();
-            int ndim = get_ndim();
-            int align_test = static_cast<int>(reinterpret_cast<intptr_t>(get_originptr()));
-
-            for (int i = 0; i < ndim; ++i) {
-                align_test |= static_cast<int>(strides[i]);
-            }
-            return ((alignment - 1) & align_test) == 0;
-        }
-    }
-
-    /**
-     * Provides the data pointer and strides array for the tree evaluation code. Note that
-     * the data may be in a different byte-order, so use the dtype returned by get_inner_dtype().
-     * The data may also be misaligned, so don't use operations requiring alignment.
-     */
-    void as_data_and_strides(char **out_originptr, intptr_t *out_strides) const;
-
-    ndarray_expr_node_ptr apply_linear_index(int ndim, const intptr_t *shape, const int *axis_map,
-                    const intptr_t *index_strides, const intptr_t *start_index, bool allow_in_place);
-    // TODO: Implement apply_integer_index
-
-    const char *node_name() const {
-        return "misbehaved_strided_array";
-    }
-
-    void debug_dump_extra(std::ostream& o, const std::string& indent) const;
-
-    friend ndarray_expr_node_ptr make_strided_array_expr_node(
-                    const dtype& dt, int ndim, const intptr_t *shape,
-                    const intptr_t *strides, char *originptr,
-                    const dnd::shared_ptr<void>& buffer_owner);
-};
 
 /** Adds a reference, for intrusive_ptr<ndarray_expr_node> to use */
 inline void intrusive_ptr_add_ref(const ndarray_expr_node *node) {

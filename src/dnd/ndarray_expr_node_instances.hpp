@@ -9,6 +9,7 @@
 
 #include <dnd/ndarray_expr_node.hpp>
 #include <dnd/shape_tools.hpp>
+#include <dnd/dtypes/conversion_dtype.hpp>
 
 namespace dnd {
 
@@ -19,33 +20,6 @@ template <class BinaryOperatorFactory>
 ndarray_expr_node_ptr make_elementwise_binary_op_expr_node(ndarray_expr_node *node1,
                                             ndarray_expr_node *node2, BinaryOperatorFactory& op_factory,
                                             assign_error_mode errmode);
-
-/**
- * NDArray expression node which broadcasts its input to the output.
- */
-class broadcast_shape_expr_node : public ndarray_expr_node {
-    /**
-     * Creates the shape broadcasting node. This function doesn't check
-     * that the broadcasting is valid, the caller must validate this
-     * before constructing the node.
-     */
-    broadcast_shape_expr_node(int ndim, const intptr_t *shape, const ndarray_expr_node_ptr& op);
-    broadcast_shape_expr_node(int ndim, const intptr_t *shape, ndarray_expr_node_ptr&& op);
-public:
-
-    virtual ~broadcast_shape_expr_node() {
-    }
-
-    ndarray_expr_node_ptr apply_linear_index(int ndim, const intptr_t *shape, const int *axis_map,
-                    const intptr_t *index_strides, const intptr_t *start_index, bool allow_in_place);
-
-    /** Provides the data pointer and strides array for the tree evaluation code */
-    void as_data_and_strides(char **out_originptr, intptr_t *out_strides) const;
-
-    const char *node_name() const {
-        return "broadcast_shape_expr_node";
-    }
-};
 
 /**
  * NDArray expression node which applies linear indexing.
@@ -67,6 +41,12 @@ class linear_index_expr_node : public ndarray_expr_node {
     linear_index_expr_node(int ndim, const intptr_t *shape, const int *axis_map,
                     const intptr_t *index_strides, const intptr_t *start_index, ndarray_expr_node *op);
 public:
+
+    virtual ~linear_index_expr_node() {
+    }
+
+    ndarray_expr_node_ptr as_dtype(const dtype& dt,
+                        dnd::assign_error_mode errmode, bool allow_in_place);
 
     ndarray_expr_node_ptr apply_linear_index(int ndim, const intptr_t *shape, const int *axis_map,
                     const intptr_t *index_strides, const intptr_t *start_index, bool allow_in_place);
@@ -119,16 +99,43 @@ class elementwise_binary_op_expr_node : public ndarray_expr_node {
         // Swap in the operator factory
         m_op_factory.swap(op_factory);
     }
+    elementwise_binary_op_expr_node(const dtype& dt, ndarray_expr_node_ptr& op0, ndarray_expr_node_ptr& op1,
+                                    BinaryOperatorFactory& op_factory)
+        : ndarray_expr_node(dt, op0->get_ndim(), 2, op0->get_shape(),
+                elementwise_node_category, elementwise_binary_op_node_type),
+                m_op_factory()
+    {
+        m_opnodes[0] = std::move(op0);
+        m_opnodes[1] = std::move(op1);
+
+        // Swap in the operator factory
+        m_op_factory.swap(op_factory);
+    }
 
 public:
 
     virtual ~elementwise_binary_op_expr_node() {
     }
 
-    void get_binary_operation(intptr_t dst_fixedstride, intptr_t src1_fixedstride,
-                                intptr_t src2_fixedstride,
-                                kernel_instance<binary_operation_t>& out_kernel) const {
-        m_op_factory.get_binary_operation(dst_fixedstride, src1_fixedstride, src2_fixedstride, out_kernel);
+    ndarray_expr_node_ptr as_dtype(const dtype& dt,
+                        dnd::assign_error_mode errmode, bool allow_in_place)
+    {
+        if (allow_in_place) {
+            m_dtype = make_conversion_dtype(dt, m_dtype, errmode);
+            return ndarray_expr_node_ptr(this);
+        } else {
+            ndarray_expr_node_ptr result(
+                    new elementwise_binary_op_expr_node(make_conversion_dtype(dt, m_dtype, errmode),
+                                    m_opnodes[0], m_opnodes[1], m_op_factory));
+            return result;
+        }
+    }
+
+    void get_binary_operation(intptr_t dst_fixedstride, intptr_t src0_fixedstride,
+                                intptr_t src1_fixedstride,
+                                kernel_instance<binary_operation_t>& out_kernel) const
+    {
+        m_op_factory.get_binary_operation(dst_fixedstride, src0_fixedstride, src1_fixedstride, out_kernel);
     }
 
     /**
@@ -171,9 +178,9 @@ public:
 };
 
 /**
- * Creates an expr node out of the raw data for a strided array. This will create either
- * a strided_array_expr_node or a misbehaved_strided_array_expr_node, if the dtype isn't
- * NBO or some elements of the array are misaligned.
+ * Creates an expr node out of the raw data for a strided array. This will create
+ * a strided_array_expr_node, the caller should ensure that the data is aligned,
+ * and use an unaligned<> dtype if not.
  *
  * @param dt        The data type of the raw elements.
  * @param ndim      The number of dimensions in the array.
@@ -186,9 +193,6 @@ ndarray_expr_node_ptr make_strided_array_expr_node(
             const dtype& dt, int ndim, const intptr_t *shape,
             const intptr_t *strides, char *originptr,
             const dnd::shared_ptr<void>& buffer_owner);
-
-ndarray_expr_node_ptr make_convert_dtype_expr_node(
-            ndarray_expr_node *node, const dtype& dt, assign_error_mode errmode);
 
 /**
  * Creates an aligned strided_array_expr_node, possibly with a follow-on node to make
@@ -245,19 +249,19 @@ ndarray_expr_node_ptr make_elementwise_binary_op_expr_node(ndarray_expr_node *no
             } else {
                 return ndarray_expr_node_ptr(new elementwise_binary_op_expr_node<BinaryOperatorFactory>(
                                     node1,
-                                    make_convert_dtype_expr_node(node2, op_factory.get_dtype(2), errmode),
+                                    node2->as_dtype(op_factory.get_dtype(2), errmode, false),
                                     op_factory));
             }
         } else {
             if (node2->get_dtype() == op_factory.get_dtype(2)) {
                 return ndarray_expr_node_ptr(new elementwise_binary_op_expr_node<BinaryOperatorFactory>(
-                                    make_convert_dtype_expr_node(node1, op_factory.get_dtype(1), errmode),
+                                    node1->as_dtype(op_factory.get_dtype(1), errmode, false),
                                     node2,
                                     op_factory));
             } else {
                 return ndarray_expr_node_ptr(new elementwise_binary_op_expr_node<BinaryOperatorFactory>(
-                                    make_convert_dtype_expr_node(node1, op_factory.get_dtype(1), errmode),
-                                    make_convert_dtype_expr_node(node2, op_factory.get_dtype(2), errmode),
+                                    node1->as_dtype(op_factory.get_dtype(1), errmode, false),
+                                    node2->as_dtype(op_factory.get_dtype(2), errmode, false),
                                     op_factory));
             }
         }
