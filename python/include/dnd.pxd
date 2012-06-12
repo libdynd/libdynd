@@ -6,9 +6,11 @@
 # * Template functions are unsupported (classes: yes, functions: no)
 # * Cython files may not contain UTF8
 # * Overloading operator= is not supported
-# * BUG: The "a(self.v)" idiom doesn't work with __add__, but works
+# * BUG: The "GET(self.v)" idiom doesn't work with __add__, but works
 #        with other functions. Requires a manual <w_...> cast to
 #        make it work.
+# * BUG: The "except +" annotation doesn't seem to work for overloaded
+#        operators, exceptions weren't being caught.
 
 include "libcpp/string.pxd"
 
@@ -40,15 +42,15 @@ cdef extern from "placement_wrappers.hpp" namespace "pydnd":
     void dtype_placement_new(dtype_placement_wrapper&)
     void dtype_placement_delete(dtype_placement_wrapper&)
     # dtype placement cast
-    dtype& a(dtype_placement_wrapper&)
+    dtype& GET(dtype_placement_wrapper&)
     # dtype placement assignment
-    void a(dtype_placement_wrapper&, dtype&)
+    void SET(dtype_placement_wrapper&, dtype&)
 
     cdef struct ndarray_placement_wrapper:
         pass
     void ndarray_placement_new(ndarray_placement_wrapper&)
     void ndarray_placement_delete(ndarray_placement_wrapper&)
     # ndarray placement cast
-    ndarray& a(ndarray_placement_wrapper&)
+    ndarray& GET(ndarray_placement_wrapper&)
     # ndarray placement assignment
-    void a(ndarray_placement_wrapper&, ndarray&)
+    void SET(ndarray_placement_wrapper&, ndarray&)

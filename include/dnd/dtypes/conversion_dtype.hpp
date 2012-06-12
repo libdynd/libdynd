@@ -77,12 +77,13 @@ public:
 
 /**
  * Makes a conversion dtype to convert from the operand_dtype to the value_dtype.
- * This always creates the conversion, if the caller wants to avoid redundant
- * conversions, they should check that (value_dtype != operand_dtype.value_dtype())
- * before calling this function.
  */
 inline dtype make_conversion_dtype(const dtype& value_dtype, const dtype& operand_dtype, assign_error_mode errmode = default_error_mode) {
-    return dtype(make_shared<conversion_dtype>(value_dtype, operand_dtype, errmode));
+    if (operand_dtype.value_dtype() != value_dtype) {
+        return dtype(make_shared<conversion_dtype>(value_dtype, operand_dtype, errmode));
+    } else {
+        return operand_dtype;
+    }
 }
 
 template<typename Tvalue, typename Tstorage>

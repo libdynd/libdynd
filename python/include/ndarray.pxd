@@ -19,10 +19,14 @@ cdef extern from "dnd/ndarray.hpp" namespace "dnd":
         ndarray(dtype&)
         ndarray(dtype, int, intptr_t *, int *)
 
-        ndarray operator+(ndarray&)
-        ndarray operator-(ndarray&)
-        ndarray operator*(ndarray&)
-        ndarray operator/(ndarray&)
+        # Cython bug: operator overloading doesn't obey "except +"
+        # TODO: Report this bug
+        # ndarray operator+(ndarray&) except +
+        ndarray operator-(ndarray&) except +
+        ndarray operator*(ndarray&) except +
+        ndarray operator/(ndarray&) except +
+
+        ndarray ndarray_add(ndarray&, ndarray&)
 
         dtype& get_dtype()
         int get_ndim()
@@ -32,10 +36,10 @@ cdef extern from "dnd/ndarray.hpp" namespace "dnd":
 
         char* get_originptr()
 
-        void val_assign(ndarray&, assign_error_mode)
-        void val_assign(dtype&, char*, assign_error_mode)
+        void val_assign(ndarray&, assign_error_mode) except +
+        void val_assign(dtype&, char*, assign_error_mode) except +
 
-        ndarray as_dtype(dtype&, assign_error_mode)
+        ndarray as_dtype(dtype&, assign_error_mode) except +
 
         void debug_dump(ostream&)
 

@@ -15,6 +15,14 @@
 
 namespace pydnd {
 
+void ndarray_init(dnd::ndarray& n, PyObject* obj);
+dnd::ndarray ndarray_vals(const dnd::ndarray& n);
+
+inline dnd::ndarray ndarray_add(const dnd::ndarray& lhs, const dnd::ndarray& rhs)
+{
+    return lhs + rhs;
+}
+
 inline std::string ndarray_str(const dnd::ndarray& n)
 {
     std::stringstream ss;
@@ -35,9 +43,6 @@ inline std::string ndarray_debug_dump(const dnd::ndarray& n)
     n.debug_dump(ss);
     return ss.str();
 }
-
-void ndarray_init(dnd::ndarray& n, PyObject* obj);
-dnd::ndarray ndarray_vals(const dnd::ndarray& n);
 
 } // namespace pydnd
 

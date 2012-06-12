@@ -33,13 +33,13 @@ inline void dtype_placement_delete(dtype_placement_wrapper& v)
 }
 
 // dtype placement cast
-inline dnd::dtype& a(dtype_placement_wrapper& v)
+inline dnd::dtype& GET(dtype_placement_wrapper& v)
 {
     return *(dnd::dtype *)&v;
 }
 
 // dtype placement assignment
-inline void a(dtype_placement_wrapper& v, const dnd::dtype& d)
+inline void SET(dtype_placement_wrapper& v, const dnd::dtype& d)
 {
     *(dnd::dtype *)&v = d;
 }
@@ -64,13 +64,13 @@ inline void ndarray_placement_delete(ndarray_placement_wrapper& v)
 }
 
 // ndarray placement cast
-inline dnd::ndarray& a(ndarray_placement_wrapper& v)
+inline dnd::ndarray& GET(ndarray_placement_wrapper& v)
 {
     return *(dnd::ndarray *)&v;
 }
 
 // dtype placement assignment
-inline void a(ndarray_placement_wrapper& v, const dnd::ndarray& d)
+inline void SET(ndarray_placement_wrapper& v, const dnd::ndarray& d)
 {
     *(dnd::ndarray *)&v = d;
 }
