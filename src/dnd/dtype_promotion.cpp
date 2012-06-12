@@ -136,7 +136,7 @@ dtype dnd::promote_dtypes_arithmetic(const dtype& dt0, const dtype& dt1)
                     case bool_kind:
                     case int_kind:
                     case uint_kind:
-                        return dt0;
+                        return dt0_val;
                     case real_kind:
                         return (dt0_val.itemsize() >= dt1_val.itemsize()) ? dt0_val
                                                                           : dt1_val;

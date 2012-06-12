@@ -49,7 +49,9 @@ namespace {
         }
 
         void promote_dtypes(const dtype& dt1, const dtype& dt2) {
+            //cout << "promoting dtypes " << dt1 << ", " << dt2 << endl;
             m_dtype = promote_dtypes_arithmetic(dt1, dt2);
+            //cout << "to " << m_dtype << endl;
         }
 
         const dtype& get_dtype(int) {

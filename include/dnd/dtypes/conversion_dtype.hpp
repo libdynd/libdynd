@@ -30,7 +30,9 @@ public:
         // An alternative to this error would be to use value_dtype.value_dtype(), cutting
         // away the expression part of the given value_dtype.
         if (m_value_dtype.kind() == expression_kind) {
-            throw std::runtime_error("conversion_dtype: The value dtype cannot be an expression_kind");
+            std::stringstream ss;
+            ss << "conversion_dtype: The destination dtype " << m_value_dtype << " should not be an expression_kind";
+            throw std::runtime_error(ss.str());
         }
 
     }
