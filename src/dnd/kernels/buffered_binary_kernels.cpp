@@ -273,7 +273,7 @@ static void buffered_binary_in1_kernel(char *dst, intptr_t dst_stride,
 
 } // anonymous namespace
 
-void make_buffered_binary_kernel(kernel_instance<binary_operation_t>& kernel,
+void dnd::make_buffered_binary_kernel(kernel_instance<binary_operation_t>& kernel,
                     kernel_instance<unary_operation_t>* adapters, const intptr_t *buffer_element_sizes,
                     kernel_instance<binary_operation_t>& out_kernel)
 {

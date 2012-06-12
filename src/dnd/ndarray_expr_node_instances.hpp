@@ -10,6 +10,7 @@
 #include <dnd/ndarray_expr_node.hpp>
 #include <dnd/shape_tools.hpp>
 #include <dnd/dtypes/conversion_dtype.hpp>
+#include <dnd/kernels/buffered_binary_kernels.hpp>
 
 namespace dnd {
 
@@ -135,7 +136,47 @@ public:
                                 intptr_t src1_fixedstride,
                                 kernel_instance<binary_operation_t>& out_kernel) const
     {
-        m_op_factory.get_binary_operation(dst_fixedstride, src0_fixedstride, src1_fixedstride, out_kernel);
+        if (m_dtype.kind() != expression_kind &&
+                            m_opnodes[0]->get_dtype().kind() != expression_kind &&
+                            m_opnodes[1]->get_dtype().kind() != expression_kind) {
+            // Return the binary operation kernel as is
+            m_op_factory.get_binary_operation(dst_fixedstride, src0_fixedstride, src1_fixedstride, out_kernel);
+        } else {
+            // Need to buffer the binary operation kernel.
+            kernel_instance<binary_operation_t> kernel;
+            kernel_instance<unary_operation_t> adapters[3];
+            intptr_t element_sizes[3];
+
+            // Adapt the output
+            if (m_dtype.kind() == expression_kind) {
+                element_sizes[0] = m_dtype.itemsize();
+                m_dtype.get_value_to_storage_operation(dst_fixedstride, element_sizes[0], adapters[0]);
+            } else {
+                element_sizes[0] = dst_fixedstride;
+            }
+
+            // Adapt the first operand
+            if (m_opnodes[0]->get_dtype().kind() == expression_kind) {
+                element_sizes[1] = m_opnodes[0]->get_dtype().itemsize();
+                m_opnodes[0]->get_dtype().get_value_to_storage_operation(element_sizes[1], src0_fixedstride, adapters[1]);
+            } else {
+                element_sizes[1] = src0_fixedstride;
+            }
+
+            // Adapt the second operand
+            if (m_opnodes[1]->get_dtype().kind() == expression_kind) {
+                element_sizes[2] = m_opnodes[1]->get_dtype().itemsize();
+                m_opnodes[1]->get_dtype().get_value_to_storage_operation(element_sizes[2], src1_fixedstride, adapters[2]);
+            } else {
+                element_sizes[2] = src0_fixedstride;
+            }
+
+            // Get the binary operation kernel with the adapted strides
+            m_op_factory.get_binary_operation(element_sizes[0], element_sizes[1], element_sizes[2], kernel);
+
+            // Hook up the buffering
+            make_buffered_binary_kernel(kernel, adapters, element_sizes, out_kernel);
+        }
     }
 
     /**
