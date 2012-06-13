@@ -17,8 +17,14 @@ TEST(ByteswapDType, Create) {
     d = make_byteswap_dtype<float>();
     // The value has the native byte-order dtype
     EXPECT_EQ(d.value_dtype(), make_dtype<float>());
-    // The storage is the byteswap dtype itself
-    EXPECT_EQ(d.storage_dtype(), d);
+    // The storage is the a bytes dtype with matching storage and alignment
+    EXPECT_EQ(d.storage_dtype(), make_bytes_dtype(4, 4));
+
+    d = make_byteswap_dtype<complex<double> >();
+    // The value has the native byte-order dtype
+    EXPECT_EQ(d.value_dtype(), make_dtype<complex<double> >());
+    // The storage is the a bytes dtype with matching storage and alignment
+    EXPECT_EQ(d.storage_dtype(), make_bytes_dtype(16, 8));
 
     // Only basic built-in dtypes can be used to make a byteswap dtype
     EXPECT_THROW(d = make_byteswap_dtype(make_conversion_dtype<int, float>()), runtime_error);

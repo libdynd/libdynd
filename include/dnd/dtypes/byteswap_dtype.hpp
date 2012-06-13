@@ -15,19 +15,35 @@
 
 #include <dnd/dtype.hpp>
 #include <dnd/dtype_assign.hpp>
+#include <dnd/dtypes/align_dtype.hpp>
 
 namespace dnd {
 
 class byteswap_dtype : public extended_dtype {
-    dtype m_value_dtype;
+    dtype m_value_dtype, m_operand_dtype;
 public:
     byteswap_dtype(const dtype& value_dtype)
-        : m_value_dtype(value_dtype)
+        : m_value_dtype(value_dtype), m_operand_dtype(make_bytes_dtype(value_dtype.itemsize(), value_dtype.alignment()))
     {
         if (value_dtype.extended() != 0) {
             throw std::runtime_error("byteswap_dtype: Only built-in dtypes are supported presently");
         }
 
+    }
+
+    byteswap_dtype(const dtype& value_dtype, const dtype& operand_dtype)
+        : m_value_dtype(value_dtype), m_operand_dtype(operand_dtype)
+    {
+        // Only a bytes dtype be the operand to the byteswap
+        if (operand_dtype.value_dtype().type_id() != bytes_type_id) {
+            std::stringstream ss;
+            ss << "byteswap_dtype: The operand to the dtype must have a value dtype of bytes, not " << operand_dtype.value_dtype();
+            throw std::runtime_error(ss.str());
+        }
+        // Automatically realign if needed
+        if (operand_dtype.value_dtype().alignment() < value_dtype.alignment()) {
+            m_operand_dtype = make_align_dtype(value_dtype.alignment(), operand_dtype);
+        }
     }
 
     type_id_t type_id() const {
@@ -48,7 +64,7 @@ public:
         return m_value_dtype;
     }
     const dtype& operand_dtype(const dtype& self) const {
-        return self;
+        return m_operand_dtype;
     }
     void print_data(std::ostream& o, const dtype& dt, const char *data, intptr_t stride, intptr_t size,
                         const char *separator) const;
@@ -58,7 +74,7 @@ public:
     // This is about the native storage, buffering code needs to check whether
     // the value_dtype is an object type separately.
     bool is_object_type() const {
-        return m_value_dtype.is_object_type();
+        return m_operand_dtype.is_object_type();
     }
 
     bool is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const;

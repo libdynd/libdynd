@@ -19,7 +19,11 @@ void dnd::byteswap_dtype::print_data(std::ostream& o, const dtype& dt, const cha
 
 void dnd::byteswap_dtype::print(std::ostream& o) const
 {
-    o << "byteswap<" << m_value_dtype << ">";
+    o << "byteswap<" << m_value_dtype;
+    if (m_operand_dtype.type_id() != bytes_type_id) {
+        o << ", " << m_operand_dtype;
+    }
+    o << ">";
 }
 
 bool dnd::byteswap_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const

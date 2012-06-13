@@ -41,6 +41,7 @@ enum dtype_kind_t {
     real_kind,
     complex_kind,
     string_kind,
+    bytes_kind,
     // For struct_type_id and array_type_id
     composite_kind,
     // For dtypes whose value_dtype != the dtype, signals
@@ -84,7 +85,8 @@ enum type_id_t {
     // Adapter dtypes
     conversion_type_id,
     byteswap_type_id,
-    unaligned_type_id,
+    align_type_id,
+    unaligned_type_id, //TODO: delete this one
     view_type_id,
 
     // pattern matches against other types - cannot instantiate
@@ -275,6 +277,11 @@ private:
     // TODO: Replace with boost::intrusive_ptr
     shared_ptr<extended_dtype> m_data;
 
+    /** Unchecked built-in dtype constructor from raw parameters */
+    dtype(char type_id, char kind, char alignment, intptr_t itemsize)
+        : m_type_id(type_id), m_kind(kind),
+          m_alignment(alignment), m_itemsize(itemsize), m_data()
+    {}
 public:
     /** Constructor */
     dtype();
@@ -447,15 +454,26 @@ public:
                                 kernel_instance<unary_operation_t>& out_kernel) const;
 
     friend std::ostream& operator<<(std::ostream& o, const dtype& rhs);
+    friend dtype make_bytes_dtype(intptr_t element_size, intptr_t alignment);
 };
 
 // Convenience function which makes a dtype object from a template parameter
 template<class T>
-dtype make_dtype() {
+dtype make_dtype()
+{
     return dtype(type_id_of<T>::value);
 }
 
 std::ostream& operator<<(std::ostream& o, const dtype& rhs);
+
+/**
+ * Creates a bytes<size, alignment> dtype, for representing
+ * raw, uninterpreted bytes.
+ */
+inline dtype make_bytes_dtype(intptr_t element_size, intptr_t alignment)
+{
+    return dtype(bytes_type_id, bytes_kind, alignment, element_size);
+}
 
 } // namespace dnd
 

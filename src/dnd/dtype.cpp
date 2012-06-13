@@ -92,6 +92,7 @@ static char type_id_names[DND_MAX_NUM_TYPE_IDS][32] = {
     "complex<float32>",
     "complex<float64>",
     "utf8",
+    "bytes<>",
     "struct",
     "array",
     "convert",
@@ -244,6 +245,9 @@ std::ostream& dnd::operator<<(std::ostream& o, const dtype& rhs)
                 o << "utf8<" << rhs.itemsize() << ">";
             }
             break;
+        case bytes_type_id:
+            o << "bytes<" << rhs.itemsize() << "," << rhs.alignment() << ">";
+            break;
         case pattern_type_id:
             o << "pattern";
             break;
@@ -251,7 +255,7 @@ std::ostream& dnd::operator<<(std::ostream& o, const dtype& rhs)
             if (rhs.extended()) {
                 rhs.extended()->print(o);
             } else {
-                o << "<dtype without formatting support>";
+                o << "<internal error: builtin dtype without formatting support>";
             }
             break;
     }

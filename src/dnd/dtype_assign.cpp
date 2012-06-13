@@ -79,6 +79,8 @@ bool dnd::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt)
                         return true;
                     case string_kind:
                         return dst_dt.itemsize() > 0;
+                    case bytes_kind:
+                        return false;
                     default:
                         break;
                 }
@@ -99,6 +101,8 @@ bool dnd::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt)
                         // Conservative value for 64-bit, could
                         // check speciifically based on the type_id.
                         return dst_dt.itemsize() >= 21;
+                    case bytes_kind:
+                        return false;
                     default:
                         break;
                 }
@@ -119,6 +123,8 @@ bool dnd::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt)
                         // Conservative value for 64-bit, could
                         // check speciifically based on the type_id.
                         return dst_dt.itemsize() >= 21;
+                    case bytes_kind:
+                        return false;
                     default:
                         break;
                 }
@@ -135,6 +141,8 @@ bool dnd::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt)
                         return dst_dt.itemsize() >= 2 * src_dt.itemsize();
                     case string_kind:
                         return dst_dt.itemsize() >= 32;
+                    case bytes_kind:
+                        return false;
                     default:
                         break;
                 }
@@ -149,6 +157,8 @@ bool dnd::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt)
                         return dst_dt.itemsize() >= src_dt.itemsize();
                     case string_kind:
                         return dst_dt.itemsize() >= 64;
+                    case bytes_kind:
+                        return false;
                     default:
                         break;
                 }
@@ -163,9 +173,14 @@ bool dnd::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt)
                     case string_kind:
                         return src_dt.type_id() == dst_dt.type_id() &&
                                 dst_dt.itemsize() >= src_dt.itemsize();
+                    case bytes_kind:
+                        return false;
                     default:
                         break;
                 }
+            case bytes_kind:
+                return dst_dt.kind() == bytes_kind  &&
+                        dst_dt.itemsize() == src_dt.itemsize();
             default:
                 break;
         }
