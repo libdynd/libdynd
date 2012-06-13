@@ -96,6 +96,10 @@ inline dtype make_byteswap_dtype(const dtype& native_dtype) {
     return dtype(make_shared<byteswap_dtype>(native_dtype));
 }
 
+inline dtype make_byteswap_dtype(const dtype& native_dtype, const dtype& operand_dtype) {
+    return dtype(make_shared<byteswap_dtype>(native_dtype, operand_dtype));
+}
+
 template<typename Tnative>
 dtype make_byteswap_dtype() {
     return dtype(make_shared<byteswap_dtype>(make_dtype<Tnative>()));

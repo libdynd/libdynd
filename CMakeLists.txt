@@ -23,14 +23,12 @@ set(dnd_SRC
     src/dnd/dtypes/array_dtype.cpp
     src/dnd/dtypes/byteswap_dtype.cpp
     src/dnd/dtypes/conversion_dtype.cpp
-    src/dnd/dtypes/unaligned_dtype.cpp
     src/dnd/dtypes/align_dtype.cpp
     src/dnd/dtypes/view_dtype.cpp
     include/dnd/dtypes/array_dtype.hpp
     include/dnd/dtypes/byteswap_dtype.hpp
     include/dnd/dtypes/conversion_dtype.hpp
     include/dnd/dtypes/align_dtype.hpp
-    include/dnd/dtypes/unaligned_dtype.hpp
     include/dnd/dtypes/view_dtype.hpp
     src/dnd/kernels/assignment_kernels.cpp
     src/dnd/kernels/builtin_dtype_binary_kernel_table.cpp
@@ -39,14 +37,14 @@ set(dnd_SRC
     src/dnd/kernels/byteswap_kernels.cpp
     src/dnd/kernels/single_assigner_builtin.hpp
     src/dnd/kernels/multiple_assigner_builtin.hpp
-    src/dnd/kernels/unaligned_kernels.cpp
+    src/dnd/kernels/alignment_kernels.cpp
     include/dnd/kernels/assignment_kernels.hpp
     include/dnd/kernels/builtin_dtype_binary_kernel_table.hpp
     include/dnd/kernels/buffered_unary_kernels.hpp
     include/dnd/kernels/buffered_binary_kernels.hpp
     include/dnd/kernels/byteswap_kernels.hpp
     include/dnd/kernels/kernel_instance.hpp
-    include/dnd/kernels/unaligned_kernels.hpp
+    include/dnd/kernels/alignment_kernels.hpp
     src/dnd/dtype.cpp
     src/dnd/dtype_assign.cpp
     src/dnd/dtype_promotion.cpp

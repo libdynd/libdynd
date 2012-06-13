@@ -2,8 +2,8 @@
 // Copyright (C) 2012 Continuum Analytics
 // All rights reserved.
 //
-#ifndef _DND__UNALIGNED_KERNELS_HPP_
-#define _DND__UNALIGNED_KERNELS_HPP_
+#ifndef _DND__ALIGNMENT_KERNELS_HPP_
+#define _DND__ALIGNMENT_KERNELS_HPP_
 
 #include <dnd/kernels/kernel_instance.hpp>
 #include <stdint.h>
@@ -22,4 +22,4 @@ void get_unaligned_copy_kernel(intptr_t element_size,
 
 } // namespace dnd
 
-#endif // _DND__UNALIGNED_KERNELS_HPP_
+#endif // _DND__ALIGNMENT_KERNELS_HPP_

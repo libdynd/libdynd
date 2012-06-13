@@ -3,7 +3,8 @@
 //
 
 #include <dnd/dtypes/align_dtype.hpp>
-#include <dnd/kernels/unaligned_kernels.hpp>
+#include <dnd/dtypes/view_dtype.hpp>
+#include <dnd/kernels/alignment_kernels.hpp>
 #include <dnd/dtype_assign.hpp>
 
 using namespace std;
@@ -76,5 +77,26 @@ dtype dnd::align_dtype::with_replaced_storage_dtype(const dtype& replacement_dty
         } else {
             return replacement_dtype;
         }
+    }
+}
+
+dtype dnd::make_unaligned_dtype(const dtype& value_dtype)
+{
+    if (value_dtype.alignment() > 1) {
+        // Only do something if it requires alignment
+        if (value_dtype.kind() != expression_kind) {
+            return make_view_dtype(value_dtype, make_bytes_dtype(value_dtype.itemsize(), 1));
+        } else {
+            const dtype& sdt = value_dtype.storage_dtype();
+            if (sdt.type_id() == bytes_type_id) {
+                // If its storage dtype is bytes, substitute an align<> dtype there
+                return dtype(value_dtype.extended()->with_replaced_storage_dtype(make_align_dtype(sdt.alignment(), make_bytes_dtype(sdt.itemsize(), 1))));
+            } else {
+                // Otherwise, substitute a view of unaligned bytes
+                return dtype(value_dtype.extended()->with_replaced_storage_dtype(make_view_dtype(sdt, make_bytes_dtype(sdt.itemsize(), 1))));
+            }
+        }
+    } else {
+        return value_dtype;
     }
 }

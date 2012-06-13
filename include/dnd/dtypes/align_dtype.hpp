@@ -70,12 +70,27 @@ public:
 /**
  * Makes an unaligned dtype to view the given dtype without alignment requirements.
  */
-inline dtype make_align_dtype(intptr_t alignment, const dtype& value_dtype) {
+inline dtype make_align_dtype(intptr_t alignment, const dtype& value_dtype)
+{
     if (alignment > value_dtype.alignment()) {
         return dtype(make_shared<align_dtype>(alignment, value_dtype));
     } else {
         return value_dtype;
     }
+}
+
+/**
+ * Reduces a dtype's alignment requirements to 1.
+ */
+dtype make_unaligned_dtype(const dtype& value_dtype);
+
+/**
+ * Reduces a dtype's alignment requirements to 1.
+ */
+template<typename T>
+dtype make_unaligned_dtype()
+{
+    return make_unaligned_dtype(make_dtype<T>());
 }
 
 } // namespace dnd

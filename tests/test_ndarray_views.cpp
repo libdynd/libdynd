@@ -7,7 +7,7 @@
 
 #include <dnd/ndarray.hpp>
 #include <dnd/ndarray_arange.hpp>
-#include <dnd/dtypes/unaligned_dtype.hpp>
+#include <dnd/dtypes/align_dtype.hpp>
 #include <dnd/dtypes/conversion_dtype.hpp>
 #include <dnd/dtypes/view_dtype.hpp>
 
@@ -39,7 +39,7 @@ TEST(NDArrayViews, OneDimensionalRawMemory) {
     // where necessary
     a(1 <= irange() < 9).vals() = c_values;
     b = a(1 <= irange() < 73).view_as_dtype<uint64_t>();
-    EXPECT_EQ(make_unaligned_dtype<uint64_t>(), b.get_dtype());
+    EXPECT_EQ(make_view_dtype(make_dtype<uint64_t>(), make_bytes_dtype(8, 1)), b.get_dtype());
     EXPECT_EQ(1, b.get_ndim());
     EXPECT_EQ(9, b.get_shape()[0]);
     EXPECT_EQ(a.get_originptr() + 1, b.get_originptr());

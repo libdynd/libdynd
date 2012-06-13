@@ -5,20 +5,20 @@
 #include "inc_gtest.hpp"
 
 #include <dnd/ndarray.hpp>
-#include <dnd/dtypes/unaligned_dtype.hpp>
+#include <dnd/dtypes/align_dtype.hpp>
 #include <dnd/dtypes/byteswap_dtype.hpp>
 
 using namespace std;
 using namespace dnd;
 
-TEST(UnalignedDType, Create) {
+TEST(AlignDType, Create) {
     dtype d;
 
     d = make_unaligned_dtype<float>();
     // The value has the native byte-order dtype
     EXPECT_EQ(d.value_dtype(), make_dtype<float>());
-    // The storage is the byteswap dtype itself
-    EXPECT_EQ(d.storage_dtype(), d);
+    // The storage is bytes with alignment 1
+    EXPECT_EQ(d.storage_dtype(), make_bytes_dtype(4, 1));
     // The alignment of the dtype is 1
     EXPECT_EQ(1, d.alignment());
 
@@ -26,7 +26,7 @@ TEST(UnalignedDType, Create) {
     //EXPECT_THROW(d = make_unaligned_dtype([[some object dtype]]), runtime_error);
 }
 
-TEST(UnalignedDType, Basic) {
+TEST(AlignDType, Basic) {
     ndarray a;
 
     union {
@@ -54,12 +54,11 @@ TEST(UnalignedDType, Basic) {
     //a = ndarray(make_dtype<int64_t>(), storage.data + 1);
 }
 
-TEST(UnalignedDType, Chained) {
+TEST(AlignDType, Chained) {
     // The unaligned dtype can give back an expression dtype as the value dtype,
     // make sure that is handled properly at the dtype object level.
     dtype dt = make_unaligned_dtype(make_byteswap_dtype<int>());
-    EXPECT_EQ(dt.storage_dtype(), dt);
-    EXPECT_EQ(dt.value_dtype(), make_dtype<int>());
-
-
+    EXPECT_EQ(make_byteswap_dtype(make_dtype<int>(), make_align_dtype(4, make_bytes_dtype(4, 1))), dt);
+    EXPECT_EQ(make_bytes_dtype(4, 1), dt.storage_dtype());
+    EXPECT_EQ(make_dtype<int>(), dt.value_dtype());
 }

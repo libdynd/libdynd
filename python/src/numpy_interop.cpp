@@ -3,7 +3,7 @@
 #if DND_NUMPY_INTEROP
 
 #include <dnd/dtypes/byteswap_dtype.hpp>
-#include <dnd/dtypes/unaligned_dtype.hpp>
+#include <dnd/dtypes/view_dtype.hpp>
 
 #include "dtype_functions.hpp"
 #include "ndarray_functions.hpp"
@@ -165,7 +165,7 @@ ndarray pydnd::ndarray_from_numpy_array(PyArrayObject* obj)
     // Get the dtype of the array
     dtype d = pydnd::dtype_from_numpy_dtype(PyArray_DESCR(obj));
 
-    // If the array's data isn't aligned properly, make it an unaligned dtype
+    // If the array's data isn't aligned properly, apply better alignment
     if (((uintptr_t)PyArray_DATA(obj)&(d.alignment()-1)) != 0) {
         d = make_unaligned_dtype(d);
     } else {

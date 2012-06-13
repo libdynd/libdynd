@@ -6,7 +6,7 @@
 #include <stdexcept>
 
 #include <dnd/diagnostics.hpp>
-#include <dnd/kernels/unaligned_kernels.hpp>
+#include <dnd/kernels/alignment_kernels.hpp>
 
 using namespace std;
 using namespace dnd;

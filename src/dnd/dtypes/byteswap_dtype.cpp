@@ -68,5 +68,11 @@ void dnd::byteswap_dtype::get_value_to_operand_operation(intptr_t dst_fixedstrid
 
 dtype dnd::byteswap_dtype::with_replaced_storage_dtype(const dtype& replacement_dtype) const
 {
-    throw std::runtime_error("byteswap_dtype: Cannot replace the storage dtype of a byteswapped dtype");
+    if (m_operand_dtype.kind() != expression_kind) {
+        // If there's no expression in the operand, just try substituting (the constructor will error-check)
+        return dtype(make_shared<byteswap_dtype>(m_value_dtype, replacement_dtype));
+    } else {
+        // With an expression operand, replace it farther down the chain
+        return dtype(make_shared<byteswap_dtype>(m_value_dtype, replacement_dtype.extended()->with_replaced_storage_dtype(replacement_dtype)));
+    }
 }

@@ -360,12 +360,8 @@ public:
         if (m_kind != expression_kind) {
             return *this;
         } else {
-            // Follow the value dtype chain to get the value dtype
-            const dtype* dt = &m_data->value_dtype(*this);
-            while (dt->kind() == expression_kind && dt != &dt->extended()->value_dtype(*dt)) {
-                dt = &dt->m_data->value_dtype(*dt);
-            }
-            return *dt;
+            // All chaining happens in the operand_dtype
+            return m_data->value_dtype(*this);
         }
     }
 
@@ -376,7 +372,7 @@ public:
         } else {
             // Follow the operand dtype chain to get the storage dtype
             const dtype* dt = &m_data->operand_dtype(*this);
-            while (dt->kind() == expression_kind && dt != &dt->extended()->operand_dtype(*dt)) {
+            while (dt->kind() == expression_kind) {
                 dt = &dt->m_data->operand_dtype(*dt);
             }
             return *dt;
