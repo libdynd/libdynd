@@ -5,8 +5,8 @@
 #include <stdint.h>
 #include <inc_gtest.hpp>
 
-#include "dnd/ndarray.hpp"
-#include "dnd/ndarray_arange.hpp"
+#include <dnd/ndarray.hpp>
+#include <dnd/ndarray_arange.hpp>
 
 using namespace std;
 using namespace dnd;

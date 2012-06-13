@@ -339,9 +339,9 @@ ndarray dnd::ndarray::view_as_dtype(const dtype& dt) const
     }
 
     // For non-one dimensional and non-contiguous one dimensional arrays, the dtype itemsize much match
-    if (get_dtype().itemsize() != dt.itemsize()) {
+    if (get_dtype().value_dtype().itemsize() != dt.itemsize()) {
         std::stringstream ss;
-        ss << "cannot view dnd::ndarray with dtype " << get_dtype() << " as dtype " << dt << " because they have different sizes, and the array is not contiguous one-dimensional";
+        ss << "cannot view dnd::ndarray with value dtype " << get_dtype().value_dtype() << " as dtype " << dt << " because they have different sizes, and the array is not contiguous one-dimensional";
         throw std::runtime_error(ss.str());
     }
 
@@ -350,7 +350,7 @@ ndarray dnd::ndarray::view_as_dtype(const dtype& dt) const
         bool aligned = true;
         // If the alignment of the requested dtype is greater, check
         // the actual strides to only apply unaligned<> when necessary.
-        if (dt.alignment() > get_dtype().alignment()) {
+        if (dt.alignment() > get_dtype().value_dtype().alignment()) {
             uintptr_t aligncheck = (uintptr_t)get_originptr();
             const intptr_t *strides = get_strides();
             for (int idim = 0; idim < get_ndim(); ++idim) {

@@ -241,6 +241,38 @@ TEST(NDArray, AsScalar) {
     EXPECT_EQ(3.141592653589f, a.as<float>());
 }
 
+TEST(NDArray, CharArrayConstructor) {
+    ndarray a;
+    char values[8] = {1,2,3,4,5,6,7,8};
+
+    // Constructor assignment
+    a = values;
+    EXPECT_EQ(1, a.get_ndim());
+    EXPECT_EQ(8, a.get_shape(0));
+    EXPECT_EQ(make_dtype<char>(), a.get_dtype());
+    EXPECT_EQ(1, a(0).as<char>());
+    EXPECT_EQ(2, a(1).as<char>());
+    EXPECT_EQ(3, a(2).as<char>());
+    EXPECT_EQ(4, a(3).as<char>());
+    EXPECT_EQ(5, a(4).as<char>());
+    EXPECT_EQ(6, a(5).as<char>());
+    EXPECT_EQ(7, a(6).as<char>());
+    EXPECT_EQ(8, a(7).as<char>());
+
+    // Value assignment
+    a.vals() = 0;
+    EXPECT_EQ(0, a(0).as<char>());
+    a.vals() = values;
+    EXPECT_EQ(1, a(0).as<char>());
+    EXPECT_EQ(2, a(1).as<char>());
+    EXPECT_EQ(3, a(2).as<char>());
+    EXPECT_EQ(4, a(3).as<char>());
+    EXPECT_EQ(5, a(4).as<char>());
+    EXPECT_EQ(6, a(5).as<char>());
+    EXPECT_EQ(7, a(6).as<char>());
+    EXPECT_EQ(8, a(7).as<char>());
+}
+
 #ifdef DND_INIT_LIST
 TEST(NDArray, InitializerLists) {
     ndarray a = {1, 2, 3, 4, 5};

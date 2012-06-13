@@ -15,6 +15,7 @@ set(tests_SRC
     test_ndarray_assign.cpp
     test_ndarray_index.cpp
     test_ndarray_arange.cpp
+    test_ndarray_views.cpp
     test_shape_tools.cpp
     )
 

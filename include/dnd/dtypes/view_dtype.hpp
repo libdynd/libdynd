@@ -18,9 +18,9 @@ public:
     view_dtype(const dtype& value_dtype, const dtype& operand_dtype)
         : m_value_dtype(value_dtype), m_operand_dtype(operand_dtype)
     {
-        if (value_dtype.itemsize() != operand_dtype.itemsize()) {
+        if (value_dtype.itemsize() != operand_dtype.value_dtype().itemsize()) {
             std::stringstream ss;
-            ss << "view_dtype: Cannot view " << operand_dtype << " as " << value_dtype << " because they have different sizes";
+            ss << "view_dtype: Cannot view " << operand_dtype.value_dtype() << " as " << value_dtype << " because they have different sizes";
             throw std::runtime_error(ss.str());
         }
         if (value_dtype.is_object_type() || operand_dtype.is_object_type()) {

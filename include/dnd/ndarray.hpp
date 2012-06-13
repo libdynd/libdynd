@@ -269,8 +269,16 @@ public:
         return as_dtype(make_dtype<T>(), errmode);
     }
 
+    /**
+     * Views the array's memory as another dtype, where such an operation
+     * makes sense. This is analogous to reinterpret_case<>.
+     */
     ndarray view_as_dtype(const dtype& dt) const;
 
+    /**
+     * Views the array's memory as another dtype, where such an operation
+     * makes sense. This is analogous to reinterpret_case<>.
+     */
     template<class T>
     ndarray view_as_dtype() const {
         return view_as_dtype(make_dtype<T>());
@@ -331,8 +339,16 @@ public:
         m_arr.val_assign(make_dtype<T>(), (const char *)&rhs);
         return *this;
     }
-    /** Does a value-assignment from the rhs C++ boolean scalar. */
-    ndarray_vals& operator=(const bool& rhs) {
+    /**
+     * Does a value-assignment from the rhs C++ boolean scalar.
+     *
+     * By default, many things are convertible to bool, and this will cause
+     * screwed up assignments if we accept any such thing. Thus, we use
+     * enable_if to only allow bools here instead of just accepting "const bool&"
+     * as would seem obvious.
+     */
+    template<class T>
+    typename enable_if<is_type_bool<T>::value, ndarray_vals&>::type  operator=(const T& rhs) {
         dnd_bool v = rhs;
         m_arr.val_assign(make_dtype<dnd_bool>(), (const char *)&v);
         return *this;

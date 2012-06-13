@@ -178,6 +178,10 @@ template <> struct is_dtype_scalar<double> {enum {value = true};};
 template <> struct is_dtype_scalar<std::complex<float> > {enum {value = true};};
 template <> struct is_dtype_scalar<std::complex<double> > {enum {value = true};};
 
+// Metaprogram for determining if a type is "bool" or not
+template<typename T> struct is_type_bool {enum {value = false};};
+template<> struct is_type_bool<bool> {enum {value = false};};
+
 class dtype;
 
 // The extended_dtype class is for dtypes which require more data
