@@ -39,6 +39,8 @@ cdef extern from "dnd/ndarray.hpp" namespace "dnd":
 
         ndarray as_dtype(dtype&, assign_error_mode) except +
 
+        ndarray view_as_dtype(dtype&) except +
+
         void debug_dump(ostream&)
 
 cdef extern from "ndarray_functions.hpp" namespace "pydnd":

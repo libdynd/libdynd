@@ -6,6 +6,7 @@
 
 #include <dnd/ndarray.hpp>
 #include <dnd/dtypes/unaligned_dtype.hpp>
+#include <dnd/dtypes/byteswap_dtype.hpp>
 
 using namespace std;
 using namespace dnd;
@@ -54,5 +55,11 @@ TEST(UnalignedDType, Basic) {
 }
 
 TEST(UnalignedDType, Chained) {
-    // TODO
+    // The unaligned dtype can give back an expression dtype as the value dtype,
+    // make sure that is handled properly at the dtype object level.
+    dtype dt = make_unaligned_dtype(make_byteswap_dtype<int>());
+    EXPECT_EQ(dt.storage_dtype(), dt);
+    EXPECT_EQ(dt.value_dtype(), make_dtype<int>());
+
+
 }

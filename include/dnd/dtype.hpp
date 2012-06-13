@@ -74,6 +74,8 @@ enum type_id_t {
     complex_float64_type_id,
     // UTF8 strings
     utf8_type_id,
+    // Raw bytes
+    bytes_type_id,
     // Composite dtypes
     struct_type_id,
     tuple_type_id,
@@ -351,7 +353,12 @@ public:
         if (m_kind != expression_kind) {
             return *this;
         } else {
-            return m_data->value_dtype(*this);
+            // Follow the value dtype chain to get the value dtype
+            const dtype* dt = &m_data->value_dtype(*this);
+            while (dt->kind() == expression_kind && dt != &dt->extended()->value_dtype(*dt)) {
+                dt = &dt->m_data->value_dtype(*dt);
+            }
+            return *dt;
         }
     }
 
@@ -361,11 +368,11 @@ public:
             return *this;
         } else {
             // Follow the operand dtype chain to get the storage dtype
-            const dtype* sdt = &m_data->operand_dtype(*this);
-            while (sdt->kind() == expression_kind && sdt != &sdt->extended()->operand_dtype(*sdt)) {
-                sdt = &sdt->m_data->operand_dtype(*sdt);
+            const dtype* dt = &m_data->operand_dtype(*this);
+            while (dt->kind() == expression_kind && dt != &dt->extended()->operand_dtype(*dt)) {
+                dt = &dt->m_data->operand_dtype(*dt);
             }
-            return *sdt;
+            return *dt;
         }
     }
 

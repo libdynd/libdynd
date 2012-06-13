@@ -73,6 +73,20 @@ cdef class w_ndarray:
         n = w_ndarray(obj)
         GET(self.v).val_assign(GET(n.v), assign_error_fractional)
 
+    def as_dtype(self, dtype):
+        """Converts the ndarray to the requested dtype. If dtype is an expression dtype, its expression gets applied on top of the existing data."""
+        cdef w_ndarray result
+        result = w_ndarray()
+        SET(result.v, GET(self.v).as_dtype(GET(w_dtype(dtype).v), assign_error_fractional))
+        return result
+
+    def view_as_dtype(self, dtype):
+        """Views the data of the ndarray as the requested dtype, where it makes sense."""
+        cdef w_ndarray result
+        result = w_ndarray()
+        SET(result.v, GET(self.v).view_as_dtype(GET(w_dtype(dtype).v)))
+        return result
+
     property dtype:
         def __get__(self):
             cdef w_dtype result
