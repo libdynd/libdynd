@@ -1,6 +1,6 @@
 //
-// Copyright (C) 2011 Mark Wiebe (mwwiebe@gmail.com)
-// All rights reserved.
+// Copyright (C) 2011-12, Dynamic NDArray Developers
+// BSD 2-Clause License, see LICENSE.txt
 //
 
 #include <sstream>

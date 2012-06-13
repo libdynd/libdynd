@@ -1,3 +1,8 @@
+#
+# Copyright (C) 2011-12, Dynamic NDArray Developers
+# BSD 2-Clause License, see LICENSE.txt
+#
+
 cmake_minimum_required(VERSION 2.8)
 project(dynamicndarray)
 
@@ -59,16 +64,20 @@ set(dnd_SRC
 	include/dnd/auxiliary_data.hpp
     include/dnd/buffer_storage.hpp
     include/dnd/config.hpp
+    include/dnd/cling_all.hpp
     include/dnd/diagnostics.hpp
     include/dnd/dtype.hpp
     include/dnd/dtype_assign.hpp
     include/dnd/dtype_promotion.hpp
     include/dnd/exceptions.hpp
+    include/dnd/fpstatus.hpp
     include/dnd/irange.hpp
     include/dnd/ndarray.hpp
     include/dnd/ndarray_arange.hpp
     include/dnd/ndarray_expr_node.hpp
     include/dnd/raw_iteration.hpp
+    include/dnd/scalars.hpp
+    include/dnd/shortvector.hpp
     include/dnd/shape_tools.hpp
     )
 

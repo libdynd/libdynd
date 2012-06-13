@@ -1,7 +1,8 @@
 //
-// Copyright (C) 2012 Continuum Analytics
-// All rights reserved.
+// Copyright (C) 2011-12, Dynamic NDArray Developers
+// BSD 2-Clause License, see LICENSE.txt
 //
+
 #include <dnd/kernels/builtin_dtype_binary_kernel_table.hpp>
 
 using namespace std;

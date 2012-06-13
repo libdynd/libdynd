@@ -1,8 +1,6 @@
 //
-// Copyright (C) 2011 Mark Wiebe (mwwiebe@gmail.com)
-// All rights reserved.
-//
-// This is unreleased proprietary software.
+// Copyright (C) 2011-12, Dynamic NDArray Developers
+// BSD 2-Clause License, see LICENSE.txt
 //
 
 // This file is an internal implementation detail of built-in value assignment

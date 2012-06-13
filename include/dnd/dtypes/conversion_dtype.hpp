@@ -1,6 +1,6 @@
 //
-// Copyright (C) 2012 Continuum Analytics
-//
+// Copyright (C) 2011-12, Dynamic NDArray Developers
+// BSD 2-Clause License, see LICENSE.txt
 //
 // The conversion dtype represents one dtype viewed
 // as another buffering based on the casting mechanism.

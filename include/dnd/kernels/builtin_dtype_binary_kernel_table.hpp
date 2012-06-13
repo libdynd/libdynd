@@ -1,3 +1,8 @@
+//
+// Copyright (C) 2011-12, Dynamic NDArray Developers
+// BSD 2-Clause License, see LICENSE.txt
+//
+
 #ifndef _DND__BINARY_KERNEL_TABLE_HPP_
 #define _DND__BINARY_KERNEL_TABLE_HPP_
 

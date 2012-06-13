@@ -1,12 +1,14 @@
 Copyright (C) 2011-2012, Mark Wiebe
 All rights reserved.
+Creative Commons Attribution-ShareAlike 3.0
+http://creativecommons.org/licenses/by-sa/3.0/
 
 Dynamic ND-Array Library Design
 -------------------------------
 
-This is a library that I (Mark Wiebe) am developing in a proprietary
-fashion, within the spirit of NumPy, but designed to be comfortable
-in C++. It's main goals are:
+This is a library that is being developed within the spirit of NumPy
+and ideas that have evolved within that community, but designed to be
+comfortable in C++. It's main goals are:
 
 * Have a flexible and high-performance data type mechanism, which can
   be extended to have new data types with POD or object semantics.
@@ -15,8 +17,9 @@ in C++. It's main goals are:
 * A design that's flexible enough to allow the data to be stored
   in CPU memory, GPU memory, or distributed across a cluster in a global
   array.
-* Delayed execution by default - all operations return views or
-  arrays with their computation deferred.
+* Delayed/lazy evaluation by default - all operations return views or
+  arrays with their computation deferred. As a flexible C++ library,
+  this could still be used as a tool to create a non-lazy evaluation library.
 * Include a compiler technology to take the deferred expression trees
   and create optimized execution plans. Either directly executing the
   expression tree, creating a compact block-based execution engine along
@@ -373,69 +376,7 @@ notice that it is a common subexpression, and only evaluate it once.
 Licensing
 ---------
 
-Currently, I intend to control the copyright of all the code, not
-granting any licenses to anyone else. I'd like to retain the ability
-to use it freely as I'd like or open source it in a BSD or GPL license,
-so incorporating 3rd party code under non-liberal licenses is unacceptable.
-Probably I will incorporate some parts of NumPy, namely ones that I have
-contributed, but which will need to be heavily modified to become pleasant
-for C++.
-
-In an ideal world, this would eventually get submitted as a boost
-library, because I think it would complement boost::multi_array and
-boost::ublas very nicely. This requires that everything be licensed
-under the boost license, which is less restrictive than BSD. For this
-reason I want to avoid pulling in third-party BSD code without first
-approaching the appropriate copyright holders to ensure the more
-liberal license first.
-
-Development Log
----------------
-
-Sept 9, 2011
-
-* Initial work on 'dtype' object design/implementation. The dtype is
-  an object which once constructed, should never be modified, so it
-  only has 'getter' functions, not setters. For more complex dtypes,
-  the lifetime is managed by a reference count.
-
-Sept 15, 2011
-
-* Raw casting/assignment functions for converting data. This includes
-  "immediate mode" versions for single and multiple elements, and
-  "delayed mode" versions which return a function pointer with auxiliary
-  data.
-
-Sept 19, 2011
-
-* Added error mode to raw casting/assignment, which can check for
-  overflow, truncation of floating point fractional part, or floating
-  point inexact conversion.
-
-Sept 20, 2011
-
-* Wrote ndarray.val_assign function for scalar inputs. This allows you
-  to assign a scalar (including a native C++ scalar) to arrays, with
-  a customizable assignment error mode. While I could also make the
-  C++ scalar assignment work with ndarray.operator=, I think the ndarray
-  assignment operator should be reserved for ndarray reference assignment
-  semantics, overloading it would be confusing.
-
-Sept 22, 2011
-
-* Wrote an irange() class, similar to Boost MultiArray's index_range(),
-  to support range-based indexing. This is like slice-based indexing in
-  Python. Also implemented the indexing in ndarray using operator(). Thought
-  about how operator[] might work - Boost MultiArray uses it and can
-  do it because whether an index is an integer or a tuple of ranges is
-  determined at compile time. In irange() I've allowed it to represent
-  an integer index by setting step to zero, something which simplifies the
-  implementation for multiple indexing.
-
-Sept 27, 2011
-
-* Over the past few days, have made the arithmetic operators +, -, *, / work. This
-  required filling in the iterator mechanism (currently using the object
-  raw_ndarray_iter templated on the number of outputs and the number of inputs). 
-
+This library is licensed under the BSD 2-Clause license, except
+for some parts taken from NumPy which are under the NumPy
+BSD 3-Clause license.
 

@@ -1,6 +1,6 @@
 //
-// Copyright (C) 2012 Continuum Analytics
-//
+// Copyright (C) 2011-12, Dynamic NDArray Developers
+// BSD 2-Clause License, see LICENSE.txt
 //
 // The realign dtype applies a more
 // stringent alignment to a bytes dtype.

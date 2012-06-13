@@ -1,3 +1,8 @@
+#
+# Copyright (C) 2011-12, Dynamic NDArray Developers
+# BSD 2-Clause License, see LICENSE.txt
+#
+
 cmake_minimum_required(VERSION 2.8)
 project(dnd_examples)
 

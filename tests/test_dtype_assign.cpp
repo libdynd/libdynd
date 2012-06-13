@@ -1,4 +1,7 @@
 //
+// Copyright (C) 2011-12, Dynamic NDArray Developers
+// BSD 2-Clause License, see LICENSE.txt
+//
 // This tests the raw-memory dtype assignment functions.
 //
 

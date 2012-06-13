@@ -1,3 +1,7 @@
+#
+# Copyright (C) 2011-12, Dynamic NDArray Developers
+# BSD 2-Clause License, see LICENSE.txt
+#
 # Cython notes:
 #
 # * Cython doesn't support 'const'. Hopefully this doesn't make it too

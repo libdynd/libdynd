@@ -1,10 +1,8 @@
 //
-// Copyright (C) 2011 Mark Wiebe (mwwiebe@gmail.com)
-// Copyright (C) 2012 Continuum Analytics
-// All rights reserved.
+// Copyright (C) 2011-12, Dynamic NDArray Developers
+// BSD 2-Clause License, see LICENSE.txt
 //
-// This is unreleased proprietary software.
-//
+
 #ifndef _DND__DTYPE_HPP_
 #define _DND__DTYPE_HPP_
 

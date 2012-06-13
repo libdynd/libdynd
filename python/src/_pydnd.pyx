@@ -1,3 +1,7 @@
+#
+# Copyright (C) 2011-12, Dynamic NDArray Developers
+# BSD 3-Clause License, see LICENSE.txt
+#
 cdef extern from "do_import_array.hpp":
     pass
 cdef extern from "numpy_interop.hpp" namespace "pydnd":
