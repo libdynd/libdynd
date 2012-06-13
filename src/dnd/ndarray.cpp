@@ -13,6 +13,8 @@
 #include <dnd/buffer_storage.hpp>
 #include <dnd/kernels/assignment_kernels.hpp>
 #include <dnd/dtypes/conversion_dtype.hpp>
+#include <dnd/dtypes/unaligned_dtype.hpp>
+#include <dnd/dtypes/view_dtype.hpp>
 
 #include "ndarray_expr_node_instances.hpp"
 
@@ -297,6 +299,81 @@ ndarray dnd::ndarray::as_dtype(const dtype& dt, assign_error_mode errmode) const
         return ndarray(m_expr_tree->as_dtype(dt, errmode, false));
     }
 }
+
+ndarray dnd::ndarray::view_as_dtype(const dtype& dt) const
+{
+    // Don't allow object dtypes
+    if (get_dtype().is_object_type()) {
+        std::stringstream ss;
+        ss << "cannot view a dnd::ndarray with object dtype " << get_dtype() << " as another dtype";
+        throw std::runtime_error(ss.str());
+    } else if (dt.is_object_type()) {
+        std::stringstream ss;
+        ss << "cannot view an dnd::ndarray with POD dtype as another dtype " << dt;
+        throw std::runtime_error(ss.str());
+    }
+
+    // Special case contiguous one dimensional arrays with a non-expression kind
+    if (get_ndim() == 1 && get_expr_tree()->get_node_type() == strided_array_node_type &&
+                            get_strides()[0] == get_dtype().itemsize() &&
+                            get_dtype().kind() != expression_kind) {
+        intptr_t nbytes = get_shape()[0] * get_dtype().itemsize();
+        char *originptr = get_originptr();
+
+        if (nbytes % dt.itemsize() != 0) {
+            std::stringstream ss;
+            ss << "cannot view dnd::ndarray with " << nbytes << " bytes as dtype " << dt << ", because its item size doesn't divide evenly";
+            throw std::runtime_error(ss.str());
+        }
+
+        intptr_t shape[1], strides[1];
+        shape[0] = nbytes / dt.itemsize();
+        strides[0] = dt.itemsize();
+        if ((((uintptr_t)originptr)&(dt.alignment()-1)) == 0) {
+            // If the dtype's alignment is satisfied, can view it as is
+            return ndarray(new strided_array_expr_node(dt, 1, shape, strides, originptr, get_buffer_owner()));
+        } else {
+            // The dtype's alignment was insufficient, so making it unaligned<>
+            return ndarray(new strided_array_expr_node(make_unaligned_dtype(dt), 1, shape, strides, originptr, get_buffer_owner()));
+        }
+    }
+
+    // For non-one dimensional and non-contiguous one dimensional arrays, the dtype itemsize much match
+    if (get_dtype().itemsize() != dt.itemsize()) {
+        std::stringstream ss;
+        ss << "cannot view dnd::ndarray with dtype " << get_dtype() << " as dtype " << dt << " because they have different sizes, and the array is not contiguous one-dimensional";
+        throw std::runtime_error(ss.str());
+    }
+
+    // In the case of a strided array with a non-expression dtype, simply substitute the dtype
+    if (get_expr_tree()->get_node_type() == strided_array_node_type && get_dtype().kind() != expression_kind) {
+        bool aligned = true;
+        // If the alignment of the requested dtype is greater, check
+        // the actual strides to only apply unaligned<> when necessary.
+        if (dt.alignment() > get_dtype().alignment()) {
+            uintptr_t aligncheck = (uintptr_t)get_originptr();
+            const intptr_t *strides = get_strides();
+            for (int idim = 0; idim < get_ndim(); ++idim) {
+                aligncheck |= (uintptr_t)strides[idim];
+            }
+            if ((aligncheck&(dt.alignment()-1)) != 0) {
+                aligned = false;
+            }
+        }
+
+        if (aligned) {
+            return ndarray(new strided_array_expr_node(dt, get_ndim(), get_shape(), get_strides(), get_originptr(), get_buffer_owner()));
+        } else {
+            return ndarray(new strided_array_expr_node(make_unaligned_dtype(dt), get_ndim(), get_shape(), get_strides(), get_originptr(), get_buffer_owner()));
+        }
+    }
+
+    // Finally, we've got some kind of expression array or expression_kind dtype,
+    // so use the view_dtype.
+    return ndarray(get_expr_tree()->as_dtype(
+                make_view_dtype(dt, get_dtype().value_dtype()), assign_error_none, false));
+}
+
 
 void dnd::ndarray::val_assign(const ndarray& rhs, assign_error_mode errmode) const
 {

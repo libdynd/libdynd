@@ -62,3 +62,7 @@ void dnd::byteswap_dtype::get_value_to_operand_operation(intptr_t dst_fixedstrid
     }
 }
 
+dtype dnd::byteswap_dtype::with_replaced_storage_dtype(const dtype& replacement_dtype) const
+{
+    throw std::runtime_error("byteswap_dtype: Cannot replace the storage dtype of a byteswapped dtype");
+}

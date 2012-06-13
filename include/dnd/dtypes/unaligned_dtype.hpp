@@ -63,6 +63,7 @@ public:
                         kernel_instance<unary_operation_t>& out_kernel) const;
     void get_value_to_operand_operation(intptr_t dst_fixedstride, intptr_t src_fixedstride,
                         kernel_instance<unary_operation_t>& out_kernel) const;
+    dtype with_replaced_storage_dtype(const dtype& replacement_dtype) const;
 };
 
 /**

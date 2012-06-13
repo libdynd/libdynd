@@ -75,14 +75,27 @@ public:
     // For expression_kind dtypes - converts to/from the storage's value dtype
     void get_operand_to_value_operation(intptr_t dst_fixedstride, intptr_t src_fixedstride, kernel_instance<unary_operation_t>& out_kernel) const;
     void get_value_to_operand_operation(intptr_t dst_fixedstride, intptr_t src_fixedstride, kernel_instance<unary_operation_t>& out_kernel) const;
+    dtype with_replaced_storage_dtype(const dtype& replacement_dtype) const;
 };
 
 /**
  * Makes a conversion dtype to convert from the operand_dtype to the value_dtype.
+ * If the value_dtype has expression_kind, it chains operand_dtype.value_dtype()
+ * into value_dtype.storage_dtype().
  */
 inline dtype make_conversion_dtype(const dtype& value_dtype, const dtype& operand_dtype, assign_error_mode errmode = default_error_mode) {
     if (operand_dtype.value_dtype() != value_dtype) {
-        return dtype(make_shared<conversion_dtype>(value_dtype, operand_dtype, errmode));
+        if (value_dtype.kind() != expression_kind) {
+            // Create a conversion dtype when the value kind is different
+            return dtype(make_shared<conversion_dtype>(value_dtype, operand_dtype, errmode));
+        } else if (value_dtype.storage_dtype() == operand_dtype.value_dtype()) {
+            // No conversion required at the connection
+            return value_dtype.extended()->with_replaced_storage_dtype(operand_dtype);
+        } else {
+            // A conversion required at the connection
+            return value_dtype.extended()->with_replaced_storage_dtype(
+                dtype(make_shared<conversion_dtype>(value_dtype.storage_dtype(), operand_dtype, errmode)));
+        }
     } else {
         return operand_dtype;
     }

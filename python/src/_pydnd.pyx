@@ -105,30 +105,30 @@ cdef class w_ndarray:
 
     def __sub__(self, rhs):
         cdef w_ndarray result = w_ndarray()
-        SET(result.v, GET((<w_ndarray>self).v) - GET(w_ndarray(rhs).v))
+        SET(result.v, ndarray_subtract(GET((<w_ndarray>self).v), GET(w_ndarray(rhs).v)))
         return result
 
     def __rsub__(self, lhs):
         cdef w_ndarray result = w_ndarray()
-        SET(result.v, GET(w_ndarray(lhs).v) - GET((<w_ndarray>self).v))
+        SET(result.v, ndarray_subtract(GET(w_ndarray(lhs).v), GET((<w_ndarray>self).v)))
         return result
 
     def __mul__(self, rhs):
         cdef w_ndarray result = w_ndarray()
-        SET(result.v, GET((<w_ndarray>self).v) * GET(w_ndarray(rhs).v))
+        SET(result.v, ndarray_multiply(GET((<w_ndarray>self).v), GET(w_ndarray(rhs).v)))
         return result
 
     def __rmul__(self, lhs):
         cdef w_ndarray result = w_ndarray()
-        SET(result.v, GET(w_ndarray(lhs).v) * GET((<w_ndarray>self).v))
+        SET(result.v, ndarray_multiply(GET(w_ndarray(lhs).v), GET((<w_ndarray>self).v)))
         return result
 
     def __div__(self, rhs):
         cdef w_ndarray result = w_ndarray()
-        SET(result.v, GET((<w_ndarray>self).v) / GET(w_ndarray(rhs).v))
+        SET(result.v, ndarray_divide(GET((<w_ndarray>self).v), GET(w_ndarray(rhs).v)))
         return result
 
     def __rdiv__(self, lhs):
         cdef w_ndarray result = w_ndarray()
-        SET(result.v, GET(w_ndarray(lhs).v) / GET((<w_ndarray>self).v))
+        SET(result.v, ndarray_divide(GET(w_ndarray(lhs).v), GET((<w_ndarray>self).v)))
         return result

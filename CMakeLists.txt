@@ -24,10 +24,12 @@ set(dnd_SRC
     src/dnd/dtypes/byteswap_dtype.cpp
     src/dnd/dtypes/conversion_dtype.cpp
     src/dnd/dtypes/unaligned_dtype.cpp
+    src/dnd/dtypes/view_dtype.cpp
     include/dnd/dtypes/array_dtype.hpp
     include/dnd/dtypes/byteswap_dtype.hpp
     include/dnd/dtypes/conversion_dtype.hpp
     include/dnd/dtypes/unaligned_dtype.hpp
+    include/dnd/dtypes/view_dtype.hpp
     src/dnd/kernels/assignment_kernels.cpp
     src/dnd/kernels/builtin_dtype_binary_kernel_table.cpp
     src/dnd/kernels/buffered_unary_kernels.cpp

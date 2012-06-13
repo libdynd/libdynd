@@ -83,6 +83,7 @@ enum type_id_t {
     conversion_type_id,
     byteswap_type_id,
     unaligned_type_id,
+    view_type_id,
 
     // pattern matches against other types - cannot instantiate
     pattern_type_id,
@@ -226,6 +227,17 @@ public:
     // For expression_kind dtypes - converts from (value_dtype()) to (operand_dtype().value_dtype())
     virtual void get_value_to_operand_operation(intptr_t dst_fixedstride, intptr_t src_fixedstride,
                                 kernel_instance<unary_operation_t>& out_kernel) const;
+
+    /**
+     * This method is for expression dtypes, and is a way to substitute
+     * the storage dtype (deepest operand dtype) of an existing dtype.
+     *
+     * The value_dtype of the replacement should match the storage dtype
+     * of this instance. Implementations of this should raise an exception
+     * when this is not true.
+     */
+    virtual dtype with_replaced_storage_dtype(const dtype& replacement_dtype) const;
+
 };
 
 /**
@@ -254,6 +266,7 @@ class dtype {
 private:
     unsigned char m_type_id, m_kind, m_alignment;
     uintptr_t m_itemsize;
+    // TODO: Replace with boost::intrusive_ptr
     shared_ptr<extended_dtype> m_data;
 
 public:

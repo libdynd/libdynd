@@ -3,9 +3,8 @@
 //
 
 #include <dnd/dtypes/unaligned_dtype.hpp>
-#include <dnd/raw_iteration.hpp>
-#include <dnd/buffer_storage.hpp>
 #include <dnd/kernels/unaligned_kernels.hpp>
+#include <dnd/dtype_assign.hpp>
 
 using namespace std;
 using namespace dnd;
@@ -54,3 +53,8 @@ void dnd::unaligned_dtype::get_value_to_operand_operation(intptr_t dst_fixedstri
     get_unaligned_copy_kernel(m_value_dtype.itemsize(), dst_fixedstride, src_fixedstride, out_kernel);
 }
 
+dtype dnd::unaligned_dtype::with_replaced_storage_dtype(const dtype& replacement_dtype) const
+{
+    return make_unaligned_dtype(
+                m_value_dtype.extended()->with_replaced_storage_dtype(replacement_dtype));
+}

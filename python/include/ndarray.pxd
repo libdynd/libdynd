@@ -22,11 +22,9 @@ cdef extern from "dnd/ndarray.hpp" namespace "dnd":
         # Cython bug: operator overloading doesn't obey "except +"
         # TODO: Report this bug
         # ndarray operator+(ndarray&) except +
-        ndarray operator-(ndarray&) except +
-        ndarray operator*(ndarray&) except +
-        ndarray operator/(ndarray&) except +
-
-        ndarray ndarray_add(ndarray&, ndarray&)
+        #ndarray operator-(ndarray&) except +
+        #ndarray operator*(ndarray&) except +
+        #ndarray operator/(ndarray&) except +
 
         dtype& get_dtype()
         int get_ndim()
@@ -52,4 +50,8 @@ cdef extern from "ndarray_functions.hpp" namespace "pydnd":
     ndarray ndarray_vals(ndarray& n) except +
 
     ndarray ndarray_add(ndarray&, ndarray&) except +
+    ndarray ndarray_subtract(ndarray&, ndarray&) except +
+    ndarray ndarray_multiply(ndarray&, ndarray&) except +
+    ndarray ndarray_divide(ndarray&, ndarray&) except +
+
 

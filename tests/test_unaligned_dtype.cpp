@@ -52,3 +52,7 @@ TEST(UnalignedDType, Basic) {
     // (or segfault on platforms that don't support unaligned access)
     //a = ndarray(make_dtype<int64_t>(), storage.data + 1);
 }
+
+TEST(UnalignedDType, Chained) {
+    // TODO
+}

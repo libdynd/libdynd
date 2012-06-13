@@ -3,8 +3,6 @@
 //
 
 #include <dnd/dtypes/conversion_dtype.hpp>
-#include <dnd/raw_iteration.hpp>
-#include <dnd/buffer_storage.hpp>
 #include <dnd/kernels/assignment_kernels.hpp>
 
 using namespace std;
@@ -86,3 +84,19 @@ void dnd::conversion_dtype::get_value_to_operand_operation(intptr_t dst_fixedstr
                                 out_kernel);
 }
 
+dtype dnd::conversion_dtype::with_replaced_storage_dtype(const dtype& replacement_dtype) const
+{
+    if (m_operand_dtype.kind() == expression_kind) {
+        return make_shared<conversion_dtype>(m_value_dtype,
+                        m_operand_dtype.extended()->with_replaced_storage_dtype(replacement_dtype),
+                        m_errmode);
+    } else {
+        if (m_operand_dtype != replacement_dtype.value_dtype()) {
+            std::stringstream ss;
+            ss << "Cannot chain dtypes, because the conversion's storage dtype, " << m_operand_dtype;
+            ss << ", does not match the replacement's value dtype, " << replacement_dtype.value_dtype();
+            throw std::runtime_error(ss.str());
+        }
+        return make_shared<conversion_dtype>(m_value_dtype, replacement_dtype, m_errmode);
+    }
+}

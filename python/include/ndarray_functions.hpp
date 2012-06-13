@@ -23,6 +23,21 @@ inline dnd::ndarray ndarray_add(const dnd::ndarray& lhs, const dnd::ndarray& rhs
     return lhs + rhs;
 }
 
+inline dnd::ndarray ndarray_subtract(const dnd::ndarray& lhs, const dnd::ndarray& rhs)
+{
+    return lhs - rhs;
+}
+
+inline dnd::ndarray ndarray_multiply(const dnd::ndarray& lhs, const dnd::ndarray& rhs)
+{
+    return lhs * rhs;
+}
+
+inline dnd::ndarray ndarray_divide(const dnd::ndarray& lhs, const dnd::ndarray& rhs)
+{
+    return lhs / rhs;
+}
+
 inline std::string ndarray_str(const dnd::ndarray& n)
 {
     std::stringstream ss;

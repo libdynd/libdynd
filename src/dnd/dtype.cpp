@@ -38,6 +38,12 @@ void dnd::extended_dtype::get_value_to_operand_operation(intptr_t dst_fixedstrid
     throw std::runtime_error("get_value_to_operand_operation: this operation is only for expression_kind dtypes");
 }
 
+dtype dnd::extended_dtype::with_replaced_storage_dtype(const dtype& replacement_dtype) const
+{
+    throw std::runtime_error("with_replaced_storage_dtype: this operation is only for expression_kind dtypes");
+}
+
+
 
 /**
  * A static look-up table structure which contains data about the type ids.
