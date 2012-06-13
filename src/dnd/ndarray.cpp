@@ -291,6 +291,17 @@ static void val_assign_equal_dtypes(const ndarray& lhs, const ndarray& rhs)
     }
 }
 
+ndarray dnd::ndarray::storage() const
+{
+    const dtype& dt = get_dtype().storage_dtype();
+    if (get_expr_tree()->get_node_type() == strided_array_node_type) {
+        return ndarray(new strided_array_expr_node(dt, get_ndim(), get_shape(), get_strides(), get_originptr(), get_buffer_owner()));
+    } else {
+        throw std::runtime_error("Can only get the storage from dnd::ndarrays which are strided arrays");
+    }
+}
+
+
 ndarray dnd::ndarray::as_dtype(const dtype& dt, assign_error_mode errmode) const
 {
     if (dt == get_dtype().value_dtype()) {

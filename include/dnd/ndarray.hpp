@@ -224,6 +224,12 @@ public:
     ndarray_vals vals() const;
 
     /**
+     * Returnas a view of the array as the dtype's storage_dtype, peeling
+     * away any expression dtypes or encodings.
+     */
+    ndarray storage() const;
+
+    /**
      * The ndarray uses the function call operator to do indexing. The [] operator
      * only supports one index object at a time, and while there are tricks that can be
      * done by overloading the comma operator, this doesn't produce a fool-proof result.

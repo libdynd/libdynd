@@ -37,6 +37,8 @@ cdef extern from "dnd/ndarray.hpp" namespace "dnd":
         void val_assign(ndarray&, assign_error_mode) except +
         void val_assign(dtype&, char*, assign_error_mode) except +
 
+        ndarray storage() except +
+
         ndarray as_dtype(dtype&, assign_error_mode) except +
 
         ndarray view_as_dtype(dtype&) except +

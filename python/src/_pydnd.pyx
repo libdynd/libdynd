@@ -61,10 +61,17 @@ cdef class w_ndarray:
         print str(ndarray_debug_dump(GET(self.v)).c_str())
 
     def vals(self):
-        """Returns a version of the ndarray with plain values, no expressions."""
+        """Returns a version of the ndarray with plain values, all expressions evaluated."""
         cdef w_ndarray result
         result = w_ndarray()
         SET(result.v, ndarray_vals(GET(self.v)))
+        return result
+
+    def storage(self):
+        """Returns a version of the ndarray with its storage dtype, all expressions discarded."""
+        cdef w_ndarray result
+        result = w_ndarray()
+        SET(result.v, GET(self.v).storage())
         return result
 
     def val_assign(self, obj):
