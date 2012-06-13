@@ -276,56 +276,80 @@ static void strided_print(std::ostream& o, const char *data, intptr_t stride, in
     }
 }
 
-void dnd::dtype::print_data(std::ostream& o, const char *data, intptr_t stride, intptr_t size, const char *separator) const
+static void single_bytes_print(std::ostream& o, const char *data, intptr_t element_size)
 {
-    if (size > 0) {
+    static char hexadecimal[] = "0123456789abcdef";
+
+    o << "0x";
+    for (int i = 0; i < element_size; ++i, ++data) {
+        unsigned char v = (unsigned char)*data;
+        o << hexadecimal[v >> 4] << hexadecimal[v & 0x0f];
+    }
+}
+
+static void strided_bytes_print(std::ostream& o, const char *data, intptr_t element_size, intptr_t stride, intptr_t size, const char *separator)
+{
+    single_bytes_print(o, data, element_size);
+    for (intptr_t i = 1; i < size; ++i) {
+        data += stride;
+        o << separator;
+        single_bytes_print(o, data, element_size);
+    }
+}
+
+void dnd::dtype::print_data(std::ostream& o, const char *data, intptr_t stride, intptr_t count, const char *separator) const
+{
+    if (count > 0) {
         if (extended() != NULL) {
-            extended()->print_data(o, *this, data, stride, size, separator);
+            extended()->print_data(o, *this, data, stride, count, separator);
         } else {
             // TODO: Handle byte-swapped dtypes
             switch (type_id()) {
                 case bool_type_id:
                     o << (*data ? "true" : "false");
-                    for (intptr_t i = 1; i < size; ++i) {
+                    for (intptr_t i = 1; i < count; ++i) {
                         data += stride;
                         o << separator << (*data ? "true" : "false");
                     }
                     break;
                 case int8_type_id:
-                    strided_print<int8_t, int32_t>(o, data, stride, size, separator);
+                    strided_print<int8_t, int32_t>(o, data, stride, count, separator);
                     break;
                 case int16_type_id:
-                    strided_print<int16_t, int32_t>(o, data, stride, size, separator);
+                    strided_print<int16_t, int32_t>(o, data, stride, count, separator);
                     break;
                 case int32_type_id:
-                    strided_print<int32_t, int32_t>(o, data, stride, size, separator);
+                    strided_print<int32_t, int32_t>(o, data, stride, count, separator);
                     break;
                 case int64_type_id:
-                    strided_print<int64_t, int64_t>(o, data, stride, size, separator);
+                    strided_print<int64_t, int64_t>(o, data, stride, count, separator);
                     break;
                 case uint8_type_id:
-                    strided_print<uint8_t, uint32_t>(o, data, stride, size, separator);
+                    strided_print<uint8_t, uint32_t>(o, data, stride, count, separator);
                     break;
                 case uint16_type_id:
-                    strided_print<uint16_t, uint32_t>(o, data, stride, size, separator);
+                    strided_print<uint16_t, uint32_t>(o, data, stride, count, separator);
                     break;
                 case uint32_type_id:
-                    strided_print<uint32_t, uint32_t>(o, data, stride, size, separator);
+                    strided_print<uint32_t, uint32_t>(o, data, stride, count, separator);
                     break;
                 case uint64_type_id:
-                    strided_print<uint64_t, uint64_t>(o, data, stride, size, separator);
+                    strided_print<uint64_t, uint64_t>(o, data, stride, count, separator);
                     break;
                 case float32_type_id:
-                    strided_print<float, float>(o, data, stride, size, separator);
+                    strided_print<float, float>(o, data, stride, count, separator);
                     break;
                 case float64_type_id:
-                    strided_print<double, double>(o, data, stride, size, separator);
+                    strided_print<double, double>(o, data, stride, count, separator);
                     break;
                 case complex_float32_type_id:
-                    strided_print<complex<float>, complex<float> >(o, data, stride, size, separator);
+                    strided_print<complex<float>, complex<float> >(o, data, stride, count, separator);
                     break;
                 case complex_float64_type_id:
-                    strided_print<complex<double>, complex<double> >(o, data, stride, size, separator);
+                    strided_print<complex<double>, complex<double> >(o, data, stride, count, separator);
+                    break;
+                case bytes_type_id:
+                    strided_bytes_print(o, data, itemsize(), stride, count, separator);
                     break;
                 default:
                     stringstream ss;
