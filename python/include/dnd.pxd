@@ -10,12 +10,13 @@
 # * Template functions are unsupported (classes: yes, functions: no)
 # * Cython files may not contain UTF8
 # * Overloading operator= is not supported
-# * BUG: The "GET(self.v)" idiom doesn't work with __add__, but works
-#        with other functions. Requires a manual <w_...> cast to
-#        make it work.
+# * Note: Many things are different in Cython types, it's important to
+#         read the page http://docs.cython.org/src/reference/extension_types.html,
+#         as Cython does not detect incorrect usage.
 # * BUG: The "except +" annotation doesn't seem to work for overloaded
 #        operators, exceptions weren't being caught.
 
+include "cpython/object.pxd"
 include "libcpp/string.pxd"
 
 cdef extern from "<stdint.h>":

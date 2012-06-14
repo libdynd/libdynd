@@ -49,6 +49,48 @@ cdef class w_dtype:
     def __repr__(self):
         return str(dtype_repr(GET(self.v)).c_str())
 
+    def __richcmp__(lhs, rhs, int op):
+        if op == Py_EQ:
+            if type(lhs) == w_dtype and type(rhs) == w_dtype:
+                return GET((<w_dtype>lhs).v) == GET((<w_dtype>rhs).v)
+            else:
+                return False
+        elif op == Py_NE:
+            if type(lhs) == w_dtype and type(rhs) == w_dtype:
+                return GET((<w_dtype>lhs).v) != GET((<w_dtype>rhs).v)
+            else:
+                return False
+        return NotImplemented
+
+def make_byteswap_dtype(native_dtype, operand_dtype=None):
+    """Constructs a byteswap dtype from a builtin one, with data feeding in from an optional operand dtype."""
+    cdef w_dtype result = w_dtype()
+    if operand_dtype is None:
+        SET(result.v, dnd_make_byteswap_dtype(GET(w_dtype(native_dtype).v)))
+    else:
+        SET(result.v, dnd_make_byteswap_dtype(GET(w_dtype(native_dtype).v), GET(w_dtype(operand_dtype).v)))
+    return result
+
+def make_bytes_dtype(int itemsize, int alignment):
+    """Constructs a bytes dtype with the specified item size and alignment."""
+    cdef w_dtype result = w_dtype()
+    SET(result.v, dnd_make_bytes_dtype(itemsize, alignment))
+    return result
+
+def make_convert_dtype(to_dtype, from_dtype):
+    """Constructs a conversion dtype from the given source and destination dtypes."""
+    cdef w_dtype result = w_dtype()
+    SET(result.v, dnd_make_conversion_dtype(GET(w_dtype(to_dtype).v), GET(w_dtype(from_dtype).v), assign_error_fractional))
+    return result
+
+def make_unaligned_dtype(aligned_dtype):
+    """Constructs a dtype with alignment of 1 from the given dtype."""
+    cdef w_dtype result = w_dtype()
+    SET(result.v, dnd_make_unaligned_dtype(GET(w_dtype(aligned_dtype).v)))
+    return result
+
+##############################################################################
+
 cdef class w_ndarray:
     # To access the embedded dtype, use "GET(self.v)",
     # which returns a reference to the ndarray, and
@@ -77,42 +119,36 @@ cdef class w_ndarray:
 
     def vals(self):
         """Returns a version of the ndarray with plain values, all expressions evaluated."""
-        cdef w_ndarray result
-        result = w_ndarray()
+        cdef w_ndarray result = w_ndarray()
         SET(result.v, ndarray_vals(GET(self.v)))
         return result
 
     def storage(self):
         """Returns a version of the ndarray with its storage dtype, all expressions discarded."""
-        cdef w_ndarray result
-        result = w_ndarray()
+        cdef w_ndarray result = w_ndarray()
         SET(result.v, GET(self.v).storage())
         return result
 
     def val_assign(self, obj):
         """Assigns to the ndarray by value instead of by reference."""
-        cdef w_ndarray n
-        n = w_ndarray(obj)
+        cdef w_ndarray n = w_ndarray(obj)
         GET(self.v).val_assign(GET(n.v), assign_error_fractional)
 
     def as_dtype(self, dtype):
         """Converts the ndarray to the requested dtype. If dtype is an expression dtype, its expression gets applied on top of the existing data."""
-        cdef w_ndarray result
-        result = w_ndarray()
+        cdef w_ndarray result = w_ndarray()
         SET(result.v, GET(self.v).as_dtype(GET(w_dtype(dtype).v), assign_error_fractional))
         return result
 
     def view_as_dtype(self, dtype):
         """Views the data of the ndarray as the requested dtype, where it makes sense."""
-        cdef w_ndarray result
-        result = w_ndarray()
+        cdef w_ndarray result = w_ndarray()
         SET(result.v, GET(self.v).view_as_dtype(GET(w_dtype(dtype).v)))
         return result
 
     property dtype:
         def __get__(self):
-            cdef w_dtype result
-            result = w_dtype()
+            cdef w_dtype result = w_dtype()
             SET(result.v, GET(self.v).get_dtype())
             return result
 
@@ -127,44 +163,22 @@ cdef class w_ndarray:
         def __get__(self):
             return ndarray_as_numpy_struct_capsule(GET(self.v))
 
-    def __add__(self, rhs):
+    def __add__(lhs, rhs):
         cdef w_ndarray result = w_ndarray()
-        # Cython seems to lose the w_ndarray type information about "self", need to forcefully cast :P
-        SET(result.v, ndarray_add(GET((<w_ndarray>self).v), GET(w_ndarray(rhs).v)))
+        SET(result.v, ndarray_add(GET((w_ndarray(lhs)).v), GET(w_ndarray(rhs).v)))
         return result
 
-    def __radd__(self, lhs):
-        # TODO: __r<*>__ are crashing, seems to be a Cython bug. Need to investigate...
+    def __sub__(lhs, rhs):
         cdef w_ndarray result = w_ndarray()
-        SET(result.v, ndarray_add(GET(w_ndarray(lhs).v), GET((<w_ndarray>self).v)))
+        SET(result.v, ndarray_subtract(GET((w_ndarray(lhs)).v), GET(w_ndarray(rhs).v)))
         return result
 
-    def __sub__(self, rhs):
+    def __mul__(lhs, rhs):
         cdef w_ndarray result = w_ndarray()
-        SET(result.v, ndarray_subtract(GET((<w_ndarray>self).v), GET(w_ndarray(rhs).v)))
+        SET(result.v, ndarray_multiply(GET((w_ndarray(lhs)).v), GET(w_ndarray(rhs).v)))
         return result
 
-    def __rsub__(self, lhs):
+    def __div__(lhs, rhs):
         cdef w_ndarray result = w_ndarray()
-        SET(result.v, ndarray_subtract(GET(w_ndarray(lhs).v), GET((<w_ndarray>self).v)))
-        return result
-
-    def __mul__(self, rhs):
-        cdef w_ndarray result = w_ndarray()
-        SET(result.v, ndarray_multiply(GET((<w_ndarray>self).v), GET(w_ndarray(rhs).v)))
-        return result
-
-    def __rmul__(self, lhs):
-        cdef w_ndarray result = w_ndarray()
-        SET(result.v, ndarray_multiply(GET(w_ndarray(lhs).v), GET((<w_ndarray>self).v)))
-        return result
-
-    def __div__(self, rhs):
-        cdef w_ndarray result = w_ndarray()
-        SET(result.v, ndarray_divide(GET((<w_ndarray>self).v), GET(w_ndarray(rhs).v)))
-        return result
-
-    def __rdiv__(self, lhs):
-        cdef w_ndarray result = w_ndarray()
-        SET(result.v, ndarray_divide(GET(w_ndarray(lhs).v), GET((<w_ndarray>self).v)))
+        SET(result.v, ndarray_divide(GET((w_ndarray(lhs)).v), GET(w_ndarray(rhs).v)))
         return result

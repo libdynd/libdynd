@@ -90,7 +90,11 @@ dtype dnd::make_unaligned_dtype(const dtype& value_dtype)
     if (value_dtype.alignment() > 1) {
         // Only do something if it requires alignment
         if (value_dtype.kind() != expression_kind) {
-            return make_view_dtype(value_dtype, make_bytes_dtype(value_dtype.itemsize(), 1));
+            if (value_dtype.type_id() == bytes_type_id) {
+                return dtype(make_align_dtype(value_dtype.alignment(), make_bytes_dtype(value_dtype.itemsize(), 1)));
+            } else {
+                return make_view_dtype(value_dtype, make_bytes_dtype(value_dtype.itemsize(), 1));
+            }
         } else {
             const dtype& sdt = value_dtype.storage_dtype();
             if (sdt.type_id() == bytes_type_id) {

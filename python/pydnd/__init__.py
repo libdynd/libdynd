@@ -1,4 +1,6 @@
-from _pydnd import w_dtype as dtype, w_ndarray as ndarray
+from _pydnd import w_dtype as dtype, w_ndarray as ndarray, \
+        make_byteswap_dtype, make_bytes_dtype, make_convert_dtype, \
+        make_unaligned_dtype
 
 bool = dtype('bool')
 int8 = dtype('int8')

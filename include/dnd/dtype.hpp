@@ -466,6 +466,21 @@ std::ostream& operator<<(std::ostream& o, const dtype& rhs);
  */
 inline dtype make_bytes_dtype(intptr_t element_size, intptr_t alignment)
 {
+    if (alignment > element_size) {
+        std::stringstream ss;
+        ss << "Cannot make a bytes<" << element_size << "," << alignment << "> dtype, its alignment is greater than its size";
+        throw std::runtime_error(ss.str());
+    }
+    if (alignment != 1 && alignment != 2 && alignment != 4 && alignment != 8 && alignment != 16) {
+        std::stringstream ss;
+        ss << "Cannot make a bytes<" << element_size << "," << alignment << "> dtype, its alignment is not a small power of two";
+        throw std::runtime_error(ss.str());
+    }
+    if ((element_size&(alignment-1)) != 0) {
+        std::stringstream ss;
+        ss << "Cannot make a bytes<" << element_size << "," << alignment << "> dtype, its alignment does not divide into its item size";
+        throw std::runtime_error(ss.str());
+    }
     return dtype(bytes_type_id, bytes_kind, alignment, element_size);
 }
 

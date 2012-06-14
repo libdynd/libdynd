@@ -65,6 +65,8 @@ cdef extern from "dnd/dtype.hpp" namespace "dnd":
         bint is_object_type()
         extended_dtype* extended()
 
+    dtype dnd_make_bytes_dtype "dnd::make_bytes_dtype" (intptr_t, intptr_t) except +
+
 cdef extern from "dnd/dtype_assign.hpp" namespace "dnd":
     cdef enum assign_error_mode:
         assign_error_none
@@ -72,9 +74,20 @@ cdef extern from "dnd/dtype_assign.hpp" namespace "dnd":
         assign_error_fractional
         assign_error_inexact
 
+cdef extern from "dnd/dtypes/byteswap_dtype.hpp" namespace "dnd":
+    dtype dnd_make_byteswap_dtype "dnd::make_byteswap_dtype" (dtype&) except +
+    dtype dnd_make_byteswap_dtype "dnd::make_byteswap_dtype" (dtype&, dtype&) except +
+
+cdef extern from "dnd/dtypes/conversion_dtype.hpp" namespace "dnd":
+    dtype dnd_make_conversion_dtype "dnd::make_conversion_dtype" (dtype&, dtype&, assign_error_mode) except +
+
+cdef extern from "dnd/dtypes/align_dtype.hpp" namespace "dnd":
+    dtype dnd_make_align_dtype "dnd::make_align_dtype" (intptr_t alignment, dtype&) except +
+    dtype dnd_make_unaligned_dtype "dnd::make_unaligned_dtype" (dtype&) except +
+
 cdef extern from "dtype_functions.hpp" namespace "pydnd":
     string dtype_str(dtype&)
     string dtype_repr(dtype&)
-    dtype deduce_dtype_from_object(object obj) except +
-    dtype make_dtype_from_object(object obj) except +
+    dtype deduce_dtype_from_object(object) except +
+    dtype make_dtype_from_object(object) except +
 
