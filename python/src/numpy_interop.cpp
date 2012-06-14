@@ -278,17 +278,24 @@ PyObject* pydnd::ndarray_as_numpy_struct_capsule(const dnd::ndarray& n)
     }
 
     dtype dt = n.get_dtype();
-
-    bool aligned = true;
-    if (dt.type_id() == unaligned_type_id) {
-        dt = dt.value_dtype();
-        aligned = false;
-    }
+    dtype value_dt;
 
     bool byteswapped = false;
     if (dt.type_id() == byteswap_type_id) {
-        dt = dt.value_dtype();
+        value_dt = dt.value_dtype();
+        dt = dt.operand_dtype();
         byteswapped = true;
+    } else {
+        value_dt = dt.value_dtype();
+    }
+
+    bool aligned = true;
+    if (dt.type_id() == view_type_id) {
+        dtype sdt = dt.storage_dtype();
+        if (sdt.type_id() == bytes_type_id) {
+            dt = dt.value_dtype();
+            aligned = false;
+        }
     }
 
     PyArrayInterface inter;

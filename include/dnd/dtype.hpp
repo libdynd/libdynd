@@ -353,6 +353,11 @@ public:
         return !(operator==(rhs));
     }
 
+    /**
+     * Returns the non-expression dtype that this
+     * dtype looks like for the purposes of calculation,
+     * printing, etc.
+     */
     const dtype& value_dtype() const {
         // Only expression_kind dtypes have different value_dtype
         if (m_kind != expression_kind) {
@@ -363,6 +368,25 @@ public:
         }
     }
 
+    /**
+     * For expression dtypes, returns the operand dtype,
+     * which is the source dtype of this dtype's expression.
+     * This is one link down the expression chain.
+     */
+    const dtype& operand_dtype() const {
+        // Only expression_kind dtypes have different operand_dtype
+        if (m_kind != expression_kind) {
+            return *this;
+        } else {
+            return m_data->operand_dtype(*this);
+        }
+    }
+
+    /**
+     * For expression dtypes, returns the storage dtype,
+     * which is the dtype of the underlying input data.
+     * This is the bottom of the expression chain.
+     */
     const dtype& storage_dtype() const {
         // Only expression_kind dtypes have different storage_dtype
         if (m_kind != expression_kind) {

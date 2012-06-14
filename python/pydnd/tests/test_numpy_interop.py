@@ -67,7 +67,8 @@ class TestNumpyDTypeInterop(unittest.TestCase):
         self.assertEqual(nd.make_byteswap_dtype(nd.cfloat64),
                 nd.dtype(np.dtype(nonnative + 'c16')))
 
-    def test_view_of_numpy_array(self):
+    def test_dnd_view_of_numpy_array(self):
+        """Tests viewing a numpy array as a dnd ndarray"""
         nonnative = self.nonnative
 
         a = np.arange(10, dtype=np.int32)
@@ -93,10 +94,48 @@ class TestNumpyDTypeInterop(unittest.TestCase):
         self.assertEqual(n.strides, a.strides)
 
         a = np.arange(49, dtype='i1')
-        a = a[1:].view(dtype=(nonnative + 'i4')).reshape(4,3)
+        a = a[1:].view(dtype=(nonnative + 'i4')).reshape(2,2,3)
         n = nd.ndarray(a)
         self.assertEqual(n.dtype,
                 nd.make_unaligned_dtype(nd.make_byteswap_dtype(nd.int32)))
         self.assertEqual(n.ndim, a.ndim)
         self.assertEqual(n.shape, a.shape)
         self.assertEqual(n.strides, a.strides)
+
+    def test_numpy_view_of_dnd_array(self):
+        """Tests viewing a dnd ndarray as a numpy array"""
+        nonnative = self.nonnative
+
+        n = nd.ndarray(np.arange(10, dtype=np.int32))
+        a = np.asarray(n)
+        self.assertEqual(a.dtype, np.dtype(np.int32))
+        self.assertTrue(a.flags.aligned)
+        self.assertEqual(a.ndim, n.ndim)
+        self.assertEqual(a.shape, n.shape)
+        self.assertEqual(a.strides, n.strides)
+
+        n = nd.ndarray(np.arange(12, dtype=(nonnative + 'i4')).reshape(3,4))
+        a = np.asarray(n)
+        self.assertEqual(a.dtype, np.dtype(nonnative + 'i4'))
+        self.assertTrue(a.flags.aligned)
+        self.assertEqual(a.ndim, n.ndim)
+        self.assertEqual(a.shape, n.shape)
+        self.assertEqual(a.strides, n.strides)
+
+        n = nd.ndarray(np.arange(49, dtype='i1')[1:].view(dtype=np.int32).reshape(4,3))
+        a = np.asarray(n)
+        self.assertEqual(a.dtype, np.dtype(np.int32))
+        self.assertFalse(a.flags.aligned)
+        self.assertEqual(a.ndim, n.ndim)
+        self.assertEqual(a.shape, n.shape)
+        self.assertEqual(a.strides, n.strides)
+
+        n = nd.ndarray(np.arange(49, dtype='i1')[1:].view(
+                    dtype=(nonnative + 'i4')).reshape(2,2,3))
+        a = np.asarray(n)
+        self.assertEqual(a.dtype, np.dtype(nonnative + 'i4'))
+        self.assertFalse(a.flags.aligned)
+        self.assertEqual(a.ndim, n.ndim)
+        self.assertEqual(a.shape, n.shape)
+        self.assertEqual(a.strides, n.strides)
+
