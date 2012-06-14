@@ -11,16 +11,6 @@
 #define DND_XSTRINGIFY(s) #s
 #define DND_STRINGIFY(s) DND_XSTRINGIFY(s)
 
-/**
- * This preprocessor symbol enables or disables assertions
- * that pointers are aligned as they are supposed to be. This helps
- * test that alignment is being done correctly on platforms which
- * do not segfault on misaligned data.
- *
- * An exception is thrown if an improper unalignment is detected.
- */
-#define DND_ALIGNMENT_ASSERTIONS 1
-
 #if DND_ALIGNMENT_ASSERTIONS
 #include <sstream>
 #include <dnd/dtype.hpp>
@@ -40,5 +30,35 @@
 #else
 # define DND_ASSERT_ALIGNED(ptr, alignment, extra_info) {}
 #endif
+
+namespace dnd {
+
+/**
+ * This function returns true if any diagnostics, which might
+ * slow down execution speed, are enabled. For example, in
+ * the Python exposure, this is used to print a warning on
+ * module import when performance might be hampered by this.
+ */
+inline bool any_diagnostics_enabled()
+{
+    // IMPORTANT: All diagnostic macros should be checked here,
+    //            and added to the description string below.
+    return DND_ALIGNMENT_ASSERTIONS != 0;
+}
+
+/**
+ * This function returns a string which lists the enabled
+ * diagnostics, including a short description for each.
+ */
+inline std::string which_diagnostics_enabled()
+{
+    std::stringstream ss;
+#if DND_ALIGNMENT_ASSERTIONS
+    ss << "DND_ALIGNMENT_ASSERTIONS - checks that data has correct alignment in inner loops\n";
+#endif // DND_ALIGNMENT_ASSERTIONS
+    return ss.str();
+}
+
+} // namespace dnd
 
 #endif // _DND__DIAGNOSTICS_HPP_

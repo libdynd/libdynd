@@ -52,18 +52,18 @@ bool dnd::byteswap_dtype::operator==(const extended_dtype& rhs) const
 void dnd::byteswap_dtype::get_operand_to_value_operation(intptr_t dst_fixedstride, intptr_t src_fixedstride, kernel_instance<unary_operation_t>& out_kernel) const
 {
     if(m_value_dtype.kind() != complex_kind) {
-        get_byteswap_kernel(m_value_dtype.itemsize(), dst_fixedstride, src_fixedstride, out_kernel);
+        get_byteswap_kernel(m_value_dtype.itemsize(), m_value_dtype.alignment(), dst_fixedstride, src_fixedstride, out_kernel);
     } else {
-        get_pairwise_byteswap_kernel(m_value_dtype.itemsize(), dst_fixedstride, src_fixedstride, out_kernel);
+        get_pairwise_byteswap_kernel(m_value_dtype.itemsize(), m_value_dtype.alignment(), dst_fixedstride, src_fixedstride, out_kernel);
     }
 }
 
 void dnd::byteswap_dtype::get_value_to_operand_operation(intptr_t dst_fixedstride, intptr_t src_fixedstride, kernel_instance<unary_operation_t>& out_kernel) const
 {
     if(m_value_dtype.kind() != complex_kind) {
-        get_byteswap_kernel(m_value_dtype.itemsize(), dst_fixedstride, src_fixedstride, out_kernel);
+        get_byteswap_kernel(m_value_dtype.itemsize(), m_value_dtype.alignment(), dst_fixedstride, src_fixedstride, out_kernel);
     } else {
-        get_pairwise_byteswap_kernel(m_value_dtype.itemsize(), dst_fixedstride, src_fixedstride, out_kernel);
+        get_pairwise_byteswap_kernel(m_value_dtype.itemsize(), m_value_dtype.alignment(), dst_fixedstride, src_fixedstride, out_kernel);
     }
 }
 

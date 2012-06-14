@@ -126,31 +126,36 @@ static void general_pairwise_byteswap_kernel(char *dst, intptr_t dst_stride,
     }
 }
 
-void dnd::get_byteswap_kernel(intptr_t element_size,
+void dnd::get_byteswap_kernel(intptr_t element_size, intptr_t alignment,
                 intptr_t dst_fixedstride, intptr_t src_fixedstride,
                 kernel_instance<unary_operation_t>& out_kernel)
 {
-    switch (element_size) {
-    case 2:
-        out_kernel.auxdata.free();
-        out_kernel.kernel = &aligned_fixed_size_byteswap_kernel<uint16_t>;
-        break;
-    case 4:
-        out_kernel.auxdata.free();
-        out_kernel.kernel = &aligned_fixed_size_byteswap_kernel<uint32_t>;
-        break;
-    case 8:
-        out_kernel.auxdata.free();
-        out_kernel.kernel = &aligned_fixed_size_byteswap_kernel<uint64_t>;
-        break;
-    default:
+    if (element_size == alignment) {
+        switch (element_size) {
+        case 2:
+            out_kernel.auxdata.free();
+            out_kernel.kernel = &aligned_fixed_size_byteswap_kernel<uint16_t>;
+            break;
+        case 4:
+            out_kernel.auxdata.free();
+            out_kernel.kernel = &aligned_fixed_size_byteswap_kernel<uint32_t>;
+            break;
+        case 8:
+            out_kernel.auxdata.free();
+            out_kernel.kernel = &aligned_fixed_size_byteswap_kernel<uint64_t>;
+            break;
+        default:
+            make_auxiliary_data<intptr_t>(out_kernel.auxdata, element_size);
+            out_kernel.kernel = &general_byteswap_kernel;
+            break;
+        }
+    } else {
         make_auxiliary_data<intptr_t>(out_kernel.auxdata, element_size);
         out_kernel.kernel = &general_byteswap_kernel;
-        break;
     }
 }
 
-void dnd::get_pairwise_byteswap_kernel(intptr_t element_size,
+void dnd::get_pairwise_byteswap_kernel(intptr_t element_size, intptr_t alignment,
                 intptr_t dst_fixedstride, intptr_t src_fixedstride,
                 kernel_instance<unary_operation_t>& out_kernel)
 {
@@ -158,22 +163,27 @@ void dnd::get_pairwise_byteswap_kernel(intptr_t element_size,
         throw runtime_error("cannot get a pairwise byteswap kernel for an odd-sized dtype");
     }
 
-    switch (element_size) {
-    case 4:
-        out_kernel.auxdata.free();
-        out_kernel.kernel = &aligned_fixed_size_pairwise_byteswap_kernel<uint16_t>;
-        break;
-    case 8:
-        out_kernel.auxdata.free();
-        out_kernel.kernel = &aligned_fixed_size_pairwise_byteswap_kernel<uint32_t>;
-        break;
-    case 16:
-        out_kernel.auxdata.free();
-        out_kernel.kernel = &aligned_fixed_size_pairwise_byteswap_kernel<uint64_t>;
-        break;
-    default:
+    if (element_size <= alignment * 2) {
+        switch (element_size) {
+        case 4:
+            out_kernel.auxdata.free();
+            out_kernel.kernel = &aligned_fixed_size_pairwise_byteswap_kernel<uint16_t>;
+            break;
+        case 8:
+            out_kernel.auxdata.free();
+            out_kernel.kernel = &aligned_fixed_size_pairwise_byteswap_kernel<uint32_t>;
+            break;
+        case 16:
+            out_kernel.auxdata.free();
+            out_kernel.kernel = &aligned_fixed_size_pairwise_byteswap_kernel<uint64_t>;
+            break;
+        default:
+            make_auxiliary_data<intptr_t>(out_kernel.auxdata, element_size);
+            out_kernel.kernel = &general_pairwise_byteswap_kernel;
+            break;
+        }
+    } else {
         make_auxiliary_data<intptr_t>(out_kernel.auxdata, element_size);
         out_kernel.kernel = &general_pairwise_byteswap_kernel;
-        break;
     }
 }

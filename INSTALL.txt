@@ -39,12 +39,12 @@ Windows
         dynamicndarray folder which is the root of the project.
         The execute the following commands:
 
-    D:\dynamicndarray>mkdir build
-    D:\dynamicndarray>cd build
-    D:\dynamicndarray\build>cmake -G "Visual Studio 10 Win64" ..
-       [output, check it for errors]
-    D:\dynamicndarray\build>start dynamicndarray.sln
-       [Visual Studio should start and load the project]
+        D:\dynamicndarray>mkdir build
+        D:\dynamicndarray>cd build
+        D:\dynamicndarray\build>cmake -G "Visual Studio 10 Win64" ..
+           [output, check it for errors]
+        D:\dynamicndarray\build>start dynamicndarray.sln
+           [Visual Studio should start and load the project]
 
     2. The RelWithDebInfo configuration is recommended for most
        purposes. The Debug configuration tries to link against

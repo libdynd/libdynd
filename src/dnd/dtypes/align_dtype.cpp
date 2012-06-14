@@ -5,8 +5,8 @@
 
 #include <dnd/dtypes/align_dtype.hpp>
 #include <dnd/dtypes/view_dtype.hpp>
-#include <dnd/kernels/alignment_kernels.hpp>
 #include <dnd/dtype_assign.hpp>
+#include <dnd/kernels/assignment_kernels.hpp>
 
 using namespace std;
 using namespace dnd;
@@ -48,12 +48,16 @@ bool dnd::align_dtype::operator==(const extended_dtype& rhs) const
 
 void dnd::align_dtype::get_operand_to_value_operation(intptr_t dst_fixedstride, intptr_t src_fixedstride, kernel_instance<unary_operation_t>& out_kernel) const
 {
-    get_unaligned_copy_kernel(m_value_dtype.itemsize(), dst_fixedstride, src_fixedstride, out_kernel);
+    get_pod_dtype_assignment_kernel(m_value_dtype.itemsize(),
+                    std::min(m_value_dtype.alignment(), m_operand_dtype.alignment()),
+                    dst_fixedstride, src_fixedstride, out_kernel);
 }
 
 void dnd::align_dtype::get_value_to_operand_operation(intptr_t dst_fixedstride, intptr_t src_fixedstride, kernel_instance<unary_operation_t>& out_kernel) const
 {
-    get_unaligned_copy_kernel(m_value_dtype.itemsize(), dst_fixedstride, src_fixedstride, out_kernel);
+    get_pod_dtype_assignment_kernel(m_value_dtype.itemsize(),
+                    std::min(m_value_dtype.alignment(), m_operand_dtype.alignment()),
+                    dst_fixedstride, src_fixedstride, out_kernel);
 }
 
 dtype dnd::align_dtype::with_replaced_storage_dtype(const dtype& replacement_dtype) const

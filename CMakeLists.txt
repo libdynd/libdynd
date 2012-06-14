@@ -42,14 +42,12 @@ set(dnd_SRC
     src/dnd/kernels/byteswap_kernels.cpp
     src/dnd/kernels/single_assigner_builtin.hpp
     src/dnd/kernels/multiple_assigner_builtin.hpp
-    src/dnd/kernels/alignment_kernels.cpp
     include/dnd/kernels/assignment_kernels.hpp
     include/dnd/kernels/builtin_dtype_binary_kernel_table.hpp
     include/dnd/kernels/buffered_unary_kernels.hpp
     include/dnd/kernels/buffered_binary_kernels.hpp
     include/dnd/kernels/byteswap_kernels.hpp
     include/dnd/kernels/kernel_instance.hpp
-    include/dnd/kernels/alignment_kernels.hpp
     src/dnd/dtype.cpp
     src/dnd/dtype_assign.cpp
     src/dnd/dtype_promotion.cpp

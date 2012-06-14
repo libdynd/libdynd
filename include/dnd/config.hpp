@@ -108,6 +108,8 @@ namespace dnd {
  *
  * See diagnostics.hpp for the macros which use this.
  */
-#define DND_ALIGNMENT_ASSERTIONS 1
+#ifndef DND_ALIGNMENT_ASSERTIONS
+# define DND_ALIGNMENT_ASSERTIONS 1
+#endif
 
 #endif // _DND__CONFIG_HPP_

@@ -1,13 +1,24 @@
 #
 # Copyright (C) 2011-12, Dynamic NDArray Developers
-# BSD 3-Clause License, see LICENSE.txt
+# BSD 2-Clause License, see LICENSE.txt
 #
+
 cdef extern from "do_import_array.hpp":
     pass
 cdef extern from "numpy_interop.hpp" namespace "pydnd":
     object ndarray_as_numpy_struct_capsule(ndarray&) except +
     void import_numpy()
 import_numpy()
+
+cdef extern from "<dnd/diagnostics.hpp>" namespace "dnd":
+    bint any_diagnostics_enabled()
+    string which_diagnostics_enabled()
+if any_diagnostics_enabled():
+    import warnings
+    class PerformanceWarning(Warning):
+        pass
+    warnings.warn("Performance is reduced because of enabled diagnostics:\n" +
+                str(which_diagnostics_enabled().c_str()), PerformanceWarning)
 
 include "dnd.pxd"
 include "dtype.pxd"

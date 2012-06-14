@@ -376,6 +376,22 @@ static void strided_copy_zerostride_assign(char *dst, intptr_t dst_stride, const
     }
 }
 
+/**
+ * An unaligned copy kernel function for a predefined fixed size.
+ */
+template<int N>
+static void unaligned_fixed_size_copy_kernel(char *dst, intptr_t dst_stride,
+                    const char *src, intptr_t src_stride,
+                    intptr_t count, const AuxDataBase *)
+{
+    for (intptr_t i = 0; i < count; ++i) {
+        memcpy(dst, src, N);
+                
+        dst += dst_stride;
+        src += src_stride;
+    }
+}
+
 void dnd::get_pod_dtype_assignment_kernel(
                     intptr_t element_size, intptr_t alignment,
                     intptr_t dst_fixedstride, intptr_t src_fixedstride,
@@ -433,8 +449,25 @@ void dnd::get_pod_dtype_assignment_kernel(
                     break;
             }
         } else {
-            out_kernel.kernel = &strided_copy_zerostride_assign;
-            make_auxiliary_data<intptr_t>(out_kernel.auxdata, element_size);
+            // unaligned
+            switch (element_size) {
+                case 2:
+                    out_kernel.kernel = &unaligned_fixed_size_copy_kernel<2>;
+                    break;
+                case 4:
+                    out_kernel.kernel = &unaligned_fixed_size_copy_kernel<4>;
+                    break;
+                case 8:
+                    out_kernel.kernel = &unaligned_fixed_size_copy_kernel<8>;
+                    break;
+                case 16:
+                    out_kernel.kernel = &unaligned_fixed_size_copy_kernel<16>;
+                    break;
+                default:
+                    out_kernel.kernel = &strided_copy_zerostride_assign;
+                    make_auxiliary_data<intptr_t>(out_kernel.auxdata, element_size);
+                    break;
+            }
         }
     } else {
         if (element_size == alignment) {

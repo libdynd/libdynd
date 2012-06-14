@@ -49,7 +49,7 @@ inline uint64_t byteswap_value(uint64_t value) {
  *
  * If a stride is unknown or non-fixed, pass INTPTR_MAX for that stride.
  */
-void get_byteswap_kernel(intptr_t element_size,
+void get_byteswap_kernel(intptr_t element_size, intptr_t alignment,
                 intptr_t dst_fixedstride, intptr_t src_fixedstride,
                 kernel_instance<unary_operation_t>& out_kernel);
 
@@ -61,7 +61,7 @@ void get_byteswap_kernel(intptr_t element_size,
  *
  * If a stride is unknown or non-fixed, pass INTPTR_MAX for that stride.
  */
-void get_pairwise_byteswap_kernel(intptr_t element_size,
+void get_pairwise_byteswap_kernel(intptr_t element_size, intptr_t alignment,
                 intptr_t dst_fixedstride, intptr_t src_fixedstride,
                 kernel_instance<unary_operation_t>& out_kernel);
 
