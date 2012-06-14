@@ -4,6 +4,11 @@ import pydnd as nd
 import numpy as np
 
 class TestNumpyDTypeInterop(unittest.TestCase):
+    def setUp(self):
+        if sys.byteorder == 'little':
+            self.nonnative = '>'
+        else:
+            self.nonnative = '<'
 
     def test_dtype_from_numpy_scalar_types(self):
         """Tests converting numpy scalar types to pydnd dtypes"""
@@ -39,28 +44,59 @@ class TestNumpyDTypeInterop(unittest.TestCase):
         self.assertEqual(nd.cfloat64, nd.dtype(np.dtype(np.complex128)))
 
         # non-native byte order
-        if sys.byteorder == 'little':
-            eindicator = '>'
-        else:
-            eindicator = '<'
+        nonnative = self.nonnative
 
         self.assertEqual(nd.make_byteswap_dtype(nd.int16),
-                nd.dtype(np.dtype(eindicator + 'i2')))
+                nd.dtype(np.dtype(nonnative + 'i2')))
         self.assertEqual(nd.make_byteswap_dtype(nd.int32),
-                nd.dtype(np.dtype(eindicator + 'i4')))
+                nd.dtype(np.dtype(nonnative + 'i4')))
         self.assertEqual(nd.make_byteswap_dtype(nd.int64),
-                nd.dtype(np.dtype(eindicator + 'i8')))
+                nd.dtype(np.dtype(nonnative + 'i8')))
         self.assertEqual(nd.make_byteswap_dtype(nd.uint16),
-                nd.dtype(np.dtype(eindicator + 'u2')))
+                nd.dtype(np.dtype(nonnative + 'u2')))
         self.assertEqual(nd.make_byteswap_dtype(nd.uint32),
-                nd.dtype(np.dtype(eindicator + 'u4')))
+                nd.dtype(np.dtype(nonnative + 'u4')))
         self.assertEqual(nd.make_byteswap_dtype(nd.uint64),
-                nd.dtype(np.dtype(eindicator + 'u8')))
+                nd.dtype(np.dtype(nonnative + 'u8')))
         self.assertEqual(nd.make_byteswap_dtype(nd.float32),
-                nd.dtype(np.dtype(eindicator + 'f4')))
+                nd.dtype(np.dtype(nonnative + 'f4')))
         self.assertEqual(nd.make_byteswap_dtype(nd.float64),
-                nd.dtype(np.dtype(eindicator + 'f8')))
+                nd.dtype(np.dtype(nonnative + 'f8')))
         self.assertEqual(nd.make_byteswap_dtype(nd.cfloat32),
-                nd.dtype(np.dtype(eindicator + 'c8')))
+                nd.dtype(np.dtype(nonnative + 'c8')))
         self.assertEqual(nd.make_byteswap_dtype(nd.cfloat64),
-                nd.dtype(np.dtype(eindicator + 'c16')))
+                nd.dtype(np.dtype(nonnative + 'c16')))
+
+    def test_view_of_numpy_array(self):
+        nonnative = self.nonnative
+
+        a = np.arange(10, dtype=np.int32)
+        n = nd.ndarray(a)
+        self.assertEqual(n.dtype, nd.int32)
+        self.assertEqual(n.ndim, a.ndim)
+        self.assertEqual(n.shape, a.shape)
+        self.assertEqual(n.strides, a.strides)
+
+        a = np.arange(12, dtype=(nonnative + 'i4')).reshape(3,4)
+        n = nd.ndarray(a)
+        self.assertEqual(n.dtype, nd.make_byteswap_dtype(nd.int32))
+        self.assertEqual(n.ndim, a.ndim)
+        self.assertEqual(n.shape, a.shape)
+        self.assertEqual(n.strides, a.strides)
+
+        a = np.arange(49, dtype='i1')
+        a = a[1:].view(dtype=np.int32).reshape(4,3)
+        n = nd.ndarray(a)
+        self.assertEqual(n.dtype, nd.make_unaligned_dtype(nd.int32))
+        self.assertEqual(n.ndim, a.ndim)
+        self.assertEqual(n.shape, a.shape)
+        self.assertEqual(n.strides, a.strides)
+
+        a = np.arange(49, dtype='i1')
+        a = a[1:].view(dtype=(nonnative + 'i4')).reshape(4,3)
+        n = nd.ndarray(a)
+        self.assertEqual(n.dtype,
+                nd.make_unaligned_dtype(nd.make_byteswap_dtype(nd.int32)))
+        self.assertEqual(n.ndim, a.ndim)
+        self.assertEqual(n.shape, a.shape)
+        self.assertEqual(n.strides, a.strides)

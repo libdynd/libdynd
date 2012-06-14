@@ -9,4 +9,5 @@ build
 
 *.a
 *.so
+*.pyc
 tests/dnd_tests

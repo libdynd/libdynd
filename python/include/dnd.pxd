@@ -40,6 +40,8 @@ cdef extern from "<iostream>" namespace "std":
 
     extern ostream cout
 
+cdef extern from "utility_functions.hpp" namespace "pydnd":
+    object intptr_array_as_tuple(int, intptr_t *)
 
 cdef extern from "placement_wrappers.hpp" namespace "pydnd":
     cdef struct dtype_placement_wrapper:

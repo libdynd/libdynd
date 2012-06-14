@@ -2,6 +2,7 @@
 // Copyright (C) 2011-12, Dynamic NDArray Developers
 // BSD 2-Clause License, see LICENSE.txt
 //
+
 #include "ndarray_functions.hpp"
 #include "dtype_functions.hpp"
 #include "numpy_interop.hpp"

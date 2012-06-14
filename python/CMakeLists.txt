@@ -49,9 +49,11 @@ set(pydnd_CPP_SRC
     include/dtype_functions.hpp
     include/ndarray_functions.hpp
     include/numpy_interop.hpp
+    include/utility_functions.hpp
     src/dtype_functions.cpp
     src/ndarray_functions.cpp
     src/numpy_interop.cpp
+    src/utility_functions.cpp
     )
 set(pydnd_CYTHON_SRC
     src/_pydnd.pyx

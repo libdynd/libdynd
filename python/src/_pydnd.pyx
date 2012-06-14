@@ -43,6 +43,14 @@ cdef class w_dtype:
     def __dealloc__(self):
         dtype_placement_delete(self.v)
 
+    property itemsize:
+        def __get__(self):
+            return GET(self.v).itemsize()
+
+    property alignment:
+        def __get__(self):
+            return GET(self.v).alignment()
+
     def __str__(self):
         return str(dtype_str(GET(self.v)).c_str())
 
@@ -151,6 +159,18 @@ cdef class w_ndarray:
             cdef w_dtype result = w_dtype()
             SET(result.v, GET(self.v).get_dtype())
             return result
+
+    property ndim:
+        def __get__(self):
+            return GET(self.v).get_ndim()
+
+    property shape:
+        def __get__(self):
+            return intptr_array_as_tuple(GET(self.v).get_ndim(), GET(self.v).get_shape())
+
+    property strides:
+        def __get__(self):
+            return intptr_array_as_tuple(GET(self.v).get_ndim(), GET(self.v).get_strides())
 
     def __str__(self):
         return str(ndarray_str(GET(self.v)).c_str())
