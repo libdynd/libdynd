@@ -8,6 +8,7 @@
 
 #include <dnd/dtypes/byteswap_dtype.hpp>
 #include <dnd/dtypes/view_dtype.hpp>
+#include <dnd/dtypes/dtype_alignment.hpp>
 
 #include "dtype_functions.hpp"
 #include "ndarray_functions.hpp"
@@ -278,15 +279,12 @@ PyObject* pydnd::ndarray_as_numpy_struct_capsule(const dnd::ndarray& n)
     }
 
     dtype dt = n.get_dtype();
-    dtype value_dt;
+    dtype value_dt = dt.value_dtype();
 
     bool byteswapped = false;
     if (dt.type_id() == byteswap_type_id) {
-        value_dt = dt.value_dtype();
         dt = dt.operand_dtype();
         byteswapped = true;
-    } else {
-        value_dt = dt.value_dtype();
     }
 
     bool aligned = true;
@@ -303,7 +301,7 @@ PyObject* pydnd::ndarray_as_numpy_struct_capsule(const dnd::ndarray& n)
 
     inter.two = 2;
     inter.nd = n.get_ndim();
-    inter.typekind = numpy_kindchar_of(dt);
+    inter.typekind = numpy_kindchar_of(value_dt);
     inter.itemsize = (int)n.get_dtype().itemsize();
     // TODO: When read-write access control is added, this must be modified
     inter.flags = (byteswapped ? 0 : NPY_ARRAY_NOTSWAPPED) | (aligned ? NPY_ARRAY_ALIGNED : 0) | NPY_ARRAY_WRITEABLE;

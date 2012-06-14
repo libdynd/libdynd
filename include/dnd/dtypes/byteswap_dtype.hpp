@@ -15,7 +15,7 @@
 
 #include <dnd/dtype.hpp>
 #include <dnd/dtype_assign.hpp>
-#include <dnd/dtypes/align_dtype.hpp>
+#include <dnd/dtypes/view_dtype.hpp>
 
 namespace dnd {
 
@@ -42,7 +42,7 @@ public:
         }
         // Automatically realign if needed
         if (operand_dtype.value_dtype().alignment() < value_dtype.alignment()) {
-            m_operand_dtype = make_align_dtype(value_dtype.alignment(), operand_dtype);
+            m_operand_dtype = make_view_dtype(operand_dtype, make_bytes_dtype(operand_dtype.itemsize(), value_dtype.alignment()));
         }
     }
 

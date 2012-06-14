@@ -81,8 +81,7 @@ cdef extern from "dnd/dtypes/byteswap_dtype.hpp" namespace "dnd":
 cdef extern from "dnd/dtypes/conversion_dtype.hpp" namespace "dnd":
     dtype dnd_make_conversion_dtype "dnd::make_conversion_dtype" (dtype&, dtype&, assign_error_mode) except +
 
-cdef extern from "dnd/dtypes/align_dtype.hpp" namespace "dnd":
-    dtype dnd_make_align_dtype "dnd::make_align_dtype" (intptr_t alignment, dtype&) except +
+cdef extern from "dnd/dtypes/dtype_alignment.hpp" namespace "dnd":
     dtype dnd_make_unaligned_dtype "dnd::make_unaligned_dtype" (dtype&) except +
 
 cdef extern from "dtype_functions.hpp" namespace "pydnd":

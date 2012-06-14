@@ -10,7 +10,7 @@
 #include "inc_gtest.hpp"
 
 #include <dnd/ndarray.hpp>
-#include <dnd/dtypes/align_dtype.hpp>
+#include <dnd/dtypes/dtype_alignment.hpp>
 #include <dnd/dtypes/byteswap_dtype.hpp>
 
 using namespace std;
@@ -63,7 +63,7 @@ TEST(AlignDType, Chained) {
     // The unaligned dtype can give back an expression dtype as the value dtype,
     // make sure that is handled properly at the dtype object level.
     dtype dt = make_unaligned_dtype(make_byteswap_dtype<int>());
-    EXPECT_EQ(make_byteswap_dtype(make_dtype<int>(), make_align_dtype(4, make_bytes_dtype(4, 1))), dt);
+    EXPECT_EQ(make_byteswap_dtype(make_dtype<int>(), make_view_dtype(make_bytes_dtype(4, 4), make_bytes_dtype(4, 1))), dt);
     EXPECT_EQ(make_bytes_dtype(4, 1), dt.storage_dtype());
     EXPECT_EQ(make_dtype<int>(), dt.value_dtype());
 }

@@ -28,12 +28,12 @@ set(dnd_SRC
     src/dnd/dtypes/array_dtype.cpp
     src/dnd/dtypes/byteswap_dtype.cpp
     src/dnd/dtypes/conversion_dtype.cpp
-    src/dnd/dtypes/align_dtype.cpp
+    src/dnd/dtypes/dtype_alignment.cpp
     src/dnd/dtypes/view_dtype.cpp
     include/dnd/dtypes/array_dtype.hpp
     include/dnd/dtypes/byteswap_dtype.hpp
     include/dnd/dtypes/conversion_dtype.hpp
-    include/dnd/dtypes/align_dtype.hpp
+    include/dnd/dtypes/dtype_alignment.hpp
     include/dnd/dtypes/view_dtype.hpp
     src/dnd/kernels/assignment_kernels.cpp
     src/dnd/kernels/builtin_dtype_binary_kernel_table.cpp

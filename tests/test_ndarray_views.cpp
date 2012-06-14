@@ -12,7 +12,7 @@
 
 #include <dnd/ndarray.hpp>
 #include <dnd/ndarray_arange.hpp>
-#include <dnd/dtypes/align_dtype.hpp>
+#include <dnd/dtypes/dtype_alignment.hpp>
 #include <dnd/dtypes/conversion_dtype.hpp>
 #include <dnd/dtypes/view_dtype.hpp>
 
