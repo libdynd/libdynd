@@ -3,6 +3,7 @@ CMakeFiles
 *.cmake
 Makefile
 .cling_history
+build
 
 *.swp
 
