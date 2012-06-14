@@ -104,7 +104,7 @@ static ndarray arithmetic_op(const ndarray& op0, const ndarray& op1,
 
     // Use buffering if a dtype conversion or alignment operation
     // is required.
-    if (dt != op0.get_dtype() || dt != op1.get_dtype() || 
+    if (dt != op0.get_dtype() || dt != op1.get_dtype() ||
                 !dt.is_data_aligned(iter.get_align_test<1>()) ||
                 !dt.is_data_aligned(iter.get_align_test<2>())) {
         stringstream ss;
@@ -128,7 +128,7 @@ static ndarray arithmetic_op(const ndarray& op0, const ndarray& op1,
         }
     }
 
-    return std::move(result);
+    return DND_MOVE(result);
 }
 */
 

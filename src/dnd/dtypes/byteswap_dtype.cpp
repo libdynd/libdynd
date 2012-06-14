@@ -12,8 +12,8 @@ using namespace std;
 using namespace dnd;
 
 
-void dnd::byteswap_dtype::print_data(std::ostream& o, const dtype& dt, const char *data, intptr_t stride, intptr_t size,
-                        const char *separator) const
+void dnd::byteswap_dtype::print_data(std::ostream& DND_UNUSED(o), const dtype& DND_UNUSED(dt), const char *DND_UNUSED(data), 
+						intptr_t DND_UNUSED(stride), intptr_t DND_UNUSED(size), const char *DND_UNUSED(separator)) const
 {
     throw runtime_error("internal error: byteswap_dtype::print_data isn't supposed to be called");
 }

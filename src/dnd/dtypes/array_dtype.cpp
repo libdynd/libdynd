@@ -61,7 +61,7 @@ static void nested_array_print(std::ostream& o, const dtype& d, const char *data
     o << "]";
 }
 
-void array_dtype::print_data(std::ostream& o, const dtype& dt, const char *data, intptr_t stride, intptr_t size,
+void array_dtype::print_data(std::ostream& o, const dtype& DND_UNUSED(dt), const char *data, intptr_t DND_UNUSED(stride), intptr_t size,
                         const char *separator) const
 {
     for (int i = 0; i < size; ++i) {

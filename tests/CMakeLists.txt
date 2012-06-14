@@ -49,7 +49,13 @@ if(WIN32)
         ../../../../googletest/build-vc10/RelWithDebInfo/gtest
         ../../../../googletest/build-vc10/RelWithDebInfo/gtest_main
         )
-else(WIN32)
+elseif(APPLE)
+    target_link_libraries(dnd_tests
+        dynamicndarray
+        gtest
+        gtest_main
+        )
+else()
     set_target_properties(dnd_tests
                 PROPERTIES COMPILE_FLAGS
                 "-Wno-unnamed-type-template-args -pthread")
@@ -60,7 +66,7 @@ else(WIN32)
         /home/mwiebe/Develop/AnimPhys/gtest/make/gtest-all.o
         /home/mwiebe/Develop/AnimPhys/gtest/make/gtest_main.o
         )
-endif(WIN32)
+endif()
 
 
 # Compile-time tests: test code that is supposed to produce compile errors

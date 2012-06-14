@@ -43,7 +43,7 @@ ndarray_expr_node *make_expr_tree_from_scalar(T value)
                                 ::dnd::detail::ndarray_buffer_deleter);
     *reinterpret_cast<T *>(buffer_owner.get()) = value;
     return new strided_array_expr_node(make_dtype<T>(), 0, NULL, NULL,
-                        reinterpret_cast<char *>(buffer_owner.get()), std::move(buffer_owner));
+                        reinterpret_cast<char *>(buffer_owner.get()), DND_MOVE(buffer_owner));
 }
 
 dnd::ndarray::ndarray(signed char value)
@@ -110,7 +110,7 @@ dnd::ndarray::ndarray(const dtype& dt)
     shared_ptr<void> buffer_owner(::dnd::detail::ndarray_buffer_allocator(dt.itemsize()),
                                 ::dnd::detail::ndarray_buffer_deleter);
     m_expr_tree.reset(new strided_array_expr_node(dt, 0, NULL, NULL,
-                            reinterpret_cast<char *>(buffer_owner.get()), std::move(buffer_owner)));
+                            reinterpret_cast<char *>(buffer_owner.get()), DND_MOVE(buffer_owner)));
 }
 
 dnd::ndarray::ndarray(const dtype& dt, char *raw_data)
@@ -122,7 +122,7 @@ dnd::ndarray::ndarray(const dtype& dt, char *raw_data)
     // Copy the value in the raw data to initialize
     dtype_assign(dt, allocated_data, dt, raw_data);
     m_expr_tree.reset(new strided_array_expr_node(dt, 0, NULL, NULL,
-                            allocated_data, std::move(buffer_owner)));
+                            allocated_data, DND_MOVE(buffer_owner)));
 }
 
 
@@ -132,7 +132,7 @@ dnd::ndarray::ndarray(const ndarray_expr_node_ptr& expr_tree)
 }
 
 dnd::ndarray::ndarray(ndarray_expr_node_ptr&& expr_tree)
-    : m_expr_tree(std::move(expr_tree))
+    : m_expr_tree(DND_MOVE(expr_tree))
 {
 }
 
@@ -144,7 +144,7 @@ dnd::ndarray::ndarray(intptr_t dim0, const dtype& dt)
                     ::dnd::detail::ndarray_buffer_allocator(dt.itemsize() * dim0),
                     ::dnd::detail::ndarray_buffer_deleter);
     m_expr_tree.reset(new strided_array_expr_node(dt, 1, &dim0, &stride,
-                            reinterpret_cast<char *>(buffer_owner.get()), std::move(buffer_owner)));
+                            reinterpret_cast<char *>(buffer_owner.get()), DND_MOVE(buffer_owner)));
 }
 
 dnd::ndarray::ndarray(intptr_t dim0, intptr_t dim1, const dtype& dt)
@@ -159,7 +159,7 @@ dnd::ndarray::ndarray(intptr_t dim0, intptr_t dim1, const dtype& dt)
                     ::dnd::detail::ndarray_buffer_allocator(dt.itemsize() * dim0 * dim1),
                     ::dnd::detail::ndarray_buffer_deleter);
     m_expr_tree.reset(new strided_array_expr_node(dt, 2, shape, strides,
-                            reinterpret_cast<char *>(buffer_owner.get()), std::move(buffer_owner)));
+                            reinterpret_cast<char *>(buffer_owner.get()), DND_MOVE(buffer_owner)));
 }
 
 dnd::ndarray::ndarray(intptr_t dim0, intptr_t dim1, intptr_t dim2, const dtype& dt)
@@ -175,7 +175,7 @@ dnd::ndarray::ndarray(intptr_t dim0, intptr_t dim1, intptr_t dim2, const dtype& 
                     ::dnd::detail::ndarray_buffer_allocator(dt.itemsize() * dim0 * dim1 * dim2),
                     ::dnd::detail::ndarray_buffer_deleter);
     m_expr_tree.reset(new strided_array_expr_node(dt, 3, shape, strides,
-                            reinterpret_cast<char *>(buffer_owner.get()), std::move(buffer_owner)));
+                            reinterpret_cast<char *>(buffer_owner.get()), DND_MOVE(buffer_owner)));
 }
 
 dnd::ndarray::ndarray(intptr_t dim0, intptr_t dim1, intptr_t dim2, intptr_t dim3, const dtype& dt)
@@ -192,7 +192,7 @@ dnd::ndarray::ndarray(intptr_t dim0, intptr_t dim1, intptr_t dim2, intptr_t dim3
                     ::dnd::detail::ndarray_buffer_allocator(dt.itemsize() * dim0 * dim1 * dim2 * dim3),
                     ::dnd::detail::ndarray_buffer_deleter);
     m_expr_tree.reset(new strided_array_expr_node(dt, 4, shape, strides,
-                            reinterpret_cast<char *>(buffer_owner.get()), std::move(buffer_owner)));
+                            reinterpret_cast<char *>(buffer_owner.get()), DND_MOVE(buffer_owner)));
 }
 
 ndarray dnd::ndarray::index(int nindex, const irange *indices) const

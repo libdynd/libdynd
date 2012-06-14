@@ -24,6 +24,13 @@
 # define NO_IMPORT_ARRAY
 #endif
 
+#ifndef NPY_1_7_API_VERSION
+#define NPY_ARRAY_NOTSWAPPED NPY_NOTSWAPPED
+#define NPY_ARRAY_ALIGNED NPY_ALIGNED
+#define NPY_ARRAY_WRITEABLE NPY_WRITEABLE
+#define NPY_ARRAY_UPDATEIFCOPY NPY_UPDATEIFCOPY
+#endif
+
 #include <stdint.h>
 #include <sstream>
 

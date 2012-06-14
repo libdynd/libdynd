@@ -69,6 +69,7 @@ source_group("Cython Headers" REGULAR_EXPRESSION ".*pxd$")
 cython_add_module(_pydnd ${pydnd_CPP_SRC} ${pydnd_CYTHON_SRC})
 
 set_target_properties(_pydnd PROPERTIES LINKER_LANGUAGE CXX)
+set_target_properties(_pydnd PROPERTIES COMPILE_FLAGS "-Wno-error")
 
 target_link_libraries(_pydnd dynamicndarray)
 

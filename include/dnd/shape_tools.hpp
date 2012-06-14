@@ -7,7 +7,6 @@
 #define _DND__SHAPE_TOOLS_HPP_
 
 #include <stdint.h>
-#include <type_traits>
 
 #include <dnd/ndarray.hpp>
 

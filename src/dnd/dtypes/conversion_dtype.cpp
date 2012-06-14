@@ -10,8 +10,9 @@ using namespace std;
 using namespace dnd;
 
 
-void dnd::conversion_dtype::print_data(std::ostream& o, const dtype& dt, const char *data, intptr_t stride, intptr_t size,
-                        const char *separator) const
+void dnd::conversion_dtype::print_data(std::ostream& DND_UNUSED(o), const dtype& DND_UNUSED(dt),
+                        const char *DND_UNUSED(data), intptr_t DND_UNUSED(stride),
+                        intptr_t DND_UNUSED(size), const char *DND_UNUSED(separator)) const
 {
     throw runtime_error("internal error: conversion_dtype::print_data isn't supposed to be called");
     /*
@@ -88,9 +89,9 @@ void dnd::conversion_dtype::get_value_to_operand_operation(intptr_t dst_fixedstr
 dtype dnd::conversion_dtype::with_replaced_storage_dtype(const dtype& replacement_dtype) const
 {
     if (m_operand_dtype.kind() == expression_kind) {
-        return make_shared<conversion_dtype>(m_value_dtype,
+        return dtype(make_shared<conversion_dtype>(m_value_dtype,
                         m_operand_dtype.extended()->with_replaced_storage_dtype(replacement_dtype),
-                        m_errmode);
+                        m_errmode));
     } else {
         if (m_operand_dtype != replacement_dtype.value_dtype()) {
             std::stringstream ss;
@@ -98,6 +99,6 @@ dtype dnd::conversion_dtype::with_replaced_storage_dtype(const dtype& replacemen
             ss << ", does not match the replacement's value dtype, " << replacement_dtype.value_dtype();
             throw std::runtime_error(ss.str());
         }
-        return make_shared<conversion_dtype>(m_value_dtype, replacement_dtype, m_errmode);
+        return dtype(make_shared<conversion_dtype>(m_value_dtype, replacement_dtype, m_errmode));
     }
 }

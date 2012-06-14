@@ -9,6 +9,7 @@
 #include <stdint.h>
 #include <iostream>
 #include <complex>
+#include <stdexcept>
 
 #include <dnd/config.hpp>
 #include <dnd/kernels/kernel_instance.hpp>
@@ -20,9 +21,9 @@ class dnd_bool {
     char m_value;
 public:
     dnd_bool() : m_value(0) {}
-    
+
     dnd_bool(bool value) : m_value(value) {}
-    
+
     // Special case complex conversion to avoid ambiguous overload
     template<class T>
     dnd_bool(std::complex<T> value) : m_value(value != std::complex<T>(0)) {}
@@ -271,7 +272,7 @@ const char *get_type_id_basename(type_id_t type_id);
 class dtype {
 private:
     unsigned char m_type_id, m_kind, m_alignment;
-    uintptr_t m_itemsize;
+    intptr_t m_itemsize;
     // TODO: Replace with boost::intrusive_ptr
     shared_ptr<extended_dtype> m_data;
 
@@ -304,19 +305,19 @@ public:
     /** Constructor from an rvalue extended_dtype */
     dtype(const shared_ptr<extended_dtype>&& data)
         : m_type_id(data->type_id(), m_kind(data->kind()), m_alignment(data->alignment()),
-        m_itemsize(data->itemsize()), m_data(std::move(data)) {}
+        m_itemsize(data->itemsize()), m_data(DND_MOVE(data)) {}
     /** Move constructor (should be "= default" in C++11) */
     dtype(dtype&& rhs)
         : m_type_id(rhs.m_type_id), m_kind(rhs.m_kind), m_alignment(rhs.m_alignment),
           m_itemsize(rhs.m_itemsize),
-          m_data(std::move(rhs.m_data)) {}
+          m_data(DND_MOVE(rhs.m_data)) {}
     /** Move assignment operator (should be "= default" in C++11) */
     dtype& operator=(dtype&& rhs) {
         m_type_id = rhs.m_type_id;
         m_kind = rhs.m_kind;
         m_alignment = rhs.m_alignment;
         m_itemsize = rhs.m_itemsize;
-        m_data = std::move(rhs.m_data);
+        m_data = DND_MOVE(rhs.m_data);
         return *this;
     }
 #endif // DND_RVALUE_REFS
@@ -325,8 +326,8 @@ public:
     explicit dtype(type_id_t type_id);
     explicit dtype(int type_id);
     /** Construct from a type ID and itemsize */
-    explicit dtype(type_id_t type_id, uintptr_t size);
-    explicit dtype(int type_id, uintptr_t size);
+    explicit dtype(type_id_t type_id, intptr_t size);
+    explicit dtype(int type_id, intptr_t size);
 
     /** Construct from a string representation */
     explicit dtype(const std::string& rep);
@@ -422,7 +423,7 @@ public:
     }
 
     /** The item size of the dtype */
-    uintptr_t itemsize() const {
+    intptr_t itemsize() const {
         return m_itemsize;
     }
 

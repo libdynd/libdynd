@@ -124,7 +124,7 @@ public:
         : m_expr_tree(rhs.m_expr_tree) {}
     /** Move constructor (should just be "= default" in C++11) */
     ndarray(ndarray&& rhs)
-        : m_expr_tree(std::move(rhs.m_expr_tree)) {}
+        : m_expr_tree(DND_MOVE(rhs.m_expr_tree)) {}
 
     /** Swap operation (should be "noexcept" in C++11) */
     void swap(ndarray& rhs);
@@ -140,7 +140,7 @@ public:
     ndarray& operator=(const ndarray& rhs);
     /** Move assignment operator (should be just "= default" in C++11) */
     ndarray& operator=(ndarray&& rhs) {
-        m_expr_tree = std::move(rhs.m_expr_tree);
+        m_expr_tree = DND_MOVE(rhs.m_expr_tree);
 
         return *this;
     }
@@ -467,7 +467,7 @@ dnd::ndarray::ndarray(std::initializer_list<T> il)
                     ::dnd::detail::ndarray_buffer_deleter);
     DND_MEMCPY(buffer_owner.get(), il.begin(), sizeof(T) * dim0);
     m_expr_tree.reset(new strided_array_expr_node(make_dtype<T>(), 1, &dim0, &stride,
-                            reinterpret_cast<char *>(buffer_owner.get()), std::move(buffer_owner)));
+                            reinterpret_cast<char *>(buffer_owner.get()), DND_MOVE(buffer_owner)));
 }
 template<class T>
 dnd::ndarray::ndarray(std::initializer_list<std::initializer_list<T> > il)
@@ -491,7 +491,7 @@ dnd::ndarray::ndarray(std::initializer_list<std::initializer_list<T> > il)
     T *dataptr = reinterpret_cast<T *>(buffer_owner.get());
     detail::initializer_list_shape<S>::copy_data(&dataptr, il);
     m_expr_tree.reset(new strided_array_expr_node(make_dtype<T>(), 2, shape, strides,
-                            reinterpret_cast<char *>(buffer_owner.get()), std::move(buffer_owner)));
+                            reinterpret_cast<char *>(buffer_owner.get()), DND_MOVE(buffer_owner)));
 }
 template<class T>
 dnd::ndarray::ndarray(std::initializer_list<std::initializer_list<std::initializer_list<T> > > il)
@@ -515,7 +515,7 @@ dnd::ndarray::ndarray(std::initializer_list<std::initializer_list<std::initializ
     T *dataptr = reinterpret_cast<T *>(buffer_owner.get());
     detail::initializer_list_shape<S>::copy_data(&dataptr, il);
     m_expr_tree.reset(new strided_array_expr_node(make_dtype<T>(), 3, shape, strides,
-                            reinterpret_cast<char *>(buffer_owner.get()), std::move(buffer_owner)));
+                            reinterpret_cast<char *>(buffer_owner.get()), DND_MOVE(buffer_owner)));
 }
 #endif // DND_INIT_LIST
 
@@ -574,7 +574,7 @@ dnd::ndarray::ndarray(const T (&rhs)[N])
     DND_MEMCPY(buffer_owner.get(), &rhs[0], num_bytes);
     m_expr_tree.reset(new strided_array_expr_node(dtype(detail::type_from_array<T>::type_id),
                             ndim, shape, strides,
-                            reinterpret_cast<char *>(buffer_owner.get()), std::move(buffer_owner)));
+                            reinterpret_cast<char *>(buffer_owner.get()), DND_MOVE(buffer_owner)));
 }
 
 ///////////// The ndarray.as<type>() templated function /////////////////////////

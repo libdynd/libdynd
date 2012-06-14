@@ -25,7 +25,7 @@ static void aligned_fixed_size_byteswap_kernel(char *dst, intptr_t dst_stride,
 
     for (intptr_t i = 0; i < count; ++i) {
         *dst_cached = byteswap_value(*src_cached);
-                
+
         dst_cached += dst_stride;
         src_cached += src_stride;
     }
@@ -46,7 +46,7 @@ static void aligned_fixed_size_pairwise_byteswap_kernel(char *dst, intptr_t dst_
     for (intptr_t i = 0; i < count; ++i) {
         *dst_cached = byteswap_value(*src_cached);
         *(dst_cached+1) = byteswap_value(*(src_cached+1));
-                
+
         dst_cached += dst_stride;
         src_cached += src_stride;
     }
@@ -71,7 +71,7 @@ static void general_byteswap_kernel(char *dst, intptr_t dst_stride,
             for (intptr_t j = 0; j < element_size/2; ++j) {
                 std::swap(dst[j], dst[element_size-j-1]);
             }
-                
+
             dst += dst_stride;
         }
     } else {
@@ -79,7 +79,7 @@ static void general_byteswap_kernel(char *dst, intptr_t dst_stride,
             for (intptr_t j = 0; j < element_size; ++j) {
                 dst[j] = src[element_size-j-1];
             }
-                
+
             src += src_stride;
             dst += dst_stride;
         }
@@ -108,7 +108,7 @@ static void general_pairwise_byteswap_kernel(char *dst, intptr_t dst_stride,
             for (intptr_t j = 0; j < element_size/4; ++j) {
                 std::swap(dst[element_size/2 + j], dst[element_size-j-1]);
             }
-                
+
             dst += dst_stride;
         }
     } else {
@@ -119,7 +119,7 @@ static void general_pairwise_byteswap_kernel(char *dst, intptr_t dst_stride,
             for (intptr_t j = 0; j < element_size/2; ++j) {
                 dst[element_size/2 + j] = src[element_size-j-1];
             }
-                
+
             src += src_stride;
             dst += dst_stride;
         }
@@ -127,7 +127,7 @@ static void general_pairwise_byteswap_kernel(char *dst, intptr_t dst_stride,
 }
 
 void dnd::get_byteswap_kernel(intptr_t element_size, intptr_t alignment,
-                intptr_t dst_fixedstride, intptr_t src_fixedstride,
+                intptr_t DND_UNUSED(dst_fixedstride), intptr_t DND_UNUSED(src_fixedstride),
                 kernel_instance<unary_operation_t>& out_kernel)
 {
     if (element_size == alignment) {
@@ -156,7 +156,7 @@ void dnd::get_byteswap_kernel(intptr_t element_size, intptr_t alignment,
 }
 
 void dnd::get_pairwise_byteswap_kernel(intptr_t element_size, intptr_t alignment,
-                intptr_t dst_fixedstride, intptr_t src_fixedstride,
+                intptr_t DND_UNUSED(dst_fixedstride), intptr_t DND_UNUSED(src_fixedstride),
                 kernel_instance<unary_operation_t>& out_kernel)
 {
     if ((element_size&0x01) == 0x01) {

@@ -7,7 +7,6 @@
 #define _SHORTVECTOR_HPP_
 
 #include <algorithm>
-#include <type_traits>
 
 namespace dnd {
 

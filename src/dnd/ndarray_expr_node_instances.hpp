@@ -93,8 +93,8 @@ class elementwise_binary_op_expr_node : public ndarray_expr_node {
                 elementwise_node_category, elementwise_binary_op_node_type),
                 m_op_factory()
     {
-        m_opnodes[0] = std::move(op0);
-        m_opnodes[1] = std::move(op1);
+        m_opnodes[0] = DND_MOVE(op0);
+        m_opnodes[1] = DND_MOVE(op1);
 
         // Swap in the operator factory
         m_op_factory.swap(op_factory);
@@ -105,8 +105,8 @@ class elementwise_binary_op_expr_node : public ndarray_expr_node {
                 elementwise_node_category, elementwise_binary_op_node_type),
                 m_op_factory()
     {
-        m_opnodes[0] = std::move(op0);
-        m_opnodes[1] = std::move(op1);
+        m_opnodes[0] = DND_MOVE(op0);
+        m_opnodes[1] = DND_MOVE(op1);
 
         // Swap in the operator factory
         m_op_factory.swap(op_factory);

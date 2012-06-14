@@ -60,7 +60,7 @@ ndarray_expr_node_ptr dnd::linear_index_expr_node::apply_linear_index(
     ndarray_expr_node *node = m_opnodes[0].get();
 
     if (allow_in_place) {
-        // Adjust the start_index vector 
+        // Adjust the start_index vector
         for (int i = 0; i < m_ndim; ++i) {
             m_start_index[m_axis_map[i]] += start_index[i];
         }
@@ -182,7 +182,7 @@ ndarray_expr_node_ptr dnd::make_broadcast_strided_array_expr_node(ndarray_expr_n
                     make_conversion_dtype(dt, snode->get_dtype(), errmode),
                     ndim, shape, strides.get(), snode->get_originptr(), snode->get_buffer_owner()));
 
-    return std::move(new_node);
+    return DND_MOVE(new_node);
 }
 
 ndarray_expr_node_ptr dnd::make_linear_index_expr_node(ndarray_expr_node *node,

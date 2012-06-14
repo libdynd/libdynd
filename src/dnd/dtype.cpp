@@ -25,19 +25,21 @@ dnd::extended_dtype::~extended_dtype()
 {
 }
 
-void dnd::extended_dtype::get_operand_to_value_operation(intptr_t dst_fixedstride, intptr_t src_fixedstride,
-                            kernel_instance<unary_operation_t>& out_kernel) const
+void dnd::extended_dtype::get_operand_to_value_operation(intptr_t DND_UNUSED(dst_fixedstride),
+                            intptr_t DND_UNUSED(src_fixedstride),
+                            kernel_instance<unary_operation_t>& DND_UNUSED(out_kernel)) const
 {
     throw std::runtime_error("get_operand_to_value_operation: this operation is only for expression_kind dtypes");
 }
 
-void dnd::extended_dtype::get_value_to_operand_operation(intptr_t dst_fixedstride, intptr_t src_fixedstride,
-                            kernel_instance<unary_operation_t>& out_kernel) const
+void dnd::extended_dtype::get_value_to_operand_operation(intptr_t DND_UNUSED(dst_fixedstride),
+                            intptr_t DND_UNUSED(src_fixedstride),
+                            kernel_instance<unary_operation_t>& DND_UNUSED(out_kernel)) const
 {
     throw std::runtime_error("get_value_to_operand_operation: this operation is only for expression_kind dtypes");
 }
 
-dtype dnd::extended_dtype::with_replaced_storage_dtype(const dtype& replacement_dtype) const
+dtype dnd::extended_dtype::with_replaced_storage_dtype(const dtype& DND_UNUSED(replacement_dtype)) const
 {
     throw std::runtime_error("with_replaced_storage_dtype: this operation is only for expression_kind dtypes");
 }
@@ -144,7 +146,7 @@ dtype::dtype(int type_id)
 {
 }
 
-dtype::dtype(type_id_t type_id, uintptr_t size)
+dtype::dtype(type_id_t type_id, intptr_t size)
     : m_type_id(validate_type_id(type_id)),
       m_kind(basic_type_id_info[type_id].kind),
       m_alignment(basic_type_id_info[type_id].alignment),
@@ -161,7 +163,7 @@ dtype::dtype(type_id_t type_id, uintptr_t size)
     }
 }
 
-dtype::dtype(int type_id, uintptr_t size)
+dtype::dtype(int type_id, intptr_t size)
     : m_type_id(validate_type_id((type_id_t)type_id)),
       m_kind(basic_type_id_info[type_id].kind),
       m_alignment(basic_type_id_info[type_id].alignment),

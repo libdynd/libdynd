@@ -15,7 +15,7 @@
 //       operators to both shared_ptr and __shared_ptr (in shared_ptr_base.h), so that clang
 //       would accept them. This is because the LLVM JIT used by CLING complains about inline
 //       assembly with the boost version, but not with the g++ version.
-//#define USE_BOOST_SHARED_PTR
+#define DND_USE_BOOST_SHARED_PTR
 // TODO: versions with constexpr
 #  define DND_CONSTEXPR constexpr
 
@@ -46,6 +46,7 @@
 // Whether to use boost's shared_ptr or the standard library's
 #ifdef DND_USE_BOOST_SHARED_PTR
 #include <boost/shared_ptr.hpp>
+#include <boost/make_shared.hpp>
 namespace dnd {
     using ::boost::shared_ptr;
     using ::boost::make_shared;
@@ -90,7 +91,11 @@ namespace dnd {
 #else
 #include <boost/utility/enable_if.hpp>
 namespace dnd {
-    using boost::enable_if;
+	template<bool B, class T = void>
+	struct enable_if {};
+ 
+	template<class T>
+	struct enable_if<true, T> { typedef T type; };
 }
 #endif
 
@@ -111,5 +116,14 @@ namespace dnd {
 #ifndef DND_ALIGNMENT_ASSERTIONS
 # define DND_ALIGNMENT_ASSERTIONS 1
 #endif
+
+
+
+/**
+ * Preprocessor macro for marking variables unused, and suppressing
+ * warnings for them.
+ */
+#define DND_UNUSED(x)
+
 
 #endif // _DND__CONFIG_HPP_

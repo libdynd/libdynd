@@ -196,8 +196,8 @@ ndarray pydnd::ndarray_from_numpy_array(PyArrayObject* obj)
     }
 
     // Create the result ndarray
-    return ndarray(new strided_array_expr_node(d, PyArray_NDIM(obj), 
-                    PyArray_DIMS(obj), PyArray_STRIDES(obj), PyArray_DATA(obj), DND_MOVE(bufowner)));
+    return ndarray(new strided_array_expr_node(d, PyArray_NDIM(obj),
+                    PyArray_DIMS(obj), PyArray_STRIDES(obj), PyArray_BYTES(obj), DND_MOVE(bufowner)));
 }
 
 dnd::ndarray pydnd::ndarray_from_numpy_scalar(PyObject* obj)

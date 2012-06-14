@@ -60,7 +60,7 @@ TEST(ByteswapDType, Basic) {
     a = a.vals();
     EXPECT_EQ(3.14159265358979, a.as<double>());
 
-    int32_t value32_pair[2] = {0xDA0F4940, 0xC1B88FD3};
+    uint32_t value32_pair[2] = {0xDA0F4940, 0xC1B88FD3};
     a = ndarray(make_byteswap_dtype<complex<float> >(), (char *)&value32_pair);
     EXPECT_EQ(complex<float>(3.1415926f, -1.23456e12f), a.as<complex<float> >());
 

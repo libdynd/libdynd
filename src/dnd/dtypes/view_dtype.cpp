@@ -10,8 +10,9 @@ using namespace std;
 using namespace dnd;
 
 
-void dnd::view_dtype::print_data(std::ostream& o, const dtype& dt, const char *data, intptr_t stride, intptr_t size,
-                        const char *separator) const
+void dnd::view_dtype::print_data(std::ostream& DND_UNUSED(o), const dtype& DND_UNUSED(dt),
+                        const char *DND_UNUSED(data), intptr_t DND_UNUSED(stride),
+                        intptr_t DND_UNUSED(size), const char *DND_UNUSED(separator)) const
 {
     throw runtime_error("internal error: view_dtype::print_data isn't supposed to be called");
 }
@@ -60,8 +61,8 @@ void dnd::view_dtype::get_value_to_operand_operation(intptr_t dst_fixedstride, i
 dtype dnd::view_dtype::with_replaced_storage_dtype(const dtype& replacement_dtype) const
 {
     if (m_operand_dtype.kind() == expression_kind) {
-        return make_shared<view_dtype>(m_value_dtype,
-                        m_operand_dtype.extended()->with_replaced_storage_dtype(replacement_dtype));
+        return dtype(make_shared<view_dtype>(m_value_dtype,
+                        m_operand_dtype.extended()->with_replaced_storage_dtype(replacement_dtype)));
     } else {
         if (m_operand_dtype != replacement_dtype.value_dtype()) {
             std::stringstream ss;
@@ -69,6 +70,6 @@ dtype dnd::view_dtype::with_replaced_storage_dtype(const dtype& replacement_dtyp
             ss << ", does not match the replacement's value dtype, " << replacement_dtype.value_dtype();
             throw std::runtime_error(ss.str());
         }
-        return make_shared<view_dtype>(m_value_dtype, replacement_dtype);
+        return dtype(make_shared<view_dtype>(m_value_dtype, replacement_dtype));
     }
 }

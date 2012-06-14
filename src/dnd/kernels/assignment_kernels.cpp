@@ -35,7 +35,7 @@ static assignment_function_t single_assign_table[builtin_type_id_count][builtin_
         ERROR_MODE_LEVEL(dst_type, complex<float>), \
         ERROR_MODE_LEVEL(dst_type, complex<double>) \
     }
-    
+
     SRC_TYPE_LEVEL(dnd_bool),
     SRC_TYPE_LEVEL(int8_t),
     SRC_TYPE_LEVEL(int16_t),
@@ -118,6 +118,7 @@ void dnd::multiple_assignment_kernel(char *dst, intptr_t dst_stride, const char 
             DTYPE_ASSIGN_SRC_TO_DST_SINGLE_CASE(dst_type, double,   BASE_FN, errmode); \
             DTYPE_ASSIGN_SRC_TO_DST_SINGLE_CASE(dst_type, std::complex<float>,    BASE_FN, errmode); \
             DTYPE_ASSIGN_SRC_TO_DST_SINGLE_CASE(dst_type, std::complex<double>,   BASE_FN, errmode); \
+            default: break; \
         }
 
 
@@ -141,6 +142,7 @@ void dnd::multiple_assignment_kernel(char *dst, intptr_t dst_stride, const char 
         DTYPE_ASSIGN_ANY_TO_DST_CASE(double, BASE_FN, errmode); \
         DTYPE_ASSIGN_ANY_TO_DST_CASE(std::complex<float>, BASE_FN, errmode); \
         DTYPE_ASSIGN_ANY_TO_DST_CASE(std::complex<double>, BASE_FN, errmode); \
+        default: break; \
     }
 
 void dnd::get_builtin_dtype_assignment_kernel(
@@ -215,7 +217,7 @@ void dnd::get_dtype_assignment_kernel(
             get_dtype_assignment_kernel(dst_dt, dst_fixedstride,
                                 src_dt.value_dtype(), src_dt.value_dtype().itemsize(),
                                 errmode, kernels.back());
-            
+
             push_front_dtype_storage_to_value_kernels(src_dt, dst_fixedstride, src_dt.value_dtype().itemsize(),
                                 kernels, element_sizes);
 
@@ -262,7 +264,7 @@ void dnd::get_dtype_assignment_kernel(
             element_sizes.push_back(dst_dt.value_dtype().itemsize());
             get_dtype_assignment_kernel(dst_dt.value_dtype(), dst_dt.value_dtype().itemsize(),
                                 src_dt, src_fixedstride, errmode, kernels.back());
-            
+
             push_back_dtype_value_to_storage_kernels(dst_dt, dst_fixedstride, dst_dt.value_dtype().itemsize(),
                                 kernels, element_sizes);
 
@@ -294,7 +296,7 @@ namespace {
 
             for (intptr_t i = 0; i < count; ++i) {
                 *dst_cached = *src_cached;
-                
+
                 dst_cached += dst_stride;
                 src_cached += src_stride;
             }
@@ -322,7 +324,7 @@ namespace {
 
             for (intptr_t i = 0; i < count; ++i) {
                 *dst_cached = s;
-                
+
                 dst_cached += dst_stride;
             }
         }
@@ -386,7 +388,7 @@ static void unaligned_fixed_size_copy_kernel(char *dst, intptr_t dst_stride,
 {
     for (intptr_t i = 0; i < count; ++i) {
         memcpy(dst, src, N);
-                
+
         dst += dst_stride;
         src += src_stride;
     }

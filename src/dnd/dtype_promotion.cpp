@@ -34,7 +34,7 @@ dtype dnd::promote_dtypes_arithmetic(const dtype& dt0, const dtype& dt1)
     const dtype& dt1_val = dt1.value_dtype();
 
     const extended_dtype *dt0_ext, *dt1_ext;
-    uintptr_t itemsize = 0;
+    intptr_t itemsize = 0;
 
     dt0_ext = dt0_val.extended();
     dt1_ext = dt1_val.extended();
@@ -42,6 +42,7 @@ dtype dnd::promote_dtypes_arithmetic(const dtype& dt0, const dtype& dt1)
     //cout << "Doing type promotion with value types " << dt0_val << " and " << dt1_val << endl;
 
     if (dt0_ext == NULL && dt1_ext == NULL) {
+        const intptr_t int_size = sizeof(int);
         switch (dt0_val.kind()) {
             case bool_kind:
                 switch (dt1_val.kind()) {
@@ -49,7 +50,7 @@ dtype dnd::promote_dtypes_arithmetic(const dtype& dt0, const dtype& dt1)
                         return make_dtype<int>();
                     case int_kind:
                     case uint_kind:
-                        return (dt1_val.itemsize() >= sizeof(int)) ? dt1_val
+                        return (dt1_val.itemsize() >= int_size) ? dt1_val
                                                                : make_dtype<int>();
                     default:
                         return dt1_val;
@@ -57,17 +58,17 @@ dtype dnd::promote_dtypes_arithmetic(const dtype& dt0, const dtype& dt1)
             case int_kind:
                 switch (dt1_val.kind()) {
                     case bool_kind:
-                        return (dt0_val.itemsize() >= sizeof(int)) ? dt0_val
+                        return (dt0_val.itemsize() >= int_size) ? dt0_val
                                                                : make_dtype<int>();
                     case int_kind:
-                        if (dt0_val.itemsize() < sizeof(int) && dt1_val.itemsize() < sizeof(int)) {
+                        if (dt0_val.itemsize() < int_size && dt1_val.itemsize() < int_size) {
                             return make_dtype<int>();
                         } else {
                             return (dt0_val.itemsize() >= dt1_val.itemsize()) ? dt0_val
                                                                               : dt1_val;
                         }
                     case uint_kind:
-                        if (dt0_val.itemsize() < sizeof(int) && dt1_val.itemsize() < sizeof(int)) {
+                        if (dt0_val.itemsize() < int_size && dt1_val.itemsize() < int_size) {
                             return make_dtype<int>();
                         } else {
                             // When the itemsizes are equal, the uint kind wins
@@ -94,10 +95,10 @@ dtype dnd::promote_dtypes_arithmetic(const dtype& dt0, const dtype& dt1)
             case uint_kind:
                 switch (dt1_val.kind()) {
                     case bool_kind:
-                        return (dt0_val.itemsize() >= sizeof(int)) ? dt0_val
+                        return (dt0_val.itemsize() >= int_size) ? dt0_val
                                                                : make_dtype<int>();
                     case int_kind:
-                        if (dt0_val.itemsize() < sizeof(int) && dt1_val.itemsize() < sizeof(int)) {
+                        if (dt0_val.itemsize() < int_size && dt1_val.itemsize() < int_size) {
                             return make_dtype<int>();
                         } else {
                             // When the itemsizes are equal, the uint kind wins
@@ -105,7 +106,7 @@ dtype dnd::promote_dtypes_arithmetic(const dtype& dt0, const dtype& dt1)
                                                                               : dt1_val;
                         }
                     case uint_kind:
-                        if (dt0_val.itemsize() < sizeof(int) && dt1_val.itemsize() < sizeof(int)) {
+                        if (dt0_val.itemsize() < int_size && dt1_val.itemsize() < int_size) {
                             return make_dtype<int>();
                         } else {
                             return (dt0_val.itemsize() >= dt1_val.itemsize()) ? dt0_val

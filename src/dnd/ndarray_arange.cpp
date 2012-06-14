@@ -109,7 +109,7 @@ ndarray dnd::arange(const dtype& dt, const void *beginval, const void *endval, c
         case type_id_of<type>::value: { \
             ndarray result(arange_counter<type, dtype_kind_of<type>::value>::count(beginval, endval, stepval), dt); \
             arange_specialization<type>::arange(beginval, stepval, result); \
-            return std::move(result); \
+            return DND_MOVE(result); \
         }
 
         switch (dt.type_id()) {
@@ -171,13 +171,13 @@ ndarray dnd::linspace(const dtype& dt, const void *startval, const void *stopval
                 ndarray result(count, dt);
                 linspace_specialization(*reinterpret_cast<const float *>(startval),
                                 *reinterpret_cast<const float *>(stopval), count, result);
-                return std::move(result);
+                return DND_MOVE(result);
             }
             case float64_type_id: {
                 ndarray result(count, dt);
                 linspace_specialization(*reinterpret_cast<const double *>(startval),
                                 *reinterpret_cast<const double *>(stopval), count, result);
-                return std::move(result);
+                return DND_MOVE(result);
             }
             default:
                 break;

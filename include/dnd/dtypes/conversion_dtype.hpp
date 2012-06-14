@@ -51,10 +51,10 @@ public:
         return m_operand_dtype.itemsize();
     }
 
-    const dtype& value_dtype(const dtype& self) const {
+    const dtype& value_dtype(const dtype& DND_UNUSED(self)) const {
         return m_value_dtype;
     }
-    const dtype& operand_dtype(const dtype& self) const {
+    const dtype& operand_dtype(const dtype& DND_UNUSED(self)) const {
         return m_operand_dtype;
     }
     void print_data(std::ostream& o, const dtype& dt, const char *data, intptr_t stride, intptr_t size,
