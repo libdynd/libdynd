@@ -289,7 +289,7 @@ PyObject* pydnd::ndarray_as_numpy_struct_capsule(const dnd::ndarray& n)
 
     bool aligned = true;
     if (dt.type_id() == view_type_id) {
-        dtype sdt = dt.storage_dtype();
+        dtype sdt = dt.operand_dtype();
         if (sdt.type_id() == bytes_type_id) {
             dt = dt.value_dtype();
             aligned = false;
