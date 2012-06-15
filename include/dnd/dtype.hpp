@@ -183,7 +183,7 @@ template <> struct is_dtype_scalar<std::complex<double> > {enum {value = true};}
 
 // Metaprogram for determining if a type is "bool" or not
 template<typename T> struct is_type_bool {enum {value = false};};
-template<> struct is_type_bool<bool> {enum {value = false};};
+template<> struct is_type_bool<bool> {enum {value = true};};
 
 class dtype;
 
