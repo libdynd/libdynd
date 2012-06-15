@@ -246,3 +246,7 @@ cdef class w_unary_gfunc:
     def add_kernel(self, kernel):
         """Adds a kernel to the gfunc object. Currently, this means a ctypes object with prototype."""
         GET(self.v).add_kernel(kernel)
+
+    def debug_dump(self):
+        """Prints a raw representation of the gfunc data."""
+        print str(GET(self.v).debug_dump().c_str())

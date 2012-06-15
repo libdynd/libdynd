@@ -7,6 +7,8 @@ cdef extern from "unary_gfunc.hpp" namespace "pydnd":
     cdef cppclass unary_gfunc:
         string& get_name()
         void add_kernel(object) except +
+        object call(object, object)
+        string debug_dump() except +
 
     string unary_gfunc_repr(unary_gfunc&) except +
     string unary_gfunc_debug_dump(unary_gfunc&) except +

@@ -33,7 +33,6 @@ void pydnd::init_ctypes_interop()
     ctypes.PyCSimpleType_Type = PyObject_GetAttrString(ctypes._ctypes, "_SimpleCData");
     ctypes.PyCFuncPtrType_Type = PyObject_GetAttrString(ctypes._ctypes, "CFuncPtr");
 
-
     if (PyErr_Occurred()) {
         Py_XDECREF(ctypes._ctypes);
 
@@ -49,6 +48,49 @@ void pydnd::init_ctypes_interop()
         throw std::runtime_error("Error initializing ctypes C-level data for low level interop");
     }
 }
+
+
+ctypes_calling_convention pydnd::get_ctypes_calling_convention(PyCFuncPtrObject* cfunc)
+{
+    // This is the internal StgDictObject "flags" attribute, which is
+    // custom-placed in the typeobject's dict by ctypes.
+    pyobject_ownref flags_obj(PyObject_GetAttrString((PyObject *)Py_TYPE(cfunc), "_flags_"));
+
+    long flags = PyInt_AsLong(flags_obj);
+    if (flags == -1 && PyErr_Occurred()) {
+        throw std::runtime_error("Error getting ctypes function flags");
+    }
+
+    if (flags&0x02) { // 0x02 is FUNCFLAG_HRESULT
+        throw std::runtime_error("Functions returning an HRESULT are not supported");
+    }
+
+    //if (flags&0x04) { // 0x04 is FUNCFLAG_PYTHONAPI, may need special handling
+    //}
+
+    if (flags&0x08) { // 0x08 is FUNCFLAG_USE_ERRNO
+        throw std::runtime_error("Functions using errno are not yet supported");
+    }
+
+    if (flags&0x10) { // 0x10 is FUNCFLAG_USE_LASTERROR
+        throw std::runtime_error("Functions using lasterror are not yet supported");
+    }
+
+    // Only on Win32 are non-CDECL calling conventions supported
+#ifdef _WIN32
+    if (cfunc->index) {
+        throw std::runtime_error("COM functions are not supported");
+    }
+    if (flags&0x01) { // 0x01 is FUNCFLAG_CDECL from cpython's internal ctypes.h
+        return cdecl_callconv;
+    } else {
+        return win32_stdcall_callconv;
+    }
+#else
+    return cdecl_callconv;
+#endif
+}
+
 
 
 dnd::dtype pydnd::dtype_from_ctypes_cdatatype(PyObject *d)
