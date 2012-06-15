@@ -57,6 +57,7 @@ cdef extern from "dnd/dtype.hpp" namespace "dnd":
         bint operator!=(dtype&)
         
         dtype& value_dtype()
+        dtype& operand_dtype()
         dtype& storage_dtype()
         type_id_t type_id()
         dtype_kind_t kind()

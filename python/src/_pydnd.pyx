@@ -3,12 +3,18 @@
 # BSD 2-Clause License, see LICENSE.txt
 #
 
+# Initialize Numpy
 cdef extern from "do_import_array.hpp":
     pass
 cdef extern from "numpy_interop.hpp" namespace "pydnd":
     object ndarray_as_numpy_struct_capsule(ndarray&) except +
     void import_numpy()
 import_numpy()
+
+# Initialize ctypes C level interop data
+cdef extern from "ctypes_interop.hpp" namespace "pydnd":
+    void init_ctypes_interop() except +
+init_ctypes_interop()
 
 cdef extern from "<dnd/diagnostics.hpp>" namespace "dnd":
     bint any_diagnostics_enabled()
@@ -23,6 +29,7 @@ if any_diagnostics_enabled():
 include "dnd.pxd"
 include "dtype.pxd"
 include "ndarray.pxd"
+include "unary_gfunc.pxd"
 
 from cython.operator import dereference
 
@@ -50,6 +57,27 @@ cdef class w_dtype:
     property alignment:
         def __get__(self):
             return GET(self.v).alignment()
+
+    property value_dtype:
+        """What this dtype looks like to calculations, printing, etc."""
+        def __get__(self):
+            cdef w_dtype result = w_dtype()
+            SET(result.v, GET(self.v).value_dtype())
+            return result
+
+    property operand_dtype:
+        """The next dtype down in the expression dtype chain."""
+        def __get__(self):
+            cdef w_dtype result = w_dtype()
+            SET(result.v, GET(self.v).operand_dtype())
+            return result
+
+    property storage_dtype:
+        """The bottom dtype in the expression chain."""
+        def __get__(self):
+            cdef w_dtype result = w_dtype()
+            SET(result.v, GET(self.v).storage_dtype())
+            return result
 
     def __str__(self):
         return str(dtype_str(GET(self.v)).c_str())
@@ -202,3 +230,19 @@ cdef class w_ndarray:
         cdef w_ndarray result = w_ndarray()
         SET(result.v, ndarray_divide(GET((w_ndarray(lhs)).v), GET(w_ndarray(rhs).v)))
         return result
+
+cdef class w_unary_gfunc:
+    cdef unary_gfunc_placement_wrapper v
+
+    def __cinit__(self, bytes name):
+        unary_gfunc_placement_new(self.v, name)
+    def __dealloc__(self):
+        unary_gfunc_placement_delete(self.v)
+
+    property name:
+        def __get__(self):
+            return str(GET(self.v).get_name().c_str())
+
+    def add_kernel(self, kernel):
+        """Adds a kernel to the gfunc object. Currently, this means a ctypes object with prototype."""
+        GET(self.v).add_kernel(kernel)

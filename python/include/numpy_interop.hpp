@@ -16,19 +16,22 @@
 // Only expose the things in this header when numpy interop is enabled
 #if DND_NUMPY_INTEROP
 
+#include <numpy/numpyconfig.h>
+
 // Don't use the deprecated Numpy functions
-#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
+#ifdef NPY_1_7_API_VERSION
+# define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
+#else
+# define NPY_ARRAY_NOTSWAPPED NPY_NOTSWAPPED
+# define NPY_ARRAY_ALIGNED NPY_ALIGNED
+# define NPY_ARRAY_WRITEABLE NPY_WRITEABLE
+# define NPY_ARRAY_UPDATEIFCOPY NPY_UPDATEIFCOPY
+#endif
+
 #define PY_ARRAY_UNIQUE_SYMBOL pydnd_ARRAY_API
 // Invert the importing signal to match how numpy wants it
 #ifndef NUMPY_IMPORT_ARRAY
 # define NO_IMPORT_ARRAY
-#endif
-
-#ifndef NPY_1_7_API_VERSION
-#define NPY_ARRAY_NOTSWAPPED NPY_NOTSWAPPED
-#define NPY_ARRAY_ALIGNED NPY_ALIGNED
-#define NPY_ARRAY_WRITEABLE NPY_WRITEABLE
-#define NPY_ARRAY_UPDATEIFCOPY NPY_UPDATEIFCOPY
 #endif
 
 #include <stdint.h>

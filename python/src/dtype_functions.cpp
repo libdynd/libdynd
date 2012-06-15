@@ -5,6 +5,7 @@
 #include "dtype_functions.hpp"
 #include "ndarray_functions.hpp"
 #include "numpy_interop.hpp"
+#include "ctypes_interop.hpp"
 
 using namespace std;
 using namespace dnd;
@@ -54,6 +55,9 @@ static dnd::dtype make_dtype_from_pytypeobject(PyTypeObject* obj)
         return make_dtype<double>();
     } else if (obj == &PyComplex_Type) {
         return make_dtype<complex<double> >();
+    } else if (PyObject_IsSubclass((PyObject *)obj, ctypes.PyCData_Type)) {
+        // CTypes type object
+        return dtype_from_ctypes_cdatatype((PyObject *)obj);
     }
 
     throw std::runtime_error("could not convert the given Python TypeObject into a dnd::dtype");

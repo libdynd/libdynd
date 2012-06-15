@@ -44,15 +44,19 @@ include_directories(
     )
 
 set(pydnd_CPP_SRC
+    include/ctypes_interop.hpp
     include/do_import_array.hpp
     include/placement_wrappers.hpp
     include/dtype_functions.hpp
     include/ndarray_functions.hpp
     include/numpy_interop.hpp
+    include/unary_gfunc.hpp
     include/utility_functions.hpp
+    src/ctypes_interop.cpp
     src/dtype_functions.cpp
     src/ndarray_functions.cpp
     src/numpy_interop.cpp
+    src/unary_gfunc.cpp
     src/utility_functions.cpp
     )
 set(pydnd_CYTHON_SRC
@@ -60,6 +64,7 @@ set(pydnd_CYTHON_SRC
     include/dnd.pxd
     include/dtype.pxd
     include/ndarray.pxd
+    include/unary_gfunc.pxd
     )
 set_source_files_properties(${pydnd_CYTHON_SRC} PROPERTIES CYTHON_IS_CXX 1)
 
@@ -69,7 +74,11 @@ source_group("Cython Headers" REGULAR_EXPRESSION ".*pxd$")
 cython_add_module(_pydnd ${pydnd_CPP_SRC} ${pydnd_CYTHON_SRC})
 
 set_target_properties(_pydnd PROPERTIES LINKER_LANGUAGE CXX)
-set_target_properties(_pydnd PROPERTIES COMPILE_FLAGS "-Wno-error")
+if(NOT WIN32)
+    # We compile with -Werror, and Cython's code generates warnings, so
+    # disable that specifically for this project.
+    set_target_properties(_pydnd PROPERTIES COMPILE_FLAGS "-Wno-error")
+endif()
 
 target_link_libraries(_pydnd dynamicndarray)
 

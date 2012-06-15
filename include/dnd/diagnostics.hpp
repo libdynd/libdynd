@@ -28,10 +28,12 @@
         } \
     }
 #else
-# define DND_ASSERT_ALIGNED(ptr, alignment, extra_info) {}
+# define DND_ASSERT_ALIGNED(ptr, stride, alignment, extra_info) {}
 #endif
 
 namespace dnd {
+
+#define DND_ANY_DIAGNOSTICS_ENABLED (DND_ALIGNMENT_ASSERTIONS != 0)
 
 /**
  * This function returns true if any diagnostics, which might
@@ -43,7 +45,7 @@ inline bool any_diagnostics_enabled()
 {
     // IMPORTANT: All diagnostic macros should be checked here,
     //            and added to the description string below.
-    return DND_ALIGNMENT_ASSERTIONS != 0;
+    return DND_ANY_DIAGNOSTICS_ENABLED;
 }
 
 /**
@@ -52,11 +54,15 @@ inline bool any_diagnostics_enabled()
  */
 inline std::string which_diagnostics_enabled()
 {
+#if DND_ANY_DIAGNOSTICS_ENABLED
     std::stringstream ss;
 #if DND_ALIGNMENT_ASSERTIONS
     ss << "DND_ALIGNMENT_ASSERTIONS - checks that data has correct alignment in inner loops\n";
 #endif // DND_ALIGNMENT_ASSERTIONS
     return ss.str();
+#else
+    return "";
+#endif
 }
 
 } // namespace dnd
