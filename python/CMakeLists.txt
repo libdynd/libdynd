@@ -77,7 +77,11 @@ set_target_properties(_pydnd PROPERTIES LINKER_LANGUAGE CXX)
 if(NOT WIN32)
     # We compile with -Werror, and Cython's code generates warnings, so
     # disable that specifically for this project.
-    set_target_properties(_pydnd PROPERTIES COMPILE_FLAGS "-Wno-error")
+    set_target_properties(
+        _pydnd
+        PROPERTIES COMPILE_FLAGS
+        "-Wno-unused-parameter -Wno-self-assign -Wno-unused-function"
+        )
 endif()
 
 target_link_libraries(_pydnd dynamicndarray)
