@@ -8,6 +8,7 @@
 
 #include <stdint.h>
 #include <sstream>
+#include <stdexcept>
 
 #include "Python.h"
 
