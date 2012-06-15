@@ -64,6 +64,7 @@ public:
     {
         DND_MEMCPY(m_data, data, size * sizeof(T));
     }
+#ifdef DND_RVALUE_REFS
     /** Move constructor */
     shortvector(shortvector&& rhs) {
         if (rhs.m_data == rhs.m_shortdata) {
@@ -94,6 +95,7 @@ public:
         }
         return *this;
     }
+#endif
 
     /** Destructor */
     ~shortvector() {
