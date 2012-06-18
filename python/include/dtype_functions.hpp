@@ -18,6 +18,17 @@
 
 namespace pydnd {
 
+/**
+ * This is the typeobject and struct of w_dtype from Cython.
+ */
+extern PyTypeObject *WDType_Type;
+struct WDType {
+  PyObject_HEAD;
+  // This is dtype_placement_wrapper in Cython-land
+  dnd::dtype v;
+};
+void init_w_dtype_typeobject(PyObject *type);
+
 inline std::string dtype_str(const dnd::dtype& d)
 {
     std::stringstream ss;

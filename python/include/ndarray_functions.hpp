@@ -18,7 +18,24 @@
 
 namespace pydnd {
 
-void ndarray_init(dnd::ndarray& n, PyObject* obj);
+/**
+ * This is the typeobject and struct of w_ndarray from Cython.
+ */
+extern PyTypeObject *WNDArray_Type;
+inline bool WNDArray_CheckExact(PyObject *obj) {
+    return Py_TYPE(obj) == WNDArray_Type;
+}
+inline bool WNDArray_Check(PyObject *obj) {
+    return PyObject_TypeCheck(obj, WNDArray_Type);
+}
+struct WNDArray {
+  PyObject_HEAD;
+  // This is ndarray_placement_wrapper in Cython-land
+  dnd::ndarray v;
+};
+void init_w_ndarray_typeobject(PyObject *type);
+
+void ndarray_init_from_pyobject(dnd::ndarray& n, PyObject* obj);
 dnd::ndarray ndarray_vals(const dnd::ndarray& n);
 
 inline dnd::ndarray ndarray_add(const dnd::ndarray& lhs, const dnd::ndarray& rhs)

@@ -50,11 +50,13 @@ cdef extern from "dnd/ndarray.hpp" namespace "dnd":
         void debug_dump(ostream&)
 
 cdef extern from "ndarray_functions.hpp" namespace "pydnd":
+    void init_w_ndarray_typeobject(object)
+
     string ndarray_str(ndarray&) except +
     string ndarray_repr(ndarray&) except +
     string ndarray_debug_dump(ndarray&)
 
-    void ndarray_init(ndarray&, object obj) except +
+    void ndarray_init_from_pyobject(ndarray&, object obj) except +
     ndarray ndarray_vals(ndarray& n) except +
 
     ndarray ndarray_add(ndarray&, ndarray&) except +

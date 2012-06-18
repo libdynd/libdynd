@@ -86,6 +86,8 @@ cdef extern from "dnd/dtypes/dtype_alignment.hpp" namespace "dnd":
     dtype dnd_make_unaligned_dtype "dnd::make_unaligned_dtype" (dtype&) except +
 
 cdef extern from "dtype_functions.hpp" namespace "pydnd":
+    void init_w_dtype_typeobject(object)
+
     string dtype_str(dtype&)
     string dtype_repr(dtype&)
     dtype deduce_dtype_from_object(object) except +

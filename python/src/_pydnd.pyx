@@ -16,6 +16,11 @@ cdef extern from "ctypes_interop.hpp" namespace "pydnd":
     void init_ctypes_interop() except +
 init_ctypes_interop()
 
+# Initialize C++ access to the Cython type objects
+init_w_ndarray_typeobject(w_ndarray)
+init_w_dtype_typeobject(w_dtype)
+
+# Issue a performance warning if any of the diagnostics macros are enabled
 cdef extern from "<dnd/diagnostics.hpp>" namespace "dnd":
     bint any_diagnostics_enabled()
     string which_diagnostics_enabled()
@@ -127,6 +132,11 @@ def make_unaligned_dtype(aligned_dtype):
 
 ##############################################################################
 
+# NOTE: This is a possible alternative to the init_w_ndarray_typeobject() call
+#       above, but it generates a 1300 line header file and still requires calling
+#       import__dnd from the C++ code, so directly using C++ primitives seems simpler.
+#cdef public api class w_ndarray [object WNDArrayObject, type WNDArrayObject_Type]:
+
 cdef class w_ndarray:
     # To access the embedded dtype, use "GET(self.v)",
     # which returns a reference to the ndarray, and
@@ -138,10 +148,7 @@ cdef class w_ndarray:
         ndarray_placement_new(self.v)
         if obj is not None:
             # Get the array data
-            if type(obj) is w_ndarray:
-                SET(self.v, GET((<w_ndarray>obj).v))
-            else:
-                ndarray_init(GET(self.v), obj)
+            ndarray_init_from_pyobject(GET(self.v), obj)
 
             # If a specific dtype is requested, use as_dtype to switch types
             if dtype is not None:
@@ -250,3 +257,7 @@ cdef class w_unary_gfunc:
     def debug_dump(self):
         """Prints a raw representation of the gfunc data."""
         print str(GET(self.v).debug_dump().c_str())
+
+    def __call__(self, *args, **kwargs):
+        """Calls the gfunc."""
+        GET(self.v).call(args, kwargs)

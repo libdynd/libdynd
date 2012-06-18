@@ -11,6 +11,12 @@ using namespace std;
 using namespace dnd;
 using namespace pydnd;
 
+PyTypeObject *pydnd::WDType_Type;
+
+void pydnd::init_w_dtype_typeobject(PyObject *type)
+{
+    WDType_Type = (PyTypeObject *)type;
+}
 
 dtype pydnd::deduce_dtype_from_object(PyObject* obj)
 {

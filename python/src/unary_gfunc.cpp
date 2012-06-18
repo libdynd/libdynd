@@ -4,6 +4,7 @@
 //
 
 #include "unary_gfunc.hpp"
+#include "ndarray_functions.hpp"
 #include "utility_functions.hpp"
 #include "ctypes_interop.hpp"
 
@@ -176,7 +177,25 @@ void pydnd::unary_gfunc::add_kernel(PyObject *kernel)
 
 PyObject *pydnd::unary_gfunc::call(PyObject *args, PyObject *kwargs)
 {
-    return NULL;
+    if (PySequence_Size(args) != 1) {
+        PyErr_SetString(PyExc_TypeError, "Unary gfuncs only take one argument");
+        return NULL;
+    }
+
+    pyobject_ownref arg0_obj(PySequence_GetItem(args, 0));
+    ndarray arg0;
+    ndarray_init_from_pyobject(arg0, arg0_obj);
+
+    type_id_t tid = arg0.get_dtype().type_id();
+    for (int i = 0; i < m_kernels.size(); ++i) {
+        if (tid == m_kernels[i].m_params[0].type_id()) {
+        }
+    }
+
+    std::stringstream ss;
+    ss << "Could not find a gfunc kernel matching dtype " << arg0.get_dtype();
+    throw std::runtime_error(ss.str());
+
 }
 
 std::string pydnd::unary_gfunc::debug_dump() const

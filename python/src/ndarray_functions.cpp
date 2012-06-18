@@ -10,8 +10,20 @@
 using namespace std;
 using namespace dnd;
 
-void pydnd::ndarray_init(dnd::ndarray& n, PyObject* obj)
+PyTypeObject *pydnd::WNDArray_Type;
+
+void pydnd::init_w_ndarray_typeobject(PyObject *type)
 {
+    WNDArray_Type = (PyTypeObject *)type;
+}
+
+void pydnd::ndarray_init_from_pyobject(dnd::ndarray& n, PyObject* obj)
+{
+    // If it's a Cython w_ndarray
+    if (WNDArray_Check(obj)) {
+        n = ((WNDArray *)obj)->v;
+    }
+
 #if DND_NUMPY_INTEROP
     if (PyArray_Check(obj)) {
         n = ndarray_from_numpy_array((PyArrayObject *)obj);
