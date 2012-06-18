@@ -187,7 +187,7 @@ PyObject *pydnd::unary_gfunc::call(PyObject *args, PyObject *kwargs)
     ndarray_init_from_pyobject(arg0, arg0_obj);
 
     type_id_t tid = arg0.get_dtype().type_id();
-    for (int i = 0; i < m_kernels.size(); ++i) {
+    for (deque<unary_gfunc_kernel>::size_type i = 0; i < m_kernels.size(); ++i) {
         if (tid == m_kernels[i].m_params[0].type_id()) {
         }
     }
@@ -204,7 +204,7 @@ std::string pydnd::unary_gfunc::debug_dump() const
     o << "------ unary_gfunc\n";
     o << "name: " << m_name << "\n";
     o << "kernel count: " << m_kernels.size() << "\n";
-    for (int i = 0; i < (int)m_kernels.size(); ++i) {
+    for (deque<unary_gfunc_kernel>::size_type i = 0; i < m_kernels.size(); ++i) {
         const unary_gfunc_kernel &k = m_kernels[i];
         o << "kernel " << i << "\n";
         o << "   " << k.m_out << " (" << k.m_params[0] << ")\n";
