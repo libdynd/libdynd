@@ -110,9 +110,14 @@ namespace detail {
  * It's non-copyable, as no reference counting has been added
  * for performance reasons, and we want to support pre-C++11.
  * With C++11, we would follow the example of unique_ptr<T>.
+ *
+ * The invariant that m_auxdata satisfies:
+ *  - If the 0th bit is set, it is static data or a borrowed reference
+ *  - If the 0th bit is not set, it is managed with the AuxDataBase
+ *    free and clone functions.
  */
 class auxiliary_data {
-    AuxDataBase *m_auxdata;
+    uintptr_t m_auxdata;
 
     // Non-copyable
     auxiliary_data(const auxiliary_data&);
@@ -120,56 +125,98 @@ class auxiliary_data {
     // Would be nice if we could rely on it being movable, like std::unique_ptr,
     // but we probably need to support pre C++11...
 public:
+    // Initialize as statically stored zero.
     auxiliary_data()
-        : m_auxdata(0)
+        : m_auxdata(1)
     {
     }
     ~auxiliary_data() {
         free();
     }
 
-    bool empty() {
-        return m_auxdata != 0;
+    bool is_static() const {
+        return (m_auxdata&1) == 1;
     }
 
-    // Frees the auxdata memory, makes this auxdata NULL
+    // Frees the auxdata memory, makes this auxdata statically
+    // stored zero.
     void free() {
-        if (m_auxdata != 0) {
-            m_auxdata->free(m_auxdata);
-            m_auxdata = 0;
+        if ((m_auxdata&1) == 0) {
+            reinterpret_cast<AuxDataBase *>(m_auxdata)->free(
+                            reinterpret_cast<AuxDataBase *>(m_auxdata));
+            m_auxdata = 1;
         }
     }
 
+    /**
+     * Clones the auxiliary data, using the AuxDataBase
+     * stored clone function.
+     */
     void clone_into(auxiliary_data& out_cloned) const {
         out_cloned.free();
-        if (m_auxdata != 0) {
-            out_cloned.m_auxdata = m_auxdata->clone(m_auxdata);
+        if ((m_auxdata&1) == 1) {
+            // Bit zero is set, copy by value
+            out_cloned.m_auxdata = m_auxdata;
+        } else {
+            // Bit zero is not set, clone the data
+            out_cloned.m_auxdata = reinterpret_cast<uintptr_t>(
+                            reinterpret_cast<AuxDataBase *>(m_auxdata)->clone(
+                                    reinterpret_cast<AuxDataBase *>(m_auxdata)));
+
             if (out_cloned.m_auxdata == 0) {
+                out_cloned.m_auxdata = 1;
                 throw std::bad_alloc();
             }
         }
+    }
+
+    /**
+     * Creates a borrowed reference to the auxiliary data,
+     * by setting the "is_static" bit of the m_auxdata member.
+     * The caller is responsible to ensure the lifetime of the borrowed
+     * reference is shorter than the lifetime of the original,
+     * no automatic tracking is done.
+     */
+    void borrow_into(auxiliary_data& out_borrowed) const {
+        out_borrowed.m_auxdata = m_auxdata|1;
     }
 
     void swap(auxiliary_data& rhs) {
         std::swap(m_auxdata, rhs.m_auxdata);
     }
 
-    // When the auxiliary_data was created with make_auxiliary_data<T>, this
-    // returns a reference to the T member. This should only be called when
-    // this->empty() returns false.
+    /**
+     * When the auxiliary_data was created with make_auxiliary_data<T>, this
+     * returns a reference to the T member. This should only be called when
+     * the auxiliary data is known to have been created with the
+     * make_auxiliary_data<T> template, and works with both tracked and
+     * borrowed auxdatas of this type.
+     */
     template<typename T>
     T& get() {
-        return reinterpret_cast<detail::auxiliary_data_holder<T> *>(m_auxdata)->m_auxdata;
+        return reinterpret_cast<detail::auxiliary_data_holder<T> *>(m_auxdata&~1)->m_auxdata;
+    }
+
+    /**
+     * When the auxiliary_data was created with with make_raw_auxiliary_data(), this
+     * gets the raw data back. Note that the zeroth bit will be set, so to use
+     * this with an aligned pointer, use get_raw()&~1, and to use this as an integer,
+     * use get_raw()>>1.
+     */
+    uintptr_t get_raw() {
+        return m_auxdata;
     }
 
     // Allow implicit conversion to const AuxDataBase *, so that this
     // can be passed as a parameter to kernel functions.
     operator const AuxDataBase *() const {
-        return m_auxdata;
+        return reinterpret_cast<const AuxDataBase *>(m_auxdata);
     }
 
     template<typename T>
     friend void make_auxiliary_data(auxiliary_data& out_created);
+
+    friend void make_raw_auxiliary_data(auxiliary_data& out_created, uintptr_t raw_value);
 };
 
 /**
@@ -181,9 +228,9 @@ template<typename T>
 void make_auxiliary_data(auxiliary_data& out_created)
 {
     out_created.free();
-    out_created.m_auxdata = reinterpret_cast<AuxDataBase *>(new detail::auxiliary_data_holder<T>());
-    out_created.m_auxdata->free = detail::auxiliary_data_holder_free<T>;
-    out_created.m_auxdata->clone = detail::auxiliary_data_holder_clone<T>;
+    out_created.m_auxdata = reinterpret_cast<uintptr_t>(new detail::auxiliary_data_holder<T>());
+    reinterpret_cast<AuxDataBase *>(out_created.m_auxdata)->free = detail::auxiliary_data_holder_free<T>;
+    reinterpret_cast<AuxDataBase *>(out_created.m_auxdata)->clone = detail::auxiliary_data_holder_clone<T>;
 }
 
 /**
@@ -201,14 +248,37 @@ void make_auxiliary_data(auxiliary_data& out_created, const T& value)
 }
 
 /**
+ * Creates a static auxiliary data object. This sets the 0th bit of the value,
+ * so the caller must be sure to avoid that value. To set a static auxiliary aligned
+ * pointer, use make_raw_auxiliary_data(output, reinterpret_cast<uintptr_t>(aligned_ptr),
+ * and to set an integer, use make_raw_auxiliary_data(output, static_cast<uintptr_t>(value) >> 1).
+ */
+inline void make_raw_auxiliary_data(auxiliary_data& out_created, uintptr_t raw_value)
+{
+    out_created.m_auxdata = raw_value|1;
+}
+
+
+/**
  * When auxdata points to an object created with make_auxiliary_data<T>,
  * this returns a reference to the T object it contains. Should not be
- * called when auxdata is NULL.
+ * called when auxdata is NULL. This works with either tracked auxiliary
+ * data or borrowed auxiliary data.
  */
 template<typename T>
 const T& get_auxiliary_data(const AuxDataBase *auxdata)
 {
-    return reinterpret_cast<const detail::auxiliary_data_holder<T>*>(auxdata)->get();
+    return reinterpret_cast<const detail::auxiliary_data_holder<T>*>(reinterpret_cast<uintptr_t>(auxdata)&~1)->get();
+}
+
+/**
+ * When auxdata points to static auxiliary data, this gets the value, including the
+ * 0th bit being set. To use this with an aligned pointer, use get_raw_auxiliary_data(auxdata)&~1,
+ * and to use this as an integer, use raw_auxiliary_data(auxdata)>>1.
+ */
+inline uintptr_t get_raw_auxiliary_data(const AuxDataBase *auxdata)
+{
+    return reinterpret_cast<uintptr_t>(auxdata);
 }
 
 
