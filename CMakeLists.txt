@@ -48,6 +48,7 @@ set(dnd_SRC
     include/dnd/kernels/buffered_binary_kernels.hpp
     include/dnd/kernels/byteswap_kernels.hpp
     include/dnd/kernels/kernel_instance.hpp
+    include/dnd/kernels/unary_kernel_instance.hpp
     src/dnd/dtype.cpp
     src/dnd/dtype_assign.cpp
     src/dnd/dtype_promotion.cpp
