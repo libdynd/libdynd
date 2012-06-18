@@ -25,7 +25,8 @@ assignment_function_t get_builtin_dtype_assignment_function(type_id_t dst_type_i
 
 /**
  * A multiple assignment kernel which calls one of the single assignment functions repeatedly.
- * The auxiliary data should be created by calling make_auxiliary_data<assignment_function_t>().
+ * The auxiliary data should be created by calling
+ *      make_raw_auxiliary_data(out_auxdata, reinterpret_cast<uintptr_t>(asnFn))
  */
 void multiple_assignment_kernel(char *dst, intptr_t dst_stride, const char *src, intptr_t src_stride,
                                     intptr_t count, const AuxDataBase *auxdata);

@@ -68,7 +68,7 @@ assignment_function_t dnd::get_builtin_dtype_assignment_function(type_id_t dst_t
 void dnd::multiple_assignment_kernel(char *dst, intptr_t dst_stride, const char *src, intptr_t src_stride,
                                     intptr_t count, const AuxDataBase *auxdata)
 {
-    assignment_function_t asn = get_auxiliary_data<assignment_function_t>(auxdata);
+    assignment_function_t asn = reinterpret_cast<assignment_function_t>(get_raw_auxiliary_data(auxdata)&~1);
 
 
     char *dst_cached = reinterpret_cast<char *>(dst);
@@ -170,7 +170,7 @@ void dnd::get_builtin_dtype_assignment_kernel(
         assignment_function_t asn = get_builtin_dtype_assignment_function(dst_type_id, src_type_id, errmode);
         if (asn != NULL) {
             out_kernel.kernel = &multiple_assignment_kernel;
-            make_auxiliary_data<assignment_function_t>(out_kernel.auxdata, asn);
+            make_raw_auxiliary_data(out_kernel.auxdata, reinterpret_cast<uintptr_t>(asn));
             return;
         }
     }
@@ -344,7 +344,7 @@ namespace {
 static void unaligned_contig_copy_assign_kernel(char *dst, intptr_t, const char *src, intptr_t,
                             intptr_t count, const AuxDataBase *auxdata)
 {
-    intptr_t itemsize = get_auxiliary_data<intptr_t>(auxdata);
+    intptr_t itemsize = static_cast<intptr_t>(get_raw_auxiliary_data(auxdata)>>1);
     memcpy(dst, src, itemsize * count);
 }
 static void unaligned_strided_copy_assign_kernel(char *dst, intptr_t dst_stride, const char *src, intptr_t src_stride,
@@ -352,7 +352,7 @@ static void unaligned_strided_copy_assign_kernel(char *dst, intptr_t dst_stride,
 {
     char *dst_cached = reinterpret_cast<char *>(dst);
     const char *src_cached = reinterpret_cast<const char *>(src);
-    intptr_t itemsize = get_auxiliary_data<intptr_t>(auxdata);
+    intptr_t itemsize = static_cast<intptr_t>(get_raw_auxiliary_data(auxdata)>>1);
 
     for (intptr_t i = 0; i < count; ++i) {
         memcpy(dst_cached, src_cached, itemsize);
@@ -370,7 +370,7 @@ static void strided_copy_zerostride_assign(char *dst, intptr_t dst_stride, const
                             intptr_t count, const AuxDataBase *auxdata)
 {
     char *dst_cached = reinterpret_cast<char *>(dst);
-    intptr_t itemsize = get_auxiliary_data<intptr_t>(auxdata);
+    intptr_t itemsize = static_cast<intptr_t>(get_raw_auxiliary_data(auxdata)>>1);
 
     for (intptr_t i = 0; i < count; ++i) {
         memcpy(dst_cached, src, itemsize);
@@ -423,7 +423,7 @@ void dnd::get_pod_dtype_assignment_kernel(
                 break;
             default:
                 out_kernel.kernel = &unaligned_contig_copy_assign_kernel;
-                make_auxiliary_data<intptr_t>(out_kernel.auxdata, element_size);
+                make_raw_auxiliary_data(out_kernel.auxdata, static_cast<uintptr_t>(element_size)<<1);
                 break;
         }
     } else if (src_fixedstride == 0) {
@@ -447,7 +447,7 @@ void dnd::get_pod_dtype_assignment_kernel(
                     break;
                 default:
                     out_kernel.kernel = &strided_copy_zerostride_assign;
-                    make_auxiliary_data<intptr_t>(out_kernel.auxdata, element_size);
+                    make_raw_auxiliary_data(out_kernel.auxdata, static_cast<uintptr_t>(element_size)<<1);
                     break;
             }
         } else {
@@ -467,7 +467,7 @@ void dnd::get_pod_dtype_assignment_kernel(
                     break;
                 default:
                     out_kernel.kernel = &strided_copy_zerostride_assign;
-                    make_auxiliary_data<intptr_t>(out_kernel.auxdata, element_size);
+                    make_raw_auxiliary_data(out_kernel.auxdata, static_cast<uintptr_t>(element_size)<<1);
                     break;
             }
         }
@@ -488,12 +488,12 @@ void dnd::get_pod_dtype_assignment_kernel(
                     break;
                 default:
                     out_kernel.kernel = &unaligned_strided_copy_assign_kernel;
-                    make_auxiliary_data<intptr_t>(out_kernel.auxdata, element_size);
+                    make_raw_auxiliary_data(out_kernel.auxdata, static_cast<uintptr_t>(element_size)<<1);
                     break;
             }
         } else {
             out_kernel.kernel = &unaligned_strided_copy_assign_kernel;
-            make_auxiliary_data<intptr_t>(out_kernel.auxdata, element_size);
+            make_raw_auxiliary_data(out_kernel.auxdata, static_cast<uintptr_t>(element_size)<<1);
         }
     }
 }

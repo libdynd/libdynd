@@ -53,15 +53,14 @@ static void aligned_fixed_size_pairwise_byteswap_kernel(char *dst, intptr_t dst_
 }
 
 /**
- * Byteswaps arbitrary sized data. The auxiliary data should
- * be created by calling make_auxiliary_data<intptr_t>(), and initialized
- * with the element size.
+ * Byteswaps arbitrary sized data. The auxiliary data should be created by calling
+ * make_raw_auxiliary_data(out_auxdata, static_cast<uintptr_t>(element_size)<<1).
  */
 static void general_byteswap_kernel(char *dst, intptr_t dst_stride,
                     const char *src, intptr_t src_stride,
                     intptr_t count, const AuxDataBase *auxdata)
 {
-    intptr_t element_size = get_auxiliary_data<intptr_t>(auxdata);
+    intptr_t element_size = static_cast<intptr_t>(get_raw_auxiliary_data(auxdata)>>1);
 
     // Do a different loop for in-place swap versus copying swap,
     // so this one kernel function works correctly for both cases.
@@ -87,15 +86,14 @@ static void general_byteswap_kernel(char *dst, intptr_t dst_stride,
 }
 
 /**
- * Byteswaps arbitrary sized data in pairs. The auxiliary data should
- * be created by calling make_auxiliary_data<intptr_t>(), and initialized
- * with the element size.
+ * Byteswaps arbitrary sized data. The auxiliary data should be created by calling
+ * make_raw_auxiliary_data(out_auxdata, static_cast<uintptr_t>(element_size)<<1).
  */
 static void general_pairwise_byteswap_kernel(char *dst, intptr_t dst_stride,
                     const char *src, intptr_t src_stride,
                     intptr_t count, const AuxDataBase *auxdata)
 {
-    intptr_t element_size = get_auxiliary_data<intptr_t>(auxdata);
+    intptr_t element_size = static_cast<intptr_t>(get_raw_auxiliary_data(auxdata)>>1);
 
     // Do a different loop for in-place swap versus copying swap,
     // so this one kernel function works correctly for both cases.
@@ -145,12 +143,12 @@ void dnd::get_byteswap_kernel(intptr_t element_size, intptr_t alignment,
             out_kernel.kernel = &aligned_fixed_size_byteswap_kernel<uint64_t>;
             break;
         default:
-            make_auxiliary_data<intptr_t>(out_kernel.auxdata, element_size);
+            make_raw_auxiliary_data(out_kernel.auxdata, static_cast<uintptr_t>(element_size)<<1);
             out_kernel.kernel = &general_byteswap_kernel;
             break;
         }
     } else {
-        make_auxiliary_data<intptr_t>(out_kernel.auxdata, element_size);
+        make_raw_auxiliary_data(out_kernel.auxdata, static_cast<uintptr_t>(element_size)<<1);
         out_kernel.kernel = &general_byteswap_kernel;
     }
 }
@@ -178,12 +176,12 @@ void dnd::get_pairwise_byteswap_kernel(intptr_t element_size, intptr_t alignment
             out_kernel.kernel = &aligned_fixed_size_pairwise_byteswap_kernel<uint64_t>;
             break;
         default:
-            make_auxiliary_data<intptr_t>(out_kernel.auxdata, element_size);
+            make_raw_auxiliary_data(out_kernel.auxdata, static_cast<uintptr_t>(element_size)<<1);
             out_kernel.kernel = &general_pairwise_byteswap_kernel;
             break;
         }
     } else {
-        make_auxiliary_data<intptr_t>(out_kernel.auxdata, element_size);
+        make_raw_auxiliary_data(out_kernel.auxdata, static_cast<uintptr_t>(element_size)<<1);
         out_kernel.kernel = &general_pairwise_byteswap_kernel;
     }
 }

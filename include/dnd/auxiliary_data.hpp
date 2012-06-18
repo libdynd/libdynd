@@ -112,7 +112,7 @@ namespace detail {
  * With C++11, we would follow the example of unique_ptr<T>.
  *
  * The invariant that m_auxdata satisfies:
- *  - If the 0th bit is set, it is static data or a borrowed reference
+ *  - If the 0th bit is set, it is by-value data or a borrowed reference
  *  - If the 0th bit is not set, it is managed with the AuxDataBase
  *    free and clone functions.
  */
@@ -134,7 +134,11 @@ public:
         free();
     }
 
-    bool is_static() const {
+    /**
+     * If this is true, the auxiliary data is by-value, signaled
+     * by its 0th bit being set to 1.
+     */
+    bool is_byvalue() const {
         return (m_auxdata&1) == 1;
     }
 
@@ -172,7 +176,7 @@ public:
 
     /**
      * Creates a borrowed reference to the auxiliary data,
-     * by setting the "is_static" bit of the m_auxdata member.
+     * by setting the "is_byvalue" bit of the m_auxdata member.
      * The caller is responsible to ensure the lifetime of the borrowed
      * reference is shorter than the lifetime of the original,
      * no automatic tracking is done.
@@ -195,16 +199,6 @@ public:
     template<typename T>
     T& get() {
         return reinterpret_cast<detail::auxiliary_data_holder<T> *>(m_auxdata&~1)->m_auxdata;
-    }
-
-    /**
-     * When the auxiliary_data was created with with make_raw_auxiliary_data(), this
-     * gets the raw data back. Note that the zeroth bit will be set, so to use
-     * this with an aligned pointer, use get_raw()&~1, and to use this as an integer,
-     * use get_raw()>>1.
-     */
-    uintptr_t get_raw() {
-        return m_auxdata;
     }
 
     // Allow implicit conversion to const AuxDataBase *, so that this
@@ -248,8 +242,8 @@ void make_auxiliary_data(auxiliary_data& out_created, const T& value)
 }
 
 /**
- * Creates a static auxiliary data object. This sets the 0th bit of the value,
- * so the caller must be sure to avoid that value. To set a static auxiliary aligned
+ * Creates a by-value auxiliary data object. This sets the 0th bit of the value,
+ * so the caller must be sure to avoid that value. To set a by-value auxiliary aligned
  * pointer, use make_raw_auxiliary_data(output, reinterpret_cast<uintptr_t>(aligned_ptr),
  * and to set an integer, use make_raw_auxiliary_data(output, static_cast<uintptr_t>(value) >> 1).
  */
@@ -272,7 +266,7 @@ const T& get_auxiliary_data(const AuxDataBase *auxdata)
 }
 
 /**
- * When auxdata points to static auxiliary data, this gets the value, including the
+ * When auxdata points to by-value auxiliary data, this gets the value, including the
  * 0th bit being set. To use this with an aligned pointer, use get_raw_auxiliary_data(auxdata)&~1,
  * and to use this as an integer, use raw_auxiliary_data(auxdata)>>1.
  */
