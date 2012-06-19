@@ -57,7 +57,7 @@ ndarray_expr_node_ptr dnd::ndarray_expr_node::evaluate()
                     intptr_t dst_stride = iter.innerstride<0>();
                     intptr_t src0_stride = iter.innerstride<1>();
                     kernel_instance<unary_operation_t> operation;
-                    m_dtype.get_storage_to_value_operation(dst_stride, src0_stride, operation);
+                    get_dtype_assignment_kernel(m_dtype.value_dtype(), dst_stride, m_dtype, src0_stride, assign_error_none, operation);
                     if (innersize > 0) {
                         do {
                             operation.kernel(iter.data<0>(), dst_stride,

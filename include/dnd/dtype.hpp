@@ -12,7 +12,7 @@
 #include <stdexcept>
 
 #include <dnd/config.hpp>
-#include <dnd/kernels/kernel_instance.hpp>
+#include <dnd/kernels/unary_kernel_instance.hpp>
 
 namespace dnd {
 
@@ -229,11 +229,9 @@ public:
     virtual bool operator==(const extended_dtype& rhs) const = 0;
 
     // For expression_kind dtypes - converts from (operand_dtype().value_dtype()) to (value_dtype())
-    virtual void get_operand_to_value_operation(intptr_t dst_fixedstride, intptr_t src_fixedstride,
-                                kernel_instance<unary_operation_t>& out_kernel) const;
+    virtual const unary_specialization_kernel_instance& get_operand_to_value_kernel() const;
     // For expression_kind dtypes - converts from (value_dtype()) to (operand_dtype().value_dtype())
-    virtual void get_value_to_operand_operation(intptr_t dst_fixedstride, intptr_t src_fixedstride,
-                                kernel_instance<unary_operation_t>& out_kernel) const;
+    virtual const unary_specialization_kernel_instance& get_value_to_operand_kernel() const;
 
     /**
      * This method is for expression dtypes, and is a way to substitute
@@ -464,13 +462,6 @@ public:
 
     void print_data(std::ostream& o, const char *data, intptr_t stride, intptr_t size,
                                                             const char *separator) const;
-
-    // Converts from (storage_dtype()) to (value_dtype()). Only necessary for expression_kind dtypes
-    void get_storage_to_value_operation(intptr_t dst_fixedstride, intptr_t src_fixedstride,
-                                kernel_instance<unary_operation_t>& out_kernel) const;
-    // Converts from (value_dtype()) to (storage_dtype()). Only necessary for expression_kind dtypes
-    void get_value_to_storage_operation(intptr_t dst_fixedstride, intptr_t src_fixedstride,
-                                kernel_instance<unary_operation_t>& out_kernel) const;
 
     friend std::ostream& operator<<(std::ostream& o, const dtype& rhs);
     friend dtype make_bytes_dtype(intptr_t element_size, intptr_t alignment);

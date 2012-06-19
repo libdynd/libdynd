@@ -41,7 +41,6 @@ set(dnd_SRC
     src/dnd/kernels/buffered_binary_kernels.cpp
     src/dnd/kernels/byteswap_kernels.cpp
     src/dnd/kernels/single_assigner_builtin.hpp
-    src/dnd/kernels/multiple_assigner_builtin.hpp
     include/dnd/kernels/assignment_kernels.hpp
     include/dnd/kernels/builtin_dtype_binary_kernel_table.hpp
     include/dnd/kernels/buffered_unary_kernels.hpp

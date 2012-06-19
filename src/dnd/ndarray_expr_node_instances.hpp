@@ -10,6 +10,7 @@
 #include <dnd/shape_tools.hpp>
 #include <dnd/dtypes/conversion_dtype.hpp>
 #include <dnd/kernels/buffered_binary_kernels.hpp>
+#include <dnd/kernels/assignment_kernels.hpp>
 
 namespace dnd {
 
@@ -149,7 +150,7 @@ public:
             // Adapt the output
             if (m_dtype.kind() == expression_kind) {
                 element_sizes[0] = m_dtype.itemsize();
-                m_dtype.get_storage_to_value_operation(dst_fixedstride, element_sizes[0], adapters[0]);
+                get_dtype_assignment_kernel(m_dtype.value_dtype(), dst_fixedstride, m_dtype, element_sizes[0], assign_error_none, adapters[0]);
             } else {
                 element_sizes[0] = dst_fixedstride;
             }
@@ -157,7 +158,8 @@ public:
             // Adapt the first operand
             if (m_opnodes[0]->get_dtype().kind() == expression_kind) {
                 element_sizes[1] = m_opnodes[0]->get_dtype().value_dtype().itemsize();
-                m_opnodes[0]->get_dtype().get_storage_to_value_operation(element_sizes[1], src0_fixedstride, adapters[1]);
+                get_dtype_assignment_kernel(m_opnodes[0]->get_dtype().value_dtype(), element_sizes[1], m_opnodes[0]->get_dtype(),
+                                    src0_fixedstride, assign_error_none, adapters[1]);
             } else {
                 element_sizes[1] = src0_fixedstride;
             }
@@ -165,7 +167,8 @@ public:
             // Adapt the second operand
             if (m_opnodes[1]->get_dtype().kind() == expression_kind) {
                 element_sizes[2] = m_opnodes[1]->get_dtype().value_dtype().itemsize();
-                m_opnodes[1]->get_dtype().get_storage_to_value_operation(element_sizes[2], src1_fixedstride, adapters[2]);
+                get_dtype_assignment_kernel(m_opnodes[1]->get_dtype().value_dtype(), element_sizes[2], m_opnodes[1]->get_dtype(),
+                                    src1_fixedstride, assign_error_none, adapters[2]);
             } else {
                 element_sizes[2] = src0_fixedstride;
             }

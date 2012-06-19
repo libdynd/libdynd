@@ -14,28 +14,16 @@
 
 #include <dnd/dtype.hpp>
 #include <dnd/dtype_assign.hpp>
+#include <dnd/kernels/unary_kernel_instance.hpp>
 
 namespace dnd {
 
 class conversion_dtype : public extended_dtype {
     dtype m_value_dtype, m_operand_dtype;
     assign_error_mode m_errmode;
-    bool m_no_errors_to_value, m_no_errors_to_storage;
+    unary_specialization_kernel_instance m_to_value_kernel, m_to_operand_kernel;
 public:
-    conversion_dtype(const dtype& value_dtype, const dtype& operand_dtype, assign_error_mode errmode)
-        : m_value_dtype(value_dtype), m_operand_dtype(operand_dtype), m_errmode(errmode),
-          m_no_errors_to_value(errmode == assign_error_none || ::dnd::is_lossless_assignment(m_value_dtype, m_operand_dtype)),
-          m_no_errors_to_storage(errmode == assign_error_none || ::dnd::is_lossless_assignment(m_operand_dtype, m_value_dtype))
-    {
-        // An alternative to this error would be to use value_dtype.value_dtype(), cutting
-        // away the expression part of the given value_dtype.
-        if (m_value_dtype.kind() == expression_kind) {
-            std::stringstream ss;
-            ss << "conversion_dtype: The destination dtype " << m_value_dtype << " should not be an expression_kind";
-            throw std::runtime_error(ss.str());
-        }
-
-    }
+    conversion_dtype(const dtype& value_dtype, const dtype& operand_dtype, assign_error_mode errmode);
 
     type_id_t type_id() const {
         return conversion_type_id;
@@ -73,8 +61,8 @@ public:
     bool operator==(const extended_dtype& rhs) const;
 
     // For expression_kind dtypes - converts to/from the storage's value dtype
-    void get_operand_to_value_operation(intptr_t dst_fixedstride, intptr_t src_fixedstride, kernel_instance<unary_operation_t>& out_kernel) const;
-    void get_value_to_operand_operation(intptr_t dst_fixedstride, intptr_t src_fixedstride, kernel_instance<unary_operation_t>& out_kernel) const;
+    const unary_specialization_kernel_instance& get_operand_to_value_kernel() const;
+    const unary_specialization_kernel_instance& get_value_to_operand_kernel() const;
     dtype with_replaced_storage_dtype(const dtype& replacement_dtype) const;
 };
 

@@ -11,6 +11,40 @@
 using namespace std;
 using namespace dnd;
 
+dnd::byteswap_dtype::byteswap_dtype(const dtype& value_dtype)
+    : m_value_dtype(value_dtype), m_operand_dtype(make_bytes_dtype(value_dtype.itemsize(), value_dtype.alignment()))
+{
+    if (value_dtype.extended() != 0) {
+        throw std::runtime_error("byteswap_dtype: Only built-in dtypes are supported presently");
+    }
+
+    if(m_value_dtype.kind() != complex_kind) {
+        get_byteswap_kernel(value_dtype.itemsize(), value_dtype.alignment(), m_byteswap_kernel);
+    } else {
+        get_pairwise_byteswap_kernel(m_value_dtype.itemsize(), m_value_dtype.alignment(), m_byteswap_kernel);
+    }
+}
+
+dnd::byteswap_dtype::byteswap_dtype(const dtype& value_dtype, const dtype& operand_dtype)
+    : m_value_dtype(value_dtype), m_operand_dtype(operand_dtype)
+{
+    // Only a bytes dtype be the operand to the byteswap
+    if (operand_dtype.value_dtype().type_id() != bytes_type_id) {
+        std::stringstream ss;
+        ss << "byteswap_dtype: The operand to the dtype must have a value dtype of bytes, not " << operand_dtype.value_dtype();
+        throw std::runtime_error(ss.str());
+    }
+    // Automatically realign if needed
+    if (operand_dtype.value_dtype().alignment() < value_dtype.alignment()) {
+        m_operand_dtype = make_view_dtype(operand_dtype, make_bytes_dtype(operand_dtype.itemsize(), value_dtype.alignment()));
+    }
+
+    if(m_value_dtype.kind() != complex_kind) {
+        get_byteswap_kernel(value_dtype.itemsize(), value_dtype.alignment(), m_byteswap_kernel);
+    } else {
+        get_pairwise_byteswap_kernel(m_value_dtype.itemsize(), m_value_dtype.alignment(), m_byteswap_kernel);
+    }
+}
 
 void dnd::byteswap_dtype::print_data(std::ostream& DND_UNUSED(o), const dtype& DND_UNUSED(dt), const char *DND_UNUSED(data), 
 						intptr_t DND_UNUSED(stride), intptr_t DND_UNUSED(size), const char *DND_UNUSED(separator)) const
@@ -49,22 +83,14 @@ bool dnd::byteswap_dtype::operator==(const extended_dtype& rhs) const
     }
 }
 
-void dnd::byteswap_dtype::get_operand_to_value_operation(intptr_t dst_fixedstride, intptr_t src_fixedstride, kernel_instance<unary_operation_t>& out_kernel) const
+const unary_specialization_kernel_instance&  dnd::byteswap_dtype::get_operand_to_value_kernel() const
 {
-    if(m_value_dtype.kind() != complex_kind) {
-        get_byteswap_kernel(m_value_dtype.itemsize(), m_value_dtype.alignment(), dst_fixedstride, src_fixedstride, out_kernel);
-    } else {
-        get_pairwise_byteswap_kernel(m_value_dtype.itemsize(), m_value_dtype.alignment(), dst_fixedstride, src_fixedstride, out_kernel);
-    }
+    return m_byteswap_kernel;
 }
 
-void dnd::byteswap_dtype::get_value_to_operand_operation(intptr_t dst_fixedstride, intptr_t src_fixedstride, kernel_instance<unary_operation_t>& out_kernel) const
+const unary_specialization_kernel_instance&  dnd::byteswap_dtype::get_value_to_operand_kernel() const
 {
-    if(m_value_dtype.kind() != complex_kind) {
-        get_byteswap_kernel(m_value_dtype.itemsize(), m_value_dtype.alignment(), dst_fixedstride, src_fixedstride, out_kernel);
-    } else {
-        get_pairwise_byteswap_kernel(m_value_dtype.itemsize(), m_value_dtype.alignment(), dst_fixedstride, src_fixedstride, out_kernel);
-    }
+    return m_byteswap_kernel;
 }
 
 dtype dnd::byteswap_dtype::with_replaced_storage_dtype(const dtype& replacement_dtype) const

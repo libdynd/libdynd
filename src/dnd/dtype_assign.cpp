@@ -213,9 +213,9 @@ void dnd::dtype_assign(const dtype& dst_dt, char *dst, const dtype& src_dt, cons
         throw std::runtime_error(ss.str());
     } else {
         // Fall back to the strided assignment functions for the extended dtypes
-        kernel_instance<unary_operation_t> op;
-        get_dtype_assignment_kernel(dst_dt, 0, src_dt, 0, errmode, op);
-        op.kernel(dst, 0, src, 0, 1, op.auxdata);
+        unary_specialization_kernel_instance op;
+        get_dtype_assignment_kernel(dst_dt, src_dt, errmode, op);
+        op.specializations[scalar_unary_specialization](dst, 0, src, 0, 1, op.auxdata);
         return;
     }
 }

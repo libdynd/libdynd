@@ -11,6 +11,7 @@
 #include <complex>
 
 #include <dnd/dtype.hpp>
+#include <dnd/diagnostics.hpp>
 
 #ifdef __GNUC__
 #pragma GCC diagnostic push
@@ -37,6 +38,8 @@ template<class dst_type, class src_type, dtype_kind_t dst_kind, dtype_kind_t src
 struct single_assigner_builtin_base<dst_type, src_type, dst_kind, src_kind, assign_error_none>
 {
     static void assign(dst_type *dst, const src_type *src) {
+        DND_TRACE_ASSIGNMENT(static_cast<dst_type>(*src), dst_type, *src, src_type);
+
         *dst = static_cast<dst_type>(*src);
     }
 };
@@ -46,6 +49,8 @@ template<class dst_type, class src_real_type>
 struct single_assigner_builtin_base<dst_type, std::complex<src_real_type>, int_kind, complex_kind, assign_error_none>
 {
     static void assign(dst_type *dst, const std::complex<src_real_type> *src) {
+        DND_TRACE_ASSIGNMENT(static_cast<dst_type>(src->real()), dst_type, *src, std::complex<src_real_type>);
+
         *dst = static_cast<dst_type>(src->real());
     }
 };
@@ -53,6 +58,8 @@ template<class dst_type, class src_real_type>
 struct single_assigner_builtin_base<dst_type, std::complex<src_real_type>, uint_kind, complex_kind, assign_error_none>
 {
     static void assign(dst_type *dst, const std::complex<src_real_type> *src) {
+        DND_TRACE_ASSIGNMENT(static_cast<dst_type>(src->real()), dst_type, *src, std::complex<src_real_type>);
+
         *dst = static_cast<dst_type>(src->real());
     }
 };
@@ -60,6 +67,8 @@ template<class dst_type, class src_real_type>
 struct single_assigner_builtin_base<dst_type, std::complex<src_real_type>, real_kind, complex_kind, assign_error_none>
 {
     static void assign(dst_type *dst, const std::complex<src_real_type> *src) {
+        DND_TRACE_ASSIGNMENT(static_cast<dst_type>(src->real()), dst_type, *src, std::complex<src_real_type>);
+
         *dst = static_cast<dst_type>(src->real());
     }
 };
@@ -70,6 +79,8 @@ struct single_assigner_builtin_base<dnd_bool, src_type, bool_kind, src_kind, ass
 {
     static void assign(dnd_bool *dst, const src_type *src) {
         src_type s = *src;
+
+        DND_TRACE_ASSIGNMENT((bool)(s != src_type(0)), dnd_bool, s, src_type);
 
         if (s == src_type(0)) {
             *dst = false;
@@ -143,6 +154,8 @@ struct single_assigner_builtin_unsigned_to_signed_overflow_base<dst_type, src_ty
     static void assign(dst_type *dst, const src_type *src) {
         src_type s = *src;
 
+        DND_TRACE_ASSIGNMENT(static_cast<dst_type>(s), dst_type, s, src_type);
+
         if (s > static_cast<src_type>(std::numeric_limits<dst_type>::max())) {
             throw std::runtime_error("overflow while assigning unsigned integer signed integer");
         }
@@ -169,6 +182,8 @@ struct single_assigner_builtin_signed_to_unsigned_overflow_base
     static void assign(dst_type *dst, const src_type *src) {
         src_type s = *src;
 
+        DND_TRACE_ASSIGNMENT(static_cast<dst_type>(s), dst_type, s, src_type);
+
         if (s < 0) {
             throw std::runtime_error("overflow while assigning signed integer to unsigned integer");
         }
@@ -180,6 +195,8 @@ struct single_assigner_builtin_signed_to_unsigned_overflow_base<dst_type, src_ty
 {
     static void assign(dst_type *dst, const src_type *src) {
         src_type s = *src;
+
+        DND_TRACE_ASSIGNMENT(static_cast<dst_type>(s), dst_type, s, src_type);
 
         if (s < 0 || s > static_cast<src_type>(std::numeric_limits<dst_type>::max())) {
             throw std::runtime_error("overflow while assigning signed integer to unsigned integer");
@@ -207,6 +224,8 @@ struct single_assigner_builtin_base<dst_type, src_type, uint_kind, uint_kind, as
     static void assign(dst_type *dst, const src_type *src) {
         src_type s = *src;
 
+        DND_TRACE_ASSIGNMENT(static_cast<dst_type>(s), dst_type, s, src_type);
+
         if (s > std::numeric_limits<dst_type>::max()) {
             throw std::runtime_error("overflow while assigning unsigned integer to unsigned integer");
         }
@@ -230,8 +249,12 @@ struct single_assigner_builtin_base<dst_type, src_type, real_kind, int_kind, ass
         src_type s = *src;
         dst_type d = static_cast<dst_type>(s);
 
+        DND_TRACE_ASSIGNMENT(d, dst_type, s, src_type);
+
         if (static_cast<src_type>(d) != s) {
-            throw std::runtime_error("inexact value while assigning signed integer to floating point");
+            std::stringstream ss;
+            ss << "inexact value while assigning " << make_dtype<src_type>() << " to " << make_dtype<dst_type>();
+            throw std::runtime_error(ss.str());
         }
         *dst = d;
     }
@@ -252,6 +275,8 @@ struct single_assigner_builtin_base<std::complex<dst_real_type>, src_type, compl
     static void assign(std::complex<dst_real_type> *dst, const src_type *src) {
         src_type s = *src;
         dst_real_type d = static_cast<dst_real_type>(s);
+
+        DND_TRACE_ASSIGNMENT(d, std::complex<dst_real_type>, s, src_type);
 
         if (static_cast<src_type>(d) != s) {
             throw std::runtime_error("inexact value while assigning signed integer to complex floating point");
@@ -276,6 +301,8 @@ struct single_assigner_builtin_base<dst_type, src_type, real_kind, uint_kind, as
         src_type s = *src;
         dst_type d = static_cast<dst_type>(s);
 
+        DND_TRACE_ASSIGNMENT(d, dst_type, s, src_type);
+
         if (static_cast<src_type>(d) != s) {
             throw std::runtime_error("inexact value while assigning unsigned integer to floating point");
         }
@@ -299,6 +326,8 @@ struct single_assigner_builtin_base<std::complex<dst_real_type>, src_type, compl
         src_type s = *src;
         dst_real_type d = static_cast<dst_real_type>(s);
 
+        DND_TRACE_ASSIGNMENT(d, std::complex<dst_real_type>, s, src_type);
+
         if (static_cast<src_type>(d) != s) {
             throw std::runtime_error("inexact value while assigning unsigned integer to floating point");
         }
@@ -321,6 +350,8 @@ struct single_assigner_builtin_base<dst_type, src_type, int_kind, real_kind, ass
     static void assign(dst_type *dst, const src_type *src) {
         src_type s = *src;
 
+        DND_TRACE_ASSIGNMENT(static_cast<dst_type>(s), dst_type, s, src_type);
+
         if (s < std::numeric_limits<dst_type>::min() || s > std::numeric_limits<dst_type>::max()) {
             throw std::runtime_error("overflow while assigning floating point to signed integer");
         }
@@ -335,7 +366,7 @@ struct single_assigner_builtin_base<dst_type, src_type, int_kind, real_kind, ass
     static void assign(dst_type *dst, const src_type *src) {
         src_type s = *src;
 
-        //std::cout << "assigning " << s << " type " << dtype(type_id_of<src_type>::value) << " to " << dtype(type_id_of<dst_type>::value) << std::endl;
+        DND_TRACE_ASSIGNMENT(static_cast<dst_type>(s), dst_type, s, src_type);
 
         if (s < std::numeric_limits<dst_type>::min() || s > std::numeric_limits<dst_type>::max()) {
             throw std::runtime_error("overflow while assigning floating point to signed integer");
@@ -360,6 +391,8 @@ struct single_assigner_builtin_base<dst_type, std::complex<src_real_type>, int_k
     static void assign(dst_type *dst, const std::complex<src_real_type> *src) {
         std::complex<src_real_type> s = *src;
 
+        DND_TRACE_ASSIGNMENT(static_cast<dst_type>(s.real()), dst_type, s, std::complex<src_real_type>);
+
         if (s.imag() != 0) {
             throw std::runtime_error("loss of imaginary component while assigning complex floating point to signed integer");
         }
@@ -377,6 +410,8 @@ struct single_assigner_builtin_base<dst_type, std::complex<src_real_type>, int_k
 {
     static void assign(dst_type *dst, const std::complex<src_real_type> *src) {
         std::complex<src_real_type> s = *src;
+
+        DND_TRACE_ASSIGNMENT(static_cast<dst_type>(s.real()), dst_type, s, std::complex<src_real_type>);
 
         if (s.imag() != 0) {
             throw std::runtime_error("loss of imaginary component while assigning complex floating point to signed integer");
@@ -405,6 +440,8 @@ struct single_assigner_builtin_base<dst_type, src_type, uint_kind, real_kind, as
     static void assign(dst_type *dst, const src_type *src) {
         src_type s = *src;
 
+        DND_TRACE_ASSIGNMENT(static_cast<dst_type>(s), dst_type, s, src_type);
+
         if (s < 0 || s > std::numeric_limits<dst_type>::max()) {
             throw std::runtime_error("overflow while assigning floating point to unsigned integer");
         }
@@ -418,6 +455,8 @@ struct single_assigner_builtin_base<dst_type, src_type, uint_kind, real_kind, as
 {
     static void assign(dst_type *dst, const src_type *src) {
         src_type s = *src;
+
+        DND_TRACE_ASSIGNMENT(static_cast<dst_type>(s), dst_type, s, src_type);
 
         if (s < 0 || s > std::numeric_limits<dst_type>::max()) {
             throw std::runtime_error("overflow while assigning floating point to unsigned integer");
@@ -442,6 +481,8 @@ struct single_assigner_builtin_base<dst_type, std::complex<src_real_type>, uint_
     static void assign(dst_type *dst, const std::complex<src_real_type> *src) {
         std::complex<src_real_type> s = *src;
 
+        DND_TRACE_ASSIGNMENT(static_cast<dst_type>(s.real()), dst_type, s, std::complex<src_real_type>);
+
         if (s.imag() != 0) {
             throw std::runtime_error("loss of imaginary component while assigning complex floating point to unsigned integer");
         }
@@ -459,6 +500,8 @@ struct single_assigner_builtin_base<dst_type, std::complex<src_real_type>, uint_
 {
     static void assign(dst_type *dst, const std::complex<src_real_type> *src) {
         std::complex<src_real_type> s = *src;
+
+        DND_TRACE_ASSIGNMENT(static_cast<dst_type>(s.real()), dst_type, s, std::complex<src_real_type>);
 
         if (s.imag() != 0) {
             throw std::runtime_error("loss of imaginary component while assigning complex floating point to unsigned integer");
@@ -551,6 +594,8 @@ template<>
 struct single_assigner_builtin_base<float, double, real_kind, real_kind, assign_error_overflow>
 {
     static void assign(float *dst, const double *src) {
+        DND_TRACE_ASSIGNMENT(static_cast<float>(*src), float, *src, double);
+
         clear_fp_status();
         *dst = static_cast<float>(*src);
         if (is_overflow_fp_status()) {
@@ -570,6 +615,8 @@ template<>
 struct single_assigner_builtin_base<float, double, real_kind, real_kind, assign_error_inexact>
 {
     static void assign(float *dst, const double *src) {
+        DND_TRACE_ASSIGNMENT(static_cast<float>(*src), float, *src, double);
+
         double s = *src;
         float d;
         clear_fp_status();
@@ -593,6 +640,8 @@ template<>
 struct single_assigner_builtin_base<std::complex<float>, std::complex<double>, complex_kind, complex_kind, assign_error_overflow>
 {
     static void assign(std::complex<float> *dst, const std::complex<double> *src) {
+        DND_TRACE_ASSIGNMENT(static_cast<std::complex<float> >(*src), std::complex<float>, *src, std::complex<double>);
+
         clear_fp_status();
         *dst = static_cast<std::complex<float> >(*src);
         if (is_overflow_fp_status()) {
@@ -612,6 +661,8 @@ template<>
 struct single_assigner_builtin_base<std::complex<float>, std::complex<double>, complex_kind, complex_kind, assign_error_inexact>
 {
     static void assign(std::complex<float> *dst, const std::complex<double> *src) {
+        DND_TRACE_ASSIGNMENT(static_cast<std::complex<float> >(*src), std::complex<float>, *src, std::complex<double>);
+
         std::complex<double> s = *src;
         std::complex<float> d;
         clear_fp_status();
@@ -637,6 +688,8 @@ struct single_assigner_builtin_base<real_type, std::complex<real_type>, real_kin
     static void assign(real_type *dst, const std::complex<real_type> *src) {
         std::complex<real_type> s = *src;
 
+        DND_TRACE_ASSIGNMENT(static_cast<float>(s.real()), real_type, s, std::complex<real_type>);
+
         if (s.imag() != 0) {
             throw std::runtime_error("loss of imaginary component while assigning complex floating point to real floating point");
         }
@@ -660,6 +713,8 @@ template<typename real_type>
 struct single_assigner_builtin_base<std::complex<real_type>, real_type, complex_kind, real_kind, assign_error_none>
 {
     static void assign(std::complex<real_type> *dst, const real_type *src) {
+        DND_TRACE_ASSIGNMENT(static_cast<std::complex<real_type> >(*src), std::complex<real_type>, *src, real_type);
+
         *dst = *src;
     }
 };
@@ -672,6 +727,8 @@ template<>
 struct single_assigner_builtin_base<std::complex<double>, float, complex_kind, real_kind, assign_error_none>
 {
     static void assign(std::complex<double> *dst, const float *src) {
+        DND_TRACE_ASSIGNMENT(static_cast<std::complex<double> >(*src), std::complex<double>, *src, float);
+
         *dst = *src;
     }
 };
@@ -685,6 +742,8 @@ struct single_assigner_builtin_base<double, std::complex<float>, real_kind, comp
 {
     static void assign(double *dst, const std::complex<float> *src) {
         std::complex<float> s = *src;
+
+        DND_TRACE_ASSIGNMENT(static_cast<double>(s.real()), double, s, std::complex<float>);
 
         if (s.imag() != 0) {
             throw std::runtime_error("loss of imaginary component while assigning complex floating point to real floating point");
@@ -711,6 +770,8 @@ struct single_assigner_builtin_base<float, std::complex<double>, real_kind, comp
     static void assign(float *dst, const std::complex<double> *src) {
         std::complex<double> s = *src;
         float d;
+
+        DND_TRACE_ASSIGNMENT(static_cast<float>(s.real()), float, s, std::complex<double>);
 
         if (s.imag() != 0) {
             throw std::runtime_error("loss of imaginary component while assigning complex floating point to real floating point");
@@ -739,6 +800,8 @@ struct single_assigner_builtin_base<float, std::complex<double>, real_kind, comp
         std::complex<double> s = *src;
         float d;
 
+        DND_TRACE_ASSIGNMENT(static_cast<float>(s.real()), float, s, std::complex<double>);
+
         if (s.imag() != 0) {
             throw std::runtime_error("loss of imaginary component while assigning complex floating point to real floating point");
         }
@@ -765,6 +828,8 @@ struct single_assigner_builtin_base<std::complex<float>, double, complex_kind, r
         double s = *src;
         float d;
 
+        DND_TRACE_ASSIGNMENT(static_cast<std::complex<float> >(s), std::complex<float>, s, double);
+
         clear_fp_status();
         d = static_cast<float>(s);
         if (is_overflow_fp_status()) {
@@ -787,6 +852,8 @@ struct single_assigner_builtin_base<std::complex<float>, double, complex_kind, r
     static void assign(std::complex<float> *dst, const double *src) {
         double s = *src;
         float d;
+
+        DND_TRACE_ASSIGNMENT(static_cast<std::complex<float> >(s), std::complex<float>, s, double);
 
         clear_fp_status();
         d = static_cast<float>(s);

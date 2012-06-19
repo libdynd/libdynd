@@ -12,6 +12,7 @@
 #define DND_STRINGIFY(s) DND_XSTRINGIFY(s)
 
 #if DND_ALIGNMENT_ASSERTIONS
+#include <iostream>
 #include <sstream>
 #include <dnd/dtype.hpp>
 
@@ -31,9 +32,21 @@
 # define DND_ASSERT_ALIGNED(ptr, stride, alignment, extra_info) {}
 #endif
 
+#if DND_ASSIGNMENT_TRACING
+#include <iostream>
+#include <dnd/dtype.hpp>
+
+# define DND_TRACE_ASSIGNMENT(dst_value, dst_type, src_value, src_type) { \
+        std::cerr << "Assigning value " << src_value << " to value " << dst_value << " from " \
+                << dnd::make_dtype<src_type>() << " to " << dnd::make_dtype<dst_type>() << std::endl; \
+    }
+#else
+# define DND_TRACE_ASSIGNMENT(dst_value, dst_type, src_value, src_type) {}
+#endif
+
 namespace dnd {
 
-#define DND_ANY_DIAGNOSTICS_ENABLED (DND_ALIGNMENT_ASSERTIONS != 0)
+#define DND_ANY_DIAGNOSTICS_ENABLED ((DND_ALIGNMENT_ASSERTIONS != 0) || (DND_ASSIGNMENT_TRACING != 0))
 
 /**
  * This function returns true if any diagnostics, which might
@@ -59,6 +72,9 @@ inline std::string which_diagnostics_enabled()
 #if DND_ALIGNMENT_ASSERTIONS
     ss << "DND_ALIGNMENT_ASSERTIONS - checks that data has correct alignment in inner loops\n";
 #endif // DND_ALIGNMENT_ASSERTIONS
+#if DND_ASSIGNMENT_TRACING
+    ss << "DND_ASSIGNMENT_TRACING - prints individual builtin assignment operations\n";
+#endif // DND_ASSIGNMENT_TRACING
     return ss.str();
 #else
     return "";

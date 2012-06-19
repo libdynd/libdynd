@@ -117,6 +117,15 @@ namespace dnd {
 # define DND_ALIGNMENT_ASSERTIONS 0
 #endif
 
+/**
+ * This preprocessor symbol enables or disables tracing
+ * of individual builtin dtype assignment operations.
+ *
+ * See diagnostics.hpp for the macros which use this.
+ */
+#ifndef DND_ASSIGNMENT_TRACING
+# define DND_ASSIGNMENT_TRACING 0
+#endif
 
 
 /**

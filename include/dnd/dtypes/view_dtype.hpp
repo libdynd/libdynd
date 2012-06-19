@@ -14,19 +14,10 @@ namespace dnd {
 
 class view_dtype : public extended_dtype {
     dtype m_value_dtype, m_operand_dtype;
+    unary_specialization_kernel_instance m_copy_kernel;
+
 public:
-    view_dtype(const dtype& value_dtype, const dtype& operand_dtype)
-        : m_value_dtype(value_dtype), m_operand_dtype(operand_dtype)
-    {
-        if (value_dtype.itemsize() != operand_dtype.value_dtype().itemsize()) {
-            std::stringstream ss;
-            ss << "view_dtype: Cannot view " << operand_dtype.value_dtype() << " as " << value_dtype << " because they have different sizes";
-            throw std::runtime_error(ss.str());
-        }
-        if (value_dtype.is_object_type() || operand_dtype.is_object_type()) {
-            throw std::runtime_error("view_dtype: Only POD dtypes are supported");
-        }
-    }
+    view_dtype(const dtype& value_dtype, const dtype& operand_dtype);
 
     type_id_t type_id() const {
         return view_type_id;
@@ -63,10 +54,8 @@ public:
     bool operator==(const extended_dtype& rhs) const;
 
     // For expression_kind dtypes - converts to/from the storage's value dtype
-    void get_operand_to_value_operation(intptr_t dst_fixedstride, intptr_t src_fixedstride,
-                        kernel_instance<unary_operation_t>& out_kernel) const;
-    void get_value_to_operand_operation(intptr_t dst_fixedstride, intptr_t src_fixedstride,
-                        kernel_instance<unary_operation_t>& out_kernel) const;
+    const unary_specialization_kernel_instance& get_operand_to_value_kernel() const;
+    const unary_specialization_kernel_instance& get_value_to_operand_kernel() const;
     dtype with_replaced_storage_dtype(const dtype& replacement_dtype) const;
 };
 

@@ -230,7 +230,7 @@ ndarray dnd::empty_like(const ndarray& rhs, const dtype& dt)
     return ndarray(dt, rhs.get_ndim(), rhs.get_shape(), axis_perm.get());
 }
 
-static void val_assign_unequal_dtypes(const ndarray& lhs, const ndarray& rhs, assign_error_mode errmode)
+static void val_assign_loop(const ndarray& lhs, const ndarray& rhs, assign_error_mode errmode)
 {
     //cout << "val_assign_unequal_dtypes\n";
     // First broadcast the 'rhs' shape to 'this'
@@ -245,44 +245,17 @@ static void val_assign_unequal_dtypes(const ndarray& lhs, const ndarray& rhs, as
     intptr_t innersize = iter.innersize();
     intptr_t dst_innerstride = iter.innerstride<0>(), src_innerstride = iter.innerstride<1>();
 
-    kernel_instance<unary_operation_t> assign;
-    get_dtype_assignment_kernel(lhs.get_dtype(), dst_innerstride,
-                                    rhs.get_dtype(), src_innerstride,
+    unary_specialization_kernel_instance assign;
+    get_dtype_assignment_kernel(lhs.get_dtype(),
+                                    rhs.get_dtype(),
                                     errmode,
                                     assign);
+    unary_operation_t assign_fn = assign.specializations[
+        get_unary_specialization(dst_innerstride, lhs.get_dtype().itemsize(), src_innerstride, rhs.get_dtype().itemsize())];
 
     if (innersize > 0) {
         do {
-            assign.kernel(iter.data<0>(), dst_innerstride,
-                        iter.data<1>(), src_innerstride,
-                        innersize, assign.auxdata);
-        } while (iter.iternext());
-    }
-}
-
-static void val_assign_equal_dtypes(const ndarray& lhs, const ndarray& rhs)
-{
-    //cout << "val_assign_equal_dtypes\n";
-    // First broadcast the 'rhs' shape to 'this'
-    dimvector rhs_strides(lhs.get_ndim());
-    broadcast_to_shape(lhs.get_ndim(), lhs.get_shape(), rhs, rhs_strides.get());
-
-    // Create the raw iterator
-    raw_ndarray_iter<1,1> iter(lhs.get_ndim(), lhs.get_shape(), lhs.get_originptr(), lhs.get_strides(),
-                                rhs.get_originptr(), rhs_strides.get());
-    //iter.debug_dump(cout);
-
-    intptr_t innersize = iter.innersize();
-    intptr_t dst_innerstride = iter.innerstride<0>(), src_innerstride = iter.innerstride<1>();
-
-    kernel_instance<unary_operation_t> assign;
-    get_dtype_assignment_kernel(lhs.get_dtype(), dst_innerstride,
-                                        src_innerstride,
-                                        assign);
-
-    if (innersize > 0) {
-        do {
-            assign.kernel(iter.data<0>(), dst_innerstride,
+            assign_fn(iter.data<0>(), dst_innerstride,
                         iter.data<1>(), src_innerstride,
                         innersize, assign.auxdata);
         } while (iter.iternext());
@@ -393,16 +366,16 @@ void dnd::ndarray::val_assign(const ndarray& rhs, assign_error_mode errmode) con
 
     if (get_dtype() == rhs.get_dtype()) {
         // The dtypes match, simpler case
-        val_assign_equal_dtypes(*this, rhs);
+        val_assign_loop(*this, rhs, assign_error_none);
     } else if (get_num_elements() > 5 * rhs.get_num_elements()) {
         // If the data is being duplicated more than 5 times, make a temporary copy of rhs
         // converted to the dtype of 'this', then do the broadcasting.
         ndarray tmp = empty_like(rhs, get_dtype());
-        val_assign_unequal_dtypes(tmp, rhs, errmode);
-        val_assign_equal_dtypes(*this, tmp);
+        val_assign_loop(tmp, rhs, errmode);
+        val_assign_loop(*this, tmp, assign_error_none);
     } else {
         // Assignment with casting
-        val_assign_unequal_dtypes(*this, rhs, errmode);
+        val_assign_loop(*this, rhs, errmode);
     }
 }
 
@@ -414,13 +387,15 @@ void dnd::ndarray::val_assign(const dtype& dt, const char *data, assign_error_mo
 
     intptr_t innersize = iter.innersize(), innerstride = iter.innerstride<0>();
 
-    kernel_instance<unary_operation_t> assign;
-    get_dtype_assignment_kernel(get_dtype(), innerstride, 0, assign);
+    unary_specialization_kernel_instance assign;
+    get_dtype_assignment_kernel(get_dtype(), assign);
+    unary_operation_t assign_fn = assign.specializations[
+        get_unary_specialization(innerstride, get_dtype().itemsize(), 0, dt.itemsize())];
 
     if (innersize > 0) {
         do {
             //DEBUG_COUT << "scalar val_assign inner loop with size " << innersize << "\n";
-            assign.kernel(iter.data<0>(), innerstride, src.data(), 0, innersize, assign.auxdata);
+            assign_fn(iter.data<0>(), innerstride, src.data(), 0, innersize, assign.auxdata);
         } while (iter.iternext());
     }
 }

@@ -9,6 +9,22 @@
 using namespace std;
 using namespace dnd;
 
+dnd::view_dtype::view_dtype(const dtype& value_dtype, const dtype& operand_dtype)
+    : m_value_dtype(value_dtype), m_operand_dtype(operand_dtype)
+{
+    if (value_dtype.itemsize() != operand_dtype.value_dtype().itemsize()) {
+        std::stringstream ss;
+        ss << "view_dtype: Cannot view " << operand_dtype.value_dtype() << " as " << value_dtype << " because they have different sizes";
+        throw std::runtime_error(ss.str());
+    }
+    if (value_dtype.is_object_type() || operand_dtype.is_object_type()) {
+        throw std::runtime_error("view_dtype: Only POD dtypes are supported");
+    }
+
+    get_pod_dtype_assignment_kernel(m_value_dtype.itemsize(),
+                    std::min(m_value_dtype.alignment(), m_operand_dtype.alignment()),
+                    m_copy_kernel);
+}
 
 void dnd::view_dtype::print_data(std::ostream& DND_UNUSED(o), const dtype& DND_UNUSED(dt),
                         const char *DND_UNUSED(data), intptr_t DND_UNUSED(stride),
@@ -44,18 +60,14 @@ bool dnd::view_dtype::operator==(const extended_dtype& rhs) const
     }
 }
 
-void dnd::view_dtype::get_operand_to_value_operation(intptr_t dst_fixedstride, intptr_t src_fixedstride, kernel_instance<unary_operation_t>& out_kernel) const
+const unary_specialization_kernel_instance&  dnd::view_dtype::get_operand_to_value_kernel() const
 {
-    get_pod_dtype_assignment_kernel(m_value_dtype.itemsize(),
-                    std::min(m_value_dtype.alignment(), m_operand_dtype.alignment()),
-                    dst_fixedstride, src_fixedstride, out_kernel);
+    return m_copy_kernel;
 }
 
-void dnd::view_dtype::get_value_to_operand_operation(intptr_t dst_fixedstride, intptr_t src_fixedstride, kernel_instance<unary_operation_t>& out_kernel) const
+const unary_specialization_kernel_instance&  dnd::view_dtype::get_value_to_operand_kernel() const
 {
-    get_pod_dtype_assignment_kernel(m_value_dtype.itemsize(),
-                    std::min(m_value_dtype.alignment(), m_operand_dtype.alignment()),
-                    dst_fixedstride, src_fixedstride, out_kernel);
+    return m_copy_kernel;
 }
 
 dtype dnd::view_dtype::with_replaced_storage_dtype(const dtype& replacement_dtype) const

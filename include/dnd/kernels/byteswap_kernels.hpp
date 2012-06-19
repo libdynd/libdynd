@@ -6,7 +6,7 @@
 #ifndef _DND__BYTESWAP_KERNELS_HPP_
 #define _DND__BYTESWAP_KERNELS_HPP_
 
-#include <dnd/kernels/kernel_instance.hpp>
+#include <dnd/kernels/unary_kernel_instance.hpp>
 #include <stdint.h>
 
 namespace dnd {
@@ -46,24 +46,18 @@ inline uint64_t byteswap_value(uint64_t value) {
  * Gets a kernel which swaps the byte-order of each element.
  * Requires that alignment == element_size for primitive-sized
  * types including 2, 4, and 8 bytes.
- *
- * If a stride is unknown or non-fixed, pass INTPTR_MAX for that stride.
  */
 void get_byteswap_kernel(intptr_t element_size, intptr_t alignment,
-                intptr_t dst_fixedstride, intptr_t src_fixedstride,
-                kernel_instance<unary_operation_t>& out_kernel);
+                unary_specialization_kernel_instance& out_kernel);
 
 /**
  * Gets a kernel which swaps the byte-order of two values within each element.
  * Requires that alignment == element_size/2 for primitive-sized
  * types including 4, 8, and 16 bytes. This is intended for use with
  * types with two primitives such as complex numbers.
- *
- * If a stride is unknown or non-fixed, pass INTPTR_MAX for that stride.
  */
 void get_pairwise_byteswap_kernel(intptr_t element_size, intptr_t alignment,
-                intptr_t dst_fixedstride, intptr_t src_fixedstride,
-                kernel_instance<unary_operation_t>& out_kernel);
+                unary_specialization_kernel_instance& out_kernel);
 
 } // namespace dnd
 

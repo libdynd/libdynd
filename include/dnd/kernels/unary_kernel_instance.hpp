@@ -3,8 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DND__KERNEL_INSTANCE_HPP_
-#define _DND__KERNEL_INSTANCE_HPP_
+#ifndef _DND__UNARY_KERNEL_INSTANCE_HPP_
+#define _DND__UNARY_KERNEL_INSTANCE_HPP_
 
 #include <dnd/kernels/kernel_instance.hpp>
 
@@ -30,8 +30,8 @@ enum unary_specialization_t {
 };
 
 // Given strides and element sizes, returns the appropriate unary_specialization enum value.
-inline unary_specialization_t get_unary_specialization(intptr_t dst_stride, intptr_t src_stride,
-                                intptr_t src_element_size, intptr_t dst_element_size)
+inline unary_specialization_t get_unary_specialization(intptr_t dst_stride, intptr_t dst_element_size,
+                        intptr_t src_stride, intptr_t src_element_size)
 {
     // The idea of this expression is to have no branches, just a deterministic calculation
     return static_cast<unary_specialization_t>(
@@ -48,8 +48,23 @@ inline unary_specialization_t get_unary_specialization(intptr_t dst_stride, intp
  * array, as well as auxiliary data for the kernels.
  */
 struct unary_specialization_kernel_instance {
-    unary_operation_t *unary_specializations;
-    auxiliary_data auxdata;
+public:
+    unary_specialization_kernel_instance()
+        : specializations(0)
+    {
+    }
+    // Copying a kernel_instance clones the auxiliary data
+    unary_specialization_kernel_instance(const unary_specialization_kernel_instance& rhs)
+        : specializations(rhs.specializations)
+    {
+        rhs.auxdata.clone_into(auxdata);
+    }
+
+    void swap(unary_specialization_kernel_instance& rhs) {
+        std::swap(specializations, rhs.specializations);
+        auxdata.swap(rhs.auxdata);
+    }
+
 
     /**
      * This grabs the requested unary operation specialization, and
@@ -59,11 +74,31 @@ struct unary_specialization_kernel_instance {
      *            instance this writes to should have a shorter lifetime
      *            than this unary_specialization_kernel_instance.
      */
-    void borrow_specialization(unary_specialization_t specialization, kernel_instance<unary_operation_t>& out_kernel)
+    void borrow_specialization(unary_specialization_t specialization_id, kernel_instance<unary_operation_t>& out_kernel)
     {
-        out_kernel.kernel = unary_specializations[specialization];
+        out_kernel.kernel = specializations[specialization_id];
         auxdata.borrow_into(out_kernel.auxdata);
     }
+
+    /**
+     * This grabs the requested unary operation specialization, and
+     * clones the auxiliary data into the output kernel.
+     *
+     * IMPORTANT: Because the auxiliary data is copied, this may
+     *            be an expensive operation. An example where this
+     *            is necessary is to duplicate a kernel so that
+     *            multiple threads may run the same kernel simultaneously.
+     */
+    void copy_specialization(unary_specialization_t specialization_id, kernel_instance<unary_operation_t>& out_kernel)
+    {
+        out_kernel.kernel = specializations[specialization_id];
+        auxdata.clone_into(out_kernel.auxdata);
+    }
+
+    // The specializations - a pointer to a static array of function pointers
+    unary_operation_t *specializations;
+    // The auxiliary data which works with all of the specializations
+    auxiliary_data auxdata;
 };
 
 
@@ -71,4 +106,4 @@ struct unary_specialization_kernel_instance {
 
 
 
-#endif // _DND__KERNEL_INSTANCE_HPP_
+#endif // _DND__UNARY_KERNEL_INSTANCE_HPP_
