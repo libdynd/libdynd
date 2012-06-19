@@ -11,3 +11,5 @@ build
 *.so
 *.pyc
 tests/dnd_tests
+
+.tags*
