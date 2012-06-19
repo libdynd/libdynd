@@ -391,19 +391,19 @@ void dnd::make_buffered_chain_unary_kernel(std::deque<unary_specialization_kerne
     }
 
     static specialized_unary_operation_table_t optable_2chain = {
-        buffered_2chain_unary_kernel::general_kernel, 
+        buffered_2chain_unary_kernel::general_kernel,
         buffered_2chain_unary_kernel::scalar_kernel,
         buffered_2chain_unary_kernel::contiguous_kernel,
         buffered_2chain_unary_kernel::scalar_to_contiguous_kernel};
 
     static specialized_unary_operation_table_t optable_3chain  = {
-        buffered_3chain_unary_kernel::general_kernel, 
+        buffered_3chain_unary_kernel::general_kernel,
         buffered_3chain_unary_kernel::scalar_kernel,
         buffered_3chain_unary_kernel::contiguous_kernel,
         buffered_3chain_unary_kernel::scalar_to_contiguous_kernel};
 
     static specialized_unary_operation_table_t optable_nchain = {
-        buffered_nchain_unary_kernel::general_kernel, 
+        buffered_nchain_unary_kernel::general_kernel,
         buffered_nchain_unary_kernel::scalar_kernel,
         buffered_nchain_unary_kernel::contiguous_kernel,
         buffered_nchain_unary_kernel::scalar_to_contiguous_kernel};
@@ -463,8 +463,6 @@ void dnd::push_front_dtype_storage_to_value_kernels(const dnd::dtype& dt,
         // Special case when there is just one
         out_kernels.push_front(dt.extended()->get_operand_to_value_kernel());
     } else {
-        intptr_t front_buffer_size;
-
         do {
             // Add this kernel to the deque
             out_element_sizes.push_front(next_dt->value_dtype().itemsize());

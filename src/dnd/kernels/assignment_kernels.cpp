@@ -174,7 +174,7 @@ namespace {
         DTYPE_ASSIGN_BUILTIN_KERNEL_TABLE_SRC_TYPE_LEVEL(errmode, complex<double>) \
     }
 
-    
+
 void dnd::get_builtin_dtype_assignment_kernel(
                     type_id_t dst_type_id, type_id_t src_type_id,
                     assign_error_mode errmode,
@@ -182,7 +182,7 @@ void dnd::get_builtin_dtype_assignment_kernel(
 {
     if (errmode == assign_error_fractional) {
         // The default error mode is fractional, so do specializations for it.
-        static specialized_unary_operation_table_t fractional_optable[builtin_type_id_count][builtin_type_id_count] = 
+        static specialized_unary_operation_table_t fractional_optable[builtin_type_id_count][builtin_type_id_count] =
                 DTYPE_ASSIGN_BUILTIN_KERNEL_TABLE(assign_error_fractional);
 
         out_kernel.specializations = fractional_optable[dst_type_id][src_type_id];
@@ -190,7 +190,7 @@ void dnd::get_builtin_dtype_assignment_kernel(
         out_kernel.auxdata.free();
     } else if (errmode == assign_error_none) {
         // The no-checking error mode also gets specializations, as it's intended for speed
-        static specialized_unary_operation_table_t fractional_optable[builtin_type_id_count][builtin_type_id_count] = 
+        static specialized_unary_operation_table_t fractional_optable[builtin_type_id_count][builtin_type_id_count] =
                 DTYPE_ASSIGN_BUILTIN_KERNEL_TABLE(assign_error_none);
 
         out_kernel.specializations = fractional_optable[dst_type_id][src_type_id];
@@ -406,7 +406,7 @@ namespace {
     };
 }
 static void unaligned_scalar_copy_assign_kernel(char *dst, intptr_t, const char *src, intptr_t,
-                            intptr_t count, const AuxDataBase *auxdata)
+                            intptr_t DND_UNUSED(count), const AuxDataBase *auxdata)
 {
     intptr_t itemsize = static_cast<intptr_t>(get_raw_auxiliary_data(auxdata)>>1);
     memcpy(dst, src, itemsize);
@@ -438,32 +438,32 @@ void dnd::get_pod_dtype_assignment_kernel(
 {
     // Aligned size-based specialization tables
     static specialized_unary_operation_table_t aligned_optable[] = {
-        {aligned_fixed_size_copy_assign<1>::general_kernel, 
+        {aligned_fixed_size_copy_assign<1>::general_kernel,
          aligned_fixed_size_copy_assign<1>::scalar_kernel,
          aligned_fixed_size_copy_assign<1>::contiguous_kernel,
          aligned_fixed_size_copy_assign<1>::scalar_to_contiguous_kernel},
-        {aligned_fixed_size_copy_assign<2>::general_kernel, 
+        {aligned_fixed_size_copy_assign<2>::general_kernel,
          aligned_fixed_size_copy_assign<2>::scalar_kernel,
          aligned_fixed_size_copy_assign<2>::contiguous_kernel,
          aligned_fixed_size_copy_assign<2>::scalar_to_contiguous_kernel},
-        {aligned_fixed_size_copy_assign<4>::general_kernel, 
+        {aligned_fixed_size_copy_assign<4>::general_kernel,
          aligned_fixed_size_copy_assign<4>::scalar_kernel,
          aligned_fixed_size_copy_assign<4>::contiguous_kernel,
          aligned_fixed_size_copy_assign<4>::scalar_to_contiguous_kernel},
-        {aligned_fixed_size_copy_assign<8>::general_kernel, 
+        {aligned_fixed_size_copy_assign<8>::general_kernel,
          aligned_fixed_size_copy_assign<8>::scalar_kernel,
          aligned_fixed_size_copy_assign<8>::contiguous_kernel,
          aligned_fixed_size_copy_assign<8>::scalar_to_contiguous_kernel}};
     static specialized_unary_operation_table_t unaligned_optable[] = {
-        {unaligned_fixed_size_copy_assign<2>::general_kernel, 
+        {unaligned_fixed_size_copy_assign<2>::general_kernel,
          unaligned_fixed_size_copy_assign<2>::scalar_kernel,
          unaligned_fixed_size_copy_assign<2>::contiguous_kernel,
          unaligned_fixed_size_copy_assign<2>::scalar_to_contiguous_kernel},
-        {unaligned_fixed_size_copy_assign<4>::general_kernel, 
+        {unaligned_fixed_size_copy_assign<4>::general_kernel,
          unaligned_fixed_size_copy_assign<4>::scalar_kernel,
          unaligned_fixed_size_copy_assign<4>::contiguous_kernel,
          unaligned_fixed_size_copy_assign<4>::scalar_to_contiguous_kernel},
-        {unaligned_fixed_size_copy_assign<8>::general_kernel, 
+        {unaligned_fixed_size_copy_assign<8>::general_kernel,
          unaligned_fixed_size_copy_assign<8>::scalar_kernel,
          unaligned_fixed_size_copy_assign<8>::contiguous_kernel,
          unaligned_fixed_size_copy_assign<8>::scalar_to_contiguous_kernel}};

@@ -10,6 +10,7 @@
 #include <boost/intrusive_ptr.hpp>
 
 #include <dnd/dtype.hpp>
+#include <dnd/dtype_assign.hpp>
 #include <dnd/irange.hpp>
 #include <dnd/kernels/kernel_instance.hpp>
 #include <dnd/shortvector.hpp>
@@ -152,7 +153,7 @@ public:
      * Converts this node to a new dtype. This uses a conversion_dtype.
      */
     virtual boost::intrusive_ptr<ndarray_expr_node> as_dtype(const dtype& dt,
-                        dnd::assign_error_mode errmode, bool allow_in_place) = 0;
+                        assign_error_mode errmode, bool allow_in_place) = 0;
 
     /**
      * Applies a linear index to the node, returning either the current node (for do-nothing
@@ -246,7 +247,7 @@ public:
     void as_data_and_strides(char **out_originptr, intptr_t *out_strides) const;
 
     ndarray_expr_node_ptr as_dtype(const dtype& dt,
-                        dnd::assign_error_mode errmode, bool allow_in_place);
+                        assign_error_mode errmode, bool allow_in_place);
 
     ndarray_expr_node_ptr apply_linear_index(int ndim, const intptr_t *shape, const int *axis_map,
                     const intptr_t *index_strides, const intptr_t *start_index, bool allow_in_place);
