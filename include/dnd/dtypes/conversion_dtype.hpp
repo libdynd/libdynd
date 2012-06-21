@@ -48,7 +48,7 @@ public:
     void print_data(std::ostream& o, const dtype& dt, const char *data, intptr_t stride, intptr_t size,
                         const char *separator) const;
 
-    void print(std::ostream& o) const;
+    void print_dtype(std::ostream& o) const;
 
     // This is about the native storage, buffering code needs to check whether
     // the value_dtype is an object type separately.

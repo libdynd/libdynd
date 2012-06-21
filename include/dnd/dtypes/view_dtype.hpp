@@ -42,7 +42,7 @@ public:
     void print_data(std::ostream& o, const dtype& dt, const char *data, intptr_t stride, intptr_t size,
                         const char *separator) const;
 
-    void print(std::ostream& o) const;
+    void print_dtype(std::ostream& o) const;
 
     // Don't support unaligned versions of object-semantic data
     bool is_object_type() const {

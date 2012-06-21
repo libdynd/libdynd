@@ -33,7 +33,7 @@ void dnd::view_dtype::print_data(std::ostream& DND_UNUSED(o), const dtype& DND_U
     throw runtime_error("internal error: view_dtype::print_data isn't supposed to be called");
 }
 
-void dnd::view_dtype::print(std::ostream& o) const
+void dnd::view_dtype::print_dtype(std::ostream& o) const
 {
     o << "view<as=" << m_value_dtype << ", original=" << m_operand_dtype << ">";
 }

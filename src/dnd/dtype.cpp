@@ -250,7 +250,7 @@ std::ostream& dnd::operator<<(std::ostream& o, const dtype& rhs)
             break;
         default:
             if (rhs.extended()) {
-                rhs.extended()->print(o);
+                rhs.extended()->print_dtype(o);
             } else {
                 o << "<internal error: builtin dtype without formatting support>";
             }

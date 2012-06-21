@@ -65,7 +65,7 @@ void dnd::conversion_dtype::print_data(std::ostream& DND_UNUSED(o), const dtype&
     */
 }
 
-void dnd::conversion_dtype::print(std::ostream& o) const
+void dnd::conversion_dtype::print_dtype(std::ostream& o) const
 {
     o << "convert<to=" << m_value_dtype << ", from=" << m_operand_dtype << ", errmode=" << m_errmode << ">";
 }

@@ -46,13 +46,13 @@ dnd::byteswap_dtype::byteswap_dtype(const dtype& value_dtype, const dtype& opera
     }
 }
 
-void dnd::byteswap_dtype::print_data(std::ostream& DND_UNUSED(o), const dtype& DND_UNUSED(dt), const char *DND_UNUSED(data), 
+void dnd::byteswap_dtype::print_data(std::ostream& DND_UNUSED(o), const dtype& DND_UNUSED(dt), const char *DND_UNUSED(data),
 						intptr_t DND_UNUSED(stride), intptr_t DND_UNUSED(size), const char *DND_UNUSED(separator)) const
 {
     throw runtime_error("internal error: byteswap_dtype::print_data isn't supposed to be called");
 }
 
-void dnd::byteswap_dtype::print(std::ostream& o) const
+void dnd::byteswap_dtype::print_dtype(std::ostream& o) const
 {
     o << "byteswap<" << m_value_dtype;
     if (m_operand_dtype.type_id() != bytes_type_id) {

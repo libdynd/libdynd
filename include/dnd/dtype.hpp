@@ -219,7 +219,7 @@ public:
     virtual void print_data(std::ostream& o, const dtype& dt, const char *data, intptr_t stride, intptr_t size,
                         const char *separator) const = 0;
 
-    virtual void print(std::ostream& o) const = 0;
+    virtual void print_dtype(std::ostream& o) const = 0;
 
     /** Should return true if the type has construct/copy/move/destruct semantics */
     virtual bool is_object_type() const = 0;

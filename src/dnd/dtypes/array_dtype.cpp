@@ -73,7 +73,7 @@ void array_dtype::print_data(std::ostream& o, const dtype& DND_UNUSED(dt), const
     }
 }
 
-void array_dtype::print(std::ostream& o) const
+void array_dtype::print_dtype(std::ostream& o) const
 {
     o << "array<" << m_element_dtype << ", (";
     const intptr_t *shape = get_shape();
