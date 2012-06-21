@@ -199,7 +199,7 @@ TEST(NDArray, ConstructorMemoryLayouts) {
             // Test constructing the array using the perm
             a = ndarray(dt, ndim, shape, axisperm);
             EXPECT_EQ(num_elements, a.get_num_elements());
-            intptr_t s = dt.itemsize();
+            intptr_t s = dt.element_size();
             for (int i = 0; i < ndim; ++i) {
                 EXPECT_EQ(s, a.get_strides(axisperm[i]));
                 s *= shape[axisperm[i]];

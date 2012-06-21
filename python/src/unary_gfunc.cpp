@@ -74,8 +74,8 @@ static void create_unary_gfunc_kernel_from_ctypes(PyCFuncPtrObject *cfunc, unary
 
     out_kernel.m_out = dtype_from_ctypes_cdatatype(restype);
     for (int i = 0; i < argcount; ++i) {
-        pyobject_ownref item(PySequence_GetItem(argtypes, i));
-        out_kernel.m_params[i] = dtype_from_ctypes_cdatatype(item);
+        pyobject_ownref element(PySequence_GetItem(argtypes, i));
+        out_kernel.m_params[i] = dtype_from_ctypes_cdatatype(element);
     }
 
     if (out_kernel.m_out != out_kernel.m_params[0]) {

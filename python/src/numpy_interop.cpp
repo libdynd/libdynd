@@ -303,7 +303,7 @@ PyObject* pydnd::ndarray_as_numpy_struct_capsule(const dnd::ndarray& n)
     inter.two = 2;
     inter.nd = n.get_ndim();
     inter.typekind = numpy_kindchar_of(value_dt);
-    inter.itemsize = (int)n.get_dtype().itemsize();
+    inter.itemsize = (int)n.get_dtype().element_size();
     // TODO: When read-write access control is added, this must be modified
     inter.flags = (byteswapped ? 0 : NPY_ARRAY_NOTSWAPPED) | (aligned ? NPY_ARRAY_ALIGNED : 0) | NPY_ARRAY_WRITEABLE;
     inter.data = n.get_originptr();

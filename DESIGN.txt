@@ -56,9 +56,9 @@ Some performance-oriented design features:
    which don't have to check that the data is sane every time.
 3. Computations have inner loop functions that can be specialized based on
    the striding of the data in that inner loop. Important special cases
-   are constant strides and strides equal to the dtype itemsize. I've confirmed
-   that g++ 4.6.1 creates SSE based inner loops for the contiguous versions
-   of the arithmetic operations.
+   are constant strides and strides equal to the dtype element_size. I've i
+   confirmed that g++ 4.6.1 creates SSE based inner loops for the contiguous 
+   versions of the arithmetic operations.
 
 Everything Is A View
 --------------------

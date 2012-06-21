@@ -188,7 +188,7 @@ template<> struct is_type_bool<bool> {enum {value = true};};
 class dtype;
 
 // The extended_dtype class is for dtypes which require more data
-// than a type_id, kind, and itemsize, and endianness.
+// than a type_id, kind, and element_size, and endianness.
 class extended_dtype {
 public:
     virtual ~extended_dtype();
@@ -196,7 +196,7 @@ public:
     virtual type_id_t type_id() const = 0;
     virtual dtype_kind_t kind() const = 0;
     virtual unsigned char alignment() const = 0;
-    virtual uintptr_t itemsize() const = 0;
+    virtual uintptr_t element_size() const = 0;
 
     /**
      * Should return a reference to the dtype representing the value which
@@ -260,7 +260,7 @@ const char *get_type_id_basename(type_id_t type_id);
  * The purpose of this data type is to describe the data layout
  * of elements in ndarrays. The class stores a number of common
  * properties, like a type id, a kind, an alignment, a byte-swapped
- * flag, and an itemsize. Some data types have additional data
+ * flag, and an element_size. Some data types have additional data
  * which is stored as a dynamically allocated extended_dtype object.
  *
  * For the simple built-in dtypes, no extended data is needed, in
@@ -270,14 +270,14 @@ const char *get_type_id_basename(type_id_t type_id);
 class dtype {
 private:
     unsigned char m_type_id, m_kind, m_alignment;
-    intptr_t m_itemsize;
+    intptr_t m_element_size;
     // TODO: Replace with boost::intrusive_ptr
     shared_ptr<extended_dtype> m_data;
 
     /** Unchecked built-in dtype constructor from raw parameters */
-    dtype(char type_id, char kind, char alignment, intptr_t itemsize)
+    dtype(char type_id, char kind, char alignment, intptr_t element_size)
         : m_type_id(type_id), m_kind(kind),
-          m_alignment(alignment), m_itemsize(itemsize), m_data()
+          m_alignment(alignment), m_element_size(element_size), m_data()
     {}
 public:
     /** Constructor */
@@ -285,17 +285,17 @@ public:
     /** Constructor from an extended_dtype */
     dtype(const shared_ptr<extended_dtype>& data)
         : m_type_id(data->type_id()), m_kind(data->kind()), m_alignment(data->alignment()),
-        m_itemsize(data->itemsize()), m_data(data) {}
+        m_element_size(data->element_size()), m_data(data) {}
     /** Copy constructor (should be "= default" in C++11) */
     dtype(const dtype& rhs)
         : m_type_id(rhs.m_type_id), m_kind(rhs.m_kind), m_alignment(rhs.m_alignment),
-          m_itemsize(rhs.m_itemsize), m_data(rhs.m_data) {}
+          m_element_size(rhs.m_element_size), m_data(rhs.m_data) {}
     /** Assignment operator (should be "= default" in C++11) */
     dtype& operator=(const dtype& rhs) {
         m_type_id = rhs.m_type_id;
         m_kind = rhs.m_kind;
         m_alignment = rhs.m_alignment;
-        m_itemsize = rhs.m_itemsize;
+        m_element_size = rhs.m_element_size;
         m_data = rhs.m_data;
         return *this;
     }
@@ -303,18 +303,18 @@ public:
     /** Constructor from an rvalue extended_dtype */
     dtype(const shared_ptr<extended_dtype>&& data)
         : m_type_id(data->type_id(), m_kind(data->kind()), m_alignment(data->alignment()),
-        m_itemsize(data->itemsize()), m_data(DND_MOVE(data)) {}
+        m_element_size(data->element_size()), m_data(DND_MOVE(data)) {}
     /** Move constructor (should be "= default" in C++11) */
     dtype(dtype&& rhs)
         : m_type_id(rhs.m_type_id), m_kind(rhs.m_kind), m_alignment(rhs.m_alignment),
-          m_itemsize(rhs.m_itemsize),
+          m_element_size(rhs.m_element_size),
           m_data(DND_MOVE(rhs.m_data)) {}
     /** Move assignment operator (should be "= default" in C++11) */
     dtype& operator=(dtype&& rhs) {
         m_type_id = rhs.m_type_id;
         m_kind = rhs.m_kind;
         m_alignment = rhs.m_alignment;
-        m_itemsize = rhs.m_itemsize;
+        m_element_size = rhs.m_element_size;
         m_data = DND_MOVE(rhs.m_data);
         return *this;
     }
@@ -323,7 +323,7 @@ public:
     /** Construct from a type ID */
     explicit dtype(type_id_t type_id);
     explicit dtype(int type_id);
-    /** Construct from a type ID and itemsize */
+    /** Construct from a type ID and element_size */
     explicit dtype(type_id_t type_id, intptr_t size);
     explicit dtype(int type_id, intptr_t size);
 
@@ -334,7 +334,7 @@ public:
         std::swap(m_type_id, rhs.m_type_id);
         std::swap(m_kind, rhs.m_kind);
         std::swap(m_alignment, rhs.m_alignment);
-        std::swap(m_itemsize, rhs.m_itemsize);
+        std::swap(m_element_size, rhs.m_element_size);
         m_data.swap(rhs.m_data);
     }
 
@@ -343,7 +343,7 @@ public:
             return *m_data == *rhs.m_data;
         }
         return m_type_id == rhs.m_type_id &&
-                m_itemsize == rhs.m_itemsize &&
+                m_element_size == rhs.m_element_size &&
                 m_kind == rhs.m_kind &&
                 m_alignment == rhs.m_alignment &&
                 m_data == rhs.m_data;
@@ -420,9 +420,9 @@ public:
         return m_alignment;
     }
 
-    /** The item size of the dtype */
-    intptr_t itemsize() const {
-        return m_itemsize;
+    /** The element size of the dtype */
+    intptr_t element_size() const {
+        return m_element_size;
     }
 
     bool is_object_type() const {

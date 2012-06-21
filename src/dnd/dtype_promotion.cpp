@@ -34,7 +34,7 @@ dtype dnd::promote_dtypes_arithmetic(const dtype& dt0, const dtype& dt1)
     const dtype& dt1_val = dt1.value_dtype();
 
     const extended_dtype *dt0_ext, *dt1_ext;
-    intptr_t itemsize = 0;
+    intptr_t element_size = 0;
 
     dt0_ext = dt0_val.extended();
     dt1_ext = dt1_val.extended();
@@ -50,7 +50,7 @@ dtype dnd::promote_dtypes_arithmetic(const dtype& dt0, const dtype& dt1)
                         return make_dtype<int>();
                     case int_kind:
                     case uint_kind:
-                        return (dt1_val.itemsize() >= int_size) ? dt1_val
+                        return (dt1_val.element_size() >= int_size) ? dt1_val
                                                                : make_dtype<int>();
                     default:
                         return dt1_val;
@@ -58,21 +58,21 @@ dtype dnd::promote_dtypes_arithmetic(const dtype& dt0, const dtype& dt1)
             case int_kind:
                 switch (dt1_val.kind()) {
                     case bool_kind:
-                        return (dt0_val.itemsize() >= int_size) ? dt0_val
+                        return (dt0_val.element_size() >= int_size) ? dt0_val
                                                                : make_dtype<int>();
                     case int_kind:
-                        if (dt0_val.itemsize() < int_size && dt1_val.itemsize() < int_size) {
+                        if (dt0_val.element_size() < int_size && dt1_val.element_size() < int_size) {
                             return make_dtype<int>();
                         } else {
-                            return (dt0_val.itemsize() >= dt1_val.itemsize()) ? dt0_val
+                            return (dt0_val.element_size() >= dt1_val.element_size()) ? dt0_val
                                                                               : dt1_val;
                         }
                     case uint_kind:
-                        if (dt0_val.itemsize() < int_size && dt1_val.itemsize() < int_size) {
+                        if (dt0_val.element_size() < int_size && dt1_val.element_size() < int_size) {
                             return make_dtype<int>();
                         } else {
-                            // When the itemsizes are equal, the uint kind wins
-                            return (dt0_val.itemsize() > dt1_val.itemsize()) ? dt0_val
+                            // When the element_sizes are equal, the uint kind wins
+                            return (dt0_val.element_size() > dt1_val.element_size()) ? dt0_val
                                                                              : dt1_val;
                         }
                     case real_kind:
@@ -83,11 +83,11 @@ dtype dnd::promote_dtypes_arithmetic(const dtype& dt0, const dtype& dt1)
                         return dt1_val;
                     case string_kind:
                         // Presently UTF8 is the only built-in string type
-                        itemsize = min_strlen_for_builtin_kind(dt0_val.kind());
-                        if (dt1_val.itemsize() > itemsize) {
-                            itemsize = dt1_val.itemsize();
+                        element_size = min_strlen_for_builtin_kind(dt0_val.kind());
+                        if (dt1_val.element_size() > element_size) {
+                            element_size = dt1_val.element_size();
                         }
-                        return dtype(utf8_type_id, itemsize);
+                        return dtype(utf8_type_id, element_size);
                     default:
                         break;
                 }
@@ -95,21 +95,21 @@ dtype dnd::promote_dtypes_arithmetic(const dtype& dt0, const dtype& dt1)
             case uint_kind:
                 switch (dt1_val.kind()) {
                     case bool_kind:
-                        return (dt0_val.itemsize() >= int_size) ? dt0_val
+                        return (dt0_val.element_size() >= int_size) ? dt0_val
                                                                : make_dtype<int>();
                     case int_kind:
-                        if (dt0_val.itemsize() < int_size && dt1_val.itemsize() < int_size) {
+                        if (dt0_val.element_size() < int_size && dt1_val.element_size() < int_size) {
                             return make_dtype<int>();
                         } else {
-                            // When the itemsizes are equal, the uint kind wins
-                            return (dt0_val.itemsize() >= dt1_val.itemsize()) ? dt0_val
+                            // When the element_sizes are equal, the uint kind wins
+                            return (dt0_val.element_size() >= dt1_val.element_size()) ? dt0_val
                                                                               : dt1_val;
                         }
                     case uint_kind:
-                        if (dt0_val.itemsize() < int_size && dt1_val.itemsize() < int_size) {
+                        if (dt0_val.element_size() < int_size && dt1_val.element_size() < int_size) {
                             return make_dtype<int>();
                         } else {
-                            return (dt0_val.itemsize() >= dt1_val.itemsize()) ? dt0_val
+                            return (dt0_val.element_size() >= dt1_val.element_size()) ? dt0_val
                                                                               : dt1_val;
                         }
                     case real_kind:
@@ -120,11 +120,11 @@ dtype dnd::promote_dtypes_arithmetic(const dtype& dt0, const dtype& dt1)
                         return dt1_val;
                     case string_kind:
                         // Presently UTF8 is the only built-in string type
-                        itemsize = min_strlen_for_builtin_kind(dt0_val.kind());
-                        if (dt1_val.itemsize() > itemsize) {
-                            itemsize = dt1_val.itemsize();
+                        element_size = min_strlen_for_builtin_kind(dt0_val.kind());
+                        if (dt1_val.element_size() > element_size) {
+                            element_size = dt1_val.element_size();
                         }
-                        return dtype(utf8_type_id, itemsize);
+                        return dtype(utf8_type_id, element_size);
                     default:
                         break;
                 }
@@ -137,7 +137,7 @@ dtype dnd::promote_dtypes_arithmetic(const dtype& dt0, const dtype& dt1)
                     case uint_kind:
                         return dt0_val;
                     case real_kind:
-                        return (dt0_val.itemsize() >= dt1_val.itemsize()) ? dt0_val
+                        return (dt0_val.element_size() >= dt1_val.element_size()) ? dt0_val
                                                                           : dt1_val;
                     case complex_kind:
                         if (dt0_val.type_id() == float64_type_id && dt1_val.type_id() == complex_float32_type_id) {
@@ -147,11 +147,11 @@ dtype dnd::promote_dtypes_arithmetic(const dtype& dt0, const dtype& dt1)
                         }
                     case string_kind:
                         // Presently UTF8 is the only built-in string type
-                        itemsize = min_strlen_for_builtin_kind(dt0_val.kind());
-                        if (dt1_val.itemsize() > itemsize) {
-                            itemsize = dt1_val.itemsize();
+                        element_size = min_strlen_for_builtin_kind(dt0_val.kind());
+                        if (dt1_val.element_size() > element_size) {
+                            element_size = dt1_val.element_size();
                         }
-                        return dtype(utf8_type_id, itemsize);
+                        return dtype(utf8_type_id, element_size);
                     default:
                         break;
                 }
@@ -169,15 +169,15 @@ dtype dnd::promote_dtypes_arithmetic(const dtype& dt0, const dtype& dt1)
                             return dt0_val;
                         }
                     case complex_kind:
-                        return (dt0_val.itemsize() >= dt1_val.itemsize()) ? dt0_val
+                        return (dt0_val.element_size() >= dt1_val.element_size()) ? dt0_val
                                                                           : dt1_val;
                     case string_kind:
                         // Presently UTF8 is the only built-in string type
-                        itemsize = min_strlen_for_builtin_kind(dt0_val.kind());
-                        if (dt1_val.itemsize() > itemsize) {
-                            itemsize = dt1_val.itemsize();
+                        element_size = min_strlen_for_builtin_kind(dt0_val.kind());
+                        if (dt1_val.element_size() > element_size) {
+                            element_size = dt1_val.element_size();
                         }
-                        return dtype(utf8_type_id, itemsize);
+                        return dtype(utf8_type_id, element_size);
                     default:
                         break;
                 }
@@ -190,13 +190,13 @@ dtype dnd::promote_dtypes_arithmetic(const dtype& dt0, const dtype& dt1)
                     case real_kind:
                     case complex_kind:
                         // Presently UTF8 is the only built-in string type
-                        itemsize = min_strlen_for_builtin_kind(dt1_val.kind());
-                        if (dt0_val.itemsize() > itemsize) {
-                            itemsize = dt0_val.itemsize();
+                        element_size = min_strlen_for_builtin_kind(dt1_val.kind());
+                        if (dt0_val.element_size() > element_size) {
+                            element_size = dt0_val.element_size();
                         }
-                        return dtype(utf8_type_id, itemsize);
+                        return dtype(utf8_type_id, element_size);
                     case string_kind:
-                        return (dt0_val.itemsize() >= dt1_val.itemsize()) ? dt0_val
+                        return (dt0_val.element_size() >= dt1_val.element_size()) ? dt0_val
                                                                           : dt1_val;
                     default:
                         break;

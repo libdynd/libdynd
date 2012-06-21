@@ -334,7 +334,7 @@ TEST(NDArrayAssign, ChainedCastingRead) {
     EXPECT_EQ(-2, b(3).as<float>());
     EXPECT_EQ(1000, b(4).as<float>());
 
-    // Now try it with longer chaining through multiple item sizes
+    // Now try it with longer chaining through multiple element sizes
     b = a.as_dtype<int16_t>(assign_error_overflow);
     b = b.as_dtype<int32_t>(assign_error_overflow);
     b = b.as_dtype<int16_t>(assign_error_overflow);

@@ -246,7 +246,7 @@ void dnd::get_dtype_assignment_kernel(
         if (src_dt.kind() == expression_kind) {
             // kernel operations from src's storage to value
             push_front_dtype_storage_to_value_kernels(src_dt, kernels, element_sizes);
-            next_element_size = src_dt_vdt.itemsize();
+            next_element_size = src_dt_vdt.element_size();
         }
 
         if (src_dt_vdt != dst_dt_vdt) {
@@ -257,7 +257,7 @@ void dnd::get_dtype_assignment_kernel(
             if (next_element_size != 0) {
                 element_sizes.push_back(next_element_size);
             }
-            next_element_size = dst_dt_vdt.itemsize();
+            next_element_size = dst_dt_vdt.element_size();
         }
 
         if (dst_dt.kind() == expression_kind) {
@@ -408,14 +408,14 @@ namespace {
 static void unaligned_scalar_copy_assign_kernel(char *dst, intptr_t, const char *src, intptr_t,
                             intptr_t DND_UNUSED(count), const AuxDataBase *auxdata)
 {
-    intptr_t itemsize = static_cast<intptr_t>(get_raw_auxiliary_data(auxdata)>>1);
-    memcpy(dst, src, itemsize);
+    intptr_t element_size = static_cast<intptr_t>(get_raw_auxiliary_data(auxdata)>>1);
+    memcpy(dst, src, element_size);
 }
 static void unaligned_contig_copy_assign_kernel(char *dst, intptr_t, const char *src, intptr_t,
                             intptr_t count, const AuxDataBase *auxdata)
 {
-    intptr_t itemsize = static_cast<intptr_t>(get_raw_auxiliary_data(auxdata)>>1);
-    memcpy(dst, src, itemsize * count);
+    intptr_t element_size = static_cast<intptr_t>(get_raw_auxiliary_data(auxdata)>>1);
+    memcpy(dst, src, element_size * count);
 }
 
 static void unaligned_strided_copy_assign_kernel(char *dst, intptr_t dst_stride, const char *src, intptr_t src_stride,
@@ -423,10 +423,10 @@ static void unaligned_strided_copy_assign_kernel(char *dst, intptr_t dst_stride,
 {
     char *dst_cached = reinterpret_cast<char *>(dst);
     const char *src_cached = reinterpret_cast<const char *>(src);
-    intptr_t itemsize = static_cast<intptr_t>(get_raw_auxiliary_data(auxdata)>>1);
+    intptr_t element_size = static_cast<intptr_t>(get_raw_auxiliary_data(auxdata)>>1);
 
     for (intptr_t i = 0; i < count; ++i) {
-        memcpy(dst_cached, src_cached, itemsize);
+        memcpy(dst_cached, src_cached, element_size);
         dst_cached += dst_stride;
         src_cached += src_stride;
     }
@@ -517,7 +517,7 @@ void dnd::get_dtype_assignment_kernel(const dtype& dt,
                     unary_specialization_kernel_instance& out_kernel)
 {
     if (!dt.is_object_type()) {
-        get_pod_dtype_assignment_kernel(dt.itemsize(), dt.alignment(),
+        get_pod_dtype_assignment_kernel(dt.element_size(), dt.alignment(),
                             out_kernel);
         return;
     } else {
@@ -544,6 +544,6 @@ void dnd::get_dtype_assignment_kernel(
 {
     unary_specialization_kernel_instance uski;
     get_dtype_assignment_kernel(dst_dt, src_dt, errmode, uski);
-    out_kernel.kernel = uski.specializations[get_unary_specialization(dst_fixedstride, dst_dt.itemsize(), src_fixedstride, src_dt.itemsize())];
+    out_kernel.kernel = uski.specializations[get_unary_specialization(dst_fixedstride, dst_dt.element_size(), src_fixedstride, src_dt.element_size())];
     out_kernel.auxdata.swap(uski.auxdata);
 }

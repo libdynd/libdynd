@@ -291,7 +291,7 @@ dnd::strided_array_expr_node::strided_array_expr_node(const dtype& dt, int ndim,
 {
     // Build the strides using the ordering and shape
     intptr_t num_elements = 1;
-    intptr_t stride = dt.itemsize();
+    intptr_t stride = dt.element_size();
     for (int i = 0; i < ndim; ++i) {
         int p = axis_perm[i];
         intptr_t size = shape[p];
@@ -304,7 +304,7 @@ dnd::strided_array_expr_node::strided_array_expr_node(const dtype& dt, int ndim,
         }
     }
 
-    m_buffer_owner.reset(::dnd::detail::ndarray_buffer_allocator(dt.itemsize() * num_elements),
+    m_buffer_owner.reset(::dnd::detail::ndarray_buffer_allocator(dt.element_size() * num_elements),
                                 ::dnd::detail::ndarray_buffer_deleter);
 
     m_originptr = reinterpret_cast<char *>(m_buffer_owner.get());

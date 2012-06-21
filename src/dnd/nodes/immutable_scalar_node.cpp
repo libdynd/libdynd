@@ -12,25 +12,25 @@ using namespace dnd;
 dnd::immutable_scalar_node::immutable_scalar_node(const dtype& dt, const char* data)
     : ndarray_expr_node(dt, 0, 0, NULL, strided_array_node_category, immutable_scalar_node_type)
 {
-    if (dt.itemsize() > (intptr_t)sizeof(m_data)) {
+    if (dt.element_size() > (intptr_t)sizeof(m_data)) {
         stringstream ss;
         ss << "input scalar dtype " << dt << " is too large for the immutable scalar node's internal buffer";
         throw runtime_error(ss.str());
     }
 
-    memcpy(&m_data[0], data, dt.itemsize());
+    memcpy(&m_data[0], data, dt.element_size());
 }
 
 immutable_scalar_node::immutable_scalar_node(const dtype& dt, const char* data, int ndim, const intptr_t *shape)
     : ndarray_expr_node(dt, ndim, 0, shape, strided_array_node_category, immutable_scalar_node_type)
 {
-    if (dt.itemsize() > (intptr_t)sizeof(m_data)) {
+    if (dt.element_size() > (intptr_t)sizeof(m_data)) {
         stringstream ss;
         ss << "input scalar dtype " << dt << " is too large for the immutable scalar node's internal buffer";
         throw runtime_error(ss.str());
     }
 
-    memcpy(&m_data[0], data, dt.itemsize());
+    memcpy(&m_data[0], data, dt.element_size());
 }
 
 
@@ -103,6 +103,6 @@ ndarray_expr_node_ptr dnd::immutable_scalar_node::apply_linear_index(
 void dnd::immutable_scalar_node::debug_dump_extra(std::ostream& o, const std::string& indent) const
 {
     o << indent << " data: ";
-    hexadecimal_print(o, reinterpret_cast<const char *>(&m_data[0]), m_dtype.itemsize());
+    hexadecimal_print(o, reinterpret_cast<const char *>(&m_data[0]), m_dtype.element_size());
     o << "\n";
 }

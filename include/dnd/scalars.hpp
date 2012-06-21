@@ -67,12 +67,12 @@ public:
                 m_allocated = false;
             } else {
                 // Make a copy into an aligned buffer
-                char *tmp = allocate_data(dst_dtype.itemsize());
-                DND_MEMCPY(tmp, src_data, dst_dtype.itemsize());
+                char *tmp = allocate_data(dst_dtype.element_size());
+                DND_MEMCPY(tmp, src_data, dst_dtype.element_size());
             }
         } else {
             // Make a converted copy into an aligned buffer
-            char *tmp = allocate_data(dst_dtype.itemsize());
+            char *tmp = allocate_data(dst_dtype.element_size());
             dtype_assign(dst_dtype, tmp, src_dtype, src_data, errmode);
         }
     }

@@ -52,9 +52,9 @@ cdef class w_dtype:
     def __dealloc__(self):
         dtype_placement_delete(self.v)
 
-    property itemsize:
+    property element_size:
         def __get__(self):
-            return GET(self.v).itemsize()
+            return GET(self.v).element_size()
 
     property alignment:
         def __get__(self):
@@ -109,10 +109,10 @@ def make_byteswap_dtype(native_dtype, operand_dtype=None):
         SET(result.v, dnd_make_byteswap_dtype(GET(w_dtype(native_dtype).v), GET(w_dtype(operand_dtype).v)))
     return result
 
-def make_bytes_dtype(int itemsize, int alignment):
-    """Constructs a bytes dtype with the specified item size and alignment."""
+def make_bytes_dtype(int element_size, int alignment):
+    """Constructs a bytes dtype with the specified element size and alignment."""
     cdef w_dtype result = w_dtype()
-    SET(result.v, dnd_make_bytes_dtype(itemsize, alignment))
+    SET(result.v, dnd_make_bytes_dtype(element_size, alignment))
     return result
 
 def make_convert_dtype(to_dtype, from_dtype):

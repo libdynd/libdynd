@@ -148,7 +148,7 @@ public:
 
             // Adapt the output
             if (m_dtype.kind() == expression_kind) {
-                element_sizes[0] = m_dtype.itemsize();
+                element_sizes[0] = m_dtype.element_size();
                 get_dtype_assignment_kernel(m_dtype.value_dtype(), dst_fixedstride, m_dtype, element_sizes[0], assign_error_none, adapters[0]);
             } else {
                 element_sizes[0] = dst_fixedstride;
@@ -156,7 +156,7 @@ public:
 
             // Adapt the first operand
             if (m_opnodes[0]->get_dtype().kind() == expression_kind) {
-                element_sizes[1] = m_opnodes[0]->get_dtype().value_dtype().itemsize();
+                element_sizes[1] = m_opnodes[0]->get_dtype().value_dtype().element_size();
                 get_dtype_assignment_kernel(m_opnodes[0]->get_dtype().value_dtype(), element_sizes[1], m_opnodes[0]->get_dtype(),
                                     src0_fixedstride, assign_error_none, adapters[1]);
             } else {
@@ -165,7 +165,7 @@ public:
 
             // Adapt the second operand
             if (m_opnodes[1]->get_dtype().kind() == expression_kind) {
-                element_sizes[2] = m_opnodes[1]->get_dtype().value_dtype().itemsize();
+                element_sizes[2] = m_opnodes[1]->get_dtype().value_dtype().element_size();
                 get_dtype_assignment_kernel(m_opnodes[1]->get_dtype().value_dtype(), element_sizes[2], m_opnodes[1]->get_dtype(),
                                     src1_fixedstride, assign_error_none, adapters[2]);
             } else {

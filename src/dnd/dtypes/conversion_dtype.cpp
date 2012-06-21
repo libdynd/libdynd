@@ -44,7 +44,7 @@ void dnd::conversion_dtype::print_data(std::ostream& DND_UNUSED(o), const dtype&
     // TODO: This doesn't work with multiple nested expression_kind dtypes
     kernel_instance<unary_operation_t> assign =
                 get_dtype_strided_assign_operation(
-                                        m_value_dtype, m_value_dtype.itemsize(),
+                                        m_value_dtype, m_value_dtype.element_size(),
                                         m_operand_dtype, stride,
                                         m_errmode);
     while (size > 0) {
@@ -53,8 +53,8 @@ void dnd::conversion_dtype::print_data(std::ostream& DND_UNUSED(o), const dtype&
             blocksize = size;
         }
 
-        assign.first(buf.storage(), m_value_dtype.itemsize(), data, stride, blocksize, assign.second.get());
-        m_value_dtype.print_data(o, buf.storage(), m_value_dtype.itemsize(), blocksize, separator);
+        assign.first(buf.storage(), m_value_dtype.element_size(), data, stride, blocksize, assign.second.get());
+        m_value_dtype.print_data(o, buf.storage(), m_value_dtype.element_size(), blocksize, separator);
 
         data += blocksize * stride;
         size -= blocksize;

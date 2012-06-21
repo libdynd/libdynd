@@ -15,7 +15,7 @@ namespace dnd {
 
 class array_dtype : public extended_dtype {
     // The number of bytes required for this dtype
-    uintptr_t m_itemsize;
+    uintptr_t m_element_size;
     // The data type of the array elements
     dtype m_element_dtype;
     // The shape and strides of the array
@@ -39,8 +39,8 @@ public:
     unsigned char alignment() const {
         return m_element_dtype.alignment();
     }
-    uintptr_t itemsize() const {
-        return m_itemsize;
+    uintptr_t element_size() const {
+        return m_element_size;
     }
 
     const dtype& value_dtype(const dtype& self) const {

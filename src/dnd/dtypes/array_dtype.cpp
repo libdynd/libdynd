@@ -8,10 +8,10 @@
 
 using namespace dnd;
 
-array_dtype::array_dtype(intptr_t itemsize, int ndim,
+array_dtype::array_dtype(intptr_t element_size, int ndim,
                                     intptr_t *shape, intptr_t *strides,
                                     const dtype& element_dtype)
-    : extended_dtype(), m_itemsize(itemsize), m_element_dtype(element_dtype),
+    : extended_dtype(), m_element_size(element_size), m_element_dtype(element_dtype),
       m_shape_and_strides(ndim), m_ndim(ndim)
 {
     memcpy(m_shape_and_strides.get(0), shape, m_ndim * sizeof(intptr_t));
@@ -29,13 +29,13 @@ intptr_t product(int n, intptr_t *values)
 }
 
 array_dtype::array_dtype(int ndim, intptr_t *shape, const dtype& element_dtype)
-    : extended_dtype(), m_itemsize(element_dtype.itemsize() * product(ndim, shape)),
+    : extended_dtype(), m_element_size(element_dtype.element_size() * product(ndim, shape)),
       m_element_dtype(element_dtype), m_shape_and_strides(ndim), m_ndim(ndim)
 {
     intptr_t *this_shape = m_shape_and_strides.get(0), *this_strides = m_shape_and_strides.get(1);
 
     memcpy(this_shape, shape, m_ndim * sizeof(intptr_t));
-    intptr_t stride_value = element_dtype.itemsize();
+    intptr_t stride_value = element_dtype.element_size();
     for (int idim = ndim-1; idim >= 0; --idim) {
         this_strides[idim] = stride_value;
         stride_value *= this_shape[idim];

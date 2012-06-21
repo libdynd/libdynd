@@ -12,7 +12,7 @@ using namespace dnd;
 dnd::view_dtype::view_dtype(const dtype& value_dtype, const dtype& operand_dtype)
     : m_value_dtype(value_dtype), m_operand_dtype(operand_dtype)
 {
-    if (value_dtype.itemsize() != operand_dtype.value_dtype().itemsize()) {
+    if (value_dtype.element_size() != operand_dtype.value_dtype().element_size()) {
         std::stringstream ss;
         ss << "view_dtype: Cannot view " << operand_dtype.value_dtype() << " as " << value_dtype << " because they have different sizes";
         throw std::runtime_error(ss.str());
@@ -21,7 +21,7 @@ dnd::view_dtype::view_dtype(const dtype& value_dtype, const dtype& operand_dtype
         throw std::runtime_error("view_dtype: Only POD dtypes are supported");
     }
 
-    get_pod_dtype_assignment_kernel(m_value_dtype.itemsize(),
+    get_pod_dtype_assignment_kernel(m_value_dtype.element_size(),
                     std::min(m_value_dtype.alignment(), m_operand_dtype.alignment()),
                     m_copy_kernel);
 }

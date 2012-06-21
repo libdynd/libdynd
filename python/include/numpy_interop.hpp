@@ -125,7 +125,7 @@ typedef struct {
                            * typestr
                            */
 
-    int itemsize;         /* size of each element */
+    int element_size;         /* size of each element */
 
     int flags;            /*
                            * how should be data interpreted. Valid

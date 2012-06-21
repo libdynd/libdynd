@@ -48,7 +48,7 @@ dtype dnd::extended_dtype::with_replaced_storage_dtype(const dtype& DND_UNUSED(r
  * is intended to be filled up with more data when custom dtypes are added.
  */
 static struct {
-    unsigned char kind, alignment, itemsize;
+    unsigned char kind, alignment, element_size;
 } basic_type_id_info[DND_MAX_NUM_TYPE_IDS] = {
     {bool_kind, 1, 1},         // bool
     {int_kind, 1, 1},          // int8
@@ -119,7 +119,7 @@ const char *dnd::get_type_id_basename(type_id_t type_id)
 
 dtype::dtype()
     : m_type_id(pattern_type_id), m_kind(pattern_kind), m_alignment(1),
-      m_itemsize(0), m_data()
+      m_element_size(0), m_data()
 {
     // Default to a generic type with zero size
 }
@@ -128,7 +128,7 @@ dtype::dtype(type_id_t type_id)
     : m_type_id(validate_type_id(type_id)),
       m_kind(basic_type_id_info[type_id].kind),
       m_alignment(basic_type_id_info[type_id].alignment),
-      m_itemsize(basic_type_id_info[type_id].itemsize),
+      m_element_size(basic_type_id_info[type_id].element_size),
       m_data()
 {
 }
@@ -137,7 +137,7 @@ dtype::dtype(int type_id)
     : m_type_id(validate_type_id((type_id_t)type_id)),
       m_kind(basic_type_id_info[type_id].kind),
       m_alignment(basic_type_id_info[type_id].alignment),
-      m_itemsize(basic_type_id_info[type_id].itemsize),
+      m_element_size(basic_type_id_info[type_id].element_size),
       m_data()
 {
 }
@@ -146,16 +146,16 @@ dtype::dtype(type_id_t type_id, intptr_t size)
     : m_type_id(validate_type_id(type_id)),
       m_kind(basic_type_id_info[type_id].kind),
       m_alignment(basic_type_id_info[type_id].alignment),
-      m_itemsize(basic_type_id_info[type_id].itemsize),
+      m_element_size(basic_type_id_info[type_id].element_size),
       m_data()
 {
-    if (m_itemsize != 0) {
-        if (m_itemsize != size) {
-            throw std::runtime_error(std::string() + "invalid itemsize for type id "
+    if (m_element_size != 0) {
+        if (m_element_size != size) {
+            throw std::runtime_error(std::string() + "invalid element_size for type id "
                                                     + get_type_id_basename(type_id));
         }
     } else {
-        m_itemsize = size;
+        m_element_size = size;
     }
 }
 
@@ -163,16 +163,16 @@ dtype::dtype(int type_id, intptr_t size)
     : m_type_id(validate_type_id((type_id_t)type_id)),
       m_kind(basic_type_id_info[type_id].kind),
       m_alignment(basic_type_id_info[type_id].alignment),
-      m_itemsize(basic_type_id_info[type_id].itemsize),
+      m_element_size(basic_type_id_info[type_id].element_size),
       m_data()
 {
-    if (m_itemsize != 0) {
-        if (m_itemsize != size) {
-            throw std::runtime_error(std::string() + "invalid itemsize for type id "
+    if (m_element_size != 0) {
+        if (m_element_size != size) {
+            throw std::runtime_error(std::string() + "invalid element_size for type id "
                                                     + get_type_id_basename((type_id_t)type_id));
         }
     } else {
-        m_itemsize = size;
+        m_element_size = size;
     }
 }
 
@@ -185,7 +185,7 @@ dtype::dtype(const std::string& rep)
             m_type_id = (type_id_t)id;
             m_kind = basic_type_id_info[id].kind;
             m_alignment = basic_type_id_info[id].alignment;
-            m_itemsize = basic_type_id_info[id].itemsize;
+            m_element_size = basic_type_id_info[id].element_size;
             return;
         }
     }
@@ -236,14 +236,14 @@ std::ostream& dnd::operator<<(std::ostream& o, const dtype& rhs)
             o << "complex<float64>";
             break;
         case utf8_type_id:
-            if (rhs.itemsize() == 0) {
+            if (rhs.element_size() == 0) {
                 o << "utf8";
             } else {
-                o << "utf8<" << rhs.itemsize() << ">";
+                o << "utf8<" << rhs.element_size() << ">";
             }
             break;
         case bytes_type_id:
-            o << "bytes<" << rhs.itemsize() << "," << rhs.alignment() << ">";
+            o << "bytes<" << rhs.element_size() << "," << rhs.alignment() << ">";
             break;
         case pattern_type_id:
             o << "pattern";
@@ -346,7 +346,7 @@ void dnd::dtype::print_data(std::ostream& o, const char *data, intptr_t stride, 
                     strided_print<complex<double>, complex<double> >(o, data, stride, count, separator);
                     break;
                 case bytes_type_id:
-                    strided_bytes_print(o, data, itemsize(), stride, count, separator);
+                    strided_bytes_print(o, data, element_size(), stride, count, separator);
                     break;
                 default:
                     stringstream ss;
@@ -371,7 +371,7 @@ dtype dnd::make_bytes_dtype(intptr_t element_size, intptr_t alignment)
     }
     if ((element_size&(alignment-1)) != 0) {
         std::stringstream ss;
-        ss << "Cannot make a bytes<" << element_size << "," << alignment << "> dtype, its alignment does not divide into its item size";
+        ss << "Cannot make a bytes<" << element_size << "," << alignment << "> dtype, its alignment does not divide into its element size";
         throw std::runtime_error(ss.str());
     }
     return dtype(bytes_type_id, bytes_kind, alignment, element_size);

@@ -43,7 +43,7 @@ cdef extern from "dnd/dtype.hpp" namespace "dnd":
         type_id_t type_id()
         dtype_kind_t kind()
         unsigned char alignment()
-        uintptr_t itemsize()
+        uintptr_t element_size()
         dtype& value_dtype(dtype&)
         dtype& operand_dtype(dtype&)
         bint is_object_type()
@@ -62,7 +62,7 @@ cdef extern from "dnd/dtype.hpp" namespace "dnd":
         type_id_t type_id()
         dtype_kind_t kind()
         int alignment()
-        uintptr_t itemsize()
+        uintptr_t element_size()
         bint is_object_type()
         extended_dtype* extended()
 

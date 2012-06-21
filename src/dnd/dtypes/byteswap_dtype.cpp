@@ -12,16 +12,16 @@ using namespace std;
 using namespace dnd;
 
 dnd::byteswap_dtype::byteswap_dtype(const dtype& value_dtype)
-    : m_value_dtype(value_dtype), m_operand_dtype(make_bytes_dtype(value_dtype.itemsize(), value_dtype.alignment()))
+    : m_value_dtype(value_dtype), m_operand_dtype(make_bytes_dtype(value_dtype.element_size(), value_dtype.alignment()))
 {
     if (value_dtype.extended() != 0) {
         throw std::runtime_error("byteswap_dtype: Only built-in dtypes are supported presently");
     }
 
     if(m_value_dtype.kind() != complex_kind) {
-        get_byteswap_kernel(value_dtype.itemsize(), value_dtype.alignment(), m_byteswap_kernel);
+        get_byteswap_kernel(value_dtype.element_size(), value_dtype.alignment(), m_byteswap_kernel);
     } else {
-        get_pairwise_byteswap_kernel(m_value_dtype.itemsize(), m_value_dtype.alignment(), m_byteswap_kernel);
+        get_pairwise_byteswap_kernel(m_value_dtype.element_size(), m_value_dtype.alignment(), m_byteswap_kernel);
     }
 }
 
@@ -36,13 +36,13 @@ dnd::byteswap_dtype::byteswap_dtype(const dtype& value_dtype, const dtype& opera
     }
     // Automatically realign if needed
     if (operand_dtype.value_dtype().alignment() < value_dtype.alignment()) {
-        m_operand_dtype = make_view_dtype(operand_dtype, make_bytes_dtype(operand_dtype.itemsize(), value_dtype.alignment()));
+        m_operand_dtype = make_view_dtype(operand_dtype, make_bytes_dtype(operand_dtype.element_size(), value_dtype.alignment()));
     }
 
     if(m_value_dtype.kind() != complex_kind) {
-        get_byteswap_kernel(value_dtype.itemsize(), value_dtype.alignment(), m_byteswap_kernel);
+        get_byteswap_kernel(value_dtype.element_size(), value_dtype.alignment(), m_byteswap_kernel);
     } else {
-        get_pairwise_byteswap_kernel(m_value_dtype.itemsize(), m_value_dtype.alignment(), m_byteswap_kernel);
+        get_pairwise_byteswap_kernel(m_value_dtype.element_size(), m_value_dtype.alignment(), m_byteswap_kernel);
     }
 }
 

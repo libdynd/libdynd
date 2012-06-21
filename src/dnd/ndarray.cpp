@@ -104,7 +104,7 @@ dnd::ndarray::ndarray(complex<double> value)
 dnd::ndarray::ndarray(const dtype& dt)
     : m_expr_tree()
 {
-    shared_ptr<void> buffer_owner(::dnd::detail::ndarray_buffer_allocator(dt.itemsize()),
+    shared_ptr<void> buffer_owner(::dnd::detail::ndarray_buffer_allocator(dt.element_size()),
                                 ::dnd::detail::ndarray_buffer_deleter);
     m_expr_tree.reset(new strided_array_expr_node(dt, 0, NULL, NULL,
                             reinterpret_cast<char *>(buffer_owner.get()), DND_MOVE(buffer_owner)));
@@ -129,9 +129,9 @@ dnd::ndarray::ndarray(ndarray_expr_node_ptr&& expr_tree)
 dnd::ndarray::ndarray(intptr_t dim0, const dtype& dt)
     : m_expr_tree()
 {
-    intptr_t stride = (dim0 <= 1) ? 0 : dt.itemsize();
+    intptr_t stride = (dim0 <= 1) ? 0 : dt.element_size();
     shared_ptr<void> buffer_owner(
-                    ::dnd::detail::ndarray_buffer_allocator(dt.itemsize() * dim0),
+                    ::dnd::detail::ndarray_buffer_allocator(dt.element_size() * dim0),
                     ::dnd::detail::ndarray_buffer_deleter);
     m_expr_tree.reset(new strided_array_expr_node(dt, 1, &dim0, &stride,
                             reinterpret_cast<char *>(buffer_owner.get()), DND_MOVE(buffer_owner)));
@@ -142,11 +142,11 @@ dnd::ndarray::ndarray(intptr_t dim0, intptr_t dim1, const dtype& dt)
 {
     intptr_t shape[2] = {dim0, dim1};
     intptr_t strides[2];
-    strides[0] = (dim0 <= 1) ? 0 : dt.itemsize() * dim1;
-    strides[1] = (dim1 <= 1) ? 0 : dt.itemsize();
+    strides[0] = (dim0 <= 1) ? 0 : dt.element_size() * dim1;
+    strides[1] = (dim1 <= 1) ? 0 : dt.element_size();
 
     shared_ptr<void> buffer_owner(
-                    ::dnd::detail::ndarray_buffer_allocator(dt.itemsize() * dim0 * dim1),
+                    ::dnd::detail::ndarray_buffer_allocator(dt.element_size() * dim0 * dim1),
                     ::dnd::detail::ndarray_buffer_deleter);
     m_expr_tree.reset(new strided_array_expr_node(dt, 2, shape, strides,
                             reinterpret_cast<char *>(buffer_owner.get()), DND_MOVE(buffer_owner)));
@@ -157,12 +157,12 @@ dnd::ndarray::ndarray(intptr_t dim0, intptr_t dim1, intptr_t dim2, const dtype& 
 {
     intptr_t shape[3] = {dim0, dim1, dim2};
     intptr_t strides[3];
-    strides[0] = (dim0 <= 1) ? 0 : dt.itemsize() * dim1 * dim2;
-    strides[1] = (dim1 <= 1) ? 0 : dt.itemsize() * dim2;
-    strides[2] = (dim2 <= 1) ? 0 : dt.itemsize();
+    strides[0] = (dim0 <= 1) ? 0 : dt.element_size() * dim1 * dim2;
+    strides[1] = (dim1 <= 1) ? 0 : dt.element_size() * dim2;
+    strides[2] = (dim2 <= 1) ? 0 : dt.element_size();
 
     shared_ptr<void> buffer_owner(
-                    ::dnd::detail::ndarray_buffer_allocator(dt.itemsize() * dim0 * dim1 * dim2),
+                    ::dnd::detail::ndarray_buffer_allocator(dt.element_size() * dim0 * dim1 * dim2),
                     ::dnd::detail::ndarray_buffer_deleter);
     m_expr_tree.reset(new strided_array_expr_node(dt, 3, shape, strides,
                             reinterpret_cast<char *>(buffer_owner.get()), DND_MOVE(buffer_owner)));
@@ -173,13 +173,13 @@ dnd::ndarray::ndarray(intptr_t dim0, intptr_t dim1, intptr_t dim2, intptr_t dim3
 {
     intptr_t shape[4] = {dim0, dim1, dim2, dim3};
     intptr_t strides[4];
-    strides[0] = (dim0 <= 1) ? 0 : dt.itemsize() * dim1 * dim2 * dim3;
-    strides[1] = (dim1 <= 1) ? 0 : dt.itemsize() * dim2 * dim3;
-    strides[2] = (dim2 <= 1) ? 0 : dt.itemsize() * dim3;
-    strides[3] = (dim3 <= 1) ? 0 : dt.itemsize();
+    strides[0] = (dim0 <= 1) ? 0 : dt.element_size() * dim1 * dim2 * dim3;
+    strides[1] = (dim1 <= 1) ? 0 : dt.element_size() * dim2 * dim3;
+    strides[2] = (dim2 <= 1) ? 0 : dt.element_size() * dim3;
+    strides[3] = (dim3 <= 1) ? 0 : dt.element_size();
 
     shared_ptr<void> buffer_owner(
-                    ::dnd::detail::ndarray_buffer_allocator(dt.itemsize() * dim0 * dim1 * dim2 * dim3),
+                    ::dnd::detail::ndarray_buffer_allocator(dt.element_size() * dim0 * dim1 * dim2 * dim3),
                     ::dnd::detail::ndarray_buffer_deleter);
     m_expr_tree.reset(new strided_array_expr_node(dt, 4, shape, strides,
                             reinterpret_cast<char *>(buffer_owner.get()), DND_MOVE(buffer_owner)));
@@ -245,7 +245,7 @@ static void val_assign_loop(const ndarray& lhs, const ndarray& rhs, assign_error
                                     errmode,
                                     assign);
     unary_operation_t assign_fn = assign.specializations[
-        get_unary_specialization(dst_innerstride, lhs.get_dtype().itemsize(), src_innerstride, rhs.get_dtype().itemsize())];
+        get_unary_specialization(dst_innerstride, lhs.get_dtype().element_size(), src_innerstride, rhs.get_dtype().element_size())];
 
     if (innersize > 0) {
         do {
@@ -291,20 +291,20 @@ ndarray dnd::ndarray::view_as_dtype(const dtype& dt) const
 
     // Special case contiguous one dimensional arrays with a non-expression kind
     if (get_ndim() == 1 && get_expr_tree()->get_node_type() == strided_array_node_type &&
-                            get_strides()[0] == get_dtype().itemsize() &&
+                            get_strides()[0] == get_dtype().element_size() &&
                             get_dtype().kind() != expression_kind) {
-        intptr_t nbytes = get_shape()[0] * get_dtype().itemsize();
+        intptr_t nbytes = get_shape()[0] * get_dtype().element_size();
         char *originptr = get_originptr();
 
-        if (nbytes % dt.itemsize() != 0) {
+        if (nbytes % dt.element_size() != 0) {
             std::stringstream ss;
-            ss << "cannot view dnd::ndarray with " << nbytes << " bytes as dtype " << dt << ", because its item size doesn't divide evenly";
+            ss << "cannot view dnd::ndarray with " << nbytes << " bytes as dtype " << dt << ", because its element size doesn't divide evenly";
             throw std::runtime_error(ss.str());
         }
 
         intptr_t shape[1], strides[1];
-        shape[0] = nbytes / dt.itemsize();
-        strides[0] = dt.itemsize();
+        shape[0] = nbytes / dt.element_size();
+        strides[0] = dt.element_size();
         if ((((uintptr_t)originptr)&(dt.alignment()-1)) == 0) {
             // If the dtype's alignment is satisfied, can view it as is
             return ndarray(new strided_array_expr_node(dt, 1, shape, strides, originptr, get_buffer_owner()));
@@ -314,8 +314,8 @@ ndarray dnd::ndarray::view_as_dtype(const dtype& dt) const
         }
     }
 
-    // For non-one dimensional and non-contiguous one dimensional arrays, the dtype itemsize much match
-    if (get_dtype().value_dtype().itemsize() != dt.itemsize()) {
+    // For non-one dimensional and non-contiguous one dimensional arrays, the dtype element_size much match
+    if (get_dtype().value_dtype().element_size() != dt.element_size()) {
         std::stringstream ss;
         ss << "cannot view dnd::ndarray with value dtype " << get_dtype().value_dtype() << " as dtype " << dt << " because they have different sizes, and the array is not contiguous one-dimensional";
         throw std::runtime_error(ss.str());
@@ -384,7 +384,7 @@ void dnd::ndarray::val_assign(const dtype& dt, const char *data, assign_error_mo
     unary_specialization_kernel_instance assign;
     get_dtype_assignment_kernel(get_dtype(), assign);
     unary_operation_t assign_fn = assign.specializations[
-        get_unary_specialization(innerstride, get_dtype().itemsize(), 0, dt.itemsize())];
+        get_unary_specialization(innerstride, get_dtype().element_size(), 0, dt.element_size())];
 
     if (innersize > 0) {
         do {

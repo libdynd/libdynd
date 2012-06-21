@@ -527,12 +527,12 @@ dnd::ndarray::ndarray(std::initializer_list<std::initializer_list<std::initializ
 namespace detail {
     template<class T> struct type_from_array {
         typedef T type;
-        static const int itemsize = sizeof(T);
+        static const int element_size = sizeof(T);
         static const int type_id = type_id_of<T>::value;
     };
     template<class T, int N> struct type_from_array<T[N]> {
         typedef typename type_from_array<T>::type type;
-        static const int itemsize = type_from_array<T>::itemsize;
+        static const int element_size = type_from_array<T>::element_size;
         static const int type_id = type_from_array<T>::type_id;
     };
 
@@ -566,7 +566,7 @@ dnd::ndarray::ndarray(const T (&rhs)[N])
     intptr_t num_bytes = detail::fill_shape_and_strides_from_array<T[N]>::fill(shape, strides);
 
     // Compute the number of elements in the array, and the strides at the same time
-    intptr_t num_elements = 1, stride = detail::type_from_array<T>::itemsize;
+    intptr_t num_elements = 1, stride = detail::type_from_array<T>::element_size;
     for (int i = ndim-1; i >= 0; --i) {
         strides[i] = (shape[i] == 1) ? 0 : stride;
         num_elements *= shape[i];

@@ -465,7 +465,7 @@ void dnd::push_front_dtype_storage_to_value_kernels(const dnd::dtype& dt,
     } else {
         do {
             // Add this kernel to the deque
-            out_element_sizes.push_front(next_dt->value_dtype().itemsize());
+            out_element_sizes.push_front(next_dt->value_dtype().element_size());
             out_kernels.push_front(front_dt->extended()->get_operand_to_value_kernel());
             // Shift to the next dtype
             front_dt = next_dt;
@@ -488,7 +488,7 @@ void dnd::push_back_dtype_value_to_storage_kernels(const dnd::dtype& dt,
     } else {
         do {
             // Add this kernel to the deque
-            out_element_sizes.push_back(next_dt->value_dtype().itemsize());
+            out_element_sizes.push_back(next_dt->value_dtype().element_size());
             out_kernels.push_back(back_dt->extended()->get_value_to_operand_kernel());
             // Shift to the next dtype
             back_dt = next_dt;

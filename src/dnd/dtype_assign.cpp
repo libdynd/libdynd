@@ -76,7 +76,7 @@ bool dnd::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt)
                     case complex_kind:
                         return true;
                     case string_kind:
-                        return dst_dt.itemsize() > 0;
+                        return dst_dt.element_size() > 0;
                     case bytes_kind:
                         return false;
                     default:
@@ -88,17 +88,17 @@ bool dnd::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt)
                     case bool_kind:
                         return false;
                     case int_kind:
-                        return dst_dt.itemsize() >= src_dt.itemsize();
+                        return dst_dt.element_size() >= src_dt.element_size();
                     case uint_kind:
                         return false;
                     case real_kind:
-                        return dst_dt.itemsize() > src_dt.itemsize();
+                        return dst_dt.element_size() > src_dt.element_size();
                     case complex_kind:
-                        return dst_dt.itemsize() > 2 * src_dt.itemsize();
+                        return dst_dt.element_size() > 2 * src_dt.element_size();
                     case string_kind:
                         // Conservative value for 64-bit, could
                         // check speciifically based on the type_id.
-                        return dst_dt.itemsize() >= 21;
+                        return dst_dt.element_size() >= 21;
                     case bytes_kind:
                         return false;
                     default:
@@ -110,17 +110,17 @@ bool dnd::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt)
                     case bool_kind:
                         return false;
                     case int_kind:
-                        return dst_dt.itemsize() > src_dt.itemsize();
+                        return dst_dt.element_size() > src_dt.element_size();
                     case uint_kind:
-                        return dst_dt.itemsize() >= src_dt.itemsize();
+                        return dst_dt.element_size() >= src_dt.element_size();
                     case real_kind:
-                        return dst_dt.itemsize() > src_dt.itemsize();
+                        return dst_dt.element_size() > src_dt.element_size();
                     case complex_kind:
-                        return dst_dt.itemsize() > 2 * src_dt.itemsize();
+                        return dst_dt.element_size() > 2 * src_dt.element_size();
                     case string_kind:
                         // Conservative value for 64-bit, could
                         // check speciifically based on the type_id.
-                        return dst_dt.itemsize() >= 21;
+                        return dst_dt.element_size() >= 21;
                     case bytes_kind:
                         return false;
                     default:
@@ -134,11 +134,11 @@ bool dnd::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt)
                     case uint_kind:
                         return false;
                     case real_kind:
-                        return dst_dt.itemsize() >= src_dt.itemsize();
+                        return dst_dt.element_size() >= src_dt.element_size();
                     case complex_kind:
-                        return dst_dt.itemsize() >= 2 * src_dt.itemsize();
+                        return dst_dt.element_size() >= 2 * src_dt.element_size();
                     case string_kind:
-                        return dst_dt.itemsize() >= 32;
+                        return dst_dt.element_size() >= 32;
                     case bytes_kind:
                         return false;
                     default:
@@ -152,9 +152,9 @@ bool dnd::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt)
                     case real_kind:
                         return false;
                     case complex_kind:
-                        return dst_dt.itemsize() >= src_dt.itemsize();
+                        return dst_dt.element_size() >= src_dt.element_size();
                     case string_kind:
-                        return dst_dt.itemsize() >= 64;
+                        return dst_dt.element_size() >= 64;
                     case bytes_kind:
                         return false;
                     default:
@@ -170,7 +170,7 @@ bool dnd::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt)
                         return false;
                     case string_kind:
                         return src_dt.type_id() == dst_dt.type_id() &&
-                                dst_dt.itemsize() >= src_dt.itemsize();
+                                dst_dt.element_size() >= src_dt.element_size();
                     case bytes_kind:
                         return false;
                     default:
@@ -178,7 +178,7 @@ bool dnd::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt)
                 }
             case bytes_kind:
                 return dst_dt.kind() == bytes_kind  &&
-                        dst_dt.itemsize() == src_dt.itemsize();
+                        dst_dt.element_size() == src_dt.element_size();
             default:
                 break;
         }
@@ -226,7 +226,7 @@ void dnd::dtype_assign(const dtype& dst_dt, char *dst, const dtype& src_dt, cons
 namespace {
     struct multiple_unaligned_auxiliary_data {
         assign_function_t assign;
-        int dst_itemsize, src_itemsize;
+        int dst_element_size, src_element_size;
     };
 }
 static void assign_multiple_unaligned(char *dst, intptr_t dst_stride, const char *src, intptr_t src_stride,
@@ -237,7 +237,7 @@ static void assign_multiple_unaligned(char *dst, intptr_t dst_stride, const char
     char *dst_cached = reinterpret_cast<char *>(dst);
     const char *src_cached = reinterpret_cast<const char *>(src);
 
-    int dst_itemsize = mgdata.dst_itemsize, src_itemsize = mgdata.src_itemsize;
+    int dst_element_size = mgdata.dst_element_size, src_element_size = mgdata.src_element_size;
     // TODO: Probably want to relax the assumption of at most 8 bytes
     int64_t d;
     int64_t s;
@@ -245,9 +245,9 @@ static void assign_multiple_unaligned(char *dst, intptr_t dst_stride, const char
     assign_function_t asn = mgdata.assign;
 
     for (intptr_t i = 0; i < count; ++i) {
-        memcpy(&s, src_cached, src_itemsize);
+        memcpy(&s, src_cached, src_element_size);
         asn(&d, &s);
-        memcpy(dst_cached, &d, dst_itemsize);
+        memcpy(dst_cached, &d, dst_element_size);
         dst_cached += dst_stride;
         src_cached += src_stride;
     }

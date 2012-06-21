@@ -35,8 +35,8 @@ public:
     unsigned char alignment() const {
         return m_operand_dtype.alignment();
     }
-    uintptr_t itemsize() const {
-        return m_operand_dtype.itemsize();
+    uintptr_t element_size() const {
+        return m_operand_dtype.element_size();
     }
 
     const dtype& value_dtype(const dtype& DND_UNUSED(self)) const {
