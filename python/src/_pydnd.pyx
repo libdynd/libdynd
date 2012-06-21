@@ -48,10 +48,7 @@ cdef class w_dtype:
     def __cinit__(self, rep=None):
         dtype_placement_new(self.v)
         if rep is not None:
-            if type(rep) is w_dtype:
-                SET(self.v, GET((<w_dtype>rep).v))
-            else:
-                SET(self.v, make_dtype_from_object(rep))
+            SET(self.v, make_dtype_from_object(rep))
     def __dealloc__(self):
         dtype_placement_delete(self.v)
 
@@ -220,22 +217,22 @@ cdef class w_ndarray:
 
     def __add__(lhs, rhs):
         cdef w_ndarray result = w_ndarray()
-        SET(result.v, ndarray_add(GET((w_ndarray(lhs)).v), GET(w_ndarray(rhs).v)))
+        SET(result.v, ndarray_add(GET(w_ndarray(lhs).v), GET(w_ndarray(rhs).v)))
         return result
 
     def __sub__(lhs, rhs):
         cdef w_ndarray result = w_ndarray()
-        SET(result.v, ndarray_subtract(GET((w_ndarray(lhs)).v), GET(w_ndarray(rhs).v)))
+        SET(result.v, ndarray_subtract(GET(w_ndarray(lhs).v), GET(w_ndarray(rhs).v)))
         return result
 
     def __mul__(lhs, rhs):
         cdef w_ndarray result = w_ndarray()
-        SET(result.v, ndarray_multiply(GET((w_ndarray(lhs)).v), GET(w_ndarray(rhs).v)))
+        SET(result.v, ndarray_multiply(GET(w_ndarray(lhs).v), GET(w_ndarray(rhs).v)))
         return result
 
     def __div__(lhs, rhs):
         cdef w_ndarray result = w_ndarray()
-        SET(result.v, ndarray_divide(GET((w_ndarray(lhs)).v), GET(w_ndarray(rhs).v)))
+        SET(result.v, ndarray_divide(GET(w_ndarray(lhs).v), GET(w_ndarray(rhs).v)))
         return result
 
 cdef class w_unary_gfunc:

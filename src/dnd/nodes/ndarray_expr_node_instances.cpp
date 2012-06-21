@@ -52,6 +52,13 @@ ndarray_expr_node_ptr dnd::linear_index_expr_node::as_dtype(const dtype& dt,
     }
 }
 
+ndarray_expr_node_ptr dnd::linear_index_expr_node::broadcast_to_shape(int ndim,
+                    const intptr_t *shape, bool allow_in_place)
+{
+    throw std::runtime_error("TODO: broadcasting of linear index expr node needs to be implemented");
+}
+
+
 // Since this is a linear_index_expr_node, it absorbs any further linear indexing
 ndarray_expr_node_ptr dnd::linear_index_expr_node::apply_linear_index(
                     int ndim, const intptr_t *shape, const int *axis_map,

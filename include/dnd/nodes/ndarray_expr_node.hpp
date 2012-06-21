@@ -32,7 +32,8 @@ enum expr_node_category {
 enum expr_node_type {
     // This node represents an NBO, aligned, strided array
     strided_array_node_type,
-    convert_dtype_node_type,
+    // This node represents a single scalar data element, by value
+    immutable_scalar_node_type,
     broadcast_shape_node_type,
     elementwise_binary_op_node_type,
     linear_index_node_type
@@ -128,12 +129,20 @@ public:
     }
 
     /**
-     * Nodes with the category strided_array_node_category should override this function,
-     * and fill the outputs.
+     * Nodes with the category strided_array_node_category and with writeable data
+     * should override this function.
      *
      * The default implementation raises an exception.
      */
-    virtual void as_data_and_strides(char **out_originptr, intptr_t *out_strides) const;
+    virtual void as_readwrite_data_and_strides(char **out_originptr, intptr_t *out_strides) const;
+
+    /**
+     * Nodes with the category strided_array_node_category and with readable
+     * data should override this function.
+     *
+     * The default implementation raises an exception.
+     */
+    virtual void as_readonly_data_and_strides(char const **out_originptr, intptr_t *out_strides) const;
 
     virtual void get_nullary_operation(intptr_t dst_fixedstride,
                                     kernel_instance<nullary_operation_t>& out_kernel) const;
@@ -154,6 +163,15 @@ public:
      */
     virtual boost::intrusive_ptr<ndarray_expr_node> as_dtype(const dtype& dt,
                         assign_error_mode errmode, bool allow_in_place) = 0;
+
+    /**
+     * Broadcasts this node to a new shape.
+     *
+     * IMPORTANT: The shape isn't validated, it must be made correct by the caller,
+     *            for instance by construction from broadcasting this node with another.
+     */
+    virtual boost::intrusive_ptr<ndarray_expr_node> broadcast_to_shape(int ndim,
+                            const intptr_t *shape, bool allow_in_place) = 0;
 
     /**
      * Applies a linear index to the node, returning either the current node (for do-nothing
@@ -244,10 +262,15 @@ public:
     }
 
     /** Provides the data pointer and strides array for the tree evaluation code */
-    void as_data_and_strides(char **out_originptr, intptr_t *out_strides) const;
+    void as_readwrite_data_and_strides(char **out_originptr, intptr_t *out_strides) const;
+
+    void as_readonly_data_and_strides(char const **out_originptr, intptr_t *out_strides) const;
 
     ndarray_expr_node_ptr as_dtype(const dtype& dt,
                         assign_error_mode errmode, bool allow_in_place);
+
+    ndarray_expr_node_ptr broadcast_to_shape(int ndim,
+                            const intptr_t *shape, bool allow_in_place);
 
     ndarray_expr_node_ptr apply_linear_index(int ndim, const intptr_t *shape, const int *axis_map,
                     const intptr_t *index_strides, const intptr_t *start_index, bool allow_in_place);

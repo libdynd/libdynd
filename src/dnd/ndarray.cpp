@@ -14,7 +14,8 @@
 #include <dnd/dtypes/dtype_alignment.hpp>
 #include <dnd/dtypes/view_dtype.hpp>
 
-#include "ndarray_expr_node_instances.hpp"
+#include "nodes/ndarray_expr_node_instances.hpp"
+#include <dnd/nodes/immutable_scalar_node.hpp>
 
 using namespace std;
 using namespace dnd;
@@ -37,69 +38,65 @@ dnd::ndarray::ndarray()
 }
 
 template<class T>
-ndarray_expr_node *make_expr_tree_from_scalar(T value)
+typename enable_if<is_dtype_scalar<T>::value, ndarray_expr_node *>::type make_immutable_scalar_node_raw(const T& value)
 {
-    shared_ptr<void> buffer_owner(::dnd::detail::ndarray_buffer_allocator(sizeof(T)),
-                                ::dnd::detail::ndarray_buffer_deleter);
-    *reinterpret_cast<T *>(buffer_owner.get()) = value;
-    return new strided_array_expr_node(make_dtype<T>(), 0, NULL, NULL,
-                        reinterpret_cast<char *>(buffer_owner.get()), DND_MOVE(buffer_owner));
+    return new immutable_scalar_node(make_dtype<T>(), reinterpret_cast<const char *>(&value));
 }
 
 dnd::ndarray::ndarray(signed char value)
-    : m_expr_tree(make_expr_tree_from_scalar(value))
+    : m_expr_tree(make_immutable_scalar_node_raw(value))
 {
 }
 dnd::ndarray::ndarray(short value)
-    : m_expr_tree(make_expr_tree_from_scalar(value))
+    : m_expr_tree(make_immutable_scalar_node_raw(value))
 {
 }
 dnd::ndarray::ndarray(int value)
-    : m_expr_tree(make_expr_tree_from_scalar(value))
+    : m_expr_tree(make_immutable_scalar_node_raw(value))
 {
 }
 dnd::ndarray::ndarray(long value)
-    : m_expr_tree(make_expr_tree_from_scalar(value))
+    : m_expr_tree(make_immutable_scalar_node_raw(value))
 {
 }
 dnd::ndarray::ndarray(long long value)
-    : m_expr_tree(make_expr_tree_from_scalar(value))
+    : m_expr_tree(make_immutable_scalar_node_raw(value))
 {
 }
 dnd::ndarray::ndarray(unsigned char value)
-    : m_expr_tree(make_expr_tree_from_scalar(value))
+    : m_expr_tree(make_immutable_scalar_node_raw(value))
 {
 }
 dnd::ndarray::ndarray(unsigned short value)
-    : m_expr_tree(make_expr_tree_from_scalar(value))
+    : m_expr_tree(make_immutable_scalar_node_raw(value))
 {
 }
 dnd::ndarray::ndarray(unsigned int value)
-    : m_expr_tree(make_expr_tree_from_scalar(value))
+    : m_expr_tree(make_immutable_scalar_node_raw(value))
 {
 }
 dnd::ndarray::ndarray(unsigned long value)
-    : m_expr_tree(make_expr_tree_from_scalar(value))
+    : m_expr_tree(make_immutable_scalar_node_raw(value))
 {
 }
 dnd::ndarray::ndarray(unsigned long long value)
-    : m_expr_tree(make_expr_tree_from_scalar(value))
+    : m_expr_tree(make_immutable_scalar_node_raw(value))
 {
 }
 dnd::ndarray::ndarray(float value)
-    : m_expr_tree(make_expr_tree_from_scalar(value))
+    : m_expr_tree(make_immutable_scalar_node_raw(value))
 {
 }
 dnd::ndarray::ndarray(double value)
-    : m_expr_tree(make_expr_tree_from_scalar(value))
+    : m_expr_tree(make_immutable_scalar_node_raw(value))
 {
 }
 dnd::ndarray::ndarray(complex<float> value)
-    : m_expr_tree(make_expr_tree_from_scalar(value))
+    : m_expr_tree(make_immutable_scalar_node_raw(value))
 {
 }
 dnd::ndarray::ndarray(complex<double> value)
-    : m_expr_tree(make_expr_tree_from_scalar(value))
+    : m_expr_tree(make_immutable_scalar_node_raw(value))
 {
 }
 
@@ -114,15 +111,8 @@ dnd::ndarray::ndarray(const dtype& dt)
 }
 
 dnd::ndarray::ndarray(const dtype& dt, char *raw_data)
-    : m_expr_tree()
+    : m_expr_tree(new immutable_scalar_node(dt, raw_data))
 {
-    shared_ptr<void> buffer_owner(::dnd::detail::ndarray_buffer_allocator(dt.itemsize()),
-                                ::dnd::detail::ndarray_buffer_deleter);
-    char *allocated_data = reinterpret_cast<char *>(buffer_owner.get());
-    // Copy the value in the raw data to initialize
-    dtype_assign(dt, allocated_data, dt, raw_data);
-    m_expr_tree.reset(new strided_array_expr_node(dt, 0, NULL, NULL,
-                            allocated_data, DND_MOVE(buffer_owner)));
 }
 
 
@@ -232,14 +222,18 @@ ndarray dnd::empty_like(const ndarray& rhs, const dtype& dt)
 
 static void val_assign_loop(const ndarray& lhs, const ndarray& rhs, assign_error_mode errmode)
 {
-    //cout << "val_assign_unequal_dtypes\n";
-    // First broadcast the 'rhs' shape to 'this'
-    dimvector rhs_strides(lhs.get_ndim());
-    broadcast_to_shape(lhs.get_ndim(), lhs.get_shape(), rhs, rhs_strides.get());
+    // Get the data pointer and strides of rhs through the standard interface
+    dimvector rhs_original_strides(rhs.get_ndim());
+    const char *rhs_originptr = NULL;
+    rhs.get_expr_tree()->as_readonly_data_and_strides(&rhs_originptr, rhs_original_strides.get());
+
+    // Broadcast the 'rhs' shape to 'this'
+    dimvector rhs_modified_strides(lhs.get_ndim());
+    broadcast_to_shape(lhs.get_ndim(), lhs.get_shape(), rhs.get_ndim(), rhs.get_shape(), rhs_original_strides.get(), rhs_modified_strides.get());
 
     // Create the raw iterator
     raw_ndarray_iter<1,1> iter(lhs.get_ndim(), lhs.get_shape(), lhs.get_originptr(), lhs.get_strides(),
-                                rhs.get_originptr(), rhs_strides.get());
+                                        rhs_originptr, rhs_modified_strides.get());
     //iter.debug_dump(cout);
 
     intptr_t innersize = iter.innersize();
@@ -437,17 +431,13 @@ static void nested_ndarray_print(std::ostream& o, const dtype& d, const char *da
 std::ostream& dnd::operator<<(std::ostream& o, const ndarray& rhs)
 {
     if (rhs.get_expr_tree() != NULL) {
-        if (rhs.get_expr_tree()->get_node_type() == strided_array_node_type) {
+        if (rhs.get_expr_tree()->get_node_category() == strided_array_node_category &&
+                        rhs.get_dtype().kind() != expression_kind) {
+            const char *originptr;
+            dimvector strides(rhs.get_ndim());
+            rhs.get_expr_tree()->as_readonly_data_and_strides(&originptr, strides.get());
             o << "ndarray(" << rhs.get_dtype() << ", ";
-            if (rhs.get_dtype().kind() == expression_kind) {
-                //o << "\n       storage = ";
-                //dtype deepest_storage = rhs.get_dtype().storage_dtype();
-                //nested_ndarray_print(o, deepest_storage, rhs.get_originptr(), rhs.get_ndim(), rhs.get_shape(), rhs.get_strides());
-                ndarray tmp = rhs.vals();
-                nested_ndarray_print(o, tmp.get_dtype(), tmp.get_originptr(), tmp.get_ndim(), tmp.get_shape(), tmp.get_strides());
-            } else {
-                nested_ndarray_print(o, rhs.get_dtype(), rhs.get_originptr(), rhs.get_ndim(), rhs.get_shape(), rhs.get_strides());
-            }
+            nested_ndarray_print(o, rhs.get_dtype(), originptr, rhs.get_ndim(), rhs.get_shape(), strides.get());
             o << ")";
         } else {
             o << rhs.vals();

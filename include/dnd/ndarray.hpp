@@ -15,7 +15,7 @@
 #include <dnd/dtype_assign.hpp>
 #include <dnd/shortvector.hpp>
 #include <dnd/irange.hpp>
-#include <dnd/ndarray_expr_node.hpp>
+#include <dnd/nodes/ndarray_expr_node.hpp>
 
 namespace dnd {
 
@@ -122,9 +122,11 @@ public:
     /** Copy constructor */
     ndarray(const ndarray& rhs)
         : m_expr_tree(rhs.m_expr_tree) {}
+#ifdef DND_RVALUE_REFS
     /** Move constructor (should just be "= default" in C++11) */
     ndarray(ndarray&& rhs)
         : m_expr_tree(DND_MOVE(rhs.m_expr_tree)) {}
+#endif // DND_RVALUE_REFS
 
     /** Swap operation (should be "noexcept" in C++11) */
     void swap(ndarray& rhs);
@@ -138,12 +140,14 @@ public:
      *       and making copies of arrays.
      */
     ndarray& operator=(const ndarray& rhs);
+#ifdef DND_RVALUE_REFS
     /** Move assignment operator (should be just "= default" in C++11) */
     ndarray& operator=(ndarray&& rhs) {
         m_expr_tree = DND_MOVE(rhs.m_expr_tree);
 
         return *this;
     }
+#endif // DND_RVALUE_REFS
 
     /**
      * Assignment operator from an ndarray_vals object. This converts the
