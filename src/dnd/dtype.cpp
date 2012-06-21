@@ -273,7 +273,7 @@ static void strided_print(std::ostream& o, const char *data, intptr_t stride, in
     }
 }
 
-static void single_bytes_print(std::ostream& o, const char *data, intptr_t element_size)
+void dnd::hexadecimal_print(std::ostream& o, const char *data, intptr_t element_size)
 {
     static char hexadecimal[] = "0123456789abcdef";
 
@@ -286,11 +286,11 @@ static void single_bytes_print(std::ostream& o, const char *data, intptr_t eleme
 
 static void strided_bytes_print(std::ostream& o, const char *data, intptr_t element_size, intptr_t stride, intptr_t size, const char *separator)
 {
-    single_bytes_print(o, data, element_size);
+    hexadecimal_print(o, data, element_size);
     for (intptr_t i = 1; i < size; ++i) {
         data += stride;
         o << separator;
-        single_bytes_print(o, data, element_size);
+        hexadecimal_print(o, data, element_size);
     }
 }
 
@@ -355,4 +355,24 @@ void dnd::dtype::print_data(std::ostream& o, const char *data, intptr_t stride, 
             }
         }
     }
+}
+
+dtype dnd::make_bytes_dtype(intptr_t element_size, intptr_t alignment)
+{
+    if (alignment > element_size) {
+        std::stringstream ss;
+        ss << "Cannot make a bytes<" << element_size << "," << alignment << "> dtype, its alignment is greater than its size";
+        throw std::runtime_error(ss.str());
+    }
+    if (alignment != 1 && alignment != 2 && alignment != 4 && alignment != 8 && alignment != 16) {
+        std::stringstream ss;
+        ss << "Cannot make a bytes<" << element_size << "," << alignment << "> dtype, its alignment is not a small power of two";
+        throw std::runtime_error(ss.str());
+    }
+    if ((element_size&(alignment-1)) != 0) {
+        std::stringstream ss;
+        ss << "Cannot make a bytes<" << element_size << "," << alignment << "> dtype, its alignment does not divide into its item size";
+        throw std::runtime_error(ss.str());
+    }
+    return dtype(bytes_type_id, bytes_kind, alignment, element_size);
 }

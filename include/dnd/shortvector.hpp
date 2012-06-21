@@ -47,6 +47,11 @@ public:
         }
     }
 
+    void init(int size, const T *data) {
+        init(size);
+        memcpy(m_data, data, size * sizeof(T));
+    }
+
     /** Construct the shortvector with a specified size */
     explicit shortvector(int size)
         : m_data((size <= staticN) ? m_shortdata : new T[size])

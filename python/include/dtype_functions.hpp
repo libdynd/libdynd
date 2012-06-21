@@ -22,6 +22,12 @@ namespace pydnd {
  * This is the typeobject and struct of w_dtype from Cython.
  */
 extern PyTypeObject *WDType_Type;
+inline bool WDType_CheckExact(PyObject *obj) {
+    return Py_TYPE(obj) == WDType_Type;
+}
+inline bool WDType_Check(PyObject *obj) {
+    return PyObject_TypeCheck(obj, WDType_Type);
+}
 struct WDType {
   PyObject_HEAD;
   // This is dtype_placement_wrapper in Cython-land

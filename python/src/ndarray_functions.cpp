@@ -22,6 +22,7 @@ void pydnd::ndarray_init_from_pyobject(dnd::ndarray& n, PyObject* obj)
     // If it's a Cython w_ndarray
     if (WNDArray_Check(obj)) {
         n = ((WNDArray *)obj)->v;
+        return;
     }
 
 #if DND_NUMPY_INTEROP

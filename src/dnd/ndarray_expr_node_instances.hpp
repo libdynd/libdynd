@@ -49,6 +49,9 @@ public:
     ndarray_expr_node_ptr as_dtype(const dtype& dt,
                         dnd::assign_error_mode errmode, bool allow_in_place);
 
+    ndarray_expr_node_ptr broadcast_to_shape(int ndim,
+                        const intptr_t *shape, bool allow_in_place);
+
     ndarray_expr_node_ptr apply_linear_index(int ndim, const intptr_t *shape, const int *axis_map,
                     const intptr_t *index_strides, const intptr_t *start_index, bool allow_in_place);
 
@@ -76,38 +79,15 @@ class elementwise_binary_op_expr_node : public ndarray_expr_node {
      *            shapes and converted to appropriate dtypes for the BinaryOperatorFactory.
      *            These things are not checked by the constructor.
      */
-    elementwise_binary_op_expr_node(const ndarray_expr_node_ptr& op0, const ndarray_expr_node_ptr& op1,
-                                    BinaryOperatorFactory& op_factory)
-        : ndarray_expr_node(op0->get_dtype().value_dtype(), op0->get_ndim(), 2, op0->get_shape(),
+    elementwise_binary_op_expr_node(const dtype& dt, int ndim, const intptr_t *shape,
+                        const ndarray_expr_node_ptr& op0, const ndarray_expr_node_ptr& op1,
+                        BinaryOperatorFactory& op_factory)
+        : ndarray_expr_node(dt, ndim, 2, shape,
                 elementwise_node_category, elementwise_binary_op_node_type),
                 m_op_factory()
     {
         m_opnodes[0] = op0;
         m_opnodes[1] = op1;
-
-        // Swap in the operator factory
-        m_op_factory.swap(op_factory);
-    }
-    elementwise_binary_op_expr_node(ndarray_expr_node_ptr&& op0, ndarray_expr_node_ptr&& op1,
-                                    BinaryOperatorFactory& op_factory)
-        : ndarray_expr_node(op0->get_dtype().value_dtype(), op0->get_ndim(), 2, op0->get_shape(),
-                elementwise_node_category, elementwise_binary_op_node_type),
-                m_op_factory()
-    {
-        m_opnodes[0] = DND_MOVE(op0);
-        m_opnodes[1] = DND_MOVE(op1);
-
-        // Swap in the operator factory
-        m_op_factory.swap(op_factory);
-    }
-    elementwise_binary_op_expr_node(const dtype& dt, ndarray_expr_node_ptr& op0, ndarray_expr_node_ptr& op1,
-                                    BinaryOperatorFactory& op_factory)
-        : ndarray_expr_node(dt, op0->get_ndim(), 2, op0->get_shape(),
-                elementwise_node_category, elementwise_binary_op_node_type),
-                m_op_factory()
-    {
-        m_opnodes[0] = DND_MOVE(op0);
-        m_opnodes[1] = DND_MOVE(op1);
 
         // Swap in the operator factory
         m_op_factory.swap(op_factory);
@@ -127,7 +107,26 @@ public:
         } else {
             ndarray_expr_node_ptr result(
                     new elementwise_binary_op_expr_node(make_conversion_dtype(dt, m_dtype, errmode),
-                                    m_opnodes[0], m_opnodes[1], m_op_factory));
+                                    m_ndim, m_shape.get(), m_opnodes[0], m_opnodes[1], m_op_factory));
+            return result;
+        }
+    }
+
+    ndarray_expr_node_ptr broadcast_to_shape(int ndim,
+                        const intptr_t *shape, bool allow_in_place)
+    {
+        if (allow_in_place) {
+            m_opnodes[0] = m_opnodes[0]->broadcast_to_shape(ndim, shape, true);
+            m_opnodes[1] = m_opnodes[1]->broadcast_to_shape(ndim, shape, true);
+            m_shape.init(ndim, shape);
+            m_ndim = ndim;
+            return ndarray_expr_node_ptr(this);
+        } else {
+            ndarray_expr_node_ptr result(
+                    new elementwise_binary_op_expr_node(m_dtype,
+                                    m_ndim, m_shape.get(),
+                                    m_opnodes[0]->broadcast_to_shape(ndim, shape, false),
+                                    m_opnodes[1]->broadcast_to_shape(ndim, shape, false), m_op_factory));
             return result;
         }
     }
@@ -205,7 +204,7 @@ public:
 
             BinaryOperatorFactory op_factory_copy(m_op_factory);
             return ndarray_expr_node_ptr(
-                        new elementwise_binary_op_expr_node(node1, node2, op_factory_copy));
+                        new elementwise_binary_op_expr_node(m_dtype, ndim, shape, node1, node2, op_factory_copy));
         }
     }
 
@@ -278,49 +277,36 @@ ndarray_expr_node_ptr make_elementwise_binary_op_expr_node(ndarray_expr_node *no
     // op_factory caches the dtype promotion information
     op_factory.promote_dtypes(node1->get_dtype(), node2->get_dtype());
 
-    ndarray_expr_node_ptr broadcast_node1, broadcast_node2;
+    ndarray_expr_node_ptr final_node1, final_node2;
 
-    // If the shapes match exactly, no need to broadcast.
+    // Determine which dtypes need conversion
+    if (node1->get_dtype() == op_factory.get_dtype(1)) {
+        final_node1 = node1;
+    } else {
+        final_node1 = node1->as_dtype(op_factory.get_dtype(1), errmode, false);
+    }
+    if (node2->get_dtype() == op_factory.get_dtype(2)) {
+        final_node2 = node2;
+    } else {
+        final_node2 = node2->as_dtype(op_factory.get_dtype(2), errmode, false);
+    }
+
+        // If the shapes match exactly, no need to broadcast.
     if (node1->get_ndim() == node2->get_ndim() &&
                     memcmp(node1->get_shape(), node2->get_shape(),
                             node1->get_ndim() * sizeof(intptr_t)) == 0) {
-        // Determine which dtypes need conversion
-        if (node1->get_dtype() == op_factory.get_dtype(1)) {
-            if (node2->get_dtype() == op_factory.get_dtype(2)) {
-                return ndarray_expr_node_ptr(new elementwise_binary_op_expr_node<BinaryOperatorFactory>(
-                                    node1, node2, op_factory));
-            } else {
-                return ndarray_expr_node_ptr(new elementwise_binary_op_expr_node<BinaryOperatorFactory>(
-                                    node1,
-                                    node2->as_dtype(op_factory.get_dtype(2), errmode, false),
-                                    op_factory));
-            }
-        } else {
-            if (node2->get_dtype() == op_factory.get_dtype(2)) {
-                return ndarray_expr_node_ptr(new elementwise_binary_op_expr_node<BinaryOperatorFactory>(
-                                    node1->as_dtype(op_factory.get_dtype(1), errmode, false),
-                                    node2,
-                                    op_factory));
-            } else {
-                return ndarray_expr_node_ptr(new elementwise_binary_op_expr_node<BinaryOperatorFactory>(
-                                    node1->as_dtype(op_factory.get_dtype(1), errmode, false),
-                                    node2->as_dtype(op_factory.get_dtype(2), errmode, false),
-                                    op_factory));
-            }
-        }
+        return ndarray_expr_node_ptr(new elementwise_binary_op_expr_node<BinaryOperatorFactory>(
+                            op_factory.get_dtype(0), node1->get_ndim(), node1->get_shape(), final_node1, final_node2, op_factory));
     } else {
         int op0_ndim;
         dimvector op0_shape;
-        broadcast_input_shapes(node1, node2, &op0_ndim, &op0_shape);
+        broadcast_input_shapes(final_node1.get(), final_node2.get(), &op0_ndim, &op0_shape);
 
         return ndarray_expr_node_ptr(new elementwise_binary_op_expr_node<BinaryOperatorFactory>(
-                                    make_broadcast_strided_array_expr_node(node1, op0_ndim,
-                                        op0_shape.get(), op_factory.get_dtype(1), errmode),
-                                    make_broadcast_strided_array_expr_node(node2, op0_ndim,
-                                        op0_shape.get(), op_factory.get_dtype(2), errmode),
-                                    op_factory));
+                            op_factory.get_dtype(0), op0_ndim, op0_shape.get(),
+                            final_node1->broadcast_to_shape(op0_ndim, op0_shape.get(), false),
+                            final_node2->broadcast_to_shape(op0_ndim, op0_shape.get(), false), op_factory));
     }
-
 }
 
 } // namespace dnd

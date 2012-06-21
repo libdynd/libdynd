@@ -25,6 +25,7 @@ endif(WIN32)
 set(LINK_FLAGS)
 
 set(dnd_SRC
+    # DTypes
     src/dnd/dtypes/array_dtype.cpp
     src/dnd/dtypes/byteswap_dtype.cpp
     src/dnd/dtypes/conversion_dtype.cpp
@@ -35,6 +36,12 @@ set(dnd_SRC
     include/dnd/dtypes/conversion_dtype.hpp
     include/dnd/dtypes/dtype_alignment.hpp
     include/dnd/dtypes/view_dtype.hpp
+    # Nodes
+    src/dnd/nodes/elementwise_unary_kernel_node.cpp
+    src/dnd/nodes/immutable_scalar_node.cpp
+    include/dnd/nodes/elementwise_unary_kernel_node.hpp
+    include/dnd/nodes/immutable_scalar_node.hpp
+    # Kernels
     src/dnd/kernels/assignment_kernels.cpp
     src/dnd/kernels/builtin_dtype_binary_kernel_table.cpp
     src/dnd/kernels/buffered_unary_kernels.cpp
@@ -48,6 +55,7 @@ set(dnd_SRC
     include/dnd/kernels/byteswap_kernels.hpp
     include/dnd/kernels/kernel_instance.hpp
     include/dnd/kernels/unary_kernel_instance.hpp
+    # Main
     src/dnd/dtype.cpp
     src/dnd/dtype_assign.cpp
     src/dnd/dtype_promotion.cpp
@@ -92,6 +100,8 @@ include_directories(
 
 source_group("DTypes Source" REGULAR_EXPRESSION "src/dnd/dtypes/.*cpp")
 source_group("DTypes Headers" REGULAR_EXPRESSION "include/dnd/dtypes/.*hpp")
+source_group("Nodes Source" REGULAR_EXPRESSION "src/dnd/nodes/.*cpp")
+source_group("Nodes Headers" REGULAR_EXPRESSION "include/dnd/nodes/.*hpp")
 source_group("Kernels Source" REGULAR_EXPRESSION "src/dnd/kernels/.*cpp")
 source_group("Kernels Headers" REGULAR_EXPRESSION "include/dnd/kernels/.*hpp")
 source_group("Internal Headers" REGULAR_EXPRESSION "src/dnd/.*hpp")

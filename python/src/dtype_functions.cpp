@@ -71,7 +71,9 @@ static dnd::dtype make_dtype_from_pytypeobject(PyTypeObject* obj)
 
 dnd::dtype pydnd::make_dtype_from_object(PyObject* obj)
 {
-    if (PyString_Check(obj)) {
+    if (WDType_Check(obj)) {
+        return ((WDType *)obj)->v;
+    } else if (PyString_Check(obj)) {
         char *s = NULL;
         Py_ssize_t len = 0;
         if (PyString_AsStringAndSize(obj, &s, &len) < 0) {

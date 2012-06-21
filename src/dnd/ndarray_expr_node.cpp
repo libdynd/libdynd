@@ -18,10 +18,17 @@
 using namespace std;
 using namespace dnd;
 
-void dnd::ndarray_expr_node::as_data_and_strides(char ** /*out_data*/,
-                                                intptr_t * /*out_strides*/) const
+void dnd::ndarray_expr_node::as_readwrite_data_and_strides(char ** DND_UNUSED(out_data),
+                                                intptr_t * DND_UNUSED(out_strides)) const
 {
-    throw std::runtime_error("as_data_and_strides is only valid for "
+    throw std::runtime_error("as_readwrite_data_and_strides is only valid for "
+                             "nodes with an expr_node_strided_array category");
+}
+
+void dnd::ndarray_expr_node::as_readonly_data_and_strides(char const ** DND_UNUSED(out_data),
+                                                intptr_t * DND_UNUSED(out_strides)) const
+{
+    throw std::runtime_error("as_readonly_data_and_strides is only valid for "
                              "nodes with an expr_node_strided_array category");
 }
 
@@ -214,9 +221,6 @@ static void print_node_type(ostream& o, expr_node_type type)
         case strided_array_node_type:
             o << "strided_array_node_type";
             break;
-        case convert_dtype_node_type:
-            o << "convert_dtype_node_type";
-            break;
         case broadcast_shape_node_type:
             o << "broadcast_shape_node_type";
             break;
@@ -306,7 +310,14 @@ dnd::strided_array_expr_node::strided_array_expr_node(const dtype& dt, int ndim,
     m_originptr = reinterpret_cast<char *>(m_buffer_owner.get());
 }
 
-void dnd::strided_array_expr_node::as_data_and_strides(char **out_originptr,
+void dnd::strided_array_expr_node::as_readwrite_data_and_strides(char **out_originptr,
+                                                    intptr_t *out_strides) const
+{
+    *out_originptr = m_originptr;
+    memcpy(out_strides, m_strides.get(), get_ndim() * sizeof(intptr_t));
+}
+
+void dnd::strided_array_expr_node::as_readonly_data_and_strides(char const **out_originptr,
                                                     intptr_t *out_strides) const
 {
     *out_originptr = m_originptr;
@@ -323,7 +334,48 @@ ndarray_expr_node_ptr dnd::strided_array_expr_node::as_dtype(const dtype& dt,
         return ndarray_expr_node_ptr(new strided_array_expr_node(
                         make_conversion_dtype(dt, m_dtype, errmode),
                         m_ndim, m_shape.get(), m_strides.get(), m_originptr, m_buffer_owner));
+    }
+}
 
+ndarray_expr_node_ptr dnd::strided_array_expr_node::broadcast_to_shape(int ndim,
+                        const intptr_t *shape, bool allow_in_place)
+{
+    intptr_t *orig_shape = m_shape.get(), *orig_strides = m_strides.get();
+
+    // If the shape is identical, don't make a new node
+    if (ndim == m_ndim && memcmp(orig_shape, shape, ndim * sizeof(intptr_t)) == 0) {
+        return ndarray_expr_node_ptr(this);
+    }
+
+    if (allow_in_place) {
+        // NOTE: It is required that all strides == 0 where the shape == 1
+
+        if (ndim == m_ndim) {
+            memcpy(orig_shape, shape, ndim * sizeof(intptr_t));
+        } else {
+            // Create the broadcast shape/strides
+            dimvector newshape(ndim), newstrides(ndim);
+            memcpy(newshape.get(), shape, ndim * sizeof(intptr_t));
+            for (int i = 0; i < ndim - m_ndim; ++i) {
+                newstrides[i] = 0;
+            }
+            memcpy(newstrides.get() + ndim - m_ndim, orig_strides, m_ndim * sizeof(intptr_t));
+
+            // swap them in place
+            m_ndim = ndim;
+            newshape.swap(m_shape);
+            newstrides.swap(m_strides);
+        }
+        return ndarray_expr_node_ptr(this);
+    } else {
+            // Create the broadcast shape/strides
+            dimvector newstrides(ndim);
+            for (int i = 0; i < ndim - m_ndim; ++i) {
+                newstrides[i] = 0;
+            }
+            memcpy(newstrides.get() + ndim - m_ndim, orig_strides, m_ndim * sizeof(intptr_t));
+
+            return ndarray_expr_node_ptr(new strided_array_expr_node(m_dtype, ndim, shape, newstrides.get(), m_originptr, m_buffer_owner));
     }
 }
 
