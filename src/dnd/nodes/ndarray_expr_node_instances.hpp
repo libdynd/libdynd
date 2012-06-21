@@ -6,7 +6,7 @@
 #ifndef _DND__NDARRAY_EXPR_NODE_INSTANCES_HPP_
 #define _DND__NDARRAY_EXPR_NODE_INSTANCES_HPP_
 
-#include <dnd/ndarray_expr_node.hpp>
+#include <dnd/nodes/ndarray_expr_node.hpp>
 #include <dnd/shape_tools.hpp>
 #include <dnd/dtypes/conversion_dtype.hpp>
 #include <dnd/kernels/buffered_binary_kernels.hpp>

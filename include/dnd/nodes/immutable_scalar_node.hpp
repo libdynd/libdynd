@@ -6,7 +6,7 @@
 #ifndef _DND__IMMUTABLE_SCALAR_NODE_HPP_
 #define _DND__IMMUTABLE_SCALAR_NODE_HPP_
 
-#include <dnd/ndarray_expr_node.hpp>
+#include <dnd/nodes/ndarray_expr_node.hpp>
 
 namespace dnd {
 

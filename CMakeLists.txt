@@ -39,8 +39,12 @@ set(dnd_SRC
     # Nodes
     src/dnd/nodes/elementwise_unary_kernel_node.cpp
     src/dnd/nodes/immutable_scalar_node.cpp
+    src/dnd/nodes/ndarray_expr_node.cpp
+    src/dnd/nodes/ndarray_expr_node_instances.cpp
+    src/dnd/nodes/ndarray_expr_node_instances.hpp
     include/dnd/nodes/elementwise_unary_kernel_node.hpp
     include/dnd/nodes/immutable_scalar_node.hpp
+    include/dnd/nodes/ndarray_expr_node.hpp
     # Kernels
     src/dnd/kernels/assignment_kernels.cpp
     src/dnd/kernels/builtin_dtype_binary_kernel_table.cpp
@@ -62,11 +66,8 @@ set(dnd_SRC
     src/dnd/exceptions.cpp
     src/dnd/ndarray.cpp
     src/dnd/ndarray_arange.cpp
-    src/dnd/ndarray_expr_node.cpp
-    src/dnd/ndarray_expr_node_instances.cpp
     src/dnd/arithmetic_op.cpp
     src/dnd/shape_tools.cpp
-    src/dnd/ndarray_expr_node_instances.hpp
 	include/dnd/auxiliary_data.hpp
     include/dnd/buffer_storage.hpp
     include/dnd/config.hpp
@@ -80,7 +81,6 @@ set(dnd_SRC
     include/dnd/irange.hpp
     include/dnd/ndarray.hpp
     include/dnd/ndarray_arange.hpp
-    include/dnd/ndarray_expr_node.hpp
     include/dnd/raw_iteration.hpp
     include/dnd/scalars.hpp
     include/dnd/shortvector.hpp

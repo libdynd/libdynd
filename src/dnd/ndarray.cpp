@@ -14,7 +14,7 @@
 #include <dnd/dtypes/dtype_alignment.hpp>
 #include <dnd/dtypes/view_dtype.hpp>
 
-#include "ndarray_expr_node_instances.hpp"
+#include "nodes/ndarray_expr_node_instances.hpp"
 #include <dnd/nodes/immutable_scalar_node.hpp>
 
 using namespace std;

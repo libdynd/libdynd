@@ -15,7 +15,7 @@
 #include <dnd/dtype_assign.hpp>
 #include <dnd/shortvector.hpp>
 #include <dnd/irange.hpp>
-#include <dnd/ndarray_expr_node.hpp>
+#include <dnd/nodes/ndarray_expr_node.hpp>
 
 namespace dnd {
 
