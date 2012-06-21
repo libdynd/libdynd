@@ -12,7 +12,7 @@ using namespace dnd;
 dnd::immutable_scalar_node::immutable_scalar_node(const dtype& dt, const char* data)
     : ndarray_expr_node(dt, 0, 0, NULL, strided_array_node_category, immutable_scalar_node_type)
 {
-    if (dt.itemsize() > sizeof(m_data)) {
+    if (dt.itemsize() > (intptr_t)sizeof(m_data)) {
         stringstream ss;
         ss << "input scalar dtype " << dt << " is too large for the immutable scalar node's internal buffer";
         throw runtime_error(ss.str());
@@ -24,7 +24,7 @@ dnd::immutable_scalar_node::immutable_scalar_node(const dtype& dt, const char* d
 immutable_scalar_node::immutable_scalar_node(const dtype& dt, const char* data, int ndim, const intptr_t *shape)
     : ndarray_expr_node(dt, ndim, 0, shape, strided_array_node_category, immutable_scalar_node_type)
 {
-    if (dt.itemsize() > sizeof(m_data)) {
+    if (dt.itemsize() > (intptr_t)sizeof(m_data)) {
         stringstream ss;
         ss << "input scalar dtype " << dt << " is too large for the immutable scalar node's internal buffer";
         throw runtime_error(ss.str());
@@ -35,7 +35,7 @@ immutable_scalar_node::immutable_scalar_node(const dtype& dt, const char* data, 
 
 
 
-void dnd::immutable_scalar_node::as_readwrite_data_and_strides(char **out_originptr,
+void dnd::immutable_scalar_node::as_readwrite_data_and_strides(char **DND_UNUSED(out_originptr),
                                                     intptr_t *DND_UNUSED(out_strides)) const
 {
     throw std::runtime_error("cannot write to an immutable scalar dnd::ndarray node");
