@@ -271,11 +271,11 @@ void dnd::get_dtype_assignment_kernel(
         return;
     }
 
-
-
-    stringstream ss;
-    ss << "strided assignment from " << src_dt << " to " << dst_dt << " isn't yet supported";
-    throw std::runtime_error(ss.str());
+    if (dst_dt.extended() != 0) {
+        dst_dt.extended()->get_dtype_assignment_kernel(dst_dt, src_dt, errmode, out_kernel);
+    } else {
+        src_dt.extended()->get_dtype_assignment_kernel(dst_dt, src_dt, errmode, out_kernel);
+    }
 }
 
 namespace {

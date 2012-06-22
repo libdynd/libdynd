@@ -7,6 +7,7 @@
 #include <dnd/dtype_comparisons.hpp>
 
 #include <complex>
+#include <stdint.h>
 
 using namespace std;
 using namespace dnd;

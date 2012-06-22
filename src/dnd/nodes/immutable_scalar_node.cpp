@@ -12,27 +12,41 @@ using namespace dnd;
 dnd::immutable_scalar_node::immutable_scalar_node(const dtype& dt, const char* data)
     : ndarray_expr_node(dt, 0, 0, NULL, strided_array_node_category, immutable_scalar_node_type)
 {
-    if (dt.element_size() > (intptr_t)sizeof(m_data)) {
-        stringstream ss;
-        ss << "input scalar dtype " << dt << " is too large for the immutable scalar node's internal buffer";
-        throw runtime_error(ss.str());
+    if (dt.is_object_type()) {
+        throw runtime_error("immutable_scalar_node doesn't support object dtypes yet");
     }
 
-    memcpy(&m_data[0], data, dt.element_size());
+    if (dt.element_size() <= (intptr_t)sizeof(m_storage)) {
+        m_data = reinterpret_cast<char *>(m_storage);
+    } else {
+        m_data = new char[dt.element_size()];
+    }
+
+    memcpy(m_data, data, dt.element_size());
 }
 
-immutable_scalar_node::immutable_scalar_node(const dtype& dt, const char* data, int ndim, const intptr_t *shape)
+dnd::immutable_scalar_node::immutable_scalar_node(const dtype& dt, const char* data, int ndim, const intptr_t *shape)
     : ndarray_expr_node(dt, ndim, 0, shape, strided_array_node_category, immutable_scalar_node_type)
 {
-    if (dt.element_size() > (intptr_t)sizeof(m_data)) {
-        stringstream ss;
-        ss << "input scalar dtype " << dt << " is too large for the immutable scalar node's internal buffer";
-        throw runtime_error(ss.str());
+    if (dt.is_object_type()) {
+        throw runtime_error("immutable_scalar_node doesn't support object dtypes yet");
     }
 
-    memcpy(&m_data[0], data, dt.element_size());
+    if (dt.element_size() <= (intptr_t)sizeof(m_storage)) {
+        m_data = reinterpret_cast<char *>(m_storage);
+    } else {
+        m_data = new char[dt.element_size()];
+    }
+
+    memcpy(m_data, data, dt.element_size());
 }
 
+dnd::immutable_scalar_node::~immutable_scalar_node()
+{
+    if (m_data != reinterpret_cast<const char *>(m_storage)) {
+        delete[] m_data;
+    }
+}
 
 
 void dnd::immutable_scalar_node::as_readwrite_data_and_strides(char **DND_UNUSED(out_originptr),

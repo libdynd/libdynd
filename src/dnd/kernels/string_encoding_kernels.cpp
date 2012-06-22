@@ -176,7 +176,6 @@ namespace {
             // Lone trail surrogate
             throw utf8::invalid_utf16(static_cast<uint16_t>(cp));
         }
-        ++it;
         return cp;
     }
 
@@ -203,7 +202,6 @@ namespace {
             // Lone trail surrogate
             return ERROR_SUBSTITUTE_CODEPOINT;
         }
-        ++it;
         return cp;
     }
 
@@ -304,6 +302,7 @@ namespace {
 
         while (src < src_end && dst < dst_end) {
             cp = next_fn(src, src_end);
+            cout << "got character " << (char)cp << endl;
             // The fixedstring dtype uses null-terminated strings
             if (cp == 0) {
                 // Null-terminate the destination string, and we're done

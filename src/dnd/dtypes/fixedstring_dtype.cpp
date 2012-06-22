@@ -88,7 +88,7 @@ void dnd::fixedstring_dtype::print_dtype(std::ostream& o) const
 
 bool dnd::fixedstring_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const
 {
-    if (&dst_dt == &src_dt) {
+    if (dst_dt.extended() == src_dt.extended()) {
         return true;
     } else if (dst_dt.type_id() != fixedstring_type_id || src_dt.type_id() != fixedstring_type_id) {
         return false;
@@ -114,6 +114,24 @@ bool dnd::fixedstring_dtype::is_lossless_assignment(const dtype& dst_dt, const d
         }
     }
 }
+
+void dnd::fixedstring_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const dtype& src_dt,
+                assign_error_mode errmode,
+                unary_specialization_kernel_instance& out_kernel) const
+{
+    if (this == dst_dt.extended()) {
+        if (src_dt.type_id() == fixedstring_type_id) {
+            const fixedstring_dtype *src_fs = static_cast<const fixedstring_dtype *>(src_dt.extended());
+            get_fixedstring_encoding_kernel(m_element_size, m_encoding, src_fs->m_element_size, src_fs->m_encoding,
+                                    errmode, out_kernel);
+        } else {
+            throw runtime_error("conversions from non-string to string are not implemented");
+        }
+    } else {
+        throw runtime_error("conversions from string to non-string are not implemented");
+    }
+}
+
 
 bool dnd::fixedstring_dtype::operator==(const extended_dtype& rhs) const
 {

@@ -235,11 +235,11 @@ public:
     virtual bool is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const = 0;
 
     /**
-     * Called by ::dnd::get_dtype_assignment_kernel with (this == dst_dt->extended()) or
-     * by another implementation of this function with (this == src_dt->extended()).
+     * Called by ::dnd::get_dtype_assignment_kernel with (this == dst_dt.extended()) or
+     * by another implementation of this function with (this == src_dt.extended()).
      *
-     * If (this == dst_dt->extended()), and the function can't produce an assignment kernel,
-     * should call dst_dt->extended()->get_dtype_assignment_kernel(...) to let the other
+     * If (this == dst_dt.extended()), and the function can't produce an assignment kernel,
+     * should call dst_dt.extended()->get_dtype_assignment_kernel(...) to let the other
      * dtype provide the function if it can be done.
      */
     virtual void get_dtype_assignment_kernel(const dtype& dst_dt, const dtype& src_dt,

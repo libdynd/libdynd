@@ -13,6 +13,7 @@
 #include <dnd/dtypes/conversion_dtype.hpp>
 #include <dnd/dtypes/dtype_alignment.hpp>
 #include <dnd/dtypes/view_dtype.hpp>
+#include <dnd/dtypes/fixedstring_dtype.hpp>
 
 #include "nodes/ndarray_expr_node_instances.hpp"
 #include <dnd/nodes/immutable_scalar_node.hpp>
@@ -100,6 +101,13 @@ dnd::ndarray::ndarray(complex<double> value)
 {
 }
 
+// Makes a UTF8 fixedstring from a std::string. Maybe we will want
+// another choice later?
+dnd::ndarray::ndarray(const std::string& value)
+    : m_expr_tree(new immutable_scalar_node(
+                make_fixedstring_dtype(string_encoding_utf8, value.size()), value.c_str()))
+{
+}
 
 dnd::ndarray::ndarray(const dtype& dt)
     : m_expr_tree()
@@ -348,6 +356,28 @@ ndarray dnd::ndarray::view_as_dtype(const dtype& dt) const
     // so use the view_dtype.
     return ndarray(get_expr_tree()->as_dtype(
                 make_view_dtype(dt, get_dtype().value_dtype()), assign_error_none, false));
+}
+
+// Implementation of ndarray.as<std::string>()
+std::string dnd::detail::ndarray_as_string(const ndarray& lhs, assign_error_mode errmode)
+{
+    if (lhs.get_ndim() != 0) {
+        throw std::runtime_error("can only convert ndarrays with 0 dimensions to scalars");
+    }
+    ndarray tmp = lhs.vals();
+    const strided_array_expr_node *node =
+            static_cast<const strided_array_expr_node *>(tmp.get_expr_tree());
+    if (lhs.get_dtype().type_id() == fixedstring_type_id) {
+        const fixedstring_dtype *fs = static_cast<const fixedstring_dtype *>(lhs.get_dtype().extended());
+        if (fs->encoding() == string_encoding_ascii || fs->encoding() == string_encoding_utf8) {
+            intptr_t size = strnlen(node->get_originptr(), lhs.get_dtype().element_size());
+            return std::string(node->get_originptr(), size);
+        }
+    }
+
+    stringstream ss;
+    ss << "ndarray.as<string> isn't supported for dtype " << lhs.get_dtype() << " yet";
+    throw runtime_error(ss.str());
 }
 
 

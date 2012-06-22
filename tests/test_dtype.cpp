@@ -117,38 +117,3 @@ TEST(DType, BasicConstructor) {
     EXPECT_EQ(sizeof(double), d.element_size());
     EXPECT_EQ(NULL, d.extended());
 }
-
-TEST(DType, FixedStringConstructor) {
-    dtype d;
-
-    // Strings with various encodings and sizes
-    d = make_fixedstring_dtype(string_encoding_utf8, 3);
-    EXPECT_EQ(fixedstring_type_id, d.type_id());
-    EXPECT_EQ(string_kind, d.kind());
-    EXPECT_EQ(1, d.alignment());
-    EXPECT_EQ(3, d.element_size());
-
-    d = make_fixedstring_dtype(string_encoding_utf8, 129);
-    EXPECT_EQ(fixedstring_type_id, d.type_id());
-    EXPECT_EQ(string_kind, d.kind());
-    EXPECT_EQ(1, d.alignment());
-    EXPECT_EQ(129, d.element_size());
-
-    d = make_fixedstring_dtype(string_encoding_ascii, 129);
-    EXPECT_EQ(fixedstring_type_id, d.type_id());
-    EXPECT_EQ(string_kind, d.kind());
-    EXPECT_EQ(1, d.alignment());
-    EXPECT_EQ(129, d.element_size());
-
-    d = make_fixedstring_dtype(string_encoding_utf16, 129);
-    EXPECT_EQ(fixedstring_type_id, d.type_id());
-    EXPECT_EQ(string_kind, d.kind());
-    EXPECT_EQ(2, d.alignment());
-    EXPECT_EQ(2*129, d.element_size());
-
-    d = make_fixedstring_dtype(string_encoding_utf32, 129);
-    EXPECT_EQ(fixedstring_type_id, d.type_id());
-    EXPECT_EQ(string_kind, d.kind());
-    EXPECT_EQ(4, d.alignment());
-    EXPECT_EQ(4*129, d.element_size());
-}

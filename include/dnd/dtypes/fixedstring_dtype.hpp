@@ -37,12 +37,17 @@ public:
         return m_element_size;
     }
 
+    string_encoding_t encoding() const {
+        return m_encoding;
+    }
+
     const dtype& value_dtype(const dtype& self) const {
         return self;
     }
     const dtype& operand_dtype(const dtype& self) const {
         return self;
     }
+
     void print_element(std::ostream& o, const char *data) const;
 
     void print_dtype(std::ostream& o) const;
@@ -54,6 +59,10 @@ public:
     }
 
     bool is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const;
+
+    void get_dtype_assignment_kernel(const dtype& dst_dt, const dtype& src_dt,
+                    assign_error_mode errmode,
+                    unary_specialization_kernel_instance& out_kernel) const;
 
     bool operator==(const extended_dtype& rhs) const;
 };

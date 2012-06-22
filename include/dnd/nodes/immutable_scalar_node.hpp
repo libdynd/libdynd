@@ -14,8 +14,9 @@ namespace dnd {
  * NDArray expression node which holds an immutable scalar.
  */
 class immutable_scalar_node : public ndarray_expr_node {
-    /** Storage for the immutable scalar */
-    int64_t m_data[2];
+    char *m_data;
+    /** Builtin storage for small immutable scalars */
+    int64_t m_storage[2];
 
     // Non-copyable
     immutable_scalar_node(const immutable_scalar_node&);
@@ -25,8 +26,7 @@ public:
     immutable_scalar_node(const dtype& dt, const char* data);
     immutable_scalar_node(const dtype& dt, const char* data, int ndim, const intptr_t *shape);
 
-    virtual ~immutable_scalar_node() {
-    }
+    virtual ~immutable_scalar_node();
 
     /** Raises an exception, since this node is not writeable */
     void as_readwrite_data_and_strides(char **out_originptr, intptr_t *out_strides) const;

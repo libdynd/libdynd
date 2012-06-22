@@ -8,6 +8,7 @@
 
 #include <iostream> // FOR DEBUG
 #include <stdexcept>
+#include <string>
 
 #include <dnd/config.hpp>
 
@@ -71,6 +72,7 @@ public:
     ndarray(double value);
     ndarray(std::complex<float> value);
     ndarray(std::complex<double> value);
+    ndarray(const std::string& value);
     /** Constructs a zero-dimensional scalar array */
     explicit ndarray(const dtype& dt);
     /** Constructs a zero-dimensional scalar array, copying the raw data for the value */
@@ -609,6 +611,15 @@ namespace detail {
     struct ndarray_as_helper<bool> {
         static bool as(const ndarray& lhs, assign_error_mode errmode) {
             return ndarray_as_helper<dnd_bool>::as(lhs, errmode);
+        }
+    };
+
+    std::string ndarray_as_string(const ndarray& lhs, assign_error_mode errmode);
+
+    template <>
+    struct ndarray_as_helper<std::string> {
+        static std::string as(const ndarray& lhs, assign_error_mode errmode) {
+            return ndarray_as_string(lhs, errmode);
         }
     };
 
