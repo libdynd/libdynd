@@ -6,6 +6,8 @@
 #ifndef _DND__STRING_ENCODINGS_HPP_
 #define _DND__STRING_ENCODINGS_HPP_
 
+#include <iostream>
+
 namespace dnd {
 
 enum string_encoding_t {

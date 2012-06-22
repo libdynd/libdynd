@@ -11,6 +11,7 @@
 #include <complex>
 #include <stdexcept>
 
+#include <dnd/dtype_assign.hpp>
 #include <dnd/config.hpp>
 #include <dnd/kernels/unary_kernel_instance.hpp>
 
@@ -225,7 +226,22 @@ public:
     /** Should return true if the type has construct/copy/move/destruct semantics */
     virtual bool is_object_type() const = 0;
 
+    /**
+     * Called by ::dnd::is_lossless_assignment, with (this == dst_dt->extended()).
+     */
     virtual bool is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const = 0;
+
+    /**
+     * Called by ::dnd::get_dtype_assignment_kernel with (this == dst_dt->extended()) or
+     * by another implementation of this function with (this == src_dt->extended()).
+     *
+     * If (this == dst_dt->extended()), and the function can't produce an assignment kernel,
+     * should call dst_dt->extended()->get_dtype_assignment_kernel(...) to let the other
+     * dtype provide the function if it can be done.
+     */
+    virtual void get_dtype_assignment_kernel(const dtype& dst_dt, const dtype& src_dt,
+                    assign_error_mode errmode,
+                    unary_specialization_kernel_instance& out_kernel) const;
 
     virtual bool operator==(const extended_dtype& rhs) const = 0;
 

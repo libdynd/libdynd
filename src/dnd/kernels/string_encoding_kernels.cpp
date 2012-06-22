@@ -4,7 +4,9 @@
 //
 
 #include <stdexcept>
+#include <sstream>
 
+#include <dnd/dtype.hpp>
 #include <dnd/diagnostics.hpp>
 #include <dnd/kernels/string_encoding_kernels.hpp>
 
@@ -44,7 +46,7 @@ namespace {
     static void append_ascii(uint32_t cp, char *&it, char *DND_UNUSED(end))
     {
         if ((cp&~0x7f) != 0) {
-            std::stringstream ss;
+            stringstream ss;
             ss << "Cannot encode input code point U+";
             hexadecimal_print(ss, cp);
             ss << " as ascii.";

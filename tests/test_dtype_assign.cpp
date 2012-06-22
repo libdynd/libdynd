@@ -11,7 +11,7 @@
 #include <stdint.h>
 #include "inc_gtest.hpp"
 
-#include "dnd/dtype_assign.hpp"
+#include "dnd/dtype.hpp"
 
 using namespace std;
 using namespace dnd;

@@ -8,9 +8,9 @@
 
 #include <utility>
 
-#include <dnd/dtype.hpp>
-
 namespace dnd {
+
+class dtype;
 
 /**
  * An enumeration for the error checks during assignment.

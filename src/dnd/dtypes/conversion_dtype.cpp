@@ -30,8 +30,8 @@ dnd::conversion_dtype::conversion_dtype(const dtype& value_dtype, const dtype& o
         errmode_to_operand = assign_error_none;
     }
 
-    get_dtype_assignment_kernel(m_value_dtype, m_operand_dtype.value_dtype(), errmode_to_value, m_to_value_kernel);
-    get_dtype_assignment_kernel(m_operand_dtype.value_dtype(), m_value_dtype, errmode_to_value, m_to_operand_kernel);
+    ::dnd::get_dtype_assignment_kernel(m_value_dtype, m_operand_dtype.value_dtype(), errmode_to_value, m_to_value_kernel);
+    ::dnd::get_dtype_assignment_kernel(m_operand_dtype.value_dtype(), m_value_dtype, errmode_to_value, m_to_operand_kernel);
 }
 
 void dnd::conversion_dtype::print_element(std::ostream& DND_UNUSED(o), const char *DND_UNUSED(data)) const
