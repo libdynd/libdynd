@@ -67,6 +67,7 @@ set(dnd_SRC
     src/dnd/arithmetic_op.cpp
     src/dnd/dtype.cpp
     src/dnd/dtype_assign.cpp
+    src/dnd/dtype_comparisons.cpp
     src/dnd/dtype_promotion.cpp
     src/dnd/exceptions.cpp
     src/dnd/ndarray.cpp
@@ -78,6 +79,7 @@ set(dnd_SRC
     include/dnd/cling_all.hpp
     include/dnd/diagnostics.hpp
     include/dnd/dtype.hpp
+    include/dnd/dtype_comparisons.hpp
     include/dnd/dtype_assign.hpp
     include/dnd/dtype_promotion.hpp
     include/dnd/exceptions.hpp

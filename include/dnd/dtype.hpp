@@ -13,6 +13,7 @@
 
 #include <dnd/dtype_assign.hpp>
 #include <dnd/config.hpp>
+#include <dnd/dtype_comparisons.hpp>
 #include <dnd/kernels/unary_kernel_instance.hpp>
 
 namespace dnd {
@@ -221,6 +222,8 @@ public:
 
     virtual void print_element(std::ostream& o, const char *data) const = 0;
 
+    virtual compare_operation_t get_comparison(comparison_id_t compare_id) const;
+
     virtual void print_dtype(std::ostream& o) const = 0;
 
     /** Should return true if the type has construct/copy/move/destruct semantics */
@@ -428,6 +431,9 @@ public:
     dtype_kind_t kind() const {
         return (dtype_kind_t)m_kind;
     }
+
+    /** The comparison for the dtype */
+    compare_operation_t get_comparison(comparison_id_t compare_id) const;
 
     /** The alignment of the dtype */
     int alignment() const {

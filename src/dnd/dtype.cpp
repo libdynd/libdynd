@@ -21,7 +21,7 @@ using namespace std;
 using namespace dnd;
 
 // Default destructor for the extended dtype does nothing
-dnd::extended_dtype::~extended_dtype()
+extended_dtype::~extended_dtype()
 {
 }
 
@@ -39,23 +39,24 @@ void dnd::extended_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const
     throw std::runtime_error(ss.str());
 }
 
-
-const unary_specialization_kernel_instance& dnd::extended_dtype::get_operand_to_value_kernel() const
+const unary_specialization_kernel_instance& extended_dtype::get_operand_to_value_kernel() const
 {
     throw std::runtime_error("get_operand_to_value_kernel: this operation is only for expression_kind dtypes");
 }
 
-const unary_specialization_kernel_instance& dnd::extended_dtype::get_value_to_operand_kernel() const
+const unary_specialization_kernel_instance& extended_dtype::get_value_to_operand_kernel() const
 {
     throw std::runtime_error("get_value_to_operand_kernel: this operation is only for expression_kind dtypes");
 }
 
-dtype dnd::extended_dtype::with_replaced_storage_dtype(const dtype& DND_UNUSED(replacement_dtype)) const
+dtype extended_dtype::with_replaced_storage_dtype(const dtype& DND_UNUSED(replacement_dtype)) const
 {
     throw std::runtime_error("with_replaced_storage_dtype: this operation is only for expression_kind dtypes");
 }
 
-
+compare_operation_t extended_dtype::get_comparison(comparison_id_t DND_UNUSED(compare_id)) const {
+        throw std::runtime_error("get_comparison: this dtypes does not support comparisons");
+}
 
 /**
  * A static look-up table structure which contains data about the type ids.
@@ -172,6 +173,16 @@ dtype::dtype(const std::string& rep)
     }
 
     throw std::runtime_error(std::string() + "invalid type string \"" + rep + "\"");
+}
+
+
+compare_operation_t dtype::get_comparison(comparison_id_t compare_id) const {
+    static int compress_type_id[builtin_type_id_count] = {-1, -1, -1, 0, 1, -1, -1, 2, 3, 4, 5, 6, 7};
+    if (extended() != NULL) {
+        return extended()->get_comparison(compare_id);
+    }
+    int ctype_id = compress_type_id[type_id()];
+    return builtin_dtype_comparisons_table[ctype_id][compare_id];
 }
 
 std::ostream& dnd::operator<<(std::ostream& o, const dtype& rhs)
