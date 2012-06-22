@@ -227,25 +227,34 @@ static void print_as(std::ostream& o, const char *data)
     o << static_cast<Tas>(value);
 }
 
-void dnd::hexadecimal_print(std::ostream& o, const char *data, intptr_t element_size)
+void dnd::hexadecimal_print(std::ostream& o, char value)
 {
     static char hexadecimal[] = "0123456789abcdef";
-
-    for (int i = 0; i < element_size; ++i, ++data) {
-        unsigned char v = (unsigned char)*data;
-        o << hexadecimal[v >> 4] << hexadecimal[v & 0x0f];
-    }
+    unsigned char v = (unsigned char)value;
+    o << hexadecimal[v >> 4] << hexadecimal[v & 0x0f];
 }
 
-void hexadecimal_print(std::ostream& o, uint32_t value)
+void dnd::hexadecimal_print(std::ostream& o, uint16_t value)
 {
-    char bytes[4];
     // Standard printing is in big-endian order
-    bytes[0] = value >> 24;
-    bytes[1] = (value >> 16) & 0xff;
-    bytes[2] = (value >> 8) & 0xff;
-    bytes[3] = value & 0xff;
-    hexadecimal_print(o, bytes, 4);
+    hexadecimal_print(o, static_cast<char>((value >> 8) & 0xff));
+    hexadecimal_print(o, static_cast<char>(value & 0xff));
+}
+
+void dnd::hexadecimal_print(std::ostream& o, uint32_t value)
+{
+    // Standard printing is in big-endian order
+    hexadecimal_print(o, static_cast<char>(value >> 24));
+    hexadecimal_print(o, static_cast<char>((value >> 16) & 0xff));
+    hexadecimal_print(o, static_cast<char>((value >> 8) & 0xff));
+    hexadecimal_print(o, static_cast<char>(value & 0xff));
+}
+
+void dnd::hexadecimal_print(std::ostream& o, const char *data, intptr_t element_size)
+{
+    for (int i = 0; i < element_size; ++i, ++data) {
+        hexadecimal_print(o, *data);
+    }
 }
 
 void dnd::dtype::print_element(std::ostream& o, const char * data) const

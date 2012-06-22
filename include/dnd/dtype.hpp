@@ -473,8 +473,10 @@ dtype make_dtype()
 
 std::ostream& operator<<(std::ostream& o, const dtype& rhs);
 /** Prints raw bytes as hexadecimal */
-void hexadecimal_print(std::ostream& o, const char *data, intptr_t element_size);
+void hexadecimal_print(std::ostream& o, char value);
+void hexadecimal_print(std::ostream& o, uint16_t value);
 void hexadecimal_print(std::ostream& o, uint32_t value);
+void hexadecimal_print(std::ostream& o, const char *data, intptr_t element_size);
 
 /**
  * Creates a bytes<size, alignment> dtype, for representing

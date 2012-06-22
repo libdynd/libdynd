@@ -4,6 +4,7 @@
 //
 
 #include <dnd/dtypes/fixedstring_dtype.hpp>
+#include <dnd/kernels/string_encoding_kernels.hpp>
 
 using namespace std;
 using namespace dnd;
@@ -32,7 +33,51 @@ dnd::fixedstring_dtype::fixedstring_dtype(string_encoding_t encoding, intptr_t s
 
 void dnd::fixedstring_dtype::print_element(std::ostream& o, const char *data) const
 {
+    uint32_t cp;
+    next_unicode_codepoint_t next_fn;
+    next_fn = get_next_unicode_codepoint_function(m_encoding, assign_error_none);
+    const char *data_end = data + m_element_size;
+
+    // Print as an escaped string
     o << "\"";
+    while (data < data_end) {
+        cp = next_fn(data, data_end);
+        if (cp == 0) {
+            break;
+        } else if (cp < 0x80) {
+            switch (cp) {
+                case '\n':
+                    o << "\\n";
+                    break;
+                case '\r':
+                    o << "\\r";
+                    break;
+                case '\t':
+                    o << "\\t";
+                    break;
+                case '\\':
+                    o << "\\\\";
+                    break;
+                case '\"':
+                    o << "\\\"";
+                    break;
+                default:
+                    if (cp < 32) {
+                        o << "\\x";
+                        hexadecimal_print(o, static_cast<char>(cp));
+                    } else {
+                        o << static_cast<char>(cp);
+                    }
+                    break;
+            }
+        } else if (cp < 0x10000) {
+            o << "\\u";
+            hexadecimal_print(o, static_cast<uint16_t>(cp));
+        } else {
+            o << "\\U";
+            hexadecimal_print(o, static_cast<uint32_t>(cp));
+        }
+    }
     o << "\"";
 }
 

@@ -14,10 +14,6 @@ using namespace std;
 using namespace dnd;
 
 namespace {
-    // Typedefs for reading and writing the next unicode characters for
-    // a given encoding.
-    typedef uint32_t (*next_codepoint_t)(const char *&it, const char *end);
-    typedef void (*append_codepoint_t)(uint32_t cp, char *&it, char *end);
     // Typedef for copying a single string
     typedef void (*string_copy_t)(char *dst, const char *src, const AuxDataBase *auxdata);
 
@@ -290,8 +286,8 @@ namespace {
     }
 
     struct fixedstring_encoder_kernel_auxdata {
-        next_codepoint_t next_fn;
-        append_codepoint_t append_fn;
+        next_unicode_codepoint_t next_fn;
+        append_unicode_codepoint_t append_fn;
         intptr_t dst_element_size, src_element_size;
         bool overflow_check;
     };
@@ -302,8 +298,8 @@ namespace {
     {
         char *dst_end = dst + ad.dst_element_size;
         const char *src_end = src + ad.src_element_size;
-        next_codepoint_t next_fn = ad.next_fn;
-        append_codepoint_t append_fn = ad.append_fn;
+        next_unicode_codepoint_t next_fn = ad.next_fn;
+        append_unicode_codepoint_t append_fn = ad.append_fn;
         uint32_t cp;
 
         while (src < src_end && dst < dst_end) {
@@ -362,6 +358,38 @@ namespace {
     };
 } // anonymous namespace
 
+next_unicode_codepoint_t dnd::get_next_unicode_codepoint_function(string_encoding_t encoding, assign_error_mode errmode)
+{
+    switch (encoding) {
+        case string_encoding_ascii:
+            return (errmode != assign_error_none) ? next_ascii : noerror_next_ascii;
+        case string_encoding_utf8:
+            return (errmode != assign_error_none) ? next_utf8 : noerror_next_utf8;
+        case string_encoding_utf16:
+            return (errmode != assign_error_none) ? next_utf16 : noerror_next_utf16;
+        case string_encoding_utf32:
+            return (errmode != assign_error_none) ? next_utf32 : noerror_next_utf32;
+        default:
+            throw runtime_error("get_next_unicode_codepoint_function: Unrecognized string encoding");
+    }
+}
+
+append_unicode_codepoint_t dnd::get_append_unicode_codepoint_function(string_encoding_t encoding, assign_error_mode errmode)
+{
+    switch (encoding) {
+        case string_encoding_ascii:
+            return (errmode != assign_error_none) ? append_ascii : noerror_append_ascii;
+        case string_encoding_utf8:
+            return (errmode != assign_error_none) ? append_utf8 : noerror_append_utf8;
+        case string_encoding_utf16:
+            return (errmode != assign_error_none) ? append_utf16 : noerror_append_utf16;
+        case string_encoding_utf32:
+            return (errmode != assign_error_none) ? append_utf32 : noerror_append_utf32;
+        default:
+            throw runtime_error("get_append_unicode_codepoint_function: Unrecognized string encoding");
+    }
+}
+
 void dnd::get_fixedstring_encoding_kernel(intptr_t dst_element_size, string_encoding_t dst_encoding,
                 intptr_t src_element_size, string_encoding_t src_encoding,
                 assign_error_mode errmode,
@@ -379,36 +407,6 @@ void dnd::get_fixedstring_encoding_kernel(intptr_t dst_element_size, string_enco
     ad.dst_element_size = dst_element_size;
     ad.src_element_size = src_element_size;
     ad.overflow_check = (errmode != assign_error_none);
-    switch (dst_encoding) {
-        case string_encoding_ascii:
-            ad.append_fn = ad.overflow_check ? append_ascii : noerror_append_ascii;
-            break;
-        case string_encoding_utf8:
-            ad.append_fn = ad.overflow_check ? append_utf8 : noerror_append_utf8;
-            break;
-        case string_encoding_utf16:
-            ad.append_fn = ad.overflow_check ? append_utf16 : noerror_append_utf16;
-            break;
-        case string_encoding_utf32:
-            ad.append_fn = ad.overflow_check ? append_utf32 : noerror_append_utf32;
-            break;
-        default:
-            throw runtime_error("Unrecognized destination string encoding");
-    }
-    switch (src_encoding) {
-        case string_encoding_ascii:
-            ad.next_fn = ad.overflow_check ? next_ascii : noerror_next_ascii;
-            break;
-        case string_encoding_utf8:
-            ad.next_fn = ad.overflow_check ? next_utf8 : noerror_next_utf8;
-            break;
-        case string_encoding_utf16:
-            ad.next_fn = ad.overflow_check ? next_utf16 : noerror_next_utf16;
-            break;
-        case string_encoding_utf32:
-            ad.next_fn = ad.overflow_check ? next_utf32 : noerror_next_utf32;
-            break;
-        default:
-            throw runtime_error("Unrecognized destination string encoding");
-    }
+    ad.append_fn = get_append_unicode_codepoint_function(dst_encoding, errmode);
+    ad.next_fn = get_next_unicode_codepoint_function(src_encoding, errmode);
 }
