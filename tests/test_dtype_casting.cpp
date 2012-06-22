@@ -8,7 +8,8 @@
 #include <stdint.h>
 #include "inc_gtest.hpp"
 
-#include "dnd/dtype_assign.hpp"
+#include <dnd/dtype_assign.hpp>
+#include <dnd/dtypes/fixedstring_dtype.hpp>
 
 using namespace std;
 using namespace dnd;
@@ -70,9 +71,18 @@ TEST(DTypeCasting, IsLosslessAssignment) {
     EXPECT_TRUE( is_lossless_assignment(dtype(complex_float64_type_id), dtype(complex_float64_type_id)));
 
     // String casting
-    EXPECT_TRUE(is_lossless_assignment(dtype(utf8_type_id, 16), dtype(utf8_type_id, 16)));
-    EXPECT_TRUE(is_lossless_assignment(dtype(utf8_type_id, 16), dtype(utf8_type_id, 12)));
-    EXPECT_FALSE(is_lossless_assignment(dtype(utf8_type_id, 12), dtype(utf8_type_id, 16)));
+    EXPECT_TRUE(is_lossless_assignment(make_fixedstring_dtype(string_encoding_utf16, 16),
+                            make_fixedstring_dtype(string_encoding_utf16, 16)));
+    EXPECT_TRUE(is_lossless_assignment(make_fixedstring_dtype(string_encoding_utf8, 16),
+                            make_fixedstring_dtype(string_encoding_utf8, 12)));
+    EXPECT_FALSE(is_lossless_assignment(make_fixedstring_dtype(string_encoding_utf32, 12),
+                            make_fixedstring_dtype(string_encoding_utf32, 16)));
+    // Converting from larger to smaller UTF representations with the same number of
+    // units is not always lossless
+    EXPECT_FALSE(is_lossless_assignment(make_fixedstring_dtype(string_encoding_utf16, 16),
+                            make_fixedstring_dtype(string_encoding_utf32, 16)));
+    EXPECT_FALSE(is_lossless_assignment(make_fixedstring_dtype(string_encoding_utf8, 16),
+                            make_fixedstring_dtype(string_encoding_utf16, 16)));
 
     // Int -> UInt casting
     EXPECT_FALSE(is_lossless_assignment(dtype(uint64_type_id), dtype(int8_type_id)));

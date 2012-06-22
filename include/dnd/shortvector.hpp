@@ -3,8 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _SHORTVECTOR_HPP_
-#define _SHORTVECTOR_HPP_
+#ifndef _DND__SHORTVECTOR_HPP_
+#define _DND__SHORTVECTOR_HPP_
 
 #include <algorithm>
 
@@ -246,4 +246,4 @@ typedef shortvector<intptr_t> dimvector;
 
 } // namespace dnd
 
-#endif // _SHORTVECTOR_HPP_
+#endif // _DND__SHORTVECTOR_HPP_

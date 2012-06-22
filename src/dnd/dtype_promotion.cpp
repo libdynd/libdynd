@@ -81,13 +81,6 @@ dtype dnd::promote_dtypes_arithmetic(const dtype& dt0, const dtype& dt1)
                     case complex_kind:
                         // Integer type sizes don't affect complex type sizes
                         return dt1_val;
-                    case string_kind:
-                        // Presently UTF8 is the only built-in string type
-                        element_size = min_strlen_for_builtin_kind(dt0_val.kind());
-                        if (dt1_val.element_size() > element_size) {
-                            element_size = dt1_val.element_size();
-                        }
-                        return dtype(utf8_type_id, element_size);
                     default:
                         break;
                 }
@@ -118,13 +111,6 @@ dtype dnd::promote_dtypes_arithmetic(const dtype& dt0, const dtype& dt1)
                     case complex_kind:
                         // Integer type sizes don't affect complex type sizes
                         return dt1_val;
-                    case string_kind:
-                        // Presently UTF8 is the only built-in string type
-                        element_size = min_strlen_for_builtin_kind(dt0_val.kind());
-                        if (dt1_val.element_size() > element_size) {
-                            element_size = dt1_val.element_size();
-                        }
-                        return dtype(utf8_type_id, element_size);
                     default:
                         break;
                 }
@@ -145,13 +131,6 @@ dtype dnd::promote_dtypes_arithmetic(const dtype& dt0, const dtype& dt1)
                         } else {
                             return dt1_val;
                         }
-                    case string_kind:
-                        // Presently UTF8 is the only built-in string type
-                        element_size = min_strlen_for_builtin_kind(dt0_val.kind());
-                        if (dt1_val.element_size() > element_size) {
-                            element_size = dt1_val.element_size();
-                        }
-                        return dtype(utf8_type_id, element_size);
                     default:
                         break;
                 }
@@ -169,33 +148,6 @@ dtype dnd::promote_dtypes_arithmetic(const dtype& dt0, const dtype& dt1)
                             return dt0_val;
                         }
                     case complex_kind:
-                        return (dt0_val.element_size() >= dt1_val.element_size()) ? dt0_val
-                                                                          : dt1_val;
-                    case string_kind:
-                        // Presently UTF8 is the only built-in string type
-                        element_size = min_strlen_for_builtin_kind(dt0_val.kind());
-                        if (dt1_val.element_size() > element_size) {
-                            element_size = dt1_val.element_size();
-                        }
-                        return dtype(utf8_type_id, element_size);
-                    default:
-                        break;
-                }
-                break;
-            case string_kind:
-                switch (dt1_val.kind()) {
-                    case bool_kind:
-                    case int_kind:
-                    case uint_kind:
-                    case real_kind:
-                    case complex_kind:
-                        // Presently UTF8 is the only built-in string type
-                        element_size = min_strlen_for_builtin_kind(dt1_val.kind());
-                        if (dt0_val.element_size() > element_size) {
-                            element_size = dt0_val.element_size();
-                        }
-                        return dtype(utf8_type_id, element_size);
-                    case string_kind:
                         return (dt0_val.element_size() >= dt1_val.element_size()) ? dt0_val
                                                                           : dt1_val;
                     default:
