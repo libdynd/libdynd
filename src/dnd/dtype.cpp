@@ -231,11 +231,21 @@ void dnd::hexadecimal_print(std::ostream& o, const char *data, intptr_t element_
 {
     static char hexadecimal[] = "0123456789abcdef";
 
-    o << "0x";
     for (int i = 0; i < element_size; ++i, ++data) {
         unsigned char v = (unsigned char)*data;
         o << hexadecimal[v >> 4] << hexadecimal[v & 0x0f];
     }
+}
+
+void hexadecimal_print(std::ostream& o, uint32_t value)
+{
+    char bytes[4];
+    // Standard printing is in big-endian order
+    bytes[0] = value >> 24;
+    bytes[1] = (value >> 16) & 0xff;
+    bytes[2] = (value >> 8) & 0xff;
+    bytes[3] = value & 0xff;
+    hexadecimal_print(o, bytes, 4);
 }
 
 void dnd::dtype::print_element(std::ostream& o, const char * data) const
@@ -243,7 +253,6 @@ void dnd::dtype::print_element(std::ostream& o, const char * data) const
     if (extended() != NULL) {
         extended()->print_element(o, *this, data);
     } else {
-        // TODO: Handle byte-swapped dtypes
         switch (type_id()) {
             case bool_type_id:
                 o << (*data ? "true" : "false");
@@ -285,6 +294,7 @@ void dnd::dtype::print_element(std::ostream& o, const char * data) const
                 print_as<complex<double>, complex<double> >(o, data);
                 break;
             case bytes_type_id:
+                o << "0x";
                 hexadecimal_print(o, data, m_element_size);
                 break;
             default:
