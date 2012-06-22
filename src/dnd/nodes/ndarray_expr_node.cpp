@@ -63,11 +63,14 @@ ndarray_expr_node_ptr dnd::ndarray_expr_node::evaluate()
                     intptr_t innersize = iter.innersize();
                     intptr_t dst_stride = iter.innerstride<0>();
                     intptr_t src0_stride = iter.innerstride<1>();
-                    kernel_instance<unary_operation_t> operation;
-                    get_dtype_assignment_kernel(m_dtype.value_dtype(), dst_stride, m_dtype, src0_stride, assign_error_none, operation);
+                    unary_specialization_kernel_instance operation;
+                    get_dtype_assignment_kernel(m_dtype.value_dtype(), m_dtype, assign_error_none, operation);
+                    unary_specialization_t uspec = get_unary_specialization(dst_stride, m_dtype.value_dtype().element_size(),
+                                                                                src0_stride, m_dtype.element_size());
+                    unary_operation_t kfunc = operation.specializations[uspec];
                     if (innersize > 0) {
                         do {
-                            operation.kernel(iter.data<0>(), dst_stride,
+                            kfunc(iter.data<0>(), dst_stride,
                                         iter.data<1>(), src0_stride,
                                         innersize, operation.auxdata);
                         } while (iter.iternext());

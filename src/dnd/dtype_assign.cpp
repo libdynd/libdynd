@@ -259,10 +259,10 @@ void dnd::dtype_strided_assign(const dtype& dst_dt, char *dst, intptr_t dst_stri
                             const dtype& src_dt, const char *src, intptr_t src_stride,
                             intptr_t count, assign_error_mode errmode)
 {
-    kernel_instance<unary_operation_t> op;
-    get_dtype_assignment_kernel(dst_dt, dst_stride,
-                                src_dt, src_stride,
+    unary_specialization_kernel_instance op;
+    get_dtype_assignment_kernel(dst_dt, src_dt,
                                 errmode, op);
-    op.kernel(dst, dst_stride, src, src_stride, count, op.auxdata);
+    op.specializations[get_unary_specialization(dst_stride, dst_dt.element_size(), src_stride, src_dt.element_size())](
+                dst, dst_stride, src, src_stride, count, op.auxdata);
 }
 

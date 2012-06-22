@@ -533,17 +533,3 @@ void dnd::get_dtype_assignment_kernel(const dtype& dt,
         throw std::runtime_error("cannot assign object dtypes yet");
     }
 }
-
-void dnd::get_dtype_assignment_kernel(
-                    const dtype& dst_dt,
-                    intptr_t dst_fixedstride,
-                    const dtype& src_dt,
-                    intptr_t src_fixedstride,
-                    assign_error_mode errmode,
-                    kernel_instance<unary_operation_t>& out_kernel)
-{
-    unary_specialization_kernel_instance uski;
-    get_dtype_assignment_kernel(dst_dt, src_dt, errmode, uski);
-    out_kernel.kernel = uski.specializations[get_unary_specialization(dst_fixedstride, dst_dt.element_size(), src_fixedstride, src_dt.element_size())];
-    out_kernel.auxdata.swap(uski.auxdata);
-}

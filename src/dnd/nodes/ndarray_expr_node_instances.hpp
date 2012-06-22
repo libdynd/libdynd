@@ -143,13 +143,18 @@ public:
         } else {
             // Need to buffer the binary operation kernel.
             kernel_instance<binary_operation_t> kernel;
+            unary_specialization_kernel_instance adapters_spec[3];
             kernel_instance<unary_operation_t> adapters[3];
             intptr_t element_sizes[3];
 
             // Adapt the output
             if (m_dtype.kind() == expression_kind) {
                 element_sizes[0] = m_dtype.element_size();
-                get_dtype_assignment_kernel(m_dtype.value_dtype(), dst_fixedstride, m_dtype, element_sizes[0], assign_error_none, adapters[0]);
+                get_dtype_assignment_kernel(m_dtype.value_dtype(), m_dtype, assign_error_none, adapters_spec[0]);
+                adapters[0].kernel = adapters_spec[0].specializations[
+                        get_unary_specialization(dst_fixedstride, m_dtype.value_dtype().element_size(),
+                                            m_dtype.element_size(), m_dtype.element_size())];
+                adapters[0].auxdata.swap(adapters_spec[0].auxdata);
             } else {
                 element_sizes[0] = dst_fixedstride;
             }
@@ -157,8 +162,12 @@ public:
             // Adapt the first operand
             if (m_opnodes[0]->get_dtype().kind() == expression_kind) {
                 element_sizes[1] = m_opnodes[0]->get_dtype().value_dtype().element_size();
-                get_dtype_assignment_kernel(m_opnodes[0]->get_dtype().value_dtype(), element_sizes[1], m_opnodes[0]->get_dtype(),
-                                    src0_fixedstride, assign_error_none, adapters[1]);
+                get_dtype_assignment_kernel(m_opnodes[0]->get_dtype().value_dtype(), m_opnodes[0]->get_dtype(),
+                                    assign_error_none, adapters_spec[1]);
+                adapters[1].kernel = adapters_spec[1].specializations[
+                            get_unary_specialization(element_sizes[1], element_sizes[1],
+                                                    src0_fixedstride, m_opnodes[0]->get_dtype().element_size())];
+                adapters[1].auxdata.swap(adapters_spec[1].auxdata);
             } else {
                 element_sizes[1] = src0_fixedstride;
             }
@@ -166,8 +175,12 @@ public:
             // Adapt the second operand
             if (m_opnodes[1]->get_dtype().kind() == expression_kind) {
                 element_sizes[2] = m_opnodes[1]->get_dtype().value_dtype().element_size();
-                get_dtype_assignment_kernel(m_opnodes[1]->get_dtype().value_dtype(), element_sizes[2], m_opnodes[1]->get_dtype(),
-                                    src1_fixedstride, assign_error_none, adapters[2]);
+                get_dtype_assignment_kernel(m_opnodes[1]->get_dtype().value_dtype(), m_opnodes[1]->get_dtype(),
+                                    assign_error_none, adapters_spec[2]);
+                adapters[2].kernel = adapters_spec[2].specializations[
+                            get_unary_specialization(element_sizes[2], element_sizes[2],
+                                                    src1_fixedstride, m_opnodes[1]->get_dtype().element_size())];
+                adapters[2].auxdata.swap(adapters_spec[2].auxdata);
             } else {
                 element_sizes[2] = src0_fixedstride;
             }

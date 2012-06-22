@@ -67,15 +67,6 @@ void get_dtype_assignment_kernel(const dtype& dst_dt, const dtype& src_dt,
                     assign_error_mode errmode,
                     unary_specialization_kernel_instance& out_kernel);
 
-// Temporary, will delete later
-void get_dtype_assignment_kernel(
-                    const dtype& dst_dt,
-                    intptr_t dst_fixedstride,
-                    const dtype& src_dt,
-                    intptr_t src_fixedstride,
-                    assign_error_mode errmode,
-                    kernel_instance<unary_operation_t>& out_kernel);
-
 /**
  * Returns a kernel for assigning from the source data to the dest data, with
  * matching source and destination dtypes. The returned specialization
