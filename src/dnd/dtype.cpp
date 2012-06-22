@@ -26,8 +26,8 @@ extended_dtype::~extended_dtype()
 }
 
 void dnd::extended_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const dtype& src_dt,
-                assign_error_mode errmode,
-                unary_specialization_kernel_instance& out_kernel) const
+                assign_error_mode DND_UNUSED(errmode),
+                unary_specialization_kernel_instance& DND_UNUSED(out_kernel)) const
 {
     stringstream ss;
     ss << "get_dtype_assignment_kernel has not been implemented for ";

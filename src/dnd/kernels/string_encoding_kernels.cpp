@@ -247,10 +247,9 @@ namespace {
         }
     }
 
-    static uint32_t next_utf32(const char *&it_raw, const char *end_raw)
+    static uint32_t next_utf32(const char *&it_raw, const char *DND_UNUSED(end_raw))
     {
         const uint32_t *&it = reinterpret_cast<const uint32_t *&>(it_raw);
-        const uint32_t *end = reinterpret_cast<const uint32_t *>(end_raw);
         uint32_t result = *it;
         if (!utf8::internal::is_code_point_valid(result)) {
             throw std::runtime_error("UTF32 input string had an invalid code point.");
@@ -259,10 +258,9 @@ namespace {
         return result;
     }
 
-    static uint32_t noerror_next_utf32(const char *&it_raw, const char *end_raw)
+    static uint32_t noerror_next_utf32(const char *&it_raw, const char *DND_UNUSED(end_raw))
     {
         const uint32_t *&it = reinterpret_cast<const uint32_t *&>(it_raw);
-        const uint32_t *end = reinterpret_cast<const uint32_t *>(end_raw);
         uint32_t result = *it;
         ++it;
         if (!utf8::internal::is_code_point_valid(result)) {
