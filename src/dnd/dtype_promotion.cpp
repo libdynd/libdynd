@@ -10,6 +10,7 @@
 using namespace std;
 using namespace dnd;
 
+/*
 static intptr_t min_strlen_for_builtin_kind(dtype_kind_t kind)
 {
     switch (kind) {
@@ -26,6 +27,7 @@ static intptr_t min_strlen_for_builtin_kind(dtype_kind_t kind)
             throw runtime_error("cannot get minimum string length for specified kind");
     }
 }
+*/
 
 dtype dnd::promote_dtypes_arithmetic(const dtype& dt0, const dtype& dt1)
 {
@@ -34,7 +36,6 @@ dtype dnd::promote_dtypes_arithmetic(const dtype& dt0, const dtype& dt1)
     const dtype& dt1_val = dt1.value_dtype();
 
     const extended_dtype *dt0_ext, *dt1_ext;
-    intptr_t element_size = 0;
 
     dt0_ext = dt0_val.extended();
     dt1_ext = dt1_val.extended();

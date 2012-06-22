@@ -13,10 +13,11 @@
 using namespace std;
 using namespace dnd;
 
+/*
 namespace {
     // The next_* functions advance an iterator pair and return
     // the code point that was processed.
-    inline uint32_t next_ascii(const char *&it, const char *end)
+    inline uint32_t next_ascii(const char *&it, const char *DND_UNUSED(end))
     {
         uint32_t result = *reinterpret_cast<const uint8_t *>(it);
         if (result&0x80) {
@@ -26,7 +27,7 @@ namespace {
         return result;
     }
 
-    inline void append_ascii(uint32_t cp, char *&it, char *end)
+    inline void append_ascii(uint32_t cp, char *&it, char *DND_UNUSED(end))
     {
         if ((cp&~0x7f) != 0) {
             throw std::runtime_error("cannot encode input code point as ascii.");
@@ -57,7 +58,7 @@ namespace {
         }
     }
 
-    inline uint32_t next_utf16(const char *&it_raw, const char *end_raw)
+    inline uint32_t next_utf16(const char *&it_raw, const char *DND_UNUSED(end_raw))
     {
         const uint16_t *&it = reinterpret_cast<const uint16_t *&>(it_raw);
         const uint16_t *end = reinterpret_cast<const uint16_t *>(end);
@@ -82,7 +83,7 @@ namespace {
         return static_cast<uint32_t>(cp);
     }
 
-    inline void append_utf16(uint32_t cp, char *&it_raw, char *end_raw)
+    inline void append_utf16(uint32_t cp, char *&it_raw, char *DND_UNUSED(end_raw))
     {
         uint16_t *&it = reinterpret_cast<uint16_t *&>(it_raw);
         uint16_t *end = reinterpret_cast<uint16_t *>(end);
@@ -100,7 +101,7 @@ namespace {
         }
     }
 
-    inline uint32_t next_utf32(const char *&it_raw, const char *end_raw)
+    inline uint32_t next_utf32(const char *&it_raw, const char *DND_UNUSED(end_raw))
     {
         const uint32_t *&it = reinterpret_cast<const uint32_t *&>(it_raw);
         const uint32_t *end = reinterpret_cast<const uint32_t *>(end);
@@ -112,7 +113,7 @@ namespace {
         return result;
     }
 
-    inline void append_utf32(uint32_t cp, char *&it_raw, char *end_raw)
+    inline void append_utf32(uint32_t cp, char *&it_raw, char *DND_UNUSED(end_raw))
     {
         uint32_t *&it = reinterpret_cast<uint32_t *&>(it_raw);
         //uint32_t *end = reinterpret_cast<uint32_t *>(end);
@@ -124,11 +125,11 @@ namespace {
 
     };
 } // anonymous namespace
+*/
 
-
-void dnd::get_fixedstring_encoding_kernel(intptr_t dst_element_size, string_encoding_t dst_encoding,
-                intptr_t src_element_size, string_encoding_t src_encoding,
-                assign_error_mode errmode,
-                unary_specialization_kernel_instance& out_kernel)
+void dnd::get_fixedstring_encoding_kernel(intptr_t /*dst_element_size*/, string_encoding_t /*dst_encoding*/,
+                intptr_t /*src_element_size*/, string_encoding_t /*src_encoding*/,
+                assign_error_mode /*errmode*/,
+                unary_specialization_kernel_instance& /*out_kernel*/)
 {
 }

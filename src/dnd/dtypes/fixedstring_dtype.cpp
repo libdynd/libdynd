@@ -9,7 +9,7 @@ using namespace std;
 using namespace dnd;
 
 dnd::fixedstring_dtype::fixedstring_dtype(string_encoding_t encoding, intptr_t stringsize)
-    : m_encoding(encoding), m_stringsize(stringsize)
+    : m_stringsize(stringsize), m_encoding(encoding)
 {
     switch (encoding) {
     case string_encoding_ascii:
@@ -30,8 +30,7 @@ dnd::fixedstring_dtype::fixedstring_dtype(string_encoding_t encoding, intptr_t s
     }
 }
 
-void dnd::fixedstring_dtype::print_data(std::ostream& o, const dtype& dt, const char *data, intptr_t stride, intptr_t size,
-                    const char *separator) const
+void dnd::fixedstring_dtype::print_element(std::ostream& /*o*/, const dtype& /*dt*/, const char * /*data*/) const
 {
     wcout << L"testing!" << endl;
 }
