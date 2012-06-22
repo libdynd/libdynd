@@ -218,7 +218,7 @@ public:
         return self;
     }
 
-    virtual void print_element(std::ostream& o, const dtype& dt, const char *data) const = 0;
+    virtual void print_element(std::ostream& o, const char *data) const = 0;
 
     virtual void print_dtype(std::ostream& o) const = 0;
 

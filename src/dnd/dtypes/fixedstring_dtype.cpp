@@ -12,27 +12,28 @@ dnd::fixedstring_dtype::fixedstring_dtype(string_encoding_t encoding, intptr_t s
     : m_stringsize(stringsize), m_encoding(encoding)
 {
     switch (encoding) {
-    case string_encoding_ascii:
-    case string_encoding_utf8:
-        m_element_size = m_stringsize;
-        m_alignment = 1;
-        break;
-    case string_encoding_utf16:
-        m_element_size = m_stringsize * 2;
-        m_alignment = 2;
-        break;
-    case string_encoding_utf32:
-        m_element_size = m_stringsize * 4;
-        m_alignment = 4;
-        break;
-    default:
-        throw runtime_error("Unrecognized string encoding in fixedstring dtype constructor");
+        case string_encoding_ascii:
+        case string_encoding_utf8:
+            m_element_size = m_stringsize;
+            m_alignment = 1;
+            break;
+        case string_encoding_utf16:
+            m_element_size = m_stringsize * 2;
+            m_alignment = 2;
+            break;
+        case string_encoding_utf32:
+            m_element_size = m_stringsize * 4;
+            m_alignment = 4;
+            break;
+        default:
+            throw runtime_error("Unrecognized string encoding in fixedstring dtype constructor");
     }
 }
 
-void dnd::fixedstring_dtype::print_element(std::ostream& /*o*/, const dtype& /*dt*/, const char * /*data*/) const
+void dnd::fixedstring_dtype::print_element(std::ostream& o, const char *data) const
 {
-    wcout << L"testing!" << endl;
+    o << "\"";
+    o << "\"";
 }
 
 void dnd::fixedstring_dtype::print_dtype(std::ostream& o) const

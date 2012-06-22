@@ -251,7 +251,7 @@ void hexadecimal_print(std::ostream& o, uint32_t value)
 void dnd::dtype::print_element(std::ostream& o, const char * data) const
 {
     if (extended() != NULL) {
-        extended()->print_element(o, *this, data);
+        extended()->print_element(o, data);
     } else {
         switch (type_id()) {
             case bool_type_id:

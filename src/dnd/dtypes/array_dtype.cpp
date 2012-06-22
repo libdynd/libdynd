@@ -66,7 +66,7 @@ static void nested_array_print(std::ostream& o, const dtype& d, const char *data
     o << "]";
 }
 
-void array_dtype::print_element(std::ostream& o, const dtype& DND_UNUSED(dt), const char * data) const
+void array_dtype::print_element(std::ostream& o, const char * data) const
 {
     intptr_t size = *get_shape();
     for (int i = 0; i < size; ++i) {

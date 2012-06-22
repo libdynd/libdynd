@@ -46,7 +46,7 @@ public:
     const dtype& value_dtype(const dtype& self) const {
         return self;
     }
-    void print_element(std::ostream& o, const dtype& dt, const char *data) const;
+    void print_element(std::ostream& o, const char *data) const;
 
     void print_dtype(std::ostream& o) const;
 

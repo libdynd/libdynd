@@ -26,8 +26,7 @@ dnd::view_dtype::view_dtype(const dtype& value_dtype, const dtype& operand_dtype
                     m_copy_kernel);
 }
 
-void dnd::view_dtype::print_element(std::ostream& DND_UNUSED(o), const dtype& DND_UNUSED(dt),
-                        const char *DND_UNUSED(data)) const
+void dnd::view_dtype::print_element(std::ostream& DND_UNUSED(o), const char *DND_UNUSED(data)) const
 {
     throw runtime_error("internal error: view_dtype::print_element isn't supposed to be called");
 }

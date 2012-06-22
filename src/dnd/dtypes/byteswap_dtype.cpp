@@ -46,8 +46,7 @@ dnd::byteswap_dtype::byteswap_dtype(const dtype& value_dtype, const dtype& opera
     }
 }
 
-void dnd::byteswap_dtype::print_element(std::ostream& DND_UNUSED(o), const dtype& DND_UNUSED(dt),
-                            const char *DND_UNUSED(data)) const
+void dnd::byteswap_dtype::print_element(std::ostream& DND_UNUSED(o), const char *DND_UNUSED(data)) const
 {
     throw runtime_error("internal error: byteswap_dtype::print_element isn't supposed to be called");
 }

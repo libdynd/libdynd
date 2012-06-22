@@ -314,6 +314,7 @@ namespace {
                 memset(dst, 0, dst_end - dst);
                 return;
             } else if (cp != UNICODE_BOM_CODEPOINT) {
+                // Skipping unicode byte order markers, TODO: only skip if at the beginning?
                 append_fn(cp, dst, dst_end);
             }
         }
@@ -380,32 +381,32 @@ void dnd::get_fixedstring_encoding_kernel(intptr_t dst_element_size, string_enco
     ad.overflow_check = (errmode != assign_error_none);
     switch (dst_encoding) {
         case string_encoding_ascii:
-            ad.append_fn = (errmode != assign_error_none) ? append_ascii : noerror_append_ascii;
+            ad.append_fn = ad.overflow_check ? append_ascii : noerror_append_ascii;
             break;
         case string_encoding_utf8:
-            ad.append_fn = (errmode != assign_error_none) ? append_utf8 : noerror_append_utf8;
+            ad.append_fn = ad.overflow_check ? append_utf8 : noerror_append_utf8;
             break;
         case string_encoding_utf16:
-            ad.append_fn = (errmode != assign_error_none) ? append_utf16 : noerror_append_utf16;
+            ad.append_fn = ad.overflow_check ? append_utf16 : noerror_append_utf16;
             break;
         case string_encoding_utf32:
-            ad.append_fn = (errmode != assign_error_none) ? append_utf32 : noerror_append_utf32;
+            ad.append_fn = ad.overflow_check ? append_utf32 : noerror_append_utf32;
             break;
         default:
             throw runtime_error("Unrecognized destination string encoding");
     }
     switch (src_encoding) {
         case string_encoding_ascii:
-            ad.next_fn = (errmode != assign_error_none) ? next_ascii : noerror_next_ascii;
+            ad.next_fn = ad.overflow_check ? next_ascii : noerror_next_ascii;
             break;
         case string_encoding_utf8:
-            ad.next_fn = (errmode != assign_error_none) ? next_utf8 : noerror_next_utf8;
+            ad.next_fn = ad.overflow_check ? next_utf8 : noerror_next_utf8;
             break;
         case string_encoding_utf16:
-            ad.next_fn = (errmode != assign_error_none) ? next_utf16 : noerror_next_utf16;
+            ad.next_fn = ad.overflow_check ? next_utf16 : noerror_next_utf16;
             break;
         case string_encoding_utf32:
-            ad.next_fn = (errmode != assign_error_none) ? next_utf32 : noerror_next_utf32;
+            ad.next_fn = ad.overflow_check ? next_utf32 : noerror_next_utf32;
             break;
         default:
             throw runtime_error("Unrecognized destination string encoding");

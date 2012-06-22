@@ -34,34 +34,9 @@ dnd::conversion_dtype::conversion_dtype(const dtype& value_dtype, const dtype& o
     get_dtype_assignment_kernel(m_operand_dtype.value_dtype(), m_value_dtype, errmode_to_value, m_to_operand_kernel);
 }
 
-void dnd::conversion_dtype::print_element(std::ostream& DND_UNUSED(o), const dtype& DND_UNUSED(dt),
-                        const char *DND_UNUSED(data)) const
+void dnd::conversion_dtype::print_element(std::ostream& DND_UNUSED(o), const char *DND_UNUSED(data)) const
 {
     throw runtime_error("internal error: conversion_dtype::print_element isn't supposed to be called");
-    /*
-    buffer_storage buf(m_value_dtype, size);
-    // TODO: This doesn't work with multiple nested expression_kind dtypes
-    kernel_instance<unary_operation_t> assign =
-                get_dtype_strided_assign_operation(
-                                        m_value_dtype, m_value_dtype.element_size(),
-                                        m_operand_dtype, stride,
-                                        m_errmode);
-    while (size > 0) {
-        intptr_t blocksize = buf.element_count();
-        if (blocksize > size) {
-            blocksize = size;
-        }
-
-        assign.first(buf.storage(), m_value_dtype.element_size(), data, stride, blocksize, assign.second.get());
-        m_value_dtype.print_data(o, buf.storage(), m_value_dtype.element_size(), blocksize, separator);
-
-        data += blocksize * stride;
-        size -= blocksize;
-        if (size > 0) {
-            o << separator;
-        }
-    }
-    */
 }
 
 void dnd::conversion_dtype::print_dtype(std::ostream& o) const
