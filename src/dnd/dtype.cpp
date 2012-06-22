@@ -104,8 +104,8 @@ static char type_id_names[DND_MAX_NUM_TYPE_IDS][32] = {
  */
 static inline int validate_type_id(type_id_t type_id)
 {
-    // 0 <= type_id <= utf8_type_id
-    if ((unsigned int)type_id <= utf8_type_id) {
+    // 0 <= type_id < builtin_type_id_count
+    if ((unsigned int)type_id < builtin_type_id_count) {
         return type_id;
     } else {
         throw invalid_type_id((int)type_id);
@@ -140,40 +140,6 @@ dtype::dtype(int type_id)
       m_element_size(basic_type_id_info[type_id].element_size),
       m_data()
 {
-}
-
-dtype::dtype(type_id_t type_id, intptr_t size)
-    : m_type_id(validate_type_id(type_id)),
-      m_kind(basic_type_id_info[type_id].kind),
-      m_alignment(basic_type_id_info[type_id].alignment),
-      m_element_size(basic_type_id_info[type_id].element_size),
-      m_data()
-{
-    if (m_element_size != 0) {
-        if (m_element_size != size) {
-            throw std::runtime_error(std::string() + "invalid element_size for type id "
-                                                    + get_type_id_basename(type_id));
-        }
-    } else {
-        m_element_size = size;
-    }
-}
-
-dtype::dtype(int type_id, intptr_t size)
-    : m_type_id(validate_type_id((type_id_t)type_id)),
-      m_kind(basic_type_id_info[type_id].kind),
-      m_alignment(basic_type_id_info[type_id].alignment),
-      m_element_size(basic_type_id_info[type_id].element_size),
-      m_data()
-{
-    if (m_element_size != 0) {
-        if (m_element_size != size) {
-            throw std::runtime_error(std::string() + "invalid element_size for type id "
-                                                    + get_type_id_basename((type_id_t)type_id));
-        }
-    } else {
-        m_element_size = size;
-    }
 }
 
 dtype::dtype(const std::string& rep)
@@ -234,13 +200,6 @@ std::ostream& dnd::operator<<(std::ostream& o, const dtype& rhs)
             break;
         case complex_float64_type_id:
             o << "complex<float64>";
-            break;
-        case utf8_type_id:
-            if (rhs.element_size() == 0) {
-                o << "utf8";
-            } else {
-                o << "utf8<" << rhs.element_size() << ">";
-            }
             break;
         case bytes_type_id:
             o << "bytes<" << rhs.element_size() << "," << rhs.alignment() << ">";

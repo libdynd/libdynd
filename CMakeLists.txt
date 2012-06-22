@@ -30,11 +30,13 @@ set(dnd_SRC
     src/dnd/dtypes/byteswap_dtype.cpp
     src/dnd/dtypes/conversion_dtype.cpp
     src/dnd/dtypes/dtype_alignment.cpp
+    src/dnd/dtypes/fixedstring_dtype.cpp
     src/dnd/dtypes/view_dtype.cpp
     include/dnd/dtypes/array_dtype.hpp
     include/dnd/dtypes/byteswap_dtype.hpp
     include/dnd/dtypes/conversion_dtype.hpp
     include/dnd/dtypes/dtype_alignment.hpp
+    include/dnd/dtypes/fixedstring_dtype.hpp
     include/dnd/dtypes/view_dtype.hpp
     # Nodes
     src/dnd/nodes/elementwise_unary_kernel_node.cpp
@@ -51,6 +53,7 @@ set(dnd_SRC
     src/dnd/kernels/buffered_unary_kernels.cpp
     src/dnd/kernels/buffered_binary_kernels.cpp
     src/dnd/kernels/byteswap_kernels.cpp
+    src/dnd/kernels/string_encoding_kernels.cpp
     src/dnd/kernels/single_assigner_builtin.hpp
     include/dnd/kernels/assignment_kernels.hpp
     include/dnd/kernels/builtin_dtype_binary_kernel_table.hpp
@@ -58,15 +61,16 @@ set(dnd_SRC
     include/dnd/kernels/buffered_binary_kernels.hpp
     include/dnd/kernels/byteswap_kernels.hpp
     include/dnd/kernels/kernel_instance.hpp
+    include/dnd/kernels/string_encoding_kernels.hpp
     include/dnd/kernels/unary_kernel_instance.hpp
     # Main
+    src/dnd/arithmetic_op.cpp
     src/dnd/dtype.cpp
     src/dnd/dtype_assign.cpp
     src/dnd/dtype_promotion.cpp
     src/dnd/exceptions.cpp
     src/dnd/ndarray.cpp
     src/dnd/ndarray_arange.cpp
-    src/dnd/arithmetic_op.cpp
     src/dnd/shape_tools.cpp
 	include/dnd/auxiliary_data.hpp
     include/dnd/buffer_storage.hpp
@@ -85,6 +89,7 @@ set(dnd_SRC
     include/dnd/scalars.hpp
     include/dnd/shortvector.hpp
     include/dnd/shape_tools.hpp
+    include/dnd/string_encodings.hpp
     )
 
 if(WIN32)
@@ -96,6 +101,7 @@ endif(WIN32)
 
 include_directories(
     include
+    thirdparty/utf8/source
     )
 
 source_group("DTypes Source" REGULAR_EXPRESSION "src/dnd/dtypes/.*cpp")

@@ -8,7 +8,8 @@
 #include <stdint.h>
 #include "inc_gtest.hpp"
 
-#include "dnd/dtype.hpp"
+#include <dnd/dtype.hpp>
+#include <dnd/dtypes/fixedstring_dtype.hpp>
 
 using namespace std;
 using namespace dnd;
@@ -47,7 +48,7 @@ TEST(DType, BasicConstructor) {
     EXPECT_EQ(NULL, d.extended());
 
     // int32 dtype
-    d = dtype(int32_type_id, 4);
+    d = dtype(int32_type_id);
     EXPECT_EQ(int32_type_id, d.type_id());
     EXPECT_EQ(int_kind, d.kind());
     EXPECT_EQ(4, d.alignment());
@@ -115,37 +116,39 @@ TEST(DType, BasicConstructor) {
     EXPECT_EQ((int)sizeof(double), d.alignment());
     EXPECT_EQ(sizeof(double), d.element_size());
     EXPECT_EQ(NULL, d.extended());
-
-    // For fixed-size types, can't specify a bad size
-    EXPECT_THROW(dtype(int32_type_id, 8), runtime_error);
 }
 
-TEST(DType, UTF8Constructor) {
+TEST(DType, FixedStringConstructor) {
     dtype d;
 
-    // UTF8 with various string sizes
-    d = dtype(utf8_type_id, 3);
-    EXPECT_EQ(utf8_type_id, d.type_id());
+    // Strings with various encodings and sizes
+    d = make_fixedstring_dtype(string_encoding_utf8, 3);
+    EXPECT_EQ(fixedstring_type_id, d.type_id());
     EXPECT_EQ(string_kind, d.kind());
     EXPECT_EQ(1, d.alignment());
-    EXPECT_EQ(3u, d.element_size());
-    EXPECT_EQ(NULL, d.extended());
+    EXPECT_EQ(3, d.element_size());
 
-    d = dtype(utf8_type_id, 129);
-    EXPECT_EQ(utf8_type_id, d.type_id());
+    d = make_fixedstring_dtype(string_encoding_utf8, 129);
+    EXPECT_EQ(fixedstring_type_id, d.type_id());
     EXPECT_EQ(string_kind, d.kind());
     EXPECT_EQ(1, d.alignment());
-    EXPECT_EQ(129u, d.element_size());
-    EXPECT_EQ(NULL, d.extended());
+    EXPECT_EQ(129, d.element_size());
 
-    // If the size is big enough, needs to use an extended_dtype
-    d = dtype(utf8_type_id, ((intptr_t)1 << (8*sizeof(intptr_t)-2)));
-    EXPECT_EQ(utf8_type_id, d.type_id());
+    d = make_fixedstring_dtype(string_encoding_ascii, 129);
+    EXPECT_EQ(fixedstring_type_id, d.type_id());
     EXPECT_EQ(string_kind, d.kind());
     EXPECT_EQ(1, d.alignment());
-    EXPECT_EQ(((uintptr_t)1 << (8*sizeof(intptr_t)-2)), d.element_size());
-    EXPECT_EQ(NULL, d.extended());
+    EXPECT_EQ(129, d.element_size());
 
-    // Can't specify a negative size (dtype accepts a uintptr_t now)
-    //EXPECT_THROW(dtype(utf8_type_id, -13), runtime_error);
+    d = make_fixedstring_dtype(string_encoding_utf16, 129);
+    EXPECT_EQ(fixedstring_type_id, d.type_id());
+    EXPECT_EQ(string_kind, d.kind());
+    EXPECT_EQ(2, d.alignment());
+    EXPECT_EQ(2*129, d.element_size());
+
+    d = make_fixedstring_dtype(string_encoding_utf32, 129);
+    EXPECT_EQ(fixedstring_type_id, d.type_id());
+    EXPECT_EQ(string_kind, d.kind());
+    EXPECT_EQ(4, d.alignment());
+    EXPECT_EQ(4*129, d.element_size());
 }

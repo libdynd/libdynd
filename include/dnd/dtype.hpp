@@ -72,10 +72,12 @@ enum type_id_t {
     // Complex floating-point types
     complex_float32_type_id,
     complex_float64_type_id,
-    // UTF8 strings
-    utf8_type_id,
     // Raw bytes
     bytes_type_id,
+
+    // Other primitives
+    fixedstring_type_id,
+
     // Composite dtypes
     struct_type_id,
     tuple_type_id,
@@ -322,9 +324,6 @@ public:
     /** Construct from a type ID */
     explicit dtype(type_id_t type_id);
     explicit dtype(int type_id);
-    /** Construct from a type ID and element_size */
-    explicit dtype(type_id_t type_id, intptr_t size);
-    explicit dtype(int type_id, intptr_t size);
 
     /** Construct from a string representation */
     explicit dtype(const std::string& rep);
