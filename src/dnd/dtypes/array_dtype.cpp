@@ -46,7 +46,12 @@ static void nested_array_print(std::ostream& o, const dtype& d, const char *data
 {
     o << "[";
     if (ndim == 1) {
-        d.print_data(o, data, strides[0], shape[0], ", ");
+        d.print_element(o, data);
+        for (intptr_t i = 1; i < shape[0]; ++i) {
+            data += strides[0];
+            o << ", ";
+            d.print_element(o, data);
+        }
     } else {
         intptr_t size = *shape;
         intptr_t stride = *strides;
@@ -61,13 +66,13 @@ static void nested_array_print(std::ostream& o, const dtype& d, const char *data
     o << "]";
 }
 
-void array_dtype::print_data(std::ostream& o, const dtype& DND_UNUSED(dt), const char *data, intptr_t DND_UNUSED(stride), intptr_t size,
-                        const char *separator) const
+void array_dtype::print_element(std::ostream& o, const dtype& DND_UNUSED(dt), const char * data) const
 {
+    intptr_t size = *get_shape();
     for (int i = 0; i < size; ++i) {
         nested_array_print(o, m_element_dtype, data, m_ndim, get_shape(), get_strides());
         if (i != size-1) {
-            o << separator;
+            o << ", ";
             data += size;
         }
     }

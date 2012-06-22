@@ -39,8 +39,7 @@ public:
     const dtype& operand_dtype(const dtype& DND_UNUSED(self)) const {
         return m_operand_dtype;
     }
-    void print_data(std::ostream& o, const dtype& dt, const char *data, intptr_t stride, intptr_t size,
-                        const char *separator) const;
+    void print_element(std::ostream& o, const dtype& dt, const char *data) const;
 
     void print_dtype(std::ostream& o) const;
 

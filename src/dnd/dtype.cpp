@@ -261,16 +261,11 @@ std::ostream& dnd::operator<<(std::ostream& o, const dtype& rhs)
 }
 
 template<class T, class Tas>
-static void strided_print(std::ostream& o, const char *data, intptr_t stride, intptr_t size, const char *separator)
+static void print_as(std::ostream& o, const char *data)
 {
     T value;
     memcpy(&value, data, sizeof(value));
     o << static_cast<Tas>(value);
-    for (intptr_t i = 1; i < size; ++i) {
-        data += stride;
-        memcpy(&value, data, sizeof(value));
-        o << separator << static_cast<Tas>(value);
-    }
 }
 
 void dnd::hexadecimal_print(std::ostream& o, const char *data, intptr_t element_size)
@@ -284,75 +279,59 @@ void dnd::hexadecimal_print(std::ostream& o, const char *data, intptr_t element_
     }
 }
 
-static void strided_bytes_print(std::ostream& o, const char *data, intptr_t element_size, intptr_t stride, intptr_t size, const char *separator)
+void dnd::dtype::print_element(std::ostream& o, const char * data) const
 {
-    hexadecimal_print(o, data, element_size);
-    for (intptr_t i = 1; i < size; ++i) {
-        data += stride;
-        o << separator;
-        hexadecimal_print(o, data, element_size);
-    }
-}
-
-void dnd::dtype::print_data(std::ostream& o, const char *data, intptr_t stride, intptr_t count, const char *separator) const
-{
-    if (count > 0) {
-        if (extended() != NULL) {
-            extended()->print_data(o, *this, data, stride, count, separator);
-        } else {
-            // TODO: Handle byte-swapped dtypes
-            switch (type_id()) {
-                case bool_type_id:
-                    o << (*data ? "true" : "false");
-                    for (intptr_t i = 1; i < count; ++i) {
-                        data += stride;
-                        o << separator << (*data ? "true" : "false");
-                    }
-                    break;
-                case int8_type_id:
-                    strided_print<int8_t, int32_t>(o, data, stride, count, separator);
-                    break;
-                case int16_type_id:
-                    strided_print<int16_t, int32_t>(o, data, stride, count, separator);
-                    break;
-                case int32_type_id:
-                    strided_print<int32_t, int32_t>(o, data, stride, count, separator);
-                    break;
-                case int64_type_id:
-                    strided_print<int64_t, int64_t>(o, data, stride, count, separator);
-                    break;
-                case uint8_type_id:
-                    strided_print<uint8_t, uint32_t>(o, data, stride, count, separator);
-                    break;
-                case uint16_type_id:
-                    strided_print<uint16_t, uint32_t>(o, data, stride, count, separator);
-                    break;
-                case uint32_type_id:
-                    strided_print<uint32_t, uint32_t>(o, data, stride, count, separator);
-                    break;
-                case uint64_type_id:
-                    strided_print<uint64_t, uint64_t>(o, data, stride, count, separator);
-                    break;
-                case float32_type_id:
-                    strided_print<float, float>(o, data, stride, count, separator);
-                    break;
-                case float64_type_id:
-                    strided_print<double, double>(o, data, stride, count, separator);
-                    break;
-                case complex_float32_type_id:
-                    strided_print<complex<float>, complex<float> >(o, data, stride, count, separator);
-                    break;
-                case complex_float64_type_id:
-                    strided_print<complex<double>, complex<double> >(o, data, stride, count, separator);
-                    break;
-                case bytes_type_id:
-                    strided_bytes_print(o, data, element_size(), stride, count, separator);
-                    break;
-                default:
-                    stringstream ss;
-                    ss << "printing of dtype " << *this << " isn't supported yet";
-                    throw std::runtime_error(ss.str());
-            }
+    if (extended() != NULL) {
+        extended()->print_element(o, *this, data);
+    } else {
+        // TODO: Handle byte-swapped dtypes
+        switch (type_id()) {
+            case bool_type_id:
+                o << (*data ? "true" : "false");
+                break;
+            case int8_type_id:
+                print_as<int8_t, int32_t>(o, data);
+                break;
+            case int16_type_id:
+                print_as<int16_t, int32_t>(o, data);
+                break;
+            case int32_type_id:
+                print_as<int32_t, int32_t>(o, data);
+                break;
+            case int64_type_id:
+                print_as<int64_t, int64_t>(o, data);
+                break;
+            case uint8_type_id:
+                print_as<uint8_t, uint32_t>(o, data);
+                break;
+            case uint16_type_id:
+                print_as<uint16_t, uint32_t>(o, data);
+                break;
+            case uint32_type_id:
+                print_as<uint32_t, uint32_t>(o, data);
+                break;
+            case uint64_type_id:
+                print_as<uint64_t, uint64_t>(o, data);
+                break;
+            case float32_type_id:
+                print_as<float, float>(o, data);
+                break;
+            case float64_type_id:
+                print_as<double, double>(o, data);
+                break;
+            case complex_float32_type_id:
+                print_as<complex<float>, complex<float> >(o, data);
+                break;
+            case complex_float64_type_id:
+                print_as<complex<double>, complex<double> >(o, data);
+                break;
+            case bytes_type_id:
+                hexadecimal_print(o, data, m_element_size);
+                break;
+            default:
+                stringstream ss;
+                ss << "printing of dtype " << *this << " isn't supported yet";
+                throw std::runtime_error(ss.str());
         }
     }
 }

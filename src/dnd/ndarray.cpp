@@ -408,11 +408,16 @@ void dnd::ndarray::debug_dump(std::ostream& o = std::cerr) const
 static void nested_ndarray_print(std::ostream& o, const dtype& d, const char *data, int ndim, const intptr_t *shape, const intptr_t *strides)
 {
     if (ndim == 0) {
-        d.print_data(o, data, 0, 1, "");
+        d.print_element(o, data);
     } else {
         o << "{";
         if (ndim == 1) {
-            d.print_data(o, data, strides[0], shape[0], ", ");
+            d.print_element(o, data);
+            for (intptr_t i = 1; i < shape[0]; ++i) {
+                data += strides[0];
+                o << ", ";
+                d.print_element(o, data);
+            }
         } else {
             intptr_t size = *shape;
             intptr_t stride = *strides;

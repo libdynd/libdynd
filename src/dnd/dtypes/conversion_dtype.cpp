@@ -34,11 +34,10 @@ dnd::conversion_dtype::conversion_dtype(const dtype& value_dtype, const dtype& o
     get_dtype_assignment_kernel(m_operand_dtype.value_dtype(), m_value_dtype, errmode_to_value, m_to_operand_kernel);
 }
 
-void dnd::conversion_dtype::print_data(std::ostream& DND_UNUSED(o), const dtype& DND_UNUSED(dt),
-                        const char *DND_UNUSED(data), intptr_t DND_UNUSED(stride),
-                        intptr_t DND_UNUSED(size), const char *DND_UNUSED(separator)) const
+void dnd::conversion_dtype::print_element(std::ostream& DND_UNUSED(o), const dtype& DND_UNUSED(dt),
+                        const char *DND_UNUSED(data)) const
 {
-    throw runtime_error("internal error: conversion_dtype::print_data isn't supposed to be called");
+    throw runtime_error("internal error: conversion_dtype::print_element isn't supposed to be called");
     /*
     buffer_storage buf(m_value_dtype, size);
     // TODO: This doesn't work with multiple nested expression_kind dtypes

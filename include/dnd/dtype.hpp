@@ -216,8 +216,7 @@ public:
         return self;
     }
 
-    virtual void print_data(std::ostream& o, const dtype& dt, const char *data, intptr_t stride, intptr_t size,
-                        const char *separator) const = 0;
+    virtual void print_element(std::ostream& o, const dtype& dt, const char *data) const = 0;
 
     virtual void print_dtype(std::ostream& o) const = 0;
 
@@ -460,8 +459,7 @@ public:
         return m_data.get();
     }
 
-    void print_data(std::ostream& o, const char *data, intptr_t stride, intptr_t size,
-                                                            const char *separator) const;
+    void print_element(std::ostream& o, const char *data) const;
 
     friend std::ostream& operator<<(std::ostream& o, const dtype& rhs);
     friend dtype make_bytes_dtype(intptr_t element_size, intptr_t alignment);
