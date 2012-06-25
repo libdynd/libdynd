@@ -42,13 +42,6 @@ class ndarray {
      */
     ndarray_expr_node_ptr m_expr_tree;
 
-    /**
-     * Private method for general indexing based on a raw array of irange
-     * objects. Maybe this method should be public?
-     */
-    ndarray index(int nindex, const irange *indices) const;
-
-
 public:
     /** Constructs an array with no buffer (NULL state) */
     ndarray();
@@ -233,6 +226,11 @@ public:
      * away any expression dtypes or encodings.
      */
     ndarray storage() const;
+
+    /**
+     * General irange-based indexing operation.
+     */
+    ndarray index(int nindex, const irange *indices) const;
 
     /**
      * The ndarray uses the function call operator to do indexing. The [] operator

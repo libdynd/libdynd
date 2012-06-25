@@ -79,9 +79,16 @@ inline std::string ndarray_debug_dump(const dnd::ndarray& n)
     return ss.str();
 }
 
-PyObject* intptr_array_as_tuple(int size, const intptr_t *array);
-
+/**
+ * Converts an ndarray into native python objects, using
+ * nested lists.
+ */
 PyObject* ndarray_as_pyobject(const dnd::ndarray& n);
+
+/**
+ * Implementation of __getitem__ for the wrapped ndarray object.
+ */
+dnd::ndarray ndarray_getitem(const dnd::ndarray& n, PyObject *subscript);
 
 } // namespace pydnd
 

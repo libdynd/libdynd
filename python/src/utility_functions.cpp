@@ -5,6 +5,21 @@
 
 #include "utility_functions.hpp"
 
+#include <Python.h>
+
+using namespace std;
+using namespace pydnd;
+
+intptr_t pydnd::pyobject_as_index(PyObject *index)
+{
+    pyobject_ownref start_obj(PyNumber_Index(index));
+    intptr_t result = PyLong_AsLongLong(start_obj);
+    if (result == -1 && PyErr_Occurred()) {
+        throw runtime_error("error getting index integer"); // TODO: propagate Python exception
+    }
+    return result;
+}
+
 PyObject* pydnd::intptr_array_as_tuple(int size, const intptr_t *values)
 {
     PyObject *result = PyTuple_New(size);

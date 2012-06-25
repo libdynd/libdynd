@@ -66,6 +66,18 @@ public:
         return m_step;
     }
 
+    void set_start(intptr_t value) {
+        m_start = value;
+    }
+
+    void set_finish(intptr_t value) {
+        m_finish = value;
+    }
+
+    void set_step(intptr_t value) {
+        m_step = value;
+    }
+
     /**
      * The notation "irange() / step" is a way to specify
      * the step of the range. Think of it as the word "by".

@@ -205,3 +205,46 @@ PyObject* pydnd::ndarray_as_pyobject(const dnd::ndarray& n)
 
     return nested_ndarray_as_pyobject(nvals.get_dtype(), data, nvals.get_ndim(), nvals.get_shape(), strides.get());
 }
+
+static irange pyobject_as_irange(PyObject *index)
+{
+    if (PySlice_Check(index)) {
+        irange result;
+        PySliceObject *slice = (PySliceObject *)index;
+        if (slice->start != Py_None) {
+            result.set_start(pyobject_as_index(slice->start));
+        }
+        if (slice->stop != Py_None) {
+            result.set_finish(pyobject_as_index(slice->stop));
+        }
+        if (slice->step != Py_None) {
+            result.set_step(pyobject_as_index(slice->step));
+        }
+        return result;
+    } else {
+        return irange(pyobject_as_index(index));
+    }
+}
+
+dnd::ndarray pydnd::ndarray_getitem(const dnd::ndarray& n, PyObject *subscript)
+{
+    // Convert the pyobject into an array of iranges
+    intptr_t size;
+    shortvector<irange> indices;
+    if (!PyTuple_Check(subscript)) {
+        // A single subscript
+        size = 1;
+        indices.init(1);
+        indices[0] = pyobject_as_irange(subscript);
+    } else {
+        size = PyTuple_GET_SIZE(subscript);
+        // Tuple of subscripts
+        indices.init(size);
+        for (Py_ssize_t i = 0; i < size; ++i) {
+            indices[i] = pyobject_as_irange(PyTuple_GET_ITEM(subscript, i));
+        }
+    }
+
+    // Do an indexing operation
+    return n.index(size, indices.get());
+}

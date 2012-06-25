@@ -240,8 +240,9 @@ cdef class w_ndarray:
         return GET(self.v).get_shape()[0]
 
     def __getitem__(self, x):
-        print x
-        return 5
+        cdef w_ndarray result = w_ndarray()
+        SET(result.v, ndarray_getitem(GET(self.v), x))
+        return result
 
     property __array_struct__:
         # Using the __array_struct__ mechanism to expose our data to numpy
