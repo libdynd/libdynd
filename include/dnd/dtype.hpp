@@ -220,10 +220,27 @@ public:
         return self;
     }
 
+    /**
+     * print data interpreted as a single value of this dtype
+     *
+     * @param o the std::ostream to print to
+     * @param data pointer to the data element to print
+     */
     virtual void print_element(std::ostream& o, const char *data) const = 0;
 
+    /*
+     * Return a comparison function that can perform the requested comparison on
+     * data of this dtype
+     *
+     * @param compare_id the identifier of the comparison
+     */
     virtual compare_operation_t get_comparison(comparison_id_t compare_id) const;
 
+    /**
+     * print a representation of the dtype itself
+     *
+     * @param o the std::ostream to print to
+     */
     virtual void print_dtype(std::ostream& o) const = 0;
 
     /** Should return true if the type has construct/copy/move/destruct semantics */
@@ -432,7 +449,12 @@ public:
         return (dtype_kind_t)m_kind;
     }
 
-    /** The comparison for the dtype */
+    /*
+     * Return a comparison function that can perform the requested comparison on
+     * data of this dtype
+     *
+     * @param compare_id the identifier of the comparison
+     */
     compare_operation_t get_comparison(comparison_id_t compare_id) const;
 
     /** The alignment of the dtype */
@@ -480,6 +502,12 @@ public:
         return m_data.get();
     }
 
+    /**
+     * print data interpreted as a single value of this dtype
+     *
+     * @param o the std::ostream to print to
+     * @param data pointer to the data element to print
+     */
     void print_element(std::ostream& o, const char *data) const;
 
     friend std::ostream& operator<<(std::ostream& o, const dtype& rhs);
