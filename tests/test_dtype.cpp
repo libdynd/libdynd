@@ -117,3 +117,84 @@ TEST(DType, BasicConstructor) {
     EXPECT_EQ(sizeof(double), d.element_size());
     EXPECT_EQ(NULL, d.extended());
 }
+
+
+TEST(DType, BasicComparison) {
+    dtype d;
+    float f1, f2;
+    double d1, d2;
+    int32_t i32_1, i32_2;
+    int64_t i64_1, i64_2;
+
+    // float32 dtype
+    d = dtype(float32_type_id);
+    f1 = 1.0; f2 = 2.0;
+    EXPECT_EQ(d.get_comparison(less_id)((char *)&f1, (char *)&f2, NULL), true);
+    EXPECT_EQ(d.get_comparison(less_equal_id)((char *)&f1, (char *)&f2, NULL), true);
+    EXPECT_EQ(d.get_comparison(equal_id)((char *)&f1, (char *)&f2, NULL), false);
+    EXPECT_EQ(d.get_comparison(not_equal_id)((char *)&f1, (char *)&f2, NULL), true);
+    EXPECT_EQ(d.get_comparison(greater_equal_id)((char *)&f1, (char *)&f2, NULL), false);
+    EXPECT_EQ(d.get_comparison(greater_id)((char *)&f1, (char *)&f2, NULL), false);
+    f1 = 2.0;
+    EXPECT_EQ(d.get_comparison(less_id)((char *)&f1, (char *)&f2, NULL), false);
+    EXPECT_EQ(d.get_comparison(less_equal_id)((char *)&f1, (char *)&f2, NULL), true);
+    EXPECT_EQ(d.get_comparison(equal_id)((char *)&f1, (char *)&f2, NULL), true);
+    EXPECT_EQ(d.get_comparison(not_equal_id)((char *)&f1, (char *)&f2, NULL), false);
+    EXPECT_EQ(d.get_comparison(greater_equal_id)((char *)&f1, (char *)&f2, NULL), true);
+    EXPECT_EQ(d.get_comparison(greater_id)((char *)&f1, (char *)&f2, NULL), false);
+
+    // float64 dtype
+    d = dtype(float64_type_id);
+    d1 = 1.0; d2 = 2.0;
+    EXPECT_EQ(d.get_comparison(less_id)((char *)&d1, (char *)&d2, NULL), true);
+    EXPECT_EQ(d.get_comparison(less_equal_id)((char *)&d1, (char *)&d2, NULL), true);
+    EXPECT_EQ(d.get_comparison(equal_id)((char *)&d1, (char *)&d2, NULL), false);
+    EXPECT_EQ(d.get_comparison(not_equal_id)((char *)&d1, (char *)&d2, NULL), true);
+    EXPECT_EQ(d.get_comparison(greater_equal_id)((char *)&d1, (char *)&d2, NULL), false);
+    EXPECT_EQ(d.get_comparison(greater_id)((char *)&d1, (char *)&d2, NULL), false);
+    d1 = 2.0;
+    EXPECT_EQ(d.get_comparison(less_id)((char *)&d1, (char *)&d2, NULL), false);
+    EXPECT_EQ(d.get_comparison(less_equal_id)((char *)&d1, (char *)&d2, NULL), true);
+    EXPECT_EQ(d.get_comparison(equal_id)((char *)&d1, (char *)&d2, NULL), true);
+    EXPECT_EQ(d.get_comparison(not_equal_id)((char *)&d1, (char *)&d2, NULL), false);
+    EXPECT_EQ(d.get_comparison(greater_equal_id)((char *)&d1, (char *)&d2, NULL), true);
+    EXPECT_EQ(d.get_comparison(greater_id)((char *)&d1, (char *)&d2, NULL), false);
+
+    // int32 dtype
+    d = dtype(int32_type_id);
+    i32_1 = 1.0; i32_2 = 2.0;
+    EXPECT_EQ(d.get_comparison(less_id)((char *)&i32_1, (char *)&i32_2, NULL), true);
+    EXPECT_EQ(d.get_comparison(less_equal_id)((char *)&i32_1, (char *)&i32_2, NULL), true);
+    EXPECT_EQ(d.get_comparison(equal_id)((char *)&i32_1, (char *)&i32_2, NULL), false);
+    EXPECT_EQ(d.get_comparison(not_equal_id)((char *)&i32_1, (char *)&i32_2, NULL), true);
+    EXPECT_EQ(d.get_comparison(greater_equal_id)((char *)&i32_1, (char *)&i32_2, NULL), false);
+    EXPECT_EQ(d.get_comparison(greater_id)((char *)&i32_1, (char *)&i32_2, NULL), false);
+    i32_1 = 2.0;
+    EXPECT_EQ(d.get_comparison(less_id)((char *)&i32_1, (char *)&i32_2, NULL), false);
+    EXPECT_EQ(d.get_comparison(less_equal_id)((char *)&i32_1, (char *)&i32_2, NULL), true);
+    EXPECT_EQ(d.get_comparison(equal_id)((char *)&i32_1, (char *)&i32_2, NULL), true);
+    EXPECT_EQ(d.get_comparison(not_equal_id)((char *)&i32_1, (char *)&i32_2, NULL), false);
+    EXPECT_EQ(d.get_comparison(greater_equal_id)((char *)&i32_1, (char *)&i32_2, NULL), true);
+    EXPECT_EQ(d.get_comparison(greater_id)((char *)&i32_1, (char *)&i32_2, NULL), false);
+
+    // int64 dtype
+    d = dtype(int64_type_id);
+    i64_1 = 1.0; i64_2 = 2.0;
+    EXPECT_EQ(d.get_comparison(less_id)((char *)&i64_1, (char *)&i64_2, NULL), true);
+    EXPECT_EQ(d.get_comparison(less_equal_id)((char *)&i64_1, (char *)&i64_2, NULL), true);
+    EXPECT_EQ(d.get_comparison(equal_id)((char *)&i64_1, (char *)&i64_2, NULL), false);
+    EXPECT_EQ(d.get_comparison(not_equal_id)((char *)&i64_1, (char *)&i64_2, NULL), true);
+    EXPECT_EQ(d.get_comparison(greater_equal_id)((char *)&i64_1, (char *)&i64_2, NULL), false);
+    EXPECT_EQ(d.get_comparison(greater_id)((char *)&i64_1, (char *)&i64_2, NULL), false);
+    i64_1 = 2.0;
+    EXPECT_EQ(d.get_comparison(less_id)((char *)&i64_1, (char *)&i64_2, NULL), false);
+    EXPECT_EQ(d.get_comparison(less_equal_id)((char *)&i64_1, (char *)&i64_2, NULL), true);
+    EXPECT_EQ(d.get_comparison(equal_id)((char *)&i64_1, (char *)&i64_2, NULL), true);
+    EXPECT_EQ(d.get_comparison(not_equal_id)((char *)&i64_1, (char *)&i64_2, NULL), false);
+    EXPECT_EQ(d.get_comparison(greater_equal_id)((char *)&i64_1, (char *)&i64_2, NULL), true);
+    EXPECT_EQ(d.get_comparison(greater_id)((char *)&i64_1, (char *)&i64_2, NULL), false);
+}
+
+
+
+
