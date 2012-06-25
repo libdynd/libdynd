@@ -234,6 +234,15 @@ cdef class w_ndarray:
     def __repr__(self):
         return str(ndarray_repr(GET(self.v)).c_str())
 
+    def __len__(self):
+        if GET(self.v).get_ndim() == 0:
+            raise TypeError('zero-dimensional dnd::ndarray has no len()')
+        return GET(self.v).get_shape()[0]
+
+    def __getitem__(self, x):
+        print x
+        return 5
+
     property __array_struct__:
         # Using the __array_struct__ mechanism to expose our data to numpy
         def __get__(self):

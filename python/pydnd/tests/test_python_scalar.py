@@ -3,7 +3,7 @@ import unittest
 import pydnd as nd
 
 class TestPythonScalar(unittest.TestCase):
-    def test_ndarray_create(self):
+    def test_bool(self):
         # Boolean true/false
         a = nd.ndarray(True)
         self.assertEqual(a.dtype, nd.bool)
@@ -14,6 +14,7 @@ class TestPythonScalar(unittest.TestCase):
         self.assertEqual(type(a.as_py()), bool)
         self.assertEqual(a.as_py(), False)
 
+    def test_int(self):
         # Integer that fits in 32 bits
         a = nd.ndarray(10)
         self.assertEqual(a.dtype, nd.int32)
@@ -32,18 +33,21 @@ class TestPythonScalar(unittest.TestCase):
         self.assertEqual(a.dtype, nd.int64)
         self.assertEqual(a.as_py(), -2200000000)
 
+    def test_float(self):
         # Floating point
         a = nd.ndarray(5.125)
         self.assertEqual(a.dtype, nd.float64)
         self.assertEqual(type(a.as_py()), float)
         self.assertEqual(a.as_py(), 5.125)
 
+    def test_complex(self):
         # Complex floating point
         a = nd.ndarray(5.125 - 2.5j)
         self.assertEqual(a.dtype, nd.cfloat64)
         self.assertEqual(type(a.as_py()), complex)
         self.assertEqual(a.as_py(), 5.125 - 2.5j)
 
+    def test_string(self):
         # String/Unicode TODO: Python 3 bytes becomes a bytes<> dtype
         a = nd.ndarray('abcdef')
         self.assertEqual(a.dtype, nd.make_fixedstring_dtype('ascii', 6))
@@ -56,6 +60,7 @@ class TestPythonScalar(unittest.TestCase):
         self.assertEqual(type(a.as_py()), unicode)
         self.assertEqual(a.as_py(), u'abcdef')
 
+    def test_utf_encodings(self):
         # Ensure all of the UTF encodings work ok for a basic string
         x = u'\uc548\ub155 hello'
         # UTF-8
@@ -80,3 +85,7 @@ class TestPythonScalar(unittest.TestCase):
         self.assertEqual(type(a.as_py()), unicode)
         self.assertEqual(a.as_py(), x)
 
+    def test_len(self):
+        # Can't get the length of a zero-dimensional ndarray
+        a = nd.ndarray(10)
+        self.assertRaises(TypeError, len, a)
