@@ -22,7 +22,7 @@ typedef void (*binary_operation_t)(char *dst, intptr_t dst_stride,
                         const char *src1, intptr_t src1_stride,
                         intptr_t count, const AuxDataBase *auxdata);
 
-typedef bool (*compare_operation_t)(const char *src0, const char *src1,
+typedef bool (*single_compare_operation_t)(const char *src0, const char *src1,
                         const AuxDataBase *auxdata);
 
 /**

@@ -54,9 +54,9 @@ dtype extended_dtype::with_replaced_storage_dtype(const dtype& DND_UNUSED(replac
     throw std::runtime_error("with_replaced_storage_dtype: this operation is only for expression_kind dtypes");
 }
 
-compare_operation_t extended_dtype::get_comparison(comparison_id_t DND_UNUSED(compare_id)) const
+void extended_dtype::get_single_compare_kernel(single_compare_kernel_instance& DND_UNUSED(out_kernel)) const
 {
-        throw std::runtime_error("get_comparison: this dtypes does not support comparisons");
+        throw std::runtime_error("get_single_compare_kernel: this dtypes does not support comparisons");
 }
 
 extended_string_dtype::~extended_string_dtype()
@@ -181,14 +181,11 @@ dtype::dtype(const std::string& rep)
     throw std::runtime_error(std::string() + "invalid type string \"" + rep + "\"");
 }
 
-
-compare_operation_t dtype::get_comparison(comparison_id_t compare_id) const {
-    static int compress_type_id[builtin_type_id_count] = {-1, -1, -1, 0, 1, -1, -1, 2, 3, 4, 5, 6, 7};
+void dtype::get_single_compare_kernel(single_compare_kernel_instance &out_kernel) const {
     if (extended() != NULL) {
-        return extended()->get_comparison(compare_id);
+        return extended()->get_single_compare_kernel(out_kernel);
     }
-    int ctype_id = compress_type_id[type_id()];
-    return builtin_dtype_comparisons_table[ctype_id][compare_id];
+    out_kernel.comparisons = builtin_dtype_comparisons_table[type_id()];
 }
 
 std::ostream& dnd::operator<<(std::ostream& o, const dtype& rhs)

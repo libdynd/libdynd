@@ -4,9 +4,11 @@
 //
 
 #include <dnd/config.hpp>
+#include <dnd/dtype.hpp>
 #include <dnd/dtype_comparisons.hpp>
 
 #include <complex>
+#include <iostream>
 #include <stdint.h>
 
 using namespace std;
@@ -62,11 +64,11 @@ struct compare_kernel< complex<T> > {
     }
 
     static bool equal_as(const char *a, const char *b, const AuxDataBase *DND_UNUSED(auxdata)) {
-        return *reinterpret_cast<const T *>(a) == *reinterpret_cast<const T *>(b);
+        return *reinterpret_cast<const complex<T> *>(a) == *reinterpret_cast<const complex<T> *>(b);
     }
 
     static bool not_equal_as(const char *a, const char *b, const AuxDataBase *DND_UNUSED(auxdata)) {
-        return *reinterpret_cast<const T *>(a) != *reinterpret_cast<const T *>(b);
+        return *reinterpret_cast<const complex<T> *>(a) != *reinterpret_cast<const complex<T> *>(b);
     }
 
     static bool greater_equal_as(const char *a, const char *b, const AuxDataBase *DND_UNUSED(auxdata)) {
@@ -85,19 +87,24 @@ struct compare_kernel< complex<T> > {
 
 
 #define DND_BUILTIN_DTYPE_COMPARISON_TABLE_TYPE_LEVEL(type) { \
-    (compare_operation_t)compare_kernel<type>::less_as, \
-    (compare_operation_t)compare_kernel<type>::less_equal_as, \
-    (compare_operation_t)compare_kernel<type>::equal_as, \
-    (compare_operation_t)compare_kernel<type>::not_equal_as, \
-    (compare_operation_t)compare_kernel<type>::greater_equal_as, \
-    (compare_operation_t)compare_kernel<type>::greater_as \
+    (single_compare_operation_t)compare_kernel<type>::less_as, \
+    (single_compare_operation_t)compare_kernel<type>::less_equal_as, \
+    (single_compare_operation_t)compare_kernel<type>::equal_as, \
+    (single_compare_operation_t)compare_kernel<type>::not_equal_as, \
+    (single_compare_operation_t)compare_kernel<type>::greater_equal_as, \
+    (single_compare_operation_t)compare_kernel<type>::greater_as \
     }
 
 namespace dnd {
 
-comparisons_table_t builtin_dtype_comparisons_table[8] = {
+single_compare_operation_table_t builtin_dtype_comparisons_table[13] = {
+    DND_BUILTIN_DTYPE_COMPARISON_TABLE_TYPE_LEVEL(dnd_bool), \
+    DND_BUILTIN_DTYPE_COMPARISON_TABLE_TYPE_LEVEL(int8_t), \
+    DND_BUILTIN_DTYPE_COMPARISON_TABLE_TYPE_LEVEL(int16_t), \
     DND_BUILTIN_DTYPE_COMPARISON_TABLE_TYPE_LEVEL(int32_t), \
     DND_BUILTIN_DTYPE_COMPARISON_TABLE_TYPE_LEVEL(int64_t), \
+    DND_BUILTIN_DTYPE_COMPARISON_TABLE_TYPE_LEVEL(uint8_t), \
+    DND_BUILTIN_DTYPE_COMPARISON_TABLE_TYPE_LEVEL(uint16_t), \
     DND_BUILTIN_DTYPE_COMPARISON_TABLE_TYPE_LEVEL(uint32_t), \
     DND_BUILTIN_DTYPE_COMPARISON_TABLE_TYPE_LEVEL(uint64_t), \
     DND_BUILTIN_DTYPE_COMPARISON_TABLE_TYPE_LEVEL(float), \

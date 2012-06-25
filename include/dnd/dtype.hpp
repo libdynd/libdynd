@@ -14,6 +14,7 @@
 #include <dnd/dtype_assign.hpp>
 #include <dnd/config.hpp>
 #include <dnd/dtype_comparisons.hpp>
+#include <dnd/kernels/single_compare_kernel_instance.hpp>
 #include <dnd/kernels/unary_kernel_instance.hpp>
 #include <dnd/string_encodings.hpp>
 
@@ -230,14 +231,6 @@ public:
      */
     virtual void print_element(std::ostream& o, const char *data) const = 0;
 
-    /*
-     * Return a comparison function that can perform the requested comparison on
-     * data of this dtype
-     *
-     * @param compare_id the identifier of the comparison
-     */
-    virtual compare_operation_t get_comparison(comparison_id_t compare_id) const;
-
     /**
      * print a representation of the dtype itself
      *
@@ -252,6 +245,14 @@ public:
      * Called by ::dnd::is_lossless_assignment, with (this == dst_dt->extended()).
      */
     virtual bool is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const = 0;
+
+    /*
+     * Return a comparison kernel that can perform the requested single comparison on
+     * data of this dtype
+     *
+     * @param compare_id the identifier of the comparison
+     */
+    virtual void get_single_compare_kernel(single_compare_kernel_instance& out_kernel) const;
 
     /**
      * Called by ::dnd::get_dtype_assignment_kernel with (this == dst_dt.extended()) or
@@ -462,12 +463,12 @@ public:
     }
 
     /*
-     * Return a comparison function that can perform the requested comparison on
+     * Return a comparison kernel that can perform the requested single comparison on
      * data of this dtype
      *
      * @param compare_id the identifier of the comparison
      */
-    compare_operation_t get_comparison(comparison_id_t compare_id) const;
+    void get_single_compare_kernel(single_compare_kernel_instance& out_kernel) const;
 
     /** The alignment of the dtype */
     int alignment() const {
