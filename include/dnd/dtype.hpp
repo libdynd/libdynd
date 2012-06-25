@@ -15,6 +15,7 @@
 #include <dnd/config.hpp>
 #include <dnd/dtype_comparisons.hpp>
 #include <dnd/kernels/unary_kernel_instance.hpp>
+#include <dnd/string_encodings.hpp>
 
 namespace dnd {
 
@@ -41,6 +42,7 @@ enum dtype_kind_t {
     uint_kind,
     real_kind,
     complex_kind,
+    // string_kind means subclass of extended_string_dtype
     string_kind,
     bytes_kind,
     // For struct_type_id and array_type_id
@@ -279,7 +281,17 @@ public:
      * when this is not true.
      */
     virtual dtype with_replaced_storage_dtype(const dtype& replacement_dtype) const;
+};
 
+/**
+ * Base class for all string extended dtypes. If a dtype
+ * has kind string_kind, it must be a subclass of
+ * extended_string_dtype.
+ */
+class extended_string_dtype : public extended_dtype {
+public:
+    virtual ~extended_string_dtype();
+    virtual string_encoding_t encoding() const = 0;
 };
 
 /**
@@ -465,6 +477,15 @@ public:
     /** The element size of the dtype */
     intptr_t element_size() const {
         return m_element_size;
+    }
+
+    /** For string dtypes, their encoding */
+    string_encoding_t string_encoding() const {
+        if (m_kind == string_kind) {
+            return static_cast<const extended_string_dtype *>(m_data.get())->encoding();
+        } else {
+            throw std::runtime_error("Can only get the string encoding from string_kind types");
+        }
     }
 
     bool is_object_type() const {

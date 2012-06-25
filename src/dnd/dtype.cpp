@@ -54,9 +54,15 @@ dtype extended_dtype::with_replaced_storage_dtype(const dtype& DND_UNUSED(replac
     throw std::runtime_error("with_replaced_storage_dtype: this operation is only for expression_kind dtypes");
 }
 
-compare_operation_t extended_dtype::get_comparison(comparison_id_t DND_UNUSED(compare_id)) const {
+compare_operation_t extended_dtype::get_comparison(comparison_id_t DND_UNUSED(compare_id)) const
+{
         throw std::runtime_error("get_comparison: this dtypes does not support comparisons");
 }
+
+extended_string_dtype::~extended_string_dtype()
+{
+}
+
 
 /**
  * A static look-up table structure which contains data about the type ids.

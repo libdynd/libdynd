@@ -39,6 +39,13 @@ cdef extern from "dnd/dtype.hpp" namespace "dnd":
         conversion_type_id
         pattern_type_id
 
+    cdef enum string_encoding_t:
+        string_encoding_ascii
+        string_encoding_utf8
+        string_encoding_utf16
+        string_encoding_utf32
+        string_encoding_invalid
+
     cdef cppclass extended_dtype:
         type_id_t type_id()
         dtype_kind_t kind()
@@ -65,6 +72,7 @@ cdef extern from "dnd/dtype.hpp" namespace "dnd":
         uintptr_t element_size()
         bint is_object_type()
         extended_dtype* extended()
+        string_encoding_t string_encoding() except +
 
     dtype dnd_make_bytes_dtype "dnd::make_bytes_dtype" (intptr_t, intptr_t) except +
 
@@ -92,4 +100,6 @@ cdef extern from "dtype_functions.hpp" namespace "pydnd":
     string dtype_repr(dtype&)
     dtype deduce_dtype_from_object(object) except +
     dtype make_dtype_from_object(object) except +
+
+    dtype dnd_make_fixedstring_dtype(object, int) except +
 

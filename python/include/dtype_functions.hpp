@@ -13,6 +13,7 @@
 #include <sstream>
 
 #include <dnd/dtype.hpp>
+#include <dnd/string_encodings.hpp>
 
 #include "Python.h"
 
@@ -68,6 +69,11 @@ dnd::dtype deduce_dtype_from_object(PyObject* obj);
  * which contains values, it is for dtype-like things only.
  */
 dnd::dtype make_dtype_from_object(PyObject* obj);
+
+/**
+ * Creates a fixed-sized string dtype.
+ */
+dnd::dtype dnd_make_fixedstring_dtype(PyObject *encoding_obj, intptr_t size);
 
 } // namespace pydnd
 

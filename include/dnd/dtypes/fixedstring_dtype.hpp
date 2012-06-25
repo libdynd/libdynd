@@ -16,7 +16,7 @@
 
 namespace dnd {
 
-class fixedstring_dtype : public extended_dtype {
+class fixedstring_dtype : public extended_string_dtype {
     intptr_t m_element_size, m_alignment, m_stringsize;
     string_encoding_t m_encoding;
 

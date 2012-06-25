@@ -10,6 +10,7 @@
 #include <dnd/dtypes/byteswap_dtype.hpp>
 #include <dnd/dtypes/view_dtype.hpp>
 #include <dnd/dtypes/dtype_alignment.hpp>
+#include <dnd/dtypes/fixedstring_dtype.hpp>
 
 #include "dtype_functions.hpp"
 #include "ndarray_functions.hpp"
@@ -69,6 +70,12 @@ dtype pydnd::dtype_from_numpy_dtype(PyArray_Descr *d)
         break;
     case NPY_CDOUBLE:
         dt = make_dtype<complex<double> >();
+        break;
+    case NPY_STRING:
+        dt = make_fixedstring_dtype(string_encoding_ascii, d->elsize);
+        break;
+    case NPY_UNICODE:
+        dt = make_fixedstring_dtype(string_encoding_utf32, d->elsize / 4);
         break;
     default: {
         stringstream ss;
@@ -253,6 +260,15 @@ char pydnd::numpy_kindchar_of(const dnd::dtype& d)
         return 'f';
     case complex_kind:
         return 'c';
+    case string_kind:
+        switch (d.string_encoding()) {
+        case string_encoding_ascii:
+            return 'S';
+        case string_encoding_utf32:
+            return 'U';
+        default:
+            break;
+        }
     default: {
         stringstream ss;
         ss << "dnd::dtype \"" << d << "\" does not have an equivalent numpy kind";
@@ -303,7 +319,8 @@ PyObject* pydnd::ndarray_as_numpy_struct_capsule(const dnd::ndarray& n)
     inter.two = 2;
     inter.nd = n.get_ndim();
     inter.typekind = numpy_kindchar_of(value_dt);
-    inter.itemsize = (int)n.get_dtype().element_size();
+    // Numpy treats 'U' as number of 4-byte characters, not number of bytes
+    inter.itemsize = (int)(inter.typekind != 'U' ? n.get_dtype().element_size() : n.get_dtype().element_size() / 4);
     // TODO: When read-write access control is added, this must be modified
     inter.flags = (byteswapped ? 0 : NPY_ARRAY_NOTSWAPPED) | (aligned ? NPY_ARRAY_ALIGNED : 0) | NPY_ARRAY_WRITEABLE;
     inter.data = n.get_originptr();

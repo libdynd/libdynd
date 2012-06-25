@@ -7,6 +7,8 @@
 #include "numpy_interop.hpp"
 #include "ctypes_interop.hpp"
 
+#include <dnd/dtypes/fixedstring_dtype.hpp>
+
 using namespace std;
 using namespace dnd;
 using namespace pydnd;
@@ -100,4 +102,66 @@ dnd::dtype pydnd::make_dtype_from_object(PyObject* obj)
 #endif // DND_NUMPY_INTEROP
 
     throw std::runtime_error("could not convert the Python Object into a dnd::dtype");
+}
+
+string_encoding_t encoding_from_pyobject(PyObject *encoding_obj)
+{
+    string_encoding_t encoding = string_encoding_invalid;
+    if (PyString_Check(encoding_obj)) {
+        char *s = NULL;
+        Py_ssize_t len = 0;
+        if (PyString_AsStringAndSize(encoding_obj, &s, &len) < 0) {
+            throw std::runtime_error("error processing string input to process string encoding");
+        }
+        switch (len) {
+        case 5:
+            switch (s[0]) {
+            case 'a':
+                if (strcmp(s, "ascii") == 0) {
+                    encoding = string_encoding_ascii;
+                }
+                break;
+            case 'u':
+                if (strcmp(s, "utf_8") == 0) {
+                    encoding = string_encoding_utf8;
+                }
+                break;
+            }
+            break;
+        case 6:
+            switch (s[4]) {
+            case '1':
+                if (strcmp(s, "utf_16") == 0) {
+                    encoding = string_encoding_utf16;
+                }
+                break;
+            case '3':
+                if (strcmp(s, "utf_32") == 0) {
+                    encoding = string_encoding_utf32;
+                }
+                break;
+            }
+        }
+
+        if (encoding != string_encoding_invalid) {
+            return encoding;
+        } else {
+            stringstream ss;
+            ss << "invalid input \"" << s << "\"for string encoding";
+            throw std::runtime_error(ss.str());
+        }
+
+    } else if (PyUnicode_Check(encoding_obj)) {
+        // TODO: Haven't implemented unicode yet.
+        throw std::runtime_error("unicode isn't implemented yet for determining string encodings");
+    } else {
+        throw std::runtime_error("invalid input type for string encoding");
+    }
+}
+
+dnd::dtype pydnd::dnd_make_fixedstring_dtype(PyObject *encoding_obj, intptr_t size)
+{
+    string_encoding_t encoding = encoding_from_pyobject(encoding_obj);
+
+    return make_fixedstring_dtype(encoding, size);
 }

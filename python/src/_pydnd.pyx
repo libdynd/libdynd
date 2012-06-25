@@ -60,6 +60,20 @@ cdef class w_dtype:
         def __get__(self):
             return GET(self.v).alignment()
 
+    property string_encoding:
+        def __get__(self):
+            cdef string_encoding_t encoding = GET(self.v).string_encoding()
+            if encoding == string_encoding_ascii:
+                return "ascii"
+            elif encoding == string_encoding_utf8:
+                return "utf_8"
+            elif encoding == string_encoding_utf16:
+                return "utf_16"
+            elif encoding == string_encoding_utf32:
+                return "utf_32"
+            else:
+                return "unknown_encoding"
+
     property value_dtype:
         """What this dtype looks like to calculations, printing, etc."""
         def __get__(self):
@@ -125,6 +139,12 @@ def make_unaligned_dtype(aligned_dtype):
     """Constructs a dtype with alignment of 1 from the given dtype."""
     cdef w_dtype result = w_dtype()
     SET(result.v, dnd_make_unaligned_dtype(GET(w_dtype(aligned_dtype).v)))
+    return result
+
+def make_fixedstring_dtype(encoding, int size):
+    """Constructs a fixed-size string dtype with a specified encoding."""
+    cdef w_dtype result = w_dtype()
+    SET(result.v, dnd_make_fixedstring_dtype(encoding, size))
     return result
 
 ##############################################################################

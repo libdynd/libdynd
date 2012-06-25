@@ -65,5 +65,5 @@ TEST(FixedstringDType, Basic) {
     a = a.vals();
     EXPECT_EQ(make_fixedstring_dtype(string_encoding_utf16, 7),
                     a.get_dtype());
-    cout << a << endl;
+    //cout << a << endl;
 }

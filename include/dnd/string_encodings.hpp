@@ -15,6 +15,8 @@ enum string_encoding_t {
     string_encoding_utf8,
     string_encoding_utf16,
     string_encoding_utf32,
+
+    string_encoding_invalid
 };
 
 inline std::ostream& operator<<(std::ostream& o, string_encoding_t encoding)
