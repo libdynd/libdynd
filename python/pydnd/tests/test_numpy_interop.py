@@ -2,6 +2,7 @@ import sys
 import unittest
 import pydnd as nd
 import numpy as np
+from numpy.testing import *
 
 class TestNumpyDTypeInterop(unittest.TestCase):
     def setUp(self):
@@ -42,6 +43,10 @@ class TestNumpyDTypeInterop(unittest.TestCase):
         self.assertEqual(nd.float64, nd.dtype(np.dtype(np.float64)))
         self.assertEqual(nd.cfloat32, nd.dtype(np.dtype(np.complex64)))
         self.assertEqual(nd.cfloat64, nd.dtype(np.dtype(np.complex128)))
+        self.assertEqual(nd.make_fixedstring_dtype('ascii', 10),
+                    nd.dtype(np.dtype('S10')))
+        self.assertEqual(nd.make_fixedstring_dtype('utf_32', 10),
+                    nd.dtype(np.dtype('U10')))
 
         # non-native byte order
         nonnative = self.nonnative
@@ -138,4 +143,41 @@ class TestNumpyDTypeInterop(unittest.TestCase):
         self.assertEqual(a.ndim, n.ndim)
         self.assertEqual(a.shape, n.shape)
         self.assertEqual(a.strides, n.strides)
+
+    def test_numpy_dnd_fixedstring_interop(self):
+        """Tests converting fixed-size string arrays to/from numpy"""
+        # ASCII Numpy -> dnd
+        a = np.array(['abc', 'testing', 'array'])
+        b = nd.ndarray(a)
+        self.assertEqual(nd.make_fixedstring_dtype('ascii', 7), b.dtype)
+        self.assertEqual(b.dtype, nd.dtype(a.dtype))
+
+        # ASCII dnd -> Numpy
+        c = np.asarray(b)
+        self.assertEqual(a.dtype, c.dtype)
+        assert_array_equal(a, c)
+        # verify 'a' and 'c' are looking at the same data
+        a[1] = 'modify'
+        assert_array_equal(a, c)
+
+        # ASCII dnd -> UTF32 dnd
+        b_u = b.as_dtype(nd.make_fixedstring_dtype('utf_32', 7))
+        self.assertEqual(
+                nd.make_convert_dtype(
+                    nd.make_fixedstring_dtype('utf_32', 7),
+                    nd.make_fixedstring_dtype('ascii', 7)),
+                b_u.dtype)
+        # Evaluate to its value array
+        b_u = b_u.vals()
+        self.assertEqual(
+                nd.make_fixedstring_dtype('utf_32', 7),
+                b_u.dtype)
+
+        # UTF32 dnd -> Numpy
+        c_u = np.asarray(b_u)
+        self.assertEqual(b_u.dtype, nd.dtype(c_u.dtype))
+        assert_array_equal(a, c_u)
+        # 'a' and 'c_u' are not looking at the same data
+        a[1] = 'diff'
+        self.assertFalse(np.all(a == c_u))
 
