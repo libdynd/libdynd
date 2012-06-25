@@ -95,22 +95,28 @@ ndarray_expr_node_ptr dnd::immutable_scalar_node::broadcast_to_shape(int ndim,
         }
         return ndarray_expr_node_ptr(this);
     } else {
-        ndarray_expr_node_ptr result(
+        return ndarray_expr_node_ptr(
                 new immutable_scalar_node(m_dtype, reinterpret_cast<const char *>(m_data), ndim, shape));
-        return result;
     }
 }
 
 
 ndarray_expr_node_ptr dnd::immutable_scalar_node::apply_linear_index(
-                int ndim, const intptr_t *DND_UNUSED(shape),
+                int ndim, const intptr_t *shape,
                 const int *DND_UNUSED(axis_map), const intptr_t *DND_UNUSED(index_strides),
-                const intptr_t *DND_UNUSED(start_index), bool DND_UNUSED(allow_in_place))
+                const intptr_t *DND_UNUSED(start_index), bool allow_in_place)
 {
-    if (ndim == 0) {
+    if (allow_in_place) {
+        if (ndim <= m_ndim) {
+            m_ndim = ndim;
+            memcpy(m_shape.get(), shape, ndim * sizeof(intptr_t));
+        } else {
+            throw runtime_error("linear index is too long in immutable scalar node");
+        }
         return ndarray_expr_node_ptr(this);
     } else {
-        throw runtime_error("cannot index into an immutable scalar dnd::ndarray node");
+        return ndarray_expr_node_ptr(
+                new immutable_scalar_node(m_dtype, reinterpret_cast<const char *>(m_data), ndim, shape));
     }
 }
 

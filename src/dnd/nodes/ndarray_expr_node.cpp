@@ -224,6 +224,9 @@ static void print_node_type(ostream& o, expr_node_type type)
         case strided_array_node_type:
             o << "strided_array_node_type";
             break;
+        case immutable_scalar_node_type:
+            o << "immutable_scalar_node_type";
+            break;
         case broadcast_shape_node_type:
             o << "broadcast_shape_node_type";
             break;
