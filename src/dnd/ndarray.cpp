@@ -359,7 +359,7 @@ ndarray dnd::ndarray::view_as_dtype(const dtype& dt) const
 }
 
 // Implementation of ndarray.as<std::string>()
-std::string dnd::detail::ndarray_as_string(const ndarray& lhs, assign_error_mode errmode)
+std::string dnd::detail::ndarray_as_string(const ndarray& lhs, assign_error_mode DND_UNUSED(errmode))
 {
     if (lhs.get_ndim() != 0) {
         throw std::runtime_error("can only convert ndarrays with 0 dimensions to scalars");
