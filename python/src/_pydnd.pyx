@@ -194,6 +194,10 @@ cdef class w_ndarray:
         cdef w_ndarray n = w_ndarray(obj)
         GET(self.v).val_assign(GET(n.v), assign_error_fractional)
 
+    def as_py(self):
+        """Evaluates the values, and converts them into native Python types."""
+        return ndarray_as_pyobject(GET(self.v))
+
     def as_dtype(self, dtype):
         """Converts the ndarray to the requested dtype. If dtype is an expression dtype, its expression gets applied on top of the existing data."""
         cdef w_ndarray result = w_ndarray()

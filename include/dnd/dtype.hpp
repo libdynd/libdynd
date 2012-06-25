@@ -292,6 +292,7 @@ public:
 class extended_string_dtype : public extended_dtype {
 public:
     virtual ~extended_string_dtype();
+    /** The encoding used by the string */
     virtual string_encoding_t encoding() const = 0;
 };
 

@@ -81,6 +81,8 @@ inline std::string ndarray_debug_dump(const dnd::ndarray& n)
 
 PyObject* intptr_array_as_tuple(int size, const intptr_t *array);
 
+PyObject* ndarray_as_pyobject(const dnd::ndarray& n);
+
 } // namespace pydnd
 
 #endif // _DND__NDARRAY_FUNCTIONS_HPP_

@@ -38,13 +38,25 @@ public:
 
     ~pyobject_ownref()
     {
-        Py_DECREF(m_obj);
+        Py_XDECREF(m_obj);
     }
 
     // Returns a borrowed reference
     operator PyObject *()
     {
         return m_obj;
+    }
+
+    /**
+     * Returns the reference owned by this object,
+     * use it like "return obj.release()". After the
+     * call, this object contains NULL.
+     */
+    PyObject *release()
+    {
+        PyObject *result = m_obj;
+        m_obj = NULL;
+        return result;
     }
 };
 

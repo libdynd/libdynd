@@ -118,7 +118,7 @@ dnd::ndarray::ndarray(const dtype& dt)
                             reinterpret_cast<char *>(buffer_owner.get()), DND_MOVE(buffer_owner)));
 }
 
-dnd::ndarray::ndarray(const dtype& dt, char *raw_data)
+dnd::ndarray::ndarray(const dtype& dt, const char *raw_data)
     : m_expr_tree(new immutable_scalar_node(dt, raw_data))
 {
 }
