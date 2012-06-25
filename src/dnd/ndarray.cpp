@@ -105,7 +105,7 @@ dnd::ndarray::ndarray(complex<double> value)
 // another choice later?
 dnd::ndarray::ndarray(const std::string& value)
     : m_expr_tree(new immutable_scalar_node(
-                make_fixedstring_dtype(string_encoding_utf8, value.size()), value.c_str()))
+                make_fixedstring_dtype(string_encoding_utf_8, value.size()), value.c_str()))
 {
 }
 
@@ -369,7 +369,7 @@ std::string dnd::detail::ndarray_as_string(const ndarray& lhs, assign_error_mode
             static_cast<const strided_array_expr_node *>(tmp.get_expr_tree());
     if (lhs.get_dtype().type_id() == fixedstring_type_id) {
         const fixedstring_dtype *fs = static_cast<const fixedstring_dtype *>(lhs.get_dtype().extended());
-        if (fs->encoding() == string_encoding_ascii || fs->encoding() == string_encoding_utf8) {
+        if (fs->encoding() == string_encoding_ascii || fs->encoding() == string_encoding_utf_8) {
             intptr_t size = strnlen(node->get_originptr(), lhs.get_dtype().element_size());
             return std::string(node->get_originptr(), size);
         }

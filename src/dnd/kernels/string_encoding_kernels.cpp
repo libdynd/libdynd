@@ -361,11 +361,11 @@ next_unicode_codepoint_t dnd::get_next_unicode_codepoint_function(string_encodin
     switch (encoding) {
         case string_encoding_ascii:
             return (errmode != assign_error_none) ? next_ascii : noerror_next_ascii;
-        case string_encoding_utf8:
+        case string_encoding_utf_8:
             return (errmode != assign_error_none) ? next_utf8 : noerror_next_utf8;
-        case string_encoding_utf16:
+        case string_encoding_utf_16:
             return (errmode != assign_error_none) ? next_utf16 : noerror_next_utf16;
-        case string_encoding_utf32:
+        case string_encoding_utf_32:
             return (errmode != assign_error_none) ? next_utf32 : noerror_next_utf32;
         default:
             throw runtime_error("get_next_unicode_codepoint_function: Unrecognized string encoding");
@@ -377,11 +377,11 @@ append_unicode_codepoint_t dnd::get_append_unicode_codepoint_function(string_enc
     switch (encoding) {
         case string_encoding_ascii:
             return (errmode != assign_error_none) ? append_ascii : noerror_append_ascii;
-        case string_encoding_utf8:
+        case string_encoding_utf_8:
             return (errmode != assign_error_none) ? append_utf8 : noerror_append_utf8;
-        case string_encoding_utf16:
+        case string_encoding_utf_16:
             return (errmode != assign_error_none) ? append_utf16 : noerror_append_utf16;
-        case string_encoding_utf32:
+        case string_encoding_utf_32:
             return (errmode != assign_error_none) ? append_utf32 : noerror_append_utf32;
         default:
             throw runtime_error("get_append_unicode_codepoint_function: Unrecognized string encoding");

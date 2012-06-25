@@ -75,7 +75,7 @@ dtype pydnd::dtype_from_numpy_dtype(PyArray_Descr *d)
         dt = make_fixedstring_dtype(string_encoding_ascii, d->elsize);
         break;
     case NPY_UNICODE:
-        dt = make_fixedstring_dtype(string_encoding_utf32, d->elsize / 4);
+        dt = make_fixedstring_dtype(string_encoding_utf_32, d->elsize / 4);
         break;
     default: {
         stringstream ss;
@@ -264,7 +264,7 @@ char pydnd::numpy_kindchar_of(const dnd::dtype& d)
         switch (d.string_encoding()) {
         case string_encoding_ascii:
             return 'S';
-        case string_encoding_utf32:
+        case string_encoding_utf_32:
             return 'U';
         default:
             break;

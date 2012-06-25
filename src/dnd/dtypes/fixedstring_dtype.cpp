@@ -14,15 +14,15 @@ dnd::fixedstring_dtype::fixedstring_dtype(string_encoding_t encoding, intptr_t s
 {
     switch (encoding) {
         case string_encoding_ascii:
-        case string_encoding_utf8:
+        case string_encoding_utf_8:
             m_element_size = m_stringsize;
             m_alignment = 1;
             break;
-        case string_encoding_utf16:
+        case string_encoding_utf_16:
             m_element_size = m_stringsize * 2;
             m_alignment = 2;
             break;
-        case string_encoding_utf32:
+        case string_encoding_utf_32:
             m_element_size = m_stringsize * 4;
             m_alignment = 4;
             break;
@@ -103,11 +103,11 @@ bool dnd::fixedstring_dtype::is_lossless_assignment(const dtype& dst_dt, const d
             switch (src_fs->m_encoding) {
                 case string_encoding_ascii:
                     return true;
-                case string_encoding_utf8:
-                    return dst_fs->m_encoding == string_encoding_utf16 ||
-                            dst_fs->m_encoding == string_encoding_utf32;
-                case string_encoding_utf16:
-                    return dst_fs->m_encoding == string_encoding_utf32;
+                case string_encoding_utf_8:
+                    return dst_fs->m_encoding == string_encoding_utf_16 ||
+                            dst_fs->m_encoding == string_encoding_utf_32;
+                case string_encoding_utf_16:
+                    return dst_fs->m_encoding == string_encoding_utf_32;
                 default:
                     return false;
             }

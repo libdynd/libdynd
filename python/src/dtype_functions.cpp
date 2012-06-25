@@ -123,7 +123,7 @@ string_encoding_t encoding_from_pyobject(PyObject *encoding_obj)
                 break;
             case 'u':
                 if (strcmp(s, "utf_8") == 0) {
-                    encoding = string_encoding_utf8;
+                    encoding = string_encoding_utf_8;
                 }
                 break;
             }
@@ -132,12 +132,12 @@ string_encoding_t encoding_from_pyobject(PyObject *encoding_obj)
             switch (s[4]) {
             case '1':
                 if (strcmp(s, "utf_16") == 0) {
-                    encoding = string_encoding_utf16;
+                    encoding = string_encoding_utf_16;
                 }
                 break;
             case '3':
                 if (strcmp(s, "utf_32") == 0) {
-                    encoding = string_encoding_utf32;
+                    encoding = string_encoding_utf_32;
                 }
                 break;
             }
