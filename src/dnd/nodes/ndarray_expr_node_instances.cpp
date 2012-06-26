@@ -187,7 +187,7 @@ ndarray_expr_node_ptr dnd::make_broadcast_strided_array_expr_node(ndarray_expr_n
     // Create the strided array node
     ndarray_expr_node_ptr new_node(new strided_array_expr_node(
                     make_conversion_dtype(dt, snode->get_dtype(), errmode),
-                    ndim, shape, strides.get(), snode->get_originptr(), snode->get_buffer_owner()));
+                    ndim, shape, strides.get(), snode->get_readwrite_originptr(), snode->get_buffer_owner()));
 
     return DND_MOVE(new_node);
 }

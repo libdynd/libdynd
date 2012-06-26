@@ -35,7 +35,7 @@ TEST(NDArrayViews, OneDimensionalRawMemory) {
     EXPECT_EQ(make_dtype<uint64_t>(), b.get_dtype());
     EXPECT_EQ(1, b.get_ndim());
     EXPECT_EQ(10, b.get_shape()[0]);
-    EXPECT_EQ(a.get_originptr(), b.get_originptr());
+    EXPECT_EQ(a.get_readonly_originptr(), b.get_readonly_originptr());
     EXPECT_EQ(u8_value, b(0).as<uint64_t>());
     b(0).vals() = 0x0505050505050505ULL;
     EXPECT_EQ(5, a(0).as<char>());
@@ -47,7 +47,7 @@ TEST(NDArrayViews, OneDimensionalRawMemory) {
     EXPECT_EQ(make_view_dtype(make_dtype<uint64_t>(), make_bytes_dtype(8, 1)), b.get_dtype());
     EXPECT_EQ(1, b.get_ndim());
     EXPECT_EQ(9, b.get_shape()[0]);
-    EXPECT_EQ(a.get_originptr() + 1, b.get_originptr());
+    EXPECT_EQ(a.get_readonly_originptr() + 1, b.get_readonly_originptr());
     EXPECT_EQ(u8_value, b(0).as<uint64_t>());
 }
 
@@ -65,7 +65,7 @@ TEST(NDArrayViews, MultiDimensionalRawMemory) {
     EXPECT_EQ(2, b.get_ndim());
     EXPECT_EQ(2, b.get_shape(0));
     EXPECT_EQ(3, b.get_shape(1));
-    EXPECT_EQ(a.get_originptr(), b.get_originptr());
+    EXPECT_EQ(a.get_readonly_originptr(), b.get_readonly_originptr());
     EXPECT_EQ(1, b(0, 0).as<int32_t>());
     EXPECT_EQ(2, b(0, 1).as<int32_t>());
     EXPECT_EQ(3, b(0, 2).as<int32_t>());
@@ -92,7 +92,7 @@ TEST(NDArrayViews, ExpressionDType) {
     EXPECT_EQ(2, b.get_ndim());
     EXPECT_EQ(2, b.get_shape(0));
     EXPECT_EQ(3, b.get_shape(1));
-    EXPECT_EQ(a.get_originptr(), b.get_originptr());
+    EXPECT_EQ(a.get_readonly_originptr(), b.get_readonly_originptr());
     EXPECT_EQ(1, b(0, 0).as<int16_t>());
     EXPECT_EQ(2, b(0, 1).as<int16_t>());
     EXPECT_EQ(3, b(0, 2).as<int16_t>());

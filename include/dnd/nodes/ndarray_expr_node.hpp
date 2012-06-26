@@ -249,7 +249,11 @@ public:
     virtual ~strided_array_expr_node() {
     }
 
-    char *get_originptr() const {
+    char *get_readwrite_originptr() const {
+        return m_originptr;
+    }
+
+    const char *get_readonly_originptr() const {
         return m_originptr;
     }
 

@@ -36,7 +36,8 @@ cdef extern from "dnd/ndarray.hpp" namespace "dnd":
         intptr_t* get_strides()
         intptr_t get_num_elements()
 
-        char* get_originptr()
+        char* get_readwrite_originptr()
+        char* get_readonly_originptr()
 
         void val_assign(ndarray&, assign_error_mode) except +
         void val_assign(dtype&, char*, assign_error_mode) except +
@@ -66,3 +67,6 @@ cdef extern from "ndarray_functions.hpp" namespace "pydnd":
 
     object ndarray_as_pyobject(ndarray&) except +
     ndarray ndarray_getitem(ndarray&, object) except +
+
+    ndarray ndarray_arange(object, object, object) except +
+    ndarray ndarray_linspace(object, object, object) except +

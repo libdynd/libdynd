@@ -90,6 +90,16 @@ PyObject* ndarray_as_pyobject(const dnd::ndarray& n);
  */
 dnd::ndarray ndarray_getitem(const dnd::ndarray& n, PyObject *subscript);
 
+/**
+ * Implementation of nd.arange().
+ */
+dnd::ndarray ndarray_arange(PyObject *start, PyObject *stop, PyObject *step);
+
+/**
+ * Implementation of nd.linspace().
+ */
+dnd::ndarray ndarray_linspace(PyObject *start, PyObject *stop, PyObject *count);
+
 } // namespace pydnd
 
 #endif // _DND__NDARRAY_FUNCTIONS_HPP_

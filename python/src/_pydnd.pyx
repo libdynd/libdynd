@@ -269,6 +269,26 @@ cdef class w_ndarray:
         SET(result.v, ndarray_divide(GET(w_ndarray(lhs).v), GET(w_ndarray(rhs).v)))
         return result
 
+def arange(start, stop=None, step=None):
+    """Constructs an ndarray representing a stepped range of values."""
+    import warnings
+    warnings.warn("dnd::arange doesn't produce an arange node yet, it is still by value")
+    cdef w_ndarray result = w_ndarray()
+    # Move the first argument to 'stop' if stop isn't specified
+    if stop is None:
+        SET(result.v, ndarray_arange(None, start, step))
+    else:
+        SET(result.v, ndarray_arange(start, stop, step))
+    return result
+
+def linspace(start, stop, count=50):
+    """Constructs a specified count of values interpolating a range."""
+    import warnings
+    warnings.warn("dnd::linspace doesn't produce a linspace node yet, it is still by value")
+    cdef w_ndarray result = w_ndarray()
+    SET(result.v, ndarray_linspace(start, stop, count))
+    return result
+
 cdef class w_unary_gfunc:
     cdef unary_gfunc_placement_wrapper v
 

@@ -283,7 +283,7 @@ public:
 
     raw_ndarray_iter(const ndarray& arr)
     {
-        const char *data = arr.get_originptr();
+        const char *data = arr.get_readonly_originptr();
         const intptr_t *strides = arr.get_strides();
         int ndim = arr.get_ndim();
 
@@ -313,7 +313,7 @@ public:
 
     raw_ndarray_iter(const ndarray& arr)
     {
-        char *data = arr.get_originptr();
+        char *data = arr.get_readwrite_originptr();
         const intptr_t *strides = arr.get_strides();
         int ndim = arr.get_ndim();
 
@@ -360,7 +360,7 @@ public:
         strides_to_axis_perm(ndim, strides.get(), axis_perm.get());
         strided_array_expr_node *node = new strided_array_expr_node(op0_dt, ndim, shape, axis_perm.get());
         op0.reset(node);
-        data[0] = node->get_originptr();
+        data[0] = node->get_readwrite_originptr();
 
         const intptr_t *strides_ptrs[2] = {node->get_strides(), strides.get()};
         init(ndim, shape, data, strides_ptrs, axis_perm.get());
@@ -411,7 +411,7 @@ public:
         multistrides_to_axis_perm(ndim, 2, strides_vec.get_all(), axis_perm.get());
         strided_array_expr_node *node = new strided_array_expr_node(op0_dt, ndim, shape, axis_perm.get());
         op0.reset(node);
-        data[0] = node->get_originptr();
+        data[0] = node->get_readwrite_originptr();
 
         const intptr_t *strides_ptrs[3] = {node->get_strides(), strides_vec.get(0), strides_vec.get(1)};
         init(ndim, shape, data, strides_ptrs, axis_perm.get());
@@ -447,9 +447,9 @@ public:
         op0 = ndarray(op0_dt, ndim, op0shape.get(), axis_perm.get());
         copy_input_strides(op0, ndim, strides[0]);
 
-        char *data[3] = {op0.get_originptr(),
-                        const_cast<char *>(op1.get_originptr()),
-                        const_cast<char *>(op2.get_originptr())};
+        char *data[3] = {op0.get_readwrite_originptr(),
+                        const_cast<char *>(op1.get_readonly_originptr()),
+                        const_cast<char *>(op2.get_readonly_originptr())};
 
         init(ndim, op0shape.get(), data, const_cast<const intptr_t **>(strides), axis_perm.get());
     }

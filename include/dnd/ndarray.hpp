@@ -194,13 +194,8 @@ public:
         return nelem;
     }
 
-    char *get_originptr() const {
-        if (m_expr_tree->get_node_type() == strided_array_node_type) {
-            return static_cast<const strided_array_expr_node *>(m_expr_tree.get())->get_originptr();
-        } else {
-            throw std::runtime_error("cannot get the origin pointer of an expression view ndarray");
-        }
-    }
+    char *get_readwrite_originptr() const;
+    const char *get_readonly_originptr() const;
 
     dnd::shared_ptr<void> get_buffer_owner() const {
         if (m_expr_tree->get_node_type() == strided_array_node_type) {
@@ -594,12 +589,12 @@ namespace detail {
             if (lhs.get_expr_tree()->get_node_type() == strided_array_node_type) {
                 const strided_array_expr_node *node =
                         static_cast<const strided_array_expr_node *>(lhs.get_expr_tree());
-                dtype_assign(make_dtype<T>(), (char *)&result, node->get_dtype(), node->get_originptr(), errmode);
+                dtype_assign(make_dtype<T>(), (char *)&result, node->get_dtype(), node->get_readwrite_originptr(), errmode);
             } else {
                 ndarray tmp = lhs.vals();
                 const strided_array_expr_node *node =
                         static_cast<const strided_array_expr_node *>(tmp.get_expr_tree());
-                dtype_assign(make_dtype<T>(), (char *)&result, node->get_dtype(), node->get_originptr(), errmode);
+                dtype_assign(make_dtype<T>(), (char *)&result, node->get_dtype(), node->get_readwrite_originptr(), errmode);
             }
             return result;
         }

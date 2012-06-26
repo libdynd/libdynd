@@ -28,6 +28,10 @@ public:
 
     virtual ~immutable_scalar_node();
 
+    const char *get_readonly_originptr() const {
+        return m_data;
+    }
+
     /** Raises an exception, since this node is not writeable */
     void as_readwrite_data_and_strides(char **out_originptr, intptr_t *out_strides) const;
 

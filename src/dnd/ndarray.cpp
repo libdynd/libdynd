@@ -218,6 +218,27 @@ void dnd::ndarray::swap(ndarray& rhs)
     m_expr_tree.swap(rhs.m_expr_tree);
 }
 
+char *dnd::ndarray::get_readwrite_originptr() const
+{
+    if (m_expr_tree->get_node_type() == strided_array_node_type) {
+        return static_cast<const strided_array_expr_node *>(m_expr_tree.get())->get_readwrite_originptr();
+    } else {
+        throw std::runtime_error("cannot get a readwrite origin ptr from this type of node");
+    }
+}
+
+const char *dnd::ndarray::get_readonly_originptr() const
+{
+    switch (m_expr_tree->get_node_type()) {
+    case strided_array_node_type:
+        return static_cast<const strided_array_expr_node *>(m_expr_tree.get())->get_readwrite_originptr();
+    case immutable_scalar_node_type:
+        return static_cast<const immutable_scalar_node *>(m_expr_tree.get())->get_readonly_originptr();
+    default:
+        throw std::runtime_error("cannot get a readwrite origin ptr from this type of node");
+    }
+}
+
 ndarray dnd::empty_like(const ndarray& rhs, const dtype& dt)
 {
     // Sort the strides to get the memory layout ordering
@@ -240,7 +261,7 @@ static void val_assign_loop(const ndarray& lhs, const ndarray& rhs, assign_error
     broadcast_to_shape(lhs.get_ndim(), lhs.get_shape(), rhs.get_ndim(), rhs.get_shape(), rhs_original_strides.get(), rhs_modified_strides.get());
 
     // Create the raw iterator
-    raw_ndarray_iter<1,1> iter(lhs.get_ndim(), lhs.get_shape(), lhs.get_originptr(), lhs.get_strides(),
+    raw_ndarray_iter<1,1> iter(lhs.get_ndim(), lhs.get_shape(), lhs.get_readwrite_originptr(), lhs.get_strides(),
                                         rhs_originptr, rhs_modified_strides.get());
     //iter.debug_dump(cout);
 
@@ -268,7 +289,8 @@ ndarray dnd::ndarray::storage() const
 {
     const dtype& dt = get_dtype().storage_dtype();
     if (get_expr_tree()->get_node_type() == strided_array_node_type) {
-        return ndarray(new strided_array_expr_node(dt, get_ndim(), get_shape(), get_strides(), get_originptr(), get_buffer_owner()));
+        return ndarray(new strided_array_expr_node(dt, get_ndim(), get_shape(), get_strides(),
+                        get_readwrite_originptr(), get_buffer_owner()));
     } else {
         throw std::runtime_error("Can only get the storage from dnd::ndarrays which are strided arrays");
     }
@@ -302,7 +324,7 @@ ndarray dnd::ndarray::view_as_dtype(const dtype& dt) const
                             get_strides()[0] == get_dtype().element_size() &&
                             get_dtype().kind() != expression_kind) {
         intptr_t nbytes = get_shape()[0] * get_dtype().element_size();
-        char *originptr = get_originptr();
+        char *originptr = get_readwrite_originptr();
 
         if (nbytes % dt.element_size() != 0) {
             std::stringstream ss;
@@ -335,7 +357,7 @@ ndarray dnd::ndarray::view_as_dtype(const dtype& dt) const
         // If the alignment of the requested dtype is greater, check
         // the actual strides to only apply unaligned<> when necessary.
         if (dt.alignment() > get_dtype().value_dtype().alignment()) {
-            uintptr_t aligncheck = (uintptr_t)get_originptr();
+            uintptr_t aligncheck = (uintptr_t)get_readwrite_originptr();
             const intptr_t *strides = get_strides();
             for (int idim = 0; idim < get_ndim(); ++idim) {
                 aligncheck |= (uintptr_t)strides[idim];
@@ -346,9 +368,11 @@ ndarray dnd::ndarray::view_as_dtype(const dtype& dt) const
         }
 
         if (aligned) {
-            return ndarray(new strided_array_expr_node(dt, get_ndim(), get_shape(), get_strides(), get_originptr(), get_buffer_owner()));
+            return ndarray(new strided_array_expr_node(dt, get_ndim(), get_shape(), get_strides(),
+                            get_readwrite_originptr(), get_buffer_owner()));
         } else {
-            return ndarray(new strided_array_expr_node(make_unaligned_dtype(dt), get_ndim(), get_shape(), get_strides(), get_originptr(), get_buffer_owner()));
+            return ndarray(new strided_array_expr_node(make_unaligned_dtype(dt), get_ndim(), get_shape(), get_strides(),
+                            get_readwrite_originptr(), get_buffer_owner()));
         }
     }
 
@@ -365,13 +389,12 @@ std::string dnd::detail::ndarray_as_string(const ndarray& lhs, assign_error_mode
         throw std::runtime_error("can only convert ndarrays with 0 dimensions to scalars");
     }
     ndarray tmp = lhs.vals();
-    const strided_array_expr_node *node =
-            static_cast<const strided_array_expr_node *>(tmp.get_expr_tree());
     if (lhs.get_dtype().type_id() == fixedstring_type_id) {
         const fixedstring_dtype *fs = static_cast<const fixedstring_dtype *>(lhs.get_dtype().extended());
         if (fs->encoding() == string_encoding_ascii || fs->encoding() == string_encoding_utf_8) {
-            intptr_t size = strnlen(node->get_originptr(), lhs.get_dtype().element_size());
-            return std::string(node->get_originptr(), size);
+            const char *data = tmp.get_readonly_originptr();
+            intptr_t size = strnlen(data, tmp.get_dtype().element_size());
+            return std::string(data, size);
         }
     }
 

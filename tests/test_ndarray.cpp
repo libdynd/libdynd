@@ -286,7 +286,7 @@ TEST(NDArray, InitializerLists) {
     EXPECT_EQ(1, a.get_ndim());
     EXPECT_EQ(5, a.get_shape()[0]);
     EXPECT_EQ((int)sizeof(int), a.get_strides()[0]);
-    int *ptr_i = (int *)a.get_originptr();
+    const int *ptr_i = (const int *)a.get_readonly_originptr();
     EXPECT_EQ(1, ptr_i[0]);
     EXPECT_EQ(2, ptr_i[1]);
     EXPECT_EQ(3, ptr_i[2]);
@@ -301,7 +301,7 @@ TEST(NDArray, InitializerLists) {
     EXPECT_EQ(3, b.get_shape()[1]);
     EXPECT_EQ(3*(int)sizeof(double), b.get_strides()[0]);
     EXPECT_EQ((int)sizeof(double), b.get_strides()[1]);
-    double *ptr_d = (double *)b.get_originptr();
+    const double *ptr_d = (const double *)b.get_readonly_originptr();
     EXPECT_EQ(1, ptr_d[0]);
     EXPECT_EQ(2, ptr_d[1]);
     EXPECT_EQ(3, ptr_d[2]);
@@ -320,7 +320,7 @@ TEST(NDArray, InitializerLists) {
     EXPECT_EQ(4*(int)sizeof(long long), a.get_strides()[0]);
     EXPECT_EQ(2*(int)sizeof(long long), a.get_strides()[1]);
     EXPECT_EQ((int)sizeof(long long), a.get_strides()[2]);
-    long long *ptr_ll = (long long *)a.get_originptr();
+    const long long *ptr_ll = (const long long *)a.get_readonly_originptr();
     EXPECT_EQ(1, ptr_ll[0]);
     EXPECT_EQ(2, ptr_ll[1]);
     EXPECT_EQ(-1, ptr_ll[2]);
@@ -346,7 +346,7 @@ TEST(NDArray, InitFromNestedCArray) {
     EXPECT_EQ(3, a.get_shape()[1]);
     EXPECT_EQ(3*(int)sizeof(int), a.get_strides()[0]);
     EXPECT_EQ((int)sizeof(int), a.get_strides()[1]);
-    int *ptr_i = (int *)a.get_originptr();
+    const int *ptr_i = (const int *)a.get_readonly_originptr();
     EXPECT_EQ(1, ptr_i[0]);
     EXPECT_EQ(2, ptr_i[1]);
     EXPECT_EQ(3, ptr_i[2]);
@@ -365,7 +365,7 @@ TEST(NDArray, InitFromNestedCArray) {
     EXPECT_EQ(6*(int)sizeof(float), a.get_strides()[0]);
     EXPECT_EQ(3*(int)sizeof(float), a.get_strides()[1]);
     EXPECT_EQ((int)sizeof(float), a.get_strides()[2]);
-    float *ptr_f = (float *)a.get_originptr();
+    const float *ptr_f = (float *)a.get_readonly_originptr();
     EXPECT_EQ(1, ptr_f[0]);
     EXPECT_EQ(2, ptr_f[1]);
     EXPECT_EQ(3, ptr_f[2]);

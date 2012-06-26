@@ -9,6 +9,8 @@
 #include "numpy_interop.hpp"
 
 #include <dnd/dtypes/fixedstring_dtype.hpp>
+#include <dnd/ndarray_arange.hpp>
+#include <dnd/dtype_promotion.hpp>
 
 using namespace std;
 using namespace dnd;
@@ -247,4 +249,56 @@ dnd::ndarray pydnd::ndarray_getitem(const dnd::ndarray& n, PyObject *subscript)
 
     // Do an indexing operation
     return n.index(size, indices.get());
+}
+
+ndarray pydnd::ndarray_arange(PyObject *start, PyObject *stop, PyObject *step)
+{
+    ndarray start_nd, stop_nd, step_nd;
+    if (start != Py_None) {
+        ndarray_init_from_pyobject(start_nd, start);
+    } else {
+        start_nd = 0;
+    }
+    ndarray_init_from_pyobject(stop_nd, stop);
+    if (step != Py_None) {
+        ndarray_init_from_pyobject(step_nd, step);
+    } else {
+        step_nd = 1;
+    }
+    
+    dtype dt = promote_dtypes_arithmetic(start_nd.get_dtype(),
+            promote_dtypes_arithmetic(stop_nd.get_dtype(), step_nd.get_dtype()));
+    
+    start_nd = start_nd.as_dtype(dt, assign_error_none).vals();
+    stop_nd = stop_nd.as_dtype(dt, assign_error_none).vals();
+    step_nd = step_nd.as_dtype(dt, assign_error_none).vals();
+
+    if (start_nd.get_ndim() > 0 || stop_nd.get_ndim() > 0 || step_nd.get_ndim()) {
+        throw runtime_error("dnd::arange should only be called with scalar parameters");
+    }
+
+    return arange(dt, start_nd.get_readonly_originptr(),
+            stop_nd.get_readonly_originptr(),
+            step_nd.get_readonly_originptr());
+}
+
+dnd::ndarray pydnd::ndarray_linspace(PyObject *start, PyObject *stop, PyObject *count)
+{
+    ndarray start_nd, stop_nd;
+    intptr_t count_val = pyobject_as_index(count);
+    ndarray_init_from_pyobject(start_nd, start);
+    ndarray_init_from_pyobject(stop_nd, stop);
+    dtype dt = promote_dtypes_arithmetic(start_nd.get_dtype(), stop_nd.get_dtype());
+    // Make sure it's at least floating point
+    if (dt.kind() == bool_kind || dt.kind() == int_kind || dt.kind() == uint_kind) {
+        dt = make_dtype<double>();
+    }
+    start_nd = start_nd.as_dtype(dt, assign_error_none).vals();
+    stop_nd = stop_nd.as_dtype(dt, assign_error_none).vals();
+
+    if (start_nd.get_ndim() > 0 || stop_nd.get_ndim() > 0) {
+        throw runtime_error("dnd::linspace should only be called with scalar parameters");
+    }
+
+    return linspace(dt, start_nd.get_readonly_originptr(), stop_nd.get_readonly_originptr(), count_val);
 }

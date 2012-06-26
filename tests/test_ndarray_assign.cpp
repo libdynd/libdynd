@@ -17,15 +17,14 @@ using namespace dnd;
 
 TEST(NDArrayAssign, ScalarAssignment_Bool) {
     ndarray a;
-    dnd_bool *ptr_b;
 
     // assignment to a bool scalar
     a = ndarray(make_dtype<dnd_bool>());
-    ptr_b = (dnd_bool *)a.get_originptr();
+    const dnd_bool *ptr_b = (const dnd_bool *)a.get_readonly_originptr();
     a.val_assign(true);
     EXPECT_TRUE(*ptr_b);
     a.val_assign(false);
-    EXPECT_FALSE( *ptr_b);
+    EXPECT_FALSE(*ptr_b);
     a.val_assign(1);
     EXPECT_TRUE(*ptr_b);
     a.val_assign(0);
@@ -50,11 +49,11 @@ TEST(NDArrayAssign, ScalarAssignment_Bool) {
 
 TEST(NDArrayAssign, ScalarAssignment_Int8) {
     ndarray a;
-    int8_t *ptr_i8;
+    const int8_t *ptr_i8;
 
     // Assignment to an int8_t scalar
     a = ndarray(make_dtype<int8_t>());
-    ptr_i8 = (int8_t *)a.get_originptr();
+    ptr_i8 = (const int8_t *)a.get_readonly_originptr();
     a.val_assign(true);
     EXPECT_EQ(1, *ptr_i8);
     a.val_assign(false);
@@ -86,11 +85,11 @@ TEST(NDArrayAssign, ScalarAssignment_Int8) {
 
 TEST(NDArrayAssign, ScalarAssignment_UInt16) {
     ndarray a;
-    uint16_t *ptr_u16;
+    const uint16_t *ptr_u16;
 
     // Assignment to a uint16_t scalar
     a = ndarray(make_dtype<uint16_t>());
-    ptr_u16 = (uint16_t *)a.get_originptr();
+    ptr_u16 = (const uint16_t *)a.get_readonly_originptr();
     a.val_assign(true);
     EXPECT_EQ(1, *ptr_u16);
     a.val_assign(false);
@@ -107,11 +106,11 @@ TEST(NDArrayAssign, ScalarAssignment_UInt16) {
 
 TEST(NDArrayAssign, ScalarAssignment_Float32) {
     ndarray a;
-    float *ptr_f32;
+    const float *ptr_f32;
 
     // Assignment to a float scalar
     a = ndarray(make_dtype<float>());
-    ptr_f32 = (float *)a.get_originptr();
+    ptr_f32 = (const float *)a.get_readonly_originptr();
     a.val_assign(true);
     EXPECT_EQ(1, *ptr_f32);
     a.val_assign(false);
@@ -135,11 +134,11 @@ TEST(NDArrayAssign, ScalarAssignment_Float32) {
 
 TEST(NDArrayAssign, ScalarAssignment_Float64) {
     ndarray a;
-    double *ptr_f64;
+    const double *ptr_f64;
 
     // Assignment to a double scalar
     a = ndarray(make_dtype<double>());
-    ptr_f64 = (double *)a.get_originptr();
+    ptr_f64 = (const double *)a.get_readonly_originptr();
     a.val_assign(true);
     EXPECT_EQ(1, *ptr_f64);
     a.val_assign(false);
@@ -158,11 +157,11 @@ TEST(NDArrayAssign, ScalarAssignment_Float64) {
 
 TEST(NDArrayAssign, ScalarAssignment_Complex_Float32) {
     ndarray a;
-    complex<float> *ptr_cf32;
+    const complex<float> *ptr_cf32;
 
     // Assignment to a complex float scalar
     a = ndarray(make_dtype<complex<float> >());
-    ptr_cf32 = (complex<float> *)a.get_originptr();
+    ptr_cf32 = (const complex<float> *)a.get_readonly_originptr();
     a.val_assign(true);
     EXPECT_EQ(complex<float>(1), *ptr_cf32);
     a.val_assign(false);
@@ -187,11 +186,11 @@ TEST(NDArrayAssign, ScalarAssignment_Complex_Float32) {
 
 TEST(NDArrayAssign, ScalarAssignment_Complex_Float64) {
     ndarray a;
-    complex<double> *ptr_cf64;
+    const complex<double> *ptr_cf64;
 
     // Assignment to a complex float scalar
     a = ndarray(make_dtype<complex<double> >());
-    ptr_cf64 = (complex<double> *)a.get_originptr();
+    ptr_cf64 = (const complex<double> *)a.get_readonly_originptr();
     a.val_assign(true);
     EXPECT_EQ(complex<double>(1), *ptr_cf64);
     a.val_assign(false);
@@ -223,7 +222,7 @@ TEST(NDArrayAssign, BroadcastAssign) {
     // Broadcasts the 4-vector by a factor of 6,
     // converting the dtype
     a.val_assign(b);
-    float *ptr_f = (float *)a.get_originptr();
+    const float *ptr_f = (const float *)a.get_readonly_originptr();
     for (int i = 0; i < 6; ++i) {
         EXPECT_EQ(3, *ptr_f++);
         EXPECT_EQ(4, *ptr_f++);
@@ -237,7 +236,7 @@ TEST(NDArrayAssign, BroadcastAssign) {
     // Broadcasts the 4-vector by a factor of 6,
     // doesn't convert the dtype
     a.val_assign(b);
-    ptr_f = (float *)a.get_originptr();
+    ptr_f = (const float *)a.get_readonly_originptr();
     for (int i = 0; i < 6; ++i) {
         EXPECT_EQ(1.5, *ptr_f++);
         EXPECT_EQ(2.5, *ptr_f++);
@@ -250,7 +249,7 @@ TEST(NDArrayAssign, BroadcastAssign) {
     // Broadcasts the (3,1)-array by a factor of 8,
     // converting the dtype
     a.val_assign(b);
-    ptr_f = (float *)a.get_originptr();
+    ptr_f = (const float *)a.get_readonly_originptr();
     for (int i = 0; i < 2; ++i) {
         for (int j = 0; j < 4; ++j)
             EXPECT_EQ(1.5, *ptr_f++);
