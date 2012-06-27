@@ -46,9 +46,12 @@ struct memory_block_data {
 #endif
     /** A memory_block_type_t enum value */
     uint32_t m_type;
+
+    explicit memory_block_data(long use_count, memory_block_type_t type)
+        : m_use_count(use_count), m_type(type)
+    {
+    }
 };
-
-
 
 namespace detail {
     /**
@@ -203,6 +206,17 @@ inline bool operator!=(const memory_block_data *memblock, const memory_block_ref
 {
     return memblock != rhs.get();
 }
+
+typedef void (*external_memory_block_free_t)(void *);
+/**
+ * Creates a memory block which is a reference to an external object.
+ */
+memory_block_ref make_external_memory_block(void *object, external_memory_block_free_t free_fn);
+/**
+ * Creates a memory block of a pre-determined fixed size. A pointer to the
+ * memory allocated for data is placed in the output parameter.
+ */
+memory_block_ref make_fixed_size_pod_memory_block_type(intptr_t alignment, intptr_t size, char **out_datapointer);
 
 } // namespace dnd
 
