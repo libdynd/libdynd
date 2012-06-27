@@ -120,7 +120,7 @@ TEST(DType, BasicConstructor) {
 }
 
 
-TEST(DType, BasicComparison) {
+TEST(DType, SingleCompare) {
 
 
 #define TEST_COMPARISONS(type_id, type, lhs, rhs) \
