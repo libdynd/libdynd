@@ -67,3 +67,57 @@ TEST(FixedstringDType, Basic) {
                     a.get_dtype());
     //cout << a << endl;
 }
+
+TEST(FixedstringDType, SingleCompare) {
+    ndarray a(2, make_fixedstring_dtype(string_encoding_utf_8, 7));
+    single_compare_kernel_instance k;
+
+    a(0).vals() = std::string("abc");
+    a(1).vals() = std::string("abd");
+
+    // test ascii kernel
+    a = a.vals();
+    a.get_dtype().get_single_compare_kernel(k);
+    EXPECT_EQ(k.comparisons[less_id]((char *)a(0).get_originptr(), (char *)a(1).get_originptr(), k.auxdata), a(0).as<std::string>() < a(1).as<std::string>());
+    EXPECT_EQ(k.comparisons[less_equal_id]((char *)a(0).get_originptr(), (char *)a(1).get_originptr(), k.auxdata), a(0).as<std::string>() <= a(1).as<std::string>());
+    EXPECT_EQ(k.comparisons[equal_id]((char *)a(0).get_originptr(), (char *)a(1).get_originptr(), k.auxdata), a(0).as<std::string>() == a(1).as<std::string>());
+    EXPECT_EQ(k.comparisons[not_equal_id]((char *)a(0).get_originptr(), (char *)a(1).get_originptr(), k.auxdata), a(0).as<std::string>() != a(1).as<std::string>());
+    EXPECT_EQ(k.comparisons[greater_equal_id]((char *)a(0).get_originptr(), (char *)a(1).get_originptr(), k.auxdata), a(0).as<std::string>() >= a(1).as<std::string>());
+    EXPECT_EQ(k.comparisons[greater_id]((char *)a(0).get_originptr(), (char *)a(1).get_originptr(), k.auxdata), a(0).as<std::string>() > a(1).as<std::string>());
+
+    // TODO: means for not hardcoding expected results in utf string comparison tests
+
+    // test utf8 kernel
+    a = a.as_dtype(make_fixedstring_dtype(string_encoding_utf_8, 7));
+    a = a.vals();
+    a.get_dtype().get_single_compare_kernel(k);
+    EXPECT_EQ(k.comparisons[less_id]((char *)a(0).get_originptr(), (char *)a(1).get_originptr(), k.auxdata), true);
+    EXPECT_EQ(k.comparisons[less_equal_id]((char *)a(0).get_originptr(), (char *)a(1).get_originptr(), k.auxdata), true);
+    EXPECT_EQ(k.comparisons[equal_id]((char *)a(0).get_originptr(), (char *)a(1).get_originptr(), k.auxdata), false);
+    EXPECT_EQ(k.comparisons[not_equal_id]((char *)a(0).get_originptr(), (char *)a(1).get_originptr(), k.auxdata), true);
+    EXPECT_EQ(k.comparisons[greater_equal_id]((char *)a(0).get_originptr(), (char *)a(1).get_originptr(), k.auxdata), false);
+    EXPECT_EQ(k.comparisons[greater_id]((char *)a(0).get_originptr(), (char *)a(1).get_originptr(), k.auxdata), false);
+
+    // test utf16 kernel
+    a = a.as_dtype(make_fixedstring_dtype(string_encoding_utf_16, 7));
+    a = a.vals();
+    a.get_dtype().get_single_compare_kernel(k);
+    EXPECT_EQ(k.comparisons[less_id]((char *)a(0).get_originptr(), (char *)a(1).get_originptr(), k.auxdata), true);
+    EXPECT_EQ(k.comparisons[less_equal_id]((char *)a(0).get_originptr(), (char *)a(1).get_originptr(), k.auxdata), true);
+    EXPECT_EQ(k.comparisons[equal_id]((char *)a(0).get_originptr(), (char *)a(1).get_originptr(), k.auxdata), false);
+    EXPECT_EQ(k.comparisons[not_equal_id]((char *)a(0).get_originptr(), (char *)a(1).get_originptr(), k.auxdata), true);
+    EXPECT_EQ(k.comparisons[greater_equal_id]((char *)a(0).get_originptr(), (char *)a(1).get_originptr(), k.auxdata), false);
+    EXPECT_EQ(k.comparisons[greater_id]((char *)a(0).get_originptr(), (char *)a(1).get_originptr(), k.auxdata), false);
+
+    // test utf32 kernel
+    a = a.as_dtype(make_fixedstring_dtype(string_encoding_utf_32, 7));
+    a = a.vals();
+    a.get_dtype().get_single_compare_kernel(k);
+    EXPECT_EQ(k.comparisons[less_id]((char *)a(0).get_originptr(), (char *)a(1).get_originptr(), k.auxdata), true);
+    EXPECT_EQ(k.comparisons[less_equal_id]((char *)a(0).get_originptr(), (char *)a(1).get_originptr(), k.auxdata), true);
+    EXPECT_EQ(k.comparisons[equal_id]((char *)a(0).get_originptr(), (char *)a(1).get_originptr(), k.auxdata), false);
+    EXPECT_EQ(k.comparisons[not_equal_id]((char *)a(0).get_originptr(), (char *)a(1).get_originptr(), k.auxdata), true);
+    EXPECT_EQ(k.comparisons[greater_equal_id]((char *)a(0).get_originptr(), (char *)a(1).get_originptr(), k.auxdata), false);
+    EXPECT_EQ(k.comparisons[greater_id]((char *)a(0).get_originptr(), (char *)a(1).get_originptr(), k.auxdata), false);
+
+}

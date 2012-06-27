@@ -60,6 +60,8 @@ public:
 
     bool is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const;
 
+    void get_single_compare_kernel(single_compare_kernel_instance& out_kernel) const;
+
     void get_dtype_assignment_kernel(const dtype& dst_dt, const dtype& src_dt,
                     assign_error_mode errmode,
                     unary_specialization_kernel_instance& out_kernel) const;
