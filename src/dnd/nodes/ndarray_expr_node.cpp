@@ -284,16 +284,16 @@ void dnd::ndarray_expr_node::debug_dump_extra(ostream&, const string&) const
 
 dnd::strided_array_expr_node::strided_array_expr_node(const dtype& dt, int ndim,
                                 const intptr_t *shape, const intptr_t *strides,
-                                char *originptr, const dnd::shared_ptr<void>& buffer_owner)
+                                char *originptr, const memory_block_ref& memblock)
     : ndarray_expr_node(dt, ndim, 0, shape, strided_array_node_category, strided_array_node_type),
-      m_originptr(originptr), m_strides(ndim, strides), m_buffer_owner(buffer_owner)
+      m_originptr(originptr), m_strides(ndim, strides), m_memblock(memblock)
 {
 }
 
 dnd::strided_array_expr_node::strided_array_expr_node(const dtype& dt, int ndim,
                                 const intptr_t *shape, const int *axis_perm)
     : ndarray_expr_node(dt, ndim, 0, shape, strided_array_node_category, strided_array_node_type),
-      m_originptr(NULL), m_strides(ndim), m_buffer_owner()
+      m_originptr(NULL), m_strides(ndim), m_memblock()
 {
     // Build the strides using the ordering and shape
     intptr_t num_elements = 1;
@@ -310,10 +310,7 @@ dnd::strided_array_expr_node::strided_array_expr_node(const dtype& dt, int ndim,
         }
     }
 
-    m_buffer_owner.reset(::dnd::detail::ndarray_buffer_allocator(dt.element_size() * num_elements),
-                                ::dnd::detail::ndarray_buffer_deleter);
-
-    m_originptr = reinterpret_cast<char *>(m_buffer_owner.get());
+    m_memblock = make_fixed_size_pod_memory_block(dt.alignment(), dt.element_size() * num_elements, &m_originptr);
 }
 
 void dnd::strided_array_expr_node::as_readwrite_data_and_strides(char **out_originptr,
@@ -339,7 +336,7 @@ ndarray_expr_node_ptr dnd::strided_array_expr_node::as_dtype(const dtype& dt,
     } else {
         return ndarray_expr_node_ptr(new strided_array_expr_node(
                         make_conversion_dtype(dt, m_dtype, errmode),
-                        m_ndim, m_shape.get(), m_strides.get(), m_originptr, m_buffer_owner));
+                        m_ndim, m_shape.get(), m_strides.get(), m_originptr, m_memblock));
     }
 }
 
@@ -381,7 +378,7 @@ ndarray_expr_node_ptr dnd::strided_array_expr_node::broadcast_to_shape(int ndim,
             }
             memcpy(newstrides.get() + ndim - m_ndim, orig_strides, m_ndim * sizeof(intptr_t));
 
-            return ndarray_expr_node_ptr(new strided_array_expr_node(m_dtype, ndim, shape, newstrides.get(), m_originptr, m_buffer_owner));
+            return ndarray_expr_node_ptr(new strided_array_expr_node(m_dtype, ndim, shape, newstrides.get(), m_originptr, m_memblock));
     }
 }
 
@@ -425,7 +422,7 @@ ndarray_expr_node_ptr dnd::strided_array_expr_node::apply_linear_index(
 
         return ndarray_expr_node_ptr(
             new strided_array_expr_node(m_dtype, new_ndim, new_shape, new_strides.get(),
-                                        new_originptr, m_buffer_owner));
+                                        new_originptr, m_memblock));
     }
 }
 
@@ -440,5 +437,6 @@ void dnd::strided_array_expr_node::debug_dump_extra(ostream& o, const string& in
     }
     o << ")\n";
     o << indent << " originptr: " << (void *)m_originptr << "\n";
-    o << indent << " buffer owner: " << m_buffer_owner.get() << "\n";
+    o << indent << " buffer owner:\n";
+    memory_block_debug_dump(m_memblock.get(), o, indent + " ");
 }

@@ -68,6 +68,7 @@ class TestPythonScalar(unittest.TestCase):
         a = a.as_dtype(nd.make_fixedstring_dtype('utf_8', 16))
         a = a.vals()
         self.assertEqual(a.dtype, nd.make_fixedstring_dtype('utf_8', 16))
+        a.debug_dump()
         self.assertEqual(type(a.as_py()), unicode)
         self.assertEqual(a.as_py(), x)
         # UTF-16

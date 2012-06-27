@@ -14,6 +14,7 @@
 #include <dnd/irange.hpp>
 #include <dnd/kernels/kernel_instance.hpp>
 #include <dnd/shortvector.hpp>
+#include <dnd/memory_block.hpp>
 
 namespace dnd {
 
@@ -221,7 +222,7 @@ typedef boost::intrusive_ptr<ndarray_expr_node> ndarray_expr_node_ptr;
 class strided_array_expr_node : public ndarray_expr_node {
     char *m_originptr;
     dimvector m_strides;
-    dnd::shared_ptr<void> m_buffer_owner;
+    memory_block_ref m_memblock;
 
     // Non-copyable
     strided_array_expr_node(const strided_array_expr_node&);
@@ -239,7 +240,7 @@ public:
      * as it does the parameter validation.
      */
     strided_array_expr_node(const dtype& dt, int ndim, const intptr_t *shape,
-            const intptr_t *strides, char *originptr, const dnd::shared_ptr<void>& buffer_owner);
+            const intptr_t *strides, char *originptr, const memory_block_ref& memblock);
 
     /**
      * Constructs a strided array node with the given dtype, shape, and axis_perm (for memory layout)
@@ -261,8 +262,8 @@ public:
         return m_strides.get();
     }
 
-    dnd::shared_ptr<void> get_buffer_owner() const {
-        return m_buffer_owner;
+    memory_block_ref get_memory_block() const {
+        return m_memblock;
     }
 
     /** Provides the data pointer and strides array for the tree evaluation code */
@@ -290,7 +291,7 @@ public:
     friend ndarray_expr_node_ptr make_strided_array_expr_node(
                     const dtype& dt, int ndim, const intptr_t *shape,
                     const intptr_t *strides, char *originptr,
-                    const dnd::shared_ptr<void>& buffer_owner);
+                    const memory_block_ref& memblock);
     // TODO: Add a virtual broadcast function to the base node type, then remove this friend function
     friend ndarray_expr_node_ptr make_broadcast_strided_array_expr_node(ndarray_expr_node *node,
                                 int ndim, const intptr_t *shape,

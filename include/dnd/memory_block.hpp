@@ -6,6 +6,8 @@
 #ifndef _DND__MEMORY_BLOCK_HPP_
 #define _DND__MEMORY_BLOCK_HPP_
 
+#include <iostream>
+
 #include <boost/detail/atomic_count.hpp>
 
 #include <dnd/config.hpp>
@@ -82,6 +84,11 @@ inline void memory_block_decref(memory_block_data *memblock)
 }
 
 /**
+ * Does a debug dump of the memory block.
+ */
+void memory_block_debug_dump(const memory_block_data *memblock, std::ostream& o, const std::string& indent = "");
+
+/**
  * A smart pointer to a memory_block object. Very similar
  * to boost::intrusive_ptr<memory_block_data>.
  */
@@ -95,7 +102,7 @@ public:
     }
 
     /** Constructor from a raw pointer */
-    memory_block_ref(memory_block_data *memblock, bool add_ref = true)
+    explicit memory_block_ref(memory_block_data *memblock, bool add_ref = true)
         : m_memblock(memblock)
     {
         if (memblock != 0 && add_ref) {
@@ -216,7 +223,7 @@ memory_block_ref make_external_memory_block(void *object, external_memory_block_
  * Creates a memory block of a pre-determined fixed size. A pointer to the
  * memory allocated for data is placed in the output parameter.
  */
-memory_block_ref make_fixed_size_pod_memory_block_type(intptr_t alignment, intptr_t size, char **out_datapointer);
+memory_block_ref make_fixed_size_pod_memory_block(intptr_t alignment, intptr_t size, char **out_datapointer);
 
 } // namespace dnd
 

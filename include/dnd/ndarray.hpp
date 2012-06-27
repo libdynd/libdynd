@@ -25,11 +25,6 @@ class ndarray;
 /** Stream printing function */
 std::ostream& operator<<(std::ostream& o, const ndarray& rhs);
 
-namespace detail {
-    void *ndarray_buffer_allocator(intptr_t size);
-    void ndarray_buffer_deleter(void *ptr);
-} // namespace detail
-
 class ndarray_vals;
 
 /**
@@ -197,9 +192,9 @@ public:
     char *get_readwrite_originptr() const;
     const char *get_readonly_originptr() const;
 
-    dnd::shared_ptr<void> get_buffer_owner() const {
+    memory_block_ref get_memory_block() const {
         if (m_expr_tree->get_node_type() == strided_array_node_type) {
-            return static_cast<const strided_array_expr_node *>(m_expr_tree.get())->get_buffer_owner();
+            return static_cast<const strided_array_expr_node *>(m_expr_tree.get())->get_memory_block();
         } else {
             throw std::runtime_error("cannot get the buffer owner of an expression view ndarray");
         }
@@ -461,12 +456,11 @@ dnd::ndarray::ndarray(std::initializer_list<T> il)
 {
     intptr_t dim0 = il.size();
     intptr_t stride = (dim0 == 1) ? 0 : sizeof(T);
-    dnd::shared_ptr<void> buffer_owner(
-                    ::dnd::detail::ndarray_buffer_allocator(sizeof(T) * dim0),
-                    ::dnd::detail::ndarray_buffer_deleter);
-    DND_MEMCPY(buffer_owner.get(), il.begin(), sizeof(T) * dim0);
+    char *originptr = 0;
+    memory_block_ref memblock = make_fixed_size_pod_memory_block(sizeof(T), sizeof(T) * dim0, &originptr);
+    DND_MEMCPY(originptr, il.begin(), sizeof(T) * dim0);
     m_expr_tree.reset(new strided_array_expr_node(make_dtype<T>(), 1, &dim0, &stride,
-                            reinterpret_cast<char *>(buffer_owner.get()), DND_MOVE(buffer_owner)));
+                            originptr, DND_MOVE(memblock)));
 }
 template<class T>
 dnd::ndarray::ndarray(std::initializer_list<std::initializer_list<T> > il)
@@ -484,13 +478,12 @@ dnd::ndarray::ndarray(std::initializer_list<std::initializer_list<T> > il)
         num_elements *= shape[i];
         stride *= shape[i];
     }
-    dnd::shared_ptr<void> buffer_owner(
-                    ::dnd::detail::ndarray_buffer_allocator(sizeof(T) * num_elements),
-                    ::dnd::detail::ndarray_buffer_deleter);
-    T *dataptr = reinterpret_cast<T *>(buffer_owner.get());
+    char *originptr = 0;
+    memory_block_ref memblock = make_fixed_size_pod_memory_block(sizeof(T), sizeof(T) * num_elements, &originptr);
+    T *dataptr = reinterpret_cast<T *>(originptr);
     detail::initializer_list_shape<S>::copy_data(&dataptr, il);
     m_expr_tree.reset(new strided_array_expr_node(make_dtype<T>(), 2, shape, strides,
-                            reinterpret_cast<char *>(buffer_owner.get()), DND_MOVE(buffer_owner)));
+                            originptr, DND_MOVE(memblock)));
 }
 template<class T>
 dnd::ndarray::ndarray(std::initializer_list<std::initializer_list<std::initializer_list<T> > > il)
@@ -508,13 +501,12 @@ dnd::ndarray::ndarray(std::initializer_list<std::initializer_list<std::initializ
         num_elements *= shape[i];
         stride *= shape[i];
     }
-    dnd::shared_ptr<void> buffer_owner(
-                    ::dnd::detail::ndarray_buffer_allocator(sizeof(T) * num_elements),
-                    ::dnd::detail::ndarray_buffer_deleter);
-    T *dataptr = reinterpret_cast<T *>(buffer_owner.get());
+    char *originptr = 0;
+    memory_block_ref memblock = make_fixed_size_pod_memory_block(sizeof(T), sizeof(T) * num_elements, &originptr);
+    T *dataptr = reinterpret_cast<T *>(originptr);
     detail::initializer_list_shape<S>::copy_data(&dataptr, il);
     m_expr_tree.reset(new strided_array_expr_node(make_dtype<T>(), 3, shape, strides,
-                            reinterpret_cast<char *>(buffer_owner.get()), DND_MOVE(buffer_owner)));
+                            originptr, DND_MOVE(memblock)));
 }
 #endif // DND_INIT_LIST
 
@@ -567,13 +559,12 @@ dnd::ndarray::ndarray(const T (&rhs)[N])
         num_elements *= shape[i];
         stride *= shape[i];
     }
-    dnd::shared_ptr<void> buffer_owner(
-                    ::dnd::detail::ndarray_buffer_allocator(num_bytes),
-                    ::dnd::detail::ndarray_buffer_deleter);
-    DND_MEMCPY(buffer_owner.get(), &rhs[0], num_bytes);
+    char *originptr = 0;
+    memory_block_ref memblock = make_fixed_size_pod_memory_block(sizeof(T), num_bytes, &originptr);
+    DND_MEMCPY(originptr, &rhs[0], num_bytes);
     m_expr_tree.reset(new strided_array_expr_node(dtype(detail::type_from_array<T>::type_id),
                             ndim, shape, strides,
-                            reinterpret_cast<char *>(buffer_owner.get()), DND_MOVE(buffer_owner)));
+                            originptr, DND_MOVE(memblock)));
 }
 
 ///////////// The ndarray.as<type>() templated function /////////////////////////

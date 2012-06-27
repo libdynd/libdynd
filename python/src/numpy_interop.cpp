@@ -167,10 +167,9 @@ dtype pydnd::dtype_of_numpy_scalar(PyObject* obj)
     throw std::runtime_error("could not deduce a pydnd dtype from the numpy scalar object");
 }
 
-template<class T>
-static void py_decref_function(T* obj)
+static void py_decref_function(void* obj)
 {
-    Py_DECREF(obj);
+    Py_DECREF((PyObject *)obj);
 }
 
 ndarray pydnd::ndarray_from_numpy_array(PyArrayObject* obj)
@@ -194,18 +193,18 @@ ndarray pydnd::ndarray_from_numpy_array(PyArrayObject* obj)
 
     // Get a shared pointer that tracks buffer ownership
     PyObject *base = PyArray_BASE(obj);
-    dnd::shared_ptr<void> bufowner;
+    memory_block_ref memblock;
     if (base == NULL || (PyArray_FLAGS(obj)&NPY_ARRAY_UPDATEIFCOPY) != 0) {
         Py_INCREF(obj);
-        bufowner = dnd::shared_ptr<PyArrayObject>(obj, py_decref_function<PyArrayObject>);
+        memblock = make_external_memory_block(obj, py_decref_function);
     } else {
         Py_INCREF(base);
-        bufowner = dnd::shared_ptr<PyObject>(base, py_decref_function<PyObject>);
+        memblock = make_external_memory_block(base, py_decref_function);
     }
 
     // Create the result ndarray
     return ndarray(new strided_array_expr_node(d, PyArray_NDIM(obj),
-                    PyArray_DIMS(obj), PyArray_STRIDES(obj), PyArray_BYTES(obj), DND_MOVE(bufowner)));
+                    PyArray_DIMS(obj), PyArray_STRIDES(obj), PyArray_BYTES(obj), DND_MOVE(memblock)));
 }
 
 dnd::ndarray pydnd::ndarray_from_numpy_scalar(PyObject* obj)
@@ -283,7 +282,7 @@ char pydnd::numpy_kindchar_of(const dnd::dtype& d)
 static void free_array_interface(void *ptr, void *extra_ptr)
 {
     PyArrayInterface* inter = (PyArrayInterface *)ptr;
-    dnd::shared_ptr<void> *extra = (dnd::shared_ptr<void> *)extra_ptr;
+    memory_block_ref *extra = (memory_block_ref *)extra_ptr;
     delete[] inter->strides;
     delete inter;
     delete extra;
@@ -331,5 +330,5 @@ PyObject* pydnd::ndarray_as_numpy_struct_capsule(const dnd::ndarray& n)
     memcpy(inter.shape, n.get_shape(), n.get_ndim() * sizeof(intptr_t));
 
     // TODO: Check for Python 3, use PyCapsule there
-    return PyCObject_FromVoidPtrAndDesc(new PyArrayInterface(inter), new dnd::shared_ptr<void>(n.get_buffer_owner()), free_array_interface);
+    return PyCObject_FromVoidPtrAndDesc(new PyArrayInterface(inter), new memory_block_ref(n.get_memory_block()), free_array_interface);
 }

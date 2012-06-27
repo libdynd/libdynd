@@ -21,18 +21,6 @@
 using namespace std;
 using namespace dnd;
 
-// Default buffer allocator for ndarray
-void *dnd::detail::ndarray_buffer_allocator(intptr_t size)
-{
-    return new char[size];
-}
-
-// Default buffer deleter for ndarray
-void dnd::detail::ndarray_buffer_deleter(void *ptr)
-{
-    delete[] reinterpret_cast<char *>(ptr);
-}
-
 dnd::ndarray::ndarray()
     : m_expr_tree()
 {
@@ -112,10 +100,10 @@ dnd::ndarray::ndarray(const std::string& value)
 dnd::ndarray::ndarray(const dtype& dt)
     : m_expr_tree()
 {
-    shared_ptr<void> buffer_owner(::dnd::detail::ndarray_buffer_allocator(dt.element_size()),
-                                ::dnd::detail::ndarray_buffer_deleter);
+    char *originptr = 0;
+    memory_block_ref memblock = make_fixed_size_pod_memory_block(dt.alignment(), dt.element_size(), &originptr);
     m_expr_tree.reset(new strided_array_expr_node(dt, 0, NULL, NULL,
-                            reinterpret_cast<char *>(buffer_owner.get()), DND_MOVE(buffer_owner)));
+                            originptr, DND_MOVE(memblock)));
 }
 
 dnd::ndarray::ndarray(const dtype& dt, const char *raw_data)
@@ -138,11 +126,10 @@ dnd::ndarray::ndarray(intptr_t dim0, const dtype& dt)
     : m_expr_tree()
 {
     intptr_t stride = (dim0 <= 1) ? 0 : dt.element_size();
-    shared_ptr<void> buffer_owner(
-                    ::dnd::detail::ndarray_buffer_allocator(dt.element_size() * dim0),
-                    ::dnd::detail::ndarray_buffer_deleter);
+    char *originptr = 0;
+    memory_block_ref memblock = make_fixed_size_pod_memory_block(dt.alignment(), dt.element_size() * dim0, &originptr);
     m_expr_tree.reset(new strided_array_expr_node(dt, 1, &dim0, &stride,
-                            reinterpret_cast<char *>(buffer_owner.get()), DND_MOVE(buffer_owner)));
+                            originptr, DND_MOVE(memblock)));
 }
 
 dnd::ndarray::ndarray(intptr_t dim0, intptr_t dim1, const dtype& dt)
@@ -153,11 +140,10 @@ dnd::ndarray::ndarray(intptr_t dim0, intptr_t dim1, const dtype& dt)
     strides[0] = (dim0 <= 1) ? 0 : dt.element_size() * dim1;
     strides[1] = (dim1 <= 1) ? 0 : dt.element_size();
 
-    shared_ptr<void> buffer_owner(
-                    ::dnd::detail::ndarray_buffer_allocator(dt.element_size() * dim0 * dim1),
-                    ::dnd::detail::ndarray_buffer_deleter);
+    char *originptr = 0;
+    memory_block_ref memblock = make_fixed_size_pod_memory_block(dt.alignment(), dt.element_size() * dim0 * dim1, &originptr);
     m_expr_tree.reset(new strided_array_expr_node(dt, 2, shape, strides,
-                            reinterpret_cast<char *>(buffer_owner.get()), DND_MOVE(buffer_owner)));
+                            originptr, DND_MOVE(memblock)));
 }
 
 dnd::ndarray::ndarray(intptr_t dim0, intptr_t dim1, intptr_t dim2, const dtype& dt)
@@ -169,11 +155,10 @@ dnd::ndarray::ndarray(intptr_t dim0, intptr_t dim1, intptr_t dim2, const dtype& 
     strides[1] = (dim1 <= 1) ? 0 : dt.element_size() * dim2;
     strides[2] = (dim2 <= 1) ? 0 : dt.element_size();
 
-    shared_ptr<void> buffer_owner(
-                    ::dnd::detail::ndarray_buffer_allocator(dt.element_size() * dim0 * dim1 * dim2),
-                    ::dnd::detail::ndarray_buffer_deleter);
+    char *originptr = 0;
+    memory_block_ref memblock = make_fixed_size_pod_memory_block(dt.alignment(), dt.element_size() * dim0 * dim1 * dim2, &originptr);
     m_expr_tree.reset(new strided_array_expr_node(dt, 3, shape, strides,
-                            reinterpret_cast<char *>(buffer_owner.get()), DND_MOVE(buffer_owner)));
+                            originptr, DND_MOVE(memblock)));
 }
 
 dnd::ndarray::ndarray(intptr_t dim0, intptr_t dim1, intptr_t dim2, intptr_t dim3, const dtype& dt)
@@ -186,11 +171,10 @@ dnd::ndarray::ndarray(intptr_t dim0, intptr_t dim1, intptr_t dim2, intptr_t dim3
     strides[2] = (dim2 <= 1) ? 0 : dt.element_size() * dim3;
     strides[3] = (dim3 <= 1) ? 0 : dt.element_size();
 
-    shared_ptr<void> buffer_owner(
-                    ::dnd::detail::ndarray_buffer_allocator(dt.element_size() * dim0 * dim1 * dim2 * dim3),
-                    ::dnd::detail::ndarray_buffer_deleter);
+    char *originptr = 0;
+    memory_block_ref memblock = make_fixed_size_pod_memory_block(dt.alignment(), dt.element_size() * dim0 * dim1 * dim2 * dim3, &originptr);
     m_expr_tree.reset(new strided_array_expr_node(dt, 4, shape, strides,
-                            reinterpret_cast<char *>(buffer_owner.get()), DND_MOVE(buffer_owner)));
+                            originptr, DND_MOVE(memblock)));
 }
 
 ndarray dnd::ndarray::index(int nindex, const irange *indices) const
@@ -290,7 +274,7 @@ ndarray dnd::ndarray::storage() const
     const dtype& dt = get_dtype().storage_dtype();
     if (get_expr_tree()->get_node_type() == strided_array_node_type) {
         return ndarray(new strided_array_expr_node(dt, get_ndim(), get_shape(), get_strides(),
-                        get_readwrite_originptr(), get_buffer_owner()));
+                        get_readwrite_originptr(), get_memory_block()));
     } else {
         throw std::runtime_error("Can only get the storage from dnd::ndarrays which are strided arrays");
     }
@@ -337,10 +321,10 @@ ndarray dnd::ndarray::view_as_dtype(const dtype& dt) const
         strides[0] = dt.element_size();
         if ((((uintptr_t)originptr)&(dt.alignment()-1)) == 0) {
             // If the dtype's alignment is satisfied, can view it as is
-            return ndarray(new strided_array_expr_node(dt, 1, shape, strides, originptr, get_buffer_owner()));
+            return ndarray(new strided_array_expr_node(dt, 1, shape, strides, originptr, get_memory_block()));
         } else {
             // The dtype's alignment was insufficient, so making it unaligned<>
-            return ndarray(new strided_array_expr_node(make_unaligned_dtype(dt), 1, shape, strides, originptr, get_buffer_owner()));
+            return ndarray(new strided_array_expr_node(make_unaligned_dtype(dt), 1, shape, strides, originptr, get_memory_block()));
         }
     }
 
@@ -369,10 +353,10 @@ ndarray dnd::ndarray::view_as_dtype(const dtype& dt) const
 
         if (aligned) {
             return ndarray(new strided_array_expr_node(dt, get_ndim(), get_shape(), get_strides(),
-                            get_readwrite_originptr(), get_buffer_owner()));
+                            get_readwrite_originptr(), get_memory_block()));
         } else {
             return ndarray(new strided_array_expr_node(make_unaligned_dtype(dt), get_ndim(), get_shape(), get_strides(),
-                            get_readwrite_originptr(), get_buffer_owner()));
+                            get_readwrite_originptr(), get_memory_block()));
         }
     }
 

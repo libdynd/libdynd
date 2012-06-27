@@ -163,11 +163,11 @@ void dnd::linear_index_expr_node::debug_dump_extra(ostream& o, const string& ind
 ndarray_expr_node_ptr dnd::make_strided_array_expr_node(
             const dtype& dt, int ndim, const intptr_t *shape,
             const intptr_t *strides, char *originptr,
-            const dnd::shared_ptr<void>& buffer_owner)
+            const memory_block_ref& memblock)
 {
     // TODO: Add a multidimensional DND_ASSERT_ALIGNED check here
     return ndarray_expr_node_ptr(new strided_array_expr_node(dt, ndim,
-                                        shape, strides, originptr, buffer_owner));
+                                        shape, strides, originptr, memblock));
 }
 
 ndarray_expr_node_ptr dnd::make_broadcast_strided_array_expr_node(ndarray_expr_node *node,
@@ -187,7 +187,7 @@ ndarray_expr_node_ptr dnd::make_broadcast_strided_array_expr_node(ndarray_expr_n
     // Create the strided array node
     ndarray_expr_node_ptr new_node(new strided_array_expr_node(
                     make_conversion_dtype(dt, snode->get_dtype(), errmode),
-                    ndim, shape, strides.get(), snode->get_readwrite_originptr(), snode->get_buffer_owner()));
+                    ndim, shape, strides.get(), snode->get_readwrite_originptr(), snode->get_memory_block()));
 
     return DND_MOVE(new_node);
 }

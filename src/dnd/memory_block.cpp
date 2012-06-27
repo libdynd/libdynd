@@ -51,17 +51,41 @@ void dnd::detail::memory_block_free(memory_block_data *memblock)
     throw runtime_error(ss.str());
 }
 
-memory_block_ref make_external_memory_block(void *object, external_memory_block_free_t free_fn)
+void dnd::memory_block_debug_dump(const memory_block_data *memblock, std::ostream& o, const std::string& indent)
+{
+    o << indent << "------ memory_block at " << (const void *)memblock << "\n";
+    o << indent << " reference count: " << memblock->m_use_count << "\n";
+    switch ((memory_block_type_t)memblock->m_type) {
+        case ndarray_node_memory_block_type:
+            o << indent << " type: ndarray_node\n";
+            break;
+        case external_memory_block_type:
+            o << indent << " type: external\n";
+            break;
+        case fixed_size_pod_memory_block_type:
+            o << indent << " type: fixed_size_pod\n";
+            break;
+        case pod_memory_block_type:
+            o << indent << " type: pod\n";
+            break;
+        case object_memory_block_type:
+            o << indent << " type: object\n";
+            break;
+    }
+    o << indent << "------" << endl;
+}
+
+memory_block_ref dnd::make_external_memory_block(void *object, external_memory_block_free_t free_fn)
 {
     external_memory_block *emb = new external_memory_block(1, external_memory_block_type, object, free_fn);
     return memory_block_ref(reinterpret_cast<memory_block_data *>(emb), false);
 }
 
-memory_block_ref make_fixed_size_pod_memory_block_type(intptr_t alignment, intptr_t size, char **out_datapointer)
+memory_block_ref dnd::make_fixed_size_pod_memory_block(intptr_t alignment, intptr_t size, char **out_datapointer)
 {
     // Calculate the aligned starting point for the data
     intptr_t start = (intptr_t)(((uintptr_t)sizeof(memory_block_data) + (uintptr_t)(alignment - 1))
-                        & (uintptr_t)(alignment - 1));
+                        & ~((uintptr_t)(alignment - 1)));
     // Allocate it
     char *result = (char *)malloc(start + size);
     if (result == 0) {
@@ -70,5 +94,5 @@ memory_block_ref make_fixed_size_pod_memory_block_type(intptr_t alignment, intpt
     // Give back the data pointer
     *out_datapointer = result + start;
     // Use placement new to initialize and return the memory block
-    return memory_block_ref(new (&result) memory_block_data(1, fixed_size_pod_memory_block_type), false);
+    return memory_block_ref(new (result) memory_block_data(1, fixed_size_pod_memory_block_type), false);
 }
