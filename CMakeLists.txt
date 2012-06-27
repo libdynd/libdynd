@@ -15,10 +15,10 @@ set(BUILD_SHARED_LIBS 1)
 #cmake_force_cxx_compiler(/usr/local/bin/clang++ CLang)
 
 if(WIN32)
-	# Treat warnings as errors (-WX does this)
-	set(CMAKE_CXX_FLAGS "-WX -EHsc")
+    # Treat warnings as errors (-WX does this)
+    set(CMAKE_CXX_FLAGS "-WX -EHsc")
 else(WIN32)
-	set(CMAKE_CXX_FLAGS "-std=c++0x -g -O0 -fPIC -Wall -Wextra -Werror -Weffc++ -fmax-errors=20")
+    set(CMAKE_CXX_FLAGS "-std=c++0x -g -O0 -fPIC -Wall -Wextra -Werror -Weffc++ -fmax-errors=20")
 endif(WIN32)
 #set(CMAKE_CXX_FLAGS "-std=c++0x -g -O3 -Wall -Wextra -Werror -Weffc++ -fmax-errors=20")
 #set(CMAKE_CXX_FLAGS "-std=c++0x -g -fprofile-arcs -ftest-coverage -Wall -Wextra -Werror")
@@ -70,10 +70,11 @@ set(dnd_SRC
     src/dnd/dtype_comparisons.cpp
     src/dnd/dtype_promotion.cpp
     src/dnd/exceptions.cpp
+    src/dnd/memory_block.cpp
     src/dnd/ndarray.cpp
     src/dnd/ndarray_arange.cpp
     src/dnd/shape_tools.cpp
-	include/dnd/auxiliary_data.hpp
+    include/dnd/auxiliary_data.hpp
     include/dnd/buffer_storage.hpp
     include/dnd/config.hpp
     include/dnd/cling_all.hpp
@@ -85,6 +86,7 @@ set(dnd_SRC
     include/dnd/exceptions.hpp
     include/dnd/fpstatus.hpp
     include/dnd/irange.hpp
+    include/dnd/memory_block.hpp
     include/dnd/ndarray.hpp
     include/dnd/ndarray_arange.hpp
     include/dnd/raw_iteration.hpp
