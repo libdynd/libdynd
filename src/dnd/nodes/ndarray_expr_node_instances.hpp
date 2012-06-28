@@ -197,15 +197,6 @@ ndarray_node_ref make_strided_ndarray_node(
             const intptr_t *strides, char *originptr,
             const dnd::shared_ptr<void>& buffer_owner);
 
-/** Applies the slicing index to the ndarray node. */
-ndarray_node_ref apply_index_to_node(ndarray_node *node,
-                                int nindex, const irange *indices, bool allow_in_place);
-/**
- * Applies an integer index to the ndarray node.
- */
-ndarray_node_ref apply_integer_index_to_node(ndarray_node *node,
-                                int axis, intptr_t idx, bool allow_in_place);
-
 
 /**
  * Creates an elementwise binary operator node from the two input ndarrays.

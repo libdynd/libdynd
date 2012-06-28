@@ -222,6 +222,15 @@ inline void intrusive_ptr_release(const ndarray_node *node) {
     }
 }
 
+/** Applies the slicing index to the ndarray node. */
+ndarray_node_ref apply_index_to_node(ndarray_node *node,
+                                int nindex, const irange *indices, bool allow_in_place);
+/**
+ * Applies an integer index to the ndarray node.
+ */
+ndarray_node_ref apply_integer_index_to_node(ndarray_node *node,
+                                int axis, intptr_t idx, bool allow_in_place);
+
 } // namespace dnd
 
 #endif // _DND__NDARRAY_NODE_HPP_
