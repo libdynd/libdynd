@@ -17,6 +17,7 @@
 #include <dnd/shortvector.hpp>
 #include <dnd/irange.hpp>
 #include <dnd/nodes/ndarray_expr_node.hpp>
+#include <dnd/nodes/strided_ndarray_node.hpp>
 
 namespace dnd {
 
@@ -66,9 +67,7 @@ public:
     /** Constructs a zero-dimensional scalar array, copying the raw data for the value */
     ndarray(const dtype& dt, const char *raw_data);
     /** Constructs an array with the given dtype, shape, and axis_perm (for memory layout) */
-    ndarray(const dtype& dt, int ndim, const intptr_t *shape, const int *axis_perm)
-        : m_expr_tree(new strided_array_expr_node(dt, ndim, shape, axis_perm)) {
-    }
+    ndarray(const dtype& dt, int ndim, const intptr_t *shape, const int *axis_perm);
 
     /** Constructs an ndaray from an expr node */
     explicit ndarray(const ndarray_expr_node_ptr& expr_tree);
@@ -166,7 +165,7 @@ public:
 
     const intptr_t *get_strides() const {
         if (m_expr_tree->get_node_type() == strided_array_node_type) {
-            return static_cast<const strided_array_expr_node *>(m_expr_tree.get())->get_strides();
+            return static_cast<const strided_ndarray_node *>(m_expr_tree.get())->get_strides();
         } else {
             throw std::runtime_error("cannot get the strides of an expression view ndarray");
         }
@@ -174,7 +173,7 @@ public:
 
     intptr_t get_strides(int i) const {
         if (m_expr_tree->get_node_type() == strided_array_node_type) {
-            return static_cast<const strided_array_expr_node *>(m_expr_tree.get())->get_strides()[i];
+            return static_cast<const strided_ndarray_node *>(m_expr_tree.get())->get_strides()[i];
         } else {
             throw std::runtime_error("cannot get the strides of an expression view ndarray");
         }
@@ -194,7 +193,7 @@ public:
 
     memory_block_ref get_memory_block() const {
         if (m_expr_tree->get_node_type() == strided_array_node_type) {
-            return static_cast<const strided_array_expr_node *>(m_expr_tree.get())->get_memory_block();
+            return static_cast<const strided_ndarray_node *>(m_expr_tree.get())->get_memory_block();
         } else {
             throw std::runtime_error("cannot get the buffer owner of an expression view ndarray");
         }
@@ -459,7 +458,7 @@ dnd::ndarray::ndarray(std::initializer_list<T> il)
     char *originptr = 0;
     memory_block_ref memblock = make_fixed_size_pod_memory_block(sizeof(T), sizeof(T) * dim0, &originptr);
     DND_MEMCPY(originptr, il.begin(), sizeof(T) * dim0);
-    m_expr_tree.reset(new strided_array_expr_node(make_dtype<T>(), 1, &dim0, &stride,
+    m_expr_tree.reset(new strided_ndarray_node(make_dtype<T>(), 1, &dim0, &stride,
                             originptr, DND_MOVE(memblock)));
 }
 template<class T>
@@ -482,7 +481,7 @@ dnd::ndarray::ndarray(std::initializer_list<std::initializer_list<T> > il)
     memory_block_ref memblock = make_fixed_size_pod_memory_block(sizeof(T), sizeof(T) * num_elements, &originptr);
     T *dataptr = reinterpret_cast<T *>(originptr);
     detail::initializer_list_shape<S>::copy_data(&dataptr, il);
-    m_expr_tree.reset(new strided_array_expr_node(make_dtype<T>(), 2, shape, strides,
+    m_expr_tree.reset(new strided_ndarray_node(make_dtype<T>(), 2, shape, strides,
                             originptr, DND_MOVE(memblock)));
 }
 template<class T>
@@ -505,7 +504,7 @@ dnd::ndarray::ndarray(std::initializer_list<std::initializer_list<std::initializ
     memory_block_ref memblock = make_fixed_size_pod_memory_block(sizeof(T), sizeof(T) * num_elements, &originptr);
     T *dataptr = reinterpret_cast<T *>(originptr);
     detail::initializer_list_shape<S>::copy_data(&dataptr, il);
-    m_expr_tree.reset(new strided_array_expr_node(make_dtype<T>(), 3, shape, strides,
+    m_expr_tree.reset(new strided_ndarray_node(make_dtype<T>(), 3, shape, strides,
                             originptr, DND_MOVE(memblock)));
 }
 #endif // DND_INIT_LIST
@@ -562,7 +561,7 @@ dnd::ndarray::ndarray(const T (&rhs)[N])
     char *originptr = 0;
     memory_block_ref memblock = make_fixed_size_pod_memory_block(sizeof(T), num_bytes, &originptr);
     DND_MEMCPY(originptr, &rhs[0], num_bytes);
-    m_expr_tree.reset(new strided_array_expr_node(dtype(detail::type_from_array<T>::type_id),
+    m_expr_tree.reset(new strided_ndarray_node(dtype(detail::type_from_array<T>::type_id),
                             ndim, shape, strides,
                             originptr, DND_MOVE(memblock)));
 }
@@ -578,13 +577,13 @@ namespace detail {
                 throw std::runtime_error("can only convert ndarrays with 0 dimensions to scalars");
             }
             if (lhs.get_expr_tree()->get_node_type() == strided_array_node_type) {
-                const strided_array_expr_node *node =
-                        static_cast<const strided_array_expr_node *>(lhs.get_expr_tree());
+                const strided_ndarray_node *node =
+                        static_cast<const strided_ndarray_node *>(lhs.get_expr_tree());
                 dtype_assign(make_dtype<T>(), (char *)&result, node->get_dtype(), node->get_readwrite_originptr(), errmode);
             } else {
                 ndarray tmp = lhs.vals();
-                const strided_array_expr_node *node =
-                        static_cast<const strided_array_expr_node *>(tmp.get_expr_tree());
+                const strided_ndarray_node *node =
+                        static_cast<const strided_ndarray_node *>(tmp.get_expr_tree());
                 dtype_assign(make_dtype<T>(), (char *)&result, node->get_dtype(), node->get_readwrite_originptr(), errmode);
             }
             return result;

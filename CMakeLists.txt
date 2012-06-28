@@ -43,10 +43,12 @@ set(dnd_SRC
     src/dnd/nodes/immutable_scalar_node.cpp
     src/dnd/nodes/ndarray_expr_node.cpp
     src/dnd/nodes/ndarray_expr_node_instances.cpp
+    src/dnd/nodes/strided_ndarray_node.cpp
     src/dnd/nodes/ndarray_expr_node_instances.hpp
     include/dnd/nodes/elementwise_unary_kernel_node.hpp
     include/dnd/nodes/immutable_scalar_node.hpp
     include/dnd/nodes/ndarray_expr_node.hpp
+    include/dnd/nodes/strided_ndarray_node.hpp
     # Kernels
     src/dnd/kernels/assignment_kernels.cpp
     src/dnd/kernels/builtin_dtype_binary_kernel_table.cpp

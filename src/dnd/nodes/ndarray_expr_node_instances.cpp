@@ -19,13 +19,13 @@ using namespace dnd;
 
 // Node factory functions
 
-ndarray_expr_node_ptr dnd::make_strided_array_expr_node(
+ndarray_expr_node_ptr dnd::make_strided_ndarray_node(
             const dtype& dt, int ndim, const intptr_t *shape,
             const intptr_t *strides, char *originptr,
             const memory_block_ref& memblock)
 {
     // TODO: Add a multidimensional DND_ASSERT_ALIGNED check here
-    return ndarray_expr_node_ptr(new strided_array_expr_node(dt, ndim,
+    return ndarray_expr_node_ptr(new strided_ndarray_node(dt, ndim,
                                         shape, strides, originptr, memblock));
 }
 

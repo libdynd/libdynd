@@ -203,7 +203,7 @@ ndarray pydnd::ndarray_from_numpy_array(PyArrayObject* obj)
     }
 
     // Create the result ndarray
-    return ndarray(new strided_array_expr_node(d, PyArray_NDIM(obj),
+    return ndarray(new strided_ndarray_node(d, PyArray_NDIM(obj),
                     PyArray_DIMS(obj), PyArray_STRIDES(obj), PyArray_BYTES(obj), DND_MOVE(memblock)));
 }
 

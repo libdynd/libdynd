@@ -41,7 +41,7 @@ void broadcast_to_shape(int ndim, const intptr_t *shape,
  * This function broadcasts the dimensions and strides of 'src' to a given
  * shape, raising an error if it cannot be broadcast.
  */
-inline void broadcast_to_shape(int ndim, const intptr_t *shape, const strided_array_expr_node *op,
+inline void broadcast_to_shape(int ndim, const intptr_t *shape, const strided_ndarray_node *op,
                                     intptr_t *out_strides)
 {
     broadcast_to_shape(ndim, shape, op->get_ndim(), op->get_shape(), op->get_strides(), out_strides);

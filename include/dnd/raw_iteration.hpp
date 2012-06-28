@@ -358,7 +358,7 @@ public:
         // Generate the axis_perm from the input strides, and use it to allocate the output
         shortvector<int> axis_perm(ndim);
         strides_to_axis_perm(ndim, strides.get(), axis_perm.get());
-        strided_array_expr_node *node = new strided_array_expr_node(op0_dt, ndim, shape, axis_perm.get());
+        strided_ndarray_node *node = new strided_ndarray_node(op0_dt, ndim, shape, axis_perm.get());
         op0.reset(node);
         data[0] = node->get_readwrite_originptr();
 
@@ -409,7 +409,7 @@ public:
         // Generate the axis_perm from the input strides, and use it to allocate the output
         shortvector<int> axis_perm(ndim);
         multistrides_to_axis_perm(ndim, 2, strides_vec.get_all(), axis_perm.get());
-        strided_array_expr_node *node = new strided_array_expr_node(op0_dt, ndim, shape, axis_perm.get());
+        strided_ndarray_node *node = new strided_ndarray_node(op0_dt, ndim, shape, axis_perm.get());
         op0.reset(node);
         data[0] = node->get_readwrite_originptr();
 
