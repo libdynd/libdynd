@@ -180,7 +180,7 @@ dnd::ndarray::ndarray(intptr_t dim0, intptr_t dim1, intptr_t dim2, intptr_t dim3
 ndarray dnd::ndarray::index(int nindex, const irange *indices) const
 {
     // Casting away const is ok here, because we pass 'false' to 'allow_in_place'
-    return ndarray(make_linear_index_expr_node(
+    return ndarray(apply_index_to_node(
                         const_cast<ndarray_expr_node *>(m_expr_tree.get()),
                         nindex, indices, false));
 }
@@ -238,7 +238,7 @@ static void val_assign_loop(const ndarray& lhs, const ndarray& rhs, assign_error
     // Get the data pointer and strides of rhs through the standard interface
     dimvector rhs_original_strides(rhs.get_ndim());
     const char *rhs_originptr = NULL;
-    rhs.get_expr_tree()->as_readonly_data_and_strides(&rhs_originptr, rhs_original_strides.get());
+    rhs.get_expr_tree()->as_readonly_data_and_strides(rhs.get_ndim(), &rhs_originptr, rhs_original_strides.get());
 
     // Broadcast the 'rhs' shape to 'this'
     dimvector rhs_modified_strides(lhs.get_ndim());
@@ -479,7 +479,7 @@ std::ostream& dnd::operator<<(std::ostream& o, const ndarray& rhs)
                         rhs.get_dtype().kind() != expression_kind) {
             const char *originptr;
             dimvector strides(rhs.get_ndim());
-            rhs.get_expr_tree()->as_readonly_data_and_strides(&originptr, strides.get());
+            rhs.get_expr_tree()->as_readonly_data_and_strides(rhs.get_ndim(), &originptr, strides.get());
             o << "ndarray(" << rhs.get_dtype() << ", ";
             nested_ndarray_print(o, rhs.get_dtype(), originptr, rhs.get_ndim(), rhs.get_shape(), strides.get());
             o << ")";

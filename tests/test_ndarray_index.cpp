@@ -41,9 +41,16 @@ TEST(NDArrayIndex, BasicInteger) {
     EXPECT_EQ(4, a(1,1).as<int>());
     EXPECT_EQ(5, a(2,0).as<int>());
     EXPECT_EQ(6, a(2,1).as<int>());
-    EXPECT_THROW(a(-1,0), index_out_of_bounds);
+    // Indexing with negative Python style
+    EXPECT_EQ(1, a(-3,-2).as<int>());
+    EXPECT_EQ(2, a(-3,-1).as<int>());
+    EXPECT_EQ(3, a(-2,-2).as<int>());
+    EXPECT_EQ(4, a(-2,-1).as<int>());
+    EXPECT_EQ(5, a(-1,-2).as<int>());
+    EXPECT_EQ(6, a(-1,-1).as<int>());
+    EXPECT_THROW(a(-4,0), index_out_of_bounds);
     EXPECT_THROW(a(3,0), index_out_of_bounds);
-    EXPECT_THROW(a(0,-1), index_out_of_bounds);
+    EXPECT_THROW(a(0,-3), index_out_of_bounds);
     EXPECT_THROW(a(0,2), index_out_of_bounds);
     EXPECT_THROW(a(0,0,0), too_many_indices);
 
@@ -73,11 +80,21 @@ TEST(NDArrayIndex, BasicInteger) {
     EXPECT_EQ(6, a(1,0,1).as<int>());
     EXPECT_EQ(7, a(1,1,0).as<int>());
     EXPECT_EQ(8, a(1,1,1).as<int>());
-    EXPECT_THROW(a(-1,0,0), index_out_of_bounds);
+    // Indexing with negative Python style
+    EXPECT_EQ(1, a(-2,-2,-2).as<int>());
+    EXPECT_EQ(2, a(-2,-2,-1).as<int>());
+    EXPECT_EQ(3, a(-2,-1,-2).as<int>());
+    EXPECT_EQ(4, a(-2,-1,-1).as<int>());
+    EXPECT_EQ(5, a(-1,-2,-2).as<int>());
+    EXPECT_EQ(6, a(-1,-2,-1).as<int>());
+    EXPECT_EQ(7, a(-1,-1,-2).as<int>());
+    EXPECT_EQ(8, a(-1,-1,-1).as<int>());
+    // Out of bounds
+    EXPECT_THROW(a(-3,0,0), index_out_of_bounds);
     EXPECT_THROW(a(2,0,0), index_out_of_bounds);
-    EXPECT_THROW(a(0,-1,0), index_out_of_bounds);
+    EXPECT_THROW(a(0,-3,0), index_out_of_bounds);
     EXPECT_THROW(a(0,2,0), index_out_of_bounds);
-    EXPECT_THROW(a(0,0,-1), index_out_of_bounds);
+    EXPECT_THROW(a(0,0,-3), index_out_of_bounds);
     EXPECT_THROW(a(0,0,2), index_out_of_bounds);
     EXPECT_THROW(a(0,0,0,0), too_many_indices);
 }
@@ -175,7 +192,7 @@ TEST(NDArrayIndex, ExceptionsOneDimensionalRange) {
     ndarray a = i0, b;
 
     // exceptions for out-of-bounds ranges
-    EXPECT_THROW(a(-1 <= irange()), irange_out_of_bounds);
+    EXPECT_THROW(a(-7 <= irange()), irange_out_of_bounds);
     EXPECT_THROW(a(0 <= irange() < 7), irange_out_of_bounds);
     EXPECT_THROW(a(0 <= irange() <= 6), irange_out_of_bounds);
     EXPECT_THROW(a(0,irange()), too_many_indices);

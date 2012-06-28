@@ -83,10 +83,10 @@ public:
     }
 
     /**
-     * An exception for when 'i' isn't in the half-open range
-     * [start, end).
+     * An exception for when 'i' isn't within bounds for
+     * the specified axis of the given shape
      */
-    index_out_of_bounds(intptr_t i, intptr_t start, intptr_t end);
+    index_out_of_bounds(intptr_t i, int axis, int ndim, const intptr_t *shape);
 
     virtual ~index_out_of_bounds() throw() {
     }
@@ -120,10 +120,10 @@ public:
     }
 
     /**
-     * An exception for when 'i' isn't in the half-open range
-     * [start, end).
+     * An exception for when 'i' isn't within bounds for
+     * the specified axis of the given shape
      */
-    irange_out_of_bounds(const irange& i, intptr_t start, intptr_t end);
+    irange_out_of_bounds(const irange& i, int axis, int ndim, const intptr_t *shape);
 
     virtual ~irange_out_of_bounds() throw() {
     }

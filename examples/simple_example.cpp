@@ -63,61 +63,38 @@ int main1()
 int main()
 {
     try {
-        ndarray a(2, make_fixedstring_dtype(string_encoding_utf_8, 7));
-        single_compare_kernel_instance k;
+        ndarray a;
+        char values[8] = {1,2,3,4,5,6,7,8};
 
+        // Constructor assignment
+        a = values;
         a.debug_dump(cout);
-        a(0).vals() = std::string("abc");
-        return 0;
-        a.debug_dump(cout);
-        a(1).vals() = std::string("abd");
-        a.debug_dump(cout);
+        a(0).debug_dump(cout);
+        a(1).debug_dump(cout);
+        EXPECT_EQ(1, a.get_ndim());
+        EXPECT_EQ(8, a.get_shape(0));
+        EXPECT_EQ(make_dtype<char>(), a.get_dtype());
+        EXPECT_EQ(1, a(0).as<char>());
+        EXPECT_EQ(2, a(1).as<char>());
+        EXPECT_EQ(3, a(2).as<char>());
+        EXPECT_EQ(4, a(3).as<char>());
+        EXPECT_EQ(5, a(4).as<char>());
+        EXPECT_EQ(6, a(5).as<char>());
+        EXPECT_EQ(7, a(6).as<char>());
+        EXPECT_EQ(8, a(7).as<char>());
 
-        // test ascii kernel
-        a = a.vals();
-        a.debug_dump(cout);
-        a.get_dtype().get_single_compare_kernel(k);
-        EXPECT_EQ(k.comparisons[less_id]((char *)a(0).get_readonly_originptr(), (char *)a(1).get_readonly_originptr(), k.auxdata), a(0).as<std::string>() < a(1).as<std::string>());
-        EXPECT_EQ(k.comparisons[less_equal_id]((char *)a(0).get_readonly_originptr(), (char *)a(1).get_readonly_originptr(), k.auxdata), a(0).as<std::string>() <= a(1).as<std::string>());
-        EXPECT_EQ(k.comparisons[equal_id]((char *)a(0).get_readonly_originptr(), (char *)a(1).get_readonly_originptr(), k.auxdata), a(0).as<std::string>() == a(1).as<std::string>());
-        EXPECT_EQ(k.comparisons[not_equal_id]((char *)a(0).get_readonly_originptr(), (char *)a(1).get_readonly_originptr(), k.auxdata), a(0).as<std::string>() != a(1).as<std::string>());
-        EXPECT_EQ(k.comparisons[greater_equal_id]((char *)a(0).get_readonly_originptr(), (char *)a(1).get_readonly_originptr(), k.auxdata), a(0).as<std::string>() >= a(1).as<std::string>());
-        EXPECT_EQ(k.comparisons[greater_id]((char *)a(0).get_readonly_originptr(), (char *)a(1).get_readonly_originptr(), k.auxdata), a(0).as<std::string>() > a(1).as<std::string>());
-
-        // TODO: means for not hardcoding expected results in utf string comparison tests
-
-        // test utf8 kernel
-        a = a.as_dtype(make_fixedstring_dtype(string_encoding_utf_8, 7));
-        a = a.vals();
-        a.get_dtype().get_single_compare_kernel(k);
-        EXPECT_EQ(k.comparisons[less_id]((char *)a(0).get_readonly_originptr(), (char *)a(1).get_readonly_originptr(), k.auxdata), true);
-        EXPECT_EQ(k.comparisons[less_equal_id]((char *)a(0).get_readonly_originptr(), (char *)a(1).get_readonly_originptr(), k.auxdata), true);
-        EXPECT_EQ(k.comparisons[equal_id]((char *)a(0).get_readonly_originptr(), (char *)a(1).get_readonly_originptr(), k.auxdata), false);
-        EXPECT_EQ(k.comparisons[not_equal_id]((char *)a(0).get_readonly_originptr(), (char *)a(1).get_readonly_originptr(), k.auxdata), true);
-        EXPECT_EQ(k.comparisons[greater_equal_id]((char *)a(0).get_readonly_originptr(), (char *)a(1).get_readonly_originptr(), k.auxdata), false);
-        EXPECT_EQ(k.comparisons[greater_id]((char *)a(0).get_readonly_originptr(), (char *)a(1).get_readonly_originptr(), k.auxdata), false);
-
-        // test utf16 kernel
-        a = a.as_dtype(make_fixedstring_dtype(string_encoding_utf_16, 7));
-        a = a.vals();
-        a.get_dtype().get_single_compare_kernel(k);
-        EXPECT_EQ(k.comparisons[less_id]((char *)a(0).get_readonly_originptr(), (char *)a(1).get_readonly_originptr(), k.auxdata), true);
-        EXPECT_EQ(k.comparisons[less_equal_id]((char *)a(0).get_readonly_originptr(), (char *)a(1).get_readonly_originptr(), k.auxdata), true);
-        EXPECT_EQ(k.comparisons[equal_id]((char *)a(0).get_readonly_originptr(), (char *)a(1).get_readonly_originptr(), k.auxdata), false);
-        EXPECT_EQ(k.comparisons[not_equal_id]((char *)a(0).get_readonly_originptr(), (char *)a(1).get_readonly_originptr(), k.auxdata), true);
-        EXPECT_EQ(k.comparisons[greater_equal_id]((char *)a(0).get_readonly_originptr(), (char *)a(1).get_readonly_originptr(), k.auxdata), false);
-        EXPECT_EQ(k.comparisons[greater_id]((char *)a(0).get_readonly_originptr(), (char *)a(1).get_readonly_originptr(), k.auxdata), false);
-
-        // test utf32 kernel
-        a = a.as_dtype(make_fixedstring_dtype(string_encoding_utf_32, 7));
-        a = a.vals();
-        a.get_dtype().get_single_compare_kernel(k);
-        EXPECT_EQ(k.comparisons[less_id]((char *)a(0).get_readonly_originptr(), (char *)a(1).get_readonly_originptr(), k.auxdata), true);
-        EXPECT_EQ(k.comparisons[less_equal_id]((char *)a(0).get_readonly_originptr(), (char *)a(1).get_readonly_originptr(), k.auxdata), true);
-        EXPECT_EQ(k.comparisons[equal_id]((char *)a(0).get_readonly_originptr(), (char *)a(1).get_readonly_originptr(), k.auxdata), false);
-        EXPECT_EQ(k.comparisons[not_equal_id]((char *)a(0).get_readonly_originptr(), (char *)a(1).get_readonly_originptr(), k.auxdata), true);
-        EXPECT_EQ(k.comparisons[greater_equal_id]((char *)a(0).get_readonly_originptr(), (char *)a(1).get_readonly_originptr(), k.auxdata), false);
-        EXPECT_EQ(k.comparisons[greater_id]((char *)a(0).get_readonly_originptr(), (char *)a(1).get_readonly_originptr(), k.auxdata), false);
+        // Value assignment
+        a.vals() = 0;
+        EXPECT_EQ(0, a(0).as<char>());
+        a.vals() = values;
+        EXPECT_EQ(1, a(0).as<char>());
+        EXPECT_EQ(2, a(1).as<char>());
+        EXPECT_EQ(3, a(2).as<char>());
+        EXPECT_EQ(4, a(3).as<char>());
+        EXPECT_EQ(5, a(4).as<char>());
+        EXPECT_EQ(6, a(5).as<char>());
+        EXPECT_EQ(7, a(6).as<char>());
+        EXPECT_EQ(8, a(7).as<char>());
     } catch(int){//std::exception& e) { cout << "Error: " << e.what() << "\n";
         return 1;
     }

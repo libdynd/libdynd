@@ -33,10 +33,10 @@ public:
     }
 
     /** Raises an exception, since this node is not writeable */
-    void as_readwrite_data_and_strides(char **out_originptr, intptr_t *out_strides) const;
+    void as_readwrite_data_and_strides(int ndim, char **out_originptr, intptr_t *out_strides) const;
 
     /** Provides the data pointer and strides array for the tree evaluation code */
-    void as_readonly_data_and_strides(char const **out_originptr, intptr_t *out_strides) const;
+    void as_readonly_data_and_strides(int ndim, char const **out_originptr, intptr_t *out_strides) const;
 
     ndarray_expr_node_ptr as_dtype(const dtype& dt,
                         dnd::assign_error_mode errmode, bool allow_in_place);
@@ -44,8 +44,11 @@ public:
     ndarray_expr_node_ptr broadcast_to_shape(int ndim,
                         const intptr_t *shape, bool allow_in_place);
 
-    ndarray_expr_node_ptr apply_linear_index(int ndim, const intptr_t *shape, const int *axis_map,
-                    const intptr_t *index_strides, const intptr_t *start_index, bool allow_in_place);
+    ndarray_expr_node_ptr apply_linear_index(
+                    int ndim, const bool *remove_axis,
+                    const intptr_t *start_index, const intptr_t *index_strides,
+                    const intptr_t *shape,
+                    bool allow_in_place);
 
     const char *node_name() const {
         return "immutable_scalar";

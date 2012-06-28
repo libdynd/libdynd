@@ -133,17 +133,23 @@ public:
      * Nodes with the category strided_array_node_category and with writeable data
      * should override this function.
      *
+     * This function should push the strides to the right, as the default broadcasting
+     * rules.
+     *
      * The default implementation raises an exception.
      */
-    virtual void as_readwrite_data_and_strides(char **out_originptr, intptr_t *out_strides) const;
+    virtual void as_readwrite_data_and_strides(int ndim, char **out_originptr, intptr_t *out_strides) const;
 
     /**
      * Nodes with the category strided_array_node_category and with readable
      * data should override this function.
      *
+     * This function should push the strides to the right, as the default broadcasting
+     * rules.
+     *
      * The default implementation raises an exception.
      */
-    virtual void as_readonly_data_and_strides(char const **out_originptr, intptr_t *out_strides) const;
+    virtual void as_readonly_data_and_strides(int ndim, char const **out_originptr, intptr_t *out_strides) const;
 
     virtual void get_nullary_operation(intptr_t dst_fixedstride,
                                     kernel_instance<nullary_operation_t>& out_kernel) const;
@@ -177,15 +183,26 @@ public:
     /**
      * Applies a linear index to the node, returning either the current node (for do-nothing
      * indexes), or a new node with the index applied. This may apply the indexing up
-     * the tree, or in cases where this is not possible, returning a node which applies the
-     * indexing.
+     * the tree, or in cases where this is not possible, return a node which applies the
+     * indexing during evaluation.
      *
-     * IMPORTANT: The input ndim, shape, etc are not validated, their correctness must
-     *            be ensured by the caller.
+     * The idea of this operation is that ndim and the shape for which the linear index
+     * operation is generated may be larger than that of the node where it gets applied.
+     * The requirement is that the node be broadcastable to the operation's shape, something
+     * which the caller must be certain of when calling this function. The resulting node
+     * is broadcastable to the operation's shape with the invariant that
+     * broadcast(linear_index(node)) is equivalent to linear_index(broadcast(node)).
+     *
+     * IMPORTANT: The input ndim, etc. are not validated, the caller must ensure that
+     *            the shape of the node is broadcastable to the shape for which the linear
+     *            index is applied.
      */
     virtual boost::intrusive_ptr<ndarray_expr_node> apply_linear_index(
-                    int ndim, const intptr_t *shape, const int *axis_map,
-                    const intptr_t *index_strides, const intptr_t *start_index, bool allow_in_place);
+                    int ndim, const bool *remove_axis,
+                    const intptr_t *start_index, const intptr_t *index_strides,
+                    const intptr_t *shape,
+                    bool allow_in_place) = 0;
+
     /**
      * Applies a single integer index to the node. See apply_linear_index for more details.
      *
@@ -267,9 +284,9 @@ public:
     }
 
     /** Provides the data pointer and strides array for the tree evaluation code */
-    void as_readwrite_data_and_strides(char **out_originptr, intptr_t *out_strides) const;
+    void as_readwrite_data_and_strides(int ndim, char **out_originptr, intptr_t *out_strides) const;
 
-    void as_readonly_data_and_strides(char const **out_originptr, intptr_t *out_strides) const;
+    void as_readonly_data_and_strides(int ndim, char const **out_originptr, intptr_t *out_strides) const;
 
     ndarray_expr_node_ptr as_dtype(const dtype& dt,
                         assign_error_mode errmode, bool allow_in_place);
@@ -277,8 +294,12 @@ public:
     ndarray_expr_node_ptr broadcast_to_shape(int ndim,
                             const intptr_t *shape, bool allow_in_place);
 
-    ndarray_expr_node_ptr apply_linear_index(int ndim, const intptr_t *shape, const int *axis_map,
-                    const intptr_t *index_strides, const intptr_t *start_index, bool allow_in_place);
+    ndarray_expr_node_ptr apply_linear_index(
+                    int ndim, const bool *remove_axis,
+                    const intptr_t *start_index, const intptr_t *index_strides,
+                    const intptr_t *shape,
+                    bool allow_in_place);
+
     // TODO: Implement apply_integer_index
 
     const char *node_name() const {

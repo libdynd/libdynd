@@ -23,50 +23,6 @@ ndarray_expr_node_ptr make_elementwise_binary_op_expr_node(ndarray_expr_node *no
                                             assign_error_mode errmode);
 
 /**
- * NDArray expression node which applies linear indexing.
- *
- * This is an operation core to strided multi-dimensional arrays, so
- * there is also a corresponding function apply_linear_index, which is
- * used to move linear indexing operations as far to the leaves as possible,
- * hopefully absorbing them into the representations of the leaf nodes.
- */
-class linear_index_expr_node : public ndarray_expr_node {
-    /** For each result axis, gives the corresponding axis in the operand */
-    shortvector<int> m_axis_map;
-    /** For each result axis, gives the index stride */
-    shortvector<intptr_t> m_index_strides;
-    /** For each operand axis, gives the start index */
-    shortvector<intptr_t> m_start_index;
-
-    /** Creates a linear index node from all the raw components */
-    linear_index_expr_node(int ndim, const intptr_t *shape, const int *axis_map,
-                    const intptr_t *index_strides, const intptr_t *start_index, ndarray_expr_node *op);
-public:
-
-    virtual ~linear_index_expr_node() {
-    }
-
-    ndarray_expr_node_ptr as_dtype(const dtype& dt,
-                        dnd::assign_error_mode errmode, bool allow_in_place);
-
-    ndarray_expr_node_ptr broadcast_to_shape(int ndim,
-                        const intptr_t *shape, bool allow_in_place);
-
-    ndarray_expr_node_ptr apply_linear_index(int ndim, const intptr_t *shape, const int *axis_map,
-                    const intptr_t *index_strides, const intptr_t *start_index, bool allow_in_place);
-
-    const char *node_name() const {
-        return "linear_index_expr_node";
-    }
-
-    void debug_dump_extra(std::ostream& o, const std::string& indent) const;
-
-    friend ndarray_expr_node_ptr make_linear_index_expr_node(ndarray_expr_node *node,
-                                    int nindex, const irange *indices, bool allow_in_place);
-    friend class ndarray_expr_node;
-};
-
-/**
  * NDArray expression node for element-wise binary operations.
  */
 template <class BinaryOperatorFactory>
@@ -197,27 +153,38 @@ public:
      * Application of a linear index to an elementwise binary operation is propagated to both
      * the input operands.
      */
-    ndarray_expr_node_ptr apply_linear_index(int ndim, const intptr_t *shape, const int *axis_map,
-                    const intptr_t *index_strides, const intptr_t *start_index, bool allow_in_place)
+    ndarray_expr_node_ptr apply_linear_index(
+                    int ndim, const bool *remove_axis,
+                    const intptr_t *start_index, const intptr_t *index_strides,
+                    const intptr_t *shape,
+                    bool allow_in_place)
     {
         if (allow_in_place) {
-            m_ndim = ndim;
-            memcpy(m_shape.get(), shape, ndim * sizeof(intptr_t));
-            m_opnodes[0] = m_opnodes[0]->apply_linear_index(ndim, shape, axis_map,
-                                            index_strides, start_index, m_opnodes[0]->unique());
-            m_opnodes[1] = m_opnodes[1]->apply_linear_index(ndim, shape, axis_map,
-                                            index_strides, start_index, m_opnodes[1]->unique());
+            // Apply the indexing to the childrin
+            m_opnodes[0] = m_opnodes[0]->apply_linear_index(ndim, remove_axis,
+                                            start_index, index_strides, shape, m_opnodes[0]->unique());
+            m_opnodes[1] = m_opnodes[1]->apply_linear_index(ndim, remove_axis,
+                                            start_index, index_strides, shape, m_opnodes[1]->unique());
+
+            // Broadcast the new child shapes to get this node's shape
+            broadcast_input_shapes(m_opnodes[0].get(), m_opnodes[1].get(), &m_ndim, &m_shape);
+
             return ndarray_expr_node_ptr(this);
         } else {
             ndarray_expr_node_ptr node1, node2;
-            node1 = m_opnodes[0]->apply_linear_index(ndim, shape, axis_map,
-                                            index_strides, start_index, false);
-            node2 = m_opnodes[1]->apply_linear_index(ndim, shape, axis_map,
-                                            index_strides, start_index, false);
+            node1 = m_opnodes[0]->apply_linear_index(ndim, remove_axis,
+                                            start_index, index_strides, shape, false);
+            node2 = m_opnodes[1]->apply_linear_index(ndim, remove_axis,
+                                            start_index, index_strides, shape, false);
+
+            // Broadcast the new child shapes to get the new node's shape
+            int new_ndim;
+            dimvector new_shape;
+            broadcast_input_shapes(node1.get(), node2.get(), &new_ndim, &new_shape);
 
             BinaryOperatorFactory op_factory_copy(m_op_factory);
             return ndarray_expr_node_ptr(
-                        new elementwise_binary_op_expr_node(m_dtype, ndim, shape, node1, node2, op_factory_copy));
+                        new elementwise_binary_op_expr_node(m_dtype, new_ndim, new_shape.get(), node1, node2, op_factory_copy));
         }
     }
 
@@ -264,12 +231,9 @@ ndarray_expr_node_ptr make_broadcast_strided_array_expr_node(ndarray_expr_node *
                                 int ndim, const intptr_t *shape,
                                 const dtype& dt, assign_error_mode errmode);
 
-/**
- * Applies a linear index to the ndarray node.
- */
-ndarray_expr_node_ptr make_linear_index_expr_node(ndarray_expr_node *node,
+/** Applies the slicing index to the ndarray node. */
+ndarray_expr_node_ptr apply_index_to_node(ndarray_expr_node *node,
                                 int nindex, const irange *indices, bool allow_in_place);
-
 /**
  * Applies an integer index to the ndarray node.
  */

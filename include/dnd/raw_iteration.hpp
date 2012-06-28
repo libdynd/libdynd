@@ -353,7 +353,7 @@ public:
         char *data[3];
 
         // Get the two operands as strided arrays
-        op1->as_readonly_data_and_strides(&const_cast<const char *&>(data[1]), strides.get());
+        op1->as_readonly_data_and_strides(ndim, &const_cast<const char *&>(data[1]), strides.get());
 
         // Generate the axis_perm from the input strides, and use it to allocate the output
         shortvector<int> axis_perm(ndim);
@@ -403,8 +403,8 @@ public:
         char *data[3];
 
         // Get the two operands as strided arrays
-        op1->as_readonly_data_and_strides(&const_cast<const char *&>(data[1]), strides_vec.get(0));
-        op2->as_readonly_data_and_strides(&const_cast<const char *&>(data[2]), strides_vec.get(1));
+        op1->as_readonly_data_and_strides(ndim, &const_cast<const char *&>(data[1]), strides_vec.get(0));
+        op2->as_readonly_data_and_strides(ndim, &const_cast<const char *&>(data[2]), strides_vec.get(1));
 
         // Generate the axis_perm from the input strides, and use it to allocate the output
         shortvector<int> axis_perm(ndim);

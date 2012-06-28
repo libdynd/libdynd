@@ -203,7 +203,7 @@ PyObject* pydnd::ndarray_as_pyobject(const dnd::ndarray& n)
     // Get a read-only strided view of the data
     const char *data = NULL;
     dimvector strides(nvals.get_ndim());
-    nvals.get_expr_tree()->as_readonly_data_and_strides(&data, strides.get());
+    nvals.get_expr_tree()->as_readonly_data_and_strides(nvals.get_ndim(), &data, strides.get());
 
     return nested_ndarray_as_pyobject(nvals.get_dtype(), data, nvals.get_ndim(), nvals.get_shape(), strides.get());
 }

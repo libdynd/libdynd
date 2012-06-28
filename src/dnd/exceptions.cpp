@@ -99,20 +99,20 @@ dnd::too_many_indices::too_many_indices(int nindex, int ndim)
     //cout << "throwing too_many_indices\n";
 }
 
-inline string index_out_of_bounds_message(intptr_t i, intptr_t start, intptr_t end)
+inline string index_out_of_bounds_message(intptr_t i, int axis, int ndim, const intptr_t *shape)
 {
     stringstream ss;
 
-    ss << "index out of bounds: index " << i << " is not in the half-open range [";
-    ss << start << ", " << end << ")";
+    ss << "index out of bounds: index " << i << " is out of bounds for axis " << axis;
+    ss << " of shape ";
+    print_shape(ss, ndim, shape);
 
     return ss.str();
 }
 
-dnd::index_out_of_bounds::index_out_of_bounds(intptr_t i, intptr_t start, intptr_t end)
-    : m_what(index_out_of_bounds_message(i, start, end))
+index_out_of_bounds::index_out_of_bounds(intptr_t i, int axis, int ndim, const intptr_t *shape)
+    : m_what(index_out_of_bounds_message(i, axis, ndim, shape))
 {
-    //cout << "throwing index_out_of_bounds\n";
 }
 
 inline string axis_out_of_bounds_message(intptr_t i, intptr_t start, intptr_t end)
@@ -131,7 +131,7 @@ dnd::axis_out_of_bounds::axis_out_of_bounds(intptr_t i, intptr_t start, intptr_t
     //cout << "throwing axis_out_of_bounds\n";
 }
 
-inline string irange_out_of_bounds_message(const irange& i, intptr_t start, intptr_t end)
+inline string irange_out_of_bounds_message(const irange& i, int axis, int ndim, const intptr_t *shape)
 {
     stringstream ss;
 
@@ -139,14 +139,15 @@ inline string irange_out_of_bounds_message(const irange& i, intptr_t start, intp
     if (i.step() != 1) {
         ss << " step " << i.step();
     }
-    ss << ") is not in the half-open range [";
-    ss << start << ", " << end << ")";
+    ss << ") is out of bounds for axis " << axis;
+    ss << " of shape ";
+    print_shape(ss, ndim, shape);
 
     return ss.str();
 }
 
-dnd::irange_out_of_bounds::irange_out_of_bounds(const irange& i, intptr_t start, intptr_t end)
-    : m_what(irange_out_of_bounds_message(i, start, end))
+dnd::irange_out_of_bounds::irange_out_of_bounds(const irange& i, int axis, int ndim, const intptr_t *shape)
+    : m_what(irange_out_of_bounds_message(i, axis, ndim, shape))
 {
     //cout << "throwing irange_out_of_bounds\n";
 }

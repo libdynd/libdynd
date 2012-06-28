@@ -99,7 +99,7 @@ public:
      * the end of a range with a positive step.
      */
     DND_CONSTEXPR irange operator<=(intptr_t last) {
-        return irange(m_start, last+1, m_step);
+        return irange(m_start, (last != -1) ? (last+1) : std::numeric_limits<intptr_t>::max(), m_step);
     }
 
     /**
@@ -115,7 +115,7 @@ public:
      * the end of a range with a negative step.
      */
     DND_CONSTEXPR irange operator>=(intptr_t last) {
-        return irange(m_start, last-1, m_step);
+        return irange(m_start, (last != 0) ? (last-1) : std::numeric_limits<intptr_t>::max(), m_step);
     }
 
     friend DND_CONSTEXPR irange operator<(intptr_t start_minus_one, const irange& i);
