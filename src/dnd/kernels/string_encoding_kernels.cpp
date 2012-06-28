@@ -119,10 +119,10 @@ namespace {
 
     static void append_utf8(uint32_t cp, char *&it, char *end)
     {
-        if (end - it >= 4) {
+        if (end - it >= 6) {
             it = utf8::append(cp, it);
         } else {
-            char tmp[4];
+            char tmp[6];
             char *tmp_ptr = tmp;
             tmp_ptr = utf8::append(cp, tmp_ptr);
             if (tmp_ptr - tmp <= end - it) {
@@ -136,10 +136,10 @@ namespace {
 
     static void noerror_append_utf8(uint32_t cp, char *&it, char *end)
     {
-        if (end - it >= 4) {
+        if (end - it >= 6) {
             it = utf8::append(cp, it);
         } else {
-            char tmp[4];
+            char tmp[6];
             char *tmp_ptr = tmp;
             tmp_ptr = utf8::append(cp, tmp_ptr);
             if (tmp_ptr - tmp <= end - it) {
@@ -307,13 +307,16 @@ namespace {
                 // Null-terminate the destination string, and we're done
                 memset(dst, 0, dst_end - dst);
                 return;
-            } else if (cp != UNICODE_BOM_CODEPOINT) {
-                // Skipping unicode byte order markers, TODO: only skip if at the beginning?
+            } else {
                 append_fn(cp, dst, dst_end);
             }
         }
-        if (src < src_end && ad.overflow_check) {
-            throw std::runtime_error("Input string is too large to convert to destination fixed-size string");
+        if (src < src_end) {
+            if (ad.overflow_check) {
+                throw std::runtime_error("Input string is too large to convert to destination fixed-size string");
+            }
+        } else if (dst < dst_end) {
+            memset(dst, 0, dst_end - dst);
         }
    }
 

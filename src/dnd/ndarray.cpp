@@ -375,11 +375,13 @@ std::string dnd::detail::ndarray_as_string(const ndarray& lhs, assign_error_mode
     ndarray tmp = lhs.vals();
     if (lhs.get_dtype().type_id() == fixedstring_type_id) {
         const fixedstring_dtype *fs = static_cast<const fixedstring_dtype *>(lhs.get_dtype().extended());
-        if (fs->encoding() == string_encoding_ascii || fs->encoding() == string_encoding_utf_8) {
-            const char *data = tmp.get_readonly_originptr();
-            intptr_t size = strnlen(data, tmp.get_dtype().element_size());
-            return std::string(data, size);
+        if (fs->encoding() != string_encoding_ascii && fs->encoding() != string_encoding_utf_8) {
+            tmp = tmp.as_dtype(make_fixedstring_dtype(string_encoding_utf_8, 4 * tmp.get_dtype().element_size() / tmp.get_dtype().alignment()));
+            tmp = tmp.vals();
         }
+        const char *data = tmp.get_readonly_originptr();
+        intptr_t size = strnlen(data, tmp.get_dtype().element_size());
+        return std::string(data, size);
     }
 
     stringstream ss;

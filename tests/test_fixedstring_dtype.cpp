@@ -68,6 +68,18 @@ TEST(FixedstringDType, Basic) {
     //cout << a << endl;
 }
 
+TEST(FixedstringDType, Casting) {
+    ndarray a;
+
+    a = ndarray(make_fixedstring_dtype(string_encoding_utf_16, 16));
+    // Fill up the string with values
+    a.vals() = std::string("0123456789012345");
+    EXPECT_EQ("0123456789012345", a.as<std::string>());
+    // Confirm that now assigning a smaller string works
+    a.vals() = std::string("abc");
+    EXPECT_EQ("abc", a.as<std::string>());
+}
+
 TEST(FixedstringDType, SingleCompare) {
     ndarray a(2, make_fixedstring_dtype(string_encoding_utf_8, 7));
     single_compare_kernel_instance k;
