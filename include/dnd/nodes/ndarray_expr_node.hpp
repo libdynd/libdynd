@@ -172,15 +172,6 @@ public:
                         assign_error_mode errmode, bool allow_in_place) = 0;
 
     /**
-     * Broadcasts this node to a new shape.
-     *
-     * IMPORTANT: The shape isn't validated, it must be made correct by the caller,
-     *            for instance by construction from broadcasting this node with another.
-     */
-    virtual boost::intrusive_ptr<ndarray_expr_node> broadcast_to_shape(int ndim,
-                            const intptr_t *shape, bool allow_in_place) = 0;
-
-    /**
      * Applies a linear index to the node, returning either the current node (for do-nothing
      * indexes), or a new node with the index applied. This may apply the indexing up
      * the tree, or in cases where this is not possible, return a node which applies the
@@ -290,9 +281,6 @@ public:
 
     ndarray_expr_node_ptr as_dtype(const dtype& dt,
                         assign_error_mode errmode, bool allow_in_place);
-
-    ndarray_expr_node_ptr broadcast_to_shape(int ndim,
-                            const intptr_t *shape, bool allow_in_place);
 
     ndarray_expr_node_ptr apply_linear_index(
                     int ndim, const bool *remove_axis,

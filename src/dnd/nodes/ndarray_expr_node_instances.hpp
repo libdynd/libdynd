@@ -68,25 +68,6 @@ public:
         }
     }
 
-    ndarray_expr_node_ptr broadcast_to_shape(int ndim,
-                        const intptr_t *shape, bool allow_in_place)
-    {
-        if (allow_in_place) {
-            m_opnodes[0] = m_opnodes[0]->broadcast_to_shape(ndim, shape, true);
-            m_opnodes[1] = m_opnodes[1]->broadcast_to_shape(ndim, shape, true);
-            m_shape.init(ndim, shape);
-            m_ndim = ndim;
-            return ndarray_expr_node_ptr(this);
-        } else {
-            ndarray_expr_node_ptr result(
-                    new elementwise_binary_op_expr_node(m_dtype,
-                                    m_ndim, m_shape.get(),
-                                    m_opnodes[0]->broadcast_to_shape(ndim, shape, false),
-                                    m_opnodes[1]->broadcast_to_shape(ndim, shape, false), m_op_factory));
-            return result;
-        }
-    }
-
     void get_binary_operation(intptr_t dst_fixedstride, intptr_t src0_fixedstride,
                                 intptr_t src1_fixedstride,
                                 kernel_instance<binary_operation_t>& out_kernel) const
@@ -281,8 +262,7 @@ ndarray_expr_node_ptr make_elementwise_binary_op_expr_node(ndarray_expr_node *no
 
         return ndarray_expr_node_ptr(new elementwise_binary_op_expr_node<BinaryOperatorFactory>(
                             op_factory.get_dtype(0), op0_ndim, op0_shape.get(),
-                            final_node1->broadcast_to_shape(op0_ndim, op0_shape.get(), false),
-                            final_node2->broadcast_to_shape(op0_ndim, op0_shape.get(), false), op_factory));
+                            final_node1, final_node2, op_factory));
     }
 }
 

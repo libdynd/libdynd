@@ -41,9 +41,6 @@ public:
     ndarray_expr_node_ptr as_dtype(const dtype& dt,
                         dnd::assign_error_mode errmode, bool allow_in_place);
 
-    ndarray_expr_node_ptr broadcast_to_shape(int ndim,
-                        const intptr_t *shape, bool allow_in_place);
-
     ndarray_expr_node_ptr apply_linear_index(
                     int ndim, const bool *remove_axis,
                     const intptr_t *start_index, const intptr_t *index_strides,

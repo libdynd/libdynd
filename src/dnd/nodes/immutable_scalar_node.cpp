@@ -75,30 +75,6 @@ ndarray_expr_node_ptr dnd::immutable_scalar_node::as_dtype(const dtype& dt,
     }
 }
 
-ndarray_expr_node_ptr dnd::immutable_scalar_node::broadcast_to_shape(int ndim,
-                    const intptr_t *shape, bool allow_in_place)
-{
-    // If the shape is identical, don't make a new node
-    if (ndim == m_ndim && memcmp(m_shape.get(), shape, ndim * sizeof(intptr_t)) == 0) {
-        return ndarray_expr_node_ptr(this);
-    }
-
-    if (allow_in_place) {
-        if (ndim == m_ndim) {
-            memcpy(m_shape.get(), shape, ndim * sizeof(intptr_t));
-        } else {
-            // Overwrite the shape
-            m_shape.init(ndim, shape);
-            m_ndim = ndim;
-        }
-        return ndarray_expr_node_ptr(this);
-    } else {
-        return ndarray_expr_node_ptr(
-                new immutable_scalar_node(m_dtype, reinterpret_cast<const char *>(m_data), ndim, shape));
-    }
-}
-
-
 ndarray_expr_node_ptr dnd::immutable_scalar_node::apply_linear_index(
                 int DND_UNUSED(ndim), const bool *DND_UNUSED(remove_axis),
                 const intptr_t *DND_UNUSED(start_index), const intptr_t *DND_UNUSED(index_strides),
