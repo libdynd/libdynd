@@ -218,7 +218,7 @@ ndarray_expr_node_ptr apply_index_to_node(ndarray_expr_node *node,
 /**
  * Applies an integer index to the ndarray node.
  */
-ndarray_expr_node_ptr make_integer_index_expr_node(ndarray_expr_node *node,
+ndarray_expr_node_ptr apply_integer_index_to_node(ndarray_expr_node *node,
                                 int axis, intptr_t idx, bool allow_in_place);
 
 

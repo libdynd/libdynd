@@ -224,18 +224,47 @@ ndarray_expr_node_ptr dnd::apply_index_to_node(ndarray_expr_node *node,
     return node->apply_linear_index(ndim, remove_axis.get(), start_index.get(), index_strides.get(), shape.get(), allow_in_place);
 }
 
-ndarray_expr_node_ptr dnd::make_integer_index_expr_node(ndarray_expr_node *node,
+ndarray_expr_node_ptr dnd::apply_integer_index_to_node(ndarray_expr_node *node,
                                 int axis, intptr_t idx, bool allow_in_place)
 {
-    // Validate the axis
-    if (axis < 0 || axis >= node->get_ndim()) {
-        throw axis_out_of_bounds(axis, 0, node->get_ndim());
+    int ndim = node->get_ndim();
+
+    if (axis < 0 || axis >= ndim) {
+        throw axis_out_of_bounds(axis, 0, ndim);
+    }
+    int shape_axis = node->get_shape()[axis];
+
+    if (idx >= 0) {
+        if (idx < shape_axis) {
+            // Normal positive index
+        } else {
+            throw index_out_of_bounds(idx, idx, ndim, node->get_shape());
+        }
+    } else if (idx >= -shape_axis) {
+        // Python style negative index
+        idx += shape_axis;
+    } else {
+        throw index_out_of_bounds(idx, idx, ndim, node->get_shape());
     }
 
-    // Validate the index
-    if (idx < 0 || idx >= node->get_shape()[axis]) {
-        throw index_out_of_bounds(idx, axis, node->get_ndim(), node->get_shape());
-    }
+    shortvector<bool> remove_axis(ndim);
+    shortvector<intptr_t> start_index(ndim);
+    shortvector<intptr_t> index_strides(ndim);
 
-    return node->apply_integer_index(axis, idx, allow_in_place);
+    for (int i = 0; i < ndim; ++i) {
+        remove_axis[i] = false;
+    }
+    remove_axis[axis] = true;
+
+    for (int i = 0; i < ndim; ++i) {
+        start_index[i] = 0;
+    }
+    start_index[axis] = idx;
+
+    for (int i = 0; i < ndim; ++i) {
+        index_strides[i] = 1;
+    }
+    index_strides[axis] = 0;
+
+    return node->apply_linear_index(ndim, remove_axis.get(), start_index.get(), index_strides.get(), node->get_shape(), allow_in_place);
 }

@@ -194,20 +194,6 @@ public:
                     const intptr_t *shape,
                     bool allow_in_place) = 0;
 
-    /**
-     * Applies a single integer index to the node. See apply_linear_index for more details.
-     *
-     * IMPORTANT: The input axis and idx are not validated, their correctness must
-     *            be ensured by the caller.
-     *
-     * @param axis  Which axis to index
-     * @param idx   The index to apply
-     * @param allow_in_place  The operation is permitted mutate the node data and return 'this'.
-     */
-    virtual boost::intrusive_ptr<ndarray_expr_node> apply_integer_index(
-                                        int axis, intptr_t idx, bool allow_in_place);
-
-
     /** Debug printing of the tree */
     void debug_dump(std::ostream& o, const std::string& indent) const;
     /** Debug printing of the data from the derived class */
@@ -287,8 +273,6 @@ public:
                     const intptr_t *start_index, const intptr_t *index_strides,
                     const intptr_t *shape,
                     bool allow_in_place);
-
-    // TODO: Implement apply_integer_index
 
     const char *node_name() const {
         return "strided_array";

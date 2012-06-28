@@ -150,35 +150,6 @@ ndarray_expr_node_ptr dnd::ndarray_expr_node::evaluate()
     throw std::runtime_error("evaluating this expression graph is not yet supported");
 }
 
-ndarray_expr_node_ptr dnd::ndarray_expr_node::apply_integer_index(int axis, intptr_t idx,
-                                                    bool allow_in_place)
-{
-    // TODO: Create a specific integer_index_expr_node
-    //
-    // For now, convert to a linear index.
-    int ndim = m_ndim;
-    shortvector<bool> remove_axis(ndim);
-    shortvector<intptr_t> start_index(ndim);
-    shortvector<intptr_t> index_strides(ndim);
-
-    for (int i = 0; i < ndim; ++i) {
-        remove_axis[i] = false;
-    }
-    remove_axis[axis] = true;
-
-    for (int i = 0; i < ndim; ++i) {
-        start_index[i] = 0;
-    }
-    start_index[axis] = idx;
-
-    for (int i = 0; i < ndim; ++i) {
-        index_strides[i] = 1;
-    }
-    index_strides[axis] = 0;
-
-    return apply_linear_index(ndim, remove_axis.get(), start_index.get(), index_strides.get(), m_shape.get(), allow_in_place);
-}
-
 static void print_node_category(ostream& o, expr_node_category cat)
 {
     switch (cat) {
@@ -429,6 +400,6 @@ void dnd::strided_array_expr_node::debug_dump_extra(ostream& o, const string& in
     }
     o << ")\n";
     o << indent << " originptr: " << (void *)m_originptr << "\n";
-    o << indent << " buffer owner:\n";
+    o << indent << " memoryblock owning the data:\n";
     memory_block_debug_dump(m_memblock.get(), o, indent + " ");
 }

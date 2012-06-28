@@ -30,7 +30,10 @@ TEST(NDArrayIndex, BasicInteger) {
     b = a(2);
     EXPECT_EQ(5, b(0).as<int>());
     EXPECT_EQ(6, b(1).as<int>());
-    EXPECT_THROW(b(-1), index_out_of_bounds);
+    // Python style negative index
+    EXPECT_EQ(5, b(-2).as<int>());
+    EXPECT_EQ(6, b(-1).as<int>());
+    EXPECT_THROW(b(-3), index_out_of_bounds);
     EXPECT_THROW(b(2), index_out_of_bounds);
     EXPECT_THROW(b(0,0), too_many_indices);
 

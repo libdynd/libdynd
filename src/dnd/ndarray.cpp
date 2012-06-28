@@ -188,7 +188,7 @@ ndarray dnd::ndarray::index(int nindex, const irange *indices) const
 const ndarray dnd::ndarray::operator()(intptr_t idx) const
 {
     // Casting away const is ok here, because we pass 'false' to 'allow_in_place'
-    return ndarray(make_integer_index_expr_node(get_expr_tree(), 0, idx, false));
+    return ndarray(apply_integer_index_to_node(get_expr_tree(), 0, idx, false));
 }
 
 ndarray& dnd::ndarray::operator=(const ndarray& rhs)
