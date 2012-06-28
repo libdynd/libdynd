@@ -11,10 +11,9 @@
 #include <dnd/exceptions.hpp>
 #include <dnd/shape_tools.hpp>
 #include <dnd/nodes/ndarray_node.hpp>
+#include <dnd/nodes/elementwise_binary_kernel_node.hpp>
 #include <dnd/raw_iteration.hpp>
 #include <dnd/dtypes/conversion_dtype.hpp>
-
-#include "ndarray_expr_node_instances.hpp"
 
 using namespace std;
 using namespace dnd;

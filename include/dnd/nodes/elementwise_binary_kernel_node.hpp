@@ -3,8 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DND__NDARRAY_EXPR_NODE_INSTANCES_HPP_
-#define _DND__NDARRAY_EXPR_NODE_INSTANCES_HPP_
+#ifndef _DND__ELEMENTWISE_BINARY_KERNEL_NODE_HPP_
+#define _DND__ELEMENTWISE_BINARY_KERNEL_NODE_HPP_
 
 #include <dnd/nodes/ndarray_node.hpp>
 #include <dnd/shape_tools.hpp>
@@ -226,4 +226,4 @@ ndarray_node_ref make_elementwise_binary_op_expr_node(ndarray_node *node1,
 
 } // namespace dnd
 
-#endif // _DND__NDARRAY_EXPR_NODE_INSTANCES_HPP_
+#endif // _DND__ELEMENTWISE_BINARY_KERNEL_NODE_HPP_

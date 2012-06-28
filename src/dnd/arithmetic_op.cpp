@@ -9,7 +9,7 @@
 #include <dnd/raw_iteration.hpp>
 #include <dnd/dtype_promotion.hpp>
 #include <dnd/kernels/builtin_dtype_binary_kernel_table.hpp>
-#include "nodes/ndarray_expr_node_instances.hpp"
+#include <dnd/nodes/elementwise_binary_kernel_node.hpp>
 
 using namespace std;
 using namespace dnd;

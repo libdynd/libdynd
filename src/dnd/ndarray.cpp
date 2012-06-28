@@ -15,9 +15,9 @@
 #include <dnd/dtypes/view_dtype.hpp>
 #include <dnd/dtypes/fixedstring_dtype.hpp>
 
-#include "nodes/ndarray_expr_node_instances.hpp"
 #include <dnd/nodes/immutable_scalar_node.hpp>
 #include <dnd/nodes/strided_ndarray_node.hpp>
+#include <dnd/nodes/elementwise_binary_kernel_node.hpp>
 
 using namespace std;
 using namespace dnd;
