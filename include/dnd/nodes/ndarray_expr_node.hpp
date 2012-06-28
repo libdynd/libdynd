@@ -285,10 +285,6 @@ public:
                     const dtype& dt, int ndim, const intptr_t *shape,
                     const intptr_t *strides, char *originptr,
                     const memory_block_ref& memblock);
-    // TODO: Add a virtual broadcast function to the base node type, then remove this friend function
-    friend ndarray_expr_node_ptr make_broadcast_strided_array_expr_node(ndarray_expr_node *node,
-                                int ndim, const intptr_t *shape,
-                                const dtype& dt, assign_error_mode errmode);
 };
 
 

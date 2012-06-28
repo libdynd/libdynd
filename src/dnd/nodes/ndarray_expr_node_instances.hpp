@@ -197,21 +197,6 @@ ndarray_expr_node_ptr make_strided_array_expr_node(
             const intptr_t *strides, char *originptr,
             const dnd::shared_ptr<void>& buffer_owner);
 
-/**
- * Creates an aligned strided_array_expr_node, possibly with a follow-on node to make
- * the data aligned if it is not, baking the shape broadcasting into the strided_array_expr_node.
- *
- * @param node   The strided array node to process.
- * @param ndim   The number of dimensions to broadcast to.
- * @param shape  The shape to broadcast to.
- * @param dt     The data type the node should be. This may cause a dtype conversion
- *               node to be added.
- * @param errmode  The error mode to be used during dtype conversion.
- */
-ndarray_expr_node_ptr make_broadcast_strided_array_expr_node(ndarray_expr_node *node,
-                                int ndim, const intptr_t *shape,
-                                const dtype& dt, assign_error_mode errmode);
-
 /** Applies the slicing index to the ndarray node. */
 ndarray_expr_node_ptr apply_index_to_node(ndarray_expr_node *node,
                                 int nindex, const irange *indices, bool allow_in_place);

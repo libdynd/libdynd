@@ -29,28 +29,6 @@ ndarray_expr_node_ptr dnd::make_strided_array_expr_node(
                                         shape, strides, originptr, memblock));
 }
 
-ndarray_expr_node_ptr dnd::make_broadcast_strided_array_expr_node(ndarray_expr_node *node,
-                                int ndim, const intptr_t *shape,
-                                const dtype& dt, assign_error_mode errmode)
-{
-    if (node->get_node_type() != strided_array_node_type) {
-        throw std::runtime_error("broadcasting only supports strided arrays so far");
-    }
-
-    strided_array_expr_node *snode = static_cast<strided_array_expr_node *>(node);
-
-    // Broadcast the array's strides to the desired shape (may raise a broadcast error)
-    dimvector strides(ndim);
-    broadcast_to_shape(ndim, shape, snode, strides.get());
-
-    // Create the strided array node
-    ndarray_expr_node_ptr new_node(new strided_array_expr_node(
-                    make_conversion_dtype(dt, snode->get_dtype(), errmode),
-                    ndim, shape, strides.get(), snode->get_readwrite_originptr(), snode->get_memory_block()));
-
-    return DND_MOVE(new_node);
-}
-
 ndarray_expr_node_ptr dnd::apply_index_to_node(ndarray_expr_node *node,
                                 int nindex, const irange *indices, bool allow_in_place)
 {
