@@ -16,7 +16,7 @@
 #include <dnd/dtype_assign.hpp>
 #include <dnd/shortvector.hpp>
 #include <dnd/irange.hpp>
-#include <dnd/nodes/ndarray_expr_node.hpp>
+#include <dnd/nodes/ndarray_node.hpp>
 #include <dnd/nodes/strided_ndarray_node.hpp>
 
 namespace dnd {
@@ -36,7 +36,7 @@ class ndarray {
      * The ndarray is fully contained in an expression tree, this is the root node, a
      * boost_intrusive_ptr, to make the ndarray size equivalent to a single pointer.
      */
-    ndarray_expr_node_ptr m_expr_tree;
+    ndarray_node_ref m_expr_tree;
 
 public:
     /** Constructs an array with no buffer (NULL state) */
@@ -70,9 +70,9 @@ public:
     ndarray(const dtype& dt, int ndim, const intptr_t *shape, const int *axis_perm);
 
     /** Constructs an ndaray from an expr node */
-    explicit ndarray(const ndarray_expr_node_ptr& expr_tree);
+    explicit ndarray(const ndarray_node_ref& expr_tree);
     /** Constructs an ndaray from an expr node */
-    explicit ndarray(ndarray_expr_node_ptr&& expr_tree);
+    explicit ndarray(ndarray_node_ref&& expr_tree);
 
     /** Constructs a one-dimensional array */
     ndarray(intptr_t dim0, const dtype& dt);
@@ -199,7 +199,7 @@ public:
         }
     }
 
-    ndarray_expr_node *get_expr_tree() const {
+    ndarray_node *get_expr_tree() const {
         return m_expr_tree.get();
     }
 

@@ -10,7 +10,7 @@ using namespace std;
 using namespace dnd;
 
 dnd::immutable_scalar_node::immutable_scalar_node(const dtype& dt, const char* data)
-    : ndarray_expr_node(dt, 0, 0, NULL, strided_array_node_category, immutable_scalar_node_type)
+    : ndarray_node(dt, 0, 0, NULL, strided_array_node_category, immutable_scalar_node_type)
 {
     if (dt.is_object_type()) {
         throw runtime_error("immutable_scalar_node doesn't support object dtypes yet");
@@ -26,7 +26,7 @@ dnd::immutable_scalar_node::immutable_scalar_node(const dtype& dt, const char* d
 }
 
 dnd::immutable_scalar_node::immutable_scalar_node(const dtype& dt, const char* data, int ndim, const intptr_t *shape)
-    : ndarray_expr_node(dt, ndim, 0, shape, strided_array_node_category, immutable_scalar_node_type)
+    : ndarray_node(dt, ndim, 0, shape, strided_array_node_category, immutable_scalar_node_type)
 {
     if (dt.is_object_type()) {
         throw runtime_error("immutable_scalar_node doesn't support object dtypes yet");
@@ -62,26 +62,26 @@ void dnd::immutable_scalar_node::as_readonly_data_and_strides(int ndim, char con
     memset(out_strides, 0, ndim * sizeof(intptr_t));
 }
 
-ndarray_expr_node_ptr dnd::immutable_scalar_node::as_dtype(const dtype& dt,
+ndarray_node_ref dnd::immutable_scalar_node::as_dtype(const dtype& dt,
                     dnd::assign_error_mode errmode, bool allow_in_place)
 {
     if (allow_in_place) {
         m_dtype = make_conversion_dtype(dt, m_dtype, errmode);
-        return ndarray_expr_node_ptr(this);
+        return ndarray_node_ref(this);
     } else {
-        return ndarray_expr_node_ptr(new immutable_scalar_node(
+        return ndarray_node_ref(new immutable_scalar_node(
                         make_conversion_dtype(dt, m_dtype, errmode),
                         reinterpret_cast<const char *>(&m_data[0])));
     }
 }
 
-ndarray_expr_node_ptr dnd::immutable_scalar_node::apply_linear_index(
+ndarray_node_ref dnd::immutable_scalar_node::apply_linear_index(
                 int DND_UNUSED(ndim), const bool *DND_UNUSED(remove_axis),
                 const intptr_t *DND_UNUSED(start_index), const intptr_t *DND_UNUSED(index_strides),
                 const intptr_t *DND_UNUSED(shape),
                 bool DND_UNUSED(allow_in_place))
 {
-    return ndarray_expr_node_ptr(this);
+    return ndarray_node_ref(this);
 }
 
 void dnd::immutable_scalar_node::debug_dump_extra(std::ostream& o, const std::string& indent) const

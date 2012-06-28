@@ -16,14 +16,14 @@ using namespace dnd;
 dnd::strided_ndarray_node::strided_ndarray_node(const dtype& dt, int ndim,
                                 const intptr_t *shape, const intptr_t *strides,
                                 char *originptr, const memory_block_ref& memblock)
-    : ndarray_expr_node(dt, ndim, 0, shape, strided_array_node_category, strided_array_node_type),
+    : ndarray_node(dt, ndim, 0, shape, strided_array_node_category, strided_array_node_type),
       m_originptr(originptr), m_strides(ndim, strides), m_memblock(memblock)
 {
 }
 
 dnd::strided_ndarray_node::strided_ndarray_node(const dtype& dt, int ndim,
                                 const intptr_t *shape, const int *axis_perm)
-    : ndarray_expr_node(dt, ndim, 0, shape, strided_array_node_category, strided_array_node_type),
+    : ndarray_node(dt, ndim, 0, shape, strided_array_node_category, strided_array_node_type),
       m_originptr(NULL), m_strides(ndim), m_memblock()
 {
     // Build the strides using the ordering and shape
@@ -68,20 +68,20 @@ void dnd::strided_ndarray_node::as_readonly_data_and_strides(int ndim, char cons
     }
 }
 
-ndarray_expr_node_ptr dnd::strided_ndarray_node::as_dtype(const dtype& dt,
+ndarray_node_ref dnd::strided_ndarray_node::as_dtype(const dtype& dt,
                     dnd::assign_error_mode errmode, bool allow_in_place)
 {
     if (allow_in_place) {
         m_dtype = make_conversion_dtype(dt, m_dtype, errmode);
-        return ndarray_expr_node_ptr(this);
+        return ndarray_node_ref(this);
     } else {
-        return ndarray_expr_node_ptr(new strided_ndarray_node(
+        return ndarray_node_ref(new strided_ndarray_node(
                         make_conversion_dtype(dt, m_dtype, errmode),
                         m_ndim, m_shape.get(), m_strides.get(), m_originptr, m_memblock));
     }
 }
 
-ndarray_expr_node_ptr dnd::strided_ndarray_node::apply_linear_index(
+ndarray_node_ref dnd::strided_ndarray_node::apply_linear_index(
                 int ndim, const bool *remove_axis,
                 const intptr_t *start_index, const intptr_t *index_strides,
                 const intptr_t *shape,
@@ -141,7 +141,7 @@ ndarray_expr_node_ptr dnd::strided_ndarray_node::apply_linear_index(
         }
         m_ndim = j;
 
-        return ndarray_expr_node_ptr(this);
+        return ndarray_node_ref(this);
     } else {
         // Apply the start_index to m_originptr
         char *new_originptr = m_originptr;
@@ -164,7 +164,7 @@ ndarray_expr_node_ptr dnd::strided_ndarray_node::apply_linear_index(
         }
         ndim = j;
 
-        return ndarray_expr_node_ptr(
+        return ndarray_node_ref(
             new strided_ndarray_node(m_dtype, ndim, new_shape.get(), new_strides.get(),
                                         new_originptr, m_memblock));
     }

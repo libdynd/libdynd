@@ -6,14 +6,14 @@
 #ifndef _DND__STRIDED_NDARRAY_NODE_HPP_
 #define _DND__STRIDED_NDARRAY_NODE_HPP_
 
-#include <dnd/nodes/ndarray_expr_node.hpp>
+#include <dnd/nodes/ndarray_node.hpp>
 
 namespace dnd {
 
 /**
  * NDArray node which holds a raw strided array.
  */
-class strided_ndarray_node : public ndarray_expr_node {
+class strided_ndarray_node : public ndarray_node {
     char *m_originptr;
     dimvector m_strides;
     memory_block_ref m_memblock;
@@ -65,10 +65,10 @@ public:
 
     void as_readonly_data_and_strides(int ndim, char const **out_originptr, intptr_t *out_strides) const;
 
-    ndarray_expr_node_ptr as_dtype(const dtype& dt,
+    ndarray_node_ref as_dtype(const dtype& dt,
                         assign_error_mode errmode, bool allow_in_place);
 
-    ndarray_expr_node_ptr apply_linear_index(
+    ndarray_node_ref apply_linear_index(
                     int ndim, const bool *remove_axis,
                     const intptr_t *start_index, const intptr_t *index_strides,
                     const intptr_t *shape,
@@ -80,7 +80,7 @@ public:
 
     void debug_dump_extra(std::ostream& o, const std::string& indent) const;
 
-    friend ndarray_expr_node_ptr make_strided_ndarray_node(
+    friend ndarray_node_ref make_strided_ndarray_node(
                     const dtype& dt, int ndim, const intptr_t *shape,
                     const intptr_t *strides, char *originptr,
                     const memory_block_ref& memblock);

@@ -4,7 +4,7 @@
 //
 
 #include <dnd/memory_block.hpp>
-#include <dnd/nodes/ndarray_expr_node.hpp>
+#include <dnd/nodes/ndarray_node.hpp>
 
 using namespace std;
 using namespace dnd;

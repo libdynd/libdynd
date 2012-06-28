@@ -19,17 +19,17 @@ using namespace dnd;
 
 // Node factory functions
 
-ndarray_expr_node_ptr dnd::make_strided_ndarray_node(
+ndarray_node_ref dnd::make_strided_ndarray_node(
             const dtype& dt, int ndim, const intptr_t *shape,
             const intptr_t *strides, char *originptr,
             const memory_block_ref& memblock)
 {
     // TODO: Add a multidimensional DND_ASSERT_ALIGNED check here
-    return ndarray_expr_node_ptr(new strided_ndarray_node(dt, ndim,
+    return ndarray_node_ref(new strided_ndarray_node(dt, ndim,
                                         shape, strides, originptr, memblock));
 }
 
-ndarray_expr_node_ptr dnd::apply_index_to_node(ndarray_expr_node *node,
+ndarray_node_ref dnd::apply_index_to_node(ndarray_node *node,
                                 int nindex, const irange *indices, bool allow_in_place)
 {
     // Validate the number of indices
@@ -202,7 +202,7 @@ ndarray_expr_node_ptr dnd::apply_index_to_node(ndarray_expr_node *node,
     return node->apply_linear_index(ndim, remove_axis.get(), start_index.get(), index_strides.get(), shape.get(), allow_in_place);
 }
 
-ndarray_expr_node_ptr dnd::apply_integer_index_to_node(ndarray_expr_node *node,
+ndarray_node_ref dnd::apply_integer_index_to_node(ndarray_node *node,
                                 int axis, intptr_t idx, bool allow_in_place)
 {
     int ndim = node->get_ndim();

@@ -63,7 +63,7 @@ dnd::broadcast_error::broadcast_error(int noperands, const ndarray **operands)
 {
 }
 
-inline string broadcast_error_message(int noperands, ndarray_expr_node **operands)
+inline string broadcast_error_message(int noperands, ndarray_node **operands)
 {
     stringstream ss;
 
@@ -78,7 +78,7 @@ inline string broadcast_error_message(int noperands, ndarray_expr_node **operand
     return ss.str();
 }
 
-dnd::broadcast_error::broadcast_error(int noperands, ndarray_expr_node **operands)
+dnd::broadcast_error::broadcast_error(int noperands, ndarray_node **operands)
     : m_what(broadcast_error_message(noperands, operands))
 {
 }

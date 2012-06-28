@@ -6,14 +6,14 @@
 #ifndef _DND__IMMUTABLE_SCALAR_NODE_HPP_
 #define _DND__IMMUTABLE_SCALAR_NODE_HPP_
 
-#include <dnd/nodes/ndarray_expr_node.hpp>
+#include <dnd/nodes/ndarray_node.hpp>
 
 namespace dnd {
 
 /**
  * NDArray expression node which holds an immutable scalar.
  */
-class immutable_scalar_node : public ndarray_expr_node {
+class immutable_scalar_node : public ndarray_node {
     char *m_data;
     /** Builtin storage for small immutable scalars */
     int64_t m_storage[2];
@@ -38,10 +38,10 @@ public:
     /** Provides the data pointer and strides array for the tree evaluation code */
     void as_readonly_data_and_strides(int ndim, char const **out_originptr, intptr_t *out_strides) const;
 
-    ndarray_expr_node_ptr as_dtype(const dtype& dt,
+    ndarray_node_ref as_dtype(const dtype& dt,
                         dnd::assign_error_mode errmode, bool allow_in_place);
 
-    ndarray_expr_node_ptr apply_linear_index(
+    ndarray_node_ref apply_linear_index(
                     int ndim, const bool *remove_axis,
                     const intptr_t *start_index, const intptr_t *index_strides,
                     const intptr_t *shape,
@@ -55,9 +55,9 @@ public:
 };
 
 template<class T>
-typename enable_if<is_dtype_scalar<T>::value, ndarray_expr_node_ptr>::type make_immutable_scalar_node(const T& value)
+typename enable_if<is_dtype_scalar<T>::value, ndarray_node_ref>::type make_immutable_scalar_node(const T& value)
 {
-    return ndarray_expr_node_ptr(new immutable_scalar_node(make_dtype<T>(), reinterpret_cast<const char *>(&value)));
+    return ndarray_node_ref(new immutable_scalar_node(make_dtype<T>(), reinterpret_cast<const char *>(&value)));
 }
 
 

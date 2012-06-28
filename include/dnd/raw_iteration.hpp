@@ -346,8 +346,8 @@ public:
         init(ndim, shape, data, strides, axis_perm.get());
     }
     raw_ndarray_iter(int ndim, const intptr_t *shape,
-                                const dtype& op0_dt, ndarray_expr_node_ptr& op0,
-                                const ndarray_expr_node *op1)
+                                const dtype& op0_dt, ndarray_node_ref& op0,
+                                const ndarray_node *op1)
     {
         shortvector<intptr_t> strides(ndim);
         char *data[3];
@@ -390,9 +390,9 @@ public:
     }
 
     raw_ndarray_iter(int ndim, const intptr_t *shape,
-                                const dtype& op0_dt, ndarray_expr_node_ptr& op0,
-                                const ndarray_expr_node *op1,
-                                const ndarray_expr_node *op2)
+                                const dtype& op0_dt, ndarray_node_ref& op0,
+                                const ndarray_node *op1,
+                                const ndarray_node *op2)
     {
         if (op0_dt.kind() == expression_kind) {
             std::stringstream ss;

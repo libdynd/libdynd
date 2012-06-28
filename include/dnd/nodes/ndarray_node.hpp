@@ -3,8 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DND__NDARRAY_EXPR_NODE_HPP_
-#define _DND__NDARRAY_EXPR_NODE_HPP_
+#ifndef _DND__NDARRAY_NODE_HPP_
+#define _DND__NDARRAY_NODE_HPP_
 
 #include <boost/detail/atomic_count.hpp>
 #include <boost/intrusive_ptr.hpp>
@@ -46,7 +46,7 @@ enum expr_node_type {
  *
  * TODO: Model this after how LLVM does this kind of thing?
  */
-class ndarray_expr_node {
+class ndarray_node {
 #ifdef DND_CLING
     // A hack avoiding boost atomic_count, since that creates inline assembly which LLVM JIT doesn't like!
     mutable long m_use_count;
@@ -56,8 +56,8 @@ class ndarray_expr_node {
 #endif
 
     // Non-copyable
-    ndarray_expr_node(const ndarray_expr_node&);
-    ndarray_expr_node& operator=(const ndarray_expr_node&);
+    ndarray_node(const ndarray_node&);
+    ndarray_node& operator=(const ndarray_node&);
 
 protected:
     expr_node_type m_node_type;
@@ -71,12 +71,12 @@ protected:
     /* The shape of the result array */
     dimvector m_shape;
     /* Pointers to the child nodes */
-    shortvector<boost::intrusive_ptr<ndarray_expr_node> > m_opnodes;
+    shortvector<boost::intrusive_ptr<ndarray_node> > m_opnodes;
 
     /**
      * Constructs the basic node with NULL operand children.
      */
-    ndarray_expr_node(const dtype& dt, int ndim, int nop, const intptr_t *shape,
+    ndarray_node(const dtype& dt, int ndim, int nop, const intptr_t *shape,
                         expr_node_category node_category, expr_node_type node_type)
         : m_use_count(0), m_node_type(node_type), m_node_category(node_category),
             m_dtype(dt), m_ndim(ndim), m_nop(nop), m_shape(ndim, shape),
@@ -90,7 +90,7 @@ public:
         return m_use_count <= 1;
     }
 
-    virtual ~ndarray_expr_node() {
+    virtual ~ndarray_node() {
     }
 
     const dtype& get_dtype() const {
@@ -105,13 +105,13 @@ public:
         return m_nop;
     }
 
-    boost::intrusive_ptr<ndarray_expr_node> get_opnode(int i)
+    boost::intrusive_ptr<ndarray_node> get_opnode(int i)
     {
         if (i >= 0 && i < m_nop) {
             return m_opnodes[i];
         } else {
             std::stringstream ss;
-            ss << "tried to get ndarray_expr_node operand " << i << " from a " << m_nop << "-ary node";
+            ss << "tried to get ndarray_node operand " << i << " from a " << m_nop << "-ary node";
             throw std::runtime_error(ss.str());
 
         }
@@ -163,12 +163,12 @@ public:
      * Evaluates the node into a strided array with a dtype that is
      * not expression_kind.
      */
-    boost::intrusive_ptr<ndarray_expr_node>  evaluate();
+    boost::intrusive_ptr<ndarray_node>  evaluate();
 
     /**
      * Converts this node to a new dtype. This uses a conversion_dtype.
      */
-    virtual boost::intrusive_ptr<ndarray_expr_node> as_dtype(const dtype& dt,
+    virtual boost::intrusive_ptr<ndarray_node> as_dtype(const dtype& dt,
                         assign_error_mode errmode, bool allow_in_place) = 0;
 
     /**
@@ -188,7 +188,7 @@ public:
      *            the shape of the node is broadcastable to the shape for which the linear
      *            index is applied.
      */
-    virtual boost::intrusive_ptr<ndarray_expr_node> apply_linear_index(
+    virtual boost::intrusive_ptr<ndarray_node> apply_linear_index(
                     int ndim, const bool *remove_axis,
                     const intptr_t *start_index, const intptr_t *index_strides,
                     const intptr_t *shape,
@@ -201,22 +201,22 @@ public:
 
     virtual const char *node_name() const = 0;
 
-    friend void intrusive_ptr_add_ref(const ndarray_expr_node *node);
-    friend void intrusive_ptr_release(const ndarray_expr_node *node);
+    friend void intrusive_ptr_add_ref(const ndarray_node *node);
+    friend void intrusive_ptr_release(const ndarray_node *node);
 };
 
 /**
  * Use boost::intrusive_ptr as the smart pointer implementation.
  */
-typedef boost::intrusive_ptr<ndarray_expr_node> ndarray_expr_node_ptr;
+typedef boost::intrusive_ptr<ndarray_node> ndarray_node_ref;
 
-/** Adds a reference, for intrusive_ptr<ndarray_expr_node> to use */
-inline void intrusive_ptr_add_ref(const ndarray_expr_node *node) {
+/** Adds a reference, for intrusive_ptr<ndarray_node> to use */
+inline void intrusive_ptr_add_ref(const ndarray_node *node) {
     ++node->m_use_count;
 }
 
-/** Frees a reference, for intrusive_ptr<ndarray_expr_node> to use */
-inline void intrusive_ptr_release(const ndarray_expr_node *node) {
+/** Frees a reference, for intrusive_ptr<ndarray_node> to use */
+inline void intrusive_ptr_release(const ndarray_node *node) {
     if (--node->m_use_count == 0) {
         delete node;
     }
@@ -224,4 +224,4 @@ inline void intrusive_ptr_release(const ndarray_expr_node *node) {
 
 } // namespace dnd
 
-#endif // _DND__NDARRAY_EXPR_NODE_HPP_
+#endif // _DND__NDARRAY_NODE_HPP_

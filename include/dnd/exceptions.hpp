@@ -15,7 +15,7 @@ namespace dnd {
 
 // Forward declaration of ndarray class, for broadcast_error
 class ndarray;
-class ndarray_expr_node;
+class ndarray_node;
 
 class dnd_exception : public std::exception {
 public:
@@ -49,7 +49,7 @@ public:
      * An exception for when a number of input operands can't be broadcast
      * together.
      */
-    broadcast_error(int noperands, ndarray_expr_node **operands);
+    broadcast_error(int noperands, ndarray_node **operands);
 
     virtual ~broadcast_error() throw() {
     }

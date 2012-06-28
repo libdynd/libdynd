@@ -64,7 +64,7 @@ void dnd::broadcast_to_shape(int dst_ndim, const intptr_t *dst_shape,
     //cout << "\n";
 }
 
-void dnd::broadcast_input_shapes(int noperands, ndarray_expr_node **operands,
+void dnd::broadcast_input_shapes(int noperands, ndarray_node **operands,
                         int* out_ndim, dimvector* out_shape)
 {
     // Get the number of broadcast dimensions

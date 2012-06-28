@@ -28,7 +28,7 @@ dnd::ndarray::ndarray()
 }
 
 template<class T>
-typename enable_if<is_dtype_scalar<T>::value, ndarray_expr_node *>::type make_immutable_scalar_node_raw(const T& value)
+typename enable_if<is_dtype_scalar<T>::value, ndarray_node *>::type make_immutable_scalar_node_raw(const T& value)
 {
     return new immutable_scalar_node(make_dtype<T>(), reinterpret_cast<const char *>(&value));
 }
@@ -117,12 +117,12 @@ dnd::ndarray::ndarray(const dtype& dt, int ndim, const intptr_t *shape, const in
 }
 
 
-dnd::ndarray::ndarray(const ndarray_expr_node_ptr& expr_tree)
+dnd::ndarray::ndarray(const ndarray_node_ref& expr_tree)
     : m_expr_tree(expr_tree)
 {
 }
 
-dnd::ndarray::ndarray(ndarray_expr_node_ptr&& expr_tree)
+dnd::ndarray::ndarray(ndarray_node_ref&& expr_tree)
     : m_expr_tree(DND_MOVE(expr_tree))
 {
 }

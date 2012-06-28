@@ -9,7 +9,7 @@
 
 #include <dnd/ndarray.hpp>
 #include <dnd/shape_tools.hpp>
-#include <dnd/nodes/ndarray_expr_node.hpp>
+#include <dnd/nodes/ndarray_node.hpp>
 #include <dnd/raw_iteration.hpp>
 #include <dnd/dtypes/conversion_dtype.hpp>
 
@@ -18,46 +18,46 @@
 using namespace std;
 using namespace dnd;
 
-void dnd::ndarray_expr_node::as_readwrite_data_and_strides(int ndim, char ** DND_UNUSED(out_data),
+void dnd::ndarray_node::as_readwrite_data_and_strides(int ndim, char ** DND_UNUSED(out_data),
                                                 intptr_t * DND_UNUSED(out_strides)) const
 {
     throw std::runtime_error("as_readwrite_data_and_strides is only valid for "
                              "nodes with an expr_node_strided_array category");
 }
 
-void dnd::ndarray_expr_node::as_readonly_data_and_strides(int ndim, char const ** DND_UNUSED(out_data),
+void dnd::ndarray_node::as_readonly_data_and_strides(int ndim, char const ** DND_UNUSED(out_data),
                                                 intptr_t * DND_UNUSED(out_strides)) const
 {
     throw std::runtime_error("as_readonly_data_and_strides is only valid for "
                              "nodes with an expr_node_strided_array category");
 }
 
-void dnd::ndarray_expr_node::get_nullary_operation(intptr_t, kernel_instance<nullary_operation_t>&) const
+void dnd::ndarray_node::get_nullary_operation(intptr_t, kernel_instance<nullary_operation_t>&) const
 {
     throw std::runtime_error("get_nullary_operation is only valid for "
                              "generator nodes which provide an implementation");
 }
 
-void dnd::ndarray_expr_node::get_unary_operation(intptr_t, intptr_t, kernel_instance<unary_operation_t>&) const
+void dnd::ndarray_node::get_unary_operation(intptr_t, intptr_t, kernel_instance<unary_operation_t>&) const
 {
     throw std::runtime_error("get_unary_operation is only valid for "
                              "unary nodes which provide an implementation");
 }
 
-void dnd::ndarray_expr_node::get_binary_operation(intptr_t, intptr_t, intptr_t, kernel_instance<binary_operation_t>&) const
+void dnd::ndarray_node::get_binary_operation(intptr_t, intptr_t, intptr_t, kernel_instance<binary_operation_t>&) const
 {
     throw std::runtime_error("get_binary_operation is only valid for "
                              "binary nodes which provide an implementation");
 }
 
-ndarray_expr_node_ptr dnd::ndarray_expr_node::evaluate()
+ndarray_node_ref dnd::ndarray_node::evaluate()
 {
     switch (m_nop) {
         case 0:
             if (m_node_category == strided_array_node_category) {
                 // Evaluate any expression dtype as well
                 if (m_dtype.kind() == expression_kind) {
-                    ndarray_expr_node_ptr result;
+                    ndarray_node_ref result;
                     raw_ndarray_iter<1,1> iter(m_ndim, m_shape.get(), m_dtype.value_dtype(), result, this);
 
                     intptr_t innersize = iter.innersize();
@@ -79,15 +79,15 @@ ndarray_expr_node_ptr dnd::ndarray_expr_node::evaluate()
                     return DND_MOVE(result);
                 }
 
-                return ndarray_expr_node_ptr(this);
+                return ndarray_node_ref(this);
             }
             break;
         case 1: {
-            const ndarray_expr_node *op1 = m_opnodes[0].get();
+            const ndarray_node *op1 = m_opnodes[0].get();
 
             if (m_node_category == elementwise_node_category) {
                 if (op1->get_node_category() == strided_array_node_category) {
-                    ndarray_expr_node_ptr result;
+                    ndarray_node_ref result;
                     raw_ndarray_iter<1,1> iter(m_ndim, m_shape.get(), m_dtype.value_dtype(), result, op1);
 
                     intptr_t innersize = iter.innersize();
@@ -109,14 +109,14 @@ ndarray_expr_node_ptr dnd::ndarray_expr_node::evaluate()
             break;
         }
         case 2: {
-            const ndarray_expr_node *op1 = m_opnodes[0].get();
-            const ndarray_expr_node *op2 = m_opnodes[1].get();
+            const ndarray_node *op1 = m_opnodes[0].get();
+            const ndarray_node *op2 = m_opnodes[1].get();
 
             if (m_node_category == elementwise_node_category) {
                 // Special case of two strided sub-operands, requiring no intermediate buffers
                 if (op1->get_node_category() == strided_array_node_category &&
                             op2->get_node_category() == strided_array_node_category) {
-                    ndarray_expr_node_ptr result;
+                    ndarray_node_ref result;
                     raw_ndarray_iter<1,2> iter(m_ndim, m_shape.get(),
                                                 m_dtype.value_dtype(), result,
                                                 op1, op2);
@@ -192,7 +192,7 @@ static void print_node_type(ostream& o, expr_node_type type)
     }
 }
 
-void dnd::ndarray_expr_node::debug_dump(ostream& o, const string& indent) const
+void dnd::ndarray_node::debug_dump(ostream& o, const string& indent) const
 {
     o << indent << "(\"" << node_name() << "\",\n";
 
@@ -225,7 +225,7 @@ void dnd::ndarray_expr_node::debug_dump(ostream& o, const string& indent) const
     o << indent << ")\n";
 }
 
-void dnd::ndarray_expr_node::debug_dump_extra(ostream&, const string&) const
+void dnd::ndarray_node::debug_dump_extra(ostream&, const string&) const
 {
     // Default is no extra information
 }
