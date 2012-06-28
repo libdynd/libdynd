@@ -86,6 +86,23 @@ public:
                     const memory_block_ref& memblock);
 };
 
+/**
+ * Creates an expr node out of the raw data for a strided array. This will create
+ * a strided_ndarray_node, the caller should ensure that the data is aligned,
+ * and use an unaligned<> dtype if not.
+ *
+ * @param dt        The data type of the raw elements.
+ * @param ndim      The number of dimensions in the array.
+ * @param shape     The shape of the array (has 'ndim' elements)
+ * @param strides   The strides of the array (has 'ndim' elements)
+ * @param originptr The pointer to the element whose multi-index is all zeros.
+ * @param buffer_owner  A reference-counted pointer to the owner of the buffer.
+ */
+ndarray_node_ref make_strided_ndarray_node(
+            const dtype& dt, int ndim, const intptr_t *shape,
+            const intptr_t *strides, char *originptr,
+            const dnd::shared_ptr<void>& buffer_owner);
+
 } // namespace dnd
 
 #endif // _DND__STRIDED_NDARRAY_NODE_HPP_

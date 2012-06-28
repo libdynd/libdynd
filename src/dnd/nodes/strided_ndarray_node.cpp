@@ -184,3 +184,13 @@ void dnd::strided_ndarray_node::debug_dump_extra(ostream& o, const string& inden
     o << indent << " memoryblock owning the data:\n";
     memory_block_debug_dump(m_memblock.get(), o, indent + " ");
 }
+
+ndarray_node_ref dnd::make_strided_ndarray_node(
+            const dtype& dt, int ndim, const intptr_t *shape,
+            const intptr_t *strides, char *originptr,
+            const memory_block_ref& memblock)
+{
+    // TODO: Add a multidimensional DND_ASSERT_ALIGNED check here
+    return ndarray_node_ref(new strided_ndarray_node(dt, ndim,
+                                        shape, strides, originptr, memblock));
+}
