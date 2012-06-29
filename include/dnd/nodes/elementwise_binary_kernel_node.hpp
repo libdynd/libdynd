@@ -37,8 +37,7 @@ class elementwise_binary_op_expr_node : public ndarray_node {
     elementwise_binary_op_expr_node(const dtype& dt, int ndim, const intptr_t *shape,
                         const ndarray_node_ref& op0, const ndarray_node_ref& op1,
                         BinaryOperatorFactory& op_factory)
-        : ndarray_node(dt, ndim, shape,
-                elementwise_node_category, elementwise_binary_kernel_node_type),
+        : ndarray_node(dt, ndim, shape, elementwise_binary_kernel_node_type),
                 m_op_factory()
     {
         m_opnodes[0] = op0;
@@ -51,6 +50,11 @@ class elementwise_binary_op_expr_node : public ndarray_node {
 public:
 
     virtual ~elementwise_binary_op_expr_node() {
+    }
+
+    ndarray_node_category get_category() const
+    {
+        return elementwise_node_category;
     }
 
     int get_nop() const {

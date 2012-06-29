@@ -337,7 +337,7 @@ ndarray dnd::ndarray::view_as_dtype(const dtype& dt) const
     }
 
     // In the case of a strided array with a non-expression dtype, simply substitute the dtype
-    if (get_expr_tree()->get_node_type() == strided_array_node_type && get_dtype().kind() != expression_kind) {
+    if (get_expr_tree()->get_category() == strided_array_node_category && get_dtype().kind() != expression_kind) {
         bool aligned = true;
         // If the alignment of the requested dtype is greater, check
         // the actual strides to only apply unaligned<> when necessary.
@@ -393,11 +393,6 @@ std::string dnd::detail::ndarray_as_string(const ndarray& lhs, assign_error_mode
 
 void dnd::ndarray::val_assign(const ndarray& rhs, assign_error_mode errmode) const
 {
-    if (m_expr_tree->get_node_type() != strided_array_node_type) {
-        throw std::runtime_error("cannot val_assign to an expression-view ndarray, must "
-                                 "first convert it to a strided array with as_strided");
-    }
-
     if (get_dtype() == rhs.get_dtype()) {
         // The dtypes match, simpler case
         val_assign_loop(*this, rhs, assign_error_none);
@@ -476,7 +471,7 @@ static void nested_ndarray_print(std::ostream& o, const dtype& d, const char *da
 std::ostream& dnd::operator<<(std::ostream& o, const ndarray& rhs)
 {
     if (rhs.get_expr_tree() != NULL) {
-        if (rhs.get_expr_tree()->get_node_category() == strided_array_node_category &&
+        if (rhs.get_expr_tree()->get_category() == strided_array_node_category &&
                         rhs.get_dtype().kind() != expression_kind) {
             const char *originptr;
             dimvector strides(rhs.get_ndim());

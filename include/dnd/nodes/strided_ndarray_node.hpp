@@ -44,6 +44,11 @@ public:
     virtual ~strided_ndarray_node() {
     }
 
+    ndarray_node_category get_category() const
+    {
+        return strided_array_node_category;
+    }
+
     char *get_readwrite_originptr() const {
         return m_originptr;
     }

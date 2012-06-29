@@ -28,7 +28,13 @@ public:
 
     virtual ~immutable_scalar_node();
 
-    const char *get_readonly_originptr() const {
+    ndarray_node_category get_category() const
+    {
+        return strided_array_node_category;
+    }
+
+    const char *get_readonly_originptr() const
+    {
         return m_data;
     }
 

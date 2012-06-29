@@ -20,7 +20,7 @@ namespace dnd {
 
 class ndarray;
 
-enum expr_node_category {
+enum ndarray_node_category {
     // The node points a simple strided array in memory
     strided_array_node_category,
     // The node represents an elementwise nop() to 1 transformation
@@ -60,7 +60,6 @@ class ndarray_node {
 
 protected:
     expr_node_type m_node_type;
-    expr_node_category m_node_category;
     /* The data type of this node's result */
     dtype m_dtype;
     /* The number of dimensions in the result array */
@@ -72,8 +71,8 @@ protected:
      * Constructs the basic node with NULL operand children.
      */
     ndarray_node(const dtype& dt, int ndim, const intptr_t *shape,
-                        expr_node_category node_category, expr_node_type node_type)
-        : m_use_count(0), m_node_type(node_type), m_node_category(node_category),
+                         expr_node_type node_type)
+        : m_use_count(0), m_node_type(node_type),
             m_dtype(dt), m_ndim(ndim), m_shape(ndim, shape)
     {
     }
@@ -87,6 +86,8 @@ public:
 
     virtual ~ndarray_node() {
     }
+
+    virtual ndarray_node_category get_category() const = 0;
 
     const dtype& get_dtype() const {
         return m_dtype;
@@ -103,10 +104,6 @@ public:
 
     virtual ndarray_node* get_opnode(int i) const {
         throw std::runtime_error("This ndarray_node does not have any operand nodes");
-    }
-
-    expr_node_category get_node_category() const {
-        return m_node_category;
     }
 
     expr_node_type get_node_type() const {
