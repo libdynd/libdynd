@@ -51,8 +51,8 @@ public:
         return false;
     }
 
-    const dtype& value_dtype(const dtype& DND_UNUSED(self)) const {
-        return m_category_dtype;
+    const dtype& value_dtype(const dtype& self) const {
+        return self;
     }
 
     bool is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const;
