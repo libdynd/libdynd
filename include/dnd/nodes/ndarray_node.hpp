@@ -60,18 +60,12 @@ class ndarray_node {
 
 protected:
     expr_node_type m_node_type;
-    /* The number of dimensions in the result array */
-    int m_ndim;
-    /* The shape of the result array */
-    dimvector m_shape;
 
     /**
      * Constructs the basic node with NULL operand children.
      */
-    ndarray_node(int ndim, const intptr_t *shape,
-                         expr_node_type node_type)
-        : m_use_count(0), m_node_type(node_type),
-            m_ndim(ndim), m_shape(ndim, shape)
+    ndarray_node(expr_node_type node_type)
+        : m_use_count(0), m_node_type(node_type)
     {
     }
 
@@ -89,9 +83,9 @@ public:
 
     virtual const dtype& get_dtype() const = 0;
 
-    int get_ndim() const {
-        return m_ndim;
-    }
+    virtual int get_ndim() const = 0;
+
+    virtual const intptr_t *get_shape() const = 0;
 
     /** The number of operand nodes this node depends on */
     virtual int get_nop() const {
@@ -104,10 +98,6 @@ public:
 
     expr_node_type get_node_type() const {
         return m_node_type;
-    }
-
-    const intptr_t *get_shape() const {
-        return m_shape.get();
     }
 
     /**

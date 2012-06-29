@@ -14,6 +14,10 @@ namespace dnd {
  * NDArray node which holds a raw strided array.
  */
 class strided_ndarray_node : public ndarray_node {
+    /* The number of dimensions in the result array */
+    int m_ndim;
+    /* The shape of the result array */
+    dimvector m_shape;
     /* The data type of this node's result */
     dtype m_dtype;
     char *m_originptr;
@@ -51,6 +55,16 @@ public:
         return m_dtype;
     }
 
+    int get_ndim() const
+    {
+        return m_ndim;
+    }
+
+    const intptr_t *get_shape() const
+    {
+        return m_shape.get();
+    }
+    
     char *get_readwrite_originptr() const {
         return m_originptr;
     }

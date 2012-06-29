@@ -39,6 +39,16 @@ public:
         return m_dtype;
     }
 
+    int get_ndim() const
+    {
+        return 0;
+    }
+
+    const intptr_t *get_shape() const
+    {
+        return NULL;
+    }
+    
     const char *get_readonly_originptr() const
     {
         return m_data;

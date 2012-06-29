@@ -59,7 +59,7 @@ ndarray_node_ref dnd::ndarray_node::evaluate()
             // Evaluate any expression dtype as well
             if (dt.kind() == expression_kind) {
                 ndarray_node_ref result;
-                raw_ndarray_iter<1,1> iter(m_ndim, m_shape.get(), dt.value_dtype(), result, this);
+                raw_ndarray_iter<1,1> iter(get_ndim(), get_shape(), dt.value_dtype(), result, this);
 
                 intptr_t innersize = iter.innersize();
                 intptr_t dst_stride = iter.innerstride<0>();
@@ -87,7 +87,7 @@ ndarray_node_ref dnd::ndarray_node::evaluate()
                     const ndarray_node *op1 = get_opnode(0);
                     if (op1->get_category() == strided_array_node_category) {
                         ndarray_node_ref result;
-                        raw_ndarray_iter<1,1> iter(m_ndim, m_shape.get(), dt.value_dtype(), result, op1);
+                        raw_ndarray_iter<1,1> iter(get_ndim(), get_shape(), dt.value_dtype(), result, op1);
 
                         intptr_t innersize = iter.innersize();
                         intptr_t dst_stride = iter.innerstride<0>();
@@ -114,7 +114,7 @@ ndarray_node_ref dnd::ndarray_node::evaluate()
                     if (op1->get_category() == strided_array_node_category &&
                                 op2->get_category() == strided_array_node_category) {
                         ndarray_node_ref result;
-                        raw_ndarray_iter<1,2> iter(m_ndim, m_shape.get(),
+                        raw_ndarray_iter<1,2> iter(get_ndim(), get_shape(),
                                                     dt.value_dtype(), result,
                                                     op1, op2);
                         //iter.debug_dump(std::cout);
@@ -192,11 +192,11 @@ void dnd::ndarray_node::debug_dump(ostream& o, const string& indent) const
     o << indent << "(\"" << node_name() << "\",\n";
 
     o << indent << " dtype: " << get_dtype() << "\n";
-    o << indent << " ndim: " << m_ndim << "\n";
+    o << indent << " ndim: " << get_ndim() << "\n";
     o << indent << " shape: (";
-    for (int i = 0; i < m_ndim; ++i) {
-        o << m_shape[i];
-        if (i != m_ndim - 1) {
+    for (int i = 0; i < get_ndim(); ++i) {
+        o << get_shape()[i];
+        if (i != get_ndim() - 1) {
             o << ", ";
         }
     }

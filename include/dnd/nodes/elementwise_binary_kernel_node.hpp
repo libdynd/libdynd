@@ -27,6 +27,10 @@ ndarray_node_ref make_elementwise_binary_op_expr_node(ndarray_node *node1,
  */
 template <class BinaryOperatorFactory>
 class elementwise_binary_op_expr_node : public ndarray_node {
+    /* The number of dimensions in the result array */
+    int m_ndim;
+    /* The shape of the result array */
+    dimvector m_shape;
     /* The data type of this node's result */
     dtype m_dtype;
     /* Pointers to the child nodes */
@@ -39,8 +43,8 @@ class elementwise_binary_op_expr_node : public ndarray_node {
     elementwise_binary_op_expr_node(const dtype& dt, int ndim, const intptr_t *shape,
                         const ndarray_node_ref& op0, const ndarray_node_ref& op1,
                         BinaryOperatorFactory& op_factory)
-        : ndarray_node(ndim, shape, elementwise_binary_kernel_node_type),
-                m_dtype(dt), m_op_factory()
+        : ndarray_node(elementwise_binary_kernel_node_type),
+                m_ndim(ndim), m_shape(ndim, shape), m_dtype(dt), m_op_factory()
     {
         m_opnodes[0] = op0;
         m_opnodes[1] = op1;
@@ -63,6 +67,15 @@ public:
         return m_dtype;
     }
 
+    int get_ndim() const {
+        return m_ndim;
+    }
+
+    const intptr_t *get_shape() const
+    {
+        return m_shape.get();
+    }
+    
     int get_nop() const {
         return 2;
     }
