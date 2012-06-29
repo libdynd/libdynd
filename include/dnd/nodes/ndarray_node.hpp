@@ -35,9 +35,8 @@ enum expr_node_type {
     strided_array_node_type,
     // This node represents a single scalar data element, by value
     immutable_scalar_node_type,
-    broadcast_shape_node_type,
-    elementwise_binary_op_node_type,
-    linear_index_node_type
+    elementwise_unary_kernel_node_type,
+    elementwise_binary_kernel_node_type,
 };
 
 

@@ -31,15 +31,12 @@ class elementwise_binary_op_expr_node : public ndarray_node {
     /**
      * Constructs the node.
      *
-     * IMPORTANT: The input nodes MUST already have been broadcast to identical
-     *            shapes and converted to appropriate dtypes for the BinaryOperatorFactory.
-     *            These things are not checked by the constructor.
      */
     elementwise_binary_op_expr_node(const dtype& dt, int ndim, const intptr_t *shape,
                         const ndarray_node_ref& op0, const ndarray_node_ref& op1,
                         BinaryOperatorFactory& op_factory)
         : ndarray_node(dt, ndim, 2, shape,
-                elementwise_node_category, elementwise_binary_op_node_type),
+                elementwise_node_category, elementwise_binary_kernel_node_type),
                 m_op_factory()
     {
         m_opnodes[0] = op0;

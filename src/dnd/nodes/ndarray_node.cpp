@@ -177,17 +177,14 @@ static void print_node_type(ostream& o, expr_node_type type)
         case immutable_scalar_node_type:
             o << "immutable_scalar_node_type";
             break;
-        case broadcast_shape_node_type:
-            o << "broadcast_shape_node_type";
+        case elementwise_unary_kernel_node_type:
+            o << "elementwise_unary_kernel_node_type";
             break;
-        case elementwise_binary_op_node_type:
-            o << "elementwise_binary_op_node_type";
-            break;
-        case linear_index_node_type:
-            o << "linear_index_node_type";
+        case elementwise_binary_kernel_node_type:
+            o << "elementwise_binary_kernel_node_type";
             break;
         default:
-            o << "unknown type (" << (int)type << ")";
+            o << "unknown node type (" << (int)type << ")";
             break;
     }
 }
