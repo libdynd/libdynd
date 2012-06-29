@@ -69,10 +69,10 @@ TEST(ShapeTools, CopyInputStrides) {
     intptr_t strides[6];
 
     EXPECT_EQ(4, a.get_ndim());
-    EXPECT_EQ(12, a.get_strides(0));
-    EXPECT_EQ(4, a.get_strides(1));
-    EXPECT_EQ(2, a.get_strides(2));
-    EXPECT_EQ(0, a.get_strides(3));
+    EXPECT_EQ(12, a.get_strides()[0]);
+    EXPECT_EQ(4, a.get_strides()[1]);
+    EXPECT_EQ(2, a.get_strides()[2]);
+    EXPECT_EQ(0, a.get_strides()[3]);
 
     copy_input_strides(a, 6, strides);
     EXPECT_EQ(0, strides[0]);

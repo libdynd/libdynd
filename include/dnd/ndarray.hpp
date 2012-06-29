@@ -159,21 +159,9 @@ public:
         return m_expr_tree->get_shape();
     }
 
-    intptr_t get_shape(int i) const {
-        return m_expr_tree->get_shape()[i];
-    }
-
     const intptr_t *get_strides() const {
         if (m_expr_tree->get_node_type() == strided_array_node_type) {
             return static_cast<const strided_ndarray_node *>(m_expr_tree.get())->get_strides();
-        } else {
-            throw std::runtime_error("cannot get the strides of an expression view ndarray");
-        }
-    }
-
-    intptr_t get_strides(int i) const {
-        if (m_expr_tree->get_node_type() == strided_array_node_type) {
-            return static_cast<const strided_ndarray_node *>(m_expr_tree.get())->get_strides()[i];
         } else {
             throw std::runtime_error("cannot get the strides of an expression view ndarray");
         }

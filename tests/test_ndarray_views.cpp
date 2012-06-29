@@ -63,8 +63,8 @@ TEST(NDArrayViews, MultiDimensionalRawMemory) {
     b = a.view_as_dtype<int32_t>();
     EXPECT_EQ(make_dtype<int32_t>(), b.get_dtype());
     EXPECT_EQ(2, b.get_ndim());
-    EXPECT_EQ(2, b.get_shape(0));
-    EXPECT_EQ(3, b.get_shape(1));
+    EXPECT_EQ(2, b.get_shape()[0]);
+    EXPECT_EQ(3, b.get_shape()[1]);
     EXPECT_EQ(a.get_readonly_originptr(), b.get_readonly_originptr());
     EXPECT_EQ(1, b(0, 0).as<int32_t>());
     EXPECT_EQ(2, b(0, 1).as<int32_t>());
@@ -90,8 +90,8 @@ TEST(NDArrayViews, ExpressionDType) {
     b = a_u2.view_as_dtype<int16_t>();
     EXPECT_EQ((make_view_dtype(make_dtype<int16_t>(), make_conversion_dtype<uint16_t, uint32_t>())), b.get_dtype());
     EXPECT_EQ(2, b.get_ndim());
-    EXPECT_EQ(2, b.get_shape(0));
-    EXPECT_EQ(3, b.get_shape(1));
+    EXPECT_EQ(2, b.get_shape()[0]);
+    EXPECT_EQ(3, b.get_shape()[1]);
     EXPECT_EQ(a.get_readonly_originptr(), b.get_readonly_originptr());
     EXPECT_EQ(1, b(0, 0).as<int16_t>());
     EXPECT_EQ(2, b(0, 1).as<int16_t>());

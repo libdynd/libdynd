@@ -32,9 +32,7 @@ TEST(NDArray, Constructors) {
     EXPECT_EQ(1, a.get_num_elements());
     EXPECT_EQ(1, a.get_ndim());
     EXPECT_EQ(1, a.get_shape()[0]);
-    EXPECT_EQ(1, a.get_shape(0));
     EXPECT_EQ(0, a.get_strides()[0]);
-    EXPECT_EQ(0, a.get_strides(0));
 
     // One-dimensional ndarray
     a = ndarray(3, make_dtype<float>());
@@ -176,14 +174,14 @@ TEST(NDArray, ConstructorMemoryLayouts) {
     axisperm[2] = 2;
     a = ndarray(dt, 3, shape, axisperm);
     EXPECT_EQ(1, a.get_num_elements());
-    EXPECT_EQ(0, a.get_strides(0));
-    EXPECT_EQ(0, a.get_strides(1));
-    EXPECT_EQ(0, a.get_strides(2));
+    EXPECT_EQ(0, a.get_strides()[0]);
+    EXPECT_EQ(0, a.get_strides()[1]);
+    EXPECT_EQ(0, a.get_strides()[2]);
     b = empty_like(a);
     EXPECT_EQ(1, b.get_num_elements());
-    EXPECT_EQ(0, b.get_strides(0));
-    EXPECT_EQ(0, b.get_strides(1));
-    EXPECT_EQ(0, b.get_strides(2));
+    EXPECT_EQ(0, b.get_strides()[0]);
+    EXPECT_EQ(0, b.get_strides()[1]);
+    EXPECT_EQ(0, b.get_strides()[2]);
 
     // Test all permutations of memory layouts from 1 through 6 dimensions
     for (int ndim = 1; ndim <= 6; ++ndim) {
@@ -201,20 +199,20 @@ TEST(NDArray, ConstructorMemoryLayouts) {
             EXPECT_EQ(num_elements, a.get_num_elements());
             intptr_t s = dt.element_size();
             for (int i = 0; i < ndim; ++i) {
-                EXPECT_EQ(s, a.get_strides(axisperm[i]));
+                EXPECT_EQ(s, a.get_strides()[axisperm[i]]);
                 s *= shape[axisperm[i]];
             }
             // Test constructing the array using empty_like, which preserves the memory layout
             b = empty_like(a);
             EXPECT_EQ(num_elements, b.get_num_elements());
             for (int i = 0; i < ndim; ++i) {
-                EXPECT_EQ(a.get_strides(i), b.get_strides(i));
+                EXPECT_EQ(a.get_strides()[i], b.get_strides()[i]);
             }
             // Test constructing the array using empty_like with a different dtype, which preserves the memory layout
             b = empty_like(a, dt2);
             EXPECT_EQ(num_elements, b.get_num_elements());
             for (int i = 0; i < ndim; ++i) {
-                EXPECT_EQ(2 * a.get_strides(i), b.get_strides(i));
+                EXPECT_EQ(2 * a.get_strides()[i], b.get_strides()[i]);
             }
             //cout << "perm " << axisperm[0] << " " << axisperm[1] << " " << axisperm[2] << "\n";
             //cout << "strides " << a.get_strides(0) << " " << a.get_strides(1) << " " << a.get_strides(2) << "\n";
@@ -253,7 +251,7 @@ TEST(NDArray, CharArrayConstructor) {
     // Constructor assignment
     a = values;
     EXPECT_EQ(1, a.get_ndim());
-    EXPECT_EQ(8, a.get_shape(0));
+    EXPECT_EQ(8, a.get_shape()[0]);
     EXPECT_EQ(make_dtype<char>(), a.get_dtype());
     EXPECT_EQ(1, a(0).as<char>());
     EXPECT_EQ(2, a(1).as<char>());

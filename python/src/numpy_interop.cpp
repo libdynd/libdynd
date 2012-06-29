@@ -292,7 +292,7 @@ static void free_array_interface(void *ptr, void *extra_ptr)
 
 PyObject* pydnd::ndarray_as_numpy_struct_capsule(const dnd::ndarray& n)
 {
-    if (n.get_expr_tree()->get_node_type() != strided_array_node_type) {
+    if (n.get_expr_tree()->get_category() != strided_array_node_category) {
         throw runtime_error("cannot convert a dnd::ndarray that isn't a strided array into a numpy array");
     }
 

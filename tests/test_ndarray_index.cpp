@@ -108,7 +108,7 @@ TEST(NDArrayIndex, SimpleOneDimensionalRange) {
 
     // full range
     b = a(irange());
-    EXPECT_EQ(6, b.get_shape(0));
+    EXPECT_EQ(6, b.get_shape()[0]);
     EXPECT_EQ(1, b(0).as<int>());
     EXPECT_EQ(2, b(1).as<int>());
     EXPECT_EQ(3, b(2).as<int>());
@@ -118,20 +118,20 @@ TEST(NDArrayIndex, SimpleOneDimensionalRange) {
 
     // selected range
     b = a(1 <= irange() < 3);
-    EXPECT_EQ(2, b.get_shape(0));
+    EXPECT_EQ(2, b.get_shape()[0]);
     EXPECT_EQ(2, b(0).as<int>());
     EXPECT_EQ(3, b(1).as<int>());
 
     // lower-bound only
     b = a(3 <= irange());
-    EXPECT_EQ(3, b.get_shape(0));
+    EXPECT_EQ(3, b.get_shape()[0]);
     EXPECT_EQ(4, b(0).as<int>());
     EXPECT_EQ(5, b(1).as<int>());
     EXPECT_EQ(6, b(2).as<int>());
 
     // upper-bound only
     b = a(irange() < 3);
-    EXPECT_EQ(3, b.get_shape(0));
+    EXPECT_EQ(3, b.get_shape()[0]);
     EXPECT_EQ(1, b(0).as<int>());
     EXPECT_EQ(2, b(1).as<int>());
     EXPECT_EQ(3, b(2).as<int>());
@@ -143,14 +143,14 @@ TEST(NDArrayIndex, SteppedOneDimensionalRange) {
 
     // different step
     b = a(irange() / 2);
-    EXPECT_EQ(3, b.get_shape(0));
+    EXPECT_EQ(3, b.get_shape()[0]);
     EXPECT_EQ(1, b(0).as<int>());
     EXPECT_EQ(3, b(1).as<int>());
     EXPECT_EQ(5, b(2).as<int>());
 
     // full reversed range
     b = a(irange() / -1);
-    EXPECT_EQ(6, b.get_shape(0));
+    EXPECT_EQ(6, b.get_shape()[0]);
     EXPECT_EQ(6, b(0).as<int>());
     EXPECT_EQ(5, b(1).as<int>());
     EXPECT_EQ(4, b(2).as<int>());
@@ -160,7 +160,7 @@ TEST(NDArrayIndex, SteppedOneDimensionalRange) {
 
     // partial reversed range
     b = a(3 >= irange() / -1 >= 0);
-    EXPECT_EQ(4, b.get_shape(0));
+    EXPECT_EQ(4, b.get_shape()[0]);
     EXPECT_EQ(4, b(0).as<int>());
     EXPECT_EQ(3, b(1).as<int>());
     EXPECT_EQ(2, b(2).as<int>());
@@ -168,23 +168,23 @@ TEST(NDArrayIndex, SteppedOneDimensionalRange) {
 
     // reversed range with different step
     b = a(irange() / -3);
-    EXPECT_EQ(2, b.get_shape(0));
+    EXPECT_EQ(2, b.get_shape()[0]);
     EXPECT_EQ(6, b(0).as<int>());
     EXPECT_EQ(3, b(1).as<int>());
 
     // partial reversed range with different step
     b = a(2 >= irange() / -2);
-    EXPECT_EQ(2, b.get_shape(0));
+    EXPECT_EQ(2, b.get_shape()[0]);
     EXPECT_EQ(3, b(0).as<int>());
     EXPECT_EQ(1, b(1).as<int>());
 
     // empty range
     b = a(2 <= irange() < 2);
-    EXPECT_EQ(0, b.get_shape(0));
+    EXPECT_EQ(0, b.get_shape()[0]);
 
     // applying two ranges, one after another
     b = a(1 <= irange() <= 5)(irange() / -2);
-    EXPECT_EQ(3, b.get_shape(0));
+    EXPECT_EQ(3, b.get_shape()[0]);
     EXPECT_EQ(6, b(0).as<int>());
     EXPECT_EQ(4, b(1).as<int>());
     EXPECT_EQ(2, b(2).as<int>());
