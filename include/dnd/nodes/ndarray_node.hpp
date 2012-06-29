@@ -65,21 +65,17 @@ protected:
     dtype m_dtype;
     /* The number of dimensions in the result array */
     int m_ndim;
-    /* The number of child operands this node uses */
-    int m_nop;
     /* The shape of the result array */
     dimvector m_shape;
-    /* Pointers to the child nodes */
-    shortvector<boost::intrusive_ptr<ndarray_node> > m_opnodes;
 
     /**
      * Constructs the basic node with NULL operand children.
      */
-    ndarray_node(const dtype& dt, int ndim, int nop, const intptr_t *shape,
+    ndarray_node(const dtype& dt, int ndim, const intptr_t *shape,
                         expr_node_category node_category, expr_node_type node_type)
         : m_use_count(0), m_node_type(node_type), m_node_category(node_category),
-            m_dtype(dt), m_ndim(ndim), m_nop(nop), m_shape(ndim, shape),
-            m_opnodes(nop) {
+            m_dtype(dt), m_ndim(ndim), m_shape(ndim, shape)
+    {
     }
 
 public:
@@ -100,20 +96,13 @@ public:
         return m_ndim;
     }
 
-    int get_nop() const {
-        return m_nop;
+    /** The number of operand nodes this node depends on */
+    virtual int get_nop() const {
+        return 0;
     }
 
-    boost::intrusive_ptr<ndarray_node> get_opnode(int i)
-    {
-        if (i >= 0 && i < m_nop) {
-            return m_opnodes[i];
-        } else {
-            std::stringstream ss;
-            ss << "tried to get ndarray_node operand " << i << " from a " << m_nop << "-ary node";
-            throw std::runtime_error(ss.str());
-
-        }
+    virtual ndarray_node* get_opnode(int i) const {
+        throw std::runtime_error("This ndarray_node does not have any operand nodes");
     }
 
     expr_node_category get_node_category() const {

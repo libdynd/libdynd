@@ -10,7 +10,7 @@ using namespace std;
 using namespace dnd;
 
 dnd::immutable_scalar_node::immutable_scalar_node(const dtype& dt, const char* data)
-    : ndarray_node(dt, 0, 0, NULL, strided_array_node_category, immutable_scalar_node_type)
+    : ndarray_node(dt, 0, NULL, strided_array_node_category, immutable_scalar_node_type)
 {
     if (dt.is_object_type()) {
         throw runtime_error("immutable_scalar_node doesn't support object dtypes yet");
@@ -26,7 +26,7 @@ dnd::immutable_scalar_node::immutable_scalar_node(const dtype& dt, const char* d
 }
 
 dnd::immutable_scalar_node::immutable_scalar_node(const dtype& dt, const char* data, int ndim, const intptr_t *shape)
-    : ndarray_node(dt, ndim, 0, shape, strided_array_node_category, immutable_scalar_node_type)
+    : ndarray_node(dt, ndim, shape, strided_array_node_category, immutable_scalar_node_type)
 {
     if (dt.is_object_type()) {
         throw runtime_error("immutable_scalar_node doesn't support object dtypes yet");

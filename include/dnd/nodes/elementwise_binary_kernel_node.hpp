@@ -27,6 +27,8 @@ ndarray_node_ref make_elementwise_binary_op_expr_node(ndarray_node *node1,
  */
 template <class BinaryOperatorFactory>
 class elementwise_binary_op_expr_node : public ndarray_node {
+    /* Pointers to the child nodes */
+    boost::intrusive_ptr<ndarray_node> m_opnodes[2];
     BinaryOperatorFactory m_op_factory;
     /**
      * Constructs the node.
@@ -35,7 +37,7 @@ class elementwise_binary_op_expr_node : public ndarray_node {
     elementwise_binary_op_expr_node(const dtype& dt, int ndim, const intptr_t *shape,
                         const ndarray_node_ref& op0, const ndarray_node_ref& op1,
                         BinaryOperatorFactory& op_factory)
-        : ndarray_node(dt, ndim, 2, shape,
+        : ndarray_node(dt, ndim, shape,
                 elementwise_node_category, elementwise_binary_kernel_node_type),
                 m_op_factory()
     {
@@ -49,6 +51,14 @@ class elementwise_binary_op_expr_node : public ndarray_node {
 public:
 
     virtual ~elementwise_binary_op_expr_node() {
+    }
+
+    int get_nop() const {
+        return 2;
+    }
+
+    ndarray_node* get_opnode(int i) const {
+        return m_opnodes[i].get();
     }
 
     ndarray_node_ref as_dtype(const dtype& dt,

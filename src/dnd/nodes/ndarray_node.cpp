@@ -52,40 +52,35 @@ void dnd::ndarray_node::get_binary_operation(intptr_t, intptr_t, intptr_t, kerne
 
 ndarray_node_ref dnd::ndarray_node::evaluate()
 {
-    switch (m_nop) {
-        case 0:
-            if (m_node_category == strided_array_node_category) {
-                // Evaluate any expression dtype as well
-                if (m_dtype.kind() == expression_kind) {
-                    ndarray_node_ref result;
-                    raw_ndarray_iter<1,1> iter(m_ndim, m_shape.get(), m_dtype.value_dtype(), result, this);
+    if (m_node_category == strided_array_node_category) {
+        // Evaluate any expression dtype as well
+        if (m_dtype.kind() == expression_kind) {
+            ndarray_node_ref result;
+            raw_ndarray_iter<1,1> iter(m_ndim, m_shape.get(), m_dtype.value_dtype(), result, this);
 
-                    intptr_t innersize = iter.innersize();
-                    intptr_t dst_stride = iter.innerstride<0>();
-                    intptr_t src0_stride = iter.innerstride<1>();
-                    unary_specialization_kernel_instance operation;
-                    get_dtype_assignment_kernel(m_dtype.value_dtype(), m_dtype, assign_error_none, operation);
-                    unary_specialization_t uspec = get_unary_specialization(dst_stride, m_dtype.value_dtype().element_size(),
-                                                                                src0_stride, m_dtype.element_size());
-                    unary_operation_t kfunc = operation.specializations[uspec];
-                    if (innersize > 0) {
-                        do {
-                            kfunc(iter.data<0>(), dst_stride,
-                                        iter.data<1>(), src0_stride,
-                                        innersize, operation.auxdata);
-                        } while (iter.iternext());
-                    }
-
-                    return DND_MOVE(result);
-                }
-
-                return ndarray_node_ref(this);
+            intptr_t innersize = iter.innersize();
+            intptr_t dst_stride = iter.innerstride<0>();
+            intptr_t src0_stride = iter.innerstride<1>();
+            unary_specialization_kernel_instance operation;
+            get_dtype_assignment_kernel(m_dtype.value_dtype(), m_dtype, assign_error_none, operation);
+            unary_specialization_t uspec = get_unary_specialization(dst_stride, m_dtype.value_dtype().element_size(),
+                                                                        src0_stride, m_dtype.element_size());
+            unary_operation_t kfunc = operation.specializations[uspec];
+            if (innersize > 0) {
+                do {
+                    kfunc(iter.data<0>(), dst_stride,
+                                iter.data<1>(), src0_stride,
+                                innersize, operation.auxdata);
+                } while (iter.iternext());
             }
-            break;
-        case 1: {
-            const ndarray_node *op1 = m_opnodes[0].get();
 
-            if (m_node_category == elementwise_node_category) {
+            return DND_MOVE(result);
+        }
+        return ndarray_node_ref(this);
+    } else if (m_node_category == elementwise_node_category) {
+        switch (get_nop()) {
+            case 1: {
+                const ndarray_node *op1 = get_opnode(0);
                 if (op1->get_node_category() == strided_array_node_category) {
                     ndarray_node_ref result;
                     raw_ndarray_iter<1,1> iter(m_ndim, m_shape.get(), m_dtype.value_dtype(), result, op1);
@@ -105,45 +100,45 @@ ndarray_node_ref dnd::ndarray_node::evaluate()
 
                     return DND_MOVE(result);
                 }
+                break;
             }
-            break;
-        }
-        case 2: {
-            const ndarray_node *op1 = m_opnodes[0].get();
-            const ndarray_node *op2 = m_opnodes[1].get();
+            case 2: {
+                const ndarray_node *op1 = get_opnode(0);
+                const ndarray_node *op2 = get_opnode(1);
 
-            if (m_node_category == elementwise_node_category) {
-                // Special case of two strided sub-operands, requiring no intermediate buffers
-                if (op1->get_node_category() == strided_array_node_category &&
-                            op2->get_node_category() == strided_array_node_category) {
-                    ndarray_node_ref result;
-                    raw_ndarray_iter<1,2> iter(m_ndim, m_shape.get(),
-                                                m_dtype.value_dtype(), result,
-                                                op1, op2);
-                    //iter.debug_dump(std::cout);
+                if (m_node_category == elementwise_node_category) {
+                    // Special case of two strided sub-operands, requiring no intermediate buffers
+                    if (op1->get_node_category() == strided_array_node_category &&
+                                op2->get_node_category() == strided_array_node_category) {
+                        ndarray_node_ref result;
+                        raw_ndarray_iter<1,2> iter(m_ndim, m_shape.get(),
+                                                    m_dtype.value_dtype(), result,
+                                                    op1, op2);
+                        //iter.debug_dump(std::cout);
 
-                    intptr_t innersize = iter.innersize();
-                    intptr_t dst_stride = iter.innerstride<0>();
-                    intptr_t src0_stride = iter.innerstride<1>();
-                    intptr_t src1_stride = iter.innerstride<2>();
-                    kernel_instance<binary_operation_t> operation;
-                    get_binary_operation(dst_stride, src0_stride, src1_stride, operation);
-                    if (innersize > 0) {
-                        do {
-                            operation.kernel(iter.data<0>(), dst_stride,
-                                        iter.data<1>(), src0_stride,
-                                        iter.data<2>(), src1_stride,
-                                        innersize, operation.auxdata);
-                        } while (iter.iternext());
+                        intptr_t innersize = iter.innersize();
+                        intptr_t dst_stride = iter.innerstride<0>();
+                        intptr_t src0_stride = iter.innerstride<1>();
+                        intptr_t src1_stride = iter.innerstride<2>();
+                        kernel_instance<binary_operation_t> operation;
+                        get_binary_operation(dst_stride, src0_stride, src1_stride, operation);
+                        if (innersize > 0) {
+                            do {
+                                operation.kernel(iter.data<0>(), dst_stride,
+                                            iter.data<1>(), src0_stride,
+                                            iter.data<2>(), src1_stride,
+                                            innersize, operation.auxdata);
+                            } while (iter.iternext());
+                        }
+
+                        return DND_MOVE(result);
                     }
-
-                    return DND_MOVE(result);
                 }
+                break;
             }
-            break;
+            default:
+                break;
         }
-        default:
-            break;
     }
 
     debug_dump(cout, "");
@@ -211,11 +206,11 @@ void dnd::ndarray_node::debug_dump(ostream& o, const string& indent) const
     o << "\n";
     debug_dump_extra(o, indent);
 
-    if (m_nop > 0) {
-        o << indent << " nop: " << m_nop << "\n";
-        for (int i = 0; i < m_nop; ++i) {
+    if (get_nop() > 0) {
+        o << indent << " nop: " << get_nop() << "\n";
+        for (int i = 0; i < get_nop(); ++i) {
             o << indent << " operand " << i << ":\n";
-            m_opnodes[i]->debug_dump(o, indent + "  ");
+            get_opnode(i)->debug_dump(o, indent + "  ");
         }
     }
 
