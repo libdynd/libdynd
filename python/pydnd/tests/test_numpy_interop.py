@@ -181,3 +181,20 @@ class TestNumpyDTypeInterop(unittest.TestCase):
         a[1] = 'diff'
         self.assertFalse(np.all(a == c_u))
 
+    def test_readwrite_access_flags(self):
+        """Tests that read/write access control is preserved to/from numpy"""
+        a = np.arange(10.)
+
+        # Writeable
+        b = nd.ndarray(a)
+        b[0].val_assign(2.0)
+        self.assertEqual(b[0].as_py(), 2.0)
+        self.assertEqual(a[0], 2.0)
+
+        # Not writeable
+        a.flags.writeable = False
+        b = nd.ndarray(a)
+        self.assertRaises(RuntimeError, b[0].val_assign, 3.0)
+        # should still be 2.0
+        self.assertEqual(b[0].as_py(), 2.0)
+        self.assertEqual(a[0], 2.0)

@@ -211,6 +211,17 @@ void dnd::ndarray_node::debug_dump(ostream& o, const string& indent) const
     print_node_type(o, m_node_type);
     o << "\n";
     debug_dump_extra(o, indent);
+    o << indent << " access flags: ";
+    if (get_access_flags() & read_access_flag) {
+        o << "read ";
+    }
+    if (get_access_flags() & write_access_flag) {
+        o << "write ";
+    }
+    if (get_access_flags() & immutable_access_flag) {
+        o << "immutable ";
+    }
+    o << "\n";
 
     if (get_nop() > 0) {
         o << indent << " nop: " << get_nop() << "\n";

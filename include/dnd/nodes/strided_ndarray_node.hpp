@@ -72,7 +72,11 @@ public:
     }
     
     char *get_readwrite_originptr() const {
-        return m_originptr;
+        if (m_access_flags & write_access_flag) {
+            return m_originptr;
+        } else {
+            throw std::runtime_error("dnd::ndarray node is not writeable");
+        }
     }
 
     const char *get_readonly_originptr() const {

@@ -25,7 +25,7 @@ dnd::strided_ndarray_node::strided_ndarray_node(const dtype& dt, int ndim,
 dnd::strided_ndarray_node::strided_ndarray_node(const dtype& dt, int ndim,
                                 const intptr_t *shape, const int *axis_perm)
     : ndarray_node(strided_array_node_type),
-      m_ndim(ndim), m_shape(ndim, shape), m_dtype(dt),
+      m_ndim(ndim), m_access_flags(read_access_flag | write_access_flag), m_shape(ndim, shape), m_dtype(dt),
       m_originptr(NULL), m_strides(ndim), m_memblock()
 {
     // Build the strides using the ordering and shape
