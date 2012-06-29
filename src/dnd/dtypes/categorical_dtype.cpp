@@ -26,6 +26,17 @@ public:
     }
 };
 
+class cmp{
+    const single_compare_operation_t m_less;
+    const auxiliary_data& m_auxdata;
+public:
+    cmp(const single_compare_operation_t less, const auxiliary_data& auxdata) :
+        m_less(less), m_auxdata(auxdata) {}
+    bool operator()(const char *a, const char *b) {
+        return m_less(a, b, m_auxdata);
+    }
+};
+
 }
 
 
@@ -55,7 +66,7 @@ categorical_dtype::categorical_dtype(const ndarray& categories)
 }
 
 categorical_dtype::~categorical_dtype() {
-    for (vector<char*>::iterator it = m_categories.begin(); it != m_categories.end(); ++it) {
+    for (vector<const char const *>::iterator it = m_categories.begin(); it != m_categories.end(); ++it) {
         delete[] *it;
     }
 
@@ -85,6 +96,21 @@ void categorical_dtype::print_dtype(std::ostream& o) const
     o << ")>";
 }
 
+int32_t categorical_dtype::get_value_from_category(const char const *category) const {
+    single_compare_kernel_instance k;
+    m_category_dtype.get_single_compare_kernel(k);
+    pair<vector<const char const *>::const_iterator,vector<const char const *>::const_iterator> bounds;
+    bounds = equal_range(
+        m_categories.begin(), m_categories.end(), category, cmp(k.comparisons[less_id], k.auxdata)
+    );
+    if (bounds.first == m_categories.end() || bounds.first == bounds.second) {
+        return -1; // TODO exception?
+    }
+    else {
+        return m_category_index_to_value[bounds.first-m_categories.begin()];
+    }
+
+}
 
 bool categorical_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const
 {

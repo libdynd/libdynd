@@ -19,7 +19,7 @@ class categorical_dtype : public extended_dtype {
     // The data type of the category
     dtype m_category_dtype;
     // list of categories, sorted lexicographically
-    std::vector<char *> m_categories;
+    std::vector<const char const *> m_categories;
     // mapping from category indices to values
     std::vector<intptr_t> m_category_index_to_value;
     // mapping from values to category indices
@@ -54,6 +54,8 @@ public:
     const dtype& value_dtype(const dtype& self) const {
         return self;
     }
+
+    int32_t get_value_from_category(const char const *category) const;
 
     bool is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const;
 

@@ -66,3 +66,22 @@ TEST(CategoricalDType, Compare) {
     di.extended()->print_dtype(cout);
 
 }
+
+TEST(CategoricalDType, Values) {
+
+    ndarray a(2, make_fixedstring_dtype(string_encoding_ascii, 3));
+    a(0).vals() = std::string("foo");
+    a(1).vals() = std::string("bar");
+    a(1).vals() = std::string("baz");
+
+    dtype dt = make_categorical_dtype(a);
+
+    EXPECT_EQ(0, static_cast<const categorical_dtype*>(dt.extended())->get_value_from_category(a(0).get_readonly_originptr()));
+    EXPECT_EQ(1, static_cast<const categorical_dtype*>(dt.extended())->get_value_from_category(a(1).get_readonly_originptr()));
+    EXPECT_EQ(-1, static_cast<const categorical_dtype*>(dt.extended())->get_value_from_category("aaa"));
+    EXPECT_EQ(-1, static_cast<const categorical_dtype*>(dt.extended())->get_value_from_category("ddd"));
+    EXPECT_EQ(-1, static_cast<const categorical_dtype*>(dt.extended())->get_value_from_category("zzz"));
+
+}
+
+
