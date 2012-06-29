@@ -66,7 +66,7 @@ categorical_dtype::categorical_dtype(const ndarray& categories)
 }
 
 categorical_dtype::~categorical_dtype() {
-    for (vector<const char const *>::iterator it = m_categories.begin(); it != m_categories.end(); ++it) {
+    for (vector<const char *>::iterator it = m_categories.begin(); it != m_categories.end(); ++it) {
         delete[] *it;
     }
 
@@ -96,10 +96,10 @@ void categorical_dtype::print_dtype(std::ostream& o) const
     o << ")>";
 }
 
-int32_t categorical_dtype::get_value_from_category(const char const *category) const {
+int32_t categorical_dtype::get_value_from_category(const char *category) const {
     single_compare_kernel_instance k;
     m_category_dtype.get_single_compare_kernel(k);
-    pair<vector<const char const *>::const_iterator,vector<const char const *>::const_iterator> bounds;
+    pair<vector<const char *>::const_iterator,vector<const char *>::const_iterator> bounds;
     bounds = equal_range(
         m_categories.begin(), m_categories.end(), category, cmp(k.comparisons[less_id], k.auxdata)
     );
