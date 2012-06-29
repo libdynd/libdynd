@@ -104,8 +104,7 @@ public:
         return 0;
     }
 
-    virtual ndarray_node* get_opnode(int i) const
-    {
+    virtual ndarray_node* get_opnode(int DND_UNUSED(i)) const {
         throw std::runtime_error("This ndarray_node does not have any operand nodes");
     }
 

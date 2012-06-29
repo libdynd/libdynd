@@ -18,14 +18,14 @@
 using namespace std;
 using namespace dnd;
 
-void dnd::ndarray_node::as_readwrite_data_and_strides(int ndim, char ** DND_UNUSED(out_data),
+void dnd::ndarray_node::as_readwrite_data_and_strides(int DND_UNUSED(ndim), char ** DND_UNUSED(out_data),
                                                 intptr_t * DND_UNUSED(out_strides)) const
 {
     throw std::runtime_error("as_readwrite_data_and_strides is only valid for "
                              "nodes with an expr_node_strided_array category");
 }
 
-void dnd::ndarray_node::as_readonly_data_and_strides(int ndim, char const ** DND_UNUSED(out_data),
+void dnd::ndarray_node::as_readonly_data_and_strides(int DND_UNUSED(ndim), char const ** DND_UNUSED(out_data),
                                                 intptr_t * DND_UNUSED(out_strides)) const
 {
     throw std::runtime_error("as_readonly_data_and_strides is only valid for "
@@ -136,11 +136,14 @@ ndarray_node_ref dnd::ndarray_node::evaluate()
 
                         return DND_MOVE(result);
                     }
-                    break;
                 }
                 default:
                     break;
             }
+            case arbitrary_node_category:
+                throw std::runtime_error("evaluate is not yet implemented for"
+                             "nodes with an arbitrary_node_category category");
+                break;
         }
     }
 
@@ -242,7 +245,6 @@ ndarray_node_ref dnd::apply_index_to_node(ndarray_node *node,
     shortvector<intptr_t> shape(ndim);
 
     // Convert the indices into the form used by the apply_linear_index function
-    int new_i = 0;
     for (int i = 0; i < nindex; ++i) {
         intptr_t step = indices[i].step();
         intptr_t node_shape_i = node_shape[i];

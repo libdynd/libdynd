@@ -25,7 +25,7 @@ dnd::immutable_scalar_node::immutable_scalar_node(const dtype& dt, const char* d
     memcpy(m_data, data, dt.element_size());
 }
 
-dnd::immutable_scalar_node::immutable_scalar_node(const dtype& dt, const char* data, int ndim, const intptr_t *shape)
+dnd::immutable_scalar_node::immutable_scalar_node(const dtype& dt, const char* data, int DND_UNUSED(ndim), const intptr_t *DND_UNUSED(shape))
     : ndarray_node(immutable_scalar_node_type), m_dtype(dt)
 {
     if (dt.is_object_type()) {
@@ -48,7 +48,7 @@ dnd::immutable_scalar_node::~immutable_scalar_node()
     }
 }
 
-void dnd::immutable_scalar_node::as_readwrite_data_and_strides(int ndim, char **DND_UNUSED(out_originptr),
+void dnd::immutable_scalar_node::as_readwrite_data_and_strides(int DND_UNUSED(ndim), char **DND_UNUSED(out_originptr),
                                                     intptr_t *DND_UNUSED(out_strides)) const
 {
     throw std::runtime_error("cannot write to an immutable scalar dnd::ndarray node");
