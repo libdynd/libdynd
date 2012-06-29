@@ -208,27 +208,6 @@ void dnd::ndarray::swap(ndarray& rhs)
     m_expr_tree.swap(rhs.m_expr_tree);
 }
 
-char *dnd::ndarray::get_readwrite_originptr() const
-{
-    if (m_expr_tree->get_node_type() == strided_array_node_type) {
-        return static_cast<const strided_ndarray_node *>(m_expr_tree.get())->get_readwrite_originptr();
-    } else {
-        throw std::runtime_error("cannot get a readwrite origin ptr from this type of node");
-    }
-}
-
-const char *dnd::ndarray::get_readonly_originptr() const
-{
-    switch (m_expr_tree->get_node_type()) {
-    case strided_array_node_type:
-        return static_cast<const strided_ndarray_node *>(m_expr_tree.get())->get_readwrite_originptr();
-    case immutable_scalar_node_type:
-        return static_cast<const immutable_scalar_node *>(m_expr_tree.get())->get_readonly_originptr();
-    default:
-        throw std::runtime_error("cannot get a readwrite origin ptr from this type of node");
-    }
-}
-
 ndarray dnd::empty_like(const ndarray& rhs, const dtype& dt)
 {
     // Sort the strides to get the memory layout ordering
@@ -284,7 +263,7 @@ ndarray dnd::ndarray::view_as_dtype(const dtype& dt) const
     }
 
     // Special case contiguous one dimensional arrays with a non-expression kind
-    if (get_ndim() == 1 && get_expr_tree()->get_node_type() == strided_array_node_type &&
+    if (get_ndim() == 1 && get_expr_tree()->get_category() == strided_array_node_category &&
                             get_strides()[0] == get_dtype().element_size() &&
                             get_dtype().kind() != expression_kind) {
         intptr_t nbytes = get_shape()[0] * get_dtype().element_size();

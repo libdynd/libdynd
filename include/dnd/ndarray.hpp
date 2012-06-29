@@ -172,8 +172,15 @@ public:
         return nelem;
     }
 
-    char *get_readwrite_originptr() const;
-    const char *get_readonly_originptr() const;
+    char *get_readwrite_originptr() const
+    {
+        return m_expr_tree->get_readwrite_originptr();
+    }
+
+    const char *get_readonly_originptr() const
+    {
+        return m_expr_tree->get_readonly_originptr();
+    }
 
     memory_block_ref get_memory_block() const
     {

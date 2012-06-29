@@ -39,16 +39,6 @@ enum ndarray_node_category {
     arbitrary_node_category
 };
 
-enum expr_node_type {
-    // This node represents an NBO, aligned, strided array
-    strided_array_node_type,
-    // This node represents a single scalar data element, by value
-    immutable_scalar_node_type,
-    elementwise_unary_kernel_node_type,
-    elementwise_binary_kernel_node_type,
-};
-
-
 /**
  * Virtual base class for the ndarray expression tree.
  *
@@ -68,13 +58,12 @@ class ndarray_node {
     ndarray_node& operator=(const ndarray_node&);
 
 protected:
-    expr_node_type m_node_type;
 
     /**
      * Constructs the basic node with NULL operand children.
      */
-    ndarray_node(expr_node_type node_type)
-        : m_use_count(0), m_node_type(node_type)
+    ndarray_node()
+        : m_use_count(0)
     {
     }
 
@@ -127,11 +116,6 @@ public:
 
     virtual ndarray_node* get_opnode(int DND_UNUSED(i)) const {
         throw std::runtime_error("This ndarray_node does not have any operand nodes");
-    }
-
-    expr_node_type get_node_type() const
-    {
-        return m_node_type;
     }
 
     virtual void get_nullary_operation(intptr_t dst_fixedstride,

@@ -181,27 +181,6 @@ static void print_node_category(ostream& o, ndarray_node_category cat)
     }
 }
 
-static void print_node_type(ostream& o, expr_node_type type)
-{
-    switch (type) {
-        case strided_array_node_type:
-            o << "strided_array_node_type";
-            break;
-        case immutable_scalar_node_type:
-            o << "immutable_scalar_node_type";
-            break;
-        case elementwise_unary_kernel_node_type:
-            o << "elementwise_unary_kernel_node_type";
-            break;
-        case elementwise_binary_kernel_node_type:
-            o << "elementwise_binary_kernel_node_type";
-            break;
-        default:
-            o << "unknown node type (" << (int)type << ")";
-            break;
-    }
-}
-
 void dnd::ndarray_node::debug_dump(ostream& o, const string& indent) const
 {
     o << indent << "(\"" << node_name() << "\",\n";
@@ -218,9 +197,6 @@ void dnd::ndarray_node::debug_dump(ostream& o, const string& indent) const
     o << ")\n";
     o << indent << " node category: ";
     print_node_category(o, get_category());
-    o << "\n";
-    o << indent << " node type: ";
-    print_node_type(o, m_node_type);
     o << "\n";
     debug_dump_extra(o, indent);
     o << indent << " access flags: ";
