@@ -92,11 +92,26 @@ public:
 
     virtual const dtype& get_dtype() const = 0;
 
+    virtual uint32_t get_access_flags() const = 0;
+
     virtual int get_ndim() const = 0;
 
     virtual const intptr_t *get_shape() const = 0;
 
-    virtual uint32_t get_access_flags() const = 0;
+    virtual const intptr_t *get_strides() const;
+
+    /**
+     * Gets the strides of this node, with the axes broadcast to the right.
+     *
+     * IMPORTANT: The caller must validate that the broadcasting is valid, this
+     *            function does not do that checking, and can't because it doesn't know
+     *            the shape it's being requested for.
+     */
+    void get_right_broadcast_strides(int ndim, intptr_t *out_strides) const;
+
+    virtual const char *get_readonly_originptr() const;
+
+    virtual char *get_readwrite_originptr() const;
 
     /** The number of operand nodes this node depends on */
     virtual int get_nop() const
@@ -123,17 +138,6 @@ public:
      * The default implementation raises an exception.
      */
     virtual void as_readwrite_data_and_strides(int ndim, char **out_originptr, intptr_t *out_strides) const;
-
-    /**
-     * Nodes with the category strided_array_node_category and with readable
-     * data should override this function.
-     *
-     * This function should push the strides to the right, as the default broadcasting
-     * rules.
-     *
-     * The default implementation raises an exception.
-     */
-    virtual void as_readonly_data_and_strides(int ndim, char const **out_originptr, intptr_t *out_strides) const;
 
     virtual void get_nullary_operation(intptr_t dst_fixedstride,
                                     kernel_instance<nullary_operation_t>& out_kernel) const;

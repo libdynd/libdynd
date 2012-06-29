@@ -49,6 +49,11 @@ public:
         return NULL;
     }
 
+    const intptr_t *get_strides() const
+    {
+        return NULL;
+    }
+
     uint32_t get_access_flags() const
     {
         return read_access_flag | immutable_access_flag;
@@ -61,9 +66,6 @@ public:
 
     /** Raises an exception, since this node is not writeable */
     void as_readwrite_data_and_strides(int ndim, char **out_originptr, intptr_t *out_strides) const;
-
-    /** Provides the data pointer and strides array for the tree evaluation code */
-    void as_readonly_data_and_strides(int ndim, char const **out_originptr, intptr_t *out_strides) const;
 
     ndarray_node_ref as_dtype(const dtype& dt,
                         dnd::assign_error_mode errmode, bool allow_in_place);

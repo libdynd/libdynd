@@ -160,11 +160,7 @@ public:
     }
 
     const intptr_t *get_strides() const {
-        if (m_expr_tree->get_node_type() == strided_array_node_type) {
-            return static_cast<const strided_ndarray_node *>(m_expr_tree.get())->get_strides();
-        } else {
-            throw std::runtime_error("cannot get the strides of an expression view ndarray");
-        }
+        return m_expr_tree->get_strides();
     }
 
     intptr_t get_num_elements() const {
@@ -564,15 +560,13 @@ namespace detail {
             if (lhs.get_ndim() != 0) {
                 throw std::runtime_error("can only convert ndarrays with 0 dimensions to scalars");
             }
-            if (lhs.get_expr_tree()->get_node_type() == strided_array_node_type) {
-                const strided_ndarray_node *node =
-                        static_cast<const strided_ndarray_node *>(lhs.get_expr_tree());
-                dtype_assign(make_dtype<T>(), (char *)&result, node->get_dtype(), node->get_readwrite_originptr(), errmode);
+            if (lhs.get_expr_tree()->get_category() == strided_array_node_category) {
+                const ndarray_node *node = lhs.get_expr_tree();
+                dtype_assign(make_dtype<T>(), (char *)&result, node->get_dtype(), node->get_readonly_originptr(), errmode);
             } else {
                 ndarray tmp = lhs.vals();
-                const strided_ndarray_node *node =
-                        static_cast<const strided_ndarray_node *>(tmp.get_expr_tree());
-                dtype_assign(make_dtype<T>(), (char *)&result, node->get_dtype(), node->get_readwrite_originptr(), errmode);
+                const ndarray_node *node = tmp.get_expr_tree();
+                dtype_assign(make_dtype<T>(), (char *)&result, node->get_dtype(), node->get_readonly_originptr(), errmode);
             }
             return result;
         }

@@ -62,18 +62,6 @@ void dnd::strided_ndarray_node::as_readwrite_data_and_strides(int ndim, char **o
     }
 }
 
-void dnd::strided_ndarray_node::as_readonly_data_and_strides(int ndim, char const **out_originptr,
-                                                    intptr_t *out_strides) const
-{
-    *out_originptr = m_originptr;
-    if (ndim == m_ndim) {
-        memcpy(out_strides, m_strides.get(), m_ndim * sizeof(intptr_t));
-    } else {
-        memset(out_strides, 0, (ndim - m_ndim) * sizeof(intptr_t));
-        memcpy(out_strides + (ndim - m_ndim), m_strides.get(), m_ndim * sizeof(intptr_t));
-    }
-}
-
 ndarray_node_ref dnd::strided_ndarray_node::as_dtype(const dtype& dt,
                     dnd::assign_error_mode errmode, bool allow_in_place)
 {

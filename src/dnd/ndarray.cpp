@@ -239,42 +239,6 @@ ndarray dnd::empty_like(const ndarray& rhs, const dtype& dt)
     return ndarray(dt, rhs.get_ndim(), rhs.get_shape(), axis_perm.get());
 }
 
-static void val_assign_loop(const ndarray& lhs, const ndarray& rhs, assign_error_mode errmode)
-{
-    // Get the data pointer and strides of rhs through the standard interface
-    dimvector rhs_original_strides(rhs.get_ndim());
-    const char *rhs_originptr = NULL;
-    rhs.get_expr_tree()->as_readonly_data_and_strides(rhs.get_ndim(), &rhs_originptr, rhs_original_strides.get());
-
-    // Broadcast the 'rhs' shape to 'this'
-    dimvector rhs_modified_strides(lhs.get_ndim());
-    broadcast_to_shape(lhs.get_ndim(), lhs.get_shape(), rhs.get_ndim(), rhs.get_shape(), rhs_original_strides.get(), rhs_modified_strides.get());
-
-    // Create the raw iterator
-    raw_ndarray_iter<1,1> iter(lhs.get_ndim(), lhs.get_shape(), lhs.get_readwrite_originptr(), lhs.get_strides(),
-                                        rhs_originptr, rhs_modified_strides.get());
-    //iter.debug_dump(cout);
-
-    intptr_t innersize = iter.innersize();
-    intptr_t dst_innerstride = iter.innerstride<0>(), src_innerstride = iter.innerstride<1>();
-
-    unary_specialization_kernel_instance assign;
-    get_dtype_assignment_kernel(lhs.get_dtype(),
-                                    rhs.get_dtype(),
-                                    errmode,
-                                    assign);
-    unary_operation_t assign_fn = assign.specializations[
-        get_unary_specialization(dst_innerstride, lhs.get_dtype().element_size(), src_innerstride, rhs.get_dtype().element_size())];
-
-    if (innersize > 0) {
-        do {
-            assign_fn(iter.data<0>(), dst_innerstride,
-                        iter.data<1>(), src_innerstride,
-                        innersize, assign.auxdata);
-        } while (iter.iternext());
-    }
-}
-
 ndarray dnd::ndarray::storage() const
 {
     const dtype& dt = get_dtype().storage_dtype();
@@ -399,26 +363,62 @@ std::string dnd::detail::ndarray_as_string(const ndarray& lhs, assign_error_mode
 }
 
 
+static void val_assign_loop(const ndarray& lhs, const ndarray& rhs, assign_error_mode errmode)
+{
+    ndarray_node *lhs_node = lhs.get_expr_tree();
+    ndarray_node *rhs_node = rhs.get_expr_tree();
+
+    // Get the data pointer and strides of rhs through the standard interface
+    const char *rhs_originptr = rhs_node->get_readonly_originptr();
+    const intptr_t *rhs_original_strides = rhs_node->get_strides();
+
+    // Broadcast the 'rhs' shape to 'this'
+    dimvector rhs_modified_strides(lhs.get_ndim());
+    broadcast_to_shape(lhs.get_ndim(), lhs.get_shape(), rhs.get_ndim(), rhs.get_shape(), rhs_original_strides, rhs_modified_strides.get());
+
+    // Create the raw iterator
+    raw_ndarray_iter<1,1> iter(lhs_node->get_ndim(), lhs_node->get_shape(), lhs_node->get_readwrite_originptr(), lhs_node->get_strides(),
+                                        rhs_originptr, rhs_modified_strides.get());
+    //iter.debug_dump(cout);
+
+    intptr_t innersize = iter.innersize();
+    intptr_t dst_innerstride = iter.innerstride<0>(), src_innerstride = iter.innerstride<1>();
+
+    unary_specialization_kernel_instance assign;
+    get_dtype_assignment_kernel(lhs.get_dtype(),
+                                    rhs.get_dtype(),
+                                    errmode,
+                                    assign);
+    unary_operation_t assign_fn = assign.specializations[
+        get_unary_specialization(dst_innerstride, lhs.get_dtype().element_size(), src_innerstride, rhs.get_dtype().element_size())];
+
+    if (innersize > 0) {
+        do {
+            assign_fn(iter.data<0>(), dst_innerstride,
+                        iter.data<1>(), src_innerstride,
+                        innersize, assign.auxdata);
+        } while (iter.iternext());
+    }
+}
+
 void dnd::ndarray::val_assign(const ndarray& rhs, assign_error_mode errmode) const
 {
     if (get_dtype() == rhs.get_dtype()) {
-        // The dtypes match, simpler case
         val_assign_loop(*this, rhs, assign_error_none);
-    } else if (get_num_elements() > 5 * rhs.get_num_elements()) {
+    } else if (get_num_elements() <= 5 * rhs.get_num_elements() ) {
+        val_assign_loop(*this, rhs, errmode);
+    } else {
         // If the data is being duplicated more than 5 times, make a temporary copy of rhs
         // converted to the dtype of 'this', then do the broadcasting.
         ndarray tmp = empty_like(rhs, get_dtype());
         val_assign_loop(tmp, rhs, errmode);
         val_assign_loop(*this, tmp, assign_error_none);
-    } else {
-        // Assignment with casting
-        val_assign_loop(*this, rhs, errmode);
     }
 }
 
 void dnd::ndarray::val_assign(const dtype& dt, const char *data, assign_error_mode errmode) const
 {
-    //DEBUG_COUT << "scalar val_assign\n";
+    cout << "scalar val_assign " << dt << " ptr " << (const void *)data << "\n";
     scalar_copied_if_necessary src(get_dtype(), dt, data, errmode);
     raw_ndarray_iter<1,0> iter(*this);
 
@@ -481,11 +481,10 @@ std::ostream& dnd::operator<<(std::ostream& o, const ndarray& rhs)
     if (rhs.get_expr_tree() != NULL) {
         if (rhs.get_expr_tree()->get_category() == strided_array_node_category &&
                         rhs.get_dtype().kind() != expression_kind) {
-            const char *originptr;
-            dimvector strides(rhs.get_ndim());
-            rhs.get_expr_tree()->as_readonly_data_and_strides(rhs.get_ndim(), &originptr, strides.get());
+            const char *originptr = rhs.get_expr_tree()->get_readonly_originptr();
+            const intptr_t *strides = rhs.get_expr_tree()->get_strides();
             o << "ndarray(" << rhs.get_dtype() << ", ";
-            nested_ndarray_print(o, rhs.get_dtype(), originptr, rhs.get_ndim(), rhs.get_shape(), strides.get());
+            nested_ndarray_print(o, rhs.get_dtype(), originptr, rhs.get_ndim(), rhs.get_shape(), strides);
             o << ")";
         } else {
             o << rhs.vals();

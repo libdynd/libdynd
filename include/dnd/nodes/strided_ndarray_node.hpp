@@ -66,6 +66,10 @@ public:
         return m_shape.get();
     }
 
+    const intptr_t *get_strides() const {
+        return m_strides.get();
+    }
+
     uint32_t get_access_flags() const
     {
         return m_access_flags;
@@ -83,18 +87,12 @@ public:
         return m_originptr;
     }
 
-    const intptr_t *get_strides() const {
-        return m_strides.get();
-    }
-
     memory_block_ref get_memory_block() const {
         return m_memblock;
     }
 
     /** Provides the data pointer and strides array for the tree evaluation code */
     void as_readwrite_data_and_strides(int ndim, char **out_originptr, intptr_t *out_strides) const;
-
-    void as_readonly_data_and_strides(int ndim, char const **out_originptr, intptr_t *out_strides) const;
 
     ndarray_node_ref as_dtype(const dtype& dt,
                         assign_error_mode errmode, bool allow_in_place);

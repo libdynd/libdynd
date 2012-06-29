@@ -200,12 +200,9 @@ PyObject* pydnd::ndarray_as_pyobject(const dnd::ndarray& n)
     // Evaluate the ndarray, and convert strings to the Python encoding
     nvals = n.vals();
 
-    // Get a read-only strided view of the data
-    const char *data = NULL;
-    dimvector strides(nvals.get_ndim());
-    nvals.get_expr_tree()->as_readonly_data_and_strides(nvals.get_ndim(), &data, strides.get());
-
-    return nested_ndarray_as_pyobject(nvals.get_dtype(), data, nvals.get_ndim(), nvals.get_shape(), strides.get());
+    ndarray_node *node = nvals.get_expr_tree();
+    return nested_ndarray_as_pyobject(node->get_dtype(), node->get_readonly_originptr(),
+                node->get_ndim(), node->get_shape(), node->get_strides());
 }
 
 static irange pyobject_as_irange(PyObject *index)

@@ -18,17 +18,36 @@
 using namespace std;
 using namespace dnd;
 
+const intptr_t *dnd::ndarray_node::get_strides() const
+{
+    throw std::runtime_error("cannot get strides from an ndarray node which is not strided");
+}
+
+void dnd::ndarray_node::get_right_broadcast_strides(int ndim, intptr_t *out_strides) const
+{
+    int node_ndim = get_ndim();
+    if (ndim == node_ndim) {
+        memcpy(out_strides, get_strides(), node_ndim * sizeof(intptr_t));
+    } else {
+        memset(out_strides, 0, (ndim - node_ndim) * sizeof(intptr_t));
+        memcpy(out_strides + (ndim - node_ndim), get_strides(), node_ndim * sizeof(intptr_t));
+    }
+}
+
+const char *dnd::ndarray_node::get_readonly_originptr() const
+{
+    throw std::runtime_error("cannot get a readonly originptr from an ndarray node which is not strided");
+}
+
+char *dnd::ndarray_node::get_readwrite_originptr() const
+{
+    throw std::runtime_error("cannot get a readwrite originptr from an ndarray node which is not strided");
+}
+
 void dnd::ndarray_node::as_readwrite_data_and_strides(int DND_UNUSED(ndim), char ** DND_UNUSED(out_data),
                                                 intptr_t * DND_UNUSED(out_strides)) const
 {
     throw std::runtime_error("as_readwrite_data_and_strides is only valid for "
-                             "nodes with an expr_node_strided_array category");
-}
-
-void dnd::ndarray_node::as_readonly_data_and_strides(int DND_UNUSED(ndim), char const ** DND_UNUSED(out_data),
-                                                intptr_t * DND_UNUSED(out_strides)) const
-{
-    throw std::runtime_error("as_readonly_data_and_strides is only valid for "
                              "nodes with an expr_node_strided_array category");
 }
 
