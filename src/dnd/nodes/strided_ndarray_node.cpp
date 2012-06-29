@@ -16,15 +16,15 @@ using namespace dnd;
 dnd::strided_ndarray_node::strided_ndarray_node(const dtype& dt, int ndim,
                                 const intptr_t *shape, const intptr_t *strides,
                                 char *originptr, const memory_block_ref& memblock)
-    : ndarray_node(dt, ndim, shape, strided_array_node_type),
-      m_originptr(originptr), m_strides(ndim, strides), m_memblock(memblock)
+    : ndarray_node(ndim, shape, strided_array_node_type),
+      m_dtype(dt), m_originptr(originptr), m_strides(ndim, strides), m_memblock(memblock)
 {
 }
 
 dnd::strided_ndarray_node::strided_ndarray_node(const dtype& dt, int ndim,
                                 const intptr_t *shape, const int *axis_perm)
-    : ndarray_node(dt, ndim, shape, strided_array_node_type),
-      m_originptr(NULL), m_strides(ndim), m_memblock()
+    : ndarray_node(ndim, shape, strided_array_node_type),
+      m_dtype(dt), m_originptr(NULL), m_strides(ndim), m_memblock()
 {
     // Build the strides using the ordering and shape
     intptr_t num_elements = 1;

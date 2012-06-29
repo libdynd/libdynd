@@ -14,6 +14,8 @@ namespace dnd {
  * NDArray expression node which holds an immutable scalar.
  */
 class immutable_scalar_node : public ndarray_node {
+    /* The data type of this node's result */
+    dtype m_dtype;
     char *m_data;
     /** Builtin storage for small immutable scalars */
     int64_t m_storage[2];
@@ -31,6 +33,10 @@ public:
     ndarray_node_category get_category() const
     {
         return strided_array_node_category;
+    }
+
+    const dtype& get_dtype() const {
+        return m_dtype;
     }
 
     const char *get_readonly_originptr() const

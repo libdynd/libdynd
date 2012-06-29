@@ -14,6 +14,8 @@ namespace dnd {
  * NDArray node which holds a raw strided array.
  */
 class strided_ndarray_node : public ndarray_node {
+    /* The data type of this node's result */
+    dtype m_dtype;
     char *m_originptr;
     dimvector m_strides;
     memory_block_ref m_memblock;
@@ -26,12 +28,8 @@ public:
     /**
      * Creates a strided array node from the raw values.
      *
-     * The dtype must be NBO, and the data must all be aligned, but this
-     * constructor does not validate these constraints. Failure to enforce
-     * these contraints will result in undefined behavior.
-     *
      * It's prefereable to use the function make_strided_ndarray_node function,
-     * as it does the parameter validation.
+     * as it does parameter validation.
      */
     strided_ndarray_node(const dtype& dt, int ndim, const intptr_t *shape,
             const intptr_t *strides, char *originptr, const memory_block_ref& memblock);
@@ -47,6 +45,10 @@ public:
     ndarray_node_category get_category() const
     {
         return strided_array_node_category;
+    }
+
+    const dtype& get_dtype() const {
+        return m_dtype;
     }
 
     char *get_readwrite_originptr() const {
