@@ -28,12 +28,18 @@
 // TODO: versions with constexpr
 #  define DND_CONSTEXPR constexpr
 
-#elif defined(_MSC_VER) && _MSC_VER >= 1600
+#elif defined(_MSC_VER)
 
+# if _MSC_VER >= 1600
 // Use enable_if from std::tr1
 #  define DND_USE_TR1_ENABLE_IF
-// No DND_CONSTEXPR yet
+// Use rvalue refs
+#  define DND_RVALUE_REFS
+# endif
+
+// No DND_CONSTEXPR yet, define it as nothing
 #  define DND_CONSTEXPR
+
 #endif
 
 // If RValue References are supported

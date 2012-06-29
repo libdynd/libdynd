@@ -225,11 +225,7 @@ TEST(NDArray, AsScalar) {
 
     a = ndarray(make_dtype<float>());
     EXPECT_EQ(1, a.get_num_elements());
-    a.debug_dump(cout);
-    cout << a << endl;
     a.val_assign(3.14f);
-    a.debug_dump(cout);
-    cout << a << endl;
     EXPECT_EQ(3.14f, a.as<float>());
     EXPECT_EQ(3.14f, a.as<double>());
     EXPECT_THROW(a.as<int64_t>(), runtime_error);

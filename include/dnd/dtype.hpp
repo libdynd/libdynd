@@ -354,7 +354,7 @@ public:
 #ifdef DND_RVALUE_REFS
     /** Constructor from an rvalue extended_dtype */
     dtype(const shared_ptr<extended_dtype>&& data)
-        : m_type_id(data->type_id(), m_kind(data->kind()), m_alignment(data->alignment()),
+        : m_type_id(data->type_id()), m_kind(data->kind()), m_alignment(data->alignment()),
         m_element_size(data->element_size()), m_data(DND_MOVE(data)) {}
     /** Move constructor (should be "= default" in C++11) */
     dtype(dtype&& rhs)

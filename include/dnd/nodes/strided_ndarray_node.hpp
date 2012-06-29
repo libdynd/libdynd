@@ -31,13 +31,30 @@ class strided_ndarray_node : public ndarray_node {
 
 public:
     /**
-     * Creates a strided array node from the raw values.
-     *
-     * It's prefereable to use the function make_strided_ndarray_node function,
-     * as it does parameter validation.
+     * Creates a strided array node from the raw values. Does not validate them.
      */
     strided_ndarray_node(const dtype& dt, int ndim, const intptr_t *shape,
             const intptr_t *strides, char *originptr, int access_flags, const memory_block_ref& memblock);
+
+    /**
+     * Creates a strided array node from the raw values. Does not validate them.
+     */
+    strided_ndarray_node(const dtype& dt, int ndim, const intptr_t *shape,
+            const intptr_t *strides, const char *originptr, int access_flags, const memory_block_ref& memblock);
+
+#ifdef DND_RVALUE_REFS
+    /**
+     * Creates a strided array node from the raw values. Does not validate them.
+     */
+    strided_ndarray_node(const dtype& dt, int ndim, const intptr_t *shape,
+            const intptr_t *strides, char *originptr, int access_flags, memory_block_ref&& memblock);
+
+    /**
+     * Creates a strided array node from the raw values. Does not validate them.
+     */
+    strided_ndarray_node(const dtype& dt, int ndim, const intptr_t *shape,
+            const intptr_t *strides, const char *originptr, int access_flags, memory_block_ref&& memblock);
+#endif
 
     /**
      * Constructs a strided array node with the given dtype, shape, and axis_perm (for memory layout)

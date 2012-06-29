@@ -175,12 +175,11 @@ public:
     char *get_readwrite_originptr() const;
     const char *get_readonly_originptr() const;
 
-    memory_block_ref get_memory_block() const {
-        if (m_expr_tree->get_node_type() == strided_array_node_type) {
-            return static_cast<const strided_ndarray_node *>(m_expr_tree.get())->get_memory_block();
-        } else {
-            throw std::runtime_error("cannot get the buffer owner of an expression view ndarray");
-        }
+    memory_block_ref get_memory_block() const
+    {
+        // TODO: When ndarray_node becomes a memory_block, return the
+        //       node if this function returns NULL.
+        return m_expr_tree->get_memory_block();
     }
 
     ndarray_node *get_expr_tree() const {

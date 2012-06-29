@@ -91,6 +91,11 @@ public:
         return m_opnodes[i].get();
     }
 
+    memory_block_ref get_memory_block() const
+    {
+        return memory_block_ref();
+    }
+
     ndarray_node_ref as_dtype(const dtype& dt,
                         dnd::assign_error_mode errmode, bool allow_in_place)
     {

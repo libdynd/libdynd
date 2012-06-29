@@ -113,6 +113,12 @@ public:
 
     virtual char *get_readwrite_originptr() const;
 
+    /**
+     * Retrieves the memory_block object which holds the data for this
+     * node. If this node holds its own data, returns NULL.
+     */
+    virtual memory_block_ref get_memory_block() const = 0;
+
     /** The number of operand nodes this node depends on */
     virtual int get_nop() const
     {

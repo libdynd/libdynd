@@ -241,13 +241,22 @@ ndarray dnd::empty_like(const ndarray& rhs, const dtype& dt)
 
 ndarray dnd::ndarray::storage() const
 {
-    const dtype& dt = get_dtype().storage_dtype();
-    if (get_expr_tree()->get_node_type() == strided_array_node_type) {
-        return ndarray(new strided_ndarray_node(dt, get_ndim(), get_shape(), get_strides(),
-                        get_readwrite_originptr(), read_access_flag | write_access_flag,
-                        get_memory_block()));
+    if (get_expr_tree()->get_category() == strided_array_node_category) {
+        ndarray_node *node = get_expr_tree();
+        int access_flags = node->get_access_flags();
+        if (access_flags&write_access_flag) {
+            return ndarray(new strided_ndarray_node(node->get_dtype().storage_dtype(),
+                        node->get_ndim(), node->get_shape(), node->get_strides(),
+                         node->get_readwrite_originptr(),
+                        access_flags, node->get_memory_block()));
+        } else {
+            return ndarray(new strided_ndarray_node(node->get_dtype().storage_dtype(),
+                        node->get_ndim(), node->get_shape(), node->get_strides(),
+                        node->get_readonly_originptr(),
+                        access_flags, node->get_memory_block()));
+        }
     } else {
-        throw std::runtime_error("Can only get the storage from dnd::ndarrays which are strided arrays");
+        throw std::runtime_error("Can only get the storage from strided dnd::ndarrays");
     }
 }
 
@@ -418,7 +427,7 @@ void dnd::ndarray::val_assign(const ndarray& rhs, assign_error_mode errmode) con
 
 void dnd::ndarray::val_assign(const dtype& dt, const char *data, assign_error_mode errmode) const
 {
-    cout << "scalar val_assign " << dt << " ptr " << (const void *)data << "\n";
+    //cout << "scalar val_assign " << dt << " ptr " << (const void *)data << "\n";
     scalar_copied_if_necessary src(get_dtype(), dt, data, errmode);
     raw_ndarray_iter<1,0> iter(*this);
 
@@ -431,7 +440,7 @@ void dnd::ndarray::val_assign(const dtype& dt, const char *data, assign_error_mo
 
     if (innersize > 0) {
         do {
-            //DEBUG_COUT << "scalar val_assign inner loop with size " << innersize << "\n";
+            //cout << "scalar val_assign inner loop with size " << innersize << "\n";
             assign_fn(iter.data<0>(), innerstride, src.data(), 0, innersize, assign.auxdata);
         } while (iter.iternext());
     }
