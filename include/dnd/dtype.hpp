@@ -82,6 +82,7 @@ enum type_id_t {
 
     // Other primitives
     fixedstring_type_id,
+    categorical_type_id,
 
     // Composite dtypes
     struct_type_id,

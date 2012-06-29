@@ -28,12 +28,14 @@ set(dnd_SRC
     # DTypes
     src/dnd/dtypes/array_dtype.cpp
     src/dnd/dtypes/byteswap_dtype.cpp
+    src/dnd/dtypes/categorical_dtype.cpp
     src/dnd/dtypes/conversion_dtype.cpp
     src/dnd/dtypes/dtype_alignment.cpp
     src/dnd/dtypes/fixedstring_dtype.cpp
     src/dnd/dtypes/view_dtype.cpp
     include/dnd/dtypes/array_dtype.hpp
     include/dnd/dtypes/byteswap_dtype.hpp
+    include/dnd/dtypes/categorical_dtype.hpp
     include/dnd/dtypes/conversion_dtype.hpp
     include/dnd/dtypes/dtype_alignment.hpp
     include/dnd/dtypes/fixedstring_dtype.hpp
