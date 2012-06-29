@@ -48,7 +48,12 @@ public:
     {
         return NULL;
     }
-    
+
+    uint32_t get_access_flags() const
+    {
+        return read_access_flag | immutable_access_flag;
+    }
+        
     const char *get_readonly_originptr() const
     {
         return m_data;

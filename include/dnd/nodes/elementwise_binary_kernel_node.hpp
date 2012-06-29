@@ -75,6 +75,13 @@ public:
     {
         return m_shape.get();
     }
+
+    uint32_t get_access_flags() const
+    {
+        // Readable, and inherit the immutable access flag of the operands
+        return read_access_flag |
+            (m_opnodes[0]->get_access_flags() & m_opnodes[1]->get_access_flags() & immutable_access_flag);
+    }
     
     int get_nop() const {
         return 2;

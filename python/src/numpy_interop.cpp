@@ -204,7 +204,9 @@ ndarray pydnd::ndarray_from_numpy_array(PyArrayObject* obj)
 
     // Create the result ndarray
     return ndarray(new strided_ndarray_node(d, PyArray_NDIM(obj),
-                    PyArray_DIMS(obj), PyArray_STRIDES(obj), PyArray_BYTES(obj), DND_MOVE(memblock)));
+                    PyArray_DIMS(obj), PyArray_STRIDES(obj), PyArray_BYTES(obj),
+                    read_access_flag | (PyArray_ISWRITEABLE(obj) ? write_access_flag : 0),
+                    DND_MOVE(memblock)));
 }
 
 dnd::ndarray pydnd::ndarray_from_numpy_scalar(PyObject* obj)
@@ -312,6 +314,8 @@ PyObject* pydnd::ndarray_as_numpy_struct_capsule(const dnd::ndarray& n)
         }
     }
 
+    bool writeable = (n.get_expr_tree()->get_access_flags() & write_access_flag) != 0;
+
     PyArrayInterface inter;
     memset(&inter, 0, sizeof(inter));
 
@@ -320,11 +324,14 @@ PyObject* pydnd::ndarray_as_numpy_struct_capsule(const dnd::ndarray& n)
     inter.typekind = numpy_kindchar_of(value_dt);
     // Numpy treats 'U' as number of 4-byte characters, not number of bytes
     inter.itemsize = (int)(inter.typekind != 'U' ? n.get_dtype().element_size() : n.get_dtype().element_size() / 4);
-    // TODO: When read-write access control is added, this must be modified
     inter.flags = (byteswapped ? 0 : NPY_ARRAY_NOTSWAPPED) |
                   (aligned ? NPY_ARRAY_ALIGNED : 0) |
-                  NPY_ARRAY_WRITEABLE;
-    inter.data = n.get_readwrite_originptr();
+                  (writeable ? NPY_ARRAY_WRITEABLE : 0);
+    if (writeable) {
+        inter.data = n.get_readwrite_originptr();
+    } else {
+        inter.data = const_cast<char *>(n.get_readonly_originptr());
+    }
     inter.strides = new intptr_t[2 * n.get_ndim()];
     inter.shape = inter.strides + n.get_ndim();
 

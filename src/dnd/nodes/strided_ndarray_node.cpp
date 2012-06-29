@@ -15,9 +15,9 @@ using namespace dnd;
 
 dnd::strided_ndarray_node::strided_ndarray_node(const dtype& dt, int ndim,
                                 const intptr_t *shape, const intptr_t *strides,
-                                char *originptr, const memory_block_ref& memblock)
+                                char *originptr, int access_flags, const memory_block_ref& memblock)
     : ndarray_node(strided_array_node_type),
-      m_ndim(ndim), m_shape(ndim, shape), m_dtype(dt),
+      m_ndim(ndim), m_access_flags(access_flags), m_shape(ndim, shape), m_dtype(dt),
       m_originptr(originptr), m_strides(ndim, strides), m_memblock(memblock)
 {
 }
@@ -49,12 +49,16 @@ dnd::strided_ndarray_node::strided_ndarray_node(const dtype& dt, int ndim,
 void dnd::strided_ndarray_node::as_readwrite_data_and_strides(int ndim, char **out_originptr,
                                                     intptr_t *out_strides) const
 {
-    *out_originptr = m_originptr;
-    if (ndim == m_ndim) {
-        memcpy(out_strides, m_strides.get(), m_ndim * sizeof(intptr_t));
+    if (m_access_flags & write_access_flag) {
+        *out_originptr = m_originptr;
+        if (ndim == m_ndim) {
+            memcpy(out_strides, m_strides.get(), m_ndim * sizeof(intptr_t));
+        } else {
+            memset(out_strides, 0, (ndim - m_ndim) * sizeof(intptr_t));
+            memcpy(out_strides + (ndim - m_ndim), m_strides.get(), m_ndim * sizeof(intptr_t));
+        }
     } else {
-        memset(out_strides, 0, (ndim - m_ndim) * sizeof(intptr_t));
-        memcpy(out_strides + (ndim - m_ndim), m_strides.get(), m_ndim * sizeof(intptr_t));
+        throw std::runtime_error("dnd::ndarray node is not writeable");
     }
 }
 
@@ -79,7 +83,8 @@ ndarray_node_ref dnd::strided_ndarray_node::as_dtype(const dtype& dt,
     } else {
         return ndarray_node_ref(new strided_ndarray_node(
                         make_conversion_dtype(dt, m_dtype, errmode),
-                        m_ndim, m_shape.get(), m_strides.get(), m_originptr, m_memblock));
+                        m_ndim, m_shape.get(), m_strides.get(),
+                        m_originptr, m_access_flags, m_memblock));
     }
 }
 
@@ -168,7 +173,7 @@ ndarray_node_ref dnd::strided_ndarray_node::apply_linear_index(
 
         return ndarray_node_ref(
             new strided_ndarray_node(m_dtype, ndim, new_shape.get(), new_strides.get(),
-                                        new_originptr, m_memblock));
+                                        new_originptr, m_access_flags, m_memblock));
     }
 }
 
@@ -185,14 +190,4 @@ void dnd::strided_ndarray_node::debug_dump_extra(ostream& o, const string& inden
     o << indent << " originptr: " << (void *)m_originptr << "\n";
     o << indent << " memoryblock owning the data:\n";
     memory_block_debug_dump(m_memblock.get(), o, indent + " ");
-}
-
-ndarray_node_ref dnd::make_strided_ndarray_node(
-            const dtype& dt, int ndim, const intptr_t *shape,
-            const intptr_t *strides, char *originptr,
-            const memory_block_ref& memblock)
-{
-    // TODO: Add a multidimensional DND_ASSERT_ALIGNED check here
-    return ndarray_node_ref(new strided_ndarray_node(dt, ndim,
-                                        shape, strides, originptr, memblock));
 }

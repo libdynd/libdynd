@@ -64,7 +64,7 @@ categorical_dtype::~categorical_dtype() {
 void categorical_dtype::print_element(std::ostream& o, const char *data) const
 {
     uint32_t value;
-    memcpy(&value, data, sizeof(index));
+    memcpy(&value, data, sizeof(value));
     m_category_dtype.print_element(o, m_categories[m_value_to_category_index[value]]);
 }
 

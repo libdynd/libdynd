@@ -562,8 +562,8 @@ dnd::ndarray::ndarray(const T (&rhs)[N])
     memory_block_ref memblock = make_fixed_size_pod_memory_block(sizeof(T), num_bytes, &originptr);
     DND_MEMCPY(originptr, &rhs[0], num_bytes);
     m_expr_tree.reset(new strided_ndarray_node(dtype(detail::type_from_array<T>::type_id),
-                            ndim, shape, strides,
-                            originptr, DND_MOVE(memblock)));
+                            ndim, shape, strides, originptr,
+                            read_access_flag | write_access_flag, DND_MOVE(memblock)));
 }
 
 ///////////// The ndarray.as<type>() templated function /////////////////////////

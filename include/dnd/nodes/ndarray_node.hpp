@@ -20,6 +20,15 @@ namespace dnd {
 
 class ndarray;
 
+enum ndarray_access_flags {
+    /** If an ndarray node is readable */
+    read_access_flag = 0x01,
+    /** If an ndarray node is writeable */
+    write_access_flag = 0x02,
+    /** If an ndarray node will not be written to by anyone else either */
+    immutable_access_flag = 0x04
+};
+
 enum ndarray_node_category {
     // The node points a simple strided array in memory
     strided_array_node_category,
@@ -87,16 +96,21 @@ public:
 
     virtual const intptr_t *get_shape() const = 0;
 
+    virtual uint32_t get_access_flags() const = 0;
+
     /** The number of operand nodes this node depends on */
-    virtual int get_nop() const {
+    virtual int get_nop() const
+    {
         return 0;
     }
 
-    virtual ndarray_node* get_opnode(int i) const {
+    virtual ndarray_node* get_opnode(int i) const
+    {
         throw std::runtime_error("This ndarray_node does not have any operand nodes");
     }
 
-    expr_node_type get_node_type() const {
+    expr_node_type get_node_type() const
+    {
         return m_node_type;
     }
 

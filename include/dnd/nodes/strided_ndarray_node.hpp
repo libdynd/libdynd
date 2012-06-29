@@ -16,6 +16,7 @@ namespace dnd {
 class strided_ndarray_node : public ndarray_node {
     /* The number of dimensions in the result array */
     int m_ndim;
+    int m_access_flags;
     /* The shape of the result array */
     dimvector m_shape;
     /* The data type of this node's result */
@@ -36,7 +37,7 @@ public:
      * as it does parameter validation.
      */
     strided_ndarray_node(const dtype& dt, int ndim, const intptr_t *shape,
-            const intptr_t *strides, char *originptr, const memory_block_ref& memblock);
+            const intptr_t *strides, char *originptr, int access_flags, const memory_block_ref& memblock);
 
     /**
      * Constructs a strided array node with the given dtype, shape, and axis_perm (for memory layout)
@@ -63,6 +64,11 @@ public:
     const intptr_t *get_shape() const
     {
         return m_shape.get();
+    }
+
+    uint32_t get_access_flags() const
+    {
+        return m_access_flags;
     }
     
     char *get_readwrite_originptr() const {
@@ -100,29 +106,7 @@ public:
     }
 
     void debug_dump_extra(std::ostream& o, const std::string& indent) const;
-
-    friend ndarray_node_ref make_strided_ndarray_node(
-                    const dtype& dt, int ndim, const intptr_t *shape,
-                    const intptr_t *strides, char *originptr,
-                    const memory_block_ref& memblock);
 };
-
-/**
- * Creates an expr node out of the raw data for a strided array. This will create
- * a strided_ndarray_node, the caller should ensure that the data is aligned,
- * and use an unaligned<> dtype if not.
- *
- * @param dt        The data type of the raw elements.
- * @param ndim      The number of dimensions in the array.
- * @param shape     The shape of the array (has 'ndim' elements)
- * @param strides   The strides of the array (has 'ndim' elements)
- * @param originptr The pointer to the element whose multi-index is all zeros.
- * @param buffer_owner  A reference-counted pointer to the owner of the buffer.
- */
-ndarray_node_ref make_strided_ndarray_node(
-            const dtype& dt, int ndim, const intptr_t *shape,
-            const intptr_t *strides, char *originptr,
-            const dnd::shared_ptr<void>& buffer_owner);
 
 } // namespace dnd
 
