@@ -46,22 +46,6 @@ dnd::strided_ndarray_node::strided_ndarray_node(const dtype& dt, int ndim,
     m_memblock = make_fixed_size_pod_memory_block(dt.alignment(), dt.element_size() * num_elements, &m_originptr);
 }
 
-void dnd::strided_ndarray_node::as_readwrite_data_and_strides(int ndim, char **out_originptr,
-                                                    intptr_t *out_strides) const
-{
-    if (m_access_flags & write_access_flag) {
-        *out_originptr = m_originptr;
-        if (ndim == m_ndim) {
-            memcpy(out_strides, m_strides.get(), m_ndim * sizeof(intptr_t));
-        } else {
-            memset(out_strides, 0, (ndim - m_ndim) * sizeof(intptr_t));
-            memcpy(out_strides + (ndim - m_ndim), m_strides.get(), m_ndim * sizeof(intptr_t));
-        }
-    } else {
-        throw std::runtime_error("dnd::ndarray node is not writeable");
-    }
-}
-
 ndarray_node_ref dnd::strided_ndarray_node::as_dtype(const dtype& dt,
                     dnd::assign_error_mode errmode, bool allow_in_place)
 {

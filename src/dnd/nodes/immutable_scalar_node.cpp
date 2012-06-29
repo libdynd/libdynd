@@ -48,12 +48,6 @@ dnd::immutable_scalar_node::~immutable_scalar_node()
     }
 }
 
-void dnd::immutable_scalar_node::as_readwrite_data_and_strides(int DND_UNUSED(ndim), char **DND_UNUSED(out_originptr),
-                                                    intptr_t *DND_UNUSED(out_strides)) const
-{
-    throw std::runtime_error("cannot write to an immutable scalar dnd::ndarray node");
-}
-
 ndarray_node_ref dnd::immutable_scalar_node::as_dtype(const dtype& dt,
                     dnd::assign_error_mode errmode, bool allow_in_place)
 {

@@ -128,17 +128,6 @@ public:
         return m_node_type;
     }
 
-    /**
-     * Nodes with the category strided_array_node_category and with writeable data
-     * should override this function.
-     *
-     * This function should push the strides to the right, as the default broadcasting
-     * rules.
-     *
-     * The default implementation raises an exception.
-     */
-    virtual void as_readwrite_data_and_strides(int ndim, char **out_originptr, intptr_t *out_strides) const;
-
     virtual void get_nullary_operation(intptr_t dst_fixedstride,
                                     kernel_instance<nullary_operation_t>& out_kernel) const;
     virtual void get_unary_operation(intptr_t dst_fixedstride, intptr_t src_fixedstride,

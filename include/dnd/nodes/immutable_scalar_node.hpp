@@ -64,9 +64,6 @@ public:
         return m_data;
     }
 
-    /** Raises an exception, since this node is not writeable */
-    void as_readwrite_data_and_strides(int ndim, char **out_originptr, intptr_t *out_strides) const;
-
     ndarray_node_ref as_dtype(const dtype& dt,
                         dnd::assign_error_mode errmode, bool allow_in_place);
 

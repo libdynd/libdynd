@@ -44,13 +44,6 @@ char *dnd::ndarray_node::get_readwrite_originptr() const
     throw std::runtime_error("cannot get a readwrite originptr from an ndarray node which is not strided");
 }
 
-void dnd::ndarray_node::as_readwrite_data_and_strides(int DND_UNUSED(ndim), char ** DND_UNUSED(out_data),
-                                                intptr_t * DND_UNUSED(out_strides)) const
-{
-    throw std::runtime_error("as_readwrite_data_and_strides is only valid for "
-                             "nodes with an expr_node_strided_array category");
-}
-
 void dnd::ndarray_node::get_nullary_operation(intptr_t, kernel_instance<nullary_operation_t>&) const
 {
     throw std::runtime_error("get_nullary_operation is only valid for "

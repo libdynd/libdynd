@@ -91,9 +91,6 @@ public:
         return m_memblock;
     }
 
-    /** Provides the data pointer and strides array for the tree evaluation code */
-    void as_readwrite_data_and_strides(int ndim, char **out_originptr, intptr_t *out_strides) const;
-
     ndarray_node_ref as_dtype(const dtype& dt,
                         assign_error_mode errmode, bool allow_in_place);
 
