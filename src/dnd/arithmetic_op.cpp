@@ -179,27 +179,27 @@ static DND_BUILTIN_DTYPE_BINARY_OPERATION_TABLE(division);
 ndarray dnd::operator+(const ndarray& op1, const ndarray& op2)
 {
     arithmetic_operator_factory op_factory(builtin_addition_table, "add");
-    return ndarray(make_elementwise_binary_op_expr_node(op1.get_expr_tree(), op2.get_expr_tree(), op_factory,
+    return ndarray(make_elementwise_binary_kernel_node(op1.get_expr_tree(), op2.get_expr_tree(), op_factory,
                                     assign_error_fractional));
 }
 
 ndarray dnd::operator-(const ndarray& op1, const ndarray& op2)
 {
     arithmetic_operator_factory op_factory(builtin_subtraction_table, "subtract");
-    return ndarray(make_elementwise_binary_op_expr_node(op1.get_expr_tree(), op2.get_expr_tree(), op_factory,
+    return ndarray(make_elementwise_binary_kernel_node(op1.get_expr_tree(), op2.get_expr_tree(), op_factory,
                                     assign_error_fractional));
 }
 
 ndarray dnd::operator*(const ndarray& op1, const ndarray& op2)
 {
     arithmetic_operator_factory op_factory(builtin_multiplication_table, "multiply");
-    return ndarray(make_elementwise_binary_op_expr_node(op1.get_expr_tree(), op2.get_expr_tree(), op_factory,
+    return ndarray(make_elementwise_binary_kernel_node(op1.get_expr_tree(), op2.get_expr_tree(), op_factory,
                                     assign_error_fractional));
 }
 
 ndarray dnd::operator/(const ndarray& op1, const ndarray& op2)
 {
     arithmetic_operator_factory op_factory(builtin_division_table, "divide");
-    return ndarray(make_elementwise_binary_op_expr_node(op1.get_expr_tree(), op2.get_expr_tree(), op_factory,
+    return ndarray(make_elementwise_binary_kernel_node(op1.get_expr_tree(), op2.get_expr_tree(), op_factory,
                                     assign_error_fractional));
 }

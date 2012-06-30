@@ -36,7 +36,7 @@ class ndarray {
      * The ndarray is fully contained in an expression tree, this is the root node, a
      * boost_intrusive_ptr, to make the ndarray size equivalent to a single pointer.
      */
-    ndarray_node_ref m_expr_tree;
+    ndarray_node_ptr m_expr_tree;
 
 public:
     /** Constructs an array with no buffer (NULL state) */
@@ -70,9 +70,9 @@ public:
     ndarray(const dtype& dt, int ndim, const intptr_t *shape, const int *axis_perm);
 
     /** Constructs an ndaray from an expr node */
-    explicit ndarray(const ndarray_node_ref& expr_tree);
+    explicit ndarray(const ndarray_node_ptr& expr_tree);
     /** Constructs an ndaray from an expr node */
-    explicit ndarray(ndarray_node_ref&& expr_tree);
+    explicit ndarray(ndarray_node_ptr&& expr_tree);
 
     /** Constructs a one-dimensional array */
     ndarray(intptr_t dim0, const dtype& dt);
@@ -182,15 +182,15 @@ public:
         return m_expr_tree->get_readonly_originptr();
     }
 
-    memory_block_ref get_memory_block() const
+    memory_block_ptr get_memory_block() const
     {
         // TODO: When ndarray_node becomes a memory_block, return the
         //       node if this function returns NULL.
         return m_expr_tree->get_memory_block();
     }
 
-    ndarray_node *get_expr_tree() const {
-        return m_expr_tree.get();
+    ndarray_node_ptr get_expr_tree() const {
+        return m_expr_tree;
     }
 
     /**
@@ -446,9 +446,9 @@ dnd::ndarray::ndarray(std::initializer_list<T> il)
     intptr_t dim0 = il.size();
     intptr_t stride = (dim0 == 1) ? 0 : sizeof(T);
     char *originptr = 0;
-    memory_block_ref memblock = make_fixed_size_pod_memory_block(sizeof(T), sizeof(T) * dim0, &originptr);
+    memory_block_ptr memblock = make_fixed_size_pod_memory_block(sizeof(T), sizeof(T) * dim0, &originptr);
     DND_MEMCPY(originptr, il.begin(), sizeof(T) * dim0);
-    m_expr_tree.reset(new strided_ndarray_node(make_dtype<T>(), 1, &dim0, &stride,
+    m_expr_tree.swap(make_strided_ndarray_node(make_dtype<T>(), 1, &dim0, &stride,
                             originptr, DND_MOVE(memblock)));
 }
 template<class T>
@@ -468,10 +468,10 @@ dnd::ndarray::ndarray(std::initializer_list<std::initializer_list<T> > il)
         stride *= shape[i];
     }
     char *originptr = 0;
-    memory_block_ref memblock = make_fixed_size_pod_memory_block(sizeof(T), sizeof(T) * num_elements, &originptr);
+    memory_block_ptr memblock = make_fixed_size_pod_memory_block(sizeof(T), sizeof(T) * num_elements, &originptr);
     T *dataptr = reinterpret_cast<T *>(originptr);
     detail::initializer_list_shape<S>::copy_data(&dataptr, il);
-    m_expr_tree.reset(new strided_ndarray_node(make_dtype<T>(), 2, shape, strides,
+    m_expr_tree.swap(make_strided_ndarray_node(make_dtype<T>(), 2, shape, strides,
                             originptr, DND_MOVE(memblock)));
 }
 template<class T>
@@ -491,10 +491,10 @@ dnd::ndarray::ndarray(std::initializer_list<std::initializer_list<std::initializ
         stride *= shape[i];
     }
     char *originptr = 0;
-    memory_block_ref memblock = make_fixed_size_pod_memory_block(sizeof(T), sizeof(T) * num_elements, &originptr);
+    memory_block_ptr memblock = make_fixed_size_pod_memory_block(sizeof(T), sizeof(T) * num_elements, &originptr);
     T *dataptr = reinterpret_cast<T *>(originptr);
     detail::initializer_list_shape<S>::copy_data(&dataptr, il);
-    m_expr_tree.reset(new strided_ndarray_node(make_dtype<T>(), 3, shape, strides,
+    m_expr_tree.swap(make_strided_ndarray_node(make_dtype<T>(), 3, shape, strides,
                             originptr, DND_MOVE(memblock)));
 }
 #endif // DND_INIT_LIST
@@ -549,9 +549,9 @@ dnd::ndarray::ndarray(const T (&rhs)[N])
         stride *= shape[i];
     }
     char *originptr = 0;
-    memory_block_ref memblock = make_fixed_size_pod_memory_block(sizeof(T), num_bytes, &originptr);
+    memory_block_ptr memblock = make_fixed_size_pod_memory_block(sizeof(T), num_bytes, &originptr);
     DND_MEMCPY(originptr, &rhs[0], num_bytes);
-    m_expr_tree.reset(new strided_ndarray_node(dtype(detail::type_from_array<T>::type_id),
+    m_expr_tree.swap(make_strided_ndarray_node(dtype(detail::type_from_array<T>::type_id),
                             ndim, shape, strides, originptr,
                             read_access_flag | write_access_flag, DND_MOVE(memblock)));
 }
@@ -567,12 +567,10 @@ namespace detail {
                 throw std::runtime_error("can only convert ndarrays with 0 dimensions to scalars");
             }
             if (lhs.get_expr_tree()->get_category() == strided_array_node_category) {
-                const ndarray_node *node = lhs.get_expr_tree();
-                dtype_assign(make_dtype<T>(), (char *)&result, node->get_dtype(), node->get_readonly_originptr(), errmode);
+                dtype_assign(make_dtype<T>(), (char *)&result, lhs.get_dtype(), lhs.get_readonly_originptr(), errmode);
             } else {
                 ndarray tmp = lhs.vals();
-                const ndarray_node *node = tmp.get_expr_tree();
-                dtype_assign(make_dtype<T>(), (char *)&result, node->get_dtype(), node->get_readonly_originptr(), errmode);
+                dtype_assign(make_dtype<T>(), (char *)&result, tmp.get_dtype(), tmp.get_readonly_originptr(), errmode);
             }
             return result;
         }

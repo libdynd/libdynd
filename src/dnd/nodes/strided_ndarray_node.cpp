@@ -15,7 +15,7 @@ using namespace dnd;
 
 dnd::strided_ndarray_node::strided_ndarray_node(const dtype& dt, int ndim,
                                 const intptr_t *shape, const intptr_t *strides,
-                                char *originptr, int access_flags, const memory_block_ref& memblock)
+                                char *originptr, int access_flags, const memory_block_ptr& memblock)
     : m_ndim(ndim), m_access_flags(access_flags), m_shape(ndim, shape), m_dtype(dt),
       m_originptr(originptr), m_strides(ndim, strides), m_memblock(memblock)
 {
@@ -23,7 +23,7 @@ dnd::strided_ndarray_node::strided_ndarray_node(const dtype& dt, int ndim,
 
 dnd::strided_ndarray_node::strided_ndarray_node(const dtype& dt, int ndim,
                                 const intptr_t *shape, const intptr_t *strides,
-                                const char *originptr, int access_flags, const memory_block_ref& memblock)
+                                const char *originptr, int access_flags, const memory_block_ptr& memblock)
     : m_ndim(ndim), m_access_flags(access_flags), m_shape(ndim, shape), m_dtype(dt),
       m_originptr(const_cast<char *>(originptr)), m_strides(ndim, strides), m_memblock(memblock)
 {
@@ -35,7 +35,7 @@ dnd::strided_ndarray_node::strided_ndarray_node(const dtype& dt, int ndim,
 #ifdef DND_RVALUE_REFS
 dnd::strided_ndarray_node::strided_ndarray_node(const dtype& dt, int ndim,
                                 const intptr_t *shape, const intptr_t *strides,
-                                char *originptr, int access_flags, memory_block_ref&& memblock)
+                                char *originptr, int access_flags, memory_block_ptr&& memblock)
     : m_ndim(ndim), m_access_flags(access_flags), m_shape(ndim, shape), m_dtype(dt),
       m_originptr(originptr), m_strides(ndim, strides), m_memblock(DND_MOVE(memblock))
 {
@@ -43,7 +43,7 @@ dnd::strided_ndarray_node::strided_ndarray_node(const dtype& dt, int ndim,
 
 dnd::strided_ndarray_node::strided_ndarray_node(const dtype& dt, int ndim,
                                 const intptr_t *shape, const intptr_t *strides,
-                                const char *originptr, int access_flags, memory_block_ref&& memblock)
+                                const char *originptr, int access_flags, memory_block_ptr&& memblock)
     : m_ndim(ndim), m_access_flags(access_flags), m_shape(ndim, shape), m_dtype(dt),
       m_originptr(const_cast<char *>(originptr)), m_strides(ndim, strides), m_memblock(DND_MOVE(memblock))
 {
@@ -76,21 +76,21 @@ dnd::strided_ndarray_node::strided_ndarray_node(const dtype& dt, int ndim,
     m_memblock = make_fixed_size_pod_memory_block(dt.alignment(), dt.element_size() * num_elements, &m_originptr);
 }
 
-ndarray_node_ref dnd::strided_ndarray_node::as_dtype(const dtype& dt,
+ndarray_node_ptr dnd::strided_ndarray_node::as_dtype(const dtype& dt,
                     dnd::assign_error_mode errmode, bool allow_in_place)
 {
     if (allow_in_place) {
         m_dtype = make_conversion_dtype(dt, m_dtype, errmode);
-        return ndarray_node_ref(this);
+        return as_ndarray_node_ptr();
     } else {
-        return ndarray_node_ref(new strided_ndarray_node(
+        return make_strided_ndarray_node(
                         make_conversion_dtype(dt, m_dtype, errmode),
                         m_ndim, m_shape.get(), m_strides.get(),
-                        m_originptr, m_access_flags, m_memblock));
+                        m_originptr, m_access_flags, m_memblock);
     }
 }
 
-ndarray_node_ref dnd::strided_ndarray_node::apply_linear_index(
+ndarray_node_ptr dnd::strided_ndarray_node::apply_linear_index(
                 int ndim, const bool *remove_axis,
                 const intptr_t *start_index, const intptr_t *index_strides,
                 const intptr_t *shape,
@@ -150,7 +150,7 @@ ndarray_node_ref dnd::strided_ndarray_node::apply_linear_index(
         }
         m_ndim = j;
 
-        return ndarray_node_ref(this);
+        return as_ndarray_node_ptr();
     } else {
         // Apply the start_index to m_originptr
         char *new_originptr = m_originptr;
@@ -173,9 +173,8 @@ ndarray_node_ref dnd::strided_ndarray_node::apply_linear_index(
         }
         ndim = j;
 
-        return ndarray_node_ref(
-            new strided_ndarray_node(m_dtype, ndim, new_shape.get(), new_strides.get(),
-                                        new_originptr, m_access_flags, m_memblock));
+        return make_strided_ndarray_node(m_dtype, ndim, new_shape.get(), new_strides.get(),
+                                        new_originptr, m_access_flags, m_memblock);
     }
 }
 
@@ -192,4 +191,75 @@ void dnd::strided_ndarray_node::debug_dump_extra(ostream& o, const string& inden
     o << indent << " originptr: " << (void *)m_originptr << "\n";
     o << indent << " memoryblock owning the data:\n";
     memory_block_debug_dump(m_memblock.get(), o, indent + " ");
+}
+
+ndarray_node_ptr dnd::make_strided_ndarray_node(const dtype& dt, int ndim, const intptr_t *shape,
+            const intptr_t *strides, char *originptr, int access_flags, const memory_block_ptr& memblock)
+{
+    // Allocate the memory_block
+    char *result = reinterpret_cast<char *>(malloc(sizeof(memory_block_data) + sizeof(strided_ndarray_node)));
+    if (result == NULL) {
+        throw bad_alloc();
+    }
+    // Placement new
+    new (result + sizeof(memory_block_data))
+            strided_ndarray_node(dt, ndim, shape, strides, originptr, access_flags, memblock);
+    return ndarray_node_ptr(new (result) memory_block_data(1, ndarray_node_memory_block_type), false);
+}
+
+ndarray_node_ptr dnd::make_strided_ndarray_node(const dtype& dt, int ndim, const intptr_t *shape,
+            const intptr_t *strides, const char *originptr, int access_flags, const memory_block_ptr& memblock)
+{
+    // Allocate the memory_block
+    char *result = reinterpret_cast<char *>(malloc(sizeof(memory_block_data) + sizeof(strided_ndarray_node)));
+    if (result == NULL) {
+        throw bad_alloc();
+    }
+    // Placement new
+    new (result + sizeof(memory_block_data))
+            strided_ndarray_node(dt, ndim, shape, strides, originptr, access_flags, memblock);
+    return ndarray_node_ptr(new (result) memory_block_data(1, ndarray_node_memory_block_type), false);
+}
+
+#ifdef DND_RVALUE_REFS
+ndarray_node_ptr dnd::make_strided_ndarray_node(const dtype& dt, int ndim, const intptr_t *shape,
+            const intptr_t *strides, char *originptr, int access_flags, memory_block_ptr&& memblock)
+{
+    // Allocate the memory_block
+    char *result = reinterpret_cast<char *>(malloc(sizeof(memory_block_data) + sizeof(strided_ndarray_node)));
+    if (result == NULL) {
+        throw bad_alloc();
+    }
+    // Placement new
+    new (result + sizeof(memory_block_data))
+            strided_ndarray_node(dt, ndim, shape, strides, originptr, access_flags, DND_MOVE(memblock));
+    return ndarray_node_ptr(new (result) memory_block_data(1, ndarray_node_memory_block_type), false);
+}
+
+ndarray_node_ptr dnd::make_strided_ndarray_node(const dtype& dt, int ndim, const intptr_t *shape,
+            const intptr_t *strides, const char *originptr, int access_flags, memory_block_ptr&& memblock)
+{
+    // Allocate the memory_block
+    char *result = reinterpret_cast<char *>(malloc(sizeof(memory_block_data) + sizeof(strided_ndarray_node)));
+    if (result == NULL) {
+        throw bad_alloc();
+    }
+    // Placement new
+    new (result + sizeof(memory_block_data))
+            strided_ndarray_node(dt, ndim, shape, strides, originptr, access_flags, DND_MOVE(memblock));
+    return ndarray_node_ptr(new (result) memory_block_data(1, ndarray_node_memory_block_type), false);
+}
+#endif
+
+ndarray_node_ptr dnd::make_strided_ndarray_node(const dtype& dt, int ndim, const intptr_t *shape, const int *axis_perm)
+{
+    // Allocate the memory_block
+    char *result = reinterpret_cast<char *>(malloc(sizeof(memory_block_data) + sizeof(strided_ndarray_node)));
+    if (result == NULL) {
+        throw bad_alloc();
+    }
+    // Placement new
+    new (result + sizeof(memory_block_data))
+            strided_ndarray_node(dt, ndim, shape, axis_perm);
+    return ndarray_node_ptr(new (result) memory_block_data(1, ndarray_node_memory_block_type), false);
 }

@@ -193,7 +193,7 @@ ndarray pydnd::ndarray_from_numpy_array(PyArrayObject* obj)
 
     // Get a shared pointer that tracks buffer ownership
     PyObject *base = PyArray_BASE(obj);
-    memory_block_ref memblock;
+    memory_block_ptr memblock;
     if (base == NULL || (PyArray_FLAGS(obj)&NPY_ARRAY_UPDATEIFCOPY) != 0) {
         Py_INCREF(obj);
         memblock = make_external_memory_block(obj, py_decref_function);
@@ -203,7 +203,7 @@ ndarray pydnd::ndarray_from_numpy_array(PyArrayObject* obj)
     }
 
     // Create the result ndarray
-    return ndarray(new strided_ndarray_node(d, PyArray_NDIM(obj),
+    return ndarray(make_strided_ndarray_node(d, PyArray_NDIM(obj),
                     PyArray_DIMS(obj), PyArray_STRIDES(obj), PyArray_BYTES(obj),
                     read_access_flag | (PyArray_ISWRITEABLE(obj) ? write_access_flag : 0),
                     DND_MOVE(memblock)));
@@ -284,7 +284,7 @@ char pydnd::numpy_kindchar_of(const dnd::dtype& d)
 static void free_array_interface(void *ptr, void *extra_ptr)
 {
     PyArrayInterface* inter = (PyArrayInterface *)ptr;
-    memory_block_ref *extra = (memory_block_ref *)extra_ptr;
+    memory_block_ptr *extra = (memory_block_ptr *)extra_ptr;
     delete[] inter->strides;
     delete inter;
     delete extra;
@@ -339,5 +339,5 @@ PyObject* pydnd::ndarray_as_numpy_struct_capsule(const dnd::ndarray& n)
     memcpy(inter.shape, n.get_shape(), n.get_ndim() * sizeof(intptr_t));
 
     // TODO: Check for Python 3, use PyCapsule there
-    return PyCObject_FromVoidPtrAndDesc(new PyArrayInterface(inter), new memory_block_ref(n.get_memory_block()), free_array_interface);
+    return PyCObject_FromVoidPtrAndDesc(new PyArrayInterface(inter), new memory_block_ptr(n.get_memory_block()), free_array_interface);
 }

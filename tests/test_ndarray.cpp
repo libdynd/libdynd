@@ -20,7 +20,7 @@ TEST(NDArray, Constructors) {
     ndarray a;
 
     // Default-constructed ndarray is NULL and will crash if access is attempted
-    EXPECT_EQ(NULL, a.get_expr_tree());
+    EXPECT_EQ(NULL, a.get_expr_tree().get());
 
     // Scalar ndarray
     a = ndarray(make_dtype<float>());

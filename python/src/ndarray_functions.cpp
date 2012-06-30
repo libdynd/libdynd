@@ -200,9 +200,8 @@ PyObject* pydnd::ndarray_as_pyobject(const dnd::ndarray& n)
     // Evaluate the ndarray, and convert strings to the Python encoding
     nvals = n.vals();
 
-    ndarray_node *node = nvals.get_expr_tree();
-    return nested_ndarray_as_pyobject(node->get_dtype(), node->get_readonly_originptr(),
-                node->get_ndim(), node->get_shape(), node->get_strides());
+    return nested_ndarray_as_pyobject(n.get_dtype(), n.get_readonly_originptr(),
+                n.get_ndim(), n.get_shape(), n.get_strides());
 }
 
 static irange pyobject_as_irange(PyObject *index)

@@ -23,7 +23,10 @@ class strided_ndarray_node : public ndarray_node {
     dtype m_dtype;
     char *m_originptr;
     dimvector m_strides;
-    memory_block_ref m_memblock;
+    memory_block_ptr m_memblock;
+
+    strided_ndarray_node() {
+    }
 
     // Non-copyable
     strided_ndarray_node(const strided_ndarray_node&);
@@ -34,26 +37,26 @@ public:
      * Creates a strided array node from the raw values. Does not validate them.
      */
     strided_ndarray_node(const dtype& dt, int ndim, const intptr_t *shape,
-            const intptr_t *strides, char *originptr, int access_flags, const memory_block_ref& memblock);
+            const intptr_t *strides, char *originptr, int access_flags, const memory_block_ptr& memblock);
 
     /**
      * Creates a strided array node from the raw values. Does not validate them.
      */
     strided_ndarray_node(const dtype& dt, int ndim, const intptr_t *shape,
-            const intptr_t *strides, const char *originptr, int access_flags, const memory_block_ref& memblock);
+            const intptr_t *strides, const char *originptr, int access_flags, const memory_block_ptr& memblock);
 
 #ifdef DND_RVALUE_REFS
     /**
      * Creates a strided array node from the raw values. Does not validate them.
      */
     strided_ndarray_node(const dtype& dt, int ndim, const intptr_t *shape,
-            const intptr_t *strides, char *originptr, int access_flags, memory_block_ref&& memblock);
+            const intptr_t *strides, char *originptr, int access_flags, memory_block_ptr&& memblock);
 
     /**
      * Creates a strided array node from the raw values. Does not validate them.
      */
     strided_ndarray_node(const dtype& dt, int ndim, const intptr_t *shape,
-            const intptr_t *strides, const char *originptr, int access_flags, memory_block_ref&& memblock);
+            const intptr_t *strides, const char *originptr, int access_flags, memory_block_ptr&& memblock);
 #endif
 
     /**
@@ -104,14 +107,14 @@ public:
         return m_originptr;
     }
 
-    memory_block_ref get_memory_block() const {
+    memory_block_ptr get_memory_block() const {
         return m_memblock;
     }
 
-    ndarray_node_ref as_dtype(const dtype& dt,
+    ndarray_node_ptr as_dtype(const dtype& dt,
                         assign_error_mode errmode, bool allow_in_place);
 
-    ndarray_node_ref apply_linear_index(
+    ndarray_node_ptr apply_linear_index(
                     int ndim, const bool *remove_axis,
                     const intptr_t *start_index, const intptr_t *index_strides,
                     const intptr_t *shape,
@@ -122,7 +125,39 @@ public:
     }
 
     void debug_dump_extra(std::ostream& o, const std::string& indent) const;
+
+    friend ndarray_node_ptr make_strided_ndarray_node(const dtype& dt, int ndim, const intptr_t *shape,
+                const intptr_t *strides, char *originptr, int access_flags, const memory_block_ptr& memblock);
+
+    friend ndarray_node_ptr make_strided_ndarray_node(const dtype& dt, int ndim, const intptr_t *shape,
+                const intptr_t *strides, const char *originptr, int access_flags, const memory_block_ptr& memblock);
+
+    #ifdef DND_RVALUE_REFS
+    friend ndarray_node_ptr make_strided_ndarray_node(const dtype& dt, int ndim, const intptr_t *shape,
+                const intptr_t *strides, char *originptr, int access_flags, memory_block_ptr&& memblock);
+
+    friend ndarray_node_ptr make_strided_ndarray_node(const dtype& dt, int ndim, const intptr_t *shape,
+                const intptr_t *strides, const char *originptr, int access_flags, memory_block_ptr&& memblock);
+    #endif
+
+    friend ndarray_node_ptr make_strided_ndarray_node(const dtype& dt, int ndim, const intptr_t *shape, const int *axis_perm);
 };
+
+ndarray_node_ptr make_strided_ndarray_node(const dtype& dt, int ndim, const intptr_t *shape,
+            const intptr_t *strides, char *originptr, int access_flags, const memory_block_ptr& memblock);
+
+ndarray_node_ptr make_strided_ndarray_node(const dtype& dt, int ndim, const intptr_t *shape,
+            const intptr_t *strides, const char *originptr, int access_flags, const memory_block_ptr& memblock);
+
+#ifdef DND_RVALUE_REFS
+ndarray_node_ptr make_strided_ndarray_node(const dtype& dt, int ndim, const intptr_t *shape,
+            const intptr_t *strides, char *originptr, int access_flags, memory_block_ptr&& memblock);
+
+ndarray_node_ptr make_strided_ndarray_node(const dtype& dt, int ndim, const intptr_t *shape,
+            const intptr_t *strides, const char *originptr, int access_flags, memory_block_ptr&& memblock);
+#endif
+
+ndarray_node_ptr make_strided_ndarray_node(const dtype& dt, int ndim, const intptr_t *shape, const int *axis_perm);
 
 } // namespace dnd
 

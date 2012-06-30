@@ -28,9 +28,9 @@ dnd::ndarray::ndarray()
 }
 
 template<class T>
-typename enable_if<is_dtype_scalar<T>::value, ndarray_node *>::type make_immutable_scalar_node_raw(const T& value)
+typename enable_if<is_dtype_scalar<T>::value, ndarray_node_ptr>::type make_immutable_scalar_node_raw(const T& value)
 {
-    return new immutable_scalar_node(make_dtype<T>(), reinterpret_cast<const char *>(&value));
+    return make_immutable_scalar_node(make_dtype<T>(), reinterpret_cast<const char *>(&value));
 }
 
 dnd::ndarray::ndarray(signed char value)
@@ -93,7 +93,7 @@ dnd::ndarray::ndarray(complex<double> value)
 // Makes a UTF8 fixedstring from a std::string. Maybe we will want
 // another choice later?
 dnd::ndarray::ndarray(const std::string& value)
-    : m_expr_tree(new immutable_scalar_node(
+    : m_expr_tree(make_immutable_scalar_node(
                 make_fixedstring_dtype(string_encoding_utf_8, value.size()), value.c_str()))
 {
 }
@@ -102,28 +102,28 @@ dnd::ndarray::ndarray(const dtype& dt)
     : m_expr_tree()
 {
     char *originptr = 0;
-    memory_block_ref memblock = make_fixed_size_pod_memory_block(dt.alignment(), dt.element_size(), &originptr);
-    m_expr_tree.reset(new strided_ndarray_node(dt, 0, NULL, NULL,
+    memory_block_ptr memblock = make_fixed_size_pod_memory_block(dt.alignment(), dt.element_size(), &originptr);
+    m_expr_tree.swap(make_strided_ndarray_node(dt, 0, NULL, NULL,
                             originptr, read_access_flag | write_access_flag,
                             DND_MOVE(memblock)));
 }
 
 dnd::ndarray::ndarray(const dtype& dt, const char *raw_data)
-    : m_expr_tree(new immutable_scalar_node(dt, raw_data))
+    : m_expr_tree(make_immutable_scalar_node(dt, raw_data))
 {
 }
 
 dnd::ndarray::ndarray(const dtype& dt, int ndim, const intptr_t *shape, const int *axis_perm)
-    : m_expr_tree(new strided_ndarray_node(dt, ndim, shape, axis_perm)) {
+    : m_expr_tree(make_strided_ndarray_node(dt, ndim, shape, axis_perm)) {
 }
 
 
-dnd::ndarray::ndarray(const ndarray_node_ref& expr_tree)
+dnd::ndarray::ndarray(const ndarray_node_ptr& expr_tree)
     : m_expr_tree(expr_tree)
 {
 }
 
-dnd::ndarray::ndarray(ndarray_node_ref&& expr_tree)
+dnd::ndarray::ndarray(ndarray_node_ptr&& expr_tree)
     : m_expr_tree(DND_MOVE(expr_tree))
 {
 }
@@ -133,8 +133,8 @@ dnd::ndarray::ndarray(intptr_t dim0, const dtype& dt)
 {
     intptr_t stride = (dim0 <= 1) ? 0 : dt.element_size();
     char *originptr = 0;
-    memory_block_ref memblock = make_fixed_size_pod_memory_block(dt.alignment(), dt.element_size() * dim0, &originptr);
-    m_expr_tree.reset(new strided_ndarray_node(dt, 1, &dim0, &stride,
+    memory_block_ptr memblock = make_fixed_size_pod_memory_block(dt.alignment(), dt.element_size() * dim0, &originptr);
+    m_expr_tree.swap(make_strided_ndarray_node(dt, 1, &dim0, &stride,
                             originptr, read_access_flag | write_access_flag,
                             DND_MOVE(memblock)));
 }
@@ -148,8 +148,8 @@ dnd::ndarray::ndarray(intptr_t dim0, intptr_t dim1, const dtype& dt)
     strides[1] = (dim1 <= 1) ? 0 : dt.element_size();
 
     char *originptr = 0;
-    memory_block_ref memblock = make_fixed_size_pod_memory_block(dt.alignment(), dt.element_size() * dim0 * dim1, &originptr);
-    m_expr_tree.reset(new strided_ndarray_node(dt, 2, shape, strides,
+    memory_block_ptr memblock = make_fixed_size_pod_memory_block(dt.alignment(), dt.element_size() * dim0 * dim1, &originptr);
+    m_expr_tree.swap(make_strided_ndarray_node(dt, 2, shape, strides,
                             originptr, read_access_flag | write_access_flag,
                             DND_MOVE(memblock)));
 }
@@ -164,8 +164,8 @@ dnd::ndarray::ndarray(intptr_t dim0, intptr_t dim1, intptr_t dim2, const dtype& 
     strides[2] = (dim2 <= 1) ? 0 : dt.element_size();
 
     char *originptr = 0;
-    memory_block_ref memblock = make_fixed_size_pod_memory_block(dt.alignment(), dt.element_size() * dim0 * dim1 * dim2, &originptr);
-    m_expr_tree.reset(new strided_ndarray_node(dt, 3, shape, strides,
+    memory_block_ptr memblock = make_fixed_size_pod_memory_block(dt.alignment(), dt.element_size() * dim0 * dim1 * dim2, &originptr);
+    m_expr_tree.swap(make_strided_ndarray_node(dt, 3, shape, strides,
                             originptr, read_access_flag | write_access_flag,
                             DND_MOVE(memblock)));
 }
@@ -181,20 +181,20 @@ dnd::ndarray::ndarray(intptr_t dim0, intptr_t dim1, intptr_t dim2, intptr_t dim3
     strides[3] = (dim3 <= 1) ? 0 : dt.element_size();
 
     char *originptr = 0;
-    memory_block_ref memblock = make_fixed_size_pod_memory_block(dt.alignment(), dt.element_size() * dim0 * dim1 * dim2 * dim3, &originptr);
-    m_expr_tree.reset(new strided_ndarray_node(dt, 4, shape, strides,
+    memory_block_ptr memblock = make_fixed_size_pod_memory_block(dt.alignment(), dt.element_size() * dim0 * dim1 * dim2 * dim3, &originptr);
+    m_expr_tree.swap(make_strided_ndarray_node(dt, 4, shape, strides,
                             originptr, read_access_flag | write_access_flag,
                             DND_MOVE(memblock)));
 }
 
 ndarray dnd::ndarray::index(int nindex, const irange *indices) const
 {
-    return ndarray(apply_index_to_node(get_expr_tree(), nindex, indices, false));
+    return ndarray(apply_index_to_node(m_expr_tree, nindex, indices, false));
 }
 
 const ndarray dnd::ndarray::operator()(intptr_t idx) const
 {
-    return ndarray(apply_integer_index_to_node(get_expr_tree(), 0, idx, false));
+    return ndarray(apply_integer_index_to_node(m_expr_tree, 0, idx, false));
 }
 
 ndarray& dnd::ndarray::operator=(const ndarray& rhs)
@@ -221,18 +221,17 @@ ndarray dnd::empty_like(const ndarray& rhs, const dtype& dt)
 ndarray dnd::ndarray::storage() const
 {
     if (get_expr_tree()->get_category() == strided_array_node_category) {
-        ndarray_node *node = get_expr_tree();
-        int access_flags = node->get_access_flags();
+        int access_flags = m_expr_tree->get_access_flags();
         if (access_flags&write_access_flag) {
-            return ndarray(new strided_ndarray_node(node->get_dtype().storage_dtype(),
-                        node->get_ndim(), node->get_shape(), node->get_strides(),
-                         node->get_readwrite_originptr(),
-                        access_flags, node->get_memory_block()));
+            return ndarray(make_strided_ndarray_node(m_expr_tree->get_dtype().storage_dtype(),
+                        m_expr_tree->get_ndim(), m_expr_tree->get_shape(), m_expr_tree->get_strides(),
+                         m_expr_tree->get_readwrite_originptr(),
+                        access_flags, m_expr_tree->get_memory_block()));
         } else {
-            return ndarray(new strided_ndarray_node(node->get_dtype().storage_dtype(),
-                        node->get_ndim(), node->get_shape(), node->get_strides(),
-                        node->get_readonly_originptr(),
-                        access_flags, node->get_memory_block()));
+            return ndarray(make_strided_ndarray_node(m_expr_tree->get_dtype().storage_dtype(),
+                        m_expr_tree->get_ndim(), m_expr_tree->get_shape(), m_expr_tree->get_strides(),
+                        m_expr_tree->get_readonly_originptr(),
+                        access_flags, m_expr_tree->get_memory_block()));
         }
     } else {
         throw std::runtime_error("Can only get the storage from strided dnd::ndarrays");
@@ -280,11 +279,11 @@ ndarray dnd::ndarray::view_as_dtype(const dtype& dt) const
         strides[0] = dt.element_size();
         if ((((uintptr_t)originptr)&(dt.alignment()-1)) == 0) {
             // If the dtype's alignment is satisfied, can view it as is
-            return ndarray(new strided_ndarray_node(dt, 1, shape, strides, originptr,
+            return ndarray(make_strided_ndarray_node(dt, 1, shape, strides, originptr,
                                 get_expr_tree()->get_access_flags(), get_memory_block()));
         } else {
             // The dtype's alignment was insufficient, so making it unaligned<>
-            return ndarray(new strided_ndarray_node(make_unaligned_dtype(dt), 1, shape, strides, originptr,
+            return ndarray(make_strided_ndarray_node(make_unaligned_dtype(dt), 1, shape, strides, originptr,
                             get_expr_tree()->get_access_flags(), get_memory_block()));
         }
     }
@@ -313,10 +312,10 @@ ndarray dnd::ndarray::view_as_dtype(const dtype& dt) const
         }
 
         if (aligned) {
-            return ndarray(new strided_ndarray_node(dt, get_ndim(), get_shape(), get_strides(),
+            return ndarray(make_strided_ndarray_node(dt, get_ndim(), get_shape(), get_strides(),
                             get_readwrite_originptr(), read_access_flag | write_access_flag, get_memory_block()));
         } else {
-            return ndarray(new strided_ndarray_node(make_unaligned_dtype(dt), get_ndim(), get_shape(), get_strides(),
+            return ndarray(make_strided_ndarray_node(make_unaligned_dtype(dt), get_ndim(), get_shape(), get_strides(),
                             get_readwrite_originptr(), read_access_flag | write_access_flag, get_memory_block()));
         }
     }
@@ -353,19 +352,16 @@ std::string dnd::detail::ndarray_as_string(const ndarray& lhs, assign_error_mode
 
 static void val_assign_loop(const ndarray& lhs, const ndarray& rhs, assign_error_mode errmode)
 {
-    ndarray_node *lhs_node = lhs.get_expr_tree();
-    ndarray_node *rhs_node = rhs.get_expr_tree();
-
     // Get the data pointer and strides of rhs through the standard interface
-    const char *rhs_originptr = rhs_node->get_readonly_originptr();
-    const intptr_t *rhs_original_strides = rhs_node->get_strides();
+    const char *rhs_originptr = rhs.get_readonly_originptr();
+    const intptr_t *rhs_original_strides = rhs.get_strides();
 
     // Broadcast the 'rhs' shape to 'this'
     dimvector rhs_modified_strides(lhs.get_ndim());
     broadcast_to_shape(lhs.get_ndim(), lhs.get_shape(), rhs.get_ndim(), rhs.get_shape(), rhs_original_strides, rhs_modified_strides.get());
 
     // Create the raw iterator
-    raw_ndarray_iter<1,1> iter(lhs_node->get_ndim(), lhs_node->get_shape(), lhs_node->get_readwrite_originptr(), lhs_node->get_strides(),
+    raw_ndarray_iter<1,1> iter(lhs.get_ndim(), lhs.get_shape(), lhs.get_readwrite_originptr(), lhs.get_strides(),
                                         rhs_originptr, rhs_modified_strides.get());
     //iter.debug_dump(cout);
 
@@ -428,7 +424,7 @@ void dnd::ndarray::val_assign(const dtype& dt, const char *data, assign_error_mo
 void dnd::ndarray::debug_dump(std::ostream& o = std::cerr) const
 {
     o << "------ ndarray\n";
-    if (m_expr_tree) {
+    if (m_expr_tree.get()) {
         m_expr_tree->debug_dump(o, " ");
     } else {
         o << "NULL\n";

@@ -24,10 +24,10 @@ class immutable_scalar_node : public ndarray_node {
     immutable_scalar_node(const immutable_scalar_node&);
     immutable_scalar_node& operator=(const immutable_scalar_node&);
 
-public:
+    // Use make_immutable_scalar_node
     immutable_scalar_node(const dtype& dt, const char* data);
-    immutable_scalar_node(const dtype& dt, const char* data, int ndim, const intptr_t *shape);
 
+public:
     virtual ~immutable_scalar_node();
 
     ndarray_node_category get_category() const
@@ -64,15 +64,15 @@ public:
         return m_data;
     }
 
-    memory_block_ref get_memory_block() const
+    memory_block_ptr get_memory_block() const
     {
-        return memory_block_ref();
+        return memory_block_ptr();
     }
 
-    ndarray_node_ref as_dtype(const dtype& dt,
+    ndarray_node_ptr as_dtype(const dtype& dt,
                         dnd::assign_error_mode errmode, bool allow_in_place);
 
-    ndarray_node_ref apply_linear_index(
+    ndarray_node_ptr apply_linear_index(
                     int ndim, const bool *remove_axis,
                     const intptr_t *start_index, const intptr_t *index_strides,
                     const intptr_t *shape,
@@ -83,14 +83,17 @@ public:
     }
 
     void debug_dump_extra(std::ostream& o, const std::string& indent) const;
+
+    friend ndarray_node_ptr make_immutable_scalar_node(const dtype& dt, const char* data);
 };
 
-template<class T>
-typename enable_if<is_dtype_scalar<T>::value, ndarray_node_ref>::type make_immutable_scalar_node(const T& value)
-{
-    return ndarray_node_ref(new immutable_scalar_node(make_dtype<T>(), reinterpret_cast<const char *>(&value)));
-}
+ndarray_node_ptr make_immutable_scalar_node(const dtype& dt, const char* data);
 
+template<class T>
+typename enable_if<is_dtype_scalar<T>::value, ndarray_node_ptr>::type make_immutable_scalar_node(const T& value)
+{
+    return ndarray_node_ptr(make_immutable_scalar_node(make_dtype<T>(), reinterpret_cast<const char *>(&value)));
+}
 
 } // namespace dnd
 

@@ -43,7 +43,7 @@ dnd::broadcast_error::broadcast_error(int dst_ndim, const intptr_t *dst_shape,
 {
 }
 
-inline string broadcast_error_message(int noperands, const ndarray **operands)
+inline string broadcast_error_message(int noperands, ndarray_node_ptr *operands)
 {
     stringstream ss;
 
@@ -58,27 +58,7 @@ inline string broadcast_error_message(int noperands, const ndarray **operands)
     return ss.str();
 }
 
-dnd::broadcast_error::broadcast_error(int noperands, const ndarray **operands)
-    : m_what(broadcast_error_message(noperands, operands))
-{
-}
-
-inline string broadcast_error_message(int noperands, ndarray_node **operands)
-{
-    stringstream ss;
-
-    ss << "broadcast error: cannot broadcast input operand shapes ";
-    for (int i = 0; i < noperands; ++i) {
-        print_shape(ss, operands[i]->get_ndim(), operands[i]->get_shape());
-        if (i != noperands - 1) {
-            ss << " ";
-        }
-    }
-
-    return ss.str();
-}
-
-dnd::broadcast_error::broadcast_error(int noperands, ndarray_node **operands)
+dnd::broadcast_error::broadcast_error(int noperands, ndarray_node_ptr *operands)
     : m_what(broadcast_error_message(noperands, operands))
 {
 }

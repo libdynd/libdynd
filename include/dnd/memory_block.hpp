@@ -92,17 +92,17 @@ void memory_block_debug_dump(const memory_block_data *memblock, std::ostream& o,
  * A smart pointer to a memory_block object. Very similar
  * to boost::intrusive_ptr<memory_block_data>.
  */
-class memory_block_ref {
+class memory_block_ptr {
     memory_block_data *m_memblock;
 public:
     /** Default constructor */
-    memory_block_ref()
+    memory_block_ptr()
         : m_memblock(0)
     {
     }
 
     /** Constructor from a raw pointer */
-    explicit memory_block_ref(memory_block_data *memblock, bool add_ref = true)
+    explicit memory_block_ptr(memory_block_data *memblock, bool add_ref = true)
         : m_memblock(memblock)
     {
         if (memblock != 0 && add_ref) {
@@ -111,15 +111,17 @@ public:
     }
 
     /** Copy constructor */
-    memory_block_ref(const memory_block_ref& rhs)
+    memory_block_ptr(const memory_block_ptr& rhs)
         : m_memblock(rhs.m_memblock)
     {
-        memory_block_incref(m_memblock);
+        if (m_memblock != 0) {
+            memory_block_incref(m_memblock);
+        }
     }
 
 #ifdef DND_RVALUE_REFS
     /** Move constructor */
-    memory_block_ref(memory_block_ref&& rhs)
+    memory_block_ptr(memory_block_ptr&& rhs)
         : m_memblock(rhs.m_memblock)
     {
         rhs.m_memblock = 0;
@@ -127,15 +129,14 @@ public:
 #endif
 
     /** Destructor */
-    ~memory_block_ref()
-    {
+    ~memory_block_ptr() {
         if (m_memblock != 0) {
             memory_block_decref(m_memblock);
         }
     }
 
     /** Assignment */
-    memory_block_ref& operator=(const memory_block_ref& rhs)
+    memory_block_ptr& operator=(const memory_block_ptr& rhs)
     {
         if (m_memblock != 0) {
             memory_block_decref(m_memblock);
@@ -151,7 +152,7 @@ public:
 
     /** Move assignment */
 #ifdef DND_RVALUE_REFS
-    memory_block_ref& operator=(memory_block_ref&& rhs)
+    memory_block_ptr& operator=(memory_block_ptr&& rhs)
     {
         if (m_memblock != 0) {
             memory_block_decref(m_memblock);
@@ -162,54 +163,52 @@ public:
     }
 #endif
 
+    /** Returns true if there is only one reference to this memory block */
+    bool unique() const {
+        return m_memblock->m_use_count <= 1;
+    }
+
     /** Gets the raw memory_block_data pointer */
-    memory_block_data *get() const
-    {
+    memory_block_data *get() const {
         return m_memblock;
     }
 
     /** Gives away ownership of the reference count */
-    memory_block_data *release()
-    {
+    memory_block_data *release() {
         memory_block_data *result = m_memblock;
         m_memblock = 0;
         return result;
     }
 
-    void swap(memory_block_ref& rhs)
-    {
+    void swap(memory_block_ptr& rhs) {
         memory_block_data *tmp = m_memblock;
         m_memblock = rhs.m_memblock;
         rhs.m_memblock = tmp;
     }
 
-    bool operator==(const memory_block_ref& rhs) const
-    {
+    bool operator==(const memory_block_ptr& rhs) const {
         return m_memblock == rhs.m_memblock;
     }
 
-    bool operator!=(const memory_block_ref& rhs) const
-    {
+    bool operator!=(const memory_block_ptr& rhs) const {
         return m_memblock != rhs.m_memblock;
     }
 
-    bool operator==(const memory_block_data *memblock) const
-    {
+    bool operator==(const memory_block_data *memblock) const {
         return m_memblock == memblock;
     }
 
-    bool operator!=(const memory_block_data *memblock) const
-    {
+    bool operator!=(const memory_block_data *memblock) const {
         return m_memblock != memblock;
     }
 };
 
-inline bool operator==(const memory_block_data *memblock, const memory_block_ref& rhs)
+inline bool operator==(const memory_block_data *memblock, const memory_block_ptr& rhs)
 {
     return memblock == rhs.get();
 }
 
-inline bool operator!=(const memory_block_data *memblock, const memory_block_ref& rhs)
+inline bool operator!=(const memory_block_data *memblock, const memory_block_ptr& rhs)
 {
     return memblock != rhs.get();
 }
@@ -218,12 +217,12 @@ typedef void (*external_memory_block_free_t)(void *);
 /**
  * Creates a memory block which is a reference to an external object.
  */
-memory_block_ref make_external_memory_block(void *object, external_memory_block_free_t free_fn);
+memory_block_ptr make_external_memory_block(void *object, external_memory_block_free_t free_fn);
 /**
  * Creates a memory block of a pre-determined fixed size. A pointer to the
  * memory allocated for data is placed in the output parameter.
  */
-memory_block_ref make_fixed_size_pod_memory_block(intptr_t alignment, intptr_t size, char **out_datapointer);
+memory_block_ptr make_fixed_size_pod_memory_block(intptr_t alignment, intptr_t size, char **out_datapointer);
 
 } // namespace dnd
 

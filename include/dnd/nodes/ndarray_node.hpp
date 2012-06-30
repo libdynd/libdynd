@@ -39,43 +39,31 @@ enum ndarray_node_category {
     arbitrary_node_category
 };
 
+class ndarray_node_ptr;
+
 /**
  * Virtual base class for the ndarray expression tree.
- *
- * TODO: Model this after how LLVM does this kind of thing?
  */
 class ndarray_node {
-#ifdef DND_CLING
-    // A hack avoiding boost atomic_count, since that creates inline assembly which LLVM JIT doesn't like!
-    mutable long m_use_count;
-#else
-    /** Embedded reference counting using boost::intrusive_ptr */
-    mutable boost::detail::atomic_count m_use_count;
-#endif
-
     // Non-copyable
     ndarray_node(const ndarray_node&);
     ndarray_node& operator=(const ndarray_node&);
 
 protected:
 
-    /**
-     * Constructs the basic node with NULL operand children.
-     */
-    ndarray_node()
-        : m_use_count(0)
-    {
+    ndarray_node() {
     }
 
 public:
-    bool unique() const {
-        // If a single intrusive_ptr has been created, the use count will
-        // be one. If a raw pointer is being used, the use count will be zero.
-        return m_use_count <= 1;
-    }
 
     virtual ~ndarray_node() {
     }
+
+    /**
+     * The ndarray_node is always allocated within a memory_block
+     * object. This returns the memory block.
+     */
+    ndarray_node_ptr as_ndarray_node_ptr();
 
     virtual ndarray_node_category get_category() const = 0;
 
@@ -106,15 +94,14 @@ public:
      * Retrieves the memory_block object which holds the data for this
      * node. If this node holds its own data, returns NULL.
      */
-    virtual memory_block_ref get_memory_block() const = 0;
+    virtual memory_block_ptr get_memory_block() const = 0;
 
     /** The number of operand nodes this node depends on */
-    virtual int get_nop() const
-    {
+    virtual int get_nop() const {
         return 0;
     }
 
-    virtual ndarray_node* get_opnode(int DND_UNUSED(i)) const {
+    virtual const ndarray_node_ptr& get_opnode(int DND_UNUSED(i)) const {
         throw std::runtime_error("This ndarray_node does not have any operand nodes");
     }
 
@@ -130,12 +117,12 @@ public:
      * Evaluates the node into a strided array with a dtype that is
      * not expression_kind.
      */
-    boost::intrusive_ptr<ndarray_node>  evaluate();
+    ndarray_node_ptr evaluate();
 
     /**
      * Converts this node to a new dtype. This uses a conversion_dtype.
      */
-    virtual boost::intrusive_ptr<ndarray_node> as_dtype(const dtype& dt,
+    virtual ndarray_node_ptr as_dtype(const dtype& dt,
                         assign_error_mode errmode, bool allow_in_place) = 0;
 
     /**
@@ -155,7 +142,7 @@ public:
      *            the shape of the node is broadcastable to the shape for which the linear
      *            index is applied.
      */
-    virtual boost::intrusive_ptr<ndarray_node> apply_linear_index(
+    virtual ndarray_node_ptr apply_linear_index(
                     int ndim, const bool *remove_axis,
                     const intptr_t *start_index, const intptr_t *index_strides,
                     const intptr_t *shape,
@@ -173,30 +160,81 @@ public:
 };
 
 /**
- * Use boost::intrusive_ptr as the smart pointer implementation.
+ * A reference-counted smart pointer for ndarray nodes,
+ * which are themselves specific instances of memory_blocks.
  */
-typedef boost::intrusive_ptr<ndarray_node> ndarray_node_ref;
-
-/** Adds a reference, for intrusive_ptr<ndarray_node> to use */
-inline void intrusive_ptr_add_ref(const ndarray_node *node) {
-    ++node->m_use_count;
-}
-
-/** Frees a reference, for intrusive_ptr<ndarray_node> to use */
-inline void intrusive_ptr_release(const ndarray_node *node) {
-    if (--node->m_use_count == 0) {
-        delete node;
+class ndarray_node_ptr : public memory_block_ptr {
+public:
+    /** Default constructor */
+    ndarray_node_ptr()
+        : memory_block_ptr()
+    {
     }
-}
+
+    /** Constructor from a raw pointer */
+    explicit ndarray_node_ptr(memory_block_data *memblock, bool add_ref = true)
+        : memory_block_ptr(memblock, add_ref)
+    {
+        if (memblock->m_type != ndarray_node_memory_block_type) {
+            throw std::runtime_error("Can only make an ndarray_node_ptr from an ndarray node memory_block");
+        }
+    }
+
+    /** Copy constructor */
+    ndarray_node_ptr(const ndarray_node_ptr& rhs)
+        : memory_block_ptr(rhs)
+    {
+    }
+
+#ifdef DND_RVALUE_REFS
+    /** Move constructor */
+    ndarray_node_ptr(ndarray_node_ptr&& rhs)
+        : memory_block_ptr(DND_MOVE(rhs))
+    {
+    }
+#endif
+
+    /** Assignment */
+    ndarray_node_ptr& operator=(const ndarray_node_ptr& rhs)
+    {
+        *static_cast<memory_block_ptr *>(this) = static_cast<const memory_block_ptr&>(rhs);
+        return *this;
+    }
+
+    /** Move assignment */
+#ifdef DND_RVALUE_REFS
+    ndarray_node_ptr& operator=(ndarray_node_ptr&& rhs)
+    {
+        *static_cast<memory_block_ptr *>(this) = DND_MOVE(static_cast<memory_block_ptr&&>(rhs));
+        return *this;
+    }
+#endif
+
+    void swap(ndarray_node_ptr& rhs) {
+        static_cast<memory_block_ptr *>(this)->swap(static_cast<memory_block_ptr&>(rhs));
+    }
+
+    /** This object behaves like an ndarray_node pointer */
+    ndarray_node *operator->() const {
+        return reinterpret_cast<ndarray_node *>(reinterpret_cast<char *>(get()) + sizeof(memory_block_data));
+    }
+};
 
 /** Applies the slicing index to the ndarray node. */
-ndarray_node_ref apply_index_to_node(ndarray_node *node,
+ndarray_node_ptr apply_index_to_node(const ndarray_node_ptr& node,
                                 int nindex, const irange *indices, bool allow_in_place);
 /**
  * Applies an integer index to the ndarray node.
  */
-ndarray_node_ref apply_integer_index_to_node(ndarray_node *node,
+ndarray_node_ptr apply_integer_index_to_node(const ndarray_node_ptr& node,
                                 int axis, intptr_t idx, bool allow_in_place);
+
+inline ndarray_node_ptr ndarray_node::as_ndarray_node_ptr()
+{
+    // Subtract to get the memory_block pointer
+    return ndarray_node_ptr(reinterpret_cast<memory_block_data *>(
+                reinterpret_cast<char *>(this) - sizeof(memory_block_data)));
+}
 
 } // namespace dnd
 

@@ -66,35 +66,98 @@ int main()
     try {
         ndarray a;
 
-        int16_t value16 = 0x1362;
-        a = ndarray(make_byteswap_dtype<int16_t>(), (char *)&value16);
-        EXPECT_EQ(0x6213, a.as<int16_t>());
+        // Default-constructed ndarray is NULL and will crash if access is attempted
+        EXPECT_EQ(NULL, a.get_expr_tree().get());
 
-        int32_t value32 = 0x12345678;
-        a = ndarray(make_byteswap_dtype<int32_t>(), (char *)&value32);
-        EXPECT_EQ(0x78563412, a.as<int32_t>());
+        // Scalar ndarray
+        a = ndarray(make_dtype<float>());
+        EXPECT_EQ(1, a.get_num_elements());
+        EXPECT_EQ(0, a.get_ndim());
 
-        int64_t value64 = 0x12345678abcdef01LL;
-        a = ndarray(make_byteswap_dtype<int64_t>(), (char *)&value64);
-        EXPECT_EQ(0x01efcdab78563412LL, a.as<int64_t>());
+        // One-dimensional ndarray with one element
+        a = ndarray(1, make_dtype<float>());
+        EXPECT_EQ(1, a.get_num_elements());
+        EXPECT_EQ(1, a.get_ndim());
+        EXPECT_EQ(1, a.get_shape()[0]);
+        EXPECT_EQ(0, a.get_strides()[0]);
 
-        value32 = 0xDA0F4940;
-        a = ndarray(make_byteswap_dtype<float>(), (char *)&value32);
-        EXPECT_EQ(3.1415926f, a.as<float>());
+        // One-dimensional ndarray
+        a = ndarray(3, make_dtype<float>());
+        EXPECT_EQ(3, a.get_num_elements());
+        EXPECT_EQ(1, a.get_ndim());
+        EXPECT_EQ(3, a.get_shape()[0]);
+        EXPECT_EQ((int)sizeof(float), a.get_strides()[0]);
 
-        value64 = 0x112D4454FB210940LL;
-        a = ndarray(make_byteswap_dtype<double>(), (char *)&value64);
-        EXPECT_EQ(3.14159265358979, a.as<double>());
-        a = a.vals();
-        EXPECT_EQ(3.14159265358979, a.as<double>());
+        // Two-dimensional ndarray with a size-one dimension
+        a = ndarray(3, 1, make_dtype<float>());
+        EXPECT_EQ(3, a.get_num_elements());
+        EXPECT_EQ(2, a.get_ndim());
+        EXPECT_EQ(3, a.get_shape()[0]);
+        EXPECT_EQ(1, a.get_shape()[1]);
+        EXPECT_EQ((int)sizeof(float), a.get_strides()[0]);
+        EXPECT_EQ(0, a.get_strides()[1]);
 
-        uint32_t value32_pair[2] = {0xDA0F4940, 0xC1B88FD3};
-        a = ndarray(make_byteswap_dtype<complex<float> >(), (char *)&value32_pair);
-        EXPECT_EQ(complex<float>(3.1415926f, -1.23456e12f), a.as<complex<float> >());
+        // Two-dimensional ndarray with a size-one dimension
+        a = ndarray(1, 3, make_dtype<float>());
+        EXPECT_EQ(3, a.get_num_elements());
+        EXPECT_EQ(2, a.get_ndim());
+        EXPECT_EQ(1, a.get_shape()[0]);
+        EXPECT_EQ(3, a.get_shape()[1]);
+        EXPECT_EQ(0, a.get_strides()[0]);
+        EXPECT_EQ((int)sizeof(float), a.get_strides()[1]);
 
-        int64_t value64_pair[2] = {0x112D4454FB210940LL, 0x002892B01FF771C2LL};
-        a = ndarray(make_byteswap_dtype<complex<double> >(), (char *)&value64_pair);
-        EXPECT_EQ(complex<double>(3.14159265358979, -1.2345678912345e12), a.as<complex<double> >());
+        // Two-dimensional ndarray
+        a = ndarray(3, 5, make_dtype<float>());
+        EXPECT_EQ(15, a.get_num_elements());
+        EXPECT_EQ(2, a.get_ndim());
+        EXPECT_EQ(3, a.get_shape()[0]);
+        EXPECT_EQ(5, a.get_shape()[1]);
+        EXPECT_EQ(5*(int)sizeof(float), a.get_strides()[0]);
+        EXPECT_EQ((int)sizeof(float), a.get_strides()[1]);
+
+        // Three-dimensional ndarray with size-one dimension
+        a = ndarray(1, 5, 4, make_dtype<float>());
+        EXPECT_EQ(20, a.get_num_elements());
+        EXPECT_EQ(3, a.get_ndim());
+        EXPECT_EQ(1, a.get_shape()[0]);
+        EXPECT_EQ(5, a.get_shape()[1]);
+        EXPECT_EQ(4, a.get_shape()[2]);
+        EXPECT_EQ(0, a.get_strides()[0]);
+        EXPECT_EQ(4*(int)sizeof(float), a.get_strides()[1]);
+        EXPECT_EQ((int)sizeof(float), a.get_strides()[2]);
+
+        // Three-dimensional ndarray with size-one dimension
+        a = ndarray(3, 1, 4, make_dtype<float>());
+        EXPECT_EQ(12, a.get_num_elements());
+        EXPECT_EQ(3, a.get_ndim());
+        EXPECT_EQ(3, a.get_shape()[0]);
+        EXPECT_EQ(1, a.get_shape()[1]);
+        EXPECT_EQ(4, a.get_shape()[2]);
+        EXPECT_EQ(4*(int)sizeof(float), a.get_strides()[0]);
+        EXPECT_EQ(0, a.get_strides()[1]);
+        EXPECT_EQ((int)sizeof(float), a.get_strides()[2]);
+
+        // Three-dimensional ndarray with size-one dimension
+        a = ndarray(3, 5, 1, make_dtype<float>());
+        EXPECT_EQ(15, a.get_num_elements());
+        EXPECT_EQ(3, a.get_ndim());
+        EXPECT_EQ(3, a.get_shape()[0]);
+        EXPECT_EQ(5, a.get_shape()[1]);
+        EXPECT_EQ(1, a.get_shape()[2]);
+        EXPECT_EQ(5*(int)sizeof(float), a.get_strides()[0]);
+        EXPECT_EQ((int)sizeof(float), a.get_strides()[1]);
+        EXPECT_EQ(0, a.get_strides()[2]);
+
+        // Three-dimensional ndarray
+        a = ndarray(3, 5, 4, make_dtype<float>());
+        EXPECT_EQ(60, a.get_num_elements());
+        EXPECT_EQ(3, a.get_ndim());
+        EXPECT_EQ(3, a.get_shape()[0]);
+        EXPECT_EQ(5, a.get_shape()[1]);
+        EXPECT_EQ(4, a.get_shape()[2]);
+        EXPECT_EQ(5*4*(int)sizeof(float), a.get_strides()[0]);
+        EXPECT_EQ(4*(int)sizeof(float), a.get_strides()[1]);
+        EXPECT_EQ((int)sizeof(float), a.get_strides()[2]);
     } catch(int){//std::exception& e) { cout << "Error: " << e.what() << "\n";
         return 1;
     }

@@ -62,7 +62,7 @@ void dnd::ndarray_node::get_binary_operation(intptr_t, intptr_t, intptr_t, kerne
                              "binary nodes which provide an implementation");
 }
 
-ndarray_node_ref dnd::ndarray_node::evaluate()
+ndarray_node_ptr dnd::ndarray_node::evaluate()
 {
     const dtype& dt = get_dtype();
 
@@ -70,8 +70,8 @@ ndarray_node_ref dnd::ndarray_node::evaluate()
         case strided_array_node_category: {
             // Evaluate any expression dtype as well
             if (dt.kind() == expression_kind) {
-                ndarray_node_ref result;
-                raw_ndarray_iter<1,1> iter(get_ndim(), get_shape(), dt.value_dtype(), result, this);
+                ndarray_node_ptr result;
+                raw_ndarray_iter<1,1> iter(get_ndim(), get_shape(), dt.value_dtype(), result, as_ndarray_node_ptr());
 
                 intptr_t innersize = iter.innersize();
                 intptr_t dst_stride = iter.innerstride<0>();
@@ -91,14 +91,14 @@ ndarray_node_ref dnd::ndarray_node::evaluate()
 
                 return DND_MOVE(result);
             }
-            return ndarray_node_ref(this);
+            return as_ndarray_node_ptr();
         }
         case elementwise_node_category: {
             switch (get_nop()) {
                 case 1: {
-                    const ndarray_node *op1 = get_opnode(0);
+                    const ndarray_node_ptr& op1 = get_opnode(0);
                     if (op1->get_category() == strided_array_node_category) {
-                        ndarray_node_ref result;
+                        ndarray_node_ptr result;
                         raw_ndarray_iter<1,1> iter(get_ndim(), get_shape(), dt.value_dtype(), result, op1);
 
                         intptr_t innersize = iter.innersize();
@@ -119,13 +119,13 @@ ndarray_node_ref dnd::ndarray_node::evaluate()
                     break;
                 }
                 case 2: {
-                    const ndarray_node *op1 = get_opnode(0);
-                    const ndarray_node *op2 = get_opnode(1);
+                    const ndarray_node_ptr& op1 = get_opnode(0);
+                    const ndarray_node_ptr& op2 = get_opnode(1);
 
                     // Special case of two strided sub-operands, requiring no intermediate buffers
                     if (op1->get_category() == strided_array_node_category &&
                                 op2->get_category() == strided_array_node_category) {
-                        ndarray_node_ref result;
+                        ndarray_node_ptr result;
                         raw_ndarray_iter<1,2> iter(get_ndim(), get_shape(),
                                                     dt.value_dtype(), result,
                                                     op1, op2);
@@ -154,7 +154,7 @@ ndarray_node_ref dnd::ndarray_node::evaluate()
             }
             case arbitrary_node_category:
                 throw std::runtime_error("evaluate is not yet implemented for"
-                             "nodes with an arbitrary_node_category category");
+                             " nodes with an arbitrary_node_category category");
                 break;
         }
     }
@@ -227,7 +227,7 @@ void dnd::ndarray_node::debug_dump_extra(ostream&, const string&) const
     // Default is no extra information
 }
 
-ndarray_node_ref dnd::apply_index_to_node(ndarray_node *node,
+ndarray_node_ptr dnd::apply_index_to_node(const ndarray_node_ptr& node,
                                 int nindex, const irange *indices, bool allow_in_place)
 {
     // Validate the number of indices
@@ -399,7 +399,7 @@ ndarray_node_ref dnd::apply_index_to_node(ndarray_node *node,
     return node->apply_linear_index(ndim, remove_axis.get(), start_index.get(), index_strides.get(), shape.get(), allow_in_place);
 }
 
-ndarray_node_ref dnd::apply_integer_index_to_node(ndarray_node *node,
+ndarray_node_ptr dnd::apply_integer_index_to_node(const ndarray_node_ptr& node,
                                 int axis, intptr_t idx, bool allow_in_place)
 {
     int ndim = node->get_ndim();
