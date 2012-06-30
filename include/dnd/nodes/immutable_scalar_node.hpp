@@ -16,19 +16,21 @@ namespace dnd {
 class immutable_scalar_node : public ndarray_node {
     /* The data type of this node's result */
     dtype m_dtype;
-    char *m_data;
-    /** Builtin storage for small immutable scalars */
-    int64_t m_storage[2];
+    char *m_originptr;
 
     // Non-copyable
     immutable_scalar_node(const immutable_scalar_node&);
     immutable_scalar_node& operator=(const immutable_scalar_node&);
 
     // Use make_immutable_scalar_node
-    immutable_scalar_node(const dtype& dt, const char* data);
+    immutable_scalar_node(const dtype& dt, char* originptr)
+        : m_dtype(dt), m_originptr(originptr)
+    {
+    }
 
 public:
-    virtual ~immutable_scalar_node();
+    virtual ~immutable_scalar_node() {
+    }
 
     ndarray_node_category get_category() const
     {
@@ -61,7 +63,7 @@ public:
         
     const char *get_readonly_originptr() const
     {
-        return m_data;
+        return m_originptr;
     }
 
     memory_block_ptr get_memory_block() const

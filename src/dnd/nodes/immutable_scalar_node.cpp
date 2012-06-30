@@ -9,25 +9,6 @@
 using namespace std;
 using namespace dnd;
 
-dnd::immutable_scalar_node::immutable_scalar_node(const dtype& dt, const char* data)
-    : m_dtype(dt)
-{
-    if (dt.element_size() <= (intptr_t)sizeof(m_storage)) {
-        m_data = reinterpret_cast<char *>(m_storage);
-    } else {
-        m_data = new char[dt.element_size()];
-    }
-
-    memcpy(m_data, data, dt.element_size());
-}
-
-dnd::immutable_scalar_node::~immutable_scalar_node()
-{
-    if (m_data != reinterpret_cast<const char *>(m_storage)) {
-        delete[] m_data;
-    }
-}
-
 ndarray_node_ptr dnd::immutable_scalar_node::as_dtype(const dtype& dt,
                     dnd::assign_error_mode errmode, bool allow_in_place)
 {
@@ -37,7 +18,7 @@ ndarray_node_ptr dnd::immutable_scalar_node::as_dtype(const dtype& dt,
     } else {
         return make_immutable_scalar_node(
                         make_conversion_dtype(dt, m_dtype, errmode),
-                        reinterpret_cast<const char *>(&m_data[0]));
+                        m_originptr);
     }
 }
 
@@ -53,7 +34,7 @@ ndarray_node_ptr dnd::immutable_scalar_node::apply_linear_index(
 void dnd::immutable_scalar_node::debug_dump_extra(std::ostream& o, const std::string& indent) const
 {
     o << indent << " data: ";
-    hexadecimal_print(o, reinterpret_cast<const char *>(&m_data[0]), m_dtype.element_size());
+    hexadecimal_print(o, m_originptr, m_dtype.element_size());
     o << "\n";
 }
 
@@ -63,13 +44,17 @@ ndarray_node_ptr dnd::make_immutable_scalar_node(const dtype& dt, const char* da
         throw runtime_error("immutable_scalar_node doesn't support object dtypes yet");
     }
 
-    // Allocate the memory_block
-    char *result = reinterpret_cast<char *>(malloc(sizeof(memory_block_data) + sizeof(immutable_scalar_node)));
+    // Calculate the aligned starting point for the data
+    intptr_t start = (intptr_t)(((uintptr_t)sizeof(memory_block_data) +
+                                        sizeof(immutable_scalar_node) + (uintptr_t)(dt.alignment() - 1))
+                        & ~((uintptr_t)(dt.alignment() - 1)));
+    char *result = reinterpret_cast<char *>(malloc(start + dt.element_size()));
     if (result == NULL) {
         throw bad_alloc();
     }
+    memcpy(result + start, data, dt.element_size());
     // Placement new
     new (result + sizeof(memory_block_data))
-            immutable_scalar_node(dt, data);
+            immutable_scalar_node(dt, result + start);
     return ndarray_node_ptr(new (result) memory_block_data(1, ndarray_node_memory_block_type), false);
 }
