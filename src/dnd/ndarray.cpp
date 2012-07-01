@@ -16,6 +16,7 @@
 #include <dnd/dtypes/fixedstring_dtype.hpp>
 
 #include <dnd/nodes/immutable_scalar_node.hpp>
+#include <dnd/nodes/immutable_builtin_scalar_node.hpp>
 #include <dnd/nodes/strided_ndarray_node.hpp>
 #include <dnd/nodes/elementwise_binary_kernel_node.hpp>
 
@@ -27,66 +28,60 @@ dnd::ndarray::ndarray()
 {
 }
 
-template<class T>
-typename enable_if<is_dtype_scalar<T>::value, ndarray_node_ptr>::type make_immutable_scalar_node_raw(const T& value)
-{
-    return make_immutable_scalar_node(make_dtype<T>(), reinterpret_cast<const char *>(&value));
-}
-
 dnd::ndarray::ndarray(signed char value)
-    : m_expr_tree(make_immutable_scalar_node_raw(value))
+    : m_expr_tree(make_immutable_builtin_scalar_node(value))
 {
 }
 dnd::ndarray::ndarray(short value)
-    : m_expr_tree(make_immutable_scalar_node_raw(value))
+    : m_expr_tree(make_immutable_builtin_scalar_node(value))
 {
 }
 dnd::ndarray::ndarray(int value)
-    : m_expr_tree(make_immutable_scalar_node_raw(value))
+    : m_expr_tree(make_immutable_builtin_scalar_node(value))
 {
 }
 dnd::ndarray::ndarray(long value)
-    : m_expr_tree(make_immutable_scalar_node_raw(value))
+    : m_expr_tree(make_immutable_builtin_scalar_node(value))
 {
 }
 dnd::ndarray::ndarray(long long value)
-    : m_expr_tree(make_immutable_scalar_node_raw(value))
+    : m_expr_tree(make_immutable_builtin_scalar_node(value))
 {
 }
 dnd::ndarray::ndarray(unsigned char value)
-    : m_expr_tree(make_immutable_scalar_node_raw(value))
+    : m_expr_tree(make_immutable_builtin_scalar_node(value))
 {
 }
 dnd::ndarray::ndarray(unsigned short value)
-    : m_expr_tree(make_immutable_scalar_node_raw(value))
+    : m_expr_tree(make_immutable_builtin_scalar_node(value))
 {
 }
 dnd::ndarray::ndarray(unsigned int value)
-    : m_expr_tree(make_immutable_scalar_node_raw(value))
+    : m_expr_tree(make_immutable_builtin_scalar_node(value))
 {
 }
 dnd::ndarray::ndarray(unsigned long value)
-    : m_expr_tree(make_immutable_scalar_node_raw(value))
+    : m_expr_tree(make_immutable_builtin_scalar_node(value))
 {
 }
 dnd::ndarray::ndarray(unsigned long long value)
-    : m_expr_tree(make_immutable_scalar_node_raw(value))
+    : m_expr_tree(make_immutable_builtin_scalar_node(value))
 {
 }
 dnd::ndarray::ndarray(float value)
-    : m_expr_tree(make_immutable_scalar_node_raw(value))
+    : m_expr_tree(make_immutable_builtin_scalar_node(value))
 {
 }
 dnd::ndarray::ndarray(double value)
-    : m_expr_tree(make_immutable_scalar_node_raw(value))
+    : m_expr_tree(make_immutable_builtin_scalar_node(value))
 {
 }
 dnd::ndarray::ndarray(complex<float> value)
-    : m_expr_tree(make_immutable_scalar_node_raw(value))
+    : m_expr_tree(make_immutable_builtin_scalar_node(value))
 {
 }
 dnd::ndarray::ndarray(complex<double> value)
-    : m_expr_tree(make_immutable_scalar_node_raw(value))
+    : m_expr_tree(make_immutable_builtin_scalar_node(value))
 {
 }
 

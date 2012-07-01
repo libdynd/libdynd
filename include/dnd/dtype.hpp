@@ -297,14 +297,13 @@ public:
     virtual string_encoding_t encoding() const = 0;
 };
 
-/**
- * This function returns a C-string of the base name for
- * the given type id. Raises an exception if the type id
- * is invalid.
- *
- * @param type_id  The type id for which to get the name.
- */
-const char *get_type_id_basename(type_id_t type_id);
+namespace detail {
+    /**
+     * Internal implementation detail - makes a builtin dtype from its raw values.
+     */
+    DND_CONSTEXPR dtype internal_make_raw_dtype(char type_id, char kind, char alignment, intptr_t element_size);
+} // namespace detail
+
 
 /**
  * This class represents a data type.
@@ -327,7 +326,7 @@ private:
     shared_ptr<extended_dtype> m_data;
 
     /** Unchecked built-in dtype constructor from raw parameters */
-    dtype(char type_id, char kind, char alignment, intptr_t element_size)
+    DND_CONSTEXPR dtype(char type_id, char kind, char alignment, intptr_t element_size)
         : m_type_id(type_id), m_kind(kind),
           m_alignment(alignment), m_element_size(element_size), m_data()
     {}
@@ -534,6 +533,7 @@ public:
      */
     void print_element(std::ostream& o, const char *data) const;
 
+    friend DND_CONSTEXPR dtype detail::internal_make_raw_dtype(char type_id, char kind, char alignment, intptr_t element_size);
     friend std::ostream& operator<<(std::ostream& o, const dtype& rhs);
     friend dtype make_bytes_dtype(intptr_t element_size, intptr_t alignment);
 };
@@ -545,18 +545,27 @@ dtype make_dtype()
     return dtype(type_id_of<T>::value);
 }
 
-std::ostream& operator<<(std::ostream& o, const dtype& rhs);
-/** Prints raw bytes as hexadecimal */
-void hexadecimal_print(std::ostream& o, char value);
-void hexadecimal_print(std::ostream& o, uint16_t value);
-void hexadecimal_print(std::ostream& o, uint32_t value);
-void hexadecimal_print(std::ostream& o, const char *data, intptr_t element_size);
+/**
+ * A static array of the builtin dtypes. If code is specialized
+ * just for a builtin type, like int, it can use
+ * static_builtin_dtypes[type_id_of<int>::value] as a fast
+ * way to get a const reference to its dtype.
+ */
+extern const dtype static_builtin_dtypes[builtin_type_id_count];
 
 /**
  * Creates a bytes<size, alignment> dtype, for representing
  * raw, uninterpreted bytes.
  */
 dtype make_bytes_dtype(intptr_t element_size, intptr_t alignment);
+
+
+std::ostream& operator<<(std::ostream& o, const dtype& rhs);
+/** Prints raw bytes as hexadecimal */
+void hexadecimal_print(std::ostream& o, char value);
+void hexadecimal_print(std::ostream& o, uint16_t value);
+void hexadecimal_print(std::ostream& o, uint32_t value);
+void hexadecimal_print(std::ostream& o, const char *data, intptr_t element_size);
 
 } // namespace dnd
 

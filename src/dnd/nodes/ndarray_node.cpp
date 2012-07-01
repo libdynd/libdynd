@@ -198,7 +198,6 @@ void dnd::ndarray_node::debug_dump(ostream& o, const string& indent) const
     o << indent << " node category: ";
     print_node_category(o, get_category());
     o << "\n";
-    debug_dump_extra(o, indent);
     o << indent << " access flags: ";
     if (get_access_flags() & read_access_flag) {
         o << "read ";
@@ -210,6 +209,7 @@ void dnd::ndarray_node::debug_dump(ostream& o, const string& indent) const
         o << "immutable ";
     }
     o << "\n";
+    debug_dump_extra(o, indent);
 
     if (get_nop() > 0) {
         o << indent << " nop: " << get_nop() << "\n";

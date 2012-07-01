@@ -63,59 +63,25 @@ extended_string_dtype::~extended_string_dtype()
 {
 }
 
+inline DND_CONSTEXPR dtype dnd::detail::internal_make_raw_dtype(char type_id, char kind, char alignment, intptr_t element_size)
+{
+    return dtype(type_id, kind, alignment, element_size);
+}
 
-/**
- * A static look-up table structure which contains data about the type ids.
- * This must match up with the type id enumeration, and has space that
- * is intended to be filled up with more data when custom dtypes are added.
- */
-static struct {
-    unsigned char kind, alignment, element_size;
-} basic_type_id_info[DND_MAX_NUM_TYPE_IDS] = {
-    {bool_kind, 1, 1},         // bool
-    {int_kind, 1, 1},          // int8
-    {int_kind, 2, 2},          // int16
-    {int_kind, 4, 4},          // int32
-    {int_kind, 8, 8},          // int64
-    {uint_kind, 1, 1},         // uint8
-    {uint_kind, 2, 2},         // uint16
-    {uint_kind, 4, 4},         // uint32
-    {uint_kind, 8, 8},         // uint64
-    {real_kind, 4, 4},         // float32
-    {real_kind, 8, 8},         // float64
-    {complex_kind, 4, 8},      // complex<float32>
-    {complex_kind, 8, 16},     // complex<float64>
-    {string_kind, 1, 0},       // utf8
-    {composite_kind, 1, 0},    // struct
-    {composite_kind, 1, 0},    // subarray
-    {pattern_kind, 1, 0}       // pattern
-};
-
-/**
- * A static look-up table which contains the names of all the type ids.
- * This must match up with the type id enumeration, and has space that
- * is intended to be filled up with more data when custom dtypes are added.
- */
-static char type_id_names[DND_MAX_NUM_TYPE_IDS][32] = {
-    "bool",
-    "int8",
-    "int16",
-    "int32",
-    "int64",
-    "uint8",
-    "uint16",
-    "uint32",
-    "uint64",
-    "float32",
-    "float64",
-    "complex<float32>",
-    "complex<float64>",
-    "bytes<>",
-    "fixedstring<>",
-    "struct",
-    "array",
-    "convert",
-    "pattern"
+const dtype dnd::static_builtin_dtypes[builtin_type_id_count] = {
+    dnd::detail::internal_make_raw_dtype(bool_type_id, bool_kind, 1, 1),
+    dnd::detail::internal_make_raw_dtype(int8_type_id, int_kind, 1, 1),
+    dnd::detail::internal_make_raw_dtype(int16_type_id, int_kind, 2, 2),
+    dnd::detail::internal_make_raw_dtype(int32_type_id, int_kind, 4, 4),
+    dnd::detail::internal_make_raw_dtype(int64_type_id, int_kind, 8, 8),
+    dnd::detail::internal_make_raw_dtype(uint8_type_id, uint_kind, 1, 1),
+    dnd::detail::internal_make_raw_dtype(uint16_type_id, uint_kind, 2, 2),
+    dnd::detail::internal_make_raw_dtype(uint32_type_id, uint_kind, 4, 4),
+    dnd::detail::internal_make_raw_dtype(uint64_type_id, uint_kind, 8, 8),
+    dnd::detail::internal_make_raw_dtype(float32_type_id, real_kind, 4, 4),
+    dnd::detail::internal_make_raw_dtype(float64_type_id, real_kind, 8, 8),
+    dnd::detail::internal_make_raw_dtype(complex_float32_type_id, complex_kind, 4, 8),
+    dnd::detail::internal_make_raw_dtype(complex_float64_type_id, complex_kind, 8, 16)
 };
 
 /**
@@ -134,11 +100,6 @@ static inline int validate_type_id(type_id_t type_id)
     }
 }
 
-const char *dnd::get_type_id_basename(type_id_t type_id)
-{
-    return type_id_names[validate_type_id(type_id)];
-}
-
 dtype::dtype()
     : m_type_id(pattern_type_id), m_kind(pattern_kind), m_alignment(1),
       m_element_size(0), m_data()
@@ -148,18 +109,18 @@ dtype::dtype()
 
 dtype::dtype(type_id_t type_id)
     : m_type_id(validate_type_id(type_id)),
-      m_kind(basic_type_id_info[type_id].kind),
-      m_alignment(basic_type_id_info[type_id].alignment),
-      m_element_size(basic_type_id_info[type_id].element_size),
+      m_kind(static_builtin_dtypes[type_id].m_kind),
+      m_alignment(static_builtin_dtypes[type_id].m_alignment),
+      m_element_size(static_builtin_dtypes[type_id].m_element_size),
       m_data()
 {
 }
 
 dtype::dtype(int type_id)
     : m_type_id(validate_type_id((type_id_t)type_id)),
-      m_kind(basic_type_id_info[type_id].kind),
-      m_alignment(basic_type_id_info[type_id].alignment),
-      m_element_size(basic_type_id_info[type_id].element_size),
+      m_kind(static_builtin_dtypes[type_id].m_kind),
+      m_alignment(static_builtin_dtypes[type_id].m_alignment),
+      m_element_size(static_builtin_dtypes[type_id].m_element_size),
       m_data()
 {
 }
@@ -167,13 +128,29 @@ dtype::dtype(int type_id)
 dtype::dtype(const std::string& rep)
     : m_data()
 {
+    static char *type_id_names[builtin_type_id_count] = {
+        "bool",
+        "int8",
+        "int16",
+        "int32",
+        "int64",
+        "uint8",
+        "uint16",
+        "uint32",
+        "uint64",
+        "float32",
+        "float64",
+        "complex<float32>",
+        "complex<float64>",
+    };
+
     // TODO: make a decent efficient parser
     for (int id = 0; id < builtin_type_id_count; ++id) {
         if (rep == type_id_names[id]) {
             m_type_id = (type_id_t)id;
-            m_kind = basic_type_id_info[id].kind;
-            m_alignment = basic_type_id_info[id].alignment;
-            m_element_size = basic_type_id_info[id].element_size;
+            m_kind = static_builtin_dtypes[id].m_kind;
+            m_alignment = static_builtin_dtypes[id].m_alignment;
+            m_element_size = static_builtin_dtypes[id].m_element_size;
             return;
         }
     }

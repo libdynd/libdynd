@@ -91,12 +91,6 @@ public:
 
 ndarray_node_ptr make_immutable_scalar_node(const dtype& dt, const char* data);
 
-template<class T>
-typename enable_if<is_dtype_scalar<T>::value, ndarray_node_ptr>::type make_immutable_scalar_node(const T& value)
-{
-    return ndarray_node_ptr(make_immutable_scalar_node(make_dtype<T>(), reinterpret_cast<const char *>(&value)));
-}
-
 } // namespace dnd
 
 #endif // _DND__IMMUTABLE_SCALAR_NODE_HPP_
