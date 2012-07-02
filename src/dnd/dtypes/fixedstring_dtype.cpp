@@ -298,7 +298,7 @@ void dnd::fixedstring_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, co
             get_fixedstring_encoding_kernel(m_element_size, m_encoding, src_fs->m_element_size, src_fs->m_encoding,
                                     errmode, out_kernel);
         } else {
-            throw runtime_error("conversions from non-string to string are not implemented");
+            src_dt.extended()->get_dtype_assignment_kernel(dst_dt, src_dt, errmode, out_kernel);
         }
     } else {
         throw runtime_error("conversions from string to non-string are not implemented");
