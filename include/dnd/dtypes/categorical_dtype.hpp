@@ -13,6 +13,13 @@
 #include <dnd/dtype.hpp>
 #include <dnd/ndarray.hpp>
 
+
+namespace {
+
+struct assign_to_same_category_type;
+
+} // anonymous namespace
+
 namespace dnd {
 
 class categorical_dtype : public extended_dtype {
@@ -55,11 +62,20 @@ public:
         return self;
     }
 
-    int32_t get_value_from_category(const char *category) const;
+    uint32_t get_value_from_category(const char const *category) const;
 
     bool is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const;
 
+    void get_dtype_assignment_kernel(const dtype& dst_dt, const dtype& src_dt,
+                    assign_error_mode errmode,
+                    unary_specialization_kernel_instance& out_kernel) const;
+
     bool operator==(const extended_dtype& rhs) const;
+
+    friend struct assign_to_same_category_type;
+    friend struct assign_from_same_category_type;
+    friend struct assign_from_commensurate_category_type;
+
 };
 
 inline dtype make_categorical_dtype(const ndarray& values) {
