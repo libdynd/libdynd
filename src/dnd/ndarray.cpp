@@ -328,8 +328,8 @@ std::string dnd::detail::ndarray_as_string(const ndarray& lhs, assign_error_mode
         throw std::runtime_error("can only convert ndarrays with 0 dimensions to scalars");
     }
     ndarray tmp = lhs.vals();
-    if (lhs.get_dtype().type_id() == fixedstring_type_id) {
-        const fixedstring_dtype *fs = static_cast<const fixedstring_dtype *>(lhs.get_dtype().extended());
+    if (tmp.get_dtype().type_id() == fixedstring_type_id) {
+        const fixedstring_dtype *fs = static_cast<const fixedstring_dtype *>(tmp.get_dtype().extended());
         if (fs->encoding() != string_encoding_ascii && fs->encoding() != string_encoding_utf_8) {
             tmp = tmp.as_dtype(make_fixedstring_dtype(string_encoding_utf_8, 4 * tmp.get_dtype().element_size() / tmp.get_dtype().alignment()));
             tmp = tmp.vals();
