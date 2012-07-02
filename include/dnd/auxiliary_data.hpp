@@ -245,7 +245,7 @@ void make_auxiliary_data(auxiliary_data& out_created, const T& value)
  * Creates a by-value auxiliary data object. This sets the 0th bit of the value,
  * so the caller must be sure to avoid that value. To set a by-value auxiliary aligned
  * pointer, use make_raw_auxiliary_data(output, reinterpret_cast<uintptr_t>(aligned_ptr),
- * and to set an integer, use make_raw_auxiliary_data(output, static_cast<uintptr_t>(value) >> 1).
+ * and to set an integer, use make_raw_auxiliary_data(output, static_cast<uintptr_t>(value) << 1).
  */
 inline void make_raw_auxiliary_data(auxiliary_data& out_created, uintptr_t raw_value)
 {
