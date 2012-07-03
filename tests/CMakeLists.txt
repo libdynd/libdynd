@@ -24,6 +24,7 @@ set(tests_SRC
     test_ndarray_arange.cpp
     test_ndarray_views.cpp
     test_shape_tools.cpp
+    test_unary_kernel.cpp
     )
 
 # TODO: this is awkwardly hardcoded
