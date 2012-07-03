@@ -551,9 +551,9 @@ dnd::ndarray::ndarray(const T (&rhs)[N])
     char *originptr = 0;
     memory_block_ptr memblock = make_fixed_size_pod_memory_block(sizeof(T), num_bytes, &originptr);
     DND_MEMCPY(originptr, &rhs[0], num_bytes);
-    m_expr_tree.swap(make_strided_ndarray_node(dtype(detail::type_from_array<T>::type_id),
+    make_strided_ndarray_node(dtype(detail::type_from_array<T>::type_id),
                             ndim, shape, strides, originptr,
-                            read_access_flag | write_access_flag, DND_MOVE(memblock)));
+                            read_access_flag | write_access_flag, DND_MOVE(memblock)).swap(m_expr_tree);
 }
 
 ///////////// The ndarray.as<type>() templated function /////////////////////////

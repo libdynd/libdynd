@@ -63,7 +63,7 @@ extended_string_dtype::~extended_string_dtype()
 {
 }
 
-inline DND_CONSTEXPR dtype dnd::detail::internal_make_raw_dtype(char type_id, char kind, char alignment, intptr_t element_size)
+inline /* TODO: DND_CONSTEXPR */ dtype dnd::detail::internal_make_raw_dtype(char type_id, char kind, char alignment, intptr_t element_size)
 {
     return dtype(type_id, kind, alignment, element_size);
 }
@@ -128,7 +128,7 @@ dtype::dtype(int type_id)
 dtype::dtype(const std::string& rep)
     : m_data()
 {
-    static char *type_id_names[builtin_type_id_count] = {
+    static const char *type_id_names[builtin_type_id_count] = {
         "bool",
         "int8",
         "int16",

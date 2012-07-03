@@ -301,7 +301,8 @@ namespace detail {
     /**
      * Internal implementation detail - makes a builtin dtype from its raw values.
      */
-    DND_CONSTEXPR dtype internal_make_raw_dtype(char type_id, char kind, char alignment, intptr_t element_size);
+    /* TODO: DND_CONSTEXPR */ dtype internal_make_raw_dtype(char type_id, char kind, char alignment, intptr_t element_size);
+
 } // namespace detail
 
 
@@ -326,7 +327,7 @@ private:
     shared_ptr<extended_dtype> m_data;
 
     /** Unchecked built-in dtype constructor from raw parameters */
-    DND_CONSTEXPR dtype(char type_id, char kind, char alignment, intptr_t element_size)
+    /* TODO: DND_CONSTEXPR */ dtype(char type_id, char kind, char alignment, intptr_t element_size)
         : m_type_id(type_id), m_kind(kind),
           m_alignment(alignment), m_element_size(element_size), m_data()
     {}
@@ -533,7 +534,7 @@ public:
      */
     void print_element(std::ostream& o, const char *data) const;
 
-    friend DND_CONSTEXPR dtype detail::internal_make_raw_dtype(char type_id, char kind, char alignment, intptr_t element_size);
+    friend /* TODO: DND_CONSTEXPR*/ dtype detail::internal_make_raw_dtype(char type_id, char kind, char alignment, intptr_t element_size);
     friend std::ostream& operator<<(std::ostream& o, const dtype& rhs);
     friend dtype make_bytes_dtype(intptr_t element_size, intptr_t alignment);
 };

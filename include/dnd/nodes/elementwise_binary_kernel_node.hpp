@@ -84,7 +84,7 @@ public:
         return read_access_flag |
             (m_opnodes[0]->get_access_flags() & m_opnodes[1]->get_access_flags() & immutable_access_flag);
     }
-    
+
     int get_nop() const {
         return 2;
     }
@@ -252,7 +252,7 @@ ndarray_node_ptr make_elementwise_binary_kernel_node(ndarray_node_ptr node1,
     // Allocate the memory_block
     char *result = reinterpret_cast<char *>(malloc(sizeof(memory_block_data) + sizeof(elementwise_binary_kernel_node<BinaryOperatorFactory>)));
     if (result == NULL) {
-        throw bad_alloc();
+        throw std::bad_alloc();
     }
 
     // If the shapes match exactly, no need to broadcast.
@@ -285,7 +285,7 @@ ndarray_node_ptr make_elementwise_binary_kernel_node(const dtype& dt, int ndim, 
     // Allocate the memory_block
     char *result = reinterpret_cast<char *>(malloc(sizeof(memory_block_data) + sizeof(elementwise_binary_kernel_node<BinaryOperatorFactory>)));
     if (result == NULL) {
-        throw bad_alloc();
+        throw std::bad_alloc();
     }
 
     // Placement new

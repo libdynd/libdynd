@@ -65,7 +65,7 @@ public:
     {
         return read_access_flag | immutable_access_flag;
     }
-        
+
     const char *get_readonly_originptr() const
     {
         return reinterpret_cast<const char *>(&m_value);
@@ -105,8 +105,8 @@ public:
         o << indent << " value: " << m_value << "\n";
     }
 
-    template<class T>
-    friend typename enable_if<is_dtype_scalar<T>::value, ndarray_node_ptr>::type make_immutable_builtin_scalar_node(const T& value);
+    template<class U>
+    friend typename enable_if<is_dtype_scalar<U>::value, ndarray_node_ptr>::type make_immutable_builtin_scalar_node(const U& value);
 };
 
 template<class T>
@@ -115,7 +115,7 @@ typename enable_if<is_dtype_scalar<T>::value, ndarray_node_ptr>::type make_immut
     // Allocate the memory_block
     char *result = reinterpret_cast<char *>(malloc(sizeof(memory_block_data) + sizeof(immutable_builtin_scalar_node<T>)));
     if (result == NULL) {
-        throw bad_alloc();
+        throw std::bad_alloc();
     }
     // Placement new
     new (result + sizeof(memory_block_data))

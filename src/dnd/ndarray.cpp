@@ -98,9 +98,9 @@ dnd::ndarray::ndarray(const dtype& dt)
 {
     char *originptr = 0;
     memory_block_ptr memblock = make_fixed_size_pod_memory_block(dt.alignment(), dt.element_size(), &originptr);
-    m_expr_tree.swap(make_strided_ndarray_node(dt, 0, NULL, NULL,
+    make_strided_ndarray_node(dt, 0, NULL, NULL,
                             originptr, read_access_flag | write_access_flag,
-                            DND_MOVE(memblock)));
+                            DND_MOVE(memblock)).swap(m_expr_tree);
 }
 
 dnd::ndarray::ndarray(const dtype& dt, const char *raw_data)
@@ -129,9 +129,9 @@ dnd::ndarray::ndarray(intptr_t dim0, const dtype& dt)
     intptr_t stride = (dim0 <= 1) ? 0 : dt.element_size();
     char *originptr = 0;
     memory_block_ptr memblock = make_fixed_size_pod_memory_block(dt.alignment(), dt.element_size() * dim0, &originptr);
-    m_expr_tree.swap(make_strided_ndarray_node(dt, 1, &dim0, &stride,
+    make_strided_ndarray_node(dt, 1, &dim0, &stride,
                             originptr, read_access_flag | write_access_flag,
-                            DND_MOVE(memblock)));
+                            DND_MOVE(memblock)).swap(m_expr_tree);
 }
 
 dnd::ndarray::ndarray(intptr_t dim0, intptr_t dim1, const dtype& dt)
@@ -144,9 +144,9 @@ dnd::ndarray::ndarray(intptr_t dim0, intptr_t dim1, const dtype& dt)
 
     char *originptr = 0;
     memory_block_ptr memblock = make_fixed_size_pod_memory_block(dt.alignment(), dt.element_size() * dim0 * dim1, &originptr);
-    m_expr_tree.swap(make_strided_ndarray_node(dt, 2, shape, strides,
+    make_strided_ndarray_node(dt, 2, shape, strides,
                             originptr, read_access_flag | write_access_flag,
-                            DND_MOVE(memblock)));
+                            DND_MOVE(memblock)).swap(m_expr_tree);
 }
 
 dnd::ndarray::ndarray(intptr_t dim0, intptr_t dim1, intptr_t dim2, const dtype& dt)
@@ -160,9 +160,9 @@ dnd::ndarray::ndarray(intptr_t dim0, intptr_t dim1, intptr_t dim2, const dtype& 
 
     char *originptr = 0;
     memory_block_ptr memblock = make_fixed_size_pod_memory_block(dt.alignment(), dt.element_size() * dim0 * dim1 * dim2, &originptr);
-    m_expr_tree.swap(make_strided_ndarray_node(dt, 3, shape, strides,
+    make_strided_ndarray_node(dt, 3, shape, strides,
                             originptr, read_access_flag | write_access_flag,
-                            DND_MOVE(memblock)));
+                            DND_MOVE(memblock)).swap(m_expr_tree);
 }
 
 dnd::ndarray::ndarray(intptr_t dim0, intptr_t dim1, intptr_t dim2, intptr_t dim3, const dtype& dt)
@@ -177,9 +177,9 @@ dnd::ndarray::ndarray(intptr_t dim0, intptr_t dim1, intptr_t dim2, intptr_t dim3
 
     char *originptr = 0;
     memory_block_ptr memblock = make_fixed_size_pod_memory_block(dt.alignment(), dt.element_size() * dim0 * dim1 * dim2 * dim3, &originptr);
-    m_expr_tree.swap(make_strided_ndarray_node(dt, 4, shape, strides,
+    make_strided_ndarray_node(dt, 4, shape, strides,
                             originptr, read_access_flag | write_access_flag,
-                            DND_MOVE(memblock)));
+                            DND_MOVE(memblock)).swap(m_expr_tree);
 }
 
 ndarray dnd::ndarray::index(int nindex, const irange *indices) const
