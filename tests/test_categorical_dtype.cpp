@@ -158,3 +158,33 @@ TEST(CategoricalDType, AssignInt) {
 
 }
 
+TEST(CategoricalDType, AssignRange) {
+
+    ndarray cat(3, make_fixedstring_dtype(string_encoding_ascii, 3));
+    cat(0).vals() = std::string("foo");
+    cat(1).vals() = std::string("bar");
+    cat(2).vals() = std::string("baz");
+
+    dtype dt = make_categorical_dtype(cat);
+
+    ndarray a(9, dt);
+    ndarray b = a(0 <= irange() < 3);
+    b.val_assign(cat);
+    ndarray c = a(3 <= irange() < 6 );
+    c.val_assign(cat(0));
+    ndarray d = a(6 <= irange() / 2 < 9 );
+    d.val_assign(cat(1));
+    a(7).vals() = cat(2);
+
+    EXPECT_EQ("foo", a(0).as_dtype(cat.get_dtype()).as<std::string>());
+    EXPECT_EQ("bar", a(1).as_dtype(cat.get_dtype()).as<std::string>());
+    EXPECT_EQ("baz", a(2).as_dtype(cat.get_dtype()).as<std::string>());
+    EXPECT_EQ("foo", a(3).as_dtype(cat.get_dtype()).as<std::string>());
+    EXPECT_EQ("foo", a(4).as_dtype(cat.get_dtype()).as<std::string>());
+    EXPECT_EQ("foo", a(5).as_dtype(cat.get_dtype()).as<std::string>());
+    EXPECT_EQ("bar", a(6).as_dtype(cat.get_dtype()).as<std::string>());
+    EXPECT_EQ("baz", a(7).as_dtype(cat.get_dtype()).as<std::string>());
+    EXPECT_EQ("bar", a(8).as_dtype(cat.get_dtype()).as<std::string>());
+
+}
+
