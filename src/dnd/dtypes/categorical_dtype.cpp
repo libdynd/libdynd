@@ -107,10 +107,11 @@ namespace {
                 get_raw_auxiliary_data(auxdata)&~1
             );
 
-            size_t N = cat->element_size();
             for (intptr_t i = 0; i < count; ++i) {
                 uint32_t src_val = cat->get_value_from_category(src);
-                memcpy(dst, reinterpret_cast<const char *>(&src_val), N);
+                *reinterpret_cast<uint32_t *>(dst) = src_val;
+                cout << "src: " << (void*)src << endl;
+                cout << "dst: " << (void*)dst << endl;
 
                 dst += dst_stride;
                 src += src_stride;
