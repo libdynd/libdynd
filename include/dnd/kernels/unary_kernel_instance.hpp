@@ -35,12 +35,16 @@ inline unary_specialization_t get_unary_specialization(intptr_t dst_stride, intp
 {
     // The idea of this expression is to have no branches, just a deterministic calculation
     return static_cast<unary_specialization_t>(
-                (((dst_stride == dst_element_size)& // dst is contiguous
-                  ((src_stride == 0)|               // src is scalar
-                   (src_stride == src_element_size) // src is contiguous
+                (((dst_stride == dst_element_size)&  // dst is contiguous
+                  ((src_stride == 0)|                // src is scalar
+                   (src_stride == src_element_size)  // src is contiguous
                  )) << 1
                 ) |
-                (src_stride == 0));                 // src is scalar
+                ((src_stride == 0)&                  // src is scalar
+                  ((dst_stride == 0)|                // dst is scalar
+                   (dst_stride == dst_element_size)  // dst is contiguous
+                  )
+                ));
 }
 
 /**
