@@ -110,8 +110,6 @@ namespace {
             for (intptr_t i = 0; i < count; ++i) {
                 uint32_t src_val = cat->get_value_from_category(src);
                 *reinterpret_cast<uint32_t *>(dst) = src_val;
-                cout << "src: " << (void*)src << endl;
-                cout << "dst: " << (void*)dst << endl;
 
                 dst += dst_stride;
                 src += src_stride;
