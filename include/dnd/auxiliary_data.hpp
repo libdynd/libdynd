@@ -20,8 +20,8 @@ struct AuxDataBase;
 // Function pointers for freeing or cloning auxiliary data
 // IMPORTANT NOTE: These are C-ABI functions, they should
 //                 not throw exceptions!
-typedef void (AuxData_FreeFunc) (AuxDataBase *);
-typedef AuxDataBase *(AuxData_CloneFunc) (const AuxDataBase *);
+typedef void (*auxdata_free_function_t) (AuxDataBase *);
+typedef AuxDataBase *(*auxdata_clone_function_t) (const AuxDataBase *);
 
 struct auxdata_kernel_api {
     /**
@@ -30,28 +30,28 @@ struct auxdata_kernel_api {
      * the kernel's auxdata. Chaining through child APIs is how to initialize
      * the growable memory_block members of the kernel.
      */
-    auxdata_kernel_api *get_child_api(const AuxDataBase *auxdata, int index);
+    auxdata_kernel_api *(*get_child_api)(const AuxDataBase *auxdata, int index);
 
     /**
      * Whether this kernel may reference an input memory_block instead
      * of requiring a destination memory_block.
      */
-    int supports_referencing_src_memory_blocks(const AuxDataBase *auxdata);
+    int (*supports_referencing_src_memory_blocks)(const AuxDataBase *auxdata);
 
     /**
      * Sets the memory_block this memblockref dtype should use to allocate
      * destination variable-sized data. Set to NULL to reference the input's
      * memory_block, when the kernel indicates this is permitted.
      */
-    void set_dst_memory_block(const AuxDataBase *auxdata, memory_block_data *memblock);
+    void (*set_dst_memory_block)(const AuxDataBase *auxdata, memory_block_data *memblock);
 
     // TODO: Temporary buffer management APIs
 };
 
 struct AuxDataBase {
     /** Mandatory free and clone functions */
-    AuxData_FreeFunc *free;
-    AuxData_CloneFunc *clone;
+    auxdata_free_function_t free;
+    auxdata_clone_function_t clone;
     /** Additional API exposed by the kernel when necessary */
     auxdata_kernel_api *kernel_api;
     void *reserved; /* for future expansion */
@@ -110,6 +110,10 @@ namespace detail {
         friend class ::dnd::auxiliary_data;
     public:
         const Taux& get() const {
+            return m_auxdata;
+        }
+
+        Taux& get() {
             return m_auxdata;
         }
     };
@@ -292,6 +296,18 @@ template<typename T>
 const T& get_auxiliary_data(const AuxDataBase *auxdata)
 {
     return reinterpret_cast<const detail::auxiliary_data_holder<T>*>(reinterpret_cast<uintptr_t>(auxdata)&~1)->get();
+}
+
+/**
+ * When auxdata points to an object created with make_auxiliary_data<T>,
+ * this returns a reference to the T object it contains. Should not be
+ * called when auxdata is NULL. This works with either tracked auxiliary
+ * data or borrowed auxiliary data.
+ */
+template<typename T>
+T& get_auxiliary_data(AuxDataBase *auxdata)
+{
+    return reinterpret_cast<detail::auxiliary_data_holder<T>*>(reinterpret_cast<uintptr_t>(auxdata)&~1)->get();
 }
 
 /**

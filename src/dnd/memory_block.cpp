@@ -100,3 +100,25 @@ memory_block_ptr dnd::make_fixed_size_pod_memory_block(intptr_t alignment, intpt
     // Use placement new to initialize and return the memory block
     return memory_block_ptr(new (result) memory_block_data(1, fixed_size_pod_memory_block_type), false);
 }
+
+memory_block_pod_allocator_api *dnd::get_memory_block_pod_allocator_api(memory_block_data *memblock)
+{
+    static memory_block_pod_allocator_api pod_allocator_api = {
+        // TODO
+    };
+
+    switch (memblock->m_type) {
+        case ndarray_node_memory_block_type:
+            throw runtime_error("Cannot get a POD allocator API from an ndarray_node_memory_block");
+        case external_memory_block_type:
+            throw runtime_error("Cannot get a POD allocator API from an external_memory_block");
+        case fixed_size_pod_memory_block_type:
+            throw runtime_error("Cannot get a POD allocator API from an fixed_size_pod_memory_block");
+        case pod_memory_block_type:
+            return &pod_allocator_api;
+        case object_memory_block_type:
+            throw runtime_error("Cannot get a POD allocator API from an object_memory_block");
+        default:
+            throw runtime_error("unknown memory block type");
+    }
+}

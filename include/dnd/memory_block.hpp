@@ -55,6 +55,36 @@ struct memory_block_data {
     }
 };
 
+/**
+ * This is a struct of function pointers for allocating and
+ * resizing POD data within a memory_block that supports it.
+ */
+struct memory_block_pod_allocator_api {
+    /**
+     * Allocates the requested amount of memory from the memory_block, returning
+     * a pointer pair.
+     *
+     * Call this once per output variable.
+     */
+    void (*allocate)(memory_block_data *self, intptr_t size_bytes, intptr_t alignment, char **out_begin, char **out_end);
+    /**
+     * Resizes the most recently allocated memory in the memory block, updating
+     * the pointer pair. This may move the memory to a new location if necessary.
+     *
+     * Call this to grow the memory as needed, and to trim the memory to just
+     * the needed size once that is determined.
+     */
+    void (*resize)(memory_block_data *self, intptr_t size_bytes, char **inout_begin, char **inout_end);
+};
+
+/**
+ * Returns a pointer to a static POD memory allocator API,
+ * for the type of the memory block.
+ */
+memory_block_pod_allocator_api *get_memory_block_pod_allocator_api(memory_block_data *memblock);
+
+
+
 namespace detail {
     /**
      * Frees the data for a memory block. Is called
@@ -162,6 +192,17 @@ public:
         return *this;
     }
 #endif
+
+    /** Assignment from raw memory_block pointer */
+    memory_block_ptr& operator=(memory_block_data *rhs)
+    {
+        if (m_memblock != 0) {
+            memory_block_decref(m_memblock);
+        }
+        m_memblock = rhs;
+        memory_block_incref(rhs);
+        return *this;
+    }
 
     /** Returns true if there is only one reference to this memory block */
     bool unique() const {

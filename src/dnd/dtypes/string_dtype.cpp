@@ -30,8 +30,8 @@ void dnd::string_dtype::print_element(std::ostream& o, const char *data) const
     uint32_t cp;
     next_unicode_codepoint_t next_fn;
     next_fn = get_next_unicode_codepoint_function(m_encoding, assign_error_none);
-    const char *begin = *reinterpret_cast<const char * const *>(data);
-    const char *end = *(reinterpret_cast<const char * const *>(data) + 1);
+    const char *begin = reinterpret_cast<const char * const *>(data)[0];
+    const char *end = reinterpret_cast<const char * const *>(data)[1];
 
     // Print as an escaped string
     o << "\"";
@@ -86,10 +86,9 @@ void dnd::string_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const d
 {
     if (this == dst_dt.extended()) {
         if (src_dt.type_id() == fixedstring_type_id) {
-            //const string_dtype *src_fs = static_cast<const string_dtype *>(src_dt.extended());
-            //get_fixedstring_encoding_kernel(m_element_size, m_encoding, src_fs->m_element_size, src_fs->m_encoding,
-            //                        errmode, out_kernel);
-            throw runtime_error("TODO get_dtype_assignment_kernel");
+            const string_dtype *src_fs = static_cast<const string_dtype *>(src_dt.extended());
+            get_blockref_string_encoding_kernel(m_encoding, src_fs->m_encoding,
+                                    errmode, out_kernel);
         } else {
             src_dt.extended()->get_dtype_assignment_kernel(dst_dt, src_dt, errmode, out_kernel);
         }

@@ -85,6 +85,7 @@ set(dnd_SRC
     src/dnd/ndarray.cpp
     src/dnd/ndarray_arange.cpp
     src/dnd/shape_tools.cpp
+    src/dnd/string_encodings.cpp
     include/dnd/auxiliary_data.hpp
     include/dnd/buffer_storage.hpp
     include/dnd/config.hpp
