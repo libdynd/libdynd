@@ -54,15 +54,15 @@ public:
 
     void print_dtype(std::ostream& o) const;
 
-    bool is_object_type() const {
-        return false;
+    dtype_memory_management_t get_memory_management() const {
+        return pod_memory_management;
     }
 
     const dtype& value_dtype(const dtype& self) const {
         return self;
     }
 
-    uint32_t get_value_from_category(const char const *category) const;
+    uint32_t get_value_from_category(const char *category) const;
 
     bool is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const;
 

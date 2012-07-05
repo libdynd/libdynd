@@ -118,153 +118,157 @@ bool dnd::fixedstring_dtype::is_lossless_assignment(const dtype& dst_dt, const d
     }
 }
 
-struct ascii_utf8_compare_kernel {
-    static bool less(const char *a, const char *b, const AuxDataBase *auxdata) {
-        intptr_t stringsize = reinterpret_cast<uintptr_t>(auxdata)>>1;
-        return strncmp(a, b, stringsize) < 0;
-    }
+namespace {
 
-    static bool less_equal(const char *a, const char *b, const AuxDataBase *auxdata) {
-        intptr_t stringsize = reinterpret_cast<uintptr_t>(auxdata)>>1;
-        return strncmp(a, b, stringsize) <= 0;
-    }
-
-    static bool equal(const char *a, const char *b, const AuxDataBase *auxdata) {
-        intptr_t stringsize = reinterpret_cast<uintptr_t>(auxdata)>>1;
-        return strncmp(a, b, stringsize) == 0;
-    }
-
-    static bool not_equal(const char *a, const char *b, const AuxDataBase *auxdata) {
-        intptr_t stringsize = reinterpret_cast<uintptr_t>(auxdata)>>1;
-        return strncmp(a, b, stringsize) != 0;
-    }
-
-    static bool greater_equal(const char *a, const char *b, const AuxDataBase *auxdata) {
-        intptr_t stringsize = reinterpret_cast<uintptr_t>(auxdata)>>1;
-        return strncmp(a, b, stringsize) >= 0;
-    }
-
-    static bool greater(const char *a, const char *b, const AuxDataBase *auxdata) {
-        intptr_t stringsize = reinterpret_cast<uintptr_t>(auxdata)>>1;
-        return strncmp(a, b, stringsize) > 0;
-    }
-};
-
-struct utf16_compare_kernel {
-    static bool less(const char *a, const char *b, const AuxDataBase *auxdata) {
-        intptr_t stringsize = reinterpret_cast<uintptr_t>(auxdata)>>1;
-        return lexicographical_compare(
-            reinterpret_cast<const uint16_t *>(a), reinterpret_cast<const uint16_t *>(a) + stringsize,
-            reinterpret_cast<const uint16_t *>(b), reinterpret_cast<const uint16_t *>(b) + stringsize
-        );
-    }
-
-    static bool less_equal(const char *a, const char *b, const AuxDataBase *auxdata) {
-        intptr_t stringsize = reinterpret_cast<uintptr_t>(auxdata)>>1;
-        return !lexicographical_compare(
-            reinterpret_cast<const uint16_t *>(b), reinterpret_cast<const uint16_t *>(b) + stringsize,
-            reinterpret_cast<const uint16_t *>(a), reinterpret_cast<const uint16_t *>(a) + stringsize
-        );
-    }
-
-    static bool equal(const char *a, const char *b, const AuxDataBase *auxdata) {
-        intptr_t stringsize = reinterpret_cast<uintptr_t>(auxdata)>>1;
-        for (uint16_t *lhs = reinterpret_cast<uint16_t *>(const_cast<char *>(a)),
-                *rhs = reinterpret_cast<uint16_t *>(const_cast<char *>(b));
-                lhs < lhs + stringsize; ++lhs, ++rhs) {
-            if (*lhs != *rhs) {
-                return false;
-            }
+    struct ascii_utf8_compare_kernel {
+        static bool less(const char *a, const char *b, const AuxDataBase *auxdata) {
+            intptr_t stringsize = reinterpret_cast<uintptr_t>(auxdata)>>1;
+            return strncmp(a, b, stringsize) < 0;
         }
-        return true;
-    }
 
-    static bool not_equal(const char *a, const char *b, const AuxDataBase *auxdata) {
-        intptr_t stringsize = reinterpret_cast<uintptr_t>(auxdata)>>1;
-        for (uint16_t *lhs = reinterpret_cast<uint16_t *>(const_cast<char *>(a)),
-                *rhs = reinterpret_cast<uint16_t *>(const_cast<char *>(b));
-                lhs < lhs + stringsize; ++lhs, ++rhs) {
-            if (*lhs != *rhs) {
-                return true;
-            }
+        static bool less_equal(const char *a, const char *b, const AuxDataBase *auxdata) {
+            intptr_t stringsize = reinterpret_cast<uintptr_t>(auxdata)>>1;
+            return strncmp(a, b, stringsize) <= 0;
         }
-        return false;
-    }
 
-    static bool greater_equal(const char *a, const char *b, const AuxDataBase *auxdata) {
-        intptr_t stringsize = reinterpret_cast<uintptr_t>(auxdata)>>1;
-        return !lexicographical_compare(
-            reinterpret_cast<const uint16_t *>(a), reinterpret_cast<const uint16_t *>(a) + stringsize,
-            reinterpret_cast<const uint16_t *>(b), reinterpret_cast<const uint16_t *>(b) + stringsize
-        );
-    }
-
-    static bool greater(const char *a, const char *b, const AuxDataBase *auxdata) {
-        intptr_t stringsize = reinterpret_cast<uintptr_t>(auxdata)>>1;
-        return lexicographical_compare(
-            reinterpret_cast<const uint16_t *>(b), reinterpret_cast<const uint16_t *>(b) + stringsize,
-            reinterpret_cast<const uint16_t *>(a), reinterpret_cast<const uint16_t *>(a) + stringsize
-        );
-    }
-};
-
-struct utf32_compare_kernel {
-    static bool less(const char *a, const char *b, const AuxDataBase *auxdata) {
-        intptr_t stringsize = reinterpret_cast<uintptr_t>(auxdata)>>1;
-        return lexicographical_compare(
-            reinterpret_cast<const uint32_t *>(a), reinterpret_cast<const uint32_t *>(a) + stringsize,
-            reinterpret_cast<const uint32_t *>(b), reinterpret_cast<const uint32_t *>(b) + stringsize
-        );
-    }
-
-    static bool less_equal(const char *a, const char *b, const AuxDataBase *auxdata) {
-        intptr_t stringsize = reinterpret_cast<uintptr_t>(auxdata)>>1;
-        return !lexicographical_compare(
-            reinterpret_cast<const uint32_t *>(b), reinterpret_cast<const uint32_t *>(b) + stringsize,
-            reinterpret_cast<const uint32_t *>(a), reinterpret_cast<const uint32_t *>(a) + stringsize
-        );
-    }
-
-    static bool equal(const char *a, const char *b, const AuxDataBase *auxdata) {
-        intptr_t stringsize = reinterpret_cast<uintptr_t>(auxdata)>>1;
-        for (uint32_t *lhs = reinterpret_cast<uint32_t *>(const_cast<char *>(a)),
-                *rhs = reinterpret_cast<uint32_t *>(const_cast<char *>(b));
-                lhs < lhs + stringsize; ++lhs, ++rhs) {
-            if (*lhs != *rhs) {
-                return false;
-            }
+        static bool equal(const char *a, const char *b, const AuxDataBase *auxdata) {
+            intptr_t stringsize = reinterpret_cast<uintptr_t>(auxdata)>>1;
+            return strncmp(a, b, stringsize) == 0;
         }
-        return true;
-    }
 
-    static bool not_equal(const char *a, const char *b, const AuxDataBase *auxdata) {
-        intptr_t stringsize = reinterpret_cast<uintptr_t>(auxdata)>>1;
-        for (uint32_t *lhs = reinterpret_cast<uint32_t *>(const_cast<char *>(a)),
-                *rhs = reinterpret_cast<uint32_t *>(const_cast<char *>(b));
-                lhs < lhs + stringsize; ++lhs, ++rhs) {
-            if (*lhs != *rhs) {
-                return true;
-            }
+        static bool not_equal(const char *a, const char *b, const AuxDataBase *auxdata) {
+            intptr_t stringsize = reinterpret_cast<uintptr_t>(auxdata)>>1;
+            return strncmp(a, b, stringsize) != 0;
         }
-        return false;
-    }
 
-    static bool greater_equal(const char *a, const char *b, const AuxDataBase *auxdata) {
-        intptr_t stringsize = reinterpret_cast<uintptr_t>(auxdata)>>1;
-        return !lexicographical_compare(
-            reinterpret_cast<const uint32_t *>(a), reinterpret_cast<const uint32_t *>(a) + stringsize,
-            reinterpret_cast<const uint32_t *>(b), reinterpret_cast<const uint32_t *>(b) + stringsize
-        );
-    }
+        static bool greater_equal(const char *a, const char *b, const AuxDataBase *auxdata) {
+            intptr_t stringsize = reinterpret_cast<uintptr_t>(auxdata)>>1;
+            return strncmp(a, b, stringsize) >= 0;
+        }
 
-    static bool greater(const char *a, const char *b, const AuxDataBase *auxdata) {
-        intptr_t stringsize = reinterpret_cast<uintptr_t>(auxdata)>>1;
-        return lexicographical_compare(
-            reinterpret_cast<const uint32_t *>(b), reinterpret_cast<const uint32_t *>(b) + stringsize,
-            reinterpret_cast<const uint32_t *>(a), reinterpret_cast<const uint32_t *>(a) + stringsize
-        );
-    }
-};
+        static bool greater(const char *a, const char *b, const AuxDataBase *auxdata) {
+            intptr_t stringsize = reinterpret_cast<uintptr_t>(auxdata)>>1;
+            return strncmp(a, b, stringsize) > 0;
+        }
+    };
+
+    struct utf16_compare_kernel {
+        static bool less(const char *a, const char *b, const AuxDataBase *auxdata) {
+            intptr_t stringsize = reinterpret_cast<uintptr_t>(auxdata)>>1;
+            return lexicographical_compare(
+                reinterpret_cast<const uint16_t *>(a), reinterpret_cast<const uint16_t *>(a) + stringsize,
+                reinterpret_cast<const uint16_t *>(b), reinterpret_cast<const uint16_t *>(b) + stringsize
+            );
+        }
+
+        static bool less_equal(const char *a, const char *b, const AuxDataBase *auxdata) {
+            intptr_t stringsize = reinterpret_cast<uintptr_t>(auxdata)>>1;
+            return !lexicographical_compare(
+                reinterpret_cast<const uint16_t *>(b), reinterpret_cast<const uint16_t *>(b) + stringsize,
+                reinterpret_cast<const uint16_t *>(a), reinterpret_cast<const uint16_t *>(a) + stringsize
+            );
+        }
+
+        static bool equal(const char *a, const char *b, const AuxDataBase *auxdata) {
+            intptr_t stringsize = reinterpret_cast<uintptr_t>(auxdata)>>1;
+            for (uint16_t *lhs = reinterpret_cast<uint16_t *>(const_cast<char *>(a)),
+                    *rhs = reinterpret_cast<uint16_t *>(const_cast<char *>(b));
+                    lhs < lhs + stringsize; ++lhs, ++rhs) {
+                if (*lhs != *rhs) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        static bool not_equal(const char *a, const char *b, const AuxDataBase *auxdata) {
+            intptr_t stringsize = reinterpret_cast<uintptr_t>(auxdata)>>1;
+            for (uint16_t *lhs = reinterpret_cast<uint16_t *>(const_cast<char *>(a)),
+                    *rhs = reinterpret_cast<uint16_t *>(const_cast<char *>(b));
+                    lhs < lhs + stringsize; ++lhs, ++rhs) {
+                if (*lhs != *rhs) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        static bool greater_equal(const char *a, const char *b, const AuxDataBase *auxdata) {
+            intptr_t stringsize = reinterpret_cast<uintptr_t>(auxdata)>>1;
+            return !lexicographical_compare(
+                reinterpret_cast<const uint16_t *>(a), reinterpret_cast<const uint16_t *>(a) + stringsize,
+                reinterpret_cast<const uint16_t *>(b), reinterpret_cast<const uint16_t *>(b) + stringsize
+            );
+        }
+
+        static bool greater(const char *a, const char *b, const AuxDataBase *auxdata) {
+            intptr_t stringsize = reinterpret_cast<uintptr_t>(auxdata)>>1;
+            return lexicographical_compare(
+                reinterpret_cast<const uint16_t *>(b), reinterpret_cast<const uint16_t *>(b) + stringsize,
+                reinterpret_cast<const uint16_t *>(a), reinterpret_cast<const uint16_t *>(a) + stringsize
+            );
+        }
+    };
+
+    struct utf32_compare_kernel {
+        static bool less(const char *a, const char *b, const AuxDataBase *auxdata) {
+            intptr_t stringsize = reinterpret_cast<uintptr_t>(auxdata)>>1;
+            return lexicographical_compare(
+                reinterpret_cast<const uint32_t *>(a), reinterpret_cast<const uint32_t *>(a) + stringsize,
+                reinterpret_cast<const uint32_t *>(b), reinterpret_cast<const uint32_t *>(b) + stringsize
+            );
+        }
+
+        static bool less_equal(const char *a, const char *b, const AuxDataBase *auxdata) {
+            intptr_t stringsize = reinterpret_cast<uintptr_t>(auxdata)>>1;
+            return !lexicographical_compare(
+                reinterpret_cast<const uint32_t *>(b), reinterpret_cast<const uint32_t *>(b) + stringsize,
+                reinterpret_cast<const uint32_t *>(a), reinterpret_cast<const uint32_t *>(a) + stringsize
+            );
+        }
+
+        static bool equal(const char *a, const char *b, const AuxDataBase *auxdata) {
+            intptr_t stringsize = reinterpret_cast<uintptr_t>(auxdata)>>1;
+            for (uint32_t *lhs = reinterpret_cast<uint32_t *>(const_cast<char *>(a)),
+                    *rhs = reinterpret_cast<uint32_t *>(const_cast<char *>(b));
+                    lhs < lhs + stringsize; ++lhs, ++rhs) {
+                if (*lhs != *rhs) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        static bool not_equal(const char *a, const char *b, const AuxDataBase *auxdata) {
+            intptr_t stringsize = reinterpret_cast<uintptr_t>(auxdata)>>1;
+            for (uint32_t *lhs = reinterpret_cast<uint32_t *>(const_cast<char *>(a)),
+                    *rhs = reinterpret_cast<uint32_t *>(const_cast<char *>(b));
+                    lhs < lhs + stringsize; ++lhs, ++rhs) {
+                if (*lhs != *rhs) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        static bool greater_equal(const char *a, const char *b, const AuxDataBase *auxdata) {
+            intptr_t stringsize = reinterpret_cast<uintptr_t>(auxdata)>>1;
+            return !lexicographical_compare(
+                reinterpret_cast<const uint32_t *>(a), reinterpret_cast<const uint32_t *>(a) + stringsize,
+                reinterpret_cast<const uint32_t *>(b), reinterpret_cast<const uint32_t *>(b) + stringsize
+            );
+        }
+
+        static bool greater(const char *a, const char *b, const AuxDataBase *auxdata) {
+            intptr_t stringsize = reinterpret_cast<uintptr_t>(auxdata)>>1;
+            return lexicographical_compare(
+                reinterpret_cast<const uint32_t *>(b), reinterpret_cast<const uint32_t *>(b) + stringsize,
+                reinterpret_cast<const uint32_t *>(a), reinterpret_cast<const uint32_t *>(a) + stringsize
+            );
+        }
+    };
+
+} // anonymous namespace
 
 #define DND_FIXEDSTRING_COMPARISON_TABLE_TYPE_LEVEL(type) { \
     (single_compare_operation_t)type##_compare_kernel::less, \

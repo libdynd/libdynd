@@ -81,6 +81,7 @@ enum type_id_t {
     bytes_type_id,
 
     // Other primitives
+    string_type_id,
     fixedstring_type_id,
     categorical_type_id,
 
@@ -101,6 +102,15 @@ enum type_id_t {
 
     // The number of built-in, atomic types
     builtin_type_id_count = 13
+};
+
+enum dtype_memory_management_t {
+    /** The dtype's memory is POD (plain old data) */
+    pod_memory_management,
+    /** The dtype contains pointers into another memory_block */
+    blockref_memory_management,
+    /** The dtype requires full object lifetime management (construct/copy/move/destroy) */
+    object_memory_management
 };
 
 
@@ -240,7 +250,7 @@ public:
     virtual void print_dtype(std::ostream& o) const = 0;
 
     /** Should return true if the type has construct/copy/move/destruct semantics */
-    virtual bool is_object_type() const = 0;
+    virtual dtype_memory_management_t get_memory_management() const = 0;
 
     /**
      * Called by ::dnd::is_lossless_assignment, with (this == dst_dt->extended()).
@@ -491,8 +501,12 @@ public:
         }
     }
 
-    bool is_object_type() const {
-        return m_data != NULL && m_data->is_object_type();
+    dtype_memory_management_t get_memory_management() const {
+        if (m_data != NULL) {
+            return m_data->get_memory_management();
+        } else {
+            return pod_memory_management;
+        }
     }
 
     /**

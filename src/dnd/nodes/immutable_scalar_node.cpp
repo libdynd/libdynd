@@ -40,7 +40,7 @@ void dnd::immutable_scalar_node::debug_dump_extra(std::ostream& o, const std::st
 
 ndarray_node_ptr dnd::make_immutable_scalar_node(const dtype& dt, const char* data)
 {
-    if (dt.is_object_type()) {
+    if (dt.get_memory_management() != pod_memory_management) {
         throw runtime_error("immutable_scalar_node doesn't support object dtypes yet");
     }
 

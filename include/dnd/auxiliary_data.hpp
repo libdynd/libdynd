@@ -9,6 +9,8 @@
 #include <new>
 #include <algorithm>
 
+#include <dnd/memory_block.hpp>
+
 namespace dnd {
 
 // AuxDataBase is the same as NpyAuxData, see the numpy doc link
@@ -21,11 +23,38 @@ struct AuxDataBase;
 typedef void (AuxData_FreeFunc) (AuxDataBase *);
 typedef AuxDataBase *(AuxData_CloneFunc) (const AuxDataBase *);
 
+struct auxdata_kernel_api {
+    /**
+     * When the dtype has memory_block references, or its components
+     * have them, the structure must match up between the dtype and
+     * the kernel's auxdata. Chaining through child APIs is how to initialize
+     * the growable memory_block members of the kernel.
+     */
+    auxdata_kernel_api *get_child_api(const AuxDataBase *auxdata, int index);
+
+    /**
+     * Whether this kernel may reference an input memory_block instead
+     * of requiring a destination memory_block.
+     */
+    int supports_referencing_src_memory_blocks(const AuxDataBase *auxdata);
+
+    /**
+     * Sets the memory_block this memblockref dtype should use to allocate
+     * destination variable-sized data. Set to NULL to reference the input's
+     * memory_block, when the kernel indicates this is permitted.
+     */
+    void set_dst_memory_block(const AuxDataBase *auxdata, memory_block_data *memblock);
+
+    // TODO: Temporary buffer management APIs
+};
+
 struct AuxDataBase {
+    /** Mandatory free and clone functions */
     AuxData_FreeFunc *free;
     AuxData_CloneFunc *clone;
-    // To allow for a bit of expansion without breaking ABI
-    void *reserved[2];
+    /** Additional API exposed by the kernel when necessary */
+    auxdata_kernel_api *kernel_api;
+    void *reserved; /* for future expansion */
 };
 
 class auxiliary_data;

@@ -518,11 +518,14 @@ void dnd::get_pod_dtype_assignment_kernel(
 void dnd::get_dtype_assignment_kernel(const dtype& dt,
                     unary_specialization_kernel_instance& out_kernel)
 {
-    if (!dt.is_object_type()) {
+    switch (dt.get_memory_management()) {
+    case pod_memory_management:
         get_pod_dtype_assignment_kernel(dt.element_size(), dt.alignment(),
                             out_kernel);
-        return;
-    } else {
+        break;
+    case blockref_memory_management:
+        throw runtime_error("blockref not supported yet in get_dtype_assignment_kernel");
+    case object_memory_management:
         if (dt.kind() == expression_kind) {
             // In the case of an expression dtype, just copy the storage
             // directly instead of chaining multiple casting operations

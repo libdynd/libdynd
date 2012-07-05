@@ -17,7 +17,8 @@ dnd::view_dtype::view_dtype(const dtype& value_dtype, const dtype& operand_dtype
         ss << "view_dtype: Cannot view " << operand_dtype.value_dtype() << " as " << value_dtype << " because they have different sizes";
         throw std::runtime_error(ss.str());
     }
-    if (value_dtype.is_object_type() || operand_dtype.is_object_type()) {
+    if (value_dtype.get_memory_management() != pod_memory_management ||
+                    operand_dtype.get_memory_management() != pod_memory_management) {
         throw std::runtime_error("view_dtype: Only POD dtypes are supported");
     }
 

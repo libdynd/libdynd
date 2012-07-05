@@ -246,11 +246,11 @@ ndarray dnd::ndarray::as_dtype(const dtype& dt, assign_error_mode errmode) const
 ndarray dnd::ndarray::view_as_dtype(const dtype& dt) const
 {
     // Don't allow object dtypes
-    if (get_dtype().is_object_type()) {
+    if (get_dtype().get_memory_management() != pod_memory_management) {
         std::stringstream ss;
         ss << "cannot view a dnd::ndarray with object dtype " << get_dtype() << " as another dtype";
         throw std::runtime_error(ss.str());
-    } else if (dt.is_object_type()) {
+    } else if (dt.get_memory_management() != pod_memory_management) {
         std::stringstream ss;
         ss << "cannot view an dnd::ndarray with POD dtype as another dtype " << dt;
         throw std::runtime_error(ss.str());

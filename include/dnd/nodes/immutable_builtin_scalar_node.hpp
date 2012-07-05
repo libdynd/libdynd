@@ -20,7 +20,7 @@ typename enable_if<is_dtype_scalar<T>::value, ndarray_node_ptr>::type make_immut
  */
 template <class T>
 class immutable_builtin_scalar_node : public ndarray_node {
-    /* The data type of this node's result */
+    /* The data of this node */
     T m_value;
 
     // Non-copyable
@@ -110,7 +110,7 @@ public:
 };
 
 template<class T>
-typename enable_if<is_dtype_scalar<T>::value, ndarray_node_ptr>::type make_immutable_builtin_scalar_node(const T& value)
+inline typename enable_if<is_dtype_scalar<T>::value, ndarray_node_ptr>::type make_immutable_builtin_scalar_node(const T& value)
 {
     // Allocate the memory_block
     char *result = reinterpret_cast<char *>(malloc(sizeof(memory_block_data) + sizeof(immutable_builtin_scalar_node<T>)));

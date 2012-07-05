@@ -2,12 +2,11 @@
 // Copyright (C) 2011-12, Dynamic NDArray Developers
 // BSD 2-Clause License, see LICENSE.txt
 //
-// The fixedstring dtype represents a string with
-// a particular encoding, stored in a fixed-size
-// buffer.
+// The string dtype uses memory_block references to store
+// arbitrarily sized strings.
 //
-#ifndef _DND__FIXEDSTRING_DTYPE_HPP_
-#define _DND__FIXEDSTRING_DTYPE_HPP_
+#ifndef _DND__STRING_DTYPE_HPP_
+#define _DND__STRING_DTYPE_HPP_
 
 #include <dnd/dtype.hpp>
 #include <dnd/dtype_assign.hpp>
@@ -16,25 +15,24 @@
 
 namespace dnd {
 
-class fixedstring_dtype : public extended_string_dtype {
-    intptr_t m_element_size, m_alignment, m_stringsize;
+class string_dtype : public extended_string_dtype {
     string_encoding_t m_encoding;
 
 public:
-    fixedstring_dtype(string_encoding_t encoding, intptr_t stringsize);
+    string_dtype(string_encoding_t encoding);
 
     type_id_t type_id() const {
-        return fixedstring_type_id;
+        return string_type_id;
     }
     dtype_kind_t kind() const {
         return string_kind;
     }
     // Expose the storage traits here
     unsigned char alignment() const {
-        return m_alignment;
+        return sizeof(const char *);
     }
     uintptr_t element_size() const {
-        return m_element_size;
+        return 2 * sizeof(const char *);
     }
 
     string_encoding_t encoding() const {
@@ -55,7 +53,7 @@ public:
     // This is about the native storage, buffering code needs to check whether
     // the value_dtype is an object type separately.
     dtype_memory_management_t get_memory_management() const {
-        return pod_memory_management;
+        return blockref_memory_management;
     }
 
     bool is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const;
@@ -69,10 +67,10 @@ public:
     bool operator==(const extended_dtype& rhs) const;
 };
 
-inline dtype make_fixedstring_dtype(string_encoding_t encoding, intptr_t stringsize) {
-    return dtype(make_shared<fixedstring_dtype>(encoding, stringsize));
+inline dtype make_string_dtype(string_encoding_t encoding) {
+    return dtype(make_shared<string_dtype>(encoding));
 }
 
 } // namespace dnd
 
-#endif // _DND__FIXEDSTRING_DTYPE_HPP_
+#endif // _DND__STRING_DTYPE_HPP_

@@ -37,6 +37,7 @@ set(dnd_SRC
     src/dnd/dtypes/conversion_dtype.cpp
     src/dnd/dtypes/dtype_alignment.cpp
     src/dnd/dtypes/fixedstring_dtype.cpp
+    src/dnd/dtypes/string_dtype.cpp
     src/dnd/dtypes/view_dtype.cpp
     include/dnd/dtypes/array_dtype.hpp
     include/dnd/dtypes/byteswap_dtype.hpp
@@ -44,6 +45,7 @@ set(dnd_SRC
     include/dnd/dtypes/conversion_dtype.hpp
     include/dnd/dtypes/dtype_alignment.hpp
     include/dnd/dtypes/fixedstring_dtype.hpp
+    include/dnd/dtypes/string_dtype.hpp
     include/dnd/dtypes/view_dtype.hpp
     # Nodes
     src/dnd/nodes/elementwise_unary_kernel_node.cpp

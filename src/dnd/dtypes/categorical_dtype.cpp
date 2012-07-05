@@ -250,7 +250,8 @@ void categorical_dtype::print_dtype(std::ostream& o) const
     o << ")";
 }
 
-uint32_t categorical_dtype::get_value_from_category(const char const *category) const {
+uint32_t categorical_dtype::get_value_from_category(const char *category) const
+{
     single_compare_kernel_instance k;
     m_category_dtype.get_single_compare_kernel(k);
     pair<vector<const char *>::const_iterator,vector<const char *>::const_iterator> bounds;

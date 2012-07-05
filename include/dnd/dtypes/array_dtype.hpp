@@ -50,8 +50,8 @@ public:
 
     void print_dtype(std::ostream& o) const;
 
-    bool is_object_type() const {
-        return m_element_dtype.is_object_type();
+    dtype_memory_management_t get_memory_management() const {
+        return m_element_dtype.get_memory_management();
     }
 
     const intptr_t *get_shape() const {
