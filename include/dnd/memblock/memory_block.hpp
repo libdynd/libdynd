@@ -254,17 +254,6 @@ inline bool operator!=(const memory_block_data *memblock, const memory_block_ptr
     return memblock != rhs.get();
 }
 
-typedef void (*external_memory_block_free_t)(void *);
-/**
- * Creates a memory block which is a reference to an external object.
- */
-memory_block_ptr make_external_memory_block(void *object, external_memory_block_free_t free_fn);
-/**
- * Creates a memory block of a pre-determined fixed size. A pointer to the
- * memory allocated for data is placed in the output parameter.
- */
-memory_block_ptr make_fixed_size_pod_memory_block(intptr_t alignment, intptr_t size, char **out_datapointer);
-
 } // namespace dnd
 
 #endif // _DND__MEMORY_BLOCK_HPP_

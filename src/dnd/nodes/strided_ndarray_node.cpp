@@ -8,6 +8,7 @@
 #include <string>
 
 #include <dnd/nodes/strided_ndarray_node.hpp>
+#include <dnd/memblock/fixed_size_pod_memory_block.hpp>
 #include <dnd/dtypes/conversion_dtype.hpp>
 
 using namespace std;

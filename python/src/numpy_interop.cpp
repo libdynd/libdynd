@@ -11,6 +11,7 @@
 #include <dnd/dtypes/view_dtype.hpp>
 #include <dnd/dtypes/dtype_alignment.hpp>
 #include <dnd/dtypes/fixedstring_dtype.hpp>
+#include <dnd/memblock/external_memory_block.hpp>
 
 #include "dtype_functions.hpp"
 #include "ndarray_functions.hpp"

@@ -186,7 +186,7 @@ namespace {
             return ad.dst_encoding == ad.src_encoding;
         }
 
-        void set_dst_memory_block(AuxDataBase *auxdata, memory_block_data *memblock)
+        static void set_dst_memory_block(AuxDataBase *auxdata, memory_block_data *memblock)
         {
             blockref_string_encoder_kernel_auxdata& ad = get_auxiliary_data<blockref_string_encoder_kernel_auxdata>(auxdata);
             ad.dst_memblock = memblock;
@@ -231,7 +231,7 @@ namespace {
     auxdata_kernel_api blockref_string_copy_kernel::kernel_api = {
             &blockref_string_copy_kernel::get_child_api,
             &blockref_string_copy_kernel::supports_referencing_src_memory_blocks,
-
+            &blockref_string_copy_kernel::set_dst_memory_block
         };
 } // anonymous namespace
 
@@ -250,6 +250,8 @@ void dnd::get_blockref_string_encoding_kernel(string_encoding_t dst_encoding,
     make_auxiliary_data<blockref_string_encoder_kernel_auxdata>(out_kernel.auxdata);
     blockref_string_encoder_kernel_auxdata& ad = out_kernel.auxdata.get<blockref_string_encoder_kernel_auxdata>();
     const_cast<AuxDataBase *>((const AuxDataBase *)out_kernel.auxdata)->kernel_api = &blockref_string_copy_kernel::kernel_api;
-    
-
+    ad.dst_encoding = dst_encoding;
+    ad.src_encoding = src_encoding;
+    ad.append_fn = get_append_unicode_codepoint_function(dst_encoding, errmode);
+    ad.next_fn = get_next_unicode_codepoint_function(src_encoding, errmode);
 }

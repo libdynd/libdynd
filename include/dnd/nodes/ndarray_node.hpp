@@ -14,7 +14,7 @@
 #include <dnd/irange.hpp>
 #include <dnd/kernels/kernel_instance.hpp>
 #include <dnd/shortvector.hpp>
-#include <dnd/memory_block.hpp>
+#include <dnd/memblock/memory_block.hpp>
 
 namespace dnd {
 

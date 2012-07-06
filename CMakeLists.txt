@@ -74,6 +74,13 @@ set(dnd_SRC
     include/dnd/kernels/kernel_instance.hpp
     include/dnd/kernels/string_encoding_kernels.hpp
     include/dnd/kernels/unary_kernel_instance.hpp
+    # MemBlock
+    src/dnd/memblock/memory_block.cpp
+    src/dnd/memblock/external_memory_block.cpp
+    src/dnd/memblock/fixed_size_pod_memory_block.cpp
+    include/dnd/memblock/memory_block.hpp
+    include/dnd/memblock/external_memory_block.hpp
+    include/dnd/memblock/fixed_size_pod_memory_block.hpp
     # Main
     src/dnd/arithmetic_op.cpp
     src/dnd/dtype.cpp
@@ -81,7 +88,6 @@ set(dnd_SRC
     src/dnd/dtype_comparisons.cpp
     src/dnd/dtype_promotion.cpp
     src/dnd/exceptions.cpp
-    src/dnd/memory_block.cpp
     src/dnd/ndarray.cpp
     src/dnd/ndarray_arange.cpp
     src/dnd/shape_tools.cpp
@@ -98,7 +104,6 @@ set(dnd_SRC
     include/dnd/exceptions.hpp
     include/dnd/fpstatus.hpp
     include/dnd/irange.hpp
-    include/dnd/memory_block.hpp
     include/dnd/ndarray.hpp
     include/dnd/ndarray_arange.hpp
     include/dnd/raw_iteration.hpp
@@ -126,6 +131,8 @@ source_group("Nodes Source" REGULAR_EXPRESSION "src/dnd/nodes/.*cpp")
 source_group("Nodes Headers" REGULAR_EXPRESSION "include/dnd/nodes/.*hpp")
 source_group("Kernels Source" REGULAR_EXPRESSION "src/dnd/kernels/.*cpp")
 source_group("Kernels Headers" REGULAR_EXPRESSION "include/dnd/kernels/.*hpp")
+source_group("MemBlock Source" REGULAR_EXPRESSION "src/dnd/memblock/.*cpp")
+source_group("MemBlock Headers" REGULAR_EXPRESSION "include/dnd/memblock/.*hpp")
 source_group("Internal Headers" REGULAR_EXPRESSION "src/dnd/.*hpp")
 
 if(WIN32)

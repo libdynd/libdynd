@@ -9,7 +9,7 @@
 #include <new>
 #include <algorithm>
 
-#include <dnd/memory_block.hpp>
+#include <dnd/memblock/memory_block.hpp>
 
 namespace dnd {
 
@@ -43,7 +43,7 @@ struct auxdata_kernel_api {
      * destination variable-sized data. Set to NULL to reference the input's
      * memory_block, when the kernel indicates this is permitted.
      */
-    void (*set_dst_memory_block)(const AuxDataBase *auxdata, memory_block_data *memblock);
+    void (*set_dst_memory_block)(AuxDataBase *auxdata, memory_block_data *memblock);
 
     // TODO: Temporary buffer management APIs
 };

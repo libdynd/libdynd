@@ -18,6 +18,7 @@
 #include <dnd/irange.hpp>
 #include <dnd/nodes/ndarray_node.hpp>
 #include <dnd/nodes/strided_ndarray_node.hpp>
+#include <dnd/memblock/fixed_size_pod_memory_block.hpp>
 
 namespace dnd {
 
