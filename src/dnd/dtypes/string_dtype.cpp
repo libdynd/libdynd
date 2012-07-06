@@ -76,7 +76,19 @@ void dnd::string_dtype::print_element(std::ostream& o, const char *data) const
     o << "\"";
 }
 
-void dnd::string_dtype::get_single_compare_kernel(single_compare_kernel_instance& out_kernel) const {
+void dnd::string_dtype::print_dtype(std::ostream& o) const {
+
+    o << "string"; // TODO
+
+}
+
+bool dnd::string_dtype::is_lossless_assignment(const dtype& /*dst_dt*/, const dtype& /*src_dt*/) const {
+
+    return false; // TODO
+
+}
+
+void dnd::string_dtype::get_single_compare_kernel(single_compare_kernel_instance& DND_UNUSED(out_kernel)) const {
     throw std::runtime_error("string_dtype::get_single_compare_kernel not supported yet");
 }
 

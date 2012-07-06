@@ -174,7 +174,7 @@ namespace {
     struct blockref_string_copy_kernel {
         static auxdata_kernel_api kernel_api;
 
-        static auxdata_kernel_api *get_child_api(const AuxDataBase *auxdata, int index)
+        static auxdata_kernel_api *get_child_api(const AuxDataBase *DND_UNUSED(auxdata), int DND_UNUSED(index))
         {
             return NULL;
         }
