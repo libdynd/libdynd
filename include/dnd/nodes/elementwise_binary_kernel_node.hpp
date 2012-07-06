@@ -11,6 +11,7 @@
 #include <dnd/dtypes/conversion_dtype.hpp>
 #include <dnd/kernels/buffered_binary_kernels.hpp>
 #include <dnd/kernels/assignment_kernels.hpp>
+#include <dnd/memblock/ndarray_node_memory_block.hpp>
 
 namespace dnd {
 
@@ -249,18 +250,15 @@ ndarray_node_ptr make_elementwise_binary_kernel_node(ndarray_node_ptr node1,
         node2 = node2->as_dtype(op_factory.get_dtype(2), errmode, false);
     }
 
-    // Allocate the memory_block
-    char *result = reinterpret_cast<char *>(malloc(sizeof(memory_block_data) + sizeof(elementwise_binary_kernel_node<BinaryOperatorFactory>)));
-    if (result == NULL) {
-        throw std::bad_alloc();
-    }
+    char *node_memory = NULL;
+    ndarray_node_ptr result(make_uninitialized_ndarray_node_memory_block(sizeof(elementwise_binary_kernel_node<BinaryOperatorFactory>), &node_memory));
 
     // If the shapes match exactly, no need to broadcast.
     if (node1->get_ndim() == node2->get_ndim() &&
                     memcmp(node1->get_shape(), node2->get_shape(),
                             node1->get_ndim() * sizeof(intptr_t)) == 0) {
         // Placement new
-        new (result + sizeof(memory_block_data)) elementwise_binary_kernel_node<BinaryOperatorFactory>(
+        new (node_memory) elementwise_binary_kernel_node<BinaryOperatorFactory>(
                             op_factory.get_dtype(0), node1->get_ndim(), node1->get_shape(),
                             node1, node2, op_factory);
     } else {
@@ -269,12 +267,12 @@ ndarray_node_ptr make_elementwise_binary_kernel_node(ndarray_node_ptr node1,
         broadcast_input_shapes(node1, node2, &op0_ndim, &op0_shape);
 
         // Placement new
-        new (result + sizeof(memory_block_data)) elementwise_binary_kernel_node<BinaryOperatorFactory>(
+        new (node_memory) elementwise_binary_kernel_node<BinaryOperatorFactory>(
                             op_factory.get_dtype(0), op0_ndim, op0_shape.get(),
                             node1, node2, op_factory);
     }
 
-    return ndarray_node_ptr(new (result) memory_block_data(1, ndarray_node_memory_block_type), false);
+    return DND_MOVE(result);
 }
 
 template<class BinaryOperatorFactory>

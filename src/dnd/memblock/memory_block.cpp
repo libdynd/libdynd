@@ -10,23 +10,27 @@ using namespace std;
 using namespace dnd;
 
 /**
+ * INTERNAL: Frees a memory_block created by make_ndarray_node_memory_block.
+ * This should only be called by the memory_block decref code.
+ */
+void free_ndarray_node_memory_block(memory_block_data *memblock);
+/**
  * INTERNAL: Frees a memory_block created by make_external_memory_block.
  * This should only be called by the memory_block decref code.
  */
 void free_external_memory_block(memory_block_data *memblock);
 /**
- * INTERNAL: Frees a memory_block created by make_external_memory_block.
+ * INTERNAL: Frees a memory_block created by make_fixed_size_pod_memory_block.
  * This should only be called by the memory_block decref code.
  */
 void free_fixed_size_pod_memory_block(memory_block_data *memblock);
 
 void dnd::detail::memory_block_free(memory_block_data *memblock)
 {
+    //cout << "freeing memory block " << (void *)memblock << endl;
     switch ((memory_block_type_t)memblock->m_type) {
         case ndarray_node_memory_block_type: {
-            ndarray_node *node = reinterpret_cast<ndarray_node *>(reinterpret_cast<char *>(memblock) + sizeof(memory_block_data));
-            node->~ndarray_node();
-            free(reinterpret_cast<void *>(memblock));
+            free_ndarray_node_memory_block(memblock);
             return;
         }
         case external_memory_block_type: {

@@ -6,8 +6,8 @@
 #ifndef _DND__IMMUTABLE_BUILTIN_SCALAR_NODE_HPP_
 #define _DND__IMMUTABLE_BUILTIN_SCALAR_NODE_HPP_
 
-#include <dnd/nodes/ndarray_node.hpp>
 #include <dnd/nodes/immutable_scalar_node.hpp>
+#include <dnd/memblock/ndarray_node_memory_block.hpp>
 
 namespace dnd {
 
@@ -112,15 +112,10 @@ public:
 template<class T>
 inline typename enable_if<is_dtype_scalar<T>::value, ndarray_node_ptr>::type make_immutable_builtin_scalar_node(const T& value)
 {
-    // Allocate the memory_block
-    char *result = reinterpret_cast<char *>(malloc(sizeof(memory_block_data) + sizeof(immutable_builtin_scalar_node<T>)));
-    if (result == NULL) {
-        throw std::bad_alloc();
-    }
-    // Placement new
-    new (result + sizeof(memory_block_data))
-            immutable_builtin_scalar_node<T>(value);
-    return ndarray_node_ptr(new (result) memory_block_data(1, ndarray_node_memory_block_type), false);
+    char *node_memory = NULL;
+    ndarray_node_ptr result(make_uninitialized_ndarray_node_memory_block(sizeof(immutable_builtin_scalar_node<T>), &node_memory));
+    new (node_memory) immutable_builtin_scalar_node<T>(value);
+    return DND_MOVE(result);
 }
 
 } // namespace dnd

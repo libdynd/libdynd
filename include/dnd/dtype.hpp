@@ -11,8 +11,8 @@
 #include <complex>
 #include <stdexcept>
 
-#include <dnd/dtype_assign.hpp>
 #include <dnd/config.hpp>
+#include <dnd/dtype_assign.hpp>
 #include <dnd/dtype_comparisons.hpp>
 #include <dnd/kernels/single_compare_kernel_instance.hpp>
 #include <dnd/kernels/unary_kernel_instance.hpp>

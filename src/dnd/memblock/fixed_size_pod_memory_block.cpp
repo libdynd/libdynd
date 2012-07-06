@@ -13,13 +13,13 @@ void free_fixed_size_pod_memory_block(memory_block_data *memblock)
     free(reinterpret_cast<void *>(memblock));
 }
 
-memory_block_ptr dnd::make_fixed_size_pod_memory_block(intptr_t alignment, intptr_t size, char **out_datapointer)
+memory_block_ptr dnd::make_fixed_size_pod_memory_block(intptr_t size_bytes, intptr_t alignment, char **out_datapointer)
 {
     // Calculate the aligned starting point for the data
     intptr_t start = (intptr_t)(((uintptr_t)sizeof(memory_block_data) + (uintptr_t)(alignment - 1))
                         & ~((uintptr_t)(alignment - 1)));
     // Allocate it
-    char *result = (char *)malloc(start + size);
+    char *result = (char *)malloc(start + size_bytes);
     if (result == 0) {
         throw bad_alloc();
     }

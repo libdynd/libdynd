@@ -9,6 +9,7 @@
 
 #include <dnd/nodes/strided_ndarray_node.hpp>
 #include <dnd/memblock/fixed_size_pod_memory_block.hpp>
+#include <dnd/memblock/ndarray_node_memory_block.hpp>
 #include <dnd/dtypes/conversion_dtype.hpp>
 
 using namespace std;
@@ -74,7 +75,7 @@ dnd::strided_ndarray_node::strided_ndarray_node(const dtype& dt, int ndim,
         }
     }
 
-    m_memblock = make_fixed_size_pod_memory_block(dt.alignment(), dt.element_size() * num_elements, &m_originptr);
+    m_memblock = make_fixed_size_pod_memory_block(dt.element_size() * num_elements, dt.alignment(), &m_originptr);
 }
 
 ndarray_node_ptr dnd::strided_ndarray_node::as_dtype(const dtype& dt,
@@ -197,70 +198,45 @@ void dnd::strided_ndarray_node::debug_dump_extra(ostream& o, const string& inden
 ndarray_node_ptr dnd::make_strided_ndarray_node(const dtype& dt, int ndim, const intptr_t *shape,
             const intptr_t *strides, char *originptr, int access_flags, const memory_block_ptr& memblock)
 {
-    // Allocate the memory_block
-    char *result = reinterpret_cast<char *>(malloc(sizeof(memory_block_data) + sizeof(strided_ndarray_node)));
-    if (result == NULL) {
-        throw bad_alloc();
-    }
-    // Placement new
-    new (result + sizeof(memory_block_data))
-            strided_ndarray_node(dt, ndim, shape, strides, originptr, access_flags, memblock);
-    return ndarray_node_ptr(new (result) memory_block_data(1, ndarray_node_memory_block_type), false);
+    char *node_memory = NULL;
+    ndarray_node_ptr result(make_uninitialized_ndarray_node_memory_block(sizeof(strided_ndarray_node), &node_memory));
+    new (node_memory) strided_ndarray_node(dt, ndim, shape, strides, originptr, access_flags, memblock);
+    return DND_MOVE(result);
 }
 
 ndarray_node_ptr dnd::make_strided_ndarray_node(const dtype& dt, int ndim, const intptr_t *shape,
             const intptr_t *strides, const char *originptr, int access_flags, const memory_block_ptr& memblock)
 {
-    // Allocate the memory_block
-    char *result = reinterpret_cast<char *>(malloc(sizeof(memory_block_data) + sizeof(strided_ndarray_node)));
-    if (result == NULL) {
-        throw bad_alloc();
-    }
-    // Placement new
-    new (result + sizeof(memory_block_data))
-            strided_ndarray_node(dt, ndim, shape, strides, originptr, access_flags, memblock);
-    return ndarray_node_ptr(new (result) memory_block_data(1, ndarray_node_memory_block_type), false);
+    char *node_memory = NULL;
+    ndarray_node_ptr result(make_uninitialized_ndarray_node_memory_block(sizeof(strided_ndarray_node), &node_memory));
+    new (node_memory) strided_ndarray_node(dt, ndim, shape, strides, originptr, access_flags, memblock);
+    return DND_MOVE(result);
 }
 
 #ifdef DND_RVALUE_REFS
 ndarray_node_ptr dnd::make_strided_ndarray_node(const dtype& dt, int ndim, const intptr_t *shape,
             const intptr_t *strides, char *originptr, int access_flags, memory_block_ptr&& memblock)
 {
-    // Allocate the memory_block
-    char *result = reinterpret_cast<char *>(malloc(sizeof(memory_block_data) + sizeof(strided_ndarray_node)));
-    if (result == NULL) {
-        throw bad_alloc();
-    }
-    // Placement new
-    new (result + sizeof(memory_block_data))
-            strided_ndarray_node(dt, ndim, shape, strides, originptr, access_flags, DND_MOVE(memblock));
-    return ndarray_node_ptr(new (result) memory_block_data(1, ndarray_node_memory_block_type), false);
+    char *node_memory = NULL;
+    ndarray_node_ptr result(make_uninitialized_ndarray_node_memory_block(sizeof(strided_ndarray_node), &node_memory));
+    new (node_memory) strided_ndarray_node(dt, ndim, shape, strides, originptr, access_flags, DND_MOVE(memblock));
+    return DND_MOVE(result);
 }
 
 ndarray_node_ptr dnd::make_strided_ndarray_node(const dtype& dt, int ndim, const intptr_t *shape,
             const intptr_t *strides, const char *originptr, int access_flags, memory_block_ptr&& memblock)
 {
-    // Allocate the memory_block
-    char *result = reinterpret_cast<char *>(malloc(sizeof(memory_block_data) + sizeof(strided_ndarray_node)));
-    if (result == NULL) {
-        throw bad_alloc();
-    }
-    // Placement new
-    new (result + sizeof(memory_block_data))
-            strided_ndarray_node(dt, ndim, shape, strides, originptr, access_flags, DND_MOVE(memblock));
-    return ndarray_node_ptr(new (result) memory_block_data(1, ndarray_node_memory_block_type), false);
+    char *node_memory = NULL;
+    ndarray_node_ptr result(make_uninitialized_ndarray_node_memory_block(sizeof(strided_ndarray_node), &node_memory));
+    new (node_memory) strided_ndarray_node(dt, ndim, shape, strides, originptr, access_flags, DND_MOVE(memblock));
+    return DND_MOVE(result);
 }
 #endif
 
 ndarray_node_ptr dnd::make_strided_ndarray_node(const dtype& dt, int ndim, const intptr_t *shape, const int *axis_perm)
 {
-    // Allocate the memory_block
-    char *result = reinterpret_cast<char *>(malloc(sizeof(memory_block_data) + sizeof(strided_ndarray_node)));
-    if (result == NULL) {
-        throw bad_alloc();
-    }
-    // Placement new
-    new (result + sizeof(memory_block_data))
-            strided_ndarray_node(dt, ndim, shape, axis_perm);
-    return ndarray_node_ptr(new (result) memory_block_data(1, ndarray_node_memory_block_type), false);
+    char *node_memory = NULL;
+    ndarray_node_ptr result(make_uninitialized_ndarray_node_memory_block(sizeof(strided_ndarray_node), &node_memory));
+    new (node_memory) strided_ndarray_node(dt, ndim, shape, axis_perm);
+    return DND_MOVE(result);
 }

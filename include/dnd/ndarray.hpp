@@ -447,7 +447,7 @@ dnd::ndarray::ndarray(std::initializer_list<T> il)
     intptr_t dim0 = il.size();
     intptr_t stride = (dim0 == 1) ? 0 : sizeof(T);
     char *originptr = 0;
-    memory_block_ptr memblock = make_fixed_size_pod_memory_block(sizeof(T), sizeof(T) * dim0, &originptr);
+    memory_block_ptr memblock = make_fixed_size_pod_memory_block(sizeof(T) * dim0, sizeof(T), &originptr);
     DND_MEMCPY(originptr, il.begin(), sizeof(T) * dim0);
     m_expr_tree.swap(make_strided_ndarray_node(make_dtype<T>(), 1, &dim0, &stride,
                             originptr, DND_MOVE(memblock)));
@@ -469,7 +469,7 @@ dnd::ndarray::ndarray(std::initializer_list<std::initializer_list<T> > il)
         stride *= shape[i];
     }
     char *originptr = 0;
-    memory_block_ptr memblock = make_fixed_size_pod_memory_block(sizeof(T), sizeof(T) * num_elements, &originptr);
+    memory_block_ptr memblock = make_fixed_size_pod_memory_block(sizeof(T) * num_elements, sizeof(T), &originptr);
     T *dataptr = reinterpret_cast<T *>(originptr);
     detail::initializer_list_shape<S>::copy_data(&dataptr, il);
     m_expr_tree.swap(make_strided_ndarray_node(make_dtype<T>(), 2, shape, strides,
@@ -492,7 +492,7 @@ dnd::ndarray::ndarray(std::initializer_list<std::initializer_list<std::initializ
         stride *= shape[i];
     }
     char *originptr = 0;
-    memory_block_ptr memblock = make_fixed_size_pod_memory_block(sizeof(T), sizeof(T) * num_elements, &originptr);
+    memory_block_ptr memblock = make_fixed_size_pod_memory_block(sizeof(T) * num_elements, sizeof(T), &originptr);
     T *dataptr = reinterpret_cast<T *>(originptr);
     detail::initializer_list_shape<S>::copy_data(&dataptr, il);
     m_expr_tree.swap(make_strided_ndarray_node(make_dtype<T>(), 3, shape, strides,
@@ -550,7 +550,7 @@ dnd::ndarray::ndarray(const T (&rhs)[N])
         stride *= shape[i];
     }
     char *originptr = 0;
-    memory_block_ptr memblock = make_fixed_size_pod_memory_block(sizeof(T), num_bytes, &originptr);
+    memory_block_ptr memblock = make_fixed_size_pod_memory_block(num_bytes, sizeof(T), &originptr);
     DND_MEMCPY(originptr, &rhs[0], num_bytes);
     make_strided_ndarray_node(dtype(detail::type_from_array<T>::type_id),
                             ndim, shape, strides, originptr,

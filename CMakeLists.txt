@@ -78,9 +78,11 @@ set(dnd_SRC
     src/dnd/memblock/memory_block.cpp
     src/dnd/memblock/external_memory_block.cpp
     src/dnd/memblock/fixed_size_pod_memory_block.cpp
+    src/dnd/memblock/ndarray_node_memory_block.cpp
     include/dnd/memblock/memory_block.hpp
     include/dnd/memblock/external_memory_block.hpp
     include/dnd/memblock/fixed_size_pod_memory_block.hpp
+    include/dnd/memblock/ndarray_node_memory_block.hpp
     # Main
     src/dnd/arithmetic_op.cpp
     src/dnd/dtype.cpp

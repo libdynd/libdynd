@@ -71,6 +71,8 @@ int main()
 
         // Scalar ndarray
         a = ndarray(make_dtype<float>());
+        cout << (void *)a.get_expr_tree().get() << endl;
+        a.debug_dump(cout);
         EXPECT_EQ(1, a.get_num_elements());
         EXPECT_EQ(0, a.get_ndim());
 
