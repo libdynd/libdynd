@@ -21,6 +21,7 @@ ndarray_node_ptr dnd::make_uninitialized_ndarray_node_memory_block(intptr_t size
     return ndarray_node_ptr(new (result) memory_block_data(1, ndarray_node_memory_block_type), false);
 }
 
+namespace dnd { namespace detail {
 
 void free_ndarray_node_memory_block(memory_block_data *memblock)
 {
@@ -28,3 +29,5 @@ void free_ndarray_node_memory_block(memory_block_data *memblock)
     node->~ndarray_node();
     free(reinterpret_cast<void *>(memblock));
 }
+
+}} // namespace dnd::detail

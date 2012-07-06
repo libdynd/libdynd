@@ -8,10 +8,14 @@
 using namespace std;
 using namespace dnd;
 
+namespace dnd { namespace detail {
+
 void free_fixed_size_pod_memory_block(memory_block_data *memblock)
 {
     free(reinterpret_cast<void *>(memblock));
 }
+
+}} // namespace dnd::detail
 
 memory_block_ptr dnd::make_fixed_size_pod_memory_block(intptr_t size_bytes, intptr_t alignment, char **out_datapointer)
 {

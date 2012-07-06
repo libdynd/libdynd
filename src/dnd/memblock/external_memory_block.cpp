@@ -29,9 +29,13 @@ memory_block_ptr dnd::make_external_memory_block(void *object, external_memory_b
     return memory_block_ptr(reinterpret_cast<memory_block_data *>(emb), false);
 }
 
+namespace dnd { namespace detail {
+
 void free_external_memory_block(memory_block_data *memblock)
 {
     external_memory_block *emb = reinterpret_cast<external_memory_block *>(memblock);
     emb->m_free_fn(emb->m_object);
     delete emb;
 }
+
+}} // namespace dnd::detail
