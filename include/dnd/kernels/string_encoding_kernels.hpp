@@ -29,6 +29,14 @@ void get_blockref_string_encoding_kernel(string_encoding_t dst_encoding,
                 assign_error_mode errmode,
                 unary_specialization_kernel_instance& out_kernel);
 
+/**
+ * Gets a kernel which converts strings of a fixed size into blockref strings.
+ */
+void get_fixedstring_to_blockref_string_encoding_kernel(string_encoding_t dst_encoding,
+                intptr_t src_element_size, string_encoding_t src_encoding,
+                assign_error_mode errmode,
+                unary_specialization_kernel_instance& out_kernel);
+
 } // namespace dnd
 
 #endif // _DND__STRING_ENCODING_KERNELS_HPP_
