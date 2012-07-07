@@ -5,7 +5,7 @@
 
 #include <dnd/dtypes/fixedstring_dtype.hpp>
 #include <dnd/kernels/single_compare_kernel_instance.hpp>
-#include <dnd/kernels/string_encoding_kernels.hpp>
+#include <dnd/kernels/string_assignment_kernels.hpp>
 
 #include <algorithm>
 
@@ -299,7 +299,7 @@ void dnd::fixedstring_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, co
     if (this == dst_dt.extended()) {
         if (src_dt.type_id() == fixedstring_type_id) {
             const fixedstring_dtype *src_fs = static_cast<const fixedstring_dtype *>(src_dt.extended());
-            get_fixedstring_encoding_kernel(m_element_size, m_encoding, src_fs->m_element_size, src_fs->m_encoding,
+            get_fixedstring_assignment_kernel(m_element_size, m_encoding, src_fs->m_element_size, src_fs->m_encoding,
                                     errmode, out_kernel);
         } else {
             src_dt.extended()->get_dtype_assignment_kernel(dst_dt, src_dt, errmode, out_kernel);
