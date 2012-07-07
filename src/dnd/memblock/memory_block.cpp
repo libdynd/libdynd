@@ -27,6 +27,11 @@ void free_external_memory_block(memory_block_data *memblock);
  * This should only be called by the memory_block decref code.
  */
 void free_fixed_size_pod_memory_block(memory_block_data *memblock);
+/**
+ * INTERNAL: Frees a memory_block created by make_pod_memory_block.
+ * This should only be called by the memory_block decref code.
+ */
+void free_pod_memory_block(memory_block_data *memblock);
 
 /**
  * INTERNAL: Static instance of the pod allocator API for the POD memory block.
@@ -52,8 +57,10 @@ void dnd::detail::memory_block_free(memory_block_data *memblock)
             free_fixed_size_pod_memory_block(memblock);
             return;
         }
-        case pod_memory_block_type:
-            throw runtime_error("pod_memory_block_type not supported yet");
+        case pod_memory_block_type: {
+            free_pod_memory_block(memblock);
+            return;
+        }
         case object_memory_block_type:
             throw runtime_error("object_memory_block_type not supported yet");
     }

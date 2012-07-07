@@ -71,6 +71,9 @@ struct memory_block_pod_allocator_api {
      * Resizes the most recently allocated memory in the memory block, updating
      * the pointer pair. This may move the memory to a new location if necessary.
      *
+     * The values in inout_begin and inout_end must have been created by a
+     * previous allocate() or resize() call.
+     *
      * Call this to grow the memory as needed, and to trim the memory to just
      * the needed size once that is determined.
      */
