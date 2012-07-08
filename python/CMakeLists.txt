@@ -5,7 +5,7 @@
 
 project(pydnd)
 
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 2.6)
 
 # Force the default build type to be Release, because a Debug
 # build doesn't work properly with the default Python build

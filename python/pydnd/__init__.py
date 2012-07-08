@@ -1,6 +1,6 @@
 from _pydnd import w_dtype as dtype, w_ndarray as ndarray, \
         make_byteswap_dtype, make_bytes_dtype, make_convert_dtype, \
-        make_unaligned_dtype, make_fixedstring_dtype, \
+        make_unaligned_dtype, make_fixedstring_dtype, make_string_dtype, \
         w_unary_gfunc as unary_gfunc, \
         arange, linspace
 

@@ -86,7 +86,7 @@ void dnd::fixedstring_dtype::print_element(std::ostream& o, const char *data) co
 
 void dnd::fixedstring_dtype::print_dtype(std::ostream& o) const
 {
-    o << "fixedstring<" << m_stringsize << ",encoding=" << m_encoding << ">";
+    o << "fixedstring<" << m_encoding << "," << m_stringsize << ">";
 }
 
 bool dnd::fixedstring_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const
@@ -297,12 +297,23 @@ void dnd::fixedstring_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, co
                 unary_specialization_kernel_instance& out_kernel) const
 {
     if (this == dst_dt.extended()) {
-        if (src_dt.type_id() == fixedstring_type_id) {
-            const fixedstring_dtype *src_fs = static_cast<const fixedstring_dtype *>(src_dt.extended());
-            get_fixedstring_assignment_kernel(m_element_size, m_encoding, src_fs->m_element_size, src_fs->m_encoding,
-                                    errmode, out_kernel);
-        } else {
-            src_dt.extended()->get_dtype_assignment_kernel(dst_dt, src_dt, errmode, out_kernel);
+        switch (src_dt.type_id()) {
+            case fixedstring_type_id: {
+                const fixedstring_dtype *src_fs = static_cast<const fixedstring_dtype *>(src_dt.extended());
+                get_fixedstring_assignment_kernel(m_element_size, m_encoding, src_fs->m_element_size, src_fs->m_encoding,
+                                        errmode, out_kernel);
+                break;
+            }
+            case string_type_id: {
+                const extended_string_dtype *src_fs = static_cast<const extended_string_dtype *>(src_dt.extended());
+                get_blockref_string_to_fixedstring_assignment_kernel(m_element_size, m_encoding, src_fs->encoding(),
+                                        errmode, out_kernel);
+                break;
+            }
+            default: {
+                src_dt.extended()->get_dtype_assignment_kernel(dst_dt, src_dt, errmode, out_kernel);
+                break;
+            }
         }
     } else {
         throw runtime_error("conversions from string to non-string are not implemented");

@@ -14,6 +14,7 @@
 #include <dnd/dtypes/dtype_alignment.hpp>
 #include <dnd/dtypes/view_dtype.hpp>
 #include <dnd/dtypes/fixedstring_dtype.hpp>
+#include <dnd/dtypes/string_dtype.hpp>
 
 #include <dnd/nodes/immutable_scalar_node.hpp>
 #include <dnd/nodes/immutable_builtin_scalar_node.hpp>
@@ -329,14 +330,27 @@ std::string dnd::detail::ndarray_as_string(const ndarray& lhs, assign_error_mode
     }
     ndarray tmp = lhs.vals();
     if (tmp.get_dtype().type_id() == fixedstring_type_id) {
-        const fixedstring_dtype *fs = static_cast<const fixedstring_dtype *>(tmp.get_dtype().extended());
-        if (fs->encoding() != string_encoding_ascii && fs->encoding() != string_encoding_utf_8) {
-            tmp = tmp.as_dtype(make_fixedstring_dtype(string_encoding_utf_8, 4 * tmp.get_dtype().element_size() / tmp.get_dtype().alignment()));
+        const extended_string_dtype *fs = static_cast<const extended_string_dtype *>(tmp.get_dtype().extended());
+        if (fs->encoding() == string_encoding_ascii || fs->encoding() == string_encoding_utf_8) {
+            const char *data = tmp.get_readonly_originptr();
+            intptr_t size = strnlen(data, tmp.get_dtype().element_size());
+            return std::string(data, size);
+        } else {
+            tmp = tmp.as_dtype(make_string_dtype(string_encoding_utf_8));
             tmp = tmp.vals();
         }
-        const char *data = tmp.get_readonly_originptr();
-        intptr_t size = strnlen(data, tmp.get_dtype().element_size());
-        return std::string(data, size);
+    }
+
+    if (tmp.get_dtype().type_id() == string_type_id) {
+        const extended_string_dtype *fs = static_cast<const extended_string_dtype *>(tmp.get_dtype().extended());
+        // Make sure it's ASCII or UTF8
+        if (fs->encoding() != string_encoding_ascii && fs->encoding() != string_encoding_utf_8) {
+            tmp = tmp.as_dtype(make_string_dtype(string_encoding_utf_8));
+            tmp = tmp.vals();
+            fs = static_cast<const extended_string_dtype *>(tmp.get_dtype().extended());
+        }
+        const char * const *data = reinterpret_cast<const char * const *>(tmp.get_readonly_originptr());
+        return std::string(data[0], data[1]);
     }
 
     stringstream ss;

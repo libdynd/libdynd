@@ -20,6 +20,7 @@ dnd::string_dtype::string_dtype(string_encoding_t encoding)
         case string_encoding_utf_8:
         case string_encoding_utf_16:
         case string_encoding_utf_32:
+            break;
         default:
             throw runtime_error("Unrecognized string encoding in string dtype constructor");
     }
@@ -78,7 +79,7 @@ void dnd::string_dtype::print_element(std::ostream& o, const char *data) const
 
 void dnd::string_dtype::print_dtype(std::ostream& o) const {
 
-    o << "string"; // TODO
+    o << "string<" << m_encoding << ">";
 
 }
 
@@ -97,12 +98,24 @@ void dnd::string_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const d
                 unary_specialization_kernel_instance& out_kernel) const
 {
     if (this == dst_dt.extended()) {
-        if (src_dt.type_id() == fixedstring_type_id) {
-            const string_dtype *src_fs = static_cast<const string_dtype *>(src_dt.extended());
-            get_blockref_string_assignment_kernel(m_encoding, src_fs->m_encoding,
-                                    errmode, out_kernel);
-        } else {
-            src_dt.extended()->get_dtype_assignment_kernel(dst_dt, src_dt, errmode, out_kernel);
+        switch (src_dt.type_id()) {
+            case string_type_id: {
+                const string_dtype *src_fs = static_cast<const string_dtype *>(src_dt.extended());
+                get_blockref_string_assignment_kernel(m_encoding, src_fs->m_encoding,
+                                        errmode, out_kernel);
+                break;
+            }
+            case fixedstring_type_id: {
+                const extended_string_dtype *src_fs = static_cast<const extended_string_dtype *>(src_dt.extended());
+                get_fixedstring_to_blockref_string_assignment_kernel(m_encoding,
+                                        src_fs->element_size(), src_fs->encoding(),
+                                        errmode, out_kernel);
+                break;
+            }
+            default: {
+                src_dt.extended()->get_dtype_assignment_kernel(dst_dt, src_dt, errmode, out_kernel);
+                break;
+            }
         }
     } else {
         throw runtime_error("conversions from string to non-string are not implemented");

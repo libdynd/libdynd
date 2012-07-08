@@ -147,6 +147,12 @@ def make_fixedstring_dtype(encoding, int size):
     SET(result.v, dnd_make_fixedstring_dtype(encoding, size))
     return result
 
+def make_string_dtype(encoding):
+    """Constructs a blockref string dtype with a specified encoding."""
+    cdef w_dtype result = w_dtype()
+    SET(result.v, dnd_make_string_dtype(encoding))
+    return result
+
 ##############################################################################
 
 # NOTE: This is a possible alternative to the init_w_ndarray_typeobject() call

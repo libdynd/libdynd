@@ -401,7 +401,7 @@ namespace {
         };
 } // anonymous namespace
 
-void get_fixedstring_to_blockref_string_assignment_kernel(string_encoding_t dst_encoding,
+void dnd::get_fixedstring_to_blockref_string_assignment_kernel(string_encoding_t dst_encoding,
                 intptr_t src_element_size, string_encoding_t src_encoding,
                 assign_error_mode errmode,
                 unary_specialization_kernel_instance& out_kernel)
@@ -427,3 +427,97 @@ void get_fixedstring_to_blockref_string_assignment_kernel(string_encoding_t dst_
 /////////////////////////////////////////
 // blockref string to fixedstring assignment
 
+namespace {
+    struct blockref_string_to_fixedstring_assign_kernel_auxdata {
+        next_unicode_codepoint_t next_fn;
+        append_unicode_codepoint_t append_fn;
+        intptr_t dst_element_size, src_element_size;
+        bool overflow_check;
+    };
+
+    /** Does a single fixed-string copy */
+    static void blockref_string_to_fixedstring_assign(char *dst, const char *src,
+            const blockref_string_to_fixedstring_assign_kernel_auxdata& ad)
+    {
+        char *dst_end = dst + ad.dst_element_size;
+        const char *src_begin = reinterpret_cast<const char * const *>(src)[0];
+        const char *src_end = reinterpret_cast<const char * const *>(src)[1];
+        next_unicode_codepoint_t next_fn = ad.next_fn;
+        append_unicode_codepoint_t append_fn = ad.append_fn;
+        uint32_t cp;
+
+        while (src_begin < src_end && dst < dst_end) {
+            cp = next_fn(src_begin, src_end);
+            append_fn(cp, dst, dst_end);
+        }
+        if (src_begin < src_end) {
+            if (ad.overflow_check) {
+                throw std::runtime_error("Input string is too large to convert to destination fixed-size string");
+            }
+        } else if (dst < dst_end) {
+            memset(dst, 0, dst_end - dst);
+        }
+   }
+
+    struct blockref_string_to_fixedstring_assign_kernel {
+        static void general_kernel(char *dst, intptr_t dst_stride, const char *src, intptr_t src_stride,
+                            intptr_t count, const AuxDataBase *auxdata)
+        {
+            const blockref_string_to_fixedstring_assign_kernel_auxdata& ad =
+                        get_auxiliary_data<blockref_string_to_fixedstring_assign_kernel_auxdata>(auxdata);
+            for (intptr_t i = 0; i < count; ++i) {
+                blockref_string_to_fixedstring_assign(dst, src, ad);
+
+                dst += dst_stride;
+                src += src_stride;
+            }
+        }
+
+        static void scalar_kernel(char *dst, intptr_t DND_UNUSED(dst_stride), const char *src, intptr_t DND_UNUSED(src_stride),
+                            intptr_t, const AuxDataBase *auxdata)
+        {
+            const blockref_string_to_fixedstring_assign_kernel_auxdata& ad =
+                        get_auxiliary_data<blockref_string_to_fixedstring_assign_kernel_auxdata>(auxdata);
+            blockref_string_to_fixedstring_assign(dst, src, ad);
+        }
+
+        static void scalar_to_contiguous_kernel(char *dst, intptr_t dst_stride, const char *src, intptr_t DND_UNUSED(src_stride),
+                            intptr_t count, const AuxDataBase *auxdata)
+        {
+            const blockref_string_to_fixedstring_assign_kernel_auxdata& ad =
+                        get_auxiliary_data<blockref_string_to_fixedstring_assign_kernel_auxdata>(auxdata);
+            intptr_t dst_element_size = ad.dst_element_size;
+
+            // Convert the encoding once, then use memcpy calls for the rest.
+            blockref_string_to_fixedstring_assign(dst, src, ad);
+            const char *dst_first = dst;
+
+            for (intptr_t i = 0; i < count; ++i) {
+                memcpy(dst, dst_first, dst_element_size);
+
+                dst += dst_stride;
+            }
+        }
+    };
+} // anonymous namespace
+
+void dnd::get_blockref_string_to_fixedstring_assignment_kernel(intptr_t dst_element_size, string_encoding_t dst_encoding,
+                string_encoding_t src_encoding,
+                assign_error_mode errmode,
+                unary_specialization_kernel_instance& out_kernel)
+{
+    static specialized_unary_operation_table_t optable = {
+        blockref_string_to_fixedstring_assign_kernel::general_kernel,
+        blockref_string_to_fixedstring_assign_kernel::scalar_kernel,
+        blockref_string_to_fixedstring_assign_kernel::general_kernel,
+        blockref_string_to_fixedstring_assign_kernel::scalar_to_contiguous_kernel};
+    out_kernel.specializations = optable;
+
+    make_auxiliary_data<fixedstring_assign_kernel_auxdata>(out_kernel.auxdata);
+    blockref_string_to_fixedstring_assign_kernel_auxdata& ad =
+                out_kernel.auxdata.get<blockref_string_to_fixedstring_assign_kernel_auxdata>();
+    ad.dst_element_size = dst_element_size;
+    ad.overflow_check = (errmode != assign_error_none);
+    ad.append_fn = get_append_unicode_codepoint_function(dst_encoding, errmode);
+    ad.next_fn = get_next_unicode_codepoint_function(src_encoding, errmode);
+}

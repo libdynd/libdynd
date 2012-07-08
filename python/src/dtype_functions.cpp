@@ -8,6 +8,7 @@
 #include "ctypes_interop.hpp"
 
 #include <dnd/dtypes/fixedstring_dtype.hpp>
+#include <dnd/dtypes/string_dtype.hpp>
 
 using namespace std;
 using namespace dnd;
@@ -164,4 +165,11 @@ dnd::dtype pydnd::dnd_make_fixedstring_dtype(PyObject *encoding_obj, intptr_t si
     string_encoding_t encoding = encoding_from_pyobject(encoding_obj);
 
     return make_fixedstring_dtype(encoding, size);
+}
+
+dnd::dtype pydnd::dnd_make_string_dtype(PyObject *encoding_obj)
+{
+    string_encoding_t encoding = encoding_from_pyobject(encoding_obj);
+
+    return make_string_dtype(encoding);
 }

@@ -8,6 +8,7 @@
 #include <dnd/ndarray.hpp>
 #include <dnd/dtypes/conversion_dtype.hpp>
 #include <dnd/dtypes/fixedstring_dtype.hpp>
+#include <dnd/dtypes/string_dtype.hpp>
 #include <dnd/dtypes/byteswap_dtype.hpp>
 #include <dnd/ndarray_arange.hpp>
 
@@ -64,102 +65,48 @@ int main1()
 int main()
 {
     try {
-        ndarray a;
+        ndarray a, b;
 
-        // Default-constructed ndarray is NULL and will crash if access is attempted
-        EXPECT_EQ(NULL, a.get_expr_tree().get());
+        // std::string goes in as a utf8 fixed string
+        a = std::string("abcdefg");
+        EXPECT_EQ(make_fixedstring_dtype(string_encoding_utf_8, 7), a.get_dtype());
+        EXPECT_EQ(std::string("abcdefg"), a.as<std::string>());
 
-        // Scalar ndarray
-        a = ndarray(make_dtype<float>());
-        cout << (void *)a.get_expr_tree().get() << endl;
-        a.debug_dump(cout);
-        EXPECT_EQ(1, a.get_num_elements());
-        EXPECT_EQ(0, a.get_ndim());
+        // Convert to a blockref string dtype with the same utf8 codec
+        b = a.as_dtype(make_string_dtype(string_encoding_utf_8));
+        EXPECT_EQ(make_conversion_dtype(make_string_dtype(string_encoding_utf_8), make_fixedstring_dtype(string_encoding_utf_8, 7)),
+                    b.get_dtype());
+        b = b.vals();
+        EXPECT_EQ(make_string_dtype(string_encoding_utf_8),
+                        b.get_dtype());
+        EXPECT_EQ(std::string("abcdefg"), b.as<std::string>());
 
-        // One-dimensional ndarray with one element
-        a = ndarray(1, make_dtype<float>());
-        EXPECT_EQ(1, a.get_num_elements());
-        EXPECT_EQ(1, a.get_ndim());
-        EXPECT_EQ(1, a.get_shape()[0]);
-        EXPECT_EQ(0, a.get_strides()[0]);
+        // Convert to a blockref string dtype with the utf16 codec
+        b = a.as_dtype(make_string_dtype(string_encoding_utf_16));
+        EXPECT_EQ(make_conversion_dtype(make_string_dtype(string_encoding_utf_16), make_fixedstring_dtype(string_encoding_utf_8, 7)),
+                    b.get_dtype());
+        b = b.vals();
+        EXPECT_EQ(make_string_dtype(string_encoding_utf_16),
+                        b.get_dtype());
+        EXPECT_EQ(std::string("abcdefg"), b.as<std::string>());
 
-        // One-dimensional ndarray
-        a = ndarray(3, make_dtype<float>());
-        EXPECT_EQ(3, a.get_num_elements());
-        EXPECT_EQ(1, a.get_ndim());
-        EXPECT_EQ(3, a.get_shape()[0]);
-        EXPECT_EQ((int)sizeof(float), a.get_strides()[0]);
+        // Convert to a blockref string dtype with the utf32 codec
+        b = a.as_dtype(make_string_dtype(string_encoding_utf_32));
+        EXPECT_EQ(make_conversion_dtype(make_string_dtype(string_encoding_utf_32), make_fixedstring_dtype(string_encoding_utf_8, 7)),
+                    b.get_dtype());
+        b = b.vals();
+        EXPECT_EQ(make_string_dtype(string_encoding_utf_32),
+                        b.get_dtype());
+        EXPECT_EQ(std::string("abcdefg"), b.as<std::string>());
 
-        // Two-dimensional ndarray with a size-one dimension
-        a = ndarray(3, 1, make_dtype<float>());
-        EXPECT_EQ(3, a.get_num_elements());
-        EXPECT_EQ(2, a.get_ndim());
-        EXPECT_EQ(3, a.get_shape()[0]);
-        EXPECT_EQ(1, a.get_shape()[1]);
-        EXPECT_EQ((int)sizeof(float), a.get_strides()[0]);
-        EXPECT_EQ(0, a.get_strides()[1]);
-
-        // Two-dimensional ndarray with a size-one dimension
-        a = ndarray(1, 3, make_dtype<float>());
-        EXPECT_EQ(3, a.get_num_elements());
-        EXPECT_EQ(2, a.get_ndim());
-        EXPECT_EQ(1, a.get_shape()[0]);
-        EXPECT_EQ(3, a.get_shape()[1]);
-        EXPECT_EQ(0, a.get_strides()[0]);
-        EXPECT_EQ((int)sizeof(float), a.get_strides()[1]);
-
-        // Two-dimensional ndarray
-        a = ndarray(3, 5, make_dtype<float>());
-        EXPECT_EQ(15, a.get_num_elements());
-        EXPECT_EQ(2, a.get_ndim());
-        EXPECT_EQ(3, a.get_shape()[0]);
-        EXPECT_EQ(5, a.get_shape()[1]);
-        EXPECT_EQ(5*(int)sizeof(float), a.get_strides()[0]);
-        EXPECT_EQ((int)sizeof(float), a.get_strides()[1]);
-
-        // Three-dimensional ndarray with size-one dimension
-        a = ndarray(1, 5, 4, make_dtype<float>());
-        EXPECT_EQ(20, a.get_num_elements());
-        EXPECT_EQ(3, a.get_ndim());
-        EXPECT_EQ(1, a.get_shape()[0]);
-        EXPECT_EQ(5, a.get_shape()[1]);
-        EXPECT_EQ(4, a.get_shape()[2]);
-        EXPECT_EQ(0, a.get_strides()[0]);
-        EXPECT_EQ(4*(int)sizeof(float), a.get_strides()[1]);
-        EXPECT_EQ((int)sizeof(float), a.get_strides()[2]);
-
-        // Three-dimensional ndarray with size-one dimension
-        a = ndarray(3, 1, 4, make_dtype<float>());
-        EXPECT_EQ(12, a.get_num_elements());
-        EXPECT_EQ(3, a.get_ndim());
-        EXPECT_EQ(3, a.get_shape()[0]);
-        EXPECT_EQ(1, a.get_shape()[1]);
-        EXPECT_EQ(4, a.get_shape()[2]);
-        EXPECT_EQ(4*(int)sizeof(float), a.get_strides()[0]);
-        EXPECT_EQ(0, a.get_strides()[1]);
-        EXPECT_EQ((int)sizeof(float), a.get_strides()[2]);
-
-        // Three-dimensional ndarray with size-one dimension
-        a = ndarray(3, 5, 1, make_dtype<float>());
-        EXPECT_EQ(15, a.get_num_elements());
-        EXPECT_EQ(3, a.get_ndim());
-        EXPECT_EQ(3, a.get_shape()[0]);
-        EXPECT_EQ(5, a.get_shape()[1]);
-        EXPECT_EQ(1, a.get_shape()[2]);
-        EXPECT_EQ(5*(int)sizeof(float), a.get_strides()[0]);
-        EXPECT_EQ((int)sizeof(float), a.get_strides()[1]);
-        EXPECT_EQ(0, a.get_strides()[2]);
-
-        // Three-dimensional ndarray
-        a = ndarray(3, 5, 4, make_dtype<float>());
-        EXPECT_EQ(60, a.get_num_elements());
-        EXPECT_EQ(3, a.get_ndim());
-        EXPECT_EQ(3, a.get_shape()[0]);
-        EXPECT_EQ(5, a.get_shape()[1]);
-        EXPECT_EQ(4, a.get_shape()[2]);
-        EXPECT_EQ(5*4*(int)sizeof(float), a.get_strides()[0]);
-        EXPECT_EQ(4*(int)sizeof(float), a.get_strides()[1]);
-        EXPECT_EQ((int)sizeof(float), a.get_strides()[2]);
+        // Convert to a blockref string dtype with the ascii codec
+        b = a.as_dtype(make_string_dtype(string_encoding_ascii));
+        EXPECT_EQ(make_conversion_dtype(make_string_dtype(string_encoding_ascii), make_fixedstring_dtype(string_encoding_utf_8, 7)),
+                    a.get_dtype());
+        b = b.vals();
+        EXPECT_EQ(make_string_dtype(string_encoding_ascii),
+                        b.get_dtype());
+        EXPECT_EQ(std::string("abcdefg"), b.as<std::string>());
     } catch(int){//std::exception& e) { cout << "Error: " << e.what() << "\n";
         return 1;
     }

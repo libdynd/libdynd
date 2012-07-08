@@ -18,6 +18,7 @@ set(tests_SRC
     test_dtype_casting.cpp
     test_dtype_promotion.cpp
     test_fixedstring_dtype.cpp
+    test_string_dtype.cpp
     test_ndarray.cpp
     test_ndarray_assign.cpp
     test_ndarray_index.cpp

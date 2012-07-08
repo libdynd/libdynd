@@ -75,6 +75,11 @@ dnd::dtype make_dtype_from_object(PyObject* obj);
  */
 dnd::dtype dnd_make_fixedstring_dtype(PyObject *encoding_obj, intptr_t size);
 
+/**
+ * Creates a blockref string dtype.
+ */
+dnd::dtype dnd_make_string_dtype(PyObject *encoding_obj);
+
 } // namespace pydnd
 
 #endif // _DND__DTYPE_FUNCTIONS_HPP_
