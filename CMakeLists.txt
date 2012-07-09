@@ -149,4 +149,12 @@ add_subdirectory(tests)
 
 add_subdirectory(examples)
 
-add_subdirectory(python)
+# should we use build the python support?
+option(
+    BUILD_PYTHON
+    "Build python bindings" ON
+    )
+
+if(BUILD_PYTHON)
+    add_subdirectory(python)
+endif()
