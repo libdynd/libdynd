@@ -3,6 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
+#include <stdexcept>
 #include <vector>
 
 #include <dnd/memblock/pod_memory_block.hpp>
