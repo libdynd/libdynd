@@ -76,25 +76,25 @@ class TestDType(unittest.TestCase):
 
     def test_fixedstring_dtype_properties(self):
         d = nd.make_fixedstring_dtype('ascii', 10)
-        self.assertEqual(str(d), 'fixedstring<10,encoding=ascii>')
+        self.assertEqual(str(d), 'fixedstring<ascii,10>')
         self.assertEqual(d.element_size, 10)
         self.assertEqual(d.alignment, 1)
         self.assertEqual(d.string_encoding, 'ascii')
 
         d = nd.make_fixedstring_dtype('utf_8', 10)
-        self.assertEqual(str(d), 'fixedstring<10,encoding=utf_8>')
+        self.assertEqual(str(d), 'fixedstring<utf_8,10>')
         self.assertEqual(d.element_size, 10)
         self.assertEqual(d.alignment, 1)
         self.assertEqual(d.string_encoding, 'utf_8')
 
         d = nd.make_fixedstring_dtype('utf_16', 10)
-        self.assertEqual(str(d), 'fixedstring<10,encoding=utf_16>')
+        self.assertEqual(str(d), 'fixedstring<utf_16,10>')
         self.assertEqual(d.element_size, 20)
         self.assertEqual(d.alignment, 2)
         self.assertEqual(d.string_encoding, 'utf_16')
 
         d = nd.make_fixedstring_dtype('utf_32', 10)
-        self.assertEqual(str(d), 'fixedstring<10,encoding=utf_32>')
+        self.assertEqual(str(d), 'fixedstring<utf_32,10>')
         self.assertEqual(d.element_size, 40)
         self.assertEqual(d.alignment, 4)
         self.assertEqual(d.string_encoding, 'utf_32')

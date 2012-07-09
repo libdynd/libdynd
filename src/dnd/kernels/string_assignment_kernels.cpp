@@ -144,12 +144,12 @@ namespace {
 
             // Allocate the initial output as the src number of characters + some padding
             // TODO: Don't add padding if the output is not a multi-character encoding
-            allocator->allocate(ad.dst_memblock.get(), ((src_end - src_begin) / src_charsize) * dst_charsize * 1124 / 1024,
+            allocator->allocate(ad.dst_memblock.get(), ((src_end - src_begin) / src_charsize + 16) * dst_charsize * 1124 / 1024,
                             dst_charsize, &dst_begin, &dst_end);
 
             dst_current = dst_begin;
             while (src_begin < src_end) {
-                cp = next_fn(src, src_end);
+                cp = next_fn(src_begin, src_end);
                 // Append the codepoint, or increase the allocated memory as necessary
                 if (dst_end - dst_current >= 8) {
                     append_fn(cp, dst_current, dst_end);
@@ -293,12 +293,12 @@ namespace {
 
             // Allocate the initial output as the src number of characters + some padding
             // TODO: Don't add padding if the output is not a multi-character encoding
-            allocator->allocate(ad.dst_memblock.get(), ((src_end - src_begin) / src_charsize) * dst_charsize * 1124 / 1024,
+            allocator->allocate(ad.dst_memblock.get(), ((src_end - src_begin) / src_charsize + 16) * dst_charsize * 1124 / 1024,
                             dst_charsize, &dst_begin, &dst_end);
 
             dst_current = dst_begin;
             while (src_begin < src_end) {
-                cp = next_fn(src, src_end);
+                cp = next_fn(src_begin, src_end);
                 // Append the codepoint, or increase the allocated memory as necessary
                 if (cp != 0) {
                     if (dst_end - dst_current >= 8) {

@@ -6,6 +6,8 @@
 #ifndef _DND__STRIDED_NDARRAY_NODE_HPP_
 #define _DND__STRIDED_NDARRAY_NODE_HPP_
 
+#include <vector>
+
 #include <dnd/nodes/ndarray_node.hpp>
 
 namespace dnd {
@@ -63,6 +65,9 @@ public:
      * Constructs a strided array node with the given dtype, shape, and axis_perm (for memory layout)
      */
     strided_ndarray_node(const dtype& dt, int ndim, const intptr_t *shape, const int *axis_perm);
+
+    strided_ndarray_node(const dtype& dt, int ndim, const intptr_t *shape, const int *axis_perm,
+                    int access_flags, memory_block_ptr *blockrefs_begin, memory_block_ptr *blockrefs_end);
 
     virtual ~strided_ndarray_node() {
     }
@@ -139,8 +144,6 @@ public:
     friend ndarray_node_ptr make_strided_ndarray_node(const dtype& dt, int ndim, const intptr_t *shape,
                 const intptr_t *strides, const char *originptr, int access_flags, memory_block_ptr&& memblock);
     #endif
-
-    friend ndarray_node_ptr make_strided_ndarray_node(const dtype& dt, int ndim, const intptr_t *shape, const int *axis_perm);
 };
 
 ndarray_node_ptr make_strided_ndarray_node(const dtype& dt, int ndim, const intptr_t *shape,
@@ -158,6 +161,9 @@ ndarray_node_ptr make_strided_ndarray_node(const dtype& dt, int ndim, const intp
 #endif
 
 ndarray_node_ptr make_strided_ndarray_node(const dtype& dt, int ndim, const intptr_t *shape, const int *axis_perm);
+
+ndarray_node_ptr make_strided_ndarray_node(const dtype& dt, int ndim, const intptr_t *shape, const int *axis_perm,
+                int access_flags, memory_block_ptr *blockrefs_begin, memory_block_ptr *blockrefs_end);
 
 } // namespace dnd
 

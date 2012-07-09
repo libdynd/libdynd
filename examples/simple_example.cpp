@@ -65,48 +65,49 @@ int main1()
 int main()
 {
     try {
-        ndarray a, b;
+    ndarray a, b;
 
-        // std::string goes in as a utf8 fixed string
-        a = std::string("abcdefg");
-        EXPECT_EQ(make_fixedstring_dtype(string_encoding_utf_8, 7), a.get_dtype());
-        EXPECT_EQ(std::string("abcdefg"), a.as<std::string>());
+    // std::string goes in as a utf8 fixed string
+    a = std::string("abcdefg");
+    EXPECT_EQ(make_fixedstring_dtype(string_encoding_utf_8, 7), a.get_dtype());
+    EXPECT_EQ(std::string("abcdefg"), a.as<std::string>());
 
-        // Convert to a blockref string dtype with the same utf8 codec
-        b = a.as_dtype(make_string_dtype(string_encoding_utf_8));
-        EXPECT_EQ(make_conversion_dtype(make_string_dtype(string_encoding_utf_8), make_fixedstring_dtype(string_encoding_utf_8, 7)),
+    // Convert to a blockref string dtype with the same utf8 codec
+    b = a.as_dtype(make_string_dtype(string_encoding_utf_8));
+    EXPECT_EQ(make_conversion_dtype(make_string_dtype(string_encoding_utf_8), make_fixedstring_dtype(string_encoding_utf_8, 7)),
+                b.get_dtype());
+    b = b.vals();
+    EXPECT_EQ(make_string_dtype(string_encoding_utf_8),
                     b.get_dtype());
-        b = b.vals();
-        EXPECT_EQ(make_string_dtype(string_encoding_utf_8),
-                        b.get_dtype());
-        EXPECT_EQ(std::string("abcdefg"), b.as<std::string>());
+    EXPECT_EQ(std::string("abcdefg"), b.as<std::string>());
 
-        // Convert to a blockref string dtype with the utf16 codec
-        b = a.as_dtype(make_string_dtype(string_encoding_utf_16));
-        EXPECT_EQ(make_conversion_dtype(make_string_dtype(string_encoding_utf_16), make_fixedstring_dtype(string_encoding_utf_8, 7)),
+    // Convert to a blockref string dtype with the utf16 codec
+    b = a.as_dtype(make_string_dtype(string_encoding_utf_16));
+    EXPECT_EQ(make_conversion_dtype(make_string_dtype(string_encoding_utf_16), make_fixedstring_dtype(string_encoding_utf_8, 7)),
+                b.get_dtype());
+    b = b.vals();
+    EXPECT_EQ(make_string_dtype(string_encoding_utf_16),
                     b.get_dtype());
-        b = b.vals();
-        EXPECT_EQ(make_string_dtype(string_encoding_utf_16),
-                        b.get_dtype());
-        EXPECT_EQ(std::string("abcdefg"), b.as<std::string>());
+    EXPECT_EQ(std::string("abcdefg"), b.as<std::string>());
 
-        // Convert to a blockref string dtype with the utf32 codec
-        b = a.as_dtype(make_string_dtype(string_encoding_utf_32));
-        EXPECT_EQ(make_conversion_dtype(make_string_dtype(string_encoding_utf_32), make_fixedstring_dtype(string_encoding_utf_8, 7)),
+    // Convert to a blockref string dtype with the utf32 codec
+    b = a.as_dtype(make_string_dtype(string_encoding_utf_32));
+    EXPECT_EQ(make_conversion_dtype(make_string_dtype(string_encoding_utf_32), make_fixedstring_dtype(string_encoding_utf_8, 7)),
+                b.get_dtype());
+    b = b.vals();
+    EXPECT_EQ(make_string_dtype(string_encoding_utf_32),
                     b.get_dtype());
-        b = b.vals();
-        EXPECT_EQ(make_string_dtype(string_encoding_utf_32),
-                        b.get_dtype());
-        EXPECT_EQ(std::string("abcdefg"), b.as<std::string>());
+    EXPECT_EQ(std::string("abcdefg"), b.as<std::string>());
 
-        // Convert to a blockref string dtype with the ascii codec
-        b = a.as_dtype(make_string_dtype(string_encoding_ascii));
-        EXPECT_EQ(make_conversion_dtype(make_string_dtype(string_encoding_ascii), make_fixedstring_dtype(string_encoding_utf_8, 7)),
-                    a.get_dtype());
-        b = b.vals();
-        EXPECT_EQ(make_string_dtype(string_encoding_ascii),
-                        b.get_dtype());
-        EXPECT_EQ(std::string("abcdefg"), b.as<std::string>());
+    // Convert to a blockref string dtype with the ascii codec
+    b = a.as_dtype(make_string_dtype(string_encoding_ascii));
+    EXPECT_EQ(make_conversion_dtype(make_string_dtype(string_encoding_ascii), make_fixedstring_dtype(string_encoding_utf_8, 7)),
+                b.get_dtype());
+    b = b.vals();
+    EXPECT_EQ(make_string_dtype(string_encoding_ascii),
+                    b.get_dtype());
+    EXPECT_EQ(std::string("abcdefg"), b.as<std::string>());
+
     } catch(int){//std::exception& e) { cout << "Error: " << e.what() << "\n";
         return 1;
     }

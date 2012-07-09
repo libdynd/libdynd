@@ -81,57 +81,6 @@ namespace {
 
 } // anonymous namespace
 
-/*
-static ndarray arithmetic_op(const ndarray& op0, const ndarray& op1,
-                                            binary_operation_t builtin_optable[][6])
-{
-    dtype dt = promote_dtypes_arithmetic(op0.get_dtype(), op1.get_dtype());
-    ndarray result;
-    raw_ndarray_iter<1,2> iter(dt, result, op0, op1);
-    //cout << "src0:\n" << op0 << "\n";
-    //op0.debug_dump(cout);
-    //cout << "\n";
-    //cout << "src1:\n" << op1 << "\n";
-    //op1.debug_dump(cout);
-    //cout << "\n";
-    //cout << "dst:\n";
-    //result.debug_dump(cout);
-    //cout << "\n";
-
-    if (dt.extended() != NULL) {
-        throw std::runtime_error("arithmetic operations for extended dtypes isn't implemented yet");
-    }
-
-    // Use buffering if a dtype conversion or alignment operation
-    // is required.
-    if (dt != op0.get_dtype() || dt != op1.get_dtype() ||
-                !dt.is_data_aligned(iter.get_align_test<1>()) ||
-                !dt.is_data_aligned(iter.get_align_test<2>())) {
-        stringstream ss;
-        ss << "arithmetic operation buffering isn't implemented yet, dtypes ";
-        ss << op0.get_dtype() << " " << op1.get_dtype();
-        throw std::runtime_error(ss.str());
-    } else {
-        intptr_t innersize = iter.innersize();
-        intptr_t dst_stride = iter.innerstride<0>();
-        intptr_t src0_stride = iter.innerstride<1>();
-        intptr_t src1_stride = iter.innerstride<2>();
-        binary_operation_t operation = get_builtin_operation_function(builtin_optable,
-                                            dt, dst_stride, src0_stride, src1_stride);
-        if (innersize > 0) {
-            do {
-                operation(iter.data<0>(), dst_stride,
-                            iter.data<1>(), src0_stride,
-                            iter.data<2>(), src1_stride,
-                            innersize, NULL);
-            } while (iter.iternext());
-        }
-    }
-
-    return DND_MOVE(result);
-}
-*/
-
 namespace {
     template<class T>
     struct addition {

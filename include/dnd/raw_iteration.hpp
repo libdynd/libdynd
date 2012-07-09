@@ -224,20 +224,6 @@ namespace detail {
         }
 
         /**
-         * Gets a byte suitable for the 'align_test' argument in dtype's
-         * is_data_aligned function.
-         */
-        template<int K>
-        typename enable_if<is_value_within_bounds<K, 0, Nwrite + Nread>::value, char>::type
-                                                                        get_align_test() const {
-            char result = static_cast<char>(reinterpret_cast<intptr_t>(m_data[K]));
-            for (int i = 0; i < m_ndim; ++i) {
-                result |= strides(K)[i];
-            }
-            return result;
-        }
-
-        /**
          * Prints out a debug dump of the object.
          */
         void debug_dump(std::ostream& o) {
@@ -346,6 +332,16 @@ public:
         init(ndim, shape, data, strides, axis_perm.get());
     }
     raw_ndarray_iter(int ndim, const intptr_t *shape,
+                                char *dataA, const intptr_t *stridesA,
+                                const char *dataB, const intptr_t *stridesB,
+                                int *axis_perm)
+    {
+        char *data[2] = {dataA, const_cast<char *>(dataB)};
+        const intptr_t *strides[2] = {stridesA, stridesB};
+
+        init(ndim, shape, data, strides, axis_perm);
+    }
+    raw_ndarray_iter(int ndim, const intptr_t *shape,
                                 const dtype& op0_dt, ndarray_node_ptr& op0,
                                 const ndarray_node_ptr& op1)
     {
@@ -365,7 +361,6 @@ public:
         const intptr_t *strides_ptrs[2] = {op0->get_strides(), strides.get()};
         init(ndim, shape, data, strides_ptrs, axis_perm.get());
     }
-
 };
 
 /**

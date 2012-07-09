@@ -78,6 +78,31 @@ dnd::strided_ndarray_node::strided_ndarray_node(const dtype& dt, int ndim,
     m_memblock = make_fixed_size_pod_memory_block(dt.element_size() * num_elements, dt.alignment(), &m_originptr);
 }
 
+dnd::strided_ndarray_node::strided_ndarray_node(const dtype& dt, int ndim,
+                                const intptr_t *shape, const int *axis_perm,
+                                int access_flags, memory_block_ptr *blockrefs_begin, memory_block_ptr *blockrefs_end)
+    : m_ndim(ndim), m_access_flags(access_flags), m_shape(ndim, shape), m_dtype(dt),
+      m_originptr(NULL), m_strides(ndim), m_memblock()
+{
+    // Build the strides using the ordering and shape
+    intptr_t num_elements = 1;
+    intptr_t stride = dt.element_size();
+    for (int i = 0; i < ndim; ++i) {
+        int p = axis_perm[i];
+        intptr_t size = shape[p];
+        if (size == 1) {
+            m_strides[p] = 0;
+        } else {
+            m_strides[p] = stride;
+            stride *= size;
+            num_elements *= size;
+        }
+    }
+
+    m_memblock = make_fixed_size_pod_memory_block(dt.element_size() * num_elements, dt.alignment(), &m_originptr,
+                    blockrefs_begin, blockrefs_end);
+}
+
 ndarray_node_ptr dnd::strided_ndarray_node::as_dtype(const dtype& dt,
                     dnd::assign_error_mode errmode, bool allow_in_place)
 {
@@ -238,5 +263,14 @@ ndarray_node_ptr dnd::make_strided_ndarray_node(const dtype& dt, int ndim, const
     char *node_memory = NULL;
     ndarray_node_ptr result(make_uninitialized_ndarray_node_memory_block(sizeof(strided_ndarray_node), &node_memory));
     new (node_memory) strided_ndarray_node(dt, ndim, shape, axis_perm);
+    return DND_MOVE(result);
+}
+
+ndarray_node_ptr dnd::make_strided_ndarray_node(const dtype& dt, int ndim, const intptr_t *shape, const int *axis_perm,
+                        int access_flags, memory_block_ptr *blockrefs_begin, memory_block_ptr *blockrefs_end)
+{
+    char *node_memory = NULL;
+    ndarray_node_ptr result(make_uninitialized_ndarray_node_memory_block(sizeof(strided_ndarray_node), &node_memory));
+    new (node_memory) strided_ndarray_node(dt, ndim, shape, axis_perm, access_flags, blockrefs_begin, blockrefs_end);
     return DND_MOVE(result);
 }

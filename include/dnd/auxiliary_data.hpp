@@ -223,6 +223,18 @@ public:
     }
 
     /**
+     * If this auxiliary data has a kernel API associated with it,
+     * returns a pointer to that API, otherwise returns NULL.
+     */
+    auxdata_kernel_api *get_kernel_api() const {
+        if ((m_auxdata&1) == 0) {
+            return reinterpret_cast<AuxDataBase *>(m_auxdata)->kernel_api;
+        } else {
+            return NULL;
+        }
+    }
+
+    /**
      * When the auxiliary_data was created with make_auxiliary_data<T>, this
      * returns a reference to the T member. This should only be called when
      * the auxiliary data is known to have been created with the
@@ -238,6 +250,10 @@ public:
     // can be passed as a parameter to kernel functions.
     operator const AuxDataBase *() const {
         return reinterpret_cast<const AuxDataBase *>(m_auxdata);
+    }
+
+    operator AuxDataBase *() {
+        return reinterpret_cast<AuxDataBase *>(m_auxdata);
     }
 
     template<typename T>

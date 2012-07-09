@@ -6,6 +6,9 @@
 #ifndef _DND__POD_MEMORY_BLOCK_HPP_
 #define _DND__POD_MEMORY_BLOCK_HPP_
 
+#include <iostream>
+#include <string>
+
 #include <dnd/memblock/memory_block.hpp>
 
 namespace dnd {
@@ -39,6 +42,8 @@ memory_block_ptr make_pod_memory_block(memory_block_ptr *blockrefs_begin, memory
  * The initial capacity can be set if a good estimate is known.
  */
 memory_block_ptr make_pod_memory_block(memory_block_data **blockrefs_begin, memory_block_data **blockrefs_end, intptr_t initial_capacity_bytes = 2048);
+
+void pod_memory_block_debug_dump(const memory_block_data *memblock, std::ostream& o, const std::string& indent);
 
 } // namespace dnd
 

@@ -24,7 +24,9 @@ TEST(NDArrayViews, OneDimensionalRawMemory) {
     char c_values[8];
     uint64_t u8_value;
 
-    a = ndarray(80, make_dtype<char>());
+    // Make an 8 byte aligned array of 80 chars
+    a = ndarray(10, make_dtype<uint64_t>());
+    a = a.view_as_dtype(make_dtype<char>());
 
     // Initialize the char values from a uint64_t,
     // to avoid having to know the endianness

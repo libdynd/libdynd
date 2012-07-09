@@ -14,6 +14,7 @@
 #include <dnd/nodes/elementwise_binary_kernel_node.hpp>
 #include <dnd/raw_iteration.hpp>
 #include <dnd/dtypes/conversion_dtype.hpp>
+#include <dnd/memblock/pod_memory_block.hpp>
 
 using namespace std;
 using namespace dnd;
@@ -62,36 +63,90 @@ void dnd::ndarray_node::get_binary_operation(intptr_t, intptr_t, intptr_t, kerne
                              "binary nodes which provide an implementation");
 }
 
+static ndarray_node_ptr evaluate_strided_array_expression_dtype(ndarray_node* node)
+{
+    const dtype& dt = node->get_dtype();
+    const dtype& value_dt = dt.value_dtype();
+    ndarray_node_ptr result;
+    int ndim = node->get_ndim();
+
+    // For blockref result dtypes, this is the memblock
+    // where the variable sized data goes
+    memory_block_ptr dst_memblock;
+
+    unary_specialization_kernel_instance operation;
+    get_dtype_assignment_kernel(value_dt, dt, assign_error_none, operation);
+
+    // Generate the axis_perm from the input strides, and use it to allocate the output
+    shortvector<int> axis_perm(ndim);
+    const intptr_t *node_strides = node->get_strides();
+    char *result_originptr;
+    strides_to_axis_perm(ndim, node_strides, axis_perm.get());
+
+    if (value_dt.get_memory_management() != blockref_memory_management) {
+        result = make_strided_ndarray_node(value_dt, ndim, node->get_shape(), axis_perm.get());
+        result_originptr = result->get_readwrite_originptr();
+    } else {
+        auxdata_kernel_api *api = operation.auxdata.get_kernel_api();
+        if (api->supports_referencing_src_memory_blocks(operation.auxdata)) {
+            // If the kernel can reference existing memory, add a blockref to the src data
+            memory_block_ptr src_memblock = node->get_memory_block();
+            if (src_memblock.get() == NULL) {
+                src_memblock = node->as_ndarray_node_ptr();
+            }
+            result = make_strided_ndarray_node(value_dt, ndim, node->get_shape(), axis_perm.get(),
+                            node->get_access_flags(), &src_memblock, &src_memblock + 1);
+            // Because we just allocated this buffer, we can write to it even though it
+            // might be marked as readonly because the src memory block is readonly
+            result_originptr = const_cast<char *>(result->get_readonly_originptr());
+        } else {
+            // Otherwise allocate a new memory block for the destination
+            dst_memblock = make_pod_memory_block();
+            api->set_dst_memory_block(operation.auxdata, dst_memblock.get());
+            memory_block_ptr tmp_memblock = dst_memblock;
+            result = make_strided_ndarray_node(value_dt, ndim, node->get_shape(), axis_perm.get(),
+                            read_access_flag | write_access_flag, &tmp_memblock, &tmp_memblock + 1);
+            result_originptr = result->get_readwrite_originptr();
+        }
+    }
+
+    // Execute the kernel for all the elements
+    raw_ndarray_iter<1,1> iter(node->get_ndim(), node->get_shape(),
+                    result_originptr, result->get_strides(),
+                    node->get_readonly_originptr(), node->get_strides());
+    
+    intptr_t innersize = iter.innersize();
+    intptr_t dst_stride = iter.innerstride<0>();
+    intptr_t src0_stride = iter.innerstride<1>();
+    unary_specialization_t uspec = get_unary_specialization(dst_stride, value_dt.element_size(),
+                                                                src0_stride, dt.element_size());
+    unary_operation_t kfunc = operation.specializations[uspec];
+    if (innersize > 0) {
+        do {
+            kfunc(iter.data<0>(), dst_stride,
+                        iter.data<1>(), src0_stride,
+                        innersize, operation.auxdata);
+        } while (iter.iternext());
+    }
+
+    // Finalize the destination memory block if it was a blockref dtype
+    if (dst_memblock.get() != NULL) {
+        memory_block_pod_allocator_api *api = get_memory_block_pod_allocator_api(dst_memblock.get());
+        api->finalize(dst_memblock.get());
+    }
+
+    return DND_MOVE(result);
+}
+
 ndarray_node_ptr dnd::ndarray_node::evaluate()
 {
-    const dtype& dt = get_dtype();
-
     switch (get_category()) {
         case strided_array_node_category: {
-            // Evaluate any expression dtype as well
-            if (dt.kind() == expression_kind) {
-                ndarray_node_ptr result;
-                raw_ndarray_iter<1,1> iter(get_ndim(), get_shape(), dt.value_dtype(), result, as_ndarray_node_ptr());
-
-                intptr_t innersize = iter.innersize();
-                intptr_t dst_stride = iter.innerstride<0>();
-                intptr_t src0_stride = iter.innerstride<1>();
-                unary_specialization_kernel_instance operation;
-                get_dtype_assignment_kernel(dt.value_dtype(), dt, assign_error_none, operation);
-                unary_specialization_t uspec = get_unary_specialization(dst_stride, dt.value_dtype().element_size(),
-                                                                            src0_stride, dt.element_size());
-                unary_operation_t kfunc = operation.specializations[uspec];
-                if (innersize > 0) {
-                    do {
-                        kfunc(iter.data<0>(), dst_stride,
-                                    iter.data<1>(), src0_stride,
-                                    innersize, operation.auxdata);
-                    } while (iter.iternext());
-                }
-
-                return DND_MOVE(result);
+            if (get_dtype().kind() != expression_kind) {
+                return as_ndarray_node_ptr();
+            } else {
+                return evaluate_strided_array_expression_dtype(this);
             }
-            return as_ndarray_node_ptr();
         }
         case elementwise_node_category: {
             switch (get_nop()) {
@@ -99,7 +154,7 @@ ndarray_node_ptr dnd::ndarray_node::evaluate()
                     const ndarray_node_ptr& op1 = get_opnode(0);
                     if (op1->get_category() == strided_array_node_category) {
                         ndarray_node_ptr result;
-                        raw_ndarray_iter<1,1> iter(get_ndim(), get_shape(), dt.value_dtype(), result, op1);
+                        raw_ndarray_iter<1,1> iter(get_ndim(), get_shape(), get_dtype().value_dtype(), result, op1);
 
                         intptr_t innersize = iter.innersize();
                         intptr_t dst_stride = iter.innerstride<0>();
@@ -127,7 +182,7 @@ ndarray_node_ptr dnd::ndarray_node::evaluate()
                                 op2->get_category() == strided_array_node_category) {
                         ndarray_node_ptr result;
                         raw_ndarray_iter<1,2> iter(get_ndim(), get_shape(),
-                                                    dt.value_dtype(), result,
+                                                    get_dtype().value_dtype(), result,
                                                     op1, op2);
                         //iter.debug_dump(std::cout);
 

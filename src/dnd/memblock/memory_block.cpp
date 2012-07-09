@@ -5,6 +5,7 @@
 
 #include <dnd/memblock/memory_block.hpp>
 #include <dnd/memblock/pod_memory_block.hpp>
+#include <dnd/memblock/fixed_size_pod_memory_block.hpp>
 #include <dnd/nodes/ndarray_node.hpp>
 
 using namespace std;
@@ -72,26 +73,35 @@ void dnd::detail::memory_block_free(memory_block_data *memblock)
 
 void dnd::memory_block_debug_dump(const memory_block_data *memblock, std::ostream& o, const std::string& indent)
 {
-    o << indent << "------ memory_block at " << (const void *)memblock << "\n";
-    o << indent << " reference count: " << memblock->m_use_count << "\n";
-    switch ((memory_block_type_t)memblock->m_type) {
-        case ndarray_node_memory_block_type:
-            o << indent << " type: ndarray_node\n";
-            break;
-        case external_memory_block_type:
-            o << indent << " type: external\n";
-            break;
-        case fixed_size_pod_memory_block_type:
-            o << indent << " type: fixed_size_pod\n";
-            break;
-        case pod_memory_block_type:
-            o << indent << " type: pod\n";
-            break;
-        case object_memory_block_type:
-            o << indent << " type: object\n";
-            break;
+    if (memblock != NULL) {
+        o << indent << "------ memory_block at " << (const void *)memblock << "\n";
+        o << indent << " reference count: " << memblock->m_use_count << "\n";
+        switch ((memory_block_type_t)memblock->m_type) {
+            case ndarray_node_memory_block_type: {
+                o << indent << " type: ndarray_node\n";
+                ndarray_node_ptr node(const_cast<memory_block_data *>(memblock));
+                node->debug_dump(o, indent + " ");
+                break;
+            }
+            case external_memory_block_type:
+                o << indent << " type: external\n";
+                break;
+            case fixed_size_pod_memory_block_type:
+                o << indent << " type: fixed_size_pod\n";
+                fixed_size_pod_memory_block_debug_dump(memblock, o, indent);
+                break;
+            case pod_memory_block_type:
+                o << indent << " type: pod\n";
+                pod_memory_block_debug_dump(memblock, o, indent);
+                break;
+            case object_memory_block_type:
+                o << indent << " type: object\n";
+                break;
+        }
+        o << indent << "------" << endl;
+    } else {
+        o << indent << "------ NULL memory block" << endl;
     }
-    o << indent << "------" << endl;
 }
 
 memory_block_pod_allocator_api *dnd::get_memory_block_pod_allocator_api(memory_block_data *memblock)

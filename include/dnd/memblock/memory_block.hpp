@@ -78,6 +78,12 @@ struct memory_block_pod_allocator_api {
      * the needed size once that is determined.
      */
     void (*resize)(memory_block_data *self, intptr_t size_bytes, char **inout_begin, char **inout_end);
+    /**
+     * Finalizes the memory block so it can no longer be used to allocate more
+     * memory. This call uses realloc to try and shrink the destination memory as
+     * much as possible.
+     */
+    void (*finalize)(memory_block_data *self);
 };
 
 /**

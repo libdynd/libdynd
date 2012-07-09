@@ -61,15 +61,9 @@ public:
                                     assign_error_mode errmode = assign_error_fractional) {
 
         if (dst_dtype == src_dtype) {
-            if (dst_dtype.is_data_aligned(src_data)) {
-                // Pass through the aligned data pointer
-                m_data = reinterpret_cast<const char *>(src_data);
-                m_allocated = false;
-            } else {
-                // Make a copy into an aligned buffer
-                char *tmp = allocate_data(dst_dtype.element_size());
-                DND_MEMCPY(tmp, src_data, dst_dtype.element_size());
-            }
+            // Pass through the aligned data pointer
+            m_data = reinterpret_cast<const char *>(src_data);
+            m_allocated = false;
         } else {
             // Make a converted copy into an aligned buffer
             char *tmp = allocate_data(dst_dtype.element_size());

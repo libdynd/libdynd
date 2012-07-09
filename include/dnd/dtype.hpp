@@ -510,27 +510,6 @@ public:
     }
 
     /**
-     * Returns true if the data pointer is aligned
-     *
-     * @param dataptr  The pointer to the data.
-     */
-    bool is_data_aligned(const void* dataptr) const {
-        return ((m_alignment - 1) & reinterpret_cast<intptr_t>(dataptr)) == 0;
-    }
-
-    /**
-     * Returns true if the data will always be aligned
-     * for this data type.
-     *
-     * @param align_test  This value should be the bitwise-OR (|)
-     *                    of the origin data pointer and all the strides
-     *                    that may be added to the data.
-     */
-    bool is_data_aligned(char align_test) const {
-        return ((char)(m_alignment - 1) & align_test) == 0;
-    }
-
-    /**
      * Returns a const pointer to the extended_dtype object which
      * contains information about the dtype, or NULL if no extended
      * dtype information exists. The returned pointer is only valid during
