@@ -77,13 +77,15 @@ enum type_id_t {
     // Complex floating-point types
     complex_float32_type_id,
     complex_float64_type_id,
-    // Raw bytes
-    bytes_type_id,
+    // Raw fixed size bytes
+    fixedbytes_type_id,
 
     // Other primitives
-    string_type_id,
     fixedstring_type_id,
     categorical_type_id,
+
+    // blockref primitive dtypes
+    string_type_id,
 
     // Composite dtypes
     struct_type_id,
@@ -94,7 +96,6 @@ enum type_id_t {
     conversion_type_id,
     byteswap_type_id,
     align_type_id,
-    unaligned_type_id, //TODO: delete this one
     view_type_id,
 
     // pattern matches against other types - cannot instantiate
@@ -529,7 +530,7 @@ public:
 
     friend /* TODO: DND_CONSTEXPR*/ dtype detail::internal_make_raw_dtype(char type_id, char kind, char alignment, intptr_t element_size);
     friend std::ostream& operator<<(std::ostream& o, const dtype& rhs);
-    friend dtype make_bytes_dtype(intptr_t element_size, intptr_t alignment);
+    friend dtype make_fixedbytes_dtype(intptr_t element_size, intptr_t alignment);
 };
 
 // Convenience function which makes a dtype object from a template parameter
@@ -551,7 +552,7 @@ extern const dtype static_builtin_dtypes[builtin_type_id_count];
  * Creates a bytes<size, alignment> dtype, for representing
  * raw, uninterpreted bytes.
  */
-dtype make_bytes_dtype(intptr_t element_size, intptr_t alignment);
+dtype make_fixedbytes_dtype(intptr_t element_size, intptr_t alignment);
 
 
 std::ostream& operator<<(std::ostream& o, const dtype& rhs);

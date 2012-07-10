@@ -73,7 +73,7 @@ cdef extern from "dnd/dtype.hpp" namespace "dnd":
         extended_dtype* extended()
         string_encoding_t string_encoding() except +
 
-    dtype dnd_make_bytes_dtype "dnd::make_bytes_dtype" (intptr_t, intptr_t) except +
+    dtype dnd_make_fixedbytes_dtype "dnd::make_fixedbytes_dtype" (intptr_t, intptr_t) except +
 
 cdef extern from "dnd/dtype_assign.hpp" namespace "dnd":
     cdef enum assign_error_mode:

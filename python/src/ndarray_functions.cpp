@@ -143,7 +143,7 @@ static PyObject* element_as_pyobject(const dtype& d, const char *data)
             return PyComplex_FromDoubles(*(const float *)data, *((const float *)data + 1));
         case complex_float64_type_id:
             return PyComplex_FromDoubles(*(const double *)data, *((const double *)data + 1));
-        case bytes_type_id:
+        case fixedbytes_type_id:
             return PyBytes_FromStringAndSize(data, d.element_size());
         case fixedstring_type_id: {
             switch (d.string_encoding()) {

@@ -46,7 +46,7 @@ TEST(NDArrayViews, OneDimensionalRawMemory) {
     // where necessary
     a(1 <= irange() < 9).vals() = c_values;
     b = a(1 <= irange() < 73).view_as_dtype<uint64_t>();
-    EXPECT_EQ(make_view_dtype(make_dtype<uint64_t>(), make_bytes_dtype(8, 1)), b.get_dtype());
+    EXPECT_EQ(make_view_dtype(make_dtype<uint64_t>(), make_fixedbytes_dtype(8, 1)), b.get_dtype());
     EXPECT_EQ(1, b.get_ndim());
     EXPECT_EQ(9, b.get_shape()[0]);
     EXPECT_EQ(a.get_readonly_originptr() + 1, b.get_readonly_originptr());

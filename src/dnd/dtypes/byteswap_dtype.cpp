@@ -12,7 +12,7 @@ using namespace std;
 using namespace dnd;
 
 dnd::byteswap_dtype::byteswap_dtype(const dtype& value_dtype)
-    : m_value_dtype(value_dtype), m_operand_dtype(make_bytes_dtype(value_dtype.element_size(), value_dtype.alignment()))
+    : m_value_dtype(value_dtype), m_operand_dtype(make_fixedbytes_dtype(value_dtype.element_size(), value_dtype.alignment()))
 {
     if (value_dtype.extended() != 0) {
         throw std::runtime_error("byteswap_dtype: Only built-in dtypes are supported presently");
@@ -29,14 +29,14 @@ dnd::byteswap_dtype::byteswap_dtype(const dtype& value_dtype, const dtype& opera
     : m_value_dtype(value_dtype), m_operand_dtype(operand_dtype)
 {
     // Only a bytes dtype be the operand to the byteswap
-    if (operand_dtype.value_dtype().type_id() != bytes_type_id) {
+    if (operand_dtype.value_dtype().type_id() != fixedbytes_type_id) {
         std::stringstream ss;
         ss << "byteswap_dtype: The operand to the dtype must have a value dtype of bytes, not " << operand_dtype.value_dtype();
         throw std::runtime_error(ss.str());
     }
     // Automatically realign if needed
     if (operand_dtype.value_dtype().alignment() < value_dtype.alignment()) {
-        m_operand_dtype = make_view_dtype(operand_dtype, make_bytes_dtype(operand_dtype.element_size(), value_dtype.alignment()));
+        m_operand_dtype = make_view_dtype(operand_dtype, make_fixedbytes_dtype(operand_dtype.element_size(), value_dtype.alignment()));
     }
 
     if(m_value_dtype.kind() != complex_kind) {
@@ -54,7 +54,7 @@ void dnd::byteswap_dtype::print_element(std::ostream& DND_UNUSED(o), const char 
 void dnd::byteswap_dtype::print_dtype(std::ostream& o) const
 {
     o << "byteswap<" << m_value_dtype;
-    if (m_operand_dtype.type_id() != bytes_type_id) {
+    if (m_operand_dtype.type_id() != fixedbytes_type_id) {
         o << ", " << m_operand_dtype;
     }
     o << ">";

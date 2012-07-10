@@ -111,20 +111,20 @@ class TestDType(unittest.TestCase):
         self.assertEqual(nd.float64, nd.dtype(float))
         self.assertEqual(nd.cfloat64, nd.dtype(complex))
 
-    def test_bytes_dtype(self):
-        d = nd.make_bytes_dtype(4, 4)
-        self.assertEqual(str(d), 'bytes<4,4>')
+    def test_fixedbytes_dtype(self):
+        d = nd.make_fixedbytes_dtype(4, 4)
+        self.assertEqual(str(d), 'fixedbytes<4,4>')
         self.assertEqual(d.element_size, 4)
         self.assertEqual(d.alignment, 4)
 
-        d = nd.make_bytes_dtype(9, 1)
-        self.assertEqual(str(d), 'bytes<9,1>')
+        d = nd.make_fixedbytes_dtype(9, 1)
+        self.assertEqual(str(d), 'fixedbytes<9,1>')
         self.assertEqual(d.element_size, 9)
         self.assertEqual(d.alignment, 1)
 
         # Alignment must not be greater than element_size
-        self.assertRaises(RuntimeError, nd.make_bytes_dtype, 1, 2)
+        self.assertRaises(RuntimeError, nd.make_fixedbytes_dtype, 1, 2)
         # Alignment must be a power of 2
-        self.assertRaises(RuntimeError, nd.make_bytes_dtype, 6, 3)
+        self.assertRaises(RuntimeError, nd.make_fixedbytes_dtype, 6, 3)
         # Alignment must divide into the element_size
-        self.assertRaises(RuntimeError, nd.make_bytes_dtype, 6, 4)
+        self.assertRaises(RuntimeError, nd.make_fixedbytes_dtype, 6, 4)

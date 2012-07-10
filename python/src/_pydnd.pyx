@@ -125,10 +125,10 @@ def make_byteswap_dtype(native_dtype, operand_dtype=None):
         SET(result.v, dnd_make_byteswap_dtype(GET(w_dtype(native_dtype).v), GET(w_dtype(operand_dtype).v)))
     return result
 
-def make_bytes_dtype(int element_size, int alignment):
+def make_fixedbytes_dtype(int element_size, int alignment):
     """Constructs a bytes dtype with the specified element size and alignment."""
     cdef w_dtype result = w_dtype()
-    SET(result.v, dnd_make_bytes_dtype(element_size, alignment))
+    SET(result.v, dnd_make_fixedbytes_dtype(element_size, alignment))
     return result
 
 def make_convert_dtype(to_dtype, from_dtype):

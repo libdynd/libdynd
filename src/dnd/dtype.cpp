@@ -207,8 +207,8 @@ std::ostream& dnd::operator<<(std::ostream& o, const dtype& rhs)
         case complex_float64_type_id:
             o << "complex<float64>";
             break;
-        case bytes_type_id:
-            o << "bytes<" << rhs.element_size() << "," << rhs.alignment() << ">";
+        case fixedbytes_type_id:
+            o << "fixedbytes<" << rhs.element_size() << "," << rhs.alignment() << ">";
             break;
         case pattern_type_id:
             o << "pattern";
@@ -308,7 +308,7 @@ void dnd::dtype::print_element(std::ostream& o, const char * data) const
             case complex_float64_type_id:
                 print_as<complex<double>, complex<double> >(o, data);
                 break;
-            case bytes_type_id:
+            case fixedbytes_type_id:
                 o << "0x";
                 hexadecimal_print(o, data, m_element_size);
                 break;
@@ -320,7 +320,7 @@ void dnd::dtype::print_element(std::ostream& o, const char * data) const
     }
 }
 
-dtype dnd::make_bytes_dtype(intptr_t element_size, intptr_t alignment)
+dtype dnd::make_fixedbytes_dtype(intptr_t element_size, intptr_t alignment)
 {
     if (alignment > element_size) {
         std::stringstream ss;
@@ -337,5 +337,5 @@ dtype dnd::make_bytes_dtype(intptr_t element_size, intptr_t alignment)
         ss << "Cannot make a bytes<" << element_size << "," << alignment << "> dtype, its alignment does not divide into its element size";
         throw std::runtime_error(ss.str());
     }
-    return dtype(bytes_type_id, bytes_kind, alignment, element_size);
+    return dtype(fixedbytes_type_id, bytes_kind, alignment, element_size);
 }
