@@ -472,16 +472,19 @@ static void nested_ndarray_print(std::ostream& o, const dtype& d, const char *da
 std::ostream& dnd::operator<<(std::ostream& o, const ndarray& rhs)
 {
     if (rhs.get_expr_tree() != NULL) {
+        o << "ndarray(" << rhs.get_dtype() << ", ";
         if (rhs.get_expr_tree()->get_category() == strided_array_node_category &&
                         rhs.get_dtype().kind() != expression_kind) {
             const char *originptr = rhs.get_expr_tree()->get_readonly_originptr();
             const intptr_t *strides = rhs.get_expr_tree()->get_strides();
-            o << "ndarray(" << rhs.get_dtype() << ", ";
             nested_ndarray_print(o, rhs.get_dtype(), originptr, rhs.get_ndim(), rhs.get_shape(), strides);
-            o << ")";
         } else {
-            o << rhs.vals();
+            ndarray tmp = rhs.vals();
+            const char *originptr = tmp.get_expr_tree()->get_readonly_originptr();
+            const intptr_t *strides = tmp.get_expr_tree()->get_strides();
+            nested_ndarray_print(o, tmp.get_dtype(), originptr, tmp.get_ndim(), tmp.get_shape(), strides);
         }
+        o << ")";
     } else {
         o << "ndarray()";
     }
