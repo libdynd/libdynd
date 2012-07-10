@@ -187,13 +187,6 @@ public:
         return m_expr_tree->get_readonly_originptr();
     }
 
-    memory_block_ptr get_memory_block() const
-    {
-        // TODO: When ndarray_node becomes a memory_block, return the
-        //       node if this function returns NULL.
-        return m_expr_tree->get_memory_block();
-    }
-
     ndarray_node_ptr get_expr_tree() const {
         return m_expr_tree;
     }

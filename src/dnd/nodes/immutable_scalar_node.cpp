@@ -16,14 +16,14 @@ ndarray_node_ptr dnd::immutable_scalar_node::as_dtype(const dtype& dt,
     if (allow_in_place) {
         m_dtype = make_conversion_dtype(dt, m_dtype, errmode);
         return as_ndarray_node_ptr();
-    } else if(m_dtype.element_size() <= 16) {
+    } else if(m_dtype.element_size() <= 32) {
         // For small amounts of data, make a copy
         return make_immutable_scalar_node(
                         make_conversion_dtype(dt, m_dtype, errmode),
                         m_originptr);
     } else {
         // For larger amounts of data, make a strided node
-        // TODO: Make a scalar_node which isn't necessarily immutable
+        // TODO: Make a scalar_node which points at a separate memory block
         return make_strided_ndarray_node(make_conversion_dtype(dt, m_dtype, errmode),
                         0, NULL, NULL, m_originptr, read_access_flag | immutable_access_flag, as_ndarray_node_ptr());
     }

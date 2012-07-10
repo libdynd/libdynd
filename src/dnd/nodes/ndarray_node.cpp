@@ -19,6 +19,20 @@
 using namespace std;
 using namespace dnd;
 
+static void print_ndarray_access_flags(std::ostream& o, int access_flags)
+{
+    if (access_flags & read_access_flag) {
+        o << "read ";
+    }
+    if (access_flags & write_access_flag) {
+        o << "write ";
+    }
+    if (access_flags & immutable_access_flag) {
+        o << "immutable ";
+    }
+}
+
+
 const intptr_t *dnd::ndarray_node::get_strides() const
 {
     throw std::runtime_error("cannot get strides from an ndarray node which is not strided");
@@ -63,6 +77,12 @@ void dnd::ndarray_node::get_binary_operation(intptr_t, intptr_t, intptr_t, kerne
                              "binary nodes which provide an implementation");
 }
 
+memory_block_ptr dnd::ndarray_node::get_data_memory_block()
+{
+    return memory_block_ptr();
+}
+
+
 static ndarray_node_ptr evaluate_strided_array_expression_dtype(ndarray_node* node)
 {
     const dtype& dt = node->get_dtype();
@@ -90,10 +110,7 @@ static ndarray_node_ptr evaluate_strided_array_expression_dtype(ndarray_node* no
         auxdata_kernel_api *api = operation.auxdata.get_kernel_api();
         if (api->supports_referencing_src_memory_blocks(operation.auxdata)) {
             // If the kernel can reference existing memory, add a blockref to the src data
-            memory_block_ptr src_memblock = node->get_memory_block();
-            if (src_memblock.get() == NULL) {
-                src_memblock = node->as_ndarray_node_ptr();
-            }
+            memory_block_ptr src_memblock = node->get_data_memory_block();
             result = make_strided_ndarray_node(value_dt, ndim, node->get_shape(), axis_perm.get(),
                             node->get_access_flags(), &src_memblock, &src_memblock + 1);
             // Because we just allocated this buffer, we can write to it even though it
@@ -254,15 +271,7 @@ void dnd::ndarray_node::debug_dump(ostream& o, const string& indent) const
     print_node_category(o, get_category());
     o << "\n";
     o << indent << " access flags: ";
-    if (get_access_flags() & read_access_flag) {
-        o << "read ";
-    }
-    if (get_access_flags() & write_access_flag) {
-        o << "write ";
-    }
-    if (get_access_flags() & immutable_access_flag) {
-        o << "immutable ";
-    }
+    print_ndarray_access_flags(o, get_access_flags());
     o << "\n";
     debug_dump_extra(o, indent);
 

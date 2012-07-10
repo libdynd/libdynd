@@ -8,8 +8,9 @@
 #include "utility_functions.hpp"
 #include "numpy_interop.hpp"
 
-#include <dnd/dtypes/fixedstring_dtype.hpp>
+#include <dnd/dtypes/string_dtype.hpp>
 #include <dnd/memblock/external_memory_block.hpp>
+#include <dnd/nodes/scalar_node.hpp>
 #include <dnd/ndarray_arange.hpp>
 #include <dnd/dtype_promotion.hpp>
 
@@ -79,22 +80,24 @@ void pydnd::ndarray_init_from_pyobject(dnd::ndarray& n, PyObject* obj)
         if (PyString_AsStringAndSize(obj, &data, &len) < 0) {
             throw runtime_error("Error getting string data");
         }
-        dtype d = make_fixedstring_dtype(string_encoding_ascii, len);
-        // Python strings are immutable, so simply use the existing memory with an external memory block
-        n = ndarray(make_strided_ndarray_node(d, 0, NULL, NULL, data, read_access_flag | immutable_access_flag,
-                make_external_memory_block(reinterpret_cast<void *>(obj), &python_decref)));
+        dtype d = make_string_dtype(string_encoding_ascii);
+        const char *refs[2] = {data, data + len};
+        // Python strings are immutable, so simply use the existing memory with an external memory 
         Py_INCREF(obj);
+        n = ndarray(make_scalar_node(d, reinterpret_cast<const char *>(&refs), read_access_flag | immutable_access_flag,
+                make_external_memory_block(reinterpret_cast<void *>(obj), &python_decref)));
     } else if (PyUnicode_Check(obj)) {
 #if Py_UNICODE_SIZE == 2
-        dtype d = make_fixedstring_dtype(string_encoding_ucs_2, PyUnicode_GetSize(obj));
+        dtype d = make_string_dtype(string_encoding_ucs_2);
 #else
-        dtype d = make_fixedstring_dtype(string_encoding_utf_32, PyUnicode_GetSize(obj));
+        dtype d = make_string_dtype(string_encoding_utf_32);
 #endif
-        // Python strings are immutable, so simply use the existing memory with an external memory block
         const char *data = reinterpret_cast<const char *>(PyUnicode_AsUnicode(obj));
-        n = ndarray(make_strided_ndarray_node(d, 0, NULL, NULL, data, read_access_flag | immutable_access_flag,
-                make_external_memory_block(reinterpret_cast<void *>(obj), &python_decref)));
+        const char *refs[2] = {data, data + Py_UNICODE_SIZE * PyUnicode_GetSize(obj)};
+        // Python strings are immutable, so simply use the existing memory with an external memory block
         Py_INCREF(obj);
+        n = ndarray(make_scalar_node(d, reinterpret_cast<const char *>(&refs), read_access_flag | immutable_access_flag,
+                make_external_memory_block(reinterpret_cast<void *>(obj), &python_decref)));
     } else {
         throw std::runtime_error("could not convert python object into a dnd::ndarray");
     }
@@ -171,6 +174,22 @@ static PyObject* element_as_pyobject(const dtype& d, const char *data)
                     }
                     return PyUnicode_DecodeUTF32(data, sizeof(uint32_t) * (udata_end - udata), NULL, NULL);
                 }
+                default:
+                    throw runtime_error("Unrecognized dnd::ndarray string encoding");
+            }
+        }
+        case string_type_id: {
+            const char * const *refs = reinterpret_cast<const char * const *>(data);
+            switch (d.string_encoding()) {
+                case string_encoding_ascii:
+                    return PyUnicode_DecodeASCII(refs[0], refs[1] - refs[0], NULL);
+                case string_encoding_utf_8:
+                    return PyUnicode_DecodeUTF8(refs[0], refs[1] - refs[0], NULL);
+                case string_encoding_ucs_2:
+                case string_encoding_utf_16:
+                    return PyUnicode_DecodeUTF16(refs[0], refs[1] - refs[0], NULL, NULL);
+                case string_encoding_utf_32:
+                    return PyUnicode_DecodeUTF32(refs[0], refs[1] - refs[0], NULL, NULL);
                 default:
                     throw runtime_error("Unrecognized dnd::ndarray string encoding");
             }

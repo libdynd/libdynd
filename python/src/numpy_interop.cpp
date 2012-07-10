@@ -340,5 +340,5 @@ PyObject* pydnd::ndarray_as_numpy_struct_capsule(const dnd::ndarray& n)
     memcpy(inter.shape, n.get_shape(), n.get_ndim() * sizeof(intptr_t));
 
     // TODO: Check for Python 3, use PyCapsule there
-    return PyCObject_FromVoidPtrAndDesc(new PyArrayInterface(inter), new memory_block_ptr(n.get_memory_block()), free_array_interface);
+    return PyCObject_FromVoidPtrAndDesc(new PyArrayInterface(inter), new memory_block_ptr(n.get_expr_tree()->get_data_memory_block()), free_array_interface);
 }

@@ -94,11 +94,6 @@ public:
         return m_opnodes[i];
     }
 
-    memory_block_ptr get_memory_block() const
-    {
-        return memory_block_ptr();
-    }
-
     ndarray_node_ptr as_dtype(const dtype& dt,
                         dnd::assign_error_mode errmode, bool allow_in_place)
     {

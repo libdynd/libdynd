@@ -37,6 +37,12 @@ public:
     virtual ~immutable_builtin_scalar_node() {
     }
 
+    memory_block_ptr get_data_memory_block()
+    {
+        // The data is always stored in the node itself
+        return as_memory_block_ptr();
+    }
+
     ndarray_node_category get_category() const
     {
         return strided_array_node_category;
@@ -69,11 +75,6 @@ public:
     const char *get_readonly_originptr() const
     {
         return reinterpret_cast<const char *>(&m_value);
-    }
-
-    memory_block_ptr get_memory_block() const
-    {
-        return memory_block_ptr();
     }
 
     ndarray_node_ptr as_dtype(const dtype& dt,

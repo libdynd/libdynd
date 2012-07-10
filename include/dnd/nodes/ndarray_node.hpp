@@ -6,6 +6,8 @@
 #ifndef _DND__NDARRAY_NODE_HPP_
 #define _DND__NDARRAY_NODE_HPP_
 
+#include <iostream>
+
 #include <boost/detail/atomic_count.hpp>
 #include <boost/intrusive_ptr.hpp>
 
@@ -61,9 +63,27 @@ public:
 
     /**
      * The ndarray_node is always allocated within a memory_block
-     * object. This returns the memory block.
+     * object. This returns the memory block smart pointer.
+     */
+    memory_block_ptr as_memory_block_ptr();
+
+    /**
+     * The ndarray_node is always allocated within a node memory_block
+     * object. This returns the ndarray node smart pointer.
      */
     ndarray_node_ptr as_ndarray_node_ptr();
+
+    /**
+     * The data for a strided node is always stored in a memory block,
+     * which may be this node or some other memory block. This
+     * returns the memory block which stores the data.
+     *
+     * For nodes that are expression-based, this returns NULL.
+     *
+     * In the case of blockref dtypes, this memory block also
+     * holds references to those other memory blocks.
+     */
+    virtual memory_block_ptr get_data_memory_block();
 
     virtual ndarray_node_category get_category() const = 0;
 
@@ -89,12 +109,6 @@ public:
     virtual const char *get_readonly_originptr() const;
 
     virtual char *get_readwrite_originptr() const;
-
-    /**
-     * Retrieves the memory_block object which holds the data for this
-     * node. If this node holds its own data, returns NULL.
-     */
-    virtual memory_block_ptr get_memory_block() const = 0;
 
     /** The number of operand nodes this node depends on */
     virtual int get_nop() const {
@@ -228,6 +242,13 @@ ndarray_node_ptr apply_index_to_node(const ndarray_node_ptr& node,
  */
 ndarray_node_ptr apply_integer_index_to_node(const ndarray_node_ptr& node,
                                 int axis, intptr_t idx, bool allow_in_place);
+
+inline memory_block_ptr ndarray_node::as_memory_block_ptr()
+{
+    // Subtract to get the memory_block pointer
+    return memory_block_ptr(reinterpret_cast<memory_block_data *>(
+                reinterpret_cast<char *>(this) - sizeof(memory_block_data)));
+}
 
 inline ndarray_node_ptr ndarray_node::as_ndarray_node_ptr()
 {

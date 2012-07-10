@@ -222,12 +222,12 @@ ndarray dnd::ndarray::storage() const
             return ndarray(make_strided_ndarray_node(m_expr_tree->get_dtype().storage_dtype(),
                         m_expr_tree->get_ndim(), m_expr_tree->get_shape(), m_expr_tree->get_strides(),
                          m_expr_tree->get_readwrite_originptr(),
-                        access_flags, m_expr_tree->get_memory_block()));
+                        access_flags, m_expr_tree->get_data_memory_block()));
         } else {
             return ndarray(make_strided_ndarray_node(m_expr_tree->get_dtype().storage_dtype(),
                         m_expr_tree->get_ndim(), m_expr_tree->get_shape(), m_expr_tree->get_strides(),
                         m_expr_tree->get_readonly_originptr(),
-                        access_flags, m_expr_tree->get_memory_block()));
+                        access_flags, m_expr_tree->get_data_memory_block()));
         }
     } else {
         throw std::runtime_error("Can only get the storage from strided dnd::ndarrays");
@@ -276,11 +276,11 @@ ndarray dnd::ndarray::view_as_dtype(const dtype& dt) const
         if ((((uintptr_t)originptr)&(dt.alignment()-1)) == 0) {
             // If the dtype's alignment is satisfied, can view it as is
             return ndarray(make_strided_ndarray_node(dt, 1, shape, strides, originptr,
-                                get_expr_tree()->get_access_flags(), get_memory_block()));
+                                get_expr_tree()->get_access_flags(), m_expr_tree->get_data_memory_block()));
         } else {
             // The dtype's alignment was insufficient, so making it unaligned<>
             return ndarray(make_strided_ndarray_node(make_unaligned_dtype(dt), 1, shape, strides, originptr,
-                            get_expr_tree()->get_access_flags(), get_memory_block()));
+                            get_expr_tree()->get_access_flags(), m_expr_tree->get_data_memory_block()));
         }
     }
 
@@ -309,10 +309,10 @@ ndarray dnd::ndarray::view_as_dtype(const dtype& dt) const
 
         if (aligned) {
             return ndarray(make_strided_ndarray_node(dt, get_ndim(), get_shape(), get_strides(),
-                            get_readwrite_originptr(), read_access_flag | write_access_flag, get_memory_block()));
+                            get_readwrite_originptr(), read_access_flag | write_access_flag, m_expr_tree->get_data_memory_block()));
         } else {
             return ndarray(make_strided_ndarray_node(make_unaligned_dtype(dt), get_ndim(), get_shape(), get_strides(),
-                            get_readwrite_originptr(), read_access_flag | write_access_flag, get_memory_block()));
+                            get_readwrite_originptr(), read_access_flag | write_access_flag, m_expr_tree->get_data_memory_block()));
         }
     }
 

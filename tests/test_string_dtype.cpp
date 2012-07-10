@@ -101,9 +101,9 @@ TEST(StringDType, AccessFlags) {
     ndarray a, b;
 
     // Default construction from a string produces an immutable fixedstring
-    a = std::string("testing one two three");
+    a = std::string("testing one two three testing one two three four five testing one two three four five six seven");
     EXPECT_EQ(read_access_flag | immutable_access_flag, a.get_access_flags());
-    EXPECT_EQ(make_fixedstring_dtype(string_encoding_utf_8, 21), a.get_dtype());
+    EXPECT_EQ(make_fixedstring_dtype(string_encoding_utf_8, 95), a.get_dtype());
 
     // Converting to a blockref string of the same encoding produces a reference
     // into the fixedstring value

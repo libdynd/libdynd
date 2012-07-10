@@ -72,6 +72,11 @@ public:
     virtual ~strided_ndarray_node() {
     }
 
+    memory_block_ptr get_data_memory_block()
+    {
+        return m_memblock;
+    }
+
     ndarray_node_category get_category() const
     {
         return strided_array_node_category;
@@ -100,7 +105,8 @@ public:
         return m_access_flags;
     }
     
-    char *get_readwrite_originptr() const {
+    char *get_readwrite_originptr() const
+    {
         if (m_access_flags & write_access_flag) {
             return m_originptr;
         } else {
@@ -108,12 +114,9 @@ public:
         }
     }
 
-    const char *get_readonly_originptr() const {
+    const char *get_readonly_originptr() const
+    {
         return m_originptr;
-    }
-
-    memory_block_ptr get_memory_block() const {
-        return m_memblock;
     }
 
     ndarray_node_ptr as_dtype(const dtype& dt,

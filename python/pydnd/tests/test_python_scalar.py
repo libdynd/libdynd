@@ -50,13 +50,13 @@ class TestPythonScalar(unittest.TestCase):
     def test_string(self):
         # String/Unicode TODO: Python 3 bytes becomes a bytes<> dtype
         a = nd.ndarray('abcdef')
-        self.assertEqual(a.dtype, nd.make_fixedstring_dtype('ascii', 6))
+        self.assertEqual(a.dtype, nd.make_string_dtype('ascii'))
         self.assertEqual(type(a.as_py()), unicode)
         self.assertEqual(a.as_py(), u'abcdef')
         a = nd.ndarray(u'abcdef')
         # Could be UTF 16 or 32 depending on the Python build configuration
-        self.assertTrue(a.dtype == nd.make_fixedstring_dtype('ucs_2', 6) or
-                    a.dtype == nd.make_fixedstring_dtype('utf_32', 6))
+        self.assertTrue(a.dtype == nd.make_string_dtype('ucs_2') or
+                    a.dtype == nd.make_string_dtype('utf_32'))
         self.assertEqual(type(a.as_py()), unicode)
         self.assertEqual(a.as_py(), u'abcdef')
 
