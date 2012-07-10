@@ -13,7 +13,7 @@
 #include <dnd/ndarray.hpp>
 #include <dnd/ndarray_arange.hpp>
 #include <dnd/dtypes/dtype_alignment.hpp>
-#include <dnd/dtypes/conversion_dtype.hpp>
+#include <dnd/dtypes/convert_dtype.hpp>
 #include <dnd/dtypes/view_dtype.hpp>
 
 using namespace std;
@@ -84,13 +84,13 @@ TEST(NDArrayViews, ExpressionDType) {
     // view uint16_t -> int16_t
     a = values;
     a_u2 = a.as_dtype<uint16_t>();
-    EXPECT_EQ((make_conversion_dtype<uint16_t, uint32_t>()), a_u2.get_dtype());
+    EXPECT_EQ((make_convert_dtype<uint16_t, uint32_t>()), a_u2.get_dtype());
 
     // Wrong size, so should throw
     EXPECT_THROW(b = a_u2.view_as_dtype<int32_t>(), runtime_error);
 
     b = a_u2.view_as_dtype<int16_t>();
-    EXPECT_EQ((make_view_dtype(make_dtype<int16_t>(), make_conversion_dtype<uint16_t, uint32_t>())), b.get_dtype());
+    EXPECT_EQ((make_view_dtype(make_dtype<int16_t>(), make_convert_dtype<uint16_t, uint32_t>())), b.get_dtype());
     EXPECT_EQ(2, b.get_ndim());
     EXPECT_EQ(2, b.get_shape()[0]);
     EXPECT_EQ(3, b.get_shape()[1]);

@@ -10,7 +10,7 @@
 #include "inc_gtest.hpp"
 
 #include "dnd/ndarray.hpp"
-#include "dnd/dtypes/conversion_dtype.hpp"
+#include "dnd/dtypes/convert_dtype.hpp"
 
 using namespace std;
 using namespace dnd;
@@ -319,8 +319,8 @@ TEST(NDArrayAssign, ChainedCastingRead) {
     b = a.as_dtype<int>(assign_error_overflow);
     b = b.as_dtype<float>(assign_error_inexact);
     // Multiple as_dtype operations should make a chained conversion dtype
-    EXPECT_EQ(make_conversion_dtype(make_dtype<float>(),
-                                    make_conversion_dtype<int, float>(assign_error_overflow), assign_error_inexact),
+    EXPECT_EQ(make_convert_dtype(make_dtype<float>(),
+                                    make_convert_dtype<int, float>(assign_error_overflow), assign_error_inexact),
               b.get_dtype());
 
     // Evaluating the values should truncate them to integers
@@ -341,12 +341,12 @@ TEST(NDArrayAssign, ChainedCastingRead) {
     b = b.as_dtype<float>(assign_error_overflow);
     b = b.as_dtype<int32_t>(assign_error_overflow);
 
-    EXPECT_EQ(make_conversion_dtype(make_dtype<int32_t>(),
-                    make_conversion_dtype(make_dtype<float>(),
-                        make_conversion_dtype(make_dtype<int64_t>(),
-                            make_conversion_dtype(make_dtype<int16_t>(),
-                                make_conversion_dtype(make_dtype<int32_t>(),
-                                    make_conversion_dtype<int16_t, float>(
+    EXPECT_EQ(make_convert_dtype(make_dtype<int32_t>(),
+                    make_convert_dtype(make_dtype<float>(),
+                        make_convert_dtype(make_dtype<int64_t>(),
+                            make_convert_dtype(make_dtype<int16_t>(),
+                                make_convert_dtype(make_dtype<int32_t>(),
+                                    make_convert_dtype<int16_t, float>(
                                     assign_error_overflow),
                                 assign_error_overflow),
                             assign_error_overflow),
@@ -370,8 +370,8 @@ TEST(NDArrayAssign, ChainedCastingWrite) {
     b = a.as_dtype<int>(assign_error_inexact);
     b = b.as_dtype<float>(assign_error_overflow);
     // Multiple as_dtype operations should make a chained conversion dtype
-    EXPECT_EQ(make_conversion_dtype(make_dtype<float>(),
-                                    make_conversion_dtype<int, float>(assign_error_inexact), assign_error_overflow),
+    EXPECT_EQ(make_convert_dtype(make_dtype<float>(),
+                                    make_convert_dtype<int, float>(assign_error_inexact), assign_error_overflow),
               b.get_dtype());
 
     b(0).vals() = 6.8f;

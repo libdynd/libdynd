@@ -93,7 +93,7 @@ enum type_id_t {
     array_type_id,
 
     // Adapter dtypes
-    conversion_type_id,
+    convert_type_id,
     byteswap_type_id,
     align_type_id,
     view_type_id,

@@ -11,7 +11,7 @@
 
 #include <dnd/ndarray.hpp>
 #include <dnd/dtypes/byteswap_dtype.hpp>
-#include <dnd/dtypes/conversion_dtype.hpp>
+#include <dnd/dtypes/convert_dtype.hpp>
 
 using namespace std;
 using namespace dnd;
@@ -32,7 +32,7 @@ TEST(ByteswapDType, Create) {
     EXPECT_EQ(d.storage_dtype(), make_fixedbytes_dtype(16, 8));
 
     // Only basic built-in dtypes can be used to make a byteswap dtype
-    EXPECT_THROW(d = make_byteswap_dtype(make_conversion_dtype<int, float>()), runtime_error);
+    EXPECT_THROW(d = make_byteswap_dtype(make_convert_dtype<int, float>()), runtime_error);
 }
 
 TEST(ByteswapDType, Basic) {

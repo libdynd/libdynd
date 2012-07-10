@@ -10,7 +10,7 @@
 #include <dnd/exceptions.hpp>
 #include <dnd/buffer_storage.hpp>
 #include <dnd/kernels/assignment_kernels.hpp>
-#include <dnd/dtypes/conversion_dtype.hpp>
+#include <dnd/dtypes/convert_dtype.hpp>
 #include <dnd/dtypes/dtype_alignment.hpp>
 #include <dnd/dtypes/view_dtype.hpp>
 #include <dnd/dtypes/fixedstring_dtype.hpp>

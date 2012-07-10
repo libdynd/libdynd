@@ -36,7 +36,7 @@ cdef extern from "dnd/dtype.hpp" namespace "dnd":
         struct_type_id
         tuple_type_id
         array_type_id
-        conversion_type_id
+        convert_type_id
         pattern_type_id
 
     cdef enum string_encoding_t:
@@ -86,8 +86,8 @@ cdef extern from "dnd/dtypes/byteswap_dtype.hpp" namespace "dnd":
     dtype dnd_make_byteswap_dtype "dnd::make_byteswap_dtype" (dtype&) except +
     dtype dnd_make_byteswap_dtype "dnd::make_byteswap_dtype" (dtype&, dtype&) except +
 
-cdef extern from "dnd/dtypes/conversion_dtype.hpp" namespace "dnd":
-    dtype dnd_make_conversion_dtype "dnd::make_conversion_dtype" (dtype&, dtype&, assign_error_mode) except +
+cdef extern from "dnd/dtypes/convert_dtype.hpp" namespace "dnd":
+    dtype dnd_make_convert_dtype "dnd::make_convert_dtype" (dtype&, dtype&, assign_error_mode) except +
 
 cdef extern from "dnd/dtypes/dtype_alignment.hpp" namespace "dnd":
     dtype dnd_make_unaligned_dtype "dnd::make_unaligned_dtype" (dtype&) except +

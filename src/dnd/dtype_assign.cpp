@@ -12,7 +12,7 @@
 #include <limits>
 
 #include <dnd/dtype_assign.hpp>
-#include <dnd/dtypes/conversion_dtype.hpp>
+#include <dnd/dtypes/convert_dtype.hpp>
 #include <dnd/kernels/assignment_kernels.hpp>
 #include <dnd/diagnostics.hpp>
 

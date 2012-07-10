@@ -134,7 +134,7 @@ def make_fixedbytes_dtype(int element_size, int alignment):
 def make_convert_dtype(to_dtype, from_dtype):
     """Constructs a conversion dtype from the given source and destination dtypes."""
     cdef w_dtype result = w_dtype()
-    SET(result.v, dnd_make_conversion_dtype(GET(w_dtype(to_dtype).v), GET(w_dtype(from_dtype).v), assign_error_fractional))
+    SET(result.v, dnd_make_convert_dtype(GET(w_dtype(to_dtype).v), GET(w_dtype(from_dtype).v), assign_error_fractional))
     return result
 
 def make_unaligned_dtype(aligned_dtype):

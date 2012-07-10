@@ -10,7 +10,7 @@
 #include <dnd/nodes/strided_ndarray_node.hpp>
 #include <dnd/memblock/fixed_size_pod_memory_block.hpp>
 #include <dnd/memblock/ndarray_node_memory_block.hpp>
-#include <dnd/dtypes/conversion_dtype.hpp>
+#include <dnd/dtypes/convert_dtype.hpp>
 
 using namespace std;
 using namespace dnd;
@@ -107,11 +107,11 @@ ndarray_node_ptr dnd::strided_ndarray_node::as_dtype(const dtype& dt,
                     dnd::assign_error_mode errmode, bool allow_in_place)
 {
     if (allow_in_place) {
-        m_dtype = make_conversion_dtype(dt, m_dtype, errmode);
+        m_dtype = make_convert_dtype(dt, m_dtype, errmode);
         return as_ndarray_node_ptr();
     } else {
         return make_strided_ndarray_node(
-                        make_conversion_dtype(dt, m_dtype, errmode),
+                        make_convert_dtype(dt, m_dtype, errmode),
                         m_ndim, m_shape.get(), m_strides.get(),
                         m_originptr, m_access_flags, m_memblock);
     }

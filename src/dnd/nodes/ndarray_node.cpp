@@ -13,7 +13,7 @@
 #include <dnd/nodes/ndarray_node.hpp>
 #include <dnd/nodes/elementwise_binary_kernel_node.hpp>
 #include <dnd/raw_iteration.hpp>
-#include <dnd/dtypes/conversion_dtype.hpp>
+#include <dnd/dtypes/convert_dtype.hpp>
 #include <dnd/memblock/pod_memory_block.hpp>
 
 using namespace std;

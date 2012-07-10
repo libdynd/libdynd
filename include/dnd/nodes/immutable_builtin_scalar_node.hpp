@@ -81,7 +81,7 @@ public:
                         dnd::assign_error_mode errmode, bool DND_UNUSED(allow_in_place))
     {
         return make_immutable_scalar_node(
-                        make_conversion_dtype(dt, static_builtin_dtypes[type_id_of<T>::value], errmode),
+                        make_convert_dtype(dt, static_builtin_dtypes[type_id_of<T>::value], errmode),
                         reinterpret_cast<const char *>(&m_value));
     }
 

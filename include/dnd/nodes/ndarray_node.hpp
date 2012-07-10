@@ -134,7 +134,7 @@ public:
     ndarray_node_ptr evaluate();
 
     /**
-     * Converts this node to a new dtype. This uses a conversion_dtype.
+     * Converts this node to a new dtype. This uses a convert_dtype.
      */
     virtual ndarray_node_ptr as_dtype(const dtype& dt,
                         assign_error_mode errmode, bool allow_in_place) = 0;

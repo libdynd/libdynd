@@ -10,7 +10,7 @@ set(tests_SRC
     test_array_dtype.cpp
     test_byteswap_dtype.cpp
     test_categorical_dtype.cpp
-    test_conversion_dtype.cpp
+    test_convert_dtype.cpp
     test_align_dtype.cpp
     test_arithmetic_op.cpp
     test_dtype.cpp

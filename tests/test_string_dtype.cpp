@@ -12,7 +12,7 @@
 #include <dnd/ndarray.hpp>
 #include <dnd/dtypes/string_dtype.hpp>
 #include <dnd/dtypes/fixedstring_dtype.hpp>
-#include <dnd/dtypes/conversion_dtype.hpp>
+#include <dnd/dtypes/convert_dtype.hpp>
 
 using namespace std;
 using namespace dnd;
@@ -62,7 +62,7 @@ TEST(StringDType, Basic) {
 
     // Convert to a blockref string dtype with the same utf8 codec
     b = a.as_dtype(make_string_dtype(string_encoding_utf_8));
-    EXPECT_EQ(make_conversion_dtype(make_string_dtype(string_encoding_utf_8), make_fixedstring_dtype(string_encoding_utf_8, 7)),
+    EXPECT_EQ(make_convert_dtype(make_string_dtype(string_encoding_utf_8), make_fixedstring_dtype(string_encoding_utf_8, 7)),
                 b.get_dtype());
     b = b.vals();
     EXPECT_EQ(make_string_dtype(string_encoding_utf_8),
@@ -71,7 +71,7 @@ TEST(StringDType, Basic) {
 
     // Convert to a blockref string dtype with the utf16 codec
     b = a.as_dtype(make_string_dtype(string_encoding_utf_16));
-    EXPECT_EQ(make_conversion_dtype(make_string_dtype(string_encoding_utf_16), make_fixedstring_dtype(string_encoding_utf_8, 7)),
+    EXPECT_EQ(make_convert_dtype(make_string_dtype(string_encoding_utf_16), make_fixedstring_dtype(string_encoding_utf_8, 7)),
                 b.get_dtype());
     b = b.vals();
     EXPECT_EQ(make_string_dtype(string_encoding_utf_16),
@@ -80,7 +80,7 @@ TEST(StringDType, Basic) {
 
     // Convert to a blockref string dtype with the utf32 codec
     b = a.as_dtype(make_string_dtype(string_encoding_utf_32));
-    EXPECT_EQ(make_conversion_dtype(make_string_dtype(string_encoding_utf_32), make_fixedstring_dtype(string_encoding_utf_8, 7)),
+    EXPECT_EQ(make_convert_dtype(make_string_dtype(string_encoding_utf_32), make_fixedstring_dtype(string_encoding_utf_8, 7)),
                 b.get_dtype());
     b = b.vals();
     EXPECT_EQ(make_string_dtype(string_encoding_utf_32),
@@ -89,7 +89,7 @@ TEST(StringDType, Basic) {
 
     // Convert to a blockref string dtype with the ascii codec
     b = a.as_dtype(make_string_dtype(string_encoding_ascii));
-    EXPECT_EQ(make_conversion_dtype(make_string_dtype(string_encoding_ascii), make_fixedstring_dtype(string_encoding_utf_8, 7)),
+    EXPECT_EQ(make_convert_dtype(make_string_dtype(string_encoding_ascii), make_fixedstring_dtype(string_encoding_utf_8, 7)),
                 b.get_dtype());
     b = b.vals();
     EXPECT_EQ(make_string_dtype(string_encoding_ascii),

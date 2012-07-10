@@ -8,7 +8,7 @@
 
 #include <dnd/nodes/ndarray_node.hpp>
 #include <dnd/shape_tools.hpp>
-#include <dnd/dtypes/conversion_dtype.hpp>
+#include <dnd/dtypes/convert_dtype.hpp>
 #include <dnd/kernels/buffered_binary_kernels.hpp>
 #include <dnd/kernels/assignment_kernels.hpp>
 #include <dnd/memblock/ndarray_node_memory_block.hpp>
@@ -98,11 +98,11 @@ public:
                         dnd::assign_error_mode errmode, bool allow_in_place)
     {
         if (allow_in_place) {
-            m_dtype = make_conversion_dtype(dt, m_dtype, errmode);
+            m_dtype = make_convert_dtype(dt, m_dtype, errmode);
             return as_ndarray_node_ptr();
         } else {
             ndarray_node_ptr result(
-                    make_elementwise_binary_kernel_node(make_conversion_dtype(dt, m_dtype, errmode),
+                    make_elementwise_binary_kernel_node(make_convert_dtype(dt, m_dtype, errmode),
                                     m_ndim, m_shape.get(), m_opnodes[0], m_opnodes[1], m_op_factory));
             return result;
         }
