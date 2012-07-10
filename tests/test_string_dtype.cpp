@@ -20,7 +20,7 @@ using namespace dnd;
 TEST(StringDType, Create) {
     dtype d;
 
-    // Strings with various encodings and sizes
+    // Strings with various encodings
     d = make_string_dtype(string_encoding_utf_8);
     EXPECT_EQ(string_type_id, d.type_id());
     EXPECT_EQ(string_kind, d.kind());
@@ -95,4 +95,27 @@ TEST(StringDType, Basic) {
     EXPECT_EQ(make_string_dtype(string_encoding_ascii),
                     b.get_dtype());
     EXPECT_EQ(std::string("abcdefg"), b.as<std::string>());
+}
+
+TEST(StringDType, AccessFlags) {
+    ndarray a, b;
+
+    // Default construction from a string produces an immutable fixedstring
+    a = std::string("testing one two three");
+    EXPECT_EQ(read_access_flag | immutable_access_flag, a.get_access_flags());
+    EXPECT_EQ(make_fixedstring_dtype(string_encoding_utf_8, 21), a.get_dtype());
+
+    // Converting to a blockref string of the same encoding produces a reference
+    // into the fixedstring value
+    b = a.as_dtype(make_string_dtype(string_encoding_utf_8)).vals();
+    EXPECT_EQ(read_access_flag | immutable_access_flag, b.get_access_flags());
+    EXPECT_EQ(make_string_dtype(string_encoding_utf_8), b.get_dtype());
+    // The data array for 'a' matches the referenced data for 'b'
+    EXPECT_EQ(a.get_readonly_originptr(), reinterpret_cast<const char * const *>(b.get_readonly_originptr())[0]);
+
+    // Converting to a blockref string of a different encoding makes a new
+    // copy, so gets read write access
+    b = a.as_dtype(make_string_dtype(string_encoding_utf_16)).vals();
+    EXPECT_EQ(read_access_flag | write_access_flag, b.get_access_flags());
+    EXPECT_EQ(make_string_dtype(string_encoding_utf_16), b.get_dtype());
 }

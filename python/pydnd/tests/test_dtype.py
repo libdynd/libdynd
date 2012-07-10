@@ -81,6 +81,12 @@ class TestDType(unittest.TestCase):
         self.assertEqual(d.alignment, 1)
         self.assertEqual(d.string_encoding, 'ascii')
 
+        d = nd.make_fixedstring_dtype('ucs_2', 10)
+        self.assertEqual(str(d), 'fixedstring<ucs_2,10>')
+        self.assertEqual(d.element_size, 20)
+        self.assertEqual(d.alignment, 2)
+        self.assertEqual(d.string_encoding, 'ucs_2')
+
         d = nd.make_fixedstring_dtype('utf_8', 10)
         self.assertEqual(str(d), 'fixedstring<utf_8,10>')
         self.assertEqual(d.element_size, 10)

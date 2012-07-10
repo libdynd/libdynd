@@ -152,6 +152,10 @@ public:
         return m_expr_tree->get_dtype();
     }
 
+    int get_access_flags() const {
+        return m_expr_tree->get_access_flags();
+    }
+
     int get_ndim() const {
         return m_expr_tree->get_ndim();
     }

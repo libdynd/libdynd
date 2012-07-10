@@ -21,6 +21,7 @@ dnd::fixedstring_dtype::fixedstring_dtype(string_encoding_t encoding, intptr_t s
             m_element_size = m_stringsize;
             m_alignment = 1;
             break;
+        case string_encoding_ucs_2:
         case string_encoding_utf_16:
             m_element_size = m_stringsize * 2;
             m_alignment = 2;
@@ -285,7 +286,7 @@ void dnd::fixedstring_dtype::get_single_compare_kernel(single_compare_kernel_ins
         DND_FIXEDSTRING_COMPARISON_TABLE_TYPE_LEVEL(utf16),
         DND_FIXEDSTRING_COMPARISON_TABLE_TYPE_LEVEL(utf32)
     };
-    static int lookup[4] = {0, 0, 1, 2};
+    static int lookup[5] = {0, 1, 0, 1, 2};
     out_kernel.comparisons = fixedstring_comparisons_table[lookup[m_encoding]];
     make_raw_auxiliary_data(out_kernel.auxdata, static_cast<uintptr_t>(m_stringsize)<<1);
 }

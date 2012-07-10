@@ -14,11 +14,13 @@
 using namespace std;
 using namespace dnd;
 
-int dnd::string_encoding_char_size_table[5] = {
+int dnd::string_encoding_char_size_table[6] = {
     // string_encoding_ascii
     1,
     // string_encoding_utf_8
     1,
+    // string_encoding_ucs_2
+    2,
     // string_encoding_utf_16
     2,
     // string_encoding_utf_32
@@ -72,6 +74,56 @@ namespace {
             cp = ERROR_SUBSTITUTE_CODEPOINT;
         }
         *it = static_cast<char>(cp);
+        ++it;
+    }
+
+    static uint32_t next_ucs2(const char *&it_raw, const char *DND_UNUSED(end_raw))
+    {
+        const uint16_t *&it = reinterpret_cast<const uint16_t *&>(it_raw);
+        uint32_t cp = *it;
+        ++it;
+        if (utf8::internal::is_surrogate(cp)) {
+            stringstream ss;
+            ss << "Decoding error, surrogate U+";
+            hexadecimal_print(ss, cp);
+            ss << " is invalid in ucs2 input.";
+            throw std::runtime_error(ss.str());
+        }
+        return cp;
+    }
+
+    static uint32_t noerror_next_ucs2(const char *&it_raw, const char *DND_UNUSED(end_raw))
+    {
+        const uint16_t *&it = reinterpret_cast<const uint16_t *&>(it_raw);
+        uint32_t cp = *it;
+        ++it;
+        if (utf8::internal::is_surrogate(cp)) {
+            return ERROR_SUBSTITUTE_CODEPOINT;
+        }
+        return cp;
+    }
+
+    static void append_ucs2(uint32_t cp, char *&it_raw, char *DND_UNUSED(end_raw))
+    {
+        uint16_t *&it = reinterpret_cast<uint16_t *&>(it_raw);
+        if ((cp&~0xffff) != 0 || utf8::internal::is_surrogate(cp)) {
+            stringstream ss;
+            ss << "Cannot encode input code point U+";
+            hexadecimal_print(ss, cp);
+            ss << " as ucs2.";
+            throw std::runtime_error(ss.str());
+        }
+        *it = static_cast<uint16_t>(cp);
+        ++it;
+    }
+
+    static void noerror_append_ucs2(uint32_t cp, char *&it_raw, char *DND_UNUSED(end_raw))
+    {
+        uint16_t *&it = reinterpret_cast<uint16_t *&>(it_raw);
+        if ((cp&~0xffff) != 0 || utf8::internal::is_surrogate(cp)) {
+            cp = ERROR_SUBSTITUTE_CODEPOINT;
+        }
+        *it = static_cast<uint16_t>(cp);
         ++it;
     }
 
@@ -167,7 +219,7 @@ namespace {
     {
         const uint16_t *&it = reinterpret_cast<const uint16_t *&>(it_raw);
         const uint16_t *end = reinterpret_cast<const uint16_t *>(end_raw);
-        uint32_t cp = utf8::internal::mask16(*it++);
+        uint32_t cp = *it++;
         // Take care of surrogate pairs first
         if (utf8::internal::is_lead_surrogate(cp)) {
             if (it != end) {
@@ -299,6 +351,8 @@ next_unicode_codepoint_t dnd::get_next_unicode_codepoint_function(string_encodin
     switch (encoding) {
         case string_encoding_ascii:
             return (errmode != assign_error_none) ? next_ascii : noerror_next_ascii;
+        case string_encoding_ucs_2:
+            return (errmode != assign_error_none) ? next_ucs2 : noerror_next_ucs2;
         case string_encoding_utf_8:
             return (errmode != assign_error_none) ? next_utf8 : noerror_next_utf8;
         case string_encoding_utf_16:
@@ -315,6 +369,8 @@ append_unicode_codepoint_t dnd::get_append_unicode_codepoint_function(string_enc
     switch (encoding) {
         case string_encoding_ascii:
             return (errmode != assign_error_none) ? append_ascii : noerror_append_ascii;
+        case string_encoding_ucs_2:
+            return (errmode != assign_error_none) ? append_ucs2 : noerror_append_ucs2;
         case string_encoding_utf_8:
             return (errmode != assign_error_none) ? append_utf8 : noerror_append_utf8;
         case string_encoding_utf_16:

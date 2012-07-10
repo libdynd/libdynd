@@ -41,6 +41,7 @@ cdef extern from "dnd/dtype.hpp" namespace "dnd":
 
     cdef enum string_encoding_t:
         string_encoding_ascii
+        string_encoding_ucs_2
         string_encoding_utf_8
         string_encoding_utf_16
         string_encoding_utf_32

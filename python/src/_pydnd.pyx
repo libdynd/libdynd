@@ -65,6 +65,8 @@ cdef class w_dtype:
             cdef string_encoding_t encoding = GET(self.v).string_encoding()
             if encoding == string_encoding_ascii:
                 return "ascii"
+            elif encoding == string_encoding_ucs_2:
+                return "ucs_2"
             elif encoding == string_encoding_utf_8:
                 return "utf_8"
             elif encoding == string_encoding_utf_16:

@@ -15,6 +15,7 @@ namespace dnd {
 
 enum string_encoding_t {
     string_encoding_ascii,
+    string_encoding_ucs_2,
     string_encoding_utf_8,
     string_encoding_utf_16,
     string_encoding_utf_32,
@@ -26,13 +27,16 @@ enum string_encoding_t {
  * A table of the individual character sizes for
  * the various encodings.
  */
-extern int string_encoding_char_size_table[5];
+extern int string_encoding_char_size_table[6];
 
 inline std::ostream& operator<<(std::ostream& o, string_encoding_t encoding)
 {
     switch (encoding) {
         case string_encoding_ascii:
             o << "ascii";
+            break;
+        case string_encoding_ucs_2:
+            o << "ucs_2";
             break;
         case string_encoding_utf_8:
             o << "utf_8";

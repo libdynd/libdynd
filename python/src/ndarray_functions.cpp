@@ -9,6 +9,7 @@
 #include "numpy_interop.hpp"
 
 #include <dnd/dtypes/fixedstring_dtype.hpp>
+#include <dnd/memblock/external_memory_block.hpp>
 #include <dnd/ndarray_arange.hpp>
 #include <dnd/dtype_promotion.hpp>
 
@@ -21,6 +22,12 @@ PyTypeObject *pydnd::WNDArray_Type;
 void pydnd::init_w_ndarray_typeobject(PyObject *type)
 {
     WNDArray_Type = (PyTypeObject *)type;
+}
+
+static void python_decref(void *obj)
+{
+    PyObject *pyobj = reinterpret_cast<PyObject *>(obj);
+    Py_DECREF(pyobj);
 }
 
 void pydnd::ndarray_init_from_pyobject(dnd::ndarray& n, PyObject* obj)
@@ -73,14 +80,21 @@ void pydnd::ndarray_init_from_pyobject(dnd::ndarray& n, PyObject* obj)
             throw runtime_error("Error getting string data");
         }
         dtype d = make_fixedstring_dtype(string_encoding_ascii, len);
-        n = ndarray(d, data);
+        // Python strings are immutable, so simply use the existing memory with an external memory block
+        n = ndarray(make_strided_ndarray_node(d, 0, NULL, NULL, data, read_access_flag | immutable_access_flag,
+                make_external_memory_block(reinterpret_cast<void *>(obj), &python_decref)));
+        Py_INCREF(obj);
     } else if (PyUnicode_Check(obj)) {
 #if Py_UNICODE_SIZE == 2
-        dtype d = make_fixedstring_dtype(string_encoding_utf_16, PyUnicode_GetSize(obj));
+        dtype d = make_fixedstring_dtype(string_encoding_ucs_2, PyUnicode_GetSize(obj));
 #else
         dtype d = make_fixedstring_dtype(string_encoding_utf_32, PyUnicode_GetSize(obj));
 #endif
-        n = ndarray(d, reinterpret_cast<const char *>(PyUnicode_AsUnicode(obj)));
+        // Python strings are immutable, so simply use the existing memory with an external memory block
+        const char *data = reinterpret_cast<const char *>(PyUnicode_AsUnicode(obj));
+        n = ndarray(make_strided_ndarray_node(d, 0, NULL, NULL, data, read_access_flag | immutable_access_flag,
+                make_external_memory_block(reinterpret_cast<void *>(obj), &python_decref)));
+        Py_INCREF(obj);
     } else {
         throw std::runtime_error("could not convert python object into a dnd::ndarray");
     }
@@ -134,6 +148,7 @@ static PyObject* element_as_pyobject(const dtype& d, const char *data)
                     return PyUnicode_DecodeASCII(data, strnlen(data, d.element_size()), NULL);
                 case string_encoding_utf_8:
                     return PyUnicode_DecodeUTF8(data, strnlen(data, d.element_size()), NULL);
+                case string_encoding_ucs_2:
                 case string_encoding_utf_16: {
                     // Get the null-terminated string length
                     const uint16_t *udata = (const uint16_t *)data;

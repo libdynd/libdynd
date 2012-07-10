@@ -116,13 +116,18 @@ string_encoding_t encoding_from_pyobject(PyObject *encoding_obj)
         }
         switch (len) {
         case 5:
-            switch (s[0]) {
-            case 'a':
+            switch (s[1]) {
+            case 'c':
+                if (strcmp(s, "ucs_2") == 0) {
+                    encoding = string_encoding_ucs_2;
+                }
+                break;
+            case 's':
                 if (strcmp(s, "ascii") == 0) {
                     encoding = string_encoding_ascii;
                 }
                 break;
-            case 'u':
+            case 't':
                 if (strcmp(s, "utf_8") == 0) {
                     encoding = string_encoding_utf_8;
                 }

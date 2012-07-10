@@ -17,6 +17,7 @@ dnd::string_dtype::string_dtype(string_encoding_t encoding)
 {
     switch (encoding) {
         case string_encoding_ascii:
+        case string_encoding_ucs_2:
         case string_encoding_utf_8:
         case string_encoding_utf_16:
         case string_encoding_utf_32:
