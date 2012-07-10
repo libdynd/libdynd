@@ -16,6 +16,7 @@
 #include <dnd/dtypes/fixedstring_dtype.hpp>
 #include <dnd/dtypes/string_dtype.hpp>
 
+#include <dnd/nodes/scalar_node.hpp>
 #include <dnd/nodes/immutable_scalar_node.hpp>
 #include <dnd/nodes/immutable_builtin_scalar_node.hpp>
 #include <dnd/nodes/strided_ndarray_node.hpp>
@@ -86,12 +87,20 @@ dnd::ndarray::ndarray(complex<double> value)
 {
 }
 
-// Makes a UTF8 fixedstring from a std::string. Maybe we will want
-// another choice later?
+// Makes a UTF8 string from a std::string. This currently creates
+// a memory block for the string data and a scalar node for the data.
+// TODO: Pack the string data into the same scalar node to reduce this to
+//       a single memory allocation.
 dnd::ndarray::ndarray(const std::string& value)
-    : m_expr_tree(make_immutable_scalar_node(
-                make_fixedstring_dtype(string_encoding_utf_8, value.size()), value.c_str()))
+    : m_expr_tree()
 {
+    char *blockref_dataptr = NULL;
+    memory_block_ptr blockref_memblock(make_fixed_size_pod_memory_block(value.size(), 1, &blockref_dataptr));
+    memcpy(blockref_dataptr, value.c_str(), value.size());
+    char *refs[2] = {blockref_dataptr, blockref_dataptr + value.size()};
+    m_expr_tree = make_scalar_node(make_string_dtype(string_encoding_utf_8),
+                    reinterpret_cast<const char *>(&refs), read_access_flag | immutable_access_flag,
+                    blockref_memblock);
 }
 
 dnd::ndarray::ndarray(const dtype& dt)

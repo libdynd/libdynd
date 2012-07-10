@@ -11,6 +11,7 @@
 
 #include <dnd/ndarray.hpp>
 #include <dnd/dtypes/fixedstring_dtype.hpp>
+#include <dnd/dtypes/string_dtype.hpp>
 #include <dnd/dtypes/convert_dtype.hpp>
 
 using namespace std;
@@ -56,7 +57,9 @@ TEST(FixedstringDType, Basic) {
 
     // Trivial string going in and out of the system
     a = std::string("abcdefg");
-    EXPECT_EQ(make_fixedstring_dtype(string_encoding_utf_8, 7), a.get_dtype());
+    EXPECT_EQ(make_string_dtype(string_encoding_utf_8), a.get_dtype());
+    // Convert to a fixedstring dtype for testing
+    a = a.as_dtype(make_fixedstring_dtype(string_encoding_utf_8, 7)).vals();
     EXPECT_EQ(std::string("abcdefg"), a.as<std::string>());
 
     a = a.as_dtype(make_fixedstring_dtype(string_encoding_utf_16, 7));
