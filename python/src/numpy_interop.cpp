@@ -263,20 +263,24 @@ char pydnd::numpy_kindchar_of(const dnd::dtype& d)
     case complex_kind:
         return 'c';
     case string_kind:
-        switch (d.string_encoding()) {
-        case string_encoding_ascii:
-            return 'S';
-        case string_encoding_utf_32:
-            return 'U';
-        default:
-            break;
+        if (d.type_id() == fixedstring_type_id) {
+            switch (d.string_encoding()) {
+                case string_encoding_ascii:
+                    return 'S';
+                case string_encoding_utf_32:
+                    return 'U';
+                default:
+                    break;
+            }
         }
-    default: {
-        stringstream ss;
-        ss << "dnd::dtype \"" << d << "\" does not have an equivalent numpy kind";
-        throw runtime_error(ss.str());
-        }
+        break;
+    default:
+        break;
     }
+
+    stringstream ss;
+    ss << "dnd::dtype \"" << d << "\" does not have an equivalent numpy kind";
+    throw runtime_error(ss.str());
 }
 
 #endif // DND_NUMPY_INTEROP
