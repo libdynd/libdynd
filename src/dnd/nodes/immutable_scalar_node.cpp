@@ -18,7 +18,7 @@ ndarray_node_ptr dnd::immutable_scalar_node::as_dtype(const dtype& dt,
         return as_ndarray_node_ptr();
     } else if(m_dtype.element_size() <= 32) {
         // For small amounts of data, make a copy
-        return make_immutable_scalar_node(
+        return detail::unchecked_make_immutable_scalar_node(
                         make_convert_dtype(dt, m_dtype, errmode),
                         m_originptr);
     } else {
@@ -45,12 +45,8 @@ void dnd::immutable_scalar_node::debug_dump_extra(std::ostream& o, const std::st
     o << "\n";
 }
 
-ndarray_node_ptr dnd::make_immutable_scalar_node(const dtype& dt, const char* data)
+ndarray_node_ptr dnd::detail::unchecked_make_immutable_scalar_node(const dtype& dt, const char* data)
 {
-    if (dt.get_memory_management() != pod_memory_management) {
-        throw runtime_error("immutable_scalar_node doesn't support object dtypes yet");
-    }
-
     // Calculate the aligned starting point for the data
     intptr_t start = (intptr_t)(((uintptr_t)sizeof(memory_block_data) +
                                         sizeof(immutable_scalar_node) + (uintptr_t)(dt.alignment() - 1))

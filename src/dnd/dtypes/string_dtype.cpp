@@ -39,9 +39,7 @@ void dnd::string_dtype::print_element(std::ostream& o, const char *data) const
     o << "\"";
     while (begin < end) {
         cp = next_fn(begin, end);
-        if (cp == 0) {
-            break;
-        } else if (cp < 0x80) {
+        if (cp < 0x80) {
             switch (cp) {
                 case '\n':
                     o << "\\n";
@@ -59,9 +57,9 @@ void dnd::string_dtype::print_element(std::ostream& o, const char *data) const
                     o << "\\\"";
                     break;
                 default:
-                    if (cp < 32) {
-                        o << "\\x";
-                        hexadecimal_print(o, static_cast<char>(cp));
+                    if (cp < 0x20 || cp == 0x7f) {
+                        o << "\\u";
+                        hexadecimal_print(o, static_cast<uint16_t>(cp));
                     } else {
                         o << static_cast<char>(cp);
                     }

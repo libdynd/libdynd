@@ -7,8 +7,16 @@
 #define _DND__IMMUTABLE_SCALAR_NODE_HPP_
 
 #include <dnd/nodes/ndarray_node.hpp>
+#include <dnd/dtypes/string_dtype.hpp>
 
 namespace dnd {
+
+template<int N>
+ndarray_node_ptr make_static_utf8_string_immutable_scalar_node(const char (&static_string)[N]);
+
+namespace detail {
+    ndarray_node_ptr unchecked_make_immutable_scalar_node(const dtype& dt, const char* data);
+} // namespace detail
 
 /**
  * NDArray expression node which holds an immutable scalar.
@@ -87,10 +95,88 @@ public:
 
     void debug_dump_extra(std::ostream& o, const std::string& indent) const;
 
-    friend ndarray_node_ptr make_immutable_scalar_node(const dtype& dt, const char* data);
+    friend ndarray_node_ptr detail::unchecked_make_immutable_scalar_node(const dtype& dt, const char* data);
+    template<int N>
+    friend ndarray_node_ptr make_static_utf8_string_immutable_scalar_node(const char (&static_string)[N]);
 };
 
-ndarray_node_ptr make_immutable_scalar_node(const dtype& dt, const char* data);
+/**
+ * Makes an immutable scalar node from a POD dtype and its
+ * corresponding data, which is coppied into the node.
+ */
+inline ndarray_node_ptr make_immutable_scalar_node(const dtype& dt, const char* data)
+{
+    if (dt.get_memory_management() != pod_memory_management) {
+        throw std::runtime_error("immutable_scalar_node only supports pod dtypes presently");
+    }
+
+    return detail::unchecked_make_immutable_scalar_node(dt, data);
+}
+
+/**
+ * Special case function, intended only for static string data like strings
+ * in quotes or static char arrays. This creates a blockref dtype, but because
+ * the string data is static, there is no memory_block which owns that data.
+ */
+template<int N>
+ndarray_node_ptr make_static_utf8_string_immutable_scalar_node(const int8_t (&static_string)[N])
+{
+    int8_t *refs[2] = {static_string, static_string + N};
+    return detail::unchecked_make_immutable_scalar_node(make_string_dtype(string_encoding_utf_8),
+                    reinterpret_cast<char *>(&refs));
+}
+
+/**
+ * Special case function, intended only for static string data like strings
+ * in quotes or static char arrays. This creates a blockref dtype, but because
+ * the string data is static, there is no memory_block which owns that data.
+ */
+template<int N>
+ndarray_node_ptr make_static_ascii_string_immutable_scalar_node(const char (&static_string)[N])
+{
+    const char *refs[2] = {static_string, static_string + N};
+    return detail::unchecked_make_immutable_scalar_node(make_string_dtype(string_encoding_ascii),
+                    reinterpret_cast<char *>(&refs));
+}
+
+/**
+ * Special case function, intended only for static string data like strings
+ * in quotes or static char arrays. This creates a blockref dtype, but because
+ * the string data is static, there is no memory_block which owns that data.
+ */
+template<int N>
+ndarray_node_ptr make_static_utf8_string_immutable_scalar_node(const uint8_t (&static_string)[N])
+{
+    const uint8_t *refs[2] = {static_string, static_string + N};
+    return detail::unchecked_make_immutable_scalar_node(make_string_dtype(string_encoding_utf_8),
+                    reinterpret_cast<char *>(&refs));
+}
+
+/**
+ * Special case function, intended only for static string data like strings
+ * in quotes or static char arrays. This creates a blockref dtype, but because
+ * the string data is static, there is no memory_block which owns that data.
+ */
+template<int N>
+ndarray_node_ptr make_static_utf16_string_immutable_scalar_node(const uint16_t (&static_string)[N])
+{
+    const uint16_t *refs[2] = {static_string, static_string + N};
+    return detail::unchecked_make_immutable_scalar_node(make_string_dtype(string_encoding_utf_16),
+                    reinterpret_cast<char *>(&refs));
+}
+
+/**
+ * Special case function, intended only for static string data like strings
+ * in quotes or static char arrays. This creates a blockref dtype, but because
+ * the string data is static, there is no memory_block which owns that data.
+ */
+template<int N>
+ndarray_node_ptr make_static_utf32_string_immutable_scalar_node(const uint32_t (&static_string)[N])
+{
+    const uint32_t *refs[2] = {static_string, static_string + N};
+    return detail::unchecked_make_immutable_scalar_node(make_string_dtype(string_encoding_utf_32),
+                    reinterpret_cast<char *>(&refs));
+}
 
 } // namespace dnd
 
