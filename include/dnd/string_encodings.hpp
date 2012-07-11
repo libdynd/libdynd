@@ -82,6 +82,11 @@ typedef void (*append_unicode_codepoint_t)(uint32_t cp, char *&it, char *end);
 next_unicode_codepoint_t get_next_unicode_codepoint_function(string_encoding_t encoding, assign_error_mode errmode);
 append_unicode_codepoint_t get_append_unicode_codepoint_function(string_encoding_t encoding, assign_error_mode errmode);
 
+/**
+ * Prints the given code point to the output stream, escaping it as necessary.
+ */
+void print_escaped_unicode_codepoint(std::ostream& o, uint32_t cp);
+
 } // namespace dnd
 
 #endif // _DND__STRING_ENCODINGS_HPP_

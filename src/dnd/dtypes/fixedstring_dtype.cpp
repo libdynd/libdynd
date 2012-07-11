@@ -46,40 +46,10 @@ void dnd::fixedstring_dtype::print_element(std::ostream& o, const char *data) co
     o << "\"";
     while (data < data_end) {
         cp = next_fn(data, data_end);
-        if (cp == 0) {
-            break;
-        } else if (cp < 0x80) {
-            switch (cp) {
-                case '\n':
-                    o << "\\n";
-                    break;
-                case '\r':
-                    o << "\\r";
-                    break;
-                case '\t':
-                    o << "\\t";
-                    break;
-                case '\\':
-                    o << "\\\\";
-                    break;
-                case '\"':
-                    o << "\\\"";
-                    break;
-                default:
-                    if (cp < 0x20 || cp == 0x7f) {
-                        o << "\\u";
-                        hexadecimal_print(o, static_cast<uint16_t>(cp));
-                    } else {
-                        o << static_cast<char>(cp);
-                    }
-                    break;
-            }
-        } else if (cp < 0x10000) {
-            o << "\\u";
-            hexadecimal_print(o, static_cast<uint16_t>(cp));
+        if (cp != 0) {
+            print_escaped_unicode_codepoint(o, cp);
         } else {
-            o << "\\U";
-            hexadecimal_print(o, static_cast<uint32_t>(cp));
+            break;
         }
     }
     o << "\"";
