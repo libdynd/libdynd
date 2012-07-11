@@ -78,7 +78,7 @@ public:
      *            instance this writes to should have a shorter lifetime
      *            than this unary_specialization_kernel_instance.
      */
-    void borrow_specialization(unary_specialization_t specialization_id, kernel_instance<unary_operation_t>& out_kernel)
+    void borrow_specialization(unary_specialization_t specialization_id, kernel_instance<unary_operation_t>& out_kernel) const
     {
         out_kernel.kernel = specializations[specialization_id];
         auxdata.borrow_into(out_kernel.auxdata);
@@ -93,7 +93,7 @@ public:
      *            is necessary is to duplicate a kernel so that
      *            multiple threads may run the same kernel simultaneously.
      */
-    void copy_specialization(unary_specialization_t specialization_id, kernel_instance<unary_operation_t>& out_kernel)
+    void copy_specialization(unary_specialization_t specialization_id, kernel_instance<unary_operation_t>& out_kernel) const
     {
         out_kernel.kernel = specializations[specialization_id];
         auxdata.clone_into(out_kernel.auxdata);
