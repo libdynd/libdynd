@@ -187,11 +187,12 @@ bool dnd::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt)
     }
 
     // Use the available extended_dtype to check the casting
-    if (src_ext != NULL) {
-        return src_ext->is_lossless_assignment(dst_dt, src_dt);
-    }
-    else {
+    if (dst_ext != NULL) {
+        // Call with dst_dt (the first parameter) first
         return dst_ext->is_lossless_assignment(dst_dt, src_dt);
+    } else {
+        // Fall back to src_dt if the dst's extended is NULL
+        return src_ext->is_lossless_assignment(dst_dt, src_dt);
     }
 }
 

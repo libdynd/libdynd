@@ -50,9 +50,32 @@ void dnd::string_dtype::print_dtype(std::ostream& o) const {
 
 }
 
-bool dnd::string_dtype::is_lossless_assignment(const dtype& /*dst_dt*/, const dtype& /*src_dt*/) const {
-
-    return false; // TODO
+bool dnd::string_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const
+{
+    if (dst_dt.extended() == this) {
+        if (dst_dt.type_id() == string_type_id) {
+            // If the source is a string, only the encoding matters because the dest is variable sized
+            const extended_string_dtype *src_esd = static_cast<const extended_string_dtype*>(src_dt.extended());
+            string_encoding_t src_encoding = src_esd->encoding();
+            switch (m_encoding) {
+                case string_encoding_ascii:
+                    return src_encoding == string_encoding_ascii;
+                case string_encoding_ucs_2:
+                    return src_encoding == string_encoding_ascii ||
+                            src_encoding == string_encoding_ucs_2;
+                case string_encoding_utf_8:
+                case string_encoding_utf_16:
+                case string_encoding_utf_32:
+                    return true;
+                default:
+                    return false;
+            }
+        } else {
+            return false;
+        }
+    } else {
+        return false;
+    }
 }
 
 void dnd::string_dtype::get_single_compare_kernel(single_compare_kernel_instance& DND_UNUSED(out_kernel)) const {

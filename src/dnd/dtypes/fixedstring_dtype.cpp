@@ -62,30 +62,34 @@ void dnd::fixedstring_dtype::print_dtype(std::ostream& o) const
 
 bool dnd::fixedstring_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const
 {
-    if (dst_dt.extended() == src_dt.extended()) {
-        return true;
-    } else if (dst_dt.type_id() != fixedstring_type_id || src_dt.type_id() != fixedstring_type_id) {
-        return false;
-    } else {
-        const fixedstring_dtype *dst_fs = static_cast<const fixedstring_dtype*>(dst_dt.extended());
-        const fixedstring_dtype *src_fs = static_cast<const fixedstring_dtype*>(src_dt.extended());
-        if (dst_fs->m_encoding == src_fs->m_encoding) {
-            return dst_fs->m_stringsize >= src_fs->m_stringsize;
-        } else if (dst_fs->m_stringsize < src_fs->m_stringsize) {
-            return false;
-        } else {
-            switch (src_fs->m_encoding) {
-                case string_encoding_ascii:
-                    return true;
-                case string_encoding_utf_8:
-                    return dst_fs->m_encoding == string_encoding_utf_16 ||
-                            dst_fs->m_encoding == string_encoding_utf_32;
-                case string_encoding_utf_16:
-                    return dst_fs->m_encoding == string_encoding_utf_32;
-                default:
-                    return false;
+    if (dst_dt.extended() == this) {
+        if (src_dt.extended() == this) {
+            return true;
+        } else if (src_dt.type_id() == fixedstring_type_id) {
+            const fixedstring_dtype *src_fs = static_cast<const fixedstring_dtype*>(src_dt.extended());
+            if (m_encoding == src_fs->m_encoding) {
+                return m_stringsize >= src_fs->m_stringsize;
+            } else if (m_stringsize < src_fs->m_stringsize) {
+                return false;
+            } else {
+                switch (src_fs->m_encoding) {
+                    case string_encoding_ascii:
+                        return true;
+                    case string_encoding_utf_8:
+                    case string_encoding_ucs_2:
+                        return m_encoding == string_encoding_utf_16 ||
+                                m_encoding == string_encoding_utf_32;
+                    case string_encoding_utf_16:
+                        return m_encoding == string_encoding_utf_32;
+                    default:
+                        return false;
+                }
             }
+        } else {
+            return false;
         }
+    } else {
+        return false;
     }
 }
 
