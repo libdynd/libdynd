@@ -140,7 +140,7 @@ TEST(StringDType, Unicode) {
             0xfffd,
             0xffff,
             0x10000,
-            0x1000ff
+            0x10ffff
             };
     static uint16_t utf16_string[] = {
             0x0000,
@@ -156,7 +156,7 @@ TEST(StringDType, Unicode) {
             0xfffd,
             0xffff, // Largest utf16 1-character code point
             0xd800, 0xdc00, // Smallest utf16 2-character code point
-            0xdbc0, 0xdcff // Largest code point
+            0xdbff, 0xdfff // Largest code point
             };
     static uint8_t utf8_string[] = {
             0x00, // NULL code point
@@ -172,7 +172,7 @@ TEST(StringDType, Unicode) {
             0xef, 0xbf, 0xbd, // 0xfffd code point
             0xef, 0xbf, 0xbf, // Largest utf8 3-character code point
             0xf0, 0x90, 0x80, 0x80, // Smallest utf8 4-character code point
-            0xf4, 0x80, 0x83, 0xbf // Largest code point
+            0xf4, 0x8f, 0xbf, 0xbf // Largest code point
             };
     ndarray x;
     ndarray a(make_static_utf32_string_immutable_scalar_node(utf32_string));
