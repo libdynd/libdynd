@@ -41,6 +41,11 @@ public:
         Py_XDECREF(m_obj);
     }
 
+    PyObject *get()
+    {
+        return m_obj;
+    }
+
     // Returns a borrowed reference
     operator PyObject *()
     {

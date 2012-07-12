@@ -20,7 +20,7 @@ namespace pydnd {
 class unary_gfunc_kernel {
 public:
     dnd::dtype m_out, m_params[1];
-    dnd::kernel_instance<dnd::unary_operation_t> m_kernel;
+    dnd::unary_specialization_kernel_instance m_kernel;
 
     void swap(unary_gfunc_kernel& rhs) {
         m_out.swap(rhs.m_out);
@@ -31,6 +31,10 @@ public:
 
 class unary_gfunc {
     std::string m_name;
+    /**
+     * This is a deque instead of a vector, because we are targetting C++98
+     * and so cannot rely on C++11 move semantics.
+     */
     std::deque<unary_gfunc_kernel> m_kernels;
 public:
     unary_gfunc(const char *name)

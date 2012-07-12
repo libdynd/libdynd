@@ -4,6 +4,7 @@
 //
 
 #include "ctypes_interop.hpp"
+#include "dtype_functions.hpp"
 #include "utility_functions.hpp"
 
 using namespace std;
@@ -99,6 +100,17 @@ dnd::dtype pydnd::dtype_from_ctypes_cdatatype(PyObject *d)
         throw runtime_error("requested a dtype from a ctypes c data type, but the given object has the wrong type");
     }
 
+    // If the ctypes type has a _dynd_type_ property, that should be
+    // a pydnd dtype instance corresponding to the type. This is how
+    // the complex type is supported, for example.
+    PyObject *dynd_type_obj = PyObject_GetAttrString(d, "_dynd_type_");
+    if (dynd_type_obj == NULL) {
+        PyErr_Clear();
+    } else {
+        pyobject_ownref dynd_type(dynd_type_obj);
+        return make_dtype_from_object(dynd_type);
+    }
+
     // The simple C data types
     if (PyObject_IsSubclass(d, ctypes.PyCSimpleType_Type)) {
         char *proto_str = NULL;
@@ -110,36 +122,36 @@ dnd::dtype pydnd::dtype_from_ctypes_cdatatype(PyObject *d)
         }
 
         switch (proto_str[0]) {
-        case 'b':
-            return make_dtype<int8_t>();
-        case 'B':
-            return make_dtype<uint8_t>();
-        case 'c': // TODO: make this a fixed sized string of size 1 instead of a number
-            return make_dtype<char>();
-        case 'd':
-            return make_dtype<double>();
-        case 'f':
-            return make_dtype<float>();
-        case 'h':
-            return make_dtype<int16_t>();
-        case 'H':
-            return make_dtype<uint16_t>();
-        case 'i':
-            return make_dtype<int32_t>();
-        case 'I':
-            return make_dtype<uint32_t>();
-        case 'l':
-            return make_dtype<long>();
-        case 'L':
-            return make_dtype<unsigned long>();
-        case 'q':
-            return make_dtype<int64_t>();
-        case 'Q':
-            return make_dtype<uint64_t>();
-        default: {
-            stringstream ss;
-            ss << "The ctypes type code '" << proto_str[0] << "' cannot be converted to a dnd::dtype";
-            throw runtime_error(ss.str());
+            case 'b':
+                return make_dtype<int8_t>();
+            case 'B':
+                return make_dtype<uint8_t>();
+            case 'c': // TODO: make this a fixed sized string of size 1 instead of a number
+                return make_dtype<char>();
+            case 'd':
+                return make_dtype<double>();
+            case 'f':
+                return make_dtype<float>();
+            case 'h':
+                return make_dtype<int16_t>();
+            case 'H':
+                return make_dtype<uint16_t>();
+            case 'i':
+                return make_dtype<int32_t>();
+            case 'I':
+                return make_dtype<uint32_t>();
+            case 'l':
+                return make_dtype<long>();
+            case 'L':
+                return make_dtype<unsigned long>();
+            case 'q':
+                return make_dtype<int64_t>();
+            case 'Q':
+                return make_dtype<uint64_t>();
+            default: {
+                stringstream ss;
+                ss << "The ctypes type code '" << proto_str[0] << "' cannot be converted to a dnd::dtype";
+                throw runtime_error(ss.str());
             }
         }
     }

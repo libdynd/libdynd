@@ -3,6 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
+#include <dnd/nodes/elementwise_unary_kernel_node.hpp>
+
 #include "unary_gfunc.hpp"
 #include "ndarray_functions.hpp"
 #include "utility_functions.hpp"
@@ -21,7 +23,7 @@ namespace {
         static void cdecl_kernel(char *dst, intptr_t dst_stride, const char *src, intptr_t src_stride,
                                     intptr_t count, const AuxDataBase *auxdata)
         {
-            cdecl_func_ptr_t kfunc = get_auxiliary_data<cdecl_func_ptr_t>(auxdata);
+            cdecl_func_ptr_t kfunc = reinterpret_cast<cdecl_func_ptr_t>(get_raw_auxiliary_data(auxdata)&(~1));
 
             for (intptr_t i = 0; i < count; ++i) {
                 *(S *)dst = kfunc(*(const T *)src);
@@ -29,6 +31,8 @@ namespace {
                 src += src_stride;
             }
         }
+
+        static specialized_unary_operation_table_t cdecl_kerneltable;
 
 #ifdef _WIN32
         typedef S (__stdcall *win32_stdcall_func_ptr_t)(T);
@@ -36,7 +40,7 @@ namespace {
         static void win32_stdcall_kernel(char *dst, intptr_t dst_stride, const char *src, intptr_t src_stride,
                                     intptr_t count, const AuxDataBase *auxdata)
         {
-            win32_stdcall_func_ptr_t kfunc = get_auxiliary_data<win32_stdcall_func_ptr_t>(auxdata);
+            win32_stdcall_func_ptr_t kfunc = reinterpret_cast<win32_stdcall_func_ptr_t>(get_raw_auxiliary_data(auxdata)&(~1));
 
             for (intptr_t i = 0; i < count; ++i) {
                 *(S *)dst = kfunc(*(const T *)src);
@@ -44,9 +48,28 @@ namespace {
                 src += src_stride;
             }
         }
-#endif
+
+        static specialized_unary_operation_table_t win32_stdcall_kerneltable;
+#endif // _WIN32
     }; // struct unary_kernels
 
+    template<typename S, typename T>
+    specialized_unary_operation_table_t unary_kernels<S, T>::cdecl_kerneltable = {
+        &unary_kernels<S, T>::cdecl_kernel,
+        &unary_kernels<S, T>::cdecl_kernel,
+        &unary_kernels<S, T>::cdecl_kernel,
+        &unary_kernels<S, T>::cdecl_kernel
+        };
+
+#ifdef _WIN32
+    template<typename S, typename T>
+    specialized_unary_operation_table_t unary_kernels<S, T>::win32_stdcall_kerneltable = {
+        &unary_kernels<S, T>::win32_stdcall_kernel,
+        &unary_kernels<S, T>::win32_stdcall_kernel,
+        &unary_kernels<S, T>::win32_stdcall_kernel,
+        &unary_kernels<S, T>::win32_stdcall_kernel
+        };
+#endif // _WIN32
 } // anonymous namespace
 
 static void create_unary_gfunc_kernel_from_ctypes(PyCFuncPtrObject *cfunc, unary_gfunc_kernel& out_kernel)
@@ -88,34 +111,34 @@ static void create_unary_gfunc_kernel_from_ctypes(PyCFuncPtrObject *cfunc, unary
     if (cc == win32_stdcall_callconv) {
         switch (out_kernel.m_params[0].type_id()) {
             case int8_type_id:
-                out_kernel.m_kernel.kernel = &unary_kernels<int8_t, int8_t>::win32_stdcall_kernel;
+                out_kernel.m_kernel.specializations = unary_kernels<int8_t, int8_t>::win32_stdcall_kerneltable;
                 break;
             case int16_type_id:
-                out_kernel.m_kernel.kernel = &unary_kernels<int16_t, int16_t>::win32_stdcall_kernel;
+                out_kernel.m_kernel.specializations = unary_kernels<int16_t, int16_t>::win32_stdcall_kerneltable;
                 break;
             case int32_type_id:
-                out_kernel.m_kernel.kernel = &unary_kernels<int32_t, int32_t>::win32_stdcall_kernel;
+                out_kernel.m_kernel.specializations = unary_kernels<int32_t, int32_t>::win32_stdcall_kerneltable;
                 break;
             case int64_type_id:
-                out_kernel.m_kernel.kernel = &unary_kernels<int64_t, int64_t>::win32_stdcall_kernel;
+                out_kernel.m_kernel.specializations = unary_kernels<int64_t, int64_t>::win32_stdcall_kerneltable;
                 break;
             case uint8_type_id:
-                out_kernel.m_kernel.kernel = &unary_kernels<uint8_t, int8_t>::win32_stdcall_kernel;
+                out_kernel.m_kernel.specializations = unary_kernels<uint8_t, int8_t>::win32_stdcall_kerneltable;
                 break;
             case uint16_type_id:
-                out_kernel.m_kernel.kernel = &unary_kernels<uint16_t, uint16_t>::win32_stdcall_kernel;
+                out_kernel.m_kernel.specializations = unary_kernels<uint16_t, uint16_t>::win32_stdcall_kerneltable;
                 break;
             case uint32_type_id:
-                out_kernel.m_kernel.kernel = &unary_kernels<uint32_t, uint32_t>::win32_stdcall_kernel;
+                out_kernel.m_kernel.specializations = unary_kernels<uint32_t, uint32_t>::win32_stdcall_kerneltable;
                 break;
             case uint64_type_id:
-                out_kernel.m_kernel.kernel = &unary_kernels<uint64_t, uint64_t>::win32_stdcall_kernel;
+                out_kernel.m_kernel.specializations = unary_kernels<uint64_t, uint64_t>::win32_stdcall_kerneltable;
                 break;
             case float32_type_id:
-                out_kernel.m_kernel.kernel = &unary_kernels<float, float>::win32_stdcall_kernel;
+                out_kernel.m_kernel.specializations = unary_kernels<float, float>::win32_stdcall_kerneltable;
                 break;
             case float64_type_id:
-                out_kernel.m_kernel.kernel = &unary_kernels<double, double>::win32_stdcall_kernel;
+                out_kernel.m_kernel.specializations = unary_kernels<double, double>::win32_stdcall_kerneltable;
                 break;
             default:
                 throw std::runtime_error("Couldn't construct a kernel for the ctypes function prototype");
@@ -125,41 +148,41 @@ static void create_unary_gfunc_kernel_from_ctypes(PyCFuncPtrObject *cfunc, unary
 
     switch (out_kernel.m_params[0].type_id()) {
         case int8_type_id:
-            out_kernel.m_kernel.kernel = &unary_kernels<int8_t, int8_t>::cdecl_kernel;
+            out_kernel.m_kernel.specializations = unary_kernels<int8_t, int8_t>::cdecl_kerneltable;
             break;
         case int16_type_id:
-            out_kernel.m_kernel.kernel = &unary_kernels<int16_t, int16_t>::cdecl_kernel;
+            out_kernel.m_kernel.specializations = unary_kernels<int16_t, int16_t>::cdecl_kerneltable;
             break;
         case int32_type_id:
-            out_kernel.m_kernel.kernel = &unary_kernels<int32_t, int32_t>::cdecl_kernel;
+            out_kernel.m_kernel.specializations = unary_kernels<int32_t, int32_t>::cdecl_kerneltable;
             break;
         case int64_type_id:
-            out_kernel.m_kernel.kernel = &unary_kernels<int64_t, int64_t>::cdecl_kernel;
+            out_kernel.m_kernel.specializations = unary_kernels<int64_t, int64_t>::cdecl_kerneltable;
             break;
         case uint8_type_id:
-            out_kernel.m_kernel.kernel = &unary_kernels<uint8_t, int8_t>::cdecl_kernel;
+            out_kernel.m_kernel.specializations = unary_kernels<uint8_t, int8_t>::cdecl_kerneltable;
             break;
         case uint16_type_id:
-            out_kernel.m_kernel.kernel = &unary_kernels<uint16_t, uint16_t>::cdecl_kernel;
+            out_kernel.m_kernel.specializations = unary_kernels<uint16_t, uint16_t>::cdecl_kerneltable;
             break;
         case uint32_type_id:
-            out_kernel.m_kernel.kernel = &unary_kernels<uint32_t, uint32_t>::cdecl_kernel;
+            out_kernel.m_kernel.specializations = unary_kernels<uint32_t, uint32_t>::cdecl_kerneltable;
             break;
         case uint64_type_id:
-            out_kernel.m_kernel.kernel = &unary_kernels<uint64_t, uint64_t>::cdecl_kernel;
+            out_kernel.m_kernel.specializations = unary_kernels<uint64_t, uint64_t>::cdecl_kerneltable;
             break;
         case float32_type_id:
-            out_kernel.m_kernel.kernel = &unary_kernels<float, float>::cdecl_kernel;
+            out_kernel.m_kernel.specializations = unary_kernels<float, float>::cdecl_kerneltable;
             break;
         case float64_type_id:
-            out_kernel.m_kernel.kernel = &unary_kernels<double, double>::cdecl_kernel;
+            out_kernel.m_kernel.specializations = unary_kernels<double, double>::cdecl_kerneltable;
             break;
         default:
             throw std::runtime_error("Couldn't construct a kernel for the ctypes function prototype");
     }
 
-    // Put the function pointer in some auxiliary data
-    make_auxiliary_data<void *>(out_kernel.m_kernel.auxdata, *(void **)cfunc->b_ptr);
+    // Use the function pointer as the raw auxiliary data
+    make_raw_auxiliary_data(out_kernel.m_kernel.auxdata, *(uintptr_t *)cfunc->b_ptr);
 }
 
 void pydnd::unary_gfunc::add_kernel(PyObject *kernel)
@@ -186,9 +209,14 @@ PyObject *pydnd::unary_gfunc::call(PyObject *args, PyObject *kwargs)
     ndarray arg0;
     ndarray_init_from_pyobject(arg0, arg0_obj);
 
-    type_id_t tid = arg0.get_dtype().type_id();
+    const dtype& dt = arg0.get_dtype();
     for (deque<unary_gfunc_kernel>::size_type i = 0; i < m_kernels.size(); ++i) {
-        if (tid == m_kernels[i].m_params[0].type_id()) {
+        if (dt == m_kernels[i].m_params[0]) {
+            ndarray result(make_elementwise_unary_kernel_node_copy_kernel(
+                        m_kernels[i].m_out, arg0.get_expr_tree(), m_kernels[i].m_kernel));
+            pyobject_ownref result_obj(WNDArray_Type->tp_alloc(WNDArray_Type, 0));
+            ((WNDArray *)result_obj.get())->v.swap(result);
+            return result_obj.release();
         }
     }
 
@@ -208,8 +236,7 @@ std::string pydnd::unary_gfunc::debug_dump() const
         const unary_gfunc_kernel &k = m_kernels[i];
         o << "kernel " << i << "\n";
         o << "   " << k.m_out << " (" << k.m_params[0] << ")\n";
-        o << "   func ptr: " << (const void *)k.m_kernel.kernel <<
-                ", aux data: " << (const void *)(const dnd::AuxDataBase *)k.m_kernel.auxdata << "\n";
+        o << "aux data: " << (const void *)(const dnd::AuxDataBase *)k.m_kernel.auxdata << "\n";
     }
     o << "------" << endl;
     return o.str();

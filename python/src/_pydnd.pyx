@@ -319,4 +319,4 @@ cdef class w_unary_gfunc:
 
     def __call__(self, *args, **kwargs):
         """Calls the gfunc."""
-        GET(self.v).call(args, kwargs)
+        return GET(self.v).call(args, kwargs)

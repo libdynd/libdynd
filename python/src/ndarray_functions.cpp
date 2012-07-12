@@ -229,13 +229,11 @@ static PyObject* nested_ndarray_as_pyobject(const dtype& d, const char *data, in
 
 PyObject* pydnd::ndarray_as_pyobject(const dnd::ndarray& n)
 {
-    ndarray nvals;
-
     // Evaluate the ndarray, and convert strings to the Python encoding
-    nvals = n.vals();
+    ndarray nvals = n.vals();
 
-    return nested_ndarray_as_pyobject(n.get_dtype(), n.get_readonly_originptr(),
-                n.get_ndim(), n.get_shape(), n.get_strides());
+    return nested_ndarray_as_pyobject(nvals.get_dtype(), nvals.get_readonly_originptr(),
+                nvals.get_ndim(), nvals.get_shape(), nvals.get_strides());
 }
 
 static irange pyobject_as_irange(PyObject *index)
