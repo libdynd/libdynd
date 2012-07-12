@@ -77,8 +77,8 @@ ctypes_calling_convention pydnd::get_ctypes_calling_convention(PyCFuncPtrObject*
         throw std::runtime_error("Functions using lasterror are not yet supported");
     }
 
-    // Only on Win32 are non-CDECL calling conventions supported
-#ifdef _WIN32
+    // Only on 32-bit Windows are non-CDECL calling conventions supported
+#if defined(_WIN32) && !defined(_M_X64)
     if (cfunc->index) {
         throw std::runtime_error("COM functions are not supported");
     }

@@ -34,7 +34,7 @@ namespace {
 
         static specialized_unary_operation_table_t cdecl_kerneltable;
 
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(_M_X64)
         typedef S (__stdcall *win32_stdcall_func_ptr_t)(T);
 
         static void win32_stdcall_kernel(char *dst, intptr_t dst_stride, const char *src, intptr_t src_stride,
@@ -50,7 +50,7 @@ namespace {
         }
 
         static specialized_unary_operation_table_t win32_stdcall_kerneltable;
-#endif // _WIN32
+#endif // 32-bit Windows
     }; // struct unary_kernels
 
     template<typename S, typename T>
@@ -61,7 +61,7 @@ namespace {
         &unary_kernels<S, T>::cdecl_kernel
         };
 
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(_M_X64)
     template<typename S, typename T>
     specialized_unary_operation_table_t unary_kernels<S, T>::win32_stdcall_kerneltable = {
         &unary_kernels<S, T>::win32_stdcall_kernel,
@@ -69,7 +69,7 @@ namespace {
         &unary_kernels<S, T>::win32_stdcall_kernel,
         &unary_kernels<S, T>::win32_stdcall_kernel
         };
-#endif // _WIN32
+#endif // 32-bit Windows
 } // anonymous namespace
 
 static void create_unary_gfunc_kernel_from_ctypes(PyCFuncPtrObject *cfunc, unary_gfunc_kernel& out_kernel)
@@ -107,7 +107,7 @@ static void create_unary_gfunc_kernel_from_ctypes(PyCFuncPtrObject *cfunc, unary
 
     ctypes_calling_convention cc = get_ctypes_calling_convention(cfunc);
     cout << "calling convention is " << cc << endl;
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(_M_X64)
     if (cc == win32_stdcall_callconv) {
         switch (out_kernel.m_params[0].type_id()) {
             case int8_type_id:
@@ -144,7 +144,7 @@ static void create_unary_gfunc_kernel_from_ctypes(PyCFuncPtrObject *cfunc, unary
                 throw std::runtime_error("Couldn't construct a kernel for the ctypes function prototype");
         }
     }
-#endif
+#endif // 32-bit Windows
 
     switch (out_kernel.m_params[0].type_id()) {
         case int8_type_id:
