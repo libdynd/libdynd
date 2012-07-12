@@ -67,6 +67,7 @@ set(dnd_SRC
     src/dnd/kernels/buffered_binary_kernels.cpp
     src/dnd/kernels/byteswap_kernels.cpp
     src/dnd/kernels/string_assignment_kernels.cpp
+    src/dnd/kernels/kernels_for_disassembly.cpp
     src/dnd/kernels/single_assigner_builtin.hpp
     include/dnd/kernels/assignment_kernels.hpp
     include/dnd/kernels/builtin_dtype_binary_kernel_table.hpp
