@@ -30,6 +30,9 @@ endif()
 #set(LINK_FLAGS)
 
 set(dnd_SRC
+    # CodeGen
+    src/dnd/codegen/unary_kernel_adapter_codegen_windows_x64.cpp
+    include/dnd/codegen/unary_kernel_adapter_codegen.hpp
     # DTypes
     src/dnd/dtypes/array_dtype.cpp
     src/dnd/dtypes/byteswap_dtype.cpp
@@ -134,6 +137,8 @@ include_directories(
     thirdparty/utf8/source
     )
 
+source_group("CodeGen Source" REGULAR_EXPRESSION "src/dnd/codegen/.*cpp")
+source_group("CodeGen Headers" REGULAR_EXPRESSION "include/dnd/codegen/.*hpp")
 source_group("DTypes Source" REGULAR_EXPRESSION "src/dnd/dtypes/.*cpp")
 source_group("DTypes Headers" REGULAR_EXPRESSION "include/dnd/dtypes/.*hpp")
 source_group("Nodes Source" REGULAR_EXPRESSION "src/dnd/nodes/.*cpp")

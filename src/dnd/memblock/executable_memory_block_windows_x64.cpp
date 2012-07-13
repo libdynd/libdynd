@@ -92,6 +92,7 @@ namespace {
         {
             HANDLE hProcess = GetCurrentProcess();
             for (size_t i = 0, i_end = m_memory_handles.size(); i != i_end; ++i) {
+                RtlDeleteFunctionTable((PRUNTIME_FUNCTION)((uintptr_t)m_memory_handles[i].m_memory_begin|0x3));
                 VirtualFreeEx(hProcess, m_memory_handles[i].m_memory_begin, 0, MEM_RELEASE);
             }
         }
