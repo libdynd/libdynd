@@ -9,7 +9,7 @@
 using namespace std;
 using namespace dnd;
 
-unary_operation_t dnd::get_unary_function_adapter(const memory_block_ptr& exec_memblock, const dtype& restype,
+unary_operation_t dnd::codegen_unary_function_adapter(const memory_block_ptr& exec_memblock, const dtype& restype,
                     const dtype& arg0type)
 {
     // This code generation always uses the same prolog structure,

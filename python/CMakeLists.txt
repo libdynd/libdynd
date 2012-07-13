@@ -44,6 +44,7 @@ include_directories(
     )
 
 set(pydnd_CPP_SRC
+    include/codegen_cache_functions.hpp
     include/ctypes_interop.hpp
     include/do_import_array.hpp
     include/placement_wrappers.hpp
@@ -52,6 +53,7 @@ set(pydnd_CPP_SRC
     include/numpy_interop.hpp
     include/unary_gfunc.hpp
     include/utility_functions.hpp
+    src/codegen_cache_functions.cpp
     src/ctypes_interop.cpp
     src/dtype_functions.cpp
     src/ndarray_functions.cpp
@@ -61,6 +63,7 @@ set(pydnd_CPP_SRC
     )
 set(pydnd_CYTHON_SRC
     src/_pydnd.pyx
+    include/codegen_cache.pxd
     include/dnd.pxd
     include/dtype.pxd
     include/ndarray.pxd

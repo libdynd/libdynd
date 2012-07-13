@@ -13,6 +13,7 @@
 
 #include <dnd/dtype.hpp>
 #include <dnd/ndarray.hpp>
+#include <dnd/codegen/codegen_cache.hpp>
 
 namespace pydnd {
 
@@ -66,16 +67,41 @@ inline void ndarray_placement_delete(ndarray_placement_wrapper& v)
     ((dnd::ndarray *)(&v))->~ndarray();
 }
 
-// ndarray placement cast
+// placement cast
 inline dnd::ndarray& GET(ndarray_placement_wrapper& v)
 {
     return *(dnd::ndarray *)&v;
 }
 
-// dtype placement assignment
+// placement assignment
 inline void SET(ndarray_placement_wrapper& v, const dnd::ndarray& d)
 {
     *(dnd::ndarray *)&v = d;
+}
+
+///////////////////////////////////
+// Same thing as above, for codegen_cache
+
+struct codegen_cache_placement_wrapper {
+    intptr_t dummy[(sizeof(dnd::codegen_cache) + sizeof(intptr_t) - 1)/sizeof(intptr_t)];
+};
+
+inline void codegen_cache_placement_new(codegen_cache_placement_wrapper& v)
+{
+    // Call placement new
+    new (&v) dnd::codegen_cache();
+}
+
+inline void codegen_cache_placement_delete(codegen_cache_placement_wrapper& v)
+{
+    // Call the destructor
+    ((dnd::codegen_cache *)(&v))->~codegen_cache();
+}
+
+// placement cast
+inline dnd::codegen_cache& GET(codegen_cache_placement_wrapper& v)
+{
+    return *(dnd::codegen_cache *)&v;
 }
 
 } // namespace pydnd

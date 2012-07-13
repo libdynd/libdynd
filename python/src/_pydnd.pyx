@@ -320,3 +320,11 @@ cdef class w_unary_gfunc:
     def __call__(self, *args, **kwargs):
         """Calls the gfunc."""
         return GET(self.v).call(args, kwargs)
+
+cdef class w_codegen_cache:
+    cdef codegen_cache_placement_wrapper v
+
+    def __cinit__(self):
+        codegen_cache_placement_new(self.v)
+    def __dealloc__(self):
+        codegen_cache_placement_delete(self.v)
