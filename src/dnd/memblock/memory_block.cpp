@@ -33,6 +33,11 @@ void free_fixed_size_pod_memory_block(memory_block_data *memblock);
  * This should only be called by the memory_block decref code.
  */
 void free_pod_memory_block(memory_block_data *memblock);
+/**
+ * INTERNAL: Frees a memory_block created by make_executable_memory_block.
+ * This should only be called by the memory_block decref code.
+ */
+void free_executable_memory_block(memory_block_data *memblock);
 
 /**
  * INTERNAL: Static instance of the pod allocator API for the POD memory block.
@@ -64,6 +69,9 @@ void dnd::detail::memory_block_free(memory_block_data *memblock)
         }
         case object_memory_block_type:
             throw runtime_error("object_memory_block_type not supported yet");
+        case executable_memory_block_type:
+            free_executable_memory_block(memblock);
+            return;
     }
 
     stringstream ss;
@@ -97,6 +105,9 @@ void dnd::memory_block_debug_dump(const memory_block_data *memblock, std::ostrea
             case object_memory_block_type:
                 o << indent << " type: object\n";
                 break;
+            case executable_memory_block_type:
+                o << indent << " type: executable\n";
+                break;
         }
         o << indent << "------" << endl;
     } else {
@@ -117,6 +128,8 @@ memory_block_pod_allocator_api *dnd::get_memory_block_pod_allocator_api(memory_b
             return &dnd::detail::pod_memory_block_allocator_api;
         case object_memory_block_type:
             throw runtime_error("Cannot get a POD allocator API from an object_memory_block");
+        case executable_memory_block_type:
+            throw runtime_error("Cannot get a POD allocator API from an executable_memory_block");
         default:
             throw runtime_error("unknown memory block type");
     }

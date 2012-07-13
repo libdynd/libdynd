@@ -24,13 +24,16 @@
 using namespace std;
 using namespace dnd;
 
-extern "C" void unary__int_int__general_kernel__disassembly_analysis(char *dst, intptr_t dst_stride, const char *src, intptr_t src_stride,
+typedef int S;
+typedef int T;
+
+extern "C" void unary__general_kernel__disassembly_analysis(char *dst, intptr_t dst_stride, const char *src, intptr_t src_stride,
                     intptr_t count, const AuxDataBase *auxdata)
 {
-    typedef int (*cdecl_func_ptr_t)(int);
+    typedef S (*cdecl_func_ptr_t)(T);
     cdecl_func_ptr_t kfunc = reinterpret_cast<cdecl_func_ptr_t>(get_raw_auxiliary_data(auxdata)&(~1));
     for (intptr_t i = 0; i < count; ++i) {
-        *(int *)dst = kfunc(*(const int *)src);
+        *(S *)dst = kfunc(*(const T *)src);
 
         dst += dst_stride;
         src += src_stride;

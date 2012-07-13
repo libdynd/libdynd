@@ -79,11 +79,13 @@ set(dnd_SRC
     include/dnd/kernels/unary_kernel_instance.hpp
     # MemBlock
     src/dnd/memblock/memory_block.cpp
+    src/dnd/memblock/executable_memory_block_windows_x64.cpp
     src/dnd/memblock/external_memory_block.cpp
     src/dnd/memblock/fixed_size_pod_memory_block.cpp
     src/dnd/memblock/ndarray_node_memory_block.cpp
     src/dnd/memblock/pod_memory_block.cpp
     include/dnd/memblock/memory_block.hpp
+    include/dnd/memblock/executable_memory_block.hpp
     include/dnd/memblock/external_memory_block.hpp
     include/dnd/memblock/fixed_size_pod_memory_block.hpp
     include/dnd/memblock/ndarray_node_memory_block.hpp

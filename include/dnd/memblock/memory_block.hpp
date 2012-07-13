@@ -29,7 +29,9 @@ enum memory_block_type_t {
     /** For when the data is POD, and the amount of memory needs to grow */
     pod_memory_block_type,
     /** For when the data is object */
-    object_memory_block_type
+    object_memory_block_type,
+    /** For memory used by code generation */
+    executable_memory_block_type
 };
 
 /**
