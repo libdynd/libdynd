@@ -32,8 +32,10 @@ endif()
 set(dnd_SRC
     # CodeGen
     src/dnd/codegen/unary_kernel_adapter_codegen_windows_x64.cpp
+    src/dnd/codegen/binary_kernel_adapter_codegen_windows_x64.cpp
     src/dnd/codegen/codegen_cache.cpp
     include/dnd/codegen/unary_kernel_adapter_codegen.hpp
+    include/dnd/codegen/binary_kernel_adapter_codegen.hpp
     include/dnd/codegen/calling_conventions.hpp
     include/dnd/codegen/codegen_cache.hpp
     # DTypes

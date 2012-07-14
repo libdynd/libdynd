@@ -15,7 +15,7 @@ using namespace std;
 using namespace dnd;
 
 template<class S, class T>
-S double_value(T value) {
+static S double_value(T value) {
     return (S)(2 * value);
 }
 
@@ -60,5 +60,45 @@ TEST(UnaryKernelAdapter, BasicOperations) {
 
 }
 
+class raise_if_negative_exception : public std::runtime_error {
+public:
+    raise_if_negative_exception()
+        : std::runtime_error("raise_if_negative_exception")
+    {
+    }
+};
+
+static int raise_if_negative(int value) {
+    if (value >= 0) {
+        return value;
+    } else {
+        throw raise_if_negative_exception();
+    }
+}
+
 TEST(UnaryKernelAdapter, UnwindException) {
+    codegen_cache cgcache;
+    unary_specialization_kernel_instance rin;
+    cgcache.codegen_unary_function_adapter(make_dtype<int>(), make_dtype<int>(), cdecl_callconv,
+                    &raise_if_negative, rin);
+    int in[3], out[3];
+    // First call it with no exception raised
+    in[0] = 0;
+    in[1] = 10;
+    in[2] = 10000;
+    rin.specializations[0]((char *)out, sizeof(int), (const char *)in, sizeof(int), 3, rin.auxdata);
+    EXPECT_EQ(0, out[0]);
+    EXPECT_EQ(10, out[1]);
+    EXPECT_EQ(10000, out[2]);
+
+    // Call it with an input stride that skips the negative value
+    in[1] = -1;
+    rin.specializations[0]((char *)out, sizeof(int), (const char *)in, 2*sizeof(int), 2, rin.auxdata);
+    EXPECT_EQ(0, out[0]);
+    EXPECT_EQ(10000, out[1]);
+    EXPECT_EQ(10000, out[2]);
+
+    // Call it with a negative value
+    EXPECT_THROW(rin.specializations[0]((char *)out, sizeof(int), (const char *)in, sizeof(int), 3, rin.auxdata),
+            raise_if_negative_exception);
 }

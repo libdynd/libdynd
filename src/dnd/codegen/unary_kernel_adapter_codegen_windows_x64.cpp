@@ -3,6 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
+#if defined(_WIN32) && defined(_M_X64)
+
 #include <dnd/codegen/unary_kernel_adapter_codegen.hpp>
 #include <dnd/memblock/executable_memory_block.hpp>
 
@@ -379,3 +381,5 @@ unary_operation_t* dnd::codegen_unary_function_adapter(const memory_block_ptr& e
 
     return reinterpret_cast<unary_operation_t *>(code_begin + sizeof(unwind_info));
 }
+
+#endif // defined(_WIN32) && defined(_M_X64)
