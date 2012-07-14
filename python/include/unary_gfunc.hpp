@@ -9,9 +9,11 @@
 #include <stdint.h>
 #include <sstream>
 #include <deque>
+#include <vector>
 
 #include <dnd/dtype.hpp>
 #include <dnd/kernels/kernel_instance.hpp>
+#include <dnd/codegen/codegen_cache.hpp>
 
 #include <Python.h>
 
@@ -28,10 +30,7 @@ public:
     {
     }
 
-    ~unary_gfunc_kernel()
-    {
-        Py_XDECREF(m_pyobj);
-    }
+    ~unary_gfunc_kernel();
 
     void swap(unary_gfunc_kernel& rhs) {
         m_out.swap(rhs.m_out);
@@ -47,17 +46,27 @@ class unary_gfunc {
      * and so cannot rely on C++11 move semantics.
      */
     std::deque<unary_gfunc_kernel> m_kernels;
+    std::vector<dnd::memory_block_data *> m_blockrefs;
 public:
     unary_gfunc(const char *name)
         : m_name(name)
     {
     }
 
+    ~unary_gfunc();
+
     const std::string& get_name() const {
         return m_name;
     }
 
-    void add_kernel(PyObject *kernel);
+    /**
+     * Adds a new memory_block for the unary_gfunc to
+     * hold a reference to. For example, the executable
+     * memory block for generated code should get added.
+     */
+    void add_blockref(dnd::memory_block_data *blockref);
+
+    void add_kernel(dnd::codegen_cache& cgcache, PyObject *kernel);
 
     PyObject *call(PyObject *args, PyObject *kwargs);
 

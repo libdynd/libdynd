@@ -32,6 +32,7 @@ if any_diagnostics_enabled():
                 str(which_diagnostics_enabled().c_str()), PerformanceWarning)
 
 include "dnd.pxd"
+include "codegen_cache.pxd"
 include "dtype.pxd"
 include "ndarray.pxd"
 include "unary_gfunc.pxd"
@@ -309,9 +310,9 @@ cdef class w_unary_gfunc:
         def __get__(self):
             return str(GET(self.v).get_name().c_str())
 
-    def add_kernel(self, kernel):
+    def add_kernel(self, w_codegen_cache cgcache, kernel):
         """Adds a kernel to the gfunc object. Currently, this means a ctypes object with prototype."""
-        GET(self.v).add_kernel(kernel)
+        GET(self.v).add_kernel(GET(cgcache.v), kernel)
 
     def debug_dump(self):
         """Prints a raw representation of the gfunc data."""

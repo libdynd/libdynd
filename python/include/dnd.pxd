@@ -67,4 +67,4 @@ cdef extern from "placement_wrappers.hpp" namespace "pydnd":
     void codegen_cache_placement_new(codegen_cache_placement_wrapper&) except +
     void codegen_cache_placement_delete(codegen_cache_placement_wrapper&)
     # placement cast
-    ndarray& GET(codegen_cache_placement_wrapper&)
+    codegen_cache& GET(codegen_cache_placement_wrapper&)

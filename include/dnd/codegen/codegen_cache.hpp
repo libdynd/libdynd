@@ -52,6 +52,15 @@ public:
     codegen_cache();
 
     /**
+     * Returns the executable memory block that
+     * this codegen cache generates into.
+     */
+    const memory_block_ptr& get_exec_memblock()
+    {
+        return m_exec_memblock;
+    }
+
+    /**
      * Generates the requested unary function adapter, and returns a
      * pointer to a specialized_unary_operation_table_t embedded in the
      * codegen_cache.

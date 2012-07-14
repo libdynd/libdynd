@@ -3,6 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
+#include <algorithm>
+
 #include <dnd/nodes/elementwise_unary_kernel_node.hpp>
 
 #include "unary_gfunc.hpp"
@@ -13,6 +15,18 @@
 using namespace std;
 using namespace dnd;
 using namespace pydnd;
+
+pydnd::unary_gfunc_kernel::~unary_gfunc_kernel()
+{
+    Py_XDECREF(m_pyobj);
+}
+
+pydnd::unary_gfunc::~unary_gfunc()
+{
+    for (size_t i = 0, i_end = m_blockrefs.size(); i != i_end; ++i) {
+        memory_block_decref(m_blockrefs[i]);
+    }
+}
 
 namespace {
 
@@ -185,7 +199,16 @@ static void create_unary_gfunc_kernel_from_ctypes(PyCFuncPtrObject *cfunc, unary
     make_raw_auxiliary_data(out_kernel.m_kernel.auxdata, *(uintptr_t *)cfunc->b_ptr);
 }
 
-void pydnd::unary_gfunc::add_kernel(PyObject *kernel)
+void pydnd::unary_gfunc::add_blockref(dnd::memory_block_data *blockref)
+{
+    if (find(m_blockrefs.begin(), m_blockrefs.end(), blockref) != m_blockrefs.end()) {
+        m_blockrefs.push_back(blockref);
+        memory_block_incref(blockref);
+    }
+}
+
+
+void pydnd::unary_gfunc::add_kernel(dnd::codegen_cache& cgcache, PyObject *kernel)
 {
     if (PyObject_IsSubclass((PyObject *)Py_TYPE(kernel), ctypes.PyCFuncPtrType_Type)) {
         unary_gfunc_kernel ugk;
@@ -193,6 +216,7 @@ void pydnd::unary_gfunc::add_kernel(PyObject *kernel)
         ugk.m_pyobj = kernel;
         m_kernels.push_back(unary_gfunc_kernel());
         ugk.swap(m_kernels.back());
+        add_blockref(cgcache.get_exec_memblock().get());
         return;
     }
 
