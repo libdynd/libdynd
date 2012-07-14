@@ -49,10 +49,7 @@ static void create_unary_gfunc_kernel_from_ctypes(dnd::codegen_cache& cgcache, P
 
     calling_convention_t cc = get_ctypes_calling_convention(cfunc);
 
-    out_kernel.m_kernel.specializations = cgcache.codegen_unary_function_adapter(sig[0], sig[1], cc);
-
-    // Use the function pointer as the raw auxiliary data
-    make_raw_auxiliary_data(out_kernel.m_kernel.auxdata, *(uintptr_t *)cfunc->b_ptr);
+    cgcache.codegen_unary_function_adapter(sig[0], sig[1], cc, *(void **)cfunc->b_ptr, out_kernel.m_kernel);
 }
 
 void pydnd::unary_gfunc::add_blockref(dnd::memory_block_data *blockref)

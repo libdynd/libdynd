@@ -16,14 +16,23 @@ dnd::codegen_cache::codegen_cache()
 {
 }
 
-unary_operation_t* dnd::codegen_cache::codegen_unary_function_adapter(const dtype& restype,
-                    const dtype& arg0type, calling_convention_t callconv)
+void dnd::codegen_cache::codegen_unary_function_adapter(const dtype& restype,
+                    const dtype& arg0type, calling_convention_t callconv,
+                    void *function_pointer,
+                    unary_specialization_kernel_instance& out_kernel)
 {
+    // Retrieve a unary function adapter from the cache
     uint64_t unique_id = get_unary_function_adapter_unique_id(restype, arg0type, callconv);
     map<uint64_t, unary_operation_t *>::iterator it = m_cached_unary_kernel_adapters.find(unique_id);
     if (it == m_cached_unary_kernel_adapters.end()) {
         unary_operation_t *optable = ::codegen_unary_function_adapter(m_exec_memblock, restype, arg0type, callconv);
         it = m_cached_unary_kernel_adapters.insert(std::pair<uint64_t, unary_operation_t *>(unique_id, optable)).first;
     }
-    return it->second;
+    // Set the specializations and create auxiliary data in the output
+    out_kernel.specializations = it->second;
+    make_auxiliary_data<unary_function_adapter_auxdata>(out_kernel.auxdata);
+    unary_function_adapter_auxdata& ad = out_kernel.auxdata.get<unary_function_adapter_auxdata>();
+    // Populate the auxiliary data
+    ad.function_pointer = function_pointer;
+    ad.exec_memblock = m_exec_memblock;
 }

@@ -37,11 +37,13 @@ public:
 
     /**
      * Generates the requested unary function adapter, and returns a
-     * pointer to a specialized_unary_operation_table_t embedded in the
-     * codegen_cache.
+     * specialized unary kernel for it. Reuses the low level generated
+     * adapter functions when it can.
      */
-    unary_operation_t* codegen_unary_function_adapter(const dtype& restype,
-                    const dtype& arg0type, calling_convention_t callconv);
+    void codegen_unary_function_adapter(const dtype& restype,
+                    const dtype& arg0type, calling_convention_t callconv,
+                    void *function_pointer,
+                    unary_specialization_kernel_instance& out_kernel);
 };
 
 } // namespace dnd

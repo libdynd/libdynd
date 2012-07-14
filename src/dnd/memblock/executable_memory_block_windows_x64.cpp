@@ -18,33 +18,10 @@ using namespace std;
 using namespace dnd;
 
 namespace {
-    struct allocated_function {
-        DWORD64 m_begin, m_end;
-        RUNTIME_FUNCTION m_rf;
-    };
-
     struct virtual_alloc_chunk {
         char *m_memory_begin;
-        vector<allocated_function> m_functions;
+        deque<RUNTIME_FUNCTION> m_functions;
     };
-
-    static PRUNTIME_FUNCTION get_runtime_function_callback(
-                                DWORD64 ControlPc, PVOID Context)
-    {
-        virtual_alloc_chunk *chunk = reinterpret_cast<virtual_alloc_chunk *>(Context);
-        // TODO: This isn't thread-safe, if a function is created while we're doing this, and
-        //       the vector is resized, there will be problems.
-
-        // Find the allocated function which contains the address
-        for (vector<allocated_function>::iterator i = chunk->m_functions.begin(), i_end = chunk->m_functions.end();
-                    i != i_end; ++i) {
-            if (i->m_begin <= ControlPc && ControlPc < i->m_end) {
-                return &i->m_rf;
-            }
-        }
-
-        return NULL;
-    }
 
     struct executable_memory_block {
         /** Every memory block object needs this at the front */
@@ -71,14 +48,6 @@ namespace {
             m_memory_current = m_memory_begin;
             m_memory_end = m_memory_current + m_chunk_size_bytes;
             m_total_allocated_capacity += m_chunk_size_bytes;
-
-            // Install the handler for stack frame unwinding
-            if (RtlInstallFunctionTableCallback((uintptr_t)m_memory_begin|0x3, (uintptr_t)m_memory_begin, m_chunk_size_bytes,
-                        &get_runtime_function_callback, &m_memory_handles.back(), NULL) == 0) {
-                VirtualFreeEx(hProcess, m_memory_begin, 0, MEM_RELEASE);
-                m_memory_handles.pop_back();
-                throw runtime_error("Error in RtlInstallFunctionTableCallback");
-            }
         }
 
         executable_memory_block(intptr_t chunk_size_bytes)
@@ -92,7 +61,9 @@ namespace {
         {
             HANDLE hProcess = GetCurrentProcess();
             for (size_t i = 0, i_end = m_memory_handles.size(); i != i_end; ++i) {
-                RtlDeleteFunctionTable((PRUNTIME_FUNCTION)((uintptr_t)m_memory_handles[i].m_memory_begin|0x3));
+                for (size_t j = 0, j_end = m_memory_handles[i].m_functions.size(); j != j_end; ++j) {
+                    RtlDeleteFunctionTable(&m_memory_handles[i].m_functions[j]);
+                }
                 VirtualFreeEx(hProcess, m_memory_handles[i].m_memory_begin, 0, MEM_RELEASE);
             }
         }
@@ -180,13 +151,13 @@ void dnd::set_executable_memory_runtime_function(memory_block_data *self, char *
     // Sets the runtime function info for the most recently allocated memory
     executable_memory_block *emb = reinterpret_cast<executable_memory_block *>(self);
     virtual_alloc_chunk &vac = emb->m_memory_handles.back();
-    vac.m_functions.push_back(allocated_function());
-    allocated_function &af = vac.m_functions.back();
-    af.m_begin = reinterpret_cast<DWORD64>(begin);
-    af.m_end = reinterpret_cast<DWORD64>(end);
-    af.m_rf.BeginAddress = (DWORD)(begin - vac.m_memory_begin);
-    af.m_rf.EndAddress = (DWORD)(end - vac.m_memory_begin);
-    af.m_rf.UnwindData = (DWORD)(unwind_data - vac.m_memory_begin);
+    vac.m_functions.push_back(RUNTIME_FUNCTION());
+    RUNTIME_FUNCTION &rf = vac.m_functions.back();
+    char *smallest_address = min(begin, unwind_data);
+    rf.BeginAddress = (DWORD)(begin - smallest_address);
+    rf.EndAddress = (DWORD)(end - smallest_address);
+    rf.UnwindData = (DWORD)(unwind_data - smallest_address);
+    RtlAddFunctionTable(&rf, 1, (DWORD64)smallest_address);
 }
 
 void dnd::executable_memory_block_debug_dump(const memory_block_data *memblock, std::ostream& o, const std::string& indent)

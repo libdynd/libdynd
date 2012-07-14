@@ -109,11 +109,11 @@ namespace detail {
 
         friend class ::dnd::auxiliary_data;
     public:
-        const Taux& get() const {
+        inline const Taux& get() const {
             return m_auxdata;
         }
 
-        Taux& get() {
+        inline Taux& get() {
             return m_auxdata;
         }
     };
@@ -309,7 +309,7 @@ inline void make_raw_auxiliary_data(auxiliary_data& out_created, uintptr_t raw_v
  * data or borrowed auxiliary data.
  */
 template<typename T>
-const T& get_auxiliary_data(const AuxDataBase *auxdata)
+inline const T& get_auxiliary_data(const AuxDataBase *auxdata)
 {
     return reinterpret_cast<const detail::auxiliary_data_holder<T>*>(reinterpret_cast<uintptr_t>(auxdata)&~1)->get();
 }

@@ -114,8 +114,8 @@ unary_operation_t* dnd::codegen_unary_function_adapter(const memory_block_ptr& e
             0x18, 0x34,
             0x0a, 0x00,
             // Unwind code: finished at offset 0x18, operation code 2 (UWOP_ALLOC_SMALL),
-            // allocation size 0x20 = 3 * 8 + 8
-            0x18, 0x32,
+            // allocation size 0x30 = 5 * 8 + 8
+            0x18, 0x52,
             // Unwind code: finished at offset 0x14, operation code 0 (UWOP_PUSH_NONVOL),
             // register number 0xD = 13 (R13)
             0x14, 0xd0,
@@ -136,12 +136,13 @@ unary_operation_t* dnd::codegen_unary_function_adapter(const memory_block_ptr& e
             0x48, 0x83, 0xec, 0x30          // sub     rsp, 48
         };
     static unsigned char loop_setup[] = {
-            0x48, 0x8b, 0x6c, 0x24, 0x78,   // mov     rbp, QWORD PTR auxdata$[rsp]
+            0x48, 0x8b, 0x44, 0x24, 0x78,   // mov rax, QWORD PTR auxdata$[rsp]     ; AUXDATA: get arg
             0x48, 0x8b, 0x74, 0x24, 0x70,   // mov     rsi, QWORD PTR count$[rsp]
             0x4d, 0x8b, 0xe1,               // mov     r12, r9
-            0x48, 0x83, 0xe5, 0xfe,         // and     rbp, -2
+            0x48, 0x83, 0xe0, 0xfe,         // and     rax, -2                      ; AUXDATA: Remove "borrowed" bit
             0x49, 0x8b, 0xd8,               // mov     rbx, r8
             0x4c, 0x8b, 0xea,               // mov     r13, rdx
+            0x48, 0x8B, 0x68, 0x20,         // mov     rbp, QWORD PTR [rax+32]      ; AUXDATA: Get function pointer
             0x48, 0x8b, 0xf9,               // mov     rdi, rcx
             0x48, 0x85, 0xf6,               // test    rsi, rsi
             0x7e, 0x00                      // jle     SHORT skip_loop (REQUIRES FIXUP)
@@ -207,9 +208,9 @@ unary_operation_t* dnd::codegen_unary_function_adapter(const memory_block_ptr& e
         };
     // skip_loop:
     static unsigned char epilog[] = {
-            0x48, 0x8b, 0x5c, 0x24, 0x40,   // mov     rbx, QWORD PTR [rsp+64]
-            0x48, 0x8b, 0x6c, 0x24, 0x48,   // mov     rbp, QWORD PTR [rsp+72]
-            0x48, 0x8b, 0x74, 0x24, 0x50,   // mov     rsi, QWORD PTR [rsp+80]
+            0x48, 0x8b, 0x5c, 0x24, 0x50,   // mov     rbx, QWORD PTR [rsp+80]
+            0x48, 0x8b, 0x6c, 0x24, 0x58,   // mov     rbp, QWORD PTR [rsp+88]
+            0x48, 0x8b, 0x74, 0x24, 0x60,   // mov     rsi, QWORD PTR [rsp+96]
             0x48, 0x83, 0xc4, 0x30,         // add     rsp, 48
             0x41, 0x5d,                     // pop     r13
             0x41, 0x5c,                     // pop     r12

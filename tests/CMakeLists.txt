@@ -7,18 +7,20 @@ cmake_minimum_required(VERSION 2.8)
 project(dnd_tests)
 
 set(tests_SRC
-    test_array_dtype.cpp
-    test_byteswap_dtype.cpp
-    test_categorical_dtype.cpp
-    test_convert_dtype.cpp
-    test_align_dtype.cpp
+    codegen/test_codegen_cache.cpp
+    codegen/test_unary_kernel_adapter.cpp
+    dtypes/test_array_dtype.cpp
+    dtypes/test_byteswap_dtype.cpp
+    dtypes/test_categorical_dtype.cpp
+    dtypes/test_convert_dtype.cpp
+    dtypes/test_align_dtype.cpp
+    dtypes/test_dtype.cpp
+    dtypes/test_dtype_assign.cpp
+    dtypes/test_dtype_casting.cpp
+    dtypes/test_dtype_promotion.cpp
+    dtypes/test_fixedstring_dtype.cpp
+    dtypes/test_string_dtype.cpp
     test_arithmetic_op.cpp
-    test_dtype.cpp
-    test_dtype_assign.cpp
-    test_dtype_casting.cpp
-    test_dtype_promotion.cpp
-    test_fixedstring_dtype.cpp
-    test_string_dtype.cpp
     test_ndarray.cpp
     test_ndarray_assign.cpp
     test_ndarray_index.cpp
@@ -42,6 +44,9 @@ include_directories(
     .
     )
 endif(WIN32)
+
+source_group("DTypes Tests" REGULAR_EXPRESSION "dtypes/.*cpp")
+source_group("CodeGen Tests" REGULAR_EXPRESSION "codegen/.*cpp")
 
 add_executable(dnd_tests ${tests_SRC})
 

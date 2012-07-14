@@ -14,7 +14,7 @@
  */
 
 // Set this to 1 when needed to analyze compiled kernel output, 0 otherwise
-#define ENABLE_DISASSEMBLY_ANALYSIS 0
+#define ENABLE_DISASSEMBLY_ANALYSIS 1
 
 #if ENABLE_DISASSEMBLY_ANALYSIS
 #include <stdint.h>
@@ -33,7 +33,7 @@ extern "C" void unary__general_kernel__disassembly_analysis(char *dst, intptr_t 
                     intptr_t count, const AuxDataBase *auxdata)
 {
     typedef S (*cdecl_func_ptr_t)(T);
-    cdecl_func_ptr_t kfunc = reinterpret_cast<cdecl_func_ptr_t>(get_raw_auxiliary_data(auxdata)&(~1));
+    cdecl_func_ptr_t kfunc = get_auxiliary_data<cdecl_func_ptr_t>(auxdata);
     for (intptr_t i = 0; i < count; ++i) {
         *(S *)dst = kfunc(*(const T *)src);
 

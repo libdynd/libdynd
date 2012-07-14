@@ -15,6 +15,19 @@
 namespace dnd {
 
 /**
+ * This is the auxiliary data used by the code generated
+ * unary function adapters.
+ *
+ * Use make_auxiliary_data<unary_function_adapter_auxdata>(out_auxdata)
+ * to create it, then populate with the function pointer and the memory
+ * block containing the code.
+ */
+struct unary_function_adapter_auxdata {
+    void *function_pointer;
+    memory_block_ptr exec_memblock;
+};
+
+/**
  * This returns an integer ID that uniquely identifies the
  * unary function adapter produced by codegen_unary_function_adapter.
  * If two sets of inputs produce the same unique ID, they would also
