@@ -23,8 +23,8 @@ namespace {
     public:
         sorter(vector<char *>& values, const single_compare_operation_t less, const auxiliary_data& auxdata) :
             m_categories(values), m_less(less), m_auxdata(auxdata) {}
-        bool operator()(int a, int b) {
-            return m_less(m_categories[a], m_categories[b], m_auxdata);
+        bool operator()(intptr_t i, intptr_t j) {
+            return m_less(m_categories[i], m_categories[j], m_auxdata);
         }
     };
 
