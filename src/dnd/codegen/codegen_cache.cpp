@@ -20,10 +20,10 @@ unary_operation_t* dnd::codegen_cache::codegen_unary_function_adapter(const dtyp
                     const dtype& arg0type, calling_convention_t callconv)
 {
     uint64_t unique_id = get_unary_function_adapter_unique_id(restype, arg0type, callconv);
-    map<uint64_t, detail::unary_kernel_adapter_holder>::iterator it = m_cached_unary_kernel_adapters.find(unique_id);
+    map<uint64_t, unary_operation_t *>::iterator it = m_cached_unary_kernel_adapters.find(unique_id);
     if (it == m_cached_unary_kernel_adapters.end()) {
-        unary_operation_t op = ::codegen_unary_function_adapter(m_exec_memblock, restype, arg0type, callconv);
-        it = m_cached_unary_kernel_adapters.insert(std::pair<uint64_t, detail::unary_kernel_adapter_holder>(unique_id, op)).first;
+        unary_operation_t *optable = ::codegen_unary_function_adapter(m_exec_memblock, restype, arg0type, callconv);
+        it = m_cached_unary_kernel_adapters.insert(std::pair<uint64_t, unary_operation_t *>(unique_id, optable)).first;
     }
-    return it->second.get();
+    return it->second;
 }

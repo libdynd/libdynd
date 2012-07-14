@@ -91,7 +91,7 @@ uint64_t dnd::get_unary_function_adapter_unique_id(const dtype& restype,
 }
 
 
-unary_operation_t dnd::codegen_unary_function_adapter(const memory_block_ptr& exec_memblock, const dtype& restype,
+unary_operation_t* dnd::codegen_unary_function_adapter(const memory_block_ptr& exec_memblock, const dtype& restype,
                     const dtype& arg0type, calling_convention_t DND_UNUSED(callconv))
 {
     // This code generation always uses the same prolog structure,
@@ -231,6 +231,15 @@ unary_operation_t dnd::codegen_unary_function_adapter(const memory_block_ptr& ex
     memcpy(code_current, unwind_info, sizeof(unwind_info));
     code_current += sizeof(unwind_info);
 
+    // The four unary_specialization_t pointers, all point to the same function
+    // because we don't specialize presently.
+    char **specializations = reinterpret_cast<char **>(code_current);
+    specializations[0] = code_begin + sizeof(unwind_info) + 4 * sizeof(char *);
+    specializations[1] = code_begin + sizeof(unwind_info) + 4 * sizeof(char *);
+    specializations[2] = code_begin + sizeof(unwind_info) + 4 * sizeof(char *);
+    specializations[3] = code_begin + sizeof(unwind_info) + 4 * sizeof(char *);
+    code_current += 4 * sizeof(char *);
+
     // The function prolog
     memcpy(code_current, prolog, sizeof(prolog));
     code_current += sizeof(prolog);
@@ -353,7 +362,9 @@ unary_operation_t dnd::codegen_unary_function_adapter(const memory_block_ptr& ex
     resize_executable_memory(exec_memblock.get(), code_current - code_begin, &code_begin, &code_end);
 
     // Register the stack info so exceptions can unwind through the call
-    set_executable_memory_runtime_function(exec_memblock.get(), code_begin + sizeof(unwind_info), code_current, code_begin);
+    set_executable_memory_runtime_function(exec_memblock.get(),
+                    code_begin + sizeof(unwind_info) + 4 * sizeof(char *),
+                    code_current, code_begin);
 
-    return reinterpret_cast<unary_operation_t>(code_begin + sizeof(unwind_info));
+    return reinterpret_cast<unary_operation_t *>(code_begin + sizeof(unwind_info));
 }

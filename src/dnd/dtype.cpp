@@ -14,9 +14,6 @@
 #include <cstring>
 #include <vector>
 
-/** The maximum number of type ids which can be defined */
-#define DND_MAX_NUM_TYPE_IDS 64
-
 using namespace std;
 using namespace dnd;
 
@@ -63,12 +60,12 @@ extended_string_dtype::~extended_string_dtype()
 {
 }
 
-inline /* TODO: DND_CONSTEXPR */ dtype dnd::detail::internal_make_raw_dtype(char type_id, char kind, char alignment, intptr_t element_size)
+inline /* TODO: DND_CONSTEXPR */ dtype dnd::detail::internal_make_raw_dtype(char type_id, char kind, intptr_t element_size, char alignment)
 {
-    return dtype(type_id, kind, alignment, element_size);
+    return dtype(type_id, kind, element_size, alignment);
 }
 
-const dtype dnd::static_builtin_dtypes[builtin_type_id_count] = {
+const dtype dnd::static_builtin_dtypes[builtin_type_id_count + 1] = {
     dnd::detail::internal_make_raw_dtype(bool_type_id, bool_kind, 1, 1),
     dnd::detail::internal_make_raw_dtype(int8_type_id, int_kind, 1, 1),
     dnd::detail::internal_make_raw_dtype(int16_type_id, int_kind, 2, 2),
@@ -80,8 +77,9 @@ const dtype dnd::static_builtin_dtypes[builtin_type_id_count] = {
     dnd::detail::internal_make_raw_dtype(uint64_type_id, uint_kind, 8, 8),
     dnd::detail::internal_make_raw_dtype(float32_type_id, real_kind, 4, 4),
     dnd::detail::internal_make_raw_dtype(float64_type_id, real_kind, 8, 8),
-    dnd::detail::internal_make_raw_dtype(complex_float32_type_id, complex_kind, 4, 8),
-    dnd::detail::internal_make_raw_dtype(complex_float64_type_id, complex_kind, 8, 16)
+    dnd::detail::internal_make_raw_dtype(complex_float32_type_id, complex_kind, 8, 4),
+    dnd::detail::internal_make_raw_dtype(complex_float64_type_id, complex_kind, 16, 8),
+    dnd::detail::internal_make_raw_dtype(void_type_id, void_kind, 0, 1)
 };
 
 /**
@@ -93,7 +91,7 @@ const dtype dnd::static_builtin_dtypes[builtin_type_id_count] = {
 static inline int validate_type_id(type_id_t type_id)
 {
     // 0 <= type_id < builtin_type_id_count
-    if ((unsigned int)type_id < builtin_type_id_count) {
+    if ((unsigned int)type_id < builtin_type_id_count + 1) {
         return type_id;
     } else {
         throw invalid_type_id((int)type_id);
@@ -155,14 +153,27 @@ dtype::dtype(const std::string& rep)
         }
     }
 
+    if (rep == "void") {
+        m_type_id = void_type_id;
+        m_kind = void_kind;
+        m_alignment = 1;
+        m_element_size = 0;
+        return;
+    }
+
     throw std::runtime_error(std::string() + "invalid type string \"" + rep + "\"");
 }
 
 void dtype::get_single_compare_kernel(single_compare_kernel_instance &out_kernel) const {
     if (extended() != NULL) {
         return extended()->get_single_compare_kernel(out_kernel);
+    } else if (type_id() >= 0 && type_id() < builtin_type_id_count) {
+        out_kernel.comparisons = builtin_dtype_comparisons_table[type_id()];
+    } else {
+        stringstream ss;
+        ss << "Cannot get single compare kernels for dtype " << *this;
+        throw runtime_error(ss.str());
     }
-    out_kernel.comparisons = builtin_dtype_comparisons_table[type_id()];
 }
 
 std::ostream& dnd::operator<<(std::ostream& o, const dtype& rhs)
@@ -209,6 +220,9 @@ std::ostream& dnd::operator<<(std::ostream& o, const dtype& rhs)
             break;
         case fixedbytes_type_id:
             o << "fixedbytes<" << rhs.element_size() << "," << rhs.alignment() << ">";
+            break;
+        case void_type_id:
+            o << "void";
             break;
         case pattern_type_id:
             o << "pattern";
@@ -312,6 +326,9 @@ void dnd::dtype::print_element(std::ostream& o, const char * data) const
                 o << "0x";
                 hexadecimal_print(o, data, m_element_size);
                 break;
+            case void_type_id:
+                o << "(void)";
+                break;
             default:
                 stringstream ss;
                 ss << "printing of dtype " << *this << " isn't supported yet";
@@ -324,18 +341,18 @@ dtype dnd::make_fixedbytes_dtype(intptr_t element_size, intptr_t alignment)
 {
     if (alignment > element_size) {
         std::stringstream ss;
-        ss << "Cannot make a bytes<" << element_size << "," << alignment << "> dtype, its alignment is greater than its size";
+        ss << "Cannot make a fixedbytes<" << element_size << "," << alignment << "> dtype, its alignment is greater than its size";
         throw std::runtime_error(ss.str());
     }
     if (alignment != 1 && alignment != 2 && alignment != 4 && alignment != 8 && alignment != 16) {
         std::stringstream ss;
-        ss << "Cannot make a bytes<" << element_size << "," << alignment << "> dtype, its alignment is not a small power of two";
+        ss << "Cannot make a fixedbytes<" << element_size << "," << alignment << "> dtype, its alignment is not a small power of two";
         throw std::runtime_error(ss.str());
     }
     if ((element_size&(alignment-1)) != 0) {
         std::stringstream ss;
-        ss << "Cannot make a bytes<" << element_size << "," << alignment << "> dtype, its alignment does not divide into its element size";
+        ss << "Cannot make a fixedbytes<" << element_size << "," << alignment << "> dtype, its alignment does not divide into its element size";
         throw std::runtime_error(ss.str());
     }
-    return dtype(fixedbytes_type_id, bytes_kind, alignment, element_size);
+    return dtype(fixedbytes_type_id, bytes_kind, element_size, alignment);
 }

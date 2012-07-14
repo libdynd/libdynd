@@ -46,6 +46,7 @@ enum dtype_kind_t {
     // string_kind means subclass of extended_string_dtype
     string_kind,
     bytes_kind,
+    void_kind,
     // For struct_type_id and array_type_id
     composite_kind,
     // For dtypes whose value_dtype != the dtype, signals
@@ -77,6 +78,9 @@ enum type_id_t {
     // Complex floating-point types
     complex_float32_type_id,
     complex_float64_type_id,
+    // Means no type, just like in C. (Different from Numpy)
+    void_type_id,
+
     // Raw fixed size bytes
     fixedbytes_type_id,
 
@@ -157,10 +161,12 @@ template <> struct type_id_of<float> {enum {value = float32_type_id};};
 template <> struct type_id_of<double> {enum {value = float64_type_id};};
 template <> struct type_id_of<std::complex<float> > {enum {value = complex_float32_type_id};};
 template <> struct type_id_of<std::complex<double> > {enum {value = complex_float64_type_id};};
+template <> struct type_id_of<void> {enum {value = void_type_id};};
 
 // Type trait for the kind
 template <typename T> struct dtype_kind_of;
 
+template <> struct dtype_kind_of<void> {static const dtype_kind_t value = void_kind;};
 // Can't use bool, because it doesn't have a guaranteed sizeof
 template <> struct dtype_kind_of<dnd_bool> {static const dtype_kind_t value = bool_kind;};
 template <> struct dtype_kind_of<char> {
@@ -200,7 +206,7 @@ template <> struct is_dtype_scalar<double> {enum {value = true};};
 template <> struct is_dtype_scalar<std::complex<float> > {enum {value = true};};
 template <> struct is_dtype_scalar<std::complex<double> > {enum {value = true};};
 
-// Metaprogram for determining if a type is "bool" or not
+// Metaprogram for determining if a type is the C++ "bool" or not
 template<typename T> struct is_type_bool {enum {value = false};};
 template<> struct is_type_bool<bool> {enum {value = true};};
 
@@ -312,7 +318,7 @@ namespace detail {
     /**
      * Internal implementation detail - makes a builtin dtype from its raw values.
      */
-    /* TODO: DND_CONSTEXPR */ dtype internal_make_raw_dtype(char type_id, char kind, char alignment, intptr_t element_size);
+    /* TODO: DND_CONSTEXPR */ dtype internal_make_raw_dtype(char type_id, char kind, intptr_t element_size, char alignment);
 
 } // namespace detail
 
@@ -338,7 +344,7 @@ private:
     shared_ptr<extended_dtype> m_data;
 
     /** Unchecked built-in dtype constructor from raw parameters */
-    /* TODO: DND_CONSTEXPR */ dtype(char type_id, char kind, char alignment, intptr_t element_size)
+    /* TODO: DND_CONSTEXPR */ dtype(char type_id, char kind, intptr_t element_size, char alignment)
         : m_type_id(type_id), m_kind(kind),
           m_alignment(alignment), m_element_size(element_size), m_data()
     {}
@@ -528,7 +534,7 @@ public:
      */
     void print_element(std::ostream& o, const char *data) const;
 
-    friend /* TODO: DND_CONSTEXPR*/ dtype detail::internal_make_raw_dtype(char type_id, char kind, char alignment, intptr_t element_size);
+    friend /* TODO: DND_CONSTEXPR*/ dtype detail::internal_make_raw_dtype(char type_id, char kind, intptr_t element_size, char alignment);
     friend std::ostream& operator<<(std::ostream& o, const dtype& rhs);
     friend dtype make_fixedbytes_dtype(intptr_t element_size, intptr_t alignment);
 };
@@ -541,12 +547,12 @@ dtype make_dtype()
 }
 
 /**
- * A static array of the builtin dtypes. If code is specialized
+ * A static array of the builtin dtypes and void. If code is specialized
  * just for a builtin type, like int, it can use
  * static_builtin_dtypes[type_id_of<int>::value] as a fast
  * way to get a const reference to its dtype.
  */
-extern const dtype static_builtin_dtypes[builtin_type_id_count];
+extern const dtype static_builtin_dtypes[builtin_type_id_count + 1];
 
 /**
  * Creates a bytes<size, alignment> dtype, for representing

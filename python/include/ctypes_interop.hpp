@@ -127,8 +127,16 @@ inline bool CDataObject_Check(PyObject *v) {
     return PyObject_TypeCheck(v, (PyTypeObject *)ctypes.PyCData_Type);
 }
 
+/**
+ * Gets the calling convention of the ctypes function pointer object.
+ */
 dnd::calling_convention_t get_ctypes_calling_convention(PyCFuncPtrObject* cfunc);
 
+/**
+ * Gets the signature of the ctypes function pointer object. out_sig[0] is
+ * the return type, and the rest are the argument types.
+ */
+void get_ctypes_signature(PyCFuncPtrObject* cfunc, std::vector<dnd::dtype>& out_sig);
 
 } // namespace pydnd
 

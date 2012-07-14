@@ -11,45 +11,33 @@
 #include <dnd/dtypes/string_dtype.hpp>
 #include <dnd/dtypes/byteswap_dtype.hpp>
 #include <dnd/ndarray_arange.hpp>
+#include <dnd/codegen/codegen_cache.hpp>
+#include <dnd/codegen/unary_kernel_adapter_codegen.hpp>
 
 using namespace std;
 using namespace dnd;
 
-int main1()
+typedef complex<double> A0;
+typedef float R;
+
+static R spin(A0 x) {
+    return 2 * x.real() + 2;
+}
+
+int main()
 {
     try {
-        ndarray a;
+        A0 a[2];
+        R b[2];
 
-        //a = {1, 5, 7};
-        int avals[] = {1, 5, 7};
-        a = avals;
-
-        cout << a << endl;
-
-        ndarray a2 = a.as_dtype<float>();
-
-        cout << a2 << endl;
-
-        ndarray a3 = a.as_dtype<double>();
-
-        cout << a3 << endl;
-
-        ndarray a4 = a2.as_dtype<double>();
-
-        cout << a4 << endl;
-        return 0;
-
-        float avals2[2][3] = {{1,2,3}, {3,2,9}};
-        ndarray b = avals2;
-
-        ndarray c = a + b;
-
-        c.debug_dump(cout);
-        cout << c << endl;
-
-        cout << c(0,1) << endl;
-        a(1).val_assign(1.5f);
-        cout << c(0,1) << endl;
+        codegen_cache cgcache;
+        unary_operation_t *optable = cgcache.codegen_unary_function_adapter(make_dtype<R>(), make_dtype<A0>(), cdecl_callconv);
+        //codegen_unary_function_adapter(emb, make_dtype<int>(), make_dtype<float>(), cdecl_callconv);
+        a[0] = 1;
+        a[1] = 2;
+        optable[0]((char *)b, sizeof(b[0]), (char *)a, sizeof(a[0]), 2, (AuxDataBase *)((uintptr_t)&spin|1));
+        cout << b[0] << endl;
+        cout << b[1] << endl;
 
         return 0;
     } catch(std::exception& e) {
@@ -62,7 +50,7 @@ int main1()
     cout << "first   : " << (a) << endl \
          << "second  : " << (b) << endl
 
-int main()
+int main1()
 {
     try {
     ndarray a, b;
@@ -111,4 +99,5 @@ int main()
     } catch(int){//std::exception& e) { cout << "Error: " << e.what() << "\n";
         return 1;
     }
+    return 0;
 }

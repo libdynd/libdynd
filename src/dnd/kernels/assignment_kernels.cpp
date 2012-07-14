@@ -530,8 +530,7 @@ void dnd::get_dtype_assignment_kernel(const dtype& dt,
             // In the case of an expression dtype, just copy the storage
             // directly instead of chaining multiple casting operations
             // together.
-            get_dtype_assignment_kernel(dt.storage_dtype(),
-                            out_kernel);
+            get_dtype_assignment_kernel(dt.storage_dtype(), out_kernel);
             return;
         }
 
