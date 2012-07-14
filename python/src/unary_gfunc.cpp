@@ -106,7 +106,7 @@ static void create_unary_gfunc_kernel_from_ctypes(PyCFuncPtrObject *cfunc, unary
     }
 
     calling_convention_t cc = get_ctypes_calling_convention(cfunc);
-    cout << "calling convention is " << cc << endl;
+    //cout << "calling convention is " << cc << endl;
 #if defined(_WIN32) && !defined(_M_X64)
     if (cc == win32_stdcall_callconv) {
         switch (out_kernel.m_params[0].type_id()) {

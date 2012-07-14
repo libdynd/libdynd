@@ -114,7 +114,9 @@ void free_executable_memory_block(memory_block_data *memblock)
     delete emb;
 }
 
-void allocate_executable_memory(memory_block_data *self, intptr_t size_bytes, intptr_t alignment, char **out_begin, char **out_end)
+}} // namespace dnd::detail
+
+void dnd::allocate_executable_memory(memory_block_data *self, intptr_t size_bytes, intptr_t alignment, char **out_begin, char **out_end)
 {
 //    cout << "allocating " << size_bytes << " of memory with alignment " << alignment << endl;
     // Allocate new exectuable memory of the requested size and alignment
@@ -144,7 +146,7 @@ void allocate_executable_memory(memory_block_data *self, intptr_t size_bytes, in
 //    cout << "allocated at address " << (void *)begin << endl;
 }
 
-void resize_executable_memory(memory_block_data *self, intptr_t size_bytes, char **inout_begin, char **inout_end)
+void dnd::resize_executable_memory(memory_block_data *self, intptr_t size_bytes, char **inout_begin, char **inout_end)
 {
     // Resizes previously allocated executable memory to the requested size
     executable_memory_block *emb = reinterpret_cast<executable_memory_block *>(self);
@@ -173,7 +175,7 @@ void resize_executable_memory(memory_block_data *self, intptr_t size_bytes, char
 //    cout << "memory state after " << (void *)emb->m_memory_begin << " / " << (void *)emb->m_memory_current << " / " << (void *)emb->m_memory_end << endl;
 }
 
-void set_executable_memory_runtime_function(memory_block_data *self, char *begin, char *end, char *unwind_data)
+void dnd::set_executable_memory_runtime_function(memory_block_data *self, char *begin, char *end, char *unwind_data)
 {
     // Sets the runtime function info for the most recently allocated memory
     executable_memory_block *emb = reinterpret_cast<executable_memory_block *>(self);
@@ -186,8 +188,6 @@ void set_executable_memory_runtime_function(memory_block_data *self, char *begin
     af.m_rf.EndAddress = (DWORD)(end - vac.m_memory_begin);
     af.m_rf.UnwindData = (DWORD)(unwind_data - vac.m_memory_begin);
 }
-
-}} // namespace dnd::detail
 
 void dnd::executable_memory_block_debug_dump(const memory_block_data *memblock, std::ostream& o, const std::string& indent)
 {
