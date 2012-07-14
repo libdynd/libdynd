@@ -36,3 +36,22 @@ void dnd::codegen_cache::codegen_unary_function_adapter(const dtype& restype,
     ad.function_pointer = function_pointer;
     ad.exec_memblock = m_exec_memblock;
 }
+
+void dnd::codegen_cache::debug_dump(std::ostream& o, const std::string& indent) const
+{
+    o << indent << "------ codegen_cache\n";
+    o << indent << " cached unary_kernel_adapters:\n";
+    for (map<uint64_t, unary_operation_t *>::const_iterator i = m_cached_unary_kernel_adapters.begin(),
+                i_end = m_cached_unary_kernel_adapters.end(); i != i_end; ++i) {
+        o << indent << "  unique id: " << get_unary_function_adapter_unique_id_string(i->first) << "\n";
+        o << indent << "  function ptrs: ";
+        for (int j = 0; j < 4; ++j) {
+            o << (void *)i->second[j] << " ";
+        }
+        o << "\n";
+    }
+
+    o << indent << " executable memory block:\n";
+    memory_block_debug_dump(m_exec_memblock.get(), o, indent + " ");
+    o << indent << "------" << endl;
+}

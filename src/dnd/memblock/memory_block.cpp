@@ -6,6 +6,7 @@
 #include <dnd/memblock/memory_block.hpp>
 #include <dnd/memblock/pod_memory_block.hpp>
 #include <dnd/memblock/fixed_size_pod_memory_block.hpp>
+#include <dnd/memblock/executable_memory_block.hpp>
 #include <dnd/nodes/ndarray_node.hpp>
 
 using namespace std;
@@ -107,6 +108,7 @@ void dnd::memory_block_debug_dump(const memory_block_data *memblock, std::ostrea
                 break;
             case executable_memory_block_type:
                 o << indent << " type: executable\n";
+                executable_memory_block_debug_dump(memblock, o, indent);
                 break;
         }
         o << indent << "------" << endl;

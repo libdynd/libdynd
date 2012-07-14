@@ -7,6 +7,8 @@
 #define _DND__CODEGEN_CACHE_HPP_
 
 #include <map>
+#include <iostream>
+#include <string>
 
 #include <dnd/dtype.hpp>
 #include <dnd/kernels/unary_kernel_instance.hpp>
@@ -44,6 +46,8 @@ public:
                     const dtype& arg0type, calling_convention_t callconv,
                     void *function_pointer,
                     unary_specialization_kernel_instance& out_kernel);
+
+    void debug_dump(std::ostream& o, const std::string& indent = "") const;
 };
 
 } // namespace dnd

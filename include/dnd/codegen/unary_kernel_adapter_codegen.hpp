@@ -37,6 +37,12 @@ uint64_t get_unary_function_adapter_unique_id(const dtype& restype,
                     const dtype& arg0type, calling_convention_t callconv);
 
 /**
+ * Gets the unique integer ID in a string form, hopefully in human
+ * readable form.
+ */
+std::string get_unary_function_adapter_unique_id_string(uint64_t unique_id);
+
+/**
  * Gets a kernel for adapting a unary function pointer of the given
  * prototype. This function assumes CDECL calling convention where
  * there are multiple conventions, or the system calling convention

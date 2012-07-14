@@ -90,6 +90,16 @@ uint64_t dnd::get_unary_function_adapter_unique_id(const dtype& restype,
     return result;
 }
 
+std::string dnd::get_unary_function_adapter_unique_id_string(uint64_t unique_id)
+{
+    stringstream ss;
+    static char *ret_types[16] = {"int8", "int16", "int32", "int64", "float32", "float64"};
+    static char *arg0_types[16] = {"int8", "int16", "int32", "int64", "float32", "float64",
+                    "complex<float32>", "complex<float64>"};
+    ss << ret_types[unique_id & 0x0f] << " (";
+    ss << arg0_types[(unique_id & 0xf0) >> 4] << ")";
+    return ss.str();
+}
 
 unary_operation_t* dnd::codegen_unary_function_adapter(const memory_block_ptr& exec_memblock, const dtype& restype,
                     const dtype& arg0type, calling_convention_t DND_UNUSED(callconv))

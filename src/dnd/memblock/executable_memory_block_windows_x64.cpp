@@ -153,11 +153,11 @@ void dnd::set_executable_memory_runtime_function(memory_block_data *self, char *
     virtual_alloc_chunk &vac = emb->m_memory_handles.back();
     vac.m_functions.push_back(RUNTIME_FUNCTION());
     RUNTIME_FUNCTION &rf = vac.m_functions.back();
-    char *smallest_address = min(begin, unwind_data);
-    rf.BeginAddress = (DWORD)(begin - smallest_address);
-    rf.EndAddress = (DWORD)(end - smallest_address);
-    rf.UnwindData = (DWORD)(unwind_data - smallest_address);
-    RtlAddFunctionTable(&rf, 1, (DWORD64)smallest_address);
+    char *root = vac.m_memory_begin;
+    rf.BeginAddress = (DWORD)(begin - root);
+    rf.EndAddress = (DWORD)(end - root);
+    rf.UnwindData = (DWORD)(unwind_data - root);
+    RtlAddFunctionTable(&rf, 1, (DWORD64)root);
 }
 
 void dnd::executable_memory_block_debug_dump(const memory_block_data *memblock, std::ostream& o, const std::string& indent)
@@ -165,6 +165,15 @@ void dnd::executable_memory_block_debug_dump(const memory_block_data *memblock, 
     const executable_memory_block *emb = reinterpret_cast<const executable_memory_block *>(memblock);
     o << indent << " chunk size: " << emb->m_chunk_size_bytes << "\n";
     o << indent << " allocated: " << emb->m_total_allocated_capacity << "\n";
+    for (size_t i = 0, i_end = emb->m_memory_handles.size(); i != i_end; ++i) {
+        const virtual_alloc_chunk& vac = emb->m_memory_handles[i];
+        o << indent << " allocated chunk at address " << (void *)vac.m_memory_begin << ":\n";
+        for (size_t j = 0, j_end = vac.m_functions.size(); j != j_end; ++j) {
+            const RUNTIME_FUNCTION &rf = vac.m_functions[j];
+            o << indent << "  RUNTIME_FUNCTION{" << (void *)rf.BeginAddress;
+            o << ", " << (void *)rf.EndAddress << ", " << (void *)rf.UnwindData << "}\n";
+        }
+    }
 }
 
 

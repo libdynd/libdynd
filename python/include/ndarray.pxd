@@ -55,7 +55,7 @@ cdef extern from "ndarray_functions.hpp" namespace "pydnd":
 
     string ndarray_str(ndarray&) except +
     string ndarray_repr(ndarray&) except +
-    string ndarray_debug_dump(ndarray&)
+    string ndarray_debug_dump(ndarray&) except +
 
     void ndarray_init_from_pyobject(ndarray&, object obj) except +
     ndarray ndarray_vals(ndarray& n) except +

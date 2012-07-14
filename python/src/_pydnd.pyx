@@ -329,3 +329,8 @@ cdef class w_codegen_cache:
         codegen_cache_placement_new(self.v)
     def __dealloc__(self):
         codegen_cache_placement_delete(self.v)
+
+    def debug_dump(self):
+        """Prints a raw representation of the codegen_cache data."""
+        print str(codegen_cache_debug_dump(GET(self.v)).c_str())
+

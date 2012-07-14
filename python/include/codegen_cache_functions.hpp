@@ -16,6 +16,12 @@
 
 namespace pydnd {
 
+inline std::string codegen_cache_debug_dump(const dnd::codegen_cache& cgcache)
+{
+    std::stringstream ss;
+    cgcache.debug_dump(ss);
+    return ss.str();
+}
 
 
 } // namespace pydnd
