@@ -21,6 +21,17 @@ class unary_gfunc_kernel {
 public:
     dnd::dtype m_out, m_params[1];
     dnd::unary_specialization_kernel_instance m_kernel;
+    PyObject *m_pyobj;
+
+    unary_gfunc_kernel()
+        : m_pyobj(0)
+    {
+    }
+
+    ~unary_gfunc_kernel()
+    {
+        Py_XDECREF(m_pyobj);
+    }
 
     void swap(unary_gfunc_kernel& rhs) {
         m_out.swap(rhs.m_out);

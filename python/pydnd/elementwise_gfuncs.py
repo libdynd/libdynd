@@ -4,6 +4,7 @@ __all__ = ['floor', 'ceil', 'sqrt', 'exp', 'log', 'log10',
 from _pydnd import w_unary_gfunc as unary_gfunc
 
 import elementwise_kernels
+from kernels import cgcache
 
 abs = unary_gfunc('abs')
 abs.add_kernel(elementwise_kernels.abs)

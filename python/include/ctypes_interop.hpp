@@ -11,6 +11,7 @@
 
 #include <dnd/dtype.hpp>
 #include <dnd/ndarray.hpp>
+#include <dnd/codegen/calling_conventions.hpp>
 
 #include <Python.h>
 
@@ -126,25 +127,7 @@ inline bool CDataObject_Check(PyObject *v) {
     return PyObject_TypeCheck(v, (PyTypeObject *)ctypes.PyCData_Type);
 }
 
-enum ctypes_calling_convention {
-    cdecl_callconv,
-    win32_stdcall_callconv
-};
-
-inline std::ostream& operator <<(std::ostream& o, ctypes_calling_convention cc) {
-    switch (cc) {
-        case cdecl_callconv:
-            o << "cdecl";
-            break;
-        case win32_stdcall_callconv:
-            o << "win32_stdcall";
-            break;
-    }
-
-    return o;
-}
-
-ctypes_calling_convention get_ctypes_calling_convention(PyCFuncPtrObject* cfunc);
+dnd::calling_convention_t get_ctypes_calling_convention(PyCFuncPtrObject* cfunc);
 
 
 } // namespace pydnd

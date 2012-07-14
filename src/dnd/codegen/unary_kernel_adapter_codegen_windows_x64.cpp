@@ -9,8 +9,90 @@
 using namespace std;
 using namespace dnd;
 
+uint64_t dnd::get_unary_function_adapter_unique_id(const dtype& restype,
+                    const dtype& arg0type, calling_convention_t DND_UNUSED(callconv))
+{
+    uint64_t result = 0;
+
+    // There is only one calling convention on Windows x64, so it doesn't
+    // need to get encoded in the unique id.
+
+    // Bits 0..3 for the result type
+    switch (restype.type_id()) {
+        case bool_type_id:
+        case int8_type_id:
+        case uint8_type_id:
+            result += 0;
+            break;
+        case int16_type_id:
+        case uint16_type_id:
+            result += 1;
+            break;
+        case int32_type_id:
+        case uint32_type_id:
+            result += 2;
+            break;
+        case int64_type_id:
+        case uint64_type_id:
+            result += 3;
+            break;
+        case float32_type_id:
+            result += 4;
+            break;
+        case float64_type_id:
+            result += 5;
+            break;
+        default: {
+            stringstream ss;
+            ss << "The unary_kernel_adapter does not support " << restype << " for the return type";
+            throw runtime_error(ss.str());
+        }
+    }
+
+    // Bits 4..7 for the arg0 type
+    switch (arg0type.type_id()) {
+        case bool_type_id:
+        case int8_type_id:
+        case uint8_type_id:
+            result += 0 << 4;
+            break;
+        case int16_type_id:
+        case uint16_type_id:
+            result += 1 << 4;
+            break;
+        case int32_type_id:
+        case uint32_type_id:
+            result += 2 << 4;
+            break;
+        case int64_type_id:
+        case uint64_type_id:
+            result += 3 << 4;
+            break;
+        case float32_type_id:
+            result += 4 << 4;
+            break;
+        case float64_type_id:
+            result += 5 << 4;
+            break;
+        case complex_float32_type_id:
+            result += 6 << 4;
+            break;
+        case complex_float64_type_id:
+            result += 7 << 4;
+            break;
+        default: {
+            stringstream ss;
+            ss << "The unary_kernel_adapter does not support " << arg0type << " for the argument type";
+            throw runtime_error(ss.str());
+        }
+    }
+
+    return result;
+}
+
+
 unary_operation_t dnd::codegen_unary_function_adapter(const memory_block_ptr& exec_memblock, const dtype& restype,
-                    const dtype& arg0type)
+                    const dtype& arg0type, calling_convention_t DND_UNUSED(callconv))
 {
     // This code generation always uses the same prolog structure,
     // so the unwind_info is fixed.

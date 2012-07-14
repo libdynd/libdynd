@@ -105,7 +105,7 @@ static void create_unary_gfunc_kernel_from_ctypes(PyCFuncPtrObject *cfunc, unary
         throw std::runtime_error("Only gfunc kernels with matching input and output are currently supported");
     }
 
-    ctypes_calling_convention cc = get_ctypes_calling_convention(cfunc);
+    calling_convention_t cc = get_ctypes_calling_convention(cfunc);
     cout << "calling convention is " << cc << endl;
 #if defined(_WIN32) && !defined(_M_X64)
     if (cc == win32_stdcall_callconv) {
@@ -190,6 +190,7 @@ void pydnd::unary_gfunc::add_kernel(PyObject *kernel)
     if (PyObject_IsSubclass((PyObject *)Py_TYPE(kernel), ctypes.PyCFuncPtrType_Type)) {
         unary_gfunc_kernel ugk;
         create_unary_gfunc_kernel_from_ctypes((PyCFuncPtrObject *)kernel, ugk);
+        ugk.m_pyobj = kernel;
         m_kernels.push_back(unary_gfunc_kernel());
         ugk.swap(m_kernels.back());
         return;

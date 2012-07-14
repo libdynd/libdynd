@@ -51,7 +51,7 @@ void pydnd::init_ctypes_interop()
 }
 
 
-ctypes_calling_convention pydnd::get_ctypes_calling_convention(PyCFuncPtrObject* cfunc)
+calling_convention_t pydnd::get_ctypes_calling_convention(PyCFuncPtrObject* cfunc)
 {
     // This is the internal StgDictObject "flags" attribute, which is
     // custom-placed in the typeobject's dict by ctypes.
