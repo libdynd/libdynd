@@ -1,6 +1,3 @@
-__all__ = ['abs', 'fabs', 'cabs', 'floor',
-            'fmod', 'isnan', 'sin', 'cos']
-
 import sys, ctypes, dnd_ctypes
 
 if sys.platform == 'win32':
@@ -33,11 +30,6 @@ if sys.platform == 'win32':
     fmod = ctypes.cdll.msvcrt.fmod
     fmod.restype = ctypes.c_double
     fmod.argtypes = [ctypes.c_double, ctypes.c_double]
-
-    # isnan
-    isnan = ctypes.cdll.msvcrt._isnan
-    isnan.restype = ctypes.c_int
-    isnan.argtypes = [ctypes.c_double]
 
     # pow
     pow = ctypes.cdll.msvcrt.pow
@@ -80,24 +72,24 @@ if sys.platform == 'win32':
     tan.argtypes = [ctypes.c_double]
 
     # arc sine
-    asin = ctypes.cdll.msvcrt.asin
-    asin.restype = ctypes.c_double
-    asin.argtypes = [ctypes.c_double]
+    arcsin = ctypes.cdll.msvcrt.asin
+    arcsin.restype = ctypes.c_double
+    arcsin.argtypes = [ctypes.c_double]
 
     # arc cosine
-    acos = ctypes.cdll.msvcrt.acos
-    acos.restype = ctypes.c_double
-    acos.argtypes = [ctypes.c_double]
+    arccos = ctypes.cdll.msvcrt.acos
+    arccos.restype = ctypes.c_double
+    arccos.argtypes = [ctypes.c_double]
 
     # arc tan
-    atan = ctypes.cdll.msvcrt.atan
-    atan.restype = ctypes.c_double
-    atan.argtypes = [ctypes.c_double]
+    arctan = ctypes.cdll.msvcrt.atan
+    arctan.restype = ctypes.c_double
+    arctan.argtypes = [ctypes.c_double]
 
     # arc tan2
-    atan2 = ctypes.cdll.msvcrt.atan2
-    atan2.restype = ctypes.c_double
-    atan2.argtypes = [ctypes.c_double, ctypes.c_double]
+    arctan2 = ctypes.cdll.msvcrt.atan2
+    arctan2.restype = ctypes.c_double
+    arctan2.argtypes = [ctypes.c_double, ctypes.c_double]
 
     # hyperbolic sine
     sinh = ctypes.cdll.msvcrt.sinh
@@ -109,15 +101,25 @@ if sys.platform == 'win32':
     cosh.restype = ctypes.c_double
     cosh.argtypes = [ctypes.c_double]
 
+    # hyperbolic tangent
+    tanh = ctypes.cdll.msvcrt.tanh
+    tanh.restype = ctypes.c_double
+    tanh.argtypes = [ctypes.c_double]
+
     # ldexp
     ldexp = ctypes.cdll.msvcrt.ldexp
     ldexp.restype = ctypes.c_double
     ldexp.argtypes = [ctypes.c_double, ctypes.c_int]
 
+    # isnan
+    isnan = ctypes.cdll.msvcrt._isnan
+    isnan.restype = dnd_ctypes.c_dnd_bool
+    isnan.argtypes = [ctypes.c_double]
+
     # isfinite
     isfinite = ctypes.cdll.msvcrt._finite
-    ldexp.restype = ctypes.c_int
-    ldexp.argtypes = [ctypes.c_double]
+    isfinite.restype = dnd_ctypes.c_dnd_bool
+    isfinite.argtypes = [ctypes.c_double]
 
     # nextafter
     nextafter = ctypes.cdll.msvcrt._nextafter

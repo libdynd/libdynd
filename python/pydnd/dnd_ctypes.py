@@ -1,7 +1,11 @@
 __all__ = ['c_complex_float32', 'c_complex64',
             'c_complex_float64', 'c_complex128']
 
-import ctypes, _pydnd
+import ctypes, _ctypes, _pydnd
+
+class c_dnd_bool(_ctypes._SimpleCData):
+    _type_ = "b"
+    _dynd_type_ = _pydnd.w_dtype('bool')
 
 class c_complex_float32(ctypes.Structure):
     _fields_ = [('real', ctypes.c_float),
