@@ -53,10 +53,9 @@ std::string get_binary_function_adapter_unique_id_string(uint64_t unique_id);
  * @param arg1type       The type of the function's second parameter.
  * @param callconv       The calling convention of the function to adapt.
  *
- * @return An array of four unary_operation_t pointers, matching to the unary_specialization_t enum.
- *         These may all be the same pointer if no specialization was done.
+ * @return A pointer to the binary adapter kernel.
  */
-unary_operation_t* codegen_binary_function_adapter(const memory_block_ptr& exec_memblock, const dtype& restype,
+binary_operation_t codegen_binary_function_adapter(const memory_block_ptr& exec_memblock, const dtype& restype,
                     const dtype& arg0type, const dtype& arg1type, calling_convention_t callconv);
 
 } // namespace dnd

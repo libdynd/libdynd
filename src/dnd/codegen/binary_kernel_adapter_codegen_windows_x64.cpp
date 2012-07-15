@@ -67,7 +67,7 @@ std::string dnd::get_binary_function_adapter_unique_id_string(uint64_t unique_id
     return ss.str();
 }
 
-unary_operation_t* dnd::codegen_binary_function_adapter(const memory_block_ptr& exec_memblock, const dtype& restype,
+binary_operation_t dnd::codegen_binary_function_adapter(const memory_block_ptr& exec_memblock, const dtype& restype,
                     const dtype& arg0type, const dtype& arg1type, calling_convention_t DND_UNUSED(callconv))
 {
     // This code generation always uses the same prolog structure,
@@ -393,16 +393,6 @@ unary_operation_t* dnd::codegen_binary_function_adapter(const memory_block_ptr& 
     memcpy(code_current, unwind_info, sizeof(unwind_info));
     code_current += sizeof(unwind_info);
 
-    // The four unary_specialization_t pointers, all point to the same function
-    // because we don't specialize presently.
-    code_current = (char *)(((uintptr_t)code_current + (sizeof(char *) - 1))&(-sizeof(char *)));
-    char **specializations = reinterpret_cast<char **>(code_current);
-    specializations[0] = code_begin;
-    specializations[1] = code_begin;
-    specializations[2] = code_begin;
-    specializations[3] = code_begin;
-    code_current += 4 * sizeof(char *);
-
     // Shrink the allocation to just what we needed
     resize_executable_memory(exec_memblock.get(), code_current - code_begin, &code_begin, &code_end);
 
@@ -411,7 +401,7 @@ unary_operation_t* dnd::codegen_binary_function_adapter(const memory_block_ptr& 
                     code_begin,
                     code_function_end, code_unwind_info);
 
-    return reinterpret_cast<unary_operation_t *>(specializations);
+    return reinterpret_cast<binary_operation_t>(code_begin);
 }
 
 #endif // defined(_WIN32) && defined(_M_X64)
