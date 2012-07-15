@@ -12,7 +12,6 @@ from kernels import cgcache
 abs = unary_gfunc('abs')
 abs.add_kernel(cgcache, elementwise_kernels.abs)
 abs.add_kernel(cgcache, elementwise_kernels.fabs)
-abs.add_kernel(cgcache, elementwise_kernels.cabs)
 
 floor = unary_gfunc('floor')
 floor.add_kernel(cgcache, elementwise_kernels.floor)

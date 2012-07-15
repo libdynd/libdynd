@@ -11,11 +11,6 @@ if sys.platform == 'win32':
     fabs.restype = ctypes.c_double
     fabs.argtypes = [ctypes.c_double]
 
-    # complex absolute value
-    cabs = ctypes.cdll.msvcrt._cabs
-    cabs.restype = ctypes.c_double
-    cabs.argtypes = [dnd_ctypes.c_complex_float64]
-
     # floor
     floor = ctypes.cdll.msvcrt.floor
     floor.restype = ctypes.c_double
