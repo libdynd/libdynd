@@ -126,7 +126,7 @@ binary_operation_t dnd::codegen_binary_function_adapter(const memory_block_ptr& 
             0x48, 0x8b, 0x5c, 0x24, 0x70,   // mov     rbx, QWORD PTR src1$[rsp]
             0x4c, 0x89, 0x64, 0x24, 0x58,   // mov     QWORD PTR [rsp+88], r12
             0x4c, 0x8b, 0x64, 0x24, 0x78,   // mov     r12, QWORD PTR src1_stride$[rsp]
-            0x66, 0x90                      // npad    2
+            0x66, 0x90                      // npad    2 ; To align loop_start to a 16-byte boundary
         };
     // loop_start:
     // Begin ARG0 CHOICE [[

@@ -35,7 +35,7 @@ include "dnd.pxd"
 include "codegen_cache.pxd"
 include "dtype.pxd"
 include "ndarray.pxd"
-include "unary_gfunc.pxd"
+include "elementwise_gfunc.pxd"
 
 from cython.operator import dereference
 
@@ -298,13 +298,13 @@ def linspace(start, stop, count=50):
     SET(result.v, ndarray_linspace(start, stop, count))
     return result
 
-cdef class w_unary_gfunc:
-    cdef unary_gfunc_placement_wrapper v
+cdef class w_elementwise_gfunc:
+    cdef elementwise_gfunc_placement_wrapper v
 
     def __cinit__(self, bytes name):
-        unary_gfunc_placement_new(self.v, name)
+        elementwise_gfunc_placement_new(self.v, name)
     def __dealloc__(self):
-        unary_gfunc_placement_delete(self.v)
+        elementwise_gfunc_placement_delete(self.v)
 
     property name:
         def __get__(self):

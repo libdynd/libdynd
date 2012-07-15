@@ -51,14 +51,14 @@ set(pydnd_CPP_SRC
     include/dtype_functions.hpp
     include/ndarray_functions.hpp
     include/numpy_interop.hpp
-    include/unary_gfunc.hpp
+    include/elementwise_gfunc.hpp
     include/utility_functions.hpp
     src/codegen_cache_functions.cpp
     src/ctypes_interop.cpp
     src/dtype_functions.cpp
     src/ndarray_functions.cpp
     src/numpy_interop.cpp
-    src/unary_gfunc.cpp
+    src/elementwise_gfunc.cpp
     src/utility_functions.cpp
     )
 set(pydnd_CYTHON_SRC
@@ -67,7 +67,7 @@ set(pydnd_CYTHON_SRC
     include/dnd.pxd
     include/dtype.pxd
     include/ndarray.pxd
-    include/unary_gfunc.pxd
+    include/elementwise_gfunc.pxd
     )
 set_source_files_properties(${pydnd_CYTHON_SRC} PROPERTIES CYTHON_IS_CXX 1)
 

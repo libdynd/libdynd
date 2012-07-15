@@ -7,7 +7,7 @@
 
 #include <dnd/nodes/elementwise_unary_kernel_node.hpp>
 
-#include "unary_gfunc.hpp"
+#include "elementwise_gfunc.hpp"
 #include "ndarray_functions.hpp"
 #include "utility_functions.hpp"
 #include "ctypes_interop.hpp"
@@ -16,19 +16,19 @@ using namespace std;
 using namespace dnd;
 using namespace pydnd;
 
-pydnd::unary_gfunc_kernel::~unary_gfunc_kernel()
+pydnd::elementwise_gfunc_kernel::~elementwise_gfunc_kernel()
 {
     Py_XDECREF(m_pyobj);
 }
 
-pydnd::unary_gfunc::~unary_gfunc()
+pydnd::elementwise_gfunc::~elementwise_gfunc()
 {
     for (size_t i = 0, i_end = m_blockrefs.size(); i != i_end; ++i) {
         memory_block_decref(m_blockrefs[i]);
     }
 }
 
-static void create_unary_gfunc_kernel_from_ctypes(dnd::codegen_cache& cgcache, PyCFuncPtrObject *cfunc, unary_gfunc_kernel& out_kernel)
+static void create_elementwise_gfunc_kernel_from_ctypes(dnd::codegen_cache& cgcache, PyCFuncPtrObject *cfunc, elementwise_gfunc_kernel& out_kernel)
 {
     vector<dtype> sig;
     get_ctypes_signature(cfunc, sig);
@@ -52,7 +52,7 @@ static void create_unary_gfunc_kernel_from_ctypes(dnd::codegen_cache& cgcache, P
     cgcache.codegen_unary_function_adapter(sig[0], sig[1], cc, *(void **)cfunc->b_ptr, out_kernel.m_kernel);
 }
 
-void pydnd::unary_gfunc::add_blockref(dnd::memory_block_data *blockref)
+void pydnd::elementwise_gfunc::add_blockref(dnd::memory_block_data *blockref)
 {
     if (find(m_blockrefs.begin(), m_blockrefs.end(), blockref) != m_blockrefs.end()) {
         m_blockrefs.push_back(blockref);
@@ -61,13 +61,13 @@ void pydnd::unary_gfunc::add_blockref(dnd::memory_block_data *blockref)
 }
 
 
-void pydnd::unary_gfunc::add_kernel(dnd::codegen_cache& cgcache, PyObject *kernel)
+void pydnd::elementwise_gfunc::add_kernel(dnd::codegen_cache& cgcache, PyObject *kernel)
 {
     if (PyObject_IsSubclass((PyObject *)Py_TYPE(kernel), ctypes.PyCFuncPtrType_Type)) {
-        unary_gfunc_kernel ugk;
-        create_unary_gfunc_kernel_from_ctypes(cgcache, (PyCFuncPtrObject *)kernel, ugk);
+        elementwise_gfunc_kernel ugk;
+        create_elementwise_gfunc_kernel_from_ctypes(cgcache, (PyCFuncPtrObject *)kernel, ugk);
         ugk.m_pyobj = kernel;
-        m_kernels.push_back(unary_gfunc_kernel());
+        m_kernels.push_back(elementwise_gfunc_kernel());
         ugk.swap(m_kernels.back());
         add_blockref(cgcache.get_exec_memblock().get());
         return;
@@ -76,7 +76,7 @@ void pydnd::unary_gfunc::add_kernel(dnd::codegen_cache& cgcache, PyObject *kerne
     throw std::runtime_error("Object could not be used as a gfunc kernel");
 }
 
-PyObject *pydnd::unary_gfunc::call(PyObject *args, PyObject *kwargs)
+PyObject *pydnd::elementwise_gfunc::call(PyObject *args, PyObject *kwargs)
 {
     if (PySequence_Size(args) != 1) {
         PyErr_SetString(PyExc_TypeError, "Unary gfuncs only take one argument");
@@ -88,7 +88,7 @@ PyObject *pydnd::unary_gfunc::call(PyObject *args, PyObject *kwargs)
     ndarray_init_from_pyobject(arg0, arg0_obj);
 
     const dtype& dt = arg0.get_dtype();
-    for (deque<unary_gfunc_kernel>::size_type i = 0; i < m_kernels.size(); ++i) {
+    for (deque<elementwise_gfunc_kernel>::size_type i = 0; i < m_kernels.size(); ++i) {
         if (dt == m_kernels[i].m_params[0]) {
             ndarray result(make_elementwise_unary_kernel_node_copy_kernel(
                         m_kernels[i].m_out, arg0.get_expr_tree(), m_kernels[i].m_kernel));
@@ -104,14 +104,14 @@ PyObject *pydnd::unary_gfunc::call(PyObject *args, PyObject *kwargs)
 
 }
 
-std::string pydnd::unary_gfunc::debug_dump() const
+std::string pydnd::elementwise_gfunc::debug_dump() const
 {
     std::stringstream o;
-    o << "------ unary_gfunc\n";
+    o << "------ elementwise_gfunc\n";
     o << "name: " << m_name << "\n";
     o << "kernel count: " << m_kernels.size() << "\n";
-    for (deque<unary_gfunc_kernel>::size_type i = 0; i < m_kernels.size(); ++i) {
-        const unary_gfunc_kernel &k = m_kernels[i];
+    for (deque<elementwise_gfunc_kernel>::size_type i = 0; i < m_kernels.size(); ++i) {
+        const elementwise_gfunc_kernel &k = m_kernels[i];
         o << "kernel " << i << "\n";
         o << "   " << k.m_out << " (" << k.m_params[0] << ")\n";
         o << "aux data: " << (const void *)(const dnd::AuxDataBase *)k.m_kernel.auxdata << "\n";
