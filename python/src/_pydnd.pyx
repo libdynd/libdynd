@@ -39,6 +39,11 @@ include "elementwise_gfunc.pxd"
 
 from cython.operator import dereference
 
+# Create the codegen cache used by default when making gfuncs
+cdef w_codegen_cache default_cgcache_c = w_codegen_cache()
+# Expose it outside the module too
+default_cgcache = default_cgcache_c
+
 cdef class w_dtype:
     # To access the embedded dtype, use "GET(self.v)",
     # which returns a reference to the dtype, and
@@ -310,7 +315,7 @@ cdef class w_elementwise_gfunc:
         def __get__(self):
             return str(GET(self.v).get_name().c_str())
 
-    def add_kernel(self, w_codegen_cache cgcache, kernel):
+    def add_kernel(self, kernel, w_codegen_cache cgcache = default_cgcache_c):
         """Adds a kernel to the gfunc object. Currently, this means a ctypes object with prototype."""
         GET(self.v).add_kernel(GET(cgcache.v), kernel)
 
