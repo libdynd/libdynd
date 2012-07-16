@@ -1,8 +1,9 @@
-__all__ = ['abs', 'floor', 'ceil', 'sqrt', 'exp', 'log', 'log10',
+__all__ = ['abs', 'floor', 'ceil', 'fmod', 'pow',
+            'sqrt', 'exp', 'log', 'log10',
             'sin', 'cos', 'tan',
-            'arcsin', 'arccos', 'arctan',
+            'arcsin', 'arccos', 'arctan', 'arctan2',
             'sinh', 'cosh', 'tanh',
-            'isnan', 'isfinite']
+            'ldexp', 'isnan', 'isfinite', 'nextafter']
 
 from _pydnd import w_elementwise_gfunc as elementwise_gfunc
 
@@ -18,6 +19,12 @@ floor.add_kernel(cgcache, elementwise_kernels.floor)
 
 ceil = elementwise_gfunc('ceil')
 ceil.add_kernel(cgcache, elementwise_kernels.ceil)
+
+fmod = elementwise_gfunc('fmod')
+fmod.add_kernel(cgcache, elementwise_kernels.fmod)
+
+pow = elementwise_gfunc('pow')
+pow.add_kernel(cgcache, elementwise_kernels.pow)
 
 sqrt = elementwise_gfunc('sqrt')
 sqrt.add_kernel(cgcache, elementwise_kernels.sqrt)
@@ -49,6 +56,9 @@ arccos.add_kernel(cgcache, elementwise_kernels.arccos)
 arctan = elementwise_gfunc('arctan')
 arctan.add_kernel(cgcache, elementwise_kernels.arctan)
 
+arctan2 = elementwise_gfunc('arctan2')
+arctan2.add_kernel(cgcache, elementwise_kernels.arctan2)
+
 sinh = elementwise_gfunc('sinh')
 sinh.add_kernel(cgcache, elementwise_kernels.sinh)
 
@@ -58,10 +68,16 @@ cosh.add_kernel(cgcache, elementwise_kernels.cosh)
 tanh = elementwise_gfunc('tanh')
 tanh.add_kernel(cgcache, elementwise_kernels.tanh)
 
+ldexp = elementwise_gfunc('ldexp')
+ldexp.add_kernel(cgcache, elementwise_kernels.ldexp)
+
 isnan = elementwise_gfunc('isnan')
 isnan.add_kernel(cgcache, elementwise_kernels.isnan)
 
 isfinite = elementwise_gfunc('isfinite')
 isfinite.add_kernel(cgcache, elementwise_kernels.isfinite)
+
+nextafter = elementwise_gfunc('nextafter')
+nextafter.add_kernel(cgcache, elementwise_kernels.nextafter)
 
 
