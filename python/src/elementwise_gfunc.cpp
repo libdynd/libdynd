@@ -6,6 +6,7 @@
 #include <algorithm>
 
 #include <dnd/nodes/elementwise_unary_kernel_node.hpp>
+#include <dnd/nodes/elementwise_binary_kernel_node.hpp>
 
 #include "elementwise_gfunc.hpp"
 #include "ndarray_functions.hpp"
@@ -30,7 +31,7 @@ pydnd::elementwise_gfunc::~elementwise_gfunc()
 
 static void create_elementwise_gfunc_kernel_from_ctypes(dnd::codegen_cache& cgcache, PyCFuncPtrObject *cfunc, elementwise_gfunc_kernel& out_kernel)
 {
-    vector<dtype> sig;
+    vector<dtype> &sig = out_kernel.m_sig;
     get_ctypes_signature(cfunc, sig);
 
     if (sig[0].type_id() == void_type_id) {
@@ -38,18 +39,20 @@ static void create_elementwise_gfunc_kernel_from_ctypes(dnd::codegen_cache& cgca
         throw std::runtime_error("Cannot construct a gfunc kernel from a ctypes function which returns void");
     }
 
-    if (sig.size() != 2) {
+    out_kernel.m_pyobj = (PyObject *)cfunc;
+    Py_INCREF(out_kernel.m_pyobj);
+
+    if (sig.size() == 2) {
+        cgcache.codegen_unary_function_adapter(sig[0], sig[1], get_ctypes_calling_convention(cfunc),
+                            *(void **)cfunc->b_ptr, out_kernel.m_unary_kernel);
+    } else if (sig.size() == 3) {
+        cgcache.codegen_binary_function_adapter(sig[0], sig[1], sig[2], get_ctypes_calling_convention(cfunc),
+                            *(void **)cfunc->b_ptr, out_kernel.m_binary_kernel);
+    } else {
         std::stringstream ss;
         ss << "Only unary gfunc kernels are currently supported, provided gfunc has " << (sig.size() - 1);
         throw std::runtime_error(ss.str());
     }
-
-    out_kernel.m_out = sig[0];
-    out_kernel.m_params[0] = sig[1];
-
-    calling_convention_t cc = get_ctypes_calling_convention(cfunc);
-
-    cgcache.codegen_unary_function_adapter(sig[0], sig[1], cc, *(void **)cfunc->b_ptr, out_kernel.m_kernel);
 }
 
 void pydnd::elementwise_gfunc::add_blockref(dnd::memory_block_data *blockref)
@@ -65,10 +68,11 @@ void pydnd::elementwise_gfunc::add_kernel(dnd::codegen_cache& cgcache, PyObject 
 {
     if (PyObject_IsSubclass((PyObject *)Py_TYPE(kernel), ctypes.PyCFuncPtrType_Type)) {
         elementwise_gfunc_kernel ugk;
+
         create_elementwise_gfunc_kernel_from_ctypes(cgcache, (PyCFuncPtrObject *)kernel, ugk);
-        ugk.m_pyobj = kernel;
         m_kernels.push_back(elementwise_gfunc_kernel());
         ugk.swap(m_kernels.back());
+
         add_blockref(cgcache.get_exec_memblock().get());
         return;
     }
@@ -78,30 +82,54 @@ void pydnd::elementwise_gfunc::add_kernel(dnd::codegen_cache& cgcache, PyObject 
 
 PyObject *pydnd::elementwise_gfunc::call(PyObject *args, PyObject *kwargs)
 {
-    if (PySequence_Size(args) != 1) {
-        PyErr_SetString(PyExc_TypeError, "Unary gfuncs only take one argument");
+    Py_ssize_t nargs = PySequence_Size(args);
+    if (nargs == 1) {
+        pyobject_ownref arg0_obj(PySequence_GetItem(args, 0));
+        ndarray arg0;
+        ndarray_init_from_pyobject(arg0, arg0_obj);
+
+        const dtype& dt0 = arg0.get_dtype();
+        for (deque<elementwise_gfunc_kernel>::size_type i = 0; i < m_kernels.size(); ++i) {
+            const std::vector<dtype>& sig = m_kernels[i].m_sig;
+            if (sig.size() == 2 && dt0 == sig[1]) {
+                ndarray result(make_elementwise_unary_kernel_node_copy_kernel(
+                            sig[0], arg0.get_expr_tree(), m_kernels[i].m_unary_kernel));
+                pyobject_ownref result_obj(WNDArray_Type->tp_alloc(WNDArray_Type, 0));
+                ((WNDArray *)result_obj.get())->v.swap(result);
+                return result_obj.release();
+            }
+        }
+
+        std::stringstream ss;
+        ss << "Could not find a gfunc kernel matching input dtype (" << dt0 << ")";
+        throw std::runtime_error(ss.str());
+    } else if (nargs == 2) {
+        pyobject_ownref arg0_obj(PySequence_GetItem(args, 0));
+        pyobject_ownref arg1_obj(PySequence_GetItem(args, 1));
+        ndarray arg0, arg1;
+        ndarray_init_from_pyobject(arg0, arg0_obj);
+        ndarray_init_from_pyobject(arg1, arg1_obj);
+
+        const dtype& dt0 = arg0.get_dtype();
+        const dtype& dt1 = arg1.get_dtype();
+        for (deque<elementwise_gfunc_kernel>::size_type i = 0; i < m_kernels.size(); ++i) {
+            const std::vector<dtype>& sig = m_kernels[i].m_sig;
+            if (sig.size() == 3 && dt0 == sig[1] && dt1 == sig[2]) {
+                ndarray result(make_elementwise_binary_kernel_node_copy_kernel(
+                            sig[0], arg0.get_expr_tree(), arg1.get_expr_tree(), m_kernels[i].m_binary_kernel));
+                pyobject_ownref result_obj(WNDArray_Type->tp_alloc(WNDArray_Type, 0));
+                ((WNDArray *)result_obj.get())->v.swap(result);
+                return result_obj.release();
+            }
+        }
+
+        std::stringstream ss;
+        ss << "Could not find a gfunc kernel matching input dtypes (" << dt0 << ", " << dt1 << ")";
+        throw std::runtime_error(ss.str());
+    } else {
+        PyErr_SetString(PyExc_TypeError, "Elementwise gfuncs only support 1 or 2 arguments presently");
         return NULL;
     }
-
-    pyobject_ownref arg0_obj(PySequence_GetItem(args, 0));
-    ndarray arg0;
-    ndarray_init_from_pyobject(arg0, arg0_obj);
-
-    const dtype& dt = arg0.get_dtype();
-    for (deque<elementwise_gfunc_kernel>::size_type i = 0; i < m_kernels.size(); ++i) {
-        if (dt == m_kernels[i].m_params[0]) {
-            ndarray result(make_elementwise_unary_kernel_node_copy_kernel(
-                        m_kernels[i].m_out, arg0.get_expr_tree(), m_kernels[i].m_kernel));
-            pyobject_ownref result_obj(WNDArray_Type->tp_alloc(WNDArray_Type, 0));
-            ((WNDArray *)result_obj.get())->v.swap(result);
-            return result_obj.release();
-        }
-    }
-
-    std::stringstream ss;
-    ss << "Could not find a gfunc kernel matching dtype " << arg0.get_dtype();
-    throw std::runtime_error(ss.str());
-
 }
 
 std::string pydnd::elementwise_gfunc::debug_dump() const
@@ -113,8 +141,19 @@ std::string pydnd::elementwise_gfunc::debug_dump() const
     for (deque<elementwise_gfunc_kernel>::size_type i = 0; i < m_kernels.size(); ++i) {
         const elementwise_gfunc_kernel &k = m_kernels[i];
         o << "kernel " << i << "\n";
-        o << "   " << k.m_out << " (" << k.m_params[0] << ")\n";
-        o << "aux data: " << (const void *)(const dnd::AuxDataBase *)k.m_kernel.auxdata << "\n";
+        o << "   " << k.m_sig[0] << " (";
+        for (size_t j = 1, j_end = k.m_sig.size(); j != j_end; ++j) {
+            o << k.m_sig[j];
+            if (j != j_end - 1) {
+                o << ", ";
+            }
+        }
+        o << ")\n";
+        if (k.m_sig.size() == 2) {
+            o << "unary aux data: " << (const void *)(const dnd::AuxDataBase *)k.m_unary_kernel.auxdata << "\n";
+        } else if (k.m_sig.size() == 3) {
+            o << "binary aux data: " << (const void *)(const dnd::AuxDataBase *)k.m_binary_kernel.auxdata << "\n";
+        }
     }
     o << "------" << endl;
     return o.str();

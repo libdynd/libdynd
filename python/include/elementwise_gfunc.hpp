@@ -21,8 +21,9 @@ namespace pydnd {
 
 class elementwise_gfunc_kernel {
 public:
-    dnd::dtype m_out, m_params[1];
-    dnd::unary_specialization_kernel_instance m_kernel;
+    std::vector<dnd::dtype> m_sig;
+    dnd::unary_specialization_kernel_instance m_unary_kernel;
+    dnd::kernel_instance<dnd::binary_operation_t> m_binary_kernel;
     PyObject *m_pyobj;
 
     elementwise_gfunc_kernel()
@@ -33,9 +34,10 @@ public:
     ~elementwise_gfunc_kernel();
 
     void swap(elementwise_gfunc_kernel& rhs) {
-        m_out.swap(rhs.m_out);
-        m_params[0].swap(rhs.m_params[0]);
-        m_kernel.swap(rhs.m_kernel);
+        m_sig.swap(rhs.m_sig);
+        m_unary_kernel.swap(rhs.m_unary_kernel);
+        m_binary_kernel.swap(rhs.m_binary_kernel);
+        std::swap(m_pyobj, rhs.m_pyobj);
     }
 };
 

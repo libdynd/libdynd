@@ -9,8 +9,8 @@
 // through the dtype interface, except for the "kind" which
 // is expression_kind to signal that the value_dtype must be examined.
 //
-#ifndef _DND__CONVERSION_DTYPE_HPP_
-#define _DND__CONVERSION_DTYPE_HPP_
+#ifndef _DND__CONVERT_DTYPE_HPP_
+#define _DND__CONVERT_DTYPE_HPP_
 
 #include <dnd/dtype.hpp>
 #include <dnd/dtype_assign.hpp>
@@ -70,7 +70,7 @@ public:
  * If the value_dtype has expression_kind, it chains operand_dtype.value_dtype()
  * into value_dtype.storage_dtype().
  */
-inline dtype make_convert_dtype(const dtype& value_dtype, const dtype& operand_dtype, assign_error_mode errmode = default_error_mode) {
+inline dtype make_convert_dtype(const dtype& value_dtype, const dtype& operand_dtype, assign_error_mode errmode = assign_error_default) {
     if (operand_dtype.value_dtype() != value_dtype) {
         if (value_dtype.kind() != expression_kind) {
             // Create a conversion dtype when the value kind is different
@@ -89,10 +89,10 @@ inline dtype make_convert_dtype(const dtype& value_dtype, const dtype& operand_d
 }
 
 template<typename Tvalue, typename Tstorage>
-dtype make_convert_dtype(assign_error_mode errmode = default_error_mode) {
+dtype make_convert_dtype(assign_error_mode errmode = assign_error_default) {
     return dtype(make_shared<convert_dtype>(make_dtype<Tvalue>(), make_dtype<Tstorage>(), errmode));
 }
 
 } // namespace dnd
 
-#endif // _DND__CONVERSION_DTYPE_HPP_
+#endif // _DND__CONVERT_DTYPE_HPP_

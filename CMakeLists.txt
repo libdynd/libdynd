@@ -57,6 +57,7 @@ set(dnd_SRC
     include/dnd/dtypes/view_dtype.hpp
     # Nodes
     src/dnd/nodes/elementwise_unary_kernel_node.cpp
+    src/dnd/nodes/elementwise_binary_kernel_node.cpp
     src/dnd/nodes/immutable_scalar_node.cpp
     src/dnd/nodes/ndarray_node.cpp
     src/dnd/nodes/scalar_node.cpp

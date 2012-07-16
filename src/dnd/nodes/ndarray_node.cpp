@@ -15,6 +15,7 @@
 #include <dnd/raw_iteration.hpp>
 #include <dnd/dtypes/convert_dtype.hpp>
 #include <dnd/memblock/pod_memory_block.hpp>
+#include <dnd/kernels/assignment_kernels.hpp>
 
 using namespace std;
 using namespace dnd;

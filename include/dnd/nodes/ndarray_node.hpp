@@ -137,7 +137,7 @@ public:
      * Converts this node to a new dtype. This uses a convert_dtype.
      */
     virtual ndarray_node_ptr as_dtype(const dtype& dt,
-                        assign_error_mode errmode, bool allow_in_place) = 0;
+                        assign_error_mode errmode = assign_error_default, bool allow_in_place = false) = 0;
 
     /**
      * Applies a linear index to the node, returning either the current node (for do-nothing
@@ -163,7 +163,7 @@ public:
                     bool allow_in_place) = 0;
 
     /** Debug printing of the tree */
-    void debug_dump(std::ostream& o, const std::string& indent) const;
+    void debug_dump(std::ostream& o, const std::string& indent = "") const;
     /** Debug printing of the data from the derived class */
     virtual void debug_dump_extra(std::ostream& o, const std::string& indent) const;
 

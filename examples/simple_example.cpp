@@ -32,40 +32,18 @@ S double_value(T value) {
 int main()
 {
     try {
-    codegen_cache cgcache;
-    unary_specialization_kernel_instance op_int_float, op_float_float, op_float_double;
-    cgcache.codegen_unary_function_adapter(make_dtype<int>(), make_dtype<float>(), cdecl_callconv,
-                    (int (*)(float))&double_value<int, float>, op_int_float);
-    cgcache.codegen_unary_function_adapter(make_dtype<float>(), make_dtype<float>(), cdecl_callconv,
-                    (float (*)(float))&double_value<float, float>, op_float_float);
-    cgcache.codegen_unary_function_adapter(make_dtype<float>(), make_dtype<double>(), cdecl_callconv,
-                    (float (*)(double))&double_value<float, double>, op_float_double);
-
-    int int_vals[3];
-    float float_vals[3];
-    double double_vals[3];
-
-    float_vals[0] = 1.f;
-    float_vals[1] = 2.5f;
-    float_vals[2] = 3.25f;
-    op_int_float.specializations[0]((char *)int_vals, sizeof(int), (char *)float_vals, sizeof(float), 3,
-                    op_int_float.auxdata);
-    EXPECT_EQ(2, int_vals[0]);
-    EXPECT_EQ(5, int_vals[1]);
-    EXPECT_EQ(6, int_vals[2]);
-
-    op_float_float.specializations[0]((char *)float_vals, sizeof(float), (char *)float_vals, sizeof(float), 3,
-                    op_float_float.auxdata);
-
-    EXPECT_EQ(1.f, float_vals[0]);
-    EXPECT_EQ(5.f, float_vals[1]);
-    EXPECT_EQ(6.5f, float_vals[2]);
-
-    double_vals[0] = -1.f;
-    double_vals[1] = 2.5f;
-    double_vals[2] = 3.25f;
-    op_float_double.specializations[0]((char *)float_vals, sizeof(float), (char *)double_vals, sizeof(double), 3,
-                    op_float_double.auxdata);
+    ndarray a;
+    // Buffering the first operand
+    a = ndarray(2) * ndarray(3.f);
+    EXPECT_EQ(elementwise_node_category, a.get_expr_tree()->get_category());
+    EXPECT_EQ(make_dtype<float>(), a.get_expr_tree()->get_dtype());
+    EXPECT_EQ((make_convert_dtype<float, int>()), a.get_expr_tree()->get_opnode(0)->get_dtype());
+    EXPECT_EQ(make_dtype<float>(), a.get_expr_tree()->get_opnode(1)->get_dtype());
+    a.debug_dump(cout);
+    ndarray b = a.vals();
+    b.debug_dump(cout);
+    cout << b << endl;
+    EXPECT_EQ(6, a.as<float>());
 
 
     } catch(std::exception& e) {
