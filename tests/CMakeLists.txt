@@ -9,6 +9,7 @@ project(dnd_tests)
 set(tests_SRC
     codegen/test_codegen_cache.cpp
     codegen/test_unary_kernel_adapter.cpp
+    codegen/test_binary_kernel_adapter.cpp
     dtypes/test_array_dtype.cpp
     dtypes/test_byteswap_dtype.cpp
     dtypes/test_categorical_dtype.cpp
