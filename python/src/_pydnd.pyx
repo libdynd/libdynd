@@ -35,7 +35,8 @@ include "dnd.pxd"
 include "codegen_cache.pxd"
 include "dtype.pxd"
 include "ndarray.pxd"
-include "elementwise_gfunc.pxd"
+include "elwise_gfunc.pxd"
+include "elwise_reduce_gfunc.pxd"
 
 from cython.operator import dereference
 
@@ -303,13 +304,13 @@ def linspace(start, stop, count=50):
     SET(result.v, ndarray_linspace(start, stop, count))
     return result
 
-cdef class w_elementwise_gfunc:
-    cdef elementwise_gfunc_placement_wrapper v
+cdef class w_elwise_gfunc:
+    cdef elwise_gfunc_placement_wrapper v
 
     def __cinit__(self, bytes name):
-        elementwise_gfunc_placement_new(self.v, name)
+        elwise_gfunc_placement_new(self.v, name)
     def __dealloc__(self):
-        elementwise_gfunc_placement_delete(self.v)
+        elwise_gfunc_placement_delete(self.v)
 
     property name:
         def __get__(self):
@@ -318,6 +319,30 @@ cdef class w_elementwise_gfunc:
     def add_kernel(self, kernel, w_codegen_cache cgcache = default_cgcache_c):
         """Adds a kernel to the gfunc object. Currently, this means a ctypes object with prototype."""
         GET(self.v).add_kernel(GET(cgcache.v), kernel)
+
+    def debug_dump(self):
+        """Prints a raw representation of the gfunc data."""
+        print str(GET(self.v).debug_dump().c_str())
+
+    def __call__(self, *args, **kwargs):
+        """Calls the gfunc."""
+        return GET(self.v).call(args, kwargs)
+
+cdef class w_elwise_reduce_gfunc:
+    cdef elwise_reduce_gfunc_placement_wrapper v
+
+    def __cinit__(self, bytes name):
+        elwise_reduce_gfunc_placement_new(self.v, name)
+    def __dealloc__(self):
+        elwise_reduce_gfunc_placement_delete(self.v)
+
+    property name:
+        def __get__(self):
+            return str(GET(self.v).get_name().c_str())
+
+    def add_kernel(self, kernel, bint associative, bint commutative, w_codegen_cache cgcache = default_cgcache_c):
+        """Adds a kernel to the gfunc object. Currently, this means a ctypes object with prototype."""
+        GET(self.v).add_kernel(GET(cgcache.v), kernel, associative, commutative)
 
     def debug_dump(self):
         """Prints a raw representation of the gfunc data."""

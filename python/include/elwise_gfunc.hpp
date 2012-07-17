@@ -3,8 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DND__ELEMENTWISE_GFUNC_HPP_
-#define _DND__ELEMENTWISE_GFUNC_HPP_
+#ifndef _DND__ELWISE_GFUNC_HPP_
+#define _DND__ELWISE_GFUNC_HPP_
 
 #include <stdint.h>
 #include <sstream>
@@ -19,21 +19,21 @@
 
 namespace pydnd {
 
-class elementwise_gfunc_kernel {
+class elwise_gfunc_kernel {
 public:
     std::vector<dnd::dtype> m_sig;
     dnd::unary_specialization_kernel_instance m_unary_kernel;
     dnd::kernel_instance<dnd::binary_operation_t> m_binary_kernel;
     PyObject *m_pyobj;
 
-    elementwise_gfunc_kernel()
+    elwise_gfunc_kernel()
         : m_pyobj(0)
     {
     }
 
-    ~elementwise_gfunc_kernel();
+    ~elwise_gfunc_kernel();
 
-    void swap(elementwise_gfunc_kernel& rhs) {
+    void swap(elwise_gfunc_kernel& rhs) {
         m_sig.swap(rhs.m_sig);
         m_unary_kernel.swap(rhs.m_unary_kernel);
         m_binary_kernel.swap(rhs.m_binary_kernel);
@@ -41,28 +41,28 @@ public:
     }
 };
 
-class elementwise_gfunc {
+class elwise_gfunc {
     std::string m_name;
     /**
      * This is a deque instead of a vector, because we are targetting C++98
      * and so cannot rely on C++11 move semantics.
      */
-    std::deque<elementwise_gfunc_kernel> m_kernels;
+    std::deque<elwise_gfunc_kernel> m_kernels;
     std::vector<dnd::memory_block_data *> m_blockrefs;
 public:
-    elementwise_gfunc(const char *name)
+    elwise_gfunc(const char *name)
         : m_name(name)
     {
     }
 
-    ~elementwise_gfunc();
+    ~elwise_gfunc();
 
     const std::string& get_name() const {
         return m_name;
     }
 
     /**
-     * Adds a new memory_block for the elementwise_gfunc to
+     * Adds a new memory_block for the elwise_gfunc to
      * hold a reference to. For example, the executable
      * memory block for generated code should get added.
      */
@@ -75,28 +75,28 @@ public:
     std::string debug_dump() const;
 };
 
-struct elementwise_gfunc_placement_wrapper {
-    intptr_t dummy[(sizeof(elementwise_gfunc) + sizeof(intptr_t) - 1)/sizeof(intptr_t)];
+struct elwise_gfunc_placement_wrapper {
+    intptr_t dummy[(sizeof(elwise_gfunc) + sizeof(intptr_t) - 1)/sizeof(intptr_t)];
 };
 
-inline void elementwise_gfunc_placement_new(elementwise_gfunc_placement_wrapper& v, const char *name)
+inline void elwise_gfunc_placement_new(elwise_gfunc_placement_wrapper& v, const char *name)
 {
     // Call placement new
-    new (&v) elementwise_gfunc(name);
+    new (&v) elwise_gfunc(name);
 }
 
-inline void elementwise_gfunc_placement_delete(elementwise_gfunc_placement_wrapper& v)
+inline void elwise_gfunc_placement_delete(elwise_gfunc_placement_wrapper& v)
 {
     // Call the destructor
-    ((elementwise_gfunc *)(&v))->~elementwise_gfunc();
+    ((elwise_gfunc *)(&v))->~elwise_gfunc();
 }
 
-// dtype placement cast
-inline elementwise_gfunc& GET(elementwise_gfunc_placement_wrapper& v)
+// placement cast
+inline elwise_gfunc& GET(elwise_gfunc_placement_wrapper& v)
 {
-    return *(elementwise_gfunc *)&v;
+    return *(elwise_gfunc *)&v;
 }
 
 } // namespace pydnd
 
-#endif // _DND__ELEMENTWISE_GFUNC_HPP_
+#endif // _DND__ELWISE_GFUNC_HPP_

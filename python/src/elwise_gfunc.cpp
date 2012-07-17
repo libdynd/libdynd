@@ -8,7 +8,7 @@
 #include <dnd/nodes/elementwise_unary_kernel_node.hpp>
 #include <dnd/nodes/elementwise_binary_kernel_node.hpp>
 
-#include "elementwise_gfunc.hpp"
+#include "elwise_gfunc.hpp"
 #include "ndarray_functions.hpp"
 #include "utility_functions.hpp"
 #include "ctypes_interop.hpp"
@@ -17,19 +17,19 @@ using namespace std;
 using namespace dnd;
 using namespace pydnd;
 
-pydnd::elementwise_gfunc_kernel::~elementwise_gfunc_kernel()
+pydnd::elwise_gfunc_kernel::~elwise_gfunc_kernel()
 {
     Py_XDECREF(m_pyobj);
 }
 
-pydnd::elementwise_gfunc::~elementwise_gfunc()
+pydnd::elwise_gfunc::~elwise_gfunc()
 {
     for (size_t i = 0, i_end = m_blockrefs.size(); i != i_end; ++i) {
         memory_block_decref(m_blockrefs[i]);
     }
 }
 
-static void create_elementwise_gfunc_kernel_from_ctypes(dnd::codegen_cache& cgcache, PyCFuncPtrObject *cfunc, elementwise_gfunc_kernel& out_kernel)
+static void create_elwise_gfunc_kernel_from_ctypes(dnd::codegen_cache& cgcache, PyCFuncPtrObject *cfunc, elwise_gfunc_kernel& out_kernel)
 {
     vector<dtype> &sig = out_kernel.m_sig;
     get_ctypes_signature(cfunc, sig);
@@ -55,7 +55,7 @@ static void create_elementwise_gfunc_kernel_from_ctypes(dnd::codegen_cache& cgca
     }
 }
 
-void pydnd::elementwise_gfunc::add_blockref(dnd::memory_block_data *blockref)
+void pydnd::elwise_gfunc::add_blockref(dnd::memory_block_data *blockref)
 {
     if (find(m_blockrefs.begin(), m_blockrefs.end(), blockref) != m_blockrefs.end()) {
         m_blockrefs.push_back(blockref);
@@ -64,13 +64,13 @@ void pydnd::elementwise_gfunc::add_blockref(dnd::memory_block_data *blockref)
 }
 
 
-void pydnd::elementwise_gfunc::add_kernel(dnd::codegen_cache& cgcache, PyObject *kernel)
+void pydnd::elwise_gfunc::add_kernel(dnd::codegen_cache& cgcache, PyObject *kernel)
 {
     if (PyObject_IsSubclass((PyObject *)Py_TYPE(kernel), ctypes.PyCFuncPtrType_Type)) {
-        elementwise_gfunc_kernel ugk;
+        elwise_gfunc_kernel ugk;
 
-        create_elementwise_gfunc_kernel_from_ctypes(cgcache, (PyCFuncPtrObject *)kernel, ugk);
-        m_kernels.push_back(elementwise_gfunc_kernel());
+        create_elwise_gfunc_kernel_from_ctypes(cgcache, (PyCFuncPtrObject *)kernel, ugk);
+        m_kernels.push_back(elwise_gfunc_kernel());
         ugk.swap(m_kernels.back());
 
         add_blockref(cgcache.get_exec_memblock().get());
@@ -80,7 +80,7 @@ void pydnd::elementwise_gfunc::add_kernel(dnd::codegen_cache& cgcache, PyObject 
     throw std::runtime_error("Object could not be used as a gfunc kernel");
 }
 
-PyObject *pydnd::elementwise_gfunc::call(PyObject *args, PyObject *kwargs)
+PyObject *pydnd::elwise_gfunc::call(PyObject *args, PyObject *kwargs)
 {
     Py_ssize_t nargs = PySequence_Size(args);
     if (nargs == 1) {
@@ -89,7 +89,7 @@ PyObject *pydnd::elementwise_gfunc::call(PyObject *args, PyObject *kwargs)
         ndarray_init_from_pyobject(arg0, arg0_obj);
 
         const dtype& dt0 = arg0.get_dtype();
-        for (deque<elementwise_gfunc_kernel>::size_type i = 0; i < m_kernels.size(); ++i) {
+        for (deque<elwise_gfunc_kernel>::size_type i = 0; i < m_kernels.size(); ++i) {
             const std::vector<dtype>& sig = m_kernels[i].m_sig;
             if (sig.size() == 2 && dt0 == sig[1]) {
                 ndarray result(make_elementwise_unary_kernel_node_copy_kernel(
@@ -112,7 +112,7 @@ PyObject *pydnd::elementwise_gfunc::call(PyObject *args, PyObject *kwargs)
 
         const dtype& dt0 = arg0.get_dtype();
         const dtype& dt1 = arg1.get_dtype();
-        for (deque<elementwise_gfunc_kernel>::size_type i = 0; i < m_kernels.size(); ++i) {
+        for (deque<elwise_gfunc_kernel>::size_type i = 0; i < m_kernels.size(); ++i) {
             const std::vector<dtype>& sig = m_kernels[i].m_sig;
             if (sig.size() == 3 && dt0 == sig[1] && dt1 == sig[2]) {
                 ndarray result(make_elementwise_binary_kernel_node_copy_kernel(
@@ -132,14 +132,14 @@ PyObject *pydnd::elementwise_gfunc::call(PyObject *args, PyObject *kwargs)
     }
 }
 
-std::string pydnd::elementwise_gfunc::debug_dump() const
+std::string pydnd::elwise_gfunc::debug_dump() const
 {
     std::stringstream o;
-    o << "------ elementwise_gfunc\n";
+    o << "------ elwise_gfunc\n";
     o << "name: " << m_name << "\n";
     o << "kernel count: " << m_kernels.size() << "\n";
-    for (deque<elementwise_gfunc_kernel>::size_type i = 0; i < m_kernels.size(); ++i) {
-        const elementwise_gfunc_kernel &k = m_kernels[i];
+    for (deque<elwise_gfunc_kernel>::size_type i = 0; i < m_kernels.size(); ++i) {
+        const elwise_gfunc_kernel &k = m_kernels[i];
         o << "kernel " << i << "\n";
         o << "   " << k.m_sig[0] << " (";
         for (size_t j = 1, j_end = k.m_sig.size(); j != j_end; ++j) {
