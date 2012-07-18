@@ -162,6 +162,11 @@ def make_string_dtype(encoding):
     SET(result.v, dnd_make_string_dtype(encoding))
     return result
 
+def make_pointer_dtype(target_dtype):
+    """Constructs a dtype which is a pointer to the target dtype."""
+    cdef w_dtype result = w_dtype()
+    SET(result.v, dnd_make_pointer_dtype(GET(w_dtype(target_dtype).v)))
+    return result
 ##############################################################################
 
 # NOTE: This is a possible alternative to the init_w_ndarray_typeobject() call

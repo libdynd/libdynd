@@ -45,16 +45,20 @@ set(dnd_SRC
     src/dnd/dtypes/convert_dtype.cpp
     src/dnd/dtypes/dtype_alignment.cpp
     src/dnd/dtypes/fixedstring_dtype.cpp
+    src/dnd/dtypes/pointer_dtype.cpp
     src/dnd/dtypes/string_dtype.cpp
     src/dnd/dtypes/view_dtype.cpp
+    src/dnd/dtypes/void_pointer_dtype.cpp
     include/dnd/dtypes/array_dtype.hpp
     include/dnd/dtypes/byteswap_dtype.hpp
     include/dnd/dtypes/categorical_dtype.hpp
     include/dnd/dtypes/convert_dtype.hpp
     include/dnd/dtypes/dtype_alignment.hpp
     include/dnd/dtypes/fixedstring_dtype.hpp
+    include/dnd/dtypes/pointer_dtype.hpp
     include/dnd/dtypes/string_dtype.hpp
     include/dnd/dtypes/view_dtype.hpp
+    include/dnd/dtypes/void_pointer_dtype.hpp
     # Nodes
     src/dnd/nodes/elementwise_unary_kernel_node.cpp
     src/dnd/nodes/elementwise_binary_kernel_node.cpp

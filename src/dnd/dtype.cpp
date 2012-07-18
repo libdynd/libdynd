@@ -254,17 +254,44 @@ void dnd::hexadecimal_print(std::ostream& o, char value)
     o << hexadecimal[v >> 4] << hexadecimal[v & 0x0f];
 }
 
-void dnd::hexadecimal_print(std::ostream& o, uint16_t value)
+void dnd::hexadecimal_print(std::ostream& o, unsigned char value)
+{
+    hexadecimal_print(o, static_cast<char>(value));
+}
+
+void dnd::hexadecimal_print(std::ostream& o, unsigned short value)
 {
     // Standard printing is in big-endian order
     hexadecimal_print(o, static_cast<char>((value >> 8) & 0xff));
     hexadecimal_print(o, static_cast<char>(value & 0xff));
 }
 
-void dnd::hexadecimal_print(std::ostream& o, uint32_t value)
+void dnd::hexadecimal_print(std::ostream& o, unsigned int value)
 {
     // Standard printing is in big-endian order
     hexadecimal_print(o, static_cast<char>(value >> 24));
+    hexadecimal_print(o, static_cast<char>((value >> 16) & 0xff));
+    hexadecimal_print(o, static_cast<char>((value >> 8) & 0xff));
+    hexadecimal_print(o, static_cast<char>(value & 0xff));
+}
+
+void dnd::hexadecimal_print(std::ostream& o, unsigned long value)
+{
+    if (sizeof(unsigned int) == sizeof(unsigned long)) {
+        hexadecimal_print(o, static_cast<unsigned int>(value));
+    } else {
+        hexadecimal_print(o, static_cast<unsigned long long>(value));
+    }
+}
+
+void dnd::hexadecimal_print(std::ostream& o, unsigned long long value)
+{
+    // Standard printing is in big-endian order
+    hexadecimal_print(o, static_cast<char>(value >> 56));
+    hexadecimal_print(o, static_cast<char>((value >> 48) & 0xff));
+    hexadecimal_print(o, static_cast<char>((value >> 40) & 0xff));
+    hexadecimal_print(o, static_cast<char>((value >> 32) & 0xff));
+    hexadecimal_print(o, static_cast<char>((value >> 24) & 0xff));
     hexadecimal_print(o, static_cast<char>((value >> 16) & 0xff));
     hexadecimal_print(o, static_cast<char>((value >> 8) & 0xff));
     hexadecimal_print(o, static_cast<char>(value & 0xff));

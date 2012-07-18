@@ -80,11 +80,13 @@ enum type_id_t {
     complex_float64_type_id,
     // Means no type, just like in C. (Different from Numpy)
     void_type_id,
+    void_pointer_type_id,
 
     // Raw fixed size bytes
     fixedbytes_type_id,
 
     // Other primitives
+    pointer_type_id,
     fixedstring_type_id,
     categorical_type_id,
 
@@ -547,8 +549,8 @@ dtype make_dtype()
 }
 
 /**
- * A static array of the builtin dtypes and void. If code is specialized
- * just for a builtin type, like int, it can use
+ * A static array of the builtin dtypes and void.
+ * If code is specialized just for a builtin type, like int, it can use
  * static_builtin_dtypes[type_id_of<int>::value] as a fast
  * way to get a const reference to its dtype.
  */
@@ -564,8 +566,11 @@ dtype make_fixedbytes_dtype(intptr_t element_size, intptr_t alignment);
 std::ostream& operator<<(std::ostream& o, const dtype& rhs);
 /** Prints raw bytes as hexadecimal */
 void hexadecimal_print(std::ostream& o, char value);
-void hexadecimal_print(std::ostream& o, uint16_t value);
-void hexadecimal_print(std::ostream& o, uint32_t value);
+void hexadecimal_print(std::ostream& o, unsigned char value);
+void hexadecimal_print(std::ostream& o, unsigned short value);
+void hexadecimal_print(std::ostream& o, unsigned int value);
+void hexadecimal_print(std::ostream& o, unsigned long value);
+void hexadecimal_print(std::ostream& o, unsigned long long value);
 void hexadecimal_print(std::ostream& o, const char *data, intptr_t element_size);
 
 } // namespace dnd

@@ -21,6 +21,7 @@ set(tests_SRC
     dtypes/test_dtype_promotion.cpp
     dtypes/test_fixedstring_dtype.cpp
     dtypes/test_string_dtype.cpp
+    dtypes/test_pointer_dtype.cpp
     test_arithmetic_op.cpp
     test_ndarray.cpp
     test_ndarray_assign.cpp

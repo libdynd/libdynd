@@ -16,7 +16,7 @@
 using namespace std;
 using namespace dnd;
 
-TEST(ConversionDType, ExpressionInValue) {
+TEST(ConvertDType, ExpressionInValue) {
     // When given an expression dtype as the destination, making a conversion dtype chains
     // the value dtype of the operand into the storage dtype of the desired result value
     dtype dt = make_convert_dtype(make_convert_dtype(make_dtype<float>(), make_dtype<int>()), make_dtype<float>());
