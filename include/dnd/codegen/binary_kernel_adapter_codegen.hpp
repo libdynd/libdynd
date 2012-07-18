@@ -29,7 +29,7 @@ struct binary_function_adapter_auxdata {
 
 /**
  * This returns an integer ID that uniquely identifies the
- * binary function adapter produced by codegen_unary_function_adapter.
+ * function adapter produced by codegen_binary_function_adapter.
  * If two sets of inputs produce the same unique ID, they would also
  * produce the same generated code.
  */
