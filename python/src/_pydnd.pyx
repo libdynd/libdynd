@@ -167,6 +167,7 @@ def make_pointer_dtype(target_dtype):
     cdef w_dtype result = w_dtype()
     SET(result.v, dnd_make_pointer_dtype(GET(w_dtype(target_dtype).v)))
     return result
+
 ##############################################################################
 
 # NOTE: This is a possible alternative to the init_w_ndarray_typeobject() call
