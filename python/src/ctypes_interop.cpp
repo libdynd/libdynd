@@ -3,6 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
+#include <dnd/dtypes/fixedstring_dtype.hpp>
 #include <dnd/dtypes/pointer_dtype.hpp>
 
 #include "ctypes_interop.hpp"
@@ -161,8 +162,8 @@ dnd::dtype pydnd::dtype_from_ctypes_cdatatype(PyObject *d)
                 return make_dtype<int8_t>();
             case 'B':
                 return make_dtype<uint8_t>();
-            case 'c': // TODO: make this a fixed sized string of size 1 instead of a number
-                return make_dtype<char>();
+            case 'c':
+                return make_fixedstring_dtype(string_encoding_ascii, 1);
             case 'd':
                 return make_dtype<double>();
             case 'f':
