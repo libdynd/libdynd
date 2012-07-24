@@ -7,6 +7,7 @@
 #include <dnd/memblock/executable_memory_block.hpp>
 #include <dnd/codegen/unary_kernel_adapter_codegen.hpp>
 #include <dnd/codegen/binary_kernel_adapter_codegen.hpp>
+#include <dnd/codegen/binary_reduce_kernel_adapter_codegen.hpp>
 #include <dnd/kernels/unary_kernel_instance.hpp>
 
 using namespace std;
@@ -58,6 +59,34 @@ void dnd::codegen_cache::codegen_binary_function_adapter(const dtype& restype,
     // Populate the auxiliary data
     ad.function_pointer = function_pointer;
     ad.exec_memblock = m_exec_memblock;
+}
+
+void dnd::codegen_cache::codegen_left_associative_binary_reduce_function_adapter(
+                const dtype& reduce_type,calling_convention_t callconv,
+                void *function_pointer,
+                kernel_instance<unary_operation_t>& out_kernel)
+{
+    // These kernels are generated with templates instead of runtime
+    // codegen, so no caching is needed
+    out_kernel.kernel = ::codegen_left_associative_binary_reduce_function_adapter(reduce_type, callconv);
+    make_auxiliary_data<binary_reduce_function_adapter_auxdata>(out_kernel.auxdata);
+    binary_reduce_function_adapter_auxdata& ad = out_kernel.auxdata.get<binary_reduce_function_adapter_auxdata>();
+    // Populate the auxiliary data
+    ad.function_pointer = function_pointer;
+}
+
+void dnd::codegen_cache::codegen_right_associative_binary_reduce_function_adapter(
+                const dtype& reduce_type,calling_convention_t callconv,
+                void *function_pointer,
+                kernel_instance<unary_operation_t>& out_kernel)
+{
+    // These kernels are generated with templates instead of runtime
+    // codegen, so no caching is needed
+    out_kernel.kernel = ::codegen_right_associative_binary_reduce_function_adapter(reduce_type, callconv);
+    make_auxiliary_data<binary_reduce_function_adapter_auxdata>(out_kernel.auxdata);
+    binary_reduce_function_adapter_auxdata& ad = out_kernel.auxdata.get<binary_reduce_function_adapter_auxdata>();
+    // Populate the auxiliary data
+    ad.function_pointer = function_pointer;
 }
 
 void dnd::codegen_cache::debug_dump(std::ostream& o, const std::string& indent) const

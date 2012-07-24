@@ -60,18 +60,112 @@ std::string dnd::get_binary_reduce_function_adapter_unique_id_string(uint64_t un
 }
 
 namespace {
-    // TODO: Use templates to generate all the desired adapters. The space of possible adapters is
-    //       very small because the input parameters equal the return type.
+    template<class T>
+    struct binary_reduce_function_adapters {
+        typedef T (*cdecl_func_ptr_t)(T, T);
+
+        static void left_associative(char *dst, intptr_t dst_stride,
+                        const char *src0, intptr_t src0_stride,
+                        intptr_t count, const AuxDataBase *auxdata)
+        {
+            cdecl_func_ptr_t kfunc = get_auxiliary_data<cdecl_func_ptr_t>(auxdata);
+            if (dst_stride == 0) {
+                T dst_value = *reinterpret_cast<T *>(dst);
+                for (intptr_t i = 0; i < count; ++i) {
+                    dst_value = kfunc(dst_value, *reinterpret_cast<const T *>(src0));
+                    src0 += src0_stride;
+                }
+                *reinterpret_cast<T *>(dst) = dst_value;
+            } else {
+                for (intptr_t i = 0; i < count; ++i) {
+                    *reinterpret_cast<T *>(dst) = kfunc(*reinterpret_cast<T *>(dst),
+                                                    *reinterpret_cast<const T *>(src0));
+                    src0 += src0_stride;
+                }
+            }
+        }
+
+        static void right_associative(char *dst, intptr_t dst_stride,
+                        const char *src0, intptr_t src0_stride,
+                        intptr_t count, const AuxDataBase *auxdata)
+        {
+            cdecl_func_ptr_t kfunc = get_auxiliary_data<cdecl_func_ptr_t>(auxdata);
+            if (dst_stride == 0) {
+                T dst_value = *reinterpret_cast<T *>(dst);
+                for (intptr_t i = 0; i < count; ++i) {
+                    dst_value = kfunc(*reinterpret_cast<const T *>(src0), dst_value);
+                    src0 += src0_stride;
+                }
+                *reinterpret_cast<T *>(dst) = dst_value;
+            } else {
+                for (intptr_t i = 0; i < count; ++i) {
+                    *reinterpret_cast<T *>(dst) = kfunc(*reinterpret_cast<const T *>(src0),
+                                                    *reinterpret_cast<T *>(dst));
+                    src0 += src0_stride;
+                }
+            }
+        }
+    };
 } // anonymous namespace
 
-unary_operation_t codegen_left_associative_binary_reduce_function_adapter(const memory_block_ptr& exec_memblock,
-                    const dtype& reduce_type,calling_convention_t callconv)
+unary_operation_t dnd::codegen_left_associative_binary_reduce_function_adapter(
+                    const dtype& reduce_type, calling_convention_t DND_UNUSED(callconv))
 {
-    return NULL;
+    // TODO: If there's a platform where there are differences in the calling convention
+    //       between the equated types, this will have to change.
+    switch(reduce_type.type_id()) {
+        case bool_type_id:
+        case int8_type_id:
+        case uint8_type_id:
+            return &binary_reduce_function_adapters<int8_t>::left_associative;
+        case int16_type_id:
+        case uint16_type_id:
+            return &binary_reduce_function_adapters<int16_t>::left_associative;
+        case int32_type_id:
+        case uint32_type_id:
+            return &binary_reduce_function_adapters<int32_t>::left_associative;
+        case int64_type_id:
+        case uint64_type_id:
+            return &binary_reduce_function_adapters<int64_t>::left_associative;
+        case float32_type_id:
+            return &binary_reduce_function_adapters<float>::left_associative;
+        case float64_type_id:
+            return &binary_reduce_function_adapters<double>::left_associative;
+        default: {
+            stringstream ss;
+            ss << "The binary reduce function adapter does not support " << reduce_type;
+            throw runtime_error(ss.str());
+        }
+    }
 }
 
-unary_operation_t codegen_right_associative_binary_reduce_function_adapter(const memory_block_ptr& exec_memblock,
-                    const dtype& reduce_type,calling_convention_t callconv)
+unary_operation_t dnd::codegen_right_associative_binary_reduce_function_adapter(
+                    const dtype& reduce_type, calling_convention_t DND_UNUSED(callconv))
 {
-    return NULL;
+    // TODO: If there's a platform where there are differences in the calling convention
+    //       between the equated types, this will have to change.
+    switch(reduce_type.type_id()) {
+        case bool_type_id:
+        case int8_type_id:
+        case uint8_type_id:
+            return &binary_reduce_function_adapters<int8_t>::right_associative;
+        case int16_type_id:
+        case uint16_type_id:
+            return &binary_reduce_function_adapters<int16_t>::right_associative;
+        case int32_type_id:
+        case uint32_type_id:
+            return &binary_reduce_function_adapters<int32_t>::right_associative;
+        case int64_type_id:
+        case uint64_type_id:
+            return &binary_reduce_function_adapters<int64_t>::right_associative;
+        case float32_type_id:
+            return &binary_reduce_function_adapters<float>::right_associative;
+        case float64_type_id:
+            return &binary_reduce_function_adapters<double>::right_associative;
+        default: {
+            stringstream ss;
+            ss << "The binary reduce function adapter does not support " << reduce_type;
+            throw runtime_error(ss.str());
+        }
+    }
 }

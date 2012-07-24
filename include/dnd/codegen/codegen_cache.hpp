@@ -60,6 +60,16 @@ public:
                     void *function_pointer,
                     kernel_instance<binary_operation_t>& out_kernel);
 
+    void codegen_left_associative_binary_reduce_function_adapter(
+                    const dtype& reduce_type,calling_convention_t callconv,
+                    void *function_pointer,
+                    kernel_instance<unary_operation_t>& out_kernel);
+
+    void codegen_right_associative_binary_reduce_function_adapter(
+                    const dtype& reduce_type,calling_convention_t callconv,
+                    void *function_pointer,
+                    kernel_instance<unary_operation_t>& out_kernel);
+
     void debug_dump(std::ostream& o, const std::string& indent = "") const;
 };
 

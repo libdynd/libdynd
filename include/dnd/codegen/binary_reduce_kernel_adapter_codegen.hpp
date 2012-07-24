@@ -56,7 +56,7 @@ std::string get_binary_reduce_function_adapter_unique_id_string(uint64_t unique_
  *
  * @return A pointer to the binary adapter kernel.
  */
-unary_operation_t codegen_left_associative_binary_reduce_function_adapter(const memory_block_ptr& exec_memblock,
+unary_operation_t codegen_left_associative_binary_reduce_function_adapter(
                     const dtype& reduce_type,calling_convention_t callconv);
 
 /**
@@ -71,7 +71,7 @@ unary_operation_t codegen_left_associative_binary_reduce_function_adapter(const 
  *
  * @return A pointer to the binary adapter kernel.
  */
-unary_operation_t codegen_right_associative_binary_reduce_function_adapter(const memory_block_ptr& exec_memblock,
+unary_operation_t codegen_right_associative_binary_reduce_function_adapter(
                     const dtype& reduce_type,calling_convention_t callconv);
 
 } // namespace dnd

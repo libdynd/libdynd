@@ -48,7 +48,11 @@ static void create_elwise_reduce_gfunc_kernel_from_ctypes(dnd::codegen_cache& cg
     }
 
     if (sig.size() == 2) {
-        if (sig[0] != sig[1]) {
+        if (!commutative) {
+            throw runtime_error("To use an in-place reduction kernel, the kernel must either be commutative, or"
+                        " both left and right associative variants must be provided");
+        }
+        if (sig[0] != sig[1] || sig[0] != sig[2]) {
             std::stringstream ss;
             ss << "An in-place reduction kernel must have all three types equal.";
             ss << " Provided signature " << sig[0] << " (" << sig[1] << ", " << sig[2] << ")";
@@ -61,14 +65,12 @@ static void create_elwise_reduce_gfunc_kernel_from_ctypes(dnd::codegen_cache& cg
             ss << " Provided signature " << sig[0] << " (" << sig[1] << ", " << sig[2] << ")";
             throw std::runtime_error(ss.str());
         }
-        /*
-        cgcache.codegen_left_associative_reduction_function_adapter(sig[0], get_ctypes_calling_convention(cfunc),
+        cgcache.codegen_left_associative_binary_reduce_function_adapter(sig[0], get_ctypes_calling_convention(cfunc),
                             *(void **)cfunc->b_ptr, out_kernel.m_left_associative_reduction_kernel);
         if (!commutative) {
-            cgcache.codegen_right_associative_reduction_function_adapter(sig[0], get_ctypes_calling_convention(cfunc),
+            cgcache.codegen_right_associative_binary_reduce_function_adapter(sig[0], get_ctypes_calling_convention(cfunc),
                                 *(void **)cfunc->b_ptr, out_kernel.m_right_associative_reduction_kernel);
         }
-        */
     } else {
         std::stringstream ss;
         ss << "A single function provided as a gfunc reduce kernel must be binary, the provided one has " << (sig.size() - 1);
@@ -83,6 +85,7 @@ void pydnd::elwise_reduce_gfunc::add_blockref(dnd::memory_block_data *blockref)
         memory_block_incref(blockref);
     }
 }
+
 
 
 void pydnd::elwise_reduce_gfunc::add_kernel(dnd::codegen_cache& cgcache, PyObject *kernel, bool associative, bool commutative)
