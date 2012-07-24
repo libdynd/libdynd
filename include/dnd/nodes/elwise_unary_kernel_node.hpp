@@ -3,15 +3,15 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DND__ELEMENTWISE_UNARY_KERNEL_NODE_HPP_
-#define _DND__ELEMENTWISE_UNARY_KERNEL_NODE_HPP_
+#ifndef _DND__ELWISE_UNARY_KERNEL_NODE_HPP_
+#define _DND__ELWISE_UNARY_KERNEL_NODE_HPP_
 
 #include <dnd/nodes/ndarray_node.hpp>
 #include <dnd/kernels/unary_kernel_instance.hpp>
 
 namespace dnd {
 
-class elementwise_unary_kernel_node : public ndarray_node {
+class elwise_unary_kernel_node : public ndarray_node {
     /** The data type */
     dtype m_dtype;
     /** Pointer to the operand node */
@@ -20,22 +20,22 @@ class elementwise_unary_kernel_node : public ndarray_node {
     unary_specialization_kernel_instance m_kernel;
 
     // Non-copyable
-    elementwise_unary_kernel_node(const elementwise_unary_kernel_node&);
-    elementwise_unary_kernel_node& operator=(const elementwise_unary_kernel_node&);
+    elwise_unary_kernel_node(const elwise_unary_kernel_node&);
+    elwise_unary_kernel_node& operator=(const elwise_unary_kernel_node&);
 
-    elementwise_unary_kernel_node(const dtype& dt, const ndarray_node_ptr& opnode)
+    elwise_unary_kernel_node(const dtype& dt, const ndarray_node_ptr& opnode)
         : m_dtype(dt), m_opnode(opnode), m_kernel()
     {
     }
 
-    elementwise_unary_kernel_node(const dtype& dt, const ndarray_node_ptr& opnode, const unary_specialization_kernel_instance& kernel)
+    elwise_unary_kernel_node(const dtype& dt, const ndarray_node_ptr& opnode, const unary_specialization_kernel_instance& kernel)
         : m_dtype(dt), m_opnode(opnode), m_kernel(kernel)
     {
     }
 
 public:
 
-    virtual ~elementwise_unary_kernel_node() {
+    virtual ~elwise_unary_kernel_node() {
     }
 
     ndarray_node_category get_category() const
@@ -87,19 +87,19 @@ public:
         return "elementwise_unary_kernel";
     }
 
-    friend ndarray_node_ptr make_elementwise_unary_kernel_node_copy_kernel(const dtype& dt, const ndarray_node_ptr& opnode,
+    friend ndarray_node_ptr make_elwise_unary_kernel_node_copy_kernel(const dtype& dt, const ndarray_node_ptr& opnode,
                                                 const unary_specialization_kernel_instance& kernel);
 
-    friend ndarray_node_ptr make_elementwise_unary_kernel_node_steal_kernel(const dtype& dt, const ndarray_node_ptr& opnode,
+    friend ndarray_node_ptr make_elwise_unary_kernel_node_steal_kernel(const dtype& dt, const ndarray_node_ptr& opnode,
                                                 unary_specialization_kernel_instance& kernel);
 };
 
-ndarray_node_ptr make_elementwise_unary_kernel_node_copy_kernel(const dtype& dt, const ndarray_node_ptr& opnode,
+ndarray_node_ptr make_elwise_unary_kernel_node_copy_kernel(const dtype& dt, const ndarray_node_ptr& opnode,
                                             const unary_specialization_kernel_instance& kernel);
 
-ndarray_node_ptr make_elementwise_unary_kernel_node_steal_kernel(const dtype& dt, const ndarray_node_ptr& opnode,
+ndarray_node_ptr make_elwise_unary_kernel_node_steal_kernel(const dtype& dt, const ndarray_node_ptr& opnode,
                                             unary_specialization_kernel_instance& kernel);
 
 } // namespace dnd
 
-#endif // _DND__ELEMENTWISE_UNARY_KERNEL_NODE_HPP_
+#endif // _DND__ELWISE_UNARY_KERNEL_NODE_HPP_

@@ -3,8 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DND__ELEMENTWISE_BINARY_KERNEL_NODE_HPP_
-#define _DND__ELEMENTWISE_BINARY_KERNEL_NODE_HPP_
+#ifndef _DND__ELWISE_BINARY_KERNEL_NODE_HPP_
+#define _DND__ELWISE_BINARY_KERNEL_NODE_HPP_
 
 #include <dnd/nodes/ndarray_node.hpp>
 #include <dnd/kernels/kernel_instance.hpp>
@@ -12,7 +12,7 @@
 
 namespace dnd {
 
-class elementwise_binary_kernel_node : public ndarray_node {
+class elwise_binary_kernel_node : public ndarray_node {
     /* The number of dimensions in the result array */
     int m_ndim;
     /* The shape of the result array */
@@ -25,10 +25,10 @@ class elementwise_binary_kernel_node : public ndarray_node {
     kernel_instance<binary_operation_t> m_kernel;
 
     // Non-copyable
-    elementwise_binary_kernel_node(const elementwise_binary_kernel_node&);
-    elementwise_binary_kernel_node& operator=(const elementwise_binary_kernel_node&);
+    elwise_binary_kernel_node(const elwise_binary_kernel_node&);
+    elwise_binary_kernel_node& operator=(const elwise_binary_kernel_node&);
 
-    elementwise_binary_kernel_node(const dtype& dt, const ndarray_node_ptr& opnode0, const ndarray_node_ptr& opnode1)
+    elwise_binary_kernel_node(const dtype& dt, const ndarray_node_ptr& opnode0, const ndarray_node_ptr& opnode1)
         : m_dtype(dt), m_kernel()
     {
         m_opnodes[0] = opnode0;
@@ -37,7 +37,7 @@ class elementwise_binary_kernel_node : public ndarray_node {
         broadcast_input_shapes(2, m_opnodes, &m_ndim, &m_shape);
     }
 
-    elementwise_binary_kernel_node(const dtype& dt, const ndarray_node_ptr& opnode0, const ndarray_node_ptr& opnode1,
+    elwise_binary_kernel_node(const dtype& dt, const ndarray_node_ptr& opnode0, const ndarray_node_ptr& opnode1,
                         const kernel_instance<binary_operation_t>& kernel)
         : m_dtype(dt), m_kernel(kernel)
     {
@@ -49,7 +49,7 @@ class elementwise_binary_kernel_node : public ndarray_node {
 
 public:
 
-    virtual ~elementwise_binary_kernel_node() {
+    virtual ~elwise_binary_kernel_node() {
     }
 
     ndarray_node_category get_category() const
@@ -102,23 +102,23 @@ public:
         return "elementwise_binary_kernel";
     }
 
-    friend ndarray_node_ptr make_elementwise_binary_kernel_node_copy_kernel(const dtype& dt,
+    friend ndarray_node_ptr make_elwise_binary_kernel_node_copy_kernel(const dtype& dt,
                         const ndarray_node_ptr& opnode0, const ndarray_node_ptr& opnode1,
                         const kernel_instance<binary_operation_t>& kernel);
 
-    friend ndarray_node_ptr make_elementwise_binary_kernel_node_steal_kernel(const dtype& dt,
+    friend ndarray_node_ptr make_elwise_binary_kernel_node_steal_kernel(const dtype& dt,
                         const ndarray_node_ptr& opnode0, const ndarray_node_ptr& opnode1,
                         kernel_instance<binary_operation_t>& kernel);
 };
 
-ndarray_node_ptr make_elementwise_binary_kernel_node_copy_kernel(const dtype& dt,
+ndarray_node_ptr make_elwise_binary_kernel_node_copy_kernel(const dtype& dt,
                     const ndarray_node_ptr& opnode0, const ndarray_node_ptr& opnode1,
                     const kernel_instance<binary_operation_t>& kernel);
 
-ndarray_node_ptr make_elementwise_binary_kernel_node_steal_kernel(const dtype& dt,
+ndarray_node_ptr make_elwise_binary_kernel_node_steal_kernel(const dtype& dt,
                     const ndarray_node_ptr& opnode0, const ndarray_node_ptr& opnode1,
                     kernel_instance<binary_operation_t>& kernel);
 
 } // namespace dnd
 
-#endif // _DND__ELEMENTWISE_BINARY_KERNEL_NODE_HPP_
+#endif // _DND__ELWISE_BINARY_KERNEL_NODE_HPP_

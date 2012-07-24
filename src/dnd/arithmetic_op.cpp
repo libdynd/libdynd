@@ -9,7 +9,7 @@
 #include <dnd/raw_iteration.hpp>
 #include <dnd/dtype_promotion.hpp>
 #include <dnd/kernels/builtin_dtype_binary_kernel_table.hpp>
-#include <dnd/nodes/elementwise_binary_kernel_node.hpp>
+#include <dnd/nodes/elwise_binary_kernel_node.hpp>
 
 using namespace std;
 using namespace dnd;
@@ -133,7 +133,7 @@ ndarray dnd::operator+(const ndarray& op1, const ndarray& op2)
     //       in how it is with the unary_specialization instance
     kernel.kernel = get_binary_operation_from_builtin_dtype_table(builtin_addition_table,
                     dt, INTPTR_MAX, INTPTR_MAX, INTPTR_MAX);
-    return ndarray(make_elementwise_binary_kernel_node_steal_kernel(dt,
+    return ndarray(make_elwise_binary_kernel_node_steal_kernel(dt,
                     op1.get_expr_tree()->as_dtype(dt), op2.get_expr_tree()->as_dtype(dt), kernel));
 }
 
@@ -145,7 +145,7 @@ ndarray dnd::operator-(const ndarray& op1, const ndarray& op2)
     //       in how it is with the unary_specialization instance
     kernel.kernel = get_binary_operation_from_builtin_dtype_table(builtin_subtraction_table,
                     dt, INTPTR_MAX, INTPTR_MAX, INTPTR_MAX);
-    return ndarray(make_elementwise_binary_kernel_node_steal_kernel(dt,
+    return ndarray(make_elwise_binary_kernel_node_steal_kernel(dt,
                     op1.get_expr_tree()->as_dtype(dt), op2.get_expr_tree()->as_dtype(dt), kernel));
 }
 
@@ -157,7 +157,7 @@ ndarray dnd::operator*(const ndarray& op1, const ndarray& op2)
     //       in how it is with the unary_specialization instance
     kernel.kernel = get_binary_operation_from_builtin_dtype_table(builtin_multiplication_table,
                     dt, INTPTR_MAX, INTPTR_MAX, INTPTR_MAX);
-    return ndarray(make_elementwise_binary_kernel_node_steal_kernel(dt,
+    return ndarray(make_elwise_binary_kernel_node_steal_kernel(dt,
                     op1.get_expr_tree()->as_dtype(dt), op2.get_expr_tree()->as_dtype(dt), kernel));
 }
 
@@ -169,6 +169,6 @@ ndarray dnd::operator/(const ndarray& op1, const ndarray& op2)
     //       in how it is with the unary_specialization instance
     kernel.kernel = get_binary_operation_from_builtin_dtype_table(builtin_division_table,
                     dt, INTPTR_MAX, INTPTR_MAX, INTPTR_MAX);
-    return ndarray(make_elementwise_binary_kernel_node_steal_kernel(dt,
+    return ndarray(make_elwise_binary_kernel_node_steal_kernel(dt,
                     op1.get_expr_tree()->as_dtype(dt), op2.get_expr_tree()->as_dtype(dt), kernel));
 }

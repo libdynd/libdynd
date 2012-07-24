@@ -62,14 +62,14 @@ set(dnd_SRC
     include/dnd/dtypes/view_dtype.hpp
     include/dnd/dtypes/void_pointer_dtype.hpp
     # Nodes
-    src/dnd/nodes/elementwise_unary_kernel_node.cpp
-    src/dnd/nodes/elementwise_binary_kernel_node.cpp
+    src/dnd/nodes/elwise_unary_kernel_node.cpp
+    src/dnd/nodes/elwise_binary_kernel_node.cpp
     src/dnd/nodes/immutable_scalar_node.cpp
     src/dnd/nodes/ndarray_node.cpp
     src/dnd/nodes/scalar_node.cpp
     src/dnd/nodes/strided_ndarray_node.cpp
-    include/dnd/nodes/elementwise_unary_kernel_node.hpp
-    include/dnd/nodes/elementwise_binary_kernel_node.hpp
+    include/dnd/nodes/elwise_unary_kernel_node.hpp
+    include/dnd/nodes/elwise_binary_kernel_node.hpp
     include/dnd/nodes/immutable_builtin_scalar_node.hpp
     include/dnd/nodes/immutable_scalar_node.hpp
     include/dnd/nodes/ndarray_node.hpp

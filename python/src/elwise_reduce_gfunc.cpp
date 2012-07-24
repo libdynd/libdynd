@@ -5,8 +5,8 @@
 
 #include <algorithm>
 
-#include <dnd/nodes/elementwise_unary_kernel_node.hpp>
-#include <dnd/nodes/elementwise_binary_kernel_node.hpp>
+#include <dnd/nodes/elwise_unary_kernel_node.hpp>
+#include <dnd/nodes/elwise_binary_kernel_node.hpp>
 
 #include "elwise_reduce_gfunc.hpp"
 #include "ndarray_functions.hpp"
@@ -119,7 +119,7 @@ PyObject *pydnd::elwise_reduce_gfunc::call(PyObject *args, PyObject *kwargs)
         for (deque<elwise_reduce_gfunc_kernel>::size_type i = 0; i < m_kernels.size(); ++i) {
             const std::vector<dtype>& sig = m_kernels[i].m_sig;
             if (sig.size() == 2 && dt0 == sig[1]) {
-                ndarray result(make_elementwise_unary_kernel_node_copy_kernel(
+                ndarray result(make_elwise_unary_kernel_node_copy_kernel(
                             sig[0], arg0.get_expr_tree(), m_kernels[i].m_unary_kernel));
                 pyobject_ownref result_obj(WNDArray_Type->tp_alloc(WNDArray_Type, 0));
                 ((WNDArray *)result_obj.get())->v.swap(result);
@@ -142,7 +142,7 @@ PyObject *pydnd::elwise_reduce_gfunc::call(PyObject *args, PyObject *kwargs)
         for (deque<elwise_reduce_gfunc_kernel>::size_type i = 0; i < m_kernels.size(); ++i) {
             const std::vector<dtype>& sig = m_kernels[i].m_sig;
             if (sig.size() == 3 && dt0 == sig[1] && dt1 == sig[2]) {
-                ndarray result(make_elementwise_binary_kernel_node_copy_kernel(
+                ndarray result(make_elwise_binary_kernel_node_copy_kernel(
                             sig[0], arg0.get_expr_tree(), arg1.get_expr_tree(), m_kernels[i].m_binary_kernel));
                 pyobject_ownref result_obj(WNDArray_Type->tp_alloc(WNDArray_Type, 0));
                 ((WNDArray *)result_obj.get())->v.swap(result);

@@ -3,7 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <dnd/nodes/elementwise_binary_kernel_node.hpp>
+#include <dnd/nodes/elwise_binary_kernel_node.hpp>
 #include <dnd/dtypes/convert_dtype.hpp>
 #include <dnd/memblock/ndarray_node_memory_block.hpp>
 #include <dnd/kernels/assignment_kernels.hpp>
@@ -12,7 +12,7 @@
 using namespace std;
 using namespace dnd;
 
-ndarray_node_ptr dnd::elementwise_binary_kernel_node::as_dtype(const dtype& dt,
+ndarray_node_ptr dnd::elwise_binary_kernel_node::as_dtype(const dtype& dt,
                     dnd::assign_error_mode errmode, bool allow_in_place)
 {
     if (allow_in_place) {
@@ -20,13 +20,13 @@ ndarray_node_ptr dnd::elementwise_binary_kernel_node::as_dtype(const dtype& dt,
         return as_ndarray_node_ptr();
     } else {
         ndarray_node_ptr result(
-                make_elementwise_binary_kernel_node_copy_kernel(make_convert_dtype(dt, m_dtype, errmode),
+                make_elwise_binary_kernel_node_copy_kernel(make_convert_dtype(dt, m_dtype, errmode),
                                 m_opnodes[0], m_opnodes[1], m_kernel));
         return result;
     }
 }
 
-ndarray_node_ptr dnd::elementwise_binary_kernel_node::apply_linear_index(
+ndarray_node_ptr dnd::elwise_binary_kernel_node::apply_linear_index(
                 int ndim, const bool *remove_axis,
                 const intptr_t *start_index, const intptr_t *index_strides,
                 const intptr_t *shape,
@@ -50,11 +50,11 @@ ndarray_node_ptr dnd::elementwise_binary_kernel_node::apply_linear_index(
                                         start_index, index_strides, shape, false);
 
         return ndarray_node_ptr(
-                    make_elementwise_binary_kernel_node_copy_kernel(m_dtype, node1, node2, m_kernel));
+                    make_elwise_binary_kernel_node_copy_kernel(m_dtype, node1, node2, m_kernel));
     }
 }
 
-void dnd::elementwise_binary_kernel_node::get_binary_operation(intptr_t dst_fixedstride, intptr_t src0_fixedstride,
+void dnd::elwise_binary_kernel_node::get_binary_operation(intptr_t dst_fixedstride, intptr_t src0_fixedstride,
                             intptr_t src1_fixedstride,
                             kernel_instance<binary_operation_t>& out_kernel) const
 {
@@ -119,29 +119,29 @@ void dnd::elementwise_binary_kernel_node::get_binary_operation(intptr_t dst_fixe
 }
 
 
-ndarray_node_ptr dnd::make_elementwise_binary_kernel_node_copy_kernel(const dtype& dt,
+ndarray_node_ptr dnd::make_elwise_binary_kernel_node_copy_kernel(const dtype& dt,
                     const ndarray_node_ptr& opnode0, const ndarray_node_ptr& opnode1,
                     const kernel_instance<binary_operation_t>& kernel)
 {
     char *node_memory = NULL;
-    ndarray_node_ptr result(make_uninitialized_ndarray_node_memory_block(sizeof(elementwise_binary_kernel_node), &node_memory));
+    ndarray_node_ptr result(make_uninitialized_ndarray_node_memory_block(sizeof(elwise_binary_kernel_node), &node_memory));
 
     // Placement new
-    new (node_memory) elementwise_binary_kernel_node(
+    new (node_memory) elwise_binary_kernel_node(
                         dt, opnode0, opnode1, kernel);
 
     return DND_MOVE(result);
 }
 
-ndarray_node_ptr dnd::make_elementwise_binary_kernel_node_steal_kernel(const dtype& dt,
+ndarray_node_ptr dnd::make_elwise_binary_kernel_node_steal_kernel(const dtype& dt,
                     const ndarray_node_ptr& opnode0, const ndarray_node_ptr& opnode1,
                     kernel_instance<binary_operation_t>& kernel)
 {
     char *node_memory = NULL;
-    ndarray_node_ptr result(make_uninitialized_ndarray_node_memory_block(sizeof(elementwise_binary_kernel_node), &node_memory));
+    ndarray_node_ptr result(make_uninitialized_ndarray_node_memory_block(sizeof(elwise_binary_kernel_node), &node_memory));
 
     // Placement new
-    elementwise_binary_kernel_node *ukn = new (node_memory) elementwise_binary_kernel_node(
+    elwise_binary_kernel_node *ukn = new (node_memory) elwise_binary_kernel_node(
                         dt, opnode0, opnode1);
 
     ukn->m_kernel.swap(kernel);

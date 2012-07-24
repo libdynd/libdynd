@@ -20,7 +20,7 @@
 #include <dnd/nodes/immutable_scalar_node.hpp>
 #include <dnd/nodes/immutable_builtin_scalar_node.hpp>
 #include <dnd/nodes/strided_ndarray_node.hpp>
-#include <dnd/nodes/elementwise_binary_kernel_node.hpp>
+#include <dnd/nodes/elwise_binary_kernel_node.hpp>
 
 using namespace std;
 using namespace dnd;
