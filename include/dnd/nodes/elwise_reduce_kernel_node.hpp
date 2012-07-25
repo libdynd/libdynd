@@ -26,6 +26,8 @@ class elwise_reduce_kernel_node : public ndarray_node {
     bool m_keepdims;
     /** The shape of the result */
     dimvector m_shape;
+    /** The identity of the reduction operation */
+    ndarray_node_ptr m_identity;
     /** The axes along which to do reduction. NOTE: Its size is m_opnode->get_ndim(), not m_ndim */
     shortvector<dnd_bool> m_reduce_axes;
 
@@ -33,7 +35,8 @@ class elwise_reduce_kernel_node : public ndarray_node {
     elwise_reduce_kernel_node(const elwise_reduce_kernel_node&);
     elwise_reduce_kernel_node& operator=(const elwise_reduce_kernel_node&);
 
-    elwise_reduce_kernel_node(const dtype& dt, const ndarray_node_ptr& opnode, dnd_bool *reduce_axes, bool rightassoc, bool keepdims);
+    elwise_reduce_kernel_node(const dtype& dt, const ndarray_node_ptr& opnode, dnd_bool *reduce_axes,
+                    bool rightassoc, bool keepdims, const ndarray_node_ptr& identity);
 
 public:
 
@@ -89,21 +92,23 @@ public:
         return "elwise_reduce_kernel";
     }
 
+    void debug_dump_extra(std::ostream& o, const std::string& indent) const;
+
     friend ndarray_node_ptr make_elwise_reduce_kernel_node_copy_kernel(const dtype& dt, const ndarray_node_ptr& opnode,
-                                                dnd_bool *reduce_axes, bool rightassoc, bool keepdims,
+                                                dnd_bool *reduce_axes, bool rightassoc, bool keepdims, const ndarray_node_ptr& identity,
                                                 const kernel_instance<unary_operation_t>& kernel);
 
     friend ndarray_node_ptr make_elwise_reduce_kernel_node_steal_kernel(const dtype& dt, const ndarray_node_ptr& opnode,
-                                                dnd_bool *reduce_axes, bool rightassoc, bool keepdims,
+                                                dnd_bool *reduce_axes, bool rightassoc, bool keepdims, const ndarray_node_ptr& identity,
                                                 kernel_instance<unary_operation_t>& kernel);
 };
 
 ndarray_node_ptr make_elwise_reduce_kernel_node_copy_kernel(const dtype& dt, const ndarray_node_ptr& opnode,
-                                            dnd_bool *reduce_axes, bool rightassoc, bool keepdims,
+                                            dnd_bool *reduce_axes, bool rightassoc, bool keepdims, const ndarray_node_ptr& identity,
                                             const kernel_instance<unary_operation_t>& kernel);
 
 ndarray_node_ptr make_elwise_reduce_kernel_node_steal_kernel(const dtype& dt, const ndarray_node_ptr& opnode,
-                                            dnd_bool *reduce_axes, bool rightassoc, bool keepdims,
+                                            dnd_bool *reduce_axes, bool rightassoc, bool keepdims, const ndarray_node_ptr& identity,
                                             kernel_instance<unary_operation_t>& kernel);
 
 } // namespace dnd

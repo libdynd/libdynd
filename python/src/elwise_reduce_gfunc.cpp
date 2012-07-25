@@ -29,7 +29,7 @@ pydnd::elwise_reduce_gfunc::~elwise_reduce_gfunc()
 }
 
 static void create_elwise_reduce_gfunc_kernel_from_ctypes(dnd::codegen_cache& cgcache,
-            PyCFuncPtrObject *cfunc, bool associative, bool commutative, elwise_reduce_gfunc_kernel& out_kernel)
+            PyCFuncPtrObject *cfunc, bool associative, bool commutative, const ndarray& identity, elwise_reduce_gfunc_kernel& out_kernel)
 {
     vector<dtype> &sig = out_kernel.m_sig;
     get_ctypes_signature(cfunc, sig);
@@ -73,6 +73,13 @@ static void create_elwise_reduce_gfunc_kernel_from_ctypes(dnd::codegen_cache& cg
         ss << "A single function provided as a gfunc reduce kernel must be binary, the provided one has " << (sig.size() - 1);
         throw std::runtime_error(ss.str());
     }
+
+    // If an identity is provided, get an immutable version of it as the reduction dtype
+    if (identity.get_expr_tree().get() != NULL) {
+        out_kernel.m_identity = identity.as_dtype(sig[0]).eval_immutable();
+    } else {
+        out_kernel.m_identity = ndarray();
+    }
 }
 
 void pydnd::elwise_reduce_gfunc::add_blockref(dnd::memory_block_data *blockref)
@@ -91,7 +98,7 @@ void pydnd::elwise_reduce_gfunc::add_kernel(dnd::codegen_cache& cgcache, PyObjec
     if (PyObject_IsSubclass((PyObject *)Py_TYPE(kernel), ctypes.PyCFuncPtrType_Type)) {
         elwise_reduce_gfunc_kernel ugk;
 
-        create_elwise_reduce_gfunc_kernel_from_ctypes(cgcache, (PyCFuncPtrObject *)kernel, associative, commutative, ugk);
+        create_elwise_reduce_gfunc_kernel_from_ctypes(cgcache, (PyCFuncPtrObject *)kernel, associative, commutative, identity, ugk);
         m_kernels.push_back(elwise_reduce_gfunc_kernel());
         ugk.swap(m_kernels.back());
 
@@ -130,7 +137,7 @@ PyObject *pydnd::elwise_reduce_gfunc::call(PyObject *args, PyObject *kwargs)
             const std::vector<dtype>& sig = m_kernels[i].m_sig;
             if (sig.size() == 2 && dt0 == sig[1]) {
                 ndarray result(make_elwise_reduce_kernel_node_copy_kernel(
-                            sig[0], arg0.get_expr_tree(), reduce_axes.get(), rightassoc, keepdims,
+                            sig[0], arg0.get_expr_tree(), reduce_axes.get(), rightassoc, keepdims, m_kernels[i].m_identity.get_expr_tree(),
                             (!rightassoc || m_kernels[i].m_commutative) ? m_kernels[i].m_left_associative_reduction_kernel :
                                     m_kernels[i].m_right_associative_reduction_kernel));
                 pyobject_ownref result_obj(WNDArray_Type->tp_alloc(WNDArray_Type, 0));

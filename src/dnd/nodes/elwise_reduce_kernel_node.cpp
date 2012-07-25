@@ -12,9 +12,10 @@
 using namespace std;
 using namespace dnd;
 
-dnd::elwise_reduce_kernel_node::elwise_reduce_kernel_node(const dtype& dt, const ndarray_node_ptr& opnode, dnd_bool *reduce_axes, bool rightassoc, bool keepdims)
+dnd::elwise_reduce_kernel_node::elwise_reduce_kernel_node(const dtype& dt,
+                        const ndarray_node_ptr& opnode, dnd_bool *reduce_axes, bool rightassoc, bool keepdims, const ndarray_node_ptr& identity)
     : m_dtype(dt), m_opnode(opnode), m_kernel(), m_rightassoc(rightassoc), m_keepdims(keepdims),
-        m_reduce_axes(opnode->get_ndim(), reduce_axes)
+        m_identity(identity), m_reduce_axes(opnode->get_ndim(), reduce_axes)
 {
     const intptr_t *opnode_shape = opnode->get_shape();
     m_ndim = opnode->get_ndim();
@@ -38,13 +39,15 @@ dnd::elwise_reduce_kernel_node::elwise_reduce_kernel_node(const dtype& dt, const
 ndarray_node_ptr dnd::elwise_reduce_kernel_node::as_dtype(const dtype& dt,
                     dnd::assign_error_mode errmode, bool allow_in_place)
 {
-    if (allow_in_place) {
+    if (m_dtype == dt) {
+        return as_ndarray_node_ptr();
+    } else if (allow_in_place) {
         m_dtype = make_convert_dtype(dt, m_dtype, errmode);
         return as_ndarray_node_ptr();
     } else {
         ndarray_node_ptr result(
                 make_elwise_reduce_kernel_node_copy_kernel(make_convert_dtype(dt, m_dtype, errmode),
-                                m_opnode, m_reduce_axes.get(), m_rightassoc, m_keepdims, m_kernel));
+                                m_opnode, m_reduce_axes.get(), m_rightassoc, m_keepdims, m_identity, m_kernel));
         return result;
     }
 }
@@ -58,8 +61,23 @@ ndarray_node_ptr dnd::elwise_reduce_kernel_node::apply_linear_index(
     throw std::runtime_error("TODO: elwise_reduce_kernel_node::apply_linear_index");
 }
 
+void dnd::elwise_reduce_kernel_node::debug_dump_extra(std::ostream& o, const std::string& indent) const
+{
+    o << indent << " associative: " << (m_rightassoc ? "right" : "left") << "\n";
+    o << indent << " keepdims: " << (m_keepdims ? "true" : "false") << "\n";
+    o << indent << " reduce axes: ";
+    for (int i = 0, i_end = m_opnode->get_ndim(); i != i_end; ++i) {
+        if (m_reduce_axes[i]) {
+            o << i << " ";
+        }
+    }
+    o << "\n";
+    o << indent << " reduction identity: ";
+    m_identity->debug_dump(o, indent + " ");
+}
+
 ndarray_node_ptr dnd::make_elwise_reduce_kernel_node_copy_kernel(const dtype& dt, const ndarray_node_ptr& opnode,
-                                            dnd_bool *reduce_axes, bool rightassoc, bool keepdims,
+                                            dnd_bool *reduce_axes, bool rightassoc, bool keepdims, const ndarray_node_ptr& identity,
                                             const kernel_instance<unary_operation_t>& kernel)
 {
     char *node_memory = NULL;
@@ -67,7 +85,7 @@ ndarray_node_ptr dnd::make_elwise_reduce_kernel_node_copy_kernel(const dtype& dt
 
     // Placement new
     elwise_reduce_kernel_node *ukn = new (node_memory) elwise_reduce_kernel_node(
-                        dt, opnode, reduce_axes, rightassoc, keepdims);
+                        dt, opnode, reduce_axes, rightassoc, keepdims, identity);
 
     ukn->m_kernel.copy_from(kernel);
 
@@ -75,7 +93,7 @@ ndarray_node_ptr dnd::make_elwise_reduce_kernel_node_copy_kernel(const dtype& dt
 }
 
 ndarray_node_ptr dnd::make_elwise_reduce_kernel_node_steal_kernel(const dtype& dt, const ndarray_node_ptr& opnode,
-                                            dnd_bool *reduce_axes, bool rightassoc, bool keepdims,
+                                            dnd_bool *reduce_axes, bool rightassoc, bool keepdims, const ndarray_node_ptr& identity,
                                             kernel_instance<unary_operation_t>& kernel)
 {
     char *node_memory = NULL;
@@ -83,7 +101,7 @@ ndarray_node_ptr dnd::make_elwise_reduce_kernel_node_steal_kernel(const dtype& d
 
     // Placement new
     elwise_reduce_kernel_node *ukn = new (node_memory) elwise_reduce_kernel_node(
-                        dt, opnode, reduce_axes, rightassoc, keepdims);
+                        dt, opnode, reduce_axes, rightassoc, keepdims, identity);
 
     ukn->m_kernel.swap(kernel);
 
