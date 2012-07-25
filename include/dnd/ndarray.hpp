@@ -294,7 +294,7 @@ public:
     template<class T>
     T as(assign_error_mode errmode = assign_error_fractional) const;
 
-    void debug_dump(std::ostream& o) const;
+    void debug_dump(std::ostream& o, const std::string& indent = "") const;
 
     friend std::ostream& operator<<(std::ostream& o, const ndarray& rhs);
     friend class ndarray_vals;

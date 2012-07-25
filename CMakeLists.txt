@@ -171,6 +171,8 @@ else()
     add_library(dynamicndarray SHARED ${dnd_SRC})
 endif()
 
+add_subdirectory(basic_kernels)
+
 add_subdirectory(tests)
 
 add_subdirectory(examples)

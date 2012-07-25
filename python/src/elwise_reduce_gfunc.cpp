@@ -164,7 +164,7 @@ std::string pydnd::elwise_reduce_gfunc::debug_dump() const
     for (deque<elwise_reduce_gfunc_kernel>::size_type i = 0; i < m_kernels.size(); ++i) {
         const elwise_reduce_gfunc_kernel &k = m_kernels[i];
         o << "kernel " << i << "\n";
-        o << "   " << k.m_sig[0] << " (";
+        o << " signature: " << k.m_sig[0] << " (";
         for (size_t j = 1, j_end = k.m_sig.size(); j != j_end; ++j) {
             o << k.m_sig[j];
             if (j != j_end - 1) {
@@ -173,11 +173,13 @@ std::string pydnd::elwise_reduce_gfunc::debug_dump() const
         }
         o << ")\n";
         if (k.m_left_associative_reduction_kernel.kernel != NULL) {
-            o << "left associative kernel aux data: " << (const void *)(const dnd::AuxDataBase *)k.m_left_associative_reduction_kernel.auxdata << "\n";
+            o << " left associative kernel aux data: " << (const void *)(const dnd::AuxDataBase *)k.m_left_associative_reduction_kernel.auxdata << "\n";
         }
         if (k.m_right_associative_reduction_kernel.kernel != NULL) {
-            o << "right associative kernel aux data: " << (const void *)(const dnd::AuxDataBase *)k.m_right_associative_reduction_kernel.auxdata << "\n";
+            o << " right associative kernel aux data: " << (const void *)(const dnd::AuxDataBase *)k.m_right_associative_reduction_kernel.auxdata << "\n";
         }
+        o << " reduction identity:\n";
+        k.m_identity.debug_dump(o, "  ");
     }
     o << "------" << endl;
     return o.str();

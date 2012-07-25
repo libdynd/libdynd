@@ -450,15 +450,15 @@ ndarray dnd::ndarray::eval_copy(uint32_t access_flags) const
 }
 
 
-void dnd::ndarray::debug_dump(std::ostream& o = std::cerr) const
+void dnd::ndarray::debug_dump(std::ostream& o = std::cerr, const std::string& indent) const
 {
-    o << "------ ndarray\n";
+    o << indent << "------ ndarray\n";
     if (m_node.get()) {
-        m_node->debug_dump(o, " ");
+        m_node->debug_dump(o, indent + " ");
     } else {
-        o << "NULL\n";
+        o << indent << "NULL\n";
     }
-    o << "------" << endl;
+    o << indent << "------" << endl;
 }
 
 static void nested_ndarray_print(std::ostream& o, const dtype& d, const char *data, int ndim, const intptr_t *shape, const intptr_t *strides)

@@ -8,6 +8,25 @@ __all__ = ['abs', 'floor', 'ceil', 'fmod', 'pow',
 import gfunc
 import elwise_kernels
 
+def add_basic_gfunc(root, types):
+    global __all__
+    print "adding gfunc " + root
+    f = gfunc.elwise(root)
+    globals()[root] = f
+    __all__.append(root)
+    for t in types:
+        name = root + '_' + t
+        f.add_kernel(elwise_kernels.__dict__[name])
+
+types = ['int32', 'int64', 'uint32', 'uint64', 'float32', 'float64']
+
+add_basic_gfunc('add', types)
+add_basic_gfunc('subtract', types)
+add_basic_gfunc('multiply', types)
+add_basic_gfunc('divide', types)
+add_basic_gfunc('maximum', types)
+add_basic_gfunc('minimum', types)
+
 abs = gfunc.elwise('abs')
 abs.add_kernel(elwise_kernels.abs)
 abs.add_kernel(elwise_kernels.fabs)

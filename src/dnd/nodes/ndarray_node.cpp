@@ -169,7 +169,9 @@ static void process_access_flags(uint32_t &dst_access_flags, uint32_t src_access
             }
         } else if (src_access_flags&immutable_access_flag) {
             // Always propagate the immutable flag from src to dst
-            dst_access_flags |= immutable_access_flag;
+            if (!inout_copy_required) {
+                dst_access_flags |= immutable_access_flag;
+            }
         } else if (dst_access_flags&immutable_access_flag) {
             // If immutable is requested, and src isn't immutable, must copy
             if (!(src_access_flags&immutable_access_flag)) {
@@ -260,7 +262,7 @@ static ndarray_node_ptr evaluate_strided_array_expression_dtype(ndarray_node* no
 
 ndarray_node_ptr dnd::ndarray_node::eval(bool copy, uint32_t access_flags)
 {
-    if (access_flags&(immutable_access_flag|write_access_flag) == (immutable_access_flag|write_access_flag)) {
+    if ((access_flags&(immutable_access_flag|write_access_flag)) == (immutable_access_flag|write_access_flag)) {
         throw runtime_error("Cannot create an ndarray which is both writeable and immutable");
     }
 

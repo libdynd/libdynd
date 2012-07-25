@@ -97,3 +97,10 @@ install(DIRECTORY pydnd DESTINATION "${CMAKE_INSTALL_PREFIX}"
     FILES_MATCHING PATTERN "*.py")
 # Install the module
 install(TARGETS _pydnd DESTINATION "${CMAKE_INSTALL_PREFIX}/pydnd")
+# Install the basic_kernels .dll/.so
+get_property(basic_kernels_loc TARGET basic_kernels PROPERTY LOCATION)
+# NOTE: This only uses one configuration for the whole Visual Studio
+#       solution, so CMAKE_BUILD_TYPE must match the build target
+#       you want to install with.
+string(REPLACE "$(Configuration)" ${CMAKE_BUILD_TYPE} basic_kernels_loc ${basic_kernels_loc})
+install(FILES ${basic_kernels_loc} DESTINATION "${CMAKE_INSTALL_PREFIX}/pydnd")

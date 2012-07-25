@@ -43,6 +43,13 @@ void dnd::immutable_scalar_node::debug_dump_extra(std::ostream& o, const std::st
     o << indent << " data: ";
     hexadecimal_print(o, m_originptr, m_dtype.element_size());
     o << "\n";
+    o << indent << " value: ";
+    try {
+        m_dtype.print_element(o, m_originptr);
+        o << "\n";
+    } catch(std::exception& e) {
+        o << "EXCEPTION: " << e.what() << "\n";
+    }
 }
 
 ndarray_node_ptr dnd::detail::unchecked_make_immutable_scalar_node(const dtype& dt, const char* data)
@@ -56,6 +63,22 @@ ndarray_node_ptr dnd::detail::unchecked_make_immutable_scalar_node(const dtype& 
         throw bad_alloc();
     }
     memcpy(result + start, data, dt.element_size());
+    // Placement new
+    new (result + sizeof(memory_block_data))
+            immutable_scalar_node(dt, result + start);
+    return ndarray_node_ptr(new (result) memory_block_data(1, ndarray_node_memory_block_type), false);
+}
+
+ndarray_node_ptr dnd::detail::unchecked_make_immutable_scalar_node(const dtype& dt)
+{
+    // Calculate the aligned starting point for the data
+    intptr_t start = (intptr_t)(((uintptr_t)sizeof(memory_block_data) +
+                                        sizeof(immutable_scalar_node) + (uintptr_t)(dt.alignment() - 1))
+                        & ~((uintptr_t)(dt.alignment() - 1)));
+    char *result = reinterpret_cast<char *>(malloc(start + dt.element_size()));
+    if (result == NULL) {
+        throw bad_alloc();
+    }
     // Placement new
     new (result + sizeof(memory_block_data))
             immutable_scalar_node(dt, result + start);

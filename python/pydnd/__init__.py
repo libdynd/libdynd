@@ -11,5 +11,5 @@ from basic_dtypes import *
 import dnd_ctypes as ctypes
 
 # All the builtin elementwise gfuncs
-from elementwise_gfuncs import *
+from elwise_gfuncs import *
 
