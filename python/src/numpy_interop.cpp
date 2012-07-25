@@ -297,7 +297,7 @@ static void free_array_interface(void *ptr, void *extra_ptr)
 
 PyObject* pydnd::ndarray_as_numpy_struct_capsule(const dnd::ndarray& n)
 {
-    if (n.get_expr_tree()->get_category() != strided_array_node_category) {
+    if (n.get_node()->get_category() != strided_array_node_category) {
         throw runtime_error("cannot convert a dnd::ndarray that isn't a strided array into a numpy array");
     }
 
@@ -319,7 +319,7 @@ PyObject* pydnd::ndarray_as_numpy_struct_capsule(const dnd::ndarray& n)
         }
     }
 
-    bool writeable = (n.get_expr_tree()->get_access_flags() & write_access_flag) != 0;
+    bool writeable = (n.get_node()->get_access_flags() & write_access_flag) != 0;
 
     PyArrayInterface inter;
     memset(&inter, 0, sizeof(inter));
@@ -344,5 +344,5 @@ PyObject* pydnd::ndarray_as_numpy_struct_capsule(const dnd::ndarray& n)
     memcpy(inter.shape, n.get_shape(), n.get_ndim() * sizeof(intptr_t));
 
     // TODO: Check for Python 3, use PyCapsule there
-    return PyCObject_FromVoidPtrAndDesc(new PyArrayInterface(inter), new memory_block_ptr(n.get_expr_tree()->get_data_memory_block()), free_array_interface);
+    return PyCObject_FromVoidPtrAndDesc(new PyArrayInterface(inter), new memory_block_ptr(n.get_node()->get_data_memory_block()), free_array_interface);
 }

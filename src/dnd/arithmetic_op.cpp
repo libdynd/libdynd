@@ -134,7 +134,7 @@ ndarray dnd::operator+(const ndarray& op1, const ndarray& op2)
     kernel.kernel = get_binary_operation_from_builtin_dtype_table(builtin_addition_table,
                     dt, INTPTR_MAX, INTPTR_MAX, INTPTR_MAX);
     return ndarray(make_elwise_binary_kernel_node_steal_kernel(dt,
-                    op1.get_expr_tree()->as_dtype(dt), op2.get_expr_tree()->as_dtype(dt), kernel));
+                    op1.get_node()->as_dtype(dt), op2.get_node()->as_dtype(dt), kernel));
 }
 
 ndarray dnd::operator-(const ndarray& op1, const ndarray& op2)
@@ -146,7 +146,7 @@ ndarray dnd::operator-(const ndarray& op1, const ndarray& op2)
     kernel.kernel = get_binary_operation_from_builtin_dtype_table(builtin_subtraction_table,
                     dt, INTPTR_MAX, INTPTR_MAX, INTPTR_MAX);
     return ndarray(make_elwise_binary_kernel_node_steal_kernel(dt,
-                    op1.get_expr_tree()->as_dtype(dt), op2.get_expr_tree()->as_dtype(dt), kernel));
+                    op1.get_node()->as_dtype(dt), op2.get_node()->as_dtype(dt), kernel));
 }
 
 ndarray dnd::operator*(const ndarray& op1, const ndarray& op2)
@@ -158,7 +158,7 @@ ndarray dnd::operator*(const ndarray& op1, const ndarray& op2)
     kernel.kernel = get_binary_operation_from_builtin_dtype_table(builtin_multiplication_table,
                     dt, INTPTR_MAX, INTPTR_MAX, INTPTR_MAX);
     return ndarray(make_elwise_binary_kernel_node_steal_kernel(dt,
-                    op1.get_expr_tree()->as_dtype(dt), op2.get_expr_tree()->as_dtype(dt), kernel));
+                    op1.get_node()->as_dtype(dt), op2.get_node()->as_dtype(dt), kernel));
 }
 
 ndarray dnd::operator/(const ndarray& op1, const ndarray& op2)
@@ -170,5 +170,5 @@ ndarray dnd::operator/(const ndarray& op1, const ndarray& op2)
     kernel.kernel = get_binary_operation_from_builtin_dtype_table(builtin_division_table,
                     dt, INTPTR_MAX, INTPTR_MAX, INTPTR_MAX);
     return ndarray(make_elwise_binary_kernel_node_steal_kernel(dt,
-                    op1.get_expr_tree()->as_dtype(dt), op2.get_expr_tree()->as_dtype(dt), kernel));
+                    op1.get_node()->as_dtype(dt), op2.get_node()->as_dtype(dt), kernel));
 }

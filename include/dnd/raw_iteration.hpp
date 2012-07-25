@@ -433,7 +433,7 @@ public:
         // Broadcast the input shapes together
         int ndim;
         dimvector op0shape;
-        broadcast_input_shapes(op1.get_expr_tree(), op2.get_expr_tree(), &ndim, &op0shape);
+        broadcast_input_shapes(op1.get_node(), op2.get_node(), &ndim, &op0shape);
 
         // Create the broadcast strides
         multi_shortvector<intptr_t, 3> strides_vec(ndim);

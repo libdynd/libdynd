@@ -75,7 +75,7 @@ static void create_elwise_reduce_gfunc_kernel_from_ctypes(dnd::codegen_cache& cg
     }
 
     // If an identity is provided, get an immutable version of it as the reduction dtype
-    if (identity.get_expr_tree().get() != NULL) {
+    if (identity.get_node().get() != NULL) {
         out_kernel.m_identity = identity.as_dtype(sig[0]).eval_immutable();
     } else {
         out_kernel.m_identity = ndarray();
@@ -137,7 +137,7 @@ PyObject *pydnd::elwise_reduce_gfunc::call(PyObject *args, PyObject *kwargs)
             const std::vector<dtype>& sig = m_kernels[i].m_sig;
             if (sig.size() == 2 && dt0 == sig[1]) {
                 ndarray result(make_elwise_reduce_kernel_node_copy_kernel(
-                            sig[0], arg0.get_expr_tree(), reduce_axes.get(), rightassoc, keepdims, m_kernels[i].m_identity.get_expr_tree(),
+                            sig[0], arg0.get_node(), reduce_axes.get(), rightassoc, keepdims, m_kernels[i].m_identity.get_node(),
                             (!rightassoc || m_kernels[i].m_commutative) ? m_kernels[i].m_left_associative_reduction_kernel :
                                     m_kernels[i].m_right_associative_reduction_kernel));
                 pyobject_ownref result_obj(WNDArray_Type->tp_alloc(WNDArray_Type, 0));
