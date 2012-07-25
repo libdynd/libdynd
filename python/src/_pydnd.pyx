@@ -346,9 +346,14 @@ cdef class w_elwise_reduce_gfunc:
         def __get__(self):
             return str(GET(self.v).get_name().c_str())
 
-    def add_kernel(self, kernel, bint associative, bint commutative, w_codegen_cache cgcache = default_cgcache_c):
+    def add_kernel(self, kernel, bint associative, bint commutative, identity = None, w_codegen_cache cgcache = default_cgcache_c):
         """Adds a kernel to the gfunc object. Currently, this means a ctypes object with prototype."""
-        GET(self.v).add_kernel(GET(cgcache.v), kernel, associative, commutative)
+        cdef w_ndarray id
+        if identity is None:
+            GET(self.v).add_kernel(GET(cgcache.v), kernel, associative, commutative, ndarray())
+        else:
+            id = w_ndarray(identity)
+            GET(self.v).add_kernel(GET(cgcache.v), kernel, associative, commutative, GET(id.v))
 
     def debug_dump(self):
         """Prints a raw representation of the gfunc data."""

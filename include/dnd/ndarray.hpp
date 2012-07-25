@@ -199,6 +199,20 @@ public:
     ndarray_vals vals() const;
 
     /**
+     * Evaluates the ndarray node into an immutable strided array, or
+     * returns it untouched if it is already both immutable and strided.
+     */
+    ndarray eval_immutable() const;
+
+    /**
+     * Evaluates the ndarray node into a newly allocated strided array,
+     * with the requested access flags.
+     *
+     * @param access_flags  The access flags for the result, default read and write.
+     */
+    ndarray eval_copy(uint32_t access_flags=read_access_flag|write_access_flag) const;
+
+    /**
      * Returnas a view of the array as the dtype's storage_dtype, peeling
      * away any expression dtypes or encodings.
      */
@@ -344,7 +358,7 @@ public:
 
     // Can implicitly convert to an ndarray, by collapsing to a strided array
     operator ndarray() const {
-        return ndarray(m_arr.m_expr_tree->evaluate());
+        return ndarray(m_arr.m_expr_tree->eval());
     }
 
     friend class ndarray;
@@ -355,7 +369,7 @@ inline ndarray_vals ndarray::vals() const {
 }
 
 inline ndarray& ndarray::operator=(const ndarray_vals& rhs) {
-    m_expr_tree = rhs.m_arr.m_expr_tree->evaluate();
+    m_expr_tree = rhs.m_arr.m_expr_tree->eval();
     return *this;
 }
 
@@ -601,11 +615,16 @@ T dnd::ndarray::as(assign_error_mode errmode) const {
 /**
  * Constructs an array with the same shape and memory layout
  * of the one given, but with a different dtype.
+ *
+ * @param rhs  The array whose shape and memory layout to emulate.
+ * @param dt   The dtype of the new array.
  */
 ndarray empty_like(const ndarray& rhs, const dtype& dt);
 
 /**
  * Constructs an empty array matching the parameters of 'rhs'
+ *
+ * @param rhs  The array whose shape, memory layout, and dtype to emulate.
  */
 inline ndarray empty_like(const ndarray& rhs) {
     return empty_like(rhs, rhs.get_dtype());

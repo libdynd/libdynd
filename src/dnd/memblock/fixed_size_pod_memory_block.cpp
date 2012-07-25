@@ -54,10 +54,12 @@ memory_block_ptr dnd::make_fixed_size_pod_memory_block(intptr_t size_bytes, intp
     if (result == 0) {
         throw bad_alloc();
     }
-    // Put in the blockrefs by moving them from the input
+    // Put in the blockrefs by copying the references
     *(int *)(result + sizeof(memory_block_data)) = blockrefs_size;
     for (int i = 0; i < blockrefs_size; ++i) {
-        *(memory_block_data **)(result + sizeof(memory_block_data) + (i + 1)*sizeof(void *)) = blockrefs_begin[i].release();
+        memory_block_data *ref = blockrefs_begin[i].get();
+        memory_block_incref(ref);
+        *(memory_block_data **)(result + sizeof(memory_block_data) + (i + 1)*sizeof(void *)) = ref;
     }
     // Give back the data pointer
     *out_datapointer = result + start;

@@ -53,15 +53,10 @@ namespace {
                     m_blockrefs(blockrefs_end - blockrefs_begin), m_memory_handles()
         {
             for (int i = 0; i < blockrefs_end - blockrefs_begin; ++i) {
-                m_blockrefs[i] = blockrefs_begin[i].release();
+                memory_block_data *ref = blockrefs_begin[i].get();
+                memory_block_incref(ref);
+                m_blockrefs[i] = ref;
             }
-            append_memory(initial_capacity_bytes);
-        }
-
-        pod_memory_block(memory_block_data **blockrefs_begin, memory_block_data **blockrefs_end, intptr_t initial_capacity_bytes)
-            : m_mbd(1, pod_memory_block_type), m_total_allocated_capacity(0),
-                    m_blockrefs(blockrefs_begin, blockrefs_end), m_memory_handles()
-        {
             append_memory(initial_capacity_bytes);
         }
 
@@ -84,13 +79,6 @@ memory_block_ptr dnd::make_pod_memory_block(intptr_t initial_capacity_bytes)
 }
 
 memory_block_ptr dnd::make_pod_memory_block(memory_block_ptr *blockrefs_begin, memory_block_ptr *blockrefs_end,
-                        intptr_t initial_capacity_bytes)
-{
-    pod_memory_block *pmb = new pod_memory_block(blockrefs_begin, blockrefs_end, initial_capacity_bytes);
-    return memory_block_ptr(reinterpret_cast<memory_block_data *>(pmb), false);
-}
-
-memory_block_ptr make_pod_memory_block(memory_block_data **blockrefs_begin, memory_block_data **blockrefs_end,
                         intptr_t initial_capacity_bytes)
 {
     pod_memory_block *pmb = new pod_memory_block(blockrefs_begin, blockrefs_end, initial_capacity_bytes);

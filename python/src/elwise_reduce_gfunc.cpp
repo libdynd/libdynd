@@ -5,8 +5,7 @@
 
 #include <algorithm>
 
-#include <dnd/nodes/elwise_unary_kernel_node.hpp>
-#include <dnd/nodes/elwise_binary_kernel_node.hpp>
+#include <dnd/nodes/elwise_reduce_kernel_node.hpp>
 
 #include "elwise_reduce_gfunc.hpp"
 #include "ndarray_functions.hpp"
@@ -52,12 +51,7 @@ static void create_elwise_reduce_gfunc_kernel_from_ctypes(dnd::codegen_cache& cg
             throw runtime_error("To use an in-place reduction kernel, the kernel must either be commutative, or"
                         " both left and right associative variants must be provided");
         }
-        if (sig[0] != sig[1] || sig[0] != sig[2]) {
-            std::stringstream ss;
-            ss << "An in-place reduction kernel must have all three types equal.";
-            ss << " Provided signature " << sig[0] << " (" << sig[1] << ", " << sig[2] << ")";
-            throw std::runtime_error(ss.str());
-        }
+
     } else if (sig.size() == 3) {
         if (sig[0] != sig[1] || sig[0] != sig[2]) {
             std::stringstream ss;
@@ -71,6 +65,9 @@ static void create_elwise_reduce_gfunc_kernel_from_ctypes(dnd::codegen_cache& cg
             cgcache.codegen_right_associative_binary_reduce_function_adapter(sig[0], get_ctypes_calling_convention(cfunc),
                                 *(void **)cfunc->b_ptr, out_kernel.m_right_associative_reduction_kernel);
         }
+
+        // The adapted reduction signature has just two types
+        sig.pop_back();
     } else {
         std::stringstream ss;
         ss << "A single function provided as a gfunc reduce kernel must be binary, the provided one has " << (sig.size() - 1);
@@ -88,7 +85,8 @@ void pydnd::elwise_reduce_gfunc::add_blockref(dnd::memory_block_data *blockref)
 
 
 
-void pydnd::elwise_reduce_gfunc::add_kernel(dnd::codegen_cache& cgcache, PyObject *kernel, bool associative, bool commutative)
+void pydnd::elwise_reduce_gfunc::add_kernel(dnd::codegen_cache& cgcache, PyObject *kernel,
+                            bool associative, bool commutative, const ndarray& identity)
 {
     if (PyObject_IsSubclass((PyObject *)Py_TYPE(kernel), ctypes.PyCFuncPtrType_Type)) {
         elwise_reduce_gfunc_kernel ugk;
@@ -108,19 +106,33 @@ PyObject *pydnd::elwise_reduce_gfunc::call(PyObject *args, PyObject *kwargs)
 {
     PyErr_SetString(PyExc_TypeError, "Elementwise gfuncs dispatch isn't implemented yet");
     return NULL;
-    /*
     Py_ssize_t nargs = PySequence_Size(args);
     if (nargs == 1) {
         pyobject_ownref arg0_obj(PySequence_GetItem(args, 0));
         ndarray arg0;
         ndarray_init_from_pyobject(arg0, arg0_obj);
 
+        shortvector<dnd_bool> reduce_axes(arg0.get_ndim());
+
+        // axis=[integer OR tuple of integers]
+        pyarg_axis_argument(PyDict_GetItemString(kwargs, "axis"), arg0.get_ndim(), reduce_axes.get());
+
+        // associate=['left' OR 'right']
+        bool rightassoc = pyarg_strings_to_int(PyDict_GetItemString(kwargs, "associate"), "associate", 0,
+                            "left", 0,
+                            "right", 1) == 1;
+
+        // keepdims
+        bool keepdims = pyarg_bool(PyDict_GetItemString(kwargs, "keepdims"), "keepdims", false);
+
         const dtype& dt0 = arg0.get_dtype();
         for (deque<elwise_reduce_gfunc_kernel>::size_type i = 0; i < m_kernels.size(); ++i) {
             const std::vector<dtype>& sig = m_kernels[i].m_sig;
             if (sig.size() == 2 && dt0 == sig[1]) {
-                ndarray result(make_elwise_unary_kernel_node_copy_kernel(
-                            sig[0], arg0.get_expr_tree(), m_kernels[i].m_unary_kernel));
+                ndarray result(make_elwise_reduce_kernel_node_copy_kernel(
+                            sig[0], arg0.get_expr_tree(), reduce_axes.get(), rightassoc, keepdims,
+                            (!rightassoc || m_kernels[i].m_commutative) ? m_kernels[i].m_left_associative_reduction_kernel :
+                                    m_kernels[i].m_right_associative_reduction_kernel));
                 pyobject_ownref result_obj(WNDArray_Type->tp_alloc(WNDArray_Type, 0));
                 ((WNDArray *)result_obj.get())->v.swap(result);
                 return result_obj.release();
@@ -130,34 +142,10 @@ PyObject *pydnd::elwise_reduce_gfunc::call(PyObject *args, PyObject *kwargs)
         std::stringstream ss;
         ss << "Could not find a gfunc kernel matching input dtype (" << dt0 << ")";
         throw std::runtime_error(ss.str());
-    } else if (nargs == 2) {
-        pyobject_ownref arg0_obj(PySequence_GetItem(args, 0));
-        pyobject_ownref arg1_obj(PySequence_GetItem(args, 1));
-        ndarray arg0, arg1;
-        ndarray_init_from_pyobject(arg0, arg0_obj);
-        ndarray_init_from_pyobject(arg1, arg1_obj);
-
-        const dtype& dt0 = arg0.get_dtype();
-        const dtype& dt1 = arg1.get_dtype();
-        for (deque<elwise_reduce_gfunc_kernel>::size_type i = 0; i < m_kernels.size(); ++i) {
-            const std::vector<dtype>& sig = m_kernels[i].m_sig;
-            if (sig.size() == 3 && dt0 == sig[1] && dt1 == sig[2]) {
-                ndarray result(make_elwise_binary_kernel_node_copy_kernel(
-                            sig[0], arg0.get_expr_tree(), arg1.get_expr_tree(), m_kernels[i].m_binary_kernel));
-                pyobject_ownref result_obj(WNDArray_Type->tp_alloc(WNDArray_Type, 0));
-                ((WNDArray *)result_obj.get())->v.swap(result);
-                return result_obj.release();
-            }
-        }
-
-        std::stringstream ss;
-        ss << "Could not find a gfunc kernel matching input dtypes (" << dt0 << ", " << dt1 << ")";
-        throw std::runtime_error(ss.str());
     } else {
-        PyErr_SetString(PyExc_TypeError, "Elementwise gfuncs only support 1 or 2 arguments presently");
+        PyErr_SetString(PyExc_TypeError, "Elementwise reduction gfuncs only support 1 argument");
         return NULL;
     }
-    */
 }
 
 std::string pydnd::elwise_reduce_gfunc::debug_dump() const
@@ -181,7 +169,7 @@ std::string pydnd::elwise_reduce_gfunc::debug_dump() const
             o << "left associative kernel aux data: " << (const void *)(const dnd::AuxDataBase *)k.m_left_associative_reduction_kernel.auxdata << "\n";
         }
         if (k.m_right_associative_reduction_kernel.kernel != NULL) {
-            o << "binary aux data: " << (const void *)(const dnd::AuxDataBase *)k.m_right_associative_reduction_kernel.auxdata << "\n";
+            o << "right associative kernel aux data: " << (const void *)(const dnd::AuxDataBase *)k.m_right_associative_reduction_kernel.auxdata << "\n";
         }
     }
     o << "------" << endl;

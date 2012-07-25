@@ -35,7 +35,9 @@ enum ndarray_node_category {
     // The node points a simple strided array in memory
     strided_array_node_category,
     // The node represents an elementwise nop() to 1 transformation
-    elementwise_node_category,
+    elwise_node_category,
+    // The node represents an elementwise reduction 1 to 1 transformation
+    elwise_reduce_node_category,
     // The node represents an arbitrary computation node, which will generally
     // require evaluation to a temporary.
     arbitrary_node_category
@@ -130,8 +132,11 @@ public:
     /**
      * Evaluates the node into a strided array with a dtype that is
      * not expression_kind.
+     *
+     * @param copy  If set to true, always makes a copy of the data
+     * @param access_flags  The requested access flags for the result, or 0 if anything is ok.
      */
-    ndarray_node_ptr evaluate();
+    ndarray_node_ptr eval(bool copy = false, uint32_t access_flags = 0);
 
     /**
      * Converts this node to a new dtype. This uses a convert_dtype.
@@ -226,6 +231,11 @@ public:
 
     void swap(ndarray_node_ptr& rhs) {
         static_cast<memory_block_ptr *>(this)->swap(static_cast<memory_block_ptr&>(rhs));
+    }
+
+    /** Method to get a pointer to the raw node object */
+    ndarray_node *get_node() const {
+        return reinterpret_cast<ndarray_node *>(reinterpret_cast<char *>(get()) + sizeof(memory_block_data));
     }
 
     /** This object behaves like an ndarray_node pointer */

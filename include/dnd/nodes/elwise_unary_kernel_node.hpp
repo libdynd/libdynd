@@ -40,7 +40,7 @@ public:
 
     ndarray_node_category get_category() const
     {
-        return elementwise_node_category;
+        return elwise_node_category;
     }
 
     const dtype& get_dtype() const {
@@ -84,7 +84,7 @@ public:
                                 kernel_instance<unary_operation_t>& out_kernel) const;
 
     const char *node_name() const {
-        return "elementwise_unary_kernel";
+        return "elwise_unary_kernel";
     }
 
     friend ndarray_node_ptr make_elwise_unary_kernel_node_copy_kernel(const dtype& dt, const ndarray_node_ptr& opnode,

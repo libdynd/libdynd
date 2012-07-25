@@ -54,7 +54,7 @@ public:
 
     ndarray_node_category get_category() const
     {
-        return elementwise_node_category;
+        return elwise_node_category;
     }
 
     const dtype& get_dtype() const {

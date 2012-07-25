@@ -439,6 +439,17 @@ void dnd::ndarray::val_assign(const dtype& dt, const char *data, assign_error_mo
     }
 }
 
+ndarray dnd::ndarray::eval_immutable() const
+{
+    return ndarray(m_expr_tree->eval(false, read_access_flag|immutable_access_flag));
+}
+
+ndarray dnd::ndarray::eval_copy(uint32_t access_flags) const
+{
+    return ndarray(m_expr_tree->eval(true, access_flags));
+}
+
+
 void dnd::ndarray::debug_dump(std::ostream& o = std::cerr) const
 {
     o << "------ ndarray\n";

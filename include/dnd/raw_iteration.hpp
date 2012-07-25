@@ -342,7 +342,7 @@ public:
         init(ndim, shape, data, strides, axis_perm);
     }
     raw_ndarray_iter(int ndim, const intptr_t *shape,
-                                const dtype& op0_dt, ndarray_node_ptr& op0,
+                                const dtype& op0_dt, ndarray_node_ptr& op0, uint32_t op0_access_flags,
                                 const ndarray_node_ptr& op1)
     {
         shortvector<intptr_t> strides(ndim);
@@ -355,8 +355,10 @@ public:
         // Generate the axis_perm from the input strides, and use it to allocate the output
         shortvector<int> axis_perm(ndim);
         strides_to_axis_perm(ndim, strides.get(), axis_perm.get());
-        op0 = make_strided_ndarray_node(op0_dt, ndim, shape, axis_perm.get());
-        data[0] = op0->get_readwrite_originptr();
+        op0 = make_strided_ndarray_node(op0_dt, ndim, shape, axis_perm.get(), op0_access_flags, NULL, NULL);
+        // Because we just allocated this buffer, we can write to it even though it
+        // might be marked as readonly because the src memory block is readonly
+        data[0] = const_cast<char *>(op0->get_readonly_originptr());
 
         const intptr_t *strides_ptrs[2] = {op0->get_strides(), strides.get()};
         init(ndim, shape, data, strides_ptrs, axis_perm.get());
@@ -385,7 +387,7 @@ public:
     }
 
     raw_ndarray_iter(int ndim, const intptr_t *shape,
-                                const dtype& op0_dt, ndarray_node_ptr& op0,
+                                const dtype& op0_dt, ndarray_node_ptr& op0, uint32_t op0_access_flags,
                                 const ndarray_node_ptr& op1,
                                 const ndarray_node_ptr& op2)
     {
@@ -406,8 +408,10 @@ public:
         // Generate the axis_perm from the input strides, and use it to allocate the output
         shortvector<int> axis_perm(ndim);
         multistrides_to_axis_perm(ndim, 2, strides_vec.get_all(), axis_perm.get());
-        op0 = make_strided_ndarray_node(op0_dt, ndim, shape, axis_perm.get());
-        data[0] = op0->get_readwrite_originptr();
+        op0 = make_strided_ndarray_node(op0_dt, ndim, shape, axis_perm.get(), op0_access_flags, NULL, NULL);
+        // Because we just allocated this buffer, we can write to it even though it
+        // might be marked as readonly because the src memory block is readonly
+        data[0] = const_cast<char *>(op0->get_readonly_originptr());
 
         const intptr_t *strides_ptrs[3] = {op0->get_strides(), strides_vec.get(0), strides_vec.get(1)};
         init(ndim, shape, data, strides_ptrs, axis_perm.get());

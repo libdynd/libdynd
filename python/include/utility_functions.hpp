@@ -10,6 +10,8 @@
 #include <sstream>
 #include <stdexcept>
 
+#include <dnd/dtype.hpp>
+
 #include "Python.h"
 
 namespace pydnd {
@@ -68,6 +70,30 @@ public:
 intptr_t pyobject_as_index(PyObject *index);
 
 PyObject* intptr_array_as_tuple(int size, const intptr_t *array);
+
+/**
+ * Parses the axis argument, which may be either a single index
+ * or a tuple of indices. They are converted into a boolean array
+ * which is set to true whereever a reduction axis is provided.
+ */
+void pyarg_axis_argument(PyObject *axis, int ndim, dnd::dnd_bool *reduce_axes);
+
+/**
+ * Matches the input object against one of several
+ * strings, returning the corresponding integer.
+ */
+int pyarg_strings_to_int(PyObject *obj, const char *argname, int default_value,
+                const char *string0, int value0);
+
+/**
+ * Matches the input object against one of several
+ * strings, returning the corresponding integer.
+ */
+int pyarg_strings_to_int(PyObject *obj, const char *argname, int default_value,
+                const char *string0, int value0,
+                const char *string1, int value1);
+
+bool pyarg_bool(PyObject *obj, const char *argname, bool default_value);
 
 } // namespace pydnd
 

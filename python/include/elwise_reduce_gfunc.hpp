@@ -12,6 +12,7 @@
 #include <vector>
 
 #include <dnd/dtype.hpp>
+#include <dnd/ndarray.hpp>
 #include <dnd/kernels/kernel_instance.hpp>
 #include <dnd/codegen/codegen_cache.hpp>
 
@@ -21,8 +22,19 @@ namespace pydnd {
 
 class elwise_reduce_gfunc_kernel {
 public:
-    bool m_associative, m_commutative;
+    /**
+     * If the kernel is associative, evaluating right-to-left
+     * and left-to-right are equivalent.
+     */
+    bool m_associative;
+    /**
+     * If the kernel is commutative, multidimensional reduction is ok,
+     * and the left/right kernels are equivalent, so just a left associating
+     * kernel is provided.
+     */
+    bool m_commutative;
     std::vector<dnd::dtype> m_sig;
+    dnd::ndarray m_identity;
     /**
      * Does dst <- operation(dst, src), use when iterating from index 0 to N-1.
      */
@@ -48,6 +60,7 @@ public:
         m_left_associative_reduction_kernel.swap(rhs.m_left_associative_reduction_kernel);
         m_right_associative_reduction_kernel.swap(rhs.m_right_associative_reduction_kernel);
         std::swap(m_pyobj, rhs.m_pyobj);
+        m_identity.swap(rhs.m_identity);
     }
 };
 
@@ -78,7 +91,7 @@ public:
      */
     void add_blockref(dnd::memory_block_data *blockref);
 
-    void add_kernel(dnd::codegen_cache& cgcache, PyObject *kernel, bool associative, bool commutative);
+    void add_kernel(dnd::codegen_cache& cgcache, PyObject *kernel, bool associative, bool commutative, const dnd::ndarray& identity);
 
     PyObject *call(PyObject *args, PyObject *kwargs);
 

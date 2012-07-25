@@ -64,12 +64,14 @@ set(dnd_SRC
     # Nodes
     src/dnd/nodes/elwise_unary_kernel_node.cpp
     src/dnd/nodes/elwise_binary_kernel_node.cpp
+    src/dnd/nodes/elwise_reduce_kernel_node.cpp
     src/dnd/nodes/immutable_scalar_node.cpp
     src/dnd/nodes/ndarray_node.cpp
     src/dnd/nodes/scalar_node.cpp
     src/dnd/nodes/strided_ndarray_node.cpp
     include/dnd/nodes/elwise_unary_kernel_node.hpp
     include/dnd/nodes/elwise_binary_kernel_node.hpp
+    include/dnd/nodes/elwise_reduce_kernel_node.hpp
     include/dnd/nodes/immutable_builtin_scalar_node.hpp
     include/dnd/nodes/immutable_scalar_node.hpp
     include/dnd/nodes/ndarray_node.hpp
@@ -149,6 +151,8 @@ include_directories(
     thirdparty/utf8/source
     )
 
+source_group("Main Source" REGULAR_EXPRESSION "src/dnd/.*cpp")
+source_group("Main Headers" REGULAR_EXPRESSION "include/dnd/.*hpp")
 source_group("CodeGen Source" REGULAR_EXPRESSION "src/dnd/codegen/.*cpp")
 source_group("CodeGen Headers" REGULAR_EXPRESSION "include/dnd/codegen/.*hpp")
 source_group("DTypes Source" REGULAR_EXPRESSION "src/dnd/dtypes/.*cpp")

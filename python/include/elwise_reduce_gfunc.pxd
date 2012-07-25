@@ -6,7 +6,7 @@
 cdef extern from "elwise_reduce_gfunc.hpp" namespace "pydnd":
     cdef cppclass elwise_reduce_gfunc:
         string& get_name()
-        void add_kernel(codegen_cache&, object, bint, bint) except +
+        void add_kernel(codegen_cache&, object, bint, bint, ndarray&) except +
         object call(object, object) except +
         string debug_dump() except +
 

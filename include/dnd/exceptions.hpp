@@ -93,10 +93,10 @@ public:
     }
 
     /**
-     * An exception for when 'i' isn't in the half-open range
-     * [start, end).
+     * An exception for when 'i' isn't a valid axis
+     * for the number of dimensions.
      */
-    axis_out_of_bounds(intptr_t i, intptr_t start, intptr_t end);
+    axis_out_of_bounds(intptr_t i, intptr_t ndim);
 
     virtual ~axis_out_of_bounds() throw() {
     }
