@@ -102,8 +102,6 @@ static void allocate(memory_block_data *self, intptr_t size_bytes, intptr_t alig
                     (reinterpret_cast<uintptr_t>(emb->m_memory_current) + alignment - 1) & ~(alignment - 1));
     char *end = begin + size_bytes;
     if (end > emb->m_memory_end) {
-        // Shrink the malloc'd memory to fit how much we used
-        realloc(emb->m_memory_begin, emb->m_memory_current - emb->m_memory_begin);
         emb->m_total_allocated_capacity -= emb->m_memory_end - emb->m_memory_current;
         // Allocate memory to double the amount used so far, or the requested size, whichever is larger
         // NOTE: We're assuming malloc produces memory which has good enough alignment for anything
@@ -138,7 +136,7 @@ static void resize(memory_block_data *self, intptr_t size_bytes, char **inout_be
         *inout_end = end;
     } else {
         // If it doesn't fit, need to copy to newly malloc'd memory
-        char *old_begin = emb->m_memory_begin, *old_current = *inout_begin, *old_end = *inout_end;
+		char *old_current = *inout_begin, *old_end = *inout_end;
         // Allocate memory to double the amount used so far, or the requested size, whichever is larger
         // NOTE: We're assuming malloc produces memory which has good enough alignment for anything
         emb->append_memory(max(emb->m_total_allocated_capacity, size_bytes));
@@ -147,8 +145,6 @@ static void resize(memory_block_data *self, intptr_t size_bytes, char **inout_be
         emb->m_memory_current = end;
         *inout_begin = emb->m_memory_begin;
         *inout_end = end;
-        // Shrink the previous malloc'd memory to fit how much was used
-        realloc(old_begin, old_current - old_begin);
         emb->m_total_allocated_capacity -= old_end - old_current;
     }
 //    cout << "memory state after " << (void *)emb->m_memory_begin << " / " << (void *)emb->m_memory_current << " / " << (void *)emb->m_memory_end << endl;
@@ -160,8 +156,6 @@ static void finalize(memory_block_data *self)
     pod_memory_block *emb = reinterpret_cast<pod_memory_block *>(self);
     
     if (emb->m_memory_current < emb->m_memory_end) {
-        // Shrink the malloc'd memory to fit how much we used
-        realloc(emb->m_memory_begin, emb->m_memory_current - emb->m_memory_begin);
         emb->m_total_allocated_capacity -= emb->m_memory_end - emb->m_memory_current;
     }
     emb->m_memory_begin = NULL;
