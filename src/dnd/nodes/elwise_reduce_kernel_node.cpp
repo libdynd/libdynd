@@ -53,12 +53,18 @@ ndarray_node_ptr dnd::elwise_reduce_kernel_node::as_dtype(const dtype& dt,
 }
 
 ndarray_node_ptr dnd::elwise_reduce_kernel_node::apply_linear_index(
-                int ndim, const bool *remove_axis,
-                const intptr_t *start_index, const intptr_t *index_strides,
-                const intptr_t *shape,
-                bool allow_in_place)
+                int DND_UNUSED(ndim), const bool *DND_UNUSED(remove_axis),
+                const intptr_t *DND_UNUSED(start_index), const intptr_t *DND_UNUSED(index_strides),
+                const intptr_t *DND_UNUSED(shape),
+                bool DND_UNUSED(allow_in_place))
 {
     throw std::runtime_error("TODO: elwise_reduce_kernel_node::apply_linear_index");
+}
+
+void dnd::elwise_reduce_kernel_node::get_unary_operation(intptr_t DND_UNUSED(dst_fixedstride),
+        intptr_t DND_UNUSED(src_fixedstride),
+        kernel_instance<unary_operation_t>& DND_UNUSED(out_kernel)) const {
+
 }
 
 void dnd::elwise_reduce_kernel_node::debug_dump_extra(std::ostream& o, const std::string& indent) const
