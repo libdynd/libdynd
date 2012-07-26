@@ -42,10 +42,10 @@ public:
         return sizeof(void *);
     }
 
-    const dtype& value_dtype(const dtype& self) const {
+    const dtype& value_dtype(const dtype& DND_UNUSED(self)) const {
         return m_target_dtype;
     }
-    const dtype& operand_dtype(const dtype& self) const {
+    const dtype& operand_dtype(const dtype& DND_UNUSED(self)) const {
         if (m_target_dtype.type_id() == pointer_type_id) {
             return m_target_dtype;
         } else {

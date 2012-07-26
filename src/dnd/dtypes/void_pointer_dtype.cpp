@@ -25,7 +25,7 @@ void dnd::void_pointer_dtype::print_dtype(std::ostream& o) const {
 
 }
 
-bool dnd::void_pointer_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const
+bool dnd::void_pointer_dtype::is_lossless_assignment(const dtype& DND_UNUSED(dst_dt), const dtype& DND_UNUSED(src_dt)) const
 {
     return false;
 }
@@ -40,7 +40,7 @@ bool dnd::void_pointer_dtype::operator==(const extended_dtype& rhs) const
 }
 
 void dnd::void_pointer_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const dtype& src_dt,
-                assign_error_mode errmode,
+                assign_error_mode DND_UNUSED(errmode),
                 unary_specialization_kernel_instance& out_kernel) const
 {
     if (this == dst_dt.extended()) {
