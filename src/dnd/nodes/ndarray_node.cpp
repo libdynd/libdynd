@@ -184,10 +184,10 @@ static void process_access_flags(uint32_t &dst_access_flags, uint32_t src_access
     }
 }
 
-static ndarray_node_ptr evaluate_strided_array_expression_dtype(ndarray_node* node, bool copy, uint32_t access_flags)
+static ndarray_node_ptr evaluate_strided_array_kernel(ndarray_node *node, bool copy, uint32_t access_flags,
+                                const dtype& dst_dt, unary_specialization_kernel_instance& operation)
 {
-    const dtype& dt = node->get_dtype();
-    const dtype& value_dt = dt.value_dtype();
+    const dtype& src_dt = node->get_dtype();
     ndarray_node_ptr result;
     int ndim = node->get_ndim();
 
@@ -198,17 +198,14 @@ static ndarray_node_ptr evaluate_strided_array_expression_dtype(ndarray_node* no
     // where the variable sized data goes
     memory_block_ptr dst_memblock;
 
-    unary_specialization_kernel_instance operation;
-    get_dtype_assignment_kernel(value_dt, dt, assign_error_none, operation);
-
     // Generate the axis_perm from the input strides, and use it to allocate the output
     shortvector<int> axis_perm(ndim);
     const intptr_t *node_strides = node->get_strides();
     char *result_originptr;
     strides_to_axis_perm(ndim, node_strides, axis_perm.get());
 
-    if (value_dt.get_memory_management() != blockref_memory_management) {
-        result = make_strided_ndarray_node(value_dt, ndim, node->get_shape(), axis_perm.get(),
+    if (dst_dt.get_memory_management() != blockref_memory_management) {
+        result = make_strided_ndarray_node(dst_dt, ndim, node->get_shape(), axis_perm.get(),
                             access_flags, NULL, NULL);
         // Because we just allocated this buffer, we can write to it even though it
         // might be marked as readonly because the src memory block is readonly
@@ -218,7 +215,7 @@ static ndarray_node_ptr evaluate_strided_array_expression_dtype(ndarray_node* no
         if (!copy && api->supports_referencing_src_memory_blocks(operation.auxdata)) {
             // If the kernel can reference existing memory, add a blockref to the src data
             memory_block_ptr src_memblock = node->get_data_memory_block();
-            result = make_strided_ndarray_node(value_dt, ndim, node->get_shape(), axis_perm.get(),
+            result = make_strided_ndarray_node(dst_dt, ndim, node->get_shape(), axis_perm.get(),
                             access_flags, &src_memblock, &src_memblock + 1);
             // Because we just allocated this buffer, we can write to it even though it
             // might be marked as readonly because the src memory block is readonly
@@ -227,7 +224,7 @@ static ndarray_node_ptr evaluate_strided_array_expression_dtype(ndarray_node* no
             // Otherwise allocate a new memory block for the destination
             dst_memblock = make_pod_memory_block();
             api->set_dst_memory_block(operation.auxdata, dst_memblock.get());
-            result = make_strided_ndarray_node(value_dt, ndim, node->get_shape(), axis_perm.get(),
+            result = make_strided_ndarray_node(dst_dt, ndim, node->get_shape(), axis_perm.get(),
                             access_flags, &dst_memblock, &dst_memblock + 1);
             // Because we just allocated this buffer, we can write to it even though it
             // might be marked as readonly because the src memory block is readonly
@@ -243,8 +240,8 @@ static ndarray_node_ptr evaluate_strided_array_expression_dtype(ndarray_node* no
     intptr_t innersize = iter.innersize();
     intptr_t dst_stride = iter.innerstride<0>();
     intptr_t src0_stride = iter.innerstride<1>();
-    unary_specialization_t uspec = get_unary_specialization(dst_stride, value_dt.element_size(),
-                                                                src0_stride, dt.element_size());
+    unary_specialization_t uspec = get_unary_specialization(dst_stride, dst_dt.element_size(),
+                                                                src0_stride, src_dt.element_size());
     unary_operation_t kfunc = operation.specializations[uspec];
     if (innersize > 0) {
         do {
@@ -263,7 +260,20 @@ static ndarray_node_ptr evaluate_strided_array_expression_dtype(ndarray_node* no
     return DND_MOVE(result);
 }
 
-static void push_front_unary_kernels(ndarray_node* node,
+static ndarray_node_ptr evaluate_strided_array_expression_dtype(ndarray_node* node, bool copy, uint32_t access_flags)
+{
+    const dtype& dt = node->get_dtype();
+    const dtype& value_dt = dt.value_dtype();
+    ndarray_node_ptr result;
+    int ndim = node->get_ndim();
+
+    unary_specialization_kernel_instance operation;
+    get_dtype_assignment_kernel(value_dt, dt, assign_error_none, operation);
+
+    return evaluate_strided_array_kernel(node, copy, access_flags, value_dt, operation);
+}
+
+static ndarray_node *push_front_unary_kernels(ndarray_node* node,
                     std::deque<unary_specialization_kernel_instance>& out_kernels,
                     std::deque<intptr_t>& out_element_sizes)
 {
@@ -275,7 +285,7 @@ static void push_front_unary_kernels(ndarray_node* node,
             if (dt.kind() == expression_kind) {
                 push_front_dtype_storage_to_value_kernels(dt, out_kernels, out_element_sizes);
             }
-            break;
+            return node;
         case elwise_node_category:
             if (node->get_nop() == 1) {
                 // The dtype expression kernels
@@ -287,26 +297,25 @@ static void push_front_unary_kernels(ndarray_node* node,
                 out_kernels.push_front(unary_specialization_kernel_instance());
                 node->get_unary_specialization_operation(out_kernels.front());
                 // The kernels from the operand
-                push_front_unary_kernels(node->get_opnode(0).get_node(), out_kernels, out_element_sizes);
-                break;
+                return push_front_unary_kernels(node->get_opnode(0).get_node(), out_kernels, out_element_sizes);
             } else {
                 stringstream ss;
                 ss << "evaluating this expression graph (which is further connected to a unary node) is not yet supported:\n";
-                node->debug_dump(ss, "");
+                node->debug_dump(ss);
                 throw runtime_error(ss.str());
             }
             break;
         default: {
             stringstream ss;
             ss << "evaluating this expression graph (which is further connected to a unary node) is not yet supported:\n";
-            node->debug_dump(ss, "");
+            node->debug_dump(ss);
             throw runtime_error(ss.str());
         }
     }
 
 }
 
-static ndarray_node_ptr evaluate_unary_elwise_array(ndarray_node* node, uint32_t access_flags)
+static ndarray_node_ptr evaluate_unary_elwise_array(ndarray_node* node, bool copy, uint32_t access_flags)
 {
     const ndarray_node_ptr& op = node->get_opnode(0);
     const dtype& dt = op->get_dtype();
@@ -315,29 +324,50 @@ static ndarray_node_ptr evaluate_unary_elwise_array(ndarray_node* node, uint32_t
     deque<unary_specialization_kernel_instance> kernels;
     deque<intptr_t> element_sizes;
 
-    push_front_unary_kernels(node, kernels, element_sizes);
+    ndarray_node *strided_node = push_front_unary_kernels(node, kernels, element_sizes);
 
-    unary_specialization_kernel_instance kernel;
-    make_buffered_chain_unary_kernel(kernels, element_sizes, kernel);
+    unary_specialization_kernel_instance operation;
+    make_buffered_chain_unary_kernel(kernels, element_sizes, operation);
 
-    ndarray_node_ptr result;
-    raw_ndarray_iter<1,1> iter(node->get_ndim(), node->get_shape(), node->get_dtype().value_dtype(),
-                            result, access_flags, op);
+    return evaluate_strided_array_kernel(strided_node, copy, access_flags, dt.value_dtype(), operation);
+}
 
-    intptr_t innersize = iter.innersize();
-    intptr_t dst_stride = iter.innerstride<0>();
-    intptr_t src0_stride = iter.innerstride<1>();
-    unary_operation_t operation = kernel.specializations[
-            get_unary_specialization(dst_stride, element_sizes.back(), src0_stride, element_sizes.front())];
-    if (innersize > 0) {
-        do {
-            operation(iter.data<0>(), dst_stride,
-                        iter.data<1>(), src0_stride,
-                        innersize, kernel.auxdata);
-        } while (iter.iternext());
+static ndarray_node_ptr evaluate_binary_elwise_array(ndarray_node* node, bool copy, uint32_t access_flags)
+{
+    const ndarray_node_ptr& op1 = node->get_opnode(0);
+    const ndarray_node_ptr& op2 = node->get_opnode(1);
+
+    // Special case of two strided sub-operands, requiring no intermediate buffers
+    if (op1->get_category() == strided_array_node_category &&
+                op2->get_category() == strided_array_node_category) {
+        ndarray_node_ptr result;
+        raw_ndarray_iter<1,2> iter(node->get_ndim(), node->get_shape(),
+                                    node->get_dtype().value_dtype(), result, access_flags,
+                                    op1, op2);
+        //iter.debug_dump(std::cout);
+
+        intptr_t innersize = iter.innersize();
+        intptr_t dst_stride = iter.innerstride<0>();
+        intptr_t src0_stride = iter.innerstride<1>();
+        intptr_t src1_stride = iter.innerstride<2>();
+        kernel_instance<binary_operation_t> operation;
+        node->get_binary_operation(dst_stride, src0_stride, src1_stride, operation);
+        if (innersize > 0) {
+            do {
+                operation.kernel(iter.data<0>(), dst_stride,
+                            iter.data<1>(), src0_stride,
+                            iter.data<2>(), src1_stride,
+                            innersize, operation.auxdata);
+            } while (iter.iternext());
+        }
+
+        return DND_MOVE(result);
     }
 
-    return DND_MOVE(result);
+    stringstream ss;
+    ss << "evaluating this expression graph is not yet supported:\n";
+    node->debug_dump(ss);
+    throw runtime_error(ss.str());
 }
 
 ndarray_node_ptr dnd::ndarray_node::eval(bool copy, uint32_t access_flags)
@@ -364,38 +394,9 @@ ndarray_node_ptr dnd::ndarray_node::eval(bool copy, uint32_t access_flags)
         case elwise_node_category: {
             switch (get_nop()) {
                 case 1:
-                    return evaluate_unary_elwise_array(this, access_flags);
-                case 2: {
-                    const ndarray_node_ptr& op1 = get_opnode(0);
-                    const ndarray_node_ptr& op2 = get_opnode(1);
-
-                    // Special case of two strided sub-operands, requiring no intermediate buffers
-                    if (op1->get_category() == strided_array_node_category &&
-                                op2->get_category() == strided_array_node_category) {
-                        ndarray_node_ptr result;
-                        raw_ndarray_iter<1,2> iter(get_ndim(), get_shape(),
-                                                    get_dtype().value_dtype(), result, access_flags,
-                                                    op1, op2);
-                        //iter.debug_dump(std::cout);
-
-                        intptr_t innersize = iter.innersize();
-                        intptr_t dst_stride = iter.innerstride<0>();
-                        intptr_t src0_stride = iter.innerstride<1>();
-                        intptr_t src1_stride = iter.innerstride<2>();
-                        kernel_instance<binary_operation_t> operation;
-                        get_binary_operation(dst_stride, src0_stride, src1_stride, operation);
-                        if (innersize > 0) {
-                            do {
-                                operation.kernel(iter.data<0>(), dst_stride,
-                                            iter.data<1>(), src0_stride,
-                                            iter.data<2>(), src1_stride,
-                                            innersize, operation.auxdata);
-                            } while (iter.iternext());
-                        }
-
-                        return DND_MOVE(result);
-                    }
-                }
+                    return evaluate_unary_elwise_array(this, copy, access_flags);
+                case 2:
+                    return evaluate_binary_elwise_array(this, copy, access_flags);
                 default:
                     break;
             }
@@ -408,7 +409,7 @@ ndarray_node_ptr dnd::ndarray_node::eval(bool copy, uint32_t access_flags)
                             " nodes with an arbitrary_node_category category");
     }
 
-    debug_dump(cout, "");
+    debug_dump(cout);
     throw std::runtime_error("evaluating this expression graph is not yet supported");
 }
 
