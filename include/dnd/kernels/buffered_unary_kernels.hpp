@@ -15,8 +15,8 @@
 namespace dnd {
 
 /**
- * Given a size-N deque of kernel instances and a size-(N-1) vector
- * of the intermediate element sizes, creates a kernel which chains
+ * Given a size-N deque of kernel instances and a size-(N+1) vector
+ * of the start, intermediate, and final element sizes, creates a kernel which chains
  * them all together through intermediate buffers.
  *
  * The deque is used instead of vector because kernel_instance's shouldn't

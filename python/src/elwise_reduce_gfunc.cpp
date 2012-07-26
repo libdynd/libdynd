@@ -111,8 +111,6 @@ void pydnd::elwise_reduce_gfunc::add_kernel(dnd::codegen_cache& cgcache, PyObjec
 
 PyObject *pydnd::elwise_reduce_gfunc::call(PyObject *args, PyObject *kwargs)
 {
-    PyErr_SetString(PyExc_TypeError, "Elementwise gfuncs dispatch isn't implemented yet");
-    return NULL;
     Py_ssize_t nargs = PySequence_Size(args);
     if (nargs == 1) {
         pyobject_ownref arg0_obj(PySequence_GetItem(args, 0));

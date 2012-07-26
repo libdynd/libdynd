@@ -108,6 +108,15 @@ dnd::ndarray pydnd::ndarray_vals(const dnd::ndarray& n)
     return n.vals();
 }
 
+dnd::ndarray pydnd::ndarray_eval_copy(const dnd::ndarray& n, PyObject* access_flags)
+{
+    if (access_flags == Py_None) {
+        return n.eval_copy();
+    } else {
+        return n.eval_copy(pyarg_access_flags(access_flags));
+    }
+}
+
 static PyObject* element_as_pyobject(const dtype& d, const char *data)
 {
     switch (d.type_id()) {

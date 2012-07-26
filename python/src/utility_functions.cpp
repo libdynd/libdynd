@@ -6,6 +6,7 @@
 #include "utility_functions.hpp"
 
 #include <dnd/exceptions.hpp>
+#include <dnd/nodes/ndarray_node.hpp>
 
 #include <Python.h>
 
@@ -137,7 +138,36 @@ int pydnd::pyarg_strings_to_int(PyObject *obj, const char *argname, int default_
     throw runtime_error(ss.str());
 }
 
-bool pyarg_bool(PyObject *obj, const char *argname, bool default_value)
+int pydnd::pyarg_strings_to_int(PyObject *obj, const char *argname, int default_value,
+                const char *string0, int value0,
+                const char *string1, int value1,
+                const char *string2, int value2)
+{
+    if (obj == NULL) {
+        return default_value;
+    }
+
+    if (!PyString_Check(obj)) {
+        stringstream ss;
+        ss << "argument " << argname << " must be a string";
+        throw runtime_error(ss.str());
+    }
+
+    char *obj_str = PyString_AsString(obj);
+    if (strcmp(obj_str, string0) == 0) {
+        return value0;
+    } else if (strcmp(obj_str, string1) == 0) {
+        return value1;
+    } else if (strcmp(obj_str, string2) == 0) {
+        return value2;
+    }
+
+    stringstream ss;
+    ss << "argument " << argname << " was given the invalid argument value \"" << obj_str << "\"";
+    throw runtime_error(ss.str());
+}
+
+bool pydnd::pyarg_bool(PyObject *obj, const char *argname, bool default_value)
 {
     if (obj == NULL) {
         return default_value;
@@ -152,4 +182,26 @@ bool pyarg_bool(PyObject *obj, const char *argname, bool default_value)
         ss << "argument " << argname << " must be a boolean True or False";
         throw runtime_error(ss.str());
     }
+}
+
+uint32_t pydnd::pyarg_access_flags(PyObject* obj)
+{
+    pyobject_ownref iterator(PyObject_GetIter(obj));
+    PyObject *item_raw;
+
+    uint32_t result = 0;
+
+    while (item_raw = PyIter_Next(iterator)) {
+        pyobject_ownref item(item_raw);
+        result |= (uint32_t)pyarg_strings_to_int(item, "access_flags", 0,
+                    "read", read_access_flag,
+                    "write", write_access_flag,
+                    "immutable", immutable_access_flag);
+    }
+
+    if (PyErr_Occurred()) {
+        throw runtime_error("propagating exception...");
+    }
+
+    return result;
 }

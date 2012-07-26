@@ -32,38 +32,54 @@ S double_value(T value) {
 int main()
 {
     try {
-    ndarray a;
+    float v0[5] = {3.5f, 1.3f, -2.4999f, -2.999, 1000.50001f};
+    ndarray a = v0, b;
 
-    int16_t value16 = 0x1362;
-    a = ndarray(make_byteswap_dtype<int16_t>(), (char *)&value16);
-    EXPECT_EQ(0x6213, a.as<int16_t>());
+    b = a.as_dtype<int>(assign_error_overflow);
+    b = b.as_dtype<float>(assign_error_inexact);
+    // Multiple as_dtype operations should make a chained conversion dtype
+    EXPECT_EQ(make_convert_dtype(make_dtype<float>(),
+                                    make_convert_dtype<int, float>(assign_error_overflow), assign_error_inexact),
+              b.get_dtype());
 
-    int32_t value32 = 0x12345678;
-    a = ndarray(make_byteswap_dtype<int32_t>(), (char *)&value32);
-    EXPECT_EQ(0x78563412, a.as<int32_t>());
+    // Evaluating the values should truncate them to integers
+    b = b.vals();
+    // Now it's just the value dtype, no chaining
+    EXPECT_EQ(make_dtype<float>(), b.get_dtype());
+    EXPECT_EQ(3, b(0).as<float>());
+    EXPECT_EQ(1, b(1).as<float>());
+    EXPECT_EQ(-2, b(2).as<float>());
+    EXPECT_EQ(-2, b(3).as<float>());
+    EXPECT_EQ(1000, b(4).as<float>());
 
-    int64_t value64 = 0x12345678abcdef01LL;
-    a = ndarray(make_byteswap_dtype<int64_t>(), (char *)&value64);
-    EXPECT_EQ(0x01efcdab78563412LL, a.as<int64_t>());
+    // Now try it with longer chaining through multiple element sizes
+    b = a.as_dtype<int16_t>(assign_error_overflow);
+    b = b.as_dtype<int32_t>(assign_error_overflow);
+    b = b.as_dtype<int16_t>(assign_error_overflow);
+    b = b.as_dtype<int64_t>(assign_error_overflow);
+    b = b.as_dtype<float>(assign_error_overflow);
+    b = b.as_dtype<int32_t>(assign_error_overflow);
 
-    value32 = 0xDA0F4940;
-    a = ndarray(make_byteswap_dtype<float>(), (char *)&value32);
-    EXPECT_EQ(3.1415926f, a.as<float>());
-
-    value64 = 0x112D4454FB210940LL;
-    a = ndarray(make_byteswap_dtype<double>(), (char *)&value64);
-    EXPECT_EQ(3.14159265358979, a.as<double>());
-    a = a.vals();
-    EXPECT_EQ(3.14159265358979, a.as<double>());
-
-    uint32_t value32_pair[2] = {0xDA0F4940, 0xC1B88FD3};
-    a = ndarray(make_byteswap_dtype<complex<float> >(), (char *)&value32_pair);
-    EXPECT_EQ(complex<float>(3.1415926f, -1.23456e12f), a.as<complex<float> >());
-
-    int64_t value64_pair[2] = {0x112D4454FB210940LL, 0x002892B01FF771C2LL};
-    a = ndarray(make_byteswap_dtype<complex<double> >(), (char *)&value64_pair);
-    EXPECT_EQ(complex<double>(3.14159265358979, -1.2345678912345e12), a.as<complex<double> >());
-
+    EXPECT_EQ(make_convert_dtype(make_dtype<int32_t>(),
+                    make_convert_dtype(make_dtype<float>(),
+                        make_convert_dtype(make_dtype<int64_t>(),
+                            make_convert_dtype(make_dtype<int16_t>(),
+                                make_convert_dtype(make_dtype<int32_t>(),
+                                    make_convert_dtype<int16_t, float>(
+                                    assign_error_overflow),
+                                assign_error_overflow),
+                            assign_error_overflow),
+                        assign_error_overflow),
+                    assign_error_overflow),
+                assign_error_overflow),
+            b.get_dtype());
+    b = b.vals();
+    EXPECT_EQ(make_dtype<int32_t>(), b.get_dtype());
+    EXPECT_EQ(3, b(0).as<int32_t>());
+    EXPECT_EQ(1, b(1).as<int32_t>());
+    EXPECT_EQ(-2, b(2).as<int32_t>());
+    EXPECT_EQ(-2, b(3).as<int32_t>());
+    EXPECT_EQ(1000, b(4).as<int32_t>());
 
     } catch(int) { //std::exception& e) {
         //cout << "Error: " << e.what() << "\n";

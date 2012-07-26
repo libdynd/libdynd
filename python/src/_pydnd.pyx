@@ -204,6 +204,16 @@ cdef class w_ndarray:
         SET(result.v, ndarray_vals(GET(self.v)))
         return result
 
+    def eval_immutable(self):
+        cdef w_ndarray result = w_ndarray()
+        SET(result.v, GET(self.v).eval_immutable())
+        return result
+
+    def eval_copy(self, access_flags = None):
+        cdef w_ndarray result = w_ndarray()
+        SET(result.v, ndarray_eval_copy(GET(self.v), access_flags))
+        return result
+
     def storage(self):
         """Returns a version of the ndarray with its storage dtype, all expressions discarded."""
         cdef w_ndarray result = w_ndarray()

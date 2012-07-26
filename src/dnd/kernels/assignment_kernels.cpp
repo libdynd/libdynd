@@ -246,24 +246,20 @@ void dnd::get_dtype_assignment_kernel(
         if (src_dt.kind() == expression_kind) {
             // kernel operations from src's storage to value
             push_front_dtype_storage_to_value_kernels(src_dt, kernels, element_sizes);
-            next_element_size = src_dt_vdt.element_size();
         }
 
         if (src_dt_vdt != dst_dt_vdt) {
             // A cast operation from src_dt.value_dtype() to dst_dt
+            if (kernels.empty()) {
+                element_sizes.push_back(src_dt_vdt.element_size());
+            }
+            element_sizes.push_back(dst_dt_vdt.element_size());
             kernels.push_back(unary_specialization_kernel_instance());
             get_dtype_assignment_kernel(dst_dt_vdt, src_dt_vdt,
                                 errmode, kernels.back());
-            if (next_element_size != 0) {
-                element_sizes.push_back(next_element_size);
-            }
-            next_element_size = dst_dt_vdt.element_size();
         }
 
         if (dst_dt.kind() == expression_kind) {
-            if (next_element_size != 0) {
-                element_sizes.push_back(next_element_size);
-            }
             push_back_dtype_value_to_storage_kernels(dst_dt, kernels, element_sizes);
         }
 

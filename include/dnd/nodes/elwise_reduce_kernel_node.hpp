@@ -85,12 +85,12 @@ public:
                     const intptr_t *shape,
                     bool allow_in_place);
 
-    void get_unary_operation(intptr_t dst_fixedstride, intptr_t src_fixedstride,
-                                kernel_instance<unary_operation_t>& out_kernel) const;
-
     const char *node_name() const {
         return "elwise_reduce_kernel";
     }
+
+    void get_unary_operation(intptr_t dst_fixedstride, intptr_t src_fixedstride,
+                                    kernel_instance<unary_operation_t>& out_kernel) const;
 
     void debug_dump_extra(std::ostream& o, const std::string& indent) const;
 

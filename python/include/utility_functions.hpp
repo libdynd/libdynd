@@ -30,6 +30,10 @@ class pyobject_ownref {
     pyobject_ownref(const pyobject_ownref&);
     pyobject_ownref& operator=(const pyobject_ownref&);
 public:
+    pyobject_ownref()
+        : m_obj(NULL)
+    {
+    }
     explicit pyobject_ownref(PyObject* obj)
         : m_obj(obj)
     {
@@ -93,7 +97,14 @@ int pyarg_strings_to_int(PyObject *obj, const char *argname, int default_value,
                 const char *string0, int value0,
                 const char *string1, int value1);
 
+int pyarg_strings_to_int(PyObject *obj, const char *argname, int default_value,
+                const char *string0, int value0,
+                const char *string1, int value1,
+                const char *string2, int value2);
+
 bool pyarg_bool(PyObject *obj, const char *argname, bool default_value);
+
+uint32_t pyarg_access_flags(PyObject* obj);
 
 } // namespace pydnd
 

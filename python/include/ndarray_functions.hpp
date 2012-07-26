@@ -37,6 +37,7 @@ void init_w_ndarray_typeobject(PyObject *type);
 
 void ndarray_init_from_pyobject(dnd::ndarray& n, PyObject* obj);
 dnd::ndarray ndarray_vals(const dnd::ndarray& n);
+dnd::ndarray ndarray_eval_copy(const dnd::ndarray& n, PyObject* access_flags);
 
 inline dnd::ndarray ndarray_add(const dnd::ndarray& lhs, const dnd::ndarray& rhs)
 {

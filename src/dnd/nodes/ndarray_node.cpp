@@ -6,6 +6,7 @@
 #include <stdexcept>
 #include <sstream>
 #include <string>
+#include <deque>
 
 #include <dnd/ndarray.hpp>
 #include <dnd/exceptions.hpp>
@@ -16,6 +17,7 @@
 #include <dnd/dtypes/convert_dtype.hpp>
 #include <dnd/memblock/pod_memory_block.hpp>
 #include <dnd/kernels/assignment_kernels.hpp>
+#include <dnd/kernels/buffered_unary_kernels.hpp>
 
 using namespace std;
 using namespace dnd;
@@ -60,17 +62,18 @@ char *dnd::ndarray_node::get_readwrite_originptr() const
     throw std::runtime_error("cannot get a readwrite originptr from an ndarray node which is not strided");
 }
 
-void dnd::ndarray_node::get_nullary_operation(intptr_t, kernel_instance<nullary_operation_t>&) const
-{
-    throw std::runtime_error("get_nullary_operation is only valid for "
-                             "generator nodes which provide an implementation");
-}
-
 void dnd::ndarray_node::get_unary_operation(intptr_t, intptr_t, kernel_instance<unary_operation_t>&) const
 {
     throw std::runtime_error("get_unary_operation is only valid for "
                              "unary nodes which provide an implementation");
 }
+
+void dnd::ndarray_node::get_unary_specialization_operation(unary_specialization_kernel_instance& out_kernel) const
+{
+    throw std::runtime_error("unary_specialization_kernel_instance is only valid for "
+                             "unary nodes which provide an implementation");
+}
+
 
 void dnd::ndarray_node::get_binary_operation(intptr_t, intptr_t, intptr_t, kernel_instance<binary_operation_t>&) const
 {
@@ -260,6 +263,83 @@ static ndarray_node_ptr evaluate_strided_array_expression_dtype(ndarray_node* no
     return DND_MOVE(result);
 }
 
+static void push_front_unary_kernels(ndarray_node* node,
+                    std::deque<unary_specialization_kernel_instance>& out_kernels,
+                    std::deque<intptr_t>& out_element_sizes)
+{
+    const dtype& dt = node->get_dtype();
+
+    switch (node->get_category()) {
+        case strided_array_node_category:
+            // The dtype expression kernels
+            if (dt.kind() == expression_kind) {
+                push_front_dtype_storage_to_value_kernels(dt, out_kernels, out_element_sizes);
+            }
+            break;
+        case elwise_node_category:
+            if (node->get_nop() == 1) {
+                // The dtype expression kernels
+                if (dt.kind() == expression_kind) {
+                    push_front_dtype_storage_to_value_kernels(dt, out_kernels, out_element_sizes);
+                }
+                // The node's kernel
+                out_element_sizes.push_front(dt.storage_dtype().element_size());
+                out_kernels.push_front(unary_specialization_kernel_instance());
+                node->get_unary_specialization_operation(out_kernels.front());
+                // The kernels from the operand
+                push_front_unary_kernels(node->get_opnode(0).get_node(), out_kernels, out_element_sizes);
+                break;
+            } else {
+                stringstream ss;
+                ss << "evaluating this expression graph (which is further connected to a unary node) is not yet supported:\n";
+                node->debug_dump(ss, "");
+                throw runtime_error(ss.str());
+            }
+            break;
+        default: {
+            stringstream ss;
+            ss << "evaluating this expression graph (which is further connected to a unary node) is not yet supported:\n";
+            node->debug_dump(ss, "");
+            throw runtime_error(ss.str());
+        }
+    }
+
+}
+
+static ndarray_node_ptr evaluate_unary_elwise_array(ndarray_node* node, uint32_t access_flags)
+{
+    const ndarray_node_ptr& op = node->get_opnode(0);
+    const dtype& dt = op->get_dtype();
+
+    // Chain the kernels together
+    deque<unary_specialization_kernel_instance> kernels;
+    deque<intptr_t> element_sizes;
+
+    push_front_unary_kernels(node, kernels, element_sizes);
+
+    unary_specialization_kernel_instance kernel;
+    make_buffered_chain_unary_kernel(kernels, element_sizes, kernel);
+
+    ndarray_node_ptr result;
+    raw_ndarray_iter<1,1> iter(node->get_ndim(), node->get_shape(), node->get_dtype().value_dtype(),
+                            result, access_flags, op);
+
+    intptr_t innersize = iter.innersize();
+    intptr_t dst_stride = iter.innerstride<0>();
+    intptr_t src0_stride = iter.innerstride<1>();
+    unary_operation_t operation = kernel.specializations[
+            get_unary_specialization(dst_stride, element_sizes.back(), src0_stride, element_sizes.front())];
+    if (innersize > 0) {
+        do {
+            operation(iter.data<0>(), dst_stride,
+                        iter.data<1>(), src0_stride,
+                        innersize, kernel.auxdata);
+        } while (iter.iternext());
+    }
+
+    return DND_MOVE(result);
+}
+
 ndarray_node_ptr dnd::ndarray_node::eval(bool copy, uint32_t access_flags)
 {
     if ((access_flags&(immutable_access_flag|write_access_flag)) == (immutable_access_flag|write_access_flag)) {
@@ -267,7 +347,7 @@ ndarray_node_ptr dnd::ndarray_node::eval(bool copy, uint32_t access_flags)
     }
 
     switch (get_category()) {
-        case strided_array_node_category: {
+        case strided_array_node_category:
             if (get_dtype().kind() != expression_kind) {
                 if (!copy && (access_flags == 0 || access_flags == get_access_flags() ||
                                 (access_flags == read_access_flag && get_access_flags() == (read_access_flag|immutable_access_flag)))) {
@@ -280,32 +360,11 @@ ndarray_node_ptr dnd::ndarray_node::eval(bool copy, uint32_t access_flags)
             } else {
                 return evaluate_strided_array_expression_dtype(this, copy, access_flags);
             }
-        }
+            break;
         case elwise_node_category: {
             switch (get_nop()) {
-                case 1: {
-                    const ndarray_node_ptr& op1 = get_opnode(0);
-                    if (op1->get_category() == strided_array_node_category) {
-                        ndarray_node_ptr result;
-                        raw_ndarray_iter<1,1> iter(get_ndim(), get_shape(), get_dtype().value_dtype(), result, access_flags, op1);
-
-                        intptr_t innersize = iter.innersize();
-                        intptr_t dst_stride = iter.innerstride<0>();
-                        intptr_t src0_stride = iter.innerstride<1>();
-                        kernel_instance<unary_operation_t> operation;
-                        get_unary_operation(dst_stride, src0_stride, operation);
-                        if (innersize > 0) {
-                            do {
-                                operation.kernel(iter.data<0>(), dst_stride,
-                                            iter.data<1>(), src0_stride,
-                                            innersize, operation.auxdata);
-                            } while (iter.iternext());
-                        }
-
-                        return DND_MOVE(result);
-                    }
-                    break;
-                }
+                case 1:
+                    return evaluate_unary_elwise_array(this, access_flags);
                 case 2: {
                     const ndarray_node_ptr& op1 = get_opnode(0);
                     const ndarray_node_ptr& op2 = get_opnode(1);
@@ -340,11 +399,13 @@ ndarray_node_ptr dnd::ndarray_node::eval(bool copy, uint32_t access_flags)
                 default:
                     break;
             }
-            case arbitrary_node_category:
-                throw std::runtime_error("evaluate is not yet implemented for"
-                             " nodes with an arbitrary_node_category category");
-                break;
         }
+        case elwise_reduce_node_category: {
+            break;
+        }
+        case arbitrary_node_category:
+            throw std::runtime_error("evaluate is not yet implemented for"
+                            " nodes with an arbitrary_node_category category");
     }
 
     debug_dump(cout, "");
@@ -359,6 +420,9 @@ static void print_node_category(ostream& o, ndarray_node_category cat)
             break;
         case elwise_node_category:
             o << "elwise_node_category";
+            break;
+        case elwise_reduce_node_category:
+            o << "elwise_reduce_node_category";
             break;
         case arbitrary_node_category:
             o << "arbitrary_node_category";

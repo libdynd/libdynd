@@ -55,6 +55,11 @@ public:
         rhs.auxdata.clone_into(auxdata);
     }
 
+    void borrow_from(const kernel_instance& rhs) {
+        kernel = rhs.kernel;
+        rhs.auxdata.borrow_into(auxdata);
+    }
+
     FT kernel;
     auxiliary_data auxdata;
 };

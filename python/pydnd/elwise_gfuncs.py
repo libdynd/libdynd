@@ -10,7 +10,6 @@ import elwise_kernels
 
 def add_basic_gfunc(root, types):
     global __all__
-    print "adding gfunc " + root
     f = gfunc.elwise(root)
     globals()[root] = f
     __all__.append(root)

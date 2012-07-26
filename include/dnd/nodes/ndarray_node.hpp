@@ -121,10 +121,9 @@ public:
         throw std::runtime_error("This ndarray_node does not have any operand nodes");
     }
 
-    virtual void get_nullary_operation(intptr_t dst_fixedstride,
-                                    kernel_instance<nullary_operation_t>& out_kernel) const;
     virtual void get_unary_operation(intptr_t dst_fixedstride, intptr_t src_fixedstride,
                                     kernel_instance<unary_operation_t>& out_kernel) const;
+    virtual void get_unary_specialization_operation(unary_specialization_kernel_instance& out_kernel) const;
     virtual void get_binary_operation(intptr_t dst_fixedstride, intptr_t src1_fixedstride,
                                     intptr_t src2_fixedstride,
                                     kernel_instance<binary_operation_t>& out_kernel) const;

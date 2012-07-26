@@ -163,7 +163,7 @@ typedef binary_operation_t specialized_binary_operation_table_t[6];
  * For example, the following creates builtin_addition table as a static variable:
  *   template<class T>
  *   struct addition {
- **       typedef T type;
+ *       typedef T type;
  *       static inline T operate(T x, T y) {
  *           return x + y;
  *       }

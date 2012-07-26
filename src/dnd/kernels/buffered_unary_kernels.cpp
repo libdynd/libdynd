@@ -383,10 +383,10 @@ namespace {
 void dnd::make_buffered_chain_unary_kernel(std::deque<unary_specialization_kernel_instance>& kernels,
                     std::deque<intptr_t>& element_sizes, unary_specialization_kernel_instance& out_kernel)
 {
-    if (kernels.size() != element_sizes.size() + 1) {
+    if (kernels.size() != element_sizes.size() - 1) {
         std::stringstream ss;
         ss << "make_buffered_nchain_unary_kernel: the size of 'kernels' (" << kernels.size()
-            << ") must be one more than 'element_sizes' (" << element_sizes.size() << ")";
+            << ") must be one less than 'element_sizes' (" << element_sizes.size() << ")";
         throw std::runtime_error(ss.str());
     }
 
@@ -417,7 +417,7 @@ void dnd::make_buffered_chain_unary_kernel(std::deque<unary_specialization_kerne
         make_auxiliary_data<buffered_2chain_unary_kernel_auxdata>(out_kernel.auxdata);
         buffered_2chain_unary_kernel_auxdata &auxdata = out_kernel.auxdata.get<buffered_2chain_unary_kernel_auxdata>();
 
-        auxdata.buf.allocate(element_sizes[0]); // TODO: pass buffering data through here
+        auxdata.buf.allocate(element_sizes[1]); // TODO: pass buffering data through here
 
         auxdata.kernels[0].swap(kernels[0]);
         auxdata.kernels[1].swap(kernels[1]);
@@ -428,8 +428,8 @@ void dnd::make_buffered_chain_unary_kernel(std::deque<unary_specialization_kerne
         make_auxiliary_data<buffered_3chain_unary_kernel_auxdata>(out_kernel.auxdata);
         buffered_3chain_unary_kernel_auxdata &auxdata = out_kernel.auxdata.get<buffered_3chain_unary_kernel_auxdata>();
 
-        auxdata.bufs[0].allocate(element_sizes[0]); // TODO: pass buffering data through here
-        auxdata.bufs[1].allocate(element_sizes[1]);
+        auxdata.bufs[0].allocate(element_sizes[1]); // TODO: pass buffering data through here
+        auxdata.bufs[1].allocate(element_sizes[2]);
 
         auxdata.kernels[0].swap(kernels[0]);
         auxdata.kernels[1].swap(kernels[1]);
@@ -440,10 +440,10 @@ void dnd::make_buffered_chain_unary_kernel(std::deque<unary_specialization_kerne
         out_kernel.specializations = optable_nchain;
         make_auxiliary_data<buffered_nchain_unary_kernel_auxdata>(out_kernel.auxdata);
         buffered_nchain_unary_kernel_auxdata &auxdata = out_kernel.auxdata.get<buffered_nchain_unary_kernel_auxdata>();
-        auxdata.init((int)element_sizes.size());
+        auxdata.init((int)kernels.size() - 1);
 
-        for (size_t i = 0; i < element_sizes.size(); ++i) {
-            auxdata.m_bufs[i].allocate(element_sizes[i]); // TODO: pass buffering data through here
+        for (size_t i = 0, i_end = kernels.size()-1; i != i_end; ++i) {
+            auxdata.m_bufs[i].allocate(element_sizes[i+1]); // TODO: pass buffering data through here
         }
 
         for (size_t i = 0; i < kernels.size(); ++i) {
@@ -453,6 +453,7 @@ void dnd::make_buffered_chain_unary_kernel(std::deque<unary_specialization_kerne
         }
     }
 }
+
 void dnd::push_front_dtype_storage_to_value_kernels(const dnd::dtype& dt,
                     std::deque<unary_specialization_kernel_instance>& out_kernels,
                     std::deque<intptr_t>& out_element_sizes)
@@ -461,8 +462,16 @@ void dnd::push_front_dtype_storage_to_value_kernels(const dnd::dtype& dt,
     const dtype* next_dt = &dt.extended()->operand_dtype(dt);
     if (next_dt->kind() != expression_kind) {
         // Special case when there is just one
+        if (out_kernels.empty()) {
+            out_element_sizes.push_front(dt.value_dtype().element_size());
+        }
+        out_element_sizes.push_front(dt.storage_dtype().element_size());
         out_kernels.push_front(dt.extended()->get_operand_to_value_kernel());
     } else {
+        // The final element size, if not yet provided
+        if (out_kernels.empty()) {
+            out_element_sizes.push_front(dt.value_dtype().element_size());
+        }
         do {
             // Add this kernel to the deque
             out_element_sizes.push_front(next_dt->value_dtype().element_size());
@@ -472,6 +481,7 @@ void dnd::push_front_dtype_storage_to_value_kernels(const dnd::dtype& dt,
             next_dt = &front_dt->extended()->operand_dtype(*front_dt);
         } while (next_dt->kind() == expression_kind);
         // Add the final kernel from the source
+        out_element_sizes.push_front(next_dt->element_size());
         out_kernels.push_front(front_dt->extended()->get_operand_to_value_kernel());
     }
 }
@@ -484,8 +494,16 @@ void dnd::push_back_dtype_value_to_storage_kernels(const dnd::dtype& dt,
     const dtype* next_dt = &dt.extended()->operand_dtype(dt);
     if (next_dt->kind() != expression_kind) {
         // Special case when there is just one
+        if (out_kernels.empty()) {
+            out_element_sizes.push_back(dt.value_dtype().element_size());
+        }
+        out_element_sizes.push_back(dt.storage_dtype().element_size());
         out_kernels.push_back(dt.extended()->get_value_to_operand_kernel());
     } else {
+        // The first element size, if not yet provided
+        if (out_kernels.empty()) {
+            out_element_sizes.push_back(dt.value_dtype().element_size());
+        }
         do {
             // Add this kernel to the deque
             out_element_sizes.push_back(next_dt->value_dtype().element_size());
@@ -495,6 +513,7 @@ void dnd::push_back_dtype_value_to_storage_kernels(const dnd::dtype& dt,
             next_dt = &back_dt->extended()->operand_dtype(*back_dt);
         } while (next_dt->kind() == expression_kind);
         // Add the final kernel from the source
+        out_element_sizes.push_back(next_dt->element_size());
         out_kernels.push_back(back_dt->extended()->get_value_to_operand_kernel());
     }
 }
