@@ -6,6 +6,8 @@
 #include <dnd/codegen/codegen_cache.hpp>
 #include <dnd/memblock/executable_memory_block.hpp>
 #include <dnd/codegen/unary_kernel_adapter_codegen.hpp>
+#include <dnd/codegen/binary_kernel_adapter_codegen.hpp>
+#include <dnd/codegen/binary_reduce_kernel_adapter_codegen.hpp>
 #include <dnd/kernels/unary_kernel_instance.hpp>
 
 using namespace std;
@@ -37,6 +39,56 @@ void dnd::codegen_cache::codegen_unary_function_adapter(const dtype& restype,
     ad.exec_memblock = m_exec_memblock;
 }
 
+void dnd::codegen_cache::codegen_binary_function_adapter(const dtype& restype,
+                const dtype& arg0type, const dtype& arg1type,
+                calling_convention_t callconv,
+                void *function_pointer,
+                kernel_instance<binary_operation_t>& out_kernel)
+{
+    // Retrieve a binary function adapter from the cache
+    uint64_t unique_id = get_binary_function_adapter_unique_id(restype, arg0type, arg1type, callconv);
+    map<uint64_t, binary_operation_t>::iterator it = m_cached_binary_kernel_adapters.find(unique_id);
+    if (it == m_cached_binary_kernel_adapters.end()) {
+        binary_operation_t op = ::codegen_binary_function_adapter(m_exec_memblock, restype, arg0type, arg1type, callconv);
+        it = m_cached_binary_kernel_adapters.insert(std::pair<uint64_t, binary_operation_t>(unique_id, op)).first;
+    }
+    // Set the kernel function and create auxiliary data in the output
+    out_kernel.kernel = it->second;
+    make_auxiliary_data<binary_function_adapter_auxdata>(out_kernel.auxdata);
+    binary_function_adapter_auxdata& ad = out_kernel.auxdata.get<binary_function_adapter_auxdata>();
+    // Populate the auxiliary data
+    ad.function_pointer = function_pointer;
+    ad.exec_memblock = m_exec_memblock;
+}
+
+void dnd::codegen_cache::codegen_left_associative_binary_reduce_function_adapter(
+                const dtype& reduce_type,calling_convention_t callconv,
+                void *function_pointer,
+                kernel_instance<unary_operation_t>& out_kernel)
+{
+    // These kernels are generated with templates instead of runtime
+    // codegen, so no caching is needed
+    out_kernel.kernel = ::codegen_left_associative_binary_reduce_function_adapter(reduce_type, callconv);
+    make_auxiliary_data<binary_reduce_function_adapter_auxdata>(out_kernel.auxdata);
+    binary_reduce_function_adapter_auxdata& ad = out_kernel.auxdata.get<binary_reduce_function_adapter_auxdata>();
+    // Populate the auxiliary data
+    ad.function_pointer = function_pointer;
+}
+
+void dnd::codegen_cache::codegen_right_associative_binary_reduce_function_adapter(
+                const dtype& reduce_type,calling_convention_t callconv,
+                void *function_pointer,
+                kernel_instance<unary_operation_t>& out_kernel)
+{
+    // These kernels are generated with templates instead of runtime
+    // codegen, so no caching is needed
+    out_kernel.kernel = ::codegen_right_associative_binary_reduce_function_adapter(reduce_type, callconv);
+    make_auxiliary_data<binary_reduce_function_adapter_auxdata>(out_kernel.auxdata);
+    binary_reduce_function_adapter_auxdata& ad = out_kernel.auxdata.get<binary_reduce_function_adapter_auxdata>();
+    // Populate the auxiliary data
+    ad.function_pointer = function_pointer;
+}
+
 void dnd::codegen_cache::debug_dump(std::ostream& o, const std::string& indent) const
 {
     o << indent << "------ codegen_cache\n";
@@ -49,6 +101,13 @@ void dnd::codegen_cache::debug_dump(std::ostream& o, const std::string& indent) 
             o << (void *)i->second[j] << " ";
         }
         o << "\n";
+    }
+
+    o << indent << " cached binary_kernel_adapters:\n";
+    for (map<uint64_t, binary_operation_t>::const_iterator i = m_cached_binary_kernel_adapters.begin(),
+                i_end = m_cached_binary_kernel_adapters.end(); i != i_end; ++i) {
+        o << indent << "  unique id: " << get_binary_function_adapter_unique_id_string(i->first) << "\n";
+        o << indent << "  function ptr: " << (void *)i->second << "\n";
     }
 
     o << indent << " executable memory block:\n";

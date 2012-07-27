@@ -23,8 +23,7 @@ memory_block_ptr make_fixed_size_pod_memory_block(intptr_t size_bytes, intptr_t 
  * Creates a memory block of a pre-determined fixed size. A pointer to the
  * memory allocated for data is placed in the output parameter.
  *
- * The resulting memory block takes over the references in the provided blockref array, all the
- * references are moved out of that array.
+ * The resulting memory block creates new references to the blockrefs provided
  */
 memory_block_ptr make_fixed_size_pod_memory_block(intptr_t size_bytes, intptr_t alignment, char **out_datapointer,
                 memory_block_ptr *blockrefs_begin, memory_block_ptr *blockrefs_end);

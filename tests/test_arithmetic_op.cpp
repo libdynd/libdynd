@@ -162,65 +162,65 @@ TEST(ArithmeticOp, Buffered) {
 
     // Basic case with no buffering
     a = ndarray(2) * ndarray(3);
-    EXPECT_EQ(elementwise_node_category, a.get_expr_tree()->get_category());
-    EXPECT_EQ(make_dtype<int>(), a.get_expr_tree()->get_dtype());
-    EXPECT_EQ(make_dtype<int>(), a.get_expr_tree()->get_opnode(0)->get_dtype());
-    EXPECT_EQ(make_dtype<int>(), a.get_expr_tree()->get_opnode(1)->get_dtype());
+    EXPECT_EQ(elwise_node_category, a.get_node()->get_category());
+    EXPECT_EQ(make_dtype<int>(), a.get_node()->get_dtype());
+    EXPECT_EQ(make_dtype<int>(), a.get_node()->get_opnode(0)->get_dtype());
+    EXPECT_EQ(make_dtype<int>(), a.get_node()->get_opnode(1)->get_dtype());
     EXPECT_EQ(6, a.as<int>());
 
     // Buffering the first operand
     a = ndarray(2) * ndarray(3.f);
-    EXPECT_EQ(elementwise_node_category, a.get_expr_tree()->get_category());
-    EXPECT_EQ(make_dtype<float>(), a.get_expr_tree()->get_dtype());
-    EXPECT_EQ((make_convert_dtype<float, int>()), a.get_expr_tree()->get_opnode(0)->get_dtype());
-    EXPECT_EQ(make_dtype<float>(), a.get_expr_tree()->get_opnode(1)->get_dtype());
+    EXPECT_EQ(elwise_node_category, a.get_node()->get_category());
+    EXPECT_EQ(make_dtype<float>(), a.get_node()->get_dtype());
+    EXPECT_EQ((make_convert_dtype<float, int>()), a.get_node()->get_opnode(0)->get_dtype());
+    EXPECT_EQ(make_dtype<float>(), a.get_node()->get_opnode(1)->get_dtype());
     EXPECT_EQ(6, a.as<float>());
 
     // Buffering the second operand
     a = ndarray(2.) * ndarray(3);
-    EXPECT_EQ(elementwise_node_category, a.get_expr_tree()->get_category());
-    EXPECT_EQ(make_dtype<double>(), a.get_expr_tree()->get_dtype());
-    EXPECT_EQ(make_dtype<double>(), a.get_expr_tree()->get_opnode(0)->get_dtype());
-    EXPECT_EQ((make_convert_dtype<double, int>()), a.get_expr_tree()->get_opnode(1)->get_dtype());
+    EXPECT_EQ(elwise_node_category, a.get_node()->get_category());
+    EXPECT_EQ(make_dtype<double>(), a.get_node()->get_dtype());
+    EXPECT_EQ(make_dtype<double>(), a.get_node()->get_opnode(0)->get_dtype());
+    EXPECT_EQ((make_convert_dtype<double, int>()), a.get_node()->get_opnode(1)->get_dtype());
     EXPECT_EQ(6, a.as<float>());
 
     // Buffering the output
     a = (ndarray(2) * ndarray(3)).as_dtype<float>();
-    EXPECT_EQ(elementwise_node_category, a.get_expr_tree()->get_category());
-    EXPECT_EQ((make_convert_dtype<float, int>()), a.get_expr_tree()->get_dtype());
-    EXPECT_EQ(make_dtype<int>(), a.get_expr_tree()->get_opnode(0)->get_dtype());
-    EXPECT_EQ(make_dtype<int>(), a.get_expr_tree()->get_opnode(1)->get_dtype());
+    EXPECT_EQ(elwise_node_category, a.get_node()->get_category());
+    EXPECT_EQ((make_convert_dtype<float, int>()), a.get_node()->get_dtype());
+    EXPECT_EQ(make_dtype<int>(), a.get_node()->get_opnode(0)->get_dtype());
+    EXPECT_EQ(make_dtype<int>(), a.get_node()->get_opnode(1)->get_dtype());
     EXPECT_EQ(6, a.as<float>());
 
     // Buffering both operands
     a = ndarray(2) * ndarray(3u).as_dtype<float>();
-    EXPECT_EQ(elementwise_node_category, a.get_expr_tree()->get_category());
-    EXPECT_EQ(make_dtype<float>(), a.get_expr_tree()->get_dtype());
-    EXPECT_EQ((make_convert_dtype<float, int>()), a.get_expr_tree()->get_opnode(0)->get_dtype());
-    EXPECT_EQ((make_convert_dtype<float, unsigned int>()), a.get_expr_tree()->get_opnode(1)->get_dtype());
+    EXPECT_EQ(elwise_node_category, a.get_node()->get_category());
+    EXPECT_EQ(make_dtype<float>(), a.get_node()->get_dtype());
+    EXPECT_EQ((make_convert_dtype<float, int>()), a.get_node()->get_opnode(0)->get_dtype());
+    EXPECT_EQ((make_convert_dtype<float, unsigned int>()), a.get_node()->get_opnode(1)->get_dtype());
     EXPECT_EQ(6, a.as<float>());
 
     // Buffering the first operand and the output
     a = (ndarray(2) * ndarray(3.f)).as_dtype<double>();
-    EXPECT_EQ(elementwise_node_category, a.get_expr_tree()->get_category());
-    EXPECT_EQ((make_convert_dtype<double, float>()), a.get_expr_tree()->get_dtype());
-    EXPECT_EQ((make_convert_dtype<float, int>()), a.get_expr_tree()->get_opnode(0)->get_dtype());
-    EXPECT_EQ(make_dtype<float>(), a.get_expr_tree()->get_opnode(1)->get_dtype());
+    EXPECT_EQ(elwise_node_category, a.get_node()->get_category());
+    EXPECT_EQ((make_convert_dtype<double, float>()), a.get_node()->get_dtype());
+    EXPECT_EQ((make_convert_dtype<float, int>()), a.get_node()->get_opnode(0)->get_dtype());
+    EXPECT_EQ(make_dtype<float>(), a.get_node()->get_opnode(1)->get_dtype());
     EXPECT_EQ(6, a.as<double>());
 
     // Buffering the second operand and the output
     a = (ndarray(2.f) * ndarray(3)).as_dtype<double>();
-    EXPECT_EQ(elementwise_node_category, a.get_expr_tree()->get_category());
-    EXPECT_EQ((make_convert_dtype<double, float>()), a.get_expr_tree()->get_dtype());
-    EXPECT_EQ(make_dtype<float>(), a.get_expr_tree()->get_opnode(0)->get_dtype());
-    EXPECT_EQ((make_convert_dtype<float, int>()), a.get_expr_tree()->get_opnode(1)->get_dtype());
+    EXPECT_EQ(elwise_node_category, a.get_node()->get_category());
+    EXPECT_EQ((make_convert_dtype<double, float>()), a.get_node()->get_dtype());
+    EXPECT_EQ(make_dtype<float>(), a.get_node()->get_opnode(0)->get_dtype());
+    EXPECT_EQ((make_convert_dtype<float, int>()), a.get_node()->get_opnode(1)->get_dtype());
     EXPECT_EQ(6, a.as<double>());
 
     // Buffering both operands and the output
     a = (ndarray(2) * ndarray(3u).as_dtype<float>()).as_dtype<double>();
-    EXPECT_EQ(elementwise_node_category, a.get_expr_tree()->get_category());
-    EXPECT_EQ((make_convert_dtype<double, float>()), a.get_expr_tree()->get_dtype());
-    EXPECT_EQ((make_convert_dtype<float, int>()), a.get_expr_tree()->get_opnode(0)->get_dtype());
-    EXPECT_EQ((make_convert_dtype<float, unsigned int>()), a.get_expr_tree()->get_opnode(1)->get_dtype());
+    EXPECT_EQ(elwise_node_category, a.get_node()->get_category());
+    EXPECT_EQ((make_convert_dtype<double, float>()), a.get_node()->get_dtype());
+    EXPECT_EQ((make_convert_dtype<float, int>()), a.get_node()->get_opnode(0)->get_dtype());
+    EXPECT_EQ((make_convert_dtype<float, unsigned int>()), a.get_node()->get_opnode(1)->get_dtype());
     EXPECT_EQ(6, a.as<double>());
 }

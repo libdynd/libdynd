@@ -35,7 +35,9 @@ enum ndarray_node_category {
     // The node points a simple strided array in memory
     strided_array_node_category,
     // The node represents an elementwise nop() to 1 transformation
-    elementwise_node_category,
+    elwise_node_category,
+    // The node represents an elementwise reduction 1 to 1 transformation
+    elwise_reduce_node_category,
     // The node represents an arbitrary computation node, which will generally
     // require evaluation to a temporary.
     arbitrary_node_category
@@ -119,10 +121,9 @@ public:
         throw std::runtime_error("This ndarray_node does not have any operand nodes");
     }
 
-    virtual void get_nullary_operation(intptr_t dst_fixedstride,
-                                    kernel_instance<nullary_operation_t>& out_kernel) const;
     virtual void get_unary_operation(intptr_t dst_fixedstride, intptr_t src_fixedstride,
                                     kernel_instance<unary_operation_t>& out_kernel) const;
+    virtual void get_unary_specialization_operation(unary_specialization_kernel_instance& out_kernel) const;
     virtual void get_binary_operation(intptr_t dst_fixedstride, intptr_t src1_fixedstride,
                                     intptr_t src2_fixedstride,
                                     kernel_instance<binary_operation_t>& out_kernel) const;
@@ -130,14 +131,17 @@ public:
     /**
      * Evaluates the node into a strided array with a dtype that is
      * not expression_kind.
+     *
+     * @param copy  If set to true, always makes a copy of the data
+     * @param access_flags  The requested access flags for the result, or 0 if anything is ok.
      */
-    ndarray_node_ptr evaluate();
+    ndarray_node_ptr eval(bool copy = false, uint32_t access_flags = 0);
 
     /**
      * Converts this node to a new dtype. This uses a convert_dtype.
      */
     virtual ndarray_node_ptr as_dtype(const dtype& dt,
-                        assign_error_mode errmode, bool allow_in_place) = 0;
+                        assign_error_mode errmode = assign_error_default, bool allow_in_place = false) = 0;
 
     /**
      * Applies a linear index to the node, returning either the current node (for do-nothing
@@ -163,7 +167,7 @@ public:
                     bool allow_in_place) = 0;
 
     /** Debug printing of the tree */
-    void debug_dump(std::ostream& o, const std::string& indent) const;
+    void debug_dump(std::ostream& o, const std::string& indent = "") const;
     /** Debug printing of the data from the derived class */
     virtual void debug_dump_extra(std::ostream& o, const std::string& indent) const;
 
@@ -226,6 +230,11 @@ public:
 
     void swap(ndarray_node_ptr& rhs) {
         static_cast<memory_block_ptr *>(this)->swap(static_cast<memory_block_ptr&>(rhs));
+    }
+
+    /** Method to get a pointer to the raw node object */
+    ndarray_node *get_node() const {
+        return reinterpret_cast<ndarray_node *>(reinterpret_cast<char *>(get()) + sizeof(memory_block_data));
     }
 
     /** This object behaves like an ndarray_node pointer */

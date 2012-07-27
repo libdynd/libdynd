@@ -42,6 +42,8 @@ cdef extern from "dnd/ndarray.hpp" namespace "dnd":
         void val_assign(ndarray&, assign_error_mode) except +
         void val_assign(dtype&, char*, assign_error_mode) except +
 
+        ndarray eval_immutable() except +
+
         ndarray storage() except +
 
         ndarray as_dtype(dtype&, assign_error_mode) except +
@@ -58,7 +60,8 @@ cdef extern from "ndarray_functions.hpp" namespace "pydnd":
     string ndarray_debug_dump(ndarray&) except +
 
     void ndarray_init_from_pyobject(ndarray&, object obj) except +
-    ndarray ndarray_vals(ndarray& n) except +
+    ndarray ndarray_vals(ndarray&) except +
+    ndarray ndarray_eval_copy(ndarray&, object) except +
 
     ndarray ndarray_add(ndarray&, ndarray&) except +
     ndarray ndarray_subtract(ndarray&, ndarray&) except +

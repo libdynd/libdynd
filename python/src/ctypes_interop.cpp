@@ -3,6 +3,9 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
+#include <dnd/dtypes/fixedstring_dtype.hpp>
+#include <dnd/dtypes/pointer_dtype.hpp>
+
 #include "ctypes_interop.hpp"
 #include "dtype_functions.hpp"
 #include "utility_functions.hpp"
@@ -159,8 +162,8 @@ dnd::dtype pydnd::dtype_from_ctypes_cdatatype(PyObject *d)
                 return make_dtype<int8_t>();
             case 'B':
                 return make_dtype<uint8_t>();
-            case 'c': // TODO: make this a fixed sized string of size 1 instead of a number
-                return make_dtype<char>();
+            case 'c':
+                return make_fixedstring_dtype(string_encoding_ascii, 1);
             case 'd':
                 return make_dtype<double>();
             case 'f':
@@ -187,6 +190,11 @@ dnd::dtype pydnd::dtype_from_ctypes_cdatatype(PyObject *d)
                 throw runtime_error(ss.str());
             }
         }
+    } else if (PyObject_IsSubclass(d, ctypes.PyCPointerType_Type)) {
+        // Translate into a blockref pointer dtype
+        pyobject_ownref target_dtype_obj(PyObject_GetAttrString(d, "_type_"));
+        dtype target_dtype = dtype_from_ctypes_cdatatype(target_dtype_obj);
+        return make_pointer_dtype(target_dtype);
     }
 
     throw runtime_error("Ctypes type object is not supported by dnd::dtype");

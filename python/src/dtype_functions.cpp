@@ -10,6 +10,7 @@
 
 #include <dnd/dtypes/fixedstring_dtype.hpp>
 #include <dnd/dtypes/string_dtype.hpp>
+#include <dnd/dtypes/pointer_dtype.hpp>
 
 using namespace std;
 using namespace dnd;
@@ -178,4 +179,9 @@ dnd::dtype pydnd::dnd_make_string_dtype(PyObject *encoding_obj)
     string_encoding_t encoding = encoding_from_pyobject(encoding_obj);
 
     return make_string_dtype(encoding);
+}
+
+dnd::dtype pydnd::dnd_make_pointer_dtype(const dtype& target_dtype)
+{
+    return make_pointer_dtype(target_dtype);
 }

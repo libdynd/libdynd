@@ -192,9 +192,11 @@ function( compile_pyx _name generated_file )
     set( no_docstrings_arg "--no-docstrings" )
   endif()
 
-  if( "${CMAKE_BUILD_TYPE}" STREQUAL "Debug" OR
-        "${CMAKE_BUILD_TYPE}" STREQUAL "RelWithDebInfo" )
-      set( cython_debug_arg "--gdb" )
+  if(NOT WIN32)
+      if( "${CMAKE_BUILD_TYPE}" STREQUAL "Debug" OR
+            "${CMAKE_BUILD_TYPE}" STREQUAL "RelWithDebInfo" )
+          set( cython_debug_arg "--gdb" )
+      endif()
   endif()
 
   # Include directory arguments. 

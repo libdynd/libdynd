@@ -11,83 +11,45 @@
 using namespace std;
 using namespace dnd;
 
+static unsigned int get_arg_id_from_type_id(unsigned int type_id)
+{
+    switch (type_id) {
+        case bool_type_id:
+        case int8_type_id:
+        case uint8_type_id:
+            return 0;
+        case int16_type_id:
+        case uint16_type_id:
+            return 1;
+        case int32_type_id:
+        case uint32_type_id:
+            return 2;
+        case int64_type_id:
+        case uint64_type_id:
+            return 3;
+        case float32_type_id:
+            return 4;
+        case float64_type_id:
+            return 5;
+        default: {
+            stringstream ss;
+            ss << "The unary_kernel_adapter does not support " << dtype(type_id) << " for the return type";
+            throw runtime_error(ss.str());
+        }
+    }
+}
+
 uint64_t dnd::get_unary_function_adapter_unique_id(const dtype& restype,
                     const dtype& arg0type, calling_convention_t DND_UNUSED(callconv))
 {
-    uint64_t result = 0;
+    // Bits 0..2 for the result type
+    uint64_t result = get_arg_id_from_type_id(restype.type_id());
+
+    // Bits 3..5 for the arg0 type
+    result += get_arg_id_from_type_id(arg0type.type_id()) << 3;
 
     // There is only one calling convention on Windows x64, so it doesn't
     // need to get encoded in the unique id.
-
-    // Bits 0..3 for the result type
-    switch (restype.type_id()) {
-        case bool_type_id:
-        case int8_type_id:
-        case uint8_type_id:
-            result += 0;
-            break;
-        case int16_type_id:
-        case uint16_type_id:
-            result += 1;
-            break;
-        case int32_type_id:
-        case uint32_type_id:
-            result += 2;
-            break;
-        case int64_type_id:
-        case uint64_type_id:
-            result += 3;
-            break;
-        case float32_type_id:
-            result += 4;
-            break;
-        case float64_type_id:
-            result += 5;
-            break;
-        default: {
-            stringstream ss;
-            ss << "The unary_kernel_adapter does not support " << restype << " for the return type";
-            throw runtime_error(ss.str());
-        }
-    }
-
-    // Bits 4..7 for the arg0 type
-    switch (arg0type.type_id()) {
-        case bool_type_id:
-        case int8_type_id:
-        case uint8_type_id:
-            result += 0 << 4;
-            break;
-        case int16_type_id:
-        case uint16_type_id:
-            result += 1 << 4;
-            break;
-        case int32_type_id:
-        case uint32_type_id:
-            result += 2 << 4;
-            break;
-        case int64_type_id:
-        case uint64_type_id:
-            result += 3 << 4;
-            break;
-        case float32_type_id:
-            result += 4 << 4;
-            break;
-        case float64_type_id:
-            result += 5 << 4;
-            break;
-        case complex_float32_type_id:
-            result += 6 << 4;
-            break;
-        case complex_float64_type_id:
-            result += 7 << 4;
-            break;
-        default: {
-            stringstream ss;
-            ss << "The unary_kernel_adapter does not support " << arg0type << " for the argument type";
-            throw runtime_error(ss.str());
-        }
-    }
 
     return result;
 }
@@ -95,11 +57,9 @@ uint64_t dnd::get_unary_function_adapter_unique_id(const dtype& restype,
 std::string dnd::get_unary_function_adapter_unique_id_string(uint64_t unique_id)
 {
     stringstream ss;
-    static char *ret_types[16] = {"int8", "int16", "int32", "int64", "float32", "float64"};
-    static char *arg0_types[16] = {"int8", "int16", "int32", "int64", "float32", "float64",
-                    "complex<float32>", "complex<float64>"};
-    ss << ret_types[unique_id & 0x0f] << " (";
-    ss << arg0_types[(unique_id & 0xf0) >> 4] << ")";
+    static char *arg_types[8] = {"int8", "int16", "int32", "int64", "float32", "float64", "(invalid)", "(invalid)"};
+    ss << arg_types[unique_id & 0x07] << " (";
+    ss << arg_types[(unique_id & (0x07 << 3)) >> 3] << ")";
     return ss.str();
 }
 
@@ -114,20 +74,20 @@ unary_operation_t* dnd::codegen_unary_function_adapter(const memory_block_ptr& e
             0x0a, // Count of unwind codes (10, means 20 bytes)
             0x00, // Frame register (0 means not used)
             // Unwind code: finished at offset 0x18, operation code 4 (UWOP_SAVE_NONVOL),
-            // register number 6 (RSI), stored at [RSP+0x60] (8 * 0x000c)
+            // register number 6 (RSI), stored at [RSP+0x50] (8 * 0x000a)
             0x18, 0x64,
-            0x0c, 0x00,
-            // Unwind code: finished at offset 0x18, operation code 4 (UWOP_SAVE_NONVOL),
-            // register number 5 (RBP), stored at [RSP+0x58] (8 * 0x000b)
-            0x18, 0x54,
-            0x0b, 0x00,
-            // Unwind code: finished at offset 0x18, operation code 4 (UWOP_SAVE_NONVOL),
-            // register number 3 (RBX), stored at [RSP+0x50] (8 * 0x000a)
-            0x18, 0x34,
             0x0a, 0x00,
+            // Unwind code: finished at offset 0x18, operation code 4 (UWOP_SAVE_NONVOL),
+            // register number 5 (RBP), stored at [RSP+0x48] (8 * 0x0009)
+            0x18, 0x54,
+            0x09, 0x00,
+            // Unwind code: finished at offset 0x18, operation code 4 (UWOP_SAVE_NONVOL),
+            // register number 3 (RBX), stored at [RSP+0x40] (8 * 0x0008)
+            0x18, 0x34,
+            0x08, 0x00,
             // Unwind code: finished at offset 0x18, operation code 2 (UWOP_ALLOC_SMALL),
-            // allocation size 0x30 = 5 * 8 + 8
-            0x18, 0x52,
+            // allocation size 0x20 = 3 * 8 + 8
+            0x18, 0x32,
             // Unwind code: finished at offset 0x14, operation code 0 (UWOP_PUSH_NONVOL),
             // register number 0xD = 13 (R13)
             0x14, 0xd0,
@@ -139,17 +99,17 @@ unary_operation_t* dnd::codegen_unary_function_adapter(const memory_block_ptr& e
             0x10, 0x70
         };
     static unsigned char prolog[] = {
-            0x48, 0x89, 0x5c, 0x24, 0x08,   // mov     QWORD PTR [rsp+8], rbx
-            0x48, 0x89, 0x6c, 0x24, 0x10,   // mov     QWORD PTR [rsp+16], rbp
-            0x48, 0x89, 0x74, 0x24, 0x18,   // mov     QWORD PTR [rsp+24], rsi
+            0x48, 0x89, 0x5c, 0x24, 0x08,   // mov     QWORD PTR [rsp+0x08], rbx
+            0x48, 0x89, 0x6c, 0x24, 0x10,   // mov     QWORD PTR [rsp+0x10], rbp
+            0x48, 0x89, 0x74, 0x24, 0x18,   // mov     QWORD PTR [rsp+0x18], rsi
             0x57,                           // push    rdi
             0x41, 0x54,                     // push    r12
             0x41, 0x55,                     // push    r13
-            0x48, 0x83, 0xec, 0x30          // sub     rsp, 48
+            0x48, 0x83, 0xec, 0x20          // sub     rsp, 0x20
         };
     static unsigned char loop_setup[] = {
-            0x48, 0x8b, 0x44, 0x24, 0x78,   // mov rax, QWORD PTR auxdata$[rsp]     ; AUXDATA: get arg
-            0x48, 0x8b, 0x74, 0x24, 0x70,   // mov     rsi, QWORD PTR count$[rsp]
+            0x48, 0x8b, 0x44, 0x24, 0x68,   // mov     rax, QWORD PTR auxdata$[rsp] ; AUXDATA: get arg
+            0x48, 0x8b, 0x74, 0x24, 0x60,   // mov     rsi, QWORD PTR count$[rsp]
             0x4d, 0x8b, 0xe1,               // mov     r12, r9
             0x48, 0x83, 0xe0, 0xfe,         // and     rax, -2                      ; AUXDATA: Remove "borrowed" bit
             0x49, 0x8b, 0xd8,               // mov     rbx, r8
@@ -178,14 +138,6 @@ unary_operation_t* dnd::codegen_unary_function_adapter(const memory_block_ptr& e
         };
     static unsigned char arg0_get_float64[] = {
             0xf2, 0x0f, 0x10, 0x03          // movsdx  xmm0, QWORD PTR [rbx]
-        };
-    static unsigned char arg0_get_complex_float32[] = {
-            0x48, 0x8b, 0x0b                // mov     rcx, QWORD PTR [rbx]
-        };
-    static unsigned char arg0_get_complex_float64[] = {
-            0x0f, 0x10, 0x03,               // movups  xmm0, XMMWORD PTR [rbx]
-            0x48, 0x8d, 0x4c, 0x24, 0x20,   // lea     rcx, QWORD PTR $stack_temporary[rsp]
-            0x0f, 0x29, 0x44, 0x24, 0x20    // movaps  XMMWORD PTR $stack_temporary[rsp], xmm0
         };
 
     // End ARG0 CHOICE ]]
@@ -220,10 +172,10 @@ unary_operation_t* dnd::codegen_unary_function_adapter(const memory_block_ptr& e
         };
     // skip_loop:
     static unsigned char epilog[] = {
-            0x48, 0x8b, 0x5c, 0x24, 0x50,   // mov     rbx, QWORD PTR [rsp+80]
-            0x48, 0x8b, 0x6c, 0x24, 0x58,   // mov     rbp, QWORD PTR [rsp+88]
-            0x48, 0x8b, 0x74, 0x24, 0x60,   // mov     rsi, QWORD PTR [rsp+96]
-            0x48, 0x83, 0xc4, 0x30,         // add     rsp, 48
+            0x48, 0x8b, 0x5c, 0x24, 0x40,   // mov     rbx, QWORD PTR [rsp+0x40]
+            0x48, 0x8b, 0x6c, 0x24, 0x48,   // mov     rbp, QWORD PTR [rsp+0x48]
+            0x48, 0x8b, 0x74, 0x24, 0x50,   // mov     rsi, QWORD PTR [rsp+0x50]
+            0x48, 0x83, 0xc4, 0x20,         // add     rsp, 0x20
             0x41, 0x5d,                     // pop     r13
             0x41, 0x5c,                     // pop     r12
             0x5f,                           // pop     rdi
@@ -232,26 +184,13 @@ unary_operation_t* dnd::codegen_unary_function_adapter(const memory_block_ptr& e
 
     // Allocate enough memory for all the variations.
     intptr_t alloc_size = sizeof(unwind_info) + sizeof(prolog) + sizeof(loop_setup) +
-                        sizeof(function_call) + sizeof(loop_finish) + sizeof(epilog) + 64;
+                        sizeof(function_call) + sizeof(loop_finish) + sizeof(epilog) + 96;
     char *code_begin, *code_current, *code_end;
     allocate_executable_memory(exec_memblock.get(), alloc_size, 16, &code_begin, &code_end);
     code_current = code_begin;
 
     char *loop_skip_fixup, *loop_continue_fixup;
-    char *loop_start_label, *loop_end_label;
-
-    // The UNWIND_INFO structure
-    memcpy(code_current, unwind_info, sizeof(unwind_info));
-    code_current += sizeof(unwind_info);
-
-    // The four unary_specialization_t pointers, all point to the same function
-    // because we don't specialize presently.
-    char **specializations = reinterpret_cast<char **>(code_current);
-    specializations[0] = code_begin + sizeof(unwind_info) + 4 * sizeof(char *);
-    specializations[1] = code_begin + sizeof(unwind_info) + 4 * sizeof(char *);
-    specializations[2] = code_begin + sizeof(unwind_info) + 4 * sizeof(char *);
-    specializations[3] = code_begin + sizeof(unwind_info) + 4 * sizeof(char *);
-    code_current += 4 * sizeof(char *);
+    char *loop_start_label, *loop_skip_label;
 
     // The function prolog
     memcpy(code_current, prolog, sizeof(prolog));
@@ -294,14 +233,6 @@ unary_operation_t* dnd::codegen_unary_function_adapter(const memory_block_ptr& e
         case float64_type_id:
             memcpy(code_current, arg0_get_float64, sizeof(arg0_get_float64));
             code_current += sizeof(arg0_get_float64);
-            break;
-        case complex_float32_type_id:
-            memcpy(code_current, arg0_get_complex_float32, sizeof(arg0_get_complex_float32));
-            code_current += sizeof(arg0_get_complex_float32);
-            break;
-        case complex_float64_type_id:
-            memcpy(code_current, arg0_get_complex_float64, sizeof(arg0_get_complex_float64));
-            code_current += sizeof(arg0_get_complex_float64);
             break;
         default: {
             // Get rid of what we allocated and raise an error
@@ -361,25 +292,43 @@ unary_operation_t* dnd::codegen_unary_function_adapter(const memory_block_ptr& e
     code_current += sizeof(loop_finish);
 
     loop_continue_fixup = code_current - 1;
-    loop_end_label = code_current;
+    loop_skip_label = code_current;
 
     // The function epilog
     memcpy(code_current, epilog, sizeof(epilog));
     code_current += sizeof(epilog);
 
+    char *code_function_end = code_current;
+
     // Apply fixups to the conditional jumps
-    *loop_skip_fixup = static_cast<char>(loop_end_label - loop_start_label);
-    *loop_continue_fixup = static_cast<char>(loop_start_label - loop_end_label);
+    *loop_skip_fixup = static_cast<char>(loop_skip_label - (loop_skip_fixup + 1));
+    *loop_continue_fixup = static_cast<char>(loop_start_label - (loop_continue_fixup + 1));
+
+    // The UNWIND_INFO structure, aligned to 2 bytes
+    code_current = (char *)(((uintptr_t)code_current + 0x1)&(-2));
+    char *code_unwind_info = code_current;
+    memcpy(code_current, unwind_info, sizeof(unwind_info));
+    code_current += sizeof(unwind_info);
+
+    // The four unary_specialization_t pointers, all point to the same function
+    // because we don't specialize presently.
+    code_current = (char *)(((uintptr_t)code_current + (sizeof(char *) - 1))&(-sizeof(char *)));
+    char **specializations = reinterpret_cast<char **>(code_current);
+    specializations[0] = code_begin;
+    specializations[1] = code_begin;
+    specializations[2] = code_begin;
+    specializations[3] = code_begin;
+    code_current += 4 * sizeof(char *);
 
     // Shrink the allocation to just what we needed
     resize_executable_memory(exec_memblock.get(), code_current - code_begin, &code_begin, &code_end);
 
     // Register the stack info so exceptions can unwind through the call
     set_executable_memory_runtime_function(exec_memblock.get(),
-                    code_begin + sizeof(unwind_info) + 4 * sizeof(char *),
-                    code_current, code_begin);
+                    code_begin,
+                    code_function_end, code_unwind_info);
 
-    return reinterpret_cast<unary_operation_t *>(code_begin + sizeof(unwind_info));
+    return reinterpret_cast<unary_operation_t *>(specializations);
 }
 
 #endif // defined(_WIN32) && defined(_M_X64)

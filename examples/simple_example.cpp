@@ -32,44 +32,57 @@ S double_value(T value) {
 int main()
 {
     try {
-    codegen_cache cgcache;
-    unary_specialization_kernel_instance op_int_float, op_float_float, op_float_double;
-    cgcache.codegen_unary_function_adapter(make_dtype<int>(), make_dtype<float>(), cdecl_callconv,
-                    (int (*)(float))&double_value<int, float>, op_int_float);
-    cgcache.codegen_unary_function_adapter(make_dtype<float>(), make_dtype<float>(), cdecl_callconv,
-                    (float (*)(float))&double_value<float, float>, op_float_float);
-    cgcache.codegen_unary_function_adapter(make_dtype<float>(), make_dtype<double>(), cdecl_callconv,
-                    (float (*)(double))&double_value<float, double>, op_float_double);
+    float v0[5] = {3.5f, 1.3f, -2.4999f, -2.999, 1000.50001f};
+    ndarray a = v0, b;
 
-    int int_vals[3];
-    float float_vals[3];
-    double double_vals[3];
+    b = a.as_dtype<int>(assign_error_overflow);
+    b = b.as_dtype<float>(assign_error_inexact);
+    // Multiple as_dtype operations should make a chained conversion dtype
+    EXPECT_EQ(make_convert_dtype(make_dtype<float>(),
+                                    make_convert_dtype<int, float>(assign_error_overflow), assign_error_inexact),
+              b.get_dtype());
 
-    float_vals[0] = 1.f;
-    float_vals[1] = 2.5f;
-    float_vals[2] = 3.25f;
-    op_int_float.specializations[0]((char *)int_vals, sizeof(int), (char *)float_vals, sizeof(float), 3,
-                    op_int_float.auxdata);
-    EXPECT_EQ(2, int_vals[0]);
-    EXPECT_EQ(5, int_vals[1]);
-    EXPECT_EQ(6, int_vals[2]);
+    // Evaluating the values should truncate them to integers
+    b = b.vals();
+    // Now it's just the value dtype, no chaining
+    EXPECT_EQ(make_dtype<float>(), b.get_dtype());
+    EXPECT_EQ(3, b(0).as<float>());
+    EXPECT_EQ(1, b(1).as<float>());
+    EXPECT_EQ(-2, b(2).as<float>());
+    EXPECT_EQ(-2, b(3).as<float>());
+    EXPECT_EQ(1000, b(4).as<float>());
 
-    op_float_float.specializations[0]((char *)float_vals, sizeof(float), (char *)float_vals, sizeof(float), 3,
-                    op_float_float.auxdata);
+    // Now try it with longer chaining through multiple element sizes
+    b = a.as_dtype<int16_t>(assign_error_overflow);
+    b = b.as_dtype<int32_t>(assign_error_overflow);
+    b = b.as_dtype<int16_t>(assign_error_overflow);
+    b = b.as_dtype<int64_t>(assign_error_overflow);
+    b = b.as_dtype<float>(assign_error_overflow);
+    b = b.as_dtype<int32_t>(assign_error_overflow);
 
-    EXPECT_EQ(1.f, float_vals[0]);
-    EXPECT_EQ(5.f, float_vals[1]);
-    EXPECT_EQ(6.5f, float_vals[2]);
+    EXPECT_EQ(make_convert_dtype(make_dtype<int32_t>(),
+                    make_convert_dtype(make_dtype<float>(),
+                        make_convert_dtype(make_dtype<int64_t>(),
+                            make_convert_dtype(make_dtype<int16_t>(),
+                                make_convert_dtype(make_dtype<int32_t>(),
+                                    make_convert_dtype<int16_t, float>(
+                                    assign_error_overflow),
+                                assign_error_overflow),
+                            assign_error_overflow),
+                        assign_error_overflow),
+                    assign_error_overflow),
+                assign_error_overflow),
+            b.get_dtype());
+    b = b.vals();
+    EXPECT_EQ(make_dtype<int32_t>(), b.get_dtype());
+    EXPECT_EQ(3, b(0).as<int32_t>());
+    EXPECT_EQ(1, b(1).as<int32_t>());
+    EXPECT_EQ(-2, b(2).as<int32_t>());
+    EXPECT_EQ(-2, b(3).as<int32_t>());
+    EXPECT_EQ(1000, b(4).as<int32_t>());
 
-    double_vals[0] = -1.f;
-    double_vals[1] = 2.5f;
-    double_vals[2] = 3.25f;
-    op_float_double.specializations[0]((char *)float_vals, sizeof(float), (char *)double_vals, sizeof(double), 3,
-                    op_float_double.auxdata);
-
-
-    } catch(std::exception& e) {
-        cout << "Error: " << e.what() << "\n";
+    } catch(int) { //std::exception& e) {
+        //cout << "Error: " << e.what() << "\n";
         return 1;
     }
     return 0;

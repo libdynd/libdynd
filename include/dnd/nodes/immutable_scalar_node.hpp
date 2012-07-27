@@ -16,6 +16,7 @@ ndarray_node_ptr make_static_utf8_string_immutable_scalar_node(const char (&stat
 
 namespace detail {
     ndarray_node_ptr unchecked_make_immutable_scalar_node(const dtype& dt, const char* data);
+    ndarray_node_ptr unchecked_make_immutable_scalar_node(const dtype& dt);
 } // namespace detail
 
 /**
@@ -96,6 +97,7 @@ public:
     void debug_dump_extra(std::ostream& o, const std::string& indent) const;
 
     friend ndarray_node_ptr detail::unchecked_make_immutable_scalar_node(const dtype& dt, const char* data);
+    friend ndarray_node_ptr detail::unchecked_make_immutable_scalar_node(const dtype& dt);
     template<int N>
     friend ndarray_node_ptr make_static_utf8_string_immutable_scalar_node(const char (&static_string)[N]);
 };
@@ -111,6 +113,20 @@ inline ndarray_node_ptr make_immutable_scalar_node(const dtype& dt, const char* 
     }
 
     return detail::unchecked_make_immutable_scalar_node(dt, data);
+}
+
+/**
+ * Makes an immutable scalar node from a POD dtype. To initialize the data,
+ * which must only be done immediately after creation, use const_cast<char *> on
+ * the get_readonly_originptr() value.
+ */
+inline ndarray_node_ptr make_immutable_scalar_node(const dtype& dt)
+{
+    if (dt.get_memory_management() != pod_memory_management) {
+        throw std::runtime_error("immutable_scalar_node only supports pod dtypes presently");
+    }
+
+    return detail::unchecked_make_immutable_scalar_node(dt);
 }
 
 /**

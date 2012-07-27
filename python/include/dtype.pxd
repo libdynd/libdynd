@@ -103,4 +103,4 @@ cdef extern from "dtype_functions.hpp" namespace "pydnd":
 
     dtype dnd_make_fixedstring_dtype(object, int) except +
     dtype dnd_make_string_dtype(object) except +
-
+    dtype dnd_make_pointer_dtype(dtype&) except +

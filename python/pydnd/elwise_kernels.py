@@ -1,4 +1,35 @@
-import sys, ctypes, dnd_ctypes
+import sys, os, ctypes, dnd_ctypes
+
+basic_kernels_lib = os.path.join(os.path.dirname(__file__), "basic_kernels")
+if sys.platform == 'win32':
+    basic_kernels_lib += '.dll'
+    basic = ctypes.WinDLL(basic_kernels_lib)
+else:
+    basic_kernels_lib += '.so'
+    basic = ctypes.CDLL(basic_kernels_lib)
+
+def add_basic_kernels(root, types):
+    """Adds simple ctypes kernels to the module namespace dict."""
+    for t in types:
+        name = root + '_' + t[0]
+        func = basic[name]
+        func.restype = t[1]
+        func.argtypes = [t[1], t[1]]
+        globals()[name] = func
+
+types = [('int32', ctypes.c_int32),
+         ('int64', ctypes.c_int64),
+         ('uint32', ctypes.c_uint32),
+         ('uint64', ctypes.c_uint64),
+         ('float32', ctypes.c_float),
+         ('float64', ctypes.c_double)]
+
+add_basic_kernels('add', types)
+add_basic_kernels('subtract', types)
+add_basic_kernels('multiply', types)
+add_basic_kernels('divide', types)
+add_basic_kernels('maximum', types)
+add_basic_kernels('minimum', types)
 
 if sys.platform == 'win32':
     # integer absolute value
@@ -10,11 +41,6 @@ if sys.platform == 'win32':
     fabs = ctypes.cdll.msvcrt.fabs
     fabs.restype = ctypes.c_double
     fabs.argtypes = [ctypes.c_double]
-
-    # complex absolute value
-    cabs = ctypes.cdll.msvcrt._cabs
-    cabs.restype = ctypes.c_double
-    cabs.argtypes = [dnd_ctypes.c_complex_float64]
 
     # floor
     floor = ctypes.cdll.msvcrt.floor

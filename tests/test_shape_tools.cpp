@@ -47,8 +47,8 @@ TEST(ShapeTools, BroadcastInputShapes) {
     ndarray c(3, 2, 1, make_dtype<double>());
     ndarray d(5, 1, make_dtype<char>());
 
-    ndarray_node_ptr operands[] = {a.get_expr_tree(), b.get_expr_tree(),
-                                    c.get_expr_tree(), d.get_expr_tree()};
+    ndarray_node_ptr operands[] = {a.get_node(), b.get_node(),
+                                    c.get_node(), d.get_node()};
 
     // Broadcast the first three shapes together
     int ndim = 0;

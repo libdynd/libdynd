@@ -35,9 +35,11 @@ set(dnd_SRC
     src/dnd/codegen/unary_kernel_adapter_codegen_x64_sysvabi.cpp
     src/dnd/codegen/binary_kernel_adapter_codegen_windows_x64.cpp
     src/dnd/codegen/binary_kernel_adapter_codegen_x64_sysvabi.cpp
+    src/dnd/codegen/binary_reduce_kernel_adapter_codegen.cpp
     src/dnd/codegen/codegen_cache.cpp
     include/dnd/codegen/unary_kernel_adapter_codegen.hpp
     include/dnd/codegen/binary_kernel_adapter_codegen.hpp
+    include/dnd/codegen/binary_reduce_kernel_adapter_codegen.hpp
     include/dnd/codegen/calling_conventions.hpp
     include/dnd/codegen/codegen_cache.hpp
     # DTypes
@@ -47,24 +49,31 @@ set(dnd_SRC
     src/dnd/dtypes/convert_dtype.cpp
     src/dnd/dtypes/dtype_alignment.cpp
     src/dnd/dtypes/fixedstring_dtype.cpp
+    src/dnd/dtypes/pointer_dtype.cpp
     src/dnd/dtypes/string_dtype.cpp
     src/dnd/dtypes/view_dtype.cpp
+    src/dnd/dtypes/void_pointer_dtype.cpp
     include/dnd/dtypes/array_dtype.hpp
     include/dnd/dtypes/byteswap_dtype.hpp
     include/dnd/dtypes/categorical_dtype.hpp
     include/dnd/dtypes/convert_dtype.hpp
     include/dnd/dtypes/dtype_alignment.hpp
     include/dnd/dtypes/fixedstring_dtype.hpp
+    include/dnd/dtypes/pointer_dtype.hpp
     include/dnd/dtypes/string_dtype.hpp
     include/dnd/dtypes/view_dtype.hpp
+    include/dnd/dtypes/void_pointer_dtype.hpp
     # Nodes
-    src/dnd/nodes/elementwise_unary_kernel_node.cpp
+    src/dnd/nodes/elwise_unary_kernel_node.cpp
+    src/dnd/nodes/elwise_binary_kernel_node.cpp
+    src/dnd/nodes/elwise_reduce_kernel_node.cpp
     src/dnd/nodes/immutable_scalar_node.cpp
     src/dnd/nodes/ndarray_node.cpp
     src/dnd/nodes/scalar_node.cpp
     src/dnd/nodes/strided_ndarray_node.cpp
-    include/dnd/nodes/elementwise_unary_kernel_node.hpp
-    include/dnd/nodes/elementwise_binary_kernel_node.hpp
+    include/dnd/nodes/elwise_unary_kernel_node.hpp
+    include/dnd/nodes/elwise_binary_kernel_node.hpp
+    include/dnd/nodes/elwise_reduce_kernel_node.hpp
     include/dnd/nodes/immutable_builtin_scalar_node.hpp
     include/dnd/nodes/immutable_scalar_node.hpp
     include/dnd/nodes/ndarray_node.hpp
@@ -156,6 +165,8 @@ include_directories(
     thirdparty/utf8/source
     )
 
+source_group("Main Source" REGULAR_EXPRESSION "src/dnd/.*cpp")
+source_group("Main Headers" REGULAR_EXPRESSION "include/dnd/.*hpp")
 source_group("CodeGen Source" REGULAR_EXPRESSION "src/dnd/codegen/.*cpp")
 source_group("CodeGen Headers" REGULAR_EXPRESSION "include/dnd/codegen/.*hpp")
 source_group("DTypes Source" REGULAR_EXPRESSION "src/dnd/dtypes/.*cpp")
@@ -173,6 +184,8 @@ if(WIN32)
 else()
     add_library(dynamicndarray SHARED ${dnd_SRC})
 endif()
+
+add_subdirectory(basic_kernels)
 
 add_subdirectory(tests)
 

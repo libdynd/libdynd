@@ -25,6 +25,8 @@ class codegen_cache {
     memory_block_ptr m_exec_memblock;
     /** A mapping from unary kernel adapter unique id to the generated kernel adapter */
     std::map<uint64_t, unary_operation_t *> m_cached_unary_kernel_adapters;
+    /** A mapping from binary kernel adapter unique id to the generated kernel adapter */
+    std::map<uint64_t, binary_operation_t> m_cached_binary_kernel_adapters;
 public:
     codegen_cache();
 
@@ -46,6 +48,27 @@ public:
                     const dtype& arg0type, calling_convention_t callconv,
                     void *function_pointer,
                     unary_specialization_kernel_instance& out_kernel);
+
+    /**
+     * Generates the requested binary function adapter, and returns a
+     * binary kernel for it. Reuses the low level generated
+     * adapter functions when it can.
+     */
+    void codegen_binary_function_adapter(const dtype& restype,
+                    const dtype& arg0type, const dtype& arg1type,
+                    calling_convention_t callconv,
+                    void *function_pointer,
+                    kernel_instance<binary_operation_t>& out_kernel);
+
+    void codegen_left_associative_binary_reduce_function_adapter(
+                    const dtype& reduce_type,calling_convention_t callconv,
+                    void *function_pointer,
+                    kernel_instance<unary_operation_t>& out_kernel);
+
+    void codegen_right_associative_binary_reduce_function_adapter(
+                    const dtype& reduce_type,calling_convention_t callconv,
+                    void *function_pointer,
+                    kernel_instance<unary_operation_t>& out_kernel);
 
     void debug_dump(std::ostream& o, const std::string& indent = "") const;
 };

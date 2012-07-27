@@ -95,18 +95,17 @@ index_out_of_bounds::index_out_of_bounds(intptr_t i, int axis, int ndim, const i
 {
 }
 
-inline string axis_out_of_bounds_message(intptr_t i, intptr_t start, intptr_t end)
+inline string axis_out_of_bounds_message(intptr_t i, intptr_t ndim)
 {
     stringstream ss;
 
-    ss << "axis out of bounds: axis " << i << " is not in the half-open range [";
-    ss << start << ", " << end << ")";
+    ss << "axis out of bounds: axis " << i << " is not a valid axis for an " << ndim << " dimensional operation";
 
     return ss.str();
 }
 
-dnd::axis_out_of_bounds::axis_out_of_bounds(intptr_t i, intptr_t start, intptr_t end)
-    : m_what(axis_out_of_bounds_message(i, start, end))
+dnd::axis_out_of_bounds::axis_out_of_bounds(intptr_t i, intptr_t ndim)
+    : m_what(axis_out_of_bounds_message(i, ndim))
 {
     //cout << "throwing axis_out_of_bounds\n";
 }

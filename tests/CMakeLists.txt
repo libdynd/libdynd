@@ -9,6 +9,7 @@ project(dnd_tests)
 set(tests_SRC
     codegen/test_codegen_cache.cpp
     codegen/test_unary_kernel_adapter.cpp
+    codegen/test_binary_kernel_adapter.cpp
     dtypes/test_array_dtype.cpp
     dtypes/test_byteswap_dtype.cpp
     dtypes/test_categorical_dtype.cpp
@@ -20,6 +21,7 @@ set(tests_SRC
     dtypes/test_dtype_promotion.cpp
     dtypes/test_fixedstring_dtype.cpp
     dtypes/test_string_dtype.cpp
+    dtypes/test_pointer_dtype.cpp
     test_arithmetic_op.cpp
     test_ndarray.cpp
     test_ndarray_assign.cpp

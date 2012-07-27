@@ -26,7 +26,7 @@ enum assign_error_mode {
     assign_error_inexact
 };
 
-const assign_error_mode default_error_mode = assign_error_fractional;
+const assign_error_mode assign_error_default = assign_error_fractional;
 
 std::ostream& operator<<(std::ostream& o, assign_error_mode errmode);
 

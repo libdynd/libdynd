@@ -9,7 +9,7 @@
 #include <dnd/raw_iteration.hpp>
 #include <dnd/dtype_promotion.hpp>
 #include <dnd/kernels/builtin_dtype_binary_kernel_table.hpp>
-#include <dnd/nodes/elementwise_binary_kernel_node.hpp>
+#include <dnd/nodes/elwise_binary_kernel_node.hpp>
 
 using namespace std;
 using namespace dnd;
@@ -127,28 +127,48 @@ static DND_BUILTIN_DTYPE_BINARY_OPERATION_TABLE(division);
 
 ndarray dnd::operator+(const ndarray& op1, const ndarray& op2)
 {
-    arithmetic_operator_factory op_factory(builtin_addition_table, "add");
-    return ndarray(make_elementwise_binary_kernel_node(op1.get_expr_tree(), op2.get_expr_tree(), op_factory,
-                                    assign_error_fractional));
+    dtype dt = promote_dtypes_arithmetic(op1.get_dtype(), op2.get_dtype());
+    kernel_instance<binary_operation_t> kernel;
+    // TODO: This is throwing away the stride specialization, probably want to put that back
+    //       in how it is with the unary_specialization instance
+    kernel.kernel = get_binary_operation_from_builtin_dtype_table(builtin_addition_table,
+                    dt, INTPTR_MAX, INTPTR_MAX, INTPTR_MAX);
+    return ndarray(make_elwise_binary_kernel_node_steal_kernel(dt,
+                    op1.get_node()->as_dtype(dt), op2.get_node()->as_dtype(dt), kernel));
 }
 
 ndarray dnd::operator-(const ndarray& op1, const ndarray& op2)
 {
-    arithmetic_operator_factory op_factory(builtin_subtraction_table, "subtract");
-    return ndarray(make_elementwise_binary_kernel_node(op1.get_expr_tree(), op2.get_expr_tree(), op_factory,
-                                    assign_error_fractional));
+    dtype dt = promote_dtypes_arithmetic(op1.get_dtype(), op2.get_dtype());
+    kernel_instance<binary_operation_t> kernel;
+    // TODO: This is throwing away the stride specialization, probably want to put that back
+    //       in how it is with the unary_specialization instance
+    kernel.kernel = get_binary_operation_from_builtin_dtype_table(builtin_subtraction_table,
+                    dt, INTPTR_MAX, INTPTR_MAX, INTPTR_MAX);
+    return ndarray(make_elwise_binary_kernel_node_steal_kernel(dt,
+                    op1.get_node()->as_dtype(dt), op2.get_node()->as_dtype(dt), kernel));
 }
 
 ndarray dnd::operator*(const ndarray& op1, const ndarray& op2)
 {
-    arithmetic_operator_factory op_factory(builtin_multiplication_table, "multiply");
-    return ndarray(make_elementwise_binary_kernel_node(op1.get_expr_tree(), op2.get_expr_tree(), op_factory,
-                                    assign_error_fractional));
+    dtype dt = promote_dtypes_arithmetic(op1.get_dtype(), op2.get_dtype());
+    kernel_instance<binary_operation_t> kernel;
+    // TODO: This is throwing away the stride specialization, probably want to put that back
+    //       in how it is with the unary_specialization instance
+    kernel.kernel = get_binary_operation_from_builtin_dtype_table(builtin_multiplication_table,
+                    dt, INTPTR_MAX, INTPTR_MAX, INTPTR_MAX);
+    return ndarray(make_elwise_binary_kernel_node_steal_kernel(dt,
+                    op1.get_node()->as_dtype(dt), op2.get_node()->as_dtype(dt), kernel));
 }
 
 ndarray dnd::operator/(const ndarray& op1, const ndarray& op2)
 {
-    arithmetic_operator_factory op_factory(builtin_division_table, "divide");
-    return ndarray(make_elementwise_binary_kernel_node(op1.get_expr_tree(), op2.get_expr_tree(), op_factory,
-                                    assign_error_fractional));
+    dtype dt = promote_dtypes_arithmetic(op1.get_dtype(), op2.get_dtype());
+    kernel_instance<binary_operation_t> kernel;
+    // TODO: This is throwing away the stride specialization, probably want to put that back
+    //       in how it is with the unary_specialization instance
+    kernel.kernel = get_binary_operation_from_builtin_dtype_table(builtin_division_table,
+                    dt, INTPTR_MAX, INTPTR_MAX, INTPTR_MAX);
+    return ndarray(make_elwise_binary_kernel_node_steal_kernel(dt,
+                    op1.get_node()->as_dtype(dt), op2.get_node()->as_dtype(dt), kernel));
 }

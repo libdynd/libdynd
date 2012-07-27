@@ -35,9 +35,15 @@ include "dnd.pxd"
 include "codegen_cache.pxd"
 include "dtype.pxd"
 include "ndarray.pxd"
-include "unary_gfunc.pxd"
+include "elwise_gfunc.pxd"
+include "elwise_reduce_gfunc.pxd"
 
 from cython.operator import dereference
+
+# Create the codegen cache used by default when making gfuncs
+cdef w_codegen_cache default_cgcache_c = w_codegen_cache()
+# Expose it outside the module too
+default_cgcache = default_cgcache_c
 
 cdef class w_dtype:
     # To access the embedded dtype, use "GET(self.v)",
@@ -156,6 +162,12 @@ def make_string_dtype(encoding):
     SET(result.v, dnd_make_string_dtype(encoding))
     return result
 
+def make_pointer_dtype(target_dtype):
+    """Constructs a dtype which is a pointer to the target dtype."""
+    cdef w_dtype result = w_dtype()
+    SET(result.v, dnd_make_pointer_dtype(GET(w_dtype(target_dtype).v)))
+    return result
+
 ##############################################################################
 
 # NOTE: This is a possible alternative to the init_w_ndarray_typeobject() call
@@ -190,6 +202,16 @@ cdef class w_ndarray:
         """Returns a version of the ndarray with plain values, all expressions evaluated."""
         cdef w_ndarray result = w_ndarray()
         SET(result.v, ndarray_vals(GET(self.v)))
+        return result
+
+    def eval_immutable(self):
+        cdef w_ndarray result = w_ndarray()
+        SET(result.v, GET(self.v).eval_immutable())
+        return result
+
+    def eval_copy(self, access_flags = None):
+        cdef w_ndarray result = w_ndarray()
+        SET(result.v, ndarray_eval_copy(GET(self.v), access_flags))
         return result
 
     def storage(self):
@@ -298,21 +320,50 @@ def linspace(start, stop, count=50):
     SET(result.v, ndarray_linspace(start, stop, count))
     return result
 
-cdef class w_unary_gfunc:
-    cdef unary_gfunc_placement_wrapper v
+cdef class w_elwise_gfunc:
+    cdef elwise_gfunc_placement_wrapper v
 
     def __cinit__(self, bytes name):
-        unary_gfunc_placement_new(self.v, name)
+        elwise_gfunc_placement_new(self.v, name)
     def __dealloc__(self):
-        unary_gfunc_placement_delete(self.v)
+        elwise_gfunc_placement_delete(self.v)
 
     property name:
         def __get__(self):
             return str(GET(self.v).get_name().c_str())
 
-    def add_kernel(self, w_codegen_cache cgcache, kernel):
+    def add_kernel(self, kernel, w_codegen_cache cgcache = default_cgcache_c):
         """Adds a kernel to the gfunc object. Currently, this means a ctypes object with prototype."""
         GET(self.v).add_kernel(GET(cgcache.v), kernel)
+
+    def debug_dump(self):
+        """Prints a raw representation of the gfunc data."""
+        print str(GET(self.v).debug_dump().c_str())
+
+    def __call__(self, *args, **kwargs):
+        """Calls the gfunc."""
+        return GET(self.v).call(args, kwargs)
+
+cdef class w_elwise_reduce_gfunc:
+    cdef elwise_reduce_gfunc_placement_wrapper v
+
+    def __cinit__(self, bytes name):
+        elwise_reduce_gfunc_placement_new(self.v, name)
+    def __dealloc__(self):
+        elwise_reduce_gfunc_placement_delete(self.v)
+
+    property name:
+        def __get__(self):
+            return str(GET(self.v).get_name().c_str())
+
+    def add_kernel(self, kernel, bint associative, bint commutative, identity = None, w_codegen_cache cgcache = default_cgcache_c):
+        """Adds a kernel to the gfunc object. Currently, this means a ctypes object with prototype."""
+        cdef w_ndarray id
+        if identity is None:
+            GET(self.v).add_kernel(GET(cgcache.v), kernel, associative, commutative, ndarray())
+        else:
+            id = w_ndarray(identity)
+            GET(self.v).add_kernel(GET(cgcache.v), kernel, associative, commutative, GET(id.v))
 
     def debug_dump(self):
         """Prints a raw representation of the gfunc data."""

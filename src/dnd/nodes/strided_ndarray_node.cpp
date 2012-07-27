@@ -8,6 +8,7 @@
 #include <string>
 
 #include <dnd/nodes/strided_ndarray_node.hpp>
+#include <dnd/nodes/immutable_scalar_node.hpp>
 #include <dnd/memblock/fixed_size_pod_memory_block.hpp>
 #include <dnd/memblock/ndarray_node_memory_block.hpp>
 #include <dnd/dtypes/convert_dtype.hpp>
@@ -225,6 +226,10 @@ ndarray_node_ptr dnd::make_strided_ndarray_node(const dtype& dt, int ndim, const
 {
     char *node_memory = NULL;
     ndarray_node_ptr result(make_uninitialized_ndarray_node_memory_block(sizeof(strided_ndarray_node), &node_memory));
+    if (access_flags == 0) {
+        // Interpret the value 0 to mean "default flags"
+        access_flags = read_access_flag|write_access_flag;
+    }
     new (node_memory) strided_ndarray_node(dt, ndim, shape, strides, originptr, access_flags, memblock);
     return DND_MOVE(result);
 }
@@ -234,6 +239,10 @@ ndarray_node_ptr dnd::make_strided_ndarray_node(const dtype& dt, int ndim, const
 {
     char *node_memory = NULL;
     ndarray_node_ptr result(make_uninitialized_ndarray_node_memory_block(sizeof(strided_ndarray_node), &node_memory));
+    if (access_flags == 0) {
+        // Interpret the value 0 to mean "default flags"
+        access_flags = read_access_flag|write_access_flag;
+    }
     new (node_memory) strided_ndarray_node(dt, ndim, shape, strides, originptr, access_flags, memblock);
     return DND_MOVE(result);
 }
@@ -244,6 +253,10 @@ ndarray_node_ptr dnd::make_strided_ndarray_node(const dtype& dt, int ndim, const
 {
     char *node_memory = NULL;
     ndarray_node_ptr result(make_uninitialized_ndarray_node_memory_block(sizeof(strided_ndarray_node), &node_memory));
+    if (access_flags == 0) {
+        // Interpret the value 0 to mean "default flags"
+        access_flags = read_access_flag|write_access_flag;
+    }
     new (node_memory) strided_ndarray_node(dt, ndim, shape, strides, originptr, access_flags, DND_MOVE(memblock));
     return DND_MOVE(result);
 }
@@ -253,6 +266,10 @@ ndarray_node_ptr dnd::make_strided_ndarray_node(const dtype& dt, int ndim, const
 {
     char *node_memory = NULL;
     ndarray_node_ptr result(make_uninitialized_ndarray_node_memory_block(sizeof(strided_ndarray_node), &node_memory));
+    if (access_flags == 0) {
+        // Interpret the value 0 to mean "default flags"
+        access_flags = read_access_flag|write_access_flag;
+    }
     new (node_memory) strided_ndarray_node(dt, ndim, shape, strides, originptr, access_flags, DND_MOVE(memblock));
     return DND_MOVE(result);
 }
@@ -269,8 +286,15 @@ ndarray_node_ptr dnd::make_strided_ndarray_node(const dtype& dt, int ndim, const
 ndarray_node_ptr dnd::make_strided_ndarray_node(const dtype& dt, int ndim, const intptr_t *shape, const int *axis_perm,
                         int access_flags, memory_block_ptr *blockrefs_begin, memory_block_ptr *blockrefs_end)
 {
+    if (ndim == 0 && access_flags == (read_access_flag|immutable_access_flag)) {
+        return make_immutable_scalar_node(dt);
+    }
     char *node_memory = NULL;
     ndarray_node_ptr result(make_uninitialized_ndarray_node_memory_block(sizeof(strided_ndarray_node), &node_memory));
+    if (access_flags == 0) {
+        // Interpret the value 0 to mean "default flags"
+        access_flags = read_access_flag|write_access_flag;
+    }
     new (node_memory) strided_ndarray_node(dt, ndim, shape, axis_perm, access_flags, blockrefs_begin, blockrefs_end);
     return DND_MOVE(result);
 }
