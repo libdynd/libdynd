@@ -8,6 +8,8 @@
 using namespace std;
 using namespace dnd;
 
+
+// this one
 ndarray_node_ptr dnd::make_uninitialized_ndarray_node_memory_block(intptr_t sizeof_node, char **out_node_memory)
 {
     //cout << "allocating ndarray node size " << sizeof_node << endl;

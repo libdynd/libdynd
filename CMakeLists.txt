@@ -32,7 +32,9 @@ endif()
 set(dnd_SRC
     # CodeGen
     src/dnd/codegen/unary_kernel_adapter_codegen_windows_x64.cpp
+    src/dnd/codegen/unary_kernel_adapter_codegen_x64_sysvabi.cpp
     src/dnd/codegen/binary_kernel_adapter_codegen_windows_x64.cpp
+    src/dnd/codegen/binary_kernel_adapter_codegen_x64_sysvabi.cpp
     src/dnd/codegen/codegen_cache.cpp
     include/dnd/codegen/unary_kernel_adapter_codegen.hpp
     include/dnd/codegen/binary_kernel_adapter_codegen.hpp
@@ -88,6 +90,8 @@ set(dnd_SRC
     # MemBlock
     src/dnd/memblock/memory_block.cpp
     src/dnd/memblock/executable_memory_block_windows_x64.cpp
+    src/dnd/memblock/executable_memory_block_darwin_x64.cpp
+    src/dnd/memblock/executable_memory_block_linux_x64.cpp
     src/dnd/memblock/external_memory_block.cpp
     src/dnd/memblock/fixed_size_pod_memory_block.cpp
     src/dnd/memblock/ndarray_node_memory_block.cpp
@@ -128,6 +132,7 @@ set(dnd_SRC
     include/dnd/shortvector.hpp
     include/dnd/shape_tools.hpp
     include/dnd/string_encodings.hpp
+    include/dnd/platform_definitions.h
     )
 
 if(WIN32)
@@ -135,6 +140,15 @@ if(WIN32)
 include_directories(
     D:/Develop/boost_1_48_0/
     )
+else(WIN32)
+# Find boost. This works as long as BOOT_ROOT is defined in env
+#     (there may be other ways to specify it though) 
+  find_package(Boost REQUIRED)
+  include_directories(${Boost_INCLUDE_DIR})
+  message(STATUS "** Boost Include: ${Boost_INCLUDE_DIR}")
+
+  find_package(GTest REQUIRED)
+  include_directories(${GTest_INCLUDE_DIR})
 endif(WIN32)
 
 include_directories(

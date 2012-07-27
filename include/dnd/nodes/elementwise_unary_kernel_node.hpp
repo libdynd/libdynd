@@ -67,7 +67,7 @@ public:
         return 1;
     }
 
-    const ndarray_node_ptr& get_opnode(int i) const {
+    const ndarray_node_ptr& get_opnode(int /*i*/) const {
         return m_opnode;
     }
 

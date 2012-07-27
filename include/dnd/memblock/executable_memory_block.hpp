@@ -30,7 +30,8 @@ memory_block_ptr make_executable_memory_block(intptr_t chunk_size_bytes = 65536)
  */
 void set_executable_memory_runtime_function(memory_block_data *self, char *begin, char *end, char *unwind_data);
 #else
-#error The executable memory block has not been implemented for this platform yet.
+// ov: work in progress
+// #error The executable memory block has not been implemented for this platform yet.
 #endif
 
 /**
