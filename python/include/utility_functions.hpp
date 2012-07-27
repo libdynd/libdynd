@@ -79,8 +79,10 @@ PyObject* intptr_array_as_tuple(int size, const intptr_t *array);
  * Parses the axis argument, which may be either a single index
  * or a tuple of indices. They are converted into a boolean array
  * which is set to true whereever a reduction axis is provided.
+ *
+ * Returns the number of axes which were set.
  */
-void pyarg_axis_argument(PyObject *axis, int ndim, dnd::dnd_bool *reduce_axes);
+int pyarg_axis_argument(PyObject *axis, int ndim, dnd::dnd_bool *reduce_axes);
 
 /**
  * Matches the input object against one of several

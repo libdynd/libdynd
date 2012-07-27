@@ -172,3 +172,31 @@ EXPORT float minimum_float32(float x, float y) {
 EXPORT double minimum_float64(double x, double y) {
     return (x < y) ? x : y;
 }
+
+////////////////////////////
+// "square" kernels
+
+EXPORT int32_t square_int32(int32_t x) {
+    return x * x;
+}
+
+EXPORT int64_t square_int64(int64_t x) {
+    return x * x;
+}
+
+EXPORT uint32_t square_uint32(uint32_t x) {
+    return x * x;
+}
+
+EXPORT uint64_t square_uint64(uint64_t x) {
+    return x * x;
+}
+
+EXPORT float square_float32(float x) {
+    return x * x;
+}
+
+EXPORT double square_float64(double x) {
+    return x * x;
+}
+

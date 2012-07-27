@@ -42,7 +42,7 @@ public:
     kernel_instance(const kernel_instance& rhs)
         : kernel(rhs.kernel)
     {
-        rhs.auxdata.clone_into(auxdata);
+        auxdata.clone_from(rhs.auxdata);
     }
 
     void swap(kernel_instance& rhs) {
@@ -52,12 +52,12 @@ public:
 
     void copy_from(const kernel_instance& rhs) {
         kernel = rhs.kernel;
-        rhs.auxdata.clone_into(auxdata);
+        auxdata.clone_from(rhs.auxdata);
     }
 
     void borrow_from(const kernel_instance& rhs) {
         kernel = rhs.kernel;
-        rhs.auxdata.borrow_into(auxdata);
+        auxdata.borrow_from(rhs.auxdata);
     }
 
     FT kernel;

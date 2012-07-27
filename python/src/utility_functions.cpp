@@ -51,26 +51,31 @@ static void mark_axis(PyObject *int_axis, int ndim, dnd_bool *reduce_axes)
         throw runtime_error("error getting integer for axis argument");
     }
 
-    for (int i = 0; i < ndim; ++i) {
-        reduce_axes[i] = false;
-    }
-
     if (value >= ndim || value < -ndim) {
         throw dnd::axis_out_of_bounds(value, ndim);
     } else if (value < 0) {
         value += ndim;
     }
 
-    reduce_axes[value] = value;
+    if (!reduce_axes[value]) {
+        reduce_axes[value] = true;
+    } else {
+        stringstream ss;
+        ss << "axis " << value << " is specified more than once";
+        throw runtime_error(ss.str());
+    }
 }
 
-void pydnd::pyarg_axis_argument(PyObject *axis, int ndim, dnd_bool *reduce_axes)
+int pydnd::pyarg_axis_argument(PyObject *axis, int ndim, dnd_bool *reduce_axes)
 {
+    int axis_count = 0;
+
     if (axis == NULL || axis == Py_None) {
         // None means use all the axes
         for (int i = 0; i < ndim; ++i) {
             reduce_axes[i] = true;
         }
+        axis_count = ndim;
     } else {
         // Start with no axes marked
         for (int i = 0; i < ndim; ++i) {
@@ -81,12 +86,16 @@ void pydnd::pyarg_axis_argument(PyObject *axis, int ndim, dnd_bool *reduce_axes)
             Py_ssize_t size = PyTuple_GET_SIZE(axis);
             for (Py_ssize_t i = 0; i < size; ++i) {
                 mark_axis(PyTuple_GET_ITEM(axis, i), ndim, reduce_axes);
+                axis_count++;
             }
         } else  {
             // Just one axis
             mark_axis(axis, ndim, reduce_axes);
+            axis_count = 1;
         }
     }
+
+    return axis_count;
 }
 
 int pydnd::pyarg_strings_to_int(PyObject *obj, const char *argname, int default_value,

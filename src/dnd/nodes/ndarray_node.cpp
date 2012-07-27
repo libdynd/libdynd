@@ -13,6 +13,7 @@
 #include <dnd/shape_tools.hpp>
 #include <dnd/nodes/ndarray_node.hpp>
 #include <dnd/nodes/elwise_binary_kernel_node.hpp>
+#include <dnd/nodes/elwise_reduce_kernel_node.hpp>
 #include <dnd/raw_iteration.hpp>
 #include <dnd/dtypes/convert_dtype.hpp>
 #include <dnd/memblock/pod_memory_block.hpp>
@@ -291,13 +292,15 @@ static ndarray_node *push_front_unary_kernels(ndarray_node* node,
                 // The dtype expression kernels
                 if (dt.kind() == expression_kind) {
                     push_front_dtype_storage_to_value_kernels(dt, out_kernels, out_element_sizes);
+                } else if (out_kernels.empty()) {
+                    out_element_sizes.push_front(node->get_opnode(0)->get_dtype().value_dtype().element_size());
                 }
                 // The node's kernel
                 out_element_sizes.push_front(dt.storage_dtype().element_size());
                 out_kernels.push_front(unary_specialization_kernel_instance());
                 node->get_unary_specialization_operation(out_kernels.front());
                 // The kernels from the operand
-                return push_front_unary_kernels(node->get_opnode(0).get_node(), out_kernels, out_element_sizes);
+                return push_front_unary_kernels(node->get_opnode(0), out_kernels, out_element_sizes);
             } else {
                 stringstream ss;
                 ss << "evaluating this expression graph (which is further connected to a unary node) is not yet supported:\n";
@@ -317,7 +320,7 @@ static ndarray_node *push_front_unary_kernels(ndarray_node* node,
 
 static ndarray_node_ptr evaluate_unary_elwise_array(ndarray_node* node, bool copy, uint32_t access_flags)
 {
-    const ndarray_node_ptr& op = node->get_opnode(0);
+    ndarray_node *op = node->get_opnode(0);
     const dtype& dt = op->get_dtype();
 
     // Chain the kernels together
@@ -334,8 +337,8 @@ static ndarray_node_ptr evaluate_unary_elwise_array(ndarray_node* node, bool cop
 
 static ndarray_node_ptr evaluate_binary_elwise_array(ndarray_node* node, bool copy, uint32_t access_flags)
 {
-    const ndarray_node_ptr& op1 = node->get_opnode(0);
-    const ndarray_node_ptr& op2 = node->get_opnode(1);
+    ndarray_node *op1 = node->get_opnode(0);
+    ndarray_node *op2 = node->get_opnode(1);
 
     // Special case of two strided sub-operands, requiring no intermediate buffers
     if (op1->get_category() == strided_array_node_category &&
@@ -370,6 +373,143 @@ static ndarray_node_ptr evaluate_binary_elwise_array(ndarray_node* node, bool co
     throw runtime_error(ss.str());
 }
 
+/**
+ * Creates a result array for an elementwise
+ * reduce operation.
+ */
+static ndarray_node_ptr make_elwise_reduce_result(const dtype& result_dt, uint32_t access_flags, bool keepdims, bool rightassoc,
+                            int ndim, const dnd_bool *reduce_axes, const intptr_t *src_shape, const int *src_axis_perm,
+                            char *&result_originptr, intptr_t *result_strides)
+{
+    dimvector result_shape(ndim);
+
+    // Calculate the shape and strides of the reduction result
+    // without removing the dimensions
+    intptr_t num_elements = 1;
+    intptr_t stride = result_dt.element_size();
+    for (int i = 0; i < ndim; ++i) {
+        int p = src_axis_perm[i];
+        if (reduce_axes[p]) {
+            result_shape[p] = 1;
+            result_strides[p] = 0;
+        } else {
+            intptr_t size = src_shape[p];
+            result_shape[p] = size;
+            if (size == 1) {
+                result_strides[p] = 0;
+            } else {
+                result_strides[p] = stride;
+                stride *= size;
+                num_elements *= size;
+            }
+        }
+    }
+
+    ndarray_node_ptr result;
+
+    if (!keepdims) {
+        throw runtime_error("!keepdims Not implemented yet");
+    } else {
+        result = make_strided_ndarray_node(result_dt, ndim, result_shape.get(), src_axis_perm,
+                            access_flags, NULL, NULL);
+    }
+    // Because we just allocated this buffer, we can write to it even though it
+    // might be marked as readonly because the src memory block is readonly
+    result_originptr = const_cast<char *>(result->get_readonly_originptr());
+
+    // If we're doing a right associative reduce, reverse the reduction axes
+    if (rightassoc) {
+        for (int i = 0; i < ndim; ++i) {
+            if (reduce_axes[i]) {
+                result_originptr += (result_shape[i] - 1) * result_strides[i];
+                result_strides[i] = -result_strides[i];
+            }
+        }
+    }
+
+    return DND_MOVE(result);
+}
+
+static ndarray_node_ptr evaluate_elwise_reduce_array(ndarray_node* node, bool copy, uint32_t access_flags)
+{
+    elwise_reduce_kernel_node *rnode = static_cast<elwise_reduce_kernel_node*>(node);
+    ndarray_node *strided_node = rnode->get_opnode(0);
+
+    const dtype& result_dt = rnode->get_dtype().value_dtype();
+
+    // Used when the input
+    deque<unary_specialization_kernel_instance> kernels;
+    deque<intptr_t> element_sizes;
+
+    if (strided_node->get_category() != strided_array_node_category ||
+                    strided_node->get_dtype().kind() == expression_kind) {
+        strided_node = push_front_unary_kernels(node, kernels, element_sizes);
+    }
+
+    // Adjust the access flags, and force a copy if the access flags require it
+    process_access_flags(access_flags, node->get_access_flags(), copy);
+
+    int ndim = strided_node->get_ndim();
+
+    // Generate the axis_perm from the input strides, and use it to allocate the output
+    shortvector<int> axis_perm(ndim);
+    strides_to_axis_perm(ndim, strided_node->get_strides(), axis_perm.get());
+
+    char *result_originptr;
+    dimvector result_strides(ndim);
+
+    ndarray_node_ptr result = make_elwise_reduce_result(result_dt, access_flags,
+                            rnode->get_keepdims(), rnode->get_rightassoc(),
+                            ndim, rnode->get_reduce_axes(), strided_node->get_shape(), axis_perm.get(),
+                            result_originptr, result_strides.get());
+
+    // Set up the iterator
+    raw_ndarray_iter<1,1> iter(strided_node->get_ndim(), strided_node->get_shape(),
+                    result_originptr, result_strides.get(),
+                    strided_node->get_readonly_originptr(), strided_node->get_strides());
+    
+    // Get the kernel to use in the inner loop
+    kernel_instance<unary_operation_t> reduce_operation;
+    unary_operation_t reduce_op_duped[4];
+
+    intptr_t innersize = iter.innersize();
+    intptr_t dst_stride = iter.innerstride<0>();
+    intptr_t src0_stride = iter.innerstride<1>();
+    unary_specialization_t uspec = get_unary_specialization(dst_stride, result_dt.element_size(),
+                                                src0_stride, strided_node->get_dtype().storage_dtype().element_size());
+
+    // Create the reduction kernel
+    rnode->get_unary_operation(reduce_operation);
+    if (!kernels.empty()) {
+        // Create a unary specialization kernel by replicating the general kernel
+        element_sizes.push_back(node->get_dtype().element_size());
+        reduce_op_duped[0] = reduce_operation.kernel;
+        reduce_op_duped[1] = reduce_operation.kernel;
+        reduce_op_duped[2] = reduce_operation.kernel;
+        reduce_op_duped[3] = reduce_operation.kernel;
+        kernels.push_back(unary_specialization_kernel_instance());
+        kernels.back().specializations = reduce_op_duped;
+        kernels.back().auxdata.swap(reduce_operation.auxdata);
+
+        // Create the chained kernel
+        unary_specialization_kernel_instance chained_kernel;
+        make_buffered_chain_unary_kernel(kernels, element_sizes, chained_kernel);
+        // Pick out the right specialization
+        reduce_operation.kernel = chained_kernel.specializations[uspec];
+        reduce_operation.auxdata.swap(chained_kernel.auxdata);
+    }
+
+    if (innersize > 0) {
+        do {
+            reduce_operation.kernel(iter.data<0>(), dst_stride,
+                        iter.data<1>(), src0_stride,
+                        innersize, reduce_operation.auxdata);
+        } while (iter.iternext());
+    }
+
+    return DND_MOVE(result);
+}
+
 ndarray_node_ptr dnd::ndarray_node::eval(bool copy, uint32_t access_flags)
 {
     if ((access_flags&(immutable_access_flag|write_access_flag)) == (immutable_access_flag|write_access_flag)) {
@@ -401,9 +541,8 @@ ndarray_node_ptr dnd::ndarray_node::eval(bool copy, uint32_t access_flags)
                     break;
             }
         }
-        case elwise_reduce_node_category: {
-            break;
-        }
+        case elwise_reduce_node_category:
+            return evaluate_elwise_reduce_array(this, copy, access_flags);
         case arbitrary_node_category:
             throw std::runtime_error("evaluate is not yet implemented for"
                             " nodes with an arbitrary_node_category category");

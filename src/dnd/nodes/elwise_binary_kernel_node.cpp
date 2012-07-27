@@ -63,7 +63,7 @@ void dnd::elwise_binary_kernel_node::get_binary_operation(intptr_t dst_fixedstri
                         m_opnodes[1]->get_dtype().kind() != expression_kind) {
         // Return the binary operation kernel as is
         out_kernel.kernel = m_kernel.kernel;
-        m_kernel.auxdata.borrow_into(out_kernel.auxdata);
+        out_kernel.auxdata.borrow_from(m_kernel.auxdata);
     } else {
         // Need to buffer the binary operation kernel.
         kernel_instance<binary_operation_t> kernel;
@@ -111,7 +111,7 @@ void dnd::elwise_binary_kernel_node::get_binary_operation(intptr_t dst_fixedstri
 
         // Return the binary operation kernel
         kernel.kernel = m_kernel.kernel;
-        m_kernel.auxdata.borrow_into(kernel.auxdata);
+        kernel.auxdata.borrow_from(m_kernel.auxdata);
 
         // Hook up the buffering
         make_buffered_binary_kernel(kernel, adapters, element_sizes, out_kernel);

@@ -72,8 +72,20 @@ public:
         return 1;
     }
 
-    const ndarray_node_ptr& get_opnode(int DND_UNUSED(i)) const {
-        return m_opnode;
+    ndarray_node *get_opnode(int DND_UNUSED(i)) const {
+        return m_opnode.get_node();
+    }
+
+    const bool get_keepdims() const {
+        return m_keepdims;
+    }
+
+    const bool get_rightassoc() const {
+        return m_rightassoc;
+    }
+
+    const dnd_bool *get_reduce_axes() const {
+        return m_reduce_axes.get();
     }
 
     ndarray_node_ptr as_dtype(const dtype& dt,
@@ -89,8 +101,7 @@ public:
         return "elwise_reduce_kernel";
     }
 
-    void get_unary_operation(intptr_t dst_fixedstride, intptr_t src_fixedstride,
-                                    kernel_instance<unary_operation_t>& out_kernel) const;
+    void get_unary_operation(kernel_instance<unary_operation_t>& out_kernel) const;
 
     void debug_dump_extra(std::ostream& o, const std::string& indent) const;
 

@@ -25,6 +25,7 @@ add_basic_gfunc('multiply', types)
 add_basic_gfunc('divide', types)
 add_basic_gfunc('maximum', types)
 add_basic_gfunc('minimum', types)
+add_basic_gfunc('square', types)
 
 abs = gfunc.elwise('abs')
 abs.add_kernel(elwise_kernels.abs)

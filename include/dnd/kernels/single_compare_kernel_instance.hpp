@@ -42,7 +42,7 @@ public:
     single_compare_kernel_instance(const single_compare_kernel_instance& rhs)
         : comparisons(rhs.comparisons)
     {
-        rhs.auxdata.clone_into(auxdata);
+        auxdata.clone_from(rhs.auxdata);
     }
 
     void swap(single_compare_kernel_instance& rhs) {
@@ -62,7 +62,7 @@ public:
     void borrow_comparison(comparison_id_t comparison_id, kernel_instance<single_compare_operation_t>& out_kernel)
     {
         out_kernel.kernel = comparisons[comparison_id];
-        auxdata.borrow_into(out_kernel.auxdata);
+        out_kernel.auxdata.borrow_from(auxdata);
     }
 
     /**
@@ -77,7 +77,7 @@ public:
     void copy_comparison(comparison_id_t comparison_id, kernel_instance<single_compare_operation_t>& out_kernel)
     {
         out_kernel.kernel = comparisons[comparison_id];
-        auxdata.clone_into(out_kernel.auxdata);
+        out_kernel.auxdata.clone_from(auxdata);
     }
 
     // The comparisons - a pointer to a static array of function pointers

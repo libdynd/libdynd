@@ -67,8 +67,8 @@ public:
         return 1;
     }
 
-    const ndarray_node_ptr& get_opnode(int DND_UNUSED(i)) const {
-        return m_opnode;
+    ndarray_node *get_opnode(int DND_UNUSED(i)) const {
+        return m_opnode.get_node();
     }
 
     ndarray_node_ptr as_dtype(const dtype& dt,
@@ -80,8 +80,7 @@ public:
                     const intptr_t *shape,
                     bool allow_in_place);
 
-    void get_unary_operation(intptr_t dst_fixedstride, intptr_t src_fixedstride,
-                                kernel_instance<unary_operation_t>& out_kernel) const;
+    void get_unary_specialization_operation(unary_specialization_kernel_instance& out_kernel) const;
 
     const char *node_name() const {
         return "elwise_unary_kernel";

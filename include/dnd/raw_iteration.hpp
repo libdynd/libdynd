@@ -388,8 +388,8 @@ public:
 
     raw_ndarray_iter(int ndim, const intptr_t *shape,
                                 const dtype& op0_dt, ndarray_node_ptr& op0, uint32_t op0_access_flags,
-                                const ndarray_node_ptr& op1,
-                                const ndarray_node_ptr& op2)
+                                ndarray_node *op1,
+                                ndarray_node *op2)
     {
         if (op0_dt.kind() == expression_kind) {
             std::stringstream ss;
