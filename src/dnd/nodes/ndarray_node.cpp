@@ -405,13 +405,30 @@ static ndarray_node_ptr make_elwise_reduce_result(const dtype& result_dt, uint32
         }
     }
 
+    // Allocate the memoryblock for the data
+    char *originptr = NULL;
+    memory_block_ptr memblock = make_fixed_size_pod_memory_block(result_dt.element_size() * num_elements,
+                    result_dt.alignment(), &originptr,
+                    NULL, NULL);
+
     ndarray_node_ptr result;
 
+    // Create the strided ndarray node, compressing the dimensions if requested
     if (!keepdims) {
-        throw runtime_error("!keepdims Not implemented yet");
+        dimvector compressed_shape(ndim), compressed_strides(ndim);
+        int compressed_ndim = 0;
+        for (int i = 0; i < ndim; ++i) {
+            if (!reduce_axes[i]) {
+                compressed_shape[compressed_ndim] = result_shape[i];
+                compressed_strides[compressed_ndim] = result_strides[i];
+                ++compressed_ndim;
+            }
+        }
+        result = make_strided_ndarray_node(result_dt, compressed_ndim,
+                    compressed_shape.get(), compressed_strides.get(), originptr, access_flags, memblock);
     } else {
-        result = make_strided_ndarray_node(result_dt, ndim, result_shape.get(), src_axis_perm,
-                            access_flags, NULL, NULL);
+        result = make_strided_ndarray_node(result_dt, ndim,
+                    result_shape.get(), result_strides, originptr, access_flags, memblock);
     }
     // Because we just allocated this buffer, we can write to it even though it
     // might be marked as readonly because the src memory block is readonly
@@ -437,36 +454,119 @@ static ndarray_node_ptr evaluate_elwise_reduce_array(ndarray_node* node, bool co
 
     const dtype& result_dt = rnode->get_dtype().value_dtype();
 
+    if (result_dt.get_memory_management() == blockref_memory_management) {
+        throw runtime_error("blockref memory management isn't supported for elwise reduce gfuncs yet");
+    }
+
     // Used when the input
     deque<unary_specialization_kernel_instance> kernels;
     deque<intptr_t> element_sizes;
 
     if (strided_node->get_category() != strided_array_node_category ||
                     strided_node->get_dtype().kind() == expression_kind) {
-        strided_node = push_front_unary_kernels(node, kernels, element_sizes);
+        strided_node = push_front_unary_kernels(strided_node, kernels, element_sizes);
     }
 
     // Adjust the access flags, and force a copy if the access flags require it
     process_access_flags(access_flags, node->get_access_flags(), copy);
 
-    int ndim = strided_node->get_ndim();
+    int src_ndim = strided_node->get_ndim();
+    const char *src_originptr = strided_node->get_readonly_originptr();
+    const intptr_t *src_shape = strided_node->get_shape();
+    const intptr_t *src_strides = strided_node->get_strides();
 
     // Generate the axis_perm from the input strides, and use it to allocate the output
-    shortvector<int> axis_perm(ndim);
-    strides_to_axis_perm(ndim, strided_node->get_strides(), axis_perm.get());
+    shortvector<int> axis_perm(src_ndim);
+    strides_to_axis_perm(src_ndim, src_strides, axis_perm.get());
 
     char *result_originptr;
-    dimvector result_strides(ndim);
+    dimvector result_strides(src_ndim);
+    const dnd_bool *reduce_axes = rnode->get_reduce_axes();
 
     ndarray_node_ptr result = make_elwise_reduce_result(result_dt, access_flags,
                             rnode->get_keepdims(), rnode->get_rightassoc(),
-                            ndim, rnode->get_reduce_axes(), strided_node->get_shape(), axis_perm.get(),
+                            src_ndim, reduce_axes, src_shape, axis_perm.get(),
                             result_originptr, result_strides.get());
 
+    // Initialize the reduction result
+    dimvector adjusted_src_shape(src_ndim);
+
+    if (rnode->get_identity()) {
+        // Copy the identity scalar to the whole result
+        intptr_t result_count = 1;
+        const intptr_t *result_shape = result->get_shape();
+        for (int i = 0, i_end = result->get_ndim(); i != i_end; ++i) {
+            result_count *= result_shape[i];
+        }
+        unary_specialization_kernel_instance copy_kernel;
+        get_dtype_assignment_kernel(result_dt, copy_kernel);
+        unary_operation_t copy_op = copy_kernel.specializations[scalar_to_contiguous_unary_specialization];
+        copy_op(const_cast<char *>(result->get_readonly_originptr()), result_dt.element_size(),
+                        rnode->get_identity()->get_readonly_originptr(), 0,
+                        result_count, copy_kernel.auxdata);
+
+        // No change to the src shape
+        memcpy(adjusted_src_shape.get(), src_shape, sizeof(intptr_t) * src_ndim);
+    } else {
+        // Copy the first element along each reduction dimension, then exclude it
+        // from the later reduction loop
+        unary_specialization_kernel_instance copy_kernel;
+        if (kernels.empty()) {
+            // Straightforward copy kernel
+            get_dtype_assignment_kernel(result_dt, copy_kernel);
+        } else {
+            // Borrow all the kernels so we can make a copy kernel for this part
+            deque<unary_specialization_kernel_instance> borrowed_kernels(kernels.size());
+            for (size_t i = 0, i_end = kernels.size(); i != i_end; ++i) {
+                borrowed_kernels[i].borrow_from(kernels[i]);
+            }
+            make_buffered_chain_unary_kernel(borrowed_kernels, element_sizes, copy_kernel);
+        }
+
+        // Create the shape for the result and
+        // the src shape with the first reduce elements cut out
+        dimvector result_shape(src_ndim), adjusted_src_strides(src_ndim);
+        for (int i = 0; i < src_ndim; ++i) {
+            if (reduce_axes[i]) {
+                result_shape[i] = 1;
+                adjusted_src_shape[i] = max(src_shape[i] - 1, (intptr_t)0);
+                adjusted_src_strides[i] = 0;
+            } else {
+                result_shape[i] = src_shape[i];
+                adjusted_src_shape[i] = src_shape[i];
+                adjusted_src_strides[i] = src_strides[i];
+            }
+        }
+
+        // Set up the iterator for the copy
+        raw_ndarray_iter<1,1> iter(src_ndim, result_shape.get(), result_originptr, result_strides.get(),
+                                    src_originptr, adjusted_src_strides.get(), axis_perm.get());
+        intptr_t innersize = iter.innersize();
+        intptr_t dst_stride = iter.innerstride<0>();
+        intptr_t src0_stride = iter.innerstride<1>();
+        unary_specialization_t uspec = get_unary_specialization(dst_stride, result_dt.element_size(),
+                                                    src0_stride, strided_node->get_dtype().storage_dtype().element_size());
+        unary_operation_t copy_op = copy_kernel.specializations[uspec];
+        if (innersize > 0) {
+            do {
+                copy_op(iter.data<0>(), dst_stride,
+                            iter.data<1>(), src0_stride,
+                            innersize, copy_kernel.auxdata);
+            } while (iter.iternext());
+        }
+
+        // Adjust the src origin pointer to skip the first reduce elements
+        for (int i = 0; i < src_ndim; ++i) {
+            if (reduce_axes[i]) {
+                src_originptr += src_strides[i];
+            }
+        }
+    }
+
     // Set up the iterator
-    raw_ndarray_iter<1,1> iter(strided_node->get_ndim(), strided_node->get_shape(),
+    raw_ndarray_iter<1,1> iter(src_ndim, adjusted_src_shape.get(),
                     result_originptr, result_strides.get(),
-                    strided_node->get_readonly_originptr(), strided_node->get_strides());
+                    src_originptr, strided_node->get_strides());
     
     // Get the kernel to use in the inner loop
     kernel_instance<unary_operation_t> reduce_operation;

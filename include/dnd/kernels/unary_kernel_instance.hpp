@@ -52,7 +52,6 @@ inline unary_specialization_t get_unary_specialization(intptr_t dst_stride, intp
  * array, as well as auxiliary data for the kernels.
  */
 struct unary_specialization_kernel_instance {
-public:
     unary_specialization_kernel_instance()
         : specializations(0)
     {
@@ -62,6 +61,12 @@ public:
         : specializations(rhs.specializations)
     {
         auxdata.clone_from(rhs.auxdata);
+    }
+    unary_specialization_kernel_instance& operator=(const unary_specialization_kernel_instance& rhs)
+    {
+        specializations = rhs.specializations;
+        auxdata.clone_from(rhs.auxdata);
+        return *this;
     }
 
     void swap(unary_specialization_kernel_instance& rhs) {

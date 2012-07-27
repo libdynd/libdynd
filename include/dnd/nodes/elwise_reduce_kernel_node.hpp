@@ -76,6 +76,10 @@ public:
         return m_opnode.get_node();
     }
 
+    ndarray_node *get_identity() const {
+        return m_identity.get_node();
+    }
+
     const bool get_keepdims() const {
         return m_keepdims;
     }
