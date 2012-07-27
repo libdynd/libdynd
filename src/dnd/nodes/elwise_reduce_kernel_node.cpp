@@ -77,8 +77,12 @@ void dnd::elwise_reduce_kernel_node::debug_dump_extra(std::ostream& o, const std
         }
     }
     o << "\n";
-    o << indent << " reduction identity: ";
-    m_identity->debug_dump(o, indent + " ");
+    if (m_identity.get()) {
+        o << indent << " reduction identity:\n";
+        m_identity->debug_dump(o, indent + " ");
+    } else {
+        o << indent << " reduction identity: NULL\n";
+    }
 }
 
 ndarray_node_ptr dnd::make_elwise_reduce_kernel_node_copy_kernel(const dtype& dt, const ndarray_node_ptr& opnode,

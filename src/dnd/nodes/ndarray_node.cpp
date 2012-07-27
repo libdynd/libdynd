@@ -377,7 +377,7 @@ static ndarray_node_ptr evaluate_binary_elwise_array(ndarray_node* node, bool co
  * Creates a result array for an elementwise
  * reduce operation.
  */
-static ndarray_node_ptr make_elwise_reduce_result(const dtype& result_dt, uint32_t access_flags, bool keepdims, bool rightassoc,
+static ndarray_node_ptr make_elwise_reduce_result(const dtype& result_dt, uint32_t access_flags, bool keepdims,
                             int ndim, const dnd_bool *reduce_axes, const intptr_t *src_shape, const int *src_axis_perm,
                             char *&result_originptr, intptr_t *result_strides)
 {
@@ -434,16 +434,6 @@ static ndarray_node_ptr make_elwise_reduce_result(const dtype& result_dt, uint32
     // might be marked as readonly because the src memory block is readonly
     result_originptr = const_cast<char *>(result->get_readonly_originptr());
 
-    // If we're doing a right associative reduce, reverse the reduction axes
-    if (rightassoc) {
-        for (int i = 0; i < ndim; ++i) {
-            if (reduce_axes[i]) {
-                result_originptr += (result_shape[i] - 1) * result_strides[i];
-                result_strides[i] = -result_strides[i];
-            }
-        }
-    }
-
     return DND_MOVE(result);
 }
 
@@ -473,20 +463,31 @@ static ndarray_node_ptr evaluate_elwise_reduce_array(ndarray_node* node, bool co
     int src_ndim = strided_node->get_ndim();
     const char *src_originptr = strided_node->get_readonly_originptr();
     const intptr_t *src_shape = strided_node->get_shape();
-    const intptr_t *src_strides = strided_node->get_strides();
+    dimvector adjusted_src_strides(src_ndim);
+    memcpy(adjusted_src_strides.get(), strided_node->get_strides(), sizeof(intptr_t) * src_ndim);
 
     // Generate the axis_perm from the input strides, and use it to allocate the output
     shortvector<int> axis_perm(src_ndim);
-    strides_to_axis_perm(src_ndim, src_strides, axis_perm.get());
+    strides_to_axis_perm(src_ndim, adjusted_src_strides.get(), axis_perm.get());
 
     char *result_originptr;
     dimvector result_strides(src_ndim);
     const dnd_bool *reduce_axes = rnode->get_reduce_axes();
 
     ndarray_node_ptr result = make_elwise_reduce_result(result_dt, access_flags,
-                            rnode->get_keepdims(), rnode->get_rightassoc(),
+                            rnode->get_keepdims(),
                             src_ndim, reduce_axes, src_shape, axis_perm.get(),
                             result_originptr, result_strides.get());
+
+    // If we're doing a right associative reduce, reverse the reduction axes
+    if (rnode->get_rightassoc()) {
+        for (int i = 0; i < src_ndim; ++i) {
+            if (reduce_axes[i]) {
+                src_originptr += (src_shape[i] - 1) * adjusted_src_strides[i];
+                adjusted_src_strides[i] = -adjusted_src_strides[i];
+            }
+        }
+    }
 
     // Initialize the reduction result
     dimvector adjusted_src_shape(src_ndim);
@@ -525,22 +526,22 @@ static ndarray_node_ptr evaluate_elwise_reduce_array(ndarray_node* node, bool co
 
         // Create the shape for the result and
         // the src shape with the first reduce elements cut out
-        dimvector result_shape(src_ndim), adjusted_src_strides(src_ndim);
+        dimvector result_shape(src_ndim), tmp_src_strides(src_ndim);
         for (int i = 0; i < src_ndim; ++i) {
             if (reduce_axes[i]) {
                 result_shape[i] = 1;
                 adjusted_src_shape[i] = max(src_shape[i] - 1, (intptr_t)0);
-                adjusted_src_strides[i] = 0;
+                tmp_src_strides[i] = 0;
             } else {
                 result_shape[i] = src_shape[i];
                 adjusted_src_shape[i] = src_shape[i];
-                adjusted_src_strides[i] = src_strides[i];
+                tmp_src_strides[i] = adjusted_src_strides[i];
             }
         }
 
         // Set up the iterator for the copy
         raw_ndarray_iter<1,1> iter(src_ndim, result_shape.get(), result_originptr, result_strides.get(),
-                                    src_originptr, adjusted_src_strides.get(), axis_perm.get());
+                                    src_originptr, tmp_src_strides.get(), axis_perm.get());
         intptr_t innersize = iter.innersize();
         intptr_t dst_stride = iter.innerstride<0>();
         intptr_t src0_stride = iter.innerstride<1>();
@@ -558,7 +559,7 @@ static ndarray_node_ptr evaluate_elwise_reduce_array(ndarray_node* node, bool co
         // Adjust the src origin pointer to skip the first reduce elements
         for (int i = 0; i < src_ndim; ++i) {
             if (reduce_axes[i]) {
-                src_originptr += src_strides[i];
+                src_originptr += adjusted_src_strides[i];
             }
         }
     }
@@ -566,7 +567,7 @@ static ndarray_node_ptr evaluate_elwise_reduce_array(ndarray_node* node, bool co
     // Set up the iterator
     raw_ndarray_iter<1,1> iter(src_ndim, adjusted_src_shape.get(),
                     result_originptr, result_strides.get(),
-                    src_originptr, strided_node->get_strides());
+                    src_originptr, adjusted_src_strides.get());
     
     // Get the kernel to use in the inner loop
     kernel_instance<unary_operation_t> reduce_operation;

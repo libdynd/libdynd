@@ -8,22 +8,13 @@ else:
     basic_kernels_lib += '.so'
     basic = ctypes.CDLL(basic_kernels_lib)
 
-def add_unary_kernels(root, types):
+def add_basic_kernels(root, types, nargs):
     """Adds simple ctypes kernels to the module namespace dict."""
     for t in types:
         name = root + '_' + t[0]
         func = basic[name]
         func.restype = t[1]
-        func.argtypes = [t[1]]
-        globals()[name] = func
-
-def add_binary_kernels(root, types):
-    """Adds simple ctypes kernels to the module namespace dict."""
-    for t in types:
-        name = root + '_' + t[0]
-        func = basic[name]
-        func.restype = t[1]
-        func.argtypes = [t[1], t[1]]
+        func.argtypes = [t[1]] * nargs
         globals()[name] = func
 
 types = [('int32', ctypes.c_int32),
@@ -33,13 +24,15 @@ types = [('int32', ctypes.c_int32),
          ('float32', ctypes.c_float),
          ('float64', ctypes.c_double)]
 
-add_binary_kernels('add', types)
-add_binary_kernels('subtract', types)
-add_binary_kernels('multiply', types)
-add_binary_kernels('divide', types)
-add_binary_kernels('maximum', types)
-add_binary_kernels('minimum', types)
-add_unary_kernels('square', types)
+add_basic_kernels('add', types, 2)
+add_basic_kernels('subtract', types, 2)
+add_basic_kernels('multiply', types, 2)
+add_basic_kernels('divide', types, 2)
+add_basic_kernels('maximum2', types, 2)
+add_basic_kernels('minimum2', types, 2)
+add_basic_kernels('maximum3', types, 3)
+add_basic_kernels('minimum3', types, 3)
+add_basic_kernels('square', types, 1)
 
 if sys.platform == 'win32':
     # integer absolute value

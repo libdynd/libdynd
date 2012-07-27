@@ -122,55 +122,103 @@ EXPORT double divide_float64(double x, double y) {
 ////////////////////////////
 // "maximum" kernels
 
-EXPORT int32_t maximum_int32(int32_t x, int32_t y) {
+EXPORT int32_t maximum2_int32(int32_t x, int32_t y) {
     return (x > y) ? x : y;
 }
 
-EXPORT int64_t maximum_int64(int64_t x, int64_t y) {
+EXPORT int64_t maximum2_int64(int64_t x, int64_t y) {
     return (x > y) ? x : y;
 }
 
-EXPORT uint32_t maximum_uint32(uint32_t x, uint32_t y) {
+EXPORT uint32_t maximum2_uint32(uint32_t x, uint32_t y) {
     return (x > y) ? x : y;
 }
 
-EXPORT uint64_t maximum_uint64(uint64_t x, uint64_t y) {
+EXPORT uint64_t maximum2_uint64(uint64_t x, uint64_t y) {
     return (x > y) ? x : y;
 }
 
-EXPORT float maximum_float32(float x, float y) {
+EXPORT float maximum2_float32(float x, float y) {
     return (x > y) ? x : y;
 }
 
-EXPORT double maximum_float64(double x, double y) {
+EXPORT double maximum2_float64(double x, double y) {
     return (x > y) ? x : y;
+}
+
+EXPORT int32_t maximum3_int32(int32_t x, int32_t y, int32_t z) {
+    return (x > y) ? ((x > z) ? x : z) : ((y > z) ? y : z);
+}
+
+EXPORT int64_t maximum3_int64(int64_t x, int64_t y, int64_t z) {
+    return (x > y) ? ((x > z) ? x : z) : ((y > z) ? y : z);
+}
+
+EXPORT uint32_t maximum3_uint32(uint32_t x, uint32_t y, uint32_t z) {
+    return (x > y) ? ((x > z) ? x : z) : ((y > z) ? y : z);
+}
+
+EXPORT uint64_t maximum3_uint64(uint64_t x, uint64_t y, uint64_t z) {
+    return (x > y) ? ((x > z) ? x : z) : ((y > z) ? y : z);
+}
+
+EXPORT float maximum3_float32(float x, float y, float z) {
+    return (x > y) ? ((x > z) ? x : z) : ((y > z) ? y : z);
+}
+
+EXPORT double maximum3_float64(double x, double y, double z) {
+    return (x > y) ? ((x > z) ? x : z) : ((y > z) ? y : z);
 }
 
 ////////////////////////////
 // "minimum" kernels
 
-EXPORT int32_t minimum_int32(int32_t x, int32_t y) {
+EXPORT int32_t minimum2_int32(int32_t x, int32_t y) {
     return (x < y) ? x : y;
 }
 
-EXPORT int64_t minimum_int64(int64_t x, int64_t y) {
+EXPORT int64_t minimum2_int64(int64_t x, int64_t y) {
     return (x < y) ? x : y;
 }
 
-EXPORT uint32_t minimum_uint32(uint32_t x, uint32_t y) {
+EXPORT uint32_t minimum2_uint32(uint32_t x, uint32_t y) {
     return (x < y) ? x : y;
 }
 
-EXPORT uint64_t minimum_uint64(uint64_t x, uint64_t y) {
+EXPORT uint64_t minimum2_uint64(uint64_t x, uint64_t y) {
     return (x < y) ? x : y;
 }
 
-EXPORT float minimum_float32(float x, float y) {
+EXPORT float minimum2_float32(float x, float y) {
     return (x < y) ? x : y;
 }
 
-EXPORT double minimum_float64(double x, double y) {
+EXPORT double minimum2_float64(double x, double y) {
     return (x < y) ? x : y;
+}
+
+EXPORT int32_t minimum3_int32(int32_t x, int32_t y, int32_t z) {
+    return (x < y) ? ((x < z) ? x : z) : ((y < z) ? y : z);
+}
+
+EXPORT int64_t minimum3_int64(int64_t x, int64_t y, int64_t z) {
+    return (x < y) ? ((x < z) ? x : z) : ((y < z) ? y : z);
+}
+
+EXPORT uint32_t minimum3_uint32(uint32_t x, uint32_t y, uint32_t z) {
+    return (x < y) ? ((x < z) ? x : z) : ((y < z) ? y : z);
+}
+
+EXPORT uint64_t minimum3_uint64(uint64_t x, uint64_t y, uint64_t z) {
+    return (x < y) ? ((x < z) ? x : z) : ((y < z) ? y : z);
+}
+
+EXPORT float minimum3_float32(float x, float y, float z) {
+    return (x < y) ? ((x < z) ? x : z) : ((y < z) ? y : z);
+}
+
+EXPORT double minimum3_float64(double x, double y, double z) {
+    return (x < y) ? ((x < z) ? x : z) : ((y < z) ? y : z);
 }
 
 ////////////////////////////

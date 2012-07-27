@@ -130,7 +130,7 @@ PyObject *pydnd::elwise_reduce_gfunc::call(PyObject *args, PyObject *kwargs)
         // keepdims
         bool keepdims = pyarg_bool(PyDict_GetItemString(kwargs, "keepdims"), "keepdims", false);
 
-        const dtype& dt0 = arg0.get_dtype();
+        const dtype& dt0 = arg0.get_dtype().value_dtype();
         for (deque<elwise_reduce_gfunc_kernel>::size_type i = 0; i < m_kernels.size(); ++i) {
             const std::vector<dtype>& sig = m_kernels[i].m_sig;
             if (sig.size() == 2 && dt0 == sig[1]) {
@@ -181,8 +181,12 @@ std::string pydnd::elwise_reduce_gfunc::debug_dump() const
         if (k.m_right_associative_reduction_kernel.kernel != NULL) {
             o << " right associative kernel aux data: " << (const void *)(const dnd::AuxDataBase *)k.m_right_associative_reduction_kernel.auxdata << "\n";
         }
-        o << " reduction identity:\n";
-        k.m_identity.debug_dump(o, "  ");
+        if (k.m_identity.get_node().get()) {
+            o << " reduction identity:\n";
+            k.m_identity.debug_dump(o, "  ");
+        } else {
+            o << " reduction identity: NULL\n";
+        }
     }
     o << "------" << endl;
     return o.str();

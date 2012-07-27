@@ -50,7 +50,7 @@ static void create_elwise_gfunc_kernel_from_ctypes(dnd::codegen_cache& cgcache, 
                             *(void **)cfunc->b_ptr, out_kernel.m_binary_kernel);
     } else {
         std::stringstream ss;
-        ss << "Only unary gfunc kernels are currently supported, provided gfunc has " << (sig.size() - 1);
+        ss << "gfunc kernels with " << (sig.size() - 1) << "parameters are not yet supported";
         throw std::runtime_error(ss.str());
     }
 }
@@ -88,7 +88,7 @@ PyObject *pydnd::elwise_gfunc::call(PyObject *args, PyObject *kwargs)
         ndarray arg0;
         ndarray_init_from_pyobject(arg0, arg0_obj);
 
-        const dtype& dt0 = arg0.get_dtype();
+        const dtype& dt0 = arg0.get_dtype().value_dtype();
         for (deque<elwise_gfunc_kernel>::size_type i = 0; i < m_kernels.size(); ++i) {
             const std::vector<dtype>& sig = m_kernels[i].m_sig;
             if (sig.size() == 2 && dt0 == sig[1]) {
@@ -110,8 +110,8 @@ PyObject *pydnd::elwise_gfunc::call(PyObject *args, PyObject *kwargs)
         ndarray_init_from_pyobject(arg0, arg0_obj);
         ndarray_init_from_pyobject(arg1, arg1_obj);
 
-        const dtype& dt0 = arg0.get_dtype();
-        const dtype& dt1 = arg1.get_dtype();
+        const dtype& dt0 = arg0.get_dtype().value_dtype();
+        const dtype& dt1 = arg1.get_dtype().value_dtype();
         for (deque<elwise_gfunc_kernel>::size_type i = 0; i < m_kernels.size(); ++i) {
             const std::vector<dtype>& sig = m_kernels[i].m_sig;
             if (sig.size() == 3 && dt0 == sig[1] && dt1 == sig[2]) {

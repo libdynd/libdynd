@@ -21,7 +21,7 @@ add_basic_gfunc_from_elwise('sum', 'add', types,
         associative=True, commutative=True, identity=0)
 add_basic_gfunc_from_elwise('product', 'multiply', types,
         associative=True, commutative=True, identity=1)
-add_basic_gfunc_from_elwise('max', 'maximum', types,
+add_basic_gfunc_from_elwise('max', 'maximum2', types,
         associative=True, commutative=True)
-add_basic_gfunc_from_elwise('min', 'minimum', types,
+add_basic_gfunc_from_elwise('min', 'minimum2', types,
         associative=True, commutative=True)

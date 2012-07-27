@@ -234,7 +234,7 @@ public:
 
     /** Method to get a pointer to the raw node object */
     ndarray_node *get_node() const {
-        return reinterpret_cast<ndarray_node *>(reinterpret_cast<char *>(get()) + sizeof(memory_block_data));
+        return get() ? reinterpret_cast<ndarray_node *>(reinterpret_cast<char *>(get()) + sizeof(memory_block_data)) : 0;
     }
 
     /** This object behaves like an ndarray_node pointer */
