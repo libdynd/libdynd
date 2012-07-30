@@ -90,6 +90,9 @@ cdef extern from "dnd/dtypes/byteswap_dtype.hpp" namespace "dnd":
 cdef extern from "dnd/dtypes/convert_dtype.hpp" namespace "dnd":
     dtype dnd_make_convert_dtype "dnd::make_convert_dtype" (dtype&, dtype&, assign_error_mode) except +
 
+cdef extern from "dnd/dtypes/categorical_dtype.hpp" namespace "dnd":
+    dtype dnd_make_categorical_dtype "dnd::make_categorical_dtype" (ndarray&) except +
+
 cdef extern from "dnd/dtypes/dtype_alignment.hpp" namespace "dnd":
     dtype dnd_make_unaligned_dtype "dnd::make_unaligned_dtype" (dtype&) except +
 

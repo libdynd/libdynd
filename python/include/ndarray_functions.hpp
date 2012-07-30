@@ -101,6 +101,11 @@ dnd::ndarray ndarray_arange(PyObject *start, PyObject *stop, PyObject *step);
  */
 dnd::ndarray ndarray_linspace(PyObject *start, PyObject *stop, PyObject *count);
 
+/**
+ * Implementation of nd.groupby().
+ */
+dnd::ndarray ndarray_groupby(const dnd::ndarray& data, const dnd::ndarray& by, const dnd::dtype& groups);
+
 } // namespace pydnd
 
 #endif // _DND__NDARRAY_FUNCTIONS_HPP_

@@ -5,6 +5,7 @@
 
 #include <dnd/nodes/groupby_node.hpp>
 #include <dnd/dtypes/categorical_dtype.hpp>
+#include <dnd/memblock/ndarray_node_memory_block.hpp>
 
 using namespace std;
 using namespace dnd;
@@ -35,3 +36,19 @@ ndarray_node_ptr dnd::groupby_node::apply_linear_index(
     throw std::runtime_error("TODO: groupby_node::apply_linear_index");
 }
 
+void dnd::groupby_node::debug_dump_extra(std::ostream& o, const std::string& indent) const
+{
+    o << indent << " groups dtype: " << m_groups << "\n";
+}
+
+ndarray_node_ptr dnd::make_groupby_node(const ndarray_node_ptr& data_node,
+                        const ndarray_node_ptr& by_node, const dtype& groups)
+{
+    char *node_memory = NULL;
+    ndarray_node_ptr result(make_uninitialized_ndarray_node_memory_block(sizeof(groupby_node), &node_memory));
+
+    // Placement new
+    new (node_memory) groupby_node(data_node, by_node, groups);
+
+    return DND_MOVE(result);
+}

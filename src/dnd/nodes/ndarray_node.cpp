@@ -680,14 +680,9 @@ void dnd::ndarray_node::debug_dump(ostream& o, const string& indent) const
 
     o << indent << " dtype: " << get_dtype() << "\n";
     o << indent << " ndim: " << get_ndim() << "\n";
-    o << indent << " shape: (";
-    for (int i = 0; i < get_ndim(); ++i) {
-        o << get_shape()[i];
-        if (i != get_ndim() - 1) {
-            o << ", ";
-        }
-    }
-    o << ")\n";
+    o << indent << " shape: ";
+    print_shape(o, get_ndim(), get_shape());
+    o << "\n";
     o << indent << " node category: ";
     print_node_category(o, get_category());
     o << "\n";

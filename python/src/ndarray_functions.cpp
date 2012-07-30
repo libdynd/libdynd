@@ -11,6 +11,7 @@
 #include <dnd/dtypes/string_dtype.hpp>
 #include <dnd/memblock/external_memory_block.hpp>
 #include <dnd/nodes/scalar_node.hpp>
+#include <dnd/nodes/groupby_node.hpp>
 #include <dnd/ndarray_arange.hpp>
 #include <dnd/dtype_promotion.hpp>
 
@@ -338,4 +339,9 @@ dnd::ndarray pydnd::ndarray_linspace(PyObject *start, PyObject *stop, PyObject *
     }
 
     return linspace(dt, start_nd.get_readonly_originptr(), stop_nd.get_readonly_originptr(), count_val);
+}
+
+dnd::ndarray pydnd::ndarray_groupby(const dnd::ndarray& data, const dnd::ndarray& by, const dnd::dtype& groups)
+{
+    return ndarray(make_groupby_node(data.get_node(), by.get_node(), groups));
 }

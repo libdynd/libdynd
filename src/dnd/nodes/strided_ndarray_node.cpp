@@ -124,31 +124,6 @@ ndarray_node_ptr dnd::strided_ndarray_node::apply_linear_index(
                 const intptr_t *shape,
                 bool allow_in_place)
 {
-    /*
-    cout << "Applying linear index:\n";
-    cout << "ndim: " << ndim << "\n";
-    cout << "remove_axis: ";
-    for (int i = 0; i < ndim; ++i) {
-        cout << remove_axis[i] << " ";
-    }
-    cout << "\n";
-    cout << "start_index: ";
-    for (int i = 0; i < ndim; ++i) {
-        cout << start_index[i] << " ";
-    }
-    cout << "\n";
-    cout << "index_strides: ";
-    for (int i = 0; i < ndim; ++i) {
-        cout << index_strides[i] << " ";
-    }
-    cout << "\n";
-    cout << "shape: ";
-    for (int i = 0; i < ndim; ++i) {
-        cout << shape[i] << " ";
-    }
-    cout << "\n";
-    */
-
     // Ignore the leftmost dimensions to which this node would broadcast
     if (ndim > m_ndim) {
         remove_axis += (ndim - m_ndim);
