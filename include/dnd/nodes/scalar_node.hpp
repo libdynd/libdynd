@@ -24,7 +24,7 @@ class scalar_node : public ndarray_node {
     scalar_node(const scalar_node&);
     scalar_node& operator=(const scalar_node&);
 
-    // Use make_scalar_node
+    // Use make_scalar_node to actually create one of these
     scalar_node(const dtype& dt, char* originptr, int access_flags)
         : m_originptr(originptr), m_blockref_memblock(), m_dtype(dt),
             m_access_flags(access_flags)
@@ -76,7 +76,7 @@ public:
     {
         return m_access_flags;
     }
-        
+
     char *get_readwrite_originptr() const
     {
         if (m_access_flags & write_access_flag) {

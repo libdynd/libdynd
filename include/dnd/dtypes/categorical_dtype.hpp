@@ -62,6 +62,10 @@ public:
         return self;
     }
 
+    intptr_t get_category_count() const {
+        return m_categories.size();
+    }
+
     uint32_t get_value_from_category(const char *category) const;
 
     bool is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const;

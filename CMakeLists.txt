@@ -65,6 +65,7 @@ set(dnd_SRC
     src/dnd/nodes/elwise_unary_kernel_node.cpp
     src/dnd/nodes/elwise_binary_kernel_node.cpp
     src/dnd/nodes/elwise_reduce_kernel_node.cpp
+    src/dnd/nodes/groupby_node.cpp
     src/dnd/nodes/immutable_scalar_node.cpp
     src/dnd/nodes/ndarray_node.cpp
     src/dnd/nodes/scalar_node.cpp
@@ -72,6 +73,7 @@ set(dnd_SRC
     include/dnd/nodes/elwise_unary_kernel_node.hpp
     include/dnd/nodes/elwise_binary_kernel_node.hpp
     include/dnd/nodes/elwise_reduce_kernel_node.hpp
+    include/dnd/nodes/groupby_node.hpp
     include/dnd/nodes/immutable_builtin_scalar_node.hpp
     include/dnd/nodes/immutable_scalar_node.hpp
     include/dnd/nodes/ndarray_node.hpp
