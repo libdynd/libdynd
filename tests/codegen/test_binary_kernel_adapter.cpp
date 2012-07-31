@@ -26,23 +26,25 @@ template float multiply_values<float, double, int>(double, int);
 TEST(BinaryKernelAdapter, BasicOperations) {
     codegen_cache cgcache;
     kernel_instance<binary_operation_t> op_int_float_double, op_float_float_float, op_float_double_int;
+    // NOTE: Cannot cast directly to <void*>, because of a compile error on MSVC:
+    //         "Context does not allow for disambiguation of overloaded function"
     cgcache.codegen_binary_function_adapter(make_dtype<int>()
                                             , make_dtype<float>()
                                             , make_dtype<double>()
                                             , cdecl_callconv
-                                            , reinterpret_cast<void*>(&multiply_values<int, float, double>)
+                                            , reinterpret_cast<int (*)(int, float, double)>(&multiply_values<int, float, double>)
                                             , op_int_float_double);
     cgcache.codegen_binary_function_adapter(make_dtype<float>()
                                             , make_dtype<float>()
                                             , make_dtype<float>()
                                             , cdecl_callconv
-                                            , reinterpret_cast<void*>(&multiply_values<float, float, float>)
+                                            , reinterpret_cast<float (*)(float, float, float)>(&multiply_values<float, float, float>)
                                             , op_float_float_float);
     cgcache.codegen_binary_function_adapter(make_dtype<float>()
                                             , make_dtype<double>()
                                             , make_dtype<int>()
                                             , cdecl_callconv
-                                            , reinterpret_cast<void*>(&multiply_values<float, double, int>)
+                                            , reinterpret_cast<float (*)(float, double, int)>(&multiply_values<float, double, int>)
                                             , op_float_double_int);
 
     int int_vals[3];

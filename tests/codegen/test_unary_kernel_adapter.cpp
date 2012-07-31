@@ -26,12 +26,14 @@ template float double_value<float, double>(double);
 TEST(UnaryKernelAdapter, BasicOperations) {
     codegen_cache cgcache;
     unary_specialization_kernel_instance op_int_float, op_float_float, op_float_double;
+    // NOTE: Cannot cast directly to <void*>, because of a compile error on MSVC:
+    //         "Context does not allow for disambiguation of overloaded function"
     cgcache.codegen_unary_function_adapter(make_dtype<int>(), make_dtype<float>(), cdecl_callconv,
-                    reinterpret_cast<void*>(&double_value<int, float>), op_int_float);
+                    reinterpret_cast<int (*)(float)>(&double_value<int, float>), op_int_float);
     cgcache.codegen_unary_function_adapter(make_dtype<float>(), make_dtype<float>(), cdecl_callconv,
-                    reinterpret_cast<void*>(&double_value<float, float>), op_float_float);
+                    reinterpret_cast<float (*)(float)>(&double_value<float, float>), op_float_float);
     cgcache.codegen_unary_function_adapter(make_dtype<float>(), make_dtype<double>(), cdecl_callconv,
-                    reinterpret_cast<void*>(&double_value<float, double>), op_float_double);
+                    reinterpret_cast<float (*)(double)>(&double_value<float, double>), op_float_double);
 
     int int_vals[3];
     float float_vals[3];
