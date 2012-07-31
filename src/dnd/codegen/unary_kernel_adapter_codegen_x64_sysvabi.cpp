@@ -18,6 +18,11 @@
 
 namespace
 {
+    void* ptr_offset(void* ptr, ptrdiff_t offset)
+    {
+        return static_cast<void*>(static_cast<uint8_t*>(ptr) + offset);
+    }
+    
     const char* restype_to_str(unsigned restype)
     {
         switch (restype)
@@ -72,12 +77,12 @@ namespace
             return 4;
         case float64_type_id:
             return 5;
-        case complex_float32_type_id:
-            return 6;
-        case complex_float64_type_id:
-            return 7;
         default:
-            return 8;  // will mean unsupported
+            {
+                std::stringstream ss;
+                ss << "unary kernel adapter does not support " << dtype(type_id) << " as return type";
+                throw ( ss.str() );
+            }
         }
     }
 }
@@ -86,13 +91,21 @@ namespace dnd
 {
 
 
-uint64_t get_unary_function_adapter_unique_id(const dtype& //restype
-                                              , const dtype& //arg0type
-                                              , calling_convention_t //DND_UNUSED(callconv)
+uint64_t get_unary_function_adapter_unique_id(const dtype& restype
+                                              , const dtype& arg0type
+                                              , calling_convention_t DND_UNUSED(callconv)
                                               )
 {
-    throw std::runtime_error("unimplemented ");
-    return 42;
+    // Bits 0..2 for the result type
+    uint64_t result = idx_for_type_id(restype.type_id());
+    
+    // Bits 3..5 for the arg0 type
+    result += idx_for_type_id(arg0type.type_id()) << 3;
+    
+    // There is only one calling convention on Windows x64, so it doesn't
+    // need to get encoded in the unique id.
+    
+    return result;    
 }
     
     
@@ -258,19 +271,31 @@ namespace // nameless
         { unary_adapter_result_set_float64,         sizeof(unary_adapter_result_set_float64)     },
     };
     
+    
+    // function_builder is a helper to generate machine code for our adapters.
+    // It copies snippets of code and allows appending empty space (filled with
+    // nops) as well as having some "label" and alignment support. The label
+    // support is based on offsets so that we may support relocating the code
+    // (as long as the generated code is PIC or the required fixups are
+    // implemented).
     class function_builder
     {
     public:
         function_builder(memory_block_data* memblock, size_t estimated_size);
         ~function_builder();
-        function_builder& label(void*& where);
+        
+        function_builder& label(size_t& where);
 
         function_builder& append(const void* code, size_t code_size);
+        function_builder& append(size_t code_size);
+        function_builder& align (size_t alignment);
         
-        bool is_ok() const;
+        void*             base() const;
+        bool              is_ok() const;
         
-        void* finish();
-        void  discard();
+        void              finish();
+        void              discard();
+        
     private:
         memory_block_data*  memblock_;
         int8_t*             current_;
@@ -295,9 +320,9 @@ namespace // nameless
         discard();
     }
     
-    function_builder& function_builder::label(void*& where)
+    function_builder& function_builder::label(size_t& offset)
     {
-        where = static_cast<void*>(current_);
+        offset = current_ - begin_;
         return *this;
     }
     
@@ -307,7 +332,7 @@ namespace // nameless
             return *this;
         
         assert(end_ >= current_);
-        if (static_cast<size_t>(end_ - current_) > code_size)
+        if (static_cast<size_t>(end_ - current_) >= code_size)
         {
             memcpy(current_, code, code_size);
             current_ += code_size;
@@ -318,25 +343,72 @@ namespace // nameless
         return *this;
     }
     
+    function_builder& function_builder::append(size_t code_size)
+    {
+        if (!ok_)
+            return *this;
+        
+        assert(end_ >= current_);
+        if (static_cast<size_t>(end_ - current_) >= code_size)
+        {
+            // fill with nop (0x90)
+            memset(current_, 0x90, code_size);
+            current_ += code_size;
+        }
+        else
+            ok_ = false;
+        
+        return *this;
+    }
+    
+    function_builder& function_builder::align(size_t code_size)
+    {
+        // align to a given size.
+        intptr_t modulo = reinterpret_cast<uintptr_t>(current_) % code_size;
+        if (0 != modulo)
+            append(code_size - modulo);
+        
+        assert(0 == reinterpret_cast<uintptr_t>(current_) % code_size);
+        return *this;
+    }
+    
+    void* function_builder::base() const
+    {
+        return static_cast<void*>(begin_);
+    }
+    
     bool function_builder::is_ok() const
     {
         return ok_;
     }
     
-    void* function_builder::finish()
+    void function_builder::finish()
     {
-        // TODO: flush instruction cache for the generated code
+        assert(is_ok());
         if (is_ok())
         {
+            // this will shrink... resize_executable_memory has realloc semantics
+            // so on shrink it will never move;
+            int8_t* old_begin = begin_;
             dnd::resize_executable_memory(memblock_, current_ - begin_, (char**)&begin_, (char**)&end_);
-            return static_cast<void*>(begin_);
-        }
-        else
-        {
-            discard();
-            return 0;
+            assert(old_begin = begin_);
+
+            // TODO: flush instruction cache for the generated code. Not needed
+            //       on intel architectures, but a function placeholder if we
+            //       factor this code out could be worth if we end supporting
+            //       other platforms (both ARM and PPC require explicit i-cache
+            //       flushing.
+
+            
+            // now mark the object as released...
+            memblock_= 0;
+            begin_   = 0;
+            end_     = 0;
+            current_ = 0;
+            ok_      = false;
         }
     }
+    
     void function_builder::discard()
     {
         if (begin_)
@@ -377,37 +449,56 @@ unary_operation_t* codegen_unary_function_adapter(const memory_block_ptr& exec_m
                           + sizeof(unary_adapter_epilog) 
                           + 64; 
 
-    void* loop_start = 0;
-    void* loop_end   = 0;
+    size_t entry_point= 0;
+    size_t loop_start = 0;
+    size_t loop_end   = 0;
+    size_t table      = 0;
     function_builder fbuilder(exec_mem_block.get(), estimated_size);
-    fbuilder.append(unary_adapter_prolog, sizeof(unary_adapter_prolog))
+    fbuilder.label(entry_point)
+            .append(unary_adapter_prolog, sizeof(unary_adapter_prolog))
             .append(unary_adapter_loop_setup, sizeof(unary_adapter_loop_setup))
+//            .align(64)
             .label(loop_start)
             .append(arg0_snippets[arg0_idx].ptr, arg0_snippets[arg0_idx].size)
             .append(unary_adapter_function_call, sizeof(unary_adapter_function_call))
             .append(ret_snippets[ret_idx].ptr, ret_snippets[ret_idx].size)
             .append(unary_adapter_loop_finish, sizeof(unary_adapter_loop_finish))
             .label(loop_end)
-            .append(unary_adapter_epilog, sizeof(unary_adapter_epilog));
+            .append(unary_adapter_epilog, sizeof(unary_adapter_epilog))
+            .align(4)
+            .label(table)
+            .append(sizeof(unary_operation_t)*4);
                  
     if (fbuilder.is_ok())
     {
         // apply fix-ups. The fix-ups needed are for offsets in the loop skip
         // and the loop close locations
-        ptrdiff_t loop_size = static_cast<uint8_t*>(loop_end) - static_cast<uint8_t*>(loop_start);
+        int loop_size = loop_end - loop_start;
+        void* base    = fbuilder.base();
 
-        assert(loop_size < 128);
+        assert(loop_size > 0 && loop_size < 128);
         // loop-skip: last byte prior to loop start is the number of bytes to
         // skip if size is 0 (note: maybe the test for 0 should be made before
         // calling the unary adapter...)
         
-        int8_t* loop_skip_offset = static_cast<int8_t*>(loop_start) - 1;
+        int8_t* loop_skip_offset = static_cast<int8_t*>(ptr_offset(base, loop_start)) - 1;
         *loop_skip_offset = loop_size;
-        int8_t* loop_continue_offset = static_cast<int8_t*>(loop_end) - 1;
+        int8_t* loop_continue_offset = static_cast<int8_t*>(ptr_offset(base, loop_end)) - 1;
         *loop_continue_offset = -loop_size;
+
+        unary_operation_t* specializations = static_cast<unary_operation_t*>(ptr_offset(base, table));
+        unary_operation_t func_ptr = reinterpret_cast<unary_operation_t>(ptr_offset(base, entry_point));
+        
+        for (int i = 0; i < 4; ++i)
+            specializations[i] = func_ptr;
+        fbuilder.finish();
+        
+        return specializations;
     }
     
-    return static_cast<unary_operation_t*>(fbuilder.finish());
+    // function construction failed.. fbuilder destructor will take care of
+    // releasing memory (it acts as RAII, kind of -- exception safe as well)
+    return 0;
 }
 } // namespace dnd
 

@@ -36,7 +36,7 @@ static unsigned int get_arg_id_from_type_id(unsigned int type_id)
     }
 }
 
-uint64_t dnd::get_binary_reduce_function_adapter_unique_id(const dtype& reduce_type, calling_convention_t callconv)
+uint64_t dnd::get_binary_reduce_function_adapter_unique_id(const dtype& reduce_type, calling_convention_t DND_UNUSED(callconv))
 {
     uint64_t result = get_arg_id_from_type_id(reduce_type.type_id());
 

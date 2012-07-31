@@ -268,7 +268,8 @@ ndarray dnd::ndarray::view_as_dtype(const dtype& dt) const
 
     // Special case contiguous one dimensional arrays with a non-expression kind
     if (get_ndim() == 1 && get_node()->get_category() == strided_array_node_category &&
-                            get_strides()[0] == get_dtype().element_size() &&
+                            get_strides()[0] > 0 && //
+                            static_cast<size_t>(get_strides()[0]) == get_dtype().element_size() &&
                             get_dtype().kind() != expression_kind) {
         intptr_t nbytes = get_shape()[0] * get_dtype().element_size();
         char *originptr = get_readwrite_originptr();

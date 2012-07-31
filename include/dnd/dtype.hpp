@@ -341,12 +341,12 @@ namespace detail {
 class dtype {
 private:
     unsigned char m_type_id, m_kind, m_alignment;
-    intptr_t m_element_size;
+    size_t m_element_size;
     // TODO: Replace with boost::intrusive_ptr
     shared_ptr<extended_dtype> m_data;
 
     /** Unchecked built-in dtype constructor from raw parameters */
-    /* TODO: DND_CONSTEXPR */ dtype(char type_id, char kind, intptr_t element_size, char alignment)
+    /* TODO: DND_CONSTEXPR */ dtype(char type_id, char kind, size_t element_size, char alignment)
         : m_type_id(type_id), m_kind(kind),
           m_alignment(alignment), m_element_size(element_size), m_data()
     {}
@@ -492,12 +492,12 @@ public:
     void get_single_compare_kernel(single_compare_kernel_instance& out_kernel) const;
 
     /** The alignment of the dtype */
-    int alignment() const {
+    size_t alignment() const {
         return m_alignment;
     }
 
     /** The element size of the dtype */
-    intptr_t element_size() const {
+    size_t element_size() const {
         return m_element_size;
     }
 

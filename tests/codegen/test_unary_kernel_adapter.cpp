@@ -19,15 +19,19 @@ static S double_value(T value) {
     return (S)(2 * value);
 }
 
+template int double_value<int, float>(float);
+template float double_value<float, float>(float);
+template float double_value<float, double>(double);
+
 TEST(UnaryKernelAdapter, BasicOperations) {
     codegen_cache cgcache;
     unary_specialization_kernel_instance op_int_float, op_float_float, op_float_double;
     cgcache.codegen_unary_function_adapter(make_dtype<int>(), make_dtype<float>(), cdecl_callconv,
-                    (int (*)(float))&double_value<int, float>, op_int_float);
+                    reinterpret_cast<void*>(&double_value<int, float>), op_int_float);
     cgcache.codegen_unary_function_adapter(make_dtype<float>(), make_dtype<float>(), cdecl_callconv,
-                    (float (*)(float))&double_value<float, float>, op_float_float);
+                    reinterpret_cast<void*>(&double_value<float, float>), op_float_float);
     cgcache.codegen_unary_function_adapter(make_dtype<float>(), make_dtype<double>(), cdecl_callconv,
-                    (float (*)(double))&double_value<float, double>, op_float_double);
+                    reinterpret_cast<void*>(&double_value<float, double>), op_float_double);
 
     int int_vals[3];
     float float_vals[3];
@@ -76,11 +80,29 @@ static int raise_if_negative(int value) {
     }
 }
 
+extern "C" void unary__int_int__general_kernel__disassembly_analysis(
+                                                                     char * __restrict dst, intptr_t dst_stride,
+                                                                     const char * __restrict src, intptr_t src_stride,
+                                                                     intptr_t count, const AuxDataBase * __restrict auxdata)
+{
+    typedef int (*cdecl_func_ptr_t)(int);
+    cdecl_func_ptr_t kfunc = reinterpret_cast<cdecl_func_ptr_t>(get_raw_auxiliary_data(auxdata)&(~1));
+    for (intptr_t i = 0; i < count; ++i) {
+        *(int *)dst = kfunc(*(const int *)src);
+        
+        dst += dst_stride;
+        src += src_stride;
+    }
+}
+
 TEST(UnaryKernelAdapter, UnwindException) {
     codegen_cache cgcache;
     unary_specialization_kernel_instance rin;
-    cgcache.codegen_unary_function_adapter(make_dtype<int>(), make_dtype<int>(), cdecl_callconv,
-                    &raise_if_negative, rin);
+    cgcache.codegen_unary_function_adapter(make_dtype<int>()
+                                           , make_dtype<int>()
+                                           , cdecl_callconv
+                                           , reinterpret_cast<void*>(&raise_if_negative)
+                                           , rin);
     int in[3], out[3];
     // First call it with no exception raised
     in[0] = 0;

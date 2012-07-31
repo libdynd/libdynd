@@ -33,8 +33,10 @@ set(dnd_SRC
     # CodeGen
     src/dnd/codegen/unary_kernel_adapter_codegen_windows_x64.cpp
     src/dnd/codegen/unary_kernel_adapter_codegen_x64_sysvabi.cpp
+    src/dnd/codegen/unary_kernel_adapter_codegen_unsupported.cpp
     src/dnd/codegen/binary_kernel_adapter_codegen_windows_x64.cpp
     src/dnd/codegen/binary_kernel_adapter_codegen_x64_sysvabi.cpp
+    src/dnd/codegen/binary_kernel_adapter_codegen_unsupported.cpp
     src/dnd/codegen/binary_reduce_kernel_adapter_codegen.cpp
     src/dnd/codegen/codegen_cache.cpp
     include/dnd/codegen/unary_kernel_adapter_codegen.hpp
@@ -153,11 +155,12 @@ else(WIN32)
 # Find boost. This works as long as BOOT_ROOT is defined in env
 #     (there may be other ways to specify it though) 
   find_package(Boost REQUIRED)
-  include_directories(${Boost_INCLUDE_DIR})
   message(STATUS "** Boost Include: ${Boost_INCLUDE_DIR}")
+  include_directories(${Boost_INCLUDE_DIR})
 
-  find_package(GTest REQUIRED)
-  include_directories(${GTest_INCLUDE_DIR})
+  enable_testing(true)
+  add_subdirectory(thirdparty/gtest)
+  include_directories(thirdparty/gtest/include)
 endif(WIN32)
 
 include_directories(

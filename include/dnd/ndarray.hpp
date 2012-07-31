@@ -515,12 +515,12 @@ dnd::ndarray::ndarray(std::initializer_list<std::initializer_list<std::initializ
 namespace detail {
     template<class T> struct type_from_array {
         typedef T type;
-        static const int element_size = sizeof(T);
+        static const size_t element_size = sizeof(T);
         static const int type_id = type_id_of<T>::value;
     };
     template<class T, int N> struct type_from_array<T[N]> {
         typedef typename type_from_array<T>::type type;
-        static const int element_size = type_from_array<T>::element_size;
+        static const size_t element_size = type_from_array<T>::element_size;
         static const int type_id = type_from_array<T>::type_id;
     };
 

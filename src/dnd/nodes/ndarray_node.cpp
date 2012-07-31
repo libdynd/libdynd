@@ -68,7 +68,7 @@ void dnd::ndarray_node::get_unary_operation(intptr_t, intptr_t, kernel_instance<
                              "unary nodes which provide an implementation");
 }
 
-void dnd::ndarray_node::get_unary_specialization_operation(unary_specialization_kernel_instance& out_kernel) const
+void dnd::ndarray_node::get_unary_specialization_operation(unary_specialization_kernel_instance& DND_UNUSED(out_kernel)) const
 {
     throw std::runtime_error("unary_specialization_kernel_instance is only valid for "
                              "unary nodes which provide an implementation");
@@ -265,7 +265,7 @@ static ndarray_node_ptr evaluate_strided_array_expression_dtype(ndarray_node* no
     const dtype& dt = node->get_dtype();
     const dtype& value_dt = dt.value_dtype();
     ndarray_node_ptr result;
-    int ndim = node->get_ndim();
+    //int ndim = node->get_ndim();
 
     unary_specialization_kernel_instance operation;
     get_dtype_assignment_kernel(value_dt, dt, assign_error_none, operation);
@@ -332,7 +332,7 @@ static ndarray_node_ptr evaluate_unary_elwise_array(ndarray_node* node, bool cop
     return evaluate_strided_array_kernel(strided_node, copy, access_flags, dt.value_dtype(), operation);
 }
 
-static ndarray_node_ptr evaluate_binary_elwise_array(ndarray_node* node, bool copy, uint32_t access_flags)
+static ndarray_node_ptr evaluate_binary_elwise_array(ndarray_node* node, bool DND_UNUSED(copy), uint32_t access_flags)
 {
     const ndarray_node_ptr& op1 = node->get_opnode(0);
     const ndarray_node_ptr& op2 = node->get_opnode(1);

@@ -29,8 +29,8 @@ TEST(CategoricalDType, Create) {
     d = make_categorical_dtype(a);
     EXPECT_EQ(categorical_type_id, d.type_id());
     EXPECT_EQ(custom_kind, d.kind());
-    EXPECT_EQ(1, d.alignment());
-    EXPECT_EQ(4, d.element_size());
+    EXPECT_EQ(1u, d.alignment());
+    EXPECT_EQ(4u, d.element_size());
 
     cout << d << endl;
 
@@ -76,9 +76,9 @@ TEST(CategoricalDType, Values) {
 
     dtype dt = make_categorical_dtype(a);
 
-    EXPECT_EQ(0, static_cast<const categorical_dtype*>(dt.extended())->get_value_from_category(a(0).get_readonly_originptr()));
-    EXPECT_EQ(1, static_cast<const categorical_dtype*>(dt.extended())->get_value_from_category(a(1).get_readonly_originptr()));
-    EXPECT_EQ(2, static_cast<const categorical_dtype*>(dt.extended())->get_value_from_category(a(2).get_readonly_originptr()));
+    EXPECT_EQ(0u, static_cast<const categorical_dtype*>(dt.extended())->get_value_from_category(a(0).get_readonly_originptr()));
+    EXPECT_EQ(1u, static_cast<const categorical_dtype*>(dt.extended())->get_value_from_category(a(1).get_readonly_originptr()));
+    EXPECT_EQ(2u, static_cast<const categorical_dtype*>(dt.extended())->get_value_from_category(a(2).get_readonly_originptr()));
     EXPECT_THROW(static_cast<const categorical_dtype*>(dt.extended())->get_value_from_category("aaa"), std::runtime_error);
     EXPECT_THROW(static_cast<const categorical_dtype*>(dt.extended())->get_value_from_category("ddd"), std::runtime_error);
     EXPECT_THROW(static_cast<const categorical_dtype*>(dt.extended())->get_value_from_category("zzz"), std::runtime_error);

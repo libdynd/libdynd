@@ -151,6 +151,10 @@ void allocate_executable_memory(memory_block_data * self       //in
               " with chunk size" << emb->m_chunk_size;
         throw std::runtime_error(ss.str());
     }
+    
+    if (emb->m_allocated_chunks.empty())
+        emb->add_chunk();
+    
     void* current_chunk = emb->m_allocated_chunks.back();
     void* begin = emb->m_pivot;
     void* end   = ptr_offset(begin, size_bytes);
@@ -161,7 +165,7 @@ void allocate_executable_memory(memory_block_data * self       //in
         end   = ptr_offset(begin, size_bytes);
     }
 
-    
+    emb->m_pivot = end;
     assert(ptr_in_range(begin
                         , emb->m_allocated_chunks.back()
                         , ptr_offset(emb->m_allocated_chunks.back()
@@ -169,8 +173,9 @@ void allocate_executable_memory(memory_block_data * self       //in
     assert(ptr_in_range(end
                         , emb->m_allocated_chunks.back()
                         , ptr_offset(emb->m_allocated_chunks.back()
-                                     , emb->m_chunk_size)));
+                        , emb->m_chunk_size)));
     assert(((int8_t*)end - (int8_t*)begin) == size_bytes);
+    assert(emb->m_pivot == end);
     *out_begin = static_cast<char*>(begin);
     *out_end = static_cast<char*>(end);
     

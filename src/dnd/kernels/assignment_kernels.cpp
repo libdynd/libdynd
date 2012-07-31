@@ -241,7 +241,7 @@ void dnd::get_dtype_assignment_kernel(
         deque<intptr_t> element_sizes;
         const dtype& src_dt_vdt = src_dt.value_dtype();
         const dtype& dst_dt_vdt = dst_dt.value_dtype();
-        intptr_t next_element_size = 0;
+        //intptr_t next_element_size = 0;
 
         if (src_dt.kind() == expression_kind) {
             // kernel operations from src's storage to value

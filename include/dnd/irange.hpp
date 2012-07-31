@@ -41,7 +41,7 @@ namespace dnd {
 class irange {
     intptr_t m_start, m_finish, m_step;
 public:
-    DND_CONSTEXPR irange()
+    /*DND_CONSTEXPR*/ irange()
         : m_start(std::numeric_limits<intptr_t>::min()),
           m_finish(std::numeric_limits<intptr_t>::max()), m_step(1) {
     }
