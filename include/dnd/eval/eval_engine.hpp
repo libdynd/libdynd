@@ -28,7 +28,7 @@ ndarray_node_ptr evaluate(ndarray_node *node, const eval::eval_context *ectx = &
  *
  * Sets the dst_access_flags, and flips inout_copy_required to true when a copy is needed.
  */
-void process_access_flags_for_eval(uint32_t &dst_access_flags, uint32_t src_access_flags, bool &inout_copy_required);
+void process_access_flags(uint32_t &dst_access_flags, uint32_t src_access_flags, bool &inout_copy_required);
 
 }} // namespace dnd::eval
 

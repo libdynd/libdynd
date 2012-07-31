@@ -109,7 +109,7 @@ ndarray_node_ptr dnd::eval::evaluate_strided_with_unary_kernel(ndarray_node *nod
     int ndim = node->get_ndim();
 
     // Adjust the access flags, and force a copy if the access flags require it
-    process_access_flags_for_eval(access_flags, node->get_access_flags(), copy);
+    eval::process_access_flags(access_flags, node->get_access_flags(), copy);
 
     // For blockref result dtypes, this is the memblock
     // where the variable sized data goes

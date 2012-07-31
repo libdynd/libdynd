@@ -6,6 +6,8 @@
 #ifndef _DND__UNARY_ELWISE_EVAL_HPP_
 #define _DND__UNARY_ELWISE_EVAL_HPP_
 
+#include <deque>
+
 #include <dnd/nodes/ndarray_node.hpp>
 #include <dnd/eval/eval_context.hpp>
 
