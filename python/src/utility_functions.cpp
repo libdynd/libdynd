@@ -184,7 +184,7 @@ bool pydnd::pyarg_bool(PyObject *obj, const char *argname, bool default_value)
 
     if (obj == Py_False) {
         return false;
-    } else if (obj = Py_True) {
+    } else if (obj == Py_True) {
         return true;
     } else {
         stringstream ss;
@@ -200,7 +200,7 @@ uint32_t pydnd::pyarg_access_flags(PyObject* obj)
 
     uint32_t result = 0;
 
-    while (item_raw = PyIter_Next(iterator)) {
+    while ((item_raw = PyIter_Next(iterator))) {
         pyobject_ownref item(item_raw);
         result |= (uint32_t)pyarg_strings_to_int(item, "access_flags", 0,
                     "read", read_access_flag,
