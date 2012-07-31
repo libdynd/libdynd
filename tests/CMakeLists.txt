@@ -31,6 +31,7 @@ set(tests_SRC
     test_shape_tools.cpp
     test_unary_kernel.cpp
     ../thirdparty/gtest/gtest-all.cc
+    ../thirdparty/gtest/gtest_main.cc
     )
 
 include_directories(

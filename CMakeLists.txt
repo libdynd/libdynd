@@ -164,14 +164,10 @@ include_directories(
     )
 else(WIN32)
 # Find boost. This works as long as BOOT_ROOT is defined in env
-#     (there may be other ways to specify it though) 
+#     (there may be other ways to specify it though)
   find_package(Boost REQUIRED)
   message(STATUS "** Boost Include: ${Boost_INCLUDE_DIR}")
   include_directories(${Boost_INCLUDE_DIR})
-
-  enable_testing(true)
-  add_subdirectory(thirdparty/gtest)
-  include_directories(thirdparty/gtest/include)
 endif(WIN32)
 
 include_directories(
