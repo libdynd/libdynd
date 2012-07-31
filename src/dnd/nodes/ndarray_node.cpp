@@ -76,7 +76,9 @@ void dnd::ndarray_node::get_unary_specialization_operation(unary_specialization_
 }
 
 
-void dnd::ndarray_node::get_binary_operation(intptr_t, intptr_t, intptr_t, kernel_instance<binary_operation_t>&) const
+void dnd::ndarray_node::get_binary_operation(intptr_t, intptr_t, intptr_t,
+                        const eval_context *DND_UNUSED(ectx),
+                        kernel_instance<binary_operation_t>&) const
 {
     throw std::runtime_error("get_binary_operation is only valid for "
                              "binary nodes which provide an implementation");
@@ -185,7 +187,8 @@ static void process_access_flags(uint32_t &dst_access_flags, uint32_t src_access
     }
 }
 
-static ndarray_node_ptr evaluate_strided_array_kernel(ndarray_node *node, bool copy, uint32_t access_flags,
+static ndarray_node_ptr evaluate_strided_array_kernel(ndarray_node *node, const eval_context *DND_UNUSED(ectx),
+                                bool copy, uint32_t access_flags,
                                 const dtype& dst_dt, unary_specialization_kernel_instance& operation)
 {
     const dtype& src_dt = node->get_dtype();
@@ -261,7 +264,7 @@ static ndarray_node_ptr evaluate_strided_array_kernel(ndarray_node *node, bool c
     return DND_MOVE(result);
 }
 
-static ndarray_node_ptr evaluate_strided_array_expression_dtype(ndarray_node* node, bool copy, uint32_t access_flags)
+static ndarray_node_ptr evaluate_strided_array_expression_dtype(ndarray_node* node, const eval_context *ectx, bool copy, uint32_t access_flags)
 {
     const dtype& dt = node->get_dtype();
     const dtype& value_dt = dt.value_dtype();
@@ -269,12 +272,13 @@ static ndarray_node_ptr evaluate_strided_array_expression_dtype(ndarray_node* no
     //int ndim = node->get_ndim();
 
     unary_specialization_kernel_instance operation;
-    get_dtype_assignment_kernel(value_dt, dt, assign_error_none, operation);
+    get_dtype_assignment_kernel(value_dt, dt, assign_error_none, ectx, operation);
 
-    return evaluate_strided_array_kernel(node, copy, access_flags, value_dt, operation);
+    return evaluate_strided_array_kernel(node, ectx, copy, access_flags, value_dt, operation);
 }
 
 static ndarray_node *push_front_unary_kernels(ndarray_node* node,
+                    const eval_context *ectx,
                     std::deque<unary_specialization_kernel_instance>& out_kernels,
                     std::deque<intptr_t>& out_element_sizes)
 {
@@ -284,14 +288,14 @@ static ndarray_node *push_front_unary_kernels(ndarray_node* node,
         case strided_array_node_category:
             // The dtype expression kernels
             if (dt.kind() == expression_kind) {
-                push_front_dtype_storage_to_value_kernels(dt, out_kernels, out_element_sizes);
+                push_front_dtype_storage_to_value_kernels(dt, ectx, out_kernels, out_element_sizes);
             }
             return node;
         case elwise_node_category:
             if (node->get_nop() == 1) {
                 // The dtype expression kernels
                 if (dt.kind() == expression_kind) {
-                    push_front_dtype_storage_to_value_kernels(dt, out_kernels, out_element_sizes);
+                    push_front_dtype_storage_to_value_kernels(dt, ectx, out_kernels, out_element_sizes);
                 } else if (out_kernels.empty()) {
                     out_element_sizes.push_front(node->get_opnode(0)->get_dtype().value_dtype().element_size());
                 }
@@ -300,7 +304,7 @@ static ndarray_node *push_front_unary_kernels(ndarray_node* node,
                 out_kernels.push_front(unary_specialization_kernel_instance());
                 node->get_unary_specialization_operation(out_kernels.front());
                 // The kernels from the operand
-                return push_front_unary_kernels(node->get_opnode(0), out_kernels, out_element_sizes);
+                return push_front_unary_kernels(node->get_opnode(0), ectx, out_kernels, out_element_sizes);
             } else {
                 stringstream ss;
                 ss << "evaluating this expression graph (which is further connected to a unary node) is not yet supported:\n";
@@ -318,7 +322,7 @@ static ndarray_node *push_front_unary_kernels(ndarray_node* node,
 
 }
 
-static ndarray_node_ptr evaluate_unary_elwise_array(ndarray_node* node, bool copy, uint32_t access_flags)
+static ndarray_node_ptr evaluate_unary_elwise_array(ndarray_node* node, const eval_context *ectx, bool copy, uint32_t access_flags)
 {
     ndarray_node *op = node->get_opnode(0);
     const dtype& dt = op->get_dtype();
@@ -327,15 +331,15 @@ static ndarray_node_ptr evaluate_unary_elwise_array(ndarray_node* node, bool cop
     deque<unary_specialization_kernel_instance> kernels;
     deque<intptr_t> element_sizes;
 
-    ndarray_node *strided_node = push_front_unary_kernels(node, kernels, element_sizes);
+    ndarray_node *strided_node = push_front_unary_kernels(node, ectx, kernels, element_sizes);
 
     unary_specialization_kernel_instance operation;
     make_buffered_chain_unary_kernel(kernels, element_sizes, operation);
 
-    return evaluate_strided_array_kernel(strided_node, copy, access_flags, dt.value_dtype(), operation);
+    return evaluate_strided_array_kernel(strided_node, ectx, copy, access_flags, dt.value_dtype(), operation);
 }
 
-static ndarray_node_ptr evaluate_binary_elwise_array(ndarray_node* node, bool DND_UNUSED(copy), uint32_t access_flags)
+static ndarray_node_ptr evaluate_binary_elwise_array(ndarray_node* node, const eval_context *ectx, bool DND_UNUSED(copy), uint32_t access_flags)
 {
     ndarray_node *op1 = node->get_opnode(0);
     ndarray_node *op2 = node->get_opnode(1);
@@ -354,7 +358,7 @@ static ndarray_node_ptr evaluate_binary_elwise_array(ndarray_node* node, bool DN
         intptr_t src0_stride = iter.innerstride<1>();
         intptr_t src1_stride = iter.innerstride<2>();
         kernel_instance<binary_operation_t> operation;
-        node->get_binary_operation(dst_stride, src0_stride, src1_stride, operation);
+        node->get_binary_operation(dst_stride, src0_stride, src1_stride, ectx, operation);
         if (innersize > 0) {
             do {
                 operation.kernel(iter.data<0>(), dst_stride,
@@ -437,7 +441,7 @@ static ndarray_node_ptr make_elwise_reduce_result(const dtype& result_dt, uint32
     return DND_MOVE(result);
 }
 
-static ndarray_node_ptr evaluate_elwise_reduce_array(ndarray_node* node, bool copy, uint32_t access_flags)
+static ndarray_node_ptr evaluate_elwise_reduce_array(ndarray_node* node, const eval_context *ectx, bool copy, uint32_t access_flags)
 {
     elwise_reduce_kernel_node *rnode = static_cast<elwise_reduce_kernel_node*>(node);
     ndarray_node *strided_node = rnode->get_opnode(0);
@@ -454,7 +458,7 @@ static ndarray_node_ptr evaluate_elwise_reduce_array(ndarray_node* node, bool co
 
     if (strided_node->get_category() != strided_array_node_category ||
                     strided_node->get_dtype().kind() == expression_kind) {
-        strided_node = push_front_unary_kernels(strided_node, kernels, element_sizes);
+        strided_node = push_front_unary_kernels(strided_node, ectx, kernels, element_sizes);
     }
 
     // Adjust the access flags, and force a copy if the access flags require it
@@ -611,7 +615,7 @@ static ndarray_node_ptr evaluate_elwise_reduce_array(ndarray_node* node, bool co
     return DND_MOVE(result);
 }
 
-ndarray_node_ptr dnd::ndarray_node::eval(bool copy, uint32_t access_flags)
+ndarray_node_ptr dnd::ndarray_node::eval(const eval_context *ectx, bool copy, uint32_t access_flags)
 {
     if ((access_flags&(immutable_access_flag|write_access_flag)) == (immutable_access_flag|write_access_flag)) {
         throw runtime_error("Cannot create an ndarray which is both writeable and immutable");
@@ -629,21 +633,21 @@ ndarray_node_ptr dnd::ndarray_node::eval(bool copy, uint32_t access_flags)
                     return copy_strided_array(this, access_flags);
                 }
             } else {
-                return evaluate_strided_array_expression_dtype(this, copy, access_flags);
+                return evaluate_strided_array_expression_dtype(this, ectx, copy, access_flags);
             }
             break;
         case elwise_node_category: {
             switch (get_nop()) {
                 case 1:
-                    return evaluate_unary_elwise_array(this, copy, access_flags);
+                    return evaluate_unary_elwise_array(this, ectx, copy, access_flags);
                 case 2:
-                    return evaluate_binary_elwise_array(this, copy, access_flags);
+                    return evaluate_binary_elwise_array(this, ectx, copy, access_flags);
                 default:
                     break;
             }
         }
         case elwise_reduce_node_category:
-            return evaluate_elwise_reduce_array(this, copy, access_flags);
+            return evaluate_elwise_reduce_array(this, ectx, copy, access_flags);
         case arbitrary_node_category:
             throw std::runtime_error("evaluate is not yet implemented for"
                             " nodes with an arbitrary_node_category category");

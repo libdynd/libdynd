@@ -82,14 +82,16 @@ bool dnd::byteswap_dtype::operator==(const extended_dtype& rhs) const
     }
 }
 
-const unary_specialization_kernel_instance&  dnd::byteswap_dtype::get_operand_to_value_kernel() const
+void dnd::byteswap_dtype::get_operand_to_value_kernel(const eval_context *DND_UNUSED(ectx),
+                        unary_specialization_kernel_instance& out_borrowed_kernel) const
 {
-    return m_byteswap_kernel;
+    out_borrowed_kernel.borrow_from(m_byteswap_kernel);
 }
 
-const unary_specialization_kernel_instance&  dnd::byteswap_dtype::get_value_to_operand_kernel() const
+void dnd::byteswap_dtype::get_value_to_operand_kernel(const eval_context *ectx,
+                        unary_specialization_kernel_instance& out_borrowed_kernel) const
 {
-    return m_byteswap_kernel;
+    out_borrowed_kernel.borrow_from(m_byteswap_kernel);
 }
 
 dtype dnd::byteswap_dtype::with_replaced_storage_dtype(const dtype& replacement_dtype) const

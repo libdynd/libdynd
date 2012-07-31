@@ -223,15 +223,13 @@ public:
     }
 
     /**
-     * If this auxiliary data has a kernel API associated with it,
-     * returns a pointer to that API, otherwise returns NULL.
+     * Returns the kernel API, assuming the auxdata is either
+     * originally allocated or borrowed. The caller must be sure
+     * that it is ok to get this, for example if the kernel api is
+     * required for a blockref destination dtype.
      */
     auxdata_kernel_api *get_kernel_api() const {
-        if ((m_auxdata&1) == 0) {
-            return reinterpret_cast<AuxDataBase *>(m_auxdata)->kernel_api;
-        } else {
-            return NULL;
-        }
+        return reinterpret_cast<AuxDataBase *>(m_auxdata&~1)->kernel_api;
     }
 
     /**

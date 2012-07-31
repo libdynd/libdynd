@@ -17,6 +17,7 @@
 #include <dnd/kernels/single_compare_kernel_instance.hpp>
 #include <dnd/kernels/unary_kernel_instance.hpp>
 #include <dnd/string_encodings.hpp>
+#include <dnd/eval/eval_context.hpp>
 
 namespace dnd {
 
@@ -288,10 +289,12 @@ public:
 
     virtual bool operator==(const extended_dtype& rhs) const = 0;
 
-    // For expression_kind dtypes - converts from (operand_dtype().value_dtype()) to (value_dtype())
-    virtual const unary_specialization_kernel_instance& get_operand_to_value_kernel() const;
-    // For expression_kind dtypes - converts from (value_dtype()) to (operand_dtype().value_dtype())
-    virtual const unary_specialization_kernel_instance& get_value_to_operand_kernel() const;
+    /** For expression_kind dtypes - converts from (operand_dtype().value_dtype()) to (value_dtype()) */
+    virtual void get_operand_to_value_kernel(const eval_context *ectx,
+                            unary_specialization_kernel_instance& out_borrowed_kernel) const;
+    /** For expression_kind dtypes - converts from (value_dtype()) to (operand_dtype().value_dtype()) */
+    virtual void get_value_to_operand_kernel(const eval_context *ectx,
+                            unary_specialization_kernel_instance& out_borrowed_kernel) const;
 
     /**
      * This method is for expression dtypes, and is a way to substitute

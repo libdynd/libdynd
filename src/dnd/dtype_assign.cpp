@@ -33,6 +33,9 @@ std::ostream& dnd::operator<<(ostream& o, assign_error_mode errmode)
         case assign_error_inexact:
             o << "inexact";
             break;
+        case assign_error_default:
+            o << "default";
+            break;
         default:
             o << "invalid error mode(" << (int)errmode << ")";
             break;
@@ -169,12 +172,25 @@ bool dnd::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt)
 }
 
 
-void dnd::dtype_assign(const dtype& dst_dt, char *dst, const dtype& src_dt, const char *src, assign_error_mode errmode)
+void dnd::dtype_assign(const dtype& dst_dt, char *dst, const dtype& src_dt, const char *src,
+                assign_error_mode errmode, const eval_context *ectx)
 {
     DND_ASSERT_ALIGNED(dst, 0, dst_dt.alignment(), "dst dtype: " << dst_dt << ", src dtype: " << src_dt);
     DND_ASSERT_ALIGNED(src, 0, src_dt.alignment(), "src dtype: " << src_dt << ", dst dtype: " << dst_dt);
     if (dst_dt.get_memory_management() != pod_memory_management) {
         throw runtime_error("dtype_assign can only be used with POD destination memory");
+    }
+
+    if (errmode == assign_error_default) {
+        if (ectx != NULL) {
+            errmode = ectx->default_assign_error_mode;
+        } else if (dst_dt == src_dt) {
+            errmode = assign_error_none;
+        } else {
+            stringstream ss;
+            ss << "assignment from " << src_dt << " to " << dst_dt << " with default error mode requires an eval_context";
+            throw runtime_error(ss.str());
+        }
     }
 
     if (dst_dt.extended() == NULL && src_dt.extended() == NULL) {
@@ -186,12 +202,12 @@ void dnd::dtype_assign(const dtype& dst_dt, char *dst, const dtype& src_dt, cons
         }
 
         stringstream ss;
-        ss << "assignment from " << src_dt << " to " << dst_dt << " isn't yet supported";
+        ss << "assignment from " << src_dt << " to " << dst_dt << " with error mode " << errmode << " isn't yet supported";
         throw std::runtime_error(ss.str());
     } else {
         // Fall back to the strided assignment functions for the extended dtypes
         unary_specialization_kernel_instance op;
-        get_dtype_assignment_kernel(dst_dt, src_dt, errmode, op);
+        get_dtype_assignment_kernel(dst_dt, src_dt, errmode, ectx, op);
         op.specializations[scalar_unary_specialization](dst, 0, src, 0, 1, op.auxdata);
         return;
     }
@@ -199,7 +215,7 @@ void dnd::dtype_assign(const dtype& dst_dt, char *dst, const dtype& src_dt, cons
 
 void dnd::dtype_strided_assign(const dtype& dst_dt, char *dst, intptr_t dst_stride,
                             const dtype& src_dt, const char *src, intptr_t src_stride,
-                            intptr_t count, assign_error_mode errmode)
+                            intptr_t count, assign_error_mode errmode, const eval_context *ectx)
 {
     if (dst_dt.get_memory_management() != pod_memory_management) {
         throw runtime_error("dtype_strided_assign can only be used with POD destination memory");
@@ -207,7 +223,7 @@ void dnd::dtype_strided_assign(const dtype& dst_dt, char *dst, intptr_t dst_stri
 
     unary_specialization_kernel_instance op;
     get_dtype_assignment_kernel(dst_dt, src_dt,
-                                errmode, op);
+                                errmode, ectx, op);
     op.specializations[get_unary_specialization(dst_stride, dst_dt.element_size(), src_stride, src_dt.element_size())](
                 dst, dst_stride, src, src_stride, count, op.auxdata);
 }

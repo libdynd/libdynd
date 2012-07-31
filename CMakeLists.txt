@@ -65,6 +65,11 @@ set(dnd_SRC
     include/dnd/dtypes/string_dtype.hpp
     include/dnd/dtypes/view_dtype.hpp
     include/dnd/dtypes/void_pointer_dtype.hpp
+    # Eval
+    src/dnd/eval/eval_context.cpp
+    src/dnd/eval/eval_engine.cpp
+    include/dnd/eval/eval_context.hpp
+    include/dnd/eval/eval_engine.hpp
     # Nodes
     src/dnd/nodes/elwise_unary_kernel_node.cpp
     src/dnd/nodes/elwise_binary_kernel_node.cpp
@@ -176,6 +181,8 @@ source_group("CodeGen Source" REGULAR_EXPRESSION "src/dnd/codegen/.*cpp")
 source_group("CodeGen Headers" REGULAR_EXPRESSION "include/dnd/codegen/.*hpp")
 source_group("DTypes Source" REGULAR_EXPRESSION "src/dnd/dtypes/.*cpp")
 source_group("DTypes Headers" REGULAR_EXPRESSION "include/dnd/dtypes/.*hpp")
+source_group("Eval Source" REGULAR_EXPRESSION "src/dnd/eval/.*cpp")
+source_group("Eval Headers" REGULAR_EXPRESSION "include/dnd/eval/.*hpp")
 source_group("Nodes Source" REGULAR_EXPRESSION "src/dnd/nodes/.*cpp")
 source_group("Nodes Headers" REGULAR_EXPRESSION "include/dnd/nodes/.*hpp")
 source_group("Kernels Source" REGULAR_EXPRESSION "src/dnd/kernels/.*cpp")

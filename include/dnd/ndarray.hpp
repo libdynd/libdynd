@@ -202,7 +202,7 @@ public:
      * Evaluates the ndarray node into an immutable strided array, or
      * returns it untouched if it is already both immutable and strided.
      */
-    ndarray eval_immutable() const;
+    ndarray eval_immutable(const eval_context *ectx = &default_eval_context) const;
 
     /**
      * Evaluates the ndarray node into a newly allocated strided array,
@@ -210,7 +210,8 @@ public:
      *
      * @param access_flags  The access flags for the result, default read and write.
      */
-    ndarray eval_copy(uint32_t access_flags=read_access_flag|write_access_flag) const;
+    ndarray eval_copy(const eval_context *ectx = &default_eval_context,
+                        uint32_t access_flags=read_access_flag|write_access_flag) const;
 
     /**
      * Returnas a view of the array as the dtype's storage_dtype, peeling
@@ -251,21 +252,23 @@ public:
     const ndarray operator()(intptr_t idx) const;
 
     /** Does a value-assignment from the rhs array. */
-    void val_assign(const ndarray& rhs, assign_error_mode errmode = assign_error_fractional) const;
+    void val_assign(const ndarray& rhs, assign_error_mode errmode = assign_error_default,
+                        const eval_context *ectx = &default_eval_context) const;
     /** Does a value-assignment from the rhs raw scalar */
-    void val_assign(const dtype& dt, const char *data, assign_error_mode errmode = assign_error_fractional) const;
+    void val_assign(const dtype& dt, const char *data, assign_error_mode errmode = assign_error_default,
+                        const eval_context *ectx = &default_eval_context) const;
 
     /**
      * Converts the array into the specified dtype.
      */
-    ndarray as_dtype(const dtype& dt, assign_error_mode errmode = assign_error_fractional) const;
+    ndarray as_dtype(const dtype& dt, assign_error_mode errmode = assign_error_default) const;
 
     /**
      * Converts the array into the specified explicit template dtype.
      * For example, arr.as_dtype<float>().
      */
     template<class T>
-    ndarray as_dtype(assign_error_mode errmode = assign_error_fractional) const {
+    ndarray as_dtype(assign_error_mode errmode = assign_error_default) const {
         return as_dtype(make_dtype<T>(), errmode);
     }
 
@@ -292,7 +295,7 @@ public:
      * @param errmode  The assignment error mode to use.
      */
     template<class T>
-    T as(assign_error_mode errmode = assign_error_fractional) const;
+    T as(assign_error_mode errmode = assign_error_default) const;
 
     void debug_dump(std::ostream& o, const std::string& indent = "") const;
 

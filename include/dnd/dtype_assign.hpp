@@ -11,6 +11,8 @@
 namespace dnd {
 
 class dtype;
+struct eval_context;
+extern const eval_context default_eval_context;
 
 /**
  * An enumeration for the error checks during assignment.
@@ -23,10 +25,10 @@ enum assign_error_mode {
     /** Overflow and loss of fractional part (for float -> int) checking */
     assign_error_fractional,
     /** Overflow and floating point precision loss checking */
-    assign_error_inexact
+    assign_error_inexact,
+    /** Use the mode specified in the eval_context */
+    assign_error_default
 };
-
-const assign_error_mode assign_error_default = assign_error_fractional;
 
 std::ostream& operator<<(std::ostream& o, assign_error_mode errmode);
 
@@ -39,7 +41,8 @@ bool is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt);
  * use make_unaligned_dtype().
  */
 void dtype_assign(const dtype& dst_dt, char *dst, const dtype& src_dt, const char *src,
-                                assign_error_mode errmode = assign_error_fractional);
+                                assign_error_mode errmode = assign_error_fractional,
+                                const eval_context *ectx = &default_eval_context);
 
 /**
  * Like dtype_assign, but for strided assignment. Requires that the data
@@ -47,7 +50,8 @@ void dtype_assign(const dtype& dst_dt, char *dst, const dtype& src_dt, const cha
  */
 void dtype_strided_assign(const dtype& dst_dt, char *dst, intptr_t dst_stride,
                             const dtype& src_dt, const char *src, intptr_t src_stride,
-                            intptr_t count, assign_error_mode errmode);
+                            intptr_t count, assign_error_mode errmode,
+                            const eval_context *ectx = &default_eval_context);
 
 
 } // namespace dnd
