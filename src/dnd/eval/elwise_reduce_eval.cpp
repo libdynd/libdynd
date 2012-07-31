@@ -16,7 +16,6 @@
 using namespace std;
 using namespace dnd;
 
-
 /**
  * Creates a result array for an elementwise
  * reduce operation.

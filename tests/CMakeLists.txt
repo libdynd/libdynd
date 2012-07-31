@@ -30,22 +30,13 @@ set(tests_SRC
     test_ndarray_views.cpp
     test_shape_tools.cpp
     test_unary_kernel.cpp
+    ../thirdparty/gtest/gtest-all.cc
     )
 
-# TODO: this is awkwardly hardcoded
-if(WIN32)
 include_directories(
-    ../../../googletest/include
-    ../include
+    ../thirdparty
     .
     )
-else(WIN32)
-include_directories(
-    ../../AnimPhys/gtest/include
-    ../include
-    .
-    )
-endif(WIN32)
 
 source_group("DTypes Tests" REGULAR_EXPRESSION "dtypes/.*cpp")
 source_group("CodeGen Tests" REGULAR_EXPRESSION "codegen/.*cpp")
@@ -63,8 +54,6 @@ if(WIN32)
 elseif(APPLE)
     target_link_libraries(dnd_tests
         dynamicndarray
-        gtest
-        gtest_main
         )
 else()
     set_target_properties(dnd_tests
@@ -74,8 +63,6 @@ else()
     target_link_libraries(dnd_tests
         dynamicndarray
         pthread
-        /home/mwiebe/Develop/AnimPhys/gtest/make/gtest-all.o
-        /home/mwiebe/Develop/AnimPhys/gtest/make/gtest_main.o
         )
 endif()
 
