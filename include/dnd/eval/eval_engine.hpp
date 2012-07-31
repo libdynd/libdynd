@@ -23,6 +23,13 @@ namespace dnd {
 ndarray_node_ptr evaluate(ndarray_node *node, const eval_context *ectx = &default_eval_context,
                     bool copy = false, uint32_t access_flags = 0);
 
+/**
+ * Analyzes whether a copy is required from the src to the dst because of the permissions.
+ *
+ * Sets the dst_access_flags, and flips inout_copy_required to true when a copy is needed.
+ */
+void process_access_flags_for_eval(uint32_t &dst_access_flags, uint32_t src_access_flags, bool &inout_copy_required);
+
 } // namespace dnd
 
 #endif // _DND__EVAL_ENGINE_HPP_
