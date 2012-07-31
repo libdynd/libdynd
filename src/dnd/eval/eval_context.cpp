@@ -8,4 +8,4 @@
 using namespace std;
 using namespace dnd;
 
-const eval_context dnd::default_eval_context;
+const eval::eval_context dnd::eval::default_eval_context;

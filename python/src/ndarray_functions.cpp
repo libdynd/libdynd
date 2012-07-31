@@ -109,7 +109,7 @@ dnd::ndarray pydnd::ndarray_vals(const dnd::ndarray& n)
     return n.vals();
 }
 
-dnd::ndarray pydnd::ndarray_eval_copy(const dnd::ndarray& n, PyObject* access_flags, const eval_context *ectx)
+dnd::ndarray pydnd::ndarray_eval_copy(const dnd::ndarray& n, PyObject* access_flags, const eval::eval_context *ectx)
 {
     if (access_flags == Py_None) {
         return n.eval_copy(ectx);

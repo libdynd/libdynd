@@ -369,7 +369,7 @@ std::string dnd::detail::ndarray_as_string(const ndarray& lhs, assign_error_mode
 }
 
 
-static void val_assign_loop(const ndarray& lhs, const ndarray& rhs, assign_error_mode errmode, const eval_context *ectx)
+static void val_assign_loop(const ndarray& lhs, const ndarray& rhs, assign_error_mode errmode, const eval::eval_context *ectx)
 {
     // Get the data pointer and strides of rhs through the standard interface
     const char *rhs_originptr = rhs.get_readonly_originptr();
@@ -403,7 +403,7 @@ static void val_assign_loop(const ndarray& lhs, const ndarray& rhs, assign_error
     }
 }
 
-void dnd::ndarray::val_assign(const ndarray& rhs, assign_error_mode errmode, const eval_context *ectx) const
+void dnd::ndarray::val_assign(const ndarray& rhs, assign_error_mode errmode, const eval::eval_context *ectx) const
 {
     if (get_dtype() == rhs.get_dtype()) {
         val_assign_loop(*this, rhs, assign_error_none, ectx);
@@ -418,7 +418,7 @@ void dnd::ndarray::val_assign(const ndarray& rhs, assign_error_mode errmode, con
     }
 }
 
-void dnd::ndarray::val_assign(const dtype& dt, const char *data, assign_error_mode errmode, const eval_context *ectx) const
+void dnd::ndarray::val_assign(const dtype& dt, const char *data, assign_error_mode errmode, const eval::eval_context *ectx) const
 {
     //cout << "scalar val_assign " << dt << " ptr " << (const void *)data << "\n";
     scalar_copied_if_necessary src(get_dtype(), dt, data, errmode, ectx);
@@ -439,12 +439,12 @@ void dnd::ndarray::val_assign(const dtype& dt, const char *data, assign_error_mo
     }
 }
 
-ndarray dnd::ndarray::eval_immutable(const eval_context *ectx) const
+ndarray dnd::ndarray::eval_immutable(const eval::eval_context *ectx) const
 {
     return ndarray(evaluate(m_node.get_node(), ectx, false, read_access_flag|immutable_access_flag));
 }
 
-ndarray dnd::ndarray::eval_copy(const eval_context *ectx, uint32_t access_flags) const
+ndarray dnd::ndarray::eval_copy(const eval::eval_context *ectx, uint32_t access_flags) const
 {
     return ndarray(evaluate(m_node.get_node(), ectx, true, access_flags));
 }

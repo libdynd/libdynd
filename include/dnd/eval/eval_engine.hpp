@@ -9,7 +9,7 @@
 #include <dnd/eval/eval_context.hpp>
 #include <dnd/nodes/ndarray_node.hpp>
 
-namespace dnd {
+namespace dnd { namespace eval {
 
 /**
  * The main evaluation function, which evaluates an arbitrary ndarray
@@ -20,7 +20,7 @@ namespace dnd {
  * @param copy  If set to true, always makes a copy of the data.
  * @param access_flags  The requested access flags for the result, or 0 if anything is ok.
  */
-ndarray_node_ptr evaluate(ndarray_node *node, const eval_context *ectx = &default_eval_context,
+ndarray_node_ptr evaluate(ndarray_node *node, const eval::eval_context *ectx = &eval::default_eval_context,
                     bool copy = false, uint32_t access_flags = 0);
 
 /**
@@ -30,6 +30,6 @@ ndarray_node_ptr evaluate(ndarray_node *node, const eval_context *ectx = &defaul
  */
 void process_access_flags_for_eval(uint32_t &dst_access_flags, uint32_t src_access_flags, bool &inout_copy_required);
 
-} // namespace dnd
+}} // namespace dnd::eval
 
 #endif // _DND__EVAL_ENGINE_HPP_

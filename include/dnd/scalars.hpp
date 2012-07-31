@@ -59,7 +59,7 @@ public:
      */
     scalar_copied_if_necessary(const dtype& dst_dtype, const dtype& src_dtype, const char *src_data,
                                     assign_error_mode errmode = assign_error_fractional,
-                                    const eval_context *ectx = &default_eval_context) {
+                                    const eval::eval_context *ectx = &eval::default_eval_context) {
 
         if (dst_dtype == src_dtype) {
             // Pass through the aligned data pointer

@@ -11,8 +11,10 @@
 namespace dnd {
 
 class dtype;
-struct eval_context;
-extern const eval_context default_eval_context;
+namespace eval {
+    struct eval_context;
+    extern const eval_context default_eval_context;
+} // namespace eval
 
 /**
  * An enumeration for the error checks during assignment.
@@ -42,7 +44,7 @@ bool is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt);
  */
 void dtype_assign(const dtype& dst_dt, char *dst, const dtype& src_dt, const char *src,
                                 assign_error_mode errmode = assign_error_fractional,
-                                const eval_context *ectx = &default_eval_context);
+                                const eval::eval_context *ectx = &eval::default_eval_context);
 
 /**
  * Like dtype_assign, but for strided assignment. Requires that the data
@@ -51,7 +53,7 @@ void dtype_assign(const dtype& dst_dt, char *dst, const dtype& src_dt, const cha
 void dtype_strided_assign(const dtype& dst_dt, char *dst, intptr_t dst_stride,
                             const dtype& src_dt, const char *src, intptr_t src_stride,
                             intptr_t count, assign_error_mode errmode,
-                            const eval_context *ectx = &default_eval_context);
+                            const eval::eval_context *ectx = &eval::default_eval_context);
 
 
 } // namespace dnd

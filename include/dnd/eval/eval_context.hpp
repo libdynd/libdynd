@@ -9,7 +9,7 @@
 #include <dnd/config.hpp>
 #include <dnd/dtype_assign.hpp>
 
-namespace dnd {
+namespace dnd { namespace eval {
 
 struct eval_context {
     assign_error_mode default_assign_error_mode;
@@ -22,6 +22,6 @@ struct eval_context {
 
 extern const eval_context default_eval_context;
 
-} // namespace dnd
+}} // namespace dnd::eval
 
 #endif // _DND__EVAL_CONTEXT_HPP_

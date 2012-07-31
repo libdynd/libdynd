@@ -49,7 +49,7 @@ void multiple_assignment_kernel(char *dst, intptr_t dst_stride, const char *src,
 void get_builtin_dtype_assignment_kernel(
                     type_id_t dst_type_id, type_id_t src_type_id,
                     assign_error_mode errmode,
-                    const eval_context *ectx,
+                    const eval::eval_context *ectx,
                     unary_specialization_kernel_instance& out_kernel);
 
 /**
@@ -70,7 +70,7 @@ void get_pod_dtype_assignment_kernel(
  */
 void get_dtype_assignment_kernel(const dtype& dst_dt, const dtype& src_dt,
                     assign_error_mode errmode,
-                    const eval_context *ectx,
+                    const eval::eval_context *ectx,
                     unary_specialization_kernel_instance& out_kernel);
 
 /**

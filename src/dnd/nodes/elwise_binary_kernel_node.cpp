@@ -56,7 +56,7 @@ ndarray_node_ptr dnd::elwise_binary_kernel_node::apply_linear_index(
 
 void dnd::elwise_binary_kernel_node::get_binary_operation(intptr_t dst_fixedstride, intptr_t src0_fixedstride,
                             intptr_t src1_fixedstride,
-                            const eval_context *ectx,
+                            const eval::eval_context *ectx,
                             kernel_instance<binary_operation_t>& out_kernel) const
 {
     if (m_dtype.kind() != expression_kind &&

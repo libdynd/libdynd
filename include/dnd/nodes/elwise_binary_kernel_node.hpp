@@ -96,7 +96,7 @@ public:
 
     void get_binary_operation(intptr_t dst_fixedstride, intptr_t src0_fixedstride,
                                 intptr_t src1_fixedstride,
-                                const eval_context *ectx,
+                                const eval::eval_context *ectx,
                                 kernel_instance<binary_operation_t>& out_kernel) const;
 
     const char *node_name() const {

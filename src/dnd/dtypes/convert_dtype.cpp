@@ -80,7 +80,7 @@ bool dnd::convert_dtype::operator==(const extended_dtype& rhs) const
     }
 }
 
-void dnd::convert_dtype::get_operand_to_value_kernel(const eval_context *ectx,
+void dnd::convert_dtype::get_operand_to_value_kernel(const eval::eval_context *ectx,
                         unary_specialization_kernel_instance& out_borrowed_kernel) const
 {
     if (m_to_value_kernel.specializations != NULL) {
@@ -95,7 +95,7 @@ void dnd::convert_dtype::get_operand_to_value_kernel(const eval_context *ectx,
     }
 }
 
-void dnd::convert_dtype::get_value_to_operand_kernel(const eval_context *ectx,
+void dnd::convert_dtype::get_value_to_operand_kernel(const eval::eval_context *ectx,
                         unary_specialization_kernel_instance& out_borrowed_kernel) const
 {
     if (m_to_operand_kernel.specializations != NULL) {

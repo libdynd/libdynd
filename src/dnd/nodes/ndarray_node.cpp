@@ -69,7 +69,7 @@ void dnd::ndarray_node::get_unary_specialization_operation(unary_specialization_
 
 
 void dnd::ndarray_node::get_binary_operation(intptr_t, intptr_t, intptr_t,
-                        const eval_context *DND_UNUSED(ectx),
+                        const eval::eval_context *DND_UNUSED(ectx),
                         kernel_instance<binary_operation_t>&) const
 {
     throw std::runtime_error("get_binary_operation is only valid for "

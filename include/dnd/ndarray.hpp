@@ -203,7 +203,7 @@ public:
      * Evaluates the ndarray node into an immutable strided array, or
      * returns it untouched if it is already both immutable and strided.
      */
-    ndarray eval_immutable(const eval_context *ectx = &default_eval_context) const;
+    ndarray eval_immutable(const eval::eval_context *ectx = &eval::default_eval_context) const;
 
     /**
      * Evaluates the ndarray node into a newly allocated strided array,
@@ -211,7 +211,7 @@ public:
      *
      * @param access_flags  The access flags for the result, default read and write.
      */
-    ndarray eval_copy(const eval_context *ectx = &default_eval_context,
+    ndarray eval_copy(const eval::eval_context *ectx = &eval::default_eval_context,
                         uint32_t access_flags=read_access_flag|write_access_flag) const;
 
     /**
@@ -254,10 +254,10 @@ public:
 
     /** Does a value-assignment from the rhs array. */
     void val_assign(const ndarray& rhs, assign_error_mode errmode = assign_error_default,
-                        const eval_context *ectx = &default_eval_context) const;
+                        const eval::eval_context *ectx = &eval::default_eval_context) const;
     /** Does a value-assignment from the rhs raw scalar */
     void val_assign(const dtype& dt, const char *data, assign_error_mode errmode = assign_error_default,
-                        const eval_context *ectx = &default_eval_context) const;
+                        const eval::eval_context *ectx = &eval::default_eval_context) const;
 
     /**
      * Converts the array into the specified dtype.
@@ -362,7 +362,7 @@ public:
 
     // Can implicitly convert to an ndarray, by collapsing to a strided array
     operator ndarray() const {
-        return ndarray(evaluate(m_arr.m_node.get_node()));
+        return ndarray(eval::evaluate(m_arr.m_node.get_node()));
     }
 
     friend class ndarray;
@@ -373,7 +373,7 @@ inline ndarray_vals ndarray::vals() const {
 }
 
 inline ndarray& ndarray::operator=(const ndarray_vals& rhs) {
-    m_node = evaluate(rhs.m_arr.m_node.get_node());
+    m_node = eval::evaluate(rhs.m_arr.m_node.get_node());
     return *this;
 }
 

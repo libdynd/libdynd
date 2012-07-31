@@ -473,7 +473,7 @@ void dnd::make_buffered_chain_unary_kernel(std::deque<unary_specialization_kerne
 }
 
 void dnd::push_front_dtype_storage_to_value_kernels(const dnd::dtype& dt,
-                    const eval_context *ectx,
+                    const eval::eval_context *ectx,
                     std::deque<unary_specialization_kernel_instance>& out_kernels,
                     std::deque<intptr_t>& out_element_sizes)
 {
@@ -509,7 +509,7 @@ void dnd::push_front_dtype_storage_to_value_kernels(const dnd::dtype& dt,
 }
 
 void dnd::push_back_dtype_value_to_storage_kernels(const dnd::dtype& dt,
-                    const eval_context *ectx,
+                    const eval::eval_context *ectx,
                     std::deque<unary_specialization_kernel_instance>& out_kernels,
                     std::deque<intptr_t>& out_element_sizes)
 {

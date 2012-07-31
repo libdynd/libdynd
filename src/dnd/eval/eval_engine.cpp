@@ -16,6 +16,7 @@
 
 using namespace std;
 using namespace dnd;
+using namespace dnd::eval;
 
 
 static ndarray_node_ptr copy_strided_array(ndarray_node* node, uint32_t access_flags)
@@ -90,7 +91,7 @@ static ndarray_node_ptr copy_strided_array(ndarray_node* node, uint32_t access_f
     return result;
 }
 
-void dnd::process_access_flags_for_eval(uint32_t &dst_access_flags, uint32_t src_access_flags, bool &inout_copy_required)
+void dnd::eval::process_access_flags_for_eval(uint32_t &dst_access_flags, uint32_t src_access_flags, bool &inout_copy_required)
 {
     if (dst_access_flags != 0 && dst_access_flags != src_access_flags) {
         if (dst_access_flags&write_access_flag) {
@@ -112,7 +113,7 @@ void dnd::process_access_flags_for_eval(uint32_t &dst_access_flags, uint32_t src
     }
 }
 
-static ndarray_node_ptr evaluate_strided_array_expression_dtype(ndarray_node* node, const eval_context *ectx, bool copy, uint32_t access_flags)
+static ndarray_node_ptr evaluate_strided_array_expression_dtype(ndarray_node* node, const eval::eval_context *ectx, bool copy, uint32_t access_flags)
 {
     const dtype& dt = node->get_dtype();
     const dtype& value_dt = dt.value_dtype();
@@ -125,7 +126,7 @@ static ndarray_node_ptr evaluate_strided_array_expression_dtype(ndarray_node* no
     return evaluate_strided_with_unary_kernel(node, ectx, copy, access_flags, value_dt, operation);
 }
 
-static ndarray_node_ptr evaluate_binary_elwise_array(ndarray_node* node, const eval_context *ectx, bool DND_UNUSED(copy), uint32_t access_flags)
+static ndarray_node_ptr evaluate_binary_elwise_array(ndarray_node* node, const eval::eval_context *ectx, bool DND_UNUSED(copy), uint32_t access_flags)
 {
     ndarray_node *op1 = node->get_opnode(0);
     ndarray_node *op2 = node->get_opnode(1);
@@ -227,7 +228,7 @@ static ndarray_node_ptr make_elwise_reduce_result(const dtype& result_dt, uint32
     return DND_MOVE(result);
 }
 
-static ndarray_node_ptr evaluate_elwise_reduce_array(ndarray_node* node, const eval_context *ectx, bool copy, uint32_t access_flags)
+static ndarray_node_ptr evaluate_elwise_reduce_array(ndarray_node* node, const eval::eval_context *ectx, bool copy, uint32_t access_flags)
 {
     elwise_reduce_kernel_node *rnode = static_cast<elwise_reduce_kernel_node*>(node);
     ndarray_node *strided_node = rnode->get_opnode(0);
@@ -401,7 +402,7 @@ static ndarray_node_ptr evaluate_elwise_reduce_array(ndarray_node* node, const e
     return DND_MOVE(result);
 }
 
-ndarray_node_ptr dnd::evaluate(ndarray_node *node, const eval_context *ectx, bool copy, uint32_t access_flags)
+ndarray_node_ptr dnd::eval::evaluate(ndarray_node *node, const eval::eval_context *ectx, bool copy, uint32_t access_flags)
 {
     if ((access_flags&(immutable_access_flag|write_access_flag)) == (immutable_access_flag|write_access_flag)) {
         throw runtime_error("Cannot create an ndarray which is both writeable and immutable");

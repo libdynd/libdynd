@@ -290,10 +290,10 @@ public:
     virtual bool operator==(const extended_dtype& rhs) const = 0;
 
     /** For expression_kind dtypes - converts from (operand_dtype().value_dtype()) to (value_dtype()) */
-    virtual void get_operand_to_value_kernel(const eval_context *ectx,
+    virtual void get_operand_to_value_kernel(const eval::eval_context *ectx,
                             unary_specialization_kernel_instance& out_borrowed_kernel) const;
     /** For expression_kind dtypes - converts from (value_dtype()) to (operand_dtype().value_dtype()) */
-    virtual void get_value_to_operand_kernel(const eval_context *ectx,
+    virtual void get_value_to_operand_kernel(const eval::eval_context *ectx,
                             unary_specialization_kernel_instance& out_borrowed_kernel) const;
 
     /**

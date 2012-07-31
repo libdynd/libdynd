@@ -126,7 +126,7 @@ public:
     virtual void get_unary_specialization_operation(unary_specialization_kernel_instance& out_kernel) const;
     virtual void get_binary_operation(intptr_t dst_fixedstride, intptr_t src1_fixedstride,
                                     intptr_t src2_fixedstride,
-                                    const eval_context *ectx,
+                                    const eval::eval_context *ectx,
                                     kernel_instance<binary_operation_t>& out_kernel) const;
 
     /**

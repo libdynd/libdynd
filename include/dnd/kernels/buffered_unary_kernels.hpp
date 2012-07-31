@@ -39,7 +39,7 @@ void make_buffered_chain_unary_kernel(std::deque<unary_specialization_kernel_ins
  * caller must verify this before calling.
  */
 void push_front_dtype_storage_to_value_kernels(const dnd::dtype& dt,
-                    const eval_context *ectx,
+                    const eval::eval_context *ectx,
                     std::deque<unary_specialization_kernel_instance>& out_kernels,
                     std::deque<intptr_t>& out_element_sizes);
 
@@ -53,7 +53,7 @@ void push_front_dtype_storage_to_value_kernels(const dnd::dtype& dt,
  * caller must verify this before calling.
  */
 void push_back_dtype_value_to_storage_kernels(const dnd::dtype& dt,
-                    const eval_context *ectx,
+                    const eval::eval_context *ectx,
                     std::deque<unary_specialization_kernel_instance>& out_kernels,
                     std::deque<intptr_t>& out_element_sizes);
 
