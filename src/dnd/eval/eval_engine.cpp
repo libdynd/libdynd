@@ -358,7 +358,7 @@ static ndarray_node_ptr evaluate_elwise_reduce_array(ndarray_node* node, const e
     raw_ndarray_iter<1,1> iter(src_ndim, adjusted_src_shape.get(),
                     result_originptr, result_strides.get(),
                     src_originptr, adjusted_src_strides.get());
-    
+
     // Get the kernel to use in the inner loop
     kernel_instance<unary_operation_t> reduce_operation;
     unary_operation_t reduce_op_duped[4];
@@ -370,7 +370,7 @@ static ndarray_node_ptr evaluate_elwise_reduce_array(ndarray_node* node, const e
                                                 src0_stride, strided_node->get_dtype().storage_dtype().element_size());
 
     // Create the reduction kernel
-    rnode->get_unary_operation(reduce_operation);
+    rnode->get_unary_operation(dst_stride, src0_stride, reduce_operation);
     if (!kernels.empty()) {
         // Create a unary specialization kernel by replicating the general kernel
         element_sizes.push_back(node->get_dtype().element_size());
