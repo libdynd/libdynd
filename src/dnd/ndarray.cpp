@@ -441,12 +441,12 @@ void dnd::ndarray::val_assign(const dtype& dt, const char *data, assign_error_mo
 
 ndarray dnd::ndarray::eval_immutable(const eval_context *ectx) const
 {
-    return ndarray(m_node->eval(ectx, false, read_access_flag|immutable_access_flag));
+    return ndarray(evaluate(m_node.get_node(), ectx, false, read_access_flag|immutable_access_flag));
 }
 
 ndarray dnd::ndarray::eval_copy(const eval_context *ectx, uint32_t access_flags) const
 {
-    return ndarray(m_node->eval(ectx, true, access_flags));
+    return ndarray(evaluate(m_node.get_node(), ectx, true, access_flags));
 }
 
 

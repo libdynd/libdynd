@@ -16,6 +16,7 @@
 #include <dnd/dtype_assign.hpp>
 #include <dnd/shortvector.hpp>
 #include <dnd/irange.hpp>
+#include <dnd/eval/eval_engine.hpp>
 #include <dnd/nodes/ndarray_node.hpp>
 #include <dnd/nodes/strided_ndarray_node.hpp>
 #include <dnd/memblock/fixed_size_pod_memory_block.hpp>
@@ -361,7 +362,7 @@ public:
 
     // Can implicitly convert to an ndarray, by collapsing to a strided array
     operator ndarray() const {
-        return ndarray(m_arr.m_node->eval());
+        return ndarray(evaluate(m_arr.m_node.get_node()));
     }
 
     friend class ndarray;
@@ -372,7 +373,7 @@ inline ndarray_vals ndarray::vals() const {
 }
 
 inline ndarray& ndarray::operator=(const ndarray_vals& rhs) {
-    m_node = rhs.m_arr.m_node->eval();
+    m_node = evaluate(rhs.m_arr.m_node.get_node());
     return *this;
 }
 

@@ -130,16 +130,6 @@ public:
                                     kernel_instance<binary_operation_t>& out_kernel) const;
 
     /**
-     * Evaluates the node into a strided array with a dtype that is
-     * not expression_kind.
-     *
-     * @param ectx  The evaluation context to use.
-     * @param copy  If set to true, always makes a copy of the data.
-     * @param access_flags  The requested access flags for the result, or 0 if anything is ok.
-     */
-    ndarray_node_ptr eval(const eval_context *ectx = &default_eval_context, bool copy = false, uint32_t access_flags = 0);
-
-    /**
      * Converts this node to a new dtype. This uses a convert_dtype.
      */
     virtual ndarray_node_ptr as_dtype(const dtype& dt,

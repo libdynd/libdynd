@@ -3,7 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#if defined(_WIN32) && defined(_M_X64)
+#if defined(__GNUC__ )
 
 #include <Windows.h>
 
