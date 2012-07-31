@@ -120,7 +120,7 @@ PyObject *pydnd::elwise_reduce_gfunc::call(PyObject *args, PyObject *kwargs)
         shortvector<dnd_bool> reduce_axes(arg0.get_ndim());
 
         // axis=[integer OR tuple of integers]
-        pyarg_axis_argument(PyDict_GetItemString(kwargs, "axis"), arg0.get_ndim(), reduce_axes.get());
+        int axis_count = pyarg_axis_argument(PyDict_GetItemString(kwargs, "axis"), arg0.get_ndim(), reduce_axes.get());
 
         // associate=['left' OR 'right']
         bool rightassoc = pyarg_strings_to_int(PyDict_GetItemString(kwargs, "associate"), "associate", 0,
@@ -130,10 +130,15 @@ PyObject *pydnd::elwise_reduce_gfunc::call(PyObject *args, PyObject *kwargs)
         // keepdims
         bool keepdims = pyarg_bool(PyDict_GetItemString(kwargs, "keepdims"), "keepdims", false);
 
-        const dtype& dt0 = arg0.get_dtype();
+        const dtype& dt0 = arg0.get_dtype().value_dtype();
         for (deque<elwise_reduce_gfunc_kernel>::size_type i = 0; i < m_kernels.size(); ++i) {
             const std::vector<dtype>& sig = m_kernels[i].m_sig;
             if (sig.size() == 2 && dt0 == sig[1]) {
+                if (axis_count > 1 && !m_kernels[i].m_commutative) {
+                    stringstream ss;
+                    ss << "Cannot call non-commutative reduce gfunc " << m_name << " with more than one axis";
+                    throw runtime_error(ss.str());
+                }
                 ndarray result(make_elwise_reduce_kernel_node_copy_kernel(
                             sig[0], arg0.get_node(), reduce_axes.get(), rightassoc, keepdims, m_kernels[i].m_identity.get_node(),
                             (!rightassoc || m_kernels[i].m_commutative) ? m_kernels[i].m_left_associative_reduction_kernel :
@@ -176,8 +181,12 @@ std::string pydnd::elwise_reduce_gfunc::debug_dump() const
         if (k.m_right_associative_reduction_kernel.kernel != NULL) {
             o << " right associative kernel aux data: " << (const void *)(const dnd::AuxDataBase *)k.m_right_associative_reduction_kernel.auxdata << "\n";
         }
-        o << " reduction identity:\n";
-        k.m_identity.debug_dump(o, "  ");
+        if (k.m_identity.get_node().get()) {
+            o << " reduction identity:\n";
+            k.m_identity.debug_dump(o, "  ");
+        } else {
+            o << " reduction identity: NULL\n";
+        }
     }
     o << "------" << endl;
     return o.str();

@@ -233,7 +233,7 @@ namespace detail {
             for (int i = 0; i < m_ndim; ++i) o << iterindex(i) << " ";
             o << "\n";
             o << " itershape: ";
-            for (int i = 0; i < m_ndim; ++i) o << itershape(i) << " ";
+            print_shape(o, m_ndim, itershape.get());
             o << "\n";
             o << " data: ";
             for (int k = 0; k < Nwrite + Nread; ++k) o << (void *)m_data[k] << " ";
@@ -388,8 +388,8 @@ public:
 
     raw_ndarray_iter(int ndim, const intptr_t *shape,
                                 const dtype& op0_dt, ndarray_node_ptr& op0, uint32_t op0_access_flags,
-                                const ndarray_node_ptr& op1,
-                                const ndarray_node_ptr& op2)
+                                ndarray_node *op1,
+                                ndarray_node *op2)
     {
         if (op0_dt.kind() == expression_kind) {
             std::stringstream ss;

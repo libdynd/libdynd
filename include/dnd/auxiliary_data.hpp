@@ -189,19 +189,19 @@ public:
      * Clones the auxiliary data, using the AuxDataBase
      * stored clone function.
      */
-    void clone_into(auxiliary_data& out_cloned) const {
-        out_cloned.free();
-        if ((m_auxdata&1) == 1) {
+    void clone_from(const auxiliary_data& rhs) {
+        free();
+        if ((rhs.m_auxdata&1) == 1) {
             // Bit zero is set, copy by value
-            out_cloned.m_auxdata = m_auxdata;
+            m_auxdata = rhs.m_auxdata;
         } else {
             // Bit zero is not set, clone the data
-            out_cloned.m_auxdata = reinterpret_cast<uintptr_t>(
-                            reinterpret_cast<AuxDataBase *>(m_auxdata)->clone(
-                                    reinterpret_cast<AuxDataBase *>(m_auxdata)));
+            m_auxdata = reinterpret_cast<uintptr_t>(
+                            reinterpret_cast<AuxDataBase *>(rhs.m_auxdata)->clone(
+                                    reinterpret_cast<AuxDataBase *>(rhs.m_auxdata)));
 
-            if (out_cloned.m_auxdata == 0) {
-                out_cloned.m_auxdata = 1;
+            if (m_auxdata == 0) {
+                m_auxdata = 1;
                 throw std::bad_alloc();
             }
         }
@@ -214,8 +214,8 @@ public:
      * reference is shorter than the lifetime of the original,
      * no automatic tracking is done.
      */
-    void borrow_into(auxiliary_data& out_borrowed) const {
-        out_borrowed.m_auxdata = m_auxdata|1;
+    void borrow_from(const auxiliary_data& rhs) {
+        m_auxdata = rhs.m_auxdata|1;
     }
 
     void swap(auxiliary_data& rhs) {

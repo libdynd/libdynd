@@ -61,8 +61,7 @@ ndarray_node_ptr dnd::elwise_reduce_kernel_node::apply_linear_index(
     throw std::runtime_error("TODO: elwise_reduce_kernel_node::apply_linear_index");
 }
 
-void dnd::elwise_reduce_kernel_node::get_unary_operation(intptr_t DND_UNUSED(dst_fixedstride), intptr_t DND_UNUSED(src_fixedstride),
-                                kernel_instance<unary_operation_t>& out_kernel) const
+void dnd::elwise_reduce_kernel_node::get_unary_operation(kernel_instance<unary_operation_t>& out_kernel) const
 {
     out_kernel.borrow_from(m_kernel);
 }
@@ -78,8 +77,12 @@ void dnd::elwise_reduce_kernel_node::debug_dump_extra(std::ostream& o, const std
         }
     }
     o << "\n";
-    o << indent << " reduction identity: ";
-    m_identity->debug_dump(o, indent + " ");
+    if (m_identity.get()) {
+        o << indent << " reduction identity:\n";
+        m_identity->debug_dump(o, indent + " ");
+    } else {
+        o << indent << " reduction identity: NULL\n";
+    }
 }
 
 ndarray_node_ptr dnd::make_elwise_reduce_kernel_node_copy_kernel(const dtype& dt, const ndarray_node_ptr& opnode,

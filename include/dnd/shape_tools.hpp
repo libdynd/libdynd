@@ -6,6 +6,7 @@
 #ifndef _DND__SHAPE_TOOLS_HPP_
 #define _DND__SHAPE_TOOLS_HPP_
 
+#include <iostream>
 #include <stdint.h>
 
 #include <dnd/ndarray.hpp>
@@ -99,6 +100,8 @@ inline void multistrides_to_axis_perm(int ndim, int noperands, intptr_t **operst
     multistrides_to_axis_perm(ndim, noperands,
                 const_cast<const intptr_t **>(operstrides), out_axis_perm);
 }
+
+void print_shape(std::ostream& o, int ndim, const intptr_t *shape);
 
 } // namespace dnd
 

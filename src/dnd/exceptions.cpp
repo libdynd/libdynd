@@ -8,21 +8,10 @@
 
 #include <dnd/exceptions.hpp>
 #include <dnd/ndarray.hpp>
+#include <dnd/shape_tools.hpp>
 
 using namespace std;
 using namespace dnd;
-
-static void print_shape(std::ostream& o, int ndim, const intptr_t *shape)
-{
-    o << "(";
-    for (int i = 0; i < ndim; ++i) {
-        o << shape[i];
-        if (i != ndim - 1) {
-            o << ", ";
-        }
-    }
-    o << ")";
-}
 
 inline string broadcast_error_message(int dst_ndim, const intptr_t *dst_shape,
                     int src_ndim, const intptr_t *src_shape)

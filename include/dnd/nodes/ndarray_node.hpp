@@ -117,7 +117,7 @@ public:
         return 0;
     }
 
-    virtual const ndarray_node_ptr& get_opnode(int DND_UNUSED(i)) const {
+    virtual ndarray_node *get_opnode(int DND_UNUSED(i)) const {
         throw std::runtime_error("This ndarray_node does not have any operand nodes");
     }
 
@@ -234,7 +234,7 @@ public:
 
     /** Method to get a pointer to the raw node object */
     ndarray_node *get_node() const {
-        return reinterpret_cast<ndarray_node *>(reinterpret_cast<char *>(get()) + sizeof(memory_block_data));
+        return get() ? reinterpret_cast<ndarray_node *>(reinterpret_cast<char *>(get()) + sizeof(memory_block_data)) : 0;
     }
 
     /** This object behaves like an ndarray_node pointer */

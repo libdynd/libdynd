@@ -301,3 +301,20 @@ void dnd::multistrides_to_axis_perm(int ndim, int noperands, const intptr_t **op
         }
     }
 }
+
+void dnd::print_shape(std::ostream& o, int ndim, const intptr_t *shape)
+{
+    o << "(";
+    for (int i = 0; i < ndim; ++i) {
+        intptr_t size = shape[i];
+        if (size != -1) {
+            o << size;
+        } else {
+            o << ":";
+        }
+        if (i != ndim - 1) {
+            o << ", ";
+        }
+    }
+    o << ")";
+}

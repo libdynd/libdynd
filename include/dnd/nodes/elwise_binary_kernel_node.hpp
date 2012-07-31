@@ -81,8 +81,8 @@ public:
         return 2;
     }
 
-    const ndarray_node_ptr& get_opnode(int i) const {
-        return m_opnodes[i];
+    ndarray_node *get_opnode(int i) const {
+        return m_opnodes[i].get_node();
     }
 
     ndarray_node_ptr as_dtype(const dtype& dt,

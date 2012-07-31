@@ -73,3 +73,4 @@ cdef extern from "ndarray_functions.hpp" namespace "pydnd":
 
     ndarray ndarray_arange(object, object, object) except +
     ndarray ndarray_linspace(object, object, object) except +
+    ndarray ndarray_groupby(ndarray, ndarray, dtype) except +

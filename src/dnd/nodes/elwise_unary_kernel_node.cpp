@@ -46,12 +46,9 @@ ndarray_node_ptr dnd::elwise_unary_kernel_node::apply_linear_index(
     }
 }
 
-void dnd::elwise_unary_kernel_node::get_unary_operation(intptr_t dst_fixedstride, intptr_t src_fixedstride,
-                            kernel_instance<unary_operation_t>& out_kernel) const
+void dnd::elwise_unary_kernel_node::get_unary_specialization_operation(unary_specialization_kernel_instance& out_kernel) const
 {
-    m_kernel.borrow_specialization(get_unary_specialization(dst_fixedstride, m_dtype.element_size(),
-                                                    src_fixedstride, m_opnode->get_dtype().element_size()),
-                                    out_kernel);
+    out_kernel.borrow_from(m_kernel);
 }
 
 

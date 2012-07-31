@@ -52,7 +52,6 @@ inline unary_specialization_t get_unary_specialization(intptr_t dst_stride, intp
  * array, as well as auxiliary data for the kernels.
  */
 struct unary_specialization_kernel_instance {
-public:
     unary_specialization_kernel_instance()
         : specializations(0)
     {
@@ -61,12 +60,24 @@ public:
     unary_specialization_kernel_instance(const unary_specialization_kernel_instance& rhs)
         : specializations(rhs.specializations)
     {
-        rhs.auxdata.clone_into(auxdata);
+        auxdata.clone_from(rhs.auxdata);
+    }
+    unary_specialization_kernel_instance& operator=(const unary_specialization_kernel_instance& rhs)
+    {
+        specializations = rhs.specializations;
+        auxdata.clone_from(rhs.auxdata);
+        return *this;
     }
 
     void swap(unary_specialization_kernel_instance& rhs) {
         std::swap(specializations, rhs.specializations);
         auxdata.swap(rhs.auxdata);
+    }
+
+    void borrow_from(const unary_specialization_kernel_instance& rhs)
+    {
+        specializations = rhs.specializations;
+        auxdata.borrow_from(rhs.auxdata);
     }
 
 
@@ -81,7 +92,7 @@ public:
     void borrow_specialization(unary_specialization_t specialization_id, kernel_instance<unary_operation_t>& out_kernel) const
     {
         out_kernel.kernel = specializations[specialization_id];
-        auxdata.borrow_into(out_kernel.auxdata);
+        out_kernel.auxdata.borrow_from(auxdata);
     }
 
     /**
@@ -96,7 +107,7 @@ public:
     void copy_specialization(unary_specialization_t specialization_id, kernel_instance<unary_operation_t>& out_kernel) const
     {
         out_kernel.kernel = specializations[specialization_id];
-        auxdata.clone_into(out_kernel.auxdata);
+        out_kernel.auxdata.clone_from(auxdata);
     }
 
     // The specializations - a pointer to a static array of function pointers

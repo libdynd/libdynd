@@ -168,6 +168,12 @@ def make_pointer_dtype(target_dtype):
     SET(result.v, dnd_make_pointer_dtype(GET(w_dtype(target_dtype).v)))
     return result
 
+def make_categorical_dtype(values):
+    """Constructs a categorical dtype with the specified values as its categories."""
+    cdef w_dtype result = w_dtype()
+    SET(result.v, dnd_make_categorical_dtype(GET(w_ndarray(values).v)))
+    return result
+
 ##############################################################################
 
 # NOTE: This is a possible alternative to the init_w_ndarray_typeobject() call
@@ -299,6 +305,12 @@ cdef class w_ndarray:
         cdef w_ndarray result = w_ndarray()
         SET(result.v, ndarray_divide(GET(w_ndarray(lhs).v), GET(w_ndarray(rhs).v)))
         return result
+
+def groupby(data, by, groups):
+    """Produces an array containing the elements of `data`, grouped according to `by` which has corresponding shape."""
+    cdef w_ndarray result = w_ndarray()
+    SET(result.v, ndarray_groupby(GET(w_ndarray(data).v), GET(w_ndarray(by).v), GET(w_dtype(groups).v)))
+    return result
 
 def arange(start, stop=None, step=None):
     """Constructs an ndarray representing a stepped range of values."""
