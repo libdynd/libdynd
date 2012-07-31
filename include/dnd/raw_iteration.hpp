@@ -233,7 +233,7 @@ namespace detail {
             for (int i = 0; i < m_ndim; ++i) o << iterindex(i) << " ";
             o << "\n";
             o << " itershape: ";
-            print_shape(o, m_ndim, itershape.get());
+            print_shape(o, m_ndim, itershape());
             o << "\n";
             o << " data: ";
             for (int k = 0; k < Nwrite + Nread; ++k) o << (void *)m_data[k] << " ";

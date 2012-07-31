@@ -29,11 +29,11 @@ TEST(UnaryKernelAdapter, BasicOperations) {
     // NOTE: Cannot cast directly to <void*>, because of a compile error on MSVC:
     //         "Context does not allow for disambiguation of overloaded function"
     cgcache.codegen_unary_function_adapter(make_dtype<int>(), make_dtype<float>(), cdecl_callconv,
-                    reinterpret_cast<int (*)(float)>(&double_value<int, float>), op_int_float);
+                    (void*)reinterpret_cast<int (*)(float)>(&double_value<int, float>), op_int_float);
     cgcache.codegen_unary_function_adapter(make_dtype<float>(), make_dtype<float>(), cdecl_callconv,
-                    reinterpret_cast<float (*)(float)>(&double_value<float, float>), op_float_float);
+                    (void*)reinterpret_cast<float (*)(float)>(&double_value<float, float>), op_float_float);
     cgcache.codegen_unary_function_adapter(make_dtype<float>(), make_dtype<double>(), cdecl_callconv,
-                    reinterpret_cast<float (*)(double)>(&double_value<float, double>), op_float_double);
+                    (void*)reinterpret_cast<float (*)(double)>(&double_value<float, double>), op_float_double);
 
     int int_vals[3];
     float float_vals[3];
@@ -91,7 +91,7 @@ extern "C" void unary__int_int__general_kernel__disassembly_analysis(
     cdecl_func_ptr_t kfunc = reinterpret_cast<cdecl_func_ptr_t>(get_raw_auxiliary_data(auxdata)&(~1));
     for (intptr_t i = 0; i < count; ++i) {
         *(int *)dst = kfunc(*(const int *)src);
-        
+
         dst += dst_stride;
         src += src_stride;
     }

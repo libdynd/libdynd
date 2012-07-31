@@ -80,11 +80,11 @@ public:
         return m_identity.get_node();
     }
 
-    const bool get_keepdims() const {
+    bool get_keepdims() const {
         return m_keepdims;
     }
 
-    const bool get_rightassoc() const {
+    bool get_rightassoc() const {
         return m_rightassoc;
     }
 
@@ -105,7 +105,8 @@ public:
         return "elwise_reduce_kernel";
     }
 
-    void get_unary_operation(kernel_instance<unary_operation_t>& out_kernel) const;
+    void get_unary_operation(intptr_t dst_fixedstride, intptr_t src_fixedstride,
+                                    kernel_instance<unary_operation_t>& out_kernel) const;
 
     void debug_dump_extra(std::ostream& o, const std::string& indent) const;
 

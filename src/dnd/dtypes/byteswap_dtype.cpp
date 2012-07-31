@@ -88,7 +88,7 @@ void dnd::byteswap_dtype::get_operand_to_value_kernel(const eval_context *DND_UN
     out_borrowed_kernel.borrow_from(m_byteswap_kernel);
 }
 
-void dnd::byteswap_dtype::get_value_to_operand_kernel(const eval_context *ectx,
+void dnd::byteswap_dtype::get_value_to_operand_kernel(const eval_context *DND_UNUSED(ectx),
                         unary_specialization_kernel_instance& out_borrowed_kernel) const
 {
     out_borrowed_kernel.borrow_from(m_byteswap_kernel);
