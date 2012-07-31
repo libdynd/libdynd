@@ -41,7 +41,7 @@ memory_block_ptr dnd::make_fixed_size_pod_memory_block(intptr_t size_bytes, intp
 }
 
 memory_block_ptr dnd::make_fixed_size_pod_memory_block(intptr_t size_bytes, intptr_t alignment, char **out_datapointer,
-                memory_block_ptr *blockrefs_begin, memory_block_ptr *blockrefs_end)
+                const memory_block_ptr *blockrefs_begin, const memory_block_ptr *blockrefs_end)
 {
     int blockrefs_size = blockrefs_end - blockrefs_begin;
     // Calculate the aligned starting point for the data

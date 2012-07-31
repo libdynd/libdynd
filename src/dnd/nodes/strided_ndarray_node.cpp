@@ -81,7 +81,7 @@ dnd::strided_ndarray_node::strided_ndarray_node(const dtype& dt, int ndim,
 
 dnd::strided_ndarray_node::strided_ndarray_node(const dtype& dt, int ndim,
                                 const intptr_t *shape, const int *axis_perm,
-                                int access_flags, memory_block_ptr *blockrefs_begin, memory_block_ptr *blockrefs_end)
+                                int access_flags, const memory_block_ptr *blockrefs_begin, const memory_block_ptr *blockrefs_end)
     : m_ndim(ndim), m_access_flags(access_flags), m_shape(ndim, shape), m_dtype(dt),
       m_originptr(NULL), m_strides(ndim), m_memblock()
 {
@@ -259,7 +259,7 @@ ndarray_node_ptr dnd::make_strided_ndarray_node(const dtype& dt, int ndim, const
 }
 
 ndarray_node_ptr dnd::make_strided_ndarray_node(const dtype& dt, int ndim, const intptr_t *shape, const int *axis_perm,
-                        int access_flags, memory_block_ptr *blockrefs_begin, memory_block_ptr *blockrefs_end)
+                        int access_flags, const memory_block_ptr *blockrefs_begin, const memory_block_ptr *blockrefs_end)
 {
     if (ndim == 0 && access_flags == (read_access_flag|immutable_access_flag)) {
         return make_immutable_scalar_node(dt);

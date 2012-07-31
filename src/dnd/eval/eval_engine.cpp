@@ -115,6 +115,45 @@ static void process_access_flags(uint32_t &dst_access_flags, uint32_t src_access
     }
 }
 
+template<class KernelType>
+static ndarray_node_ptr initialize_dst_memblock(bool copy, const dtype& dst_dt, int ndim, const intptr_t *shape,
+                    const int *axis_perm, uint32_t access_flags,
+                    KernelType& operation,
+                    const memory_block_ptr& src_data_memblock,
+                    memory_block_ptr& out_dst_memblock, char *&out_originptr)
+{
+    ndarray_node_ptr result;
+
+    if (dst_dt.get_memory_management() != blockref_memory_management) {
+        result = make_strided_ndarray_node(dst_dt, ndim, shape, axis_perm,
+                            access_flags, NULL, NULL);
+        // Because we just allocated this buffer, we can write to it even though it
+        // might be marked as readonly because the src memory block is readonly
+        out_originptr = const_cast<char *>(result->get_readonly_originptr());
+    } else {
+        auxdata_kernel_api *api = operation.auxdata.get_kernel_api();
+        if (!copy && api->supports_referencing_src_memory_blocks(operation.auxdata)) {
+            // If the kernel can reference existing memory, add a blockref to the src data
+            result = make_strided_ndarray_node(dst_dt, ndim, shape, axis_perm,
+                            access_flags, &src_data_memblock, &src_data_memblock + 1);
+            // Because we just allocated this buffer, we can write to it even though it
+            // might be marked as readonly because the src memory block is readonly
+            out_originptr = const_cast<char *>(result->get_readonly_originptr());
+        } else {
+            // Otherwise allocate a new memory block for the destination
+            out_dst_memblock = make_pod_memory_block();
+            api->set_dst_memory_block(operation.auxdata, out_dst_memblock.get());
+            result = make_strided_ndarray_node(dst_dt, ndim, shape, axis_perm,
+                            access_flags, &out_dst_memblock, &out_dst_memblock + 1);
+            // Because we just allocated this buffer, we can write to it even though it
+            // might be marked as readonly because the src memory block is readonly
+            out_originptr = const_cast<char *>(result->get_readonly_originptr());
+        }
+    }
+
+    return DND_MOVE(result);
+}
+
 static ndarray_node_ptr evaluate_strided_array_kernel(ndarray_node *node, const eval_context *DND_UNUSED(ectx),
                                 bool copy, uint32_t access_flags,
                                 const dtype& dst_dt, unary_specialization_kernel_instance& operation)
@@ -136,33 +175,8 @@ static ndarray_node_ptr evaluate_strided_array_kernel(ndarray_node *node, const 
     char *result_originptr;
     strides_to_axis_perm(ndim, node_strides, axis_perm.get());
 
-    if (dst_dt.get_memory_management() != blockref_memory_management) {
-        result = make_strided_ndarray_node(dst_dt, ndim, node->get_shape(), axis_perm.get(),
-                            access_flags, NULL, NULL);
-        // Because we just allocated this buffer, we can write to it even though it
-        // might be marked as readonly because the src memory block is readonly
-        result_originptr = const_cast<char *>(result->get_readonly_originptr());
-    } else {
-        auxdata_kernel_api *api = operation.auxdata.get_kernel_api();
-        if (!copy && api->supports_referencing_src_memory_blocks(operation.auxdata)) {
-            // If the kernel can reference existing memory, add a blockref to the src data
-            memory_block_ptr src_memblock = node->get_data_memory_block();
-            result = make_strided_ndarray_node(dst_dt, ndim, node->get_shape(), axis_perm.get(),
-                            access_flags, &src_memblock, &src_memblock + 1);
-            // Because we just allocated this buffer, we can write to it even though it
-            // might be marked as readonly because the src memory block is readonly
-            result_originptr = const_cast<char *>(result->get_readonly_originptr());
-        } else {
-            // Otherwise allocate a new memory block for the destination
-            dst_memblock = make_pod_memory_block();
-            api->set_dst_memory_block(operation.auxdata, dst_memblock.get());
-            result = make_strided_ndarray_node(dst_dt, ndim, node->get_shape(), axis_perm.get(),
-                            access_flags, &dst_memblock, &dst_memblock + 1);
-            // Because we just allocated this buffer, we can write to it even though it
-            // might be marked as readonly because the src memory block is readonly
-            result_originptr = const_cast<char *>(result->get_readonly_originptr());
-        }
-    }
+    result = initialize_dst_memblock(copy, dst_dt, ndim, node->get_shape(), axis_perm.get(),
+                        access_flags, operation, node->get_data_memory_block(), dst_memblock, result_originptr);
 
     // Execute the kernel for all the elements
     raw_ndarray_iter<1,1> iter(node->get_ndim(), node->get_shape(),
