@@ -85,7 +85,9 @@ namespace detail {
         Taux m_auxdata;
 
         // Only make_auxiliary_data<T> can default-construct one of these
-        auxiliary_data_holder() {
+        auxiliary_data_holder()
+            : m_base(), m_auxdata()
+        {
         }
 
         // Only auxiliary_data_holder_free<T> can delete one of these

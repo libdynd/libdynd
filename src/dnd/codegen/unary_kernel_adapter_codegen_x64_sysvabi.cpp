@@ -8,12 +8,14 @@
 
 #if defined(DND_CALL_SYSV_X64)
 
+#include <sstream>
+#include <stdexcept>
+#include <cassert>
+
 #include <dnd/codegen/unary_kernel_adapter_codegen.hpp>
 #include <dnd/memblock/executable_memory_block.hpp>
 #include <dnd/memblock/memory_block.hpp>
 #include <dnd/dtype.hpp>
-#include <sstream>
-#include <stdexcept>
 
 
 namespace
@@ -85,7 +87,7 @@ namespace
             }
         }
     }
-}
+} // anonymous namespace
 
 namespace dnd
 {
@@ -280,6 +282,9 @@ namespace // nameless
     // implemented).
     class function_builder
     {
+        // Make it non-copyable
+        function_builder(const function_builder&);
+        function_builder& operator=(const function_builder&);
     public:
         function_builder(memory_block_data* memblock, size_t estimated_size);
         ~function_builder();
@@ -424,7 +429,7 @@ namespace // nameless
         end_      = 0;
         ok_       = false;
     }
-} // nameless namespace
+} // anonymous namespace
 
 
 unary_operation_t* codegen_unary_function_adapter(const memory_block_ptr& exec_mem_block

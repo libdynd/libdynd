@@ -29,10 +29,10 @@ if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
       "Choose the Python module directory (default site-packages)" FORCE)
 endif()
 
-# Require version >= 1.6
-if(NUMPY_VERSION_DECIMAL LESS 10600)
+# Require version >= 1.5
+if(NUMPY_VERSION_DECIMAL LESS 10500)
     message(FATAL_ERROR,
-        "pydnd requires NumPy >= 1.6")
+        "pydnd requires NumPy >= 1.5")
 endif()
 
 # TODO: introduce a variable for the DND include dir

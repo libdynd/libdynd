@@ -35,14 +35,21 @@ enum comparison_id_t {
 struct single_compare_kernel_instance {
 public:
     single_compare_kernel_instance()
-        : comparisons(0)
+        : comparisons(0), auxdata()
     {
     }
     // Copying a kernel_instance clones the auxiliary data
     single_compare_kernel_instance(const single_compare_kernel_instance& rhs)
-        : comparisons(rhs.comparisons)
+        : comparisons(rhs.comparisons), auxdata()
     {
         auxdata.clone_from(rhs.auxdata);
+    }
+
+    single_compare_kernel_instance& operator=(const single_compare_kernel_instance& rhs)
+    {
+        comparisons = rhs.comparisons;
+        auxdata.clone_from(rhs.auxdata);
+        return *this;
     }
 
     void swap(single_compare_kernel_instance& rhs) {

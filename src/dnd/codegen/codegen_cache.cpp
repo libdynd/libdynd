@@ -14,7 +14,9 @@ using namespace std;
 using namespace dnd;
 
 dnd::codegen_cache::codegen_cache()
-    : m_exec_memblock(make_executable_memory_block())
+    : m_exec_memblock(make_executable_memory_block()),
+        m_cached_unary_kernel_adapters(),
+        m_cached_binary_kernel_adapters()
 {
 }
 
