@@ -9,12 +9,12 @@
 #ifndef _DND__NDARRAY_FUNCTIONS_HPP_
 #define _DND__NDARRAY_FUNCTIONS_HPP_
 
+#include "Python.h"
+
 #include <stdint.h>
 #include <sstream>
 
 #include <dnd/ndarray.hpp>
-
-#include "Python.h"
 
 namespace pydnd {
 

@@ -9,6 +9,8 @@
 #ifndef _DND__NUMPY_INTEROP_HPP_
 #define _DND__NUMPY_INTEROP_HPP_
 
+#include <Python.h>
+
 // Define this to 1 or 0 depending on whether numpy interop
 // should be compiled in.
 #define DND_NUMPY_INTEROP 1
@@ -39,8 +41,6 @@
 
 #include <dnd/dtype.hpp>
 #include <dnd/ndarray.hpp>
-
-#include "Python.h"
 
 #include <numpy/ndarrayobject.h>
 #include <numpy/ufuncobject.h>

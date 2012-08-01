@@ -9,11 +9,11 @@
 #ifndef _DND__CTYPES_INTEROP_HPP_
 #define _DND__CTYPES_INTEROP_HPP_
 
+#include <Python.h>
+
 #include <dnd/dtype.hpp>
 #include <dnd/ndarray.hpp>
 #include <dnd/codegen/calling_conventions.hpp>
-
-#include <Python.h>
 
 namespace pydnd {
 

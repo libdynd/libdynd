@@ -1,12 +1,11 @@
 import sys, os, ctypes, dnd_ctypes
 
-basic_kernels_lib = os.path.join(os.path.dirname(__file__), "basic_kernels")
 if sys.platform == 'win32':
-    basic_kernels_lib += '.dll'
-    basic = ctypes.WinDLL(basic_kernels_lib)
+    libpath = os.path.join(os.path.dirname(__file__), "basic_kernels.dll")
+    basic = ctypes.WinDLL(libpath)
 else:
-    basic_kernels_lib += '.so'
-    basic = ctypes.CDLL(basic_kernels_lib)
+    libpath = os.path.join(os.path.dirname(__file__), "libbasic_kernels.so")
+    basic = ctypes.CDLL(libpath)
 
 def add_basic_kernels(root, types, nargs):
     """Adds simple ctypes kernels to the module namespace dict."""

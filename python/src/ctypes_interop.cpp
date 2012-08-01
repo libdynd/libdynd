@@ -3,6 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
+#include <Python.h>
+
 #include <dnd/dtypes/fixedstring_dtype.hpp>
 #include <dnd/dtypes/pointer_dtype.hpp>
 

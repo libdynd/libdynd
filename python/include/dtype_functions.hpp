@@ -9,13 +9,13 @@
 #ifndef _DND__DTYPE_FUNCTIONS_HPP_
 #define _DND__DTYPE_FUNCTIONS_HPP_
 
+#include "Python.h"
+
 #include <stdint.h>
 #include <sstream>
 
 #include <dnd/dtype.hpp>
 #include <dnd/string_encodings.hpp>
-
-#include "Python.h"
 
 namespace pydnd {
 

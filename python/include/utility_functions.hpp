@@ -6,13 +6,13 @@
 #ifndef _DND__UTILITY_FUNCTIONS_HPP_
 #define _DND__UTILITY_FUNCTIONS_HPP_
 
+#include "Python.h"
+
 #include <stdint.h>
 #include <sstream>
 #include <stdexcept>
 
 #include <dnd/dtype.hpp>
-
-#include "Python.h"
 
 namespace pydnd {
 

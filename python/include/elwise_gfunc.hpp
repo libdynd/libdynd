@@ -6,6 +6,8 @@
 #ifndef _DND__ELWISE_GFUNC_HPP_
 #define _DND__ELWISE_GFUNC_HPP_
 
+#include <Python.h>
+
 #include <stdint.h>
 #include <sstream>
 #include <deque>
@@ -14,8 +16,6 @@
 #include <dnd/dtype.hpp>
 #include <dnd/kernels/kernel_instance.hpp>
 #include <dnd/codegen/codegen_cache.hpp>
-
-#include <Python.h>
 
 namespace pydnd {
 

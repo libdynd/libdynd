@@ -3,6 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
+#include <Python.h>
+
 #include <algorithm>
 
 #include <dnd/nodes/elwise_unary_kernel_node.hpp>
