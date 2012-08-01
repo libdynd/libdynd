@@ -49,8 +49,6 @@ if(WIN32)
     # TODO: Make this not be hardcoded
     target_link_libraries(dnd_tests
         dynamicndarray
-        ../../../../googletest/build-vc10/RelWithDebInfo/gtest
-        ../../../../googletest/build-vc10/RelWithDebInfo/gtest_main
         )
 elseif(APPLE)
     target_link_libraries(dnd_tests
