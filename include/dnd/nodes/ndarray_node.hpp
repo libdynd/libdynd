@@ -38,6 +38,8 @@ enum ndarray_node_category {
     elwise_node_category,
     // The node represents an elementwise reduction 1 to 1 transformation
     elwise_reduce_node_category,
+    // The node represents a groupby operation
+    groupby_node_category,
     // The node represents an arbitrary computation node, which will generally
     // require evaluation to a temporary.
     arbitrary_node_category

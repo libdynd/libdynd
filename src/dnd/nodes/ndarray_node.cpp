@@ -93,6 +93,9 @@ static void print_node_category(ostream& o, ndarray_node_category cat)
         case elwise_reduce_node_category:
             o << "elwise_reduce_node_category";
             break;
+        case groupby_node_category:
+            o << "groupby_node_category";
+            break;
         case arbitrary_node_category:
             o << "arbitrary_node_category";
             break;

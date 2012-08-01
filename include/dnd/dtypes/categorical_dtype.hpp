@@ -44,10 +44,10 @@ public:
         return custom_kind;
     }
     unsigned char alignment() const {
-        return 1;  // TODO
+        return 4; // TODO
     }
     uintptr_t element_size() const {
-        return 4; // TODO;
+        return 4; // TODO
     }
 
     void print_element(std::ostream& o, const char *data) const;

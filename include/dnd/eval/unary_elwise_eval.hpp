@@ -21,7 +21,7 @@ ndarray_node_ptr evaluate_unary_elwise_array(ndarray_node* node, const eval::eva
 /**
  * Applies the unary kernel to the input strided array node.
  */
-ndarray_node_ptr evaluate_strided_with_unary_kernel(ndarray_node *node, const eval::eval_context *DND_UNUSED(ectx),
+ndarray_node_ptr evaluate_strided_with_unary_kernel(ndarray_node *node, const eval::eval_context *ectx,
                                 bool copy, uint32_t access_flags,
                                 const dtype& dst_dt, unary_specialization_kernel_instance& operation);
 

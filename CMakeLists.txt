@@ -69,10 +69,12 @@ set(dnd_SRC
     src/dnd/eval/eval_context.cpp
     src/dnd/eval/eval_engine.cpp
     src/dnd/eval/elwise_reduce_eval.cpp
+    src/dnd/eval/groupby_elwise_reduce_eval.cpp
     src/dnd/eval/unary_elwise_eval.cpp
     include/dnd/eval/eval_context.hpp
     include/dnd/eval/eval_engine.hpp
     include/dnd/eval/elwise_reduce_eval.hpp
+    include/dnd/eval/groupby_elwise_reduce_eval.hpp
     include/dnd/eval/unary_elwise_eval.hpp
     # Nodes
     src/dnd/nodes/elwise_unary_kernel_node.cpp

@@ -7,6 +7,7 @@
 #include <dnd/eval/eval_engine.hpp>
 #include <dnd/eval/unary_elwise_eval.hpp>
 #include <dnd/eval/elwise_reduce_eval.hpp>
+#include <dnd/eval/groupby_elwise_reduce_eval.hpp>
 #include <dnd/kernels/buffered_unary_kernels.hpp>
 #include <dnd/kernels/assignment_kernels.hpp>
 #include <dnd/memblock/fixed_size_pod_memory_block.hpp>
@@ -93,12 +94,16 @@ ndarray_node_ptr dnd::eval::evaluate_elwise_reduce_array(ndarray_node* node,
         throw runtime_error("blockref memory management isn't supported for elwise reduce gfuncs yet");
     }
 
-    // Used when the input
+    // Used when the input is some kind of expression
     deque<unary_specialization_kernel_instance> kernels;
     deque<intptr_t> element_sizes;
 
     if (strided_node->get_category() != strided_array_node_category ||
                     strided_node->get_dtype().kind() == expression_kind) {
+        // If the next node is a groupby, call the special groupby reduction code
+        if (strided_node->get_category() == groupby_node_category) {
+            return evaluate_groupby_elwise_reduce(node, ectx, copy, access_flags);
+        }
         strided_node = push_front_node_unary_kernels(strided_node, ectx, kernels, element_sizes);
     }
 
