@@ -464,8 +464,8 @@ dnd::ndarray::ndarray(std::initializer_list<T> il)
     char *originptr = 0;
     memory_block_ptr memblock = make_fixed_size_pod_memory_block(sizeof(T) * dim0, sizeof(T), &originptr);
     DND_MEMCPY(originptr, il.begin(), sizeof(T) * dim0);
-    m_node.swap(make_strided_ndarray_node(make_dtype<T>(), 1, &dim0, &stride,
-                            originptr, DND_MOVE(memblock)));
+    make_strided_ndarray_node(make_dtype<T>(), 1, &dim0, &stride,
+                            originptr, read_access_flag | write_access_flag, DND_MOVE(memblock)).swap(m_node);
 }
 template<class T>
 dnd::ndarray::ndarray(std::initializer_list<std::initializer_list<T> > il)
@@ -487,8 +487,8 @@ dnd::ndarray::ndarray(std::initializer_list<std::initializer_list<T> > il)
     memory_block_ptr memblock = make_fixed_size_pod_memory_block(sizeof(T) * num_elements, sizeof(T), &originptr);
     T *dataptr = reinterpret_cast<T *>(originptr);
     detail::initializer_list_shape<S>::copy_data(&dataptr, il);
-    m_node.swap(make_strided_ndarray_node(make_dtype<T>(), 2, shape, strides,
-                            originptr, DND_MOVE(memblock)));
+    make_strided_ndarray_node(make_dtype<T>(), 2, shape, strides,
+                        originptr, read_access_flag | write_access_flag, DND_MOVE(memblock)).swap(m_node);
 }
 template<class T>
 dnd::ndarray::ndarray(std::initializer_list<std::initializer_list<std::initializer_list<T> > > il)
@@ -510,8 +510,8 @@ dnd::ndarray::ndarray(std::initializer_list<std::initializer_list<std::initializ
     memory_block_ptr memblock = make_fixed_size_pod_memory_block(sizeof(T) * num_elements, sizeof(T), &originptr);
     T *dataptr = reinterpret_cast<T *>(originptr);
     detail::initializer_list_shape<S>::copy_data(&dataptr, il);
-    m_node.swap(make_strided_ndarray_node(make_dtype<T>(), 3, shape, strides,
-                            originptr, DND_MOVE(memblock)));
+    make_strided_ndarray_node(make_dtype<T>(), 3, shape, strides,
+                    originptr, read_access_flag | write_access_flag, DND_MOVE(memblock)).swap(m_node);
 }
 #endif // DND_INIT_LIST
 

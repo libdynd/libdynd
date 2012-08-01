@@ -17,7 +17,12 @@
 #        operators, exceptions weren't being caught.
 
 include "cpython/object.pxd"
-include "libcpp/string.pxd"
+
+# string.pxd does not exist in older Cython
+#include "libcpp/string.pxd"
+cdef extern from "<string>" namespace "std":
+    cdef cppclass string:
+        char *c_str()
 
 cdef extern from "<stdint.h>":
     # From the Cython docs:

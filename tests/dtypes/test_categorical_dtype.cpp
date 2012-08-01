@@ -50,9 +50,9 @@ TEST(CategoricalDType, Compare) {
     dtype da2 = make_categorical_dtype(a);
     dtype db = make_categorical_dtype(b);
 
-    EXPECT_EQ(true, da == da);
-    EXPECT_EQ(true, da == da2);
-    EXPECT_EQ(false, da == db);
+    EXPECT_TRUE(da == da);
+    EXPECT_TRUE( da == da2);
+    EXPECT_FALSE(da == db);
 
     ndarray i(3, make_dtype<int32_t>());
     i(0).vals() = 0;
@@ -60,9 +60,9 @@ TEST(CategoricalDType, Compare) {
     i(2).vals() = 100;
 
     dtype di = make_categorical_dtype(i);
-    EXPECT_EQ(false, da == di);
+    EXPECT_FALSE(da == di);
 
-    cout << di << endl;
+    // cout << di << endl;
 
 }
 

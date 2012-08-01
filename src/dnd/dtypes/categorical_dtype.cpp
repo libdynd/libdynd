@@ -48,10 +48,10 @@ namespace {
             );
 
             // TODO handle non POD or throw
-            size_t N = cat->m_category_dtype.element_size();
+            size_t N = cat->get_category_dtype().element_size();
             for (intptr_t i = 0; i < count; ++i) {
                 uint32_t value = *reinterpret_cast<const uint32_t *>(src);
-                const char *src_val = cat->m_categories[cat->m_value_to_category_index[value]];
+                const char *src_val = cat->get_category_from_value(value);
                 memcpy(dst, src_val, N);
 
                 dst += dst_stride;
@@ -67,9 +67,9 @@ namespace {
             );
 
             // TODO handle non POD or throw
-            size_t N = cat->m_category_dtype.element_size();
+            size_t N = cat->get_category_dtype().element_size();
             uint32_t value = *reinterpret_cast<const uint32_t *>(src);
-            const char *src_val = cat->m_categories[cat->m_value_to_category_index[value]];
+            const char *src_val = cat->get_category_from_value(value);
             memcpy(dst, src_val, N);
         }
 
@@ -81,9 +81,9 @@ namespace {
             );
 
             // TODO handle non POD or throw
-            size_t N = cat->m_category_dtype.element_size();
+            size_t N = cat->get_category_dtype().element_size();
             uint32_t value = *reinterpret_cast<const uint32_t *>(src);
-            const char *src_val = cat->m_categories[cat->m_value_to_category_index[value]];
+            const char *src_val = cat->get_category_from_value(value);
             for (intptr_t i = 0; i < count; ++i) {
                 memcpy(dst, src_val, N);
 

@@ -20,6 +20,13 @@ init_ctypes_interop()
 init_w_ndarray_typeobject(w_ndarray)
 init_w_dtype_typeobject(w_dtype)
 
+include "dnd.pxd"
+include "codegen_cache.pxd"
+include "dtype.pxd"
+include "ndarray.pxd"
+include "elwise_gfunc.pxd"
+include "elwise_reduce_gfunc.pxd"
+
 # Issue a performance warning if any of the diagnostics macros are enabled
 cdef extern from "<dnd/diagnostics.hpp>" namespace "dnd":
     bint any_diagnostics_enabled()
@@ -30,13 +37,6 @@ if any_diagnostics_enabled():
         pass
     warnings.warn("Performance is reduced because of enabled diagnostics:\n" +
                 str(which_diagnostics_enabled().c_str()), PerformanceWarning)
-
-include "dnd.pxd"
-include "codegen_cache.pxd"
-include "dtype.pxd"
-include "ndarray.pxd"
-include "elwise_gfunc.pxd"
-include "elwise_reduce_gfunc.pxd"
 
 from cython.operator import dereference
 

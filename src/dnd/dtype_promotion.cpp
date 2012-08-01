@@ -43,7 +43,7 @@ dtype dnd::promote_dtypes_arithmetic(const dtype& dt0, const dtype& dt1)
     //cout << "Doing type promotion with value types " << dt0_val << " and " << dt1_val << endl;
 
     if (dt0_ext == NULL && dt1_ext == NULL) {
-        const intptr_t int_size = sizeof(int);
+        const size_t int_size = sizeof(int);
         switch (dt0_val.kind()) {
             case bool_kind:
                 switch (dt1_val.kind()) {

@@ -66,7 +66,18 @@ public:
         return m_categories.size();
     }
 
+    const dtype& get_category_dtype() const {
+        return m_category_dtype;
+    }
+
     uint32_t get_value_from_category(const char *category) const;
+
+    const char *get_category_from_value(uint32_t value) const {
+        if (value >= get_category_count()) {
+            throw std::runtime_error("category value is out of bounds");
+        }
+        return m_categories[m_value_to_category_index[value]];
+    }
 
     bool is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const;
 
