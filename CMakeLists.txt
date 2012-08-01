@@ -53,6 +53,7 @@ set(dnd_SRC
     src/dnd/dtypes/fixedstring_dtype.cpp
     src/dnd/dtypes/pointer_dtype.cpp
     src/dnd/dtypes/string_dtype.cpp
+    src/dnd/dtypes/tuple_dtype.cpp
     src/dnd/dtypes/view_dtype.cpp
     src/dnd/dtypes/void_pointer_dtype.cpp
     include/dnd/dtypes/array_dtype.hpp
@@ -63,6 +64,7 @@ set(dnd_SRC
     include/dnd/dtypes/fixedstring_dtype.hpp
     include/dnd/dtypes/pointer_dtype.hpp
     include/dnd/dtypes/string_dtype.hpp
+    include/dnd/dtypes/tuple_dtype.hpp
     include/dnd/dtypes/view_dtype.hpp
     include/dnd/dtypes/void_pointer_dtype.hpp
     # Eval
