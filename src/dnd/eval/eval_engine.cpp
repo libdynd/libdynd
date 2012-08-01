@@ -194,6 +194,9 @@ ndarray_node_ptr dnd::eval::evaluate(ndarray_node *node, const eval::eval_contex
         }
         case elwise_reduce_node_category:
             return evaluate_elwise_reduce_array(node, ectx, copy, access_flags);
+        case groupby_node_category:
+            throw std::runtime_error("evaluate is not yet implemented for"
+                            " nodes with an groupby_node_category category");
         case arbitrary_node_category:
             throw std::runtime_error("evaluate is not yet implemented for"
                             " nodes with an arbitrary_node_category category");

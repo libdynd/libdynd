@@ -78,9 +78,9 @@ void dnd::tuple_dtype::get_single_compare_kernel(single_compare_kernel_instance&
     throw runtime_error("tuple_dtype::get_single_compare_kernel is unimplemented"); 
 }
 
-void dnd::tuple_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const dtype& src_dt,
-                assign_error_mode errmode,
-                unary_specialization_kernel_instance& out_kernel) const
+void dnd::tuple_dtype::get_dtype_assignment_kernel(const dtype& DND_UNUSED(dst_dt), const dtype& DND_UNUSED(src_dt),
+                assign_error_mode DND_UNUSED(errmode),
+                unary_specialization_kernel_instance& DND_UNUSED(out_kernel)) const
 {
     throw runtime_error("tuple_dtype::get_dtype_assignment_kernel is unimplemented"); 
 }
