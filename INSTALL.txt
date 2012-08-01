@@ -6,7 +6,7 @@ This library requires a C++98 compiler. [TODO: pick supported
 compiler versions and list them here. Should set up build/test
 infrastructure for supported configurations.]
 
- * CMake >= 1.6
+ * CMake >= 2.6
  * Boost (header-only, doesn't require that any libraries be built)
 
 For the Python exposure, the following are also needed.
