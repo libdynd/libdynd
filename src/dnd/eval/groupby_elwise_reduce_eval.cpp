@@ -7,11 +7,34 @@
 #include <dnd/dtypes/categorical_dtype.hpp>
 #include <dnd/eval/groupby_elwise_reduce_eval.hpp>
 #include <dnd/eval/unary_elwise_eval.hpp>
+#include <dnd/kernels/buffered_unary_kernels.hpp>
 #include <dnd/nodes/elwise_reduce_kernel_node.hpp>
 #include <dnd/nodes/groupby_node.hpp>
 
 using namespace std;
 using namespace dnd;
+
+static void groupby_elwise_reduce_loop(char *result_originptr, intptr_t result_stride,
+                const char *data_ptr, intptr_t data_stride,
+                const char *by_ptr, intptr_t by_stride,
+                intptr_t size, int32_t num_groups,
+                const kernel_instance<unary_operation_t>& reduce_operation,
+                const dtype& groups_dt)
+{
+    for (intptr_t i = 0; i < size; ++i) {
+        int32_t group = *reinterpret_cast<const int32_t *>(by_ptr);
+        if ((uint32_t)group < (uint32_t)num_groups) {
+            reduce_operation.kernel(result_originptr + result_stride * group, 0,
+                            data_ptr, 0, 1, reduce_operation.auxdata);
+        } else {
+            stringstream ss;
+            ss << "invalid value " << group << " for categorical dtype " << groups_dt;
+            throw runtime_error(ss.str());
+        }
+        by_ptr += by_stride;
+        data_ptr += data_stride;
+    }
+}
 
 ndarray_node_ptr dnd::eval::evaluate_groupby_elwise_reduce(ndarray_node *node, const eval::eval_context *ectx,
                                 bool copy, uint32_t access_flags)
@@ -25,6 +48,7 @@ ndarray_node_ptr dnd::eval::evaluate_groupby_elwise_reduce(ndarray_node *node, c
     const dtype& groups_dt = gnode->get_groups();
     const categorical_dtype *groups = static_cast<const categorical_dtype *>(groups_dt.extended());
     intptr_t num_groups = groups->get_category_count();
+
 
     // The structure of this node is (node == elwise_reduce_kernel_node) -> (groupby_node) -> (...)
     // The groupby itself isn't stored, but rather the reduction is
@@ -104,21 +128,85 @@ ndarray_node_ptr dnd::eval::evaluate_groupby_elwise_reduce(ndarray_node *node, c
                             num_groups, assign_error_none, ectx);
 
         if (data_kernels.empty() && by_kernels.empty()) {
-            for (intptr_t i = 0; i < size; ++i) {
-                int32_t group = *reinterpret_cast<const int32_t *>(by_ptr);
-                if ((uint32_t)group < (uint32_t)num_groups) {
-                    reduce_operation.kernel(result_originptr + result_stride * group, 0,
-                                    data_ptr, 0, 1, reduce_operation.auxdata);
-                } else {
-                    stringstream ss;
-                    ss << "invalid value " << group << " for categorical dtype " << groups_dt;
-                    throw runtime_error(ss.str());
+            groupby_elwise_reduce_loop(result_originptr, result_stride,
+                        data_ptr, data_stride, by_ptr, by_stride,
+                        size, num_groups,
+                        reduce_operation, groups_dt);
+        } else if (data_kernels.empty()) {
+            unary_specialization_kernel_instance by_operation;
+            make_buffered_chain_unary_kernel(by_kernels, by_element_sizes, by_operation);
+            unary_operation_t by_func = by_operation.specializations[
+                        get_unary_specialization(groups_dt.element_size(), groups_dt.element_size(), by_stride, by_element_sizes.front())];
+            buffer_storage by_buf(by_element_sizes.back(), size);
+            intptr_t count = size;
+            do {
+                intptr_t block_count = by_buf.element_count();
+                if (count < block_count) {
+                    block_count = count;
                 }
-                by_ptr += by_stride;
-                data_ptr += data_stride;
-            }
+
+                by_func(by_buf.storage(), groups_dt.element_size(), by_ptr, by_stride, block_count, by_operation.auxdata);
+
+                groupby_elwise_reduce_loop(result_originptr, result_stride,
+                            data_ptr, data_stride, by_buf.storage(), groups_dt.element_size(),
+                            size, num_groups,
+                            reduce_operation, groups_dt);
+
+                by_ptr += block_count * by_stride;
+                count -= block_count;
+            } while (count > 0);
+        } else if (by_kernels.empty()) {
+            unary_specialization_kernel_instance data_operation;
+            make_buffered_chain_unary_kernel(data_kernels, data_element_sizes, data_operation);
+            unary_operation_t data_func = data_operation.specializations[
+                        get_unary_specialization(data_element_sizes.back(), data_element_sizes.back(), data_stride, data_element_sizes.front())];
+            buffer_storage data_buf(data_element_sizes.back(), size);
+            intptr_t count = size;
+            do {
+                intptr_t block_count = data_buf.element_count();
+                if (count < block_count) {
+                    block_count = count;
+                }
+
+                data_func(data_buf.storage(), data_element_sizes.back(), data_ptr, data_stride, block_count, data_operation.auxdata);
+
+                groupby_elwise_reduce_loop(result_originptr, result_stride,
+                            data_buf.storage(), data_element_sizes.back(), by_ptr, by_stride,
+                            size, num_groups,
+                            reduce_operation, groups_dt);
+
+                data_ptr += block_count * data_stride;
+                count -= block_count;
+            } while (count > 0);
         } else {
-            throw runtime_error("groupby reduction with expression inputs isn't implemented yet");
+            unary_specialization_kernel_instance by_operation, data_operation;
+            make_buffered_chain_unary_kernel(by_kernels, by_element_sizes, by_operation);
+            make_buffered_chain_unary_kernel(data_kernels, data_element_sizes, data_operation);
+            unary_operation_t by_func = by_operation.specializations[
+                        get_unary_specialization(groups_dt.element_size(), groups_dt.element_size(), by_stride, by_element_sizes.front())];
+            unary_operation_t data_func = data_operation.specializations[
+                        get_unary_specialization(data_element_sizes.back(), data_element_sizes.back(), data_stride, data_element_sizes.front())];
+            buffer_storage by_buf(by_element_sizes.back(), size);
+            buffer_storage data_buf(data_element_sizes.back(), size);
+            intptr_t count = size, buf_size = min(by_buf.element_count(), data_buf.element_count());
+            do {
+                intptr_t block_count = buf_size;
+                if (count < block_count) {
+                    block_count = count;
+                }
+
+                by_func(by_buf.storage(), groups_dt.element_size(), by_ptr, by_stride, block_count, by_operation.auxdata);
+                data_func(data_buf.storage(), data_element_sizes.back(), data_ptr, data_stride, block_count, data_operation.auxdata);
+
+                groupby_elwise_reduce_loop(result_originptr, result_stride,
+                            data_buf.storage(), data_element_sizes.back(), by_buf.storage(), groups_dt.element_size(),
+                            size, num_groups,
+                            reduce_operation, groups_dt);
+
+                by_ptr += block_count * by_stride;
+                data_ptr += block_count * data_stride;
+                count -= block_count;
+            } while (count > 0);
         }
     } else {
         // TODO: Make a boolean array to track which elements have been started
