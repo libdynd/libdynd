@@ -150,6 +150,8 @@ ndarray_node_ptr dnd::eval::evaluate_groupby_elwise_reduce(ndarray_node *node, c
         by_stride = -by_stride;
     }
 
+    // TODO: There's a lot of code duplication below, needs to be refactored!
+
     kernel_instance<unary_operation_t> reduce_operation;
     rnode->get_unary_operation(0, 0, reduce_operation);
 
@@ -285,8 +287,6 @@ ndarray_node_ptr dnd::eval::evaluate_groupby_elwise_reduce(ndarray_node *node, c
                 count -= block_count;
             } while (count > 0);
         } else if (by_kernels.empty()) {
-            unary_specialization_kernel_instance data_operation;
-            make_buffered_chain_unary_kernel(data_kernels, data_element_sizes, data_operation);
             unary_operation_t data_func = data_operation.specializations[
                         get_unary_specialization(data_element_sizes.back(), data_element_sizes.back(), data_stride, data_element_sizes.front())];
             buffer_storage data_buf(data_element_sizes.back(), size);
@@ -309,9 +309,8 @@ ndarray_node_ptr dnd::eval::evaluate_groupby_elwise_reduce(ndarray_node *node, c
                 count -= block_count;
             } while (count > 0);
         } else {
-            unary_specialization_kernel_instance by_operation, data_operation;
+            unary_specialization_kernel_instance by_operation;
             make_buffered_chain_unary_kernel(by_kernels, by_element_sizes, by_operation);
-            make_buffered_chain_unary_kernel(data_kernels, data_element_sizes, data_operation);
             unary_operation_t by_func = by_operation.specializations[
                         get_unary_specialization(groups_dt.element_size(), groups_dt.element_size(), by_stride, by_element_sizes.front())];
             unary_operation_t data_func = data_operation.specializations[
