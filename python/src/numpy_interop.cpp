@@ -40,12 +40,12 @@ dtype make_tuple_dtype_from_numpy_struct(PyArray_Descr *d, size_t data_alignment
     for (Py_ssize_t i = 0; i < names_size; ++i) {
         PyObject *key = PyTuple_GET_ITEM(names, i);
         PyObject *tup = PyDict_GetItem(d->fields, key);
-        pyobject_ownref fld_dtype_obj, title;
+        PyArray_Descr *fld_dtype;
+        PyObject *title;
         int offset = 0;
-        if (!PyArg_ParseTuple(tup, "Oi|O", &fld_dtype_obj, &offset, &title)) {
+        if (!PyArg_ParseTuple(tup, "Oi|O", &fld_dtype, &offset, &title)) {
             throw runtime_error("Numpy struct dtype has corrupt data");
         }
-        PyArray_Descr *fld_dtype = (PyArray_Descr *)fld_dtype_obj.get();
         fields.push_back(dtype_from_numpy_dtype(fld_dtype));
         offsets.push_back(offset);
         if (fields.back().alignment() > max_field_alignment) {
