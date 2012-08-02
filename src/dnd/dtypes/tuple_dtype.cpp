@@ -132,15 +132,17 @@ void dnd::tuple_dtype::print_dtype(std::ostream& o) const
                 o << ", ";
             }
         }
-        o << "), offsets=(";
+        o << ")";
+        o << ", offsets=(";
         for (size_t i = 0, i_end = m_fields.size(); i != i_end; ++i) {
             o << m_offsets[i];
             if (i != i_end - 1) {
                 o << ", ";
             }
         }
-        o << "), alignment=" << (unsigned int)m_alignment;
+        o << ")";
         o << ", size=" << m_element_size;
+        o << ", alignment=" << (unsigned int)m_alignment;
         o << ">";
     }
 }

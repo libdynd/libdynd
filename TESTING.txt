@@ -73,4 +73,4 @@ To use nose, execute the following:
     OK
 
 To generate Jenkins-compatible XML output, use
-`nosetests --nosetests --with-xunit --xunit-file=pydnd_tests.xml python/pydnd/tests`.
+`nosetests --with-xunit --xunit-file=pydnd_tests.xml python/pydnd/tests`.
