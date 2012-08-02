@@ -58,9 +58,23 @@ inline int import_numpy()
 }
 
 /**
- * Converts a numpy dtype to a dnd::dtype.
+ * Converts a numpy dtype to a dnd::dtype. Use the data_alignment
+ * parameter to get accurate alignment, as Numpy may have misaligned data,
+ * or may report a smaller alignment than is necessary based on the data.
+ *
+ * @param d  The Numpy dtype to convert.
+ * @param data_alignment  If associated with particular data, the actual
+ *                        alignment of that data. The default of zero
+ *                        causes it to use Numpy's data alignment
  */
-dnd::dtype dtype_from_numpy_dtype(PyArray_Descr *d);
+dnd::dtype dtype_from_numpy_dtype(PyArray_Descr *d, size_t data_alignment = 0);
+
+/**
+ * Converts a dnd::dtype to a numpy dtype.
+ *
+ * @param dt  The dtype to convert.
+ */
+PyArray_Descr *numpy_dtype_from_dtype(const dnd::dtype& dt);
 
 /**
  * Converts a pytypeobject for a numpy scalar

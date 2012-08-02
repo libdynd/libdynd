@@ -4,6 +4,7 @@
 //
 
 #include <dnd/dtypes/tuple_dtype.hpp>
+#include <dnd/dtypes/dtype_alignment.hpp>
 
 using namespace std;
 using namespace dnd;
@@ -36,6 +37,40 @@ dnd::tuple_dtype::tuple_dtype(const std::vector<dtype>& fields)
     m_element_size = (offset + m_alignment - 1) & (-m_alignment);
 }
 
+dnd::tuple_dtype::tuple_dtype(const std::vector<dtype>& fields, const std::vector<size_t> offsets,
+                    size_t element_size, size_t alignment)
+    : m_fields(fields), m_offsets(offsets), m_element_size(element_size), m_alignment(alignment)
+{
+    if ((element_size & (alignment - 1)) != 0) {
+        stringstream ss;
+        ss << "tuple type cannot be created with size " << element_size;
+        ss << " and alignment " << alignment << ", the alignment must divide into the element size";
+        throw runtime_error(ss.str());
+    }
+
+    m_memory_management = pod_memory_management;
+    for (size_t i = 0, i_end = fields.size(); i != i_end; ++i) {
+        // Check that the field is within bounds
+        if (offsets[i] + fields[i].element_size() > element_size) {
+            stringstream ss;
+            ss << "tuple type cannot be created with field " << i << " of type " << fields[i];
+            ss << " at offset " << offsets[i] << ", not fitting within the total element size of " << element_size;
+            throw runtime_error(ss.str());
+        }
+        // Check that the field has proper alignment, and de-align it if not
+        if (((m_alignment | offsets[i]) & (fields[i].alignment() - 1)) != 0) {
+            m_fields[i] = make_unaligned_dtype(fields[i]);
+        }
+        // Accumulate the correct memory management
+        // TODO: Handle object, and object+blockref memory management types as well
+        //       In particular, object/blockref dtypes should not overlap with each other so
+        //       need more code to test for that.
+        if (fields[i].get_memory_management() == blockref_memory_management) {
+            m_memory_management = blockref_memory_management;
+        }
+    }
+}
+
 void dnd::tuple_dtype::print_element(std::ostream& o, const char *data) const
 {
     o << "[";
@@ -66,7 +101,7 @@ bool dnd::tuple_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& 
         if (src_dt.extended() == this) {
             return true;
         } else if (src_dt.type_id() == tuple_type_id) {
-            return src_dt == dst_dt;
+            return *dst_dt.extended() == *src_dt.extended();
         }
     }
 

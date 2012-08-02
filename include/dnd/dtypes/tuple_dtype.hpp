@@ -14,12 +14,14 @@ namespace dnd {
 
 class tuple_dtype : public extended_dtype {
     std::vector<dtype> m_fields;
-    std::vector<intptr_t> m_offsets;
+    std::vector<size_t> m_offsets;
     uintptr_t m_element_size;
     dtype_memory_management_t m_memory_management;
     unsigned char m_alignment;
 public:
     tuple_dtype(const std::vector<dtype>& fields);
+    tuple_dtype(const std::vector<dtype>& fields, const std::vector<size_t> offsets,
+                        size_t element_size, size_t alignment);
 
     type_id_t type_id() const {
         return tuple_type_id;
@@ -40,6 +42,14 @@ public:
     }
     const dtype& operand_dtype(const dtype& self) const {
         return self;
+    }
+
+    const std::vector<dtype>& get_fields() const {
+        return m_fields;
+    }
+
+    const std::vector<size_t>& get_offsets() const {
+        return m_offsets;
     }
 
     void print_element(std::ostream& o, const char *data) const;
@@ -65,6 +75,12 @@ public:
 
 inline dtype make_tuple_dtype(const std::vector<dtype>& fields) {
     return dtype(make_shared<tuple_dtype>(fields));
+}
+
+inline dtype make_tuple_dtype(const std::vector<dtype>& fields, const std::vector<size_t> offsets,
+                size_t element_size, size_t alignment)
+{
+    return dtype(make_shared<tuple_dtype>(fields, offsets, element_size, alignment));
 }
 
 } // namespace dnd
