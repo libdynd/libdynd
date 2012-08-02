@@ -18,6 +18,9 @@ class tuple_dtype : public extended_dtype {
     uintptr_t m_element_size;
     dtype_memory_management_t m_memory_management;
     unsigned char m_alignment;
+    bool m_is_standard_layout;
+
+    bool compute_is_standard_layout() const;
 public:
     tuple_dtype(const std::vector<dtype>& fields);
     tuple_dtype(const std::vector<dtype>& fields, const std::vector<size_t> offsets,
@@ -52,6 +55,14 @@ public:
         return m_offsets;
     }
 
+    /**
+     * Returns true if the layout is standard, i.e. constructable without
+     * specifying the offsets/alignment/element_size.
+     */
+    bool is_standard_layout() const {
+        return m_is_standard_layout;
+    }
+
     void print_element(std::ostream& o, const char *data) const;
 
     void print_dtype(std::ostream& o) const;
@@ -73,14 +84,54 @@ public:
     bool operator==(const extended_dtype& rhs) const;
 }; // class tuple_dtype
 
+/** Makes a tuple dtype with the specified fields, using the standard layout */
 inline dtype make_tuple_dtype(const std::vector<dtype>& fields) {
     return dtype(make_shared<tuple_dtype>(fields));
 }
 
+/** Makes a tuple dtype with the specified fields and layout */
 inline dtype make_tuple_dtype(const std::vector<dtype>& fields, const std::vector<size_t> offsets,
                 size_t element_size, size_t alignment)
 {
     return dtype(make_shared<tuple_dtype>(fields, offsets, element_size, alignment));
+}
+
+/** Makes a tuple dtype with the specified fields, using the standard layout */
+inline dtype make_tuple_dtype(const dtype& dt0)
+{
+    std::vector<dtype> fields;
+    fields.push_back(dt0);
+    return make_tuple_dtype(fields);
+}
+
+/** Makes a tuple dtype with the specified fields, using the standard layout */
+inline dtype make_tuple_dtype(const dtype& dt0, const dtype& dt1)
+{
+    std::vector<dtype> fields;
+    fields.push_back(dt0);
+    fields.push_back(dt1);
+    return make_tuple_dtype(fields);
+}
+
+/** Makes a tuple dtype with the specified fields, using the standard layout */
+inline dtype make_tuple_dtype(const dtype& dt0, const dtype& dt1, const dtype& dt2)
+{
+    std::vector<dtype> fields;
+    fields.push_back(dt0);
+    fields.push_back(dt1);
+    fields.push_back(dt2);
+    return make_tuple_dtype(fields);
+}
+
+/** Makes a tuple dtype with the specified fields, using the standard layout */
+inline dtype make_tuple_dtype(const dtype& dt0, const dtype& dt1, const dtype& dt2, const dtype& dt3)
+{
+    std::vector<dtype> fields;
+    fields.push_back(dt0);
+    fields.push_back(dt1);
+    fields.push_back(dt2);
+    fields.push_back(dt3);
+    return make_tuple_dtype(fields);
 }
 
 } // namespace dnd

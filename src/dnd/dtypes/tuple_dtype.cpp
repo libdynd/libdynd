@@ -35,6 +35,8 @@ dnd::tuple_dtype::tuple_dtype(const std::vector<dtype>& fields)
     }
     // Pad to get the final element size
     m_element_size = (offset + m_alignment - 1) & (-m_alignment);
+    // This is the standard layout
+    m_is_standard_layout = true;
 }
 
 dnd::tuple_dtype::tuple_dtype(const std::vector<dtype>& fields, const std::vector<size_t> offsets,
@@ -57,9 +59,13 @@ dnd::tuple_dtype::tuple_dtype(const std::vector<dtype>& fields, const std::vecto
             ss << " at offset " << offsets[i] << ", not fitting within the total element size of " << element_size;
             throw runtime_error(ss.str());
         }
-        // Check that the field has proper alignment, and de-align it if not
+        // Check that the field has proper alignment
         if (((m_alignment | offsets[i]) & (fields[i].alignment() - 1)) != 0) {
-            m_fields[i] = make_unaligned_dtype(fields[i]);
+            stringstream ss;
+            ss << "tuple type cannot be created with field " << i << " of type " << fields[i];
+            ss << " at offset " << offsets[i] << " and tuple alignment " << m_alignment;
+            ss << " because the field is not properly aligned";
+            throw runtime_error(ss.str());
         }
         // Accumulate the correct memory management
         // TODO: Handle object, and object+blockref memory management types as well
@@ -69,6 +75,30 @@ dnd::tuple_dtype::tuple_dtype(const std::vector<dtype>& fields, const std::vecto
             m_memory_management = blockref_memory_management;
         }
     }
+    // Check whether the layout we were given is standard
+    m_is_standard_layout = compute_is_standard_layout();
+}
+
+bool dnd::tuple_dtype::compute_is_standard_layout() const
+{
+    size_t standard_offset = 0, standard_alignment = 1;
+    for (size_t i = 0, i_end = m_fields.size(); i != i_end; ++i) {
+        size_t field_alignment = m_fields[i].alignment();
+        // Accumulate the biggest field alignment as the dtype alignment
+        if (field_alignment > standard_alignment) {
+            standard_alignment = field_alignment;
+        }
+        // Add padding bytes as necessary
+        standard_offset = (standard_offset + field_alignment - 1) & (-field_alignment);
+        if (m_offsets[i] != standard_offset) {
+            return false;
+        }
+        standard_offset += m_fields[i].element_size();
+    }
+    // Pad to get the standard element size
+    size_t standard_element_size = (standard_offset + standard_alignment - 1) & (-standard_alignment);
+
+    return m_element_size == standard_element_size && m_alignment == standard_alignment;
 }
 
 void dnd::tuple_dtype::print_element(std::ostream& o, const char *data) const
@@ -85,14 +115,34 @@ void dnd::tuple_dtype::print_element(std::ostream& o, const char *data) const
 
 void dnd::tuple_dtype::print_dtype(std::ostream& o) const
 {
-    o << "tuple<fields=(";
-    for (size_t i = 0, i_end = m_fields.size(); i != i_end; ++i) {
-        o << m_fields[i];
-        if (i != i_end - 1) {
-            o << ", ";
+    if (is_standard_layout()) {
+        o << "tuple<";
+        for (size_t i = 0, i_end = m_fields.size(); i != i_end; ++i) {
+            o << m_fields[i];
+            if (i != i_end - 1) {
+                o << ", ";
+            }
         }
+        o << ">";
+    } else {
+        o << "tuple<fields=(";
+        for (size_t i = 0, i_end = m_fields.size(); i != i_end; ++i) {
+            o << m_fields[i];
+            if (i != i_end - 1) {
+                o << ", ";
+            }
+        }
+        o << "), offsets=(";
+        for (size_t i = 0, i_end = m_fields.size(); i != i_end; ++i) {
+            o << m_offsets[i];
+            if (i != i_end - 1) {
+                o << ", ";
+            }
+        }
+        o << "), alignment=" << (unsigned int)m_alignment;
+        o << ", size=" << m_element_size;
+        o << ">";
     }
-    o << ")>";
 }
 
 bool dnd::tuple_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const

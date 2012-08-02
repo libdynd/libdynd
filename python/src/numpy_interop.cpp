@@ -37,6 +37,12 @@ dtype make_tuple_dtype_from_numpy_struct(PyArray_Descr *d, size_t data_alignment
     Py_ssize_t names_size = PyTuple_GET_SIZE(names);
     size_t max_field_alignment = 1;
 
+    // The alignment must divide into the total element size,
+    // shrink it until it does.
+    while ((((size_t)d->elsize)&(data_alignment-1)) != 0) {
+        data_alignment >>= 1;
+    }
+
     for (Py_ssize_t i = 0; i < names_size; ++i) {
         PyObject *key = PyTuple_GET_ITEM(names, i);
         PyObject *tup = PyDict_GetItem(d->fields, key);
@@ -47,6 +53,10 @@ dtype make_tuple_dtype_from_numpy_struct(PyArray_Descr *d, size_t data_alignment
             throw runtime_error("Numpy struct dtype has corrupt data");
         }
         fields.push_back(dtype_from_numpy_dtype(fld_dtype));
+        // If the field isn't aligned enough, turn it into an unaligned type
+        if ((((offset | data_alignment) & (fields.back().alignment() - 1))) != 0) {
+            fields.back() = make_unaligned_dtype(fields.back());
+        }
         offsets.push_back(offset);
         if (fields.back().alignment() > max_field_alignment) {
             max_field_alignment = fields.back().alignment();
@@ -54,12 +64,6 @@ dtype make_tuple_dtype_from_numpy_struct(PyArray_Descr *d, size_t data_alignment
     }
 
     data_alignment = min(max_field_alignment, data_alignment);
-
-    // The alignment must divide the total element size as well,
-    // shrink it until it does.
-    while ((((size_t)d->elsize)&(data_alignment-1)) != 0) {
-        data_alignment >>= 1;
-    }
 
     return make_tuple_dtype(fields, offsets, d->elsize, data_alignment);
 }

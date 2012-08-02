@@ -73,7 +73,13 @@ void dnd::view_dtype::print_element(std::ostream& o, const char *data) const
 
 void dnd::view_dtype::print_dtype(std::ostream& o) const
 {
-    o << "view<as=" << m_value_dtype << ", original=" << m_operand_dtype << ">";
+    // Special case printing of alignment to make it more human-readable
+    if (m_value_dtype.alignment() != 1 && m_operand_dtype.type_id() == fixedbytes_type_id &&
+                    m_operand_dtype.alignment() == 1) {
+        o << "unaligned<" << m_value_dtype << ">";
+    } else {
+        o << "view<as=" << m_value_dtype << ", original=" << m_operand_dtype << ">";
+    }
 }
 
 bool dnd::view_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const
