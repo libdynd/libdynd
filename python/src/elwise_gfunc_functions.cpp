@@ -20,7 +20,7 @@ using namespace std;
 using namespace dnd;
 using namespace pydnd;
 
-static void create_elwise_gfunc_kernel_from_ctypes(dnd::codegen_cache& cgcache, PyCFuncPtrObject *cfunc, dnd::gfunc::elwise_gfunc_kernel& out_kernel)
+static void create_elwise_gfunc_kernel_from_ctypes(dnd::codegen_cache& cgcache, PyCFuncPtrObject *cfunc, dnd::gfunc::elwise_kernel& out_kernel)
 {
     dtype& returntype = out_kernel.m_returntype;
     vector<dtype> &paramtypes = out_kernel.m_paramtypes;
@@ -46,10 +46,10 @@ static void create_elwise_gfunc_kernel_from_ctypes(dnd::codegen_cache& cgcache, 
     }
 }
 
-void pydnd::elwise_gfunc_add_kernel(dnd::gfunc::elwise_gfunc& gf, dnd::codegen_cache& cgcache, PyObject *kernel)
+void pydnd::elwise_gfunc_add_kernel(dnd::gfunc::elwise& gf, dnd::codegen_cache& cgcache, PyObject *kernel)
 {
     if (PyObject_IsSubclass((PyObject *)Py_TYPE(kernel), ctypes.PyCFuncPtrType_Type)) {
-        gfunc::elwise_gfunc_kernel egk;
+        gfunc::elwise_kernel egk;
 
         create_elwise_gfunc_kernel_from_ctypes(cgcache, (PyCFuncPtrObject *)kernel, egk);
         gf.add_kernel(egk);
@@ -60,7 +60,7 @@ void pydnd::elwise_gfunc_add_kernel(dnd::gfunc::elwise_gfunc& gf, dnd::codegen_c
     throw std::runtime_error("Object could not be used as a gfunc kernel");
 }
 
-PyObject *pydnd::elwise_gfunc_call(dnd::gfunc::elwise_gfunc& gf, PyObject *args, PyObject *kwargs)
+PyObject *pydnd::elwise_gfunc_call(dnd::gfunc::elwise& gf, PyObject *args, PyObject *kwargs)
 {
     Py_ssize_t nargs = PySequence_Size(args);
 
@@ -73,7 +73,7 @@ PyObject *pydnd::elwise_gfunc_call(dnd::gfunc::elwise_gfunc& gf, PyObject *args,
         argtypes[i] = ndarray_args[i].get_dtype().value_dtype();
     }
 
-    const gfunc::elwise_gfunc_kernel *egk;
+    const gfunc::elwise_kernel *egk;
     egk = gf.find_matching_kernel(argtypes);
 
     if (egk == NULL) {

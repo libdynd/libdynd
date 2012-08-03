@@ -18,7 +18,7 @@
 
 namespace dnd { namespace gfunc {
 
-class elwise_reduce_gfunc_kernel {
+class elwise_reduce_kernel {
 public:
     /**
      * If the kernel is associative, evaluating right-to-left
@@ -44,7 +44,7 @@ public:
      */
     dnd::kernel_instance<dnd::unary_operation_t> m_right_associative_reduction_kernel;
 
-    void swap(elwise_reduce_gfunc_kernel& rhs) {
+    void swap(elwise_reduce_kernel& rhs) {
         std::swap(m_associative, rhs.m_associative);
         std::swap(m_commutative, rhs.m_commutative);
         m_returntype.swap(rhs.m_returntype);
@@ -55,15 +55,15 @@ public:
     }
 };
 
-class elwise_reduce_gfunc {
+class elwise_reduce {
     std::string m_name;
     /**
      * This is a deque instead of a vector, because we are targetting C++98
      * and so cannot rely on C++11 move semantics.
      */
-    std::deque<elwise_reduce_gfunc_kernel> m_kernels;
+    std::deque<elwise_reduce_kernel> m_kernels;
 public:
-    elwise_reduce_gfunc(const char *name)
+    elwise_reduce(const char *name)
         : m_name(name)
     {
     }
@@ -75,13 +75,13 @@ public:
     /**
      * Searches for a kernel which matches all the parameter types.
      */
-    const elwise_reduce_gfunc_kernel *find_matching_kernel(const std::vector<dtype>& paramtypes) const;
+    const elwise_reduce_kernel *find_matching_kernel(const std::vector<dtype>& paramtypes) const;
 
     /**
      * Adds the provided kernel to the gfunc. This swaps it out of the provided
      * variable to avoid extra copies.
      */
-    void add_kernel(elwise_reduce_gfunc_kernel& ergk);
+    void add_kernel(elwise_reduce_kernel& ergk);
 
     void debug_dump(std::ostream& o, const std::string& indent = "") const;
 };

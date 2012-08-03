@@ -11,8 +11,8 @@
 using namespace std;
 using namespace dnd;
 
-const dnd::gfunc::elwise_reduce_gfunc_kernel *
-dnd::gfunc::elwise_reduce_gfunc::find_matching_kernel(const std::vector<dtype>& paramtypes) const
+const dnd::gfunc::elwise_reduce_kernel *
+dnd::gfunc::elwise_reduce::find_matching_kernel(const std::vector<dtype>& paramtypes) const
 {
     for(size_t i = 0, i_end = m_kernels.size(); i != i_end; ++i) {
         const std::vector<dtype>& kparamtypes = m_kernels[i].m_paramtypes;
@@ -24,11 +24,11 @@ dnd::gfunc::elwise_reduce_gfunc::find_matching_kernel(const std::vector<dtype>& 
     return NULL;
 }
 
-void dnd::gfunc::elwise_reduce_gfunc::add_kernel(elwise_reduce_gfunc_kernel& ergk)
+void dnd::gfunc::elwise_reduce::add_kernel(elwise_reduce_kernel& ergk)
 {
-    const elwise_reduce_gfunc_kernel *check = find_matching_kernel(ergk.m_paramtypes);
+    const elwise_reduce_kernel *check = find_matching_kernel(ergk.m_paramtypes);
     if (check == NULL) {
-        m_kernels.push_back(elwise_reduce_gfunc_kernel());
+        m_kernels.push_back(elwise_reduce_kernel());
         m_kernels.back().swap(ergk);
     } else {
         stringstream ss;
@@ -44,13 +44,13 @@ void dnd::gfunc::elwise_reduce_gfunc::add_kernel(elwise_reduce_gfunc_kernel& erg
     }
 }
 
-void dnd::gfunc::elwise_reduce_gfunc::debug_dump(std::ostream& o, const std::string& indent) const
+void dnd::gfunc::elwise_reduce::debug_dump(std::ostream& o, const std::string& indent) const
 {
     o << indent << "------ elwise_reduce_gfunc\n";
     o << indent << "name: " << m_name << "\n";
     o << indent << "kernel count: " << m_kernels.size() << "\n";
-    for (deque<elwise_reduce_gfunc_kernel>::size_type i = 0; i < m_kernels.size(); ++i) {
-        const elwise_reduce_gfunc_kernel &k = m_kernels[i];
+    for (deque<elwise_reduce_kernel>::size_type i = 0; i < m_kernels.size(); ++i) {
+        const elwise_reduce_kernel &k = m_kernels[i];
         o << indent << "kernel " << i << "\n";
         o << indent << " signature: " << k.m_returntype << " (";
         for (size_t j = 0, j_end = k.m_paramtypes.size(); j != j_end; ++j) {

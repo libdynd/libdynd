@@ -21,7 +21,7 @@ using namespace pydnd;
 
 static void create_elwise_reduce_gfunc_kernel_from_ctypes(dnd::codegen_cache& cgcache,
             PyCFuncPtrObject *cfunc, bool associative, bool commutative, const ndarray& identity,
-            dnd::gfunc::elwise_reduce_gfunc_kernel& out_kernel)
+            dnd::gfunc::elwise_reduce_kernel& out_kernel)
 {
     dtype& returntype = out_kernel.m_returntype;
     vector<dtype> &paramtypes = out_kernel.m_paramtypes;
@@ -74,11 +74,11 @@ static void create_elwise_reduce_gfunc_kernel_from_ctypes(dnd::codegen_cache& cg
     }
 }
 
-void pydnd::elwise_reduce_gfunc_add_kernel(dnd::gfunc::elwise_reduce_gfunc& gf, dnd::codegen_cache& cgcache, PyObject *kernel,
+void pydnd::elwise_reduce_gfunc_add_kernel(dnd::gfunc::elwise_reduce& gf, dnd::codegen_cache& cgcache, PyObject *kernel,
                             bool associative, bool commutative, const dnd::ndarray& identity)
 {
     if (PyObject_IsSubclass((PyObject *)Py_TYPE(kernel), ctypes.PyCFuncPtrType_Type)) {
-        gfunc::elwise_reduce_gfunc_kernel ergk;
+        gfunc::elwise_reduce_kernel ergk;
 
         create_elwise_reduce_gfunc_kernel_from_ctypes(cgcache, (PyCFuncPtrObject *)kernel,
                         associative, commutative, identity, ergk);
@@ -90,7 +90,7 @@ void pydnd::elwise_reduce_gfunc_add_kernel(dnd::gfunc::elwise_reduce_gfunc& gf, 
 }
 
 
-PyObject *pydnd::elwise_reduce_gfunc_call(dnd::gfunc::elwise_reduce_gfunc& gf, PyObject *args, PyObject *kwargs)
+PyObject *pydnd::elwise_reduce_gfunc_call(dnd::gfunc::elwise_reduce& gf, PyObject *args, PyObject *kwargs)
 {
     Py_ssize_t nargs = PySequence_Size(args);
     if (nargs == 1) {
@@ -113,7 +113,7 @@ PyObject *pydnd::elwise_reduce_gfunc_call(dnd::gfunc::elwise_reduce_gfunc& gf, P
 
         vector<dtype> argtypes(1);
         argtypes[0] = arg0.get_dtype().value_dtype();
-        const gfunc::elwise_reduce_gfunc_kernel *ergk = gf.find_matching_kernel(argtypes);
+        const gfunc::elwise_reduce_kernel *ergk = gf.find_matching_kernel(argtypes);
         if (ergk != NULL) {
             if (axis_count > 1 && !ergk->m_commutative) {
                 stringstream ss;
