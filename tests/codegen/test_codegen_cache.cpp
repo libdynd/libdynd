@@ -30,27 +30,30 @@ TEST(CodeGenCache, UnaryCaching) {
     codegen_cache cgcache;
     unary_specialization_kernel_instance op_int_float1, op_int_float2;
     // Generate two adapted functions with different function pointers
-    cgcache.codegen_unary_function_adapter(make_dtype<int>()
-                                           , make_dtype<float>()
-                                           , cdecl_callconv
-                                           , reinterpret_cast<void*>(&int_float_fn1)
-                                           , op_int_float1);
+    cgcache.codegen_unary_function_adapter(make_dtype<int>(),
+                                           make_dtype<float>(),
+                                           cdecl_callconv,
+                                           reinterpret_cast<void*>(&int_float_fn1),
+                                           NULL,
+                                           op_int_float1);
     
-    cgcache.codegen_unary_function_adapter(make_dtype<int>()
-                                           , make_dtype<float>()
-                                           , cdecl_callconv
-                                           , reinterpret_cast<void*>(&int_float_fn2)
-                                           , op_int_float2);
+    cgcache.codegen_unary_function_adapter(make_dtype<int>(),
+                                           make_dtype<float>(),
+                                           cdecl_callconv,
+                                           reinterpret_cast<void*>(&int_float_fn2),
+                                           NULL,
+                                           op_int_float2);
 
     // The adapter kernel should have been reused
     EXPECT_EQ(op_int_float1.specializations[0], op_int_float2.specializations[0]);
 
     unary_specialization_kernel_instance op_uint_float1;
-    cgcache.codegen_unary_function_adapter(make_dtype<unsigned int>()
-                                           , make_dtype<float>()
-                                           , cdecl_callconv
-                                           , reinterpret_cast<void*>(&uint_float_fn1)
-                                           , op_uint_float1);
+    cgcache.codegen_unary_function_adapter(make_dtype<unsigned int>(),
+                                           make_dtype<float>(),
+                                           cdecl_callconv,
+                                           reinterpret_cast<void*>(&uint_float_fn1),
+                                           NULL,
+                                           op_uint_float1);
 
     // int and uint look the same at the assembly level, so it should have reused the kernel
     EXPECT_EQ(op_int_float1.specializations[0], op_uint_float1.specializations[0]);

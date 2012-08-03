@@ -337,11 +337,6 @@ dtype pydnd::dtype_of_numpy_scalar(PyObject* obj)
     throw std::runtime_error("could not deduce a pydnd dtype from the numpy scalar object");
 }
 
-static void py_decref_function(void* obj)
-{
-    Py_DECREF((PyObject *)obj);
-}
-
 inline size_t get_alignment_of(uintptr_t align_bits)
 {
     size_t alignment = 1;

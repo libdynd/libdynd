@@ -47,6 +47,10 @@ with a white or black list.
     [==========] 2 tests from 1 test case ran. (6 ms total)
     [  PASSED  ] 2 tests.
 
+One useful option is to disable googletest's catching of exceptions,
+with the option `--gtest_catch_exceptions=0`. This allows your debugger
+to handle it.
+
 To generate Jenkins-compatible XML output, use `dnd_tests --gtest_output=xml:dnd_tests.xml`.
 
 Running Python Tests

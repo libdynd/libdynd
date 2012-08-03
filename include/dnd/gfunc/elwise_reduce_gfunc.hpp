@@ -6,8 +6,6 @@
 #ifndef _DND__ELWISE_REDUCE_GFUNC_HPP_
 #define _DND__ELWISE_REDUCE_GFUNC_HPP_
 
-#include <Python.h>
-
 #include <stdint.h>
 #include <sstream>
 #include <deque>
@@ -18,7 +16,7 @@
 #include <dnd/kernels/kernel_instance.hpp>
 #include <dnd/codegen/codegen_cache.hpp>
 
-namespace pydnd {
+namespace dnd { namespace gfunc {
 
 class elwise_reduce_gfunc_kernel {
 public:
@@ -33,7 +31,8 @@ public:
      * kernel is provided.
      */
     bool m_commutative;
-    std::vector<dnd::dtype> m_sig;
+    dtype m_returntype;
+    std::vector<dnd::dtype> m_paramtypes;
     dnd::ndarray m_identity;
     /**
      * Does dst <- operation(dst, src), use when iterating from index 0 to N-1.
@@ -44,22 +43,14 @@ public:
      * If the kernel is flagged commutative, this kernel is never used so may be left empty.
      */
     dnd::kernel_instance<dnd::unary_operation_t> m_right_associative_reduction_kernel;
-    PyObject *m_pyobj;
-
-    elwise_reduce_gfunc_kernel()
-        : m_pyobj(0)
-    {
-    }
-
-    ~elwise_reduce_gfunc_kernel();
 
     void swap(elwise_reduce_gfunc_kernel& rhs) {
         std::swap(m_associative, rhs.m_associative);
         std::swap(m_commutative, rhs.m_commutative);
-        m_sig.swap(rhs.m_sig);
+        m_returntype.swap(rhs.m_returntype);
+        m_paramtypes.swap(rhs.m_paramtypes);
         m_left_associative_reduction_kernel.swap(rhs.m_left_associative_reduction_kernel);
         m_right_associative_reduction_kernel.swap(rhs.m_right_associative_reduction_kernel);
-        std::swap(m_pyobj, rhs.m_pyobj);
         m_identity.swap(rhs.m_identity);
     }
 };
@@ -71,55 +62,30 @@ class elwise_reduce_gfunc {
      * and so cannot rely on C++11 move semantics.
      */
     std::deque<elwise_reduce_gfunc_kernel> m_kernels;
-    std::vector<dnd::memory_block_data *> m_blockrefs;
 public:
     elwise_reduce_gfunc(const char *name)
         : m_name(name)
     {
     }
 
-    ~elwise_reduce_gfunc();
-
     const std::string& get_name() const {
         return m_name;
     }
 
     /**
-     * Adds a new memory_block for the elwise_gfunc to
-     * hold a reference to. For example, the executable
-     * memory block for generated code should get added.
+     * Searches for a kernel which matches all the parameter types.
      */
-    void add_blockref(dnd::memory_block_data *blockref);
+    const elwise_reduce_gfunc_kernel *find_matching_kernel(const std::vector<dtype>& paramtypes) const;
 
-    void add_kernel(dnd::codegen_cache& cgcache, PyObject *kernel, bool associative, bool commutative, const dnd::ndarray& identity);
+    /**
+     * Adds the provided kernel to the gfunc. This swaps it out of the provided
+     * variable to avoid extra copies.
+     */
+    void add_kernel(elwise_reduce_gfunc_kernel& ergk);
 
-    PyObject *call(PyObject *args, PyObject *kwargs);
-
-    std::string debug_dump() const;
+    void debug_dump(std::ostream& o, const std::string& indent = "") const;
 };
 
-struct elwise_reduce_gfunc_placement_wrapper {
-    intptr_t dummy[(sizeof(elwise_reduce_gfunc) + sizeof(intptr_t) - 1)/sizeof(intptr_t)];
-};
-
-inline void elwise_reduce_gfunc_placement_new(elwise_reduce_gfunc_placement_wrapper& v, const char *name)
-{
-    // Call placement new
-    new (&v) elwise_reduce_gfunc(name);
-}
-
-inline void elwise_reduce_gfunc_placement_delete(elwise_reduce_gfunc_placement_wrapper& v)
-{
-    // Call the destructor
-    ((elwise_reduce_gfunc *)(&v))->~elwise_reduce_gfunc();
-}
-
-// placement cast
-inline elwise_reduce_gfunc& GET(elwise_reduce_gfunc_placement_wrapper& v)
-{
-    return *(elwise_reduce_gfunc *)&v;
-}
-
-} // namespace pydnd
+}} // namespace dnd::gfunc
 
 #endif // _DND__ELWISE_REDUCE_GFUNC_HPP_

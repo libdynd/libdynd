@@ -24,7 +24,7 @@ namespace dnd {
  */
 struct unary_function_adapter_auxdata {
     void *function_pointer;
-    memory_block_ptr exec_memblock;
+    memory_block_ptr adapter_memblock, adaptee_memblock;
 };
 
 /**

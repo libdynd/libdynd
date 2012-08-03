@@ -211,7 +211,9 @@ public:
             memory_block_decref(m_memblock);
         }
         m_memblock = rhs;
-        memory_block_incref(rhs);
+        if (rhs != 0) {
+            memory_block_incref(rhs);
+        }
         return *this;
     }
 

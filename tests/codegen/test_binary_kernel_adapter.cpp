@@ -28,24 +28,27 @@ TEST(BinaryKernelAdapter, BasicOperations) {
     kernel_instance<binary_operation_t> op_int_float_double, op_float_float_float, op_float_double_int;
     // NOTE: Cannot cast directly to <void*>, because of a compile error on MSVC:
     //         "Context does not allow for disambiguation of overloaded function"
-    cgcache.codegen_binary_function_adapter(make_dtype<int>()
-                                            , make_dtype<float>()
-                                            , make_dtype<double>()
-                                            , cdecl_callconv
-                                            , (void*)reinterpret_cast<int (*)(int, float, double)>(&multiply_values<int, float, double>)
-                                            , op_int_float_double);
-    cgcache.codegen_binary_function_adapter(make_dtype<float>()
-                                            , make_dtype<float>()
-                                            , make_dtype<float>()
-                                            , cdecl_callconv
-                                            , (void*)reinterpret_cast<float (*)(float, float, float)>(&multiply_values<float, float, float>)
-                                            , op_float_float_float);
-    cgcache.codegen_binary_function_adapter(make_dtype<float>()
-                                            , make_dtype<double>()
-                                            , make_dtype<int>()
-                                            , cdecl_callconv
-                                            , (void*)reinterpret_cast<float (*)(float, double, int)>(&multiply_values<float, double, int>)
-                                            , op_float_double_int);
+    cgcache.codegen_binary_function_adapter(make_dtype<int>(),
+                                            make_dtype<float>(),
+                                            make_dtype<double>(),
+                                            cdecl_callconv,
+                                            (void*)reinterpret_cast<int (*)(int, float, double)>(&multiply_values<int, float, double>),
+                                            NULL,
+                                            op_int_float_double);
+    cgcache.codegen_binary_function_adapter(make_dtype<float>(),
+                                            make_dtype<float>(),
+                                            make_dtype<float>(),
+                                            cdecl_callconv,
+                                            (void*)reinterpret_cast<float (*)(float, float, float)>(&multiply_values<float, float, float>),
+                                            NULL,
+                                            op_float_float_float);
+    cgcache.codegen_binary_function_adapter(make_dtype<float>(),
+                                            make_dtype<double>(),
+                                            make_dtype<int>(),
+                                            cdecl_callconv,
+                                            (void*)reinterpret_cast<float (*)(float, double, int)>(&multiply_values<float, double, int>),
+                                            NULL,
+                                            op_float_double_int);
 
     int int_vals[3];
     float float_vals[3];
@@ -105,12 +108,13 @@ static int raise_if_greater(int value1, int value2) {
 TEST(BinaryKernelAdapter, UnwindException) {
     codegen_cache cgcache;
     kernel_instance<binary_operation_t> rig;
-    cgcache.codegen_binary_function_adapter(make_dtype<int>()
-                                            , make_dtype<int>()
-                                            , make_dtype<int>()
-                                            , cdecl_callconv
-                                            , reinterpret_cast<void*>(&raise_if_greater)
-                                            , rig);
+    cgcache.codegen_binary_function_adapter(make_dtype<int>(),
+                                            make_dtype<int>(),
+                                            make_dtype<int>(),
+                                            cdecl_callconv,
+                                            reinterpret_cast<void*>(&raise_if_greater),
+                                            NULL,
+                                            rig);
     int in1[3], in2[3], out[3];
     // First call it with no exception raised
     in1[0] = 0;

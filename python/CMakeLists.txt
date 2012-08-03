@@ -51,16 +51,16 @@ set(pydnd_CPP_SRC
     include/dtype_functions.hpp
     include/ndarray_functions.hpp
     include/numpy_interop.hpp
-    include/elwise_gfunc.hpp
-    include/elwise_reduce_gfunc.hpp
+    include/elwise_gfunc_functions.hpp
+    include/elwise_reduce_gfunc_functions.hpp
     include/utility_functions.hpp
     src/codegen_cache_functions.cpp
     src/ctypes_interop.cpp
     src/dtype_functions.cpp
     src/ndarray_functions.cpp
     src/numpy_interop.cpp
-    src/elwise_gfunc.cpp
-    src/elwise_reduce_gfunc.cpp
+    src/elwise_gfunc_functions.cpp
+    src/elwise_reduce_gfunc_functions.cpp
     src/utility_functions.cpp
     )
 set(pydnd_CYTHON_SRC

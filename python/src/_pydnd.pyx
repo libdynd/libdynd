@@ -346,15 +346,15 @@ cdef class w_elwise_gfunc:
 
     def add_kernel(self, kernel, w_codegen_cache cgcache = default_cgcache_c):
         """Adds a kernel to the gfunc object. Currently, this means a ctypes object with prototype."""
-        GET(self.v).add_kernel(GET(cgcache.v), kernel)
+        elwise_gfunc_add_kernel(GET(self.v), GET(cgcache.v), kernel)
 
     def debug_dump(self):
         """Prints a raw representation of the gfunc data."""
-        print str(GET(self.v).debug_dump().c_str())
+        print str(elwise_gfunc_debug_dump(GET(self.v)).c_str())
 
     def __call__(self, *args, **kwargs):
         """Calls the gfunc."""
-        return GET(self.v).call(args, kwargs)
+        return elwise_gfunc_call(GET(self.v), args, kwargs)
 
 cdef class w_elwise_reduce_gfunc:
     cdef elwise_reduce_gfunc_placement_wrapper v
@@ -372,18 +372,18 @@ cdef class w_elwise_reduce_gfunc:
         """Adds a kernel to the gfunc object. Currently, this means a ctypes object with prototype."""
         cdef w_ndarray id
         if identity is None:
-            GET(self.v).add_kernel(GET(cgcache.v), kernel, associative, commutative, ndarray())
+            elwise_reduce_gfunc_add_kernel(GET(self.v), GET(cgcache.v), kernel, associative, commutative, ndarray())
         else:
             id = w_ndarray(identity)
-            GET(self.v).add_kernel(GET(cgcache.v), kernel, associative, commutative, GET(id.v))
+            elwise_reduce_gfunc_add_kernel(GET(self.v), GET(cgcache.v), kernel, associative, commutative, GET(id.v))
 
     def debug_dump(self):
         """Prints a raw representation of the gfunc data."""
-        print str(GET(self.v).debug_dump().c_str())
+        print str(elwise_reduce_gfunc_debug_dump(GET(self.v)).c_str())
 
     def __call__(self, *args, **kwargs):
         """Calls the gfunc."""
-        return GET(self.v).call(args, kwargs)
+        return elwise_reduce_gfunc_call(GET(self.v), args, kwargs)
 
 cdef class w_codegen_cache:
     cdef codegen_cache_placement_wrapper v

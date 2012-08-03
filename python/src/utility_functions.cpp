@@ -14,6 +14,12 @@ using namespace std;
 using namespace dnd;
 using namespace pydnd;
 
+void pydnd::py_decref_function(void* obj)
+{
+    // TODO: Should ensure we're holding the GIL before doing the DECREF
+    Py_XDECREF((PyObject *)obj);
+}
+
 intptr_t pydnd::pyobject_as_index(PyObject *index)
 {
     pyobject_ownref start_obj(PyNumber_Index(index));
