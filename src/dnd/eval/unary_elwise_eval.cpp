@@ -154,9 +154,6 @@ ndarray_node_ptr dnd::eval::evaluate_strided_with_unary_kernel(ndarray_node *nod
 
 ndarray_node_ptr dnd::eval::evaluate_unary_elwise_array(ndarray_node* node, const eval::eval_context *ectx, bool copy, uint32_t access_flags)
 {
-    ndarray_node *op = node->get_opnode(0);
-    const dtype& dt = op->get_dtype();
-
     // Chain the kernels together
     deque<unary_specialization_kernel_instance> kernels;
     deque<intptr_t> element_sizes;
@@ -166,6 +163,6 @@ ndarray_node_ptr dnd::eval::evaluate_unary_elwise_array(ndarray_node* node, cons
     unary_specialization_kernel_instance operation;
     make_buffered_chain_unary_kernel(kernels, element_sizes, operation);
 
-    return evaluate_strided_with_unary_kernel(strided_node, ectx, copy, access_flags, dt.value_dtype(), operation);
+    return evaluate_strided_with_unary_kernel(strided_node, ectx, copy, access_flags, node->get_dtype().value_dtype(), operation);
 }
 
