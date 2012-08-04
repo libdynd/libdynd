@@ -50,6 +50,8 @@ set(pydnd_CPP_SRC
     include/placement_wrappers.hpp
     include/dtype_functions.hpp
     include/ndarray_functions.hpp
+    include/ndarray_from_py.hpp
+    include/ndarray_as_py.hpp
     include/numpy_interop.hpp
     include/elwise_gfunc_functions.hpp
     include/elwise_reduce_gfunc_functions.hpp
@@ -58,6 +60,8 @@ set(pydnd_CPP_SRC
     src/ctypes_interop.cpp
     src/dtype_functions.cpp
     src/ndarray_functions.cpp
+    src/ndarray_from_py.cpp
+    src/ndarray_as_py.cpp
     src/numpy_interop.cpp
     src/elwise_gfunc_functions.cpp
     src/elwise_reduce_gfunc_functions.cpp

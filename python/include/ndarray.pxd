@@ -68,9 +68,11 @@ cdef extern from "ndarray_functions.hpp" namespace "pydnd":
     ndarray ndarray_multiply(ndarray&, ndarray&) except +
     ndarray ndarray_divide(ndarray&, ndarray&) except +
 
-    object ndarray_as_pyobject(ndarray&) except +
     ndarray ndarray_getitem(ndarray&, object) except +
 
     ndarray ndarray_arange(object, object, object) except +
     ndarray ndarray_linspace(object, object, object) except +
     ndarray ndarray_groupby(ndarray, ndarray, dtype) except +
+
+    object ndarray_as_py(ndarray&) except +
+    ndarray ndarray_from_py(object) except +

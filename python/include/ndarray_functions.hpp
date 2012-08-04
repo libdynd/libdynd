@@ -16,6 +16,9 @@
 
 #include <dnd/ndarray.hpp>
 
+#include "ndarray_from_py.hpp"
+#include "ndarray_as_py.hpp"
+
 namespace pydnd {
 
 /**
@@ -35,7 +38,10 @@ struct WNDArray {
 };
 void init_w_ndarray_typeobject(PyObject *type);
 
-void ndarray_init_from_pyobject(dnd::ndarray& n, PyObject* obj);
+inline void ndarray_init_from_pyobject(dnd::ndarray& n, PyObject* obj)
+{
+    n = ndarray_from_py(obj);
+}
 dnd::ndarray ndarray_vals(const dnd::ndarray& n);
 dnd::ndarray ndarray_eval_copy(const dnd::ndarray& n, PyObject* access_flags, const dnd::eval::eval_context *ectx = &dnd::eval::default_eval_context);
 
@@ -79,12 +85,6 @@ inline std::string ndarray_debug_dump(const dnd::ndarray& n)
     n.debug_dump(ss);
     return ss.str();
 }
-
-/**
- * Converts an ndarray into native python objects, using
- * nested lists.
- */
-PyObject* ndarray_as_pyobject(const dnd::ndarray& n);
 
 /**
  * Implementation of __getitem__ for the wrapped ndarray object.

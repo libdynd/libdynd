@@ -233,7 +233,7 @@ cdef class w_ndarray:
 
     def as_py(self):
         """Evaluates the values, and converts them into native Python types."""
-        return ndarray_as_pyobject(GET(self.v))
+        return ndarray_as_py(GET(self.v))
 
     def as_dtype(self, dtype):
         """Converts the ndarray to the requested dtype. If dtype is an expression dtype, its expression gets applied on top of the existing data."""
