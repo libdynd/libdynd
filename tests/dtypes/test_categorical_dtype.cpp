@@ -66,6 +66,24 @@ TEST(CategoricalDType, Compare) {
 
 }
 
+TEST(CategoricalDType, Unique) {
+
+    ndarray a(3, make_fixedstring_dtype(string_encoding_ascii, 3));
+    a(0).vals() = std::string("foo");
+    a(1).vals() = std::string("bar");
+    a(2).vals() = std::string("foo");
+
+    EXPECT_THROW(make_categorical_dtype(a), std::runtime_error);
+
+    ndarray i(3, make_dtype<int32_t>());
+    i(0).vals() = 0;
+    i(1).vals() = 10;
+    i(2).vals() = 10;
+
+    EXPECT_THROW(make_categorical_dtype(i), std::runtime_error);
+
+}
+
 TEST(CategoricalDType, Values) {
 
     ndarray a(3, make_fixedstring_dtype(string_encoding_ascii, 3));

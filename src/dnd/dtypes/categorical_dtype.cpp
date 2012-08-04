@@ -4,6 +4,7 @@
 //
 
 #include <cstring>
+#include <set>
 
 #include <dnd/auxiliary_data.hpp>
 #include <dnd/dtypes/categorical_dtype.hpp>
@@ -23,18 +24,18 @@ namespace {
     public:
         sorter(vector<char *>& values, const single_compare_operation_t less, const auxiliary_data& auxdata) :
             m_categories(values), m_less(less), m_auxdata(auxdata) {}
-        bool operator()(intptr_t i, intptr_t j) {
+        bool operator()(intptr_t i, intptr_t j) const {
             return m_less(m_categories[i], m_categories[j], m_auxdata);
         }
     };
 
-    class cmp{
+    class cmp {
         const single_compare_operation_t m_less;
         const auxiliary_data& m_auxdata;
     public:
         cmp(const single_compare_operation_t less, const auxiliary_data& auxdata) :
             m_less(less), m_auxdata(auxdata) {}
-        bool operator()(const char *a, const char *b) {
+        bool operator()(const char *a, const char *b) const {
             return m_less(a, b, m_auxdata);
         }
     };
@@ -198,6 +199,12 @@ namespace {
 categorical_dtype::categorical_dtype(const ndarray& categories)
     : extended_dtype(), m_category_dtype(categories.get_dtype())
 {
+    single_compare_kernel_instance k;
+    m_category_dtype.get_single_compare_kernel(k);
+
+    cmp less(k.comparisons[less_id], k.auxdata);
+    set<char *, cmp> uniques(less);
+
     m_categories.resize(categories.get_num_elements());
     m_value_to_category_index.resize(categories.get_num_elements());
     m_category_index_to_value.resize(categories.get_num_elements());
@@ -208,9 +215,13 @@ categorical_dtype::categorical_dtype(const ndarray& categories)
         m_category_index_to_value[i] = i;
         categories_user_order[i] = new char[m_category_dtype.element_size()];
         memcpy(categories_user_order[i], categories(i).get_readonly_originptr(), m_category_dtype.element_size());
+        if (uniques.count(categories_user_order[i]) == 0) {
+            uniques.insert(categories_user_order[i]);
+        }
+        else {
+            throw std::runtime_error("categories must be unique");
+        }
     }
-    single_compare_kernel_instance k;
-    m_category_dtype.get_single_compare_kernel(k);
     std::sort(m_category_index_to_value.begin(), m_category_index_to_value.end(), sorter(categories_user_order, k.comparisons[less_id], k.auxdata));
 
     // reorder categories lexicographically, and create mapping from values to indices of (lexicographically sorted) categories
