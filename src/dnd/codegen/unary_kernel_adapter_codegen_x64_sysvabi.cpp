@@ -23,7 +23,7 @@ namespace
         return static_cast<void*>(static_cast<uint8_t*>(ptr) + offset);
     }
     
-    const char* restype_to_str(unsigned restype)
+    const char* type_to_str(unsigned restype)
     {
         switch (restype)
         {
@@ -37,21 +37,6 @@ namespace
         }
     }
     
-    const char* argtype_to_str(unsigned argtype)
-    {
-        switch (argtype)
-        {
-            case 0: return "int8";
-            case 1: return "int16";
-            case 2: return "int32";
-            case 3: return "int64";
-            case 4: return "float32";
-            case 5: return "float64";
-            case 6: return "complex<float32>";
-            case 7: return "complex<float64>";
-            default: return "unknown type";
-        }
-    }
     
     size_t idx_for_type_id(dnd::type_id_t type_id)
     {
@@ -113,8 +98,8 @@ std::string get_unary_function_adapter_unique_id_string(uint64_t unique_id)
 {
     std::stringstream ss;
 
-    const char* str_ret = restype_to_str(unique_id & 0xf);
-    const char* str_arg = argtype_to_str((unique_id>>4) &0xf);
+    const char* str_ret = type_to_str(unique_id & 0xf);
+    const char* str_arg = type_to_str((unique_id>>4) &0xf);
     ss << str_ret << " (" << str_arg << ")";
     return ss.str();
 }
@@ -123,131 +108,93 @@ namespace // nameless
 {
 // these are portions of machine code used to compose the unary function adapter    
     static unsigned char unary_adapter_prolog[] = {
-        0x48, 0x89, 0x5c, 0x24, 0x08,   // mov     QWORD PTR [rsp+8], rbx
-        0x48, 0x89, 0x6c, 0x24, 0x10,   // mov     QWORD PTR [rsp+16], rbp
-        0x48, 0x89, 0x74, 0x24, 0x18,   // mov     QWORD PTR [rsp+24], rsi
-        0x57,                           // push    rdi
-        0x41, 0x54,                     // push    r12
-        0x41, 0x55,                     // push    r13
-        0x48, 0x83, 0xec, 0x30          // sub     rsp, 48
+        // save callee saved registers... we use them all ;)
+        0x55,                           // pushq %rbp
+        0x41, 0x57,                     // pushq %r15
+        0x41, 0x56,                     // pushq %r14
+        0x41, 0x55,                     // pushq %r13
+        0x41, 0x54,                     // pushq %r12
+        0x54,                           // pushq %rbx
     };
+    
     static unsigned char unary_adapter_loop_setup[] = {
-        0x48, 0x8b, 0x44, 0x24, 0x78,   // mov rax, QWORD PTR auxdata$[rsp]     ; AUXDATA: get arg
-        0x48, 0x8b, 0x74, 0x24, 0x70,   // mov     rsi, QWORD PTR count$[rsp]
-        0x4d, 0x8b, 0xe1,               // mov     r12, r9
-        0x48, 0x83, 0xe0, 0xfe,         // and     rax, -2                      ; AUXDATA: Remove "borrowed" bit
-        0x49, 0x8b, 0xd8,               // mov     rbx, r8
-        0x4c, 0x8b, 0xea,               // mov     r13, rdx
-        0x48, 0x8B, 0x68, 0x20,         // mov     rbp, QWORD PTR [rax+32]      ; AUXDATA: Get function pointer
-        0x48, 0x8b, 0xf9,               // mov     rdi, rcx
-        0x48, 0x85, 0xf6,               // test    rsi, rsi
-        0x7e, 0x00                      // jle     SHORT skip_loop (REQUIRES FIXUP)
+        // move all the registers to callee saved ones... we are reusing them
+        // in the loop
+        0x4d, 0x89, 0xce,               // movq %r9, %r14
+        0x4d, 0x89, 0xc4,               // movq %r8, %r12
+        0x49, 0x89, 0xcf,               // movq %rcx, %r15
+        0x48, 0x89, 0xd3,               // movq %rdx, %rbx
+        0x49, 0x89, 0xf5,               // movq %rsi, %r13
+        0x48, 0x89, 0xfd,               // movq %rdi, %rbp
+        // and mask the lower bit on what is the function kernel (0xfe == -2)
+        0x49, 0x83, 0xe6, 0xfe,         // andq $0xfe, %r14
+        // then fetch the actual function pointer..
+        0x4d, 0x8b, 0x76, 0x20,         // movq 0x20(%r14), %r14
     };
 
     
     static unsigned char unary_adapter_arg0_get_int8[] = {
-        0x0f, 0xb6, 0x0b                // movzx   ecx, BYTE PTR [rbx]
+        0x0f, 0xbe, 0x3b,               // movsbl   (%rbx), %edi
     };
     static unsigned char unary_adapter_arg0_get_int16[] = {
-        0x0f, 0xb7, 0x0b                // movzx   ecx, WORD PTR [rbx]
+        0x0f, 0xbf, 0x3b,               // movswl   (%rbx), %edi
     };
     static unsigned char unary_adapter_arg0_get_int32[] = {
-        0x8b, 0x0b                      // mov     ecx, DWORD PTR [rbx]
+        0x8b, 0x3b                      // movl     (%rbx), %edi
     };
     static unsigned char unary_adapter_arg0_get_int64[] = {
-        0x48, 0x8b, 0x0b                // mov     rcx, QWORD PTR [rbx]
+        0x48, 0x8b, 0x3b                // movq     (%rbx), %rdi
     };
     static unsigned char unary_adapter_arg0_get_float32[] = {
-        0xf3, 0x0f, 0x10, 0x03          // movss   xmm0, DWORD PTR [rbx]
+        0xf3, 0x0f, 0x10, 0x03          // movss    (%rbx), %xmm0
     };
     static unsigned char unary_adapter_arg0_get_float64[] = {
-        0xf2, 0x0f, 0x10, 0x03          // movsdx  xmm0, QWORD PTR [rbx]
+        0xf2, 0x0f, 0x10, 0x03          // movsd    (%rbx), %xmm0
     };
-    static unsigned char unary_adapter_arg0_get_complex_float32[] = {
-        0x48, 0x8b, 0x0b                // mov     rcx, QWORD PTR [rbx]
-    };
-    static unsigned char unary_adapter_arg0_get_complex_float64[] = {
-        0x0f, 0x10, 0x03,               // movups  xmm0, XMMWORD PTR [rbx]
-        0x48, 0x8d, 0x4c, 0x24, 0x20,   // lea     rcx, QWORD PTR $stack_temporary[rsp]
-        0x0f, 0x29, 0x44, 0x24, 0x20    // movaps  XMMWORD PTR $stack_temporary[rsp], xmm0
-    };
-    
+
     // End ARG0 CHOICE ]]
     static unsigned char unary_adapter_function_call[] = {
-        0xff, 0xd5,                     // call    rbp
-        0x49, 0x03, 0xdc                // add     rbx, r12
+        // our function pointer is in %r14
+        0x41, 0xff, 0xd6,               // call     *%r14
     };
     // Begin RESULT CHOICE [[
     static unsigned char unary_adapter_result_set_int8[] = {
-        0x88, 0x07                      // mov     BYTE PTR [rdi], al
+        0x88, 0x45, 0x00                // movb     %al, 0x00(%rbp)
     };
     static unsigned char unary_adapter_result_set_int16[] = {
-        0x66, 0x89, 0x07                // mov     WORD PTR [rdi], ax
+        0x66, 0x89, 0x45, 0x00          // movw     %ax, 0x00(%rbp)
     };
     static unsigned char unary_adapter_result_set_int32[] = {
-        0x89, 0x07                      // mov     DWORD PTR [rdi], eax
+        0x89, 0x45, 0x00                // movl     %eax, (%rbp)
     };
     static unsigned char unary_adapter_result_set_int64[] = {
-        0x48, 0x89, 0x07                // mov     QWORD PTR [rdi], rax
+        0x48, 0x89, 0x45, 0x00          // moq      %rax, (%rbp)
     };
     static unsigned char unary_adapter_result_set_float32[] = {
-        0xf3, 0x0f, 0x11, 0x07          // movss   DWORD PTR [rdi], xmm0
+        0xf3, 0x0f, 0x11, 0x45, 0x00    // movss    %xmm0, (%rbp)
     };
     static unsigned char unary_adapter_result_set_float64[] = {
-        0xf2, 0x0f, 0x11, 0x07          // movsdx  QWORD PTR [rdi], xmm0
+        0xf2, 0x0f, 0x11, 0x45, 0x00    // movsd    %xmm0, (%rbp)
     };
     // End RESULT CHOICE ]]
-    static unsigned char unary_adapter_loop_finish[] = {
-        0x49, 0x03, 0xfd,               // add     rdi, r13
-        0x48, 0xff, 0xce,               // dec     rsi
-        0x75, 0x00                      // jne     SHORT loop_start (REQUIRES FIXUP)
+    static unsigned char unary_adapter_update_streams[] = {
+        0x4c, 0x01, 0xfb,               // add  %r15, %rbx  # update src
+        0x4c, 0x01, 0xed,               // addq %r13, %rbp  # update dst
+        0x49, 0xff, 0xcc,               // decq %r12        # dec count
+        0x75, 0x00,                     // jne loop (patch last byte)
     };
     // skip_loop:
     static unsigned char unary_adapter_epilog[] = {
-        0x48, 0x8b, 0x5c, 0x24, 0x50,   // mov     rbx, QWORD PTR [rsp+80]
-        0x48, 0x8b, 0x6c, 0x24, 0x58,   // mov     rbp, QWORD PTR [rsp+88]
-        0x48, 0x8b, 0x74, 0x24, 0x60,   // mov     rsi, QWORD PTR [rsp+96]
-        0x48, 0x83, 0xc4, 0x30,         // add     rsp, 48
-        0x41, 0x5d,                     // pop     r13
-        0x41, 0x5c,                     // pop     r12
-        0x5f,                           // pop     rdi
-        0xc3                            // ret     0
+        // restore callee saved registers and return...
+        0x5b,                           // popq %rbx
+        0x41, 0x5c,                     // popq %r12
+        0x41, 0x5d,                     // popq %r13
+        0x41, 0x5e,                     // popq %r14
+        0x41, 0x5f,                     // popq %r15
+        0x5d,                           // popq %rbp
+        0xc3,                           // ret
     };
     
-    
-// unwind info
-    /*
-    static unsigned char unwind_info[] = {
-        0x01, // Version 1 (bits 0..2), All flags cleared (bits 3..7)
-        0x18, // Size of prolog
-        0x0a, // Count of unwind codes (10, means 20 bytes)
-        0x00, // Frame register (0 means not used)
-        // Unwind code: finished at offset 0x18, operation code 4 (UWOP_SAVE_NONVOL),
-        // register number 6 (RSI), stored at [RSP+0x60] (8 * 0x000c)
-        0x18, 0x64,
-        0x0c, 0x00,
-        // Unwind code: finished at offset 0x18, operation code 4 (UWOP_SAVE_NONVOL),
-        // register number 5 (RBP), stored at [RSP+0x58] (8 * 0x000b)
-        0x18, 0x54,
-        0x0b, 0x00,
-        // Unwind code: finished at offset 0x18, operation code 4 (UWOP_SAVE_NONVOL),
-        // register number 3 (RBX), stored at [RSP+0x50] (8 * 0x000a)
-        0x18, 0x34,
-        0x0a, 0x00,
-        // Unwind code: finished at offset 0x18, operation code 2 (UWOP_ALLOC_SMALL),
-        // allocation size 0x30 = 5 * 8 + 8
-        0x18, 0x52,
-        // Unwind code: finished at offset 0x14, operation code 0 (UWOP_PUSH_NONVOL),
-        // register number 0xD = 13 (R13)
-        0x14, 0xd0,
-        // Unwind code: finished at offset 0x12, operation code 0 (UWOP_PUSH_NONVOL),
-        // register number 0xC = 12 (R12)
-        0x12, 0xC0,
-        // Unwind code: finished at offset 0x10, operation code 0 (UWOP_PUSH_NONVOL),
-        // register number 7 (RDI)
-        0x10, 0x70
-    };
-    */
     typedef struct { void* ptr; size_t size; } _code_snippet;
     static _code_snippet arg0_snippets[] =
     {
@@ -257,8 +204,6 @@ namespace // nameless
         { unary_adapter_arg0_get_int64,           sizeof(unary_adapter_arg0_get_int64)           },
         { unary_adapter_arg0_get_float32,         sizeof(unary_adapter_arg0_get_float32)         },
         { unary_adapter_arg0_get_float64,         sizeof(unary_adapter_arg0_get_float64)         },
-        { unary_adapter_arg0_get_complex_float32, sizeof(unary_adapter_arg0_get_complex_float32) },
-        { unary_adapter_arg0_get_complex_float64, sizeof(unary_adapter_arg0_get_complex_float64) },
     };
     
     static _code_snippet ret_snippets[] =
@@ -389,7 +334,9 @@ namespace // nameless
         {
             // this will shrink... resize_executable_memory has realloc semantics
             // so on shrink it will never move;
+#ifndef _NDEBUG
             int8_t* old_begin = begin_;
+#endif
             dnd::resize_executable_memory(memblock_, current_ - begin_, (char**)&begin_, (char**)&end_);
             assert(old_begin = begin_);
 
@@ -445,7 +392,7 @@ unary_operation_t* codegen_unary_function_adapter(const memory_block_ptr& exec_m
     size_t estimated_size = sizeof(unary_adapter_prolog)
                           + sizeof(unary_adapter_loop_setup) 
                           + sizeof(unary_adapter_function_call)
-                          + sizeof(unary_adapter_loop_finish)
+                          + sizeof(unary_adapter_update_streams)
                           + sizeof(unary_adapter_epilog) 
                           + 64; 
 
@@ -457,12 +404,12 @@ unary_operation_t* codegen_unary_function_adapter(const memory_block_ptr& exec_m
     fbuilder.label(entry_point)
             .append(unary_adapter_prolog, sizeof(unary_adapter_prolog))
             .append(unary_adapter_loop_setup, sizeof(unary_adapter_loop_setup))
-//            .align(64)
+            .align(4)
             .label(loop_start)
             .append(arg0_snippets[arg0_idx].ptr, arg0_snippets[arg0_idx].size)
             .append(unary_adapter_function_call, sizeof(unary_adapter_function_call))
             .append(ret_snippets[ret_idx].ptr, ret_snippets[ret_idx].size)
-            .append(unary_adapter_loop_finish, sizeof(unary_adapter_loop_finish))
+            .append(unary_adapter_update_streams, sizeof(unary_adapter_update_streams))
             .label(loop_end)
             .append(unary_adapter_epilog, sizeof(unary_adapter_epilog))
             .align(4)
@@ -477,15 +424,9 @@ unary_operation_t* codegen_unary_function_adapter(const memory_block_ptr& exec_m
         void* base    = fbuilder.base();
 
         assert(loop_size > 0 && loop_size < 128);
-        // loop-skip: last byte prior to loop start is the number of bytes to
-        // skip if size is 0 (note: maybe the test for 0 should be made before
-        // calling the unary adapter...)
-        
-        int8_t* loop_skip_offset = static_cast<int8_t*>(ptr_offset(base, loop_start)) - 1;
-        *loop_skip_offset = loop_size;
         int8_t* loop_continue_offset = static_cast<int8_t*>(ptr_offset(base, loop_end)) - 1;
-        *loop_continue_offset = -loop_size;
-
+        *loop_continue_offset = - loop_size;
+        
         unary_operation_t* specializations = static_cast<unary_operation_t*>(ptr_offset(base, table));
         unary_operation_t func_ptr = reinterpret_cast<unary_operation_t>(ptr_offset(base, entry_point));
         
