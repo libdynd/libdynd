@@ -10,6 +10,7 @@ set(tests_SRC
     codegen/test_codegen_cache.cpp
     codegen/test_unary_kernel_adapter.cpp
     codegen/test_binary_kernel_adapter.cpp
+#    codegen/assembly_samples/asm_tests.cpp
     dtypes/test_array_dtype.cpp
     dtypes/test_byteswap_dtype.cpp
     dtypes/test_categorical_dtype.cpp
@@ -30,6 +31,9 @@ set(tests_SRC
     test_ndarray_views.cpp
     test_shape_tools.cpp
     test_unary_kernel.cpp
+
+
+ 
     )
 
 # TODO: this is awkwardly hardcoded
@@ -61,11 +65,11 @@ if(WIN32)
         ../../../../googletest/build-vc10/RelWithDebInfo/gtest_main
         )
 elseif(APPLE)
-    target_link_libraries(dnd_tests
-        dynamicndarray
-        gtest
-        gtest_main
-        )
+  target_link_libraries(dnd_tests dynamicndarray gtest gtest_main)
+  enable_testing(true)
+  add_subdirectory(thirdparty/gtest)
+  include_directories(thirdparty/gtest/include)
+  
 else()
     set_target_properties(dnd_tests
                 PROPERTIES COMPILE_FLAGS
