@@ -101,7 +101,7 @@ static inline int validate_type_id(type_id_t type_id)
 }
 
 dtype::dtype()
-    : m_type_id(pattern_type_id), m_kind(pattern_kind), m_alignment(1),
+    : m_type_id(void_type_id), m_kind(void_kind), m_alignment(1),
       m_element_size(0), m_data()
 {
     // Default to a generic type with zero size

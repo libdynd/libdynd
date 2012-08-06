@@ -53,6 +53,8 @@ dtype dnd::promote_dtypes_arithmetic(const dtype& dt0, const dtype& dt1)
                     case uint_kind:
                         return (dt1_val.element_size() >= int_size) ? dt1_val
                                                                : make_dtype<int>();
+                    case void_kind:
+                        return dt0_val;
                     default:
                         return dt1_val;
                 }
@@ -82,6 +84,8 @@ dtype dnd::promote_dtypes_arithmetic(const dtype& dt0, const dtype& dt1)
                     case complex_kind:
                         // Integer type sizes don't affect complex type sizes
                         return dt1_val;
+                    case void_kind:
+                        return dt0_val;
                     default:
                         break;
                 }
@@ -112,6 +116,8 @@ dtype dnd::promote_dtypes_arithmetic(const dtype& dt0, const dtype& dt1)
                     case complex_kind:
                         // Integer type sizes don't affect complex type sizes
                         return dt1_val;
+                    case void_kind:
+                        return dt0_val;
                     default:
                         break;
                 }
@@ -132,6 +138,8 @@ dtype dnd::promote_dtypes_arithmetic(const dtype& dt0, const dtype& dt1)
                         } else {
                             return dt1_val;
                         }
+                    case void_kind:
+                        return dt0_val;
                     default:
                         break;
                 }
@@ -151,15 +159,21 @@ dtype dnd::promote_dtypes_arithmetic(const dtype& dt0, const dtype& dt1)
                     case complex_kind:
                         return (dt0_val.element_size() >= dt1_val.element_size()) ? dt0_val
                                                                           : dt1_val;
+                    case void_kind:
+                        return dt0_val;
                     default:
                         break;
                 }
                 break;
+            case void_kind:
+                return dt1_val;
             default:
                 break;
         }
 
-        throw std::runtime_error("internal error in built-in dtype promotion");
+        stringstream ss;
+        ss << "internal error in built-in dtype promotion of " << dt0_val << " and " << dt1_val;
+        throw std::runtime_error(ss.str());
     }
 
     throw std::runtime_error("type promotion of custom dtypes is not yet supported");

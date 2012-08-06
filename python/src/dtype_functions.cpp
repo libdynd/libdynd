@@ -39,9 +39,37 @@ dtype pydnd::deduce_dtype_from_object(PyObject* obj)
     if (PyBool_Check(obj)) {
         // Python bool
         return make_dtype<dnd_bool>();
-    } else if (PyLong_Check(obj) || PyInt_Check(obj)) {
+#if PY_VERSION_HEX < 0x03000000
+    } else if (PyInt_Check(obj)) {
         // Python integer
-        return make_dtype<int32_t>();
+# if SIZEOF_LONG > SIZEOF_INT
+        long value = PyInt_AS_LONG(obj);
+        // Use a 32-bit int if it fits. This conversion strategy
+        // is independent of sizeof(long), and is the same on 32-bit
+        // and 64-bit platforms.
+        if (value >= INT_MIN && value <= INT_MAX) {
+            return make_dtype<int>();
+        } else {
+            return make_dtype<long>();
+        }
+# else
+        return make_dtype<int>();
+# endif
+#endif // PY_VERSION_HEX < 0x03000000
+    } else if (PyLong_Check(obj)) {
+        // Python integer
+        PY_LONG_LONG value = PyLong_AsLongLong(obj);
+        if (value == -1 && PyErr_Occurred()) {
+            throw runtime_error("error converting int value");
+        }
+        // Use a 32-bit int if it fits. This conversion strategy
+        // is independent of sizeof(long), and is the same on 32-bit
+        // and 64-bit platforms.
+        if (value >= INT_MIN && value <= INT_MAX) {
+            return make_dtype<int>();
+        } else {
+            return make_dtype<PY_LONG_LONG>();
+        }
     } else if (PyFloat_Check(obj)) {
         // Python float
         return make_dtype<double>();
