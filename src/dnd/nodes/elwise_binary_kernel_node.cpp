@@ -56,6 +56,7 @@ ndarray_node_ptr dnd::elwise_binary_kernel_node::apply_linear_index(
 
 void dnd::elwise_binary_kernel_node::get_binary_operation(intptr_t dst_fixedstride, intptr_t src0_fixedstride,
                             intptr_t src1_fixedstride,
+                            const eval::eval_context *ectx,
                             kernel_instance<binary_operation_t>& out_kernel) const
 {
     if (m_dtype.kind() != expression_kind &&
@@ -74,7 +75,7 @@ void dnd::elwise_binary_kernel_node::get_binary_operation(intptr_t dst_fixedstri
         // Adapt the output
         if (m_dtype.kind() == expression_kind) {
             element_sizes[0] = m_dtype.element_size();
-            get_dtype_assignment_kernel(m_dtype.value_dtype(), m_dtype, assign_error_none, adapters_spec[0]);
+            get_dtype_assignment_kernel(m_dtype.value_dtype(), m_dtype, assign_error_none, ectx, adapters_spec[0]);
             adapters[0].kernel = adapters_spec[0].specializations[
                     get_unary_specialization(dst_fixedstride, m_dtype.value_dtype().element_size(),
                                         m_dtype.element_size(), m_dtype.element_size())];
@@ -87,7 +88,7 @@ void dnd::elwise_binary_kernel_node::get_binary_operation(intptr_t dst_fixedstri
         if (m_opnodes[0]->get_dtype().kind() == expression_kind) {
             element_sizes[1] = m_opnodes[0]->get_dtype().value_dtype().element_size();
             get_dtype_assignment_kernel(m_opnodes[0]->get_dtype().value_dtype(), m_opnodes[0]->get_dtype(),
-                                assign_error_none, adapters_spec[1]);
+                                assign_error_none, ectx, adapters_spec[1]);
             adapters[1].kernel = adapters_spec[1].specializations[
                         get_unary_specialization(element_sizes[1], element_sizes[1],
                                                 src0_fixedstride, m_opnodes[0]->get_dtype().element_size())];
@@ -100,7 +101,7 @@ void dnd::elwise_binary_kernel_node::get_binary_operation(intptr_t dst_fixedstri
         if (m_opnodes[1]->get_dtype().kind() == expression_kind) {
             element_sizes[2] = m_opnodes[1]->get_dtype().value_dtype().element_size();
             get_dtype_assignment_kernel(m_opnodes[1]->get_dtype().value_dtype(), m_opnodes[1]->get_dtype(),
-                                assign_error_none, adapters_spec[2]);
+                                assign_error_none, ectx, adapters_spec[2]);
             adapters[2].kernel = adapters_spec[2].specializations[
                         get_unary_specialization(element_sizes[2], element_sizes[2],
                                                 src1_fixedstride, m_opnodes[1]->get_dtype().element_size())];

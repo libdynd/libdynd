@@ -53,12 +53,12 @@ inline unary_specialization_t get_unary_specialization(intptr_t dst_stride, intp
  */
 struct unary_specialization_kernel_instance {
     unary_specialization_kernel_instance()
-        : specializations(0)
+        : specializations(0), auxdata()
     {
     }
     // Copying a kernel_instance clones the auxiliary data
     unary_specialization_kernel_instance(const unary_specialization_kernel_instance& rhs)
-        : specializations(rhs.specializations)
+        : specializations(rhs.specializations), auxdata()
     {
         auxdata.clone_from(rhs.auxdata);
     }

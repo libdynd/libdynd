@@ -19,8 +19,8 @@ TEST(DType, BasicConstructor) {
     dtype d;
 
     // Default-constructed dtype properties
-    EXPECT_EQ(pattern_type_id, d.type_id());
-    EXPECT_EQ(pattern_kind, d.kind());
+    EXPECT_EQ(void_type_id, d.type_id());
+    EXPECT_EQ(void_kind, d.kind());
     EXPECT_EQ(1u, d.alignment());
     EXPECT_EQ(0u, d.element_size());
     EXPECT_EQ(NULL, d.extended());

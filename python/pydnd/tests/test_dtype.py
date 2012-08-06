@@ -128,3 +128,6 @@ class TestDType(unittest.TestCase):
         self.assertRaises(RuntimeError, nd.make_fixedbytes_dtype, 6, 3)
         # Alignment must divide into the element_size
         self.assertRaises(RuntimeError, nd.make_fixedbytes_dtype, 6, 4)
+
+if __name__ == '__main__':
+    unittest.main()

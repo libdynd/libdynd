@@ -501,7 +501,6 @@ binary_operation_t dnd::codegen_binary_function_adapter(const memory_block_ptr& 
     fbuilder.label(entry_point)
             .append(binary_adapter_prolog, sizeof(binary_adapter_prolog))
             .append(binary_adapter_loop_setup, sizeof(binary_adapter_loop_setup))
-            .align(4)
             .label(loop_start)
             .add_argument(arg0_idx)
             .add_argument(arg1_idx)

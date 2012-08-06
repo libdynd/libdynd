@@ -47,6 +47,7 @@ public:
     void codegen_unary_function_adapter(const dtype& restype,
                     const dtype& arg0type, calling_convention_t callconv,
                     void *function_pointer,
+                    memory_block_data *function_pointer_owner,
                     unary_specialization_kernel_instance& out_kernel);
 
     /**
@@ -58,16 +59,19 @@ public:
                     const dtype& arg0type, const dtype& arg1type,
                     calling_convention_t callconv,
                     void *function_pointer,
+                    memory_block_data *function_pointer_owner,
                     kernel_instance<binary_operation_t>& out_kernel);
 
     void codegen_left_associative_binary_reduce_function_adapter(
                     const dtype& reduce_type,calling_convention_t callconv,
                     void *function_pointer,
+                    memory_block_data *function_pointer_owner,
                     kernel_instance<unary_operation_t>& out_kernel);
 
     void codegen_right_associative_binary_reduce_function_adapter(
                     const dtype& reduce_type,calling_convention_t callconv,
                     void *function_pointer,
+                    memory_block_data *function_pointer_owner,
                     kernel_instance<unary_operation_t>& out_kernel);
 
     void debug_dump(std::ostream& o, const std::string& indent = "") const;

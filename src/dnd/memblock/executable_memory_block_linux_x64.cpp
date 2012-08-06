@@ -3,178 +3,245 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#if defined(_WIN32) && defined(_M_X64)
+// TODO: This is a clone of the OSX one, should just merge them into one file
 
-#include <Windows.h>
 
-#include <stdexcept>
-#include <deque>
-#include <vector>
-#include <sstream>
+// To enable logging just uncomment this:
+#define ENABLE_LOGGING
+
+
+#include <dnd/platform_definitions.h>
+#if defined(DND_OS_LINUX)
 
 #include <dnd/memblock/executable_memory_block.hpp>
 
-using namespace std;
-using namespace dnd;
+// system includes
+#include <sys/mman.h>
 
-namespace {
-    struct virtual_alloc_chunk {
-        char *m_memory_begin;
-        deque<RUNTIME_FUNCTION> m_functions;
-    };
+// standard includes
+#include <iostream>
+#include <sstream>
+#include <vector>
+#include <algorithm>
+#include <stdexcept>
 
-    struct executable_memory_block {
-        /** Every memory block object needs this at the front */
-        memory_block_data m_mbd;
-        intptr_t m_total_allocated_capacity, m_chunk_size_bytes;
-        /** The VirtualAlloc'd memory, with  */
-        deque<virtual_alloc_chunk> m_memory_handles;
-        /** The current VirtualAlloc'd memory being doled out */
-        char *m_memory_begin, *m_memory_current, *m_memory_end;
+#include <assert.h>
+#include <errno.h>
 
-        /**
-         * Allocates a new chunk of executable memory.
-         */
-        void append_memory()
-        {
-            HANDLE hProcess = GetCurrentProcess();
-            m_memory_handles.push_back(virtual_alloc_chunk());
-            m_memory_begin = reinterpret_cast<char *>(VirtualAllocEx(hProcess, NULL, m_chunk_size_bytes, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE));
-            m_memory_handles.back().m_memory_begin = m_memory_begin;
-            if (m_memory_begin == NULL) {
-                m_memory_handles.pop_back();
-                throw bad_alloc();
-            }
-            m_memory_current = m_memory_begin;
-            m_memory_end = m_memory_current + m_chunk_size_bytes;
-            m_total_allocated_capacity += m_chunk_size_bytes;
-        }
 
-        executable_memory_block(intptr_t chunk_size_bytes)
-            : m_mbd(1, executable_memory_block_type), m_total_allocated_capacity(0),
-                    m_chunk_size_bytes(chunk_size_bytes), m_memory_handles()
-        {
-            append_memory();
-        }
-
-        ~executable_memory_block()
-        {
-            HANDLE hProcess = GetCurrentProcess();
-            for (size_t i = 0, i_end = m_memory_handles.size(); i != i_end; ++i) {
-                for (size_t j = 0, j_end = m_memory_handles[i].m_functions.size(); j != j_end; ++j) {
-                    RtlDeleteFunctionTable(&m_memory_handles[i].m_functions[j]);
-                }
-                VirtualFreeEx(hProcess, m_memory_handles[i].m_memory_begin, 0, MEM_RELEASE);
-            }
-        }
-    };
-} // anonymous namespace
-
-memory_block_ptr dnd::make_executable_memory_block(intptr_t chunk_size_bytes)
+static inline bool ptr_in_range(void* ptr, void* lower, void* upper)
 {
-    executable_memory_block *pmb = new executable_memory_block(chunk_size_bytes);
-    return memory_block_ptr(reinterpret_cast<memory_block_data *>(pmb), false);
+    return (ptr >= lower) && (ptr < upper);    
 }
 
+static inline void* ptr_offset(void* base, ptrdiff_t offset_in_bytes)
+{
+    return static_cast<void*>(static_cast<int8_t*>(base) + offset_in_bytes);
+}
 
-namespace dnd { namespace detail {
+static inline size_t align_up(size_t value, size_t alignment)
+{
+    return ((value + alignment - 1) / alignment) * alignment;
+}
 
+static inline size_t align_down(size_t value, size_t alignment)
+{
+    return value % alignment;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+namespace {
+
+struct executable_memory_block : public dnd::memory_block_data 
+{
+    executable_memory_block(size_t chunk_size_in_bytes);
+    ~executable_memory_block();
+    
+    void add_chunk();
+    
+    size_t              m_chunk_size;       // maximum chunk size
+    void*               m_pivot;
+    std::vector<void*>  m_allocated_chunks;    
+};
+
+executable_memory_block::executable_memory_block(size_t chunk_size_in_bytes)
+    : dnd::memory_block_data(1, dnd::executable_memory_block_type)
+    , m_chunk_size(align_up(chunk_size_in_bytes, getpagesize()))
+{
+}
+
+executable_memory_block::~executable_memory_block()
+{
+    std::vector<void*>::const_iterator curr = m_allocated_chunks.begin();
+    std::vector<void*>::const_iterator end = m_allocated_chunks.end();
+    while (curr < end)
+    {
+        munmap(*curr, m_chunk_size);
+        ++curr;
+    }
+    
+    // not needed, just to leave no traces behind :)
+    m_allocated_chunks.clear();
+    m_chunk_size = 0;
+    m_pivot = 0;
+}
+    
+void executable_memory_block::add_chunk()
+{
+    void* result = mmap(0  // no address hint
+                        , m_chunk_size // the size
+                        , PROT_READ | PROT_WRITE | PROT_EXEC // rwx
+                        , MAP_PRIVATE | MAP_ANON
+                        , 0, 0);
+    
+    if (result != MAP_FAILED)
+    {
+        m_allocated_chunks.push_back(result);
+        m_pivot = result;
+    }
+    else 
+    {
+        std::stringstream ss;
+        ss << "mmap failed with errno = " << errno << ": "<< strerror(errno);
+        throw std::runtime_error(ss.str());
+    }
+}
+
+} // nameless namespace
+
+////////////////////////////////////////////////////////////////////////////////
+
+namespace dnd { 
+    
+namespace detail {
 void free_executable_memory_block(memory_block_data *memblock)
 {
-    executable_memory_block *emb = reinterpret_cast<executable_memory_block *>(memblock);
+    executable_memory_block *emb = static_cast<executable_memory_block *>(memblock);
     delete emb;
 }
+} // namespace detail
 
-}} // namespace dnd::detail
 
-void dnd::allocate_executable_memory(memory_block_data *self, intptr_t size_bytes, intptr_t alignment, char **out_begin, char **out_end)
+memory_block_ptr make_executable_memory_block(intptr_t chunk_size_bytes)
 {
-//    cout << "allocating " << size_bytes << " of memory with alignment " << alignment << endl;
-    // Allocate new exectuable memory of the requested size and alignment
-    executable_memory_block *emb = reinterpret_cast<executable_memory_block *>(self);
-    if (size_bytes > emb->m_chunk_size_bytes) {
-        stringstream ss;
-        ss << "Memory allocation request of " << size_bytes << " is too large for this executable_memory_block";
-        ss << " with chunk size " << emb->m_chunk_size_bytes;
-        throw runtime_error(ss.str());
+    executable_memory_block *pmb = new executable_memory_block(chunk_size_bytes);
+    return memory_block_ptr(pmb, false);
+}
+    
+void allocate_executable_memory(memory_block_data * self       //in
+                                , intptr_t          size_bytes //in
+                                , intptr_t          alignment  //in
+                                , char **           out_begin  //out
+                                , char **           out_end    //out
+                                )
+{
+    executable_memory_block* emb = static_cast<executable_memory_block*>(self);
+    // some preconditions
+    assert( executable_memory_block_type == executable_memory_block_type);
+    assert( (size_t)size_bytes <= emb->m_chunk_size );
+#ifdef ENABLE_LOGGING
+    std::cout << "allocating " << size_bytes 
+              << " of executable memory with alignment " << alignment 
+              << std::endl;
+#endif //ENABLE LOGGING
+    
+    if ((size_t)size_bytes > emb->m_chunk_size)
+    {
+        std::stringstream ss;
+        ss << "Memory allocation request of " << size_bytes 
+           << " is too large for this executable_memory_block"
+              " with chunk size" << emb->m_chunk_size;
+        throw std::runtime_error(ss.str());
     }
-    char *begin = reinterpret_cast<char *>(
-                    (reinterpret_cast<uintptr_t>(emb->m_memory_current) + alignment - 1) & ~(alignment - 1));
-    char *end = begin + size_bytes;
-    if (end > emb->m_memory_end) {
-        // Allocate another chunk of memory
-        emb->append_memory();
-        begin = emb->m_memory_begin;
-        end = begin + size_bytes;
+    
+    if (emb->m_allocated_chunks.empty())
+        emb->add_chunk();
+    
+    void* current_chunk = emb->m_allocated_chunks.back();
+    void* begin = emb->m_pivot;
+    void* end   = ptr_offset(begin, size_bytes);
+    if (ptr_offset(current_chunk, emb->m_chunk_size) < ptr_offset(emb->m_pivot, size_bytes))
+    {
+        emb->add_chunk();
+        begin = emb->m_allocated_chunks.back();
+        end   = ptr_offset(begin, size_bytes);
     }
 
-    // Indicate where to allocate the next memory
-    emb->m_memory_current = end;
-
-    // Return the allocated memory
-    *out_begin = begin;
-    *out_end = end;
-//    cout << "allocated at address " << (void *)begin << endl;
+    emb->m_pivot = end;
+    assert(ptr_in_range(begin
+                        , emb->m_allocated_chunks.back()
+                        , ptr_offset(emb->m_allocated_chunks.back()
+                                     , emb->m_chunk_size)));
+    assert(ptr_in_range(end
+                        , emb->m_allocated_chunks.back()
+                        , ptr_offset(emb->m_allocated_chunks.back()
+                        , emb->m_chunk_size)));
+    assert(((int8_t*)end - (int8_t*)begin) == size_bytes);
+    assert(emb->m_pivot == end);
+    *out_begin = static_cast<char*>(begin);
+    *out_end = static_cast<char*>(end);
+    
 }
 
-void dnd::resize_executable_memory(memory_block_data *self, intptr_t size_bytes, char **inout_begin, char **inout_end)
+void resize_executable_memory(memory_block_data * self
+                            , intptr_t            new_size
+                            , char **             inout_begin
+                            , char **             inout_end
+                            )
 {
-    // Resizes previously allocated executable memory to the requested size
-    executable_memory_block *emb = reinterpret_cast<executable_memory_block *>(self);
-//    cout << "resizing memory " << (void *)*inout_begin << " / " << (void *)*inout_end << " from size " << (*inout_end - *inout_begin) << " to " << size_bytes << endl;
-//    cout << "memory state before " << (void *)emb->m_memory_begin << " / " << (void *)emb->m_memory_current << " / " << (void *)emb->m_memory_end << endl;
-    if (*inout_end != emb->m_memory_current) {
-        // Simple sanity check
-        throw runtime_error("executable_memory_block resize must be called only using the most recently allocated memory");
-    }
-    char *end = *inout_begin + size_bytes;
-    if (end <= emb->m_memory_end) {
-        // If it fits, just adjust the current allocation point
-        emb->m_memory_current = end;
-        *inout_end = end;
-    } else {
-        // If it doesn't fit, need to copy to a new memory chunk (note: assuming position independent code)
-        char *old_begin = emb->m_memory_begin, *old_current = *inout_begin;
-        // Allocate another chunk of memory
-        emb->append_memory();
-        memcpy(emb->m_memory_begin, *inout_begin, *inout_end - *inout_begin);
-        end = emb->m_memory_begin + size_bytes;
-        emb->m_memory_current = end;
-        *inout_begin = emb->m_memory_begin;
-        *inout_end = end;
-    }
-//    cout << "memory state after " << (void *)emb->m_memory_begin << " / " << (void *)emb->m_memory_current << " / " << (void *)emb->m_memory_end << endl;
-}
+    executable_memory_block* emb = static_cast<executable_memory_block*>(self);
+    void* current_chunk = emb->m_allocated_chunks.back();
+    
+    void* old_begin = static_cast<void*>(*inout_begin);
+    void* old_end   = static_cast<void*>(*inout_end);
+    
+    assert(old_end == emb->m_pivot);
 
-void dnd::set_executable_memory_runtime_function(memory_block_data *self, char *begin, char *end, char *unwind_data)
-{
-    // Sets the runtime function info for the most recently allocated memory
-    executable_memory_block *emb = reinterpret_cast<executable_memory_block *>(self);
-    virtual_alloc_chunk &vac = emb->m_memory_handles.back();
-    vac.m_functions.push_back(RUNTIME_FUNCTION());
-    RUNTIME_FUNCTION &rf = vac.m_functions.back();
-    char *root = vac.m_memory_begin;
-    rf.BeginAddress = (DWORD)(begin - root);
-    rf.EndAddress = (DWORD)(end - root);
-    rf.UnwindData = (DWORD)(unwind_data - root);
-    RtlAddFunctionTable(&rf, 1, (DWORD64)root);
-}
+    void* new_begin = old_begin;
+    void* new_end   = ptr_offset(old_begin, new_size);
 
-void dnd::executable_memory_block_debug_dump(const memory_block_data *memblock, std::ostream& o, const std::string& indent)
+    if (new_end >= ptr_offset(current_chunk, emb->m_chunk_size))
+    {
+        emb->add_chunk();
+        new_begin = emb->m_allocated_chunks.back();
+        new_end   = ptr_offset(new_begin, new_size);
+        size_t old_size = static_cast<uint8_t*>(old_end) - static_cast<uint8_t*>(old_begin);
+        memcpy(new_begin, old_begin, old_size);
+        *inout_begin = static_cast<char*>(new_begin);
+    }
+ 
+    emb->m_pivot = new_end;
+    *inout_end   = static_cast<char*>(new_end);
+
+}
+    
+void executable_memory_block_debug_dump(const memory_block_data *memblock
+                                        , std::ostream& os
+                                        , const std::string& indent
+                                        )
 {
-    const executable_memory_block *emb = reinterpret_cast<const executable_memory_block *>(memblock);
-    o << indent << " chunk size: " << emb->m_chunk_size_bytes << "\n";
-    o << indent << " allocated: " << emb->m_total_allocated_capacity << "\n";
+    const executable_memory_block *emb = static_cast<const executable_memory_block *>(memblock);
+    size_t chunk_size = emb->m_chunk_size;
+    void*  current_chunk = emb->m_allocated_chunks.back();
+    ptrdiff_t current_chunk_used_bytes = static_cast<uint8_t*>(emb->m_pivot) - static_cast<uint8_t*>(current_chunk);
+    size_t allocated  = emb->m_allocated_chunks.size() * (chunk_size - 1)
+                        + current_chunk_used_bytes;
+    os << indent << " chunk size: " << chunk_size << std::endl;
+    os << indent << " allocated: "  << allocated << std::endl;
+    os << indent << " system page size: " << getpagesize() << std::endl;
+
+    /*
     for (size_t i = 0, i_end = emb->m_memory_handles.size(); i != i_end; ++i) {
         const virtual_alloc_chunk& vac = emb->m_memory_handles[i];
-        o << indent << " allocated chunk at address " << (void *)vac.m_memory_begin << ":\n";
+        os << indent << " allocated chunk at address " << (void *)vac.m_memory_begin << ":\n";
         for (size_t j = 0, j_end = vac.m_functions.size(); j != j_end; ++j) {
             const RUNTIME_FUNCTION &rf = vac.m_functions[j];
-            o << indent << "  RUNTIME_FUNCTION{" << (void *)rf.BeginAddress;
-            o << ", " << (void *)rf.EndAddress << ", " << (void *)rf.UnwindData << "}\n";
+            os << indent << "  RUNTIME_FUNCTION{" << (void *)rf.BeginAddress;
+            os << ", " << (void *)rf.EndAddress << ", " << (void *)rf.UnwindData << "}\n";
         }
     }
+    */
 }
-
+} // namespace dnd
 
 #endif // defined(_WIN32) && defined(_M_X64)

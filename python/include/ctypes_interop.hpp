@@ -9,11 +9,11 @@
 #ifndef _DND__CTYPES_INTEROP_HPP_
 #define _DND__CTYPES_INTEROP_HPP_
 
+#include <Python.h>
+
 #include <dnd/dtype.hpp>
 #include <dnd/ndarray.hpp>
 #include <dnd/codegen/calling_conventions.hpp>
-
-#include <Python.h>
 
 namespace pydnd {
 
@@ -133,10 +133,13 @@ inline bool CDataObject_Check(PyObject *v) {
 dnd::calling_convention_t get_ctypes_calling_convention(PyCFuncPtrObject* cfunc);
 
 /**
- * Gets the signature of the ctypes function pointer object. out_sig[0] is
- * the return type, and the rest are the argument types.
+ * Gets the signature of the ctypes function pointer object.
+ *
+ * @cfunc  The ctypes function pointer object
+ * @out_returntype  The return type is placed here
+ * @out_paramtypes  This is populated with the parameter types
  */
-void get_ctypes_signature(PyCFuncPtrObject* cfunc, std::vector<dnd::dtype>& out_sig);
+void get_ctypes_signature(PyCFuncPtrObject* cfunc, dnd::dtype& out_returntype, std::vector<dnd::dtype>& out_paramtypes);
 
 } // namespace pydnd
 

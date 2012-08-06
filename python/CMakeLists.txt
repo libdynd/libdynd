@@ -29,10 +29,10 @@ if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
       "Choose the Python module directory (default site-packages)" FORCE)
 endif()
 
-# Require version >= 1.6
-if(NUMPY_VERSION_DECIMAL LESS 10600)
+# Require version >= 1.5
+if(NUMPY_VERSION_DECIMAL LESS 10500)
     message(FATAL_ERROR,
-        "pydnd requires NumPy >= 1.6")
+        "pydnd requires NumPy >= 1.5")
 endif()
 
 # TODO: introduce a variable for the DND include dir
@@ -50,17 +50,21 @@ set(pydnd_CPP_SRC
     include/placement_wrappers.hpp
     include/dtype_functions.hpp
     include/ndarray_functions.hpp
+    include/ndarray_from_py.hpp
+    include/ndarray_as_py.hpp
     include/numpy_interop.hpp
-    include/elwise_gfunc.hpp
-    include/elwise_reduce_gfunc.hpp
+    include/elwise_gfunc_functions.hpp
+    include/elwise_reduce_gfunc_functions.hpp
     include/utility_functions.hpp
     src/codegen_cache_functions.cpp
     src/ctypes_interop.cpp
     src/dtype_functions.cpp
     src/ndarray_functions.cpp
+    src/ndarray_from_py.cpp
+    src/ndarray_as_py.cpp
     src/numpy_interop.cpp
-    src/elwise_gfunc.cpp
-    src/elwise_reduce_gfunc.cpp
+    src/elwise_gfunc_functions.cpp
+    src/elwise_reduce_gfunc_functions.cpp
     src/utility_functions.cpp
     )
 set(pydnd_CYTHON_SRC
@@ -80,13 +84,22 @@ source_group("Cython Headers" REGULAR_EXPRESSION ".*pxd$")
 cython_add_module(_pydnd ${pydnd_CPP_SRC} ${pydnd_CYTHON_SRC})
 
 set_target_properties(_pydnd PROPERTIES LINKER_LANGUAGE CXX)
-if(NOT WIN32)
+if(WIN32)
+elseif(APPLE)
     # We compile with -Werror, and Cython's code generates warnings, so
     # disable that specifically for this project.
     set_target_properties(
         _pydnd
         PROPERTIES COMPILE_FLAGS
         "-Wno-unused-parameter -Wno-self-assign -Wno-unused-function"
+        )
+else()
+    # strict aliasing is disabled because Cython generated code
+    # which made g++ 4.6.1 complain
+    set_target_properties(
+        _pydnd
+        PROPERTIES COMPILE_FLAGS
+        "-Wno-unused-parameter -Wno-unused-function -fno-strict-aliasing"
         )
 endif()
 

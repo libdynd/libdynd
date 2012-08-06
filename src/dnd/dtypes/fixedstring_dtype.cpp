@@ -3,11 +3,11 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
+#include <algorithm>
+
 #include <dnd/dtypes/fixedstring_dtype.hpp>
 #include <dnd/kernels/single_compare_kernel_instance.hpp>
 #include <dnd/kernels/string_assignment_kernels.hpp>
-
-#include <algorithm>
 
 using namespace std;
 using namespace dnd;

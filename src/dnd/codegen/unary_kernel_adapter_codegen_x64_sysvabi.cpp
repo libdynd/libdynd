@@ -8,12 +8,14 @@
 
 #if defined(DND_CALL_SYSV_X64)
 
+#include <sstream>
+#include <stdexcept>
+#include <cassert>
+
 #include <dnd/codegen/unary_kernel_adapter_codegen.hpp>
 #include <dnd/memblock/executable_memory_block.hpp>
 #include <dnd/memblock/memory_block.hpp>
 #include <dnd/dtype.hpp>
-#include <sstream>
-#include <stdexcept>
 
 
 namespace
@@ -79,22 +81,25 @@ namespace
     // implemented).
     class function_builder
     {
+        // Make it non-copyable
+        function_builder(const function_builder&);
+        function_builder& operator=(const function_builder&);
     public:
         function_builder(dnd::memory_block_data* memblock, size_t estimated_size);
         ~function_builder();
-        
+
         function_builder& label(size_t& where);
         
         function_builder& append(const void* code, size_t code_size);
         function_builder& append(size_t code_size);
         function_builder& align (size_t alignment);
-        
+
         void*             base() const;
         bool              is_ok() const;
-        
+
         void              finish();
         void              discard();
-        
+
     private:
         dnd::memory_block_data*  memblock_;
         int8_t*             current_;
@@ -119,12 +124,12 @@ namespace
                                         );
         current_ = begin_;
     }
-    
+
     function_builder::~function_builder()
     {
         discard();
     }
-    
+
     function_builder& function_builder::label(size_t& offset)
     {
         offset = current_ - begin_;
@@ -137,7 +142,7 @@ namespace
     {
         if (!ok_)
             return *this;
-        
+
         assert(end_ >= current_);
         if (static_cast<size_t>(end_ - current_) >= code_size)
         {
@@ -146,15 +151,15 @@ namespace
         }
         else
             ok_ = false;
-        
+
         return *this;
     }
-    
+
     function_builder& function_builder::append(size_t code_size)
     {
         if (!ok_)
             return *this;
-        
+
         assert(end_ >= current_);
         if (static_cast<size_t>(end_ - current_) >= code_size)
         {
@@ -164,31 +169,31 @@ namespace
         }
         else
             ok_ = false;
-        
+
         return *this;
     }
-    
+
     function_builder& function_builder::align(size_t code_size)
     {
         // align to a given size.
         intptr_t modulo = reinterpret_cast<uintptr_t>(current_) % code_size;
         if (0 != modulo)
             append(code_size - modulo);
-        
+
         assert(0 == reinterpret_cast<uintptr_t>(current_) % code_size);
         return *this;
     }
-    
+
     void* function_builder::base() const
     {
         return static_cast<void*>(begin_);
     }
-    
+
     bool function_builder::is_ok() const
     {
         return ok_;
     }
-    
+
     void function_builder::finish()
     {
         assert(is_ok());
@@ -196,19 +201,19 @@ namespace
         {
             // this will shrink... resize_executable_memory has realloc semantics
             // so on shrink it will never move;
-#ifndef NDEBUG
-            int8_t* old_begin = begin_; // only used in asserts
+#if !defined(NDEBUG)
+            int8_t* old_begin = begin_;
 #endif
             dnd::resize_executable_memory(memblock_, current_ - begin_, (char**)&begin_, (char**)&end_);
             assert(old_begin = begin_);
-            
+
             // TODO: flush instruction cache for the generated code. Not needed
             //       on intel architectures, but a function placeholder if we
             //       factor this code out could be worth if we end supporting
             //       other platforms (both ARM and PPC require explicit i-cache
             //       flushing.
-            
-            
+
+
             // now mark the object as released...
             memblock_= 0;
             begin_   = 0;
@@ -217,7 +222,7 @@ namespace
             ok_      = false;
         }
     }
-    
+
     void function_builder::discard()
     {
         if (begin_)
@@ -344,7 +349,7 @@ namespace // nameless
         0x4c, 0x01, 0xed,               // addq %r13, %rbp  # update dst
     };
     
-    uint8_t unary_adapter_close_loop[] = {
+    uint8_t unary_adapter_loop_finish[] = {
         0x49, 0xff, 0xcc,               // decq %r12        # dec count
         0x75, 0x00,                     // jne loop (patch last byte)
     };
@@ -392,22 +397,22 @@ unary_operation_t* codegen_unary_function_adapter(const memory_block_ptr& exec_m
 {
     size_t arg0_idx = idx_for_type_id(arg0type.type_id());
     size_t ret_idx  = idx_for_type_id(restype.type_id());
-    
-    if (arg0_idx >= sizeof(arg0_snippets)/sizeof(arg0_snippets[0]) 
+
+    if (arg0_idx >= sizeof(arg0_snippets)/sizeof(arg0_snippets[0])
         || ret_idx >= sizeof(ret_snippets)/sizeof(ret_snippets[0]))
     {
         return 0;
     }
-    
-    // an (over)estimation of the size of the generated function. 64 is an 
+
+    // an (over)estimation of the size of the generated function. 64 is an
     // overestimation of the code that gets chosen based on args and ret value.
-    // that is 
+    // that is
     size_t estimated_size = sizeof(unary_adapter_prolog)
-                          + sizeof(unary_adapter_loop_setup) 
+                          + sizeof(unary_adapter_loop_setup)
                           + sizeof(unary_adapter_function_call)
-                          + sizeof(unary_adapter_update_streams)
-                          + sizeof(unary_adapter_epilog) 
-                          + 64; 
+                          + sizeof(unary_adapter_loop_finish)
+                          + sizeof(unary_adapter_epilog)
+                          + 64;
 
     size_t entry_point= 0;
     size_t loop_start = 0;
@@ -417,19 +422,18 @@ unary_operation_t* codegen_unary_function_adapter(const memory_block_ptr& exec_m
     fbuilder.label(entry_point)
             .append(unary_adapter_prolog, sizeof(unary_adapter_prolog))
             .append(unary_adapter_loop_setup, sizeof(unary_adapter_loop_setup))
-            .align(4)
             .label(loop_start)
             .append(arg0_snippets[arg0_idx].ptr, arg0_snippets[arg0_idx].size)
             .append(unary_adapter_function_call, sizeof(unary_adapter_function_call))
             .append(ret_snippets[ret_idx].ptr, ret_snippets[ret_idx].size)
             .append(unary_adapter_update_streams, sizeof(unary_adapter_update_streams))
-            .append(unary_adapter_close_loop, sizeof(unary_adapter_close_loop))
+            .append(unary_adapter_loop_finish, sizeof(unary_adapter_loop_finish))
             .label(loop_end)
             .append(unary_adapter_epilog, sizeof(unary_adapter_epilog))
             .align(4)
             .label(table)
             .append(sizeof(unary_operation_t)*4);
-                 
+
     if (fbuilder.is_ok())
     {
         // fix-up the offset of the jump closing the loop
@@ -442,14 +446,14 @@ unary_operation_t* codegen_unary_function_adapter(const memory_block_ptr& exec_m
         
         unary_operation_t* specializations = static_cast<unary_operation_t*>(ptr_offset(base, table));
         unary_operation_t func_ptr = reinterpret_cast<unary_operation_t>(ptr_offset(base, entry_point));
-        
+
         for (int i = 0; i < 4; ++i)
             specializations[i] = func_ptr;
         fbuilder.finish();
-        
+
         return specializations;
     }
-    
+
     // function construction failed.. fbuilder destructor will take care of
     // releasing memory (it acts as RAII, kind of -- exception safe as well)
     return 0;

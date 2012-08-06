@@ -6,15 +6,21 @@
 #ifndef _DND__UTILITY_FUNCTIONS_HPP_
 #define _DND__UTILITY_FUNCTIONS_HPP_
 
+#include "Python.h"
+
 #include <stdint.h>
 #include <sstream>
 #include <stdexcept>
 
 #include <dnd/dtype.hpp>
 
-#include "Python.h"
-
 namespace pydnd {
+
+/**
+ * Function which casts the parameter to
+ * a PyObject pointer and calls Py_XDECREF on it.
+ */
+void py_decref_function(void* obj);
 
 /**
  * A container class for managing the local lifetime of

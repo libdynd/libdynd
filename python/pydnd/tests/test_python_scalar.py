@@ -89,3 +89,6 @@ class TestPythonScalar(unittest.TestCase):
         # Can't get the length of a zero-dimensional ndarray
         a = nd.ndarray(10)
         self.assertRaises(TypeError, len, a)
+
+if __name__ == '__main__':
+    unittest.main()

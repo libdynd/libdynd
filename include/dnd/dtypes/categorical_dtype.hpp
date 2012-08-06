@@ -44,10 +44,10 @@ public:
         return custom_kind;
     }
     unsigned char alignment() const {
-        return 1;  // TODO
+        return 4; // TODO
     }
     uintptr_t element_size() const {
-        return 4; // TODO;
+        return 4; // TODO
     }
 
     void print_element(std::ostream& o, const char *data) const;
@@ -66,7 +66,18 @@ public:
         return m_categories.size();
     }
 
+    const dtype& get_category_dtype() const {
+        return m_category_dtype;
+    }
+
     uint32_t get_value_from_category(const char *category) const;
+
+    const char *get_category_from_value(uint32_t value) const {
+        if (value >= get_category_count()) {
+            throw std::runtime_error("category value is out of bounds");
+        }
+        return m_categories[m_value_to_category_index[value]];
+    }
 
     bool is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const;
 
@@ -85,6 +96,9 @@ public:
 inline dtype make_categorical_dtype(const ndarray& values) {
     return dtype(make_shared<categorical_dtype>(values));
 }
+
+
+dtype factor_categorical_dtype(const ndarray& values);
 
 
 } // namespace dnd

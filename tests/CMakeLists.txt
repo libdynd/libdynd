@@ -3,7 +3,7 @@
 # BSD 2-Clause License, see LICENSE.txt
 #
 
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 2.6)
 project(dnd_tests)
 
 set(tests_SRC
@@ -22,37 +22,29 @@ set(tests_SRC
     dtypes/test_dtype_promotion.cpp
     dtypes/test_fixedstring_dtype.cpp
     dtypes/test_string_dtype.cpp
+    dtypes/test_tuple_dtype.cpp
     dtypes/test_pointer_dtype.cpp
+    ndarray/test_ndarray.cpp
+    ndarray/test_ndarray_assign.cpp
+    ndarray/test_ndarray_index.cpp
+    ndarray/test_ndarray_arange.cpp
+    ndarray/test_ndarray_views.cpp
     test_arithmetic_op.cpp
-    test_ndarray.cpp
-    test_ndarray_assign.cpp
-    test_ndarray_index.cpp
-    test_ndarray_arange.cpp
-    test_ndarray_views.cpp
     test_shape_tools.cpp
     test_unary_kernel.cpp
-
-
- 
+    ../thirdparty/gtest/gtest-all.cc
+    ../thirdparty/gtest/gtest_main.cc
     )
 
-# TODO: this is awkwardly hardcoded
-if(WIN32)
 include_directories(
-    ../../../googletest/include
-    ../include
+    ../thirdparty
     .
     )
-else(WIN32)
-include_directories(
-    ../../AnimPhys/gtest/include
-    ../include
-    .
-    )
-endif(WIN32)
 
-source_group("DTypes Tests" REGULAR_EXPRESSION "dtypes/.*cpp")
-source_group("CodeGen Tests" REGULAR_EXPRESSION "codegen/.*cpp")
+source_group("Other Tests" REGULAR_EXPRESSION "\\/test_[^\\/]*\\.cpp$")
+source_group("NDArray Tests" REGULAR_EXPRESSION "\\/ndarray\\/test_[^\\/]*\\.cpp$")
+source_group("CodeGen Tests" REGULAR_EXPRESSION "\\/codegen\\/test_[^\\/]*\\.cpp$")
+source_group("DTypes Tests" REGULAR_EXPRESSION "\\/dtypes\\/test_[^\\/]*\\.cpp$")
 
 add_executable(dnd_tests ${tests_SRC})
 
@@ -61,15 +53,11 @@ if(WIN32)
     # TODO: Make this not be hardcoded
     target_link_libraries(dnd_tests
         dynamicndarray
-        ../../../../googletest/build-vc10/RelWithDebInfo/gtest
-        ../../../../googletest/build-vc10/RelWithDebInfo/gtest_main
         )
 elseif(APPLE)
-  target_link_libraries(dnd_tests dynamicndarray gtest gtest_main)
-  enable_testing(true)
-  add_subdirectory(thirdparty/gtest)
-  include_directories(thirdparty/gtest/include)
-  
+    target_link_libraries(dnd_tests
+        dynamicndarray
+        )
 else()
     set_target_properties(dnd_tests
                 PROPERTIES COMPILE_FLAGS
@@ -78,8 +66,6 @@ else()
     target_link_libraries(dnd_tests
         dynamicndarray
         pthread
-        /home/mwiebe/Develop/AnimPhys/gtest/make/gtest-all.o
-        /home/mwiebe/Develop/AnimPhys/gtest/make/gtest_main.o
         )
 endif()
 

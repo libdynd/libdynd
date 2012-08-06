@@ -240,8 +240,8 @@ TEST(DTypeAssign, FixedSizeTests_Float64) {
             EXPECT_EQ(m, v)
 #define ONE_TEST_THROW(tid, v) \
             EXPECT_THROW(dtype_assign(dtype(tid), (char *)&v, s_dt, s_ptr), runtime_error);
-//            EXPECT_THROW(dtype_assign(dtype(tid), (char *)&v, s_dt, s_ptr, assign_error_overflow), runtime_error); \
-//            EXPECT_THROW(dtype_assign(dtype(tid), (char *)&v, s_dt, s_ptr, assign_error_fractional), runtime_error); \
+//            EXPECT_THROW(dtype_assign(dtype(tid), (char *)&v, s_dt, s_ptr, assign_error_overflow), runtime_error);
+//            EXPECT_THROW(dtype_assign(dtype(tid), (char *)&v, s_dt, s_ptr, assign_error_fractional), runtime_error);
 //            EXPECT_THROW(dtype_assign(dtype(tid), (char *)&v, s_dt, s_ptr, assign_error_inexact), runtime_error)
     ONE_TEST_THROW(bool_type_id, v_b);
     ONE_TEST_THROW(int8_type_id, v_i8);
@@ -371,8 +371,8 @@ TEST(DTypeAssign, FixedSizeTests_Complex_Float32) {
             EXPECT_EQ(m, v)
 #define ONE_TEST_THROW(tid, v) \
             EXPECT_THROW(dtype_assign(dtype(tid), (char *)&v, s_dt, s_ptr), runtime_error);
-//            EXPECT_THROW(dtype_assign(dtype(tid), &v, s_dt, s_ptr, assign_error_overflow), runtime_error); \
-//            EXPECT_THROW(dtype_assign(dtype(tid), &v, s_dt, s_ptr, assign_error_fractional), runtime_error); \
+//            EXPECT_THROW(dtype_assign(dtype(tid), &v, s_dt, s_ptr, assign_error_overflow), runtime_error);
+//            EXPECT_THROW(dtype_assign(dtype(tid), &v, s_dt, s_ptr, assign_error_fractional), runtime_error);
 //            EXPECT_THROW(dtype_assign(dtype(tid), &v, s_dt, s_ptr, assign_error_inexact), runtime_error)
     ONE_TEST_THROW(bool_type_id, v_b);
     ONE_TEST(int8_type_id, v_i8, 2);
@@ -397,8 +397,8 @@ TEST(DTypeAssign, FixedSizeTests_Complex_Float32) {
             EXPECT_EQ(m, v)
 #define ONE_TEST_THROW(tid, v) \
             EXPECT_THROW(dtype_assign(dtype(tid), (char *)&v, s_dt, s_ptr), runtime_error);
-//            EXPECT_THROW(dtype_assign(dtype(tid), &v, s_dt, s_ptr, assign_error_overflow), runtime_error); \
-//            EXPECT_THROW(dtype_assign(dtype(tid), &v, s_dt, s_ptr, assign_error_fractional), runtime_error); \
+//            EXPECT_THROW(dtype_assign(dtype(tid), &v, s_dt, s_ptr, assign_error_overflow), runtime_error);
+//            EXPECT_THROW(dtype_assign(dtype(tid), &v, s_dt, s_ptr, assign_error_fractional), runtime_error);
 //            EXPECT_THROW(dtype_assign(dtype(tid), &v, s_dt, s_ptr, assign_error_inexact), runtime_error)
     ONE_TEST_THROW(bool_type_id, v_b);
     ONE_TEST(int8_type_id, v_i8, -1);
@@ -423,8 +423,8 @@ TEST(DTypeAssign, FixedSizeTests_Complex_Float32) {
             EXPECT_EQ(m, v)
 #define ONE_TEST_THROW(tid, v) \
             EXPECT_THROW(dtype_assign(dtype(tid), (char *)&v, s_dt, s_ptr), runtime_error);
-//            EXPECT_THROW(dtype_assign(dtype(tid), &v, s_dt, s_ptr, assign_error_overflow), runtime_error); \
-//            EXPECT_THROW(dtype_assign(dtype(tid), &v, s_dt, s_ptr, assign_error_fractional), runtime_error); \
+//            EXPECT_THROW(dtype_assign(dtype(tid), &v, s_dt, s_ptr, assign_error_overflow), runtime_error);
+//            EXPECT_THROW(dtype_assign(dtype(tid), &v, s_dt, s_ptr, assign_error_fractional), runtime_error);
 //            EXPECT_THROW(dtype_assign(dtype(tid), &v, s_dt, s_ptr, assign_error_inexact), runtime_error)
     ONE_TEST_THROW(bool_type_id, v_b);
     ONE_TEST_THROW(int8_type_id, v_i8);
@@ -449,8 +449,8 @@ TEST(DTypeAssign, FixedSizeTests_Complex_Float32) {
             EXPECT_EQ(m, v)
 #define ONE_TEST_THROW(tid, v) \
             EXPECT_THROW(dtype_assign(dtype(tid), (char *)&v, s_dt, s_ptr), runtime_error);
-//            EXPECT_THROW(dtype_assign(dtype(tid), &v, s_dt, s_ptr, assign_error_overflow), runtime_error); \
-//            EXPECT_THROW(dtype_assign(dtype(tid), &v, s_dt, s_ptr, assign_error_fractional), runtime_error); \
+//            EXPECT_THROW(dtype_assign(dtype(tid), &v, s_dt, s_ptr, assign_error_overflow), runtime_error);
+//            EXPECT_THROW(dtype_assign(dtype(tid), &v, s_dt, s_ptr, assign_error_fractional), runtime_error);
 //            EXPECT_THROW(dtype_assign(dtype(tid), &v, s_dt, s_ptr, assign_error_inexact), runtime_error)
     ONE_TEST_THROW(bool_type_id, v_b);
     ONE_TEST_THROW(int8_type_id, v_i8);
@@ -475,8 +475,8 @@ TEST(DTypeAssign, FixedSizeTests_Complex_Float32) {
             EXPECT_EQ(m, v)
 #define ONE_TEST_THROW(tid, v) \
             EXPECT_THROW(dtype_assign(dtype(tid), (char *)&v, s_dt, s_ptr), runtime_error);
-//            EXPECT_THROW(dtype_assign(dtype(tid), &v, s_dt, s_ptr, assign_error_overflow), runtime_error); \
-//            EXPECT_THROW(dtype_assign(dtype(tid), &v, s_dt, s_ptr, assign_error_fractional), runtime_error); \
+//            EXPECT_THROW(dtype_assign(dtype(tid), &v, s_dt, s_ptr, assign_error_overflow), runtime_error);
+//            EXPECT_THROW(dtype_assign(dtype(tid), &v, s_dt, s_ptr, assign_error_fractional), runtime_error);
 //            EXPECT_THROW(dtype_assign(dtype(tid), &v, s_dt, s_ptr, assign_error_inexact), runtime_error)
     ONE_TEST_THROW(bool_type_id, v_b);
     ONE_TEST_THROW(int8_type_id, v_i8);
@@ -566,8 +566,8 @@ TEST(DTypeAssign, FixedSizeTests_Complex_Float64) {
             EXPECT_EQ(m, v)
 #define ONE_TEST_THROW(tid, v) \
             EXPECT_THROW(dtype_assign(dtype(tid), (char *)&v, s_dt, s_ptr), runtime_error);
-//            EXPECT_THROW(dtype_assign(dtype(tid), (char *)&v, s_dt, s_ptr, assign_error_overflow), runtime_error); \
-//            EXPECT_THROW(dtype_assign(dtype(tid), (char *)&v, s_dt, s_ptr, assign_error_fractional), runtime_error); \
+//            EXPECT_THROW(dtype_assign(dtype(tid), (char *)&v, s_dt, s_ptr, assign_error_overflow), runtime_error);
+//            EXPECT_THROW(dtype_assign(dtype(tid), (char *)&v, s_dt, s_ptr, assign_error_fractional), runtime_error);
 //            EXPECT_THROW(dtype_assign(dtype(tid), (char *)&v, s_dt, s_ptr, assign_error_inexact), runtime_error)
     ONE_TEST_THROW(bool_type_id, v_b);
     ONE_TEST(int8_type_id, v_i8, 2);
@@ -592,8 +592,8 @@ TEST(DTypeAssign, FixedSizeTests_Complex_Float64) {
             EXPECT_EQ(m, v)
 #define ONE_TEST_THROW(tid, v) \
             EXPECT_THROW(dtype_assign(dtype(tid), (char *)&v, s_dt, s_ptr), runtime_error);
-//            EXPECT_THROW(dtype_assign(dtype(tid), (char *)&v, s_dt, s_ptr, assign_error_overflow), runtime_error); \
-//            EXPECT_THROW(dtype_assign(dtype(tid), (char *)&v, s_dt, s_ptr, assign_error_fractional), runtime_error); \
+//            EXPECT_THROW(dtype_assign(dtype(tid), (char *)&v, s_dt, s_ptr, assign_error_overflow), runtime_error);
+//            EXPECT_THROW(dtype_assign(dtype(tid), (char *)&v, s_dt, s_ptr, assign_error_fractional), runtime_error);
 //            EXPECT_THROW(dtype_assign(dtype(tid), (char *)&v, s_dt, s_ptr, assign_error_inexact), runtime_error)
     ONE_TEST_THROW(bool_type_id, v_b);
     ONE_TEST(int8_type_id, v_i8, -1);
@@ -618,8 +618,8 @@ TEST(DTypeAssign, FixedSizeTests_Complex_Float64) {
             EXPECT_EQ(m, v)
 #define ONE_TEST_THROW(tid, v) \
             EXPECT_THROW(dtype_assign(dtype(tid), (char *)&v, s_dt, s_ptr), runtime_error);
-//            EXPECT_THROW(dtype_assign(dtype(tid), (char *)&v, s_dt, s_ptr, assign_error_overflow), runtime_error); \
-//            EXPECT_THROW(dtype_assign(dtype(tid), (char *)&v, s_dt, s_ptr, assign_error_fractional), runtime_error); \
+//            EXPECT_THROW(dtype_assign(dtype(tid), (char *)&v, s_dt, s_ptr, assign_error_overflow), runtime_error);
+//            EXPECT_THROW(dtype_assign(dtype(tid), (char *)&v, s_dt, s_ptr, assign_error_fractional), runtime_error);
 //            EXPECT_THROW(dtype_assign(dtype(tid), (char *)&v, s_dt, s_ptr, assign_error_inexact), runtime_error)
     ONE_TEST_THROW(bool_type_id, v_b);
     ONE_TEST_THROW(int8_type_id, v_i8);
@@ -644,8 +644,8 @@ TEST(DTypeAssign, FixedSizeTests_Complex_Float64) {
             EXPECT_EQ(m, v)
 #define ONE_TEST_THROW(tid, v) \
             EXPECT_THROW(dtype_assign(dtype(tid), (char *)&v, s_dt, s_ptr), runtime_error);
-//            EXPECT_THROW(dtype_assign(dtype(tid), (char *)&v, s_dt, s_ptr, assign_error_overflow), runtime_error); \
-//            EXPECT_THROW(dtype_assign(dtype(tid), (char *)&v, s_dt, s_ptr, assign_error_fractional), runtime_error); \
+//            EXPECT_THROW(dtype_assign(dtype(tid), (char *)&v, s_dt, s_ptr, assign_error_overflow), runtime_error);
+//            EXPECT_THROW(dtype_assign(dtype(tid), (char *)&v, s_dt, s_ptr, assign_error_fractional), runtime_error);
 //            EXPECT_THROW(dtype_assign(dtype(tid), (char *)&v, s_dt, s_ptr, assign_error_inexact), runtime_error)
     ONE_TEST_THROW(bool_type_id, v_b);
     ONE_TEST_THROW(int8_type_id, v_i8);
@@ -670,8 +670,8 @@ TEST(DTypeAssign, FixedSizeTests_Complex_Float64) {
             EXPECT_EQ(m, v)
 #define ONE_TEST_THROW(tid, v) \
             EXPECT_THROW(dtype_assign(dtype(tid), (char *)&v, s_dt, s_ptr), runtime_error);
-//            EXPECT_THROW(dtype_assign(dtype(tid), (char *)&v, s_dt, s_ptr, assign_error_overflow), runtime_error); \
-//            EXPECT_THROW(dtype_assign(dtype(tid), (char *)&v, s_dt, s_ptr, assign_error_fractional), runtime_error); \
+//            EXPECT_THROW(dtype_assign(dtype(tid), (char *)&v, s_dt, s_ptr, assign_error_overflow), runtime_error);
+//            EXPECT_THROW(dtype_assign(dtype(tid), (char *)&v, s_dt, s_ptr, assign_error_fractional), runtime_error);
 //            EXPECT_THROW(dtype_assign(dtype(tid), (char *)&v, s_dt, s_ptr, assign_error_inexact), runtime_error)
     ONE_TEST_THROW(bool_type_id, v_b);
     ONE_TEST_THROW(int8_type_id, v_i8);

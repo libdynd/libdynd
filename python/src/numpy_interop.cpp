@@ -11,10 +11,12 @@
 #include <dnd/dtypes/view_dtype.hpp>
 #include <dnd/dtypes/dtype_alignment.hpp>
 #include <dnd/dtypes/fixedstring_dtype.hpp>
+#include <dnd/dtypes/tuple_dtype.hpp>
 #include <dnd/memblock/external_memory_block.hpp>
 
 #include "dtype_functions.hpp"
 #include "ndarray_functions.hpp"
+#include "utility_functions.hpp"
 
 #include <numpy/arrayscalars.h>
 
@@ -22,9 +24,57 @@ using namespace std;
 using namespace dnd;
 using namespace pydnd;
 
-dtype pydnd::dtype_from_numpy_dtype(PyArray_Descr *d)
+dtype make_tuple_dtype_from_numpy_struct(PyArray_Descr *d, size_t data_alignment)
+{
+    vector<dtype> fields;
+    vector<size_t> offsets;
+
+    if (!PyDataType_HASFIELDS(d)) {
+        throw runtime_error("Tried to make a tuple dtype from a Numpy descr without fields");
+    }
+
+    PyObject *names = d->names;
+    Py_ssize_t names_size = PyTuple_GET_SIZE(names);
+    size_t max_field_alignment = 1;
+
+    // The alignment must divide into the total element size,
+    // shrink it until it does.
+    while ((((size_t)d->elsize)&(data_alignment-1)) != 0) {
+        data_alignment >>= 1;
+    }
+
+    for (Py_ssize_t i = 0; i < names_size; ++i) {
+        PyObject *key = PyTuple_GET_ITEM(names, i);
+        PyObject *tup = PyDict_GetItem(d->fields, key);
+        PyArray_Descr *fld_dtype;
+        PyObject *title;
+        int offset = 0;
+        if (!PyArg_ParseTuple(tup, "Oi|O", &fld_dtype, &offset, &title)) {
+            throw runtime_error("Numpy struct dtype has corrupt data");
+        }
+        fields.push_back(dtype_from_numpy_dtype(fld_dtype));
+        // If the field isn't aligned enough, turn it into an unaligned type
+        if ((((offset | data_alignment) & (fields.back().alignment() - 1))) != 0) {
+            fields.back() = make_unaligned_dtype(fields.back());
+        }
+        offsets.push_back(offset);
+        if (fields.back().alignment() > max_field_alignment) {
+            max_field_alignment = fields.back().alignment();
+        }
+    }
+
+    data_alignment = min(max_field_alignment, data_alignment);
+
+    return make_tuple_dtype(fields, offsets, d->elsize, data_alignment);
+}
+
+dtype pydnd::dtype_from_numpy_dtype(PyArray_Descr *d, size_t data_alignment)
 {
     dtype dt;
+
+    if (data_alignment == 0) {
+        data_alignment = d->alignment;
+    }
 
     switch (d->type_num) {
     case NPY_BOOL:
@@ -78,6 +128,9 @@ dtype pydnd::dtype_from_numpy_dtype(PyArray_Descr *d)
     case NPY_UNICODE:
         dt = make_fixedstring_dtype(string_encoding_utf_32, d->elsize / 4);
         break;
+    case NPY_VOID:
+        dt = make_tuple_dtype_from_numpy_struct(d, data_alignment);
+        break;
     default: {
         stringstream ss;
         ss << "unsupported Numpy dtype with type id " << d->type_num;
@@ -89,7 +142,123 @@ dtype pydnd::dtype_from_numpy_dtype(PyArray_Descr *d)
         dt = make_byteswap_dtype(dt);
     }
 
+    // If the data this dtype is for isn't aligned enough,
+    // make an unaligned version.
+    if (data_alignment < dt.alignment()) {
+        dt = make_unaligned_dtype(dt);
+    }
+
     return dt;
+}
+
+PyArray_Descr *pydnd::numpy_dtype_from_dtype(const dnd::dtype& dt)
+{
+    switch (dt.type_id()) {
+        case bool_type_id:
+            return PyArray_DescrFromType(NPY_BOOL);
+        case int8_type_id:
+            return PyArray_DescrFromType(NPY_INT8);
+        case int16_type_id:
+            return PyArray_DescrFromType(NPY_INT16);
+        case int32_type_id:
+            return PyArray_DescrFromType(NPY_INT32);
+        case int64_type_id:
+            return PyArray_DescrFromType(NPY_INT64);
+        case uint8_type_id:
+            return PyArray_DescrFromType(NPY_UINT8);
+        case uint16_type_id:
+            return PyArray_DescrFromType(NPY_UINT16);
+        case uint32_type_id:
+            return PyArray_DescrFromType(NPY_UINT32);
+        case uint64_type_id:
+            return PyArray_DescrFromType(NPY_UINT64);
+        case float32_type_id:
+            return PyArray_DescrFromType(NPY_FLOAT32);
+        case float64_type_id:
+            return PyArray_DescrFromType(NPY_FLOAT64);
+        case complex_float32_type_id:
+            return PyArray_DescrFromType(NPY_CFLOAT);
+        case complex_float64_type_id:
+            return PyArray_DescrFromType(NPY_CDOUBLE);
+        case fixedstring_type_id: {
+            const fixedstring_dtype *fdt = static_cast<const fixedstring_dtype *>(dt.extended());
+            PyArray_Descr *result;
+            switch (fdt->encoding()) {
+                case string_encoding_ascii:
+                    result = PyArray_DescrNewFromType(NPY_STRING);
+                    result->elsize = fdt->element_size();
+                    return result;
+                case string_encoding_utf_32:
+                    result = PyArray_DescrNewFromType(NPY_UNICODE);
+                    result->elsize = fdt->element_size();
+                    return result;
+                default:
+                    break;
+            }
+            break;
+        }
+        case tuple_type_id: {
+            const tuple_dtype *tdt = static_cast<const tuple_dtype *>(dt.extended());
+            const vector<dtype>& fields = tdt->get_fields();
+            size_t num_fields = fields.size();
+            const vector<size_t>& offsets = tdt->get_offsets();
+
+            // TODO: Deal with the names better
+            pyobject_ownref names_obj(PyList_New(num_fields));
+            for (size_t i = 0; i < num_fields; ++i) {
+                stringstream ss;
+                ss << "f" << i;
+                PyList_SET_ITEM((PyObject *)names_obj, i, PyString_FromString(ss.str().c_str()));
+            }
+
+            pyobject_ownref formats_obj(PyList_New(num_fields));
+            for (size_t i = 0; i < num_fields; ++i) {
+                PyList_SET_ITEM((PyObject *)formats_obj, i, (PyObject *)numpy_dtype_from_dtype(fields[i]));
+            }
+
+            pyobject_ownref offsets_obj(PyList_New(num_fields));
+            for (size_t i = 0; i < num_fields; ++i) {
+                PyList_SET_ITEM((PyObject *)offsets_obj, i, PyLong_FromSize_t(offsets[i]));
+            }
+
+            pyobject_ownref itemsize_obj(PyLong_FromSize_t(dt.element_size()));
+
+            pyobject_ownref dict_obj(PyDict_New());
+            PyDict_SetItemString(dict_obj, "names", names_obj);
+            PyDict_SetItemString(dict_obj, "formats", formats_obj);
+            PyDict_SetItemString(dict_obj, "offsets", offsets_obj);
+            PyDict_SetItemString(dict_obj, "itemsize", itemsize_obj);
+
+            PyArray_Descr *result = NULL;
+            if (PyArray_DescrConverter(dict_obj, &result) != NPY_SUCCEED) {
+                throw runtime_error("failed to convert tuple dtype into numpy dtype via dict");
+            }
+            return result;
+        }
+        case view_type_id: {
+            // If there's a view which is for alignment purposes, throw it
+            // away because Numpy works differently
+            if (dt.operand_dtype().type_id() == fixedbytes_type_id) {
+                return numpy_dtype_from_dtype(dt.value_dtype());
+            }
+            break;
+        }
+        case byteswap_type_id: {
+            // If it's a simple byteswap from bytes, that can be converted
+            if (dt.operand_dtype().type_id() == fixedbytes_type_id) {
+                PyArray_Descr *unswapped = numpy_dtype_from_dtype(dt.value_dtype());
+                PyArray_Descr *result = PyArray_DescrNewByteorder(unswapped, NPY_SWAP);
+                Py_DECREF(unswapped);
+                return result;
+            }
+        }
+        default:
+            break;
+    }
+
+    stringstream ss;
+    ss << "cannot convert dynd dtype " << dt << " into a Numpy dtype";
+    throw runtime_error(ss.str());
 }
 
 int pydnd::dtype_from_numpy_scalar_typeobject(PyTypeObject* obj, dnd::dtype& out_d)
@@ -168,29 +337,37 @@ dtype pydnd::dtype_of_numpy_scalar(PyObject* obj)
     throw std::runtime_error("could not deduce a pydnd dtype from the numpy scalar object");
 }
 
-static void py_decref_function(void* obj)
+inline size_t get_alignment_of(uintptr_t align_bits)
 {
-    Py_DECREF((PyObject *)obj);
+    size_t alignment = 1;
+    // Loop 4 times, maximum alignment of 16
+    for (int i = 0; i < 4; ++i) {
+        if ((align_bits & alignment) == 0) {
+            alignment <<= 1;
+        } else {
+            return alignment;
+        }
+    }
+    return alignment;
+}
+
+inline size_t get_alignment_of(PyArrayObject* obj)
+{
+    // Get the alignment of the data
+    uintptr_t align_bits = reinterpret_cast<uintptr_t>(PyArray_DATA(obj));
+    int ndim = PyArray_NDIM(obj);
+    intptr_t *strides = PyArray_STRIDES(obj);
+    for (int idim = 0; idim < ndim; ++idim) {
+        align_bits |= (uintptr_t)strides[idim];
+    }
+
+    return get_alignment_of(align_bits);
 }
 
 ndarray pydnd::ndarray_from_numpy_array(PyArrayObject* obj)
 {
     // Get the dtype of the array
-    dtype d = pydnd::dtype_from_numpy_dtype(PyArray_DESCR(obj));
-
-    // If the array's data isn't aligned properly, apply better alignment
-    if (((uintptr_t)PyArray_DATA(obj)&(d.alignment()-1)) != 0) {
-        d = make_unaligned_dtype(d);
-    } else {
-        int ndim = PyArray_NDIM(obj);
-        intptr_t *strides = PyArray_STRIDES(obj);
-        for (int idim = 0; idim < ndim; ++idim) {
-            if (((uintptr_t)strides[idim]&(d.alignment()-1)) != 0) {
-                d = make_unaligned_dtype(d);
-                break;
-            }
-        }
-    }
+    dtype d = pydnd::dtype_from_numpy_dtype(PyArray_DESCR(obj), get_alignment_of(obj));
 
     // Get a shared pointer that tracks buffer ownership
     PyObject *base = PyArray_BASE(obj);
@@ -291,8 +468,39 @@ static void free_array_interface(void *ptr, void *extra_ptr)
     PyArrayInterface* inter = (PyArrayInterface *)ptr;
     memory_block_ptr *extra = (memory_block_ptr *)extra_ptr;
     delete[] inter->strides;
+    Py_XDECREF(inter->descr);
     delete inter;
     delete extra;
+}
+
+static PyObject* tuple_ndarray_as_numpy_struct_capsule(const dnd::ndarray& n)
+{
+    bool writeable = (n.get_node()->get_access_flags() & write_access_flag) != 0;
+
+    pyobject_ownref descr((PyObject *)numpy_dtype_from_dtype(n.get_dtype()));
+
+    PyArrayInterface inter;
+    memset(&inter, 0, sizeof(inter));
+
+    inter.two = 2;
+    inter.nd = n.get_ndim();
+    inter.typekind = 'V';
+    inter.itemsize = n.get_dtype().element_size();
+    inter.flags = NPY_ARRAY_ALIGNED | (writeable ? NPY_ARRAY_WRITEABLE : 0);
+    if (writeable) {
+        inter.data = n.get_readwrite_originptr();
+    } else {
+        inter.data = const_cast<char *>(n.get_readonly_originptr());
+    }
+    inter.strides = new intptr_t[2 * n.get_ndim()];
+    inter.shape = inter.strides + n.get_ndim();
+    inter.descr = descr.release();
+
+    memcpy(inter.strides, n.get_strides(), n.get_ndim() * sizeof(intptr_t));
+    memcpy(inter.shape, n.get_shape(), n.get_ndim() * sizeof(intptr_t));
+
+    // TODO: Check for Python 3, use PyCapsule there
+    return PyCObject_FromVoidPtrAndDesc(new PyArrayInterface(inter), new memory_block_ptr(n.get_node()->get_data_memory_block()), free_array_interface);
 }
 
 PyObject* pydnd::ndarray_as_numpy_struct_capsule(const dnd::ndarray& n)
@@ -302,7 +510,11 @@ PyObject* pydnd::ndarray_as_numpy_struct_capsule(const dnd::ndarray& n)
     }
 
     dtype dt = n.get_dtype();
-    dtype value_dt = dt.value_dtype();
+    const dtype& value_dt = dt.value_dtype();
+
+    if (dt.type_id() == tuple_type_id) {
+        return tuple_ndarray_as_numpy_struct_capsule(n);
+    }
 
     bool byteswapped = false;
     if (dt.type_id() == byteswap_type_id) {

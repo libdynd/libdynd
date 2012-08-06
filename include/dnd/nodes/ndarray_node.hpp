@@ -38,6 +38,8 @@ enum ndarray_node_category {
     elwise_node_category,
     // The node represents an elementwise reduction 1 to 1 transformation
     elwise_reduce_node_category,
+    // The node represents a groupby operation
+    groupby_node_category,
     // The node represents an arbitrary computation node, which will generally
     // require evaluation to a temporary.
     arbitrary_node_category
@@ -126,16 +128,8 @@ public:
     virtual void get_unary_specialization_operation(unary_specialization_kernel_instance& out_kernel) const;
     virtual void get_binary_operation(intptr_t dst_fixedstride, intptr_t src1_fixedstride,
                                     intptr_t src2_fixedstride,
+                                    const eval::eval_context *ectx,
                                     kernel_instance<binary_operation_t>& out_kernel) const;
-
-    /**
-     * Evaluates the node into a strided array with a dtype that is
-     * not expression_kind.
-     *
-     * @param copy  If set to true, always makes a copy of the data
-     * @param access_flags  The requested access flags for the result, or 0 if anything is ok.
-     */
-    ndarray_node_ptr eval(bool copy = false, uint32_t access_flags = 0);
 
     /**
      * Converts this node to a new dtype. This uses a convert_dtype.

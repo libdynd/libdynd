@@ -25,11 +25,10 @@ TEST(CategoricalDType, Create) {
 
     dtype d;
 
-    // Strings with various encodings and sizes
     d = make_categorical_dtype(a);
     EXPECT_EQ(categorical_type_id, d.type_id());
     EXPECT_EQ(custom_kind, d.kind());
-    EXPECT_EQ(1u, d.alignment());
+    EXPECT_EQ(4u, d.alignment());
     EXPECT_EQ(4u, d.element_size());
 
     cout << d << endl;
@@ -51,9 +50,9 @@ TEST(CategoricalDType, Compare) {
     dtype da2 = make_categorical_dtype(a);
     dtype db = make_categorical_dtype(b);
 
-    EXPECT_EQ(true, da == da);
-    EXPECT_EQ(true, da == da2);
-    EXPECT_EQ(false, da == db);
+    EXPECT_TRUE(da == da);
+    EXPECT_TRUE( da == da2);
+    EXPECT_FALSE(da == db);
 
     ndarray i(3, make_dtype<int32_t>());
     i(0).vals() = 0;
@@ -61,7 +60,47 @@ TEST(CategoricalDType, Compare) {
     i(2).vals() = 100;
 
     dtype di = make_categorical_dtype(i);
-    EXPECT_EQ(false, da == di);
+    EXPECT_FALSE(da == di);
+
+    // cout << di << endl;
+
+}
+
+TEST(CategoricalDType, Unique) {
+
+    ndarray a(3, make_fixedstring_dtype(string_encoding_ascii, 3));
+    a(0).vals() = std::string("foo");
+    a(1).vals() = std::string("bar");
+    a(2).vals() = std::string("foo");
+
+    EXPECT_THROW(make_categorical_dtype(a), std::runtime_error);
+
+    ndarray i(3, make_dtype<int32_t>());
+    i(0).vals() = 0;
+    i(1).vals() = 10;
+    i(2).vals() = 10;
+
+    EXPECT_THROW(make_categorical_dtype(i), std::runtime_error);
+
+}
+
+TEST(CategoricalDType, Factor) {
+
+    ndarray a(3, make_fixedstring_dtype(string_encoding_ascii, 3));
+    a(0).vals() = std::string("foo");
+    a(1).vals() = std::string("bar");
+    a(2).vals() = std::string("foo");
+
+    dtype da = factor_categorical_dtype(a);
+
+    cout << da << endl;
+
+    ndarray i(3, make_dtype<int32_t>());
+    i(0).vals() = 10;
+    i(1).vals() = 10;
+    i(2).vals() = 0;
+
+    dtype di = factor_categorical_dtype(i);
 
     cout << di << endl;
 

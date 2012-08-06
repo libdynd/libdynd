@@ -27,12 +27,14 @@ template float double_value<float, double>(double);
 TEST(UnaryKernelAdapter, BasicOperations) {
     codegen_cache cgcache;
     unary_specialization_kernel_instance op_int_float, op_float_float, op_float_double;
+    // NOTE: Cannot cast directly to <void*>, because of a compile error on MSVC:
+    //         "Context does not allow for disambiguation of overloaded function"
     cgcache.codegen_unary_function_adapter(make_dtype<int>(), make_dtype<float>(), cdecl_callconv,
-                    reinterpret_cast<void*>(&double_value<int, float>), op_int_float);
+                    (void*)reinterpret_cast<int (*)(float)>(&double_value<int, float>), NULL, op_int_float);
     cgcache.codegen_unary_function_adapter(make_dtype<float>(), make_dtype<float>(), cdecl_callconv,
-                    reinterpret_cast<void*>(&double_value<float, float>), op_float_float);
+                    (void*)reinterpret_cast<float (*)(float)>(&double_value<float, float>), NULL, op_float_float);
     cgcache.codegen_unary_function_adapter(make_dtype<float>(), make_dtype<double>(), cdecl_callconv,
-                    reinterpret_cast<void*>(&double_value<float, double>), op_float_double);
+                    (void*)reinterpret_cast<float (*)(double)>(&double_value<float, double>), NULL, op_float_double);
 
     int int_vals[3];
     float float_vals[3];
@@ -84,11 +86,12 @@ static int raise_if_negative(int value) {
 TEST(UnaryKernelAdapter, UnwindException) {
     codegen_cache cgcache;
     unary_specialization_kernel_instance rin;
-    cgcache.codegen_unary_function_adapter(make_dtype<int>()
-                                           , make_dtype<int>()
-                                           , cdecl_callconv
-                                           , reinterpret_cast<void*>(&raise_if_negative)
-                                           , rin);
+    cgcache.codegen_unary_function_adapter(make_dtype<int>(),
+                                           make_dtype<int>(),
+                                           cdecl_callconv,
+                                           reinterpret_cast<void*>(&raise_if_negative),
+                                           NULL,
+                                           rin);
     int in[3], out[3];
     // First call it with no exception raised
     in[0] = 0;

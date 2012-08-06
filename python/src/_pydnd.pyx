@@ -20,6 +20,13 @@ init_ctypes_interop()
 init_w_ndarray_typeobject(w_ndarray)
 init_w_dtype_typeobject(w_dtype)
 
+include "dnd.pxd"
+include "codegen_cache.pxd"
+include "dtype.pxd"
+include "ndarray.pxd"
+include "elwise_gfunc.pxd"
+include "elwise_reduce_gfunc.pxd"
+
 # Issue a performance warning if any of the diagnostics macros are enabled
 cdef extern from "<dnd/diagnostics.hpp>" namespace "dnd":
     bint any_diagnostics_enabled()
@@ -30,13 +37,6 @@ if any_diagnostics_enabled():
         pass
     warnings.warn("Performance is reduced because of enabled diagnostics:\n" +
                 str(which_diagnostics_enabled().c_str()), PerformanceWarning)
-
-include "dnd.pxd"
-include "codegen_cache.pxd"
-include "dtype.pxd"
-include "ndarray.pxd"
-include "elwise_gfunc.pxd"
-include "elwise_reduce_gfunc.pxd"
 
 from cython.operator import dereference
 
@@ -233,7 +233,7 @@ cdef class w_ndarray:
 
     def as_py(self):
         """Evaluates the values, and converts them into native Python types."""
-        return ndarray_as_pyobject(GET(self.v))
+        return ndarray_as_py(GET(self.v))
 
     def as_dtype(self, dtype):
         """Converts the ndarray to the requested dtype. If dtype is an expression dtype, its expression gets applied on top of the existing data."""
@@ -346,15 +346,15 @@ cdef class w_elwise_gfunc:
 
     def add_kernel(self, kernel, w_codegen_cache cgcache = default_cgcache_c):
         """Adds a kernel to the gfunc object. Currently, this means a ctypes object with prototype."""
-        GET(self.v).add_kernel(GET(cgcache.v), kernel)
+        elwise_gfunc_add_kernel(GET(self.v), GET(cgcache.v), kernel)
 
     def debug_dump(self):
         """Prints a raw representation of the gfunc data."""
-        print str(GET(self.v).debug_dump().c_str())
+        print str(elwise_gfunc_debug_dump(GET(self.v)).c_str())
 
     def __call__(self, *args, **kwargs):
         """Calls the gfunc."""
-        return GET(self.v).call(args, kwargs)
+        return elwise_gfunc_call(GET(self.v), args, kwargs)
 
 cdef class w_elwise_reduce_gfunc:
     cdef elwise_reduce_gfunc_placement_wrapper v
@@ -372,18 +372,18 @@ cdef class w_elwise_reduce_gfunc:
         """Adds a kernel to the gfunc object. Currently, this means a ctypes object with prototype."""
         cdef w_ndarray id
         if identity is None:
-            GET(self.v).add_kernel(GET(cgcache.v), kernel, associative, commutative, ndarray())
+            elwise_reduce_gfunc_add_kernel(GET(self.v), GET(cgcache.v), kernel, associative, commutative, ndarray())
         else:
             id = w_ndarray(identity)
-            GET(self.v).add_kernel(GET(cgcache.v), kernel, associative, commutative, GET(id.v))
+            elwise_reduce_gfunc_add_kernel(GET(self.v), GET(cgcache.v), kernel, associative, commutative, GET(id.v))
 
     def debug_dump(self):
         """Prints a raw representation of the gfunc data."""
-        print str(GET(self.v).debug_dump().c_str())
+        print str(elwise_reduce_gfunc_debug_dump(GET(self.v)).c_str())
 
     def __call__(self, *args, **kwargs):
         """Calls the gfunc."""
-        return GET(self.v).call(args, kwargs)
+        return elwise_reduce_gfunc_call(GET(self.v), args, kwargs)
 
 cdef class w_codegen_cache:
     cdef codegen_cache_placement_wrapper v

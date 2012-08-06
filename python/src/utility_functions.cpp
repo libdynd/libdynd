@@ -14,6 +14,12 @@ using namespace std;
 using namespace dnd;
 using namespace pydnd;
 
+void pydnd::py_decref_function(void* obj)
+{
+    // TODO: Should ensure we're holding the GIL before doing the DECREF
+    Py_XDECREF((PyObject *)obj);
+}
+
 intptr_t pydnd::pyobject_as_index(PyObject *index)
 {
     pyobject_ownref start_obj(PyNumber_Index(index));
@@ -184,7 +190,7 @@ bool pydnd::pyarg_bool(PyObject *obj, const char *argname, bool default_value)
 
     if (obj == Py_False) {
         return false;
-    } else if (obj = Py_True) {
+    } else if (obj == Py_True) {
         return true;
     } else {
         stringstream ss;
@@ -200,7 +206,7 @@ uint32_t pydnd::pyarg_access_flags(PyObject* obj)
 
     uint32_t result = 0;
 
-    while (item_raw = PyIter_Next(iterator)) {
+    while ((item_raw = PyIter_Next(iterator))) {
         pyobject_ownref item(item_raw);
         result |= (uint32_t)pyarg_strings_to_int(item, "access_flags", 0,
                     "read", read_access_flag,

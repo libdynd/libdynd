@@ -61,7 +61,8 @@ ndarray_node_ptr dnd::elwise_reduce_kernel_node::apply_linear_index(
     throw std::runtime_error("TODO: elwise_reduce_kernel_node::apply_linear_index");
 }
 
-void dnd::elwise_reduce_kernel_node::get_unary_operation(kernel_instance<unary_operation_t>& out_kernel) const
+void dnd::elwise_reduce_kernel_node::get_unary_operation(intptr_t DND_UNUSED(dst_fixedstride), intptr_t DND_UNUSED(src_fixedstride),
+                                    kernel_instance<unary_operation_t>& out_kernel) const
 {
     out_kernel.borrow_from(m_kernel);
 }

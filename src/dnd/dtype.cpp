@@ -36,12 +36,14 @@ void dnd::extended_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const
     throw std::runtime_error(ss.str());
 }
 
-const unary_specialization_kernel_instance& extended_dtype::get_operand_to_value_kernel() const
+void extended_dtype::get_operand_to_value_kernel(const eval::eval_context *DND_UNUSED(ectx),
+                        unary_specialization_kernel_instance& DND_UNUSED(out_borrowed_kernel)) const
 {
     throw std::runtime_error("get_operand_to_value_kernel: this operation is only for expression_kind dtypes");
 }
 
-const unary_specialization_kernel_instance& extended_dtype::get_value_to_operand_kernel() const
+void extended_dtype::get_value_to_operand_kernel(const eval::eval_context *DND_UNUSED(ectx),
+                        unary_specialization_kernel_instance& DND_UNUSED(out_borrowed_kernel)) const
 {
     throw std::runtime_error("get_value_to_operand_kernel: this operation is only for expression_kind dtypes");
 }
@@ -99,7 +101,7 @@ static inline int validate_type_id(type_id_t type_id)
 }
 
 dtype::dtype()
-    : m_type_id(pattern_type_id), m_kind(pattern_kind), m_alignment(1),
+    : m_type_id(void_type_id), m_kind(void_kind), m_alignment(1),
       m_element_size(0), m_data()
 {
     // Default to a generic type with zero size

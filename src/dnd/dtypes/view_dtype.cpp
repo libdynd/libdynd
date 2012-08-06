@@ -3,6 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
+#include <vector>
+
 #include <dnd/dtypes/view_dtype.hpp>
 #include <dnd/kernels/assignment_kernels.hpp>
 
@@ -27,14 +29,57 @@ dnd::view_dtype::view_dtype(const dtype& value_dtype, const dtype& operand_dtype
                     m_copy_kernel);
 }
 
-void dnd::view_dtype::print_element(std::ostream& DND_UNUSED(o), const char *DND_UNUSED(data)) const
+void dnd::view_dtype::print_element(std::ostream& o, const char *data) const
 {
+    // Allow calling print_element in the special case that the view
+    // is being used just to align the data
+    if (m_operand_dtype.type_id() == fixedbytes_type_id) {
+        switch (m_operand_dtype.element_size()) {
+            case 1:
+                m_value_dtype.print_element(o, data);
+                return;
+            case 2: {
+                uint16_t tmp;
+                memcpy(&tmp, data, sizeof(tmp));
+                m_value_dtype.print_element(o, reinterpret_cast<const char *>(&tmp));
+                return;
+            }
+            case 4: {
+                uint32_t tmp;
+                memcpy(&tmp, data, sizeof(tmp));
+                m_value_dtype.print_element(o, reinterpret_cast<const char *>(&tmp));
+                return;
+            }
+            case 8: {
+                uint64_t tmp;
+                memcpy(&tmp, data, sizeof(tmp));
+                m_value_dtype.print_element(o, reinterpret_cast<const char *>(&tmp));
+                return;
+            }
+            default: {
+                vector<char> storage(m_value_dtype.element_size() + m_value_dtype.alignment());
+                char *buffer = &storage[0];
+                // Make the storage aligned as needed
+                buffer = (char *)(((uintptr_t)buffer + (uintptr_t)m_value_dtype.alignment() - 1) & (m_value_dtype.alignment() - 1));
+                memcpy(buffer, data, m_value_dtype.element_size());
+                m_value_dtype.print_element(o, reinterpret_cast<const char *>(&buffer));
+                return;
+            }
+        }
+    }
+
     throw runtime_error("internal error: view_dtype::print_element isn't supposed to be called");
 }
 
 void dnd::view_dtype::print_dtype(std::ostream& o) const
 {
-    o << "view<as=" << m_value_dtype << ", original=" << m_operand_dtype << ">";
+    // Special case printing of alignment to make it more human-readable
+    if (m_value_dtype.alignment() != 1 && m_operand_dtype.type_id() == fixedbytes_type_id &&
+                    m_operand_dtype.alignment() == 1) {
+        o << "unaligned<" << m_value_dtype << ">";
+    } else {
+        o << "view<as=" << m_value_dtype << ", original=" << m_operand_dtype << ">";
+    }
 }
 
 bool dnd::view_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const
@@ -59,14 +104,16 @@ bool dnd::view_dtype::operator==(const extended_dtype& rhs) const
     }
 }
 
-const unary_specialization_kernel_instance&  dnd::view_dtype::get_operand_to_value_kernel() const
+void dnd::view_dtype::get_operand_to_value_kernel(const eval::eval_context *DND_UNUSED(ectx),
+                        unary_specialization_kernel_instance& out_borrowed_kernel) const
 {
-    return m_copy_kernel;
+    out_borrowed_kernel.borrow_from(m_copy_kernel);
 }
 
-const unary_specialization_kernel_instance&  dnd::view_dtype::get_value_to_operand_kernel() const
+void dnd::view_dtype::get_value_to_operand_kernel(const eval::eval_context *DND_UNUSED(ectx),
+                        unary_specialization_kernel_instance& out_borrowed_kernel) const
 {
-    return m_copy_kernel;
+    out_borrowed_kernel.borrow_from(m_copy_kernel);
 }
 
 dtype dnd::view_dtype::with_replaced_storage_dtype(const dtype& replacement_dtype) const

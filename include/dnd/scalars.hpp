@@ -58,7 +58,8 @@ public:
      * @param errmode     What kind of error checking to do when converting data types.
      */
     scalar_copied_if_necessary(const dtype& dst_dtype, const dtype& src_dtype, const char *src_data,
-                                    assign_error_mode errmode = assign_error_fractional) {
+                                    assign_error_mode errmode = assign_error_fractional,
+                                    const eval::eval_context *ectx = &eval::default_eval_context) {
 
         if (dst_dtype == src_dtype) {
             // Pass through the aligned data pointer
@@ -67,7 +68,7 @@ public:
         } else {
             // Make a converted copy into an aligned buffer
             char *tmp = allocate_data(dst_dtype.element_size());
-            dtype_assign(dst_dtype, tmp, src_dtype, src_data, errmode);
+            dtype_assign(dst_dtype, tmp, src_dtype, src_data, errmode, ectx);
         }
     }
 

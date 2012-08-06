@@ -16,6 +16,7 @@
 #include <dnd/dtype_assign.hpp>
 #include <dnd/shortvector.hpp>
 #include <dnd/irange.hpp>
+#include <dnd/eval/eval_engine.hpp>
 #include <dnd/nodes/ndarray_node.hpp>
 #include <dnd/nodes/strided_ndarray_node.hpp>
 #include <dnd/memblock/fixed_size_pod_memory_block.hpp>
@@ -202,7 +203,7 @@ public:
      * Evaluates the ndarray node into an immutable strided array, or
      * returns it untouched if it is already both immutable and strided.
      */
-    ndarray eval_immutable() const;
+    ndarray eval_immutable(const eval::eval_context *ectx = &eval::default_eval_context) const;
 
     /**
      * Evaluates the ndarray node into a newly allocated strided array,
@@ -210,7 +211,8 @@ public:
      *
      * @param access_flags  The access flags for the result, default read and write.
      */
-    ndarray eval_copy(uint32_t access_flags=read_access_flag|write_access_flag) const;
+    ndarray eval_copy(const eval::eval_context *ectx = &eval::default_eval_context,
+                        uint32_t access_flags=read_access_flag|write_access_flag) const;
 
     /**
      * Returnas a view of the array as the dtype's storage_dtype, peeling
@@ -251,21 +253,23 @@ public:
     const ndarray operator()(intptr_t idx) const;
 
     /** Does a value-assignment from the rhs array. */
-    void val_assign(const ndarray& rhs, assign_error_mode errmode = assign_error_fractional) const;
+    void val_assign(const ndarray& rhs, assign_error_mode errmode = assign_error_default,
+                        const eval::eval_context *ectx = &eval::default_eval_context) const;
     /** Does a value-assignment from the rhs raw scalar */
-    void val_assign(const dtype& dt, const char *data, assign_error_mode errmode = assign_error_fractional) const;
+    void val_assign(const dtype& dt, const char *data, assign_error_mode errmode = assign_error_default,
+                        const eval::eval_context *ectx = &eval::default_eval_context) const;
 
     /**
      * Converts the array into the specified dtype.
      */
-    ndarray as_dtype(const dtype& dt, assign_error_mode errmode = assign_error_fractional) const;
+    ndarray as_dtype(const dtype& dt, assign_error_mode errmode = assign_error_default) const;
 
     /**
      * Converts the array into the specified explicit template dtype.
      * For example, arr.as_dtype<float>().
      */
     template<class T>
-    ndarray as_dtype(assign_error_mode errmode = assign_error_fractional) const {
+    ndarray as_dtype(assign_error_mode errmode = assign_error_default) const {
         return as_dtype(make_dtype<T>(), errmode);
     }
 
@@ -292,7 +296,7 @@ public:
      * @param errmode  The assignment error mode to use.
      */
     template<class T>
-    T as(assign_error_mode errmode = assign_error_fractional) const;
+    T as(assign_error_mode errmode = assign_error_default) const;
 
     void debug_dump(std::ostream& o, const std::string& indent = "") const;
 
@@ -358,7 +362,7 @@ public:
 
     // Can implicitly convert to an ndarray, by collapsing to a strided array
     operator ndarray() const {
-        return ndarray(m_arr.m_node->eval());
+        return ndarray(eval::evaluate(m_arr.m_node.get_node()));
     }
 
     friend class ndarray;
@@ -369,7 +373,7 @@ inline ndarray_vals ndarray::vals() const {
 }
 
 inline ndarray& ndarray::operator=(const ndarray_vals& rhs) {
-    m_node = rhs.m_arr.m_node->eval();
+    m_node = eval::evaluate(rhs.m_arr.m_node.get_node());
     return *this;
 }
 
@@ -460,8 +464,8 @@ dnd::ndarray::ndarray(std::initializer_list<T> il)
     char *originptr = 0;
     memory_block_ptr memblock = make_fixed_size_pod_memory_block(sizeof(T) * dim0, sizeof(T), &originptr);
     DND_MEMCPY(originptr, il.begin(), sizeof(T) * dim0);
-    m_node.swap(make_strided_ndarray_node(make_dtype<T>(), 1, &dim0, &stride,
-                            originptr, DND_MOVE(memblock)));
+    make_strided_ndarray_node(make_dtype<T>(), 1, &dim0, &stride,
+                            originptr, read_access_flag | write_access_flag, DND_MOVE(memblock)).swap(m_node);
 }
 template<class T>
 dnd::ndarray::ndarray(std::initializer_list<std::initializer_list<T> > il)
@@ -483,8 +487,8 @@ dnd::ndarray::ndarray(std::initializer_list<std::initializer_list<T> > il)
     memory_block_ptr memblock = make_fixed_size_pod_memory_block(sizeof(T) * num_elements, sizeof(T), &originptr);
     T *dataptr = reinterpret_cast<T *>(originptr);
     detail::initializer_list_shape<S>::copy_data(&dataptr, il);
-    m_node.swap(make_strided_ndarray_node(make_dtype<T>(), 2, shape, strides,
-                            originptr, DND_MOVE(memblock)));
+    make_strided_ndarray_node(make_dtype<T>(), 2, shape, strides,
+                        originptr, read_access_flag | write_access_flag, DND_MOVE(memblock)).swap(m_node);
 }
 template<class T>
 dnd::ndarray::ndarray(std::initializer_list<std::initializer_list<std::initializer_list<T> > > il)
@@ -506,8 +510,8 @@ dnd::ndarray::ndarray(std::initializer_list<std::initializer_list<std::initializ
     memory_block_ptr memblock = make_fixed_size_pod_memory_block(sizeof(T) * num_elements, sizeof(T), &originptr);
     T *dataptr = reinterpret_cast<T *>(originptr);
     detail::initializer_list_shape<S>::copy_data(&dataptr, il);
-    m_node.swap(make_strided_ndarray_node(make_dtype<T>(), 3, shape, strides,
-                            originptr, DND_MOVE(memblock)));
+    make_strided_ndarray_node(make_dtype<T>(), 3, shape, strides,
+                    originptr, read_access_flag | write_access_flag, DND_MOVE(memblock)).swap(m_node);
 }
 #endif // DND_INIT_LIST
 

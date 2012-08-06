@@ -32,54 +32,16 @@ S double_value(T value) {
 int main()
 {
     try {
-    float v0[5] = {3.5f, 1.3f, -2.4999f, -2.999, 1000.50001f};
-    ndarray a = v0, b;
+    ndarray a;
 
-    b = a.as_dtype<int>(assign_error_overflow);
-    b = b.as_dtype<float>(assign_error_inexact);
-    // Multiple as_dtype operations should make a chained conversion dtype
-    EXPECT_EQ(make_convert_dtype(make_dtype<float>(),
-                                    make_convert_dtype<int, float>(assign_error_overflow), assign_error_inexact),
-              b.get_dtype());
+    a = ndarray(make_fixedstring_dtype(string_encoding_utf_16, 16));
+    // Fill up the string with values
+    a.vals() = std::string("0123456789012345");
+    EXPECT_EQ("0123456789012345", a.as<std::string>());
+    // Confirm that now assigning a smaller string works
+    a.vals() = std::string("abc");
+    EXPECT_EQ("abc", a.as<std::string>());
 
-    // Evaluating the values should truncate them to integers
-    b = b.vals();
-    // Now it's just the value dtype, no chaining
-    EXPECT_EQ(make_dtype<float>(), b.get_dtype());
-    EXPECT_EQ(3, b(0).as<float>());
-    EXPECT_EQ(1, b(1).as<float>());
-    EXPECT_EQ(-2, b(2).as<float>());
-    EXPECT_EQ(-2, b(3).as<float>());
-    EXPECT_EQ(1000, b(4).as<float>());
-
-    // Now try it with longer chaining through multiple element sizes
-    b = a.as_dtype<int16_t>(assign_error_overflow);
-    b = b.as_dtype<int32_t>(assign_error_overflow);
-    b = b.as_dtype<int16_t>(assign_error_overflow);
-    b = b.as_dtype<int64_t>(assign_error_overflow);
-    b = b.as_dtype<float>(assign_error_overflow);
-    b = b.as_dtype<int32_t>(assign_error_overflow);
-
-    EXPECT_EQ(make_convert_dtype(make_dtype<int32_t>(),
-                    make_convert_dtype(make_dtype<float>(),
-                        make_convert_dtype(make_dtype<int64_t>(),
-                            make_convert_dtype(make_dtype<int16_t>(),
-                                make_convert_dtype(make_dtype<int32_t>(),
-                                    make_convert_dtype<int16_t, float>(
-                                    assign_error_overflow),
-                                assign_error_overflow),
-                            assign_error_overflow),
-                        assign_error_overflow),
-                    assign_error_overflow),
-                assign_error_overflow),
-            b.get_dtype());
-    b = b.vals();
-    EXPECT_EQ(make_dtype<int32_t>(), b.get_dtype());
-    EXPECT_EQ(3, b(0).as<int32_t>());
-    EXPECT_EQ(1, b(1).as<int32_t>());
-    EXPECT_EQ(-2, b(2).as<int32_t>());
-    EXPECT_EQ(-2, b(3).as<int32_t>());
-    EXPECT_EQ(1000, b(4).as<int32_t>());
 
     } catch(int) { //std::exception& e) {
         //cout << "Error: " << e.what() << "\n";

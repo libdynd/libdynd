@@ -6,13 +6,13 @@
 #ifndef _DND__CODEGEN_CACHE_FUNCTIONS_HPP_
 #define _DND__CODEGEN_CACHE_FUNCTIONS_HPP_
 
+#include "Python.h"
+
 #include <stdint.h>
 #include <sstream>
 #include <stdexcept>
 
 #include <dnd/codegen/codegen_cache.hpp>
-
-#include "Python.h"
 
 namespace pydnd {
 

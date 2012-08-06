@@ -58,7 +58,8 @@ assignment_function_t dnd::get_builtin_dtype_assignment_function(type_id_t dst_t
 {
     // Do a table lookup for the built-in range of dtypes
     if (dst_type_id >= bool_type_id && dst_type_id <= complex_float64_type_id &&
-            src_type_id >= bool_type_id && src_type_id <= complex_float64_type_id) {
+            src_type_id >= bool_type_id && src_type_id <= complex_float64_type_id &&
+            errmode != assign_error_default) {
         return single_assign_table[dst_type_id][src_type_id][errmode];
     } else {
         return NULL;
@@ -178,8 +179,19 @@ namespace {
 void dnd::get_builtin_dtype_assignment_kernel(
                     type_id_t dst_type_id, type_id_t src_type_id,
                     assign_error_mode errmode,
+                    const eval::eval_context *ectx,
                     unary_specialization_kernel_instance& out_kernel)
 {
+    // Apply the default error mode from the context if possible
+    if (errmode == assign_error_default) {
+        if (ectx != NULL) {
+            errmode = ectx->default_assign_error_mode;
+        } else {
+            out_kernel.specializations = NULL;
+            out_kernel.auxdata.free();
+        }
+    }
+
     if (errmode == assign_error_fractional) {
         // The default error mode is fractional, so do specializations for it.
         static specialized_unary_operation_table_t fractional_optable[builtin_type_id_count][builtin_type_id_count] =
@@ -208,6 +220,11 @@ void dnd::get_builtin_dtype_assignment_kernel(
             out_kernel.specializations = fn_optable;
             make_raw_auxiliary_data(out_kernel.auxdata, reinterpret_cast<uintptr_t>(asn));
             return;
+        } else {
+            stringstream ss;
+            ss << "Could not construct assignment kernel from " << dtype(src_type_id) << " to ";
+            ss << dtype(dst_type_id) << " with error mode " << errmode;
+            throw runtime_error(ss.str());
         }
     }
 }
@@ -215,6 +232,7 @@ void dnd::get_builtin_dtype_assignment_kernel(
 void dnd::get_dtype_assignment_kernel(
                     const dtype& dst_dt, const dtype& src_dt,
                     assign_error_mode errmode,
+                    const eval::eval_context *ectx,
                     unary_specialization_kernel_instance& out_kernel)
 {
     // special-case matching src and dst dtypes
@@ -227,10 +245,14 @@ void dnd::get_dtype_assignment_kernel(
         errmode = assign_error_none;
     }
 
+    if (errmode == assign_error_default && ectx != NULL) {
+        errmode = ectx->default_assign_error_mode;
+    }
+
     // Assignment of built-in types
     if (dst_dt.extended() == NULL && src_dt.extended() == NULL) {
         get_builtin_dtype_assignment_kernel(dst_dt.type_id(),
-                            src_dt.type_id(), errmode, out_kernel);
+                            src_dt.type_id(), errmode, ectx, out_kernel);
         return;
     }
 
@@ -245,7 +267,7 @@ void dnd::get_dtype_assignment_kernel(
 
         if (src_dt.kind() == expression_kind) {
             // kernel operations from src's storage to value
-            push_front_dtype_storage_to_value_kernels(src_dt, kernels, element_sizes);
+            push_front_dtype_storage_to_value_kernels(src_dt, ectx, kernels, element_sizes);
         }
 
         if (src_dt_vdt != dst_dt_vdt) {
@@ -256,11 +278,11 @@ void dnd::get_dtype_assignment_kernel(
             element_sizes.push_back(dst_dt_vdt.element_size());
             kernels.push_back(unary_specialization_kernel_instance());
             get_dtype_assignment_kernel(dst_dt_vdt, src_dt_vdt,
-                                errmode, kernels.back());
+                                errmode, ectx, kernels.back());
         }
 
         if (dst_dt.kind() == expression_kind) {
-            push_back_dtype_value_to_storage_kernels(dst_dt, kernels, element_sizes);
+            push_back_dtype_value_to_storage_kernels(dst_dt, ectx, kernels, element_sizes);
         }
 
         make_buffered_chain_unary_kernel(kernels, element_sizes, out_kernel);

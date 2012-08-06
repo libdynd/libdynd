@@ -369,7 +369,7 @@ std::string dnd::detail::ndarray_as_string(const ndarray& lhs, assign_error_mode
 }
 
 
-static void val_assign_loop(const ndarray& lhs, const ndarray& rhs, assign_error_mode errmode)
+static void val_assign_loop(const ndarray& lhs, const ndarray& rhs, assign_error_mode errmode, const eval::eval_context *ectx)
 {
     // Get the data pointer and strides of rhs through the standard interface
     const char *rhs_originptr = rhs.get_readonly_originptr();
@@ -388,9 +388,8 @@ static void val_assign_loop(const ndarray& lhs, const ndarray& rhs, assign_error
     intptr_t dst_innerstride = iter.innerstride<0>(), src_innerstride = iter.innerstride<1>();
 
     unary_specialization_kernel_instance assign;
-    get_dtype_assignment_kernel(lhs.get_dtype(),
-                                    rhs.get_dtype(),
-                                    errmode,
+    get_dtype_assignment_kernel(lhs.get_dtype(), rhs.get_dtype(),
+                                    errmode, ectx,
                                     assign);
     unary_operation_t assign_fn = assign.specializations[
         get_unary_specialization(dst_innerstride, lhs.get_dtype().element_size(), src_innerstride, rhs.get_dtype().element_size())];
@@ -404,25 +403,25 @@ static void val_assign_loop(const ndarray& lhs, const ndarray& rhs, assign_error
     }
 }
 
-void dnd::ndarray::val_assign(const ndarray& rhs, assign_error_mode errmode) const
+void dnd::ndarray::val_assign(const ndarray& rhs, assign_error_mode errmode, const eval::eval_context *ectx) const
 {
     if (get_dtype() == rhs.get_dtype()) {
-        val_assign_loop(*this, rhs, assign_error_none);
+        val_assign_loop(*this, rhs, assign_error_none, ectx);
     } else if (get_num_elements() <= 5 * rhs.get_num_elements() ) {
-        val_assign_loop(*this, rhs, errmode);
+        val_assign_loop(*this, rhs, errmode, ectx);
     } else {
         // If the data is being duplicated more than 5 times, make a temporary copy of rhs
         // converted to the dtype of 'this', then do the broadcasting.
         ndarray tmp = empty_like(rhs, get_dtype());
-        val_assign_loop(tmp, rhs, errmode);
-        val_assign_loop(*this, tmp, assign_error_none);
+        val_assign_loop(tmp, rhs, errmode, ectx);
+        val_assign_loop(*this, tmp, assign_error_none, ectx);
     }
 }
 
-void dnd::ndarray::val_assign(const dtype& dt, const char *data, assign_error_mode errmode) const
+void dnd::ndarray::val_assign(const dtype& dt, const char *data, assign_error_mode errmode, const eval::eval_context *ectx) const
 {
     //cout << "scalar val_assign " << dt << " ptr " << (const void *)data << "\n";
-    scalar_copied_if_necessary src(get_dtype(), dt, data, errmode);
+    scalar_copied_if_necessary src(get_dtype(), dt, data, errmode, ectx);
     raw_ndarray_iter<1,0> iter(*this);
 
     intptr_t innersize = iter.innersize(), innerstride = iter.innerstride<0>();
@@ -440,14 +439,14 @@ void dnd::ndarray::val_assign(const dtype& dt, const char *data, assign_error_mo
     }
 }
 
-ndarray dnd::ndarray::eval_immutable() const
+ndarray dnd::ndarray::eval_immutable(const eval::eval_context *ectx) const
 {
-    return ndarray(m_node->eval(false, read_access_flag|immutable_access_flag));
+    return ndarray(evaluate(m_node.get_node(), ectx, false, read_access_flag|immutable_access_flag));
 }
 
-ndarray dnd::ndarray::eval_copy(uint32_t access_flags) const
+ndarray dnd::ndarray::eval_copy(const eval::eval_context *ectx, uint32_t access_flags) const
 {
-    return ndarray(m_node->eval(true, access_flags));
+    return ndarray(evaluate(m_node.get_node(), ectx, true, access_flags));
 }
 
 
@@ -467,7 +466,7 @@ static void nested_ndarray_print(std::ostream& o, const dtype& d, const char *da
     if (ndim == 0) {
         d.print_element(o, data);
     } else {
-        o << "{";
+        o << "[";
         if (ndim == 1) {
             d.print_element(o, data);
             for (intptr_t i = 1; i < shape[0]; ++i) {
@@ -486,14 +485,14 @@ static void nested_ndarray_print(std::ostream& o, const dtype& d, const char *da
                 data += stride;
             }
         }
-        o << "}";
+        o << "]";
     }
 }
 
 std::ostream& dnd::operator<<(std::ostream& o, const ndarray& rhs)
 {
     if (rhs.get_node() != NULL) {
-        o << "ndarray(" << rhs.get_dtype() << ", ";
+        o << "ndarray(";
         if (rhs.get_node()->get_category() == strided_array_node_category &&
                         rhs.get_dtype().kind() != expression_kind) {
             const char *originptr = rhs.get_node()->get_readonly_originptr();
@@ -505,6 +504,7 @@ std::ostream& dnd::operator<<(std::ostream& o, const ndarray& rhs)
             const intptr_t *strides = tmp.get_node()->get_strides();
             nested_ndarray_print(o, tmp.get_dtype(), originptr, tmp.get_ndim(), tmp.get_shape(), strides);
         }
+        o << ", " << rhs.get_dtype();
         o << ")";
     } else {
         o << "ndarray()";

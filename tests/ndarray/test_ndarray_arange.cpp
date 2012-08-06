@@ -36,3 +36,20 @@ TEST(NDArrayArange, Basic) {
     cout << linspace(10, 20) << "\n";
     cout << linspace(0, 5.0, 10) << "\n";
 }
+
+TEST(NDArrayArange, AsDType) {
+    ndarray a;
+
+    a = arange(4).as_dtype(make_dtype<int32_t>());
+    a = a.vals();
+    EXPECT_EQ(0, a(0).as<int32_t>());
+    EXPECT_EQ(1, a(1).as<int32_t>());
+    EXPECT_EQ(2, a(2).as<int32_t>());
+    EXPECT_EQ(3, a(3).as<int32_t>());
+    a = a.as_dtype(make_dtype<double>());
+    a = a.vals();
+    EXPECT_EQ(0., a(0).as<double>());
+    EXPECT_EQ(1., a(1).as<double>());
+    EXPECT_EQ(2., a(2).as<double>());
+    EXPECT_EQ(3., a(3).as<double>());
+}

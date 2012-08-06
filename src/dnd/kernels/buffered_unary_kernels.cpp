@@ -409,52 +409,71 @@ void dnd::make_buffered_chain_unary_kernel(std::deque<unary_specialization_kerne
         buffered_nchain_unary_kernel::scalar_to_contiguous_kernel};
 
     switch (kernels.size()) {
-    case 1:
-        kernels[0].swap(out_kernel);
-        break;
-    case 2: {
-        out_kernel.specializations = optable_2chain;
-        make_auxiliary_data<buffered_2chain_unary_kernel_auxdata>(out_kernel.auxdata);
-        buffered_2chain_unary_kernel_auxdata &auxdata = out_kernel.auxdata.get<buffered_2chain_unary_kernel_auxdata>();
+        case 1:
+            kernels[0].swap(out_kernel);
+            break;
+        case 2: {
+            if (kernels[0].specializations != NULL && kernels[1].specializations != NULL) {
+                out_kernel.specializations = optable_2chain;
+                make_auxiliary_data<buffered_2chain_unary_kernel_auxdata>(out_kernel.auxdata);
+                buffered_2chain_unary_kernel_auxdata &auxdata = out_kernel.auxdata.get<buffered_2chain_unary_kernel_auxdata>();
 
-        auxdata.buf.allocate(element_sizes[1]); // TODO: pass buffering data through here
+                auxdata.buf.allocate(element_sizes[1]); // TODO: pass buffering data through here
 
-        auxdata.kernels[0].swap(kernels[0]);
-        auxdata.kernels[1].swap(kernels[1]);
-        break;
+                auxdata.kernels[0].swap(kernels[0]);
+                auxdata.kernels[1].swap(kernels[1]);
+            } else {
+                out_kernel.specializations = NULL;
+                out_kernel.auxdata.free();
+            }
+            break;
         }
-    case 3: {
-        out_kernel.specializations = optable_3chain;
-        make_auxiliary_data<buffered_3chain_unary_kernel_auxdata>(out_kernel.auxdata);
-        buffered_3chain_unary_kernel_auxdata &auxdata = out_kernel.auxdata.get<buffered_3chain_unary_kernel_auxdata>();
+        case 3: {
+            if (kernels[0].specializations != NULL && kernels[1].specializations != NULL &&
+                        kernels[2].specializations != NULL) {
+                out_kernel.specializations = optable_3chain;
+                make_auxiliary_data<buffered_3chain_unary_kernel_auxdata>(out_kernel.auxdata);
+                buffered_3chain_unary_kernel_auxdata &auxdata = out_kernel.auxdata.get<buffered_3chain_unary_kernel_auxdata>();
 
-        auxdata.bufs[0].allocate(element_sizes[1]); // TODO: pass buffering data through here
-        auxdata.bufs[1].allocate(element_sizes[2]);
+                auxdata.bufs[0].allocate(element_sizes[1]); // TODO: pass buffering data through here
+                auxdata.bufs[1].allocate(element_sizes[2]);
 
-        auxdata.kernels[0].swap(kernels[0]);
-        auxdata.kernels[1].swap(kernels[1]);
-        auxdata.kernels[2].swap(kernels[2]);
-        break;
+                auxdata.kernels[0].swap(kernels[0]);
+                auxdata.kernels[1].swap(kernels[1]);
+                auxdata.kernels[2].swap(kernels[2]);
+            } else {
+                out_kernel.specializations = NULL;
+                out_kernel.auxdata.free();
+            }
+            break;
         }
-    default: {
-        out_kernel.specializations = optable_nchain;
-        make_auxiliary_data<buffered_nchain_unary_kernel_auxdata>(out_kernel.auxdata);
-        buffered_nchain_unary_kernel_auxdata &auxdata = out_kernel.auxdata.get<buffered_nchain_unary_kernel_auxdata>();
-        auxdata.init((int)kernels.size() - 1);
+        default: {
+            for (size_t i = 0, i_end = kernels.size()-1; i != i_end; ++i) {
+                if (kernels[i].specializations == NULL) {
+                    out_kernel.specializations = NULL;
+                    out_kernel.auxdata.free();
+                    return;
+                }
+            }
+            out_kernel.specializations = optable_nchain;
+            make_auxiliary_data<buffered_nchain_unary_kernel_auxdata>(out_kernel.auxdata);
+            buffered_nchain_unary_kernel_auxdata &auxdata = out_kernel.auxdata.get<buffered_nchain_unary_kernel_auxdata>();
+            auxdata.init((int)kernels.size() - 1);
 
-        for (size_t i = 0, i_end = kernels.size()-1; i != i_end; ++i) {
-            auxdata.m_bufs[i].allocate(element_sizes[i+1]); // TODO: pass buffering data through here
-        }
+            for (size_t i = 0, i_end = kernels.size()-1; i != i_end; ++i) {
+                auxdata.m_bufs[i].allocate(element_sizes[i+1]); // TODO: pass buffering data through here
+            }
 
-        for (size_t i = 0; i < kernels.size(); ++i) {
-            auxdata.m_kernels[i].swap(kernels[i]);
-        }
-        break;
+            for (size_t i = 0; i < kernels.size(); ++i) {
+                auxdata.m_kernels[i].swap(kernels[i]);
+            }
+            break;
         }
     }
 }
 
 void dnd::push_front_dtype_storage_to_value_kernels(const dnd::dtype& dt,
+                    const eval::eval_context *ectx,
                     std::deque<unary_specialization_kernel_instance>& out_kernels,
                     std::deque<intptr_t>& out_element_sizes)
 {
@@ -466,7 +485,8 @@ void dnd::push_front_dtype_storage_to_value_kernels(const dnd::dtype& dt,
             out_element_sizes.push_front(dt.value_dtype().element_size());
         }
         out_element_sizes.push_front(dt.storage_dtype().element_size());
-        out_kernels.push_front(dt.extended()->get_operand_to_value_kernel());
+        out_kernels.push_front(unary_specialization_kernel_instance());
+        dt.extended()->get_operand_to_value_kernel(ectx, out_kernels.front());
     } else {
         // The final element size, if not yet provided
         if (out_kernels.empty()) {
@@ -475,18 +495,21 @@ void dnd::push_front_dtype_storage_to_value_kernels(const dnd::dtype& dt,
         do {
             // Add this kernel to the deque
             out_element_sizes.push_front(next_dt->value_dtype().element_size());
-            out_kernels.push_front(front_dt->extended()->get_operand_to_value_kernel());
+            out_kernels.push_front(unary_specialization_kernel_instance());
+            front_dt->extended()->get_operand_to_value_kernel(ectx, out_kernels.front());
             // Shift to the next dtype
             front_dt = next_dt;
             next_dt = &front_dt->extended()->operand_dtype(*front_dt);
         } while (next_dt->kind() == expression_kind);
         // Add the final kernel from the source
         out_element_sizes.push_front(next_dt->element_size());
-        out_kernels.push_front(front_dt->extended()->get_operand_to_value_kernel());
+        out_kernels.push_front(unary_specialization_kernel_instance());
+        front_dt->extended()->get_operand_to_value_kernel(ectx, out_kernels.front());
     }
 }
 
 void dnd::push_back_dtype_value_to_storage_kernels(const dnd::dtype& dt,
+                    const eval::eval_context *ectx,
                     std::deque<unary_specialization_kernel_instance>& out_kernels,
                     std::deque<intptr_t>& out_element_sizes)
 {
@@ -498,7 +521,8 @@ void dnd::push_back_dtype_value_to_storage_kernels(const dnd::dtype& dt,
             out_element_sizes.push_back(dt.value_dtype().element_size());
         }
         out_element_sizes.push_back(dt.storage_dtype().element_size());
-        out_kernels.push_back(dt.extended()->get_value_to_operand_kernel());
+        out_kernels.push_back(unary_specialization_kernel_instance());
+        dt.extended()->get_value_to_operand_kernel(ectx, out_kernels.back());
     } else {
         // The first element size, if not yet provided
         if (out_kernels.empty()) {
@@ -507,13 +531,15 @@ void dnd::push_back_dtype_value_to_storage_kernels(const dnd::dtype& dt,
         do {
             // Add this kernel to the deque
             out_element_sizes.push_back(next_dt->value_dtype().element_size());
-            out_kernels.push_back(back_dt->extended()->get_value_to_operand_kernel());
+            out_kernels.push_back(unary_specialization_kernel_instance());
+            back_dt->extended()->get_value_to_operand_kernel(ectx, out_kernels.back());
             // Shift to the next dtype
             back_dt = next_dt;
             next_dt = &back_dt->extended()->operand_dtype(*back_dt);
         } while (next_dt->kind() == expression_kind);
         // Add the final kernel from the source
         out_element_sizes.push_back(next_dt->element_size());
-        out_kernels.push_back(back_dt->extended()->get_value_to_operand_kernel());
+        out_kernels.push_back(unary_specialization_kernel_instance());
+        back_dt->extended()->get_value_to_operand_kernel(ectx, out_kernels.back());
     }
 }

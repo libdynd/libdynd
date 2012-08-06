@@ -24,10 +24,14 @@ namespace dnd {
  * Use make_auxiliary_data<binary_function_adapter_auxdata>(out_auxdata)
  * to create it, then populate with the function pointer and the memory
  * block containing the code.
+ *
+ * @param function_pointer  Pointer to the function being adapted.
+ * @param adapter_memblock  Empty, or a reference to the object holding the adapter code memory.
+ * @param adaptee_memblock  Empty, or a reference to the object holding the function being adapted.
  */
 struct binary_reduce_function_adapter_auxdata {
     void *function_pointer;
-    memory_block_ptr exec_memblock;
+    memory_block_ptr adapter_memblock, adaptee_memblock;
 };
 
 /**

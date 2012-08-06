@@ -3,6 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
+#include <Python.h>
+
 #include <dnd/dtypes/fixedstring_dtype.hpp>
 #include <dnd/dtypes/pointer_dtype.hpp>
 
@@ -95,7 +97,7 @@ calling_convention_t pydnd::get_ctypes_calling_convention(PyCFuncPtrObject* cfun
 #endif
 }
 
-void pydnd::get_ctypes_signature(PyCFuncPtrObject* cfunc, std::vector<dnd::dtype>& out_sig)
+void pydnd::get_ctypes_signature(PyCFuncPtrObject* cfunc, dtype& out_returntype, std::vector<dnd::dtype>& out_paramtypes)
 {
     // The fields restype and argtypes are not always stored at the C level,
     // so must use the higher level getattr.
@@ -106,26 +108,26 @@ void pydnd::get_ctypes_signature(PyCFuncPtrObject* cfunc, std::vector<dnd::dtype
         throw std::runtime_error("The argtypes and restype of a ctypes function pointer must be specified to get its signature");
     }
 
+    // Get the return type
+    if (restype == Py_None) {
+        // No return type
+        out_returntype = make_dtype<void>();
+    } else {
+        out_returntype = dtype_from_ctypes_cdatatype(restype);
+    }
+
     Py_ssize_t argcount = PySequence_Size(argtypes);
     if (argcount < 0) {
         throw runtime_error("The argtypes of the ctypes function pointer has the wrong type");
     }
 
     // Set the output size
-    out_sig.resize(argcount + 1);
-
-    // Get the return type
-    if (restype == Py_None) {
-        // No return type
-        out_sig[0] = make_dtype<void>();
-    } else {
-        out_sig[0] = dtype_from_ctypes_cdatatype(restype);
-    }
+    out_paramtypes.resize(argcount);
 
     // Get the argument types
     for (intptr_t i = 0; i < argcount; ++i) {
         pyobject_ownref element(PySequence_GetItem(argtypes, i));
-        out_sig[i + 1] = dtype_from_ctypes_cdatatype(element);
+        out_paramtypes[i] = dtype_from_ctypes_cdatatype(element);
     }
 }
 

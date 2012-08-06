@@ -30,8 +30,16 @@ dnd::convert_dtype::convert_dtype(const dtype& value_dtype, const dtype& operand
         errmode_to_operand = assign_error_none;
     }
 
-    ::dnd::get_dtype_assignment_kernel(m_value_dtype, m_operand_dtype.value_dtype(), errmode_to_value, m_to_value_kernel);
-    ::dnd::get_dtype_assignment_kernel(m_operand_dtype.value_dtype(), m_value_dtype, errmode_to_value, m_to_operand_kernel);
+    if (errmode_to_value != assign_error_default) {
+        ::dnd::get_dtype_assignment_kernel(m_value_dtype, m_operand_dtype.value_dtype(), errmode_to_value, NULL, m_to_value_kernel);
+    } else {
+        m_to_value_kernel.specializations = NULL;
+    }
+    if (errmode_to_operand != assign_error_default) {
+        ::dnd::get_dtype_assignment_kernel(m_operand_dtype.value_dtype(), m_value_dtype, errmode_to_value, NULL, m_to_operand_kernel);
+    } else {
+        m_to_operand_kernel.specializations = NULL;
+    }
 }
 
 void dnd::convert_dtype::print_element(std::ostream& DND_UNUSED(o), const char *DND_UNUSED(data)) const
@@ -41,7 +49,11 @@ void dnd::convert_dtype::print_element(std::ostream& DND_UNUSED(o), const char *
 
 void dnd::convert_dtype::print_dtype(std::ostream& o) const
 {
-    o << "convert<to=" << m_value_dtype << ", from=" << m_operand_dtype << ", errmode=" << m_errmode << ">";
+    o << "convert<to=" << m_value_dtype << ", from=" << m_operand_dtype;
+    if (m_errmode != assign_error_default) {
+        o << ", errmode=" << m_errmode;
+    }
+    o << ">";
 }
 
 bool dnd::convert_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const
@@ -68,14 +80,34 @@ bool dnd::convert_dtype::operator==(const extended_dtype& rhs) const
     }
 }
 
-const unary_specialization_kernel_instance&  dnd::convert_dtype::get_operand_to_value_kernel() const
+void dnd::convert_dtype::get_operand_to_value_kernel(const eval::eval_context *ectx,
+                        unary_specialization_kernel_instance& out_borrowed_kernel) const
 {
-    return m_to_value_kernel;
+    if (m_to_value_kernel.specializations != NULL) {
+        out_borrowed_kernel.borrow_from(m_to_value_kernel);
+    } else if (ectx != NULL) {
+        // If the kernel wasn't set, errmode is assign_error_default, so we must use the eval_context
+        ::dnd::get_dtype_assignment_kernel(m_value_dtype, m_operand_dtype.value_dtype(),
+                            ectx->default_assign_error_mode, ectx, out_borrowed_kernel);
+    } else {
+        // An evaluation context is needed to get the kernel, set the output to NULL
+        out_borrowed_kernel.specializations = NULL;
+    }
 }
 
-const unary_specialization_kernel_instance&  dnd::convert_dtype::get_value_to_operand_kernel() const
+void dnd::convert_dtype::get_value_to_operand_kernel(const eval::eval_context *ectx,
+                        unary_specialization_kernel_instance& out_borrowed_kernel) const
 {
-    return m_to_operand_kernel;
+    if (m_to_operand_kernel.specializations != NULL) {
+        out_borrowed_kernel.borrow_from(m_to_operand_kernel);
+    } else if (ectx != NULL) {
+        // If the kernel wasn't set, errmode is assign_error_default, so we must use the eval_context
+        ::dnd::get_dtype_assignment_kernel(m_operand_dtype.value_dtype(), m_value_dtype,
+                            ectx->default_assign_error_mode, ectx, out_borrowed_kernel);
+    } else {
+        // An evaluation context is needed to get the kernel, set the output to NULL
+        out_borrowed_kernel.specializations = NULL;
+    }
 }
 
 dtype dnd::convert_dtype::with_replaced_storage_dtype(const dtype& replacement_dtype) const

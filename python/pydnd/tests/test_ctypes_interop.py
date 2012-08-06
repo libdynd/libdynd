@@ -17,3 +17,6 @@ class TestCTypesDTypeInterop(unittest.TestCase):
         self.assertEqual(nd.uint64, nd.dtype(ctypes.c_uint64))
         self.assertEqual(nd.float32, nd.dtype(ctypes.c_float))
         self.assertEqual(nd.float64, nd.dtype(ctypes.c_double))
+
+if __name__ == '__main__':
+    unittest.main()

@@ -9,6 +9,7 @@
 #include <dnd/dtype.hpp>
 #include <dnd/dtype_assign.hpp>
 #include <dnd/kernels/unary_kernel_instance.hpp>
+#include <dnd/eval/eval_context.hpp>
 
 namespace dnd {
 
@@ -19,7 +20,10 @@ typedef void (*assignment_function_t)(void *dst, const void *src);
 
 /**
  * Returns an assignment function for assigning a single built-in
- * dtype value.
+ * dtype value. The errmode must not be `assign_error_default`, which
+ * would require an auxdata with a kernel_api to retrieve that default.
+ *
+ * This returns NULL if there is any problem.
  */
 assignment_function_t get_builtin_dtype_assignment_function(type_id_t dst_type_id, type_id_t src_type_id,
                                                                 assign_error_mode errmode);
@@ -45,6 +49,7 @@ void multiple_assignment_kernel(char *dst, intptr_t dst_stride, const char *src,
 void get_builtin_dtype_assignment_kernel(
                     type_id_t dst_type_id, type_id_t src_type_id,
                     assign_error_mode errmode,
+                    const eval::eval_context *ectx,
                     unary_specialization_kernel_instance& out_kernel);
 
 /**
@@ -65,6 +70,7 @@ void get_pod_dtype_assignment_kernel(
  */
 void get_dtype_assignment_kernel(const dtype& dst_dt, const dtype& src_dt,
                     assign_error_mode errmode,
+                    const eval::eval_context *ectx,
                     unary_specialization_kernel_instance& out_kernel);
 
 /**

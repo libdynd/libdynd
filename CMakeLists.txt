@@ -53,6 +53,7 @@ set(dnd_SRC
     src/dnd/dtypes/fixedstring_dtype.cpp
     src/dnd/dtypes/pointer_dtype.cpp
     src/dnd/dtypes/string_dtype.cpp
+    src/dnd/dtypes/tuple_dtype.cpp
     src/dnd/dtypes/view_dtype.cpp
     src/dnd/dtypes/void_pointer_dtype.cpp
     include/dnd/dtypes/array_dtype.hpp
@@ -63,26 +64,25 @@ set(dnd_SRC
     include/dnd/dtypes/fixedstring_dtype.hpp
     include/dnd/dtypes/pointer_dtype.hpp
     include/dnd/dtypes/string_dtype.hpp
+    include/dnd/dtypes/tuple_dtype.hpp
     include/dnd/dtypes/view_dtype.hpp
     include/dnd/dtypes/void_pointer_dtype.hpp
-    # Nodes
-    src/dnd/nodes/elwise_unary_kernel_node.cpp
-    src/dnd/nodes/elwise_binary_kernel_node.cpp
-    src/dnd/nodes/elwise_reduce_kernel_node.cpp
-    src/dnd/nodes/groupby_node.cpp
-    src/dnd/nodes/immutable_scalar_node.cpp
-    src/dnd/nodes/ndarray_node.cpp
-    src/dnd/nodes/scalar_node.cpp
-    src/dnd/nodes/strided_ndarray_node.cpp
-    include/dnd/nodes/elwise_unary_kernel_node.hpp
-    include/dnd/nodes/elwise_binary_kernel_node.hpp
-    include/dnd/nodes/elwise_reduce_kernel_node.hpp
-    include/dnd/nodes/groupby_node.hpp
-    include/dnd/nodes/immutable_builtin_scalar_node.hpp
-    include/dnd/nodes/immutable_scalar_node.hpp
-    include/dnd/nodes/ndarray_node.hpp
-    include/dnd/nodes/scalar_node.hpp
-    include/dnd/nodes/strided_ndarray_node.hpp
+    # Eval
+    src/dnd/eval/eval_context.cpp
+    src/dnd/eval/eval_engine.cpp
+    src/dnd/eval/elwise_reduce_eval.cpp
+    src/dnd/eval/groupby_elwise_reduce_eval.cpp
+    src/dnd/eval/unary_elwise_eval.cpp
+    include/dnd/eval/eval_context.hpp
+    include/dnd/eval/eval_engine.hpp
+    include/dnd/eval/elwise_reduce_eval.hpp
+    include/dnd/eval/groupby_elwise_reduce_eval.hpp
+    include/dnd/eval/unary_elwise_eval.hpp
+    # GFunc
+    src/dnd/gfunc/elwise_gfunc.cpp
+    src/dnd/gfunc/elwise_reduce_gfunc.cpp
+    include/dnd/gfunc/elwise_gfunc.hpp
+    include/dnd/gfunc/elwise_reduce_gfunc.hpp
     # Kernels
     src/dnd/kernels/assignment_kernels.cpp
     src/dnd/kernels/builtin_dtype_binary_kernel_table.cpp
@@ -115,6 +115,24 @@ set(dnd_SRC
     include/dnd/memblock/fixed_size_pod_memory_block.hpp
     include/dnd/memblock/ndarray_node_memory_block.hpp
     include/dnd/memblock/pod_memory_block.hpp
+    # Nodes
+    src/dnd/nodes/elwise_unary_kernel_node.cpp
+    src/dnd/nodes/elwise_binary_kernel_node.cpp
+    src/dnd/nodes/elwise_reduce_kernel_node.cpp
+    src/dnd/nodes/groupby_node.cpp
+    src/dnd/nodes/immutable_scalar_node.cpp
+    src/dnd/nodes/ndarray_node.cpp
+    src/dnd/nodes/scalar_node.cpp
+    src/dnd/nodes/strided_ndarray_node.cpp
+    include/dnd/nodes/elwise_unary_kernel_node.hpp
+    include/dnd/nodes/elwise_binary_kernel_node.hpp
+    include/dnd/nodes/elwise_reduce_kernel_node.hpp
+    include/dnd/nodes/groupby_node.hpp
+    include/dnd/nodes/immutable_builtin_scalar_node.hpp
+    include/dnd/nodes/immutable_scalar_node.hpp
+    include/dnd/nodes/ndarray_node.hpp
+    include/dnd/nodes/scalar_node.hpp
+    include/dnd/nodes/strided_ndarray_node.hpp
     # Main
     src/dnd/arithmetic_op.cpp
     src/dnd/dtype.cpp
@@ -155,7 +173,7 @@ include_directories(
     )
 else(WIN32)
 # Find boost. This works as long as BOOT_ROOT is defined in env
-#     (there may be other ways to specify it though) 
+#     (there may be other ways to specify it though)
   find_package(Boost REQUIRED)
   message(STATUS "** Boost Include: ${Boost_INCLUDE_DIR}")
   include_directories(${Boost_INCLUDE_DIR})
@@ -172,12 +190,16 @@ source_group("CodeGen Source" REGULAR_EXPRESSION "src/dnd/codegen/.*cpp")
 source_group("CodeGen Headers" REGULAR_EXPRESSION "include/dnd/codegen/.*hpp")
 source_group("DTypes Source" REGULAR_EXPRESSION "src/dnd/dtypes/.*cpp")
 source_group("DTypes Headers" REGULAR_EXPRESSION "include/dnd/dtypes/.*hpp")
-source_group("Nodes Source" REGULAR_EXPRESSION "src/dnd/nodes/.*cpp")
-source_group("Nodes Headers" REGULAR_EXPRESSION "include/dnd/nodes/.*hpp")
+source_group("Eval Source" REGULAR_EXPRESSION "src/dnd/eval/.*cpp")
+source_group("Eval Headers" REGULAR_EXPRESSION "include/dnd/eval/.*hpp")
+source_group("GFunc Source" REGULAR_EXPRESSION "src/dnd/gfunc/.*cpp")
+source_group("GFunc Headers" REGULAR_EXPRESSION "include/dnd/gfunc/.*hpp")
 source_group("Kernels Source" REGULAR_EXPRESSION "src/dnd/kernels/.*cpp")
 source_group("Kernels Headers" REGULAR_EXPRESSION "include/dnd/kernels/.*hpp")
 source_group("MemBlock Source" REGULAR_EXPRESSION "src/dnd/memblock/.*cpp")
 source_group("MemBlock Headers" REGULAR_EXPRESSION "include/dnd/memblock/.*hpp")
+source_group("Nodes Source" REGULAR_EXPRESSION "src/dnd/nodes/.*cpp")
+source_group("Nodes Headers" REGULAR_EXPRESSION "include/dnd/nodes/.*hpp")
 source_group("Internal Headers" REGULAR_EXPRESSION "src/dnd/.*hpp")
 
 if(WIN32)

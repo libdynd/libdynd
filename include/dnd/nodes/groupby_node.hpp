@@ -39,7 +39,7 @@ public:
 
     ndarray_node_category get_category() const
     {
-        return arbitrary_node_category;
+        return groupby_node_category;
     }
 
     const dtype& get_dtype() const {
@@ -82,6 +82,10 @@ public:
 
     ndarray_node *get_by_node() const {
         return m_by_node.get_node();
+    }
+
+    const dtype& get_groups() const {
+        return m_groups;
     }
 
     int get_nop() const {

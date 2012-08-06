@@ -4,10 +4,10 @@
 //
 
 #ifndef __PLATFORM_DEFINITIONS_H_
-#define __PLATFORM_DEFINITIONS_H_   
+#define __PLATFORM_DEFINITIONS_H_
 
 // platform macros
-// based on info found in 
+// based on info found in
 // http://sourceforge.net/apps/mediawiki/predef/index.php?title=Main_Page
 
 
@@ -61,7 +61,7 @@
 #   define DND_PLATFORM_DARWIN_ON_X64
 #elif defined(DND_OS_DARWIN) && defined(DND_ISA_X86)
 #   define DND_PLATFORM_DARWIN_ON_X86
-#elif
+#else
 #   error Unsupported ISA-OS configuration
 #endif
 
@@ -72,7 +72,7 @@
 #elif defined(DND_PLATFORM_LINUX_ON_X64) || defined(DND_PLATFORM_DARWIN_ON_X64)
 // http://www.x86-64.org/documentation/abi.pdf
 #   define DND_CALL_SYSV_X64
-#elif
+#else
 #   error unknown calling convention
 #endif
 

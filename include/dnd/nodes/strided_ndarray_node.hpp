@@ -67,7 +67,7 @@ public:
     strided_ndarray_node(const dtype& dt, int ndim, const intptr_t *shape, const int *axis_perm);
 
     strided_ndarray_node(const dtype& dt, int ndim, const intptr_t *shape, const int *axis_perm,
-                    int access_flags, memory_block_ptr *blockrefs_begin, memory_block_ptr *blockrefs_end);
+                    int access_flags, const memory_block_ptr *blockrefs_begin, const memory_block_ptr *blockrefs_end);
 
     virtual ~strided_ndarray_node() {
     }
@@ -166,7 +166,7 @@ ndarray_node_ptr make_strided_ndarray_node(const dtype& dt, int ndim, const intp
 ndarray_node_ptr make_strided_ndarray_node(const dtype& dt, int ndim, const intptr_t *shape, const int *axis_perm);
 
 ndarray_node_ptr make_strided_ndarray_node(const dtype& dt, int ndim, const intptr_t *shape, const int *axis_perm,
-                int access_flags, memory_block_ptr *blockrefs_begin, memory_block_ptr *blockrefs_end);
+                int access_flags, const memory_block_ptr *blockrefs_begin, const memory_block_ptr *blockrefs_end);
 
 } // namespace dnd
 

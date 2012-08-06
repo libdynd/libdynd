@@ -66,6 +66,7 @@ namespace {
 
         void get_binary_operation(intptr_t dst_fixedstride, intptr_t src1_fixedstride,
                                     intptr_t src2_fixedstride,
+                                    const eval::eval_context *DND_UNUSED(ectx),
                                     kernel_instance<binary_operation_t>& out_kernel) const
         {
             out_kernel.kernel = get_binary_operation_from_builtin_dtype_table(m_builtin_optable,

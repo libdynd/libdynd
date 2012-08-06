@@ -14,14 +14,17 @@ using namespace std;
 using namespace dnd;
 
 dnd::codegen_cache::codegen_cache()
-    : m_exec_memblock(make_executable_memory_block())
+    : m_exec_memblock(make_executable_memory_block()),
+        m_cached_unary_kernel_adapters(),
+        m_cached_binary_kernel_adapters()
 {
 }
 
 void dnd::codegen_cache::codegen_unary_function_adapter(const dtype& restype,
-                    const dtype& arg0type, calling_convention_t callconv,
-                    void *function_pointer,
-                    unary_specialization_kernel_instance& out_kernel)
+                const dtype& arg0type, calling_convention_t callconv,
+                void *function_pointer,
+                memory_block_data *function_pointer_owner,
+                unary_specialization_kernel_instance& out_kernel)
 {
     // Retrieve a unary function adapter from the cache
     uint64_t unique_id = get_unary_function_adapter_unique_id(restype, arg0type, callconv);
@@ -36,13 +39,17 @@ void dnd::codegen_cache::codegen_unary_function_adapter(const dtype& restype,
     unary_function_adapter_auxdata& ad = out_kernel.auxdata.get<unary_function_adapter_auxdata>();
     // Populate the auxiliary data
     ad.function_pointer = function_pointer;
-    ad.exec_memblock = m_exec_memblock;
+    // Set the memblock tracking the lifetime of the generated adapter function
+    ad.adapter_memblock = m_exec_memblock;
+    // Set the memblock tracking the lifetime of the function being adapted
+    ad.adaptee_memblock = function_pointer_owner;
 }
 
 void dnd::codegen_cache::codegen_binary_function_adapter(const dtype& restype,
                 const dtype& arg0type, const dtype& arg1type,
                 calling_convention_t callconv,
                 void *function_pointer,
+                memory_block_data *function_pointer_owner,
                 kernel_instance<binary_operation_t>& out_kernel)
 {
     // Retrieve a binary function adapter from the cache
@@ -58,12 +65,16 @@ void dnd::codegen_cache::codegen_binary_function_adapter(const dtype& restype,
     binary_function_adapter_auxdata& ad = out_kernel.auxdata.get<binary_function_adapter_auxdata>();
     // Populate the auxiliary data
     ad.function_pointer = function_pointer;
-    ad.exec_memblock = m_exec_memblock;
+    // Set the memblock tracking the lifetime of the generated adapter function
+    ad.adapter_memblock = m_exec_memblock;
+    // Set the memblock tracking the lifetime of the function being adapted
+    ad.adaptee_memblock = function_pointer_owner;
 }
 
 void dnd::codegen_cache::codegen_left_associative_binary_reduce_function_adapter(
                 const dtype& reduce_type,calling_convention_t callconv,
                 void *function_pointer,
+                memory_block_data *function_pointer_owner,
                 kernel_instance<unary_operation_t>& out_kernel)
 {
     // These kernels are generated with templates instead of runtime
@@ -73,11 +84,15 @@ void dnd::codegen_cache::codegen_left_associative_binary_reduce_function_adapter
     binary_reduce_function_adapter_auxdata& ad = out_kernel.auxdata.get<binary_reduce_function_adapter_auxdata>();
     // Populate the auxiliary data
     ad.function_pointer = function_pointer;
+    // The adapter is static, so the adapter_memblock isn't needed
+    // Set the memblock tracking the lifetime of the function being adapted
+    ad.adaptee_memblock = function_pointer_owner;
 }
 
 void dnd::codegen_cache::codegen_right_associative_binary_reduce_function_adapter(
                 const dtype& reduce_type,calling_convention_t callconv,
                 void *function_pointer,
+                memory_block_data *function_pointer_owner,
                 kernel_instance<unary_operation_t>& out_kernel)
 {
     // These kernels are generated with templates instead of runtime
@@ -87,6 +102,9 @@ void dnd::codegen_cache::codegen_right_associative_binary_reduce_function_adapte
     binary_reduce_function_adapter_auxdata& ad = out_kernel.auxdata.get<binary_reduce_function_adapter_auxdata>();
     // Populate the auxiliary data
     ad.function_pointer = function_pointer;
+    // The adapter is static, so the adapter_memblock isn't needed
+    // Set the memblock tracking the lifetime of the function being adapted
+    ad.adaptee_memblock = function_pointer_owner;
 }
 
 void dnd::codegen_cache::debug_dump(std::ostream& o, const std::string& indent) const
