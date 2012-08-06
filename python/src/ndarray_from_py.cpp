@@ -43,7 +43,9 @@ static void deduce_pylist_shape_and_dtype(PyObject *obj, vector<intptr_t>& shape
         }
 
         dtype obj_dt = pydnd::deduce_dtype_from_object(obj);
-        dt = dnd::promote_dtypes_arithmetic(obj_dt, dt);
+        if (dt != obj_dt) {
+            dt = dnd::promote_dtypes_arithmetic(obj_dt, dt);
+        }
     }
 }
 
