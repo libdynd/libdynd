@@ -369,3 +369,27 @@ bool categorical_dtype::operator==(const extended_dtype& rhs) const
 }
 
 
+dtype dnd::factor_categorical_dtype(const ndarray& values)
+{
+    single_compare_kernel_instance k;
+    values.get_dtype().get_single_compare_kernel(k);
+
+    cmp less(k.comparisons[less_id], k.auxdata);
+    set<const char *, cmp> uniques(less);
+
+    for (uint32_t i = 0; i < values.get_num_elements(); ++i) {
+        if (uniques.count(values(i).get_readonly_originptr()) == 0) {
+            uniques.insert(values(i).get_readonly_originptr());
+        }
+    }
+
+    ndarray categories(uniques.size(), values.get_dtype());
+    uint32_t i = 0;
+    for (set<const char *, cmp>::const_iterator it = uniques.begin(); it != uniques.end(); ++it) {
+        memcpy(categories(i).get_readwrite_originptr(), *it, categories.get_dtype().element_size());
+        ++i;
+    }
+
+    return make_categorical_dtype(categories);
+}
+

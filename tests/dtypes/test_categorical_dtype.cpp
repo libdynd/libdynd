@@ -84,6 +84,28 @@ TEST(CategoricalDType, Unique) {
 
 }
 
+TEST(CategoricalDType, Factor) {
+
+    ndarray a(3, make_fixedstring_dtype(string_encoding_ascii, 3));
+    a(0).vals() = std::string("foo");
+    a(1).vals() = std::string("bar");
+    a(2).vals() = std::string("foo");
+
+    dtype da = factor_categorical_dtype(a);
+
+    cout << da << endl;
+
+    ndarray i(3, make_dtype<int32_t>());
+    i(0).vals() = 10;
+    i(1).vals() = 10;
+    i(2).vals() = 0;
+
+    dtype di = factor_categorical_dtype(i);
+
+    cout << di << endl;
+
+}
+
 TEST(CategoricalDType, Values) {
 
     ndarray a(3, make_fixedstring_dtype(string_encoding_ascii, 3));

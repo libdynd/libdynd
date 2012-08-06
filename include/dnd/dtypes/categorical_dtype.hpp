@@ -98,6 +98,9 @@ inline dtype make_categorical_dtype(const ndarray& values) {
 }
 
 
+dtype factor_categorical_dtype(const ndarray& values);
+
+
 } // namespace dnd
 
 #endif // _DND__CATEGORICAL_DTYPE_HPP_
