@@ -5,7 +5,7 @@
 
 #include <dnd/platform_definitions.h>
 
-#if !defined(DND_CALL_MSFT_X64)
+#if !defined(DND_CALL_MSFT_X64) && !defined(DND_CALL_SYSV_X64)
 #include <dnd/codegen/binary_kernel_adapter_codegen.hpp>
 
 #include <stdexcept>

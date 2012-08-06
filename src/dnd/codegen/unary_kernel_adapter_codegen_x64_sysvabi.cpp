@@ -66,156 +66,10 @@ namespace
             {
                 std::stringstream ss;
                 ss << "unary kernel adapter does not support " << dtype(type_id) << " as return type";
-                throw ( ss.str() );
+                throw std::runtime_error( ss.str() );
             }
         }
     }
-}
-
-namespace dnd
-{
-
-
-uint64_t get_unary_function_adapter_unique_id(const dtype& restype
-                                              , const dtype& arg0type
-                                              , calling_convention_t DND_UNUSED(callconv)
-                                              )
-{
-    // Bits 0..2 for the result type
-    uint64_t result = idx_for_type_id(restype.type_id());
-    
-    // Bits 3..5 for the arg0 type
-    result += idx_for_type_id(arg0type.type_id()) << 3;
-    
-    // There is only one calling convention on Windows x64, so it doesn't
-    // need to get encoded in the unique id.
-    
-    return result;    
-}
-    
-    
-std::string get_unary_function_adapter_unique_id_string(uint64_t unique_id)
-{
-    std::stringstream ss;
-
-    const char* str_ret = type_to_str(unique_id & 0xf);
-    const char* str_arg = type_to_str((unique_id>>4) &0xf);
-    ss << str_ret << " (" << str_arg << ")";
-    return ss.str();
-}
-
-namespace // nameless
-{
-// these are portions of machine code used to compose the unary function adapter    
-    static unsigned char unary_adapter_prolog[] = {
-        // save callee saved registers... we use them all ;)
-        0x55,                           // pushq %rbp
-        0x41, 0x57,                     // pushq %r15
-        0x41, 0x56,                     // pushq %r14
-        0x41, 0x55,                     // pushq %r13
-        0x41, 0x54,                     // pushq %r12
-        0x54,                           // pushq %rbx
-    };
-    
-    static unsigned char unary_adapter_loop_setup[] = {
-        // move all the registers to callee saved ones... we are reusing them
-        // in the loop
-        0x4d, 0x89, 0xce,               // movq %r9, %r14
-        0x4d, 0x89, 0xc4,               // movq %r8, %r12
-        0x49, 0x89, 0xcf,               // movq %rcx, %r15
-        0x48, 0x89, 0xd3,               // movq %rdx, %rbx
-        0x49, 0x89, 0xf5,               // movq %rsi, %r13
-        0x48, 0x89, 0xfd,               // movq %rdi, %rbp
-        // and mask the lower bit on what is the function kernel (0xfe == -2)
-        0x49, 0x83, 0xe6, 0xfe,         // andq $0xfe, %r14
-        // then fetch the actual function pointer..
-        0x4d, 0x8b, 0x76, 0x20,         // movq 0x20(%r14), %r14
-    };
-
-    
-    static unsigned char unary_adapter_arg0_get_int8[] = {
-        0x0f, 0xbe, 0x3b,               // movsbl   (%rbx), %edi
-    };
-    static unsigned char unary_adapter_arg0_get_int16[] = {
-        0x0f, 0xbf, 0x3b,               // movswl   (%rbx), %edi
-    };
-    static unsigned char unary_adapter_arg0_get_int32[] = {
-        0x8b, 0x3b                      // movl     (%rbx), %edi
-    };
-    static unsigned char unary_adapter_arg0_get_int64[] = {
-        0x48, 0x8b, 0x3b                // movq     (%rbx), %rdi
-    };
-    static unsigned char unary_adapter_arg0_get_float32[] = {
-        0xf3, 0x0f, 0x10, 0x03          // movss    (%rbx), %xmm0
-    };
-    static unsigned char unary_adapter_arg0_get_float64[] = {
-        0xf2, 0x0f, 0x10, 0x03          // movsd    (%rbx), %xmm0
-    };
-
-    // End ARG0 CHOICE ]]
-    static unsigned char unary_adapter_function_call[] = {
-        // our function pointer is in %r14
-        0x41, 0xff, 0xd6,               // call     *%r14
-    };
-    // Begin RESULT CHOICE [[
-    static unsigned char unary_adapter_result_set_int8[] = {
-        0x88, 0x45, 0x00                // movb     %al, 0x00(%rbp)
-    };
-    static unsigned char unary_adapter_result_set_int16[] = {
-        0x66, 0x89, 0x45, 0x00          // movw     %ax, 0x00(%rbp)
-    };
-    static unsigned char unary_adapter_result_set_int32[] = {
-        0x89, 0x45, 0x00                // movl     %eax, (%rbp)
-    };
-    static unsigned char unary_adapter_result_set_int64[] = {
-        0x48, 0x89, 0x45, 0x00          // moq      %rax, (%rbp)
-    };
-    static unsigned char unary_adapter_result_set_float32[] = {
-        0xf3, 0x0f, 0x11, 0x45, 0x00    // movss    %xmm0, (%rbp)
-    };
-    static unsigned char unary_adapter_result_set_float64[] = {
-        0xf2, 0x0f, 0x11, 0x45, 0x00    // movsd    %xmm0, (%rbp)
-    };
-    // End RESULT CHOICE ]]
-    static unsigned char unary_adapter_update_streams[] = {
-        0x4c, 0x01, 0xfb,               // add  %r15, %rbx  # update src
-        0x4c, 0x01, 0xed,               // addq %r13, %rbp  # update dst
-        0x49, 0xff, 0xcc,               // decq %r12        # dec count
-        0x75, 0x00,                     // jne loop (patch last byte)
-    };
-    // skip_loop:
-    static unsigned char unary_adapter_epilog[] = {
-        // restore callee saved registers and return...
-        0x5b,                           // popq %rbx
-        0x41, 0x5c,                     // popq %r12
-        0x41, 0x5d,                     // popq %r13
-        0x41, 0x5e,                     // popq %r14
-        0x41, 0x5f,                     // popq %r15
-        0x5d,                           // popq %rbp
-        0xc3,                           // ret
-    };
-    
-    typedef struct { void* ptr; size_t size; } _code_snippet;
-    static _code_snippet arg0_snippets[] =
-    {
-        { unary_adapter_arg0_get_int8,            sizeof(unary_adapter_arg0_get_int8)            },
-        { unary_adapter_arg0_get_int16,           sizeof(unary_adapter_arg0_get_int16)           },
-        { unary_adapter_arg0_get_int32,           sizeof(unary_adapter_arg0_get_int32)           },
-        { unary_adapter_arg0_get_int64,           sizeof(unary_adapter_arg0_get_int64)           },
-        { unary_adapter_arg0_get_float32,         sizeof(unary_adapter_arg0_get_float32)         },
-        { unary_adapter_arg0_get_float64,         sizeof(unary_adapter_arg0_get_float64)         },
-    };
-    
-    static _code_snippet ret_snippets[] =
-    {
-        { unary_adapter_result_set_int8,            sizeof(unary_adapter_result_set_int8)        },
-        { unary_adapter_result_set_int16,           sizeof(unary_adapter_result_set_int16)       },
-        { unary_adapter_result_set_int32,           sizeof(unary_adapter_result_set_int32)       },
-        { unary_adapter_result_set_int64,           sizeof(unary_adapter_result_set_int64)       },
-        { unary_adapter_result_set_float32,         sizeof(unary_adapter_result_set_float32)     },
-        { unary_adapter_result_set_float64,         sizeof(unary_adapter_result_set_float64)     },
-    };
-    
     
     // function_builder is a helper to generate machine code for our adapters.
     // It copies snippets of code and allows appending empty space (filled with
@@ -226,11 +80,11 @@ namespace // nameless
     class function_builder
     {
     public:
-        function_builder(memory_block_data* memblock, size_t estimated_size);
+        function_builder(dnd::memory_block_data* memblock, size_t estimated_size);
         ~function_builder();
         
         function_builder& label(size_t& where);
-
+        
         function_builder& append(const void* code, size_t code_size);
         function_builder& append(size_t code_size);
         function_builder& align (size_t alignment);
@@ -242,21 +96,27 @@ namespace // nameless
         void              discard();
         
     private:
-        memory_block_data*  memblock_;
+        dnd::memory_block_data*  memblock_;
         int8_t*             current_;
         int8_t*             begin_;
         int8_t*             end_;
         bool                ok_;
     };
-
-    function_builder::function_builder(memory_block_data* memblock, size_t estimated_size)
-        : memblock_(memblock)
-        , current_(0)
-        , begin_(0)
-        , end_(0)
-        , ok_(true)
+    
+    function_builder::function_builder(dnd::memory_block_data* memblock
+                                       , size_t estimated_size)
+    : memblock_(memblock)
+    , current_(0)
+    , begin_(0)
+    , end_(0)
+    , ok_(true)
     {
-        dnd::allocate_executable_memory(memblock, estimated_size, 16, (char**)&begin_, (char**)&end_);
+        dnd::allocate_executable_memory(memblock
+                                        , estimated_size
+                                        , 16
+                                        , (char**)&begin_
+                                        , (char**)&end_
+                                        );
         current_ = begin_;
     }
     
@@ -271,7 +131,9 @@ namespace // nameless
         return *this;
     }
     
-    function_builder& function_builder::append(const void* code, size_t code_size)
+    function_builder& function_builder::append(const void* code
+                                               , size_t code_size
+                                               )
     {
         if (!ok_)
             return *this;
@@ -334,18 +196,18 @@ namespace // nameless
         {
             // this will shrink... resize_executable_memory has realloc semantics
             // so on shrink it will never move;
-#ifndef _NDEBUG
-            int8_t* old_begin = begin_;
+#ifndef NDEBUG
+            int8_t* old_begin = begin_; // only used in asserts
 #endif
             dnd::resize_executable_memory(memblock_, current_ - begin_, (char**)&begin_, (char**)&end_);
             assert(old_begin = begin_);
-
+            
             // TODO: flush instruction cache for the generated code. Not needed
             //       on intel architectures, but a function placeholder if we
             //       factor this code out could be worth if we end supporting
             //       other platforms (both ARM and PPC require explicit i-cache
             //       flushing.
-
+            
             
             // now mark the object as released...
             memblock_= 0;
@@ -362,20 +224,171 @@ namespace // nameless
         {
             // if we didn't finish... rollback the executable memory
             dnd::resize_executable_memory(memblock_, 0, (char**)&begin_, (char**)&end_);
-        } 
+        }
         memblock_ = 0;
         current_  = 0;
         begin_    = 0;
         end_      = 0;
         ok_       = false;
     }
+    
+}
+
+namespace dnd
+{
+
+
+uint64_t get_unary_function_adapter_unique_id(const dtype& restype
+                                              , const dtype& arg0type
+                                              , calling_convention_t DND_UNUSED(callconv)
+                                              )
+{
+    // Bits 0..2 for the result type
+    uint64_t result = idx_for_type_id(restype.type_id());
+    
+    // Bits 3..5 for the arg0 type
+    result += idx_for_type_id(arg0type.type_id()) << 3;
+    
+    // There is only one calling convention on Windows x64, so it doesn't
+    // need to get encoded in the unique id.
+    
+    return result;    
+}
+    
+    
+std::string get_unary_function_adapter_unique_id_string(uint64_t unique_id)
+{
+    std::stringstream ss;
+
+    const char* str_ret = type_to_str(unique_id & 0xf);
+    const char* str_arg = type_to_str((unique_id>>4) &0xf);
+    ss << str_ret << " (" << str_arg << ")";
+    return ss.str();
+}
+
+namespace // nameless
+{
+// these are portions of machine code used to compose the unary function adapter    
+    uint8_t unary_adapter_prolog[] = {
+        // save callee saved registers... we use them all ;)
+        0x55,                           // pushq %rbp
+        0x41, 0x57,                     // pushq %r15
+        0x41, 0x56,                     // pushq %r14
+        0x41, 0x55,                     // pushq %r13
+        0x41, 0x54,                     // pushq %r12
+        0x53,                           // pushq %rbx
+    };
+    
+    uint8_t unary_adapter_loop_setup[] = {
+        // move all the registers to callee saved ones... we are reusing them
+        // in the loop
+        0x4d, 0x89, 0xce,               // movq %r9, %r14
+        0x4d, 0x89, 0xc4,               // movq %r8, %r12
+        0x49, 0x89, 0xcf,               // movq %rcx, %r15
+        0x48, 0x89, 0xd3,               // movq %rdx, %rbx
+        0x49, 0x89, 0xf5,               // movq %rsi, %r13
+        0x48, 0x89, 0xfd,               // movq %rdi, %rbp
+        // and mask the lower bit on what is the function kernel (0xfe == -2)
+        0x49, 0x83, 0xe6, 0xfe,         // andq $0xfe, %r14
+        // then fetch the actual function pointer..
+        0x4d, 0x8b, 0x76, 0x20,         // movq 0x20(%r14), %r14
+    };
+
+    
+    uint8_t unary_adapter_arg0_get_int8[] = {
+        0x0f, 0xbe, 0x3b,               // movsbl   (%rbx), %edi
+    };
+    uint8_t unary_adapter_arg0_get_int16[] = {
+        0x0f, 0xbf, 0x3b,               // movswl   (%rbx), %edi
+    };
+    uint8_t unary_adapter_arg0_get_int32[] = {
+        0x8b, 0x3b                      // movl     (%rbx), %edi
+    };
+    uint8_t unary_adapter_arg0_get_int64[] = {
+        0x48, 0x8b, 0x3b                // movq     (%rbx), %rdi
+    };
+    uint8_t unary_adapter_arg0_get_float32[] = {
+        0xf3, 0x0f, 0x10, 0x03          // movss    (%rbx), %xmm0
+    };
+    uint8_t unary_adapter_arg0_get_float64[] = {
+        0xf2, 0x0f, 0x10, 0x03          // movsd    (%rbx), %xmm0
+    };
+
+    // End ARG0 CHOICE ]]
+    uint8_t unary_adapter_function_call[] = {
+        // our function pointer is in %r14
+        0x41, 0xff, 0xd6,               // call     *%r14
+    };
+    // Begin RESULT CHOICE [[
+    uint8_t unary_adapter_result_set_int8[] = {
+        0x88, 0x45, 0x00                // movb     %al, 0x00(%rbp)
+    };
+    uint8_t unary_adapter_result_set_int16[] = {
+        0x66, 0x89, 0x45, 0x00          // movw     %ax, 0x00(%rbp)
+    };
+    uint8_t unary_adapter_result_set_int32[] = {
+        0x89, 0x45, 0x00                // movl     %eax, (%rbp)
+    };
+    uint8_t unary_adapter_result_set_int64[] = {
+        0x48, 0x89, 0x45, 0x00          // moq      %rax, (%rbp)
+    };
+    uint8_t unary_adapter_result_set_float32[] = {
+        0xf3, 0x0f, 0x11, 0x45, 0x00    // movss    %xmm0, (%rbp)
+    };
+    uint8_t unary_adapter_result_set_float64[] = {
+        0xf2, 0x0f, 0x11, 0x45, 0x00    // movsd    %xmm0, (%rbp)
+    };
+    // End RESULT CHOICE ]]
+    uint8_t unary_adapter_update_streams[] = {
+        0x4c, 0x01, 0xfb,               // addq %r15, %rbx  # update src
+        0x4c, 0x01, 0xed,               // addq %r13, %rbp  # update dst
+    };
+    
+    uint8_t unary_adapter_close_loop[] = {
+        0x49, 0xff, 0xcc,               // decq %r12        # dec count
+        0x75, 0x00,                     // jne loop (patch last byte)
+    };
+ 
+    // skip_loop:
+    uint8_t unary_adapter_epilog[] = {
+        // restore callee saved registers and return...
+        0x5b,                           // popq %rbx
+        0x41, 0x5c,                     // popq %r12
+        0x41, 0x5d,                     // popq %r13
+        0x41, 0x5e,                     // popq %r14
+        0x41, 0x5f,                     // popq %r15
+        0x5d,                           // popq %rbp
+        0xc3,                           // ret
+    };
+    
+    typedef struct { void* ptr; size_t size; } _code_snippet;
+    _code_snippet arg0_snippets[] =
+    {
+        { unary_adapter_arg0_get_int8,            sizeof(unary_adapter_arg0_get_int8)            },
+        { unary_adapter_arg0_get_int16,           sizeof(unary_adapter_arg0_get_int16)           },
+        { unary_adapter_arg0_get_int32,           sizeof(unary_adapter_arg0_get_int32)           },
+        { unary_adapter_arg0_get_int64,           sizeof(unary_adapter_arg0_get_int64)           },
+        { unary_adapter_arg0_get_float32,         sizeof(unary_adapter_arg0_get_float32)         },
+        { unary_adapter_arg0_get_float64,         sizeof(unary_adapter_arg0_get_float64)         },
+    };
+    
+    _code_snippet ret_snippets[] =
+    {
+        { unary_adapter_result_set_int8,            sizeof(unary_adapter_result_set_int8)        },
+        { unary_adapter_result_set_int16,           sizeof(unary_adapter_result_set_int16)       },
+        { unary_adapter_result_set_int32,           sizeof(unary_adapter_result_set_int32)       },
+        { unary_adapter_result_set_int64,           sizeof(unary_adapter_result_set_int64)       },
+        { unary_adapter_result_set_float32,         sizeof(unary_adapter_result_set_float32)     },
+        { unary_adapter_result_set_float64,         sizeof(unary_adapter_result_set_float64)     },
+    };
 } // nameless namespace
     
 
 unary_operation_t* codegen_unary_function_adapter(const memory_block_ptr& exec_mem_block
                                                  , const dtype& restype
                                                  , const dtype& arg0type
-                                                 , calling_convention_t DND_UNUSED(callconv))    
+                                                 , calling_convention_t DND_UNUSED(callconv)
+                                                 )
 {
     size_t arg0_idx = idx_for_type_id(arg0type.type_id());
     size_t ret_idx  = idx_for_type_id(restype.type_id());
@@ -410,6 +423,7 @@ unary_operation_t* codegen_unary_function_adapter(const memory_block_ptr& exec_m
             .append(unary_adapter_function_call, sizeof(unary_adapter_function_call))
             .append(ret_snippets[ret_idx].ptr, ret_snippets[ret_idx].size)
             .append(unary_adapter_update_streams, sizeof(unary_adapter_update_streams))
+            .append(unary_adapter_close_loop, sizeof(unary_adapter_close_loop))
             .label(loop_end)
             .append(unary_adapter_epilog, sizeof(unary_adapter_epilog))
             .align(4)
@@ -418,8 +432,7 @@ unary_operation_t* codegen_unary_function_adapter(const memory_block_ptr& exec_m
                  
     if (fbuilder.is_ok())
     {
-        // apply fix-ups. The fix-ups needed are for offsets in the loop skip
-        // and the loop close locations
+        // fix-up the offset of the jump closing the loop
         int loop_size = loop_end - loop_start;
         void* base    = fbuilder.base();
 

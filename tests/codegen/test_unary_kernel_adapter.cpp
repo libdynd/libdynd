@@ -3,6 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
+#include <dnd/platform_definitions.h>
 #include <complex>
 #include <iostream>
 #include <stdexcept>
@@ -106,7 +107,7 @@ TEST(UnaryKernelAdapter, UnwindException) {
     EXPECT_EQ(10000, out[2]);
 
     // Call it with a negative value
-#if 0  // ov: not supporting exceptions yet
+#if defined(DND_CALL_MSFT_X64)
     EXPECT_THROW(rin.specializations[0]((char *)out, sizeof(int), (const char *)in, sizeof(int), 3, rin.auxdata),
             raise_if_negative_exception);
 #endif
