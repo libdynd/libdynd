@@ -49,92 +49,46 @@ static void deduce_pylist_shape_and_dtype(PyObject *obj, vector<intptr_t>& shape
     }
 }
 
-static dnd_bool *fill_bool_ndarray_from_pylist(dnd_bool *data, PyObject *obj, const vector<intptr_t>& shape, int current_axis)
+inline void convert_one_pyscalar(dnd_bool *out, PyObject *obj)
 {
-    if (current_axis == shape.size() - 1) {
-        Py_ssize_t size = PyList_GET_SIZE(obj);
-        for (Py_ssize_t i = 0; i < size; ++i) {
-            PyObject *item = PyList_GET_ITEM(obj, i);
-            *data = PyObject_IsTrue(item);
-            ++data;
-        }
-    } else {
-        Py_ssize_t size = PyList_GET_SIZE(obj);
-        for (Py_ssize_t i = 0; i < size; ++i) {
-            data = fill_bool_ndarray_from_pylist(data, PyList_GET_ITEM(obj, i), shape, current_axis + 1);
-        }
-    }
-    return data;
+    *out = PyObject_IsTrue(obj);
 }
 
-static int32_t *fill_int32_ndarray_from_pylist(int32_t *data, PyObject *obj, const vector<intptr_t>& shape, int current_axis)
+inline void convert_one_pyscalar(int32_t *out, PyObject *obj)
 {
-    if (current_axis == shape.size() - 1) {
-        Py_ssize_t size = PyList_GET_SIZE(obj);
-        for (Py_ssize_t i = 0; i < size; ++i) {
-            PyObject *item = PyList_GET_ITEM(obj, i);
-            *data = static_cast<int32_t>(PyInt_AsLong(item));
-            ++data;
-        }
-    } else {
-        Py_ssize_t size = PyList_GET_SIZE(obj);
-        for (Py_ssize_t i = 0; i < size; ++i) {
-            data = fill_int32_ndarray_from_pylist(data, PyList_GET_ITEM(obj, i), shape, current_axis + 1);
-        }
-    }
-    return data;
+    *out = static_cast<int32_t>(PyInt_AsLong(obj));
 }
 
-static int64_t *fill_int64_ndarray_from_pylist(int64_t *data, PyObject *obj, const vector<intptr_t>& shape, int current_axis)
+inline void convert_one_pyscalar(int64_t *out, PyObject *obj)
 {
-    if (current_axis == shape.size() - 1) {
-        Py_ssize_t size = PyList_GET_SIZE(obj);
-        for (Py_ssize_t i = 0; i < size; ++i) {
-            PyObject *item = PyList_GET_ITEM(obj, i);
-            *data = PyLong_AsLongLong(item);
-            ++data;
-        }
-    } else {
-        Py_ssize_t size = PyList_GET_SIZE(obj);
-        for (Py_ssize_t i = 0; i < size; ++i) {
-            data = fill_int64_ndarray_from_pylist(data, PyList_GET_ITEM(obj, i), shape, current_axis + 1);
-        }
-    }
-    return data;
+    *out = PyLong_AsLongLong(obj);
 }
 
-static double *fill_float64_ndarray_from_pylist(double *data, PyObject *obj, const vector<intptr_t>& shape, int current_axis)
+inline void convert_one_pyscalar(double *out, PyObject *obj)
 {
-    if (current_axis == shape.size() - 1) {
-        Py_ssize_t size = PyList_GET_SIZE(obj);
-        for (Py_ssize_t i = 0; i < size; ++i) {
-            PyObject *item = PyList_GET_ITEM(obj, i);
-            *data = PyFloat_AsDouble(item);
-            ++data;
-        }
-    } else {
-        Py_ssize_t size = PyList_GET_SIZE(obj);
-        for (Py_ssize_t i = 0; i < size; ++i) {
-            data = fill_float64_ndarray_from_pylist(data, PyList_GET_ITEM(obj, i), shape, current_axis + 1);
-        }
-    }
-    return data;
+    *out = PyFloat_AsDouble(obj);
 }
 
-static complex<double> *fill_complex_float64_ndarray_from_pylist(complex<double> *data, PyObject *obj, const vector<intptr_t>& shape, int current_axis)
+inline void convert_one_pyscalar(complex<double> *out, PyObject *obj)
+{
+    out->real(PyComplex_RealAsDouble(obj));
+    out->imag(PyComplex_ImagAsDouble(obj));
+}
+
+template<typename T>
+static T *fill_ndarray_from_pylist(T *data, PyObject *obj, const vector<intptr_t>& shape, int current_axis)
 {
     if (current_axis == shape.size() - 1) {
         Py_ssize_t size = PyList_GET_SIZE(obj);
         for (Py_ssize_t i = 0; i < size; ++i) {
             PyObject *item = PyList_GET_ITEM(obj, i);
-            data->real(PyComplex_RealAsDouble(item));
-            data->imag(PyComplex_ImagAsDouble(item));
+            convert_one_pyscalar(data, item);
             ++data;
         }
     } else {
         Py_ssize_t size = PyList_GET_SIZE(obj);
         for (Py_ssize_t i = 0; i < size; ++i) {
-            data = fill_complex_float64_ndarray_from_pylist(data, PyList_GET_ITEM(obj, i), shape, current_axis + 1);
+            data = fill_ndarray_from_pylist(data, PyList_GET_ITEM(obj, i), shape, current_axis + 1);
         }
     }
     return data;
@@ -162,23 +116,23 @@ static dnd::ndarray ndarray_from_pylist(PyObject *obj)
     // Populate the array with data
     switch (dt.type_id()) {
         case bool_type_id:
-            fill_bool_ndarray_from_pylist(reinterpret_cast<dnd_bool *>(result.get_readwrite_originptr()),
+            fill_ndarray_from_pylist(reinterpret_cast<dnd_bool *>(result.get_readwrite_originptr()),
                             obj, shape, 0);
             break;
         case int32_type_id:
-            fill_int32_ndarray_from_pylist(reinterpret_cast<int32_t *>(result.get_readwrite_originptr()),
+            fill_ndarray_from_pylist(reinterpret_cast<int32_t *>(result.get_readwrite_originptr()),
                             obj, shape, 0);
             break;
         case int64_type_id:
-            fill_int64_ndarray_from_pylist(reinterpret_cast<int64_t *>(result.get_readwrite_originptr()),
+            fill_ndarray_from_pylist(reinterpret_cast<int64_t *>(result.get_readwrite_originptr()),
                             obj, shape, 0);
             break;
         case float64_type_id:
-            fill_float64_ndarray_from_pylist(reinterpret_cast<double *>(result.get_readwrite_originptr()),
+            fill_ndarray_from_pylist(reinterpret_cast<double *>(result.get_readwrite_originptr()),
                             obj, shape, 0);
             break;
         case complex_float64_type_id:
-            fill_complex_float64_ndarray_from_pylist(reinterpret_cast<complex<double> *>(result.get_readwrite_originptr()),
+            fill_ndarray_from_pylist(reinterpret_cast<complex<double> *>(result.get_readwrite_originptr()),
                             obj, shape, 0);
             break;
         default: {
