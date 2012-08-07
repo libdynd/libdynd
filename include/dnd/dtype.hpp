@@ -34,7 +34,7 @@ public:
     dnd_bool(std::complex<T> value) : m_value(value != std::complex<T>(0)) {}
 
     operator bool() const {
-        return (bool)m_value;
+        return m_value != 0;
     }
 };
 
@@ -223,7 +223,7 @@ public:
 
     virtual type_id_t type_id() const = 0;
     virtual dtype_kind_t kind() const = 0;
-    virtual unsigned char alignment() const = 0;
+    virtual size_t alignment() const = 0;
     virtual uintptr_t element_size() const = 0;
 
     /**
@@ -358,7 +358,7 @@ public:
     dtype();
     /** Constructor from an extended_dtype */
     dtype(const shared_ptr<extended_dtype>& data)
-        : m_type_id(data->type_id()), m_kind(data->kind()), m_alignment(data->alignment()),
+        : m_type_id(data->type_id()), m_kind(data->kind()), m_alignment((unsigned char)data->alignment()),
         m_element_size(data->element_size()), m_data(data) {}
     /** Copy constructor (should be "= default" in C++11) */
     dtype(const dtype& rhs)
@@ -376,7 +376,7 @@ public:
 #ifdef DND_RVALUE_REFS
     /** Constructor from an rvalue extended_dtype */
     dtype(const shared_ptr<extended_dtype>&& data)
-        : m_type_id(data->type_id()), m_kind(data->kind()), m_alignment(data->alignment()),
+        : m_type_id(data->type_id()), m_kind(data->kind()), m_alignment((unsigned char)data->alignment()),
         m_element_size(data->element_size()), m_data(DND_MOVE(data)) {}
     /** Move constructor (should be "= default" in C++11) */
     dtype(dtype&& rhs)

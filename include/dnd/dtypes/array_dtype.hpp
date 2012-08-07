@@ -36,7 +36,7 @@ public:
     dtype_kind_t kind() const {
         return composite_kind;
     }
-    unsigned char alignment() const {
+    size_t alignment() const {
         return m_element_dtype.alignment();
     }
     uintptr_t element_size() const {

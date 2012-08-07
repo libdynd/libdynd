@@ -43,7 +43,7 @@ public:
     dtype_kind_t kind() const {
         return custom_kind;
     }
-    unsigned char alignment() const {
+    size_t alignment() const {
         return 4; // TODO
     }
     uintptr_t element_size() const {
