@@ -2,7 +2,7 @@ import sys
 import unittest
 import pydnd as nd
 
-class TestPythonScalar(unittest.TestCase):
+class TestPythonList(unittest.TestCase):
     def test_bool(self):
         lst = [True, False, True, True]
         a = nd.ndarray(lst)

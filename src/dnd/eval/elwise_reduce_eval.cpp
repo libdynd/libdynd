@@ -139,8 +139,10 @@ ndarray_node_ptr dnd::eval::evaluate_elwise_reduce_array(ndarray_node* node,
         }
     }
 
-    // Initialize the reduction result
-    dimvector adjusted_src_shape(src_ndim);
+    // Initialize the reduction result.
+    // The skip_count is used when there is no reduction identity, and initial values are
+    // copied to initialize the result.
+    intptr_t skip_count = 0;
 
     if (rnode->get_identity()) {
         // Copy the identity scalar to the whole result
@@ -155,12 +157,8 @@ ndarray_node_ptr dnd::eval::evaluate_elwise_reduce_array(ndarray_node* node,
         copy_op(const_cast<char *>(result->get_readonly_originptr()), result_dt.element_size(),
                         rnode->get_identity()->get_readonly_originptr(), 0,
                         result_count, copy_kernel.auxdata);
-
-        // No change to the src shape
-        memcpy(adjusted_src_shape.get(), src_shape, sizeof(intptr_t) * src_ndim);
     } else {
-        // Copy the first element along each reduction dimension, then exclude it
-        // from the later reduction loop
+        // Copy the first element along each reduction dimension
         unary_specialization_kernel_instance copy_kernel;
         if (kernels.empty()) {
             // Straightforward copy kernel
@@ -177,19 +175,23 @@ ndarray_node_ptr dnd::eval::evaluate_elwise_reduce_array(ndarray_node* node,
         // Create the shape for the result and
         // the src shape with the first reduce elements cut out
         dimvector result_shape(src_ndim), tmp_src_strides(src_ndim);
+        skip_count = 1;
+        bool any_reduction = false;
         for (int i = 0; i < src_ndim; ++i) {
             if (reduce_axes[i]) {
+                if (src_shape[i] > 1) {
+                    any_reduction = true;
+                }
                 result_shape[i] = 1;
-                adjusted_src_shape[i] = max(src_shape[i] - 1, (intptr_t)0);
                 tmp_src_strides[i] = 0;
             } else {
+                skip_count *= src_shape[i];
                 result_shape[i] = src_shape[i];
-                adjusted_src_shape[i] = src_shape[i];
                 tmp_src_strides[i] = adjusted_src_strides[i];
             }
         }
 
-        // Set up the iterator for the copy
+        // Copy all the initial elements
         raw_ndarray_iter<1,1> iter(src_ndim, result_shape.get(), result_originptr, result_strides.get(),
                                     src_originptr, tmp_src_strides.get(), axis_perm.get());
         intptr_t innersize = iter.innersize();
@@ -206,16 +208,14 @@ ndarray_node_ptr dnd::eval::evaluate_elwise_reduce_array(ndarray_node* node,
             } while (iter.iternext());
         }
 
-        // Adjust the src origin pointer to skip the first reduce elements
-        for (int i = 0; i < src_ndim; ++i) {
-            if (reduce_axes[i]) {
-                src_originptr += adjusted_src_strides[i];
-            }
+        // If there isn't any actual reduction going on, return the result of the copy
+        if (!any_reduction) {
+            return DND_MOVE(result);
         }
     }
 
     // Set up the iterator
-    raw_ndarray_iter<1,1> iter(src_ndim, adjusted_src_shape.get(),
+    raw_ndarray_iter<1,1> iter(src_ndim, src_shape,
                     result_originptr, result_strides.get(),
                     src_originptr, adjusted_src_strides.get());
 
@@ -248,6 +248,22 @@ ndarray_node_ptr dnd::eval::evaluate_elwise_reduce_array(ndarray_node* node,
         // Pick out the right specialization
         reduce_operation.kernel = chained_kernel.specializations[uspec];
         reduce_operation.auxdata.swap(chained_kernel.auxdata);
+    }
+
+    if (skip_count > 0) {
+        // If we need to skip the first visits of some 
+        do {
+            // This subtracts the number of elements skipped from skip_count
+            if (iter.skip_first_visits<0>(skip_count)) {
+                reduce_operation.kernel(iter.data<0>() + dst_stride, dst_stride,
+                            iter.data<1>() + src0_stride, src0_stride,
+                            innersize - 1, reduce_operation.auxdata);
+            } else {
+                reduce_operation.kernel(iter.data<0>(), dst_stride,
+                            iter.data<1>(), src0_stride,
+                            innersize, reduce_operation.auxdata);
+            }
+        } while (iter.iternext() && skip_count > 0);
     }
 
     if (innersize > 0) {

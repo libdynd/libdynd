@@ -42,27 +42,27 @@ namespace detail {
         int m_ndim;
         char *m_data[Nwrite + Nread];
 
-        intptr_t& iterindex(int i) {
+        inline intptr_t& iterindex(int i) {
             return m_vectors.get(0, i);
         }
 
-        const intptr_t& iterindex(int i) const {
+        inline const intptr_t& iterindex(int i) const {
             return m_vectors.get(0, i);
         }
 
-        intptr_t& itershape(int i) {
+        inline intptr_t& itershape(int i) {
             return m_vectors.get(1, i);
         }
 
-        const intptr_t& itershape(int i) const {
+        inline const intptr_t& itershape(int i) const {
             return m_vectors.get(1, i);
         }
 
-        intptr_t* strides(int k) {
+        inline intptr_t* strides(int k) {
             return m_vectors.get_all()[k+2];
         }
 
-        const intptr_t* strides(int k) const {
+        inline const intptr_t* strides(int k) const {
             return m_vectors.get_all()[k+2];
         }
 
@@ -196,12 +196,12 @@ namespace detail {
             return i < m_ndim;
         }
 
-        intptr_t innersize() const {
+        inline intptr_t innersize() const {
             return itershape(0);
         }
 
         template<int K>
-        typename enable_if<is_value_within_bounds<K, 0, Nwrite + Nread>::value, intptr_t>::type
+        inline typename enable_if<is_value_within_bounds<K, 0, Nwrite + Nread>::value, intptr_t>::type
                                                                         innerstride() const {
             return strides(K)[0];
         }
@@ -210,7 +210,7 @@ namespace detail {
          * Provide non-const access to the 'write' operands.
          */
         template<int K>
-        typename enable_if<is_value_within_bounds<K, 0, Nwrite>::value, char *>::type data() {
+        inline typename enable_if<is_value_within_bounds<K, 0, Nwrite>::value, char *>::type data() {
             return m_data[K];
         }
 
@@ -218,9 +218,45 @@ namespace detail {
          * Provide const access to all the operands.
          */
         template<int K>
-        typename enable_if<is_value_within_bounds<K, 0, Nwrite + Nread>::value, const char *>::type
+        inline typename enable_if<is_value_within_bounds<K, 0, Nwrite + Nread>::value, const char *>::type
                                                                         data() const {
             return m_data[K];
+        }
+
+        /**
+         * This causes the iterator to skip elements which are visited for the first time,
+         * up to the requested skip count. The number of elements skipped is subtracted from
+         * the skip count. If this function returns true, the caller should skip the first
+         * element of its inner loop.
+         *
+         * @param inout_skip_count  The number of elements skipped is subtracted from this value.
+         *                          If initially set to the number of elements in the result, this
+         *                          becomes zero when there are no more elements to skip.
+         * @returns  True if the first element in the inner loop should be skipped.
+         */
+        template<int K>
+        inline typename enable_if<is_value_within_bounds<K, 0, Nwrite + Nread>::value, bool>::type
+                                                    skip_first_visits(intptr_t& inout_skip_count) {
+            const intptr_t *strides_array = strides(K), *iterindex_array = &iterindex(0);
+            // First check all the indexes managed by the iterator
+            for(int i = 1; i < m_ndim; ++i) {
+                if (strides_array[i] == 0 && iterindex_array != 0) {
+                    return false;
+                }
+            }
+            // Two cases, either just the first element is skipped or they all are
+            if (strides_array[0] == 0) {
+                return true;
+            } else {
+                // Skip all the elements in this inner loop, and
+                // proceed to the next iteration.
+                inout_skip_count -= innersize();
+                if (iternext()) {
+                    return skip_first_visits<K>(inout_skip_count);
+                } else {
+                    return false;
+                }
+            }
         }
 
         /**
