@@ -251,7 +251,7 @@ ndarray_node_ptr dnd::eval::evaluate_elwise_reduce_array(ndarray_node* node,
     }
 
     if (skip_count > 0) {
-        // If we need to skip the first visits of some 
+        bool more_iteration = false;
         do {
             // This subtracts the number of elements skipped from skip_count
             if (iter.skip_first_visits<0>(skip_count)) {
@@ -263,7 +263,10 @@ ndarray_node_ptr dnd::eval::evaluate_elwise_reduce_array(ndarray_node* node,
                             iter.data<1>(), src0_stride,
                             innersize, reduce_operation.auxdata);
             }
-        } while (iter.iternext() && skip_count > 0);
+        } while ((more_iteration = iter.iternext()) && skip_count > 0);
+        if (!more_iteration) {
+            return DND_MOVE(result);
+        }
     }
 
     if (innersize > 0) {
