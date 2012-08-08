@@ -128,10 +128,12 @@ dnd::ndarray::ndarray(const ndarray_node_ptr& expr_tree)
 {
 }
 
+#if defined(DND_RVALUE_REFS)
 dnd::ndarray::ndarray(ndarray_node_ptr&& expr_tree)
     : m_node(DND_MOVE(expr_tree))
 {
 }
+#endif // defined(DND_RVALUE_REFS)
 
 dnd::ndarray::ndarray(intptr_t dim0, const dtype& dt)
     : m_node()

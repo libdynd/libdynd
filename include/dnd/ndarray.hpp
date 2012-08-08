@@ -73,8 +73,10 @@ public:
 
     /** Constructs an ndaray from an expr node */
     explicit ndarray(const ndarray_node_ptr& expr_tree);
+#if defined(DND_RVALUE_REFS)
     /** Constructs an ndaray from an expr node */
     explicit ndarray(ndarray_node_ptr&& expr_tree);
+#endif // defined(DND_RVALUE_REFS)
 
     /** Constructs a one-dimensional array */
     ndarray(intptr_t dim0, const dtype& dt);

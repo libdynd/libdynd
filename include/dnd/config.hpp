@@ -21,12 +21,20 @@
 
 #elif defined(__GNUC__)
 
-// TODO: Specific gcc versions with rvalue ref support
-#  define DND_RVALUE_REFS
-// TODO: Specific gcc versions with initializer list support
+#if __GNUC__ > 4 || \
+              (__GNUC__ == 4 && (__GNUC_MINOR__ >= 7))
+// Use initializer lists on gcc >= 4.7
 #  define DND_INIT_LIST
-// TODO: versions with constexpr
+// Use constexpr on gcc >= 4.7
 #  define DND_CONSTEXPR constexpr
+// Use rvalue references on gcc >= 4.7
+#  define DND_RVALUE_REFS
+#else
+// Don't use constexpr on gcc < 4.7
+#  define DND_CONSTEXPR
+// Use boost shared_ptr on gcc < 4.7
+#  define DND_USE_BOOST_SHARED_PTR
+#endif
 
 #elif defined(_MSC_VER)
 

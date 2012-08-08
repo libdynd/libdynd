@@ -3,6 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
+#include <cassert>
+
 #include <dnd/platform_definitions.h>
 
 #if defined(DND_CALL_SYSV_X64)
@@ -373,12 +375,10 @@ namespace // nameless
         ok_       = false;
     }
     
-}
+} // anonymous namespace
 
 
-namespace dnd
-{
-uint64_t get_binary_function_adapter_unique_id(const dtype& restype
+uint64_t dnd::get_binary_function_adapter_unique_id(const dtype& restype
                                                , const dtype& arg0type
                                                , const dtype& arg1type
                                                , calling_convention_t DND_UNUSED(callconv)
@@ -399,7 +399,7 @@ uint64_t get_binary_function_adapter_unique_id(const dtype& restype
     return result;
 }
 
-std::string get_binary_function_adapter_unique_id_string(uint64_t unique_id)
+std::string dnd::get_binary_function_adapter_unique_id_string(uint64_t unique_id)
 {
     std::stringstream ss;
     ss << type_to_str(cc_register_class(unique_id & 0x07)) << " ("
@@ -470,14 +470,14 @@ namespace // nameless
         0x5d,                           // popq %rbp
         0xc3,                           // ret
     };
-}
+} // anonymous namespace
 
-binary_operation_t codegen_binary_function_adapter(const memory_block_ptr& exec_memblock
-                                                  , const dtype& restype
-                                                  , const dtype& arg0type
-                                                  , const dtype& arg1type
-                                                  , calling_convention_t DND_UNUSED(callconv)
-                                                  )
+dnd::binary_operation_t dnd::codegen_binary_function_adapter(const memory_block_ptr& exec_memblock
+                                                        , const dtype& restype
+                                                        , const dtype& arg0type
+                                                        , const dtype& arg1type
+                                                        , calling_convention_t DND_UNUSED(callconv)
+                                                        )
 {
     cc_register_class ret_idx  = idx_for_type_id(restype.type_id());
     cc_register_class arg0_idx = idx_for_type_id(arg0type.type_id());
@@ -536,7 +536,5 @@ binary_operation_t codegen_binary_function_adapter(const memory_block_ptr& exec_
     // releasing memory (it acts as RAII, kind of -- exception safe as well)
     return 0;
 }
-
-} // namespace dnd
 
 #endif // DND_CALL_SYSV_X64
