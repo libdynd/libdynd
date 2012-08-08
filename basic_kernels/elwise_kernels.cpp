@@ -4,6 +4,7 @@
 //
 
 #include <stdint.h>
+#include <cmath>
 
 #ifdef _WIN32
 # define EXPORT extern "C" __declspec(dllexport)
@@ -246,5 +247,86 @@ EXPORT float square_float32(float x) {
 
 EXPORT double square_float64(double x) {
     return x * x;
+}
+
+////////////////////////////
+// "abs" kernels
+
+EXPORT int32_t abs_int32(int32_t x) {
+    return (x >= 0) ? x : -x;
+}
+
+EXPORT int64_t abs_int64(int64_t x) {
+    return (x >= 0) ? x : -x;
+}
+
+EXPORT uint32_t abs_uint32(uint32_t x) {
+    return x;
+}
+
+EXPORT uint64_t abs_uint64(uint64_t x) {
+    return x;
+}
+
+EXPORT float abs_float32(float x) {
+    return (x >= 0) ? x : -x;
+}
+
+EXPORT double abs_float64(double x) {
+    return (x >= 0) ? x : -x;
+}
+
+////////////////////////////
+// "floor" kernels
+
+EXPORT int32_t floor_int32(int32_t x) {
+    return x;
+}
+
+EXPORT int64_t floor_int64(int64_t x) {
+    return x;
+}
+
+EXPORT uint32_t floor_uint32(uint32_t x) {
+    return x;
+}
+
+EXPORT uint64_t floor_uint64(uint64_t x) {
+    return x;
+}
+
+EXPORT float floor_float32(float x) {
+    return floorf(x);
+}
+
+EXPORT double floor_float64(double x) {
+    return floor(x);
+}
+
+////////////////////////////
+// "ceil" kernels
+
+EXPORT int32_t ceil_int32(int32_t x) {
+    return x;
+}
+
+EXPORT int64_t ceil_int64(int64_t x) {
+    return x;
+}
+
+EXPORT uint32_t ceil_uint32(uint32_t x) {
+    return x;
+}
+
+EXPORT uint64_t ceil_uint64(uint64_t x) {
+    return x;
+}
+
+EXPORT float ceil_float32(float x) {
+    return ceilf(x);
+}
+
+EXPORT double ceil_float64(double x) {
+    return ceil(x);
 }
 
