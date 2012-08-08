@@ -32,7 +32,7 @@ public:
         return expression_kind;
     }
     // Expose the storage traits here
-    unsigned char alignment() const {
+    size_t alignment() const {
         return m_operand_dtype.alignment();
     }
     uintptr_t element_size() const {

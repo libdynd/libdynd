@@ -252,13 +252,14 @@ void categorical_dtype::print_element(std::ostream& o, const char *data) const
 
 void categorical_dtype::print_dtype(std::ostream& o) const
 {
-    o << "categorical(";
+    o << "categorical<";
     m_category_dtype.print_element(o, m_categories[m_value_to_category_index[0]]);
     for (uint32_t i = 1; i < m_categories.size(); ++i) {
         o << ", ";
         m_category_dtype.print_element(o, m_categories[m_value_to_category_index[i]]);
     }
-    o << ")";
+    o << ", category_dtype=" << m_category_dtype;
+    o << ">";
 }
 
 uint32_t categorical_dtype::get_value_from_category(const char *category) const

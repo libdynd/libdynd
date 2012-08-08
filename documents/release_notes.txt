@@ -1,0 +1,55 @@
+DyND Release Notes
+==================
+
+DyND is a C++ library for array programming with a dynamic
+type system. It is currently in a preview state, and nothing
+about the API or the ABI is guaranteed to stay the same.
+
+Version 0.1
+-----------
+
+This is the first preview release of the library, with the
+primary goals of demonstrating some basic computations and
+good interoperability with Numpy.
+
+Initial features include:
+
+ - Strided multi-dimensional array primitive, similar to
+   Numpy, Boost MultiArray and others. This object is fully
+   dynamic, the data type and dimensionality are specified
+   at runtime.
+
+ - Initial set of data types comparable to that
+   of Numpy, with a few exceptions such as datetime and
+   float16.
+
+ - A lazy evaluation computation infrastructure, which builds
+   up an expression graph and evaluates it when values are
+   requested.
+
+ - Elementwise computation nodes and elementwise reduction
+   computation nodes, exposed as "gfuncs" in Python. These
+   are similar to Numpy's "ufuncs" and its reduction methods
+   like "sum".
+
+ - A preliminary code generation system to adapt simple
+   functions to operate as kernels in gfuncs, and a basic
+   .dll/.so defining a few simple kernels this way.
+
+ - A proof of concept implementation of data types based on
+   array/memory block level references, initially with a
+   variable-sized string type.
+
+ - Flexible error checking in data type conversion, raising
+   errors dynamically based on values instead of just checking
+   data types.
+
+Limitations:
+
+ - The code generation system only supports 64-bit platforms
+   presently, and only can adapt unary and binary kernel functions
+   for use in gfuncs.
+
+ - Only a subset of the possible expression trees can be evaluated.
+   This can be worked around by manually creating temporaries
+   using the ndarray.vals() method.

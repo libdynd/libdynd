@@ -28,7 +28,7 @@ public:
         return string_kind;
     }
     // Expose the storage traits here
-    unsigned char alignment() const {
+    size_t alignment() const {
         return sizeof(const char *);
     }
     uintptr_t element_size() const {

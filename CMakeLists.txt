@@ -9,6 +9,8 @@ project(dynamicndarray)
 set(CMAKE_VERBOSE_MAKEFILE 1)
 set(BUILD_SHARED_LIBS 1)
 
+find_package(Boost REQUIRED)
+
 # Clang Compiler
 #include(CMakeForceCompiler)
 #cmake_force_c_compiler(/usr/local/bin/clang CLang)
@@ -166,20 +168,8 @@ set(dnd_SRC
     include/dnd/platform_definitions.h
     )
 
-if(WIN32)
-# This is my hardcoded boost path
 include_directories(
-    D:/Develop/boost_1_48_0/
-    )
-else(WIN32)
-# Find boost. This works as long as BOOT_ROOT is defined in env
-#     (there may be other ways to specify it though)
-  find_package(Boost REQUIRED)
-  message(STATUS "** Boost Include: ${Boost_INCLUDE_DIR}")
-  include_directories(${Boost_INCLUDE_DIR})
-endif(WIN32)
-
-include_directories(
+    ${Boost_INCLUDE_DIR}
     include
     thirdparty/utf8/source
     )
@@ -214,12 +204,3 @@ add_subdirectory(tests)
 
 add_subdirectory(examples)
 
-# should we use build the python support?
-option(
-    BUILD_PYTHON
-    "Build python bindings" ON
-    )
-
-if(BUILD_PYTHON)
-    add_subdirectory(python)
-endif()

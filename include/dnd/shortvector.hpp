@@ -36,7 +36,7 @@ public:
     }
 
     /** Initializes the shortvector after default construction */
-    void init(int size) {
+    void init(size_t size) {
         if (m_data != m_shortdata) {
             delete[] m_data;
         }
@@ -47,24 +47,24 @@ public:
         }
     }
 
-    void init(int size, const T *data) {
+    void init(size_t size, const T *data) {
         init(size);
         memcpy(m_data, data, size * sizeof(T));
     }
 
     /** Construct the shortvector with a specified size */
-    explicit shortvector(int size)
+    explicit shortvector(size_t size)
         : m_data((size <= staticN) ? m_shortdata : new T[size])
     {
     }
     /** Construct the shortvector with a specified size and initial data */
-    shortvector(int size, const shortvector& rhs)
+    shortvector(size_t size, const shortvector& rhs)
         : m_data((size <= staticN) ? m_shortdata : new T[size])
     {
         DND_MEMCPY(m_data, rhs.m_data, size * sizeof(T));
     }
     /** Construct the shortvector with a specified size and initial data */
-    shortvector(int size, const T* data)
+    shortvector(size_t size, const T* data)
         : m_data((size <= staticN) ? m_shortdata : new T[size])
     {
         DND_MEMCPY(m_data, data, size * sizeof(T));
@@ -144,11 +144,11 @@ public:
     }
 
     /** Const indexing operator */
-    const T& operator[](int i) const {
+    const T& operator[](size_t i) const {
         return m_data[i];
     }
     /** Non-const indexing operator */
-    T& operator[](int i) {
+    T& operator[](size_t i) {
         return m_data[i];
     }
 };

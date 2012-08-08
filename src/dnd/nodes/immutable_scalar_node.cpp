@@ -6,6 +6,7 @@
 #include <dnd/nodes/immutable_scalar_node.hpp>
 #include <dnd/nodes/strided_ndarray_node.hpp>
 #include <dnd/dtypes/convert_dtype.hpp>
+#include <dnd/ndarray.hpp>
 
 using namespace std;
 using namespace dnd;
@@ -45,7 +46,12 @@ void dnd::immutable_scalar_node::debug_dump_extra(std::ostream& o, const std::st
     o << "\n";
     o << indent << " value: ";
     try {
-        m_dtype.print_element(o, m_originptr);
+        if (m_dtype.kind() != expression_kind) {
+            m_dtype.print_element(o, m_originptr);
+        } else {
+            ndarray a = ndarray(const_cast<immutable_scalar_node *>(this)->as_ndarray_node_ptr()).vals();
+            a.get_dtype().print_element(o, a.get_readonly_originptr());
+        }
         o << "\n";
     } catch(std::exception& e) {
         o << "EXCEPTION: " << e.what() << "\n";

@@ -35,7 +35,7 @@ public:
         return expression_kind;
     }
     // Expose the storage traits here
-    unsigned char alignment() const {
+    size_t alignment() const {
         return sizeof(void *);
     }
     uintptr_t element_size() const {
