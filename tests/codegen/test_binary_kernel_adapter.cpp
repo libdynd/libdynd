@@ -91,6 +91,9 @@ TEST(BinaryKernelAdapter, BasicOperations) {
 
 }
 
+
+#if defined(DND_CALL_MSFT_X64)
+
 class raise_if_greater_exception : public std::runtime_error {
 public:
     raise_if_greater_exception()
@@ -140,9 +143,9 @@ TEST(BinaryKernelAdapter, UnwindException) {
     EXPECT_EQ(-90000, out[2]);
 
     // Call it with a negative value
-#if defined(DND_CALL_MSFT_X64)
     EXPECT_THROW(rig.kernel((char *)out, sizeof(int), (const char *)in1, sizeof(int), (const char *)in2, sizeof(int),
                     3, rig.auxdata),
             raise_if_greater_exception);
-#endif
 }
+
+#endif

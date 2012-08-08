@@ -67,6 +67,8 @@ TEST(UnaryKernelAdapter, BasicOperations) {
 
 }
 
+#if defined(DND_CALL_MSFT_X64)
+
 class raise_if_negative_exception : public std::runtime_error {
 public:
     raise_if_negative_exception()
@@ -110,8 +112,8 @@ TEST(UnaryKernelAdapter, UnwindException) {
     EXPECT_EQ(10000, out[2]);
 
     // Call it with a negative value
-#if defined(DND_CALL_MSFT_X64)
     EXPECT_THROW(rin.specializations[0]((char *)out, sizeof(int), (const char *)in, sizeof(int), 3, rin.auxdata),
             raise_if_negative_exception);
-#endif
 }
+#endif
+
