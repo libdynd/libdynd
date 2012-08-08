@@ -10,6 +10,7 @@
 #include <dnd/codegen/binary_kernel_adapter_codegen.hpp>
 #include <dnd/memblock/executable_memory_block.hpp>
 
+#include <assert.h>
 
 namespace // nameless
 {
@@ -109,6 +110,11 @@ namespace // nameless
     private:
         void              emit (uint8_t byte);
         
+        // non copyable 
+        function_builder(function_builder&);
+        function_builder& operator= (const function_builder&);
+
+
         dnd::memory_block_data*  memblock_;
         int8_t*             current_;
         int8_t*             begin_;
@@ -466,12 +472,12 @@ namespace // nameless
     };
 }
 
-binary_operation_t dnd::codegen_binary_function_adapter(const memory_block_ptr& exec_memblock
-                                                        , const dtype& restype
-                                                        , const dtype& arg0type
-                                                        , const dtype& arg1type
-                                                        , calling_convention_t DND_UNUSED(callconv)
-                                                        )
+binary_operation_t codegen_binary_function_adapter(const memory_block_ptr& exec_memblock
+                                                  , const dtype& restype
+                                                  , const dtype& arg0type
+                                                  , const dtype& arg1type
+                                                  , calling_convention_t DND_UNUSED(callconv)
+                                                  )
 {
     cc_register_class ret_idx  = idx_for_type_id(restype.type_id());
     cc_register_class arg0_idx = idx_for_type_id(arg0type.type_id());

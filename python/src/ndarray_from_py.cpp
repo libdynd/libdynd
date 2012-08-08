@@ -3,12 +3,14 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
+
+#include "ndarray_from_py.hpp"
+
 #include <dnd/dtypes/string_dtype.hpp>
 #include <dnd/memblock/external_memory_block.hpp>
 #include <dnd/nodes/scalar_node.hpp>
 #include <dnd/dtype_promotion.hpp>
 
-#include "ndarray_from_py.hpp"
 #include "ndarray_functions.hpp"
 #include "dtype_functions.hpp"
 #include "utility_functions.hpp"
@@ -22,7 +24,7 @@ static void deduce_pylist_shape_and_dtype(PyObject *obj, vector<intptr_t>& shape
 {
     if (PyList_Check(obj)) {
         Py_ssize_t size = PyList_GET_SIZE(obj);
-        if (shape.size() == current_axis) {
+        if (shape.size() == static_cast<size_t>(current_axis)) {
             if (dt.type_id() == void_type_id) {
                 shape.push_back(size);
             } else {
@@ -38,7 +40,7 @@ static void deduce_pylist_shape_and_dtype(PyObject *obj, vector<intptr_t>& shape
             deduce_pylist_shape_and_dtype(PyList_GET_ITEM(obj, i), shape, dt, current_axis + 1);
         }
     } else {
-        if (shape.size() != current_axis) {
+        if (shape.size() != static_cast<size_t>(current_axis)) {
             throw runtime_error("dnd:ndarray doesn't support dimensions which are sometimes scalars and sometimes arrays");
         }
 
@@ -78,7 +80,7 @@ inline void convert_one_pyscalar(complex<double> *out, PyObject *obj)
 template<typename T>
 static T *fill_ndarray_from_pylist(T *data, PyObject *obj, const vector<intptr_t>& shape, int current_axis)
 {
-    if (current_axis == shape.size() - 1) {
+  if (static_cast<size_t>(current_axis) == shape.size() - 1) {
         Py_ssize_t size = PyList_GET_SIZE(obj);
         for (Py_ssize_t i = 0; i < size; ++i) {
             PyObject *item = PyList_GET_ITEM(obj, i);

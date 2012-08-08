@@ -7,7 +7,7 @@
 
 
 // To enable logging just uncomment this:
-#define ENABLE_LOGGING
+//#define ENABLE_LOGGING
 
 
 #include <dnd/platform_definitions.h>
@@ -158,7 +158,7 @@ void allocate_executable_memory(memory_block_data * self       //in
         emb->add_chunk();
     
     void* current_chunk = emb->m_allocated_chunks.back();
-    void* begin = emb->m_pivot;
+    void* begin = reinterpret_cast<void*>(align_up(reinterpret_cast<size_t>(emb->m_pivot), alignment));
     void* end   = ptr_offset(begin, size_bytes);
     if (ptr_offset(current_chunk, emb->m_chunk_size) < ptr_offset(emb->m_pivot, size_bytes))
     {
