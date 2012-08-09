@@ -6,6 +6,7 @@
 #include <stdexcept>
 
 #include <dnd/dtype_promotion.hpp>
+#include <dnd/dtypes/string_dtype.hpp>
 
 using namespace std;
 using namespace dnd;
@@ -174,6 +175,27 @@ dtype dnd::promote_dtypes_arithmetic(const dtype& dt0, const dtype& dt1)
         stringstream ss;
         ss << "internal error in built-in dtype promotion of " << dt0_val << " and " << dt1_val;
         throw std::runtime_error(ss.str());
+    }
+
+    // HACK for getting simple string dtype promotions.
+    // TODO: Do this properly in a pluggable manner.
+    if (dt0_val.type_id() == string_type_id && dt1_val.type_id() == string_type_id) {
+        const extended_string_dtype *ext0 = static_cast<const extended_string_dtype *>(
+                        dt0_val.extended());
+        const extended_string_dtype *ext1 = static_cast<const extended_string_dtype *>(
+                        dt1_val.extended());
+        if (ext0->encoding() > ext1->encoding()) {
+            return dt0_val;
+        } else {
+            return dt1_val;
+        }
+    }
+
+    // In general, if one type is void, just return the other type
+    if (dt0_val.type_id() == void_type_id) {
+        return dt1_val;
+    } else if (dt1_val.type_id() == void_type_id) {
+        return dt0_val;
     }
 
     throw std::runtime_error("type promotion of custom dtypes is not yet supported");
