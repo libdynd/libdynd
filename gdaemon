@@ -1,1 +1,0 @@
-git daemon --base-path=/home/mwiebe/Develop/dynamicndarray --export-all --verbose --enable=receive-pack

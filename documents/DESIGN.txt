@@ -3,62 +3,41 @@ All rights reserved.
 Creative Commons Attribution-ShareAlike 3.0
 http://creativecommons.org/licenses/by-sa/3.0/
 
-Dynamic ND-Array Library Design
+Dynamic NDArray Library Design
 -------------------------------
 
-This is a library that is being developed within the spirit of NumPy
-and ideas that have evolved within that community, but designed to be
-comfortable in C++. It's main goals are:
+This is an array programming library that is being developed
+within the spirit of NumPy and including ideas that have evolved
+within that community, but designed to be comfortable in C++.
+It's main goals are:
 
-* Have a flexible and high-performance data type mechanism, which can
-  be extended to have new data types with POD or object semantics.
-* A simple strided memory layout like NumPy, with KEEPORDER semantics
-  by default.
-* A design that's flexible enough to allow the data to be stored
-  in CPU memory, GPU memory, or distributed across a cluster in a global
-  array.
-* Delayed/lazy evaluation by default - all operations return views or
-  arrays with their computation deferred. As a flexible C++ library,
-  this could still be used as a tool to create a non-lazy evaluation library.
-* Include a compiler technology to take the deferred expression trees
-  and create optimized execution plans. Either directly executing the
-  expression tree, creating a compact block-based execution engine along
-  the lines of numexpr, or JITting with LLVM.
+* Take array programming ideas from NumPy, APL, J, K, MATLAB,
+  R, and other systems and try to apply them in a unified,
+  consistent data model.
+* Have a flexible, high-performance, array-oriented data type
+  mechanism, which can be extended to have new data types with
+  POD (plain old data) or object semantics.
+* Delayed/lazy evaluation, where all operations return views or
+  arrays with their computation deferred.
+* Easily and efficiently embed in other dynamic or static
+  languages. The first embedding is the Blaze Local project, built
+  for Python.
+* Understand data in memory, whereever it may lie and however it might
+  be structured. It should be able to compute with the data in place
+  where that is reasonable, and export the results in place to
+  external systems where that is also reasonable.
 
 Some principles which seem desirable:
 
-1. Everything is a view. Array operations do not compute an answer,
-   they merely compute the new dtype, geometry, and an expression tree.
-   Since this is based on reference counting, using the library to
-   implement copy-on-write semantics is possible as well.
-2. There is no default "flat" perspective, any conversion between
-   multi-dimensional and one-dimensional is explicit.
-3. Default type conversion follows strict value-preserving semantics,
-   except double -> float conversions in the precision-loss case.
-4. Default overflow checking for integer math. This appears to require
-   assembly-language implementations of inner loops, and precludes the
-   use of SSE operations, as they set no overflow/carry flags when doing
-   integer operations.
-
-Some performance-oriented design features:
-
-1. The dtype has all the basic necessary information in a pass-by-value
-   class. For dtypes that require extended information, like structs,
-   a virtual base class with additional information is added as well,
-   and is reference counted which works because the extended info is
-   treated as an immutable object once created.
-   NOTE: After seeing Bryan's enum NEP proposal, it might be good
-         to relax the immutable restriction in some way to support the
-         "open"/"closed" idea.
-2. The ndarray always exposes arrays that are aligned and in NBO. The only
-   way to see a non-NBO array is to dig into the expression tree itself,
-   behind the veil of buffering. This allows fast default operations
-   which don't have to check that the data is sane every time.
-3. Computations have inner loop functions that can be specialized based on
-   the striding of the data in that inner loop. Important special cases
-   are constant strides and strides equal to the dtype element_size. I've i
-   confirmed that g++ 4.6.1 creates SSE based inner loops for the contiguous 
-   versions of the arithmetic operations.
+* There is no default "flat" perspective, any conversion between
+  multi-dimensional and one-dimensional is explicit.
+* Type conversions get validated at conversion time, based on the
+  actual data present, not based on whether "float" can convert
+  to "int" for example.
+* Strict, fine-grained error checking by default, but with the
+  ability to easily relax it and get higher performance.
+* Data for a given dtype always is aligned as the dtype requires.
+  Unaligned data requires an "unaligned" adapter step.
 
 Everything Is A View
 --------------------
@@ -70,21 +49,12 @@ Leaf nodes of the expression trees can either be ndarrays themselves,
 or rvalue array generators, such as a constant generator or a linear range
 generator.
 
-This design choice is analogous to the shift towards using iterators
-for most things in Python 3. For example, in Python 2, range(4) returns
+This design choice is analogous to the Python 3 shift towards using iterators
+for most things. For example, in Python 2, range(4) returns
 a list [0, 1, 2, 3], whereas in Python 3 it returns a generator object
 whose repr is 'range(0, 4)'.
 
-Every operation in the system produces a view of the inputs. Suppose we
-have two arrays, 'a' and 'b'. If we assign 'c = a + b', 'c' is now a view
-into the sum of 'a' and 'b'. Note that 'c' itself is now an rvalue array, as
-there are multiple ways an assigned value could be split up between 'a' and
-'b', so such an assignment is not unique. If we take a value of 'c', for
-example 'c(0,0).as<float>()', then modify 'a(0,0)', taking that value of 'c'
-again will be different. The view nature of this can be collapsed by running
-'c.as_lvalue()' (function subject to renaming).
-
-Some example ndarray_expr_node subclasses:
+Some example ndarray_expr_node subclasses that could be created:
 
 zero_gen<dtype>, one_gen<dtype>, constant_gen<dtype, value> (rvalue):
     Generates 0, 1 or arbitrary constant values, respectively.
@@ -109,11 +79,6 @@ linear_map<float/complex dtype, A, B, childnode> (maybe lvalue?):
     treat this as an lvalue array. Whether this in general is desireable needs
     some thought.
 
-broadcast_shape<ndim, shape[ndim], axismap[childnode.ndim], childnode>
-    Broadcasts the childnode to the specified shape, according to the specified
-    mapping of the axes. These nodes are added when necessary for multiply-type
-    nodes.
-
 flat_to_ndim<ndim, shape[ndim], strides[ndim], childnode> (lvalue):
     Maps a one-dimensional array to a multi-dimensional array.
     result[i[0], ..., i[ndim-1]] ==
@@ -123,16 +88,17 @@ linear_index<ndim, shape[ndim], base[ndim], strides[ndim], childnode> (lvalue):
     Does a linear strided indexing operation into the childnode. This doesn't
     change the number of dimensions of the childnode.
 
-To heuristically determine where to create temporaries, the nodes should indicate
-an estimate of how many source node accesses are required for each result
-element. For example, a matrix multiply node for an m by n times an n by r matrix,
-would indicate 2*n for each output element.
+To heuristically determine where to create temporaries, the nodes
+could indicate an estimate of how many source node accesses are
+required for each result element. For example, a matrix multiply
+node for an m by n times an n by r matrix, would indicate 2*n for
+each output element.
 
 Reference Assignment vs Value Assignment
 ----------------------------------------
 
 This library has two types of assignment operations, assigning by
-reference and assigning by value. This is similar to NumPy, where
+reference and assigning by value. This is similar to Python+NumPy, where
 this distinction can trip up programmers fairly easily:
 
     a = np.arange(10)
@@ -223,7 +189,7 @@ When output parameters are used, exception safety is not guaranteed.
 Since operations can fail part-way through, guaranteeing exception safety
 would require making a temporary copy.  In the interests of efficiency,
 this is not done. When exception safety is required, the functional-style
-operations are recommended.
+operations are required.
 
 Label-based Indexing
 --------------------
@@ -234,49 +200,11 @@ people wanted for this functionality, some conflicting with each other.
 
 I think there needs to be a big distinction between an ordered mapping,
 for instance thinking of the array as a position or time instant with
-associated data. For this library, I'd like to restrict the labels
-to be strings only, so integer-based and label-based indexing can
-live together comfortably.
+associated data.
 
-The axis names and labels should themselves be one-dimensional ndarrays
-of UTF8 strings.
-
-Arrays with ndarrays as the Data Type
--------------------------------------
-
-In J, there is an idea of a "boxed" array, which is basically having
-the dtype itself consist of arrays. This is a way to support ragged
-arrays, and it is natural to extend the indexing operation so that
-when more indices are specified than there are dimensions, the
-rest of the indices get passed on to index into the elements which
-are themselves arrays.
-
-For the dynamic ndarray library, we can treat this mechanism as a
-"late binding" idea. Consider an array of strings, where the size
-of the string is 0, indicating a "flexible" (this is NumPy's terminology,
-perhaps a better name can be found) dtype. Behind the scenes, this
-becomes a concrete dtype during each iteration step, so that the strings
-themselves may be stored in a packed form along with an array of byte-ranges
-to go with it. This would need corresponding API which give a dtype
-that could hold all the data in a uniform fashion, which would take the maximum
-length of one of the strings.
-
-The way that having ndarray as a dtype should affect
-
-Struct Data Types
------------------
-
-A data type which is a struct can be considered equivalent to an ndarray
-of ndarrays, with the restriction that the subarray shapes and dtypes do
-not vary across different elements. Considered in full generality, we can
-imagine more ways aspects of the array are static or dynamic, For instance,
-a ragged array could be imagined with a uniform dtype, but varying sizes
-in the subarray.
-
-Indirect Indexing
------------------
-
-
+It might be worth having the labels always be a categorical dtype,
+as there might be nice ways this dtype, axis labels, and groupby-like
+operations function together.
 
 Boolean Indexing
 ----------------
@@ -295,18 +223,17 @@ the ndarray library.
 2. The ability for one or more dimensions of the shape to be indeterminate,
    signaled with the value -1.
 
-The selection mask can't be an NA mask like the one introduced recently
-into NumPy, but rather one which corresponds loosely to the IGNORE missing
+The selection mask can't be an NA mask like the one proposed recently
+for NumPy, but rather one which corresponds loosely to the IGNORE missing
 value semantics described in the NumPy missing value NEP.
 
-In NumPy, the boolean index can apply to one, some, or all of the dimensions
-of the array. In this library, I propose to restrict that to just one or
-all of the dimensions. This mostly works out, but there are some serious
-conflicts between facility 1 and facility 2, so they must be separated
-into different functions.
+In NumPy, calling [] with indices and boolean masks go through
+the same interface. This mostly works out, but there are some serious
+conflicts between facility 1 and facility 2, so separating them into
+different functions seems like a better approach.
 
 To understand why conflating the two mechanisms is problematic, consider
-the following C++11 code in a hypothetical C++ REPL (they do exist, for
+the following C++11 code in a hypothetical C++ REPL (for
 example cling is one). In each case, the alternative interpretations of
 the arrays produce vastly different results.
 
@@ -338,9 +265,9 @@ which is operator() in C++.  The proposed resolution looks like this:
     :> b_ix = a((a % 2) == 1);
     :> b_wr = a.where((a % 2) == 1);
     :> cout << b_ix << "\n";
-    ndarray(int32, {1, 3})
+    ndarray([1, 3], int32)
     :> cout << b_wr << "\n";
-    ndarray(int32, {IGNORE, 1, IGNORE, 3, IGNORE})
+    ndarray([IGNORE, 1, IGNORE, 3, IGNORE], int32)
 
     :> c = zeros(5, make_dtype<int>());
     :> c.val_assign(b_ix);
@@ -360,23 +287,3 @@ which is operator() in C++.  The proposed resolution looks like this:
 One nice property of this is that for boolean indexing, the programmer
 can be sure that each index entry lines up with a particular axis, instead
 of having it change if the boolean index object has more than one dimension.
-
-Rejected Boolean Indexing Ideas
--------------------------------
-
-A bad way to handle boolean indexing would be to turn boolean indexing
-into an immediate operation like in NumPy. This would create an
-inconsistency in the system, and require programmers to parse expressions
-in their head to determine which parts of them remain views and which
-parts get baked into copies. Another reason this wouldn't be good is that
-"a[a>0] + b[a>0]" is forced to evaluate the subexpression "a>0" twice. If
-it remains as an expression graph, the expression evaluation code can
-notice that it is a common subexpression, and only evaluate it once.
-
-Licensing
----------
-
-This library is licensed under the BSD 2-Clause license, except
-for some parts taken from NumPy which are under the NumPy
-BSD 3-Clause license.
-
