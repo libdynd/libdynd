@@ -7,8 +7,8 @@ is in a preview release state, and every aspect of its API and interface
 could likely change drastically while learning how it should look by
 trying to use it in practical settings.
 
-Building and Installing
-=======================
+Building
+========
 
 The build system of this library is based on CMake. See BUILD.md for
 details about how to build the library.
