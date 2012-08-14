@@ -48,9 +48,7 @@ source_group("DTypes Tests" REGULAR_EXPRESSION "\\/dtypes\\/test_[^\\/]*\\.cpp$"
 
 add_executable(dnd_tests ${tests_SRC})
 
-# gtest generates "unnamed-type-template-args" warnings with clang
 if(WIN32)
-    # TODO: Make this not be hardcoded
     target_link_libraries(dnd_tests
         dynamicndarray
         )
