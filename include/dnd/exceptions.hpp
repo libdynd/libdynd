@@ -6,6 +6,7 @@
 #ifndef _DND__EXCEPTIONS_HPP_
 #define _DND__EXCEPTIONS_HPP_
 
+#include <string>
 #include <stdexcept>
 #include <stdint.h>
 
@@ -17,7 +18,21 @@ namespace dnd {
 class ndarray_node_ptr;
 
 class dnd_exception : public std::exception {
+protected:
+    std::string m_message, m_what;
 public:
+    dnd_exception(const char *exception_name, const std::string& msg)
+        : m_what(std::string() + exception_name + ": " + msg), m_message(msg)
+    {
+    }
+
+    virtual const char* message() const throw() {
+        return m_message.c_str();
+    }
+    virtual const char* what() const throw() {
+        return m_what.c_str();
+    }
+
     virtual ~dnd_exception() throw() {
     }
 };
@@ -26,11 +41,7 @@ public:
  * An exception for various kinds of broadcast errors.
  */
 class broadcast_error : public dnd_exception {
-    std::string m_what;
 public:
-    virtual const char* what() const throw() {
-        return m_what.c_str();
-    }
 
     /**
      * An exception for when 'src' doesn't broadcast to 'dst'
@@ -52,12 +63,7 @@ public:
  * An exception for an index out of bounds
  */
 class too_many_indices : public dnd_exception {
-    std::string m_what;
 public:
-    virtual const char* what() const throw() {
-        return m_what.c_str();
-    }
-
     /**
      * An exception for when too many indices are provided in
      * an indexing operation (nindex > ndim).
@@ -69,12 +75,7 @@ public:
 };
 
 class index_out_of_bounds : public dnd_exception {
-    std::string m_what;
 public:
-    virtual const char* what() const throw() {
-        return m_what.c_str();
-    }
-
     /**
      * An exception for when 'i' isn't within bounds for
      * the specified axis of the given shape
@@ -86,12 +87,7 @@ public:
 };
 
 class axis_out_of_bounds : public dnd_exception {
-    std::string m_what;
 public:
-    virtual const char* what() const throw() {
-        return m_what.c_str();
-    }
-
     /**
      * An exception for when 'i' isn't a valid axis
      * for the number of dimensions.
@@ -106,12 +102,7 @@ public:
  * An exception for a range out of bounds.
  */
 class irange_out_of_bounds : public dnd_exception {
-    std::string m_what;
 public:
-    virtual const char* what() const throw() {
-        return m_what.c_str();
-    }
-
     /**
      * An exception for when 'i' isn't within bounds for
      * the specified axis of the given shape
@@ -126,12 +117,7 @@ public:
  * An exception for an invalid type ID.
  */
 class invalid_type_id : public dnd_exception {
-    std::string m_what;
 public:
-    virtual const char* what() const throw() {
-        return m_what.c_str();
-    }
-
     invalid_type_id(int type_id);
 
     virtual ~invalid_type_id() throw() {
