@@ -22,7 +22,7 @@ protected:
     std::string m_message, m_what;
 public:
     dnd_exception(const char *exception_name, const std::string& msg)
-        : m_what(std::string() + exception_name + ": " + msg), m_message(msg)
+        : m_message(msg), m_what(std::string() + exception_name + ": " + msg)
     {
     }
 
