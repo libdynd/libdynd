@@ -30,11 +30,11 @@ TEST(UnaryKernelAdapter, BasicOperations) {
     // NOTE: Cannot cast directly to <void*>, because of a compile error on MSVC:
     //         "Context does not allow for disambiguation of overloaded function"
     cgcache.codegen_unary_function_adapter(make_dtype<int>(), make_dtype<float>(), cdecl_callconv,
-                    (void*)reinterpret_cast<int (*)(float)>(&double_value<int, float>), NULL, op_int_float);
+                    (void*)static_cast<int (*)(float)>(&double_value<int, float>), NULL, op_int_float);
     cgcache.codegen_unary_function_adapter(make_dtype<float>(), make_dtype<float>(), cdecl_callconv,
-                    (void*)reinterpret_cast<float (*)(float)>(&double_value<float, float>), NULL, op_float_float);
+                    (void*)static_cast<float (*)(float)>(&double_value<float, float>), NULL, op_float_float);
     cgcache.codegen_unary_function_adapter(make_dtype<float>(), make_dtype<double>(), cdecl_callconv,
-                    (void*)reinterpret_cast<float (*)(double)>(&double_value<float, double>), NULL, op_float_double);
+                    (void*)static_cast<float (*)(double)>(&double_value<float, double>), NULL, op_float_double);
 
     int int_vals[3];
     float float_vals[3];

@@ -34,21 +34,21 @@ TEST(BinaryKernelAdapter, BasicOperations) {
                                             make_dtype<float>(),
                                             make_dtype<double>(),
                                             cdecl_callconv,
-                                            (void*)reinterpret_cast<int (*)(int, float, double)>(&multiply_values<int, float, double>),
+                                            (void*)static_cast<int (*)(float, double)>(&multiply_values<int, float, double>),
                                             NULL,
                                             op_int_float_double);
     cgcache.codegen_binary_function_adapter(make_dtype<float>(),
                                             make_dtype<float>(),
                                             make_dtype<float>(),
                                             cdecl_callconv,
-                                            (void*)reinterpret_cast<float (*)(float, float, float)>(&multiply_values<float, float, float>),
+                                            (void*)static_cast<float (*)(float, float)>(&multiply_values<float, float, float>),
                                             NULL,
                                             op_float_float_float);
     cgcache.codegen_binary_function_adapter(make_dtype<float>(),
                                             make_dtype<double>(),
                                             make_dtype<int>(),
                                             cdecl_callconv,
-                                            (void*)reinterpret_cast<float (*)(float, double, int)>(&multiply_values<float, double, int>),
+                                            (void*)static_cast<float (*)(double, int)>(&multiply_values<float, double, int>),
                                             NULL,
                                             op_float_double_int);
 
