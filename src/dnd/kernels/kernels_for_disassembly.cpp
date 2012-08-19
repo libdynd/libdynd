@@ -14,7 +14,7 @@
  */
 
 // Set this to 1 when needed to analyze compiled kernel output, 0 otherwise
-#define ENABLE_DISASSEMBLY_ANALYSIS 1
+#define ENABLE_DISASSEMBLY_ANALYSIS 0
 
 #if ENABLE_DISASSEMBLY_ANALYSIS
 #include <stdint.h>

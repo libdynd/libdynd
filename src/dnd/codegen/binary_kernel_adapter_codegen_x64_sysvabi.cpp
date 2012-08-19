@@ -18,7 +18,7 @@ namespace // nameless
 {
     void* ptr_offset(void* ptr, ptrdiff_t offset)
     {
-        return static_cast<void*>(static_cast<uint8_t*>(ptr) + offset);
+        return static_cast<void*>(static_cast<char*>(ptr) + offset);
     }
     
     // ov: todo: stuff in this nameless namespace is replicated in unary_kernel_adapter...
@@ -110,7 +110,7 @@ namespace // nameless
         void              discard();
         
     private:
-        void              emit (uint8_t byte);
+        void              emit (char byte);
         
         // non copyable 
         function_builder(function_builder&);
@@ -118,9 +118,9 @@ namespace // nameless
 
 
         dnd::memory_block_data*  memblock_;
-        int8_t*             current_;
-        int8_t*             begin_;
-        int8_t*             end_;
+        char*             current_;
+        char*             begin_;
+        char*             end_;
         int8_t              current_arg_;
         bool                used_float_arg_;
         bool                ok_;
@@ -140,8 +140,8 @@ namespace // nameless
         dnd::allocate_executable_memory(memblock
                                         , estimated_size
                                         , 16
-                                        , (char**)&begin_
-                                        , (char**)&end_
+                                        , &begin_
+                                        , &end_
                                         );
         current_ = begin_;
     }
@@ -151,7 +151,7 @@ namespace // nameless
         discard();
     }
     
-    void function_builder::emit(uint8_t byte)
+    void function_builder::emit(char byte)
     {
         ok_ = ok_ && (current_ < end_);
         if (!ok_)
@@ -258,7 +258,7 @@ namespace // nameless
             else
             {
                 // some magick...
-                uint8_t magick_mask = (used_float_arg_ == is_float_register_class(rc)) ? 0x08 : 0x00;
+                char magick_mask = (used_float_arg_ == is_float_register_class(rc)) ? 0x08 : 0x00;
                 switch (rc)
                 {
                 case ccrc_integer_8bit:
@@ -340,9 +340,9 @@ namespace // nameless
             // this will shrink... resize_executable_memory has realloc semantics
             // so on shrink it will never move;
 #ifndef NDEBUG
-            int8_t* old_begin = begin_; // only used in asserts
+            char* old_begin = begin_; // only used in asserts
 #endif
-            dnd::resize_executable_memory(memblock_, current_ - begin_, (char**)&begin_, (char**)&end_);
+            dnd::resize_executable_memory(memblock_, current_ - begin_, &begin_, &end_);
             assert(old_begin = begin_);
             
             // TODO: flush instruction cache for the generated code. Not needed
@@ -366,7 +366,7 @@ namespace // nameless
         if (begin_)
         {
             // if we didn't finish... rollback the executable memory
-            dnd::resize_executable_memory(memblock_, 0, (char**)&begin_, (char**)&end_);
+            dnd::resize_executable_memory(memblock_, 0, &begin_, &end_);
         }
         memblock_ = 0;
         current_  = 0;
@@ -412,7 +412,7 @@ std::string dnd::get_binary_function_adapter_unique_id_string(uint64_t unique_id
 namespace // nameless
 {
 // snippets of code to generate the machine code for the adapter
-    uint8_t binary_adapter_prolog[] =
+    char binary_adapter_prolog[] =
     {
         // save callee saved registers... we use them all ;)
         0x55,                           // pushq %rbp
@@ -424,7 +424,7 @@ namespace // nameless
         0x48, 0x83, 0xec, 0x18,         // subq  $24, %rsp
     };
     
-    uint8_t binary_adapter_loop_setup[] =
+    char binary_adapter_loop_setup[] =
     {
         0x4c, 0x89, 0x4c, 0x24, 0x10,   // movq %r9, 16(%rsp)
         0x4d, 0x89, 0xc4,               // movq %r8, %r12
@@ -438,13 +438,13 @@ namespace // nameless
         0x4c, 0x8b, 0x7c, 0x24, 0x50,   // movq 80(%rsp), %r15
     };
     
-    uint8_t binary_adapter_function_call[] =
+    char binary_adapter_function_call[] =
     {
         // function pointer in %r14
         0x41, 0xff, 0xd6,               // call *%r14
     };
     
-    uint8_t binary_adapter_update_streams[] =
+    char binary_adapter_update_streams[] =
     {
         // strides are in %r13, 8(%rsp), 16(%rsp)
         0x4c, 0x03, 0x64, 0x24, 0x10,   // addq 16(%rsp),%r12
@@ -452,13 +452,13 @@ namespace // nameless
         0x4c, 0x01, 0xed                // addq    %r13,%rbp
 
     };
-    uint8_t binary_adapter_close_loop[] =
+    char binary_adapter_close_loop[] =
     {
         0x49, 0xff, 0xcf,               // decq %r15
         0x75, 0x00,                     // jne loop, needs fix-up
     };
     
-    uint8_t binary_adapter_epilog[] =
+    char binary_adapter_epilog[] =
     {
         // restore callee saved registers and return...
         0x48, 0x83, 0xc4, 0x18,         // addq $24, %rsp

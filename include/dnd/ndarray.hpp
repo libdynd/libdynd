@@ -368,6 +368,7 @@ public:
     }
 
     friend class ndarray;
+    friend ndarray_vals ndarray::vals() const;
 };
 
 inline ndarray_vals ndarray::vals() const {

@@ -11,8 +11,6 @@
 #include <dnd/kernels/builtin_dtype_binary_kernel_table.hpp>
 #include <dnd/nodes/elwise_binary_kernel_node.hpp>
 
-#define INTPTR_MAX  std::numeric_limits<intptr_t>::max()
-
 using namespace std;
 using namespace dnd;
 
@@ -134,8 +132,10 @@ ndarray dnd::operator+(const ndarray& op1, const ndarray& op2)
     kernel_instance<binary_operation_t> kernel;
     // TODO: This is throwing away the stride specialization, probably want to put that back
     //       in how it is with the unary_specialization instance
-    kernel.kernel = get_binary_operation_from_builtin_dtype_table(builtin_addition_table,
-                    dt, INTPTR_MAX, INTPTR_MAX, INTPTR_MAX);
+    kernel.kernel = get_binary_operation_from_builtin_dtype_table(builtin_addition_table, dt,
+                    numeric_limits<intptr_t>::max(),
+                    numeric_limits<intptr_t>::max(),
+                    numeric_limits<intptr_t>::max());
     return ndarray(make_elwise_binary_kernel_node_steal_kernel(dt,
                     op1.get_node()->as_dtype(dt), op2.get_node()->as_dtype(dt), kernel));
 }
@@ -146,8 +146,10 @@ ndarray dnd::operator-(const ndarray& op1, const ndarray& op2)
     kernel_instance<binary_operation_t> kernel;
     // TODO: This is throwing away the stride specialization, probably want to put that back
     //       in how it is with the unary_specialization instance
-    kernel.kernel = get_binary_operation_from_builtin_dtype_table(builtin_subtraction_table,
-                    dt, INTPTR_MAX, INTPTR_MAX, INTPTR_MAX);
+    kernel.kernel = get_binary_operation_from_builtin_dtype_table(builtin_subtraction_table, dt,
+                    numeric_limits<intptr_t>::max(),
+                    numeric_limits<intptr_t>::max(),
+                    numeric_limits<intptr_t>::max());
     return ndarray(make_elwise_binary_kernel_node_steal_kernel(dt,
                     op1.get_node()->as_dtype(dt), op2.get_node()->as_dtype(dt), kernel));
 }
@@ -158,8 +160,10 @@ ndarray dnd::operator*(const ndarray& op1, const ndarray& op2)
     kernel_instance<binary_operation_t> kernel;
     // TODO: This is throwing away the stride specialization, probably want to put that back
     //       in how it is with the unary_specialization instance
-    kernel.kernel = get_binary_operation_from_builtin_dtype_table(builtin_multiplication_table,
-                    dt, INTPTR_MAX, INTPTR_MAX, INTPTR_MAX);
+    kernel.kernel = get_binary_operation_from_builtin_dtype_table(builtin_multiplication_table, dt,
+                    numeric_limits<intptr_t>::max(),
+                    numeric_limits<intptr_t>::max(),
+                    numeric_limits<intptr_t>::max());
     return ndarray(make_elwise_binary_kernel_node_steal_kernel(dt,
                     op1.get_node()->as_dtype(dt), op2.get_node()->as_dtype(dt), kernel));
 }
@@ -170,8 +174,10 @@ ndarray dnd::operator/(const ndarray& op1, const ndarray& op2)
     kernel_instance<binary_operation_t> kernel;
     // TODO: This is throwing away the stride specialization, probably want to put that back
     //       in how it is with the unary_specialization instance
-    kernel.kernel = get_binary_operation_from_builtin_dtype_table(builtin_division_table,
-                    dt, INTPTR_MAX, INTPTR_MAX, INTPTR_MAX);
+    kernel.kernel = get_binary_operation_from_builtin_dtype_table(builtin_division_table, dt,
+                    numeric_limits<intptr_t>::max(),
+                    numeric_limits<intptr_t>::max(),
+                    numeric_limits<intptr_t>::max());
     return ndarray(make_elwise_binary_kernel_node_steal_kernel(dt,
                     op1.get_node()->as_dtype(dt), op2.get_node()->as_dtype(dt), kernel));
 }

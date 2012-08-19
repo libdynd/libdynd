@@ -17,12 +17,14 @@
 #include <dnd/memblock/memory_block.hpp>
 #include <dnd/dtype.hpp>
 
+using namespace std;
+using namespace dnd;
 
 namespace
 {
     void* ptr_offset(void* ptr, ptrdiff_t offset)
     {
-        return static_cast<void*>(static_cast<uint8_t*>(ptr) + offset);
+        return static_cast<void*>(static_cast<char*>(ptr) + offset);
     }
     
     const char* type_to_str(unsigned restype)
@@ -102,25 +104,25 @@ namespace
 
     private:
         dnd::memory_block_data*  memblock_;
-        int8_t*             current_;
-        int8_t*             begin_;
-        int8_t*             end_;
+        char*             current_;
+        char*             begin_;
+        char*             end_;
         bool                ok_;
     };
     
-    function_builder::function_builder(dnd::memory_block_data* memblock
-                                       , size_t estimated_size)
+    function_builder::function_builder(dnd::memory_block_data* memblock,
+                                       size_t estimated_size)
     : memblock_(memblock)
     , current_(0)
     , begin_(0)
     , end_(0)
     , ok_(true)
     {
-        dnd::allocate_executable_memory(memblock
-                                        , estimated_size
-                                        , 16
-                                        , (char**)&begin_
-                                        , (char**)&end_
+        dnd::allocate_executable_memory(memblock,
+                                         estimated_size,
+                                         16,
+                                         &begin_,
+                                         &end_
                                         );
         current_ = begin_;
     }
@@ -136,8 +138,8 @@ namespace
         return *this;
     }
     
-    function_builder& function_builder::append(const void* code
-                                               , size_t code_size
+    function_builder& function_builder::append(const void* code,
+                                                size_t code_size
                                                )
     {
         if (!ok_)
@@ -202,9 +204,9 @@ namespace
             // this will shrink... resize_executable_memory has realloc semantics
             // so on shrink it will never move;
 #if !defined(NDEBUG)
-            int8_t* old_begin = begin_;
+            char* old_begin = begin_;
 #endif
-            dnd::resize_executable_memory(memblock_, current_ - begin_, (char**)&begin_, (char**)&end_);
+            dnd::resize_executable_memory(memblock_, current_ - begin_, &begin_, &end_);
             assert(old_begin = begin_);
 
             // TODO: flush instruction cache for the generated code. Not needed
@@ -228,7 +230,7 @@ namespace
         if (begin_)
         {
             // if we didn't finish... rollback the executable memory
-            dnd::resize_executable_memory(memblock_, 0, (char**)&begin_, (char**)&end_);
+            dnd::resize_executable_memory(memblock_, 0, &begin_, &end_);
         }
         memblock_ = 0;
         current_  = 0;
@@ -239,13 +241,9 @@ namespace
     
 }
 
-namespace dnd
-{
-
-
-uint64_t get_unary_function_adapter_unique_id(const dtype& restype
-                                              , const dtype& arg0type
-                                              , calling_convention_t DND_UNUSED(callconv)
+uint64_t dnd::get_unary_function_adapter_unique_id(const dtype& restype,
+                                               const dtype& arg0type,
+                                               calling_convention_t DND_UNUSED(callconv)
                                               )
 {
     // Bits 0..2 for the result type
@@ -261,7 +259,7 @@ uint64_t get_unary_function_adapter_unique_id(const dtype& restype
 }
     
     
-std::string get_unary_function_adapter_unique_id_string(uint64_t unique_id)
+std::string dnd::get_unary_function_adapter_unique_id_string(uint64_t unique_id)
 {
     std::stringstream ss;
 
@@ -274,7 +272,7 @@ std::string get_unary_function_adapter_unique_id_string(uint64_t unique_id)
 namespace // nameless
 {
 // these are portions of machine code used to compose the unary function adapter    
-    uint8_t unary_adapter_prolog[] = {
+    char unary_adapter_prolog[] = {
         // save callee saved registers... we use them all ;)
         0x55,                           // pushq %rbp
         0x41, 0x57,                     // pushq %r15
@@ -284,7 +282,7 @@ namespace // nameless
         0x53,                           // pushq %rbx
     };
     
-    uint8_t unary_adapter_loop_setup[] = {
+    char unary_adapter_loop_setup[] = {
         // move all the registers to callee saved ones... we are reusing them
         // in the loop
         0x4d, 0x89, 0xce,               // movq %r9, %r14
@@ -300,62 +298,62 @@ namespace // nameless
     };
 
     
-    uint8_t unary_adapter_arg0_get_int8[] = {
+    char unary_adapter_arg0_get_int8[] = {
         0x0f, 0xbe, 0x3b,               // movsbl   (%rbx), %edi
     };
-    uint8_t unary_adapter_arg0_get_int16[] = {
+    char unary_adapter_arg0_get_int16[] = {
         0x0f, 0xbf, 0x3b,               // movswl   (%rbx), %edi
     };
-    uint8_t unary_adapter_arg0_get_int32[] = {
+    char unary_adapter_arg0_get_int32[] = {
         0x8b, 0x3b                      // movl     (%rbx), %edi
     };
-    uint8_t unary_adapter_arg0_get_int64[] = {
+    char unary_adapter_arg0_get_int64[] = {
         0x48, 0x8b, 0x3b                // movq     (%rbx), %rdi
     };
-    uint8_t unary_adapter_arg0_get_float32[] = {
+    char unary_adapter_arg0_get_float32[] = {
         0xf3, 0x0f, 0x10, 0x03          // movss    (%rbx), %xmm0
     };
-    uint8_t unary_adapter_arg0_get_float64[] = {
+    char unary_adapter_arg0_get_float64[] = {
         0xf2, 0x0f, 0x10, 0x03          // movsd    (%rbx), %xmm0
     };
 
     // End ARG0 CHOICE ]]
-    uint8_t unary_adapter_function_call[] = {
+    char unary_adapter_function_call[] = {
         // our function pointer is in %r14
         0x41, 0xff, 0xd6,               // call     *%r14
     };
     // Begin RESULT CHOICE [[
-    uint8_t unary_adapter_result_set_int8[] = {
+    char unary_adapter_result_set_int8[] = {
         0x88, 0x45, 0x00                // movb     %al, 0x00(%rbp)
     };
-    uint8_t unary_adapter_result_set_int16[] = {
+    char unary_adapter_result_set_int16[] = {
         0x66, 0x89, 0x45, 0x00          // movw     %ax, 0x00(%rbp)
     };
-    uint8_t unary_adapter_result_set_int32[] = {
+    char unary_adapter_result_set_int32[] = {
         0x89, 0x45, 0x00                // movl     %eax, (%rbp)
     };
-    uint8_t unary_adapter_result_set_int64[] = {
+    char unary_adapter_result_set_int64[] = {
         0x48, 0x89, 0x45, 0x00          // moq      %rax, (%rbp)
     };
-    uint8_t unary_adapter_result_set_float32[] = {
+    char unary_adapter_result_set_float32[] = {
         0xf3, 0x0f, 0x11, 0x45, 0x00    // movss    %xmm0, (%rbp)
     };
-    uint8_t unary_adapter_result_set_float64[] = {
+    char unary_adapter_result_set_float64[] = {
         0xf2, 0x0f, 0x11, 0x45, 0x00    // movsd    %xmm0, (%rbp)
     };
     // End RESULT CHOICE ]]
-    uint8_t unary_adapter_update_streams[] = {
+    char unary_adapter_update_streams[] = {
         0x4c, 0x01, 0xfb,               // addq %r15, %rbx  # update src
         0x4c, 0x01, 0xed,               // addq %r13, %rbp  # update dst
     };
     
-    uint8_t unary_adapter_loop_finish[] = {
+    char unary_adapter_loop_finish[] = {
         0x49, 0xff, 0xcc,               // decq %r12        # dec count
         0x75, 0x00,                     // jne loop (patch last byte)
     };
  
     // skip_loop:
-    uint8_t unary_adapter_epilog[] = {
+    char unary_adapter_epilog[] = {
         // restore callee saved registers and return...
         0x5b,                           // popq %rbx
         0x41, 0x5c,                     // popq %r12
@@ -389,10 +387,10 @@ namespace // nameless
 } // nameless namespace
     
 
-unary_operation_t* codegen_unary_function_adapter(const memory_block_ptr& exec_mem_block
-                                                 , const dtype& restype
-                                                 , const dtype& arg0type
-                                                 , calling_convention_t DND_UNUSED(callconv)
+unary_operation_t* dnd::codegen_unary_function_adapter(const memory_block_ptr& exec_mem_block,
+                                                  const dtype& restype,
+                                                  const dtype& arg0type,
+                                                  calling_convention_t DND_UNUSED(callconv)
                                                  )
 {
     size_t arg0_idx = idx_for_type_id(arg0type.type_id());
@@ -441,7 +439,7 @@ unary_operation_t* codegen_unary_function_adapter(const memory_block_ptr& exec_m
         void* base    = fbuilder.base();
 
         assert(loop_size > 0 && loop_size < 128);
-        int8_t* loop_continue_offset = static_cast<int8_t*>(ptr_offset(base, loop_end)) - 1;
+        char* loop_continue_offset = static_cast<char*>(ptr_offset(base, loop_end)) - 1;
         *loop_continue_offset = - loop_size;
         
         unary_operation_t* specializations = static_cast<unary_operation_t*>(ptr_offset(base, table));
@@ -458,6 +456,5 @@ unary_operation_t* codegen_unary_function_adapter(const memory_block_ptr& exec_m
     // releasing memory (it acts as RAII, kind of -- exception safe as well)
     return 0;
 }
-} // namespace dnd
 
 #endif // defined(DND_CALL_SYSV_X64)

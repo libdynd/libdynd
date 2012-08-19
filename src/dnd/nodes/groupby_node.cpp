@@ -52,3 +52,4 @@ ndarray_node_ptr dnd::make_groupby_node(const ndarray_node_ptr& data_node,
 
     return DND_MOVE(result);
 }
+

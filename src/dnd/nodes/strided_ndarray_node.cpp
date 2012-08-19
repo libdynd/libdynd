@@ -273,3 +273,4 @@ ndarray_node_ptr dnd::make_strided_ndarray_node(const dtype& dt, int ndim, const
     new (node_memory) strided_ndarray_node(dt, ndim, shape, axis_perm, access_flags, blockrefs_begin, blockrefs_end);
     return DND_MOVE(result);
 }
+
