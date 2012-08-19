@@ -16,13 +16,22 @@ find_package(Boost REQUIRED)
 #cmake_force_c_compiler(/usr/local/bin/clang CLang)
 #cmake_force_cxx_compiler(/usr/local/bin/clang++ CLang)
 
+# If we're using gcc, check the version
+if (CMAKE_COMPILER_IS_GNUCXX)
+    execute_process(COMMAND ${CMAKE_C_COMPILER} -dumpversion
+                    OUTPUT_VARIABLE GCC_VERSION)
+endif()    
+
 if(WIN32)
     # Treat warnings as errors (-WX does this)
     set(CMAKE_CXX_FLAGS "-WX -EHsc")
 else()
     set(CMAKE_CXX_FLAGS "-std=c++0x -g -O0 -fomit-frame-pointer -fstrict-aliasing -fPIC -Wall -Wextra -Werror")
     if (CMAKE_COMPILER_IS_GNUCXX)
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fmax-errors=20")
+        # The '-fmax-errors' flag was first supported in gcc 4.6
+        if (GCC_VERSION VERSION_GREATER 4.6 OR GCC_VERSION VERSION_EQUAL 4.6)
+            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fmax-errors=20")
+        endif()
     else()
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ferror-limit=20")
     endif()
