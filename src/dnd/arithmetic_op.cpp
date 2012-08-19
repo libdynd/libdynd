@@ -11,6 +11,8 @@
 #include <dnd/kernels/builtin_dtype_binary_kernel_table.hpp>
 #include <dnd/nodes/elwise_binary_kernel_node.hpp>
 
+#define INTPTR_MAX  std::numeric_limits<intptr_t>::max()
+
 using namespace std;
 using namespace dnd;
 
