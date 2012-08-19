@@ -76,8 +76,4 @@ public:
 
 } // namespace dnd
 
-#ifdef __GNUC__
-#pragma GCC diagnostic pop
-#endif
-
 #endif // _SCALARS_HPP_

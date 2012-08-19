@@ -877,9 +877,5 @@ struct single_assigner_builtin<same_type, same_type, errmode>
     }
 };
 
-#ifdef __GNUC__
-#pragma GCC diagnostic pop
-#endif
-
 } // namespace dnd
 

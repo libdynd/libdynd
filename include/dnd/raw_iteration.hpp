@@ -483,8 +483,4 @@ public:
 
 } // namespace dnd
 
-#ifdef __GNUC__
-#pragma GCC diagnostic pop
-#endif
-
 #endif // _RAW_ITERATION_HPP_
