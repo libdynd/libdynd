@@ -9,6 +9,7 @@
 #include <dnd/fpstatus.hpp>
 #include <cmath>
 #include <complex>
+#include <limits>
 
 #include <dnd/dtype.hpp>
 #include <dnd/diagnostics.hpp>
