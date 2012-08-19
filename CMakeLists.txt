@@ -11,16 +11,11 @@ set(BUILD_SHARED_LIBS 1)
 
 find_package(Boost REQUIRED)
 
-# Clang Compiler
-#include(CMakeForceCompiler)
-#cmake_force_c_compiler(/usr/local/bin/clang CLang)
-#cmake_force_cxx_compiler(/usr/local/bin/clang++ CLang)
-
 # If we're using gcc, check the version
 if (CMAKE_COMPILER_IS_GNUCXX)
     execute_process(COMMAND ${CMAKE_C_COMPILER} -dumpversion
                     OUTPUT_VARIABLE GCC_VERSION)
-endif()    
+endif()
 
 if(WIN32)
     # Treat warnings as errors (-WX does this)

@@ -412,7 +412,7 @@ std::string dnd::get_binary_function_adapter_unique_id_string(uint64_t unique_id
 namespace // nameless
 {
 // snippets of code to generate the machine code for the adapter
-    char binary_adapter_prolog[] =
+    uint8_t binary_adapter_prolog[] =
     {
         // save callee saved registers... we use them all ;)
         0x55,                           // pushq %rbp
@@ -424,7 +424,7 @@ namespace // nameless
         0x48, 0x83, 0xec, 0x18,         // subq  $24, %rsp
     };
     
-    char binary_adapter_loop_setup[] =
+    uint8_t binary_adapter_loop_setup[] =
     {
         0x4c, 0x89, 0x4c, 0x24, 0x10,   // movq %r9, 16(%rsp)
         0x4d, 0x89, 0xc4,               // movq %r8, %r12
@@ -438,13 +438,13 @@ namespace // nameless
         0x4c, 0x8b, 0x7c, 0x24, 0x50,   // movq 80(%rsp), %r15
     };
     
-    char binary_adapter_function_call[] =
+    uint8_t binary_adapter_function_call[] =
     {
         // function pointer in %r14
         0x41, 0xff, 0xd6,               // call *%r14
     };
     
-    char binary_adapter_update_streams[] =
+    uint8_t binary_adapter_update_streams[] =
     {
         // strides are in %r13, 8(%rsp), 16(%rsp)
         0x4c, 0x03, 0x64, 0x24, 0x10,   // addq 16(%rsp),%r12
@@ -452,13 +452,13 @@ namespace // nameless
         0x4c, 0x01, 0xed                // addq    %r13,%rbp
 
     };
-    char binary_adapter_close_loop[] =
+    uint8_t binary_adapter_close_loop[] =
     {
         0x49, 0xff, 0xcf,               // decq %r15
         0x75, 0x00,                     // jne loop, needs fix-up
     };
     
-    char binary_adapter_epilog[] =
+    uint8_t binary_adapter_epilog[] =
     {
         // restore callee saved registers and return...
         0x48, 0x83, 0xc4, 0x18,         // addq $24, %rsp

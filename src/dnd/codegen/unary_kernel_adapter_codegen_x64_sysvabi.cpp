@@ -272,7 +272,7 @@ std::string dnd::get_unary_function_adapter_unique_id_string(uint64_t unique_id)
 namespace // nameless
 {
 // these are portions of machine code used to compose the unary function adapter    
-    char unary_adapter_prolog[] = {
+    uint8_t unary_adapter_prolog[] = {
         // save callee saved registers... we use them all ;)
         0x55,                           // pushq %rbp
         0x41, 0x57,                     // pushq %r15
@@ -282,7 +282,7 @@ namespace // nameless
         0x53,                           // pushq %rbx
     };
     
-    char unary_adapter_loop_setup[] = {
+    uint8_t unary_adapter_loop_setup[] = {
         // move all the registers to callee saved ones... we are reusing them
         // in the loop
         0x4d, 0x89, 0xce,               // movq %r9, %r14
@@ -298,62 +298,62 @@ namespace // nameless
     };
 
     
-    char unary_adapter_arg0_get_int8[] = {
+    uint8_t unary_adapter_arg0_get_int8[] = {
         0x0f, 0xbe, 0x3b,               // movsbl   (%rbx), %edi
     };
-    char unary_adapter_arg0_get_int16[] = {
+    uint8_t unary_adapter_arg0_get_int16[] = {
         0x0f, 0xbf, 0x3b,               // movswl   (%rbx), %edi
     };
-    char unary_adapter_arg0_get_int32[] = {
+    uint8_t unary_adapter_arg0_get_int32[] = {
         0x8b, 0x3b                      // movl     (%rbx), %edi
     };
-    char unary_adapter_arg0_get_int64[] = {
+    uint8_t unary_adapter_arg0_get_int64[] = {
         0x48, 0x8b, 0x3b                // movq     (%rbx), %rdi
     };
-    char unary_adapter_arg0_get_float32[] = {
+    uint8_t unary_adapter_arg0_get_float32[] = {
         0xf3, 0x0f, 0x10, 0x03          // movss    (%rbx), %xmm0
     };
-    char unary_adapter_arg0_get_float64[] = {
+    uint8_t unary_adapter_arg0_get_float64[] = {
         0xf2, 0x0f, 0x10, 0x03          // movsd    (%rbx), %xmm0
     };
 
     // End ARG0 CHOICE ]]
-    char unary_adapter_function_call[] = {
+    uint8_t unary_adapter_function_call[] = {
         // our function pointer is in %r14
         0x41, 0xff, 0xd6,               // call     *%r14
     };
     // Begin RESULT CHOICE [[
-    char unary_adapter_result_set_int8[] = {
+    uint8_t unary_adapter_result_set_int8[] = {
         0x88, 0x45, 0x00                // movb     %al, 0x00(%rbp)
     };
-    char unary_adapter_result_set_int16[] = {
+    uint8_t unary_adapter_result_set_int16[] = {
         0x66, 0x89, 0x45, 0x00          // movw     %ax, 0x00(%rbp)
     };
-    char unary_adapter_result_set_int32[] = {
+    uint8_t unary_adapter_result_set_int32[] = {
         0x89, 0x45, 0x00                // movl     %eax, (%rbp)
     };
-    char unary_adapter_result_set_int64[] = {
+    uint8_t unary_adapter_result_set_int64[] = {
         0x48, 0x89, 0x45, 0x00          // moq      %rax, (%rbp)
     };
-    char unary_adapter_result_set_float32[] = {
+    uint8_t unary_adapter_result_set_float32[] = {
         0xf3, 0x0f, 0x11, 0x45, 0x00    // movss    %xmm0, (%rbp)
     };
-    char unary_adapter_result_set_float64[] = {
+    uint8_t unary_adapter_result_set_float64[] = {
         0xf2, 0x0f, 0x11, 0x45, 0x00    // movsd    %xmm0, (%rbp)
     };
     // End RESULT CHOICE ]]
-    char unary_adapter_update_streams[] = {
+    uint8_t unary_adapter_update_streams[] = {
         0x4c, 0x01, 0xfb,               // addq %r15, %rbx  # update src
         0x4c, 0x01, 0xed,               // addq %r13, %rbp  # update dst
     };
     
-    char unary_adapter_loop_finish[] = {
+    uint8_t unary_adapter_loop_finish[] = {
         0x49, 0xff, 0xcc,               // decq %r12        # dec count
         0x75, 0x00,                     // jne loop (patch last byte)
     };
  
     // skip_loop:
-    char unary_adapter_epilog[] = {
+    uint8_t unary_adapter_epilog[] = {
         // restore callee saved registers and return...
         0x5b,                           // popq %rbx
         0x41, 0x5c,                     // popq %r12
