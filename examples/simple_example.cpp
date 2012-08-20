@@ -32,16 +32,29 @@ S double_value(T value) {
 int main()
 {
     try {
-    ndarray a;
 
-    a = ndarray(make_fixedstring_dtype(string_encoding_utf_16, 16));
-    // Fill up the string with values
-    a.vals() = std::string("0123456789012345");
-    EXPECT_EQ("0123456789012345", a.as<std::string>());
-    // Confirm that now assigning a smaller string works
-    a.vals() = std::string("abc");
-    EXPECT_EQ("abc", a.as<std::string>());
+    float v0[4] = {3.5, 1.0, 0, 1000};
+    ndarray a = v0, b;
 
+	a.debug_dump(cout);
+    cout << a << endl;
+
+    //b = a.as_dtype(make_dtype<int>());
+    // This triggers the conversion from float to int,
+    // but the default assign policy is 'fractional'
+
+    // Allow truncation of fractional part
+    //b = a.as_dtype(make_dtype<int>(), assign_error_overflow);
+    b = a.as_dtype(make_dtype<int>(), assign_error_overflow);
+	b.debug_dump(cout);
+    cout << b << endl;
+    b = b.vals();
+	b.debug_dump(cout);
+    cout << b << endl;
+    EXPECT_EQ(3, b(0).as<int>());
+    EXPECT_EQ(1, b(1).as<int>());
+    EXPECT_EQ(0, b(2).as<int>());
+    EXPECT_EQ(1000, b(3).as<int>());
 
     } catch(int) { //std::exception& e) {
         //cout << "Error: " << e.what() << "\n";

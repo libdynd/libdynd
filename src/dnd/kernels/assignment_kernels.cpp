@@ -69,8 +69,7 @@ assignment_function_t dnd::get_builtin_dtype_assignment_function(type_id_t dst_t
 void dnd::multiple_assignment_kernel(char *dst, intptr_t dst_stride, const char *src, intptr_t src_stride,
                                     intptr_t count, const AuxDataBase *auxdata)
 {
-    assignment_function_t asn = reinterpret_cast<assignment_function_t>(get_raw_auxiliary_data(auxdata)&~1);
-
+    assignment_function_t asn = get_auxiliary_data<assignment_function_t>(auxdata);
 
     char *dst_cached = reinterpret_cast<char *>(dst);
     const char *src_cached = reinterpret_cast<const char *>(src);
@@ -187,8 +186,11 @@ void dnd::get_builtin_dtype_assignment_kernel(
         if (ectx != NULL) {
             errmode = ectx->default_assign_error_mode;
         } else {
+            // Behavior is to return NULL for default mode if no
+            // evaluation context is provided
             out_kernel.specializations = NULL;
             out_kernel.auxdata.free();
+            return;
         }
     }
 
@@ -218,7 +220,7 @@ void dnd::get_builtin_dtype_assignment_kernel(
         assignment_function_t asn = get_builtin_dtype_assignment_function(dst_type_id, src_type_id, errmode);
         if (asn != NULL) {
             out_kernel.specializations = fn_optable;
-            make_raw_auxiliary_data(out_kernel.auxdata, reinterpret_cast<uintptr_t>(asn));
+            make_auxiliary_data<assignment_function_t>(out_kernel.auxdata, asn);
             return;
         } else {
             stringstream ss;
