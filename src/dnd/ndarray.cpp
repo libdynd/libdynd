@@ -30,6 +30,10 @@ dnd::ndarray::ndarray()
 {
 }
 
+dnd::ndarray::ndarray(dnd_bool value)
+    : m_node(make_immutable_builtin_scalar_node(value))
+{
+}
 dnd::ndarray::ndarray(signed char value)
     : m_node(make_immutable_builtin_scalar_node(value))
 {

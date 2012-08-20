@@ -49,6 +49,7 @@ public:
      * TODO: Figure out why enable_if with is_dtype_scalar didn't work for this constructor
      *       in g++ 4.6.0.
      */
+    ndarray(dnd_bool value);
     ndarray(signed char value);
     ndarray(short value);
     ndarray(int value);
