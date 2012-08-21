@@ -60,11 +60,15 @@ void dnd::gfunc::elwise_reduce::debug_dump(std::ostream& o, const std::string& i
             }
         }
         o << ")\n";
+        o << indent << " associative: " << (k.m_associative ? "true" : "false") << "\n";
+        o << indent << " commutative: " << (k.m_commutative ? "true" : "false") << "\n";
         if (k.m_left_associative_reduction_kernel.kernel != NULL) {
-            o << indent << " left associative kernel aux data: " << (const void *)(const dnd::AuxDataBase *)k.m_left_associative_reduction_kernel.auxdata << "\n";
+            o << indent << " left associative kernel aux data: ";
+            o << (const void *)(const dnd::AuxDataBase *)k.m_left_associative_reduction_kernel.auxdata << "\n";
         }
         if (k.m_right_associative_reduction_kernel.kernel != NULL) {
-            o << indent << " right associative kernel aux data: " << (const void *)(const dnd::AuxDataBase *)k.m_right_associative_reduction_kernel.auxdata << "\n";
+            o << indent << " right associative kernel aux data: ";
+            o << (const void *)(const dnd::AuxDataBase *)k.m_right_associative_reduction_kernel.auxdata << "\n";
         }
         if (k.m_identity.get_node().get()) {
             o << indent << " reduction identity:\n";
