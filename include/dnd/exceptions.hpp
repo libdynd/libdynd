@@ -8,7 +8,6 @@
 
 #include <string>
 #include <stdexcept>
-#include <stdint.h>
 
 #include <dnd/irange.hpp>
 

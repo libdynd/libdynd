@@ -6,7 +6,6 @@
 #ifndef _DND__IRANGE_HPP_
 #define _DND__IRANGE_HPP_
 
-#include <stdint.h>
 #include <limits>
 
 #include <dnd/config.hpp>

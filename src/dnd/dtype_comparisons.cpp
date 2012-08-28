@@ -9,7 +9,6 @@
 
 #include <complex>
 #include <iostream>
-#include <stdint.h>
 
 using namespace std;
 using namespace dnd;

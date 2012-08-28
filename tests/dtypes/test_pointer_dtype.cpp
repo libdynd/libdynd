@@ -6,7 +6,6 @@
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
-#include <stdint.h>
 #include "inc_gtest.hpp"
 
 #include <dnd/dtypes/pointer_dtype.hpp>

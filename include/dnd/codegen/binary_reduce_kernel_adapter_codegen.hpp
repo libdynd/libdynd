@@ -10,7 +10,6 @@
 #include <dnd/kernels/kernel_instance.hpp>
 #include <dnd/memblock/memory_block.hpp>
 #include <dnd/codegen/calling_conventions.hpp>
-#include <stdint.h>
 
 namespace dnd {
 

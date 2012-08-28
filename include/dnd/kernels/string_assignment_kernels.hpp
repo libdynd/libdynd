@@ -9,7 +9,6 @@
 #include <dnd/kernels/unary_kernel_instance.hpp>
 #include <dnd/dtype_assign.hpp>
 #include <dnd/string_encodings.hpp>
-#include <stdint.h>
 
 namespace dnd {
 

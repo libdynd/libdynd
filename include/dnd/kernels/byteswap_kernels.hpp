@@ -7,7 +7,6 @@
 #define _DND__BYTESWAP_KERNELS_HPP_
 
 #include <dnd/kernels/unary_kernel_instance.hpp>
-#include <stdint.h>
 
 namespace dnd {
 

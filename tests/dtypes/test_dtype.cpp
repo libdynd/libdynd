@@ -6,7 +6,6 @@
 #include <complex>
 #include <iostream>
 #include <stdexcept>
-#include <stdint.h>
 #include "inc_gtest.hpp"
 
 #include <dnd/dtype.hpp>

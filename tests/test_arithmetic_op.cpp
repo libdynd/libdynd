@@ -6,7 +6,6 @@
 #include <iostream>
 #include <stdexcept>
 #include <cmath>
-#include <stdint.h>
 #include <inc_gtest.hpp>
 
 #include <dnd/ndarray.hpp>

@@ -4,7 +4,6 @@
 //
 
 #include <sstream>
-#include <stdint.h>
 
 #include <dnd/dtype.hpp>
 #include <dnd/string_encodings.hpp>

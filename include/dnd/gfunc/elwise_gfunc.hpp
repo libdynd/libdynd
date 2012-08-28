@@ -6,7 +6,6 @@
 #ifndef _DND__ELWISE_GFUNC_HPP_
 #define _DND__ELWISE_GFUNC_HPP_
 
-#include <stdint.h>
 #include <sstream>
 #include <deque>
 #include <vector>

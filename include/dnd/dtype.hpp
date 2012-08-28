@@ -6,7 +6,6 @@
 #ifndef _DND__DTYPE_HPP_
 #define _DND__DTYPE_HPP_
 
-#include <stdint.h>
 #include <iostream>
 #include <complex>
 #include <stdexcept>

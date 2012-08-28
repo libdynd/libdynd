@@ -19,7 +19,11 @@
 // TODO: versions with constexpr
 #  define DND_CONSTEXPR constexpr
 
+# define DND_USE_STDINT
+
 #elif defined(__GNUC__)
+
+# define DND_USE_STDINT
 
 #if __GNUC__ > 4 || \
               (__GNUC__ == 4 && (__GNUC_MINOR__ >= 7))
@@ -43,6 +47,9 @@
 #  define DND_USE_TR1_ENABLE_IF
 // Use rvalue refs
 #  define DND_RVALUE_REFS
+#  define DND_USE_STDINT
+# else
+#  define DND_USE_BOOST_SHARED_PTR
 # endif
 
 // No DND_CONSTEXPR yet, define it as nothing
@@ -148,5 +155,19 @@ namespace dnd {
  */
 #define DND_UNUSED(x)
 
+#ifdef DND_USE_STDINT
+#include <stdint.h>
+#else
+typedef signed char      int8_t;
+typedef short            int16_t;
+typedef int              int32_t;
+typedef __int64          int64_t;
+typedef ptrdiff_t        intptr_t;
+typedef unsigned char    uint8_t;
+typedef unsigned short   uint16_t;
+typedef unsigned int     uint32_t;
+typedef unsigned __int64 uint64_t;
+typedef size_t           uintptr_t;
+#endif
 
 #endif // _DND__CONFIG_HPP_

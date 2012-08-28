@@ -3,8 +3,9 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <stdint.h>
 #include <cmath>
+
+#include <dnd/config.hpp>
 
 #ifdef _WIN32
 # define EXPORT extern "C" __declspec(dllexport)

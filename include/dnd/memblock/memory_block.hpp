@@ -12,8 +12,6 @@
 
 #include <dnd/config.hpp>
 
-#include <stdint.h>
-
 namespace dnd {
 
 /**

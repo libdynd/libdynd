@@ -8,7 +8,6 @@
 #include <complex>
 #include <iostream>
 #include <stdexcept>
-#include <stdint.h>
 #include "inc_gtest.hpp"
 
 #include <dnd/codegen/codegen_cache.hpp>
