@@ -3,12 +3,12 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <dnd/dtypes/array_dtype.hpp>
+#include <dnd/dtypes/ndarray_dtype.hpp>
 #include <dnd/raw_iteration.hpp>
 
 using namespace dnd;
 
-array_dtype::array_dtype(intptr_t element_size, int ndim,
+ndarray_dtype::ndarray_dtype(intptr_t element_size, int ndim,
                                     intptr_t *shape, intptr_t *strides,
                                     const dtype& element_dtype)
     : extended_dtype(), m_element_size(element_size), m_element_dtype(element_dtype),
@@ -28,7 +28,7 @@ intptr_t product(int n, intptr_t *values)
     return result;
 }
 
-array_dtype::array_dtype(int ndim, intptr_t *shape, const dtype& element_dtype)
+ndarray_dtype::ndarray_dtype(int ndim, intptr_t *shape, const dtype& element_dtype)
     : extended_dtype(), m_element_size(element_dtype.element_size() * product(ndim, shape)),
       m_element_dtype(element_dtype), m_shape_and_strides(ndim), m_ndim(ndim)
 {
@@ -66,7 +66,7 @@ static void nested_array_print(std::ostream& o, const dtype& d, const char *data
     o << "]";
 }
 
-void array_dtype::print_element(std::ostream& o, const char * data) const
+void ndarray_dtype::print_element(std::ostream& o, const char * data) const
 {
     intptr_t size = *get_shape();
     for (int i = 0; i < size; ++i) {
@@ -78,7 +78,7 @@ void array_dtype::print_element(std::ostream& o, const char * data) const
     }
 }
 
-void array_dtype::print_dtype(std::ostream& o) const
+void ndarray_dtype::print_dtype(std::ostream& o) const
 {
     o << "array<" << m_element_dtype << ", (";
     const intptr_t *shape = get_shape();
@@ -92,7 +92,7 @@ void array_dtype::print_dtype(std::ostream& o) const
 }
 
 
-bool array_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const
+bool ndarray_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const
 {
     if (dst_dt.extended() == this) {
         if (src_dt.extended() == this) {
@@ -101,7 +101,7 @@ bool array_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_d
         } else if (src_dt.type_id() == array_type_id) {
             // Casting array to array, check that it can broadcast, and that the
             // element dtype can cast losslessly
-            const array_dtype *src_adt = static_cast<const array_dtype *>(src_dt.extended());
+            const ndarray_dtype *src_adt = static_cast<const ndarray_dtype *>(src_dt.extended());
             return shape_can_broadcast(m_ndim, get_shape(), src_adt->m_ndim, src_adt->get_shape()) &&
                 ::is_lossless_assignment(m_element_dtype, src_adt->m_element_dtype);
         } else {
@@ -115,14 +115,14 @@ bool array_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_d
     }
 }
 
-bool array_dtype::operator==(const extended_dtype& rhs) const
+bool ndarray_dtype::operator==(const extended_dtype& rhs) const
 {
     if (this == &rhs) {
         return true;
     } else if (rhs.type_id() != array_type_id) {
         return false;
     } else {
-        const array_dtype *adt = static_cast<const array_dtype*>(&rhs);
+        const ndarray_dtype *adt = static_cast<const ndarray_dtype*>(&rhs);
 
         if (m_ndim != adt->m_ndim || m_element_dtype != adt->m_element_dtype)
             return false;

@@ -2,18 +2,18 @@
 // Copyright (C) 2011-12, Dynamic NDArray Developers
 // BSD 2-Clause License, see LICENSE.txt
 //
-// The array dtype always represents linearly-strided arrays of
+// The ndarray dtype always represents linearly-strided arrays of
 // dtyped elements.
 //
-#ifndef _DND__ARRAY_DTYPE_HPP_
-#define _DND__ARRAY_DTYPE_HPP_
+#ifndef _DND__NDARRAY_DTYPE_HPP_
+#define _DND__NDARRAY_DTYPE_HPP_
 
 #include <dnd/dtype.hpp>
 #include <dnd/shortvector.hpp>
 
 namespace dnd {
 
-class array_dtype : public extended_dtype {
+class ndarray_dtype : public extended_dtype {
     // The number of bytes required for this dtype
     uintptr_t m_element_size;
     // The data type of the array elements
@@ -26,9 +26,9 @@ class array_dtype : public extended_dtype {
 public:
     // The general constructor with arbitrarily linear-strided data. The caller should ensure correctness,
     // i.e. that the strides are all divisible by the element_dtype's alignment.
-    array_dtype(intptr_t dtype_size, int ndim, intptr_t *shape, intptr_t *strides, const dtype& element_dtype);
+    ndarray_dtype(intptr_t dtype_size, int ndim, intptr_t *shape, intptr_t *strides, const dtype& element_dtype);
     // A default C-order constructor
-    array_dtype(int ndim, intptr_t *shape, const dtype& element_dtype);
+    ndarray_dtype(int ndim, intptr_t *shape, const dtype& element_dtype);
 
     type_id_t type_id() const {
         return (type_id_t)array_type_id;
@@ -68,10 +68,10 @@ public:
 };
 
 template<class T>
-dtype make_array_dtype(int ndim, intptr_t *shape) {
-    return dtype(make_shared<array_dtype>(ndim, shape, make_dtype<T>()));
+dtype make_ndarray_dtype(int ndim, intptr_t *shape) {
+    return dtype(make_shared<ndarray_dtype>(ndim, shape, make_dtype<T>()));
 }
 
 } // namespace dnd
 
-#endif // _DND__ARRAY_DTYPE_HPP_
+#endif // _DND__NDARRAY_DTYPE_HPP_
