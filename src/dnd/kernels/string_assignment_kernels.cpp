@@ -125,7 +125,7 @@ namespace {
         memory_block_ptr dst_memblock;
     };
 
-    /** Does a single fixed-string copy */
+    /** Does a single blockref-string copy */
     static void blockref_string_assign(char *dst, const char *src,
             const blockref_string_assign_kernel_auxdata& ad)
     {

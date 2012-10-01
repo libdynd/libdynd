@@ -47,7 +47,7 @@ enum dtype_kind_t {
     string_kind,
     bytes_kind,
     void_kind,
-    // For struct_type_id and array_type_id
+    // For struct_type_id and ndarray_type_id
     composite_kind,
     // For dtypes whose value_dtype != the dtype, signals
     // that calculations should look at the value_dtype for
@@ -93,10 +93,13 @@ enum type_id_t {
     // blockref primitive dtypes
     string_type_id,
 
+    // blockref composite dtypes
+    array_type_id,
+
     // Composite dtypes
     struct_type_id,
     tuple_type_id,
-    array_type_id,
+    ndarray_type_id,
 
     // Adapter dtypes
     convert_type_id,

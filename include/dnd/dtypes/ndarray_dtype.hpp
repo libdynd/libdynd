@@ -31,7 +31,7 @@ public:
     ndarray_dtype(int ndim, intptr_t *shape, const dtype& element_dtype);
 
     type_id_t type_id() const {
-        return (type_id_t)array_type_id;
+        return (type_id_t)ndarray_type_id;
     }
     dtype_kind_t kind() const {
         return composite_kind;

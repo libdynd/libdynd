@@ -98,7 +98,7 @@ bool ndarray_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src
         if (src_dt.extended() == this) {
             // Casting from identical types
             return true;
-        } else if (src_dt.type_id() == array_type_id) {
+        } else if (src_dt.type_id() == ndarray_type_id) {
             // Casting array to array, check that it can broadcast, and that the
             // element dtype can cast losslessly
             const ndarray_dtype *src_adt = static_cast<const ndarray_dtype *>(src_dt.extended());
@@ -119,7 +119,7 @@ bool ndarray_dtype::operator==(const extended_dtype& rhs) const
 {
     if (this == &rhs) {
         return true;
-    } else if (rhs.type_id() != array_type_id) {
+    } else if (rhs.type_id() != ndarray_type_id) {
         return false;
     } else {
         const ndarray_dtype *adt = static_cast<const ndarray_dtype*>(&rhs);

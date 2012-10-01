@@ -49,23 +49,25 @@ set(dnd_SRC
     include/dnd/codegen/calling_conventions.hpp
     include/dnd/codegen/codegen_cache.hpp
     # DTypes
-    src/dnd/dtypes/ndarray_dtype.cpp
+    src/dnd/dtypes/array_dtype.cpp
     src/dnd/dtypes/byteswap_dtype.cpp
     src/dnd/dtypes/categorical_dtype.cpp
     src/dnd/dtypes/convert_dtype.cpp
     src/dnd/dtypes/dtype_alignment.cpp
     src/dnd/dtypes/fixedstring_dtype.cpp
+    src/dnd/dtypes/ndarray_dtype.cpp
     src/dnd/dtypes/pointer_dtype.cpp
     src/dnd/dtypes/string_dtype.cpp
     src/dnd/dtypes/tuple_dtype.cpp
     src/dnd/dtypes/view_dtype.cpp
     src/dnd/dtypes/void_pointer_dtype.cpp
-    include/dnd/dtypes/ndarray_dtype.hpp
+    include/dnd/dtypes/array_dtype.hpp
     include/dnd/dtypes/byteswap_dtype.hpp
     include/dnd/dtypes/categorical_dtype.hpp
     include/dnd/dtypes/convert_dtype.hpp
     include/dnd/dtypes/dtype_alignment.hpp
     include/dnd/dtypes/fixedstring_dtype.hpp
+    include/dnd/dtypes/ndarray_dtype.hpp
     include/dnd/dtypes/pointer_dtype.hpp
     include/dnd/dtypes/string_dtype.hpp
     include/dnd/dtypes/tuple_dtype.hpp
@@ -89,6 +91,7 @@ set(dnd_SRC
     include/dnd/gfunc/elwise_reduce_gfunc.hpp
     # Kernels
     src/dnd/kernels/assignment_kernels.cpp
+    src/dnd/kernels/array_assignment_kernels.cpp
     src/dnd/kernels/builtin_dtype_binary_kernel_table.cpp
     src/dnd/kernels/buffered_unary_kernels.cpp
     src/dnd/kernels/buffered_binary_kernels.cpp
@@ -97,6 +100,7 @@ set(dnd_SRC
     src/dnd/kernels/kernels_for_disassembly.cpp
     src/dnd/kernels/single_assigner_builtin.hpp
     include/dnd/kernels/assignment_kernels.hpp
+    include/dnd/kernels/array_assignment_kernels.hpp
     include/dnd/kernels/builtin_dtype_binary_kernel_table.hpp
     include/dnd/kernels/buffered_unary_kernels.hpp
     include/dnd/kernels/buffered_binary_kernels.hpp
