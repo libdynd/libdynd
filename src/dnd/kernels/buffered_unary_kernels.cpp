@@ -478,7 +478,8 @@ void dnd::push_front_dtype_storage_to_value_kernels(const dnd::dtype& dt,
                     std::deque<intptr_t>& out_element_sizes)
 {
     const dtype* front_dt = &dt;
-    const dtype* next_dt = &dt.extended()->operand_dtype(dt);
+    const extended_expression_dtype* front_dt_extended = static_cast<const extended_expression_dtype *>(front_dt->extended());
+    const dtype* next_dt = &static_cast<const extended_expression_dtype *>(dt.extended())->get_operand_dtype(dt);
     if (next_dt->kind() != expression_kind) {
         // Special case when there is just one
         if (out_kernels.empty()) {
@@ -486,7 +487,7 @@ void dnd::push_front_dtype_storage_to_value_kernels(const dnd::dtype& dt,
         }
         out_element_sizes.push_front(dt.storage_dtype().element_size());
         out_kernels.push_front(unary_specialization_kernel_instance());
-        dt.extended()->get_operand_to_value_kernel(ectx, out_kernels.front());
+        front_dt_extended->get_operand_to_value_kernel(ectx, out_kernels.front());
     } else {
         // The final element size, if not yet provided
         if (out_kernels.empty()) {
@@ -496,15 +497,16 @@ void dnd::push_front_dtype_storage_to_value_kernels(const dnd::dtype& dt,
             // Add this kernel to the deque
             out_element_sizes.push_front(next_dt->value_dtype().element_size());
             out_kernels.push_front(unary_specialization_kernel_instance());
-            front_dt->extended()->get_operand_to_value_kernel(ectx, out_kernels.front());
+            front_dt_extended->get_operand_to_value_kernel(ectx, out_kernels.front());
             // Shift to the next dtype
             front_dt = next_dt;
-            next_dt = &front_dt->extended()->operand_dtype(*front_dt);
+            front_dt_extended = static_cast<const extended_expression_dtype *>(front_dt->extended());
+            next_dt = &front_dt_extended->get_operand_dtype(*front_dt);
         } while (next_dt->kind() == expression_kind);
         // Add the final kernel from the source
         out_element_sizes.push_front(next_dt->element_size());
         out_kernels.push_front(unary_specialization_kernel_instance());
-        front_dt->extended()->get_operand_to_value_kernel(ectx, out_kernels.front());
+        front_dt_extended->get_operand_to_value_kernel(ectx, out_kernels.front());
     }
 }
 
@@ -514,7 +516,8 @@ void dnd::push_back_dtype_value_to_storage_kernels(const dnd::dtype& dt,
                     std::deque<intptr_t>& out_element_sizes)
 {
     const dtype* back_dt = &dt;
-    const dtype* next_dt = &dt.extended()->operand_dtype(dt);
+    const extended_expression_dtype* back_dt_extended = static_cast<const extended_expression_dtype *>(back_dt->extended());
+    const dtype* next_dt = &back_dt_extended->get_operand_dtype(dt);
     if (next_dt->kind() != expression_kind) {
         // Special case when there is just one
         if (out_kernels.empty()) {
@@ -522,7 +525,7 @@ void dnd::push_back_dtype_value_to_storage_kernels(const dnd::dtype& dt,
         }
         out_element_sizes.push_back(dt.storage_dtype().element_size());
         out_kernels.push_back(unary_specialization_kernel_instance());
-        dt.extended()->get_value_to_operand_kernel(ectx, out_kernels.back());
+        back_dt_extended->get_value_to_operand_kernel(ectx, out_kernels.back());
     } else {
         // The first element size, if not yet provided
         if (out_kernels.empty()) {
@@ -532,14 +535,15 @@ void dnd::push_back_dtype_value_to_storage_kernels(const dnd::dtype& dt,
             // Add this kernel to the deque
             out_element_sizes.push_back(next_dt->value_dtype().element_size());
             out_kernels.push_back(unary_specialization_kernel_instance());
-            back_dt->extended()->get_value_to_operand_kernel(ectx, out_kernels.back());
+            back_dt_extended->get_value_to_operand_kernel(ectx, out_kernels.back());
             // Shift to the next dtype
             back_dt = next_dt;
-            next_dt = &back_dt->extended()->operand_dtype(*back_dt);
+            back_dt_extended = static_cast<const extended_expression_dtype *>(back_dt->extended());
+            next_dt = &back_dt_extended->get_operand_dtype(*back_dt);
         } while (next_dt->kind() == expression_kind);
         // Add the final kernel from the source
         out_element_sizes.push_back(next_dt->element_size());
         out_kernels.push_back(unary_specialization_kernel_instance());
-        back_dt->extended()->get_value_to_operand_kernel(ectx, out_kernels.back());
+        back_dt_extended->get_value_to_operand_kernel(ectx, out_kernels.back());
     }
 }

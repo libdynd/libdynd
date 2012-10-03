@@ -229,24 +229,6 @@ public:
     virtual uintptr_t element_size() const = 0;
 
     /**
-     * Should return a reference to the dtype representing the value which
-     * is for calculation. This should never be an expression dtype.
-     *
-     * @param self    The dtype which holds the shared_ptr<extended_dtype> containing this.
-     */
-    virtual const dtype& value_dtype(const dtype& self) const = 0;
-    /**
-     * Should return a reference to a dtype representing the data this dtype
-     * uses to produce the value. This should only be different from *this for expression_kind
-     * dtypes.
-     *
-     * @param self    The dtype which holds the shared_ptr<extended_dtype> containing this.
-     */
-    virtual const dtype& operand_dtype(const dtype& self) const {
-        return self;
-    }
-
-    /**
      * print data interpreted as a single value of this dtype
      *
      * @param o the std::ostream to print to
@@ -290,23 +272,6 @@ public:
                     unary_specialization_kernel_instance& out_kernel) const;
 
     virtual bool operator==(const extended_dtype& rhs) const = 0;
-
-    /** For expression_kind dtypes - converts from (operand_dtype().value_dtype()) to (value_dtype()) */
-    virtual void get_operand_to_value_kernel(const eval::eval_context *ectx,
-                            unary_specialization_kernel_instance& out_borrowed_kernel) const;
-    /** For expression_kind dtypes - converts from (value_dtype()) to (operand_dtype().value_dtype()) */
-    virtual void get_value_to_operand_kernel(const eval::eval_context *ectx,
-                            unary_specialization_kernel_instance& out_borrowed_kernel) const;
-
-    /**
-     * This method is for expression dtypes, and is a way to substitute
-     * the storage dtype (deepest operand dtype) of an existing dtype.
-     *
-     * The value_dtype of the replacement should match the storage dtype
-     * of this instance. Implementations of this should raise an exception
-     * when this is not true.
-     */
-    virtual dtype with_replaced_storage_dtype(const dtype& replacement_dtype) const;
 };
 
 /**
@@ -319,6 +284,44 @@ public:
     virtual ~extended_string_dtype();
     /** The encoding used by the string */
     virtual string_encoding_t encoding() const = 0;
+};
+
+/**
+ * Base class for all dtypes of expression_kind.
+ */
+class extended_expression_dtype : public extended_dtype {
+public:
+    /**
+     * Should return a reference to the dtype representing the value which
+     * is for calculation. This should never be an expression dtype.
+     *
+     * @param self    The dtype which holds the shared_ptr<extended_dtype> containing this.
+     */
+    virtual const dtype& get_value_dtype(const dtype& self) const = 0;
+    /**
+     * Should return a reference to a dtype representing the data this dtype
+     * uses to produce the value.
+     *
+     * @param self    The dtype which holds the shared_ptr<extended_dtype> containing this.
+     */
+    virtual const dtype& get_operand_dtype(const dtype& self) const = 0;
+
+    /** Returns a kernel which converts from (operand_dtype().value_dtype()) to (value_dtype()) */
+    virtual void get_operand_to_value_kernel(const eval::eval_context *ectx,
+                            unary_specialization_kernel_instance& out_borrowed_kernel) const = 0;
+    /** Returns a kernel which converts from (value_dtype()) to (operand_dtype().value_dtype()) */
+    virtual void get_value_to_operand_kernel(const eval::eval_context *ectx,
+                            unary_specialization_kernel_instance& out_borrowed_kernel) const = 0;
+
+    /**
+     * This method is for expression dtypes, and is a way to substitute
+     * the storage dtype (deepest operand dtype) of an existing dtype.
+     *
+     * The value_dtype of the replacement should match the storage dtype
+     * of this instance. Implementations of this should raise an exception
+     * when this is not true.
+     */
+    virtual dtype with_replaced_storage_dtype(const dtype& replacement_dtype) const = 0;
 };
 
 namespace detail {
@@ -436,7 +439,7 @@ public:
             return *this;
         } else {
             // All chaining happens in the operand_dtype
-            return m_data->value_dtype(*this);
+            return static_cast<const extended_expression_dtype *>(m_data.get())->get_value_dtype(*this);
         }
     }
 
@@ -450,7 +453,7 @@ public:
         if (m_kind != expression_kind) {
             return *this;
         } else {
-            return m_data->operand_dtype(*this);
+            return static_cast<const extended_expression_dtype *>(m_data.get())->get_operand_dtype(*this);
         }
     }
 
@@ -465,9 +468,9 @@ public:
             return *this;
         } else {
             // Follow the operand dtype chain to get the storage dtype
-            const dtype* dt = &m_data->operand_dtype(*this);
+            const dtype* dt = &static_cast<const extended_expression_dtype *>(m_data.get())->get_operand_dtype(*this);
             while (dt->kind() == expression_kind) {
-                dt = &dt->m_data->operand_dtype(*dt);
+                dt = &static_cast<const extended_expression_dtype *>(dt->m_data.get())->get_operand_dtype(*dt);
             }
             return *dt;
         }

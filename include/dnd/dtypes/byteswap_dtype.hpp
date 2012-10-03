@@ -19,7 +19,7 @@
 
 namespace dnd {
 
-class byteswap_dtype : public extended_dtype {
+class byteswap_dtype : public extended_expression_dtype {
     dtype m_value_dtype, m_operand_dtype;
     unary_specialization_kernel_instance m_byteswap_kernel;
 
@@ -41,10 +41,10 @@ public:
         return m_value_dtype.element_size();
     }
 
-    const dtype& value_dtype(const dtype& DND_UNUSED(self)) const {
+    const dtype& get_value_dtype(const dtype& DND_UNUSED(self)) const {
         return m_value_dtype;
     }
-    const dtype& operand_dtype(const dtype& DND_UNUSED(self)) const {
+    const dtype& get_operand_dtype(const dtype& DND_UNUSED(self)) const {
         return m_operand_dtype;
     }
     void print_element(std::ostream& o, const char *data) const;
@@ -61,7 +61,7 @@ public:
 
     bool operator==(const extended_dtype& rhs) const;
 
-    // For expression_kind dtypes - converts to/from the storage's value dtype
+    // Converts to/from the storage's value dtype
     void get_operand_to_value_kernel(const eval::eval_context *ectx,
                             unary_specialization_kernel_instance& out_borrowed_kernel) const;
     void get_value_to_operand_kernel(const eval::eval_context *ectx,

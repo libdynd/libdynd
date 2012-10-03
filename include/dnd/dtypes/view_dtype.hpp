@@ -12,7 +12,7 @@
 
 namespace dnd {
 
-class view_dtype : public extended_dtype {
+class view_dtype : public extended_expression_dtype {
     dtype m_value_dtype, m_operand_dtype;
     unary_specialization_kernel_instance m_copy_kernel;
 
@@ -33,10 +33,10 @@ public:
         return m_operand_dtype.element_size();
     }
 
-    const dtype& value_dtype(const dtype& DND_UNUSED(self)) const {
+    const dtype& get_value_dtype(const dtype& DND_UNUSED(self)) const {
         return m_value_dtype;
     }
-    const dtype& operand_dtype(const dtype& DND_UNUSED(self)) const {
+    const dtype& get_operand_dtype(const dtype& DND_UNUSED(self)) const {
         return m_operand_dtype;
     }
     void print_element(std::ostream& o, const char *data) const;
@@ -69,7 +69,7 @@ inline dtype make_view_dtype(const dtype& value_dtype, const dtype& operand_dtyp
     } else {
         // When the value dtype has an expression_kind, we need to chain things together
         // so that the view operation happens just at the primitive level.
-        return value_dtype.extended()->with_replaced_storage_dtype(
+        return static_cast<const extended_expression_dtype *>(value_dtype.extended())->with_replaced_storage_dtype(
             dtype(make_shared<view_dtype>(value_dtype.storage_dtype(), operand_dtype)));
     }
 }

@@ -113,3 +113,19 @@ bool dnd::pointer_dtype::operator==(const extended_dtype& rhs) const
         return m_target_dtype == dt->m_target_dtype;
     }
 }
+
+void dnd::pointer_dtype::get_operand_to_value_kernel(const eval::eval_context * /*ectx*/,
+                        unary_specialization_kernel_instance& /*out_borrowed_kernel*/) const
+{
+    throw runtime_error("TODO: implement pointer_dtype::get_operand_to_value_kernel");
+}
+void dnd::pointer_dtype::get_value_to_operand_kernel(const eval::eval_context * /*ectx*/,
+                        unary_specialization_kernel_instance& /*out_borrowed_kernel*/) const
+{
+    throw runtime_error("TODO: implement pointer_dtype::get_value_to_operand_kernel");
+}
+
+dtype dnd::pointer_dtype::with_replaced_storage_dtype(const dtype& /*replacement_dtype*/) const
+{
+    throw runtime_error("TODO: implement pointer_dtype::with_replaced_storage_dtype");
+}

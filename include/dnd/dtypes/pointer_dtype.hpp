@@ -21,7 +21,7 @@
 
 namespace dnd {
 
-class pointer_dtype : public extended_dtype {
+class pointer_dtype : public extended_expression_dtype {
     dtype m_target_dtype;
     static dtype m_void_pointer_dtype;
 
@@ -42,10 +42,10 @@ public:
         return sizeof(void *);
     }
 
-    const dtype& value_dtype(const dtype& DND_UNUSED(self)) const {
+    const dtype& get_value_dtype(const dtype& DND_UNUSED(self)) const {
         return m_target_dtype;
     }
-    const dtype& operand_dtype(const dtype& DND_UNUSED(self)) const {
+    const dtype& get_operand_dtype(const dtype& DND_UNUSED(self)) const {
         if (m_target_dtype.type_id() == pointer_type_id) {
             return m_target_dtype;
         } else {
@@ -68,6 +68,13 @@ public:
     void get_single_compare_kernel(single_compare_kernel_instance& out_kernel) const;
 
     bool operator==(const extended_dtype& rhs) const;
+
+    // Converts to/from the storage's value dtype
+    void get_operand_to_value_kernel(const eval::eval_context *ectx,
+                            unary_specialization_kernel_instance& out_borrowed_kernel) const;
+    void get_value_to_operand_kernel(const eval::eval_context *ectx,
+                            unary_specialization_kernel_instance& out_borrowed_kernel) const;
+    dtype with_replaced_storage_dtype(const dtype& replacement_dtype) const;
 };
 
 inline dtype make_pointer_dtype(const dtype& target_dtype) {

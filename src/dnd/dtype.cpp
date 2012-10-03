@@ -36,23 +36,6 @@ void dnd::extended_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const
     throw std::runtime_error(ss.str());
 }
 
-void extended_dtype::get_operand_to_value_kernel(const eval::eval_context *DND_UNUSED(ectx),
-                        unary_specialization_kernel_instance& DND_UNUSED(out_borrowed_kernel)) const
-{
-    throw std::runtime_error("get_operand_to_value_kernel: this operation is only for expression_kind dtypes");
-}
-
-void extended_dtype::get_value_to_operand_kernel(const eval::eval_context *DND_UNUSED(ectx),
-                        unary_specialization_kernel_instance& DND_UNUSED(out_borrowed_kernel)) const
-{
-    throw std::runtime_error("get_value_to_operand_kernel: this operation is only for expression_kind dtypes");
-}
-
-dtype extended_dtype::with_replaced_storage_dtype(const dtype& DND_UNUSED(replacement_dtype)) const
-{
-    throw std::runtime_error("with_replaced_storage_dtype: this operation is only for expression_kind dtypes");
-}
-
 void extended_dtype::get_single_compare_kernel(single_compare_kernel_instance& DND_UNUSED(out_kernel)) const
 {
         throw std::runtime_error("get_single_compare_kernel: this dtypes does not support comparisons");

@@ -19,7 +19,7 @@ dtype dnd::make_unaligned_dtype(const dtype& value_dtype)
             return make_view_dtype(value_dtype, make_fixedbytes_dtype(value_dtype.element_size(), 1));
         } else {
             const dtype& sdt = value_dtype.storage_dtype();
-            return dtype(value_dtype.extended()->with_replaced_storage_dtype(make_view_dtype(sdt, make_fixedbytes_dtype(sdt.element_size(), 1))));
+            return dtype(static_cast<const extended_expression_dtype *>(value_dtype.extended())->with_replaced_storage_dtype(make_view_dtype(sdt, make_fixedbytes_dtype(sdt.element_size(), 1))));
         }
     } else {
         return value_dtype;

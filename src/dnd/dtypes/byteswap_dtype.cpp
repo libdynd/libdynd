@@ -101,6 +101,7 @@ dtype dnd::byteswap_dtype::with_replaced_storage_dtype(const dtype& replacement_
         return dtype(make_shared<byteswap_dtype>(m_value_dtype, replacement_dtype));
     } else {
         // With an expression operand, replace it farther down the chain
-        return dtype(make_shared<byteswap_dtype>(m_value_dtype, replacement_dtype.extended()->with_replaced_storage_dtype(replacement_dtype)));
+        return dtype(make_shared<byteswap_dtype>(m_value_dtype,
+                reinterpret_cast<const extended_expression_dtype *>(replacement_dtype.extended())->with_replaced_storage_dtype(replacement_dtype)));
     }
 }

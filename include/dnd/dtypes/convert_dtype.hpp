@@ -18,7 +18,7 @@
 
 namespace dnd {
 
-class convert_dtype : public extended_dtype {
+class convert_dtype : public extended_expression_dtype {
     dtype m_value_dtype, m_operand_dtype;
     assign_error_mode m_errmode;
     unary_specialization_kernel_instance m_to_value_kernel, m_to_operand_kernel;
@@ -39,10 +39,10 @@ public:
         return m_operand_dtype.element_size();
     }
 
-    const dtype& value_dtype(const dtype& DND_UNUSED(self)) const {
+    const dtype& get_value_dtype(const dtype& DND_UNUSED(self)) const {
         return m_value_dtype;
     }
-    const dtype& operand_dtype(const dtype& DND_UNUSED(self)) const {
+    const dtype& get_operand_dtype(const dtype& DND_UNUSED(self)) const {
         return m_operand_dtype;
     }
     void print_element(std::ostream& o, const char *data) const;
@@ -79,10 +79,10 @@ inline dtype make_convert_dtype(const dtype& value_dtype, const dtype& operand_d
             return dtype(make_shared<convert_dtype>(value_dtype, operand_dtype, errmode));
         } else if (value_dtype.storage_dtype() == operand_dtype.value_dtype()) {
             // No conversion required at the connection
-            return value_dtype.extended()->with_replaced_storage_dtype(operand_dtype);
+            return static_cast<const extended_expression_dtype *>(value_dtype.extended())->with_replaced_storage_dtype(operand_dtype);
         } else {
             // A conversion required at the connection
-            return value_dtype.extended()->with_replaced_storage_dtype(
+            return static_cast<const extended_expression_dtype *>(value_dtype.extended())->with_replaced_storage_dtype(
                 dtype(make_shared<convert_dtype>(value_dtype.storage_dtype(), operand_dtype, errmode)));
         }
     } else {

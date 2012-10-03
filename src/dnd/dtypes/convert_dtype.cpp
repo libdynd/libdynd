@@ -114,7 +114,7 @@ dtype dnd::convert_dtype::with_replaced_storage_dtype(const dtype& replacement_d
 {
     if (m_operand_dtype.kind() == expression_kind) {
         return dtype(make_shared<convert_dtype>(m_value_dtype,
-                        m_operand_dtype.extended()->with_replaced_storage_dtype(replacement_dtype),
+                        static_cast<const extended_expression_dtype *>(m_operand_dtype.extended())->with_replaced_storage_dtype(replacement_dtype),
                         m_errmode));
     } else {
         if (m_operand_dtype != replacement_dtype.value_dtype()) {
