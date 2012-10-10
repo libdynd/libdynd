@@ -13,7 +13,7 @@ using namespace std;
 using namespace dnd;
 
 // Static instance of a void pointer to use as the storage of pointer dtypes
-dtype dnd::pointer_dtype::m_void_pointer_dtype(make_shared<void_pointer_dtype>());
+dtype dnd::pointer_dtype::m_void_pointer_dtype(new void_pointer_dtype());
 
 
 dnd::pointer_dtype::pointer_dtype(const dtype& target_dtype)
@@ -40,6 +40,15 @@ void dnd::pointer_dtype::print_dtype(std::ostream& o) const {
 
     o << "pointer<" << m_target_dtype << ">";
 
+}
+
+dtype dnd::pointer_dtype::apply_linear_index(int ndim, const irange *indices, int dtype_ndim) const
+{
+    if (ndim == 0) {
+        return dtype(this);
+    } else {
+        throw runtime_error("not implemented yet");
+    }
 }
 
 bool dnd::pointer_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const

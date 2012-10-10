@@ -33,13 +33,6 @@ public:
         return 2 * sizeof(const char *);
     }
 
-    const dtype& value_dtype(const dtype& self) const {
-        return self;
-    }
-    const dtype& operand_dtype(const dtype& self) const {
-        return self;
-    }
-
     const dtype& get_element_dtype() const {
         return m_element_dtype;
     }
@@ -54,6 +47,8 @@ public:
         return blockref_memory_management;
     }
 
+    dtype apply_linear_index(int ndim, const irange *indices, int dtype_ndim) const;
+
     bool is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const;
 
     void get_single_compare_kernel(single_compare_kernel_instance& out_kernel) const;
@@ -66,7 +61,7 @@ public:
 };
 
 inline dtype make_array_dtype(const dtype& element_dtype) {
-    return dtype(make_shared<array_dtype>(element_dtype));
+    return dtype(new array_dtype(element_dtype));
 }
 
 } // namespace dnd

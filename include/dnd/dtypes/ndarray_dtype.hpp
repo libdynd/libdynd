@@ -43,9 +43,6 @@ public:
         return m_element_size;
     }
 
-    const dtype& value_dtype(const dtype& self) const {
-        return self;
-    }
     void print_element(std::ostream& o, const char *data) const;
 
     void print_dtype(std::ostream& o) const;
@@ -53,6 +50,8 @@ public:
     dtype_memory_management_t get_memory_management() const {
         return m_element_dtype.get_memory_management();
     }
+
+    dtype apply_linear_index(int ndim, const irange *indices, int dtype_ndim) const;
 
     const intptr_t *get_shape() const {
         return m_shape_and_strides.get(0);
@@ -69,7 +68,7 @@ public:
 
 template<class T>
 dtype make_ndarray_dtype(int ndim, intptr_t *shape) {
-    return dtype(make_shared<ndarray_dtype>(ndim, shape, make_dtype<T>()));
+    return dtype(new ndarray_dtype(ndim, shape, make_dtype<T>()));
 }
 
 } // namespace dnd

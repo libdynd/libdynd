@@ -40,13 +40,6 @@ public:
         return m_element_size;
     }
 
-    const dtype& value_dtype(const dtype& self) const {
-        return self;
-    }
-    const dtype& operand_dtype(const dtype& self) const {
-        return self;
-    }
-
     const std::vector<dtype>& get_fields() const {
         return m_fields;
     }
@@ -73,6 +66,8 @@ public:
         return m_memory_management;
     }
 
+    dtype apply_linear_index(int ndim, const irange *indices, int dtype_ndim) const;
+
     bool is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const;
 
     void get_single_compare_kernel(single_compare_kernel_instance& out_kernel) const;
@@ -86,14 +81,14 @@ public:
 
 /** Makes a tuple dtype with the specified fields, using the standard layout */
 inline dtype make_tuple_dtype(const std::vector<dtype>& fields) {
-    return dtype(make_shared<tuple_dtype>(fields));
+    return dtype(new tuple_dtype(fields));
 }
 
 /** Makes a tuple dtype with the specified fields and layout */
 inline dtype make_tuple_dtype(const std::vector<dtype>& fields, const std::vector<size_t> offsets,
                 size_t element_size, size_t alignment)
 {
-    return dtype(make_shared<tuple_dtype>(fields, offsets, element_size, alignment));
+    return dtype(new tuple_dtype(fields, offsets, element_size, alignment));
 }
 
 /** Makes a tuple dtype with the specified fields, using the standard layout */

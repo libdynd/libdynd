@@ -35,13 +35,6 @@ public:
         return sizeof(void *);
     }
 
-    const dtype& value_dtype(const dtype& self) const {
-        return self;
-    }
-    const dtype& operand_dtype(const dtype& self) const {
-        return self;
-    }
-
     void print_element(std::ostream& o, const char *data) const;
 
     void print_dtype(std::ostream& o) const;
@@ -51,6 +44,8 @@ public:
     dtype_memory_management_t get_memory_management() const {
         return blockref_memory_management;
     }
+
+    dtype apply_linear_index(int ndim, const irange *indices, int dtype_ndim) const;
 
     bool is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const;
 

@@ -6,6 +6,7 @@
 #include <dnd/dtypes/ndarray_dtype.hpp>
 #include <dnd/raw_iteration.hpp>
 
+using namespace std;
 using namespace dnd;
 
 ndarray_dtype::ndarray_dtype(intptr_t element_size, int ndim,
@@ -91,6 +92,14 @@ void ndarray_dtype::print_dtype(std::ostream& o) const
     o << ")>";
 }
 
+dtype dnd::ndarray_dtype::apply_linear_index(int ndim, const irange *indices, int dtype_ndim) const
+{
+    if (ndim == 0) {
+        return dtype(this);
+    } else {
+        throw runtime_error("not implemented yet");
+    }
+}
 
 bool ndarray_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const
 {

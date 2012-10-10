@@ -58,9 +58,7 @@ public:
         return pod_memory_management;
     }
 
-    const dtype& value_dtype(const dtype& self) const {
-        return self;
-    }
+    dtype apply_linear_index(int ndim, const irange *indices, int dtype_ndim) const;
 
     intptr_t get_category_count() const {
         return m_categories.size();
@@ -94,7 +92,7 @@ public:
 };
 
 inline dtype make_categorical_dtype(const ndarray& values) {
-    return dtype(make_shared<categorical_dtype>(values));
+    return dtype(new categorical_dtype(values));
 }
 
 

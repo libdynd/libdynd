@@ -60,6 +60,15 @@ void dnd::byteswap_dtype::print_dtype(std::ostream& o) const
     o << ">";
 }
 
+dtype dnd::byteswap_dtype::apply_linear_index(int ndim, const irange *indices, int dtype_ndim) const
+{
+    if (ndim == 0) {
+        return dtype(this);
+    } else {
+        throw runtime_error("not implemented yet");
+    }
+}
+
 bool dnd::byteswap_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const
 {
     // Treat this dtype as the value dtype for whether assignment is always lossless
@@ -98,10 +107,10 @@ dtype dnd::byteswap_dtype::with_replaced_storage_dtype(const dtype& replacement_
 {
     if (m_operand_dtype.kind() != expression_kind) {
         // If there's no expression in the operand, just try substituting (the constructor will error-check)
-        return dtype(make_shared<byteswap_dtype>(m_value_dtype, replacement_dtype));
+        return dtype(new byteswap_dtype(m_value_dtype, replacement_dtype));
     } else {
         // With an expression operand, replace it farther down the chain
-        return dtype(make_shared<byteswap_dtype>(m_value_dtype,
+        return dtype(new byteswap_dtype(m_value_dtype,
                 reinterpret_cast<const extended_expression_dtype *>(replacement_dtype.extended())->with_replaced_storage_dtype(replacement_dtype)));
     }
 }

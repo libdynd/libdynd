@@ -42,10 +42,10 @@ public:
         return sizeof(void *);
     }
 
-    const dtype& get_value_dtype(const dtype& DND_UNUSED(self)) const {
+    const dtype& get_value_dtype() const {
         return m_target_dtype;
     }
-    const dtype& get_operand_dtype(const dtype& DND_UNUSED(self)) const {
+    const dtype& get_operand_dtype() const {
         if (m_target_dtype.type_id() == pointer_type_id) {
             return m_target_dtype;
         } else {
@@ -63,6 +63,8 @@ public:
         return blockref_memory_management;
     }
 
+    dtype apply_linear_index(int ndim, const irange *indices, int dtype_ndim) const;
+
     bool is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const;
 
     void get_single_compare_kernel(single_compare_kernel_instance& out_kernel) const;
@@ -79,9 +81,9 @@ public:
 
 inline dtype make_pointer_dtype(const dtype& target_dtype) {
     if (target_dtype.type_id() != void_type_id) {
-        return dtype(make_shared<pointer_dtype>(target_dtype));
+        return dtype(new pointer_dtype(target_dtype));
     } else {
-        return dtype(make_shared<void_pointer_dtype>());
+        return dtype(new void_pointer_dtype());
     }
 }
 

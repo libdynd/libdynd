@@ -56,6 +56,15 @@ void dnd::convert_dtype::print_dtype(std::ostream& o) const
     o << ">";
 }
 
+dtype dnd::convert_dtype::apply_linear_index(int ndim, const irange *indices, int dtype_ndim) const
+{
+    if (ndim == 0) {
+        return dtype(this);
+    } else {
+        throw runtime_error("not implemented yet");
+    }
+}
+
 bool dnd::convert_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const
 {
     // Treat this dtype as the value dtype for whether assignment is always lossless
@@ -113,7 +122,7 @@ void dnd::convert_dtype::get_value_to_operand_kernel(const eval::eval_context *e
 dtype dnd::convert_dtype::with_replaced_storage_dtype(const dtype& replacement_dtype) const
 {
     if (m_operand_dtype.kind() == expression_kind) {
-        return dtype(make_shared<convert_dtype>(m_value_dtype,
+        return dtype(new convert_dtype(m_value_dtype,
                         static_cast<const extended_expression_dtype *>(m_operand_dtype.extended())->with_replaced_storage_dtype(replacement_dtype),
                         m_errmode));
     } else {
@@ -123,6 +132,6 @@ dtype dnd::convert_dtype::with_replaced_storage_dtype(const dtype& replacement_d
             ss << ", does not match the replacement's value dtype, " << replacement_dtype.value_dtype();
             throw std::runtime_error(ss.str());
         }
-        return dtype(make_shared<convert_dtype>(m_value_dtype, replacement_dtype, m_errmode));
+        return dtype(new convert_dtype(m_value_dtype, replacement_dtype, m_errmode));
     }
 }

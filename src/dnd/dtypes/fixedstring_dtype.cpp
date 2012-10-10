@@ -60,6 +60,15 @@ void dnd::fixedstring_dtype::print_dtype(std::ostream& o) const
     o << "fixedstring<" << m_encoding << "," << m_stringsize << ">";
 }
 
+dtype dnd::fixedstring_dtype::apply_linear_index(int ndim, const irange *indices, int dtype_ndim) const
+{
+    if (ndim == 0) {
+        return dtype(this);
+    } else {
+        throw runtime_error("not implemented yet");
+    }
+}
+
 bool dnd::fixedstring_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const
 {
     if (dst_dt.extended() == this) {

@@ -85,7 +85,7 @@ static inline int validate_type_id(type_id_t type_id)
 
 dtype::dtype()
     : m_type_id(void_type_id), m_kind(void_kind), m_alignment(1),
-      m_element_size(0), m_data()
+      m_element_size(0), m_extended(NULL)
 {
     // Default to a generic type with zero size
 }
@@ -95,7 +95,7 @@ dtype::dtype(type_id_t type_id)
       m_kind(static_builtin_dtypes[type_id].m_kind),
       m_alignment(static_builtin_dtypes[type_id].m_alignment),
       m_element_size(static_builtin_dtypes[type_id].m_element_size),
-      m_data()
+      m_extended(NULL)
 {
 }
 
@@ -104,12 +104,12 @@ dtype::dtype(int type_id)
       m_kind(static_builtin_dtypes[type_id].m_kind),
       m_alignment(static_builtin_dtypes[type_id].m_alignment),
       m_element_size(static_builtin_dtypes[type_id].m_element_size),
-      m_data()
+      m_extended(NULL)
 {
 }
 
 dtype::dtype(const std::string& rep)
-    : m_data()
+    : m_extended(NULL)
 {
     static const char *type_id_names[builtin_type_id_count] = {
         "bool",

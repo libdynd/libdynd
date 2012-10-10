@@ -25,6 +25,15 @@ void dnd::void_pointer_dtype::print_dtype(std::ostream& o) const {
 
 }
 
+dtype dnd::void_pointer_dtype::apply_linear_index(int ndim, const irange *indices, int dtype_ndim) const
+{
+    if (ndim == 0) {
+        return dtype(this);
+    } else {
+        throw runtime_error("not implemented yet");
+    }
+}
+
 bool dnd::void_pointer_dtype::is_lossless_assignment(const dtype& DND_UNUSED(dst_dt), const dtype& DND_UNUSED(src_dt)) const
 {
     return false;

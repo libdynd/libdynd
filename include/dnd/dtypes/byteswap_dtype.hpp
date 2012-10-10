@@ -41,10 +41,10 @@ public:
         return m_value_dtype.element_size();
     }
 
-    const dtype& get_value_dtype(const dtype& DND_UNUSED(self)) const {
+    const dtype& get_value_dtype() const {
         return m_value_dtype;
     }
-    const dtype& get_operand_dtype(const dtype& DND_UNUSED(self)) const {
+    const dtype& get_operand_dtype() const {
         return m_operand_dtype;
     }
     void print_element(std::ostream& o, const char *data) const;
@@ -56,6 +56,8 @@ public:
     dtype_memory_management_t get_memory_management() const {
         return m_operand_dtype.get_memory_management();
     }
+
+    dtype apply_linear_index(int ndim, const irange *indices, int dtype_ndim) const;
 
     bool is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const;
 
@@ -73,16 +75,16 @@ public:
  * Makes a byteswapped dtype to view the given dtype with a swapped byte order.
  */
 inline dtype make_byteswap_dtype(const dtype& native_dtype) {
-    return dtype(make_shared<byteswap_dtype>(native_dtype));
+    return dtype(new byteswap_dtype(native_dtype));
 }
 
 inline dtype make_byteswap_dtype(const dtype& native_dtype, const dtype& operand_dtype) {
-    return dtype(make_shared<byteswap_dtype>(native_dtype, operand_dtype));
+    return dtype(new byteswap_dtype(native_dtype, operand_dtype));
 }
 
 template<typename Tnative>
 dtype make_byteswap_dtype() {
-    return dtype(make_shared<byteswap_dtype>(make_dtype<Tnative>()));
+    return dtype(new byteswap_dtype(make_dtype<Tnative>()));
 }
 
 } // namespace dnd

@@ -33,10 +33,10 @@ public:
         return m_operand_dtype.element_size();
     }
 
-    const dtype& get_value_dtype(const dtype& DND_UNUSED(self)) const {
+    const dtype& get_value_dtype() const {
         return m_value_dtype;
     }
-    const dtype& get_operand_dtype(const dtype& DND_UNUSED(self)) const {
+    const dtype& get_operand_dtype() const {
         return m_operand_dtype;
     }
     void print_element(std::ostream& o, const char *data) const;
@@ -47,6 +47,8 @@ public:
     dtype_memory_management_t get_memory_management() const {
         return pod_memory_management;
     }
+
+    dtype apply_linear_index(int ndim, const irange *indices, int dtype_ndim) const;
 
     bool is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const;
 
@@ -65,18 +67,18 @@ public:
  */
 inline dtype make_view_dtype(const dtype& value_dtype, const dtype& operand_dtype) {
     if (value_dtype.kind() != expression_kind) {
-        return dtype(make_shared<view_dtype>(value_dtype, operand_dtype));
+        return dtype(new view_dtype(value_dtype, operand_dtype));
     } else {
         // When the value dtype has an expression_kind, we need to chain things together
         // so that the view operation happens just at the primitive level.
         return static_cast<const extended_expression_dtype *>(value_dtype.extended())->with_replaced_storage_dtype(
-            dtype(make_shared<view_dtype>(value_dtype.storage_dtype(), operand_dtype)));
+            dtype(new view_dtype(value_dtype.storage_dtype(), operand_dtype)));
     }
 }
 
 template<typename Tvalue, typename Toperand>
 dtype make_view_dtype() {
-    return dtype(make_shared<view_dtype>(make_dtype<Tvalue>()));
+    return dtype(new view_dtype(make_dtype<Tvalue>()));
 }
 
 } // namespace dnd

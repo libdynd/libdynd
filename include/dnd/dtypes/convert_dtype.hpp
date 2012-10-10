@@ -39,10 +39,10 @@ public:
         return m_operand_dtype.element_size();
     }
 
-    const dtype& get_value_dtype(const dtype& DND_UNUSED(self)) const {
+    const dtype& get_value_dtype() const {
         return m_value_dtype;
     }
-    const dtype& get_operand_dtype(const dtype& DND_UNUSED(self)) const {
+    const dtype& get_operand_dtype() const {
         return m_operand_dtype;
     }
     void print_element(std::ostream& o, const char *data) const;
@@ -54,6 +54,8 @@ public:
     dtype_memory_management_t get_memory_management() const {
         return m_operand_dtype.get_memory_management();
     }
+
+    dtype apply_linear_index(int ndim, const irange *indices, int dtype_ndim) const;
 
     bool is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const;
 
@@ -76,14 +78,14 @@ inline dtype make_convert_dtype(const dtype& value_dtype, const dtype& operand_d
     if (operand_dtype.value_dtype() != value_dtype) {
         if (value_dtype.kind() != expression_kind) {
             // Create a conversion dtype when the value kind is different
-            return dtype(make_shared<convert_dtype>(value_dtype, operand_dtype, errmode));
+            return dtype(new convert_dtype(value_dtype, operand_dtype, errmode));
         } else if (value_dtype.storage_dtype() == operand_dtype.value_dtype()) {
             // No conversion required at the connection
             return static_cast<const extended_expression_dtype *>(value_dtype.extended())->with_replaced_storage_dtype(operand_dtype);
         } else {
             // A conversion required at the connection
             return static_cast<const extended_expression_dtype *>(value_dtype.extended())->with_replaced_storage_dtype(
-                dtype(make_shared<convert_dtype>(value_dtype.storage_dtype(), operand_dtype, errmode)));
+                dtype(new convert_dtype(value_dtype.storage_dtype(), operand_dtype, errmode)));
         }
     } else {
         return operand_dtype;
@@ -92,7 +94,7 @@ inline dtype make_convert_dtype(const dtype& value_dtype, const dtype& operand_d
 
 template<typename Tvalue, typename Tstorage>
 dtype make_convert_dtype(assign_error_mode errmode = assign_error_default) {
-    return dtype(make_shared<convert_dtype>(make_dtype<Tvalue>(), make_dtype<Tstorage>(), errmode));
+    return dtype(new convert_dtype(make_dtype<Tvalue>(), make_dtype<Tstorage>(), errmode));
 }
 
 } // namespace dnd

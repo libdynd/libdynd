@@ -262,6 +262,15 @@ void categorical_dtype::print_dtype(std::ostream& o) const
     o << "]>";
 }
 
+dtype dnd::categorical_dtype::apply_linear_index(int ndim, const irange *indices, int dtype_ndim) const
+{
+    if (ndim == 0) {
+        return dtype(this);
+    } else {
+        throw runtime_error("not implemented yet");
+    }
+}
+
 uint32_t categorical_dtype::get_value_from_category(const char *category) const
 {
     single_compare_kernel_instance k;

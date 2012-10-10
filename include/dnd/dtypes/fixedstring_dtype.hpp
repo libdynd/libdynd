@@ -58,6 +58,8 @@ public:
         return pod_memory_management;
     }
 
+    dtype apply_linear_index(int ndim, const irange *indices, int dtype_ndim) const;
+
     bool is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const;
 
     void get_single_compare_kernel(single_compare_kernel_instance& out_kernel) const;
@@ -70,7 +72,7 @@ public:
 };
 
 inline dtype make_fixedstring_dtype(string_encoding_t encoding, intptr_t stringsize) {
-    return dtype(make_shared<fixedstring_dtype>(encoding, stringsize));
+    return dtype(new fixedstring_dtype(encoding, stringsize));
 }
 
 } // namespace dnd

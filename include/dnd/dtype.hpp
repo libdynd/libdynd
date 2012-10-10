@@ -10,6 +10,8 @@
 #include <complex>
 #include <stdexcept>
 
+#include <boost/detail/atomic_count.hpp>
+
 #include <dnd/config.hpp>
 #include <dnd/dtype_assign.hpp>
 #include <dnd/dtype_comparisons.hpp>
@@ -17,6 +19,7 @@
 #include <dnd/kernels/unary_kernel_instance.hpp>
 #include <dnd/string_encodings.hpp>
 #include <dnd/eval/eval_context.hpp>
+#include <dnd/irange.hpp>
 
 namespace dnd {
 
@@ -220,7 +223,14 @@ class dtype;
 // The extended_dtype class is for dtypes which require more data
 // than a type_id, kind, and element_size, and endianness.
 class extended_dtype {
+    /** Embedded reference counting */
+    mutable boost::detail::atomic_count m_use_count;
 public:
+    /** Starts off the extended dtype instance with a use count of 1. */
+    extended_dtype()
+        : m_use_count(1)
+    {}
+
     virtual ~extended_dtype();
 
     virtual type_id_t type_id() const = 0;
@@ -229,7 +239,7 @@ public:
     virtual uintptr_t element_size() const = 0;
 
     /**
-     * print data interpreted as a single value of this dtype
+     * Print the raw data interpreted as a single value of this dtype.
      *
      * @param o the std::ostream to print to
      * @param data pointer to the data element to print
@@ -237,14 +247,24 @@ public:
     virtual void print_element(std::ostream& o, const char *data) const = 0;
 
     /**
-     * print a representation of the dtype itself
+     * Print a representation of the dtype itself
      *
      * @param o the std::ostream to print to
      */
     virtual void print_dtype(std::ostream& o) const = 0;
 
-    /** Should return true if the type has construct/copy/move/destruct semantics */
+    /** Returns what kind of memory management the dtype uses, e.g. construct/copy/move/destruct semantics */
     virtual dtype_memory_management_t get_memory_management() const = 0;
+
+    /**
+     * Indexes one level into the dtype. This function returns the dtype which results
+     * from applying the same index to an ndarray of this dtype.
+     *
+     * @param ndim         The number of elements in the 'indices' array
+     * @param indices      The indices to apply.
+     * @param dtype_ndim   The number of dimensions already recursively applied, used for producing error messages.
+     */
+    virtual dtype apply_linear_index(int ndim, const irange *indices, int dtype_ndim = 0) const = 0;
 
     /**
      * Called by ::dnd::is_lossless_assignment, with (this == dst_dt->extended()).
@@ -272,7 +292,31 @@ public:
                     unary_specialization_kernel_instance& out_kernel) const;
 
     virtual bool operator==(const extended_dtype& rhs) const = 0;
+
+    friend void extended_dtype_incref(const extended_dtype *ed);
+    friend void extended_dtype_decref(const extended_dtype *ed);
 };
+
+/**
+ * Increments the reference count of a memory block object.
+ */
+inline void extended_dtype_incref(const extended_dtype *ed)
+{
+    ++ed->m_use_count;
+}
+
+/**
+ * Decrements the reference count of a memory block object,
+ * freeing it if the count reaches zero.
+ */
+inline void extended_dtype_decref(const extended_dtype *ed)
+{
+    if (--ed->m_use_count == 0) {
+        delete ed;
+    }
+}
+
+
 
 /**
  * Base class for all string extended dtypes. If a dtype
@@ -294,17 +338,13 @@ public:
     /**
      * Should return a reference to the dtype representing the value which
      * is for calculation. This should never be an expression dtype.
-     *
-     * @param self    The dtype which holds the shared_ptr<extended_dtype> containing this.
      */
-    virtual const dtype& get_value_dtype(const dtype& self) const = 0;
+    virtual const dtype& get_value_dtype() const = 0;
     /**
      * Should return a reference to a dtype representing the data this dtype
      * uses to produce the value.
-     *
-     * @param self    The dtype which holds the shared_ptr<extended_dtype> containing this.
      */
-    virtual const dtype& get_operand_dtype(const dtype& self) const = 0;
+    virtual const dtype& get_operand_dtype() const = 0;
 
     /** Returns a kernel which converts from (operand_dtype().value_dtype()) to (value_dtype()) */
     virtual void get_operand_to_value_kernel(const eval::eval_context *ectx,
@@ -350,51 +390,58 @@ class dtype {
 private:
     unsigned char m_type_id, m_kind, m_alignment;
     size_t m_element_size;
-    // TODO: Replace with boost::intrusive_ptr
-    shared_ptr<extended_dtype> m_data;
+    const extended_dtype *m_extended;
 
     /** Unchecked built-in dtype constructor from raw parameters */
     /* TODO: DND_CONSTEXPR */ dtype(char type_id, char kind, size_t element_size, char alignment)
         : m_type_id(type_id), m_kind(kind),
-          m_alignment(alignment), m_element_size(element_size), m_data()
+          m_alignment(alignment), m_element_size(element_size), m_extended(NULL)
     {}
 public:
     /** Constructor */
     dtype();
-    /** Constructor from an extended_dtype */
-    dtype(const shared_ptr<extended_dtype>& data)
-        : m_type_id(data->type_id()), m_kind(data->kind()), m_alignment((unsigned char)data->alignment()),
-        m_element_size(data->element_size()), m_data(data) {}
+    /** Constructor from an extended_dtype. This claims ownership of the 'extended' reference, be careful! */
+    dtype(const extended_dtype *extended)
+        : m_type_id(extended->type_id()), m_kind(extended->kind()), m_alignment((unsigned char)extended->alignment()),
+        m_element_size(extended->element_size()), m_extended(extended) {}
     /** Copy constructor (should be "= default" in C++11) */
     dtype(const dtype& rhs)
         : m_type_id(rhs.m_type_id), m_kind(rhs.m_kind), m_alignment(rhs.m_alignment),
-          m_element_size(rhs.m_element_size), m_data(rhs.m_data) {}
+          m_element_size(rhs.m_element_size), m_extended(rhs.m_extended)
+    {
+        if (m_extended != NULL) {
+            extended_dtype_incref(m_extended);
+        }
+    }
     /** Assignment operator (should be "= default" in C++11) */
     dtype& operator=(const dtype& rhs) {
         m_type_id = rhs.m_type_id;
         m_kind = rhs.m_kind;
         m_alignment = rhs.m_alignment;
         m_element_size = rhs.m_element_size;
-        m_data = rhs.m_data;
+        m_extended = rhs.m_extended;
+        if (m_extended != NULL) {
+            extended_dtype_incref(m_extended);
+        }
         return *this;
     }
 #ifdef DND_RVALUE_REFS
-    /** Constructor from an rvalue extended_dtype */
-    dtype(const shared_ptr<extended_dtype>&& data)
-        : m_type_id(data->type_id()), m_kind(data->kind()), m_alignment((unsigned char)data->alignment()),
-        m_element_size(data->element_size()), m_data(DND_MOVE(data)) {}
     /** Move constructor (should be "= default" in C++11) */
     dtype(dtype&& rhs)
         : m_type_id(rhs.m_type_id), m_kind(rhs.m_kind), m_alignment(rhs.m_alignment),
           m_element_size(rhs.m_element_size),
-          m_data(DND_MOVE(rhs.m_data)) {}
+          m_extended(rhs.m_extended)
+    {
+        rhs.m_extended = NULL;
+    }
     /** Move assignment operator (should be "= default" in C++11) */
     dtype& operator=(dtype&& rhs) {
         m_type_id = rhs.m_type_id;
         m_kind = rhs.m_kind;
         m_alignment = rhs.m_alignment;
         m_element_size = rhs.m_element_size;
-        m_data = DND_MOVE(rhs.m_data);
+        m_extended = rhs.m_extended;
+        rhs.m_extended = NULL;
         return *this;
     }
 #endif // DND_RVALUE_REFS
@@ -406,23 +453,29 @@ public:
     /** Construct from a string representation */
     explicit dtype(const std::string& rep);
 
+    ~dtype() {
+        if (m_extended != NULL) {
+            extended_dtype_decref(m_extended);
+        }
+    }
+
     void swap(dtype& rhs) {
         std::swap(m_type_id, rhs.m_type_id);
         std::swap(m_kind, rhs.m_kind);
         std::swap(m_alignment, rhs.m_alignment);
         std::swap(m_element_size, rhs.m_element_size);
-        m_data.swap(rhs.m_data);
+        std::swap(m_extended, rhs.m_extended);
     }
 
     bool operator==(const dtype& rhs) const {
-        if (m_data && rhs.m_data) {
-            return *m_data == *rhs.m_data;
+        if (m_extended && rhs.m_extended) {
+            return *m_extended == *rhs.m_extended;
         }
         return m_type_id == rhs.m_type_id &&
                 m_element_size == rhs.m_element_size &&
                 m_kind == rhs.m_kind &&
                 m_alignment == rhs.m_alignment &&
-                m_data == rhs.m_data;
+                m_extended == rhs.m_extended;
     }
     bool operator!=(const dtype& rhs) const {
         return !(operator==(rhs));
@@ -439,7 +492,7 @@ public:
             return *this;
         } else {
             // All chaining happens in the operand_dtype
-            return static_cast<const extended_expression_dtype *>(m_data.get())->get_value_dtype(*this);
+            return static_cast<const extended_expression_dtype *>(m_extended)->get_value_dtype();
         }
     }
 
@@ -453,7 +506,7 @@ public:
         if (m_kind != expression_kind) {
             return *this;
         } else {
-            return static_cast<const extended_expression_dtype *>(m_data.get())->get_operand_dtype(*this);
+            return static_cast<const extended_expression_dtype *>(m_extended)->get_operand_dtype();
         }
     }
 
@@ -468,9 +521,9 @@ public:
             return *this;
         } else {
             // Follow the operand dtype chain to get the storage dtype
-            const dtype* dt = &static_cast<const extended_expression_dtype *>(m_data.get())->get_operand_dtype(*this);
+            const dtype* dt = &static_cast<const extended_expression_dtype *>(m_extended)->get_operand_dtype();
             while (dt->kind() == expression_kind) {
-                dt = &static_cast<const extended_expression_dtype *>(dt->m_data.get())->get_operand_dtype(*dt);
+                dt = &static_cast<const extended_expression_dtype *>(dt->m_extended)->get_operand_dtype();
             }
             return *dt;
         }
@@ -512,15 +565,15 @@ public:
     /** For string dtypes, their encoding */
     string_encoding_t string_encoding() const {
         if (m_kind == string_kind) {
-            return static_cast<const extended_string_dtype *>(m_data.get())->encoding();
+            return static_cast<const extended_string_dtype *>(m_extended)->encoding();
         } else {
             throw std::runtime_error("Can only get the string encoding from string_kind types");
         }
     }
 
     dtype_memory_management_t get_memory_management() const {
-        if (m_data != NULL) {
-            return m_data->get_memory_management();
+        if (m_extended != NULL) {
+            return m_extended->get_memory_management();
         } else {
             return pod_memory_management;
         }
@@ -533,7 +586,7 @@ public:
      * the lifetime of the dtype.
      */
     const extended_dtype* extended() const {
-        return m_data.get();
+        return m_extended;
     }
 
     /**

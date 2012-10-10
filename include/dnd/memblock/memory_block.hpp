@@ -43,7 +43,7 @@ struct memory_block_data {
     // A hack avoiding boost atomic_count, since that creates inline assembly which LLVM JIT doesn't like!
     mutable long m_use_count;
 #else
-    /** Embedded reference counting using boost::intrusive_ptr */
+    /** Embedded reference counting */
     mutable boost::detail::atomic_count m_use_count;
 #endif
     /** A memory_block_type_t enum value */
