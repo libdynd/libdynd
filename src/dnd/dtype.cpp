@@ -149,6 +149,32 @@ dtype::dtype(const std::string& rep)
     throw std::runtime_error(std::string() + "invalid type string \"" + rep + "\"");
 }
 
+dtype dnd::dtype::apply_linear_index(int nindices, const irange *indices) const
+{
+    if (m_extended == NULL) {
+        if (nindices == 0) {
+            return *this;
+        } else {
+            throw too_many_indices(nindices, 0);
+        }
+    } else {
+        return m_extended->apply_linear_index(nindices, indices, 0, *this);
+    }
+}
+
+dtype dnd::dtype::apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& root_dt) const
+{
+    if (m_extended == NULL) {
+        if (nindices == 0) {
+            return *this;
+        } else {
+            throw too_many_indices(nindices + current_i, current_i);
+        }
+    } else {
+        return m_extended->apply_linear_index(nindices, indices, current_i, root_dt);
+    }
+}
+
 void dtype::get_single_compare_kernel(single_compare_kernel_instance &out_kernel) const {
     if (extended() != NULL) {
         return extended()->get_single_compare_kernel(out_kernel);

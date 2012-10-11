@@ -6,6 +6,7 @@
 #include <dnd/dtypes/void_pointer_dtype.hpp>
 #include <dnd/kernels/single_compare_kernel_instance.hpp>
 #include <dnd/kernels/assignment_kernels.hpp>
+#include <dnd/exceptions.hpp>
 
 #include <algorithm>
 
@@ -25,13 +26,17 @@ void dnd::void_pointer_dtype::print_dtype(std::ostream& o) const {
 
 }
 
-dtype dnd::void_pointer_dtype::apply_linear_index(int ndim, const irange *indices, int dtype_ndim) const
+dtype dnd::void_pointer_dtype::apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& root_dt) const
 {
-    if (ndim == 0) {
+    if (nindices == 0) {
         return dtype(this);
     } else {
-        throw runtime_error("not implemented yet");
+        throw too_many_indices(current_i + nindices, current_i);
     }
+}
+
+void dnd::void_pointer_dtype::get_shape(int i, std::vector<intptr_t>& out_shape) const
+{
 }
 
 bool dnd::void_pointer_dtype::is_lossless_assignment(const dtype& DND_UNUSED(dst_dt), const dtype& DND_UNUSED(src_dt)) const

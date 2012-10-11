@@ -29,6 +29,15 @@ enum string_encoding_t {
  */
 extern int string_encoding_char_size_table[6];
 
+/**
+ * Returns true if the provided encoding uses a variable-length encoding
+ * for each character, for example UTF-8.
+ */
+inline bool is_variable_length_string_encoding(string_encoding_t encoding)
+{
+    return encoding == string_encoding_utf_8 || encoding == string_encoding_utf_16;
+}
+
 inline std::ostream& operator<<(std::ostream& o, string_encoding_t encoding)
 {
     switch (encoding) {

@@ -5,6 +5,7 @@
 
 #include <dnd/dtypes/array_dtype.hpp>
 #include <dnd/kernels/array_assignment_kernels.hpp>
+#include <dnd/shape_tools.hpp>
 
 #include <algorithm>
 
@@ -38,12 +39,38 @@ void dnd::array_dtype::print_dtype(std::ostream& o) const {
 
 }
 
-dtype dnd::array_dtype::apply_linear_index(int ndim, const irange *indices, int dtype_ndim) const
+dtype dnd::array_dtype::apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& root_dt) const
 {
-    if (ndim == 0) {
+    if (nindices == 0) {
         return dtype(this);
+    } else if (nindices == 1) {
+        if (indices->step() == 0) {
+            return m_element_dtype;
+        } else {
+            return dtype(this);
+        }
     } else {
-        throw runtime_error("not implemented yet");
+        if (indices->step() == 0) {
+            return m_element_dtype.apply_linear_index(nindices-1, indices+1, current_i+1, root_dt);
+        } else {
+            return dtype(new array_dtype(m_element_dtype.apply_linear_index(nindices-1, indices+1, current_i+1, root_dt)));
+        }
+    }
+}
+
+void dnd::array_dtype::get_shape(int i, std::vector<intptr_t>& out_shape) const
+{
+    // Ensure the output shape is big enough
+    while (out_shape.size() <= i) {
+        out_shape.push_back(shape_signal_uninitialized);
+    }
+
+    // Adjust the current shape
+    out_shape[i] = shape_signal_varying;
+
+    // Process the later shape values
+    if (m_element_dtype.extended()) {
+        m_element_dtype.extended()->get_shape(i+1, out_shape);
     }
 }
 

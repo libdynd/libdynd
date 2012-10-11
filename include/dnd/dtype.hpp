@@ -9,6 +9,7 @@
 #include <iostream>
 #include <complex>
 #include <stdexcept>
+#include <vector>
 
 #include <boost/detail/atomic_count.hpp>
 
@@ -257,14 +258,20 @@ public:
     virtual dtype_memory_management_t get_memory_management() const = 0;
 
     /**
-     * Indexes one level into the dtype. This function returns the dtype which results
+     * Indexes into the dtype. This function returns the dtype which results
      * from applying the same index to an ndarray of this dtype.
      *
-     * @param ndim         The number of elements in the 'indices' array
-     * @param indices      The indices to apply.
-     * @param dtype_ndim   The number of dimensions already recursively applied, used for producing error messages.
+     * @param nindices     The number of elements in the 'indices' array. This is shrunk by one for each recursive call.
+     * @param indices      The indices to apply. This is incremented by one for each recursive call.
+     * @param current_i    The current index position. Used for error messages.
+     * @param root_dt      The data type in the first call, before any recursion. Used for error messages.
      */
-    virtual dtype apply_linear_index(int ndim, const irange *indices, int dtype_ndim = 0) const = 0;
+    virtual dtype apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& root_dt) const = 0;
+
+    /**
+     * Retrieves the shape of the dtype, expanding the vector as needed.
+     */
+    virtual void get_shape(int i, std::vector<intptr_t>& out_shape) const = 0;
 
     /**
      * Called by ::dnd::is_lossless_assignment, with (this == dst_dt->extended()).
@@ -480,6 +487,21 @@ public:
     bool operator!=(const dtype& rhs) const {
         return !(operator==(rhs));
     }
+
+    /**
+     * Indexes into the dtype. This function returns the dtype which results
+     * from applying the same index to an ndarray of this dtype.
+     *
+     * @param ndim         The number of elements in the 'indices' array
+     * @param indices      The indices to apply.
+     */
+    dtype apply_linear_index(int nindices, const irange *indices) const;
+
+    /**
+     * Indexes into the dtype, intended for recursive calls from the extended-dtype version. See
+     * the function in extended_dtype with the same name for more details.
+     */
+    dtype dnd::dtype::apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& root_dt) const;
 
     /**
      * Returns the non-expression dtype that this

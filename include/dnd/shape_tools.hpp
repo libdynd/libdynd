@@ -102,6 +102,29 @@ inline void multistrides_to_axis_perm(int ndim, int noperands, intptr_t **operst
 
 void print_shape(std::ostream& o, int ndim, const intptr_t *shape);
 
+/**
+ * Applies the indexing rules for a single linear indexing irange object to
+ * a dimension of the specified size.
+ *
+ * @param idx  The irange indexing object.
+ * @param dimension_size  The size of the dimension to which the idx is being applied.
+ * @param error_i  The position in the shape where the indexing is being applied.
+ * @param error_dt The dtype to which the indexing is being applied, or NULL.
+ * @param out_remove_dimension  Is set to true if the dimension should be removed
+ * @param out_start_index  The start index of the resolved indexing.
+ * @param out_index_stride  The index stride of the resolved indexing.
+ * @param out_dimension_size  The size of the resulting dimension from the resolved indexing.
+ */
+void apply_single_linear_index(const irange& idx, intptr_t dimension_size, int error_i, const dtype* error_dt,
+        bool& out_remove_dimension, intptr_t& out_start_index, intptr_t& out_index_stride, intptr_t& out_dimension_size);
+
+enum shape_signal_t {
+    /** Shape value that has never been initialized */
+    shape_signal_uninitialized = -1,
+    /** Shape value that may have more than one size, depending on index */
+    shape_signal_varying = -2,
+};
+
 } // namespace dnd
 
 #endif // _DND__SHAPE_TOOLS_HPP_

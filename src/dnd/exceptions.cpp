@@ -84,6 +84,12 @@ index_out_of_bounds::index_out_of_bounds(intptr_t i, int axis, int ndim, const i
 {
 }
 
+index_out_of_bounds::index_out_of_bounds(intptr_t i, int axis, const std::vector<intptr_t>& shape)
+    : dnd_exception("index out of bounds", index_out_of_bounds_message(i, axis, (int)shape.size(), shape.empty() ? NULL : &shape[0]))
+{
+}
+
+
 inline string axis_out_of_bounds_message(intptr_t i, intptr_t ndim)
 {
     stringstream ss;
@@ -119,6 +125,12 @@ dnd::irange_out_of_bounds::irange_out_of_bounds(const irange& i, int axis, int n
 {
     //cout << "throwing irange_out_of_bounds\n";
 }
+
+dnd::irange_out_of_bounds::irange_out_of_bounds(const irange& i, int axis, const std::vector<intptr_t>& shape)
+    : dnd_exception("irange out of bounds", irange_out_of_bounds_message(i, axis, (int)shape.size(), shape.empty() ? NULL : &shape[0]))
+{
+}
+
 
 inline string invalid_type_id_message(int type_id)
 {

@@ -5,6 +5,8 @@
 
 #include <dnd/dtypes/tuple_dtype.hpp>
 #include <dnd/dtypes/dtype_alignment.hpp>
+#include <dnd/shape_tools.hpp>
+#include <dnd/exceptions.hpp>
 
 using namespace std;
 using namespace dnd;
@@ -147,12 +149,58 @@ void dnd::tuple_dtype::print_dtype(std::ostream& o) const
     }
 }
 
-dtype dnd::tuple_dtype::apply_linear_index(int ndim, const irange *indices, int dtype_ndim) const
+dtype dnd::tuple_dtype::apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& root_dt) const
 {
-    if (ndim == 0) {
+    if (nindices == 0) {
         return dtype(this);
     } else {
-        throw runtime_error("not implemented yet");
+        bool remove_dimension;
+        intptr_t start_index, index_stride, dimension_size;
+        apply_single_linear_index(*indices, m_fields.size(), current_i, &root_dt, remove_dimension, start_index, index_stride, dimension_size);
+        if (remove_dimension) {
+            return m_fields[start_index];
+        } else {
+            // Take the subset of the fixed fields in-place
+            std::vector<dtype> fields(dimension_size);
+            std::vector<size_t> offsets(dimension_size);
+
+            for (intptr_t i = 0; i < dimension_size; ++i) {
+                intptr_t idx = start_index + i * index_stride;
+                fields[i] = m_fields[idx].apply_linear_index(nindices-1, indices+1, current_i+1, root_dt);
+                offsets[i] = m_offsets[idx];
+            }
+
+            return dtype(new tuple_dtype(fields, offsets, m_element_size, m_alignment));
+        }
+    }
+}
+
+void dnd::tuple_dtype::get_shape(int i, std::vector<intptr_t>& out_shape) const
+{
+    // Ensure the output shape is big enough
+    while (out_shape.size() <= i) {
+        out_shape.push_back(shape_signal_uninitialized);
+    }
+
+    // Adjust the current shape if necessary
+    switch (out_shape[i]) {
+        case shape_signal_uninitialized:
+            out_shape[i] = m_fields.size();
+            break;
+        case shape_signal_varying:
+            break;
+        default:
+            if (out_shape[i] != m_fields.size()) {
+                out_shape[i] = shape_signal_varying;
+            }
+            break;
+    }
+
+    // Process the later shape values
+    for (size_t j = 0; j < m_fields.size(); ++j) {
+        if (m_fields[j].extended()) {
+            m_fields[j].extended()->get_shape(i+1, out_shape);
+        }
     }
 }
 

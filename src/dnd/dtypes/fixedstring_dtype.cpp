@@ -8,6 +8,7 @@
 #include <dnd/dtypes/fixedstring_dtype.hpp>
 #include <dnd/kernels/single_compare_kernel_instance.hpp>
 #include <dnd/kernels/string_assignment_kernels.hpp>
+#include <dnd/exceptions.hpp>
 
 using namespace std;
 using namespace dnd;
@@ -60,13 +61,26 @@ void dnd::fixedstring_dtype::print_dtype(std::ostream& o) const
     o << "fixedstring<" << m_encoding << "," << m_stringsize << ">";
 }
 
-dtype dnd::fixedstring_dtype::apply_linear_index(int ndim, const irange *indices, int dtype_ndim) const
+dtype dnd::fixedstring_dtype::apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& root_dt) const
 {
-    if (ndim == 0) {
+    if (nindices == 0) {
         return dtype(this);
+    } else if (nindices == 1) {
+        if (indices->step() == 0) {
+            // If the string encoding is variable-length switch to UTF32 so that the result can always
+            // store a single character.
+            return make_fixedstring_dtype(is_variable_length_string_encoding(m_encoding) ? string_encoding_utf_32 : m_encoding, 1);
+        } else {
+            // Just use the same string width, no big reason to be "too smart" and shrink it
+            return dtype(this);
+        }
     } else {
-        throw runtime_error("not implemented yet");
+        throw too_many_indices(nindices, current_i + 1);
     }
+}
+
+void dnd::fixedstring_dtype::get_shape(int i, std::vector<intptr_t>& out_shape) const
+{
 }
 
 bool dnd::fixedstring_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const

@@ -55,7 +55,6 @@ set(dnd_SRC
     src/dnd/dtypes/convert_dtype.cpp
     src/dnd/dtypes/dtype_alignment.cpp
     src/dnd/dtypes/fixedstring_dtype.cpp
-    src/dnd/dtypes/ndarray_dtype.cpp
     src/dnd/dtypes/pointer_dtype.cpp
     src/dnd/dtypes/string_dtype.cpp
     src/dnd/dtypes/tuple_dtype.cpp
@@ -67,7 +66,6 @@ set(dnd_SRC
     include/dnd/dtypes/convert_dtype.hpp
     include/dnd/dtypes/dtype_alignment.hpp
     include/dnd/dtypes/fixedstring_dtype.hpp
-    include/dnd/dtypes/ndarray_dtype.hpp
     include/dnd/dtypes/pointer_dtype.hpp
     include/dnd/dtypes/string_dtype.hpp
     include/dnd/dtypes/tuple_dtype.hpp

@@ -318,3 +318,161 @@ void dnd::print_shape(std::ostream& o, int ndim, const intptr_t *shape)
     }
     o << ")";
 }
+
+void dnd::apply_single_linear_index(const irange& irnge, intptr_t dimension_size, int error_i, const dtype* error_dt,
+        bool& out_remove_dimension, intptr_t& out_start_index, intptr_t& out_index_stride, intptr_t& out_dimension_size)
+{
+    intptr_t step = irnge.step();
+    if (step == 0) {
+        // A single index
+        out_remove_dimension = true;
+        intptr_t idx = irnge.start();
+        if (idx >= 0) {
+            if (idx < dimension_size) {
+                out_start_index = idx;
+                out_index_stride = 1;
+                out_dimension_size = 1;
+            } else {
+                vector<intptr_t> shape;
+                error_dt->extended()->get_shape(0, shape);
+                throw index_out_of_bounds(idx, error_i, shape);
+            }
+        } else if (idx >= -dimension_size) {
+            out_start_index = idx + dimension_size;
+            out_index_stride = 1;
+            out_dimension_size = 1;
+        } else {
+            vector<intptr_t> shape;
+            error_dt->extended()->get_shape(0, shape);
+            throw index_out_of_bounds(idx, error_i, shape);
+        }
+    } else if (step > 0) {
+        // A range with a positive step
+        intptr_t start = irnge.start();
+        if (start >= 0) {
+            if (start < dimension_size) {
+                // Starts with a positive index
+            } else {
+                vector<intptr_t> shape;
+                error_dt->extended()->get_shape(0, shape);
+                throw irange_out_of_bounds(irnge, error_i, shape);
+            }
+        } else if (start >= -dimension_size) {
+            // Starts with Python style negative index
+            start += dimension_size;
+        } else if (start == std::numeric_limits<intptr_t>::min()) {
+            // Signal for "from the beginning"
+            start = 0;
+        } else {
+            vector<intptr_t> shape;
+            error_dt->extended()->get_shape(0, shape);
+            throw irange_out_of_bounds(irnge, error_i, shape);
+        }
+
+        intptr_t end = irnge.finish();
+        if (end >= 0) {
+            if (end <= dimension_size) {
+                // Ends with a positive index, or the end of the array
+            } else if (end == std::numeric_limits<intptr_t>::max()) {
+                // Signal for "until the end"
+                end = dimension_size;
+            } else {
+                vector<intptr_t> shape;
+                error_dt->extended()->get_shape(0, shape);
+                throw irange_out_of_bounds(irnge, error_i, shape);
+            }
+        } else if (end >= -dimension_size) {
+            // Ends with a Python style negative index
+            end += dimension_size;
+        } else {
+            vector<intptr_t> shape;
+            error_dt->extended()->get_shape(0, shape);
+            throw irange_out_of_bounds(irnge, error_i, shape);
+        }
+
+        intptr_t size = end - start;
+        out_remove_dimension = false;
+        if (size > 0) {
+            if (step == 1) {
+                // Simple range
+                out_start_index = start;
+                out_index_stride = 1;
+                out_dimension_size = size;
+            } else {
+                // Range with a stride
+                out_start_index = start;
+                out_index_stride = step;
+                out_dimension_size = (size + step - 1) / step;
+            }
+        } else {
+            // Empty slice
+            out_start_index = 0;
+            out_index_stride = 1;
+            out_dimension_size = 0;
+        }
+    } else {
+        // A range with a negative step
+        intptr_t start = irnge.start();
+        if (start >= 0) {
+            if (start < dimension_size) {
+                // Starts with a positive index
+            } else {
+                vector<intptr_t> shape;
+                error_dt->extended()->get_shape(0, shape);
+                throw irange_out_of_bounds(irnge, error_i, shape);
+            }
+        } else if (start >= -dimension_size) {
+            // Starts with Python style negative index
+            start += dimension_size;
+        } else if (start == std::numeric_limits<intptr_t>::min()) {
+            // Signal for "from the beginning" (which means the last element)
+            start = dimension_size - 1;
+        } else {
+            vector<intptr_t> shape;
+            error_dt->extended()->get_shape(0, shape);
+            throw irange_out_of_bounds(irnge, error_i, shape);
+        }
+
+        intptr_t end = irnge.finish();
+        if (end >= 0) {
+            if (end < dimension_size) {
+                // Ends with a positive index, or the end of the array
+            } else if (end == std::numeric_limits<intptr_t>::max()) {
+                // Signal for "until the end" (which means towards index 0 of the data)
+                end = -1;
+            } else {
+                vector<intptr_t> shape;
+                error_dt->extended()->get_shape(0, shape);
+                throw irange_out_of_bounds(irnge, error_i, shape);
+            }
+        } else if (end >= -dimension_size) {
+            // Ends with a Python style negative index
+            end += dimension_size;
+        } else {
+            vector<intptr_t> shape;
+            error_dt->extended()->get_shape(0, shape);
+            throw irange_out_of_bounds(irnge, error_i, shape);
+        }
+
+        intptr_t size = start - end;
+        out_remove_dimension = false;
+        if (size > 0) {
+            if (step == -1) {
+                // Simple range
+                out_start_index = start;
+                out_index_stride = -1;
+                out_dimension_size = size;
+            } else {
+                // Range with a stride
+                out_start_index = start;
+                out_index_stride = step;
+                out_dimension_size = (size + (-step) - 1) / (-step);
+            }
+        } else {
+            // Empty slice
+            out_start_index = 0;
+            out_index_stride = 1;
+            out_dimension_size = 0;
+        }
+    }
+}

@@ -42,12 +42,19 @@ void dnd::pointer_dtype::print_dtype(std::ostream& o) const {
 
 }
 
-dtype dnd::pointer_dtype::apply_linear_index(int ndim, const irange *indices, int dtype_ndim) const
+dtype dnd::pointer_dtype::apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& root_dt) const
 {
-    if (ndim == 0) {
+    if (nindices == 0) {
         return dtype(this);
     } else {
-        throw runtime_error("not implemented yet");
+        return m_target_dtype.apply_linear_index(nindices, indices, current_i, root_dt);
+    }
+}
+
+void dnd::pointer_dtype::get_shape(int i, std::vector<intptr_t>& out_shape) const
+{
+    if (m_target_dtype.extended()) {
+        m_target_dtype.extended()->get_shape(i, out_shape);
     }
 }
 

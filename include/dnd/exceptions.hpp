@@ -8,6 +8,7 @@
 
 #include <string>
 #include <stdexcept>
+#include <vector>
 
 #include <dnd/irange.hpp>
 
@@ -80,6 +81,7 @@ public:
      * the specified axis of the given shape
      */
     index_out_of_bounds(intptr_t i, int axis, int ndim, const intptr_t *shape);
+    index_out_of_bounds(intptr_t i, int axis, const std::vector<intptr_t>& shape);
 
     virtual ~index_out_of_bounds() throw() {
     }
@@ -107,6 +109,7 @@ public:
      * the specified axis of the given shape
      */
     irange_out_of_bounds(const irange& i, int axis, int ndim, const intptr_t *shape);
+    irange_out_of_bounds(const irange& i, int axis, const std::vector<intptr_t>& shape);
 
     virtual ~irange_out_of_bounds() throw() {
     }

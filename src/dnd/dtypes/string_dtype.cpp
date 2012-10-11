@@ -6,6 +6,8 @@
 #include <dnd/dtypes/string_dtype.hpp>
 #include <dnd/kernels/single_compare_kernel_instance.hpp>
 #include <dnd/kernels/string_assignment_kernels.hpp>
+#include <dnd/dtypes/fixedstring_dtype.hpp>
+#include <dnd/exceptions.hpp>
 
 #include <algorithm>
 
@@ -50,13 +52,26 @@ void dnd::string_dtype::print_dtype(std::ostream& o) const {
 
 }
 
-dtype dnd::string_dtype::apply_linear_index(int ndim, const irange *indices, int dtype_ndim) const
+dtype dnd::string_dtype::apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& root_dt) const
 {
-    if (ndim == 0) {
+    if (nindices == 0) {
         return dtype(this);
+    } else if (nindices == 1) {
+        if (indices->step() == 0) {
+            // Return a fixedstring dtype, since it's always one character.
+            // If the string encoding is variable-length switch to UTF32 so that the result can always
+            // store a single character.
+            return make_fixedstring_dtype(is_variable_length_string_encoding(m_encoding) ? string_encoding_utf_32 : m_encoding, 1);
+        } else {
+            return dtype(this);
+        }
     } else {
-        throw runtime_error("not implemented yet");
+        throw too_many_indices(nindices, current_i + 1);
     }
+}
+
+void dnd::string_dtype::get_shape(int DND_UNUSED(i), std::vector<intptr_t>& DND_UNUSED(out_shape)) const
+{
 }
 
 bool dnd::string_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const
