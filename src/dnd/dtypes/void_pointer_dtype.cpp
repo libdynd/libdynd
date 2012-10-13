@@ -23,7 +23,6 @@ void dnd::void_pointer_dtype::print_element(std::ostream& o, const char *data) c
 void dnd::void_pointer_dtype::print_dtype(std::ostream& o) const {
 
     o << "pointer<void>";
-
 }
 
 dtype dnd::void_pointer_dtype::apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& root_dt) const

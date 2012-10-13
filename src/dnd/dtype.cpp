@@ -149,7 +149,7 @@ dtype::dtype(const std::string& rep)
     throw std::runtime_error(std::string() + "invalid type string \"" + rep + "\"");
 }
 
-dtype dnd::dtype::apply_linear_index(int nindices, const irange *indices) const
+dtype dnd::dtype::index(int nindices, const irange *indices) const
 {
     if (m_extended == NULL) {
         if (nindices == 0) {

@@ -495,7 +495,7 @@ public:
      * @param ndim         The number of elements in the 'indices' array
      * @param indices      The indices to apply.
      */
-    dtype apply_linear_index(int nindices, const irange *indices) const;
+    dtype index(int nindices, const irange *indices) const;
 
     /**
      * Indexes into the dtype, intended for recursive calls from the extended-dtype version. See
