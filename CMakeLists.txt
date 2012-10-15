@@ -140,6 +140,9 @@ set(dynd_SRC
     include/dynd/nodes/ndarray_node.hpp
     include/dynd/nodes/scalar_node.hpp
     include/dynd/nodes/strided_ndarray_node.hpp
+    # VM
+    src/dynd/vm/elwise_program.cpp
+    include/dynd/vm/elwise_program.hpp
     # Main
     src/dynd/arithmetic_op.cpp
     src/dynd/dtype.cpp
@@ -195,6 +198,8 @@ source_group("MemBlock Source" REGULAR_EXPRESSION "src/dynd/memblock/.*cpp")
 source_group("MemBlock Headers" REGULAR_EXPRESSION "include/dynd/memblock/.*hpp")
 source_group("Nodes Source" REGULAR_EXPRESSION "src/dynd/nodes/.*cpp")
 source_group("Nodes Headers" REGULAR_EXPRESSION "include/dynd/nodes/.*hpp")
+source_group("VM Source" REGULAR_EXPRESSION "src/dynd/vm/.*cpp")
+source_group("VM Headers" REGULAR_EXPRESSION "include/dynd/vm/.*hpp")
 source_group("Internal Headers" REGULAR_EXPRESSION "src/dynd/.*hpp")
 
 if(WIN32)
