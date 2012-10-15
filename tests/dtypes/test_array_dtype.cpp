@@ -9,10 +9,29 @@
 #include "inc_gtest.hpp"
 
 #include "dnd/dtype_assign.hpp"
+#include "dnd/dtypes/tuple_dtype.hpp"
+#include "dnd/dtypes/array_dtype.hpp"
 //#include "dnd/dtypes/ndarray_dtype.hpp"
 
 using namespace std;
 using namespace dnd;
+
+TEST(ArrayDType, DTypeSubscript) {
+    dtype dfloat = make_dtype<float>();
+    dtype darr1 = make_array_dtype(dfloat);
+    dtype darr2 = make_array_dtype(darr1);
+    dtype dtest;
+    irange ss[4];
+
+    ss[0] = 1 <= irange() < 3;
+    // Indexing an array like this creates a result with a known array size
+    dtest = darr1.index(1, ss);
+    // TODO!
+    //EXPECT_EQ(make_strided_array_dtype(), dtest);
+    //dtest = darr2.index(1, ss);
+    //EXPECT_EQ(darr1, dtest);
+
+}
 
 TEST(ArrayDType, LosslessCasting) {
 /*
