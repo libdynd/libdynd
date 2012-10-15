@@ -29,6 +29,7 @@ set(tests_SRC
     ndarray/test_ndarray_index.cpp
     ndarray/test_ndarray_arange.cpp
     ndarray/test_ndarray_views.cpp
+    vm/test_elwise_program.cpp
     test_arithmetic_op.cpp
     test_shape_tools.cpp
     test_unary_kernel.cpp
@@ -45,6 +46,7 @@ source_group("Other Tests" REGULAR_EXPRESSION "\\/test_[^\\/]*\\.cpp$")
 source_group("NDArray Tests" REGULAR_EXPRESSION "\\/ndarray\\/test_[^\\/]*\\.cpp$")
 source_group("CodeGen Tests" REGULAR_EXPRESSION "\\/codegen\\/test_[^\\/]*\\.cpp$")
 source_group("DTypes Tests" REGULAR_EXPRESSION "\\/dtypes\\/test_[^\\/]*\\.cpp$")
+source_group("VM Tests" REGULAR_EXPRESSION "\\/vm\\/test_[^\\/]*\\.cpp$")
 
 add_executable(dnd_tests ${tests_SRC})
 

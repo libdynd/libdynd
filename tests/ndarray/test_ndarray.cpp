@@ -10,7 +10,7 @@
 
 #include "inc_gtest.hpp"
 
-#include "dnd/ndarray.hpp"
+#include "dynd/ndarray.hpp"
 
 using namespace std;
 using namespace dynd;

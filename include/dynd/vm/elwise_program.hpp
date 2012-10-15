@@ -27,21 +27,22 @@ struct opcode_info_t {
 
 extern const opcode_info_t opcode_info[opcode_count];
 
+/**
+    * Validates that the program follows the VM structural rules.
+    */
+void validate_elwise_program(int reg_count, size_t program_size, const int *program);
+
 class elwise_program {
     std::vector<dtype> m_regtypes;
     std::vector<int> m_program;
 
-    /**
-     * Validates that the program follows the VM structural rules.
-     */
-    void validate_program() const;
 public:
     /** Constructs an elementwise VM program, stealing the internal values of regtypes and program */
     elwise_program(std::vector<dtype>& regtypes, std::vector<int>& program)
     {
+        validate_elwise_program(regtypes.size(), program.size(), &program[0]);
         m_regtypes.swap(regtypes);
         m_program.swap(program);
-        validate_program();
     }
 };
 
