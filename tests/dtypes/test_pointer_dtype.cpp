@@ -8,7 +8,7 @@
 #include <stdexcept>
 #include "inc_gtest.hpp"
 
-#include <dnd/dtypes/pointer_dtype.hpp>
+#include <dynd/dtypes/pointer_dtype.hpp>
 
 using namespace std;
 using namespace dynd;

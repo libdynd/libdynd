@@ -3,13 +3,13 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <dnd/platform_definitions.h>
+#include <dynd/platform_definitions.h>
 #include <complex>
 #include <iostream>
 #include <stdexcept>
 #include "inc_gtest.hpp"
 
-#include <dnd/codegen/codegen_cache.hpp>
+#include <dynd/codegen/codegen_cache.hpp>
 
 using namespace std;
 using namespace dynd;

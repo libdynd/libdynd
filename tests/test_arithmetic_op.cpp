@@ -8,8 +8,8 @@
 #include <cmath>
 #include <inc_gtest.hpp>
 
-#include <dnd/ndarray.hpp>
-#include <dnd/dtypes/convert_dtype.hpp>
+#include <dynd/ndarray.hpp>
+#include <dynd/dtypes/convert_dtype.hpp>
 
 using namespace std;
 using namespace dynd;

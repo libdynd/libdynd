@@ -8,9 +8,9 @@
 #include <stdexcept>
 #include "inc_gtest.hpp"
 
-#include <dnd/dtype_assign.hpp>
-#include <dnd/dtypes/byteswap_dtype.hpp>
-#include <dnd/dtypes/convert_dtype.hpp>
+#include <dynd/dtype_assign.hpp>
+#include <dynd/dtypes/byteswap_dtype.hpp>
+#include <dynd/dtypes/convert_dtype.hpp>
 
 using namespace std;
 using namespace dynd;

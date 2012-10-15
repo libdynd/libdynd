@@ -8,11 +8,11 @@
 #include <stdexcept>
 #include "inc_gtest.hpp"
 
-#include <dnd/ndarray.hpp>
-#include <dnd/nodes/immutable_scalar_node.hpp>
-#include <dnd/dtypes/string_dtype.hpp>
-#include <dnd/dtypes/fixedstring_dtype.hpp>
-#include <dnd/dtypes/convert_dtype.hpp>
+#include <dynd/ndarray.hpp>
+#include <dynd/nodes/immutable_scalar_node.hpp>
+#include <dynd/dtypes/string_dtype.hpp>
+#include <dynd/dtypes/fixedstring_dtype.hpp>
+#include <dynd/dtypes/convert_dtype.hpp>
 
 using namespace std;
 using namespace dynd;

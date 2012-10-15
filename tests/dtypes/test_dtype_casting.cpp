@@ -7,8 +7,8 @@
 #include <stdexcept>
 #include "inc_gtest.hpp"
 
-#include <dnd/dtype_assign.hpp>
-#include <dnd/dtypes/fixedstring_dtype.hpp>
+#include <dynd/dtype_assign.hpp>
+#include <dynd/dtypes/fixedstring_dtype.hpp>
 
 using namespace std;
 using namespace dynd;

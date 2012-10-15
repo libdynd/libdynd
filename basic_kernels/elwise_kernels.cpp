@@ -5,7 +5,7 @@
 
 #include <cmath>
 
-#include <dnd/config.hpp>
+#include <dynd/config.hpp>
 
 #ifdef _WIN32
 # define EXPORT extern "C" __declspec(dllexport)

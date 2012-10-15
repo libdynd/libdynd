@@ -5,14 +5,14 @@
 
 #include <iostream>
 
-#include <dnd/ndarray.hpp>
-#include <dnd/dtypes/convert_dtype.hpp>
-#include <dnd/dtypes/fixedstring_dtype.hpp>
-#include <dnd/dtypes/string_dtype.hpp>
-#include <dnd/dtypes/byteswap_dtype.hpp>
-#include <dnd/ndarray_arange.hpp>
-#include <dnd/codegen/codegen_cache.hpp>
-#include <dnd/codegen/unary_kernel_adapter_codegen.hpp>
+#include <dynd/ndarray.hpp>
+#include <dynd/dtypes/convert_dtype.hpp>
+#include <dynd/dtypes/fixedstring_dtype.hpp>
+#include <dynd/dtypes/string_dtype.hpp>
+#include <dynd/dtypes/byteswap_dtype.hpp>
+#include <dynd/ndarray_arange.hpp>
+#include <dynd/codegen/codegen_cache.hpp>
+#include <dynd/codegen/unary_kernel_adapter_codegen.hpp>
 
 using namespace std;
 using namespace dynd;

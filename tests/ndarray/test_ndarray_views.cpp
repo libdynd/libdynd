@@ -9,11 +9,11 @@
 #include <cmath>
 #include <inc_gtest.hpp>
 
-#include <dnd/ndarray.hpp>
-#include <dnd/ndarray_arange.hpp>
-#include <dnd/dtypes/dtype_alignment.hpp>
-#include <dnd/dtypes/convert_dtype.hpp>
-#include <dnd/dtypes/view_dtype.hpp>
+#include <dynd/ndarray.hpp>
+#include <dynd/ndarray_arange.hpp>
+#include <dynd/dtypes/dtype_alignment.hpp>
+#include <dynd/dtypes/convert_dtype.hpp>
+#include <dynd/dtypes/view_dtype.hpp>
 
 using namespace std;
 using namespace dynd;

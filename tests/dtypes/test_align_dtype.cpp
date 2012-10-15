@@ -8,9 +8,9 @@
 #include <stdexcept>
 #include "inc_gtest.hpp"
 
-#include <dnd/ndarray.hpp>
-#include <dnd/dtypes/dtype_alignment.hpp>
-#include <dnd/dtypes/byteswap_dtype.hpp>
+#include <dynd/ndarray.hpp>
+#include <dynd/dtypes/dtype_alignment.hpp>
+#include <dynd/dtypes/byteswap_dtype.hpp>
 
 using namespace std;
 using namespace dynd;

@@ -8,7 +8,7 @@
 #include <stdexcept>
 #include "inc_gtest.hpp"
 
-#include <dnd/codegen/codegen_cache.hpp>
+#include <dynd/codegen/codegen_cache.hpp>
 
 using namespace std;
 using namespace dynd;

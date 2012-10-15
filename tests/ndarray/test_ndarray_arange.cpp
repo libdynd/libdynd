@@ -9,8 +9,8 @@
 #include <cmath>
 #include <inc_gtest.hpp>
 
-#include <dnd/ndarray.hpp>
-#include <dnd/ndarray_arange.hpp>
+#include <dynd/ndarray.hpp>
+#include <dynd/ndarray_arange.hpp>
 
 using namespace std;
 using namespace dynd;

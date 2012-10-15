@@ -33,144 +33,144 @@ else()
     endif()
 endif()
 
-set(dnd_SRC
+set(dynd_SRC
     # CodeGen
-    src/dnd/codegen/unary_kernel_adapter_codegen_windows_x64.cpp
-    src/dnd/codegen/unary_kernel_adapter_codegen_x64_sysvabi.cpp
-    src/dnd/codegen/unary_kernel_adapter_codegen_unsupported.cpp
-    src/dnd/codegen/binary_kernel_adapter_codegen_windows_x64.cpp
-    src/dnd/codegen/binary_kernel_adapter_codegen_x64_sysvabi.cpp
-    src/dnd/codegen/binary_kernel_adapter_codegen_unsupported.cpp
-    src/dnd/codegen/binary_reduce_kernel_adapter_codegen.cpp
-    src/dnd/codegen/codegen_cache.cpp
-    include/dnd/codegen/unary_kernel_adapter_codegen.hpp
-    include/dnd/codegen/binary_kernel_adapter_codegen.hpp
-    include/dnd/codegen/binary_reduce_kernel_adapter_codegen.hpp
-    include/dnd/codegen/calling_conventions.hpp
-    include/dnd/codegen/codegen_cache.hpp
+    src/dynd/codegen/unary_kernel_adapter_codegen_windows_x64.cpp
+    src/dynd/codegen/unary_kernel_adapter_codegen_x64_sysvabi.cpp
+    src/dynd/codegen/unary_kernel_adapter_codegen_unsupported.cpp
+    src/dynd/codegen/binary_kernel_adapter_codegen_windows_x64.cpp
+    src/dynd/codegen/binary_kernel_adapter_codegen_x64_sysvabi.cpp
+    src/dynd/codegen/binary_kernel_adapter_codegen_unsupported.cpp
+    src/dynd/codegen/binary_reduce_kernel_adapter_codegen.cpp
+    src/dynd/codegen/codegen_cache.cpp
+    include/dynd/codegen/unary_kernel_adapter_codegen.hpp
+    include/dynd/codegen/binary_kernel_adapter_codegen.hpp
+    include/dynd/codegen/binary_reduce_kernel_adapter_codegen.hpp
+    include/dynd/codegen/calling_conventions.hpp
+    include/dynd/codegen/codegen_cache.hpp
     # DTypes
-    src/dnd/dtypes/array_dtype.cpp
-    src/dnd/dtypes/byteswap_dtype.cpp
-    src/dnd/dtypes/categorical_dtype.cpp
-    src/dnd/dtypes/convert_dtype.cpp
-    src/dnd/dtypes/dtype_alignment.cpp
-    src/dnd/dtypes/fixedstring_dtype.cpp
-    src/dnd/dtypes/pointer_dtype.cpp
-    src/dnd/dtypes/string_dtype.cpp
-    src/dnd/dtypes/tuple_dtype.cpp
-    src/dnd/dtypes/view_dtype.cpp
-    src/dnd/dtypes/void_pointer_dtype.cpp
-    include/dnd/dtypes/array_dtype.hpp
-    include/dnd/dtypes/byteswap_dtype.hpp
-    include/dnd/dtypes/categorical_dtype.hpp
-    include/dnd/dtypes/convert_dtype.hpp
-    include/dnd/dtypes/dtype_alignment.hpp
-    include/dnd/dtypes/fixedstring_dtype.hpp
-    include/dnd/dtypes/pointer_dtype.hpp
-    include/dnd/dtypes/string_dtype.hpp
-    include/dnd/dtypes/tuple_dtype.hpp
-    include/dnd/dtypes/view_dtype.hpp
-    include/dnd/dtypes/void_pointer_dtype.hpp
+    src/dynd/dtypes/array_dtype.cpp
+    src/dynd/dtypes/byteswap_dtype.cpp
+    src/dynd/dtypes/categorical_dtype.cpp
+    src/dynd/dtypes/convert_dtype.cpp
+    src/dynd/dtypes/dtype_alignment.cpp
+    src/dynd/dtypes/fixedstring_dtype.cpp
+    src/dynd/dtypes/pointer_dtype.cpp
+    src/dynd/dtypes/string_dtype.cpp
+    src/dynd/dtypes/tuple_dtype.cpp
+    src/dynd/dtypes/view_dtype.cpp
+    src/dynd/dtypes/void_pointer_dtype.cpp
+    include/dynd/dtypes/array_dtype.hpp
+    include/dynd/dtypes/byteswap_dtype.hpp
+    include/dynd/dtypes/categorical_dtype.hpp
+    include/dynd/dtypes/convert_dtype.hpp
+    include/dynd/dtypes/dtype_alignment.hpp
+    include/dynd/dtypes/fixedstring_dtype.hpp
+    include/dynd/dtypes/pointer_dtype.hpp
+    include/dynd/dtypes/string_dtype.hpp
+    include/dynd/dtypes/tuple_dtype.hpp
+    include/dynd/dtypes/view_dtype.hpp
+    include/dynd/dtypes/void_pointer_dtype.hpp
     # Eval
-    src/dnd/eval/eval_context.cpp
-    src/dnd/eval/eval_engine.cpp
-    src/dnd/eval/elwise_reduce_eval.cpp
-    src/dnd/eval/groupby_elwise_reduce_eval.cpp
-    src/dnd/eval/unary_elwise_eval.cpp
-    include/dnd/eval/eval_context.hpp
-    include/dnd/eval/eval_engine.hpp
-    include/dnd/eval/elwise_reduce_eval.hpp
-    include/dnd/eval/groupby_elwise_reduce_eval.hpp
-    include/dnd/eval/unary_elwise_eval.hpp
+    src/dynd/eval/eval_context.cpp
+    src/dynd/eval/eval_engine.cpp
+    src/dynd/eval/elwise_reduce_eval.cpp
+    src/dynd/eval/groupby_elwise_reduce_eval.cpp
+    src/dynd/eval/unary_elwise_eval.cpp
+    include/dynd/eval/eval_context.hpp
+    include/dynd/eval/eval_engine.hpp
+    include/dynd/eval/elwise_reduce_eval.hpp
+    include/dynd/eval/groupby_elwise_reduce_eval.hpp
+    include/dynd/eval/unary_elwise_eval.hpp
     # GFunc
-    src/dnd/gfunc/elwise_gfunc.cpp
-    src/dnd/gfunc/elwise_reduce_gfunc.cpp
-    include/dnd/gfunc/elwise_gfunc.hpp
-    include/dnd/gfunc/elwise_reduce_gfunc.hpp
+    src/dynd/gfunc/elwise_gfunc.cpp
+    src/dynd/gfunc/elwise_reduce_gfunc.cpp
+    include/dynd/gfunc/elwise_gfunc.hpp
+    include/dynd/gfunc/elwise_reduce_gfunc.hpp
     # Kernels
-    src/dnd/kernels/assignment_kernels.cpp
-    src/dnd/kernels/array_assignment_kernels.cpp
-    src/dnd/kernels/builtin_dtype_binary_kernel_table.cpp
-    src/dnd/kernels/buffered_unary_kernels.cpp
-    src/dnd/kernels/buffered_binary_kernels.cpp
-    src/dnd/kernels/byteswap_kernels.cpp
-    src/dnd/kernels/string_assignment_kernels.cpp
-    src/dnd/kernels/kernels_for_disassembly.cpp
-    src/dnd/kernels/single_assigner_builtin.hpp
-    include/dnd/kernels/assignment_kernels.hpp
-    include/dnd/kernels/array_assignment_kernels.hpp
-    include/dnd/kernels/builtin_dtype_binary_kernel_table.hpp
-    include/dnd/kernels/buffered_unary_kernels.hpp
-    include/dnd/kernels/buffered_binary_kernels.hpp
-    include/dnd/kernels/byteswap_kernels.hpp
-    include/dnd/kernels/kernel_instance.hpp
-    include/dnd/kernels/single_compare_kernel_instance.hpp
-    include/dnd/kernels/string_assignment_kernels.hpp
-    include/dnd/kernels/unary_kernel_instance.hpp
+    src/dynd/kernels/assignment_kernels.cpp
+    src/dynd/kernels/array_assignment_kernels.cpp
+    src/dynd/kernels/builtin_dtype_binary_kernel_table.cpp
+    src/dynd/kernels/buffered_unary_kernels.cpp
+    src/dynd/kernels/buffered_binary_kernels.cpp
+    src/dynd/kernels/byteswap_kernels.cpp
+    src/dynd/kernels/string_assignment_kernels.cpp
+    src/dynd/kernels/kernels_for_disassembly.cpp
+    src/dynd/kernels/single_assigner_builtin.hpp
+    include/dynd/kernels/assignment_kernels.hpp
+    include/dynd/kernels/array_assignment_kernels.hpp
+    include/dynd/kernels/builtin_dtype_binary_kernel_table.hpp
+    include/dynd/kernels/buffered_unary_kernels.hpp
+    include/dynd/kernels/buffered_binary_kernels.hpp
+    include/dynd/kernels/byteswap_kernels.hpp
+    include/dynd/kernels/kernel_instance.hpp
+    include/dynd/kernels/single_compare_kernel_instance.hpp
+    include/dynd/kernels/string_assignment_kernels.hpp
+    include/dynd/kernels/unary_kernel_instance.hpp
     # MemBlock
-    src/dnd/memblock/memory_block.cpp
-    src/dnd/memblock/executable_memory_block_windows_x64.cpp
-    src/dnd/memblock/executable_memory_block_darwin_x64.cpp
-    src/dnd/memblock/executable_memory_block_linux_x64.cpp
-    src/dnd/memblock/external_memory_block.cpp
-    src/dnd/memblock/fixed_size_pod_memory_block.cpp
-    src/dnd/memblock/ndarray_node_memory_block.cpp
-    src/dnd/memblock/pod_memory_block.cpp
-    include/dnd/memblock/memory_block.hpp
-    include/dnd/memblock/executable_memory_block.hpp
-    include/dnd/memblock/external_memory_block.hpp
-    include/dnd/memblock/fixed_size_pod_memory_block.hpp
-    include/dnd/memblock/ndarray_node_memory_block.hpp
-    include/dnd/memblock/pod_memory_block.hpp
+    src/dynd/memblock/memory_block.cpp
+    src/dynd/memblock/executable_memory_block_windows_x64.cpp
+    src/dynd/memblock/executable_memory_block_darwin_x64.cpp
+    src/dynd/memblock/executable_memory_block_linux_x64.cpp
+    src/dynd/memblock/external_memory_block.cpp
+    src/dynd/memblock/fixed_size_pod_memory_block.cpp
+    src/dynd/memblock/ndarray_node_memory_block.cpp
+    src/dynd/memblock/pod_memory_block.cpp
+    include/dynd/memblock/memory_block.hpp
+    include/dynd/memblock/executable_memory_block.hpp
+    include/dynd/memblock/external_memory_block.hpp
+    include/dynd/memblock/fixed_size_pod_memory_block.hpp
+    include/dynd/memblock/ndarray_node_memory_block.hpp
+    include/dynd/memblock/pod_memory_block.hpp
     # Nodes
-    src/dnd/nodes/elwise_unary_kernel_node.cpp
-    src/dnd/nodes/elwise_binary_kernel_node.cpp
-    src/dnd/nodes/elwise_reduce_kernel_node.cpp
-    src/dnd/nodes/groupby_node.cpp
-    src/dnd/nodes/immutable_scalar_node.cpp
-    src/dnd/nodes/ndarray_node.cpp
-    src/dnd/nodes/scalar_node.cpp
-    src/dnd/nodes/strided_ndarray_node.cpp
-    include/dnd/nodes/elwise_unary_kernel_node.hpp
-    include/dnd/nodes/elwise_binary_kernel_node.hpp
-    include/dnd/nodes/elwise_reduce_kernel_node.hpp
-    include/dnd/nodes/groupby_node.hpp
-    include/dnd/nodes/immutable_builtin_scalar_node.hpp
-    include/dnd/nodes/immutable_scalar_node.hpp
-    include/dnd/nodes/ndarray_node.hpp
-    include/dnd/nodes/scalar_node.hpp
-    include/dnd/nodes/strided_ndarray_node.hpp
+    src/dynd/nodes/elwise_unary_kernel_node.cpp
+    src/dynd/nodes/elwise_binary_kernel_node.cpp
+    src/dynd/nodes/elwise_reduce_kernel_node.cpp
+    src/dynd/nodes/groupby_node.cpp
+    src/dynd/nodes/immutable_scalar_node.cpp
+    src/dynd/nodes/ndarray_node.cpp
+    src/dynd/nodes/scalar_node.cpp
+    src/dynd/nodes/strided_ndarray_node.cpp
+    include/dynd/nodes/elwise_unary_kernel_node.hpp
+    include/dynd/nodes/elwise_binary_kernel_node.hpp
+    include/dynd/nodes/elwise_reduce_kernel_node.hpp
+    include/dynd/nodes/groupby_node.hpp
+    include/dynd/nodes/immutable_builtin_scalar_node.hpp
+    include/dynd/nodes/immutable_scalar_node.hpp
+    include/dynd/nodes/ndarray_node.hpp
+    include/dynd/nodes/scalar_node.hpp
+    include/dynd/nodes/strided_ndarray_node.hpp
     # Main
-    src/dnd/arithmetic_op.cpp
-    src/dnd/dtype.cpp
-    src/dnd/dtype_assign.cpp
-    src/dnd/dtype_comparisons.cpp
-    src/dnd/dtype_promotion.cpp
-    src/dnd/exceptions.cpp
-    src/dnd/ndarray.cpp
-    src/dnd/ndarray_arange.cpp
-    src/dnd/shape_tools.cpp
-    src/dnd/string_encodings.cpp
-    include/dnd/auxiliary_data.hpp
-    include/dnd/buffer_storage.hpp
-    include/dnd/config.hpp
-    include/dnd/cling_all.hpp
-    include/dnd/diagnostics.hpp
-    include/dnd/dtype.hpp
-    include/dnd/dtype_comparisons.hpp
-    include/dnd/dtype_assign.hpp
-    include/dnd/dtype_promotion.hpp
-    include/dnd/exceptions.hpp
-    include/dnd/fpstatus.hpp
-    include/dnd/irange.hpp
-    include/dnd/ndarray.hpp
-    include/dnd/ndarray_arange.hpp
-    include/dnd/raw_iteration.hpp
-    include/dnd/scalars.hpp
-    include/dnd/shortvector.hpp
-    include/dnd/shape_tools.hpp
-    include/dnd/string_encodings.hpp
-    include/dnd/platform_definitions.h
+    src/dynd/arithmetic_op.cpp
+    src/dynd/dtype.cpp
+    src/dynd/dtype_assign.cpp
+    src/dynd/dtype_comparisons.cpp
+    src/dynd/dtype_promotion.cpp
+    src/dynd/exceptions.cpp
+    src/dynd/ndarray.cpp
+    src/dynd/ndarray_arange.cpp
+    src/dynd/shape_tools.cpp
+    src/dynd/string_encodings.cpp
+    include/dynd/auxiliary_data.hpp
+    include/dynd/buffer_storage.hpp
+    include/dynd/config.hpp
+    include/dynd/cling_all.hpp
+    include/dynd/diagnostics.hpp
+    include/dynd/dtype.hpp
+    include/dynd/dtype_comparisons.hpp
+    include/dynd/dtype_assign.hpp
+    include/dynd/dtype_promotion.hpp
+    include/dynd/exceptions.hpp
+    include/dynd/fpstatus.hpp
+    include/dynd/irange.hpp
+    include/dynd/ndarray.hpp
+    include/dynd/ndarray_arange.hpp
+    include/dynd/raw_iteration.hpp
+    include/dynd/scalars.hpp
+    include/dynd/shortvector.hpp
+    include/dynd/shape_tools.hpp
+    include/dynd/string_encodings.hpp
+    include/dynd/platform_definitions.h
     )
 
 include_directories(
@@ -179,28 +179,28 @@ include_directories(
     thirdparty/utf8/source
     )
 
-source_group("Main Source" REGULAR_EXPRESSION "src/dnd/.*cpp")
-source_group("Main Headers" REGULAR_EXPRESSION "include/dnd/.*hpp")
-source_group("CodeGen Source" REGULAR_EXPRESSION "src/dnd/codegen/.*cpp")
-source_group("CodeGen Headers" REGULAR_EXPRESSION "include/dnd/codegen/.*hpp")
-source_group("DTypes Source" REGULAR_EXPRESSION "src/dnd/dtypes/.*cpp")
-source_group("DTypes Headers" REGULAR_EXPRESSION "include/dnd/dtypes/.*hpp")
-source_group("Eval Source" REGULAR_EXPRESSION "src/dnd/eval/.*cpp")
-source_group("Eval Headers" REGULAR_EXPRESSION "include/dnd/eval/.*hpp")
-source_group("GFunc Source" REGULAR_EXPRESSION "src/dnd/gfunc/.*cpp")
-source_group("GFunc Headers" REGULAR_EXPRESSION "include/dnd/gfunc/.*hpp")
-source_group("Kernels Source" REGULAR_EXPRESSION "src/dnd/kernels/.*cpp")
-source_group("Kernels Headers" REGULAR_EXPRESSION "include/dnd/kernels/.*hpp")
-source_group("MemBlock Source" REGULAR_EXPRESSION "src/dnd/memblock/.*cpp")
-source_group("MemBlock Headers" REGULAR_EXPRESSION "include/dnd/memblock/.*hpp")
-source_group("Nodes Source" REGULAR_EXPRESSION "src/dnd/nodes/.*cpp")
-source_group("Nodes Headers" REGULAR_EXPRESSION "include/dnd/nodes/.*hpp")
-source_group("Internal Headers" REGULAR_EXPRESSION "src/dnd/.*hpp")
+source_group("Main Source" REGULAR_EXPRESSION "src/dynd/.*cpp")
+source_group("Main Headers" REGULAR_EXPRESSION "include/dynd/.*hpp")
+source_group("CodeGen Source" REGULAR_EXPRESSION "src/dynd/codegen/.*cpp")
+source_group("CodeGen Headers" REGULAR_EXPRESSION "include/dynd/codegen/.*hpp")
+source_group("DTypes Source" REGULAR_EXPRESSION "src/dynd/dtypes/.*cpp")
+source_group("DTypes Headers" REGULAR_EXPRESSION "include/dynd/dtypes/.*hpp")
+source_group("Eval Source" REGULAR_EXPRESSION "src/dynd/eval/.*cpp")
+source_group("Eval Headers" REGULAR_EXPRESSION "include/dynd/eval/.*hpp")
+source_group("GFunc Source" REGULAR_EXPRESSION "src/dynd/gfunc/.*cpp")
+source_group("GFunc Headers" REGULAR_EXPRESSION "include/dynd/gfunc/.*hpp")
+source_group("Kernels Source" REGULAR_EXPRESSION "src/dynd/kernels/.*cpp")
+source_group("Kernels Headers" REGULAR_EXPRESSION "include/dynd/kernels/.*hpp")
+source_group("MemBlock Source" REGULAR_EXPRESSION "src/dynd/memblock/.*cpp")
+source_group("MemBlock Headers" REGULAR_EXPRESSION "include/dynd/memblock/.*hpp")
+source_group("Nodes Source" REGULAR_EXPRESSION "src/dynd/nodes/.*cpp")
+source_group("Nodes Headers" REGULAR_EXPRESSION "include/dynd/nodes/.*hpp")
+source_group("Internal Headers" REGULAR_EXPRESSION "src/dynd/.*hpp")
 
 if(WIN32)
-    add_library(dynamicndarray STATIC ${dnd_SRC})
+    add_library(dynamicndarray STATIC ${dynd_SRC})
 else()
-    add_library(dynamicndarray SHARED ${dnd_SRC})
+    add_library(dynamicndarray SHARED ${dynd_SRC})
 endif()
 
 add_subdirectory(basic_kernels)
