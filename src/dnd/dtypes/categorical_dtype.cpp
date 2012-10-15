@@ -12,7 +12,7 @@
 #include <dnd/kernels/single_compare_kernel_instance.hpp>
 #include <dnd/raw_iteration.hpp>
 
-using namespace dnd;
+using namespace dynd;
 using namespace std;
 
 namespace {
@@ -262,7 +262,7 @@ void categorical_dtype::print_dtype(std::ostream& o) const
     o << "]>";
 }
 
-dtype dnd::categorical_dtype::apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& root_dt) const
+dtype dynd::categorical_dtype::apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& root_dt) const
 {
     if (nindices == 0) {
         return dtype(this);
@@ -271,7 +271,7 @@ dtype dnd::categorical_dtype::apply_linear_index(int nindices, const irange *ind
     }
 }
 
-void dnd::categorical_dtype::get_shape(int i, std::vector<intptr_t>& out_shape) const
+void dynd::categorical_dtype::get_shape(int i, std::vector<intptr_t>& out_shape) const
 {
     if (m_category_dtype.extended()) {
         m_category_dtype.extended()->get_shape(i, out_shape);
@@ -386,7 +386,7 @@ bool categorical_dtype::operator==(const extended_dtype& rhs) const
 }
 
 
-dtype dnd::factor_categorical_dtype(const ndarray& values)
+dtype dynd::factor_categorical_dtype(const ndarray& values)
 {
     single_compare_kernel_instance k;
     values.get_dtype().get_single_compare_kernel(k);

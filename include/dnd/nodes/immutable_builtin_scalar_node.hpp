@@ -9,7 +9,7 @@
 #include <dnd/nodes/immutable_scalar_node.hpp>
 #include <dnd/memblock/ndarray_node_memory_block.hpp>
 
-namespace dnd {
+namespace dynd {
 
 template<class T>
 typename enable_if<is_dtype_scalar<T>::value, ndarray_node_ptr>::type make_immutable_builtin_scalar_node(const T& value);
@@ -78,7 +78,7 @@ public:
     }
 
     ndarray_node_ptr as_dtype(const dtype& dt,
-                        dnd::assign_error_mode errmode, bool DND_UNUSED(allow_in_place))
+                        dynd::assign_error_mode errmode, bool DND_UNUSED(allow_in_place))
     {
         return make_immutable_scalar_node(
                         make_convert_dtype(dt, static_builtin_dtypes[type_id_of<T>::value], errmode),
@@ -121,6 +121,6 @@ inline typename enable_if<is_dtype_scalar<T>::value, ndarray_node_ptr>::type mak
     return DND_MOVE(result);
 }
 
-} // namespace dnd
+} // namespace dynd
 
 #endif // _DND__IMMUTABLE_BUILTIN_SCALAR_NODE_HPP_

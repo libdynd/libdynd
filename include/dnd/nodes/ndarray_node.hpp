@@ -18,7 +18,7 @@
 #include <dnd/shortvector.hpp>
 #include <dnd/memblock/memory_block.hpp>
 
-namespace dnd {
+namespace dynd {
 
 class ndarray;
 
@@ -260,6 +260,6 @@ inline ndarray_node_ptr ndarray_node::as_ndarray_node_ptr()
                 reinterpret_cast<char *>(this) - sizeof(memory_block_data)));
 }
 
-} // namespace dnd
+} // namespace dynd
 
 #endif // _DND__NDARRAY_NODE_HPP_

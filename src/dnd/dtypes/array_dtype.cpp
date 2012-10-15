@@ -10,14 +10,14 @@
 #include <algorithm>
 
 using namespace std;
-using namespace dnd;
+using namespace dynd;
 
-dnd::array_dtype::array_dtype(const dtype& element_dtype)
+dynd::array_dtype::array_dtype(const dtype& element_dtype)
     : m_element_dtype(element_dtype)
 {
 }
 
-void dnd::array_dtype::print_element(std::ostream& o, const char *data) const
+void dynd::array_dtype::print_element(std::ostream& o, const char *data) const
 {
     const char *begin = reinterpret_cast<const char * const *>(data)[0];
     const char *end = reinterpret_cast<const char * const *>(data)[1];
@@ -33,13 +33,13 @@ void dnd::array_dtype::print_element(std::ostream& o, const char *data) const
     o << "]";
 }
 
-void dnd::array_dtype::print_dtype(std::ostream& o) const {
+void dynd::array_dtype::print_dtype(std::ostream& o) const {
 
     o << "array<" << m_element_dtype << ">";
 
 }
 
-dtype dnd::array_dtype::apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& root_dt) const
+dtype dynd::array_dtype::apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& root_dt) const
 {
     if (nindices == 0) {
         return dtype(this);
@@ -58,7 +58,7 @@ dtype dnd::array_dtype::apply_linear_index(int nindices, const irange *indices, 
     }
 }
 
-void dnd::array_dtype::get_shape(int i, std::vector<intptr_t>& out_shape) const
+void dynd::array_dtype::get_shape(int i, std::vector<intptr_t>& out_shape) const
 {
     // Ensure the output shape is big enough
     while (out_shape.size() <= i) {
@@ -74,25 +74,25 @@ void dnd::array_dtype::get_shape(int i, std::vector<intptr_t>& out_shape) const
     }
 }
 
-bool dnd::array_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const
+bool dynd::array_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const
 {
     if (dst_dt.extended() == this) {
         if (dst_dt.type_id() == array_type_id) {
             const array_dtype *src_esd = static_cast<const array_dtype*>(src_dt.extended());
-            return ::dnd::is_lossless_assignment(m_element_dtype, src_esd->m_element_dtype);
+            return ::dynd::is_lossless_assignment(m_element_dtype, src_esd->m_element_dtype);
         } else {
-            return ::dnd::is_lossless_assignment(m_element_dtype, src_dt);
+            return ::dynd::is_lossless_assignment(m_element_dtype, src_dt);
         }
     } else {
         return false;
     }
 }
 
-void dnd::array_dtype::get_single_compare_kernel(single_compare_kernel_instance& DND_UNUSED(out_kernel)) const {
+void dynd::array_dtype::get_single_compare_kernel(single_compare_kernel_instance& DND_UNUSED(out_kernel)) const {
     throw std::runtime_error("array_dtype::get_single_compare_kernel not supported yet");
 }
 
-void dnd::array_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const dtype& src_dt,
+void dynd::array_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const dtype& src_dt,
                 assign_error_mode errmode,
                 unary_specialization_kernel_instance& out_kernel) const
 {
@@ -115,7 +115,7 @@ void dnd::array_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const dt
 }
 
 
-bool dnd::array_dtype::operator==(const extended_dtype& rhs) const
+bool dynd::array_dtype::operator==(const extended_dtype& rhs) const
 {
     if (this == &rhs) {
         return true;

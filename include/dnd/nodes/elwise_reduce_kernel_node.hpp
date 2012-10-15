@@ -9,7 +9,7 @@
 #include <dnd/nodes/ndarray_node.hpp>
 #include <dnd/kernels/kernel_instance.hpp>
 
-namespace dnd {
+namespace dynd {
 
 class elwise_reduce_kernel_node : public ndarray_node {
     /** The dtype of the result this operation produces */
@@ -93,7 +93,7 @@ public:
     }
 
     ndarray_node_ptr as_dtype(const dtype& dt,
-                        dnd::assign_error_mode errmode, bool allow_in_place);
+                        dynd::assign_error_mode errmode, bool allow_in_place);
 
     ndarray_node_ptr apply_linear_index(
                     int ndim, const bool *remove_axis,
@@ -127,6 +127,6 @@ ndarray_node_ptr make_elwise_reduce_kernel_node_steal_kernel(const dtype& dt, co
                                             dnd_bool *reduce_axes, bool rightassoc, bool keepdims, const ndarray_node_ptr& identity,
                                             kernel_instance<unary_operation_t>& kernel);
 
-} // namespace dnd
+} // namespace dynd
 
 #endif // _DND__ELWISE_REDUCE_KERNEL_NODE_HPP_

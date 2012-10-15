@@ -13,7 +13,7 @@
 #include <dnd/dtypes/convert_dtype.hpp>
 
 using namespace std;
-using namespace dnd;
+using namespace dynd;
 
 TEST(ConvertDType, ExpressionInValue) {
     // When given an expression dtype as the destination, making a conversion dtype chains

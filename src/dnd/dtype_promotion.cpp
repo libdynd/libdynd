@@ -9,7 +9,7 @@
 #include <dnd/dtypes/string_dtype.hpp>
 
 using namespace std;
-using namespace dnd;
+using namespace dynd;
 
 /*
 static intptr_t min_strlen_for_builtin_kind(dtype_kind_t kind)
@@ -30,7 +30,7 @@ static intptr_t min_strlen_for_builtin_kind(dtype_kind_t kind)
 }
 */
 
-dtype dnd::promote_dtypes_arithmetic(const dtype& dt0, const dtype& dt1)
+dtype dynd::promote_dtypes_arithmetic(const dtype& dt0, const dtype& dt1)
 {
     // Use the value dtypes
     const dtype& dt0_val = dt0.value_dtype();

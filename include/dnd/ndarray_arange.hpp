@@ -8,7 +8,7 @@
 
 #include <dnd/ndarray.hpp>
 
-namespace dnd {
+namespace dynd {
 
 /**
  * General version of arange, with raw pointers to the values. Returns
@@ -66,6 +66,6 @@ typename enable_if<dtype_kind_of<T>::value == int_kind ||
     return linspace((double)start, (double)stop, count);
 }
 
-} // namespace dnd
+} // namespace dynd
 
 #endif // _DND__NDARRAY_ARANGE_HPP_

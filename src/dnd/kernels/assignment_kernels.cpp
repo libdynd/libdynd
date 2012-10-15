@@ -9,7 +9,7 @@
 #include "single_assigner_builtin.hpp"
 
 using namespace std;
-using namespace dnd;
+using namespace dynd;
 
 static assignment_function_t single_assign_table[builtin_type_id_count][builtin_type_id_count][4] =
 {
@@ -53,7 +53,7 @@ static assignment_function_t single_assign_table[builtin_type_id_count][builtin_
 #undef ERROR_MODE_LEVEL
 };
 
-assignment_function_t dnd::get_builtin_dtype_assignment_function(type_id_t dst_type_id, type_id_t src_type_id,
+assignment_function_t dynd::get_builtin_dtype_assignment_function(type_id_t dst_type_id, type_id_t src_type_id,
                                                                 assign_error_mode errmode)
 {
     // Do a table lookup for the built-in range of dtypes
@@ -66,7 +66,7 @@ assignment_function_t dnd::get_builtin_dtype_assignment_function(type_id_t dst_t
     }
 }
 
-void dnd::multiple_assignment_kernel(char *dst, intptr_t dst_stride, const char *src, intptr_t src_stride,
+void dynd::multiple_assignment_kernel(char *dst, intptr_t dst_stride, const char *src, intptr_t src_stride,
                                     intptr_t count, const AuxDataBase *auxdata)
 {
     assignment_function_t asn = get_auxiliary_data<assignment_function_t>(auxdata);
@@ -175,7 +175,7 @@ namespace {
     }
 
 
-void dnd::get_builtin_dtype_assignment_kernel(
+void dynd::get_builtin_dtype_assignment_kernel(
                     type_id_t dst_type_id, type_id_t src_type_id,
                     assign_error_mode errmode,
                     const eval::eval_context *ectx,
@@ -231,7 +231,7 @@ void dnd::get_builtin_dtype_assignment_kernel(
     }
 }
 
-void dnd::get_dtype_assignment_kernel(
+void dynd::get_dtype_assignment_kernel(
                     const dtype& dst_dt, const dtype& src_dt,
                     assign_error_mode errmode,
                     const eval::eval_context *ectx,
@@ -454,7 +454,7 @@ static void unaligned_strided_copy_assign_kernel(char *dst, intptr_t dst_stride,
     }
 }
 
-void dnd::get_pod_dtype_assignment_kernel(
+void dynd::get_pod_dtype_assignment_kernel(
                     intptr_t element_size, intptr_t alignment,
                     unary_specialization_kernel_instance& out_kernel)
 {
@@ -535,7 +535,7 @@ void dnd::get_pod_dtype_assignment_kernel(
     make_raw_auxiliary_data(out_kernel.auxdata, static_cast<uintptr_t>(element_size)<<1);
 }
 
-void dnd::get_dtype_assignment_kernel(const dtype& dt,
+void dynd::get_dtype_assignment_kernel(const dtype& dt,
                     unary_specialization_kernel_instance& out_kernel)
 {
     switch (dt.get_memory_management()) {

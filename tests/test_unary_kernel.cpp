@@ -12,7 +12,7 @@
 #include "dnd/kernels/unary_kernel_instance.hpp"
 
 using namespace std;
-using namespace dnd;
+using namespace dynd;
 
 TEST(UnaryKernel, Specialization) {
 	

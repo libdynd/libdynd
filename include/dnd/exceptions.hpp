@@ -12,7 +12,7 @@
 
 #include <dnd/irange.hpp>
 
-namespace dnd {
+namespace dynd {
 
 // Forward declaration of ndarray class, for broadcast_error
 class ndarray_node_ptr;
@@ -126,6 +126,6 @@ public:
     }
 };
 
-} // namespace dnd
+} // namespace dynd
 
 #endif // _DND__EXCEPTIONS_HPP_

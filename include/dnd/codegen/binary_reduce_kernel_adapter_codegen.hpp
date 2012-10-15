@@ -11,7 +11,7 @@
 #include <dnd/memblock/memory_block.hpp>
 #include <dnd/codegen/calling_conventions.hpp>
 
-namespace dnd {
+namespace dynd {
 
 /**
  * This is the auxiliary data used by the code generated
@@ -77,6 +77,6 @@ unary_operation_t codegen_left_associative_binary_reduce_function_adapter(
 unary_operation_t codegen_right_associative_binary_reduce_function_adapter(
                     const dtype& reduce_type,calling_convention_t callconv);
 
-} // namespace dnd
+} // namespace dynd
 
 #endif // _DND__BINARY_REDUCE_KERNEL_ADAPTER_CODEGEN_HPP_

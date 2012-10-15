@@ -14,7 +14,7 @@
 
 #include <dnd/dtype.hpp>
 
-namespace dnd {
+namespace dynd {
 
 class void_pointer_dtype : public extended_dtype {
 public:
@@ -60,6 +60,6 @@ public:
     bool operator==(const extended_dtype& rhs) const;
 };
 
-} // namespace dnd
+} // namespace dynd
 
 #endif // _DND__VOID_POINTER_DTYPE_HPP_

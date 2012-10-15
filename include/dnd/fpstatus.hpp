@@ -9,7 +9,7 @@
 #if defined(_MSC_VER)
 #include <float.h>
 
-namespace dnd {
+namespace dynd {
 
 inline void clear_fp_status() {
     _clearfp();
@@ -23,12 +23,12 @@ inline bool is_inexact_fp_status() {
     return (_statusfp() & _EM_INEXACT) != 0;
 }
 
-} // namespace dnd
+} // namespace dynd
 
 #else
 #include <fenv.h>
 
-namespace dnd {
+namespace dynd {
 
 inline void clear_fp_status() {
     feclearexcept(FE_DIVBYZERO | FE_OVERFLOW | FE_UNDERFLOW | FE_INVALID);
@@ -42,7 +42,7 @@ inline bool is_inexact_fp_status() {
     return fetestexcept(FE_INEXACT) != 0;
 }
 
-} // namespace dnd
+} // namespace dynd
 
 #endif
 

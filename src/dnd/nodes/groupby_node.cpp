@@ -8,9 +8,9 @@
 #include <dnd/memblock/ndarray_node_memory_block.hpp>
 
 using namespace std;
-using namespace dnd;
+using namespace dynd;
 
-dnd::groupby_node::groupby_node(const ndarray_node_ptr& data_node, const ndarray_node_ptr& by_node, const dtype& groups)
+dynd::groupby_node::groupby_node(const ndarray_node_ptr& data_node, const ndarray_node_ptr& by_node, const dtype& groups)
     : m_data_node(data_node), m_by_node(by_node->as_dtype(groups)), m_groups(groups)
 {
     if (groups.type_id() != categorical_type_id) {
@@ -21,13 +21,13 @@ dnd::groupby_node::groupby_node(const ndarray_node_ptr& data_node, const ndarray
     m_shape[1] = -1;
 }
 
-ndarray_node_ptr dnd::groupby_node::as_dtype(const dtype& /*dt*/,
-                    dnd::assign_error_mode /*errmode*/, bool /*allow_in_place*/)
+ndarray_node_ptr dynd::groupby_node::as_dtype(const dtype& /*dt*/,
+                    dynd::assign_error_mode /*errmode*/, bool /*allow_in_place*/)
 {
     throw std::runtime_error("TODO: groupby_node::as_dtype");
 }
 
-ndarray_node_ptr dnd::groupby_node::apply_linear_index(
+ndarray_node_ptr dynd::groupby_node::apply_linear_index(
                 int /*ndim*/, const bool * /*remove_axis*/,
                 const intptr_t * /*start_index*/, const intptr_t * /*index_strides*/,
                 const intptr_t * /*shape*/,
@@ -36,12 +36,12 @@ ndarray_node_ptr dnd::groupby_node::apply_linear_index(
     throw std::runtime_error("TODO: groupby_node::apply_linear_index");
 }
 
-void dnd::groupby_node::debug_dump_extra(std::ostream& o, const std::string& indent) const
+void dynd::groupby_node::debug_dump_extra(std::ostream& o, const std::string& indent) const
 {
     o << indent << " groups dtype: " << m_groups << "\n";
 }
 
-ndarray_node_ptr dnd::make_groupby_node(const ndarray_node_ptr& data_node,
+ndarray_node_ptr dynd::make_groupby_node(const ndarray_node_ptr& data_node,
                         const ndarray_node_ptr& by_node, const dtype& groups)
 {
     char *node_memory = NULL;

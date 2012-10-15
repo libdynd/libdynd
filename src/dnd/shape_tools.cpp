@@ -9,9 +9,9 @@
 #include <dnd/exceptions.hpp>
 
 using namespace std;
-using namespace dnd;
+using namespace dynd;
 
-bool dnd::shape_can_broadcast(int dst_ndim, const intptr_t *dst_shape,
+bool dynd::shape_can_broadcast(int dst_ndim, const intptr_t *dst_shape,
                             int src_ndim, const intptr_t *src_shape)
 {
     if (dst_ndim >= src_ndim) {
@@ -28,7 +28,7 @@ bool dnd::shape_can_broadcast(int dst_ndim, const intptr_t *dst_shape,
     }
 }
 
-void dnd::broadcast_to_shape(int dst_ndim, const intptr_t *dst_shape,
+void dynd::broadcast_to_shape(int dst_ndim, const intptr_t *dst_shape,
                 int src_ndim, const intptr_t *src_shape, const intptr_t *src_strides,
                 intptr_t *out_strides)
 {
@@ -64,7 +64,7 @@ void dnd::broadcast_to_shape(int dst_ndim, const intptr_t *dst_shape,
     //cout << "\n";
 }
 
-void dnd::broadcast_input_shapes(int noperands, ndarray_node_ptr *operands,
+void dynd::broadcast_input_shapes(int noperands, ndarray_node_ptr *operands,
                         int* out_ndim, dimvector* out_shape)
 {
     // Get the number of broadcast dimensions
@@ -99,7 +99,7 @@ void dnd::broadcast_input_shapes(int noperands, ndarray_node_ptr *operands,
     *out_ndim = ndim;
 }
 
-void dnd::copy_input_strides(const ndarray& op, int ndim, intptr_t *out_strides)
+void dynd::copy_input_strides(const ndarray& op, int ndim, intptr_t *out_strides)
 {
     // Process op
     int dimdelta = ndim - op.get_ndim();
@@ -133,7 +133,7 @@ namespace {
 
 } // anonymous namespace
 
-void dnd::strides_to_axis_perm(int ndim, const intptr_t *strides, int *out_axis_perm)
+void dynd::strides_to_axis_perm(int ndim, const intptr_t *strides, int *out_axis_perm)
 {
     switch (ndim) {
         case 0: {
@@ -234,7 +234,7 @@ static inline void compare_strides(int i, int j, int noperands, const intptr_t *
     }
 }
 
-void dnd::multistrides_to_axis_perm(int ndim, int noperands, const intptr_t **operstrides, int *out_axis_perm)
+void dynd::multistrides_to_axis_perm(int ndim, int noperands, const intptr_t **operstrides, int *out_axis_perm)
 {
     switch (ndim) {
         case 0: {
@@ -302,7 +302,7 @@ void dnd::multistrides_to_axis_perm(int ndim, int noperands, const intptr_t **op
     }
 }
 
-void dnd::print_shape(std::ostream& o, int ndim, const intptr_t *shape)
+void dynd::print_shape(std::ostream& o, int ndim, const intptr_t *shape)
 {
     o << "(";
     for (int i = 0; i < ndim; ++i) {
@@ -319,7 +319,7 @@ void dnd::print_shape(std::ostream& o, int ndim, const intptr_t *shape)
     o << ")";
 }
 
-void dnd::apply_single_linear_index(const irange& irnge, intptr_t dimension_size, int error_i, const dtype* error_dt,
+void dynd::apply_single_linear_index(const irange& irnge, intptr_t dimension_size, int error_i, const dtype* error_dt,
         bool& out_remove_dimension, intptr_t& out_start_index, intptr_t& out_index_stride, intptr_t& out_dimension_size)
 {
     intptr_t step = irnge.step();

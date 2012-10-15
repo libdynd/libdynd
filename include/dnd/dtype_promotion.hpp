@@ -8,7 +8,7 @@
 
 #include <dnd/dtype.hpp>
 
-namespace dnd {
+namespace dynd {
 
 /**
  * Given two dtypes, this function produces the dtype with which
@@ -23,6 +23,6 @@ namespace dnd {
  */
 dtype promote_dtypes_arithmetic(const dtype& dt0, const dtype& dt1);
 
-} // namespace dnd
+} // namespace dynd
 
 #endif // _DND__DTYPE_PROMOTION_HPP_

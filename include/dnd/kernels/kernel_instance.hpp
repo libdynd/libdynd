@@ -8,7 +8,7 @@
 
 #include <dnd/auxiliary_data.hpp>
 
-namespace dnd {
+namespace dynd {
 
 typedef void (*nullary_operation_t)(char *dst, intptr_t dst_stride,
                         intptr_t count, const AuxDataBase *auxdata);
@@ -64,6 +64,6 @@ public:
     auxiliary_data auxdata;
 };
 
-} // namespace dnd;
+} // namespace dynd;
 
 #endif // _DND__KERNEL_INSTANCE_HPP_

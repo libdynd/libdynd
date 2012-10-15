@@ -12,7 +12,7 @@
 #include "dnd/exceptions.hpp"
 
 using namespace std;
-using namespace dnd;
+using namespace dynd;
 
 TEST(NDArrayIndex, BasicInteger) {
     int i0[3][2] = {{1,2},{3,4},{5,6}};

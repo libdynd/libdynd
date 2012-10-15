@@ -11,21 +11,21 @@
 #include <algorithm>
 
 using namespace std;
-using namespace dnd;
+using namespace dynd;
 
-void dnd::void_pointer_dtype::print_element(std::ostream& o, const char *data) const
+void dynd::void_pointer_dtype::print_element(std::ostream& o, const char *data) const
 {
     uintptr_t target_ptr = *reinterpret_cast<const uintptr_t *>(data);
     o << "0x";
     hexadecimal_print(o, target_ptr);
 }
 
-void dnd::void_pointer_dtype::print_dtype(std::ostream& o) const {
+void dynd::void_pointer_dtype::print_dtype(std::ostream& o) const {
 
     o << "pointer<void>";
 }
 
-dtype dnd::void_pointer_dtype::apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& root_dt) const
+dtype dynd::void_pointer_dtype::apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& root_dt) const
 {
     if (nindices == 0) {
         return dtype(this);
@@ -34,25 +34,25 @@ dtype dnd::void_pointer_dtype::apply_linear_index(int nindices, const irange *in
     }
 }
 
-void dnd::void_pointer_dtype::get_shape(int i, std::vector<intptr_t>& out_shape) const
+void dynd::void_pointer_dtype::get_shape(int i, std::vector<intptr_t>& out_shape) const
 {
 }
 
-bool dnd::void_pointer_dtype::is_lossless_assignment(const dtype& DND_UNUSED(dst_dt), const dtype& DND_UNUSED(src_dt)) const
+bool dynd::void_pointer_dtype::is_lossless_assignment(const dtype& DND_UNUSED(dst_dt), const dtype& DND_UNUSED(src_dt)) const
 {
     return false;
 }
 
-void dnd::void_pointer_dtype::get_single_compare_kernel(single_compare_kernel_instance& DND_UNUSED(out_kernel)) const {
+void dynd::void_pointer_dtype::get_single_compare_kernel(single_compare_kernel_instance& DND_UNUSED(out_kernel)) const {
     throw std::runtime_error("void_pointer_dtype::get_single_compare_kernel not supported yet");
 }
 
-bool dnd::void_pointer_dtype::operator==(const extended_dtype& rhs) const
+bool dynd::void_pointer_dtype::operator==(const extended_dtype& rhs) const
 {
     return rhs.type_id() == void_pointer_type_id;
 }
 
-void dnd::void_pointer_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const dtype& src_dt,
+void dynd::void_pointer_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const dtype& src_dt,
                 assign_error_mode DND_UNUSED(errmode),
                 unary_specialization_kernel_instance& out_kernel) const
 {

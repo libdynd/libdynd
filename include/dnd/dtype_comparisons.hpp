@@ -10,7 +10,7 @@
 #include <dnd/kernels/single_compare_kernel_instance.hpp>
 
 
-namespace dnd {
+namespace dynd {
 
 extern single_compare_operation_table_t builtin_dtype_comparisons_table[13];
 

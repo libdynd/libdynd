@@ -11,7 +11,7 @@
 #include <dnd/ndarray.hpp>
 #include <dnd/shape_tools.hpp>
 
-namespace dnd {
+namespace dynd {
 
 namespace detail {
 
@@ -481,6 +481,6 @@ public:
     }
 };
 
-} // namespace dnd
+} // namespace dynd
 
 #endif // _RAW_ITERATION_HPP_

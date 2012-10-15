@@ -6,7 +6,7 @@
 #include <dnd/codegen/binary_reduce_kernel_adapter_codegen.hpp>
 
 using namespace std;
-using namespace dnd;
+using namespace dynd;
 
 static unsigned int get_arg_id_from_type_id(unsigned int type_id)
 {
@@ -36,7 +36,7 @@ static unsigned int get_arg_id_from_type_id(unsigned int type_id)
     }
 }
 
-uint64_t dnd::get_binary_reduce_function_adapter_unique_id(const dtype& reduce_type, calling_convention_t DND_UNUSED(callconv))
+uint64_t dynd::get_binary_reduce_function_adapter_unique_id(const dtype& reduce_type, calling_convention_t DND_UNUSED(callconv))
 {
     uint64_t result = get_arg_id_from_type_id(reduce_type.type_id());
 
@@ -48,7 +48,7 @@ uint64_t dnd::get_binary_reduce_function_adapter_unique_id(const dtype& reduce_t
     return result;
 }
 
-std::string dnd::get_binary_reduce_function_adapter_unique_id_string(uint64_t unique_id)
+std::string dynd::get_binary_reduce_function_adapter_unique_id_string(uint64_t unique_id)
 {
     stringstream ss;
     static const char *arg_types[8] = {"int8", "int16", "int32", "int64", "float32", "float64", "(invalid)", "(invalid)"};
@@ -108,7 +108,7 @@ namespace {
     };
 } // anonymous namespace
 
-unary_operation_t dnd::codegen_left_associative_binary_reduce_function_adapter(
+unary_operation_t dynd::codegen_left_associative_binary_reduce_function_adapter(
                     const dtype& reduce_type, calling_convention_t DND_UNUSED(callconv))
 {
     // TODO: If there's a platform where there are differences in the calling convention
@@ -139,7 +139,7 @@ unary_operation_t dnd::codegen_left_associative_binary_reduce_function_adapter(
     }
 }
 
-unary_operation_t dnd::codegen_right_associative_binary_reduce_function_adapter(
+unary_operation_t dynd::codegen_right_associative_binary_reduce_function_adapter(
                     const dtype& reduce_type, calling_convention_t DND_UNUSED(callconv))
 {
     // TODO: If there's a platform where there are differences in the calling convention

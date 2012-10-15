@@ -50,7 +50,7 @@ static inline size_t align_down(size_t value, size_t alignment)
 ////////////////////////////////////////////////////////////////////////////////
 namespace {
 
-struct executable_memory_block : public dnd::memory_block_data 
+struct executable_memory_block : public dynd::memory_block_data 
 {
     executable_memory_block(size_t chunk_size_in_bytes);
     ~executable_memory_block();
@@ -63,7 +63,7 @@ struct executable_memory_block : public dnd::memory_block_data
 };
 
 executable_memory_block::executable_memory_block(size_t chunk_size_in_bytes)
-    : dnd::memory_block_data(1, dnd::executable_memory_block_type)
+    : dynd::memory_block_data(1, dynd::executable_memory_block_type)
     , m_chunk_size(align_up(chunk_size_in_bytes, getpagesize()))
 {
 }
@@ -109,7 +109,7 @@ void executable_memory_block::add_chunk()
 
 ////////////////////////////////////////////////////////////////////////////////
 
-namespace dnd { 
+namespace dynd { 
     
 namespace detail {
 void free_executable_memory_block(memory_block_data *memblock)
@@ -240,6 +240,6 @@ void executable_memory_block_debug_dump(const memory_block_data *memblock
     }
     */
 }
-} // namespace dnd
+} // namespace dynd
 
 #endif // defined(_WIN32) && defined(_M_X64)

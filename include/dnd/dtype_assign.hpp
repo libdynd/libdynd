@@ -8,7 +8,7 @@
 
 #include <utility>
 
-namespace dnd {
+namespace dynd {
 
 class dtype;
 namespace eval {
@@ -56,6 +56,6 @@ void dtype_strided_assign(const dtype& dst_dt, char *dst, intptr_t dst_stride,
                             const eval::eval_context *ectx = &eval::default_eval_context);
 
 
-} // namespace dnd
+} // namespace dynd
 
 #endif // _DND__DTYPE_ASSIGN_HPP_

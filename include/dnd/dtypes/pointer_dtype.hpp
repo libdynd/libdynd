@@ -19,7 +19,7 @@
 #include <dnd/dtype.hpp>
 #include <dnd/dtypes/void_pointer_dtype.hpp>
 
-namespace dnd {
+namespace dynd {
 
 class pointer_dtype : public extended_expression_dtype {
     dtype m_target_dtype;
@@ -94,6 +94,6 @@ dtype make_pointer_dtype() {
     return make_pointer_dtype(make_dtype<Tnative>());
 }
 
-} // namespace dnd
+} // namespace dynd
 
 #endif // _DND__POINTER_DTYPE_HPP_

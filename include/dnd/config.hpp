@@ -68,13 +68,13 @@
 #ifdef DND_USE_BOOST_SHARED_PTR
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
-namespace dnd {
+namespace dynd {
     using ::boost::shared_ptr;
     using ::boost::make_shared;
 }
 #else
 #include <memory>
-namespace dnd {
+namespace dynd {
     using ::std::shared_ptr;
     using ::std::make_shared;
 }
@@ -106,12 +106,12 @@ inline void DND_MEMCPY(char *dst, const char *src, intptr_t count)
 
 #ifdef DND_USE_TR1_ENABLE_IF
 #include <type_traits>
-namespace dnd {
+namespace dynd {
     using std::tr1::enable_if;
 }
 #else
 #include <boost/utility/enable_if.hpp>
-namespace dnd {
+namespace dynd {
 	template<bool B, class T = void>
 	struct enable_if {};
  

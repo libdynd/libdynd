@@ -8,7 +8,7 @@
 
 #include <dnd/dtype.hpp>
 
-namespace dnd {
+namespace dynd {
 
 class buffer_storage {
     char *m_storage;
@@ -64,6 +64,6 @@ public:
     }
 };
 
-} // namespace dnd
+} // namespace dynd
 
 #endif // _DND__BUFFER_STORAGE_HPP_

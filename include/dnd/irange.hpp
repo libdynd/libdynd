@@ -10,7 +10,7 @@
 
 #include <dnd/config.hpp>
 
-namespace dnd {
+namespace dynd {
 
 /**
  * This class represents a range of indices, or a single index.
@@ -155,6 +155,6 @@ inline DND_CONSTEXPR irange operator>=(intptr_t start, const irange& i) {
     return irange(start, i.m_finish, i.m_step);
 }
 
-} // namespace dnd
+} // namespace dynd
 
 #endif // _DND__IRANGE_HPP_

@@ -17,7 +17,7 @@
 #include <dnd/dtype_assign.hpp>
 #include <dnd/dtypes/view_dtype.hpp>
 
-namespace dnd {
+namespace dynd {
 
 class byteswap_dtype : public extended_expression_dtype {
     dtype m_value_dtype, m_operand_dtype;
@@ -89,6 +89,6 @@ dtype make_byteswap_dtype() {
     return dtype(new byteswap_dtype(make_dtype<Tnative>()));
 }
 
-} // namespace dnd
+} // namespace dynd
 
 #endif // _DND__BYTESWAP_DTYPE_HPP_

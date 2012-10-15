@@ -9,7 +9,7 @@
 #include <dnd/kernels/kernel_instance.hpp>
 #include <dnd/buffer_storage.hpp>
 
-namespace dnd {
+namespace dynd {
 
 /**
  * Given a binary kernel, an array of three unary kernels to be connected to
@@ -27,6 +27,6 @@ void make_buffered_binary_kernel(kernel_instance<binary_operation_t>& kernel,
                     kernel_instance<unary_operation_t>* adapters, const intptr_t *buffer_element_sizes,
                     kernel_instance<binary_operation_t>& out_kernel);
 
-} // namespace dnd
+} // namespace dynd
 
 #endif // _DND__BUFFERED_BINARY_KERNELS_HPP_

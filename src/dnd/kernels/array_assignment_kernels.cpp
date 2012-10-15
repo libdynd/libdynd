@@ -12,7 +12,7 @@
 #include <dnd/kernels/array_assignment_kernels.hpp>
 
 using namespace std;
-using namespace dnd;
+using namespace dynd;
 
 /////////////////////////////////////////
 // blockref array to blockref array assignment
@@ -119,7 +119,7 @@ namespace {
         };
 } // anonymous namespace
 
-void dnd::get_blockref_array_assignment_kernel(const dtype& dst_element_type,
+void dynd::get_blockref_array_assignment_kernel(const dtype& dst_element_type,
                 const dtype& src_element_type,
                 assign_error_mode errmode,
                 unary_specialization_kernel_instance& out_kernel)
@@ -136,5 +136,5 @@ void dnd::get_blockref_array_assignment_kernel(const dtype& dst_element_type,
     const_cast<AuxDataBase *>((const AuxDataBase *)out_kernel.auxdata)->kernel_api = &blockref_array_assign_kernel::kernel_api;
     ad.dst_dtype = dst_element_type;
     ad.src_dtype = src_element_type;
-    ::dnd::get_dtype_assignment_kernel(dst_element_type, src_element_type, errmode, NULL, ad.assign_elements);
+    ::dynd::get_dtype_assignment_kernel(dst_element_type, src_element_type, errmode, NULL, ad.assign_elements);
 }

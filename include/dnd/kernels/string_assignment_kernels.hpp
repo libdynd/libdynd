@@ -10,7 +10,7 @@
 #include <dnd/dtype_assign.hpp>
 #include <dnd/string_encodings.hpp>
 
-namespace dnd {
+namespace dynd {
 
 /**
  * Gets a kernel which converts strings of a fixed size from one codec to another.
@@ -45,6 +45,6 @@ void get_blockref_string_to_fixedstring_assignment_kernel(intptr_t dst_element_s
                 assign_error_mode errmode,
                 unary_specialization_kernel_instance& out_kernel);
 
-} // namespace dnd
+} // namespace dynd
 
 #endif // _DND__STRING_ASSIGNMENT_KERNELS_HPP_

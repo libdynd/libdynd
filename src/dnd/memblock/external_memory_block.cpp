@@ -5,7 +5,7 @@
 
 #include <dnd/memblock/external_memory_block.hpp>
 
-using namespace dnd;
+using namespace dynd;
 
 namespace {
     struct external_memory_block {
@@ -23,13 +23,13 @@ namespace {
     };
 } // anonymous namespace
 
-memory_block_ptr dnd::make_external_memory_block(void *object, external_memory_block_free_t free_fn)
+memory_block_ptr dynd::make_external_memory_block(void *object, external_memory_block_free_t free_fn)
 {
     external_memory_block *emb = new external_memory_block(object, free_fn);
     return memory_block_ptr(reinterpret_cast<memory_block_data *>(emb), false);
 }
 
-namespace dnd { namespace detail {
+namespace dynd { namespace detail {
 
 void free_external_memory_block(memory_block_data *memblock)
 {
@@ -38,4 +38,4 @@ void free_external_memory_block(memory_block_data *memblock)
     delete emb;
 }
 
-}} // namespace dnd::detail
+}} // namespace dynd::detail

@@ -13,7 +13,7 @@
 #include <dnd/dtypes/byteswap_dtype.hpp>
 
 using namespace std;
-using namespace dnd;
+using namespace dynd;
 
 TEST(AlignDType, Create) {
     dtype d;

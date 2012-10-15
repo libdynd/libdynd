@@ -9,7 +9,7 @@
 #include <dnd/memblock/executable_memory_block.hpp>
 
 using namespace std;
-using namespace dnd;
+using namespace dynd;
 
 static unsigned int get_arg_id_from_type_id(unsigned int type_id)
 {
@@ -39,7 +39,7 @@ static unsigned int get_arg_id_from_type_id(unsigned int type_id)
     }
 }
 
-uint64_t dnd::get_binary_function_adapter_unique_id(const dtype& restype,
+uint64_t dynd::get_binary_function_adapter_unique_id(const dtype& restype,
                     const dtype& arg0type, const dtype& arg1type, calling_convention_t DND_UNUSED(callconv))
 {
     // Bits 0..2 for the result type
@@ -57,7 +57,7 @@ uint64_t dnd::get_binary_function_adapter_unique_id(const dtype& restype,
     return result;
 }
 
-std::string dnd::get_binary_function_adapter_unique_id_string(uint64_t unique_id)
+std::string dynd::get_binary_function_adapter_unique_id_string(uint64_t unique_id)
 {
     stringstream ss;
     static char *arg_types[8] = {"int8", "int16", "int32", "int64", "float32", "float64", "(invalid)", "(invalid)"};
@@ -67,7 +67,7 @@ std::string dnd::get_binary_function_adapter_unique_id_string(uint64_t unique_id
     return ss.str();
 }
 
-binary_operation_t dnd::codegen_binary_function_adapter(const memory_block_ptr& exec_memblock, const dtype& restype,
+binary_operation_t dynd::codegen_binary_function_adapter(const memory_block_ptr& exec_memblock, const dtype& restype,
                     const dtype& arg0type, const dtype& arg1type, calling_convention_t DND_UNUSED(callconv))
 {
     // This code generation always uses the same prolog structure,

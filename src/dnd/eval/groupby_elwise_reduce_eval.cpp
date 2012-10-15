@@ -13,7 +13,7 @@
 #include <dnd/nodes/groupby_node.hpp>
 
 using namespace std;
-using namespace dnd;
+using namespace dynd;
 
 static void groupby_elwise_reduce_loop(char *result_originptr, intptr_t result_stride,
                 const char *data_ptr, intptr_t data_stride,
@@ -68,7 +68,7 @@ static void groupby_elwise_reduce_loop_no_identity(char *result_originptr, intpt
     }
 }
 
-ndarray_node_ptr dnd::eval::evaluate_groupby_elwise_reduce(ndarray_node *node, const eval::eval_context *ectx,
+ndarray_node_ptr dynd::eval::evaluate_groupby_elwise_reduce(ndarray_node *node, const eval::eval_context *ectx,
                                 bool copy, uint32_t access_flags)
 {
     elwise_reduce_kernel_node *rnode = static_cast<elwise_reduce_kernel_node*>(node);

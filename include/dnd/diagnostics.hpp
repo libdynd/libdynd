@@ -38,13 +38,13 @@
 
 # define DND_TRACE_ASSIGNMENT(dst_value, dst_type, src_value, src_type) { \
         std::cerr << "Assigning value " << src_value << " to value " << dst_value << " from " \
-                << dnd::make_dtype<src_type>() << " to " << dnd::make_dtype<dst_type>() << std::endl; \
+                << dynd::make_dtype<src_type>() << " to " << dynd::make_dtype<dst_type>() << std::endl; \
     }
 #else
 # define DND_TRACE_ASSIGNMENT(dst_value, dst_type, src_value, src_type) {}
 #endif
 
-namespace dnd {
+namespace dynd {
 
 #define DND_ANY_DIAGNOSTICS_ENABLED ((DND_ALIGNMENT_ASSERTIONS != 0) || (DND_ASSIGNMENT_TRACING != 0))
 
@@ -81,6 +81,6 @@ inline std::string which_diagnostics_enabled()
 #endif
 }
 
-} // namespace dnd
+} // namespace dynd
 
 #endif // _DND__DIAGNOSTICS_HPP_

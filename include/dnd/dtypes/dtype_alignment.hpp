@@ -10,7 +10,7 @@
 
 #include <dnd/dtype.hpp>
 
-namespace dnd {
+namespace dynd {
 
 /**
  * Uses an appropriate view<..., bytes<>> dtype
@@ -27,6 +27,6 @@ dtype make_unaligned_dtype()
     return make_unaligned_dtype(make_dtype<T>());
 }
 
-} // namespace dnd
+} // namespace dynd
 
 #endif // _DND__REALIGN_DTYPE_HPP_

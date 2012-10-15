@@ -9,10 +9,10 @@
 #include <dnd/gfunc/elwise_reduce_gfunc.hpp>
 
 using namespace std;
-using namespace dnd;
+using namespace dynd;
 
-const dnd::gfunc::elwise_reduce_kernel *
-dnd::gfunc::elwise_reduce::find_matching_kernel(const std::vector<dtype>& paramtypes) const
+const dynd::gfunc::elwise_reduce_kernel *
+dynd::gfunc::elwise_reduce::find_matching_kernel(const std::vector<dtype>& paramtypes) const
 {
     for(size_t i = 0, i_end = m_kernels.size(); i != i_end; ++i) {
         const std::vector<dtype>& kparamtypes = m_kernels[i].m_paramtypes;
@@ -24,7 +24,7 @@ dnd::gfunc::elwise_reduce::find_matching_kernel(const std::vector<dtype>& paramt
     return NULL;
 }
 
-void dnd::gfunc::elwise_reduce::add_kernel(elwise_reduce_kernel& ergk)
+void dynd::gfunc::elwise_reduce::add_kernel(elwise_reduce_kernel& ergk)
 {
     const elwise_reduce_kernel *check = find_matching_kernel(ergk.m_paramtypes);
     if (check == NULL) {
@@ -44,7 +44,7 @@ void dnd::gfunc::elwise_reduce::add_kernel(elwise_reduce_kernel& ergk)
     }
 }
 
-void dnd::gfunc::elwise_reduce::debug_dump(std::ostream& o, const std::string& indent) const
+void dynd::gfunc::elwise_reduce::debug_dump(std::ostream& o, const std::string& indent) const
 {
     o << indent << "------ elwise_reduce_gfunc\n";
     o << indent << "name: " << m_name << "\n";
@@ -64,11 +64,11 @@ void dnd::gfunc::elwise_reduce::debug_dump(std::ostream& o, const std::string& i
         o << indent << " commutative: " << (k.m_commutative ? "true" : "false") << "\n";
         if (k.m_left_associative_reduction_kernel.kernel != NULL) {
             o << indent << " left associative kernel aux data: ";
-            o << (const void *)(const dnd::AuxDataBase *)k.m_left_associative_reduction_kernel.auxdata << "\n";
+            o << (const void *)(const dynd::AuxDataBase *)k.m_left_associative_reduction_kernel.auxdata << "\n";
         }
         if (k.m_right_associative_reduction_kernel.kernel != NULL) {
             o << indent << " right associative kernel aux data: ";
-            o << (const void *)(const dnd::AuxDataBase *)k.m_right_associative_reduction_kernel.auxdata << "\n";
+            o << (const void *)(const dynd::AuxDataBase *)k.m_right_associative_reduction_kernel.auxdata << "\n";
         }
         if (k.m_identity.get_node().get()) {
             o << indent << " reduction identity:\n";

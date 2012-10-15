@@ -23,70 +23,70 @@
 #include <dnd/nodes/elwise_binary_kernel_node.hpp>
 
 using namespace std;
-using namespace dnd;
+using namespace dynd;
 
-dnd::ndarray::ndarray()
+dynd::ndarray::ndarray()
     : m_node()
 {
 }
 
-dnd::ndarray::ndarray(dnd_bool value)
+dynd::ndarray::ndarray(dnd_bool value)
     : m_node(make_immutable_builtin_scalar_node(value))
 {
 }
-dnd::ndarray::ndarray(signed char value)
+dynd::ndarray::ndarray(signed char value)
     : m_node(make_immutable_builtin_scalar_node(value))
 {
 }
-dnd::ndarray::ndarray(short value)
+dynd::ndarray::ndarray(short value)
     : m_node(make_immutable_builtin_scalar_node(value))
 {
 }
-dnd::ndarray::ndarray(int value)
+dynd::ndarray::ndarray(int value)
     : m_node(make_immutable_builtin_scalar_node(value))
 {
 }
-dnd::ndarray::ndarray(long value)
+dynd::ndarray::ndarray(long value)
     : m_node(make_immutable_builtin_scalar_node(value))
 {
 }
-dnd::ndarray::ndarray(long long value)
+dynd::ndarray::ndarray(long long value)
     : m_node(make_immutable_builtin_scalar_node(value))
 {
 }
-dnd::ndarray::ndarray(unsigned char value)
+dynd::ndarray::ndarray(unsigned char value)
     : m_node(make_immutable_builtin_scalar_node(value))
 {
 }
-dnd::ndarray::ndarray(unsigned short value)
+dynd::ndarray::ndarray(unsigned short value)
     : m_node(make_immutable_builtin_scalar_node(value))
 {
 }
-dnd::ndarray::ndarray(unsigned int value)
+dynd::ndarray::ndarray(unsigned int value)
     : m_node(make_immutable_builtin_scalar_node(value))
 {
 }
-dnd::ndarray::ndarray(unsigned long value)
+dynd::ndarray::ndarray(unsigned long value)
     : m_node(make_immutable_builtin_scalar_node(value))
 {
 }
-dnd::ndarray::ndarray(unsigned long long value)
+dynd::ndarray::ndarray(unsigned long long value)
     : m_node(make_immutable_builtin_scalar_node(value))
 {
 }
-dnd::ndarray::ndarray(float value)
+dynd::ndarray::ndarray(float value)
     : m_node(make_immutable_builtin_scalar_node(value))
 {
 }
-dnd::ndarray::ndarray(double value)
+dynd::ndarray::ndarray(double value)
     : m_node(make_immutable_builtin_scalar_node(value))
 {
 }
-dnd::ndarray::ndarray(complex<float> value)
+dynd::ndarray::ndarray(complex<float> value)
     : m_node(make_immutable_builtin_scalar_node(value))
 {
 }
-dnd::ndarray::ndarray(complex<double> value)
+dynd::ndarray::ndarray(complex<double> value)
     : m_node(make_immutable_builtin_scalar_node(value))
 {
 }
@@ -95,7 +95,7 @@ dnd::ndarray::ndarray(complex<double> value)
 // a memory block for the string data and a scalar node for the data.
 // TODO: Pack the string data into the same scalar node to reduce this to
 //       a single memory allocation.
-dnd::ndarray::ndarray(const std::string& value)
+dynd::ndarray::ndarray(const std::string& value)
     : m_node()
 {
     char *blockref_dataptr = NULL;
@@ -107,7 +107,7 @@ dnd::ndarray::ndarray(const std::string& value)
                     blockref_memblock);
 }
 
-dnd::ndarray::ndarray(const dtype& dt)
+dynd::ndarray::ndarray(const dtype& dt)
     : m_node()
 {
     char *originptr = 0;
@@ -117,29 +117,29 @@ dnd::ndarray::ndarray(const dtype& dt)
                             DND_MOVE(memblock)).swap(m_node);
 }
 
-dnd::ndarray::ndarray(const dtype& dt, const char *raw_data)
+dynd::ndarray::ndarray(const dtype& dt, const char *raw_data)
     : m_node(make_immutable_scalar_node(dt, raw_data))
 {
 }
 
-dnd::ndarray::ndarray(const dtype& dt, int ndim, const intptr_t *shape, const int *axis_perm)
+dynd::ndarray::ndarray(const dtype& dt, int ndim, const intptr_t *shape, const int *axis_perm)
     : m_node(make_strided_ndarray_node(dt, ndim, shape, axis_perm)) {
 }
 
 
-dnd::ndarray::ndarray(const ndarray_node_ptr& expr_tree)
+dynd::ndarray::ndarray(const ndarray_node_ptr& expr_tree)
     : m_node(expr_tree)
 {
 }
 
 #if defined(DND_RVALUE_REFS)
-dnd::ndarray::ndarray(ndarray_node_ptr&& expr_tree)
+dynd::ndarray::ndarray(ndarray_node_ptr&& expr_tree)
     : m_node(DND_MOVE(expr_tree))
 {
 }
 #endif // defined(DND_RVALUE_REFS)
 
-dnd::ndarray::ndarray(intptr_t dim0, const dtype& dt)
+dynd::ndarray::ndarray(intptr_t dim0, const dtype& dt)
     : m_node()
 {
     intptr_t stride = (dim0 <= 1) ? 0 : dt.element_size();
@@ -150,7 +150,7 @@ dnd::ndarray::ndarray(intptr_t dim0, const dtype& dt)
                             DND_MOVE(memblock)).swap(m_node);
 }
 
-dnd::ndarray::ndarray(intptr_t dim0, intptr_t dim1, const dtype& dt)
+dynd::ndarray::ndarray(intptr_t dim0, intptr_t dim1, const dtype& dt)
     : m_node()
 {
     intptr_t shape[2] = {dim0, dim1};
@@ -165,7 +165,7 @@ dnd::ndarray::ndarray(intptr_t dim0, intptr_t dim1, const dtype& dt)
                             DND_MOVE(memblock)).swap(m_node);
 }
 
-dnd::ndarray::ndarray(intptr_t dim0, intptr_t dim1, intptr_t dim2, const dtype& dt)
+dynd::ndarray::ndarray(intptr_t dim0, intptr_t dim1, intptr_t dim2, const dtype& dt)
     : m_node()
 {
     intptr_t shape[3] = {dim0, dim1, dim2};
@@ -181,7 +181,7 @@ dnd::ndarray::ndarray(intptr_t dim0, intptr_t dim1, intptr_t dim2, const dtype& 
                             DND_MOVE(memblock)).swap(m_node);
 }
 
-dnd::ndarray::ndarray(intptr_t dim0, intptr_t dim1, intptr_t dim2, intptr_t dim3, const dtype& dt)
+dynd::ndarray::ndarray(intptr_t dim0, intptr_t dim1, intptr_t dim2, intptr_t dim3, const dtype& dt)
     : m_node()
 {
     intptr_t shape[4] = {dim0, dim1, dim2, dim3};
@@ -198,28 +198,28 @@ dnd::ndarray::ndarray(intptr_t dim0, intptr_t dim1, intptr_t dim2, intptr_t dim3
                             DND_MOVE(memblock)).swap(m_node);
 }
 
-ndarray dnd::ndarray::index(int nindex, const irange *indices) const
+ndarray dynd::ndarray::index(int nindex, const irange *indices) const
 {
     return ndarray(apply_index_to_node(m_node, nindex, indices, false));
 }
 
-const ndarray dnd::ndarray::operator()(intptr_t idx) const
+const ndarray dynd::ndarray::operator()(intptr_t idx) const
 {
     return ndarray(apply_integer_index_to_node(m_node, 0, idx, false));
 }
 
-ndarray& dnd::ndarray::operator=(const ndarray& rhs)
+ndarray& dynd::ndarray::operator=(const ndarray& rhs)
 {
     m_node = rhs.m_node;
     return *this;
 }
 
-void dnd::ndarray::swap(ndarray& rhs)
+void dynd::ndarray::swap(ndarray& rhs)
 {
     m_node.swap(rhs.m_node);
 }
 
-ndarray dnd::empty_like(const ndarray& rhs, const dtype& dt)
+ndarray dynd::empty_like(const ndarray& rhs, const dtype& dt)
 {
     // Sort the strides to get the memory layout ordering
     shortvector<int> axis_perm(rhs.get_ndim());
@@ -229,7 +229,7 @@ ndarray dnd::empty_like(const ndarray& rhs, const dtype& dt)
     return ndarray(dt, rhs.get_ndim(), rhs.get_shape(), axis_perm.get());
 }
 
-ndarray dnd::ndarray::storage() const
+ndarray dynd::ndarray::storage() const
 {
     if (get_node()->get_category() == strided_array_node_category) {
         int access_flags = m_node->get_access_flags();
@@ -245,12 +245,12 @@ ndarray dnd::ndarray::storage() const
                         access_flags, m_node->get_data_memory_block()));
         }
     } else {
-        throw std::runtime_error("Can only get the storage from strided dnd::ndarrays");
+        throw std::runtime_error("Can only get the storage from strided dynd::ndarrays");
     }
 }
 
 
-ndarray dnd::ndarray::as_dtype(const dtype& dt, assign_error_mode errmode) const
+ndarray dynd::ndarray::as_dtype(const dtype& dt, assign_error_mode errmode) const
 {
     if (dt == get_dtype().value_dtype()) {
         return *this;
@@ -259,16 +259,16 @@ ndarray dnd::ndarray::as_dtype(const dtype& dt, assign_error_mode errmode) const
     }
 }
 
-ndarray dnd::ndarray::view_as_dtype(const dtype& dt) const
+ndarray dynd::ndarray::view_as_dtype(const dtype& dt) const
 {
     // Don't allow object dtypes
     if (get_dtype().get_memory_management() != pod_memory_management) {
         std::stringstream ss;
-        ss << "cannot view a dnd::ndarray with object dtype " << get_dtype() << " as another dtype";
+        ss << "cannot view a dynd::ndarray with object dtype " << get_dtype() << " as another dtype";
         throw std::runtime_error(ss.str());
     } else if (dt.get_memory_management() != pod_memory_management) {
         std::stringstream ss;
-        ss << "cannot view an dnd::ndarray with POD dtype as another dtype " << dt;
+        ss << "cannot view an dynd::ndarray with POD dtype as another dtype " << dt;
         throw std::runtime_error(ss.str());
     }
 
@@ -282,7 +282,7 @@ ndarray dnd::ndarray::view_as_dtype(const dtype& dt) const
 
         if (nbytes % dt.element_size() != 0) {
             std::stringstream ss;
-            ss << "cannot view dnd::ndarray with " << nbytes << " bytes as dtype " << dt << ", because its element size doesn't divide evenly";
+            ss << "cannot view dynd::ndarray with " << nbytes << " bytes as dtype " << dt << ", because its element size doesn't divide evenly";
             throw std::runtime_error(ss.str());
         }
 
@@ -303,7 +303,7 @@ ndarray dnd::ndarray::view_as_dtype(const dtype& dt) const
     // For non-one dimensional and non-contiguous one dimensional arrays, the dtype element_size much match
     if (get_dtype().value_dtype().element_size() != dt.element_size()) {
         std::stringstream ss;
-        ss << "cannot view dnd::ndarray with value dtype " << get_dtype().value_dtype() << " as dtype " << dt << " because they have different sizes, and the array is not contiguous one-dimensional";
+        ss << "cannot view dynd::ndarray with value dtype " << get_dtype().value_dtype() << " as dtype " << dt << " because they have different sizes, and the array is not contiguous one-dimensional";
         throw std::runtime_error(ss.str());
     }
 
@@ -339,7 +339,7 @@ ndarray dnd::ndarray::view_as_dtype(const dtype& dt) const
 }
 
 // Implementation of ndarray.as<std::string>()
-std::string dnd::detail::ndarray_as_string(const ndarray& lhs, assign_error_mode DND_UNUSED(errmode))
+std::string dynd::detail::ndarray_as_string(const ndarray& lhs, assign_error_mode DND_UNUSED(errmode))
 {
     if (lhs.get_ndim() != 0) {
         throw std::runtime_error("can only convert ndarrays with 0 dimensions to scalars");
@@ -409,7 +409,7 @@ static void val_assign_loop(const ndarray& lhs, const ndarray& rhs, assign_error
     }
 }
 
-void dnd::ndarray::val_assign(const ndarray& rhs, assign_error_mode errmode, const eval::eval_context *ectx) const
+void dynd::ndarray::val_assign(const ndarray& rhs, assign_error_mode errmode, const eval::eval_context *ectx) const
 {
     if (get_dtype() == rhs.get_dtype()) {
         val_assign_loop(*this, rhs, assign_error_none, ectx);
@@ -424,7 +424,7 @@ void dnd::ndarray::val_assign(const ndarray& rhs, assign_error_mode errmode, con
     }
 }
 
-void dnd::ndarray::val_assign(const dtype& dt, const char *data, assign_error_mode errmode, const eval::eval_context *ectx) const
+void dynd::ndarray::val_assign(const dtype& dt, const char *data, assign_error_mode errmode, const eval::eval_context *ectx) const
 {
     //cout << "scalar val_assign " << dt << " ptr " << (const void *)data << "\n";
     scalar_copied_if_necessary src(get_dtype(), dt, data, errmode, ectx);
@@ -445,18 +445,18 @@ void dnd::ndarray::val_assign(const dtype& dt, const char *data, assign_error_mo
     }
 }
 
-ndarray dnd::ndarray::eval_immutable(const eval::eval_context *ectx) const
+ndarray dynd::ndarray::eval_immutable(const eval::eval_context *ectx) const
 {
     return ndarray(evaluate(m_node.get_node(), ectx, false, read_access_flag|immutable_access_flag));
 }
 
-ndarray dnd::ndarray::eval_copy(const eval::eval_context *ectx, uint32_t access_flags) const
+ndarray dynd::ndarray::eval_copy(const eval::eval_context *ectx, uint32_t access_flags) const
 {
     return ndarray(evaluate(m_node.get_node(), ectx, true, access_flags));
 }
 
 
-void dnd::ndarray::debug_dump(std::ostream& o = std::cerr, const std::string& indent) const
+void dynd::ndarray::debug_dump(std::ostream& o = std::cerr, const std::string& indent) const
 {
     o << indent << "------ ndarray\n";
     if (m_node.get()) {
@@ -495,7 +495,7 @@ static void nested_ndarray_print(std::ostream& o, const dtype& d, const char *da
     }
 }
 
-std::ostream& dnd::operator<<(std::ostream& o, const ndarray& rhs)
+std::ostream& dynd::operator<<(std::ostream& o, const ndarray& rhs)
 {
     if (rhs.get_node() != NULL) {
         o << "ndarray(";

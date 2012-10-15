@@ -11,7 +11,7 @@
 #include <iostream>
 
 using namespace std;
-using namespace dnd;
+using namespace dynd;
 
 namespace {
 
@@ -94,7 +94,7 @@ struct compare_kernel< complex<T> > {
     (single_compare_operation_t)compare_kernel<type>::greater_as \
     }
 
-namespace dnd {
+namespace dynd {
 
 single_compare_operation_table_t builtin_dtype_comparisons_table[builtin_type_id_count] = {
     DND_BUILTIN_DTYPE_COMPARISON_TABLE_TYPE_LEVEL(dnd_bool), \

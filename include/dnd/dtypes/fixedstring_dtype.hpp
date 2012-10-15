@@ -14,7 +14,7 @@
 #include <dnd/dtypes/view_dtype.hpp>
 #include <dnd/string_encodings.hpp>
 
-namespace dnd {
+namespace dynd {
 
 class fixedstring_dtype : public extended_string_dtype {
     intptr_t m_element_size, m_alignment, m_stringsize;
@@ -77,6 +77,6 @@ inline dtype make_fixedstring_dtype(string_encoding_t encoding, intptr_t strings
     return dtype(new fixedstring_dtype(encoding, stringsize));
 }
 
-} // namespace dnd
+} // namespace dynd
 
 #endif // _DND__FIXEDSTRING_DTYPE_HPP_

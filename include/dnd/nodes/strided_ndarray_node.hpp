@@ -10,7 +10,7 @@
 
 #include <dnd/nodes/ndarray_node.hpp>
 
-namespace dnd {
+namespace dynd {
 
 /**
  * NDArray node which holds a raw strided array.
@@ -110,7 +110,7 @@ public:
         if (m_access_flags & write_access_flag) {
             return m_originptr;
         } else {
-            throw std::runtime_error("dnd::ndarray node is not writeable");
+            throw std::runtime_error("dynd::ndarray node is not writeable");
         }
     }
 
@@ -168,6 +168,6 @@ ndarray_node_ptr make_strided_ndarray_node(const dtype& dt, int ndim, const intp
 ndarray_node_ptr make_strided_ndarray_node(const dtype& dt, int ndim, const intptr_t *shape, const int *axis_perm,
                 int access_flags, const memory_block_ptr *blockrefs_begin, const memory_block_ptr *blockrefs_end);
 
-} // namespace dnd
+} // namespace dynd
 
 #endif // _DND__STRIDED_NDARRAY_NODE_HPP_

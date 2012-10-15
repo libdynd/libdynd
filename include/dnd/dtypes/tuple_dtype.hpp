@@ -10,7 +10,7 @@
 
 #include <dnd/dtype.hpp>
 
-namespace dnd {
+namespace dynd {
 
 class tuple_dtype : public extended_dtype {
     std::vector<dtype> m_fields;
@@ -131,6 +131,6 @@ inline dtype make_tuple_dtype(const dtype& dt0, const dtype& dt1, const dtype& d
     return make_tuple_dtype(fields);
 }
 
-} // namespace dnd
+} // namespace dynd
 
 #endif // _DND__TUPLE_DTYPE_HPP_

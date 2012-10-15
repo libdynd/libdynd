@@ -10,10 +10,10 @@
 #include <dnd/gfunc/elwise_gfunc.hpp>
 
 using namespace std;
-using namespace dnd;
+using namespace dynd;
 
-const dnd::gfunc::elwise_kernel *
-dnd::gfunc::elwise::find_matching_kernel(const std::vector<dtype>& paramtypes) const
+const dynd::gfunc::elwise_kernel *
+dynd::gfunc::elwise::find_matching_kernel(const std::vector<dtype>& paramtypes) const
 {
     for(size_t i = 0, i_end = m_kernels.size(); i != i_end; ++i) {
         const std::vector<dtype>& kparamtypes = m_kernels[i].m_paramtypes;
@@ -25,7 +25,7 @@ dnd::gfunc::elwise::find_matching_kernel(const std::vector<dtype>& paramtypes) c
     return NULL;
 }
 
-void dnd::gfunc::elwise::add_kernel(elwise_kernel& egk)
+void dynd::gfunc::elwise::add_kernel(elwise_kernel& egk)
 {
     const elwise_kernel *check = find_matching_kernel(egk.m_paramtypes);
     if (check == NULL) {
@@ -45,7 +45,7 @@ void dnd::gfunc::elwise::add_kernel(elwise_kernel& egk)
     }
 }
 
-void dnd::gfunc::elwise::debug_dump(std::ostream& o, const std::string& indent) const
+void dynd::gfunc::elwise::debug_dump(std::ostream& o, const std::string& indent) const
 {
     o << indent << "------ elwise_gfunc\n";
     o << indent << "name: " << m_name << "\n";
@@ -62,9 +62,9 @@ void dnd::gfunc::elwise::debug_dump(std::ostream& o, const std::string& indent) 
         }
         o << ")\n";
         if (k.m_paramtypes.size() == 1) {
-            o << indent << "unary aux data: " << (const void *)(const dnd::AuxDataBase *)k.m_unary_kernel.auxdata << "\n";
+            o << indent << "unary aux data: " << (const void *)(const dynd::AuxDataBase *)k.m_unary_kernel.auxdata << "\n";
         } else if (k.m_paramtypes.size() == 2) {
-            o << indent << "binary aux data: " << (const void *)(const dnd::AuxDataBase *)k.m_binary_kernel.auxdata << "\n";
+            o << indent << "binary aux data: " << (const void *)(const dynd::AuxDataBase *)k.m_binary_kernel.auxdata << "\n";
         }
     }
     o << indent << "------" << endl;

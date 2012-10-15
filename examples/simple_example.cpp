@@ -15,7 +15,7 @@
 #include <dnd/codegen/unary_kernel_adapter_codegen.hpp>
 
 using namespace std;
-using namespace dnd;
+using namespace dynd;
 
 typedef complex<double> A0;
 typedef float R;

@@ -13,7 +13,7 @@
 #include "dnd/ndarray.hpp"
 
 using namespace std;
-using namespace dnd;
+using namespace dynd;
 
 TEST(NDArray, Constructors) {
     ndarray a;

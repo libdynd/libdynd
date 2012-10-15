@@ -9,7 +9,7 @@
 #include <dnd/eval/eval_context.hpp>
 #include <dnd/nodes/ndarray_node.hpp>
 
-namespace dnd { namespace eval {
+namespace dynd { namespace eval {
 
 /**
  * The main evaluation function, which evaluates an arbitrary ndarray
@@ -30,6 +30,6 @@ ndarray_node_ptr evaluate(ndarray_node *node, const eval::eval_context *ectx = &
  */
 void process_access_flags(uint32_t &dst_access_flags, uint32_t src_access_flags, bool &inout_copy_required);
 
-}} // namespace dnd::eval
+}} // namespace dynd::eval
 
 #endif // _DND__EVAL_ENGINE_HPP_

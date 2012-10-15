@@ -14,9 +14,9 @@
 #include <dnd/dtypes/convert_dtype.hpp>
 
 using namespace std;
-using namespace dnd;
+using namespace dynd;
 
-dnd::strided_ndarray_node::strided_ndarray_node(const dtype& dt, int ndim,
+dynd::strided_ndarray_node::strided_ndarray_node(const dtype& dt, int ndim,
                                 const intptr_t *shape, const intptr_t *strides,
                                 char *originptr, int access_flags, const memory_block_ptr& memblock)
     : m_ndim(ndim), m_access_flags(access_flags), m_shape(ndim, shape), m_dtype(dt),
@@ -24,7 +24,7 @@ dnd::strided_ndarray_node::strided_ndarray_node(const dtype& dt, int ndim,
 {
 }
 
-dnd::strided_ndarray_node::strided_ndarray_node(const dtype& dt, int ndim,
+dynd::strided_ndarray_node::strided_ndarray_node(const dtype& dt, int ndim,
                                 const intptr_t *shape, const intptr_t *strides,
                                 const char *originptr, int access_flags, const memory_block_ptr& memblock)
     : m_ndim(ndim), m_access_flags(access_flags), m_shape(ndim, shape), m_dtype(dt),
@@ -36,7 +36,7 @@ dnd::strided_ndarray_node::strided_ndarray_node(const dtype& dt, int ndim,
 }
 
 #ifdef DND_RVALUE_REFS
-dnd::strided_ndarray_node::strided_ndarray_node(const dtype& dt, int ndim,
+dynd::strided_ndarray_node::strided_ndarray_node(const dtype& dt, int ndim,
                                 const intptr_t *shape, const intptr_t *strides,
                                 char *originptr, int access_flags, memory_block_ptr&& memblock)
     : m_ndim(ndim), m_access_flags(access_flags), m_shape(ndim, shape), m_dtype(dt),
@@ -44,7 +44,7 @@ dnd::strided_ndarray_node::strided_ndarray_node(const dtype& dt, int ndim,
 {
 }
 
-dnd::strided_ndarray_node::strided_ndarray_node(const dtype& dt, int ndim,
+dynd::strided_ndarray_node::strided_ndarray_node(const dtype& dt, int ndim,
                                 const intptr_t *shape, const intptr_t *strides,
                                 const char *originptr, int access_flags, memory_block_ptr&& memblock)
     : m_ndim(ndim), m_access_flags(access_flags), m_shape(ndim, shape), m_dtype(dt),
@@ -56,7 +56,7 @@ dnd::strided_ndarray_node::strided_ndarray_node(const dtype& dt, int ndim,
 }
 #endif
 
-dnd::strided_ndarray_node::strided_ndarray_node(const dtype& dt, int ndim,
+dynd::strided_ndarray_node::strided_ndarray_node(const dtype& dt, int ndim,
                                 const intptr_t *shape, const int *axis_perm)
     : m_ndim(ndim), m_access_flags(read_access_flag | write_access_flag), m_shape(ndim, shape), m_dtype(dt),
       m_originptr(NULL), m_strides(ndim), m_memblock()
@@ -79,7 +79,7 @@ dnd::strided_ndarray_node::strided_ndarray_node(const dtype& dt, int ndim,
     m_memblock = make_fixed_size_pod_memory_block(dt.element_size() * num_elements, dt.alignment(), &m_originptr);
 }
 
-dnd::strided_ndarray_node::strided_ndarray_node(const dtype& dt, int ndim,
+dynd::strided_ndarray_node::strided_ndarray_node(const dtype& dt, int ndim,
                                 const intptr_t *shape, const int *axis_perm,
                                 int access_flags, const memory_block_ptr *blockrefs_begin, const memory_block_ptr *blockrefs_end)
     : m_ndim(ndim), m_access_flags(access_flags), m_shape(ndim, shape), m_dtype(dt),
@@ -104,8 +104,8 @@ dnd::strided_ndarray_node::strided_ndarray_node(const dtype& dt, int ndim,
                     blockrefs_begin, blockrefs_end);
 }
 
-ndarray_node_ptr dnd::strided_ndarray_node::as_dtype(const dtype& dt,
-                    dnd::assign_error_mode errmode, bool allow_in_place)
+ndarray_node_ptr dynd::strided_ndarray_node::as_dtype(const dtype& dt,
+                    dynd::assign_error_mode errmode, bool allow_in_place)
 {
     if (allow_in_place) {
         m_dtype = make_convert_dtype(dt, m_dtype, errmode);
@@ -118,7 +118,7 @@ ndarray_node_ptr dnd::strided_ndarray_node::as_dtype(const dtype& dt,
     }
 }
 
-ndarray_node_ptr dnd::strided_ndarray_node::apply_linear_index(
+ndarray_node_ptr dynd::strided_ndarray_node::apply_linear_index(
                 int ndim, const bool *remove_axis,
                 const intptr_t *start_index, const intptr_t *index_strides,
                 const intptr_t *shape,
@@ -181,7 +181,7 @@ ndarray_node_ptr dnd::strided_ndarray_node::apply_linear_index(
     }
 }
 
-void dnd::strided_ndarray_node::debug_dump_extra(ostream& o, const string& indent) const
+void dynd::strided_ndarray_node::debug_dump_extra(ostream& o, const string& indent) const
 {
     o << indent << " strides: (";
     for (int i = 0; i < m_ndim; ++i) {
@@ -196,7 +196,7 @@ void dnd::strided_ndarray_node::debug_dump_extra(ostream& o, const string& inden
     memory_block_debug_dump(m_memblock.get(), o, indent + " ");
 }
 
-ndarray_node_ptr dnd::make_strided_ndarray_node(const dtype& dt, int ndim, const intptr_t *shape,
+ndarray_node_ptr dynd::make_strided_ndarray_node(const dtype& dt, int ndim, const intptr_t *shape,
             const intptr_t *strides, char *originptr, int access_flags, const memory_block_ptr& memblock)
 {
     char *node_memory = NULL;
@@ -209,7 +209,7 @@ ndarray_node_ptr dnd::make_strided_ndarray_node(const dtype& dt, int ndim, const
     return DND_MOVE(result);
 }
 
-ndarray_node_ptr dnd::make_strided_ndarray_node(const dtype& dt, int ndim, const intptr_t *shape,
+ndarray_node_ptr dynd::make_strided_ndarray_node(const dtype& dt, int ndim, const intptr_t *shape,
             const intptr_t *strides, const char *originptr, int access_flags, const memory_block_ptr& memblock)
 {
     char *node_memory = NULL;
@@ -223,7 +223,7 @@ ndarray_node_ptr dnd::make_strided_ndarray_node(const dtype& dt, int ndim, const
 }
 
 #ifdef DND_RVALUE_REFS
-ndarray_node_ptr dnd::make_strided_ndarray_node(const dtype& dt, int ndim, const intptr_t *shape,
+ndarray_node_ptr dynd::make_strided_ndarray_node(const dtype& dt, int ndim, const intptr_t *shape,
             const intptr_t *strides, char *originptr, int access_flags, memory_block_ptr&& memblock)
 {
     char *node_memory = NULL;
@@ -236,7 +236,7 @@ ndarray_node_ptr dnd::make_strided_ndarray_node(const dtype& dt, int ndim, const
     return DND_MOVE(result);
 }
 
-ndarray_node_ptr dnd::make_strided_ndarray_node(const dtype& dt, int ndim, const intptr_t *shape,
+ndarray_node_ptr dynd::make_strided_ndarray_node(const dtype& dt, int ndim, const intptr_t *shape,
             const intptr_t *strides, const char *originptr, int access_flags, memory_block_ptr&& memblock)
 {
     char *node_memory = NULL;
@@ -250,7 +250,7 @@ ndarray_node_ptr dnd::make_strided_ndarray_node(const dtype& dt, int ndim, const
 }
 #endif
 
-ndarray_node_ptr dnd::make_strided_ndarray_node(const dtype& dt, int ndim, const intptr_t *shape, const int *axis_perm)
+ndarray_node_ptr dynd::make_strided_ndarray_node(const dtype& dt, int ndim, const intptr_t *shape, const int *axis_perm)
 {
     char *node_memory = NULL;
     ndarray_node_ptr result(make_uninitialized_ndarray_node_memory_block(sizeof(strided_ndarray_node), &node_memory));
@@ -258,7 +258,7 @@ ndarray_node_ptr dnd::make_strided_ndarray_node(const dtype& dt, int ndim, const
     return DND_MOVE(result);
 }
 
-ndarray_node_ptr dnd::make_strided_ndarray_node(const dtype& dt, int ndim, const intptr_t *shape, const int *axis_perm,
+ndarray_node_ptr dynd::make_strided_ndarray_node(const dtype& dt, int ndim, const intptr_t *shape, const int *axis_perm,
                         int access_flags, const memory_block_ptr *blockrefs_begin, const memory_block_ptr *blockrefs_end)
 {
     if (ndim == 0 && access_flags == (read_access_flag|immutable_access_flag)) {

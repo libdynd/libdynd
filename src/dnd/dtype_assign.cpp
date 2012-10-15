@@ -16,9 +16,9 @@
 #include <dnd/diagnostics.hpp>
 
 using namespace std;
-using namespace dnd;
+using namespace dynd;
 
-std::ostream& dnd::operator<<(ostream& o, assign_error_mode errmode)
+std::ostream& dynd::operator<<(ostream& o, assign_error_mode errmode)
 {
     switch (errmode) {
         case assign_error_none:
@@ -48,7 +48,7 @@ std::ostream& dnd::operator<<(ostream& o, assign_error_mode errmode)
 // of the source dtype, false otherwise. This is used, for example,
 // to skip any overflow checks when doing value assignments between differing
 // types.
-bool dnd::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt)
+bool dynd::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt)
 {
     const extended_dtype *dst_ext, *src_ext;
 
@@ -172,7 +172,7 @@ bool dnd::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt)
 }
 
 
-void dnd::dtype_assign(const dtype& dst_dt, char *dst, const dtype& src_dt, const char *src,
+void dynd::dtype_assign(const dtype& dst_dt, char *dst, const dtype& src_dt, const char *src,
                 assign_error_mode errmode, const eval::eval_context *ectx)
 {
     DND_ASSERT_ALIGNED(dst, 0, dst_dt.alignment(), "dst dtype: " << dst_dt << ", src dtype: " << src_dt);
@@ -213,7 +213,7 @@ void dnd::dtype_assign(const dtype& dst_dt, char *dst, const dtype& src_dt, cons
     }
 }
 
-void dnd::dtype_strided_assign(const dtype& dst_dt, char *dst, intptr_t dst_stride,
+void dynd::dtype_strided_assign(const dtype& dst_dt, char *dst, intptr_t dst_stride,
                             const dtype& src_dt, const char *src, intptr_t src_stride,
                             intptr_t count, assign_error_mode errmode, const eval::eval_context *ectx)
 {

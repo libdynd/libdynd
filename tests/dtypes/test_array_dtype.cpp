@@ -14,7 +14,7 @@
 //#include "dnd/dtypes/ndarray_dtype.hpp"
 
 using namespace std;
-using namespace dnd;
+using namespace dynd;
 
 TEST(ArrayDType, DTypeSubscript) {
     dtype dfloat = make_dtype<float>();

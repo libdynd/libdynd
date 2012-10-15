@@ -12,7 +12,7 @@
 #include <dnd/dtype_assign.hpp>
 #include <dnd/dtypes/view_dtype.hpp>
 
-namespace dnd {
+namespace dynd {
 
 class array_dtype : public extended_dtype {
     dtype m_element_dtype;
@@ -66,6 +66,6 @@ inline dtype make_array_dtype(const dtype& element_dtype) {
     return dtype(new array_dtype(element_dtype));
 }
 
-} // namespace dnd
+} // namespace dynd
 
 #endif // _DND__ARRAY_DTYPE_HPP_

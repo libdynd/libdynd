@@ -12,7 +12,7 @@
 #include <dnd/kernels/unary_kernel_instance.hpp>
 #include <dnd/buffer_storage.hpp>
 
-namespace dnd {
+namespace dynd {
 
 /**
  * Given a size-N deque of kernel instances and a size-(N+1) vector
@@ -38,7 +38,7 @@ void make_buffered_chain_unary_kernel(std::deque<unary_specialization_kernel_ins
  * This function assumes 'dt' is an expression_kind dtype, the
  * caller must verify this before calling.
  */
-void push_front_dtype_storage_to_value_kernels(const dnd::dtype& dt,
+void push_front_dtype_storage_to_value_kernels(const dynd::dtype& dt,
                     const eval::eval_context *ectx,
                     std::deque<unary_specialization_kernel_instance>& out_kernels,
                     std::deque<intptr_t>& out_element_sizes);
@@ -52,11 +52,11 @@ void push_front_dtype_storage_to_value_kernels(const dnd::dtype& dt,
  * This function assumes 'dt' is an expression_kind dtype, the
  * caller must verify this before calling.
  */
-void push_back_dtype_value_to_storage_kernels(const dnd::dtype& dt,
+void push_back_dtype_value_to_storage_kernels(const dynd::dtype& dt,
                     const eval::eval_context *ectx,
                     std::deque<unary_specialization_kernel_instance>& out_kernels,
                     std::deque<intptr_t>& out_element_sizes);
 
-} // namespace dnd
+} // namespace dynd
 
 #endif // _DND__BUFFERED_UNARY_KERNELS_HPP_

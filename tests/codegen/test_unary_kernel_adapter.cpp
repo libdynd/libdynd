@@ -12,7 +12,7 @@
 #include <dnd/codegen/codegen_cache.hpp>
 
 using namespace std;
-using namespace dnd;
+using namespace dynd;
 
 template<class S, class T>
 static S double_value(T value) {

@@ -10,9 +10,9 @@
 #include <dnd/dtypes/convert_dtype.hpp>
 
 using namespace std;
-using namespace dnd;
+using namespace dynd;
 
-dnd::elwise_reduce_kernel_node::elwise_reduce_kernel_node(const dtype& dt,
+dynd::elwise_reduce_kernel_node::elwise_reduce_kernel_node(const dtype& dt,
                         const ndarray_node_ptr& opnode, dnd_bool *reduce_axes, bool rightassoc, bool keepdims, const ndarray_node_ptr& identity)
     : m_dtype(dt), m_opnode(opnode), m_kernel(), m_rightassoc(rightassoc), m_keepdims(keepdims),
         m_identity(identity), m_reduce_axes(opnode->get_ndim(), reduce_axes)
@@ -36,8 +36,8 @@ dnd::elwise_reduce_kernel_node::elwise_reduce_kernel_node(const dtype& dt,
     }
 }
 
-ndarray_node_ptr dnd::elwise_reduce_kernel_node::as_dtype(const dtype& dt,
-                    dnd::assign_error_mode errmode, bool allow_in_place)
+ndarray_node_ptr dynd::elwise_reduce_kernel_node::as_dtype(const dtype& dt,
+                    dynd::assign_error_mode errmode, bool allow_in_place)
 {
     if (m_dtype == dt) {
         return as_ndarray_node_ptr();
@@ -52,7 +52,7 @@ ndarray_node_ptr dnd::elwise_reduce_kernel_node::as_dtype(const dtype& dt,
     }
 }
 
-ndarray_node_ptr dnd::elwise_reduce_kernel_node::apply_linear_index(
+ndarray_node_ptr dynd::elwise_reduce_kernel_node::apply_linear_index(
                 int DND_UNUSED(ndim), const bool *DND_UNUSED(remove_axis),
                 const intptr_t *DND_UNUSED(start_index), const intptr_t *DND_UNUSED(index_strides),
                 const intptr_t *DND_UNUSED(shape),
@@ -61,13 +61,13 @@ ndarray_node_ptr dnd::elwise_reduce_kernel_node::apply_linear_index(
     throw std::runtime_error("TODO: elwise_reduce_kernel_node::apply_linear_index");
 }
 
-void dnd::elwise_reduce_kernel_node::get_unary_operation(intptr_t DND_UNUSED(dst_fixedstride), intptr_t DND_UNUSED(src_fixedstride),
+void dynd::elwise_reduce_kernel_node::get_unary_operation(intptr_t DND_UNUSED(dst_fixedstride), intptr_t DND_UNUSED(src_fixedstride),
                                     kernel_instance<unary_operation_t>& out_kernel) const
 {
     out_kernel.borrow_from(m_kernel);
 }
 
-void dnd::elwise_reduce_kernel_node::debug_dump_extra(std::ostream& o, const std::string& indent) const
+void dynd::elwise_reduce_kernel_node::debug_dump_extra(std::ostream& o, const std::string& indent) const
 {
     o << indent << " associative: " << (m_rightassoc ? "right" : "left") << "\n";
     o << indent << " keepdims: " << (m_keepdims ? "true" : "false") << "\n";
@@ -86,7 +86,7 @@ void dnd::elwise_reduce_kernel_node::debug_dump_extra(std::ostream& o, const std
     }
 }
 
-ndarray_node_ptr dnd::make_elwise_reduce_kernel_node_copy_kernel(const dtype& dt, const ndarray_node_ptr& opnode,
+ndarray_node_ptr dynd::make_elwise_reduce_kernel_node_copy_kernel(const dtype& dt, const ndarray_node_ptr& opnode,
                                             dnd_bool *reduce_axes, bool rightassoc, bool keepdims, const ndarray_node_ptr& identity,
                                             const kernel_instance<unary_operation_t>& kernel)
 {
@@ -102,7 +102,7 @@ ndarray_node_ptr dnd::make_elwise_reduce_kernel_node_copy_kernel(const dtype& dt
     return DND_MOVE(result);
 }
 
-ndarray_node_ptr dnd::make_elwise_reduce_kernel_node_steal_kernel(const dtype& dt, const ndarray_node_ptr& opnode,
+ndarray_node_ptr dynd::make_elwise_reduce_kernel_node_steal_kernel(const dtype& dt, const ndarray_node_ptr& opnode,
                                             dnd_bool *reduce_axes, bool rightassoc, bool keepdims, const ndarray_node_ptr& identity,
                                             kernel_instance<unary_operation_t>& kernel)
 {

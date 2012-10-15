@@ -13,7 +13,7 @@
 #include <dnd/nodes/ndarray_node.hpp>
 
 using namespace std;
-using namespace dnd;
+using namespace dynd;
 
 static void print_ndarray_access_flags(std::ostream& o, int access_flags)
 {
@@ -29,12 +29,12 @@ static void print_ndarray_access_flags(std::ostream& o, int access_flags)
 }
 
 
-const intptr_t *dnd::ndarray_node::get_strides() const
+const intptr_t *dynd::ndarray_node::get_strides() const
 {
     throw std::runtime_error("cannot get strides from an ndarray node which is not strided");
 }
 
-void dnd::ndarray_node::get_right_broadcast_strides(int ndim, intptr_t *out_strides) const
+void dynd::ndarray_node::get_right_broadcast_strides(int ndim, intptr_t *out_strides) const
 {
     int node_ndim = get_ndim();
     if (ndim == node_ndim) {
@@ -45,30 +45,30 @@ void dnd::ndarray_node::get_right_broadcast_strides(int ndim, intptr_t *out_stri
     }
 }
 
-const char *dnd::ndarray_node::get_readonly_originptr() const
+const char *dynd::ndarray_node::get_readonly_originptr() const
 {
     throw std::runtime_error("cannot get a readonly originptr from an ndarray node which is not strided");
 }
 
-char *dnd::ndarray_node::get_readwrite_originptr() const
+char *dynd::ndarray_node::get_readwrite_originptr() const
 {
     throw std::runtime_error("cannot get a readwrite originptr from an ndarray node which is not strided");
 }
 
-void dnd::ndarray_node::get_unary_operation(intptr_t, intptr_t, kernel_instance<unary_operation_t>&) const
+void dynd::ndarray_node::get_unary_operation(intptr_t, intptr_t, kernel_instance<unary_operation_t>&) const
 {
     throw std::runtime_error("get_unary_operation is only valid for "
                              "unary nodes which provide an implementation");
 }
 
-void dnd::ndarray_node::get_unary_specialization_operation(unary_specialization_kernel_instance& DND_UNUSED(out_kernel)) const
+void dynd::ndarray_node::get_unary_specialization_operation(unary_specialization_kernel_instance& DND_UNUSED(out_kernel)) const
 {
     throw std::runtime_error("unary_specialization_kernel_instance is only valid for "
                              "unary nodes which provide an implementation");
 }
 
 
-void dnd::ndarray_node::get_binary_operation(intptr_t, intptr_t, intptr_t,
+void dynd::ndarray_node::get_binary_operation(intptr_t, intptr_t, intptr_t,
                         const eval::eval_context *DND_UNUSED(ectx),
                         kernel_instance<binary_operation_t>&) const
 {
@@ -76,7 +76,7 @@ void dnd::ndarray_node::get_binary_operation(intptr_t, intptr_t, intptr_t,
                              "binary nodes which provide an implementation");
 }
 
-memory_block_ptr dnd::ndarray_node::get_data_memory_block()
+memory_block_ptr dynd::ndarray_node::get_data_memory_block()
 {
     return memory_block_ptr();
 }
@@ -105,7 +105,7 @@ static void print_node_category(ostream& o, ndarray_node_category cat)
     }
 }
 
-void dnd::ndarray_node::debug_dump(ostream& o, const string& indent) const
+void dynd::ndarray_node::debug_dump(ostream& o, const string& indent) const
 {
     o << indent << "(\"" << node_name() << "\",\n";
 
@@ -133,12 +133,12 @@ void dnd::ndarray_node::debug_dump(ostream& o, const string& indent) const
     o << indent << ")\n";
 }
 
-void dnd::ndarray_node::debug_dump_extra(ostream&, const string&) const
+void dynd::ndarray_node::debug_dump_extra(ostream&, const string&) const
 {
     // Default is no extra information
 }
 
-ndarray_node_ptr dnd::apply_index_to_node(const ndarray_node_ptr& node,
+ndarray_node_ptr dynd::apply_index_to_node(const ndarray_node_ptr& node,
                                 int nindex, const irange *indices, bool allow_in_place)
 {
     // Validate the number of indices
@@ -310,7 +310,7 @@ ndarray_node_ptr dnd::apply_index_to_node(const ndarray_node_ptr& node,
     return node->apply_linear_index(ndim, remove_axis.get(), start_index.get(), index_strides.get(), shape.get(), allow_in_place);
 }
 
-ndarray_node_ptr dnd::apply_integer_index_to_node(const ndarray_node_ptr& node,
+ndarray_node_ptr dynd::apply_integer_index_to_node(const ndarray_node_ptr& node,
                                 int axis, intptr_t idx, bool allow_in_place)
 {
     int ndim = node->get_ndim();

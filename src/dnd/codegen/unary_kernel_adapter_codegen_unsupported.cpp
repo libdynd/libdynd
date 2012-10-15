@@ -11,7 +11,7 @@
 #include <dnd/codegen/unary_kernel_adapter_codegen.hpp>
 #include <stdexcept>
 
-namespace dnd
+namespace dynd
 {
     
     namespace

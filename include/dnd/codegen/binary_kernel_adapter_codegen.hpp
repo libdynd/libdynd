@@ -11,7 +11,7 @@
 #include <dnd/memblock/memory_block.hpp>
 #include <dnd/codegen/calling_conventions.hpp>
 
-namespace dnd {
+namespace dynd {
 
 /**
  * This is the auxiliary data used by the code generated
@@ -57,6 +57,6 @@ std::string get_binary_function_adapter_unique_id_string(uint64_t unique_id);
 binary_operation_t codegen_binary_function_adapter(const memory_block_ptr& exec_memblock, const dtype& restype,
                     const dtype& arg0type, const dtype& arg1type, calling_convention_t callconv);
 
-} // namespace dnd
+} // namespace dynd
 
 #endif // _DND__BINARY_KERNEL_ADAPTER_CODEGEN_HPP_

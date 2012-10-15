@@ -10,7 +10,7 @@
 
 #include <stdexcept>
 
-namespace dnd
+namespace dynd
 {
 
 namespace

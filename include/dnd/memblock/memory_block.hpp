@@ -12,7 +12,7 @@
 
 #include <dnd/config.hpp>
 
-namespace dnd {
+namespace dynd {
 
 /**
  * These are all the types of memory blocks supported by the dnd library.
@@ -265,6 +265,6 @@ inline bool operator!=(const memory_block_data *memblock, const memory_block_ptr
     return memblock != rhs.get();
 }
 
-} // namespace dnd
+} // namespace dynd
 
 #endif // _DND__MEMORY_BLOCK_HPP_

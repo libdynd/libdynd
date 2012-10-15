@@ -8,7 +8,7 @@
 
 #include <dnd/memblock/memory_block.hpp>
 
-namespace dnd {
+namespace dynd {
 
 /**
  * Creates a memory block which holds memory which can be used for
@@ -47,6 +47,6 @@ void resize_executable_memory(memory_block_data *self, intptr_t size_bytes, char
 
 void executable_memory_block_debug_dump(const memory_block_data *memblock, std::ostream& o, const std::string& indent);
 
-} // namespace dnd
+} // namespace dynd
 
 #endif // _DND__EXECUTABLE_MEMORY_BLOCK_HPP_

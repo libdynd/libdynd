@@ -13,7 +13,7 @@
 #include "dnd/exceptions.hpp"
 
 using namespace std;
-using namespace dnd;
+using namespace dynd;
 
 TEST(ShapeTools, BroadcastToShape) {
     intptr_t shape0[] = {3,2,5}, shape1[] = {1,3,2,5};

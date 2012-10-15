@@ -10,7 +10,7 @@
 #include <dnd/kernels/kernel_instance.hpp>
 #include <dnd/shape_tools.hpp>
 
-namespace dnd {
+namespace dynd {
 
 class elwise_binary_kernel_node : public ndarray_node {
     /* The number of dimensions in the result array */
@@ -86,7 +86,7 @@ public:
     }
 
     ndarray_node_ptr as_dtype(const dtype& dt,
-                        dnd::assign_error_mode errmode, bool allow_in_place);
+                        dynd::assign_error_mode errmode, bool allow_in_place);
 
     ndarray_node_ptr apply_linear_index(
                     int ndim, const bool *remove_axis,
@@ -120,6 +120,6 @@ ndarray_node_ptr make_elwise_binary_kernel_node_steal_kernel(const dtype& dt,
                     const ndarray_node_ptr& opnode0, const ndarray_node_ptr& opnode1,
                     kernel_instance<binary_operation_t>& kernel);
 
-} // namespace dnd
+} // namespace dynd
 
 #endif // _DND__ELWISE_BINARY_KERNEL_NODE_HPP_

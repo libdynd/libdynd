@@ -9,9 +9,9 @@
 #include <dnd/kernels/assignment_kernels.hpp>
 
 using namespace std;
-using namespace dnd;
+using namespace dynd;
 
-dnd::view_dtype::view_dtype(const dtype& value_dtype, const dtype& operand_dtype)
+dynd::view_dtype::view_dtype(const dtype& value_dtype, const dtype& operand_dtype)
     : m_value_dtype(value_dtype), m_operand_dtype(operand_dtype)
 {
     if (value_dtype.element_size() != operand_dtype.value_dtype().element_size()) {
@@ -29,7 +29,7 @@ dnd::view_dtype::view_dtype(const dtype& value_dtype, const dtype& operand_dtype
                     m_copy_kernel);
 }
 
-void dnd::view_dtype::print_element(std::ostream& o, const char *data) const
+void dynd::view_dtype::print_element(std::ostream& o, const char *data) const
 {
     // Allow calling print_element in the special case that the view
     // is being used just to align the data
@@ -71,7 +71,7 @@ void dnd::view_dtype::print_element(std::ostream& o, const char *data) const
     throw runtime_error("internal error: view_dtype::print_element isn't supposed to be called");
 }
 
-void dnd::view_dtype::print_dtype(std::ostream& o) const
+void dynd::view_dtype::print_dtype(std::ostream& o) const
 {
     // Special case printing of alignment to make it more human-readable
     if (m_value_dtype.alignment() != 1 && m_operand_dtype.type_id() == fixedbytes_type_id &&
@@ -82,7 +82,7 @@ void dnd::view_dtype::print_dtype(std::ostream& o) const
     }
 }
 
-dtype dnd::view_dtype::apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& root_dt) const
+dtype dynd::view_dtype::apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& root_dt) const
 {
     if (nindices == 0) {
         return dtype(this);
@@ -91,24 +91,24 @@ dtype dnd::view_dtype::apply_linear_index(int nindices, const irange *indices, i
     }
 }
 
-void dnd::view_dtype::get_shape(int i, std::vector<intptr_t>& out_shape) const
+void dynd::view_dtype::get_shape(int i, std::vector<intptr_t>& out_shape) const
 {
     if (m_value_dtype.extended()) {
         m_value_dtype.extended()->get_shape(i, out_shape);
     }
 }
 
-bool dnd::view_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const
+bool dynd::view_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const
 {
     // Treat this dtype as the value dtype for whether assignment is always lossless
     if (src_dt.extended() == this) {
-        return ::dnd::is_lossless_assignment(dst_dt, m_value_dtype);
+        return ::dynd::is_lossless_assignment(dst_dt, m_value_dtype);
     } else {
-        return ::dnd::is_lossless_assignment(m_value_dtype, src_dt);
+        return ::dynd::is_lossless_assignment(m_value_dtype, src_dt);
     }
 }
 
-bool dnd::view_dtype::operator==(const extended_dtype& rhs) const
+bool dynd::view_dtype::operator==(const extended_dtype& rhs) const
 {
     if (this == &rhs) {
         return true;
@@ -120,19 +120,19 @@ bool dnd::view_dtype::operator==(const extended_dtype& rhs) const
     }
 }
 
-void dnd::view_dtype::get_operand_to_value_kernel(const eval::eval_context *DND_UNUSED(ectx),
+void dynd::view_dtype::get_operand_to_value_kernel(const eval::eval_context *DND_UNUSED(ectx),
                         unary_specialization_kernel_instance& out_borrowed_kernel) const
 {
     out_borrowed_kernel.borrow_from(m_copy_kernel);
 }
 
-void dnd::view_dtype::get_value_to_operand_kernel(const eval::eval_context *DND_UNUSED(ectx),
+void dynd::view_dtype::get_value_to_operand_kernel(const eval::eval_context *DND_UNUSED(ectx),
                         unary_specialization_kernel_instance& out_borrowed_kernel) const
 {
     out_borrowed_kernel.borrow_from(m_copy_kernel);
 }
 
-dtype dnd::view_dtype::with_replaced_storage_dtype(const dtype& replacement_dtype) const
+dtype dynd::view_dtype::with_replaced_storage_dtype(const dtype& replacement_dtype) const
 {
     if (m_operand_dtype.kind() == expression_kind) {
         return dtype(new view_dtype(m_value_dtype,

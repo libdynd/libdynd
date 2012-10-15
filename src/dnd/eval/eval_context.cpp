@@ -6,6 +6,6 @@
 #include <dnd/eval/eval_context.hpp>
 
 using namespace std;
-using namespace dnd;
+using namespace dynd;
 
-const eval::eval_context dnd::eval::default_eval_context;
+const eval::eval_context dynd::eval::default_eval_context;

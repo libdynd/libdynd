@@ -11,7 +11,7 @@
 #include <dnd/nodes/ndarray_node.hpp>
 #include <dnd/eval/eval_context.hpp>
 
-namespace dnd { namespace eval {
+namespace dynd { namespace eval {
 
 /**
  * Evaluates a node which is purely unary elementwise.
@@ -35,6 +35,6 @@ ndarray_node *push_front_node_unary_kernels(ndarray_node* node,
                     std::deque<unary_specialization_kernel_instance>& out_kernels,
                     std::deque<intptr_t>& out_element_sizes);
 
-}} // namespace dnd::eval
+}} // namespace dynd::eval
 
 #endif // _DND__UNARY_ELWISE_EVAL_HPP_

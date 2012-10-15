@@ -15,7 +15,7 @@
 #include <dnd/dtypes/convert_dtype.hpp>
 
 using namespace std;
-using namespace dnd;
+using namespace dynd;
 
 TEST(StringDType, Create) {
     dtype d;

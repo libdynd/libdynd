@@ -11,16 +11,16 @@
 #include <dnd/kernels/unary_kernel_instance.hpp>
 
 using namespace std;
-using namespace dnd;
+using namespace dynd;
 
-dnd::codegen_cache::codegen_cache()
+dynd::codegen_cache::codegen_cache()
     : m_exec_memblock(make_executable_memory_block()),
         m_cached_unary_kernel_adapters(),
         m_cached_binary_kernel_adapters()
 {
 }
 
-void dnd::codegen_cache::codegen_unary_function_adapter(const dtype& restype,
+void dynd::codegen_cache::codegen_unary_function_adapter(const dtype& restype,
                 const dtype& arg0type, calling_convention_t callconv,
                 void *function_pointer,
                 memory_block_data *function_pointer_owner,
@@ -45,7 +45,7 @@ void dnd::codegen_cache::codegen_unary_function_adapter(const dtype& restype,
     ad.adaptee_memblock = function_pointer_owner;
 }
 
-void dnd::codegen_cache::codegen_binary_function_adapter(const dtype& restype,
+void dynd::codegen_cache::codegen_binary_function_adapter(const dtype& restype,
                 const dtype& arg0type, const dtype& arg1type,
                 calling_convention_t callconv,
                 void *function_pointer,
@@ -71,7 +71,7 @@ void dnd::codegen_cache::codegen_binary_function_adapter(const dtype& restype,
     ad.adaptee_memblock = function_pointer_owner;
 }
 
-void dnd::codegen_cache::codegen_left_associative_binary_reduce_function_adapter(
+void dynd::codegen_cache::codegen_left_associative_binary_reduce_function_adapter(
                 const dtype& reduce_type,calling_convention_t callconv,
                 void *function_pointer,
                 memory_block_data *function_pointer_owner,
@@ -89,7 +89,7 @@ void dnd::codegen_cache::codegen_left_associative_binary_reduce_function_adapter
     ad.adaptee_memblock = function_pointer_owner;
 }
 
-void dnd::codegen_cache::codegen_right_associative_binary_reduce_function_adapter(
+void dynd::codegen_cache::codegen_right_associative_binary_reduce_function_adapter(
                 const dtype& reduce_type,calling_convention_t callconv,
                 void *function_pointer,
                 memory_block_data *function_pointer_owner,
@@ -107,7 +107,7 @@ void dnd::codegen_cache::codegen_right_associative_binary_reduce_function_adapte
     ad.adaptee_memblock = function_pointer_owner;
 }
 
-void dnd::codegen_cache::debug_dump(std::ostream& o, const std::string& indent) const
+void dynd::codegen_cache::debug_dump(std::ostream& o, const std::string& indent) const
 {
     o << indent << "------ codegen_cache\n";
     o << indent << " cached unary_kernel_adapters:\n";

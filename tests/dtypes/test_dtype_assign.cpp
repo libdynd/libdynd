@@ -13,7 +13,7 @@
 #include "dnd/dtype.hpp"
 
 using namespace std;
-using namespace dnd;
+using namespace dynd;
 
 TEST(DTypeAssign, FixedSizeTestsNoExcept) {
     dnd_bool v_b;

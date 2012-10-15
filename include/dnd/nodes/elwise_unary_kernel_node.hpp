@@ -9,7 +9,7 @@
 #include <dnd/nodes/ndarray_node.hpp>
 #include <dnd/kernels/unary_kernel_instance.hpp>
 
-namespace dnd {
+namespace dynd {
 
 class elwise_unary_kernel_node : public ndarray_node {
     /** The data type */
@@ -72,7 +72,7 @@ public:
     }
 
     ndarray_node_ptr as_dtype(const dtype& dt,
-                        dnd::assign_error_mode errmode, bool allow_in_place);
+                        dynd::assign_error_mode errmode, bool allow_in_place);
 
     ndarray_node_ptr apply_linear_index(
                     int ndim, const bool *remove_axis,
@@ -99,6 +99,6 @@ ndarray_node_ptr make_elwise_unary_kernel_node_copy_kernel(const dtype& dt, cons
 ndarray_node_ptr make_elwise_unary_kernel_node_steal_kernel(const dtype& dt, const ndarray_node_ptr& opnode,
                                             unary_specialization_kernel_instance& kernel);
 
-} // namespace dnd
+} // namespace dynd
 
 #endif // _DND__ELWISE_UNARY_KERNEL_NODE_HPP_

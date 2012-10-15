@@ -11,9 +11,9 @@
 #include <dnd/exceptions.hpp>
 
 using namespace std;
-using namespace dnd;
+using namespace dynd;
 
-dnd::fixedstring_dtype::fixedstring_dtype(string_encoding_t encoding, intptr_t stringsize)
+dynd::fixedstring_dtype::fixedstring_dtype(string_encoding_t encoding, intptr_t stringsize)
     : m_stringsize(stringsize), m_encoding(encoding)
 {
     switch (encoding) {
@@ -36,7 +36,7 @@ dnd::fixedstring_dtype::fixedstring_dtype(string_encoding_t encoding, intptr_t s
     }
 }
 
-void dnd::fixedstring_dtype::print_element(std::ostream& o, const char *data) const
+void dynd::fixedstring_dtype::print_element(std::ostream& o, const char *data) const
 {
     uint32_t cp;
     next_unicode_codepoint_t next_fn;
@@ -56,12 +56,12 @@ void dnd::fixedstring_dtype::print_element(std::ostream& o, const char *data) co
     o << "\"";
 }
 
-void dnd::fixedstring_dtype::print_dtype(std::ostream& o) const
+void dynd::fixedstring_dtype::print_dtype(std::ostream& o) const
 {
     o << "fixedstring<" << m_encoding << "," << m_stringsize << ">";
 }
 
-dtype dnd::fixedstring_dtype::apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& root_dt) const
+dtype dynd::fixedstring_dtype::apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& root_dt) const
 {
     if (nindices == 0) {
         return dtype(this);
@@ -79,11 +79,11 @@ dtype dnd::fixedstring_dtype::apply_linear_index(int nindices, const irange *ind
     }
 }
 
-void dnd::fixedstring_dtype::get_shape(int i, std::vector<intptr_t>& out_shape) const
+void dynd::fixedstring_dtype::get_shape(int i, std::vector<intptr_t>& out_shape) const
 {
 }
 
-bool dnd::fixedstring_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const
+bool dynd::fixedstring_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const
 {
     if (dst_dt.extended() == this) {
         if (src_dt.extended() == this) {
@@ -277,7 +277,7 @@ namespace {
     (single_compare_operation_t)type##_compare_kernel::greater \
     }
 
-void dnd::fixedstring_dtype::get_single_compare_kernel(single_compare_kernel_instance& out_kernel) const {
+void dynd::fixedstring_dtype::get_single_compare_kernel(single_compare_kernel_instance& out_kernel) const {
     static single_compare_operation_table_t fixedstring_comparisons_table[3] = {
         DND_FIXEDSTRING_COMPARISON_TABLE_TYPE_LEVEL(ascii_utf8),
         DND_FIXEDSTRING_COMPARISON_TABLE_TYPE_LEVEL(utf16),
@@ -290,7 +290,7 @@ void dnd::fixedstring_dtype::get_single_compare_kernel(single_compare_kernel_ins
 
 #undef DND_FIXEDSTRING_COMPARISON_TABLE_TYPE_LEVEL
 
-void dnd::fixedstring_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const dtype& src_dt,
+void dynd::fixedstring_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const dtype& src_dt,
                 assign_error_mode errmode,
                 unary_specialization_kernel_instance& out_kernel) const
 {
@@ -319,7 +319,7 @@ void dnd::fixedstring_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, co
 }
 
 
-bool dnd::fixedstring_dtype::operator==(const extended_dtype& rhs) const
+bool dynd::fixedstring_dtype::operator==(const extended_dtype& rhs) const
 {
     if (this == &rhs) {
         return true;

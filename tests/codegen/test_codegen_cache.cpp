@@ -11,7 +11,7 @@
 #include <dnd/codegen/codegen_cache.hpp>
 
 using namespace std;
-using namespace dnd;
+using namespace dynd;
 
 static int int_float_fn1(float x) {
     return (int)(x * 2);

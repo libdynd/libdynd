@@ -9,9 +9,9 @@
 #include <dnd/kernels/byteswap_kernels.hpp>
 
 using namespace std;
-using namespace dnd;
+using namespace dynd;
 
-dnd::byteswap_dtype::byteswap_dtype(const dtype& value_dtype)
+dynd::byteswap_dtype::byteswap_dtype(const dtype& value_dtype)
     : m_value_dtype(value_dtype), m_operand_dtype(make_fixedbytes_dtype(value_dtype.element_size(), value_dtype.alignment()))
 {
     if (value_dtype.extended() != 0) {
@@ -25,7 +25,7 @@ dnd::byteswap_dtype::byteswap_dtype(const dtype& value_dtype)
     }
 }
 
-dnd::byteswap_dtype::byteswap_dtype(const dtype& value_dtype, const dtype& operand_dtype)
+dynd::byteswap_dtype::byteswap_dtype(const dtype& value_dtype, const dtype& operand_dtype)
     : m_value_dtype(value_dtype), m_operand_dtype(operand_dtype)
 {
     // Only a bytes dtype be the operand to the byteswap
@@ -46,12 +46,12 @@ dnd::byteswap_dtype::byteswap_dtype(const dtype& value_dtype, const dtype& opera
     }
 }
 
-void dnd::byteswap_dtype::print_element(std::ostream& DND_UNUSED(o), const char *DND_UNUSED(data)) const
+void dynd::byteswap_dtype::print_element(std::ostream& DND_UNUSED(o), const char *DND_UNUSED(data)) const
 {
     throw runtime_error("internal error: byteswap_dtype::print_element isn't supposed to be called");
 }
 
-void dnd::byteswap_dtype::print_dtype(std::ostream& o) const
+void dynd::byteswap_dtype::print_dtype(std::ostream& o) const
 {
     o << "byteswap<" << m_value_dtype;
     if (m_operand_dtype.type_id() != fixedbytes_type_id) {
@@ -60,7 +60,7 @@ void dnd::byteswap_dtype::print_dtype(std::ostream& o) const
     o << ">";
 }
 
-dtype dnd::byteswap_dtype::apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& root_dt) const
+dtype dynd::byteswap_dtype::apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& root_dt) const
 {
     if (nindices == 0) {
         return dtype(this);
@@ -69,24 +69,24 @@ dtype dnd::byteswap_dtype::apply_linear_index(int nindices, const irange *indice
     }
 }
 
-void dnd::byteswap_dtype::get_shape(int i, std::vector<intptr_t>& out_shape) const
+void dynd::byteswap_dtype::get_shape(int i, std::vector<intptr_t>& out_shape) const
 {
     if (m_operand_dtype.extended()) {
         m_operand_dtype.extended()->get_shape(i, out_shape);
     }
 }
 
-bool dnd::byteswap_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const
+bool dynd::byteswap_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const
 {
     // Treat this dtype as the value dtype for whether assignment is always lossless
     if (src_dt.extended() == this) {
-        return ::dnd::is_lossless_assignment(dst_dt, m_value_dtype);
+        return ::dynd::is_lossless_assignment(dst_dt, m_value_dtype);
     } else {
-        return ::dnd::is_lossless_assignment(m_value_dtype, src_dt);
+        return ::dynd::is_lossless_assignment(m_value_dtype, src_dt);
     }
 }
 
-bool dnd::byteswap_dtype::operator==(const extended_dtype& rhs) const
+bool dynd::byteswap_dtype::operator==(const extended_dtype& rhs) const
 {
     if (this == &rhs) {
         return true;
@@ -98,19 +98,19 @@ bool dnd::byteswap_dtype::operator==(const extended_dtype& rhs) const
     }
 }
 
-void dnd::byteswap_dtype::get_operand_to_value_kernel(const eval::eval_context *DND_UNUSED(ectx),
+void dynd::byteswap_dtype::get_operand_to_value_kernel(const eval::eval_context *DND_UNUSED(ectx),
                         unary_specialization_kernel_instance& out_borrowed_kernel) const
 {
     out_borrowed_kernel.borrow_from(m_byteswap_kernel);
 }
 
-void dnd::byteswap_dtype::get_value_to_operand_kernel(const eval::eval_context *DND_UNUSED(ectx),
+void dynd::byteswap_dtype::get_value_to_operand_kernel(const eval::eval_context *DND_UNUSED(ectx),
                         unary_specialization_kernel_instance& out_borrowed_kernel) const
 {
     out_borrowed_kernel.borrow_from(m_byteswap_kernel);
 }
 
-dtype dnd::byteswap_dtype::with_replaced_storage_dtype(const dtype& replacement_dtype) const
+dtype dynd::byteswap_dtype::with_replaced_storage_dtype(const dtype& replacement_dtype) const
 {
     if (m_operand_dtype.kind() != expression_kind) {
         // If there's no expression in the operand, just try substituting (the constructor will error-check)

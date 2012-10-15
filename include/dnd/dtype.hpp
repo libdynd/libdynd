@@ -22,7 +22,7 @@
 #include <dnd/eval/eval_context.hpp>
 #include <dnd/irange.hpp>
 
-namespace dnd {
+namespace dynd {
 
 // A boolean class for dynamicndarray which is one-byte big
 class dnd_bool {
@@ -274,7 +274,7 @@ public:
     virtual void get_shape(int i, std::vector<intptr_t>& out_shape) const = 0;
 
     /**
-     * Called by ::dnd::is_lossless_assignment, with (this == dst_dt->extended()).
+     * Called by ::dynd::is_lossless_assignment, with (this == dst_dt->extended()).
      */
     virtual bool is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const = 0;
 
@@ -287,7 +287,7 @@ public:
     virtual void get_single_compare_kernel(single_compare_kernel_instance& out_kernel) const;
 
     /**
-     * Called by ::dnd::get_dtype_assignment_kernel with (this == dst_dt.extended()) or
+     * Called by ::dynd::get_dtype_assignment_kernel with (this == dst_dt.extended()) or
      * by another implementation of this function with (this == src_dt.extended()).
      *
      * If (this == dst_dt.extended()), and the function can't produce an assignment kernel,
@@ -501,7 +501,7 @@ public:
      * Indexes into the dtype, intended for recursive calls from the extended-dtype version. See
      * the function in extended_dtype with the same name for more details.
      */
-    dtype dnd::dtype::apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& root_dt) const;
+    dtype dynd::dtype::apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& root_dt) const;
 
     /**
      * Returns the non-expression dtype that this
@@ -656,6 +656,6 @@ void hexadecimal_print(std::ostream& o, unsigned long value);
 void hexadecimal_print(std::ostream& o, unsigned long long value);
 void hexadecimal_print(std::ostream& o, const char *data, intptr_t element_size);
 
-} // namespace dnd
+} // namespace dynd
 
 #endif // _DND__DTYPE_HPP_

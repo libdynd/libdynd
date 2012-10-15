@@ -8,10 +8,10 @@
 #include <dnd/dtypes/convert_dtype.hpp>
 
 using namespace std;
-using namespace dnd;
+using namespace dynd;
 
-ndarray_node_ptr dnd::scalar_node::as_dtype(const dtype& dt,
-                    dnd::assign_error_mode errmode, bool allow_in_place)
+ndarray_node_ptr dynd::scalar_node::as_dtype(const dtype& dt,
+                    dynd::assign_error_mode errmode, bool allow_in_place)
 {
     if (allow_in_place) {
         m_dtype = make_convert_dtype(dt, m_dtype, errmode);
@@ -29,7 +29,7 @@ ndarray_node_ptr dnd::scalar_node::as_dtype(const dtype& dt,
     }
 }
 
-ndarray_node_ptr dnd::scalar_node::apply_linear_index(
+ndarray_node_ptr dynd::scalar_node::apply_linear_index(
                 int DND_UNUSED(ndim), const bool *DND_UNUSED(remove_axis),
                 const intptr_t *DND_UNUSED(start_index), const intptr_t *DND_UNUSED(index_strides),
                 const intptr_t *DND_UNUSED(shape),
@@ -38,7 +38,7 @@ ndarray_node_ptr dnd::scalar_node::apply_linear_index(
     return as_ndarray_node_ptr();
 }
 
-void dnd::scalar_node::debug_dump_extra(std::ostream& o, const std::string& indent) const
+void dynd::scalar_node::debug_dump_extra(std::ostream& o, const std::string& indent) const
 {
     o << indent << " data: ";
     hexadecimal_print(o, m_originptr, m_dtype.element_size());
@@ -49,7 +49,7 @@ void dnd::scalar_node::debug_dump_extra(std::ostream& o, const std::string& inde
     }
 }
 
-ndarray_node_ptr dnd::make_scalar_node(const dtype& dt, const char* data, int access_flags)
+ndarray_node_ptr dynd::make_scalar_node(const dtype& dt, const char* data, int access_flags)
 {
     if (dt.get_memory_management() != pod_memory_management) {
         throw runtime_error("scalar_node doesn't support object dtypes yet");
@@ -70,7 +70,7 @@ ndarray_node_ptr dnd::make_scalar_node(const dtype& dt, const char* data, int ac
     return ndarray_node_ptr(new (result) memory_block_data(1, ndarray_node_memory_block_type), false);
 }
 
-ndarray_node_ptr dnd::make_scalar_node(const dtype& dt, const char* data, int access_flags,
+ndarray_node_ptr dynd::make_scalar_node(const dtype& dt, const char* data, int access_flags,
                 const memory_block_ptr& blockref_memblock)
 {
     if (blockref_memblock.get() != NULL) {

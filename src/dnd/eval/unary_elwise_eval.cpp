@@ -13,7 +13,7 @@
 #include <dnd/memblock/pod_memory_block.hpp>
 
 using namespace std;
-using namespace dnd;
+using namespace dynd;
 
 
 template<class KernelType>
@@ -55,7 +55,7 @@ static ndarray_node_ptr initialize_dst_memblock(bool copy, const dtype& dst_dt, 
     return DND_MOVE(result);
 }
 
-ndarray_node *dnd::eval::push_front_node_unary_kernels(ndarray_node* node,
+ndarray_node *dynd::eval::push_front_node_unary_kernels(ndarray_node* node,
                     const eval::eval_context *ectx,
                     std::deque<unary_specialization_kernel_instance>& out_kernels,
                     std::deque<intptr_t>& out_element_sizes)
@@ -100,7 +100,7 @@ ndarray_node *dnd::eval::push_front_node_unary_kernels(ndarray_node* node,
 
 }
 
-ndarray_node_ptr dnd::eval::evaluate_strided_with_unary_kernel(ndarray_node *node, const eval::eval_context *DND_UNUSED(ectx),
+ndarray_node_ptr dynd::eval::evaluate_strided_with_unary_kernel(ndarray_node *node, const eval::eval_context *DND_UNUSED(ectx),
                                 bool copy, uint32_t access_flags,
                                 const dtype& dst_dt, unary_specialization_kernel_instance& operation)
 {
@@ -152,7 +152,7 @@ ndarray_node_ptr dnd::eval::evaluate_strided_with_unary_kernel(ndarray_node *nod
     return DND_MOVE(result);
 }
 
-ndarray_node_ptr dnd::eval::evaluate_unary_elwise_array(ndarray_node* node, const eval::eval_context *ectx, bool copy, uint32_t access_flags)
+ndarray_node_ptr dynd::eval::evaluate_unary_elwise_array(ndarray_node* node, const eval::eval_context *ectx, bool copy, uint32_t access_flags)
 {
     // Chain the kernels together
     deque<unary_specialization_kernel_instance> kernels;

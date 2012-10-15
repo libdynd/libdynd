@@ -11,7 +11,7 @@
 #include <dnd/nodes/ndarray_node.hpp>
 #include <dnd/eval/eval_context.hpp>
 
-namespace dnd { namespace eval {
+namespace dynd { namespace eval {
 
 /**
  * Applies the unary kernel to the input strided array node.
@@ -19,6 +19,6 @@ namespace dnd { namespace eval {
 ndarray_node_ptr evaluate_groupby_elwise_reduce(ndarray_node *node, const eval::eval_context *ectx,
                                 bool copy, uint32_t access_flags);
 
-}} // namespace dnd::eval
+}} // namespace dynd::eval
 
 #endif // _DND__GROUPBY_UNARY_ELWISE_EVAL_HPP_

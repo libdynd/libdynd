@@ -16,7 +16,7 @@
 #include <dnd/dtypes/view_dtype.hpp>
 
 using namespace std;
-using namespace dnd;
+using namespace dynd;
 
 TEST(NDArrayViews, OneDimensionalRawMemory) {
     ndarray a, b;

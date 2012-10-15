@@ -11,7 +11,7 @@
 #include <dnd/kernels/unary_kernel_instance.hpp>
 #include <dnd/eval/eval_context.hpp>
 
-namespace dnd {
+namespace dynd {
 
 /**
  * A function prototype for functions which assign a single value.
@@ -82,6 +82,6 @@ void get_dtype_assignment_kernel(const dtype& dst_dt, const dtype& src_dt,
 void get_dtype_assignment_kernel(const dtype& dt,
                     unary_specialization_kernel_instance& out_kernel);
 
-} // namespace dnd
+} // namespace dynd
 
 #endif // _DND__ASSIGNMENT_KERNELS_HPP_

@@ -8,7 +8,7 @@
 
 #include <dnd/nodes/ndarray_node.hpp>
 
-namespace dnd {
+namespace dynd {
 
 /**
  * NDArray expression node which holds a scalar.
@@ -82,7 +82,7 @@ public:
         if (m_access_flags & write_access_flag) {
             return m_originptr;
         } else {
-            throw std::runtime_error("dnd::ndarray node is not writeable");
+            throw std::runtime_error("dynd::ndarray node is not writeable");
         }
     }
 
@@ -92,7 +92,7 @@ public:
     }
 
     ndarray_node_ptr as_dtype(const dtype& dt,
-                        dnd::assign_error_mode errmode, bool allow_in_place);
+                        dynd::assign_error_mode errmode, bool allow_in_place);
 
     ndarray_node_ptr apply_linear_index(
                     int ndim, const bool *remove_axis,
@@ -116,6 +116,6 @@ ndarray_node_ptr make_scalar_node(const dtype& dt, const char* data, int access_
 ndarray_node_ptr make_scalar_node(const dtype& dt, const char* data, int access_flags,
                 const memory_block_ptr& blockref_memblock);
 
-} // namespace dnd
+} // namespace dynd
 
 #endif // _DND__SCALAR_NODE_HPP_

@@ -21,7 +21,7 @@
 #include <dnd/nodes/strided_ndarray_node.hpp>
 #include <dnd/memblock/fixed_size_pod_memory_block.hpp>
 
-namespace dnd {
+namespace dynd {
 
 class ndarray;
 
@@ -460,7 +460,7 @@ namespace detail {
 
 // Implementation of initializer list construction
 template<class T>
-dnd::ndarray::ndarray(std::initializer_list<T> il)
+dynd::ndarray::ndarray(std::initializer_list<T> il)
     : m_node()
 {
     intptr_t dim0 = il.size();
@@ -472,7 +472,7 @@ dnd::ndarray::ndarray(std::initializer_list<T> il)
                             originptr, read_access_flag | write_access_flag, DND_MOVE(memblock)).swap(m_node);
 }
 template<class T>
-dnd::ndarray::ndarray(std::initializer_list<std::initializer_list<T> > il)
+dynd::ndarray::ndarray(std::initializer_list<std::initializer_list<T> > il)
     : m_node()
 {
     typedef std::initializer_list<std::initializer_list<T> > S;
@@ -495,7 +495,7 @@ dnd::ndarray::ndarray(std::initializer_list<std::initializer_list<T> > il)
                         originptr, read_access_flag | write_access_flag, DND_MOVE(memblock)).swap(m_node);
 }
 template<class T>
-dnd::ndarray::ndarray(std::initializer_list<std::initializer_list<std::initializer_list<T> > > il)
+dynd::ndarray::ndarray(std::initializer_list<std::initializer_list<std::initializer_list<T> > > il)
     : m_node()
 {
     typedef std::initializer_list<std::initializer_list<std::initializer_list<T> > > S;
@@ -554,7 +554,7 @@ namespace detail {
 };
 
 template<class T, int N>
-dnd::ndarray::ndarray(const T (&rhs)[N])
+dynd::ndarray::ndarray(const T (&rhs)[N])
     : m_node()
 {
     intptr_t shape[detail::ndim_from_array<T[N]>::value], strides[detail::ndim_from_array<T[N]>::value];
@@ -616,7 +616,7 @@ namespace detail {
 } // namespace detail;
 
 template<class T>
-T dnd::ndarray::as(assign_error_mode errmode) const {
+T dynd::ndarray::as(assign_error_mode errmode) const {
     return detail::ndarray_as_helper<T>::as(*this, errmode);
 }
 
@@ -638,6 +638,6 @@ inline ndarray empty_like(const ndarray& rhs) {
     return empty_like(rhs, rhs.get_dtype());
 }
 
-} // namespace dnd
+} // namespace dynd
 
 #endif // _DND__NDARRAY_HPP_

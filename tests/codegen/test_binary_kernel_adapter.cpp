@@ -13,7 +13,7 @@
 #include <dnd/codegen/codegen_cache.hpp>
 
 using namespace std;
-using namespace dnd;
+using namespace dynd;
 
 template<class S, class T1, class T2>
 static S multiply_values(T1 value1, T2 value2) {

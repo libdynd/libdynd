@@ -8,7 +8,7 @@
 
 #include <dnd/kernels/unary_kernel_instance.hpp>
 
-namespace dnd {
+namespace dynd {
 
 /**
  * Function for byteswapping a single value.
@@ -58,6 +58,6 @@ void get_byteswap_kernel(intptr_t element_size, intptr_t alignment,
 void get_pairwise_byteswap_kernel(intptr_t element_size, intptr_t alignment,
                 unary_specialization_kernel_instance& out_kernel);
 
-} // namespace dnd
+} // namespace dynd
 
 #endif // _DND__BYTESWAP_KERNELS_HPP_

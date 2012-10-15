@@ -9,7 +9,7 @@
 #include <dnd/memblock/pod_memory_block.hpp>
 
 using namespace std;
-using namespace dnd;
+using namespace dynd;
 
 namespace {
     struct pod_memory_block {
@@ -72,20 +72,20 @@ namespace {
     };
 } // anonymous namespace
 
-memory_block_ptr dnd::make_pod_memory_block(intptr_t initial_capacity_bytes)
+memory_block_ptr dynd::make_pod_memory_block(intptr_t initial_capacity_bytes)
 {
     pod_memory_block *pmb = new pod_memory_block(initial_capacity_bytes);
     return memory_block_ptr(reinterpret_cast<memory_block_data *>(pmb), false);
 }
 
-memory_block_ptr dnd::make_pod_memory_block(memory_block_ptr *blockrefs_begin, memory_block_ptr *blockrefs_end,
+memory_block_ptr dynd::make_pod_memory_block(memory_block_ptr *blockrefs_begin, memory_block_ptr *blockrefs_end,
                         intptr_t initial_capacity_bytes)
 {
     pod_memory_block *pmb = new pod_memory_block(blockrefs_begin, blockrefs_end, initial_capacity_bytes);
     return memory_block_ptr(reinterpret_cast<memory_block_data *>(pmb), false);
 }
 
-namespace dnd { namespace detail {
+namespace dynd { namespace detail {
 
 void free_pod_memory_block(memory_block_data *memblock)
 {
@@ -169,9 +169,9 @@ memory_block_pod_allocator_api pod_memory_block_allocator_api = {
     &finalize
 };
 
-}} // namespace dnd::detail
+}} // namespace dynd::detail
 
-void dnd::pod_memory_block_debug_dump(const memory_block_data *memblock, std::ostream& o, const std::string& indent)
+void dynd::pod_memory_block_debug_dump(const memory_block_data *memblock, std::ostream& o, const std::string& indent)
 {
     const pod_memory_block *emb = reinterpret_cast<const pod_memory_block *>(memblock);
     if (emb->m_memory_begin != NULL) {

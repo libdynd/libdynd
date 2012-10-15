@@ -52,10 +52,10 @@ namespace // nameless
     {
         return ((ccrc_float_32bit == rc) || (ccrc_float_64bit == rc));
     }
-    cc_register_class idx_for_type_id(dnd::type_id_t type_id)
+    cc_register_class idx_for_type_id(dynd::type_id_t type_id)
     {
         // related with the array of code snippets... handle with care
-        using namespace dnd;
+        using namespace dynd;
         switch (type_id) {
             case bool_type_id:
             case int8_type_id:
@@ -91,7 +91,7 @@ namespace // nameless
     class function_builder
     {
     public:
-        function_builder(dnd::memory_block_data* memblock, size_t estimated_size);
+        function_builder(dynd::memory_block_data* memblock, size_t estimated_size);
         ~function_builder();
         
         function_builder& label(size_t& where);
@@ -117,7 +117,7 @@ namespace // nameless
         function_builder& operator= (const function_builder&);
 
 
-        dnd::memory_block_data*  memblock_;
+        dynd::memory_block_data*  memblock_;
         char*             current_;
         char*             begin_;
         char*             end_;
@@ -127,7 +127,7 @@ namespace // nameless
     };
     
     
-    function_builder::function_builder(dnd::memory_block_data* memblock
+    function_builder::function_builder(dynd::memory_block_data* memblock
                                        , size_t estimated_size)
     : memblock_(memblock)
     , current_(0)
@@ -137,7 +137,7 @@ namespace // nameless
     , used_float_arg_(false)
     , ok_(true)
     {
-        dnd::allocate_executable_memory(memblock
+        dynd::allocate_executable_memory(memblock
                                         , estimated_size
                                         , 16
                                         , &begin_
@@ -342,7 +342,7 @@ namespace // nameless
 #ifndef NDEBUG
             char* old_begin = begin_; // only used in asserts
 #endif
-            dnd::resize_executable_memory(memblock_, current_ - begin_, &begin_, &end_);
+            dynd::resize_executable_memory(memblock_, current_ - begin_, &begin_, &end_);
             assert(old_begin = begin_);
             
             // TODO: flush instruction cache for the generated code. Not needed
@@ -366,7 +366,7 @@ namespace // nameless
         if (begin_)
         {
             // if we didn't finish... rollback the executable memory
-            dnd::resize_executable_memory(memblock_, 0, &begin_, &end_);
+            dynd::resize_executable_memory(memblock_, 0, &begin_, &end_);
         }
         memblock_ = 0;
         current_  = 0;
@@ -378,7 +378,7 @@ namespace // nameless
 } // anonymous namespace
 
 
-uint64_t dnd::get_binary_function_adapter_unique_id(const dtype& restype
+uint64_t dynd::get_binary_function_adapter_unique_id(const dtype& restype
                                                , const dtype& arg0type
                                                , const dtype& arg1type
                                                , calling_convention_t DND_UNUSED(callconv)
@@ -399,7 +399,7 @@ uint64_t dnd::get_binary_function_adapter_unique_id(const dtype& restype
     return result;
 }
 
-std::string dnd::get_binary_function_adapter_unique_id_string(uint64_t unique_id)
+std::string dynd::get_binary_function_adapter_unique_id_string(uint64_t unique_id)
 {
     std::stringstream ss;
     ss << type_to_str(cc_register_class(unique_id & 0x07)) << " ("
@@ -472,7 +472,7 @@ namespace // nameless
     };
 } // anonymous namespace
 
-dnd::binary_operation_t dnd::codegen_binary_function_adapter(const memory_block_ptr& exec_memblock
+dynd::binary_operation_t dynd::codegen_binary_function_adapter(const memory_block_ptr& exec_memblock
                                                         , const dtype& restype
                                                         , const dtype& arg0type
                                                         , const dtype& arg1type

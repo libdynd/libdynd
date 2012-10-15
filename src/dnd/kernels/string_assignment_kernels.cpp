@@ -11,7 +11,7 @@
 #include <dnd/kernels/string_assignment_kernels.hpp>
 
 using namespace std;
-using namespace dnd;
+using namespace dynd;
 
 /////////////////////////////////////////
 // fixedstring to fixedstring assignment
@@ -93,7 +93,7 @@ namespace {
     };
 } // anonymous namespace
 
-void dnd::get_fixedstring_assignment_kernel(intptr_t dst_element_size, string_encoding_t dst_encoding,
+void dynd::get_fixedstring_assignment_kernel(intptr_t dst_element_size, string_encoding_t dst_encoding,
                 intptr_t src_element_size, string_encoding_t src_encoding,
                 assign_error_mode errmode,
                 unary_specialization_kernel_instance& out_kernel)
@@ -241,7 +241,7 @@ namespace {
         };
 } // anonymous namespace
 
-void dnd::get_blockref_string_assignment_kernel(string_encoding_t dst_encoding,
+void dynd::get_blockref_string_assignment_kernel(string_encoding_t dst_encoding,
                 string_encoding_t src_encoding,
                 assign_error_mode errmode,
                 unary_specialization_kernel_instance& out_kernel)
@@ -401,7 +401,7 @@ namespace {
         };
 } // anonymous namespace
 
-void dnd::get_fixedstring_to_blockref_string_assignment_kernel(string_encoding_t dst_encoding,
+void dynd::get_fixedstring_to_blockref_string_assignment_kernel(string_encoding_t dst_encoding,
                 intptr_t src_element_size, string_encoding_t src_encoding,
                 assign_error_mode errmode,
                 unary_specialization_kernel_instance& out_kernel)
@@ -501,7 +501,7 @@ namespace {
     };
 } // anonymous namespace
 
-void dnd::get_blockref_string_to_fixedstring_assignment_kernel(intptr_t dst_element_size, string_encoding_t dst_encoding,
+void dynd::get_blockref_string_to_fixedstring_assignment_kernel(intptr_t dst_element_size, string_encoding_t dst_encoding,
                 string_encoding_t src_encoding,
                 assign_error_mode errmode,
                 unary_specialization_kernel_instance& out_kernel)

@@ -14,14 +14,14 @@
 #include <dnd/kernels/kernel_instance.hpp>
 #include <dnd/codegen/codegen_cache.hpp>
 
-namespace dnd { namespace gfunc {
+namespace dynd { namespace gfunc {
 
 class elwise_kernel {
 public:
     dtype m_returntype;
-    std::vector<dnd::dtype> m_paramtypes;
-    dnd::unary_specialization_kernel_instance m_unary_kernel;
-    dnd::kernel_instance<dnd::binary_operation_t> m_binary_kernel;
+    std::vector<dynd::dtype> m_paramtypes;
+    dynd::unary_specialization_kernel_instance m_unary_kernel;
+    dynd::kernel_instance<dynd::binary_operation_t> m_binary_kernel;
 
     void swap(elwise_kernel& rhs) {
         m_returntype.swap(rhs.m_returntype);
@@ -38,7 +38,7 @@ class elwise {
      * and so cannot rely on C++11 move semantics.
      */
     std::deque<elwise_kernel> m_kernels;
-    std::vector<dnd::memory_block_data *> m_blockrefs;
+    std::vector<dynd::memory_block_data *> m_blockrefs;
 public:
     elwise(const char *name)
         : m_name(name)
@@ -63,6 +63,6 @@ public:
     void debug_dump(std::ostream& o, const std::string& indent = "") const;
 };
 
-}} // namespace dnd::gfunc
+}} // namespace dynd::gfunc
 
 #endif // _DND__ELWISE_GFUNC_HPP_

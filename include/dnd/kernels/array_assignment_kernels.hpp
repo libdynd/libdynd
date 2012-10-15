@@ -9,7 +9,7 @@
 #include <dnd/kernels/unary_kernel_instance.hpp>
 #include <dnd/dtype_assign.hpp>
 
-namespace dnd {
+namespace dynd {
 
 /**
  * Gets a kernel which assigns blockref arrays
@@ -19,6 +19,6 @@ void get_blockref_array_assignment_kernel(const dtype& dst_element_type,
                 assign_error_mode errmode,
                 unary_specialization_kernel_instance& out_kernel);
 
-} // namespace dnd
+} // namespace dynd
 
 #endif // _DND__ARRAY_ASSIGNMENT_KERNELS_HPP_

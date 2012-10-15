@@ -12,7 +12,7 @@
 #include <dnd/nodes/elwise_binary_kernel_node.hpp>
 
 using namespace std;
-using namespace dnd;
+using namespace dynd;
 
 
 namespace {
@@ -126,7 +126,7 @@ static DND_BUILTIN_DTYPE_BINARY_OPERATION_TABLE(division);
 
 // These operators are declared in ndarray.hpp
 
-ndarray dnd::operator+(const ndarray& op1, const ndarray& op2)
+ndarray dynd::operator+(const ndarray& op1, const ndarray& op2)
 {
     dtype dt = promote_dtypes_arithmetic(op1.get_dtype(), op2.get_dtype());
     kernel_instance<binary_operation_t> kernel;
@@ -140,7 +140,7 @@ ndarray dnd::operator+(const ndarray& op1, const ndarray& op2)
                     op1.get_node()->as_dtype(dt), op2.get_node()->as_dtype(dt), kernel));
 }
 
-ndarray dnd::operator-(const ndarray& op1, const ndarray& op2)
+ndarray dynd::operator-(const ndarray& op1, const ndarray& op2)
 {
     dtype dt = promote_dtypes_arithmetic(op1.get_dtype(), op2.get_dtype());
     kernel_instance<binary_operation_t> kernel;
@@ -154,7 +154,7 @@ ndarray dnd::operator-(const ndarray& op1, const ndarray& op2)
                     op1.get_node()->as_dtype(dt), op2.get_node()->as_dtype(dt), kernel));
 }
 
-ndarray dnd::operator*(const ndarray& op1, const ndarray& op2)
+ndarray dynd::operator*(const ndarray& op1, const ndarray& op2)
 {
     dtype dt = promote_dtypes_arithmetic(op1.get_dtype(), op2.get_dtype());
     kernel_instance<binary_operation_t> kernel;
@@ -168,7 +168,7 @@ ndarray dnd::operator*(const ndarray& op1, const ndarray& op2)
                     op1.get_node()->as_dtype(dt), op2.get_node()->as_dtype(dt), kernel));
 }
 
-ndarray dnd::operator/(const ndarray& op1, const ndarray& op2)
+ndarray dynd::operator/(const ndarray& op1, const ndarray& op2)
 {
     dtype dt = promote_dtypes_arithmetic(op1.get_dtype(), op2.get_dtype());
     kernel_instance<binary_operation_t> kernel;

@@ -19,7 +19,7 @@
 #pragma fenv_access(on)
 #endif
 
-namespace dnd {
+namespace dynd {
 
 template<class dst_type, class src_type, dtype_kind_t dst_kind, dtype_kind_t src_kind, assign_error_mode errmode>
 struct single_assigner_builtin_base;
@@ -878,5 +878,5 @@ struct single_assigner_builtin<same_type, same_type, errmode>
     }
 };
 
-} // namespace dnd
+} // namespace dynd
 

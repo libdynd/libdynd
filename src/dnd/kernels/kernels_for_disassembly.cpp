@@ -24,7 +24,7 @@
 #include <complex>
 
 using namespace std;
-using namespace dnd;
+using namespace dynd;
 
 typedef int RET;
 typedef int ARG0;

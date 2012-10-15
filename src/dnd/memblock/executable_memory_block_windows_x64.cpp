@@ -15,7 +15,7 @@
 #include <dnd/memblock/executable_memory_block.hpp>
 
 using namespace std;
-using namespace dnd;
+using namespace dynd;
 
 namespace {
     struct virtual_alloc_chunk {
@@ -70,14 +70,14 @@ namespace {
     };
 } // anonymous namespace
 
-memory_block_ptr dnd::make_executable_memory_block(intptr_t chunk_size_bytes)
+memory_block_ptr dynd::make_executable_memory_block(intptr_t chunk_size_bytes)
 {
     executable_memory_block *pmb = new executable_memory_block(chunk_size_bytes);
     return memory_block_ptr(reinterpret_cast<memory_block_data *>(pmb), false);
 }
 
 
-namespace dnd { namespace detail {
+namespace dynd { namespace detail {
 
 void free_executable_memory_block(memory_block_data *memblock)
 {
@@ -85,9 +85,9 @@ void free_executable_memory_block(memory_block_data *memblock)
     delete emb;
 }
 
-}} // namespace dnd::detail
+}} // namespace dynd::detail
 
-void dnd::allocate_executable_memory(memory_block_data *self, intptr_t size_bytes, intptr_t alignment, char **out_begin, char **out_end)
+void dynd::allocate_executable_memory(memory_block_data *self, intptr_t size_bytes, intptr_t alignment, char **out_begin, char **out_end)
 {
 //    cout << "allocating " << size_bytes << " of memory with alignment " << alignment << endl;
     // Allocate new exectuable memory of the requested size and alignment
@@ -117,7 +117,7 @@ void dnd::allocate_executable_memory(memory_block_data *self, intptr_t size_byte
 //    cout << "allocated at address " << (void *)begin << endl;
 }
 
-void dnd::resize_executable_memory(memory_block_data *self, intptr_t size_bytes, char **inout_begin, char **inout_end)
+void dynd::resize_executable_memory(memory_block_data *self, intptr_t size_bytes, char **inout_begin, char **inout_end)
 {
     // Resizes previously allocated executable memory to the requested size
     executable_memory_block *emb = reinterpret_cast<executable_memory_block *>(self);
@@ -146,7 +146,7 @@ void dnd::resize_executable_memory(memory_block_data *self, intptr_t size_bytes,
 //    cout << "memory state after " << (void *)emb->m_memory_begin << " / " << (void *)emb->m_memory_current << " / " << (void *)emb->m_memory_end << endl;
 }
 
-void dnd::set_executable_memory_runtime_function(memory_block_data *self, char *begin, char *end, char *unwind_data)
+void dynd::set_executable_memory_runtime_function(memory_block_data *self, char *begin, char *end, char *unwind_data)
 {
     // Sets the runtime function info for the most recently allocated memory
     executable_memory_block *emb = reinterpret_cast<executable_memory_block *>(self);
@@ -160,7 +160,7 @@ void dnd::set_executable_memory_runtime_function(memory_block_data *self, char *
     RtlAddFunctionTable(&rf, 1, (DWORD64)root);
 }
 
-void dnd::executable_memory_block_debug_dump(const memory_block_data *memblock, std::ostream& o, const std::string& indent)
+void dynd::executable_memory_block_debug_dump(const memory_block_data *memblock, std::ostream& o, const std::string& indent)
 {
     const executable_memory_block *emb = reinterpret_cast<const executable_memory_block *>(memblock);
     o << indent << " chunk size: " << emb->m_chunk_size_bytes << "\n";

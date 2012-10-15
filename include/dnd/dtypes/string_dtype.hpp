@@ -13,7 +13,7 @@
 #include <dnd/dtypes/view_dtype.hpp>
 #include <dnd/string_encodings.hpp>
 
-namespace dnd {
+namespace dynd {
 
 class string_dtype : public extended_string_dtype {
     string_encoding_t m_encoding;
@@ -68,6 +68,6 @@ inline dtype make_string_dtype(string_encoding_t encoding) {
     return dtype(new string_dtype(encoding));
 }
 
-} // namespace dnd
+} // namespace dynd
 
 #endif // _DND__STRING_DTYPE_HPP_

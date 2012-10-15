@@ -13,7 +13,7 @@
 #include <dnd/ndarray_arange.hpp>
 
 using namespace std;
-using namespace dnd;
+using namespace dynd;
 
 TEST(NDArrayArange, Basic) {
     ndarray a;

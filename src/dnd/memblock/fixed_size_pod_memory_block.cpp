@@ -6,9 +6,9 @@
 #include <dnd/memblock/fixed_size_pod_memory_block.hpp>
 
 using namespace std;
-using namespace dnd;
+using namespace dynd;
 
-namespace dnd { namespace detail {
+namespace dynd { namespace detail {
 
 void free_fixed_size_pod_memory_block(memory_block_data *memblock)
 {
@@ -20,9 +20,9 @@ void free_fixed_size_pod_memory_block(memory_block_data *memblock)
     free(reinterpret_cast<void *>(memblock));
 }
 
-}} // namespace dnd::detail
+}} // namespace dynd::detail
 
-memory_block_ptr dnd::make_fixed_size_pod_memory_block(intptr_t size_bytes, intptr_t alignment, char **out_datapointer)
+memory_block_ptr dynd::make_fixed_size_pod_memory_block(intptr_t size_bytes, intptr_t alignment, char **out_datapointer)
 {
     // Calculate the aligned starting point for the data
     intptr_t start = (intptr_t)(((uintptr_t)sizeof(memory_block_data) + (uintptr_t)sizeof(int) + (uintptr_t)(alignment - 1))
@@ -40,7 +40,7 @@ memory_block_ptr dnd::make_fixed_size_pod_memory_block(intptr_t size_bytes, intp
     return memory_block_ptr(new (result) memory_block_data(1, fixed_size_pod_memory_block_type), false);
 }
 
-memory_block_ptr dnd::make_fixed_size_pod_memory_block(intptr_t size_bytes, intptr_t alignment, char **out_datapointer,
+memory_block_ptr dynd::make_fixed_size_pod_memory_block(intptr_t size_bytes, intptr_t alignment, char **out_datapointer,
                 const memory_block_ptr *blockrefs_begin, const memory_block_ptr *blockrefs_end)
 {
     int blockrefs_size = blockrefs_end - blockrefs_begin;
@@ -67,7 +67,7 @@ memory_block_ptr dnd::make_fixed_size_pod_memory_block(intptr_t size_bytes, intp
     return memory_block_ptr(new (result) memory_block_data(1, fixed_size_pod_memory_block_type), false);
 }
 
-void dnd::fixed_size_pod_memory_block_debug_dump(const memory_block_data *memblock, std::ostream& o, const std::string& indent)
+void dynd::fixed_size_pod_memory_block_debug_dump(const memory_block_data *memblock, std::ostream& o, const std::string& indent)
 {
     const char *rawmem = reinterpret_cast<const char *>(memblock);
     int blockrefs_size = *(const int *)(rawmem + sizeof(memory_block_data));

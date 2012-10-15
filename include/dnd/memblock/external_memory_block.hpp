@@ -8,7 +8,7 @@
 
 #include <dnd/memblock/memory_block.hpp>
 
-namespace dnd {
+namespace dynd {
 
 typedef void (*external_memory_block_free_t)(void *);
 
@@ -17,6 +17,6 @@ typedef void (*external_memory_block_free_t)(void *);
  */
 memory_block_ptr make_external_memory_block(void *object, external_memory_block_free_t free_fn);
 
-} // namespace dnd
+} // namespace dynd
 
 #endif // _DND__EXTERNAL_MEMORY_BLOCK_HPP_

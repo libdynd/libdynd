@@ -20,7 +20,7 @@ struct assign_to_same_category_type;
 
 } // anonymous namespace
 
-namespace dnd {
+namespace dynd {
 
 class categorical_dtype : public extended_dtype {
     // The data type of the category
@@ -101,6 +101,6 @@ inline dtype make_categorical_dtype(const ndarray& values) {
 dtype factor_categorical_dtype(const ndarray& values);
 
 
-} // namespace dnd
+} // namespace dynd
 
 #endif // _DND__CATEGORICAL_DTYPE_HPP_

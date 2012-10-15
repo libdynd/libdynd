@@ -8,7 +8,7 @@
 
 #include <iostream>
 
-namespace dnd {
+namespace dynd {
 
 enum calling_convention_t {
     cdecl_callconv,
@@ -31,6 +31,6 @@ inline std::ostream& operator <<(std::ostream& o, calling_convention_t cc) {
     return o;
 }
 
-} // namespace pydnd
+} // namespace pydynd
 
 #endif // _DND__CALLING_CONVENTIONS_HPP_

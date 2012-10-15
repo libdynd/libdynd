@@ -15,7 +15,7 @@
 #include <dnd/kernels/kernel_instance.hpp>
 #include <dnd/codegen/codegen_cache.hpp>
 
-namespace dnd { namespace gfunc {
+namespace dynd { namespace gfunc {
 
 class elwise_reduce_kernel {
 public:
@@ -31,17 +31,17 @@ public:
      */
     bool m_commutative;
     dtype m_returntype;
-    std::vector<dnd::dtype> m_paramtypes;
-    dnd::ndarray m_identity;
+    std::vector<dynd::dtype> m_paramtypes;
+    dynd::ndarray m_identity;
     /**
      * Does dst <- operation(dst, src), use when iterating from index 0 to N-1.
      */
-    dnd::kernel_instance<dnd::unary_operation_t> m_left_associative_reduction_kernel;
+    dynd::kernel_instance<dynd::unary_operation_t> m_left_associative_reduction_kernel;
     /**
      * Does dst <- operation(src, dst), use when iterating from index N-1 to 0.
      * If the kernel is flagged commutative, this kernel is never used so may be left empty.
      */
-    dnd::kernel_instance<dnd::unary_operation_t> m_right_associative_reduction_kernel;
+    dynd::kernel_instance<dynd::unary_operation_t> m_right_associative_reduction_kernel;
 
     void swap(elwise_reduce_kernel& rhs) {
         std::swap(m_associative, rhs.m_associative);
@@ -85,6 +85,6 @@ public:
     void debug_dump(std::ostream& o, const std::string& indent = "") const;
 };
 
-}} // namespace dnd::gfunc
+}} // namespace dynd::gfunc
 
 #endif // _DND__ELWISE_REDUCE_GFUNC_HPP_

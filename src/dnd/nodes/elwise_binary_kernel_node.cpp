@@ -10,10 +10,10 @@
 #include <dnd/kernels/buffered_binary_kernels.hpp>
 
 using namespace std;
-using namespace dnd;
+using namespace dynd;
 
-ndarray_node_ptr dnd::elwise_binary_kernel_node::as_dtype(const dtype& dt,
-                    dnd::assign_error_mode errmode, bool allow_in_place)
+ndarray_node_ptr dynd::elwise_binary_kernel_node::as_dtype(const dtype& dt,
+                    dynd::assign_error_mode errmode, bool allow_in_place)
 {
     if (allow_in_place) {
         m_dtype = make_convert_dtype(dt, m_dtype, errmode);
@@ -26,7 +26,7 @@ ndarray_node_ptr dnd::elwise_binary_kernel_node::as_dtype(const dtype& dt,
     }
 }
 
-ndarray_node_ptr dnd::elwise_binary_kernel_node::apply_linear_index(
+ndarray_node_ptr dynd::elwise_binary_kernel_node::apply_linear_index(
                 int ndim, const bool *remove_axis,
                 const intptr_t *start_index, const intptr_t *index_strides,
                 const intptr_t *shape,
@@ -54,7 +54,7 @@ ndarray_node_ptr dnd::elwise_binary_kernel_node::apply_linear_index(
     }
 }
 
-void dnd::elwise_binary_kernel_node::get_binary_operation(intptr_t dst_fixedstride, intptr_t src0_fixedstride,
+void dynd::elwise_binary_kernel_node::get_binary_operation(intptr_t dst_fixedstride, intptr_t src0_fixedstride,
                             intptr_t src1_fixedstride,
                             const eval::eval_context *ectx,
                             kernel_instance<binary_operation_t>& out_kernel) const
@@ -120,7 +120,7 @@ void dnd::elwise_binary_kernel_node::get_binary_operation(intptr_t dst_fixedstri
 }
 
 
-ndarray_node_ptr dnd::make_elwise_binary_kernel_node_copy_kernel(const dtype& dt,
+ndarray_node_ptr dynd::make_elwise_binary_kernel_node_copy_kernel(const dtype& dt,
                     const ndarray_node_ptr& opnode0, const ndarray_node_ptr& opnode1,
                     const kernel_instance<binary_operation_t>& kernel)
 {
@@ -134,7 +134,7 @@ ndarray_node_ptr dnd::make_elwise_binary_kernel_node_copy_kernel(const dtype& dt
     return DND_MOVE(result);
 }
 
-ndarray_node_ptr dnd::make_elwise_binary_kernel_node_steal_kernel(const dtype& dt,
+ndarray_node_ptr dynd::make_elwise_binary_kernel_node_steal_kernel(const dtype& dt,
                     const ndarray_node_ptr& opnode0, const ndarray_node_ptr& opnode1,
                     kernel_instance<binary_operation_t>& kernel)
 {

@@ -8,7 +8,7 @@
 
 #include <algorithm>
 
-namespace dnd {
+namespace dynd {
 
 /**
  * This is a helper class for storing vectors that are
@@ -244,6 +244,6 @@ public:
 /** Typedef for vector of dimensions or strides */
 typedef shortvector<intptr_t> dimvector;
 
-} // namespace dnd
+} // namespace dynd
 
 #endif // _DND__SHORTVECTOR_HPP_

@@ -11,7 +11,7 @@
 #include <dnd/config.hpp>
 #include <dnd/dtype_assign.hpp>
 
-namespace dnd {
+namespace dynd {
 
 enum string_encoding_t {
     string_encoding_ascii,
@@ -96,6 +96,6 @@ append_unicode_codepoint_t get_append_unicode_codepoint_function(string_encoding
  */
 void print_escaped_unicode_codepoint(std::ostream& o, uint32_t cp);
 
-} // namespace dnd
+} // namespace dynd
 
 #endif // _DND__STRING_ENCODINGS_HPP_

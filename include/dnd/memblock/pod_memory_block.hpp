@@ -11,7 +11,7 @@
 
 #include <dnd/memblock/memory_block.hpp>
 
-namespace dnd {
+namespace dynd {
 
 /**
  * Creates a memory block which can be used to allocate POD output memory
@@ -34,6 +34,6 @@ memory_block_ptr make_pod_memory_block(memory_block_ptr *blockrefs_begin, memory
 
 void pod_memory_block_debug_dump(const memory_block_data *memblock, std::ostream& o, const std::string& indent);
 
-} // namespace dnd
+} // namespace dynd
 
 #endif // _DND__POD_MEMORY_BLOCK_HPP_

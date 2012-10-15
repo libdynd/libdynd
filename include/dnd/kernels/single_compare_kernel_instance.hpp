@@ -8,7 +8,7 @@
 
 #include <dnd/kernels/kernel_instance.hpp>
 
-namespace dnd {
+namespace dynd {
 
 /**
  * Unary operations support four specializations as a standardized

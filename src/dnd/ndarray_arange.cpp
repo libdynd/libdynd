@@ -10,7 +10,7 @@
 #include <dnd/ndarray_arange.hpp>
 
 using namespace std;
-using namespace dnd;
+using namespace dynd;
 
 namespace {
     template<class T>
@@ -101,7 +101,7 @@ namespace {
     };
 } // anonymous namespace
 
-ndarray dnd::arange(const dtype& dt, const void *beginval, const void *endval, const void *stepval)
+ndarray dynd::arange(const dtype& dt, const void *beginval, const void *endval, const void *stepval)
 {
     if (dt.extended() == NULL) {
 
@@ -179,7 +179,7 @@ static void linspace_specialization(complex<double> start, complex<double> stop,
     }
 }
 
-ndarray dnd::linspace(const dtype& dt, const void *startval, const void *stopval, intptr_t count)
+ndarray dynd::linspace(const dtype& dt, const void *startval, const void *stopval, intptr_t count)
 {
     if (count < 2) {
         throw runtime_error("linspace needs a count of at least 2");

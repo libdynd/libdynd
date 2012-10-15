@@ -9,7 +9,7 @@
 #include <dnd/memblock/memory_block.hpp>
 #include <dnd/nodes/ndarray_node.hpp>
 
-namespace dnd {
+namespace dynd {
 
 /**
  * Creates a memory block for an ndarray_node. The caller must call
@@ -18,6 +18,6 @@ namespace dnd {
 ndarray_node_ptr make_uninitialized_ndarray_node_memory_block(intptr_t sizeof_node, char **out_node_memory);
 
 
-} // namespace dnd
+} // namespace dynd
 
 #endif // _DND__NDARRAY_NODE_MEMORY_BLOCK_HPP_

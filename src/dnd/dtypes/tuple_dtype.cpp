@@ -9,9 +9,9 @@
 #include <dnd/exceptions.hpp>
 
 using namespace std;
-using namespace dnd;
+using namespace dynd;
 
-dnd::tuple_dtype::tuple_dtype(const std::vector<dtype>& fields)
+dynd::tuple_dtype::tuple_dtype(const std::vector<dtype>& fields)
     : m_fields(fields), m_offsets(fields.size())
 {
     // Calculate the offsets and element size
@@ -41,7 +41,7 @@ dnd::tuple_dtype::tuple_dtype(const std::vector<dtype>& fields)
     m_is_standard_layout = true;
 }
 
-dnd::tuple_dtype::tuple_dtype(const std::vector<dtype>& fields, const std::vector<size_t> offsets,
+dynd::tuple_dtype::tuple_dtype(const std::vector<dtype>& fields, const std::vector<size_t> offsets,
                     size_t element_size, size_t alignment)
     : m_fields(fields), m_offsets(offsets), m_element_size(element_size), m_alignment(alignment)
 {
@@ -81,7 +81,7 @@ dnd::tuple_dtype::tuple_dtype(const std::vector<dtype>& fields, const std::vecto
     m_is_standard_layout = compute_is_standard_layout();
 }
 
-bool dnd::tuple_dtype::compute_is_standard_layout() const
+bool dynd::tuple_dtype::compute_is_standard_layout() const
 {
     size_t standard_offset = 0, standard_alignment = 1;
     for (size_t i = 0, i_end = m_fields.size(); i != i_end; ++i) {
@@ -103,7 +103,7 @@ bool dnd::tuple_dtype::compute_is_standard_layout() const
     return m_element_size == standard_element_size && m_alignment == standard_alignment;
 }
 
-void dnd::tuple_dtype::print_element(std::ostream& o, const char *data) const
+void dynd::tuple_dtype::print_element(std::ostream& o, const char *data) const
 {
     o << "[";
     for (size_t i = 0, i_end = m_fields.size(); i != i_end; ++i) {
@@ -115,7 +115,7 @@ void dnd::tuple_dtype::print_element(std::ostream& o, const char *data) const
     o << "]";
 }
 
-void dnd::tuple_dtype::print_dtype(std::ostream& o) const
+void dynd::tuple_dtype::print_dtype(std::ostream& o) const
 {
     if (is_standard_layout()) {
         o << "tuple<";
@@ -149,7 +149,7 @@ void dnd::tuple_dtype::print_dtype(std::ostream& o) const
     }
 }
 
-dtype dnd::tuple_dtype::apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& root_dt) const
+dtype dynd::tuple_dtype::apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& root_dt) const
 {
     if (nindices == 0) {
         return dtype(this);
@@ -175,7 +175,7 @@ dtype dnd::tuple_dtype::apply_linear_index(int nindices, const irange *indices, 
     }
 }
 
-void dnd::tuple_dtype::get_shape(int i, std::vector<intptr_t>& out_shape) const
+void dynd::tuple_dtype::get_shape(int i, std::vector<intptr_t>& out_shape) const
 {
     // Ensure the output shape is big enough
     while (out_shape.size() <= i) {
@@ -204,7 +204,7 @@ void dnd::tuple_dtype::get_shape(int i, std::vector<intptr_t>& out_shape) const
     }
 }
 
-bool dnd::tuple_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const
+bool dynd::tuple_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const
 {
     if (dst_dt.extended() == this) {
         if (src_dt.extended() == this) {
@@ -217,19 +217,19 @@ bool dnd::tuple_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& 
     return false;
 }
 
-void dnd::tuple_dtype::get_single_compare_kernel(single_compare_kernel_instance& DND_UNUSED(out_kernel)) const
+void dynd::tuple_dtype::get_single_compare_kernel(single_compare_kernel_instance& DND_UNUSED(out_kernel)) const
 {
     throw runtime_error("tuple_dtype::get_single_compare_kernel is unimplemented"); 
 }
 
-void dnd::tuple_dtype::get_dtype_assignment_kernel(const dtype& DND_UNUSED(dst_dt), const dtype& DND_UNUSED(src_dt),
+void dynd::tuple_dtype::get_dtype_assignment_kernel(const dtype& DND_UNUSED(dst_dt), const dtype& DND_UNUSED(src_dt),
                 assign_error_mode DND_UNUSED(errmode),
                 unary_specialization_kernel_instance& DND_UNUSED(out_kernel)) const
 {
     throw runtime_error("tuple_dtype::get_dtype_assignment_kernel is unimplemented"); 
 }
 
-bool dnd::tuple_dtype::operator==(const extended_dtype& rhs) const
+bool dynd::tuple_dtype::operator==(const extended_dtype& rhs) const
 {
     if (this == &rhs) {
         return true;

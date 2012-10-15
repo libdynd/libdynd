@@ -12,7 +12,7 @@
 #include "dnd/dtypes/convert_dtype.hpp"
 
 using namespace std;
-using namespace dnd;
+using namespace dynd;
 
 TEST(NDArrayAssign, ScalarAssignment_Bool) {
     ndarray a;

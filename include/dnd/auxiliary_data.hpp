@@ -11,7 +11,7 @@
 
 #include <dnd/memblock/memory_block.hpp>
 
-namespace dnd {
+namespace dynd {
 
 // AuxDataBase is the same as NpyAuxData, see the numpy doc link
 // http://docs.scipy.org/doc/numpy/reference/c-api.array.html#auxiliary-data-with-object-semantics
@@ -103,13 +103,13 @@ namespace detail {
         auxiliary_data_holder& operator=(const auxiliary_data_holder&);
 
         template<typename T>
-        friend void ::dnd::make_auxiliary_data(auxiliary_data& out_created);
+        friend void ::dynd::make_auxiliary_data(auxiliary_data& out_created);
         template<typename T>
         friend void auxiliary_data_holder_free(AuxDataBase *auxdata);
         template<typename T>
         friend AuxDataBase *auxiliary_data_holder_clone(const AuxDataBase *auxdata);
 
-        friend class ::dnd::auxiliary_data;
+        friend class ::dynd::auxiliary_data;
     public:
         inline const Taux& get() const {
             return m_auxdata;
@@ -337,6 +337,6 @@ inline uintptr_t get_raw_auxiliary_data(const AuxDataBase *auxdata)
 }
 
 
-} // namespace dnd
+} // namespace dynd
 
 #endif // _DND__AUXILIARY_DATA_HPP_

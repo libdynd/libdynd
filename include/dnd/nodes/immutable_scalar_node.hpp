@@ -9,7 +9,7 @@
 #include <dnd/nodes/ndarray_node.hpp>
 #include <dnd/dtypes/string_dtype.hpp>
 
-namespace dnd {
+namespace dynd {
 
 template<int N>
 ndarray_node_ptr make_static_utf8_string_immutable_scalar_node(const char (&static_string)[N]);
@@ -82,7 +82,7 @@ public:
     }
 
     ndarray_node_ptr as_dtype(const dtype& dt,
-                        dnd::assign_error_mode errmode, bool allow_in_place);
+                        dynd::assign_error_mode errmode, bool allow_in_place);
 
     ndarray_node_ptr apply_linear_index(
                     int ndim, const bool *remove_axis,
@@ -194,6 +194,6 @@ ndarray_node_ptr make_static_utf32_string_immutable_scalar_node(const uint32_t (
                     reinterpret_cast<char *>(&refs));
 }
 
-} // namespace dnd
+} // namespace dynd
 
 #endif // _DND__IMMUTABLE_SCALAR_NODE_HPP_

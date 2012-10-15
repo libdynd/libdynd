@@ -9,9 +9,9 @@
 #include <dnd/kernels/assignment_kernels.hpp>
 
 using namespace std;
-using namespace dnd;
+using namespace dynd;
 
-dtype dnd::make_unaligned_dtype(const dtype& value_dtype)
+dtype dynd::make_unaligned_dtype(const dtype& value_dtype)
 {
     if (value_dtype.alignment() > 1) {
         // Only do something if it requires alignment

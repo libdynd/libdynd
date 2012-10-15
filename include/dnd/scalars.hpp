@@ -9,7 +9,7 @@
 #include <dnd/dtype.hpp>
 #include <dnd/dtype_assign.hpp>
 
-namespace dnd {
+namespace dynd {
 
 /**
  * This class makes a copy of an input scalar if necessary, otherwise
@@ -74,6 +74,6 @@ public:
     }
 };
 
-} // namespace dnd
+} // namespace dynd
 
 #endif // _SCALARS_HPP_

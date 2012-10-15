@@ -15,14 +15,14 @@
 #include <vector>
 
 using namespace std;
-using namespace dnd;
+using namespace dynd;
 
 // Default destructor for the extended dtype does nothing
 extended_dtype::~extended_dtype()
 {
 }
 
-void dnd::extended_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const dtype& src_dt,
+void dynd::extended_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const dtype& src_dt,
                 assign_error_mode DND_UNUSED(errmode),
                 unary_specialization_kernel_instance& DND_UNUSED(out_kernel)) const
 {
@@ -45,26 +45,26 @@ extended_string_dtype::~extended_string_dtype()
 {
 }
 
-inline /* TODO: DND_CONSTEXPR */ dtype dnd::detail::internal_make_raw_dtype(char type_id, char kind, intptr_t element_size, char alignment)
+inline /* TODO: DND_CONSTEXPR */ dtype dynd::detail::internal_make_raw_dtype(char type_id, char kind, intptr_t element_size, char alignment)
 {
     return dtype(type_id, kind, element_size, alignment);
 }
 
-const dtype dnd::static_builtin_dtypes[builtin_type_id_count + 1] = {
-    dnd::detail::internal_make_raw_dtype(bool_type_id, bool_kind, 1, 1),
-    dnd::detail::internal_make_raw_dtype(int8_type_id, int_kind, 1, 1),
-    dnd::detail::internal_make_raw_dtype(int16_type_id, int_kind, 2, 2),
-    dnd::detail::internal_make_raw_dtype(int32_type_id, int_kind, 4, 4),
-    dnd::detail::internal_make_raw_dtype(int64_type_id, int_kind, 8, 8),
-    dnd::detail::internal_make_raw_dtype(uint8_type_id, uint_kind, 1, 1),
-    dnd::detail::internal_make_raw_dtype(uint16_type_id, uint_kind, 2, 2),
-    dnd::detail::internal_make_raw_dtype(uint32_type_id, uint_kind, 4, 4),
-    dnd::detail::internal_make_raw_dtype(uint64_type_id, uint_kind, 8, 8),
-    dnd::detail::internal_make_raw_dtype(float32_type_id, real_kind, 4, 4),
-    dnd::detail::internal_make_raw_dtype(float64_type_id, real_kind, 8, 8),
-    dnd::detail::internal_make_raw_dtype(complex_float32_type_id, complex_kind, 8, 4),
-    dnd::detail::internal_make_raw_dtype(complex_float64_type_id, complex_kind, 16, 8),
-    dnd::detail::internal_make_raw_dtype(void_type_id, void_kind, 0, 1)
+const dtype dynd::static_builtin_dtypes[builtin_type_id_count + 1] = {
+    dynd::detail::internal_make_raw_dtype(bool_type_id, bool_kind, 1, 1),
+    dynd::detail::internal_make_raw_dtype(int8_type_id, int_kind, 1, 1),
+    dynd::detail::internal_make_raw_dtype(int16_type_id, int_kind, 2, 2),
+    dynd::detail::internal_make_raw_dtype(int32_type_id, int_kind, 4, 4),
+    dynd::detail::internal_make_raw_dtype(int64_type_id, int_kind, 8, 8),
+    dynd::detail::internal_make_raw_dtype(uint8_type_id, uint_kind, 1, 1),
+    dynd::detail::internal_make_raw_dtype(uint16_type_id, uint_kind, 2, 2),
+    dynd::detail::internal_make_raw_dtype(uint32_type_id, uint_kind, 4, 4),
+    dynd::detail::internal_make_raw_dtype(uint64_type_id, uint_kind, 8, 8),
+    dynd::detail::internal_make_raw_dtype(float32_type_id, real_kind, 4, 4),
+    dynd::detail::internal_make_raw_dtype(float64_type_id, real_kind, 8, 8),
+    dynd::detail::internal_make_raw_dtype(complex_float32_type_id, complex_kind, 8, 4),
+    dynd::detail::internal_make_raw_dtype(complex_float64_type_id, complex_kind, 16, 8),
+    dynd::detail::internal_make_raw_dtype(void_type_id, void_kind, 0, 1)
 };
 
 /**
@@ -149,7 +149,7 @@ dtype::dtype(const std::string& rep)
     throw std::runtime_error(std::string() + "invalid type string \"" + rep + "\"");
 }
 
-dtype dnd::dtype::index(int nindices, const irange *indices) const
+dtype dynd::dtype::index(int nindices, const irange *indices) const
 {
     if (m_extended == NULL) {
         if (nindices == 0) {
@@ -162,7 +162,7 @@ dtype dnd::dtype::index(int nindices, const irange *indices) const
     }
 }
 
-dtype dnd::dtype::apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& root_dt) const
+dtype dynd::dtype::apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& root_dt) const
 {
     if (m_extended == NULL) {
         if (nindices == 0) {
@@ -187,7 +187,7 @@ void dtype::get_single_compare_kernel(single_compare_kernel_instance &out_kernel
     }
 }
 
-std::ostream& dnd::operator<<(std::ostream& o, const dtype& rhs)
+std::ostream& dynd::operator<<(std::ostream& o, const dtype& rhs)
 {
     switch (rhs.type_id()) {
         case bool_type_id:
@@ -258,26 +258,26 @@ static void print_as(std::ostream& o, const char *data)
     o << static_cast<Tas>(value);
 }
 
-void dnd::hexadecimal_print(std::ostream& o, char value)
+void dynd::hexadecimal_print(std::ostream& o, char value)
 {
     static char hexadecimal[] = "0123456789abcdef";
     unsigned char v = (unsigned char)value;
     o << hexadecimal[v >> 4] << hexadecimal[v & 0x0f];
 }
 
-void dnd::hexadecimal_print(std::ostream& o, unsigned char value)
+void dynd::hexadecimal_print(std::ostream& o, unsigned char value)
 {
     hexadecimal_print(o, static_cast<char>(value));
 }
 
-void dnd::hexadecimal_print(std::ostream& o, unsigned short value)
+void dynd::hexadecimal_print(std::ostream& o, unsigned short value)
 {
     // Standard printing is in big-endian order
     hexadecimal_print(o, static_cast<char>((value >> 8) & 0xff));
     hexadecimal_print(o, static_cast<char>(value & 0xff));
 }
 
-void dnd::hexadecimal_print(std::ostream& o, unsigned int value)
+void dynd::hexadecimal_print(std::ostream& o, unsigned int value)
 {
     // Standard printing is in big-endian order
     hexadecimal_print(o, static_cast<char>(value >> 24));
@@ -286,7 +286,7 @@ void dnd::hexadecimal_print(std::ostream& o, unsigned int value)
     hexadecimal_print(o, static_cast<char>(value & 0xff));
 }
 
-void dnd::hexadecimal_print(std::ostream& o, unsigned long value)
+void dynd::hexadecimal_print(std::ostream& o, unsigned long value)
 {
     if (sizeof(unsigned int) == sizeof(unsigned long)) {
         hexadecimal_print(o, static_cast<unsigned int>(value));
@@ -295,7 +295,7 @@ void dnd::hexadecimal_print(std::ostream& o, unsigned long value)
     }
 }
 
-void dnd::hexadecimal_print(std::ostream& o, unsigned long long value)
+void dynd::hexadecimal_print(std::ostream& o, unsigned long long value)
 {
     // Standard printing is in big-endian order
     hexadecimal_print(o, static_cast<char>(value >> 56));
@@ -308,14 +308,14 @@ void dnd::hexadecimal_print(std::ostream& o, unsigned long long value)
     hexadecimal_print(o, static_cast<char>(value & 0xff));
 }
 
-void dnd::hexadecimal_print(std::ostream& o, const char *data, intptr_t element_size)
+void dynd::hexadecimal_print(std::ostream& o, const char *data, intptr_t element_size)
 {
     for (int i = 0; i < element_size; ++i, ++data) {
         hexadecimal_print(o, *data);
     }
 }
 
-void dnd::dtype::print_element(std::ostream& o, const char * data) const
+void dynd::dtype::print_element(std::ostream& o, const char * data) const
 {
     if (extended() != NULL) {
         extended()->print_element(o, data);
@@ -375,7 +375,7 @@ void dnd::dtype::print_element(std::ostream& o, const char * data) const
     }
 }
 
-dtype dnd::make_fixedbytes_dtype(intptr_t element_size, intptr_t alignment)
+dtype dynd::make_fixedbytes_dtype(intptr_t element_size, intptr_t alignment)
 {
     if (alignment > element_size) {
         std::stringstream ss;

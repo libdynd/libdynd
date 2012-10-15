@@ -13,7 +13,7 @@
 #include <dnd/dtypes/fixedstring_dtype.hpp>
 
 using namespace std;
-using namespace dnd;
+using namespace dynd;
 
 TEST(TupleDType, Create) {
     dtype dt;

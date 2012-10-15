@@ -16,7 +16,7 @@
 #include <dnd/dtype_assign.hpp>
 #include <dnd/kernels/unary_kernel_instance.hpp>
 
-namespace dnd {
+namespace dynd {
 
 class convert_dtype : public extended_expression_dtype {
     dtype m_value_dtype, m_operand_dtype;
@@ -99,6 +99,6 @@ dtype make_convert_dtype(assign_error_mode errmode = assign_error_default) {
     return dtype(new convert_dtype(make_dtype<Tvalue>(), make_dtype<Tstorage>(), errmode));
 }
 
-} // namespace dnd
+} // namespace dynd
 
 #endif // _DND__CONVERT_DTYPE_HPP_

@@ -12,9 +12,9 @@
 #include <algorithm>
 
 using namespace std;
-using namespace dnd;
+using namespace dynd;
 
-dnd::string_dtype::string_dtype(string_encoding_t encoding)
+dynd::string_dtype::string_dtype(string_encoding_t encoding)
     : m_encoding(encoding)
 {
     switch (encoding) {
@@ -29,7 +29,7 @@ dnd::string_dtype::string_dtype(string_encoding_t encoding)
     }
 }
 
-void dnd::string_dtype::print_element(std::ostream& o, const char *data) const
+void dynd::string_dtype::print_element(std::ostream& o, const char *data) const
 {
     uint32_t cp;
     next_unicode_codepoint_t next_fn;
@@ -46,13 +46,13 @@ void dnd::string_dtype::print_element(std::ostream& o, const char *data) const
     o << "\"";
 }
 
-void dnd::string_dtype::print_dtype(std::ostream& o) const {
+void dynd::string_dtype::print_dtype(std::ostream& o) const {
 
     o << "string<" << m_encoding << ">";
 
 }
 
-dtype dnd::string_dtype::apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& root_dt) const
+dtype dynd::string_dtype::apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& root_dt) const
 {
     if (nindices == 0) {
         return dtype(this);
@@ -70,11 +70,11 @@ dtype dnd::string_dtype::apply_linear_index(int nindices, const irange *indices,
     }
 }
 
-void dnd::string_dtype::get_shape(int DND_UNUSED(i), std::vector<intptr_t>& DND_UNUSED(out_shape)) const
+void dynd::string_dtype::get_shape(int DND_UNUSED(i), std::vector<intptr_t>& DND_UNUSED(out_shape)) const
 {
 }
 
-bool dnd::string_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const
+bool dynd::string_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const
 {
     if (dst_dt.extended() == this) {
         if (dst_dt.type_id() == string_type_id) {
@@ -102,11 +102,11 @@ bool dnd::string_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype&
     }
 }
 
-void dnd::string_dtype::get_single_compare_kernel(single_compare_kernel_instance& DND_UNUSED(out_kernel)) const {
+void dynd::string_dtype::get_single_compare_kernel(single_compare_kernel_instance& DND_UNUSED(out_kernel)) const {
     throw std::runtime_error("string_dtype::get_single_compare_kernel not supported yet");
 }
 
-void dnd::string_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const dtype& src_dt,
+void dynd::string_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const dtype& src_dt,
                 assign_error_mode errmode,
                 unary_specialization_kernel_instance& out_kernel) const
 {
@@ -136,7 +136,7 @@ void dnd::string_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const d
 }
 
 
-bool dnd::string_dtype::operator==(const extended_dtype& rhs) const
+bool dynd::string_dtype::operator==(const extended_dtype& rhs) const
 {
     if (this == &rhs) {
         return true;

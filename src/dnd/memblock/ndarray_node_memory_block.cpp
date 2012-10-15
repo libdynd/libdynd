@@ -6,11 +6,11 @@
 #include <dnd/memblock/ndarray_node_memory_block.hpp>
 
 using namespace std;
-using namespace dnd;
+using namespace dynd;
 
 
 // this one
-ndarray_node_ptr dnd::make_uninitialized_ndarray_node_memory_block(intptr_t sizeof_node, char **out_node_memory)
+ndarray_node_ptr dynd::make_uninitialized_ndarray_node_memory_block(intptr_t sizeof_node, char **out_node_memory)
 {
     //cout << "allocating ndarray node size " << sizeof_node << endl;
     //cout << "sizeof memory_block_data " << sizeof(memory_block_data) << endl;
@@ -23,7 +23,7 @@ ndarray_node_ptr dnd::make_uninitialized_ndarray_node_memory_block(intptr_t size
     return ndarray_node_ptr(new (result) memory_block_data(1, ndarray_node_memory_block_type), false);
 }
 
-namespace dnd { namespace detail {
+namespace dynd { namespace detail {
 
 void free_ndarray_node_memory_block(memory_block_data *memblock)
 {
@@ -32,4 +32,4 @@ void free_ndarray_node_memory_block(memory_block_data *memblock)
     free(reinterpret_cast<void *>(memblock));
 }
 
-}} // namespace dnd::detail
+}} // namespace dynd::detail

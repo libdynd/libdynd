@@ -8,7 +8,7 @@
 
 #include <dnd/nodes/ndarray_node.hpp>
 
-namespace dnd {
+namespace dynd {
 
 /**
  * NDArray expression node which represents the
@@ -64,7 +64,7 @@ public:
     }
 
     ndarray_node_ptr as_dtype(const dtype& dt,
-                        dnd::assign_error_mode errmode, bool allow_in_place);
+                        dynd::assign_error_mode errmode, bool allow_in_place);
 
     ndarray_node_ptr apply_linear_index(
                     int ndim, const bool *remove_axis,
@@ -112,6 +112,6 @@ ndarray_node_ptr make_groupby_node(const ndarray_node_ptr& data_node,
                         const ndarray_node_ptr& by_node, const dtype& groups);
 
 
-} // namespace dnd
+} // namespace dynd
 
 #endif // _DND__GROUPBY_NODE_HPP_

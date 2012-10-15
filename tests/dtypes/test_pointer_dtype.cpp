@@ -11,7 +11,7 @@
 #include <dnd/dtypes/pointer_dtype.hpp>
 
 using namespace std;
-using namespace dnd;
+using namespace dynd;
 
 TEST(PointerDType, VoidPointer) {
     dtype d;

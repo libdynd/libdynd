@@ -15,7 +15,7 @@
 #include <dnd/nodes/elwise_reduce_kernel_node.hpp>
 
 using namespace std;
-using namespace dnd;
+using namespace dynd;
 
 /**
  * Creates a result array for an elementwise
@@ -82,7 +82,7 @@ static ndarray_node_ptr make_elwise_reduce_result(const dtype& result_dt, uint32
 }
 
 
-ndarray_node_ptr dnd::eval::evaluate_elwise_reduce_array(ndarray_node* node,
+ndarray_node_ptr dynd::eval::evaluate_elwise_reduce_array(ndarray_node* node,
                     const eval::eval_context *ectx, bool copy, uint32_t access_flags)
 {
     elwise_reduce_kernel_node *rnode = static_cast<elwise_reduce_kernel_node*>(node);

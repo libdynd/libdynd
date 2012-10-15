@@ -11,9 +11,9 @@
 #include <utf8.h>
 
 using namespace std;
-using namespace dnd;
+using namespace dynd;
 
-int dnd::string_encoding_char_size_table[6] = {
+int dynd::string_encoding_char_size_table[6] = {
     // string_encoding_ascii
     1,
     // string_encoding_utf_8
@@ -345,7 +345,7 @@ namespace {
     }
 } // anonymous namespace
 
-next_unicode_codepoint_t dnd::get_next_unicode_codepoint_function(string_encoding_t encoding, assign_error_mode errmode)
+next_unicode_codepoint_t dynd::get_next_unicode_codepoint_function(string_encoding_t encoding, assign_error_mode errmode)
 {
     switch (encoding) {
         case string_encoding_ascii:
@@ -363,7 +363,7 @@ next_unicode_codepoint_t dnd::get_next_unicode_codepoint_function(string_encodin
     }
 }
 
-append_unicode_codepoint_t dnd::get_append_unicode_codepoint_function(string_encoding_t encoding, assign_error_mode errmode)
+append_unicode_codepoint_t dynd::get_append_unicode_codepoint_function(string_encoding_t encoding, assign_error_mode errmode)
 {
     switch (encoding) {
         case string_encoding_ascii:
@@ -381,7 +381,7 @@ append_unicode_codepoint_t dnd::get_append_unicode_codepoint_function(string_enc
     }
 }
 
-void dnd::print_escaped_unicode_codepoint(std::ostream& o, uint32_t cp)
+void dynd::print_escaped_unicode_codepoint(std::ostream& o, uint32_t cp)
 {
     if (cp < 0x80) {
         switch (cp) {

@@ -9,7 +9,7 @@
 #include <dnd/dtype.hpp>
 #include <dnd/kernels/kernel_instance.hpp>
 
-namespace dnd {
+namespace dynd {
 
 // This is where macros and templates are placed to auto-generate a binary operation
 // specialization table. The current version does not work with auxiliary data,
@@ -171,7 +171,7 @@ typedef binary_operation_t specialized_binary_operation_table_t[6];
  *   static DND_BUILTIN_DTYPE_BINARY_OPERATION_TABLE(addition);
  */
 #define DND_BUILTIN_DTYPE_BINARY_OPERATION_TABLE(operation) \
-    dnd::specialized_binary_operation_table_t builtin_##operation##_table[8] = \
+    dynd::specialized_binary_operation_table_t builtin_##operation##_table[8] = \
         DND_BUILTIN_DTYPE_BINARY_TABLE_TYPE_LEVEL(operation)
 
 /**
@@ -184,6 +184,6 @@ binary_operation_t get_binary_operation_from_builtin_dtype_table(
                                 intptr_t src0_fixedstride, intptr_t src1_fixedstride);
 
 
-} // namespace dnd
+} // namespace dynd
 
 #endif // _DND__BINARY_KERNEL_TABLE_HPP_

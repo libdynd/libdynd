@@ -10,13 +10,13 @@
 #include <algorithm>
 
 using namespace std;
-using namespace dnd;
+using namespace dynd;
 
 // Static instance of a void pointer to use as the storage of pointer dtypes
-dtype dnd::pointer_dtype::m_void_pointer_dtype(new void_pointer_dtype());
+dtype dynd::pointer_dtype::m_void_pointer_dtype(new void_pointer_dtype());
 
 
-dnd::pointer_dtype::pointer_dtype(const dtype& target_dtype)
+dynd::pointer_dtype::pointer_dtype(const dtype& target_dtype)
     : m_target_dtype(target_dtype)
 {
     // I'm not 100% sure how blockref pointer dtypes should interact with
@@ -30,19 +30,19 @@ dnd::pointer_dtype::pointer_dtype(const dtype& target_dtype)
     }
 }
 
-void dnd::pointer_dtype::print_element(std::ostream& o, const char *data) const
+void dynd::pointer_dtype::print_element(std::ostream& o, const char *data) const
 {
     const char *target_data = *reinterpret_cast<const char * const *>(data);
     m_target_dtype.print_element(o, target_data);
 }
 
-void dnd::pointer_dtype::print_dtype(std::ostream& o) const {
+void dynd::pointer_dtype::print_dtype(std::ostream& o) const {
 
     o << "pointer<" << m_target_dtype << ">";
 
 }
 
-dtype dnd::pointer_dtype::apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& root_dt) const
+dtype dynd::pointer_dtype::apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& root_dt) const
 {
     if (nindices == 0) {
         return dtype(this);
@@ -51,14 +51,14 @@ dtype dnd::pointer_dtype::apply_linear_index(int nindices, const irange *indices
     }
 }
 
-void dnd::pointer_dtype::get_shape(int i, std::vector<intptr_t>& out_shape) const
+void dynd::pointer_dtype::get_shape(int i, std::vector<intptr_t>& out_shape) const
 {
     if (m_target_dtype.extended()) {
         m_target_dtype.extended()->get_shape(i, out_shape);
     }
 }
 
-bool dnd::pointer_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const
+bool dynd::pointer_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const
 {
     if (dst_dt.extended() == this) {
         return ::is_lossless_assignment(m_target_dtype, src_dt);
@@ -67,7 +67,7 @@ bool dnd::pointer_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype
     }
 }
 
-void dnd::pointer_dtype::get_single_compare_kernel(single_compare_kernel_instance& DND_UNUSED(out_kernel)) const {
+void dynd::pointer_dtype::get_single_compare_kernel(single_compare_kernel_instance& DND_UNUSED(out_kernel)) const {
     throw std::runtime_error("pointer_dtype::get_single_compare_kernel not supported yet");
 }
 
@@ -118,7 +118,7 @@ namespace {
     };
 } // anonymous namespace
 
-bool dnd::pointer_dtype::operator==(const extended_dtype& rhs) const
+bool dynd::pointer_dtype::operator==(const extended_dtype& rhs) const
 {
     if (this == &rhs) {
         return true;
@@ -130,18 +130,18 @@ bool dnd::pointer_dtype::operator==(const extended_dtype& rhs) const
     }
 }
 
-void dnd::pointer_dtype::get_operand_to_value_kernel(const eval::eval_context * /*ectx*/,
+void dynd::pointer_dtype::get_operand_to_value_kernel(const eval::eval_context * /*ectx*/,
                         unary_specialization_kernel_instance& /*out_borrowed_kernel*/) const
 {
     throw runtime_error("TODO: implement pointer_dtype::get_operand_to_value_kernel");
 }
-void dnd::pointer_dtype::get_value_to_operand_kernel(const eval::eval_context * /*ectx*/,
+void dynd::pointer_dtype::get_value_to_operand_kernel(const eval::eval_context * /*ectx*/,
                         unary_specialization_kernel_instance& /*out_borrowed_kernel*/) const
 {
     throw runtime_error("TODO: implement pointer_dtype::get_value_to_operand_kernel");
 }
 
-dtype dnd::pointer_dtype::with_replaced_storage_dtype(const dtype& /*replacement_dtype*/) const
+dtype dynd::pointer_dtype::with_replaced_storage_dtype(const dtype& /*replacement_dtype*/) const
 {
     throw runtime_error("TODO: implement pointer_dtype::with_replaced_storage_dtype");
 }

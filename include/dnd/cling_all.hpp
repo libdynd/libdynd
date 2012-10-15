@@ -14,6 +14,6 @@
 #include <dnd/ndarray_arange.hpp>
 
 using namespace std;
-using namespace dnd;
+using namespace dynd;
 
 #endif // _DND__CLING_ALL_HPP_

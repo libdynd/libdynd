@@ -10,9 +10,9 @@
 #include <dnd/nodes/ndarray_node.hpp>
 
 using namespace std;
-using namespace dnd;
+using namespace dynd;
 
-namespace dnd { namespace detail {
+namespace dynd { namespace detail {
 
 /**
  * INTERNAL: Frees a memory_block created by make_ndarray_node_memory_block.
@@ -45,10 +45,10 @@ void free_executable_memory_block(memory_block_data *memblock);
  */
 extern memory_block_pod_allocator_api pod_memory_block_allocator_api;
 
-}} // namespace dnd::detail
+}} // namespace dynd::detail
 
 
-void dnd::detail::memory_block_free(memory_block_data *memblock)
+void dynd::detail::memory_block_free(memory_block_data *memblock)
 {
     //cout << "freeing memory block " << (void *)memblock << endl;
     switch ((memory_block_type_t)memblock->m_type) {
@@ -80,7 +80,7 @@ void dnd::detail::memory_block_free(memory_block_data *memblock)
     throw runtime_error(ss.str());
 }
 
-void dnd::memory_block_debug_dump(const memory_block_data *memblock, std::ostream& o, const std::string& indent)
+void dynd::memory_block_debug_dump(const memory_block_data *memblock, std::ostream& o, const std::string& indent)
 {
     if (memblock != NULL) {
         o << indent << "------ memory_block at " << (const void *)memblock << "\n";
@@ -117,7 +117,7 @@ void dnd::memory_block_debug_dump(const memory_block_data *memblock, std::ostrea
     }
 }
 
-memory_block_pod_allocator_api *dnd::get_memory_block_pod_allocator_api(memory_block_data *memblock)
+memory_block_pod_allocator_api *dynd::get_memory_block_pod_allocator_api(memory_block_data *memblock)
 {
     switch (memblock->m_type) {
         case ndarray_node_memory_block_type:
@@ -127,7 +127,7 @@ memory_block_pod_allocator_api *dnd::get_memory_block_pod_allocator_api(memory_b
         case fixed_size_pod_memory_block_type:
             throw runtime_error("Cannot get a POD allocator API from an fixed_size_pod_memory_block");
         case pod_memory_block_type:
-            return &dnd::detail::pod_memory_block_allocator_api;
+            return &dynd::detail::pod_memory_block_allocator_api;
         case object_memory_block_type:
             throw runtime_error("Cannot get a POD allocator API from an object_memory_block");
         case executable_memory_block_type:

@@ -10,7 +10,7 @@
 
 #include <dnd/dtype.hpp>
 
-namespace dnd {
+namespace dynd {
 
 class view_dtype : public extended_expression_dtype {
     dtype m_value_dtype, m_operand_dtype;
@@ -83,6 +83,6 @@ dtype make_view_dtype() {
     return dtype(new view_dtype(make_dtype<Tvalue>()));
 }
 
-} // namespace dnd
+} // namespace dynd
 
 #endif // _DND__VIEW_DTYPE_HPP_

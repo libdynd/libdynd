@@ -13,7 +13,7 @@
 #include <dnd/memblock/pod_memory_block.hpp>
 
 using namespace std;
-using namespace dnd;
+using namespace dynd;
 
 static ndarray_node_ptr copy_strided_array(ndarray_node* node, uint32_t access_flags)
 {
@@ -87,7 +87,7 @@ static ndarray_node_ptr copy_strided_array(ndarray_node* node, uint32_t access_f
     return result;
 }
 
-void dnd::eval::process_access_flags(uint32_t &dst_access_flags, uint32_t src_access_flags, bool &inout_copy_required)
+void dynd::eval::process_access_flags(uint32_t &dst_access_flags, uint32_t src_access_flags, bool &inout_copy_required)
 {
     if (dst_access_flags != 0 && dst_access_flags != src_access_flags) {
         if (dst_access_flags&write_access_flag) {
@@ -160,7 +160,7 @@ static ndarray_node_ptr evaluate_binary_elwise_array(ndarray_node* node, const e
     throw runtime_error(ss.str());
 }
 
-ndarray_node_ptr dnd::eval::evaluate(ndarray_node *node, const eval::eval_context *ectx, bool copy, uint32_t access_flags)
+ndarray_node_ptr dynd::eval::evaluate(ndarray_node *node, const eval::eval_context *ectx, bool copy, uint32_t access_flags)
 {
     if ((access_flags&(immutable_access_flag|write_access_flag)) == (immutable_access_flag|write_access_flag)) {
         throw runtime_error("Cannot create an ndarray which is both writeable and immutable");

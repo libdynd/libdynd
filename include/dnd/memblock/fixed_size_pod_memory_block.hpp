@@ -11,7 +11,7 @@
 
 #include <dnd/memblock/memory_block.hpp>
 
-namespace dnd {
+namespace dynd {
 
 /**
  * Creates a memory block of a pre-determined fixed size. A pointer to the
@@ -30,6 +30,6 @@ memory_block_ptr make_fixed_size_pod_memory_block(intptr_t size_bytes, intptr_t 
 
 void fixed_size_pod_memory_block_debug_dump(const memory_block_data *memblock, std::ostream& o, const std::string& indent);
 
-} // namespace dnd
+} // namespace dynd
 
 #endif // _DND__FIXED_SIZE_POD_MEMORY_BLOCK_HPP_

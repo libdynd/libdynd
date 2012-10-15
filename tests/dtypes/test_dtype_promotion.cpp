@@ -11,7 +11,7 @@
 #include "dnd/dtype_promotion.hpp"
 
 using namespace std;
-using namespace dnd;
+using namespace dynd;
 
 template<class S, class T, class U>
 void dtype_promotion_matches_cxx_test(S, T, U) {

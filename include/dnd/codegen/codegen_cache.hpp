@@ -14,7 +14,7 @@
 #include <dnd/kernels/unary_kernel_instance.hpp>
 #include <dnd/codegen/calling_conventions.hpp>
 
-namespace dnd {
+namespace dynd {
 
 /**
  * This class owns an executable_memory_block, and provides a caching
@@ -77,6 +77,6 @@ public:
     void debug_dump(std::ostream& o, const std::string& indent = "") const;
 };
 
-} // namespace dnd
+} // namespace dynd
 
 #endif // _DND__CODEGEN_CACHE_HPP_

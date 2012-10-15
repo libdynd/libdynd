@@ -10,7 +10,7 @@
 
 #include <dnd/ndarray.hpp>
 
-namespace dnd {
+namespace dynd {
 
 /**
  * This function returns true if the src_shape can broadcast to the dst_shape
@@ -125,6 +125,6 @@ enum shape_signal_t {
     shape_signal_varying = -2,
 };
 
-} // namespace dnd
+} // namespace dynd
 
 #endif // _DND__SHAPE_TOOLS_HPP_
