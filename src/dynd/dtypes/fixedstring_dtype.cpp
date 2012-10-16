@@ -61,7 +61,7 @@ void dynd::fixedstring_dtype::print_dtype(std::ostream& o) const
     o << "fixedstring<" << m_encoding << "," << m_stringsize << ">";
 }
 
-dtype dynd::fixedstring_dtype::apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& root_dt) const
+dtype dynd::fixedstring_dtype::apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& DND_UNUSED(root_dt)) const
 {
     if (nindices == 0) {
         return dtype(this);
@@ -79,7 +79,7 @@ dtype dynd::fixedstring_dtype::apply_linear_index(int nindices, const irange *in
     }
 }
 
-void dynd::fixedstring_dtype::get_shape(int i, std::vector<intptr_t>& out_shape) const
+void dynd::fixedstring_dtype::get_shape(int DND_UNUSED(i), std::vector<intptr_t>& DND_UNUSED(out_shape)) const
 {
 }
 

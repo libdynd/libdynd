@@ -8,7 +8,7 @@
 #include <cmath>
 #include "inc_gtest.hpp"
 
-#include "dnd/dtype_promotion.hpp"
+#include "dynd/dtype_promotion.hpp"
 
 using namespace std;
 using namespace dynd;

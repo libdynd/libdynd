@@ -501,7 +501,7 @@ public:
      * Indexes into the dtype, intended for recursive calls from the extended-dtype version. See
      * the function in extended_dtype with the same name for more details.
      */
-    dtype dynd::dtype::apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& root_dt) const;
+    dtype apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& root_dt) const;
 
     /**
      * Returns the non-expression dtype that this

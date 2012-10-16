@@ -9,7 +9,7 @@
 #include <cmath>
 #include "inc_gtest.hpp"
 
-#include "dnd/kernels/unary_kernel_instance.hpp"
+#include "dynd/kernels/unary_kernel_instance.hpp"
 
 using namespace std;
 using namespace dynd;

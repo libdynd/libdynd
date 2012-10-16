@@ -25,7 +25,7 @@ void dynd::void_pointer_dtype::print_dtype(std::ostream& o) const {
     o << "pointer<void>";
 }
 
-dtype dynd::void_pointer_dtype::apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& root_dt) const
+dtype dynd::void_pointer_dtype::apply_linear_index(int nindices, const irange *DND_UNUSED(indices), int current_i, const dtype& DND_UNUSED(root_dt)) const
 {
     if (nindices == 0) {
         return dtype(this);
@@ -34,7 +34,7 @@ dtype dynd::void_pointer_dtype::apply_linear_index(int nindices, const irange *i
     }
 }
 
-void dynd::void_pointer_dtype::get_shape(int i, std::vector<intptr_t>& out_shape) const
+void dynd::void_pointer_dtype::get_shape(int DND_UNUSED(i), std::vector<intptr_t>& DND_UNUSED(out_shape)) const
 {
 }
 

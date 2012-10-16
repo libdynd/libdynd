@@ -9,8 +9,8 @@
 #include <cmath>
 #include "inc_gtest.hpp"
 
-#include "dnd/shape_tools.hpp"
-#include "dnd/exceptions.hpp"
+#include "dynd/shape_tools.hpp"
+#include "dynd/exceptions.hpp"
 
 using namespace std;
 using namespace dynd;

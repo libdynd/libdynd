@@ -8,8 +8,8 @@
 #include <cmath>
 #include "inc_gtest.hpp"
 
-#include "dnd/ndarray.hpp"
-#include "dnd/exceptions.hpp"
+#include "dynd/ndarray.hpp"
+#include "dynd/exceptions.hpp"
 
 using namespace std;
 using namespace dynd;

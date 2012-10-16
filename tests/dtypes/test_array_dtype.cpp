@@ -8,9 +8,9 @@
 #include <stdexcept>
 #include "inc_gtest.hpp"
 
-#include "dnd/dtype_assign.hpp"
-#include "dnd/dtypes/tuple_dtype.hpp"
-#include "dnd/dtypes/array_dtype.hpp"
+#include "dynd/dtype_assign.hpp"
+#include "dynd/dtypes/tuple_dtype.hpp"
+#include "dynd/dtypes/array_dtype.hpp"
 //#include "dnd/dtypes/ndarray_dtype.hpp"
 
 using namespace std;

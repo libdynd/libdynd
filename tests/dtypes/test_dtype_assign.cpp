@@ -10,7 +10,7 @@
 #include <cmath>
 #include "inc_gtest.hpp"
 
-#include "dnd/dtype.hpp"
+#include "dynd/dtype.hpp"
 
 using namespace std;
 using namespace dynd;

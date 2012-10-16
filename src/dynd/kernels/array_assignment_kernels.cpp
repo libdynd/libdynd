@@ -29,7 +29,7 @@ namespace {
             const blockref_array_assign_kernel_auxdata& ad)
     {
         if (ad.dst_memblock.get() != NULL) {
-            char *dst_begin = NULL, *dst_current, *dst_end = NULL;
+            char *dst_begin = NULL, *dst_end = NULL;
             const char *src_begin = reinterpret_cast<const char * const *>(src)[0];
             const char *src_end = reinterpret_cast<const char * const *>(src)[1];
             memory_block_pod_allocator_api *allocator = get_memory_block_pod_allocator_api(ad.dst_memblock.get());

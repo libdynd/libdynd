@@ -178,7 +178,7 @@ dtype dynd::tuple_dtype::apply_linear_index(int nindices, const irange *indices,
 void dynd::tuple_dtype::get_shape(int i, std::vector<intptr_t>& out_shape) const
 {
     // Ensure the output shape is big enough
-    while (out_shape.size() <= i) {
+    while (out_shape.size() <= (size_t)i) {
         out_shape.push_back(shape_signal_uninitialized);
     }
 
@@ -190,7 +190,7 @@ void dynd::tuple_dtype::get_shape(int i, std::vector<intptr_t>& out_shape) const
         case shape_signal_varying:
             break;
         default:
-            if (out_shape[i] != m_fields.size()) {
+            if ((size_t)out_shape[i] != m_fields.size()) {
                 out_shape[i] = shape_signal_varying;
             }
             break;

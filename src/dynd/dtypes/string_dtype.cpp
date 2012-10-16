@@ -52,7 +52,7 @@ void dynd::string_dtype::print_dtype(std::ostream& o) const {
 
 }
 
-dtype dynd::string_dtype::apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& root_dt) const
+dtype dynd::string_dtype::apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& DND_UNUSED(root_dt)) const
 {
     if (nindices == 0) {
         return dtype(this);
