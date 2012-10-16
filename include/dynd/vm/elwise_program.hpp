@@ -41,11 +41,16 @@ class elwise_program {
     int m_input_count;
 
 public:
+    elwise_program()
+        : m_regtypes(), m_program(), m_input_count(0)
+    {
+    }
+
     /** Constructs an elementwise VM program, stealing the internal values of regtypes and program */
     elwise_program(int input_count, std::vector<dtype>& regtypes, std::vector<int>& program)
         : m_input_count(input_count)
     {
-        validate_elwise_program(input_count, regtypes.size(), program.size(), &program[0]);
+        validate_elwise_program(input_count, (int)regtypes.size(), (int)program.size(), &program[0]);
         m_regtypes.swap(regtypes);
         m_program.swap(program);
     }
@@ -53,7 +58,7 @@ public:
     /** Sets the values of the elementwise VM program, stealing the internal values of regtypes and program */
     void set(int input_count, std::vector<dtype>& regtypes, std::vector<int>& program)
     {
-        validate_elwise_program(input_count, regtypes.size(), program.size(), &program[0]);
+        validate_elwise_program(input_count, (int)regtypes.size(), (int)program.size(), &program[0]);
         m_regtypes.swap(regtypes);
         m_program.swap(program);
         m_input_count = input_count;
