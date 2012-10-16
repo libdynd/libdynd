@@ -13,12 +13,13 @@
 namespace dynd { namespace vm {
 
 enum opcode_t {
+    opcode_copy,
     opcode_add,
     opcode_subtract,
     opcode_multiply,
     opcode_divide
 };
-const int opcode_count = 4;
+const int opcode_count = opcode_divide + 1;
 
 struct opcode_info_t {
     const char *name;
@@ -47,6 +48,15 @@ public:
         validate_elwise_program(input_count, regtypes.size(), program.size(), &program[0]);
         m_regtypes.swap(regtypes);
         m_program.swap(program);
+    }
+
+    /** Sets the values of the elementwise VM program, stealing the internal values of regtypes and program */
+    void set(int input_count, std::vector<dtype>& regtypes, std::vector<int>& program)
+    {
+        validate_elwise_program(input_count, regtypes.size(), program.size(), &program[0]);
+        m_regtypes.swap(regtypes);
+        m_program.swap(program);
+        m_input_count = input_count;
     }
 };
 
