@@ -13,7 +13,7 @@ using namespace std;
 using namespace dynd;
 
 dynd::elwise_reduce_kernel_node::elwise_reduce_kernel_node(const dtype& dt,
-                        const ndarray_node_ptr& opnode, dnd_bool *reduce_axes, bool rightassoc, bool keepdims, const ndarray_node_ptr& identity)
+                        const ndarray_node_ptr& opnode, dynd_bool *reduce_axes, bool rightassoc, bool keepdims, const ndarray_node_ptr& identity)
     : m_dtype(dt), m_opnode(opnode), m_kernel(), m_rightassoc(rightassoc), m_keepdims(keepdims),
         m_identity(identity), m_reduce_axes(opnode->get_ndim(), reduce_axes)
 {
@@ -87,7 +87,7 @@ void dynd::elwise_reduce_kernel_node::debug_dump_extra(std::ostream& o, const st
 }
 
 ndarray_node_ptr dynd::make_elwise_reduce_kernel_node_copy_kernel(const dtype& dt, const ndarray_node_ptr& opnode,
-                                            dnd_bool *reduce_axes, bool rightassoc, bool keepdims, const ndarray_node_ptr& identity,
+                                            dynd_bool *reduce_axes, bool rightassoc, bool keepdims, const ndarray_node_ptr& identity,
                                             const kernel_instance<unary_operation_t>& kernel)
 {
     char *node_memory = NULL;
@@ -103,7 +103,7 @@ ndarray_node_ptr dynd::make_elwise_reduce_kernel_node_copy_kernel(const dtype& d
 }
 
 ndarray_node_ptr dynd::make_elwise_reduce_kernel_node_steal_kernel(const dtype& dt, const ndarray_node_ptr& opnode,
-                                            dnd_bool *reduce_axes, bool rightassoc, bool keepdims, const ndarray_node_ptr& identity,
+                                            dynd_bool *reduce_axes, bool rightassoc, bool keepdims, const ndarray_node_ptr& identity,
                                             kernel_instance<unary_operation_t>& kernel)
 {
     char *node_memory = NULL;

@@ -27,7 +27,7 @@ void dtype_promotion_matches_cxx() {
 }
 
 #define TEST_ALL_SECOND(first) \
-    dtype_promotion_matches_cxx<first, dnd_bool>(); \
+    dtype_promotion_matches_cxx<first, dynd_bool>(); \
     dtype_promotion_matches_cxx<first, int8_t>(); \
     dtype_promotion_matches_cxx<first, int16_t>(); \
     dtype_promotion_matches_cxx<first, int32_t>(); \
@@ -40,7 +40,7 @@ void dtype_promotion_matches_cxx() {
     dtype_promotion_matches_cxx<first, double>()
 
 #define TEST_ALL_FIRST() \
-    TEST_ALL_SECOND(dnd_bool); \
+    TEST_ALL_SECOND(dynd_bool); \
     TEST_ALL_SECOND(int8_t); \
     TEST_ALL_SECOND(int16_t); \
     TEST_ALL_SECOND(int32_t); \

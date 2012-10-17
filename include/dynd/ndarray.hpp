@@ -49,7 +49,7 @@ public:
      * TODO: Figure out why enable_if with is_dtype_scalar didn't work for this constructor
      *       in g++ 4.6.0.
      */
-    ndarray(dnd_bool value);
+    ndarray(dynd_bool value);
     ndarray(signed char value);
     ndarray(short value);
     ndarray(int value);
@@ -356,8 +356,8 @@ public:
      */
     template<class T>
     typename enable_if<is_type_bool<T>::value, ndarray_vals&>::type  operator=(const T& rhs) {
-        dnd_bool v = rhs;
-        m_arr.val_assign(make_dtype<dnd_bool>(), (const char *)&v);
+        dynd_bool v = rhs;
+        m_arr.val_assign(make_dtype<dynd_bool>(), (const char *)&v);
         return *this;
     }
 
@@ -599,7 +599,7 @@ namespace detail {
     template <>
     struct ndarray_as_helper<bool> {
         static bool as(const ndarray& lhs, assign_error_mode errmode) {
-            return ndarray_as_helper<dnd_bool>::as(lhs, errmode);
+            return ndarray_as_helper<dynd_bool>::as(lhs, errmode);
         }
     };
 

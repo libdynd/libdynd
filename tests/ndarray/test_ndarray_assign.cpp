@@ -18,8 +18,8 @@ TEST(NDArrayAssign, ScalarAssignment_Bool) {
     ndarray a;
 
     // assignment to a bool scalar
-    a = ndarray(make_dtype<dnd_bool>());
-    const dnd_bool *ptr_b = (const dnd_bool *)a.get_readonly_originptr();
+    a = ndarray(make_dtype<dynd_bool>());
+    const dynd_bool *ptr_b = (const dynd_bool *)a.get_readonly_originptr();
     a.val_assign(true);
     EXPECT_TRUE(*ptr_b);
     a.val_assign(false);

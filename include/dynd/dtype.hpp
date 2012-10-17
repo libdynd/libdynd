@@ -25,16 +25,16 @@
 namespace dynd {
 
 // A boolean class for dynamicndarray which is one-byte big
-class dnd_bool {
+class dynd_bool {
     char m_value;
 public:
-    dnd_bool() : m_value(0) {}
+    dynd_bool() : m_value(0) {}
 
-    dnd_bool(bool value) : m_value(value) {}
+    dynd_bool(bool value) : m_value(value) {}
 
     // Special case complex conversion to avoid ambiguous overload
     template<class T>
-    dnd_bool(std::complex<T> value) : m_value(value != std::complex<T>(0)) {}
+    dynd_bool(std::complex<T> value) : m_value(value != std::complex<T>(0)) {}
 
     operator bool() const {
         return m_value != 0;
@@ -150,7 +150,7 @@ namespace detail {
 template <typename T> struct type_id_of;
 
 // Can't use bool, because it doesn't have a guaranteed sizeof
-template <> struct type_id_of<dnd_bool> {enum {value = bool_type_id};};
+template <> struct type_id_of<dynd_bool> {enum {value = bool_type_id};};
 template <> struct type_id_of<char> {enum {value = ((char)-1) < 0 ? int8_type_id : uint8_type_id};};
 template <> struct type_id_of<signed char> {enum {value = int8_type_id};};
 template <> struct type_id_of<short> {enum {value = int16_type_id};};
@@ -177,7 +177,7 @@ template <typename T> struct dtype_kind_of;
 
 template <> struct dtype_kind_of<void> {static const dtype_kind_t value = void_kind;};
 // Can't use bool, because it doesn't have a guaranteed sizeof
-template <> struct dtype_kind_of<dnd_bool> {static const dtype_kind_t value = bool_kind;};
+template <> struct dtype_kind_of<dynd_bool> {static const dtype_kind_t value = bool_kind;};
 template <> struct dtype_kind_of<char> {
     static const dtype_kind_t value = ((char)-1) < 0 ? int_kind : uint_kind;
 };
@@ -198,7 +198,7 @@ template <typename T> struct dtype_kind_of<std::complex<T> > {static const dtype
 // Metaprogram for determining if a type is a valid C++ scalar
 // of a particular dtype.
 template<typename T> struct is_dtype_scalar {enum {value = false};};
-template <> struct is_dtype_scalar<dnd_bool> {enum {value = true};};
+template <> struct is_dtype_scalar<dynd_bool> {enum {value = true};};
 template <> struct is_dtype_scalar<char> {enum {value = true};};
 template <> struct is_dtype_scalar<signed char> {enum {value = true};};
 template <> struct is_dtype_scalar<short> {enum {value = true};};

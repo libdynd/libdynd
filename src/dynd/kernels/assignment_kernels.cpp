@@ -21,7 +21,7 @@ static assignment_function_t single_assign_table[builtin_type_id_count][builtin_
     }
 
 #define SRC_TYPE_LEVEL(dst_type) { \
-        ERROR_MODE_LEVEL(dst_type, dnd_bool), \
+        ERROR_MODE_LEVEL(dst_type, dynd_bool), \
         ERROR_MODE_LEVEL(dst_type, int8_t), \
         ERROR_MODE_LEVEL(dst_type, int16_t), \
         ERROR_MODE_LEVEL(dst_type, int32_t), \
@@ -36,7 +36,7 @@ static assignment_function_t single_assign_table[builtin_type_id_count][builtin_
         ERROR_MODE_LEVEL(dst_type, complex<double>) \
     }
 
-    SRC_TYPE_LEVEL(dnd_bool),
+    SRC_TYPE_LEVEL(dynd_bool),
     SRC_TYPE_LEVEL(int8_t),
     SRC_TYPE_LEVEL(int16_t),
     SRC_TYPE_LEVEL(int32_t),
@@ -142,7 +142,7 @@ namespace {
 
 #define DTYPE_ASSIGN_BUILTIN_KERNEL_TABLE_SRC_TYPE_LEVEL(errmode, dst_type) \
     { \
-        DTYPE_ASSIGN_BUILTIN_KERNEL_TABLE_SPECIALIZATION_LEVEL(errmode, dst_type, dnd_bool), \
+        DTYPE_ASSIGN_BUILTIN_KERNEL_TABLE_SPECIALIZATION_LEVEL(errmode, dst_type, dynd_bool), \
         DTYPE_ASSIGN_BUILTIN_KERNEL_TABLE_SPECIALIZATION_LEVEL(errmode, dst_type, int8_t), \
         DTYPE_ASSIGN_BUILTIN_KERNEL_TABLE_SPECIALIZATION_LEVEL(errmode, dst_type, int16_t), \
         DTYPE_ASSIGN_BUILTIN_KERNEL_TABLE_SPECIALIZATION_LEVEL(errmode, dst_type, int32_t), \
@@ -159,7 +159,7 @@ namespace {
 
 #define DTYPE_ASSIGN_BUILTIN_KERNEL_TABLE(errmode) \
     { \
-        DTYPE_ASSIGN_BUILTIN_KERNEL_TABLE_SRC_TYPE_LEVEL(errmode, dnd_bool), \
+        DTYPE_ASSIGN_BUILTIN_KERNEL_TABLE_SRC_TYPE_LEVEL(errmode, dynd_bool), \
         DTYPE_ASSIGN_BUILTIN_KERNEL_TABLE_SRC_TYPE_LEVEL(errmode, int8_t), \
         DTYPE_ASSIGN_BUILTIN_KERNEL_TABLE_SRC_TYPE_LEVEL(errmode, int16_t), \
         DTYPE_ASSIGN_BUILTIN_KERNEL_TABLE_SRC_TYPE_LEVEL(errmode, int32_t), \

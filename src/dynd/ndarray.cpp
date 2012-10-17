@@ -30,7 +30,7 @@ dynd::ndarray::ndarray()
 {
 }
 
-dynd::ndarray::ndarray(dnd_bool value)
+dynd::ndarray::ndarray(dynd_bool value)
     : m_node(make_immutable_builtin_scalar_node(value))
 {
 }

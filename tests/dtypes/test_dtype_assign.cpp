@@ -16,7 +16,7 @@ using namespace std;
 using namespace dynd;
 
 TEST(DTypeAssign, FixedSizeTestsNoExcept) {
-    dnd_bool v_b;
+    dynd_bool v_b;
     int8_t v_i8;
     int16_t v_i16;
     int32_t v_i32;
@@ -119,7 +119,7 @@ TEST(DTypeAssign, FixedSizeTestsNoExcept) {
 }
 
 TEST(DTypeAssign, FixedSizeTests_Bool) {
-    dnd_bool v_b;
+    dynd_bool v_b;
     int8_t v_i8;
     int16_t v_i16;
     int32_t v_i32;
@@ -159,7 +159,7 @@ TEST(DTypeAssign, FixedSizeTests_Bool) {
 }
 
 TEST(DTypeAssign, FixedSizeTests_Int8) {
-    dnd_bool v_b;
+    dynd_bool v_b;
     int8_t v_i8;
     int16_t v_i16;
     int32_t v_i32;
@@ -214,7 +214,7 @@ TEST(DTypeAssign, FixedSizeTests_Int8) {
 }
 
 TEST(DTypeAssign, FixedSizeTests_Float64) {
-    dnd_bool v_b;
+    dynd_bool v_b;
     int8_t v_i8;
     int16_t v_i16;
     int32_t v_i32;
@@ -300,7 +300,7 @@ TEST(DTypeAssign, FixedSizeTests_Float64) {
 }
 
 TEST(DTypeAssign, FixedSizeTests_Complex_Float32) {
-    dnd_bool v_b;
+    dynd_bool v_b;
     int8_t v_i8;
     int16_t v_i16;
     int32_t v_i32;
@@ -495,7 +495,7 @@ TEST(DTypeAssign, FixedSizeTests_Complex_Float32) {
 }
 
 TEST(DTypeAssign, FixedSizeTests_Complex_Float64) {
-    dnd_bool v_b;
+    dynd_bool v_b;
     int8_t v_i8;
     int16_t v_i16;
     int32_t v_i32;
@@ -734,7 +734,7 @@ TEST(DTypeAssign, FixedSizeTests_Complex_Float64) {
 }
 
 TEST(DTypeAssign, FixedSizeTestsStridedNoExcept_Bool) {
-    dnd_bool v_b[4];
+    dynd_bool v_b[4];
     int8_t v_i8[4];
     int16_t v_i16[4];
     int32_t v_i32[4];
@@ -776,7 +776,7 @@ TEST(DTypeAssign, FixedSizeTestsStridedNoExcept_Bool) {
 }
 
 TEST(DTypeAssign, FixedSizeTestsStridedNoExcept_Int8) {
-    dnd_bool v_b[4];
+    dynd_bool v_b[4];
     int8_t v_i8[4];
     int16_t v_i16[4];
     int32_t v_i32[4];
@@ -823,7 +823,7 @@ TEST(DTypeAssign, FixedSizeTestsStridedNoExcept_Int8) {
 }
 
 TEST(DTypeAssign, FixedSizeTestsStridedNoExcept_Float64) {
-    dnd_bool v_b[4];
+    dynd_bool v_b[4];
     int8_t v_i8[4];
     int16_t v_i16[4];
     int32_t v_i32[4];
@@ -869,7 +869,7 @@ TEST(DTypeAssign, FixedSizeTestsStridedNoExcept_Float64) {
 }
 
 TEST(DTypeAssign, FixedSizeTestsStridedNoExcept_Complex_Float64) {
-    dnd_bool v_b[4];
+    dynd_bool v_b[4];
     int8_t v_i8[4];
     int16_t v_i16[4];
     int32_t v_i32[4];

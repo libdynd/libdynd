@@ -22,7 +22,7 @@ using namespace dynd;
  * reduce operation.
  */
 static ndarray_node_ptr make_elwise_reduce_result(const dtype& result_dt, uint32_t access_flags, bool keepdims,
-                            int ndim, const dnd_bool *reduce_axes, const intptr_t *src_shape, const int *src_axis_perm,
+                            int ndim, const dynd_bool *reduce_axes, const intptr_t *src_shape, const int *src_axis_perm,
                             char *&result_originptr, intptr_t *result_strides)
 {
     dimvector result_shape(ndim);
@@ -122,7 +122,7 @@ ndarray_node_ptr dynd::eval::evaluate_elwise_reduce_array(ndarray_node* node,
 
     char *result_originptr;
     dimvector result_strides(src_ndim);
-    const dnd_bool *reduce_axes = rnode->get_reduce_axes();
+    const dynd_bool *reduce_axes = rnode->get_reduce_axes();
 
     ndarray_node_ptr result = make_elwise_reduce_result(result_dt, access_flags,
                             rnode->get_keepdims(),
