@@ -61,7 +61,7 @@ int dynd::vm::validate_elwise_program(int input_count, int reg_count, size_t pro
                 } else if (reg <= input_count) {
                     stringstream ss;
                     ss << "DyND VM program opcode " << vm::opcode_info[opcode].name << " at position " << i;
-                    ss << ", has its output set to one of the input registers, which are read-only";
+                    ss << ", has its output set to register " << reg << ", which is a read-only input register";
                     throw runtime_error(ss.str());
                 }
             }
@@ -76,4 +76,63 @@ int dynd::vm::validate_elwise_program(int input_count, int reg_count, size_t pro
     }
 
     return instruction_count;
+}
+
+static void print_register(std::ostream& o, int reg)
+{
+    o << "r";
+    if (reg < 10) {
+        o << "0";
+    }
+    o << reg;
+}
+
+void dynd::vm::elwise_program::debug_dump(std::ostream& o, const std::string& indent) const
+{
+    // Print all the register dtypes
+    o << indent << "output register (0):\n";
+    o << indent << "  " << m_regtypes[0] << "\n";
+    if (m_input_count == 0) {
+        o << indent << "no input registers\n";
+    } else {
+        o << indent << "input registers (1 to " << m_input_count << "):\n";
+        for (int i = 1; i <= m_input_count; ++i) {
+            o << indent << "  " << m_regtypes[i] << "\n";
+        }
+    }
+    if (m_input_count + 1 == m_regtypes.size()) {
+        o << indent << "no temporary registers\n";
+    } else {
+        o << indent << "temporary registers (" << (m_input_count + 1) << " to " << (m_regtypes.size() - 1) << "):\n";
+        for (int i = m_input_count + 1; i < (int)m_regtypes.size(); ++i) {
+            o << indent << "  " << m_regtypes[i] << "\n";
+        }
+    }
+
+    // Print all the instructions
+    // NOTE: This assumes the program has previously been validated and not modified since
+    o << indent << "program:\n";
+    for (size_t ip = 0; ip < m_program.size();) {
+        int opcode = m_program[ip];
+        int arity = vm::opcode_info[opcode].arity;
+        // operation
+        o << indent << "  " << vm::opcode_info[opcode].name << " ";
+        for (int i = 0, i_end = 12 - strlen(vm::opcode_info[opcode].name); i < i_end; ++i) {
+            o << " ";
+        }
+        // output
+        print_register(o, m_program[ip + 1]);
+        if (arity > 0) {
+            o << ",  ";
+            for (int i = 1; i <= arity; ++i) {
+                print_register(o, m_program[ip + 1 + i]);
+                if (i != arity) {
+                    o << ", ";
+                }
+            }
+        }
+        o << "\n";
+        ip += 2 + arity;
+    }
+    o.flush();
 }
