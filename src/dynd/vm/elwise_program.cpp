@@ -100,7 +100,7 @@ void dynd::vm::elwise_program::debug_dump(std::ostream& o, const std::string& in
             o << indent << "  " << m_regtypes[i] << "\n";
         }
     }
-    if (m_input_count + 1 == m_regtypes.size()) {
+    if (m_input_count + 1 == (int)m_regtypes.size()) {
         o << indent << "no temporary registers\n";
     } else {
         o << indent << "temporary registers (" << (m_input_count + 1) << " to " << (m_regtypes.size() - 1) << "):\n";
