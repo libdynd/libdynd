@@ -23,8 +23,8 @@ extended_dtype::~extended_dtype()
 }
 
 void dynd::extended_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const dtype& src_dt,
-                assign_error_mode DND_UNUSED(errmode),
-                unary_specialization_kernel_instance& DND_UNUSED(out_kernel)) const
+                assign_error_mode DYND_UNUSED(errmode),
+                unary_specialization_kernel_instance& DYND_UNUSED(out_kernel)) const
 {
     stringstream ss;
     ss << "get_dtype_assignment_kernel has not been implemented for ";
@@ -36,7 +36,7 @@ void dynd::extended_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, cons
     throw std::runtime_error(ss.str());
 }
 
-void extended_dtype::get_single_compare_kernel(single_compare_kernel_instance& DND_UNUSED(out_kernel)) const
+void extended_dtype::get_single_compare_kernel(single_compare_kernel_instance& DYND_UNUSED(out_kernel)) const
 {
         throw std::runtime_error("get_single_compare_kernel: this dtypes does not support comparisons");
 }
@@ -45,7 +45,7 @@ extended_string_dtype::~extended_string_dtype()
 {
 }
 
-inline /* TODO: DND_CONSTEXPR */ dtype dynd::detail::internal_make_raw_dtype(char type_id, char kind, intptr_t element_size, char alignment)
+inline /* TODO: DYND_CONSTEXPR */ dtype dynd::detail::internal_make_raw_dtype(char type_id, char kind, intptr_t element_size, char alignment)
 {
     return dtype(type_id, kind, element_size, alignment);
 }

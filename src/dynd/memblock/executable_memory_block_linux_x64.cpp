@@ -11,7 +11,7 @@
 
 
 #include <dynd/platform_definitions.h>
-#if defined(DND_OS_LINUX)
+#if defined(DYND_OS_LINUX)
 
 #include <dynd/memblock/executable_memory_block.hpp>
 

@@ -3,8 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DND__BINARY_KERNEL_TABLE_HPP_
-#define _DND__BINARY_KERNEL_TABLE_HPP_
+#ifndef _DYND__BINARY_KERNEL_TABLE_HPP_
+#define _DYND__BINARY_KERNEL_TABLE_HPP_
 
 #include <dynd/dtype.hpp>
 #include <dynd/kernels/kernel_instance.hpp>
@@ -132,7 +132,7 @@ namespace detail {
 
 } // namespace detail
 
-#define DND_BUILTIN_DTYPE_BINARY_TABLE_SPECIALIZATION_LEVEL(type, operation) { \
+#define DYND_BUILTIN_DTYPE_BINARY_TABLE_SPECIALIZATION_LEVEL(type, operation) { \
     (binary_operation_t)&detail::binary_anystride_anystride_anystride_kernel<operation<type> >::func, \
     (binary_operation_t)&detail::binary_anystride_zerostride_anystride_kernel<operation<type> >::func, \
     (binary_operation_t)&detail::binary_anystride_anystride_zerostride_kernel<operation<type> >::func, \
@@ -140,15 +140,15 @@ namespace detail {
     (binary_operation_t)&detail::binary_contig_zerostride_contig_kernel<operation<type> >::func, \
     (binary_operation_t)&detail::binary_contig_contig_zerostride_kernel<operation<type> >::func \
     }
-#define DND_BUILTIN_DTYPE_BINARY_TABLE_TYPE_LEVEL(operation) { \
-    DND_BUILTIN_DTYPE_BINARY_TABLE_SPECIALIZATION_LEVEL(int32_t, operation), \
-    DND_BUILTIN_DTYPE_BINARY_TABLE_SPECIALIZATION_LEVEL(int64_t, operation), \
-    DND_BUILTIN_DTYPE_BINARY_TABLE_SPECIALIZATION_LEVEL(uint32_t, operation), \
-    DND_BUILTIN_DTYPE_BINARY_TABLE_SPECIALIZATION_LEVEL(uint64_t, operation), \
-    DND_BUILTIN_DTYPE_BINARY_TABLE_SPECIALIZATION_LEVEL(float, operation), \
-    DND_BUILTIN_DTYPE_BINARY_TABLE_SPECIALIZATION_LEVEL(double, operation), \
-    DND_BUILTIN_DTYPE_BINARY_TABLE_SPECIALIZATION_LEVEL(complex<float>, operation), \
-    DND_BUILTIN_DTYPE_BINARY_TABLE_SPECIALIZATION_LEVEL(complex<double>, operation) \
+#define DYND_BUILTIN_DTYPE_BINARY_TABLE_TYPE_LEVEL(operation) { \
+    DYND_BUILTIN_DTYPE_BINARY_TABLE_SPECIALIZATION_LEVEL(int32_t, operation), \
+    DYND_BUILTIN_DTYPE_BINARY_TABLE_SPECIALIZATION_LEVEL(int64_t, operation), \
+    DYND_BUILTIN_DTYPE_BINARY_TABLE_SPECIALIZATION_LEVEL(uint32_t, operation), \
+    DYND_BUILTIN_DTYPE_BINARY_TABLE_SPECIALIZATION_LEVEL(uint64_t, operation), \
+    DYND_BUILTIN_DTYPE_BINARY_TABLE_SPECIALIZATION_LEVEL(float, operation), \
+    DYND_BUILTIN_DTYPE_BINARY_TABLE_SPECIALIZATION_LEVEL(double, operation), \
+    DYND_BUILTIN_DTYPE_BINARY_TABLE_SPECIALIZATION_LEVEL(complex<float>, operation), \
+    DYND_BUILTIN_DTYPE_BINARY_TABLE_SPECIALIZATION_LEVEL(complex<double>, operation) \
     }
 
 typedef binary_operation_t specialized_binary_operation_table_t[6];
@@ -168,15 +168,15 @@ typedef binary_operation_t specialized_binary_operation_table_t[6];
  *           return x + y;
  *       }
  *   };
- *   static DND_BUILTIN_DTYPE_BINARY_OPERATION_TABLE(addition);
+ *   static DYND_BUILTIN_DTYPE_BINARY_OPERATION_TABLE(addition);
  */
-#define DND_BUILTIN_DTYPE_BINARY_OPERATION_TABLE(operation) \
+#define DYND_BUILTIN_DTYPE_BINARY_OPERATION_TABLE(operation) \
     dynd::specialized_binary_operation_table_t builtin_##operation##_table[8] = \
-        DND_BUILTIN_DTYPE_BINARY_TABLE_TYPE_LEVEL(operation)
+        DYND_BUILTIN_DTYPE_BINARY_TABLE_TYPE_LEVEL(operation)
 
 /**
  * This returns a specialized binary kernel operation function from
- * a table created by the DND_BUILTIN_DTYPE_BINARY_OPERATION_TABLE macro.
+ * a table created by the DYND_BUILTIN_DTYPE_BINARY_OPERATION_TABLE macro.
  */
 binary_operation_t get_binary_operation_from_builtin_dtype_table(
                                 specialized_binary_operation_table_t *builtin_optable,
@@ -186,4 +186,4 @@ binary_operation_t get_binary_operation_from_builtin_dtype_table(
 
 } // namespace dynd
 
-#endif // _DND__BINARY_KERNEL_TABLE_HPP_
+#endif // _DYND__BINARY_KERNEL_TABLE_HPP_

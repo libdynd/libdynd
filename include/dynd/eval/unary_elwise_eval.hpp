@@ -3,8 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DND__UNARY_ELWISE_EVAL_HPP_
-#define _DND__UNARY_ELWISE_EVAL_HPP_
+#ifndef _DYND__UNARY_ELWISE_EVAL_HPP_
+#define _DYND__UNARY_ELWISE_EVAL_HPP_
 
 #include <deque>
 
@@ -37,4 +37,4 @@ ndarray_node *push_front_node_unary_kernels(ndarray_node* node,
 
 }} // namespace dynd::eval
 
-#endif // _DND__UNARY_ELWISE_EVAL_HPP_
+#endif // _DYND__UNARY_ELWISE_EVAL_HPP_

@@ -3,8 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DND__GROUPBY_UNARY_ELWISE_EVAL_HPP_
-#define _DND__GROUPBY_UNARY_ELWISE_EVAL_HPP_
+#ifndef _DYND__GROUPBY_UNARY_ELWISE_EVAL_HPP_
+#define _DYND__GROUPBY_UNARY_ELWISE_EVAL_HPP_
 
 #include <deque>
 
@@ -21,4 +21,4 @@ ndarray_node_ptr evaluate_groupby_elwise_reduce(ndarray_node *node, const eval::
 
 }} // namespace dynd::eval
 
-#endif // _DND__GROUPBY_UNARY_ELWISE_EVAL_HPP_
+#endif // _DYND__GROUPBY_UNARY_ELWISE_EVAL_HPP_

@@ -9,7 +9,7 @@
 
 
 #include <dynd/platform_definitions.h>
-#if defined(DND_OS_DARWIN)
+#if defined(DYND_OS_DARWIN)
 
 #include <dynd/memblock/executable_memory_block.hpp>
 

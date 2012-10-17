@@ -114,7 +114,7 @@ dynd::ndarray::ndarray(const dtype& dt)
     memory_block_ptr memblock = make_fixed_size_pod_memory_block(dt.element_size(), dt.alignment(), &originptr);
     make_strided_ndarray_node(dt, 0, NULL, NULL,
                             originptr, read_access_flag | write_access_flag,
-                            DND_MOVE(memblock)).swap(m_node);
+                            DYND_MOVE(memblock)).swap(m_node);
 }
 
 dynd::ndarray::ndarray(const dtype& dt, const char *raw_data)
@@ -132,12 +132,12 @@ dynd::ndarray::ndarray(const ndarray_node_ptr& expr_tree)
 {
 }
 
-#if defined(DND_RVALUE_REFS)
+#if defined(DYND_RVALUE_REFS)
 dynd::ndarray::ndarray(ndarray_node_ptr&& expr_tree)
-    : m_node(DND_MOVE(expr_tree))
+    : m_node(DYND_MOVE(expr_tree))
 {
 }
-#endif // defined(DND_RVALUE_REFS)
+#endif // defined(DYND_RVALUE_REFS)
 
 dynd::ndarray::ndarray(intptr_t dim0, const dtype& dt)
     : m_node()
@@ -147,7 +147,7 @@ dynd::ndarray::ndarray(intptr_t dim0, const dtype& dt)
     memory_block_ptr memblock = make_fixed_size_pod_memory_block(dt.element_size() * dim0, dt.alignment(), &originptr);
     make_strided_ndarray_node(dt, 1, &dim0, &stride,
                             originptr, read_access_flag | write_access_flag,
-                            DND_MOVE(memblock)).swap(m_node);
+                            DYND_MOVE(memblock)).swap(m_node);
 }
 
 dynd::ndarray::ndarray(intptr_t dim0, intptr_t dim1, const dtype& dt)
@@ -162,7 +162,7 @@ dynd::ndarray::ndarray(intptr_t dim0, intptr_t dim1, const dtype& dt)
     memory_block_ptr memblock = make_fixed_size_pod_memory_block(dt.element_size() * dim0 * dim1, dt.alignment(), &originptr);
     make_strided_ndarray_node(dt, 2, shape, strides,
                             originptr, read_access_flag | write_access_flag,
-                            DND_MOVE(memblock)).swap(m_node);
+                            DYND_MOVE(memblock)).swap(m_node);
 }
 
 dynd::ndarray::ndarray(intptr_t dim0, intptr_t dim1, intptr_t dim2, const dtype& dt)
@@ -178,7 +178,7 @@ dynd::ndarray::ndarray(intptr_t dim0, intptr_t dim1, intptr_t dim2, const dtype&
     memory_block_ptr memblock = make_fixed_size_pod_memory_block(dt.element_size() * dim0 * dim1 * dim2, dt.alignment(), &originptr);
     make_strided_ndarray_node(dt, 3, shape, strides,
                             originptr, read_access_flag | write_access_flag,
-                            DND_MOVE(memblock)).swap(m_node);
+                            DYND_MOVE(memblock)).swap(m_node);
 }
 
 dynd::ndarray::ndarray(intptr_t dim0, intptr_t dim1, intptr_t dim2, intptr_t dim3, const dtype& dt)
@@ -195,7 +195,7 @@ dynd::ndarray::ndarray(intptr_t dim0, intptr_t dim1, intptr_t dim2, intptr_t dim
     memory_block_ptr memblock = make_fixed_size_pod_memory_block(dt.element_size() * dim0 * dim1 * dim2 * dim3, dt.alignment(), &originptr);
     make_strided_ndarray_node(dt, 4, shape, strides,
                             originptr, read_access_flag | write_access_flag,
-                            DND_MOVE(memblock)).swap(m_node);
+                            DYND_MOVE(memblock)).swap(m_node);
 }
 
 ndarray dynd::ndarray::index(int nindex, const irange *indices) const
@@ -339,7 +339,7 @@ ndarray dynd::ndarray::view_as_dtype(const dtype& dt) const
 }
 
 // Implementation of ndarray.as<std::string>()
-std::string dynd::detail::ndarray_as_string(const ndarray& lhs, assign_error_mode DND_UNUSED(errmode))
+std::string dynd::detail::ndarray_as_string(const ndarray& lhs, assign_error_mode DYND_UNUSED(errmode))
 {
     if (lhs.get_ndim() != 0) {
         throw std::runtime_error("can only convert ndarrays with 0 dimensions to scalars");

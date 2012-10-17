@@ -60,8 +60,8 @@ namespace {
             }
         }
 
-        static void scalar_kernel(char *dst, intptr_t DND_UNUSED(dst_stride), const char *src, intptr_t DND_UNUSED(src_stride),
-                            intptr_t DND_UNUSED(count), const AuxDataBase *auxdata)
+        static void scalar_kernel(char *dst, intptr_t DYND_UNUSED(dst_stride), const char *src, intptr_t DYND_UNUSED(src_stride),
+                            intptr_t DYND_UNUSED(count), const AuxDataBase *auxdata)
         {
             categorical_dtype *cat = reinterpret_cast<categorical_dtype *>(
                 get_raw_auxiliary_data(auxdata)&~1
@@ -74,7 +74,7 @@ namespace {
             memcpy(dst, src_val, N);
         }
 
-        static void scalar_to_contiguous_kernel(char *dst, intptr_t DND_UNUSED(dst_stride), const char *src, intptr_t DND_UNUSED(src_stride),
+        static void scalar_to_contiguous_kernel(char *dst, intptr_t DYND_UNUSED(dst_stride), const char *src, intptr_t DYND_UNUSED(src_stride),
                             intptr_t count, const AuxDataBase *auxdata)
         {
             categorical_dtype *cat = reinterpret_cast<categorical_dtype *>(
@@ -117,8 +117,8 @@ namespace {
             }
         }
 
-        static void scalar_kernel(char *dst, intptr_t DND_UNUSED(dst_stride), const char *src, intptr_t DND_UNUSED(src_stride),
-                            intptr_t DND_UNUSED(count), const AuxDataBase *auxdata)
+        static void scalar_kernel(char *dst, intptr_t DYND_UNUSED(dst_stride), const char *src, intptr_t DYND_UNUSED(src_stride),
+                            intptr_t DYND_UNUSED(count), const AuxDataBase *auxdata)
         {
             categorical_dtype *cat = reinterpret_cast<categorical_dtype *>(
                 get_raw_auxiliary_data(auxdata)&~1
@@ -128,7 +128,7 @@ namespace {
             memcpy(dst, reinterpret_cast<const char *>(&src_val), N);
         }
 
-        static void scalar_to_contiguous_kernel(char *dst, intptr_t DND_UNUSED(dst_stride), const char *src, intptr_t DND_UNUSED(src_stride),
+        static void scalar_to_contiguous_kernel(char *dst, intptr_t DYND_UNUSED(dst_stride), const char *src, intptr_t DYND_UNUSED(src_stride),
                             intptr_t count, const AuxDataBase *auxdata)
         {
             categorical_dtype *cat = reinterpret_cast<categorical_dtype *>(
@@ -161,7 +161,7 @@ namespace {
     //         );
     //     }
 
-    //     static void scalar_kernel(char *dst, intptr_t DND_UNUSED(dst_stride), const char *src, intptr_t DND_UNUSED(src_stride),
+    //     static void scalar_kernel(char *dst, intptr_t DYND_UNUSED(dst_stride), const char *src, intptr_t DYND_UNUSED(src_stride),
     //                         intptr_t, const AuxDataBase *auxdata)
     //     {
     //         categorical_dtype *cat = reinterpret_cast<categorical_dtype *>(
@@ -169,7 +169,7 @@ namespace {
     //         );
     //     }
 
-    //     static void contiguous_kernel(char *dst, intptr_t DND_UNUSED(dst_stride), const char *src, intptr_t DND_UNUSED(src_stride),
+    //     static void contiguous_kernel(char *dst, intptr_t DYND_UNUSED(dst_stride), const char *src, intptr_t DYND_UNUSED(src_stride),
     //                         intptr_t count, const AuxDataBase *auxdata)
     //     {
     //         categorical_dtype *cat = reinterpret_cast<categorical_dtype *>(
@@ -177,7 +177,7 @@ namespace {
     //         );
     //     }
 
-    //     static void scalar_to_contiguous_kernel(char *dst, intptr_t DND_UNUSED(dst_stride), const char *src, intptr_t DND_UNUSED(src_stride),
+    //     static void scalar_to_contiguous_kernel(char *dst, intptr_t DYND_UNUSED(dst_stride), const char *src, intptr_t DYND_UNUSED(src_stride),
     //                         intptr_t count, const AuxDataBase *auxdata)
     //     {
     //         categorical_dtype *cat = reinterpret_cast<categorical_dtype *>(
@@ -315,7 +315,7 @@ bool categorical_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype&
 }
 
 void categorical_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const dtype& src_dt,
-                    assign_error_mode DND_UNUSED(errmode),
+                    assign_error_mode DYND_UNUSED(errmode),
                     unary_specialization_kernel_instance& out_kernel) const {
 
     // POD copy already handled if category mappings are identical

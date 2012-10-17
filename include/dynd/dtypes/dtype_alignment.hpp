@@ -5,8 +5,8 @@
 // The realign dtype applies a more
 // stringent alignment to a bytes dtype.
 //
-#ifndef _DND__REALIGN_DTYPE_HPP_
-#define _DND__REALIGN_DTYPE_HPP_
+#ifndef _DYND__REALIGN_DTYPE_HPP_
+#define _DYND__REALIGN_DTYPE_HPP_
 
 #include <dynd/dtype.hpp>
 
@@ -29,4 +29,4 @@ dtype make_unaligned_dtype()
 
 } // namespace dynd
 
-#endif // _DND__REALIGN_DTYPE_HPP_
+#endif // _DYND__REALIGN_DTYPE_HPP_

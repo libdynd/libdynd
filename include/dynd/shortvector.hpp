@@ -3,8 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DND__SHORTVECTOR_HPP_
-#define _DND__SHORTVECTOR_HPP_
+#ifndef _DYND__SHORTVECTOR_HPP_
+#define _DYND__SHORTVECTOR_HPP_
 
 #include <algorithm>
 
@@ -61,20 +61,20 @@ public:
     shortvector(size_t size, const shortvector& rhs)
         : m_data((size <= staticN) ? m_shortdata : new T[size])
     {
-        DND_MEMCPY(m_data, rhs.m_data, size * sizeof(T));
+        DYND_MEMCPY(m_data, rhs.m_data, size * sizeof(T));
     }
     /** Construct the shortvector with a specified size and initial data */
     shortvector(size_t size, const T* data)
         : m_data((size <= staticN) ? m_shortdata : new T[size])
     {
-        DND_MEMCPY(m_data, data, size * sizeof(T));
+        DYND_MEMCPY(m_data, data, size * sizeof(T));
     }
-#ifdef DND_RVALUE_REFS
+#ifdef DYND_RVALUE_REFS
     /** Move constructor */
     shortvector(shortvector&& rhs) {
         if (rhs.m_data == rhs.m_shortdata) {
             // In the short case, copy the full shortdata vector
-            DND_MEMCPY(m_shortdata, rhs.m_shortdata, staticN * sizeof(T));
+            DYND_MEMCPY(m_shortdata, rhs.m_shortdata, staticN * sizeof(T));
             m_data = m_shortdata;
         } else {
             // In the long case, move the long allocated pointer
@@ -90,7 +90,7 @@ public:
             }
             if (rhs.m_data == rhs.m_shortdata) {
                 // In the short case, copy the full shortdata vector
-                DND_MEMCPY(m_shortdata, rhs.m_shortdata, staticN * sizeof(T));
+                DYND_MEMCPY(m_shortdata, rhs.m_shortdata, staticN * sizeof(T));
                 m_data = m_shortdata;
             } else {
                 // In the long case, move the long allocated pointer
@@ -120,17 +120,17 @@ public:
                 // Both data's were pointing to their shortdata
                 T tmp[staticN];
                 rhs.m_data = rhs.m_shortdata;
-                DND_MEMCPY(tmp, m_shortdata, staticN * sizeof(T));
-                DND_MEMCPY(m_shortdata, rhs.m_shortdata, staticN * sizeof(T));
-                DND_MEMCPY(rhs.m_shortdata, tmp, staticN * sizeof(T));
+                DYND_MEMCPY(tmp, m_shortdata, staticN * sizeof(T));
+                DYND_MEMCPY(m_shortdata, rhs.m_shortdata, staticN * sizeof(T));
+                DYND_MEMCPY(rhs.m_shortdata, tmp, staticN * sizeof(T));
             } else {
                 // Just the rhs data was pointing to shortdata
-                DND_MEMCPY(m_shortdata, rhs.m_shortdata, staticN * sizeof(T));
+                DYND_MEMCPY(m_shortdata, rhs.m_shortdata, staticN * sizeof(T));
             }
         } else if (rhs.m_data == m_shortdata) {
             // Just this data was pointing to shortdata
             rhs.m_data = rhs.m_shortdata;
-            DND_MEMCPY(rhs.m_shortdata, m_shortdata, staticN * sizeof(T));
+            DYND_MEMCPY(rhs.m_shortdata, m_shortdata, staticN * sizeof(T));
         }
     }
 
@@ -246,4 +246,4 @@ typedef shortvector<intptr_t> dimvector;
 
 } // namespace dynd
 
-#endif // _DND__SHORTVECTOR_HPP_
+#endif // _DYND__SHORTVECTOR_HPP_

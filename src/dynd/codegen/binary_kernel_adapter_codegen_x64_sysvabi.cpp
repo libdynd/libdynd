@@ -7,7 +7,7 @@
 
 #include <dynd/platform_definitions.h>
 
-#if defined(DND_CALL_SYSV_X64)
+#if defined(DYND_CALL_SYSV_X64)
 
 #include <dynd/codegen/binary_kernel_adapter_codegen.hpp>
 #include <dynd/memblock/executable_memory_block.hpp>
@@ -381,7 +381,7 @@ namespace // nameless
 uint64_t dynd::get_binary_function_adapter_unique_id(const dtype& restype
                                                , const dtype& arg0type
                                                , const dtype& arg1type
-                                               , calling_convention_t DND_UNUSED(callconv)
+                                               , calling_convention_t DYND_UNUSED(callconv)
                                                )
 {
     // Bits 0..2 for the result type
@@ -476,7 +476,7 @@ dynd::binary_operation_t dynd::codegen_binary_function_adapter(const memory_bloc
                                                         , const dtype& restype
                                                         , const dtype& arg0type
                                                         , const dtype& arg1type
-                                                        , calling_convention_t DND_UNUSED(callconv)
+                                                        , calling_convention_t DYND_UNUSED(callconv)
                                                         )
 {
     cc_register_class ret_idx  = idx_for_type_id(restype.type_id());
@@ -537,4 +537,4 @@ dynd::binary_operation_t dynd::codegen_binary_function_adapter(const memory_bloc
     return 0;
 }
 
-#endif // DND_CALL_SYSV_X64
+#endif // DYND_CALL_SYSV_X64

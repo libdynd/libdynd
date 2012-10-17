@@ -3,8 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DND__EXTERNAL_MEMORY_BLOCK_HPP_
-#define _DND__EXTERNAL_MEMORY_BLOCK_HPP_
+#ifndef _DYND__EXTERNAL_MEMORY_BLOCK_HPP_
+#define _DYND__EXTERNAL_MEMORY_BLOCK_HPP_
 
 #include <dynd/memblock/memory_block.hpp>
 
@@ -19,4 +19,4 @@ memory_block_ptr make_external_memory_block(void *object, external_memory_block_
 
 } // namespace dynd
 
-#endif // _DND__EXTERNAL_MEMORY_BLOCK_HPP_
+#endif // _DYND__EXTERNAL_MEMORY_BLOCK_HPP_

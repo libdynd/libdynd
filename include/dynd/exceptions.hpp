@@ -3,8 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DND__EXCEPTIONS_HPP_
-#define _DND__EXCEPTIONS_HPP_
+#ifndef _DYND__EXCEPTIONS_HPP_
+#define _DYND__EXCEPTIONS_HPP_
 
 #include <string>
 #include <stdexcept>
@@ -128,4 +128,4 @@ public:
 
 } // namespace dynd
 
-#endif // _DND__EXCEPTIONS_HPP_
+#endif // _DYND__EXCEPTIONS_HPP_

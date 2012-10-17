@@ -3,8 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DND__GROUPBY_NODE_HPP_
-#define _DND__GROUPBY_NODE_HPP_
+#ifndef _DYND__GROUPBY_NODE_HPP_
+#define _DYND__GROUPBY_NODE_HPP_
 
 #include <dynd/nodes/ndarray_node.hpp>
 
@@ -114,4 +114,4 @@ ndarray_node_ptr make_groupby_node(const ndarray_node_ptr& data_node,
 
 } // namespace dynd
 
-#endif // _DND__GROUPBY_NODE_HPP_
+#endif // _DYND__GROUPBY_NODE_HPP_

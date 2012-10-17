@@ -3,8 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DND__TUPLE_DTYPE_HPP_
-#define _DND__TUPLE_DTYPE_HPP_
+#ifndef _DYND__TUPLE_DTYPE_HPP_
+#define _DYND__TUPLE_DTYPE_HPP_
 
 #include <vector>
 
@@ -133,4 +133,4 @@ inline dtype make_tuple_dtype(const dtype& dt0, const dtype& dt1, const dtype& d
 
 } // namespace dynd
 
-#endif // _DND__TUPLE_DTYPE_HPP_
+#endif // _DYND__TUPLE_DTYPE_HPP_

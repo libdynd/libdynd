@@ -3,8 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DND__DTYPE_ASSIGN_HPP_
-#define _DND__DTYPE_ASSIGN_HPP_
+#ifndef _DYND__DTYPE_ASSIGN_HPP_
+#define _DYND__DTYPE_ASSIGN_HPP_
 
 #include <utility>
 
@@ -58,4 +58,4 @@ void dtype_strided_assign(const dtype& dst_dt, char *dst, intptr_t dst_stride,
 
 } // namespace dynd
 
-#endif // _DND__DTYPE_ASSIGN_HPP_
+#endif // _DYND__DTYPE_ASSIGN_HPP_

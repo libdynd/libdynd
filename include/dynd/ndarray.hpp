@@ -3,8 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DND__NDARRAY_HPP_
-#define _DND__NDARRAY_HPP_
+#ifndef _DYND__NDARRAY_HPP_
+#define _DYND__NDARRAY_HPP_
 
 #include <iostream> // FOR DEBUG
 #include <stdexcept>
@@ -74,10 +74,10 @@ public:
 
     /** Constructs an ndaray from an expr node */
     explicit ndarray(const ndarray_node_ptr& expr_tree);
-#if defined(DND_RVALUE_REFS)
+#if defined(DYND_RVALUE_REFS)
     /** Constructs an ndaray from an expr node */
     explicit ndarray(ndarray_node_ptr&& expr_tree);
-#endif // defined(DND_RVALUE_REFS)
+#endif // defined(DYND_RVALUE_REFS)
 
     /** Constructs a one-dimensional array */
     ndarray(intptr_t dim0, const dtype& dt);
@@ -88,7 +88,7 @@ public:
     /** Constructs a four-dimensional array */
     ndarray(intptr_t dim0, intptr_t dim1, intptr_t dim2, intptr_t dim3, const dtype& dt);
 
-#ifdef DND_INIT_LIST
+#ifdef DYND_INIT_LIST
     /**
      * Constructs an array from an initializer list.
      *
@@ -105,7 +105,7 @@ public:
     /** Constructs an array from a three-level nested initializer list */
     template<class T>
     ndarray(std::initializer_list<std::initializer_list<std::initializer_list<T> > > il);
-#endif // DND_INIT_LIST
+#endif // DYND_INIT_LIST
 
     /**
      * Constructs an array from a multi-dimensional C-style array.
@@ -116,11 +116,11 @@ public:
     /** Copy constructor */
     ndarray(const ndarray& rhs)
         : m_node(rhs.m_node) {}
-#ifdef DND_RVALUE_REFS
+#ifdef DYND_RVALUE_REFS
     /** Move constructor (should just be "= default" in C++11) */
     ndarray(ndarray&& rhs)
-        : m_node(DND_MOVE(rhs.m_node)) {}
-#endif // DND_RVALUE_REFS
+        : m_node(DYND_MOVE(rhs.m_node)) {}
+#endif // DYND_RVALUE_REFS
 
     /** Swap operation (should be "noexcept" in C++11) */
     void swap(ndarray& rhs);
@@ -134,14 +134,14 @@ public:
      *       and making copies of arrays.
      */
     ndarray& operator=(const ndarray& rhs);
-#ifdef DND_RVALUE_REFS
+#ifdef DYND_RVALUE_REFS
     /** Move assignment operator (should be just "= default" in C++11) */
     ndarray& operator=(ndarray&& rhs) {
-        m_node = DND_MOVE(rhs.m_node);
+        m_node = DYND_MOVE(rhs.m_node);
 
         return *this;
     }
-#endif // DND_RVALUE_REFS
+#endif // DYND_RVALUE_REFS
 
     /**
      * Assignment operator from an ndarray_vals object. This converts the
@@ -382,7 +382,7 @@ inline ndarray& ndarray::operator=(const ndarray_vals& rhs) {
 }
 
 ///////////// Initializer list constructor implementation /////////////////////////
-#ifdef DND_INIT_LIST
+#ifdef DYND_INIT_LIST
 namespace detail {
     // Computes the number of dimensions in a nested initializer list constructor
     template<class T>
@@ -417,7 +417,7 @@ namespace detail {
             }
         }
         static void copy_data(T **dataptr, const std::initializer_list<T>& il) {
-            DND_MEMCPY(*dataptr, il.begin(), il.size() * sizeof(T));
+            DYND_MEMCPY(*dataptr, il.begin(), il.size() * sizeof(T));
             *dataptr += il.size();
         }
     };
@@ -467,9 +467,9 @@ dynd::ndarray::ndarray(std::initializer_list<T> il)
     intptr_t stride = (dim0 == 1) ? 0 : sizeof(T);
     char *originptr = 0;
     memory_block_ptr memblock = make_fixed_size_pod_memory_block(sizeof(T) * dim0, sizeof(T), &originptr);
-    DND_MEMCPY(originptr, il.begin(), sizeof(T) * dim0);
+    DYND_MEMCPY(originptr, il.begin(), sizeof(T) * dim0);
     make_strided_ndarray_node(make_dtype<T>(), 1, &dim0, &stride,
-                            originptr, read_access_flag | write_access_flag, DND_MOVE(memblock)).swap(m_node);
+                            originptr, read_access_flag | write_access_flag, DYND_MOVE(memblock)).swap(m_node);
 }
 template<class T>
 dynd::ndarray::ndarray(std::initializer_list<std::initializer_list<T> > il)
@@ -492,7 +492,7 @@ dynd::ndarray::ndarray(std::initializer_list<std::initializer_list<T> > il)
     T *dataptr = reinterpret_cast<T *>(originptr);
     detail::initializer_list_shape<S>::copy_data(&dataptr, il);
     make_strided_ndarray_node(make_dtype<T>(), 2, shape, strides,
-                        originptr, read_access_flag | write_access_flag, DND_MOVE(memblock)).swap(m_node);
+                        originptr, read_access_flag | write_access_flag, DYND_MOVE(memblock)).swap(m_node);
 }
 template<class T>
 dynd::ndarray::ndarray(std::initializer_list<std::initializer_list<std::initializer_list<T> > > il)
@@ -515,9 +515,9 @@ dynd::ndarray::ndarray(std::initializer_list<std::initializer_list<std::initiali
     T *dataptr = reinterpret_cast<T *>(originptr);
     detail::initializer_list_shape<S>::copy_data(&dataptr, il);
     make_strided_ndarray_node(make_dtype<T>(), 3, shape, strides,
-                    originptr, read_access_flag | write_access_flag, DND_MOVE(memblock)).swap(m_node);
+                    originptr, read_access_flag | write_access_flag, DYND_MOVE(memblock)).swap(m_node);
 }
-#endif // DND_INIT_LIST
+#endif // DYND_INIT_LIST
 
 ///////////// C-style array constructor implementation /////////////////////////
 namespace detail {
@@ -570,10 +570,10 @@ dynd::ndarray::ndarray(const T (&rhs)[N])
     }
     char *originptr = 0;
     memory_block_ptr memblock = make_fixed_size_pod_memory_block(num_bytes, sizeof(T), &originptr);
-    DND_MEMCPY(originptr, &rhs[0], num_bytes);
+    DYND_MEMCPY(originptr, &rhs[0], num_bytes);
     make_strided_ndarray_node(dtype(detail::type_from_array<T>::type_id),
                             ndim, shape, strides, originptr,
-                            read_access_flag | write_access_flag, DND_MOVE(memblock)).swap(m_node);
+                            read_access_flag | write_access_flag, DYND_MOVE(memblock)).swap(m_node);
 }
 
 ///////////// The ndarray.as<type>() templated function /////////////////////////
@@ -640,4 +640,4 @@ inline ndarray empty_like(const ndarray& rhs) {
 
 } // namespace dynd
 
-#endif // _DND__NDARRAY_HPP_
+#endif // _DYND__NDARRAY_HPP_

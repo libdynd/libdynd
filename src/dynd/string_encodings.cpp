@@ -37,7 +37,7 @@ namespace {
 
     // The next_* functions advance an iterator pair and return
     // the code point that was processed.
-    static uint32_t next_ascii(const char *&it, const char *DND_UNUSED(end))
+    static uint32_t next_ascii(const char *&it, const char *DYND_UNUSED(end))
     {
         uint32_t result = *reinterpret_cast<const uint8_t *>(it);
         if (result&0x80) {
@@ -47,14 +47,14 @@ namespace {
         return result;
     }
 
-    static uint32_t noerror_next_ascii(const char *&it, const char *DND_UNUSED(end))
+    static uint32_t noerror_next_ascii(const char *&it, const char *DYND_UNUSED(end))
     {
         uint32_t result = *reinterpret_cast<const uint8_t *>(it);
         ++it;
         return ((result&0x80) == 0) ? result : ERROR_SUBSTITUTE_CODEPOINT;
     }
 
-    static void append_ascii(uint32_t cp, char *&it, char *DND_UNUSED(end))
+    static void append_ascii(uint32_t cp, char *&it, char *DYND_UNUSED(end))
     {
         if ((cp&~0x7f) != 0) {
             stringstream ss;
@@ -67,7 +67,7 @@ namespace {
         ++it;
     }
 
-    static void noerror_append_ascii(uint32_t cp, char *&it, char *DND_UNUSED(end))
+    static void noerror_append_ascii(uint32_t cp, char *&it, char *DYND_UNUSED(end))
     {
         if ((cp&~0x7f) != 0) {
             cp = ERROR_SUBSTITUTE_CODEPOINT;
@@ -76,7 +76,7 @@ namespace {
         ++it;
     }
 
-    static uint32_t next_ucs2(const char *&it_raw, const char *DND_UNUSED(end_raw))
+    static uint32_t next_ucs2(const char *&it_raw, const char *DYND_UNUSED(end_raw))
     {
         const uint16_t *&it = reinterpret_cast<const uint16_t *&>(it_raw);
         uint32_t cp = *it;
@@ -91,7 +91,7 @@ namespace {
         return cp;
     }
 
-    static uint32_t noerror_next_ucs2(const char *&it_raw, const char *DND_UNUSED(end_raw))
+    static uint32_t noerror_next_ucs2(const char *&it_raw, const char *DYND_UNUSED(end_raw))
     {
         const uint16_t *&it = reinterpret_cast<const uint16_t *&>(it_raw);
         uint32_t cp = *it;
@@ -102,7 +102,7 @@ namespace {
         return cp;
     }
 
-    static void append_ucs2(uint32_t cp, char *&it_raw, char *DND_UNUSED(end_raw))
+    static void append_ucs2(uint32_t cp, char *&it_raw, char *DYND_UNUSED(end_raw))
     {
         uint16_t *&it = reinterpret_cast<uint16_t *&>(it_raw);
         if ((cp&~0xffff) != 0 || utf8::internal::is_surrogate(cp)) {
@@ -116,7 +116,7 @@ namespace {
         ++it;
     }
 
-    static void noerror_append_ucs2(uint32_t cp, char *&it_raw, char *DND_UNUSED(end_raw))
+    static void noerror_append_ucs2(uint32_t cp, char *&it_raw, char *DYND_UNUSED(end_raw))
     {
         uint16_t *&it = reinterpret_cast<uint16_t *&>(it_raw);
         if ((cp&~0xffff) != 0 || utf8::internal::is_surrogate(cp)) {
@@ -306,7 +306,7 @@ namespace {
         }
     }
 
-    static uint32_t next_utf32(const char *&it_raw, const char *DND_UNUSED(end_raw))
+    static uint32_t next_utf32(const char *&it_raw, const char *DYND_UNUSED(end_raw))
     {
         const uint32_t *&it = reinterpret_cast<const uint32_t *&>(it_raw);
         uint32_t result = *it;
@@ -317,7 +317,7 @@ namespace {
         return result;
     }
 
-    static uint32_t noerror_next_utf32(const char *&it_raw, const char *DND_UNUSED(end_raw))
+    static uint32_t noerror_next_utf32(const char *&it_raw, const char *DYND_UNUSED(end_raw))
     {
         const uint32_t *&it = reinterpret_cast<const uint32_t *&>(it_raw);
         uint32_t result = *it;
@@ -328,7 +328,7 @@ namespace {
         return result;
     }
 
-    static void append_utf32(uint32_t cp, char *&it_raw, char *DND_UNUSED(end_raw))
+    static void append_utf32(uint32_t cp, char *&it_raw, char *DYND_UNUSED(end_raw))
     {
         uint32_t *&it = reinterpret_cast<uint32_t *&>(it_raw);
         //uint32_t *end = reinterpret_cast<uint32_t *>(end);
@@ -336,7 +336,7 @@ namespace {
         ++it;
     }
 
-    static void noerror_append_utf32(uint32_t cp, char *&it_raw, char *DND_UNUSED(end_raw))
+    static void noerror_append_utf32(uint32_t cp, char *&it_raw, char *DYND_UNUSED(end_raw))
     {
         uint32_t *&it = reinterpret_cast<uint32_t *&>(it_raw);
         //uint32_t *end = reinterpret_cast<uint32_t *>(end);

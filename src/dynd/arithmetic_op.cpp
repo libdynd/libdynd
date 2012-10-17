@@ -66,7 +66,7 @@ namespace {
 
         void get_binary_operation(intptr_t dst_fixedstride, intptr_t src1_fixedstride,
                                     intptr_t src2_fixedstride,
-                                    const eval::eval_context *DND_UNUSED(ectx),
+                                    const eval::eval_context *DYND_UNUSED(ectx),
                                     kernel_instance<binary_operation_t>& out_kernel) const
         {
             out_kernel.kernel = get_binary_operation_from_builtin_dtype_table(m_builtin_optable,
@@ -119,10 +119,10 @@ namespace {
 } // anonymous namespace
 
 
-static DND_BUILTIN_DTYPE_BINARY_OPERATION_TABLE(addition);
-static DND_BUILTIN_DTYPE_BINARY_OPERATION_TABLE(subtraction);
-static DND_BUILTIN_DTYPE_BINARY_OPERATION_TABLE(multiplication);
-static DND_BUILTIN_DTYPE_BINARY_OPERATION_TABLE(division);
+static DYND_BUILTIN_DTYPE_BINARY_OPERATION_TABLE(addition);
+static DYND_BUILTIN_DTYPE_BINARY_OPERATION_TABLE(subtraction);
+static DYND_BUILTIN_DTYPE_BINARY_OPERATION_TABLE(multiplication);
+static DYND_BUILTIN_DTYPE_BINARY_OPERATION_TABLE(division);
 
 // These operators are declared in ndarray.hpp
 

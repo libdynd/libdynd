@@ -3,8 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DND__UNARY_KERNEL_ADAPTER_CODEGEN_HPP_
-#define _DND__UNARY_KERNEL_ADAPTER_CODEGEN_HPP_
+#ifndef _DYND__UNARY_KERNEL_ADAPTER_CODEGEN_HPP_
+#define _DYND__UNARY_KERNEL_ADAPTER_CODEGEN_HPP_
 
 #include <dynd/dtype.hpp>
 #include <dynd/kernels/kernel_instance.hpp>
@@ -59,4 +59,4 @@ unary_operation_t* codegen_unary_function_adapter(const memory_block_ptr& exec_m
 
 } // namespace dynd
 
-#endif // _DND__UNARY_KERNEL_ADAPTER_CODEGEN_HPP_
+#endif // _DYND__UNARY_KERNEL_ADAPTER_CODEGEN_HPP_

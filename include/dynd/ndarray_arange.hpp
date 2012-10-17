@@ -3,8 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DND__NDARRAY_ARANGE_HPP_
-#define _DND__NDARRAY_ARANGE_HPP_
+#ifndef _DYND__NDARRAY_ARANGE_HPP_
+#define _DYND__NDARRAY_ARANGE_HPP_
 
 #include <dynd/ndarray.hpp>
 
@@ -68,4 +68,4 @@ typename enable_if<dtype_kind_of<T>::value == int_kind ||
 
 } // namespace dynd
 
-#endif // _DND__NDARRAY_ARANGE_HPP_
+#endif // _DYND__NDARRAY_ARANGE_HPP_

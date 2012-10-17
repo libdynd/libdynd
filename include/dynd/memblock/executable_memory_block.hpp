@@ -3,8 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DND__EXECUTABLE_MEMORY_BLOCK_HPP_
-#define _DND__EXECUTABLE_MEMORY_BLOCK_HPP_
+#ifndef _DYND__EXECUTABLE_MEMORY_BLOCK_HPP_
+#define _DYND__EXECUTABLE_MEMORY_BLOCK_HPP_
 
 #include <dynd/memblock/memory_block.hpp>
 
@@ -49,4 +49,4 @@ void executable_memory_block_debug_dump(const memory_block_data *memblock, std::
 
 } // namespace dynd
 
-#endif // _DND__EXECUTABLE_MEMORY_BLOCK_HPP_
+#endif // _DYND__EXECUTABLE_MEMORY_BLOCK_HPP_

@@ -18,27 +18,27 @@ namespace {
 
 template <typename T>
 struct compare_kernel {
-    static bool less_as(const char *a, const char *b, const AuxDataBase *DND_UNUSED(auxdata)) {
+    static bool less_as(const char *a, const char *b, const AuxDataBase *DYND_UNUSED(auxdata)) {
         return *reinterpret_cast<const T *>(a) < *reinterpret_cast<const T *>(b);
     }
 
-    static bool less_equal_as(const char *a, const char *b, const AuxDataBase *DND_UNUSED(auxdata)) {
+    static bool less_equal_as(const char *a, const char *b, const AuxDataBase *DYND_UNUSED(auxdata)) {
         return *reinterpret_cast<const T *>(a) <= *reinterpret_cast<const T *>(b);
     }
 
-    static bool equal_as(const char *a, const char *b, const AuxDataBase *DND_UNUSED(auxdata)) {
+    static bool equal_as(const char *a, const char *b, const AuxDataBase *DYND_UNUSED(auxdata)) {
         return *reinterpret_cast<const T *>(a) == *reinterpret_cast<const T *>(b);
     }
 
-    static bool not_equal_as(const char *a, const char *b, const AuxDataBase *DND_UNUSED(auxdata)) {
+    static bool not_equal_as(const char *a, const char *b, const AuxDataBase *DYND_UNUSED(auxdata)) {
         return *reinterpret_cast<const T *>(a) != *reinterpret_cast<const T *>(b);
     }
 
-    static bool greater_equal_as(const char *a, const char *b, const AuxDataBase *DND_UNUSED(auxdata)) {
+    static bool greater_equal_as(const char *a, const char *b, const AuxDataBase *DYND_UNUSED(auxdata)) {
         return *reinterpret_cast<const T *>(a) >= *reinterpret_cast<const T *>(b);
     }
 
-    static bool greater_as(const char *a, const char *b, const AuxDataBase *DND_UNUSED(auxdata)) {
+    static bool greater_as(const char *a, const char *b, const AuxDataBase *DYND_UNUSED(auxdata)) {
         return *reinterpret_cast<const T *>(a) > *reinterpret_cast<const T *>(b);
     }
 };
@@ -54,27 +54,27 @@ struct compare_kernel {
 
 template <typename T>
 struct compare_kernel< complex<T> > {
-    static bool less_as(const char *a, const char *b, const AuxDataBase *DND_UNUSED(auxdata)) {
+    static bool less_as(const char *a, const char *b, const AuxDataBase *DYND_UNUSED(auxdata)) {
         COMPLEX_COMPARE(<)
     }
 
-    static bool less_equal_as(const char *a, const char *b, const AuxDataBase *DND_UNUSED(auxdata)) {
+    static bool less_equal_as(const char *a, const char *b, const AuxDataBase *DYND_UNUSED(auxdata)) {
         COMPLEX_COMPARE(<=)
     }
 
-    static bool equal_as(const char *a, const char *b, const AuxDataBase *DND_UNUSED(auxdata)) {
+    static bool equal_as(const char *a, const char *b, const AuxDataBase *DYND_UNUSED(auxdata)) {
         return *reinterpret_cast<const complex<T> *>(a) == *reinterpret_cast<const complex<T> *>(b);
     }
 
-    static bool not_equal_as(const char *a, const char *b, const AuxDataBase *DND_UNUSED(auxdata)) {
+    static bool not_equal_as(const char *a, const char *b, const AuxDataBase *DYND_UNUSED(auxdata)) {
         return *reinterpret_cast<const complex<T> *>(a) != *reinterpret_cast<const complex<T> *>(b);
     }
 
-    static bool greater_equal_as(const char *a, const char *b, const AuxDataBase *DND_UNUSED(auxdata)) {
+    static bool greater_equal_as(const char *a, const char *b, const AuxDataBase *DYND_UNUSED(auxdata)) {
         COMPLEX_COMPARE(>=)
     }
 
-    static bool greater_as(const char *a, const char *b, const AuxDataBase *DND_UNUSED(auxdata)) {
+    static bool greater_as(const char *a, const char *b, const AuxDataBase *DYND_UNUSED(auxdata)) {
         COMPLEX_COMPARE(>)
     }
 
@@ -85,7 +85,7 @@ struct compare_kernel< complex<T> > {
 } // anonymous namespace
 
 
-#define DND_BUILTIN_DTYPE_COMPARISON_TABLE_TYPE_LEVEL(type) { \
+#define DYND_BUILTIN_DTYPE_COMPARISON_TABLE_TYPE_LEVEL(type) { \
     (single_compare_operation_t)compare_kernel<type>::less_as, \
     (single_compare_operation_t)compare_kernel<type>::less_equal_as, \
     (single_compare_operation_t)compare_kernel<type>::equal_as, \
@@ -97,19 +97,19 @@ struct compare_kernel< complex<T> > {
 namespace dynd {
 
 single_compare_operation_table_t builtin_dtype_comparisons_table[builtin_type_id_count] = {
-    DND_BUILTIN_DTYPE_COMPARISON_TABLE_TYPE_LEVEL(dynd_bool), \
-    DND_BUILTIN_DTYPE_COMPARISON_TABLE_TYPE_LEVEL(int8_t), \
-    DND_BUILTIN_DTYPE_COMPARISON_TABLE_TYPE_LEVEL(int16_t), \
-    DND_BUILTIN_DTYPE_COMPARISON_TABLE_TYPE_LEVEL(int32_t), \
-    DND_BUILTIN_DTYPE_COMPARISON_TABLE_TYPE_LEVEL(int64_t), \
-    DND_BUILTIN_DTYPE_COMPARISON_TABLE_TYPE_LEVEL(uint8_t), \
-    DND_BUILTIN_DTYPE_COMPARISON_TABLE_TYPE_LEVEL(uint16_t), \
-    DND_BUILTIN_DTYPE_COMPARISON_TABLE_TYPE_LEVEL(uint32_t), \
-    DND_BUILTIN_DTYPE_COMPARISON_TABLE_TYPE_LEVEL(uint64_t), \
-    DND_BUILTIN_DTYPE_COMPARISON_TABLE_TYPE_LEVEL(float), \
-    DND_BUILTIN_DTYPE_COMPARISON_TABLE_TYPE_LEVEL(double), \
-    DND_BUILTIN_DTYPE_COMPARISON_TABLE_TYPE_LEVEL(complex<float>), \
-    DND_BUILTIN_DTYPE_COMPARISON_TABLE_TYPE_LEVEL(complex<double>) \
+    DYND_BUILTIN_DTYPE_COMPARISON_TABLE_TYPE_LEVEL(dynd_bool), \
+    DYND_BUILTIN_DTYPE_COMPARISON_TABLE_TYPE_LEVEL(int8_t), \
+    DYND_BUILTIN_DTYPE_COMPARISON_TABLE_TYPE_LEVEL(int16_t), \
+    DYND_BUILTIN_DTYPE_COMPARISON_TABLE_TYPE_LEVEL(int32_t), \
+    DYND_BUILTIN_DTYPE_COMPARISON_TABLE_TYPE_LEVEL(int64_t), \
+    DYND_BUILTIN_DTYPE_COMPARISON_TABLE_TYPE_LEVEL(uint8_t), \
+    DYND_BUILTIN_DTYPE_COMPARISON_TABLE_TYPE_LEVEL(uint16_t), \
+    DYND_BUILTIN_DTYPE_COMPARISON_TABLE_TYPE_LEVEL(uint32_t), \
+    DYND_BUILTIN_DTYPE_COMPARISON_TABLE_TYPE_LEVEL(uint64_t), \
+    DYND_BUILTIN_DTYPE_COMPARISON_TABLE_TYPE_LEVEL(float), \
+    DYND_BUILTIN_DTYPE_COMPARISON_TABLE_TYPE_LEVEL(double), \
+    DYND_BUILTIN_DTYPE_COMPARISON_TABLE_TYPE_LEVEL(complex<float>), \
+    DYND_BUILTIN_DTYPE_COMPARISON_TABLE_TYPE_LEVEL(complex<double>) \
 };
 
 }

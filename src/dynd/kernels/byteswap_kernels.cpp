@@ -16,10 +16,10 @@ namespace {
     template<typename T>
     struct aligned_fixed_size_byteswap {
         static void general_kernel(char *dst, intptr_t dst_stride, const char *src, intptr_t src_stride,
-                            intptr_t count, const AuxDataBase *DND_UNUSED(auxdata))
+                            intptr_t count, const AuxDataBase *DYND_UNUSED(auxdata))
         {
-            DND_ASSERT_ALIGNED(dst, dst_stride, sizeof(T), "type: " << dynd::dtype(dynd::type_id_of<T>::value));
-            DND_ASSERT_ALIGNED(src, src_stride, sizeof(T), "type: " << dynd::dtype(dynd::type_id_of<T>::value));
+            DYND_ASSERT_ALIGNED(dst, dst_stride, sizeof(T), "type: " << dynd::dtype(dynd::type_id_of<T>::value));
+            DYND_ASSERT_ALIGNED(src, src_stride, sizeof(T), "type: " << dynd::dtype(dynd::type_id_of<T>::value));
             for (intptr_t i = 0; i < count; ++i) {
                 *(T *)dst = byteswap_value(*(T *)src);
 
@@ -28,19 +28,19 @@ namespace {
             }
         }
 
-        static void scalar_kernel(char *dst, intptr_t DND_UNUSED(dst_stride), const char *src, intptr_t DND_UNUSED(src_stride),
-                            intptr_t, const AuxDataBase *DND_UNUSED(auxdata))
+        static void scalar_kernel(char *dst, intptr_t DYND_UNUSED(dst_stride), const char *src, intptr_t DYND_UNUSED(src_stride),
+                            intptr_t, const AuxDataBase *DYND_UNUSED(auxdata))
         {
-            DND_ASSERT_ALIGNED(dst, dst_stride, sizeof(T), "type: " << dynd::dtype(dynd::type_id_of<T>::value));
-            DND_ASSERT_ALIGNED(src, src_stride, sizeof(T), "type: " << dynd::dtype(dynd::type_id_of<T>::value));
+            DYND_ASSERT_ALIGNED(dst, dst_stride, sizeof(T), "type: " << dynd::dtype(dynd::type_id_of<T>::value));
+            DYND_ASSERT_ALIGNED(src, src_stride, sizeof(T), "type: " << dynd::dtype(dynd::type_id_of<T>::value));
             *(T *)dst = byteswap_value(*(T *)src);
         }
 
-        static void contiguous_kernel(char *dst, intptr_t DND_UNUSED(dst_stride), const char *src, intptr_t DND_UNUSED(src_stride),
-                            intptr_t count, const AuxDataBase *DND_UNUSED(auxdata))
+        static void contiguous_kernel(char *dst, intptr_t DYND_UNUSED(dst_stride), const char *src, intptr_t DYND_UNUSED(src_stride),
+                            intptr_t count, const AuxDataBase *DYND_UNUSED(auxdata))
         {
-            DND_ASSERT_ALIGNED(dst, dst_stride, sizeof(T), "type: " << dynd::dtype(dynd::type_id_of<T>::value));
-            DND_ASSERT_ALIGNED(src, src_stride, sizeof(T), "type: " << dynd::dtype(dynd::type_id_of<T>::value));
+            DYND_ASSERT_ALIGNED(dst, dst_stride, sizeof(T), "type: " << dynd::dtype(dynd::type_id_of<T>::value));
+            DYND_ASSERT_ALIGNED(src, src_stride, sizeof(T), "type: " << dynd::dtype(dynd::type_id_of<T>::value));
             T *dst_cached = reinterpret_cast<T *>(dst);
             const T *src_cached = reinterpret_cast<const T *>(src);
 
@@ -52,11 +52,11 @@ namespace {
             }
         }
 
-        static void scalar_to_contiguous_kernel(char *dst, intptr_t DND_UNUSED(dst_stride), const char *src, intptr_t DND_UNUSED(src_stride),
-                            intptr_t count, const AuxDataBase *DND_UNUSED(auxdata))
+        static void scalar_to_contiguous_kernel(char *dst, intptr_t DYND_UNUSED(dst_stride), const char *src, intptr_t DYND_UNUSED(src_stride),
+                            intptr_t count, const AuxDataBase *DYND_UNUSED(auxdata))
         {
-            DND_ASSERT_ALIGNED(dst, dst_stride, sizeof(T), "type: " << dynd::dtype(dynd::type_id_of<T>::value));
-            DND_ASSERT_ALIGNED(src, src_stride, sizeof(T), "type: " << dynd::dtype(dynd::type_id_of<T>::value));
+            DYND_ASSERT_ALIGNED(dst, dst_stride, sizeof(T), "type: " << dynd::dtype(dynd::type_id_of<T>::value));
+            DYND_ASSERT_ALIGNED(src, src_stride, sizeof(T), "type: " << dynd::dtype(dynd::type_id_of<T>::value));
             T *dst_cached = reinterpret_cast<T *>(dst);
             const T src_value = byteswap_value(*reinterpret_cast<const T *>(src));
 
@@ -71,10 +71,10 @@ namespace {
     template<typename T>
     struct aligned_fixed_size_pairwise_byteswap_kernel {
        static void general_kernel(char *dst, intptr_t dst_stride, const char *src, intptr_t src_stride,
-                            intptr_t count, const AuxDataBase *DND_UNUSED(auxdata))
+                            intptr_t count, const AuxDataBase *DYND_UNUSED(auxdata))
         {
-            DND_ASSERT_ALIGNED(dst, dst_stride, sizeof(T), "type: " << dynd::dtype(dynd::type_id_of<T>::value));
-            DND_ASSERT_ALIGNED(src, src_stride, sizeof(T), "type: " << dynd::dtype(dynd::type_id_of<T>::value));
+            DYND_ASSERT_ALIGNED(dst, dst_stride, sizeof(T), "type: " << dynd::dtype(dynd::type_id_of<T>::value));
+            DYND_ASSERT_ALIGNED(src, src_stride, sizeof(T), "type: " << dynd::dtype(dynd::type_id_of<T>::value));
             for (intptr_t i = 0; i < count; ++i) {
                 *(T *)dst = byteswap_value(*(T *)src);
                 *((T *)dst + 1) = byteswap_value(*((T *)src + 1));
@@ -84,20 +84,20 @@ namespace {
             }
         }
 
-        static void scalar_kernel(char *dst, intptr_t DND_UNUSED(dst_stride), const char *src, intptr_t DND_UNUSED(src_stride),
-                            intptr_t, const AuxDataBase *DND_UNUSED(auxdata))
+        static void scalar_kernel(char *dst, intptr_t DYND_UNUSED(dst_stride), const char *src, intptr_t DYND_UNUSED(src_stride),
+                            intptr_t, const AuxDataBase *DYND_UNUSED(auxdata))
         {
-            DND_ASSERT_ALIGNED(dst, dst_stride, sizeof(T), "type: " << dynd::dtype(dynd::type_id_of<T>::value));
-            DND_ASSERT_ALIGNED(src, src_stride, sizeof(T), "type: " << dynd::dtype(dynd::type_id_of<T>::value));
+            DYND_ASSERT_ALIGNED(dst, dst_stride, sizeof(T), "type: " << dynd::dtype(dynd::type_id_of<T>::value));
+            DYND_ASSERT_ALIGNED(src, src_stride, sizeof(T), "type: " << dynd::dtype(dynd::type_id_of<T>::value));
             *(T *)dst = byteswap_value(*(T *)src);
             *((T *)dst + 1) = byteswap_value(*((T *)src + 1));
         }
 
-        static void contiguous_kernel(char *dst, intptr_t DND_UNUSED(dst_stride), const char *src, intptr_t DND_UNUSED(src_stride),
-                            intptr_t count, const AuxDataBase *DND_UNUSED(auxdata))
+        static void contiguous_kernel(char *dst, intptr_t DYND_UNUSED(dst_stride), const char *src, intptr_t DYND_UNUSED(src_stride),
+                            intptr_t count, const AuxDataBase *DYND_UNUSED(auxdata))
         {
-            DND_ASSERT_ALIGNED(dst, dst_stride, sizeof(T), "type: " << dynd::dtype(dynd::type_id_of<T>::value));
-            DND_ASSERT_ALIGNED(src, src_stride, sizeof(T), "type: " << dynd::dtype(dynd::type_id_of<T>::value));
+            DYND_ASSERT_ALIGNED(dst, dst_stride, sizeof(T), "type: " << dynd::dtype(dynd::type_id_of<T>::value));
+            DYND_ASSERT_ALIGNED(src, src_stride, sizeof(T), "type: " << dynd::dtype(dynd::type_id_of<T>::value));
             T *dst_cached = reinterpret_cast<T *>(dst);
             const T *src_cached = reinterpret_cast<const T *>(src);
 
@@ -112,11 +112,11 @@ namespace {
             }
         }
 
-        static void scalar_to_contiguous_kernel(char *dst, intptr_t DND_UNUSED(dst_stride), const char *src, intptr_t DND_UNUSED(src_stride),
-                            intptr_t count, const AuxDataBase *DND_UNUSED(auxdata))
+        static void scalar_to_contiguous_kernel(char *dst, intptr_t DYND_UNUSED(dst_stride), const char *src, intptr_t DYND_UNUSED(src_stride),
+                            intptr_t count, const AuxDataBase *DYND_UNUSED(auxdata))
         {
-            DND_ASSERT_ALIGNED(dst, dst_stride, sizeof(T), "type: " << dynd::dtype(dynd::type_id_of<T>::value));
-            DND_ASSERT_ALIGNED(src, src_stride, sizeof(T), "type: " << dynd::dtype(dynd::type_id_of<T>::value));
+            DYND_ASSERT_ALIGNED(dst, dst_stride, sizeof(T), "type: " << dynd::dtype(dynd::type_id_of<T>::value));
+            DYND_ASSERT_ALIGNED(src, src_stride, sizeof(T), "type: " << dynd::dtype(dynd::type_id_of<T>::value));
             T *dst_cached = reinterpret_cast<T *>(dst);
             const T src_value = byteswap_value(*reinterpret_cast<const T *>(src));
 

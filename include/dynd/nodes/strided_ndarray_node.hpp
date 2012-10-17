@@ -3,8 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DND__STRIDED_NDARRAY_NODE_HPP_
-#define _DND__STRIDED_NDARRAY_NODE_HPP_
+#ifndef _DYND__STRIDED_NDARRAY_NODE_HPP_
+#define _DYND__STRIDED_NDARRAY_NODE_HPP_
 
 #include <vector>
 
@@ -47,7 +47,7 @@ public:
     strided_ndarray_node(const dtype& dt, int ndim, const intptr_t *shape,
             const intptr_t *strides, const char *originptr, int access_flags, const memory_block_ptr& memblock);
 
-#ifdef DND_RVALUE_REFS
+#ifdef DYND_RVALUE_REFS
     /**
      * Creates a strided array node from the raw values. Does not validate them.
      */
@@ -140,7 +140,7 @@ public:
     friend ndarray_node_ptr make_strided_ndarray_node(const dtype& dt, int ndim, const intptr_t *shape,
                 const intptr_t *strides, const char *originptr, int access_flags, const memory_block_ptr& memblock);
 
-    #ifdef DND_RVALUE_REFS
+    #ifdef DYND_RVALUE_REFS
     friend ndarray_node_ptr make_strided_ndarray_node(const dtype& dt, int ndim, const intptr_t *shape,
                 const intptr_t *strides, char *originptr, int access_flags, memory_block_ptr&& memblock);
 
@@ -155,7 +155,7 @@ ndarray_node_ptr make_strided_ndarray_node(const dtype& dt, int ndim, const intp
 ndarray_node_ptr make_strided_ndarray_node(const dtype& dt, int ndim, const intptr_t *shape,
             const intptr_t *strides, const char *originptr, int access_flags, const memory_block_ptr& memblock);
 
-#ifdef DND_RVALUE_REFS
+#ifdef DYND_RVALUE_REFS
 ndarray_node_ptr make_strided_ndarray_node(const dtype& dt, int ndim, const intptr_t *shape,
             const intptr_t *strides, char *originptr, int access_flags, memory_block_ptr&& memblock);
 
@@ -170,4 +170,4 @@ ndarray_node_ptr make_strided_ndarray_node(const dtype& dt, int ndim, const intp
 
 } // namespace dynd
 
-#endif // _DND__STRIDED_NDARRAY_NODE_HPP_
+#endif // _DYND__STRIDED_NDARRAY_NODE_HPP_

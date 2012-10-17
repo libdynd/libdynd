@@ -9,8 +9,8 @@
 // through the dtype interface, except for the "kind" which
 // is expression_kind to signal that the value_dtype must be examined.
 //
-#ifndef _DND__CONVERT_DTYPE_HPP_
-#define _DND__CONVERT_DTYPE_HPP_
+#ifndef _DYND__CONVERT_DTYPE_HPP_
+#define _DYND__CONVERT_DTYPE_HPP_
 
 #include <dynd/dtype.hpp>
 #include <dynd/dtype_assign.hpp>
@@ -101,4 +101,4 @@ dtype make_convert_dtype(assign_error_mode errmode = assign_error_default) {
 
 } // namespace dynd
 
-#endif // _DND__CONVERT_DTYPE_HPP_
+#endif // _DYND__CONVERT_DTYPE_HPP_

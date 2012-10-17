@@ -3,8 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DND__NDARRAY_NODE_MEMORY_BLOCK_HPP_
-#define _DND__NDARRAY_NODE_MEMORY_BLOCK_HPP_
+#ifndef _DYND__NDARRAY_NODE_MEMORY_BLOCK_HPP_
+#define _DYND__NDARRAY_NODE_MEMORY_BLOCK_HPP_
 
 #include <dynd/memblock/memory_block.hpp>
 #include <dynd/nodes/ndarray_node.hpp>
@@ -20,4 +20,4 @@ ndarray_node_ptr make_uninitialized_ndarray_node_memory_block(intptr_t sizeof_no
 
 } // namespace dynd
 
-#endif // _DND__NDARRAY_NODE_MEMORY_BLOCK_HPP_
+#endif // _DYND__NDARRAY_NODE_MEMORY_BLOCK_HPP_

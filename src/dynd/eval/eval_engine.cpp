@@ -122,7 +122,7 @@ static ndarray_node_ptr evaluate_strided_array_expression_dtype(ndarray_node* no
     return evaluate_strided_with_unary_kernel(node, ectx, copy, access_flags, value_dt, operation);
 }
 
-static ndarray_node_ptr evaluate_binary_elwise_array(ndarray_node* node, const eval::eval_context *ectx, bool DND_UNUSED(copy), uint32_t access_flags)
+static ndarray_node_ptr evaluate_binary_elwise_array(ndarray_node* node, const eval::eval_context *ectx, bool DYND_UNUSED(copy), uint32_t access_flags)
 {
     ndarray_node *op1 = node->get_opnode(0);
     ndarray_node *op2 = node->get_opnode(1);
@@ -151,7 +151,7 @@ static ndarray_node_ptr evaluate_binary_elwise_array(ndarray_node* node, const e
             } while (iter.iternext());
         }
 
-        return DND_MOVE(result);
+        return DYND_MOVE(result);
     }
 
     stringstream ss;

@@ -3,8 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DND__IRANGE_HPP_
-#define _DND__IRANGE_HPP_
+#ifndef _DYND__IRANGE_HPP_
+#define _DYND__IRANGE_HPP_
 
 #include <limits>
 
@@ -25,7 +25,7 @@ namespace dynd {
  * m_finish when m_step is negative.
  *
  * The ways to construct this class do no error checking, in order
- * to fit the requirements of C++ DND_CONSTEXPR.
+ * to fit the requirements of C++ DYND_CONSTEXPR.
  *
  * Typical ways to construct ranges are as follows:
  *
@@ -40,28 +40,28 @@ namespace dynd {
 class irange {
     intptr_t m_start, m_finish, m_step;
 public:
-    /*DND_CONSTEXPR*/ irange()
+    /*DYND_CONSTEXPR*/ irange()
         : m_start(std::numeric_limits<intptr_t>::min()),
           m_finish(std::numeric_limits<intptr_t>::max()), m_step(1) {
     }
 
-    DND_CONSTEXPR irange(intptr_t idx)
+    DYND_CONSTEXPR irange(intptr_t idx)
         : m_start(idx), m_finish(idx), m_step(0) {
     }
 
-    DND_CONSTEXPR irange(intptr_t start, intptr_t finish, intptr_t step = 1)
+    DYND_CONSTEXPR irange(intptr_t start, intptr_t finish, intptr_t step = 1)
         : m_start(start), m_finish(finish), m_step(step) {
     }
 
-    DND_CONSTEXPR const intptr_t& start() const {
+    DYND_CONSTEXPR const intptr_t& start() const {
         return m_start;
     }
 
-    DND_CONSTEXPR const intptr_t& finish() const {
+    DYND_CONSTEXPR const intptr_t& finish() const {
         return m_finish;
     }
 
-    DND_CONSTEXPR const intptr_t& step() const {
+    DYND_CONSTEXPR const intptr_t& step() const {
         return m_step;
     }
 
@@ -81,7 +81,7 @@ public:
      * The notation "irange() / step" is a way to specify
      * the step of the range. Think of it as the word "by".
      */
-    DND_CONSTEXPR irange operator/(intptr_t step) {
+    DYND_CONSTEXPR irange operator/(intptr_t step) {
         return irange(m_start, m_finish, step);
     }
 
@@ -89,7 +89,7 @@ public:
      * The notation "irange() < finish" is a way to specify
      * the end of a range with a positive step.
      */
-    DND_CONSTEXPR irange operator<(intptr_t finish) {
+    DYND_CONSTEXPR irange operator<(intptr_t finish) {
         return irange(m_start, finish, m_step);
     }
 
@@ -97,7 +97,7 @@ public:
      * The notation "irange() <= last" is a way to specify
      * the end of a range with a positive step.
      */
-    DND_CONSTEXPR irange operator<=(intptr_t last) {
+    DYND_CONSTEXPR irange operator<=(intptr_t last) {
         return irange(m_start, (last != -1) ? (last+1) : std::numeric_limits<intptr_t>::max(), m_step);
     }
 
@@ -105,7 +105,7 @@ public:
      * The notation "irange() > finish" is a way to specify
      * the end of a range with a negative step.
      */
-    DND_CONSTEXPR irange operator>(intptr_t finish) {
+    DYND_CONSTEXPR irange operator>(intptr_t finish) {
         return irange(m_start, finish, m_step);
     }
 
@@ -113,21 +113,21 @@ public:
      * The notation "irange() >= last" is a way to specify
      * the end of a range with a negative step.
      */
-    DND_CONSTEXPR irange operator>=(intptr_t last) {
+    DYND_CONSTEXPR irange operator>=(intptr_t last) {
         return irange(m_start, (last != 0) ? (last-1) : std::numeric_limits<intptr_t>::max(), m_step);
     }
 
-    friend DND_CONSTEXPR irange operator<(intptr_t start_minus_one, const irange& i);
-    friend DND_CONSTEXPR irange operator<=(intptr_t start, const irange& i);
-    friend DND_CONSTEXPR irange operator>(intptr_t start_plus_one, const irange& i);
-    friend DND_CONSTEXPR irange operator>=(intptr_t start, const irange& i);
+    friend DYND_CONSTEXPR irange operator<(intptr_t start_minus_one, const irange& i);
+    friend DYND_CONSTEXPR irange operator<=(intptr_t start, const irange& i);
+    friend DYND_CONSTEXPR irange operator>(intptr_t start_plus_one, const irange& i);
+    friend DYND_CONSTEXPR irange operator>=(intptr_t start, const irange& i);
 };
 
 /**
  * The notation "lower < irange()" is a way to specify
  * the beginning of a range with a positive step.
  */
-inline DND_CONSTEXPR irange operator<(intptr_t start_minus_one, const irange& i) {
+inline DYND_CONSTEXPR irange operator<(intptr_t start_minus_one, const irange& i) {
     return irange(start_minus_one + 1, i.m_finish, i.m_step);
 }
 
@@ -135,7 +135,7 @@ inline DND_CONSTEXPR irange operator<(intptr_t start_minus_one, const irange& i)
  * The notation "start <= irange()" is a way to specify
  * the beginning of a range with a positive step.
  */
-inline DND_CONSTEXPR irange operator<=(intptr_t start, const irange& i) {
+inline DYND_CONSTEXPR irange operator<=(intptr_t start, const irange& i) {
     return irange(start, i.m_finish, i.m_step);
 }
 
@@ -143,7 +143,7 @@ inline DND_CONSTEXPR irange operator<=(intptr_t start, const irange& i) {
  * The notation "upper > irange()" is a way to specify
  * the beginning of a range with a negative step.
  */
-inline DND_CONSTEXPR irange operator>(intptr_t start_plus_one, const irange& i) {
+inline DYND_CONSTEXPR irange operator>(intptr_t start_plus_one, const irange& i) {
     return irange(start_plus_one - 1, i.m_finish, i.m_step);
 }
 
@@ -151,10 +151,10 @@ inline DND_CONSTEXPR irange operator>(intptr_t start_plus_one, const irange& i) 
  * The notation "start >= irange()" is a way to specify
  * the beginning of a range with a negative step.
  */
-inline DND_CONSTEXPR irange operator>=(intptr_t start, const irange& i) {
+inline DYND_CONSTEXPR irange operator>=(intptr_t start, const irange& i) {
     return irange(start, i.m_finish, i.m_step);
 }
 
 } // namespace dynd
 
-#endif // _DND__IRANGE_HPP_
+#endif // _DYND__IRANGE_HPP_

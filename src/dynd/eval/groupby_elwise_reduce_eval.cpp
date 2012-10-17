@@ -351,5 +351,5 @@ ndarray_node_ptr dynd::eval::evaluate_groupby_elwise_reduce(ndarray_node *node, 
         }
     }
 
-    return DND_MOVE(result);
+    return DYND_MOVE(result);
 }

@@ -6,8 +6,8 @@
 // a particular encoding, stored in a fixed-size
 // buffer.
 //
-#ifndef _DND__FIXEDSTRING_DTYPE_HPP_
-#define _DND__FIXEDSTRING_DTYPE_HPP_
+#ifndef _DYND__FIXEDSTRING_DTYPE_HPP_
+#define _DYND__FIXEDSTRING_DTYPE_HPP_
 
 #include <dynd/dtype.hpp>
 #include <dynd/dtype_assign.hpp>
@@ -79,4 +79,4 @@ inline dtype make_fixedstring_dtype(string_encoding_t encoding, intptr_t strings
 
 } // namespace dynd
 
-#endif // _DND__FIXEDSTRING_DTYPE_HPP_
+#endif // _DYND__FIXEDSTRING_DTYPE_HPP_

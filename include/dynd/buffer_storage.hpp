@@ -3,8 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DND__BUFFER_STORAGE_HPP_
-#define _DND__BUFFER_STORAGE_HPP_
+#ifndef _DYND__BUFFER_STORAGE_HPP_
+#define _DYND__BUFFER_STORAGE_HPP_
 
 #include <dynd/dtype.hpp>
 
@@ -66,4 +66,4 @@ public:
 
 } // namespace dynd
 
-#endif // _DND__BUFFER_STORAGE_HPP_
+#endif // _DYND__BUFFER_STORAGE_HPP_

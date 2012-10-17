@@ -25,7 +25,7 @@ void dynd::void_pointer_dtype::print_dtype(std::ostream& o) const {
     o << "pointer<void>";
 }
 
-dtype dynd::void_pointer_dtype::apply_linear_index(int nindices, const irange *DND_UNUSED(indices), int current_i, const dtype& DND_UNUSED(root_dt)) const
+dtype dynd::void_pointer_dtype::apply_linear_index(int nindices, const irange *DYND_UNUSED(indices), int current_i, const dtype& DYND_UNUSED(root_dt)) const
 {
     if (nindices == 0) {
         return dtype(this);
@@ -34,16 +34,16 @@ dtype dynd::void_pointer_dtype::apply_linear_index(int nindices, const irange *D
     }
 }
 
-void dynd::void_pointer_dtype::get_shape(int DND_UNUSED(i), std::vector<intptr_t>& DND_UNUSED(out_shape)) const
+void dynd::void_pointer_dtype::get_shape(int DYND_UNUSED(i), std::vector<intptr_t>& DYND_UNUSED(out_shape)) const
 {
 }
 
-bool dynd::void_pointer_dtype::is_lossless_assignment(const dtype& DND_UNUSED(dst_dt), const dtype& DND_UNUSED(src_dt)) const
+bool dynd::void_pointer_dtype::is_lossless_assignment(const dtype& DYND_UNUSED(dst_dt), const dtype& DYND_UNUSED(src_dt)) const
 {
     return false;
 }
 
-void dynd::void_pointer_dtype::get_single_compare_kernel(single_compare_kernel_instance& DND_UNUSED(out_kernel)) const {
+void dynd::void_pointer_dtype::get_single_compare_kernel(single_compare_kernel_instance& DYND_UNUSED(out_kernel)) const {
     throw std::runtime_error("void_pointer_dtype::get_single_compare_kernel not supported yet");
 }
 
@@ -53,7 +53,7 @@ bool dynd::void_pointer_dtype::operator==(const extended_dtype& rhs) const
 }
 
 void dynd::void_pointer_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const dtype& src_dt,
-                assign_error_mode DND_UNUSED(errmode),
+                assign_error_mode DYND_UNUSED(errmode),
                 unary_specialization_kernel_instance& out_kernel) const
 {
     if (this == dst_dt.extended()) {

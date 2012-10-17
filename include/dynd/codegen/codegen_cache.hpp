@@ -3,8 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DND__CODEGEN_CACHE_HPP_
-#define _DND__CODEGEN_CACHE_HPP_
+#ifndef _DYND__CODEGEN_CACHE_HPP_
+#define _DYND__CODEGEN_CACHE_HPP_
 
 #include <map>
 #include <iostream>
@@ -79,4 +79,4 @@ public:
 
 } // namespace dynd
 
-#endif // _DND__CODEGEN_CACHE_HPP_
+#endif // _DYND__CODEGEN_CACHE_HPP_

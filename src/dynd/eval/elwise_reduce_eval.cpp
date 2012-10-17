@@ -78,7 +78,7 @@ static ndarray_node_ptr make_elwise_reduce_result(const dtype& result_dt, uint32
     // might be marked as readonly because the src memory block is readonly
     result_originptr = const_cast<char *>(result->get_readonly_originptr());
 
-    return DND_MOVE(result);
+    return DYND_MOVE(result);
 }
 
 
@@ -210,7 +210,7 @@ ndarray_node_ptr dynd::eval::evaluate_elwise_reduce_array(ndarray_node* node,
 
         // If there isn't any actual reduction going on, return the result of the copy
         if (!any_reduction) {
-            return DND_MOVE(result);
+            return DYND_MOVE(result);
         }
     }
 
@@ -265,7 +265,7 @@ ndarray_node_ptr dynd::eval::evaluate_elwise_reduce_array(ndarray_node* node,
             }
         } while ((more_iteration = iter.iternext()) && skip_count > 0);
         if (!more_iteration) {
-            return DND_MOVE(result);
+            return DYND_MOVE(result);
         }
     }
 
@@ -277,5 +277,5 @@ ndarray_node_ptr dynd::eval::evaluate_elwise_reduce_array(ndarray_node* node,
         } while (iter.iternext());
     }
 
-    return DND_MOVE(result);
+    return DYND_MOVE(result);
 }

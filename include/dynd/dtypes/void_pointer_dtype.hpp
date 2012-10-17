@@ -9,8 +9,8 @@
  * as expression dtypes.
  */
 
-#ifndef _DND__VOID_POINTER_DTYPE_HPP_
-#define _DND__VOID_POINTER_DTYPE_HPP_
+#ifndef _DYND__VOID_POINTER_DTYPE_HPP_
+#define _DYND__VOID_POINTER_DTYPE_HPP_
 
 #include <dynd/dtype.hpp>
 
@@ -62,4 +62,4 @@ public:
 
 } // namespace dynd
 
-#endif // _DND__VOID_POINTER_DTYPE_HPP_
+#endif // _DYND__VOID_POINTER_DTYPE_HPP_

@@ -10,8 +10,8 @@
 //       be added, which this dtype would use to
 //       do the actual swapping.
 //
-#ifndef _DND__BYTESWAP_DTYPE_HPP_
-#define _DND__BYTESWAP_DTYPE_HPP_
+#ifndef _DYND__BYTESWAP_DTYPE_HPP_
+#define _DYND__BYTESWAP_DTYPE_HPP_
 
 #include <dynd/dtype.hpp>
 #include <dynd/dtype_assign.hpp>
@@ -91,4 +91,4 @@ dtype make_byteswap_dtype() {
 
 } // namespace dynd
 
-#endif // _DND__BYTESWAP_DTYPE_HPP_
+#endif // _DYND__BYTESWAP_DTYPE_HPP_

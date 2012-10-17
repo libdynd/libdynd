@@ -3,8 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DND__ELWISE_BINARY_KERNEL_NODE_HPP_
-#define _DND__ELWISE_BINARY_KERNEL_NODE_HPP_
+#ifndef _DYND__ELWISE_BINARY_KERNEL_NODE_HPP_
+#define _DYND__ELWISE_BINARY_KERNEL_NODE_HPP_
 
 #include <dynd/nodes/ndarray_node.hpp>
 #include <dynd/kernels/kernel_instance.hpp>
@@ -122,4 +122,4 @@ ndarray_node_ptr make_elwise_binary_kernel_node_steal_kernel(const dtype& dt,
 
 } // namespace dynd
 
-#endif // _DND__ELWISE_BINARY_KERNEL_NODE_HPP_
+#endif // _DYND__ELWISE_BINARY_KERNEL_NODE_HPP_

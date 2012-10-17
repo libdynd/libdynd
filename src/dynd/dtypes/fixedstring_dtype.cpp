@@ -61,7 +61,7 @@ void dynd::fixedstring_dtype::print_dtype(std::ostream& o) const
     o << "fixedstring<" << m_encoding << "," << m_stringsize << ">";
 }
 
-dtype dynd::fixedstring_dtype::apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& DND_UNUSED(root_dt)) const
+dtype dynd::fixedstring_dtype::apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& DYND_UNUSED(root_dt)) const
 {
     if (nindices == 0) {
         return dtype(this);
@@ -79,7 +79,7 @@ dtype dynd::fixedstring_dtype::apply_linear_index(int nindices, const irange *in
     }
 }
 
-void dynd::fixedstring_dtype::get_shape(int DND_UNUSED(i), std::vector<intptr_t>& DND_UNUSED(out_shape)) const
+void dynd::fixedstring_dtype::get_shape(int DYND_UNUSED(i), std::vector<intptr_t>& DYND_UNUSED(out_shape)) const
 {
 }
 
@@ -268,7 +268,7 @@ namespace {
 
 } // anonymous namespace
 
-#define DND_FIXEDSTRING_COMPARISON_TABLE_TYPE_LEVEL(type) { \
+#define DYND_FIXEDSTRING_COMPARISON_TABLE_TYPE_LEVEL(type) { \
     (single_compare_operation_t)type##_compare_kernel::less, \
     (single_compare_operation_t)type##_compare_kernel::less_equal, \
     (single_compare_operation_t)type##_compare_kernel::equal, \
@@ -279,16 +279,16 @@ namespace {
 
 void dynd::fixedstring_dtype::get_single_compare_kernel(single_compare_kernel_instance& out_kernel) const {
     static single_compare_operation_table_t fixedstring_comparisons_table[3] = {
-        DND_FIXEDSTRING_COMPARISON_TABLE_TYPE_LEVEL(ascii_utf8),
-        DND_FIXEDSTRING_COMPARISON_TABLE_TYPE_LEVEL(utf16),
-        DND_FIXEDSTRING_COMPARISON_TABLE_TYPE_LEVEL(utf32)
+        DYND_FIXEDSTRING_COMPARISON_TABLE_TYPE_LEVEL(ascii_utf8),
+        DYND_FIXEDSTRING_COMPARISON_TABLE_TYPE_LEVEL(utf16),
+        DYND_FIXEDSTRING_COMPARISON_TABLE_TYPE_LEVEL(utf32)
     };
     static int lookup[5] = {0, 1, 0, 1, 2};
     out_kernel.comparisons = fixedstring_comparisons_table[lookup[m_encoding]];
     make_raw_auxiliary_data(out_kernel.auxdata, static_cast<uintptr_t>(m_stringsize)<<1);
 }
 
-#undef DND_FIXEDSTRING_COMPARISON_TABLE_TYPE_LEVEL
+#undef DYND_FIXEDSTRING_COMPARISON_TABLE_TYPE_LEVEL
 
 void dynd::fixedstring_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const dtype& src_dt,
                 assign_error_mode errmode,

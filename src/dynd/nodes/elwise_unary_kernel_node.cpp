@@ -62,7 +62,7 @@ ndarray_node_ptr dynd::make_elwise_unary_kernel_node_copy_kernel(const dtype& dt
     new (node_memory) elwise_unary_kernel_node(
                         dt, opnode, kernel);
 
-    return DND_MOVE(result);
+    return DYND_MOVE(result);
 }
 
 ndarray_node_ptr dynd::make_elwise_unary_kernel_node_steal_kernel(const dtype& dt, const ndarray_node_ptr& opnode,
@@ -77,5 +77,5 @@ ndarray_node_ptr dynd::make_elwise_unary_kernel_node_steal_kernel(const dtype& d
 
     ukn->m_kernel.swap(kernel);
 
-    return DND_MOVE(result);
+    return DYND_MOVE(result);
 }

@@ -3,8 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DND__ELWISE_REDUCE_EVAL_HPP_
-#define _DND__ELWISE_REDUCE_EVAL_HPP_
+#ifndef _DYND__ELWISE_REDUCE_EVAL_HPP_
+#define _DYND__ELWISE_REDUCE_EVAL_HPP_
 
 #include <dynd/nodes/ndarray_node.hpp>
 
@@ -15,4 +15,4 @@ ndarray_node_ptr evaluate_elwise_reduce_array(ndarray_node* node,
 
 }} // namespace dynd::eval
 
-#endif // _DND__ELWISE_REDUCE_EVAL_HPP_
+#endif // _DYND__ELWISE_REDUCE_EVAL_HPP_

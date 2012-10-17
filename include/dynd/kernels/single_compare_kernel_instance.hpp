@@ -3,8 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DND__SINGLE_COMPARE_KERNEL_INSTANCE_HPP_
-#define _DND__SINGLE_COMPARE_KERNEL_INSTANCE_HPP_
+#ifndef _DYND__SINGLE_COMPARE_KERNEL_INSTANCE_HPP_
+#define _DYND__SINGLE_COMPARE_KERNEL_INSTANCE_HPP_
 
 #include <dynd/kernels/kernel_instance.hpp>
 
@@ -98,4 +98,4 @@ public:
 
 
 
-#endif // _DND__SINGLE_COMPARE_KERNEL_INSTANCE_HPP_
+#endif // _DYND__SINGLE_COMPARE_KERNEL_INSTANCE_HPP_

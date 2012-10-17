@@ -217,14 +217,14 @@ bool dynd::tuple_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype&
     return false;
 }
 
-void dynd::tuple_dtype::get_single_compare_kernel(single_compare_kernel_instance& DND_UNUSED(out_kernel)) const
+void dynd::tuple_dtype::get_single_compare_kernel(single_compare_kernel_instance& DYND_UNUSED(out_kernel)) const
 {
     throw runtime_error("tuple_dtype::get_single_compare_kernel is unimplemented"); 
 }
 
-void dynd::tuple_dtype::get_dtype_assignment_kernel(const dtype& DND_UNUSED(dst_dt), const dtype& DND_UNUSED(src_dt),
-                assign_error_mode DND_UNUSED(errmode),
-                unary_specialization_kernel_instance& DND_UNUSED(out_kernel)) const
+void dynd::tuple_dtype::get_dtype_assignment_kernel(const dtype& DYND_UNUSED(dst_dt), const dtype& DYND_UNUSED(src_dt),
+                assign_error_mode DYND_UNUSED(errmode),
+                unary_specialization_kernel_instance& DYND_UNUSED(out_kernel)) const
 {
     throw runtime_error("tuple_dtype::get_dtype_assignment_kernel is unimplemented"); 
 }

@@ -3,8 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DND__UNARY_KERNEL_INSTANCE_HPP_
-#define _DND__UNARY_KERNEL_INSTANCE_HPP_
+#ifndef _DYND__UNARY_KERNEL_INSTANCE_HPP_
+#define _DYND__UNARY_KERNEL_INSTANCE_HPP_
 
 #include <dynd/kernels/kernel_instance.hpp>
 
@@ -121,4 +121,4 @@ struct unary_specialization_kernel_instance {
 
 
 
-#endif // _DND__UNARY_KERNEL_INSTANCE_HPP_
+#endif // _DYND__UNARY_KERNEL_INSTANCE_HPP_

@@ -120,13 +120,13 @@ bool dynd::view_dtype::operator==(const extended_dtype& rhs) const
     }
 }
 
-void dynd::view_dtype::get_operand_to_value_kernel(const eval::eval_context *DND_UNUSED(ectx),
+void dynd::view_dtype::get_operand_to_value_kernel(const eval::eval_context *DYND_UNUSED(ectx),
                         unary_specialization_kernel_instance& out_borrowed_kernel) const
 {
     out_borrowed_kernel.borrow_from(m_copy_kernel);
 }
 
-void dynd::view_dtype::get_value_to_operand_kernel(const eval::eval_context *DND_UNUSED(ectx),
+void dynd::view_dtype::get_value_to_operand_kernel(const eval::eval_context *DYND_UNUSED(ectx),
                         unary_specialization_kernel_instance& out_borrowed_kernel) const
 {
     out_borrowed_kernel.borrow_from(m_copy_kernel);

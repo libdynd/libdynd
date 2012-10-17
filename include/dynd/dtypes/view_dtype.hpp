@@ -5,8 +5,8 @@
 // The view dtype reinterprets the bytes of
 // one dtype as another.
 //
-#ifndef _DND__VIEW_DTYPE_HPP_
-#define _DND__VIEW_DTYPE_HPP_
+#ifndef _DYND__VIEW_DTYPE_HPP_
+#define _DYND__VIEW_DTYPE_HPP_
 
 #include <dynd/dtype.hpp>
 
@@ -85,4 +85,4 @@ dtype make_view_dtype() {
 
 } // namespace dynd
 
-#endif // _DND__VIEW_DTYPE_HPP_
+#endif // _DYND__VIEW_DTYPE_HPP_

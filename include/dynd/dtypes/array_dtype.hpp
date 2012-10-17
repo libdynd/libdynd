@@ -5,8 +5,8 @@
 // The array dtype uses memory_block references to store
 // arbitrarily sized arrays.
 //
-#ifndef _DND__ARRAY_DTYPE_HPP_
-#define _DND__ARRAY_DTYPE_HPP_
+#ifndef _DYND__ARRAY_DTYPE_HPP_
+#define _DYND__ARRAY_DTYPE_HPP_
 
 #include <dynd/dtype.hpp>
 #include <dynd/dtype_assign.hpp>
@@ -68,4 +68,4 @@ inline dtype make_array_dtype(const dtype& element_dtype) {
 
 } // namespace dynd
 
-#endif // _DND__ARRAY_DTYPE_HPP_
+#endif // _DYND__ARRAY_DTYPE_HPP_

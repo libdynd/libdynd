@@ -175,8 +175,8 @@ bool dynd::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt)
 void dynd::dtype_assign(const dtype& dst_dt, char *dst, const dtype& src_dt, const char *src,
                 assign_error_mode errmode, const eval::eval_context *ectx)
 {
-    DND_ASSERT_ALIGNED(dst, 0, dst_dt.alignment(), "dst dtype: " << dst_dt << ", src dtype: " << src_dt);
-    DND_ASSERT_ALIGNED(src, 0, src_dt.alignment(), "src dtype: " << src_dt << ", dst dtype: " << dst_dt);
+    DYND_ASSERT_ALIGNED(dst, 0, dst_dt.alignment(), "dst dtype: " << dst_dt << ", src dtype: " << src_dt);
+    DYND_ASSERT_ALIGNED(src, 0, src_dt.alignment(), "src dtype: " << src_dt << ", dst dtype: " << dst_dt);
     if (dst_dt.get_memory_management() != pod_memory_management) {
         throw runtime_error("dtype_assign can only be used with POD destination memory");
     }

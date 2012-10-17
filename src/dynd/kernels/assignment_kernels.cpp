@@ -85,7 +85,7 @@ namespace {
     template<typename dst_type, typename src_type, assign_error_mode errmode>
     struct multiple_assignment_builtin {
         static void general_kernel(char *dst, intptr_t dst_stride, const char *src, intptr_t src_stride,
-                            intptr_t count, const AuxDataBase *DND_UNUSED(auxdata))
+                            intptr_t count, const AuxDataBase *DYND_UNUSED(auxdata))
         {
             for (intptr_t i = 0; i < count; ++i) {
                 single_assigner_builtin<dst_type, src_type, errmode>::assign(
@@ -96,15 +96,15 @@ namespace {
             }
         }
 
-        static void scalar_kernel(char *dst, intptr_t DND_UNUSED(dst_stride), const char *src, intptr_t DND_UNUSED(src_stride),
-                            intptr_t, const AuxDataBase *DND_UNUSED(auxdata))
+        static void scalar_kernel(char *dst, intptr_t DYND_UNUSED(dst_stride), const char *src, intptr_t DYND_UNUSED(src_stride),
+                            intptr_t, const AuxDataBase *DYND_UNUSED(auxdata))
         {
             single_assigner_builtin<dst_type, src_type, errmode>::assign(
                             reinterpret_cast<dst_type *>(dst), reinterpret_cast<const src_type *>(src));
         }
 
-        static void contiguous_kernel(char *dst, intptr_t DND_UNUSED(dst_stride), const char *src, intptr_t DND_UNUSED(src_stride),
-                            intptr_t count, const AuxDataBase *DND_UNUSED(auxdata))
+        static void contiguous_kernel(char *dst, intptr_t DYND_UNUSED(dst_stride), const char *src, intptr_t DYND_UNUSED(src_stride),
+                            intptr_t count, const AuxDataBase *DYND_UNUSED(auxdata))
         {
             dst_type *dst_cached = reinterpret_cast<dst_type *>(dst);
             const src_type *src_cached = reinterpret_cast<const src_type *>(src);
@@ -117,8 +117,8 @@ namespace {
             }
         }
 
-        static void scalar_to_contiguous_kernel(char *dst, intptr_t DND_UNUSED(dst_stride), const char *src, intptr_t DND_UNUSED(src_stride),
-                            intptr_t count, const AuxDataBase *DND_UNUSED(auxdata))
+        static void scalar_to_contiguous_kernel(char *dst, intptr_t DYND_UNUSED(dst_stride), const char *src, intptr_t DYND_UNUSED(src_stride),
+                            intptr_t count, const AuxDataBase *DYND_UNUSED(auxdata))
         {
             dst_type *dst_cached = reinterpret_cast<dst_type *>(dst);
             const src_type src_value = *reinterpret_cast<const src_type *>(src);
@@ -302,7 +302,7 @@ namespace {
     template<class T>
     struct aligned_fixed_size_copy_assign_type {
         static void general_kernel(char *dst, intptr_t dst_stride, const char *src, intptr_t src_stride,
-                            intptr_t count, const AuxDataBase *DND_UNUSED(auxdata))
+                            intptr_t count, const AuxDataBase *DYND_UNUSED(auxdata))
         {
             for (intptr_t i = 0; i < count; ++i) {
                 *(T *)dst = *(T *)src;
@@ -312,14 +312,14 @@ namespace {
             }
         }
 
-        static void scalar_kernel(char *dst, intptr_t DND_UNUSED(dst_stride), const char *src, intptr_t DND_UNUSED(src_stride),
-                            intptr_t, const AuxDataBase *DND_UNUSED(auxdata))
+        static void scalar_kernel(char *dst, intptr_t DYND_UNUSED(dst_stride), const char *src, intptr_t DYND_UNUSED(src_stride),
+                            intptr_t, const AuxDataBase *DYND_UNUSED(auxdata))
         {
             *(T *)dst = *(T *)src;
         }
 
-        static void contiguous_kernel(char *dst, intptr_t DND_UNUSED(dst_stride), const char *src, intptr_t DND_UNUSED(src_stride),
-                            intptr_t count, const AuxDataBase *DND_UNUSED(auxdata))
+        static void contiguous_kernel(char *dst, intptr_t DYND_UNUSED(dst_stride), const char *src, intptr_t DYND_UNUSED(src_stride),
+                            intptr_t count, const AuxDataBase *DYND_UNUSED(auxdata))
         {
             T *dst_cached = reinterpret_cast<T *>(dst);
             const T *src_cached = reinterpret_cast<const T *>(src);
@@ -332,8 +332,8 @@ namespace {
             }
         }
 
-        static void scalar_to_contiguous_kernel(char *dst, intptr_t DND_UNUSED(dst_stride), const char *src, intptr_t DND_UNUSED(src_stride),
-                            intptr_t count, const AuxDataBase *DND_UNUSED(auxdata))
+        static void scalar_to_contiguous_kernel(char *dst, intptr_t DYND_UNUSED(dst_stride), const char *src, intptr_t DYND_UNUSED(src_stride),
+                            intptr_t count, const AuxDataBase *DYND_UNUSED(auxdata))
         {
             T *dst_cached = reinterpret_cast<T *>(dst);
             const T src_value = *reinterpret_cast<const T *>(src);
@@ -351,7 +351,7 @@ namespace {
     template<>
     struct aligned_fixed_size_copy_assign<1> {
         static void general_kernel(char *dst, intptr_t dst_stride, const char *src, intptr_t src_stride,
-                            intptr_t count, const AuxDataBase *DND_UNUSED(auxdata))
+                            intptr_t count, const AuxDataBase *DYND_UNUSED(auxdata))
         {
             for (intptr_t i = 0; i < count; ++i) {
                 *dst = *src;
@@ -361,20 +361,20 @@ namespace {
             }
         }
 
-        static void scalar_kernel(char *dst, intptr_t DND_UNUSED(dst_stride), const char *src, intptr_t DND_UNUSED(src_stride),
-                            intptr_t, const AuxDataBase *DND_UNUSED(auxdata))
+        static void scalar_kernel(char *dst, intptr_t DYND_UNUSED(dst_stride), const char *src, intptr_t DYND_UNUSED(src_stride),
+                            intptr_t, const AuxDataBase *DYND_UNUSED(auxdata))
         {
             *dst = *src;
         }
 
-        static void contiguous_kernel(char *dst, intptr_t DND_UNUSED(dst_stride), const char *src, intptr_t DND_UNUSED(src_stride),
-                            intptr_t count, const AuxDataBase *DND_UNUSED(auxdata))
+        static void contiguous_kernel(char *dst, intptr_t DYND_UNUSED(dst_stride), const char *src, intptr_t DYND_UNUSED(src_stride),
+                            intptr_t count, const AuxDataBase *DYND_UNUSED(auxdata))
         {
             memcpy(dst, src, count);
         }
 
-        static void scalar_to_contiguous_kernel(char *dst, intptr_t DND_UNUSED(dst_stride), const char *src, intptr_t DND_UNUSED(src_stride),
-                            intptr_t count, const AuxDataBase *DND_UNUSED(auxdata))
+        static void scalar_to_contiguous_kernel(char *dst, intptr_t DYND_UNUSED(dst_stride), const char *src, intptr_t DYND_UNUSED(src_stride),
+                            intptr_t count, const AuxDataBase *DYND_UNUSED(auxdata))
         {
             char src_value = *src;
             for (intptr_t i = 0; i < count; ++i) {
@@ -394,7 +394,7 @@ namespace {
     template<int N>
     struct unaligned_fixed_size_copy_assign {
         static void general_kernel(char *dst, intptr_t dst_stride, const char *src, intptr_t src_stride,
-                            intptr_t count, const AuxDataBase *DND_UNUSED(auxdata))
+                            intptr_t count, const AuxDataBase *DYND_UNUSED(auxdata))
         {
             for (intptr_t i = 0; i < count; ++i) {
                 memcpy(dst, src, N);
@@ -404,20 +404,20 @@ namespace {
             }
         }
 
-        static void scalar_kernel(char *dst, intptr_t DND_UNUSED(dst_stride), const char *src, intptr_t DND_UNUSED(src_stride),
-                            intptr_t, const AuxDataBase *DND_UNUSED(auxdata))
+        static void scalar_kernel(char *dst, intptr_t DYND_UNUSED(dst_stride), const char *src, intptr_t DYND_UNUSED(src_stride),
+                            intptr_t, const AuxDataBase *DYND_UNUSED(auxdata))
         {
             memcpy(dst, src, N);
         }
 
-        static void contiguous_kernel(char *dst, intptr_t DND_UNUSED(dst_stride), const char *src, intptr_t DND_UNUSED(src_stride),
-                            intptr_t count, const AuxDataBase *DND_UNUSED(auxdata))
+        static void contiguous_kernel(char *dst, intptr_t DYND_UNUSED(dst_stride), const char *src, intptr_t DYND_UNUSED(src_stride),
+                            intptr_t count, const AuxDataBase *DYND_UNUSED(auxdata))
         {
             memcpy(dst, src, count * N);
         }
 
-        static void scalar_to_contiguous_kernel(char *dst, intptr_t DND_UNUSED(dst_stride), const char *src, intptr_t DND_UNUSED(src_stride),
-                            intptr_t count, const AuxDataBase *DND_UNUSED(auxdata))
+        static void scalar_to_contiguous_kernel(char *dst, intptr_t DYND_UNUSED(dst_stride), const char *src, intptr_t DYND_UNUSED(src_stride),
+                            intptr_t count, const AuxDataBase *DYND_UNUSED(auxdata))
         {
             for (intptr_t i = 0; i < count; ++i) {
                 memcpy(dst, src, N);
@@ -428,7 +428,7 @@ namespace {
     };
 }
 static void unaligned_scalar_copy_assign_kernel(char *dst, intptr_t, const char *src, intptr_t,
-                            intptr_t DND_UNUSED(count), const AuxDataBase *auxdata)
+                            intptr_t DYND_UNUSED(count), const AuxDataBase *auxdata)
 {
     intptr_t element_size = static_cast<intptr_t>(get_raw_auxiliary_data(auxdata)>>1);
     memcpy(dst, src, element_size);

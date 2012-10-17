@@ -3,8 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DND__BUFFERED_UNARY_KERNELS_HPP_
-#define _DND__BUFFERED_UNARY_KERNELS_HPP_
+#ifndef _DYND__BUFFERED_UNARY_KERNELS_HPP_
+#define _DYND__BUFFERED_UNARY_KERNELS_HPP_
 
 #include <vector>
 #include <deque>
@@ -59,4 +59,4 @@ void push_back_dtype_value_to_storage_kernels(const dynd::dtype& dt,
 
 } // namespace dynd
 
-#endif // _DND__BUFFERED_UNARY_KERNELS_HPP_
+#endif // _DYND__BUFFERED_UNARY_KERNELS_HPP_

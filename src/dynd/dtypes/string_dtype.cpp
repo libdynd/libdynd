@@ -52,7 +52,7 @@ void dynd::string_dtype::print_dtype(std::ostream& o) const {
 
 }
 
-dtype dynd::string_dtype::apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& DND_UNUSED(root_dt)) const
+dtype dynd::string_dtype::apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& DYND_UNUSED(root_dt)) const
 {
     if (nindices == 0) {
         return dtype(this);
@@ -70,7 +70,7 @@ dtype dynd::string_dtype::apply_linear_index(int nindices, const irange *indices
     }
 }
 
-void dynd::string_dtype::get_shape(int DND_UNUSED(i), std::vector<intptr_t>& DND_UNUSED(out_shape)) const
+void dynd::string_dtype::get_shape(int DYND_UNUSED(i), std::vector<intptr_t>& DYND_UNUSED(out_shape)) const
 {
 }
 
@@ -102,7 +102,7 @@ bool dynd::string_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype
     }
 }
 
-void dynd::string_dtype::get_single_compare_kernel(single_compare_kernel_instance& DND_UNUSED(out_kernel)) const {
+void dynd::string_dtype::get_single_compare_kernel(single_compare_kernel_instance& DYND_UNUSED(out_kernel)) const {
     throw std::runtime_error("string_dtype::get_single_compare_kernel not supported yet");
 }
 

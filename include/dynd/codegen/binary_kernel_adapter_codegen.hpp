@@ -3,8 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DND__BINARY_KERNEL_ADAPTER_CODEGEN_HPP_
-#define _DND__BINARY_KERNEL_ADAPTER_CODEGEN_HPP_
+#ifndef _DYND__BINARY_KERNEL_ADAPTER_CODEGEN_HPP_
+#define _DYND__BINARY_KERNEL_ADAPTER_CODEGEN_HPP_
 
 #include <dynd/dtype.hpp>
 #include <dynd/kernels/kernel_instance.hpp>
@@ -59,4 +59,4 @@ binary_operation_t codegen_binary_function_adapter(const memory_block_ptr& exec_
 
 } // namespace dynd
 
-#endif // _DND__BINARY_KERNEL_ADAPTER_CODEGEN_HPP_
+#endif // _DYND__BINARY_KERNEL_ADAPTER_CODEGEN_HPP_

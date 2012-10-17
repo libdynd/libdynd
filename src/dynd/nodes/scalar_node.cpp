@@ -30,10 +30,10 @@ ndarray_node_ptr dynd::scalar_node::as_dtype(const dtype& dt,
 }
 
 ndarray_node_ptr dynd::scalar_node::apply_linear_index(
-                int DND_UNUSED(ndim), const bool *DND_UNUSED(remove_axis),
-                const intptr_t *DND_UNUSED(start_index), const intptr_t *DND_UNUSED(index_strides),
-                const intptr_t *DND_UNUSED(shape),
-                bool DND_UNUSED(allow_in_place))
+                int DYND_UNUSED(ndim), const bool *DYND_UNUSED(remove_axis),
+                const intptr_t *DYND_UNUSED(start_index), const intptr_t *DYND_UNUSED(index_strides),
+                const intptr_t *DYND_UNUSED(shape),
+                bool DYND_UNUSED(allow_in_place))
 {
     return as_ndarray_node_ptr();
 }

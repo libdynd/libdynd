@@ -46,7 +46,7 @@ dynd::byteswap_dtype::byteswap_dtype(const dtype& value_dtype, const dtype& oper
     }
 }
 
-void dynd::byteswap_dtype::print_element(std::ostream& DND_UNUSED(o), const char *DND_UNUSED(data)) const
+void dynd::byteswap_dtype::print_element(std::ostream& DYND_UNUSED(o), const char *DYND_UNUSED(data)) const
 {
     throw runtime_error("internal error: byteswap_dtype::print_element isn't supposed to be called");
 }
@@ -98,13 +98,13 @@ bool dynd::byteswap_dtype::operator==(const extended_dtype& rhs) const
     }
 }
 
-void dynd::byteswap_dtype::get_operand_to_value_kernel(const eval::eval_context *DND_UNUSED(ectx),
+void dynd::byteswap_dtype::get_operand_to_value_kernel(const eval::eval_context *DYND_UNUSED(ectx),
                         unary_specialization_kernel_instance& out_borrowed_kernel) const
 {
     out_borrowed_kernel.borrow_from(m_byteswap_kernel);
 }
 
-void dynd::byteswap_dtype::get_value_to_operand_kernel(const eval::eval_context *DND_UNUSED(ectx),
+void dynd::byteswap_dtype::get_value_to_operand_kernel(const eval::eval_context *DYND_UNUSED(ectx),
                         unary_specialization_kernel_instance& out_borrowed_kernel) const
 {
     out_borrowed_kernel.borrow_from(m_byteswap_kernel);

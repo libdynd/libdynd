@@ -3,8 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DND__SHAPE_TOOLS_HPP_
-#define _DND__SHAPE_TOOLS_HPP_
+#ifndef _DYND__SHAPE_TOOLS_HPP_
+#define _DYND__SHAPE_TOOLS_HPP_
 
 #include <iostream>
 
@@ -127,4 +127,4 @@ enum shape_signal_t {
 
 } // namespace dynd
 
-#endif // _DND__SHAPE_TOOLS_HPP_
+#endif // _DYND__SHAPE_TOOLS_HPP_

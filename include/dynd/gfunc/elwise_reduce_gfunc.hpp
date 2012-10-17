@@ -3,8 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DND__ELWISE_REDUCE_GFUNC_HPP_
-#define _DND__ELWISE_REDUCE_GFUNC_HPP_
+#ifndef _DYND__ELWISE_REDUCE_GFUNC_HPP_
+#define _DYND__ELWISE_REDUCE_GFUNC_HPP_
 
 #include <sstream>
 #include <deque>
@@ -87,4 +87,4 @@ public:
 
 }} // namespace dynd::gfunc
 
-#endif // _DND__ELWISE_REDUCE_GFUNC_HPP_
+#endif // _DYND__ELWISE_REDUCE_GFUNC_HPP_

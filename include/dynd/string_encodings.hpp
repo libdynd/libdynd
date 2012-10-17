@@ -3,8 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DND__STRING_ENCODINGS_HPP_
-#define _DND__STRING_ENCODINGS_HPP_
+#ifndef _DYND__STRING_ENCODINGS_HPP_
+#define _DYND__STRING_ENCODINGS_HPP_
 
 #include <iostream>
 
@@ -98,4 +98,4 @@ void print_escaped_unicode_codepoint(std::ostream& o, uint32_t cp);
 
 } // namespace dynd
 
-#endif // _DND__STRING_ENCODINGS_HPP_
+#endif // _DYND__STRING_ENCODINGS_HPP_

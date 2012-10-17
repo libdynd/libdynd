@@ -5,8 +5,8 @@
 // The string dtype uses memory_block references to store
 // arbitrarily sized strings.
 //
-#ifndef _DND__STRING_DTYPE_HPP_
-#define _DND__STRING_DTYPE_HPP_
+#ifndef _DYND__STRING_DTYPE_HPP_
+#define _DYND__STRING_DTYPE_HPP_
 
 #include <dynd/dtype.hpp>
 #include <dynd/dtype_assign.hpp>
@@ -70,4 +70,4 @@ inline dtype make_string_dtype(string_encoding_t encoding) {
 
 } // namespace dynd
 
-#endif // _DND__STRING_DTYPE_HPP_
+#endif // _DYND__STRING_DTYPE_HPP_

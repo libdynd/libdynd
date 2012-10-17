@@ -3,8 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DND__ASSIGNMENT_KERNELS_HPP_
-#define _DND__ASSIGNMENT_KERNELS_HPP_
+#ifndef _DYND__ASSIGNMENT_KERNELS_HPP_
+#define _DYND__ASSIGNMENT_KERNELS_HPP_
 
 #include <dynd/dtype.hpp>
 #include <dynd/dtype_assign.hpp>
@@ -84,4 +84,4 @@ void get_dtype_assignment_kernel(const dtype& dt,
 
 } // namespace dynd
 
-#endif // _DND__ASSIGNMENT_KERNELS_HPP_
+#endif // _DYND__ASSIGNMENT_KERNELS_HPP_

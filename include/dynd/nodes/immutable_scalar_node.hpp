@@ -3,8 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DND__IMMUTABLE_SCALAR_NODE_HPP_
-#define _DND__IMMUTABLE_SCALAR_NODE_HPP_
+#ifndef _DYND__IMMUTABLE_SCALAR_NODE_HPP_
+#define _DYND__IMMUTABLE_SCALAR_NODE_HPP_
 
 #include <dynd/nodes/ndarray_node.hpp>
 #include <dynd/dtypes/string_dtype.hpp>
@@ -196,4 +196,4 @@ ndarray_node_ptr make_static_utf32_string_immutable_scalar_node(const uint32_t (
 
 } // namespace dynd
 
-#endif // _DND__IMMUTABLE_SCALAR_NODE_HPP_
+#endif // _DYND__IMMUTABLE_SCALAR_NODE_HPP_

@@ -53,7 +53,7 @@ TEST(AlignDType, Basic) {
     a = ndarray(make_unaligned_dtype<int64_t>(), storage.data + 1);
     EXPECT_EQ(0x12345678abcdef01LL, a.as<int64_t>());
     // This should raise an exception if the
-    // preprocessor symbol DND_ALIGNMENT_ASSERTIONS is defined,
+    // preprocessor symbol DYND_ALIGNMENT_ASSERTIONS is defined,
     // (or segfault on platforms that don't support unaligned access)
     //a = ndarray(make_dtype<int64_t>(), storage.data + 1);
 }

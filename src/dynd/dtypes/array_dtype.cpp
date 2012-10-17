@@ -88,7 +88,7 @@ bool dynd::array_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype&
     }
 }
 
-void dynd::array_dtype::get_single_compare_kernel(single_compare_kernel_instance& DND_UNUSED(out_kernel)) const {
+void dynd::array_dtype::get_single_compare_kernel(single_compare_kernel_instance& DYND_UNUSED(out_kernel)) const {
     throw std::runtime_error("array_dtype::get_single_compare_kernel not supported yet");
 }
 

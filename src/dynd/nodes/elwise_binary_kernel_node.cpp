@@ -131,7 +131,7 @@ ndarray_node_ptr dynd::make_elwise_binary_kernel_node_copy_kernel(const dtype& d
     new (node_memory) elwise_binary_kernel_node(
                         dt, opnode0, opnode1, kernel);
 
-    return DND_MOVE(result);
+    return DYND_MOVE(result);
 }
 
 ndarray_node_ptr dynd::make_elwise_binary_kernel_node_steal_kernel(const dtype& dt,
@@ -147,5 +147,5 @@ ndarray_node_ptr dynd::make_elwise_binary_kernel_node_steal_kernel(const dtype& 
 
     ukn->m_kernel.swap(kernel);
 
-    return DND_MOVE(result);
+    return DYND_MOVE(result);
 }

@@ -3,8 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DND__BUFFERED_BINARY_KERNELS_HPP_
-#define _DND__BUFFERED_BINARY_KERNELS_HPP_
+#ifndef _DYND__BUFFERED_BINARY_KERNELS_HPP_
+#define _DYND__BUFFERED_BINARY_KERNELS_HPP_
 
 #include <dynd/kernels/kernel_instance.hpp>
 #include <dynd/buffer_storage.hpp>
@@ -29,4 +29,4 @@ void make_buffered_binary_kernel(kernel_instance<binary_operation_t>& kernel,
 
 } // namespace dynd
 
-#endif // _DND__BUFFERED_BINARY_KERNELS_HPP_
+#endif // _DYND__BUFFERED_BINARY_KERNELS_HPP_

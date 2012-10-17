@@ -3,8 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DND__MEMORY_BLOCK_HPP_
-#define _DND__MEMORY_BLOCK_HPP_
+#ifndef _DYND__MEMORY_BLOCK_HPP_
+#define _DYND__MEMORY_BLOCK_HPP_
 
 #include <iostream>
 
@@ -39,7 +39,7 @@ enum memory_block_type_t {
  * extensible ones.
  */
 struct memory_block_data {
-#ifdef DND_CLING
+#ifdef DYND_CLING
     // A hack avoiding boost atomic_count, since that creates inline assembly which LLVM JIT doesn't like!
     mutable long m_use_count;
 #else
@@ -158,7 +158,7 @@ public:
         }
     }
 
-#ifdef DND_RVALUE_REFS
+#ifdef DYND_RVALUE_REFS
     /** Move constructor */
     memory_block_ptr(memory_block_ptr&& rhs)
         : m_memblock(rhs.m_memblock)
@@ -190,7 +190,7 @@ public:
     }
 
     /** Move assignment */
-#ifdef DND_RVALUE_REFS
+#ifdef DYND_RVALUE_REFS
     memory_block_ptr& operator=(memory_block_ptr&& rhs)
     {
         if (m_memblock != 0) {
@@ -267,4 +267,4 @@ inline bool operator!=(const memory_block_data *memblock, const memory_block_ptr
 
 } // namespace dynd
 
-#endif // _DND__MEMORY_BLOCK_HPP_
+#endif // _DYND__MEMORY_BLOCK_HPP_

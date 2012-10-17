@@ -3,8 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DND__ARRAY_ASSIGNMENT_KERNELS_HPP_
-#define _DND__ARRAY_ASSIGNMENT_KERNELS_HPP_
+#ifndef _DYND__ARRAY_ASSIGNMENT_KERNELS_HPP_
+#define _DYND__ARRAY_ASSIGNMENT_KERNELS_HPP_
 
 #include <dynd/kernels/unary_kernel_instance.hpp>
 #include <dynd/dtype_assign.hpp>
@@ -21,4 +21,4 @@ void get_blockref_array_assignment_kernel(const dtype& dst_element_type,
 
 } // namespace dynd
 
-#endif // _DND__ARRAY_ASSIGNMENT_KERNELS_HPP_
+#endif // _DYND__ARRAY_ASSIGNMENT_KERNELS_HPP_

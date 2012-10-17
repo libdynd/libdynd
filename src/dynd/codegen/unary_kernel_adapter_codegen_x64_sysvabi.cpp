@@ -6,7 +6,7 @@
 
 #include <dynd/platform_definitions.h>
 
-#if defined(DND_CALL_SYSV_X64)
+#if defined(DYND_CALL_SYSV_X64)
 
 #include <sstream>
 #include <stdexcept>
@@ -243,7 +243,7 @@ namespace
 
 uint64_t dynd::get_unary_function_adapter_unique_id(const dtype& restype,
                                                const dtype& arg0type,
-                                               calling_convention_t DND_UNUSED(callconv)
+                                               calling_convention_t DYND_UNUSED(callconv)
                                               )
 {
     // Bits 0..2 for the result type
@@ -390,7 +390,7 @@ namespace // nameless
 unary_operation_t* dynd::codegen_unary_function_adapter(const memory_block_ptr& exec_mem_block,
                                                   const dtype& restype,
                                                   const dtype& arg0type,
-                                                  calling_convention_t DND_UNUSED(callconv)
+                                                  calling_convention_t DYND_UNUSED(callconv)
                                                  )
 {
     size_t arg0_idx = idx_for_type_id(arg0type.type_id());
@@ -457,4 +457,4 @@ unary_operation_t* dynd::codegen_unary_function_adapter(const memory_block_ptr& 
     return 0;
 }
 
-#endif // defined(DND_CALL_SYSV_X64)
+#endif // defined(DYND_CALL_SYSV_X64)

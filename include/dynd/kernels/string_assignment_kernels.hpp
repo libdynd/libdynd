@@ -3,8 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DND__STRING_ASSIGNMENT_KERNELS_HPP_
-#define _DND__STRING_ASSIGNMENT_KERNELS_HPP_
+#ifndef _DYND__STRING_ASSIGNMENT_KERNELS_HPP_
+#define _DYND__STRING_ASSIGNMENT_KERNELS_HPP_
 
 #include <dynd/kernels/unary_kernel_instance.hpp>
 #include <dynd/dtype_assign.hpp>
@@ -47,4 +47,4 @@ void get_blockref_string_to_fixedstring_assignment_kernel(intptr_t dst_element_s
 
 } // namespace dynd
 
-#endif // _DND__STRING_ASSIGNMENT_KERNELS_HPP_
+#endif // _DYND__STRING_ASSIGNMENT_KERNELS_HPP_

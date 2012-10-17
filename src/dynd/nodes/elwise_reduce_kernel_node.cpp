@@ -53,15 +53,15 @@ ndarray_node_ptr dynd::elwise_reduce_kernel_node::as_dtype(const dtype& dt,
 }
 
 ndarray_node_ptr dynd::elwise_reduce_kernel_node::apply_linear_index(
-                int DND_UNUSED(ndim), const bool *DND_UNUSED(remove_axis),
-                const intptr_t *DND_UNUSED(start_index), const intptr_t *DND_UNUSED(index_strides),
-                const intptr_t *DND_UNUSED(shape),
-                bool DND_UNUSED(allow_in_place))
+                int DYND_UNUSED(ndim), const bool *DYND_UNUSED(remove_axis),
+                const intptr_t *DYND_UNUSED(start_index), const intptr_t *DYND_UNUSED(index_strides),
+                const intptr_t *DYND_UNUSED(shape),
+                bool DYND_UNUSED(allow_in_place))
 {
     throw std::runtime_error("TODO: elwise_reduce_kernel_node::apply_linear_index");
 }
 
-void dynd::elwise_reduce_kernel_node::get_unary_operation(intptr_t DND_UNUSED(dst_fixedstride), intptr_t DND_UNUSED(src_fixedstride),
+void dynd::elwise_reduce_kernel_node::get_unary_operation(intptr_t DYND_UNUSED(dst_fixedstride), intptr_t DYND_UNUSED(src_fixedstride),
                                     kernel_instance<unary_operation_t>& out_kernel) const
 {
     out_kernel.borrow_from(m_kernel);
@@ -99,7 +99,7 @@ ndarray_node_ptr dynd::make_elwise_reduce_kernel_node_copy_kernel(const dtype& d
 
     ukn->m_kernel.copy_from(kernel);
 
-    return DND_MOVE(result);
+    return DYND_MOVE(result);
 }
 
 ndarray_node_ptr dynd::make_elwise_reduce_kernel_node_steal_kernel(const dtype& dt, const ndarray_node_ptr& opnode,
@@ -115,5 +115,5 @@ ndarray_node_ptr dynd::make_elwise_reduce_kernel_node_steal_kernel(const dtype& 
 
     ukn->m_kernel.swap(kernel);
 
-    return DND_MOVE(result);
+    return DYND_MOVE(result);
 }

@@ -3,8 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DND__DTYPE_HPP_
-#define _DND__DTYPE_HPP_
+#ifndef _DYND__DTYPE_HPP_
+#define _DYND__DTYPE_HPP_
 
 #include <iostream>
 #include <complex>
@@ -375,7 +375,7 @@ namespace detail {
     /**
      * Internal implementation detail - makes a builtin dtype from its raw values.
      */
-    /* TODO: DND_CONSTEXPR */ dtype internal_make_raw_dtype(char type_id, char kind, intptr_t element_size, char alignment);
+    /* TODO: DYND_CONSTEXPR */ dtype internal_make_raw_dtype(char type_id, char kind, intptr_t element_size, char alignment);
 
 } // namespace detail
 
@@ -400,7 +400,7 @@ private:
     const extended_dtype *m_extended;
 
     /** Unchecked built-in dtype constructor from raw parameters */
-    /* TODO: DND_CONSTEXPR */ dtype(char type_id, char kind, size_t element_size, char alignment)
+    /* TODO: DYND_CONSTEXPR */ dtype(char type_id, char kind, size_t element_size, char alignment)
         : m_type_id(type_id), m_kind(kind),
           m_alignment(alignment), m_element_size(element_size), m_extended(NULL)
     {}
@@ -432,7 +432,7 @@ public:
         }
         return *this;
     }
-#ifdef DND_RVALUE_REFS
+#ifdef DYND_RVALUE_REFS
     /** Move constructor (should be "= default" in C++11) */
     dtype(dtype&& rhs)
         : m_type_id(rhs.m_type_id), m_kind(rhs.m_kind), m_alignment(rhs.m_alignment),
@@ -451,7 +451,7 @@ public:
         rhs.m_extended = NULL;
         return *this;
     }
-#endif // DND_RVALUE_REFS
+#endif // DYND_RVALUE_REFS
 
     /** Construct from a type ID */
     explicit dtype(type_id_t type_id);
@@ -619,7 +619,7 @@ public:
      */
     void print_element(std::ostream& o, const char *data) const;
 
-    friend /* TODO: DND_CONSTEXPR*/ dtype detail::internal_make_raw_dtype(char type_id, char kind, intptr_t element_size, char alignment);
+    friend /* TODO: DYND_CONSTEXPR*/ dtype detail::internal_make_raw_dtype(char type_id, char kind, intptr_t element_size, char alignment);
     friend std::ostream& operator<<(std::ostream& o, const dtype& rhs);
     friend dtype make_fixedbytes_dtype(intptr_t element_size, intptr_t alignment);
 };
@@ -658,4 +658,4 @@ void hexadecimal_print(std::ostream& o, const char *data, intptr_t element_size)
 
 } // namespace dynd
 
-#endif // _DND__DTYPE_HPP_
+#endif // _DYND__DTYPE_HPP_

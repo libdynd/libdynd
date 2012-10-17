@@ -67,7 +67,7 @@ bool dynd::pointer_dtype::is_lossless_assignment(const dtype& dst_dt, const dtyp
     }
 }
 
-void dynd::pointer_dtype::get_single_compare_kernel(single_compare_kernel_instance& DND_UNUSED(out_kernel)) const {
+void dynd::pointer_dtype::get_single_compare_kernel(single_compare_kernel_instance& DYND_UNUSED(out_kernel)) const {
     throw std::runtime_error("pointer_dtype::get_single_compare_kernel not supported yet");
 }
 
@@ -92,7 +92,7 @@ namespace {
             }
         }
 
-        static void scalar_kernel(char *dst, intptr_t DND_UNUSED(dst_stride), const char *src, intptr_t DND_UNUSED(src_stride),
+        static void scalar_kernel(char *dst, intptr_t DYND_UNUSED(dst_stride), const char *src, intptr_t DYND_UNUSED(src_stride),
                             intptr_t, const AuxDataBase *auxdata)
         {
             const pointer_dst_assign_kernel_auxdata& ad = get_auxiliary_data<pointer_dst_assign_kernel_auxdata>(auxdata);
@@ -100,7 +100,7 @@ namespace {
             ad.m_assign_kernel.kernel(dst_target, 0, src, 0, 1, ad.m_assign_kernel.auxdata);
         }
 
-        static void contiguous_kernel(char *dst, intptr_t DND_UNUSED(dst_stride), const char *src, intptr_t src_stride,
+        static void contiguous_kernel(char *dst, intptr_t DYND_UNUSED(dst_stride), const char *src, intptr_t src_stride,
                             intptr_t count, const AuxDataBase *auxdata)
         {
             const pointer_dst_assign_kernel_auxdata& ad = get_auxiliary_data<pointer_dst_assign_kernel_auxdata>(auxdata);

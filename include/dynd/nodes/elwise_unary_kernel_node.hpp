@@ -3,8 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DND__ELWISE_UNARY_KERNEL_NODE_HPP_
-#define _DND__ELWISE_UNARY_KERNEL_NODE_HPP_
+#ifndef _DYND__ELWISE_UNARY_KERNEL_NODE_HPP_
+#define _DYND__ELWISE_UNARY_KERNEL_NODE_HPP_
 
 #include <dynd/nodes/ndarray_node.hpp>
 #include <dynd/kernels/unary_kernel_instance.hpp>
@@ -67,7 +67,7 @@ public:
         return 1;
     }
 
-    ndarray_node *get_opnode(int DND_UNUSED(i)) const {
+    ndarray_node *get_opnode(int DYND_UNUSED(i)) const {
         return m_opnode.get_node();
     }
 
@@ -101,4 +101,4 @@ ndarray_node_ptr make_elwise_unary_kernel_node_steal_kernel(const dtype& dt, con
 
 } // namespace dynd
 
-#endif // _DND__ELWISE_UNARY_KERNEL_NODE_HPP_
+#endif // _DYND__ELWISE_UNARY_KERNEL_NODE_HPP_

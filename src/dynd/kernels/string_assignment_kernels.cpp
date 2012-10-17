@@ -67,14 +67,14 @@ namespace {
             }
         }
 
-        static void scalar_kernel(char *dst, intptr_t DND_UNUSED(dst_stride), const char *src, intptr_t DND_UNUSED(src_stride),
+        static void scalar_kernel(char *dst, intptr_t DYND_UNUSED(dst_stride), const char *src, intptr_t DYND_UNUSED(src_stride),
                             intptr_t, const AuxDataBase *auxdata)
         {
             const fixedstring_assign_kernel_auxdata& ad = get_auxiliary_data<fixedstring_assign_kernel_auxdata>(auxdata);
             fixedstring_assign(dst, src, ad);
         }
 
-        static void scalar_to_contiguous_kernel(char *dst, intptr_t dst_stride, const char *src, intptr_t DND_UNUSED(src_stride),
+        static void scalar_to_contiguous_kernel(char *dst, intptr_t dst_stride, const char *src, intptr_t DYND_UNUSED(src_stride),
                             intptr_t count, const AuxDataBase *auxdata)
         {
             const fixedstring_assign_kernel_auxdata& ad = get_auxiliary_data<fixedstring_assign_kernel_auxdata>(auxdata);
@@ -180,7 +180,7 @@ namespace {
     struct blockref_string_assign_kernel {
         static auxdata_kernel_api kernel_api;
 
-        static auxdata_kernel_api *get_child_api(const AuxDataBase *DND_UNUSED(auxdata), int DND_UNUSED(index))
+        static auxdata_kernel_api *get_child_api(const AuxDataBase *DYND_UNUSED(auxdata), int DYND_UNUSED(index))
         {
             return NULL;
         }
@@ -210,14 +210,14 @@ namespace {
             }
         }
 
-        static void scalar_kernel(char *dst, intptr_t DND_UNUSED(dst_stride), const char *src, intptr_t DND_UNUSED(src_stride),
+        static void scalar_kernel(char *dst, intptr_t DYND_UNUSED(dst_stride), const char *src, intptr_t DYND_UNUSED(src_stride),
                             intptr_t, const AuxDataBase *auxdata)
         {
             const blockref_string_assign_kernel_auxdata& ad = get_auxiliary_data<blockref_string_assign_kernel_auxdata>(auxdata);
             blockref_string_assign(dst, src, ad);
         }
 
-        static void scalar_to_contiguous_kernel(char *dst, intptr_t dst_stride, const char *src, intptr_t DND_UNUSED(src_stride),
+        static void scalar_to_contiguous_kernel(char *dst, intptr_t dst_stride, const char *src, intptr_t DYND_UNUSED(src_stride),
                             intptr_t count, const AuxDataBase *auxdata)
         {
             const blockref_string_assign_kernel_auxdata& ad = get_auxiliary_data<blockref_string_assign_kernel_auxdata>(auxdata);
@@ -335,7 +335,7 @@ namespace {
     struct fixedstring_to_blockref_string_assign_kernel {
         static auxdata_kernel_api kernel_api;
 
-        static auxdata_kernel_api *get_child_api(const AuxDataBase *DND_UNUSED(auxdata), int DND_UNUSED(index))
+        static auxdata_kernel_api *get_child_api(const AuxDataBase *DYND_UNUSED(auxdata), int DYND_UNUSED(index))
         {
             return NULL;
         }
@@ -368,7 +368,7 @@ namespace {
             }
         }
 
-        static void scalar_kernel(char *dst, intptr_t DND_UNUSED(dst_stride), const char *src, intptr_t DND_UNUSED(src_stride),
+        static void scalar_kernel(char *dst, intptr_t DYND_UNUSED(dst_stride), const char *src, intptr_t DYND_UNUSED(src_stride),
                             intptr_t, const AuxDataBase *auxdata)
         {
             const fixedstring_to_blockref_string_assign_kernel_auxdata& ad =
@@ -376,7 +376,7 @@ namespace {
             fixedstring_to_blockref_string_assign(dst, src, ad);
         }
 
-        static void scalar_to_contiguous_kernel(char *dst, intptr_t dst_stride, const char *src, intptr_t DND_UNUSED(src_stride),
+        static void scalar_to_contiguous_kernel(char *dst, intptr_t dst_stride, const char *src, intptr_t DYND_UNUSED(src_stride),
                             intptr_t count, const AuxDataBase *auxdata)
         {
             const fixedstring_to_blockref_string_assign_kernel_auxdata& ad =
@@ -473,7 +473,7 @@ namespace {
             }
         }
 
-        static void scalar_kernel(char *dst, intptr_t DND_UNUSED(dst_stride), const char *src, intptr_t DND_UNUSED(src_stride),
+        static void scalar_kernel(char *dst, intptr_t DYND_UNUSED(dst_stride), const char *src, intptr_t DYND_UNUSED(src_stride),
                             intptr_t, const AuxDataBase *auxdata)
         {
             const blockref_string_to_fixedstring_assign_kernel_auxdata& ad =
@@ -481,7 +481,7 @@ namespace {
             blockref_string_to_fixedstring_assign(dst, src, ad);
         }
 
-        static void scalar_to_contiguous_kernel(char *dst, intptr_t dst_stride, const char *src, intptr_t DND_UNUSED(src_stride),
+        static void scalar_to_contiguous_kernel(char *dst, intptr_t dst_stride, const char *src, intptr_t DYND_UNUSED(src_stride),
                             intptr_t count, const AuxDataBase *auxdata)
         {
             const blockref_string_to_fixedstring_assign_kernel_auxdata& ad =

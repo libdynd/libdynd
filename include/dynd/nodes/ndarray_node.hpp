@@ -3,8 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DND__NDARRAY_NODE_HPP_
-#define _DND__NDARRAY_NODE_HPP_
+#ifndef _DYND__NDARRAY_NODE_HPP_
+#define _DYND__NDARRAY_NODE_HPP_
 
 #include <iostream>
 
@@ -119,7 +119,7 @@ public:
         return 0;
     }
 
-    virtual ndarray_node *get_opnode(int DND_UNUSED(i)) const {
+    virtual ndarray_node *get_opnode(int DYND_UNUSED(i)) const {
         throw std::runtime_error("This ndarray_node does not have any operand nodes");
     }
 
@@ -198,10 +198,10 @@ public:
     {
     }
 
-#ifdef DND_RVALUE_REFS
+#ifdef DYND_RVALUE_REFS
     /** Move constructor */
     ndarray_node_ptr(ndarray_node_ptr&& rhs)
-        : memory_block_ptr(DND_MOVE(rhs))
+        : memory_block_ptr(DYND_MOVE(rhs))
     {
     }
 #endif
@@ -214,10 +214,10 @@ public:
     }
 
     /** Move assignment */
-#ifdef DND_RVALUE_REFS
+#ifdef DYND_RVALUE_REFS
     ndarray_node_ptr& operator=(ndarray_node_ptr&& rhs)
     {
-        *static_cast<memory_block_ptr *>(this) = DND_MOVE(static_cast<memory_block_ptr&&>(rhs));
+        *static_cast<memory_block_ptr *>(this) = DYND_MOVE(static_cast<memory_block_ptr&&>(rhs));
         return *this;
     }
 #endif
@@ -262,4 +262,4 @@ inline ndarray_node_ptr ndarray_node::as_ndarray_node_ptr()
 
 } // namespace dynd
 
-#endif // _DND__NDARRAY_NODE_HPP_
+#endif // _DYND__NDARRAY_NODE_HPP_

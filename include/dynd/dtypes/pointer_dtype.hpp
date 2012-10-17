@@ -13,8 +13,8 @@
  * copies the data to/from the pointer targets.
  */
 
-#ifndef _DND__POINTER_DTYPE_HPP_
-#define _DND__POINTER_DTYPE_HPP_
+#ifndef _DYND__POINTER_DTYPE_HPP_
+#define _DYND__POINTER_DTYPE_HPP_
 
 #include <dynd/dtype.hpp>
 #include <dynd/dtypes/void_pointer_dtype.hpp>
@@ -96,4 +96,4 @@ dtype make_pointer_dtype() {
 
 } // namespace dynd
 
-#endif // _DND__POINTER_DTYPE_HPP_
+#endif // _DYND__POINTER_DTYPE_HPP_

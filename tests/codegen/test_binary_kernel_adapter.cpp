@@ -91,7 +91,7 @@ TEST(BinaryKernelAdapter, BasicOperations) {
 }
 
 
-#if defined(DND_CALL_MSFT_X64)
+#if defined(DYND_CALL_MSFT_X64)
 
 class raise_if_greater_exception : public std::runtime_error {
 public:

@@ -3,12 +3,12 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DND__CLING_ALL_HPP_
-#define _DND__CLING_ALL_HPP_
+#ifndef _DYND__CLING_ALL_HPP_
+#define _DYND__CLING_ALL_HPP_
 
 // When CLING is enabled, we avoid certain glibc operations
 // that generate inline assembly, unsupported by the LLVM JIT.
-#define DND_CLING
+#define DYND_CLING
 
 #include <dynd/ndarray.hpp>
 #include <dynd/ndarray_arange.hpp>
@@ -16,4 +16,4 @@
 using namespace std;
 using namespace dynd;
 
-#endif // _DND__CLING_ALL_HPP_
+#endif // _DYND__CLING_ALL_HPP_

@@ -109,7 +109,7 @@ namespace {
             }
         }
 
-        static void scalar_kernel(char *dst, intptr_t DND_UNUSED(dst_stride), const char *src, intptr_t DND_UNUSED(src_stride),
+        static void scalar_kernel(char *dst, intptr_t DYND_UNUSED(dst_stride), const char *src, intptr_t DYND_UNUSED(src_stride),
                             intptr_t count, const AuxDataBase *auxdata)
         {
             const buffered_2chain_unary_kernel_auxdata& ad = get_auxiliary_data<buffered_2chain_unary_kernel_auxdata>(auxdata);
@@ -146,7 +146,7 @@ namespace {
             } while (count > 0);
         }
 
-        static void scalar_to_contiguous_kernel(char *dst, intptr_t dst_stride, const char *src, intptr_t DND_UNUSED(src_stride),
+        static void scalar_to_contiguous_kernel(char *dst, intptr_t dst_stride, const char *src, intptr_t DYND_UNUSED(src_stride),
                             intptr_t count, const AuxDataBase *auxdata)
         {
             const buffered_2chain_unary_kernel_auxdata& ad = get_auxiliary_data<buffered_2chain_unary_kernel_auxdata>(auxdata);
@@ -202,7 +202,7 @@ namespace {
             }
         }
 
-        static void scalar_kernel(char *dst, intptr_t DND_UNUSED(dst_stride), const char *src, intptr_t DND_UNUSED(src_stride),
+        static void scalar_kernel(char *dst, intptr_t DYND_UNUSED(dst_stride), const char *src, intptr_t DYND_UNUSED(src_stride),
                             intptr_t count, const AuxDataBase *auxdata)
         {
             const buffered_3chain_unary_kernel_auxdata& ad = get_auxiliary_data<buffered_3chain_unary_kernel_auxdata>(auxdata);
@@ -245,7 +245,7 @@ namespace {
             } while (count > 0);
         }
 
-        static void scalar_to_contiguous_kernel(char *dst, intptr_t dst_stride, const char *src, intptr_t DND_UNUSED(src_stride),
+        static void scalar_to_contiguous_kernel(char *dst, intptr_t dst_stride, const char *src, intptr_t DYND_UNUSED(src_stride),
                             intptr_t count, const AuxDataBase *auxdata)
         {
             const buffered_3chain_unary_kernel_auxdata& ad = get_auxiliary_data<buffered_3chain_unary_kernel_auxdata>(auxdata);
@@ -309,7 +309,7 @@ namespace {
             }
         }
 
-        static void scalar_kernel(char *dst, intptr_t DND_UNUSED(dst_stride), const char *src, intptr_t DND_UNUSED(src_stride),
+        static void scalar_kernel(char *dst, intptr_t DYND_UNUSED(dst_stride), const char *src, intptr_t DYND_UNUSED(src_stride),
                             intptr_t count, const AuxDataBase *auxdata)
         {
             const buffered_nchain_unary_kernel_auxdata& ad = get_auxiliary_data<buffered_nchain_unary_kernel_auxdata>(auxdata);
@@ -358,7 +358,7 @@ namespace {
             } while (count > 0);
         }
 
-        static void scalar_to_contiguous_kernel(char *dst, intptr_t dst_stride, const char *src, intptr_t DND_UNUSED(src_stride),
+        static void scalar_to_contiguous_kernel(char *dst, intptr_t dst_stride, const char *src, intptr_t DYND_UNUSED(src_stride),
                             intptr_t count, const AuxDataBase *auxdata)
         {
             const buffered_nchain_unary_kernel_auxdata& ad = get_auxiliary_data<buffered_nchain_unary_kernel_auxdata>(auxdata);

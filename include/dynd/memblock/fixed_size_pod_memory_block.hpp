@@ -3,8 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DND__FIXED_SIZE_POD_MEMORY_BLOCK_HPP_
-#define _DND__FIXED_SIZE_POD_MEMORY_BLOCK_HPP_
+#ifndef _DYND__FIXED_SIZE_POD_MEMORY_BLOCK_HPP_
+#define _DYND__FIXED_SIZE_POD_MEMORY_BLOCK_HPP_
 
 #include <iostream>
 #include <string>
@@ -32,4 +32,4 @@ void fixed_size_pod_memory_block_debug_dump(const memory_block_data *memblock, s
 
 } // namespace dynd
 
-#endif // _DND__FIXED_SIZE_POD_MEMORY_BLOCK_HPP_
+#endif // _DYND__FIXED_SIZE_POD_MEMORY_BLOCK_HPP_

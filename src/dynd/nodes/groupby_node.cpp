@@ -50,6 +50,6 @@ ndarray_node_ptr dynd::make_groupby_node(const ndarray_node_ptr& data_node,
     // Placement new
     new (node_memory) groupby_node(data_node, by_node, groups);
 
-    return DND_MOVE(result);
+    return DYND_MOVE(result);
 }
 

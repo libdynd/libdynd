@@ -3,8 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DND__KERNEL_INSTANCE_HPP_
-#define _DND__KERNEL_INSTANCE_HPP_
+#ifndef _DYND__KERNEL_INSTANCE_HPP_
+#define _DYND__KERNEL_INSTANCE_HPP_
 
 #include <dynd/auxiliary_data.hpp>
 
@@ -66,4 +66,4 @@ public:
 
 } // namespace dynd;
 
-#endif // _DND__KERNEL_INSTANCE_HPP_
+#endif // _DYND__KERNEL_INSTANCE_HPP_

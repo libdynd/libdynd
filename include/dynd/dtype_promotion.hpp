@@ -3,8 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DND__DTYPE_PROMOTION_HPP_
-#define _DND__DTYPE_PROMOTION_HPP_
+#ifndef _DYND__DTYPE_PROMOTION_HPP_
+#define _DYND__DTYPE_PROMOTION_HPP_
 
 #include <dynd/dtype.hpp>
 
@@ -25,4 +25,4 @@ dtype promote_dtypes_arithmetic(const dtype& dt0, const dtype& dt1);
 
 } // namespace dynd
 
-#endif // _DND__DTYPE_PROMOTION_HPP_
+#endif // _DYND__DTYPE_PROMOTION_HPP_

@@ -3,69 +3,69 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DND__CONFIG_HPP_
-#define _DND__CONFIG_HPP_
+#ifndef _DYND__CONFIG_HPP_
+#define _DYND__CONFIG_HPP_
 
 #ifdef __clang__
 
-//#  define DND_RVALUE_REFS
-//#  define DND_INIT_LIST
+//#  define DYND_RVALUE_REFS
+//#  define DYND_INIT_LIST
 
 // NOTE: I hacked the g++ system headers, adding explicit copy constructors and assignment
 //       operators to both shared_ptr and __shared_ptr (in shared_ptr_base.h), so that clang
 //       would accept them. This is because the LLVM JIT used by CLING complains about inline
 //       assembly with the boost version, but not with the g++ version.
-#define DND_USE_BOOST_SHARED_PTR
+#define DYND_USE_BOOST_SHARED_PTR
 // TODO: versions with constexpr
-#  define DND_CONSTEXPR constexpr
+#  define DYND_CONSTEXPR constexpr
 
-# define DND_USE_STDINT
+# define DYND_USE_STDINT
 
 #elif defined(__GNUC__)
 
-# define DND_USE_STDINT
+# define DYND_USE_STDINT
 
 #if __GNUC__ > 4 || \
               (__GNUC__ == 4 && (__GNUC_MINOR__ >= 7))
 // Use initializer lists on gcc >= 4.7
-#  define DND_INIT_LIST
+#  define DYND_INIT_LIST
 // Use constexpr on gcc >= 4.7
-#  define DND_CONSTEXPR constexpr
+#  define DYND_CONSTEXPR constexpr
 // Use rvalue references on gcc >= 4.7
-#  define DND_RVALUE_REFS
+#  define DYND_RVALUE_REFS
 #else
 // Don't use constexpr on gcc < 4.7
-#  define DND_CONSTEXPR
+#  define DYND_CONSTEXPR
 // Use boost shared_ptr on gcc < 4.7
-#  define DND_USE_BOOST_SHARED_PTR
+#  define DYND_USE_BOOST_SHARED_PTR
 #endif
 
 #elif defined(_MSC_VER)
 
 # if _MSC_VER >= 1600
 // Use enable_if from std::tr1
-#  define DND_USE_TR1_ENABLE_IF
+#  define DYND_USE_TR1_ENABLE_IF
 // Use rvalue refs
-#  define DND_RVALUE_REFS
-#  define DND_USE_STDINT
+#  define DYND_RVALUE_REFS
+#  define DYND_USE_STDINT
 # else
-#  define DND_USE_BOOST_SHARED_PTR
+#  define DYND_USE_BOOST_SHARED_PTR
 # endif
 
-// No DND_CONSTEXPR yet, define it as nothing
-#  define DND_CONSTEXPR
+// No DYND_CONSTEXPR yet, define it as nothing
+#  define DYND_CONSTEXPR
 
 #endif
 
 // If RValue References are supported
-#ifdef DND_RVALUE_REFS
-#  define DND_MOVE(x) (std::move(x))
+#ifdef DYND_RVALUE_REFS
+#  define DYND_MOVE(x) (std::move(x))
 #else
-#  define DND_MOVE(x) (x)
+#  define DYND_MOVE(x) (x)
 #endif
 
 // Whether to use boost's shared_ptr or the standard library's
-#ifdef DND_USE_BOOST_SHARED_PTR
+#ifdef DYND_USE_BOOST_SHARED_PTR
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
 namespace dynd {
@@ -81,17 +81,17 @@ namespace dynd {
 #endif
 
 // If Initializer Lists are supported
-#ifdef DND_INIT_LIST
+#ifdef DYND_INIT_LIST
 #include <initializer_list>
 #endif
 
 // If being run from the CLING C++ interpreter
-#ifdef DND_CLING
+#ifdef DYND_CLING
 // 1) Used g++ shared_ptr instead of boost shared_ptr (see above in clang config section).
 //    This allowed dtypes to be created in cling!
 // 2) Don't use the memcpy function (it has inline assembly).
 
-inline void DND_MEMCPY(char *dst, const char *src, intptr_t count)
+inline void DYND_MEMCPY(char *dst, const char *src, intptr_t count)
 {
     char *cdst = (char *)dst;
     const char *csrc = (const char *)src;
@@ -101,10 +101,10 @@ inline void DND_MEMCPY(char *dst, const char *src, intptr_t count)
 }
 #else
 #include <cstring>
-#define DND_MEMCPY(a, b, c) std::memcpy(a, b, c)
+#define DYND_MEMCPY(a, b, c) std::memcpy(a, b, c)
 #endif
 
-#ifdef DND_USE_TR1_ENABLE_IF
+#ifdef DYND_USE_TR1_ENABLE_IF
 #include <type_traits>
 namespace dynd {
     using std::tr1::enable_if;
@@ -134,8 +134,8 @@ namespace dynd {
  *
  * See diagnostics.hpp for the macros which use this.
  */
-#ifndef DND_ALIGNMENT_ASSERTIONS
-# define DND_ALIGNMENT_ASSERTIONS 0
+#ifndef DYND_ALIGNMENT_ASSERTIONS
+# define DYND_ALIGNMENT_ASSERTIONS 0
 #endif
 
 /**
@@ -144,8 +144,8 @@ namespace dynd {
  *
  * See diagnostics.hpp for the macros which use this.
  */
-#ifndef DND_ASSIGNMENT_TRACING
-# define DND_ASSIGNMENT_TRACING 0
+#ifndef DYND_ASSIGNMENT_TRACING
+# define DYND_ASSIGNMENT_TRACING 0
 #endif
 
 
@@ -153,9 +153,9 @@ namespace dynd {
  * Preprocessor macro for marking variables unused, and suppressing
  * warnings for them.
  */
-#define DND_UNUSED(x)
+#define DYND_UNUSED(x)
 
-#ifdef DND_USE_STDINT
+#ifdef DYND_USE_STDINT
 #include <stdint.h>
 #else
 typedef signed char      int8_t;
@@ -170,4 +170,4 @@ typedef unsigned __int64 uint64_t;
 typedef size_t           uintptr_t;
 #endif
 
-#endif // _DND__CONFIG_HPP_
+#endif // _DYND__CONFIG_HPP_

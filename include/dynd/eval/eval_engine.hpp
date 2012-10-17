@@ -3,8 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DND__EVAL_ENGINE_HPP_
-#define _DND__EVAL_ENGINE_HPP_
+#ifndef _DYND__EVAL_ENGINE_HPP_
+#define _DYND__EVAL_ENGINE_HPP_
 
 #include <dynd/eval/eval_context.hpp>
 #include <dynd/nodes/ndarray_node.hpp>
@@ -32,4 +32,4 @@ void process_access_flags(uint32_t &dst_access_flags, uint32_t src_access_flags,
 
 }} // namespace dynd::eval
 
-#endif // _DND__EVAL_ENGINE_HPP_
+#endif // _DYND__EVAL_ENGINE_HPP_

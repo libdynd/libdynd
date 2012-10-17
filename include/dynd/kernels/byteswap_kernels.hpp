@@ -3,8 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DND__BYTESWAP_KERNELS_HPP_
-#define _DND__BYTESWAP_KERNELS_HPP_
+#ifndef _DYND__BYTESWAP_KERNELS_HPP_
+#define _DYND__BYTESWAP_KERNELS_HPP_
 
 #include <dynd/kernels/unary_kernel_instance.hpp>
 
@@ -60,4 +60,4 @@ void get_pairwise_byteswap_kernel(intptr_t element_size, intptr_t alignment,
 
 } // namespace dynd
 
-#endif // _DND__BYTESWAP_KERNELS_HPP_
+#endif // _DYND__BYTESWAP_KERNELS_HPP_

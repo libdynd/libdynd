@@ -3,8 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DND__IMMUTABLE_BUILTIN_SCALAR_NODE_HPP_
-#define _DND__IMMUTABLE_BUILTIN_SCALAR_NODE_HPP_
+#ifndef _DYND__IMMUTABLE_BUILTIN_SCALAR_NODE_HPP_
+#define _DYND__IMMUTABLE_BUILTIN_SCALAR_NODE_HPP_
 
 #include <dynd/nodes/immutable_scalar_node.hpp>
 #include <dynd/memblock/ndarray_node_memory_block.hpp>
@@ -78,7 +78,7 @@ public:
     }
 
     ndarray_node_ptr as_dtype(const dtype& dt,
-                        dynd::assign_error_mode errmode, bool DND_UNUSED(allow_in_place))
+                        dynd::assign_error_mode errmode, bool DYND_UNUSED(allow_in_place))
     {
         return make_immutable_scalar_node(
                         make_convert_dtype(dt, static_builtin_dtypes[type_id_of<T>::value], errmode),
@@ -86,10 +86,10 @@ public:
     }
 
     ndarray_node_ptr apply_linear_index(
-                int DND_UNUSED(ndim), const bool *DND_UNUSED(remove_axis),
-                const intptr_t *DND_UNUSED(start_index), const intptr_t *DND_UNUSED(index_strides),
-                const intptr_t *DND_UNUSED(shape),
-                bool DND_UNUSED(allow_in_place))
+                int DYND_UNUSED(ndim), const bool *DYND_UNUSED(remove_axis),
+                const intptr_t *DYND_UNUSED(start_index), const intptr_t *DYND_UNUSED(index_strides),
+                const intptr_t *DYND_UNUSED(shape),
+                bool DYND_UNUSED(allow_in_place))
     {
         return as_ndarray_node_ptr();
     }
@@ -118,9 +118,9 @@ inline typename enable_if<is_dtype_scalar<T>::value, ndarray_node_ptr>::type mak
     char *node_memory = NULL;
     ndarray_node_ptr result(make_uninitialized_ndarray_node_memory_block(sizeof(immutable_builtin_scalar_node<T>), &node_memory));
     new (node_memory) immutable_builtin_scalar_node<T>(value);
-    return DND_MOVE(result);
+    return DYND_MOVE(result);
 }
 
 } // namespace dynd
 
-#endif // _DND__IMMUTABLE_BUILTIN_SCALAR_NODE_HPP_
+#endif // _DYND__IMMUTABLE_BUILTIN_SCALAR_NODE_HPP_

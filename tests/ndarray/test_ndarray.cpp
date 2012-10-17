@@ -275,7 +275,7 @@ TEST(NDArray, CharArrayConstructor) {
     EXPECT_EQ(8, a(7).as<char>());
 }
 
-#ifdef DND_INIT_LIST
+#ifdef DYND_INIT_LIST
 TEST(NDArray, InitializerLists) {
     ndarray a = {1, 2, 3, 4, 5};
     EXPECT_EQ(5, a.get_num_elements());
@@ -331,7 +331,7 @@ TEST(NDArray, InitializerLists) {
     EXPECT_THROW((a = {{1,2,3}, {1,2}}), runtime_error);
     EXPECT_THROW((a = {{{1},{2},{3}}, {{1},{2},{3, 4}}}), runtime_error);
 }
-#endif // DND_INIT_LIST
+#endif // DYND_INIT_LIST
 
 TEST(NDArray, InitFromNestedCArray) {
     int i0[2][3] = {{1,2,3}, {4,5,6}};

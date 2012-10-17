@@ -61,7 +61,7 @@ void dynd::ndarray_node::get_unary_operation(intptr_t, intptr_t, kernel_instance
                              "unary nodes which provide an implementation");
 }
 
-void dynd::ndarray_node::get_unary_specialization_operation(unary_specialization_kernel_instance& DND_UNUSED(out_kernel)) const
+void dynd::ndarray_node::get_unary_specialization_operation(unary_specialization_kernel_instance& DYND_UNUSED(out_kernel)) const
 {
     throw std::runtime_error("unary_specialization_kernel_instance is only valid for "
                              "unary nodes which provide an implementation");
@@ -69,7 +69,7 @@ void dynd::ndarray_node::get_unary_specialization_operation(unary_specialization
 
 
 void dynd::ndarray_node::get_binary_operation(intptr_t, intptr_t, intptr_t,
-                        const eval::eval_context *DND_UNUSED(ectx),
+                        const eval::eval_context *DYND_UNUSED(ectx),
                         kernel_instance<binary_operation_t>&) const
 {
     throw std::runtime_error("get_binary_operation is only valid for "

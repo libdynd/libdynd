@@ -109,7 +109,7 @@ ndarray dynd::arange(const dtype& dt, const void *beginval, const void *endval, 
         case type_id_of<type>::value: { \
             ndarray result(arange_counter<type, dtype_kind_of<type>::value>::count(beginval, endval, stepval), dt); \
             arange_specialization<type>::arange(beginval, stepval, result); \
-            return DND_MOVE(result); \
+            return DYND_MOVE(result); \
         }
 
         switch (dt.type_id()) {
@@ -191,25 +191,25 @@ ndarray dynd::linspace(const dtype& dt, const void *startval, const void *stopva
                 ndarray result(count, dt);
                 linspace_specialization(*reinterpret_cast<const float *>(startval),
                                 *reinterpret_cast<const float *>(stopval), count, result);
-                return DND_MOVE(result);
+                return DYND_MOVE(result);
             }
             case float64_type_id: {
                 ndarray result(count, dt);
                 linspace_specialization(*reinterpret_cast<const double *>(startval),
                                 *reinterpret_cast<const double *>(stopval), count, result);
-                return DND_MOVE(result);
+                return DYND_MOVE(result);
             }
             case complex_float32_type_id: {
                 ndarray result(count, dt);
                 linspace_specialization(*reinterpret_cast<const complex<float> *>(startval),
                                 *reinterpret_cast<const complex<float> *>(stopval), count, result);
-                return DND_MOVE(result);
+                return DYND_MOVE(result);
             }
             case complex_float64_type_id: {
                 ndarray result(count, dt);
                 linspace_specialization(*reinterpret_cast<const complex<double> *>(startval),
                                 *reinterpret_cast<const complex<double> *>(stopval), count, result);
-                return DND_MOVE(result);
+                return DYND_MOVE(result);
             }
             default:
                 break;

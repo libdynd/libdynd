@@ -4,8 +4,8 @@
 //
 // The categorical dtype always represents categorical data
 //
-#ifndef _DND__CATEGORICAL_DTYPE_HPP_
-#define _DND__CATEGORICAL_DTYPE_HPP_
+#ifndef _DYND__CATEGORICAL_DTYPE_HPP_
+#define _DYND__CATEGORICAL_DTYPE_HPP_
 
 #include <map>
 #include <vector>
@@ -103,4 +103,4 @@ dtype factor_categorical_dtype(const ndarray& values);
 
 } // namespace dynd
 
-#endif // _DND__CATEGORICAL_DTYPE_HPP_
+#endif // _DYND__CATEGORICAL_DTYPE_HPP_

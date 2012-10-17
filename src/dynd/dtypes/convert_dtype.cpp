@@ -42,7 +42,7 @@ dynd::convert_dtype::convert_dtype(const dtype& value_dtype, const dtype& operan
     }
 }
 
-void dynd::convert_dtype::print_element(std::ostream& DND_UNUSED(o), const char *DND_UNUSED(data)) const
+void dynd::convert_dtype::print_element(std::ostream& DYND_UNUSED(o), const char *DYND_UNUSED(data)) const
 {
     throw runtime_error("internal error: convert_dtype::print_element isn't supposed to be called");
 }
