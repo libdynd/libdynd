@@ -19,10 +19,11 @@ const dynd::vm::opcode_info_t dynd::vm::opcode_info[opcode_count] = {
     {"divide", 2}
 };
 
-void dynd::vm::validate_elwise_program(int input_count, int reg_count, size_t program_size, const int *program)
+int dynd::vm::validate_elwise_program(int input_count, int reg_count, size_t program_size, const int *program)
 {
     size_t i = 0;
     bool wrote_to_output = false;
+    int instruction_count = 0;
     while (i < program_size) {
         // Validate the opcode
         int opcode = program[i];
@@ -66,10 +67,13 @@ void dynd::vm::validate_elwise_program(int input_count, int reg_count, size_t pr
             }
         }
 
+        ++instruction_count;
         i += 2 + arity;
     }
 
     if (!wrote_to_output) {
         throw runtime_error("DyND VM program did not write to the output register (register 0)");
     }
+
+    return instruction_count;
 }
