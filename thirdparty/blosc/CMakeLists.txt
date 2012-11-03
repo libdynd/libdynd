@@ -17,7 +17,6 @@ if(WIN32)
         ${blosc_SRC}
         blosc/win32/pthread.c
         blosc/win32/pthread.h
-        blosc/win32/stdint-windows.h
         )
     include_directories(blosc/win32)
 endif()
