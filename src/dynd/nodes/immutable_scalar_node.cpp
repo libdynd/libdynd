@@ -72,7 +72,7 @@ ndarray_node_ptr dynd::detail::unchecked_make_immutable_scalar_node(const dtype&
     // Placement new
     new (result + sizeof(memory_block_data))
             immutable_scalar_node(dt, result + start);
-    return ndarray_node_ptr(new (result) memory_block_data(1, ndarray_node_memory_block_type), false);
+    return ndarray_node_ptr(new (result) memory_block_data(1, deprecated_ndarray_node_memory_block_type), false);
 }
 
 ndarray_node_ptr dynd::detail::unchecked_make_immutable_scalar_node(const dtype& dt)
@@ -88,5 +88,5 @@ ndarray_node_ptr dynd::detail::unchecked_make_immutable_scalar_node(const dtype&
     // Placement new
     new (result + sizeof(memory_block_data))
             immutable_scalar_node(dt, result + start);
-    return ndarray_node_ptr(new (result) memory_block_data(1, ndarray_node_memory_block_type), false);
+    return ndarray_node_ptr(new (result) memory_block_data(1, deprecated_ndarray_node_memory_block_type), false);
 }

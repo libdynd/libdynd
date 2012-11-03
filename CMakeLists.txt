@@ -73,11 +73,13 @@ set(dynd_SRC
     include/dynd/dtypes/void_pointer_dtype.hpp
     # Eval
     src/dynd/eval/eval_context.cpp
+    src/dynd/eval/eval_elwise_vm.cpp
     src/dynd/eval/eval_engine.cpp
     src/dynd/eval/elwise_reduce_eval.cpp
     src/dynd/eval/groupby_elwise_reduce_eval.cpp
     src/dynd/eval/unary_elwise_eval.cpp
     include/dynd/eval/eval_context.hpp
+    include/dynd/eval/eval_elwise_vm.hpp
     include/dynd/eval/eval_engine.hpp
     include/dynd/eval/elwise_reduce_eval.hpp
     include/dynd/eval/groupby_elwise_reduce_eval.hpp
@@ -114,14 +116,16 @@ set(dynd_SRC
     src/dynd/memblock/executable_memory_block_linux_x64.cpp
     src/dynd/memblock/external_memory_block.cpp
     src/dynd/memblock/fixed_size_pod_memory_block.cpp
-    src/dynd/memblock/ndarray_node_memory_block.cpp
     src/dynd/memblock/pod_memory_block.cpp
+    src/dynd/memblock/ndobject_memory_block.cpp
+    src/dynd/memblock/ndarray_node_memory_block.cpp # DEPRECATED
     include/dynd/memblock/memory_block.hpp
     include/dynd/memblock/executable_memory_block.hpp
     include/dynd/memblock/external_memory_block.hpp
     include/dynd/memblock/fixed_size_pod_memory_block.hpp
-    include/dynd/memblock/ndarray_node_memory_block.hpp
     include/dynd/memblock/pod_memory_block.hpp
+    include/dynd/memblock/ndobject_memory_block.hpp
+    include/dynd/memblock/ndarray_node_memory_block.hpp # DEPRECATED
     # Nodes
     src/dynd/nodes/elwise_unary_kernel_node.cpp
     src/dynd/nodes/elwise_binary_kernel_node.cpp
@@ -142,7 +146,9 @@ set(dynd_SRC
     include/dynd/nodes/strided_ndarray_node.hpp
     # VM
     src/dynd/vm/elwise_program.cpp
+    src/dynd/vm/register_allocation.cpp
     include/dynd/vm/elwise_program.hpp
+    include/dynd/vm/register_allocation.hpp
     # Main
     src/dynd/arithmetic_op.cpp
     src/dynd/dtype.cpp

@@ -18,8 +18,10 @@ namespace dynd {
  * These are all the types of memory blocks supported by the dnd library.
  */
 enum memory_block_type_t {
-    /** An ndarray node is a node so that it can hold its own data memory if desired */
-    ndarray_node_memory_block_type,
+    /** An ndobject containing the node metadata specified by the dtype */
+    ndobject_memory_block_type,
+    /** DEPRECATED - An ndarray node is a node so that it can hold its own data memory if desired */
+    deprecated_ndarray_node_memory_block_type,
     /** Memory from outside the dnd library */
     external_memory_block_type,
     /** For when the data is POD and its size is fully known ahead of time */

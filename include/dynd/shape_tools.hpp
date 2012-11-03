@@ -57,8 +57,15 @@ inline void broadcast_to_shape(int ndim, const intptr_t *shape, const strided_nd
  * @param out_ndim    The number of broadcast dimensions is placed here.
  * @param out_shape   The broadcast shape is populated here.
  */
-void broadcast_input_shapes(int noperands, ndarray_node_ptr *operands,
+void broadcast_input_shapes(int noperands, const ndarray_node_ptr *operands,
                         int* out_ndim, dimvector* out_shape);
+
+inline void broadcast_input_shapes(const std::vector<ndarray>& operands,
+                        int* out_ndim, dimvector* out_shape)
+{
+    broadcast_input_shapes((int)operands.size(),
+                reinterpret_cast<const ndarray_node_ptr *>(&operands[0]), out_ndim, out_shape);
+}
 
 /**
  * Convenience function for broadcasting two operands.

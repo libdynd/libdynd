@@ -53,7 +53,7 @@ public:
      * An exception for when a number of input operands can't be broadcast
      * together.
      */
-    broadcast_error(int noperands, ndarray_node_ptr *operands);
+    broadcast_error(int noperands, const ndarray_node_ptr *operands);
 
     virtual ~broadcast_error() throw() {
     }

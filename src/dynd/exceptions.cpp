@@ -32,7 +32,7 @@ dynd::broadcast_error::broadcast_error(int dst_ndim, const intptr_t *dst_shape,
 {
 }
 
-inline string broadcast_error_message(int noperands, ndarray_node_ptr *operands)
+inline string broadcast_error_message(int noperands, const ndarray_node_ptr *operands)
 {
     stringstream ss;
 
@@ -47,7 +47,7 @@ inline string broadcast_error_message(int noperands, ndarray_node_ptr *operands)
     return ss.str();
 }
 
-dynd::broadcast_error::broadcast_error(int noperands, ndarray_node_ptr *operands)
+dynd::broadcast_error::broadcast_error(int noperands, const ndarray_node_ptr *operands)
     : dnd_exception("broadcast error", broadcast_error_message(noperands, operands))
 {
 }

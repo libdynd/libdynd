@@ -579,6 +579,21 @@ public:
         return m_alignment;
     }
 
+    /** Increments the offset as much as is needed so it is aligned appropriately */
+    size_t apply_alignment(size_t offset) const {
+        return (offset + m_alignment - 1) & (-m_alignment);
+    }
+
+    /** Increments the pointer as much as is needed so it is aligned appropriately */
+    char *apply_alignment(char *ptr) const {
+        return reinterpret_cast<char *>((reinterpret_cast<uintptr_t>(ptr) + m_alignment - 1) & (-m_alignment));
+    }
+
+    /** Increments the pointer as much as is needed so it is aligned appropriately */
+    const char *apply_alignment(const char *ptr) const {
+        return reinterpret_cast<char *>((reinterpret_cast<uintptr_t>(ptr) + m_alignment - 1) & (-m_alignment));
+    }
+
     /** The element size of the dtype */
     size_t element_size() const {
         return m_element_size;

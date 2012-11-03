@@ -52,7 +52,7 @@ void dynd::detail::memory_block_free(memory_block_data *memblock)
 {
     //cout << "freeing memory block " << (void *)memblock << endl;
     switch ((memory_block_type_t)memblock->m_type) {
-        case ndarray_node_memory_block_type: {
+        case deprecated_ndarray_node_memory_block_type: {
             free_ndarray_node_memory_block(memblock);
             return;
         }
@@ -86,7 +86,7 @@ void dynd::memory_block_debug_dump(const memory_block_data *memblock, std::ostre
         o << indent << "------ memory_block at " << (const void *)memblock << "\n";
         o << indent << " reference count: " << memblock->m_use_count << "\n";
         switch ((memory_block_type_t)memblock->m_type) {
-            case ndarray_node_memory_block_type: {
+            case deprecated_ndarray_node_memory_block_type: {
                 o << indent << " type: ndarray_node\n";
                 ndarray_node_ptr node(const_cast<memory_block_data *>(memblock));
                 node->debug_dump(o, indent + " ");
@@ -120,7 +120,7 @@ void dynd::memory_block_debug_dump(const memory_block_data *memblock, std::ostre
 memory_block_pod_allocator_api *dynd::get_memory_block_pod_allocator_api(memory_block_data *memblock)
 {
     switch (memblock->m_type) {
-        case ndarray_node_memory_block_type:
+        case deprecated_ndarray_node_memory_block_type:
             throw runtime_error("Cannot get a POD allocator API from an ndarray_node_memory_block");
         case external_memory_block_type:
             throw runtime_error("Cannot get a POD allocator API from an external_memory_block");

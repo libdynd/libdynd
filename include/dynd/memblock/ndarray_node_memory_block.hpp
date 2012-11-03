@@ -3,6 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
+// DEPRECATED 2012-11-02
+
 #ifndef _DYND__NDARRAY_NODE_MEMORY_BLOCK_HPP_
 #define _DYND__NDARRAY_NODE_MEMORY_BLOCK_HPP_
 

@@ -3,6 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
+// DEPRECATED 2012-11-02
+
 #include <dynd/memblock/ndarray_node_memory_block.hpp>
 
 using namespace std;
@@ -20,7 +22,7 @@ ndarray_node_ptr dynd::make_uninitialized_ndarray_node_memory_block(intptr_t siz
         throw bad_alloc();
     }
     *out_node_memory = result + sizeof(memory_block_data);
-    return ndarray_node_ptr(new (result) memory_block_data(1, ndarray_node_memory_block_type), false);
+    return ndarray_node_ptr(new (result) memory_block_data(1, deprecated_ndarray_node_memory_block_type), false);
 }
 
 namespace dynd { namespace detail {

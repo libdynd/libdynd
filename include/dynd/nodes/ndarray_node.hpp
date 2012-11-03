@@ -31,7 +31,14 @@ enum ndarray_access_flags {
     immutable_access_flag = 0x04
 };
 
+// In the new design, all nodes have the same
+// data layout, determined completely by its dtype.
+// The previous design had different kinds of nodes,
+// which is now deprecated and to be removed after
+// the new way is finished being implemented.
 enum ndarray_node_category {
+    // The node contains a zero-dimensional scalar
+    scalar_node_category,
     // The node points a simple strided array in memory
     strided_array_node_category,
     // The node represents an elementwise nop() to 1 transformation
@@ -187,7 +194,7 @@ public:
     explicit ndarray_node_ptr(memory_block_data *memblock, bool add_ref = true)
         : memory_block_ptr(memblock, add_ref)
     {
-        if (memblock->m_type != ndarray_node_memory_block_type) {
+        if (memblock->m_type != deprecated_ndarray_node_memory_block_type) {
             throw std::runtime_error("Can only make an ndarray_node_ptr from an ndarray node memory_block");
         }
     }
