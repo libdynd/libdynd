@@ -23,6 +23,14 @@ extended_dtype::~extended_dtype()
 }
 
 // TODO: Make this a pure virtual function eventually
+size_t extended_dtype::get_metadata_size() const
+{
+    stringstream ss;
+    ss << "TODO: get_metadata_size for " << dtype(this) << " is not implemented";
+    throw std::runtime_error(ss.str());
+}
+
+// TODO: Make this a pure virtual function eventually
 void extended_dtype::metadata_destruct(char *DYND_UNUSED(metadata))
 {
     stringstream ss;

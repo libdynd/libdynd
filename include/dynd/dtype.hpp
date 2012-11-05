@@ -325,10 +325,12 @@ public:
 
     virtual bool operator==(const extended_dtype& rhs) const = 0;
 
+    /* The size of the ndobject metadata for this dtype */
+    virtual size_t get_metadata_size() const;
     /** Destructs any references or other state contained in the ndobjects' metdata */
-    void metadata_destruct(char *metadata);
+    virtual void metadata_destruct(char *metadata);
     /** Debug print of the metdata */
-    void metadata_debug_dump(const char *metadata, std::ostream& o, const std::string& indent);
+    virtual void metadata_debug_dump(const char *metadata, std::ostream& o, const std::string& indent);
 
     friend void extended_dtype_incref(const extended_dtype *ed);
     friend void extended_dtype_decref(const extended_dtype *ed);
