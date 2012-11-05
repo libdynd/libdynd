@@ -22,6 +22,23 @@ extended_dtype::~extended_dtype()
 {
 }
 
+// TODO: Make this a pure virtual function eventually
+void extended_dtype::metadata_destruct(char *DYND_UNUSED(metadata))
+{
+    stringstream ss;
+    ss << "TODO: metadata_destruct for " << dtype(this) << " is not implemented";
+    throw std::runtime_error(ss.str());
+}
+
+// TODO: Make this a pure virtual function eventually
+void extended_dtype::metadata_debug_dump(const char *DYND_UNUSED(metadata), std::ostream& DYND_UNUSED(o), const std::string& DYND_UNUSED(indent))
+{
+    stringstream ss;
+    ss << "TODO: metadata_debug_dump for " << dtype(this) << " is not implemented";
+    throw std::runtime_error(ss.str());
+}
+
+
 void dynd::extended_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const dtype& src_dt,
                 assign_error_mode DYND_UNUSED(errmode),
                 unary_specialization_kernel_instance& DYND_UNUSED(out_kernel)) const

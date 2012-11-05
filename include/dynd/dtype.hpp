@@ -219,6 +219,31 @@ template <> struct is_dtype_scalar<std::complex<double> > {enum {value = true};}
 template<typename T> struct is_type_bool {enum {value = false};};
 template<> struct is_type_bool<bool> {enum {value = true};};
 
+/**
+ * Increments the offset value so that it is aligned to the requested alignment
+ * NOTE: The alignment must be a power of two.
+ */
+inline size_t inc_to_alignment(size_t offset, size_t alignment) {
+    return (offset + alignment - 1) & (size_t)(-(ptrdiff_t)alignment);
+}
+
+/**
+ * Increments the pointer value so that it is aligned to the requested alignment
+ * NOTE: The alignment must be a power of two.
+ */
+inline char *inc_to_alignment(char *ptr, size_t alignment) {
+    return reinterpret_cast<char *>((reinterpret_cast<size_t>(ptr) + alignment - 1) & (size_t)(-(ptrdiff_t)alignment));
+}
+
+/**
+ * Increments the pointer value so that it is aligned to the requested alignment
+ * NOTE: The alignment must be a power of two.
+ */
+inline void *inc_to_alignment(void *ptr, size_t alignment) {
+    return reinterpret_cast<char *>((reinterpret_cast<size_t>(ptr) + alignment - 1) & (size_t)(-(ptrdiff_t)alignment));
+}
+
+
 class dtype;
 
 // The extended_dtype class is for dtypes which require more data
@@ -299,6 +324,11 @@ public:
                     unary_specialization_kernel_instance& out_kernel) const;
 
     virtual bool operator==(const extended_dtype& rhs) const = 0;
+
+    /** Destructs any references or other state contained in the ndobjects' metdata */
+    void metadata_destruct(char *metadata);
+    /** Debug print of the metdata */
+    void metadata_debug_dump(const char *metadata, std::ostream& o, const std::string& indent);
 
     friend void extended_dtype_incref(const extended_dtype *ed);
     friend void extended_dtype_decref(const extended_dtype *ed);
@@ -580,13 +610,13 @@ public:
     }
 
     /** Increments the offset as much as is needed so it is aligned appropriately */
-    size_t apply_alignment(size_t offset) const {
-        return (offset + m_alignment - 1) & (-m_alignment);
+    size_t inc_to_alignment(size_t offset) const {
+        return ::dynd::inc_to_alignment(offset, m_alignment);
     }
 
     /** Increments the pointer as much as is needed so it is aligned appropriately */
-    char *apply_alignment(char *ptr) const {
-        return reinterpret_cast<char *>((reinterpret_cast<uintptr_t>(ptr) + m_alignment - 1) & (-m_alignment));
+    char *inc_to_alignment(char *ptr) const {
+        return ::dynd::inc_to_alignment(ptr, m_alignment);
     }
 
     /** Increments the pointer as much as is needed so it is aligned appropriately */
