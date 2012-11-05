@@ -52,6 +52,26 @@ extern "C" {
 #define BLOSC_DOSHUFFLE 0x1
 #define BLOSC_MEMCPYED  0x2
 
+/* Structure for parameters in (de-)compression threads */
+typedef struct {
+  uint32_t typesize;
+  uint32_t blocksize;
+  int32_t compress;
+  int32_t clevel;
+  int32_t flags;
+  int32_t memcpyed;
+  int32_t ntbytes;
+  uint32_t nbytes;
+  uint32_t maxbytes;
+  uint32_t nblocks;
+  uint32_t leftover;
+  uint32_t *bstarts;             /* start pointers for each block */
+  uint8_t *src;
+  uint8_t *dest;
+  uint8_t *tmp[BLOSC_MAX_THREADS];
+  uint8_t *tmp2[BLOSC_MAX_THREADS];
+} blosc_params;
+
 
 
 /**

@@ -1,5 +1,5 @@
 /*********************************************************************
-  Blosc - Blocked Suffling and Compression Library
+  Blosc - Blocked Shuffling and Compression Library
 
   Author: Francesc Alted (faltet@pytables.org)
   Creation date: 2009-05-20
@@ -18,7 +18,7 @@
 #include <string.h>
 #include "blosclz.h"
 
-#if defined(_WIN32) && !defined(__MINGW32__)
+#if defined(_MSC_VER)
     #include <windows.h>
     #if _MSC_VER >= 1600
         #include <stdint.h>

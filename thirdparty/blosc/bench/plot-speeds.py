@@ -54,7 +54,7 @@ def get_values(filename):
             speedr = float(tmp.split(' ')[1])
             speedsr.append(speedr)
             if "OK" not in line:
-                print "WARNING!  OK not found in decomp line!"
+                print("WARNING!  OK not found in decomp line!")
 
     f.close()
     return nthreads, values
@@ -79,7 +79,7 @@ def show_plot(plots, yaxis, legends, gtitle, xmax=None):
 
     #subplots_adjust(bottom=0.2, top=None, wspace=0.2, hspace=0.2)
     if outfile:
-        print "Saving plot to:", outfile
+        print("Saving plot to: %s" % outfile)
         savefig(outfile)
     else:
         show()
