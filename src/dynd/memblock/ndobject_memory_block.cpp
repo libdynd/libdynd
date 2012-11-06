@@ -29,7 +29,7 @@ void free_ndobject_memory_block(memory_block_data *memblock)
 
 }} // namespace dynd::detail
 
-memory_block_ptr dynd::make_ndobject_memory_block(intptr_t metadata_size)
+memory_block_ptr dynd::make_ndobject_memory_block(size_t metadata_size)
 {
     char *result = (char *)malloc(sizeof(memory_block_data) + sizeof(ndobject_preamble) + metadata_size);
     if (result == 0) {
@@ -41,10 +41,10 @@ memory_block_ptr dynd::make_ndobject_memory_block(intptr_t metadata_size)
     return memory_block_ptr(new (result) memory_block_data(1, ndobject_memory_block_type), false);
 }
 
-memory_block_ptr make_ndobject_memory_block(intptr_t metadata_size, intptr_t extra_size,
-                    intptr_t extra_alignment, char **out_extra_ptr)
+memory_block_ptr dynd::make_ndobject_memory_block(size_t metadata_size, size_t extra_size,
+                    size_t extra_alignment, char **out_extra_ptr)
 {
-    intptr_t extra_offset = inc_to_alignment(sizeof(memory_block_data) + sizeof(ndobject_preamble) + metadata_size,
+    size_t extra_offset = inc_to_alignment(sizeof(memory_block_data) + sizeof(ndobject_preamble) + metadata_size,
                                         extra_alignment);
     char *result = (char *)malloc(extra_offset + extra_size);
     if (result == 0) {
@@ -56,6 +56,20 @@ memory_block_ptr make_ndobject_memory_block(intptr_t metadata_size, intptr_t ext
     // Return a pointer to the extra allocated memory
     *out_extra_ptr = result + extra_offset;
     return memory_block_ptr(new (result) memory_block_data(1, ndobject_memory_block_type), false);
+}
+
+memory_block_ptr make_ndobject_memory_block(const dtype& dt, int ndim, const intptr_t *shape)
+{
+    if (dt.extended() == NULL) {
+        throw runtime_error("builtin scalar dtypes aren't supported by ndobject yet");
+    }
+
+    size_t metadata_size = dt.extended()->get_metadata_size();
+    size_t element_size = dt.extended()->get_default_element_size(ndim, shape);
+    char *data = NULL;
+    memory_block_ptr result = make_ndobject_memory_block(metadata_size, element_size, dt.alignment(), &data);
+    dt.extended()->metadata_default_construct(reinterpret_cast<char *>(result.get() + 1), ndim, shape);
+    return result;
 }
 
 void dynd::ndobject_memory_block_debug_dump(const memory_block_data *memblock, std::ostream& o, const std::string& indent)

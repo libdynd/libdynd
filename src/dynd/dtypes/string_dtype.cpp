@@ -121,7 +121,7 @@ void dynd::string_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const 
             case fixedstring_type_id: {
                 const extended_string_dtype *src_fs = static_cast<const extended_string_dtype *>(src_dt.extended());
                 get_fixedstring_to_blockref_string_assignment_kernel(m_encoding,
-                                        src_fs->element_size(), src_fs->encoding(),
+                                        src_fs->get_element_size(), src_fs->encoding(),
                                         errmode, out_kernel);
                 break;
             }

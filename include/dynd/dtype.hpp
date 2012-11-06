@@ -51,6 +51,7 @@ enum dtype_kind_t {
     string_kind,
     bytes_kind,
     void_kind,
+    datetime_kind,
     // For struct_type_id and ndarray_type_id
     composite_kind,
     // For dtypes whose value_dtype != the dtype, signals
@@ -93,6 +94,7 @@ enum type_id_t {
     pointer_type_id,
     fixedstring_type_id,
     categorical_type_id,
+    date_type_id,
 
     // blockref primitive dtypes
     string_type_id,
@@ -101,6 +103,7 @@ enum type_id_t {
     array_type_id,
 
     // Composite dtypes
+    strided_array_type_id,
     struct_type_id,
     tuple_type_id,
     ndarray_type_id,
@@ -262,7 +265,8 @@ public:
     virtual type_id_t type_id() const = 0;
     virtual dtype_kind_t kind() const = 0;
     virtual size_t alignment() const = 0;
-    virtual uintptr_t element_size() const = 0;
+    virtual size_t get_element_size() const = 0;
+    virtual size_t get_default_element_size(int ndim, const intptr_t *shape) const;
 
     /**
      * Print the raw data interpreted as a single value of this dtype.
@@ -327,6 +331,11 @@ public:
 
     /* The size of the ndobject metadata for this dtype */
     virtual size_t get_metadata_size() const;
+    /**
+     * Constructs the ndobject metadata for this dtype, prepared for writing.
+     * The element size of the result must match that from get_default_element_size().
+     */
+    virtual void metadata_default_construct(char *metadata, int ndim, const intptr_t* shape) const;
     /** Destructs any references or other state contained in the ndobjects' metdata */
     virtual void metadata_destruct(char *metadata) const;
     /** Debug print of the metdata */
@@ -442,7 +451,7 @@ public:
     /** Constructor from an extended_dtype. This claims ownership of the 'extended' reference, be careful! */
     dtype(const extended_dtype *extended)
         : m_type_id(extended->type_id()), m_kind(extended->kind()), m_alignment((unsigned char)extended->alignment()),
-        m_element_size(extended->element_size()), m_extended(extended) {}
+        m_element_size(extended->get_element_size()), m_extended(extended) {}
     /** Copy constructor (should be "= default" in C++11) */
     dtype(const dtype& rhs)
         : m_type_id(rhs.m_type_id), m_kind(rhs.m_kind), m_alignment(rhs.m_alignment),

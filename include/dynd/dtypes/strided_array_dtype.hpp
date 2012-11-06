@@ -2,50 +2,43 @@
 // Copyright (C) 2011-12, Dynamic NDArray Developers
 // BSD 2-Clause License, see LICENSE.txt
 //
-// The fixedstring dtype represents a string with
-// a particular encoding, stored in a fixed-size
-// buffer.
-//
-#ifndef _DYND__FIXEDSTRING_DTYPE_HPP_
-#define _DYND__FIXEDSTRING_DTYPE_HPP_
+
+#ifndef _DYND__STRIDED_ARRAY_DTYPE_HPP_
+#define _DYND__STRIDED_ARRAY_DTYPE_HPP_
 
 #include <dynd/dtype.hpp>
 #include <dynd/dtype_assign.hpp>
 #include <dynd/dtypes/view_dtype.hpp>
-#include <dynd/string_encodings.hpp>
 
 namespace dynd {
 
-class fixedstring_dtype : public extended_string_dtype {
-    intptr_t m_element_size, m_alignment, m_stringsize;
-    string_encoding_t m_encoding;
+struct strided_array_dtype_metadata {
+    intptr_t size;
+    intptr_t stride;
+};
 
+class strided_array_dtype : public extended_dtype {
+    dtype m_element_dtype;
 public:
-    fixedstring_dtype(string_encoding_t encoding, intptr_t stringsize);
+    strided_array_dtype(const dtype& element_dtype);
 
     type_id_t type_id() const {
-        return fixedstring_type_id;
+        return strided_array_type_id;
     }
     dtype_kind_t kind() const {
-        return string_kind;
+        return composite_kind;
     }
     // Expose the storage traits here
     size_t alignment() const {
-        return m_alignment;
+        return m_element_dtype.alignment();
     }
     size_t get_element_size() const {
-        return m_element_size;
+        return 0;
     }
+    size_t get_default_element_size(int ndim, const intptr_t *shape) const;
 
-    string_encoding_t encoding() const {
-        return m_encoding;
-    }
-
-    const dtype& value_dtype(const dtype& self) const {
-        return self;
-    }
-    const dtype& operand_dtype(const dtype& self) const {
-        return self;
+    const dtype& get_element_dtype() const {
+        return m_element_dtype;
     }
 
     void print_element(std::ostream& o, const char *data, const char *metadata) const;
@@ -72,19 +65,16 @@ public:
 
     bool operator==(const extended_dtype& rhs) const;
 
-    size_t get_metadata_size() const {
-        return 0;
-    }
-    void metadata_destruct(char *DYND_UNUSED(metadata)) const {
-    }
-    void metadata_debug_dump(const char *DYND_UNUSED(metadata), std::ostream& DYND_UNUSED(o), const std::string& DYND_UNUSED(indent)) const {
-    }
+    size_t get_metadata_size() const;
+    void metadata_default_construct(char *metadata, int ndim, const intptr_t* shape) const;
+    void metadata_destruct(char *metadata) const;
+    void metadata_debug_dump(const char *metadata, std::ostream& o, const std::string& indent) const;
 };
 
-inline dtype make_fixedstring_dtype(string_encoding_t encoding, intptr_t stringsize) {
-    return dtype(new fixedstring_dtype(encoding, stringsize));
+inline dtype make_strided_array_dtype(const dtype& element_dtype) {
+    return dtype(new strided_array_dtype(element_dtype));
 }
 
 } // namespace dynd
 
-#endif // _DYND__FIXEDSTRING_DTYPE_HPP_
+#endif // _DYND__STRIDED_ARRAY_DTYPE_HPP_

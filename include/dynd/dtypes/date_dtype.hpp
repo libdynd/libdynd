@@ -2,12 +2,9 @@
 // Copyright (C) 2011-12, Dynamic NDArray Developers
 // BSD 2-Clause License, see LICENSE.txt
 //
-// The fixedstring dtype represents a string with
-// a particular encoding, stored in a fixed-size
-// buffer.
-//
-#ifndef _DYND__FIXEDSTRING_DTYPE_HPP_
-#define _DYND__FIXEDSTRING_DTYPE_HPP_
+
+#ifndef _DYND__DATE_DTYPE_HPP_
+#define _DYND__DATE_DTYPE_HPP_
 
 #include <dynd/dtype.hpp>
 #include <dynd/dtype_assign.hpp>
@@ -16,36 +13,56 @@
 
 namespace dynd {
 
-class fixedstring_dtype : public extended_string_dtype {
-    intptr_t m_element_size, m_alignment, m_stringsize;
-    string_encoding_t m_encoding;
+enum date_unit_t {
+    date_unit_day,
+    date_unit_week,
+    date_unit_month,
+    date_unit_year
+};
+
+inline std::ostream& operator<<(std::ostream& o, date_unit_t unit) {
+    switch (unit) {
+        case date_unit_day:
+            o << "day";
+            break;
+        case date_unit_week:
+            o << "week";
+            break;
+        case date_unit_month:
+            o << "month";
+            break;
+        case date_unit_year:
+            o << "year";
+            break;
+        default:
+            o << "invalid (" << (int)unit << ")";
+            break;
+    }
+    return o;
+}
+
+class date_dtype : public extended_dtype {
+    date_unit_t m_unit;
 
 public:
-    fixedstring_dtype(string_encoding_t encoding, intptr_t stringsize);
+    date_dtype(date_unit_t unit);
 
     type_id_t type_id() const {
-        return fixedstring_type_id;
+        return date_type_id;
     }
     dtype_kind_t kind() const {
-        return string_kind;
+        return datetime_kind;
     }
     // Expose the storage traits here
     size_t alignment() const {
-        return m_alignment;
+        return 4;
     }
     size_t get_element_size() const {
-        return m_element_size;
+        return 4;
     }
 
-    string_encoding_t encoding() const {
-        return m_encoding;
-    }
-
-    const dtype& value_dtype(const dtype& self) const {
-        return self;
-    }
-    const dtype& operand_dtype(const dtype& self) const {
-        return self;
+    date_unit_t unit() const {
+        return m_unit;
     }
 
     void print_element(std::ostream& o, const char *data, const char *metadata) const;
@@ -81,10 +98,10 @@ public:
     }
 };
 
-inline dtype make_fixedstring_dtype(string_encoding_t encoding, intptr_t stringsize) {
-    return dtype(new fixedstring_dtype(encoding, stringsize));
+inline dtype make_date_dtype(date_unit_t unit) {
+    return dtype(new date_dtype(unit));
 }
 
 } // namespace dynd
 
-#endif // _DYND__FIXEDSTRING_DTYPE_HPP_
+#endif // _DYND__DATE_DTYPE_HPP_

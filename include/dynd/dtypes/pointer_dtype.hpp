@@ -38,7 +38,7 @@ public:
     size_t alignment() const {
         return sizeof(void *);
     }
-    uintptr_t element_size() const {
+    size_t get_element_size() const {
         return sizeof(void *);
     }
 

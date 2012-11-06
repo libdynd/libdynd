@@ -14,12 +14,6 @@
 
 namespace dynd {
 
-/** ndobject metadata for this dtype */
-struct struct_dtype_metadata {
-    size_t *offsets;
-    memory_block_data *m_offsets_reference;
-};
-
 class struct_dtype : public extended_dtype {
     std::vector<dtype> m_fields;
     std::vector<std::string> m_field_names;
@@ -40,9 +34,10 @@ public:
     size_t alignment() const {
         return m_alignment;
     }
-    uintptr_t element_size() const {
+    size_t get_element_size() const {
         return 0;
     }
+    size_t get_default_element_size(int ndim, const intptr_t *shape) const;
 
     const std::vector<dtype>& get_fields() const {
         return m_fields;
@@ -71,6 +66,11 @@ public:
                     unary_specialization_kernel_instance& out_kernel) const;
 
     bool operator==(const extended_dtype& rhs) const;
+
+    size_t get_metadata_size() const;
+    void metadata_default_construct(char *metadata, int ndim, const intptr_t* shape) const;
+    void metadata_destruct(char *metadata) const;
+    void metadata_debug_dump(const char *metadata, std::ostream& o, const std::string& indent) const;
 }; // class struct_dtype
 
 /** Makes a tuple dtype with the specified fields, using the standard layout */

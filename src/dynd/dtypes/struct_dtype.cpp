@@ -19,7 +19,7 @@ dynd::struct_dtype::struct_dtype(const std::vector<dtype>& fields, const std::ve
     }
 
     // Calculate the needed element alignment
-    size_t metadata_offset = sizeof(struct_dtype_metadata);
+    size_t metadata_offset = fields.size() * sizeof(size_t);
     m_alignment = 1;
     m_memory_management = pod_memory_management;
     for (size_t i = 0, i_end = fields.size(); i != i_end; ++i) {
@@ -40,12 +40,29 @@ dynd::struct_dtype::struct_dtype(const std::vector<dtype>& fields, const std::ve
     m_metadata_size = metadata_offset;
 }
 
+size_t dynd::struct_dtype::get_default_element_size(int ndim, const intptr_t *shape) const
+{
+    // Default layout is to match the field order - could reorder the elements for more efficient packing
+    size_t s = 0;
+    for (size_t i = 0, i_end = m_fields.size(); i != i_end; ++i) {
+        s = inc_to_alignment(s, m_fields[i].alignment());
+        if (m_fields[i].extended()) {
+            s += m_fields[i].extended()->get_default_element_size(ndim, shape);
+        } else {
+            s += m_fields[i].element_size();
+        }
+    }
+    s = inc_to_alignment(s, m_alignment);
+    return s;
+}
+
+
 void dynd::struct_dtype::print_element(std::ostream& o, const char *data, const char *metadata) const
 {
-    const struct_dtype_metadata *m = reinterpret_cast<const struct_dtype_metadata *>(metadata);
+    const size_t *offsets = reinterpret_cast<const size_t *>(metadata);
     o << "[";
     for (size_t i = 0, i_end = m_fields.size(); i != i_end; ++i) {
-        m_fields[i].print_element(o, data + m->offsets[i], metadata + m_metadata_offsets[i]);
+        m_fields[i].print_element(o, data + offsets[i], metadata + m_metadata_offsets[i]);
         if (i != i_end - 1) {
             o << ", ";
         }
@@ -125,7 +142,7 @@ bool dynd::struct_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype
     if (dst_dt.extended() == this) {
         if (src_dt.extended() == this) {
             return true;
-        } else if (src_dt.type_id() == tuple_type_id) {
+        } else if (src_dt.type_id() == struct_type_id) {
             return *dst_dt.extended() == *src_dt.extended();
         }
     }
@@ -149,7 +166,7 @@ bool dynd::struct_dtype::operator==(const extended_dtype& rhs) const
 {
     if (this == &rhs) {
         return true;
-    } else if (rhs.type_id() != tuple_type_id) {
+    } else if (rhs.type_id() != struct_type_id) {
         return false;
     } else {
         const struct_dtype *dt = static_cast<const struct_dtype*>(&rhs);
@@ -157,4 +174,70 @@ bool dynd::struct_dtype::operator==(const extended_dtype& rhs) const
                 m_memory_management == dt->m_memory_management &&
                 m_fields == dt->m_fields;
     }
+}
+
+size_t dynd::struct_dtype::get_metadata_size() const
+{
+    return m_metadata_size;
+}
+
+void dynd::struct_dtype::metadata_default_construct(char *metadata, int ndim, const intptr_t* shape) const
+{
+    // Validate that the shape is ok
+    if (ndim > 0) {
+        if (shape[0] >= 0 && shape[0] != m_fields.size()) {
+            stringstream ss;
+            ss << "Cannot construct dynd object of dtype " << dtype(this);
+            ss << " with dimension size " << shape[0] << ", the size must be " << m_fields.size();
+            throw runtime_error(ss.str());
+        }
+    }
+
+    size_t *offsets = reinterpret_cast<size_t *>(metadata);
+    size_t offs = 0;
+    for (size_t i = 0; i < m_fields.size(); ++i) {
+        const dtype& field_dt = m_fields[i];
+        offs = inc_to_alignment(offs, field_dt.alignment());
+        offsets[i] = offs;
+        if (field_dt.extended()) {
+            try {
+                field_dt.extended()->metadata_default_construct(
+                            metadata + m_metadata_offsets[i], ndim, shape);
+            } catch(...) {
+                // Since we're explicitly controlling the memory, need to manually do the cleanup too
+                for (size_t j = 0; j < i; ++j) {
+                    if (m_fields[j].extended()) {
+                        m_fields[j].extended()->metadata_destruct(metadata + m_metadata_offsets[i]);
+                    }
+                }
+                throw;
+            }
+            offs += m_fields[i].extended()->get_default_element_size(ndim, shape);
+        } else {
+            offs += m_fields[i].element_size();
+        }
+    }
+}
+
+void dynd::struct_dtype::metadata_destruct(char *metadata) const
+{
+    for (size_t i = 0; i < m_fields.size(); ++i) {
+        const dtype& field_dt = m_fields[i];
+        if (field_dt.extended()) {
+            field_dt.extended()->metadata_destruct(metadata + m_metadata_offsets[i]);
+        }
+    }
+}
+
+void dynd::struct_dtype::metadata_debug_dump(const char *metadata, std::ostream& o, const std::string& indent) const
+{
+    const size_t *offsets = reinterpret_cast<const size_t *>(metadata);
+    o << indent << " field offsets: ";
+    for (size_t i = 0, i_end = m_fields.size(); i != i_end; ++i) {
+        o << offsets[i];
+        if (i != i_end - 1) {
+            o << ", ";
+        }
+    }
+    o << "\n";
 }

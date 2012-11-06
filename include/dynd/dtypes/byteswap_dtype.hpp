@@ -37,7 +37,7 @@ public:
     size_t alignment() const {
         return m_value_dtype.alignment();
     }
-    uintptr_t element_size() const {
+    size_t get_element_size() const {
         return m_value_dtype.element_size();
     }
 

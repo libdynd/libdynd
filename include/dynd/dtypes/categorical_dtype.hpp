@@ -46,7 +46,7 @@ public:
     size_t alignment() const {
         return 4; // TODO
     }
-    uintptr_t element_size() const {
+    size_t get_element_size() const {
         return 4; // TODO
     }
 

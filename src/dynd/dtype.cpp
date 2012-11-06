@@ -22,6 +22,11 @@ extended_dtype::~extended_dtype()
 {
 }
 
+size_t extended_dtype::get_default_element_size(int DYND_UNUSED(ndim), const intptr_t *DYND_UNUSED(shape)) const
+{
+    return get_element_size();
+}
+
 // TODO: Make this a pure virtual function eventually
 size_t extended_dtype::get_metadata_size() const
 {
@@ -29,6 +34,15 @@ size_t extended_dtype::get_metadata_size() const
     ss << "TODO: get_metadata_size for " << dtype(this) << " is not implemented";
     throw std::runtime_error(ss.str());
 }
+
+// TODO: Make this a pure virtual function eventually
+void extended_dtype::metadata_default_construct(char *metadata, int ndim, const intptr_t* shape) const
+{
+    stringstream ss;
+    ss << "TODO: metadata_construct for " << dtype(this) << " is not implemented";
+    throw std::runtime_error(ss.str());
+}
+
 
 // TODO: Make this a pure virtual function eventually
 void extended_dtype::metadata_destruct(char *DYND_UNUSED(metadata)) const

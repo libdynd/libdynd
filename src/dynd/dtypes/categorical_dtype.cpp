@@ -123,7 +123,7 @@ namespace {
             categorical_dtype *cat = reinterpret_cast<categorical_dtype *>(
                 get_raw_auxiliary_data(auxdata)&~1
             );
-            size_t N = cat->element_size();
+            size_t N = cat->get_element_size();
             uint32_t src_val = cat->get_value_from_category(src);
             memcpy(dst, reinterpret_cast<const char *>(&src_val), N);
         }
@@ -135,7 +135,7 @@ namespace {
                 get_raw_auxiliary_data(auxdata)&~1
             );
 
-            size_t N = cat->element_size();
+            size_t N = cat->get_element_size();
             uint32_t src_val = cat->get_value_from_category(src);
             for (intptr_t i = 0; i < count; ++i) {
                 memcpy(dst, reinterpret_cast<const char *>(&src_val), N);
