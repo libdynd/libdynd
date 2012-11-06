@@ -270,7 +270,7 @@ public:
      * @param o the std::ostream to print to
      * @param data pointer to the data element to print
      */
-    virtual void print_element(std::ostream& o, const char *data) const = 0;
+    virtual void print_element(std::ostream& o, const char *data, const char *metadata) const = 0;
 
     /**
      * Print a representation of the dtype itself
@@ -328,9 +328,9 @@ public:
     /* The size of the ndobject metadata for this dtype */
     virtual size_t get_metadata_size() const;
     /** Destructs any references or other state contained in the ndobjects' metdata */
-    virtual void metadata_destruct(char *metadata);
+    virtual void metadata_destruct(char *metadata) const;
     /** Debug print of the metdata */
-    virtual void metadata_debug_dump(const char *metadata, std::ostream& o, const std::string& indent);
+    virtual void metadata_debug_dump(const char *metadata, std::ostream& o, const std::string& indent) const;
 
     friend void extended_dtype_incref(const extended_dtype *ed);
     friend void extended_dtype_decref(const extended_dtype *ed);
@@ -661,10 +661,11 @@ public:
     /**
      * print data interpreted as a single value of this dtype
      *
-     * @param o the std::ostream to print to
-     * @param data pointer to the data element to print
+     * @param o         the std::ostream to print to
+     * @param data      pointer to the data element to print
+     * @param metadata  pointer to the ndobject metadata for the data element
      */
-    void print_element(std::ostream& o, const char *data) const;
+    void print_element(std::ostream& o, const char *data, const char *metadata) const;
 
     friend /* TODO: DYND_CONSTEXPR*/ dtype detail::internal_make_raw_dtype(char type_id, char kind, intptr_t element_size, char alignment);
     friend std::ostream& operator<<(std::ostream& o, const dtype& rhs);

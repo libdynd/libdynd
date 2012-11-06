@@ -17,14 +17,14 @@ dynd::array_dtype::array_dtype(const dtype& element_dtype)
 {
 }
 
-void dynd::array_dtype::print_element(std::ostream& o, const char *data) const
+void dynd::array_dtype::print_element(std::ostream& o, const char *data, const char *metadata) const
 {
     const char *begin = reinterpret_cast<const char * const *>(data)[0];
     const char *end = reinterpret_cast<const char * const *>(data)[1];
 
     o << "[";
     while (begin < end) {
-        m_element_dtype.print_element(o, begin);
+        m_element_dtype.print_element(o, begin, metadata);
         begin += m_element_dtype.element_size();
         if (begin < end) {
             o << ", ";

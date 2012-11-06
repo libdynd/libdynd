@@ -40,11 +40,12 @@ dynd::struct_dtype::struct_dtype(const std::vector<dtype>& fields, const std::ve
     m_metadata_size = metadata_offset;
 }
 
-void dynd::struct_dtype::print_element(std::ostream& o, const char *data) const
+void dynd::struct_dtype::print_element(std::ostream& o, const char *data, const char *metadata) const
 {
+    const struct_dtype_metadata *m = reinterpret_cast<const struct_dtype_metadata *>(metadata);
     o << "[";
     for (size_t i = 0, i_end = m_fields.size(); i != i_end; ++i) {
-        m_fields[i].print_element(o, data /*+ offsets[i]*/);
+        m_fields[i].print_element(o, data + m->offsets[i], metadata + m_metadata_offsets[i]);
         if (i != i_end - 1) {
             o << ", ";
         }

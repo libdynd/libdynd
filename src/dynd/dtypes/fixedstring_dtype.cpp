@@ -36,7 +36,7 @@ dynd::fixedstring_dtype::fixedstring_dtype(string_encoding_t encoding, intptr_t 
     }
 }
 
-void dynd::fixedstring_dtype::print_element(std::ostream& o, const char *data) const
+void dynd::fixedstring_dtype::print_element(std::ostream& o, const char *data, const char *DYND_UNUSED(metadata)) const
 {
     uint32_t cp;
     next_unicode_codepoint_t next_fn;

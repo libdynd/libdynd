@@ -31,7 +31,7 @@ size_t extended_dtype::get_metadata_size() const
 }
 
 // TODO: Make this a pure virtual function eventually
-void extended_dtype::metadata_destruct(char *DYND_UNUSED(metadata))
+void extended_dtype::metadata_destruct(char *DYND_UNUSED(metadata)) const
 {
     stringstream ss;
     ss << "TODO: metadata_destruct for " << dtype(this) << " is not implemented";
@@ -39,7 +39,7 @@ void extended_dtype::metadata_destruct(char *DYND_UNUSED(metadata))
 }
 
 // TODO: Make this a pure virtual function eventually
-void extended_dtype::metadata_debug_dump(const char *DYND_UNUSED(metadata), std::ostream& DYND_UNUSED(o), const std::string& DYND_UNUSED(indent))
+void extended_dtype::metadata_debug_dump(const char *DYND_UNUSED(metadata), std::ostream& DYND_UNUSED(o), const std::string& DYND_UNUSED(indent)) const
 {
     stringstream ss;
     ss << "TODO: metadata_debug_dump for " << dtype(this) << " is not implemented";
@@ -340,10 +340,10 @@ void dynd::hexadecimal_print(std::ostream& o, const char *data, intptr_t element
     }
 }
 
-void dynd::dtype::print_element(std::ostream& o, const char * data) const
+void dynd::dtype::print_element(std::ostream& o, const char *data, const char *metadata) const
 {
     if (extended() != NULL) {
-        extended()->print_element(o, data);
+        extended()->print_element(o, data, metadata);
     } else {
         switch (type_id()) {
             case bool_type_id:

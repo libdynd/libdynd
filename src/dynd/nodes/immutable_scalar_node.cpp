@@ -47,10 +47,10 @@ void dynd::immutable_scalar_node::debug_dump_extra(std::ostream& o, const std::s
     o << indent << " value: ";
     try {
         if (m_dtype.kind() != expression_kind) {
-            m_dtype.print_element(o, m_originptr);
+            m_dtype.print_element(o, m_originptr, NULL); // TODO: ndobject metadata
         } else {
             ndarray a = ndarray(const_cast<immutable_scalar_node *>(this)->as_ndarray_node_ptr()).vals();
-            a.get_dtype().print_element(o, a.get_readonly_originptr());
+            a.get_dtype().print_element(o, a.get_readonly_originptr(), NULL); // TODO: ndobject metadata
         }
         o << "\n";
     } catch(std::exception& e) {

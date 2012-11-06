@@ -29,7 +29,7 @@ dynd::string_dtype::string_dtype(string_encoding_t encoding)
     }
 }
 
-void dynd::string_dtype::print_element(std::ostream& o, const char *data) const
+void dynd::string_dtype::print_element(std::ostream& o, const char *data, const char *DYND_UNUSED(metadata)) const
 {
     uint32_t cp;
     next_unicode_codepoint_t next_fn;

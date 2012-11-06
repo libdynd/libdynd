@@ -15,6 +15,8 @@ namespace dynd {
 class tuple_dtype : public extended_dtype {
     std::vector<dtype> m_fields;
     std::vector<size_t> m_offsets;
+    std::vector<size_t> m_metadata_offsets;
+    size_t m_metadata_size;
     uintptr_t m_element_size;
     dtype_memory_management_t m_memory_management;
     unsigned char m_alignment;
@@ -56,7 +58,7 @@ public:
         return m_is_standard_layout;
     }
 
-    void print_element(std::ostream& o, const char *data) const;
+    void print_element(std::ostream& o, const char *data, const char *metadata) const;
 
     void print_dtype(std::ostream& o) const;
 
@@ -117,6 +119,7 @@ inline dtype make_tuple_dtype(const dtype& dt0, const dtype& dt1, const dtype& d
     fields.push_back(dt0);
     fields.push_back(dt1);
     fields.push_back(dt2);
+    std::cout << "blah 122" << std::endl;
     return make_tuple_dtype(fields);
 }
 

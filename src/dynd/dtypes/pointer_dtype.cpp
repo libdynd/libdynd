@@ -30,10 +30,10 @@ dynd::pointer_dtype::pointer_dtype(const dtype& target_dtype)
     }
 }
 
-void dynd::pointer_dtype::print_element(std::ostream& o, const char *data) const
+void dynd::pointer_dtype::print_element(std::ostream& o, const char *data, const char *metadata) const
 {
     const char *target_data = *reinterpret_cast<const char * const *>(data);
-    m_target_dtype.print_element(o, target_data);
+    m_target_dtype.print_element(o, target_data, metadata);
 }
 
 void dynd::pointer_dtype::print_dtype(std::ostream& o) const {

@@ -29,31 +29,31 @@ dynd::view_dtype::view_dtype(const dtype& value_dtype, const dtype& operand_dtyp
                     m_copy_kernel);
 }
 
-void dynd::view_dtype::print_element(std::ostream& o, const char *data) const
+void dynd::view_dtype::print_element(std::ostream& o, const char *data, const char *metadata) const
 {
     // Allow calling print_element in the special case that the view
     // is being used just to align the data
     if (m_operand_dtype.type_id() == fixedbytes_type_id) {
         switch (m_operand_dtype.element_size()) {
             case 1:
-                m_value_dtype.print_element(o, data);
+                m_value_dtype.print_element(o, data, metadata);
                 return;
             case 2: {
                 uint16_t tmp;
                 memcpy(&tmp, data, sizeof(tmp));
-                m_value_dtype.print_element(o, reinterpret_cast<const char *>(&tmp));
+                m_value_dtype.print_element(o, reinterpret_cast<const char *>(&tmp), metadata);
                 return;
             }
             case 4: {
                 uint32_t tmp;
                 memcpy(&tmp, data, sizeof(tmp));
-                m_value_dtype.print_element(o, reinterpret_cast<const char *>(&tmp));
+                m_value_dtype.print_element(o, reinterpret_cast<const char *>(&tmp), metadata);
                 return;
             }
             case 8: {
                 uint64_t tmp;
                 memcpy(&tmp, data, sizeof(tmp));
-                m_value_dtype.print_element(o, reinterpret_cast<const char *>(&tmp));
+                m_value_dtype.print_element(o, reinterpret_cast<const char *>(&tmp), metadata);
                 return;
             }
             default: {
@@ -62,7 +62,7 @@ void dynd::view_dtype::print_element(std::ostream& o, const char *data) const
                 // Make the storage aligned as needed
                 buffer = (char *)(((uintptr_t)buffer + (uintptr_t)m_value_dtype.alignment() - 1) & (m_value_dtype.alignment() - 1));
                 memcpy(buffer, data, m_value_dtype.element_size());
-                m_value_dtype.print_element(o, reinterpret_cast<const char *>(&buffer));
+                m_value_dtype.print_element(o, reinterpret_cast<const char *>(&buffer), metadata);
                 return;
             }
         }

@@ -39,7 +39,7 @@ public:
         return m_encoding;
     }
 
-    void print_element(std::ostream& o, const char *data) const;
+    void print_element(std::ostream& o, const char *data, const char *metadata) const;
 
     void print_dtype(std::ostream& o) const;
 
@@ -62,6 +62,14 @@ public:
                     unary_specialization_kernel_instance& out_kernel) const;
 
     bool operator==(const extended_dtype& rhs) const;
+
+    size_t get_metadata_size() const {
+        return 0;
+    }
+    void metadata_destruct(char *DYND_UNUSED(metadata)) const {
+    }
+    void metadata_debug_dump(const char *DYND_UNUSED(metadata), std::ostream& DYND_UNUSED(o), const std::string& DYND_UNUSED(indent)) const {
+    }
 };
 
 inline dtype make_string_dtype(string_encoding_t encoding) {

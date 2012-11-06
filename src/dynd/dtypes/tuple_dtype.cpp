@@ -12,9 +12,10 @@ using namespace std;
 using namespace dynd;
 
 dynd::tuple_dtype::tuple_dtype(const std::vector<dtype>& fields)
-    : m_fields(fields), m_offsets(fields.size())
+    : m_fields(fields), m_offsets(fields.size()), m_metadata_offsets(fields.size())
 {
     // Calculate the offsets and element size
+    size_t metadata_offset = 0;
     size_t offset = 0;
     m_alignment = 1;
     m_memory_management = pod_memory_management;
@@ -34,7 +35,11 @@ dynd::tuple_dtype::tuple_dtype(const std::vector<dtype>& fields)
         if (fields[i].get_memory_management() == blockref_memory_management) {
             m_memory_management = blockref_memory_management;
         }
+        // Calculate the metadata offsets
+        m_metadata_offsets[i] = metadata_offset;
+        metadata_offset += m_fields[i].extended() ? m_fields[i].extended()->get_metadata_size() : 0;
     }
+    m_metadata_size = metadata_offset;
     // Pad to get the final element size
     m_element_size = (offset + m_alignment - 1) & (-m_alignment);
     // This is the standard layout
@@ -43,7 +48,8 @@ dynd::tuple_dtype::tuple_dtype(const std::vector<dtype>& fields)
 
 dynd::tuple_dtype::tuple_dtype(const std::vector<dtype>& fields, const std::vector<size_t> offsets,
                     size_t element_size, size_t alignment)
-    : m_fields(fields), m_offsets(offsets), m_element_size(element_size), m_alignment(alignment)
+    : m_fields(fields), m_offsets(offsets), m_metadata_offsets(fields.size()),
+        m_element_size(element_size), m_alignment(alignment)
 {
     if ((element_size & (alignment - 1)) != 0) {
         stringstream ss;
@@ -52,6 +58,7 @@ dynd::tuple_dtype::tuple_dtype(const std::vector<dtype>& fields, const std::vect
         throw runtime_error(ss.str());
     }
 
+    size_t metadata_offset = 0;
     m_memory_management = pod_memory_management;
     for (size_t i = 0, i_end = fields.size(); i != i_end; ++i) {
         // Check that the field is within bounds
@@ -76,7 +83,11 @@ dynd::tuple_dtype::tuple_dtype(const std::vector<dtype>& fields, const std::vect
         if (fields[i].get_memory_management() == blockref_memory_management) {
             m_memory_management = blockref_memory_management;
         }
+        // Calculate the metadata offsets
+        m_metadata_offsets[i] = metadata_offset;
+        metadata_offset += m_fields[i].extended() ? m_fields[i].extended()->get_metadata_size() : 0;
     }
+    m_metadata_size = metadata_offset;
     // Check whether the layout we were given is standard
     m_is_standard_layout = compute_is_standard_layout();
 }
@@ -103,11 +114,11 @@ bool dynd::tuple_dtype::compute_is_standard_layout() const
     return m_element_size == standard_element_size && m_alignment == standard_alignment;
 }
 
-void dynd::tuple_dtype::print_element(std::ostream& o, const char *data) const
+void dynd::tuple_dtype::print_element(std::ostream& o, const char *data, const char *metadata) const
 {
     o << "[";
     for (size_t i = 0, i_end = m_fields.size(); i != i_end; ++i) {
-        m_fields[i].print_element(o, data + m_offsets[i]);
+        m_fields[i].print_element(o, data + m_offsets[i], metadata + m_metadata_offsets[i]);
         if (i != i_end - 1) {
             o << ", ";
         }

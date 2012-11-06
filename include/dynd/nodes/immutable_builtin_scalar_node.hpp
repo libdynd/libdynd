@@ -104,7 +104,7 @@ public:
         hexadecimal_print(o, reinterpret_cast<const char *>(&m_value), sizeof(m_value));
         o << "\n";
         o << indent << " value: ";
-        get_dtype().print_element(o, reinterpret_cast<const char *>(&m_value));
+        get_dtype().print_element(o, reinterpret_cast<const char *>(&m_value), NULL); // TODO: ndobject metadata
         o << "\n";
     }
 

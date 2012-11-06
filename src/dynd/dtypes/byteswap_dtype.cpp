@@ -46,7 +46,7 @@ dynd::byteswap_dtype::byteswap_dtype(const dtype& value_dtype, const dtype& oper
     }
 }
 
-void dynd::byteswap_dtype::print_element(std::ostream& DYND_UNUSED(o), const char *DYND_UNUSED(data)) const
+void dynd::byteswap_dtype::print_element(std::ostream& DYND_UNUSED(o), const char *DYND_UNUSED(data), const char *DYND_UNUSED(metadata)) const
 {
     throw runtime_error("internal error: byteswap_dtype::print_element isn't supposed to be called");
 }
