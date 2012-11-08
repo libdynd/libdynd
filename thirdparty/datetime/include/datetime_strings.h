@@ -1,6 +1,10 @@
 #ifndef DATETIME_STRINGS_H
 #define DATETIME_STRINGS_H
 
+#include <string>
+
+#include "datetime_main.h"
+
 namespace datetime {
 
 /*
@@ -52,7 +56,7 @@ namespace datetime {
  *
  * Returns 0 on success, -1 on failure.
  */
-void parse_iso_8601_datetime(char *str, size_t len,
+void parse_iso_8601_datetime(const char *str, size_t len,
                     datetime_unit_t unit,
                     datetime_conversion_rule_t casting,
                     datetime_fields *out,
@@ -85,12 +89,21 @@ int get_datetime_iso_8601_strlen(bool local, datetime_unit_t base);
  *  in order to form a date unit string as a local time, the casting
  *  must be unsafe.
  *
- *  Returns 0 on success, -1 on failure (for example if the output
- *  string was too short).
+ *  Returns the length of the string populated in outstr.
  */
-void make_iso_8601_datetime(datetime_fields *dts, char *outstr, int outlen,
+size_t make_iso_8601_datetime(const datetime_fields *dtf, char *outstr, size_t outlen,
                     bool local = false, datetime_unit_t unit = datetime_unit_unspecified, int tzoffset = -1,
                     datetime_conversion_rule_t casting = datetime_conversion_strict);
+
+std::string make_iso_8601_datetime(const datetime_fields *dtf,
+                    bool local = false, datetime_unit_t unit = datetime_unit_unspecified, int tzoffset = -1,
+                    datetime_conversion_rule_t casting = datetime_conversion_strict);
+
+inline std::string make_iso_8601_date(date_val_t date, datetime_unit_t unit = datetime_unit_day) {
+    datetime_fields dtf;
+    dtf.set_from_datetime_val(date, unit);
+    return make_iso_8601_datetime(&dtf, false, unit);
+}
 
 } // namespace datetime
 

@@ -11,6 +11,10 @@ set(BUILD_SHARED_LIBS 1)
 
 find_package(Boost REQUIRED)
 
+# Embedded libraries
+add_subdirectory(thirdparty/datetime)
+include_directories(thirdparty/datetime/include)
+
 # If we're using gcc, check the version
 if (CMAKE_COMPILER_IS_GNUCXX)
     execute_process(COMMAND ${CMAKE_C_COMPILER} -dumpversion
@@ -219,6 +223,9 @@ if(WIN32)
 else()
     add_library(dynamicndarray SHARED ${dynd_SRC})
 endif()
+target_link_libraries(dynamicndarray
+    datetime
+    )
 
 add_subdirectory(basic_kernels)
 

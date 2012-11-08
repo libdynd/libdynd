@@ -9,6 +9,7 @@
 
 #include <string.h>
 #include <ctype.h>
+#include <stdio.h>
 
 #include <stdexcept>
 #include <sstream>
@@ -54,7 +55,7 @@ using namespace datetime;
  *
  * Returns 0 on success, -1 on failure.
  */
-void datetime::parse_iso_8601_datetime(char *str, size_t len,
+void datetime::parse_iso_8601_datetime(const char *str, size_t len,
                     datetime_unit_t unit,
                     datetime_conversion_rule_t casting,
                     datetime_fields *out,
@@ -64,7 +65,7 @@ void datetime::parse_iso_8601_datetime(char *str, size_t len,
 {
     int year_leap = 0;
     int i, numdigits;
-    char *substr;
+    const char *substr;
     ptrdiff_t sublen;
     datetime_unit_t bestunit;
 
@@ -640,8 +641,7 @@ int datetime::get_datetime_iso_8601_strlen(bool local, datetime_unit_t unit)
  * Finds the largest unit whose value is nonzero, and for which
  * the remainder for the rest of the units is zero.
  */
-static datetime_unit_t
-lossless_unit_from_datetimestruct(datetime_fields *dts)
+static datetime_unit_t lossless_unit_from_datetime_fields(const datetime_fields *dts)
 {
     if (dts->as % 1000 != 0) {
         return datetime_unit_as;
@@ -707,14 +707,15 @@ lossless_unit_from_datetimestruct(datetime_fields *dts)
  *
  *  Throws an exception on error.
  */
-void datetime::make_iso_8601_datetime(datetime_fields *dts, char *outstr, int outlen,
+size_t datetime::make_iso_8601_datetime(const datetime_fields *dts, char *outstr, size_t outlen,
                     bool local, datetime_unit_t unit, int tzoffset,
                     datetime_conversion_rule_t casting)
 {
     datetime_fields dtf_local;
     int timezone_offset = 0;
 
-    char *substr = outstr, sublen = outlen;
+    char *substr = outstr;
+    ptrdiff_t sublen = outlen;
     int tmplen;
 
     /* Handle NaT, and treat a datetime with generic units as NaT */
@@ -729,7 +730,7 @@ void datetime::make_iso_8601_datetime(datetime_fields *dts, char *outstr, int ou
             outstr[3] = '\0';
         }
 
-        return;
+        return 3;
     }
 
     /*
@@ -749,7 +750,7 @@ void datetime::make_iso_8601_datetime(datetime_fields *dts, char *outstr, int ou
 
     /* Automatically detect a good unit */
     if (unit == -1) {
-        unit = lossless_unit_from_datetimestruct(dts);
+        unit = lossless_unit_from_datetime_fields(dts);
         /*
          * If there's a timezone, use at least minutes precision,
          * and never split up hours and minutes by default
@@ -783,11 +784,12 @@ void datetime::make_iso_8601_datetime(datetime_fields *dts, char *outstr, int ou
     else if (local) {
         /* Make a copy of the datetime_fields we can modify */
         dtf_local = *dts;
-        dts = &dtf_local;
 
         /* Set and apply the required timezone offset */
         timezone_offset = tzoffset;
-        dts->add_minutes(timezone_offset);
+        dtf_local.add_minutes(timezone_offset);
+
+        dts = &dtf_local;
     }
 
     /*
@@ -804,7 +806,7 @@ void datetime::make_iso_8601_datetime(datetime_fields *dts, char *outstr, int ou
         else {
             datetime_unit_t unitprec;
 
-            unitprec = lossless_unit_from_datetimestruct(dts);
+            unitprec = lossless_unit_from_datetime_fields(dts);
             if (unitprec > unit) {
                 std::stringstream ss;
                 ss << "cannot create a string with unit precision " << unit;
@@ -815,7 +817,9 @@ void datetime::make_iso_8601_datetime(datetime_fields *dts, char *outstr, int ou
     }
 
     /* YEAR */
-#if defined(_MSC_VER)
+#if defined(_MSC_VER) && (_MSC_VER >= 1400)
+    tmplen = _snprintf_s(substr, sublen, sublen, "%04I64d", dts->year);
+#elif defined(_MSC_VER)
     tmplen = _snprintf(substr, sublen, "%04I64d", dts->year);
 #elif defined(__APPLE__) || defined(__FreeBSD__)
     tmplen = snprintf(substr, sublen, "%04Ld", dts->year);
@@ -834,7 +838,7 @@ void datetime::make_iso_8601_datetime(datetime_fields *dts, char *outstr, int ou
         if (sublen > 0) {
             *substr = '\0';
         }
-        return;
+        return substr - outstr;
     }
 
     /* MONTH */
@@ -858,7 +862,7 @@ void datetime::make_iso_8601_datetime(datetime_fields *dts, char *outstr, int ou
         if (sublen > 0) {
             *substr = '\0';
         }
-        return;
+        return substr - outstr;
     }
 
     /* DAY */
@@ -882,7 +886,7 @@ void datetime::make_iso_8601_datetime(datetime_fields *dts, char *outstr, int ou
         if (sublen > 0) {
             *substr = '\0';
         }
-        return;
+        return substr - outstr;
     }
 
     /* HOUR */
@@ -1124,11 +1128,22 @@ add_time_zone:
         substr[0] = '\0';
     }
 
-    return;
+    return substr - outstr;
 
 string_too_short:
     std::stringstream ss;
     ss << "The string buffer provided for ISO datetime formatting ";
     ss << "was too short, require a length greater than" << outlen;
     throw std::runtime_error(ss.str());
+}
+
+std::string datetime::make_iso_8601_datetime(const datetime_fields *dts,
+                    bool local, datetime_unit_t unit, int tzoffset,
+                    datetime_conversion_rule_t casting)
+{
+    size_t result_size = get_datetime_iso_8601_strlen(local, unit);
+    std::string result(result_size, '\0');
+    result.resize(make_iso_8601_datetime(dts,
+                &result[0], result_size, local, unit, tzoffset, casting));
+    return result;
 }

@@ -10,6 +10,8 @@
 #include <dynd/kernels/string_assignment_kernels.hpp>
 #include <dynd/exceptions.hpp>
 
+#include <datetime_strings.h>
+
 #define DYND_DATE_ORIGIN_YEAR 1970
 
 using namespace std;
@@ -19,10 +21,10 @@ dynd::date_dtype::date_dtype(date_unit_t unit)
     : m_unit(unit)
 {
     switch (unit) {
-        case date_unit_day:
-        case date_unit_week:
-        case date_unit_month:
         case date_unit_year:
+        case date_unit_month:
+        case date_unit_week:
+        case date_unit_day:
             break;
         default:
             throw runtime_error("Unrecognized date unit in date dtype constructor");
@@ -33,21 +35,31 @@ void dynd::date_dtype::print_element(std::ostream& o, const char *data, const ch
 {
     int32_t value = *reinterpret_cast<const int32_t *>(data);
     switch (m_unit) {
-        case date_unit_day:
-            break;
-        case date_unit_week:
+        case date_unit_year:
+            o << datetime::make_iso_8601_date(value, datetime::datetime_unit_year);
             break;
         case date_unit_month:
+            o << datetime::make_iso_8601_date(value, datetime::datetime_unit_month);
             break;
-        case date_unit_year:
-            o << (DYND_DATE_ORIGIN_YEAR + value);
+        case date_unit_week:
+            o << datetime::make_iso_8601_date(value, datetime::datetime_unit_week);
+            break;
+        case date_unit_day:
+            o << datetime::make_iso_8601_date(value, datetime::datetime_unit_day);
+            break;
+        default:
+            o << "<corrupt date dtype>";
             break;
     }
 }
 
 void dynd::date_dtype::print_dtype(std::ostream& o) const
 {
-    o << "date<" << m_unit << ">";
+    if (m_unit == date_unit_day) {
+        o << "date";
+    } else {
+        o << "date<" << m_unit << ">";
+    }
 }
 
 dtype dynd::date_dtype::apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& DYND_UNUSED(root_dt)) const
