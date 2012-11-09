@@ -54,6 +54,7 @@ set(dynd_SRC
     include/dynd/codegen/codegen_cache.hpp
     # DTypes
     src/dynd/dtypes/array_dtype.cpp
+    src/dynd/dtypes/busdate_dtype.cpp
     src/dynd/dtypes/byteswap_dtype.cpp
     src/dynd/dtypes/categorical_dtype.cpp
     src/dynd/dtypes/convert_dtype.cpp
@@ -68,6 +69,7 @@ set(dynd_SRC
     src/dynd/dtypes/view_dtype.cpp
     src/dynd/dtypes/void_pointer_dtype.cpp
     include/dynd/dtypes/array_dtype.hpp
+    include/dynd/dtypes/busdate_dtype.hpp
     include/dynd/dtypes/byteswap_dtype.hpp
     include/dynd/dtypes/categorical_dtype.hpp
     include/dynd/dtypes/convert_dtype.hpp

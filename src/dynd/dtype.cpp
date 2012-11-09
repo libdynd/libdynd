@@ -22,6 +22,22 @@ extended_dtype::~extended_dtype()
 {
 }
 
+dtype extended_dtype::apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& DYND_UNUSED(root_dt)) const
+{
+    // Default to scalar behavior
+    if (nindices == 0) {
+        return dtype(this);
+    } else {
+        throw too_many_indices(current_i + nindices, current_i);
+    }
+}
+
+void dynd::extended_dtype::get_shape(int DYND_UNUSED(i), std::vector<intptr_t>& DYND_UNUSED(out_shape)) const
+{
+    // Default to scalar behavior
+}
+
+
 size_t extended_dtype::get_default_element_size(int DYND_UNUSED(ndim), const intptr_t *DYND_UNUSED(shape)) const
 {
     return get_element_size();

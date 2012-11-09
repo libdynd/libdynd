@@ -62,20 +62,6 @@ void dynd::date_dtype::print_dtype(std::ostream& o) const
     }
 }
 
-dtype dynd::date_dtype::apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& DYND_UNUSED(root_dt)) const
-{
-    // TODO: Could treat "year", "month", "day" or "year", "week" as a dimension.
-    if (nindices == 0) {
-        return dtype(this);
-    } else {
-        throw too_many_indices(current_i + nindices, current_i);
-    }
-}
-
-void dynd::date_dtype::get_shape(int DYND_UNUSED(i), std::vector<intptr_t>& DYND_UNUSED(out_shape)) const
-{
-}
-
 bool dynd::date_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const
 {
     if (dst_dt.extended() == this) {

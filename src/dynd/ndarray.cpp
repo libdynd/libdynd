@@ -455,6 +455,17 @@ ndarray dynd::ndarray::eval_copy(const eval::eval_context *ectx, uint32_t access
     return ndarray(evaluate(m_node.get_node(), ectx, true, access_flags));
 }
 
+bool dynd::ndarray::equals_exact(const ndarray& rhs) const
+{
+    if (get_node() == rhs.get_node()) {
+        return true;
+    } else if (get_node() != NULL && rhs.get_node() != NULL) {
+        throw runtime_error("ndarray::equals_exact is not yet implemented");
+    } else {
+        return false;
+    }
+}
+
 
 void dynd::ndarray::debug_dump(std::ostream& o = std::cerr, const std::string& indent) const
 {

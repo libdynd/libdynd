@@ -95,6 +95,7 @@ enum type_id_t {
     fixedstring_type_id,
     categorical_type_id,
     date_type_id,
+    busdate_type_id,
 
     // blockref primitive dtypes
     string_type_id,
@@ -295,12 +296,12 @@ public:
      * @param current_i    The current index position. Used for error messages.
      * @param root_dt      The data type in the first call, before any recursion. Used for error messages.
      */
-    virtual dtype apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& root_dt) const = 0;
+    virtual dtype apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& root_dt) const;
 
     /**
      * Retrieves the shape of the dtype, expanding the vector as needed.
      */
-    virtual void get_shape(int i, std::vector<intptr_t>& out_shape) const = 0;
+    virtual void get_shape(int i, std::vector<intptr_t>& out_shape) const;
 
     /**
      * Called by ::dynd::is_lossless_assignment, with (this == dst_dt->extended()).

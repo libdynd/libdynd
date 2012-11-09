@@ -301,6 +301,8 @@ public:
     template<class T>
     T as(assign_error_mode errmode = assign_error_default) const;
 
+    bool equals_exact(const ndarray& rhs) const;
+
     void debug_dump(std::ostream& o, const std::string& indent = "") const;
 
     friend std::ostream& operator<<(std::ostream& o, const ndarray& rhs);
