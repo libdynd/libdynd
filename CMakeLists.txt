@@ -60,6 +60,7 @@ set(dynd_SRC
     src/dynd/dtypes/convert_dtype.cpp
     src/dynd/dtypes/date_dtype.cpp
     src/dynd/dtypes/dtype_alignment.cpp
+    src/dynd/dtypes/fixedbytes_dtype.cpp
     src/dynd/dtypes/fixedstring_dtype.cpp
     src/dynd/dtypes/pointer_dtype.cpp
     src/dynd/dtypes/strided_array_dtype.cpp
@@ -75,6 +76,7 @@ set(dynd_SRC
     include/dynd/dtypes/convert_dtype.hpp
     include/dynd/dtypes/date_dtype.hpp
     include/dynd/dtypes/dtype_alignment.hpp
+    include/dynd/dtypes/fixedbytes_dtype.hpp
     include/dynd/dtypes/fixedstring_dtype.hpp
     include/dynd/dtypes/pointer_dtype.hpp
     include/dynd/dtypes/strided_array_dtype.hpp
@@ -169,6 +171,7 @@ set(dynd_SRC
     src/dynd/dtype_promotion.cpp
     src/dynd/exceptions.cpp
     src/dynd/ndarray.cpp
+    src/dynd/ndobject.cpp
     src/dynd/ndarray_arange.cpp
     src/dynd/shape_tools.cpp
     src/dynd/string_encodings.cpp
@@ -185,6 +188,7 @@ set(dynd_SRC
     include/dynd/fpstatus.hpp
     include/dynd/irange.hpp
     include/dynd/ndarray.hpp
+    include/dynd/ndobject.hpp
     include/dynd/ndarray_arange.hpp
     include/dynd/raw_iteration.hpp
     include/dynd/scalars.hpp

@@ -14,6 +14,7 @@
 #include <dynd/dtypes/dtype_alignment.hpp>
 #include <dynd/dtypes/convert_dtype.hpp>
 #include <dynd/dtypes/view_dtype.hpp>
+#include <dynd/dtypes/fixedbytes_dtype.hpp>
 
 using namespace std;
 using namespace dynd;

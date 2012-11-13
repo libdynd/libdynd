@@ -7,6 +7,7 @@
 #include <dynd/memblock/pod_memory_block.hpp>
 #include <dynd/memblock/fixed_size_pod_memory_block.hpp>
 #include <dynd/memblock/executable_memory_block.hpp>
+#include <dynd/memblock/ndobject_memory_block.hpp>
 #include <dynd/nodes/ndarray_node.hpp>
 
 using namespace std;
@@ -39,6 +40,12 @@ void free_pod_memory_block(memory_block_data *memblock);
  * This should only be called by the memory_block decref code.
  */
 void free_executable_memory_block(memory_block_data *memblock);
+/**
+ * INTERNAL: Frees a memory_block created by make_ndobject_memory_block.
+ * This should only be called by the memory_block decref code.
+ */
+void free_ndobject_memory_block(memory_block_data *memblock);
+
 
 /**
  * INTERNAL: Static instance of the pod allocator API for the POD memory block.
@@ -72,6 +79,9 @@ void dynd::detail::memory_block_free(memory_block_data *memblock)
             throw runtime_error("object_memory_block_type not supported yet");
         case executable_memory_block_type:
             free_executable_memory_block(memblock);
+            return;
+        case ndobject_memory_block_type:
+            free_ndobject_memory_block(memblock);
             return;
     }
 
@@ -109,6 +119,10 @@ void dynd::memory_block_debug_dump(const memory_block_data *memblock, std::ostre
             case executable_memory_block_type:
                 o << indent << " type: executable\n";
                 executable_memory_block_debug_dump(memblock, o, indent);
+                break;
+            case ndobject_memory_block_type:
+                o << indent << " type: ndobject\n";
+                ndobject_memory_block_debug_dump(memblock, o, indent);
                 break;
         }
         o << indent << "------" << endl;

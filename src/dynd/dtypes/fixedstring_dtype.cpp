@@ -79,10 +79,6 @@ dtype dynd::fixedstring_dtype::apply_linear_index(int nindices, const irange *in
     }
 }
 
-void dynd::fixedstring_dtype::get_shape(int DYND_UNUSED(i), std::vector<intptr_t>& DYND_UNUSED(out_shape)) const
-{
-}
-
 bool dynd::fixedstring_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const
 {
     if (dst_dt.extended() == this) {

@@ -50,6 +50,12 @@ void dynd::strided_array_dtype::print_dtype(std::ostream& o) const
     o << "strided_array<" << m_element_dtype << ">";
 }
 
+bool dynd::strided_array_dtype::is_scalar(const char *DYND_UNUSED(data), const char *DYND_UNUSED(metadata)) const
+{
+    return false;
+}
+
+
 dtype dynd::strided_array_dtype::apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& root_dt) const
 {
     if (nindices == 0) {

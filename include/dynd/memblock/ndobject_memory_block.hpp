@@ -3,8 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__POD_MEMORY_BLOCK_HPP_
-#define _DYND__POD_MEMORY_BLOCK_HPP_
+#ifndef _DYND__NDOBJECT_MEMORY_BLOCK_HPP_
+#define _DYND__NDOBJECT_MEMORY_BLOCK_HPP_
 
 #include <iostream>
 #include <string>
@@ -20,9 +20,34 @@ namespace dynd {
  * object.
  */
 struct ndobject_preamble {
+    memory_block_data m_memblockdata;
+    /**
+     * m_dtype is overloaded - for builtin scalar dtypes, it
+     * simply contains the type id. If (m_dtype&~builtin_type_id_mask)
+     * is 0, its a builtin type.
+     */
     extended_dtype *m_dtype;
-    void *m_data_pointer;
+    char *m_data_pointer;
+    int64_t m_flags;
     memory_block_data *m_data_reference;
+
+    /** Returns true if the dtype is builtin */
+    inline bool is_builtin_dtype() const {
+        return (reinterpret_cast<uintptr_t>(m_dtype)&(~builtin_type_id_mask)) == 0;
+    }
+
+    /** Should only be called if is_builtin_dtype() returns true */
+    inline type_id_t get_builtin_type_id() const {
+        return static_cast<type_id_t>(reinterpret_cast<uintptr_t>(m_dtype));
+    }
+
+    inline type_id_t get_type_id() const {
+        if (is_builtin_dtype()) {
+            return get_builtin_type_id();
+        } else {
+            return m_dtype->type_id();
+        }
+    }
 };
 
 /**
@@ -51,4 +76,4 @@ void ndobject_memory_block_debug_dump(const memory_block_data *memblock, std::os
 
 } // namespace dynd
 
-#endif // _DYND__POD_MEMORY_BLOCK_HPP_
+#endif // _DYND__NDOBJECT_MEMORY_BLOCK_HPP_

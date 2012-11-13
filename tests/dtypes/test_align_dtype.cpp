@@ -56,13 +56,19 @@ TEST(AlignDType, Basic) {
     // preprocessor symbol DYND_ALIGNMENT_ASSERTIONS is defined,
     // (or segfault on platforms that don't support unaligned access)
     //a = ndarray(make_dtype<int64_t>(), storage.data + 1);
+    cout << "Basic out" << endl;
 }
 
 TEST(AlignDType, Chained) {
     // The unaligned dtype can give back an expression dtype as the value dtype,
     // make sure that is handled properly at the dtype object level.
+    cout << "A" << endl;
     dtype dt = make_unaligned_dtype(make_byteswap_dtype<int>());
+    cout << "B" << endl;
     EXPECT_EQ(make_byteswap_dtype(make_dtype<int>(), make_view_dtype(make_fixedbytes_dtype(4, 4), make_fixedbytes_dtype(4, 1))), dt);
+    cout << "C" << endl;
     EXPECT_EQ(make_fixedbytes_dtype(4, 1), dt.storage_dtype());
+    cout << "D" << endl;
     EXPECT_EQ(make_dtype<int>(), dt.value_dtype());
+    cout << "E" << endl;
 }

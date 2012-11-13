@@ -22,6 +22,12 @@ extended_dtype::~extended_dtype()
 {
 }
 
+bool extended_dtype::is_scalar(const char *DYND_UNUSED(data), const char *DYND_UNUSED(metadata)) const
+{
+    return true;
+}
+
+
 dtype extended_dtype::apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& DYND_UNUSED(root_dt)) const
 {
     // Default to scalar behavior
@@ -284,9 +290,6 @@ std::ostream& dynd::operator<<(std::ostream& o, const dtype& rhs)
         case complex_float64_type_id:
             o << "complex<float64>";
             break;
-        case fixedbytes_type_id:
-            o << "fixedbytes<" << rhs.element_size() << "," << rhs.alignment() << ">";
-            break;
         case void_type_id:
             o << "void";
             break;
@@ -370,82 +373,63 @@ void dynd::hexadecimal_print(std::ostream& o, const char *data, intptr_t element
     }
 }
 
+void dynd::print_builtin_scalar(type_id_t type_id, std::ostream& o, const char *data)
+{
+    switch (type_id) {
+        case bool_type_id:
+            o << (*data ? "true" : "false");
+            break;
+        case int8_type_id:
+            print_as<int8_t, int32_t>(o, data);
+            break;
+        case int16_type_id:
+            print_as<int16_t, int32_t>(o, data);
+            break;
+        case int32_type_id:
+            print_as<int32_t, int32_t>(o, data);
+            break;
+        case int64_type_id:
+            print_as<int64_t, int64_t>(o, data);
+            break;
+        case uint8_type_id:
+            print_as<uint8_t, uint32_t>(o, data);
+            break;
+        case uint16_type_id:
+            print_as<uint16_t, uint32_t>(o, data);
+            break;
+        case uint32_type_id:
+            print_as<uint32_t, uint32_t>(o, data);
+            break;
+        case uint64_type_id:
+            print_as<uint64_t, uint64_t>(o, data);
+            break;
+        case float32_type_id:
+            print_as<float, float>(o, data);
+            break;
+        case float64_type_id:
+            print_as<double, double>(o, data);
+            break;
+        case complex_float32_type_id:
+            print_as<complex<float>, complex<float> >(o, data);
+            break;
+        case complex_float64_type_id:
+            print_as<complex<double>, complex<double> >(o, data);
+            break;
+        case void_type_id:
+            o << "(void)";
+            break;
+        default:
+            stringstream ss;
+            ss << "printing of dynd builtin type id " << type_id << " isn't supported yet";
+            throw std::runtime_error(ss.str());
+    }
+}
+
 void dynd::dtype::print_element(std::ostream& o, const char *data, const char *metadata) const
 {
     if (extended() != NULL) {
         extended()->print_element(o, data, metadata);
     } else {
-        switch (type_id()) {
-            case bool_type_id:
-                o << (*data ? "true" : "false");
-                break;
-            case int8_type_id:
-                print_as<int8_t, int32_t>(o, data);
-                break;
-            case int16_type_id:
-                print_as<int16_t, int32_t>(o, data);
-                break;
-            case int32_type_id:
-                print_as<int32_t, int32_t>(o, data);
-                break;
-            case int64_type_id:
-                print_as<int64_t, int64_t>(o, data);
-                break;
-            case uint8_type_id:
-                print_as<uint8_t, uint32_t>(o, data);
-                break;
-            case uint16_type_id:
-                print_as<uint16_t, uint32_t>(o, data);
-                break;
-            case uint32_type_id:
-                print_as<uint32_t, uint32_t>(o, data);
-                break;
-            case uint64_type_id:
-                print_as<uint64_t, uint64_t>(o, data);
-                break;
-            case float32_type_id:
-                print_as<float, float>(o, data);
-                break;
-            case float64_type_id:
-                print_as<double, double>(o, data);
-                break;
-            case complex_float32_type_id:
-                print_as<complex<float>, complex<float> >(o, data);
-                break;
-            case complex_float64_type_id:
-                print_as<complex<double>, complex<double> >(o, data);
-                break;
-            case fixedbytes_type_id:
-                o << "0x";
-                hexadecimal_print(o, data, m_element_size);
-                break;
-            case void_type_id:
-                o << "(void)";
-                break;
-            default:
-                stringstream ss;
-                ss << "printing of dtype " << *this << " isn't supported yet";
-                throw std::runtime_error(ss.str());
-        }
+        print_builtin_scalar(type_id(), o, data);
     }
-}
-
-dtype dynd::make_fixedbytes_dtype(intptr_t element_size, intptr_t alignment)
-{
-    if (alignment > element_size) {
-        std::stringstream ss;
-        ss << "Cannot make a fixedbytes<" << element_size << "," << alignment << "> dtype, its alignment is greater than its size";
-        throw std::runtime_error(ss.str());
-    }
-    if (alignment != 1 && alignment != 2 && alignment != 4 && alignment != 8 && alignment != 16) {
-        std::stringstream ss;
-        ss << "Cannot make a fixedbytes<" << element_size << "," << alignment << "> dtype, its alignment is not a small power of two";
-        throw std::runtime_error(ss.str());
-    }
-    if ((element_size&(alignment-1)) != 0) {
-        std::stringstream ss;
-        ss << "Cannot make a fixedbytes<" << element_size << "," << alignment << "> dtype, its alignment does not divide into its element size";
-        throw std::runtime_error(ss.str());
-    }
-    return dtype(fixedbytes_type_id, bytes_kind, element_size, alignment);
 }

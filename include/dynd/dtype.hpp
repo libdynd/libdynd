@@ -87,15 +87,13 @@ enum type_id_t {
     void_type_id,
     void_pointer_type_id,
 
-    // Raw fixed size bytes
+    // Other primitives (not builtin)
     fixedbytes_type_id,
-
-    // Other primitives
-    pointer_type_id,
     fixedstring_type_id,
     categorical_type_id,
     date_type_id,
     busdate_type_id,
+    pointer_type_id,
 
     // blockref primitive dtypes
     string_type_id,
@@ -120,6 +118,11 @@ enum type_id_t {
 
     // The number of built-in, atomic types
     builtin_type_id_count = 13
+};
+
+enum {
+    /** A mask within which alll the built-in type ids are guaranteed to fit */
+    builtin_type_id_mask = 0x1f
 };
 
 enum dtype_memory_management_t {
@@ -219,6 +222,25 @@ template <> struct is_dtype_scalar<double> {enum {value = true};};
 template <> struct is_dtype_scalar<std::complex<float> > {enum {value = true};};
 template <> struct is_dtype_scalar<std::complex<double> > {enum {value = true};};
 
+// Metaprogram for determining scalar alignment
+template<typename T> struct scalar_align_of;
+template <> struct scalar_align_of<dynd_bool> {enum {value = 1};};
+template <> struct scalar_align_of<char> {enum {value = 1};};
+template <> struct scalar_align_of<signed char> {enum {value = 1};};
+template <> struct scalar_align_of<short> {enum {value = sizeof(short)};};
+template <> struct scalar_align_of<int> {enum {value = sizeof(int)};};
+template <> struct scalar_align_of<long> {enum {value = sizeof(long)};};
+template <> struct scalar_align_of<long long> {enum {value = sizeof(long long)};};
+template <> struct scalar_align_of<unsigned char> {enum {value = 1};};
+template <> struct scalar_align_of<unsigned short> {enum {value = sizeof(unsigned short)};};
+template <> struct scalar_align_of<unsigned int> {enum {value = sizeof(unsigned int)};};
+template <> struct scalar_align_of<unsigned long> {enum {value = sizeof(unsigned long)};};
+template <> struct scalar_align_of<unsigned long long> {enum {value = sizeof(unsigned long long)};};
+template <> struct scalar_align_of<float> {enum {value = sizeof(long)};};
+template <> struct scalar_align_of<double> {enum {value = sizeof(double)};};
+template <> struct scalar_align_of<std::complex<float> > {enum {value = sizeof(long)};};
+template <> struct scalar_align_of<std::complex<double> > {enum {value = sizeof(double)};};
+
 // Metaprogram for determining if a type is the C++ "bool" or not
 template<typename T> struct is_type_bool {enum {value = false};};
 template<> struct is_type_bool<bool> {enum {value = true};};
@@ -247,6 +269,8 @@ inline void *inc_to_alignment(void *ptr, size_t alignment) {
     return reinterpret_cast<char *>((reinterpret_cast<size_t>(ptr) + alignment - 1) & (size_t)(-(ptrdiff_t)alignment));
 }
 
+/** Prints a single scalar of a builtin dtype to the stream */
+void print_builtin_scalar(type_id_t type_id, std::ostream& o, const char *data);
 
 class dtype;
 
@@ -286,6 +310,9 @@ public:
 
     /** Returns what kind of memory management the dtype uses, e.g. construct/copy/move/destruct semantics */
     virtual dtype_memory_management_t get_memory_management() const = 0;
+
+    /** Returns true if the ndobject with the data/metadata is a scalar */
+    virtual bool is_scalar(const char *data, const char *metadata) const;
 
     /**
      * Indexes into the dtype. This function returns the dtype which results
@@ -679,7 +706,6 @@ public:
 
     friend /* TODO: DYND_CONSTEXPR*/ dtype detail::internal_make_raw_dtype(char type_id, char kind, intptr_t element_size, char alignment);
     friend std::ostream& operator<<(std::ostream& o, const dtype& rhs);
-    friend dtype make_fixedbytes_dtype(intptr_t element_size, intptr_t alignment);
 };
 
 // Convenience function which makes a dtype object from a template parameter
@@ -696,13 +722,6 @@ dtype make_dtype()
  * way to get a const reference to its dtype.
  */
 extern const dtype static_builtin_dtypes[builtin_type_id_count + 1];
-
-/**
- * Creates a bytes<size, alignment> dtype, for representing
- * raw, uninterpreted bytes.
- */
-dtype make_fixedbytes_dtype(intptr_t element_size, intptr_t alignment);
-
 
 std::ostream& operator<<(std::ostream& o, const dtype& rhs);
 /** Prints raw bytes as hexadecimal */

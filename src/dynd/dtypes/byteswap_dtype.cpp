@@ -4,6 +4,7 @@
 //
 
 #include <dynd/dtypes/byteswap_dtype.hpp>
+#include <dynd/dtypes/fixedbytes_dtype.hpp>
 #include <dynd/raw_iteration.hpp>
 #include <dynd/buffer_storage.hpp>
 #include <dynd/kernels/byteswap_kernels.hpp>

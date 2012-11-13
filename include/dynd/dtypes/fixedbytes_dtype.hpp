@@ -3,42 +3,34 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__STRIDED_ARRAY_DTYPE_HPP_
-#define _DYND__STRIDED_ARRAY_DTYPE_HPP_
+#ifndef _DYND__FIXEDBYTES_DTYPE_HPP_
+#define _DYND__FIXEDBYTES_DTYPE_HPP_
 
 #include <dynd/dtype.hpp>
 #include <dynd/dtype_assign.hpp>
 #include <dynd/dtypes/view_dtype.hpp>
+#include <dynd/string_encodings.hpp>
 
 namespace dynd {
 
-struct strided_array_dtype_metadata {
-    intptr_t size;
-    intptr_t stride;
-};
+class fixedbytes_dtype : public extended_dtype {
+    intptr_t m_element_size, m_alignment;
 
-class strided_array_dtype : public extended_dtype {
-    dtype m_element_dtype;
 public:
-    strided_array_dtype(const dtype& element_dtype);
+    fixedbytes_dtype(intptr_t element_size, intptr_t alignment);
 
     type_id_t type_id() const {
-        return strided_array_type_id;
+        return fixedbytes_type_id;
     }
     dtype_kind_t kind() const {
-        return composite_kind;
+        return bytes_kind;
     }
     // Expose the storage traits here
     size_t alignment() const {
-        return m_element_dtype.alignment();
+        return m_alignment;
     }
     size_t get_element_size() const {
-        return 0;
-    }
-    size_t get_default_element_size(int ndim, const intptr_t *shape) const;
-
-    const dtype& get_element_dtype() const {
-        return m_element_dtype;
+        return m_element_size;
     }
 
     void print_element(std::ostream& o, const char *data, const char *metadata) const;
@@ -51,11 +43,7 @@ public:
         return pod_memory_management;
     }
 
-    bool is_scalar(const char *data, const char *metadata) const;
-
     dtype apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& root_dt) const;
-
-    void get_shape(int i, std::vector<intptr_t>& out_shape) const;
 
     bool is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const;
 
@@ -67,16 +55,23 @@ public:
 
     bool operator==(const extended_dtype& rhs) const;
 
-    size_t get_metadata_size() const;
-    void metadata_default_construct(char *metadata, int ndim, const intptr_t* shape) const;
-    void metadata_destruct(char *metadata) const;
-    void metadata_debug_dump(const char *metadata, std::ostream& o, const std::string& indent) const;
+    size_t get_metadata_size() const {
+        return 0;
+    }
+    void metadata_destruct(char *DYND_UNUSED(metadata)) const {
+    }
+    void metadata_debug_dump(const char *DYND_UNUSED(metadata), std::ostream& DYND_UNUSED(o), const std::string& DYND_UNUSED(indent)) const {
+    }
 };
 
-inline dtype make_strided_array_dtype(const dtype& element_dtype) {
-    return dtype(new strided_array_dtype(element_dtype));
+/**
+ * Creates a bytes<size, alignment> dtype, for representing
+ * raw, uninterpreted bytes.
+ */
+inline dtype make_fixedbytes_dtype(intptr_t element_size, intptr_t alignment) {
+    return dtype(new fixedbytes_dtype(element_size, alignment));
 }
 
 } // namespace dynd
 
-#endif // _DYND__STRIDED_ARRAY_DTYPE_HPP_
+#endif // _DYND__FIXEDBYTES_DTYPE_HPP_

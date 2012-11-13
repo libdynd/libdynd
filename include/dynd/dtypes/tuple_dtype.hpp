@@ -119,7 +119,6 @@ inline dtype make_tuple_dtype(const dtype& dt0, const dtype& dt1, const dtype& d
     fields.push_back(dt0);
     fields.push_back(dt1);
     fields.push_back(dt2);
-    std::cout << "blah 122" << std::endl;
     return make_tuple_dtype(fields);
 }
 
