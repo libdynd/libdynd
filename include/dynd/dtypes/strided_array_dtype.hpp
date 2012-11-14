@@ -57,6 +57,10 @@ public:
 
     void get_shape(int i, std::vector<intptr_t>& out_shape) const;
 
+    void get_shape(int i, std::vector<intptr_t>& out_shape, const char *data, const char *metadata) const;
+
+    void get_strides(int i, std::vector<intptr_t>& out_strides, const char *data, const char *metadata) const;
+
     bool is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const;
 
     void get_single_compare_kernel(single_compare_kernel_instance& out_kernel) const;

@@ -91,6 +91,40 @@ void dynd::strided_array_dtype::get_shape(int i, std::vector<intptr_t>& out_shap
     }
 }
 
+void ::strided_array_dtype::get_shape(int i, std::vector<intptr_t>& out_shape, const char *data, const char *metadata) const
+{
+    const strided_array_dtype_metadata *md = reinterpret_cast<const strided_array_dtype_metadata *>(metadata);
+
+    // Ensure the output shape is big enough
+    while (out_shape.size() <= (size_t)i) {
+        out_shape.push_back(shape_signal_uninitialized);
+    }
+
+    out_shape[i] = md->size;
+
+    // Process the later shape values
+    if (m_element_dtype.extended()) {
+        m_element_dtype.extended()->get_shape(i+1, out_shape, data, metadata + sizeof(strided_array_dtype_metadata));
+    }
+}
+
+void ::strided_array_dtype::get_strides(int i, std::vector<intptr_t>& out_strides, const char *data, const char *metadata) const
+{
+    const strided_array_dtype_metadata *md = reinterpret_cast<const strided_array_dtype_metadata *>(metadata);
+
+    // Ensure the output shape is big enough
+    while (out_strides.size() <= (size_t)i) {
+        out_strides.push_back(0);
+    }
+
+    out_strides[i] = md->stride;
+
+    // Process the later shape values
+    if (m_element_dtype.extended()) {
+        m_element_dtype.extended()->get_strides(i+1, out_strides, data, metadata + sizeof(strided_array_dtype_metadata));
+    }
+}
+
 bool dynd::strided_array_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const
 {
     if (dst_dt.extended() == this) {
@@ -148,7 +182,11 @@ void dynd::strided_array_dtype::metadata_default_construct(char *metadata, int n
 
     strided_array_dtype_metadata *md = reinterpret_cast<strided_array_dtype_metadata *>(metadata);
     md->size = shape[0];
-    md->stride = element_size;
+    if (shape[0] > 1) {
+        md->stride = element_size;
+    } else {
+        md->stride = 0;
+    }
     if (m_element_dtype.extended()) {
         m_element_dtype.extended()->metadata_default_construct(metadata + sizeof(strided_array_dtype_metadata), ndim-1, shape+1);
     }

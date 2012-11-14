@@ -11,6 +11,7 @@
 #include <dynd/ndarray.hpp>
 #include <dynd/dtypes/byteswap_dtype.hpp>
 #include <dynd/dtypes/convert_dtype.hpp>
+#include <dynd/dtypes/fixedbytes_dtype.hpp>
 
 using namespace std;
 using namespace dynd;

@@ -326,9 +326,23 @@ public:
     virtual dtype apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& root_dt) const;
 
     /**
-     * Retrieves the shape of the dtype, expanding the vector as needed.
+     * Retrieves the shape of the dtype, expanding the vector as needed. For dimensions with
+     * unknown or variable shape, -1 is returned.
      */
     virtual void get_shape(int i, std::vector<intptr_t>& out_shape) const;
+
+    /**
+     * Retrieves the shape of the dtype ndobject instance, expanding the vector as needed. For dimensions with
+     * variable shape, -1 is returned.
+     */
+    virtual void get_shape(int i, std::vector<intptr_t>& out_shape, const char *data, const char *metadata) const;
+
+    /**
+     * Retrieves the strides of the dtype ndobject instance, expanding the vector as needed. For dimensions
+     * where there is not a simple stride (e.g. a tuple/struct dtype), 0 is returned and
+     * the caller should handle this.
+     */
+    virtual void get_strides(int i, std::vector<intptr_t>& out_strides, const char *data, const char *metadata) const;
 
     /**
      * Called by ::dynd::is_lossless_assignment, with (this == dst_dt->extended()).
@@ -476,10 +490,14 @@ private:
 public:
     /** Constructor */
     dtype();
-    /** Constructor from an extended_dtype. This claims ownership of the 'extended' reference, be careful! */
-    dtype(const extended_dtype *extended)
+    /** Constructor from an extended_dtype. This claims ownership of the 'extended' reference by default, be careful! */
+    explicit dtype(const extended_dtype *extended, bool incref = false)
         : m_type_id(extended->type_id()), m_kind(extended->kind()), m_alignment((unsigned char)extended->alignment()),
-        m_element_size(extended->get_element_size()), m_extended(extended) {}
+            m_element_size(extended->get_element_size()), m_extended(extended) {
+        if (incref) {
+            extended_dtype_incref(m_extended);
+        }
+    }
     /** Copy constructor (should be "= default" in C++11) */
     dtype(const dtype& rhs)
         : m_type_id(rhs.m_type_id), m_kind(rhs.m_kind), m_alignment(rhs.m_alignment),

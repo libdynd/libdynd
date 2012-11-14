@@ -4,6 +4,7 @@
 //
 
 #include <dynd/memblock/ndobject_memory_block.hpp>
+#include <dynd/nodes/ndarray_node.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -12,7 +13,6 @@ namespace dynd { namespace detail {
 
 void free_ndobject_memory_block(memory_block_data *memblock)
 {
-    cout << (void *)memblock << " destructing" << endl;
     ndobject_preamble *preamble = reinterpret_cast<ndobject_preamble *>(memblock);
     char *metadata = reinterpret_cast<char *>(preamble + 1);
     // If the dtype in the preamble is NULL, it was never initialized
@@ -29,7 +29,6 @@ void free_ndobject_memory_block(memory_block_data *memblock)
     }
     // Finally free the memory block itself
     free(reinterpret_cast<void *>(memblock));
-    cout << (void *)memblock << " destructed" << endl;
 }
 
 }} // namespace dynd::detail
@@ -62,11 +61,10 @@ memory_block_ptr dynd::make_ndobject_memory_block(size_t metadata_size, size_t e
     preamble->m_data_pointer = NULL;
     // Return a pointer to the extra allocated memory
     *out_extra_ptr = result + extra_offset;
-    cout << (void *)result << " constructed" << endl;
     return memory_block_ptr(new (result) memory_block_data(1, ndobject_memory_block_type), false);
 }
 
-memory_block_ptr make_ndobject_memory_block(const dtype& dt, int ndim, const intptr_t *shape)
+memory_block_ptr dynd::make_ndobject_memory_block(const dtype& dt, int ndim, const intptr_t *shape)
 {
     size_t metadata_size, element_size;
 
@@ -80,9 +78,17 @@ memory_block_ptr make_ndobject_memory_block(const dtype& dt, int ndim, const int
 
     char *data = NULL;
     memory_block_ptr result = make_ndobject_memory_block(metadata_size, element_size, dt.alignment(), &data);
-    if (metadata_size > 0) {
-        dt.extended()->metadata_default_construct(reinterpret_cast<char *>(result.get() + 1), ndim, shape);
+    ndobject_preamble *preamble = reinterpret_cast<ndobject_preamble *>(result.get());
+    if (dt.extended() == NULL) {
+        preamble->m_dtype = reinterpret_cast<extended_dtype *>(dt.type_id());
+    } else {
+        preamble->m_dtype = dt.extended();
+        extended_dtype_incref(preamble->m_dtype);
+        dt.extended()->metadata_default_construct(reinterpret_cast<char *>(preamble + 1), ndim, shape);
     }
+    preamble->m_data_pointer = data;
+    preamble->m_data_reference = NULL;
+    preamble->m_flags = read_access_flag|write_access_flag;
     return result;
 }
 

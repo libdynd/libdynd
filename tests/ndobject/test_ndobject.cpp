@@ -11,11 +11,11 @@
 #include "inc_gtest.hpp"
 
 #include "dynd/ndobject.hpp"
+#include <dynd/dtypes/strided_array_dtype.hpp>
 
 using namespace std;
 using namespace dynd;
 
-#if 0
 TEST(NDObject, Constructors) {
     ndobject a;
 
@@ -24,23 +24,28 @@ TEST(NDObject, Constructors) {
 
     // Scalar ndobject
     a = ndobject(make_dtype<float>());
-    EXPECT_EQ(1, a.get_num_elements());
-    EXPECT_EQ(0, a.get_ndim());
+    EXPECT_EQ(make_dtype<float>(), a.get_dtype());
+    EXPECT_TRUE(a.is_scalar());
 
-    // One-dimensional ndobject with one element
-    a = ndobject(1, make_dtype<float>());
-    EXPECT_EQ(1, a.get_num_elements());
-    EXPECT_EQ(1, a.get_ndim());
+    // One-dimensional strided ndobject with one element
+    a = ndobject(make_strided_array_dtype(make_dtype<float>()), 1);
+    EXPECT_EQ(make_strided_array_dtype(make_dtype<float>()), a.get_dtype());
+    EXPECT_FALSE(a.is_scalar());
+    EXPECT_EQ(1, a.get_shape().size());
     EXPECT_EQ(1, a.get_shape()[0]);
+    EXPECT_EQ(1, a.get_strides().size());
     EXPECT_EQ(0, a.get_strides()[0]);
 
     // One-dimensional ndobject
-    a = ndobject(3, make_dtype<float>());
-    EXPECT_EQ(3, a.get_num_elements());
-    EXPECT_EQ(1, a.get_ndim());
+    a = ndobject(make_strided_array_dtype(make_dtype<float>()), 3);
+    EXPECT_EQ(make_strided_array_dtype(make_dtype<float>()), a.get_dtype());
+    EXPECT_FALSE(a.is_scalar());
+    EXPECT_EQ(1, a.get_shape().size());
     EXPECT_EQ(3, a.get_shape()[0]);
-    EXPECT_EQ((int)sizeof(float), a.get_strides()[0]);
+    EXPECT_EQ(1, a.get_strides().size());
+    EXPECT_EQ(sizeof(float), a.get_strides()[0]);
 
+#if 0
     // Two-dimensional ndobject with a size-one dimension
     a = ndobject(3, 1, make_dtype<float>());
     EXPECT_EQ(3, a.get_num_elements());
@@ -111,8 +116,8 @@ TEST(NDObject, Constructors) {
     EXPECT_EQ(5*4*(int)sizeof(float), a.get_strides()[0]);
     EXPECT_EQ(4*(int)sizeof(float), a.get_strides()[1]);
     EXPECT_EQ((int)sizeof(float), a.get_strides()[2]);
-}
 #endif
+}
 
 TEST(NDObject, ScalarConstructor) {
     stringstream ss;

@@ -43,6 +43,18 @@ void dynd::extended_dtype::get_shape(int DYND_UNUSED(i), std::vector<intptr_t>& 
     // Default to scalar behavior
 }
 
+void dynd::extended_dtype::get_shape(int DYND_UNUSED(i), std::vector<intptr_t>& DYND_UNUSED(out_shape),
+                    const char *DYND_UNUSED(data), const char *DYND_UNUSED(metadata)) const
+{
+    // Default to scalar behavior
+}
+
+void dynd::extended_dtype::get_strides(int DYND_UNUSED(i), std::vector<intptr_t>& DYND_UNUSED(out_strides),
+                    const char *DYND_UNUSED(data), const char *DYND_UNUSED(metadata)) const
+{
+    // Default to scalar behavior
+}
+
 
 size_t extended_dtype::get_default_element_size(int DYND_UNUSED(ndim), const intptr_t *DYND_UNUSED(shape)) const
 {

@@ -98,6 +98,17 @@ dynd::ndobject::ndobject(std::complex<double> value)
     : m_memblock(make_immutable_builtin_scalar_ndobject(value))
 {
 }
+dynd::ndobject::ndobject(const dtype& dt)
+    : m_memblock(make_ndobject_memory_block(dt, 0, NULL))
+{
+}
+
+dynd::ndobject::ndobject(const dtype& dt, intptr_t dim0)
+    : m_memblock(make_ndobject_memory_block(dt, 1, &dim0))
+{
+}
+
+
 
 std::ostream& dynd::operator<<(std::ostream& o, const ndobject& rhs)
 {

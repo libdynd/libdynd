@@ -67,6 +67,18 @@ public:
 
     explicit ndobject(const memory_block_ptr& ndobj_memblock);
 
+    /**
+     * Constructs a writeable uninitialized ndobject of the specified dtype.
+     * This dtype should be scalar or already fully specify the datashape.
+     */
+    explicit ndobject(const dtype& dt);
+    /**
+     * Constructs a writeable uninitialized ndobject of the specified dtype.
+     * This dtype should be at least one dimensional, and is initialized
+     * using the specified dimension size.
+     */
+    ndobject(const dtype& dt, intptr_t dim0);
+
     /** Constructs a one-dimensional array */
     ndobject(intptr_t dim0, const dtype& dt);
     /** Constructs a two-dimensional array */
@@ -140,7 +152,7 @@ public:
         if (get_ndo()->is_builtin_dtype()) {
             return dtype(get_ndo()->get_builtin_type_id());
         } else {
-            return dtype(get_ndo()->m_dtype);
+            return dtype(get_ndo()->m_dtype, true);
         }
     }
 
@@ -151,13 +163,13 @@ public:
 
     std::vector<intptr_t> get_shape() const {
         std::vector<intptr_t> result;
-        //TODO get_ndo()->m_dtype->get_node_shape(result, get_ndo()->m_data_pointer, get_ndo_meta());
+        get_ndo()->m_dtype->get_shape(0, result, get_ndo()->m_data_pointer, get_ndo_meta());
         return result;
     }
 
     std::vector<intptr_t> get_strides() const {
         std::vector<intptr_t> result;
-        //TODO get_ndo()->m_dtype->get_node_strides(result, get_ndo()->m_data_pointer, get_ndo_meta());
+        get_ndo()->m_dtype->get_strides(0, result, get_ndo()->m_data_pointer, get_ndo_meta());
         return result;
     }
 
