@@ -107,6 +107,16 @@ dynd::ndobject::ndobject(const dtype& dt, intptr_t dim0)
     : m_memblock(make_ndobject_memory_block(dt, 1, &dim0))
 {
 }
+dynd::ndobject::ndobject(const dtype& dt, intptr_t dim0, intptr_t dim1)
+{
+    intptr_t dims[2] = {dim0, dim1};
+    m_memblock = make_ndobject_memory_block(dt, 2, dims);
+}
+dynd::ndobject::ndobject(const dtype& dt, intptr_t dim0, intptr_t dim1, intptr_t dim2)
+{
+    intptr_t dims[3] = {dim0, dim1, dim2};
+    m_memblock = make_ndobject_memory_block(dt, 3, dims);
+}
 
 
 

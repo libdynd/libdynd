@@ -78,6 +78,18 @@ public:
      * using the specified dimension size.
      */
     ndobject(const dtype& dt, intptr_t dim0);
+    /**
+     * Constructs a writeable uninitialized ndobject of the specified dtype.
+     * This dtype should be at least two dimensional, and is initialized
+     * using the specified dimension size.
+     */
+    ndobject(const dtype& dt, intptr_t dim0, intptr_t dim1);
+    /**
+     * Constructs a writeable uninitialized ndobject of the specified dtype.
+     * This dtype should be at least three dimensional, and is initialized
+     * using the specified dimension size.
+     */
+    ndobject(const dtype& dt, intptr_t dim0, intptr_t dim1, intptr_t dim2);
 
     /** Constructs a one-dimensional array */
     ndobject(intptr_t dim0, const dtype& dt);

@@ -177,7 +177,7 @@ void dynd::strided_array_dtype::metadata_default_construct(char *metadata, int n
     if (ndim == 0 || shape[0] < 0) {
         throw std::runtime_error("the strided_array dtype requires a shape be specified for default construction");
     }
-    size_t element_size = m_element_dtype.extended() ? m_element_dtype.extended()->get_default_element_size(ndim, shape)
+    size_t element_size = m_element_dtype.extended() ? m_element_dtype.extended()->get_default_element_size(ndim-1, shape+1)
                                                      : m_element_dtype.element_size();
 
     strided_array_dtype_metadata *md = reinterpret_cast<strided_array_dtype_metadata *>(metadata);
