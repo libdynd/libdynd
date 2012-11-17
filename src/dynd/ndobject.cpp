@@ -123,6 +123,7 @@ dynd::ndobject::ndobject(const dtype& dt, intptr_t dim0, intptr_t dim1, intptr_t
 void dynd::ndobject::val_assign(const ndobject& rhs, assign_error_mode errmode,
                     const eval::eval_context *ectx) const
 {
+    cout << "val_assign from rhs " << rhs << endl;
     // Verify access permissions
     if (!(get_flags()&write_access_flag)) {
         throw runtime_error("tried to write to a dynd array that is not writeable");
@@ -133,11 +134,11 @@ void dynd::ndobject::val_assign(const ndobject& rhs, assign_error_mode errmode,
 
     if (rhs.is_scalar()) {
         unary_specialization_kernel_instance assign;
-        get_dtype_assignment_kernel(get_dtype(), assign);
-        unary_operation_t assign_fn = assign.specializations[scalar_unary_specialization];
         const char *src_ptr = rhs.get_ndo()->m_data_pointer;
 
-        ndobject_iter<1, 0> iter(rhs);
+        ndobject_iter<1, 0> iter(*this);
+        get_dtype_assignment_kernel(iter.get_uniform_dtype(), rhs.get_dtype(), errmode, ectx, assign);
+        unary_operation_t assign_fn = assign.specializations[scalar_unary_specialization];
         if (!iter.empty()) {
             do {
                 assign_fn(iter.data(), 0, src_ptr, 0, 1, assign.auxdata);

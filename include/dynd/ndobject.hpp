@@ -570,6 +570,7 @@ dynd::ndobject::ndobject(const T (&rhs)[N])
                             ndim, shape, strides, originptr,
                             read_access_flag | write_access_flag, DYND_MOVE(memblock)).swap(m_memblock);
 }
+#endif
 
 ///////////// The ndobject.as<type>() templated function /////////////////////////
 namespace detail {
@@ -578,15 +579,12 @@ namespace detail {
         static typename enable_if<is_dtype_scalar<T>::value, T>::type as(const ndobject& lhs,
                                                                     assign_error_mode errmode) {
             T result;
-            if (lhs.get_ndim() != 0) {
+            if (!lhs.is_scalar()) {
                 throw std::runtime_error("can only convert ndobjects with 0 dimensions to scalars");
             }
-            if (lhs.get_node()->get_category() == strided_array_node_category) {
-                dtype_assign(make_dtype<T>(), (char *)&result, lhs.get_dtype(), lhs.get_readonly_originptr(), errmode);
-            } else {
-                ndobject tmp = lhs.vals();
-                dtype_assign(make_dtype<T>(), (char *)&result, tmp.get_dtype(), tmp.get_readonly_originptr(), errmode);
-            }
+            std::cout << "Converting scalar " << lhs.get_dtype() << " to dtype " << make_dtype<T>() << std::endl;
+            std::cout << "Scalar value " << lhs << std::endl;
+            dtype_assign(make_dtype<T>(), (char *)&result, lhs.get_dtype(), lhs.get_ndo()->m_data_pointer, errmode);
             return result;
         }
     };
@@ -614,7 +612,6 @@ template<class T>
 T dynd::ndobject::as(assign_error_mode errmode) const {
     return detail::ndobject_as_helper<T>::as(*this, errmode);
 }
-#endif // #if 0
 
 /**
  * Constructs an array with the same shape and memory layout

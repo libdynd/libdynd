@@ -214,7 +214,6 @@ TEST(NDObject, AsScalar) {
 
     a = ndobject(make_dtype<float>());
     a.val_assign(3.14f);
-    /*
     EXPECT_EQ(3.14f, a.as<float>());
     EXPECT_EQ(3.14f, a.as<double>());
     EXPECT_THROW(a.as<int64_t>(), runtime_error);
@@ -226,12 +225,14 @@ TEST(NDObject, AsScalar) {
     EXPECT_THROW(a.as<bool>(assign_error_overflow), runtime_error);
     EXPECT_EQ(true, a.as<bool>(assign_error_none));
 
+    cout << "a is " << a << " line " << __LINE__ << endl;
     a = ndobject(make_dtype<double>());
+    cout << "a is " << a << " line " << __LINE__ << endl;
     a.val_assign(3.141592653589);
+    cout << "a is " << a << " line " << __LINE__ << endl;
     EXPECT_EQ(3.141592653589, a.as<double>());
     EXPECT_THROW(a.as<float>(assign_error_inexact), runtime_error);
     EXPECT_EQ(3.141592653589f, a.as<float>());
-    */
 }
 
 #if 0

@@ -86,6 +86,10 @@ public:
     char *data() {
         return m_data;
     }
+
+    const dtype& get_uniform_dtype() const {
+        return m_uniform_dtype;
+    }
 };
 
 } // namespace dynd
