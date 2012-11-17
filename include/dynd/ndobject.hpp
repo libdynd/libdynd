@@ -3,8 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__NDARRAY_HPP_
-#define _DYND__NDARRAY_HPP_
+#ifndef _DYND__NDOBJECT_HPP_
+#define _DYND__NDOBJECT_HPP_
 
 #include <iostream> // FOR DEBUG
 #include <stdexcept>
@@ -636,4 +636,4 @@ inline ndobject empty_like(const ndobject& rhs) {
 
 } // namespace dynd
 
-#endif // _DYND__NDARRAY_HPP_
+#endif // _DYND__NDOBJECT_HPP_

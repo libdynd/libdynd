@@ -17,6 +17,12 @@ struct strided_array_dtype_metadata {
     intptr_t stride;
 };
 
+struct strided_array_dtype_iterdata {
+    iterdata_common common;
+    char *data;
+    intptr_t stride;
+};
+
 class strided_array_dtype : public extended_dtype {
     dtype m_element_dtype;
 public:
@@ -75,6 +81,12 @@ public:
     void metadata_default_construct(char *metadata, int ndim, const intptr_t* shape) const;
     void metadata_destruct(char *metadata) const;
     void metadata_debug_dump(const char *metadata, std::ostream& o, const std::string& indent) const;
+
+    size_t get_iterdata_size() const;
+    size_t iterdata_construct(iterdata_common *iterdata, const char *metadata, int ndim, const intptr_t* shape, dtype& out_uniform_dtype) const;
+    size_t iterdata_destruct(iterdata_common *iterdata, int ndim) const;
+
+    void foreach(int ndim, char *data, const char *metadata, foreach_fn_t callback, const void *callback_data) const;
 };
 
 inline dtype make_strided_array_dtype(const dtype& element_dtype) {

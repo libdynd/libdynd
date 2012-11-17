@@ -94,6 +94,42 @@ void extended_dtype::metadata_debug_dump(const char *DYND_UNUSED(metadata), std:
     throw std::runtime_error(ss.str());
 }
 
+size_t extended_dtype::get_iterdata_size() const
+{
+    stringstream ss;
+    ss << "get_iterdata_size: dynd dtype " << dtype(this) << " is not uniformly iterable";
+    throw std::runtime_error(ss.str());
+}
+
+size_t extended_dtype::iterdata_construct(iterdata_common *DYND_UNUSED(iterdata), const char *DYND_UNUSED(metadata),
+                int DYND_UNUSED(ndim), const intptr_t* DYND_UNUSED(shape), dtype& DYND_UNUSED(out_uniform_dtype)) const
+{
+    stringstream ss;
+    ss << "iterdata_default_construct: dynd dtype " << dtype(this) << " is not uniformly iterable";
+    throw std::runtime_error(ss.str());
+}
+
+size_t extended_dtype::iterdata_destruct(iterdata_common *DYND_UNUSED(iterdata), int DYND_UNUSED(ndim)) const
+{
+    stringstream ss;
+    ss << "iterdata_destruct: dynd dtype " << dtype(this) << " is not uniformly iterable";
+    throw std::runtime_error(ss.str());
+}
+
+
+void extended_dtype::foreach(int ndim, char *data, const char *metadata, foreach_fn_t callback, const void *callback_data) const
+{
+    // Default to scalar behavior
+    if (ndim > 0) {
+        stringstream ss;
+        ss << "dynd dtype " << dtype(this) << " is a scalar, foreach cannot further recurse";
+        throw std::runtime_error(ss.str());
+    }
+
+    callback(this, data, metadata, callback_data);
+}
+
+
 
 void dynd::extended_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const dtype& src_dt,
                 assign_error_mode DYND_UNUSED(errmode),

@@ -206,3 +206,81 @@ void dynd::strided_array_dtype::metadata_debug_dump(const char *metadata, std::o
         m_element_dtype.extended()->metadata_debug_dump(metadata + sizeof(strided_array_dtype_metadata), o, indent + " ");
     }
 }
+
+size_t strided_array_dtype::get_iterdata_size() const
+{
+    return sizeof(strided_array_dtype_iterdata);
+}
+
+// Does one iterator increment for this dtype
+static char *iterdata_incr(iterdata_common *iterdata, int level)
+{
+    strided_array_dtype_iterdata *id = reinterpret_cast<strided_array_dtype_iterdata *>(iterdata);
+    if (level == 0) {
+        id->data += id->stride;
+        return id->data;
+    } else {
+        id->data = (id + 1)->common.incr(&(id + 1)->common, level - 1);
+        return id->data;
+    }
+}
+
+static char *iterdata_reset(iterdata_common *iterdata, char *data, int ndim)
+{
+    strided_array_dtype_iterdata *id = reinterpret_cast<strided_array_dtype_iterdata *>(iterdata);
+    if (ndim == 1) {
+        id->data = data;
+        return data;
+    } else {
+        id->data = (id + 1)->common.reset(&(id + 1)->common, data, ndim - 1);
+        return id->data;
+    }
+}
+
+size_t strided_array_dtype::iterdata_construct(iterdata_common *iterdata, const char *metadata, int ndim, const intptr_t* shape, dtype& out_uniform_dtype) const
+{
+    size_t inner_size = 0;
+    if (ndim > 1) {
+        // Place any inner iterdata earlier than the outer iterdata
+        inner_size = m_element_dtype.extended()->iterdata_construct(iterdata, metadata + sizeof(strided_array_dtype_metadata),
+                        ndim - 1, shape + 1, out_uniform_dtype);
+        iterdata = reinterpret_cast<iterdata_common *>(reinterpret_cast<char *>(iterdata) + inner_size);
+    } else {
+        out_uniform_dtype = m_element_dtype;
+    }
+
+    const strided_array_dtype_metadata *md = reinterpret_cast<const strided_array_dtype_metadata *>(metadata);
+    strided_array_dtype_iterdata *id = reinterpret_cast<strided_array_dtype_iterdata *>(iterdata);
+
+    id->common.incr = &iterdata_incr;
+    id->common.reset = &iterdata_reset;
+    id->data = NULL;
+    id->stride = md->stride;
+
+    return inner_size + sizeof(strided_array_dtype_iterdata);
+}
+
+size_t strided_array_dtype::iterdata_destruct(iterdata_common *iterdata, int ndim) const
+{
+    size_t inner_size = 0;
+    if (ndim > 1) {
+        inner_size = m_element_dtype.extended()->iterdata_destruct(iterdata, ndim - 1);
+    }
+    // No dynamic data to free
+    return inner_size + sizeof(strided_array_dtype_iterdata);
+}
+
+void dynd::strided_array_dtype::foreach(int ndim, char *data, const char *metadata, foreach_fn_t callback, const void *callback_data) const
+{
+    if (ndim > 0) {
+        const strided_array_dtype_metadata *md = reinterpret_cast<const strided_array_dtype_metadata *>(metadata);
+        const extended_dtype *child_dtype = m_element_dtype.extended();
+        const char *child_metadata = metadata + sizeof(strided_array_dtype_metadata);
+        intptr_t stride = md->stride;
+        for (intptr_t i = 0, i_end = md->size; i < i_end; ++i, data += stride) {
+        
+        }
+    } else {
+        callback(this, data, metadata, callback_data);
+    }
+}

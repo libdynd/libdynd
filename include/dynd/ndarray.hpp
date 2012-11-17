@@ -2,6 +2,7 @@
 // Copyright (C) 2011-12, Dynamic NDArray Developers
 // BSD 2-Clause License, see LICENSE.txt
 //
+// DEPRECATED (replacement in ndobject.hpp)
 
 #ifndef _DYND__NDARRAY_HPP_
 #define _DYND__NDARRAY_HPP_

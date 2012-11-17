@@ -209,6 +209,31 @@ TEST(NDObject, ScalarConstructor) {
     EXPECT_EQ(make_dtype<complex<double> >(), a.get_dtype());
 }
 
+TEST(NDObject, AsScalar) {
+    ndobject a;
+
+    a = ndobject(make_dtype<float>());
+    a.val_assign(3.14f);
+    /*
+    EXPECT_EQ(3.14f, a.as<float>());
+    EXPECT_EQ(3.14f, a.as<double>());
+    EXPECT_THROW(a.as<int64_t>(), runtime_error);
+    EXPECT_EQ(3, a.as<int64_t>(assign_error_overflow));
+    EXPECT_THROW(a.as<dynd_bool>(), runtime_error);
+    EXPECT_THROW(a.as<dynd_bool>(assign_error_overflow), runtime_error);
+    EXPECT_EQ(true, a.as<dynd_bool>(assign_error_none));
+    EXPECT_THROW(a.as<bool>(), runtime_error);
+    EXPECT_THROW(a.as<bool>(assign_error_overflow), runtime_error);
+    EXPECT_EQ(true, a.as<bool>(assign_error_none));
+
+    a = ndobject(make_dtype<double>());
+    a.val_assign(3.141592653589);
+    EXPECT_EQ(3.141592653589, a.as<double>());
+    EXPECT_THROW(a.as<float>(assign_error_inexact), runtime_error);
+    EXPECT_EQ(3.141592653589f, a.as<float>());
+    */
+}
+
 #if 0
 TEST(NDObject, ConstructorMemoryLayouts) {
     ndobject a, b;
@@ -269,30 +294,6 @@ TEST(NDObject, ConstructorMemoryLayouts) {
             //cout << "strides " << a.get_strides(0) << " " << a.get_strides(1) << " " << a.get_strides(2) << "\n";
         } while(next_permutation(&axisperm[0], &axisperm[0] + ndim));
     }
-}
-
-TEST(NDObject, AsScalar) {
-    ndobject a;
-
-    a = ndobject(make_dtype<float>());
-    EXPECT_EQ(1, a.get_num_elements());
-    a.val_assign(3.14f);
-    EXPECT_EQ(3.14f, a.as<float>());
-    EXPECT_EQ(3.14f, a.as<double>());
-    EXPECT_THROW(a.as<int64_t>(), runtime_error);
-    EXPECT_EQ(3, a.as<int64_t>(assign_error_overflow));
-    EXPECT_THROW(a.as<dynd_bool>(), runtime_error);
-    EXPECT_THROW(a.as<dynd_bool>(assign_error_overflow), runtime_error);
-    EXPECT_EQ(true, a.as<dynd_bool>(assign_error_none));
-    EXPECT_THROW(a.as<bool>(), runtime_error);
-    EXPECT_THROW(a.as<bool>(assign_error_overflow), runtime_error);
-    EXPECT_EQ(true, a.as<bool>(assign_error_none));
-
-    a = ndobject(make_dtype<double>());
-    a.val_assign(3.141592653589);
-    EXPECT_EQ(3.141592653589, a.as<double>());
-    EXPECT_THROW(a.as<float>(assign_error_inexact), runtime_error);
-    EXPECT_EQ(3.141592653589f, a.as<float>());
 }
 
 TEST(NDObject, CharArrayConstructor) {

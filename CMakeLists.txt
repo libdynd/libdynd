@@ -189,6 +189,7 @@ set(dynd_SRC
     include/dynd/irange.hpp
     include/dynd/ndarray.hpp
     include/dynd/ndobject.hpp
+    include/dynd/ndobject_iter.hpp
     include/dynd/ndarray_arange.hpp
     include/dynd/raw_iteration.hpp
     include/dynd/scalars.hpp

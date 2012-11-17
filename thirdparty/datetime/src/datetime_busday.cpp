@@ -239,7 +239,7 @@ date_val_t datetime::apply_business_day_offset(date_val_t date, int32_t offset,
         /* Adjust based on the number of holidays we crossed */
         holidays_temp = find_earliest_holiday_after(date,
                                             holidays_begin, holidays_end);
-        offset += holidays_temp - holidays_begin;
+        offset += (int32_t)(holidays_temp - holidays_begin);
         holidays_begin = holidays_temp;
 
         /* Step until we use up the rest of the offset */
@@ -266,7 +266,7 @@ date_val_t datetime::apply_business_day_offset(date_val_t date, int32_t offset,
         /* Adjust based on the number of holidays we crossed */
         holidays_temp = find_earliest_holiday_on_or_after(date,
                                             holidays_begin, holidays_end);
-        offset -= holidays_end - holidays_temp;
+        offset -= (int32_t)(holidays_end - holidays_temp);
         holidays_end = holidays_temp;
 
         /* Step until we use up the rest of the offset */
@@ -318,7 +318,7 @@ int32_t datetime::apply_business_day_count(date_val_t date_begin, date_val_t dat
                                         holidays_begin, holidays_end);
 
     /* Start the count as negative the number of holidays in the range */
-    count = -(holidays_end - holidays_begin);
+    count = -(int32_t)(holidays_end - holidays_begin);
 
     /* Add the whole weeks between date_begin and date_end */
     whole_weeks = (date_end - date_begin) / 7;

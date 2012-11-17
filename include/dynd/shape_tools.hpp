@@ -9,6 +9,7 @@
 #include <iostream>
 
 #include <dynd/ndarray.hpp>
+#include <dynd/nodes/strided_ndarray_node.hpp>
 
 namespace dynd {
 

@@ -2,6 +2,7 @@
 // Copyright (C) 2011-12, Dynamic NDArray Developers
 // BSD 2-Clause License, see LICENSE.txt
 //
+// DEPRECATED (replacement in ndobject.cpp)
 
 #include <dynd/ndarray.hpp>
 #include <dynd/scalars.hpp>

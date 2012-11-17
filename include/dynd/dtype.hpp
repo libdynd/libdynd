@@ -273,6 +273,28 @@ inline void *inc_to_alignment(void *ptr, size_t alignment) {
 void print_builtin_scalar(type_id_t type_id, std::ostream& o, const char *data);
 
 class dtype;
+class extended_dtype;
+struct iterdata_common;
+
+/** This is the callback function type used by the extended_dtype::foreach function */
+typedef void (*foreach_fn_t)(const extended_dtype *dt, char *data, const char *metadata, const void *callback_data);
+
+/**
+ * This is the iteration increment function used by iterdata. It increments the
+ * iterator at the specified level, resetting all the more inner levels to 0.
+ */
+typedef char * (*iterdata_increment_fn_t)(iterdata_common *iterdata, int level);
+/**
+ * This is the reset function which is called when an outer dimension
+ * increment resets all the lower dimensions to index 0. It returns
+ * the data pointer for the next inner level of iteration.
+ */
+typedef char * (*iterdata_reset_fn_t)(iterdata_common *iterdata, char *data, int ndim);
+
+struct iterdata_common {
+    iterdata_increment_fn_t incr;
+    iterdata_reset_fn_t reset;
+};
 
 // The extended_dtype class is for dtypes which require more data
 // than a type_id, kind, and element_size, and endianness.
@@ -371,7 +393,7 @@ public:
 
     virtual bool operator==(const extended_dtype& rhs) const = 0;
 
-    /* The size of the ndobject metadata for this dtype */
+    /** The size of the ndobject metadata for this dtype */
     virtual size_t get_metadata_size() const;
     /**
      * Constructs the ndobject metadata for this dtype, prepared for writing.
@@ -382,6 +404,21 @@ public:
     virtual void metadata_destruct(char *metadata) const;
     /** Debug print of the metdata */
     virtual void metadata_debug_dump(const char *metadata, std::ostream& o, const std::string& indent) const;
+
+    /** The size of the data required for uniform iteration */
+    virtual size_t get_iterdata_size() const;
+    /**
+     * Constructs the iterdata for processing iteration at this level of the datashape
+     */
+    virtual size_t iterdata_construct(iterdata_common *iterdata, const char *metadata, int ndim, const intptr_t* shape, dtype& out_uniform_dtype) const;
+    /** Destructs any references or other state contained in the iterdata */
+    virtual size_t iterdata_destruct(iterdata_common *iterdata, int ndim) const;
+
+    /**
+     * Call the callback on each element of the array with given data/metdata, descending
+     * to exactly 'ndim' dimensions (or all the way if ndim is -1).
+     */
+    virtual void foreach(int ndim, char *data, const char *metadata, foreach_fn_t callback, const void *callback_data) const;
 
     friend void extended_dtype_incref(const extended_dtype *ed);
     friend void extended_dtype_decref(const extended_dtype *ed);
