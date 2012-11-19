@@ -5,6 +5,7 @@
 
 #include <dynd/ndobject.hpp>
 #include <dynd/ndobject_iter.hpp>
+#include <dynd/dtypes/strided_array_dtype.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 
 using namespace std;
@@ -33,6 +34,42 @@ make_immutable_builtin_scalar_ndobject(const T& value)
     ndo->m_data_reference = NULL;
     ndo->m_flags = read_access_flag | immutable_access_flag;
     return result;
+}
+
+ndobject dynd::make_corder_ndobject(const dtype& uniform_dtype, int ndim, const intptr_t *shape, const void *data)
+{
+    // Determine the total data size
+    intptr_t size = uniform_dtype.element_size();
+    for (int i = 0; i < ndim; ++i) {
+        size *= shape[i];
+    }
+
+    dtype array_dtype = make_strided_array_dtype(uniform_dtype, ndim);
+
+    // Allocate the ndobject metadata and data in one memory block
+    char *data_ptr = NULL;
+    memory_block_ptr result = make_ndobject_memory_block(array_dtype.extended()->get_metadata_size(),
+                    size, uniform_dtype.alignment(), &data_ptr);
+    DYND_MEMCPY(data_ptr, data, size);
+
+    // Fill in the preamble metadata
+    ndobject_preamble *ndo = reinterpret_cast<ndobject_preamble *>(result.get());
+    ndo->m_dtype = array_dtype.extended();
+    extended_dtype_incref(ndo->m_dtype);
+    ndo->m_data_pointer = data_ptr;
+    ndo->m_data_reference = NULL;
+    ndo->m_flags = read_access_flag | write_access_flag;
+
+    // Fill in the ndobject metadata with C-order strides
+    strided_array_dtype_metadata *meta = reinterpret_cast<strided_array_dtype_metadata *>(ndo + 1);
+    intptr_t stride = uniform_dtype.element_size();
+    for (int i = ndim - 1; i >= 0; --i) {
+        meta[i].stride = stride;
+        meta[i].size = shape[i];
+        stride *= shape[i];
+    }
+
+    return ndobject(result);
 }
 
 // Constructors from C++ scalars
@@ -123,7 +160,6 @@ dynd::ndobject::ndobject(const dtype& dt, intptr_t dim0, intptr_t dim1, intptr_t
 void dynd::ndobject::val_assign(const ndobject& rhs, assign_error_mode errmode,
                     const eval::eval_context *ectx) const
 {
-    cout << "val_assign from rhs " << rhs << endl;
     // Verify access permissions
     if (!(get_flags()&write_access_flag)) {
         throw runtime_error("tried to write to a dynd array that is not writeable");
@@ -149,6 +185,31 @@ void dynd::ndobject::val_assign(const ndobject& rhs, assign_error_mode errmode,
     }
 }
 
+void ndobject::debug_dump(std::ostream& o, const std::string& indent) const
+{
+    o << indent << "------ ndobject\n";
+    if (m_memblock.get()) {
+        const ndobject_preamble *ndo = get_ndo();
+        o << " address: " << (void *)m_memblock.get() << "\n";
+        o << " refcount: " << ndo->m_memblockdata.m_use_count << "\n";
+        o << " data pointer: " << (void *)ndo->m_data_pointer << "\n";
+        o << " data reference: " << (void *)ndo->m_data_reference << "\n";
+        o << " flags: " << ndo->m_flags << " (";
+        if (ndo->m_flags & read_access_flag) o << "read_access ";
+        if (ndo->m_flags & write_access_flag) o << "write_access ";
+        if (ndo->m_flags & immutable_access_flag) o << "immutable ";
+        o << ")\n";
+        o << " dtype raw value: " << (void *)ndo->m_dtype << "\n";
+        o << " dtype: " << get_dtype() << "\n";
+        if (!ndo->is_builtin_dtype()) {
+            o << " metadata:\n";
+            ndo->m_dtype->metadata_debug_dump(get_ndo_meta(), o, indent + " ");
+        }
+    } else {
+        o << indent << "NULL\n";
+    }
+    o << indent << "------" << endl;
+}
 
 std::ostream& dynd::operator<<(std::ostream& o, const ndobject& rhs)
 {

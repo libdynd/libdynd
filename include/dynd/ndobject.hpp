@@ -38,6 +38,8 @@ class ndobject {
      */
     memory_block_ptr m_memblock;
 
+    // Don't allow implicit construction from a raw pointer
+    ndobject(const void *);
 public:
     /** Constructs an array with no buffer (NULL state) */
     ndobject();
@@ -65,7 +67,19 @@ public:
     ndobject(std::complex<double> value);
     ndobject(const std::string& value);
 
-    explicit ndobject(const memory_block_ptr& ndobj_memblock);
+    /**
+     * Constructs an array from a multi-dimensional C-style array.
+     */
+    template<class T, int N>
+    ndobject(const T (&rhs)[N]);
+
+    explicit ndobject(const memory_block_ptr& ndobj_memblock)
+        : m_memblock(ndobj_memblock)
+    {
+        if (m_memblock.get()->m_type != ndobject_memory_block_type) {
+            throw std::runtime_error("ndobject can only be constructed from a memblock with ndobject type");
+        }
+    }
 
     /**
      * Constructs a writeable uninitialized ndobject of the specified dtype.
@@ -109,10 +123,13 @@ public:
      * Assignment operator (should be just "= default" in C++11).
      * Copies with reference semantics.
      */
-    ndobject& operator=(const ndobject& rhs);
+    inline ndobject& operator=(const ndobject& rhs) {
+        m_memblock = rhs.m_memblock;
+        return *this;
+    }
 #ifdef DYND_RVALUE_REFS
     /** Move assignment operator (should be just "= default" in C++11) */
-    ndobject& operator=(ndobject&& rhs) {
+    inline ndobject& operator=(ndobject&& rhs) {
         m_memblock = DYND_MOVE(rhs.m_memblock);
 
         return *this;
@@ -366,6 +383,9 @@ public:
     friend ndobject_vals ndobject::vals() const;
 };
 
+/** Makes an ndobject by copying the data from a raw C-order array */
+ndobject make_corder_ndobject(const dtype& uniform_dtype, int ndim, const intptr_t *shape, const void *data);
+
 inline ndobject_vals ndobject::vals() const {
     return ndobject_vals(*this);
 }
@@ -514,17 +534,16 @@ dynd::ndobject::ndobject(std::initializer_list<std::initializer_list<std::initia
 #endif // DYND_INIT_LIST
 
 ///////////// C-style array constructor implementation /////////////////////////
-#if 0
 namespace detail {
-    template<class T> struct type_from_array {
+    template<class T> struct uniform_type_from_array {
         typedef T type;
         static const size_t element_size = sizeof(T);
         static const int type_id = type_id_of<T>::value;
     };
-    template<class T, int N> struct type_from_array<T[N]> {
-        typedef typename type_from_array<T>::type type;
-        static const size_t element_size = type_from_array<T>::element_size;
-        static const int type_id = type_from_array<T>::type_id;
+    template<class T, int N> struct uniform_type_from_array<T[N]> {
+        typedef typename uniform_type_from_array<T>::type type;
+        static const size_t element_size = uniform_type_from_array<T>::element_size;
+        static const int type_id = uniform_type_from_array<T>::type_id;
     };
 
     template<class T> struct ndim_from_array {static const int value = 0;};
@@ -532,18 +551,14 @@ namespace detail {
         static const int value = ndim_from_array<T>::value + 1;
     };
 
-    template<class T> struct fill_shape_and_strides_from_array {
-        static intptr_t fill(intptr_t *, intptr_t *) {
-            return sizeof(T);
+    template<class T> struct fill_shape {
+        static void fill(intptr_t *) {
         }
     };
-    template<class T, int N> struct fill_shape_and_strides_from_array<T[N]> {
-        static intptr_t fill(intptr_t *out_shape, intptr_t *out_strides) {
-            intptr_t stride = fill_shape_and_strides_from_array<T>::
-                                            fill(out_shape + 1, out_strides + 1);
-            out_strides[0] = stride;
+    template<class T, int N> struct fill_shape<T[N]> {
+        static void fill(intptr_t *out_shape) {
             out_shape[0] = N;
-            return N * stride;
+            fill_shape<T>::fill(out_shape + 1);
         }
     };
 };
@@ -552,25 +567,13 @@ template<class T, int N>
 dynd::ndobject::ndobject(const T (&rhs)[N])
     : m_memblock()
 {
-    intptr_t shape[detail::ndim_from_array<T[N]>::value], strides[detail::ndim_from_array<T[N]>::value];
+    intptr_t shape[detail::ndim_from_array<T[N]>::value];
     const int ndim = detail::ndim_from_array<T[N]>::value;
-    intptr_t num_bytes = detail::fill_shape_and_strides_from_array<T[N]>::fill(shape, strides);
+    detail::fill_shape<T[N]>::fill(shape);
 
-    // Compute the number of elements in the array, and the strides at the same time
-    intptr_t num_elements = 1, stride = detail::type_from_array<T>::element_size;
-    for (int i = ndim-1; i >= 0; --i) {
-        strides[i] = (shape[i] == 1) ? 0 : stride;
-        num_elements *= shape[i];
-        stride *= shape[i];
-    }
-    char *originptr = 0;
-    memory_block_ptr memblock = make_fixed_size_pod_memory_block(num_bytes, sizeof(T), &originptr);
-    DYND_MEMCPY(originptr, &rhs[0], num_bytes);
-    make_strided_ndobject_node(dtype(detail::type_from_array<T>::type_id),
-                            ndim, shape, strides, originptr,
-                            read_access_flag | write_access_flag, DYND_MOVE(memblock)).swap(m_memblock);
+    *this = make_corder_ndobject(dtype(detail::uniform_type_from_array<T>::type_id), ndim, shape,
+                    reinterpret_cast<const void *>(&rhs));
 }
-#endif
 
 ///////////// The ndobject.as<type>() templated function /////////////////////////
 namespace detail {
@@ -582,8 +585,6 @@ namespace detail {
             if (!lhs.is_scalar()) {
                 throw std::runtime_error("can only convert ndobjects with 0 dimensions to scalars");
             }
-            std::cout << "Converting scalar " << lhs.get_dtype() << " to dtype " << make_dtype<T>() << std::endl;
-            std::cout << "Scalar value " << lhs << std::endl;
             dtype_assign(make_dtype<T>(), (char *)&result, lhs.get_dtype(), lhs.get_ndo()->m_data_pointer, errmode);
             return result;
         }

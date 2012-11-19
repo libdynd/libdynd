@@ -225,11 +225,8 @@ TEST(NDObject, AsScalar) {
     EXPECT_THROW(a.as<bool>(assign_error_overflow), runtime_error);
     EXPECT_EQ(true, a.as<bool>(assign_error_none));
 
-    cout << "a is " << a << " line " << __LINE__ << endl;
     a = ndobject(make_dtype<double>());
-    cout << "a is " << a << " line " << __LINE__ << endl;
     a.val_assign(3.141592653589);
-    cout << "a is " << a << " line " << __LINE__ << endl;
     EXPECT_EQ(3.141592653589, a.as<double>());
     EXPECT_THROW(a.as<float>(assign_error_inexact), runtime_error);
     EXPECT_EQ(3.141592653589f, a.as<float>());
@@ -387,17 +384,18 @@ TEST(NDObject, InitializerLists) {
 }
 #endif // DYND_INIT_LIST
 
+#endif
+
 TEST(NDObject, InitFromNestedCArray) {
     int i0[2][3] = {{1,2,3}, {4,5,6}};
     ndobject a = i0;
-    EXPECT_EQ(6, a.get_num_elements());
-    EXPECT_EQ(make_dtype<int>(), a.get_dtype());
-    EXPECT_EQ(2, a.get_ndim());
+    EXPECT_EQ(make_strided_array_dtype(make_strided_array_dtype(make_dtype<int>())), a.get_dtype());
+    EXPECT_EQ(2, a.get_shape().size());
     EXPECT_EQ(2, a.get_shape()[0]);
     EXPECT_EQ(3, a.get_shape()[1]);
     EXPECT_EQ(3*(int)sizeof(int), a.get_strides()[0]);
     EXPECT_EQ((int)sizeof(int), a.get_strides()[1]);
-    const int *ptr_i = (const int *)a.get_readonly_originptr();
+    const int *ptr_i = (const int *)a.get_ndo()->m_data_pointer;
     EXPECT_EQ(1, ptr_i[0]);
     EXPECT_EQ(2, ptr_i[1]);
     EXPECT_EQ(3, ptr_i[2]);
@@ -407,16 +405,15 @@ TEST(NDObject, InitFromNestedCArray) {
 
     float i1[2][2][3] = {{{1,2,3}, {1.5f, 2.5f, 3.5f}}, {{-10, 0, -3.1f}, {9,8,7}}};
     a = i1;
-    EXPECT_EQ(12, a.get_num_elements());
-    EXPECT_EQ(make_dtype<float>(), a.get_dtype());
-    EXPECT_EQ(3, a.get_ndim());
+    EXPECT_EQ(make_strided_array_dtype(make_strided_array_dtype(make_strided_array_dtype(make_dtype<float>()))), a.get_dtype());
+    EXPECT_EQ(3, a.get_shape().size());
     EXPECT_EQ(2, a.get_shape()[0]);
     EXPECT_EQ(2, a.get_shape()[1]);
     EXPECT_EQ(3, a.get_shape()[2]);
     EXPECT_EQ(6*(int)sizeof(float), a.get_strides()[0]);
     EXPECT_EQ(3*(int)sizeof(float), a.get_strides()[1]);
     EXPECT_EQ((int)sizeof(float), a.get_strides()[2]);
-    const float *ptr_f = (float *)a.get_readonly_originptr();
+    const float *ptr_f = (float *)a.get_ndo()->m_data_pointer;
     EXPECT_EQ(1, ptr_f[0]);
     EXPECT_EQ(2, ptr_f[1]);
     EXPECT_EQ(3, ptr_f[2]);
@@ -430,4 +427,3 @@ TEST(NDObject, InitFromNestedCArray) {
     EXPECT_EQ(8, ptr_f[10]);
     EXPECT_EQ(7, ptr_f[11]);
 }
-#endif

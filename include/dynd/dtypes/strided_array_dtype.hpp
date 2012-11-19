@@ -93,6 +93,14 @@ inline dtype make_strided_array_dtype(const dtype& element_dtype) {
     return dtype(new strided_array_dtype(element_dtype));
 }
 
+inline dtype make_strided_array_dtype(const dtype& uniform_dtype, int ndim) {
+    dtype result = uniform_dtype;
+    for (int i = 0; i < ndim; ++i) {
+        result = make_strided_array_dtype(result);
+    }
+    return result;
+}
+
 } // namespace dynd
 
 #endif // _DYND__STRIDED_ARRAY_DTYPE_HPP_

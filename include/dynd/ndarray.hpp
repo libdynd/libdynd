@@ -523,7 +523,7 @@ dynd::ndarray::ndarray(std::initializer_list<std::initializer_list<std::initiali
 #endif // DYND_INIT_LIST
 
 ///////////// C-style array constructor implementation /////////////////////////
-namespace detail {
+namespace detail_ndarray {
     template<class T> struct type_from_array {
         typedef T type;
         static const size_t element_size = sizeof(T);
@@ -560,12 +560,12 @@ template<class T, int N>
 dynd::ndarray::ndarray(const T (&rhs)[N])
     : m_node()
 {
-    intptr_t shape[detail::ndim_from_array<T[N]>::value], strides[detail::ndim_from_array<T[N]>::value];
-    const int ndim = detail::ndim_from_array<T[N]>::value;
-    intptr_t num_bytes = detail::fill_shape_and_strides_from_array<T[N]>::fill(shape, strides);
+    intptr_t shape[detail_ndarray::ndim_from_array<T[N]>::value], strides[detail_ndarray::ndim_from_array<T[N]>::value];
+    const int ndim = detail_ndarray::ndim_from_array<T[N]>::value;
+    intptr_t num_bytes = detail_ndarray::fill_shape_and_strides_from_array<T[N]>::fill(shape, strides);
 
     // Compute the number of elements in the array, and the strides at the same time
-    intptr_t num_elements = 1, stride = detail::type_from_array<T>::element_size;
+    intptr_t num_elements = 1, stride = detail_ndarray::type_from_array<T>::element_size;
     for (int i = ndim-1; i >= 0; --i) {
         strides[i] = (shape[i] == 1) ? 0 : stride;
         num_elements *= shape[i];
@@ -574,7 +574,7 @@ dynd::ndarray::ndarray(const T (&rhs)[N])
     char *originptr = 0;
     memory_block_ptr memblock = make_fixed_size_pod_memory_block(num_bytes, sizeof(T), &originptr);
     DYND_MEMCPY(originptr, &rhs[0], num_bytes);
-    make_strided_ndarray_node(dtype(detail::type_from_array<T>::type_id),
+    make_strided_ndarray_node(dtype(detail_ndarray::type_from_array<T>::type_id),
                             ndim, shape, strides, originptr,
                             read_access_flag | write_access_flag, DYND_MOVE(memblock)).swap(m_node);
 }

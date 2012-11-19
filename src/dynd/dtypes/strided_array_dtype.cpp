@@ -201,9 +201,14 @@ void dynd::strided_array_dtype::metadata_destruct(char *metadata) const
 
 void dynd::strided_array_dtype::metadata_debug_dump(const char *metadata, std::ostream& o, const std::string& indent) const
 {
+    const strided_array_dtype_metadata *md = reinterpret_cast<const strided_array_dtype_metadata *>(metadata);
+    o << indent << "strided_array_dtype metadata\n";
+    o << indent << " stride: " << md->stride << "\n";
+    o << indent << " size: " << md->size << "\n";
     if (m_element_dtype.extended()) {
-        o << indent << " element metadata:\n";
         m_element_dtype.extended()->metadata_debug_dump(metadata + sizeof(strided_array_dtype_metadata), o, indent + " ");
+    } else {
+        o << indent << "  " << m_element_dtype << "\n";
     }
 }
 

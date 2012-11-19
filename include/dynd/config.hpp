@@ -101,7 +101,7 @@ inline void DYND_MEMCPY(char *dst, const char *src, intptr_t count)
 }
 #else
 #include <cstring>
-#define DYND_MEMCPY(a, b, c) std::memcpy(a, b, c)
+#define DYND_MEMCPY(dst, src, count) std::memcpy(dst, src, count)
 #endif
 
 #ifdef DYND_USE_TR1_ENABLE_IF

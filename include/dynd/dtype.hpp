@@ -430,6 +430,7 @@ public:
 inline void extended_dtype_incref(const extended_dtype *ed)
 {
     ++ed->m_use_count;
+    //std::cout << "dtype " << (void *)ed << " inc: " << ed->m_use_count << std::endl;
 }
 
 /**
@@ -438,6 +439,7 @@ inline void extended_dtype_incref(const extended_dtype *ed)
  */
 inline void extended_dtype_decref(const extended_dtype *ed)
 {
+    //std::cout << "dtype " << (void *)ed << " dec: " << ed->m_use_count - 1 << std::endl;
     if (--ed->m_use_count == 0) {
         delete ed;
     }
