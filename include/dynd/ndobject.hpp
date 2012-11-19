@@ -185,21 +185,40 @@ public:
         }
     }
 
+    /** The uniform dtype, which has all initial uniform dimensions stripped away */
+    inline dtype get_uniform_dtype() const {
+        if (get_ndo()->is_builtin_dtype()) {
+            return dtype(get_ndo()->get_builtin_type_id());
+        } else {
+            return get_ndo()->m_dtype->get_uniform_dtype();
+        }
+    }
+
     /** The flags, including access permissions. */
     inline int64_t get_flags() const {
         return get_ndo()->m_flags;
     }
 
-    std::vector<intptr_t> get_shape() const {
+    inline std::vector<intptr_t> get_shape() const {
         std::vector<intptr_t> result;
-        get_ndo()->m_dtype->get_shape(0, result, get_ndo()->m_data_pointer, get_ndo_meta());
+        get_shape(result);
         return result;
+    }
+    inline void get_shape(std::vector<intptr_t>& out_shape) const {
+        if (!get_ndo()->is_builtin_dtype()) {
+            get_ndo()->m_dtype->get_shape(0, out_shape, get_ndo()->m_data_pointer, get_ndo_meta());
+        }
     }
 
     std::vector<intptr_t> get_strides() const {
         std::vector<intptr_t> result;
-        get_ndo()->m_dtype->get_strides(0, result, get_ndo()->m_data_pointer, get_ndo_meta());
+        get_strides(result);
         return result;
+    }
+    inline void get_strides(std::vector<intptr_t>& out_strides) const {
+        if (!get_ndo()->is_builtin_dtype()) {
+            get_ndo()->m_dtype->get_strides(0, out_strides, get_ndo()->m_data_pointer, get_ndo_meta());
+        }
     }
 
     /**
@@ -617,21 +636,19 @@ T dynd::ndobject::as(assign_error_mode errmode) const {
 
 /**
  * Constructs an array with the same shape and memory layout
- * of the one given, but with a different dtype.
+ * of the one given, but replacing the
  *
  * @param rhs  The array whose shape and memory layout to emulate.
- * @param dt   The dtype of the new array.
+ * @param dt   The uniform dtype of the new array.
  */
-ndobject empty_like(const ndobject& rhs, const dtype& dt);
+ndobject empty_like(const ndobject& rhs, const dtype& uniform_dtype);
 
 /**
  * Constructs an empty array matching the parameters of 'rhs'
  *
  * @param rhs  The array whose shape, memory layout, and dtype to emulate.
  */
-inline ndobject empty_like(const ndobject& rhs) {
-    return empty_like(rhs, rhs.get_dtype());
-}
+ndobject empty_like(const ndobject& rhs);
 
 } // namespace dynd
 

@@ -348,6 +348,11 @@ public:
     virtual dtype apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& root_dt) const;
 
     /**
+     * Retrieves the dtype with all the initial uniform dimensions stripped away.
+     */
+    virtual dtype get_uniform_dtype() const;
+
+    /**
      * Retrieves the shape of the dtype, expanding the vector as needed. For dimensions with
      * unknown or variable shape, -1 is returned.
      */

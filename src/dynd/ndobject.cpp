@@ -234,3 +234,24 @@ std::ostream& dynd::operator<<(std::ostream& o, const ndobject& rhs)
     }
     return o;
 }
+
+ndobject dynd::empty_like(const ndobject& rhs, const dtype& uniform_dtype)
+{
+    // FIXME: This implementation only works for linearly strided arrays
+    vector<intptr_t> shape;
+    rhs.get_shape(shape);
+    if (shape.empty()) {
+        return ndobject(uniform_dtype);
+    } else {
+        vector<intptr_t> strides;
+        rhs.get_strides(strides);
+        vector<int> axis_perm(strides.size());
+        strides_to_axis_perm(strides.size(), &strides[0], &axis_perm[0]);
+        return make_strided_ndobject(uniform_dtype, shape.size(), &shape[0], &axis_perm[0]);
+    }
+}
+
+ndobject dynd::empty_like(const ndobject& rhs)
+{
+    return empty_like(rhs, rhs.get_uniform_dtype());
+}

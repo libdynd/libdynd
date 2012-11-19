@@ -75,6 +75,16 @@ dtype dynd::strided_array_dtype::apply_linear_index(int nindices, const irange *
     }
 }
 
+dtype dynd::strided_array_dtype::get_uniform_dtype() const
+{
+    if (!m_element_dtype.extended()) {
+        return m_element_dtype;
+    } else {
+        return m_element_dtype.extended()->get_uniform_dtype();
+    }
+}
+
+
 void dynd::strided_array_dtype::get_shape(int i, std::vector<intptr_t>& out_shape) const
 {
     // Ensure the output shape is big enough

@@ -38,6 +38,13 @@ dtype extended_dtype::apply_linear_index(int nindices, const irange *indices, in
     }
 }
 
+dtype dynd::extended_dtype::get_uniform_dtype() const
+{
+    // Default to heterogeneous dimension behavior
+    return dtype(this);
+}
+
+
 void dynd::extended_dtype::get_shape(int DYND_UNUSED(i), std::vector<intptr_t>& DYND_UNUSED(out_shape)) const
 {
     // Default to scalar behavior

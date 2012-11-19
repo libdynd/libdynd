@@ -250,13 +250,11 @@ TEST(NDObject, ConstructorMemoryLayouts) {
     EXPECT_EQ(0, a.get_strides()[0]);
     EXPECT_EQ(0, a.get_strides()[1]);
     EXPECT_EQ(0, a.get_strides()[2]);
-    /*
     b = empty_like(a);
     EXPECT_EQ(3, b.get_strides().size());
     EXPECT_EQ(0, b.get_strides()[0]);
     EXPECT_EQ(0, b.get_strides()[1]);
     EXPECT_EQ(0, b.get_strides()[2]);
-    */
 
     // Test all permutations of memory layouts from 1 through 6 dimensions
     for (int ndim = 1; ndim <= 6; ++ndim) {
@@ -278,7 +276,6 @@ TEST(NDObject, ConstructorMemoryLayouts) {
                 s *= shape[axisperm[i]];
             }
             // Test constructing the array using empty_like, which preserves the memory layout
-            /*
             b = empty_like(a);
             EXPECT_EQ(ndim, b.get_strides().size());
             for (int i = 0; i < ndim; ++i) {
@@ -290,7 +287,6 @@ TEST(NDObject, ConstructorMemoryLayouts) {
             for (int i = 0; i < ndim; ++i) {
                 EXPECT_EQ(2 * a.get_strides()[i], b.get_strides()[i]);
             }
-            */
             //cout << "perm " << axisperm[0] << " " << axisperm[1] << " " << axisperm[2] << "\n";
             //cout << "strides " << a.get_strides(0) << " " << a.get_strides(1) << " " << a.get_strides(2) << "\n";
         } while(next_permutation(&axisperm[0], &axisperm[0] + ndim));
