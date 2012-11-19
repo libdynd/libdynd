@@ -36,7 +36,7 @@ make_immutable_builtin_scalar_ndobject(const T& value)
     return result;
 }
 
-ndobject dynd::make_corder_ndobject(const dtype& uniform_dtype, int ndim, const intptr_t *shape, const void *data)
+ndobject dynd::make_strided_ndobject(const dtype& uniform_dtype, int ndim, const intptr_t *shape, const int *axis_perm)
 {
     // Determine the total data size
     intptr_t size = uniform_dtype.element_size();
@@ -50,7 +50,6 @@ ndobject dynd::make_corder_ndobject(const dtype& uniform_dtype, int ndim, const 
     char *data_ptr = NULL;
     memory_block_ptr result = make_ndobject_memory_block(array_dtype.extended()->get_metadata_size(),
                     size, uniform_dtype.alignment(), &data_ptr);
-    DYND_MEMCPY(data_ptr, data, size);
 
     // Fill in the preamble metadata
     ndobject_preamble *ndo = reinterpret_cast<ndobject_preamble *>(result.get());
@@ -63,10 +62,21 @@ ndobject dynd::make_corder_ndobject(const dtype& uniform_dtype, int ndim, const 
     // Fill in the ndobject metadata with C-order strides
     strided_array_dtype_metadata *meta = reinterpret_cast<strided_array_dtype_metadata *>(ndo + 1);
     intptr_t stride = uniform_dtype.element_size();
-    for (int i = ndim - 1; i >= 0; --i) {
-        meta[i].stride = stride;
-        meta[i].size = shape[i];
-        stride *= shape[i];
+    if (axis_perm == NULL) {
+        for (int i = ndim - 1; i >= 0; --i) {
+            intptr_t dim_size = shape[i];
+            meta[i].stride = dim_size > 1 ? stride : 0;
+            meta[i].size = dim_size;
+            stride *= dim_size;
+        }
+    } else {
+        for (int i = 0; i < ndim; ++i) {
+            int i_perm = axis_perm[i];
+            intptr_t dim_size = shape[i_perm];
+            meta[i_perm].stride = dim_size > 1 ? stride : 0;
+            meta[i_perm].size = dim_size;
+            stride *= dim_size;
+        }
     }
 
     return ndobject(result);

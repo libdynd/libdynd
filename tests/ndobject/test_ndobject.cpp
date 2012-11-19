@@ -232,7 +232,6 @@ TEST(NDObject, AsScalar) {
     EXPECT_EQ(3.141592653589f, a.as<float>());
 }
 
-#if 0
 TEST(NDObject, ConstructorMemoryLayouts) {
     ndobject a, b;
     dtype dt(int16_type_id), dt2(int32_type_id);
@@ -246,16 +245,18 @@ TEST(NDObject, ConstructorMemoryLayouts) {
     axisperm[0] = 0;
     axisperm[1] = 1;
     axisperm[2] = 2;
-    a = ndobject(dt, 3, shape, axisperm);
-    EXPECT_EQ(1, a.get_num_elements());
+    a = make_strided_ndobject(dt, 3, shape, axisperm);
+    EXPECT_EQ(3, a.get_strides().size());
     EXPECT_EQ(0, a.get_strides()[0]);
     EXPECT_EQ(0, a.get_strides()[1]);
     EXPECT_EQ(0, a.get_strides()[2]);
+    /*
     b = empty_like(a);
-    EXPECT_EQ(1, b.get_num_elements());
+    EXPECT_EQ(3, b.get_strides().size());
     EXPECT_EQ(0, b.get_strides()[0]);
     EXPECT_EQ(0, b.get_strides()[1]);
     EXPECT_EQ(0, b.get_strides()[2]);
+    */
 
     // Test all permutations of memory layouts from 1 through 6 dimensions
     for (int ndim = 1; ndim <= 6; ++ndim) {
@@ -269,31 +270,34 @@ TEST(NDObject, ConstructorMemoryLayouts) {
         }
         do {
             // Test constructing the array using the perm
-            a = ndobject(dt, ndim, shape, axisperm);
-            EXPECT_EQ(num_elements, a.get_num_elements());
+            a = make_strided_ndobject(dt, ndim, shape, axisperm);
+            EXPECT_EQ(ndim, a.get_strides().size());
             intptr_t s = dt.element_size();
             for (int i = 0; i < ndim; ++i) {
                 EXPECT_EQ(s, a.get_strides()[axisperm[i]]);
                 s *= shape[axisperm[i]];
             }
             // Test constructing the array using empty_like, which preserves the memory layout
+            /*
             b = empty_like(a);
-            EXPECT_EQ(num_elements, b.get_num_elements());
+            EXPECT_EQ(ndim, b.get_strides().size());
             for (int i = 0; i < ndim; ++i) {
                 EXPECT_EQ(a.get_strides()[i], b.get_strides()[i]);
             }
             // Test constructing the array using empty_like with a different dtype, which preserves the memory layout
             b = empty_like(a, dt2);
-            EXPECT_EQ(num_elements, b.get_num_elements());
+            EXPECT_EQ(ndim, b.get_strides().size());
             for (int i = 0; i < ndim; ++i) {
                 EXPECT_EQ(2 * a.get_strides()[i], b.get_strides()[i]);
             }
+            */
             //cout << "perm " << axisperm[0] << " " << axisperm[1] << " " << axisperm[2] << "\n";
             //cout << "strides " << a.get_strides(0) << " " << a.get_strides(1) << " " << a.get_strides(2) << "\n";
         } while(next_permutation(&axisperm[0], &axisperm[0] + ndim));
     }
 }
 
+#if 0
 TEST(NDObject, CharArrayConstructor) {
     ndobject a;
     char values[8] = {1,2,3,4,5,6,7,8};

@@ -383,8 +383,8 @@ public:
     friend ndobject_vals ndobject::vals() const;
 };
 
-/** Makes an ndobject by copying the data from a raw C-order array */
-ndobject make_corder_ndobject(const dtype& uniform_dtype, int ndim, const intptr_t *shape, const void *data);
+/** Makes a strided ndobject with uninitialized data. If axis_perm is NULL, it is C-order */
+ndobject make_strided_ndobject(const dtype& uniform_dtype, int ndim, const intptr_t *shape, const int *axis_perm = NULL);
 
 inline ndobject_vals ndobject::vals() const {
     return ndobject_vals(*this);
@@ -552,13 +552,14 @@ namespace detail {
     };
 
     template<class T> struct fill_shape {
-        static void fill(intptr_t *) {
+        static size_t fill(intptr_t *) {
+            return sizeof(T);
         }
     };
     template<class T, int N> struct fill_shape<T[N]> {
-        static void fill(intptr_t *out_shape) {
+        static size_t fill(intptr_t *out_shape) {
             out_shape[0] = N;
-            fill_shape<T>::fill(out_shape + 1);
+            return N * fill_shape<T>::fill(out_shape + 1);
         }
     };
 };
@@ -567,12 +568,12 @@ template<class T, int N>
 dynd::ndobject::ndobject(const T (&rhs)[N])
     : m_memblock()
 {
-    intptr_t shape[detail::ndim_from_array<T[N]>::value];
     const int ndim = detail::ndim_from_array<T[N]>::value;
-    detail::fill_shape<T[N]>::fill(shape);
+    intptr_t shape[ndim];
+    size_t size = detail::fill_shape<T[N]>::fill(shape);
 
-    *this = make_corder_ndobject(dtype(detail::uniform_type_from_array<T>::type_id), ndim, shape,
-                    reinterpret_cast<const void *>(&rhs));
+    *this = make_strided_ndobject(dtype(detail::uniform_type_from_array<T>::type_id), ndim, shape);
+    DYND_MEMCPY(get_ndo()->m_data_pointer, reinterpret_cast<const void *>(&rhs), size);
 }
 
 ///////////// The ndobject.as<type>() templated function /////////////////////////
