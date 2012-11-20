@@ -91,7 +91,7 @@ dtype dynd::view_dtype::apply_linear_index(int nindices, const irange *indices, 
     }
 }
 
-void dynd::view_dtype::get_shape(int i, std::vector<intptr_t>& out_shape) const
+void dynd::view_dtype::get_shape(int i, intptr_t *out_shape) const
 {
     if (m_value_dtype.extended()) {
         m_value_dtype.extended()->get_shape(i, out_shape);

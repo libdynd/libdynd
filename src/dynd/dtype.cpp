@@ -38,25 +38,31 @@ dtype extended_dtype::apply_linear_index(int nindices, const irange *indices, in
     }
 }
 
+int dynd::extended_dtype::get_uniform_ndim() const
+{
+    // Default to heterogeneous dimension/scalar behavior
+    return 0;
+}
+
 dtype dynd::extended_dtype::get_uniform_dtype() const
 {
-    // Default to heterogeneous dimension behavior
+    // Default to heterogeneous dimension/scalar behavior
     return dtype(this);
 }
 
 
-void dynd::extended_dtype::get_shape(int DYND_UNUSED(i), std::vector<intptr_t>& DYND_UNUSED(out_shape)) const
+void dynd::extended_dtype::get_shape(int DYND_UNUSED(i), intptr_t *DYND_UNUSED(out_shape)) const
 {
     // Default to scalar behavior
 }
 
-void dynd::extended_dtype::get_shape(int DYND_UNUSED(i), std::vector<intptr_t>& DYND_UNUSED(out_shape),
+void dynd::extended_dtype::get_shape(int DYND_UNUSED(i), intptr_t *DYND_UNUSED(out_shape),
                     const char *DYND_UNUSED(data), const char *DYND_UNUSED(metadata)) const
 {
     // Default to scalar behavior
 }
 
-void dynd::extended_dtype::get_strides(int DYND_UNUSED(i), std::vector<intptr_t>& DYND_UNUSED(out_strides),
+void dynd::extended_dtype::get_strides(int DYND_UNUSED(i), intptr_t *DYND_UNUSED(out_strides),
                     const char *DYND_UNUSED(data), const char *DYND_UNUSED(metadata)) const
 {
     // Default to scalar behavior

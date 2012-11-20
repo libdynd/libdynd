@@ -271,7 +271,7 @@ dtype dynd::categorical_dtype::apply_linear_index(int nindices, const irange *in
     }
 }
 
-void dynd::categorical_dtype::get_shape(int i, std::vector<intptr_t>& out_shape) const
+void dynd::categorical_dtype::get_shape(int i, intptr_t *out_shape) const
 {
     if (m_category_dtype.extended()) {
         m_category_dtype.extended()->get_shape(i, out_shape);

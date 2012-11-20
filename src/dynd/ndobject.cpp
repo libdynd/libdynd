@@ -238,16 +238,16 @@ std::ostream& dynd::operator<<(std::ostream& o, const ndobject& rhs)
 ndobject dynd::empty_like(const ndobject& rhs, const dtype& uniform_dtype)
 {
     // FIXME: This implementation only works for linearly strided arrays
-    vector<intptr_t> shape;
-    rhs.get_shape(shape);
-    if (shape.empty()) {
+    if (rhs.is_scalar()) {
         return ndobject(uniform_dtype);
     } else {
-        vector<intptr_t> strides;
-        rhs.get_strides(strides);
-        vector<int> axis_perm(strides.size());
-        strides_to_axis_perm(strides.size(), &strides[0], &axis_perm[0]);
-        return make_strided_ndobject(uniform_dtype, shape.size(), &shape[0], &axis_perm[0]);
+        int ndim = rhs.get_ndo()->m_dtype->get_uniform_ndim();
+        dimvector shape(ndim), strides(ndim);
+        rhs.get_shape(shape.get());
+        rhs.get_strides(strides.get());
+        shortvector<int> axis_perm(ndim);
+        strides_to_axis_perm(ndim, strides.get(), axis_perm.get());
+        return make_strided_ndobject(uniform_dtype, ndim, shape.get(), axis_perm.get());
     }
 }
 

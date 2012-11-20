@@ -75,6 +75,15 @@ dtype dynd::strided_array_dtype::apply_linear_index(int nindices, const irange *
     }
 }
 
+int dynd::strided_array_dtype::get_uniform_ndim() const
+{
+    if (!m_element_dtype.extended()) {
+        return 1;
+    } else {
+        return 1 + m_element_dtype.extended()->get_uniform_ndim();
+    }
+}
+
 dtype dynd::strided_array_dtype::get_uniform_dtype() const
 {
     if (!m_element_dtype.extended()) {
@@ -85,13 +94,8 @@ dtype dynd::strided_array_dtype::get_uniform_dtype() const
 }
 
 
-void dynd::strided_array_dtype::get_shape(int i, std::vector<intptr_t>& out_shape) const
+void dynd::strided_array_dtype::get_shape(int i, intptr_t *out_shape) const
 {
-    // Ensure the output shape is big enough
-    while (out_shape.size() <= (size_t)i) {
-        out_shape.push_back(shape_signal_uninitialized);
-    }
-
     // Adjust the current shape if necessary
     out_shape[i] = shape_signal_varying;
 
@@ -101,14 +105,9 @@ void dynd::strided_array_dtype::get_shape(int i, std::vector<intptr_t>& out_shap
     }
 }
 
-void ::strided_array_dtype::get_shape(int i, std::vector<intptr_t>& out_shape, const char *data, const char *metadata) const
+void ::strided_array_dtype::get_shape(int i, intptr_t *out_shape, const char *data, const char *metadata) const
 {
     const strided_array_dtype_metadata *md = reinterpret_cast<const strided_array_dtype_metadata *>(metadata);
-
-    // Ensure the output shape is big enough
-    while (out_shape.size() <= (size_t)i) {
-        out_shape.push_back(shape_signal_uninitialized);
-    }
 
     out_shape[i] = md->size;
 
@@ -118,14 +117,9 @@ void ::strided_array_dtype::get_shape(int i, std::vector<intptr_t>& out_shape, c
     }
 }
 
-void ::strided_array_dtype::get_strides(int i, std::vector<intptr_t>& out_strides, const char *data, const char *metadata) const
+void ::strided_array_dtype::get_strides(int i, intptr_t *out_strides, const char *data, const char *metadata) const
 {
     const strided_array_dtype_metadata *md = reinterpret_cast<const strided_array_dtype_metadata *>(metadata);
-
-    // Ensure the output shape is big enough
-    while (out_strides.size() <= (size_t)i) {
-        out_strides.push_back(0);
-    }
 
     out_strides[i] = md->stride;
 

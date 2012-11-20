@@ -176,6 +176,15 @@ public:
             get_ndo()->m_dtype->is_scalar(get_ndo()->m_data_pointer, get_ndo_meta());
     }
 
+    /** The number of uniform dimensions */
+    inline int get_uniform_ndim() const {
+        if (get_ndo()->is_builtin_dtype()) {
+            return 0;
+        } else {
+            return get_ndo()->m_dtype->get_uniform_ndim();
+        }
+    }
+
     /** The dtype */
     inline dtype get_dtype() const {
         if (get_ndo()->is_builtin_dtype()) {
@@ -200,22 +209,22 @@ public:
     }
 
     inline std::vector<intptr_t> get_shape() const {
-        std::vector<intptr_t> result;
-        get_shape(result);
+        std::vector<intptr_t> result(get_uniform_ndim());
+        get_shape(&result[0]);
         return result;
     }
-    inline void get_shape(std::vector<intptr_t>& out_shape) const {
+    inline void get_shape(intptr_t *out_shape) const {
         if (!get_ndo()->is_builtin_dtype()) {
             get_ndo()->m_dtype->get_shape(0, out_shape, get_ndo()->m_data_pointer, get_ndo_meta());
         }
     }
 
     std::vector<intptr_t> get_strides() const {
-        std::vector<intptr_t> result;
-        get_strides(result);
+        std::vector<intptr_t> result(get_uniform_ndim());
+        get_strides(&result[0]);
         return result;
     }
-    inline void get_strides(std::vector<intptr_t>& out_strides) const {
+    inline void get_strides(intptr_t *out_strides) const {
         if (!get_ndo()->is_builtin_dtype()) {
             get_ndo()->m_dtype->get_strides(0, out_strides, get_ndo()->m_data_pointer, get_ndo_meta());
         }

@@ -347,6 +347,13 @@ public:
      */
     virtual dtype apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& root_dt) const;
 
+    //virtual void apply_linear_index();
+
+    /**
+     * Retrieves the number of initial uniform dimensions.
+     */
+    virtual int get_uniform_ndim() const;
+
     /**
      * Retrieves the dtype with all the initial uniform dimensions stripped away.
      */
@@ -355,21 +362,27 @@ public:
     /**
      * Retrieves the shape of the dtype, expanding the vector as needed. For dimensions with
      * unknown or variable shape, -1 is returned.
+     *
+     * The output must be pre-initialized to have get_uniform_ndim() elements.
      */
-    virtual void get_shape(int i, std::vector<intptr_t>& out_shape) const;
+    virtual void get_shape(int i, intptr_t *out_shape) const;
 
     /**
      * Retrieves the shape of the dtype ndobject instance, expanding the vector as needed. For dimensions with
      * variable shape, -1 is returned.
+     *
+     * The output must be pre-initialized to have get_uniform_ndim() elements.
      */
-    virtual void get_shape(int i, std::vector<intptr_t>& out_shape, const char *data, const char *metadata) const;
+    virtual void get_shape(int i, intptr_t *out_shape, const char *data, const char *metadata) const;
 
     /**
      * Retrieves the strides of the dtype ndobject instance, expanding the vector as needed. For dimensions
      * where there is not a simple stride (e.g. a tuple/struct dtype), 0 is returned and
      * the caller should handle this.
+     *
+     * The output must be pre-initialized to have get_uniform_ndim() elements.
      */
-    virtual void get_strides(int i, std::vector<intptr_t>& out_strides, const char *data, const char *metadata) const;
+    virtual void get_strides(int i, intptr_t *out_strides, const char *data, const char *metadata) const;
 
     /**
      * Called by ::dynd::is_lossless_assignment, with (this == dst_dt->extended()).

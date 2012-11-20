@@ -186,13 +186,8 @@ dtype dynd::tuple_dtype::apply_linear_index(int nindices, const irange *indices,
     }
 }
 
-void dynd::tuple_dtype::get_shape(int i, std::vector<intptr_t>& out_shape) const
+void dynd::tuple_dtype::get_shape(int i, intptr_t *out_shape) const
 {
-    // Ensure the output shape is big enough
-    while (out_shape.size() <= (size_t)i) {
-        out_shape.push_back(shape_signal_uninitialized);
-    }
-
     // Adjust the current shape if necessary
     switch (out_shape[i]) {
         case shape_signal_uninitialized:
