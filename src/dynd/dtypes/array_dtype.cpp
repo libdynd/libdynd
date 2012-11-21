@@ -42,12 +42,12 @@ void dynd::array_dtype::print_dtype(std::ostream& o) const {
 dtype dynd::array_dtype::apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& root_dt) const
 {
     if (nindices == 0) {
-        return dtype(this);
+        return dtype(this, true);
     } else if (nindices == 1) {
         if (indices->step() == 0) {
             return m_element_dtype;
         } else {
-            return dtype(this);
+            return dtype(this, true);
         }
     } else {
         if (indices->step() == 0) {

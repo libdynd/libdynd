@@ -64,7 +64,7 @@ void dynd::byteswap_dtype::print_dtype(std::ostream& o) const
 dtype dynd::byteswap_dtype::apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& root_dt) const
 {
     if (nindices == 0) {
-        return dtype(this);
+        return dtype(this, true);
     } else {
         return m_operand_dtype.apply_linear_index(nindices, indices, current_i, root_dt);
     }

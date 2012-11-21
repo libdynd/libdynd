@@ -85,7 +85,7 @@ void dynd::struct_dtype::print_dtype(std::ostream& o) const
 dtype dynd::struct_dtype::apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& root_dt) const
 {
     if (nindices == 0) {
-        return dtype(this);
+        return dtype(this, true);
     } else {
         bool remove_dimension;
         intptr_t start_index, index_stride, dimension_size;
@@ -107,6 +107,54 @@ dtype dynd::struct_dtype::apply_linear_index(int nindices, const irange *indices
         }
     }
 }
+
+intptr_t dynd::struct_dtype::apply_linear_index(int nindices, const irange *indices, char *data, const char *metadata,
+                const dtype& result_dtype, char *out_metadata, int current_i, const dtype& root_dt) const
+{
+    const intptr_t *offsets = reinterpret_cast<const intptr_t *>(metadata);
+    intptr_t *out_offsets = reinterpret_cast<intptr_t *>(out_metadata);
+    if (nindices == 0) {
+        // Copy the struct offset metadata verbatim
+        memcpy(out_metadata, metadata, m_fields.size() * sizeof(size_t));
+        // Then process each element verbatim as well
+        for (size_t i = 0, i_end = m_fields.size(); i != i_end; ++i) {
+            if (m_fields[i].extended()) {
+                out_offsets[i] += m_fields[i].extended()->apply_linear_index(nindices - 1, indices + 1, data + offsets[i],
+                                metadata + m_metadata_offsets[i], m_fields[i], out_metadata + m_metadata_offsets[i],
+                                current_i + 1, root_dt);
+            }
+        }
+        return 0;
+    } else {
+        bool remove_dimension;
+        intptr_t start_index, index_stride, dimension_size;
+        apply_single_linear_index(*indices, m_fields.size(), current_i, &root_dt, remove_dimension, start_index, index_stride, dimension_size);
+        if (remove_dimension) {
+            const dtype& dt = m_fields[start_index];
+            if (dt.extended()) {
+                intptr_t offset = offsets[start_index];
+                offset += dt.extended()->apply_linear_index(nindices - 1, indices + 1, data + offset,
+                                metadata + m_metadata_offsets[start_index], result_dtype, out_metadata, current_i + 1, root_dt);
+                return offset;
+            }
+            return 0;
+        } else {
+            const struct_dtype *result_e_dt = static_cast<const struct_dtype *>(result_dtype.extended());
+            for (intptr_t i = 0; i < dimension_size; ++i) {
+                intptr_t idx = start_index + i * index_stride;
+                out_offsets[i] = offsets[idx];
+                const dtype& dt = result_e_dt->m_fields[i];
+                if (dt.extended()) {
+                    out_offsets[i] += dt.extended()->apply_linear_index(nindices - 1, indices + 1, data + out_offsets[i],
+                                    metadata + m_metadata_offsets[idx], dt, out_metadata + result_e_dt->m_metadata_offsets[i],
+                                    current_i + 1, root_dt);
+                }
+            }
+            return 0;
+        }
+    }
+}
+
 
 void dynd::struct_dtype::get_shape(int i, intptr_t *out_shape) const
 {
@@ -182,7 +230,7 @@ void dynd::struct_dtype::metadata_default_construct(char *metadata, int ndim, co
     if (ndim > 0) {
         if (shape[0] >= 0 && shape[0] != m_fields.size()) {
             stringstream ss;
-            ss << "Cannot construct dynd object of dtype " << dtype(this);
+            ss << "Cannot construct dynd object of dtype " << dtype(this, true);
             ss << " with dimension size " << shape[0] << ", the size must be " << m_fields.size();
             throw runtime_error(ss.str());
         }

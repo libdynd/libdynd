@@ -163,7 +163,7 @@ void dynd::tuple_dtype::print_dtype(std::ostream& o) const
 dtype dynd::tuple_dtype::apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& root_dt) const
 {
     if (nindices == 0) {
-        return dtype(this);
+        return dtype(this, true);
     } else {
         bool remove_dimension;
         intptr_t start_index, index_stride, dimension_size;

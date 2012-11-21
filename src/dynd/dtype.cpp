@@ -32,11 +32,23 @@ dtype extended_dtype::apply_linear_index(int nindices, const irange *indices, in
 {
     // Default to scalar behavior
     if (nindices == 0) {
-        return dtype(this);
+        return dtype(this, true);
     } else {
         throw too_many_indices(current_i + nindices, current_i);
     }
 }
+
+intptr_t extended_dtype::apply_linear_index(int nindices, const irange *DYND_UNUSED(indices), char *DYND_UNUSED(data), const char *DYND_UNUSED(metadata),
+                const dtype& DYND_UNUSED(result_dtype), char *DYND_UNUSED(out_metadata), int current_i, const dtype& DYND_UNUSED(root_dt)) const
+{
+    // Default to scalar behavior
+    if (nindices == 0) {
+        return 0;
+    } else {
+        throw too_many_indices(current_i + nindices, current_i);
+    }
+}
+
 
 int dynd::extended_dtype::get_uniform_ndim() const
 {
@@ -47,7 +59,7 @@ int dynd::extended_dtype::get_uniform_ndim() const
 dtype dynd::extended_dtype::get_uniform_dtype() const
 {
     // Default to heterogeneous dimension/scalar behavior
-    return dtype(this);
+    return dtype(this, true);
 }
 
 
@@ -78,7 +90,7 @@ size_t extended_dtype::get_default_element_size(int DYND_UNUSED(ndim), const int
 size_t extended_dtype::get_metadata_size() const
 {
     stringstream ss;
-    ss << "TODO: get_metadata_size for " << dtype(this) << " is not implemented";
+    ss << "TODO: get_metadata_size for " << dtype(this, true) << " is not implemented";
     throw std::runtime_error(ss.str());
 }
 
@@ -86,7 +98,7 @@ size_t extended_dtype::get_metadata_size() const
 void extended_dtype::metadata_default_construct(char *metadata, int ndim, const intptr_t* shape) const
 {
     stringstream ss;
-    ss << "TODO: metadata_construct for " << dtype(this) << " is not implemented";
+    ss << "TODO: metadata_construct for " << dtype(this, true) << " is not implemented";
     throw std::runtime_error(ss.str());
 }
 
@@ -95,7 +107,7 @@ void extended_dtype::metadata_default_construct(char *metadata, int ndim, const 
 void extended_dtype::metadata_destruct(char *DYND_UNUSED(metadata)) const
 {
     stringstream ss;
-    ss << "TODO: metadata_destruct for " << dtype(this) << " is not implemented";
+    ss << "TODO: metadata_destruct for " << dtype(this, true) << " is not implemented";
     throw std::runtime_error(ss.str());
 }
 
@@ -103,14 +115,14 @@ void extended_dtype::metadata_destruct(char *DYND_UNUSED(metadata)) const
 void extended_dtype::metadata_debug_dump(const char *DYND_UNUSED(metadata), std::ostream& DYND_UNUSED(o), const std::string& DYND_UNUSED(indent)) const
 {
     stringstream ss;
-    ss << "TODO: metadata_debug_dump for " << dtype(this) << " is not implemented";
+    ss << "TODO: metadata_debug_dump for " << dtype(this, true) << " is not implemented";
     throw std::runtime_error(ss.str());
 }
 
 size_t extended_dtype::get_iterdata_size() const
 {
     stringstream ss;
-    ss << "get_iterdata_size: dynd dtype " << dtype(this) << " is not uniformly iterable";
+    ss << "get_iterdata_size: dynd dtype " << dtype(this, true) << " is not uniformly iterable";
     throw std::runtime_error(ss.str());
 }
 
@@ -118,14 +130,14 @@ size_t extended_dtype::iterdata_construct(iterdata_common *DYND_UNUSED(iterdata)
                 int DYND_UNUSED(ndim), const intptr_t* DYND_UNUSED(shape), dtype& DYND_UNUSED(out_uniform_dtype)) const
 {
     stringstream ss;
-    ss << "iterdata_default_construct: dynd dtype " << dtype(this) << " is not uniformly iterable";
+    ss << "iterdata_default_construct: dynd dtype " << dtype(this, true) << " is not uniformly iterable";
     throw std::runtime_error(ss.str());
 }
 
 size_t extended_dtype::iterdata_destruct(iterdata_common *DYND_UNUSED(iterdata), int DYND_UNUSED(ndim)) const
 {
     stringstream ss;
-    ss << "iterdata_destruct: dynd dtype " << dtype(this) << " is not uniformly iterable";
+    ss << "iterdata_destruct: dynd dtype " << dtype(this, true) << " is not uniformly iterable";
     throw std::runtime_error(ss.str());
 }
 
@@ -135,7 +147,7 @@ void extended_dtype::foreach(int ndim, char *data, const char *metadata, foreach
     // Default to scalar behavior
     if (ndim > 0) {
         stringstream ss;
-        ss << "dynd dtype " << dtype(this) << " is a scalar, foreach cannot further recurse";
+        ss << "dynd dtype " << dtype(this, true) << " is a scalar, foreach cannot further recurse";
         throw std::runtime_error(ss.str());
     }
 
@@ -296,6 +308,7 @@ dtype dynd::dtype::apply_linear_index(int nindices, const irange *indices, int c
         return m_extended->apply_linear_index(nindices, indices, current_i, root_dt);
     }
 }
+
 
 void dtype::get_single_compare_kernel(single_compare_kernel_instance &out_kernel) const {
     if (extended() != NULL) {

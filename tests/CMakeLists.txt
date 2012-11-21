@@ -31,6 +31,7 @@ set(tests_SRC
     ndarray/test_ndarray_arange.cpp
     ndarray/test_ndarray_views.cpp
     ndobject/test_ndobject.cpp
+    ndobject/test_ndobject_at.cpp
     vm/test_elwise_program.cpp
     test_arithmetic_op.cpp
     test_shape_tools.cpp

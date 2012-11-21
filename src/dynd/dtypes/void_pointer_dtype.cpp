@@ -28,7 +28,7 @@ void dynd::void_pointer_dtype::print_dtype(std::ostream& o) const {
 dtype dynd::void_pointer_dtype::apply_linear_index(int nindices, const irange *DYND_UNUSED(indices), int current_i, const dtype& DYND_UNUSED(root_dt)) const
 {
     if (nindices == 0) {
-        return dtype(this);
+        return dtype(this, true);
     } else {
         throw too_many_indices(current_i + nindices, current_i);
     }

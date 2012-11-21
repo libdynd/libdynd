@@ -54,6 +54,8 @@ public:
     }
 
     dtype apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& root_dt) const;
+    intptr_t apply_linear_index(int nindices, const irange *indices, char *data, const char *metadata,
+                    const dtype& result_dtype, char *out_metadata, int current_i, const dtype& root_dt) const;
 
     void get_shape(int i, intptr_t *out_shape) const;
 

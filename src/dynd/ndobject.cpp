@@ -7,6 +7,7 @@
 #include <dynd/ndobject_iter.hpp>
 #include <dynd/dtypes/strided_array_dtype.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
+#include <dynd/exceptions.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -165,6 +166,40 @@ dynd::ndobject::ndobject(const dtype& dt, intptr_t dim0, intptr_t dim1, intptr_t
 {
     intptr_t dims[3] = {dim0, dim1, dim2};
     m_memblock = make_ndobject_memory_block(dt, 3, dims);
+}
+
+ndobject dynd::ndobject::at_array(int nindices, const irange *indices) const
+{
+    if (is_scalar()) {
+        if (nindices != 0) {
+            throw too_many_indices(nindices, 0);
+        }
+        return *this;
+    } else {
+        dtype this_dt(get_ndo()->m_dtype, true);
+        dtype dt = get_ndo()->m_dtype->apply_linear_index(nindices, indices, 0, this_dt);
+        ndobject result;
+        if (dt.extended()) {
+            result.set(make_ndobject_memory_block(dt.extended()->get_metadata_size()));
+            result.get_ndo()->m_dtype = dt.extended();
+            extended_dtype_incref(result.get_ndo()->m_dtype);
+        } else {
+            result.set(make_ndobject_memory_block(0));
+            result.get_ndo()->m_dtype = reinterpret_cast<const extended_dtype *>(dt.type_id());
+        }
+        intptr_t offset = get_ndo()->m_dtype->apply_linear_index(nindices, indices, get_ndo()->m_data_pointer,
+                        get_ndo_meta(), dt, result.get_ndo_meta(), 0, this_dt);
+        result.get_ndo()->m_data_pointer = get_ndo()->m_data_pointer + offset;
+        if (get_ndo()->m_data_reference) {
+            result.get_ndo()->m_data_reference = get_ndo()->m_data_reference;
+        } else {
+            // If the data reference is NULL, the data is embedded in the ndobject itself
+            result.get_ndo()->m_data_reference = m_memblock.get();
+        }
+        memory_block_incref(result.get_ndo()->m_data_reference);
+        result.get_ndo()->m_flags = get_ndo()->m_flags;
+        return result;
+    }
 }
 
 void dynd::ndobject::val_assign(const ndobject& rhs, assign_error_mode errmode,

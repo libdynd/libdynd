@@ -347,7 +347,24 @@ public:
      */
     virtual dtype apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& root_dt) const;
 
-    //virtual void apply_linear_index();
+    /**
+     * Indexes into an ndobject using the provided linear index, and a dtype and freshly allocated output
+     * set to point to the same base data reference.
+     *
+     * @param nindices     The number of elements in the 'indices' array. This is shrunk by one for each recursive call.
+     * @param indices      The indices to apply. This is incremented by one for each recursive call.
+     * @param data         The data of the input array.
+     * @param metadata     The metadata of the input array.
+     * @param result_dtype The result of an apply_linear_index call.
+     * @param out_metadata The metadata of the output array. The output data should all be references to the data
+     *                     of the input array, so there is no out_data parameter.
+     * @param current_i    The current index position. Used for error messages.
+     * @param root_dt      The data type in the first call, before any recursion. Used for error messages.
+     *
+     * @return  An offset to apply to the data pointer.
+     */
+    virtual intptr_t apply_linear_index(int nindices, const irange *indices, char *data, const char *metadata,
+                    const dtype& result_dtype, char *out_metadata, int current_i, const dtype& root_dt) const;
 
     /**
      * Retrieves the number of initial uniform dimensions.

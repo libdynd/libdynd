@@ -81,6 +81,14 @@ public:
         }
     }
 
+    void set(const memory_block_ptr& ndobj_memblock)
+    {
+        if (ndobj_memblock.get()->m_type != ndobject_memory_block_type) {
+            throw std::runtime_error("ndobject can only be constructed from a memblock with ndobject type");
+        }
+        m_memblock = ndobj_memblock;
+    }
+
     /**
      * Constructs a writeable uninitialized ndobject of the specified dtype.
      * This dtype should be scalar or already fully specify the datashape.
@@ -261,7 +269,7 @@ public:
     /**
      * General irange-based indexing operation.
      */
-    ndobject at(int nindex, const irange *indices) const;
+    ndobject at_array(int nindices, const irange *indices) const;
 
     /**
      * The ndobject uses the function call operator to do indexing. The [] operator
@@ -270,27 +278,25 @@ public:
      * The function call operator behaves more consistently.
      */
     const ndobject at(const irange& i0) const {
-        return at(1, &i0);
+        return at_array(1, &i0);
     }
 
     /** Indexing with two index values */
     const ndobject at(const irange& i0, const irange& i1) const {
         irange i[2] = {i0, i1};
-        return at(2, i);
+        return at_array(2, i);
     }
 
     /** Indexing with three index values */
     const ndobject at(const irange& i0, const irange& i1, const irange& i2) const {
         irange i[3] = {i0, i1, i2};
-        return at(3, i);
+        return at_array(3, i);
     }
     /** Indexing with four index values */
     const ndobject at(const irange& i0, const irange& i1, const irange& i2, const irange& i3) const {
         irange i[4] = {i0, i1, i2, i3};
-        return at(4, i);
+        return at_array(4, i);
     }
-    /** Indexing with one integer index */
-    const ndobject at(intptr_t idx) const;
 
     /** Does a value-assignment from the rhs array. */
     void val_assign(const ndobject& rhs, assign_error_mode errmode = assign_error_default,

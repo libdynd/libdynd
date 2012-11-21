@@ -55,7 +55,7 @@ void dynd::string_dtype::print_dtype(std::ostream& o) const {
 dtype dynd::string_dtype::apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& DYND_UNUSED(root_dt)) const
 {
     if (nindices == 0) {
-        return dtype(this);
+        return dtype(this, true);
     } else if (nindices == 1) {
         if (indices->step() == 0) {
             // Return a fixedstring dtype, since it's always one character.
@@ -63,7 +63,7 @@ dtype dynd::string_dtype::apply_linear_index(int nindices, const irange *indices
             // store a single character.
             return make_fixedstring_dtype(is_variable_length_string_encoding(m_encoding) ? string_encoding_utf_32 : m_encoding, 1);
         } else {
-            return dtype(this);
+            return dtype(this, true);
         }
     } else {
         throw too_many_indices(nindices, current_i + 1);

@@ -59,12 +59,12 @@ bool dynd::strided_array_dtype::is_scalar(const char *DYND_UNUSED(data), const c
 dtype dynd::strided_array_dtype::apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& root_dt) const
 {
     if (nindices == 0) {
-        return dtype(this);
+        return dtype(this, true);
     } else if (nindices == 1) {
         if (indices->step() == 0) {
             return m_element_dtype;
         } else {
-            return dtype(this);
+            return dtype(this, true);
         }
     } else {
         if (indices->step() == 0) {
@@ -74,6 +74,49 @@ dtype dynd::strided_array_dtype::apply_linear_index(int nindices, const irange *
         }
     }
 }
+
+intptr_t dynd::strided_array_dtype::apply_linear_index(int nindices, const irange *indices, char *data, const char *metadata,
+                const dtype& result_dtype, char *out_metadata, int current_i, const dtype& root_dt) const
+{
+    const strided_array_dtype_metadata *md = reinterpret_cast<const strided_array_dtype_metadata *>(metadata);
+    strided_array_dtype_metadata *out_md = reinterpret_cast<strided_array_dtype_metadata *>(out_metadata);
+    if (nindices == 0) {
+        // If there are no more indices, copy the rest verbatim
+        *out_md = *md;
+        if (m_element_dtype.extended()) {
+            return m_element_dtype.extended()->apply_linear_index(0, NULL, data, metadata + sizeof(strided_array_dtype_metadata),
+                            m_element_dtype, out_metadata + sizeof(strided_array_dtype_metadata), current_i + 1, root_dt);
+        }
+        return 0;
+    } else {
+        bool remove_dimension;
+        intptr_t start_index, index_stride, dimension_size;
+        apply_single_linear_index(*indices, md->size, current_i, &root_dt, remove_dimension, start_index, index_stride, dimension_size);
+        if (remove_dimension) {
+            // Apply the strided offset and continue applying the index
+            intptr_t offset = md->stride * start_index;
+            if (m_element_dtype.extended()) {
+                offset += m_element_dtype.extended()->apply_linear_index(nindices - 1, indices + 1, data + offset,
+                                metadata + sizeof(strided_array_dtype_metadata),
+                                result_dtype, out_metadata, current_i + 1, root_dt);
+            }
+            return offset;
+        } else {
+            // Produce the new offset data, stride, and size for the resulting array
+            intptr_t offset = md->stride * start_index;
+            out_md->stride = md->stride * index_stride;
+            out_md->size = dimension_size;
+            if (m_element_dtype.extended()) {
+                const strided_array_dtype *result_edtype = static_cast<const strided_array_dtype *>(result_dtype.extended());
+                offset += m_element_dtype.extended()->apply_linear_index(nindices - 1, indices + 1, data + offset,
+                                metadata + sizeof(strided_array_dtype_metadata),
+                                result_edtype->m_element_dtype, out_metadata + sizeof(strided_array_dtype_metadata), current_i + 1, root_dt);
+            }
+            return offset;
+        }
+    }
+}
+
 
 int dynd::strided_array_dtype::get_uniform_ndim() const
 {
