@@ -59,9 +59,9 @@ dtype dynd::strided_array_dtype::with_replaced_scalar_types(const dtype& scalar_
 {
     dtype element_dtype;
     if (m_element_dtype.extended()) {
-        element_dtype = scalar_dtype;
-    } else {
         element_dtype = m_element_dtype.extended()->with_replaced_scalar_types(scalar_dtype);
+    } else {
+        element_dtype = scalar_dtype;
     }
     if (element_dtype == m_element_dtype) {
         return dtype(this, true);

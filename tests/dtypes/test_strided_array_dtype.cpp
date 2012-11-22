@@ -16,6 +16,20 @@
 using namespace std;
 using namespace dynd;
 
+TEST(StridedArrayDType, ReplaceScalarTypes) {
+    dtype dafloat, dadouble, daint32;
+    dafloat = make_strided_array_dtype(make_dtype<float>());
+    dadouble = make_strided_array_dtype(make_dtype<double>());
+
+    EXPECT_EQ(dafloat, dadouble.extended()->with_replaced_scalar_types(make_dtype<float>()));
+
+    // Two dimensional array
+    dafloat = make_strided_array_dtype(dafloat);
+    dadouble = make_strided_array_dtype(dadouble);
+
+    EXPECT_EQ(dadouble, dafloat.extended()->with_replaced_scalar_types(make_dtype<double>()));
+}
+
 TEST(StridedArrayDType, DTypeAt) {
     dtype dfloat = make_dtype<float>();
     dtype darr1 = make_strided_array_dtype(dfloat);

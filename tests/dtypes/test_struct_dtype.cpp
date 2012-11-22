@@ -90,3 +90,4 @@ TEST(StructDType, ReplaceScalarTypes) {
     dt2 = dt.extended()->with_replaced_scalar_types(make_dtype<int16_t>());
     EXPECT_EQ(make_struct_dtype(make_dtype<int16_t>(), "x", make_dtype<int16_t>(), "y", make_dtype<int16_t>(), "z"), dt2);
 }
+
