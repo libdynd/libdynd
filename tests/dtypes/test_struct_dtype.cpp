@@ -91,3 +91,19 @@ TEST(StructDType, ReplaceScalarTypes) {
     EXPECT_EQ(make_struct_dtype(make_dtype<int16_t>(), "x", make_dtype<int16_t>(), "y", make_dtype<int16_t>(), "z"), dt2);
 }
 
+TEST(StructDType, DTypeAt) {
+    dtype dt, dt2;
+    const struct_dtype *tdt;
+
+    // Struct with three fields
+    dtype d1 = make_dtype<std::complex<double> >();
+    dtype d2 = make_dtype<int32_t>();
+    dtype d3 = make_fixedstring_dtype(string_encoding_utf_8, 5);
+    dt = make_struct_dtype(d1, "x", d2, "y", d3, "z");
+
+    // indexing into a dtype with a slice produces another
+    // struct dtype with the subset of fields.
+    EXPECT_EQ(make_struct_dtype(d1, "x", d2, "y"), dt.at(irange() < 2));
+    EXPECT_EQ(make_struct_dtype(d1, "x", d3, "z"), dt.at(irange(0, 3, 2)));
+    EXPECT_EQ(make_struct_dtype(d3, "z", d2, "y"), dt.at(irange(2, 0, -1)));
+}
