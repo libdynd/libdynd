@@ -172,7 +172,7 @@ set(dynd_SRC
     src/dynd/exceptions.cpp
     src/dynd/ndarray.cpp
     src/dynd/ndobject.cpp
-    src/dynd/ndarray_arange.cpp
+    src/dynd/ndobject_arange.cpp
     src/dynd/shape_tools.cpp
     src/dynd/string_encodings.cpp
     include/dynd/auxiliary_data.hpp
@@ -189,8 +189,8 @@ set(dynd_SRC
     include/dynd/irange.hpp
     include/dynd/ndarray.hpp
     include/dynd/ndobject.hpp
+    include/dynd/ndobject_arange.hpp
     include/dynd/ndobject_iter.hpp
-    include/dynd/ndarray_arange.hpp
     include/dynd/raw_iteration.hpp
     include/dynd/scalars.hpp
     include/dynd/shortvector.hpp

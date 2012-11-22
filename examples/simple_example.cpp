@@ -10,7 +10,7 @@
 #include <dynd/dtypes/fixedstring_dtype.hpp>
 #include <dynd/dtypes/string_dtype.hpp>
 #include <dynd/dtypes/byteswap_dtype.hpp>
-#include <dynd/ndarray_arange.hpp>
+#include <dynd/ndobject_arange.hpp>
 #include <dynd/codegen/codegen_cache.hpp>
 #include <dynd/codegen/unary_kernel_adapter_codegen.hpp>
 

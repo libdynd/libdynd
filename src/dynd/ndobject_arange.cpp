@@ -6,8 +6,8 @@
 #include <stdexcept>
 #include <sstream>
 
-#include <dynd/ndarray.hpp>
-#include <dynd/ndarray_arange.hpp>
+#include <dynd/ndobject.hpp>
+#include <dynd/ndobject_arange.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -15,7 +15,7 @@ using namespace dynd;
 namespace {
     template<class T>
     struct arange_specialization {
-        static void arange(const void *beginval, const void *stepval, ndarray& result) {
+        static void arange(const void *beginval, const void *stepval, ndobject& result) {
             T begin = *reinterpret_cast<const T *>(beginval);
             T step = *reinterpret_cast<const T *>(stepval);
             intptr_t count = result.get_shape()[0], stride = result.get_strides()[0];
@@ -101,18 +101,20 @@ namespace {
     };
 } // anonymous namespace
 
-ndarray dynd::arange(const dtype& dt, const void *beginval, const void *endval, const void *stepval)
+ndobject dynd::arange(const dtype& scalar_dtype, const void *beginval, const void *endval, const void *stepval)
 {
-    if (dt.extended() == NULL) {
+    if (scalar_dtype.extended() == NULL) {
 
 #define ONE_ARANGE_SPECIALIZATION(type) \
         case type_id_of<type>::value: { \
-            ndarray result(arange_counter<type, dtype_kind_of<type>::value>::count(beginval, endval, stepval), dt); \
+            intptr_t dim_size = arange_counter<type, dtype_kind_of<type>::value>::count(beginval, endval, stepval); \
+            ndobject result = \
+                    make_strided_ndobject(scalar_dtype, dim_size); \
             arange_specialization<type>::arange(beginval, stepval, result); \
             return DYND_MOVE(result); \
         }
 
-        switch (dt.type_id()) {
+        switch (scalar_dtype.type_id()) {
             ONE_ARANGE_SPECIALIZATION(int8_t);
             ONE_ARANGE_SPECIALIZATION(int16_t);
             ONE_ARANGE_SPECIALIZATION(int32_t);
@@ -130,16 +132,16 @@ ndarray dynd::arange(const dtype& dt, const void *beginval, const void *endval, 
 #undef ONE_ARANGE_SPECIALIZATION
 
         stringstream ss;
-        ss << "arange doesn't support built-in dtype " << dt;
+        ss << "arange doesn't support built-in dtype " << scalar_dtype;
         throw runtime_error(ss.str());
     } else {
         stringstream ss;
-        ss << "arange doesn't support extended dtype " << dt;
+        ss << "arange doesn't support extended dtype " << scalar_dtype;
         throw runtime_error(ss.str());
     }
 }
 
-static void linspace_specialization(float start, float stop, intptr_t count, ndarray& result)
+static void linspace_specialization(float start, float stop, intptr_t count, ndobject& result)
 {
     intptr_t stride = result.get_strides()[0];
     char *dst = result.get_readwrite_originptr();
@@ -149,7 +151,7 @@ static void linspace_specialization(float start, float stop, intptr_t count, nda
     }
 }
 
-static void linspace_specialization(double start, double stop, intptr_t count, ndarray& result)
+static void linspace_specialization(double start, double stop, intptr_t count, ndobject& result)
 {
     intptr_t stride = result.get_strides()[0];
     char *dst = result.get_readwrite_originptr();
@@ -159,7 +161,7 @@ static void linspace_specialization(double start, double stop, intptr_t count, n
     }
 }
 
-static void linspace_specialization(complex<float> start, complex<float> stop, intptr_t count, ndarray& result)
+static void linspace_specialization(complex<float> start, complex<float> stop, intptr_t count, ndobject& result)
 {
     intptr_t stride = result.get_strides()[0];
     char *dst = result.get_readwrite_originptr();
@@ -169,7 +171,7 @@ static void linspace_specialization(complex<float> start, complex<float> stop, i
     }
 }
 
-static void linspace_specialization(complex<double> start, complex<double> stop, intptr_t count, ndarray& result)
+static void linspace_specialization(complex<double> start, complex<double> stop, intptr_t count, ndobject& result)
 {
     intptr_t stride = result.get_strides()[0];
     char *dst = result.get_readwrite_originptr();
@@ -179,7 +181,7 @@ static void linspace_specialization(complex<double> start, complex<double> stop,
     }
 }
 
-ndarray dynd::linspace(const dtype& dt, const void *startval, const void *stopval, intptr_t count)
+ndobject dynd::linspace(const dtype& dt, const void *startval, const void *stopval, intptr_t count)
 {
     if (count < 2) {
         throw runtime_error("linspace needs a count of at least 2");
@@ -188,25 +190,25 @@ ndarray dynd::linspace(const dtype& dt, const void *startval, const void *stopva
     if (dt.extended() == NULL) {
         switch (dt.type_id()) {
             case float32_type_id: {
-                ndarray result(count, dt);
+                ndobject result = make_strided_ndobject(dt, count);
                 linspace_specialization(*reinterpret_cast<const float *>(startval),
                                 *reinterpret_cast<const float *>(stopval), count, result);
                 return DYND_MOVE(result);
             }
             case float64_type_id: {
-                ndarray result(count, dt);
+                ndobject result = make_strided_ndobject(dt, count);
                 linspace_specialization(*reinterpret_cast<const double *>(startval),
                                 *reinterpret_cast<const double *>(stopval), count, result);
                 return DYND_MOVE(result);
             }
             case complex_float32_type_id: {
-                ndarray result(count, dt);
+                ndobject result = make_strided_ndobject(dt, count);
                 linspace_specialization(*reinterpret_cast<const complex<float> *>(startval),
                                 *reinterpret_cast<const complex<float> *>(stopval), count, result);
                 return DYND_MOVE(result);
             }
             case complex_float64_type_id: {
-                ndarray result(count, dt);
+                ndobject result = make_strided_ndobject(dt, count);
                 linspace_specialization(*reinterpret_cast<const complex<double> *>(startval),
                                 *reinterpret_cast<const complex<double> *>(stopval), count, result);
                 return DYND_MOVE(result);

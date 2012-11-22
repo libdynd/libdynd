@@ -30,11 +30,11 @@ set(tests_SRC
     ndarray/test_ndarray.cpp
     ndarray/test_ndarray_assign.cpp
     ndarray/test_ndarray_index.cpp
-    ndarray/test_ndarray_arange.cpp
-    ndarray/test_ndarray_views.cpp
     ndobject/test_ndobject.cpp
+    ndobject/test_ndobject_arange.cpp
     ndobject/test_ndobject_assign.cpp
     ndobject/test_ndobject_at.cpp
+    ndobject/test_ndobject_views.cpp
     vm/test_elwise_program.cpp
     test_arithmetic_op.cpp
     test_shape_tools.cpp

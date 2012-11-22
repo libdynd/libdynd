@@ -169,6 +169,18 @@ public:
         return reinterpret_cast<char *>(get_ndo() + 1);
     }
 
+    inline char *get_readwrite_originptr() const {
+        if (get_ndo()->m_flags & write_access_flag) {
+            return get_ndo()->m_data_pointer;
+        } else {
+            throw std::runtime_error("dynd::ndarray node is not writeable");
+        }
+    }
+
+    inline const char *get_readonly_originptr() const {
+        return get_ndo()->m_data_pointer;
+    }
+
     /** Returns true if the object is a scalar */
     inline bool is_scalar() const {
         return get_ndo()->is_builtin_dtype() ||
