@@ -659,7 +659,32 @@ public:
      * @param ndim         The number of elements in the 'indices' array
      * @param indices      The indices to apply.
      */
-    dtype index(int nindices, const irange *indices) const;
+    dtype at_array(int nindices, const irange *indices) const;
+
+    /**
+     * The 'at' function is used for indexing. Overloading operator[] isn't
+     * practical for multidimensional objects.
+     */
+    const dtype at(const irange& i0) const {
+        return at_array(1, &i0);
+    }
+
+    /** Indexing with two index values */
+    const dtype at(const irange& i0, const irange& i1) const {
+        irange i[2] = {i0, i1};
+        return at_array(2, i);
+    }
+
+    /** Indexing with three index values */
+    const dtype at(const irange& i0, const irange& i1, const irange& i2) const {
+        irange i[3] = {i0, i1, i2};
+        return at_array(3, i);
+    }
+    /** Indexing with four index values */
+    const dtype at(const irange& i0, const irange& i1, const irange& i2, const irange& i3) const {
+        irange i[4] = {i0, i1, i2, i3};
+        return at_array(4, i);
+    }
 
     /**
      * Indexes into the dtype, intended for recursive calls from the extended-dtype version. See

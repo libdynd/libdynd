@@ -263,10 +263,8 @@ public:
     ndobject at_array(int nindices, const irange *indices) const;
 
     /**
-     * The ndobject uses the function call operator to do indexing. The [] operator
-     * only supports one index object at a time, and while there are tricks that can be
-     * done by overloading the comma operator, this doesn't produce a fool-proof result.
-     * The function call operator behaves more consistently.
+     * The 'at' function is used for indexing. Overloading operator[] isn't
+     * practical for multidimensional objects.
      */
     const ndobject at(const irange& i0) const {
         return at_array(1, &i0);

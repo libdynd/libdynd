@@ -21,11 +21,9 @@ TEST(ArrayDType, DTypeSubscript) {
     dtype darr1 = make_array_dtype(dfloat);
     dtype darr2 = make_array_dtype(darr1);
     dtype dtest;
-    irange ss[4];
 
-    ss[0] = 1 <= irange() < 3;
     // Indexing an array like this creates a result with a known array size
-    dtest = darr1.index(1, ss);
+    dtest = darr1.at(1 <= irange() < 3);
     // TODO!
     //EXPECT_EQ(make_strided_array_dtype(), dtest);
     //dtest = darr2.index(1, ss);

@@ -288,7 +288,7 @@ dtype::dtype(const std::string& rep)
     throw std::runtime_error(std::string() + "invalid type string \"" + rep + "\"");
 }
 
-dtype dynd::dtype::index(int nindices, const irange *indices) const
+dtype dynd::dtype::at_array(int nindices, const irange *indices) const
 {
     if (m_extended == NULL) {
         if (nindices == 0) {
