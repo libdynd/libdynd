@@ -23,6 +23,7 @@ set(tests_SRC
     dtypes/test_dtype_promotion.cpp
     dtypes/test_fixedstring_dtype.cpp
     dtypes/test_string_dtype.cpp
+    dtypes/test_struct_dtype.cpp
     dtypes/test_tuple_dtype.cpp
     dtypes/test_pointer_dtype.cpp
     ndarray/test_ndarray.cpp
@@ -31,6 +32,7 @@ set(tests_SRC
     ndarray/test_ndarray_arange.cpp
     ndarray/test_ndarray_views.cpp
     ndobject/test_ndobject.cpp
+    ndobject/test_ndobject_assign.cpp
     ndobject/test_ndobject_at.cpp
     vm/test_elwise_program.cpp
     test_arithmetic_op.cpp

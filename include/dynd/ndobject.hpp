@@ -113,15 +113,6 @@ public:
      */
     ndobject(const dtype& dt, intptr_t dim0, intptr_t dim1, intptr_t dim2);
 
-    /** Constructs a one-dimensional array */
-    ndobject(intptr_t dim0, const dtype& dt);
-    /** Constructs a two-dimensional array */
-    ndobject(intptr_t dim0, intptr_t dim1, const dtype& dt);
-    /** Constructs a three-dimensional array */
-    ndobject(intptr_t dim0, intptr_t dim1, intptr_t dim2, const dtype& dt);
-    /** Constructs a four-dimensional array */
-    ndobject(intptr_t dim0, intptr_t dim1, intptr_t dim2, intptr_t dim3, const dtype& dt);
-
     // TODO: Copy the initializer list and C array constructor mechanisms from ndarray
 
     /** Swap operation (should be "noexcept" in C++11) */
@@ -306,32 +297,32 @@ public:
                         const eval::eval_context *ectx = &eval::default_eval_context) const;
 
     /**
-     * Converts the array into the specified dtype.
+     * Converts all the scalar dtypes of the array into the specified scalar dtype.
      */
-    ndobject as_dtype(const dtype& dt, assign_error_mode errmode = assign_error_default) const;
+    ndobject cast_scalars(const dtype& scalar_dtype, assign_error_mode errmode = assign_error_default) const;
 
     /**
-     * Converts the array into the specified explicit template dtype.
-     * For example, arr.as_dtype<float>().
+     * Converts the array into the specified explicit scalar dtype.
+     * For example, arr.cast_scalar<float>().
      */
     template<class T>
-    ndobject as_dtype(assign_error_mode errmode = assign_error_default) const {
-        return as_dtype(make_dtype<T>(), errmode);
+    ndobject cast_scalars(assign_error_mode errmode = assign_error_default) const {
+        return cast_scalars(make_dtype<T>(), errmode);
     }
 
     /**
      * Views the array's memory as another dtype, where such an operation
-     * makes sense. This is analogous to reinterpret_case<>.
+     * makes sense. This is analogous to reinterpret_cast<>.
      */
-    ndobject view_as_dtype(const dtype& dt) const;
+    ndobject view_as_scalar(const dtype& scalar_dtype) const;
 
     /**
      * Views the array's memory as another dtype, where such an operation
      * makes sense. This is analogous to reinterpret_case<>.
      */
     template<class T>
-    ndobject view_as_dtype() const {
-        return view_as_dtype(make_dtype<T>());
+    ndobject view_as_scalar() const {
+        return view_as_scalar(make_dtype<T>());
     }
 
     /**
@@ -419,6 +410,18 @@ public:
 
 /** Makes a strided ndobject with uninitialized data. If axis_perm is NULL, it is C-order */
 ndobject make_strided_ndobject(const dtype& uniform_dtype, int ndim, const intptr_t *shape, const int *axis_perm = NULL);
+
+inline ndobject make_strided_ndobject(const dtype& uniform_dtype, intptr_t shape0) {
+    return make_strided_ndobject(uniform_dtype, 1, &shape0, NULL);
+}
+inline ndobject make_strided_ndobject(const dtype& uniform_dtype, intptr_t shape0, intptr_t shape1) {
+    intptr_t shape[2] = {shape0, shape1};
+    return make_strided_ndobject(uniform_dtype, 2, shape, NULL);
+}
+inline ndobject make_strided_ndobject(const dtype& uniform_dtype, intptr_t shape0, intptr_t shape1, intptr_t shape2) {
+    intptr_t shape[3] = {shape0, shape1, shape2};
+    return make_strided_ndobject(uniform_dtype, 3, shape, NULL);
+}
 
 inline ndobject_vals ndobject::vals() const {
     return ndobject_vals(*this);

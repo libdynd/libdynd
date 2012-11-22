@@ -217,6 +217,7 @@ void dynd::ndobject::val_assign(const ndobject& rhs, assign_error_mode errmode,
         unary_specialization_kernel_instance assign;
         const char *src_ptr = rhs.get_ndo()->m_data_pointer;
 
+        // TODO: Performance optimization
         ndobject_iter<1, 0> iter(*this);
         get_dtype_assignment_kernel(iter.get_uniform_dtype(), rhs.get_dtype(), errmode, ectx, assign);
         unary_operation_t assign_fn = assign.specializations[scalar_unary_specialization];
@@ -229,6 +230,38 @@ void dynd::ndobject::val_assign(const ndobject& rhs, assign_error_mode errmode,
         throw runtime_error("TODO: finish ndobject::val_assign for non-scalar case");
     }
 }
+
+void ndobject::val_assign(const dtype& dt, const char *data, assign_error_mode errmode,
+                    const eval::eval_context *ectx) const
+{
+    // Verify access permissions
+    if (!(get_flags()&write_access_flag)) {
+        throw runtime_error("tried to write to a dynd array that is not writeable");
+    }
+
+    unary_specialization_kernel_instance assign;
+
+    // TODO: Performance optimization
+    ndobject_iter<1, 0> iter(*this);
+    get_dtype_assignment_kernel(iter.get_uniform_dtype(), dt, errmode, ectx, assign);
+    unary_operation_t assign_fn = assign.specializations[scalar_unary_specialization];
+    if (!iter.empty()) {
+        do {
+            assign_fn(iter.data(), 0, data, 0, 1, assign.auxdata);
+        } while (iter.next());
+    }
+}
+
+ndobject ndobject::cast_scalars(const dtype& scalar_dtype, assign_error_mode errmode) const
+{
+    throw std::runtime_error("TODO: implement ndobject::cast_scalars");
+}
+
+ndobject ndobject::view_as_scalar(const dtype& scalar_dtype) const
+{
+    throw std::runtime_error("TODO: implement ndobject::view_as_scalar");
+}
+
 
 void ndobject::debug_dump(std::ostream& o, const std::string& indent) const
 {

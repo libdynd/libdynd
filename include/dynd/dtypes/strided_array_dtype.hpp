@@ -58,6 +58,7 @@ public:
     }
 
     bool is_scalar(const char *data, const char *metadata) const;
+    dtype with_replaced_scalar_types(const dtype& scalar_dtype) const;
 
     dtype apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& root_dt) const;
     intptr_t apply_linear_index(int nindices, const irange *indices, char *data, const char *metadata,

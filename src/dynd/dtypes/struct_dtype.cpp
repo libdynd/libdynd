@@ -72,14 +72,35 @@ void dynd::struct_dtype::print_element(std::ostream& o, const char *data, const 
 
 void dynd::struct_dtype::print_dtype(std::ostream& o) const
 {
-    o << "struct<fields=(";
+    o << "struct<";
     for (size_t i = 0, i_end = m_fields.size(); i != i_end; ++i) {
-        o << m_fields[i];
+        o << m_fields[i] << " " << m_field_names[i];
         if (i != i_end - 1) {
             o << ", ";
         }
     }
-    o << ")>";
+    o << ">";
+}
+
+bool dynd::struct_dtype::is_scalar(const char *DYND_UNUSED(data), const char *DYND_UNUSED(metadata)) const
+{
+    return false;
+}
+
+dtype dynd::struct_dtype::with_replaced_scalar_types(const dtype& scalar_dtype) const
+{
+    std::vector<dtype> fields(m_fields.size());
+
+    for (size_t i = 0, i_end = m_fields.size(); i != i_end; ++i) {
+        const dtype& dt = m_fields[i];
+        if (dt.extended()) {
+            fields[i] = dt.extended()->with_replaced_scalar_types(scalar_dtype);
+        } else {
+            fields[i] = scalar_dtype;
+        }
+    }
+
+    return dtype(new struct_dtype(fields, m_field_names));
 }
 
 dtype dynd::struct_dtype::apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& root_dt) const

@@ -27,6 +27,11 @@ bool extended_dtype::is_scalar(const char *DYND_UNUSED(data), const char *DYND_U
     return true;
 }
 
+dtype extended_dtype::with_replaced_scalar_types(const dtype& scalar_dtype) const
+{
+    // Default to scalar behavior
+    return scalar_dtype;
+}
 
 dtype extended_dtype::apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& DYND_UNUSED(root_dt)) const
 {

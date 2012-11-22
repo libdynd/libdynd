@@ -43,6 +43,10 @@ public:
         return m_fields;
     }
 
+    const std::vector<std::string>& get_field_names() const {
+        return m_field_names;
+    }
+
     void print_element(std::ostream& o, const char *data, const char *metadata) const;
 
     void print_dtype(std::ostream& o) const;
@@ -52,6 +56,9 @@ public:
     dtype_memory_management_t get_memory_management() const {
         return m_memory_management;
     }
+
+    bool is_scalar(const char *data, const char *metadata) const;
+    dtype with_replaced_scalar_types(const dtype& scalar_dtype) const;
 
     dtype apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& root_dt) const;
     intptr_t apply_linear_index(int nindices, const irange *indices, char *data, const char *metadata,

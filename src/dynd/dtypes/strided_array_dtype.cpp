@@ -55,6 +55,20 @@ bool dynd::strided_array_dtype::is_scalar(const char *DYND_UNUSED(data), const c
     return false;
 }
 
+dtype dynd::strided_array_dtype::with_replaced_scalar_types(const dtype& scalar_dtype) const
+{
+    dtype element_dtype;
+    if (m_element_dtype.extended()) {
+        element_dtype = scalar_dtype;
+    } else {
+        element_dtype = m_element_dtype.extended()->with_replaced_scalar_types(scalar_dtype);
+    }
+    if (element_dtype == m_element_dtype) {
+        return dtype(this, true);
+    } else {
+        return dtype(new strided_array_dtype(element_dtype));
+    }
+}
 
 dtype dynd::strided_array_dtype::apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& root_dt) const
 {

@@ -336,6 +336,9 @@ public:
     /** Returns true if the ndobject with the data/metadata is a scalar */
     virtual bool is_scalar(const char *data, const char *metadata) const;
 
+    /** For array types, recursively applies to each child type, and for scalar types switches to the provided one */
+    virtual dtype with_replaced_scalar_types(const dtype& scalar_dtype) const;
+
     /**
      * Indexes into the dtype. This function returns the dtype which results
      * from applying the same index to an ndarray of this dtype.
