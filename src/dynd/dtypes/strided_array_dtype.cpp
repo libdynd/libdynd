@@ -55,19 +55,9 @@ bool dynd::strided_array_dtype::is_scalar(const char *DYND_UNUSED(data), const c
     return false;
 }
 
-dtype dynd::strided_array_dtype::with_replaced_scalar_types(const dtype& scalar_dtype) const
+dtype dynd::strided_array_dtype::with_replaced_scalar_types(const dtype& scalar_dtype, assign_error_mode errmode) const
 {
-    dtype element_dtype;
-    if (m_element_dtype.extended()) {
-        element_dtype = m_element_dtype.extended()->with_replaced_scalar_types(scalar_dtype);
-    } else {
-        element_dtype = scalar_dtype;
-    }
-    if (element_dtype == m_element_dtype) {
-        return dtype(this, true);
-    } else {
-        return dtype(new strided_array_dtype(element_dtype));
-    }
+    return dtype(new strided_array_dtype(m_element_dtype.with_replaced_scalar_types(scalar_dtype, errmode)));
 }
 
 dtype dynd::strided_array_dtype::apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& root_dt) const
@@ -141,12 +131,12 @@ int dynd::strided_array_dtype::get_uniform_ndim() const
     }
 }
 
-dtype dynd::strided_array_dtype::get_uniform_dtype() const
+dtype dynd::strided_array_dtype::get_dtype_at_dimension(int i, int total_ndim) const
 {
-    if (!m_element_dtype.extended()) {
-        return m_element_dtype;
+    if (i == 0) {
+        return dtype(this, true);
     } else {
-        return m_element_dtype.extended()->get_uniform_dtype();
+        return m_element_dtype.get_dtype_at_dimension(i - 1, total_ndim + 1);
     }
 }
 

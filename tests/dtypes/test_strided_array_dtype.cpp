@@ -11,6 +11,7 @@
 #include <dynd/dtype_assign.hpp>
 #include <dynd/dtypes/tuple_dtype.hpp>
 #include <dynd/dtypes/strided_array_dtype.hpp>
+#include <dynd/dtypes/convert_dtype.hpp>
 #include <dynd/exceptions.hpp>
 
 using namespace std;
@@ -21,13 +22,15 @@ TEST(StridedArrayDType, ReplaceScalarTypes) {
     dafloat = make_strided_array_dtype(make_dtype<float>());
     dadouble = make_strided_array_dtype(make_dtype<double>());
 
-    EXPECT_EQ(dafloat, dadouble.extended()->with_replaced_scalar_types(make_dtype<float>()));
+    EXPECT_EQ(make_strided_array_dtype(make_convert_dtype<float, double>()),
+            dadouble.with_replaced_scalar_types(make_dtype<float>()));
 
     // Two dimensional array
     dafloat = make_strided_array_dtype(dafloat);
     dadouble = make_strided_array_dtype(dadouble);
 
-    EXPECT_EQ(dadouble, dafloat.extended()->with_replaced_scalar_types(make_dtype<double>()));
+    EXPECT_EQ(make_strided_array_dtype(make_strided_array_dtype(make_convert_dtype<double, float>())),
+            dafloat.with_replaced_scalar_types(make_dtype<double>()));
 }
 
 TEST(StridedArrayDType, DTypeAt) {

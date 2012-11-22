@@ -87,17 +87,13 @@ bool dynd::struct_dtype::is_scalar(const char *DYND_UNUSED(data), const char *DY
     return false;
 }
 
-dtype dynd::struct_dtype::with_replaced_scalar_types(const dtype& scalar_dtype) const
+dtype dynd::struct_dtype::with_replaced_scalar_types(const dtype& scalar_dtype, assign_error_mode errmode) const
 {
     std::vector<dtype> fields(m_fields.size());
 
     for (size_t i = 0, i_end = m_fields.size(); i != i_end; ++i) {
         const dtype& dt = m_fields[i];
-        if (dt.extended()) {
-            fields[i] = dt.extended()->with_replaced_scalar_types(scalar_dtype);
-        } else {
-            fields[i] = scalar_dtype;
-        }
+        fields[i] = dt.with_replaced_scalar_types(scalar_dtype, errmode);
     }
 
     return dtype(new struct_dtype(fields, m_field_names));

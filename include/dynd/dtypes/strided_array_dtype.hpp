@@ -58,15 +58,14 @@ public:
     }
 
     bool is_scalar(const char *data, const char *metadata) const;
-    dtype with_replaced_scalar_types(const dtype& scalar_dtype) const;
+    dtype with_replaced_scalar_types(const dtype& scalar_dtype, assign_error_mode errmode) const;
 
     dtype apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& root_dt) const;
     intptr_t apply_linear_index(int nindices, const irange *indices, char *data, const char *metadata,
                     const dtype& result_dtype, char *out_metadata, int current_i, const dtype& root_dt) const;
 
     int get_uniform_ndim() const;
-
-    dtype get_uniform_dtype() const;
+    dtype get_dtype_at_dimension(int i, int total_ndim = 0) const;
 
     void get_shape(int i, intptr_t *out_shape) const;
 

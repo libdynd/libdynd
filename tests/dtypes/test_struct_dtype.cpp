@@ -11,6 +11,7 @@
 #include <dynd/ndarray.hpp>
 #include <dynd/dtypes/struct_dtype.hpp>
 #include <dynd/dtypes/fixedstring_dtype.hpp>
+#include <dynd/dtypes/convert_dtype.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -87,8 +88,12 @@ TEST(StructDType, ReplaceScalarTypes) {
     dtype d2 = make_dtype<int32_t>();
     dtype d3 = make_fixedstring_dtype(string_encoding_utf_8, 5);
     dt = make_struct_dtype(d1, "x", d2, "y", d3, "z");
-    dt2 = dt.extended()->with_replaced_scalar_types(make_dtype<int16_t>());
-    EXPECT_EQ(make_struct_dtype(make_dtype<int16_t>(), "x", make_dtype<int16_t>(), "y", make_dtype<int16_t>(), "z"), dt2);
+    dt2 = dt.with_replaced_scalar_types(make_dtype<int16_t>());
+    EXPECT_EQ(make_struct_dtype(
+                make_convert_dtype(make_dtype<int16_t>(), d1), "x",
+                make_convert_dtype(make_dtype<int16_t>(), d2), "y",
+                make_convert_dtype(make_dtype<int16_t>(), d3), "z"),
+        dt2);
 }
 
 TEST(StructDType, DTypeAt) {

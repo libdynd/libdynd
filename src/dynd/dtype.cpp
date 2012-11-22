@@ -9,6 +9,7 @@
 #include <dynd/buffer_storage.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/kernels/buffered_unary_kernels.hpp>
+#include <dynd/dtypes/convert_dtype.hpp>
 
 #include <sstream>
 #include <cstring>
@@ -27,10 +28,10 @@ bool extended_dtype::is_scalar(const char *DYND_UNUSED(data), const char *DYND_U
     return true;
 }
 
-dtype extended_dtype::with_replaced_scalar_types(const dtype& scalar_dtype) const
+dtype extended_dtype::with_replaced_scalar_types(const dtype& scalar_dtype, assign_error_mode errmode) const
 {
     // Default to scalar behavior
-    return scalar_dtype;
+    return make_convert_dtype(scalar_dtype, dtype(this, true), errmode);
 }
 
 dtype extended_dtype::apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& DYND_UNUSED(root_dt)) const
@@ -61,10 +62,14 @@ int dynd::extended_dtype::get_uniform_ndim() const
     return 0;
 }
 
-dtype dynd::extended_dtype::get_uniform_dtype() const
+dtype dynd::extended_dtype::get_dtype_at_dimension(int i, int total_ndim) const
 {
     // Default to heterogeneous dimension/scalar behavior
-    return dtype(this, true);
+    if (i == 0) {
+        return dtype(this, true);
+    } else {
+        throw too_many_indices(total_ndim + i, total_ndim);
+    }
 }
 
 
@@ -311,6 +316,15 @@ dtype dynd::dtype::apply_linear_index(int nindices, const irange *indices, int c
         }
     } else {
         return m_extended->apply_linear_index(nindices, indices, current_i, root_dt);
+    }
+}
+
+dtype dynd::dtype::with_replaced_scalar_types(const dtype& scalar_dtype, assign_error_mode errmode) const
+{
+    if (m_extended) {
+        return m_extended->with_replaced_scalar_types(scalar_dtype, errmode);
+    } else {
+        return make_convert_dtype(scalar_dtype, *this, errmode);
     }
 }
 

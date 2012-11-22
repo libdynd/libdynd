@@ -227,6 +227,7 @@ void dynd::ndobject::val_assign(const ndobject& rhs, assign_error_mode errmode,
             } while (iter.next());
         }
     } else {
+        ndobject_iter<1, 1>(*this, rhs);
         throw runtime_error("TODO: finish ndobject::val_assign for non-scalar case");
     }
 }
@@ -321,5 +322,6 @@ ndobject dynd::empty_like(const ndobject& rhs, const dtype& uniform_dtype)
 
 ndobject dynd::empty_like(const ndobject& rhs)
 {
-    return empty_like(rhs, rhs.get_uniform_dtype());
+    throw runtime_error("TODO: implement dynd::empty_like");
+    //return empty_like(rhs, rhs.get_dtype().get_uniform_dtype());
 }

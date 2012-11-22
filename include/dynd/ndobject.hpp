@@ -173,7 +173,7 @@ public:
         if (get_ndo()->m_flags & write_access_flag) {
             return get_ndo()->m_data_pointer;
         } else {
-            throw std::runtime_error("dynd::ndarray node is not writeable");
+            throw std::runtime_error("dynd::ndobject is not writeable");
         }
     }
 
@@ -187,15 +187,6 @@ public:
             get_ndo()->m_dtype->is_scalar(get_ndo()->m_data_pointer, get_ndo_meta());
     }
 
-    /** The number of uniform dimensions */
-    inline int get_uniform_ndim() const {
-        if (get_ndo()->is_builtin_dtype()) {
-            return 0;
-        } else {
-            return get_ndo()->m_dtype->get_uniform_ndim();
-        }
-    }
-
     /** The dtype */
     inline dtype get_dtype() const {
         if (get_ndo()->is_builtin_dtype()) {
@@ -205,22 +196,13 @@ public:
         }
     }
 
-    /** The uniform dtype, which has all initial uniform dimensions stripped away */
-    inline dtype get_uniform_dtype() const {
-        if (get_ndo()->is_builtin_dtype()) {
-            return dtype(get_ndo()->get_builtin_type_id());
-        } else {
-            return get_ndo()->m_dtype->get_uniform_dtype();
-        }
-    }
-
     /** The flags, including access permissions. */
     inline int64_t get_flags() const {
         return get_ndo()->m_flags;
     }
 
     inline std::vector<intptr_t> get_shape() const {
-        std::vector<intptr_t> result(get_uniform_ndim());
+        std::vector<intptr_t> result(get_dtype().get_uniform_ndim());
         get_shape(&result[0]);
         return result;
     }
@@ -231,7 +213,7 @@ public:
     }
 
     std::vector<intptr_t> get_strides() const {
-        std::vector<intptr_t> result(get_uniform_ndim());
+        std::vector<intptr_t> result(get_dtype().get_uniform_ndim());
         get_strides(&result[0]);
         return result;
     }

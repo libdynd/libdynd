@@ -21,6 +21,7 @@
 #include <dynd/string_encodings.hpp>
 #include <dynd/eval/eval_context.hpp>
 #include <dynd/irange.hpp>
+#include <dynd/exceptions.hpp>
 
 namespace dynd {
 
@@ -336,8 +337,14 @@ public:
     /** Returns true if the ndobject with the data/metadata is a scalar */
     virtual bool is_scalar(const char *data, const char *metadata) const;
 
-    /** For array types, recursively applies to each child type, and for scalar types switches to the provided one */
-    virtual dtype with_replaced_scalar_types(const dtype& scalar_dtype) const;
+    /**
+     * For array types, recursively applies to each child type, and for
+     * scalar types converts to the provided one.
+     *
+     * @param scalar_dtype  The scalar dtype to convert all scalars to.
+     * @param errmode       The error mode for the conversion.
+     */
+    virtual dtype with_replaced_scalar_types(const dtype& scalar_dtype, assign_error_mode errmode) const;
 
     /**
      * Indexes into the dtype. This function returns the dtype which results
@@ -375,9 +382,15 @@ public:
     virtual int get_uniform_ndim() const;
 
     /**
-     * Retrieves the dtype with all the initial uniform dimensions stripped away.
+     * Retrieves the dtype starting at the requested dimension. This is
+     * generally equivalent to apply_linear_index with a count of 'dim'
+     * scalar indices.
+     *
+     * @param i         The dimension number to retrieve.
+     * @param total_ndim  A count of how many dimensions have been traversed from the
+     *                    dtype start, for producing error messages.
      */
-    virtual dtype get_uniform_dtype() const;
+    virtual dtype get_dtype_at_dimension(int i, int total_ndim = 0) const;
 
     /**
      * Retrieves the shape of the dtype, expanding the vector as needed. For dimensions with
@@ -804,6 +817,33 @@ public:
             return pod_memory_management;
         }
     }
+
+    /**
+     * For array types, recursively applies to each child type, and for
+     * scalar types converts to the provided one.
+     *
+     * @param scalar_dtype  The scalar dtype to convert all scalars to.
+     * @param errmode       The error mode for the conversion.
+     */
+    dtype with_replaced_scalar_types(const dtype& scalar_dtype, assign_error_mode errmode = assign_error_default) const;
+    inline int get_uniform_ndim() const {
+        if (m_extended) {
+            return m_extended->get_uniform_ndim();
+        } else {
+            return 0;
+        }
+    }
+
+    inline dtype get_dtype_at_dimension(int i, int total_ndim = 0) const {
+        if (m_extended) {
+            return m_extended->get_dtype_at_dimension(i, total_ndim);
+        } else if (i == 0) {
+            return *this;
+        } else {
+            throw too_many_indices(total_ndim + i, total_ndim);
+        }
+    }
+
 
     /**
      * Returns a const pointer to the extended_dtype object which
