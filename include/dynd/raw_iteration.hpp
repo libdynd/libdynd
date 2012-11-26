@@ -18,7 +18,7 @@ namespace detail {
 
     /** A simple metaprogram to indicate whether a value is within the bounds or not */
     template<int V, int V_START, int V_END>
-    struct is_value_within_bounds {
+    struct is_value_within_bounds_raw_iter {
         enum {value = (V >= V_START) && V < V_END};
     };
 
@@ -192,7 +192,7 @@ namespace detail {
         }
 
         template<int K>
-        inline typename enable_if<is_value_within_bounds<K, 0, Nwrite + Nread>::value, intptr_t>::type
+        inline typename enable_if<is_value_within_bounds_raw_iter<K, 0, Nwrite + Nread>::value, intptr_t>::type
                                                                         innerstride() const {
             return strides(K)[0];
         }
@@ -201,7 +201,7 @@ namespace detail {
          * Provide non-const access to the 'write' operands.
          */
         template<int K>
-        inline typename enable_if<is_value_within_bounds<K, 0, Nwrite>::value, char *>::type data() {
+        inline typename enable_if<is_value_within_bounds_raw_iter<K, 0, Nwrite>::value, char *>::type data() {
             return m_data[K];
         }
 
@@ -209,7 +209,7 @@ namespace detail {
          * Provide const access to all the operands.
          */
         template<int K>
-        inline typename enable_if<is_value_within_bounds<K, 0, Nwrite + Nread>::value, const char *>::type
+        inline typename enable_if<is_value_within_bounds_raw_iter<K, 0, Nwrite + Nread>::value, const char *>::type
                                                                         data() const {
             return m_data[K];
         }
@@ -226,7 +226,7 @@ namespace detail {
          * @returns  True if the first element in the inner loop should be skipped.
          */
         template<int K>
-        inline typename enable_if<is_value_within_bounds<K, 0, Nwrite + Nread>::value, bool>::type
+        inline typename enable_if<is_value_within_bounds_raw_iter<K, 0, Nwrite + Nread>::value, bool>::type
                                                     skip_first_visits(intptr_t& inout_skip_count) {
             const intptr_t *strides_array = strides(K), *iterindex_array = &iterindex(0);
             // First check all the indexes managed by the iterator

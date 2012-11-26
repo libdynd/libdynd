@@ -306,15 +306,15 @@ public:
      * Views the array's memory as another dtype, where such an operation
      * makes sense. This is analogous to reinterpret_cast<>.
      */
-    ndobject view_as_scalar(const dtype& scalar_dtype) const;
+    ndobject view_scalars(const dtype& scalar_dtype) const;
 
     /**
      * Views the array's memory as another dtype, where such an operation
      * makes sense. This is analogous to reinterpret_case<>.
      */
     template<class T>
-    ndobject view_as_scalar() const {
-        return view_as_scalar(make_dtype<T>());
+    ndobject view_scalars() const {
+        return view_scalars(make_dtype<T>());
     }
 
     /**

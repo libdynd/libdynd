@@ -50,6 +50,11 @@ void dynd::strided_array_dtype::print_dtype(std::ostream& o) const
     o << "strided_array<" << m_element_dtype << ">";
 }
 
+bool dynd::strided_array_dtype::is_uniform_dim() const
+{
+    return true;
+}
+
 bool dynd::strided_array_dtype::is_scalar(const char *DYND_UNUSED(data), const char *DYND_UNUSED(metadata)) const
 {
     return false;
@@ -58,6 +63,11 @@ bool dynd::strided_array_dtype::is_scalar(const char *DYND_UNUSED(data), const c
 dtype dynd::strided_array_dtype::with_replaced_scalar_types(const dtype& scalar_dtype, assign_error_mode errmode) const
 {
     return dtype(new strided_array_dtype(m_element_dtype.with_replaced_scalar_types(scalar_dtype, errmode)));
+}
+
+dtype dynd::strided_array_dtype::get_canonical_dtype() const
+{
+    return dtype(new strided_array_dtype(m_element_dtype.get_canonical_dtype()));
 }
 
 dtype dynd::strided_array_dtype::apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& root_dt) const
@@ -243,6 +253,18 @@ void dynd::strided_array_dtype::metadata_default_construct(char *metadata, int n
     }
 }
 
+void dynd::strided_array_dtype::metadata_copy_construct(char *out_metadata, const char *in_metadata, memory_block_data *embedded_reference) const
+{
+    const strided_array_dtype_metadata *in_md = reinterpret_cast<const strided_array_dtype_metadata *>(in_metadata);
+    strided_array_dtype_metadata *out_md = reinterpret_cast<strided_array_dtype_metadata *>(out_metadata);
+    out_md->size = in_md->size;
+    out_md->stride = in_md->stride;
+    if (m_element_dtype.extended()) {
+        m_element_dtype.extended()->metadata_copy_construct(out_metadata + sizeof(strided_array_dtype_metadata),
+                        in_metadata + sizeof(strided_array_dtype_metadata), embedded_reference);
+    }
+}
+
 void dynd::strided_array_dtype::metadata_destruct(char *metadata) const
 {
     if (m_element_dtype.extended()) {
@@ -265,7 +287,7 @@ void dynd::strided_array_dtype::metadata_debug_dump(const char *metadata, std::o
 
 size_t strided_array_dtype::get_iterdata_size() const
 {
-    return sizeof(strided_array_dtype_iterdata);
+    return m_element_dtype.get_iterdata_size() + sizeof(strided_array_dtype_iterdata);
 }
 
 // Does one iterator increment for this dtype

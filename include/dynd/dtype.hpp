@@ -297,6 +297,14 @@ struct iterdata_common {
     iterdata_reset_fn_t reset;
 };
 
+/** Special iterdata which broadcasts to any number of additional dimensions */
+struct iterdata_broadcasting_terminator {
+    iterdata_common common;
+    char *data;
+};
+char *iterdata_broadcasting_terminator_incr(iterdata_common *iterdata, int level);
+char *iterdata_broadcasting_terminator_reset(iterdata_common *iterdata, char *data, int level);
+
 // The extended_dtype class is for dtypes which require more data
 // than a type_id, kind, and element_size, and endianness.
 class extended_dtype {
@@ -334,6 +342,9 @@ public:
     /** Returns what kind of memory management the dtype uses, e.g. construct/copy/move/destruct semantics */
     virtual dtype_memory_management_t get_memory_management() const = 0;
 
+    /** Returns true if the dtype is an array dtype whose elements all have the same dtype */
+    virtual bool is_uniform_dim() const;
+
     /** Returns true if the ndobject with the data/metadata is a scalar */
     virtual bool is_scalar(const char *data, const char *metadata) const;
 
@@ -345,6 +356,14 @@ public:
      * @param errmode       The error mode for the conversion.
      */
     virtual dtype with_replaced_scalar_types(const dtype& scalar_dtype, assign_error_mode errmode) const;
+
+    /**
+     * Returns a modified dtype with all expression dtypes replaced with
+     * their value dtypes, and dtypes replaced with "standard versions"
+     * whereever appropriate. For example, an offset-based uniform array
+     * would be replaced by a strided uniform array.
+     */
+    virtual dtype get_canonical_dtype() const;
 
     /**
      * Indexes into the dtype. This function returns the dtype which results
@@ -451,6 +470,18 @@ public:
      * The element size of the result must match that from get_default_element_size().
      */
     virtual void metadata_default_construct(char *metadata, int ndim, const intptr_t* shape) const;
+    /**
+     * Constructs the ndobject metadata for this dtype, copying everything exactly from
+     * input metadata for the same dtype.
+     *
+     * @param out_metadata  The new metadata memory which is constructed.
+     * @param in_metadata   Existing metadata memory from which to copy.
+     * @param embedded_reference  For references which are NULL, add this reference in the output.
+     *                            A NULL means the data was embedded in the original ndobject, so
+     *                            when putting it in a new ndobject, need to hold a reference to
+     *                            that memory.
+     */
+    virtual void metadata_copy_construct(char *out_metadata, const char *in_metadata, memory_block_data *embedded_reference) const;
     /** Destructs any references or other state contained in the ndobjects' metdata */
     virtual void metadata_destruct(char *metadata) const;
     /** Debug print of the metdata */
@@ -542,6 +573,16 @@ public:
      * when this is not true.
      */
     virtual dtype with_replaced_storage_dtype(const dtype& replacement_dtype) const = 0;
+
+    // The canonical dtype for expression dtypes is always the value dtype
+    dtype get_canonical_dtype() const;
+
+    // Expression dtypes use the values from their operand dtype.
+    size_t get_metadata_size() const;
+    void metadata_default_construct(char *metadata, int ndim, const intptr_t* shape) const;
+    void metadata_copy_construct(char *out_metadata, const char *in_metadata, memory_block_data *embedded_reference) const;
+    void metadata_destruct(char *metadata) const;
+    void metadata_debug_dump(const char *metadata, std::ostream& o, const std::string& indent) const;
 };
 
 namespace detail {
@@ -826,6 +867,21 @@ public:
      * @param errmode       The error mode for the conversion.
      */
     dtype with_replaced_scalar_types(const dtype& scalar_dtype, assign_error_mode errmode = assign_error_default) const;
+
+    /**
+     * Returns a modified dtype with all expression dtypes replaced with
+     * their value dtypes, and dtypes replaced with "standard versions"
+     * whereever appropriate. For example, an offset-based uniform array
+     * would be replaced by a strided uniform array.
+     */
+    inline dtype get_canonical_dtype() const {
+        if (m_extended) {
+            return m_extended->get_canonical_dtype();
+        } else {
+            return *this;
+        }
+    }
+
     inline int get_uniform_ndim() const {
         if (m_extended) {
             return m_extended->get_uniform_ndim();
@@ -853,6 +909,60 @@ public:
      */
     const extended_dtype* extended() const {
         return m_extended;
+    }
+
+    /** The size of the data required for uniform iteration */
+    inline size_t get_iterdata_size() const {
+        if (m_extended) {
+            return m_extended->get_iterdata_size();
+        } else {
+            return 0;
+        }
+    }
+    /**
+     * Constructs the iterdata for processing iteration of the specified shape
+     */
+    inline void iterdata_construct(iterdata_common *iterdata, const char *metadata,
+                    int ndim, const intptr_t* shape, dtype& out_uniform_dtype) const
+    {
+        if (m_extended) {
+            m_extended->iterdata_construct(iterdata, metadata, ndim, shape, out_uniform_dtype);
+        }
+    }
+
+    /** Destructs any references or other state contained in the iterdata */
+    inline void iterdata_destruct(iterdata_common *iterdata, int ndim) const
+    {
+        if (m_extended) {
+            m_extended->iterdata_destruct(iterdata, ndim);
+        }
+    }
+
+    inline size_t get_broadcasted_iterdata_size() const {
+        if (m_extended) {
+            return m_extended->get_iterdata_size() + sizeof(iterdata_broadcasting_terminator);
+        } else {
+            return sizeof(iterdata_broadcasting_terminator);
+        }
+    }
+
+    /**
+     * Constructs an iterdata which can be broadcast to the left indefinitely, by capping
+     * off the iterdata with a iterdata_broadcasting_terminator.
+     */
+    inline void broadcasted_iterdata_construct(iterdata_common *iterdata, const char *metadata,
+                    int ndim, const intptr_t* shape, dtype& out_uniform_dtype) const
+    {
+        size_t size;
+        if (m_extended) {
+            size = m_extended->iterdata_construct(iterdata, metadata, ndim, shape, out_uniform_dtype);
+        } else {
+            size = 0;
+        }
+        iterdata_broadcasting_terminator *id = reinterpret_cast<iterdata_broadcasting_terminator *>(
+                        reinterpret_cast<char *>(iterdata) + size);
+        id->common.incr = &iterdata_broadcasting_terminator_incr;
+        id->common.reset = &iterdata_broadcasting_terminator_reset;
     }
 
     /**

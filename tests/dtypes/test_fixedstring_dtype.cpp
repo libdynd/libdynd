@@ -134,3 +134,9 @@ TEST(FixedstringDType, SingleCompare) {
     EXPECT_EQ(k.comparisons[greater_equal_id]((char *)a(0).get_readonly_originptr(), (char *)a(1).get_readonly_originptr(), k.auxdata), false);
     EXPECT_EQ(k.comparisons[greater_id]((char *)a(0).get_readonly_originptr(), (char *)a(1).get_readonly_originptr(), k.auxdata), false);
 }
+
+TEST(FixedstringDType, CanonicalDType) {
+    // The canonical dtype of a fixedstring dtype is always a UTF8 string dtype
+    EXPECT_EQ((make_string_dtype(string_encoding_utf_8)),
+                (make_fixedstring_dtype(string_encoding_utf_16, 7).get_canonical_dtype()));
+}

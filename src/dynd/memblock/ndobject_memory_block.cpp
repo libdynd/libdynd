@@ -92,6 +92,39 @@ memory_block_ptr dynd::make_ndobject_memory_block(const dtype& dt, int ndim, con
     return result;
 }
 
+memory_block_ptr dynd::shallow_copy_ndobject_memory_block(const memory_block_ptr& ndo)
+{
+    // Allocate the new memory block.
+    const ndobject_preamble *preamble = reinterpret_cast<const ndobject_preamble *>(ndo.get());
+    size_t metadata_size = 0;
+    if (!preamble->is_builtin_dtype()) {
+        metadata_size = preamble->m_dtype->get_metadata_size();
+    }
+    memory_block_ptr result = make_ndobject_memory_block(metadata_size);
+    ndobject_preamble *result_preamble = reinterpret_cast<ndobject_preamble *>(result.get());
+
+    // Clone the data pointer
+    result_preamble->m_data_pointer = preamble->m_data_pointer;
+    result_preamble->m_data_reference = preamble->m_data_reference;
+    if (result_preamble->m_data_reference == NULL) {
+        result_preamble->m_data_reference = ndo.get();
+    }
+    memory_block_incref(result_preamble->m_data_reference);
+
+    // Copy the flags
+    result_preamble->m_flags = preamble->m_flags;
+
+    // Clone the dtype
+    result_preamble->m_dtype = preamble->m_dtype;
+    if (!preamble->is_builtin_dtype()) {
+        extended_dtype_incref(preamble->m_dtype);
+        preamble->m_dtype->metadata_copy_construct(reinterpret_cast<char *>(result.get()) + sizeof(ndobject_preamble),
+                        reinterpret_cast<const char *>(ndo.get()) + sizeof(ndobject_preamble), ndo.get());
+    }
+
+    return result;
+}
+
 void dynd::ndobject_memory_block_debug_dump(const memory_block_data *memblock, std::ostream& o, const std::string& indent)
 {
     const ndobject_preamble *preamble = reinterpret_cast<const ndobject_preamble *>(memblock + 1);

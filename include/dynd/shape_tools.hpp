@@ -23,6 +23,13 @@ namespace dynd {
 bool shape_can_broadcast(int dst_ndim, const intptr_t *dst_shape,
                         int src_ndim, const intptr_t *src_shape);
 
+inline bool shape_can_broadcast(const std::vector<intptr_t>& dst_shape,
+                        const std::vector<intptr_t>& src_shape)
+{
+    return shape_can_broadcast(dst_shape.size(), dst_shape.empty() ? NULL : &dst_shape[0],
+                        src_shape.size(), src_shape.empty() ? NULL : &src_shape[0]);
+}
+
 /**
  * This function broadcasts the dimensions and strides of 'src' to a given
  * shape, raising an error if it cannot be broadcast.
@@ -109,6 +116,10 @@ inline void multistrides_to_axis_perm(int ndim, int noperands, intptr_t **operst
 }
 
 void print_shape(std::ostream& o, int ndim, const intptr_t *shape);
+
+inline void print_shape(std::ostream& o, const std::vector<intptr_t>& shape) {
+    print_shape(o, shape.size(), shape.empty() ? NULL : &shape[0]);
+}
 
 /**
  * Applies the indexing rules for a single linear indexing irange object to

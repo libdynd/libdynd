@@ -8,6 +8,7 @@
 
 #include <dynd/exceptions.hpp>
 #include <dynd/ndarray.hpp>
+#include <dynd/ndobject.hpp>
 #include <dynd/shape_tools.hpp>
 
 using namespace std;
@@ -31,6 +32,26 @@ dynd::broadcast_error::broadcast_error(int dst_ndim, const intptr_t *dst_shape,
     : dnd_exception("broadcast error", broadcast_error_message(dst_ndim, dst_shape, src_ndim, src_shape))
 {
 }
+
+inline string broadcast_error_message(const ndobject& dst, const ndobject& src)
+{
+    vector<intptr_t> dst_shape = dst.get_shape(), src_shape = src.get_shape();
+    stringstream ss;
+
+    ss << "cannot broadcast ndobject with dtype ";
+    ss << src.get_dtype() << " and shape ";
+    print_shape(ss, src_shape);
+    ss << " to dtype " << dst.get_dtype() << " and shape ";
+    print_shape(ss, dst_shape);
+
+    return ss.str();
+}
+
+dynd::broadcast_error::broadcast_error(const ndobject& dst, const ndobject& src)
+    : dnd_exception("broadcast error", broadcast_error_message(dst, src))
+{
+}
+
 
 inline string broadcast_error_message(int noperands, const ndarray_node_ptr *operands)
 {

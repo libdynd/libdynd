@@ -68,3 +68,8 @@ TEST(AlignDType, Chained) {
     EXPECT_EQ(make_fixedbytes_dtype(4, 1), dt.storage_dtype());
     EXPECT_EQ(make_dtype<int>(), dt.value_dtype());
 }
+
+TEST(AlignDType, CanonicalDType) {
+    // The canonical dtype of an alignment result is always the aligned dtype
+    EXPECT_EQ((make_dtype<float>()), (make_unaligned_dtype<float>().get_canonical_dtype()));
+}

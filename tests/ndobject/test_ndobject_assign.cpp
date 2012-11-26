@@ -221,7 +221,7 @@ TEST(NDObjectAssign, BroadcastAssign) {
     // Broadcasts the 4-vector by a factor of 6,
     // converting the dtype
     a.val_assign(b);
-    const float *ptr_f = (const float *)a.get_ndo()->m_data_pointer;
+    const float *ptr_f = (const float *)a.get_readonly_originptr();
     for (int i = 0; i < 6; ++i) {
         EXPECT_EQ(3, *ptr_f++);
         EXPECT_EQ(4, *ptr_f++);
@@ -235,7 +235,7 @@ TEST(NDObjectAssign, BroadcastAssign) {
     // Broadcasts the 4-vector by a factor of 6,
     // doesn't convert the dtype
     a.val_assign(b);
-    ptr_f = (const float *)a.get_ndo()->m_data_pointer;
+    ptr_f = (const float *)a.get_readonly_originptr();
     for (int i = 0; i < 6; ++i) {
         EXPECT_EQ(1.5, *ptr_f++);
         EXPECT_EQ(2.5, *ptr_f++);
@@ -248,7 +248,7 @@ TEST(NDObjectAssign, BroadcastAssign) {
     // Broadcasts the (3,1)-array by a factor of 8,
     // converting the dtype
     a.val_assign(b);
-    ptr_f = (const float *)a.get_ndo()->m_data_pointer;
+    ptr_f = (const float *)a.get_readonly_originptr();
     for (int i = 0; i < 2; ++i) {
         for (int j = 0; j < 4; ++j)
             EXPECT_EQ(1.5, *ptr_f++);

@@ -96,38 +96,6 @@ bool dynd::convert_dtype::operator==(const extended_dtype& rhs) const
     }
 }
 
-size_t dynd::convert_dtype::get_metadata_size() const
-{
-    // Just the metadata for the operand type
-    if (m_operand_dtype.extended()) {
-        return m_operand_dtype.extended()->get_metadata_size();
-    } else {
-        return 0;
-    }
-}
-
-void dynd::convert_dtype::metadata_default_construct(char *metadata, int ndim, const intptr_t* shape) const
-{
-    if (m_operand_dtype.extended()) {
-        m_operand_dtype.extended()->metadata_default_construct(metadata, ndim, shape);
-    }
-}
-
-void dynd::convert_dtype::metadata_destruct(char *metadata) const
-{
-    if (m_operand_dtype.extended()) {
-        m_operand_dtype.extended()->metadata_destruct(metadata);
-    }
-}
-
-void dynd::convert_dtype::metadata_debug_dump(const char *metadata, std::ostream& o, const std::string& indent) const
-{
-    o << indent << " convert (just store operand's metadata)\n";
-    if (m_operand_dtype.extended()) {
-        m_operand_dtype.extended()->metadata_debug_dump(metadata, o, indent);
-    }
-}
-
 void dynd::convert_dtype::get_operand_to_value_kernel(const eval::eval_context *ectx,
                         unary_specialization_kernel_instance& out_borrowed_kernel) const
 {

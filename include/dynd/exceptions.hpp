@@ -16,6 +16,7 @@ namespace dynd {
 
 // Forward declaration of ndarray class, for broadcast_error
 class ndarray_node_ptr;
+class ndobject;
 
 class dnd_exception : public std::exception {
 protected:
@@ -48,6 +49,11 @@ public:
      */
     broadcast_error(int dst_ndim, const intptr_t *dst_shape,
                         int src_ndim, const intptr_t *src_shape);
+
+    /**
+     * An exception for when 'src' doesn't broadcast to 'dst'
+     */
+    broadcast_error(const ndobject& dst, const ndobject& src);
 
     /**
      * An exception for when a number of input operands can't be broadcast

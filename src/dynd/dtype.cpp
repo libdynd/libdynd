@@ -18,10 +18,31 @@
 using namespace std;
 using namespace dynd;
 
+char *dynd::iterdata_broadcasting_terminator_incr(iterdata_common *iterdata, int DYND_UNUSED(level))
+{
+    // This repeats the same data over and over again, broadcasting additional leftmost dimensions
+    iterdata_broadcasting_terminator *id = reinterpret_cast<iterdata_broadcasting_terminator *>(iterdata);
+    return id->data;
+}
+
+char *dynd::iterdata_broadcasting_terminator_reset(iterdata_common *iterdata, char *data, int DYND_UNUSED(level))
+{
+    iterdata_broadcasting_terminator *id = reinterpret_cast<iterdata_broadcasting_terminator *>(iterdata);
+    id->data = data;
+    return data;
+}
+
+
 // Default destructor for the extended dtype does nothing
 extended_dtype::~extended_dtype()
 {
 }
+
+bool extended_dtype::is_uniform_dim() const
+{
+    return false;
+}
+
 
 bool extended_dtype::is_scalar(const char *DYND_UNUSED(data), const char *DYND_UNUSED(metadata)) const
 {
@@ -32,6 +53,12 @@ dtype extended_dtype::with_replaced_scalar_types(const dtype& scalar_dtype, assi
 {
     // Default to scalar behavior
     return make_convert_dtype(scalar_dtype, dtype(this, true), errmode);
+}
+
+dtype dynd::extended_dtype::get_canonical_dtype() const
+{
+    // Default to no transformation of the dtype
+    return dtype(this, true);
 }
 
 dtype extended_dtype::apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& DYND_UNUSED(root_dt)) const
@@ -112,6 +139,12 @@ void extended_dtype::metadata_default_construct(char *metadata, int ndim, const 
     throw std::runtime_error(ss.str());
 }
 
+void extended_dtype::metadata_copy_construct(char *DYND_UNUSED(out_metadata), const char *DYND_UNUSED(in_metadata), memory_block_data *DYND_UNUSED(embedded_reference)) const
+{
+    stringstream ss;
+    ss << "TODO: metadata_copy_construct for " << dtype(this, true) << " is not implemented";
+    throw std::runtime_error(ss.str());
+}
 
 // TODO: Make this a pure virtual function eventually
 void extended_dtype::metadata_destruct(char *DYND_UNUSED(metadata)) const
@@ -187,6 +220,53 @@ void extended_dtype::get_single_compare_kernel(single_compare_kernel_instance& D
 
 extended_string_dtype::~extended_string_dtype()
 {
+}
+
+dtype extended_expression_dtype::get_canonical_dtype() const
+{
+    return get_value_dtype();
+}
+
+size_t extended_expression_dtype::get_metadata_size() const
+{
+    const dtype& dt = get_operand_dtype();
+    if (dt.extended()) {
+        return dt.extended()->get_metadata_size();
+    } else {
+        return 0;
+    }
+}
+
+void extended_expression_dtype::metadata_default_construct(char *metadata, int ndim, const intptr_t* shape) const
+{
+    const dtype& dt = get_operand_dtype();
+    if (dt.extended()) {
+        dt.extended()->metadata_default_construct(metadata, ndim, shape);
+    }
+}
+
+void extended_expression_dtype::metadata_copy_construct(char *out_metadata, const char *in_metadata, memory_block_data *embedded_reference) const
+{
+    const dtype& dt = get_operand_dtype();
+    if (dt.extended()) {
+        dt.extended()->metadata_copy_construct(out_metadata, in_metadata, embedded_reference);
+    }
+}
+
+void extended_expression_dtype::metadata_destruct(char *metadata) const
+{
+    const dtype& dt = get_operand_dtype();
+    if (dt.extended()) {
+        dt.extended()->metadata_destruct(metadata);
+    }
+}
+
+void extended_expression_dtype::metadata_debug_dump(const char *metadata, std::ostream& o, const std::string& indent) const
+{
+    const dtype& dt = get_operand_dtype();
+    if (dt.extended()) {
+        dt.extended()->metadata_debug_dump(metadata, o, indent);
+    }
 }
 
 inline /* TODO: DYND_CONSTEXPR */ dtype dynd::detail::internal_make_raw_dtype(char type_id, char kind, intptr_t element_size, char alignment)

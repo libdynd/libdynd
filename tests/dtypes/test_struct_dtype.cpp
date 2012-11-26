@@ -11,7 +11,9 @@
 #include <dynd/ndarray.hpp>
 #include <dynd/dtypes/struct_dtype.hpp>
 #include <dynd/dtypes/fixedstring_dtype.hpp>
+#include <dynd/dtypes/string_dtype.hpp>
 #include <dynd/dtypes/convert_dtype.hpp>
+#include <dynd/dtypes/byteswap_dtype.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -111,4 +113,19 @@ TEST(StructDType, DTypeAt) {
     EXPECT_EQ(make_struct_dtype(d1, "x", d2, "y"), dt.at(irange() < 2));
     EXPECT_EQ(make_struct_dtype(d1, "x", d3, "z"), dt.at(irange(0, 3, 2)));
     EXPECT_EQ(make_struct_dtype(d3, "z", d2, "y"), dt.at(irange(2, 0, -1)));
+}
+
+TEST(StructDType, CanonicalDType) {
+    dtype dt, dt2;
+    const struct_dtype *tdt;
+
+    // Struct with three fields
+    dtype d1 = make_convert_dtype<std::complex<double>, float>();
+    dtype d2 = make_byteswap_dtype<int32_t>();
+    dtype d3 = make_fixedstring_dtype(string_encoding_utf_32, 5);
+    dt = make_struct_dtype(d1, "x", d2, "y", d3, "z");
+    EXPECT_EQ(make_struct_dtype(make_dtype<std::complex<double> >(), "x",
+                                make_dtype<int32_t>(), "y",
+                                make_string_dtype(string_encoding_utf_8), "z"),
+            dt.get_canonical_dtype());
 }

@@ -220,3 +220,10 @@ TEST(StringDType, Unicode) {
                 *reinterpret_cast<const char * const *>(x.get_readonly_originptr()),
                 sizeof(utf8_string)));
 }
+
+
+TEST(StringDType, CanonicalDType) {
+    // The canonical dtype of a string dtype is always a UTF8 string dtype
+    EXPECT_EQ((make_string_dtype(string_encoding_utf_8)),
+                (make_string_dtype(string_encoding_utf_16).get_canonical_dtype()));
+}

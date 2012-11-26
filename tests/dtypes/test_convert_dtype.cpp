@@ -21,3 +21,8 @@ TEST(ConvertDType, ExpressionInValue) {
     dtype dt = make_convert_dtype(make_convert_dtype(make_dtype<float>(), make_dtype<int>()), make_dtype<float>());
     EXPECT_EQ(make_convert_dtype(make_dtype<float>(), make_convert_dtype<int, float>()), dt);
 }
+
+TEST(ConvertDType, CanonicalDType) {
+    // The canonical dtype of a convert dtype is always the value
+    EXPECT_EQ((make_dtype<float>()), (make_convert_dtype<float, int>().get_canonical_dtype()));
+}

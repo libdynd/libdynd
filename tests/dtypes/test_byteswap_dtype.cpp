@@ -68,3 +68,8 @@ TEST(ByteswapDType, Basic) {
     a = ndarray(make_byteswap_dtype<complex<double> >(), (char *)&value64_pair);
     EXPECT_EQ(complex<double>(3.14159265358979, -1.2345678912345e12), a.as<complex<double> >());
 }
+
+TEST(ByteswapDType, CanonicalDType) {
+    // The canonical dtype of a byteswap dtype is always the non-swapped version
+    EXPECT_EQ((make_dtype<float>()), (make_byteswap_dtype<float>().get_canonical_dtype()));
+}

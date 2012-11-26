@@ -72,6 +72,14 @@ memory_block_ptr make_ndobject_memory_block(size_t metadata_size, size_t extra_s
  */
 memory_block_ptr make_ndobject_memory_block(const dtype& dt, int ndim, const intptr_t *shape);
 
+/**
+ * Makes a shallow copy of the ndobject memory block. In the copy, only the
+ * ndobject metadata is duplicated, all the references are the same. Any NULL
+ * references are swapped to point at the original ndobject memory block, as they
+ * are a signal that the data was embedded in the same memory allocation.
+ */
+memory_block_ptr shallow_copy_ndobject_memory_block(const memory_block_ptr& ndo);
+
 void ndobject_memory_block_debug_dump(const memory_block_data *memblock, std::ostream& o, const std::string& indent);
 
 } // namespace dynd

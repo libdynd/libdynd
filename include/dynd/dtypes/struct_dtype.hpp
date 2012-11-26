@@ -59,6 +59,7 @@ public:
 
     bool is_scalar(const char *data, const char *metadata) const;
     dtype with_replaced_scalar_types(const dtype& scalar_dtype, assign_error_mode errmode) const;
+    dtype get_canonical_dtype() const;
 
     dtype apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& root_dt) const;
     intptr_t apply_linear_index(int nindices, const irange *indices, char *data, const char *metadata,
@@ -78,6 +79,7 @@ public:
 
     size_t get_metadata_size() const;
     void metadata_default_construct(char *metadata, int ndim, const intptr_t* shape) const;
+    void metadata_copy_construct(char *out_metadata, const char *in_metadata, memory_block_data *embedded_reference) const;
     void metadata_destruct(char *metadata) const;
     void metadata_debug_dump(const char *metadata, std::ostream& o, const std::string& indent) const;
 }; // class struct_dtype

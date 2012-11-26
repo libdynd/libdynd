@@ -6,6 +6,7 @@
 #include <algorithm>
 
 #include <dynd/dtypes/fixedstring_dtype.hpp>
+#include <dynd/dtypes/string_dtype.hpp>
 #include <dynd/kernels/single_compare_kernel_instance.hpp>
 #include <dynd/kernels/string_assignment_kernels.hpp>
 #include <dynd/exceptions.hpp>
@@ -77,6 +78,11 @@ dtype dynd::fixedstring_dtype::apply_linear_index(int nindices, const irange *in
     } else {
         throw too_many_indices(nindices, current_i + 1);
     }
+}
+
+dtype dynd::fixedstring_dtype::get_canonical_dtype() const
+{
+    return dtype(new string_dtype(string_encoding_utf_8));
 }
 
 bool dynd::fixedstring_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const

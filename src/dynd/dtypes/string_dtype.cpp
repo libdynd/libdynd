@@ -70,6 +70,12 @@ dtype dynd::string_dtype::apply_linear_index(int nindices, const irange *indices
     }
 }
 
+dtype dynd::string_dtype::get_canonical_dtype() const
+{
+    return dtype(new string_dtype(string_encoding_utf_8));
+}
+
+
 void dynd::string_dtype::get_shape(int DYND_UNUSED(i), std::vector<intptr_t>& DYND_UNUSED(out_shape)) const
 {
 }

@@ -92,8 +92,18 @@ dtype dynd::struct_dtype::with_replaced_scalar_types(const dtype& scalar_dtype, 
     std::vector<dtype> fields(m_fields.size());
 
     for (size_t i = 0, i_end = m_fields.size(); i != i_end; ++i) {
-        const dtype& dt = m_fields[i];
-        fields[i] = dt.with_replaced_scalar_types(scalar_dtype, errmode);
+        fields[i] = m_fields[i].with_replaced_scalar_types(scalar_dtype, errmode);
+    }
+
+    return dtype(new struct_dtype(fields, m_field_names));
+}
+
+dtype dynd::struct_dtype::get_canonical_dtype() const
+{
+    std::vector<dtype> fields(m_fields.size());
+
+    for (size_t i = 0, i_end = m_fields.size(); i != i_end; ++i) {
+        fields[i] = m_fields[i].get_canonical_dtype();
     }
 
     return dtype(new struct_dtype(fields, m_field_names));
@@ -275,6 +285,21 @@ void dynd::struct_dtype::metadata_default_construct(char *metadata, int ndim, co
             offs += m_fields[i].extended()->get_default_element_size(ndim, shape);
         } else {
             offs += m_fields[i].element_size();
+        }
+    }
+}
+
+void dynd::struct_dtype::metadata_copy_construct(char *out_metadata, const char *in_metadata, memory_block_data *embedded_reference) const
+{
+    // Copy all the field offsets
+    memcpy(out_metadata, in_metadata, m_fields.size() * sizeof(intptr_t));
+    // Copy construct all the field's metadata
+    for (size_t i = 0; i < m_fields.size(); ++i) {
+        const dtype& field_dt = m_fields[i];
+        if (field_dt.extended()) {
+            field_dt.extended()->metadata_copy_construct(out_metadata + m_metadata_offsets[i],
+                            in_metadata + m_metadata_offsets[i],
+                            embedded_reference);
         }
     }
 }

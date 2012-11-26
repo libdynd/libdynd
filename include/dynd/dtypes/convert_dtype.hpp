@@ -63,11 +63,6 @@ public:
 
     bool operator==(const extended_dtype& rhs) const;
 
-    size_t get_metadata_size() const;
-    void metadata_default_construct(char *metadata, int ndim, const intptr_t* shape) const;
-    void metadata_destruct(char *metadata) const;
-    void metadata_debug_dump(const char *metadata, std::ostream& o, const std::string& indent) const;
-
     // For expression_kind dtypes - converts to/from the storage's value dtype
     void get_operand_to_value_kernel(const eval::eval_context *ectx,
                             unary_specialization_kernel_instance& out_borrowed_kernel) const;
