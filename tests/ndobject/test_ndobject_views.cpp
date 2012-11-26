@@ -65,7 +65,7 @@ TEST(NDObjectViews, MultiDimensionalRawMemory) {
     EXPECT_THROW(b = a.view_scalars<int16_t>(), runtime_error);
 
     b = a.view_scalars<int32_t>();
-    EXPECT_EQ(make_dtype<int32_t>(), b.get_dtype());
+    EXPECT_EQ(make_strided_array_dtype(make_dtype<int32_t>(), 2), b.get_dtype());
     EXPECT_EQ(2, b.get_shape().size());
     EXPECT_EQ(2, b.get_shape()[0]);
     EXPECT_EQ(3, b.get_shape()[1]);
@@ -92,7 +92,8 @@ TEST(NDObjectViews, ExpressionDType) {
     EXPECT_THROW(b = a_u2.view_scalars<int32_t>(), runtime_error);
 
     b = a_u2.view_scalars<int16_t>();
-    EXPECT_EQ((make_view_dtype(make_dtype<int16_t>(), make_convert_dtype<uint16_t, uint32_t>())), b.get_dtype());
+    EXPECT_EQ(make_strided_array_dtype(make_view_dtype(make_dtype<int16_t>(), make_convert_dtype<uint16_t, uint32_t>()), 2),
+                    b.get_dtype());
     EXPECT_EQ(2, b.get_shape().size());
     EXPECT_EQ(2, b.get_shape()[0]);
     EXPECT_EQ(3, b.get_shape()[1]);

@@ -8,8 +8,9 @@
 #include <cmath>
 #include "inc_gtest.hpp"
 
-#include "dynd/ndobject.hpp"
-#include "dynd/dtypes/convert_dtype.hpp"
+#include <dynd/ndobject.hpp>
+#include <dynd/dtypes/convert_dtype.hpp>
+#include <dynd/dtypes/strided_array_dtype.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -318,14 +319,15 @@ TEST(NDObjectAssign, ChainedCastingRead) {
     b = a.cast_scalars<int>(assign_error_overflow);
     b = b.cast_scalars<float>(assign_error_inexact);
     // Multiple cast_scalars operations should make a chained conversion dtype
-    EXPECT_EQ(make_convert_dtype(make_dtype<float>(),
-                                    make_convert_dtype<int, float>(assign_error_overflow), assign_error_inexact),
+    EXPECT_EQ(make_strided_array_dtype(
+                    make_convert_dtype(make_dtype<float>(),
+                                    make_convert_dtype<int, float>(assign_error_overflow), assign_error_inexact)),
               b.get_dtype());
 
     // Evaluating the values should truncate them to integers
     b = b.vals();
     // Now it's just the value dtype, no chaining
-    EXPECT_EQ(make_dtype<float>(), b.get_dtype());
+    EXPECT_EQ(make_strided_array_dtype(make_dtype<float>()), b.get_dtype());
     EXPECT_EQ(3, b.at(0).as<float>());
     EXPECT_EQ(1, b.at(1).as<float>());
     EXPECT_EQ(-2, b.at(2).as<float>());
@@ -340,7 +342,8 @@ TEST(NDObjectAssign, ChainedCastingRead) {
     b = b.cast_scalars<float>(assign_error_overflow);
     b = b.cast_scalars<int32_t>(assign_error_overflow);
 
-    EXPECT_EQ(make_convert_dtype(make_dtype<int32_t>(),
+    EXPECT_EQ(make_strided_array_dtype(
+                make_convert_dtype(make_dtype<int32_t>(),
                     make_convert_dtype(make_dtype<float>(),
                         make_convert_dtype(make_dtype<int64_t>(),
                             make_convert_dtype(make_dtype<int16_t>(),
@@ -351,10 +354,10 @@ TEST(NDObjectAssign, ChainedCastingRead) {
                             assign_error_overflow),
                         assign_error_overflow),
                     assign_error_overflow),
-                assign_error_overflow),
+                assign_error_overflow)),
             b.get_dtype());
     b = b.vals();
-    EXPECT_EQ(make_dtype<int32_t>(), b.get_dtype());
+    EXPECT_EQ(make_strided_array_dtype(make_dtype<int32_t>()), b.get_dtype());
     EXPECT_EQ(3, b.at(0).as<int32_t>());
     EXPECT_EQ(1, b.at(1).as<int32_t>());
     EXPECT_EQ(-2, b.at(2).as<int32_t>());
@@ -369,8 +372,8 @@ TEST(NDObjectAssign, ChainedCastingWrite) {
     b = a.cast_scalars<int>(assign_error_inexact);
     b = b.cast_scalars<float>(assign_error_overflow);
     // Multiple cast_scalars operations should make a chained conversion dtype
-    EXPECT_EQ(make_convert_dtype(make_dtype<float>(),
-                                    make_convert_dtype<int, float>(assign_error_inexact), assign_error_overflow),
+    EXPECT_EQ(make_strided_array_dtype(make_convert_dtype(make_dtype<float>(),
+                                    make_convert_dtype<int, float>(assign_error_inexact), assign_error_overflow)),
               b.get_dtype());
 
     b.at(0).vals() = 6.8f;

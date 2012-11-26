@@ -7,6 +7,7 @@
 #include <dynd/ndobject_iter.hpp>
 #include <dynd/dtypes/strided_array_dtype.hpp>
 #include <dynd/dtypes/dtype_alignment.hpp>
+#include <dynd/dtypes/view_dtype.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/exceptions.hpp>
 
@@ -286,6 +287,21 @@ ndobject ndobject::cast_scalars(const dtype& scalar_dtype, assign_error_mode err
     return result;
 }
 
+namespace {
+    static dtype view_scalar_type(const dtype& dt, const void *extra)
+    {
+        const dtype *e = reinterpret_cast<const dtype *>(extra);
+        // If things aren't simple, use a view_dtype
+        if (dt.kind() == expression_kind || dt.element_size() != e->element_size() ||
+                    dt.get_memory_management() != pod_memory_management ||
+                    e->get_memory_management() != pod_memory_management) {
+            return make_view_dtype(*e, dt);
+        } else {
+            return *e;
+        }
+    }
+} // anonymous namespace
+
 ndobject ndobject::view_scalars(const dtype& scalar_dtype) const
 {
     const dtype& array_dtype = get_dtype();
@@ -300,7 +316,7 @@ ndobject ndobject::view_scalars(const dtype& scalar_dtype) const
                     sad->get_element_dtype().kind() != expression_kind &&
                     sad->get_element_dtype().get_memory_management() == pod_memory_management) {
             intptr_t nbytes = md->size * element_size;
-
+            // Make sure the element size divides into the # of bytes
             if (nbytes % scalar_dtype.element_size() != 0) {
                 std::stringstream ss;
                 ss << "cannot view dynd::ndobject with " << nbytes << " bytes as dtype ";
@@ -308,7 +324,7 @@ ndobject ndobject::view_scalars(const dtype& scalar_dtype) const
                 ss << " doesn't divide evenly into the total array size " << nbytes;
                 throw std::runtime_error(ss.str());
             }
-
+            // Create the result array, adjusting the dtype if the data isn't aligned correctly
             char *data_ptr = get_ndo()->m_data_pointer;
             dtype result_dtype;
             if ((((uintptr_t)data_ptr)&(scalar_dtype.alignment()-1)) == 0) {
@@ -317,6 +333,7 @@ ndobject ndobject::view_scalars(const dtype& scalar_dtype) const
                 result_dtype = make_strided_array_dtype(make_unaligned_dtype(scalar_dtype));
             }
             ndobject result(make_ndobject_memory_block(result_dtype.extended()->get_metadata_size()));
+            // Copy all the ndobject metadata fields
             result.get_ndo()->m_data_pointer = get_ndo()->m_data_pointer;
             if (get_ndo()->m_data_reference) {
                 result.get_ndo()->m_data_reference = get_ndo()->m_data_reference;
@@ -327,6 +344,7 @@ ndobject ndobject::view_scalars(const dtype& scalar_dtype) const
             result.get_ndo()->m_dtype = result_dtype.extended();
             extended_dtype_incref(result.get_ndo()->m_dtype);
             result.get_ndo()->m_flags = get_ndo()->m_flags;
+            // The result has one strided ndarray field
             strided_array_dtype_metadata *result_md = reinterpret_cast<strided_array_dtype_metadata *>(result.get_ndo_meta());
             result_md->size = nbytes / scalar_dtype.element_size();
             result_md->stride = scalar_dtype.element_size();
@@ -334,9 +352,21 @@ ndobject ndobject::view_scalars(const dtype& scalar_dtype) const
         }
     }
 
-    const dtype& uniform_dtype = array_dtype.get_dtype_at_dimension(uniform_ndim);
+    const dtype& viewed_dtype = array_dtype.with_transformed_scalar_types(view_scalar_type, &scalar_dtype);
 
-    throw runtime_error("TODO: finish implementing ndobject::view_scalars");
+    ndobject result(shallow_copy_ndobject_memory_block(m_memblock));
+    ndobject_preamble *preamble = result.get_ndo();
+    // Swap in the dtype
+    if (!preamble->is_builtin_dtype()) {
+        extended_dtype_decref(preamble->m_dtype);
+    }
+    if(viewed_dtype.extended()) {
+        preamble->m_dtype = viewed_dtype.extended();
+        extended_dtype_incref(preamble->m_dtype);
+    } else {
+        preamble->m_dtype = reinterpret_cast<extended_dtype *>(viewed_dtype.type_id());
+    }
+    return result;
 }
 
 
@@ -398,8 +428,8 @@ ndobject dynd::empty_like(const ndobject& rhs, const dtype& uniform_dtype)
 
 ndobject dynd::empty_like(const ndobject& rhs)
 {
-    throw runtime_error("TODO: implement dynd::empty_like");
-    //return empty_like(rhs, rhs.get_dtype().get_uniform_dtype());
+    // FIXME: This implementation only works for linearly strided arrays
+    return empty_like(rhs, rhs.get_dtype().get_dtype_at_dimension(rhs.get_dtype().get_uniform_ndim()));
 }
 
 dynd::ndobject_vals::operator ndobject() const

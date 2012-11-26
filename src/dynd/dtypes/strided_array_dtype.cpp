@@ -60,9 +60,9 @@ bool dynd::strided_array_dtype::is_scalar(const char *DYND_UNUSED(data), const c
     return false;
 }
 
-dtype dynd::strided_array_dtype::with_replaced_scalar_types(const dtype& scalar_dtype, assign_error_mode errmode) const
+dtype dynd::strided_array_dtype::with_transformed_scalar_types(dtype_transform_fn_t transform_fn, const void *extra) const
 {
-    return dtype(new strided_array_dtype(m_element_dtype.with_replaced_scalar_types(scalar_dtype, errmode)));
+    return dtype(new strided_array_dtype(m_element_dtype.with_transformed_scalar_types(transform_fn, extra)));
 }
 
 dtype dynd::strided_array_dtype::get_canonical_dtype() const

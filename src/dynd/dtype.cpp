@@ -49,10 +49,10 @@ bool extended_dtype::is_scalar(const char *DYND_UNUSED(data), const char *DYND_U
     return true;
 }
 
-dtype extended_dtype::with_replaced_scalar_types(const dtype& scalar_dtype, assign_error_mode errmode) const
+dtype extended_dtype::with_transformed_scalar_types(dtype_transform_fn_t transform_fn, const void *extra) const
 {
     // Default to scalar behavior
-    return make_convert_dtype(scalar_dtype, dtype(this, true), errmode);
+    return transform_fn(dtype(this, true), extra);
 }
 
 dtype dynd::extended_dtype::get_canonical_dtype() const
@@ -269,6 +269,11 @@ void extended_expression_dtype::metadata_debug_dump(const char *metadata, std::o
     }
 }
 
+size_t extended_expression_dtype::get_iterdata_size() const
+{
+    return 0;
+}
+
 inline /* TODO: DYND_CONSTEXPR */ dtype dynd::detail::internal_make_raw_dtype(char type_id, char kind, intptr_t element_size, char alignment)
 {
     return dtype(type_id, kind, element_size, alignment);
@@ -399,10 +404,27 @@ dtype dynd::dtype::apply_linear_index(int nindices, const irange *indices, int c
     }
 }
 
+namespace {
+    struct replace_scalar_type_extra {
+        replace_scalar_type_extra(const dtype& dt, assign_error_mode em)
+            : scalar_dtype(dt), errmode(em)
+        {
+        }
+        const dtype& scalar_dtype;
+        assign_error_mode errmode;
+    };
+    static dtype replace_scalar_type(const dtype& dt, const void *extra)
+    {
+        const replace_scalar_type_extra *e = reinterpret_cast<const replace_scalar_type_extra *>(extra);
+        return make_convert_dtype(e->scalar_dtype, dt, e->errmode);
+    }
+} // anonymous namespace
+
 dtype dynd::dtype::with_replaced_scalar_types(const dtype& scalar_dtype, assign_error_mode errmode) const
 {
     if (m_extended) {
-        return m_extended->with_replaced_scalar_types(scalar_dtype, errmode);
+        replace_scalar_type_extra extra(scalar_dtype, errmode);
+        return m_extended->with_transformed_scalar_types(&replace_scalar_type, &extra);
     } else {
         return make_convert_dtype(scalar_dtype, *this, errmode);
     }

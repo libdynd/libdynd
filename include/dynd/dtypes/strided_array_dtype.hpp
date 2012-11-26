@@ -59,7 +59,7 @@ public:
 
     bool is_uniform_dim() const;
     bool is_scalar(const char *data, const char *metadata) const;
-    dtype with_replaced_scalar_types(const dtype& scalar_dtype, assign_error_mode errmode) const;
+    dtype with_transformed_scalar_types(dtype_transform_fn_t transform_fn, const void *extra) const;
     dtype get_canonical_dtype() const;
 
     dtype apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& root_dt) const;

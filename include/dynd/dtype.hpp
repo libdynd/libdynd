@@ -292,6 +292,8 @@ typedef char * (*iterdata_increment_fn_t)(iterdata_common *iterdata, int level);
  */
 typedef char * (*iterdata_reset_fn_t)(iterdata_common *iterdata, char *data, int ndim);
 
+typedef dtype (*dtype_transform_fn_t)(const dtype& dt, const void *extra);
+
 struct iterdata_common {
     iterdata_increment_fn_t incr;
     iterdata_reset_fn_t reset;
@@ -327,15 +329,15 @@ public:
     /**
      * Print the raw data interpreted as a single value of this dtype.
      *
-     * @param o the std::ostream to print to
-     * @param data pointer to the data element to print
+     * \param o the std::ostream to print to
+     * \param data pointer to the data element to print
      */
     virtual void print_element(std::ostream& o, const char *data, const char *metadata) const = 0;
 
     /**
      * Print a representation of the dtype itself
      *
-     * @param o the std::ostream to print to
+     * \param o the std::ostream to print to
      */
     virtual void print_dtype(std::ostream& o) const = 0;
 
@@ -349,13 +351,12 @@ public:
     virtual bool is_scalar(const char *data, const char *metadata) const;
 
     /**
-     * For array types, recursively applies to each child type, and for
-     * scalar types converts to the provided one.
+     * For array types, recursively applies itself, and for
+     * scalar types, applies the provided function.
      *
-     * @param scalar_dtype  The scalar dtype to convert all scalars to.
-     * @param errmode       The error mode for the conversion.
+     * \param transform_fn  The function for transforming scalar dtypes.
      */
-    virtual dtype with_replaced_scalar_types(const dtype& scalar_dtype, assign_error_mode errmode) const;
+    virtual dtype with_transformed_scalar_types(dtype_transform_fn_t transform_fn, const void *extra) const;
 
     /**
      * Returns a modified dtype with all expression dtypes replaced with
@@ -369,10 +370,10 @@ public:
      * Indexes into the dtype. This function returns the dtype which results
      * from applying the same index to an ndarray of this dtype.
      *
-     * @param nindices     The number of elements in the 'indices' array. This is shrunk by one for each recursive call.
-     * @param indices      The indices to apply. This is incremented by one for each recursive call.
-     * @param current_i    The current index position. Used for error messages.
-     * @param root_dt      The data type in the first call, before any recursion. Used for error messages.
+     * \param nindices     The number of elements in the 'indices' array. This is shrunk by one for each recursive call.
+     * \param indices      The indices to apply. This is incremented by one for each recursive call.
+     * \param current_i    The current index position. Used for error messages.
+     * \param root_dt      The data type in the first call, before any recursion. Used for error messages.
      */
     virtual dtype apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& root_dt) const;
 
@@ -380,15 +381,15 @@ public:
      * Indexes into an ndobject using the provided linear index, and a dtype and freshly allocated output
      * set to point to the same base data reference.
      *
-     * @param nindices     The number of elements in the 'indices' array. This is shrunk by one for each recursive call.
-     * @param indices      The indices to apply. This is incremented by one for each recursive call.
-     * @param data         The data of the input array.
-     * @param metadata     The metadata of the input array.
-     * @param result_dtype The result of an apply_linear_index call.
-     * @param out_metadata The metadata of the output array. The output data should all be references to the data
+     * \param nindices     The number of elements in the 'indices' array. This is shrunk by one for each recursive call.
+     * \param indices      The indices to apply. This is incremented by one for each recursive call.
+     * \param data         The data of the input array.
+     * \param metadata     The metadata of the input array.
+     * \param result_dtype The result of an apply_linear_index call.
+     * \param out_metadata The metadata of the output array. The output data should all be references to the data
      *                     of the input array, so there is no out_data parameter.
-     * @param current_i    The current index position. Used for error messages.
-     * @param root_dt      The data type in the first call, before any recursion. Used for error messages.
+     * \param current_i    The current index position. Used for error messages.
+     * \param root_dt      The data type in the first call, before any recursion. Used for error messages.
      *
      * @return  An offset to apply to the data pointer.
      */
@@ -405,8 +406,8 @@ public:
      * generally equivalent to apply_linear_index with a count of 'dim'
      * scalar indices.
      *
-     * @param i         The dimension number to retrieve.
-     * @param total_ndim  A count of how many dimensions have been traversed from the
+     * \param i         The dimension number to retrieve.
+     * \param total_ndim  A count of how many dimensions have been traversed from the
      *                    dtype start, for producing error messages.
      */
     virtual dtype get_dtype_at_dimension(int i, int total_ndim = 0) const;
@@ -445,7 +446,7 @@ public:
      * Return a comparison kernel that can perform the requested single comparison on
      * data of this dtype
      *
-     * @param compare_id the identifier of the comparison
+     * \param compare_id the identifier of the comparison
      */
     virtual void get_single_compare_kernel(single_compare_kernel_instance& out_kernel) const;
 
@@ -474,9 +475,9 @@ public:
      * Constructs the ndobject metadata for this dtype, copying everything exactly from
      * input metadata for the same dtype.
      *
-     * @param out_metadata  The new metadata memory which is constructed.
-     * @param in_metadata   Existing metadata memory from which to copy.
-     * @param embedded_reference  For references which are NULL, add this reference in the output.
+     * \param out_metadata  The new metadata memory which is constructed.
+     * \param in_metadata   Existing metadata memory from which to copy.
+     * \param embedded_reference  For references which are NULL, add this reference in the output.
      *                            A NULL means the data was embedded in the original ndobject, so
      *                            when putting it in a new ndobject, need to hold a reference to
      *                            that memory.
@@ -583,6 +584,10 @@ public:
     void metadata_copy_construct(char *out_metadata, const char *in_metadata, memory_block_data *embedded_reference) const;
     void metadata_destruct(char *metadata) const;
     void metadata_debug_dump(const char *metadata, std::ostream& o, const std::string& indent) const;
+
+    // Expression dtypes stop the iterdata chain
+    // TODO: Maybe it should be more flexible?
+    size_t get_iterdata_size() const;
 };
 
 namespace detail {
@@ -710,8 +715,8 @@ public:
      * Indexes into the dtype. This function returns the dtype which results
      * from applying the same index to an ndarray of this dtype.
      *
-     * @param ndim         The number of elements in the 'indices' array
-     * @param indices      The indices to apply.
+     * \param ndim         The number of elements in the 'indices' array
+     * \param indices      The indices to apply.
      */
     dtype at_array(int nindices, const irange *indices) const;
 
@@ -813,7 +818,7 @@ public:
      * Return a comparison kernel that can perform the requested single comparison on
      * data of this dtype
      *
-     * @param compare_id the identifier of the comparison
+     * \param compare_id the identifier of the comparison
      */
     void get_single_compare_kernel(single_compare_kernel_instance& out_kernel) const;
 
@@ -863,10 +868,26 @@ public:
      * For array types, recursively applies to each child type, and for
      * scalar types converts to the provided one.
      *
-     * @param scalar_dtype  The scalar dtype to convert all scalars to.
-     * @param errmode       The error mode for the conversion.
+     * \param scalar_dtype  The scalar dtype to convert all scalars to.
+     * \param errmode       The error mode for the conversion.
      */
     dtype with_replaced_scalar_types(const dtype& scalar_dtype, assign_error_mode errmode = assign_error_default) const;
+
+    /**
+     * For array types, recursively applies itself, and for
+     * scalar types, applies the provided function.
+     *
+     * \param transform_fn  The function for transforming scalar dtypes.
+     * \param extra         Extra data to pass to transform_fn.
+     */
+    inline dtype with_transformed_scalar_types(dtype_transform_fn_t transform_fn, const void *extra) const
+    {
+        if (extended()) {
+            return extended()->with_transformed_scalar_types(transform_fn, extra);
+        } else {
+            return transform_fn(*this, extra);
+        }
+    }
 
     /**
      * Returns a modified dtype with all expression dtypes replaced with
@@ -968,9 +989,9 @@ public:
     /**
      * print data interpreted as a single value of this dtype
      *
-     * @param o         the std::ostream to print to
-     * @param data      pointer to the data element to print
-     * @param metadata  pointer to the ndobject metadata for the data element
+     * \param o         the std::ostream to print to
+     * \param data      pointer to the data element to print
+     * \param metadata  pointer to the ndobject metadata for the data element
      */
     void print_element(std::ostream& o, const char *data, const char *metadata) const;
 

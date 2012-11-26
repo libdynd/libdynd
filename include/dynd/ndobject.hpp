@@ -418,7 +418,8 @@ inline ndobject_vals ndobject::vals() const {
 }
 
 inline ndobject& ndobject::operator=(const ndobject_vals& rhs) {
-    //TODO m_memblock = eval::evaluate(rhs.m_arr.m_memblock.get_memblock());
+    ndobject temp(rhs);
+    temp.swap(*this);
     return *this;
 }
 
