@@ -392,9 +392,7 @@ public:
     // TODO: Could also do +=, -=, *=, etc.
 
     // Can implicitly convert to an ndobject, by collapsing to a strided array
-    operator ndobject() const {
-        return ndobject();//TODO ndobject(eval::evaluate(m_arr.m_memblock.get()));
-    }
+    operator ndobject() const;
 
     friend class ndobject;
     friend ndobject_vals ndobject::vals() const;

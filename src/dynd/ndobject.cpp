@@ -401,3 +401,23 @@ ndobject dynd::empty_like(const ndobject& rhs)
     throw runtime_error("TODO: implement dynd::empty_like");
     //return empty_like(rhs, rhs.get_dtype().get_uniform_dtype());
 }
+
+dynd::ndobject_vals::operator ndobject() const
+{
+    // Create a canonical dtype for the result
+    const dtype& current_dtype = m_arr.get_dtype();
+    const dtype& dt = current_dtype.get_canonical_dtype();
+
+    if (dt == current_dtype) {
+        return m_arr;
+    } else {
+        // If the canonical dtype is different, make a copy of the array
+        int ndim = current_dtype.get_uniform_ndim();
+        dimvector shape(ndim);
+        m_arr.get_shape(shape.get());
+        ndobject result(make_ndobject_memory_block(dt, ndim, shape.get()));
+        // TODO: Reorder strides of strided dimensions in a KEEPORDER fashion
+        result.val_assign(m_arr);
+        return result;
+    }
+}
