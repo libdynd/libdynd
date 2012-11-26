@@ -401,6 +401,9 @@ public:
 /** Makes a strided ndobject with uninitialized data. If axis_perm is NULL, it is C-order */
 ndobject make_strided_ndobject(const dtype& uniform_dtype, int ndim, const intptr_t *shape, const int *axis_perm = NULL);
 
+/** Makes a scalar ndobject with data initialized by the provided pointer */
+ndobject make_scalar_ndobject(const dtype& scalar_dtype, const void *data);
+
 inline ndobject make_strided_ndobject(const dtype& uniform_dtype, intptr_t shape0) {
     return make_strided_ndobject(uniform_dtype, 1, &shape0, NULL);
 }

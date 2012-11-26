@@ -85,6 +85,39 @@ ndobject dynd::make_strided_ndobject(const dtype& uniform_dtype, int ndim, const
     return ndobject(result);
 }
 
+ndobject dynd::make_scalar_ndobject(const dtype& scalar_dtype, const void *data)
+{
+    size_t size = scalar_dtype.element_size();
+    if (scalar_dtype.extended() && (size == 0 ||
+                scalar_dtype.get_memory_management() != pod_memory_management ||
+                scalar_dtype.extended()->is_uniform_dim() ||
+                scalar_dtype.extended()->get_metadata_size() != 0)) {
+        stringstream ss;
+        ss << "Cannot make a dynd scalar from raw data using dtype " << scalar_dtype;
+        throw runtime_error(ss.str());
+    }
+
+    // Allocate the ndobject metadata and data in one memory block
+    char *data_ptr = NULL;
+    memory_block_ptr result = make_ndobject_memory_block(0, size, scalar_dtype.alignment(), &data_ptr);
+
+    // Fill in the preamble metadata
+    ndobject_preamble *ndo = reinterpret_cast<ndobject_preamble *>(result.get());
+    if (scalar_dtype.extended()) {
+        ndo->m_dtype = scalar_dtype.extended();
+        extended_dtype_incref(ndo->m_dtype);
+    } else {
+        ndo->m_dtype = reinterpret_cast<const extended_dtype *>(scalar_dtype.type_id());
+    }
+    ndo->m_data_pointer = data_ptr;
+    ndo->m_data_reference = NULL;
+    ndo->m_flags = read_access_flag | write_access_flag;
+
+    memcpy(data_ptr, data, size);
+
+    return ndobject(result);
+}
+
 // Constructors from C++ scalars
 dynd::ndobject::ndobject(dynd_bool value)
     : m_memblock(make_immutable_builtin_scalar_ndobject(value))

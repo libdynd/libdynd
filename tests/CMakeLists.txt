@@ -27,9 +27,6 @@ set(tests_SRC
     dtypes/test_struct_dtype.cpp
     dtypes/test_tuple_dtype.cpp
     dtypes/test_pointer_dtype.cpp
-    ndarray/test_ndarray.cpp
-    ndarray/test_ndarray_assign.cpp
-    ndarray/test_ndarray_index.cpp
     ndobject/test_ndobject.cpp
     ndobject/test_ndobject_arange.cpp
     ndobject/test_ndobject_assign.cpp
