@@ -8,7 +8,7 @@
 #include <stdexcept>
 #include "inc_gtest.hpp"
 
-#include <dynd/ndarray.hpp>
+#include <dynd/ndobject.hpp>
 #include <dynd/dtypes/fixedstring_dtype.hpp>
 #include <dynd/dtypes/string_dtype.hpp>
 #include <dynd/dtypes/convert_dtype.hpp>
@@ -52,16 +52,16 @@ TEST(FixedstringDType, Create) {
 }
 
 TEST(FixedstringDType, Basic) {
-    ndarray a;
+    ndobject a;
 
     // Trivial string going in and out of the system
     a = std::string("abcdefg");
     EXPECT_EQ(make_string_dtype(string_encoding_utf_8), a.get_dtype());
     // Convert to a fixedstring dtype for testing
-    a = a.as_dtype(make_fixedstring_dtype(string_encoding_utf_8, 7)).vals();
+    a = a.cast_scalars(make_fixedstring_dtype(string_encoding_utf_8, 7)).vals();
     EXPECT_EQ(std::string("abcdefg"), a.as<std::string>());
 
-    a = a.as_dtype(make_fixedstring_dtype(string_encoding_utf_16, 7));
+    a = a.cast_scalars(make_fixedstring_dtype(string_encoding_utf_16, 7));
     EXPECT_EQ(make_convert_dtype(make_fixedstring_dtype(string_encoding_utf_16, 7), make_fixedstring_dtype(string_encoding_utf_8, 7)),
                 a.get_dtype());
     a = a.vals();
@@ -71,9 +71,9 @@ TEST(FixedstringDType, Basic) {
 }
 
 TEST(FixedstringDType, Casting) {
-    ndarray a;
+    ndobject a;
 
-    a = ndarray(make_fixedstring_dtype(string_encoding_utf_16, 16));
+    a = ndobject(make_fixedstring_dtype(string_encoding_utf_16, 16));
     // Fill up the string with values
     a.vals() = std::string("0123456789012345");
     EXPECT_EQ("0123456789012345", a.as<std::string>());
@@ -83,56 +83,56 @@ TEST(FixedstringDType, Casting) {
 }
 
 TEST(FixedstringDType, SingleCompare) {
-    ndarray a(2, make_fixedstring_dtype(string_encoding_utf_8, 7));
+    ndobject a = make_strided_ndobject(2, make_fixedstring_dtype(string_encoding_utf_8, 7));
     single_compare_kernel_instance k;
 
-    a(0).vals() = std::string("abc");
-    a(1).vals() = std::string("abd");
+    a.at(0).vals() = std::string("abc");
+    a.at(1).vals() = std::string("abd");
 
     // test ascii kernel
     a = a.vals();
-    a.get_dtype().get_single_compare_kernel(k);
-    EXPECT_EQ(k.comparisons[less_id]((char *)a(0).get_readonly_originptr(), (char *)a(1).get_readonly_originptr(), k.auxdata), a(0).as<std::string>() < a(1).as<std::string>());
-    EXPECT_EQ(k.comparisons[less_equal_id]((char *)a(0).get_readonly_originptr(), (char *)a(1).get_readonly_originptr(), k.auxdata), a(0).as<std::string>() <= a(1).as<std::string>());
-    EXPECT_EQ(k.comparisons[equal_id]((char *)a(0).get_readonly_originptr(), (char *)a(1).get_readonly_originptr(), k.auxdata), a(0).as<std::string>() == a(1).as<std::string>());
-    EXPECT_EQ(k.comparisons[not_equal_id]((char *)a(0).get_readonly_originptr(), (char *)a(1).get_readonly_originptr(), k.auxdata), a(0).as<std::string>() != a(1).as<std::string>());
-    EXPECT_EQ(k.comparisons[greater_equal_id]((char *)a(0).get_readonly_originptr(), (char *)a(1).get_readonly_originptr(), k.auxdata), a(0).as<std::string>() >= a(1).as<std::string>());
-    EXPECT_EQ(k.comparisons[greater_id]((char *)a(0).get_readonly_originptr(), (char *)a(1).get_readonly_originptr(), k.auxdata), a(0).as<std::string>() > a(1).as<std::string>());
+    a.get_dtype().at(0).get_single_compare_kernel(k);
+    EXPECT_EQ(k.comparisons[less_id]((char *)a.at(0).get_readonly_originptr(), (char *)a.at(1).get_readonly_originptr(), k.auxdata), a.at(0).as<std::string>() < a.at(1).as<std::string>());
+    EXPECT_EQ(k.comparisons[less_equal_id]((char *)a.at(0).get_readonly_originptr(), (char *)a.at(1).get_readonly_originptr(), k.auxdata), a.at(0).as<std::string>() <= a.at(1).as<std::string>());
+    EXPECT_EQ(k.comparisons[equal_id]((char *)a.at(0).get_readonly_originptr(), (char *)a.at(1).get_readonly_originptr(), k.auxdata), a.at(0).as<std::string>() == a.at(1).as<std::string>());
+    EXPECT_EQ(k.comparisons[not_equal_id]((char *)a.at(0).get_readonly_originptr(), (char *)a.at(1).get_readonly_originptr(), k.auxdata), a.at(0).as<std::string>() != a.at(1).as<std::string>());
+    EXPECT_EQ(k.comparisons[greater_equal_id]((char *)a.at(0).get_readonly_originptr(), (char *)a.at(1).get_readonly_originptr(), k.auxdata), a.at(0).as<std::string>() >= a.at(1).as<std::string>());
+    EXPECT_EQ(k.comparisons[greater_id]((char *)a.at(0).get_readonly_originptr(), (char *)a.at(1).get_readonly_originptr(), k.auxdata), a.at(0).as<std::string>() > a.at(1).as<std::string>());
 
     // TODO: means for not hardcoding expected results in utf string comparison tests
 
     // test utf8 kernel
-    a = a.as_dtype(make_fixedstring_dtype(string_encoding_utf_8, 7));
+    a = a.cast_scalars(make_fixedstring_dtype(string_encoding_utf_8, 7));
     a = a.vals();
-    a.get_dtype().get_single_compare_kernel(k);
-    EXPECT_EQ(k.comparisons[less_id]((char *)a(0).get_readonly_originptr(), (char *)a(1).get_readonly_originptr(), k.auxdata), true);
-    EXPECT_EQ(k.comparisons[less_equal_id]((char *)a(0).get_readonly_originptr(), (char *)a(1).get_readonly_originptr(), k.auxdata), true);
-    EXPECT_EQ(k.comparisons[equal_id]((char *)a(0).get_readonly_originptr(), (char *)a(1).get_readonly_originptr(), k.auxdata), false);
-    EXPECT_EQ(k.comparisons[not_equal_id]((char *)a(0).get_readonly_originptr(), (char *)a(1).get_readonly_originptr(), k.auxdata), true);
-    EXPECT_EQ(k.comparisons[greater_equal_id]((char *)a(0).get_readonly_originptr(), (char *)a(1).get_readonly_originptr(), k.auxdata), false);
-    EXPECT_EQ(k.comparisons[greater_id]((char *)a(0).get_readonly_originptr(), (char *)a(1).get_readonly_originptr(), k.auxdata), false);
+    a.get_dtype().at(0).get_single_compare_kernel(k);
+    EXPECT_EQ(k.comparisons[less_id]((char *)a.at(0).get_readonly_originptr(), (char *)a.at(1).get_readonly_originptr(), k.auxdata), true);
+    EXPECT_EQ(k.comparisons[less_equal_id]((char *)a.at(0).get_readonly_originptr(), (char *)a.at(1).get_readonly_originptr(), k.auxdata), true);
+    EXPECT_EQ(k.comparisons[equal_id]((char *)a.at(0).get_readonly_originptr(), (char *)a.at(1).get_readonly_originptr(), k.auxdata), false);
+    EXPECT_EQ(k.comparisons[not_equal_id]((char *)a.at(0).get_readonly_originptr(), (char *)a.at(1).get_readonly_originptr(), k.auxdata), true);
+    EXPECT_EQ(k.comparisons[greater_equal_id]((char *)a.at(0).get_readonly_originptr(), (char *)a.at(1).get_readonly_originptr(), k.auxdata), false);
+    EXPECT_EQ(k.comparisons[greater_id]((char *)a.at(0).get_readonly_originptr(), (char *)a.at(1).get_readonly_originptr(), k.auxdata), false);
 
     // test utf16 kernel
-    a = a.as_dtype(make_fixedstring_dtype(string_encoding_utf_16, 7));
+    a = a.cast_scalars(make_fixedstring_dtype(string_encoding_utf_16, 7));
     a = a.vals();
-    a.get_dtype().get_single_compare_kernel(k);
-    EXPECT_EQ(k.comparisons[less_id]((char *)a(0).get_readonly_originptr(), (char *)a(1).get_readonly_originptr(), k.auxdata), true);
-    EXPECT_EQ(k.comparisons[less_equal_id]((char *)a(0).get_readonly_originptr(), (char *)a(1).get_readonly_originptr(), k.auxdata), true);
-    EXPECT_EQ(k.comparisons[equal_id]((char *)a(0).get_readonly_originptr(), (char *)a(1).get_readonly_originptr(), k.auxdata), false);
-    EXPECT_EQ(k.comparisons[not_equal_id]((char *)a(0).get_readonly_originptr(), (char *)a(1).get_readonly_originptr(), k.auxdata), true);
-    EXPECT_EQ(k.comparisons[greater_equal_id]((char *)a(0).get_readonly_originptr(), (char *)a(1).get_readonly_originptr(), k.auxdata), false);
-    EXPECT_EQ(k.comparisons[greater_id]((char *)a(0).get_readonly_originptr(), (char *)a(1).get_readonly_originptr(), k.auxdata), false);
+    a.get_dtype().at(0).get_single_compare_kernel(k);
+    EXPECT_EQ(k.comparisons[less_id]((char *)a.at(0).get_readonly_originptr(), (char *)a.at(1).get_readonly_originptr(), k.auxdata), true);
+    EXPECT_EQ(k.comparisons[less_equal_id]((char *)a.at(0).get_readonly_originptr(), (char *)a.at(1).get_readonly_originptr(), k.auxdata), true);
+    EXPECT_EQ(k.comparisons[equal_id]((char *)a.at(0).get_readonly_originptr(), (char *)a.at(1).get_readonly_originptr(), k.auxdata), false);
+    EXPECT_EQ(k.comparisons[not_equal_id]((char *)a.at(0).get_readonly_originptr(), (char *)a.at(1).get_readonly_originptr(), k.auxdata), true);
+    EXPECT_EQ(k.comparisons[greater_equal_id]((char *)a.at(0).get_readonly_originptr(), (char *)a.at(1).get_readonly_originptr(), k.auxdata), false);
+    EXPECT_EQ(k.comparisons[greater_id]((char *)a.at(0).get_readonly_originptr(), (char *)a.at(1).get_readonly_originptr(), k.auxdata), false);
 
     // test utf32 kernel
-    a = a.as_dtype(make_fixedstring_dtype(string_encoding_utf_32, 7));
+    a = a.cast_scalars(make_fixedstring_dtype(string_encoding_utf_32, 7));
     a = a.vals();
-    a.get_dtype().get_single_compare_kernel(k);
-    EXPECT_EQ(k.comparisons[less_id]((char *)a(0).get_readonly_originptr(), (char *)a(1).get_readonly_originptr(), k.auxdata), true);
-    EXPECT_EQ(k.comparisons[less_equal_id]((char *)a(0).get_readonly_originptr(), (char *)a(1).get_readonly_originptr(), k.auxdata), true);
-    EXPECT_EQ(k.comparisons[equal_id]((char *)a(0).get_readonly_originptr(), (char *)a(1).get_readonly_originptr(), k.auxdata), false);
-    EXPECT_EQ(k.comparisons[not_equal_id]((char *)a(0).get_readonly_originptr(), (char *)a(1).get_readonly_originptr(), k.auxdata), true);
-    EXPECT_EQ(k.comparisons[greater_equal_id]((char *)a(0).get_readonly_originptr(), (char *)a(1).get_readonly_originptr(), k.auxdata), false);
-    EXPECT_EQ(k.comparisons[greater_id]((char *)a(0).get_readonly_originptr(), (char *)a(1).get_readonly_originptr(), k.auxdata), false);
+    a.get_dtype().at(0).get_single_compare_kernel(k);
+    EXPECT_EQ(k.comparisons[less_id]((char *)a.at(0).get_readonly_originptr(), (char *)a.at(1).get_readonly_originptr(), k.auxdata), true);
+    EXPECT_EQ(k.comparisons[less_equal_id]((char *)a.at(0).get_readonly_originptr(), (char *)a.at(1).get_readonly_originptr(), k.auxdata), true);
+    EXPECT_EQ(k.comparisons[equal_id]((char *)a.at(0).get_readonly_originptr(), (char *)a.at(1).get_readonly_originptr(), k.auxdata), false);
+    EXPECT_EQ(k.comparisons[not_equal_id]((char *)a.at(0).get_readonly_originptr(), (char *)a.at(1).get_readonly_originptr(), k.auxdata), true);
+    EXPECT_EQ(k.comparisons[greater_equal_id]((char *)a.at(0).get_readonly_originptr(), (char *)a.at(1).get_readonly_originptr(), k.auxdata), false);
+    EXPECT_EQ(k.comparisons[greater_id]((char *)a.at(0).get_readonly_originptr(), (char *)a.at(1).get_readonly_originptr(), k.auxdata), false);
 }
 
 TEST(FixedstringDType, CanonicalDType) {
