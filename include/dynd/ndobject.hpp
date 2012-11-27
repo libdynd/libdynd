@@ -169,6 +169,11 @@ public:
         return reinterpret_cast<char *>(get_ndo() + 1);
     }
 
+    /** Returns true if the ndobject is NULL */
+    inline bool empty() const {
+        return m_memblock.get() == NULL;
+    }
+
     inline char *get_readwrite_originptr() const {
         if (get_ndo()->m_flags & write_access_flag) {
             return get_ndo()->m_data_pointer;
@@ -214,6 +219,13 @@ public:
         if (!get_ndo()->is_builtin_dtype()) {
             get_ndo()->m_dtype->get_shape(0, out_shape, get_ndo()->m_data_pointer, get_ndo_meta());
         }
+    }
+
+    /**
+     * Returns the size of the leading (leftmost) dimension.
+     */
+    inline intptr_t get_dim_size() const {
+        return get_dtype().get_dim_size(get_ndo()->m_data_pointer, get_ndo_meta());
     }
 
     std::vector<intptr_t> get_strides() const {

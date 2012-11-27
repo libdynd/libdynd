@@ -69,10 +69,9 @@ public:
     int get_uniform_ndim() const;
     dtype get_dtype_at_dimension(char **inout_metadata, int i, int total_ndim = 0) const;
 
+    intptr_t get_dim_size(const char *data, const char *metadata) const;
     void get_shape(int i, intptr_t *out_shape) const;
-
     void get_shape(int i, intptr_t *out_shape, const char *data, const char *metadata) const;
-
     void get_strides(int i, intptr_t *out_strides, const char *data, const char *metadata) const;
 
     bool is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const;

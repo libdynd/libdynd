@@ -11,12 +11,12 @@
 using namespace std;
 using namespace dynd;
 
-dynd::strided_array_dtype::strided_array_dtype(const dtype& element_dtype)
+strided_array_dtype::strided_array_dtype(const dtype& element_dtype)
     : m_element_dtype(element_dtype)
 {
 }
 
-size_t dynd::strided_array_dtype::get_default_element_size(int ndim, const intptr_t *shape) const
+size_t strided_array_dtype::get_default_element_size(int ndim, const intptr_t *shape) const
 {
     if (ndim == 0 || shape[0] < 0) {
         throw std::runtime_error("the strided_array dtype requires a shape be specified for default construction");
@@ -30,7 +30,7 @@ size_t dynd::strided_array_dtype::get_default_element_size(int ndim, const intpt
 }
 
 
-void dynd::strided_array_dtype::print_element(std::ostream& o, const char *data, const char *metadata) const
+void strided_array_dtype::print_element(std::ostream& o, const char *data, const char *metadata) const
 {
     const strided_array_dtype_metadata *md = reinterpret_cast<const strided_array_dtype_metadata *>(metadata);
     size_t stride = md->stride;
@@ -45,32 +45,32 @@ void dynd::strided_array_dtype::print_element(std::ostream& o, const char *data,
     o << "]";
 }
 
-void dynd::strided_array_dtype::print_dtype(std::ostream& o) const
+void strided_array_dtype::print_dtype(std::ostream& o) const
 {
     o << "strided_array<" << m_element_dtype << ">";
 }
 
-bool dynd::strided_array_dtype::is_uniform_dim() const
+bool strided_array_dtype::is_uniform_dim() const
 {
     return true;
 }
 
-bool dynd::strided_array_dtype::is_scalar(const char *DYND_UNUSED(data), const char *DYND_UNUSED(metadata)) const
+bool strided_array_dtype::is_scalar(const char *DYND_UNUSED(data), const char *DYND_UNUSED(metadata)) const
 {
     return false;
 }
 
-dtype dynd::strided_array_dtype::with_transformed_scalar_types(dtype_transform_fn_t transform_fn, const void *extra) const
+dtype strided_array_dtype::with_transformed_scalar_types(dtype_transform_fn_t transform_fn, const void *extra) const
 {
     return dtype(new strided_array_dtype(m_element_dtype.with_transformed_scalar_types(transform_fn, extra)));
 }
 
-dtype dynd::strided_array_dtype::get_canonical_dtype() const
+dtype strided_array_dtype::get_canonical_dtype() const
 {
     return dtype(new strided_array_dtype(m_element_dtype.get_canonical_dtype()));
 }
 
-dtype dynd::strided_array_dtype::apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& root_dt) const
+dtype strided_array_dtype::apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& root_dt) const
 {
     if (nindices == 0) {
         return dtype(this, true);
@@ -89,7 +89,7 @@ dtype dynd::strided_array_dtype::apply_linear_index(int nindices, const irange *
     }
 }
 
-intptr_t dynd::strided_array_dtype::apply_linear_index(int nindices, const irange *indices, char *data, const char *metadata,
+intptr_t strided_array_dtype::apply_linear_index(int nindices, const irange *indices, char *data, const char *metadata,
                 const dtype& result_dtype, char *out_metadata, int current_i, const dtype& root_dt) const
 {
     const strided_array_dtype_metadata *md = reinterpret_cast<const strided_array_dtype_metadata *>(metadata);
@@ -132,7 +132,7 @@ intptr_t dynd::strided_array_dtype::apply_linear_index(int nindices, const irang
 }
 
 
-int dynd::strided_array_dtype::get_uniform_ndim() const
+int strided_array_dtype::get_uniform_ndim() const
 {
     if (!m_element_dtype.extended()) {
         return 1;
@@ -141,7 +141,7 @@ int dynd::strided_array_dtype::get_uniform_ndim() const
     }
 }
 
-dtype dynd::strided_array_dtype::get_dtype_at_dimension(char **inout_metadata, int i, int total_ndim) const
+dtype strided_array_dtype::get_dtype_at_dimension(char **inout_metadata, int i, int total_ndim) const
 {
     if (i == 0) {
         return dtype(this, true);
@@ -153,8 +153,13 @@ dtype dynd::strided_array_dtype::get_dtype_at_dimension(char **inout_metadata, i
     }
 }
 
+intptr_t strided_array_dtype::get_dim_size(const char *DYND_UNUSED(data), const char *metadata) const
+{
+    const strided_array_dtype_metadata *md = reinterpret_cast<const strided_array_dtype_metadata *>(metadata);
+    return md->size;
+}
 
-void dynd::strided_array_dtype::get_shape(int i, intptr_t *out_shape) const
+void strided_array_dtype::get_shape(int i, intptr_t *out_shape) const
 {
     // Adjust the current shape if necessary
     out_shape[i] = shape_signal_varying;
@@ -165,7 +170,7 @@ void dynd::strided_array_dtype::get_shape(int i, intptr_t *out_shape) const
     }
 }
 
-void ::strided_array_dtype::get_shape(int i, intptr_t *out_shape, const char *data, const char *metadata) const
+void strided_array_dtype::get_shape(int i, intptr_t *out_shape, const char *data, const char *metadata) const
 {
     const strided_array_dtype_metadata *md = reinterpret_cast<const strided_array_dtype_metadata *>(metadata);
 
@@ -177,7 +182,7 @@ void ::strided_array_dtype::get_shape(int i, intptr_t *out_shape, const char *da
     }
 }
 
-void ::strided_array_dtype::get_strides(int i, intptr_t *out_strides, const char *data, const char *metadata) const
+void strided_array_dtype::get_strides(int i, intptr_t *out_strides, const char *data, const char *metadata) const
 {
     const strided_array_dtype_metadata *md = reinterpret_cast<const strided_array_dtype_metadata *>(metadata);
 
@@ -189,7 +194,7 @@ void ::strided_array_dtype::get_strides(int i, intptr_t *out_strides, const char
     }
 }
 
-bool dynd::strided_array_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const
+bool strided_array_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const
 {
     if (dst_dt.extended() == this) {
         if (src_dt.extended() == this) {
@@ -202,19 +207,19 @@ bool dynd::strided_array_dtype::is_lossless_assignment(const dtype& dst_dt, cons
     return false;
 }
 
-void dynd::strided_array_dtype::get_single_compare_kernel(single_compare_kernel_instance& DYND_UNUSED(out_kernel)) const
+void strided_array_dtype::get_single_compare_kernel(single_compare_kernel_instance& DYND_UNUSED(out_kernel)) const
 {
     throw runtime_error("strided_array_dtype::get_single_compare_kernel is unimplemented"); 
 }
 
-void dynd::strided_array_dtype::get_dtype_assignment_kernel(const dtype& DYND_UNUSED(dst_dt), const dtype& DYND_UNUSED(src_dt),
+void strided_array_dtype::get_dtype_assignment_kernel(const dtype& DYND_UNUSED(dst_dt), const dtype& DYND_UNUSED(src_dt),
                 assign_error_mode DYND_UNUSED(errmode),
                 unary_specialization_kernel_instance& DYND_UNUSED(out_kernel)) const
 {
     throw runtime_error("strided_array_dtype::get_dtype_assignment_kernel is unimplemented"); 
 }
 
-bool dynd::strided_array_dtype::operator==(const extended_dtype& rhs) const
+bool strided_array_dtype::operator==(const extended_dtype& rhs) const
 {
     if (this == &rhs) {
         return true;
@@ -226,7 +231,7 @@ bool dynd::strided_array_dtype::operator==(const extended_dtype& rhs) const
     }
 }
 
-size_t dynd::strided_array_dtype::get_metadata_size() const
+size_t strided_array_dtype::get_metadata_size() const
 {
     size_t result = sizeof(strided_array_dtype_metadata);
     if (m_element_dtype.extended()) {
@@ -235,7 +240,7 @@ size_t dynd::strided_array_dtype::get_metadata_size() const
     return result;
 }
 
-void dynd::strided_array_dtype::metadata_default_construct(char *metadata, int ndim, const intptr_t* shape) const
+void strided_array_dtype::metadata_default_construct(char *metadata, int ndim, const intptr_t* shape) const
 {
     // Validate that the shape is ok
     if (ndim == 0 || shape[0] < 0) {
@@ -256,7 +261,7 @@ void dynd::strided_array_dtype::metadata_default_construct(char *metadata, int n
     }
 }
 
-void dynd::strided_array_dtype::metadata_copy_construct(char *dst_metadata, const char *src_metadata, memory_block_data *embedded_reference) const
+void strided_array_dtype::metadata_copy_construct(char *dst_metadata, const char *src_metadata, memory_block_data *embedded_reference) const
 {
     const strided_array_dtype_metadata *src_md = reinterpret_cast<const strided_array_dtype_metadata *>(src_metadata);
     strided_array_dtype_metadata *dst_md = reinterpret_cast<strided_array_dtype_metadata *>(dst_metadata);
@@ -268,14 +273,14 @@ void dynd::strided_array_dtype::metadata_copy_construct(char *dst_metadata, cons
     }
 }
 
-void dynd::strided_array_dtype::metadata_destruct(char *metadata) const
+void strided_array_dtype::metadata_destruct(char *metadata) const
 {
     if (m_element_dtype.extended()) {
         m_element_dtype.extended()->metadata_destruct(metadata + sizeof(strided_array_dtype_metadata));
     }
 }
 
-void dynd::strided_array_dtype::metadata_debug_dump(const char *metadata, std::ostream& o, const std::string& indent) const
+void strided_array_dtype::metadata_debug_dump(const char *metadata, std::ostream& o, const std::string& indent) const
 {
     const strided_array_dtype_metadata *md = reinterpret_cast<const strided_array_dtype_metadata *>(metadata);
     o << indent << "strided_array_dtype metadata\n";
@@ -358,7 +363,7 @@ size_t strided_array_dtype::iterdata_destruct(iterdata_common *iterdata, int ndi
     return inner_size + sizeof(strided_array_dtype_iterdata);
 }
 
-void dynd::strided_array_dtype::foreach(int ndim, char *data, const char *metadata, foreach_fn_t callback, const void *callback_data) const
+void strided_array_dtype::foreach(int ndim, char *data, const char *metadata, foreach_fn_t callback, const void *callback_data) const
 {
     if (ndim > 0) {
         const strided_array_dtype_metadata *md = reinterpret_cast<const strided_array_dtype_metadata *>(metadata);

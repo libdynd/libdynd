@@ -55,7 +55,7 @@ dtype extended_dtype::with_transformed_scalar_types(dtype_transform_fn_t transfo
     return transform_fn(dtype(this, true), extra);
 }
 
-dtype dynd::extended_dtype::get_canonical_dtype() const
+dtype extended_dtype::get_canonical_dtype() const
 {
     // Default to no transformation of the dtype
     return dtype(this, true);
@@ -83,13 +83,13 @@ intptr_t extended_dtype::apply_linear_index(int nindices, const irange *DYND_UNU
 }
 
 
-int dynd::extended_dtype::get_uniform_ndim() const
+int extended_dtype::get_uniform_ndim() const
 {
     // Default to heterogeneous dimension/scalar behavior
     return 0;
 }
 
-dtype dynd::extended_dtype::get_dtype_at_dimension(char **inout_metadata, int i, int total_ndim) const
+dtype extended_dtype::get_dtype_at_dimension(char **inout_metadata, int i, int total_ndim) const
 {
     // Default to heterogeneous dimension/scalar behavior
     if (i == 0) {
@@ -99,19 +99,26 @@ dtype dynd::extended_dtype::get_dtype_at_dimension(char **inout_metadata, int i,
     }
 }
 
+intptr_t extended_dtype::get_dim_size(const char *data, const char *metadata) const
+{
+    // Default to scalar behavior
+    stringstream ss;
+    ss << "Cannot get the leading dimension size of ndobject with scalar dtype " << dtype(this, true);
+    throw std::runtime_error(ss.str());
+}
 
-void dynd::extended_dtype::get_shape(int DYND_UNUSED(i), intptr_t *DYND_UNUSED(out_shape)) const
+void extended_dtype::get_shape(int DYND_UNUSED(i), intptr_t *DYND_UNUSED(out_shape)) const
 {
     // Default to scalar behavior
 }
 
-void dynd::extended_dtype::get_shape(int DYND_UNUSED(i), intptr_t *DYND_UNUSED(out_shape),
+void extended_dtype::get_shape(int DYND_UNUSED(i), intptr_t *DYND_UNUSED(out_shape),
                     const char *DYND_UNUSED(data), const char *DYND_UNUSED(metadata)) const
 {
     // Default to scalar behavior
 }
 
-void dynd::extended_dtype::get_strides(int DYND_UNUSED(i), intptr_t *DYND_UNUSED(out_strides),
+void extended_dtype::get_strides(int DYND_UNUSED(i), intptr_t *DYND_UNUSED(out_strides),
                     const char *DYND_UNUSED(data), const char *DYND_UNUSED(metadata)) const
 {
     // Default to scalar behavior
@@ -204,7 +211,7 @@ void extended_dtype::foreach(int ndim, char *data, const char *metadata, foreach
 
 
 
-void dynd::extended_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const dtype& src_dt,
+void extended_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const dtype& src_dt,
                 assign_error_mode DYND_UNUSED(errmode),
                 unary_specialization_kernel_instance& DYND_UNUSED(out_kernel)) const
 {

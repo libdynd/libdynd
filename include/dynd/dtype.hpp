@@ -415,6 +415,14 @@ public:
     virtual dtype get_dtype_at_dimension(char **inout_metadata, int i, int total_ndim = 0) const;
 
     /**
+     * Retrieves the leading dimension size of the shape.
+     *
+     * \param data      Data corresponding to the dtype.
+     * \param metadata  Metadata corresponding to the data.
+     */
+    virtual intptr_t get_dim_size(const char *data, const char *metadata) const;
+
+    /**
      * Retrieves the shape of the dtype, expanding the vector as needed. For dimensions with
      * unknown or variable shape, -1 is returned.
      *
@@ -927,6 +935,16 @@ public:
             return m_extended->get_uniform_ndim();
         } else {
             return 0;
+        }
+    }
+
+    intptr_t get_dim_size(const char *data, const char *metadata) const {
+        if (m_extended) {
+            return m_extended->get_dim_size(data, metadata);
+        } else {
+            std::stringstream ss;
+            ss << "Cannot get the leading dimension size of ndobject with scalar dtype " << *this;
+            throw std::runtime_error(ss.str());
         }
     }
 

@@ -182,6 +182,10 @@ intptr_t dynd::struct_dtype::apply_linear_index(int nindices, const irange *indi
     }
 }
 
+intptr_t struct_dtype::get_dim_size(const char *DYND_UNUSED(data), const char *DYND_UNUSED(metadata)) const
+{
+    return m_fields.size();
+}
 
 void dynd::struct_dtype::get_shape(int i, intptr_t *out_shape) const
 {
