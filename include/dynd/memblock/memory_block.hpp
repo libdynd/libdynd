@@ -8,9 +8,8 @@
 
 #include <iostream>
 
-#include <boost/detail/atomic_count.hpp>
-
 #include <dynd/config.hpp>
+#include <dynd/atomic_refcount.hpp>
 
 namespace dynd {
 
@@ -41,13 +40,7 @@ enum memory_block_type_t {
  * extensible ones.
  */
 struct memory_block_data {
-#ifdef DYND_CLING
-    // A hack avoiding boost atomic_count, since that creates inline assembly which LLVM JIT doesn't like!
-    mutable long m_use_count;
-#else
-    /** Embedded reference counting */
-    mutable boost::detail::atomic_count m_use_count;
-#endif
+    atomic_refcount m_use_count;
     /** A memory_block_type_t enum value */
     uint32_t m_type;
 

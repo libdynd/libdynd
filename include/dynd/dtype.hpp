@@ -11,9 +11,8 @@
 #include <stdexcept>
 #include <vector>
 
-#include <boost/detail/atomic_count.hpp>
-
 #include <dynd/config.hpp>
+#include <dynd/atomic_refcount.hpp>
 #include <dynd/dtype_assign.hpp>
 #include <dynd/dtype_comparisons.hpp>
 #include <dynd/kernels/single_compare_kernel_instance.hpp>
@@ -311,7 +310,7 @@ char *iterdata_broadcasting_terminator_reset(iterdata_common *iterdata, char *da
 // than a type_id, kind, and element_size, and endianness.
 class extended_dtype {
     /** Embedded reference counting */
-    mutable boost::detail::atomic_count m_use_count;
+    mutable atomic_refcount m_use_count;
 public:
     /** Starts off the extended dtype instance with a use count of 1. */
     extended_dtype()

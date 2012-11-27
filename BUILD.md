@@ -7,7 +7,6 @@ is the recommended compiler. On Linux, gcc 4.6.1 and 4.7.0 have
 been tested.
 
  * CMake >= 2.6
- * Boost (header-only, doesn't require that any libraries be built)
 
 The following libraries/projects are included with the code:
 
@@ -33,11 +32,7 @@ Visual Studio 2010 or newer is recommended.
     subdirectory so that your build is isolated from the
     source code files.
 
-4. Click 'Add Entry', and create a variable called BOOST_ROOT.
-   Set its type to PATH, and select the path to the boost library.
-   Boost doesn't need to be built, only headers are used.
-
-5. Double-click on the generated dynamicndarray.sln
+4. Double-click on the generated dynamicndarray.sln
     to open Visual Studio. The RelWithDebInfo configuration is
     recommended for most purposes.
 
@@ -46,13 +41,11 @@ Visual Studio 2010 or newer is recommended.
 Start a command prompt window, and navigate to the
 dynamicndarray folder which is the root of the project.
 Switch the "-G" argument below to "Visual Studio 10" if using
-32-bit Python. Replace the "BOOST_ROOT" path with the path to boost
-(boost doesn't need to be built, only headers are used).
+32-bit Python.
 Execute the following commands:
 
     D:\dynamicndarray>mkdir build
     D:\dynamicndarray>cd build
-    D:\dynamicndarray>set BOOST_ROOT=D:\Develop\boost_1_48_0
     D:\dynamicndarray\build>cmake -G "Visual Studio 10 Win64" ..
        [output, check it for errors]
     D:\dynamicndarray\build>start dynamicndarray.sln

@@ -9,8 +9,6 @@ project(dynamicndarray)
 set(CMAKE_VERBOSE_MAKEFILE 1)
 set(BUILD_SHARED_LIBS 1)
 
-find_package(Boost REQUIRED)
-
 # Embedded libraries
 add_subdirectory(thirdparty/datetime)
 include_directories(thirdparty/datetime/include)
@@ -175,6 +173,7 @@ set(dynd_SRC
     src/dynd/ndobject_arange.cpp
     src/dynd/shape_tools.cpp
     src/dynd/string_encodings.cpp
+    include/dynd/atomic_refcount.hpp
     include/dynd/auxiliary_data.hpp
     include/dynd/buffer_storage.hpp
     include/dynd/config.hpp
@@ -200,7 +199,6 @@ set(dynd_SRC
     )
 
 include_directories(
-    ${Boost_INCLUDE_DIR}
     include
     thirdparty/utf8/source
     )

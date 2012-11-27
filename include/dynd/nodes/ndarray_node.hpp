@@ -8,9 +8,6 @@
 
 #include <iostream>
 
-#include <boost/detail/atomic_count.hpp>
-#include <boost/intrusive_ptr.hpp>
-
 #include <dynd/dtype.hpp>
 #include <dynd/dtype_assign.hpp>
 #include <dynd/irange.hpp>

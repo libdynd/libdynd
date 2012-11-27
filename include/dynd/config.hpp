@@ -85,7 +85,7 @@ namespace dynd {
     using std::tr1::enable_if;
 }
 #else
-#include <boost/utility/enable_if.hpp>
+// enable_if is a small template, so we just replicate it here
 namespace dynd {
 	template<bool B, class T = void>
 	struct enable_if {};
