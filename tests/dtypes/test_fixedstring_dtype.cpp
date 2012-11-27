@@ -137,6 +137,12 @@ TEST(FixedstringDType, SingleCompare) {
 
 TEST(FixedstringDType, CanonicalDType) {
     // The canonical dtype of a fixedstring dtype is always a UTF8 string dtype
-    EXPECT_EQ((make_string_dtype(string_encoding_utf_8)),
-                (make_fixedstring_dtype(string_encoding_utf_16, 7).get_canonical_dtype()));
+    EXPECT_EQ((make_fixedstring_dtype(string_encoding_ascii, 12)),
+                (make_fixedstring_dtype(string_encoding_ascii, 12).get_canonical_dtype()));
+    EXPECT_EQ((make_fixedstring_dtype(string_encoding_utf_8, 14)),
+                (make_fixedstring_dtype(string_encoding_utf_8, 14).get_canonical_dtype()));
+    EXPECT_EQ((make_fixedstring_dtype(string_encoding_utf_16, 17)),
+                (make_fixedstring_dtype(string_encoding_utf_16, 17).get_canonical_dtype()));
+    EXPECT_EQ((make_fixedstring_dtype(string_encoding_utf_32, 21)),
+                (make_fixedstring_dtype(string_encoding_utf_32, 21).get_canonical_dtype()));
 }

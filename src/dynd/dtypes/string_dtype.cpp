@@ -80,7 +80,7 @@ dtype string_dtype::apply_linear_index(int nindices, const irange *indices, int 
 
 dtype string_dtype::get_canonical_dtype() const
 {
-    return dtype(new string_dtype(string_encoding_utf_8));
+    return dtype(this, true);
 }
 
 
@@ -91,7 +91,7 @@ void string_dtype::get_shape(int DYND_UNUSED(i), std::vector<intptr_t>& DYND_UNU
 bool string_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const
 {
     if (dst_dt.extended() == this) {
-        if (dst_dt.type_id() == string_type_id) {
+        if (src_dt.kind() == string_kind) {
             // If the source is a string, only the encoding matters because the dest is variable sized
             const extended_string_dtype *src_esd = static_cast<const extended_string_dtype*>(src_dt.extended());
             string_encoding_t src_encoding = src_esd->get_encoding();
@@ -108,6 +108,8 @@ bool string_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_
                 default:
                     return false;
             }
+        } else if (src_dt.extended() != NULL) {
+            return src_dt.extended()->is_lossless_assignment(dst_dt, src_dt);
         } else {
             return false;
         }
@@ -128,8 +130,7 @@ void string_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const dtype&
         switch (src_dt.type_id()) {
             case string_type_id: {
                 const string_dtype *src_fs = static_cast<const string_dtype *>(src_dt.extended());
-                get_blockref_string_assignment_kernel(m_encoding, src_fs->m_encoding,
-                                        errmode, out_kernel);
+                get_blockref_string_assignment_kernel(m_encoding, src_fs->m_encoding, errmode, out_kernel);
                 break;
             }
             case fixedstring_type_id: {
@@ -140,12 +141,20 @@ void string_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const dtype&
                 break;
             }
             default: {
-                src_dt.extended()->get_dtype_assignment_kernel(dst_dt, src_dt, errmode, out_kernel);
+                if (src_dt.extended()) {
+                    src_dt.extended()->get_dtype_assignment_kernel(dst_dt, src_dt, errmode, out_kernel);
+                } else {
+                    stringstream ss;
+                    ss << "assignment from " << src_dt << " to " << dst_dt << " is not implemented yet";
+                    throw runtime_error(ss.str());
+                }
                 break;
             }
         }
     } else {
-        throw runtime_error("conversions from string to non-string are not implemented");
+        stringstream ss;
+        ss << "assignment from " << src_dt << " to " << dst_dt << " is not implemented yet";
+        throw runtime_error(ss.str());
     }
 }
 

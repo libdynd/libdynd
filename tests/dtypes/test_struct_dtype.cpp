@@ -126,6 +126,6 @@ TEST(StructDType, CanonicalDType) {
     dt = make_struct_dtype(d1, "x", d2, "y", d3, "z");
     EXPECT_EQ(make_struct_dtype(make_dtype<std::complex<double> >(), "x",
                                 make_dtype<int32_t>(), "y",
-                                make_string_dtype(string_encoding_utf_8), "z"),
+                                d3, "z"),
             dt.get_canonical_dtype());
 }

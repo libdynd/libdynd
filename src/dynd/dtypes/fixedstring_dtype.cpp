@@ -99,7 +99,7 @@ dtype dynd::fixedstring_dtype::apply_linear_index(int nindices, const irange *in
 
 dtype dynd::fixedstring_dtype::get_canonical_dtype() const
 {
-    return dtype(new string_dtype(string_encoding_utf_8));
+    return dtype(this, true);
 }
 
 bool dynd::fixedstring_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const

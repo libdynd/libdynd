@@ -178,7 +178,6 @@ TEST(StringDType, Unicode) {
     ndobject b(make_utf16_ndobject(utf16_string));
     ndobject c(make_utf8_ndobject(utf8_string));
 
-cout << "A " << __LINE__ << endl;
     // Convert all to utf32 and compare with the reference
     x = a.cast_scalars(make_string_dtype(string_encoding_utf_32)).vals();
     EXPECT_EQ(0, memcmp(utf32_string,
@@ -193,7 +192,6 @@ cout << "A " << __LINE__ << endl;
                 *reinterpret_cast<const char * const *>(x.get_readonly_originptr()),
                 sizeof(utf32_string)));
 
-cout << "A " << __LINE__ << endl;
     // Convert all to utf16 and compare with the reference
     x = a.cast_scalars(make_string_dtype(string_encoding_utf_16)).vals();
     EXPECT_EQ(0, memcmp(utf16_string,
@@ -208,7 +206,6 @@ cout << "A " << __LINE__ << endl;
                 *reinterpret_cast<const char * const *>(x.get_readonly_originptr()),
                 sizeof(utf16_string)));
 
-cout << "A " << __LINE__ << endl;
     // Convert all to utf8 and compare with the reference
     x = a.cast_scalars(make_string_dtype(string_encoding_utf_8)).vals();
     EXPECT_EQ(0, memcmp(utf8_string,
@@ -222,12 +219,17 @@ cout << "A " << __LINE__ << endl;
     EXPECT_EQ(0, memcmp(utf8_string,
                 *reinterpret_cast<const char * const *>(x.get_readonly_originptr()),
                 sizeof(utf8_string)));
-cout << "A " << __LINE__ << endl;
 }
 
 
 TEST(StringDType, CanonicalDType) {
-    // The canonical dtype of a string dtype is always a UTF8 string dtype
+    // The canonical dtype of a string dtype is the same type
+    EXPECT_EQ((make_string_dtype(string_encoding_ascii)),
+                (make_string_dtype(string_encoding_ascii).get_canonical_dtype()));
     EXPECT_EQ((make_string_dtype(string_encoding_utf_8)),
+                (make_string_dtype(string_encoding_utf_8).get_canonical_dtype()));
+    EXPECT_EQ((make_string_dtype(string_encoding_utf_16)),
                 (make_string_dtype(string_encoding_utf_16).get_canonical_dtype()));
+    EXPECT_EQ((make_string_dtype(string_encoding_utf_32)),
+                (make_string_dtype(string_encoding_utf_32).get_canonical_dtype()));
 }

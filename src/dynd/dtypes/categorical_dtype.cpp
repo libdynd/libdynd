@@ -41,64 +41,62 @@ namespace {
         }
     };
 
-    struct assign_to_same_category_type {
+    struct categorical_to_other_assign_auxdata {
+        kernel_instance<unary_operation_t> kernel;
+        dtype cat_dt;
+        const categorical_dtype *cat;
+    };
+
+    struct categorical_to_other_assign {
+        static auxdata_kernel_api kernel_api;
+
+        static auxdata_kernel_api *get_child_api(const AuxDataBase *DYND_UNUSED(auxdata), int DYND_UNUSED(index))
+        {
+            return NULL;
+        }
+
+        static int supports_referencing_src_memory_blocks(const AuxDataBase *auxdata)
+        {
+            return false;
+        }
+
+        static void set_dst_memory_block(AuxDataBase *auxdata, memory_block_data *memblock)
+        {
+            categorical_to_other_assign_auxdata& ad =
+                        get_auxiliary_data<categorical_to_other_assign_auxdata>(auxdata);
+            ad.kernel.auxdata.get_kernel_api()->set_dst_memory_block(ad.kernel.auxdata, memblock);
+        }
+
         static void general_kernel(char *dst, intptr_t dst_stride, const char *src, intptr_t src_stride,
                             intptr_t count, const AuxDataBase *auxdata)
         {
-            categorical_dtype *cat = reinterpret_cast<categorical_dtype *>(
-                get_raw_auxiliary_data(auxdata)&~1
-            );
+            const categorical_to_other_assign_auxdata& ad =
+                        get_auxiliary_data<categorical_to_other_assign_auxdata>(auxdata);
 
             // TODO handle non POD or throw
-            size_t N = cat->get_category_dtype().element_size();
+            size_t N = ad.cat->get_category_dtype().element_size();
             for (intptr_t i = 0; i < count; ++i) {
                 uint32_t value = *reinterpret_cast<const uint32_t *>(src);
-                const char *src_val = cat->get_category_from_value(value);
-                memcpy(dst, src_val, N);
+                const char *src_val = ad.cat->get_category_from_value(value);
+                ad.kernel.kernel(dst, 0, src_val, 0, 1, ad.kernel.auxdata);
 
                 dst += dst_stride;
                 src += src_stride;
             }
         }
-
-        static void scalar_kernel(char *dst, intptr_t DYND_UNUSED(dst_stride), const char *src, intptr_t DYND_UNUSED(src_stride),
-                            intptr_t DYND_UNUSED(count), const AuxDataBase *auxdata)
-        {
-            categorical_dtype *cat = reinterpret_cast<categorical_dtype *>(
-                get_raw_auxiliary_data(auxdata)&~1
-            );
-
-            // TODO handle non POD or throw
-            size_t N = cat->get_category_dtype().element_size();
-            uint32_t value = *reinterpret_cast<const uint32_t *>(src);
-            const char *src_val = cat->get_category_from_value(value);
-            memcpy(dst, src_val, N);
-        }
-
-        static void scalar_to_contiguous_kernel(char *dst, intptr_t DYND_UNUSED(dst_stride), const char *src, intptr_t DYND_UNUSED(src_stride),
-                            intptr_t count, const AuxDataBase *auxdata)
-        {
-            categorical_dtype *cat = reinterpret_cast<categorical_dtype *>(
-                get_raw_auxiliary_data(auxdata)&~1
-            );
-
-            // TODO handle non POD or throw
-            size_t N = cat->get_category_dtype().element_size();
-            uint32_t value = *reinterpret_cast<const uint32_t *>(src);
-            const char *src_val = cat->get_category_from_value(value);
-            for (intptr_t i = 0; i < count; ++i) {
-                memcpy(dst, src_val, N);
-
-                dst += N;
-            }
-        }
     };
 
-    static specialized_unary_operation_table_t assign_to_same_category_type_specializations = {
-        assign_to_same_category_type::general_kernel,
-        assign_to_same_category_type::scalar_kernel,
-        assign_to_same_category_type::general_kernel,
-        assign_to_same_category_type::scalar_to_contiguous_kernel
+    auxdata_kernel_api categorical_to_other_assign::kernel_api = {
+            &categorical_to_other_assign::get_child_api,
+            &categorical_to_other_assign::supports_referencing_src_memory_blocks,
+            &categorical_to_other_assign::set_dst_memory_block
+        };
+
+    static specialized_unary_operation_table_t categorical_to_other_assign_specializations = {
+        categorical_to_other_assign::general_kernel,
+        categorical_to_other_assign::general_kernel,
+        categorical_to_other_assign::general_kernel,
+        categorical_to_other_assign::general_kernel
     };
 
     struct assign_from_same_category_type {
@@ -208,6 +206,11 @@ categorical_dtype::categorical_dtype(const ndobject& categories)
     if (m_category_dtype.is_uniform_dim()) {
         throw runtime_error("categorical_dtype only supports construction from a 1-dimensional strided_array of categories");
     }
+    if (m_category_dtype.get_memory_management() != pod_memory_management) {
+        stringstream ss;
+        ss << "categorical_dtype does not yet support " << m_category_dtype << " as the category because it is not POD";
+        throw runtime_error(ss.str());
+    }
 
     intptr_t num_categories;
     categories.get_shape(&num_categories);
@@ -312,25 +315,23 @@ uint32_t categorical_dtype::get_value_from_category(const char *category) const
 
 bool categorical_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const
 {
-    if (src_dt.extended() == this) {
-        if (dst_dt.extended() == this) {
+    if (dst_dt.extended() == this) {
+        if (src_dt.extended() == this) {
             // Casting from identical types
             return true;
-        } else if (dst_dt.type_id() != categorical_type_id) {
-            return false;
-        } else {
+        } else  {
             return false; // TODO
         }
 
     } else {
-        return false; // TODO
+        return ::is_lossless_assignment(dst_dt, m_category_dtype); // TODO
     }
 }
 
 void categorical_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const dtype& src_dt,
-                    assign_error_mode DYND_UNUSED(errmode),
-                    unary_specialization_kernel_instance& out_kernel) const {
-
+                    assign_error_mode errmode,
+                    unary_specialization_kernel_instance& out_kernel) const
+{
     // POD copy already handled if category mappings are identical
 
     if (this == dst_dt.extended()) {
@@ -338,6 +339,7 @@ void categorical_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const d
         if (src_dt.type_id() == categorical_type_id) {
             //out_kernel.specializations = assign_from_commensurate_category_specializations;
             // TODO auxdata
+            throw std::runtime_error("assignment between different categorical dtypes isn't supported yet");
         }
         // assign from the same category value dtype
         else if (src_dt.value_dtype() == m_category_dtype) {
@@ -346,27 +348,31 @@ void categorical_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const d
         }
         else {
             stringstream ss;
-            ss << "Cannot assign categorical type '";
-            this->print_dtype(ss);
-            //ss << "' from type '";
-            //src_dt.extended()->print_dtype(ss);
-            //ss << "'";
+            ss << "Cannot assign categorical type '" << dtype(this, true);
+            ss << "' from type '" << src_dt << "'";
             throw std::runtime_error(ss.str()); // TODO better message
         }
     }
     else {
-        // assign to the same category value dtype
-        if (dst_dt.value_dtype() == m_category_dtype) {
-            out_kernel.specializations = assign_to_same_category_type_specializations;
-            make_raw_auxiliary_data(out_kernel.auxdata, reinterpret_cast<uintptr_t>(this));
+        if (dst_dt.value_dtype().type_id() != categorical_type_id) {
+            out_kernel.specializations = categorical_to_other_assign_specializations;
+            make_auxiliary_data<categorical_to_other_assign_auxdata>(out_kernel.auxdata);
+            categorical_to_other_assign_auxdata& ad =
+                        out_kernel.auxdata.get<categorical_to_other_assign_auxdata>();
+            if (dst_dt.get_memory_management() == blockref_memory_management) {
+                const_cast<AuxDataBase *>((const AuxDataBase *)out_kernel.auxdata)->kernel_api = &categorical_to_other_assign::kernel_api;
+            }
+            ad.cat_dt = src_dt;
+            ad.cat = static_cast<const categorical_dtype *>(ad.cat_dt.extended());
+            unary_specialization_kernel_instance spkernel;
+            ::get_dtype_assignment_kernel(dst_dt, m_category_dtype, errmode, NULL, spkernel);
+            ad.kernel.kernel = spkernel.specializations[scalar_unary_specialization];
+            ad.kernel.auxdata.swap(spkernel.auxdata);
         }
         else {
             stringstream ss;
-            ss << "Cannot assign categorical type '";
-            this->print_dtype(ss);
-            //ss << "' to type '";
-            //dst_dt.extended()->print_dtype(ss);
-            //ss << "'";
+            ss << "Cannot assign categorical type '" << dtype(this, true);
+            ss << "' to type '" << dst_dt << "'";
             throw std::runtime_error(ss.str()); // TODO better message
         }
 

@@ -454,7 +454,8 @@ std::string dynd::detail::ndobject_as_string(const ndobject& lhs, assign_error_m
     }
 
     // Otherwise cast it to a UTF8 string, then get the data bytes.
-    ndobject temp = lhs.cast_scalars(make_string_dtype(string_encoding_utf_8)).vals();
+    ndobject temp = lhs.cast_scalars(make_string_dtype(string_encoding_utf_8));
+    temp = temp.vals();
     const extended_string_dtype *esd = static_cast<const extended_string_dtype *>(temp.get_dtype().extended());
     const char *begin, *end;
     esd->get_string_range(&begin, &end, temp.get_readonly_originptr(), temp.get_ndo_meta());

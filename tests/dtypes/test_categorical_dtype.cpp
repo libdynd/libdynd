@@ -11,12 +11,13 @@
 #include <dynd/ndobject.hpp>
 #include <dynd/dtypes/categorical_dtype.hpp>
 #include <dynd/dtypes/fixedstring_dtype.hpp>
+#include <dynd/dtypes/string_dtype.hpp>
+#include <dynd/dtypes/convert_dtype.hpp>
 
 using namespace std;
 using namespace dynd;
 
 TEST(CategoricalDType, Create) {
-
     ndobject a = make_strided_ndobject(3, make_fixedstring_dtype(string_encoding_ascii, 3));
     a.at(0).vals() = std::string("foo");
     a.at(1).vals() = std::string("bar");
@@ -31,7 +32,24 @@ TEST(CategoricalDType, Create) {
     EXPECT_EQ(4u, d.element_size());
 
     cout << d << endl;
+}
 
+TEST(CategoricalDType, Convert) {
+    ndobject a = make_strided_ndobject(3, make_fixedstring_dtype(string_encoding_ascii, 3));
+    a.at(0).vals() = std::string("foo");
+    a.at(1).vals() = std::string("bar");
+    a.at(2).vals() = std::string("baz");
+
+    dtype cd = make_categorical_dtype(a);
+    dtype sd = make_string_dtype(string_encoding_utf_8);
+
+    EXPECT_TRUE(is_lossless_assignment(sd, cd));
+    EXPECT_FALSE(is_lossless_assignment(cd, sd));
+
+    // This operation was crashing, hence the test
+    dtype cvt = make_convert_dtype(sd, cd);
+    EXPECT_EQ(cd, cvt.operand_dtype());
+    EXPECT_EQ(sd, cvt.value_dtype());
 }
 
 TEST(CategoricalDType, Compare) {
@@ -124,7 +142,6 @@ TEST(CategoricalDType, Values) {
 }
 
 TEST(CategoricalDType, AssignFixedString) {
-
     ndobject cat = make_strided_ndobject(3, make_fixedstring_dtype(string_encoding_ascii, 3));
     cat.at(0).vals() = std::string("foo");
     cat.at(1).vals() = std::string("bar");
@@ -139,7 +156,7 @@ TEST(CategoricalDType, AssignFixedString) {
     EXPECT_EQ("baz", a.at(2).as<std::string>());
     cout << a << endl;
     a.at(0).vals() = cat.at(2);
-    EXPECT_EQ("baz", a.at(0).cast_scalars(cat.get_dtype()).as<std::string>());
+    EXPECT_EQ("baz", a.at(0).as<std::string>());
     cout << a << endl;
 
     cat.at(0).vals() = std::string("zzz");
@@ -149,7 +166,7 @@ TEST(CategoricalDType, AssignFixedString) {
     //a(0).vals() = std::string("bar");
     //cout << a << endl;
 
-    ndobject tmp = make_strided_ndobject(3, cat.get_dtype());
+    ndobject tmp = make_strided_ndobject(3, cat.get_dtype().at(0));
     tmp.val_assign(a);
     EXPECT_EQ("baz", tmp.at(0).as<std::string>());
     EXPECT_EQ("bar", tmp.at(1).as<std::string>());
@@ -184,7 +201,7 @@ TEST(CategoricalDType, AssignInt) {
     //a(0).vals() = std::string("bar");
     //cout << a << endl;
 
-    ndobject tmp = make_strided_ndobject(3, cat.get_dtype());
+    ndobject tmp = make_strided_ndobject(3, cat.get_dtype().at(0));
     tmp.val_assign(a);
     EXPECT_EQ(1000, tmp.at(0).as<int32_t>());
     EXPECT_EQ(100, tmp.at(1).as<int32_t>());
