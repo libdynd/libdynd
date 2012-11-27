@@ -8,7 +8,7 @@
 #include <stdexcept>
 #include "inc_gtest.hpp"
 
-#include <dynd/ndarray.hpp>
+#include <dynd/ndobject.hpp>
 #include <dynd/dtypes/tuple_dtype.hpp>
 #include <dynd/dtypes/fixedstring_dtype.hpp>
 
