@@ -109,7 +109,7 @@ ndobject dynd::arange(const dtype& scalar_dtype, const void *beginval, const voi
         case type_id_of<type>::value: { \
             intptr_t dim_size = arange_counter<type, dtype_kind_of<type>::value>::count(beginval, endval, stepval); \
             ndobject result = \
-                    make_strided_ndobject(scalar_dtype, dim_size); \
+                    make_strided_ndobject(dim_size, scalar_dtype); \
             arange_specialization<type>::arange(beginval, stepval, result); \
             return DYND_MOVE(result); \
         }
@@ -190,25 +190,25 @@ ndobject dynd::linspace(const dtype& dt, const void *startval, const void *stopv
     if (dt.extended() == NULL) {
         switch (dt.type_id()) {
             case float32_type_id: {
-                ndobject result = make_strided_ndobject(dt, count);
+                ndobject result = make_strided_ndobject(count, dt);
                 linspace_specialization(*reinterpret_cast<const float *>(startval),
                                 *reinterpret_cast<const float *>(stopval), count, result);
                 return DYND_MOVE(result);
             }
             case float64_type_id: {
-                ndobject result = make_strided_ndobject(dt, count);
+                ndobject result = make_strided_ndobject(count, dt);
                 linspace_specialization(*reinterpret_cast<const double *>(startval),
                                 *reinterpret_cast<const double *>(stopval), count, result);
                 return DYND_MOVE(result);
             }
             case complex_float32_type_id: {
-                ndobject result = make_strided_ndobject(dt, count);
+                ndobject result = make_strided_ndobject(count, dt);
                 linspace_specialization(*reinterpret_cast<const complex<float> *>(startval),
                                 *reinterpret_cast<const complex<float> *>(stopval), count, result);
                 return DYND_MOVE(result);
             }
             case complex_float64_type_id: {
-                ndobject result = make_strided_ndobject(dt, count);
+                ndobject result = make_strided_ndobject(count, dt);
                 linspace_specialization(*reinterpret_cast<const complex<double> *>(startval),
                                 *reinterpret_cast<const complex<double> *>(stopval), count, result);
                 return DYND_MOVE(result);

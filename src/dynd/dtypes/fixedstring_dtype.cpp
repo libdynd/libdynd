@@ -37,6 +37,23 @@ dynd::fixedstring_dtype::fixedstring_dtype(string_encoding_t encoding, intptr_t 
     }
 }
 
+void dynd::fixedstring_dtype::get_string_range(const char **out_begin, const char**out_end,
+                const char *data, const char *DYND_UNUSED(metadata)) const
+{
+    // Beginning of the string
+    *out_begin = data;
+
+    // One past the end of the string, use the unicode codepoint advancer to find it
+    uint32_t cp = 1;
+    const char *data_end = data + m_element_size;
+    next_unicode_codepoint_t next_fn;
+    next_fn = get_next_unicode_codepoint_function(m_encoding, assign_error_none);
+    while (data < data_end && cp != 0) {
+        cp = next_fn(data, data_end);
+    }
+    *out_end = data;
+}
+
 void dynd::fixedstring_dtype::print_element(std::ostream& o, const char *data, const char *DYND_UNUSED(metadata)) const
 {
     uint32_t cp;
@@ -306,7 +323,7 @@ void dynd::fixedstring_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, c
             }
             case string_type_id: {
                 const extended_string_dtype *src_fs = static_cast<const extended_string_dtype *>(src_dt.extended());
-                get_blockref_string_to_fixedstring_assignment_kernel(m_element_size, m_encoding, src_fs->encoding(),
+                get_blockref_string_to_fixedstring_assignment_kernel(m_element_size, m_encoding, src_fs->get_encoding(),
                                         errmode, out_kernel);
                 break;
             }

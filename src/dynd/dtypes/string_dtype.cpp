@@ -4,6 +4,7 @@
 //
 
 #include <dynd/dtypes/string_dtype.hpp>
+#include <dynd/memblock/pod_memory_block.hpp>
 #include <dynd/kernels/single_compare_kernel_instance.hpp>
 #include <dynd/kernels/string_assignment_kernels.hpp>
 #include <dynd/dtypes/fixedstring_dtype.hpp>
@@ -14,7 +15,7 @@
 using namespace std;
 using namespace dynd;
 
-dynd::string_dtype::string_dtype(string_encoding_t encoding)
+string_dtype::string_dtype(string_encoding_t encoding)
     : m_encoding(encoding)
 {
     switch (encoding) {
@@ -29,7 +30,14 @@ dynd::string_dtype::string_dtype(string_encoding_t encoding)
     }
 }
 
-void dynd::string_dtype::print_element(std::ostream& o, const char *data, const char *DYND_UNUSED(metadata)) const
+void string_dtype::get_string_range(const char **out_begin, const char**out_end,
+                const char *data, const char *DYND_UNUSED(metadata)) const
+{
+    *out_begin = reinterpret_cast<const char * const *>(data)[0];
+    *out_end = reinterpret_cast<const char * const *>(data)[1];
+}
+
+void string_dtype::print_element(std::ostream& o, const char *data, const char *DYND_UNUSED(metadata)) const
 {
     uint32_t cp;
     next_unicode_codepoint_t next_fn;
@@ -46,13 +54,13 @@ void dynd::string_dtype::print_element(std::ostream& o, const char *data, const 
     o << "\"";
 }
 
-void dynd::string_dtype::print_dtype(std::ostream& o) const {
+void string_dtype::print_dtype(std::ostream& o) const {
 
     o << "string<" << m_encoding << ">";
 
 }
 
-dtype dynd::string_dtype::apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& DYND_UNUSED(root_dt)) const
+dtype string_dtype::apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& DYND_UNUSED(root_dt)) const
 {
     if (nindices == 0) {
         return dtype(this, true);
@@ -70,23 +78,23 @@ dtype dynd::string_dtype::apply_linear_index(int nindices, const irange *indices
     }
 }
 
-dtype dynd::string_dtype::get_canonical_dtype() const
+dtype string_dtype::get_canonical_dtype() const
 {
     return dtype(new string_dtype(string_encoding_utf_8));
 }
 
 
-void dynd::string_dtype::get_shape(int DYND_UNUSED(i), std::vector<intptr_t>& DYND_UNUSED(out_shape)) const
+void string_dtype::get_shape(int DYND_UNUSED(i), std::vector<intptr_t>& DYND_UNUSED(out_shape)) const
 {
 }
 
-bool dynd::string_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const
+bool string_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const
 {
     if (dst_dt.extended() == this) {
         if (dst_dt.type_id() == string_type_id) {
             // If the source is a string, only the encoding matters because the dest is variable sized
             const extended_string_dtype *src_esd = static_cast<const extended_string_dtype*>(src_dt.extended());
-            string_encoding_t src_encoding = src_esd->encoding();
+            string_encoding_t src_encoding = src_esd->get_encoding();
             switch (m_encoding) {
                 case string_encoding_ascii:
                     return src_encoding == string_encoding_ascii;
@@ -108,11 +116,11 @@ bool dynd::string_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype
     }
 }
 
-void dynd::string_dtype::get_single_compare_kernel(single_compare_kernel_instance& DYND_UNUSED(out_kernel)) const {
+void string_dtype::get_single_compare_kernel(single_compare_kernel_instance& DYND_UNUSED(out_kernel)) const {
     throw std::runtime_error("string_dtype::get_single_compare_kernel not supported yet");
 }
 
-void dynd::string_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const dtype& src_dt,
+void string_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const dtype& src_dt,
                 assign_error_mode errmode,
                 unary_specialization_kernel_instance& out_kernel) const
 {
@@ -127,7 +135,7 @@ void dynd::string_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const 
             case fixedstring_type_id: {
                 const extended_string_dtype *src_fs = static_cast<const extended_string_dtype *>(src_dt.extended());
                 get_fixedstring_to_blockref_string_assignment_kernel(m_encoding,
-                                        src_fs->get_element_size(), src_fs->encoding(),
+                                        src_fs->get_element_size(), src_fs->get_encoding(),
                                         errmode, out_kernel);
                 break;
             }
@@ -142,7 +150,7 @@ void dynd::string_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const 
 }
 
 
-bool dynd::string_dtype::operator==(const extended_dtype& rhs) const
+bool string_dtype::operator==(const extended_dtype& rhs) const
 {
     if (this == &rhs) {
         return true;
@@ -152,4 +160,49 @@ bool dynd::string_dtype::operator==(const extended_dtype& rhs) const
         const string_dtype *dt = static_cast<const string_dtype*>(&rhs);
         return m_encoding == dt->m_encoding;
     }
+}
+
+void string_dtype::prepare_kernel_auxdata(const char *metadata, AuxDataBase *auxdata) const
+{
+    const string_dtype_metadata *md = reinterpret_cast<const string_dtype_metadata *>(metadata);
+    auxdata = reinterpret_cast<AuxDataBase *>(reinterpret_cast<uintptr_t>(auxdata)&~1);
+    if (auxdata->kernel_api) {
+        auxdata->kernel_api->set_dst_memory_block(auxdata, md->blockref);
+    }
+}
+
+size_t string_dtype::get_metadata_size() const
+{
+    return sizeof(string_dtype_metadata);
+}
+
+void string_dtype::metadata_default_construct(char *metadata, int DYND_UNUSED(ndim), const intptr_t* DYND_UNUSED(shape)) const
+{
+    // Simply allocate a POD memory block
+    string_dtype_metadata *md = reinterpret_cast<string_dtype_metadata *>(metadata);
+    md->blockref = make_pod_memory_block().release();
+}
+
+void string_dtype::metadata_copy_construct(char *dst_metadata, const char *src_metadata, memory_block_data *embedded_reference) const
+{
+    // Copy the blockref, switching it to the embedded_reference if necessary
+    const string_dtype_metadata *src_md = reinterpret_cast<const string_dtype_metadata *>(src_metadata);
+    string_dtype_metadata *dst_md = reinterpret_cast<string_dtype_metadata *>(dst_metadata);
+    dst_md->blockref = src_md->blockref ? src_md->blockref : embedded_reference;
+    memory_block_incref(dst_md->blockref);
+}
+
+void string_dtype::metadata_destruct(char *metadata) const
+{
+    string_dtype_metadata *md = reinterpret_cast<string_dtype_metadata *>(metadata);
+    if (md->blockref) {
+        memory_block_decref(md->blockref);
+    }
+}
+
+void string_dtype::metadata_debug_dump(const char *metadata, std::ostream& o, const std::string& indent) const
+{
+    const string_dtype_metadata *md = reinterpret_cast<const string_dtype_metadata *>(metadata);
+    o << "string_dtype metadata\n";
+    memory_block_debug_dump(md->blockref, o, indent);
 }

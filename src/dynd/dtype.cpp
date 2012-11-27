@@ -89,7 +89,7 @@ int dynd::extended_dtype::get_uniform_ndim() const
     return 0;
 }
 
-dtype dynd::extended_dtype::get_dtype_at_dimension(int i, int total_ndim) const
+dtype dynd::extended_dtype::get_dtype_at_dimension(char **inout_metadata, int i, int total_ndim) const
 {
     // Default to heterogeneous dimension/scalar behavior
     if (i == 0) {
@@ -123,6 +123,11 @@ size_t extended_dtype::get_default_element_size(int DYND_UNUSED(ndim), const int
     return get_element_size();
 }
 
+void extended_dtype::prepare_kernel_auxdata(const char *DYND_UNUSED(metadata), AuxDataBase *DYND_UNUSED(auxdata)) const
+{
+    // Default to no blockrefs
+}
+
 // TODO: Make this a pure virtual function eventually
 size_t extended_dtype::get_metadata_size() const
 {
@@ -135,11 +140,11 @@ size_t extended_dtype::get_metadata_size() const
 void extended_dtype::metadata_default_construct(char *metadata, int ndim, const intptr_t* shape) const
 {
     stringstream ss;
-    ss << "TODO: metadata_construct for " << dtype(this, true) << " is not implemented";
+    ss << "TODO: metadata_default_construct for " << dtype(this, true) << " is not implemented";
     throw std::runtime_error(ss.str());
 }
 
-void extended_dtype::metadata_copy_construct(char *DYND_UNUSED(out_metadata), const char *DYND_UNUSED(in_metadata), memory_block_data *DYND_UNUSED(embedded_reference)) const
+void extended_dtype::metadata_copy_construct(char *DYND_UNUSED(dst_metadata), const char *DYND_UNUSED(src_metadata), memory_block_data *DYND_UNUSED(embedded_reference)) const
 {
     stringstream ss;
     ss << "TODO: metadata_copy_construct for " << dtype(this, true) << " is not implemented";
@@ -162,14 +167,14 @@ void extended_dtype::metadata_debug_dump(const char *DYND_UNUSED(metadata), std:
     throw std::runtime_error(ss.str());
 }
 
-size_t extended_dtype::get_iterdata_size() const
+size_t extended_dtype::get_iterdata_size(int DYND_UNUSED(ndim)) const
 {
     stringstream ss;
     ss << "get_iterdata_size: dynd dtype " << dtype(this, true) << " is not uniformly iterable";
     throw std::runtime_error(ss.str());
 }
 
-size_t extended_dtype::iterdata_construct(iterdata_common *DYND_UNUSED(iterdata), const char *DYND_UNUSED(metadata),
+size_t extended_dtype::iterdata_construct(iterdata_common *DYND_UNUSED(iterdata), const char **DYND_UNUSED(inout_metadata),
                 int DYND_UNUSED(ndim), const intptr_t* DYND_UNUSED(shape), dtype& DYND_UNUSED(out_uniform_dtype)) const
 {
     stringstream ss;
@@ -222,6 +227,11 @@ extended_string_dtype::~extended_string_dtype()
 {
 }
 
+size_t extended_string_dtype::get_iterdata_size(int DYND_UNUSED(ndim)) const
+{
+    return 0;
+}
+
 dtype extended_expression_dtype::get_canonical_dtype() const
 {
     return get_value_dtype();
@@ -245,11 +255,11 @@ void extended_expression_dtype::metadata_default_construct(char *metadata, int n
     }
 }
 
-void extended_expression_dtype::metadata_copy_construct(char *out_metadata, const char *in_metadata, memory_block_data *embedded_reference) const
+void extended_expression_dtype::metadata_copy_construct(char *dst_metadata, const char *src_metadata, memory_block_data *embedded_reference) const
 {
     const dtype& dt = get_operand_dtype();
     if (dt.extended()) {
-        dt.extended()->metadata_copy_construct(out_metadata, in_metadata, embedded_reference);
+        dt.extended()->metadata_copy_construct(dst_metadata, src_metadata, embedded_reference);
     }
 }
 
@@ -269,7 +279,7 @@ void extended_expression_dtype::metadata_debug_dump(const char *metadata, std::o
     }
 }
 
-size_t extended_expression_dtype::get_iterdata_size() const
+size_t extended_expression_dtype::get_iterdata_size(int DYND_UNUSED(ndim)) const
 {
     return 0;
 }

@@ -31,6 +31,7 @@ class ndobject_iter<1, 0> {
     dimvector m_iterindex;
     dimvector m_itershape;
     char *m_data;
+    const char *m_metadata;
     iterdata_common *m_iterdata;
     dtype m_array_dtype, m_uniform_dtype;
 public:
@@ -44,13 +45,14 @@ public:
             m_itershape.init(m_iter_ndim);
             m_array_dtype.extended()->get_shape(0, m_itershape.get(), op0.get_ndo()->m_data_pointer, op0.get_ndo_meta());
 
-            size_t iterdata_size = m_array_dtype.extended()->get_iterdata_size();
+            size_t iterdata_size = m_array_dtype.extended()->get_iterdata_size(m_iter_ndim);
             m_iterdata = reinterpret_cast<iterdata_common *>(malloc(iterdata_size));
             if (!m_iterdata) {
                 throw std::bad_alloc("memory allocation error creating dynd ndobject iterator");
             }
+            m_metadata = op0.get_ndo_meta();
             m_array_dtype.iterdata_construct(m_iterdata,
-                            op0.get_ndo_meta(), m_iter_ndim, m_itershape.get(), m_uniform_dtype);
+                            &m_metadata, m_iter_ndim, m_itershape.get(), m_uniform_dtype);
             m_data = m_iterdata->reset(m_iterdata, op0.get_ndo()->m_data_pointer, m_iter_ndim);
 
             for (size_t i = 0, i_end = m_iter_ndim; i != i_end; ++i) {
@@ -60,6 +62,7 @@ public:
             m_iterdata = NULL;
             m_uniform_dtype = m_array_dtype;
             m_data = op0.get_ndo()->m_data_pointer;
+            m_metadata = op0.get_ndo_meta();
         }
     }
 
@@ -99,6 +102,10 @@ public:
         return m_data;
     }
 
+    const char *metadata() {
+        return m_metadata;
+    }
+
     const dtype& get_uniform_dtype() const {
         return m_uniform_dtype;
     }
@@ -111,6 +118,7 @@ class ndobject_iter<1, 1> {
     dimvector m_iterindex;
     dimvector m_itershape;
     char *m_data[2];
+    const char *m_metadata[2];
     iterdata_common *m_iterdata[2];
     dtype m_array_dtype[2], m_uniform_dtype[2];
 public:
@@ -136,22 +144,24 @@ public:
             m_iterindex.init(m_iter_ndim[0]);
             memset(m_iterindex.get(), 0, sizeof(intptr_t) * m_iter_ndim[0]);
             // The destination iterdata
-            size_t iterdata_size = m_array_dtype[0].get_iterdata_size();
+            size_t iterdata_size = m_array_dtype[0].get_iterdata_size(m_iter_ndim[0]);
             m_iterdata[0] = reinterpret_cast<iterdata_common *>(malloc(iterdata_size));
             if (!m_iterdata[0]) {
                 throw std::bad_alloc("memory allocation error creating dynd ndobject iterator");
             }
+            m_metadata[0] = op0.get_ndo_meta();
             m_array_dtype[0].iterdata_construct(m_iterdata[0],
-                            op0.get_ndo_meta(), m_iter_ndim[0], m_itershape.get(), m_uniform_dtype[0]);
+                            &m_metadata[0], m_iter_ndim[0], m_itershape.get(), m_uniform_dtype[0]);
             m_data[0] = m_iterdata[0]->reset(m_iterdata[0], op0.get_readwrite_originptr(), m_iter_ndim[0]);
             // The source iterdata
-            iterdata_size = m_array_dtype[1].get_broadcasted_iterdata_size();
+            iterdata_size = m_array_dtype[1].get_broadcasted_iterdata_size(m_iter_ndim[1]);
             m_iterdata[1] = reinterpret_cast<iterdata_common *>(malloc(iterdata_size));
             if (!m_iterdata[1]) {
                 throw std::bad_alloc("memory allocation error creating dynd ndobject iterator");
             }
+            m_metadata[1] = op1.get_ndo_meta();
             m_array_dtype[1].broadcasted_iterdata_construct(m_iterdata[1],
-                            op1.get_ndo_meta(), m_iter_ndim[1],
+                            &m_metadata[1], m_iter_ndim[1],
                             m_itershape.get() + (m_iter_ndim[0] - m_iter_ndim[1]), m_uniform_dtype[1]);
             m_data[1] = m_iterdata[1]->reset(m_iterdata[1], op1.get_readwrite_originptr(), m_iter_ndim[0]);
 
@@ -165,6 +175,8 @@ public:
             m_uniform_dtype[1] = m_array_dtype[1];
             m_data[0] = op0.get_readwrite_originptr();
             m_data[1] = op1.get_ndo()->m_data_pointer;
+            m_metadata[0] = op0.get_ndo_meta();
+            m_metadata[1] = op1.get_ndo_meta();
         }
     }
 
@@ -219,6 +231,11 @@ public:
     template<int K>
     inline typename enable_if<detail::is_value_within_bounds<K, 0, 2>::value, const char *>::type data() const {
         return m_data[K];
+    }
+
+    template<int K>
+    inline typename enable_if<detail::is_value_within_bounds<K, 0, 2>::value, const char *>::type metadata() const {
+        return m_metadata[K];
     }
 
     template<int K>

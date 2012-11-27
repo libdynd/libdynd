@@ -67,7 +67,7 @@ public:
                     const dtype& result_dtype, char *out_metadata, int current_i, const dtype& root_dt) const;
 
     int get_uniform_ndim() const;
-    dtype get_dtype_at_dimension(int i, int total_ndim = 0) const;
+    dtype get_dtype_at_dimension(char **inout_metadata, int i, int total_ndim = 0) const;
 
     void get_shape(int i, intptr_t *out_shape) const;
 
@@ -87,12 +87,12 @@ public:
 
     size_t get_metadata_size() const;
     void metadata_default_construct(char *metadata, int ndim, const intptr_t* shape) const;
-    void metadata_copy_construct(char *out_metadata, const char *in_metadata, memory_block_data *embedded_reference) const;
+    void metadata_copy_construct(char *dst_metadata, const char *src_metadata, memory_block_data *embedded_reference) const;
     void metadata_destruct(char *metadata) const;
     void metadata_debug_dump(const char *metadata, std::ostream& o, const std::string& indent) const;
 
-    size_t get_iterdata_size() const;
-    size_t iterdata_construct(iterdata_common *iterdata, const char *metadata, int ndim, const intptr_t* shape, dtype& out_uniform_dtype) const;
+    size_t get_iterdata_size(int ndim) const;
+    size_t iterdata_construct(iterdata_common *iterdata, const char **inout_metadata, int ndim, const intptr_t* shape, dtype& out_uniform_dtype) const;
     size_t iterdata_destruct(iterdata_common *iterdata, int ndim) const;
 
     void foreach(int ndim, char *data, const char *metadata, foreach_fn_t callback, const void *callback_data) const;

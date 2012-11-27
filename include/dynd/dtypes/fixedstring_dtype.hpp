@@ -37,9 +37,11 @@ public:
         return m_element_size;
     }
 
-    string_encoding_t encoding() const {
+    string_encoding_t get_encoding() const {
         return m_encoding;
     }
+
+    void get_string_range(const char **out_begin, const char**out_end, const char *data, const char *metadata) const;
 
     void print_element(std::ostream& o, const char *data, const char *metadata) const;
 
@@ -67,6 +69,10 @@ public:
 
     size_t get_metadata_size() const {
         return 0;
+    }
+    void metadata_default_construct(char *DYND_UNUSED(metadata), int DYND_UNUSED(ndim), const intptr_t* DYND_UNUSED(shape)) const {
+    }
+    void metadata_copy_construct(char *DYND_UNUSED(dst_metadata), const char *DYND_UNUSED(src_metadata), memory_block_data *DYND_UNUSED(embedded_reference)) const {
     }
     void metadata_destruct(char *DYND_UNUSED(metadata)) const {
     }

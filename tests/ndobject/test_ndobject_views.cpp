@@ -26,7 +26,7 @@ TEST(NDObjectViews, OneDimensionalRawMemory) {
     uint64_t u8_value;
 
     // Make an 8 byte aligned array of 80 chars
-    a = make_strided_ndobject(make_dtype<uint64_t>(), 10);
+    a = make_strided_ndobject(10, make_dtype<uint64_t>());
     a = a.view_scalars(make_dtype<char>());
 
     // Initialize the char values from a uint64_t,

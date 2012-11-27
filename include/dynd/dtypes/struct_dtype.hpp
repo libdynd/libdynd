@@ -79,7 +79,7 @@ public:
 
     size_t get_metadata_size() const;
     void metadata_default_construct(char *metadata, int ndim, const intptr_t* shape) const;
-    void metadata_copy_construct(char *out_metadata, const char *in_metadata, memory_block_data *embedded_reference) const;
+    void metadata_copy_construct(char *dst_metadata, const char *src_metadata, memory_block_data *embedded_reference) const;
     void metadata_destruct(char *metadata) const;
     void metadata_debug_dump(const char *metadata, std::ostream& o, const std::string& indent) const;
 }; // class struct_dtype

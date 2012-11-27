@@ -15,6 +15,11 @@
 
 namespace dynd {
 
+struct string_dtype_metadata {
+    /** A reference to the memory block which contains the string's data */
+    memory_block_data *blockref;
+};
+
 class string_dtype : public extended_string_dtype {
     string_encoding_t m_encoding;
 
@@ -35,9 +40,11 @@ public:
         return 2 * sizeof(const char *);
     }
 
-    string_encoding_t encoding() const {
+    string_encoding_t get_encoding() const {
         return m_encoding;
     }
+
+    void get_string_range(const char **out_begin, const char**out_end, const char *data, const char *metadata) const;
 
     void print_element(std::ostream& o, const char *data, const char *metadata) const;
 
@@ -65,13 +72,13 @@ public:
 
     bool operator==(const extended_dtype& rhs) const;
 
-    size_t get_metadata_size() const {
-        return 0;
-    }
-    void metadata_destruct(char *DYND_UNUSED(metadata)) const {
-    }
-    void metadata_debug_dump(const char *DYND_UNUSED(metadata), std::ostream& DYND_UNUSED(o), const std::string& DYND_UNUSED(indent)) const {
-    }
+    void prepare_kernel_auxdata(const char *metadata, AuxDataBase *auxdata) const;
+
+    size_t get_metadata_size() const;
+    void metadata_default_construct(char *metadata, int ndim, const intptr_t* shape) const;
+    void metadata_copy_construct(char *dst_metadata, const char *src_metadata, memory_block_data *embedded_reference) const;
+    void metadata_destruct(char *metadata) const;
+    void metadata_debug_dump(const char *metadata, std::ostream& o, const std::string& indent) const;
 };
 
 inline dtype make_string_dtype(string_encoding_t encoding) {

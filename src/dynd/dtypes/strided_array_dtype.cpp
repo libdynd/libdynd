@@ -141,12 +141,15 @@ int dynd::strided_array_dtype::get_uniform_ndim() const
     }
 }
 
-dtype dynd::strided_array_dtype::get_dtype_at_dimension(int i, int total_ndim) const
+dtype dynd::strided_array_dtype::get_dtype_at_dimension(char **inout_metadata, int i, int total_ndim) const
 {
     if (i == 0) {
         return dtype(this, true);
     } else {
-        return m_element_dtype.get_dtype_at_dimension(i - 1, total_ndim + 1);
+        if (inout_metadata) {
+            *inout_metadata += sizeof(strided_array_dtype_metadata);
+        }
+        return m_element_dtype.get_dtype_at_dimension(inout_metadata, i - 1, total_ndim + 1);
     }
 }
 
@@ -253,15 +256,15 @@ void dynd::strided_array_dtype::metadata_default_construct(char *metadata, int n
     }
 }
 
-void dynd::strided_array_dtype::metadata_copy_construct(char *out_metadata, const char *in_metadata, memory_block_data *embedded_reference) const
+void dynd::strided_array_dtype::metadata_copy_construct(char *dst_metadata, const char *src_metadata, memory_block_data *embedded_reference) const
 {
-    const strided_array_dtype_metadata *in_md = reinterpret_cast<const strided_array_dtype_metadata *>(in_metadata);
-    strided_array_dtype_metadata *out_md = reinterpret_cast<strided_array_dtype_metadata *>(out_metadata);
-    out_md->size = in_md->size;
-    out_md->stride = in_md->stride;
+    const strided_array_dtype_metadata *src_md = reinterpret_cast<const strided_array_dtype_metadata *>(src_metadata);
+    strided_array_dtype_metadata *dst_md = reinterpret_cast<strided_array_dtype_metadata *>(dst_metadata);
+    dst_md->size = src_md->size;
+    dst_md->stride = src_md->stride;
     if (m_element_dtype.extended()) {
-        m_element_dtype.extended()->metadata_copy_construct(out_metadata + sizeof(strided_array_dtype_metadata),
-                        in_metadata + sizeof(strided_array_dtype_metadata), embedded_reference);
+        m_element_dtype.extended()->metadata_copy_construct(dst_metadata + sizeof(strided_array_dtype_metadata),
+                        src_metadata + sizeof(strided_array_dtype_metadata), embedded_reference);
     }
 }
 
@@ -285,9 +288,15 @@ void dynd::strided_array_dtype::metadata_debug_dump(const char *metadata, std::o
     }
 }
 
-size_t strided_array_dtype::get_iterdata_size() const
+size_t strided_array_dtype::get_iterdata_size(int ndim) const
 {
-    return m_element_dtype.get_iterdata_size() + sizeof(strided_array_dtype_iterdata);
+    if (ndim == 0) {
+        return 0;
+    } else if (ndim == 1) {
+        return sizeof(strided_array_dtype_iterdata);
+    } else {
+        return m_element_dtype.get_iterdata_size(ndim - 1) + sizeof(strided_array_dtype_iterdata);
+    }
 }
 
 // Does one iterator increment for this dtype
@@ -315,19 +324,20 @@ static char *iterdata_reset(iterdata_common *iterdata, char *data, int ndim)
     }
 }
 
-size_t strided_array_dtype::iterdata_construct(iterdata_common *iterdata, const char *metadata, int ndim, const intptr_t* shape, dtype& out_uniform_dtype) const
+size_t strided_array_dtype::iterdata_construct(iterdata_common *iterdata, const char **inout_metadata, int ndim, const intptr_t* shape, dtype& out_uniform_dtype) const
 {
+    const strided_array_dtype_metadata *md = reinterpret_cast<const strided_array_dtype_metadata *>(*inout_metadata);
     size_t inner_size = 0;
     if (ndim > 1) {
         // Place any inner iterdata earlier than the outer iterdata
-        inner_size = m_element_dtype.extended()->iterdata_construct(iterdata, metadata + sizeof(strided_array_dtype_metadata),
+        *inout_metadata += sizeof(strided_array_dtype_metadata);
+        inner_size = m_element_dtype.extended()->iterdata_construct(iterdata, inout_metadata,
                         ndim - 1, shape + 1, out_uniform_dtype);
         iterdata = reinterpret_cast<iterdata_common *>(reinterpret_cast<char *>(iterdata) + inner_size);
     } else {
         out_uniform_dtype = m_element_dtype;
     }
 
-    const strided_array_dtype_metadata *md = reinterpret_cast<const strided_array_dtype_metadata *>(metadata);
     strided_array_dtype_iterdata *id = reinterpret_cast<strided_array_dtype_iterdata *>(iterdata);
 
     id->common.incr = &iterdata_incr;

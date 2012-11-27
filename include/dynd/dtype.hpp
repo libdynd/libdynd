@@ -406,11 +406,14 @@ public:
      * generally equivalent to apply_linear_index with a count of 'dim'
      * scalar indices.
      *
+     * \param inout_metadata  NULL to ignore, or point it at some metadata for the dtype,
+     *                        and it will be updated to point to the metadata for the returned
+     *                        dtype.
      * \param i         The dimension number to retrieve.
      * \param total_ndim  A count of how many dimensions have been traversed from the
      *                    dtype start, for producing error messages.
      */
-    virtual dtype get_dtype_at_dimension(int i, int total_ndim = 0) const;
+    virtual dtype get_dtype_at_dimension(char **inout_metadata, int i, int total_ndim = 0) const;
 
     /**
      * Retrieves the shape of the dtype, expanding the vector as needed. For dimensions with
@@ -464,6 +467,8 @@ public:
 
     virtual bool operator==(const extended_dtype& rhs) const = 0;
 
+    virtual void prepare_kernel_auxdata(const char *metadata, AuxDataBase *auxdata) const;
+
     /** The size of the ndobject metadata for this dtype */
     virtual size_t get_metadata_size() const;
     /**
@@ -482,18 +487,18 @@ public:
      *                            when putting it in a new ndobject, need to hold a reference to
      *                            that memory.
      */
-    virtual void metadata_copy_construct(char *out_metadata, const char *in_metadata, memory_block_data *embedded_reference) const;
+    virtual void metadata_copy_construct(char *dst_metadata, const char *src_metadata, memory_block_data *embedded_reference) const;
     /** Destructs any references or other state contained in the ndobjects' metdata */
     virtual void metadata_destruct(char *metadata) const;
     /** Debug print of the metdata */
     virtual void metadata_debug_dump(const char *metadata, std::ostream& o, const std::string& indent) const;
 
     /** The size of the data required for uniform iteration */
-    virtual size_t get_iterdata_size() const;
+    virtual size_t get_iterdata_size(int ndim) const;
     /**
      * Constructs the iterdata for processing iteration at this level of the datashape
      */
-    virtual size_t iterdata_construct(iterdata_common *iterdata, const char *metadata, int ndim, const intptr_t* shape, dtype& out_uniform_dtype) const;
+    virtual size_t iterdata_construct(iterdata_common *iterdata, const char **inout_metadata, int ndim, const intptr_t* shape, dtype& out_uniform_dtype) const;
     /** Destructs any references or other state contained in the iterdata */
     virtual size_t iterdata_destruct(iterdata_common *iterdata, int ndim) const;
 
@@ -539,7 +544,14 @@ class extended_string_dtype : public extended_dtype {
 public:
     virtual ~extended_string_dtype();
     /** The encoding used by the string */
-    virtual string_encoding_t encoding() const = 0;
+    virtual string_encoding_t get_encoding() const = 0;
+
+    /** Retrieves the data range in which a string is stored */
+    virtual void get_string_range(const char **out_begin, const char**out_end, const char *data, const char *metadata) const = 0;
+
+    // String dtypes stop the iterdata chain
+    // TODO: Maybe it should be more flexible?
+    size_t get_iterdata_size(int ndim) const;
 };
 
 /**
@@ -581,13 +593,13 @@ public:
     // Expression dtypes use the values from their operand dtype.
     size_t get_metadata_size() const;
     void metadata_default_construct(char *metadata, int ndim, const intptr_t* shape) const;
-    void metadata_copy_construct(char *out_metadata, const char *in_metadata, memory_block_data *embedded_reference) const;
+    void metadata_copy_construct(char *dst_metadata, const char *src_metadata, memory_block_data *embedded_reference) const;
     void metadata_destruct(char *metadata) const;
     void metadata_debug_dump(const char *metadata, std::ostream& o, const std::string& indent) const;
 
     // Expression dtypes stop the iterdata chain
     // TODO: Maybe it should be more flexible?
-    size_t get_iterdata_size() const;
+    size_t get_iterdata_size(int ndim) const;
 };
 
 namespace detail {
@@ -850,17 +862,25 @@ public:
     /** For string dtypes, their encoding */
     string_encoding_t string_encoding() const {
         if (m_kind == string_kind) {
-            return static_cast<const extended_string_dtype *>(m_extended)->encoding();
+            return static_cast<const extended_string_dtype *>(m_extended)->get_encoding();
         } else {
             throw std::runtime_error("Can only get the string encoding from string_kind types");
         }
     }
 
-    dtype_memory_management_t get_memory_management() const {
+    inline dtype_memory_management_t get_memory_management() const {
         if (m_extended != NULL) {
             return m_extended->get_memory_management();
         } else {
             return pod_memory_management;
+        }
+    }
+
+    inline bool is_uniform_dim() const {
+        if (m_extended != NULL) {
+            return m_extended->is_uniform_dim();
+        } else {
+            return false;
         }
     }
 
@@ -911,9 +931,9 @@ public:
         }
     }
 
-    inline dtype get_dtype_at_dimension(int i, int total_ndim = 0) const {
+    inline dtype get_dtype_at_dimension(char **inout_metadata, int i, int total_ndim = 0) const {
         if (m_extended) {
-            return m_extended->get_dtype_at_dimension(i, total_ndim);
+            return m_extended->get_dtype_at_dimension(inout_metadata, i, total_ndim);
         } else if (i == 0) {
             return *this;
         } else {
@@ -932,22 +952,35 @@ public:
         return m_extended;
     }
 
-    /** The size of the data required for uniform iteration */
-    inline size_t get_iterdata_size() const {
+    inline void prepare_kernel_auxdata(const char *metadata, AuxDataBase *auxdata) const {
         if (m_extended) {
-            return m_extended->get_iterdata_size();
+            return m_extended->prepare_kernel_auxdata(metadata, auxdata);
+        }
+    }
+
+    /** The size of the data required for uniform iteration */
+    inline size_t get_iterdata_size(int ndim) const {
+        if (m_extended) {
+            return m_extended->get_iterdata_size(ndim);
         } else {
             return 0;
         }
     }
     /**
-     * Constructs the iterdata for processing iteration of the specified shape
+     * \brief Constructs the iterdata for processing iteration of the specified shape.
+     *
+     * \param iterdata  The allocated iterdata to construct.
+     * \param inout_metadata  The metadata corresponding to the dtype for the iterdata construction.
+     *                        This is modified in place to become the metadata for the uniform dtype.
+     * \param ndim      Number of iteration dimensions.
+     * \param shape     The iteration shape.
+     * \param out_uniform_dtype  This is populated with the dtype of each iterated element
      */
-    inline void iterdata_construct(iterdata_common *iterdata, const char *metadata,
+    inline void iterdata_construct(iterdata_common *iterdata, const char **inout_metadata,
                     int ndim, const intptr_t* shape, dtype& out_uniform_dtype) const
     {
         if (m_extended) {
-            m_extended->iterdata_construct(iterdata, metadata, ndim, shape, out_uniform_dtype);
+            m_extended->iterdata_construct(iterdata, inout_metadata, ndim, shape, out_uniform_dtype);
         }
     }
 
@@ -959,9 +992,9 @@ public:
         }
     }
 
-    inline size_t get_broadcasted_iterdata_size() const {
+    inline size_t get_broadcasted_iterdata_size(int ndim) const {
         if (m_extended) {
-            return m_extended->get_iterdata_size() + sizeof(iterdata_broadcasting_terminator);
+            return m_extended->get_iterdata_size(ndim) + sizeof(iterdata_broadcasting_terminator);
         } else {
             return sizeof(iterdata_broadcasting_terminator);
         }
@@ -970,13 +1003,19 @@ public:
     /**
      * Constructs an iterdata which can be broadcast to the left indefinitely, by capping
      * off the iterdata with a iterdata_broadcasting_terminator.
+     * \param iterdata  The allocated iterdata to construct.
+     * \param inout_metadata  The metadata corresponding to the dtype for the iterdata construction.
+     *                        This is modified in place to become the metadata for the uniform dtype.
+     * \param ndim      Number of iteration dimensions.
+     * \param shape     The iteration shape.
+     * \param out_uniform_dtype  This is populated with the dtype of each iterated element
      */
-    inline void broadcasted_iterdata_construct(iterdata_common *iterdata, const char *metadata,
+    inline void broadcasted_iterdata_construct(iterdata_common *iterdata, const char **inout_metadata,
                     int ndim, const intptr_t* shape, dtype& out_uniform_dtype) const
     {
         size_t size;
         if (m_extended) {
-            size = m_extended->iterdata_construct(iterdata, metadata, ndim, shape, out_uniform_dtype);
+            size = m_extended->iterdata_construct(iterdata, inout_metadata, ndim, shape, out_uniform_dtype);
         } else {
             size = 0;
         }

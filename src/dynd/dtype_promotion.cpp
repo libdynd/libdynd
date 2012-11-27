@@ -184,7 +184,7 @@ dtype dynd::promote_dtypes_arithmetic(const dtype& dt0, const dtype& dt1)
                         dt0_val.extended());
         const extended_string_dtype *ext1 = static_cast<const extended_string_dtype *>(
                         dt1_val.extended());
-        if (ext0->encoding() > ext1->encoding()) {
+        if (ext0->get_encoding() > ext1->get_encoding()) {
             return dt0_val;
         } else {
             return dt1_val;

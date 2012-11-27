@@ -7,6 +7,7 @@
 #include <set>
 
 #include <dynd/auxiliary_data.hpp>
+#include <dynd/ndobject_iter.hpp>
 #include <dynd/dtypes/categorical_dtype.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/kernels/single_compare_kernel_instance.hpp>
@@ -196,25 +197,37 @@ namespace {
 } // anoymous namespace
 
 
-categorical_dtype::categorical_dtype(const ndarray& categories)
-    : extended_dtype(), m_category_dtype(categories.get_dtype())
+categorical_dtype::categorical_dtype(const ndobject& categories)
+    : extended_dtype()
 {
+    const dtype& cdt = categories.get_dtype();
+    if (cdt.type_id() != strided_array_type_id) {
+        throw runtime_error("categorical_dtype only supports construction from a strided_array of categories");
+    }
+    m_category_dtype = categories.get_dtype().at(0);
+    if (m_category_dtype.is_uniform_dim()) {
+        throw runtime_error("categorical_dtype only supports construction from a 1-dimensional strided_array of categories");
+    }
+
+    intptr_t num_categories;
+    categories.get_shape(&num_categories);
+
     single_compare_kernel_instance k;
     m_category_dtype.get_single_compare_kernel(k);
 
     cmp less(k.comparisons[less_id], k.auxdata);
     set<char *, cmp> uniques(less);
 
-    m_categories.resize(categories.get_num_elements());
-    m_value_to_category_index.resize(categories.get_num_elements());
-    m_category_index_to_value.resize(categories.get_num_elements());
+    m_categories.resize(num_categories);
+    m_value_to_category_index.resize(num_categories);
+    m_category_index_to_value.resize(num_categories);
 
     // create the mapping from indices of (to be lexicographically sorted) categories to values
-    vector<char *> categories_user_order(categories.get_num_elements());
+    vector<char *> categories_user_order(num_categories);
     for (uint32_t i = 0; i < m_category_index_to_value.size(); ++i) {
         m_category_index_to_value[i] = i;
         categories_user_order[i] = new char[m_category_dtype.element_size()];
-        memcpy(categories_user_order[i], categories(i).get_readonly_originptr(), m_category_dtype.element_size());
+        memcpy(categories_user_order[i], categories.at(i).get_readonly_originptr(), m_category_dtype.element_size());
         if (uniques.count(categories_user_order[i]) == 0) {
             uniques.insert(categories_user_order[i]);
         }
@@ -385,25 +398,65 @@ bool categorical_dtype::operator==(const extended_dtype& rhs) const
 
 }
 
+size_t categorical_dtype::get_metadata_size() const
+{
+    if (m_category_dtype.extended()) {
+        return m_category_dtype.extended()->get_metadata_size();
+    } else {
+        return 0;
+    }
+}
 
-dtype dynd::factor_categorical_dtype(const ndarray& values)
+void categorical_dtype::metadata_default_construct(char *metadata, int ndim, const intptr_t* shape) const
+{
+    if (m_category_dtype.extended()) {
+        m_category_dtype.extended()->metadata_default_construct(metadata, ndim, shape);
+    }
+}
+
+void categorical_dtype::metadata_copy_construct(char *dst_metadata, const char *src_metadata, memory_block_data *embedded_reference) const
+{
+    if (m_category_dtype.extended()) {
+        m_category_dtype.extended()->metadata_copy_construct(dst_metadata, src_metadata, embedded_reference);
+    }
+}
+
+void categorical_dtype::metadata_destruct(char *metadata) const
+{
+    if (m_category_dtype.extended()) {
+        m_category_dtype.extended()->metadata_destruct(metadata);
+    }
+}
+
+void categorical_dtype::metadata_debug_dump(const char *metadata, std::ostream& o, const std::string& indent) const
+{
+    if (m_category_dtype.extended()) {
+        m_category_dtype.extended()->metadata_debug_dump(metadata, o, indent);
+    }
+}
+
+dtype dynd::factor_categorical_dtype(const ndobject& values)
 {
     single_compare_kernel_instance k;
-    values.get_dtype().get_single_compare_kernel(k);
 
+    ndobject_iter<1, 0> iter(values);
+
+    iter.get_uniform_dtype().get_single_compare_kernel(k);
     cmp less(k.comparisons[less_id], k.auxdata);
     set<const char *, cmp> uniques(less);
 
-    for (uint32_t i = 0; i < values.get_num_elements(); ++i) {
-        if (uniques.count(values(i).get_readonly_originptr()) == 0) {
-            uniques.insert(values(i).get_readonly_originptr());
-        }
+    if (!iter.empty()) {
+        do {
+            if (uniques.count(iter.data()) == 0) {
+                uniques.insert(iter.data());
+            }
+        } while (iter.next());
     }
 
-    ndarray categories(uniques.size(), values.get_dtype());
+    ndobject categories = make_strided_ndobject(uniques.size(), iter.get_uniform_dtype());
     uint32_t i = 0;
     for (set<const char *, cmp>::const_iterator it = uniques.begin(); it != uniques.end(); ++it) {
-        memcpy(categories(i).get_readwrite_originptr(), *it, categories.get_dtype().element_size());
+        memcpy(categories.at(i).get_readwrite_originptr(), *it, categories.get_dtype().element_size());
         ++i;
     }
 

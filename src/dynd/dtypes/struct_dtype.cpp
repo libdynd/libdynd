@@ -289,16 +289,16 @@ void dynd::struct_dtype::metadata_default_construct(char *metadata, int ndim, co
     }
 }
 
-void dynd::struct_dtype::metadata_copy_construct(char *out_metadata, const char *in_metadata, memory_block_data *embedded_reference) const
+void dynd::struct_dtype::metadata_copy_construct(char *dst_metadata, const char *src_metadata, memory_block_data *embedded_reference) const
 {
     // Copy all the field offsets
-    memcpy(out_metadata, in_metadata, m_fields.size() * sizeof(intptr_t));
+    memcpy(dst_metadata, src_metadata, m_fields.size() * sizeof(intptr_t));
     // Copy construct all the field's metadata
     for (size_t i = 0; i < m_fields.size(); ++i) {
         const dtype& field_dt = m_fields[i];
         if (field_dt.extended()) {
-            field_dt.extended()->metadata_copy_construct(out_metadata + m_metadata_offsets[i],
-                            in_metadata + m_metadata_offsets[i],
+            field_dt.extended()->metadata_copy_construct(dst_metadata + m_metadata_offsets[i],
+                            src_metadata + m_metadata_offsets[i],
                             embedded_reference);
         }
     }

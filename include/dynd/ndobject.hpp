@@ -181,6 +181,10 @@ public:
         return get_ndo()->m_data_pointer;
     }
 
+    inline uint32_t get_access_flags() const {
+        return get_ndo()->m_flags & (immutable_access_flag | read_access_flag | write_access_flag);
+    }
+
     /** Returns true if the object is a scalar */
     inline bool is_scalar() const {
         return get_ndo()->is_builtin_dtype() ||
@@ -404,14 +408,50 @@ ndobject make_strided_ndobject(const dtype& uniform_dtype, int ndim, const intpt
 /** Makes a scalar ndobject with data initialized by the provided pointer */
 ndobject make_scalar_ndobject(const dtype& scalar_dtype, const void *data);
 
-inline ndobject make_strided_ndobject(const dtype& uniform_dtype, intptr_t shape0) {
+ndobject make_string_ndobject(const char *str, size_t len, string_encoding_t encoding);
+inline ndobject make_ascii_ndobject(const char *str, size_t len) {
+    return make_string_ndobject(str, len, string_encoding_ascii);
+}
+inline ndobject make_utf8_ndobject(const char *str, size_t len) {
+    return make_string_ndobject(str, len, string_encoding_utf_8);
+}
+inline ndobject make_utf16_ndobject(const uint16_t *str, size_t len) {
+    return make_string_ndobject(reinterpret_cast<const char *>(str), len * sizeof(uint16_t), string_encoding_utf_16);
+}
+inline ndobject make_utf32_ndobject(const uint32_t *str, size_t len) {
+    return make_string_ndobject(reinterpret_cast<const char *>(str), len * sizeof(uint32_t), string_encoding_utf_32);
+}
+
+template<int N>
+inline ndobject make_ascii_ndobject(const char (&static_string)[N]) {
+    return make_ascii_ndobject(&static_string[0], N);
+}
+template<int N>
+inline ndobject make_utf8_ndobject(const char (&static_string)[N]) {
+    return make_utf8_ndobject(&static_string[0], N);
+}
+template<int N>
+inline ndobject make_utf8_ndobject(const unsigned char (&static_string)[N]) {
+    return make_utf8_ndobject(reinterpret_cast<const char *>(&static_string[0]), N);
+}
+template<int N>
+inline ndobject make_utf16_ndobject(const uint16_t (&static_string)[N]) {
+    return make_utf16_ndobject(&static_string[0], N);
+}
+template<int N>
+inline ndobject make_utf32_ndobject(const uint32_t (&static_string)[N]) {
+    return make_utf32_ndobject(&static_string[0], N);
+}
+
+
+inline ndobject make_strided_ndobject(intptr_t shape0, const dtype& uniform_dtype) {
     return make_strided_ndobject(uniform_dtype, 1, &shape0, NULL);
 }
-inline ndobject make_strided_ndobject(const dtype& uniform_dtype, intptr_t shape0, intptr_t shape1) {
+inline ndobject make_strided_ndobject(intptr_t shape0, intptr_t shape1, const dtype& uniform_dtype) {
     intptr_t shape[2] = {shape0, shape1};
     return make_strided_ndobject(uniform_dtype, 2, shape, NULL);
 }
-inline ndobject make_strided_ndobject(const dtype& uniform_dtype, intptr_t shape0, intptr_t shape1, intptr_t shape2) {
+inline ndobject make_strided_ndobject(intptr_t shape0, intptr_t shape1, intptr_t shape2, const dtype& uniform_dtype) {
     intptr_t shape[3] = {shape0, shape1, shape2};
     return make_strided_ndobject(uniform_dtype, 3, shape, NULL);
 }

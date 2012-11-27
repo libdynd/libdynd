@@ -8,6 +8,7 @@
 #include <dynd/dtypes/strided_array_dtype.hpp>
 #include <dynd/dtypes/dtype_alignment.hpp>
 #include <dynd/dtypes/view_dtype.hpp>
+#include <dynd/dtypes/string_dtype.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/exceptions.hpp>
 
@@ -111,11 +112,36 @@ ndobject dynd::make_scalar_ndobject(const dtype& scalar_dtype, const void *data)
     }
     ndo->m_data_pointer = data_ptr;
     ndo->m_data_reference = NULL;
-    ndo->m_flags = read_access_flag | write_access_flag;
+    ndo->m_flags = immutable_access_flag | read_access_flag;
 
     memcpy(data_ptr, data, size);
 
     return ndobject(result);
+}
+
+ndobject dynd::make_string_ndobject(const char *str, size_t len, string_encoding_t encoding)
+{
+    char *data_ptr = NULL, *string_ptr;
+    dtype dt = make_string_dtype(encoding);
+    ndobject result(make_ndobject_memory_block(dt.extended()->get_metadata_size(),
+                        dt.element_size() + len, dt.alignment(), &data_ptr));
+    // Set the string extents
+    string_ptr = data_ptr + dt.element_size();
+    ((char **)data_ptr)[0] = string_ptr;
+    ((char **)data_ptr)[1] = string_ptr + len;
+    // Copy the string data
+    memcpy(string_ptr, str, len);
+    // Set the ndobject metadata
+    ndobject_preamble *ndo = result.get_ndo();
+    ndo->m_dtype = dt.extended();
+    extended_dtype_incref(ndo->m_dtype);
+    ndo->m_data_pointer = data_ptr;
+    ndo->m_data_reference = NULL;
+    ndo->m_flags = read_access_flag | immutable_access_flag;
+    // Set the string metadata, telling the system that the string data was embedded in the ndobject memory
+    string_dtype_metadata *ndo_meta = reinterpret_cast<string_dtype_metadata *>(result.get_ndo_meta());
+    ndo_meta->blockref = NULL;
+    return result;
 }
 
 // Constructors from C++ scalars
@@ -182,6 +208,11 @@ dynd::ndobject::ndobject(std::complex<float> value)
 dynd::ndobject::ndobject(std::complex<double> value)
     : m_memblock(make_immutable_builtin_scalar_ndobject(value))
 {
+}
+dynd::ndobject::ndobject(const std::string& value)
+{
+    ndobject temp = make_utf8_ndobject(value.c_str(), value.size());
+    temp.swap(*this);
 }
 dynd::ndobject::ndobject(const dtype& dt)
     : m_memblock(make_ndobject_memory_block(dt, 0, NULL))
@@ -257,6 +288,7 @@ void dynd::ndobject::val_assign(const ndobject& rhs, assign_error_mode errmode,
         get_dtype_assignment_kernel(iter.get_uniform_dtype(), rhs.get_dtype(), errmode, ectx, assign);
         unary_operation_t assign_fn = assign.specializations[scalar_unary_specialization];
         if (!iter.empty()) {
+            iter.get_uniform_dtype().prepare_kernel_auxdata(iter.metadata(), assign.auxdata);
             do {
                 assign_fn(iter.data(), 0, src_ptr, 0, 1, assign.auxdata);
             } while (iter.next());
@@ -270,6 +302,7 @@ void dynd::ndobject::val_assign(const ndobject& rhs, assign_error_mode errmode,
         unary_operation_t assign_fn = assign.specializations[scalar_unary_specialization];
 
         if (!iter.empty()) {
+            iter.get_uniform_dtype<0>().prepare_kernel_auxdata(iter.metadata<0>(), assign.auxdata);
             do {
                 assign_fn(iter.data<0>(), 0, iter.data<1>(), 0, 1, assign.auxdata);
             } while (iter.next());
@@ -292,6 +325,7 @@ void ndobject::val_assign(const dtype& dt, const char *data, assign_error_mode e
     get_dtype_assignment_kernel(iter.get_uniform_dtype(), dt, errmode, ectx, assign);
     unary_operation_t assign_fn = assign.specializations[scalar_unary_specialization];
     if (!iter.empty()) {
+        iter.get_uniform_dtype().prepare_kernel_auxdata(iter.metadata(), assign.auxdata);
         do {
             assign_fn(iter.data(), 0, data, 0, 1, assign.auxdata);
         } while (iter.next());
@@ -402,6 +436,30 @@ ndobject ndobject::view_scalars(const dtype& scalar_dtype) const
     return result;
 }
 
+std::string dynd::detail::ndobject_as_string(const ndobject& lhs, assign_error_mode errmode)
+{
+    if (!lhs.is_scalar()) {
+        throw std::runtime_error("can only convert ndobjects with 0 dimensions to scalars");
+    }
+    // Try to make a string directly from the data bytes if possible
+    const dtype& lhs_dt = lhs.get_dtype();
+    if (lhs_dt.kind() == string_kind) {
+        const extended_string_dtype *esd = static_cast<const extended_string_dtype *>(lhs_dt.extended());
+        string_encoding_t encoding = esd->get_encoding();
+        if (encoding == string_encoding_utf_8 || encoding == string_encoding_ascii) {
+            const char *begin, *end;
+            esd->get_string_range(&begin, &end, lhs.get_readonly_originptr(), lhs.get_ndo_meta());
+            return std::string(begin, end);
+        }
+    }
+
+    // Otherwise cast it to a UTF8 string, then get the data bytes.
+    ndobject temp = lhs.cast_scalars(make_string_dtype(string_encoding_utf_8)).vals();
+    const extended_string_dtype *esd = static_cast<const extended_string_dtype *>(temp.get_dtype().extended());
+    const char *begin, *end;
+    esd->get_string_range(&begin, &end, temp.get_readonly_originptr(), temp.get_ndo_meta());
+    return std::string(begin, end);
+}
 
 void ndobject::debug_dump(std::ostream& o, const std::string& indent) const
 {
@@ -462,7 +520,7 @@ ndobject dynd::empty_like(const ndobject& rhs, const dtype& uniform_dtype)
 ndobject dynd::empty_like(const ndobject& rhs)
 {
     // FIXME: This implementation only works for linearly strided arrays
-    return empty_like(rhs, rhs.get_dtype().get_dtype_at_dimension(rhs.get_dtype().get_uniform_ndim()));
+    return empty_like(rhs, rhs.get_dtype().get_dtype_at_dimension(NULL, rhs.get_dtype().get_uniform_ndim()));
 }
 
 dynd::ndobject_vals::operator ndobject() const

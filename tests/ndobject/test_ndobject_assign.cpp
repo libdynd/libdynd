@@ -215,7 +215,7 @@ TEST(NDObjectAssign, ScalarAssignment_Complex_Float64) {
 }
 
 TEST(NDObjectAssign, BroadcastAssign) {
-    ndobject a = make_strided_ndobject(make_dtype<float>(), 2, 3, 4);
+    ndobject a = make_strided_ndobject(2, 3, 4, make_dtype<float>());
     int v0[4] = {3,4,5,6};
     ndobject b = v0;
 

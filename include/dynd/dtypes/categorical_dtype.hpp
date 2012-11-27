@@ -11,7 +11,7 @@
 #include <vector>
 
 #include <dynd/dtype.hpp>
-#include <dynd/ndarray.hpp>
+#include <dynd/ndobject.hpp>
 
 
 namespace {
@@ -33,7 +33,7 @@ class categorical_dtype : public extended_dtype {
     std::vector<intptr_t> m_value_to_category_index;
 
 public:
-    categorical_dtype(const ndarray& categories);
+    categorical_dtype(const ndobject& categories);
 
     ~categorical_dtype();
 
@@ -87,18 +87,23 @@ public:
 
     bool operator==(const extended_dtype& rhs) const;
 
+    size_t get_metadata_size() const;
+    void metadata_default_construct(char *metadata, int ndim, const intptr_t* shape) const;
+    void metadata_copy_construct(char *dst_metadata, const char *src_metadata, memory_block_data *embedded_reference) const;
+    void metadata_destruct(char *metadata) const;
+    void metadata_debug_dump(const char *metadata, std::ostream& o, const std::string& indent) const;
+
     friend struct assign_to_same_category_type;
     friend struct assign_from_same_category_type;
     friend struct assign_from_commensurate_category_type;
-
 };
 
-inline dtype make_categorical_dtype(const ndarray& values) {
+inline dtype make_categorical_dtype(const ndobject& values) {
     return dtype(new categorical_dtype(values));
 }
 
 
-dtype factor_categorical_dtype(const ndarray& values);
+dtype factor_categorical_dtype(const ndobject& values);
 
 
 } // namespace dynd
