@@ -11,11 +11,6 @@
 //#  define DYND_RVALUE_REFS
 //#  define DYND_INIT_LIST
 
-// NOTE: I hacked the g++ system headers, adding explicit copy constructors and assignment
-//       operators to both shared_ptr and __shared_ptr (in shared_ptr_base.h), so that clang
-//       would accept them. This is because the LLVM JIT used by CLING complains about inline
-//       assembly with the boost version, but not with the g++ version.
-#define DYND_USE_BOOST_SHARED_PTR
 // TODO: versions with constexpr
 #  define DYND_CONSTEXPR constexpr
 
@@ -36,8 +31,6 @@
 #else
 // Don't use constexpr on gcc < 4.7
 #  define DYND_CONSTEXPR
-// Use boost shared_ptr on gcc < 4.7
-#  define DYND_USE_BOOST_SHARED_PTR
 #endif
 
 #elif defined(_MSC_VER)
@@ -64,22 +57,6 @@
 #  define DYND_MOVE(x) (x)
 #endif
 
-// Whether to use boost's shared_ptr or the standard library's
-#ifdef DYND_USE_BOOST_SHARED_PTR
-#include <boost/shared_ptr.hpp>
-#include <boost/make_shared.hpp>
-namespace dynd {
-    using ::boost::shared_ptr;
-    using ::boost::make_shared;
-}
-#else
-#include <memory>
-namespace dynd {
-    using ::std::shared_ptr;
-    using ::std::make_shared;
-}
-#endif
-
 // If Initializer Lists are supported
 #ifdef DYND_INIT_LIST
 #include <initializer_list>
@@ -87,9 +64,7 @@ namespace dynd {
 
 // If being run from the CLING C++ interpreter
 #ifdef DYND_CLING
-// 1) Used g++ shared_ptr instead of boost shared_ptr (see above in clang config section).
-//    This allowed dtypes to be created in cling!
-// 2) Don't use the memcpy function (it has inline assembly).
+// Don't use the memcpy function (it has inline assembly).
 
 inline void DYND_MEMCPY(char *dst, const char *src, intptr_t count)
 {
