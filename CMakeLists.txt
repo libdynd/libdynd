@@ -53,6 +53,7 @@ set(dynd_SRC
     # DTypes
     src/dynd/dtypes/array_dtype.cpp
     src/dynd/dtypes/busdate_dtype.cpp
+    src/dynd/dtypes/bytes_dtype.cpp
     src/dynd/dtypes/byteswap_dtype.cpp
     src/dynd/dtypes/categorical_dtype.cpp
     src/dynd/dtypes/convert_dtype.cpp
@@ -69,6 +70,7 @@ set(dynd_SRC
     src/dynd/dtypes/void_pointer_dtype.cpp
     include/dynd/dtypes/array_dtype.hpp
     include/dynd/dtypes/busdate_dtype.hpp
+    include/dynd/dtypes/bytes_dtype.hpp
     include/dynd/dtypes/byteswap_dtype.hpp
     include/dynd/dtypes/categorical_dtype.hpp
     include/dynd/dtypes/convert_dtype.hpp
@@ -107,6 +109,7 @@ set(dynd_SRC
     src/dynd/kernels/builtin_dtype_binary_kernel_table.cpp
     src/dynd/kernels/buffered_unary_kernels.cpp
     src/dynd/kernels/buffered_binary_kernels.cpp
+    src/dynd/kernels/bytes_assignment_kernels.cpp
     src/dynd/kernels/byteswap_kernels.cpp
     src/dynd/kernels/string_assignment_kernels.cpp
     src/dynd/kernels/kernels_for_disassembly.cpp
@@ -116,6 +119,7 @@ set(dynd_SRC
     include/dynd/kernels/builtin_dtype_binary_kernel_table.hpp
     include/dynd/kernels/buffered_unary_kernels.hpp
     include/dynd/kernels/buffered_binary_kernels.hpp
+    include/dynd/kernels/bytes_assignment_kernels.hpp
     include/dynd/kernels/byteswap_kernels.hpp
     include/dynd/kernels/kernel_instance.hpp
     include/dynd/kernels/single_compare_kernel_instance.hpp

@@ -597,7 +597,12 @@ void ndobject::debug_print(std::ostream& o, const std::string& indent) const
         o << " address: " << (void *)m_memblock.get() << "\n";
         o << " refcount: " << ndo->m_memblockdata.m_use_count << "\n";
         o << " data pointer: " << (void *)ndo->m_data_pointer << "\n";
-        o << " data reference: " << (void *)ndo->m_data_reference << "\n";
+        o << " data reference: " << (void *)ndo->m_data_reference;
+        if (ndo->m_data_reference == NULL) {
+            o << " (embedded in ndobject memory)\n";
+        } else {
+            o << "\n";
+        }
         o << " flags: " << ndo->m_flags << " (";
         if (ndo->m_flags & read_access_flag) o << "read_access ";
         if (ndo->m_flags & write_access_flag) o << "write_access ";

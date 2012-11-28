@@ -2,39 +2,37 @@
 // Copyright (C) 2011-12, Dynamic NDArray Developers
 // BSD 2-Clause License, see LICENSE.txt
 //
-// The string dtype uses memory_block references to store
-// arbitrarily sized strings.
+// The bytes dtype uses memory_block references to store
+// arbitrarily sized bytes.
 //
-#ifndef _DYND__STRING_DTYPE_HPP_
-#define _DYND__STRING_DTYPE_HPP_
+#ifndef _DYND__BYTES_DTYPE_HPP_
+#define _DYND__BYTES_DTYPE_HPP_
 
 #include <dynd/dtype.hpp>
 #include <dynd/dtype_assign.hpp>
-#include <dynd/dtypes/view_dtype.hpp>
-#include <dynd/string_encodings.hpp>
 
 namespace dynd {
 
-struct string_dtype_metadata {
+struct bytes_dtype_metadata {
     /**
-     * A reference to the memory block which contains the string's data.
-     * NOTE: This is identical to bytes_dtype_metadata, by design. Maybe
+     * A reference to the memory block which contains the byte's data.
+     * NOTE: This is identical to string_dtype_metadata, by design. Maybe
      *       both should become a typedef to a common class?
      */
     memory_block_data *blockref;
 };
 
-class string_dtype : public extended_string_dtype {
-    string_encoding_t m_encoding;
+class bytes_dtype : public extended_dtype {
+    size_t m_alignment;
 
 public:
-    string_dtype(string_encoding_t encoding);
+    bytes_dtype(size_t alignment);
 
     type_id_t type_id() const {
-        return string_type_id;
+        return bytes_type_id;
     }
     dtype_kind_t kind() const {
-        return string_kind;
+        return bytes_kind;
     }
     // Expose the storage traits here
     size_t alignment() const {
@@ -44,11 +42,10 @@ public:
         return 2 * sizeof(const char *);
     }
 
-    string_encoding_t get_encoding() const {
-        return m_encoding;
+    /** Alignment of the bytes data being pointed to. */
+    size_t get_data_alignment() const {
+        return m_alignment;
     }
-
-    void get_string_range(const char **out_begin, const char**out_end, const char *data, const char *metadata) const;
 
     void print_element(std::ostream& o, const char *data, const char *metadata) const;
 
@@ -87,10 +84,10 @@ public:
     void metadata_debug_print(const char *metadata, std::ostream& o, const std::string& indent) const;
 };
 
-inline dtype make_string_dtype(string_encoding_t encoding) {
-    return dtype(new string_dtype(encoding));
+inline dtype make_bytes_dtype(size_t alignment) {
+    return dtype(new bytes_dtype(alignment));
 }
 
 } // namespace dynd
 
-#endif // _DYND__STRING_DTYPE_HPP_
+#endif // _DYND__BYTES_DTYPE_HPP_

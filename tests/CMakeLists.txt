@@ -12,6 +12,7 @@ set(tests_SRC
     codegen/test_binary_kernel_adapter.cpp
 #    codegen/assembly_samples/asm_tests.cpp
     dtypes/test_array_dtype.cpp
+    dtypes/test_bytes_dtype.cpp
     dtypes/test_byteswap_dtype.cpp
     dtypes/test_categorical_dtype.cpp
     dtypes/test_convert_dtype.cpp

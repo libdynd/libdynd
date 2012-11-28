@@ -9,7 +9,6 @@
 #include "inc_gtest.hpp"
 
 #include <dynd/ndobject.hpp>
-#include <dynd/nodes/immutable_scalar_node.hpp>
 #include <dynd/dtypes/string_dtype.hpp>
 #include <dynd/dtypes/strided_array_dtype.hpp>
 #include <dynd/dtypes/fixedstring_dtype.hpp>
