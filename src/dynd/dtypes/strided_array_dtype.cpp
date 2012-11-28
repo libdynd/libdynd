@@ -288,8 +288,6 @@ void strided_array_dtype::metadata_debug_print(const char *metadata, std::ostrea
     o << indent << " size: " << md->size << "\n";
     if (m_element_dtype.extended()) {
         m_element_dtype.extended()->metadata_debug_print(metadata + sizeof(strided_array_dtype_metadata), o, indent + " ");
-    } else {
-        o << indent << "  " << m_element_dtype << "\n";
     }
 }
 
@@ -369,6 +367,6 @@ void strided_array_dtype::foreach_leading(char *data, const char *metadata, fore
     const char *child_metadata = metadata + sizeof(strided_array_dtype_metadata);
     intptr_t stride = md->stride;
     for (intptr_t i = 0, i_end = md->size; i < i_end; ++i, data += stride) {
-        callback(m_element_dtype, data, metadata, callback_data);
+        callback(m_element_dtype, data, child_metadata, callback_data);
     }
 }

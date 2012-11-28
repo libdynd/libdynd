@@ -577,14 +577,17 @@ void ndobject::debug_print(std::ostream& o, const std::string& indent) const
 
 std::ostream& dynd::operator<<(std::ostream& o, const ndobject& rhs)
 {
-    if (rhs.get_ndo() != NULL) {
-        if (rhs.get_ndo()->is_builtin_dtype()) {
-            print_builtin_scalar(rhs.get_ndo()->get_builtin_type_id(), o, rhs.get_ndo()->m_data_pointer);
+    if (!rhs.empty()) {
+        o << "ndobject(";
+        ndobject v = rhs.vals();
+        if (v.get_ndo()->is_builtin_dtype()) {
+            print_builtin_scalar(v.get_ndo()->get_builtin_type_id(), o, v.get_ndo()->m_data_pointer);
         } else {
-            rhs.get_ndo()->m_dtype->print_element(o, rhs.get_ndo()->m_data_pointer, rhs.get_ndo_meta());
+            v.get_ndo()->m_dtype->print_element(o, v.get_ndo()->m_data_pointer, v.get_ndo_meta());
         }
+        o << ", " << rhs.get_dtype() << ")";
     } else {
-        o << "<null>";
+        o << "ndobject()";
     }
     return o;
 }
