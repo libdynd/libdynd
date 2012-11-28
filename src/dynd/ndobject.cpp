@@ -567,7 +567,7 @@ void ndobject::debug_print(std::ostream& o, const std::string& indent) const
         o << " dtype: " << get_dtype() << "\n";
         if (!ndo->is_builtin_dtype()) {
             o << " metadata:\n";
-            ndo->m_dtype->metadata_debug_print(get_ndo_meta(), o, indent + " ");
+            ndo->m_dtype->metadata_debug_print(get_ndo_meta(), o, indent + "  ");
         }
     } else {
         o << indent << "NULL\n";
