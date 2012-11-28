@@ -70,7 +70,7 @@ void dynd::gfunc::elwise_reduce::debug_dump(std::ostream& o, const std::string& 
             o << indent << " right associative kernel aux data: ";
             o << (const void *)(const dynd::AuxDataBase *)k.m_right_associative_reduction_kernel.auxdata << "\n";
         }
-        if (k.m_identity.get_node().get()) {
+        if (!k.m_identity.empty()) {
             o << indent << " reduction identity:\n";
             k.m_identity.debug_dump(o, indent + "  ");
         } else {

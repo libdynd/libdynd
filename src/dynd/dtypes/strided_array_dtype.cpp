@@ -55,7 +55,7 @@ bool strided_array_dtype::is_uniform_dim() const
     return true;
 }
 
-bool strided_array_dtype::is_scalar(const char *DYND_UNUSED(data), const char *DYND_UNUSED(metadata)) const
+bool strided_array_dtype::is_scalar() const
 {
     return false;
 }
@@ -363,17 +363,12 @@ size_t strided_array_dtype::iterdata_destruct(iterdata_common *iterdata, int ndi
     return inner_size + sizeof(strided_array_dtype_iterdata);
 }
 
-void strided_array_dtype::foreach(int ndim, char *data, const char *metadata, foreach_fn_t callback, const void *callback_data) const
+void strided_array_dtype::foreach_leading(char *data, const char *metadata, foreach_fn_t callback, void *callback_data) const
 {
-    if (ndim > 0) {
-        const strided_array_dtype_metadata *md = reinterpret_cast<const strided_array_dtype_metadata *>(metadata);
-        const extended_dtype *child_dtype = m_element_dtype.extended();
-        const char *child_metadata = metadata + sizeof(strided_array_dtype_metadata);
-        intptr_t stride = md->stride;
-        for (intptr_t i = 0, i_end = md->size; i < i_end; ++i, data += stride) {
-        
-        }
-    } else {
-        callback(this, data, metadata, callback_data);
+    const strided_array_dtype_metadata *md = reinterpret_cast<const strided_array_dtype_metadata *>(metadata);
+    const char *child_metadata = metadata + sizeof(strided_array_dtype_metadata);
+    intptr_t stride = md->stride;
+    for (intptr_t i = 0, i_end = md->size; i < i_end; ++i, data += stride) {
+        callback(m_element_dtype, data, metadata, callback_data);
     }
 }

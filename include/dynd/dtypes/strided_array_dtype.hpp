@@ -58,7 +58,7 @@ public:
     }
 
     bool is_uniform_dim() const;
-    bool is_scalar(const char *data, const char *metadata) const;
+    bool is_scalar() const;
     dtype with_transformed_scalar_types(dtype_transform_fn_t transform_fn, const void *extra) const;
     dtype get_canonical_dtype() const;
 
@@ -94,7 +94,7 @@ public:
     size_t iterdata_construct(iterdata_common *iterdata, const char **inout_metadata, int ndim, const intptr_t* shape, dtype& out_uniform_dtype) const;
     size_t iterdata_destruct(iterdata_common *iterdata, int ndim) const;
 
-    void foreach(int ndim, char *data, const char *metadata, foreach_fn_t callback, const void *callback_data) const;
+    void foreach_leading(char *data, const char *metadata, foreach_fn_t callback, void *callback_data) const;
 };
 
 inline dtype make_strided_array_dtype(const dtype& element_dtype) {

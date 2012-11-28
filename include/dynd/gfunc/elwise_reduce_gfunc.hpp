@@ -11,7 +11,7 @@
 #include <vector>
 
 #include <dynd/dtype.hpp>
-#include <dynd/ndarray.hpp>
+#include <dynd/ndobject.hpp>
 #include <dynd/kernels/kernel_instance.hpp>
 #include <dynd/codegen/codegen_cache.hpp>
 
@@ -32,7 +32,7 @@ public:
     bool m_commutative;
     dtype m_returntype;
     std::vector<dynd::dtype> m_paramtypes;
-    dynd::ndarray m_identity;
+    dynd::ndobject m_identity;
     /**
      * Does dst <- operation(dst, src), use when iterating from index 0 to N-1.
      */

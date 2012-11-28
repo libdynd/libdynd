@@ -277,7 +277,7 @@ class extended_dtype;
 struct iterdata_common;
 
 /** This is the callback function type used by the extended_dtype::foreach function */
-typedef void (*foreach_fn_t)(const extended_dtype *dt, char *data, const char *metadata, const void *callback_data);
+typedef void (*foreach_fn_t)(const dtype &dt, char *data, const char *metadata, void *callback_data);
 
 /**
  * This is the iteration increment function used by iterdata. It increments the
@@ -346,8 +346,13 @@ public:
     /** Returns true if the dtype is an array dtype whose elements all have the same dtype */
     virtual bool is_uniform_dim() const;
 
-    /** Returns true if the ndobject with the data/metadata is a scalar */
-    virtual bool is_scalar(const char *data, const char *metadata) const;
+    /**
+     * \brief Returns true if the dtype is a scalar.
+     *
+     * This precludes a dynamic dtype from switching between scalar and array behavior,
+     * but the simplicity seems to probably be worth it.
+     */
+    virtual bool is_scalar() const;
 
     /**
      * For array types, recursively applies itself, and for
@@ -510,10 +515,16 @@ public:
     virtual size_t iterdata_destruct(iterdata_common *iterdata, int ndim) const;
 
     /**
-     * Call the callback on each element of the array with given data/metdata, descending
-     * to exactly 'ndim' dimensions (or all the way if ndim is -1).
+     * Call the callback on each element of the array with given data/metadata along the leading
+     * dimension. For uniform dimensions, the dtype provided is the same each call, but for
+     * heterogeneous dimensions it changes.
+     *
+     * \param data  The ndobject data.
+     * \param metadata  The ndobject metadata.
+     * \param callback  Callback function called for each subelement.
+     * \param callback_data  Data provided to the callback function.
      */
-    virtual void foreach(int ndim, char *data, const char *metadata, foreach_fn_t callback, const void *callback_data) const;
+    virtual void foreach_leading(char *data, const char *metadata, foreach_fn_t callback, void *callback_data) const;
 
     friend void extended_dtype_incref(const extended_dtype *ed);
     friend void extended_dtype_decref(const extended_dtype *ed);
@@ -888,6 +899,14 @@ public:
             return m_extended->is_uniform_dim();
         } else {
             return false;
+        }
+    }
+
+    inline bool is_scalar() const {
+        if (m_extended != NULL) {
+            return m_extended->is_scalar();
+        } else {
+            return true;
         }
     }
 

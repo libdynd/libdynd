@@ -10,8 +10,9 @@
 
 #include "inc_gtest.hpp"
 
-#include "dynd/ndobject.hpp"
+#include <dynd/ndobject.hpp>
 #include <dynd/dtypes/strided_array_dtype.hpp>
+#include <dynd/dtypes/fixedbytes_dtype.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -245,7 +246,7 @@ TEST(NDObject, ConstructorMemoryLayouts) {
     axisperm[0] = 0;
     axisperm[1] = 1;
     axisperm[2] = 2;
-    a = make_strided_ndobject(dt, 3, shape, axisperm);
+    a = make_strided_ndobject(dt, 3, shape, read_access_flag|write_access_flag, axisperm);
     EXPECT_EQ(3, a.get_strides().size());
     EXPECT_EQ(0, a.get_strides()[0]);
     EXPECT_EQ(0, a.get_strides()[1]);
@@ -268,7 +269,7 @@ TEST(NDObject, ConstructorMemoryLayouts) {
         }
         do {
             // Test constructing the array using the perm
-            a = make_strided_ndobject(dt, ndim, shape, axisperm);
+            a = make_strided_ndobject(dt, ndim, shape, read_access_flag|write_access_flag, axisperm);
             EXPECT_EQ(ndim, a.get_strides().size());
             intptr_t s = dt.element_size();
             for (int i = 0; i < ndim; ++i) {
@@ -426,4 +427,16 @@ TEST(NDObject, InitFromNestedCArray) {
     EXPECT_EQ(9, ptr_f[9]);
     EXPECT_EQ(8, ptr_f[10]);
     EXPECT_EQ(7, ptr_f[11]);
+}
+
+TEST(NDObject, Storage) {
+    int i0[2][3] = {{1,2,3}, {4,5,6}};
+    ndobject a = i0;
+
+    ndobject b = a.storage();
+    EXPECT_EQ(make_strided_array_dtype(make_strided_array_dtype(make_dtype<int>())), a.get_dtype());
+    EXPECT_EQ(make_strided_array_dtype(make_strided_array_dtype(make_fixedbytes_dtype(4, 4))), b.get_dtype());
+    EXPECT_EQ(a.get_readonly_originptr(), b.get_readonly_originptr());
+    EXPECT_EQ(a.get_shape(), b.get_shape());
+    EXPECT_EQ(a.get_strides(), b.get_strides());
 }

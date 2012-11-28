@@ -9,18 +9,19 @@
 #include <dynd/dtypes/dtype_alignment.hpp>
 #include <dynd/dtypes/view_dtype.hpp>
 #include <dynd/dtypes/string_dtype.hpp>
+#include <dynd/dtypes/fixedbytes_dtype.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/exceptions.hpp>
 
 using namespace std;
 using namespace dynd;
 
-dynd::ndobject::ndobject()
+ndobject::ndobject()
     : m_memblock()
 {
 }
 
-void dynd::ndobject::swap(ndobject& rhs)
+void ndobject::swap(ndobject& rhs)
 {
     m_memblock.swap(rhs.m_memblock);
 }
@@ -40,7 +41,8 @@ make_immutable_builtin_scalar_ndobject(const T& value)
     return result;
 }
 
-ndobject dynd::make_strided_ndobject(const dtype& uniform_dtype, int ndim, const intptr_t *shape, const int *axis_perm)
+ndobject dynd::make_strided_ndobject(const dtype& uniform_dtype, int ndim, const intptr_t *shape,
+                int64_t access_flags, const int *axis_perm)
 {
     // Determine the total data size
     intptr_t size = uniform_dtype.element_size();
@@ -61,7 +63,7 @@ ndobject dynd::make_strided_ndobject(const dtype& uniform_dtype, int ndim, const
     extended_dtype_incref(ndo->m_dtype);
     ndo->m_data_pointer = data_ptr;
     ndo->m_data_reference = NULL;
-    ndo->m_flags = read_access_flag | write_access_flag;
+    ndo->m_flags = access_flags;
 
     // Fill in the ndobject metadata with C-order strides
     strided_array_dtype_metadata *meta = reinterpret_cast<strided_array_dtype_metadata *>(ndo + 1);
@@ -81,6 +83,40 @@ ndobject dynd::make_strided_ndobject(const dtype& uniform_dtype, int ndim, const
             meta[i_perm].size = dim_size;
             stride *= dim_size;
         }
+    }
+
+    return ndobject(result);
+}
+
+ndobject dynd::make_strided_ndobject_from_data(const dtype& uniform_dtype, int ndim, const intptr_t *shape,
+                const intptr_t *strides, int64_t access_flags, char *data_ptr, const memory_block_ptr& data_reference)
+{
+    if (uniform_dtype.extended() && uniform_dtype.extended()->get_metadata_size() > 0) {
+        stringstream ss;
+        ss << "Cannot make a strided ndobject with dtype " << uniform_dtype << " from a preexisting data pointer";
+        throw runtime_error(ss.str());
+    }
+
+    dtype array_dtype = make_strided_array_dtype(uniform_dtype, ndim);
+
+    // Allocate the ndobject metadata and data in one memory block
+    memory_block_ptr result = make_ndobject_memory_block(array_dtype.extended()->get_metadata_size());
+
+    // Fill in the preamble metadata
+    ndobject_preamble *ndo = reinterpret_cast<ndobject_preamble *>(result.get());
+    ndo->m_dtype = array_dtype.extended();
+    extended_dtype_incref(ndo->m_dtype);
+    ndo->m_data_pointer = data_ptr;
+    ndo->m_data_reference = data_reference.get();
+    memory_block_incref(ndo->m_data_reference);
+    ndo->m_flags = access_flags;
+
+    // Fill in the ndobject metadata with the shape and strides
+    strided_array_dtype_metadata *meta = reinterpret_cast<strided_array_dtype_metadata *>(ndo + 1);
+    for (int i = 0; i < ndim; ++i) {
+        intptr_t dim_size = shape[i];
+        meta[i].stride = dim_size > 1 ? strides[i] : 0;
+        meta[i].size = dim_size;
     }
 
     return ndobject(result);
@@ -144,97 +180,140 @@ ndobject dynd::make_string_ndobject(const char *str, size_t len, string_encoding
     return result;
 }
 
+/**
+ * Clones the metadata and swaps in a new dtype. The dtype must
+ * have identical metadata, but this function doesn't check that.
+ */
+static ndobject make_ndobject_clone_with_new_dtype(const ndobject& n, const dtype& new_dt)
+{
+    ndobject result(shallow_copy_ndobject_memory_block(n.get_memblock()));
+    ndobject_preamble *preamble = result.get_ndo();
+    // Swap in the dtype
+    if (!preamble->is_builtin_dtype()) {
+        extended_dtype_decref(preamble->m_dtype);
+    }
+    if(new_dt.extended()) {
+        preamble->m_dtype = new_dt.extended();
+        extended_dtype_incref(preamble->m_dtype);
+    } else {
+        preamble->m_dtype = reinterpret_cast<extended_dtype *>(new_dt.type_id());
+    }
+    return result;
+}
+
+
 // Constructors from C++ scalars
-dynd::ndobject::ndobject(dynd_bool value)
+ndobject::ndobject(dynd_bool value)
     : m_memblock(make_immutable_builtin_scalar_ndobject(value))
 {
 }
-dynd::ndobject::ndobject(bool value)
+ndobject::ndobject(bool value)
     : m_memblock(make_immutable_builtin_scalar_ndobject(dynd_bool(value)))
 {
 }
-dynd::ndobject::ndobject(signed char value)
+ndobject::ndobject(signed char value)
     : m_memblock(make_immutable_builtin_scalar_ndobject(value))
 {
 }
-dynd::ndobject::ndobject(short value)
+ndobject::ndobject(short value)
     : m_memblock(make_immutable_builtin_scalar_ndobject(value))
 {
 }
-dynd::ndobject::ndobject(int value)
+ndobject::ndobject(int value)
     : m_memblock(make_immutable_builtin_scalar_ndobject(value))
 {
 }
-dynd::ndobject::ndobject(long value)
+ndobject::ndobject(long value)
     : m_memblock(make_immutable_builtin_scalar_ndobject(value))
 {
 }
-dynd::ndobject::ndobject(long long value)
+ndobject::ndobject(long long value)
     : m_memblock(make_immutable_builtin_scalar_ndobject(value))
 {
 }
-dynd::ndobject::ndobject(unsigned char value)
+ndobject::ndobject(unsigned char value)
     : m_memblock(make_immutable_builtin_scalar_ndobject(value))
 {
 }
-dynd::ndobject::ndobject(unsigned short value)
+ndobject::ndobject(unsigned short value)
     : m_memblock(make_immutable_builtin_scalar_ndobject(value))
 {
 }
-dynd::ndobject::ndobject(unsigned int value)
+ndobject::ndobject(unsigned int value)
     : m_memblock(make_immutable_builtin_scalar_ndobject(value))
 {
 }
-dynd::ndobject::ndobject(unsigned long value)
+ndobject::ndobject(unsigned long value)
     : m_memblock(make_immutable_builtin_scalar_ndobject(value))
 {
 }
-dynd::ndobject::ndobject(unsigned long long value)
+ndobject::ndobject(unsigned long long value)
     : m_memblock(make_immutable_builtin_scalar_ndobject(value))
 {
 }
-dynd::ndobject::ndobject(float value)
+ndobject::ndobject(float value)
     : m_memblock(make_immutable_builtin_scalar_ndobject(value))
 {
 }
-dynd::ndobject::ndobject(double value)
+ndobject::ndobject(double value)
     : m_memblock(make_immutable_builtin_scalar_ndobject(value))
 {
 }
-dynd::ndobject::ndobject(std::complex<float> value)
+ndobject::ndobject(std::complex<float> value)
     : m_memblock(make_immutable_builtin_scalar_ndobject(value))
 {
 }
-dynd::ndobject::ndobject(std::complex<double> value)
+ndobject::ndobject(std::complex<double> value)
     : m_memblock(make_immutable_builtin_scalar_ndobject(value))
 {
 }
-dynd::ndobject::ndobject(const std::string& value)
+ndobject::ndobject(const std::string& value)
 {
     ndobject temp = make_utf8_ndobject(value.c_str(), value.size());
     temp.swap(*this);
 }
-dynd::ndobject::ndobject(const dtype& dt)
+ndobject::ndobject(const dtype& dt)
     : m_memblock(make_ndobject_memory_block(dt, 0, NULL))
 {
 }
 
-dynd::ndobject::ndobject(const dtype& dt, intptr_t dim0)
+ndobject::ndobject(const dtype& dt, intptr_t dim0)
     : m_memblock(make_ndobject_memory_block(dt, 1, &dim0))
 {
 }
-dynd::ndobject::ndobject(const dtype& dt, intptr_t dim0, intptr_t dim1)
+ndobject::ndobject(const dtype& dt, intptr_t dim0, intptr_t dim1)
 {
     intptr_t dims[2] = {dim0, dim1};
     m_memblock = make_ndobject_memory_block(dt, 2, dims);
 }
-dynd::ndobject::ndobject(const dtype& dt, intptr_t dim0, intptr_t dim1, intptr_t dim2)
+ndobject::ndobject(const dtype& dt, intptr_t dim0, intptr_t dim1, intptr_t dim2)
 {
     intptr_t dims[3] = {dim0, dim1, dim2};
     m_memblock = make_ndobject_memory_block(dt, 3, dims);
 }
 
-ndobject dynd::ndobject::at_array(int nindices, const irange *indices) const
+namespace {
+    static dtype as_storage_type(const dtype& dt, const void *DYND_UNUSED(extra))
+    {
+        // If the dtype is a simple POD, switch it to a bytes dtype. Otherwise, keep it
+        // the same so that the metadata layout is identical.
+        const dtype& storage_dt = dt.storage_dtype();
+        if (!storage_dt.extended() || (storage_dt.get_memory_management() == pod_memory_management &&
+                                storage_dt.extended()->get_metadata_size() == 0)) {
+            return make_fixedbytes_dtype(storage_dt.element_size(), storage_dt.alignment());
+        } else {
+            return storage_dt;
+        }
+    }
+} // anonymous namespace
+
+ndobject ndobject::storage() const
+{
+    dtype storage_dt = get_dtype().with_transformed_scalar_types(&as_storage_type, NULL);
+    return make_ndobject_clone_with_new_dtype(*this, storage_dt);
+}
+
+ndobject ndobject::at_array(int nindices, const irange *indices) const
 {
     if (is_scalar()) {
         if (nindices != 0) {
@@ -268,7 +347,7 @@ ndobject dynd::ndobject::at_array(int nindices, const irange *indices) const
     }
 }
 
-void dynd::ndobject::val_assign(const ndobject& rhs, assign_error_mode errmode,
+void ndobject::val_assign(const ndobject& rhs, assign_error_mode errmode,
                     const eval::eval_context *ectx) const
 {
     // Verify access permissions
@@ -332,26 +411,47 @@ void ndobject::val_assign(const dtype& dt, const char *data, assign_error_mode e
     }
 }
 
+ndobject ndobject::eval_immutable(const eval::eval_context *ectx) const
+{
+    if (get_access_flags()&immutable_access_flag) {
+        return *this;
+    } else {
+        // Create a canonical dtype for the result
+        const dtype& current_dtype = get_dtype();
+        const dtype& dt = current_dtype.get_canonical_dtype();
+        int ndim = current_dtype.get_uniform_ndim();
+        dimvector shape(ndim);
+        get_shape(shape.get());
+        ndobject result(make_ndobject_memory_block(dt, ndim, shape.get()));
+        // TODO: Reorder strides of strided dimensions in a KEEPORDER fashion
+        result.val_assign(*this, assign_error_default, ectx);
+        result.get_ndo()->m_flags = immutable_access_flag|read_access_flag;
+        return result;
+    }
+}
+
+ndobject ndobject::eval_copy(const eval::eval_context *ectx,
+                    uint32_t access_flags) const
+{
+    const dtype& current_dtype = get_dtype();
+    const dtype& dt = current_dtype.get_canonical_dtype();
+    int ndim = current_dtype.get_uniform_ndim();
+    dimvector shape(ndim);
+    get_shape(shape.get());
+    ndobject result(make_ndobject_memory_block(dt, ndim, shape.get()));
+    // TODO: Reorder strides of strided dimensions in a KEEPORDER fashion
+    result.val_assign(*this, assign_error_default, ectx);
+    result.get_ndo()->m_flags = access_flags;
+    return result;
+}
+
 ndobject ndobject::cast_scalars(const dtype& scalar_dtype, assign_error_mode errmode) const
 {
     // This creates a dtype which has a convert dtype for every scalar of different dtype.
     // The result has the exact same metadata and data, so we just have to swap in the new
     // dtype in a shallow copy.
     dtype replaced_dtype = get_dtype().with_replaced_scalar_types(scalar_dtype, errmode);
-
-    ndobject result(shallow_copy_ndobject_memory_block(m_memblock));
-    ndobject_preamble *preamble = result.get_ndo();
-    // Swap in the dtype
-    if (!preamble->is_builtin_dtype()) {
-        extended_dtype_decref(preamble->m_dtype);
-    }
-    if(replaced_dtype.extended()) {
-        preamble->m_dtype = replaced_dtype.extended();
-        extended_dtype_incref(preamble->m_dtype);
-    } else {
-        preamble->m_dtype = reinterpret_cast<extended_dtype *>(replaced_dtype.type_id());
-    }
-    return result;
+    return make_ndobject_clone_with_new_dtype(*this, replaced_dtype);
 }
 
 namespace {
@@ -386,7 +486,7 @@ ndobject ndobject::view_scalars(const dtype& scalar_dtype) const
             // Make sure the element size divides into the # of bytes
             if (nbytes % scalar_dtype.element_size() != 0) {
                 std::stringstream ss;
-                ss << "cannot view dynd::ndobject with " << nbytes << " bytes as dtype ";
+                ss << "cannot view ndobject with " << nbytes << " bytes as dtype ";
                 ss << scalar_dtype << ", because its element size " << scalar_dtype.element_size();
                 ss << " doesn't divide evenly into the total array size " << nbytes;
                 throw std::runtime_error(ss.str());
@@ -420,20 +520,7 @@ ndobject ndobject::view_scalars(const dtype& scalar_dtype) const
     }
 
     const dtype& viewed_dtype = array_dtype.with_transformed_scalar_types(view_scalar_type, &scalar_dtype);
-
-    ndobject result(shallow_copy_ndobject_memory_block(m_memblock));
-    ndobject_preamble *preamble = result.get_ndo();
-    // Swap in the dtype
-    if (!preamble->is_builtin_dtype()) {
-        extended_dtype_decref(preamble->m_dtype);
-    }
-    if(viewed_dtype.extended()) {
-        preamble->m_dtype = viewed_dtype.extended();
-        extended_dtype_incref(preamble->m_dtype);
-    } else {
-        preamble->m_dtype = reinterpret_cast<extended_dtype *>(viewed_dtype.type_id());
-    }
-    return result;
+    return make_ndobject_clone_with_new_dtype(*this, viewed_dtype);
 }
 
 std::string dynd::detail::ndobject_as_string(const ndobject& lhs, assign_error_mode errmode)
@@ -514,7 +601,7 @@ ndobject dynd::empty_like(const ndobject& rhs, const dtype& uniform_dtype)
         rhs.get_strides(strides.get());
         shortvector<int> axis_perm(ndim);
         strides_to_axis_perm(ndim, strides.get(), axis_perm.get());
-        return make_strided_ndobject(uniform_dtype, ndim, shape.get(), axis_perm.get());
+        return make_strided_ndobject(uniform_dtype, ndim, shape.get(), read_access_flag|write_access_flag, axis_perm.get());
     }
 }
 
@@ -524,7 +611,7 @@ ndobject dynd::empty_like(const ndobject& rhs)
     return empty_like(rhs, rhs.get_dtype().get_dtype_at_dimension(NULL, rhs.get_dtype().get_uniform_ndim()));
 }
 
-dynd::ndobject_vals::operator ndobject() const
+ndobject_vals::operator ndobject() const
 {
     // Create a canonical dtype for the result
     const dtype& current_dtype = m_arr.get_dtype();

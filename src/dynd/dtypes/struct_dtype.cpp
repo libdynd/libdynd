@@ -11,7 +11,7 @@
 using namespace std;
 using namespace dynd;
 
-dynd::struct_dtype::struct_dtype(const std::vector<dtype>& fields, const std::vector<std::string>& field_names)
+struct_dtype::struct_dtype(const std::vector<dtype>& fields, const std::vector<std::string>& field_names)
     : m_fields(fields), m_field_names(field_names), m_metadata_offsets(fields.size())
 {
     if (fields.size() != field_names.size()) {
@@ -40,7 +40,7 @@ dynd::struct_dtype::struct_dtype(const std::vector<dtype>& fields, const std::ve
     m_metadata_size = metadata_offset;
 }
 
-size_t dynd::struct_dtype::get_default_element_size(int ndim, const intptr_t *shape) const
+size_t struct_dtype::get_default_element_size(int ndim, const intptr_t *shape) const
 {
     // Default layout is to match the field order - could reorder the elements for more efficient packing
     size_t s = 0;
@@ -57,7 +57,7 @@ size_t dynd::struct_dtype::get_default_element_size(int ndim, const intptr_t *sh
 }
 
 
-void dynd::struct_dtype::print_element(std::ostream& o, const char *data, const char *metadata) const
+void struct_dtype::print_element(std::ostream& o, const char *data, const char *metadata) const
 {
     const size_t *offsets = reinterpret_cast<const size_t *>(metadata);
     o << "[";
@@ -70,7 +70,7 @@ void dynd::struct_dtype::print_element(std::ostream& o, const char *data, const 
     o << "]";
 }
 
-void dynd::struct_dtype::print_dtype(std::ostream& o) const
+void struct_dtype::print_dtype(std::ostream& o) const
 {
     o << "struct<";
     for (size_t i = 0, i_end = m_fields.size(); i != i_end; ++i) {
@@ -82,12 +82,12 @@ void dynd::struct_dtype::print_dtype(std::ostream& o) const
     o << ">";
 }
 
-bool dynd::struct_dtype::is_scalar(const char *DYND_UNUSED(data), const char *DYND_UNUSED(metadata)) const
+bool struct_dtype::is_scalar() const
 {
     return false;
 }
 
-dtype dynd::struct_dtype::with_transformed_scalar_types(dtype_transform_fn_t transform_fn, const void *extra) const
+dtype struct_dtype::with_transformed_scalar_types(dtype_transform_fn_t transform_fn, const void *extra) const
 {
     std::vector<dtype> fields(m_fields.size());
 
@@ -98,7 +98,7 @@ dtype dynd::struct_dtype::with_transformed_scalar_types(dtype_transform_fn_t tra
     return dtype(new struct_dtype(fields, m_field_names));
 }
 
-dtype dynd::struct_dtype::get_canonical_dtype() const
+dtype struct_dtype::get_canonical_dtype() const
 {
     std::vector<dtype> fields(m_fields.size());
 
@@ -109,7 +109,7 @@ dtype dynd::struct_dtype::get_canonical_dtype() const
     return dtype(new struct_dtype(fields, m_field_names));
 }
 
-dtype dynd::struct_dtype::apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& root_dt) const
+dtype struct_dtype::apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& root_dt) const
 {
     if (nindices == 0) {
         return dtype(this, true);
@@ -135,7 +135,7 @@ dtype dynd::struct_dtype::apply_linear_index(int nindices, const irange *indices
     }
 }
 
-intptr_t dynd::struct_dtype::apply_linear_index(int nindices, const irange *indices, char *data, const char *metadata,
+intptr_t struct_dtype::apply_linear_index(int nindices, const irange *indices, char *data, const char *metadata,
                 const dtype& result_dtype, char *out_metadata, int current_i, const dtype& root_dt) const
 {
     const intptr_t *offsets = reinterpret_cast<const intptr_t *>(metadata);
@@ -187,7 +187,7 @@ intptr_t struct_dtype::get_dim_size(const char *DYND_UNUSED(data), const char *D
     return m_fields.size();
 }
 
-void dynd::struct_dtype::get_shape(int i, intptr_t *out_shape) const
+void struct_dtype::get_shape(int i, intptr_t *out_shape) const
 {
     // Adjust the current shape if necessary
     switch (out_shape[i]) {
@@ -211,7 +211,7 @@ void dynd::struct_dtype::get_shape(int i, intptr_t *out_shape) const
     }
 }
 
-bool dynd::struct_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const
+bool struct_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const
 {
     if (dst_dt.extended() == this) {
         if (src_dt.extended() == this) {
@@ -224,19 +224,19 @@ bool dynd::struct_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype
     return false;
 }
 
-void dynd::struct_dtype::get_single_compare_kernel(single_compare_kernel_instance& DYND_UNUSED(out_kernel)) const
+void struct_dtype::get_single_compare_kernel(single_compare_kernel_instance& DYND_UNUSED(out_kernel)) const
 {
     throw runtime_error("struct_dtype::get_single_compare_kernel is unimplemented"); 
 }
 
-void dynd::struct_dtype::get_dtype_assignment_kernel(const dtype& DYND_UNUSED(dst_dt), const dtype& DYND_UNUSED(src_dt),
+void struct_dtype::get_dtype_assignment_kernel(const dtype& DYND_UNUSED(dst_dt), const dtype& DYND_UNUSED(src_dt),
                 assign_error_mode DYND_UNUSED(errmode),
                 unary_specialization_kernel_instance& DYND_UNUSED(out_kernel)) const
 {
     throw runtime_error("struct_dtype::get_dtype_assignment_kernel is unimplemented"); 
 }
 
-bool dynd::struct_dtype::operator==(const extended_dtype& rhs) const
+bool struct_dtype::operator==(const extended_dtype& rhs) const
 {
     if (this == &rhs) {
         return true;
@@ -250,12 +250,12 @@ bool dynd::struct_dtype::operator==(const extended_dtype& rhs) const
     }
 }
 
-size_t dynd::struct_dtype::get_metadata_size() const
+size_t struct_dtype::get_metadata_size() const
 {
     return m_metadata_size;
 }
 
-void dynd::struct_dtype::metadata_default_construct(char *metadata, int ndim, const intptr_t* shape) const
+void struct_dtype::metadata_default_construct(char *metadata, int ndim, const intptr_t* shape) const
 {
     // Validate that the shape is ok
     if (ndim > 0) {
@@ -293,7 +293,7 @@ void dynd::struct_dtype::metadata_default_construct(char *metadata, int ndim, co
     }
 }
 
-void dynd::struct_dtype::metadata_copy_construct(char *dst_metadata, const char *src_metadata, memory_block_data *embedded_reference) const
+void struct_dtype::metadata_copy_construct(char *dst_metadata, const char *src_metadata, memory_block_data *embedded_reference) const
 {
     // Copy all the field offsets
     memcpy(dst_metadata, src_metadata, m_fields.size() * sizeof(intptr_t));
@@ -308,7 +308,7 @@ void dynd::struct_dtype::metadata_copy_construct(char *dst_metadata, const char 
     }
 }
 
-void dynd::struct_dtype::metadata_destruct(char *metadata) const
+void struct_dtype::metadata_destruct(char *metadata) const
 {
     for (size_t i = 0; i < m_fields.size(); ++i) {
         const dtype& field_dt = m_fields[i];
@@ -318,7 +318,7 @@ void dynd::struct_dtype::metadata_destruct(char *metadata) const
     }
 }
 
-void dynd::struct_dtype::metadata_debug_dump(const char *metadata, std::ostream& o, const std::string& indent) const
+void struct_dtype::metadata_debug_dump(const char *metadata, std::ostream& o, const std::string& indent) const
 {
     const size_t *offsets = reinterpret_cast<const size_t *>(metadata);
     o << indent << " field offsets: ";
@@ -329,4 +329,16 @@ void dynd::struct_dtype::metadata_debug_dump(const char *metadata, std::ostream&
         }
     }
     o << "\n";
+}
+
+void struct_dtype::foreach_leading(char *data, const char *metadata, foreach_fn_t callback, void *callback_data) const
+{
+    if (!m_fields.empty()) {
+        const size_t *offsets = reinterpret_cast<const size_t *>(metadata);
+        const dtype *fields = &m_fields[0];
+        const size_t *metadata_offsets = &m_metadata_offsets[0];
+        for (intptr_t i = 0, i_end = m_fields.size(); i < i_end; ++i) {
+            callback(fields[i], data + offsets[i], metadata + metadata_offsets[i], callback_data);
+        }
+    }
 }

@@ -3,8 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__TUPLE_DTYPE_HPP_
-#define _DYND__TUPLE_DTYPE_HPP_
+#ifndef _DYND__STRUCT_DTYPE_HPP_
+#define _DYND__STRUCT_DTYPE_HPP_
 
 #include <vector>
 #include <string>
@@ -47,6 +47,10 @@ public:
         return m_field_names;
     }
 
+    const std::vector<size_t>& get_metadata_offsets() const {
+        return m_metadata_offsets;
+    }
+
     void print_element(std::ostream& o, const char *data, const char *metadata) const;
 
     void print_dtype(std::ostream& o) const;
@@ -57,7 +61,7 @@ public:
         return m_memory_management;
     }
 
-    bool is_scalar(const char *data, const char *metadata) const;
+    bool is_scalar() const;
     dtype with_transformed_scalar_types(dtype_transform_fn_t transform_fn, const void *extra) const;
     dtype get_canonical_dtype() const;
 
@@ -83,6 +87,8 @@ public:
     void metadata_copy_construct(char *dst_metadata, const char *src_metadata, memory_block_data *embedded_reference) const;
     void metadata_destruct(char *metadata) const;
     void metadata_debug_dump(const char *metadata, std::ostream& o, const std::string& indent) const;
+
+    void foreach_leading(char *data, const char *metadata, foreach_fn_t callback, void *callback_data) const;
 }; // class struct_dtype
 
 /** Makes a tuple dtype with the specified fields, using the standard layout */
@@ -128,4 +134,4 @@ inline dtype make_struct_dtype(const dtype& dt0, const std::string& name0, const
 
 } // namespace dynd
 
-#endif // _DYND__TUPLE_DTYPE_HPP_
+#endif // _DYND__STRUCT_DTYPE_HPP_

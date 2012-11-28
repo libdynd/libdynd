@@ -44,10 +44,8 @@ public:
     /** Constructs an array with no buffer (NULL state) */
     ndobject();
     /**
-     * Constructs a zero-dimensional scalar array from a C++ scalar.
+     * Constructs a zero-dimensional scalar from a C++ scalar.
      *
-     * TODO: Figure out why enable_if with is_dtype_scalar didn't work for this constructor
-     *       in g++ 4.6.0.
      */
     ndobject(dynd_bool value);
     ndobject(bool value);
@@ -192,8 +190,7 @@ public:
 
     /** Returns true if the object is a scalar */
     inline bool is_scalar() const {
-        return get_ndo()->is_builtin_dtype() ||
-            get_ndo()->m_dtype->is_scalar(get_ndo()->m_data_pointer, get_ndo_meta());
+        return get_dtype().is_scalar();
     }
 
     /** The dtype */
@@ -241,8 +238,7 @@ public:
 
     /**
      * Returns a value-exposing helper object, which allows one to assign to
-     * the values of the ndobject, or collapse the expression tree of the
-     * ndobject into a strided array.
+     * the values of the ndobject, or collapse any expression dtypes.
      */
     ndobject_vals vals() const;
 
@@ -262,8 +258,8 @@ public:
                         uint32_t access_flags=read_access_flag|write_access_flag) const;
 
     /**
-     * Returnas a view of the array as the dtype's storage_dtype, peeling
-     * away any expression dtypes or encodings.
+     * Returns a view of the array as bytes (for POD) or the storage dtype,
+     * peeling away any expression dtypes or encodings.
      */
     ndobject storage() const;
 
@@ -415,7 +411,12 @@ public:
 };
 
 /** Makes a strided ndobject with uninitialized data. If axis_perm is NULL, it is C-order */
-ndobject make_strided_ndobject(const dtype& uniform_dtype, int ndim, const intptr_t *shape, const int *axis_perm = NULL);
+ndobject make_strided_ndobject(const dtype& uniform_dtype, int ndim, const intptr_t *shape,
+                int64_t access_flags, const int *axis_perm = NULL);
+
+/** Makes a strided ndobject pointing to existing data */
+ndobject make_strided_ndobject_from_data(const dtype& scalar_dtype, int ndim, const intptr_t *shape,
+                const intptr_t *strides, int64_t access_flags, char *data_ptr, const memory_block_ptr& data_reference);
 
 /** Makes a scalar ndobject with data initialized by the provided pointer */
 ndobject make_scalar_ndobject(const dtype& scalar_dtype, const void *data);
@@ -655,7 +656,7 @@ dynd::ndobject::ndobject(const T (&rhs)[N])
     intptr_t shape[ndim];
     size_t size = detail::fill_shape<T[N]>::fill(shape);
 
-    *this = make_strided_ndobject(dtype(detail::uniform_type_from_array<T>::type_id), ndim, shape);
+    *this = make_strided_ndobject(dtype(detail::uniform_type_from_array<T>::type_id), ndim, shape, read_access_flag|write_access_flag);
     DYND_MEMCPY(get_ndo()->m_data_pointer, reinterpret_cast<const void *>(&rhs), size);
 }
 

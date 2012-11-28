@@ -44,7 +44,7 @@ bool extended_dtype::is_uniform_dim() const
 }
 
 
-bool extended_dtype::is_scalar(const char *DYND_UNUSED(data), const char *DYND_UNUSED(metadata)) const
+bool extended_dtype::is_scalar() const
 {
     return true;
 }
@@ -197,16 +197,12 @@ size_t extended_dtype::iterdata_destruct(iterdata_common *DYND_UNUSED(iterdata),
 }
 
 
-void extended_dtype::foreach(int ndim, char *data, const char *metadata, foreach_fn_t callback, const void *callback_data) const
+void extended_dtype::foreach_leading(char *data, const char *metadata, foreach_fn_t callback, void *callback_data) const
 {
     // Default to scalar behavior
-    if (ndim > 0) {
-        stringstream ss;
-        ss << "dynd dtype " << dtype(this, true) << " is a scalar, foreach cannot further recurse";
-        throw std::runtime_error(ss.str());
-    }
-
-    callback(this, data, metadata, callback_data);
+    stringstream ss;
+    ss << "dynd dtype " << dtype(this, true) << " is a scalar, foreach_leading cannot process";
+    throw std::runtime_error(ss.str());
 }
 
 
