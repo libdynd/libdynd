@@ -160,7 +160,7 @@ void dynd::set_executable_memory_runtime_function(memory_block_data *self, char 
     RtlAddFunctionTable(&rf, 1, (DWORD64)root);
 }
 
-void dynd::executable_memory_block_debug_dump(const memory_block_data *memblock, std::ostream& o, const std::string& indent)
+void dynd::executable_memory_block_debug_print(const memory_block_data *memblock, std::ostream& o, const std::string& indent)
 {
     const executable_memory_block *emb = reinterpret_cast<const executable_memory_block *>(memblock);
     o << indent << " chunk size: " << emb->m_chunk_size_bytes << "\n";

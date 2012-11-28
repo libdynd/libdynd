@@ -39,7 +39,7 @@ ndarray_node_ptr dynd::immutable_scalar_node::apply_linear_index(
     return as_ndarray_node_ptr();
 }
 
-void dynd::immutable_scalar_node::debug_dump_extra(std::ostream& o, const std::string& indent) const
+void dynd::immutable_scalar_node::debug_print_extra(std::ostream& o, const std::string& indent) const
 {
     o << indent << " data: ";
     hexadecimal_print(o, m_originptr, m_dtype.element_size());

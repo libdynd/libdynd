@@ -167,10 +167,10 @@ void extended_dtype::metadata_destruct(char *DYND_UNUSED(metadata)) const
 }
 
 // TODO: Make this a pure virtual function eventually
-void extended_dtype::metadata_debug_dump(const char *DYND_UNUSED(metadata), std::ostream& DYND_UNUSED(o), const std::string& DYND_UNUSED(indent)) const
+void extended_dtype::metadata_debug_print(const char *DYND_UNUSED(metadata), std::ostream& DYND_UNUSED(o), const std::string& DYND_UNUSED(indent)) const
 {
     stringstream ss;
-    ss << "TODO: metadata_debug_dump for " << dtype(this, true) << " is not implemented";
+    ss << "TODO: metadata_debug_print for " << dtype(this, true) << " is not implemented";
     throw std::runtime_error(ss.str());
 }
 
@@ -274,11 +274,11 @@ void extended_expression_dtype::metadata_destruct(char *metadata) const
     }
 }
 
-void extended_expression_dtype::metadata_debug_dump(const char *metadata, std::ostream& o, const std::string& indent) const
+void extended_expression_dtype::metadata_debug_print(const char *metadata, std::ostream& o, const std::string& indent) const
 {
     const dtype& dt = get_operand_dtype();
     if (dt.extended()) {
-        dt.extended()->metadata_debug_dump(metadata, o, indent);
+        dt.extended()->metadata_debug_print(metadata, o, indent);
     }
 }
 

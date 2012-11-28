@@ -45,7 +45,7 @@ void dynd::gfunc::elwise::add_kernel(elwise_kernel& egk)
     }
 }
 
-void dynd::gfunc::elwise::debug_dump(std::ostream& o, const std::string& indent) const
+void dynd::gfunc::elwise::debug_print(std::ostream& o, const std::string& indent) const
 {
     o << indent << "------ elwise_gfunc\n";
     o << indent << "name: " << m_name << "\n";

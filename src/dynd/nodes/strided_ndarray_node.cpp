@@ -181,7 +181,7 @@ ndarray_node_ptr dynd::strided_ndarray_node::apply_linear_index(
     }
 }
 
-void dynd::strided_ndarray_node::debug_dump_extra(ostream& o, const string& indent) const
+void dynd::strided_ndarray_node::debug_print_extra(ostream& o, const string& indent) const
 {
     o << indent << " strides: (";
     for (int i = 0; i < m_ndim; ++i) {
@@ -193,7 +193,7 @@ void dynd::strided_ndarray_node::debug_dump_extra(ostream& o, const string& inde
     o << ")\n";
     o << indent << " originptr: " << (void *)m_originptr << "\n";
     o << indent << " memoryblock owning the data:\n";
-    memory_block_debug_dump(m_memblock.get(), o, indent + " ");
+    memory_block_debug_print(m_memblock.get(), o, indent + " ");
 }
 
 ndarray_node_ptr dynd::make_strided_ndarray_node(const dtype& dt, int ndim, const intptr_t *shape,

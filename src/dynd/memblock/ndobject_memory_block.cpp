@@ -125,7 +125,7 @@ memory_block_ptr dynd::shallow_copy_ndobject_memory_block(const memory_block_ptr
     return result;
 }
 
-void dynd::ndobject_memory_block_debug_dump(const memory_block_data *memblock, std::ostream& o, const std::string& indent)
+void dynd::ndobject_memory_block_debug_print(const memory_block_data *memblock, std::ostream& o, const std::string& indent)
 {
     const ndobject_preamble *preamble = reinterpret_cast<const ndobject_preamble *>(memblock + 1);
     const char *metadata = reinterpret_cast<const char *>(preamble + 1);
@@ -133,8 +133,8 @@ void dynd::ndobject_memory_block_debug_dump(const memory_block_data *memblock, s
         o << indent << " dtype: " << dynd::dtype(preamble->m_dtype) << "\n";
         o << indent << " data pointer: " << (const void *)preamble->m_data_pointer << "\n";
         o << indent << " data memblock:\n";
-        memory_block_debug_dump(preamble->m_data_reference, o, indent + " ");
-        preamble->m_dtype->metadata_debug_dump(metadata, o, indent + " ");
+        memory_block_debug_print(preamble->m_data_reference, o, indent + " ");
+        preamble->m_dtype->metadata_debug_print(metadata, o, indent + " ");
     } else {
         o << indent << " uninitialized ndobject\n";
     }

@@ -304,7 +304,7 @@ public:
 
     bool equals_exact(const ndarray& rhs) const;
 
-    void debug_dump(std::ostream& o, const std::string& indent = "") const;
+    void debug_print(std::ostream& o, const std::string& indent = "") const;
 
     friend std::ostream& operator<<(std::ostream& o, const ndarray& rhs);
     friend class ndarray_vals;

@@ -74,7 +74,7 @@ public:
                     memory_block_data *function_pointer_owner,
                     kernel_instance<unary_operation_t>& out_kernel);
 
-    void debug_dump(std::ostream& o, const std::string& indent = "") const;
+    void debug_print(std::ostream& o, const std::string& indent = "") const;
 };
 
 } // namespace dynd

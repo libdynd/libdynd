@@ -134,7 +134,7 @@ static ndarray_node_ptr evaluate_binary_elwise_array(ndarray_node* node, const e
         raw_ndarray_iter<1,2> iter(node->get_ndim(), node->get_shape(),
                                     node->get_dtype().value_dtype(), result, access_flags,
                                     op1, op2);
-        //iter.debug_dump(std::cout);
+        //iter.debug_print(std::cout);
 
         intptr_t innersize = iter.innersize();
         intptr_t dst_stride = iter.innerstride<0>();
@@ -156,7 +156,7 @@ static ndarray_node_ptr evaluate_binary_elwise_array(ndarray_node* node, const e
 
     stringstream ss;
     ss << "evaluating this expression graph is not yet supported:\n";
-    node->debug_dump(ss);
+    node->debug_print(ss);
     throw runtime_error(ss.str());
 }
 
@@ -204,6 +204,6 @@ ndarray_node_ptr dynd::eval::evaluate(ndarray_node *node, const eval::eval_conte
 
     stringstream ss;
     ss << "Evaluating the following node is not yet supported:\n";
-    node->debug_dump(ss);
+    node->debug_print(ss);
     throw std::runtime_error(ss.str());
 }

@@ -67,7 +67,7 @@ void dynd::elwise_reduce_kernel_node::get_unary_operation(intptr_t DYND_UNUSED(d
     out_kernel.borrow_from(m_kernel);
 }
 
-void dynd::elwise_reduce_kernel_node::debug_dump_extra(std::ostream& o, const std::string& indent) const
+void dynd::elwise_reduce_kernel_node::debug_print_extra(std::ostream& o, const std::string& indent) const
 {
     o << indent << " associative: " << (m_rightassoc ? "right" : "left") << "\n";
     o << indent << " keepdims: " << (m_keepdims ? "true" : "false") << "\n";
@@ -80,7 +80,7 @@ void dynd::elwise_reduce_kernel_node::debug_dump_extra(std::ostream& o, const st
     o << "\n";
     if (m_identity.get()) {
         o << indent << " reduction identity:\n";
-        m_identity->debug_dump(o, indent + " ");
+        m_identity->debug_print(o, indent + " ");
     } else {
         o << indent << " reduction identity: NULL\n";
     }

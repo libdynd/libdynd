@@ -88,7 +88,7 @@ public:
     void metadata_default_construct(char *metadata, int ndim, const intptr_t* shape) const;
     void metadata_copy_construct(char *dst_metadata, const char *src_metadata, memory_block_data *embedded_reference) const;
     void metadata_destruct(char *metadata) const;
-    void metadata_debug_dump(const char *metadata, std::ostream& o, const std::string& indent) const;
+    void metadata_debug_print(const char *metadata, std::ostream& o, const std::string& indent) const;
 
     size_t get_iterdata_size(int ndim) const;
     size_t iterdata_construct(iterdata_common *iterdata, const char **inout_metadata, int ndim, const intptr_t* shape, dtype& out_uniform_dtype) const;

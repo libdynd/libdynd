@@ -549,7 +549,7 @@ std::string dynd::detail::ndobject_as_string(const ndobject& lhs, assign_error_m
     return std::string(begin, end);
 }
 
-void ndobject::debug_dump(std::ostream& o, const std::string& indent) const
+void ndobject::debug_print(std::ostream& o, const std::string& indent) const
 {
     o << indent << "------ ndobject\n";
     if (m_memblock.get()) {
@@ -567,7 +567,7 @@ void ndobject::debug_dump(std::ostream& o, const std::string& indent) const
         o << " dtype: " << get_dtype() << "\n";
         if (!ndo->is_builtin_dtype()) {
             o << " metadata:\n";
-            ndo->m_dtype->metadata_debug_dump(get_ndo_meta(), o, indent + " ");
+            ndo->m_dtype->metadata_debug_print(get_ndo_meta(), o, indent + " ");
         }
     } else {
         o << indent << "NULL\n";

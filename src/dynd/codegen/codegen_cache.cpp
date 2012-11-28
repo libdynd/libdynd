@@ -107,7 +107,7 @@ void dynd::codegen_cache::codegen_right_associative_binary_reduce_function_adapt
     ad.adaptee_memblock = function_pointer_owner;
 }
 
-void dynd::codegen_cache::debug_dump(std::ostream& o, const std::string& indent) const
+void dynd::codegen_cache::debug_print(std::ostream& o, const std::string& indent) const
 {
     o << indent << "------ codegen_cache\n";
     o << indent << " cached unary_kernel_adapters:\n";
@@ -129,6 +129,6 @@ void dynd::codegen_cache::debug_dump(std::ostream& o, const std::string& indent)
     }
 
     o << indent << " executable memory block:\n";
-    memory_block_debug_dump(m_exec_memblock.get(), o, indent + " ");
+    memory_block_debug_print(m_exec_memblock.get(), o, indent + " ");
     o << indent << "------" << endl;
 }

@@ -87,7 +87,7 @@ static void print_register(std::ostream& o, int reg)
     o << reg;
 }
 
-void dynd::vm::elwise_program::debug_dump(std::ostream& o, const std::string& indent) const
+void dynd::vm::elwise_program::debug_print(std::ostream& o, const std::string& indent) const
 {
     // Print all the register dtypes
     o << indent << "output register (0):\n";

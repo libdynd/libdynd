@@ -253,7 +253,7 @@ namespace detail {
         /**
          * Prints out a debug dump of the object.
          */
-        void debug_dump(std::ostream& o) {
+        void debug_print(std::ostream& o) {
             o << "------ raw_ndarray_iter<" << Nwrite << ", " << Nread << ">\n";
             o << " ndim: " << m_ndim << "\n";
             o << " iterindex: ";

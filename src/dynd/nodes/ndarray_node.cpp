@@ -105,7 +105,7 @@ static void print_node_category(ostream& o, ndarray_node_category cat)
     }
 }
 
-void dynd::ndarray_node::debug_dump(ostream& o, const string& indent) const
+void dynd::ndarray_node::debug_print(ostream& o, const string& indent) const
 {
     o << indent << "(\"" << node_name() << "\",\n";
 
@@ -120,20 +120,20 @@ void dynd::ndarray_node::debug_dump(ostream& o, const string& indent) const
     o << indent << " access flags: ";
     print_ndarray_access_flags(o, get_access_flags());
     o << "\n";
-    debug_dump_extra(o, indent);
+    debug_print_extra(o, indent);
 
     if (get_nop() > 0) {
         o << indent << " nop: " << get_nop() << "\n";
         for (int i = 0; i < get_nop(); ++i) {
             o << indent << " operand " << i << ":\n";
-            get_opnode(i)->debug_dump(o, indent + "  ");
+            get_opnode(i)->debug_print(o, indent + "  ");
         }
     }
 
     o << indent << ")\n";
 }
 
-void dynd::ndarray_node::debug_dump_extra(ostream&, const string&) const
+void dynd::ndarray_node::debug_print_extra(ostream&, const string&) const
 {
     // Default is no extra information
 }

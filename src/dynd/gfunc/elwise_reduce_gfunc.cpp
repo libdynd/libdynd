@@ -44,7 +44,7 @@ void dynd::gfunc::elwise_reduce::add_kernel(elwise_reduce_kernel& ergk)
     }
 }
 
-void dynd::gfunc::elwise_reduce::debug_dump(std::ostream& o, const std::string& indent) const
+void dynd::gfunc::elwise_reduce::debug_print(std::ostream& o, const std::string& indent) const
 {
     o << indent << "------ elwise_reduce_gfunc\n";
     o << indent << "name: " << m_name << "\n";
@@ -72,7 +72,7 @@ void dynd::gfunc::elwise_reduce::debug_dump(std::ostream& o, const std::string& 
         }
         if (!k.m_identity.empty()) {
             o << indent << " reduction identity:\n";
-            k.m_identity.debug_dump(o, indent + "  ");
+            k.m_identity.debug_print(o, indent + "  ");
         } else {
             o << indent << " reduction identity: NULL\n";
         }

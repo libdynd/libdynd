@@ -38,14 +38,14 @@ ndarray_node_ptr dynd::scalar_node::apply_linear_index(
     return as_ndarray_node_ptr();
 }
 
-void dynd::scalar_node::debug_dump_extra(std::ostream& o, const std::string& indent) const
+void dynd::scalar_node::debug_print_extra(std::ostream& o, const std::string& indent) const
 {
     o << indent << " data: ";
     hexadecimal_print(o, m_originptr, m_dtype.element_size());
     o << "\n";
     if (m_blockref_memblock.get() != NULL) {
         o << indent << " blockref memory block\n";
-        memory_block_debug_dump(m_blockref_memblock.get(), o, indent + " ");
+        memory_block_debug_print(m_blockref_memblock.get(), o, indent + " ");
     }
 }
 

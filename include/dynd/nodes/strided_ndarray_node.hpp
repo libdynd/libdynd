@@ -132,7 +132,7 @@ public:
         return "strided_array";
     }
 
-    void debug_dump_extra(std::ostream& o, const std::string& indent) const;
+    void debug_print_extra(std::ostream& o, const std::string& indent) const;
 
     friend ndarray_node_ptr make_strided_ndarray_node(const dtype& dt, int ndim, const intptr_t *shape,
                 const intptr_t *strides, char *originptr, int access_flags, const memory_block_ptr& memblock);

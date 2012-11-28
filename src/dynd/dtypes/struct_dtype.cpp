@@ -318,7 +318,7 @@ void struct_dtype::metadata_destruct(char *metadata) const
     }
 }
 
-void struct_dtype::metadata_debug_dump(const char *metadata, std::ostream& o, const std::string& indent) const
+void struct_dtype::metadata_debug_print(const char *metadata, std::ostream& o, const std::string& indent) const
 {
     const size_t *offsets = reinterpret_cast<const size_t *>(metadata);
     o << indent << " field offsets: ";

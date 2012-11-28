@@ -67,7 +67,7 @@ memory_block_ptr dynd::make_fixed_size_pod_memory_block(intptr_t size_bytes, int
     return memory_block_ptr(new (result) memory_block_data(1, fixed_size_pod_memory_block_type), false);
 }
 
-void dynd::fixed_size_pod_memory_block_debug_dump(const memory_block_data *memblock, std::ostream& o, const std::string& indent)
+void dynd::fixed_size_pod_memory_block_debug_print(const memory_block_data *memblock, std::ostream& o, const std::string& indent)
 {
     const char *rawmem = reinterpret_cast<const char *>(memblock);
     int blockrefs_size = *(const int *)(rawmem + sizeof(memory_block_data));
@@ -76,7 +76,7 @@ void dynd::fixed_size_pod_memory_block_debug_dump(const memory_block_data *membl
     } else {
         o << indent << " " << blockrefs_size << " blockrefs\n";
         for (int i = 0; i < blockrefs_size; ++i) {
-            memory_block_debug_dump(*(memory_block_data **)(rawmem + sizeof(memory_block_data) + (i + 1)*sizeof(void *)), o, indent + " ");
+            memory_block_debug_print(*(memory_block_data **)(rawmem + sizeof(memory_block_data) + (i + 1)*sizeof(void *)), o, indent + " ");
         }
     }
 }

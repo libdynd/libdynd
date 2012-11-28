@@ -36,7 +36,7 @@ int main()
     float v0[4] = {3.5, 1.0, 0, 1000};
     ndarray a = v0, b;
 
-	a.debug_dump(cout);
+	a.debug_print(cout);
     cout << a << endl;
 
     //b = a.as_dtype(make_dtype<int>());
@@ -46,10 +46,10 @@ int main()
     // Allow truncation of fractional part
     //b = a.as_dtype(make_dtype<int>(), assign_error_overflow);
     b = a.as_dtype(make_dtype<int>(), assign_error_overflow);
-	b.debug_dump(cout);
+	b.debug_print(cout);
     cout << b << endl;
     b = b.vals();
-	b.debug_dump(cout);
+	b.debug_print(cout);
     cout << b << endl;
     EXPECT_EQ(3, b(0).as<int>());
     EXPECT_EQ(1, b(1).as<int>());

@@ -102,7 +102,7 @@ TEST(ArithmeticOp, ComplexScalar) {
     a = v0;
 
     // A complex scalar
-    (a + complex<float>(1, 2)).debug_dump(cout);
+    (a + complex<float>(1, 2)).debug_print(cout);
     c = (a + complex<float>(1, 2)).vals();
     EXPECT_EQ(complex<float>(2,2), c(0).as<complex<float> >());
     EXPECT_EQ(complex<float>(3,2), c(1).as<complex<float> >());

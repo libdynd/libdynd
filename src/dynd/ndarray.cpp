@@ -389,7 +389,7 @@ static void val_assign_loop(const ndarray& lhs, const ndarray& rhs, assign_error
     // Create the raw iterator
     raw_ndarray_iter<1,1> iter(lhs.get_ndim(), lhs.get_shape(), lhs.get_readwrite_originptr(), lhs.get_strides(),
                                         rhs_originptr, rhs_modified_strides.get());
-    //iter.debug_dump(cout);
+    //iter.debug_print(cout);
 
     intptr_t innersize = iter.innersize();
     intptr_t dst_innerstride = iter.innerstride<0>(), src_innerstride = iter.innerstride<1>();
@@ -468,11 +468,11 @@ bool dynd::ndarray::equals_exact(const ndarray& rhs) const
 }
 
 
-void dynd::ndarray::debug_dump(std::ostream& o = std::cerr, const std::string& indent) const
+void dynd::ndarray::debug_print(std::ostream& o = std::cerr, const std::string& indent) const
 {
     o << indent << "------ ndarray\n";
     if (m_node.get()) {
-        m_node->debug_dump(o, indent + " ");
+        m_node->debug_print(o, indent + " ");
     } else {
         o << indent << "NULL\n";
     }

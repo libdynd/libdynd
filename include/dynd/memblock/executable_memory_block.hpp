@@ -45,7 +45,7 @@ void allocate_executable_memory(memory_block_data *self, intptr_t size_bytes, in
  */
 void resize_executable_memory(memory_block_data *self, intptr_t size_bytes, char **inout_begin, char **inout_end);
 
-void executable_memory_block_debug_dump(const memory_block_data *memblock, std::ostream& o, const std::string& indent);
+void executable_memory_block_debug_print(const memory_block_data *memblock, std::ostream& o, const std::string& indent);
 
 } // namespace dynd
 

@@ -171,7 +171,7 @@ memory_block_pod_allocator_api pod_memory_block_allocator_api = {
 
 }} // namespace dynd::detail
 
-void dynd::pod_memory_block_debug_dump(const memory_block_data *memblock, std::ostream& o, const std::string& indent)
+void dynd::pod_memory_block_debug_print(const memory_block_data *memblock, std::ostream& o, const std::string& indent)
 {
     const pod_memory_block *emb = reinterpret_cast<const pod_memory_block *>(memblock);
     if (emb->m_memory_begin != NULL) {
@@ -185,7 +185,7 @@ void dynd::pod_memory_block_debug_dump(const memory_block_data *memblock, std::o
     } else {
         o << indent << " " << blockrefs_size << " blockrefs\n";
         for (int i = 0; i < blockrefs_size; ++i) {
-            memory_block_debug_dump(emb->m_blockrefs[i], o, indent + " ");
+            memory_block_debug_print(emb->m_blockrefs[i], o, indent + " ");
         }
     }
 }

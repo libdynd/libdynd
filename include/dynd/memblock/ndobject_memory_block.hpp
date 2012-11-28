@@ -80,7 +80,7 @@ memory_block_ptr make_ndobject_memory_block(const dtype& dt, int ndim, const int
  */
 memory_block_ptr shallow_copy_ndobject_memory_block(const memory_block_ptr& ndo);
 
-void ndobject_memory_block_debug_dump(const memory_block_data *memblock, std::ostream& o, const std::string& indent);
+void ndobject_memory_block_debug_print(const memory_block_data *memblock, std::ostream& o, const std::string& indent);
 
 } // namespace dynd
 

@@ -86,14 +86,14 @@ ndarray_node *dynd::eval::push_front_node_unary_kernels(ndarray_node* node,
             } else {
                 stringstream ss;
                 ss << "evaluating this expression graph (which is further connected to a unary node) is not yet supported:\n";
-                node->debug_dump(ss);
+                node->debug_print(ss);
                 throw runtime_error(ss.str());
             }
             break;
         default: {
             stringstream ss;
             ss << "evaluating this expression graph (which is further connected to a unary node) is not yet supported:\n";
-            node->debug_dump(ss);
+            node->debug_print(ss);
             throw runtime_error(ss.str());
         }
     }

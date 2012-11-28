@@ -215,7 +215,7 @@ void resize_executable_memory(memory_block_data * self
 
 }
     
-void executable_memory_block_debug_dump(const memory_block_data *memblock
+void executable_memory_block_debug_print(const memory_block_data *memblock
                                         , std::ostream& os
                                         , const std::string& indent
                                         )

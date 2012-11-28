@@ -434,10 +434,10 @@ void categorical_dtype::metadata_destruct(char *metadata) const
     }
 }
 
-void categorical_dtype::metadata_debug_dump(const char *metadata, std::ostream& o, const std::string& indent) const
+void categorical_dtype::metadata_debug_print(const char *metadata, std::ostream& o, const std::string& indent) const
 {
     if (m_category_dtype.extended()) {
-        m_category_dtype.extended()->metadata_debug_dump(metadata, o, indent);
+        m_category_dtype.extended()->metadata_debug_print(metadata, o, indent);
     }
 }
 

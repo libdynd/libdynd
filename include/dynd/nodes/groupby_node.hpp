@@ -102,7 +102,7 @@ public:
         }
     }
 
-    void debug_dump_extra(std::ostream& o, const std::string& indent) const;
+    void debug_print_extra(std::ostream& o, const std::string& indent) const;
 
     friend ndarray_node_ptr make_groupby_node(const ndarray_node_ptr& data_node,
                             const ndarray_node_ptr& by_node, const dtype& groups);

@@ -209,9 +209,9 @@ void string_dtype::metadata_destruct(char *metadata) const
     }
 }
 
-void string_dtype::metadata_debug_dump(const char *metadata, std::ostream& o, const std::string& indent) const
+void string_dtype::metadata_debug_print(const char *metadata, std::ostream& o, const std::string& indent) const
 {
     const string_dtype_metadata *md = reinterpret_cast<const string_dtype_metadata *>(metadata);
     o << "string_dtype metadata\n";
-    memory_block_debug_dump(md->blockref, o, indent);
+    memory_block_debug_print(md->blockref, o, indent);
 }

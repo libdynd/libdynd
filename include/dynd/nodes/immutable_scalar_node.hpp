@@ -94,7 +94,7 @@ public:
         return "immutable_scalar";
     }
 
-    void debug_dump_extra(std::ostream& o, const std::string& indent) const;
+    void debug_print_extra(std::ostream& o, const std::string& indent) const;
 
     friend ndarray_node_ptr detail::unchecked_make_immutable_scalar_node(const dtype& dt, const char* data);
     friend ndarray_node_ptr detail::unchecked_make_immutable_scalar_node(const dtype& dt);

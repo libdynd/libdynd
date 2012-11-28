@@ -108,7 +108,7 @@ public:
     void get_unary_operation(intptr_t dst_fixedstride, intptr_t src_fixedstride,
                                     kernel_instance<unary_operation_t>& out_kernel) const;
 
-    void debug_dump_extra(std::ostream& o, const std::string& indent) const;
+    void debug_print_extra(std::ostream& o, const std::string& indent) const;
 
     friend ndarray_node_ptr make_elwise_reduce_kernel_node_copy_kernel(const dtype& dt, const ndarray_node_ptr& opnode,
                                                 dynd_bool *reduce_axes, bool rightassoc, bool keepdims, const ndarray_node_ptr& identity,

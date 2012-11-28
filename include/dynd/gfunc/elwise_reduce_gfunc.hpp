@@ -82,7 +82,7 @@ public:
      */
     void add_kernel(elwise_reduce_kernel& ergk);
 
-    void debug_dump(std::ostream& o, const std::string& indent = "") const;
+    void debug_print(std::ostream& o, const std::string& indent = "") const;
 };
 
 }} // namespace dynd::gfunc

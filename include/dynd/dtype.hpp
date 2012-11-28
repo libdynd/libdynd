@@ -503,7 +503,7 @@ public:
     /** Destructs any references or other state contained in the ndobjects' metdata */
     virtual void metadata_destruct(char *metadata) const;
     /** Debug print of the metdata */
-    virtual void metadata_debug_dump(const char *metadata, std::ostream& o, const std::string& indent) const;
+    virtual void metadata_debug_print(const char *metadata, std::ostream& o, const std::string& indent) const;
 
     /** The size of the data required for uniform iteration */
     virtual size_t get_iterdata_size(int ndim) const;
@@ -613,7 +613,7 @@ public:
     void metadata_default_construct(char *metadata, int ndim, const intptr_t* shape) const;
     void metadata_copy_construct(char *dst_metadata, const char *src_metadata, memory_block_data *embedded_reference) const;
     void metadata_destruct(char *metadata) const;
-    void metadata_debug_dump(const char *metadata, std::ostream& o, const std::string& indent) const;
+    void metadata_debug_print(const char *metadata, std::ostream& o, const std::string& indent) const;
 
     // Expression dtypes stop the iterdata chain
     // TODO: Maybe it should be more flexible?

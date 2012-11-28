@@ -104,7 +104,7 @@ public:
         return "scalar";
     }
 
-    void debug_dump_extra(std::ostream& o, const std::string& indent) const;
+    void debug_print_extra(std::ostream& o, const std::string& indent) const;
 
     friend ndarray_node_ptr make_scalar_node(const dtype& dt, const char* data, int access_flags);
     friend ndarray_node_ptr make_scalar_node(const dtype& dt, const char* data, int access_flags,

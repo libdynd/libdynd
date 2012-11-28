@@ -67,7 +67,7 @@ public:
     }
 
     /** Debug printing of the elwise program */
-    void debug_dump(std::ostream& o, const std::string& indent = "") const;
+    void debug_print(std::ostream& o, const std::string& indent = "") const;
 
     /** Returns a const reference to the vector of register dtypes */
     const std::vector<dtype>& get_register_types() const {

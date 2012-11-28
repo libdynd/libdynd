@@ -36,7 +36,7 @@ ndarray_node_ptr dynd::groupby_node::apply_linear_index(
     throw std::runtime_error("TODO: groupby_node::apply_linear_index");
 }
 
-void dynd::groupby_node::debug_dump_extra(std::ostream& o, const std::string& indent) const
+void dynd::groupby_node::debug_print_extra(std::ostream& o, const std::string& indent) const
 {
     o << indent << " groups dtype: " << m_groups << "\n";
 }

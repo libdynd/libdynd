@@ -90,7 +90,7 @@ void dynd::detail::memory_block_free(memory_block_data *memblock)
     throw runtime_error(ss.str());
 }
 
-void dynd::memory_block_debug_dump(const memory_block_data *memblock, std::ostream& o, const std::string& indent)
+void dynd::memory_block_debug_print(const memory_block_data *memblock, std::ostream& o, const std::string& indent)
 {
     if (memblock != NULL) {
         o << indent << "------ memory_block at " << (const void *)memblock << "\n";
@@ -99,7 +99,7 @@ void dynd::memory_block_debug_dump(const memory_block_data *memblock, std::ostre
             case deprecated_ndarray_node_memory_block_type: {
                 o << indent << " type: ndarray_node\n";
                 ndarray_node_ptr node(const_cast<memory_block_data *>(memblock));
-                node->debug_dump(o, indent + " ");
+                node->debug_print(o, indent + " ");
                 break;
             }
             case external_memory_block_type:
@@ -107,22 +107,22 @@ void dynd::memory_block_debug_dump(const memory_block_data *memblock, std::ostre
                 break;
             case fixed_size_pod_memory_block_type:
                 o << indent << " type: fixed_size_pod\n";
-                fixed_size_pod_memory_block_debug_dump(memblock, o, indent);
+                fixed_size_pod_memory_block_debug_print(memblock, o, indent);
                 break;
             case pod_memory_block_type:
                 o << indent << " type: pod\n";
-                pod_memory_block_debug_dump(memblock, o, indent);
+                pod_memory_block_debug_print(memblock, o, indent);
                 break;
             case object_memory_block_type:
                 o << indent << " type: object\n";
                 break;
             case executable_memory_block_type:
                 o << indent << " type: executable\n";
-                executable_memory_block_debug_dump(memblock, o, indent);
+                executable_memory_block_debug_print(memblock, o, indent);
                 break;
             case ndobject_memory_block_type:
                 o << indent << " type: ndobject\n";
-                ndobject_memory_block_debug_dump(memblock, o, indent);
+                ndobject_memory_block_debug_print(memblock, o, indent);
                 break;
         }
         o << indent << "------" << endl;

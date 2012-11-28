@@ -341,7 +341,7 @@ public:
 
     bool equals_exact(const ndobject& rhs) const;
 
-    void debug_dump(std::ostream& o, const std::string& indent = "") const;
+    void debug_print(std::ostream& o, const std::string& indent = "") const;
 
     friend std::ostream& operator<<(std::ostream& o, const ndobject& rhs);
     friend class ndobject_vals;

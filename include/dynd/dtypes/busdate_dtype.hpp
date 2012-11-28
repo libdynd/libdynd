@@ -106,7 +106,7 @@ public:
     }
     void metadata_destruct(char *DYND_UNUSED(metadata)) const {
     }
-    void metadata_debug_dump(const char *DYND_UNUSED(metadata), std::ostream& DYND_UNUSED(o), const std::string& DYND_UNUSED(indent)) const {
+    void metadata_debug_print(const char *DYND_UNUSED(metadata), std::ostream& DYND_UNUSED(o), const std::string& DYND_UNUSED(indent)) const {
     }
 };
 

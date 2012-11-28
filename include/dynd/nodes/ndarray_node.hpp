@@ -165,9 +165,9 @@ public:
                     bool allow_in_place) = 0;
 
     /** Debug printing of the tree */
-    void debug_dump(std::ostream& o, const std::string& indent = "") const;
+    void debug_print(std::ostream& o, const std::string& indent = "") const;
     /** Debug printing of the data from the derived class */
-    virtual void debug_dump_extra(std::ostream& o, const std::string& indent) const;
+    virtual void debug_print_extra(std::ostream& o, const std::string& indent) const;
 
     virtual const char *node_name() const = 0;
 

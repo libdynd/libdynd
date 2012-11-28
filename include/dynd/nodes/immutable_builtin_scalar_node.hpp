@@ -98,7 +98,7 @@ public:
         return "immutable_builtin_scalar";
     }
 
-    void debug_dump_extra(std::ostream& o, const std::string& indent) const
+    void debug_print_extra(std::ostream& o, const std::string& indent) const
     {
         o << indent << " data: ";
         hexadecimal_print(o, reinterpret_cast<const char *>(&m_value), sizeof(m_value));

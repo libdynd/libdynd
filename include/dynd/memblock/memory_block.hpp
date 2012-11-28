@@ -120,7 +120,7 @@ inline void memory_block_decref(memory_block_data *memblock)
 /**
  * Does a debug dump of the memory block.
  */
-void memory_block_debug_dump(const memory_block_data *memblock, std::ostream& o, const std::string& indent = "");
+void memory_block_debug_print(const memory_block_data *memblock, std::ostream& o, const std::string& indent = "");
 
 /**
  * A smart pointer to a memory_block object. Very similar
