@@ -11,6 +11,7 @@
 #include <dynd/ndobject.hpp>
 #include <dynd/nodes/immutable_scalar_node.hpp>
 #include <dynd/dtypes/string_dtype.hpp>
+#include <dynd/dtypes/strided_array_dtype.hpp>
 #include <dynd/dtypes/fixedstring_dtype.hpp>
 #include <dynd/dtypes/convert_dtype.hpp>
 
@@ -50,6 +51,38 @@ TEST(StringDType, Create) {
     EXPECT_EQ(string_kind, d.kind());
     EXPECT_EQ(sizeof(void *), d.alignment());
     EXPECT_EQ(2*sizeof(void *), d.element_size());
+}
+
+TEST(StringDType, NDObjectCreation) {
+    ndobject a;
+
+    // A C-style string literal
+    a = "testing string construction";
+    EXPECT_EQ(make_string_dtype(string_encoding_utf_8), a.get_dtype());
+    EXPECT_EQ("testing string construction", a.as<string>());
+
+    // A C-style char array variable
+    const char carr[] = "string construction";
+    a = carr;
+    EXPECT_EQ(make_string_dtype(string_encoding_utf_8), a.get_dtype());
+    EXPECT_EQ("string construction", a.as<string>());
+
+    // A C-style char pointer variable
+    const char *cptr = "construction";
+    a = cptr;
+    EXPECT_EQ(make_string_dtype(string_encoding_utf_8), a.get_dtype());
+    EXPECT_EQ("construction", a.as<string>());
+
+    // An array of UTF8 strings
+    const char *i0[5] = {"this", "is", "a", "test", "of strings that are various sizes"};
+    a = i0;
+    EXPECT_EQ(make_strided_array_dtype(make_string_dtype(string_encoding_utf_8)), a.get_dtype());
+    EXPECT_EQ(a.get_shape()[0], 5);
+    EXPECT_EQ("this", a.at(0).as<string>());
+    EXPECT_EQ("is", a.at(1).as<string>());
+    EXPECT_EQ("a", a.at(2).as<string>());
+    EXPECT_EQ("test", a.at(3).as<string>());
+    EXPECT_EQ("of strings that are various sizes", a.at(4).as<string>());
 }
 
 TEST(StringDType, Basic) {

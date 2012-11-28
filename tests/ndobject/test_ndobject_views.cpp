@@ -22,7 +22,7 @@ using namespace dynd;
 
 TEST(NDObjectViews, OneDimensionalRawMemory) {
     ndobject a, b;
-    char c_values[8];
+    signed char c_values[8];
     uint64_t u8_value;
 
     // Make an 8 byte aligned array of 80 chars

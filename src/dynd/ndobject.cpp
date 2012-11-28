@@ -45,7 +45,13 @@ ndobject dynd::make_strided_ndobject(const dtype& uniform_dtype, int ndim, const
                 int64_t access_flags, const int *axis_perm)
 {
     // Determine the total data size
-    intptr_t size = uniform_dtype.element_size();
+    intptr_t element_size;
+    if (uniform_dtype.extended()) {
+        element_size = uniform_dtype.extended()->get_default_element_size(0, NULL);
+    } else {
+        element_size = uniform_dtype.element_size();
+    }
+    intptr_t size = element_size;
     for (int i = 0; i < ndim; ++i) {
         size *= shape[i];
     }
@@ -65,9 +71,13 @@ ndobject dynd::make_strided_ndobject(const dtype& uniform_dtype, int ndim, const
     ndo->m_data_reference = NULL;
     ndo->m_flags = access_flags;
 
-    // Fill in the ndobject metadata with C-order strides
+    // Fill in the ndobject metadata with strides and sizes
     strided_array_dtype_metadata *meta = reinterpret_cast<strided_array_dtype_metadata *>(ndo + 1);
-    intptr_t stride = uniform_dtype.element_size();
+    // Use the default construction to handle the uniform_dtype's metadata
+    if (uniform_dtype.extended()) {
+        uniform_dtype.extended()->metadata_default_construct(reinterpret_cast<char *>(meta + ndim), 0, NULL);
+    }
+    intptr_t stride = element_size;
     if (axis_perm == NULL) {
         for (int i = ndim - 1; i >= 0; --i) {
             intptr_t dim_size = shape[i];
@@ -180,6 +190,25 @@ ndobject dynd::make_string_ndobject(const char *str, size_t len, string_encoding
     return result;
 }
 
+ndobject dynd::make_utf8_array_ndobject(const char **cstr_array, size_t array_size)
+{
+    dtype dt = make_string_dtype(string_encoding_utf_8);
+    ndobject result = make_strided_ndobject(array_size, dt);
+    // Get the allocator for the output string dtype
+    const string_dtype_metadata *md = reinterpret_cast<const string_dtype_metadata *>(result.get_ndo_meta() + sizeof(strided_array_dtype_metadata));
+    memory_block_data *dst_memblock = md->blockref;
+    memory_block_pod_allocator_api *allocator = get_memory_block_pod_allocator_api(dst_memblock);
+    char **out_data = reinterpret_cast<char **>(result.get_ndo()->m_data_pointer);
+    for (size_t i = 0; i < array_size; ++i) {
+        size_t size = strlen(cstr_array[i]);
+        allocator->allocate(dst_memblock, size, 1, &out_data[0], &out_data[1]);
+        memcpy(out_data[0], cstr_array[i], size);
+        out_data += 2;
+    }
+    allocator->finalize(dst_memblock);
+    return result;
+}
+
 /**
  * Clones the metadata and swaps in a new dtype. The dtype must
  * have identical metadata, but this function doesn't check that.
@@ -272,6 +301,17 @@ ndobject::ndobject(const std::string& value)
     ndobject temp = make_utf8_ndobject(value.c_str(), value.size());
     temp.swap(*this);
 }
+ndobject::ndobject(const char *cstr)
+{
+    ndobject temp = make_utf8_ndobject(cstr, strlen(cstr));
+    temp.swap(*this);
+}
+ndobject::ndobject(const char *str, size_t size)
+{
+    ndobject temp = make_utf8_ndobject(str, size);
+    temp.swap(*this);
+}
+
 ndobject::ndobject(const dtype& dt)
     : m_memblock(make_ndobject_memory_block(dt, 0, NULL))
 {

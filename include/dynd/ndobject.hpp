@@ -64,12 +64,22 @@ public:
     ndobject(std::complex<float> value);
     ndobject(std::complex<double> value);
     ndobject(const std::string& value);
+    /** Construct a string from a NULL-terminated UTF8 string */
+    ndobject(const char *cstr);
+    /** Construct a string from a UTF8 buffer and specified buffer size */
+    ndobject(const char *str, size_t size);
 
     /**
      * Constructs an array from a multi-dimensional C-style array.
      */
     template<class T, int N>
     ndobject(const T (&rhs)[N]);
+    /** Specialize to treat char arrays as strings */
+    template<int N>
+    ndobject(const char (&rhs)[N]);
+    /** Specialize to create 1D arrays of strings */
+    template<int N>
+    ndobject(const char *(&rhs)[N]);
 
     explicit ndobject(const memory_block_ptr& ndobj_memblock)
         : m_memblock(ndobj_memblock)
@@ -456,6 +466,15 @@ inline ndobject make_utf32_ndobject(const uint32_t (&static_string)[N]) {
     return make_utf32_ndobject(&static_string[0], N);
 }
 
+/**
+ * \brief Creates an ndobject array of strings.
+ *
+ * \param cstr_array  An array of NULL-terminated UTF8 strings.
+ * \param array_size  The number of elements in `cstr_array`.
+ *
+ * \returns  An ndobject of type strided_array<string<utf_8>>.
+ */
+ndobject make_utf8_array_ndobject(const char **cstr_array, size_t array_size);
 
 inline ndobject make_strided_ndobject(intptr_t shape0, const dtype& uniform_dtype) {
     return make_strided_ndobject(uniform_dtype, 1, &shape0, read_access_flag|write_access_flag, NULL);
@@ -658,6 +677,18 @@ dynd::ndobject::ndobject(const T (&rhs)[N])
 
     *this = make_strided_ndobject(dtype(detail::uniform_type_from_array<T>::type_id), ndim, shape, read_access_flag|write_access_flag, NULL);
     DYND_MEMCPY(get_ndo()->m_data_pointer, reinterpret_cast<const void *>(&rhs), size);
+}
+
+template<int N>
+inline dynd::ndobject::ndobject(const char (&rhs)[N])
+{
+    *this = make_string_ndobject(rhs, N, string_encoding_utf_8);
+}
+
+template<int N>
+inline dynd::ndobject::ndobject(const char *(&rhs)[N])
+{
+    *this = make_utf8_array_ndobject(rhs, N);
 }
 
 ///////////// The ndobject.as<type>() templated function /////////////////////////

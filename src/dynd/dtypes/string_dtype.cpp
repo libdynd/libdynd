@@ -64,6 +64,7 @@ dtype string_dtype::apply_linear_index(int nindices, const irange *indices, int 
 {
     if (nindices == 0) {
         return dtype(this, true);
+        /* TODO:
     } else if (nindices == 1) {
         if (indices->step() == 0) {
             // Return a fixedstring dtype, since it's always one character.
@@ -73,9 +74,21 @@ dtype string_dtype::apply_linear_index(int nindices, const irange *indices, int 
         } else {
             return dtype(this, true);
         }
+        */
     } else {
         throw too_many_indices(nindices, current_i + 1);
     }
+}
+
+intptr_t string_dtype::apply_linear_index(int nindices, const irange *indices, char *data, const char *metadata,
+                const dtype& result_dtype, char *out_metadata, int current_i, const dtype& root_dt) const
+{
+    const string_dtype_metadata *md = reinterpret_cast<const string_dtype_metadata *>(metadata);
+    string_dtype_metadata *out_md = reinterpret_cast<string_dtype_metadata *>(out_metadata);
+    // Just copy the blockref
+    out_md->blockref = md->blockref;
+    memory_block_incref(out_md->blockref);
+    return 0;
 }
 
 dtype string_dtype::get_canonical_dtype() const
