@@ -412,7 +412,7 @@ public:
 
 /** Makes a strided ndobject with uninitialized data. If axis_perm is NULL, it is C-order */
 ndobject make_strided_ndobject(const dtype& uniform_dtype, int ndim, const intptr_t *shape,
-                int64_t access_flags, const int *axis_perm = NULL);
+                int64_t access_flags, const int *axis_perm);
 
 /** Makes a strided ndobject pointing to existing data */
 ndobject make_strided_ndobject_from_data(const dtype& scalar_dtype, int ndim, const intptr_t *shape,
@@ -458,15 +458,15 @@ inline ndobject make_utf32_ndobject(const uint32_t (&static_string)[N]) {
 
 
 inline ndobject make_strided_ndobject(intptr_t shape0, const dtype& uniform_dtype) {
-    return make_strided_ndobject(uniform_dtype, 1, &shape0, NULL);
+    return make_strided_ndobject(uniform_dtype, 1, &shape0, read_access_flag|write_access_flag, NULL);
 }
 inline ndobject make_strided_ndobject(intptr_t shape0, intptr_t shape1, const dtype& uniform_dtype) {
     intptr_t shape[2] = {shape0, shape1};
-    return make_strided_ndobject(uniform_dtype, 2, shape, NULL);
+    return make_strided_ndobject(uniform_dtype, 2, shape, read_access_flag|write_access_flag, NULL);
 }
 inline ndobject make_strided_ndobject(intptr_t shape0, intptr_t shape1, intptr_t shape2, const dtype& uniform_dtype) {
     intptr_t shape[3] = {shape0, shape1, shape2};
-    return make_strided_ndobject(uniform_dtype, 3, shape, NULL);
+    return make_strided_ndobject(uniform_dtype, 3, shape, read_access_flag|write_access_flag, NULL);
 }
 
 inline ndobject_vals ndobject::vals() const {
@@ -656,7 +656,7 @@ dynd::ndobject::ndobject(const T (&rhs)[N])
     intptr_t shape[ndim];
     size_t size = detail::fill_shape<T[N]>::fill(shape);
 
-    *this = make_strided_ndobject(dtype(detail::uniform_type_from_array<T>::type_id), ndim, shape, read_access_flag|write_access_flag);
+    *this = make_strided_ndobject(dtype(detail::uniform_type_from_array<T>::type_id), ndim, shape, read_access_flag|write_access_flag, NULL);
     DYND_MEMCPY(get_ndo()->m_data_pointer, reinterpret_cast<const void *>(&rhs), size);
 }
 
