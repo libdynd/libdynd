@@ -35,8 +35,8 @@ public:
         return composite_kind;
     }
     // Expose the storage traits here
-    size_t alignment() const {
-        return m_element_dtype.alignment();
+    size_t get_alignment() const {
+        return m_element_dtype.get_alignment();
     }
     size_t get_element_size() const {
         return 0;

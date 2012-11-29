@@ -275,9 +275,9 @@ void dynd::get_dtype_assignment_kernel(
         if (src_dt_vdt != dst_dt_vdt) {
             // A cast operation from src_dt.value_dtype() to dst_dt
             if (kernels.empty()) {
-                element_sizes.push_back(src_dt_vdt.element_size());
+                element_sizes.push_back(src_dt_vdt.get_element_size());
             }
-            element_sizes.push_back(dst_dt_vdt.element_size());
+            element_sizes.push_back(dst_dt_vdt.get_element_size());
             kernels.push_back(unary_specialization_kernel_instance());
             get_dtype_assignment_kernel(dst_dt_vdt, src_dt_vdt,
                                 errmode, ectx, kernels.back());
@@ -540,7 +540,7 @@ void dynd::get_dtype_assignment_kernel(const dtype& dt,
 {
     switch (dt.get_memory_management()) {
     case pod_memory_management:
-        get_pod_dtype_assignment_kernel(dt.element_size(), dt.alignment(),
+        get_pod_dtype_assignment_kernel(dt.get_element_size(), dt.get_alignment(),
                             out_kernel);
         break;
     case blockref_memory_management:

@@ -50,7 +50,7 @@ ndobject dynd::make_strided_ndobject(const dtype& uniform_dtype, int ndim, const
     if (uniform_dtype.extended()) {
         element_size = uniform_dtype.extended()->get_default_element_size(0, NULL);
     } else {
-        element_size = uniform_dtype.element_size();
+        element_size = uniform_dtype.get_element_size();
     }
     intptr_t size = element_size;
     for (int i = 0; i < ndim; ++i) {
@@ -62,7 +62,7 @@ ndobject dynd::make_strided_ndobject(const dtype& uniform_dtype, int ndim, const
     // Allocate the ndobject metadata and data in one memory block
     char *data_ptr = NULL;
     memory_block_ptr result = make_ndobject_memory_block(array_dtype.extended()->get_metadata_size(),
-                    size, uniform_dtype.alignment(), &data_ptr);
+                    size, uniform_dtype.get_alignment(), &data_ptr);
 
     // Fill in the preamble metadata
     ndobject_preamble *ndo = reinterpret_cast<ndobject_preamble *>(result.get());
@@ -141,7 +141,7 @@ ndobject dynd::make_strided_ndobject_from_data(const dtype& uniform_dtype, int n
 
 ndobject dynd::make_scalar_ndobject(const dtype& scalar_dtype, const void *data)
 {
-    size_t size = scalar_dtype.element_size();
+    size_t size = scalar_dtype.get_element_size();
     if (scalar_dtype.extended() && (size == 0 ||
                 scalar_dtype.get_memory_management() != pod_memory_management ||
                 scalar_dtype.extended()->is_uniform_dim() ||
@@ -153,7 +153,7 @@ ndobject dynd::make_scalar_ndobject(const dtype& scalar_dtype, const void *data)
 
     // Allocate the ndobject metadata and data in one memory block
     char *data_ptr = NULL;
-    memory_block_ptr result = make_ndobject_memory_block(0, size, scalar_dtype.alignment(), &data_ptr);
+    memory_block_ptr result = make_ndobject_memory_block(0, size, scalar_dtype.get_alignment(), &data_ptr);
 
     // Fill in the preamble metadata
     ndobject_preamble *ndo = reinterpret_cast<ndobject_preamble *>(result.get());
@@ -177,9 +177,9 @@ ndobject dynd::make_string_ndobject(const char *str, size_t len, string_encoding
     char *data_ptr = NULL, *string_ptr;
     dtype dt = make_string_dtype(encoding);
     ndobject result(make_ndobject_memory_block(dt.extended()->get_metadata_size(),
-                        dt.element_size() + len, dt.alignment(), &data_ptr));
+                        dt.get_element_size() + len, dt.get_alignment(), &data_ptr));
     // Set the string extents
-    string_ptr = data_ptr + dt.element_size();
+    string_ptr = data_ptr + dt.get_element_size();
     ((char **)data_ptr)[0] = string_ptr;
     ((char **)data_ptr)[1] = string_ptr + len;
     // Copy the string data
@@ -347,7 +347,7 @@ namespace {
         const dtype& storage_dt = dt.storage_dtype();
         if (!storage_dt.extended() || (storage_dt.get_memory_management() == pod_memory_management &&
                                 storage_dt.extended()->get_metadata_size() == 0)) {
-            return make_fixedbytes_dtype(storage_dt.element_size(), storage_dt.alignment());
+            return make_fixedbytes_dtype(storage_dt.get_element_size(), storage_dt.get_alignment());
         } else if (storage_dt.get_type_id() == string_type_id) {
             return make_bytes_dtype(static_cast<const string_dtype *>(storage_dt.extended())->get_data_alignment());
         } else {
@@ -508,7 +508,7 @@ namespace {
     {
         const dtype *e = reinterpret_cast<const dtype *>(extra);
         // If things aren't simple, use a view_dtype
-        if (dt.get_kind() == expression_kind || dt.element_size() != e->element_size() ||
+        if (dt.get_kind() == expression_kind || dt.get_element_size() != e->get_element_size() ||
                     dt.get_memory_management() != pod_memory_management ||
                     e->get_memory_management() != pod_memory_management) {
             return make_view_dtype(*e, dt);
@@ -527,23 +527,23 @@ ndobject ndobject::view_scalars(const dtype& scalar_dtype) const
     if (uniform_ndim == 1 && array_dtype.get_type_id() == strided_array_type_id) {
         const strided_array_dtype *sad = static_cast<const strided_array_dtype *>(array_dtype.extended());
         const strided_array_dtype_metadata *md = reinterpret_cast<const strided_array_dtype_metadata *>(get_ndo_meta());
-        size_t element_size = sad->get_element_dtype().element_size();
+        size_t element_size = sad->get_element_dtype().get_element_size();
         if (element_size != 0 && element_size == md->stride &&
                     sad->get_element_dtype().get_kind() != expression_kind &&
                     sad->get_element_dtype().get_memory_management() == pod_memory_management) {
             intptr_t nbytes = md->size * element_size;
             // Make sure the element size divides into the # of bytes
-            if (nbytes % scalar_dtype.element_size() != 0) {
+            if (nbytes % scalar_dtype.get_element_size() != 0) {
                 std::stringstream ss;
                 ss << "cannot view ndobject with " << nbytes << " bytes as dtype ";
-                ss << scalar_dtype << ", because its element size " << scalar_dtype.element_size();
+                ss << scalar_dtype << ", because its element size " << scalar_dtype.get_element_size();
                 ss << " doesn't divide evenly into the total array size " << nbytes;
                 throw std::runtime_error(ss.str());
             }
             // Create the result array, adjusting the dtype if the data isn't aligned correctly
             char *data_ptr = get_ndo()->m_data_pointer;
             dtype result_dtype;
-            if ((((uintptr_t)data_ptr)&(scalar_dtype.alignment()-1)) == 0) {
+            if ((((uintptr_t)data_ptr)&(scalar_dtype.get_alignment()-1)) == 0) {
                 result_dtype = make_strided_array_dtype(scalar_dtype);
             } else {
                 result_dtype = make_strided_array_dtype(make_unaligned_dtype(scalar_dtype));
@@ -562,8 +562,8 @@ ndobject ndobject::view_scalars(const dtype& scalar_dtype) const
             result.get_ndo()->m_flags = get_ndo()->m_flags;
             // The result has one strided ndarray field
             strided_array_dtype_metadata *result_md = reinterpret_cast<strided_array_dtype_metadata *>(result.get_ndo_meta());
-            result_md->size = nbytes / scalar_dtype.element_size();
-            result_md->stride = scalar_dtype.element_size();
+            result_md->size = nbytes / scalar_dtype.get_element_size();
+            result_md->stride = scalar_dtype.get_element_size();
             return result;
         }
     }

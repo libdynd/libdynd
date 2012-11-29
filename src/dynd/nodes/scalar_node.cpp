@@ -16,7 +16,7 @@ ndarray_node_ptr dynd::scalar_node::as_dtype(const dtype& dt,
     if (allow_in_place) {
         m_dtype = make_convert_dtype(dt, m_dtype, errmode);
         return as_ndarray_node_ptr();
-    } else if(m_dtype.element_size() <= 32) {
+    } else if(m_dtype.get_element_size() <= 32) {
         // For small amounts of data, make a copy
         return make_scalar_node(
                         make_convert_dtype(dt, m_dtype, errmode),
@@ -41,7 +41,7 @@ ndarray_node_ptr dynd::scalar_node::apply_linear_index(
 void dynd::scalar_node::debug_print_extra(std::ostream& o, const std::string& indent) const
 {
     o << indent << " data: ";
-    hexadecimal_print(o, m_originptr, m_dtype.element_size());
+    hexadecimal_print(o, m_originptr, m_dtype.get_element_size());
     o << "\n";
     if (m_blockref_memblock.get() != NULL) {
         o << indent << " blockref memory block\n";
@@ -57,13 +57,13 @@ ndarray_node_ptr dynd::make_scalar_node(const dtype& dt, const char* data, int a
 
     // Calculate the aligned starting point for the data
     intptr_t start = (intptr_t)(((uintptr_t)sizeof(memory_block_data) +
-                                        sizeof(scalar_node) + (uintptr_t)(dt.alignment() - 1))
-                        & ~((uintptr_t)(dt.alignment() - 1)));
-    char *result = reinterpret_cast<char *>(malloc(start + dt.element_size()));
+                                        sizeof(scalar_node) + (uintptr_t)(dt.get_alignment() - 1))
+                        & ~((uintptr_t)(dt.get_alignment() - 1)));
+    char *result = reinterpret_cast<char *>(malloc(start + dt.get_element_size()));
     if (result == NULL) {
         throw bad_alloc();
     }
-    memcpy(result + start, data, dt.element_size());
+    memcpy(result + start, data, dt.get_element_size());
     // Placement new
     new (result + sizeof(memory_block_data))
             scalar_node(dt, result + start, access_flags);
@@ -83,13 +83,13 @@ ndarray_node_ptr dynd::make_scalar_node(const dtype& dt, const char* data, int a
 
     // Calculate the aligned starting point for the data
     intptr_t start = (intptr_t)(((uintptr_t)sizeof(memory_block_data) +
-                                        sizeof(scalar_node) + (uintptr_t)(dt.alignment() - 1))
-                        & ~((uintptr_t)(dt.alignment() - 1)));
-    char *result = reinterpret_cast<char *>(malloc(start + dt.element_size()));
+                                        sizeof(scalar_node) + (uintptr_t)(dt.get_alignment() - 1))
+                        & ~((uintptr_t)(dt.get_alignment() - 1)));
+    char *result = reinterpret_cast<char *>(malloc(start + dt.get_element_size()));
     if (result == NULL) {
         throw bad_alloc();
     }
-    memcpy(result + start, data, dt.element_size());
+    memcpy(result + start, data, dt.get_element_size());
     // Placement new
     new (result + sizeof(memory_block_data))
             scalar_node(dt, result + start, access_flags, blockref_memblock);

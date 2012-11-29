@@ -55,11 +55,11 @@ public:
         return m_storage;
     }
 
-    intptr_t element_size() const {
+    intptr_t get_element_size() const {
         return m_element_size;
     }
 
-    intptr_t element_count() const {
+    intptr_t get_element_count() const {
         return m_element_count;
     }
 };

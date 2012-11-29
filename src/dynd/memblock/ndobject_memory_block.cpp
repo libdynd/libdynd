@@ -66,14 +66,14 @@ memory_block_ptr dynd::make_ndobject_memory_block(const dtype& dt, int ndim, con
 
     if (dt.extended() == NULL) {
         metadata_size = 0;
-        element_size = dt.element_size();
+        element_size = dt.get_element_size();
     } else {
         metadata_size = dt.extended()->get_metadata_size();
         element_size = dt.extended()->get_default_element_size(ndim, shape);
     }
 
     char *data = NULL;
-    memory_block_ptr result = make_ndobject_memory_block(metadata_size, element_size, dt.alignment(), &data);
+    memory_block_ptr result = make_ndobject_memory_block(metadata_size, element_size, dt.get_alignment(), &data);
     ndobject_preamble *preamble = reinterpret_cast<ndobject_preamble *>(result.get());
     if (dt.extended() == NULL) {
         preamble->m_dtype = reinterpret_cast<extended_dtype *>(dt.get_type_id());

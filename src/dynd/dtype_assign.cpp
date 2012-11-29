@@ -78,13 +78,13 @@ bool dynd::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt)
                     case bool_kind:
                         return false;
                     case int_kind:
-                        return dst_dt.element_size() >= src_dt.element_size();
+                        return dst_dt.get_element_size() >= src_dt.get_element_size();
                     case uint_kind:
                         return false;
                     case real_kind:
-                        return dst_dt.element_size() > src_dt.element_size();
+                        return dst_dt.get_element_size() > src_dt.get_element_size();
                     case complex_kind:
-                        return dst_dt.element_size() > 2 * src_dt.element_size();
+                        return dst_dt.get_element_size() > 2 * src_dt.get_element_size();
                     case bytes_kind:
                         return false;
                     default:
@@ -96,13 +96,13 @@ bool dynd::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt)
                     case bool_kind:
                         return false;
                     case int_kind:
-                        return dst_dt.element_size() > src_dt.element_size();
+                        return dst_dt.get_element_size() > src_dt.get_element_size();
                     case uint_kind:
-                        return dst_dt.element_size() >= src_dt.element_size();
+                        return dst_dt.get_element_size() >= src_dt.get_element_size();
                     case real_kind:
-                        return dst_dt.element_size() > src_dt.element_size();
+                        return dst_dt.get_element_size() > src_dt.get_element_size();
                     case complex_kind:
-                        return dst_dt.element_size() > 2 * src_dt.element_size();
+                        return dst_dt.get_element_size() > 2 * src_dt.get_element_size();
                     case bytes_kind:
                         return false;
                     default:
@@ -116,9 +116,9 @@ bool dynd::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt)
                     case uint_kind:
                         return false;
                     case real_kind:
-                        return dst_dt.element_size() >= src_dt.element_size();
+                        return dst_dt.get_element_size() >= src_dt.get_element_size();
                     case complex_kind:
-                        return dst_dt.element_size() >= 2 * src_dt.element_size();
+                        return dst_dt.get_element_size() >= 2 * src_dt.get_element_size();
                     case bytes_kind:
                         return false;
                     default:
@@ -132,7 +132,7 @@ bool dynd::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt)
                     case real_kind:
                         return false;
                     case complex_kind:
-                        return dst_dt.element_size() >= src_dt.element_size();
+                        return dst_dt.get_element_size() >= src_dt.get_element_size();
                     case bytes_kind:
                         return false;
                     default:
@@ -153,7 +153,7 @@ bool dynd::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt)
                 }
             case bytes_kind:
                 return dst_dt.get_kind() == bytes_kind  &&
-                        dst_dt.element_size() == src_dt.element_size();
+                        dst_dt.get_element_size() == src_dt.get_element_size();
             default:
                 break;
         }
@@ -175,8 +175,8 @@ bool dynd::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt)
 void dynd::dtype_assign(const dtype& dst_dt, char *dst, const dtype& src_dt, const char *src,
                 assign_error_mode errmode, const eval::eval_context *ectx)
 {
-    DYND_ASSERT_ALIGNED(dst, 0, dst_dt.alignment(), "dst dtype: " << dst_dt << ", src dtype: " << src_dt);
-    DYND_ASSERT_ALIGNED(src, 0, src_dt.alignment(), "src dtype: " << src_dt << ", dst dtype: " << dst_dt);
+    DYND_ASSERT_ALIGNED(dst, 0, dst_dt.get_alignment(), "dst dtype: " << dst_dt << ", src dtype: " << src_dt);
+    DYND_ASSERT_ALIGNED(src, 0, src_dt.get_alignment(), "src dtype: " << src_dt << ", dst dtype: " << dst_dt);
     if (dst_dt.get_memory_management() != pod_memory_management) {
         throw runtime_error("dtype_assign can only be used with POD destination memory");
     }
@@ -224,7 +224,7 @@ void dynd::dtype_strided_assign(const dtype& dst_dt, char *dst, intptr_t dst_str
     unary_specialization_kernel_instance op;
     get_dtype_assignment_kernel(dst_dt, src_dt,
                                 errmode, ectx, op);
-    op.specializations[get_unary_specialization(dst_stride, dst_dt.element_size(), src_stride, src_dt.element_size())](
+    op.specializations[get_unary_specialization(dst_stride, dst_dt.get_element_size(), src_stride, src_dt.get_element_size())](
                 dst, dst_stride, src, src_stride, count, op.auxdata);
 }
 

@@ -28,8 +28,8 @@ TEST(CategoricalDType, Create) {
     d = make_categorical_dtype(a);
     EXPECT_EQ(categorical_type_id, d.get_type_id());
     EXPECT_EQ(custom_kind, d.get_kind());
-    EXPECT_EQ(4u, d.alignment());
-    EXPECT_EQ(4u, d.element_size());
+    EXPECT_EQ(4u, d.get_alignment());
+    EXPECT_EQ(4u, d.get_element_size());
 
     cout << d << endl;
 }

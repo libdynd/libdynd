@@ -75,10 +75,10 @@ ndarray_node *dynd::eval::push_front_node_unary_kernels(ndarray_node* node,
                 if (dt.get_kind() == expression_kind) {
                     push_front_dtype_storage_to_value_kernels(dt, ectx, out_kernels, out_element_sizes);
                 } else if (out_kernels.empty()) {
-                    out_element_sizes.push_front(node->get_opnode(0)->get_dtype().value_dtype().element_size());
+                    out_element_sizes.push_front(node->get_opnode(0)->get_dtype().value_dtype().get_element_size());
                 }
                 // The node's kernel
-                out_element_sizes.push_front(dt.storage_dtype().element_size());
+                out_element_sizes.push_front(dt.storage_dtype().get_element_size());
                 out_kernels.push_front(unary_specialization_kernel_instance());
                 node->get_unary_specialization_operation(out_kernels.front());
                 // The kernels from the operand
@@ -132,8 +132,8 @@ ndarray_node_ptr dynd::eval::evaluate_strided_with_unary_kernel(ndarray_node *no
     intptr_t innersize = iter.innersize();
     intptr_t dst_stride = iter.innerstride<0>();
     intptr_t src0_stride = iter.innerstride<1>();
-    unary_specialization_t uspec = get_unary_specialization(dst_stride, dst_dt.element_size(),
-                                                                src0_stride, src_dt.element_size());
+    unary_specialization_t uspec = get_unary_specialization(dst_stride, dst_dt.get_element_size(),
+                                                                src0_stride, src_dt.get_element_size());
     unary_operation_t kfunc = operation.specializations[uspec];
     if (innersize > 0) {
         do {

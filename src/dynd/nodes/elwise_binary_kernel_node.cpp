@@ -74,11 +74,11 @@ void dynd::elwise_binary_kernel_node::get_binary_operation(intptr_t dst_fixedstr
 
         // Adapt the output
         if (m_dtype.get_kind() == expression_kind) {
-            element_sizes[0] = m_dtype.element_size();
+            element_sizes[0] = m_dtype.get_element_size();
             get_dtype_assignment_kernel(m_dtype.value_dtype(), m_dtype, assign_error_none, ectx, adapters_spec[0]);
             adapters[0].kernel = adapters_spec[0].specializations[
-                    get_unary_specialization(dst_fixedstride, m_dtype.value_dtype().element_size(),
-                                        m_dtype.element_size(), m_dtype.element_size())];
+                    get_unary_specialization(dst_fixedstride, m_dtype.value_dtype().get_element_size(),
+                                        m_dtype.get_element_size(), m_dtype.get_element_size())];
             adapters[0].auxdata.swap(adapters_spec[0].auxdata);
         } else {
             element_sizes[0] = dst_fixedstride;
@@ -86,12 +86,12 @@ void dynd::elwise_binary_kernel_node::get_binary_operation(intptr_t dst_fixedstr
 
         // Adapt the first operand
         if (m_opnodes[0]->get_dtype().get_kind() == expression_kind) {
-            element_sizes[1] = m_opnodes[0]->get_dtype().value_dtype().element_size();
+            element_sizes[1] = m_opnodes[0]->get_dtype().value_dtype().get_element_size();
             get_dtype_assignment_kernel(m_opnodes[0]->get_dtype().value_dtype(), m_opnodes[0]->get_dtype(),
                                 assign_error_none, ectx, adapters_spec[1]);
             adapters[1].kernel = adapters_spec[1].specializations[
                         get_unary_specialization(element_sizes[1], element_sizes[1],
-                                                src0_fixedstride, m_opnodes[0]->get_dtype().element_size())];
+                                                src0_fixedstride, m_opnodes[0]->get_dtype().get_element_size())];
             adapters[1].auxdata.swap(adapters_spec[1].auxdata);
         } else {
             element_sizes[1] = src0_fixedstride;
@@ -99,12 +99,12 @@ void dynd::elwise_binary_kernel_node::get_binary_operation(intptr_t dst_fixedstr
 
         // Adapt the second operand
         if (m_opnodes[1]->get_dtype().get_kind() == expression_kind) {
-            element_sizes[2] = m_opnodes[1]->get_dtype().value_dtype().element_size();
+            element_sizes[2] = m_opnodes[1]->get_dtype().value_dtype().get_element_size();
             get_dtype_assignment_kernel(m_opnodes[1]->get_dtype().value_dtype(), m_opnodes[1]->get_dtype(),
                                 assign_error_none, ectx, adapters_spec[2]);
             adapters[2].kernel = adapters_spec[2].specializations[
                         get_unary_specialization(element_sizes[2], element_sizes[2],
-                                                src1_fixedstride, m_opnodes[1]->get_dtype().element_size())];
+                                                src1_fixedstride, m_opnodes[1]->get_dtype().get_element_size())];
             adapters[2].auxdata.swap(adapters_spec[2].auxdata);
         } else {
             element_sizes[2] = src0_fixedstride;

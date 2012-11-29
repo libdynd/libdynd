@@ -35,13 +35,13 @@ namespace {
             memory_block_pod_allocator_api *allocator = get_memory_block_pod_allocator_api(ad.dst_memblock.get());
 
             // Allocate the output array data
-            intptr_t count = (src_end - src_begin) / ad.src_dtype.element_size();
+            intptr_t count = (src_end - src_begin) / ad.src_dtype.get_element_size();
             allocator->allocate(ad.dst_memblock.get(),
-                        ad.dst_dtype.element_size() * count,
-                        ad.dst_dtype.alignment(), &dst_begin, &dst_end);
+                        ad.dst_dtype.get_element_size() * count,
+                        ad.dst_dtype.get_alignment(), &dst_begin, &dst_end);
 
             ad.assign_elements.specializations[contiguous_unary_specialization](
-                        dst_begin, ad.dst_dtype.element_size(), src_begin, ad.src_dtype.element_size(),
+                        dst_begin, ad.dst_dtype.get_element_size(), src_begin, ad.src_dtype.get_element_size(),
                         count, ad.assign_elements.auxdata);
 
             // Set the output

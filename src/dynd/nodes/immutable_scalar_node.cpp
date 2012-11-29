@@ -17,7 +17,7 @@ ndarray_node_ptr dynd::immutable_scalar_node::as_dtype(const dtype& dt,
     if (allow_in_place) {
         m_dtype = make_convert_dtype(dt, m_dtype, errmode);
         return as_ndarray_node_ptr();
-    } else if(m_dtype.element_size() <= 32) {
+    } else if(m_dtype.get_element_size() <= 32) {
         // For small amounts of data, make a copy
         return detail::unchecked_make_immutable_scalar_node(
                         make_convert_dtype(dt, m_dtype, errmode),
@@ -42,7 +42,7 @@ ndarray_node_ptr dynd::immutable_scalar_node::apply_linear_index(
 void dynd::immutable_scalar_node::debug_print_extra(std::ostream& o, const std::string& indent) const
 {
     o << indent << " data: ";
-    hexadecimal_print(o, m_originptr, m_dtype.element_size());
+    hexadecimal_print(o, m_originptr, m_dtype.get_element_size());
     o << "\n";
     o << indent << " value: ";
     try {
@@ -62,13 +62,13 @@ ndarray_node_ptr dynd::detail::unchecked_make_immutable_scalar_node(const dtype&
 {
     // Calculate the aligned starting point for the data
     intptr_t start = (intptr_t)(((uintptr_t)sizeof(memory_block_data) +
-                                        sizeof(immutable_scalar_node) + (uintptr_t)(dt.alignment() - 1))
-                        & ~((uintptr_t)(dt.alignment() - 1)));
-    char *result = reinterpret_cast<char *>(malloc(start + dt.element_size()));
+                                        sizeof(immutable_scalar_node) + (uintptr_t)(dt.get_alignment() - 1))
+                        & ~((uintptr_t)(dt.get_alignment() - 1)));
+    char *result = reinterpret_cast<char *>(malloc(start + dt.get_element_size()));
     if (result == NULL) {
         throw bad_alloc();
     }
-    memcpy(result + start, data, dt.element_size());
+    memcpy(result + start, data, dt.get_element_size());
     // Placement new
     new (result + sizeof(memory_block_data))
             immutable_scalar_node(dt, result + start);
@@ -79,9 +79,9 @@ ndarray_node_ptr dynd::detail::unchecked_make_immutable_scalar_node(const dtype&
 {
     // Calculate the aligned starting point for the data
     intptr_t start = (intptr_t)(((uintptr_t)sizeof(memory_block_data) +
-                                        sizeof(immutable_scalar_node) + (uintptr_t)(dt.alignment() - 1))
-                        & ~((uintptr_t)(dt.alignment() - 1)));
-    char *result = reinterpret_cast<char *>(malloc(start + dt.element_size()));
+                                        sizeof(immutable_scalar_node) + (uintptr_t)(dt.get_alignment() - 1))
+                        & ~((uintptr_t)(dt.get_alignment() - 1)));
+    char *result = reinterpret_cast<char *>(malloc(start + dt.get_element_size()));
     if (result == NULL) {
         throw bad_alloc();
     }

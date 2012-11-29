@@ -20,7 +20,7 @@ dynd::tuple_dtype::tuple_dtype(const std::vector<dtype>& fields)
     m_alignment = 1;
     m_memory_management = pod_memory_management;
     for (size_t i = 0, i_end = fields.size(); i != i_end; ++i) {
-        size_t field_alignment = fields[i].alignment();
+        size_t field_alignment = fields[i].get_alignment();
         // Accumulate the biggest field alignment as the dtype alignment
         if (field_alignment > m_alignment) {
             m_alignment = field_alignment;
@@ -29,7 +29,7 @@ dynd::tuple_dtype::tuple_dtype(const std::vector<dtype>& fields)
         offset = (offset + field_alignment - 1) & (-field_alignment);
         // Save the offset
         m_offsets[i] = offset;
-        offset += fields[i].element_size();
+        offset += fields[i].get_element_size();
         // Accumulate the correct memory management
         // TODO: Handle object, and object+blockref memory management types as well
         if (fields[i].get_memory_management() == blockref_memory_management) {
@@ -62,14 +62,14 @@ dynd::tuple_dtype::tuple_dtype(const std::vector<dtype>& fields, const std::vect
     m_memory_management = pod_memory_management;
     for (size_t i = 0, i_end = fields.size(); i != i_end; ++i) {
         // Check that the field is within bounds
-        if (offsets[i] + fields[i].element_size() > element_size) {
+        if (offsets[i] + fields[i].get_element_size() > element_size) {
             stringstream ss;
             ss << "tuple type cannot be created with field " << i << " of type " << fields[i];
             ss << " at offset " << offsets[i] << ", not fitting within the total element size of " << element_size;
             throw runtime_error(ss.str());
         }
         // Check that the field has proper alignment
-        if (((m_alignment | offsets[i]) & (fields[i].alignment() - 1)) != 0) {
+        if (((m_alignment | offsets[i]) & (fields[i].get_alignment() - 1)) != 0) {
             stringstream ss;
             ss << "tuple type cannot be created with field " << i << " of type " << fields[i];
             ss << " at offset " << offsets[i] << " and tuple alignment " << m_alignment;
@@ -96,7 +96,7 @@ bool dynd::tuple_dtype::compute_is_standard_layout() const
 {
     size_t standard_offset = 0, standard_alignment = 1;
     for (size_t i = 0, i_end = m_fields.size(); i != i_end; ++i) {
-        size_t field_alignment = m_fields[i].alignment();
+        size_t field_alignment = m_fields[i].get_alignment();
         // Accumulate the biggest field alignment as the dtype alignment
         if (field_alignment > standard_alignment) {
             standard_alignment = field_alignment;
@@ -106,7 +106,7 @@ bool dynd::tuple_dtype::compute_is_standard_layout() const
         if (m_offsets[i] != standard_offset) {
             return false;
         }
-        standard_offset += m_fields[i].element_size();
+        standard_offset += m_fields[i].get_element_size();
     }
     // Pad to get the standard element size
     size_t standard_element_size = (standard_offset + standard_alignment - 1) & (-standard_alignment);

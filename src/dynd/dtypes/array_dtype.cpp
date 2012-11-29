@@ -25,7 +25,7 @@ void dynd::array_dtype::print_element(std::ostream& o, const char *data, const c
     o << "[";
     while (begin < end) {
         m_element_dtype.print_element(o, begin, metadata);
-        begin += m_element_dtype.element_size();
+        begin += m_element_dtype.get_element_size();
         if (begin < end) {
             o << ", ";
         }

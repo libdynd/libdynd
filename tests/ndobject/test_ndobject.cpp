@@ -271,7 +271,7 @@ TEST(NDObject, ConstructorMemoryLayouts) {
             // Test constructing the array using the perm
             a = make_strided_ndobject(dt, ndim, shape, read_access_flag|write_access_flag, axisperm);
             EXPECT_EQ(ndim, a.get_strides().size());
-            intptr_t s = dt.element_size();
+            intptr_t s = dt.get_element_size();
             for (int i = 0; i < ndim; ++i) {
                 EXPECT_EQ(s, a.get_strides()[axisperm[i]]);
                 s *= shape[axisperm[i]];

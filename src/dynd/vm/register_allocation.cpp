@@ -15,7 +15,7 @@ dynd::vm::register_allocation::register_allocation(const std::vector<dtype>& reg
     // Get the number of bytes per element across all the registers
     intptr_t bytes_per_element = 0;
     for (size_t i = 0; i < regtypes.size(); ++i) {
-        bytes_per_element += regtypes[i].element_size();
+        bytes_per_element += regtypes[i].get_element_size();
     }
     // Turn it into an element count, clamped to [1, max_element_count
     intptr_t element_count = max_byte_count / bytes_per_element;

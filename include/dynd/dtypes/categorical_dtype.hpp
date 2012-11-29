@@ -43,7 +43,7 @@ public:
     dtype_kind_t get_kind() const {
         return custom_kind;
     }
-    size_t alignment() const {
+    size_t get_alignment() const {
         return 4; // TODO
     }
     size_t get_element_size() const {

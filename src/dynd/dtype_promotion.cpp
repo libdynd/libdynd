@@ -52,7 +52,7 @@ dtype dynd::promote_dtypes_arithmetic(const dtype& dt0, const dtype& dt1)
                         return make_dtype<int>();
                     case int_kind:
                     case uint_kind:
-                        return (dt1_val.element_size() >= int_size) ? dt1_val
+                        return (dt1_val.get_element_size() >= int_size) ? dt1_val
                                                                : make_dtype<int>();
                     case void_kind:
                         return dt0_val;
@@ -62,21 +62,21 @@ dtype dynd::promote_dtypes_arithmetic(const dtype& dt0, const dtype& dt1)
             case int_kind:
                 switch (dt1_val.get_kind()) {
                     case bool_kind:
-                        return (dt0_val.element_size() >= int_size) ? dt0_val
+                        return (dt0_val.get_element_size() >= int_size) ? dt0_val
                                                                : make_dtype<int>();
                     case int_kind:
-                        if (dt0_val.element_size() < int_size && dt1_val.element_size() < int_size) {
+                        if (dt0_val.get_element_size() < int_size && dt1_val.get_element_size() < int_size) {
                             return make_dtype<int>();
                         } else {
-                            return (dt0_val.element_size() >= dt1_val.element_size()) ? dt0_val
+                            return (dt0_val.get_element_size() >= dt1_val.get_element_size()) ? dt0_val
                                                                               : dt1_val;
                         }
                     case uint_kind:
-                        if (dt0_val.element_size() < int_size && dt1_val.element_size() < int_size) {
+                        if (dt0_val.get_element_size() < int_size && dt1_val.get_element_size() < int_size) {
                             return make_dtype<int>();
                         } else {
                             // When the element_sizes are equal, the uint kind wins
-                            return (dt0_val.element_size() > dt1_val.element_size()) ? dt0_val
+                            return (dt0_val.get_element_size() > dt1_val.get_element_size()) ? dt0_val
                                                                              : dt1_val;
                         }
                     case real_kind:
@@ -94,21 +94,21 @@ dtype dynd::promote_dtypes_arithmetic(const dtype& dt0, const dtype& dt1)
             case uint_kind:
                 switch (dt1_val.get_kind()) {
                     case bool_kind:
-                        return (dt0_val.element_size() >= int_size) ? dt0_val
+                        return (dt0_val.get_element_size() >= int_size) ? dt0_val
                                                                : make_dtype<int>();
                     case int_kind:
-                        if (dt0_val.element_size() < int_size && dt1_val.element_size() < int_size) {
+                        if (dt0_val.get_element_size() < int_size && dt1_val.get_element_size() < int_size) {
                             return make_dtype<int>();
                         } else {
                             // When the element_sizes are equal, the uint kind wins
-                            return (dt0_val.element_size() >= dt1_val.element_size()) ? dt0_val
+                            return (dt0_val.get_element_size() >= dt1_val.get_element_size()) ? dt0_val
                                                                               : dt1_val;
                         }
                     case uint_kind:
-                        if (dt0_val.element_size() < int_size && dt1_val.element_size() < int_size) {
+                        if (dt0_val.get_element_size() < int_size && dt1_val.get_element_size() < int_size) {
                             return make_dtype<int>();
                         } else {
-                            return (dt0_val.element_size() >= dt1_val.element_size()) ? dt0_val
+                            return (dt0_val.get_element_size() >= dt1_val.get_element_size()) ? dt0_val
                                                                               : dt1_val;
                         }
                     case real_kind:
@@ -131,7 +131,7 @@ dtype dynd::promote_dtypes_arithmetic(const dtype& dt0, const dtype& dt1)
                     case uint_kind:
                         return dt0_val;
                     case real_kind:
-                        return (dt0_val.element_size() >= dt1_val.element_size()) ? dt0_val
+                        return (dt0_val.get_element_size() >= dt1_val.get_element_size()) ? dt0_val
                                                                           : dt1_val;
                     case complex_kind:
                         if (dt0_val.get_type_id() == float64_type_id && dt1_val.get_type_id() == complex_float32_type_id) {
@@ -158,7 +158,7 @@ dtype dynd::promote_dtypes_arithmetic(const dtype& dt0, const dtype& dt1)
                             return dt0_val;
                         }
                     case complex_kind:
-                        return (dt0_val.element_size() >= dt1_val.element_size()) ? dt0_val
+                        return (dt0_val.get_element_size() >= dt1_val.get_element_size()) ? dt0_val
                                                                           : dt1_val;
                     case void_kind:
                         return dt0_val;

@@ -322,7 +322,7 @@ public:
 
     virtual type_id_t get_type_id() const = 0;
     virtual dtype_kind_t get_kind() const = 0;
-    virtual size_t alignment() const = 0;
+    virtual size_t get_alignment() const = 0;
     virtual size_t get_element_size() const = 0;
     virtual size_t get_default_element_size(int ndim, const intptr_t *shape) const;
 
@@ -659,7 +659,7 @@ public:
     dtype();
     /** Constructor from an extended_dtype. This claims ownership of the 'extended' reference by default, be careful! */
     explicit dtype(const extended_dtype *extended, bool incref = false)
-        : m_type_id(extended->get_type_id()), m_kind(extended->get_kind()), m_alignment((unsigned char)extended->alignment()),
+        : m_type_id(extended->get_type_id()), m_kind(extended->get_kind()), m_alignment((unsigned char)extended->get_alignment()),
             m_element_size(extended->get_element_size()), m_extended(extended) {
         if (incref) {
             extended_dtype_incref(m_extended);
@@ -854,7 +854,7 @@ public:
     void get_single_compare_kernel(single_compare_kernel_instance& out_kernel) const;
 
     /** The alignment of the dtype */
-    size_t alignment() const {
+    size_t get_alignment() const {
         return m_alignment;
     }
 
@@ -874,7 +874,7 @@ public:
     }
 
     /** The element size of the dtype */
-    size_t element_size() const {
+    size_t get_element_size() const {
         return m_element_size;
     }
 

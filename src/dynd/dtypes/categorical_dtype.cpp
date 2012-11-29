@@ -74,7 +74,7 @@ namespace {
                         get_auxiliary_data<categorical_to_other_assign_auxdata>(auxdata);
 
             // TODO handle non POD or throw
-            size_t N = ad.cat->get_category_dtype().element_size();
+            size_t N = ad.cat->get_category_dtype().get_element_size();
             for (intptr_t i = 0; i < count; ++i) {
                 uint32_t value = *reinterpret_cast<const uint32_t *>(src);
                 const char *src_val = ad.cat->get_category_from_value(value);
@@ -229,8 +229,8 @@ categorical_dtype::categorical_dtype(const ndobject& categories)
     vector<char *> categories_user_order(num_categories);
     for (uint32_t i = 0; i < m_category_index_to_value.size(); ++i) {
         m_category_index_to_value[i] = i;
-        categories_user_order[i] = new char[m_category_dtype.element_size()];
-        memcpy(categories_user_order[i], categories.at(i).get_readonly_originptr(), m_category_dtype.element_size());
+        categories_user_order[i] = new char[m_category_dtype.get_element_size()];
+        memcpy(categories_user_order[i], categories.at(i).get_readonly_originptr(), m_category_dtype.get_element_size());
         if (uniques.count(categories_user_order[i]) == 0) {
             uniques.insert(categories_user_order[i]);
         }
@@ -462,7 +462,7 @@ dtype dynd::factor_categorical_dtype(const ndobject& values)
     ndobject categories = make_strided_ndobject(uniques.size(), iter.get_uniform_dtype());
     uint32_t i = 0;
     for (set<const char *, cmp>::const_iterator it = uniques.begin(); it != uniques.end(); ++it) {
-        memcpy(categories.at(i).get_readwrite_originptr(), *it, categories.get_dtype().element_size());
+        memcpy(categories.at(i).get_readwrite_originptr(), *it, categories.get_dtype().get_element_size());
         ++i;
     }
 

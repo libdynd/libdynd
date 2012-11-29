@@ -63,7 +63,7 @@ dynd::strided_ndarray_node::strided_ndarray_node(const dtype& dt, int ndim,
 {
     // Build the strides using the ordering and shape
     intptr_t num_elements = 1;
-    intptr_t stride = dt.element_size();
+    intptr_t stride = dt.get_element_size();
     for (int i = 0; i < ndim; ++i) {
         int p = axis_perm[i];
         intptr_t size = shape[p];
@@ -76,7 +76,7 @@ dynd::strided_ndarray_node::strided_ndarray_node(const dtype& dt, int ndim,
         }
     }
 
-    m_memblock = make_fixed_size_pod_memory_block(dt.element_size() * num_elements, dt.alignment(), &m_originptr);
+    m_memblock = make_fixed_size_pod_memory_block(dt.get_element_size() * num_elements, dt.get_alignment(), &m_originptr);
 }
 
 dynd::strided_ndarray_node::strided_ndarray_node(const dtype& dt, int ndim,
@@ -87,7 +87,7 @@ dynd::strided_ndarray_node::strided_ndarray_node(const dtype& dt, int ndim,
 {
     // Build the strides using the ordering and shape
     intptr_t num_elements = 1;
-    intptr_t stride = dt.element_size();
+    intptr_t stride = dt.get_element_size();
     for (int i = 0; i < ndim; ++i) {
         int p = axis_perm[i];
         intptr_t size = shape[p];
@@ -100,7 +100,7 @@ dynd::strided_ndarray_node::strided_ndarray_node(const dtype& dt, int ndim,
         }
     }
 
-    m_memblock = make_fixed_size_pod_memory_block(dt.element_size() * num_elements, dt.alignment(), &m_originptr,
+    m_memblock = make_fixed_size_pod_memory_block(dt.get_element_size() * num_elements, dt.get_alignment(), &m_originptr,
                     blockrefs_begin, blockrefs_end);
 }
 

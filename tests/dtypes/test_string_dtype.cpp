@@ -25,32 +25,32 @@ TEST(StringDType, Create) {
     d = make_string_dtype(string_encoding_utf_8);
     EXPECT_EQ(string_type_id, d.get_type_id());
     EXPECT_EQ(string_kind, d.get_kind());
-    EXPECT_EQ(sizeof(void *), d.alignment());
-    EXPECT_EQ(2*sizeof(void *), d.element_size());
+    EXPECT_EQ(sizeof(void *), d.get_alignment());
+    EXPECT_EQ(2*sizeof(void *), d.get_element_size());
 
     d = make_string_dtype(string_encoding_utf_8);
     EXPECT_EQ(string_type_id, d.get_type_id());
     EXPECT_EQ(string_kind, d.get_kind());
-    EXPECT_EQ(sizeof(void *), d.alignment());
-    EXPECT_EQ(2*sizeof(void *), d.element_size());
+    EXPECT_EQ(sizeof(void *), d.get_alignment());
+    EXPECT_EQ(2*sizeof(void *), d.get_element_size());
 
     d = make_string_dtype(string_encoding_ascii);
     EXPECT_EQ(string_type_id, d.get_type_id());
     EXPECT_EQ(string_kind, d.get_kind());
-    EXPECT_EQ(sizeof(void *), d.alignment());
-    EXPECT_EQ(2*sizeof(void *), d.element_size());
+    EXPECT_EQ(sizeof(void *), d.get_alignment());
+    EXPECT_EQ(2*sizeof(void *), d.get_element_size());
 
     d = make_string_dtype(string_encoding_utf_16);
     EXPECT_EQ(string_type_id, d.get_type_id());
     EXPECT_EQ(string_kind, d.get_kind());
-    EXPECT_EQ(sizeof(void *), d.alignment());
-    EXPECT_EQ(2*sizeof(void *), d.element_size());
+    EXPECT_EQ(sizeof(void *), d.get_alignment());
+    EXPECT_EQ(2*sizeof(void *), d.get_element_size());
 
     d = make_string_dtype(string_encoding_utf_32);
     EXPECT_EQ(string_type_id, d.get_type_id());
     EXPECT_EQ(string_kind, d.get_kind());
-    EXPECT_EQ(sizeof(void *), d.alignment());
-    EXPECT_EQ(2*sizeof(void *), d.element_size());
+    EXPECT_EQ(sizeof(void *), d.get_alignment());
+    EXPECT_EQ(2*sizeof(void *), d.get_element_size());
 }
 
 TEST(StringDType, NDObjectCreation) {

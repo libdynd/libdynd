@@ -112,7 +112,7 @@ dynd::ndarray::ndarray(const dtype& dt)
     : m_node()
 {
     char *originptr = 0;
-    memory_block_ptr memblock = make_fixed_size_pod_memory_block(dt.element_size(), dt.alignment(), &originptr);
+    memory_block_ptr memblock = make_fixed_size_pod_memory_block(dt.get_element_size(), dt.get_alignment(), &originptr);
     make_strided_ndarray_node(dt, 0, NULL, NULL,
                             originptr, read_access_flag | write_access_flag,
                             DYND_MOVE(memblock)).swap(m_node);
@@ -143,9 +143,9 @@ dynd::ndarray::ndarray(ndarray_node_ptr&& expr_tree)
 dynd::ndarray::ndarray(intptr_t dim0, const dtype& dt)
     : m_node()
 {
-    intptr_t stride = (dim0 <= 1) ? 0 : dt.element_size();
+    intptr_t stride = (dim0 <= 1) ? 0 : dt.get_element_size();
     char *originptr = 0;
-    memory_block_ptr memblock = make_fixed_size_pod_memory_block(dt.element_size() * dim0, dt.alignment(), &originptr);
+    memory_block_ptr memblock = make_fixed_size_pod_memory_block(dt.get_element_size() * dim0, dt.get_alignment(), &originptr);
     make_strided_ndarray_node(dt, 1, &dim0, &stride,
                             originptr, read_access_flag | write_access_flag,
                             DYND_MOVE(memblock)).swap(m_node);
@@ -156,11 +156,11 @@ dynd::ndarray::ndarray(intptr_t dim0, intptr_t dim1, const dtype& dt)
 {
     intptr_t shape[2] = {dim0, dim1};
     intptr_t strides[2];
-    strides[0] = (dim0 <= 1) ? 0 : dt.element_size() * dim1;
-    strides[1] = (dim1 <= 1) ? 0 : dt.element_size();
+    strides[0] = (dim0 <= 1) ? 0 : dt.get_element_size() * dim1;
+    strides[1] = (dim1 <= 1) ? 0 : dt.get_element_size();
 
     char *originptr = 0;
-    memory_block_ptr memblock = make_fixed_size_pod_memory_block(dt.element_size() * dim0 * dim1, dt.alignment(), &originptr);
+    memory_block_ptr memblock = make_fixed_size_pod_memory_block(dt.get_element_size() * dim0 * dim1, dt.get_alignment(), &originptr);
     make_strided_ndarray_node(dt, 2, shape, strides,
                             originptr, read_access_flag | write_access_flag,
                             DYND_MOVE(memblock)).swap(m_node);
@@ -171,12 +171,12 @@ dynd::ndarray::ndarray(intptr_t dim0, intptr_t dim1, intptr_t dim2, const dtype&
 {
     intptr_t shape[3] = {dim0, dim1, dim2};
     intptr_t strides[3];
-    strides[0] = (dim0 <= 1) ? 0 : dt.element_size() * dim1 * dim2;
-    strides[1] = (dim1 <= 1) ? 0 : dt.element_size() * dim2;
-    strides[2] = (dim2 <= 1) ? 0 : dt.element_size();
+    strides[0] = (dim0 <= 1) ? 0 : dt.get_element_size() * dim1 * dim2;
+    strides[1] = (dim1 <= 1) ? 0 : dt.get_element_size() * dim2;
+    strides[2] = (dim2 <= 1) ? 0 : dt.get_element_size();
 
     char *originptr = 0;
-    memory_block_ptr memblock = make_fixed_size_pod_memory_block(dt.element_size() * dim0 * dim1 * dim2, dt.alignment(), &originptr);
+    memory_block_ptr memblock = make_fixed_size_pod_memory_block(dt.get_element_size() * dim0 * dim1 * dim2, dt.get_alignment(), &originptr);
     make_strided_ndarray_node(dt, 3, shape, strides,
                             originptr, read_access_flag | write_access_flag,
                             DYND_MOVE(memblock)).swap(m_node);
@@ -187,13 +187,13 @@ dynd::ndarray::ndarray(intptr_t dim0, intptr_t dim1, intptr_t dim2, intptr_t dim
 {
     intptr_t shape[4] = {dim0, dim1, dim2, dim3};
     intptr_t strides[4];
-    strides[0] = (dim0 <= 1) ? 0 : dt.element_size() * dim1 * dim2 * dim3;
-    strides[1] = (dim1 <= 1) ? 0 : dt.element_size() * dim2 * dim3;
-    strides[2] = (dim2 <= 1) ? 0 : dt.element_size() * dim3;
-    strides[3] = (dim3 <= 1) ? 0 : dt.element_size();
+    strides[0] = (dim0 <= 1) ? 0 : dt.get_element_size() * dim1 * dim2 * dim3;
+    strides[1] = (dim1 <= 1) ? 0 : dt.get_element_size() * dim2 * dim3;
+    strides[2] = (dim2 <= 1) ? 0 : dt.get_element_size() * dim3;
+    strides[3] = (dim3 <= 1) ? 0 : dt.get_element_size();
 
     char *originptr = 0;
-    memory_block_ptr memblock = make_fixed_size_pod_memory_block(dt.element_size() * dim0 * dim1 * dim2 * dim3, dt.alignment(), &originptr);
+    memory_block_ptr memblock = make_fixed_size_pod_memory_block(dt.get_element_size() * dim0 * dim1 * dim2 * dim3, dt.get_alignment(), &originptr);
     make_strided_ndarray_node(dt, 4, shape, strides,
                             originptr, read_access_flag | write_access_flag,
                             DYND_MOVE(memblock)).swap(m_node);
@@ -276,21 +276,21 @@ ndarray dynd::ndarray::view_as_dtype(const dtype& dt) const
     // Special case contiguous one dimensional arrays with a non-expression kind
     if (get_ndim() == 1 && get_node()->get_category() == strided_array_node_category &&
                             get_strides()[0] > 0 && //
-                            static_cast<size_t>(get_strides()[0]) == get_dtype().element_size() &&
+                            static_cast<size_t>(get_strides()[0]) == get_dtype().get_element_size() &&
                             get_dtype().get_kind() != expression_kind) {
-        intptr_t nbytes = get_shape()[0] * get_dtype().element_size();
+        intptr_t nbytes = get_shape()[0] * get_dtype().get_element_size();
         char *originptr = get_readwrite_originptr();
 
-        if (nbytes % dt.element_size() != 0) {
+        if (nbytes % dt.get_element_size() != 0) {
             std::stringstream ss;
             ss << "cannot view dynd::ndarray with " << nbytes << " bytes as dtype " << dt << ", because its element size doesn't divide evenly";
             throw std::runtime_error(ss.str());
         }
 
         intptr_t shape[1], strides[1];
-        shape[0] = nbytes / dt.element_size();
-        strides[0] = dt.element_size();
-        if ((((uintptr_t)originptr)&(dt.alignment()-1)) == 0) {
+        shape[0] = nbytes / dt.get_element_size();
+        strides[0] = dt.get_element_size();
+        if ((((uintptr_t)originptr)&(dt.get_alignment()-1)) == 0) {
             // If the dtype's alignment is satisfied, can view it as is
             return ndarray(make_strided_ndarray_node(dt, 1, shape, strides, originptr,
                                 get_node()->get_access_flags(), m_node->get_data_memory_block()));
@@ -302,7 +302,7 @@ ndarray dynd::ndarray::view_as_dtype(const dtype& dt) const
     }
 
     // For non-one dimensional and non-contiguous one dimensional arrays, the dtype element_size much match
-    if (get_dtype().value_dtype().element_size() != dt.element_size()) {
+    if (get_dtype().value_dtype().get_element_size() != dt.get_element_size()) {
         std::stringstream ss;
         ss << "cannot view dynd::ndarray with value dtype " << get_dtype().value_dtype() << " as dtype " << dt << " because they have different sizes, and the array is not contiguous one-dimensional";
         throw std::runtime_error(ss.str());
@@ -313,13 +313,13 @@ ndarray dynd::ndarray::view_as_dtype(const dtype& dt) const
         bool aligned = true;
         // If the alignment of the requested dtype is greater, check
         // the actual strides to only apply unaligned<> when necessary.
-        if (dt.alignment() > get_dtype().value_dtype().alignment()) {
+        if (dt.get_alignment() > get_dtype().value_dtype().get_alignment()) {
             uintptr_t aligncheck = (uintptr_t)get_readwrite_originptr();
             const intptr_t *strides = get_strides();
             for (int idim = 0; idim < get_ndim(); ++idim) {
                 aligncheck |= (uintptr_t)strides[idim];
             }
-            if ((aligncheck&(dt.alignment()-1)) != 0) {
+            if ((aligncheck&(dt.get_alignment()-1)) != 0) {
                 aligned = false;
             }
         }
@@ -350,7 +350,7 @@ std::string dynd::detail::ndarray_as_string(const ndarray& lhs, assign_error_mod
         const extended_string_dtype *fs = static_cast<const extended_string_dtype *>(tmp.get_dtype().extended());
         if (fs->get_encoding() == string_encoding_ascii || fs->get_encoding() == string_encoding_utf_8) {
             const char *data = tmp.get_readonly_originptr();
-            intptr_t size = strnlen(data, tmp.get_dtype().element_size());
+            intptr_t size = strnlen(data, tmp.get_dtype().get_element_size());
             return std::string(data, size);
         } else {
             tmp = tmp.as_dtype(make_string_dtype(string_encoding_utf_8));
@@ -399,7 +399,7 @@ static void val_assign_loop(const ndarray& lhs, const ndarray& rhs, assign_error
                                     errmode, ectx,
                                     assign);
     unary_operation_t assign_fn = assign.specializations[
-        get_unary_specialization(dst_innerstride, lhs.get_dtype().element_size(), src_innerstride, rhs.get_dtype().element_size())];
+        get_unary_specialization(dst_innerstride, lhs.get_dtype().get_element_size(), src_innerstride, rhs.get_dtype().get_element_size())];
 
     if (innersize > 0) {
         do {
@@ -436,7 +436,7 @@ void dynd::ndarray::val_assign(const dtype& dt, const char *data, assign_error_m
     unary_specialization_kernel_instance assign;
     get_dtype_assignment_kernel(get_dtype(), assign);
     unary_operation_t assign_fn = assign.specializations[
-        get_unary_specialization(innerstride, get_dtype().element_size(), 0, dt.element_size())];
+        get_unary_specialization(innerstride, get_dtype().get_element_size(), 0, dt.get_element_size())];
 
     if (innersize > 0) {
         do {

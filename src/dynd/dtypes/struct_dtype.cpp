@@ -23,7 +23,7 @@ struct_dtype::struct_dtype(const std::vector<dtype>& fields, const std::vector<s
     m_alignment = 1;
     m_memory_management = pod_memory_management;
     for (size_t i = 0, i_end = fields.size(); i != i_end; ++i) {
-        size_t field_alignment = fields[i].alignment();
+        size_t field_alignment = fields[i].get_alignment();
         // Accumulate the biggest field alignment as the dtype alignment
         if (field_alignment > m_alignment) {
             m_alignment = field_alignment;
@@ -45,11 +45,11 @@ size_t struct_dtype::get_default_element_size(int ndim, const intptr_t *shape) c
     // Default layout is to match the field order - could reorder the elements for more efficient packing
     size_t s = 0;
     for (size_t i = 0, i_end = m_fields.size(); i != i_end; ++i) {
-        s = inc_to_alignment(s, m_fields[i].alignment());
+        s = inc_to_alignment(s, m_fields[i].get_alignment());
         if (m_fields[i].extended()) {
             s += m_fields[i].extended()->get_default_element_size(ndim, shape);
         } else {
-            s += m_fields[i].element_size();
+            s += m_fields[i].get_element_size();
         }
     }
     s = inc_to_alignment(s, m_alignment);
@@ -273,7 +273,7 @@ void struct_dtype::metadata_default_construct(char *metadata, int ndim, const in
     size_t offs = 0;
     for (size_t i = 0; i < m_fields.size(); ++i) {
         const dtype& field_dt = m_fields[i];
-        offs = inc_to_alignment(offs, field_dt.alignment());
+        offs = inc_to_alignment(offs, field_dt.get_alignment());
         offsets[i] = offs;
         if (field_dt.extended()) {
             try {
@@ -290,7 +290,7 @@ void struct_dtype::metadata_default_construct(char *metadata, int ndim, const in
             }
             offs += m_fields[i].extended()->get_default_element_size(ndim, shape);
         } else {
-            offs += m_fields[i].element_size();
+            offs += m_fields[i].get_element_size();
         }
     }
 }

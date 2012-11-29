@@ -35,7 +35,7 @@ public:
         return expression_kind;
     }
     // Expose the storage traits here
-    size_t alignment() const {
+    size_t get_alignment() const {
         return sizeof(void *);
     }
     size_t get_element_size() const {

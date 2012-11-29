@@ -26,8 +26,8 @@ namespace {
      *       // Allocate the buffering memory
      *       auxdata.buf.allocate(intermediate_element_size);
      *       // Get the two kernels in the chain
-     *       produce_first_kernel(auxdata.buf.element_size(), src_fixedstride, auxdata.kernels[0]);
-     *       produce_second_kernel(dst_fixedstride, auxdata.buf.element_size(), auxdata.kernels[1]);
+     *       produce_first_kernel(auxdata.buf.get_element_size(), src_fixedstride, auxdata.kernels[0]);
+     *       produce_second_kernel(dst_fixedstride, auxdata.buf.get_element_size(), auxdata.kernels[1]);
      *   }
      */
     struct buffered_2chain_unary_kernel_auxdata {
@@ -83,15 +83,15 @@ namespace {
                 unary_operation_t link0 = ad.kernels[0].specializations[general_unary_specialization];
                 unary_operation_t link1 = ad.kernels[1].specializations[general_unary_specialization];
                 do {
-                    intptr_t block_count = ad.buf.element_count();
+                    intptr_t block_count = ad.buf.get_element_count();
                     if (count < block_count) {
                         block_count = count;
                     }
 
                     // First link of the chain
-                    link0(ad.buf.storage(), ad.buf.element_size(), src, src_stride, block_count, ad.kernels[0].auxdata);
+                    link0(ad.buf.storage(), ad.buf.get_element_size(), src, src_stride, block_count, ad.kernels[0].auxdata);
                     // Second link of the chain
-                    link1(dst, dst_stride, ad.buf.storage(), ad.buf.element_size(), block_count, ad.kernels[1].auxdata);
+                    link1(dst, dst_stride, ad.buf.storage(), ad.buf.get_element_size(), block_count, ad.kernels[1].auxdata);
 
                     src += block_count * src_stride;
                     dst += block_count * dst_stride;
@@ -130,15 +130,15 @@ namespace {
             unary_operation_t link1 = ad.kernels[1].specializations[contiguous_unary_specialization];
 
             do {
-                intptr_t block_count = ad.buf.element_count();
+                intptr_t block_count = ad.buf.get_element_count();
                 if (count < block_count) {
                     block_count = count;
                 }
 
                 // First link of the chain
-                link0(ad.buf.storage(), ad.buf.element_size(), src, src_stride, block_count, ad.kernels[0].auxdata);
+                link0(ad.buf.storage(), ad.buf.get_element_size(), src, src_stride, block_count, ad.kernels[0].auxdata);
                 // Second link of the chain
-                link1(dst, dst_stride, ad.buf.storage(), ad.buf.element_size(), block_count, ad.kernels[1].auxdata);
+                link1(dst, dst_stride, ad.buf.storage(), ad.buf.get_element_size(), block_count, ad.kernels[1].auxdata);
 
                 src += block_count * src_stride;
                 dst += block_count * dst_stride;
@@ -171,17 +171,17 @@ namespace {
                 unary_operation_t link1 = ad.kernels[1].specializations[contiguous_unary_specialization];
                 unary_operation_t link2 = ad.kernels[2].specializations[general_unary_specialization];
                 do {
-                    intptr_t block_count = ad.bufs[0].element_count();
+                    intptr_t block_count = ad.bufs[0].get_element_count();
                     if (count < block_count) {
                         block_count = count;
                     }
 
                     // First link of the chain
-                    link0(ad.bufs[0].storage(), ad.bufs[0].element_size(), src, src_stride, block_count, ad.kernels[0].auxdata);
+                    link0(ad.bufs[0].storage(), ad.bufs[0].get_element_size(), src, src_stride, block_count, ad.kernels[0].auxdata);
                     // Second link of the chain
-                    link1(ad.bufs[1].storage(), ad.bufs[1].element_size(), ad.bufs[0].storage(), ad.bufs[0].element_size(), block_count, ad.kernels[1].auxdata);
+                    link1(ad.bufs[1].storage(), ad.bufs[1].get_element_size(), ad.bufs[0].storage(), ad.bufs[0].get_element_size(), block_count, ad.kernels[1].auxdata);
                     // Third link of the chain
-                    link2(dst, dst_stride, ad.bufs[1].storage(), ad.bufs[1].element_size(), block_count, ad.kernels[2].auxdata);
+                    link2(dst, dst_stride, ad.bufs[1].storage(), ad.bufs[1].get_element_size(), block_count, ad.kernels[2].auxdata);
 
                     src += block_count * src_stride;
                     dst += block_count * dst_stride;
@@ -227,17 +227,17 @@ namespace {
             unary_operation_t link2 = ad.kernels[2].specializations[contiguous_unary_specialization];
 
             do {
-                intptr_t block_count = ad.bufs[0].element_count();
+                intptr_t block_count = ad.bufs[0].get_element_count();
                 if (count < block_count) {
                     block_count = count;
                 }
 
                 // First link of the chain
-                link0(ad.bufs[0].storage(), ad.bufs[0].element_size(), src, src_stride, block_count, ad.kernels[0].auxdata);
+                link0(ad.bufs[0].storage(), ad.bufs[0].get_element_size(), src, src_stride, block_count, ad.kernels[0].auxdata);
                 // Second link of the chain
-                link1(ad.bufs[1].storage(), ad.bufs[1].element_size(), ad.bufs[0].storage(), ad.bufs[0].element_size(), block_count, ad.kernels[1].auxdata);
+                link1(ad.bufs[1].storage(), ad.bufs[1].get_element_size(), ad.bufs[0].storage(), ad.bufs[0].get_element_size(), block_count, ad.kernels[1].auxdata);
                 // Third link of the chain
-                link2(dst, dst_stride, ad.bufs[1].storage(), ad.bufs[1].element_size(), block_count, ad.kernels[2].auxdata);
+                link2(dst, dst_stride, ad.bufs[1].storage(), ad.bufs[1].get_element_size(), block_count, ad.kernels[2].auxdata);
 
                 src += block_count * src_stride;
                 dst += block_count * dst_stride;
@@ -271,22 +271,22 @@ namespace {
             if (src_stride != 0) {
                 // The fully general case
                 do {
-                    intptr_t block_count = ad.m_bufs[0].element_count();
+                    intptr_t block_count = ad.m_bufs[0].get_element_count();
                     if (count < block_count) {
                         block_count = count;
                     }
 
                     // From the source into the first buffer
                     ad.m_kernels[0].specializations[general_unary_specialization](
-                                ad.m_bufs[0].storage(), ad.m_bufs[0].element_size(), src, src_stride, block_count, ad.m_kernels[0].auxdata);
+                                ad.m_bufs[0].storage(), ad.m_bufs[0].get_element_size(), src, src_stride, block_count, ad.m_kernels[0].auxdata);
                     // All the links from buffer to buffer
                     for (int i = 1; i < buf_count; ++i) {
                         ad.m_kernels[i].specializations[contiguous_unary_specialization](
-                                ad.m_bufs[i].storage(), ad.m_bufs[i].element_size(), ad.m_bufs[i-1].storage(), ad.m_bufs[i-1].element_size(), block_count, ad.m_kernels[i].auxdata);
+                                ad.m_bufs[i].storage(), ad.m_bufs[i].get_element_size(), ad.m_bufs[i-1].storage(), ad.m_bufs[i-1].get_element_size(), block_count, ad.m_kernels[i].auxdata);
                     }
                     // From the last buffer into the destination
                     ad.m_kernels[buf_count].specializations[general_unary_specialization](
-                                dst, dst_stride, ad.m_bufs[buf_count-1].storage(), ad.m_bufs[buf_count-1].element_size(), block_count, ad.m_kernels[buf_count].auxdata);
+                                dst, dst_stride, ad.m_bufs[buf_count-1].storage(), ad.m_bufs[buf_count-1].get_element_size(), block_count, ad.m_kernels[buf_count].auxdata);
 
                     src += block_count * src_stride;
                     dst += block_count * dst_stride;
@@ -335,22 +335,22 @@ namespace {
             int buf_count = ad.m_buf_count;
 
             do {
-                intptr_t block_count = ad.m_bufs[0].element_count();
+                intptr_t block_count = ad.m_bufs[0].get_element_count();
                 if (count < block_count) {
                     block_count = count;
                 }
 
                 // From the source into the first buffer
                 ad.m_kernels[0].specializations[contiguous_unary_specialization](
-                            ad.m_bufs[0].storage(), ad.m_bufs[0].element_size(), src, src_stride, block_count, ad.m_kernels[0].auxdata);
+                            ad.m_bufs[0].storage(), ad.m_bufs[0].get_element_size(), src, src_stride, block_count, ad.m_kernels[0].auxdata);
                 // All the links from buffer to buffer
                 for (int i = 1; i < buf_count; ++i) {
                     ad.m_kernels[i].specializations[contiguous_unary_specialization](
-                            ad.m_bufs[i].storage(), ad.m_bufs[i].element_size(), ad.m_bufs[i-1].storage(), ad.m_bufs[i-1].element_size(), block_count, ad.m_kernels[i].auxdata);
+                            ad.m_bufs[i].storage(), ad.m_bufs[i].get_element_size(), ad.m_bufs[i-1].storage(), ad.m_bufs[i-1].get_element_size(), block_count, ad.m_kernels[i].auxdata);
                 }
                 // From the last buffer into the destination
                 ad.m_kernels[buf_count].specializations[contiguous_unary_specialization](
-                            dst, dst_stride, ad.m_bufs[buf_count-1].storage(), ad.m_bufs[buf_count-1].element_size(), block_count, ad.m_kernels[buf_count].auxdata);
+                            dst, dst_stride, ad.m_bufs[buf_count-1].storage(), ad.m_bufs[buf_count-1].get_element_size(), block_count, ad.m_kernels[buf_count].auxdata);
 
                 src += block_count * src_stride;
                 dst += block_count * dst_stride;
@@ -483,19 +483,19 @@ void dynd::push_front_dtype_storage_to_value_kernels(const dynd::dtype& dt,
     if (next_dt->get_kind() != expression_kind) {
         // Special case when there is just one
         if (out_kernels.empty()) {
-            out_element_sizes.push_front(dt.value_dtype().element_size());
+            out_element_sizes.push_front(dt.value_dtype().get_element_size());
         }
-        out_element_sizes.push_front(dt.storage_dtype().element_size());
+        out_element_sizes.push_front(dt.storage_dtype().get_element_size());
         out_kernels.push_front(unary_specialization_kernel_instance());
         front_dt_extended->get_operand_to_value_kernel(ectx, out_kernels.front());
     } else {
         // The final element size, if not yet provided
         if (out_kernels.empty()) {
-            out_element_sizes.push_front(dt.value_dtype().element_size());
+            out_element_sizes.push_front(dt.value_dtype().get_element_size());
         }
         do {
             // Add this kernel to the deque
-            out_element_sizes.push_front(next_dt->value_dtype().element_size());
+            out_element_sizes.push_front(next_dt->value_dtype().get_element_size());
             out_kernels.push_front(unary_specialization_kernel_instance());
             front_dt_extended->get_operand_to_value_kernel(ectx, out_kernels.front());
             // Shift to the next dtype
@@ -504,7 +504,7 @@ void dynd::push_front_dtype_storage_to_value_kernels(const dynd::dtype& dt,
             next_dt = &front_dt_extended->get_operand_dtype();
         } while (next_dt->get_kind() == expression_kind);
         // Add the final kernel from the source
-        out_element_sizes.push_front(next_dt->element_size());
+        out_element_sizes.push_front(next_dt->get_element_size());
         out_kernels.push_front(unary_specialization_kernel_instance());
         front_dt_extended->get_operand_to_value_kernel(ectx, out_kernels.front());
     }
@@ -521,19 +521,19 @@ void dynd::push_back_dtype_value_to_storage_kernels(const dynd::dtype& dt,
     if (next_dt->get_kind() != expression_kind) {
         // Special case when there is just one
         if (out_kernels.empty()) {
-            out_element_sizes.push_back(dt.value_dtype().element_size());
+            out_element_sizes.push_back(dt.value_dtype().get_element_size());
         }
-        out_element_sizes.push_back(dt.storage_dtype().element_size());
+        out_element_sizes.push_back(dt.storage_dtype().get_element_size());
         out_kernels.push_back(unary_specialization_kernel_instance());
         back_dt_extended->get_value_to_operand_kernel(ectx, out_kernels.back());
     } else {
         // The first element size, if not yet provided
         if (out_kernels.empty()) {
-            out_element_sizes.push_back(dt.value_dtype().element_size());
+            out_element_sizes.push_back(dt.value_dtype().get_element_size());
         }
         do {
             // Add this kernel to the deque
-            out_element_sizes.push_back(next_dt->value_dtype().element_size());
+            out_element_sizes.push_back(next_dt->value_dtype().get_element_size());
             out_kernels.push_back(unary_specialization_kernel_instance());
             back_dt_extended->get_value_to_operand_kernel(ectx, out_kernels.back());
             // Shift to the next dtype
@@ -542,7 +542,7 @@ void dynd::push_back_dtype_value_to_storage_kernels(const dynd::dtype& dt,
             next_dt = &back_dt_extended->get_operand_dtype();
         } while (next_dt->get_kind() == expression_kind);
         // Add the final kernel from the source
-        out_element_sizes.push_back(next_dt->element_size());
+        out_element_sizes.push_back(next_dt->get_element_size());
         out_kernels.push_back(unary_specialization_kernel_instance());
         back_dt_extended->get_value_to_operand_kernel(ectx, out_kernels.back());
     }

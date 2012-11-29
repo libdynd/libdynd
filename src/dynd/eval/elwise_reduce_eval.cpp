@@ -30,7 +30,7 @@ static ndarray_node_ptr make_elwise_reduce_result(const dtype& result_dt, uint32
     // Calculate the shape and strides of the reduction result
     // without removing the dimensions
     intptr_t num_elements = 1;
-    intptr_t stride = result_dt.element_size();
+    intptr_t stride = result_dt.get_element_size();
     for (int i = 0; i < ndim; ++i) {
         int p = src_axis_perm[i];
         if (reduce_axes[p]) {
@@ -51,8 +51,8 @@ static ndarray_node_ptr make_elwise_reduce_result(const dtype& result_dt, uint32
 
     // Allocate the memoryblock for the data
     char *originptr = NULL;
-    memory_block_ptr memblock = make_fixed_size_pod_memory_block(result_dt.element_size() * num_elements,
-                    result_dt.alignment(), &originptr,
+    memory_block_ptr memblock = make_fixed_size_pod_memory_block(result_dt.get_element_size() * num_elements,
+                    result_dt.get_alignment(), &originptr,
                     NULL, NULL);
 
     ndarray_node_ptr result;
@@ -154,7 +154,7 @@ ndarray_node_ptr dynd::eval::evaluate_elwise_reduce_array(ndarray_node* node,
         unary_specialization_kernel_instance copy_kernel;
         get_dtype_assignment_kernel(result_dt, copy_kernel);
         unary_operation_t copy_op = copy_kernel.specializations[scalar_to_contiguous_unary_specialization];
-        copy_op(const_cast<char *>(result->get_readonly_originptr()), result_dt.element_size(),
+        copy_op(const_cast<char *>(result->get_readonly_originptr()), result_dt.get_element_size(),
                         rnode->get_identity()->get_readonly_originptr(), 0,
                         result_count, copy_kernel.auxdata);
     } else {
@@ -197,8 +197,8 @@ ndarray_node_ptr dynd::eval::evaluate_elwise_reduce_array(ndarray_node* node,
         intptr_t innersize = iter.innersize();
         intptr_t dst_stride = iter.innerstride<0>();
         intptr_t src0_stride = iter.innerstride<1>();
-        unary_specialization_t uspec = get_unary_specialization(dst_stride, result_dt.element_size(),
-                                                    src0_stride, strided_node->get_dtype().storage_dtype().element_size());
+        unary_specialization_t uspec = get_unary_specialization(dst_stride, result_dt.get_element_size(),
+                                                    src0_stride, strided_node->get_dtype().storage_dtype().get_element_size());
         unary_operation_t copy_op = copy_kernel.specializations[uspec];
         if (innersize > 0) {
             do {
@@ -226,14 +226,14 @@ ndarray_node_ptr dynd::eval::evaluate_elwise_reduce_array(ndarray_node* node,
     intptr_t innersize = iter.innersize();
     intptr_t dst_stride = iter.innerstride<0>();
     intptr_t src0_stride = iter.innerstride<1>();
-    unary_specialization_t uspec = get_unary_specialization(dst_stride, result_dt.element_size(),
-                                                src0_stride, strided_node->get_dtype().storage_dtype().element_size());
+    unary_specialization_t uspec = get_unary_specialization(dst_stride, result_dt.get_element_size(),
+                                                src0_stride, strided_node->get_dtype().storage_dtype().get_element_size());
 
     // Create the reduction kernel
     rnode->get_unary_operation(dst_stride, src0_stride, reduce_operation);
     if (!kernels.empty()) {
         // Create a unary specialization kernel by replicating the general kernel
-        element_sizes.push_back(node->get_dtype().element_size());
+        element_sizes.push_back(node->get_dtype().get_element_size());
         reduce_op_duped[0] = reduce_operation.kernel;
         reduce_op_duped[1] = reduce_operation.kernel;
         reduce_op_duped[2] = reduce_operation.kernel;
