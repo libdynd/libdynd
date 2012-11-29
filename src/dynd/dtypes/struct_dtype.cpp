@@ -146,7 +146,7 @@ intptr_t struct_dtype::apply_linear_index(int nindices, const irange *indices, c
         // Then process each element verbatim as well
         for (size_t i = 0, i_end = m_fields.size(); i != i_end; ++i) {
             if (m_fields[i].extended()) {
-                out_offsets[i] += m_fields[i].extended()->apply_linear_index(nindices - 1, indices + 1, data + offsets[i],
+                out_offsets[i] += m_fields[i].extended()->apply_linear_index(0, NULL, data + offsets[i],
                                 metadata + m_metadata_offsets[i], m_fields[i], out_metadata + m_metadata_offsets[i],
                                 current_i + 1, root_dt);
             }
