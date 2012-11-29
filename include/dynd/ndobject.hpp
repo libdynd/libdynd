@@ -246,6 +246,14 @@ public:
         }
     }
 
+    inline memory_block_ptr get_data_memblock() const {
+        if (get_ndo()->m_data_reference) {
+            return memory_block_ptr(get_ndo()->m_data_reference, true);
+        } else {
+            return m_memblock;
+        }
+    }
+
     /**
      * Returns a value-exposing helper object, which allows one to assign to
      * the values of the ndobject, or collapse any expression dtypes.
