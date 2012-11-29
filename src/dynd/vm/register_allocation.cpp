@@ -37,7 +37,7 @@ dynd::vm::register_allocation::register_allocation(const std::vector<dtype>& reg
     for (size_t i = 0; i < regtypes.size(); ++i) {
         const dtype& d = regtypes[i];
         // Align the pointer
-        offset = d.inc_to_alignment(offset);
+        offset = inc_to_alignment(offset, d.get_alignment());
         m_registers[i] = m_allocated_memory + offset;
     }
 }

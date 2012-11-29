@@ -858,21 +858,6 @@ public:
         return m_alignment;
     }
 
-    /** Increments the offset as much as is needed so it is aligned appropriately */
-    size_t inc_to_alignment(size_t offset) const {
-        return ::dynd::inc_to_alignment(offset, m_alignment);
-    }
-
-    /** Increments the pointer as much as is needed so it is aligned appropriately */
-    char *inc_to_alignment(char *ptr) const {
-        return ::dynd::inc_to_alignment(ptr, m_alignment);
-    }
-
-    /** Increments the pointer as much as is needed so it is aligned appropriately */
-    const char *apply_alignment(const char *ptr) const {
-        return reinterpret_cast<char *>((reinterpret_cast<uintptr_t>(ptr) + m_alignment - 1) & (-m_alignment));
-    }
-
     /** The element size of the dtype */
     size_t get_element_size() const {
         return m_element_size;
