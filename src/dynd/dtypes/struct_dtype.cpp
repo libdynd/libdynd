@@ -128,7 +128,7 @@ dtype struct_dtype::apply_linear_index(int nindices, const irange *indices, int 
         intptr_t start_index, index_stride, dimension_size;
         apply_single_linear_index(*indices, m_fields.size(), current_i, &root_dt, remove_dimension, start_index, index_stride, dimension_size);
         if (remove_dimension) {
-            return m_fields[start_index];
+            return m_fields[start_index].apply_linear_index(nindices - 1, indices + 1, current_i + 1, root_dt);
         } else {
             // Take the subset of the fixed fields in-place
             std::vector<dtype> fields(dimension_size);
@@ -171,7 +171,8 @@ intptr_t struct_dtype::apply_linear_index(int nindices, const irange *indices, c
             if (dt.extended()) {
                 intptr_t offset = offsets[start_index];
                 offset += dt.extended()->apply_linear_index(nindices - 1, indices + 1, data + offset,
-                                metadata + m_metadata_offsets[start_index], result_dtype, out_metadata, current_i + 1, root_dt);
+                                metadata + m_metadata_offsets[start_index], result_dtype,
+                                out_metadata, current_i + 1, root_dt);
                 return offset;
             }
             return 0;
@@ -342,6 +343,13 @@ void struct_dtype::metadata_debug_print(const char *metadata, std::ostream& o, c
         }
     }
     o << "\n";
+    for (size_t i = 0; i < m_fields.size(); ++i) {
+        const dtype& field_dt = m_fields[i];
+        if (field_dt.extended() && field_dt.extended()->get_metadata_size() > 0) {
+            o << indent << " field " << i << " (name " << m_field_names[i] << ") metadata:\n";
+            field_dt.extended()->metadata_debug_print(metadata + m_metadata_offsets[i], o, indent + "  ");
+        }
+    }
 }
 
 void struct_dtype::foreach_leading(char *data, const char *metadata, foreach_fn_t callback, void *callback_data) const
