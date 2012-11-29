@@ -60,6 +60,11 @@ bool strided_array_dtype::is_scalar() const
     return false;
 }
 
+bool strided_array_dtype::is_expression() const
+{
+    return m_element_dtype.is_expression();
+}
+
 dtype strided_array_dtype::with_transformed_scalar_types(dtype_transform_fn_t transform_fn, const void *extra) const
 {
     return dtype(new strided_array_dtype(m_element_dtype.with_transformed_scalar_types(transform_fn, extra)));

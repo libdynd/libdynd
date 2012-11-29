@@ -670,14 +670,13 @@ ndobject dynd::empty_like(const ndobject& rhs)
 
 ndobject_vals::operator ndobject() const
 {
-    // Create a canonical dtype for the result
     const dtype& current_dtype = m_arr.get_dtype();
-    const dtype& dt = current_dtype.get_canonical_dtype();
 
-    if (dt == current_dtype) {
+    if (!current_dtype.is_expression()) {
         return m_arr;
     } else {
-        // If the canonical dtype is different, make a copy of the array
+        // If there is any expression in the dtype, make a copy using the canonical dtype
+        const dtype& dt = current_dtype.get_canonical_dtype();
         int ndim = current_dtype.get_uniform_ndim();
         dimvector shape(ndim);
         m_arr.get_shape(shape.get());

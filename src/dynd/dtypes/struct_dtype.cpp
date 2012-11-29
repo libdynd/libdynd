@@ -87,6 +87,16 @@ bool struct_dtype::is_scalar() const
     return false;
 }
 
+bool struct_dtype::is_expression() const
+{
+    for (size_t i = 0, i_end = m_fields.size(); i != i_end; ++i) {
+        if (m_fields[i].is_expression()) {
+            return true;
+        }
+    }
+    return false;
+}
+
 dtype struct_dtype::with_transformed_scalar_types(dtype_transform_fn_t transform_fn, const void *extra) const
 {
     std::vector<dtype> fields(m_fields.size());

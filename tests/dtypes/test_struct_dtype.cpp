@@ -129,3 +129,13 @@ TEST(StructDType, CanonicalDType) {
                                 d3, "z"),
             dt.get_canonical_dtype());
 }
+
+TEST(StructDType, IsExpression) {
+    dtype d1 = make_dtype<float>();
+    dtype d2 = make_byteswap_dtype<int32_t>();
+    dtype d3 = make_fixedstring_dtype(string_encoding_utf_32, 5);
+    dtype d = make_struct_dtype(d1, "x", d2, "y", d3, "z");
+
+    EXPECT_TRUE(d.is_expression());
+    EXPECT_FALSE(d.at(irange(0, 3, 2)).is_expression());
+}

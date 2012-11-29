@@ -62,6 +62,7 @@ public:
     }
 
     bool is_scalar() const;
+    bool is_expression() const;
     dtype with_transformed_scalar_types(dtype_transform_fn_t transform_fn, const void *extra) const;
     dtype get_canonical_dtype() const;
 

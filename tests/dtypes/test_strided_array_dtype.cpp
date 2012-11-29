@@ -61,3 +61,19 @@ TEST(StridedArrayDType, DTypeAt) {
     EXPECT_THROW(darr1.at(1, 2), too_many_indices);
     EXPECT_THROW(darr2.at(1, 2, 3), too_many_indices);
 }
+
+TEST(StridedArrayDType, IsExpression) {
+    dtype dfloat = make_dtype<float>();
+    dtype darr1 = make_strided_array_dtype(dfloat);
+    dtype darr2 = make_strided_array_dtype(darr1);
+
+    EXPECT_FALSE(darr1.is_expression());
+    EXPECT_FALSE(darr2.is_expression());
+
+    dfloat = make_convert_dtype(make_dtype<double>(), dfloat);
+    darr1 = make_strided_array_dtype(dfloat);
+    darr2 = make_strided_array_dtype(darr1);
+
+    EXPECT_TRUE(darr1.is_expression());
+    EXPECT_TRUE(darr2.is_expression());
+}

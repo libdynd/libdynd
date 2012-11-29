@@ -24,6 +24,7 @@ TEST(ByteswapDType, Create) {
     EXPECT_EQ(d.value_dtype(), make_dtype<float>());
     // The storage is the a bytes dtype with matching storage and alignment
     EXPECT_EQ(d.storage_dtype(), make_fixedbytes_dtype(4, 4));
+    EXPECT_TRUE(d.is_expression());
 
     d = make_byteswap_dtype<complex<double> >();
     // The value has the native byte-order dtype

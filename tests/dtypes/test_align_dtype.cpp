@@ -26,6 +26,7 @@ TEST(AlignDType, Create) {
     EXPECT_EQ(d.storage_dtype(), make_fixedbytes_dtype(4, 1));
     // The alignment of the dtype is 1
     EXPECT_EQ(1u, d.get_alignment());
+    EXPECT_TRUE(d.is_expression());
 
     // TODO: Make sure it raises if an object dtype is attempted
     //EXPECT_THROW(d = make_unaligned_dtype([[some object dtype]]), runtime_error);

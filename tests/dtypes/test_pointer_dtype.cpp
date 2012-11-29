@@ -22,6 +22,7 @@ TEST(PointerDType, VoidPointer) {
     EXPECT_EQ(sizeof(void *), d.get_element_size());
     EXPECT_EQ(sizeof(void *), d.get_alignment());
     EXPECT_EQ(blockref_memory_management, d.get_memory_management());
+    EXPECT_FALSE(d.is_expression());
 }
 
 TEST(PointerDType, PointerToBuiltIn) {
@@ -36,4 +37,5 @@ TEST(PointerDType, PointerToBuiltIn) {
     EXPECT_EQ(make_dtype<char>(), d.value_dtype());
     EXPECT_EQ(make_pointer_dtype<void>(), d.operand_dtype());
     EXPECT_EQ(make_pointer_dtype<void>(), d.storage_dtype());
+    EXPECT_TRUE(d.is_expression());
 }

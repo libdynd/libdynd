@@ -30,6 +30,7 @@ TEST(CategoricalDType, Create) {
     EXPECT_EQ(custom_kind, d.get_kind());
     EXPECT_EQ(4u, d.get_alignment());
     EXPECT_EQ(4u, d.get_element_size());
+    EXPECT_FALSE(d.is_expression());
 
     cout << d << endl;
 }

@@ -27,6 +27,7 @@ TEST(BytesDType, Create) {
     EXPECT_EQ(sizeof(void *), d.get_alignment());
     EXPECT_EQ(2*sizeof(void *), d.get_element_size());
     EXPECT_EQ(1, static_cast<const bytes_dtype *>(d.extended())->get_data_alignment());
+    EXPECT_FALSE(d.is_expression());
 
     d = make_bytes_dtype(2);
     EXPECT_EQ(bytes_type_id, d.get_type_id());

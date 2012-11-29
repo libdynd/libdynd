@@ -25,6 +25,7 @@ TEST(FixedstringDType, Create) {
     EXPECT_EQ(string_kind, d.get_kind());
     EXPECT_EQ(1u, d.get_alignment());
     EXPECT_EQ(3u, d.get_element_size());
+    EXPECT_FALSE(d.is_expression());
 
     d = make_fixedstring_dtype(string_encoding_utf_8, 129);
     EXPECT_EQ(fixedstring_type_id, d.get_type_id());

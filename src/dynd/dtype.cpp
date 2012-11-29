@@ -49,6 +49,11 @@ bool extended_dtype::is_scalar() const
     return true;
 }
 
+bool extended_dtype::is_expression() const
+{
+    return false;
+}
+
 dtype extended_dtype::with_transformed_scalar_types(dtype_transform_fn_t transform_fn, const void *extra) const
 {
     // Default to scalar behavior
@@ -233,6 +238,11 @@ extended_string_dtype::~extended_string_dtype()
 size_t extended_string_dtype::get_iterdata_size(int DYND_UNUSED(ndim)) const
 {
     return 0;
+}
+
+bool extended_expression_dtype::is_expression() const
+{
+    return true;
 }
 
 dtype extended_expression_dtype::get_canonical_dtype() const

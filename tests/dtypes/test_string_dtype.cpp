@@ -27,6 +27,7 @@ TEST(StringDType, Create) {
     EXPECT_EQ(string_kind, d.get_kind());
     EXPECT_EQ(sizeof(void *), d.get_alignment());
     EXPECT_EQ(2*sizeof(void *), d.get_element_size());
+    EXPECT_FALSE(d.is_expression());
 
     d = make_string_dtype(string_encoding_utf_8);
     EXPECT_EQ(string_type_id, d.get_type_id());

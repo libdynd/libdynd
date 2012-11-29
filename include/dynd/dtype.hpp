@@ -356,6 +356,11 @@ public:
     virtual bool is_scalar() const;
 
     /**
+     * \brief Returns true if the dtype contains an expression dtype anywhere within it.
+     */
+    virtual bool is_expression() const;
+
+    /**
      * For array types, recursively applies itself, and for
      * scalar types, applies the provided function.
      *
@@ -605,6 +610,9 @@ public:
      * when this is not true.
      */
     virtual dtype with_replaced_storage_dtype(const dtype& replacement_dtype) const = 0;
+
+    // Always return true for expression dtypes
+    bool is_expression() const;
 
     // The canonical dtype for expression dtypes is always the value dtype
     dtype get_canonical_dtype() const;
@@ -893,6 +901,18 @@ public:
             return m_extended->is_scalar();
         } else {
             return true;
+        }
+    }
+
+    /**
+     * Returns true if the dtype contains any expression
+     * dtype within it somewhere.
+     */
+    inline bool is_expression() const {
+        if (m_extended != NULL) {
+            return m_extended->is_expression();
+        } else {
+            return false;
         }
     }
 
