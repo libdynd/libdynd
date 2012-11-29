@@ -45,9 +45,9 @@ dtype dynd::promote_dtypes_arithmetic(const dtype& dt0, const dtype& dt1)
 
     if (dt0_ext == NULL && dt1_ext == NULL) {
         const size_t int_size = sizeof(int);
-        switch (dt0_val.kind()) {
+        switch (dt0_val.get_kind()) {
             case bool_kind:
-                switch (dt1_val.kind()) {
+                switch (dt1_val.get_kind()) {
                     case bool_kind:
                         return make_dtype<int>();
                     case int_kind:
@@ -60,7 +60,7 @@ dtype dynd::promote_dtypes_arithmetic(const dtype& dt0, const dtype& dt1)
                         return dt1_val;
                 }
             case int_kind:
-                switch (dt1_val.kind()) {
+                switch (dt1_val.get_kind()) {
                     case bool_kind:
                         return (dt0_val.element_size() >= int_size) ? dt0_val
                                                                : make_dtype<int>();
@@ -92,7 +92,7 @@ dtype dynd::promote_dtypes_arithmetic(const dtype& dt0, const dtype& dt1)
                 }
                 break;
             case uint_kind:
-                switch (dt1_val.kind()) {
+                switch (dt1_val.get_kind()) {
                     case bool_kind:
                         return (dt0_val.element_size() >= int_size) ? dt0_val
                                                                : make_dtype<int>();
@@ -124,7 +124,7 @@ dtype dynd::promote_dtypes_arithmetic(const dtype& dt0, const dtype& dt1)
                 }
                 break;
             case real_kind:
-                switch (dt1_val.kind()) {
+                switch (dt1_val.get_kind()) {
                     // Integer type sizes don't affect float type sizes
                     case bool_kind:
                     case int_kind:
@@ -146,7 +146,7 @@ dtype dynd::promote_dtypes_arithmetic(const dtype& dt0, const dtype& dt1)
                 }
                 break;
             case complex_kind:
-                switch (dt1_val.kind()) {
+                switch (dt1_val.get_kind()) {
                     // Integer and float type sizes don't affect complex type sizes
                     case bool_kind:
                     case int_kind:

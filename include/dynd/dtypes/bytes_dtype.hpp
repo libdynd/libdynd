@@ -31,7 +31,7 @@ public:
     type_id_t get_type_id() const {
         return bytes_type_id;
     }
-    dtype_kind_t kind() const {
+    dtype_kind_t get_kind() const {
         return bytes_kind;
     }
     // Expose the storage traits here

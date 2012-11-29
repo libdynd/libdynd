@@ -22,7 +22,7 @@ public:
     type_id_t get_type_id() const {
         return view_type_id;
     }
-    dtype_kind_t kind() const {
+    dtype_kind_t get_kind() const {
         return expression_kind;
     }
     // Expose the storage traits here
@@ -68,7 +68,7 @@ public:
  * Makes an unaligned dtype to view the given dtype without alignment requirements.
  */
 inline dtype make_view_dtype(const dtype& value_dtype, const dtype& operand_dtype) {
-    if (value_dtype.kind() != expression_kind) {
+    if (value_dtype.get_kind() != expression_kind) {
         return dtype(new view_dtype(value_dtype, operand_dtype));
     } else {
         // When the value dtype has an expression_kind, we need to chain things together

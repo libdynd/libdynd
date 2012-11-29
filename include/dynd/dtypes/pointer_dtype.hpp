@@ -31,7 +31,7 @@ public:
     type_id_t get_type_id() const {
         return pointer_type_id;
     }
-    dtype_kind_t kind() const {
+    dtype_kind_t get_kind() const {
         return expression_kind;
     }
     // Expose the storage traits here

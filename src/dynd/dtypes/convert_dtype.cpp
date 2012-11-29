@@ -14,7 +14,7 @@ dynd::convert_dtype::convert_dtype(const dtype& value_dtype, const dtype& operan
 {
     // An alternative to this error would be to use value_dtype.value_dtype(), cutting
     // away the expression part of the given value_dtype.
-    if (m_value_dtype.kind() == expression_kind) {
+    if (m_value_dtype.get_kind() == expression_kind) {
         std::stringstream ss;
         ss << "convert_dtype: The destination dtype " << m_value_dtype << " should not be an expression_kind";
         throw std::runtime_error(ss.str());
@@ -128,7 +128,7 @@ void dynd::convert_dtype::get_value_to_operand_kernel(const eval::eval_context *
 
 dtype dynd::convert_dtype::with_replaced_storage_dtype(const dtype& replacement_dtype) const
 {
-    if (m_operand_dtype.kind() == expression_kind) {
+    if (m_operand_dtype.get_kind() == expression_kind) {
         return dtype(new convert_dtype(m_value_dtype,
                         static_cast<const extended_expression_dtype *>(m_operand_dtype.extended())->with_replaced_storage_dtype(replacement_dtype),
                         m_errmode));

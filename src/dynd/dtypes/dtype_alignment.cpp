@@ -16,7 +16,7 @@ dtype dynd::make_unaligned_dtype(const dtype& value_dtype)
 {
     if (value_dtype.alignment() > 1) {
         // Only do something if it requires alignment
-        if (value_dtype.kind() != expression_kind) {
+        if (value_dtype.get_kind() != expression_kind) {
             return make_view_dtype(value_dtype, make_fixedbytes_dtype(value_dtype.element_size(), 1));
         } else {
             const dtype& sdt = value_dtype.storage_dtype();

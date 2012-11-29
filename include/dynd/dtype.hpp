@@ -321,7 +321,7 @@ public:
     virtual ~extended_dtype();
 
     virtual type_id_t get_type_id() const = 0;
-    virtual dtype_kind_t kind() const = 0;
+    virtual dtype_kind_t get_kind() const = 0;
     virtual size_t alignment() const = 0;
     virtual size_t get_element_size() const = 0;
     virtual size_t get_default_element_size(int ndim, const intptr_t *shape) const;
@@ -659,7 +659,7 @@ public:
     dtype();
     /** Constructor from an extended_dtype. This claims ownership of the 'extended' reference by default, be careful! */
     explicit dtype(const extended_dtype *extended, bool incref = false)
-        : m_type_id(extended->get_type_id()), m_kind(extended->kind()), m_alignment((unsigned char)extended->alignment()),
+        : m_type_id(extended->get_type_id()), m_kind(extended->get_kind()), m_alignment((unsigned char)extended->alignment()),
             m_element_size(extended->get_element_size()), m_extended(extended) {
         if (incref) {
             extended_dtype_incref(m_extended);
@@ -823,7 +823,7 @@ public:
         } else {
             // Follow the operand dtype chain to get the storage dtype
             const dtype* dt = &static_cast<const extended_expression_dtype *>(m_extended)->get_operand_dtype();
-            while (dt->kind() == expression_kind) {
+            while (dt->get_kind() == expression_kind) {
                 dt = &static_cast<const extended_expression_dtype *>(dt->m_extended)->get_operand_dtype();
             }
             return *dt;
@@ -841,7 +841,7 @@ public:
     }
 
     /** The 'kind' of the dtype (int, uint, float, etc) */
-    dtype_kind_t kind() const {
+    dtype_kind_t get_kind() const {
         return (dtype_kind_t)m_kind;
     }
 

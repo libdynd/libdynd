@@ -19,7 +19,7 @@ dynd::byteswap_dtype::byteswap_dtype(const dtype& value_dtype)
         throw std::runtime_error("byteswap_dtype: Only built-in dtypes are supported presently");
     }
 
-    if(m_value_dtype.kind() != complex_kind) {
+    if(m_value_dtype.get_kind() != complex_kind) {
         get_byteswap_kernel(value_dtype.element_size(), value_dtype.alignment(), m_byteswap_kernel);
     } else {
         get_pairwise_byteswap_kernel(m_value_dtype.element_size(), m_value_dtype.alignment(), m_byteswap_kernel);
@@ -40,7 +40,7 @@ dynd::byteswap_dtype::byteswap_dtype(const dtype& value_dtype, const dtype& oper
         m_operand_dtype = make_view_dtype(operand_dtype, make_fixedbytes_dtype(operand_dtype.element_size(), value_dtype.alignment()));
     }
 
-    if(m_value_dtype.kind() != complex_kind) {
+    if(m_value_dtype.get_kind() != complex_kind) {
         get_byteswap_kernel(value_dtype.element_size(), value_dtype.alignment(), m_byteswap_kernel);
     } else {
         get_pairwise_byteswap_kernel(m_value_dtype.element_size(), m_value_dtype.alignment(), m_byteswap_kernel);
@@ -113,7 +113,7 @@ void dynd::byteswap_dtype::get_value_to_operand_kernel(const eval::eval_context 
 
 dtype dynd::byteswap_dtype::with_replaced_storage_dtype(const dtype& replacement_dtype) const
 {
-    if (m_operand_dtype.kind() != expression_kind) {
+    if (m_operand_dtype.get_kind() != expression_kind) {
         // If there's no expression in the operand, just try substituting (the constructor will error-check)
         return dtype(new byteswap_dtype(m_value_dtype, replacement_dtype));
     } else {

@@ -277,7 +277,7 @@ ndarray dynd::ndarray::view_as_dtype(const dtype& dt) const
     if (get_ndim() == 1 && get_node()->get_category() == strided_array_node_category &&
                             get_strides()[0] > 0 && //
                             static_cast<size_t>(get_strides()[0]) == get_dtype().element_size() &&
-                            get_dtype().kind() != expression_kind) {
+                            get_dtype().get_kind() != expression_kind) {
         intptr_t nbytes = get_shape()[0] * get_dtype().element_size();
         char *originptr = get_readwrite_originptr();
 
@@ -309,7 +309,7 @@ ndarray dynd::ndarray::view_as_dtype(const dtype& dt) const
     }
 
     // In the case of a strided array with a non-expression dtype, simply substitute the dtype
-    if (get_node()->get_category() == strided_array_node_category && get_dtype().kind() != expression_kind) {
+    if (get_node()->get_category() == strided_array_node_category && get_dtype().get_kind() != expression_kind) {
         bool aligned = true;
         // If the alignment of the requested dtype is greater, check
         // the actual strides to only apply unaligned<> when necessary.
@@ -512,7 +512,7 @@ std::ostream& dynd::operator<<(std::ostream& o, const ndarray& rhs)
     if (rhs.get_node() != NULL) {
         o << "ndarray(";
         if (rhs.get_node()->get_category() == strided_array_node_category &&
-                        rhs.get_dtype().kind() != expression_kind) {
+                        rhs.get_dtype().get_kind() != expression_kind) {
             const char *originptr = rhs.get_node()->get_readonly_originptr();
             const intptr_t *strides = rhs.get_node()->get_strides();
             nested_ndarray_print(o, rhs.get_dtype(), originptr, rhs.get_ndim(), rhs.get_shape(), strides);

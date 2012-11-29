@@ -480,7 +480,7 @@ void dynd::push_front_dtype_storage_to_value_kernels(const dynd::dtype& dt,
     const dtype* front_dt = &dt;
     const extended_expression_dtype* front_dt_extended = static_cast<const extended_expression_dtype *>(front_dt->extended());
     const dtype* next_dt = &static_cast<const extended_expression_dtype *>(dt.extended())->get_operand_dtype();
-    if (next_dt->kind() != expression_kind) {
+    if (next_dt->get_kind() != expression_kind) {
         // Special case when there is just one
         if (out_kernels.empty()) {
             out_element_sizes.push_front(dt.value_dtype().element_size());
@@ -502,7 +502,7 @@ void dynd::push_front_dtype_storage_to_value_kernels(const dynd::dtype& dt,
             front_dt = next_dt;
             front_dt_extended = static_cast<const extended_expression_dtype *>(front_dt->extended());
             next_dt = &front_dt_extended->get_operand_dtype();
-        } while (next_dt->kind() == expression_kind);
+        } while (next_dt->get_kind() == expression_kind);
         // Add the final kernel from the source
         out_element_sizes.push_front(next_dt->element_size());
         out_kernels.push_front(unary_specialization_kernel_instance());
@@ -518,7 +518,7 @@ void dynd::push_back_dtype_value_to_storage_kernels(const dynd::dtype& dt,
     const dtype* back_dt = &dt;
     const extended_expression_dtype* back_dt_extended = static_cast<const extended_expression_dtype *>(back_dt->extended());
     const dtype* next_dt = &back_dt_extended->get_operand_dtype();
-    if (next_dt->kind() != expression_kind) {
+    if (next_dt->get_kind() != expression_kind) {
         // Special case when there is just one
         if (out_kernels.empty()) {
             out_element_sizes.push_back(dt.value_dtype().element_size());
@@ -540,7 +540,7 @@ void dynd::push_back_dtype_value_to_storage_kernels(const dynd::dtype& dt,
             back_dt = next_dt;
             back_dt_extended = static_cast<const extended_expression_dtype *>(back_dt->extended());
             next_dt = &back_dt_extended->get_operand_dtype();
-        } while (next_dt->kind() == expression_kind);
+        } while (next_dt->get_kind() == expression_kind);
         // Add the final kernel from the source
         out_element_sizes.push_back(next_dt->element_size());
         out_kernels.push_back(unary_specialization_kernel_instance());

@@ -508,7 +508,7 @@ namespace {
     {
         const dtype *e = reinterpret_cast<const dtype *>(extra);
         // If things aren't simple, use a view_dtype
-        if (dt.kind() == expression_kind || dt.element_size() != e->element_size() ||
+        if (dt.get_kind() == expression_kind || dt.element_size() != e->element_size() ||
                     dt.get_memory_management() != pod_memory_management ||
                     e->get_memory_management() != pod_memory_management) {
             return make_view_dtype(*e, dt);
@@ -529,7 +529,7 @@ ndobject ndobject::view_scalars(const dtype& scalar_dtype) const
         const strided_array_dtype_metadata *md = reinterpret_cast<const strided_array_dtype_metadata *>(get_ndo_meta());
         size_t element_size = sad->get_element_dtype().element_size();
         if (element_size != 0 && element_size == md->stride &&
-                    sad->get_element_dtype().kind() != expression_kind &&
+                    sad->get_element_dtype().get_kind() != expression_kind &&
                     sad->get_element_dtype().get_memory_management() == pod_memory_management) {
             intptr_t nbytes = md->size * element_size;
             // Make sure the element size divides into the # of bytes
@@ -579,7 +579,7 @@ std::string dynd::detail::ndobject_as_string(const ndobject& lhs, assign_error_m
     }
     // Try to make a string directly from the data bytes if possible
     const dtype& lhs_dt = lhs.get_dtype();
-    if (lhs_dt.kind() == string_kind) {
+    if (lhs_dt.get_kind() == string_kind) {
         const extended_string_dtype *esd = static_cast<const extended_string_dtype *>(lhs_dt.extended());
         string_encoding_t encoding = esd->get_encoding();
         if (encoding == string_encoding_utf_8 || encoding == string_encoding_ascii) {

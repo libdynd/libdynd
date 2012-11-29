@@ -28,7 +28,7 @@ public:
     type_id_t get_type_id() const {
         return convert_type_id;
     }
-    dtype_kind_t kind() const {
+    dtype_kind_t get_kind() const {
         return expression_kind;
     }
     // Expose the storage traits here
@@ -78,7 +78,7 @@ public:
  */
 inline dtype make_convert_dtype(const dtype& value_dtype, const dtype& operand_dtype, assign_error_mode errmode = assign_error_default) {
     if (operand_dtype.value_dtype() != value_dtype) {
-        if (value_dtype.kind() != expression_kind) {
+        if (value_dtype.get_kind() != expression_kind) {
             // Create a conversion dtype when the value kind is different
             return dtype(new convert_dtype(value_dtype, operand_dtype, errmode));
         } else if (value_dtype.storage_dtype() == operand_dtype.value_dtype()) {

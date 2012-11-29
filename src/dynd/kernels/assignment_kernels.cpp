@@ -259,7 +259,7 @@ void dynd::get_dtype_assignment_kernel(
     }
 
     // Assignment of expression dtypes
-    if (src_dt.kind() == expression_kind || dst_dt.kind() == expression_kind) {
+    if (src_dt.get_kind() == expression_kind || dst_dt.get_kind() == expression_kind) {
         // Chain the kernels together
         deque<unary_specialization_kernel_instance> kernels;
         deque<intptr_t> element_sizes;
@@ -267,7 +267,7 @@ void dynd::get_dtype_assignment_kernel(
         const dtype& dst_dt_vdt = dst_dt.value_dtype();
         //intptr_t next_element_size = 0;
 
-        if (src_dt.kind() == expression_kind) {
+        if (src_dt.get_kind() == expression_kind) {
             // kernel operations from src's storage to value
             push_front_dtype_storage_to_value_kernels(src_dt, ectx, kernels, element_sizes);
         }
@@ -283,7 +283,7 @@ void dynd::get_dtype_assignment_kernel(
                                 errmode, ectx, kernels.back());
         }
 
-        if (dst_dt.kind() == expression_kind) {
+        if (dst_dt.get_kind() == expression_kind) {
             push_back_dtype_value_to_storage_kernels(dst_dt, ectx, kernels, element_sizes);
         }
 
@@ -546,7 +546,7 @@ void dynd::get_dtype_assignment_kernel(const dtype& dt,
     case blockref_memory_management:
         throw runtime_error("blockref not supported yet in get_dtype_assignment_kernel");
     case object_memory_management:
-        if (dt.kind() == expression_kind) {
+        if (dt.get_kind() == expression_kind) {
             // In the case of an expression dtype, just copy the storage
             // directly instead of chaining multiple casting operations
             // together.

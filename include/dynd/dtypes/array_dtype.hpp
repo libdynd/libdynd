@@ -22,7 +22,7 @@ public:
     type_id_t get_type_id() const {
         return array_type_id;
     }
-    dtype_kind_t kind() const {
+    dtype_kind_t get_kind() const {
         return composite_kind;
     }
     // Expose the storage traits here

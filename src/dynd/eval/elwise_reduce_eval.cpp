@@ -99,7 +99,7 @@ ndarray_node_ptr dynd::eval::evaluate_elwise_reduce_array(ndarray_node* node,
     deque<intptr_t> element_sizes;
 
     if (strided_node->get_category() != strided_array_node_category ||
-                    strided_node->get_dtype().kind() == expression_kind) {
+                    strided_node->get_dtype().get_kind() == expression_kind) {
         // If the next node is a groupby, call the special groupby reduction code
         if (strided_node->get_category() == groupby_node_category) {
             return evaluate_groupby_elwise_reduce(node, ectx, copy, access_flags);

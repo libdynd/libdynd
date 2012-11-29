@@ -74,7 +74,7 @@ void bytes_dtype::get_shape(int DYND_UNUSED(i), std::vector<intptr_t>& DYND_UNUS
 bool bytes_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const
 {
     if (dst_dt.extended() == this) {
-        if (src_dt.kind() == bytes_kind) {
+        if (src_dt.get_kind() == bytes_kind) {
             return true;
         } else {
             return false;

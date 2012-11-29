@@ -22,7 +22,7 @@ dynd::pointer_dtype::pointer_dtype(const dtype& target_dtype)
     // I'm not 100% sure how blockref pointer dtypes should interact with
     // the computational subsystem, the details will have to shake out
     // when we want to actually do something with them.
-    if (target_dtype.kind() == expression_kind && target_dtype.get_type_id() != pointer_type_id) {
+    if (target_dtype.get_kind() == expression_kind && target_dtype.get_type_id() != pointer_type_id) {
         stringstream ss;
         ss << "A pointer dtype's target cannot be the expression dtype ";
         ss << target_dtype;

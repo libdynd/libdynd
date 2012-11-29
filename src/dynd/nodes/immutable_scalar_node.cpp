@@ -46,7 +46,7 @@ void dynd::immutable_scalar_node::debug_print_extra(std::ostream& o, const std::
     o << "\n";
     o << indent << " value: ";
     try {
-        if (m_dtype.kind() != expression_kind) {
+        if (m_dtype.get_kind() != expression_kind) {
             m_dtype.print_element(o, m_originptr, NULL); // TODO: ndobject metadata
         } else {
             ndarray a = ndarray(const_cast<immutable_scalar_node *>(this)->as_ndarray_node_ptr()).vals();

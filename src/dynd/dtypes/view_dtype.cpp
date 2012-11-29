@@ -134,7 +134,7 @@ void dynd::view_dtype::get_value_to_operand_kernel(const eval::eval_context *DYN
 
 dtype dynd::view_dtype::with_replaced_storage_dtype(const dtype& replacement_dtype) const
 {
-    if (m_operand_dtype.kind() == expression_kind) {
+    if (m_operand_dtype.get_kind() == expression_kind) {
         return dtype(new view_dtype(m_value_dtype,
                         static_cast<const extended_expression_dtype *>(m_operand_dtype.extended())->with_replaced_storage_dtype(replacement_dtype)));
     } else {

@@ -59,9 +59,9 @@ void dynd::elwise_binary_kernel_node::get_binary_operation(intptr_t dst_fixedstr
                             const eval::eval_context *ectx,
                             kernel_instance<binary_operation_t>& out_kernel) const
 {
-    if (m_dtype.kind() != expression_kind &&
-                        m_opnodes[0]->get_dtype().kind() != expression_kind &&
-                        m_opnodes[1]->get_dtype().kind() != expression_kind) {
+    if (m_dtype.get_kind() != expression_kind &&
+                        m_opnodes[0]->get_dtype().get_kind() != expression_kind &&
+                        m_opnodes[1]->get_dtype().get_kind() != expression_kind) {
         // Return the binary operation kernel as is
         out_kernel.kernel = m_kernel.kernel;
         out_kernel.auxdata.borrow_from(m_kernel.auxdata);
@@ -73,7 +73,7 @@ void dynd::elwise_binary_kernel_node::get_binary_operation(intptr_t dst_fixedstr
         intptr_t element_sizes[3];
 
         // Adapt the output
-        if (m_dtype.kind() == expression_kind) {
+        if (m_dtype.get_kind() == expression_kind) {
             element_sizes[0] = m_dtype.element_size();
             get_dtype_assignment_kernel(m_dtype.value_dtype(), m_dtype, assign_error_none, ectx, adapters_spec[0]);
             adapters[0].kernel = adapters_spec[0].specializations[
@@ -85,7 +85,7 @@ void dynd::elwise_binary_kernel_node::get_binary_operation(intptr_t dst_fixedstr
         }
 
         // Adapt the first operand
-        if (m_opnodes[0]->get_dtype().kind() == expression_kind) {
+        if (m_opnodes[0]->get_dtype().get_kind() == expression_kind) {
             element_sizes[1] = m_opnodes[0]->get_dtype().value_dtype().element_size();
             get_dtype_assignment_kernel(m_opnodes[0]->get_dtype().value_dtype(), m_opnodes[0]->get_dtype(),
                                 assign_error_none, ectx, adapters_spec[1]);
@@ -98,7 +98,7 @@ void dynd::elwise_binary_kernel_node::get_binary_operation(intptr_t dst_fixedstr
         }
 
         // Adapt the second operand
-        if (m_opnodes[1]->get_dtype().kind() == expression_kind) {
+        if (m_opnodes[1]->get_dtype().get_kind() == expression_kind) {
             element_sizes[2] = m_opnodes[1]->get_dtype().value_dtype().element_size();
             get_dtype_assignment_kernel(m_opnodes[1]->get_dtype().value_dtype(), m_opnodes[1]->get_dtype(),
                                 assign_error_none, ectx, adapters_spec[2]);

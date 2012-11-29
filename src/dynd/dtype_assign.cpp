@@ -56,11 +56,11 @@ bool dynd::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt)
     src_ext = src_dt.extended();
 
     if (dst_ext == NULL && src_ext == NULL) {
-        switch (src_dt.kind()) {
+        switch (src_dt.get_kind()) {
             case pattern_kind: // TODO: raise an error?
                 return true;
             case bool_kind:
-                switch (dst_dt.kind()) {
+                switch (dst_dt.get_kind()) {
                     case bool_kind:
                     case int_kind:
                     case uint_kind:
@@ -74,7 +74,7 @@ bool dynd::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt)
                 }
                 break;
             case int_kind:
-                switch (dst_dt.kind()) {
+                switch (dst_dt.get_kind()) {
                     case bool_kind:
                         return false;
                     case int_kind:
@@ -92,7 +92,7 @@ bool dynd::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt)
                 }
                 break;
             case uint_kind:
-                switch (dst_dt.kind()) {
+                switch (dst_dt.get_kind()) {
                     case bool_kind:
                         return false;
                     case int_kind:
@@ -110,7 +110,7 @@ bool dynd::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt)
                 }
                 break;
             case real_kind:
-                switch (dst_dt.kind()) {
+                switch (dst_dt.get_kind()) {
                     case bool_kind:
                     case int_kind:
                     case uint_kind:
@@ -125,7 +125,7 @@ bool dynd::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt)
                         break;
                 }
             case complex_kind:
-                switch (dst_dt.kind()) {
+                switch (dst_dt.get_kind()) {
                     case bool_kind:
                     case int_kind:
                     case uint_kind:
@@ -139,7 +139,7 @@ bool dynd::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt)
                         break;
                 }
             case string_kind:
-                switch (dst_dt.kind()) {
+                switch (dst_dt.get_kind()) {
                     case bool_kind:
                     case int_kind:
                     case uint_kind:
@@ -152,7 +152,7 @@ bool dynd::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt)
                         break;
                 }
             case bytes_kind:
-                return dst_dt.kind() == bytes_kind  &&
+                return dst_dt.get_kind() == bytes_kind  &&
                         dst_dt.element_size() == src_dt.element_size();
             default:
                 break;

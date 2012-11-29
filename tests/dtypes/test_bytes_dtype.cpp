@@ -23,35 +23,35 @@ TEST(BytesDType, Create) {
     // Strings with various alignments
     d = make_bytes_dtype(1);
     EXPECT_EQ(bytes_type_id, d.get_type_id());
-    EXPECT_EQ(bytes_kind, d.kind());
+    EXPECT_EQ(bytes_kind, d.get_kind());
     EXPECT_EQ(sizeof(void *), d.alignment());
     EXPECT_EQ(2*sizeof(void *), d.element_size());
     EXPECT_EQ(1, static_cast<const bytes_dtype *>(d.extended())->get_data_alignment());
 
     d = make_bytes_dtype(2);
     EXPECT_EQ(bytes_type_id, d.get_type_id());
-    EXPECT_EQ(bytes_kind, d.kind());
+    EXPECT_EQ(bytes_kind, d.get_kind());
     EXPECT_EQ(sizeof(void *), d.alignment());
     EXPECT_EQ(2*sizeof(void *), d.element_size());
     EXPECT_EQ(2, static_cast<const bytes_dtype *>(d.extended())->get_data_alignment());
 
     d = make_bytes_dtype(4);
     EXPECT_EQ(bytes_type_id, d.get_type_id());
-    EXPECT_EQ(bytes_kind, d.kind());
+    EXPECT_EQ(bytes_kind, d.get_kind());
     EXPECT_EQ(sizeof(void *), d.alignment());
     EXPECT_EQ(2*sizeof(void *), d.element_size());
     EXPECT_EQ(4, static_cast<const bytes_dtype *>(d.extended())->get_data_alignment());
 
     d = make_bytes_dtype(8);
     EXPECT_EQ(bytes_type_id, d.get_type_id());
-    EXPECT_EQ(bytes_kind, d.kind());
+    EXPECT_EQ(bytes_kind, d.get_kind());
     EXPECT_EQ(sizeof(void *), d.alignment());
     EXPECT_EQ(2*sizeof(void *), d.element_size());
     EXPECT_EQ(8, static_cast<const bytes_dtype *>(d.extended())->get_data_alignment());
 
     d = make_bytes_dtype(16);
     EXPECT_EQ(bytes_type_id, d.get_type_id());
-    EXPECT_EQ(bytes_kind, d.kind());
+    EXPECT_EQ(bytes_kind, d.get_kind());
     EXPECT_EQ(sizeof(void *), d.alignment());
     EXPECT_EQ(16, static_cast<const bytes_dtype *>(d.extended())->get_data_alignment());
 }

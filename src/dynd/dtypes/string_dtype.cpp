@@ -104,7 +104,7 @@ void string_dtype::get_shape(int DYND_UNUSED(i), std::vector<intptr_t>& DYND_UNU
 bool string_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const
 {
     if (dst_dt.extended() == this) {
-        if (src_dt.kind() == string_kind) {
+        if (src_dt.get_kind() == string_kind) {
             // If the source is a string, only the encoding matters because the dest is variable sized
             const extended_string_dtype *src_esd = static_cast<const extended_string_dtype*>(src_dt.extended());
             string_encoding_t src_encoding = src_esd->get_encoding();
