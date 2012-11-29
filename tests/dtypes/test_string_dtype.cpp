@@ -10,6 +10,7 @@
 
 #include <dynd/ndobject.hpp>
 #include <dynd/dtypes/string_dtype.hpp>
+#include <dynd/dtypes/bytes_dtype.hpp>
 #include <dynd/dtypes/strided_array_dtype.hpp>
 #include <dynd/dtypes/fixedstring_dtype.hpp>
 #include <dynd/dtypes/convert_dtype.hpp>
@@ -264,4 +265,27 @@ TEST(StringDType, CanonicalDType) {
                 (make_string_dtype(string_encoding_utf_16).get_canonical_dtype()));
     EXPECT_EQ((make_string_dtype(string_encoding_utf_32)),
                 (make_string_dtype(string_encoding_utf_32).get_canonical_dtype()));
+}
+
+TEST(StringDType, Storage) {
+    ndobject a;
+
+    a = "testing";
+    cout << a << endl;
+    a.debug_print(cout);
+    EXPECT_EQ(make_bytes_dtype(1), a.storage().get_dtype());
+
+    a = a.cast_scalars(make_string_dtype(string_encoding_utf_16)).vals();
+    EXPECT_EQ(make_bytes_dtype(2), a.storage().get_dtype());
+
+    a = a.cast_scalars(make_string_dtype(string_encoding_utf_32)).vals();
+    EXPECT_EQ(make_bytes_dtype(4), a.storage().get_dtype());
+}
+
+TEST(StringDType, EncodingSizes) {
+    EXPECT_EQ(1, string_encoding_char_size_table[string_encoding_ascii]);
+    EXPECT_EQ(1, string_encoding_char_size_table[string_encoding_utf_8]);
+    EXPECT_EQ(2, string_encoding_char_size_table[string_encoding_ucs_2]);
+    EXPECT_EQ(2, string_encoding_char_size_table[string_encoding_utf_16]);
+    EXPECT_EQ(4, string_encoding_char_size_table[string_encoding_utf_32]);
 }

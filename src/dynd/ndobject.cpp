@@ -9,6 +9,7 @@
 #include <dynd/dtypes/dtype_alignment.hpp>
 #include <dynd/dtypes/view_dtype.hpp>
 #include <dynd/dtypes/string_dtype.hpp>
+#include <dynd/dtypes/bytes_dtype.hpp>
 #include <dynd/dtypes/fixedbytes_dtype.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/exceptions.hpp>
@@ -341,6 +342,8 @@ namespace {
         if (!storage_dt.extended() || (storage_dt.get_memory_management() == pod_memory_management &&
                                 storage_dt.extended()->get_metadata_size() == 0)) {
             return make_fixedbytes_dtype(storage_dt.element_size(), storage_dt.alignment());
+        } else if (storage_dt.type_id() == string_type_id) {
+            return make_bytes_dtype(static_cast<const string_dtype *>(storage_dt.extended())->get_data_alignment());
         } else {
             return storage_dt;
         }

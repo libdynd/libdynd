@@ -127,7 +127,7 @@ bool bytes_dtype::operator==(const extended_dtype& rhs) const
 {
     if (this == &rhs) {
         return true;
-    } else if (rhs.type_id() != string_type_id) {
+    } else if (rhs.type_id() != bytes_type_id) {
         return false;
     } else {
         const bytes_dtype *dt = static_cast<const bytes_dtype*>(&rhs);

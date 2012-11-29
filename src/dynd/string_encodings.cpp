@@ -16,10 +16,10 @@ using namespace dynd;
 int dynd::string_encoding_char_size_table[6] = {
     // string_encoding_ascii
     1,
-    // string_encoding_utf_8
-    1,
     // string_encoding_ucs_2
     2,
+    // string_encoding_utf_8
+    1,
     // string_encoding_utf_16
     2,
     // string_encoding_utf_32

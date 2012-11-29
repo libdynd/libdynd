@@ -48,6 +48,11 @@ public:
         return m_encoding;
     }
 
+    /** Alignment of the string data being pointed to. */
+    size_t get_data_alignment() const {
+        return string_encoding_char_size_table[m_encoding];
+    }
+
     void get_string_range(const char **out_begin, const char**out_end, const char *data, const char *metadata) const;
 
     void print_element(std::ostream& o, const char *data, const char *metadata) const;
