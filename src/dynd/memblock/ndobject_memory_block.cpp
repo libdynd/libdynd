@@ -39,10 +39,8 @@ memory_block_ptr dynd::make_ndobject_memory_block(size_t metadata_size)
     if (result == 0) {
         throw bad_alloc();
     }
-    // Signal that this object is uninitialized by setting its dtype to NULL
-    ndobject_preamble *preamble = reinterpret_cast<ndobject_preamble *>(result + sizeof(memory_block_data));
-    preamble->m_dtype = NULL;
-    preamble->m_data_pointer = NULL;
+    // Zero out all the metadata to start
+    memset(result + sizeof(memory_block_data), 0, sizeof(ndobject_preamble) + metadata_size);
     return memory_block_ptr(new (result) memory_block_data(1, ndobject_memory_block_type), false);
 }
 
@@ -55,10 +53,8 @@ memory_block_ptr dynd::make_ndobject_memory_block(size_t metadata_size, size_t e
     if (result == 0) {
         throw bad_alloc();
     }
-    // Signal that this object is uninitialized by setting its dtype to NULL
-    ndobject_preamble *preamble = reinterpret_cast<ndobject_preamble *>(result + sizeof(memory_block_data));
-    preamble->m_dtype = NULL;
-    preamble->m_data_pointer = NULL;
+    // Zero out all the metadata to start
+    memset(result + sizeof(memory_block_data), 0, sizeof(ndobject_preamble) + metadata_size);
     // Return a pointer to the extra allocated memory
     *out_extra_ptr = result + extra_offset;
     return memory_block_ptr(new (result) memory_block_data(1, ndobject_memory_block_type), false);

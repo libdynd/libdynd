@@ -226,14 +226,16 @@ bool struct_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_
 
 void struct_dtype::get_single_compare_kernel(single_compare_kernel_instance& DYND_UNUSED(out_kernel)) const
 {
-    throw runtime_error("struct_dtype::get_single_compare_kernel is unimplemented"); 
+    throw runtime_error("struct_dtype::get_single_compare_kernel is unimplemented");
 }
 
-void struct_dtype::get_dtype_assignment_kernel(const dtype& DYND_UNUSED(dst_dt), const dtype& DYND_UNUSED(src_dt),
+void struct_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const dtype& src_dt,
                 assign_error_mode DYND_UNUSED(errmode),
                 unary_specialization_kernel_instance& DYND_UNUSED(out_kernel)) const
 {
-    throw runtime_error("struct_dtype::get_dtype_assignment_kernel is unimplemented"); 
+    stringstream ss;
+    ss << "struct_dtype::get_dtype_assignment_kernel from " << src_dt << " to " << dst_dt << " is unimplemented";
+    throw runtime_error(ss.str());
 }
 
 bool struct_dtype::operator==(const extended_dtype& rhs) const
@@ -321,6 +323,7 @@ void struct_dtype::metadata_destruct(char *metadata) const
 void struct_dtype::metadata_debug_print(const char *metadata, std::ostream& o, const std::string& indent) const
 {
     const size_t *offsets = reinterpret_cast<const size_t *>(metadata);
+    o << indent << "struct_dtype metadata\n";
     o << indent << " field offsets: ";
     for (size_t i = 0, i_end = m_fields.size(); i != i_end; ++i) {
         o << offsets[i];

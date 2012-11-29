@@ -100,9 +100,10 @@ ndobject dynd::make_strided_ndobject(const dtype& uniform_dtype, int ndim, const
 }
 
 ndobject dynd::make_strided_ndobject_from_data(const dtype& uniform_dtype, int ndim, const intptr_t *shape,
-                const intptr_t *strides, int64_t access_flags, char *data_ptr, const memory_block_ptr& data_reference)
+                const intptr_t *strides, int64_t access_flags, char *data_ptr,
+                const memory_block_ptr& data_reference, char **out_uniform_metadata)
 {
-    if (uniform_dtype.extended() && uniform_dtype.extended()->get_metadata_size() > 0) {
+    if (out_uniform_metadata == NULL && uniform_dtype.extended() && uniform_dtype.extended()->get_metadata_size() > 0) {
         stringstream ss;
         ss << "Cannot make a strided ndobject with dtype " << uniform_dtype << " from a preexisting data pointer";
         throw runtime_error(ss.str());
@@ -128,6 +129,11 @@ ndobject dynd::make_strided_ndobject_from_data(const dtype& uniform_dtype, int n
         intptr_t dim_size = shape[i];
         meta[i].stride = dim_size > 1 ? strides[i] : 0;
         meta[i].size = dim_size;
+    }
+
+    // Return a pointer to the metadata for uniform_dtype.
+    if (out_uniform_metadata != NULL) {
+        *out_uniform_metadata = reinterpret_cast<char *>(meta + ndim);
     }
 
     return ndobject(result);

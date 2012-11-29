@@ -432,9 +432,26 @@ public:
 ndobject make_strided_ndobject(const dtype& uniform_dtype, int ndim, const intptr_t *shape,
                 int64_t access_flags, const int *axis_perm);
 
-/** Makes a strided ndobject pointing to existing data */
-ndobject make_strided_ndobject_from_data(const dtype& scalar_dtype, int ndim, const intptr_t *shape,
-                const intptr_t *strides, int64_t access_flags, char *data_ptr, const memory_block_ptr& data_reference);
+/**
+ * \brief Makes a strided ndobject pointing to existing data
+ *
+ * \param uniform_dtype  The dtype of each element in the strided array.
+ * \param ndim  The number of strided dimensions.
+ * \param shape  The shape of the strided dimensions.
+ * \param strides  The strides of the strided dimensions.
+ * \param access_flags Read/write/immutable flags.
+ * \param data_ptr  Pointer to the element at index 0.
+ * \param data_reference  A memory block which holds a reference to the data.
+ * \param out_uniform_metadata  If the uniform_dtype has metadata (get_metadata_size() > 0),
+ *                              this must be non-NULL, and is populated with a pointer to the
+ *                              metadata for the uniform_dtype. The caller must populate it
+ *                              with valid data.
+ *
+ * \returns  The created ndobject.
+ */
+ndobject make_strided_ndobject_from_data(const dtype& uniform_dtype, int ndim, const intptr_t *shape,
+                const intptr_t *strides, int64_t access_flags, char *data_ptr,
+                const memory_block_ptr& data_reference, char **out_uniform_metadata = NULL);
 
 /** Makes a scalar ndobject with data initialized by the provided pointer */
 ndobject make_scalar_ndobject(const dtype& scalar_dtype, const void *data);
