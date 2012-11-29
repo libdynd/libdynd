@@ -31,6 +31,7 @@ void bytes_dtype::print_element(std::ostream& o, const char *data, const char *D
     const char *end = reinterpret_cast<const char * const *>(data)[1];
 
     // Print as hexadecimal
+    o << "0x";
     hexadecimal_print(o, begin, end - begin);
 }
 
