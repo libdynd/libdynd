@@ -86,7 +86,7 @@ bool dynd::convert_dtype::operator==(const extended_dtype& rhs) const
 {
     if (this == &rhs) {
         return true;
-    } else if (rhs.type_id() != convert_type_id) {
+    } else if (rhs.get_type_id() != convert_type_id) {
         return false;
     } else {
         const convert_dtype *dt = static_cast<const convert_dtype*>(&rhs);

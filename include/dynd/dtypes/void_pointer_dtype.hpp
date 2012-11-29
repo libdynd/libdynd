@@ -21,7 +21,7 @@ public:
     void_pointer_dtype() {
     }
 
-    type_id_t type_id() const {
+    type_id_t get_type_id() const {
         return void_pointer_type_id;
     }
     dtype_kind_t kind() const {

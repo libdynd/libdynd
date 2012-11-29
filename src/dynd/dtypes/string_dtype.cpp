@@ -140,7 +140,7 @@ void string_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const dtype&
                 unary_specialization_kernel_instance& out_kernel) const
 {
     if (this == dst_dt.extended()) {
-        switch (src_dt.type_id()) {
+        switch (src_dt.get_type_id()) {
             case string_type_id: {
                 const string_dtype *src_fs = static_cast<const string_dtype *>(src_dt.extended());
                 get_blockref_string_assignment_kernel(m_encoding, src_fs->m_encoding, errmode, out_kernel);
@@ -176,7 +176,7 @@ bool string_dtype::operator==(const extended_dtype& rhs) const
 {
     if (this == &rhs) {
         return true;
-    } else if (rhs.type_id() != string_type_id) {
+    } else if (rhs.get_type_id() != string_type_id) {
         return false;
     } else {
         const string_dtype *dt = static_cast<const string_dtype*>(&rhs);
@@ -225,6 +225,6 @@ void string_dtype::metadata_destruct(char *metadata) const
 void string_dtype::metadata_debug_print(const char *metadata, std::ostream& o, const std::string& indent) const
 {
     const string_dtype_metadata *md = reinterpret_cast<const string_dtype_metadata *>(metadata);
-    o << indent << "string_dtype metadata\n";
+    o << indent << "string metadata\n";
     memory_block_debug_print(md->blockref, o, indent + " ");
 }

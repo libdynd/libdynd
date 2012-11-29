@@ -47,7 +47,7 @@ class date_dtype : public extended_dtype {
 public:
     date_dtype(date_unit_t unit);
 
-    type_id_t type_id() const {
+    type_id_t get_type_id() const {
         return date_type_id;
     }
     dtype_kind_t kind() const {

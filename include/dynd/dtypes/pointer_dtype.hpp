@@ -28,7 +28,7 @@ class pointer_dtype : public extended_expression_dtype {
 public:
     pointer_dtype(const dtype& target_dtype);
 
-    type_id_t type_id() const {
+    type_id_t get_type_id() const {
         return pointer_type_id;
     }
     dtype_kind_t kind() const {
@@ -46,7 +46,7 @@ public:
         return m_target_dtype;
     }
     const dtype& get_operand_dtype() const {
-        if (m_target_dtype.type_id() == pointer_type_id) {
+        if (m_target_dtype.get_type_id() == pointer_type_id) {
             return m_target_dtype;
         } else {
             return m_void_pointer_dtype;
@@ -82,7 +82,7 @@ public:
 };
 
 inline dtype make_pointer_dtype(const dtype& target_dtype) {
-    if (target_dtype.type_id() != void_type_id) {
+    if (target_dtype.get_type_id() != void_type_id) {
         return dtype(new pointer_dtype(target_dtype));
     } else {
         return dtype(new void_pointer_dtype());

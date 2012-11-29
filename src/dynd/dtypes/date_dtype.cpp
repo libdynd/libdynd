@@ -67,7 +67,7 @@ bool dynd::date_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& 
     if (dst_dt.extended() == this) {
         if (src_dt.extended() == this) {
             return true;
-        } else if (src_dt.type_id() == date_type_id) {
+        } else if (src_dt.get_type_id() == date_type_id) {
             const date_dtype *src_fs = static_cast<const date_dtype*>(src_dt.extended());
             return src_fs->m_unit == m_unit;
         } else {
@@ -94,7 +94,7 @@ bool dynd::date_dtype::operator==(const extended_dtype& rhs) const
 {
     if (this == &rhs) {
         return true;
-    } else if (rhs.type_id() != date_type_id) {
+    } else if (rhs.get_type_id() != date_type_id) {
         return false;
     } else {
         const date_dtype *dt = static_cast<const date_dtype*>(&rhs);

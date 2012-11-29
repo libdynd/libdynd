@@ -19,7 +19,7 @@ class array_dtype : public extended_dtype {
 public:
     array_dtype(const dtype& element_dtype);
 
-    type_id_t type_id() const {
+    type_id_t get_type_id() const {
         return array_type_id;
     }
     dtype_kind_t kind() const {

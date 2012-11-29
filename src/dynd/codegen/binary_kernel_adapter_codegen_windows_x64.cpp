@@ -43,13 +43,13 @@ uint64_t dynd::get_binary_function_adapter_unique_id(const dtype& restype,
                     const dtype& arg0type, const dtype& arg1type, calling_convention_t DYND_UNUSED(callconv))
 {
     // Bits 0..2 for the result type
-    uint64_t result = get_arg_id_from_type_id(restype.type_id());
+    uint64_t result = get_arg_id_from_type_id(restype.get_type_id());
 
     // Bits 3..5 for the arg0 type
-    result += get_arg_id_from_type_id(arg0type.type_id()) << 3;
+    result += get_arg_id_from_type_id(arg0type.get_type_id()) << 3;
 
     // Bits 6..8 for the arg0 type
-    result += get_arg_id_from_type_id(arg1type.type_id()) << 6;
+    result += get_arg_id_from_type_id(arg1type.get_type_id()) << 6;
 
     // There is only one calling convention on Windows x64, so it doesn't
     // need to get encoded in the unique id.
@@ -243,7 +243,7 @@ binary_operation_t dynd::codegen_binary_function_adapter(const memory_block_ptr&
     loop_start_label = code_current;
 
     // Argument zero setup
-    switch (arg0type.type_id()) {
+    switch (arg0type.get_type_id()) {
         case bool_type_id:
         case int8_type_id:
         case uint8_type_id:
@@ -283,7 +283,7 @@ binary_operation_t dynd::codegen_binary_function_adapter(const memory_block_ptr&
     }
 
     // Argument one setup
-    switch (arg1type.type_id()) {
+    switch (arg1type.get_type_id()) {
         case bool_type_id:
         case int8_type_id:
         case uint8_type_id:
@@ -326,7 +326,7 @@ binary_operation_t dynd::codegen_binary_function_adapter(const memory_block_ptr&
     code_current += sizeof(function_call);
 
     // Store the return value
-    switch (restype.type_id()) {
+    switch (restype.get_type_id()) {
         case bool_type_id:
         case int8_type_id:
         case uint8_type_id:

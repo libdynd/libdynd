@@ -38,7 +38,7 @@ static unsigned int get_arg_id_from_type_id(unsigned int type_id)
 
 uint64_t dynd::get_binary_reduce_function_adapter_unique_id(const dtype& reduce_type, calling_convention_t DYND_UNUSED(callconv))
 {
-    uint64_t result = get_arg_id_from_type_id(reduce_type.type_id());
+    uint64_t result = get_arg_id_from_type_id(reduce_type.get_type_id());
 
 #if defined(_WIN32) && !defined(_M_X64)
     // For 32-bit Windows, support both cdecl and stdcall
@@ -113,7 +113,7 @@ unary_operation_t dynd::codegen_left_associative_binary_reduce_function_adapter(
 {
     // TODO: If there's a platform where there are differences in the calling convention
     //       between the equated types, this will have to change.
-    switch(reduce_type.type_id()) {
+    switch(reduce_type.get_type_id()) {
         case bool_type_id:
         case int8_type_id:
         case uint8_type_id:
@@ -144,7 +144,7 @@ unary_operation_t dynd::codegen_right_associative_binary_reduce_function_adapter
 {
     // TODO: If there's a platform where there are differences in the calling convention
     //       between the equated types, this will have to change.
-    switch(reduce_type.type_id()) {
+    switch(reduce_type.get_type_id()) {
         case bool_type_id:
         case int8_type_id:
         case uint8_type_id:

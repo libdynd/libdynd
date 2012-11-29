@@ -13,7 +13,7 @@ using namespace dynd;
 dynd::groupby_node::groupby_node(const ndarray_node_ptr& data_node, const ndarray_node_ptr& by_node, const dtype& groups)
     : m_data_node(data_node), m_by_node(by_node->as_dtype(groups)), m_groups(groups)
 {
-    if (groups.type_id() != categorical_type_id) {
+    if (groups.get_type_id() != categorical_type_id) {
         throw runtime_error("The groups dtype for a groupby_node must be categorical");
     }
     const categorical_dtype *cdt = static_cast<const categorical_dtype*>(groups.extended());

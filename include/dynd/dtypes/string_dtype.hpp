@@ -30,7 +30,7 @@ class string_dtype : public extended_string_dtype {
 public:
     string_dtype(string_encoding_t encoding);
 
-    type_id_t type_id() const {
+    type_id_t get_type_id() const {
         return string_type_id;
     }
     dtype_kind_t kind() const {

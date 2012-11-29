@@ -49,7 +49,7 @@ void dynd::void_pointer_dtype::get_single_compare_kernel(single_compare_kernel_i
 
 bool dynd::void_pointer_dtype::operator==(const extended_dtype& rhs) const
 {
-    return rhs.type_id() == void_pointer_type_id;
+    return rhs.get_type_id() == void_pointer_type_id;
 }
 
 void dynd::void_pointer_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const dtype& src_dt,
@@ -57,7 +57,7 @@ void dynd::void_pointer_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, 
                 unary_specialization_kernel_instance& out_kernel) const
 {
     if (this == dst_dt.extended()) {
-        if (src_dt.type_id() == void_type_id) {
+        if (src_dt.get_type_id() == void_type_id) {
             // Get a POD assignment kernel. The code handling the blockref should see
             // that this kernel doesn't define a kernel_api, and raise an error if
             // a copy is attempted instead of maintaining existing blockrefs.

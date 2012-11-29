@@ -18,7 +18,7 @@ TEST(DType, BasicConstructor) {
     dtype d;
 
     // Default-constructed dtype properties
-    EXPECT_EQ(void_type_id, d.type_id());
+    EXPECT_EQ(void_type_id, d.get_type_id());
     EXPECT_EQ(void_kind, d.kind());
     EXPECT_EQ(1u, d.alignment());
     EXPECT_EQ(0u, d.element_size());
@@ -26,7 +26,7 @@ TEST(DType, BasicConstructor) {
 
     // bool dtype
     d = dtype(bool_type_id);
-    EXPECT_EQ(bool_type_id, d.type_id());
+    EXPECT_EQ(bool_type_id, d.get_type_id());
     EXPECT_EQ(bool_kind, d.kind());
     EXPECT_EQ(1u, d.alignment());
     EXPECT_EQ(1u, d.element_size());
@@ -34,7 +34,7 @@ TEST(DType, BasicConstructor) {
 
     // int8 dtype
     d = dtype(int8_type_id);
-    EXPECT_EQ(int8_type_id, d.type_id());
+    EXPECT_EQ(int8_type_id, d.get_type_id());
     EXPECT_EQ(int_kind, d.kind());
     EXPECT_EQ(1u, d.alignment());
     EXPECT_EQ(1u, d.element_size());
@@ -49,7 +49,7 @@ TEST(DType, BasicConstructor) {
 
     // int32 dtype
     d = dtype(int32_type_id);
-    EXPECT_EQ(int32_type_id, d.type_id());
+    EXPECT_EQ(int32_type_id, d.get_type_id());
     EXPECT_EQ(int_kind, d.kind());
     EXPECT_EQ(4u, d.alignment());
     EXPECT_EQ(4u, d.element_size());
@@ -57,7 +57,7 @@ TEST(DType, BasicConstructor) {
 
     // int
     d = make_dtype<int>();
-    EXPECT_EQ(int32_type_id, d.type_id());
+    EXPECT_EQ(int32_type_id, d.get_type_id());
     EXPECT_EQ(int_kind, d.kind());
     EXPECT_EQ(sizeof(int), d.alignment());
     EXPECT_EQ(sizeof(int), d.element_size());
@@ -72,7 +72,7 @@ TEST(DType, BasicConstructor) {
 
     // long long
     d = make_dtype<long long>();
-    EXPECT_EQ(int64_type_id, d.type_id());
+    EXPECT_EQ(int64_type_id, d.get_type_id());
     EXPECT_EQ(int_kind, d.kind());
     EXPECT_EQ(sizeof(long long), d.alignment());
     EXPECT_EQ(sizeof(long long), d.element_size());
@@ -80,7 +80,7 @@ TEST(DType, BasicConstructor) {
 
     // unsigned int
     d = make_dtype<unsigned int>();
-    EXPECT_EQ(uint32_type_id, d.type_id());
+    EXPECT_EQ(uint32_type_id, d.get_type_id());
     EXPECT_EQ(uint_kind, d.kind());
     EXPECT_EQ(sizeof(unsigned int), d.alignment());
     EXPECT_EQ(sizeof(unsigned int), d.element_size());
@@ -95,7 +95,7 @@ TEST(DType, BasicConstructor) {
 
     // unsigned long long
     d = make_dtype<unsigned long long>();
-    EXPECT_EQ(uint64_type_id, d.type_id());
+    EXPECT_EQ(uint64_type_id, d.get_type_id());
     EXPECT_EQ(uint_kind, d.kind());
     EXPECT_EQ(sizeof(unsigned long long), d.alignment());
     EXPECT_EQ(sizeof(unsigned long long), d.element_size());
@@ -103,7 +103,7 @@ TEST(DType, BasicConstructor) {
 
     // float
     d = make_dtype<float>();
-    EXPECT_EQ(float32_type_id, d.type_id());
+    EXPECT_EQ(float32_type_id, d.get_type_id());
     EXPECT_EQ(real_kind, d.kind());
     EXPECT_EQ(sizeof(float), d.alignment());
     EXPECT_EQ(sizeof(float), d.element_size());
@@ -111,7 +111,7 @@ TEST(DType, BasicConstructor) {
 
     // double
     d = make_dtype<double>();
-    EXPECT_EQ(float64_type_id, d.type_id());
+    EXPECT_EQ(float64_type_id, d.get_type_id());
     EXPECT_EQ(real_kind, d.kind());
     EXPECT_EQ(sizeof(double), d.alignment());
     EXPECT_EQ(sizeof(double), d.element_size());

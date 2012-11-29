@@ -28,7 +28,7 @@ class bytes_dtype : public extended_dtype {
 public:
     bytes_dtype(size_t alignment);
 
-    type_id_t type_id() const {
+    type_id_t get_type_id() const {
         return bytes_type_id;
     }
     dtype_kind_t kind() const {

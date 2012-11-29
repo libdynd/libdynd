@@ -23,7 +23,7 @@ class fixedstring_dtype : public extended_string_dtype {
 public:
     fixedstring_dtype(string_encoding_t encoding, intptr_t stringsize);
 
-    type_id_t type_id() const {
+    type_id_t get_type_id() const {
         return fixedstring_type_id;
     }
     dtype_kind_t kind() const {

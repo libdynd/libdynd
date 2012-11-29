@@ -72,7 +72,7 @@ void dynd::array_dtype::get_shape(int i, intptr_t *out_shape) const
 bool dynd::array_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const
 {
     if (dst_dt.extended() == this) {
-        if (dst_dt.type_id() == array_type_id) {
+        if (dst_dt.get_type_id() == array_type_id) {
             const array_dtype *src_esd = static_cast<const array_dtype*>(src_dt.extended());
             return ::dynd::is_lossless_assignment(m_element_dtype, src_esd->m_element_dtype);
         } else {
@@ -92,7 +92,7 @@ void dynd::array_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const d
                 unary_specialization_kernel_instance& out_kernel) const
 {
     if (this == dst_dt.extended()) {
-        switch (src_dt.type_id()) {
+        switch (src_dt.get_type_id()) {
             case array_type_id: {
                 const array_dtype *src_fs = static_cast<const array_dtype *>(src_dt.extended());
                 get_blockref_array_assignment_kernel(m_element_dtype, src_fs->m_element_dtype,
@@ -114,7 +114,7 @@ bool dynd::array_dtype::operator==(const extended_dtype& rhs) const
 {
     if (this == &rhs) {
         return true;
-    } else if (rhs.type_id() != array_type_id) {
+    } else if (rhs.get_type_id() != array_type_id) {
         return false;
     } else {
         const array_dtype *dt = static_cast<const array_dtype*>(&rhs);

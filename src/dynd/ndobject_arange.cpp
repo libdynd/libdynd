@@ -114,7 +114,7 @@ ndobject dynd::arange(const dtype& scalar_dtype, const void *beginval, const voi
             return DYND_MOVE(result); \
         }
 
-        switch (scalar_dtype.type_id()) {
+        switch (scalar_dtype.get_type_id()) {
             ONE_ARANGE_SPECIALIZATION(int8_t);
             ONE_ARANGE_SPECIALIZATION(int16_t);
             ONE_ARANGE_SPECIALIZATION(int32_t);
@@ -188,7 +188,7 @@ ndobject dynd::linspace(const dtype& dt, const void *startval, const void *stopv
     }
 
     if (dt.extended() == NULL) {
-        switch (dt.type_id()) {
+        switch (dt.get_type_id()) {
             case float32_type_id: {
                 ndobject result = make_strided_ndobject(count, dt);
                 linspace_specialization(*reinterpret_cast<const float *>(startval),

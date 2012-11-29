@@ -23,31 +23,31 @@ TEST(StringDType, Create) {
 
     // Strings with various encodings
     d = make_string_dtype(string_encoding_utf_8);
-    EXPECT_EQ(string_type_id, d.type_id());
+    EXPECT_EQ(string_type_id, d.get_type_id());
     EXPECT_EQ(string_kind, d.kind());
     EXPECT_EQ(sizeof(void *), d.alignment());
     EXPECT_EQ(2*sizeof(void *), d.element_size());
 
     d = make_string_dtype(string_encoding_utf_8);
-    EXPECT_EQ(string_type_id, d.type_id());
+    EXPECT_EQ(string_type_id, d.get_type_id());
     EXPECT_EQ(string_kind, d.kind());
     EXPECT_EQ(sizeof(void *), d.alignment());
     EXPECT_EQ(2*sizeof(void *), d.element_size());
 
     d = make_string_dtype(string_encoding_ascii);
-    EXPECT_EQ(string_type_id, d.type_id());
+    EXPECT_EQ(string_type_id, d.get_type_id());
     EXPECT_EQ(string_kind, d.kind());
     EXPECT_EQ(sizeof(void *), d.alignment());
     EXPECT_EQ(2*sizeof(void *), d.element_size());
 
     d = make_string_dtype(string_encoding_utf_16);
-    EXPECT_EQ(string_type_id, d.type_id());
+    EXPECT_EQ(string_type_id, d.get_type_id());
     EXPECT_EQ(string_kind, d.kind());
     EXPECT_EQ(sizeof(void *), d.alignment());
     EXPECT_EQ(2*sizeof(void *), d.element_size());
 
     d = make_string_dtype(string_encoding_utf_32);
-    EXPECT_EQ(string_type_id, d.type_id());
+    EXPECT_EQ(string_type_id, d.get_type_id());
     EXPECT_EQ(string_kind, d.kind());
     EXPECT_EQ(sizeof(void *), d.alignment());
     EXPECT_EQ(2*sizeof(void *), d.element_size());

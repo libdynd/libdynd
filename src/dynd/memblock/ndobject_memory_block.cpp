@@ -76,7 +76,7 @@ memory_block_ptr dynd::make_ndobject_memory_block(const dtype& dt, int ndim, con
     memory_block_ptr result = make_ndobject_memory_block(metadata_size, element_size, dt.alignment(), &data);
     ndobject_preamble *preamble = reinterpret_cast<ndobject_preamble *>(result.get());
     if (dt.extended() == NULL) {
-        preamble->m_dtype = reinterpret_cast<extended_dtype *>(dt.type_id());
+        preamble->m_dtype = reinterpret_cast<extended_dtype *>(dt.get_type_id());
     } else {
         preamble->m_dtype = dt.extended();
         extended_dtype_incref(preamble->m_dtype);

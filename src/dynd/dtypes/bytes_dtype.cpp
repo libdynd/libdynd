@@ -93,7 +93,7 @@ void bytes_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const dtype& 
                 unary_specialization_kernel_instance& out_kernel) const
 {
     if (this == dst_dt.extended()) {
-        switch (src_dt.type_id()) {
+        switch (src_dt.get_type_id()) {
             case bytes_type_id: {
                 const bytes_dtype *src_fs = static_cast<const bytes_dtype *>(src_dt.extended());
                 get_blockref_bytes_assignment_kernel(m_alignment, errmode, out_kernel);
@@ -128,7 +128,7 @@ bool bytes_dtype::operator==(const extended_dtype& rhs) const
 {
     if (this == &rhs) {
         return true;
-    } else if (rhs.type_id() != bytes_type_id) {
+    } else if (rhs.get_type_id() != bytes_type_id) {
         return false;
     } else {
         const bytes_dtype *dt = static_cast<const bytes_dtype*>(&rhs);
@@ -177,6 +177,6 @@ void bytes_dtype::metadata_destruct(char *metadata) const
 void bytes_dtype::metadata_debug_print(const char *metadata, std::ostream& o, const std::string& indent) const
 {
     const bytes_dtype_metadata *md = reinterpret_cast<const bytes_dtype_metadata *>(metadata);
-    o << indent << "bytes_dtype metadata\n";
+    o << indent << "bytes metadata\n";
     memory_block_debug_print(md->blockref, o, indent + " ");
 }

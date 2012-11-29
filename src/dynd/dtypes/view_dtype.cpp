@@ -33,7 +33,7 @@ void dynd::view_dtype::print_element(std::ostream& o, const char *data, const ch
 {
     // Allow calling print_element in the special case that the view
     // is being used just to align the data
-    if (m_operand_dtype.type_id() == fixedbytes_type_id) {
+    if (m_operand_dtype.get_type_id() == fixedbytes_type_id) {
         switch (m_operand_dtype.element_size()) {
             case 1:
                 m_value_dtype.print_element(o, data, metadata);
@@ -74,7 +74,7 @@ void dynd::view_dtype::print_element(std::ostream& o, const char *data, const ch
 void dynd::view_dtype::print_dtype(std::ostream& o) const
 {
     // Special case printing of alignment to make it more human-readable
-    if (m_value_dtype.alignment() != 1 && m_operand_dtype.type_id() == fixedbytes_type_id &&
+    if (m_value_dtype.alignment() != 1 && m_operand_dtype.get_type_id() == fixedbytes_type_id &&
                     m_operand_dtype.alignment() == 1) {
         o << "unaligned<" << m_value_dtype << ">";
     } else {
@@ -112,7 +112,7 @@ bool dynd::view_dtype::operator==(const extended_dtype& rhs) const
 {
     if (this == &rhs) {
         return true;
-    } else if (rhs.type_id() != view_type_id) {
+    } else if (rhs.get_type_id() != view_type_id) {
         return false;
     } else {
         const view_dtype *dt = static_cast<const view_dtype*>(&rhs);

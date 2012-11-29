@@ -161,7 +161,7 @@ ndobject dynd::make_scalar_ndobject(const dtype& scalar_dtype, const void *data)
         ndo->m_dtype = scalar_dtype.extended();
         extended_dtype_incref(ndo->m_dtype);
     } else {
-        ndo->m_dtype = reinterpret_cast<const extended_dtype *>(scalar_dtype.type_id());
+        ndo->m_dtype = reinterpret_cast<const extended_dtype *>(scalar_dtype.get_type_id());
     }
     ndo->m_data_pointer = data_ptr;
     ndo->m_data_reference = NULL;
@@ -232,7 +232,7 @@ static ndobject make_ndobject_clone_with_new_dtype(const ndobject& n, const dtyp
         preamble->m_dtype = new_dt.extended();
         extended_dtype_incref(preamble->m_dtype);
     } else {
-        preamble->m_dtype = reinterpret_cast<extended_dtype *>(new_dt.type_id());
+        preamble->m_dtype = reinterpret_cast<extended_dtype *>(new_dt.get_type_id());
     }
     return result;
 }
@@ -348,7 +348,7 @@ namespace {
         if (!storage_dt.extended() || (storage_dt.get_memory_management() == pod_memory_management &&
                                 storage_dt.extended()->get_metadata_size() == 0)) {
             return make_fixedbytes_dtype(storage_dt.element_size(), storage_dt.alignment());
-        } else if (storage_dt.type_id() == string_type_id) {
+        } else if (storage_dt.get_type_id() == string_type_id) {
             return make_bytes_dtype(static_cast<const string_dtype *>(storage_dt.extended())->get_data_alignment());
         } else {
             return storage_dt;
@@ -379,7 +379,7 @@ ndobject ndobject::at_array(int nindices, const irange *indices) const
             extended_dtype_incref(result.get_ndo()->m_dtype);
         } else {
             result.set(make_ndobject_memory_block(0));
-            result.get_ndo()->m_dtype = reinterpret_cast<const extended_dtype *>(dt.type_id());
+            result.get_ndo()->m_dtype = reinterpret_cast<const extended_dtype *>(dt.get_type_id());
         }
         intptr_t offset = get_ndo()->m_dtype->apply_linear_index(nindices, indices, get_ndo()->m_data_pointer,
                         get_ndo_meta(), dt, result.get_ndo_meta(), 0, this_dt);
@@ -524,7 +524,7 @@ ndobject ndobject::view_scalars(const dtype& scalar_dtype) const
     int uniform_ndim = array_dtype.get_uniform_ndim();
     // First check if we're dealing with a simple one dimensional block of memory we can reinterpret
     // at will.
-    if (uniform_ndim == 1 && array_dtype.type_id() == strided_array_type_id) {
+    if (uniform_ndim == 1 && array_dtype.get_type_id() == strided_array_type_id) {
         const strided_array_dtype *sad = static_cast<const strided_array_dtype *>(array_dtype.extended());
         const strided_array_dtype_metadata *md = reinterpret_cast<const strided_array_dtype_metadata *>(get_ndo_meta());
         size_t element_size = sad->get_element_dtype().element_size();

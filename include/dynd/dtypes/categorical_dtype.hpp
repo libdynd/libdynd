@@ -37,7 +37,7 @@ public:
 
     ~categorical_dtype();
 
-    type_id_t type_id() const {
+    type_id_t get_type_id() const {
         return categorical_type_id;
     }
     dtype_kind_t kind() const {

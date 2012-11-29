@@ -216,7 +216,7 @@ bool struct_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_
     if (dst_dt.extended() == this) {
         if (src_dt.extended() == this) {
             return true;
-        } else if (src_dt.type_id() == struct_type_id) {
+        } else if (src_dt.get_type_id() == struct_type_id) {
             return *dst_dt.extended() == *src_dt.extended();
         }
     }
@@ -242,7 +242,7 @@ bool struct_dtype::operator==(const extended_dtype& rhs) const
 {
     if (this == &rhs) {
         return true;
-    } else if (rhs.type_id() != struct_type_id) {
+    } else if (rhs.get_type_id() != struct_type_id) {
         return false;
     } else {
         const struct_dtype *dt = static_cast<const struct_dtype*>(&rhs);
@@ -323,7 +323,7 @@ void struct_dtype::metadata_destruct(char *metadata) const
 void struct_dtype::metadata_debug_print(const char *metadata, std::ostream& o, const std::string& indent) const
 {
     const size_t *offsets = reinterpret_cast<const size_t *>(metadata);
-    o << indent << "struct_dtype metadata\n";
+    o << indent << "struct metadata\n";
     o << indent << " field offsets: ";
     for (size_t i = 0, i_end = m_fields.size(); i != i_end; ++i) {
         o << offsets[i];

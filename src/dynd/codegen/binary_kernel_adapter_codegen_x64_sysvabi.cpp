@@ -385,13 +385,13 @@ uint64_t dynd::get_binary_function_adapter_unique_id(const dtype& restype
                                                )
 {
     // Bits 0..2 for the result type
-    uint64_t result = idx_for_type_id(restype.type_id());
+    uint64_t result = idx_for_type_id(restype.get_type_id());
     
     // Bits 3..5 for the arg0 type
-    result += idx_for_type_id(arg0type.type_id()) << 3;
+    result += idx_for_type_id(arg0type.get_type_id()) << 3;
     
     // Bits 6..8 for the arg0 type
-    result += idx_for_type_id(arg1type.type_id()) << 6;
+    result += idx_for_type_id(arg1type.get_type_id()) << 6;
     
     // There is only one calling convention on Windows x64, so it doesn't
     // need to get encoded in the unique id.
@@ -479,9 +479,9 @@ dynd::binary_operation_t dynd::codegen_binary_function_adapter(const memory_bloc
                                                         , calling_convention_t DYND_UNUSED(callconv)
                                                         )
 {
-    cc_register_class ret_idx  = idx_for_type_id(restype.type_id());
-    cc_register_class arg0_idx = idx_for_type_id(arg0type.type_id());
-    cc_register_class arg1_idx = idx_for_type_id(arg1type.type_id());
+    cc_register_class ret_idx  = idx_for_type_id(restype.get_type_id());
+    cc_register_class arg0_idx = idx_for_type_id(arg0type.get_type_id());
+    cc_register_class arg1_idx = idx_for_type_id(arg1type.get_type_id());
     
     if ( (arg0_idx >= ccrc_count)
         || (arg1_idx >= ccrc_count)

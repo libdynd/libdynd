@@ -30,7 +30,7 @@ dynd::byteswap_dtype::byteswap_dtype(const dtype& value_dtype, const dtype& oper
     : m_value_dtype(value_dtype), m_operand_dtype(operand_dtype)
 {
     // Only a bytes dtype be the operand to the byteswap
-    if (operand_dtype.value_dtype().type_id() != fixedbytes_type_id) {
+    if (operand_dtype.value_dtype().get_type_id() != fixedbytes_type_id) {
         std::stringstream ss;
         ss << "byteswap_dtype: The operand to the dtype must have a value dtype of bytes, not " << operand_dtype.value_dtype();
         throw std::runtime_error(ss.str());
@@ -55,7 +55,7 @@ void dynd::byteswap_dtype::print_element(std::ostream& DYND_UNUSED(o), const cha
 void dynd::byteswap_dtype::print_dtype(std::ostream& o) const
 {
     o << "byteswap<" << m_value_dtype;
-    if (m_operand_dtype.type_id() != fixedbytes_type_id) {
+    if (m_operand_dtype.get_type_id() != fixedbytes_type_id) {
         o << ", " << m_operand_dtype;
     }
     o << ">";
@@ -91,7 +91,7 @@ bool dynd::byteswap_dtype::operator==(const extended_dtype& rhs) const
 {
     if (this == &rhs) {
         return true;
-    } else if (rhs.type_id() != byteswap_type_id) {
+    } else if (rhs.get_type_id() != byteswap_type_id) {
         return false;
     } else {
         const byteswap_dtype *dt = static_cast<const byteswap_dtype*>(&rhs);

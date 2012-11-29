@@ -320,7 +320,7 @@ public:
 
     virtual ~extended_dtype();
 
-    virtual type_id_t type_id() const = 0;
+    virtual type_id_t get_type_id() const = 0;
     virtual dtype_kind_t kind() const = 0;
     virtual size_t alignment() const = 0;
     virtual size_t get_element_size() const = 0;
@@ -659,7 +659,7 @@ public:
     dtype();
     /** Constructor from an extended_dtype. This claims ownership of the 'extended' reference by default, be careful! */
     explicit dtype(const extended_dtype *extended, bool incref = false)
-        : m_type_id(extended->type_id()), m_kind(extended->kind()), m_alignment((unsigned char)extended->alignment()),
+        : m_type_id(extended->get_type_id()), m_kind(extended->kind()), m_alignment((unsigned char)extended->alignment()),
             m_element_size(extended->get_element_size()), m_extended(extended) {
         if (incref) {
             extended_dtype_incref(m_extended);
@@ -836,7 +836,7 @@ public:
      * inspired by the approach in NumPy, and the intention is
      * to have the default
      */
-    type_id_t type_id() const {
+    type_id_t get_type_id() const {
         return (type_id_t)m_type_id;
     }
 

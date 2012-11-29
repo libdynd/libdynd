@@ -346,7 +346,7 @@ std::string dynd::detail::ndarray_as_string(const ndarray& lhs, assign_error_mod
         throw std::runtime_error("can only convert ndarrays with 0 dimensions to scalars");
     }
     ndarray tmp = lhs.vals();
-    if (tmp.get_dtype().type_id() == fixedstring_type_id) {
+    if (tmp.get_dtype().get_type_id() == fixedstring_type_id) {
         const extended_string_dtype *fs = static_cast<const extended_string_dtype *>(tmp.get_dtype().extended());
         if (fs->get_encoding() == string_encoding_ascii || fs->get_encoding() == string_encoding_utf_8) {
             const char *data = tmp.get_readonly_originptr();
@@ -358,7 +358,7 @@ std::string dynd::detail::ndarray_as_string(const ndarray& lhs, assign_error_mod
         }
     }
 
-    if (tmp.get_dtype().type_id() == string_type_id) {
+    if (tmp.get_dtype().get_type_id() == string_type_id) {
         const extended_string_dtype *fs = static_cast<const extended_string_dtype *>(tmp.get_dtype().extended());
         // Make sure it's ASCII or UTF8
         if (fs->get_encoding() != string_encoding_ascii && fs->get_encoding() != string_encoding_utf_8) {

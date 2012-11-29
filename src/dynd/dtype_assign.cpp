@@ -195,7 +195,7 @@ void dynd::dtype_assign(const dtype& dst_dt, char *dst, const dtype& src_dt, con
 
     if (dst_dt.extended() == NULL && src_dt.extended() == NULL) {
         // Try to use the simple single-value assignment for built-in types
-        assignment_function_t asn = get_builtin_dtype_assignment_function(dst_dt.type_id(), src_dt.type_id(), errmode);
+        assignment_function_t asn = get_builtin_dtype_assignment_function(dst_dt.get_type_id(), src_dt.get_type_id(), errmode);
         if (asn != NULL) {
             asn(dst, src);
             return;

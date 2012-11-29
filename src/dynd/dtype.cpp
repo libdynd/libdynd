@@ -447,8 +447,8 @@ dtype dynd::dtype::with_replaced_scalar_types(const dtype& scalar_dtype, assign_
 void dtype::get_single_compare_kernel(single_compare_kernel_instance &out_kernel) const {
     if (extended() != NULL) {
         return extended()->get_single_compare_kernel(out_kernel);
-    } else if (type_id() >= 0 && type_id() < builtin_type_id_count) {
-        out_kernel.comparisons = builtin_dtype_comparisons_table[type_id()];
+    } else if (get_type_id() >= 0 && get_type_id() < builtin_type_id_count) {
+        out_kernel.comparisons = builtin_dtype_comparisons_table[get_type_id()];
     } else {
         stringstream ss;
         ss << "Cannot get single compare kernels for dtype " << *this;
@@ -458,7 +458,7 @@ void dtype::get_single_compare_kernel(single_compare_kernel_instance &out_kernel
 
 std::ostream& dynd::operator<<(std::ostream& o, const dtype& rhs)
 {
-    switch (rhs.type_id()) {
+    switch (rhs.get_type_id()) {
         case bool_type_id:
             o << "bool";
             break;
@@ -638,6 +638,6 @@ void dynd::dtype::print_element(std::ostream& o, const char *data, const char *m
     if (extended() != NULL) {
         extended()->print_element(o, data, metadata);
     } else {
-        print_builtin_scalar(type_id(), o, data);
+        print_builtin_scalar(get_type_id(), o, data);
     }
 }

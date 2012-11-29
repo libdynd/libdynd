@@ -253,8 +253,8 @@ void dynd::get_dtype_assignment_kernel(
 
     // Assignment of built-in types
     if (dst_dt.extended() == NULL && src_dt.extended() == NULL) {
-        get_builtin_dtype_assignment_kernel(dst_dt.type_id(),
-                            src_dt.type_id(), errmode, ectx, out_kernel);
+        get_builtin_dtype_assignment_kernel(dst_dt.get_type_id(),
+                            src_dt.get_type_id(), errmode, ectx, out_kernel);
         return;
     }
 

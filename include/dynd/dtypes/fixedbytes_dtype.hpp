@@ -19,7 +19,7 @@ class fixedbytes_dtype : public extended_dtype {
 public:
     fixedbytes_dtype(intptr_t element_size, intptr_t alignment);
 
-    type_id_t type_id() const {
+    type_id_t get_type_id() const {
         return fixedbytes_type_id;
     }
     dtype_kind_t kind() const {

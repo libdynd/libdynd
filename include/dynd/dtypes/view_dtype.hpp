@@ -19,7 +19,7 @@ class view_dtype : public extended_expression_dtype {
 public:
     view_dtype(const dtype& value_dtype, const dtype& operand_dtype);
 
-    type_id_t type_id() const {
+    type_id_t get_type_id() const {
         return view_type_id;
     }
     dtype_kind_t kind() const {

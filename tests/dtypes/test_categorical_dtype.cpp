@@ -26,7 +26,7 @@ TEST(CategoricalDType, Create) {
     dtype d;
 
     d = make_categorical_dtype(a);
-    EXPECT_EQ(categorical_type_id, d.type_id());
+    EXPECT_EQ(categorical_type_id, d.get_type_id());
     EXPECT_EQ(custom_kind, d.kind());
     EXPECT_EQ(4u, d.alignment());
     EXPECT_EQ(4u, d.element_size());

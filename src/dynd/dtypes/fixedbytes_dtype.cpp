@@ -75,7 +75,7 @@ bool dynd::fixedbytes_dtype::is_lossless_assignment(const dtype& dst_dt, const d
     if (dst_dt.extended() == this) {
         if (src_dt.extended() == this) {
             return true;
-        } else if (src_dt.type_id() == fixedbytes_type_id) {
+        } else if (src_dt.get_type_id() == fixedbytes_type_id) {
             const fixedbytes_dtype *src_fs = static_cast<const fixedbytes_dtype*>(src_dt.extended());
             return m_element_size == src_fs->m_element_size;
         } else {
@@ -91,7 +91,7 @@ void dynd::fixedbytes_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, co
                 unary_specialization_kernel_instance& out_kernel) const
 {
     if (this == dst_dt.extended()) {
-        switch (src_dt.type_id()) {
+        switch (src_dt.get_type_id()) {
             case fixedbytes_type_id: {
                 const fixedbytes_dtype *src_fs = static_cast<const fixedbytes_dtype *>(src_dt.extended());
                 if (m_element_size != src_fs->m_element_size) {
@@ -115,7 +115,7 @@ bool dynd::fixedbytes_dtype::operator==(const extended_dtype& rhs) const
 {
     if (this == &rhs) {
         return true;
-    } else if (rhs.type_id() != fixedbytes_type_id) {
+    } else if (rhs.get_type_id() != fixedbytes_type_id) {
         return false;
     } else {
         const fixedbytes_dtype *dt = static_cast<const fixedbytes_dtype*>(&rhs);

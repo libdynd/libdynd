@@ -24,7 +24,7 @@ TEST(StructDType, CreateOneField) {
 
     // Struct with one field
     dt = make_struct_dtype(make_dtype<int32_t>(), "x");
-    EXPECT_EQ(struct_type_id, dt.type_id());
+    EXPECT_EQ(struct_type_id, dt.get_type_id());
     EXPECT_EQ(0u, dt.element_size()); // No size
     EXPECT_EQ(4u, dt.extended()->get_default_element_size(0, NULL));
     EXPECT_EQ(4u, dt.alignment());
@@ -42,7 +42,7 @@ TEST(StructDType, CreateTwoField) {
 
     // Struct with two fields
     dt = make_struct_dtype(make_dtype<int64_t>(), "a", make_dtype<int32_t>(), "b");
-    EXPECT_EQ(struct_type_id, dt.type_id());
+    EXPECT_EQ(struct_type_id, dt.get_type_id());
     EXPECT_EQ(0u, dt.element_size());
     EXPECT_EQ(16u, dt.extended()->get_default_element_size(0, NULL));
     EXPECT_EQ(8u, dt.alignment());
@@ -65,7 +65,7 @@ TEST(StructDType, CreateThreeField) {
     dtype d2 = make_dtype<int32_t>();
     dtype d3 = make_fixedstring_dtype(string_encoding_utf_8, 5);
     dt = make_struct_dtype(d1, "x", d2, "y", d3, "z");
-    EXPECT_EQ(struct_type_id, dt.type_id());
+    EXPECT_EQ(struct_type_id, dt.get_type_id());
     EXPECT_EQ(0u, dt.element_size());
     EXPECT_EQ(24u, dt.extended()->get_default_element_size(0, NULL));
     EXPECT_EQ(8u, dt.alignment());

@@ -199,7 +199,7 @@ bool strided_array_dtype::is_lossless_assignment(const dtype& dst_dt, const dtyp
     if (dst_dt.extended() == this) {
         if (src_dt.extended() == this) {
             return true;
-        } else if (src_dt.type_id() == strided_array_type_id) {
+        } else if (src_dt.get_type_id() == strided_array_type_id) {
             return *dst_dt.extended() == *src_dt.extended();
         }
     }
@@ -223,7 +223,7 @@ bool strided_array_dtype::operator==(const extended_dtype& rhs) const
 {
     if (this == &rhs) {
         return true;
-    } else if (rhs.type_id() != strided_array_type_id) {
+    } else if (rhs.get_type_id() != strided_array_type_id) {
         return false;
     } else {
         const strided_array_dtype *dt = static_cast<const strided_array_dtype*>(&rhs);
@@ -283,7 +283,7 @@ void strided_array_dtype::metadata_destruct(char *metadata) const
 void strided_array_dtype::metadata_debug_print(const char *metadata, std::ostream& o, const std::string& indent) const
 {
     const strided_array_dtype_metadata *md = reinterpret_cast<const strided_array_dtype_metadata *>(metadata);
-    o << indent << "strided_array_dtype metadata\n";
+    o << indent << "strided_array metadata\n";
     o << indent << " stride: " << md->stride << "\n";
     o << indent << " size: " << md->size << "\n";
     if (m_element_dtype.extended()) {

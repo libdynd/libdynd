@@ -134,7 +134,7 @@ dtype dynd::promote_dtypes_arithmetic(const dtype& dt0, const dtype& dt1)
                         return (dt0_val.element_size() >= dt1_val.element_size()) ? dt0_val
                                                                           : dt1_val;
                     case complex_kind:
-                        if (dt0_val.type_id() == float64_type_id && dt1_val.type_id() == complex_float32_type_id) {
+                        if (dt0_val.get_type_id() == float64_type_id && dt1_val.get_type_id() == complex_float32_type_id) {
                             return dtype(complex_float64_type_id);
                         } else {
                             return dt1_val;
@@ -152,7 +152,7 @@ dtype dynd::promote_dtypes_arithmetic(const dtype& dt0, const dtype& dt1)
                     case int_kind:
                     case uint_kind:
                     case real_kind:
-                        if (dt0_val.type_id() == complex_float32_type_id && dt1_val.type_id() == float64_type_id) {
+                        if (dt0_val.get_type_id() == complex_float32_type_id && dt1_val.get_type_id() == float64_type_id) {
                             return dtype(complex_float64_type_id);
                         } else {
                             return dt0_val;
@@ -179,7 +179,7 @@ dtype dynd::promote_dtypes_arithmetic(const dtype& dt0, const dtype& dt1)
 
     // HACK for getting simple string dtype promotions.
     // TODO: Do this properly in a pluggable manner.
-    if (dt0_val.type_id() == string_type_id && dt1_val.type_id() == string_type_id) {
+    if (dt0_val.get_type_id() == string_type_id && dt1_val.get_type_id() == string_type_id) {
         const extended_string_dtype *ext0 = static_cast<const extended_string_dtype *>(
                         dt0_val.extended());
         const extended_string_dtype *ext1 = static_cast<const extended_string_dtype *>(
@@ -192,9 +192,9 @@ dtype dynd::promote_dtypes_arithmetic(const dtype& dt0, const dtype& dt1)
     }
 
     // In general, if one type is void, just return the other type
-    if (dt0_val.type_id() == void_type_id) {
+    if (dt0_val.get_type_id() == void_type_id) {
         return dt1_val;
-    } else if (dt1_val.type_id() == void_type_id) {
+    } else if (dt1_val.get_type_id() == void_type_id) {
         return dt0_val;
     }
 

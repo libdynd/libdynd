@@ -27,7 +27,7 @@ public:
     byteswap_dtype(const dtype& value_dtype);
     byteswap_dtype(const dtype& value_dtype, const dtype& operand_dtype);
 
-    type_id_t type_id() const {
+    type_id_t get_type_id() const {
         return byteswap_type_id;
     }
     dtype_kind_t kind() const {

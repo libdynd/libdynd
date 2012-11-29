@@ -24,7 +24,7 @@ class struct_dtype : public extended_dtype {
 public:
     struct_dtype(const std::vector<dtype>& fields, const std::vector<std::string>& field_names);
 
-    type_id_t type_id() const {
+    type_id_t get_type_id() const {
         return struct_type_id;
     }
     dtype_kind_t kind() const {

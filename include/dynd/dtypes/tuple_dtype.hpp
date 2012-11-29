@@ -28,7 +28,7 @@ public:
     tuple_dtype(const std::vector<dtype>& fields, const std::vector<size_t> offsets,
                         size_t element_size, size_t alignment);
 
-    type_id_t type_id() const {
+    type_id_t get_type_id() const {
         return tuple_type_id;
     }
     dtype_kind_t kind() const {

@@ -45,7 +45,7 @@ struct ndobject_preamble {
         if (is_builtin_dtype()) {
             return get_builtin_type_id();
         } else {
-            return m_dtype->type_id();
+            return m_dtype->get_type_id();
         }
     }
 };

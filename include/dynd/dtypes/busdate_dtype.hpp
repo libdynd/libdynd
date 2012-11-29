@@ -47,7 +47,7 @@ class busdate_dtype : public extended_dtype {
 public:
     busdate_dtype(busdate_roll_t roll, const bool *weekmask, const ndarray& holidays);
 
-    type_id_t type_id() const {
+    type_id_t get_type_id() const {
         return busdate_type_id;
     }
     dtype_kind_t kind() const {

@@ -199,7 +199,7 @@ categorical_dtype::categorical_dtype(const ndobject& categories)
     : extended_dtype()
 {
     const dtype& cdt = categories.get_dtype();
-    if (cdt.type_id() != strided_array_type_id) {
+    if (cdt.get_type_id() != strided_array_type_id) {
         throw runtime_error("categorical_dtype only supports construction from a strided_array of categories");
     }
     m_category_dtype = categories.get_dtype().at(0);
@@ -336,7 +336,7 @@ void categorical_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const d
 
     if (this == dst_dt.extended()) {
         // try to assign from another categorical dtype if it can be mapped
-        if (src_dt.type_id() == categorical_type_id) {
+        if (src_dt.get_type_id() == categorical_type_id) {
             //out_kernel.specializations = assign_from_commensurate_category_specializations;
             // TODO auxdata
             throw std::runtime_error("assignment between different categorical dtypes isn't supported yet");
@@ -354,7 +354,7 @@ void categorical_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const d
         }
     }
     else {
-        if (dst_dt.value_dtype().type_id() != categorical_type_id) {
+        if (dst_dt.value_dtype().get_type_id() != categorical_type_id) {
             out_kernel.specializations = categorical_to_other_assign_specializations;
             make_auxiliary_data<categorical_to_other_assign_auxdata>(out_kernel.auxdata);
             categorical_to_other_assign_auxdata& ad =
@@ -384,7 +384,7 @@ bool categorical_dtype::operator==(const extended_dtype& rhs) const
 {
     if (this == &rhs) return true;
 
-    if (rhs.type_id() != categorical_type_id) return false;
+    if (rhs.get_type_id() != categorical_type_id) return false;
 
     if (static_cast<const categorical_dtype&>(rhs).m_category_index_to_value != m_category_index_to_value) return false;
 

@@ -247,10 +247,10 @@ uint64_t dynd::get_unary_function_adapter_unique_id(const dtype& restype,
                                               )
 {
     // Bits 0..2 for the result type
-    uint64_t result = idx_for_type_id(restype.type_id());
+    uint64_t result = idx_for_type_id(restype.get_type_id());
     
     // Bits 3..5 for the arg0 type
-    result += idx_for_type_id(arg0type.type_id()) << 3;
+    result += idx_for_type_id(arg0type.get_type_id()) << 3;
     
     // There is only one calling convention on Windows x64, so it doesn't
     // need to get encoded in the unique id.
@@ -393,8 +393,8 @@ unary_operation_t* dynd::codegen_unary_function_adapter(const memory_block_ptr& 
                                                   calling_convention_t DYND_UNUSED(callconv)
                                                  )
 {
-    size_t arg0_idx = idx_for_type_id(arg0type.type_id());
-    size_t ret_idx  = idx_for_type_id(restype.type_id());
+    size_t arg0_idx = idx_for_type_id(arg0type.get_type_id());
+    size_t ret_idx  = idx_for_type_id(restype.get_type_id());
 
     if (arg0_idx >= sizeof(arg0_snippets)/sizeof(arg0_snippets[0])
         || ret_idx >= sizeof(ret_snippets)/sizeof(ret_snippets[0]))
