@@ -103,8 +103,10 @@ set(dynd_SRC
     # GFunc
     src/dynd/gfunc/elwise_gfunc.cpp
     src/dynd/gfunc/elwise_reduce_gfunc.cpp
+    src/dynd/gfunc/serialize.cpp
     include/dynd/gfunc/elwise_gfunc.hpp
     include/dynd/gfunc/elwise_reduce_gfunc.hpp
+    include/dynd/gfunc/serialize.hpp
     # Kernels
     src/dynd/kernels/assignment_kernels.cpp
     src/dynd/kernels/array_assignment_kernels.cpp

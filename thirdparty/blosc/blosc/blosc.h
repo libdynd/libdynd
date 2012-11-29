@@ -1,5 +1,5 @@
 /*********************************************************************
-  Blosc - Blocked Suffling and Compression Library
+  Blosc - Blocked Shuffling and Compression Library
 
   Author: Francesc Alted (faltet@pytables.org)
 
@@ -54,69 +54,77 @@ extern "C" {
 
 
 /**
-  Compress a block of data in the `src` buffer and returns the size of
-  compressed block.  The size of `src` buffer is specified by
-  `nbytes`.  There is not a minimum for `src` buffer size (`nbytes`).
-
-  `clevel` is the desired compression level and must be a number
-  between 0 (no compression) and 9 (maximum compression).
-
-  `doshuffle` specifies whether the shuffle compression preconditioner
-  should be applied or not.  0 means not applying it and 1 means
-  applying it.
-
-  `typesize` is the number of bytes for the atomic type in binary
-  `src` buffer.  This is mainly useful for the shuffle preconditioner.
-  Only a typesize > 1 will allow the shuffle to work.
-
-  The `dest` buffer must have at least the size of `destsize`.  Blosc
-  guarantees that if you set `destsize` to, at least,
-  (`nbytes`+BLOSC_MAX_OVERHEAD), the compression will always succeed.
-  The `src` buffer and the `dest` buffer can not overlap.
-
-  If `src` buffer cannot be compressed into `destsize`, the return
-  value is zero and you should discard the contents of the `dest`
-  buffer.
-
-  A negative return value means that an internal error happened.  This
-  should never happen.  If you see this, please report it back
-  together with the buffer data causing this and compression settings.
-
-  Compression is memory safe and guaranteed not to write the `dest`
-  buffer more than what is specified in `destsize`.  However, it is
-  not re-entrant and not thread-safe (despite the fact that it uses
-  threads internally).
+ * \brief Compress a block of data using the BLOSC compression algorithm.
+ *
+ * Compress a block of data in the `src` buffer and returns the size of
+ * compressed block.  The size of `src` buffer is specified by
+ * `nbytes`.  There is not a minimum for `src` buffer size (`nbytes`).
+ *
+ * Compression is memory safe and guaranteed not to write the `dest`
+ * buffer more than what is specified in `destsize`.  However, it is
+ * not re-entrant and not thread-safe (despite the fact that it uses
+ * threads internally).
+ *
+ * \param clevel  The desired compression level and must be a number
+ *                between 0 (no compression) and 9 (maximum compression).
+ *
+ * \param doshuffle  Whether the shuffle compression preconditioner
+ *                   should be applied or not.  0 means not applying it
+ *                   and 1 means applying it.
+ *
+ * \param typesize  The number of bytes for the atomic type in binary
+ *                   `src` buffer. This is mainly useful for the shuffle
+ *                  preconditioner. Only a typesize > 1 will allow the
+ *                  shuffle to work.
+ *
+ * \param nbytes  The number of bytes in the `src` buffer.
+ *
+ * \param src  A buffer containing the data which is to be compressed. It
+ *             must be of size `nbytes`.
+ *
+ * \param dest  A buffer which must have at least the size of `destsize`.
+ *              Blosc guarantees that if you set `destsize` to, at least,
+ *              (`nbytes`+BLOSC_MAX_OVERHEAD), the compression will always
+ *              succeed. The `src` buffer and the `dest` buffer must not overlap.
+ *
+ * \param destsize  The number of bytes in the `dest` buffer.
+ *
+ * \returns  The number of bytes used in the `dest` buffer. If `src` buffer
+ *           cannot be compressed into `destsize`, the return
+ *           value is zero and you should discard the contents of the `dest`
+ *           buffer. A negative return value means that an internal error happened.
+ *           This should never happen.  If you see this, please report it back
+ *           together with the buffer data causing this and compression settings.
  */
-
 int blosc_compress(int clevel, int doshuffle, size_t typesize, size_t nbytes,
                    const void *src, void *dest, size_t destsize);
 
 
 /**
-  Decompress a block of compressed data in `src`, put the result in
-  `dest` and returns the size of the decompressed block. If error
-  occurs, e.g. the compressed data is corrupted or the output buffer
-  is not large enough, then 0 (zero) or a negative value will be
-  returned instead.
-
-  The `src` buffer and the `dest` buffer can not overlap.
-
-  Decompression is memory safe and guaranteed not to write the `dest`
-  buffer more than what is specified in `destsize`.  However, it is
-  not re-entrant and not thread-safe (despite the fact that it uses
-  threads internally).
-*/
-
+ * \brief Decompress a block of data compressed using the BLOSC compression algorithm.
+ *
+ * Decompress a block of compressed data in `src`, put the result in
+ * `dest` and returns the size of the decompressed block. If error
+ * occurs, e.g. the compressed data is corrupted or the output buffer
+ * is not large enough, then 0 (zero) or a negative value will be
+ * returned instead.
+ *
+ * The `src` buffer and the `dest` buffer can not overlap.
+ *
+ * Decompression is memory safe and guaranteed not to write the `dest`
+ * buffer more than what is specified in `destsize`.  However, it is
+ * not re-entrant and not thread-safe (despite the fact that it uses
+ * threads internally).
+ */
 int blosc_decompress(const void *src, void *dest, size_t destsize);
 
 
 /**
-  Get `nitems` (of typesize size) in `src` buffer starting in `start`.
-  The items are returned in `dest` buffer, which has to have enough
-  space for storing all items.  Returns the number of bytes copied to
-  `dest` or a negative value if some error happens.
+ * Get `nitems` (of typesize size) in `src` buffer starting in `start`.
+ * The items are returned in `dest` buffer, which has to have enough
+ * space for storing all items.  Returns the number of bytes copied to
+ * `dest` or a negative value if some error happens.
  */
-
 int blosc_getitem(const void *src, int start, int nitems, void *dest);
 
 
