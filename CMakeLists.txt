@@ -10,6 +10,8 @@ set(CMAKE_VERBOSE_MAKEFILE 1)
 set(BUILD_SHARED_LIBS 1)
 
 # Embedded libraries
+add_subdirectory(thirdparty/blosc)
+include_directories(thirdparty/blosc/blosc)
 add_subdirectory(thirdparty/datetime)
 include_directories(thirdparty/datetime/include)
 
