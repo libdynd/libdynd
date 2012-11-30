@@ -66,7 +66,8 @@ dtype extended_dtype::get_canonical_dtype() const
     return dtype(this, true);
 }
 
-dtype extended_dtype::apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& DYND_UNUSED(root_dt)) const
+dtype extended_dtype::apply_linear_index(int nindices, const irange *DYND_UNUSED(indices),
+                int current_i, const dtype& DYND_UNUSED(root_dt)) const
 {
     // Default to scalar behavior
     if (nindices == 0) {
@@ -94,7 +95,7 @@ int extended_dtype::get_uniform_ndim() const
     return 0;
 }
 
-dtype extended_dtype::get_dtype_at_dimension(char **inout_metadata, int i, int total_ndim) const
+dtype extended_dtype::get_dtype_at_dimension(char **DYND_UNUSED(inout_metadata), int i, int total_ndim) const
 {
     // Default to heterogeneous dimension/scalar behavior
     if (i == 0) {
@@ -104,7 +105,7 @@ dtype extended_dtype::get_dtype_at_dimension(char **inout_metadata, int i, int t
     }
 }
 
-intptr_t extended_dtype::get_dim_size(const char *data, const char *metadata) const
+intptr_t extended_dtype::get_dim_size(const char *DYND_UNUSED(data), const char *DYND_UNUSED(metadata)) const
 {
     // Default to scalar behavior
     stringstream ss;
@@ -149,7 +150,8 @@ size_t extended_dtype::get_metadata_size() const
 }
 
 // TODO: Make this a pure virtual function eventually
-void extended_dtype::metadata_default_construct(char *metadata, int ndim, const intptr_t* shape) const
+void extended_dtype::metadata_default_construct(char *DYND_UNUSED(metadata),
+                int DYND_UNUSED(ndim), const intptr_t* DYND_UNUSED(shape)) const
 {
     stringstream ss;
     ss << "TODO: metadata_default_construct for " << dtype(this, true) << " is not implemented";
@@ -202,7 +204,8 @@ size_t extended_dtype::iterdata_destruct(iterdata_common *DYND_UNUSED(iterdata),
 }
 
 
-void extended_dtype::foreach_leading(char *data, const char *metadata, foreach_fn_t callback, void *callback_data) const
+void extended_dtype::foreach_leading(char *DYND_UNUSED(data), const char *DYND_UNUSED(metadata),
+                foreach_fn_t DYND_UNUSED(callback), void *DYND_UNUSED(callback_data)) const
 {
     // Default to scalar behavior
     stringstream ss;

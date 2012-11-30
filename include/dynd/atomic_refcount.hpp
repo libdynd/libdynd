@@ -90,11 +90,11 @@ namespace dynd {
 
         operator int32_t() const
         {
-            return atomic_exchange_and_add(&m_refcount, 0)
+            return atomic_exchange_and_add((int32_t *)&m_refcount, 0);
         }
     private:
 
-        static int atomic_exchange_and_add( int32_t * pw, int32_t dv )
+        static int atomic_exchange_and_add(int32_t * pw, int32_t dv)
         {
             // int32_t r = *pw;
             // *pw += dv;

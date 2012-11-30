@@ -7,6 +7,7 @@
 #define _DYND__DTYPE_ASSIGN_HPP_
 
 #include <utility>
+#include <iostream>
 
 namespace dynd {
 

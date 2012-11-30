@@ -272,7 +272,7 @@ void struct_dtype::metadata_default_construct(char *metadata, int ndim, const in
 {
     // Validate that the shape is ok
     if (ndim > 0) {
-        if (shape[0] >= 0 && shape[0] != m_fields.size()) {
+        if (shape[0] >= 0 && shape[0] != (intptr_t)m_fields.size()) {
             stringstream ss;
             ss << "Cannot construct dynd object of dtype " << dtype(this, true);
             ss << " with dimension size " << shape[0] << ", the size must be " << m_fields.size();

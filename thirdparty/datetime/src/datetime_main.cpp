@@ -8,13 +8,14 @@
  */
 
 #include <stdexcept>
+#include <string.h>
 
 #include "datetime_main.h"
 #include "datetime_strings.h"
 
 using namespace datetime;
 
-std::ostream& operator<<(std::ostream& o, datetime_unit_t unit)
+std::ostream& datetime::operator<<(std::ostream& o, datetime_unit_t unit)
 {
     switch (unit) {
         case datetime_unit_unspecified:
@@ -66,7 +67,7 @@ std::ostream& operator<<(std::ostream& o, datetime_unit_t unit)
     return o;
 }
 
-std::ostream& operator<<(std::ostream& o, datetime_conversion_rule_t rule)
+std::ostream& datetime::operator<<(std::ostream& o, datetime_conversion_rule_t rule)
 {
     switch (rule) {
         case datetime_conversion_exact:

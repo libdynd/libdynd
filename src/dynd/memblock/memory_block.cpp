@@ -94,7 +94,7 @@ void dynd::memory_block_debug_print(const memory_block_data *memblock, std::ostr
 {
     if (memblock != NULL) {
         o << indent << "------ memory_block at " << (const void *)memblock << "\n";
-        o << indent << " reference count: " << memblock->m_use_count << "\n";
+        o << indent << " reference count: " << (int32_t)memblock->m_use_count << "\n";
         switch ((memory_block_type_t)memblock->m_type) {
             case deprecated_ndarray_node_memory_block_type: {
                 o << indent << " type: ndarray_node\n";

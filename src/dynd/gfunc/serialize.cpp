@@ -31,7 +31,7 @@ ndobject dynd::gfunc::serialize(const ndobject& val)
     throw runtime_error("dynd::gfunc::serialize is not implemented yet");
 }
 
-ndobject dynd::gfunc::deserialize(const ndobject& data)
+ndobject dynd::gfunc::deserialize(const ndobject& /*data*/)
 {
     throw runtime_error("dynd::gfunc::deserialize is not implemented yet");
 }

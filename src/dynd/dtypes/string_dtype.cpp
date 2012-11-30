@@ -60,7 +60,8 @@ void string_dtype::print_dtype(std::ostream& o) const {
 
 }
 
-dtype string_dtype::apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& DYND_UNUSED(root_dt)) const
+dtype string_dtype::apply_linear_index(int nindices, const irange *DYND_UNUSED(indices),
+                int current_i, const dtype& DYND_UNUSED(root_dt)) const
 {
     if (nindices == 0) {
         return dtype(this, true);
@@ -80,8 +81,10 @@ dtype string_dtype::apply_linear_index(int nindices, const irange *indices, int 
     }
 }
 
-intptr_t string_dtype::apply_linear_index(int nindices, const irange *indices, char *data, const char *metadata,
-                const dtype& result_dtype, char *out_metadata, int current_i, const dtype& root_dt) const
+intptr_t string_dtype::apply_linear_index(int DYND_UNUSED(nindices), const irange *DYND_UNUSED(indices),
+                char *DYND_UNUSED(data), const char *metadata,
+                const dtype& DYND_UNUSED(result_dtype), char *out_metadata,
+                int DYND_UNUSED(current_i), const dtype& DYND_UNUSED(root_dt)) const
 {
     const string_dtype_metadata *md = reinterpret_cast<const string_dtype_metadata *>(metadata);
     string_dtype_metadata *out_md = reinterpret_cast<string_dtype_metadata *>(out_metadata);

@@ -117,7 +117,7 @@ TEST(NDObjectIndex, SimpleOneDimensionalRange) {
 
     // selected range
     b = a.at(1 <= irange() < 3);
-    EXPECT_EQ(1, b.get_shape().size());
+    EXPECT_EQ(1u, b.get_shape().size());
     EXPECT_EQ(2, b.get_shape()[0]);
     EXPECT_EQ(2, b.at(0).as<int>());
     EXPECT_EQ(3, b.at(1).as<int>());

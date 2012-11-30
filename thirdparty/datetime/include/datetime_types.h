@@ -8,6 +8,9 @@ typedef __int64 int64_t;
 #define INT32_MIN INT_MIN
 #define INT64_MIN _I64_MIN
 #else
+// Request the limits macros
+#define __STDC_LIMIT_MACROS
+#include <limits.h>
 #include <stdint.h>
 #endif
 

@@ -37,7 +37,7 @@ void dynd::busdate_dtype::print_workweek(std::ostream& o) const
     if (m_workweek[6]) o << "Su";
 }
 
-void dynd::busdate_dtype::print_holidays(std::ostream& o) const
+void dynd::busdate_dtype::print_holidays(std::ostream& /*o*/) const
 {
     throw std::runtime_error("busdate_dtype::print_holidays to be implemented");
 }
@@ -93,13 +93,13 @@ bool dynd::busdate_dtype::is_lossless_assignment(const dtype& dst_dt, const dtyp
     }
 }
 
-void dynd::busdate_dtype::get_single_compare_kernel(single_compare_kernel_instance& out_kernel) const {
+void dynd::busdate_dtype::get_single_compare_kernel(single_compare_kernel_instance& /*out_kernel*/) const {
     throw runtime_error("get_single_compare_kernel for date are not implemented");
 }
 
-void dynd::busdate_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const dtype& src_dt,
-                assign_error_mode errmode,
-                unary_specialization_kernel_instance& out_kernel) const
+void dynd::busdate_dtype::get_dtype_assignment_kernel(const dtype& /*dst_dt*/, const dtype& /*src_dt*/,
+                assign_error_mode /*errmode*/,
+                unary_specialization_kernel_instance& /*out_kernel*/) const
 {
     throw runtime_error("conversions for date are not implemented");
 }

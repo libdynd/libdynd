@@ -138,7 +138,7 @@ TEST(StringDType, AccessFlags) {
 
     // Default construction from a string produces an immutable fixedstring
     a = std::string("testing one two three testing one two three four five testing one two three four five six seven");
-    EXPECT_EQ(read_access_flag | immutable_access_flag, a.get_access_flags());
+    EXPECT_EQ(read_access_flag | immutable_access_flag, (int)a.get_access_flags());
     // Turn it into a fixedstring dtype for this test
     a = a.cast_scalars(make_fixedstring_dtype(string_encoding_utf_8, 95)).vals();
     EXPECT_EQ(make_fixedstring_dtype(string_encoding_utf_8, 95), a.get_dtype());
@@ -146,7 +146,7 @@ TEST(StringDType, AccessFlags) {
     // Converting to a blockref string of the same encoding produces a reference
     // into the fixedstring value
     b = a.cast_scalars(make_string_dtype(string_encoding_utf_8)).vals();
-    EXPECT_EQ(read_access_flag | write_access_flag, b.get_access_flags());
+    EXPECT_EQ(read_access_flag | write_access_flag, (int)b.get_access_flags());
     EXPECT_EQ(make_string_dtype(string_encoding_utf_8), b.get_dtype());
     // The data array for 'a' matches the referenced data for 'b' (TODO: Restore this property)
 //    EXPECT_EQ(a.get_readonly_originptr(), reinterpret_cast<const char * const *>(b.get_readonly_originptr())[0]);
@@ -154,7 +154,7 @@ TEST(StringDType, AccessFlags) {
     // Converting to a blockref string of a different encoding makes a new
     // copy, so gets read write access
     b = a.cast_scalars(make_string_dtype(string_encoding_utf_16)).vals();
-    EXPECT_EQ(read_access_flag | write_access_flag, b.get_access_flags());
+    EXPECT_EQ(read_access_flag | write_access_flag, (int)b.get_access_flags());
     EXPECT_EQ(make_string_dtype(string_encoding_utf_16), b.get_dtype());
 }
 

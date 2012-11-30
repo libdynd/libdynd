@@ -36,7 +36,7 @@ TEST(NDObjectViews, OneDimensionalRawMemory) {
     a.at(irange() < 8).vals() = c_values;
     b = a.view_scalars<uint64_t>();
     EXPECT_EQ(make_strided_array_dtype(make_dtype<uint64_t>()), b.get_dtype());
-    EXPECT_EQ(1, b.get_shape().size());
+    EXPECT_EQ(1u, b.get_shape().size());
     EXPECT_EQ(10, b.get_shape()[0]);
     EXPECT_EQ(a.get_readonly_originptr(), b.get_readonly_originptr());
     EXPECT_EQ(u8_value, b.at(0).as<uint64_t>());
@@ -49,7 +49,7 @@ TEST(NDObjectViews, OneDimensionalRawMemory) {
     b = a.at(1 <= irange() < 73).view_scalars<uint64_t>();
     EXPECT_EQ(make_strided_array_dtype(make_view_dtype(make_dtype<uint64_t>(), make_fixedbytes_dtype(8, 1))),
                     b.get_dtype());
-    EXPECT_EQ(1, b.get_shape().size());
+    EXPECT_EQ(1u, b.get_shape().size());
     EXPECT_EQ(9, b.get_shape()[0]);
     EXPECT_EQ(a.get_readonly_originptr() + 1, b.get_readonly_originptr());
     EXPECT_EQ(u8_value, b.at(0).as<uint64_t>());
@@ -66,7 +66,7 @@ TEST(NDObjectViews, MultiDimensionalRawMemory) {
 
     b = a.view_scalars<int32_t>();
     EXPECT_EQ(make_strided_array_dtype(make_dtype<int32_t>(), 2), b.get_dtype());
-    EXPECT_EQ(2, b.get_shape().size());
+    EXPECT_EQ(2u, b.get_shape().size());
     EXPECT_EQ(2, b.get_shape()[0]);
     EXPECT_EQ(3, b.get_shape()[1]);
     EXPECT_EQ(a.get_readonly_originptr(), b.get_readonly_originptr());
@@ -94,7 +94,7 @@ TEST(NDObjectViews, ExpressionDType) {
     b = a_u2.view_scalars<int16_t>();
     EXPECT_EQ(make_strided_array_dtype(make_view_dtype(make_dtype<int16_t>(), make_convert_dtype<uint16_t, uint32_t>()), 2),
                     b.get_dtype());
-    EXPECT_EQ(2, b.get_shape().size());
+    EXPECT_EQ(2u, b.get_shape().size());
     EXPECT_EQ(2, b.get_shape()[0]);
     EXPECT_EQ(3, b.get_shape()[1]);
     EXPECT_EQ(a.get_readonly_originptr(), b.get_readonly_originptr());

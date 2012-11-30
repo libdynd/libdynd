@@ -11,7 +11,7 @@ using namespace std;
 using namespace dynd;
 
 ndarray dynd::eval::evaluate_elwise_vm(const vm::elwise_program& ep, std::vector<ndarray> inputs,
-                    const eval::eval_context *ectx)
+                    const eval::eval_context *DYND_UNUSED(ectx))
 {
     // Allocate contiguous registers for the VM
     vm::register_allocation reg(ep.get_register_types(), 0x8000, 0x8000*16);

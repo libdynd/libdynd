@@ -28,13 +28,14 @@
 #include <assert.h>
 #include <errno.h>
 
+using namespace std;
 
 static inline bool ptr_in_range(void* ptr, void* lower, void* upper)
 {
     return (ptr >= lower) && (ptr < upper);    
 }
 
-static inline void* ptr_offset(void* base, ptrdiff_t offset_in_bytes)
+static inline void* ptr_offset(void* base, std::ptrdiff_t offset_in_bytes)
 {
     return static_cast<void*>(static_cast<int8_t*>(base) + offset_in_bytes);
 }

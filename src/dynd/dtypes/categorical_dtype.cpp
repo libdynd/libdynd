@@ -55,7 +55,7 @@ namespace {
             return NULL;
         }
 
-        static int supports_referencing_src_memory_blocks(const AuxDataBase *auxdata)
+        static int supports_referencing_src_memory_blocks(const AuxDataBase *DYND_UNUSED(auxdata))
         {
             return false;
         }
@@ -74,7 +74,6 @@ namespace {
                         get_auxiliary_data<categorical_to_other_assign_auxdata>(auxdata);
 
             // TODO handle non POD or throw
-            size_t N = ad.cat->get_category_dtype().get_element_size();
             for (intptr_t i = 0; i < count; ++i) {
                 uint32_t value = *reinterpret_cast<const uint32_t *>(src);
                 const char *src_val = ad.cat->get_category_from_value(value);

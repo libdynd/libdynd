@@ -41,7 +41,8 @@ void bytes_dtype::print_dtype(std::ostream& o) const {
 
 }
 
-dtype bytes_dtype::apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& DYND_UNUSED(root_dt)) const
+dtype bytes_dtype::apply_linear_index(int nindices, const irange *DYND_UNUSED(indices),
+                int current_i, const dtype& DYND_UNUSED(root_dt)) const
 {
     if (nindices == 0) {
         return dtype(this, true);
@@ -50,8 +51,10 @@ dtype bytes_dtype::apply_linear_index(int nindices, const irange *indices, int c
     }
 }
 
-intptr_t bytes_dtype::apply_linear_index(int nindices, const irange *indices, char *data, const char *metadata,
-                const dtype& result_dtype, char *out_metadata, int current_i, const dtype& root_dt) const
+intptr_t bytes_dtype::apply_linear_index(int DYND_UNUSED(nindices), const irange *DYND_UNUSED(indices),
+                char *DYND_UNUSED(data), const char *metadata,
+                const dtype& DYND_UNUSED(result_dtype), char *out_metadata,
+                int DYND_UNUSED(current_i), const dtype& DYND_UNUSED(root_dt)) const
 {
     const bytes_dtype_metadata *md = reinterpret_cast<const bytes_dtype_metadata *>(metadata);
     bytes_dtype_metadata *out_md = reinterpret_cast<bytes_dtype_metadata *>(out_metadata);
@@ -95,7 +98,6 @@ void bytes_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const dtype& 
     if (this == dst_dt.extended()) {
         switch (src_dt.get_type_id()) {
             case bytes_type_id: {
-                const bytes_dtype *src_fs = static_cast<const bytes_dtype *>(src_dt.extended());
                 get_blockref_bytes_assignment_kernel(m_alignment, errmode, out_kernel);
                 break;
             }

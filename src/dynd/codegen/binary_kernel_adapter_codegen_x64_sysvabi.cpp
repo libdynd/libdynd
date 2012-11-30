@@ -16,7 +16,7 @@
 
 namespace // nameless
 {
-    void* ptr_offset(void* ptr, ptrdiff_t offset)
+    void* ptr_offset(void* ptr, std::ptrdiff_t offset)
     {
         return static_cast<void*>(static_cast<char*>(ptr) + offset);
     }

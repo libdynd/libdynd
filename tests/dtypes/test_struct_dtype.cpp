@@ -83,7 +83,6 @@ TEST(StructDType, CreateThreeField) {
 
 TEST(StructDType, ReplaceScalarTypes) {
     dtype dt, dt2;
-    const struct_dtype *tdt;
 
     // Struct with three fields
     dtype d1 = make_dtype<std::complex<double> >();
@@ -100,7 +99,6 @@ TEST(StructDType, ReplaceScalarTypes) {
 
 TEST(StructDType, DTypeAt) {
     dtype dt, dt2;
-    const struct_dtype *tdt;
 
     // Struct with three fields
     dtype d1 = make_dtype<std::complex<double> >();
@@ -117,7 +115,6 @@ TEST(StructDType, DTypeAt) {
 
 TEST(StructDType, CanonicalDType) {
     dtype dt, dt2;
-    const struct_dtype *tdt;
 
     // Struct with three fields
     dtype d1 = make_convert_dtype<std::complex<double>, float>();

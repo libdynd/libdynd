@@ -200,6 +200,9 @@ ndarray_node_ptr dynd::eval::evaluate(ndarray_node *node, const eval::eval_conte
         case arbitrary_node_category:
             throw std::runtime_error("evaluate is not yet implemented for"
                             " nodes with an arbitrary_node_category category");
+        case scalar_node_category:
+            throw std::runtime_error("evaluate is not yet implemented for"
+                            " nodes with an scalar_node_category category");
     }
 
     stringstream ss;

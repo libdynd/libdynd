@@ -28,7 +28,7 @@ void ndobject::swap(ndobject& rhs)
 }
 
 template<class T>
-inline typename enable_if<is_dtype_scalar<T>::value, memory_block_ptr>::type
+inline typename dynd::enable_if<is_dtype_scalar<T>::value, memory_block_ptr>::type
 make_immutable_builtin_scalar_ndobject(const T& value)
 {
     char *data_ptr = NULL;
@@ -528,7 +528,7 @@ ndobject ndobject::view_scalars(const dtype& scalar_dtype) const
         const strided_array_dtype *sad = static_cast<const strided_array_dtype *>(array_dtype.extended());
         const strided_array_dtype_metadata *md = reinterpret_cast<const strided_array_dtype_metadata *>(get_ndo_meta());
         size_t element_size = sad->get_element_dtype().get_element_size();
-        if (element_size != 0 && element_size == md->stride &&
+        if (element_size != 0 && (intptr_t)element_size == md->stride &&
                     sad->get_element_dtype().get_kind() != expression_kind &&
                     sad->get_element_dtype().get_memory_management() == pod_memory_management) {
             intptr_t nbytes = md->size * element_size;
@@ -572,7 +572,7 @@ ndobject ndobject::view_scalars(const dtype& scalar_dtype) const
     return make_ndobject_clone_with_new_dtype(*this, viewed_dtype);
 }
 
-std::string dynd::detail::ndobject_as_string(const ndobject& lhs, assign_error_mode errmode)
+std::string dynd::detail::ndobject_as_string(const ndobject& lhs, assign_error_mode DYND_UNUSED(errmode))
 {
     if (!lhs.is_scalar()) {
         throw std::runtime_error("can only convert ndobjects with 0 dimensions to scalars");

@@ -30,7 +30,7 @@ dynd::vm::register_allocation::register_allocation(const std::vector<dtype>& reg
     size_t memsize = bytes_per_element * element_count + 16 * regtypes.size();
     m_allocated_memory = (char *)malloc(memsize);
     if (m_allocated_memory == NULL) {
-        throw bad_alloc("out of memory allocating registers for the dynd VM");
+        throw bad_alloc();
     }
     // Create pointers to the individual register data
     size_t offset = 0;

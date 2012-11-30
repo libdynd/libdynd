@@ -18,6 +18,7 @@
 #include "datetime_strings.h"
 #include "datetime_localtime.h"
 
+using namespace std;
 using namespace datetime;
 
 /*

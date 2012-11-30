@@ -27,7 +27,7 @@ namespace {
             const blockref_bytes_assign_kernel_auxdata& ad)
     {
         if (ad.dst_memblock.get() != NULL) {
-            char *dst_begin = NULL, *dst_current, *dst_end = NULL;
+            char *dst_begin = NULL, *dst_end = NULL;
             const char *src_begin = reinterpret_cast<const char * const *>(src)[0];
             const char *src_end = reinterpret_cast<const char * const *>(src)[1];
 
@@ -146,7 +146,7 @@ namespace {
             const fixedbytes_to_blockref_bytes_assign_kernel_auxdata& ad)
     {
         if (ad.dst_memblock.get() != NULL) {
-            char *dst_begin = NULL, *dst_current, *dst_end = NULL;
+            char *dst_begin = NULL, *dst_end = NULL;
             const char *src_begin = src;
             const char *src_end = src + ad.src_element_size;
 

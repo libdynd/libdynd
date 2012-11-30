@@ -48,7 +48,7 @@ public:
             size_t iterdata_size = m_array_dtype.extended()->get_iterdata_size(m_iter_ndim);
             m_iterdata = reinterpret_cast<iterdata_common *>(malloc(iterdata_size));
             if (!m_iterdata) {
-                throw std::bad_alloc("memory allocation error creating dynd ndobject iterator");
+                throw std::bad_alloc();
             }
             m_metadata = op0.get_ndo_meta();
             m_array_dtype.iterdata_construct(m_iterdata,
@@ -147,7 +147,7 @@ public:
             size_t iterdata_size = m_array_dtype[0].get_iterdata_size(m_iter_ndim[0]);
             m_iterdata[0] = reinterpret_cast<iterdata_common *>(malloc(iterdata_size));
             if (!m_iterdata[0]) {
-                throw std::bad_alloc("memory allocation error creating dynd ndobject iterator");
+                throw std::bad_alloc();
             }
             m_metadata[0] = op0.get_ndo_meta();
             m_array_dtype[0].iterdata_construct(m_iterdata[0],
@@ -157,7 +157,7 @@ public:
             iterdata_size = m_array_dtype[1].get_broadcasted_iterdata_size(m_iter_ndim[1]);
             m_iterdata[1] = reinterpret_cast<iterdata_common *>(malloc(iterdata_size));
             if (!m_iterdata[1]) {
-                throw std::bad_alloc("memory allocation error creating dynd ndobject iterator");
+                throw std::bad_alloc();
             }
             m_metadata[1] = op1.get_ndo_meta();
             m_array_dtype[1].broadcasted_iterdata_construct(m_iterdata[1],

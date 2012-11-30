@@ -251,7 +251,7 @@ template<> struct is_type_bool<bool> {enum {value = true};};
  * NOTE: The alignment must be a power of two.
  */
 inline size_t inc_to_alignment(size_t offset, size_t alignment) {
-    return (offset + alignment - 1) & (size_t)(-(ptrdiff_t)alignment);
+    return (offset + alignment - 1) & (std::size_t)(-(std::ptrdiff_t)alignment);
 }
 
 /**
@@ -259,7 +259,8 @@ inline size_t inc_to_alignment(size_t offset, size_t alignment) {
  * NOTE: The alignment must be a power of two.
  */
 inline char *inc_to_alignment(char *ptr, size_t alignment) {
-    return reinterpret_cast<char *>((reinterpret_cast<size_t>(ptr) + alignment - 1) & (size_t)(-(ptrdiff_t)alignment));
+    return reinterpret_cast<char *>((reinterpret_cast<std::size_t>(ptr) + alignment - 1) &
+                                    (std::size_t)(-(std::ptrdiff_t)alignment));
 }
 
 /**
@@ -267,7 +268,8 @@ inline char *inc_to_alignment(char *ptr, size_t alignment) {
  * NOTE: The alignment must be a power of two.
  */
 inline void *inc_to_alignment(void *ptr, size_t alignment) {
-    return reinterpret_cast<char *>((reinterpret_cast<size_t>(ptr) + alignment - 1) & (size_t)(-(ptrdiff_t)alignment));
+    return reinterpret_cast<char *>((reinterpret_cast<std::size_t>(ptr) + alignment - 1) &
+                                    (size_t)(-(std::ptrdiff_t)alignment));
 }
 
 /** Prints a single scalar of a builtin dtype to the stream */
