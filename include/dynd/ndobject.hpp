@@ -121,7 +121,7 @@ public:
      */
     ndobject(const dtype& dt, intptr_t dim0, intptr_t dim1, intptr_t dim2);
 
-    // TODO: Copy the initializer list and C array constructor mechanisms from ndarray
+    // TODO: Copy the initializer list mechanisms from ndarray
 
     /** Swap operation (should be "noexcept" in C++11) */
     void swap(ndobject& rhs);

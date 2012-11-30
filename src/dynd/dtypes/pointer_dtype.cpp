@@ -4,6 +4,7 @@
 //
 
 #include <dynd/dtypes/pointer_dtype.hpp>
+#include <dynd/memblock/pod_memory_block.hpp>
 #include <dynd/kernels/single_compare_kernel_instance.hpp>
 #include <dynd/kernels/string_assignment_kernels.hpp>
 
@@ -13,10 +14,10 @@ using namespace std;
 using namespace dynd;
 
 // Static instance of a void pointer to use as the storage of pointer dtypes
-dtype dynd::pointer_dtype::m_void_pointer_dtype(new void_pointer_dtype());
+dtype pointer_dtype::m_void_pointer_dtype(new void_pointer_dtype());
 
 
-dynd::pointer_dtype::pointer_dtype(const dtype& target_dtype)
+pointer_dtype::pointer_dtype(const dtype& target_dtype)
     : m_target_dtype(target_dtype)
 {
     // I'm not 100% sure how blockref pointer dtypes should interact with
@@ -30,35 +31,111 @@ dynd::pointer_dtype::pointer_dtype(const dtype& target_dtype)
     }
 }
 
-void dynd::pointer_dtype::print_element(std::ostream& o, const char *data, const char *metadata) const
+void pointer_dtype::print_element(std::ostream& o, const char *data, const char *metadata) const
 {
-    const char *target_data = *reinterpret_cast<const char * const *>(data);
+    const pointer_dtype_metadata *md = reinterpret_cast<const pointer_dtype_metadata *>(metadata);
+    const char *target_data = *reinterpret_cast<const char * const *>(data) + md->offset;
     m_target_dtype.print_element(o, target_data, metadata);
 }
 
-void dynd::pointer_dtype::print_dtype(std::ostream& o) const {
-
+void pointer_dtype::print_dtype(std::ostream& o) const
+{
     o << "pointer<" << m_target_dtype << ">";
-
 }
 
-dtype dynd::pointer_dtype::apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& root_dt) const
+bool pointer_dtype::is_uniform_dim() const
+{
+    return m_target_dtype.is_uniform_dim();
+}
+
+bool pointer_dtype::is_scalar() const
+{
+    return m_target_dtype.is_scalar();
+}
+
+bool pointer_dtype::is_expression() const
+{
+    // Even though the pointer is an instance of an extended_expression_dtype,
+    // we'll only call it an expression if the target is.
+    return m_target_dtype.is_expression();
+}
+
+dtype pointer_dtype::with_transformed_scalar_types(dtype_transform_fn_t transform_fn, const void *extra) const
+{
+    dtype dt = m_target_dtype.with_transformed_scalar_types(transform_fn, extra);
+    if (dt == m_target_dtype) {
+        return dtype(this, true);
+    } else {
+        return dtype(new pointer_dtype(dt));
+    }
+}
+
+dtype pointer_dtype::get_canonical_dtype() const
+{
+    // The canonical version doesn't include the pointer
+    return m_target_dtype;
+}
+
+dtype pointer_dtype::apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& root_dt) const
 {
     if (nindices == 0) {
         return dtype(this, true);
     } else {
-        return m_target_dtype.apply_linear_index(nindices, indices, current_i, root_dt);
+        dtype dt = m_target_dtype.apply_linear_index(nindices, indices, current_i, root_dt);
+        if (dt == m_target_dtype) {
+            return dtype(this, true);
+        } else {
+            return dtype(new pointer_dtype(dt));
+        }
     }
 }
 
-void dynd::pointer_dtype::get_shape(int i, intptr_t *out_shape) const
+intptr_t pointer_dtype::apply_linear_index(int nindices, const irange *indices, char *data, const char *metadata,
+                const dtype& result_dtype, char *out_metadata, int current_i, const dtype& root_dt) const
+{
+    const pointer_dtype_metadata *md = reinterpret_cast<const pointer_dtype_metadata *>(metadata);
+    pointer_dtype_metadata *out_md = reinterpret_cast<pointer_dtype_metadata *>(out_metadata);
+    // If there are no more indices, copy the rest verbatim
+    out_md->blockref = md->blockref;
+    memory_block_incref(out_md->blockref);
+    out_md->offset = md->offset;
+    if (m_target_dtype.extended()) {
+        // The indexing may cause a change to the metadata offset
+        out_md->offset += m_target_dtype.extended()->apply_linear_index(0, NULL, data, metadata + sizeof(pointer_dtype_metadata),
+                        m_target_dtype, out_metadata + sizeof(pointer_dtype_metadata), current_i, root_dt);
+    }
+    return 0;
+}
+
+int pointer_dtype::get_uniform_ndim() const
+{
+    return m_target_dtype.get_uniform_ndim();
+}
+
+dtype pointer_dtype::get_dtype_at_dimension(char **inout_metadata, int i, int total_ndim) const
+{
+    if (i == 0) {
+        return dtype(this, true);
+    } else {
+        *inout_metadata += sizeof(pointer_dtype_metadata);
+        return m_target_dtype.get_dtype_at_dimension(inout_metadata, i, total_ndim);
+    }
+}
+
+intptr_t pointer_dtype::get_dim_size(const char *data, const char *metadata) const
+{
+    const pointer_dtype_metadata *md = reinterpret_cast<const pointer_dtype_metadata *>(metadata);
+    return m_target_dtype.get_dim_size(data + md->offset, metadata + sizeof(pointer_dtype_metadata));
+}
+
+void pointer_dtype::get_shape(int i, intptr_t *out_shape) const
 {
     if (m_target_dtype.extended()) {
         m_target_dtype.extended()->get_shape(i, out_shape);
     }
 }
 
-bool dynd::pointer_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const
+bool pointer_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const
 {
     if (dst_dt.extended() == this) {
         return ::is_lossless_assignment(m_target_dtype, src_dt);
@@ -67,7 +144,7 @@ bool dynd::pointer_dtype::is_lossless_assignment(const dtype& dst_dt, const dtyp
     }
 }
 
-void dynd::pointer_dtype::get_single_compare_kernel(single_compare_kernel_instance& DYND_UNUSED(out_kernel)) const {
+void pointer_dtype::get_single_compare_kernel(single_compare_kernel_instance& DYND_UNUSED(out_kernel)) const {
     throw std::runtime_error("pointer_dtype::get_single_compare_kernel not supported yet");
 }
 
@@ -118,7 +195,7 @@ namespace {
     };
 } // anonymous namespace
 
-bool dynd::pointer_dtype::operator==(const extended_dtype& rhs) const
+bool pointer_dtype::operator==(const extended_dtype& rhs) const
 {
     if (this == &rhs) {
         return true;
@@ -130,18 +207,59 @@ bool dynd::pointer_dtype::operator==(const extended_dtype& rhs) const
     }
 }
 
-void dynd::pointer_dtype::get_operand_to_value_kernel(const eval::eval_context * /*ectx*/,
+void pointer_dtype::get_operand_to_value_kernel(const eval::eval_context * /*ectx*/,
                         unary_specialization_kernel_instance& /*out_borrowed_kernel*/) const
 {
     throw runtime_error("TODO: implement pointer_dtype::get_operand_to_value_kernel");
 }
-void dynd::pointer_dtype::get_value_to_operand_kernel(const eval::eval_context * /*ectx*/,
+void pointer_dtype::get_value_to_operand_kernel(const eval::eval_context * /*ectx*/,
                         unary_specialization_kernel_instance& /*out_borrowed_kernel*/) const
 {
     throw runtime_error("TODO: implement pointer_dtype::get_value_to_operand_kernel");
 }
 
-dtype dynd::pointer_dtype::with_replaced_storage_dtype(const dtype& /*replacement_dtype*/) const
+dtype pointer_dtype::with_replaced_storage_dtype(const dtype& /*replacement_dtype*/) const
 {
     throw runtime_error("TODO: implement pointer_dtype::with_replaced_storage_dtype");
+}
+
+size_t pointer_dtype::get_metadata_size() const
+{
+    return sizeof(pointer_dtype_metadata) +
+                m_target_dtype.extended() ? m_target_dtype.extended()->get_metadata_size() : 0;
+}
+
+void pointer_dtype::metadata_default_construct(char *metadata, int ndim, const intptr_t* shape) const
+{
+    // Simply allocate a POD memory block
+    // TODO: Will need a different kind of memory block if the data isn't POD.
+    pointer_dtype_metadata *md = reinterpret_cast<pointer_dtype_metadata *>(metadata);
+    md->blockref = make_pod_memory_block().release();
+}
+
+void pointer_dtype::metadata_copy_construct(char *dst_metadata, const char *src_metadata, memory_block_data *embedded_reference) const
+{
+    // Copy the blockref, switching it to the embedded_reference if necessary
+    const pointer_dtype_metadata *src_md = reinterpret_cast<const pointer_dtype_metadata *>(src_metadata);
+    pointer_dtype_metadata *dst_md = reinterpret_cast<pointer_dtype_metadata *>(dst_metadata);
+    dst_md->blockref = src_md->blockref ? src_md->blockref : embedded_reference;
+    memory_block_incref(dst_md->blockref);
+}
+
+void pointer_dtype::metadata_destruct(char *metadata) const
+{
+    pointer_dtype_metadata *md = reinterpret_cast<pointer_dtype_metadata *>(metadata);
+    if (md->blockref) {
+        memory_block_decref(md->blockref);
+    }
+}
+
+void pointer_dtype::metadata_debug_print(const char *metadata, std::ostream& o, const std::string& indent) const
+{
+    const pointer_dtype_metadata *md = reinterpret_cast<const pointer_dtype_metadata *>(metadata);
+    o << indent << "pointer metadata\n";
+    memory_block_debug_print(md->blockref, o, indent + " ");
+    if (m_target_dtype.extended()) {
+        m_target_dtype.extended()->metadata_debug_print(metadata + sizeof(pointer_dtype_metadata), o, indent + " ");
+    }
 }

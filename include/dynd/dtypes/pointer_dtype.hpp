@@ -21,6 +21,15 @@
 
 namespace dynd {
 
+struct pointer_dtype_metadata {
+    /**
+     * A reference to the memory block which contains the data.
+     */
+    memory_block_data *blockref;
+    /* Each pointed-to destination is offset by this amount */
+    intptr_t offset;
+};
+
 class pointer_dtype : public extended_expression_dtype {
     dtype m_target_dtype;
     static dtype m_void_pointer_dtype;
@@ -63,8 +72,20 @@ public:
         return blockref_memory_management;
     }
 
-    dtype apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& root_dt) const;
+    bool is_uniform_dim() const;
+    bool is_scalar() const;
+    bool is_expression() const;
+    dtype with_transformed_scalar_types(dtype_transform_fn_t transform_fn, const void *extra) const;
+    dtype get_canonical_dtype() const;
 
+    dtype apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& root_dt) const;
+    intptr_t apply_linear_index(int nindices, const irange *indices, char *data, const char *metadata,
+                    const dtype& result_dtype, char *out_metadata, int current_i, const dtype& root_dt) const;
+
+    int get_uniform_ndim() const;
+    dtype get_dtype_at_dimension(char **inout_metadata, int i, int total_ndim = 0) const;
+
+    intptr_t get_dim_size(const char *data, const char *metadata) const;
     void get_shape(int i, intptr_t *out_shape) const;
 
     bool is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const;
@@ -79,6 +100,12 @@ public:
     void get_value_to_operand_kernel(const eval::eval_context *ectx,
                             unary_specialization_kernel_instance& out_borrowed_kernel) const;
     dtype with_replaced_storage_dtype(const dtype& replacement_dtype) const;
+
+    size_t get_metadata_size() const;
+    void metadata_default_construct(char *metadata, int ndim, const intptr_t* shape) const;
+    void metadata_copy_construct(char *dst_metadata, const char *src_metadata, memory_block_data *embedded_reference) const;
+    void metadata_destruct(char *metadata) const;
+    void metadata_debug_print(const char *metadata, std::ostream& o, const std::string& indent) const;
 };
 
 inline dtype make_pointer_dtype(const dtype& target_dtype) {
