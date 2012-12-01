@@ -88,6 +88,12 @@ intptr_t extended_dtype::apply_linear_index(int nindices, const irange *DYND_UNU
     }
 }
 
+dtype extended_dtype::at(intptr_t DYND_UNUSED(i0), const char **DYND_UNUSED(inout_metadata),
+                const char **DYND_UNUSED(inout_data)) const
+{
+    // Default to scalar behavior
+    throw too_many_indices(1, 0);
+}
 
 int extended_dtype::get_uniform_ndim() const
 {
@@ -130,6 +136,13 @@ void extended_dtype::get_strides(int DYND_UNUSED(i), intptr_t *DYND_UNUSED(out_s
     // Default to scalar behavior
 }
 
+intptr_t extended_dtype::get_representative_stride(const char *DYND_UNUSED(metadata)) const
+{
+    // Default to scalar behavior
+    stringstream ss;
+    ss << "Cannot get a representative stride for scalar dtype " << dtype(this, true);
+    throw std::runtime_error(ss.str());
+}
 
 size_t extended_dtype::get_default_element_size(int DYND_UNUSED(ndim), const intptr_t *DYND_UNUSED(shape)) const
 {
@@ -213,6 +226,11 @@ void extended_dtype::foreach_leading(char *DYND_UNUSED(data), const char *DYND_U
     throw std::runtime_error(ss.str());
 }
 
+void extended_dtype::reorder_default_constructed_strides(char *DYND_UNUSED(dst_metadata),
+                const dtype& DYND_UNUSED(src_dtype), const char *DYND_UNUSED(src_metadata)) const
+{
+    // Default to scalar behavior, which is to do no modifications.
+}
 
 
 void extended_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const dtype& src_dt,

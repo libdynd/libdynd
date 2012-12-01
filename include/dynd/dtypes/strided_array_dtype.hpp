@@ -66,6 +66,7 @@ public:
     dtype apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& root_dt) const;
     intptr_t apply_linear_index(int nindices, const irange *indices, char *data, const char *metadata,
                     const dtype& result_dtype, char *out_metadata, int current_i, const dtype& root_dt) const;
+    dtype at(intptr_t i0, const char **inout_metadata, const char **inout_data) const;
 
     int get_uniform_ndim() const;
     dtype get_dtype_at_dimension(char **inout_metadata, int i, int total_ndim = 0) const;
@@ -74,6 +75,7 @@ public:
     void get_shape(int i, intptr_t *out_shape) const;
     void get_shape(int i, intptr_t *out_shape, const char *data, const char *metadata) const;
     void get_strides(int i, intptr_t *out_strides, const char *data, const char *metadata) const;
+    intptr_t get_representative_stride(const char *metadata) const;
 
     bool is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const;
 
@@ -96,6 +98,8 @@ public:
     size_t iterdata_destruct(iterdata_common *iterdata, int ndim) const;
 
     void foreach_leading(char *data, const char *metadata, foreach_fn_t callback, void *callback_data) const;
+    
+    void reorder_default_constructed_strides(char *dst_metadata, const dtype& src_dtype, const char *src_metadata) const;
 };
 
 inline dtype make_strided_array_dtype(const dtype& element_dtype) {

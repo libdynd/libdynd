@@ -648,24 +648,37 @@ std::ostream& dynd::operator<<(std::ostream& o, const ndobject& rhs)
 
 ndobject dynd::empty_like(const ndobject& rhs, const dtype& uniform_dtype)
 {
-    // FIXME: This implementation only works for linearly strided arrays
     if (rhs.is_scalar()) {
         return ndobject(uniform_dtype);
     } else {
-        int ndim = rhs.get_ndo()->m_dtype->get_uniform_ndim();
-        dimvector shape(ndim), strides(ndim);
+        dtype dt = rhs.get_ndo()->m_dtype->get_canonical_dtype();
+        int ndim = dt.extended()->get_uniform_ndim();
+        dt = make_strided_array_dtype(uniform_dtype, ndim);
+        dimvector shape(ndim);
         rhs.get_shape(shape.get());
-        rhs.get_strides(strides.get());
-        shortvector<int> axis_perm(ndim);
-        strides_to_axis_perm(ndim, strides.get(), axis_perm.get());
-        return make_strided_ndobject(uniform_dtype, ndim, shape.get(), read_access_flag|write_access_flag, axis_perm.get());
+        ndobject result(make_ndobject_memory_block(dt, ndim, shape.get()));
+        // Reorder strides of output strided dimensions in a KEEPORDER fashion
+        dt.extended()->reorder_default_constructed_strides(result.get_ndo_meta(),
+                        rhs.get_dtype(), rhs.get_ndo_meta());
+        return result;
     }
 }
 
 ndobject dynd::empty_like(const ndobject& rhs)
 {
-    // FIXME: This implementation only works for linearly strided arrays
-    return empty_like(rhs, rhs.get_dtype().get_dtype_at_dimension(NULL, rhs.get_dtype().get_uniform_ndim()));
+    if (rhs.is_scalar()) {
+        return ndobject(rhs.get_dtype());
+    } else {
+        dtype dt = rhs.get_ndo()->m_dtype->get_canonical_dtype();
+        int ndim = dt.extended()->get_uniform_ndim();
+        dimvector shape(ndim);
+        rhs.get_shape(shape.get());
+        ndobject result(make_ndobject_memory_block(dt, ndim, shape.get()));
+        // Reorder strides of output strided dimensions in a KEEPORDER fashion
+        dt.extended()->reorder_default_constructed_strides(result.get_ndo_meta(),
+                        rhs.get_dtype(), rhs.get_ndo_meta());
+        return result;
+    }
 }
 
 ndobject_vals::operator ndobject() const
@@ -681,7 +694,12 @@ ndobject_vals::operator ndobject() const
         dimvector shape(ndim);
         m_arr.get_shape(shape.get());
         ndobject result(make_ndobject_memory_block(dt, ndim, shape.get()));
-        // TODO: Reorder strides of strided dimensions in a KEEPORDER fashion
+        if (dt.extended()) {
+            // Reorder strides of output strided dimensions in a KEEPORDER fashion
+            dt.extended()->reorder_default_constructed_strides(result.get_ndo_meta(),
+                            m_arr.get_dtype(), m_arr.get_ndo_meta());
+                            
+        }
         result.val_assign(m_arr);
         return result;
     }

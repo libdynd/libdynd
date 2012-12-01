@@ -5,7 +5,7 @@
 
 #include <iostream>
 
-#include <dynd/ndarray.hpp>
+#include <dynd/ndobject.hpp>
 #include <dynd/dtypes/convert_dtype.hpp>
 #include <dynd/dtypes/fixedstring_dtype.hpp>
 #include <dynd/dtypes/string_dtype.hpp>
@@ -32,29 +32,20 @@ S double_value(T value) {
 int main()
 {
     try {
+        intptr_t shape[] = {2,3,4};
+        int axisperm[] = {0,2,1};
 
-    float v0[4] = {3.5, 1.0, 0, 1000};
-    ndarray a = v0, b;
+        ndobject a = make_strided_ndobject(make_dtype<int>(), 3, shape, read_access_flag|write_access_flag, axisperm);
 
-	a.debug_print(cout);
-    cout << a << endl;
+        a.debug_print(cout);
 
-    //b = a.as_dtype(make_dtype<int>());
-    // This triggers the conversion from float to int,
-    // but the default assign policy is 'fractional'
+        ndobject b = empty_like(a);
 
-    // Allow truncation of fractional part
-    //b = a.as_dtype(make_dtype<int>(), assign_error_overflow);
-    b = a.as_dtype(make_dtype<int>(), assign_error_overflow);
-	b.debug_print(cout);
-    cout << b << endl;
-    b = b.vals();
-	b.debug_print(cout);
-    cout << b << endl;
-    EXPECT_EQ(3, b(0).as<int>());
-    EXPECT_EQ(1, b(1).as<int>());
-    EXPECT_EQ(0, b(2).as<int>());
-    EXPECT_EQ(1000, b(3).as<int>());
+        b.debug_print(cout);
+
+        ndobject c = empty_like(a, make_dtype<double>());
+
+        c.debug_print(cout);
 
     } catch(int) { //std::exception& e) {
         //cout << "Error: " << e.what() << "\n";

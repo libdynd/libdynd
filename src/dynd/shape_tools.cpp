@@ -333,20 +333,28 @@ void dynd::apply_single_linear_index(const irange& irnge, intptr_t dimension_siz
                 out_index_stride = 1;
                 out_dimension_size = 1;
             } else {
-                int ndim = error_dt->extended()->get_uniform_ndim();
-                dimvector shape(ndim);
-                error_dt->extended()->get_shape(0, shape.get());
-                throw index_out_of_bounds(idx, error_i, ndim, shape.get());
+                if (error_dt) {
+                    int ndim = error_dt->extended()->get_uniform_ndim();
+                    dimvector shape(ndim);
+                    error_dt->extended()->get_shape(0, shape.get());
+                    throw index_out_of_bounds(idx, error_i, ndim, shape.get());
+                } else {
+                    throw index_out_of_bounds(idx, dimension_size);
+                }
             }
         } else if (idx >= -dimension_size) {
             out_start_index = idx + dimension_size;
             out_index_stride = 1;
             out_dimension_size = 1;
         } else {
-            int ndim = error_dt->extended()->get_uniform_ndim();
-            dimvector shape(ndim);
-            error_dt->extended()->get_shape(0, shape.get());
-            throw index_out_of_bounds(idx, error_i, ndim, shape.get());
+            if (error_dt) {
+                int ndim = error_dt->extended()->get_uniform_ndim();
+                dimvector shape(ndim);
+                error_dt->extended()->get_shape(0, shape.get());
+                throw index_out_of_bounds(idx, error_i, ndim, shape.get());
+            } else {
+                throw index_out_of_bounds(idx, dimension_size);
+            }
         }
     } else if (step > 0) {
         // A range with a positive step
@@ -355,10 +363,14 @@ void dynd::apply_single_linear_index(const irange& irnge, intptr_t dimension_siz
             if (start < dimension_size) {
                 // Starts with a positive index
             } else {
-                int ndim = error_dt->extended()->get_uniform_ndim();
-                dimvector shape(ndim);
-                error_dt->extended()->get_shape(0, shape.get());
-                throw irange_out_of_bounds(irnge, error_i, ndim, shape.get());
+                if (error_dt) {
+                    int ndim = error_dt->extended()->get_uniform_ndim();
+                    dimvector shape(ndim);
+                    error_dt->extended()->get_shape(0, shape.get());
+                    throw irange_out_of_bounds(irnge, error_i, ndim, shape.get());
+                } else {
+                    throw irange_out_of_bounds(irnge, dimension_size);
+                }
             }
         } else if (start >= -dimension_size) {
             // Starts with Python style negative index
@@ -367,10 +379,14 @@ void dynd::apply_single_linear_index(const irange& irnge, intptr_t dimension_siz
             // Signal for "from the beginning"
             start = 0;
         } else {
-            int ndim = error_dt->extended()->get_uniform_ndim();
-            dimvector shape(ndim);
-            error_dt->extended()->get_shape(0, shape.get());
-            throw irange_out_of_bounds(irnge, error_i, ndim, shape.get());
+            if (error_dt) {
+                int ndim = error_dt->extended()->get_uniform_ndim();
+                dimvector shape(ndim);
+                error_dt->extended()->get_shape(0, shape.get());
+                throw irange_out_of_bounds(irnge, error_i, ndim, shape.get());
+            } else {
+                throw irange_out_of_bounds(irnge, dimension_size);
+            }
         }
 
         intptr_t end = irnge.finish();
@@ -381,19 +397,27 @@ void dynd::apply_single_linear_index(const irange& irnge, intptr_t dimension_siz
                 // Signal for "until the end"
                 end = dimension_size;
             } else {
-                int ndim = error_dt->extended()->get_uniform_ndim();
-                dimvector shape(ndim);
-                error_dt->extended()->get_shape(0, shape.get());
-                throw irange_out_of_bounds(irnge, error_i, ndim, shape.get());
+                if (error_dt) {
+                    int ndim = error_dt->extended()->get_uniform_ndim();
+                    dimvector shape(ndim);
+                    error_dt->extended()->get_shape(0, shape.get());
+                    throw irange_out_of_bounds(irnge, error_i, ndim, shape.get());
+                } else {
+                    throw irange_out_of_bounds(irnge, dimension_size);
+                }
             }
         } else if (end >= -dimension_size) {
             // Ends with a Python style negative index
             end += dimension_size;
         } else {
-            int ndim = error_dt->extended()->get_uniform_ndim();
-            dimvector shape(ndim);
-            error_dt->extended()->get_shape(0, shape.get());
-            throw irange_out_of_bounds(irnge, error_i, ndim, shape.get());
+            if (error_dt) {
+                int ndim = error_dt->extended()->get_uniform_ndim();
+                dimvector shape(ndim);
+                error_dt->extended()->get_shape(0, shape.get());
+                throw irange_out_of_bounds(irnge, error_i, ndim, shape.get());
+            } else {
+                throw irange_out_of_bounds(irnge, dimension_size);
+            }
         }
 
         intptr_t size = end - start;
@@ -423,10 +447,14 @@ void dynd::apply_single_linear_index(const irange& irnge, intptr_t dimension_siz
             if (start < dimension_size) {
                 // Starts with a positive index
             } else {
-                int ndim = error_dt->extended()->get_uniform_ndim();
-                dimvector shape(ndim);
-                error_dt->extended()->get_shape(0, shape.get());
-                throw irange_out_of_bounds(irnge, error_i, ndim, shape.get());
+                if (error_dt) {
+                    int ndim = error_dt->extended()->get_uniform_ndim();
+                    dimvector shape(ndim);
+                    error_dt->extended()->get_shape(0, shape.get());
+                    throw irange_out_of_bounds(irnge, error_i, ndim, shape.get());
+                } else {
+                    throw irange_out_of_bounds(irnge, dimension_size);
+                }
             }
         } else if (start >= -dimension_size) {
             // Starts with Python style negative index
@@ -435,10 +463,14 @@ void dynd::apply_single_linear_index(const irange& irnge, intptr_t dimension_siz
             // Signal for "from the beginning" (which means the last element)
             start = dimension_size - 1;
         } else {
-            int ndim = error_dt->extended()->get_uniform_ndim();
-            dimvector shape(ndim);
-            error_dt->extended()->get_shape(0, shape.get());
-            throw irange_out_of_bounds(irnge, error_i, ndim, shape.get());
+            if (error_dt) {
+                int ndim = error_dt->extended()->get_uniform_ndim();
+                dimvector shape(ndim);
+                error_dt->extended()->get_shape(0, shape.get());
+                throw irange_out_of_bounds(irnge, error_i, ndim, shape.get());
+            } else {
+                throw irange_out_of_bounds(irnge, dimension_size);
+            }
         }
 
         intptr_t end = irnge.finish();
@@ -449,19 +481,27 @@ void dynd::apply_single_linear_index(const irange& irnge, intptr_t dimension_siz
                 // Signal for "until the end" (which means towards index 0 of the data)
                 end = -1;
             } else {
-                int ndim = error_dt->extended()->get_uniform_ndim();
-                dimvector shape(ndim);
-                error_dt->extended()->get_shape(0, shape.get());
-                throw irange_out_of_bounds(irnge, error_i, ndim, shape.get());
+                if (error_dt) {
+                    int ndim = error_dt->extended()->get_uniform_ndim();
+                    dimvector shape(ndim);
+                    error_dt->extended()->get_shape(0, shape.get());
+                    throw irange_out_of_bounds(irnge, error_i, ndim, shape.get());
+                } else {
+                    throw irange_out_of_bounds(irnge, dimension_size);
+                }
             }
         } else if (end >= -dimension_size) {
             // Ends with a Python style negative index
             end += dimension_size;
         } else {
-            int ndim = error_dt->extended()->get_uniform_ndim();
-            dimvector shape(ndim);
-            error_dt->extended()->get_shape(0, shape.get());
-            throw irange_out_of_bounds(irnge, error_i, ndim, shape.get());
+            if (error_dt) {
+                int ndim = error_dt->extended()->get_uniform_ndim();
+                dimvector shape(ndim);
+                error_dt->extended()->get_shape(0, shape.get());
+                throw irange_out_of_bounds(irnge, error_i, ndim, shape.get());
+            } else {
+                throw irange_out_of_bounds(irnge, dimension_size);
+            }
         }
 
         intptr_t size = start - end;

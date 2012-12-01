@@ -409,6 +409,23 @@ public:
                     const dtype& result_dtype, char *out_metadata, int current_i, const dtype& root_dt) const;
 
     /**
+     * The 'at' function is used for indexing. Indexing one dimension with
+     * an integer index is special-cased, both for higher performance and
+     * to provide a way to get a metadata pointer for the result dtype.
+     *
+     * \param i0  The index to apply.
+     * \param inout_metadata  If non-NULL, points to a metadata pointer for
+     *                        this dtype that is modified to point to the
+     *                        result's metadata.
+     * \param inout_data  If non-NULL, points to a data pointer that is modified
+     *                    to point to the result's data. If `inout_data` is non-NULL,
+     *                    `inout_metadata` must also be non-NULL.
+     *
+     * \returns  The dtype that results from the indexing operation.
+     */
+    virtual dtype at(intptr_t i0, const char **inout_metadata, const char **inout_data) const;
+
+    /**
      * Retrieves the number of initial uniform dimensions.
      */
     virtual int get_uniform_ndim() const;
@@ -459,6 +476,20 @@ public:
      * The output must be pre-initialized to have get_uniform_ndim() elements.
      */
     virtual void get_strides(int i, intptr_t *out_strides, const char *data, const char *metadata) const;
+
+    /**
+     * \brief Returns a value representative of a stride for the dimension, used for axis sorting.
+     *
+     * For dimensions which are strided, returns the stride. For dimensions which
+     * are not, for example a dimension with an array of offsets, returns a
+     * non-zero value which represents roughly what a stride would be. In this
+     * example, the first non-zero offset would work.
+     *
+     * \param metadata  Metadata corresponding to the dtype.
+     *
+     * \returns  The representative stride.
+     */
+    virtual intptr_t get_representative_stride(const char *metadata) const;
 
     /**
      * Called by ::dynd::is_lossless_assignment, with (this == dst_dt->extended()).
@@ -533,6 +564,17 @@ public:
      * \param callback_data  Data provided to the callback function.
      */
     virtual void foreach_leading(char *data, const char *metadata, foreach_fn_t callback, void *callback_data) const;
+
+    /**
+     * Modifies metadata allocated using the metadata_default_construct function, to be used
+     * immediately after ndobject construction. Given an input dtype/metadata, edits the output
+     * metadata in place to match.
+     *
+     * \param dst_metadata  The metadata created by metadata_default_construct, which is modified in place
+     * \param src_dtype  The dtype of the input ndobject whose stride ordering is to be matched.
+     * \param src_metadata  The metadata of the input ndobject whose stride ordering is to be matched.
+     */
+    virtual void reorder_default_constructed_strides(char *dst_metadata, const dtype& src_dtype, const char *src_metadata) const;
 
     friend void extended_dtype_incref(const extended_dtype *ed);
     friend void extended_dtype_decref(const extended_dtype *ed);
@@ -763,25 +805,49 @@ public:
 
     /**
      * The 'at' function is used for indexing. Overloading operator[] isn't
+     * practical for multidimensional objects. Indexing one dimension with
+     * an integer index is special-cased, both for higher performance and
+     * to provide a way to get a metadata pointer for the result dtype.
+     *
+     * \param i0  The index to apply.
+     * \param inout_metadata  If non-NULL, points to a metadata pointer for
+     *                        this dtype that is modified to point to the
+     *                        result's metadata.
+     * \param inout_data  If non-NULL, points to a data pointer that is modified
+     *                    to point to the result's data. If `inout_data` is non-NULL,
+     *                    `inout_metadata` must also be non-NULL.
+     *
+     * \returns  The dtype that results from the indexing operation.
+     */
+    inline dtype at(intptr_t i0, const char **inout_metadata = NULL, const char **inout_data = NULL) const {
+        if (m_extended) {
+            return m_extended->at(i0, inout_metadata, inout_data);
+        } else {
+            throw too_many_indices(1, 0);
+        }
+    }
+
+    /**
+     * The 'at' function is used for indexing. Overloading operator[] isn't
      * practical for multidimensional objects.
      */
-    const dtype at(const irange& i0) const {
+    inline dtype at(const irange& i0) const {
         return at_array(1, &i0);
     }
 
     /** Indexing with two index values */
-    const dtype at(const irange& i0, const irange& i1) const {
+    inline dtype at(const irange& i0, const irange& i1) const {
         irange i[2] = {i0, i1};
         return at_array(2, i);
     }
 
     /** Indexing with three index values */
-    const dtype at(const irange& i0, const irange& i1, const irange& i2) const {
+    inline dtype at(const irange& i0, const irange& i1, const irange& i2) const {
         irange i[3] = {i0, i1, i2};
         return at_array(3, i);
     }
     /** Indexing with four index values */
-    const dtype at(const irange& i0, const irange& i1, const irange& i2, const irange& i3) const {
+    inline dtype at(const irange& i0, const irange& i1, const irange& i2, const irange& i3) const {
         irange i[4] = {i0, i1, i2, i3};
         return at_array(4, i);
     }

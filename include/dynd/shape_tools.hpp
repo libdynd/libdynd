@@ -34,12 +34,12 @@ inline bool shape_can_broadcast(const std::vector<intptr_t>& dst_shape,
  * This function broadcasts the dimensions and strides of 'src' to a given
  * shape, raising an error if it cannot be broadcast.
  *
- * @param ndim        The number of dimensions being broadcast to.
- * @param shape       The shape being broadcast to.
- * @param src_ndim    The number of dimensions of the input which is to be broadcast.
- * @param src_shape   The shape of the input which is to be broadcast.
- * @param src_strides The strides of the input which is to be broadcast.
- * @param out_strides The resulting strides after broadcasting (with length 'ndim').
+ * \param ndim        The number of dimensions being broadcast to.
+ * \param shape       The shape being broadcast to.
+ * \param src_ndim    The number of dimensions of the input which is to be broadcast.
+ * \param src_shape   The shape of the input which is to be broadcast.
+ * \param src_strides The strides of the input which is to be broadcast.
+ * \param out_strides The resulting strides after broadcasting (with length 'ndim').
  */
 void broadcast_to_shape(int ndim, const intptr_t *shape,
                 int src_ndim, const intptr_t *src_shape, const intptr_t *src_strides,
@@ -60,10 +60,10 @@ inline void broadcast_to_shape(int ndim, const intptr_t *shape, const strided_nd
  * This function broadcasts the input operands together, populating
  * the output ndim and shape.
  *
- * @param noperands   The number of operands.
- * @param operands    The array of operands.
- * @param out_ndim    The number of broadcast dimensions is placed here.
- * @param out_shape   The broadcast shape is populated here.
+ * \param noperands   The number of operands.
+ * \param operands    The array of operands.
+ * \param out_ndim    The number of broadcast dimensions is placed here.
+ * \param out_shape   The broadcast shape is populated here.
  */
 void broadcast_input_shapes(int noperands, const ndarray_node_ptr *operands,
                         int* out_ndim, dimvector* out_shape);
@@ -98,6 +98,10 @@ void copy_input_strides(const ndarray& op, int ndim, intptr_t *out_strides);
  * This function creates a permutation based on one ndarray's strides.
  * The value strides(out_axis_perm[0]) is the smallest stride,
  * and strides(out_axis_perm[ndim-1]) is the largest stride.
+ *
+ * \param ndim  The number of values in strides and out_axis_perm.
+ * \param strides  The strides values used for sorting.
+ * \param out_axis_perm  A permutation which corresponds to the input strides.
  */
 void strides_to_axis_perm(int ndim, const intptr_t *strides, int *out_axis_perm);
 
@@ -125,17 +129,54 @@ inline void print_shape(std::ostream& o, const std::vector<intptr_t>& shape) {
  * Applies the indexing rules for a single linear indexing irange object to
  * a dimension of the specified size.
  *
- * @param idx  The irange indexing object.
- * @param dimension_size  The size of the dimension to which the idx is being applied.
- * @param error_i  The position in the shape where the indexing is being applied.
- * @param error_dt The dtype to which the indexing is being applied, or NULL.
- * @param out_remove_dimension  Is set to true if the dimension should be removed
- * @param out_start_index  The start index of the resolved indexing.
- * @param out_index_stride  The index stride of the resolved indexing.
- * @param out_dimension_size  The size of the resulting dimension from the resolved indexing.
+ * \param idx  The irange indexing object.
+ * \param dimension_size  The size of the dimension to which the idx is being applied.
+ * \param error_i  The position in the shape where the indexing is being applied.
+ * \param error_dt The dtype to which the indexing is being applied, or NULL.
+ * \param out_remove_dimension  Is set to true if the dimension should be removed
+ * \param out_start_index  The start index of the resolved indexing.
+ * \param out_index_stride  The index stride of the resolved indexing.
+ * \param out_dimension_size  The size of the resulting dimension from the resolved indexing.
  */
 void apply_single_linear_index(const irange& idx, intptr_t dimension_size, int error_i, const dtype* error_dt,
         bool& out_remove_dimension, intptr_t& out_start_index, intptr_t& out_index_stride, intptr_t& out_dimension_size);
+
+/**
+ * \brief Applies indexing rules for a single integer index, returning an index in the range [0, dimension_size).
+ *
+ * \param i0  The integer index.
+ * \param dimension_size  The size of the dimension being indexed.
+ * \param error_dt  If non-NULL, a dtype used for error messages.
+ *
+ * \returns  An index value in the range [0, dimension_size).
+ */
+inline intptr_t apply_single_index(intptr_t i0, intptr_t dimension_size, const dtype* error_dt) {
+    if (i0 >= 0) {
+        if (i0 < dimension_size) {
+            return i0;
+        } else {
+            if (error_dt) {
+                int ndim = error_dt->extended()->get_uniform_ndim();
+                dimvector shape(ndim);
+                error_dt->extended()->get_shape(0, shape.get());
+                throw index_out_of_bounds(i0, 0, ndim, shape.get());
+            } else {
+                throw index_out_of_bounds(i0, dimension_size);
+            }
+        }
+    } else if (i0 >= -dimension_size) {
+        return i0 + dimension_size;
+    } else {
+        if (error_dt) {
+            int ndim = error_dt->extended()->get_uniform_ndim();
+            dimvector shape(ndim);
+            error_dt->extended()->get_shape(0, shape.get());
+            throw index_out_of_bounds(i0, 0, ndim, shape.get());
+        } else {
+            throw index_out_of_bounds(i0, dimension_size);
+        }
+    }
+}
 
 enum shape_signal_t {
     /** Shape value that has never been initialized */

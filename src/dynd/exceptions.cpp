@@ -73,18 +73,18 @@ dynd::broadcast_error::broadcast_error(int noperands, const ndarray_node_ptr *op
 {
 }
 
-inline string too_many_indices_message(int nindex, int ndim)
+inline string too_many_indices_message(int nindices, int ndim)
 {
     std::stringstream ss;
 
-    ss << "provided " << nindex << " indices, but array has only ";
+    ss << "provided " << nindices << " indices, but array has only ";
     ss << ndim << " dimensions";
 
     return ss.str();
 }
 
-dynd::too_many_indices::too_many_indices(int nindex, int ndim)
-    : dnd_exception("too many indices", too_many_indices_message(nindex, ndim))
+dynd::too_many_indices::too_many_indices(int nindices, int ndim)
+    : dnd_exception("too many indices", too_many_indices_message(nindices, ndim))
 {
     //cout << "throwing too_many_indices\n";
 }
@@ -100,6 +100,15 @@ inline string index_out_of_bounds_message(intptr_t i, int axis, int ndim, const 
     return ss.str();
 }
 
+inline string index_out_of_bounds_message(intptr_t i, intptr_t dimension_size)
+{
+    stringstream ss;
+
+    ss << "index " << i << " is out of bounds for dimension of size " << dimension_size;
+
+    return ss.str();
+}
+
 index_out_of_bounds::index_out_of_bounds(intptr_t i, int axis, int ndim, const intptr_t *shape)
     : dnd_exception("index out of bounds", index_out_of_bounds_message(i, axis, ndim, shape))
 {
@@ -110,6 +119,10 @@ index_out_of_bounds::index_out_of_bounds(intptr_t i, int axis, const std::vector
 {
 }
 
+index_out_of_bounds::index_out_of_bounds(intptr_t i, intptr_t dimension_size)
+    : dnd_exception("index out of bounds", index_out_of_bounds_message(i, dimension_size))
+{
+}
 
 inline string axis_out_of_bounds_message(intptr_t i, intptr_t ndim)
 {
@@ -141,14 +154,32 @@ inline string irange_out_of_bounds_message(const irange& i, int axis, int ndim, 
     return ss.str();
 }
 
-dynd::irange_out_of_bounds::irange_out_of_bounds(const irange& i, int axis, int ndim, const intptr_t *shape)
+inline string irange_out_of_bounds_message(const irange& i, intptr_t dimension_size)
+{
+    stringstream ss;
+
+    ss << "index range (" << i.start() << " to " << i.finish();
+    if (i.step() != 1) {
+        ss << " step " << i.step();
+    }
+    ss << ") is out of bounds for dimension of size " << dimension_size;
+
+    return ss.str();
+}
+
+irange_out_of_bounds::irange_out_of_bounds(const irange& i, int axis, int ndim, const intptr_t *shape)
     : dnd_exception("irange out of bounds", irange_out_of_bounds_message(i, axis, ndim, shape))
 {
     //cout << "throwing irange_out_of_bounds\n";
 }
 
-dynd::irange_out_of_bounds::irange_out_of_bounds(const irange& i, int axis, const std::vector<intptr_t>& shape)
+irange_out_of_bounds::irange_out_of_bounds(const irange& i, int axis, const std::vector<intptr_t>& shape)
     : dnd_exception("irange out of bounds", irange_out_of_bounds_message(i, axis, (int)shape.size(), shape.empty() ? NULL : &shape[0]))
+{
+}
+
+irange_out_of_bounds::irange_out_of_bounds(const irange& i, intptr_t dimension_size)
+    : dnd_exception("irange out of bounds", irange_out_of_bounds_message(i, dimension_size))
 {
 }
 

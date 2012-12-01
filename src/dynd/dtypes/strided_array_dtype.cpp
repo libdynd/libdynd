@@ -136,6 +136,21 @@ intptr_t strided_array_dtype::apply_linear_index(int nindices, const irange *ind
     }
 }
 
+dtype strided_array_dtype::at(intptr_t i0, const char **inout_metadata, const char **inout_data) const
+{
+    if (inout_metadata) {
+        const strided_array_dtype_metadata *md = reinterpret_cast<const strided_array_dtype_metadata *>(*inout_metadata);
+        // Bounds-checking of the index
+        i0 = apply_single_index(i0, md->size, NULL);
+        // Modify the metadata
+        *inout_metadata += sizeof(strided_array_dtype_metadata);
+        // If requested, modify the data
+        if (inout_data) {
+            *inout_data += i0 * md->stride;
+        }
+    }
+    return m_element_dtype;
+}
 
 int strided_array_dtype::get_uniform_ndim() const
 {
@@ -197,6 +212,12 @@ void strided_array_dtype::get_strides(int i, intptr_t *out_strides, const char *
     if (m_element_dtype.extended()) {
         m_element_dtype.extended()->get_strides(i+1, out_strides, data, metadata + sizeof(strided_array_dtype_metadata));
     }
+}
+
+intptr_t strided_array_dtype::get_representative_stride(const char *metadata) const
+{
+    const strided_array_dtype_metadata *md = reinterpret_cast<const strided_array_dtype_metadata *>(metadata);
+    return md->stride;
 }
 
 bool strided_array_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const
@@ -373,5 +394,70 @@ void strided_array_dtype::foreach_leading(char *data, const char *metadata, fore
     intptr_t stride = md->stride;
     for (intptr_t i = 0, i_end = md->size; i < i_end; ++i, data += stride) {
         callback(m_element_dtype, data, child_metadata, callback_data);
+    }
+}
+
+void strided_array_dtype::reorder_default_constructed_strides(char *dst_metadata,
+                const dtype& src_dtype, const char *src_metadata) const
+{
+    // If the next dimension isn't also strided, then nothing can be reordered
+    if (m_element_dtype.get_type_id() != strided_array_type_id) {
+        if (m_element_dtype.extended()) {
+            dtype src_child_dtype = src_dtype.at(0, &src_metadata);
+            m_element_dtype.extended()->reorder_default_constructed_strides(dst_metadata + sizeof(strided_array_dtype_metadata),
+                            src_child_dtype, src_metadata);
+        }
+        return;
+    }
+
+    // Find the total number of dimensions we might be reordering, then process
+    // them all at once. This code handles a whole chain of strided_array_dtype
+    // instances at once.
+    int ndim = 1;
+    dtype last_dt = m_element_dtype;
+    do {
+        ++ndim;
+        last_dt = static_cast<const strided_array_dtype *>(last_dt.extended())->get_element_dtype();
+    } while (last_dt.get_type_id() == strided_array_type_id);
+
+    // Get the representative strides from all the dimensions, and
+    // advance the src_metadata pointer. Track if the
+    // result is C-order in which case we can skip all sorting and manipulation
+    dimvector strides(ndim);
+    dtype last_src_dtype = src_dtype;
+    intptr_t previous_stride = 0;
+    bool c_order = true;
+    for (int i = 0; i < ndim; ++i) {
+        intptr_t stride = last_src_dtype.extended()->get_representative_stride(src_metadata);
+        // To check for C-order, we skip over any 0-strides, and check if a stride ever gets
+        // bigger instead of always getting smaller.
+        if (stride != 0) {
+            if (previous_stride != 0 && previous_stride < stride) {
+                c_order = false;
+            }
+            previous_stride = stride;
+        }
+        strides[i] = stride;
+        last_src_dtype = last_src_dtype.extended()->at(0, &src_metadata, NULL);
+    }
+
+    if (!c_order) {
+        shortvector<int> axis_perm(ndim);
+        strides_to_axis_perm(ndim, strides.get(), axis_perm.get());
+        strided_array_dtype_metadata *md = reinterpret_cast<strided_array_dtype_metadata *>(dst_metadata);
+        intptr_t stride = md[ndim-1].stride;
+        for (int i = 0; i < ndim; ++i) {
+            int i_perm = axis_perm[i];
+            strided_array_dtype_metadata& i_md = md[i_perm];
+            intptr_t dim_size = i_md.size;
+            i_md.stride = dim_size > 1 ? stride : 0;
+            stride *= dim_size;
+        }
+    }
+
+    // Allow further subtypes to reorder their strides as well
+    if (last_dt.extended()) {
+        last_dt.extended()->reorder_default_constructed_strides(dst_metadata + ndim * sizeof(strided_array_dtype_metadata),
+                        last_src_dtype, src_metadata);
     }
 }

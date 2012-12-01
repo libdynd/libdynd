@@ -74,7 +74,7 @@ public:
      * An exception for when too many indices are provided in
      * an indexing operation (nindex > ndim).
      */
-    too_many_indices(int nindex, int ndim);
+    too_many_indices(int nindices, int ndim);
 
     virtual ~too_many_indices() throw() {
     }
@@ -88,6 +88,7 @@ public:
      */
     index_out_of_bounds(intptr_t i, int axis, int ndim, const intptr_t *shape);
     index_out_of_bounds(intptr_t i, int axis, const std::vector<intptr_t>& shape);
+    index_out_of_bounds(intptr_t i, intptr_t dimension_size);
 
     virtual ~index_out_of_bounds() throw() {
     }
@@ -116,6 +117,7 @@ public:
      */
     irange_out_of_bounds(const irange& i, int axis, int ndim, const intptr_t *shape);
     irange_out_of_bounds(const irange& i, int axis, const std::vector<intptr_t>& shape);
+    irange_out_of_bounds(const irange& i, intptr_t dimension_size);
 
     virtual ~irange_out_of_bounds() throw() {
     }

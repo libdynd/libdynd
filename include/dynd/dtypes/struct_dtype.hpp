@@ -72,6 +72,7 @@ public:
 
     intptr_t get_dim_size(const char *data, const char *metadata) const;
     void get_shape(int i, intptr_t *out_shape) const;
+    intptr_t get_representative_stride(const char *metadata) const;
 
     bool is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const;
 
