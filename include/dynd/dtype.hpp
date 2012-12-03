@@ -52,6 +52,8 @@ enum dtype_kind_t {
     bytes_kind,
     void_kind,
     datetime_kind,
+    // For any array dtypes which have elements of all the same type
+    uniform_array_kind,
     // For struct_type_id and ndarray_type_id
     composite_kind,
     // For dtypes whose value_dtype != the dtype, signals
@@ -334,7 +336,7 @@ public:
      * \param o the std::ostream to print to
      * \param data pointer to the data element to print
      */
-    virtual void print_element(std::ostream& o, const char *data, const char *metadata) const = 0;
+    virtual void print_element(std::ostream& o, const char *metadata, const char *data) const = 0;
 
     /**
      * Print a representation of the dtype itself
@@ -345,9 +347,6 @@ public:
 
     /** Returns what kind of memory management the dtype uses, e.g. construct/copy/move/destruct semantics */
     virtual dtype_memory_management_t get_memory_management() const = 0;
-
-    /** Returns true if the dtype is an array dtype whose elements all have the same dtype */
-    virtual bool is_uniform_dim() const;
 
     /**
      * \brief Returns true if the dtype is a scalar.
@@ -466,7 +465,7 @@ public:
      *
      * The output must be pre-initialized to have get_uniform_ndim() elements.
      */
-    virtual void get_shape(int i, intptr_t *out_shape, const char *data, const char *metadata) const;
+    virtual void get_shape(int i, intptr_t *out_shape, const char *metadata) const;
 
     /**
      * Retrieves the strides of the dtype ndobject instance, expanding the vector as needed. For dimensions
@@ -475,7 +474,7 @@ public:
      *
      * The output must be pre-initialized to have get_uniform_ndim() elements.
      */
-    virtual void get_strides(int i, intptr_t *out_strides, const char *data, const char *metadata) const;
+    virtual void get_strides(int i, intptr_t *out_strides, const char *metadata) const;
 
     /**
      * \brief Returns a value representative of a stride for the dimension, used for axis sorting.
@@ -956,14 +955,6 @@ public:
         }
     }
 
-    inline bool is_uniform_dim() const {
-        if (m_extended != NULL) {
-            return m_extended->is_uniform_dim();
-        } else {
-            return false;
-        }
-    }
-
     inline bool is_scalar() const {
         if (m_extended != NULL) {
             return m_extended->is_scalar();
@@ -1142,7 +1133,7 @@ public:
      * \param data      pointer to the data element to print
      * \param metadata  pointer to the ndobject metadata for the data element
      */
-    void print_element(std::ostream& o, const char *data, const char *metadata) const;
+    void print_element(std::ostream& o, const char *metadata, const char *data) const;
 
     friend /* TODO: DYND_CONSTEXPR*/ dtype detail::internal_make_raw_dtype(char type_id, char kind, intptr_t element_size, char alignment);
     friend std::ostream& operator<<(std::ostream& o, const dtype& rhs);

@@ -144,7 +144,7 @@ ndobject dynd::make_scalar_ndobject(const dtype& scalar_dtype, const void *data)
     size_t size = scalar_dtype.get_element_size();
     if (scalar_dtype.extended() && (size == 0 ||
                 scalar_dtype.get_memory_management() != pod_memory_management ||
-                scalar_dtype.extended()->is_uniform_dim() ||
+                scalar_dtype.extended()->get_kind() == uniform_array_kind ||
                 scalar_dtype.extended()->get_metadata_size() != 0)) {
         stringstream ss;
         ss << "Cannot make a dynd scalar from raw data using dtype " << scalar_dtype;
@@ -637,7 +637,7 @@ std::ostream& dynd::operator<<(std::ostream& o, const ndobject& rhs)
         if (v.get_ndo()->is_builtin_dtype()) {
             print_builtin_scalar(v.get_ndo()->get_builtin_type_id(), o, v.get_ndo()->m_data_pointer);
         } else {
-            v.get_ndo()->m_dtype->print_element(o, v.get_ndo()->m_data_pointer, v.get_ndo_meta());
+            v.get_ndo()->m_dtype->print_element(o, v.get_ndo_meta(), v.get_ndo()->m_data_pointer);
         }
         o << ", " << rhs.get_dtype() << ")";
     } else {

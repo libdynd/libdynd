@@ -224,7 +224,7 @@ public:
     }
     inline void get_shape(intptr_t *out_shape) const {
         if (!get_ndo()->is_builtin_dtype()) {
-            get_ndo()->m_dtype->get_shape(0, out_shape, get_ndo()->m_data_pointer, get_ndo_meta());
+            get_ndo()->m_dtype->get_shape(0, out_shape, get_ndo_meta());
         }
     }
 
@@ -242,7 +242,7 @@ public:
     }
     inline void get_strides(intptr_t *out_strides) const {
         if (!get_ndo()->is_builtin_dtype()) {
-            get_ndo()->m_dtype->get_strides(0, out_strides, get_ndo()->m_data_pointer, get_ndo_meta());
+            get_ndo()->m_dtype->get_strides(0, out_strides, get_ndo_meta());
         }
     }
 

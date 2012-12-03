@@ -30,14 +30,14 @@ size_t strided_array_dtype::get_default_element_size(int ndim, const intptr_t *s
 }
 
 
-void strided_array_dtype::print_element(std::ostream& o, const char *data, const char *metadata) const
+void strided_array_dtype::print_element(std::ostream& o, const char *metadata, const char *data) const
 {
     const strided_array_dtype_metadata *md = reinterpret_cast<const strided_array_dtype_metadata *>(metadata);
     size_t stride = md->stride;
     metadata += sizeof(strided_array_dtype_metadata);
     o << "[";
     for (size_t i = 0, i_end = md->size; i != i_end; ++i, data += stride) {
-        m_element_dtype.print_element(o, data, metadata);
+        m_element_dtype.print_element(o, metadata, data);
         if (i != i_end - 1) {
             o << ", ";
         }
@@ -48,11 +48,6 @@ void strided_array_dtype::print_element(std::ostream& o, const char *data, const
 void strided_array_dtype::print_dtype(std::ostream& o) const
 {
     o << "strided_array<" << m_element_dtype << ">";
-}
-
-bool strided_array_dtype::is_uniform_dim() const
-{
-    return true;
 }
 
 bool strided_array_dtype::is_scalar() const
@@ -190,7 +185,7 @@ void strided_array_dtype::get_shape(int i, intptr_t *out_shape) const
     }
 }
 
-void strided_array_dtype::get_shape(int i, intptr_t *out_shape, const char *data, const char *metadata) const
+void strided_array_dtype::get_shape(int i, intptr_t *out_shape, const char *metadata) const
 {
     const strided_array_dtype_metadata *md = reinterpret_cast<const strided_array_dtype_metadata *>(metadata);
 
@@ -198,11 +193,11 @@ void strided_array_dtype::get_shape(int i, intptr_t *out_shape, const char *data
 
     // Process the later shape values
     if (m_element_dtype.extended()) {
-        m_element_dtype.extended()->get_shape(i+1, out_shape, data, metadata + sizeof(strided_array_dtype_metadata));
+        m_element_dtype.extended()->get_shape(i+1, out_shape, metadata + sizeof(strided_array_dtype_metadata));
     }
 }
 
-void strided_array_dtype::get_strides(int i, intptr_t *out_strides, const char *data, const char *metadata) const
+void strided_array_dtype::get_strides(int i, intptr_t *out_strides, const char *metadata) const
 {
     const strided_array_dtype_metadata *md = reinterpret_cast<const strided_array_dtype_metadata *>(metadata);
 
@@ -210,7 +205,7 @@ void strided_array_dtype::get_strides(int i, intptr_t *out_strides, const char *
 
     // Process the later shape values
     if (m_element_dtype.extended()) {
-        m_element_dtype.extended()->get_strides(i+1, out_strides, data, metadata + sizeof(strided_array_dtype_metadata));
+        m_element_dtype.extended()->get_strides(i+1, out_strides, metadata + sizeof(strided_array_dtype_metadata));
     }
 }
 

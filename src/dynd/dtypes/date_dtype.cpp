@@ -31,7 +31,7 @@ dynd::date_dtype::date_dtype(date_unit_t unit)
     }
 }
 
-void dynd::date_dtype::print_element(std::ostream& o, const char *data, const char *DYND_UNUSED(metadata)) const
+void dynd::date_dtype::print_element(std::ostream& o, const char *DYND_UNUSED(metadata), const char *data) const
 {
     int32_t value = *reinterpret_cast<const int32_t *>(data);
     switch (m_unit) {

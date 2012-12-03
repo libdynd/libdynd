@@ -54,7 +54,7 @@ void dynd::fixedstring_dtype::get_string_range(const char **out_begin, const cha
     *out_end = data;
 }
 
-void dynd::fixedstring_dtype::print_element(std::ostream& o, const char *data, const char *DYND_UNUSED(metadata)) const
+void dynd::fixedstring_dtype::print_element(std::ostream& o, const char *DYND_UNUSED(metadata), const char *data) const
 {
     uint32_t cp;
     next_unicode_codepoint_t next_fn;

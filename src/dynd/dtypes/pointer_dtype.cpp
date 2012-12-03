@@ -31,21 +31,16 @@ pointer_dtype::pointer_dtype(const dtype& target_dtype)
     }
 }
 
-void pointer_dtype::print_element(std::ostream& o, const char *data, const char *metadata) const
+void pointer_dtype::print_element(std::ostream& o, const char *metadata, const char *data) const
 {
     const pointer_dtype_metadata *md = reinterpret_cast<const pointer_dtype_metadata *>(metadata);
     const char *target_data = *reinterpret_cast<const char * const *>(data) + md->offset;
-    m_target_dtype.print_element(o, target_data, metadata);
+    m_target_dtype.print_element(o, metadata, target_data);
 }
 
 void pointer_dtype::print_dtype(std::ostream& o) const
 {
     o << "pointer<" << m_target_dtype << ">";
-}
-
-bool pointer_dtype::is_uniform_dim() const
-{
-    return m_target_dtype.is_uniform_dim();
 }
 
 bool pointer_dtype::is_scalar() const

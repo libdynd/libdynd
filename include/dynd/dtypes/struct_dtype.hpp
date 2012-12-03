@@ -51,7 +51,7 @@ public:
         return m_metadata_offsets;
     }
 
-    void print_element(std::ostream& o, const char *data, const char *metadata) const;
+    void print_element(std::ostream& o, const char *metadata, const char *data) const;
 
     void print_dtype(std::ostream& o) const;
 

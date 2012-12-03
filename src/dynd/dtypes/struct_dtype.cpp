@@ -57,12 +57,12 @@ size_t struct_dtype::get_default_element_size(int ndim, const intptr_t *shape) c
 }
 
 
-void struct_dtype::print_element(std::ostream& o, const char *data, const char *metadata) const
+void struct_dtype::print_element(std::ostream& o, const char *metadata, const char *data) const
 {
     const size_t *offsets = reinterpret_cast<const size_t *>(metadata);
     o << "[";
     for (size_t i = 0, i_end = m_fields.size(); i != i_end; ++i) {
-        m_fields[i].print_element(o, data + offsets[i], metadata + m_metadata_offsets[i]);
+        m_fields[i].print_element(o, metadata + m_metadata_offsets[i], data + offsets[i]);
         if (i != i_end - 1) {
             o << ", ";
         }

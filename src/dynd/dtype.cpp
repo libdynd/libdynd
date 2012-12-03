@@ -38,12 +38,6 @@ extended_dtype::~extended_dtype()
 {
 }
 
-bool extended_dtype::is_uniform_dim() const
-{
-    return false;
-}
-
-
 bool extended_dtype::is_scalar() const
 {
     return true;
@@ -125,13 +119,13 @@ void extended_dtype::get_shape(int DYND_UNUSED(i), intptr_t *DYND_UNUSED(out_sha
 }
 
 void extended_dtype::get_shape(int DYND_UNUSED(i), intptr_t *DYND_UNUSED(out_shape),
-                    const char *DYND_UNUSED(data), const char *DYND_UNUSED(metadata)) const
+                    const char *DYND_UNUSED(metadata)) const
 {
     // Default to scalar behavior
 }
 
 void extended_dtype::get_strides(int DYND_UNUSED(i), intptr_t *DYND_UNUSED(out_strides),
-                    const char *DYND_UNUSED(data), const char *DYND_UNUSED(metadata)) const
+                    const char *DYND_UNUSED(metadata)) const
 {
     // Default to scalar behavior
 }
@@ -664,10 +658,10 @@ void dynd::print_builtin_scalar(type_id_t type_id, std::ostream& o, const char *
     }
 }
 
-void dynd::dtype::print_element(std::ostream& o, const char *data, const char *metadata) const
+void dynd::dtype::print_element(std::ostream& o, const char *metadata, const char *data) const
 {
     if (extended() != NULL) {
-        extended()->print_element(o, data, metadata);
+        extended()->print_element(o, metadata, data);
     } else {
         print_builtin_scalar(get_type_id(), o, data);
     }

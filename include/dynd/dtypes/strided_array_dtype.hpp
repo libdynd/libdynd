@@ -32,7 +32,7 @@ public:
         return strided_array_type_id;
     }
     dtype_kind_t get_kind() const {
-        return composite_kind;
+        return uniform_array_kind;
     }
     // Expose the storage traits here
     size_t get_alignment() const {
@@ -47,7 +47,7 @@ public:
         return m_element_dtype;
     }
 
-    void print_element(std::ostream& o, const char *data, const char *metadata) const;
+    void print_element(std::ostream& o, const char *metadata, const char *data) const;
 
     void print_dtype(std::ostream& o) const;
 
@@ -57,7 +57,6 @@ public:
         return pod_memory_management;
     }
 
-    bool is_uniform_dim() const;
     bool is_scalar() const;
     bool is_expression() const;
     dtype with_transformed_scalar_types(dtype_transform_fn_t transform_fn, const void *extra) const;
@@ -73,8 +72,8 @@ public:
 
     intptr_t get_dim_size(const char *data, const char *metadata) const;
     void get_shape(int i, intptr_t *out_shape) const;
-    void get_shape(int i, intptr_t *out_shape, const char *data, const char *metadata) const;
-    void get_strides(int i, intptr_t *out_strides, const char *data, const char *metadata) const;
+    void get_shape(int i, intptr_t *out_shape, const char *metadata) const;
+    void get_strides(int i, intptr_t *out_strides, const char *metadata) const;
     intptr_t get_representative_stride(const char *metadata) const;
 
     bool is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const;

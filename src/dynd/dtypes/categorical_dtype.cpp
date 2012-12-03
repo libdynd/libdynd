@@ -202,7 +202,7 @@ categorical_dtype::categorical_dtype(const ndobject& categories)
         throw runtime_error("categorical_dtype only supports construction from a strided_array of categories");
     }
     m_category_dtype = categories.get_dtype().at(0);
-    if (m_category_dtype.is_uniform_dim()) {
+    if (!m_category_dtype.is_scalar()) {
         throw runtime_error("categorical_dtype only supports construction from a 1-dimensional strided_array of categories");
     }
     if (m_category_dtype.get_memory_management() != pod_memory_management) {
@@ -253,11 +253,11 @@ categorical_dtype::~categorical_dtype() {
 
 }
 
-void categorical_dtype::print_element(std::ostream& o, const char *data, const char *metadata) const
+void categorical_dtype::print_element(std::ostream& o, const char *metadata, const char *data) const
 {
     uint32_t value = *reinterpret_cast<const uint32_t*>(data);
     if (value < m_value_to_category_index.size()) {
-        m_category_dtype.print_element(o, m_categories[m_value_to_category_index[value]], metadata);
+        m_category_dtype.print_element(o, metadata, m_categories[m_value_to_category_index[value]]);
     }
     else {
         o << "UNK"; // TODO better outpout?
@@ -269,10 +269,10 @@ void categorical_dtype::print_dtype(std::ostream& o) const
 {
     o << "categorical<" << m_category_dtype;
     o << ", [";
-    m_category_dtype.print_element(o, m_categories[m_value_to_category_index[0]], NULL); // TODO: ndobject metadata
+    m_category_dtype.print_element(o, NULL, m_categories[m_value_to_category_index[0]]); // TODO: ndobject metadata
     for (uint32_t i = 1; i < m_categories.size(); ++i) {
         o << ", ";
-        m_category_dtype.print_element(o, m_categories[m_value_to_category_index[i]], NULL); // TODO: ndobject metadata
+        m_category_dtype.print_element(o, NULL, m_categories[m_value_to_category_index[i]]); // TODO: ndobject metadata
     }
     o << "]>";
 }
@@ -303,7 +303,7 @@ uint32_t categorical_dtype::get_value_from_category(const char *category) const
     );
     if (bounds.first == m_categories.end() || bounds.first == bounds.second) {
         stringstream ss;
-        m_category_dtype.print_element(ss, category, NULL); // TODO: ndobject metadata
+        m_category_dtype.print_element(ss, NULL, category); // TODO: ndobject metadata
         throw std::runtime_error("Unknown category: '" + ss.str() + "'");
     }
     else {

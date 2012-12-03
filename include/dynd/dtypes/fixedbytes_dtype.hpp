@@ -33,7 +33,7 @@ public:
         return m_element_size;
     }
 
-    void print_element(std::ostream& o, const char *data, const char *metadata) const;
+    void print_element(std::ostream& o, const char *metadata, const char *data) const;
 
     void print_dtype(std::ostream& o) const;
 

@@ -25,7 +25,7 @@ bytes_dtype::bytes_dtype(size_t alignment)
     }
 }
 
-void bytes_dtype::print_element(std::ostream& o, const char *data, const char *DYND_UNUSED(metadata)) const
+void bytes_dtype::print_element(std::ostream& o, const char *DYND_UNUSED(metadata), const char *data) const
 {
     const char *begin = reinterpret_cast<const char * const *>(data)[0];
     const char *end = reinterpret_cast<const char * const *>(data)[1];

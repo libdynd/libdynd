@@ -37,7 +37,7 @@ void string_dtype::get_string_range(const char **out_begin, const char**out_end,
     *out_end = reinterpret_cast<const char * const *>(data)[1];
 }
 
-void string_dtype::print_element(std::ostream& o, const char *data, const char *DYND_UNUSED(metadata)) const
+void string_dtype::print_element(std::ostream& o, const char *DYND_UNUSED(metadata), const char *data) const
 {
     uint32_t cp;
     next_unicode_codepoint_t next_fn;

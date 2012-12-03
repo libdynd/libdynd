@@ -482,15 +482,15 @@ void dynd::ndarray::debug_print(std::ostream& o = std::cerr, const std::string& 
 static void nested_ndarray_print(std::ostream& o, const dtype& d, const char *data, int ndim, const intptr_t *shape, const intptr_t *strides)
 {
     if (ndim == 0) {
-        d.print_element(o, data, NULL); // TODO: ndobject metadata
+        d.print_element(o, NULL, data); // TODO: ndobject metadata
     } else {
         o << "[";
         if (ndim == 1) {
-            d.print_element(o, data, NULL); // TODO: ndobject metadata
+            d.print_element(o, NULL, data); // TODO: ndobject metadata
             for (intptr_t i = 1; i < shape[0]; ++i) {
                 data += strides[0];
                 o << ", ";
-                d.print_element(o, data, NULL); // TODO: ndobject metadata
+                d.print_element(o, NULL, data); // TODO: ndobject metadata
             }
         } else {
             intptr_t size = *shape;

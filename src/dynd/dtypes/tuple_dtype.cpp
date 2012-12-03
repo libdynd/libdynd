@@ -114,11 +114,11 @@ bool dynd::tuple_dtype::compute_is_standard_layout() const
     return m_element_size == standard_element_size && m_alignment == standard_alignment;
 }
 
-void dynd::tuple_dtype::print_element(std::ostream& o, const char *data, const char *metadata) const
+void dynd::tuple_dtype::print_element(std::ostream& o, const char *metadata, const char *data) const
 {
     o << "[";
     for (size_t i = 0, i_end = m_fields.size(); i != i_end; ++i) {
-        m_fields[i].print_element(o, data + m_offsets[i], metadata + m_metadata_offsets[i]);
+        m_fields[i].print_element(o, metadata + m_metadata_offsets[i], data + m_offsets[i]);
         if (i != i_end - 1) {
             o << ", ";
         }

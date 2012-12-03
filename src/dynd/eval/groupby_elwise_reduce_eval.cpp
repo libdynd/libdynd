@@ -345,7 +345,7 @@ ndarray_node_ptr dynd::eval::evaluate_groupby_elwise_reduce(ndarray_node *node, 
                 stringstream ss;
                 ss << "groupby reduction with no identity didn't product a value for group ";
                 ss << i << ", which has name ";
-                groups->get_category_dtype().print_element(ss, groups->get_category_from_value(i), NULL); // TODO: ndobject metadata
+                groups->get_category_dtype().print_element(ss, NULL, groups->get_category_from_value(i)); // TODO: ndobject metadata
                 throw runtime_error(ss.str());
             }
         }

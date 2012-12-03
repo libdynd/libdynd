@@ -62,7 +62,7 @@ public:
         }
     }
 
-    void print_element(std::ostream& o, const char *data, const char *metadata) const;
+    void print_element(std::ostream& o, const char *metadata, const char *data) const;
 
     void print_dtype(std::ostream& o) const;
 
@@ -72,7 +72,6 @@ public:
         return blockref_memory_management;
     }
 
-    bool is_uniform_dim() const;
     bool is_scalar() const;
     bool is_expression() const;
     dtype with_transformed_scalar_types(dtype_transform_fn_t transform_fn, const void *extra) const;

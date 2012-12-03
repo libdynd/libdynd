@@ -43,7 +43,7 @@ public:
             m_iterindex.init(m_iter_ndim);
             memset(m_iterindex.get(), 0, sizeof(intptr_t) * m_iter_ndim);
             m_itershape.init(m_iter_ndim);
-            m_array_dtype.extended()->get_shape(0, m_itershape.get(), op0.get_ndo()->m_data_pointer, op0.get_ndo_meta());
+            m_array_dtype.extended()->get_shape(0, m_itershape.get(), op0.get_ndo_meta());
 
             size_t iterdata_size = m_array_dtype.extended()->get_iterdata_size(m_iter_ndim);
             m_iterdata = reinterpret_cast<iterdata_common *>(malloc(iterdata_size));
