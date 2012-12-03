@@ -51,6 +51,7 @@ fixedstruct_dtype::fixedstruct_dtype(const std::vector<dtype>& field_types, cons
         metadata_offset += m_field_types[i].extended() ? m_field_types[i].extended()->get_metadata_size() : 0;
     }
     m_metadata_size = metadata_offset;
+    m_element_size = inc_to_alignment(data_offset, m_alignment);
 }
 
 void fixedstruct_dtype::print_element(std::ostream& o, const char *metadata, const char *data) const
