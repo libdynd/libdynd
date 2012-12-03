@@ -149,11 +149,7 @@ dtype strided_array_dtype::at(intptr_t i0, const char **inout_metadata, const ch
 
 int strided_array_dtype::get_uniform_ndim() const
 {
-    if (!m_element_dtype.extended()) {
-        return 1;
-    } else {
-        return 1 + m_element_dtype.extended()->get_uniform_ndim();
-    }
+    return 1 + m_element_dtype.get_uniform_ndim();
 }
 
 dtype strided_array_dtype::get_dtype_at_dimension(char **inout_metadata, int i, int total_ndim) const

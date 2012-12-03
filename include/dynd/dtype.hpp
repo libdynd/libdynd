@@ -106,9 +106,11 @@ enum type_id_t {
 
     // Composite dtypes
     strided_array_type_id,
+    fixedarray_type_id,
     struct_type_id,
+    fixedstruct_type_id,
     tuple_type_id,
-    ndarray_type_id,
+    ndobject_type_id,
 
     // Adapter dtypes
     convert_type_id,

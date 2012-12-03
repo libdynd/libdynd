@@ -61,8 +61,10 @@ set(dynd_SRC
     src/dynd/dtypes/convert_dtype.cpp
     src/dynd/dtypes/date_dtype.cpp
     src/dynd/dtypes/dtype_alignment.cpp
+    src/dynd/dtypes/fixedarray_dtype.cpp
     src/dynd/dtypes/fixedbytes_dtype.cpp
     src/dynd/dtypes/fixedstring_dtype.cpp
+    src/dynd/dtypes/fixedstruct_dtype.cpp
     src/dynd/dtypes/pointer_dtype.cpp
     src/dynd/dtypes/strided_array_dtype.cpp
     src/dynd/dtypes/string_dtype.cpp
@@ -78,12 +80,15 @@ set(dynd_SRC
     include/dynd/dtypes/convert_dtype.hpp
     include/dynd/dtypes/date_dtype.hpp
     include/dynd/dtypes/dtype_alignment.hpp
+    include/dynd/dtypes/fixedarray_dtype.hpp
     include/dynd/dtypes/fixedbytes_dtype.hpp
     include/dynd/dtypes/fixedstring_dtype.hpp
+    include/dynd/dtypes/fixedstruct_dtype.hpp
     include/dynd/dtypes/pointer_dtype.hpp
     include/dynd/dtypes/strided_array_dtype.hpp
     include/dynd/dtypes/string_dtype.hpp
     include/dynd/dtypes/struct_dtype.hpp
+    include/dynd/dtypes/fixedstruct_dtype.hpp
     include/dynd/dtypes/tuple_dtype.hpp
     include/dynd/dtypes/view_dtype.hpp
     include/dynd/dtypes/void_pointer_dtype.hpp
