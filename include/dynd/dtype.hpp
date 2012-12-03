@@ -820,12 +820,16 @@ public:
      *
      * \returns  The dtype that results from the indexing operation.
      */
-    inline dtype at(intptr_t i0, const char **inout_metadata = NULL, const char **inout_data = NULL) const {
+    inline dtype at_single(intptr_t i0, const char **inout_metadata = NULL, const char **inout_data = NULL) const {
         if (m_extended) {
             return m_extended->at(i0, inout_metadata, inout_data);
         } else {
             throw too_many_indices(1, 0);
         }
+    }
+
+    inline dtype at(intptr_t i0) const {
+        return at_single(i0);
     }
 
     /**

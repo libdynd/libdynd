@@ -7,31 +7,49 @@
 #include <dynd/dtypes/strided_array_dtype.hpp>
 #include <dynd/dtypes/dtype_alignment.hpp>
 #include <dynd/shape_tools.hpp>
+#include <dynd/shortvector.hpp>
 #include <dynd/exceptions.hpp>
 
 using namespace std;
 using namespace dynd;
 
 fixedarray_dtype::fixedarray_dtype(const dtype& element_dtype, size_t dimension_size)
-    : m_element_dtype(element_dtype), m_dimension_size(dimension_size), m_stride(element_dtype.get_element_size())
+    : m_element_dtype(element_dtype), m_dimension_size(dimension_size)
 {
-    if (m_stride == 0) {
+    size_t child_element_size = element_dtype.get_element_size();
+    if (child_element_size == 0) {
         stringstream ss;
         ss << "Cannot create fixedarray dtype with element type " << element_dtype;
         ss << ", as it does not have a fixed size";
         throw runtime_error(ss.str());
     }
+    m_stride = m_dimension_size > 1 ? element_dtype.get_element_size() : 0;
+    m_element_size = m_dimension_size > 1 ? m_stride * m_dimension_size : m_dimension_size * child_element_size;
 }
 
 fixedarray_dtype::fixedarray_dtype(const dtype& element_dtype, size_t dimension_size, intptr_t stride)
     : m_element_dtype(element_dtype), m_dimension_size(dimension_size), m_stride(stride)
 {
-    if (element_dtype.get_element_size() == 0) {
+    size_t child_element_size = element_dtype.get_element_size();
+    if (child_element_size == 0) {
         stringstream ss;
         ss << "Cannot create fixedarray dtype with element type " << element_dtype;
         ss << ", as it does not have a fixed size";
         throw runtime_error(ss.str());
     }
+    if (dimension_size <= 1 && stride != 0) {
+        stringstream ss;
+        ss << "Cannot create fixedarray dtype with size " << dimension_size;
+        ss << " and stride " << stride << ", as the stride must be zero when the dimension size is 1";
+        throw runtime_error(ss.str());
+    }
+    if (dimension_size > 1 && stride == 0) {
+        stringstream ss;
+        ss << "Cannot create fixedarray dtype with size " << dimension_size;
+        ss << " and stride 0, as the stride must be non-zero when the dimension size is > 1";
+        throw runtime_error(ss.str());
+    }
+    m_element_size = stride ? stride * m_dimension_size : dimension_size * child_element_size;
 }
 
 void fixedarray_dtype::print_element(std::ostream& o, const char *metadata, const char *data) const
@@ -49,11 +67,12 @@ void fixedarray_dtype::print_element(std::ostream& o, const char *metadata, cons
 
 void fixedarray_dtype::print_dtype(std::ostream& o) const
 {
-    o << "fixedarray<" << m_element_dtype;
-    o << ", " << m_dimension_size;
+    o << "fixedarray<";
+    o << m_dimension_size;
     if (m_stride != m_element_dtype.get_element_size()) {
         o << ", stride=" << m_stride;
     }
+    o << ", " << m_element_dtype;
     o << ">";
 }
 
@@ -383,4 +402,32 @@ void fixedarray_dtype::reorder_default_constructed_strides(char *dst_metadata,
 {
     // Because everything contained in the fixedarray must have fixed size, it can't
     // be reordered. This makes this function a NOP
+}
+
+dtype dynd::make_fixedarray_dtype(const dtype& uniform_dtype, int ndim, const intptr_t *shape, const int *axis_perm)
+{
+    if (axis_perm == NULL) {
+        // Build a C-order fixed array dtype
+        dtype result = uniform_dtype;
+        for (int i = ndim-1; i >= 0; --i) {
+            result = make_fixedarray_dtype(result, shape[i]);
+        }
+        return result;
+    } else {
+        // Create strides with the axis permutation
+        dimvector strides(ndim);
+        intptr_t stride = uniform_dtype.get_element_size();
+        for (int i = 0; i < ndim; ++i) {
+            int i_perm = axis_perm[i];
+            size_t dim_size = shape[i_perm];
+            strides[i_perm] = dim_size > 1 ? stride : 0;
+            stride *= dim_size;
+        }
+        // Build the fixed array dtype
+        dtype result = uniform_dtype;
+        for (int i = ndim-1; i >= 0; --i) {
+            result = make_fixedarray_dtype(result, shape[i], strides[i]);
+        }
+        return result;
+    }
 }

@@ -9,7 +9,6 @@
 #include <dynd/dtype.hpp>
 #include <dynd/dtype_assign.hpp>
 #include <dynd/dtypes/view_dtype.hpp>
-#include <dynd/shortvector.hpp>
 
 namespace dynd {
 
@@ -46,6 +45,14 @@ public:
 
     const dtype& get_element_dtype() const {
         return m_element_dtype;
+    }
+
+    intptr_t get_fixed_stride() const {
+        return m_stride;
+    }
+
+    size_t get_fixed_dim_size() const {
+        return m_dimension_size;
     }
 
     void print_element(std::ostream& o, const char *metadata, const char *data) const;
@@ -112,32 +119,7 @@ inline dtype make_fixedarray_dtype(const dtype& element_dtype, size_t size, intp
     return dtype(new fixedarray_dtype(element_dtype, size, stride));
 }
 
-inline dtype make_fixedarray_dtype(const dtype& uniform_dtype, int ndim, const intptr_t *shape, const int *axis_perm = NULL) {
-    if (axis_perm == NULL) {
-        // Build a C-order fixed array dtype
-        dtype result = uniform_dtype;
-        for (int i = ndim-1; i >= 0; --i) {
-            result = make_fixedarray_dtype(result, shape[i]);
-        }
-        return result;
-    } else {
-        // Create strides with the axis permutation
-        dimvector strides(ndim);
-        intptr_t stride = uniform_dtype.get_element_size();
-        for (int i = 0; i < ndim; ++i) {
-            int i_perm = axis_perm[i];
-            size_t dim_size = shape[i_perm];
-            strides[i_perm] = dim_size > 1 ? stride : 0;
-            stride *= dim_size;
-        }
-        // Build the fixed array dtype
-        dtype result = uniform_dtype;
-        for (int i = ndim-1; i >= 0; --i) {
-            result = make_fixedarray_dtype(result, shape[i], strides[i]);
-        }
-        return result;
-    }
-}
+dtype make_fixedarray_dtype(const dtype& uniform_dtype, int ndim, const intptr_t *shape, const int *axis_perm);
 
 } // namespace dynd
 

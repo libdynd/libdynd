@@ -394,7 +394,7 @@ void strided_array_dtype::reorder_default_constructed_strides(char *dst_metadata
     // If the next dimension isn't also strided, then nothing can be reordered
     if (m_element_dtype.get_type_id() != strided_array_type_id) {
         if (m_element_dtype.extended()) {
-            dtype src_child_dtype = src_dtype.at(0, &src_metadata);
+            dtype src_child_dtype = src_dtype.at_single(0, &src_metadata);
             m_element_dtype.extended()->reorder_default_constructed_strides(dst_metadata + sizeof(strided_array_dtype_metadata),
                             src_child_dtype, src_metadata);
         }

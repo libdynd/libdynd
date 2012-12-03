@@ -302,7 +302,7 @@ void array_dtype::reorder_default_constructed_strides(char *dst_metadata,
 {
     // The blockref array dtype can't be reordered, so just let any deeper dtypes do their reordering.
     if (m_element_dtype.extended()) {
-        dtype src_child_dtype = src_dtype.at(0, &src_metadata);
+        dtype src_child_dtype = src_dtype.at_single(0, &src_metadata);
         m_element_dtype.extended()->reorder_default_constructed_strides(dst_metadata + sizeof(array_dtype_metadata),
                         src_child_dtype, src_metadata);
     }
