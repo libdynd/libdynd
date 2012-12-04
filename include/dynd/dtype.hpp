@@ -276,6 +276,21 @@ inline void *inc_to_alignment(void *ptr, size_t alignment) {
                                     (size_t)(-(std::ptrdiff_t)alignment));
 }
 
+/**
+ * \brief Tests whether the offset has the requested alignment.
+ *
+ * NOTE: The alignment must be a power of two.
+ *
+ * \param offset  The offset whose alignment is tested.
+ * \param alignment  The required alignment, must be a power of two.
+ *
+ * \returns  True if the offset is divisible by the power of two alignment,
+ *           False otherwise.
+ */
+inline bool offset_is_aligned(size_t offset, size_t alignment) {
+    return (offset&(alignment - 1)) == 0;
+}
+
 /** Prints a single scalar of a builtin dtype to the stream */
 void print_builtin_scalar(type_id_t type_id, std::ostream& o, const char *data);
 

@@ -142,6 +142,38 @@ inline dtype make_fixedstruct_dtype(const dtype& dt0, const std::string& name0, 
     return make_fixedstruct_dtype(fields, field_names);
 }
 
+/**
+ * \brief Checks whether a set of offsets can be used for fixedstruct.
+ *
+ * Because fixedstruct does not support customizable offset (use struct for
+ * that), this function can be used to check that offsets are compatible with
+ * fixedstruct.
+ *
+ * \param nfields  The number of array entries in `field_types` and `field_offsets`
+ * \param field_types  An array of the field dtypes.
+ * \param field_offsets  The offsets corresponding to the types.
+ * \param total_size  The total size of the struct in bytes.
+ *
+ * \returns  True if constructing a fixedstruct with the same dtypes and field offsets will
+ *           produce the provided offsets.
+ */
+inline bool is_fixedstruct_compatible_offsets(int nfields, const dtype *field_types, const size_t *field_offsets, size_t total_size)
+{
+    size_t offset = 0, max_alignment = 1;
+    for (int i = 0; i < nfields; ++i) {
+        size_t field_alignment = field_types[i].get_alignment();
+        size_t field_data_size = field_types[i].get_element_size();
+        offset = inc_to_alignment(offset, field_alignment);
+        if (field_offsets[i] != offset || field_data_size == 0) {
+            return false;
+        }
+        max_alignment = (field_alignment > max_alignment) ? field_alignment : max_alignment;
+        offset += field_data_size;
+    }
+    offset = inc_to_alignment(offset, max_alignment);
+    return total_size == offset;
+}
+
 } // namespace dynd
 
 #endif // _DYND__FIXEDSTRUCT_DTYPE_HPP_

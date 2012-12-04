@@ -178,11 +178,32 @@ inline intptr_t apply_single_index(intptr_t i0, intptr_t dimension_size, const d
     }
 }
 
+/**
+ * \brief Checks whether an array represents a valid permutation.
+ *
+ * \param size  The number of entries in the permutation
+ * \param perm  The permutation array.
+ *
+ * \returns  True if it's a valid permutation, false otherwise.
+ */
+inline bool is_valid_perm(int size, const int *perm) {
+    shortvector<char> flags(size);
+    memset(flags.get(), 0, size);
+    for (int i = 0; i < size; ++i) {
+        int v = perm[i];
+        if (v < 0 || v > size || flags[v]) {
+            return false;
+        }
+        flags[v] = 1;
+    }
+    return true;
+}
+
 enum shape_signal_t {
     /** Shape value that has never been initialized */
-    shape_signal_uninitialized = -1,
+    shape_signal_uninitialized = -2,
     /** Shape value that may have more than one size, depending on index */
-    shape_signal_varying = -2,
+    shape_signal_varying = -1,
 };
 
 } // namespace dynd
