@@ -199,6 +199,26 @@ inline bool is_valid_perm(int size, const int *perm) {
     return true;
 }
 
+inline bool strides_are_c_contiguous(int ndim, intptr_t element_size, const intptr_t *shape, const intptr_t *strides) {
+    for (int i = ndim-1; i >= 0; --i) {
+        if (shape[i] != 1 && strides[i] != element_size) {
+            return false;
+        }
+        element_size *= shape[i];
+    }
+    return true;
+}
+
+inline bool strides_are_f_contiguous(int ndim, intptr_t element_size, const intptr_t *shape, const intptr_t *strides) {
+    for (int i = 0; i < ndim; ++i) {
+        if (shape[i] != 1 && strides[i] != element_size) {
+            return false;
+        }
+        element_size *= shape[i];
+    }
+    return true;
+}
+
 enum shape_signal_t {
     /** Shape value that has never been initialized */
     shape_signal_uninitialized = -2,
