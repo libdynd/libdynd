@@ -11,6 +11,7 @@
 #include "inc_gtest.hpp"
 
 #include <dynd/gfunc/callable.hpp>
+#include <dynd/gfunc/make_callable.hpp>
 #include <dynd/dtypes/strided_array_dtype.hpp>
 
 using namespace std;
