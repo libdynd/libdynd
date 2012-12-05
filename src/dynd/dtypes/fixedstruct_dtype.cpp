@@ -147,8 +147,7 @@ dtype fixedstruct_dtype::apply_linear_index(int nindices, const irange *indices,
 intptr_t fixedstruct_dtype::apply_linear_index(int nindices, const irange *indices, char *data, const char *metadata,
                 const dtype& result_dtype, char *out_metadata, int current_i, const dtype& root_dt) const
 {
-    // A fixedstruct dtype is retained only when the resulting dtype is exactly the same
-    if (result_dtype.get_type_id() == fixedstruct_type_id) {
+    if (nindices == 0) {
         // Process each element verbatim
         for (size_t i = 0, i_end = m_field_types.size(); i != i_end; ++i) {
             if (m_field_types[i].extended()) {
@@ -168,12 +167,25 @@ intptr_t fixedstruct_dtype::apply_linear_index(int nindices, const irange *indic
         apply_single_linear_index(*indices, m_field_types.size(), current_i, &root_dt, remove_dimension, start_index, index_stride, dimension_size);
         if (remove_dimension) {
             const dtype& dt = m_field_types[start_index];
+            intptr_t offset = m_data_offsets[start_index];
             if (dt.extended()) {
-                intptr_t offset = m_data_offsets[start_index];
                 offset += dt.extended()->apply_linear_index(nindices - 1, indices + 1, data + offset,
                                 metadata + m_metadata_offsets[start_index], result_dtype,
                                 out_metadata, current_i + 1, root_dt);
-                return offset;
+            }
+            return offset;
+        } else if (result_dtype.get_type_id() == fixedstruct_type_id) {
+            // This was a no-op, so copy everything verbatim
+            for (size_t i = 0, i_end = m_field_types.size(); i != i_end; ++i) {
+                if (m_field_types[i].extended()) {
+                    if (m_field_types[i].extended()->apply_linear_index(0, NULL, data + m_data_offsets[i],
+                                    metadata + m_metadata_offsets[i], m_field_types[i], out_metadata + m_metadata_offsets[i],
+                                    current_i + 1, root_dt) != 0) {
+                        stringstream ss;
+                        ss << "Unexpected non-zero offset when applying a NULL index to dtype " << m_field_types[i];
+                        throw runtime_error(ss.str());
+                    }
+                }
             }
             return 0;
         } else {
@@ -193,6 +205,21 @@ intptr_t fixedstruct_dtype::apply_linear_index(int nindices, const irange *indic
             return 0;
         }
     }
+}
+
+dtype fixedstruct_dtype::at(intptr_t i0, const char **inout_metadata, const char **inout_data) const
+{
+    // Bounds-checking of the index
+    i0 = apply_single_index(i0, m_field_types.size(), NULL);
+    if (inout_metadata) {
+        // Modify the metadata
+        *inout_metadata += m_metadata_offsets[i0];
+        // If requested, modify the data
+        if (inout_data) {
+            *inout_data += m_data_offsets[i0];
+        }
+    }
+    return m_field_types[i0];
 }
 
 intptr_t fixedstruct_dtype::get_dim_size(const char *DYND_UNUSED(data), const char *DYND_UNUSED(metadata)) const

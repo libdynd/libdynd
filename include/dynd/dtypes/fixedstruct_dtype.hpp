@@ -77,6 +77,7 @@ public:
     dtype apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& root_dt) const;
     intptr_t apply_linear_index(int nindices, const irange *indices, char *data, const char *metadata,
                     const dtype& result_dtype, char *out_metadata, int current_i, const dtype& root_dt) const;
+    dtype at(intptr_t i0, const char **inout_metadata, const char **inout_data) const;
 
     intptr_t get_dim_size(const char *data, const char *metadata) const;
     void get_shape(int i, intptr_t *out_shape) const;
@@ -101,12 +102,12 @@ public:
     void foreach_leading(char *data, const char *metadata, foreach_fn_t callback, void *callback_data) const;
 }; // class fixedstruct_dtype
 
-/** Makes a tuple dtype with the specified fields, using the standard layout */
+/** Makes a struct dtype with the specified fields */
 inline dtype make_fixedstruct_dtype(const std::vector<dtype>& field_types, const std::vector<std::string>& field_names) {
     return dtype(new fixedstruct_dtype(field_types, field_names));
 }
 
-/** Makes a tuple dtype with the specified fields, using the standard layout */
+/** Makes a struct dtype with the specified fields */
 inline dtype make_fixedstruct_dtype(const dtype& dt0, const std::string& name0)
 {
     std::vector<dtype> fields;
@@ -116,7 +117,7 @@ inline dtype make_fixedstruct_dtype(const dtype& dt0, const std::string& name0)
     return make_fixedstruct_dtype(fields, field_names);
 }
 
-/** Makes a tuple dtype with the specified fields, using the standard layout */
+/** Makes a struct dtype with the specified fields */
 inline dtype make_fixedstruct_dtype(const dtype& dt0, const std::string& name0, const dtype& dt1, const std::string& name1)
 {
     std::vector<dtype> fields;
@@ -128,7 +129,7 @@ inline dtype make_fixedstruct_dtype(const dtype& dt0, const std::string& name0, 
     return make_fixedstruct_dtype(fields, field_names);
 }
 
-/** Makes a tuple dtype with the specified fields, using the standard layout */
+/** Makes a struct dtype with the specified fields */
 inline dtype make_fixedstruct_dtype(const dtype& dt0, const std::string& name0, const dtype& dt1, const std::string& name1, const dtype& dt2, const std::string& name2)
 {
     std::vector<dtype> fields;
@@ -139,6 +140,44 @@ inline dtype make_fixedstruct_dtype(const dtype& dt0, const std::string& name0, 
     field_names.push_back(name0);
     field_names.push_back(name1);
     field_names.push_back(name2);
+    return make_fixedstruct_dtype(fields, field_names);
+}
+
+/** Makes a struct dtype with the specified fields */
+inline dtype make_fixedstruct_dtype(const dtype& dt0, const std::string& name0,
+                const dtype& dt1, const std::string& name1, const dtype& dt2, const std::string& name2,
+                const dtype& dt3, const std::string& name3)
+{
+    std::vector<dtype> fields;
+    std::vector<std::string> field_names;
+    fields.push_back(dt0);
+    fields.push_back(dt1);
+    fields.push_back(dt2);
+    fields.push_back(dt3);
+    field_names.push_back(name0);
+    field_names.push_back(name1);
+    field_names.push_back(name2);
+    field_names.push_back(name3);
+    return make_fixedstruct_dtype(fields, field_names);
+}
+
+/** Makes a struct dtype with the specified fields */
+inline dtype make_fixedstruct_dtype(const dtype& dt0, const std::string& name0,
+                const dtype& dt1, const std::string& name1, const dtype& dt2, const std::string& name2,
+                const dtype& dt3, const std::string& name3, const dtype& dt4, const std::string& name4)
+{
+    std::vector<dtype> fields;
+    std::vector<std::string> field_names;
+    fields.push_back(dt0);
+    fields.push_back(dt1);
+    fields.push_back(dt2);
+    fields.push_back(dt3);
+    fields.push_back(dt4);
+    field_names.push_back(name0);
+    field_names.push_back(name1);
+    field_names.push_back(name2);
+    field_names.push_back(name3);
+    field_names.push_back(name4);
     return make_fixedstruct_dtype(fields, field_names);
 }
 

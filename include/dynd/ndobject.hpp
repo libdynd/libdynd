@@ -89,6 +89,10 @@ public:
         }
     }
 
+    explicit ndobject(ndobject_preamble *ndo, bool add_ref)
+        : m_memblock(&ndo->m_memblockdata, add_ref)
+    {}
+
     void set(const memory_block_ptr& ndobj_memblock)
     {
         if (ndobj_memblock.get()->m_type != ndobject_memory_block_type) {

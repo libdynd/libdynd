@@ -25,7 +25,7 @@ namespace dynd { namespace gfunc {
  *
  * \returns  A reference to an ndobject.
  */
-typedef ndobject_preamble *(*callable_function_t)(ndobject_preamble *params, void *extra);
+typedef ndobject_preamble *(*callable_function_t)(const ndobject_preamble *params, void *extra);
 
 /**
  * Object that provides a dynd-based parameter passing mechanism
@@ -50,6 +50,10 @@ public:
 
     inline callable_function_t get_function() const {
         return m_function;
+    }
+
+    inline ndobject call(const ndobject& n) const {
+        return ndobject(m_function(n.get_ndo(), m_extra), false);
     }
 
     void debug_print(std::ostream& o, const std::string& indent = "") const;
@@ -102,7 +106,7 @@ namespace detail {
         struct params_struct {
             typename parameter_type_of<P0>::type p0;
         };
-        static ndobject_preamble *wrapper(ndobject_preamble *params, void *extra) {
+        static ndobject_preamble *wrapper(const ndobject_preamble *params, void *extra) {
             params_struct *p = reinterpret_cast<params_struct *>(params->m_data_pointer);
             function_pointer_t f = reinterpret_cast<function_pointer_t>(extra);
             return box_result<R>::box(f(p->p0));
@@ -120,7 +124,7 @@ namespace detail {
             typename parameter_type_of<P0>::type p0;
             typename parameter_type_of<P1>::type p1;
         };
-        static ndobject_preamble *wrapper(ndobject_preamble *params, void *extra) {
+        static ndobject_preamble *wrapper(const ndobject_preamble *params, void *extra) {
             params_struct *p = reinterpret_cast<params_struct *>(params->m_data_pointer);
             function_pointer_t f = reinterpret_cast<function_pointer_t>(extra);
             return box_result<R>::box(f(p->p0, p->p1));
@@ -140,7 +144,7 @@ namespace detail {
             typename parameter_type_of<P1>::type p1;
             typename parameter_type_of<P2>::type p2;
         };
-        static ndobject_preamble *wrapper(ndobject_preamble *params, void *extra) {
+        static ndobject_preamble *wrapper(const ndobject_preamble *params, void *extra) {
             params_struct *p = reinterpret_cast<params_struct *>(params->m_data_pointer);
             function_pointer_t f = reinterpret_cast<function_pointer_t>(extra);
             return box_result<R>::box(f(p->p0, p->p1, p->p2));
@@ -151,30 +155,106 @@ namespace detail {
                             make_parameter_dtype<P2>::make(), name2);
         }
     };
+
+    // Metaprogramming wrapper for 4-parameter function
+    template<class R, class P0, class P1, class P2, class P3>
+    struct callable_maker<R (*)(P0, P1, P2, P3)> {
+        typedef R (*function_pointer_t)(P0, P1, P2, P3);
+        struct params_struct {
+            typename parameter_type_of<P0>::type p0;
+            typename parameter_type_of<P1>::type p1;
+            typename parameter_type_of<P2>::type p2;
+            typename parameter_type_of<P3>::type p3;
+        };
+        static ndobject_preamble *wrapper(const ndobject_preamble *params, void *extra) {
+            params_struct *p = reinterpret_cast<params_struct *>(params->m_data_pointer);
+            function_pointer_t f = reinterpret_cast<function_pointer_t>(extra);
+            return box_result<R>::box(f(p->p0, p->p1, p->p2, p->p3));
+        }
+        static dtype make_parameters_dtype(const char *name0, const char *name1, const char *name2, const char *name3) {
+            std::vector<dtype> fields;
+            std::vector<std::string> field_names;
+            fields.push_back(make_parameter_dtype<P0>::make());
+            fields.push_back(make_parameter_dtype<P1>::make());
+            fields.push_back(make_parameter_dtype<P2>::make());
+            fields.push_back(make_parameter_dtype<P3>::make());
+            field_names.push_back(name0);
+            field_names.push_back(name1);
+            field_names.push_back(name2);
+            field_names.push_back(name3);
+            return make_fixedstruct_dtype(fields, field_names);
+        }
+    };
+
+    // Metaprogramming wrapper for 5-parameter function
+    template<class R, class P0, class P1, class P2, class P3, class P4>
+    struct callable_maker<R (*)(P0, P1, P2, P3, P4)> {
+        typedef R (*function_pointer_t)(P0, P1, P2, P3, P4);
+        struct params_struct {
+            typename parameter_type_of<P0>::type p0;
+            typename parameter_type_of<P1>::type p1;
+            typename parameter_type_of<P2>::type p2;
+            typename parameter_type_of<P3>::type p3;
+            typename parameter_type_of<P4>::type p4;
+        };
+        static ndobject_preamble *wrapper(const ndobject_preamble *params, void *extra) {
+            params_struct *p = reinterpret_cast<params_struct *>(params->m_data_pointer);
+            function_pointer_t f = reinterpret_cast<function_pointer_t>(extra);
+            return box_result<R>::box(f(p->p0, p->p1, p->p2, p->p3, p->p4));
+        }
+        static dtype make_parameters_dtype(const char *name0, const char *name1, const char *name2,
+                        const char *name3, const char *name4) {
+            std::vector<dtype> fields;
+            std::vector<std::string> field_names;
+            fields.push_back(make_parameter_dtype<P0>::make());
+            fields.push_back(make_parameter_dtype<P1>::make());
+            fields.push_back(make_parameter_dtype<P2>::make());
+            fields.push_back(make_parameter_dtype<P3>::make());
+            fields.push_back(make_parameter_dtype<P4>::make());
+            field_names.push_back(name0);
+            field_names.push_back(name1);
+            field_names.push_back(name2);
+            field_names.push_back(name3);
+            field_names.push_back(name4);
+            return make_fixedstruct_dtype(fields, field_names);
+        }
+    };
 } // namespace detail
 
 template<typename FN>
 inline callable make_callable(FN *f, const char *name0) {
-    callable result = callable(detail::callable_maker<FN *>::make_parameters_dtype(name0),
+    return callable(detail::callable_maker<FN *>::make_parameters_dtype(name0),
                 &detail::callable_maker<FN *>::wrapper,
                 reinterpret_cast<void *>(f));
-    return result;
 }
 
 template<typename FN>
 inline callable make_callable(FN *f, const char *name0, const char *name1) {
-    callable result = callable(detail::callable_maker<FN *>::make_parameters_dtype(name0, name1),
+    return callable(detail::callable_maker<FN *>::make_parameters_dtype(name0, name1),
                 &detail::callable_maker<FN *>::wrapper,
                 reinterpret_cast<void *>(f));
-    return result;
 }
 
 template<typename FN>
 inline callable make_callable(FN *f, const char *name0, const char *name1, const char *name2) {
-    callable result = callable(detail::callable_maker<FN *>::make_parameters_dtype(name0, name1, name2),
+    return callable(detail::callable_maker<FN *>::make_parameters_dtype(name0, name1, name2),
                 &detail::callable_maker<FN *>::wrapper,
                 reinterpret_cast<void *>(f));
-    return result;
+}
+
+template<typename FN>
+inline callable make_callable(FN *f, const char *name0, const char *name1, const char *name2, const char *name3) {
+    return callable(detail::callable_maker<FN *>::make_parameters_dtype(name0, name1, name2, name3),
+                &detail::callable_maker<FN *>::wrapper,
+                reinterpret_cast<void *>(f));
+}
+
+template<typename FN>
+inline callable make_callable(FN *f, const char *name0, const char *name1, const char *name2,
+                const char *name3, const char *name4) {
+    return callable(detail::callable_maker<FN *>::make_parameters_dtype(name0, name1, name2, name3, name4),
+                &detail::callable_maker<FN *>::wrapper,
+                reinterpret_cast<void *>(f));
 }
 
 }} // namespace dynd::gfunc
