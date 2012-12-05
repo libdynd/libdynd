@@ -30,6 +30,7 @@ set(tests_SRC
     dtypes/test_struct_dtype.cpp
     dtypes/test_tuple_dtype.cpp
     dtypes/test_pointer_dtype.cpp
+    gfunc/test_callable.cpp
     ndobject/test_ndobject.cpp
     ndobject/test_ndobject_arange.cpp
     ndobject/test_ndobject_assign.cpp
@@ -53,6 +54,7 @@ source_group("NDArray Tests" REGULAR_EXPRESSION "\\/ndarray\\/test_[^\\/]*\\.cpp
 source_group("NDObject Tests" REGULAR_EXPRESSION "\\/ndobject\\/test_[^\\/]*\\.cpp$")
 source_group("CodeGen Tests" REGULAR_EXPRESSION "\\/codegen\\/test_[^\\/]*\\.cpp$")
 source_group("DTypes Tests" REGULAR_EXPRESSION "\\/dtypes\\/test_[^\\/]*\\.cpp$")
+source_group("GFunc Tests" REGULAR_EXPRESSION "\\/gfunc\\/test_[^\\/]*\\.cpp$")
 source_group("VM Tests" REGULAR_EXPRESSION "\\/vm\\/test_[^\\/]*\\.cpp$")
 
 add_executable(dnd_tests ${tests_SRC})

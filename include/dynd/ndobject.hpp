@@ -152,6 +152,15 @@ public:
      */
     ndobject& operator=(const ndobject_vals& rhs);
 
+    /**
+     * This function releases the memory block reference, setting the
+     * ndobject to NULL. The caller takes explicit ownership of the
+     * reference.
+     */
+    ndobject_preamble *release() {
+        return reinterpret_cast<ndobject_preamble *>(m_memblock.release());
+    }
+
     /** Low level access to the reference-counted memory */
     inline memory_block_ptr get_memblock() const {
         return m_memblock;

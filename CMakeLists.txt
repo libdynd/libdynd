@@ -106,9 +106,11 @@ set(dynd_SRC
     include/dynd/eval/groupby_elwise_reduce_eval.hpp
     include/dynd/eval/unary_elwise_eval.hpp
     # GFunc
+    src/dynd/gfunc/callable.cpp
     src/dynd/gfunc/elwise_gfunc.cpp
     src/dynd/gfunc/elwise_reduce_gfunc.cpp
     src/dynd/gfunc/serialize.cpp
+    include/dynd/gfunc/callable.hpp
     include/dynd/gfunc/elwise_gfunc.hpp
     include/dynd/gfunc/elwise_reduce_gfunc.hpp
     include/dynd/gfunc/serialize.hpp
