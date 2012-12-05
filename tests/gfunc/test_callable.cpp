@@ -13,6 +13,7 @@
 #include <dynd/gfunc/callable.hpp>
 #include <dynd/gfunc/make_callable.hpp>
 #include <dynd/dtypes/strided_array_dtype.hpp>
+#include <dynd/dtypes/string_dtype.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -236,3 +237,24 @@ TEST(GFuncCallable, DTypeParam) {
     EXPECT_EQ(8, r.as<size_t>());
 }
 
+static string string_return(int a, int b, int c) {
+    stringstream ss;
+    ss << a << ", " << b << ", " << c;
+    return ss.str();
+}
+
+TEST(GFuncCallable, StringReturn) {
+    // Create the callable
+    gfunc::callable c = gfunc::make_callable(&string_return, "a", "b", "c");
+
+    // Call it and see that it gave what we want
+    ndobject a, r;
+    a = ndobject(c.get_parameters_dtype());
+
+    a.at(0).val_assign(-10);
+    a.at(1).val_assign(20);
+    a.at(2).val_assign(1000);
+    r = c.call(a);
+    EXPECT_EQ(make_string_dtype(string_encoding_utf_8), r.get_dtype());
+    EXPECT_EQ("-10, 20, 1000", r.as<string>());
+}

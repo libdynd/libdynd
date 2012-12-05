@@ -6,14 +6,7 @@
 #ifndef _DYND__CALLABLE_HPP_
 #define _DYND__CALLABLE_HPP_
 
-#include <sstream>
-#include <deque>
-#include <vector>
-
 #include <dynd/ndobject.hpp>
-#include <dynd/dtypes/fixedstruct_dtype.hpp>
-#include <dynd/dtypes/fixedarray_dtype.hpp>
-#include <dynd/dtypes/void_pointer_dtype.hpp>
 
 namespace dynd { namespace gfunc {
 

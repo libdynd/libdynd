@@ -6,11 +6,10 @@
 #ifndef _DYND__MAKE_CALLABLE_HPP_
 #define _DYND__MAKE_CALLABLE_HPP_
 
-#include <sstream>
-#include <deque>
-#include <vector>
-
 #include <dynd/gfunc/callable.hpp>
+#include <dynd/dtypes/fixedstruct_dtype.hpp>
+#include <dynd/dtypes/fixedarray_dtype.hpp>
+#include <dynd/dtypes/void_pointer_dtype.hpp>
 
 namespace dynd { namespace gfunc {
 
@@ -61,6 +60,11 @@ template <typename T> struct box_result {
 template <> struct box_result<ndobject> {
     inline static ndobject_preamble *box(ndobject& v) {
         return v.release();
+    }
+};
+template <> struct box_result<std::string> {
+    inline static ndobject_preamble *box(const std::string& v) {
+        return ndobject(v).release();
     }
 };
 

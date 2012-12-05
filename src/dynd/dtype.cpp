@@ -226,6 +226,13 @@ void extended_dtype::reorder_default_constructed_strides(char *DYND_UNUSED(dst_m
     // Default to scalar behavior, which is to do no modifications.
 }
 
+void extended_dtype::get_dynamic_properties(std::pair<std::string, gfunc::callable> **out_properties, int *out_count)
+{
+    // Default to no properties
+    *out_properties = NULL;
+    *out_count = 0;
+}
+
 
 void extended_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const dtype& src_dt,
                 assign_error_mode DYND_UNUSED(errmode),

@@ -24,6 +24,11 @@
 
 namespace dynd {
 
+// Forward definition from dynd/gfunc/callable.hpp
+namespace gfunc {
+    class callable;
+};
+
 // A boolean class for dynamicndarray which is one-byte big
 class dynd_bool {
     char m_value;
@@ -591,6 +596,11 @@ public:
      * \param src_metadata  The metadata of the input ndobject whose stride ordering is to be matched.
      */
     virtual void reorder_default_constructed_strides(char *dst_metadata, const dtype& src_dtype, const char *src_metadata) const;
+
+    /**
+     * Additional dynamic properties exposed by the dtype as gfunc::callable.
+     */
+    virtual void get_dynamic_properties(std::pair<std::string, gfunc::callable> **out_properties, int *out_count);
 
     friend void extended_dtype_incref(const extended_dtype *ed);
     friend void extended_dtype_decref(const extended_dtype *ed);
