@@ -13,6 +13,7 @@
 #include <dynd/ndobject.hpp>
 #include <dynd/dtypes/fixedstruct_dtype.hpp>
 #include <dynd/dtypes/fixedarray_dtype.hpp>
+#include <dynd/dtypes/void_pointer_dtype.hpp>
 
 namespace dynd { namespace gfunc {
 
@@ -78,6 +79,7 @@ template <> struct parameter_type_of<float> {typedef float type;};
 template <> struct parameter_type_of<double> {typedef double type;};
 template <typename T> struct parameter_type_of<std::complex<T> > {typedef std::complex<T> type;};
 template <> struct parameter_type_of<ndobject> {typedef ndobject_preamble *type;};
+template <> struct parameter_type_of<dtype> {typedef extended_dtype *type;};
 
 template <typename T> struct make_parameter_dtype {inline static dtype make() {
         return make_dtype<parameter_type_of<T>::type>();
@@ -87,10 +89,44 @@ template <typename T> struct make_parameter_dtype<const T> : public make_paramet
 template <typename T, int N> struct make_parameter_dtype<T[N]> {inline static dtype make() {
         return make_fixedarray_dtype(make_dtype<T>(), N);
     }};
+// Use void* to pass ndobject and dtype as parameters, correctness currently will
+// rely on using them in the right context. To pass these properly will require
+// dynd to grow the ability to manage object memory.
+template <> struct make_parameter_dtype<ndobject> {inline static dtype make() {
+        return dtype(new void_pointer_dtype);
+    }};
+template <> struct make_parameter_dtype<dtype> {inline static dtype make() {
+        return dtype(new void_pointer_dtype);
+    }};
 
 template <typename T> struct box_result {
     inline static typename enable_if<is_dtype_scalar<T>::value, ndobject_preamble *>::type box(const T& v) {
         return ndobject(v).release();
+    }
+};
+template <> struct box_result<ndobject> {
+    inline static ndobject_preamble *box(ndobject& v) {
+        return v.release();
+    }
+};
+
+template <typename T> struct unbox_param {
+    inline static typename enable_if<is_dtype_scalar<T>::value, const T&>::type unbox(const T& v) {
+        return v;
+    }
+};
+template <> struct unbox_param<ndobject> {
+    inline static ndobject unbox(ndobject_preamble *v) {
+        return ndobject(v, true);
+    }
+};
+template <> struct unbox_param<dtype> {
+    inline static dtype unbox(extended_dtype *v) {
+        if ((reinterpret_cast<uintptr_t>(v)&(~builtin_type_id_mask)) == 0) {
+            return dtype(static_cast<type_id_t>(reinterpret_cast<uintptr_t>(v)));
+        } else {
+            return dtype(v);
+        }
     }
 };
 

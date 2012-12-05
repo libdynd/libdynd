@@ -11,6 +11,7 @@
 #include "inc_gtest.hpp"
 
 #include <dynd/gfunc/callable.hpp>
+#include <dynd/dtypes/strided_array_dtype.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -158,4 +159,30 @@ TEST(GFuncCallable, FiveParameters) {
     r = c.call(a);
     EXPECT_EQ(make_dtype<double>(), r.get_dtype());
     EXPECT_EQ(86, r.as<double>());
+}
+
+static ndobject ndobject_return(int a, int b, int c) {
+    ndobject result = make_strided_ndobject(3, make_dtype<int>());
+    result.at(0).vals() = a;
+    result.at(1).vals() = b;
+    result.at(2).vals() = c;
+    return result;
+}
+
+TEST(GFuncCallable, NDObjectReturn) {
+    // Create the callable
+    gfunc::callable c = gfunc::make_callable(&ndobject_return, "a", "b", "c");
+
+    // Call it and see that it gave what we want
+    ndobject a, r;
+    a = ndobject(c.get_parameters_dtype());
+
+    a.at(0).val_assign(-10);
+    a.at(1).val_assign(20);
+    a.at(2).val_assign(1000);
+    r = c.call(a);
+    EXPECT_EQ(make_strided_array_dtype(make_dtype<int>()), r.get_dtype());
+    EXPECT_EQ(-10, r.at(0).as<int>());
+    EXPECT_EQ(20, r.at(1).as<int>());
+    EXPECT_EQ(1000, r.at(2).as<int>());
 }
