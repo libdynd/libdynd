@@ -115,6 +115,19 @@ template <typename T> struct unbox_param {
         return v;
     }
 };
+template <> struct unbox_param<bool> {
+    inline static bool unbox(const dynd_bool& v) {
+        return v;
+    }
+};
+template <typename T> struct unbox_param<T &> : public unbox_param<T> {};
+template <typename T> struct unbox_param<const T> : public unbox_param<T> {};
+template <typename T, int N> struct unbox_param<T[N]> {
+    typedef T (&result_type)[N];
+    inline static result_type unbox(T (&v)[N]) {
+        return v;
+    }
+};
 template <> struct unbox_param<ndobject> {
     inline static ndobject unbox(ndobject_preamble *v) {
         return ndobject(v, true);
@@ -145,7 +158,7 @@ namespace detail {
         static ndobject_preamble *wrapper(const ndobject_preamble *params, void *extra) {
             params_struct *p = reinterpret_cast<params_struct *>(params->m_data_pointer);
             function_pointer_t f = reinterpret_cast<function_pointer_t>(extra);
-            return box_result<R>::box(f(p->p0));
+            return box_result<R>::box(f(unbox_param<P0>::unbox(p->p0)));
         }
         static dtype make_parameters_dtype(const char *name0) {
             return make_fixedstruct_dtype(make_parameter_dtype<P0>::make(), name0);
@@ -163,7 +176,7 @@ namespace detail {
         static ndobject_preamble *wrapper(const ndobject_preamble *params, void *extra) {
             params_struct *p = reinterpret_cast<params_struct *>(params->m_data_pointer);
             function_pointer_t f = reinterpret_cast<function_pointer_t>(extra);
-            return box_result<R>::box(f(p->p0, p->p1));
+            return box_result<R>::box(f(unbox_param<P0>::unbox(p->p0), unbox_param<P1>::unbox(p->p1)));
         }
         static dtype make_parameters_dtype(const char *name0, const char *name1) {
             return make_fixedstruct_dtype(make_parameter_dtype<P0>::make(), name0,
@@ -183,7 +196,8 @@ namespace detail {
         static ndobject_preamble *wrapper(const ndobject_preamble *params, void *extra) {
             params_struct *p = reinterpret_cast<params_struct *>(params->m_data_pointer);
             function_pointer_t f = reinterpret_cast<function_pointer_t>(extra);
-            return box_result<R>::box(f(p->p0, p->p1, p->p2));
+            return box_result<R>::box(f(unbox_param<P0>::unbox(p->p0), unbox_param<P1>::unbox(p->p1),
+                            unbox_param<P2>::unbox(p->p2)));
         }
         static dtype make_parameters_dtype(const char *name0, const char *name1, const char *name2) {
             return make_fixedstruct_dtype(make_parameter_dtype<P0>::make(), name0,
@@ -205,7 +219,8 @@ namespace detail {
         static ndobject_preamble *wrapper(const ndobject_preamble *params, void *extra) {
             params_struct *p = reinterpret_cast<params_struct *>(params->m_data_pointer);
             function_pointer_t f = reinterpret_cast<function_pointer_t>(extra);
-            return box_result<R>::box(f(p->p0, p->p1, p->p2, p->p3));
+            return box_result<R>::box(f(unbox_param<P0>::unbox(p->p0), unbox_param<P1>::unbox(p->p1),
+                            unbox_param<P2>::unbox(p->p2), unbox_param<P3>::unbox(p->p3)));
         }
         static dtype make_parameters_dtype(const char *name0, const char *name1, const char *name2, const char *name3) {
             std::vector<dtype> fields;
@@ -236,7 +251,9 @@ namespace detail {
         static ndobject_preamble *wrapper(const ndobject_preamble *params, void *extra) {
             params_struct *p = reinterpret_cast<params_struct *>(params->m_data_pointer);
             function_pointer_t f = reinterpret_cast<function_pointer_t>(extra);
-            return box_result<R>::box(f(p->p0, p->p1, p->p2, p->p3, p->p4));
+            return box_result<R>::box(f(unbox_param<P0>::unbox(p->p0), unbox_param<P1>::unbox(p->p1),
+                            unbox_param<P2>::unbox(p->p2), unbox_param<P3>::unbox(p->p3),
+                            unbox_param<P4>::unbox(p->p4)));
         }
         static dtype make_parameters_dtype(const char *name0, const char *name1, const char *name2,
                         const char *name3, const char *name4) {

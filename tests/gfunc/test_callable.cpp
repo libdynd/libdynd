@@ -186,3 +186,52 @@ TEST(GFuncCallable, NDObjectReturn) {
     EXPECT_EQ(20, r.at(1).as<int>());
     EXPECT_EQ(1000, r.at(2).as<int>());
 }
+
+static int ndobject_param(const ndobject& n) {
+    return n.get_dtype().get_uniform_ndim();
+}
+
+TEST(GFuncCallable, NDObjectParam) {
+    // Create the callable
+    gfunc::callable c = gfunc::make_callable(&ndobject_param, "n");
+
+    // Call it and see that it gave what we want
+    ndobject tmp;
+    ndobject a, r;
+    a = ndobject(c.get_parameters_dtype());
+
+    tmp = make_strided_ndobject(2, 3, 1, make_dtype<int>());
+    *(void**)a.get_ndo()->m_data_pointer = tmp.get_ndo();
+    r = c.call(a);
+    EXPECT_EQ(make_dtype<int>(), r.get_dtype());
+    EXPECT_EQ(3, r.as<int>());
+}
+
+static size_t dtype_param(const dtype& d) {
+    return d.get_element_size();
+}
+
+TEST(GFuncCallable, DTypeParam) {
+    // Create the callable
+    gfunc::callable c = gfunc::make_callable(&dtype_param, "d");
+
+    // Call it and see that it gave what we want
+    dtype tmp;
+    ndobject a, r;
+    a = ndobject(c.get_parameters_dtype());
+
+    // With an extended_dtype
+    tmp = make_fixedstruct_dtype(make_dtype<complex<float> >(), "A", make_dtype<int8_t>(), "B");
+    *(const void**)a.get_ndo()->m_data_pointer = tmp.extended();
+    r = c.call(a);
+    EXPECT_EQ(make_dtype<size_t>(), r.get_dtype());
+    EXPECT_EQ(12, r.as<size_t>());
+
+    // With a builtin dtype
+    tmp = make_dtype<uint64_t>();
+    *(void**)a.get_ndo()->m_data_pointer = (void *)tmp.get_type_id();
+    r = c.call(a);
+    EXPECT_EQ(make_dtype<size_t>(), r.get_dtype());
+    EXPECT_EQ(8, r.as<size_t>());
+}
+

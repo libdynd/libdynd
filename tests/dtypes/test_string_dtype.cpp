@@ -272,8 +272,6 @@ TEST(StringDType, Storage) {
     ndobject a;
 
     a = "testing";
-    cout << a << endl;
-    a.debug_print(cout);
     EXPECT_EQ(make_bytes_dtype(1), a.storage().get_dtype());
 
     a = a.cast_scalars(make_string_dtype(string_encoding_utf_16)).vals();
