@@ -227,14 +227,14 @@ TEST(GFuncCallable, DTypeParam) {
     *(const void**)a.get_ndo()->m_data_pointer = tmp.extended();
     r = c.call(a);
     EXPECT_EQ(make_dtype<size_t>(), r.get_dtype());
-    EXPECT_EQ(12, r.as<size_t>());
+    EXPECT_EQ(12u, r.as<size_t>());
 
     // With a builtin dtype
     tmp = make_dtype<uint64_t>();
     *(void**)a.get_ndo()->m_data_pointer = (void *)tmp.get_type_id();
     r = c.call(a);
     EXPECT_EQ(make_dtype<size_t>(), r.get_dtype());
-    EXPECT_EQ(8, r.as<size_t>());
+    EXPECT_EQ(8u, r.as<size_t>());
 }
 
 static string string_return(int a, int b, int c) {

@@ -97,9 +97,11 @@ intptr_t pointer_dtype::apply_linear_index(int nindices, const irange *indices, 
     memory_block_incref(out_md->blockref);
     out_md->offset = md->offset;
     if (m_target_dtype.extended()) {
+        const pointer_dtype *pdt = static_cast<const pointer_dtype *>(result_dtype.extended());
         // The indexing may cause a change to the metadata offset
-        out_md->offset += m_target_dtype.extended()->apply_linear_index(0, NULL, data, metadata + sizeof(pointer_dtype_metadata),
-                        m_target_dtype, out_metadata + sizeof(pointer_dtype_metadata),
+        out_md->offset += m_target_dtype.extended()->apply_linear_index(nindices, indices, data,
+                        metadata + sizeof(pointer_dtype_metadata),
+                        pdt->m_target_dtype, out_metadata + sizeof(pointer_dtype_metadata),
                         embedded_reference, current_i, root_dt);
     }
     return 0;
@@ -233,6 +235,9 @@ void pointer_dtype::metadata_default_construct(char *metadata, int ndim, const i
     // TODO: Will need a different kind of memory block if the data isn't POD.
     pointer_dtype_metadata *md = reinterpret_cast<pointer_dtype_metadata *>(metadata);
     md->blockref = make_pod_memory_block().release();
+    if (m_target_dtype.extended()) {
+        m_target_dtype.extended()->metadata_default_construct(metadata + sizeof(pointer_dtype_metadata), ndim, shape);
+    }
 }
 
 void pointer_dtype::metadata_copy_construct(char *dst_metadata, const char *src_metadata, memory_block_data *embedded_reference) const

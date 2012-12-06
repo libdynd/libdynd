@@ -126,7 +126,8 @@ dtype fixedstruct_dtype::apply_linear_index(int nindices, const irange *indices,
         apply_single_linear_index(*indices, m_field_types.size(), current_i, &root_dt, remove_dimension, start_index, index_stride, dimension_size);
         if (remove_dimension) {
             return m_field_types[start_index].apply_linear_index(nindices - 1, indices + 1, current_i + 1, root_dt);
-        } else if (nindices == 1 && start_index == 0 && index_stride == 1 && dimension_size == m_field_types.size()) {
+        } else if (nindices == 1 && start_index == 0 && index_stride == 1 &&
+                        (size_t)dimension_size == m_field_types.size()) {
             // This is a do-nothing index, keep the same dtype
             return dtype(this, true);
         } else {
@@ -254,7 +255,7 @@ void fixedstruct_dtype::get_shape(int i, intptr_t *out_shape) const
     }
 }
 
-intptr_t fixedstruct_dtype::get_representative_stride(const char *metadata) const
+intptr_t fixedstruct_dtype::get_representative_stride(const char *DYND_UNUSED(metadata)) const
 {
     // Return the first non-zero offset as the representative stride
     for (size_t i = 0, i_end = m_field_types.size(); i != i_end; ++i) {
@@ -368,7 +369,6 @@ void fixedstruct_dtype::metadata_destruct(char *metadata) const
 
 void fixedstruct_dtype::metadata_debug_print(const char *metadata, std::ostream& o, const std::string& indent) const
 {
-    const size_t *offsets = reinterpret_cast<const size_t *>(metadata);
     o << indent << "fixedstruct metadata\n";
     for (size_t i = 0; i < m_field_types.size(); ++i) {
         const dtype& field_dt = m_field_types[i];

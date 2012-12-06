@@ -37,7 +37,7 @@ TEST(FixedArrayDType, Create) {
     EXPECT_THROW(d.at(3), index_out_of_bounds);
     fad = static_cast<const fixedarray_dtype *>(d.extended());
     EXPECT_EQ(4, fad->get_fixed_stride());
-    EXPECT_EQ(3, fad->get_fixed_dim_size());
+    EXPECT_EQ(3u, fad->get_fixed_dim_size());
 
     d = make_fixedarray_dtype(make_dtype<int32_t>(), 1);
     EXPECT_EQ(fixedarray_type_id, d.get_type_id());
@@ -47,7 +47,7 @@ TEST(FixedArrayDType, Create) {
     EXPECT_FALSE(d.is_expression());
     fad = static_cast<const fixedarray_dtype *>(d.extended());
     EXPECT_EQ(0, fad->get_fixed_stride());
-    EXPECT_EQ(1, fad->get_fixed_dim_size());
+    EXPECT_EQ(1u, fad->get_fixed_dim_size());
 }
 
 TEST(FixedArrayDType, CreateCOrder) {

@@ -35,7 +35,7 @@ template <> struct parameter_type_of<ndobject> {typedef ndobject_preamble *type;
 template <> struct parameter_type_of<dtype> {typedef extended_dtype *type;};
 
 template <typename T> struct make_parameter_dtype {inline static dtype make() {
-        return make_dtype<parameter_type_of<T>::type>();
+        return make_dtype<typename parameter_type_of<T>::type>();
     }};
 template <typename T> struct make_parameter_dtype<T &> : public make_parameter_dtype<T> {};
 template <typename T> struct make_parameter_dtype<const T> : public make_parameter_dtype<T> {};
@@ -57,9 +57,12 @@ template <typename T> struct box_result {
         return ndobject(v).release();
     }
 };
+template <typename T> struct box_result<T &> : public box_result<T> {};
+template <typename T> struct box_result<const T> : public box_result<T> {};
 template <> struct box_result<ndobject> {
-    inline static ndobject_preamble *box(ndobject& v) {
-        return v.release();
+    inline static ndobject_preamble *box(const ndobject& v) {
+        // Throwing away v's value is ok here, for the limited use of this function
+        return const_cast<ndobject&>(v).release();
     }
 };
 template <> struct box_result<std::string> {

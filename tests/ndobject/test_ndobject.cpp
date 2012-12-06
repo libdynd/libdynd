@@ -282,7 +282,7 @@ TEST(NDObject, StdVectorStringConstructor) {
     EXPECT_EQ(1u, a.get_shape().size());
     EXPECT_EQ(5, a.get_shape()[0]);
     EXPECT_EQ(1u, a.get_strides().size());
-    EXPECT_EQ(a.get_dtype().at(0).get_element_size(), a.get_strides()[0]);
+    EXPECT_EQ((intptr_t)a.get_dtype().at(0).get_element_size(), a.get_strides()[0]);
     for (int i = 0; i < 5; ++i) {
         EXPECT_EQ(v[i], a.at(i).as<string>());
     }

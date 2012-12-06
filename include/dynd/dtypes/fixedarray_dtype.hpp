@@ -39,7 +39,7 @@ public:
     size_t get_element_size() const {
         return m_element_size;
     }
-    size_t get_default_element_size(int ndim, const intptr_t *shape) const {
+    size_t get_default_element_size(int DYND_UNUSED(ndim), const intptr_t *DYND_UNUSED(shape)) const {
         return m_element_size;
     }
 

@@ -28,7 +28,7 @@ fixedarray_dtype::fixedarray_dtype(const dtype& element_dtype, size_t dimension_
 }
 
 fixedarray_dtype::fixedarray_dtype(const dtype& element_dtype, size_t dimension_size, intptr_t stride)
-    : m_element_dtype(element_dtype), m_dimension_size(dimension_size), m_stride(stride)
+    : m_element_dtype(element_dtype), m_stride(stride), m_dimension_size(dimension_size)
 {
     size_t child_element_size = element_dtype.get_element_size();
     if (child_element_size == 0) {
@@ -69,7 +69,7 @@ void fixedarray_dtype::print_dtype(std::ostream& o) const
 {
     o << "fixedarray<";
     o << m_dimension_size;
-    if (m_stride != m_element_dtype.get_element_size()) {
+    if ((size_t)m_stride != m_element_dtype.get_element_size()) {
         o << ", stride=" << m_stride;
     }
     o << ", " << m_element_dtype;
@@ -173,7 +173,7 @@ intptr_t fixedarray_dtype::apply_linear_index(int nindices, const irange *indice
     }
 }
 
-dtype fixedarray_dtype::at(intptr_t i0, const char **inout_metadata, const char **inout_data) const
+dtype fixedarray_dtype::at(intptr_t i0, const char **DYND_UNUSED(inout_metadata), const char **inout_data) const
 {
     // Bounds-checking of the index
     i0 = apply_single_index(i0, m_dimension_size, NULL);
@@ -199,7 +199,7 @@ dtype fixedarray_dtype::get_dtype_at_dimension(char **inout_metadata, int i, int
     }
 }
 
-intptr_t fixedarray_dtype::get_dim_size(const char *DYND_UNUSED(data), const char *metadata) const
+intptr_t fixedarray_dtype::get_dim_size(const char *DYND_UNUSED(data), const char *DYND_UNUSED(metadata)) const
 {
     return m_dimension_size;
 }
@@ -234,7 +234,7 @@ void fixedarray_dtype::get_strides(int i, intptr_t *out_strides, const char *met
     }
 }
 
-intptr_t fixedarray_dtype::get_representative_stride(const char *metadata) const
+intptr_t fixedarray_dtype::get_representative_stride(const char *DYND_UNUSED(metadata)) const
 {
     return m_stride;
 }
@@ -282,7 +282,7 @@ void fixedarray_dtype::metadata_default_construct(char *metadata, int ndim, cons
 {
     // Validate that the shape is ok
     if (ndim > 0) {
-        if (shape[0] >= 0 && shape[0] != m_dimension_size) {
+        if (shape[0] >= 0 && (size_t)shape[0] != m_dimension_size) {
             stringstream ss;
             ss << "Cannot construct dynd object of dtype " << dtype(this, true);
             ss << " with dimension size " << shape[0] << ", the size must be " << m_dimension_size;
@@ -364,7 +364,7 @@ size_t fixedarray_dtype::iterdata_construct(iterdata_common *iterdata, const cha
         out_uniform_dtype = m_element_dtype;
     }
 
-    if (m_dimension_size != 1 && shape[0] != m_dimension_size) {
+    if (m_dimension_size != 1 && (size_t)shape[0] != m_dimension_size) {
         stringstream ss;
         ss << "Cannot construct dynd iterator of dtype " << dtype(this, true);
         ss << " with dimension size " << shape[0] << ", the size must be " << m_dimension_size;
@@ -399,8 +399,8 @@ void fixedarray_dtype::foreach_leading(char *data, const char *metadata, foreach
     }
 }
 
-void fixedarray_dtype::reorder_default_constructed_strides(char *dst_metadata,
-                const dtype& src_dtype, const char *src_metadata) const
+void fixedarray_dtype::reorder_default_constructed_strides(char *DYND_UNUSED(dst_metadata),
+                const dtype& DYND_UNUSED(src_dtype), const char *DYND_UNUSED(src_metadata)) const
 {
     // Because everything contained in the fixedarray must have fixed size, it can't
     // be reordered. This makes this function a NOP

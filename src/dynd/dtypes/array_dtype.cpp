@@ -121,7 +121,7 @@ dtype array_dtype::get_dtype_at_dimension(char **inout_metadata, int i, int tota
     }
 }
 
-intptr_t array_dtype::get_dim_size(const char *data, const char *metadata) const
+intptr_t array_dtype::get_dim_size(const char *data, const char *DYND_UNUSED(metadata)) const
 {
     const array_dtype_data *d = reinterpret_cast<const array_dtype_data *>(data);
     return d->size;
@@ -272,17 +272,17 @@ void array_dtype::metadata_debug_print(const char *metadata, std::ostream& o, co
     }
 }
 
-size_t array_dtype::get_iterdata_size(int ndim) const
+size_t array_dtype::get_iterdata_size(int DYND_UNUSED(ndim)) const
 {
     throw runtime_error("TODO: implement array_dtype::get_iterdata_size");
 }
 
-size_t array_dtype::iterdata_construct(iterdata_common *iterdata, const char **inout_metadata, int ndim, const intptr_t* shape, dtype& out_uniform_dtype) const
+size_t array_dtype::iterdata_construct(iterdata_common *DYND_UNUSED(iterdata), const char **DYND_UNUSED(inout_metadata), int DYND_UNUSED(ndim), const intptr_t* DYND_UNUSED(shape), dtype& DYND_UNUSED(out_uniform_dtype)) const
 {
     throw runtime_error("TODO: implement array_dtype::iterdata_construct");
 }
 
-size_t array_dtype::iterdata_destruct(iterdata_common *iterdata, int ndim) const
+size_t array_dtype::iterdata_destruct(iterdata_common *DYND_UNUSED(iterdata), int DYND_UNUSED(ndim)) const
 {
     throw runtime_error("TODO: implement array_dtype::iterdata_destruct");
 }
