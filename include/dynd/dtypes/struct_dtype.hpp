@@ -94,7 +94,7 @@ public:
 
     void foreach_leading(char *data, const char *metadata, foreach_fn_t callback, void *callback_data) const;
 
-    void get_dynamic_properties(std::pair<std::string, gfunc::callable> **out_properties, int *out_count);
+    void get_dynamic_properties(const std::pair<std::string, gfunc::callable> **out_properties, int *out_count) const;
 }; // class struct_dtype
 
 /** Makes a tuple dtype with the specified fields, using the standard layout */

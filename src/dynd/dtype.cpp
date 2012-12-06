@@ -229,7 +229,7 @@ void extended_dtype::reorder_default_constructed_strides(char *DYND_UNUSED(dst_m
     // Default to scalar behavior, which is to do no modifications.
 }
 
-void extended_dtype::get_dynamic_properties(std::pair<std::string, gfunc::callable> **out_properties, int *out_count)
+void extended_dtype::get_dynamic_properties(const std::pair<std::string, gfunc::callable> **out_properties, int *out_count) const
 {
     // Default to no properties
     *out_properties = NULL;
@@ -276,7 +276,7 @@ static pair<string, gfunc::callable> extended_string_dtype_properties[] = {
     pair<string, gfunc::callable>("encoding", gfunc::make_callable(&get_extended_string_encoding, "self"))
 };
 
-void extended_string_dtype::get_dynamic_properties(std::pair<std::string, gfunc::callable> **out_properties, int *out_count)
+void extended_string_dtype::get_dynamic_properties(const std::pair<std::string, gfunc::callable> **out_properties, int *out_count) const
 {
     *out_properties = extended_string_dtype_properties;
     *out_count = sizeof(extended_string_dtype_properties) / sizeof(extended_string_dtype_properties[0]);

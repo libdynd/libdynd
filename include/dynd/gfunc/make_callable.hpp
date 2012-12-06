@@ -96,7 +96,7 @@ template <> struct unbox_param<dtype> {
         if ((reinterpret_cast<uintptr_t>(v)&(~builtin_type_id_mask)) == 0) {
             return dtype(static_cast<type_id_t>(reinterpret_cast<uintptr_t>(v)));
         } else {
-            return dtype(v);
+            return dtype(v, true);
         }
     }
 };
