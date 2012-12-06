@@ -15,17 +15,6 @@
 using namespace std;
 using namespace dynd;
 
-static string get_encoding(const dtype& dt) {
-    const fixedstring_dtype *d = static_cast<const fixedstring_dtype *>(dt.extended());
-    stringstream ss;
-    ss << d->get_encoding();
-    return ss.str();
-}
-
-static pair<string, gfunc::callable> fixedstring_properties[] = {
-    pair<string, gfunc::callable>("encoding", gfunc::make_callable(&get_encoding, "self"))
-};
-
 dynd::fixedstring_dtype::fixedstring_dtype(string_encoding_t encoding, intptr_t stringsize)
     : m_stringsize(stringsize), m_encoding(encoding)
 {

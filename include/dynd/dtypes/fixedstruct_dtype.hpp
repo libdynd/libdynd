@@ -100,6 +100,8 @@ public:
     void metadata_debug_print(const char *metadata, std::ostream& o, const std::string& indent) const;
 
     void foreach_leading(char *data, const char *metadata, foreach_fn_t callback, void *callback_data) const;
+
+    void get_dynamic_properties(std::pair<std::string, gfunc::callable> **out_properties, int *out_count);
 }; // class fixedstruct_dtype
 
 /** Makes a struct dtype with the specified fields */

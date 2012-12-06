@@ -8,6 +8,7 @@
 #include <dynd/dtypes/dtype_alignment.hpp>
 #include <dynd/shape_tools.hpp>
 #include <dynd/exceptions.hpp>
+#include <dynd/gfunc/make_callable.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -385,4 +386,27 @@ void fixedstruct_dtype::foreach_leading(char *data, const char *metadata, foreac
             callback(field_types[i], data + m_data_offsets[i], metadata + metadata_offsets[i], callback_data);
         }
     }
+}
+
+static ndobject property_get_data_offsets(const dtype& dt) {
+    const fixedstruct_dtype *d = static_cast<const fixedstruct_dtype *>(dt.extended());
+    // TODO: The offsets could be an immutable ndobject, which we would just return.
+    return ndobject(d->get_data_offsets());
+}
+
+static ndobject property_get_metadata_offsets(const dtype& dt) {
+    const fixedstruct_dtype *d = static_cast<const fixedstruct_dtype *>(dt.extended());
+    // TODO: The offsets could be an immutable ndobject, which we would just return.
+    return ndobject(d->get_metadata_offsets());
+}
+
+static pair<string, gfunc::callable> dtype_properties[] = {
+    pair<string, gfunc::callable>("data_offsets", gfunc::make_callable(&property_get_data_offsets, "self")),
+    pair<string, gfunc::callable>("metadata_offsets", gfunc::make_callable(&property_get_metadata_offsets, "self"))
+};
+
+void fixedstruct_dtype::get_dynamic_properties(std::pair<std::string, gfunc::callable> **out_properties, int *out_count)
+{
+    *out_properties = dtype_properties;
+    *out_count = sizeof(dtype_properties) / sizeof(dtype_properties[0]);
 }

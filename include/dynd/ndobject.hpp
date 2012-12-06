@@ -81,6 +81,12 @@ public:
     template<int N>
     ndobject(const char *(&rhs)[N]);
 
+    /**
+     * Constructs an array from a std::vector.
+     */
+    template<class T>
+    ndobject(const std::vector<T>& vec);
+
     explicit ndobject(const memory_block_ptr& ndobj_memblock)
         : m_memblock(ndobj_memblock)
     {
@@ -703,7 +709,7 @@ namespace detail {
             return N * fill_shape<T>::fill(out_shape + 1);
         }
     };
-};
+} // namespace detail
 
 template<class T, int N>
 dynd::ndobject::ndobject(const T (&rhs)[N])
@@ -720,14 +726,35 @@ dynd::ndobject::ndobject(const T (&rhs)[N])
 template<int N>
 inline dynd::ndobject::ndobject(const char (&rhs)[N])
 {
-    *this = make_string_ndobject(rhs, N, string_encoding_utf_8);
+    make_string_ndobject(rhs, N, string_encoding_utf_8).swap(*this);
 }
 
 template<int N>
 inline dynd::ndobject::ndobject(const char *(&rhs)[N])
 {
-    *this = make_utf8_array_ndobject(rhs, N);
+    make_utf8_array_ndobject(rhs, N).swap(*this);
 }
+
+///////////// std::vector constructor implementation /////////////////////////
+namespace detail {
+    template <class T>
+    inline typename enable_if<is_dtype_scalar<T>::value, ndobject>::type
+                    make_from_vec(const std::vector<T>& vec)
+    {
+        ndobject result = make_strided_ndobject(vec.size(), make_dtype<T>());
+        if (!vec.empty()) {
+            memcpy(result.get_readwrite_originptr(), &vec[0], vec.size() * sizeof(T));
+        }
+        return result;
+    }
+} // namespace detail
+
+template<class T>
+ndobject::ndobject(const std::vector<T>& vec)
+{
+   detail::make_from_vec(vec).swap(*this);
+}
+
 
 ///////////// The ndobject.as<type>() templated function /////////////////////////
 namespace detail {

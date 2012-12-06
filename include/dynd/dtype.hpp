@@ -646,6 +646,8 @@ public:
     // String dtypes stop the iterdata chain
     // TODO: Maybe it should be more flexible?
     size_t get_iterdata_size(int ndim) const;
+
+    void get_dynamic_properties(std::pair<std::string, gfunc::callable> **out_properties, int *out_count);
 };
 
 /**

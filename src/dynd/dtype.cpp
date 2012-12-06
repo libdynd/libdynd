@@ -10,6 +10,7 @@
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/kernels/buffered_unary_kernels.hpp>
 #include <dynd/dtypes/convert_dtype.hpp>
+#include <dynd/gfunc/make_callable.hpp>
 
 #include <sstream>
 #include <cstring>
@@ -260,6 +261,23 @@ extended_string_dtype::~extended_string_dtype()
 size_t extended_string_dtype::get_iterdata_size(int DYND_UNUSED(ndim)) const
 {
     return 0;
+}
+
+static string get_extended_string_encoding(const dtype& dt) {
+    const extended_string_dtype *d = static_cast<const extended_string_dtype *>(dt.extended());
+    stringstream ss;
+    ss << d->get_encoding();
+    return ss.str();
+}
+
+static pair<string, gfunc::callable> extended_string_dtype_properties[] = {
+    pair<string, gfunc::callable>("encoding", gfunc::make_callable(&get_extended_string_encoding, "self"))
+};
+
+void extended_string_dtype::get_dynamic_properties(std::pair<std::string, gfunc::callable> **out_properties, int *out_count)
+{
+    *out_properties = extended_string_dtype_properties;
+    *out_count = sizeof(extended_string_dtype_properties) / sizeof(extended_string_dtype_properties[0]);
 }
 
 bool extended_expression_dtype::is_expression() const
