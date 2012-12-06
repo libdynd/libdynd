@@ -130,13 +130,15 @@ dtype fixedarray_dtype::apply_linear_index(int nindices, const irange *indices, 
 }
 
 intptr_t fixedarray_dtype::apply_linear_index(int nindices, const irange *indices, char *data, const char *metadata,
-                const dtype& result_dtype, char *out_metadata, int current_i, const dtype& root_dt) const
+                const dtype& result_dtype, char *out_metadata,
+                memory_block_data *embedded_reference,
+                int current_i, const dtype& root_dt) const
 {
     if (nindices == 0) {
         // If there are no more indices, copy the rest verbatim
         if (m_element_dtype.extended()) {
             return m_element_dtype.extended()->apply_linear_index(0, NULL, data, metadata,
-                            m_element_dtype, out_metadata, current_i + 1, root_dt);
+                            m_element_dtype, out_metadata, embedded_reference, current_i + 1, root_dt);
         }
         return 0;
     } else {
@@ -149,7 +151,7 @@ intptr_t fixedarray_dtype::apply_linear_index(int nindices, const irange *indice
             if (m_element_dtype.extended()) {
                 offset += m_element_dtype.extended()->apply_linear_index(nindices - 1, indices + 1,
                                 data + offset, metadata,
-                                result_dtype, out_metadata, current_i + 1, root_dt);
+                                result_dtype, out_metadata, embedded_reference, current_i + 1, root_dt);
             }
             return offset;
         } else {
@@ -164,7 +166,7 @@ intptr_t fixedarray_dtype::apply_linear_index(int nindices, const irange *indice
                 offset += m_element_dtype.extended()->apply_linear_index(nindices - 1, indices + 1,
                                 data + offset, metadata,
                                 result_edtype->m_element_dtype, out_metadata + sizeof(strided_array_dtype_metadata),
-                                current_i + 1, root_dt);
+                                embedded_reference, current_i + 1, root_dt);
             }
             return offset;
         }

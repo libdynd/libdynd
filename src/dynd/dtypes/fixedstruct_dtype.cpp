@@ -146,7 +146,9 @@ dtype fixedstruct_dtype::apply_linear_index(int nindices, const irange *indices,
 }
 
 intptr_t fixedstruct_dtype::apply_linear_index(int nindices, const irange *indices, char *data, const char *metadata,
-                const dtype& result_dtype, char *out_metadata, int current_i, const dtype& root_dt) const
+                const dtype& result_dtype, char *out_metadata,
+                memory_block_data *embedded_reference,
+                int current_i, const dtype& root_dt) const
 {
     if (nindices == 0) {
         // Process each element verbatim
@@ -154,7 +156,7 @@ intptr_t fixedstruct_dtype::apply_linear_index(int nindices, const irange *indic
             if (m_field_types[i].extended()) {
                 if (m_field_types[i].extended()->apply_linear_index(0, NULL, data + m_data_offsets[i],
                                 metadata + m_metadata_offsets[i], m_field_types[i], out_metadata + m_metadata_offsets[i],
-                                current_i + 1, root_dt) != 0) {
+                                embedded_reference, current_i + 1, root_dt) != 0) {
                     stringstream ss;
                     ss << "Unexpected non-zero offset when applying a NULL index to dtype " << m_field_types[i];
                     throw runtime_error(ss.str());
@@ -172,7 +174,7 @@ intptr_t fixedstruct_dtype::apply_linear_index(int nindices, const irange *indic
             if (dt.extended()) {
                 offset += dt.extended()->apply_linear_index(nindices - 1, indices + 1, data + offset,
                                 metadata + m_metadata_offsets[start_index], result_dtype,
-                                out_metadata, current_i + 1, root_dt);
+                                out_metadata, embedded_reference, current_i + 1, root_dt);
             }
             return offset;
         } else if (result_dtype.get_type_id() == fixedstruct_type_id) {
@@ -181,7 +183,7 @@ intptr_t fixedstruct_dtype::apply_linear_index(int nindices, const irange *indic
                 if (m_field_types[i].extended()) {
                     if (m_field_types[i].extended()->apply_linear_index(0, NULL, data + m_data_offsets[i],
                                     metadata + m_metadata_offsets[i], m_field_types[i], out_metadata + m_metadata_offsets[i],
-                                    current_i + 1, root_dt) != 0) {
+                                    embedded_reference, current_i + 1, root_dt) != 0) {
                         stringstream ss;
                         ss << "Unexpected non-zero offset when applying a NULL index to dtype " << m_field_types[i];
                         throw runtime_error(ss.str());
@@ -199,8 +201,8 @@ intptr_t fixedstruct_dtype::apply_linear_index(int nindices, const irange *indic
                 if (dt.extended()) {
                     out_offsets[i] += dt.extended()->apply_linear_index(nindices - 1, indices + 1,
                                     data + out_offsets[i], metadata + m_metadata_offsets[idx],
-                                    dt,out_metadata + result_e_dt->get_metadata_offsets()[i],
-                                    current_i + 1, root_dt);
+                                    dt, out_metadata + result_e_dt->get_metadata_offsets()[i],
+                                    embedded_reference, current_i + 1, root_dt);
                 }
             }
             return 0;

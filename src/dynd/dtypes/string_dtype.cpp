@@ -84,12 +84,13 @@ dtype string_dtype::apply_linear_index(int nindices, const irange *DYND_UNUSED(i
 intptr_t string_dtype::apply_linear_index(int DYND_UNUSED(nindices), const irange *DYND_UNUSED(indices),
                 char *DYND_UNUSED(data), const char *metadata,
                 const dtype& DYND_UNUSED(result_dtype), char *out_metadata,
+                memory_block_data *embedded_reference,
                 int DYND_UNUSED(current_i), const dtype& DYND_UNUSED(root_dt)) const
 {
     const string_dtype_metadata *md = reinterpret_cast<const string_dtype_metadata *>(metadata);
     string_dtype_metadata *out_md = reinterpret_cast<string_dtype_metadata *>(out_metadata);
-    // Just copy the blockref
-    out_md->blockref = md->blockref;
+    // Copy the blockref, switching to the reference we were embedded in if necessary
+    out_md->blockref = md->blockref ? md->blockref : embedded_reference;
     memory_block_incref(out_md->blockref);
     return 0;
 }

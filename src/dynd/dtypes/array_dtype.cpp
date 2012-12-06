@@ -80,7 +80,9 @@ dtype array_dtype::apply_linear_index(int nindices, const irange *indices, int c
 }
 
 intptr_t array_dtype::apply_linear_index(int DYND_UNUSED(nindices), const irange *DYND_UNUSED(indices), char *DYND_UNUSED(data), const char *DYND_UNUSED(metadata),
-                const dtype& DYND_UNUSED(result_dtype), char *DYND_UNUSED(out_metadata), int DYND_UNUSED(current_i), const dtype& DYND_UNUSED(root_dt)) const
+                const dtype& DYND_UNUSED(result_dtype), char *DYND_UNUSED(out_metadata),
+                memory_block_data *DYND_UNUSED(embedded_reference),
+                int DYND_UNUSED(current_i), const dtype& DYND_UNUSED(root_dt)) const
 {
     throw runtime_error("TODO: implement array_dtype::apply_linear_index");
 }

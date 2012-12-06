@@ -90,7 +90,9 @@ dtype strided_array_dtype::apply_linear_index(int nindices, const irange *indice
 }
 
 intptr_t strided_array_dtype::apply_linear_index(int nindices, const irange *indices, char *data, const char *metadata,
-                const dtype& result_dtype, char *out_metadata, int current_i, const dtype& root_dt) const
+                const dtype& result_dtype, char *out_metadata,
+                memory_block_data *embedded_reference,
+                int current_i, const dtype& root_dt) const
 {
     const strided_array_dtype_metadata *md = reinterpret_cast<const strided_array_dtype_metadata *>(metadata);
     strided_array_dtype_metadata *out_md = reinterpret_cast<strided_array_dtype_metadata *>(out_metadata);
@@ -99,7 +101,8 @@ intptr_t strided_array_dtype::apply_linear_index(int nindices, const irange *ind
         *out_md = *md;
         if (m_element_dtype.extended()) {
             return m_element_dtype.extended()->apply_linear_index(0, NULL, data, metadata + sizeof(strided_array_dtype_metadata),
-                            m_element_dtype, out_metadata + sizeof(strided_array_dtype_metadata), current_i + 1, root_dt);
+                            m_element_dtype, out_metadata + sizeof(strided_array_dtype_metadata),
+                            embedded_reference, current_i + 1, root_dt);
         }
         return 0;
     } else {
@@ -112,7 +115,8 @@ intptr_t strided_array_dtype::apply_linear_index(int nindices, const irange *ind
             if (m_element_dtype.extended()) {
                 offset += m_element_dtype.extended()->apply_linear_index(nindices - 1, indices + 1, data + offset,
                                 metadata + sizeof(strided_array_dtype_metadata),
-                                result_dtype, out_metadata, current_i + 1, root_dt);
+                                result_dtype, out_metadata,
+                                embedded_reference, current_i + 1, root_dt);
             }
             return offset;
         } else {
@@ -124,7 +128,8 @@ intptr_t strided_array_dtype::apply_linear_index(int nindices, const irange *ind
                 const strided_array_dtype *result_edtype = static_cast<const strided_array_dtype *>(result_dtype.extended());
                 offset += m_element_dtype.extended()->apply_linear_index(nindices - 1, indices + 1, data + offset,
                                 metadata + sizeof(strided_array_dtype_metadata),
-                                result_edtype->m_element_dtype, out_metadata + sizeof(strided_array_dtype_metadata), current_i + 1, root_dt);
+                                result_edtype->m_element_dtype, out_metadata + sizeof(strided_array_dtype_metadata),
+                                embedded_reference, current_i + 1, root_dt);
             }
             return offset;
         }

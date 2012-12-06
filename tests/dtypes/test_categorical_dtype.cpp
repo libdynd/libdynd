@@ -118,9 +118,9 @@ TEST(CategoricalDType, Factor) {
     i.at(1).vals() = 10;
     i.at(2).vals() = 0;
 
-    dtype di = factor_categorical_dtype(i);
+    //dtype di = factor_categorical_dtype(i);
 
-    cout << di << endl;
+    //cout << di << endl;
 
 }
 

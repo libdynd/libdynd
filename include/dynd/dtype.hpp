@@ -421,13 +421,19 @@ public:
      * \param result_dtype The result of an apply_linear_index call.
      * \param out_metadata The metadata of the output array. The output data should all be references to the data
      *                     of the input array, so there is no out_data parameter.
+     * \param embedded_reference  For references which are NULL, add this reference in the output.
+     *                            A NULL means the data was embedded in the original ndobject, so
+     *                            when putting it in a new ndobject, need to hold a reference to
+     *                            that memory.
      * \param current_i    The current index position. Used for error messages.
      * \param root_dt      The data type in the first call, before any recursion. Used for error messages.
      *
      * @return  An offset to apply to the data pointer.
      */
     virtual intptr_t apply_linear_index(int nindices, const irange *indices, char *data, const char *metadata,
-                    const dtype& result_dtype, char *out_metadata, int current_i, const dtype& root_dt) const;
+                    const dtype& result_dtype, char *out_metadata,
+                    memory_block_data *embedded_reference,
+                    int current_i, const dtype& root_dt) const;
 
     /**
      * The 'at' function is used for indexing. Indexing one dimension with

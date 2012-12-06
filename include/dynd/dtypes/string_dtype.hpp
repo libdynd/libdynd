@@ -24,6 +24,11 @@ struct string_dtype_metadata {
     memory_block_data *blockref;
 };
 
+struct string_dtype_element {
+    char *begin;
+    char *end;
+};
+
 class string_dtype : public extended_string_dtype {
     string_encoding_t m_encoding;
 
@@ -41,7 +46,7 @@ public:
         return sizeof(const char *);
     }
     size_t get_element_size() const {
-        return 2 * sizeof(const char *);
+        return sizeof(string_dtype_element);
     }
 
     string_encoding_t get_encoding() const {
@@ -67,7 +72,9 @@ public:
 
     dtype apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& root_dt) const;
     intptr_t apply_linear_index(int nindices, const irange *indices, char *data, const char *metadata,
-                    const dtype& result_dtype, char *out_metadata, int current_i, const dtype& root_dt) const;
+                    const dtype& result_dtype, char *out_metadata,
+                    memory_block_data *embedded_reference,
+                    int current_i, const dtype& root_dt) const;
 
     dtype get_canonical_dtype() const;
 

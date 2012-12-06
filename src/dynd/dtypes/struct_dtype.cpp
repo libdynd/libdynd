@@ -146,7 +146,9 @@ dtype struct_dtype::apply_linear_index(int nindices, const irange *indices, int 
 }
 
 intptr_t struct_dtype::apply_linear_index(int nindices, const irange *indices, char *data, const char *metadata,
-                const dtype& result_dtype, char *out_metadata, int current_i, const dtype& root_dt) const
+                const dtype& result_dtype, char *out_metadata,
+                memory_block_data *embedded_reference,
+                int current_i, const dtype& root_dt) const
 {
     const intptr_t *offsets = reinterpret_cast<const intptr_t *>(metadata);
     intptr_t *out_offsets = reinterpret_cast<intptr_t *>(out_metadata);
@@ -158,7 +160,7 @@ intptr_t struct_dtype::apply_linear_index(int nindices, const irange *indices, c
             if (m_fields[i].extended()) {
                 out_offsets[i] += m_fields[i].extended()->apply_linear_index(0, NULL, data + offsets[i],
                                 metadata + m_metadata_offsets[i], m_fields[i], out_metadata + m_metadata_offsets[i],
-                                current_i + 1, root_dt);
+                                embedded_reference, current_i + 1, root_dt);
             }
         }
         return 0;
@@ -172,7 +174,7 @@ intptr_t struct_dtype::apply_linear_index(int nindices, const irange *indices, c
                 intptr_t offset = offsets[start_index];
                 offset += dt.extended()->apply_linear_index(nindices - 1, indices + 1, data + offset,
                                 metadata + m_metadata_offsets[start_index], result_dtype,
-                                out_metadata, current_i + 1, root_dt);
+                                out_metadata, embedded_reference, current_i + 1, root_dt);
                 return offset;
             }
             return 0;
@@ -185,7 +187,7 @@ intptr_t struct_dtype::apply_linear_index(int nindices, const irange *indices, c
                 if (dt.extended()) {
                     out_offsets[i] += dt.extended()->apply_linear_index(nindices - 1, indices + 1, data + out_offsets[i],
                                     metadata + m_metadata_offsets[idx], dt, out_metadata + result_e_dt->m_metadata_offsets[i],
-                                    current_i + 1, root_dt);
+                                    embedded_reference, current_i + 1, root_dt);
                 }
             }
             return 0;

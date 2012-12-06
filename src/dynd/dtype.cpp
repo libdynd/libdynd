@@ -73,7 +73,9 @@ dtype extended_dtype::apply_linear_index(int nindices, const irange *DYND_UNUSED
 }
 
 intptr_t extended_dtype::apply_linear_index(int nindices, const irange *DYND_UNUSED(indices), char *DYND_UNUSED(data), const char *DYND_UNUSED(metadata),
-                const dtype& DYND_UNUSED(result_dtype), char *DYND_UNUSED(out_metadata), int current_i, const dtype& DYND_UNUSED(root_dt)) const
+                const dtype& DYND_UNUSED(result_dtype), char *DYND_UNUSED(out_metadata),
+                memory_block_data *DYND_UNUSED(embedded_reference),
+                int current_i, const dtype& DYND_UNUSED(root_dt)) const
 {
     // Default to scalar behavior
     if (nindices == 0) {

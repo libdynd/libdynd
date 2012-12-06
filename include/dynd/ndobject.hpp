@@ -738,21 +738,28 @@ inline dynd::ndobject::ndobject(const char *(&rhs)[N])
 ///////////// std::vector constructor implementation /////////////////////////
 namespace detail {
     template <class T>
-    inline typename enable_if<is_dtype_scalar<T>::value, ndobject>::type
-                    make_from_vec(const std::vector<T>& vec)
-    {
-        ndobject result = make_strided_ndobject(vec.size(), make_dtype<T>());
-        if (!vec.empty()) {
-            memcpy(result.get_readwrite_originptr(), &vec[0], vec.size() * sizeof(T));
+    struct make_from_vec {
+        inline static typename enable_if<is_dtype_scalar<T>::value, ndobject>::type
+                        make(const std::vector<T>& vec)
+        {
+            ndobject result = make_strided_ndobject(vec.size(), make_dtype<T>());
+            if (!vec.empty()) {
+                memcpy(result.get_readwrite_originptr(), &vec[0], vec.size() * sizeof(T));
+            }
+            return result;
         }
-        return result;
-    }
+    };
+
+    template <>
+    struct make_from_vec<std::string> {
+        static ndobject make(const std::vector<std::string>& vec);
+    };
 } // namespace detail
 
 template<class T>
 ndobject::ndobject(const std::vector<T>& vec)
 {
-   detail::make_from_vec(vec).swap(*this);
+   detail::make_from_vec<T>::make(vec).swap(*this);
 }
 
 

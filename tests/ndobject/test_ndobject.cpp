@@ -13,6 +13,7 @@
 #include <dynd/ndobject.hpp>
 #include <dynd/dtypes/strided_array_dtype.hpp>
 #include <dynd/dtypes/fixedbytes_dtype.hpp>
+#include <dynd/dtypes/string_dtype.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -233,6 +234,7 @@ TEST(NDObject, StdVectorConstructor) {
 
     // Empty vector
     a = v;
+    EXPECT_EQ(make_strided_array_dtype(make_dtype<float>()), a.get_dtype());
     EXPECT_EQ(1, a.get_dtype().get_uniform_ndim());
     EXPECT_EQ(1u, a.get_shape().size());
     EXPECT_EQ(0, a.get_shape()[0]);
@@ -244,6 +246,7 @@ TEST(NDObject, StdVectorConstructor) {
         v.push_back(i/0.5f);
     }
     a = v;
+    EXPECT_EQ(make_strided_array_dtype(make_dtype<float>()), a.get_dtype());
     EXPECT_EQ(1, a.get_dtype().get_uniform_ndim());
     EXPECT_EQ(1u, a.get_shape().size());
     EXPECT_EQ(10, a.get_shape()[0]);
@@ -251,6 +254,37 @@ TEST(NDObject, StdVectorConstructor) {
     EXPECT_EQ((int)sizeof(float), a.get_strides()[0]);
     for (int i = 0; i < 10; ++i) {
         EXPECT_EQ(i/0.5f, a.at(i).as<float>());
+    }
+}
+
+TEST(NDObject, StdVectorStringConstructor) {
+    ndobject a;
+    std::vector<std::string> v;
+
+    // Empty vector
+    a = v;
+    EXPECT_EQ(make_strided_array_dtype(make_string_dtype(string_encoding_utf_8)), a.get_dtype());
+    EXPECT_EQ(1, a.get_dtype().get_uniform_ndim());
+    EXPECT_EQ(1u, a.get_shape().size());
+    EXPECT_EQ(0, a.get_shape()[0]);
+    EXPECT_EQ(1u, a.get_strides().size());
+    EXPECT_EQ(0, a.get_strides()[0]);
+
+    // Size-5 vector
+    v.push_back("this");
+    v.push_back("is a test of");
+    v.push_back("string");
+    v.push_back("vectors");
+    v.push_back("testing testing testing testing testing testing testing testing testing");
+    a = v;
+    EXPECT_EQ(make_strided_array_dtype(make_string_dtype(string_encoding_utf_8)), a.get_dtype());
+    EXPECT_EQ(1, a.get_dtype().get_uniform_ndim());
+    EXPECT_EQ(1u, a.get_shape().size());
+    EXPECT_EQ(5, a.get_shape()[0]);
+    EXPECT_EQ(1u, a.get_strides().size());
+    EXPECT_EQ(a.get_dtype().at(0).get_element_size(), a.get_strides()[0]);
+    for (int i = 0; i < 5; ++i) {
+        EXPECT_EQ(v[i], a.at(i).as<string>());
     }
 }
 

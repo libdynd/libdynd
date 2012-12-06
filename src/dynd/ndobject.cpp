@@ -319,6 +319,49 @@ ndobject::ndobject(const char *str, size_t size)
     temp.swap(*this);
 }
 
+ndobject dynd::detail::make_from_vec<std::string>::make(const std::vector<std::string>& vec)
+{
+    // Constructor detail for making an ndobject from a vector of strings
+    size_t total_string_size = 0;
+    for (size_t i = 0, i_end = vec.size(); i != i_end; ++i) {
+        total_string_size += vec[i].size();
+    }
+
+    dtype dt = make_strided_array_dtype(make_string_dtype(string_encoding_utf_8));
+    char *data_ptr = NULL;
+    // Make an ndobject memory block which contains both the string pointers and
+    // the string data
+    ndobject result(make_ndobject_memory_block(dt.extended()->get_metadata_size(),
+                    sizeof(string_dtype_element) * vec.size() + total_string_size,
+                    dt.get_alignment(), &data_ptr));
+    char *string_ptr = data_ptr + sizeof(string_dtype_element) * vec.size();
+    // The main ndobject metadata
+    ndobject_preamble *preamble = result.get_ndo();
+    preamble->m_data_pointer = data_ptr;
+    preamble->m_data_reference = NULL;
+    preamble->m_dtype = dt.extended();
+    extended_dtype_incref(preamble->m_dtype);
+    preamble->m_flags = read_access_flag | immutable_access_flag;
+    // The metadata for the strided and string parts of the dtype
+    strided_array_dtype_metadata *sa_md = reinterpret_cast<strided_array_dtype_metadata *>(
+                                            result.get_ndo_meta());
+    sa_md->size = vec.size();
+    sa_md->stride = vec.empty() ? 0 : sizeof(string_dtype_element);
+    string_dtype_metadata *s_md = reinterpret_cast<string_dtype_metadata *>(sa_md + 1);
+    s_md->blockref = NULL;
+    // The string pointers and data
+    string_dtype_element *data = reinterpret_cast<string_dtype_element *>(data_ptr);
+    for (size_t i = 0, i_end = vec.size(); i != i_end; ++i) {
+        size_t size = vec[i].size();
+        memcpy(string_ptr, vec[i].data(), size);
+        data[i].begin = string_ptr;
+        string_ptr += size;
+        data[i].end = string_ptr;
+    }
+    return result;
+}
+
+
 ndobject::ndobject(const dtype& dt)
     : m_memblock(make_ndobject_memory_block(dt, 0, NULL))
 {
@@ -382,7 +425,8 @@ ndobject ndobject::at_array(int nindices, const irange *indices) const
             result.get_ndo()->m_dtype = reinterpret_cast<const extended_dtype *>(dt.get_type_id());
         }
         intptr_t offset = get_ndo()->m_dtype->apply_linear_index(nindices, indices, get_ndo()->m_data_pointer,
-                        get_ndo_meta(), dt, result.get_ndo_meta(), 0, this_dt);
+                        get_ndo_meta(), dt, result.get_ndo_meta(),
+                        m_memblock.get(), 0, this_dt);
         result.get_ndo()->m_data_pointer = get_ndo()->m_data_pointer + offset;
         if (get_ndo()->m_data_reference) {
             result.get_ndo()->m_data_reference = get_ndo()->m_data_reference;

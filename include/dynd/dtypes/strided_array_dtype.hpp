@@ -64,7 +64,9 @@ public:
 
     dtype apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& root_dt) const;
     intptr_t apply_linear_index(int nindices, const irange *indices, char *data, const char *metadata,
-                    const dtype& result_dtype, char *out_metadata, int current_i, const dtype& root_dt) const;
+                    const dtype& result_dtype, char *out_metadata,
+                    memory_block_data *embedded_reference,
+                    int current_i, const dtype& root_dt) const;
     dtype at(intptr_t i0, const char **inout_metadata, const char **inout_data) const;
 
     int get_uniform_ndim() const;
