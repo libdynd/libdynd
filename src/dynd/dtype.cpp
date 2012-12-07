@@ -9,8 +9,10 @@
 #include <dynd/buffer_storage.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/kernels/buffered_unary_kernels.hpp>
-#include <dynd/dtypes/convert_dtype.hpp>
 #include <dynd/gfunc/make_callable.hpp>
+
+#include <dynd/dtypes/convert_dtype.hpp>
+#include <dynd/dtypes/date_dtype.hpp>
 
 #include <sstream>
 #include <cstring>
@@ -229,7 +231,7 @@ void extended_dtype::reorder_default_constructed_strides(char *DYND_UNUSED(dst_m
     // Default to scalar behavior, which is to do no modifications.
 }
 
-void extended_dtype::get_dynamic_properties(const std::pair<std::string, gfunc::callable> **out_properties, int *out_count) const
+void extended_dtype::get_dynamic_dtype_properties(const std::pair<std::string, gfunc::callable> **out_properties, int *out_count) const
 {
     // Default to no properties
     *out_properties = NULL;
@@ -283,7 +285,7 @@ static pair<string, gfunc::callable> extended_string_dtype_properties[] = {
     pair<string, gfunc::callable>("encoding", gfunc::make_callable(&get_extended_string_encoding, "self"))
 };
 
-void extended_string_dtype::get_dynamic_properties(const std::pair<std::string, gfunc::callable> **out_properties, int *out_count) const
+void extended_string_dtype::get_dynamic_dtype_properties(const std::pair<std::string, gfunc::callable> **out_properties, int *out_count) const
 {
     *out_properties = extended_string_dtype_properties;
     *out_count = sizeof(extended_string_dtype_properties) / sizeof(extended_string_dtype_properties[0]);
@@ -444,6 +446,11 @@ dtype::dtype(const std::string& rep)
         m_kind = void_kind;
         m_alignment = 1;
         m_element_size = 0;
+        return;
+    }
+
+    if (rep == "date") {
+        *this = make_date_dtype();
         return;
     }
 

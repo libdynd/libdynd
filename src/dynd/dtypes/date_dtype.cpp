@@ -9,6 +9,7 @@
 #include <dynd/kernels/single_compare_kernel_instance.hpp>
 #include <dynd/kernels/string_assignment_kernels.hpp>
 #include <dynd/exceptions.hpp>
+#include <dynd/gfunc/make_callable.hpp>
 
 #include <datetime_strings.h>
 
@@ -17,7 +18,7 @@
 using namespace std;
 using namespace dynd;
 
-dynd::date_dtype::date_dtype(date_unit_t unit)
+date_dtype::date_dtype(date_unit_t unit)
     : m_unit(unit)
 {
     switch (unit) {
@@ -31,7 +32,7 @@ dynd::date_dtype::date_dtype(date_unit_t unit)
     }
 }
 
-void dynd::date_dtype::print_element(std::ostream& o, const char *DYND_UNUSED(metadata), const char *data) const
+void date_dtype::print_element(std::ostream& o, const char *DYND_UNUSED(metadata), const char *data) const
 {
     int32_t value = *reinterpret_cast<const int32_t *>(data);
     switch (m_unit) {
@@ -53,7 +54,7 @@ void dynd::date_dtype::print_element(std::ostream& o, const char *DYND_UNUSED(me
     }
 }
 
-void dynd::date_dtype::print_dtype(std::ostream& o) const
+void date_dtype::print_dtype(std::ostream& o) const
 {
     if (m_unit == date_unit_day) {
         o << "date";
@@ -62,7 +63,7 @@ void dynd::date_dtype::print_dtype(std::ostream& o) const
     }
 }
 
-bool dynd::date_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const
+bool date_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const
 {
     if (dst_dt.extended() == this) {
         if (src_dt.extended() == this) {
@@ -78,19 +79,19 @@ bool dynd::date_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& 
     }
 }
 
-void dynd::date_dtype::get_single_compare_kernel(single_compare_kernel_instance& /*out_kernel*/) const {
+void date_dtype::get_single_compare_kernel(single_compare_kernel_instance& /*out_kernel*/) const {
     throw runtime_error("get_single_compare_kernel for date are not implemented");
 }
 
-void dynd::date_dtype::get_dtype_assignment_kernel(const dtype& /*dst_dt*/, const dtype& /*src_dt*/,
-                assign_error_mode /*errmode*/,
-                unary_specialization_kernel_instance& /*out_kernel*/) const
+void date_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const dtype& src_dt,
+                assign_error_mode errmode,
+                unary_specialization_kernel_instance& out_kernel) const
 {
-    throw runtime_error("conversions for date are not implemented");
+    
 }
 
 
-bool dynd::date_dtype::operator==(const extended_dtype& rhs) const
+bool date_dtype::operator==(const extended_dtype& rhs) const
 {
     if (this == &rhs) {
         return true;
@@ -100,4 +101,21 @@ bool dynd::date_dtype::operator==(const extended_dtype& rhs) const
         const date_dtype *dt = static_cast<const date_dtype*>(&rhs);
         return m_unit == dt->m_unit;
     }
+}
+
+static string property_get_encoding(const dtype& dt) {
+    const date_dtype *d = static_cast<const date_dtype *>(dt.extended());
+    stringstream ss;
+    ss << d->get_unit();
+    return ss.str();
+}
+
+static pair<string, gfunc::callable> date_dtype_properties[] = {
+    pair<string, gfunc::callable>("unit", gfunc::make_callable(&property_get_encoding, "self"))
+};
+
+void date_dtype::get_dynamic_dtype_properties(const std::pair<std::string, gfunc::callable> **out_properties, int *out_count) const
+{
+    *out_properties = date_dtype_properties;
+    *out_count = sizeof(date_dtype_properties) / sizeof(date_dtype_properties[0]);
 }

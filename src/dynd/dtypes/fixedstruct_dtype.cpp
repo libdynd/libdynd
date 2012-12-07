@@ -417,7 +417,7 @@ static pair<string, gfunc::callable> dtype_properties[] = {
     pair<string, gfunc::callable>("metadata_offsets", gfunc::make_callable(&property_get_metadata_offsets, "self"))
 };
 
-void fixedstruct_dtype::get_dynamic_properties(const std::pair<std::string, gfunc::callable> **out_properties, int *out_count) const
+void fixedstruct_dtype::get_dynamic_dtype_properties(const std::pair<std::string, gfunc::callable> **out_properties, int *out_count) const
 {
     *out_properties = dtype_properties;
     *out_count = sizeof(dtype_properties) / sizeof(dtype_properties[0]);

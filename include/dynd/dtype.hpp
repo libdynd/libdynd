@@ -607,7 +607,7 @@ public:
     /**
      * Additional dynamic properties exposed by the dtype as gfunc::callable.
      */
-    virtual void get_dynamic_properties(const std::pair<std::string, gfunc::callable> **out_properties, int *out_count) const;
+    virtual void get_dynamic_dtype_properties(const std::pair<std::string, gfunc::callable> **out_properties, int *out_count) const;
 
     /**
      * Additional dynamic properties exposed by any ndobject of this dtype as gfunc::callable.
@@ -663,7 +663,7 @@ public:
     // TODO: Maybe it should be more flexible?
     size_t get_iterdata_size(int ndim) const;
 
-    void get_dynamic_properties(const std::pair<std::string, gfunc::callable> **out_properties, int *out_count) const;
+    void get_dynamic_dtype_properties(const std::pair<std::string, gfunc::callable> **out_properties, int *out_count) const;
 };
 
 /**

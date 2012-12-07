@@ -61,7 +61,7 @@ public:
         return 4;
     }
 
-    date_unit_t unit() const {
+    date_unit_t get_unit() const {
         return m_unit;
     }
 
@@ -88,13 +88,19 @@ public:
     size_t get_metadata_size() const {
         return 0;
     }
+    void metadata_default_construct(char *DYND_UNUSED(metadata), int DYND_UNUSED(ndim), const intptr_t* DYND_UNUSED(shape)) const {
+    }
+    void metadata_copy_construct(char *DYND_UNUSED(dst_metadata), const char *DYND_UNUSED(src_metadata), memory_block_data *DYND_UNUSED(embedded_reference)) const {
+    }
     void metadata_destruct(char *DYND_UNUSED(metadata)) const {
     }
     void metadata_debug_print(const char *DYND_UNUSED(metadata), std::ostream& DYND_UNUSED(o), const std::string& DYND_UNUSED(indent)) const {
     }
+
+    void get_dynamic_dtype_properties(const std::pair<std::string, gfunc::callable> **out_properties, int *out_count) const;
 };
 
-inline dtype make_date_dtype(date_unit_t unit) {
+inline dtype make_date_dtype(date_unit_t unit = date_unit_day) {
     return dtype(new date_dtype(unit));
 }
 
