@@ -9,6 +9,7 @@
 #include <dynd/shape_tools.hpp>
 #include <dynd/shortvector.hpp>
 #include <dynd/exceptions.hpp>
+#include <dynd/gfunc/callable.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -462,4 +463,10 @@ void fixedarray_dtype::create_ndobject_properties()
             m_ndobject_properties[i] = properties[i];
         }
     }
+}
+
+void fixedarray_dtype::get_dynamic_ndobject_properties(const std::pair<std::string, gfunc::callable> **out_properties, int *out_count) const
+{
+    *out_properties = m_ndobject_properties.empty() ? NULL : &m_ndobject_properties[0];
+    *out_count = (int)m_ndobject_properties.size();
 }

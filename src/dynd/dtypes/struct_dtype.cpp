@@ -39,6 +39,8 @@ struct_dtype::struct_dtype(const std::vector<dtype>& fields, const std::vector<s
         metadata_offset += m_field_types[i].extended() ? m_field_types[i].extended()->get_metadata_size() : 0;
     }
     m_metadata_size = metadata_offset;
+
+    create_ndobject_properties();
 }
 
 size_t struct_dtype::get_default_element_size(int ndim, const intptr_t *shape) const
