@@ -41,7 +41,7 @@ public:
         return m_encoding;
     }
 
-    void get_string_range(const char **out_begin, const char**out_end, const char *data, const char *metadata) const;
+    void get_string_range(const char **out_begin, const char**out_end, const char *metadata, const char *data) const;
 
     void print_element(std::ostream& o, const char *metadata, const char *data) const;
 

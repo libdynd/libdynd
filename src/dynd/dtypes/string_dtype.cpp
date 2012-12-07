@@ -31,7 +31,7 @@ string_dtype::string_dtype(string_encoding_t encoding)
 }
 
 void string_dtype::get_string_range(const char **out_begin, const char**out_end,
-                const char *data, const char *DYND_UNUSED(metadata)) const
+                const char *DYND_UNUSED(metadata), const char *data) const
 {
     *out_begin = reinterpret_cast<const char * const *>(data)[0];
     *out_end = reinterpret_cast<const char * const *>(data)[1];

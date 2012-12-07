@@ -214,6 +214,15 @@ namespace {
         }
     }
 
+    static void string_append_utf8(uint32_t cp, string& s)
+    {
+        char tmp[6];
+        char *tmp_ptr = tmp, *tmp_ptr_end;
+        tmp_ptr_end = utf8::append(cp, tmp_ptr);
+        while (tmp_ptr < tmp_ptr_end)
+            s += *tmp_ptr++;
+    }
+
     static uint32_t next_utf16(const char *&it_raw, const char *end_raw)
     {
         const uint16_t *&it = reinterpret_cast<const uint16_t *&>(it_raw);
@@ -378,6 +387,52 @@ append_unicode_codepoint_t dynd::get_append_unicode_codepoint_function(string_en
             return (errmode != assign_error_none) ? append_utf32 : noerror_append_utf32;
         default:
             throw runtime_error("get_append_unicode_codepoint_function: Unrecognized string encoding");
+    }
+}
+
+template<next_unicode_codepoint_t next_fn>
+std::string string_range_as_utf8_string_templ(const char *begin, const char *end)
+{
+    string result;
+    uint32_t cp;
+    while (begin < end) {
+        cp = next_fn(begin, end);
+        string_append_utf8(cp, result);
+    }
+    return result;
+}
+
+std::string dynd::string_range_as_utf8_string(string_encoding_t encoding, const char *begin, const char *end, assign_error_mode errmode)
+{
+    switch (encoding) {
+        case string_encoding_ascii:
+        case string_encoding_utf_8:
+            // TODO: Validate the input string according to errmode
+            return string(begin, end);
+        case string_encoding_ucs_2:
+            if (errmode == assign_error_none) {
+                return string_range_as_utf8_string_templ<&noerror_next_ucs2>(begin, end);
+            } else {
+                return string_range_as_utf8_string_templ<&next_ucs2>(begin, end);
+            }
+        case string_encoding_utf_16: {
+            if (errmode == assign_error_none) {
+                return string_range_as_utf8_string_templ<&noerror_next_utf16>(begin, end);
+            } else {
+                return string_range_as_utf8_string_templ<&next_utf16>(begin, end);
+            }
+        }
+        case string_encoding_utf_32: {
+            if (errmode == assign_error_none) {
+                return string_range_as_utf8_string_templ<&noerror_next_utf32>(begin, end);
+            } else {
+                return string_range_as_utf8_string_templ<&next_utf32>(begin, end);
+            }
+        }
+        default: {
+            stringstream ss;
+            throw runtime_error("string_range_as_utf8_string: Unrecognized string encoding");
+        }
     }
 }
 

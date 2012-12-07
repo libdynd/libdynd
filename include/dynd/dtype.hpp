@@ -657,7 +657,8 @@ public:
     virtual string_encoding_t get_encoding() const = 0;
 
     /** Retrieves the data range in which a string is stored */
-    virtual void get_string_range(const char **out_begin, const char**out_end, const char *data, const char *metadata) const = 0;
+    virtual void get_string_range(const char **out_begin, const char**out_end, const char *metadata, const char *data) const = 0;
+    std::string get_utf8_string(const char *metadata, const char *data, assign_error_mode errmode) const;
 
     // String dtypes stop the iterdata chain
     // TODO: Maybe it should be more flexible?

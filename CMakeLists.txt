@@ -123,6 +123,7 @@ set(dynd_SRC
     src/dynd/kernels/buffered_binary_kernels.cpp
     src/dynd/kernels/bytes_assignment_kernels.cpp
     src/dynd/kernels/byteswap_kernels.cpp
+    src/dynd/kernels/date_assignment_kernels.cpp
     src/dynd/kernels/string_assignment_kernels.cpp
     src/dynd/kernels/kernels_for_disassembly.cpp
     src/dynd/kernels/single_assigner_builtin.hpp
@@ -133,6 +134,7 @@ set(dynd_SRC
     include/dynd/kernels/buffered_binary_kernels.hpp
     include/dynd/kernels/bytes_assignment_kernels.hpp
     include/dynd/kernels/byteswap_kernels.hpp
+    include/dynd/kernels/date_assignment_kernels.hpp
     include/dynd/kernels/kernel_instance.hpp
     include/dynd/kernels/single_compare_kernel_instance.hpp
     include/dynd/kernels/string_assignment_kernels.hpp

@@ -269,6 +269,13 @@ extended_string_dtype::~extended_string_dtype()
 {
 }
 
+std::string extended_string_dtype::get_utf8_string(const char *metadata, const char *data, assign_error_mode errmode) const
+{
+    const char *begin, *end;
+    get_string_range(&begin, &end, metadata, data);
+    return string_range_as_utf8_string(get_encoding(), begin, end, errmode);
+}
+
 size_t extended_string_dtype::get_iterdata_size(int DYND_UNUSED(ndim)) const
 {
     return 0;

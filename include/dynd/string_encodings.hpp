@@ -7,6 +7,7 @@
 #define _DYND__STRING_ENCODINGS_HPP_
 
 #include <iostream>
+#include <string>
 
 #include <dynd/config.hpp>
 #include <dynd/dtype_assign.hpp>
@@ -90,6 +91,11 @@ typedef void (*append_unicode_codepoint_t)(uint32_t cp, char *&it, char *end);
 
 next_unicode_codepoint_t get_next_unicode_codepoint_function(string_encoding_t encoding, assign_error_mode errmode);
 append_unicode_codepoint_t get_append_unicode_codepoint_function(string_encoding_t encoding, assign_error_mode errmode);
+
+/**
+ * Converts a string buffer provided as a range of bytes into a std::string as UTF8.
+ */
+std::string string_range_as_utf8_string(string_encoding_t encoding, const char *begin, const char *end, assign_error_mode errmode);
 
 /**
  * Prints the given code point to the output stream, escaping it as necessary.

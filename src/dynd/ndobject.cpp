@@ -621,25 +621,13 @@ std::string dynd::detail::ndobject_as_string(const ndobject& lhs, assign_error_m
     if (!lhs.is_scalar()) {
         throw std::runtime_error("can only convert ndobjects with 0 dimensions to scalars");
     }
-    // Try to make a string directly from the data bytes if possible
-    const dtype& lhs_dt = lhs.get_dtype();
-    if (lhs_dt.get_kind() == string_kind) {
-        const extended_string_dtype *esd = static_cast<const extended_string_dtype *>(lhs_dt.extended());
-        string_encoding_t encoding = esd->get_encoding();
-        if (encoding == string_encoding_utf_8 || encoding == string_encoding_ascii) {
-            const char *begin, *end;
-            esd->get_string_range(&begin, &end, lhs.get_readonly_originptr(), lhs.get_ndo_meta());
-            return std::string(begin, end);
-        }
-    }
 
-    // Otherwise cast it to a UTF8 string, then get the data bytes.
-    ndobject temp = lhs.cast_scalars(make_string_dtype(string_encoding_utf_8));
-    temp = temp.vals();
+    ndobject temp = lhs;
+    if (temp.get_dtype().get_kind() != string_kind) {
+        temp = temp.cast_scalars(make_string_dtype(string_encoding_utf_8)).vals();
+    }
     const extended_string_dtype *esd = static_cast<const extended_string_dtype *>(temp.get_dtype().extended());
-    const char *begin, *end;
-    esd->get_string_range(&begin, &end, temp.get_readonly_originptr(), temp.get_ndo_meta());
-    return std::string(begin, end);
+    return esd->get_utf8_string(temp.get_ndo_meta(), temp.get_ndo()->m_data_pointer, assign_error_none);
 }
 
 void ndobject::debug_print(std::ostream& o, const std::string& indent) const

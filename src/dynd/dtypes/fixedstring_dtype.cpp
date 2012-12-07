@@ -39,7 +39,7 @@ dynd::fixedstring_dtype::fixedstring_dtype(string_encoding_t encoding, intptr_t 
 }
 
 void dynd::fixedstring_dtype::get_string_range(const char **out_begin, const char**out_end,
-                const char *data, const char *DYND_UNUSED(metadata)) const
+                const char *DYND_UNUSED(metadata), const char *data) const
 {
     // Beginning of the string
     *out_begin = data;
@@ -49,8 +49,14 @@ void dynd::fixedstring_dtype::get_string_range(const char **out_begin, const cha
     const char *data_end = data + m_element_size;
     next_unicode_codepoint_t next_fn;
     next_fn = get_next_unicode_codepoint_function(m_encoding, assign_error_none);
-    while (data < data_end && cp != 0) {
-        cp = next_fn(data, data_end);
+    while (data < data_end) {
+        const char *data_tmp = data;
+        cp = next_fn(data_tmp, data_end);
+        if (cp != 0) {
+            data = data_tmp;
+        } else {
+            break;
+        }
     }
     *out_end = data;
 }
