@@ -30,8 +30,8 @@ TEST(StructDType, CreateOneField) {
     EXPECT_EQ(4u, dt.get_alignment());
     EXPECT_EQ(pod_memory_management, dt.get_memory_management());
     tdt = static_cast<const struct_dtype *>(dt.extended());
-    EXPECT_EQ(1u, tdt->get_fields().size());
-    EXPECT_EQ(make_dtype<int32_t>(), tdt->get_fields()[0]);
+    EXPECT_EQ(1u, tdt->get_field_types().size());
+    EXPECT_EQ(make_dtype<int32_t>(), tdt->get_field_types()[0]);
     EXPECT_EQ(1u, tdt->get_field_names().size());
     EXPECT_EQ("x", tdt->get_field_names()[0]);
 }
@@ -48,10 +48,10 @@ TEST(StructDType, CreateTwoField) {
     EXPECT_EQ(8u, dt.get_alignment());
     EXPECT_EQ(pod_memory_management, dt.get_memory_management());
     tdt = static_cast<const struct_dtype *>(dt.extended());
-    EXPECT_EQ(2u, tdt->get_fields().size());
+    EXPECT_EQ(2u, tdt->get_field_types().size());
     EXPECT_EQ(2u, tdt->get_field_names().size());
-    EXPECT_EQ(make_dtype<int64_t>(), tdt->get_fields()[0]);
-    EXPECT_EQ(make_dtype<int32_t>(), tdt->get_fields()[1]);
+    EXPECT_EQ(make_dtype<int64_t>(), tdt->get_field_types()[0]);
+    EXPECT_EQ(make_dtype<int32_t>(), tdt->get_field_types()[1]);
     EXPECT_EQ("a", tdt->get_field_names()[0]);
     EXPECT_EQ("b", tdt->get_field_names()[1]);
 }
@@ -71,11 +71,11 @@ TEST(StructDType, CreateThreeField) {
     EXPECT_EQ(8u, dt.get_alignment());
     EXPECT_EQ(pod_memory_management, dt.get_memory_management());
     tdt = static_cast<const struct_dtype *>(dt.extended());
-    EXPECT_EQ(3u, tdt->get_fields().size());
+    EXPECT_EQ(3u, tdt->get_field_types().size());
     EXPECT_EQ(3u, tdt->get_field_names().size());
-    EXPECT_EQ(make_dtype<int64_t>(), tdt->get_fields()[0]);
-    EXPECT_EQ(make_dtype<int32_t>(), tdt->get_fields()[1]);
-    EXPECT_EQ(make_fixedstring_dtype(string_encoding_utf_8, 5), tdt->get_fields()[2]);
+    EXPECT_EQ(make_dtype<int64_t>(), tdt->get_field_types()[0]);
+    EXPECT_EQ(make_dtype<int32_t>(), tdt->get_field_types()[1]);
+    EXPECT_EQ(make_fixedstring_dtype(string_encoding_utf_8, 5), tdt->get_field_types()[2]);
     EXPECT_EQ("x", tdt->get_field_names()[0]);
     EXPECT_EQ("y", tdt->get_field_names()[1]);
     EXPECT_EQ("z", tdt->get_field_names()[2]);

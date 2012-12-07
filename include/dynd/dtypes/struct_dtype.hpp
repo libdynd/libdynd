@@ -15,12 +15,18 @@
 namespace dynd {
 
 class struct_dtype : public extended_dtype {
-    std::vector<dtype> m_fields;
+    std::vector<dtype> m_field_types;
     std::vector<std::string> m_field_names;
     std::vector<size_t> m_metadata_offsets;
+    std::vector<std::pair<std::string, gfunc::callable> > m_ndobject_properties;
     size_t m_metadata_size;
     dtype_memory_management_t m_memory_management;
     unsigned char m_alignment;
+
+    void create_ndobject_properties();
+
+    // Used as the parameters dtype for the ndobject properties callables
+    static dtype ndobject_parameters_dtype;
 public:
     struct_dtype(const std::vector<dtype>& fields, const std::vector<std::string>& field_names);
 
@@ -39,8 +45,8 @@ public:
     }
     size_t get_default_element_size(int ndim, const intptr_t *shape) const;
 
-    const std::vector<dtype>& get_fields() const {
-        return m_fields;
+    const std::vector<dtype>& get_field_types() const {
+        return m_field_types;
     }
 
     const std::vector<std::string>& get_field_names() const {
@@ -95,6 +101,7 @@ public:
     void foreach_leading(char *data, const char *metadata, foreach_fn_t callback, void *callback_data) const;
 
     void get_dynamic_properties(const std::pair<std::string, gfunc::callable> **out_properties, int *out_count) const;
+    void get_dynamic_ndobject_properties(const std::pair<std::string, gfunc::callable> **out_properties, int *out_count) const;
 }; // class struct_dtype
 
 /** Makes a tuple dtype with the specified fields, using the standard layout */

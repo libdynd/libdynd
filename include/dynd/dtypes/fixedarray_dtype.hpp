@@ -22,6 +22,9 @@ class fixedarray_dtype : public extended_dtype {
     dtype m_element_dtype;
     intptr_t m_stride;
     size_t m_dimension_size, m_element_size;
+    std::vector<std::pair<std::string, gfunc::callable> > m_ndobject_properties;
+
+    void create_ndobject_properties();
 public:
     fixedarray_dtype(const dtype& element_dtype, size_t dimension_size);
     fixedarray_dtype(const dtype& element_dtype, size_t dimension_size, intptr_t stride);
@@ -111,6 +114,8 @@ public:
     void foreach_leading(char *data, const char *metadata, foreach_fn_t callback, void *callback_data) const;
     
     void reorder_default_constructed_strides(char *dst_metadata, const dtype& src_dtype, const char *src_metadata) const;
+
+    void get_dynamic_ndobject_properties(const std::pair<std::string, gfunc::callable> **out_properties, int *out_count) const;
 };
 
 inline dtype make_fixedarray_dtype(const dtype& element_dtype, size_t size) {

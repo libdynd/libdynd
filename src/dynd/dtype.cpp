@@ -236,6 +236,13 @@ void extended_dtype::get_dynamic_properties(const std::pair<std::string, gfunc::
     *out_count = 0;
 }
 
+void extended_dtype::get_dynamic_ndobject_properties(const std::pair<std::string, gfunc::callable> **out_properties, int *out_count) const
+{
+    // Default to no properties
+    *out_properties = NULL;
+    *out_count = 0;
+}
+
 
 void extended_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const dtype& src_dt,
                 assign_error_mode DYND_UNUSED(errmode),

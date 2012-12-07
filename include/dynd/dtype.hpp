@@ -338,6 +338,7 @@ char *iterdata_broadcasting_terminator_reset(iterdata_common *iterdata, char *da
 class extended_dtype {
     /** Embedded reference counting */
     mutable atomic_refcount m_use_count;
+
 public:
     /** Starts off the extended dtype instance with a use count of 1. */
     extended_dtype()
@@ -607,6 +608,15 @@ public:
      * Additional dynamic properties exposed by the dtype as gfunc::callable.
      */
     virtual void get_dynamic_properties(const std::pair<std::string, gfunc::callable> **out_properties, int *out_count) const;
+
+    /**
+     * Additional dynamic properties exposed by any ndobject of this dtype as gfunc::callable.
+     *
+     * \note Uniform dtypes copy these properties from the first non-uniform dtype, so such properties must
+     *       be able to handle the case where they are the first non-uniform dtype in an array type, not
+     *       just strictly of the non-uniform dtype.
+     */
+    virtual void get_dynamic_ndobject_properties(const std::pair<std::string, gfunc::callable> **out_properties, int *out_count) const;
 
     friend void extended_dtype_incref(const extended_dtype *ed);
     friend void extended_dtype_decref(const extended_dtype *ed);

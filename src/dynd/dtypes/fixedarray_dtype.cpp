@@ -25,6 +25,8 @@ fixedarray_dtype::fixedarray_dtype(const dtype& element_dtype, size_t dimension_
     }
     m_stride = m_dimension_size > 1 ? element_dtype.get_element_size() : 0;
     m_element_size = m_dimension_size > 1 ? m_stride * m_dimension_size : m_dimension_size * child_element_size;
+
+    create_ndobject_properties();
 }
 
 fixedarray_dtype::fixedarray_dtype(const dtype& element_dtype, size_t dimension_size, intptr_t stride)
@@ -50,6 +52,8 @@ fixedarray_dtype::fixedarray_dtype(const dtype& element_dtype, size_t dimension_
         throw runtime_error(ss.str());
     }
     m_element_size = stride ? stride * m_dimension_size : dimension_size * child_element_size;
+
+    create_ndobject_properties();
 }
 
 void fixedarray_dtype::print_element(std::ostream& o, const char *metadata, const char *data) const
@@ -431,5 +435,31 @@ dtype dynd::make_fixedarray_dtype(const dtype& uniform_dtype, int ndim, const in
             result = make_fixedarray_dtype(result, shape[i], strides[i]);
         }
         return result;
+    }
+}
+
+void fixedarray_dtype::create_ndobject_properties()
+{
+    // TODO: This code is shared with all other uniform array dtypes, refactor it to a common place
+    // Copy ndobject properties from the first non-uniform dimension
+    if (m_element_dtype.extended()) {
+        int ndim = m_element_dtype.get_uniform_ndim();
+        int count = 0;
+        const std::pair<std::string, gfunc::callable> *properties;
+        if (ndim == 0) {
+            m_element_dtype.extended()->get_dynamic_ndobject_properties(&properties, &count);
+        } else {
+            dtype dt = m_element_dtype;
+            for (int i = 0; i < ndim; ++i) {
+                dt = dt.at(0);
+            }
+            if (dt.extended()) {
+                dt.extended()->get_dynamic_ndobject_properties(&properties, &count);
+            }
+        }
+        m_ndobject_properties.resize(count);
+        for (int i = 0; i < count; ++i) {
+            m_ndobject_properties[i] = properties[i];
+        }
     }
 }

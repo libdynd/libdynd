@@ -27,12 +27,23 @@ typedef ndobject_preamble *(*callable_function_t)(const ndobject_preamble *param
 class callable {
     /** DType for the parameters, must be a fixedstruct dtype */
     dtype m_parameters_dtype;
-    void *m_extra;
     callable_function_t m_function;
+    void *m_extra;
 public:
-    inline callable(const dtype& parameters_dtype, callable_function_t function, void *extra = NULL)
-        : m_parameters_dtype(parameters_dtype), m_extra(extra), m_function(function)
+    inline callable()
+        : m_parameters_dtype(), m_function(), m_extra()
     {}
+
+    inline callable(const dtype& parameters_dtype, callable_function_t function, void *extra = NULL)
+        : m_parameters_dtype(parameters_dtype), m_function(function), m_extra(extra)
+    {}
+
+    inline void set(const dtype& parameters_dtype, callable_function_t function, void *extra = NULL)
+    {
+        m_parameters_dtype = parameters_dtype;
+        m_function = function;
+        m_extra = extra;
+    }
 
     inline const dtype& get_parameters_dtype() const {
         return m_parameters_dtype;

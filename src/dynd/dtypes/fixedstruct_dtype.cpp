@@ -53,6 +53,8 @@ fixedstruct_dtype::fixedstruct_dtype(const std::vector<dtype>& field_types, cons
     }
     m_metadata_size = metadata_offset;
     m_element_size = inc_to_alignment(data_offset, m_alignment);
+
+    create_ndobject_properties();
 }
 
 void fixedstruct_dtype::print_element(std::ostream& o, const char *metadata, const char *data) const
@@ -198,7 +200,7 @@ intptr_t fixedstruct_dtype::apply_linear_index(int nindices, const irange *indic
             for (intptr_t i = 0; i < dimension_size; ++i) {
                 intptr_t idx = start_index + i * index_stride;
                 out_offsets[i] = m_data_offsets[idx];
-                const dtype& dt = result_e_dt->get_fields()[i];
+                const dtype& dt = result_e_dt->get_field_types()[i];
                 if (dt.extended()) {
                     out_offsets[i] += dt.extended()->apply_linear_index(nindices - 1, indices + 1,
                                     data + out_offsets[i], metadata + m_metadata_offsets[idx],
@@ -419,4 +421,37 @@ void fixedstruct_dtype::get_dynamic_properties(const std::pair<std::string, gfun
 {
     *out_properties = dtype_properties;
     *out_count = sizeof(dtype_properties) / sizeof(dtype_properties[0]);
+}
+
+dtype fixedstruct_dtype::ndobject_parameters_dtype = make_fixedstruct_dtype(dtype(new void_pointer_dtype), "self");
+
+static ndobject_preamble *property_get_ndobject_field(const ndobject_preamble *params, void *extra)
+{
+    // Get the ndobject 'self' parameter
+    ndobject n = ndobject(*(ndobject_preamble **)params->m_data_pointer, true);
+    intptr_t i = reinterpret_cast<intptr_t>(extra);
+    int ndim = n.get_dtype().get_uniform_ndim();
+    if (ndim == 0) {
+        return n.at(i).release();
+    } else {
+        shortvector<irange> idx(ndim + 1);
+        idx[ndim] = irange(i);
+        return n.at_array(ndim + 1, idx.get()).release();
+    }
+}
+
+void fixedstruct_dtype::create_ndobject_properties()
+{
+    m_ndobject_properties.resize(m_field_types.size());
+    for (size_t i = 0, i_end = m_field_types.size(); i != i_end; ++i) {
+        // TODO: Transform the name into a valid Python symbol?
+        m_ndobject_properties[i].first = m_field_names[i];
+        m_ndobject_properties[i].second.set(ndobject_parameters_dtype, &property_get_ndobject_field, (void *)i);
+    }
+}
+
+void fixedstruct_dtype::get_dynamic_ndobject_properties(const std::pair<std::string, gfunc::callable> **out_properties, int *out_count) const
+{
+    *out_properties = m_ndobject_properties.empty() ? NULL : &m_ndobject_properties[0];
+    *out_count = (int)m_ndobject_properties.size();
 }

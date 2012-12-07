@@ -19,10 +19,16 @@ class fixedstruct_dtype : public extended_dtype {
     std::vector<std::string> m_field_names;
     std::vector<size_t> m_data_offsets;
     std::vector<size_t> m_metadata_offsets;
+    std::vector<std::pair<std::string, gfunc::callable> > m_ndobject_properties;
     size_t m_element_size;
     size_t m_metadata_size;
     dtype_memory_management_t m_memory_management;
     unsigned char m_alignment;
+
+    void create_ndobject_properties();
+
+    // Used as the parameters dtype for the ndobject properties callables
+    static dtype ndobject_parameters_dtype;
 public:
     fixedstruct_dtype(const std::vector<dtype>& field_types, const std::vector<std::string>& field_names);
 
@@ -104,6 +110,7 @@ public:
     void foreach_leading(char *data, const char *metadata, foreach_fn_t callback, void *callback_data) const;
 
     void get_dynamic_properties(const std::pair<std::string, gfunc::callable> **out_properties, int *out_count) const;
+    void get_dynamic_ndobject_properties(const std::pair<std::string, gfunc::callable> **out_properties, int *out_count) const;
 }; // class fixedstruct_dtype
 
 /** Makes a struct dtype with the specified fields */
