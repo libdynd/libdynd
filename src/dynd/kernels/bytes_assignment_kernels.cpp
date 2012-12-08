@@ -14,7 +14,7 @@ using namespace std;
 using namespace dynd;
 
 /////////////////////////////////////////
-// blockref string to blockref bytes assignment
+// blockref bytes to blockref bytes assignment
 
 namespace {
     struct blockref_bytes_assign_kernel_auxdata {
@@ -132,7 +132,7 @@ void dynd::get_blockref_bytes_assignment_kernel(size_t dst_alignment,
 }
 
 /////////////////////////////////////////
-// fixedbytes to blockref string assignment
+// fixedbytes to blockref bytes assignment
 
 namespace {
     struct fixedbytes_to_blockref_bytes_assign_kernel_auxdata {

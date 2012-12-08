@@ -70,6 +70,22 @@ void parse_iso_8601_datetime(const char *str, size_t len,
  */
 int get_datetime_iso_8601_strlen(bool local, datetime_unit_t base);
 
+/**
+ * Simplified interface to date parsing.
+ *
+ * \param str  The input date string.
+ * \param unit  The unit to parse it as (must be a date unit).
+ * \param casting  The casting rule to apply to the parsing.
+ */
+inline date_val_t parse_iso_8601_date(const std::string& str, datetime_unit_t unit,
+                    datetime_conversion_rule_t casting)
+{
+    datetime_fields fld;
+    parse_iso_8601_datetime(str.c_str(), str.length(), unit, casting,
+                    &fld, NULL, NULL, NULL);
+    return fld.as_date_val(unit);
+}
+
 /*
  * Converts an npy_datetimestruct to an (almost) ISO 8601
  * NULL-terminated string.

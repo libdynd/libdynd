@@ -52,9 +52,21 @@ struct datetime_fields {
      * Converts a datetime from a datetimestruct to a datetime based
      * on some metadata. The date is assumed to be valid.
      *
+     * \param unit  The datetime unit to use.
+     *
      * Throws an exception on error.
      */
     datetime_val_t as_datetime_val(datetime_unit_t unit) const;
+
+    /*
+     * Converts a datetime from a datetimestruct to a date based
+     * on some metadata. The date is assumed to be valid.
+     *
+     * \param unit  The datetime unit to use, must be a date unit.
+     *
+     * Throws an exception on error.
+     */
+    date_val_t as_date_val(datetime_unit_t unit) const;
     
     /*
      * Converts a datetime based on the given metadata into a datetimestruct

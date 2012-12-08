@@ -8,11 +8,13 @@
  */
 
 #include <stdexcept>
+#include <sstream>
 #include <string.h>
 
 #include "datetime_main.h"
 #include "datetime_strings.h"
 
+using namespace std;
 using namespace datetime;
 
 std::ostream& datetime::operator<<(std::ostream& o, datetime_unit_t unit)
@@ -238,6 +240,7 @@ void datetime::datetime_fields::fill_from_days(datetime_val_t days)
         if (days < month_lengths[i]) {
             this->month = i + 1;
             this->day = (int)days + 1;
+            break;
         } else {
             days -= month_lengths[i];
         }
@@ -328,6 +331,40 @@ datetime_val_t datetime::datetime_fields::as_datetime_val(datetime_unit_t unit) 
             default:
                 throw std::runtime_error(
                         "datetime metadata with corrupt unit value");
+        }
+    }
+}
+
+date_val_t datetime::datetime_fields::as_date_val(datetime_unit_t unit) const
+{
+    /* If the datetimestruct is NaT, return NaT */
+    if (this->year == DATETIME_DATETIME_NAT) {
+        return DATETIME_DATE_NAT;
+    }
+
+    if (unit == datetime_unit_year) {
+        /* Truncate to the year */
+        return static_cast<date_val_t>(this->year - 1970);
+    }
+    else if (unit == datetime_unit_month) {
+        /* Truncate to the month */
+        return static_cast<date_val_t>(12 * (this->year - 1970) + (this->month - 1));
+    }
+    else {
+        /* Otherwise calculate the number of days to start */
+        datetime_val_t days = this->as_days();
+
+        switch (unit) {
+            case datetime_unit_week:
+                /* Truncate to weeks */
+                return static_cast<date_val_t>((days >= 0) ? (days / 7) : ((days - 6) / 7));
+            case datetime_unit_day:
+                return static_cast<date_val_t>(days);
+            default: {
+                stringstream ss;
+                ss << "as_date_val requires a date unit, got " << unit;
+                throw std::runtime_error(ss.str());
+            }
         }
     }
 }

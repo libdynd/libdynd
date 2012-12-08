@@ -10,6 +10,7 @@
 #include <dynd/kernels/string_assignment_kernels.hpp>
 #include <dynd/exceptions.hpp>
 #include <dynd/gfunc/make_callable.hpp>
+#include <dynd/kernels/date_assignment_kernels.hpp>
 
 #include <datetime_strings.h>
 
@@ -87,7 +88,23 @@ void date_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const dtype& s
                 assign_error_mode errmode,
                 unary_specialization_kernel_instance& out_kernel) const
 {
-    
+    if (this == dst_dt.extended()) {
+        if (src_dt.get_kind() == string_kind) {
+            // Assignment from strings
+            get_string_to_date_assignment_kernel(m_unit, src_dt, errmode, out_kernel);
+            return;
+        }
+        if (src_dt.extended()) {
+            src_dt.extended()->get_dtype_assignment_kernel(dst_dt, src_dt, errmode, out_kernel);
+        }
+        // TODO
+    } else {
+        // TODO
+    }
+
+    stringstream ss;
+    ss << "assignment from " << src_dt << " to " << dst_dt << " is not implemented yet";
+    throw runtime_error(ss.str());
 }
 
 

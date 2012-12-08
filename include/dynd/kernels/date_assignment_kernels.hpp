@@ -16,6 +16,7 @@ namespace dynd {
  */
 void get_string_to_date_assignment_kernel(date_unit_t dst_unit,
                 const dtype& src_string_dtype,
+                assign_error_mode errmode,
                 unary_specialization_kernel_instance& out_kernel);
 
 } // namespace dynd
