@@ -21,9 +21,9 @@ namespace {
         };
 
         /** Does a single fixed-string copy */
-        static void assign(char *dst, const char *src,
-                const auxdata_storage& ad)
+        static void single(char *dst, const char *src, unary_kernel_static_data *extra)
         {
+            auxdata_storage& ad = get_auxiliary_data<auxdata_storage>(extra->auxdata);
             const extended_string_dtype *esd = static_cast<const extended_string_dtype *>(ad.src_dtype.extended());
             // TODO: Kernels should get pointers to metadata too!
             datetime::datetime_unit_t unit;
@@ -53,42 +53,6 @@ namespace {
             *reinterpret_cast<int32_t *>(dst) = datetime::parse_iso_8601_date(
                                     esd->get_utf8_string(NULL, src, ad.errmode),
                                     unit, casting);
-
-        }
-
-        static void general_kernel(char *dst, intptr_t dst_stride, const char *src, intptr_t src_stride,
-                            intptr_t count, const AuxDataBase *auxdata)
-        {
-            const auxdata_storage& ad = get_auxiliary_data<auxdata_storage>(auxdata);
-            for (intptr_t i = 0; i < count; ++i) {
-                assign(dst, src, ad);
-
-                dst += dst_stride;
-                src += src_stride;
-            }
-        }
-
-        static void scalar_kernel(char *dst, intptr_t DYND_UNUSED(dst_stride), const char *src, intptr_t DYND_UNUSED(src_stride),
-                            intptr_t, const AuxDataBase *auxdata)
-        {
-            const auxdata_storage& ad = get_auxiliary_data<auxdata_storage>(auxdata);
-            assign(dst, src, ad);
-        }
-
-        static void scalar_to_contiguous_kernel(char *dst, intptr_t dst_stride, const char *src, intptr_t DYND_UNUSED(src_stride),
-                            intptr_t count, const AuxDataBase *auxdata)
-        {
-            const auxdata_storage& ad = get_auxiliary_data<auxdata_storage>(auxdata);
-
-            // Convert the encoding once, then use memcpy calls for the rest.
-            assign(dst, src, ad);
-            const char *dst_first = dst;
-
-            for (intptr_t i = 0; i < count; ++i) {
-                memcpy(dst, dst_first, 4);
-
-                dst += 4;
-            }
         }
     };
 } // anonymous namespace
@@ -96,7 +60,7 @@ namespace {
 void dynd::get_string_to_date_assignment_kernel(date_unit_t dst_unit,
                 const dtype& src_string_dtype,
                 assign_error_mode errmode,
-                unary_specialization_kernel_instance& out_kernel)
+                kernel_instance<unary_operation_pair_t>& out_kernel)
 {
     if (src_string_dtype.get_kind() != string_kind) {
         stringstream ss;
@@ -104,12 +68,8 @@ void dynd::get_string_to_date_assignment_kernel(date_unit_t dst_unit,
         throw runtime_error(ss.str());
     }
 
-    static specialized_unary_operation_table_t optable = {
-        string_to_date_assign_kernel::general_kernel,
-        string_to_date_assign_kernel::scalar_kernel,
-        string_to_date_assign_kernel::general_kernel,
-        string_to_date_assign_kernel::scalar_to_contiguous_kernel};
-    out_kernel.specializations = optable;
+    out_kernel.kernel.single = &string_to_date_assign_kernel::single;
+    out_kernel.kernel.contig = NULL;
 
     make_auxiliary_data<string_to_date_assign_kernel::auxdata_storage>(out_kernel.auxdata);
     string_to_date_assign_kernel::auxdata_storage& ad = out_kernel.auxdata.get<string_to_date_assign_kernel::auxdata_storage>();

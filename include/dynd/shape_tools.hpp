@@ -8,8 +8,8 @@
 
 #include <iostream>
 
-#include <dynd/ndarray.hpp>
-#include <dynd/nodes/strided_ndarray_node.hpp>
+#include <dynd/dtype.hpp>
+#include <dynd/shortvector.hpp>
 
 namespace dynd {
 
@@ -44,55 +44,6 @@ inline bool shape_can_broadcast(const std::vector<intptr_t>& dst_shape,
 void broadcast_to_shape(int ndim, const intptr_t *shape,
                 int src_ndim, const intptr_t *src_shape, const intptr_t *src_strides,
                 intptr_t *out_strides);
-
-/**
- * This function broadcasts the dimensions and strides of 'src' to a given
- * shape, raising an error if it cannot be broadcast.
- */
-inline void broadcast_to_shape(int ndim, const intptr_t *shape, const strided_ndarray_node *op,
-                                    intptr_t *out_strides)
-{
-    broadcast_to_shape(ndim, shape, op->get_ndim(), op->get_shape(), op->get_strides(), out_strides);
-}
-
-
-/**
- * This function broadcasts the input operands together, populating
- * the output ndim and shape.
- *
- * \param noperands   The number of operands.
- * \param operands    The array of operands.
- * \param out_ndim    The number of broadcast dimensions is placed here.
- * \param out_shape   The broadcast shape is populated here.
- */
-void broadcast_input_shapes(int noperands, const ndarray_node_ptr *operands,
-                        int* out_ndim, dimvector* out_shape);
-
-inline void broadcast_input_shapes(const std::vector<ndarray>& operands,
-                        int* out_ndim, dimvector* out_shape)
-{
-    broadcast_input_shapes((int)operands.size(),
-                reinterpret_cast<const ndarray_node_ptr *>(&operands[0]), out_ndim, out_shape);
-}
-
-/**
- * Convenience function for broadcasting two operands.
- */
-inline void broadcast_input_shapes(const ndarray_node_ptr& node0, const ndarray_node_ptr& node1,
-                        int* out_ndim, dimvector* out_shape) {
-    ndarray_node_ptr operands[2] = {node0, node1};
-    broadcast_input_shapes(2, operands, out_ndim, out_shape);
-}
-
-/**
- * After broadcasting some input operands with broadcast_input_shapes, this function can
- * be used to copy the input strides into stride arrays where each has the same length,
- * for futher processing by strides_to_axis_perm, for instance.
- *
- * It is similar to 'broadcast_to_shape', but does not validate that the operand's shape
- * broadcasts, it merely copies the strides and pads them with zeros appropriately.
- */
-void copy_input_strides(const ndarray& op, int ndim, intptr_t *out_strides);
 
 /**
  * This function creates a permutation based on one ndarray's strides.

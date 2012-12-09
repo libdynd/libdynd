@@ -6,7 +6,7 @@
 #ifndef _DYND__DATE_ASSIGNMENT_KERNELS_HPP_
 #define _DYND__DATE_ASSIGNMENT_KERNELS_HPP_
 
-#include <dynd/kernels/unary_kernel_instance.hpp>
+#include <dynd/kernels/kernel_instance.hpp>
 #include <dynd/dtypes/date_dtype.hpp>
 
 namespace dynd {
@@ -17,7 +17,7 @@ namespace dynd {
 void get_string_to_date_assignment_kernel(date_unit_t dst_unit,
                 const dtype& src_string_dtype,
                 assign_error_mode errmode,
-                unary_specialization_kernel_instance& out_kernel);
+                kernel_instance<unary_operation_pair_t>& out_kernel);
 
 } // namespace dynd
 

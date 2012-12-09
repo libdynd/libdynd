@@ -97,14 +97,15 @@ public:
 
     // Converts to/from the storage's value dtype
     void get_operand_to_value_kernel(const eval::eval_context *ectx,
-                            unary_specialization_kernel_instance& out_borrowed_kernel) const;
+                            kernel_instance<unary_operation_pair_t>& out_borrowed_kernel) const;
     void get_value_to_operand_kernel(const eval::eval_context *ectx,
-                            unary_specialization_kernel_instance& out_borrowed_kernel) const;
+                            kernel_instance<unary_operation_pair_t>& out_borrowed_kernel) const;
     dtype with_replaced_storage_dtype(const dtype& replacement_dtype) const;
 
     size_t get_metadata_size() const;
     void metadata_default_construct(char *metadata, int ndim, const intptr_t* shape) const;
     void metadata_copy_construct(char *dst_metadata, const char *src_metadata, memory_block_data *embedded_reference) const;
+    void metadata_reset_buffers(char *metadata) const;
     void metadata_destruct(char *metadata) const;
     void metadata_debug_print(const char *metadata, std::ostream& o, const std::string& indent) const;
 };

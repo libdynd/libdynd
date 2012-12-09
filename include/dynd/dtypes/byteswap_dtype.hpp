@@ -21,7 +21,7 @@ namespace dynd {
 
 class byteswap_dtype : public extended_expression_dtype {
     dtype m_value_dtype, m_operand_dtype;
-    unary_specialization_kernel_instance m_byteswap_kernel;
+    kernel_instance<unary_operation_pair_t> m_byteswap_kernel;
 
 public:
     byteswap_dtype(const dtype& value_dtype);
@@ -67,9 +67,9 @@ public:
 
     // Converts to/from the storage's value dtype
     void get_operand_to_value_kernel(const eval::eval_context *ectx,
-                            unary_specialization_kernel_instance& out_borrowed_kernel) const;
+                            kernel_instance<unary_operation_pair_t>& out_borrowed_kernel) const;
     void get_value_to_operand_kernel(const eval::eval_context *ectx,
-                            unary_specialization_kernel_instance& out_borrowed_kernel) const;
+                            kernel_instance<unary_operation_pair_t>& out_borrowed_kernel) const;
     dtype with_replaced_storage_dtype(const dtype& replacement_dtype) const;
 };
 

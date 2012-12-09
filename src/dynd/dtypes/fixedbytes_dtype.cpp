@@ -88,7 +88,7 @@ bool dynd::fixedbytes_dtype::is_lossless_assignment(const dtype& dst_dt, const d
 
 void dynd::fixedbytes_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const dtype& src_dt,
                 assign_error_mode errmode,
-                unary_specialization_kernel_instance& out_kernel) const
+                kernel_instance<unary_operation_pair_t>& out_kernel) const
 {
     if (this == dst_dt.extended()) {
         switch (src_dt.get_type_id()) {

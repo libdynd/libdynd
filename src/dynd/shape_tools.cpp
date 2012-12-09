@@ -64,56 +64,6 @@ void dynd::broadcast_to_shape(int dst_ndim, const intptr_t *dst_shape,
     //cout << "\n";
 }
 
-void dynd::broadcast_input_shapes(int noperands, const ndarray_node_ptr *operands,
-                        int* out_ndim, dimvector* out_shape)
-{
-    // Get the number of broadcast dimensions
-    int ndim = operands[0]->get_ndim();
-    for (int i = 0; i < noperands; ++i) {
-        if (operands[i]->get_ndim() > ndim) {
-            ndim = operands[i]->get_ndim();
-        }
-    }
-
-    out_shape->init(ndim);
-    intptr_t *shape = out_shape->get();
-
-    // Fill in the broadcast shape
-    for (int k = 0; k < ndim; ++k) {
-        shape[k] = 1;
-    }
-    for (int i = 0; i < noperands; ++i) {
-        int dimdelta = ndim - operands[i]->get_ndim();
-        for (int k = dimdelta; k < ndim; ++k) {
-            intptr_t size = operands[i]->get_shape()[k - dimdelta];
-            intptr_t itershape_size = shape[k];
-            if (itershape_size == 1) {
-                shape[k] = size;
-            } else if (size != 1 && itershape_size != size) {
-                //cout << "operand " << i << ", comparing size " << itershape_size << " vs " << size << "\n";
-                throw broadcast_error(noperands, operands);
-            }
-        }
-    }
-
-    *out_ndim = ndim;
-}
-
-void dynd::copy_input_strides(const ndarray& op, int ndim, intptr_t *out_strides)
-{
-    // Process op
-    int dimdelta = ndim - op.get_ndim();
-    const intptr_t *in_strides = op.get_strides();
-    const intptr_t *in_shape = op.get_shape();
-
-    for (int i = 0; i < dimdelta; ++i) {
-        out_strides[i] = 0;
-    }
-    for (int i = dimdelta; i < ndim; ++i) {
-        out_strides[i] = in_shape[i - dimdelta] == 1 ? 0 : in_strides[i - dimdelta];
-    }
-}
-
 static inline intptr_t intptr_abs(intptr_t x) {
     return x >= 0 ? x : -x;
 }

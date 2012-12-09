@@ -24,7 +24,7 @@ struct string_dtype_metadata {
     memory_block_data *blockref;
 };
 
-struct string_dtype_element {
+struct string_dtype_data {
     char *begin;
     char *end;
 };
@@ -46,7 +46,7 @@ public:
         return sizeof(const char *);
     }
     size_t get_element_size() const {
-        return sizeof(string_dtype_element);
+        return sizeof(string_dtype_data);
     }
 
     string_encoding_t get_encoding() const {
@@ -86,15 +86,14 @@ public:
 
     void get_dtype_assignment_kernel(const dtype& dst_dt, const dtype& src_dt,
                     assign_error_mode errmode,
-                    unary_specialization_kernel_instance& out_kernel) const;
+                    kernel_instance<unary_operation_pair_t>& out_kernel) const;
 
     bool operator==(const extended_dtype& rhs) const;
-
-    void prepare_kernel_auxdata(const char *metadata, AuxDataBase *auxdata) const;
 
     size_t get_metadata_size() const;
     void metadata_default_construct(char *metadata, int ndim, const intptr_t* shape) const;
     void metadata_copy_construct(char *dst_metadata, const char *src_metadata, memory_block_data *embedded_reference) const;
+    void metadata_reset_buffers(char *metadata) const;
     void metadata_destruct(char *metadata) const;
     void metadata_debug_print(const char *metadata, std::ostream& o, const std::string& indent) const;
 };

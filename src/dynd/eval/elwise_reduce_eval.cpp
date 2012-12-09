@@ -3,6 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
+#if 0 // TODO reenable?
+
 #include <dynd/raw_iteration.hpp>
 #include <dynd/eval/eval_engine.hpp>
 #include <dynd/eval/unary_elwise_eval.hpp>
@@ -11,8 +13,6 @@
 #include <dynd/kernels/buffered_unary_kernels.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/memblock/fixed_size_pod_memory_block.hpp>
-#include <dynd/nodes/strided_ndarray_node.hpp>
-#include <dynd/nodes/elwise_reduce_kernel_node.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -95,7 +95,7 @@ ndarray_node_ptr dynd::eval::evaluate_elwise_reduce_array(ndarray_node* node,
     }
 
     // Used when the input is some kind of expression
-    deque<unary_specialization_kernel_instance> kernels;
+    deque<kernel_instance<unary_operation_pair_t>> kernels;
     deque<intptr_t> element_sizes;
 
     if (strided_node->get_category() != strided_array_node_category ||
@@ -151,7 +151,7 @@ ndarray_node_ptr dynd::eval::evaluate_elwise_reduce_array(ndarray_node* node,
         for (int i = 0, i_end = result->get_ndim(); i != i_end; ++i) {
             result_count *= result_shape[i];
         }
-        unary_specialization_kernel_instance copy_kernel;
+        kernel_instance<unary_operation_pair_t> copy_kernel;
         get_dtype_assignment_kernel(result_dt, copy_kernel);
         unary_operation_t copy_op = copy_kernel.specializations[scalar_to_contiguous_unary_specialization];
         copy_op(const_cast<char *>(result->get_readonly_originptr()), result_dt.get_element_size(),
@@ -159,13 +159,13 @@ ndarray_node_ptr dynd::eval::evaluate_elwise_reduce_array(ndarray_node* node,
                         result_count, copy_kernel.auxdata);
     } else {
         // Copy the first element along each reduction dimension
-        unary_specialization_kernel_instance copy_kernel;
+        kernel_instance<unary_operation_pair_t> copy_kernel;
         if (kernels.empty()) {
             // Straightforward copy kernel
             get_dtype_assignment_kernel(result_dt, copy_kernel);
         } else {
             // Borrow all the kernels so we can make a copy kernel for this part
-            deque<unary_specialization_kernel_instance> borrowed_kernels(kernels.size());
+            deque<kernel_instance<unary_operation_pair_t>> borrowed_kernels(kernels.size());
             for (size_t i = 0, i_end = kernels.size(); i != i_end; ++i) {
                 borrowed_kernels[i].borrow_from(kernels[i]);
             }
@@ -238,12 +238,12 @@ ndarray_node_ptr dynd::eval::evaluate_elwise_reduce_array(ndarray_node* node,
         reduce_op_duped[1] = reduce_operation.kernel;
         reduce_op_duped[2] = reduce_operation.kernel;
         reduce_op_duped[3] = reduce_operation.kernel;
-        kernels.push_back(unary_specialization_kernel_instance());
+        kernels.push_back(kernel_instance<unary_operation_pair_t>());
         kernels.back().specializations = reduce_op_duped;
         kernels.back().auxdata.swap(reduce_operation.auxdata);
 
         // Create the chained kernel
-        unary_specialization_kernel_instance chained_kernel;
+        kernel_instance<unary_operation_pair_t> chained_kernel;
         make_buffered_chain_unary_kernel(kernels, element_sizes, chained_kernel);
         // Pick out the right specialization
         reduce_operation.kernel = chained_kernel.specializations[uspec];
@@ -279,3 +279,5 @@ ndarray_node_ptr dynd::eval::evaluate_elwise_reduce_array(ndarray_node* node,
 
     return DYND_MOVE(result);
 }
+
+#endif // TODO reenable?

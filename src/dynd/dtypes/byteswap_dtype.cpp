@@ -5,7 +5,6 @@
 
 #include <dynd/dtypes/byteswap_dtype.hpp>
 #include <dynd/dtypes/fixedbytes_dtype.hpp>
-#include <dynd/raw_iteration.hpp>
 #include <dynd/buffer_storage.hpp>
 #include <dynd/kernels/byteswap_kernels.hpp>
 
@@ -100,13 +99,13 @@ bool dynd::byteswap_dtype::operator==(const extended_dtype& rhs) const
 }
 
 void dynd::byteswap_dtype::get_operand_to_value_kernel(const eval::eval_context *DYND_UNUSED(ectx),
-                        unary_specialization_kernel_instance& out_borrowed_kernel) const
+                        kernel_instance<unary_operation_pair_t>& out_borrowed_kernel) const
 {
     out_borrowed_kernel.borrow_from(m_byteswap_kernel);
 }
 
 void dynd::byteswap_dtype::get_value_to_operand_kernel(const eval::eval_context *DYND_UNUSED(ectx),
-                        unary_specialization_kernel_instance& out_borrowed_kernel) const
+                        kernel_instance<unary_operation_pair_t>& out_borrowed_kernel) const
 {
     out_borrowed_kernel.borrow_from(m_byteswap_kernel);
 }

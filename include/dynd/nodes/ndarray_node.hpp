@@ -2,6 +2,7 @@
 // Copyright (C) 2011-12, Dynamic NDArray Developers
 // BSD 2-Clause License, see LICENSE.txt
 //
+// DEPRECATED
 
 #ifndef _DYND__NDARRAY_NODE_HPP_
 #define _DYND__NDARRAY_NODE_HPP_
@@ -18,15 +19,6 @@
 namespace dynd {
 
 class ndarray;
-
-enum ndarray_access_flags {
-    /** If an ndarray node is readable */
-    read_access_flag = 0x01,
-    /** If an ndarray node is writeable */
-    write_access_flag = 0x02,
-    /** If an ndarray node will not be written to by anyone else either */
-    immutable_access_flag = 0x04
-};
 
 // In the new design, all nodes have the same
 // data layout, determined completely by its dtype.
@@ -129,7 +121,7 @@ public:
 
     virtual void get_unary_operation(intptr_t dst_fixedstride, intptr_t src_fixedstride,
                                     kernel_instance<unary_operation_t>& out_kernel) const;
-    virtual void get_unary_specialization_operation(unary_specialization_kernel_instance& out_kernel) const;
+    virtual void get_unary_specialization_operation(kernel_instance<unary_operation_pair_t>& out_kernel) const;
     virtual void get_binary_operation(intptr_t dst_fixedstride, intptr_t src1_fixedstride,
                                     intptr_t src2_fixedstride,
                                     const eval::eval_context *ectx,

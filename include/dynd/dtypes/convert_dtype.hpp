@@ -14,14 +14,14 @@
 
 #include <dynd/dtype.hpp>
 #include <dynd/dtype_assign.hpp>
-#include <dynd/kernels/unary_kernel_instance.hpp>
+#include <dynd/kernels/kernel_instance.hpp>
 
 namespace dynd {
 
 class convert_dtype : public extended_expression_dtype {
     dtype m_value_dtype, m_operand_dtype;
     assign_error_mode m_errmode;
-    unary_specialization_kernel_instance m_to_value_kernel, m_to_operand_kernel;
+    kernel_instance<unary_operation_pair_t> m_to_value_kernel, m_to_operand_kernel;
 public:
     convert_dtype(const dtype& value_dtype, const dtype& operand_dtype, assign_error_mode errmode);
 
@@ -65,9 +65,9 @@ public:
 
     // For expression_kind dtypes - converts to/from the storage's value dtype
     void get_operand_to_value_kernel(const eval::eval_context *ectx,
-                            unary_specialization_kernel_instance& out_borrowed_kernel) const;
+                            kernel_instance<unary_operation_pair_t>& out_borrowed_kernel) const;
     void get_value_to_operand_kernel(const eval::eval_context *ectx,
-                            unary_specialization_kernel_instance& out_borrowed_kernel) const;
+                            kernel_instance<unary_operation_pair_t>& out_borrowed_kernel) const;
     dtype with_replaced_storage_dtype(const dtype& replacement_dtype) const;
 };
 

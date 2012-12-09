@@ -8,7 +8,6 @@
 
 #include <deque>
 
-#include <dynd/nodes/ndarray_node.hpp>
 #include <dynd/eval/eval_context.hpp>
 
 namespace dynd { namespace eval {
@@ -23,7 +22,7 @@ ndarray_node_ptr evaluate_unary_elwise_array(ndarray_node* node, const eval::eva
  */
 ndarray_node_ptr evaluate_strided_with_unary_kernel(ndarray_node *node, const eval::eval_context *ectx,
                                 bool copy, uint32_t access_flags,
-                                const dtype& dst_dt, unary_specialization_kernel_instance& operation);
+                                const dtype& dst_dt, kernel_instance<unary_operation_pair_t>& operation);
 
 /**
  * If the node is just a chain of unary operations, pushes all of the
@@ -32,7 +31,7 @@ ndarray_node_ptr evaluate_strided_with_unary_kernel(ndarray_node *node, const ev
  */
 ndarray_node *push_front_node_unary_kernels(ndarray_node* node,
                     const eval::eval_context *ectx,
-                    std::deque<unary_specialization_kernel_instance>& out_kernels,
+                    std::deque<kernel_instance<unary_operation_pair_t>>& out_kernels,
                     std::deque<intptr_t>& out_element_sizes);
 
 }} // namespace dynd::eval

@@ -172,14 +172,12 @@ bool dynd::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt)
 }
 
 
-void dynd::dtype_assign(const dtype& dst_dt, char *dst, const dtype& src_dt, const char *src,
+void dynd::dtype_assign(const dtype& dst_dt, const char *dst_metadata, char *dst_data,
+                const dtype& src_dt, const char *src_metadata, const char *src_data,
                 assign_error_mode errmode, const eval::eval_context *ectx)
 {
     DYND_ASSERT_ALIGNED(dst, 0, dst_dt.get_alignment(), "dst dtype: " << dst_dt << ", src dtype: " << src_dt);
     DYND_ASSERT_ALIGNED(src, 0, src_dt.get_alignment(), "src dtype: " << src_dt << ", dst dtype: " << dst_dt);
-    if (dst_dt.get_memory_management() != pod_memory_management) {
-        throw runtime_error("dtype_assign can only be used with POD destination memory");
-    }
 
     if (errmode == assign_error_default) {
         if (ectx != NULL) {
@@ -193,11 +191,16 @@ void dynd::dtype_assign(const dtype& dst_dt, char *dst, const dtype& src_dt, con
         }
     }
 
+    unary_kernel_static_data extra;
+    extra.dst_metadata = dst_metadata;
+    extra.src_metadata = src_metadata;
+
     if (dst_dt.extended() == NULL && src_dt.extended() == NULL) {
         // Try to use the simple single-value assignment for built-in types
-        assignment_function_t asn = get_builtin_dtype_assignment_function(dst_dt.get_type_id(), src_dt.get_type_id(), errmode);
-        if (asn != NULL) {
-            asn(dst, src);
+        unary_operation_pair_t asn = get_builtin_dtype_assignment_function(dst_dt.get_type_id(), src_dt.get_type_id(), errmode);
+        if (asn.single != NULL) {
+            extra.auxdata = NULL;
+            asn.single(dst_data, src_data, &extra);
             return;
         }
 
@@ -206,25 +209,10 @@ void dynd::dtype_assign(const dtype& dst_dt, char *dst, const dtype& src_dt, con
         throw std::runtime_error(ss.str());
     } else {
         // Fall back to the strided assignment functions for the extended dtypes
-        unary_specialization_kernel_instance op;
+        kernel_instance<unary_operation_pair_t> op;
         get_dtype_assignment_kernel(dst_dt, src_dt, errmode, ectx, op);
-        op.specializations[scalar_unary_specialization](dst, 0, src, 0, 1, op.auxdata);
+        extra.auxdata = op.auxdata;
+        op.kernel.single(dst_data, src_data, &extra);
         return;
     }
 }
-
-void dynd::dtype_strided_assign(const dtype& dst_dt, char *dst, intptr_t dst_stride,
-                            const dtype& src_dt, const char *src, intptr_t src_stride,
-                            intptr_t count, assign_error_mode errmode, const eval::eval_context *ectx)
-{
-    if (dst_dt.get_memory_management() != pod_memory_management) {
-        throw runtime_error("dtype_strided_assign can only be used with POD destination memory");
-    }
-
-    unary_specialization_kernel_instance op;
-    get_dtype_assignment_kernel(dst_dt, src_dt,
-                                errmode, ectx, op);
-    op.specializations[get_unary_specialization(dst_stride, dst_dt.get_element_size(), src_stride, src_dt.get_element_size())](
-                dst, dst_stride, src, src_stride, count, op.auxdata);
-}
-

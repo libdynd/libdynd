@@ -318,7 +318,7 @@ void dynd::fixedstring_dtype::get_single_compare_kernel(single_compare_kernel_in
 
 void dynd::fixedstring_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const dtype& src_dt,
                 assign_error_mode errmode,
-                unary_specialization_kernel_instance& out_kernel) const
+                kernel_instance<unary_operation_pair_t>& out_kernel) const
 {
     if (this == dst_dt.extended()) {
         switch (src_dt.get_type_id()) {

@@ -187,7 +187,7 @@ void array_dtype::get_single_compare_kernel(single_compare_kernel_instance& DYND
 
 void array_dtype::get_dtype_assignment_kernel(const dtype& DYND_UNUSED(dst_dt), const dtype& DYND_UNUSED(src_dt),
                 assign_error_mode DYND_UNUSED(errmode),
-                unary_specialization_kernel_instance& DYND_UNUSED(out_kernel)) const
+                kernel_instance<unary_operation_pair_t>& DYND_UNUSED(out_kernel)) const
 {
     throw runtime_error("array_dtype::get_dtype_assignment_kernel is unimplemented"); 
 }
@@ -201,16 +201,6 @@ bool array_dtype::operator==(const extended_dtype& rhs) const
     } else {
         const array_dtype *dt = static_cast<const array_dtype*>(&rhs);
         return m_element_dtype == dt->m_element_dtype;
-    }
-}
-
-void array_dtype::prepare_kernel_auxdata(const char *metadata, AuxDataBase *auxdata) const
-{
-    const array_dtype_metadata *md = reinterpret_cast<const array_dtype_metadata *>(metadata);
-    auxdata = reinterpret_cast<AuxDataBase *>(reinterpret_cast<uintptr_t>(auxdata)&~1);
-    if (auxdata->kernel_api) {
-        auxdata->kernel_api->set_dst_memory_block(auxdata, md->blockref);
-        // TODO: Need to handle multiple blockref types, e.g. array<string>
     }
 }
 
@@ -248,6 +238,11 @@ void array_dtype::metadata_copy_construct(char *dst_metadata, const char *src_me
         m_element_dtype.extended()->metadata_copy_construct(dst_metadata + sizeof(array_dtype_metadata),
                         src_metadata + sizeof(array_dtype_metadata), embedded_reference);
     }
+}
+
+void array_dtype::metadata_reset_buffers(char *metadata) const
+{
+    throw runtime_error("TODO implement array_dtype::metadata_reset_buffers");
 }
 
 void array_dtype::metadata_destruct(char *metadata) const

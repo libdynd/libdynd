@@ -36,12 +36,12 @@ public:
     /**
      * Does dst <- operation(dst, src), use when iterating from index 0 to N-1.
      */
-    dynd::kernel_instance<dynd::unary_operation_t> m_left_associative_reduction_kernel;
+    dynd::kernel_instance<dynd::unary_single_operation_t> m_left_associative_reduction_kernel;
     /**
      * Does dst <- operation(src, dst), use when iterating from index N-1 to 0.
      * If the kernel is flagged commutative, this kernel is never used so may be left empty.
      */
-    dynd::kernel_instance<dynd::unary_operation_t> m_right_associative_reduction_kernel;
+    dynd::kernel_instance<dynd::unary_single_operation_t> m_right_associative_reduction_kernel;
 
     void swap(elwise_reduce_kernel& rhs) {
         std::swap(m_associative, rhs.m_associative);

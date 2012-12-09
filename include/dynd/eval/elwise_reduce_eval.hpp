@@ -6,8 +6,6 @@
 #ifndef _DYND__ELWISE_REDUCE_EVAL_HPP_
 #define _DYND__ELWISE_REDUCE_EVAL_HPP_
 
-#include <dynd/nodes/ndarray_node.hpp>
-
 namespace dynd { namespace eval {
 
 ndarray_node_ptr evaluate_elwise_reduce_array(ndarray_node* node,

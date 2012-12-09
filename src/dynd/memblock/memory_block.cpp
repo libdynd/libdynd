@@ -8,18 +8,12 @@
 #include <dynd/memblock/fixed_size_pod_memory_block.hpp>
 #include <dynd/memblock/executable_memory_block.hpp>
 #include <dynd/memblock/ndobject_memory_block.hpp>
-#include <dynd/nodes/ndarray_node.hpp>
 
 using namespace std;
 using namespace dynd;
 
 namespace dynd { namespace detail {
 
-/**
- * INTERNAL: Frees a memory_block created by make_ndarray_node_memory_block.
- * This should only be called by the memory_block decref code.
- */
-void free_ndarray_node_memory_block(memory_block_data *memblock);
 /**
  * INTERNAL: Frees a memory_block created by make_external_memory_block.
  * This should only be called by the memory_block decref code.
@@ -59,10 +53,6 @@ void dynd::detail::memory_block_free(memory_block_data *memblock)
 {
     //cout << "freeing memory block " << (void *)memblock << endl;
     switch ((memory_block_type_t)memblock->m_type) {
-        case deprecated_ndarray_node_memory_block_type: {
-            free_ndarray_node_memory_block(memblock);
-            return;
-        }
         case external_memory_block_type: {
             free_external_memory_block(memblock);
             return;
@@ -96,12 +86,6 @@ void dynd::memory_block_debug_print(const memory_block_data *memblock, std::ostr
         o << indent << "------ memory_block at " << (const void *)memblock << "\n";
         o << indent << " reference count: " << (int32_t)memblock->m_use_count << "\n";
         switch ((memory_block_type_t)memblock->m_type) {
-            case deprecated_ndarray_node_memory_block_type: {
-                o << indent << " type: ndarray_node\n";
-                ndarray_node_ptr node(const_cast<memory_block_data *>(memblock));
-                node->debug_print(o, indent + " ");
-                break;
-            }
             case external_memory_block_type:
                 o << indent << " type: external\n";
                 break;
@@ -134,8 +118,6 @@ void dynd::memory_block_debug_print(const memory_block_data *memblock, std::ostr
 memory_block_pod_allocator_api *dynd::get_memory_block_pod_allocator_api(memory_block_data *memblock)
 {
     switch (memblock->m_type) {
-        case deprecated_ndarray_node_memory_block_type:
-            throw runtime_error("Cannot get a POD allocator API from an ndarray_node_memory_block");
         case external_memory_block_type:
             throw runtime_error("Cannot get a POD allocator API from an external_memory_block");
         case fixed_size_pod_memory_block_type:

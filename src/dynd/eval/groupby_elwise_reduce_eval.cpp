@@ -3,6 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
+#if 0 // TODO reenable?
+
 #include <dynd/shape_tools.hpp>
 #include <dynd/dtypes/categorical_dtype.hpp>
 #include <dynd/eval/groupby_elwise_reduce_eval.hpp>
@@ -95,7 +97,7 @@ ndarray_node_ptr dynd::eval::evaluate_groupby_elwise_reduce(ndarray_node *node, 
     }
 
     // Used when the input is some kind of expression
-    deque<unary_specialization_kernel_instance> data_kernels, by_kernels;
+    deque<kernel_instance<unary_operation_pair_t>> data_kernels, by_kernels;
     deque<intptr_t> data_element_sizes, by_element_sizes;
 
     if (data_strided_node->get_category() != strided_array_node_category ||
@@ -167,7 +169,7 @@ ndarray_node_ptr dynd::eval::evaluate_groupby_elwise_reduce(ndarray_node *node, 
                         size, num_groups,
                         reduce_operation, groups_dt);
         } else if (data_kernels.empty()) {
-            unary_specialization_kernel_instance by_operation;
+            kernel_instance<unary_operation_pair_t> by_operation;
             make_buffered_chain_unary_kernel(by_kernels, by_element_sizes, by_operation);
             unary_operation_t by_func = by_operation.specializations[
                         get_unary_specialization(groups_dt.get_element_size(), groups_dt.get_element_size(), by_stride, by_element_sizes.front())];
@@ -190,7 +192,7 @@ ndarray_node_ptr dynd::eval::evaluate_groupby_elwise_reduce(ndarray_node *node, 
                 count -= block_count;
             } while (count > 0);
         } else if (by_kernels.empty()) {
-            unary_specialization_kernel_instance data_operation;
+            kernel_instance<unary_operation_pair_t> data_operation;
             make_buffered_chain_unary_kernel(data_kernels, data_element_sizes, data_operation);
             unary_operation_t data_func = data_operation.specializations[
                         get_unary_specialization(data_element_sizes.back(), data_element_sizes.back(), data_stride, data_element_sizes.front())];
@@ -213,7 +215,7 @@ ndarray_node_ptr dynd::eval::evaluate_groupby_elwise_reduce(ndarray_node *node, 
                 count -= block_count;
             } while (count > 0);
         } else {
-            unary_specialization_kernel_instance by_operation, data_operation;
+            kernel_instance<unary_operation_pair_t> by_operation, data_operation;
             make_buffered_chain_unary_kernel(by_kernels, by_element_sizes, by_operation);
             make_buffered_chain_unary_kernel(data_kernels, data_element_sizes, data_operation);
             unary_operation_t by_func = by_operation.specializations[
@@ -248,7 +250,7 @@ ndarray_node_ptr dynd::eval::evaluate_groupby_elwise_reduce(ndarray_node *node, 
 
         // Whenever we initialize a result value for the first time,
         // we copy it from the data array. This sets up the copy operation.
-        unary_specialization_kernel_instance data_operation;
+        kernel_instance<unary_operation_pair_t> data_operation;
         if (data_kernels.empty()) {
             get_dtype_assignment_kernel(result_dt, data_operation);
         } else {
@@ -263,7 +265,7 @@ ndarray_node_ptr dynd::eval::evaluate_groupby_elwise_reduce(ndarray_node *node, 
                         group_seen, copy_one_data_func, data_operation.auxdata,
                         reduce_operation, groups_dt);
         } else if (data_kernels.empty()) {
-            unary_specialization_kernel_instance by_operation;
+            kernel_instance<unary_operation_pair_t> by_operation;
             make_buffered_chain_unary_kernel(by_kernels, by_element_sizes, by_operation);
             unary_operation_t by_func = by_operation.specializations[
                         get_unary_specialization(groups_dt.get_element_size(), groups_dt.get_element_size(), by_stride, by_element_sizes.front())];
@@ -309,7 +311,7 @@ ndarray_node_ptr dynd::eval::evaluate_groupby_elwise_reduce(ndarray_node *node, 
                 count -= block_count;
             } while (count > 0);
         } else {
-            unary_specialization_kernel_instance by_operation;
+            kernel_instance<unary_operation_pair_t> by_operation;
             make_buffered_chain_unary_kernel(by_kernels, by_element_sizes, by_operation);
             unary_operation_t by_func = by_operation.specializations[
                         get_unary_specialization(groups_dt.get_element_size(), groups_dt.get_element_size(), by_stride, by_element_sizes.front())];
@@ -353,3 +355,5 @@ ndarray_node_ptr dynd::eval::evaluate_groupby_elwise_reduce(ndarray_node *node, 
 
     return DYND_MOVE(result);
 }
+
+#endif // TODO reenable?

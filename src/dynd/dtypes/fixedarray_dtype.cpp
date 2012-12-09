@@ -264,7 +264,7 @@ void fixedarray_dtype::get_single_compare_kernel(single_compare_kernel_instance&
 
 void fixedarray_dtype::get_dtype_assignment_kernel(const dtype& DYND_UNUSED(dst_dt), const dtype& DYND_UNUSED(src_dt),
                 assign_error_mode DYND_UNUSED(errmode),
-                unary_specialization_kernel_instance& DYND_UNUSED(out_kernel)) const
+                kernel_instance<unary_operation_pair_t>& DYND_UNUSED(out_kernel)) const
 {
     throw runtime_error("fixedarray_dtype::get_dtype_assignment_kernel is unimplemented"); 
 }

@@ -10,57 +10,84 @@
 
 namespace dynd {
 
+template<size_t N = 128>
 class buffer_storage {
     char *m_storage;
-    intptr_t m_element_size, m_element_count;
+    char *m_metadata;
+    dtype m_dtype;
 
     // Non-assignable
     buffer_storage& operator=(const buffer_storage&);
 
-    void internal_allocate(intptr_t element_size, intptr_t max_element_count, intptr_t max_byte_count)
+    void internal_allocate()
     {
-        m_element_count = max_byte_count / element_size;
-        if (m_element_count > max_element_count) {
-            m_element_count = max_element_count;
+        m_storage = new char[element_count * m_dtype.get_element_size()];
+        size_t metasize = m_dtype.extended() ? m_dtype.extended()->get_metadata_size() : 0;
+        if (metasize != 0) {
+            try {
+                m_metadata = NULL;
+                m_metadata = new char[metasize];
+                m_dtype.extended()->metadata_default_construct(m_metadata, 0, NULL);
+            } catch(const std::exception&) {
+                delete[] m_storage;
+                delete[] m_metadata;
+                throw;
+            }
         }
-        if (m_element_count == 0) {
-            m_element_count = 1;
-        }
-        m_element_size = element_size;
-        m_storage = new char[m_element_count * element_size];
     }
 public:
-    buffer_storage() {
-        m_storage = 0;
-    }
-    buffer_storage(const buffer_storage& rhs)
-        : m_storage(new char[rhs.m_element_count * rhs.m_element_size]),
-            m_element_size(rhs.m_element_size), m_element_count(rhs.m_element_count)
+    enum { element_count = N };
+
+    inline buffer_storage()
+        : m_storage(NULL), m_metadata(NULL), m_dtype()
     {}
-    buffer_storage(intptr_t element_size, intptr_t max_element_count = 32768, intptr_t max_byte_count = 32768) {
-        internal_allocate(element_size, max_element_count, max_byte_count);
+    inline buffer_storage(const buffer_storage& rhs)
+        : m_storage(NULL), m_metadata(NULL), m_dtype(rhs.m_dtype)
+    {
+        internal_allocate();
+    }
+    inline buffer_storage(const dtype& dt)
+        : m_storage(NULL), m_metadata(NULL), m_dtype(dt)
+    {
+        internal_allocate();
     }
     ~buffer_storage() {
         // It's ok to call delete on a NULL pointer
         delete[] m_storage;
+        if (m_metadata) {
+            m_dtype.extended()->metadata_destruct(m_metadata);
+            delete[] m_metadata;
+        }
     }
 
-    void allocate(intptr_t element_size, intptr_t max_element_count = 32768, intptr_t max_byte_count = 32768) {
+    void allocate(const dtype& dt) {
         delete[] m_storage;
         m_storage = 0;
-        internal_allocate(element_size, max_element_count, max_byte_count);
+        if (m_metadata) {
+            m_dtype.extended()->metadata_destruct(m_metadata);
+            delete[] m_metadata;
+            m_metadata = NULL;
+        }
+        m_dtype = dt;
+        internal_allocate();
     }
 
-    char *storage() const {
+    inline const dtype& get_dtype() const {
+        return m_dtype;
+    }
+
+    inline char *get_storage() const {
         return m_storage;
     }
 
-    intptr_t get_element_size() const {
-        return m_element_size;
+    inline const char *get_metadata() const {
+        return m_metadata;
     }
 
-    intptr_t get_element_count() const {
-        return m_element_count;
+    inline void reset_metadata() {
+        if (m_metadata && m_dtype.extended()) {
+            m_dtype.extended()->metadata_reset_buffers(m_metadata);
+        }
     }
 };
 

@@ -64,7 +64,7 @@ public:
      *
      * IMPORTANT: Because the auxiliary data is borrowed, the kernel
      *            instance this writes to should have a shorter lifetime
-     *            than this unary_specialization_kernel_instance.
+     *            than this kernel_instance<unary_operation_pair_t>.
      */
     void borrow_comparison(comparison_id_t comparison_id, kernel_instance<single_compare_operation_t>& out_kernel)
     {

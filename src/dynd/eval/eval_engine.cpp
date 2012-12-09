@@ -3,6 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
+#if 0 // TODO reenable?
+
 #include <dynd/eval/eval_engine.hpp>
 #include <dynd/eval/unary_elwise_eval.hpp>
 #include <dynd/eval/elwise_reduce_eval.hpp>
@@ -47,7 +49,7 @@ static ndarray_node_ptr copy_strided_array(ndarray_node* node, uint32_t access_f
                                     node->get_shape(), axis_perm.get(), access_flags, blockrefs_begin, blockrefs_end);
 
     // Get the kernel copy operation
-    unary_specialization_kernel_instance kernel;
+    kernel_instance<unary_operation_pair_t> kernel;
     get_dtype_assignment_kernel(dt, kernel);
     if (mem_mgmt == blockref_memory_management) {
         // Set up the destination memory block for the blockref copy kernel
@@ -116,7 +118,7 @@ static ndarray_node_ptr evaluate_strided_array_expression_dtype(ndarray_node* no
     ndarray_node_ptr result;
     //int ndim = node->get_ndim();
 
-    unary_specialization_kernel_instance operation;
+    kernel_instance<unary_operation_pair_t> operation;
     get_dtype_assignment_kernel(value_dt, dt, assign_error_none, ectx, operation);
 
     return evaluate_strided_with_unary_kernel(node, ectx, copy, access_flags, value_dt, operation);
@@ -210,3 +212,5 @@ ndarray_node_ptr dynd::eval::evaluate(ndarray_node *node, const eval::eval_conte
     node->debug_print(ss);
     throw std::runtime_error(ss.str());
 }
+
+#endif // TODO reenable?

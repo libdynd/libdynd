@@ -7,7 +7,6 @@
 #define _DYND__EVAL_ENGINE_HPP_
 
 #include <dynd/eval/eval_context.hpp>
-#include <dynd/nodes/ndarray_node.hpp>
 
 namespace dynd { namespace eval {
 

@@ -33,12 +33,12 @@ dynd::convert_dtype::convert_dtype(const dtype& value_dtype, const dtype& operan
     if (errmode_to_value != assign_error_default) {
         ::dynd::get_dtype_assignment_kernel(m_value_dtype, m_operand_dtype.value_dtype(), errmode_to_value, NULL, m_to_value_kernel);
     } else {
-        m_to_value_kernel.specializations = NULL;
+        m_to_value_kernel.kernel = unary_operation_pair_t();
     }
     if (errmode_to_operand != assign_error_default) {
         ::dynd::get_dtype_assignment_kernel(m_operand_dtype.value_dtype(), m_value_dtype, errmode_to_value, NULL, m_to_operand_kernel);
     } else {
-        m_to_operand_kernel.specializations = NULL;
+        m_to_value_kernel.kernel = unary_operation_pair_t();
     }
 }
 
@@ -97,9 +97,9 @@ bool dynd::convert_dtype::operator==(const extended_dtype& rhs) const
 }
 
 void dynd::convert_dtype::get_operand_to_value_kernel(const eval::eval_context *ectx,
-                        unary_specialization_kernel_instance& out_borrowed_kernel) const
+                        kernel_instance<unary_operation_pair_t>& out_borrowed_kernel) const
 {
-    if (m_to_value_kernel.specializations != NULL) {
+    if (m_to_value_kernel.kernel.single != NULL) {
         out_borrowed_kernel.borrow_from(m_to_value_kernel);
     } else if (ectx != NULL) {
         // If the kernel wasn't set, errmode is assign_error_default, so we must use the eval_context
@@ -107,14 +107,14 @@ void dynd::convert_dtype::get_operand_to_value_kernel(const eval::eval_context *
                             ectx->default_assign_error_mode, ectx, out_borrowed_kernel);
     } else {
         // An evaluation context is needed to get the kernel, set the output to NULL
-        out_borrowed_kernel.specializations = NULL;
+        out_borrowed_kernel.kernel = unary_operation_pair_t();
     }
 }
 
 void dynd::convert_dtype::get_value_to_operand_kernel(const eval::eval_context *ectx,
-                        unary_specialization_kernel_instance& out_borrowed_kernel) const
+                        kernel_instance<unary_operation_pair_t>& out_borrowed_kernel) const
 {
-    if (m_to_operand_kernel.specializations != NULL) {
+    if (m_to_operand_kernel.kernel.single != NULL) {
         out_borrowed_kernel.borrow_from(m_to_operand_kernel);
     } else if (ectx != NULL) {
         // If the kernel wasn't set, errmode is assign_error_default, so we must use the eval_context
@@ -122,7 +122,7 @@ void dynd::convert_dtype::get_value_to_operand_kernel(const eval::eval_context *
                             ectx->default_assign_error_mode, ectx, out_borrowed_kernel);
     } else {
         // An evaluation context is needed to get the kernel, set the output to NULL
-        out_borrowed_kernel.specializations = NULL;
+        out_borrowed_kernel.kernel = unary_operation_pair_t();
     }
 }
 

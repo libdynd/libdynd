@@ -3,10 +3,10 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
+#if 0 // TODO reenable
+
 #include <algorithm>
 
-#include <dynd/nodes/elwise_unary_kernel_node.hpp>
-#include <dynd/nodes/elwise_binary_kernel_node.hpp>
 #include <dynd/gfunc/elwise_gfunc.hpp>
 
 using namespace std;
@@ -69,3 +69,5 @@ void dynd::gfunc::elwise::debug_print(std::ostream& o, const std::string& indent
     }
     o << indent << "------" << endl;
 }
+
+#endif // TODO reenable

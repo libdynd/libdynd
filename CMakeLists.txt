@@ -138,7 +138,6 @@ set(dynd_SRC
     include/dynd/kernels/kernel_instance.hpp
     include/dynd/kernels/single_compare_kernel_instance.hpp
     include/dynd/kernels/string_assignment_kernels.hpp
-    include/dynd/kernels/unary_kernel_instance.hpp
     # MemBlock
     src/dynd/memblock/memory_block.cpp
     src/dynd/memblock/executable_memory_block_windows_x64.cpp
@@ -148,32 +147,12 @@ set(dynd_SRC
     src/dynd/memblock/fixed_size_pod_memory_block.cpp
     src/dynd/memblock/pod_memory_block.cpp
     src/dynd/memblock/ndobject_memory_block.cpp
-    src/dynd/memblock/ndarray_node_memory_block.cpp # DEPRECATED
     include/dynd/memblock/memory_block.hpp
     include/dynd/memblock/executable_memory_block.hpp
     include/dynd/memblock/external_memory_block.hpp
     include/dynd/memblock/fixed_size_pod_memory_block.hpp
     include/dynd/memblock/pod_memory_block.hpp
     include/dynd/memblock/ndobject_memory_block.hpp
-    include/dynd/memblock/ndarray_node_memory_block.hpp # DEPRECATED
-    # Nodes
-    src/dynd/nodes/elwise_unary_kernel_node.cpp
-    src/dynd/nodes/elwise_binary_kernel_node.cpp
-    src/dynd/nodes/elwise_reduce_kernel_node.cpp
-    src/dynd/nodes/groupby_node.cpp
-    src/dynd/nodes/immutable_scalar_node.cpp
-    src/dynd/nodes/ndarray_node.cpp
-    src/dynd/nodes/scalar_node.cpp
-    src/dynd/nodes/strided_ndarray_node.cpp
-    include/dynd/nodes/elwise_unary_kernel_node.hpp
-    include/dynd/nodes/elwise_binary_kernel_node.hpp
-    include/dynd/nodes/elwise_reduce_kernel_node.hpp
-    include/dynd/nodes/groupby_node.hpp
-    include/dynd/nodes/immutable_builtin_scalar_node.hpp
-    include/dynd/nodes/immutable_scalar_node.hpp
-    include/dynd/nodes/ndarray_node.hpp
-    include/dynd/nodes/scalar_node.hpp
-    include/dynd/nodes/strided_ndarray_node.hpp
     # VM
     src/dynd/vm/elwise_program.cpp
     src/dynd/vm/register_allocation.cpp
@@ -186,7 +165,6 @@ set(dynd_SRC
     src/dynd/dtype_comparisons.cpp
     src/dynd/dtype_promotion.cpp
     src/dynd/exceptions.cpp
-    src/dynd/ndarray.cpp
     src/dynd/ndobject.cpp
     src/dynd/ndobject_arange.cpp
     src/dynd/shape_tools.cpp
@@ -204,7 +182,6 @@ set(dynd_SRC
     include/dynd/exceptions.hpp
     include/dynd/fpstatus.hpp
     include/dynd/irange.hpp
-    include/dynd/ndarray.hpp
     include/dynd/ndobject.hpp
     include/dynd/ndobject_arange.hpp
     include/dynd/ndobject_iter.hpp
@@ -235,8 +212,6 @@ source_group("Kernels Source" REGULAR_EXPRESSION "src/dynd/kernels/.*cpp")
 source_group("Kernels Headers" REGULAR_EXPRESSION "include/dynd/kernels/.*hpp")
 source_group("MemBlock Source" REGULAR_EXPRESSION "src/dynd/memblock/.*cpp")
 source_group("MemBlock Headers" REGULAR_EXPRESSION "include/dynd/memblock/.*hpp")
-source_group("Nodes Source" REGULAR_EXPRESSION "src/dynd/nodes/.*cpp")
-source_group("Nodes Headers" REGULAR_EXPRESSION "include/dynd/nodes/.*hpp")
 source_group("VM Source" REGULAR_EXPRESSION "src/dynd/vm/.*cpp")
 source_group("VM Headers" REGULAR_EXPRESSION "include/dynd/vm/.*hpp")
 source_group("Internal Headers" REGULAR_EXPRESSION "src/dynd/.*hpp")

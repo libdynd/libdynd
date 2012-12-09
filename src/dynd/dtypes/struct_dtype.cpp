@@ -260,7 +260,7 @@ void struct_dtype::get_single_compare_kernel(single_compare_kernel_instance& DYN
 
 void struct_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const dtype& src_dt,
                 assign_error_mode DYND_UNUSED(errmode),
-                unary_specialization_kernel_instance& DYND_UNUSED(out_kernel)) const
+                kernel_instance<unary_operation_pair_t>& DYND_UNUSED(out_kernel)) const
 {
     stringstream ss;
     ss << "struct_dtype::get_dtype_assignment_kernel from " << src_dt << " to " << dst_dt << " is unimplemented";

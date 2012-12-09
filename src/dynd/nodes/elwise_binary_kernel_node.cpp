@@ -2,6 +2,7 @@
 // Copyright (C) 2011-2012, Dynamic NDArray Developers
 // BSD 2-Clause License, see LICENSE.txt
 //
+// DEPRECATED
 
 #include <dynd/nodes/elwise_binary_kernel_node.hpp>
 #include <dynd/dtypes/convert_dtype.hpp>
@@ -68,7 +69,7 @@ void dynd::elwise_binary_kernel_node::get_binary_operation(intptr_t dst_fixedstr
     } else {
         // Need to buffer the binary operation kernel.
         kernel_instance<binary_operation_t> kernel;
-        unary_specialization_kernel_instance adapters_spec[3];
+        kernel_instance<unary_operation_pair_t> adapters_spec[3];
         kernel_instance<unary_operation_t> adapters[3];
         intptr_t element_sizes[3];
 

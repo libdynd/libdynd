@@ -2,6 +2,7 @@
 // Copyright (C) 2011-12, Dynamic NDArray Developers
 // BSD 2-Clause License, see LICENSE.txt
 //
+// DEPRECATED
 
 #include <stdexcept>
 #include <sstream>
@@ -15,7 +16,7 @@
 using namespace std;
 using namespace dynd;
 
-static void print_ndarray_access_flags(std::ostream& o, int access_flags)
+static void print_ndobject_access_flags(std::ostream& o, int access_flags)
 {
     if (access_flags & read_access_flag) {
         o << "read ";
@@ -61,9 +62,9 @@ void dynd::ndarray_node::get_unary_operation(intptr_t, intptr_t, kernel_instance
                              "unary nodes which provide an implementation");
 }
 
-void dynd::ndarray_node::get_unary_specialization_operation(unary_specialization_kernel_instance& DYND_UNUSED(out_kernel)) const
+void dynd::ndarray_node::get_unary_specialization_operation(kernel_instance<unary_operation_pair_t>& DYND_UNUSED(out_kernel)) const
 {
-    throw std::runtime_error("unary_specialization_kernel_instance is only valid for "
+    throw std::runtime_error("kernel_instance<unary_operation_pair_t> is only valid for "
                              "unary nodes which provide an implementation");
 }
 
@@ -118,7 +119,7 @@ void dynd::ndarray_node::debug_print(ostream& o, const string& indent) const
     print_node_category(o, get_category());
     o << "\n";
     o << indent << " access flags: ";
-    print_ndarray_access_flags(o, get_access_flags());
+    print_ndobject_access_flags(o, get_access_flags());
     o << "\n";
     debug_print_extra(o, indent);
 

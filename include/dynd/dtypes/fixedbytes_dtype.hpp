@@ -51,7 +51,7 @@ public:
 
     void get_dtype_assignment_kernel(const dtype& dst_dt, const dtype& src_dt,
                     assign_error_mode errmode,
-                    unary_specialization_kernel_instance& out_kernel) const;
+                    kernel_instance<unary_operation_pair_t>& out_kernel) const;
 
     bool operator==(const extended_dtype& rhs) const;
 

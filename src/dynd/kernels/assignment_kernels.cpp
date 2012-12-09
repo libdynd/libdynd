@@ -11,13 +11,37 @@
 using namespace std;
 using namespace dynd;
 
-static assignment_function_t single_assign_table[builtin_type_id_count][builtin_type_id_count][4] =
+namespace {
+    template<typename dst_type, typename src_type, assign_error_mode errmode>
+    struct multiple_assignment_builtin {
+        static void contig_assign(char *dst, const char *src,
+                            size_t count, unary_kernel_static_data *DYND_UNUSED(extra))
+        {
+            dst_type *dst_cached = reinterpret_cast<dst_type *>(dst);
+            const src_type *src_cached = reinterpret_cast<const src_type *>(src);
+
+            for (size_t i = 0; i != count; ++i) {
+                single_assigner_builtin<dst_type, src_type, errmode>::assign(dst_cached, src_cached, NULL);
+
+                ++dst_cached;
+                ++src_cached;
+            }
+        }
+    };
+} // anonymous namespace
+
+
+static unary_operation_pair_t assign_table[builtin_type_id_count][builtin_type_id_count][4] =
 {
+#define SINGLE_OPERATION_PAIR_LEVEL(dst_type, src_type, errmode) unary_operation_pair_t( \
+            (unary_single_operation_t)&single_assigner_builtin<dst_type, src_type, errmode>::assign, \
+            multiple_assignment_builtin<dst_type, src_type, errmode>::contig_assign)
+        
 #define ERROR_MODE_LEVEL(dst_type, src_type) { \
-        (assignment_function_t)&single_assigner_builtin<dst_type, src_type, assign_error_none>::assign, \
-        (assignment_function_t)&single_assigner_builtin<dst_type, src_type, assign_error_overflow>::assign, \
-        (assignment_function_t)&single_assigner_builtin<dst_type, src_type, assign_error_fractional>::assign, \
-        (assignment_function_t)&single_assigner_builtin<dst_type, src_type, assign_error_inexact>::assign \
+        SINGLE_OPERATION_PAIR_LEVEL(dst_type, src_type, assign_error_none), \
+        SINGLE_OPERATION_PAIR_LEVEL(dst_type, src_type, assign_error_overflow), \
+        SINGLE_OPERATION_PAIR_LEVEL(dst_type, src_type, assign_error_fractional), \
+        SINGLE_OPERATION_PAIR_LEVEL(dst_type, src_type, assign_error_inexact) \
     }
 
 #define SRC_TYPE_LEVEL(dst_type) { \
@@ -51,135 +75,27 @@ static assignment_function_t single_assign_table[builtin_type_id_count][builtin_
     SRC_TYPE_LEVEL(complex<double>)
 #undef SRC_TYPE_LEVEL
 #undef ERROR_MODE_LEVEL
+#undef SINGLE_OPERATION_PAIR_LEVEL
 };
 
-assignment_function_t dynd::get_builtin_dtype_assignment_function(type_id_t dst_type_id, type_id_t src_type_id,
+unary_operation_pair_t dynd::get_builtin_dtype_assignment_function(type_id_t dst_type_id, type_id_t src_type_id,
                                                                 assign_error_mode errmode)
 {
     // Do a table lookup for the built-in range of dtypes
     if (dst_type_id >= bool_type_id && dst_type_id <= complex_float64_type_id &&
             src_type_id >= bool_type_id && src_type_id <= complex_float64_type_id &&
             errmode != assign_error_default) {
-        return single_assign_table[dst_type_id][src_type_id][errmode];
+        return assign_table[dst_type_id][src_type_id][errmode];
     } else {
-        return NULL;
+        return unary_operation_pair_t();
     }
 }
-
-void dynd::multiple_assignment_kernel(char *dst, intptr_t dst_stride, const char *src, intptr_t src_stride,
-                                    intptr_t count, const AuxDataBase *auxdata)
-{
-    assignment_function_t asn = get_auxiliary_data<assignment_function_t>(auxdata);
-
-    char *dst_cached = reinterpret_cast<char *>(dst);
-    const char *src_cached = reinterpret_cast<const char *>(src);
-
-    for (intptr_t i = 0; i < count; ++i) {
-        asn(dst_cached, src_cached);
-        dst_cached += dst_stride;
-        src_cached += src_stride;
-    }
-}
-
-namespace {
-    template<typename dst_type, typename src_type, assign_error_mode errmode>
-    struct multiple_assignment_builtin {
-        static void general_kernel(char *dst, intptr_t dst_stride, const char *src, intptr_t src_stride,
-                            intptr_t count, const AuxDataBase *DYND_UNUSED(auxdata))
-        {
-            for (intptr_t i = 0; i < count; ++i) {
-                single_assigner_builtin<dst_type, src_type, errmode>::assign(
-                                reinterpret_cast<dst_type *>(dst), reinterpret_cast<const src_type *>(src));
-
-                dst += dst_stride;
-                src += src_stride;
-            }
-        }
-
-        static void scalar_kernel(char *dst, intptr_t DYND_UNUSED(dst_stride), const char *src, intptr_t DYND_UNUSED(src_stride),
-                            intptr_t, const AuxDataBase *DYND_UNUSED(auxdata))
-        {
-            single_assigner_builtin<dst_type, src_type, errmode>::assign(
-                            reinterpret_cast<dst_type *>(dst), reinterpret_cast<const src_type *>(src));
-        }
-
-        static void contiguous_kernel(char *dst, intptr_t DYND_UNUSED(dst_stride), const char *src, intptr_t DYND_UNUSED(src_stride),
-                            intptr_t count, const AuxDataBase *DYND_UNUSED(auxdata))
-        {
-            dst_type *dst_cached = reinterpret_cast<dst_type *>(dst);
-            const src_type *src_cached = reinterpret_cast<const src_type *>(src);
-
-            for (intptr_t i = 0; i < count; ++i) {
-                single_assigner_builtin<dst_type, src_type, errmode>::assign(dst_cached, src_cached);
-
-                ++dst_cached;
-                ++src_cached;
-            }
-        }
-
-        static void scalar_to_contiguous_kernel(char *dst, intptr_t DYND_UNUSED(dst_stride), const char *src, intptr_t DYND_UNUSED(src_stride),
-                            intptr_t count, const AuxDataBase *DYND_UNUSED(auxdata))
-        {
-            dst_type *dst_cached = reinterpret_cast<dst_type *>(dst);
-            const src_type src_value = *reinterpret_cast<const src_type *>(src);
-
-            for (intptr_t i = 0; i < count; ++i) {
-                single_assigner_builtin<dst_type, src_type, errmode>::assign(dst_cached, &src_value);
-
-                ++dst_cached;
-            }
-        }
-    };
-} // anonymous namespace
-
-#define DTYPE_ASSIGN_BUILTIN_KERNEL_TABLE_SPECIALIZATION_LEVEL(errmode, dst_type, src_type) \
-    { \
-        multiple_assignment_builtin<dst_type, src_type, errmode>::general_kernel, \
-        multiple_assignment_builtin<dst_type, src_type, errmode>::scalar_kernel, \
-        multiple_assignment_builtin<dst_type, src_type, errmode>::contiguous_kernel, \
-        multiple_assignment_builtin<dst_type, src_type, errmode>::scalar_to_contiguous_kernel \
-    }
-
-#define DTYPE_ASSIGN_BUILTIN_KERNEL_TABLE_SRC_TYPE_LEVEL(errmode, dst_type) \
-    { \
-        DTYPE_ASSIGN_BUILTIN_KERNEL_TABLE_SPECIALIZATION_LEVEL(errmode, dst_type, dynd_bool), \
-        DTYPE_ASSIGN_BUILTIN_KERNEL_TABLE_SPECIALIZATION_LEVEL(errmode, dst_type, int8_t), \
-        DTYPE_ASSIGN_BUILTIN_KERNEL_TABLE_SPECIALIZATION_LEVEL(errmode, dst_type, int16_t), \
-        DTYPE_ASSIGN_BUILTIN_KERNEL_TABLE_SPECIALIZATION_LEVEL(errmode, dst_type, int32_t), \
-        DTYPE_ASSIGN_BUILTIN_KERNEL_TABLE_SPECIALIZATION_LEVEL(errmode, dst_type, int64_t), \
-        DTYPE_ASSIGN_BUILTIN_KERNEL_TABLE_SPECIALIZATION_LEVEL(errmode, dst_type, uint8_t), \
-        DTYPE_ASSIGN_BUILTIN_KERNEL_TABLE_SPECIALIZATION_LEVEL(errmode, dst_type, uint16_t), \
-        DTYPE_ASSIGN_BUILTIN_KERNEL_TABLE_SPECIALIZATION_LEVEL(errmode, dst_type, uint32_t), \
-        DTYPE_ASSIGN_BUILTIN_KERNEL_TABLE_SPECIALIZATION_LEVEL(errmode, dst_type, uint64_t), \
-        DTYPE_ASSIGN_BUILTIN_KERNEL_TABLE_SPECIALIZATION_LEVEL(errmode, dst_type, float), \
-        DTYPE_ASSIGN_BUILTIN_KERNEL_TABLE_SPECIALIZATION_LEVEL(errmode, dst_type, double), \
-        DTYPE_ASSIGN_BUILTIN_KERNEL_TABLE_SPECIALIZATION_LEVEL(errmode, dst_type, complex<float>), \
-        DTYPE_ASSIGN_BUILTIN_KERNEL_TABLE_SPECIALIZATION_LEVEL(errmode, dst_type, complex<double>) \
-    }
-
-#define DTYPE_ASSIGN_BUILTIN_KERNEL_TABLE(errmode) \
-    { \
-        DTYPE_ASSIGN_BUILTIN_KERNEL_TABLE_SRC_TYPE_LEVEL(errmode, dynd_bool), \
-        DTYPE_ASSIGN_BUILTIN_KERNEL_TABLE_SRC_TYPE_LEVEL(errmode, int8_t), \
-        DTYPE_ASSIGN_BUILTIN_KERNEL_TABLE_SRC_TYPE_LEVEL(errmode, int16_t), \
-        DTYPE_ASSIGN_BUILTIN_KERNEL_TABLE_SRC_TYPE_LEVEL(errmode, int32_t), \
-        DTYPE_ASSIGN_BUILTIN_KERNEL_TABLE_SRC_TYPE_LEVEL(errmode, int64_t), \
-        DTYPE_ASSIGN_BUILTIN_KERNEL_TABLE_SRC_TYPE_LEVEL(errmode, uint8_t), \
-        DTYPE_ASSIGN_BUILTIN_KERNEL_TABLE_SRC_TYPE_LEVEL(errmode, uint16_t), \
-        DTYPE_ASSIGN_BUILTIN_KERNEL_TABLE_SRC_TYPE_LEVEL(errmode, uint32_t), \
-        DTYPE_ASSIGN_BUILTIN_KERNEL_TABLE_SRC_TYPE_LEVEL(errmode, uint64_t), \
-        DTYPE_ASSIGN_BUILTIN_KERNEL_TABLE_SRC_TYPE_LEVEL(errmode, float), \
-        DTYPE_ASSIGN_BUILTIN_KERNEL_TABLE_SRC_TYPE_LEVEL(errmode, double), \
-        DTYPE_ASSIGN_BUILTIN_KERNEL_TABLE_SRC_TYPE_LEVEL(errmode, complex<float>), \
-        DTYPE_ASSIGN_BUILTIN_KERNEL_TABLE_SRC_TYPE_LEVEL(errmode, complex<double>) \
-    }
-
 
 void dynd::get_builtin_dtype_assignment_kernel(
                     type_id_t dst_type_id, type_id_t src_type_id,
                     assign_error_mode errmode,
                     const eval::eval_context *ectx,
-                    unary_specialization_kernel_instance& out_kernel)
+                    kernel_instance<unary_operation_pair_t>& out_kernel)
 {
     // Apply the default error mode from the context if possible
     if (errmode == assign_error_default) {
@@ -188,46 +104,22 @@ void dynd::get_builtin_dtype_assignment_kernel(
         } else {
             // Behavior is to return NULL for default mode if no
             // evaluation context is provided
-            out_kernel.specializations = NULL;
+            out_kernel.kernel = unary_operation_pair_t();
             out_kernel.auxdata.free();
             return;
         }
     }
 
-    if (errmode == assign_error_fractional) {
-        // The default error mode is fractional, so do specializations for it.
-        static specialized_unary_operation_table_t fractional_optable[builtin_type_id_count][builtin_type_id_count] =
-                DTYPE_ASSIGN_BUILTIN_KERNEL_TABLE(assign_error_fractional);
-
-        out_kernel.specializations = fractional_optable[dst_type_id][src_type_id];
-        // Make sure there's no stray auxiliary data
-        out_kernel.auxdata.free();
-    } else if (errmode == assign_error_none) {
-        // The no-checking error mode also gets specializations, as it's intended for speed
-        static specialized_unary_operation_table_t fractional_optable[builtin_type_id_count][builtin_type_id_count] =
-                DTYPE_ASSIGN_BUILTIN_KERNEL_TABLE(assign_error_none);
-
-        out_kernel.specializations = fractional_optable[dst_type_id][src_type_id];
-        // Make sure there's no stray auxiliary data
+    if (dst_type_id >= bool_type_id && dst_type_id <= complex_float64_type_id &&
+            src_type_id >= bool_type_id && src_type_id <= complex_float64_type_id &&
+            errmode != assign_error_default) {
+        out_kernel.kernel = assign_table[dst_type_id][src_type_id][errmode];
         out_kernel.auxdata.free();
     } else {
-        // Use a multiple assignment kernel with a assignment function for all the other cases.
-        static specialized_unary_operation_table_t fn_optable = {
-            &multiple_assignment_kernel,
-            &multiple_assignment_kernel,
-            &multiple_assignment_kernel,
-            &multiple_assignment_kernel};
-        assignment_function_t asn = get_builtin_dtype_assignment_function(dst_type_id, src_type_id, errmode);
-        if (asn != NULL) {
-            out_kernel.specializations = fn_optable;
-            make_auxiliary_data<assignment_function_t>(out_kernel.auxdata, asn);
-            return;
-        } else {
-            stringstream ss;
-            ss << "Could not construct assignment kernel from " << dtype(src_type_id) << " to ";
-            ss << dtype(dst_type_id) << " with error mode " << errmode;
-            throw runtime_error(ss.str());
-        }
+        stringstream ss;
+        ss << "Could not construct dynd assignment kernel from " << dtype(src_type_id) << " to ";
+        ss << dtype(dst_type_id) << " with error mode " << errmode;
+        throw runtime_error(ss.str());
     }
 }
 
@@ -235,7 +127,7 @@ void dynd::get_dtype_assignment_kernel(
                     const dtype& dst_dt, const dtype& src_dt,
                     assign_error_mode errmode,
                     const eval::eval_context *ectx,
-                    unary_specialization_kernel_instance& out_kernel)
+                    kernel_instance<unary_operation_pair_t>& out_kernel)
 {
     // special-case matching src and dst dtypes
     if (dst_dt == src_dt) {
@@ -261,33 +153,33 @@ void dynd::get_dtype_assignment_kernel(
     // Assignment of expression dtypes
     if (src_dt.get_kind() == expression_kind || dst_dt.get_kind() == expression_kind) {
         // Chain the kernels together
-        deque<unary_specialization_kernel_instance> kernels;
-        deque<intptr_t> element_sizes;
+        deque<kernel_instance<unary_operation_pair_t>> kernels;
+        deque<dtype> dtypes;
         const dtype& src_dt_vdt = src_dt.value_dtype();
         const dtype& dst_dt_vdt = dst_dt.value_dtype();
         //intptr_t next_element_size = 0;
 
         if (src_dt.get_kind() == expression_kind) {
             // kernel operations from src's storage to value
-            push_front_dtype_storage_to_value_kernels(src_dt, ectx, kernels, element_sizes);
+            push_front_dtype_storage_to_value_kernels(src_dt, ectx, kernels, dtypes);
         }
 
         if (src_dt_vdt != dst_dt_vdt) {
             // A cast operation from src_dt.value_dtype() to dst_dt
             if (kernels.empty()) {
-                element_sizes.push_back(src_dt_vdt.get_element_size());
+                dtypes.push_back(src_dt_vdt);
             }
-            element_sizes.push_back(dst_dt_vdt.get_element_size());
-            kernels.push_back(unary_specialization_kernel_instance());
+            dtypes.push_back(dst_dt_vdt);
+            kernels.push_back(kernel_instance<unary_operation_pair_t>());
             get_dtype_assignment_kernel(dst_dt_vdt, src_dt_vdt,
                                 errmode, ectx, kernels.back());
         }
 
         if (dst_dt.get_kind() == expression_kind) {
-            push_back_dtype_value_to_storage_kernels(dst_dt, ectx, kernels, element_sizes);
+            push_back_dtype_value_to_storage_kernels(dst_dt, ectx, kernels, dtypes);
         }
 
-        make_buffered_chain_unary_kernel(kernels, element_sizes, out_kernel);
+        make_buffered_chain_unary_kernel(kernels, dtypes, out_kernel);
         return;
     }
 
@@ -301,48 +193,14 @@ void dynd::get_dtype_assignment_kernel(
 namespace {
     template<class T>
     struct aligned_fixed_size_copy_assign_type {
-        static void general_kernel(char *dst, intptr_t dst_stride, const char *src, intptr_t src_stride,
-                            intptr_t count, const AuxDataBase *DYND_UNUSED(auxdata))
-        {
-            for (intptr_t i = 0; i < count; ++i) {
-                *(T *)dst = *(T *)src;
-
-                dst += dst_stride;
-                src += src_stride;
-            }
-        }
-
-        static void scalar_kernel(char *dst, intptr_t DYND_UNUSED(dst_stride), const char *src, intptr_t DYND_UNUSED(src_stride),
-                            intptr_t, const AuxDataBase *DYND_UNUSED(auxdata))
+        static void single(char *dst, const char *src, unary_kernel_static_data *DYND_UNUSED(extra))
         {
             *(T *)dst = *(T *)src;
         }
 
-        static void contiguous_kernel(char *dst, intptr_t DYND_UNUSED(dst_stride), const char *src, intptr_t DYND_UNUSED(src_stride),
-                            intptr_t count, const AuxDataBase *DYND_UNUSED(auxdata))
+        static void contig(char *dst, const char *src, size_t count, unary_kernel_static_data *DYND_UNUSED(extra))
         {
-            T *dst_cached = reinterpret_cast<T *>(dst);
-            const T *src_cached = reinterpret_cast<const T *>(src);
-
-            for (intptr_t i = 0; i < count; ++i) {
-                *dst_cached = *src_cached;
-
-                ++dst_cached;
-                ++src_cached;
-            }
-        }
-
-        static void scalar_to_contiguous_kernel(char *dst, intptr_t DYND_UNUSED(dst_stride), const char *src, intptr_t DYND_UNUSED(src_stride),
-                            intptr_t count, const AuxDataBase *DYND_UNUSED(auxdata))
-        {
-            T *dst_cached = reinterpret_cast<T *>(dst);
-            const T src_value = *reinterpret_cast<const T *>(src);
-
-            for (intptr_t i = 0; i < count; ++i) {
-                *dst_cached = src_value;
-
-                ++dst_cached;
-            }
+            memcpy(dst, src, count * sizeof(T));
         }
     };
 
@@ -350,38 +208,14 @@ namespace {
     struct aligned_fixed_size_copy_assign;
     template<>
     struct aligned_fixed_size_copy_assign<1> {
-        static void general_kernel(char *dst, intptr_t dst_stride, const char *src, intptr_t src_stride,
-                            intptr_t count, const AuxDataBase *DYND_UNUSED(auxdata))
-        {
-            for (intptr_t i = 0; i < count; ++i) {
-                *dst = *src;
-
-                dst += dst_stride;
-                src += src_stride;
-            }
-        }
-
-        static void scalar_kernel(char *dst, intptr_t DYND_UNUSED(dst_stride), const char *src, intptr_t DYND_UNUSED(src_stride),
-                            intptr_t, const AuxDataBase *DYND_UNUSED(auxdata))
+        static void single(char *dst, const char *src, unary_kernel_static_data *DYND_UNUSED(extra))
         {
             *dst = *src;
         }
 
-        static void contiguous_kernel(char *dst, intptr_t DYND_UNUSED(dst_stride), const char *src, intptr_t DYND_UNUSED(src_stride),
-                            intptr_t count, const AuxDataBase *DYND_UNUSED(auxdata))
+        static void contig(char *dst, const char *src, size_t count, unary_kernel_static_data *DYND_UNUSED(extra))
         {
             memcpy(dst, src, count);
-        }
-
-        static void scalar_to_contiguous_kernel(char *dst, intptr_t DYND_UNUSED(dst_stride), const char *src, intptr_t DYND_UNUSED(src_stride),
-                            intptr_t count, const AuxDataBase *DYND_UNUSED(auxdata))
-        {
-            char src_value = *src;
-            for (intptr_t i = 0; i < count; ++i) {
-                *dst = src_value;
-
-                ++dst;
-            }
         }
     };
     template<>
@@ -393,142 +227,74 @@ namespace {
 
     template<int N>
     struct unaligned_fixed_size_copy_assign {
-        static void general_kernel(char *dst, intptr_t dst_stride, const char *src, intptr_t src_stride,
-                            intptr_t count, const AuxDataBase *DYND_UNUSED(auxdata))
-        {
-            for (intptr_t i = 0; i < count; ++i) {
-                memcpy(dst, src, N);
-
-                dst += dst_stride;
-                src += src_stride;
-            }
-        }
-
-        static void scalar_kernel(char *dst, intptr_t DYND_UNUSED(dst_stride), const char *src, intptr_t DYND_UNUSED(src_stride),
-                            intptr_t, const AuxDataBase *DYND_UNUSED(auxdata))
+        static void single(char *dst, const char *src, unary_kernel_static_data *DYND_UNUSED(extra))
         {
             memcpy(dst, src, N);
         }
 
-        static void contiguous_kernel(char *dst, intptr_t DYND_UNUSED(dst_stride), const char *src, intptr_t DYND_UNUSED(src_stride),
-                            intptr_t count, const AuxDataBase *DYND_UNUSED(auxdata))
+        static void contig(char *dst, const char *src, size_t count, unary_kernel_static_data *DYND_UNUSED(extra))
         {
             memcpy(dst, src, count * N);
         }
-
-        static void scalar_to_contiguous_kernel(char *dst, intptr_t DYND_UNUSED(dst_stride), const char *src, intptr_t DYND_UNUSED(src_stride),
-                            intptr_t count, const AuxDataBase *DYND_UNUSED(auxdata))
-        {
-            for (intptr_t i = 0; i < count; ++i) {
-                memcpy(dst, src, N);
-
-                dst += N;
-            }
-        }
     };
 }
-static void unaligned_scalar_copy_assign_kernel(char *dst, intptr_t, const char *src, intptr_t,
-                            intptr_t DYND_UNUSED(count), const AuxDataBase *auxdata)
+static void unaligned_copy_single(char *dst, const char *src, unary_kernel_static_data *extra)
 {
-    intptr_t element_size = static_cast<intptr_t>(get_raw_auxiliary_data(auxdata)>>1);
+    size_t element_size = static_cast<size_t>(get_raw_auxiliary_data(extra->auxdata)>>1);
     memcpy(dst, src, element_size);
 }
-static void unaligned_contig_copy_assign_kernel(char *dst, intptr_t, const char *src, intptr_t,
-                            intptr_t count, const AuxDataBase *auxdata)
+static void unaligned_copy_contig(char *dst, const char *src, size_t count, unary_kernel_static_data *extra)
 {
-    intptr_t element_size = static_cast<intptr_t>(get_raw_auxiliary_data(auxdata)>>1);
+    size_t element_size = static_cast<size_t>(get_raw_auxiliary_data(extra->auxdata)>>1);
     memcpy(dst, src, element_size * count);
-}
-
-static void unaligned_strided_copy_assign_kernel(char *dst, intptr_t dst_stride, const char *src, intptr_t src_stride,
-                            intptr_t count, const AuxDataBase *auxdata)
-{
-    char *dst_cached = reinterpret_cast<char *>(dst);
-    const char *src_cached = reinterpret_cast<const char *>(src);
-    intptr_t element_size = static_cast<intptr_t>(get_raw_auxiliary_data(auxdata)>>1);
-
-    for (intptr_t i = 0; i < count; ++i) {
-        memcpy(dst_cached, src_cached, element_size);
-        dst_cached += dst_stride;
-        src_cached += src_stride;
-    }
 }
 
 void dynd::get_pod_dtype_assignment_kernel(
                     intptr_t element_size, intptr_t alignment,
-                    unary_specialization_kernel_instance& out_kernel)
+                    kernel_instance<unary_operation_pair_t>& out_kernel)
 {
-    // Aligned size-based specialization tables
-    static specialized_unary_operation_table_t aligned_optable[] = {
-        {aligned_fixed_size_copy_assign<1>::general_kernel,
-         aligned_fixed_size_copy_assign<1>::scalar_kernel,
-         aligned_fixed_size_copy_assign<1>::contiguous_kernel,
-         aligned_fixed_size_copy_assign<1>::scalar_to_contiguous_kernel},
-        {aligned_fixed_size_copy_assign<2>::general_kernel,
-         aligned_fixed_size_copy_assign<2>::scalar_kernel,
-         aligned_fixed_size_copy_assign<2>::contiguous_kernel,
-         aligned_fixed_size_copy_assign<2>::scalar_to_contiguous_kernel},
-        {aligned_fixed_size_copy_assign<4>::general_kernel,
-         aligned_fixed_size_copy_assign<4>::scalar_kernel,
-         aligned_fixed_size_copy_assign<4>::contiguous_kernel,
-         aligned_fixed_size_copy_assign<4>::scalar_to_contiguous_kernel},
-        {aligned_fixed_size_copy_assign<8>::general_kernel,
-         aligned_fixed_size_copy_assign<8>::scalar_kernel,
-         aligned_fixed_size_copy_assign<8>::contiguous_kernel,
-         aligned_fixed_size_copy_assign<8>::scalar_to_contiguous_kernel}};
-    static specialized_unary_operation_table_t unaligned_optable[] = {
-        {unaligned_fixed_size_copy_assign<2>::general_kernel,
-         unaligned_fixed_size_copy_assign<2>::scalar_kernel,
-         unaligned_fixed_size_copy_assign<2>::contiguous_kernel,
-         unaligned_fixed_size_copy_assign<2>::scalar_to_contiguous_kernel},
-        {unaligned_fixed_size_copy_assign<4>::general_kernel,
-         unaligned_fixed_size_copy_assign<4>::scalar_kernel,
-         unaligned_fixed_size_copy_assign<4>::contiguous_kernel,
-         unaligned_fixed_size_copy_assign<4>::scalar_to_contiguous_kernel},
-        {unaligned_fixed_size_copy_assign<8>::general_kernel,
-         unaligned_fixed_size_copy_assign<8>::scalar_kernel,
-         unaligned_fixed_size_copy_assign<8>::contiguous_kernel,
-         unaligned_fixed_size_copy_assign<8>::scalar_to_contiguous_kernel}};
-    // Generic specialization table
-    static specialized_unary_operation_table_t general_optable = {
-        unaligned_strided_copy_assign_kernel,
-        unaligned_scalar_copy_assign_kernel,
-        unaligned_contig_copy_assign_kernel,
-        unaligned_strided_copy_assign_kernel};
-
     if (element_size == alignment) {
         // Aligned specialization tables
         switch (element_size) {
             case 1:
-                out_kernel.specializations = aligned_optable[0];
+                out_kernel.kernel.single = &aligned_fixed_size_copy_assign<1>::single;
+                out_kernel.kernel.contig = &aligned_fixed_size_copy_assign<1>::contig;
                 break;
             case 2:
-                out_kernel.specializations = aligned_optable[1];
+                out_kernel.kernel.single = &aligned_fixed_size_copy_assign<2>::single;
+                out_kernel.kernel.contig = &aligned_fixed_size_copy_assign<2>::contig;
                 break;
             case 4:
-                out_kernel.specializations = aligned_optable[2];
+                out_kernel.kernel.single = &aligned_fixed_size_copy_assign<4>::single;
+                out_kernel.kernel.contig = &aligned_fixed_size_copy_assign<4>::contig;
                 break;
             case 8:
-                out_kernel.specializations = aligned_optable[3];
+                out_kernel.kernel.single = &aligned_fixed_size_copy_assign<8>::single;
+                out_kernel.kernel.contig = &aligned_fixed_size_copy_assign<8>::contig;
                 break;
             default:
-                out_kernel.specializations = general_optable;
+                out_kernel.kernel.single = &unaligned_copy_single;
+                out_kernel.kernel.contig = &unaligned_copy_contig;
                 break;
         }
     } else {
         // Unaligned specialization tables
         switch (element_size) {
             case 2:
-                out_kernel.specializations = unaligned_optable[0];
+                out_kernel.kernel.single = unaligned_fixed_size_copy_assign<2>::single;
+                out_kernel.kernel.contig = unaligned_fixed_size_copy_assign<2>::contig;
                 break;
             case 4:
-                out_kernel.specializations = unaligned_optable[1];
+                out_kernel.kernel.single = unaligned_fixed_size_copy_assign<4>::single;
+                out_kernel.kernel.contig = unaligned_fixed_size_copy_assign<4>::contig;
                 break;
             case 8:
-                out_kernel.specializations = unaligned_optable[2];
+                out_kernel.kernel.single = unaligned_fixed_size_copy_assign<8>::single;
+                out_kernel.kernel.contig = unaligned_fixed_size_copy_assign<8>::contig;
                 break;
             default:
-                out_kernel.specializations = general_optable;
+                out_kernel.kernel.single = &unaligned_copy_single;
+                out_kernel.kernel.contig = &unaligned_copy_contig;
                 break;
         }
     }
@@ -536,7 +302,7 @@ void dynd::get_pod_dtype_assignment_kernel(
 }
 
 void dynd::get_dtype_assignment_kernel(const dtype& dt,
-                    unary_specialization_kernel_instance& out_kernel)
+                    kernel_instance<unary_operation_pair_t>& out_kernel)
 {
     switch (dt.get_memory_management()) {
     case pod_memory_management:

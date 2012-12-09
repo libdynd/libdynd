@@ -40,48 +40,6 @@ TEST(ShapeTools, BroadcastToShape) {
                     broadcast_error);
 }
 
-TEST(ShapeTools, BroadcastInputShapes) {
-    ndarray a(4, make_dtype<int>());
-    ndarray b(3, 1, 1, make_dtype<float>());
-    ndarray c(3, 2, 1, make_dtype<double>());
-    ndarray d(5, 1, make_dtype<char>());
-
-    ndarray_node_ptr operands[] = {a.get_node(), b.get_node(),
-                                    c.get_node(), d.get_node()};
-
-    // Broadcast the first three shapes together
-    int ndim = 0;
-    dimvector shape;
-    broadcast_input_shapes(3, operands, &ndim, &shape);
-    EXPECT_EQ(3, ndim);
-    EXPECT_EQ(3, shape[0]);
-    EXPECT_EQ(2, shape[1]);
-    EXPECT_EQ(4, shape[2]);
-
-    // Also broadcasting the fourth one should cause an error
-    EXPECT_THROW(broadcast_input_shapes(4, operands, &ndim, &shape),
-                    broadcast_error);
-}
-
-TEST(ShapeTools, CopyInputStrides) {
-    ndarray a(2,3,2,1,make_dtype<int16_t>());
-    intptr_t strides[6];
-
-    EXPECT_EQ(4, a.get_ndim());
-    EXPECT_EQ(12, a.get_strides()[0]);
-    EXPECT_EQ(4, a.get_strides()[1]);
-    EXPECT_EQ(2, a.get_strides()[2]);
-    EXPECT_EQ(0, a.get_strides()[3]);
-
-    copy_input_strides(a, 6, strides);
-    EXPECT_EQ(0, strides[0]);
-    EXPECT_EQ(0, strides[1]);
-    EXPECT_EQ(12, strides[2]);
-    EXPECT_EQ(4, strides[3]);
-    EXPECT_EQ(2, strides[4]);
-    EXPECT_EQ(0, strides[5]);
-}
-
 TEST(ShapeTools, MultiStridesToAxisPerm_OneOp) {
     // Basic test that a single C/F-order array works
     intptr_t strides_f[] = {1,2,4,8,16,32};

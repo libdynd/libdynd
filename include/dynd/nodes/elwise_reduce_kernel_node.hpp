@@ -2,6 +2,7 @@
 // Copyright (C) 2011-12, Dynamic NDArray Developers
 // BSD 2-Clause License, see LICENSE.txt
 //
+// DEPRECATED
 
 #ifndef _DYND__ELWISE_REDUCE_KERNEL_NODE_HPP_
 #define _DYND__ELWISE_REDUCE_KERNEL_NODE_HPP_

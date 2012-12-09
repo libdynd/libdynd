@@ -6,7 +6,7 @@
 #ifndef _DYND__BYTESWAP_KERNELS_HPP_
 #define _DYND__BYTESWAP_KERNELS_HPP_
 
-#include <dynd/kernels/unary_kernel_instance.hpp>
+#include <dynd/kernels/kernel_instance.hpp>
 
 namespace dynd {
 
@@ -47,7 +47,7 @@ inline uint64_t byteswap_value(uint64_t value) {
  * types including 2, 4, and 8 bytes.
  */
 void get_byteswap_kernel(intptr_t element_size, intptr_t alignment,
-                unary_specialization_kernel_instance& out_kernel);
+                kernel_instance<unary_operation_pair_t>& out_kernel);
 
 /**
  * Gets a kernel which swaps the byte-order of two values within each element.
@@ -56,7 +56,7 @@ void get_byteswap_kernel(intptr_t element_size, intptr_t alignment,
  * types with two primitives such as complex numbers.
  */
 void get_pairwise_byteswap_kernel(intptr_t element_size, intptr_t alignment,
-                unary_specialization_kernel_instance& out_kernel);
+                kernel_instance<unary_operation_pair_t>& out_kernel);
 
 } // namespace dynd
 

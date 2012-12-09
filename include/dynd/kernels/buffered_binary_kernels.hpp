@@ -24,7 +24,7 @@ namespace dynd {
  * so the provided kernels are empty on exit.
  */
 void make_buffered_binary_kernel(kernel_instance<binary_operation_t>& kernel,
-                    kernel_instance<unary_operation_t>* adapters, const intptr_t *buffer_element_sizes,
+                    kernel_instance<unary_operation_pair_t>* adapters, const intptr_t *buffer_element_sizes,
                     kernel_instance<binary_operation_t>& out_kernel);
 
 } // namespace dynd

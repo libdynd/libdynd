@@ -12,6 +12,8 @@
 
 #include <dynd/codegen/codegen_cache.hpp>
 
+#if 0 // TODO reenable
+
 using namespace std;
 using namespace dynd;
 
@@ -148,3 +150,5 @@ TEST(BinaryKernelAdapter, UnwindException) {
 }
 
 #endif
+
+#endif // TODO reenable

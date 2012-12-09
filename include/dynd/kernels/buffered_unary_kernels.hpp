@@ -9,7 +9,7 @@
 #include <vector>
 #include <deque>
 
-#include <dynd/kernels/unary_kernel_instance.hpp>
+#include <dynd/kernels/kernel_instance.hpp>
 #include <dynd/buffer_storage.hpp>
 
 namespace dynd {
@@ -26,8 +26,8 @@ namespace dynd {
  * For efficiency, the kernels are swapped out of the deque instead of copied,
  * so the deque 'kernels' no longer contains them on exit.
  */
-void make_buffered_chain_unary_kernel(std::deque<unary_specialization_kernel_instance>& kernels,
-                    std::deque<intptr_t>& element_sizes, unary_specialization_kernel_instance& out_kernel);
+void make_buffered_chain_unary_kernel(std::deque<kernel_instance<unary_operation_pair_t>>& kernels,
+                    std::deque<dtype>& dtypes, kernel_instance<unary_operation_pair_t>& out_kernel);
 
 /**
  * This uses push_front calls on the output kernels and element_sizes
@@ -40,8 +40,8 @@ void make_buffered_chain_unary_kernel(std::deque<unary_specialization_kernel_ins
  */
 void push_front_dtype_storage_to_value_kernels(const dynd::dtype& dt,
                     const eval::eval_context *ectx,
-                    std::deque<unary_specialization_kernel_instance>& out_kernels,
-                    std::deque<intptr_t>& out_element_sizes);
+                    std::deque<kernel_instance<unary_operation_pair_t>>& out_kernels,
+                    std::deque<dtype>& out_dtypes);
 
 /**
  * This uses push_back calls on the output kernels and element_sizes
@@ -54,8 +54,8 @@ void push_front_dtype_storage_to_value_kernels(const dynd::dtype& dt,
  */
 void push_back_dtype_value_to_storage_kernels(const dynd::dtype& dt,
                     const eval::eval_context *ectx,
-                    std::deque<unary_specialization_kernel_instance>& out_kernels,
-                    std::deque<intptr_t>& out_element_sizes);
+                    std::deque<kernel_instance<unary_operation_pair_t>>& out_kernels,
+                    std::deque<dtype>& out_dtypes);
 
 } // namespace dynd
 

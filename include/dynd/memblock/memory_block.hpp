@@ -17,10 +17,8 @@ namespace dynd {
  * These are all the types of memory blocks supported by the dnd library.
  */
 enum memory_block_type_t {
-    /** An ndobject containing the node metadata specified by the dtype */
+    /** An ndobject containing the metadata specified by the dtype */
     ndobject_memory_block_type,
-    /** DEPRECATED - An ndarray node is a node so that it can hold its own data memory if desired */
-    deprecated_ndarray_node_memory_block_type,
     /** Memory from outside the dnd library */
     external_memory_block_type,
     /** For when the data is POD and its size is fully known ahead of time */
@@ -36,7 +34,7 @@ enum memory_block_type_t {
 /**
  * This is the data that goes at the start of every memory block, including
  * an atomic reference count and a memory_block_type_t. There is a fixed set
- * of memory block types, of which 'ndarray_node' and 'external' are the only
+ * of memory block types, of which 'external' is presently the only
  * extensible ones.
  */
 struct memory_block_data {

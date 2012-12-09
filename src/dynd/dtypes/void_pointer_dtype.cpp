@@ -54,7 +54,7 @@ bool dynd::void_pointer_dtype::operator==(const extended_dtype& rhs) const
 
 void dynd::void_pointer_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const dtype& src_dt,
                 assign_error_mode DYND_UNUSED(errmode),
-                unary_specialization_kernel_instance& out_kernel) const
+                kernel_instance<unary_operation_pair_t>& out_kernel) const
 {
     if (this == dst_dt.extended()) {
         if (src_dt.get_type_id() == void_type_id) {

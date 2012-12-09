@@ -4,7 +4,7 @@
 //
 
 #include <dynd/memblock/ndobject_memory_block.hpp>
-#include <dynd/nodes/ndarray_node.hpp>
+#include <dynd/ndobject.hpp>
 
 using namespace std;
 using namespace dynd;

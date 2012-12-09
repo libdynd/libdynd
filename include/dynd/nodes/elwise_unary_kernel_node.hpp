@@ -2,12 +2,13 @@
 // Copyright (C) 2011-12, Dynamic NDArray Developers
 // BSD 2-Clause License, see LICENSE.txt
 //
+// DEPRECATED
 
 #ifndef _DYND__ELWISE_UNARY_KERNEL_NODE_HPP_
 #define _DYND__ELWISE_UNARY_KERNEL_NODE_HPP_
 
 #include <dynd/nodes/ndarray_node.hpp>
-#include <dynd/kernels/unary_kernel_instance.hpp>
+#include <dynd/kernels/kernel_instance.hpp>
 
 namespace dynd {
 
@@ -17,7 +18,7 @@ class elwise_unary_kernel_node : public ndarray_node {
     /** Pointer to the operand node */
     ndarray_node_ptr m_opnode;
     /** The computational kernel */
-    unary_specialization_kernel_instance m_kernel;
+    kernel_instance<unary_operation_pair_t> m_kernel;
 
     // Non-copyable
     elwise_unary_kernel_node(const elwise_unary_kernel_node&);
@@ -28,7 +29,7 @@ class elwise_unary_kernel_node : public ndarray_node {
     {
     }
 
-    elwise_unary_kernel_node(const dtype& dt, const ndarray_node_ptr& opnode, const unary_specialization_kernel_instance& kernel)
+    elwise_unary_kernel_node(const dtype& dt, const ndarray_node_ptr& opnode, const kernel_instance<unary_operation_pair_t>& kernel)
         : m_dtype(dt), m_opnode(opnode), m_kernel(kernel)
     {
     }
@@ -80,24 +81,24 @@ public:
                     const intptr_t *shape,
                     bool allow_in_place);
 
-    void get_unary_specialization_operation(unary_specialization_kernel_instance& out_kernel) const;
+    void get_unary_specialization_operation(kernel_instance<unary_operation_pair_t>& out_kernel) const;
 
     const char *node_name() const {
         return "elwise_unary_kernel";
     }
 
     friend ndarray_node_ptr make_elwise_unary_kernel_node_copy_kernel(const dtype& dt, const ndarray_node_ptr& opnode,
-                                                const unary_specialization_kernel_instance& kernel);
+                                                const kernel_instance<unary_operation_pair_t>& kernel);
 
     friend ndarray_node_ptr make_elwise_unary_kernel_node_steal_kernel(const dtype& dt, const ndarray_node_ptr& opnode,
-                                                unary_specialization_kernel_instance& kernel);
+                                                kernel_instance<unary_operation_pair_t>& kernel);
 };
 
 ndarray_node_ptr make_elwise_unary_kernel_node_copy_kernel(const dtype& dt, const ndarray_node_ptr& opnode,
-                                            const unary_specialization_kernel_instance& kernel);
+                                            const kernel_instance<unary_operation_pair_t>& kernel);
 
 ndarray_node_ptr make_elwise_unary_kernel_node_steal_kernel(const dtype& dt, const ndarray_node_ptr& opnode,
-                                            unary_specialization_kernel_instance& kernel);
+                                            kernel_instance<unary_operation_pair_t>& kernel);
 
 } // namespace dynd
 

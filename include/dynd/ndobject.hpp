@@ -16,12 +16,20 @@
 #include <dynd/dtype_assign.hpp>
 #include <dynd/shortvector.hpp>
 #include <dynd/irange.hpp>
-#include <dynd/eval/eval_engine.hpp>
 #include <dynd/memblock/ndobject_memory_block.hpp>
 
 namespace dynd {
 
 class ndobject;
+
+enum ndobject_access_flags {
+    /** If an ndarray node is readable */
+    read_access_flag = 0x01,
+    /** If an ndarray node is writeable */
+    write_access_flag = 0x02,
+    /** If an ndarray node will not be written to by anyone else either */
+    immutable_access_flag = 0x04
+};
 
 /** Stream printing function */
 std::ostream& operator<<(std::ostream& o, const ndobject& rhs);
@@ -334,7 +342,8 @@ public:
     void val_assign(const ndobject& rhs, assign_error_mode errmode = assign_error_default,
                         const eval::eval_context *ectx = &eval::default_eval_context) const;
     /** Does a value-assignment from the rhs raw scalar */
-    void val_assign(const dtype& dt, const char *data, assign_error_mode errmode = assign_error_default,
+    void val_assign(const dtype& rhs_dt, const char *rhs_metadata, const char *rhs_data,
+                        assign_error_mode errmode = assign_error_default,
                         const eval::eval_context *ectx = &eval::default_eval_context) const;
 
     /**
@@ -420,7 +429,7 @@ public:
     /** Does a value-assignment from the rhs C++ scalar. */
     template<class T>
     typename enable_if<is_dtype_scalar<T>::value, ndobject_vals&>::type operator=(const T& rhs) {
-        m_arr.val_assign(make_dtype<T>(), (const char *)&rhs);
+        m_arr.val_assign(make_dtype<T>(), NULL, (const char *)&rhs);
         return *this;
     }
     /**
@@ -434,7 +443,7 @@ public:
     template<class T>
     typename enable_if<is_type_bool<T>::value, ndobject_vals&>::type  operator=(const T& rhs) {
         dynd_bool v = rhs;
-        m_arr.val_assign(make_dtype<dynd_bool>(), (const char *)&v);
+        m_arr.val_assign(make_dtype<dynd_bool>(), NULL, (const char *)&v);
         return *this;
     }
 
@@ -773,7 +782,8 @@ namespace detail {
             if (!lhs.is_scalar()) {
                 throw std::runtime_error("can only convert ndobjects with 0 dimensions to scalars");
             }
-            dtype_assign(make_dtype<T>(), (char *)&result, lhs.get_dtype(), lhs.get_ndo()->m_data_pointer, errmode);
+            dtype_assign(make_dtype<T>(), NULL, (char *)&result,
+                        lhs.get_dtype(), lhs.get_ndo_meta(), lhs.get_ndo()->m_data_pointer, errmode);
             return result;
         }
     };

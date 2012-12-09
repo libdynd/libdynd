@@ -149,47 +149,40 @@ void pointer_dtype::get_single_compare_kernel(single_compare_kernel_instance& DY
 }
 
 namespace {
-    struct pointer_dst_assign_kernel_auxdata {
-        kernel_instance<unary_operation_t> m_assign_kernel;
-    };
-
     struct pointer_dst_assign_kernel {
-        static void general_kernel(char *dst, intptr_t dst_stride, const char *src, intptr_t src_stride,
-                            intptr_t count, const AuxDataBase *auxdata)
-        {
-            const pointer_dst_assign_kernel_auxdata& ad = get_auxiliary_data<pointer_dst_assign_kernel_auxdata>(auxdata);
-            unary_operation_t child_op = ad.m_assign_kernel.kernel;
-            const AuxDataBase *child_ad = ad.m_assign_kernel.auxdata;
-            for (intptr_t i = 0; i < count; ++i) {
-                char *dst_target = *reinterpret_cast<char **>(dst);
-                child_op(dst_target, 0, src, 0, 1, child_ad);
+        struct auxdata_storage {
+            kernel_instance<unary_operation_pair_t> m_assign_kernel;
+            size_t src_size;
+        };
 
-                dst += dst_stride;
-                src += src_stride;
-            }
-        }
-
-        static void scalar_kernel(char *dst, intptr_t DYND_UNUSED(dst_stride), const char *src, intptr_t DYND_UNUSED(src_stride),
-                            intptr_t, const AuxDataBase *auxdata)
+        static void single_kernel(char *dst, const char *src, unary_kernel_static_data *extra)
         {
-            const pointer_dst_assign_kernel_auxdata& ad = get_auxiliary_data<pointer_dst_assign_kernel_auxdata>(auxdata);
+            auxdata_storage& ad = get_auxiliary_data<auxdata_storage>(extra->auxdata);
+            unary_single_operation_t child_op = ad.m_assign_kernel.kernel.single;
+            unary_kernel_static_data kernel_extra(ad.m_assign_kernel.auxdata,
+                            extra->dst_metadata + sizeof(pointer_dtype_metadata),
+                            extra->src_metadata);
+
             char *dst_target = *reinterpret_cast<char **>(dst);
-            ad.m_assign_kernel.kernel(dst_target, 0, src, 0, 1, ad.m_assign_kernel.auxdata);
+            ad.m_assign_kernel.kernel.single(dst_target, src, &kernel_extra);
         }
 
-        static void contiguous_kernel(char *dst, intptr_t DYND_UNUSED(dst_stride), const char *src, intptr_t src_stride,
-                            intptr_t count, const AuxDataBase *auxdata)
+        static void contig_kernel(char *dst, const char *src, size_t count, unary_kernel_static_data *extra)
         {
-            const pointer_dst_assign_kernel_auxdata& ad = get_auxiliary_data<pointer_dst_assign_kernel_auxdata>(auxdata);
-            unary_operation_t child_op = ad.m_assign_kernel.kernel;
-            const AuxDataBase *child_ad = ad.m_assign_kernel.auxdata;
-            char **dst_cached = reinterpret_cast<char **>(dst);
+            auxdata_storage& ad = get_auxiliary_data<auxdata_storage>(extra->auxdata);
+            unary_single_operation_t child_op = ad.m_assign_kernel.kernel.single;
+            unary_kernel_static_data kernel_extra(ad.m_assign_kernel.auxdata,
+                            extra->dst_metadata + sizeof(pointer_dtype_metadata),
+                            extra->src_metadata);
+            size_t src_size = ad.src_size;
 
-            for (intptr_t i = 0; i < count; ++i) {
-                child_op(*dst_cached, 0, src, 0, 1, child_ad);
+            char **dst_vals = reinterpret_cast<char **>(dst);
+            for (size_t i = 0; i != count; ++i) {
+                char *dst_target = *dst_vals;
+                ad.m_assign_kernel.kernel.single(dst_target, src, &kernel_extra);
 
-                ++dst_cached;
-                src += src_stride;
+                ++dst_vals;
+                src += src_size;
             }
         }
     };
@@ -208,12 +201,12 @@ bool pointer_dtype::operator==(const extended_dtype& rhs) const
 }
 
 void pointer_dtype::get_operand_to_value_kernel(const eval::eval_context * /*ectx*/,
-                        unary_specialization_kernel_instance& /*out_borrowed_kernel*/) const
+                        kernel_instance<unary_operation_pair_t>& /*out_borrowed_kernel*/) const
 {
     throw runtime_error("TODO: implement pointer_dtype::get_operand_to_value_kernel");
 }
 void pointer_dtype::get_value_to_operand_kernel(const eval::eval_context * /*ectx*/,
-                        unary_specialization_kernel_instance& /*out_borrowed_kernel*/) const
+                        kernel_instance<unary_operation_pair_t>& /*out_borrowed_kernel*/) const
 {
     throw runtime_error("TODO: implement pointer_dtype::get_value_to_operand_kernel");
 }
@@ -247,6 +240,11 @@ void pointer_dtype::metadata_copy_construct(char *dst_metadata, const char *src_
     pointer_dtype_metadata *dst_md = reinterpret_cast<pointer_dtype_metadata *>(dst_metadata);
     dst_md->blockref = src_md->blockref ? src_md->blockref : embedded_reference;
     memory_block_incref(dst_md->blockref);
+}
+
+void pointer_dtype::metadata_reset_buffers(char *metadata) const
+{
+    throw runtime_error("TODO implement pointer_dtype::metadata_reset_buffers");
 }
 
 void pointer_dtype::metadata_destruct(char *metadata) const

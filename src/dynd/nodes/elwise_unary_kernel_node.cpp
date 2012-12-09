@@ -2,6 +2,7 @@
 // Copyright (C) 2011-2012, Dynamic NDArray Developers
 // BSD 2-Clause License, see LICENSE.txt
 //
+// DEPRECATED
 
 #include <dynd/nodes/elwise_unary_kernel_node.hpp>
 #include <dynd/dtypes/convert_dtype.hpp>
@@ -46,14 +47,14 @@ ndarray_node_ptr dynd::elwise_unary_kernel_node::apply_linear_index(
     }
 }
 
-void dynd::elwise_unary_kernel_node::get_unary_specialization_operation(unary_specialization_kernel_instance& out_kernel) const
+void dynd::elwise_unary_kernel_node::get_unary_specialization_operation(kernel_instance<unary_operation_pair_t>& out_kernel) const
 {
     out_kernel.borrow_from(m_kernel);
 }
 
 
 ndarray_node_ptr dynd::make_elwise_unary_kernel_node_copy_kernel(const dtype& dt, const ndarray_node_ptr& opnode,
-                                            const unary_specialization_kernel_instance& kernel)
+                                            const kernel_instance<unary_operation_pair_t>& kernel)
 {
     char *node_memory = NULL;
     ndarray_node_ptr result(make_uninitialized_ndarray_node_memory_block(sizeof(elwise_unary_kernel_node), &node_memory));
@@ -66,7 +67,7 @@ ndarray_node_ptr dynd::make_elwise_unary_kernel_node_copy_kernel(const dtype& dt
 }
 
 ndarray_node_ptr dynd::make_elwise_unary_kernel_node_steal_kernel(const dtype& dt, const ndarray_node_ptr& opnode,
-                                            unary_specialization_kernel_instance& kernel)
+                                            kernel_instance<unary_operation_pair_t>& kernel)
 {
     char *node_memory = NULL;
     ndarray_node_ptr result(make_uninitialized_ndarray_node_memory_block(sizeof(elwise_unary_kernel_node), &node_memory));

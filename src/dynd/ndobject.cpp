@@ -332,9 +332,9 @@ ndobject dynd::detail::make_from_vec<std::string>::make(const std::vector<std::s
     // Make an ndobject memory block which contains both the string pointers and
     // the string data
     ndobject result(make_ndobject_memory_block(dt.extended()->get_metadata_size(),
-                    sizeof(string_dtype_element) * vec.size() + total_string_size,
+                    sizeof(string_dtype_data) * vec.size() + total_string_size,
                     dt.get_alignment(), &data_ptr));
-    char *string_ptr = data_ptr + sizeof(string_dtype_element) * vec.size();
+    char *string_ptr = data_ptr + sizeof(string_dtype_data) * vec.size();
     // The main ndobject metadata
     ndobject_preamble *preamble = result.get_ndo();
     preamble->m_data_pointer = data_ptr;
@@ -346,11 +346,11 @@ ndobject dynd::detail::make_from_vec<std::string>::make(const std::vector<std::s
     strided_array_dtype_metadata *sa_md = reinterpret_cast<strided_array_dtype_metadata *>(
                                             result.get_ndo_meta());
     sa_md->size = vec.size();
-    sa_md->stride = vec.empty() ? 0 : sizeof(string_dtype_element);
+    sa_md->stride = vec.empty() ? 0 : sizeof(string_dtype_data);
     string_dtype_metadata *s_md = reinterpret_cast<string_dtype_metadata *>(sa_md + 1);
     s_md->blockref = NULL;
     // The string pointers and data
-    string_dtype_element *data = reinterpret_cast<string_dtype_element *>(data_ptr);
+    string_dtype_data *data = reinterpret_cast<string_dtype_data *>(data_ptr);
     for (size_t i = 0, i_end = vec.size(); i != i_end; ++i) {
         size_t size = vec[i].size();
         memcpy(string_ptr, vec[i].data(), size);
@@ -452,54 +452,50 @@ void ndobject::val_assign(const ndobject& rhs, assign_error_mode errmode,
     }
 
     if (rhs.is_scalar()) {
-        unary_specialization_kernel_instance assign;
+        kernel_instance<unary_operation_pair_t> assign;
         const char *src_ptr = rhs.get_ndo()->m_data_pointer;
 
         // TODO: Performance optimization
         ndobject_iter<1, 0> iter(*this);
         get_dtype_assignment_kernel(iter.get_uniform_dtype(), rhs.get_dtype(), errmode, ectx, assign);
-        unary_operation_t assign_fn = assign.specializations[scalar_unary_specialization];
+        unary_kernel_static_data extra(assign.auxdata, get_ndo_meta(), rhs.get_ndo_meta());
         if (!iter.empty()) {
-            iter.get_uniform_dtype().prepare_kernel_auxdata(iter.metadata(), assign.auxdata);
             do {
-                assign_fn(iter.data(), 0, src_ptr, 0, 1, assign.auxdata);
+                assign.kernel.single(iter.data(), src_ptr, &extra);
             } while (iter.next());
         }
     } else {
-        unary_specialization_kernel_instance assign;
+        kernel_instance<unary_operation_pair_t> assign;
 
         // TODO: Performance optimization
         ndobject_iter<1, 1> iter(*this, rhs);
         get_dtype_assignment_kernel(iter.get_uniform_dtype<0>(), iter.get_uniform_dtype<1>(), errmode, ectx, assign);
-        unary_operation_t assign_fn = assign.specializations[scalar_unary_specialization];
-
+        unary_kernel_static_data extra(assign.auxdata, get_ndo_meta(), rhs.get_ndo_meta());
         if (!iter.empty()) {
-            iter.get_uniform_dtype<0>().prepare_kernel_auxdata(iter.metadata<0>(), assign.auxdata);
             do {
-                assign_fn(iter.data<0>(), 0, iter.data<1>(), 0, 1, assign.auxdata);
+                assign.kernel.single(iter.data<0>(), iter.data<1>(), &extra);
             } while (iter.next());
         }
     }
 }
 
-void ndobject::val_assign(const dtype& dt, const char *data, assign_error_mode errmode,
-                    const eval::eval_context *ectx) const
+void ndobject::val_assign(const dtype& rhs_dt, const char *rhs_metadata, const char *rhs_data,
+                    assign_error_mode errmode, const eval::eval_context *ectx) const
 {
     // Verify access permissions
     if (!(get_flags()&write_access_flag)) {
         throw runtime_error("tried to write to a dynd array that is not writeable");
     }
 
-    unary_specialization_kernel_instance assign;
+    kernel_instance<unary_operation_pair_t> assign;
 
     // TODO: Performance optimization
     ndobject_iter<1, 0> iter(*this);
-    get_dtype_assignment_kernel(iter.get_uniform_dtype(), dt, errmode, ectx, assign);
-    unary_operation_t assign_fn = assign.specializations[scalar_unary_specialization];
+    get_dtype_assignment_kernel(iter.get_uniform_dtype(), rhs_dt, errmode, ectx, assign);
     if (!iter.empty()) {
-        iter.get_uniform_dtype().prepare_kernel_auxdata(iter.metadata(), assign.auxdata);
+        unary_kernel_static_data extra(assign.auxdata, get_ndo_meta(), rhs_metadata);
         do {
-            assign_fn(iter.data(), 0, data, 0, 1, assign.auxdata);
+            assign.kernel.single(iter.data(), rhs_data, &extra);
         } while (iter.next());
     }
 }

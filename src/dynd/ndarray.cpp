@@ -394,7 +394,7 @@ static void val_assign_loop(const ndarray& lhs, const ndarray& rhs, assign_error
     intptr_t innersize = iter.innersize();
     intptr_t dst_innerstride = iter.innerstride<0>(), src_innerstride = iter.innerstride<1>();
 
-    unary_specialization_kernel_instance assign;
+    kernel_instance<unary_operation_pair_t> assign;
     get_dtype_assignment_kernel(lhs.get_dtype(), rhs.get_dtype(),
                                     errmode, ectx,
                                     assign);
@@ -433,7 +433,7 @@ void dynd::ndarray::val_assign(const dtype& dt, const char *data, assign_error_m
 
     intptr_t innersize = iter.innersize(), innerstride = iter.innerstride<0>();
 
-    unary_specialization_kernel_instance assign;
+    kernel_instance<unary_operation_pair_t> assign;
     get_dtype_assignment_kernel(get_dtype(), assign);
     unary_operation_t assign_fn = assign.specializations[
         get_unary_specialization(innerstride, get_dtype().get_element_size(), 0, dt.get_element_size())];

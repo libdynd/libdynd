@@ -31,441 +31,290 @@ namespace {
      *   }
      */
     struct buffered_2chain_unary_kernel_auxdata {
-        unary_specialization_kernel_instance kernels[2];
-        buffer_storage buf;
+        kernel_instance<unary_operation_pair_t> kernels[2];
+        unary_kernel_static_data kernel_extras[2];
+        buffer_storage<> buf;
+        size_t dst_item_size, src_item_size;
     };
 
     /**
      * Just like the 2chain kernel, but for 3 kernels chained together.
      */
     struct buffered_3chain_unary_kernel_auxdata {
-        unary_specialization_kernel_instance kernels[3];
-        buffer_storage bufs[2];
+        kernel_instance<unary_operation_pair_t> kernels[3];
+        unary_kernel_static_data kernel_extras[3];
+        buffer_storage<> bufs[2];
+        size_t dst_item_size, src_item_size;
     };
 
     struct buffered_nchain_unary_kernel_auxdata {
         // We use raw heap-allocated arrays for performance.
         // If we were using C++11, would use unique_ptr<T[]>.
-        unary_specialization_kernel_instance* m_kernels;
-        buffer_storage* m_bufs;
-        int m_buf_count;
+        kernel_instance<unary_operation_pair_t> *kernels;
+        buffer_storage<> *bufs;
+        unary_kernel_static_data *kernel_extras;
+        int buf_count;
+        size_t dst_item_size, src_item_size;
 
-        buffered_nchain_unary_kernel_auxdata() {
-            m_kernels = 0;
-            m_bufs = 0;
+        buffered_nchain_unary_kernel_auxdata()
+            : kernels(NULL), bufs(NULL), kernel_extras(NULL), buf_count(0)
+        {}
+
+        buffered_nchain_unary_kernel_auxdata(const buffered_nchain_unary_kernel_auxdata& rhs)
+            : kernels(NULL), bufs(NULL), kernel_extras(NULL), buf_count(0)
+        {
+            throw std::runtime_error("buffered_nchain_unary_kernel_auxdata copy constructor not implemented");
         }
 
         ~buffered_nchain_unary_kernel_auxdata() {
-            delete[] m_kernels;
-            delete[] m_bufs;
+            delete[] kernels;
+            delete[] kernel_extras;
+            delete[] bufs;
         }
 
-        void init(int buf_count) {
-            m_kernels = new unary_specialization_kernel_instance[buf_count + 1];
+        void init(int buffer_count) {
+            kernels = new kernel_instance<unary_operation_pair_t>[buffer_count + 1];
             try {
-                m_bufs = new buffer_storage[buf_count];
+                kernel_extras = new unary_kernel_static_data[buffer_count + 1];
+                bufs = new buffer_storage<>[buffer_count];
             } catch(const std::exception&) {
-                delete[] m_kernels;
-                m_kernels = 0;
+                delete[] kernels;
+                kernels = NULL;
+                delete[] kernel_extras;
+                kernel_extras = NULL;
                 throw;
             }
-            m_buf_count = buf_count;
+            buf_count = buffer_count;
         }
     };
 
     struct buffered_2chain_unary_kernel {
-        static void general_kernel(char *dst, intptr_t dst_stride, const char *src, intptr_t src_stride,
-                            intptr_t count, const AuxDataBase *auxdata)
+        static void single(char *dst, const char *src, unary_kernel_static_data *extra)
         {
-            const buffered_2chain_unary_kernel_auxdata& ad = get_auxiliary_data<buffered_2chain_unary_kernel_auxdata>(auxdata);
-            if (src_stride != 0) {
-                // The fully general case
-                unary_operation_t link0 = ad.kernels[0].specializations[general_unary_specialization];
-                unary_operation_t link1 = ad.kernels[1].specializations[general_unary_specialization];
-                do {
-                    intptr_t block_count = ad.buf.get_element_count();
-                    if (count < block_count) {
-                        block_count = count;
-                    }
+            buffered_2chain_unary_kernel_auxdata& ad = get_auxiliary_data<buffered_2chain_unary_kernel_auxdata>(extra->auxdata);
+            ad.kernel_extras[0].src_metadata = extra->src_metadata;
+            ad.kernels[0].kernel.single(ad.buf.get_storage(), src, &ad.kernel_extras[0]);
+            ad.kernel_extras[1].dst_metadata = extra->dst_metadata;
+            ad.kernels[1].kernel.single(dst, ad.buf.get_storage(), &ad.kernel_extras[1]);
+            ad.buf.reset_metadata();
+        }
 
-                    // First link of the chain
-                    link0(ad.buf.storage(), ad.buf.get_element_size(), src, src_stride, block_count, ad.kernels[0].auxdata);
-                    // Second link of the chain
-                    link1(dst, dst_stride, ad.buf.storage(), ad.buf.get_element_size(), block_count, ad.kernels[1].auxdata);
+        static void contig(char *dst, const char *src, size_t count, unary_kernel_static_data *extra)
+        {
+            buffered_2chain_unary_kernel_auxdata& ad = get_auxiliary_data<buffered_2chain_unary_kernel_auxdata>(extra->auxdata);
+            size_t dst_item_size = ad.dst_item_size, src_item_size = ad.src_item_size;
 
-                    src += block_count * src_stride;
-                    dst += block_count * dst_stride;
-                    count -= block_count;
-                } while (count > 0);
-            } else {
-                // Deal with the src stride == 0 case specially, since it isn't fully specialized at the function pointer level
-                unary_operation_t link0 = ad.kernels[0].specializations[scalar_unary_specialization];
-                unary_operation_t link1 = ad.kernels[1].specializations[general_unary_specialization];
+            ad.kernel_extras[0].src_metadata = extra->src_metadata;
+            ad.kernel_extras[1].dst_metadata = extra->dst_metadata;
+            while (count > buffer_storage<>::element_count) {
+                ad.kernels[0].kernel.contig(ad.buf.get_storage(), src, buffer_storage<>::element_count, &ad.kernel_extras[0]);
+                ad.kernels[1].kernel.contig(dst, ad.buf.get_storage(), buffer_storage<>::element_count, &ad.kernel_extras[1]);
+                ad.buf.reset_metadata();
 
-                // First link of the chain
-                link0(ad.buf.storage(), 0, src, 0, count, ad.kernels[0].auxdata);
-                // Second link of the chain
-                link1(dst, dst_stride, ad.buf.storage(), 0, count, ad.kernels[1].auxdata);
+                count -= buffer_storage<>::element_count;
+                dst += buffer_storage<>::element_count * dst_item_size;
+                src += buffer_storage<>::element_count * src_item_size;
             }
-        }
-
-        static void scalar_kernel(char *dst, intptr_t DYND_UNUSED(dst_stride), const char *src, intptr_t DYND_UNUSED(src_stride),
-                            intptr_t count, const AuxDataBase *auxdata)
-        {
-            const buffered_2chain_unary_kernel_auxdata& ad = get_auxiliary_data<buffered_2chain_unary_kernel_auxdata>(auxdata);
-            unary_operation_t link0 = ad.kernels[0].specializations[scalar_unary_specialization];
-            unary_operation_t link1 = ad.kernels[1].specializations[scalar_unary_specialization];
-
-            // First link of the chain
-            link0(ad.buf.storage(), 0, src, 0, count, ad.kernels[0].auxdata);
-            // Second link of the chain
-            link1(dst, 0, ad.buf.storage(), 0, count, ad.kernels[1].auxdata);
-        }
-
-        static void contiguous_kernel(char *dst, intptr_t dst_stride, const char *src, intptr_t src_stride,
-                            intptr_t count, const AuxDataBase *auxdata)
-        {
-            const buffered_2chain_unary_kernel_auxdata& ad = get_auxiliary_data<buffered_2chain_unary_kernel_auxdata>(auxdata);
-            unary_operation_t link0 = ad.kernels[0].specializations[contiguous_unary_specialization];
-            unary_operation_t link1 = ad.kernels[1].specializations[contiguous_unary_specialization];
-
-            do {
-                intptr_t block_count = ad.buf.get_element_count();
-                if (count < block_count) {
-                    block_count = count;
-                }
-
-                // First link of the chain
-                link0(ad.buf.storage(), ad.buf.get_element_size(), src, src_stride, block_count, ad.kernels[0].auxdata);
-                // Second link of the chain
-                link1(dst, dst_stride, ad.buf.storage(), ad.buf.get_element_size(), block_count, ad.kernels[1].auxdata);
-
-                src += block_count * src_stride;
-                dst += block_count * dst_stride;
-                count -= block_count;
-            } while (count > 0);
-        }
-
-        static void scalar_to_contiguous_kernel(char *dst, intptr_t dst_stride, const char *src, intptr_t DYND_UNUSED(src_stride),
-                            intptr_t count, const AuxDataBase *auxdata)
-        {
-            const buffered_2chain_unary_kernel_auxdata& ad = get_auxiliary_data<buffered_2chain_unary_kernel_auxdata>(auxdata);
-            unary_operation_t link0 = ad.kernels[0].specializations[scalar_unary_specialization];
-            unary_operation_t link1 = ad.kernels[1].specializations[scalar_to_contiguous_unary_specialization];
-
-            // First link of the chain
-            link0(ad.buf.storage(), 0, src, 0, count, ad.kernels[0].auxdata);
-            // Second link of the chain
-            link1(dst, dst_stride, ad.buf.storage(), 0, count, ad.kernels[1].auxdata);
+            ad.kernels[0].kernel.contig(ad.buf.get_storage(), src, count, &ad.kernel_extras[0]);
+            ad.kernels[1].kernel.contig(dst, ad.buf.get_storage(), count, &ad.kernel_extras[1]);
+            ad.buf.reset_metadata();
         }
     };
 
     struct buffered_3chain_unary_kernel {
-        static void general_kernel(char *dst, intptr_t dst_stride, const char *src, intptr_t src_stride,
-                            intptr_t count, const AuxDataBase *auxdata)
+        static void single(char *dst, const char *src, unary_kernel_static_data *extra)
         {
-            const buffered_3chain_unary_kernel_auxdata& ad = get_auxiliary_data<buffered_3chain_unary_kernel_auxdata>(auxdata);
-            if (src_stride != 0) {
-                // The fully general case
-                unary_operation_t link0 = ad.kernels[0].specializations[general_unary_specialization];
-                unary_operation_t link1 = ad.kernels[1].specializations[contiguous_unary_specialization];
-                unary_operation_t link2 = ad.kernels[2].specializations[general_unary_specialization];
-                do {
-                    intptr_t block_count = ad.bufs[0].get_element_count();
-                    if (count < block_count) {
-                        block_count = count;
-                    }
+            buffered_3chain_unary_kernel_auxdata& ad = get_auxiliary_data<buffered_3chain_unary_kernel_auxdata>(extra->auxdata);
+            ad.kernel_extras[0].src_metadata = extra->src_metadata;
+            ad.kernels[0].kernel.single(ad.bufs[0].get_storage(), src, &ad.kernel_extras[0]);
+            ad.kernels[1].kernel.single(ad.bufs[1].get_storage(), ad.bufs[0].get_storage(), &ad.kernel_extras[1]);
+            ad.kernel_extras[2].dst_metadata = extra->dst_metadata;
+            ad.kernels[2].kernel.single(dst, ad.bufs[1].get_storage(), &ad.kernel_extras[2]);
+            ad.bufs[0].reset_metadata();
+            ad.bufs[1].reset_metadata();
+        }
 
-                    // First link of the chain
-                    link0(ad.bufs[0].storage(), ad.bufs[0].get_element_size(), src, src_stride, block_count, ad.kernels[0].auxdata);
-                    // Second link of the chain
-                    link1(ad.bufs[1].storage(), ad.bufs[1].get_element_size(), ad.bufs[0].storage(), ad.bufs[0].get_element_size(), block_count, ad.kernels[1].auxdata);
-                    // Third link of the chain
-                    link2(dst, dst_stride, ad.bufs[1].storage(), ad.bufs[1].get_element_size(), block_count, ad.kernels[2].auxdata);
+        static void contig(char *dst, const char *src, size_t count, unary_kernel_static_data *extra)
+        {
+            buffered_3chain_unary_kernel_auxdata& ad = get_auxiliary_data<buffered_3chain_unary_kernel_auxdata>(extra->auxdata);
+            size_t dst_item_size = ad.dst_item_size, src_item_size = ad.src_item_size;
 
-                    src += block_count * src_stride;
-                    dst += block_count * dst_stride;
-                    count -= block_count;
-                } while (count > 0);
-            } else {
-                // Deal with the src stride == 0 case specially, since it isn't fully specialized at the function pointer level
-                unary_operation_t link0 = ad.kernels[0].specializations[scalar_unary_specialization];
-                unary_operation_t link1 = ad.kernels[1].specializations[scalar_unary_specialization];
-                unary_operation_t link2 = ad.kernels[2].specializations[general_unary_specialization];
+            ad.kernel_extras[0].src_metadata = extra->src_metadata;
+            ad.kernel_extras[2].dst_metadata = extra->dst_metadata;
+            while (count > buffer_storage<>::element_count) {
+                ad.kernels[0].kernel.contig(ad.bufs[0].get_storage(), src, buffer_storage<>::element_count, &ad.kernel_extras[0]);
+                ad.kernels[1].kernel.contig(ad.bufs[1].get_storage(), ad.bufs[0].get_storage(), buffer_storage<>::element_count, &ad.kernel_extras[1]);
+                ad.kernels[2].kernel.contig(dst, ad.bufs[1].get_storage(), buffer_storage<>::element_count, &ad.kernel_extras[2]);
+                ad.bufs[0].reset_metadata();
+                ad.bufs[1].reset_metadata();
 
-                // First link of the chain
-                link0(ad.bufs[0].storage(), 0, src, 0, count, ad.kernels[0].auxdata);
-                // Second link of the chain
-                link1(ad.bufs[1].storage(), 0, ad.bufs[0].storage(), 0, count, ad.kernels[1].auxdata);
-                // Third link of the chain
-                link2(dst, dst_stride, ad.bufs[1].storage(), 0, count, ad.kernels[2].auxdata);
+                count -= buffer_storage<>::element_count;
+                dst += buffer_storage<>::element_count * dst_item_size;
+                src += buffer_storage<>::element_count * src_item_size;
             }
-        }
-
-        static void scalar_kernel(char *dst, intptr_t DYND_UNUSED(dst_stride), const char *src, intptr_t DYND_UNUSED(src_stride),
-                            intptr_t count, const AuxDataBase *auxdata)
-        {
-            const buffered_3chain_unary_kernel_auxdata& ad = get_auxiliary_data<buffered_3chain_unary_kernel_auxdata>(auxdata);
-            unary_operation_t link0 = ad.kernels[0].specializations[scalar_unary_specialization];
-            unary_operation_t link1 = ad.kernels[1].specializations[scalar_unary_specialization];
-            unary_operation_t link2 = ad.kernels[2].specializations[scalar_unary_specialization];
-
-            // First link of the chain
-            link0(ad.bufs[0].storage(), 0, src, 0, count, ad.kernels[0].auxdata);
-            // Second link of the chain
-            link1(ad.bufs[1].storage(), 0, ad.bufs[0].storage(), 0, count, ad.kernels[1].auxdata);
-            // Third link of the chain
-            link2(dst, 0, ad.bufs[1].storage(), 0, count, ad.kernels[2].auxdata);
-        }
-
-        static void contiguous_kernel(char *dst, intptr_t dst_stride, const char *src, intptr_t src_stride,
-                            intptr_t count, const AuxDataBase *auxdata)
-        {
-            const buffered_3chain_unary_kernel_auxdata& ad = get_auxiliary_data<buffered_3chain_unary_kernel_auxdata>(auxdata);
-            unary_operation_t link0 = ad.kernels[0].specializations[contiguous_unary_specialization];
-            unary_operation_t link1 = ad.kernels[1].specializations[contiguous_unary_specialization];
-            unary_operation_t link2 = ad.kernels[2].specializations[contiguous_unary_specialization];
-
-            do {
-                intptr_t block_count = ad.bufs[0].get_element_count();
-                if (count < block_count) {
-                    block_count = count;
-                }
-
-                // First link of the chain
-                link0(ad.bufs[0].storage(), ad.bufs[0].get_element_size(), src, src_stride, block_count, ad.kernels[0].auxdata);
-                // Second link of the chain
-                link1(ad.bufs[1].storage(), ad.bufs[1].get_element_size(), ad.bufs[0].storage(), ad.bufs[0].get_element_size(), block_count, ad.kernels[1].auxdata);
-                // Third link of the chain
-                link2(dst, dst_stride, ad.bufs[1].storage(), ad.bufs[1].get_element_size(), block_count, ad.kernels[2].auxdata);
-
-                src += block_count * src_stride;
-                dst += block_count * dst_stride;
-                count -= block_count;
-            } while (count > 0);
-        }
-
-        static void scalar_to_contiguous_kernel(char *dst, intptr_t dst_stride, const char *src, intptr_t DYND_UNUSED(src_stride),
-                            intptr_t count, const AuxDataBase *auxdata)
-        {
-            const buffered_3chain_unary_kernel_auxdata& ad = get_auxiliary_data<buffered_3chain_unary_kernel_auxdata>(auxdata);
-            unary_operation_t link0 = ad.kernels[0].specializations[scalar_unary_specialization];
-            unary_operation_t link1 = ad.kernels[1].specializations[scalar_unary_specialization];
-            unary_operation_t link2 = ad.kernels[2].specializations[scalar_to_contiguous_unary_specialization];
-
-            // First link of the chain
-            link0(ad.bufs[0].storage(), 0, src, 0, count, ad.kernels[0].auxdata);
-            // Second link of the chain
-            link1(ad.bufs[1].storage(), 0, ad.bufs[0].storage(), 0, count, ad.kernels[1].auxdata);
-            // Second link of the chain
-            link2(dst, dst_stride, ad.bufs[1].storage(), 0, count, ad.kernels[2].auxdata);
+            ad.kernels[0].kernel.contig(ad.bufs[0].get_storage(), src, count, &ad.kernel_extras[0]);
+            ad.kernels[1].kernel.contig(ad.bufs[1].get_storage(), ad.bufs[0].get_storage(), count, &ad.kernel_extras[1]);
+            ad.kernels[2].kernel.contig(dst, ad.bufs[1].get_storage(), count, &ad.kernel_extras[2]);
+            ad.bufs[0].reset_metadata();
+            ad.bufs[1].reset_metadata();
         }
     };
 
     struct buffered_nchain_unary_kernel {
-        static void general_kernel(char *dst, intptr_t dst_stride, const char *src, intptr_t src_stride,
-                            intptr_t count, const AuxDataBase *auxdata)
+        static void single(char *dst, const char *src, unary_kernel_static_data *extra)
         {
-            const buffered_nchain_unary_kernel_auxdata& ad = get_auxiliary_data<buffered_nchain_unary_kernel_auxdata>(auxdata);
-            int buf_count = ad.m_buf_count;
-            if (src_stride != 0) {
-                // The fully general case
-                do {
-                    intptr_t block_count = ad.m_bufs[0].get_element_count();
-                    if (count < block_count) {
-                        block_count = count;
-                    }
-
-                    // From the source into the first buffer
-                    ad.m_kernels[0].specializations[general_unary_specialization](
-                                ad.m_bufs[0].storage(), ad.m_bufs[0].get_element_size(), src, src_stride, block_count, ad.m_kernels[0].auxdata);
-                    // All the links from buffer to buffer
-                    for (int i = 1; i < buf_count; ++i) {
-                        ad.m_kernels[i].specializations[contiguous_unary_specialization](
-                                ad.m_bufs[i].storage(), ad.m_bufs[i].get_element_size(), ad.m_bufs[i-1].storage(), ad.m_bufs[i-1].get_element_size(), block_count, ad.m_kernels[i].auxdata);
-                    }
-                    // From the last buffer into the destination
-                    ad.m_kernels[buf_count].specializations[general_unary_specialization](
-                                dst, dst_stride, ad.m_bufs[buf_count-1].storage(), ad.m_bufs[buf_count-1].get_element_size(), block_count, ad.m_kernels[buf_count].auxdata);
-
-                    src += block_count * src_stride;
-                    dst += block_count * dst_stride;
-                    count -= block_count;
-                } while (count > 0);
-            } else {
-                // Deal with the src stride == 0 case specially, since it isn't fully specialized at the function pointer level
-
-                // From the source into the first buffer
-                ad.m_kernels[0].specializations[scalar_unary_specialization](
-                            ad.m_bufs[0].storage(), 0, src, 0, count, ad.m_kernels[0].auxdata);
-                // All the links from buffer to buffer
-                for (int i = 1; i < buf_count; ++i) {
-                    ad.m_kernels[i].specializations[scalar_unary_specialization](
-                            ad.m_bufs[i].storage(), 0, ad.m_bufs[i-1].storage(), 0, count, ad.m_kernels[i].auxdata);
-                }
-                // From the last buffer into the destination
-                ad.m_kernels[buf_count].specializations[general_unary_specialization](
-                            dst, dst_stride, ad.m_bufs[buf_count-1].storage(), 0, count, ad.m_kernels[buf_count].auxdata);
-            }
-        }
-
-        static void scalar_kernel(char *dst, intptr_t DYND_UNUSED(dst_stride), const char *src, intptr_t DYND_UNUSED(src_stride),
-                            intptr_t count, const AuxDataBase *auxdata)
-        {
-            const buffered_nchain_unary_kernel_auxdata& ad = get_auxiliary_data<buffered_nchain_unary_kernel_auxdata>(auxdata);
-            int buf_count = ad.m_buf_count;
+            buffered_nchain_unary_kernel_auxdata& ad = get_auxiliary_data<buffered_nchain_unary_kernel_auxdata>(extra->auxdata);
+            int buf_count = ad.buf_count;
 
             // From the source into the first buffer
-            ad.m_kernels[0].specializations[scalar_unary_specialization](
-                        ad.m_bufs[0].storage(), 0, src, 0, count, ad.m_kernels[0].auxdata);
+            ad.kernel_extras[0].src_metadata = extra->src_metadata;
+            ad.kernels[0].kernel.single(ad.bufs[0].get_storage(), src, &ad.kernel_extras[0]);
             // All the links from buffer to buffer
             for (int i = 1; i < buf_count; ++i) {
-                ad.m_kernels[i].specializations[scalar_unary_specialization](
-                        ad.m_bufs[i].storage(), 0, ad.m_bufs[i-1].storage(), 0, count, ad.m_kernels[i].auxdata);
+                ad.kernels[i].kernel.single(ad.bufs[i].get_storage(), ad.bufs[i-1].get_storage(), &ad.kernel_extras[i]);
             }
             // From the last buffer into the destination
-            ad.m_kernels[buf_count].specializations[scalar_unary_specialization](
-                        dst, 0, ad.m_bufs[buf_count-1].storage(), 0, count, ad.m_kernels[buf_count].auxdata);
+            ad.kernel_extras[buf_count].dst_metadata = extra->dst_metadata;
+            ad.kernels[buf_count].kernel.single(dst, ad.bufs[buf_count-1].get_storage(), &ad.kernel_extras[buf_count]);
+            // Reset any metadata blockrefs
+            for (int i = 0; i < buf_count; ++i) {
+                ad.bufs[i].reset_metadata();
+            }
         }
 
-        static void contiguous_kernel(char *dst, intptr_t dst_stride, const char *src, intptr_t src_stride,
-                            intptr_t count, const AuxDataBase *auxdata)
+        static void contig(char *dst, const char *src, size_t count, unary_kernel_static_data *extra)
         {
-            const buffered_nchain_unary_kernel_auxdata& ad = get_auxiliary_data<buffered_nchain_unary_kernel_auxdata>(auxdata);
-            int buf_count = ad.m_buf_count;
+            buffered_nchain_unary_kernel_auxdata& ad = get_auxiliary_data<buffered_nchain_unary_kernel_auxdata>(extra->auxdata);
+            size_t dst_item_size = ad.dst_item_size, src_item_size = ad.src_item_size;
+            int buf_count = ad.buf_count;
 
-            do {
-                intptr_t block_count = ad.m_bufs[0].get_element_count();
-                if (count < block_count) {
-                    block_count = count;
-                }
-
+            ad.kernel_extras[0].src_metadata = extra->src_metadata;
+            ad.kernel_extras[buf_count].dst_metadata = extra->dst_metadata;
+            while (count > buffer_storage<>::element_count) {
                 // From the source into the first buffer
-                ad.m_kernels[0].specializations[contiguous_unary_specialization](
-                            ad.m_bufs[0].storage(), ad.m_bufs[0].get_element_size(), src, src_stride, block_count, ad.m_kernels[0].auxdata);
+                ad.kernels[0].kernel.contig(ad.bufs[0].get_storage(), src, buffer_storage<>::element_count, &ad.kernel_extras[0]);
                 // All the links from buffer to buffer
                 for (int i = 1; i < buf_count; ++i) {
-                    ad.m_kernels[i].specializations[contiguous_unary_specialization](
-                            ad.m_bufs[i].storage(), ad.m_bufs[i].get_element_size(), ad.m_bufs[i-1].storage(), ad.m_bufs[i-1].get_element_size(), block_count, ad.m_kernels[i].auxdata);
+                    ad.kernels[i].kernel.contig(ad.bufs[i].get_storage(), ad.bufs[i-1].get_storage(), buffer_storage<>::element_count, &ad.kernel_extras[i]);
                 }
                 // From the last buffer into the destination
-                ad.m_kernels[buf_count].specializations[contiguous_unary_specialization](
-                            dst, dst_stride, ad.m_bufs[buf_count-1].storage(), ad.m_bufs[buf_count-1].get_element_size(), block_count, ad.m_kernels[buf_count].auxdata);
+                ad.kernels[buf_count].kernel.contig(dst, ad.bufs[buf_count-1].get_storage(), buffer_storage<>::element_count, &ad.kernel_extras[buf_count]);
+                // Reset any metadata blockrefs
+                for (int i = 0; i < buf_count; ++i) {
+                    ad.bufs[i].reset_metadata();
+                }
 
-                src += block_count * src_stride;
-                dst += block_count * dst_stride;
-                count -= block_count;
-            } while (count > 0);
-        }
-
-        static void scalar_to_contiguous_kernel(char *dst, intptr_t dst_stride, const char *src, intptr_t DYND_UNUSED(src_stride),
-                            intptr_t count, const AuxDataBase *auxdata)
-        {
-            const buffered_nchain_unary_kernel_auxdata& ad = get_auxiliary_data<buffered_nchain_unary_kernel_auxdata>(auxdata);
-            int buf_count = ad.m_buf_count;
-
+                count -= buffer_storage<>::element_count;
+                dst += buffer_storage<>::element_count * dst_item_size;
+                src += buffer_storage<>::element_count * src_item_size;
+            }
             // From the source into the first buffer
-            ad.m_kernels[0].specializations[scalar_unary_specialization](
-                        ad.m_bufs[0].storage(), 0, src, 0, count, ad.m_kernels[0].auxdata);
+            ad.kernels[0].kernel.contig(ad.bufs[0].get_storage(), src, count, &ad.kernel_extras[0]);
             // All the links from buffer to buffer
             for (int i = 1; i < buf_count; ++i) {
-                ad.m_kernels[i].specializations[scalar_unary_specialization](
-                        ad.m_bufs[i].storage(), 0, ad.m_bufs[i-1].storage(), 0, count, ad.m_kernels[i].auxdata);
+                ad.kernels[i].kernel.contig(ad.bufs[i].get_storage(), ad.bufs[i-1].get_storage(), count, &ad.kernel_extras[i]);
             }
             // From the last buffer into the destination
-            ad.m_kernels[buf_count].specializations[scalar_to_contiguous_unary_specialization](
-                        dst, dst_stride, ad.m_bufs[buf_count-1].storage(), 0, count, ad.m_kernels[buf_count].auxdata);
+            ad.kernels[buf_count].kernel.contig(dst, ad.bufs[buf_count-1].get_storage(), count, &ad.kernel_extras[buf_count]);
+            // Reset any metadata blockrefs
+            for (int i = 0; i < buf_count; ++i) {
+                ad.bufs[i].reset_metadata();
+            }
         }
     };
-
 } // anonymous namespace
 
-void dynd::make_buffered_chain_unary_kernel(std::deque<unary_specialization_kernel_instance>& kernels,
-                    std::deque<intptr_t>& element_sizes, unary_specialization_kernel_instance& out_kernel)
+void dynd::make_buffered_chain_unary_kernel(std::deque<kernel_instance<unary_operation_pair_t>>& kernels,
+                    std::deque<dtype>& dtypes, kernel_instance<unary_operation_pair_t>& out_kernel)
 {
-    if (kernels.size() != element_sizes.size() - 1) {
+    if (kernels.size() != dtypes.size() - 1) {
         std::stringstream ss;
         ss << "make_buffered_nchain_unary_kernel: the size of 'kernels' (" << kernels.size()
-            << ") must be one less than 'element_sizes' (" << element_sizes.size() << ")";
+            << ") must be one less than 'dtypes' (" << dtypes.size() << ")";
         throw std::runtime_error(ss.str());
     }
-
-    static specialized_unary_operation_table_t optable_2chain = {
-        buffered_2chain_unary_kernel::general_kernel,
-        buffered_2chain_unary_kernel::scalar_kernel,
-        buffered_2chain_unary_kernel::contiguous_kernel,
-        buffered_2chain_unary_kernel::scalar_to_contiguous_kernel};
-
-    static specialized_unary_operation_table_t optable_3chain  = {
-        buffered_3chain_unary_kernel::general_kernel,
-        buffered_3chain_unary_kernel::scalar_kernel,
-        buffered_3chain_unary_kernel::contiguous_kernel,
-        buffered_3chain_unary_kernel::scalar_to_contiguous_kernel};
-
-    static specialized_unary_operation_table_t optable_nchain = {
-        buffered_nchain_unary_kernel::general_kernel,
-        buffered_nchain_unary_kernel::scalar_kernel,
-        buffered_nchain_unary_kernel::contiguous_kernel,
-        buffered_nchain_unary_kernel::scalar_to_contiguous_kernel};
 
     switch (kernels.size()) {
         case 1:
             kernels[0].swap(out_kernel);
             break;
         case 2: {
-            if (kernels[0].specializations != NULL && kernels[1].specializations != NULL) {
-                out_kernel.specializations = optable_2chain;
+            if (kernels[0].kernel.single != NULL && kernels[1].kernel.single != NULL) {
+                out_kernel.kernel.single = &buffered_2chain_unary_kernel::single;
+                if (kernels[0].kernel.contig != NULL && kernels[1].kernel.contig != NULL) {
+                    out_kernel.kernel.contig = &buffered_2chain_unary_kernel::contig;
+                } else {
+                    out_kernel.kernel.contig = NULL;
+                }
                 make_auxiliary_data<buffered_2chain_unary_kernel_auxdata>(out_kernel.auxdata);
                 buffered_2chain_unary_kernel_auxdata &auxdata = out_kernel.auxdata.get<buffered_2chain_unary_kernel_auxdata>();
 
-                auxdata.buf.allocate(element_sizes[1]); // TODO: pass buffering data through here
+                auxdata.buf.allocate(dtypes[1]);
+                auxdata.src_item_size = dtypes.front().get_element_size();
+                auxdata.dst_item_size = dtypes.back().get_element_size();
 
                 auxdata.kernels[0].swap(kernels[0]);
                 auxdata.kernels[1].swap(kernels[1]);
             } else {
-                out_kernel.specializations = NULL;
+                out_kernel.kernel = unary_operation_pair_t();
                 out_kernel.auxdata.free();
             }
             break;
         }
         case 3: {
-            if (kernels[0].specializations != NULL && kernels[1].specializations != NULL &&
-                        kernels[2].specializations != NULL) {
-                out_kernel.specializations = optable_3chain;
+            if (kernels[0].kernel.single != NULL && kernels[1].kernel.single != NULL &&
+                            kernels[2].kernel.single != NULL) {
+                out_kernel.kernel.single = &buffered_3chain_unary_kernel::single;
+                if (kernels[0].kernel.contig != NULL && kernels[1].kernel.contig != NULL &&
+                            kernels[2].kernel.contig != NULL) {
+                    out_kernel.kernel.contig = &buffered_2chain_unary_kernel::contig;
+                } else {
+                    out_kernel.kernel.contig = NULL;
+                }
                 make_auxiliary_data<buffered_3chain_unary_kernel_auxdata>(out_kernel.auxdata);
                 buffered_3chain_unary_kernel_auxdata &auxdata = out_kernel.auxdata.get<buffered_3chain_unary_kernel_auxdata>();
 
-                auxdata.bufs[0].allocate(element_sizes[1]); // TODO: pass buffering data through here
-                auxdata.bufs[1].allocate(element_sizes[2]);
+                auxdata.bufs[0].allocate(dtypes[1]);
+                auxdata.bufs[1].allocate(dtypes[2]);
+                auxdata.src_item_size = dtypes.front().get_element_size();
+                auxdata.dst_item_size = dtypes.back().get_element_size();
 
                 auxdata.kernels[0].swap(kernels[0]);
                 auxdata.kernels[1].swap(kernels[1]);
                 auxdata.kernels[2].swap(kernels[2]);
             } else {
-                out_kernel.specializations = NULL;
+                out_kernel.kernel = unary_operation_pair_t();
                 out_kernel.auxdata.free();
             }
             break;
         }
         default: {
-            for (size_t i = 0, i_end = kernels.size()-1; i != i_end; ++i) {
-                if (kernels[i].specializations == NULL) {
-                    out_kernel.specializations = NULL;
+            bool all_contig_nonnull = true;
+            for (size_t i = 0, i_end = kernels.size(); i != i_end; ++i) {
+                if (kernels[i].kernel.single == NULL) {
+                    out_kernel.kernel = unary_operation_pair_t();
                     out_kernel.auxdata.free();
                     return;
+                } else if (kernels[i].kernel.contig == NULL) {
+                    all_contig_nonnull = false;
                 }
             }
-            out_kernel.specializations = optable_nchain;
+            out_kernel.kernel.single = &buffered_nchain_unary_kernel::single;
+            if (all_contig_nonnull) {
+                out_kernel.kernel.contig = &buffered_nchain_unary_kernel::contig;
+            }
             make_auxiliary_data<buffered_nchain_unary_kernel_auxdata>(out_kernel.auxdata);
             buffered_nchain_unary_kernel_auxdata &auxdata = out_kernel.auxdata.get<buffered_nchain_unary_kernel_auxdata>();
             auxdata.init((int)kernels.size() - 1);
 
             for (size_t i = 0, i_end = kernels.size()-1; i != i_end; ++i) {
-                auxdata.m_bufs[i].allocate(element_sizes[i+1]); // TODO: pass buffering data through here
+                auxdata.bufs[i].allocate(dtypes[i+1]);
             }
+            auxdata.src_item_size = dtypes.front().get_element_size();
+            auxdata.dst_item_size = dtypes.back().get_element_size();
 
             for (size_t i = 0; i < kernels.size(); ++i) {
-                auxdata.m_kernels[i].swap(kernels[i]);
+                auxdata.kernels[i].swap(kernels[i]);
             }
             break;
         }
@@ -474,8 +323,8 @@ void dynd::make_buffered_chain_unary_kernel(std::deque<unary_specialization_kern
 
 void dynd::push_front_dtype_storage_to_value_kernels(const dynd::dtype& dt,
                     const eval::eval_context *ectx,
-                    std::deque<unary_specialization_kernel_instance>& out_kernels,
-                    std::deque<intptr_t>& out_element_sizes)
+                    std::deque<kernel_instance<unary_operation_pair_t>>& out_kernels,
+                    std::deque<dtype>& out_dtypes)
 {
     const dtype* front_dt = &dt;
     const extended_expression_dtype* front_dt_extended = static_cast<const extended_expression_dtype *>(front_dt->extended());
@@ -483,20 +332,20 @@ void dynd::push_front_dtype_storage_to_value_kernels(const dynd::dtype& dt,
     if (next_dt->get_kind() != expression_kind) {
         // Special case when there is just one
         if (out_kernels.empty()) {
-            out_element_sizes.push_front(dt.value_dtype().get_element_size());
+            out_dtypes.push_front(dt.value_dtype());
         }
-        out_element_sizes.push_front(dt.storage_dtype().get_element_size());
-        out_kernels.push_front(unary_specialization_kernel_instance());
+        out_dtypes.push_front(dt.storage_dtype());
+        out_kernels.push_front(kernel_instance<unary_operation_pair_t>());
         front_dt_extended->get_operand_to_value_kernel(ectx, out_kernels.front());
     } else {
         // The final element size, if not yet provided
         if (out_kernels.empty()) {
-            out_element_sizes.push_front(dt.value_dtype().get_element_size());
+            out_dtypes.push_front(dt.value_dtype());
         }
         do {
             // Add this kernel to the deque
-            out_element_sizes.push_front(next_dt->value_dtype().get_element_size());
-            out_kernels.push_front(unary_specialization_kernel_instance());
+            out_dtypes.push_front(next_dt->value_dtype());
+            out_kernels.push_front(kernel_instance<unary_operation_pair_t>());
             front_dt_extended->get_operand_to_value_kernel(ectx, out_kernels.front());
             // Shift to the next dtype
             front_dt = next_dt;
@@ -504,16 +353,16 @@ void dynd::push_front_dtype_storage_to_value_kernels(const dynd::dtype& dt,
             next_dt = &front_dt_extended->get_operand_dtype();
         } while (next_dt->get_kind() == expression_kind);
         // Add the final kernel from the source
-        out_element_sizes.push_front(next_dt->get_element_size());
-        out_kernels.push_front(unary_specialization_kernel_instance());
+        out_dtypes.push_front(*next_dt);
+        out_kernels.push_front(kernel_instance<unary_operation_pair_t>());
         front_dt_extended->get_operand_to_value_kernel(ectx, out_kernels.front());
     }
 }
 
 void dynd::push_back_dtype_value_to_storage_kernels(const dynd::dtype& dt,
                     const eval::eval_context *ectx,
-                    std::deque<unary_specialization_kernel_instance>& out_kernels,
-                    std::deque<intptr_t>& out_element_sizes)
+                    std::deque<kernel_instance<unary_operation_pair_t>>& out_kernels,
+                    std::deque<dtype>& out_dtypes)
 {
     const dtype* back_dt = &dt;
     const extended_expression_dtype* back_dt_extended = static_cast<const extended_expression_dtype *>(back_dt->extended());
@@ -521,20 +370,20 @@ void dynd::push_back_dtype_value_to_storage_kernels(const dynd::dtype& dt,
     if (next_dt->get_kind() != expression_kind) {
         // Special case when there is just one
         if (out_kernels.empty()) {
-            out_element_sizes.push_back(dt.value_dtype().get_element_size());
+            out_dtypes.push_back(dt.value_dtype());
         }
-        out_element_sizes.push_back(dt.storage_dtype().get_element_size());
-        out_kernels.push_back(unary_specialization_kernel_instance());
+        out_dtypes.push_back(dt.storage_dtype());
+        out_kernels.push_back(kernel_instance<unary_operation_pair_t>());
         back_dt_extended->get_value_to_operand_kernel(ectx, out_kernels.back());
     } else {
         // The first element size, if not yet provided
         if (out_kernels.empty()) {
-            out_element_sizes.push_back(dt.value_dtype().get_element_size());
+            out_dtypes.push_back(dt.value_dtype());
         }
         do {
             // Add this kernel to the deque
-            out_element_sizes.push_back(next_dt->value_dtype().get_element_size());
-            out_kernels.push_back(unary_specialization_kernel_instance());
+            out_dtypes.push_back(next_dt->value_dtype());
+            out_kernels.push_back(kernel_instance<unary_operation_pair_t>());
             back_dt_extended->get_value_to_operand_kernel(ectx, out_kernels.back());
             // Shift to the next dtype
             back_dt = next_dt;
@@ -542,8 +391,8 @@ void dynd::push_back_dtype_value_to_storage_kernels(const dynd::dtype& dt,
             next_dt = &back_dt_extended->get_operand_dtype();
         } while (next_dt->get_kind() == expression_kind);
         // Add the final kernel from the source
-        out_element_sizes.push_back(next_dt->get_element_size());
-        out_kernels.push_back(unary_specialization_kernel_instance());
+        out_dtypes.push_back(*next_dt);
+        out_kernels.push_back(kernel_instance<unary_operation_pair_t>());
         back_dt_extended->get_value_to_operand_kernel(ectx, out_kernels.back());
     }
 }

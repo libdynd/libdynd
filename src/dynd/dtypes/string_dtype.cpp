@@ -141,7 +141,7 @@ void string_dtype::get_single_compare_kernel(single_compare_kernel_instance& DYN
 
 void string_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const dtype& src_dt,
                 assign_error_mode errmode,
-                unary_specialization_kernel_instance& out_kernel) const
+                kernel_instance<unary_operation_pair_t>& out_kernel) const
 {
     if (this == dst_dt.extended()) {
         switch (src_dt.get_type_id()) {
@@ -188,15 +188,6 @@ bool string_dtype::operator==(const extended_dtype& rhs) const
     }
 }
 
-void string_dtype::prepare_kernel_auxdata(const char *metadata, AuxDataBase *auxdata) const
-{
-    const string_dtype_metadata *md = reinterpret_cast<const string_dtype_metadata *>(metadata);
-    auxdata = reinterpret_cast<AuxDataBase *>(reinterpret_cast<uintptr_t>(auxdata)&~1);
-    if (auxdata->kernel_api) {
-        auxdata->kernel_api->set_dst_memory_block(auxdata, md->blockref);
-    }
-}
-
 size_t string_dtype::get_metadata_size() const
 {
     return sizeof(string_dtype_metadata);
@@ -216,6 +207,11 @@ void string_dtype::metadata_copy_construct(char *dst_metadata, const char *src_m
     string_dtype_metadata *dst_md = reinterpret_cast<string_dtype_metadata *>(dst_metadata);
     dst_md->blockref = src_md->blockref ? src_md->blockref : embedded_reference;
     memory_block_incref(dst_md->blockref);
+}
+
+void string_dtype::metadata_reset_buffers(char *metadata) const
+{
+    throw runtime_error("TODO implement string_dtype::metadata_reset_buffers");
 }
 
 void string_dtype::metadata_destruct(char *metadata) const

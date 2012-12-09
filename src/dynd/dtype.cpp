@@ -148,11 +148,6 @@ size_t extended_dtype::get_default_element_size(int DYND_UNUSED(ndim), const int
     return get_element_size();
 }
 
-void extended_dtype::prepare_kernel_auxdata(const char *DYND_UNUSED(metadata), AuxDataBase *DYND_UNUSED(auxdata)) const
-{
-    // Default to no blockrefs
-}
-
 // TODO: Make this a pure virtual function eventually
 size_t extended_dtype::get_metadata_size() const
 {
@@ -175,6 +170,11 @@ void extended_dtype::metadata_copy_construct(char *DYND_UNUSED(dst_metadata), co
     stringstream ss;
     ss << "TODO: metadata_copy_construct for " << dtype(this, true) << " is not implemented";
     throw std::runtime_error(ss.str());
+}
+
+void extended_dtype::metadata_reset_buffers(char *metadata) const
+{
+    // By default there are no buffers to reset
 }
 
 // TODO: Make this a pure virtual function eventually
@@ -248,7 +248,7 @@ void extended_dtype::get_dynamic_ndobject_properties(const std::pair<std::string
 
 void extended_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const dtype& src_dt,
                 assign_error_mode DYND_UNUSED(errmode),
-                unary_specialization_kernel_instance& DYND_UNUSED(out_kernel)) const
+                kernel_instance<unary_operation_pair_t>& DYND_UNUSED(out_kernel)) const
 {
     stringstream ss;
     ss << "get_dtype_assignment_kernel has not been implemented for ";

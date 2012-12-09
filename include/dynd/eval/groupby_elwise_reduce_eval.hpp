@@ -8,7 +8,6 @@
 
 #include <deque>
 
-#include <dynd/nodes/ndarray_node.hpp>
 #include <dynd/eval/eval_context.hpp>
 
 namespace dynd { namespace eval {

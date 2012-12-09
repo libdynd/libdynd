@@ -16,7 +16,6 @@
 #include <dynd/dtype_assign.hpp>
 #include <dynd/dtype_comparisons.hpp>
 #include <dynd/kernels/single_compare_kernel_instance.hpp>
-#include <dynd/kernels/unary_kernel_instance.hpp>
 #include <dynd/string_encodings.hpp>
 #include <dynd/eval/eval_context.hpp>
 #include <dynd/irange.hpp>
@@ -542,11 +541,9 @@ public:
      */
     virtual void get_dtype_assignment_kernel(const dtype& dst_dt, const dtype& src_dt,
                     assign_error_mode errmode,
-                    unary_specialization_kernel_instance& out_kernel) const;
+                    kernel_instance<unary_operation_pair_t>& out_kernel) const;
 
     virtual bool operator==(const extended_dtype& rhs) const = 0;
-
-    virtual void prepare_kernel_auxdata(const char *metadata, AuxDataBase *auxdata) const;
 
     /** The size of the ndobject metadata for this dtype */
     virtual size_t get_metadata_size() const;
@@ -569,6 +566,12 @@ public:
     virtual void metadata_copy_construct(char *dst_metadata, const char *src_metadata, memory_block_data *embedded_reference) const;
     /** Destructs any references or other state contained in the ndobjects' metdata */
     virtual void metadata_destruct(char *metadata) const;
+    /**
+     * When metadata is used for temporary buffers of a dtype, and that usage is finished one
+     * execution cycle, this function is called to clear usage of that memory so it can be reused in
+     * the next cycle.
+     */
+    virtual void metadata_reset_buffers(char *metadata) const;
     /** Debug print of the metdata */
     virtual void metadata_debug_print(const char *metadata, std::ostream& o, const std::string& indent) const;
 
@@ -685,10 +688,10 @@ public:
 
     /** Returns a kernel which converts from (operand_dtype().value_dtype()) to (value_dtype()) */
     virtual void get_operand_to_value_kernel(const eval::eval_context *ectx,
-                            unary_specialization_kernel_instance& out_borrowed_kernel) const = 0;
+                            kernel_instance<unary_operation_pair_t>& out_borrowed_kernel) const = 0;
     /** Returns a kernel which converts from (value_dtype()) to (operand_dtype().value_dtype()) */
     virtual void get_value_to_operand_kernel(const eval::eval_context *ectx,
-                            unary_specialization_kernel_instance& out_borrowed_kernel) const = 0;
+                            kernel_instance<unary_operation_pair_t>& out_borrowed_kernel) const = 0;
 
     /**
      * This method is for expression dtypes, and is a way to substitute
@@ -1101,12 +1104,6 @@ public:
      */
     const extended_dtype* extended() const {
         return m_extended;
-    }
-
-    inline void prepare_kernel_auxdata(const char *metadata, AuxDataBase *auxdata) const {
-        if (m_extended) {
-            return m_extended->prepare_kernel_auxdata(metadata, auxdata);
-        }
     }
 
     /** The size of the data required for uniform iteration */

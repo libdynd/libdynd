@@ -8,24 +8,19 @@
 
 #include <dynd/dtype.hpp>
 #include <dynd/dtype_assign.hpp>
-#include <dynd/kernels/unary_kernel_instance.hpp>
+#include <dynd/kernels/kernel_instance.hpp>
 #include <dynd/eval/eval_context.hpp>
 
 namespace dynd {
 
 /**
- * A function prototype for functions which assign a single value.
- */
-typedef void (*assignment_function_t)(void *dst, const void *src);
-
-/**
- * Returns an assignment function for assigning a single built-in
+ * Returns an assignment function for assigning a built-in
  * dtype value. The errmode must not be `assign_error_default`, which
  * would require an auxdata with a kernel_api to retrieve that default.
  *
  * This returns NULL if there is any problem.
  */
-assignment_function_t get_builtin_dtype_assignment_function(type_id_t dst_type_id, type_id_t src_type_id,
+unary_operation_pair_t get_builtin_dtype_assignment_function(type_id_t dst_type_id, type_id_t src_type_id,
                                                                 assign_error_mode errmode);
 
 /**
@@ -50,7 +45,7 @@ void get_builtin_dtype_assignment_kernel(
                     type_id_t dst_type_id, type_id_t src_type_id,
                     assign_error_mode errmode,
                     const eval::eval_context *ectx,
-                    unary_specialization_kernel_instance& out_kernel);
+                    kernel_instance<unary_operation_pair_t>& out_kernel);
 
 /**
  * Gets a unary kernel for assigning a pod dtype, i.e. a raw
@@ -60,7 +55,7 @@ void get_builtin_dtype_assignment_kernel(
  */
 void get_pod_dtype_assignment_kernel(
                     intptr_t element_size, intptr_t alignment,
-                    unary_specialization_kernel_instance& out_kernel);
+                    kernel_instance<unary_operation_pair_t>& out_kernel);
 
 /**
  * Returns a kernel for assigning from the source data type
@@ -71,7 +66,7 @@ void get_pod_dtype_assignment_kernel(
 void get_dtype_assignment_kernel(const dtype& dst_dt, const dtype& src_dt,
                     assign_error_mode errmode,
                     const eval::eval_context *ectx,
-                    unary_specialization_kernel_instance& out_kernel);
+                    kernel_instance<unary_operation_pair_t>& out_kernel);
 
 /**
  * Returns a kernel for assigning from the source data to the dest data, with
@@ -80,7 +75,7 @@ void get_dtype_assignment_kernel(const dtype& dst_dt, const dtype& src_dt,
  * of kernel specializations.
  */
 void get_dtype_assignment_kernel(const dtype& dt,
-                    unary_specialization_kernel_instance& out_kernel);
+                    kernel_instance<unary_operation_pair_t>& out_kernel);
 
 } // namespace dynd
 

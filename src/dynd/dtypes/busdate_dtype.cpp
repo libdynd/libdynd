@@ -16,13 +16,14 @@
 using namespace std;
 using namespace dynd;
 
-dynd::busdate_dtype::busdate_dtype(busdate_roll_t roll, const bool *weekmask, const ndarray& holidays)
+dynd::busdate_dtype::busdate_dtype(busdate_roll_t roll, const bool *weekmask, const ndobject& holidays)
     : m_roll(roll)
 {
     memcpy(m_workweek, weekmask, sizeof(m_workweek));
-    if (holidays.get_node() != NULL) {
-        ndarray hol = holidays.as_dtype(make_date_dtype(date_unit_day)).eval_immutable();
-
+    if (!holidays.empty()) {
+        ndobject hol = holidays.cast_scalars(make_date_dtype()).eval_immutable();
+        // TODO: Make sure hol is contiguous and one-dimensional
+        m_holidays = hol;
     }
 }
 
@@ -50,7 +51,7 @@ void dynd::busdate_dtype::print_element(std::ostream& o, const char *DYND_UNUSED
 
 void dynd::busdate_dtype::print_dtype(std::ostream& o) const
 {
-    if (m_roll == busdate_roll_following && is_default_workweek() && m_holidays.get_node() == NULL) {
+    if (m_roll == busdate_roll_following && is_default_workweek() && m_holidays.empty()) {
         o << "busdate";
     } else {
         bool comma = false;
@@ -65,7 +66,7 @@ void dynd::busdate_dtype::print_dtype(std::ostream& o) const
             print_workweek(o);
             comma = true;
         }
-        if (m_holidays.get_node() != NULL) {
+        if (!m_holidays.empty()) {
             if (comma) o << ", ";
             o << "holidays=[";
             print_holidays(o);
@@ -99,7 +100,7 @@ void dynd::busdate_dtype::get_single_compare_kernel(single_compare_kernel_instan
 
 void dynd::busdate_dtype::get_dtype_assignment_kernel(const dtype& /*dst_dt*/, const dtype& /*src_dt*/,
                 assign_error_mode /*errmode*/,
-                unary_specialization_kernel_instance& /*out_kernel*/) const
+                kernel_instance<unary_operation_pair_t>& /*out_kernel*/) const
 {
     throw runtime_error("conversions for date are not implemented");
 }

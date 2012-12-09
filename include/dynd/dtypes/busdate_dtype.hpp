@@ -7,10 +7,7 @@
 #define _DYND__BUSDATE_DTYPE_HPP_
 
 #include <dynd/dtype.hpp>
-#include <dynd/dtype_assign.hpp>
-#include <dynd/dtypes/view_dtype.hpp>
-#include <dynd/string_encodings.hpp>
-#include <dynd/ndarray.hpp>
+#include <dynd/ndobject.hpp>
 
 namespace dynd {
 
@@ -42,10 +39,10 @@ class busdate_dtype : public extended_dtype {
      * If non-NULL, a one-dimensional contiguous array of day unit date_dtype
      * which has no duplicates or holidays falling on a weekend.
      */
-    ndarray m_holidays;
+    ndobject m_holidays;
 
 public:
-    busdate_dtype(busdate_roll_t roll, const bool *weekmask, const ndarray& holidays);
+    busdate_dtype(busdate_roll_t roll, const bool *weekmask, const ndobject& holidays);
 
     type_id_t get_type_id() const {
         return busdate_type_id;
@@ -69,7 +66,7 @@ public:
         return m_workweek;
     }
 
-    ndarray get_holidays() const {
+    ndobject get_holidays() const {
         return m_holidays;
     }
 
@@ -97,7 +94,7 @@ public:
 
     void get_dtype_assignment_kernel(const dtype& dst_dt, const dtype& src_dt,
                     assign_error_mode errmode,
-                    unary_specialization_kernel_instance& out_kernel) const;
+                    kernel_instance<unary_operation_pair_t>& out_kernel) const;
 
     bool operator==(const extended_dtype& rhs) const;
 
@@ -114,7 +111,7 @@ public:
     }
 };
 
-inline dtype make_busdate_dtype(busdate_roll_t roll = busdate_roll_following, const bool *weekmask = NULL, const ndarray& holidays = ndarray()) {
+inline dtype make_busdate_dtype(busdate_roll_t roll = busdate_roll_following, const bool *weekmask = NULL, const ndobject& holidays = ndobject()) {
     return dtype(new busdate_dtype(roll, weekmask, holidays));
 }
 

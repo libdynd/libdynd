@@ -3,6 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
+#if 0 // TODO reenable?
+
 #include <deque>
 
 #include <dynd/shape_tools.hpp>
@@ -57,7 +59,7 @@ static ndarray_node_ptr initialize_dst_memblock(bool copy, const dtype& dst_dt, 
 
 ndarray_node *dynd::eval::push_front_node_unary_kernels(ndarray_node* node,
                     const eval::eval_context *ectx,
-                    std::deque<unary_specialization_kernel_instance>& out_kernels,
+                    std::deque<kernel_instance<unary_operation_pair_t>>& out_kernels,
                     std::deque<intptr_t>& out_element_sizes)
 {
     const dtype& dt = node->get_dtype();
@@ -79,7 +81,7 @@ ndarray_node *dynd::eval::push_front_node_unary_kernels(ndarray_node* node,
                 }
                 // The node's kernel
                 out_element_sizes.push_front(dt.storage_dtype().get_element_size());
-                out_kernels.push_front(unary_specialization_kernel_instance());
+                out_kernels.push_front(kernel_instance<unary_operation_pair_t>());
                 node->get_unary_specialization_operation(out_kernels.front());
                 // The kernels from the operand
                 return push_front_node_unary_kernels(node->get_opnode(0), ectx, out_kernels, out_element_sizes);
@@ -102,7 +104,7 @@ ndarray_node *dynd::eval::push_front_node_unary_kernels(ndarray_node* node,
 
 ndarray_node_ptr dynd::eval::evaluate_strided_with_unary_kernel(ndarray_node *node, const eval::eval_context *DYND_UNUSED(ectx),
                                 bool copy, uint32_t access_flags,
-                                const dtype& dst_dt, unary_specialization_kernel_instance& operation)
+                                const dtype& dst_dt, kernel_instance<unary_operation_pair_t>& operation)
 {
     const dtype& src_dt = node->get_dtype();
     ndarray_node_ptr result;
@@ -155,14 +157,15 @@ ndarray_node_ptr dynd::eval::evaluate_strided_with_unary_kernel(ndarray_node *no
 ndarray_node_ptr dynd::eval::evaluate_unary_elwise_array(ndarray_node* node, const eval::eval_context *ectx, bool copy, uint32_t access_flags)
 {
     // Chain the kernels together
-    deque<unary_specialization_kernel_instance> kernels;
+    deque<kernel_instance<unary_operation_pair_t>> kernels;
     deque<intptr_t> element_sizes;
 
     ndarray_node *strided_node = push_front_node_unary_kernels(node, ectx, kernels, element_sizes);
 
-    unary_specialization_kernel_instance operation;
+    kernel_instance<unary_operation_pair_t> operation;
     make_buffered_chain_unary_kernel(kernels, element_sizes, operation);
 
     return evaluate_strided_with_unary_kernel(strided_node, ectx, copy, access_flags, node->get_dtype().value_dtype(), operation);
 }
 
+#endif // TODO reenable?

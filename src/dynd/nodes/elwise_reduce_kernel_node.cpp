@@ -2,6 +2,7 @@
 // Copyright (C) 2011-2012, Dynamic NDArray Developers
 // BSD 2-Clause License, see LICENSE.txt
 //
+// DEPRECATED
 
 #include <dynd/nodes/elwise_reduce_kernel_node.hpp>
 #include <dynd/memblock/ndarray_node_memory_block.hpp>

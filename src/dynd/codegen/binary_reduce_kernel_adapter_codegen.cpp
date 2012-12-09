@@ -64,51 +64,23 @@ namespace {
     struct binary_reduce_function_adapters {
         typedef T (*cdecl_func_ptr_t)(T, T);
 
-        static void left_associative(char *dst, intptr_t dst_stride,
-                        const char *src0, intptr_t src0_stride,
-                        intptr_t count, const AuxDataBase *auxdata)
+        static void left_associative(char *dst, const char *src, unary_kernel_static_data *extra)
         {
-            cdecl_func_ptr_t kfunc = get_auxiliary_data<cdecl_func_ptr_t>(auxdata);
-            if (dst_stride == 0) {
-                T dst_value = *reinterpret_cast<T *>(dst);
-                for (intptr_t i = 0; i < count; ++i) {
-                    dst_value = kfunc(dst_value, *reinterpret_cast<const T *>(src0));
-                    src0 += src0_stride;
-                }
-                *reinterpret_cast<T *>(dst) = dst_value;
-            } else {
-                for (intptr_t i = 0; i < count; ++i) {
-                    *reinterpret_cast<T *>(dst) = kfunc(*reinterpret_cast<T *>(dst),
-                                                    *reinterpret_cast<const T *>(src0));
-                    src0 += src0_stride;
-                }
-            }
+            cdecl_func_ptr_t kfunc = get_auxiliary_data<cdecl_func_ptr_t>(extra->auxdata);
+            *reinterpret_cast<T *>(dst) = kfunc(*reinterpret_cast<T *>(dst),
+                                            *reinterpret_cast<const T *>(src));
         }
 
-        static void right_associative(char *dst, intptr_t dst_stride,
-                        const char *src0, intptr_t src0_stride,
-                        intptr_t count, const AuxDataBase *auxdata)
+        static void right_associative(char *dst, const char *src, unary_kernel_static_data *extra)
         {
-            cdecl_func_ptr_t kfunc = get_auxiliary_data<cdecl_func_ptr_t>(auxdata);
-            if (dst_stride == 0) {
-                T dst_value = *reinterpret_cast<T *>(dst);
-                for (intptr_t i = 0; i < count; ++i) {
-                    dst_value = kfunc(*reinterpret_cast<const T *>(src0), dst_value);
-                    src0 += src0_stride;
-                }
-                *reinterpret_cast<T *>(dst) = dst_value;
-            } else {
-                for (intptr_t i = 0; i < count; ++i) {
-                    *reinterpret_cast<T *>(dst) = kfunc(*reinterpret_cast<const T *>(src0),
-                                                    *reinterpret_cast<T *>(dst));
-                    src0 += src0_stride;
-                }
-            }
+            cdecl_func_ptr_t kfunc = get_auxiliary_data<cdecl_func_ptr_t>(extra->auxdata);
+            *reinterpret_cast<T *>(dst) = kfunc(*reinterpret_cast<const T *>(src),
+                                            *reinterpret_cast<T *>(dst));
         }
     };
 } // anonymous namespace
 
-unary_operation_t dynd::codegen_left_associative_binary_reduce_function_adapter(
+unary_single_operation_t dynd::codegen_left_associative_binary_reduce_function_adapter(
                     const dtype& reduce_type, calling_convention_t DYND_UNUSED(callconv))
 {
     // TODO: If there's a platform where there are differences in the calling convention
@@ -139,7 +111,7 @@ unary_operation_t dynd::codegen_left_associative_binary_reduce_function_adapter(
     }
 }
 
-unary_operation_t dynd::codegen_right_associative_binary_reduce_function_adapter(
+unary_single_operation_t dynd::codegen_right_associative_binary_reduce_function_adapter(
                     const dtype& reduce_type, calling_convention_t DYND_UNUSED(callconv))
 {
     // TODO: If there's a platform where there are differences in the calling convention

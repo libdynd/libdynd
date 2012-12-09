@@ -3,6 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
+#if 0 // TODO reenable
+
 #include <algorithm>
 
 #include <dynd/nodes/elwise_reduce_kernel_node.hpp>
@@ -79,3 +81,5 @@ void dynd::gfunc::elwise_reduce::debug_print(std::ostream& o, const std::string&
     }
     o << indent << "------" << endl;
 }
+
+#endif // TODO reenable

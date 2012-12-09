@@ -7,7 +7,6 @@
 #include <iostream> // for DEBUG
 
 #include <dynd/exceptions.hpp>
-#include <dynd/ndarray.hpp>
 #include <dynd/ndobject.hpp>
 #include <dynd/shape_tools.hpp>
 
@@ -49,27 +48,6 @@ inline string broadcast_error_message(const ndobject& dst, const ndobject& src)
 
 dynd::broadcast_error::broadcast_error(const ndobject& dst, const ndobject& src)
     : dnd_exception("broadcast error", broadcast_error_message(dst, src))
-{
-}
-
-
-inline string broadcast_error_message(int noperands, const ndarray_node_ptr *operands)
-{
-    stringstream ss;
-
-    ss << "cannot broadcast input operand shapes ";
-    for (int i = 0; i < noperands; ++i) {
-        print_shape(ss, operands[i]->get_ndim(), operands[i]->get_shape());
-        if (i != noperands - 1) {
-            ss << " ";
-        }
-    }
-
-    return ss.str();
-}
-
-dynd::broadcast_error::broadcast_error(int noperands, const ndarray_node_ptr *operands)
-    : dnd_exception("broadcast error", broadcast_error_message(noperands, operands))
 {
 }
 

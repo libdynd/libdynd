@@ -5,15 +5,15 @@
 
 #include <sstream>
 
-#include <dynd/ndarray.hpp>
-#include <dynd/raw_iteration.hpp>
+#include <dynd/ndobject.hpp>
+#include <dynd/ndobject_iter.hpp>
 #include <dynd/dtype_promotion.hpp>
 #include <dynd/kernels/builtin_dtype_binary_kernel_table.hpp>
-#include <dynd/nodes/elwise_binary_kernel_node.hpp>
 
 using namespace std;
 using namespace dynd;
 
+#if 0 // TODO: Restore this code
 
 namespace {
 
@@ -181,3 +181,5 @@ ndarray dynd::operator/(const ndarray& op1, const ndarray& op2)
     return ndarray(make_elwise_binary_kernel_node_steal_kernel(dt,
                     op1.get_node()->as_dtype(dt), op2.get_node()->as_dtype(dt), kernel));
 }
+
+#endif // TODO restore this code

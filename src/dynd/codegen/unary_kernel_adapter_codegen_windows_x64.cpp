@@ -63,7 +63,7 @@ std::string dynd::get_unary_function_adapter_unique_id_string(uint64_t unique_id
     return ss.str();
 }
 
-unary_operation_t* dynd::codegen_unary_function_adapter(const memory_block_ptr& exec_memblock, const dtype& restype,
+unary_operation_pair_t dynd::codegen_unary_function_adapter(const memory_block_ptr& exec_memblock, const dtype& restype,
                     const dtype& arg0type, calling_convention_t DYND_UNUSED(callconv))
 {
     // This code generation always uses the same prolog structure,
@@ -328,7 +328,8 @@ unary_operation_t* dynd::codegen_unary_function_adapter(const memory_block_ptr& 
                     code_begin,
                     code_function_end, code_unwind_info);
 
-    return reinterpret_cast<unary_operation_t *>(specializations);
+    throw std::runtime_error("TODO: dynd::codegen_unary_function_adapter needs fixing for updated kernel prototype");
+    //return unary_operation_pair_t(NULL, NULL);
 }
 
 #endif // defined(_WIN32) && defined(_M_X64)

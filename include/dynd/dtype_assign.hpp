@@ -43,19 +43,10 @@ bool is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt);
  * Requires that the data be aligned. To assign unaligned data,
  * use make_unaligned_dtype().
  */
-void dtype_assign(const dtype& dst_dt, char *dst, const dtype& src_dt, const char *src,
-                                assign_error_mode errmode = assign_error_fractional,
-                                const eval::eval_context *ectx = &eval::default_eval_context);
-
-/**
- * Like dtype_assign, but for strided assignment. Requires that the data
- * be aligned. To assign unaligned data, use make_unaligned_dtype().
- */
-void dtype_strided_assign(const dtype& dst_dt, char *dst, intptr_t dst_stride,
-                            const dtype& src_dt, const char *src, intptr_t src_stride,
-                            intptr_t count, assign_error_mode errmode,
-                            const eval::eval_context *ectx = &eval::default_eval_context);
-
+void dtype_assign(const dtype& dst_dt, const char *dst_metadata, char *dst_data,
+                const dtype& src_dt, const char *src_metadata, const char *src_data,
+                assign_error_mode errmode = assign_error_fractional,
+                const eval::eval_context *ectx = &eval::default_eval_context);
 
 } // namespace dynd
 

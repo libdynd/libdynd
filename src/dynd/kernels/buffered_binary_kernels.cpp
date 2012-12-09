@@ -3,6 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
+#if 0 // TODO reenable
+
 #include <dynd/dtype.hpp>
 #include <dynd/kernels/buffered_binary_kernels.hpp>
 
@@ -16,17 +18,17 @@ namespace {
 //
 struct buffered_binary_out_in0_in1_kernel_auxdata {
     kernel_instance<binary_operation_t> kernel;
-    kernel_instance<unary_operation_t> adapter_kernels[3];
-    buffer_storage bufs[3];
+    kernel_instance<unary_operation_pair_t> adapter_kernels[3];
+    buffer_storage<> bufs[3];
 };
 static void buffered_binary_out_in0_in1_kernel(char *dst, intptr_t dst_stride,
                     const char *src0, intptr_t src0_stride,
                     const char *src1, intptr_t src1_stride,
                     intptr_t count, const AuxDataBase *auxdata)
 {
-    const buffered_binary_out_in0_in1_kernel_auxdata& ad = get_auxiliary_data<buffered_binary_out_in0_in1_kernel_auxdata>(auxdata);
+    buffered_binary_out_in0_in1_kernel_auxdata& ad = get_auxiliary_data<buffered_binary_out_in0_in1_kernel_auxdata>(auxdata);
     do {
-        intptr_t block_count = ad.bufs[0].get_element_count();
+        intptr_t block_count = buffer_storage<>::element_count;
         if (count < block_count) {
             block_count = count;
         }
@@ -58,8 +60,8 @@ static void buffered_binary_out_in0_in1_kernel(char *dst, intptr_t dst_stride,
 
 struct buffered_binary_out_in0_kernel_auxdata {
     kernel_instance<binary_operation_t> kernel;
-    kernel_instance<unary_operation_t> adapter_kernels[2];
-    buffer_storage bufs[2];
+    kernel_instance<unary_operation_pair_t> adapter_kernels[2];
+    buffer_storage<> bufs[2];
 };
 static void buffered_binary_out_in0_kernel(char *dst, intptr_t dst_stride,
                     const char *src0, intptr_t src0_stride,
@@ -68,7 +70,7 @@ static void buffered_binary_out_in0_kernel(char *dst, intptr_t dst_stride,
 {
     const buffered_binary_out_in0_kernel_auxdata& ad = get_auxiliary_data<buffered_binary_out_in0_kernel_auxdata>(auxdata);
     do {
-        intptr_t block_count = ad.bufs[0].get_element_count();
+        intptr_t block_count = buffer_storage<>::element_count;
         if (count < block_count) {
             block_count = count;
         }
@@ -96,8 +98,8 @@ static void buffered_binary_out_in0_kernel(char *dst, intptr_t dst_stride,
 
 struct buffered_binary_out_in1_kernel_auxdata {
     kernel_instance<binary_operation_t> kernel;
-    kernel_instance<unary_operation_t> adapter_kernels[2];
-    buffer_storage bufs[2];
+    kernel_instance<unary_operation_pair_t> adapter_kernels[2];
+    buffer_storage<> bufs[2];
 };
 static void buffered_binary_out_in1_kernel(char *dst, intptr_t dst_stride,
                     const char *src0, intptr_t src0_stride,
@@ -106,7 +108,7 @@ static void buffered_binary_out_in1_kernel(char *dst, intptr_t dst_stride,
 {
     const buffered_binary_out_in1_kernel_auxdata& ad = get_auxiliary_data<buffered_binary_out_in1_kernel_auxdata>(auxdata);
     do {
-        intptr_t block_count = ad.bufs[0].get_element_count();
+        intptr_t block_count = buffer_storage<>::element_count;
         if (count < block_count) {
             block_count = count;
         }
@@ -134,8 +136,8 @@ static void buffered_binary_out_in1_kernel(char *dst, intptr_t dst_stride,
 
 struct buffered_binary_out_kernel_auxdata {
     kernel_instance<binary_operation_t> kernel;
-    kernel_instance<unary_operation_t> adapter_kernels[1];
-    buffer_storage bufs[1];
+    kernel_instance<unary_operation_pair_t> adapter_kernels[1];
+    buffer_storage<> bufs[1];
 };
 static void buffered_binary_out_kernel(char *dst, intptr_t dst_stride,
                     const char *src0, intptr_t src0_stride,
@@ -144,7 +146,7 @@ static void buffered_binary_out_kernel(char *dst, intptr_t dst_stride,
 {
     const buffered_binary_out_kernel_auxdata& ad = get_auxiliary_data<buffered_binary_out_kernel_auxdata>(auxdata);
     do {
-        intptr_t block_count = ad.bufs[0].get_element_count();
+        intptr_t block_count = buffer_storage<>::element_count;
         if (count < block_count) {
             block_count = count;
         }
@@ -168,8 +170,8 @@ static void buffered_binary_out_kernel(char *dst, intptr_t dst_stride,
 
 struct buffered_binary_in0_in1_kernel_auxdata {
     kernel_instance<binary_operation_t> kernel;
-    kernel_instance<unary_operation_t> adapter_kernels[2];
-    buffer_storage bufs[2];
+    kernel_instance<unary_operation_pair_t> adapter_kernels[2];
+    buffer_storage<> bufs[2];
 };
 static void buffered_binary_in0_in1_kernel(char *dst, intptr_t dst_stride,
                     const char *src0, intptr_t src0_stride,
@@ -178,7 +180,7 @@ static void buffered_binary_in0_in1_kernel(char *dst, intptr_t dst_stride,
 {
     const buffered_binary_in0_in1_kernel_auxdata& ad = get_auxiliary_data<buffered_binary_in0_in1_kernel_auxdata>(auxdata);
     do {
-        intptr_t block_count = ad.bufs[0].get_element_count();
+        intptr_t block_count = buffer_storage<>::element_count;
         if (count < block_count) {
             block_count = count;
         }
@@ -206,8 +208,8 @@ static void buffered_binary_in0_in1_kernel(char *dst, intptr_t dst_stride,
 
 struct buffered_binary_in0_kernel_auxdata {
     kernel_instance<binary_operation_t> kernel;
-    kernel_instance<unary_operation_t> adapter_kernels[1];
-    buffer_storage bufs[1];
+    kernel_instance<unary_operation_pair_t> adapter_kernels[1];
+    buffer_storage<> bufs[1];
 };
 static void buffered_binary_in0_kernel(char *dst, intptr_t dst_stride,
                     const char *src0, intptr_t src0_stride,
@@ -216,7 +218,7 @@ static void buffered_binary_in0_kernel(char *dst, intptr_t dst_stride,
 {
     const buffered_binary_in0_kernel_auxdata& ad = get_auxiliary_data<buffered_binary_in0_kernel_auxdata>(auxdata);
     do {
-        intptr_t block_count = ad.bufs[0].get_element_count();
+        intptr_t block_count = buffer_storage<>::element_count;
         if (count < block_count) {
             block_count = count;
         }
@@ -240,8 +242,8 @@ static void buffered_binary_in0_kernel(char *dst, intptr_t dst_stride,
 
 struct buffered_binary_in1_kernel_auxdata {
     kernel_instance<binary_operation_t> kernel;
-    kernel_instance<unary_operation_t> adapter_kernels[1];
-    buffer_storage bufs[1];
+    kernel_instance<unary_operation_pair_t> adapter_kernels[1];
+    buffer_storage<> bufs[1];
 };
 static void buffered_binary_in1_kernel(char *dst, intptr_t dst_stride,
                     const char *src0, intptr_t src0_stride,
@@ -250,7 +252,7 @@ static void buffered_binary_in1_kernel(char *dst, intptr_t dst_stride,
 {
     const buffered_binary_in1_kernel_auxdata& ad = get_auxiliary_data<buffered_binary_in1_kernel_auxdata>(auxdata);
     do {
-        intptr_t block_count = ad.bufs[0].get_element_count();
+        intptr_t block_count = buffer_storage<>::element_count;
         if (count < block_count) {
             block_count = count;
         }
@@ -275,7 +277,7 @@ static void buffered_binary_in1_kernel(char *dst, intptr_t dst_stride,
 } // anonymous namespace
 
 void dynd::make_buffered_binary_kernel(kernel_instance<binary_operation_t>& kernel,
-                    kernel_instance<unary_operation_t>* adapters, const intptr_t *buffer_element_sizes,
+                    kernel_instance<unary_operation_pair_t>* adapters, const intptr_t *buffer_element_sizes,
                     kernel_instance<binary_operation_t>& out_kernel)
 {
     //cout << "adapters: " << adapters[0].kernel << ", " << adapters[1].kernel << ", " << adapters[2].kernel << endl;
@@ -376,3 +378,5 @@ void dynd::make_buffered_binary_kernel(kernel_instance<binary_operation_t>& kern
         }
     }
 }
+
+#endif // TODO reenable

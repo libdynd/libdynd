@@ -10,7 +10,7 @@
 using namespace std;
 using namespace dynd;
 
-ndarray dynd::eval::evaluate_elwise_vm(const vm::elwise_program& ep, std::vector<ndarray> inputs,
+ndobject dynd::eval::evaluate_elwise_vm(const vm::elwise_program& ep, std::vector<ndobject> inputs,
                     const eval::eval_context *DYND_UNUSED(ectx))
 {
     // Allocate contiguous registers for the VM
@@ -19,9 +19,9 @@ ndarray dynd::eval::evaluate_elwise_vm(const vm::elwise_program& ep, std::vector
     // Determine the result broadcast shape
     int ndim;
     dimvector shape;
-    broadcast_input_shapes(inputs, &ndim, &shape);
+    //broadcast_input_shapes(inputs, &ndim, &shape);
 
 
     
-    return ndarray();
+    return ndobject();
 }
