@@ -37,6 +37,48 @@ void string_dtype::get_string_range(const char **out_begin, const char**out_end,
     *out_end = reinterpret_cast<const char * const *>(data)[1];
 }
 
+void string_dtype::set_utf8_string(const char *data_metadata, char *data, assign_error_mode errmode, const std::string& utf8_str) const
+{
+    const string_dtype_metadata *data_md = reinterpret_cast<const string_dtype_metadata *>(data_metadata);
+    const intptr_t src_charsize = 1;
+    intptr_t dst_charsize = string_encoding_char_size_table[m_encoding];
+    char *dst_begin = NULL, *dst_current, *dst_end = NULL;
+    const char *src_begin = utf8_str.data();
+    const char *src_end = src_begin + utf8_str.size();
+    next_unicode_codepoint_t next_fn = get_next_unicode_codepoint_function(string_encoding_utf_8, errmode);
+    append_unicode_codepoint_t append_fn = get_append_unicode_codepoint_function(m_encoding, errmode);
+    uint32_t cp;
+
+    memory_block_pod_allocator_api *allocator = get_memory_block_pod_allocator_api(data_md->blockref);
+
+    // Allocate the initial output as the src number of characters + some padding
+    // TODO: Don't add padding if the output is not a multi-character encoding
+    allocator->allocate(data_md->blockref, ((src_end - src_begin) / src_charsize + 16) * dst_charsize * 1124 / 1024,
+                    dst_charsize, &dst_begin, &dst_end);
+
+    dst_current = dst_begin;
+    while (src_begin < src_end) {
+        cp = next_fn(src_begin, src_end);
+        // Append the codepoint, or increase the allocated memory as necessary
+        if (dst_end - dst_current >= 8) {
+            append_fn(cp, dst_current, dst_end);
+        } else {
+            char *dst_begin_saved = dst_begin;
+            allocator->resize(data_md->blockref, 2 * (dst_end - dst_begin), &dst_begin, &dst_end);
+            dst_current = dst_begin + (dst_current - dst_begin_saved);
+
+            append_fn(cp, dst_current, dst_end);
+        }
+    }
+
+    // Shrink-wrap the memory to just fit the string
+    allocator->resize(data_md->blockref, dst_current - dst_begin, &dst_begin, &dst_end);
+
+    // Set the output
+    reinterpret_cast<string_dtype_data *>(data)->begin = dst_begin;
+    reinterpret_cast<string_dtype_data*>(data)->end = dst_end;
+}
+
 void string_dtype::print_element(std::ostream& o, const char *DYND_UNUSED(metadata), const char *data) const
 {
     uint32_t cp;

@@ -15,7 +15,7 @@
 using namespace std;
 using namespace dynd;
 
-dynd::fixedstring_dtype::fixedstring_dtype(string_encoding_t encoding, intptr_t stringsize)
+fixedstring_dtype::fixedstring_dtype(string_encoding_t encoding, intptr_t stringsize)
     : m_stringsize(stringsize), m_encoding(encoding)
 {
     switch (encoding) {
@@ -38,30 +38,61 @@ dynd::fixedstring_dtype::fixedstring_dtype(string_encoding_t encoding, intptr_t 
     }
 }
 
-void dynd::fixedstring_dtype::get_string_range(const char **out_begin, const char**out_end,
+void fixedstring_dtype::get_string_range(const char **out_begin, const char**out_end,
                 const char *DYND_UNUSED(metadata), const char *data) const
 {
     // Beginning of the string
     *out_begin = data;
 
-    // One past the end of the string, use the unicode codepoint advancer to find it
-    uint32_t cp = 1;
-    const char *data_end = data + m_element_size;
-    next_unicode_codepoint_t next_fn;
-    next_fn = get_next_unicode_codepoint_function(m_encoding, assign_error_none);
-    while (data < data_end) {
-        const char *data_tmp = data;
-        cp = next_fn(data_tmp, data_end);
-        if (cp != 0) {
-            data = data_tmp;
-        } else {
+    switch (string_encoding_char_size_table[m_encoding]) {
+        case 1: {
+            *out_end = data + strnlen(data, m_element_size);
+            break;
+        }
+        case 2: {
+            const uint16_t *ptr = reinterpret_cast<const uint16_t *>(data);
+            const uint16_t *ptr_max = ptr + m_element_size / sizeof(uint16_t);
+            while (ptr < ptr_max && *ptr != 0) {
+                ++ptr;
+            }
+            *out_end = reinterpret_cast<const char *>(ptr);
+            break;
+        }
+        case 4: {
+            const uint32_t *ptr = reinterpret_cast<const uint32_t *>(data);
+            const uint32_t *ptr_max = ptr + m_element_size / sizeof(uint32_t);
+            while (ptr < ptr_max && *ptr != 0) {
+                ++ptr;
+            }
+            *out_end = reinterpret_cast<const char *>(ptr);
             break;
         }
     }
-    *out_end = data;
 }
 
-void dynd::fixedstring_dtype::print_element(std::ostream& o, const char *DYND_UNUSED(metadata), const char *data) const
+void fixedstring_dtype::set_utf8_string(const char *DYND_UNUSED(metadata), char *dst, assign_error_mode errmode, const std::string& utf8_str) const
+{
+    char *dst_end = dst + m_element_size;
+    const char *src = utf8_str.data();
+    const char *src_end = src + utf8_str.size();
+    next_unicode_codepoint_t next_fn = get_next_unicode_codepoint_function(string_encoding_utf_8, errmode);
+    append_unicode_codepoint_t append_fn = get_append_unicode_codepoint_function(m_encoding, errmode);
+    uint32_t cp;
+
+    while (src < src_end && dst < dst_end) {
+        cp = next_fn(src, src_end);
+        append_fn(cp, dst, dst_end);
+    }
+    if (src < src_end) {
+        if (errmode != assign_error_none) {
+            throw std::runtime_error("Input is too large to convert to destination fixed-size string");
+        }
+    } else if (dst < dst_end) {
+        memset(dst, 0, dst_end - dst);
+    }
+}
+
+void fixedstring_dtype::print_element(std::ostream& o, const char *DYND_UNUSED(metadata), const char *data) const
 {
     uint32_t cp;
     next_unicode_codepoint_t next_fn;
@@ -81,12 +112,12 @@ void dynd::fixedstring_dtype::print_element(std::ostream& o, const char *DYND_UN
     o << "\"";
 }
 
-void dynd::fixedstring_dtype::print_dtype(std::ostream& o) const
+void fixedstring_dtype::print_dtype(std::ostream& o) const
 {
     o << "fixedstring<" << m_encoding << "," << m_stringsize << ">";
 }
 
-dtype dynd::fixedstring_dtype::apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& DYND_UNUSED(root_dt)) const
+dtype fixedstring_dtype::apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& DYND_UNUSED(root_dt)) const
 {
     if (nindices == 0) {
         return dtype(this, true);
@@ -104,12 +135,12 @@ dtype dynd::fixedstring_dtype::apply_linear_index(int nindices, const irange *in
     }
 }
 
-dtype dynd::fixedstring_dtype::get_canonical_dtype() const
+dtype fixedstring_dtype::get_canonical_dtype() const
 {
     return dtype(this, true);
 }
 
-bool dynd::fixedstring_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const
+bool fixedstring_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const
 {
     if (dst_dt.extended() == this) {
         if (src_dt.extended() == this) {
@@ -303,7 +334,7 @@ namespace {
     (single_compare_operation_t)type##_compare_kernel::greater \
     }
 
-void dynd::fixedstring_dtype::get_single_compare_kernel(single_compare_kernel_instance& out_kernel) const {
+void fixedstring_dtype::get_single_compare_kernel(single_compare_kernel_instance& out_kernel) const {
     static single_compare_operation_table_t fixedstring_comparisons_table[3] = {
         DYND_FIXEDSTRING_COMPARISON_TABLE_TYPE_LEVEL(ascii_utf8),
         DYND_FIXEDSTRING_COMPARISON_TABLE_TYPE_LEVEL(utf16),
@@ -316,7 +347,7 @@ void dynd::fixedstring_dtype::get_single_compare_kernel(single_compare_kernel_in
 
 #undef DYND_FIXEDSTRING_COMPARISON_TABLE_TYPE_LEVEL
 
-void dynd::fixedstring_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const dtype& src_dt,
+void fixedstring_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const dtype& src_dt,
                 assign_error_mode errmode,
                 kernel_instance<unary_operation_pair_t>& out_kernel) const
 {
@@ -345,7 +376,7 @@ void dynd::fixedstring_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, c
 }
 
 
-bool dynd::fixedstring_dtype::operator==(const extended_dtype& rhs) const
+bool fixedstring_dtype::operator==(const extended_dtype& rhs) const
 {
     if (this == &rhs) {
         return true;

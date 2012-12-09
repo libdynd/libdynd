@@ -59,6 +59,7 @@ public:
     }
 
     void get_string_range(const char **out_begin, const char**out_end, const char *metadata, const char *data) const;
+    void set_utf8_string(const char *metadata, char *data, assign_error_mode errmode, const std::string& utf8_str) const;
 
     void print_element(std::ostream& o, const char *metadata, const char *data) const;
 

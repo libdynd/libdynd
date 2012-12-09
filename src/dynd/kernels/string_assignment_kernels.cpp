@@ -252,8 +252,8 @@ namespace {
         const blockref_string_to_fixedstring_assign_kernel_auxdata& ad =
                     get_auxiliary_data<blockref_string_to_fixedstring_assign_kernel_auxdata>(extra->auxdata);
         char *dst_end = dst + ad.dst_element_size;
-        const char *src_begin = reinterpret_cast<const char * const *>(src)[0];
-        const char *src_end = reinterpret_cast<const char * const *>(src)[1];
+        const char *src_begin = reinterpret_cast<const string_dtype_data *>(src)->begin;
+        const char *src_end = reinterpret_cast<const string_dtype_data *>(src)->end;
         next_unicode_codepoint_t next_fn = ad.next_fn;
         append_unicode_codepoint_t append_fn = ad.append_fn;
         uint32_t cp;

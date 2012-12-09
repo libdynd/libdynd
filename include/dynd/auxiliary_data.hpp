@@ -321,7 +321,7 @@ inline const T& get_auxiliary_data(const AuxDataBase *auxdata)
  * data or borrowed auxiliary data.
  */
 template<typename T>
-T& get_auxiliary_data(AuxDataBase *auxdata)
+inline T& get_auxiliary_data(AuxDataBase *auxdata)
 {
     return reinterpret_cast<detail::auxiliary_data_holder<T>*>(reinterpret_cast<uintptr_t>(auxdata)&~1)->get();
 }

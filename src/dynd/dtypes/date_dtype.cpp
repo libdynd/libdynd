@@ -99,6 +99,11 @@ void date_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const dtype& s
         }
         // TODO
     } else {
+        if (dst_dt.get_kind() == string_kind) {
+            // Assignment to strings
+            get_date_to_string_assignment_kernel(dst_dt, m_unit, errmode, out_kernel);
+            return;
+        }
         // TODO
     }
 

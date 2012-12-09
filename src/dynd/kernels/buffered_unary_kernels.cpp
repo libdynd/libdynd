@@ -255,6 +255,11 @@ void dynd::make_buffered_chain_unary_kernel(std::deque<kernel_instance<unary_ope
 
                 auxdata.kernels[0].swap(kernels[0]);
                 auxdata.kernels[1].swap(kernels[1]);
+
+                auxdata.kernel_extras[0].auxdata = auxdata.kernels[0].auxdata;
+                auxdata.kernel_extras[1].auxdata = auxdata.kernels[1].auxdata;
+                auxdata.kernel_extras[1].src_metadata =
+                            auxdata.kernel_extras[0].dst_metadata = auxdata.buf.get_metadata();
             } else {
                 out_kernel.kernel = unary_operation_pair_t();
                 out_kernel.auxdata.free();
@@ -282,6 +287,14 @@ void dynd::make_buffered_chain_unary_kernel(std::deque<kernel_instance<unary_ope
                 auxdata.kernels[0].swap(kernels[0]);
                 auxdata.kernels[1].swap(kernels[1]);
                 auxdata.kernels[2].swap(kernels[2]);
+
+                auxdata.kernel_extras[0].auxdata = auxdata.kernels[0].auxdata;
+                auxdata.kernel_extras[1].auxdata = auxdata.kernels[1].auxdata;
+                auxdata.kernel_extras[2].auxdata = auxdata.kernels[2].auxdata;
+                auxdata.kernel_extras[1].src_metadata =
+                            auxdata.kernel_extras[0].dst_metadata = auxdata.bufs[0].get_metadata();
+                auxdata.kernel_extras[2].src_metadata =
+                            auxdata.kernel_extras[1].dst_metadata = auxdata.bufs[1].get_metadata();
             } else {
                 out_kernel.kernel = unary_operation_pair_t();
                 out_kernel.auxdata.free();
@@ -315,6 +328,14 @@ void dynd::make_buffered_chain_unary_kernel(std::deque<kernel_instance<unary_ope
 
             for (size_t i = 0; i < kernels.size(); ++i) {
                 auxdata.kernels[i].swap(kernels[i]);
+            }
+
+            for (size_t i = 0; i < kernels.size(); ++i) {
+                auxdata.kernel_extras[i].auxdata = auxdata.kernels[i].auxdata;
+            }
+            for (size_t i = 0; i < kernels.size() - 1; ++i) {
+                auxdata.kernel_extras[i+1].src_metadata =
+                            auxdata.kernel_extras[i].dst_metadata = auxdata.bufs[i].get_metadata();
             }
             break;
         }
