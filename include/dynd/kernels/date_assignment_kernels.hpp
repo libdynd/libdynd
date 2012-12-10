@@ -27,6 +27,14 @@ void get_date_to_string_assignment_kernel(const dtype& dst_string_dtype,
                 assign_error_mode errmode,
                 kernel_instance<unary_operation_pair_t>& out_kernel);
 
+/**
+ * Gets a kernel which converts dates to structs.
+ */
+void get_date_to_struct_assignment_kernel(const dtype& dst_struct_dtype,
+                date_unit_t src_unit,
+                assign_error_mode errmode,
+                kernel_instance<unary_operation_pair_t>& out_kernel);
+
 } // namespace dynd
 
 #endif // _DYND__DATE_ASSIGNMENT_KERNELS_HPP_

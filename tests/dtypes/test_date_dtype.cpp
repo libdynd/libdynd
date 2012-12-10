@@ -14,6 +14,8 @@
 #include <dynd/dtypes/fixedstring_dtype.hpp>
 #include <dynd/dtypes/string_dtype.hpp>
 #include <dynd/dtypes/convert_dtype.hpp>
+#include <dynd/dtypes/fixedstruct_dtype.hpp>
+#include <dynd/dtypes/struct_dtype.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -192,4 +194,88 @@ TEST(DateDType, DateYearsUnitProperties) {
     EXPECT_EQ(2012, a.p("year").at(2).as<int32_t>());
     EXPECT_THROW(a.p("month"), runtime_error);
     EXPECT_THROW(a.p("day"), runtime_error);
+}
+
+TEST(DateDType, DaysUnitToStruct) {
+    dtype d = make_date_dtype(), ds;
+    ndobject a, b;
+
+    a = ndobject("1955-03-13").cast_scalars(d).vals();
+
+    // This is the default struct produced
+    ds = make_fixedstruct_dtype(make_dtype<int32_t>(), "year", make_dtype<int8_t>(), "month", make_dtype<int8_t>(), "day");
+    b = ndobject(ds);
+    b.val_assign(a);
+    EXPECT_EQ(1955, b.at(0).as<int32_t>());
+    EXPECT_EQ(3, b.at(1).as<int8_t>());
+    EXPECT_EQ(13, b.at(2).as<int8_t>());
+
+    // This should work too
+    ds = make_fixedstruct_dtype(make_dtype<int16_t>(), "month", make_dtype<int16_t>(), "year", make_dtype<float>(), "day");
+    b = ndobject(ds);
+    b.val_assign(a);
+    EXPECT_EQ(1955, b.at(1).as<int16_t>());
+    EXPECT_EQ(3, b.at(0).as<int16_t>());
+    EXPECT_EQ(13, b.at(2).as<float>());
+
+    // This should work too
+    ds = make_struct_dtype(make_dtype<int16_t>(), "month", make_dtype<int16_t>(), "year", make_dtype<float>(), "day");
+    b = ndobject(ds);
+    b.val_assign(a);
+    EXPECT_EQ(1955, b.at(1).as<int16_t>());
+    EXPECT_EQ(3, b.at(0).as<int16_t>());
+    EXPECT_EQ(13, b.at(2).as<float>());
+}
+
+TEST(DateDType, MonthsUnitToStruct) {
+    dtype d = make_date_dtype(date_unit_month), ds;
+    ndobject a, b;
+
+    a = ndobject("1955-03").cast_scalars(d).vals();
+
+    // This is the default struct produced
+    ds = make_fixedstruct_dtype(make_dtype<int32_t>(), "year", make_dtype<int8_t>(), "month");
+    b = ndobject(ds);
+    b.val_assign(a);
+    EXPECT_EQ(1955, b.at(0).as<int32_t>());
+    EXPECT_EQ(3, b.at(1).as<int8_t>());
+
+    // This should work too
+    ds = make_fixedstruct_dtype(make_dtype<int16_t>(), "month", make_dtype<int16_t>(), "year");
+    b = ndobject(ds);
+    b.val_assign(a);
+    EXPECT_EQ(1955, b.at(1).as<int16_t>());
+    EXPECT_EQ(3, b.at(0).as<int16_t>());
+
+    // This should work too
+    ds = make_struct_dtype(make_dtype<int16_t>(), "month", make_dtype<int16_t>(), "year");
+    b = ndobject(ds);
+    b.val_assign(a);
+    EXPECT_EQ(1955, b.at(1).as<int16_t>());
+    EXPECT_EQ(3, b.at(0).as<int16_t>());
+}
+
+TEST(DateDType, YearsUnitToStruct) {
+    dtype d = make_date_dtype(date_unit_year), ds;
+    ndobject a, b;
+
+    a = ndobject("1955").cast_scalars(d).vals();
+
+    // This is the default struct produced
+    ds = make_fixedstruct_dtype(make_dtype<int32_t>(), "year");
+    b = ndobject(ds);
+    b.val_assign(a);
+    EXPECT_EQ(1955, b.at(0).as<int32_t>());
+
+    // This should work too
+    ds = make_fixedstruct_dtype(make_dtype<float>(), "year");
+    b = ndobject(ds);
+    b.val_assign(a);
+    EXPECT_EQ(1955, b.at(0).as<float>());
+
+    // This should work too
+    ds = make_struct_dtype(make_dtype<float>(), "year");
+    b = ndobject(ds);
+    b.val_assign(a);
+    EXPECT_EQ(1955, b.at(0).as<float>());
 }

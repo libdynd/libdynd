@@ -7,6 +7,7 @@
 
 #include <dynd/dtypes/date_dtype.hpp>
 #include <dynd/dtypes/date_property_dtype.hpp>
+#include <dynd/dtypes/fixedstruct_dtype.hpp>
 #include <dynd/kernels/single_compare_kernel_instance.hpp>
 #include <dynd/kernels/string_assignment_kernels.hpp>
 #include <dynd/exceptions.hpp>
@@ -97,6 +98,9 @@ void date_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const dtype& s
         if (dst_dt.get_kind() == string_kind) {
             // Assignment to strings
             get_date_to_string_assignment_kernel(dst_dt, m_unit, errmode, out_kernel);
+            return;
+        } else if (dst_dt.get_kind() == struct_kind) {
+            get_date_to_struct_assignment_kernel(dst_dt, m_unit, errmode, out_kernel);
             return;
         }
         // TODO
