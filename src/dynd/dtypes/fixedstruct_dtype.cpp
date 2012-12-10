@@ -298,6 +298,8 @@ void fixedstruct_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const d
             get_pod_dtype_assignment_kernel(m_element_size, m_alignment, out_kernel);
         } else if (src_dt.get_type_id() == fixedstruct_type_id) {
             get_fixedstruct_assignment_kernel(dst_dt, src_dt, errmode, out_kernel);
+        } else if (src_dt.get_type_id() == struct_type_id) {
+            get_struct_to_fixedstruct_assignment_kernel(dst_dt, src_dt, errmode, out_kernel);
         } else {
             stringstream ss;
             ss << "assignment from " << src_dt << " to " << dst_dt << " is not implemented yet";
