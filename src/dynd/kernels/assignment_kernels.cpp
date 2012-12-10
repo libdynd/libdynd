@@ -304,22 +304,10 @@ void dynd::get_pod_dtype_assignment_kernel(
 void dynd::get_dtype_assignment_kernel(const dtype& dt,
                     kernel_instance<unary_operation_pair_t>& out_kernel)
 {
-    switch (dt.get_memory_management()) {
-    case pod_memory_management:
-        get_pod_dtype_assignment_kernel(dt.get_element_size(), dt.get_alignment(),
-                            out_kernel);
-        break;
-    case blockref_memory_management:
-        throw runtime_error("blockref not supported yet in get_dtype_assignment_kernel");
-    case object_memory_management:
-        if (dt.get_kind() == expression_kind) {
-            // In the case of an expression dtype, just copy the storage
-            // directly instead of chaining multiple casting operations
-            // together.
-            get_dtype_assignment_kernel(dt.storage_dtype(), out_kernel);
-            return;
-        }
-
-        throw std::runtime_error("cannot assign object dtypes yet");
+    // If the dtype doesn't have a fixed size, get its specific assignment kernel
+    if (dt.get_element_size() > 0 && dt.get_memory_management() == pod_memory_management) {
+        get_pod_dtype_assignment_kernel(dt.get_element_size(), dt.get_alignment(), out_kernel);
+    } else {
+        dt.extended()->get_dtype_assignment_kernel(dt, dt, assign_error_none, out_kernel);
     }
 }

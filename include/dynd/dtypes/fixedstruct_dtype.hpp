@@ -49,6 +49,10 @@ public:
         return m_element_size;
     }
 
+    size_t get_field_count() const {
+        return m_field_types.size();
+    }
+
     const std::vector<dtype>& get_field_types() const {
         return m_field_types;
     }

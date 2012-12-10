@@ -471,7 +471,7 @@ void ndobject::val_assign(const ndobject& rhs, assign_error_mode errmode,
         // TODO: Performance optimization
         ndobject_iter<1, 1> iter(*this, rhs);
         get_dtype_assignment_kernel(iter.get_uniform_dtype<0>(), iter.get_uniform_dtype<1>(), errmode, ectx, assign);
-        unary_kernel_static_data extra(assign.auxdata, get_ndo_meta(), rhs.get_ndo_meta());
+        unary_kernel_static_data extra(assign.auxdata, iter.metadata<0>(), iter.metadata<1>());
         if (!iter.empty()) {
             do {
                 assign.kernel.single(iter.data<0>(), iter.data<1>(), &extra);

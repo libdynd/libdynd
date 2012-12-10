@@ -12,25 +12,23 @@ using namespace dynd;
 /////////////////////////////////////////
 // string to date assignment
 
-namespace {
-    struct string_to_date_assign_kernel {
-        struct auxdata_storage {
-            dtype src_string_dtype;
-            assign_error_mode errmode;
-            datetime::datetime_unit_t unit;
-            datetime::datetime_conversion_rule_t casting;
-        };
-
-        static void single(char *dst, const char *src, unary_kernel_static_data *extra)
-        {
-            auxdata_storage& ad = get_auxiliary_data<auxdata_storage>(extra->auxdata);
-            const extended_string_dtype *esd = static_cast<const extended_string_dtype *>(ad.src_string_dtype.extended());
-            *reinterpret_cast<int32_t *>(dst) = datetime::parse_iso_8601_date(
-                                    esd->get_utf8_string(extra->src_metadata, src, ad.errmode),
-                                    ad.unit, ad.casting);
-        }
+namespace { struct string_to_date_assign_kernel {
+    struct auxdata_storage {
+        dtype src_string_dtype;
+        assign_error_mode errmode;
+        datetime::datetime_unit_t unit;
+        datetime::datetime_conversion_rule_t casting;
     };
-} // anonymous namespace
+
+    static void single(char *dst, const char *src, unary_kernel_static_data *extra)
+    {
+        auxdata_storage& ad = get_auxiliary_data<auxdata_storage>(extra->auxdata);
+        const extended_string_dtype *esd = static_cast<const extended_string_dtype *>(ad.src_string_dtype.extended());
+        *reinterpret_cast<int32_t *>(dst) = datetime::parse_iso_8601_date(
+                                esd->get_utf8_string(extra->src_metadata, src, ad.errmode),
+                                ad.unit, ad.casting);
+    }
+};} // anonymous namespace
 
 void dynd::get_string_to_date_assignment_kernel(date_unit_t dst_unit,
                 const dtype& src_string_dtype,

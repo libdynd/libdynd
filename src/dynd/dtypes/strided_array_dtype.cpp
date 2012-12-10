@@ -375,10 +375,10 @@ static char *iterdata_reset(iterdata_common *iterdata, char *data, int ndim)
 size_t strided_array_dtype::iterdata_construct(iterdata_common *iterdata, const char **inout_metadata, int ndim, const intptr_t* shape, dtype& out_uniform_dtype) const
 {
     const strided_array_dtype_metadata *md = reinterpret_cast<const strided_array_dtype_metadata *>(*inout_metadata);
+    *inout_metadata += sizeof(strided_array_dtype_metadata);
     size_t inner_size = 0;
     if (ndim > 1) {
         // Place any inner iterdata earlier than the outer iterdata
-        *inout_metadata += sizeof(strided_array_dtype_metadata);
         inner_size = m_element_dtype.extended()->iterdata_construct(iterdata, inout_metadata,
                         ndim - 1, shape + 1, out_uniform_dtype);
         iterdata = reinterpret_cast<iterdata_common *>(reinterpret_cast<char *>(iterdata) + inner_size);

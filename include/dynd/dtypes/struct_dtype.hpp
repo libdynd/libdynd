@@ -45,6 +45,10 @@ public:
     }
     size_t get_default_element_size(int ndim, const intptr_t *shape) const;
 
+    size_t get_field_count() const {
+        return m_field_types.size();
+    }
+
     const std::vector<dtype>& get_field_types() const {
         return m_field_types;
     }

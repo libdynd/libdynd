@@ -8,6 +8,7 @@
 #include <dynd/shape_tools.hpp>
 #include <dynd/exceptions.hpp>
 #include <dynd/gfunc/make_callable.hpp>
+#include <dynd/kernels/struct_assignment_kernels.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -173,14 +174,13 @@ intptr_t struct_dtype::apply_linear_index(int nindices, const irange *indices, c
         apply_single_linear_index(*indices, m_field_types.size(), current_i, &root_dt, remove_dimension, start_index, index_stride, dimension_size);
         if (remove_dimension) {
             const dtype& dt = m_field_types[start_index];
+            intptr_t offset = offsets[start_index];
             if (dt.extended()) {
-                intptr_t offset = offsets[start_index];
                 offset += dt.extended()->apply_linear_index(nindices - 1, indices + 1, data + offset,
                                 metadata + m_metadata_offsets[start_index], result_dtype,
                                 out_metadata, embedded_reference, current_i + 1, root_dt);
-                return offset;
             }
-            return 0;
+            return offset;
         } else {
             const struct_dtype *result_e_dt = static_cast<const struct_dtype *>(result_dtype.extended());
             for (intptr_t i = 0; i < dimension_size; ++i) {
@@ -259,12 +259,24 @@ void struct_dtype::get_single_compare_kernel(single_compare_kernel_instance& DYN
 }
 
 void struct_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const dtype& src_dt,
-                assign_error_mode DYND_UNUSED(errmode),
-                kernel_instance<unary_operation_pair_t>& DYND_UNUSED(out_kernel)) const
+                assign_error_mode errmode,
+                kernel_instance<unary_operation_pair_t>& out_kernel) const
 {
-    stringstream ss;
-    ss << "struct_dtype::get_dtype_assignment_kernel from " << src_dt << " to " << dst_dt << " is unimplemented";
-    throw runtime_error(ss.str());
+    if (this == dst_dt.extended()) {
+        if (this == src_dt.extended()) {
+            get_struct_assignment_kernel(dst_dt, out_kernel);
+        } else if (src_dt.get_type_id() == struct_type_id) {
+            get_struct_assignment_kernel(dst_dt, src_dt, errmode, out_kernel);
+        } else {
+            stringstream ss;
+            ss << "assignment from " << src_dt << " to " << dst_dt << " is not implemented yet";
+            throw runtime_error(ss.str());
+        }
+    } else {
+        stringstream ss;
+        ss << "assignment from " << src_dt << " to " << dst_dt << " is not implemented yet";
+        throw runtime_error(ss.str());
+    }
 }
 
 bool struct_dtype::operator==(const extended_dtype& rhs) const
