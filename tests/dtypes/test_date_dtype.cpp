@@ -135,7 +135,9 @@ TEST(DateDType, BadInputStrings) {
 
 TEST(DateDType, DateDaysUnitProperties) {
     dtype d = make_date_dtype();
-    ndobject a = ndobject("1955-03-13").cast_scalars(d).vals();
+    ndobject a;
+
+    a = ndobject("1955-03-13").cast_scalars(d).vals();
     EXPECT_EQ(make_date_property_dtype(d, "year"), a.p("year").get_dtype());
     EXPECT_EQ(make_date_property_dtype(d, "month"), a.p("month").get_dtype());
     EXPECT_EQ(make_date_property_dtype(d, "day"), a.p("day").get_dtype());
@@ -154,6 +156,22 @@ TEST(DateDType, DateDaysUnitProperties) {
     EXPECT_EQ(2012, a.p("year").at(2).as<int32_t>());
     EXPECT_EQ(12, a.p("month").at(2).as<int32_t>());
     EXPECT_EQ(25, a.p("day").at(2).as<int32_t>());
+}
+
+TEST(DateDType, DateDaysUnitStructProperty) {
+    dtype d = make_date_dtype();
+    ndobject a, b;
+
+    a = ndobject("1955-03-13").cast_scalars(d).vals();
+    b = a.p("struct");
+    EXPECT_EQ(make_convert_dtype(make_fixedstruct_dtype(make_dtype<int32_t>(), "year", make_dtype<int8_t>(), "month", make_dtype<int8_t>(), "day"), d),
+                    b.get_dtype());
+    b = b.vals();
+    EXPECT_EQ(make_fixedstruct_dtype(make_dtype<int32_t>(), "year", make_dtype<int8_t>(), "month", make_dtype<int8_t>(), "day"),
+                    b.get_dtype());
+    EXPECT_EQ(1955, b.p("year").as<int32_t>());
+    EXPECT_EQ(3, b.p("month").as<int32_t>());
+    EXPECT_EQ(13, b.p("day").as<int32_t>());
 }
 
 TEST(DateDType, DateMonthsUnitProperties) {

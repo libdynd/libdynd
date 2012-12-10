@@ -137,18 +137,11 @@ void dynd::get_date_to_string_assignment_kernel(const dtype& dst_string_dtype,
 /////////////////////////////////////////
 // data for date to/from struct assignment
 
-namespace {
-    struct default_date_struct {
-        int32_t year;
-        int8_t month, day;
-    };
-
-    const dtype default_date_struct_dtypes[3] = {
-        make_fixedstruct_dtype(make_dtype<int32_t>(), "year", make_dtype<int8_t>(), "month", make_dtype<int8_t>(), "day"),
-        make_fixedstruct_dtype(make_dtype<int32_t>(), "year", make_dtype<int8_t>(), "month"),
-        make_fixedstruct_dtype(make_dtype<int32_t>(), "year")
-    };
-} // anonymous namespace
+const dtype dynd::date_dtype_default_struct_dtypes[3] = {
+    make_fixedstruct_dtype(make_dtype<int32_t>(), "year", make_dtype<int8_t>(), "month", make_dtype<int8_t>(), "day"),
+    make_fixedstruct_dtype(make_dtype<int32_t>(), "year", make_dtype<int8_t>(), "month"),
+    make_fixedstruct_dtype(make_dtype<int32_t>(), "year")
+};
 
 /////////////////////////////////////////
 // date to struct assignment
@@ -161,7 +154,7 @@ namespace {
             datetime::datetime_unit_t unit = static_cast<datetime::datetime_unit_t>(get_raw_auxiliary_data(extra->auxdata)>>1);
             datetime::datetime_fields fld;
             fld.set_from_date_val(*reinterpret_cast<const int32_t *>(src), unit);
-            default_date_struct *dst_struct = reinterpret_cast<default_date_struct *>(dst);
+            date_dtype_default_struct *dst_struct = reinterpret_cast<date_dtype_default_struct *>(dst);
             switch (unit) {
                 case datetime::datetime_unit_day:
                     dst_struct->day = fld.day;
@@ -187,7 +180,7 @@ namespace {
             datetime::datetime_fields fld;
             fld.set_from_date_val(*reinterpret_cast<const int32_t *>(src), ad.unit);
             // Put the date in our default struct layout
-            default_date_struct tmp_date;
+            date_dtype_default_struct tmp_date;
             tmp_date.year = fld.year != DATETIME_DATETIME_NAT ? fld.year : DATETIME_DATE_NAT;
             tmp_date.month = fld.month;
             tmp_date.day = fld.day;
@@ -228,7 +221,7 @@ void dynd::get_date_to_struct_assignment_kernel(const dtype& dst_struct_dtype,
         }
     }
 
-    if (dst_struct_dtype == default_date_struct_dtypes[src_unit]) {
+    if (dst_struct_dtype == date_dtype_default_struct_dtypes[src_unit]) {
         out_kernel.kernel.single = &date_to_struct_trivial_assign_kernel::single;
         out_kernel.kernel.contig = NULL;
         make_raw_auxiliary_data(out_kernel.auxdata, static_cast<uintptr_t>(src_datetime_unit)<<1);
@@ -241,7 +234,7 @@ void dynd::get_date_to_struct_assignment_kernel(const dtype& dst_struct_dtype,
     make_auxiliary_data<date_to_struct_assign_kernel::auxdata_storage>(out_kernel.auxdata);
     date_to_struct_assign_kernel::auxdata_storage& ad = out_kernel.auxdata.get<date_to_struct_assign_kernel::auxdata_storage>();
     ad.unit = src_datetime_unit;
-    get_dtype_assignment_kernel(dst_struct_dtype, default_date_struct_dtypes[src_unit], errmode, NULL, ad.kernel);
+    get_dtype_assignment_kernel(dst_struct_dtype, date_dtype_default_struct_dtypes[src_unit], errmode, NULL, ad.kernel);
 }
 
 /////////////////////////////////////////
@@ -255,7 +248,7 @@ namespace {
         {
             datetime::datetime_unit_t unit = static_cast<datetime::datetime_unit_t>(get_raw_auxiliary_data(extra->auxdata)>>1);
             datetime::datetime_fields fld;
-            const default_date_struct *src_struct = reinterpret_cast<const default_date_struct *>(src);
+            const date_dtype_default_struct *src_struct = reinterpret_cast<const date_dtype_default_struct *>(src);
             switch (unit) {
                 case datetime::datetime_unit_day:
                     fld.day = src_struct->day;
@@ -282,7 +275,7 @@ namespace {
             datetime::datetime_fields fld;
             fld.set_from_date_val(*reinterpret_cast<const int32_t *>(src), ad.unit);
             // Copy the source struct into our default struct layout
-            default_date_struct tmp_date;
+            date_dtype_default_struct tmp_date;
             unary_kernel_static_data kernel_extra(ad.kernel.auxdata, NULL, extra->src_metadata);
             ad.kernel.kernel.single(reinterpret_cast<char *>(&tmp_date), src, &kernel_extra);
             // Convert to datetime_fields, then to the result date dtype
@@ -330,7 +323,7 @@ void dynd::get_struct_to_date_assignment_kernel(date_unit_t dst_unit,
         }
     }
 
-    if (src_struct_dtype == default_date_struct_dtypes[dst_unit]) {
+    if (src_struct_dtype == date_dtype_default_struct_dtypes[dst_unit]) {
         out_kernel.kernel.single = &struct_to_date_trivial_assign_kernel::single;
         out_kernel.kernel.contig = NULL;
         make_raw_auxiliary_data(out_kernel.auxdata, static_cast<uintptr_t>(dst_datetime_unit)<<1);
@@ -343,5 +336,5 @@ void dynd::get_struct_to_date_assignment_kernel(date_unit_t dst_unit,
     make_auxiliary_data<struct_to_date_assign_kernel::auxdata_storage>(out_kernel.auxdata);
     struct_to_date_assign_kernel::auxdata_storage& ad = out_kernel.auxdata.get<struct_to_date_assign_kernel::auxdata_storage>();
     ad.unit = dst_datetime_unit;
-    get_dtype_assignment_kernel(default_date_struct_dtypes[dst_unit], src_struct_dtype, errmode, NULL, ad.kernel);
+    get_dtype_assignment_kernel(date_dtype_default_struct_dtypes[dst_unit], src_struct_dtype, errmode, NULL, ad.kernel);
 }

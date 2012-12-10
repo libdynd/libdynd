@@ -147,6 +147,13 @@ void date_dtype::get_dynamic_dtype_properties(const std::pair<std::string, gfunc
 
 ///////// properties on the ndobject
 
+static ndobject property_ndo_get_struct(const ndobject& n) {
+    dtype array_dt = n.get_dtype();
+    dtype dt = array_dt.get_dtype_at_dimension(NULL, array_dt.get_uniform_ndim()).value_dtype();
+    const date_dtype *dd = static_cast<const date_dtype *>(dt.extended());
+    return n.cast_scalars(date_dtype_default_struct_dtypes[dd->get_unit()]);
+}
+
 static ndobject property_ndo_get_year(const ndobject& n) {
     dtype array_dt = n.get_dtype();
     dtype dt = array_dt.get_dtype_at_dimension(NULL, array_dt.get_uniform_ndim());
@@ -166,6 +173,7 @@ static ndobject property_ndo_get_day(const ndobject& n) {
 }
 
 static pair<string, gfunc::callable> date_ndobject_properties[] = {
+    pair<string, gfunc::callable>("struct", gfunc::make_callable(&property_ndo_get_struct, "self")),
     pair<string, gfunc::callable>("year", gfunc::make_callable(&property_ndo_get_year, "self")),
     pair<string, gfunc::callable>("month", gfunc::make_callable(&property_ndo_get_month, "self")),
     pair<string, gfunc::callable>("day", gfunc::make_callable(&property_ndo_get_day, "self"))

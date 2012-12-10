@@ -43,6 +43,22 @@ void get_struct_to_date_assignment_kernel(date_unit_t dst_unit,
                 assign_error_mode errmode,
                 kernel_instance<unary_operation_pair_t>& out_kernel);
 
+/**
+ * This is the layout of the default struct that is converted
+ * to/from date dtypes.
+ */
+struct date_dtype_default_struct {
+    int32_t year;
+    int8_t month, day;
+};
+
+/**
+ * This is an array of fixedstruct dtypes, one for each
+ * date_unit_t, which is the layout of the default struct
+ * converted to/from date dtypes.
+ */
+extern const dtype date_dtype_default_struct_dtypes[3];
+
 } // namespace dynd
 
 #endif // _DYND__DATE_ASSIGNMENT_KERNELS_HPP_
