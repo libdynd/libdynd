@@ -172,7 +172,7 @@ void extended_dtype::metadata_copy_construct(char *DYND_UNUSED(dst_metadata), co
     throw std::runtime_error(ss.str());
 }
 
-void extended_dtype::metadata_reset_buffers(char *metadata) const
+void extended_dtype::metadata_reset_buffers(char *DYND_UNUSED(metadata)) const
 {
     // By default there are no buffers to reset
 }

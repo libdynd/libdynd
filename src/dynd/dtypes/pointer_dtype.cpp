@@ -158,7 +158,6 @@ namespace {
         static void single_kernel(char *dst, const char *src, unary_kernel_static_data *extra)
         {
             auxdata_storage& ad = get_auxiliary_data<auxdata_storage>(extra->auxdata);
-            unary_single_operation_t child_op = ad.m_assign_kernel.kernel.single;
             unary_kernel_static_data kernel_extra(ad.m_assign_kernel.auxdata,
                             extra->dst_metadata + sizeof(pointer_dtype_metadata),
                             extra->src_metadata);
@@ -170,7 +169,6 @@ namespace {
         static void contig_kernel(char *dst, const char *src, size_t count, unary_kernel_static_data *extra)
         {
             auxdata_storage& ad = get_auxiliary_data<auxdata_storage>(extra->auxdata);
-            unary_single_operation_t child_op = ad.m_assign_kernel.kernel.single;
             unary_kernel_static_data kernel_extra(ad.m_assign_kernel.auxdata,
                             extra->dst_metadata + sizeof(pointer_dtype_metadata),
                             extra->src_metadata);
@@ -242,7 +240,7 @@ void pointer_dtype::metadata_copy_construct(char *dst_metadata, const char *src_
     memory_block_incref(dst_md->blockref);
 }
 
-void pointer_dtype::metadata_reset_buffers(char *metadata) const
+void pointer_dtype::metadata_reset_buffers(char *DYND_UNUSED(metadata)) const
 {
     throw runtime_error("TODO implement pointer_dtype::metadata_reset_buffers");
 }

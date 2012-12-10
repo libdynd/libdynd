@@ -579,6 +579,15 @@ ndobject ndobject::eval_copy(const eval::eval_context *ectx,
     return result;
 }
 
+bool dynd::ndobject::equals_exact(const ndobject& rhs) const
+{
+    if (get_ndo() == rhs.get_ndo()) {
+        return true;
+    } else {
+        throw runtime_error("ndarray::equals_exact is not yet implemented");
+    }
+}
+
 ndobject ndobject::cast_scalars(const dtype& scalar_dtype, assign_error_mode errmode) const
 {
     // This creates a dtype which has a convert dtype for every scalar of different dtype.

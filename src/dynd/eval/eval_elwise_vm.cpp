@@ -10,15 +10,15 @@
 using namespace std;
 using namespace dynd;
 
-ndobject dynd::eval::evaluate_elwise_vm(const vm::elwise_program& ep, std::vector<ndobject> inputs,
+ndobject dynd::eval::evaluate_elwise_vm(const vm::elwise_program& ep, std::vector<ndobject> DYND_UNUSED(inputs),
                     const eval::eval_context *DYND_UNUSED(ectx))
 {
     // Allocate contiguous registers for the VM
     vm::register_allocation reg(ep.get_register_types(), 0x8000, 0x8000*16);
 
     // Determine the result broadcast shape
-    int ndim;
-    dimvector shape;
+    //int ndim;
+    //dimvector shape;
     //broadcast_input_shapes(inputs, &ndim, &shape);
 
 

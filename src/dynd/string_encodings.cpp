@@ -67,7 +67,7 @@ namespace {
         ++it;
     }
 
-    static void noerror_append_ascii(uint32_t cp, char *&it, char *DYND_UNUSED(end))
+    void noerror_append_ascii(uint32_t cp, char *&it, char *DYND_UNUSED(end))
     {
         if ((cp&~0x7f) != 0) {
             cp = ERROR_SUBSTITUTE_CODEPOINT;
@@ -76,7 +76,7 @@ namespace {
         ++it;
     }
 
-    static uint32_t next_ucs2(const char *&it_raw, const char *DYND_UNUSED(end_raw))
+    uint32_t next_ucs2(const char *&it_raw, const char *DYND_UNUSED(end_raw))
     {
         const uint16_t *&it = reinterpret_cast<const uint16_t *&>(it_raw);
         uint32_t cp = *it;
@@ -91,7 +91,7 @@ namespace {
         return cp;
     }
 
-    static uint32_t noerror_next_ucs2(const char *&it_raw, const char *DYND_UNUSED(end_raw))
+    uint32_t noerror_next_ucs2(const char *&it_raw, const char *DYND_UNUSED(end_raw))
     {
         const uint16_t *&it = reinterpret_cast<const uint16_t *&>(it_raw);
         uint32_t cp = *it;
@@ -102,7 +102,7 @@ namespace {
         return cp;
     }
 
-    static void append_ucs2(uint32_t cp, char *&it_raw, char *DYND_UNUSED(end_raw))
+    void append_ucs2(uint32_t cp, char *&it_raw, char *DYND_UNUSED(end_raw))
     {
         uint16_t *&it = reinterpret_cast<uint16_t *&>(it_raw);
         if ((cp&~0xffff) != 0 || utf8::internal::is_surrogate(cp)) {
@@ -116,7 +116,7 @@ namespace {
         ++it;
     }
 
-    static void noerror_append_ucs2(uint32_t cp, char *&it_raw, char *DYND_UNUSED(end_raw))
+    void noerror_append_ucs2(uint32_t cp, char *&it_raw, char *DYND_UNUSED(end_raw))
     {
         uint16_t *&it = reinterpret_cast<uint16_t *&>(it_raw);
         if ((cp&~0xffff) != 0 || utf8::internal::is_surrogate(cp)) {
@@ -126,12 +126,12 @@ namespace {
         ++it;
     }
 
-    static uint32_t next_utf8(const char *&it, const char *end)
+    uint32_t next_utf8(const char *&it, const char *end)
     {
         return utf8::next(reinterpret_cast<const uint8_t *&>(it), reinterpret_cast<const uint8_t *>(end));
     }
 
-    static uint32_t noerror_next_utf8(const char *&it, const char *end)
+    uint32_t noerror_next_utf8(const char *&it, const char *end)
     {
         uint32_t cp = 0;
         // Determine the sequence length based on the lead octet
@@ -178,7 +178,7 @@ namespace {
         return cp;
     }
 
-    static void append_utf8(uint32_t cp, char *&it, char *end)
+    void append_utf8(uint32_t cp, char *&it, char *end)
     {
         if (end - it >= 6) {
             it = utf8::append(cp, it);
@@ -195,7 +195,7 @@ namespace {
         }
     }
 
-    static void noerror_append_utf8(uint32_t cp, char *&it, char *end)
+    void noerror_append_utf8(uint32_t cp, char *&it, char *end)
     {
         if (end - it >= 6) {
             it = utf8::append(cp, it);
@@ -214,7 +214,7 @@ namespace {
         }
     }
 
-    static void string_append_utf8(uint32_t cp, string& s)
+    void string_append_utf8(uint32_t cp, string& s)
     {
         char tmp[6];
         char *tmp_ptr = tmp, *tmp_ptr_end;
@@ -223,7 +223,7 @@ namespace {
             s += *tmp_ptr++;
     }
 
-    static uint32_t next_utf16(const char *&it_raw, const char *end_raw)
+    uint32_t next_utf16(const char *&it_raw, const char *end_raw)
     {
         const uint16_t *&it = reinterpret_cast<const uint16_t *&>(it_raw);
         const uint16_t *end = reinterpret_cast<const uint16_t *>(end_raw);
@@ -249,7 +249,7 @@ namespace {
         return cp;
     }
 
-    static uint32_t noerror_next_utf16(const char *&it_raw, const char *end_raw)
+    uint32_t noerror_next_utf16(const char *&it_raw, const char *end_raw)
     {
         const uint16_t *&it = reinterpret_cast<const uint16_t *&>(it_raw);
         const uint16_t *end = reinterpret_cast<const uint16_t *>(end_raw);
@@ -275,7 +275,7 @@ namespace {
         return cp;
     }
 
-    static void append_utf16(uint32_t cp, char *&it_raw, char *end_raw)
+    void append_utf16(uint32_t cp, char *&it_raw, char *end_raw)
     {
         uint16_t *&it = reinterpret_cast<uint16_t *&>(it_raw);
         uint16_t *end = reinterpret_cast<uint16_t *>(end_raw);
@@ -293,7 +293,7 @@ namespace {
         }
     }
 
-    static void noerror_append_utf16(uint32_t cp, char *&it_raw, char *end_raw)
+    void noerror_append_utf16(uint32_t cp, char *&it_raw, char *end_raw)
     {
         uint16_t *&it = reinterpret_cast<uint16_t *&>(it_raw);
         uint16_t *end = reinterpret_cast<uint16_t *>(end_raw);
@@ -315,7 +315,7 @@ namespace {
         }
     }
 
-    static uint32_t next_utf32(const char *&it_raw, const char *DYND_UNUSED(end_raw))
+    uint32_t next_utf32(const char *&it_raw, const char *DYND_UNUSED(end_raw))
     {
         const uint32_t *&it = reinterpret_cast<const uint32_t *&>(it_raw);
         uint32_t result = *it;
@@ -326,7 +326,7 @@ namespace {
         return result;
     }
 
-    static uint32_t noerror_next_utf32(const char *&it_raw, const char *DYND_UNUSED(end_raw))
+    uint32_t noerror_next_utf32(const char *&it_raw, const char *DYND_UNUSED(end_raw))
     {
         const uint32_t *&it = reinterpret_cast<const uint32_t *&>(it_raw);
         uint32_t result = *it;
@@ -337,7 +337,7 @@ namespace {
         return result;
     }
 
-    static void append_utf32(uint32_t cp, char *&it_raw, char *DYND_UNUSED(end_raw))
+    void append_utf32(uint32_t cp, char *&it_raw, char *DYND_UNUSED(end_raw))
     {
         uint32_t *&it = reinterpret_cast<uint32_t *&>(it_raw);
         //uint32_t *end = reinterpret_cast<uint32_t *>(end);
@@ -345,7 +345,7 @@ namespace {
         ++it;
     }
 
-    static void noerror_append_utf32(uint32_t cp, char *&it_raw, char *DYND_UNUSED(end_raw))
+    void noerror_append_utf32(uint32_t cp, char *&it_raw, char *DYND_UNUSED(end_raw))
     {
         uint32_t *&it = reinterpret_cast<uint32_t *&>(it_raw);
         //uint32_t *end = reinterpret_cast<uint32_t *>(end);

@@ -159,7 +159,7 @@ void bytes_dtype::metadata_copy_construct(char *dst_metadata, const char *src_me
     memory_block_incref(dst_md->blockref);
 }
 
-void bytes_dtype::metadata_reset_buffers(char *metadata) const
+void bytes_dtype::metadata_reset_buffers(char *DYND_UNUSED(metadata)) const
 {
     throw runtime_error("TODO implement bytes_dtype::metadata_reset_buffers");
 }

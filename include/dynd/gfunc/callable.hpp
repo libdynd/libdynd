@@ -99,9 +99,9 @@ inline ndobject callable::call(const T& p0) const
 {
     const fixedstruct_dtype *fsdt = static_cast<const fixedstruct_dtype *>(m_parameters_dtype.extended());
     if (fsdt->get_field_types().size() != 1) {
-        stringstream ss;
+        std::stringstream ss;
         ss << "incorrect number of arguments (received 1) for dynd callable with parameters " << m_parameters_dtype;
-        throw runtime_error(ss.str());
+        throw std::runtime_error(ss.str());
     }
     ndobject params(m_parameters_dtype);
     detail::callable_argument_setter<T>::set(fsdt->get_field_types()[0],

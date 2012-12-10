@@ -240,7 +240,7 @@ void array_dtype::metadata_copy_construct(char *dst_metadata, const char *src_me
     }
 }
 
-void array_dtype::metadata_reset_buffers(char *metadata) const
+void array_dtype::metadata_reset_buffers(char *DYND_UNUSED(metadata)) const
 {
     throw runtime_error("TODO implement array_dtype::metadata_reset_buffers");
 }

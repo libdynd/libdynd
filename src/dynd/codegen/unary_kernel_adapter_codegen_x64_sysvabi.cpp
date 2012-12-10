@@ -387,7 +387,7 @@ namespace // nameless
 } // nameless namespace
     
 
-unary_operation_t* dynd::codegen_unary_function_adapter(const memory_block_ptr& exec_mem_block,
+unary_operation_pair_t dynd::codegen_unary_function_adapter(const memory_block_ptr& exec_mem_block,
                                                   const dtype& restype,
                                                   const dtype& arg0type,
                                                   calling_convention_t DYND_UNUSED(callconv)
@@ -399,7 +399,7 @@ unary_operation_t* dynd::codegen_unary_function_adapter(const memory_block_ptr& 
     if (arg0_idx >= sizeof(arg0_snippets)/sizeof(arg0_snippets[0])
         || ret_idx >= sizeof(ret_snippets)/sizeof(ret_snippets[0]))
     {
-        return 0;
+        return unary_operation_pair_t();
     }
 
     // an (over)estimation of the size of the generated function. 64 is an
@@ -429,8 +429,7 @@ unary_operation_t* dynd::codegen_unary_function_adapter(const memory_block_ptr& 
             .label(loop_end)
             .append(unary_adapter_epilog, sizeof(unary_adapter_epilog))
             .align(4)
-            .label(table)
-            .append(sizeof(unary_operation_t)*4);
+            .label(table);
 
     if (fbuilder.is_ok())
     {
@@ -442,19 +441,17 @@ unary_operation_t* dynd::codegen_unary_function_adapter(const memory_block_ptr& 
         char* loop_continue_offset = static_cast<char*>(ptr_offset(base, loop_end)) - 1;
         *loop_continue_offset = - loop_size;
         
-        unary_operation_t* specializations = static_cast<unary_operation_t*>(ptr_offset(base, table));
-        unary_operation_t func_ptr = reinterpret_cast<unary_operation_t>(ptr_offset(base, entry_point));
+        //unary_single_operation_t func_ptr = reinterpret_cast<unary_single_operation_t>(ptr_offset(base, entry_point));
 
-        for (int i = 0; i < 4; ++i)
-            specializations[i] = func_ptr;
         fbuilder.finish();
 
-        return specializations;
+        throw std::runtime_error("TODO: dynd::codegen_unary_function_adapter needs fixing for updated kernel prototype");
+        //return specializations;
     }
 
     // function construction failed.. fbuilder destructor will take care of
     // releasing memory (it acts as RAII, kind of -- exception safe as well)
-    return 0;
+    return unary_operation_pair_t();
 }
 
 #endif // defined(DYND_CALL_SYSV_X64)

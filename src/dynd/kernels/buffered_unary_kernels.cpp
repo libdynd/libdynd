@@ -60,7 +60,7 @@ namespace {
             : kernels(NULL), bufs(NULL), kernel_extras(NULL), buf_count(0)
         {}
 
-        buffered_nchain_unary_kernel_auxdata(const buffered_nchain_unary_kernel_auxdata& rhs)
+        buffered_nchain_unary_kernel_auxdata(const buffered_nchain_unary_kernel_auxdata& DYND_UNUSED(rhs))
             : kernels(NULL), bufs(NULL), kernel_extras(NULL), buf_count(0)
         {
             throw std::runtime_error("buffered_nchain_unary_kernel_auxdata copy constructor not implemented");

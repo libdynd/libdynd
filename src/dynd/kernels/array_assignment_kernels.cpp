@@ -42,24 +42,26 @@ namespace {
                         ad.dst_dtype.get_element_size() * src_size,
                         ad.dst_dtype.get_alignment(), &dst_begin, &dst_end);
 
+            // Set the output
+            reinterpret_cast<array_dtype_data *>(dst)->begin = dst_begin;
+            reinterpret_cast<array_dtype_data *>(dst)->size = src_size;
+
             unary_kernel_static_data assign_elements_extra(ad.assign_elements.auxdata,
                             extra->dst_metadata + sizeof(array_dtype_metadata),
                             extra->src_metadata + sizeof(array_dtype_metadata));
             intptr_t dst_stride = dst_md->stride, src_stride = src_md->stride;
             if (ad.assign_elements.kernel.contig == NULL ||
-                            dst_stride != ad.dst_dtype.get_element_size() ||
-                            src_stride != ad.src_dtype.get_element_size()) {
+                            dst_stride != (intptr_t)ad.dst_dtype.get_element_size() ||
+                            src_stride != (intptr_t)ad.src_dtype.get_element_size()) {
                 unary_single_operation_t assign_single = ad.assign_elements.kernel.single;
                 for (size_t i = 0; i != src_size; ++i) {
-                    assign_single(dst, src, &assign_elements_extra);
+                    assign_single(dst_begin, src_begin, &assign_elements_extra);
+                    dst_begin += dst_stride;
+                    src_begin += src_stride;
                 }
             } else {
-                ad.assign_elements.kernel.contig(dst, src, src_size, &assign_elements_extra);
+                ad.assign_elements.kernel.contig(dst_begin, src_begin, src_size, &assign_elements_extra);
             }
-
-            // Set the output
-            reinterpret_cast<array_dtype_data *>(dst)->begin = dst_begin;
-            reinterpret_cast<array_dtype_data *>(dst)->size = src_size;
         } else {
             // Copy the pointers directly, reuse the same data
             memcpy(dst, src, sizeof(array_dtype_data));

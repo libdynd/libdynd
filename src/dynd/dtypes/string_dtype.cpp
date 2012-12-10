@@ -251,7 +251,7 @@ void string_dtype::metadata_copy_construct(char *dst_metadata, const char *src_m
     memory_block_incref(dst_md->blockref);
 }
 
-void string_dtype::metadata_reset_buffers(char *metadata) const
+void string_dtype::metadata_reset_buffers(char *DYND_UNUSED(metadata)) const
 {
     throw runtime_error("TODO implement string_dtype::metadata_reset_buffers");
 }

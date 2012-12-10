@@ -88,8 +88,8 @@ void dynd::date_property_dtype::get_operand_to_value_kernel(const eval::eval_con
     }
 }
 
-void dynd::date_property_dtype::get_value_to_operand_kernel(const eval::eval_context *ectx,
-                        kernel_instance<unary_operation_pair_t>& out_borrowed_kernel) const
+void dynd::date_property_dtype::get_value_to_operand_kernel(const eval::eval_context *DYND_UNUSED(ectx),
+                        kernel_instance<unary_operation_pair_t>& DYND_UNUSED(out_borrowed_kernel)) const
 {
     stringstream ss;
     ss << "cannot write to property " << dtype(this, true);

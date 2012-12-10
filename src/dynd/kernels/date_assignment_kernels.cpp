@@ -163,6 +163,8 @@ namespace {
                 case datetime::datetime_unit_year:
                     dst_struct->year = fld.year != DATETIME_DATETIME_NAT ? fld.year : DATETIME_DATE_NAT;
                     break;
+                default:
+                    break;
             }
         }
     };
@@ -257,6 +259,8 @@ namespace {
                 case datetime::datetime_unit_year:
                     fld.year = src_struct->year != DATETIME_DATE_NAT ? src_struct->year : DATETIME_DATETIME_NAT;
                     break;
+                default:
+                    break;
             }
             *reinterpret_cast<int32_t *>(dst) = fld.as_date_val(unit);
         }
@@ -286,6 +290,8 @@ namespace {
                     fld.month = tmp_date.month;
                 case datetime::datetime_unit_year:
                     fld.year = tmp_date.year != DATETIME_DATE_NAT ? tmp_date.year : DATETIME_DATETIME_NAT;
+                    break;
+                default:
                     break;
             }
             *reinterpret_cast<int32_t *>(dst) = fld.as_date_val(ad.unit);
