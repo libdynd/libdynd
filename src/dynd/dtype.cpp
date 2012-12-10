@@ -377,6 +377,30 @@ const dtype dynd::static_builtin_dtypes[builtin_type_id_count + 1] = {
     dynd::detail::internal_make_raw_dtype(void_type_id, void_kind, 0, 1)
 };
 
+namespace {
+    struct builtin_type_details {
+        dtype_kind_t kind;
+        unsigned char data_size;
+        unsigned char data_alignment;
+    };
+    const builtin_type_details static_builtin_type_details[builtin_type_id_count + 1] = {
+        {bool_kind, 1, 1},
+        {int_kind, 1, 1},
+        {int_kind, 2, 2},
+        {int_kind, 4, 4},
+        {int_kind, 8, 8},
+        {uint_kind, 1, 1},
+        {uint_kind, 2, 2},
+        {uint_kind, 4, 4},
+        {uint_kind, 8, 8},
+        {real_kind, 4, 4},
+        {real_kind, 8, 8},
+        {complex_kind, 8, 4},
+        {complex_kind, 16, 8},
+        {void_kind, 0, 1}
+        };
+} // anonymous namespace
+
 /**
  * Validates that the given type ID is a proper ID. Throws
  * an exception if not.
@@ -402,18 +426,18 @@ dtype::dtype()
 
 dtype::dtype(type_id_t type_id)
     : m_type_id(validate_type_id(type_id)),
-      m_kind(static_builtin_dtypes[type_id].m_kind),
-      m_alignment(static_builtin_dtypes[type_id].m_alignment),
-      m_element_size(static_builtin_dtypes[type_id].m_element_size),
+      m_kind(static_builtin_type_details[type_id].kind),
+      m_alignment(static_builtin_type_details[type_id].data_alignment),
+      m_element_size(static_builtin_type_details[type_id].data_size),
       m_extended(NULL)
 {
 }
 
 dtype::dtype(int type_id)
     : m_type_id(validate_type_id((type_id_t)type_id)),
-      m_kind(static_builtin_dtypes[type_id].m_kind),
-      m_alignment(static_builtin_dtypes[type_id].m_alignment),
-      m_element_size(static_builtin_dtypes[type_id].m_element_size),
+      m_kind(static_builtin_type_details[type_id].kind),
+      m_alignment(static_builtin_type_details[type_id].data_alignment),
+      m_element_size(static_builtin_type_details[type_id].data_size),
       m_extended(NULL)
 {
 }
