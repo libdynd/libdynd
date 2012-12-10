@@ -11,6 +11,7 @@
 #include <dynd/dtypes/categorical_dtype.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/kernels/single_compare_kernel_instance.hpp>
+#include <dynd/dtypes/strided_array_dtype.hpp>
 
 using namespace dynd;
 using namespace std;
@@ -191,11 +192,15 @@ categorical_dtype::categorical_dtype(const ndobject& categories)
         m_category_index_to_value[i] = i;
         categories_user_order[i] = new char[m_category_dtype.get_element_size()];
         memcpy(categories_user_order[i], categories.at(i).get_readonly_originptr(), m_category_dtype.get_element_size());
-        if (uniques.count(categories_user_order[i]) == 0) {
+
+        if (uniques.find(categories_user_order[i]) == uniques.end()) {
             uniques.insert(categories_user_order[i]);
-        }
-        else {
-            throw std::runtime_error("categories must be unique");
+        } else {
+            stringstream ss;
+            ss << "categories must be unique: category value ";
+            m_category_dtype.print_element(ss, NULL, categories_user_order[i]);
+            ss << " appears more than once";
+            throw std::runtime_error(ss.str());
         }
     }
     std::sort(m_category_index_to_value.begin(), m_category_index_to_value.end(), sorter(categories_user_order, k.comparisons[less_id], k.auxdata));
@@ -309,9 +314,8 @@ void categorical_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const d
         }
         else {
             stringstream ss;
-            ss << "Cannot assign categorical type '" << dtype(this, true);
-            ss << "' from type '" << src_dt << "'";
-            throw std::runtime_error(ss.str()); // TODO better message
+            ss << "assignment from " << src_dt << " to " << dst_dt << " is not implemented yet";
+            throw runtime_error(ss.str());
         }
     }
     else {
@@ -327,9 +331,8 @@ void categorical_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const d
         }
         else {
             stringstream ss;
-            ss << "Cannot assign categorical type '" << dtype(this, true);
-            ss << "' to type '" << dst_dt << "'";
-            throw std::runtime_error(ss.str()); // TODO better message
+            ss << "assignment from " << src_dt << " to " << dst_dt << " is not implemented yet";
+            throw runtime_error(ss.str());
         }
 
     }
@@ -409,17 +412,28 @@ dtype dynd::factor_categorical_dtype(const ndobject& values)
 
     if (!iter.empty()) {
         do {
-            if (uniques.count(iter.data()) == 0) {
+            if (uniques.find(iter.data()) == uniques.end()) {
                 uniques.insert(iter.data());
             }
         } while (iter.next());
     }
 
+    // TODO: This voodoo needs to be simplified so it's easy to understand what's going on
+
+    // Copy the values (now sorted and unique) into a new ndobject
     ndobject categories = make_strided_ndobject(uniques.size(), iter.get_uniform_dtype());
+    kernel_instance<unary_operation_pair_t> kernel;
+    get_dtype_assignment_kernel(iter.get_uniform_dtype(), kernel);
+
+    intptr_t stride = reinterpret_cast<const strided_array_dtype_metadata *>(categories.get_ndo_meta())->stride;
+    char *dst_ptr = categories.get_readwrite_originptr();
     uint32_t i = 0;
+    unary_kernel_static_data extra(kernel.auxdata, categories.get_ndo_meta() + sizeof(strided_array_dtype_metadata),
+                    iter.metadata());
     for (set<const char *, cmp>::const_iterator it = uniques.begin(); it != uniques.end(); ++it) {
-        memcpy(categories.at(i).get_readwrite_originptr(), *it, categories.get_dtype().get_element_size());
+        kernel.kernel.single(dst_ptr, *it, &extra);
         ++i;
+        dst_ptr += stride;
     }
 
     return make_categorical_dtype(categories);

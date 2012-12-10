@@ -89,8 +89,10 @@ void date_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const dtype& s
             // Assignment from strings
             get_string_to_date_assignment_kernel(m_unit, src_dt, errmode, out_kernel);
             return;
-        }
-        if (src_dt.extended()) {
+        } else if (src_dt.get_kind() == struct_kind) {
+            get_struct_to_date_assignment_kernel(m_unit, src_dt, errmode, out_kernel);
+            return;
+        } else if (src_dt.extended()) {
             src_dt.extended()->get_dtype_assignment_kernel(dst_dt, src_dt, errmode, out_kernel);
         }
         // TODO

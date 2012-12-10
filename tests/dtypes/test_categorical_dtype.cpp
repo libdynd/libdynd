@@ -102,7 +102,10 @@ TEST(CategoricalDType, Unique) {
 
 }
 
-TEST(CategoricalDType, Factor) {
+TEST(CategoricalDType, FactorString) {
+    ndobject string_cats = make_strided_ndobject(2, make_fixedstring_dtype(string_encoding_ascii, 3));
+    string_cats.at(0).vals() = "bar";
+    string_cats.at(1).vals() = "foo";
 
     ndobject a = make_strided_ndobject(3, make_fixedstring_dtype(string_encoding_ascii, 3));
     a.at(0).vals() = "foo";
@@ -110,18 +113,21 @@ TEST(CategoricalDType, Factor) {
     a.at(2).vals() = "foo";
 
     dtype da = factor_categorical_dtype(a);
+    EXPECT_EQ(make_categorical_dtype(string_cats), da);
+}
 
-    cout << da << endl;
+TEST(CategoricalDType, FactorInt) {
+    ndobject int_cats = make_strided_ndobject(2, make_dtype<int32_t>());
+    int_cats.at(0).vals() = 0;
+    int_cats.at(1).vals() = 10;
 
     ndobject i = make_strided_ndobject(3, make_dtype<int32_t>());
     i.at(0).vals() = 10;
     i.at(1).vals() = 10;
     i.at(2).vals() = 0;
 
-    //dtype di = factor_categorical_dtype(i);
-
-    //cout << di << endl;
-
+    dtype di = factor_categorical_dtype(i);
+    EXPECT_EQ(make_categorical_dtype(int_cats), di);
 }
 
 TEST(CategoricalDType, Values) {
