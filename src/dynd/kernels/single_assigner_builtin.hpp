@@ -78,7 +78,10 @@ struct single_assigner_builtin_base<dynd_bool, src_type, bool_kind, src_kind, as
         } else if (s == src_type(1)) {
             *dst = true;
         } else {
-            throw std::runtime_error("overflow while assigning to boolean value");
+            std::stringstream ss;
+            ss << "overflow while assigning " << make_dtype<src_type>() << " value ";
+            ss << s << " to " << make_dtype<dynd_bool>();
+            throw std::runtime_error(ss.str());
         }
     }
 };
@@ -121,7 +124,10 @@ struct single_assigner_builtin_base<dst_type, src_type, int_kind, int_kind, assi
         src_type s = *src;
 
         if (s < std::numeric_limits<dst_type>::min() || s > std::numeric_limits<dst_type>::max()) {
-            throw std::runtime_error("overflow while assigning signed integer to signed integer");
+            std::stringstream ss;
+            ss << "overflow while assigning " << make_dtype<src_type>() << " value ";
+            ss << s << " to " << make_dtype<dst_type>();
+            throw std::runtime_error(ss.str());
         }
         *dst = static_cast<dst_type>(s);
     }
@@ -148,7 +154,10 @@ struct single_assigner_builtin_unsigned_to_signed_overflow_base<dst_type, src_ty
         DYND_TRACE_ASSIGNMENT(static_cast<dst_type>(s), dst_type, s, src_type);
 
         if (s > static_cast<src_type>(std::numeric_limits<dst_type>::max())) {
-            throw std::runtime_error("overflow while assigning unsigned integer signed integer");
+            std::stringstream ss;
+            ss << "overflow while assigning " << make_dtype<src_type>() << " value ";
+            ss << s << " to " << make_dtype<dst_type>();
+            throw std::runtime_error(ss.str());
         }
         *dst = static_cast<dst_type>(s);
     }
@@ -176,7 +185,10 @@ struct single_assigner_builtin_signed_to_unsigned_overflow_base
         DYND_TRACE_ASSIGNMENT(static_cast<dst_type>(s), dst_type, s, src_type);
 
         if (s < 0) {
-            throw std::runtime_error("overflow while assigning signed integer to unsigned integer");
+            std::stringstream ss;
+            ss << "overflow while assigning " << make_dtype<src_type>() << " value ";
+            ss << s << " to " << make_dtype<dst_type>();
+            throw std::runtime_error(ss.str());
         }
         *dst = static_cast<dst_type>(s);
     }
@@ -190,7 +202,10 @@ struct single_assigner_builtin_signed_to_unsigned_overflow_base<dst_type, src_ty
         DYND_TRACE_ASSIGNMENT(static_cast<dst_type>(s), dst_type, s, src_type);
 
         if (s < 0 || s > static_cast<src_type>(std::numeric_limits<dst_type>::max())) {
-            throw std::runtime_error("overflow while assigning signed integer to unsigned integer");
+            std::stringstream ss;
+            ss << "overflow while assigning " << make_dtype<src_type>() << " value ";
+            ss << s << " to " << make_dtype<dst_type>();
+            throw std::runtime_error(ss.str());
         }
         *dst = static_cast<dst_type>(s);
     }
@@ -218,7 +233,10 @@ struct single_assigner_builtin_base<dst_type, src_type, uint_kind, uint_kind, as
         DYND_TRACE_ASSIGNMENT(static_cast<dst_type>(s), dst_type, s, src_type);
 
         if (s > std::numeric_limits<dst_type>::max()) {
-            throw std::runtime_error("overflow while assigning unsigned integer to unsigned integer");
+            std::stringstream ss;
+            ss << "overflow while assigning " << make_dtype<src_type>() << " value ";
+            ss << s << " to " << make_dtype<dst_type>();
+            throw std::runtime_error(ss.str());
         }
         *dst = static_cast<dst_type>(s);
     }
@@ -244,7 +262,8 @@ struct single_assigner_builtin_base<dst_type, src_type, real_kind, int_kind, ass
 
         if (static_cast<src_type>(d) != s) {
             std::stringstream ss;
-            ss << "inexact value while assigning " << make_dtype<src_type>() << " to " << make_dtype<dst_type>();
+            ss << "inexact value while assigning " << make_dtype<src_type>() << " value ";
+            ss << s << " to " << make_dtype<dst_type>() << " value " << d;
             throw std::runtime_error(ss.str());
         }
         *dst = d;
@@ -270,7 +289,10 @@ struct single_assigner_builtin_base<std::complex<dst_real_type>, src_type, compl
         DYND_TRACE_ASSIGNMENT(d, std::complex<dst_real_type>, s, src_type);
 
         if (static_cast<src_type>(d) != s) {
-            throw std::runtime_error("inexact value while assigning signed integer to complex floating point");
+            std::stringstream ss;
+            ss << "inexact value while assigning " << make_dtype<src_type>() << " value ";
+            ss << s << " to " << make_dtype<std::complex<dst_real_type> >() << " value " << d;
+            throw std::runtime_error(ss.str());
         }
         *dst = d;
     }
@@ -295,7 +317,10 @@ struct single_assigner_builtin_base<dst_type, src_type, real_kind, uint_kind, as
         DYND_TRACE_ASSIGNMENT(d, dst_type, s, src_type);
 
         if (static_cast<src_type>(d) != s) {
-            throw std::runtime_error("inexact value while assigning unsigned integer to floating point");
+            std::stringstream ss;
+            ss << "inexact value while assigning " << make_dtype<src_type>() << " value ";
+            ss << s << " to " << make_dtype<dst_type>() << " value " << d;
+            throw std::runtime_error(ss.str());
         }
         *dst = d;
     }
@@ -320,7 +345,10 @@ struct single_assigner_builtin_base<std::complex<dst_real_type>, src_type, compl
         DYND_TRACE_ASSIGNMENT(d, std::complex<dst_real_type>, s, src_type);
 
         if (static_cast<src_type>(d) != s) {
-            throw std::runtime_error("inexact value while assigning unsigned integer to floating point");
+            std::stringstream ss;
+            ss << "inexact value while assigning " << make_dtype<src_type>() << " value ";
+            ss << s << " to " << make_dtype<std::complex<dst_real_type> >() << " value " << d;
+            throw std::runtime_error(ss.str());
         }
         *dst = d;
     }
@@ -344,7 +372,10 @@ struct single_assigner_builtin_base<dst_type, src_type, int_kind, real_kind, ass
         DYND_TRACE_ASSIGNMENT(static_cast<dst_type>(s), dst_type, s, src_type);
 
         if (s < std::numeric_limits<dst_type>::min() || s > std::numeric_limits<dst_type>::max()) {
-            throw std::runtime_error("overflow while assigning floating point to signed integer");
+            std::stringstream ss;
+            ss << "overflow while assigning " << make_dtype<src_type>() << " value ";
+            ss << s << " to " << make_dtype<dst_type>();
+            throw std::runtime_error(ss.str());
         }
         *dst = static_cast<dst_type>(s);
     }
@@ -360,11 +391,17 @@ struct single_assigner_builtin_base<dst_type, src_type, int_kind, real_kind, ass
         DYND_TRACE_ASSIGNMENT(static_cast<dst_type>(s), dst_type, s, src_type);
 
         if (s < std::numeric_limits<dst_type>::min() || s > std::numeric_limits<dst_type>::max()) {
-            throw std::runtime_error("overflow while assigning floating point to signed integer");
+            std::stringstream ss;
+            ss << "overflow while assigning " << make_dtype<src_type>() << " value ";
+            ss << s << " to " << make_dtype<dst_type>();
+            throw std::runtime_error(ss.str());
         }
 
         if (std::floor(s) != s) {
-            throw std::runtime_error("fractional part lost while assigning floating point to signed integer");
+            std::stringstream ss;
+            ss << "fractional part lost while assigning " << make_dtype<src_type>() << " value ";
+            ss << s << " to " << make_dtype<dst_type>();
+            throw std::runtime_error(ss.str());
         }
         *dst = static_cast<dst_type>(s);
     }
@@ -385,11 +422,17 @@ struct single_assigner_builtin_base<dst_type, std::complex<src_real_type>, int_k
         DYND_TRACE_ASSIGNMENT(static_cast<dst_type>(s.real()), dst_type, s, std::complex<src_real_type>);
 
         if (s.imag() != 0) {
-            throw std::runtime_error("loss of imaginary component while assigning complex floating point to signed integer");
+            std::stringstream ss;
+            ss << "loss of imaginary component while assigning " << make_dtype<std::complex<src_real_type> >() << " value ";
+            ss << s << " to " << make_dtype<dst_type>();
+            throw std::runtime_error(ss.str());
         }
 
         if (s.real() < std::numeric_limits<dst_type>::min() || s.real() > std::numeric_limits<dst_type>::max()) {
-            throw std::runtime_error("overflow while assigning complex floating point to signed integer");
+            std::stringstream ss;
+            ss << "overflow while assigning " << make_dtype<std::complex<src_real_type> >() << " value ";
+            ss << s << " to " << make_dtype<dst_type>();
+            throw std::runtime_error(ss.str());
         }
         *dst = static_cast<dst_type>(s.real());
     }
@@ -405,15 +448,24 @@ struct single_assigner_builtin_base<dst_type, std::complex<src_real_type>, int_k
         DYND_TRACE_ASSIGNMENT(static_cast<dst_type>(s.real()), dst_type, s, std::complex<src_real_type>);
 
         if (s.imag() != 0) {
-            throw std::runtime_error("loss of imaginary component while assigning complex floating point to signed integer");
+            std::stringstream ss;
+            ss << "loss of imaginary component while assigning " << make_dtype<std::complex<src_real_type> >() << " value ";
+            ss << s << " to " << make_dtype<dst_type>();
+            throw std::runtime_error(ss.str());
         }
 
         if (s.real() < std::numeric_limits<dst_type>::min() || s.real() > std::numeric_limits<dst_type>::max()) {
-            throw std::runtime_error("overflow while assigning complex floating point to signed integer");
+            std::stringstream ss;
+            ss << "overflow while assigning " << make_dtype<std::complex<src_real_type> >() << " value ";
+            ss << s << " to " << make_dtype<dst_type>();
+            throw std::runtime_error(ss.str());
         }
 
         if (std::floor(s.real()) != s.real()) {
-            throw std::runtime_error("fractional part lost while assigning complex floating point to signed integer");
+            std::stringstream ss;
+            ss << "fractional part lost while assigning " << make_dtype<std::complex<src_real_type> >() << " value ";
+            ss << s << " to " << make_dtype<dst_type>();
+            throw std::runtime_error(ss.str());
         }
         *dst = static_cast<dst_type>(s.real());
     }
@@ -434,7 +486,10 @@ struct single_assigner_builtin_base<dst_type, src_type, uint_kind, real_kind, as
         DYND_TRACE_ASSIGNMENT(static_cast<dst_type>(s), dst_type, s, src_type);
 
         if (s < 0 || s > std::numeric_limits<dst_type>::max()) {
-            throw std::runtime_error("overflow while assigning floating point to unsigned integer");
+            std::stringstream ss;
+            ss << "overflow while assigning " << make_dtype<src_type>() << " value ";
+            ss << s << " to " << make_dtype<dst_type>();
+            throw std::runtime_error(ss.str());
         }
         *dst = static_cast<dst_type>(s);
     }
@@ -450,11 +505,17 @@ struct single_assigner_builtin_base<dst_type, src_type, uint_kind, real_kind, as
         DYND_TRACE_ASSIGNMENT(static_cast<dst_type>(s), dst_type, s, src_type);
 
         if (s < 0 || s > std::numeric_limits<dst_type>::max()) {
-            throw std::runtime_error("overflow while assigning floating point to unsigned integer");
+            std::stringstream ss;
+            ss << "overflow while assigning " << make_dtype<src_type>() << " value ";
+            ss << s << " to " << make_dtype<dst_type>();
+            throw std::runtime_error(ss.str());
         }
 
         if (std::floor(s) != s) {
-            throw std::runtime_error("fractional part lost while assigning floating point to unsigned integer");
+            std::stringstream ss;
+            ss << "fractional part lost while assigning " << make_dtype<src_type>() << " value ";
+            ss << s << " to " << make_dtype<dst_type>();
+            throw std::runtime_error(ss.str());
         }
         *dst = static_cast<dst_type>(s);
     }
@@ -475,11 +536,17 @@ struct single_assigner_builtin_base<dst_type, std::complex<src_real_type>, uint_
         DYND_TRACE_ASSIGNMENT(static_cast<dst_type>(s.real()), dst_type, s, std::complex<src_real_type>);
 
         if (s.imag() != 0) {
-            throw std::runtime_error("loss of imaginary component while assigning complex floating point to unsigned integer");
+            std::stringstream ss;
+            ss << "loss of imaginary component while assigning " << make_dtype<std::complex<src_real_type> >() << " value ";
+            ss << s << " to " << make_dtype<dst_type>();
+            throw std::runtime_error(ss.str());
         }
 
         if (s.real() < 0 || s.real() > std::numeric_limits<dst_type>::max()) {
-            throw std::runtime_error("overflow while assigning complex floating point to unsigned integer");
+            std::stringstream ss;
+            ss << "overflow while assigning " << make_dtype<std::complex<src_real_type> >() << " value ";
+            ss << s << " to " << make_dtype<dst_type>();
+            throw std::runtime_error(ss.str());
         }
         *dst = static_cast<dst_type>(s.real());
     }
@@ -495,15 +562,24 @@ struct single_assigner_builtin_base<dst_type, std::complex<src_real_type>, uint_
         DYND_TRACE_ASSIGNMENT(static_cast<dst_type>(s.real()), dst_type, s, std::complex<src_real_type>);
 
         if (s.imag() != 0) {
-            throw std::runtime_error("loss of imaginary component while assigning complex floating point to unsigned integer");
+            std::stringstream ss;
+            ss << "loss of imaginary component while assigning " << make_dtype<std::complex<src_real_type> >() << " value ";
+            ss << s << " to " << make_dtype<dst_type>();
+            throw std::runtime_error(ss.str());
         }
 
         if (s.real() < 0 || s.real() > std::numeric_limits<dst_type>::max()) {
-            throw std::runtime_error("overflow while assigning complex floating point to unsigned integer");
+            std::stringstream ss;
+            ss << "overflow while assigning " << make_dtype<std::complex<src_real_type> >() << " value ";
+            ss << s << " to " << make_dtype<dst_type>();
+            throw std::runtime_error(ss.str());
         }
 
         if (std::floor(s.real()) != s.real()) {
-            throw std::runtime_error("fractional part lost while assigning complex floating point to unsigned integer");
+            std::stringstream ss;
+            ss << "fractional part lost while assigning " << make_dtype<std::complex<src_real_type> >() << " value ";
+            ss << s << " to " << make_dtype<dst_type>();
+            throw std::runtime_error(ss.str());
         }
         *dst = static_cast<dst_type>(s.real());
     }
@@ -590,7 +666,10 @@ struct single_assigner_builtin_base<float, double, real_kind, real_kind, assign_
         clear_fp_status();
         *dst = static_cast<float>(*src);
         if (is_overflow_fp_status()) {
-            throw std::runtime_error("overflow while assigning double to float");
+            std::stringstream ss;
+            ss << "overflow while assigning " << make_dtype<double>() << " value ";
+            ss << *src << " to " << make_dtype<float>();
+            throw std::runtime_error(ss.str());
         }
     }
 };
@@ -613,14 +692,20 @@ struct single_assigner_builtin_base<float, double, real_kind, real_kind, assign_
         clear_fp_status();
         d = static_cast<float>(s);
         if (is_overflow_fp_status()) {
-            throw std::runtime_error("overflow while assigning double to float");
+            std::stringstream ss;
+            ss << "overflow while assigning " << make_dtype<double>() << " value ";
+            ss << *src << " to " << make_dtype<float>();
+            throw std::runtime_error(ss.str());
         }
         // The inexact status didn't work as it should have, so converting back to double and comparing
         //if (is_inexact_fp_status()) {
         //    throw std::runtime_error("inexact precision loss while assigning double to float");
         //}
         if (d != s) {
-            throw std::runtime_error("inexact precision loss while assigning double to float");
+            std::stringstream ss;
+            ss << "inexact precision loss while assigning " << make_dtype<double>() << " value ";
+            ss << *src << " to " << make_dtype<float>();
+            throw std::runtime_error(ss.str());
         }
         *dst = d;
     }
@@ -636,7 +721,10 @@ struct single_assigner_builtin_base<std::complex<float>, std::complex<double>, c
         clear_fp_status();
         *dst = static_cast<std::complex<float> >(*src);
         if (is_overflow_fp_status()) {
-            throw std::runtime_error("overflow while assigning complex double to complex float");
+            std::stringstream ss;
+            ss << "overflow while assigning " << make_dtype<std::complex<double> >() << " value ";
+            ss << *src << " to " << make_dtype<std::complex<float> >();
+            throw std::runtime_error(ss.str());
         }
     }
 };
@@ -659,14 +747,20 @@ struct single_assigner_builtin_base<std::complex<float>, std::complex<double>, c
         clear_fp_status();
         d = static_cast<std::complex<float> >(s);
         if (is_overflow_fp_status()) {
-            throw std::runtime_error("overflow while assigning complex double to complex float");
+            std::stringstream ss;
+            ss << "overflow while assigning " << make_dtype<std::complex<double> >() << " value ";
+            ss << *src << " to " << make_dtype<std::complex<float> >();
+            throw std::runtime_error(ss.str());
         }
         // The inexact status didn't work as it should have, so converting back to double and comparing
         //if (is_inexact_fp_status()) {
         //    throw std::runtime_error("inexact precision loss while assigning double to float");
         //}
         if (d.real() != s.real() || d.imag() != s.imag()) {
-            throw std::runtime_error("inexact precision loss while assigning complex double to complex float");
+            std::stringstream ss;
+            ss << "inexact precision loss while assigning " << make_dtype<std::complex<double> >() << " value ";
+            ss << *src << " to " << make_dtype<std::complex<float> >();
+            throw std::runtime_error(ss.str());
         }
         *dst = d;
     }
@@ -682,7 +776,10 @@ struct single_assigner_builtin_base<real_type, std::complex<real_type>, real_kin
         DYND_TRACE_ASSIGNMENT(static_cast<float>(s.real()), real_type, s, std::complex<real_type>);
 
         if (s.imag() != 0) {
-            throw std::runtime_error("loss of imaginary component while assigning complex floating point to real floating point");
+            std::stringstream ss;
+            ss << "loss of imaginary component while assigning " << make_dtype<std::complex<real_type> >() << " value ";
+            ss << *src << " to " << make_dtype<real_type>();
+            throw std::runtime_error(ss.str());
         }
 
         *dst = s.real();
@@ -737,7 +834,10 @@ struct single_assigner_builtin_base<double, std::complex<float>, real_kind, comp
         DYND_TRACE_ASSIGNMENT(static_cast<double>(s.real()), double, s, std::complex<float>);
 
         if (s.imag() != 0) {
-            throw std::runtime_error("loss of imaginary component while assigning complex floating point to real floating point");
+            std::stringstream ss;
+            ss << "loss of imaginary component while assigning " << make_dtype<std::complex<float> >() << " value ";
+            ss << *src << " to " << make_dtype<double>();
+            throw std::runtime_error(ss.str());
         }
 
         *dst = s.real();
@@ -765,13 +865,19 @@ struct single_assigner_builtin_base<float, std::complex<double>, real_kind, comp
         DYND_TRACE_ASSIGNMENT(static_cast<float>(s.real()), float, s, std::complex<double>);
 
         if (s.imag() != 0) {
-            throw std::runtime_error("loss of imaginary component while assigning complex floating point to real floating point");
+            std::stringstream ss;
+            ss << "loss of imaginary component while assigning " << make_dtype<std::complex<double> >() << " value ";
+            ss << *src << " to " << make_dtype<float>();
+            throw std::runtime_error(ss.str());
         }
 
         clear_fp_status();
         d = static_cast<float>(s.real());
         if (is_overflow_fp_status()) {
-            throw std::runtime_error("overflow while assigning complex floating point to real floating point");
+            std::stringstream ss;
+            ss << "overflow while assigning " << make_dtype<std::complex<double> >() << " value ";
+            ss << *src << " to " << make_dtype<float>();
+            throw std::runtime_error(ss.str());
         }
 
         *dst = d;
@@ -794,17 +900,26 @@ struct single_assigner_builtin_base<float, std::complex<double>, real_kind, comp
         DYND_TRACE_ASSIGNMENT(static_cast<float>(s.real()), float, s, std::complex<double>);
 
         if (s.imag() != 0) {
-            throw std::runtime_error("loss of imaginary component while assigning complex floating point to real floating point");
+            std::stringstream ss;
+            ss << "loss of imaginary component while assigning " << make_dtype<std::complex<double> >() << " value ";
+            ss << *src << " to " << make_dtype<float>();
+            throw std::runtime_error(ss.str());
         }
 
         clear_fp_status();
         d = static_cast<float>(s.real());
         if (is_overflow_fp_status()) {
-            throw std::runtime_error("overflow while assigning complex floating point to real floating point");
+            std::stringstream ss;
+            ss << "overflow while assigning " << make_dtype<std::complex<double> >() << " value ";
+            ss << *src << " to " << make_dtype<float>();
+            throw std::runtime_error(ss.str());
         }
 
         if (d != s.real()) {
-            throw std::runtime_error("inexact precision loss while assigning complex floating point to real floating point");
+            std::stringstream ss;
+            ss << "inexact precision loss while assigning " << make_dtype<std::complex<double> >() << " value ";
+            ss << *src << " to " << make_dtype<float>();
+            throw std::runtime_error(ss.str());
         }
 
         *dst = d;
@@ -824,7 +939,10 @@ struct single_assigner_builtin_base<std::complex<float>, double, complex_kind, r
         clear_fp_status();
         d = static_cast<float>(s);
         if (is_overflow_fp_status()) {
-            throw std::runtime_error("overflow while assigning real floating point to complex floating point");
+            std::stringstream ss;
+            ss << "overflow while assigning " << make_dtype<double>() << " value ";
+            ss << s << " to " << make_dtype<std::complex<float> >();
+            throw std::runtime_error(ss.str());
         }
 
         *dst = d;
@@ -849,11 +967,17 @@ struct single_assigner_builtin_base<std::complex<float>, double, complex_kind, r
         clear_fp_status();
         d = static_cast<float>(s);
         if (is_overflow_fp_status()) {
-            throw std::runtime_error("overflow while assigning real floating point to complex floating point");
+            std::stringstream ss;
+            ss << "overflow while assigning " << make_dtype<double>() << " value ";
+            ss << s << " to " << make_dtype<std::complex<float> >();
+            throw std::runtime_error(ss.str());
         }
 
         if (d != s) {
-            throw std::runtime_error("inexact precision loss while assigning complex floating point to real floating point");
+            std::stringstream ss;
+            ss << "inexact precision loss while assigning " << make_dtype<double>() << " value ";
+            ss << s << " to " << make_dtype<std::complex<float> >();
+            throw std::runtime_error(ss.str());
         }
 
         *dst = d;
