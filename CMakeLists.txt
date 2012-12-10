@@ -127,6 +127,7 @@ set(dynd_SRC
     src/dynd/kernels/byteswap_kernels.cpp
     src/dynd/kernels/date_assignment_kernels.cpp
     src/dynd/kernels/string_assignment_kernels.cpp
+    src/dynd/kernels/struct_assignment_kernels.cpp
     src/dynd/kernels/kernels_for_disassembly.cpp
     src/dynd/kernels/single_assigner_builtin.hpp
     include/dynd/kernels/assignment_kernels.hpp
@@ -140,6 +141,7 @@ set(dynd_SRC
     include/dynd/kernels/kernel_instance.hpp
     include/dynd/kernels/single_compare_kernel_instance.hpp
     include/dynd/kernels/string_assignment_kernels.hpp
+    include/dynd/kernels/struct_assignment_kernels.hpp
     # MemBlock
     src/dynd/memblock/memory_block.cpp
     src/dynd/memblock/executable_memory_block_windows_x64.cpp

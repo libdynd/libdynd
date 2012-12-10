@@ -58,8 +58,8 @@ enum dtype_kind_t {
     datetime_kind,
     // For any array dtypes which have elements of all the same type
     uniform_array_kind,
-    // For struct_type_id and ndarray_type_id
-    composite_kind,
+    // For struct_type_id and fixedstruct_type_id
+    struct_kind,
     // For dtypes whose value_dtype != the dtype, signals
     // that calculations should look at the value_dtype for
     // type promotion, etc.

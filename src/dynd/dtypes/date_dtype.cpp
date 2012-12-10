@@ -15,8 +15,6 @@
 
 #include <datetime_strings.h>
 
-#define DYND_DATE_ORIGIN_YEAR 1970
-
 using namespace std;
 using namespace dynd;
 

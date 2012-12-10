@@ -4,7 +4,7 @@
 #
 
 cmake_minimum_required(VERSION 2.6)
-project(dnd_tests)
+project(test_dynd)
 
 set(tests_SRC
     codegen/test_codegen_cache.cpp
@@ -56,22 +56,22 @@ source_group("DTypes Tests" REGULAR_EXPRESSION "\\/dtypes\\/test_[^\\/]*\\.cpp$"
 source_group("GFunc Tests" REGULAR_EXPRESSION "\\/gfunc\\/test_[^\\/]*\\.cpp$")
 source_group("VM Tests" REGULAR_EXPRESSION "\\/vm\\/test_[^\\/]*\\.cpp$")
 
-add_executable(dnd_tests ${tests_SRC})
+add_executable(test_dynd ${tests_SRC})
 
 if(WIN32)
-    target_link_libraries(dnd_tests
+    target_link_libraries(test_dynd
         dynamicndarray
         )
 elseif(APPLE)
-    target_link_libraries(dnd_tests
+    target_link_libraries(test_dynd
         dynamicndarray
         )
 else()
-    set_target_properties(dnd_tests
+    set_target_properties(test_dynd
                 PROPERTIES COMPILE_FLAGS
                 "-Wno-unnamed-type-template-args -pthread")
 
-    target_link_libraries(dnd_tests
+    target_link_libraries(test_dynd
         dynamicndarray
         pthread
         )

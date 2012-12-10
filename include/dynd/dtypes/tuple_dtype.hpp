@@ -32,7 +32,8 @@ public:
         return tuple_type_id;
     }
     dtype_kind_t get_kind() const {
-        return composite_kind;
+        // TODO: what kind should this have?
+        return struct_kind;
     }
     // Expose the storage traits here
     size_t get_alignment() const {
