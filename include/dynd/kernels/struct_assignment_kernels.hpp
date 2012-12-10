@@ -45,6 +45,18 @@ void get_fixedstruct_assignment_kernel(const dtype& dst_fixedstruct_dtype, const
                 assign_error_mode errmode,
                 kernel_instance<unary_operation_pair_t>& out_kernel);
 
+/**
+ * Gets a kernel which converts from a fixedstruct to a struct.
+ *
+ * \param dst_fixedstruct_dtype  The dtype of the destination fixedstruct.
+ * \param src_struct_dtype  The dtype of the source struct.
+ * \param errmode  The error handling mode of the assignment.
+ * \param out_kernel  The output where the kernel is placed.
+ */
+void get_fixedstruct_to_struct_assignment_kernel(const dtype& dst_struct_dtype, const dtype& src_fixedstruct_dtype,
+                assign_error_mode errmode,
+                kernel_instance<unary_operation_pair_t>& out_kernel);
+
 } // namespace dynd
 
 #endif // _DYND__STRUCT_ASSIGNMENT_KERNELS_HPP_

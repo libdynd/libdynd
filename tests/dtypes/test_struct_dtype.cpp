@@ -14,6 +14,7 @@
 #include <dynd/dtypes/string_dtype.hpp>
 #include <dynd/dtypes/convert_dtype.hpp>
 #include <dynd/dtypes/byteswap_dtype.hpp>
+#include <dynd/dtypes/fixedstruct_dtype.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -171,6 +172,27 @@ TEST(StructDType, EqualDTypeAssign) {
 
 TEST(StructDType, DifferentDTypeAssign) {
     dtype dt = make_struct_dtype(make_dtype<int>(), "x", make_dtype<double>(), "y", make_dtype<short>(), "z");
+    ndobject a = make_strided_ndobject(2, dt);
+    a.at(0,0).vals() = 3;
+    a.at(0,1).vals() = 4.25;
+    a.at(0,2).vals() = 5;
+    a.at(1,0).vals() = 6;
+    a.at(1,1).vals() = 7.25;
+    a.at(1,2).vals() = 8;
+
+    dtype dt2 = make_struct_dtype(make_dtype<float>(), "y", make_dtype<int>(), "z", make_dtype<uint8_t>(), "x");
+    ndobject b = make_strided_ndobject(2, dt2);
+    b.val_assign(a);
+    EXPECT_EQ(3,    b.at(0,2).as<int>());
+    EXPECT_EQ(4.25, b.at(0,0).as<double>());
+    EXPECT_EQ(5,    b.at(0,1).as<short>());
+    EXPECT_EQ(6,    b.at(1,2).as<int>());
+    EXPECT_EQ(7.25, b.at(1,0).as<double>());
+    EXPECT_EQ(8,    b.at(1,1).as<short>());
+}
+
+TEST(StructDType, FromFixedStructAssign) {
+    dtype dt = make_fixedstruct_dtype(make_dtype<int>(), "x", make_dtype<double>(), "y", make_dtype<short>(), "z");
     ndobject a = make_strided_ndobject(2, dt);
     a.at(0,0).vals() = 3;
     a.at(0,1).vals() = 4.25;
