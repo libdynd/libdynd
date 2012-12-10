@@ -54,9 +54,6 @@ void dynd::get_string_to_date_assignment_kernel(date_unit_t dst_unit,
         case date_unit_day:
             ad.unit = datetime::datetime_unit_day;
             break;
-        case date_unit_week:
-            ad.unit = datetime::datetime_unit_week;
-            break;
         case date_unit_month:
             ad.unit = datetime::datetime_unit_month;
             break;
@@ -122,9 +119,6 @@ void dynd::get_date_to_string_assignment_kernel(const dtype& dst_string_dtype,
     switch (src_unit) {
         case date_unit_day:
             ad.unit = datetime::datetime_unit_day;
-            break;
-        case date_unit_week:
-            ad.unit = datetime::datetime_unit_week;
             break;
         case date_unit_month:
             ad.unit = datetime::datetime_unit_month;

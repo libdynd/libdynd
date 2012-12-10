@@ -392,6 +392,8 @@ void fixedstruct_dtype::foreach_leading(char *data, const char *metadata, foreac
     }
 }
 
+///////// properties on the dtype
+
 static ndobject property_get_field_names(const dtype& dt) {
     const fixedstruct_dtype *d = static_cast<const fixedstruct_dtype *>(dt.extended());
     // TODO: This property could be an immutable ndobject, which we would just return.
@@ -422,6 +424,8 @@ void fixedstruct_dtype::get_dynamic_dtype_properties(const std::pair<std::string
     *out_properties = dtype_properties;
     *out_count = sizeof(dtype_properties) / sizeof(dtype_properties[0]);
 }
+
+///////// properties on the ndobject
 
 dtype fixedstruct_dtype::ndobject_parameters_dtype = make_fixedstruct_dtype(dtype(new void_pointer_dtype), "self");
 

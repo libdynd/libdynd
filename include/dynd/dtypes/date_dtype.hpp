@@ -15,7 +15,6 @@ namespace dynd {
 
 enum date_unit_t {
     date_unit_day,
-    date_unit_week,
     date_unit_month,
     date_unit_year
 };
@@ -24,9 +23,6 @@ inline std::ostream& operator<<(std::ostream& o, date_unit_t unit) {
     switch (unit) {
         case date_unit_day:
             o << "day";
-            break;
-        case date_unit_week:
-            o << "week";
             break;
         case date_unit_month:
             o << "month";
@@ -98,6 +94,19 @@ public:
     }
 
     void get_dynamic_dtype_properties(const std::pair<std::string, gfunc::callable> **out_properties, int *out_count) const;
+    void get_dynamic_ndobject_properties(const std::pair<std::string, gfunc::callable> **out_properties, int *out_count) const;
+
+    /**
+     * Returns a kernel to transform instances of this date dtype into values of the
+     * property.
+     *
+     * \param property_name  The name of the requested property.
+     * \param out_value_dtype  This is filled with the dtype of the property.
+     * \param out_to_value_kernel  This is filled with a kernel extracting the property from the dtype.
+     */
+    void get_property_getter_kernel(const std::string& property_name,
+                    dtype& out_value_dtype, kernel_instance<unary_operation_pair_t>& out_to_value_kernel) const;
+
 };
 
 inline dtype make_date_dtype(date_unit_t unit = date_unit_day) {

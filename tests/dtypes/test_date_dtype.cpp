@@ -10,6 +10,7 @@
 
 #include <dynd/ndobject.hpp>
 #include <dynd/dtypes/date_dtype.hpp>
+#include <dynd/dtypes/date_property_dtype.hpp>
 #include <dynd/dtypes/fixedstring_dtype.hpp>
 #include <dynd/dtypes/string_dtype.hpp>
 #include <dynd/dtypes/convert_dtype.hpp>
@@ -26,10 +27,6 @@ TEST(DateDType, Create) {
     EXPECT_EQ(4u, d.get_alignment());
     dd = static_cast<const date_dtype *>(d.extended());
     EXPECT_EQ(dd->get_unit(), date_unit_day);
-
-    d = make_date_dtype(date_unit_week);
-    dd = static_cast<const date_dtype *>(d.extended());
-    EXPECT_EQ(dd->get_unit(), date_unit_week);
 
     d = make_date_dtype(date_unit_month);
     dd = static_cast<const date_dtype *>(d.extended());
@@ -132,4 +129,67 @@ TEST(DateDType, BadInputStrings) {
     // Cannot have trailing characters
     EXPECT_THROW(ndobject(ndobject("1980-02-03%").cast_scalars(d).vals()), runtime_error);
     EXPECT_THROW(ndobject(ndobject("1980-02-03 q").cast_scalars(d).vals()), runtime_error);
+}
+
+TEST(DateDType, DateDaysUnitProperties) {
+    dtype d = make_date_dtype();
+    ndobject a = ndobject("1955-03-13").cast_scalars(d).vals();
+    EXPECT_EQ(make_date_property_dtype(d, "year"), a.p("year").get_dtype());
+    EXPECT_EQ(make_date_property_dtype(d, "month"), a.p("month").get_dtype());
+    EXPECT_EQ(make_date_property_dtype(d, "day"), a.p("day").get_dtype());
+    EXPECT_EQ(1955, a.p("year").as<int32_t>());
+    EXPECT_EQ(3, a.p("month").as<int32_t>());
+    EXPECT_EQ(13, a.p("day").as<int32_t>());
+
+    const char *strs[] = {"1931-12-12", "2013-05-14", "2012-12-25"};
+    a = ndobject(strs).cast_scalars(d).vals();
+    EXPECT_EQ(1931, a.p("year").at(0).as<int32_t>());
+    EXPECT_EQ(12, a.p("month").at(0).as<int32_t>());
+    EXPECT_EQ(12, a.p("day").at(0).as<int32_t>());
+    EXPECT_EQ(2013, a.p("year").at(1).as<int32_t>());
+    EXPECT_EQ(5, a.p("month").at(1).as<int32_t>());
+    EXPECT_EQ(14, a.p("day").at(1).as<int32_t>());
+    EXPECT_EQ(2012, a.p("year").at(2).as<int32_t>());
+    EXPECT_EQ(12, a.p("month").at(2).as<int32_t>());
+    EXPECT_EQ(25, a.p("day").at(2).as<int32_t>());
+}
+
+TEST(DateDType, DateMonthsUnitProperties) {
+    dtype d = make_date_dtype(date_unit_month);
+    ndobject a = ndobject("1955-03").cast_scalars(d).vals();
+    EXPECT_EQ(make_date_property_dtype(d, "year"), a.p("year").get_dtype());
+    EXPECT_EQ(make_date_property_dtype(d, "month"), a.p("month").get_dtype());
+    EXPECT_THROW(make_date_property_dtype(d, "day"), runtime_error);
+    EXPECT_EQ(1955, a.p("year").as<int32_t>());
+    EXPECT_EQ(3, a.p("month").as<int32_t>());
+    EXPECT_THROW(a.p("day"), runtime_error);
+
+    const char *strs[] = {"1931-12", "2013-05", "2012-12"};
+    a = ndobject(strs).cast_scalars(d).vals();
+    EXPECT_EQ(1931, a.p("year").at(0).as<int32_t>());
+    EXPECT_EQ(12, a.p("month").at(0).as<int32_t>());
+    EXPECT_EQ(2013, a.p("year").at(1).as<int32_t>());
+    EXPECT_EQ(5, a.p("month").at(1).as<int32_t>());
+    EXPECT_EQ(2012, a.p("year").at(2).as<int32_t>());
+    EXPECT_EQ(12, a.p("month").at(2).as<int32_t>());
+    EXPECT_THROW(a.p("day"), runtime_error);
+}
+
+TEST(DateDType, DateYearsUnitProperties) {
+    dtype d = make_date_dtype(date_unit_year);
+    ndobject a = ndobject("1955").cast_scalars(d).vals();
+    EXPECT_EQ(make_date_property_dtype(d, "year"), a.p("year").get_dtype());
+    EXPECT_THROW(make_date_property_dtype(d, "month"), runtime_error);
+    EXPECT_THROW(make_date_property_dtype(d, "day"), runtime_error);
+    EXPECT_EQ(1955, a.p("year").as<int32_t>());
+    EXPECT_THROW(a.p("month"), runtime_error);
+    EXPECT_THROW(a.p("day"), runtime_error);
+
+    const char *strs[] = {"1931", "2013", "2012"};
+    a = ndobject(strs).cast_scalars(d).vals();
+    EXPECT_EQ(1931, a.p("year").at(0).as<int32_t>());
+    EXPECT_EQ(2013, a.p("year").at(1).as<int32_t>());
+    EXPECT_EQ(2012, a.p("year").at(2).as<int32_t>());
+    EXPECT_THROW(a.p("month"), runtime_error);
+    EXPECT_THROW(a.p("day"), runtime_error);
 }

@@ -73,6 +73,13 @@ struct datetime_fields {
      */
     void set_from_datetime_val(datetime_val_t val, datetime_unit_t unit);
     
+    /*
+     * Converts a date based on the given metadata into a datetimestruct
+     */
+    void set_from_date_val(date_val_t val, datetime_unit_t unit) {
+        set_from_datetime_val(val == DATETIME_DATE_NAT ? DATETIME_DATETIME_NAT : val, unit);
+    }
+    
     /**
      * Fills in the year, month, day in 'dts' based on the days
      * offset from 1970. Leaves the rest of the fields alone.

@@ -7,6 +7,8 @@
 #define _DYND__CALLABLE_HPP_
 
 #include <dynd/ndobject.hpp>
+#include <dynd/dtypes/fixedstruct_dtype.hpp>
+#include <dynd/dtype_assign.hpp>
 
 namespace dynd { namespace gfunc {
 
@@ -57,12 +59,58 @@ public:
         return m_function;
     }
 
-    inline ndobject call(const ndobject& n) const {
+    inline ndobject call_generic(const ndobject& n) const {
         return ndobject(m_function(n.get_ndo(), m_extra), false);
     }
 
+    template<class T>
+    ndobject call(const T& p0) const;
+
     void debug_print(std::ostream& o, const std::string& indent = "") const;
 };
+
+namespace detail {
+    template<class T>
+    struct callable_argument_setter {
+        static typename enable_if<is_dtype_scalar<T>::value, void>::type set(const dtype& paramtype, char *metadata, char *data, const T& value) {
+            if (paramtype.get_type_id() == type_id_of<T>::value) {
+                *reinterpret_cast<T *>(data) = value;
+            } else {
+                dtype_assign(paramtype, metadata, data, make_dtype<T>(), NULL, &value);
+            }
+        }
+    };
+
+    template<>
+    struct callable_argument_setter<ndobject> {
+        static void set(const dtype& paramtype, char *metadata, char *data, const ndobject& value) {
+            if (paramtype.get_type_id() == void_pointer_type_id) {
+                // TODO: switch to a better mechanism for passing ndobject references
+                *reinterpret_cast<const ndobject_preamble **>(data) = value.get_ndo();
+            } else {
+                dtype_assign(paramtype, metadata, data, value.get_dtype(), value.get_ndo_meta(), value.get_ndo()->m_data_pointer);
+            }
+        }
+    };
+} // namespace detail
+
+template<class T>
+inline ndobject callable::call(const T& p0) const
+{
+    const fixedstruct_dtype *fsdt = static_cast<const fixedstruct_dtype *>(m_parameters_dtype.extended());
+    if (fsdt->get_field_types().size() != 1) {
+        stringstream ss;
+        ss << "incorrect number of arguments (received 1) for dynd callable with parameters " << m_parameters_dtype;
+        throw runtime_error(ss.str());
+    }
+    ndobject params(m_parameters_dtype);
+    detail::callable_argument_setter<T>::set(fsdt->get_field_types()[0],
+                    params.get_ndo_meta() + fsdt->get_metadata_offsets()[0],
+                    params.get_ndo()->m_data_pointer + fsdt->get_data_offsets()[0],
+                    p0);
+    return call_generic(params);
+}
+
 
 }} // namespace dynd::gfunc
 

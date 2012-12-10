@@ -13,6 +13,7 @@
 #include <dynd/dtypes/fixedbytes_dtype.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/exceptions.hpp>
+#include <dynd/gfunc/callable.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -498,6 +499,50 @@ void ndobject::val_assign(const dtype& rhs_dt, const char *rhs_metadata, const c
             assign.kernel.single(iter.data(), rhs_data, &extra);
         } while (iter.next());
     }
+}
+
+ndobject ndobject::p(const char *property_name) const
+{
+    dtype dt = get_dtype();
+    if (dt.extended()) {
+        const std::pair<std::string, gfunc::callable> *properties;
+        int count;
+        dt.extended()->get_dynamic_ndobject_properties(&properties, &count);
+        // TODO: We probably want to make some kind of acceleration structure for the name lookup
+        if (count > 0) {
+            for (int i = 0; i < count; ++i) {
+                if (properties[i].first == property_name) {
+                    return properties[i].second.call(*this);
+                }
+            }
+        }
+    }
+
+    stringstream ss;
+    ss << "dynd nobject does not have property " << property_name;
+    throw runtime_error(ss.str());
+}
+
+ndobject ndobject::p(const std::string& property_name) const
+{
+    dtype dt = get_dtype();
+    if (dt.extended()) {
+        const std::pair<std::string, gfunc::callable> *properties;
+        int count;
+        dt.extended()->get_dynamic_ndobject_properties(&properties, &count);
+        // TODO: We probably want to make some kind of acceleration structure for the name lookup
+        if (count > 0) {
+            for (int i = 0; i < count; ++i) {
+                if (properties[i].first == property_name) {
+                    return properties[i].second.call(*this);
+                }
+            }
+        }
+    }
+
+    stringstream ss;
+    ss << "dynd nobject does not have property " << property_name;
+    throw runtime_error(ss.str());
 }
 
 ndobject ndobject::eval_immutable(const eval::eval_context *ectx) const

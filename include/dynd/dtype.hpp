@@ -101,6 +101,8 @@ enum type_id_t {
     busdate_type_id,
     pointer_type_id,
 
+    date_property_type_id,
+
     // blockref primitive dtypes
     bytes_type_id,
     string_type_id,

@@ -282,6 +282,19 @@ public:
     }
 
     /**
+     * Accesses a dynamic property of the ndobject.
+     *
+     * \param property_name  The property to access.
+     */
+    ndobject p(const char *property_name) const;
+    /**
+     * Accesses a dynamic property of the ndobject.
+     *
+     * \param property_name  The property to access.
+     */
+    ndobject p(const std::string& property_name) const;
+
+    /**
      * Returns a value-exposing helper object, which allows one to assign to
      * the values of the ndobject, or collapse any expression dtypes.
      */
