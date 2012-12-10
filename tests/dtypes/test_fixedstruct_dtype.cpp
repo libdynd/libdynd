@@ -146,3 +146,56 @@ TEST(FixedStructDType, IsExpression) {
     EXPECT_TRUE(d.is_expression());
     EXPECT_FALSE(d.at(irange(0, 3, 2)).is_expression());
 }
+
+TEST(FixedStructDType, PropertyAccess) {
+    dtype dt = make_fixedstruct_dtype(make_dtype<int>(), "x", make_dtype<double>(), "y", make_dtype<short>(), "z");
+    ndobject a(dt);
+    a.at(0).vals() = 3;
+    a.at(1).vals() = 4.25;
+    a.at(2).vals() = 5;
+    EXPECT_EQ(3, a.p("x").as<int>());
+    EXPECT_EQ(4.25, a.p("y").as<double>());
+    EXPECT_EQ(5, a.p("z").as<short>());
+    EXPECT_THROW(a.p("w"), runtime_error);
+}
+
+TEST(FixedStructDType, EqualDTypeAssign) {
+    dtype dt = make_fixedstruct_dtype(make_dtype<int>(), "x", make_dtype<double>(), "y", make_dtype<short>(), "z");
+    ndobject a = make_strided_ndobject(2, dt);
+    a.at(0,0).vals() = 3;
+    a.at(0,1).vals() = 4.25;
+    a.at(0,2).vals() = 5;
+    a.at(1,0).vals() = 6;
+    a.at(1,1).vals() = 7.25;
+    a.at(1,2).vals() = 8;
+
+    ndobject b = make_strided_ndobject(2, dt);
+    b.val_assign(a);
+    EXPECT_EQ(3,    a.at(0,0).as<int>());
+    EXPECT_EQ(4.25, a.at(0,1).as<double>());
+    EXPECT_EQ(5,    a.at(0,2).as<short>());
+    EXPECT_EQ(6,    a.at(1,0).as<int>());
+    EXPECT_EQ(7.25, a.at(1,1).as<double>());
+    EXPECT_EQ(8,    a.at(1,2).as<short>());
+}
+
+TEST(FixedStructDType, DifferentDTypeAssign) {
+    dtype dt = make_fixedstruct_dtype(make_dtype<int>(), "x", make_dtype<double>(), "y", make_dtype<short>(), "z");
+    ndobject a = make_strided_ndobject(2, dt);
+    a.at(0,0).vals() = 3;
+    a.at(0,1).vals() = 4.25;
+    a.at(0,2).vals() = 5;
+    a.at(1,0).vals() = 6;
+    a.at(1,1).vals() = 7.25;
+    a.at(1,2).vals() = 8;
+
+    dtype dt2 = make_fixedstruct_dtype(make_dtype<float>(), "y", make_dtype<int>(), "z", make_dtype<uint8_t>(), "x");
+    ndobject b = make_strided_ndobject(2, dt2);
+    b.val_assign(a);
+    EXPECT_EQ(3,    b.at(0,2).as<int>());
+    EXPECT_EQ(4.25, b.at(0,0).as<double>());
+    EXPECT_EQ(5,    b.at(0,1).as<short>());
+    EXPECT_EQ(6,    b.at(1,2).as<int>());
+    EXPECT_EQ(7.25, b.at(1,0).as<double>());
+    EXPECT_EQ(8,    b.at(1,1).as<short>());
+}

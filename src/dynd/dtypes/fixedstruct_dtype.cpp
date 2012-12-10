@@ -9,6 +9,8 @@
 #include <dynd/shape_tools.hpp>
 #include <dynd/exceptions.hpp>
 #include <dynd/gfunc/make_callable.hpp>
+#include <dynd/kernels/assignment_kernels.hpp>
+#include <dynd/kernels/struct_assignment_kernels.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -288,12 +290,24 @@ void fixedstruct_dtype::get_single_compare_kernel(single_compare_kernel_instance
 }
 
 void fixedstruct_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const dtype& src_dt,
-                assign_error_mode DYND_UNUSED(errmode),
-                kernel_instance<unary_operation_pair_t>& DYND_UNUSED(out_kernel)) const
+                assign_error_mode errmode,
+                kernel_instance<unary_operation_pair_t>& out_kernel) const
 {
-    stringstream ss;
-    ss << "fixedstruct_dtype::get_dtype_assignment_kernel from " << src_dt << " to " << dst_dt << " is unimplemented";
-    throw runtime_error(ss.str());
+    if (this == dst_dt.extended()) {
+        if (this == src_dt.extended()) {
+            get_pod_dtype_assignment_kernel(m_element_size, m_alignment, out_kernel);
+        } else if (src_dt.get_type_id() == fixedstruct_type_id) {
+            get_fixedstruct_assignment_kernel(dst_dt, src_dt, errmode, out_kernel);
+        } else {
+            stringstream ss;
+            ss << "assignment from " << src_dt << " to " << dst_dt << " is not implemented yet";
+            throw runtime_error(ss.str());
+        }
+    } else {
+        stringstream ss;
+        ss << "assignment from " << src_dt << " to " << dst_dt << " is not implemented yet";
+        throw runtime_error(ss.str());
+    }
 }
 
 bool fixedstruct_dtype::operator==(const extended_dtype& rhs) const
