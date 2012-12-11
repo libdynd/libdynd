@@ -663,6 +663,7 @@ struct single_assigner_builtin_base<float, double, real_kind, real_kind, assign_
     static void assign(float *dst, const double *src, unary_kernel_static_data *DYND_UNUSED(extra)) {
         DYND_TRACE_ASSIGNMENT(static_cast<float>(*src), float, *src, double);
 
+#if defined(DYND_USE_FPSTATUS)
         clear_fp_status();
         *dst = static_cast<float>(*src);
         if (is_overflow_fp_status()) {
@@ -671,6 +672,16 @@ struct single_assigner_builtin_base<float, double, real_kind, real_kind, assign_
             ss << *src << " to " << make_dtype<float>();
             throw std::runtime_error(ss.str());
         }
+#else
+        double s = *src;
+        if (s < -std::numeric_limits<float>::max() || s > std::numeric_limits<float>::max()) {
+            std::stringstream ss;
+            ss << "overflow while assigning " << make_dtype<double>() << " value ";
+            ss << *src << " to " << make_dtype<float>();
+            throw std::runtime_error(ss.str());
+        }
+        *dst = static_cast<float>(s);
+#endif // DYND_USE_FPSTATUS
     }
 };
 
@@ -689,6 +700,7 @@ struct single_assigner_builtin_base<float, double, real_kind, real_kind, assign_
 
         double s = *src;
         float d;
+#if defined(DYND_USE_FPSTATUS)
         clear_fp_status();
         d = static_cast<float>(s);
         if (is_overflow_fp_status()) {
@@ -697,6 +709,16 @@ struct single_assigner_builtin_base<float, double, real_kind, real_kind, assign_
             ss << *src << " to " << make_dtype<float>();
             throw std::runtime_error(ss.str());
         }
+#else
+        if (s < -std::numeric_limits<float>::max() || s > std::numeric_limits<float>::max()) {
+            std::stringstream ss;
+            ss << "overflow while assigning " << make_dtype<double>() << " value ";
+            ss << *src << " to " << make_dtype<float>();
+            throw std::runtime_error(ss.str());
+        }
+        d = static_cast<float>(s);
+#endif // DYND_USE_FPSTATUS
+
         // The inexact status didn't work as it should have, so converting back to double and comparing
         //if (is_inexact_fp_status()) {
         //    throw std::runtime_error("inexact precision loss while assigning double to float");
@@ -718,6 +740,7 @@ struct single_assigner_builtin_base<std::complex<float>, std::complex<double>, c
     static void assign(std::complex<float> *dst, const std::complex<double> *src, unary_kernel_static_data *DYND_UNUSED(extra)) {
         DYND_TRACE_ASSIGNMENT(static_cast<std::complex<float> >(*src), std::complex<float>, *src, std::complex<double>);
 
+#if defined(DYND_USE_FPSTATUS)
         clear_fp_status();
         *dst = static_cast<std::complex<float> >(*src);
         if (is_overflow_fp_status()) {
@@ -726,6 +749,17 @@ struct single_assigner_builtin_base<std::complex<float>, std::complex<double>, c
             ss << *src << " to " << make_dtype<std::complex<float> >();
             throw std::runtime_error(ss.str());
         }
+#else
+        std::complex<double>(s) = *src;
+        if (s.real() < -std::numeric_limits<float>::max() || s.real() > std::numeric_limits<float>::max() ||
+                    s.imag() < -std::numeric_limits<float>::max() || s.imag() > std::numeric_limits<float>::max()) {
+            std::stringstream ss;
+            ss << "overflow while assigning " << make_dtype<std::complex<double> >() << " value ";
+            ss << *src << " to " << make_dtype<std::complex<float> >();
+            throw std::runtime_error(ss.str());
+        }
+        *dst = static_cast<std::complex<float> >(s);
+#endif // DYND_USE_FPSTATUS
     }
 };
 
@@ -744,6 +778,8 @@ struct single_assigner_builtin_base<std::complex<float>, std::complex<double>, c
 
         std::complex<double> s = *src;
         std::complex<float> d;
+
+#if defined(DYND_USE_FPSTATUS)
         clear_fp_status();
         d = static_cast<std::complex<float> >(s);
         if (is_overflow_fp_status()) {
@@ -752,6 +788,17 @@ struct single_assigner_builtin_base<std::complex<float>, std::complex<double>, c
             ss << *src << " to " << make_dtype<std::complex<float> >();
             throw std::runtime_error(ss.str());
         }
+#else
+        if (s.real() < -std::numeric_limits<float>::max() || s.real() > std::numeric_limits<float>::max() ||
+                    s.imag() < -std::numeric_limits<float>::max() || s.imag() > std::numeric_limits<float>::max()) {
+            std::stringstream ss;
+            ss << "overflow while assigning " << make_dtype<std::complex<double> >() << " value ";
+            ss << *src << " to " << make_dtype<std::complex<float> >();
+            throw std::runtime_error(ss.str());
+        }
+        d = static_cast<std::complex<float> >(s);
+#endif // DYND_USE_FPSTATUS
+
         // The inexact status didn't work as it should have, so converting back to double and comparing
         //if (is_inexact_fp_status()) {
         //    throw std::runtime_error("inexact precision loss while assigning double to float");
@@ -871,6 +918,7 @@ struct single_assigner_builtin_base<float, std::complex<double>, real_kind, comp
             throw std::runtime_error(ss.str());
         }
 
+#if defined(DYND_USE_FPSTATUS)
         clear_fp_status();
         d = static_cast<float>(s.real());
         if (is_overflow_fp_status()) {
@@ -879,6 +927,15 @@ struct single_assigner_builtin_base<float, std::complex<double>, real_kind, comp
             ss << *src << " to " << make_dtype<float>();
             throw std::runtime_error(ss.str());
         }
+#else
+        if (s.real() < -std::numeric_limits<float>::max() || s.real() > std::numeric_limits<float>::max()) {
+            std::stringstream ss;
+            ss << "overflow while assigning " << make_dtype<std::complex<double> >() << " value ";
+            ss << *src << " to " << make_dtype<float>();
+            throw std::runtime_error(ss.str());
+        }
+        d = static_cast<float>(s.real());
+#endif // DYND_USE_FPSTATUS
 
         *dst = d;
     }
@@ -906,14 +963,24 @@ struct single_assigner_builtin_base<float, std::complex<double>, real_kind, comp
             throw std::runtime_error(ss.str());
         }
 
+#if defined(DYND_USE_FPSTATUS)
         clear_fp_status();
         d = static_cast<float>(s.real());
         if (is_overflow_fp_status()) {
             std::stringstream ss;
             ss << "overflow while assigning " << make_dtype<std::complex<double> >() << " value ";
-            ss << *src << " to " << make_dtype<float>();
+            ss << s << " to " << make_dtype<float>();
             throw std::runtime_error(ss.str());
         }
+#else
+        if (s.real() < -std::numeric_limits<float>::max() || s.real() > std::numeric_limits<float>::max()) {
+            std::stringstream ss;
+            ss << "overflow while assigning " << make_dtype<std::complex<double> >() << " value ";
+            ss << s << " to " << make_dtype<float>();
+            throw std::runtime_error(ss.str());
+        }
+        d = static_cast<float>(s.real());
+#endif // DYND_USE_FPSTATUS
 
         if (d != s.real()) {
             std::stringstream ss;
@@ -936,6 +1003,7 @@ struct single_assigner_builtin_base<std::complex<float>, double, complex_kind, r
 
         DYND_TRACE_ASSIGNMENT(static_cast<std::complex<float> >(s), std::complex<float>, s, double);
 
+#if defined(DYND_USE_FPSTATUS)
         clear_fp_status();
         d = static_cast<float>(s);
         if (is_overflow_fp_status()) {
@@ -944,6 +1012,15 @@ struct single_assigner_builtin_base<std::complex<float>, double, complex_kind, r
             ss << s << " to " << make_dtype<std::complex<float> >();
             throw std::runtime_error(ss.str());
         }
+#else
+        if (s < -std::numeric_limits<float>::max() || s > std::numeric_limits<float>::max()) {
+            std::stringstream ss;
+            ss << "overflow while assigning " << make_dtype<double>() << " value ";
+            ss << s << " to " << make_dtype<std::complex<float> >();
+            throw std::runtime_error(ss.str());
+        }
+        d = static_cast<float>(s);
+#endif // DYND_USE_FPSTATUS
 
         *dst = d;
     }
@@ -964,6 +1041,7 @@ struct single_assigner_builtin_base<std::complex<float>, double, complex_kind, r
 
         DYND_TRACE_ASSIGNMENT(static_cast<std::complex<float> >(s), std::complex<float>, s, double);
 
+#if defined(DYND_USE_FPSTATUS)
         clear_fp_status();
         d = static_cast<float>(s);
         if (is_overflow_fp_status()) {
@@ -972,6 +1050,15 @@ struct single_assigner_builtin_base<std::complex<float>, double, complex_kind, r
             ss << s << " to " << make_dtype<std::complex<float> >();
             throw std::runtime_error(ss.str());
         }
+#else
+        if (s < -std::numeric_limits<float>::max() || s > std::numeric_limits<float>::max()) {
+            std::stringstream ss;
+            ss << "overflow while assigning " << make_dtype<double>() << " value ";
+            ss << s << " to " << make_dtype<std::complex<float> >();
+            throw std::runtime_error(ss.str());
+        }
+        d = static_cast<float>(s);
+#endif // DYND_USE_FPSTATUS
 
         if (d != s) {
             std::stringstream ss;
