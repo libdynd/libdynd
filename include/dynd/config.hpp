@@ -56,6 +56,27 @@
 // No DYND_CONSTEXPR yet, define it as nothing
 #  define DYND_CONSTEXPR
 
+#include <stdlib.h>
+// Some C library calls will abort if given bad format strings, etc
+// This RAII class temporarily disables that
+class disable_invalid_parameter_handler {
+    _invalid_parameter_handler m_saved;
+
+    disable_invalid_parameter_handler(const disable_invalid_parameter_handler&);
+    disable_invalid_parameter_handler& operator=(const disable_invalid_parameter_handler&);
+
+    static void nop_parameter_handler(const wchar_t *, const wchar_t *, const wchar_t *, 
+                       unsigned int, uintptr_t) {
+    }
+public:
+    disable_invalid_parameter_handler() {
+        m_saved = _set_invalid_parameter_handler(&nop_parameter_handler);
+    }
+    ~disable_invalid_parameter_handler() {
+        _set_invalid_parameter_handler(m_saved);
+    }
+};
+
 #endif
 
 // If RValue References are supported

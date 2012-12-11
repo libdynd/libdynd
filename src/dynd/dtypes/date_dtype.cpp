@@ -239,12 +239,22 @@ static ndobject function_ndo_strftime(const ndobject& n, const std::string& form
             datetime::date_val_to_struct_tm(date, datetime_unit, tm_val);
             // Call strftime, growing the string buffer if needed so it fits
             str.resize(format.size() + 16);
+#ifdef _MSC_VER
+            // Given an invalid format string strftime will abort unless an invalid
+            // parameter handler is installed.
+            disable_invalid_parameter_handler raii;
+#endif
             for(int i = 0; i < 3; ++i) {
                 size_t len = strftime(&str[0], str.size(), format.c_str(), &tm_val);
                 if (len > 0) {
                     str.resize(len);
                     break;
                 } else {
+                    if (errno == EINVAL) {
+                        stringstream ss;
+                        ss << "invalid format string \"" << format << "\" to strftime";
+                        throw runtime_error(ss.str());
+                    }
                     str.resize(str.size() * 2);
                 }
             }
