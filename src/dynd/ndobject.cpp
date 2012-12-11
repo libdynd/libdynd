@@ -545,7 +545,7 @@ ndobject ndobject::p(const std::string& property_name) const
     throw runtime_error(ss.str());
 }
 
-const gfunc::callable& ndobject::find_function(const char *function_name) const
+const gfunc::callable& ndobject::f(const char *function_name) const
 {
     dtype dt = get_dtype();
     if (dt.extended()) {
@@ -566,11 +566,6 @@ const gfunc::callable& ndobject::find_function(const char *function_name) const
     ss << "dynd nobject does not have function " << function_name;
     throw runtime_error(ss.str());
 }
-
-ndobject ndobject::f(const char *function_name) const {
-    return find_function(function_name).call(*this);
-}
-
 
 ndobject ndobject::eval_immutable(const eval::eval_context *ectx) const
 {

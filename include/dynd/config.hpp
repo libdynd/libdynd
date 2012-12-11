@@ -35,6 +35,14 @@
 
 #elif defined(_MSC_VER)
 
+// If set, uses the FP status registers.
+// On some compilers, there is no proper
+// way to tell the compiler that these are
+// important, and it reorders instructions
+// so as to make them useless. On MSVC, there
+// is #pragma fenv_access(on), which works.
+#define DYND_USE_FPSTATUS
+
 # if _MSC_VER >= 1600
 // Use enable_if from std::tr1
 #  define DYND_USE_TR1_ENABLE_IF

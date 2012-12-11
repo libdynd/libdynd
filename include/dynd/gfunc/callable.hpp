@@ -8,6 +8,8 @@
 
 #include <dynd/ndobject.hpp>
 #include <dynd/dtypes/fixedstruct_dtype.hpp>
+#include <dynd/dtypes/string_dtype.hpp>
+#include <dynd/dtypes/fixedstring_dtype.hpp>
 #include <dynd/dtype_assign.hpp>
 
 namespace dynd { namespace gfunc {
@@ -111,6 +113,9 @@ namespace detail {
             }
         }
     };
+
+    template<int N>
+    struct callable_argument_setter<char[N]> : public callable_argument_setter<const char[N]> {};
 } // namespace detail
 
 template<class T>

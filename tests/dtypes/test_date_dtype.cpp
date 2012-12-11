@@ -346,17 +346,17 @@ TEST(DateDType, StrFTime) {
 
     a = ndobject("1955-03-13").cast_scalars(d).vals();
 
-    b = a.f("strftime", "%Y");
+    b = a.f("strftime").call(a, "%Y");
     EXPECT_EQ("1955", b.as<string>());
-    b = a.f("strftime", "%m/%d/%y");
+    b = a.f("strftime").call(a, "%m/%d/%y");
     EXPECT_EQ("03/13/55", b.as<string>());
-    b = a.f("strftime", "%Y and %j");
+    b = a.f("strftime").call(a, "%Y and %j");
     EXPECT_EQ("1955 and 072", b.as<string>());
 
     const char *strs[] = {"1931-12-12", "2013-05-14", "2012-12-25"};
     a = ndobject(strs).cast_scalars(d).vals();
 
-    b = a.f("strftime", "%Y-%m-%d %j %U %w %W");
+    b = a.f("strftime").call(a, "%Y-%m-%d %j %U %w %W");
     EXPECT_EQ("1931-12-12 346 49 6 49", b.at(0).as<string>());
     EXPECT_EQ("2013-05-14 134 19 2 19", b.at(1).as<string>());
     EXPECT_EQ("2012-12-25 360 52 2 52", b.at(2).as<string>());
