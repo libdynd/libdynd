@@ -545,6 +545,33 @@ ndobject ndobject::p(const std::string& property_name) const
     throw runtime_error(ss.str());
 }
 
+const gfunc::callable& ndobject::find_function(const char *function_name) const
+{
+    dtype dt = get_dtype();
+    if (dt.extended()) {
+        const std::pair<std::string, gfunc::callable> *properties;
+        int count;
+        dt.extended()->get_dynamic_ndobject_functions(&properties, &count);
+        // TODO: We probably want to make some kind of acceleration structure for the name lookup
+        if (count > 0) {
+            for (int i = 0; i < count; ++i) {
+                if (properties[i].first == function_name) {
+                    return properties[i].second;
+                }
+            }
+        }
+    }
+
+    stringstream ss;
+    ss << "dynd nobject does not have function " << function_name;
+    throw runtime_error(ss.str());
+}
+
+ndobject ndobject::f(const char *function_name) const {
+    return find_function(function_name).call(*this);
+}
+
+
 ndobject ndobject::eval_immutable(const eval::eval_context *ectx) const
 {
     if (get_access_flags()&immutable_access_flag) {

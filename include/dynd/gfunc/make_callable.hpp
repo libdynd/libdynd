@@ -10,6 +10,7 @@
 #include <dynd/dtypes/fixedstruct_dtype.hpp>
 #include <dynd/dtypes/fixedarray_dtype.hpp>
 #include <dynd/dtypes/void_pointer_dtype.hpp>
+#include <dynd/dtypes/string_dtype.hpp>
 
 namespace dynd { namespace gfunc {
 
@@ -33,6 +34,7 @@ template <> struct parameter_type_of<double> {typedef double type;};
 template <typename T> struct parameter_type_of<std::complex<T> > {typedef std::complex<T> type;};
 template <> struct parameter_type_of<ndobject> {typedef ndobject_preamble *type;};
 template <> struct parameter_type_of<dtype> {typedef extended_dtype *type;};
+template <> struct parameter_type_of<std::string> {typedef string_dtype_data type;};
 
 template <typename T> struct make_parameter_dtype {inline static dtype make() {
         return make_dtype<typename parameter_type_of<T>::type>();
@@ -50,6 +52,9 @@ template <> struct make_parameter_dtype<ndobject> {inline static dtype make() {
     }};
 template <> struct make_parameter_dtype<dtype> {inline static dtype make() {
         return dtype(new void_pointer_dtype);
+    }};
+template <> struct make_parameter_dtype<std::string> {inline static dtype make() {
+        return make_string_dtype(string_encoding_utf_8);
     }};
 
 template <typename T> struct box_result {
@@ -101,6 +106,11 @@ template <> struct unbox_param<dtype> {
         } else {
             return dtype(v, true);
         }
+    }
+};
+template <> struct unbox_param<std::string> {
+    inline static std::string unbox(string_dtype_data& v) {
+        return std::string(v.begin, v.end);
     }
 };
 

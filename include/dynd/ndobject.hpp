@@ -293,6 +293,29 @@ public:
      * \param property_name  The property to access.
      */
     ndobject p(const std::string& property_name) const;
+    /**
+     * Finds the dynamic function of the ndobject. Throws an
+     * exception if it does not exist.
+     *
+     * \param function_name  The name of the function.
+     */
+    const gfunc::callable& find_function(const char *function_name) const;
+    /**
+     * Calls a dynamic function of the ndobject with zero parameters.
+     *
+     * \param function_name  The function to call.
+     */
+    ndobject f(const char *function_name) const;
+    /**
+     * Calls a dynamic function of the ndobject with one parameter.
+     *
+     * \param function_name  The function to call.
+     * \param p0  The first parameter to the function.
+     */
+    template <class T>
+    inline ndobject f(const char *function_name, const T& p0) const {
+        return find_function(function_name).call(*this, p0);
+    }
 
     /**
      * Returns a value-exposing helper object, which allows one to assign to

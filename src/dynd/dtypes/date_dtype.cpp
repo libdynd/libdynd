@@ -3,21 +3,33 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
+#include <time.h>
+
 #include <algorithm>
 
 #include <dynd/dtypes/date_dtype.hpp>
 #include <dynd/dtypes/date_property_dtype.hpp>
 #include <dynd/dtypes/fixedstruct_dtype.hpp>
+#include <dynd/dtypes/string_dtype.hpp>
 #include <dynd/kernels/single_compare_kernel_instance.hpp>
 #include <dynd/kernels/string_assignment_kernels.hpp>
+#include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/exceptions.hpp>
 #include <dynd/gfunc/make_callable.hpp>
 #include <dynd/kernels/date_assignment_kernels.hpp>
+#include <dynd/ndobject_iter.hpp>
 
 #include <datetime_strings.h>
 
 using namespace std;
 using namespace dynd;
+
+inline datetime::datetime_unit_t datetime_unit_from_date_unit(date_unit_t unit)
+{
+    return unit == date_unit_day ? datetime::datetime_unit_day :
+                                   unit == date_unit_month ? datetime::datetime_unit_month :
+                                   datetime::datetime_unit_year;
+}
 
 date_dtype::date_dtype(date_unit_t unit)
     : m_unit(unit)
@@ -191,6 +203,69 @@ void date_dtype::get_dynamic_ndobject_properties(const std::pair<std::string, gf
     }
 }
 
+///////// functions on the ndobject
+
+static ndobject function_ndo_strftime(const ndobject& n, const std::string& format) {
+    if (format.empty()) {
+        throw runtime_error("format string for strftime should not be empty");
+    }
+    // TODO: lazy evaluation?
+    ndobject result = empty_like(n, make_string_dtype(string_encoding_utf_8));
+    ndobject_iter<1, 1> iter(result, n);
+    kernel_instance<unary_operation_pair_t> kernel;
+    unary_kernel_static_data extra;
+    if (iter.get_uniform_dtype<1>().get_kind() == expression_kind) {
+        get_dtype_assignment_kernel(iter.get_uniform_dtype<1>().value_dtype(), iter.get_uniform_dtype<1>(),
+                        assign_error_none, NULL, kernel);
+        extra.auxdata = kernel.auxdata;
+        extra.dst_metadata = NULL;
+        extra.src_metadata = iter.metadata<1>();
+    }
+    int32_t date;
+    const date_dtype *dd = static_cast<const date_dtype *>(iter.get_uniform_dtype<1>().value_dtype().extended());
+    const extended_string_dtype *esd = static_cast<const extended_string_dtype *>(iter.get_uniform_dtype<0>().extended());
+    datetime::datetime_unit_t datetime_unit = datetime_unit_from_date_unit(dd->get_unit());
+    struct tm tm_val;
+    string str;
+    if (!iter.empty()) {
+        do {
+            // Get the date
+            if (kernel.kernel.single) {
+                kernel.kernel.single(reinterpret_cast<char *>(&date), iter.data<1>(), &extra);
+            } else {
+                date = *reinterpret_cast<const int32_t *>(iter.data<1>());
+            }
+            // Convert the date to a 'struct tm'
+            datetime::date_val_to_struct_tm(date, datetime_unit, tm_val);
+            // Call strftime, growing the string buffer if needed so it fits
+            str.resize(format.size() + 16);
+            for(int i = 0; i < 3; ++i) {
+                size_t len = strftime(&str[0], str.size(), format.c_str(), &tm_val);
+                if (len > 0) {
+                    str.resize(len);
+                    break;
+                } else {
+                    str.resize(str.size() * 2);
+                }
+            }
+            // Copy the string to the output
+            esd->set_utf8_string(iter.metadata<0>(), iter.data<0>(), assign_error_none, str);
+        } while(iter.next());
+    }
+    return result;
+}
+
+
+static pair<string, gfunc::callable> date_ndobject_functions[] = {
+    pair<string, gfunc::callable>("strftime", gfunc::make_callable(&function_ndo_strftime, "self", "format"))
+};
+
+void date_dtype::get_dynamic_ndobject_functions(const std::pair<std::string, gfunc::callable> **out_functions, int *out_count) const
+{
+    *out_functions = date_ndobject_functions;
+    *out_count = sizeof(date_ndobject_functions) / sizeof(date_ndobject_functions[0]);
+}
+
 ///////// property accessor kernels (used by date_property_dtype)
 
 namespace {
@@ -255,9 +330,7 @@ namespace {
 void date_dtype::get_property_getter_kernel(const std::string& property_name,
                 dtype& out_value_dtype, kernel_instance<unary_operation_pair_t>& out_to_value_kernel) const
 {
-    datetime::datetime_unit_t unit = m_unit == date_unit_day ? datetime::datetime_unit_day :
-                                    m_unit == date_unit_month ? datetime::datetime_unit_month :
-                                    datetime::datetime_unit_year;
+    datetime::datetime_unit_t unit = datetime_unit_from_date_unit(m_unit);
 
     out_value_dtype = make_dtype<int32_t>();
     make_raw_auxiliary_data(out_to_value_kernel.auxdata, static_cast<uintptr_t>(unit)<<1);

@@ -340,6 +340,11 @@ class extended_dtype {
     /** Embedded reference counting */
     mutable atomic_refcount m_use_count;
 
+protected:
+    // Helper function for uniform dimension dtypes
+    void get_nonuniform_ndobject_properties_and_functions(
+                    std::vector<std::pair<std::string, gfunc::callable> >& out_properties,
+                    std::vector<std::pair<std::string, gfunc::callable> >& out_functions) const;
 public:
     /** Starts off the extended dtype instance with a use count of 1. */
     extended_dtype()
@@ -622,6 +627,15 @@ public:
      *       just strictly of the non-uniform dtype.
      */
     virtual void get_dynamic_ndobject_properties(const std::pair<std::string, gfunc::callable> **out_properties, int *out_count) const;
+
+    /**
+     * Additional dynamic functions exposed by any ndobject of this dtype as gfunc::callable.
+     *
+     * \note Uniform dtypes copy these functions from the first non-uniform dtype, so such properties must
+     *       be able to handle the case where they are the first non-uniform dtype in an array type, not
+     *       just strictly of the non-uniform dtype.
+     */
+    virtual void get_dynamic_ndobject_functions(const std::pair<std::string, gfunc::callable> **out_functions, int *out_count) const;
 
     friend void extended_dtype_incref(const extended_dtype *ed);
     friend void extended_dtype_decref(const extended_dtype *ed);

@@ -34,6 +34,16 @@ std::ostream& operator<<(std::ostream& o, datetime_unit_t unit);
 
 std::ostream& operator<<(std::ostream& o, datetime_conversion_rule_t rule);
 
+/** A date as year, day offset within year */
+struct date_yd {
+    int32_t year, day;
+};
+
+/** A date as year, month, day */
+struct date_ymd {
+    int32_t year, month, day;
+};
+
 /*
  * This structure contains an exploded view of a date-time value.
  * NaT is represented by year == DATETIME_DATE_NAT.
@@ -105,6 +115,47 @@ struct datetime_fields {
     void add_minutes(int minutes);
 };
 
+/** 
+ * Converts any date value into a 'days' date and filled date_ymd structure.
+ */
+void date_to_days_yd_and_ymd(date_val_t date, datetime_unit_t unit,
+                int32_t& out_days, date_yd& out_yd, date_ymd& out_ymd);
+
+/*
+ * Converts a 'days' date into a date_yd year + day offset structure.
+ */
+void days_to_yeardays(int32_t days, date_yd& out_yd);
+
+/*
+ * Modifies 'days' in place to be the day offset within the year,
+ * and returns the year.
+ */
+int64_t days_to_yeardays(int64_t* inout_days);
+
+/*
+ * Converts a year + days offset to year/month/day struct.
+ */
+void yeardays_to_ymd(int32_t year, int32_t days, date_ymd& out_ymd);
+
+/**
+ * Converts a year/month/day date into a 32-bit days date.
+ */
+int32_t ymd_to_days(int32_t year, int32_t month, int32_t day);
+
+/**
+ * Converts a year/month/day date into a 32-bit days date.
+ */
+inline int32_t ymd_to_days(const date_ymd& ymd) {
+    return ymd_to_days(ymd.year, ymd.month, ymd.day);
+}
+
+/**
+ * Converts a year/month/day date into a 64-bit days date.
+ */
+int64_t ymd_to_days(int64_t year, int32_t month, int32_t day);
+
+void date_val_to_struct_tm(date_val_t date, datetime_unit_t unit, struct tm& out_tm);
+
 extern int days_per_month_table[2][12];
 
 /*
@@ -116,12 +167,6 @@ inline bool is_leapyear(int64_t year)
            ((year % 100) != 0 ||
             (year % 400) == 0);
 }
-
-/*
- * Modifies 'days' in place to be the day offset within the year,
- * and returns the year.
- */
-datetime_val_t days_to_yearsdays(datetime_val_t* inout_days);
 
 /* Extracts the month number from a 'datetime64[D]' value */
 int days_to_month_number(datetime_val_t days);

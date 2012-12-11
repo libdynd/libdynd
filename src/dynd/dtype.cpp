@@ -231,6 +231,37 @@ void extended_dtype::reorder_default_constructed_strides(char *DYND_UNUSED(dst_m
     // Default to scalar behavior, which is to do no modifications.
 }
 
+void extended_dtype::get_nonuniform_ndobject_properties_and_functions(
+                std::vector<std::pair<std::string, gfunc::callable> >& out_properties,
+                std::vector<std::pair<std::string, gfunc::callable> >& out_functions) const
+{
+    // This copies properties from the first non-uniform dtype dimension to
+    // the requested vectors. It is for use by uniform dtypes, which by convention
+    // expose the properties from the first non-uniform dtypes, and possibly add
+    // additional properties of their own.
+    int ndim = get_uniform_ndim();
+    int properties_count = 0, functions_count = 0;
+    const std::pair<std::string, gfunc::callable> *properties = NULL, *functions = NULL;
+    if (ndim == 0) {
+        get_dynamic_ndobject_properties(&properties, &properties_count);
+        get_dynamic_ndobject_functions(&functions, &functions_count);
+    } else {
+        dtype dt = get_dtype_at_dimension(NULL, ndim);
+        if (dt.extended()) {
+            dt.extended()->get_dynamic_ndobject_properties(&properties, &properties_count);
+            dt.extended()->get_dynamic_ndobject_functions(&functions, &functions_count);
+        }
+    }
+    out_properties.resize(properties_count);
+    for (int i = 0; i < properties_count; ++i) {
+        out_properties[i] = properties[i];
+    }
+    out_functions.resize(functions_count);
+    for (int i = 0; i < functions_count; ++i) {
+        out_functions[i] = functions[i];
+    }
+}
+
 void extended_dtype::get_dynamic_dtype_properties(const std::pair<std::string, gfunc::callable> **out_properties, int *out_count) const
 {
     // Default to no properties
@@ -242,6 +273,13 @@ void extended_dtype::get_dynamic_ndobject_properties(const std::pair<std::string
 {
     // Default to no properties
     *out_properties = NULL;
+    *out_count = 0;
+}
+
+void extended_dtype::get_dynamic_ndobject_functions(const std::pair<std::string, gfunc::callable> **out_functions, int *out_count) const
+{
+    // Default to no functions
+    *out_functions = NULL;
     *out_count = 0;
 }
 

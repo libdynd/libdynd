@@ -27,7 +27,8 @@ fixedarray_dtype::fixedarray_dtype(const dtype& element_dtype, size_t dimension_
     m_stride = m_dimension_size > 1 ? element_dtype.get_element_size() : 0;
     m_element_size = m_dimension_size > 1 ? m_stride * m_dimension_size : m_dimension_size * child_element_size;
 
-    create_ndobject_properties();
+    // Copy ndobject properties and functions from the first non-uniform dimension
+    get_nonuniform_ndobject_properties_and_functions(m_ndobject_properties, m_ndobject_functions);
 }
 
 fixedarray_dtype::fixedarray_dtype(const dtype& element_dtype, size_t dimension_size, intptr_t stride)
@@ -54,7 +55,8 @@ fixedarray_dtype::fixedarray_dtype(const dtype& element_dtype, size_t dimension_
     }
     m_element_size = stride ? stride * m_dimension_size : dimension_size * child_element_size;
 
-    create_ndobject_properties();
+    // Copy ndobject properties and functions from the first non-uniform dimension
+    get_nonuniform_ndobject_properties_and_functions(m_ndobject_properties, m_ndobject_functions);
 }
 
 void fixedarray_dtype::print_element(std::ostream& o, const char *metadata, const char *data) const
@@ -439,34 +441,14 @@ dtype dynd::make_fixedarray_dtype(const dtype& uniform_dtype, int ndim, const in
     }
 }
 
-void fixedarray_dtype::create_ndobject_properties()
-{
-    // TODO: This code is shared with all other uniform array dtypes, refactor it to a common place
-    // Copy ndobject properties from the first non-uniform dimension
-    if (m_element_dtype.extended()) {
-        int ndim = m_element_dtype.get_uniform_ndim();
-        int count = 0;
-        const std::pair<std::string, gfunc::callable> *properties;
-        if (ndim == 0) {
-            m_element_dtype.extended()->get_dynamic_ndobject_properties(&properties, &count);
-        } else {
-            dtype dt = m_element_dtype;
-            for (int i = 0; i < ndim; ++i) {
-                dt = dt.at(0);
-            }
-            if (dt.extended()) {
-                dt.extended()->get_dynamic_ndobject_properties(&properties, &count);
-            }
-        }
-        m_ndobject_properties.resize(count);
-        for (int i = 0; i < count; ++i) {
-            m_ndobject_properties[i] = properties[i];
-        }
-    }
-}
-
 void fixedarray_dtype::get_dynamic_ndobject_properties(const std::pair<std::string, gfunc::callable> **out_properties, int *out_count) const
 {
     *out_properties = m_ndobject_properties.empty() ? NULL : &m_ndobject_properties[0];
     *out_count = (int)m_ndobject_properties.size();
+}
+
+void fixedarray_dtype::get_dynamic_ndobject_functions(const std::pair<std::string, gfunc::callable> **out_functions, int *out_count) const
+{
+    *out_functions = m_ndobject_functions.empty() ? NULL : &m_ndobject_functions[0];
+    *out_count = (int)m_ndobject_functions.size();
 }

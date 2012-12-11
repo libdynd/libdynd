@@ -22,7 +22,7 @@ class fixedarray_dtype : public extended_dtype {
     dtype m_element_dtype;
     intptr_t m_stride;
     size_t m_dimension_size, m_element_size;
-    std::vector<std::pair<std::string, gfunc::callable> > m_ndobject_properties;
+    std::vector<std::pair<std::string, gfunc::callable> > m_ndobject_properties, m_ndobject_functions;
 
     void create_ndobject_properties();
 public:
@@ -116,6 +116,7 @@ public:
     void reorder_default_constructed_strides(char *dst_metadata, const dtype& src_dtype, const char *src_metadata) const;
 
     void get_dynamic_ndobject_properties(const std::pair<std::string, gfunc::callable> **out_properties, int *out_count) const;
+    void get_dynamic_ndobject_functions(const std::pair<std::string, gfunc::callable> **out_functions, int *out_count) const;
 };
 
 inline dtype make_fixedarray_dtype(const dtype& element_dtype, size_t size) {

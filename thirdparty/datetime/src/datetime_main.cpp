@@ -94,17 +94,140 @@ int datetime::days_per_month_table[2][12] = {
     { 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 }
 };
 
-/*
- * Calculates the days offset from the 1970 epoch.
- */
-datetime_val_t datetime::datetime_fields::as_days() const
+void datetime::date_to_days_yd_and_ymd(date_val_t date, datetime_unit_t unit,
+                int32_t& out_days, date_yd& out_yd, date_ymd& out_ymd)
 {
-    int i, month;
-    int64_t year;
-    datetime_val_t days = 0;
+    if (date == DATETIME_DATE_NAT) {
+        out_days = DATETIME_DATE_NAT;
+        out_yd.year = DATETIME_DATE_NAT;
+        out_yd.day = 0;
+        out_ymd.year = DATETIME_DATE_NAT;
+        out_ymd.month = 0;
+        out_ymd.day = 0;
+        return;
+    }
+
+    switch (unit) {
+        case datetime_unit_year: {
+            out_ymd.year = 1970 + date;
+            out_ymd.month = 1;
+            out_ymd.day = 1;
+            out_yd.year = 1970;
+            out_yd.day = 0;
+            out_days = ymd_to_days(out_ymd);
+            break;
+        }
+        case datetime_unit_month: {
+            if (date >= 0) {
+                out_ymd.year  = 1970 + date / 12;
+                out_ymd.month = date % 12 + 1;
+                out_ymd.day = 1;
+            }
+            else {
+                out_ymd.year  = 1969 + (date + 1) / 12;
+                out_ymd.month = 12 + (date + 1)% 12;
+                out_ymd.day = 1;
+            }
+            out_days = ymd_to_days(out_ymd);
+            days_to_yeardays(out_days, out_yd);
+            break;
+        }
+        case datetime_unit_day: {
+            out_days = date;
+            days_to_yeardays(out_days, out_yd);
+            yeardays_to_ymd(out_yd.year, out_yd.day, out_ymd);
+            break;
+        }
+        default: {
+            stringstream ss;
+            ss << "datetime unit " << unit << " cannot be used as a date unit";
+            throw runtime_error(ss.str());
+        }
+    }
+}
+
+/*
+ * Modifies 'days' to be the day offset within the year,
+ * and returns the year.
+ */
+template<class T>
+inline T days_to_yeardays_templ(T* inout_days)
+{
+    const T days_per_400years = (400*365 + 100 - 4 + 1);
+    /* Adjust so it's relative to the year 2000 (divisible by 400) */
+    T days = *inout_days - (365*30 + 7);
+    T year;
+
+    /* Break down the 400 year cycle to get the year and day within the year */
+    if (days >= 0) {
+        year = 400 * (days / days_per_400years);
+        days = days % days_per_400years;
+    }
+    else {
+        year = 400 * ((days - (days_per_400years - 1)) / days_per_400years);
+        days = days % days_per_400years;
+        if (days < 0) {
+            days += days_per_400years;
+        }
+    }
+
+    /* Work out the year/day within the 400 year cycle */
+    if (days >= 366) {
+        year += 100 * ((days-1) / (100*365 + 25 - 1));
+        days = (days-1) % (100*365 + 25 - 1);
+        if (days >= 365) {
+            year += 4 * ((days+1) / (4*365 + 1));
+            days = (days+1) % (4*365 + 1);
+            if (days >= 366) {
+                year += (days-1) / 365;
+                days = (days-1) % 365;
+            }
+        }
+    }
+
+    *inout_days = days;
+    return year + 2000;
+}
+
+void datetime::days_to_yeardays(int32_t days, date_yd& out_yd)
+{
+    out_yd.day = days;
+    out_yd.year = days_to_yeardays_templ<int32_t>(&out_yd.day);
+}
+
+int64_t datetime::days_to_yeardays(int64_t* inout_days)
+{
+    return days_to_yeardays_templ<int64_t>(inout_days);
+}
+
+void datetime::yeardays_to_ymd(int32_t year, int32_t days, date_ymd& out_ymd)
+{
+    int *month_lengths, i;
+
+    month_lengths = days_per_month_table[is_leapyear(year)];
+
+    out_ymd.year = year;
+    for (i = 0; i < 12; ++i) {
+        if (days < month_lengths[i]) {
+            out_ymd.month = i + 1;
+            out_ymd.day = (int32_t)days + 1;
+            break;
+        } else {
+            days -= month_lengths[i];
+        }
+    }
+
+}
+
+template<class T>
+inline T ymd_to_days_templ(T year, int32_t month, int32_t day)
+{
+    T original_year = year;
+    int i;
+    T days = 0;
     int *month_lengths;
 
-    year = this->year - 1970;
+    year = year - 1970;
     days = year * 365;
 
     /* Adjust for leap years */
@@ -142,8 +265,8 @@ datetime_val_t datetime::datetime_fields::as_days() const
         days += year / 400;
     }
 
-    month_lengths = days_per_month_table[is_leapyear(this->year)];
-    month = this->month - 1;
+    month_lengths = days_per_month_table[is_leapyear(original_year)];
+    month = month - 1;
 
     /* Add the months */
     for (i = 0; i < month; ++i) {
@@ -151,56 +274,36 @@ datetime_val_t datetime::datetime_fields::as_days() const
     }
 
     /* Add the days */
-    days += this->day - 1;
+    days += day - 1;
 
     return days;
+}
+
+int32_t datetime::ymd_to_days(int32_t year, int32_t month, int32_t day)
+{
+    return ymd_to_days_templ<int32_t>(year, month, day);
+}
+
+int64_t datetime::ymd_to_days(int64_t year, int32_t month, int32_t day)
+{
+    return ymd_to_days_templ<int64_t>(year, month, day);
+}
+
+/*
+ * Calculates the days offset from the 1970 epoch.
+ */
+datetime_val_t datetime::datetime_fields::as_days() const
+{
+    if (this->year != DATETIME_DATETIME_NAT) {
+        return ymd_to_days(this->year, this->month, this->day);
+    } else {
+        return DATETIME_DATETIME_NAT;
+    }
 }
 
 datetime_val_t datetime::datetime_fields::as_minutes() const
 {
     return (as_days() * 24 + this->hour) * 60 + this->min;
-}
-
-/*
- * Modifies 'days' to be the day offset within the year,
- * and returns the year.
- */
-datetime_val_t datetime::days_to_yearsdays(datetime_val_t* inout_days)
-{
-    const datetime_val_t days_per_400years = (400*365 + 100 - 4 + 1);
-    /* Adjust so it's relative to the year 2000 (divisible by 400) */
-    datetime_val_t days = *inout_days - (365*30 + 7);
-    datetime_val_t year;
-
-    /* Break down the 400 year cycle to get the year and day within the year */
-    if (days >= 0) {
-        year = 400 * (days / days_per_400years);
-        days = days % days_per_400years;
-    }
-    else {
-        year = 400 * ((days - (days_per_400years - 1)) / days_per_400years);
-        days = days % days_per_400years;
-        if (days < 0) {
-            days += days_per_400years;
-        }
-    }
-
-    /* Work out the year/day within the 400 year cycle */
-    if (days >= 366) {
-        year += 100 * ((days-1) / (100*365 + 25 - 1));
-        days = (days-1) % (100*365 + 25 - 1);
-        if (days >= 365) {
-            year += 4 * ((days+1) / (4*365 + 1));
-            days = (days+1) % (4*365 + 1);
-            if (days >= 366) {
-                year += (days-1) / 365;
-                days = (days-1) % 365;
-            }
-        }
-    }
-
-    *inout_days = days;
-    return year + 2000;
 }
 
 /* Extracts the month number from a 'datetime64[D]' value */
@@ -209,7 +312,7 @@ int datetime::days_to_month_number(datetime_val_t days)
     int64_t year;
     int *month_lengths, i;
 
-    year = days_to_yearsdays(&days);
+    year = days_to_yeardays(&days);
     month_lengths = days_per_month_table[is_leapyear(year)];
 
     for (i = 0; i < 12; ++i) {
@@ -233,7 +336,7 @@ void datetime::datetime_fields::fill_from_days(datetime_val_t days)
 {
     int *month_lengths, i;
 
-    this->year = days_to_yearsdays(&days);
+    this->year = days_to_yeardays(&days);
     month_lengths = days_per_month_table[is_leapyear(this->year)];
 
     for (i = 0; i < 12; ++i) {
@@ -657,6 +760,26 @@ void datetime::datetime_fields::add_minutes(int minutes)
         }
     }
 }
+
+void datetime::date_val_to_struct_tm(date_val_t date, datetime_unit_t unit, struct tm& out_tm)
+{
+    int32_t days;
+    date_yd yd;
+    date_ymd ymd;
+    date_to_days_yd_and_ymd(date, unit, days, yd, ymd);
+
+    memset(&out_tm, 0, sizeof(struct tm));
+    out_tm.tm_year = ymd.year - 1900;
+    out_tm.tm_yday = yd.day;
+    out_tm.tm_mon = ymd.month - 1;
+    out_tm.tm_mday = ymd.day;
+    // 1970-01-04 is Sunday
+    out_tm.tm_wday = (int)((days - 3) % 7);
+    if (out_tm.tm_wday < 0) {
+        out_tm.tm_wday += 7;
+    }
+}
+
 
 bool datetime::satisfies_conversion_rule(datetime_unit_t dst, datetime_unit_t src, datetime_conversion_rule_t rule)
 {

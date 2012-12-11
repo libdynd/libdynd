@@ -66,6 +66,9 @@ public:
     template<class T>
     ndobject call(const T& p0) const;
 
+    template<class T0, class T1>
+    ndobject call(const T0& p0, const T1& p1) const;
+
     void debug_print(std::ostream& o, const std::string& indent = "") const;
 };
 
@@ -92,6 +95,22 @@ namespace detail {
             }
         }
     };
+
+    template<int N>
+    struct callable_argument_setter<const char[N]> {
+        static void set(const dtype& paramtype, char *metadata, char *data, const char (&value)[N]) {
+            // Setting from a known-sized character string array
+            if (paramtype.get_type_id() == string_type_id &&
+                    static_cast<const string_dtype *>(paramtype.extended())->get_encoding() == string_encoding_utf_8) {
+                reinterpret_cast<string_dtype_metadata*>(metadata)->blockref = NULL;
+                reinterpret_cast<string_dtype_data*>(data)->begin = const_cast<char *>(value);
+                reinterpret_cast<string_dtype_data*>(data)->end = const_cast<char *>(value + N);
+            } else {
+                dtype_assign(paramtype, metadata, data, make_fixedstring_dtype(string_encoding_utf_8, N),
+                        NULL, value);
+            }
+        }
+    };
 } // namespace detail
 
 template<class T>
@@ -110,6 +129,28 @@ inline ndobject callable::call(const T& p0) const
                     p0);
     return call_generic(params);
 }
+
+template<class T0, class T1>
+inline ndobject callable::call(const T0& p0, const T1& p1) const
+{
+    const fixedstruct_dtype *fsdt = static_cast<const fixedstruct_dtype *>(m_parameters_dtype.extended());
+    if (fsdt->get_field_types().size() != 2) {
+        std::stringstream ss;
+        ss << "incorrect number of arguments (received 1) for dynd callable with parameters " << m_parameters_dtype;
+        throw std::runtime_error(ss.str());
+    }
+    ndobject params(m_parameters_dtype);
+    detail::callable_argument_setter<T0>::set(fsdt->get_field_types()[0],
+                    params.get_ndo_meta() + fsdt->get_metadata_offsets()[0],
+                    params.get_ndo()->m_data_pointer + fsdt->get_data_offsets()[0],
+                    p0);
+    detail::callable_argument_setter<T1>::set(fsdt->get_field_types()[1],
+                    params.get_ndo_meta() + fsdt->get_metadata_offsets()[1],
+                    params.get_ndo()->m_data_pointer + fsdt->get_data_offsets()[1],
+                    p1);
+    return call_generic(params);
+}
+
 
 
 }} // namespace dynd::gfunc

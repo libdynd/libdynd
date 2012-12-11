@@ -16,6 +16,7 @@
 #include <dynd/dtypes/convert_dtype.hpp>
 #include <dynd/dtypes/fixedstruct_dtype.hpp>
 #include <dynd/dtypes/struct_dtype.hpp>
+#include <dynd/gfunc/callable.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -339,3 +340,24 @@ TEST(DateDType, StructToDaysUnit) {
     EXPECT_EQ(13,   b.p("day").as<int32_t>());
 }
 
+TEST(DateDType, StrFTime) {
+    dtype d = make_date_dtype(), ds;
+    ndobject a, b;
+
+    a = ndobject("1955-03-13").cast_scalars(d).vals();
+
+    b = a.f("strftime", "%Y");
+    EXPECT_EQ("1955", b.as<string>());
+    b = a.f("strftime", "%m/%d/%y");
+    EXPECT_EQ("03/13/55", b.as<string>());
+    b = a.f("strftime", "%Y and %j");
+    EXPECT_EQ("1955 and 072", b.as<string>());
+
+    const char *strs[] = {"1931-12-12", "2013-05-14", "2012-12-25"};
+    a = ndobject(strs).cast_scalars(d).vals();
+
+    b = a.f("strftime", "%Y-%m-%d %j %U %w %W");
+    EXPECT_EQ("1931-12-12 346 49 6 49", b.at(0).as<string>());
+    EXPECT_EQ("2013-05-14 134 19 2 19", b.at(1).as<string>());
+    EXPECT_EQ("2012-12-25 360 52 2 52", b.at(2).as<string>());
+}

@@ -15,28 +15,8 @@ using namespace dynd;
 strided_array_dtype::strided_array_dtype(const dtype& element_dtype)
     : m_element_dtype(element_dtype)
 {
-    // TODO: This code is shared with all other uniform array dtypes, refactor it to a common place
-    // Copy ndobject properties from the first non-uniform dimension
-    if (m_element_dtype.extended()) {
-        int ndim = m_element_dtype.get_uniform_ndim();
-        int count = 0;
-        const std::pair<std::string, gfunc::callable> *properties;
-        if (ndim == 0) {
-            m_element_dtype.extended()->get_dynamic_ndobject_properties(&properties, &count);
-        } else {
-            dtype dt = m_element_dtype;
-            for (int i = 0; i < ndim; ++i) {
-                dt = dt.at(0);
-            }
-            if (dt.extended()) {
-                dt.extended()->get_dynamic_ndobject_properties(&properties, &count);
-            }
-        }
-        m_ndobject_properties.resize(count);
-        for (int i = 0; i < count; ++i) {
-            m_ndobject_properties[i] = properties[i];
-        }
-    }
+    // Copy ndobject properties and functions from the first non-uniform dimension
+    get_nonuniform_ndobject_properties_and_functions(m_ndobject_properties, m_ndobject_functions);
 }
 
 size_t strided_array_dtype::get_default_element_size(int ndim, const intptr_t *shape) const
@@ -485,4 +465,10 @@ void strided_array_dtype::get_dynamic_ndobject_properties(const std::pair<std::s
 {
     *out_properties = m_ndobject_properties.empty() ? NULL : &m_ndobject_properties[0];
     *out_count = (int)m_ndobject_properties.size();
+}
+
+void strided_array_dtype::get_dynamic_ndobject_functions(const std::pair<std::string, gfunc::callable> **out_functions, int *out_count) const
+{
+    *out_functions = m_ndobject_functions.empty() ? NULL : &m_ndobject_functions[0];
+    *out_count = (int)m_ndobject_functions.size();
 }
