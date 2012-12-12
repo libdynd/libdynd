@@ -177,6 +177,11 @@ void extended_dtype::metadata_reset_buffers(char *DYND_UNUSED(metadata)) const
     // By default there are no buffers to reset
 }
 
+void extended_dtype::metadata_finalize_buffers(char *DYND_UNUSED(metadata)) const
+{
+    // By default there are no buffers to finalize
+}
+
 // TODO: Make this a pure virtual function eventually
 void extended_dtype::metadata_destruct(char *DYND_UNUSED(metadata)) const
 {

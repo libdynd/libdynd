@@ -377,6 +377,26 @@ void fixedstruct_dtype::metadata_copy_construct(char *dst_metadata, const char *
     }
 }
 
+void fixedstruct_dtype::metadata_reset_buffers(char *metadata) const
+{
+    for (size_t i = 0; i < m_field_types.size(); ++i) {
+        const dtype& field_dt = m_field_types[i];
+        if (field_dt.extended()) {
+            field_dt.extended()->metadata_reset_buffers(metadata + m_metadata_offsets[i]);
+        }
+    }
+}
+
+void fixedstruct_dtype::metadata_finalize_buffers(char *metadata) const
+{
+    for (size_t i = 0; i < m_field_types.size(); ++i) {
+        const dtype& field_dt = m_field_types[i];
+        if (field_dt.extended()) {
+            field_dt.extended()->metadata_finalize_buffers(metadata + m_metadata_offsets[i]);
+        }
+    }
+}
+
 void fixedstruct_dtype::metadata_destruct(char *metadata) const
 {
     for (size_t i = 0; i < m_field_types.size(); ++i) {

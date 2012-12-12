@@ -245,6 +245,18 @@ void pointer_dtype::metadata_reset_buffers(char *DYND_UNUSED(metadata)) const
     throw runtime_error("TODO implement pointer_dtype::metadata_reset_buffers");
 }
 
+void pointer_dtype::metadata_finalize_buffers(char *metadata) const
+{
+    pointer_dtype_metadata *md = reinterpret_cast<pointer_dtype_metadata *>(metadata);
+    if (md->blockref != NULL) {
+        // Finalize the memory block
+        memory_block_pod_allocator_api *allocator = get_memory_block_pod_allocator_api(md->blockref);
+        if (allocator != NULL) {
+            allocator->finalize(md->blockref);
+        }
+    }
+}
+
 void pointer_dtype::metadata_destruct(char *metadata) const
 {
     pointer_dtype_metadata *md = reinterpret_cast<pointer_dtype_metadata *>(metadata);

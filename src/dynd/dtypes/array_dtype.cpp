@@ -245,6 +245,24 @@ void array_dtype::metadata_reset_buffers(char *DYND_UNUSED(metadata)) const
     throw runtime_error("TODO implement array_dtype::metadata_reset_buffers");
 }
 
+void array_dtype::metadata_finalize_buffers(char *metadata) const
+{
+    // Finalize any child metadata
+    if (m_element_dtype.extended() != NULL) {
+        m_element_dtype.extended()->metadata_finalize_buffers(metadata + sizeof(array_dtype_metadata));
+    }
+
+    // Finalize the blockref buffer we own
+    array_dtype_metadata *md = reinterpret_cast<array_dtype_metadata *>(metadata);
+    if (md->blockref != NULL) {
+        // Finalize the memory block
+        memory_block_pod_allocator_api *allocator = get_memory_block_pod_allocator_api(md->blockref);
+        if (allocator != NULL) {
+            allocator->finalize(md->blockref);
+        }
+    }
+}
+
 void array_dtype::metadata_destruct(char *metadata) const
 {
     array_dtype_metadata *md = reinterpret_cast<array_dtype_metadata *>(metadata);

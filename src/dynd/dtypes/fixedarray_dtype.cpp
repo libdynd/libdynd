@@ -309,6 +309,20 @@ void fixedarray_dtype::metadata_copy_construct(char *dst_metadata, const char *s
     }
 }
 
+void fixedarray_dtype::metadata_reset_buffers(char *metadata) const
+{
+    if (m_element_dtype.extended()) {
+        m_element_dtype.extended()->metadata_reset_buffers(metadata);
+    }
+}
+
+void fixedarray_dtype::metadata_finalize_buffers(char *metadata) const
+{
+    if (m_element_dtype.extended()) {
+        m_element_dtype.extended()->metadata_finalize_buffers(metadata);
+    }
+}
+
 void fixedarray_dtype::metadata_destruct(char *metadata) const
 {
     if (m_element_dtype.extended()) {

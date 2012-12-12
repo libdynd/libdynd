@@ -360,13 +360,20 @@ TEST(DateDType, StrFTime) {
     EXPECT_EQ("1931-12-12 346 49 6 49", b.at(0).as<string>());
     EXPECT_EQ("2013-05-14 134 19 2 19", b.at(1).as<string>());
     EXPECT_EQ("2012-12-25 360 52 2 52", b.at(2).as<string>());
+}
 
 #if defined(_MSC_VER)
+// Only the Windows strftime seems to support this behavior without
+// writing our own strftime format parser.
+TEST(DateDType, StrFTimeBadFormat) {
+    dtype d = make_date_dtype();
+    ndobject a;
+
+    a = ndobject("1955-03-13").cast_scalars(d).vals();
     // Invalid format string should raise an error.
-    // Only the Windows one seems to support this behavior though.
     EXPECT_THROW(a.f("strftime").call(a, "%Y %x %s"), runtime_error);
-#endif
 }
+#endif
 
 TEST(DateDType, WeekDay) {
     dtype d = make_date_dtype(), ds;
