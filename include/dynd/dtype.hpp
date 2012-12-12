@@ -89,7 +89,7 @@ enum type_id_t {
     // Complex floating-point types
     complex_float32_type_id,
     complex_float64_type_id,
-    // Means no type, just like in C. (Different from Numpy)
+    // Means no type, just like in C. (Different from NumPy)
     void_type_id,
     void_pointer_type_id,
 

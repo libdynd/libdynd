@@ -9,6 +9,7 @@
 #include <dynd/dtypes/string_dtype.hpp>
 #include <dynd/kernels/single_compare_kernel_instance.hpp>
 #include <dynd/kernels/string_assignment_kernels.hpp>
+#include <dynd/kernels/string_numeric_assignment_kernels.hpp>
 #include <dynd/exceptions.hpp>
 #include <dynd/gfunc/make_callable.hpp>
 
@@ -366,12 +367,24 @@ void fixedstring_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const d
                 break;
             }
             default: {
-                src_dt.extended()->get_dtype_assignment_kernel(dst_dt, src_dt, errmode, out_kernel);
+                if (src_dt.extended()) {
+                    src_dt.extended()->get_dtype_assignment_kernel(dst_dt, src_dt, errmode, out_kernel);
+                } else {
+                    stringstream ss;
+                    ss << "assignment from " << src_dt << " to " << dst_dt << " is not implemented yet";
+                    throw runtime_error(ss.str());
+                }
                 break;
             }
         }
     } else {
-        throw runtime_error("conversions from string to non-string are not implemented");
+        if (dst_dt.extended() == NULL) {
+            get_string_to_builtin_assignment_kernel(dst_dt.get_type_id(), src_dt, errmode, out_kernel);
+        } else {
+            stringstream ss;
+            ss << "assignment from " << src_dt << " to " << dst_dt << " is not implemented yet";
+            throw runtime_error(ss.str());
+        }
     }
 }
 

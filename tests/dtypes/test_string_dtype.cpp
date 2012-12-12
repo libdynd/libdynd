@@ -288,3 +288,80 @@ TEST(StringDType, EncodingSizes) {
     EXPECT_EQ(2, string_encoding_char_size_table[string_encoding_utf_16]);
     EXPECT_EQ(4, string_encoding_char_size_table[string_encoding_utf_32]);
 }
+
+TEST(StringDType, StringToBool) {
+    EXPECT_TRUE(ndobject("true").cast_scalars<dynd_bool>().as<bool>());
+    EXPECT_TRUE(ndobject(" True").cast_scalars<dynd_bool>().as<bool>());
+    EXPECT_TRUE(ndobject("TRUE ").cast_scalars<dynd_bool>().as<bool>());
+    EXPECT_TRUE(ndobject("T").cast_scalars<dynd_bool>().as<bool>());
+    EXPECT_TRUE(ndobject("yes  ").cast_scalars<dynd_bool>().as<bool>());
+    EXPECT_TRUE(ndobject("Yes").cast_scalars<dynd_bool>().as<bool>());
+    EXPECT_TRUE(ndobject("Y").cast_scalars<dynd_bool>().as<bool>());
+    EXPECT_TRUE(ndobject(" on").cast_scalars<dynd_bool>().as<bool>());
+    EXPECT_TRUE(ndobject("On").cast_scalars<dynd_bool>().as<bool>());
+    EXPECT_TRUE(ndobject("1").cast_scalars<dynd_bool>().as<bool>());
+
+    EXPECT_FALSE(ndobject("false").cast_scalars<dynd_bool>().as<bool>());
+    EXPECT_FALSE(ndobject("False").cast_scalars<dynd_bool>().as<bool>());
+    EXPECT_FALSE(ndobject("FALSE ").cast_scalars<dynd_bool>().as<bool>());
+    EXPECT_FALSE(ndobject("F ").cast_scalars<dynd_bool>().as<bool>());
+    EXPECT_FALSE(ndobject(" no").cast_scalars<dynd_bool>().as<bool>());
+    EXPECT_FALSE(ndobject("No").cast_scalars<dynd_bool>().as<bool>());
+    EXPECT_FALSE(ndobject("N").cast_scalars<dynd_bool>().as<bool>());
+    EXPECT_FALSE(ndobject("off ").cast_scalars<dynd_bool>().as<bool>());
+    EXPECT_FALSE(ndobject("Off").cast_scalars<dynd_bool>().as<bool>());
+    EXPECT_FALSE(ndobject("0 ").cast_scalars<dynd_bool>().as<bool>());
+
+    // By default, conversion to bool is not permissive
+    EXPECT_THROW(ndobject(ndobject("").cast_scalars<dynd_bool>().vals()), runtime_error);
+    EXPECT_THROW(ndobject(ndobject("2").cast_scalars<dynd_bool>().vals()), runtime_error);
+    EXPECT_THROW(ndobject(ndobject("flase").cast_scalars<dynd_bool>().vals()), runtime_error);
+
+    // In "none" mode, it's a bit more permissive
+    EXPECT_FALSE(ndobject(ndobject("").cast_scalars<dynd_bool>(assign_error_none).vals()).as<bool>());
+    EXPECT_TRUE(ndobject(ndobject("2").cast_scalars<dynd_bool>(assign_error_none).vals()).as<bool>());
+    EXPECT_TRUE(ndobject(ndobject("flase").cast_scalars<dynd_bool>(assign_error_none).vals()).as<bool>());
+}
+
+TEST(StringDType, StringToInteger) {
+    // Test the boundary cases of the various integers
+    EXPECT_EQ(-128, ndobject("-128").cast_scalars<int8_t>().as<int8_t>());
+    EXPECT_EQ(127, ndobject("127").cast_scalars<int8_t>().as<int8_t>());
+    EXPECT_THROW(ndobject(ndobject("-129").cast_scalars<int8_t>().vals()), runtime_error);
+    EXPECT_THROW(ndobject(ndobject("128").cast_scalars<int8_t>().vals()), runtime_error);
+
+    EXPECT_EQ(-32768, ndobject("-32768").cast_scalars<int16_t>().as<int16_t>());
+    EXPECT_EQ(32767, ndobject("32767").cast_scalars<int16_t>().as<int16_t>());
+    EXPECT_THROW(ndobject(ndobject("-32769").cast_scalars<int16_t>().vals()), runtime_error);
+    EXPECT_THROW(ndobject(ndobject("32768").cast_scalars<int16_t>().vals()), runtime_error);
+
+    EXPECT_EQ(-2147483648, ndobject("-2147483648").cast_scalars<int32_t>().as<int32_t>());
+    EXPECT_EQ(2147483647, ndobject("2147483647").cast_scalars<int32_t>().as<int32_t>());
+    EXPECT_THROW(ndobject(ndobject("-2147483649").cast_scalars<int32_t>().vals()), runtime_error);
+    EXPECT_THROW(ndobject(ndobject("2147483648").cast_scalars<int32_t>().vals()), runtime_error);
+
+    EXPECT_EQ(-9223372036854775808LL, ndobject("-9223372036854775808").cast_scalars<int64_t>().as<int64_t>());
+    EXPECT_EQ(9223372036854775807LL, ndobject("9223372036854775807").cast_scalars<int64_t>().as<int64_t>());
+    EXPECT_THROW(ndobject(ndobject("-9223372036854775809").cast_scalars<int64_t>().vals()), runtime_error);
+    EXPECT_THROW(ndobject(ndobject("9223372036854775808").cast_scalars<int64_t>().vals()), runtime_error);
+
+    EXPECT_EQ(0, ndobject("0").cast_scalars<uint8_t>().as<uint8_t>());
+    EXPECT_EQ(255, ndobject("255").cast_scalars<uint8_t>().as<uint8_t>());
+    EXPECT_THROW(ndobject(ndobject("-1").cast_scalars<uint8_t>().vals()), runtime_error);
+    EXPECT_THROW(ndobject(ndobject("256").cast_scalars<uint8_t>().vals()), runtime_error);
+
+    EXPECT_EQ(0, ndobject("0").cast_scalars<uint16_t>().as<uint16_t>());
+    EXPECT_EQ(65535, ndobject("65535").cast_scalars<uint16_t>().as<uint16_t>());
+    EXPECT_THROW(ndobject(ndobject("-1").cast_scalars<uint16_t>().vals()), runtime_error);
+    EXPECT_THROW(ndobject(ndobject("65536").cast_scalars<uint16_t>().vals()), runtime_error);
+
+    EXPECT_EQ(0, ndobject("0").cast_scalars<uint32_t>().as<uint32_t>());
+    EXPECT_EQ(4294967295U, ndobject("4294967295").cast_scalars<uint32_t>().as<uint32_t>());
+    EXPECT_THROW(ndobject(ndobject("-1").cast_scalars<uint32_t>().vals()), runtime_error);
+    EXPECT_THROW(ndobject(ndobject("4294967296").cast_scalars<uint32_t>().vals()), runtime_error);
+
+    EXPECT_EQ(0, ndobject("0").cast_scalars<uint64_t>().as<uint64_t>());
+    EXPECT_EQ(18446744073709551615ULL, ndobject("18446744073709551615").cast_scalars<uint64_t>().as<uint64_t>());
+    EXPECT_THROW(ndobject(ndobject("-1").cast_scalars<uint64_t>().vals()), runtime_error);
+    EXPECT_THROW(ndobject(ndobject("18446744073709551616").cast_scalars<uint64_t>().vals()), runtime_error);
+}

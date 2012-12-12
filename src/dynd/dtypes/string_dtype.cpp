@@ -7,6 +7,7 @@
 #include <dynd/memblock/pod_memory_block.hpp>
 #include <dynd/kernels/single_compare_kernel_instance.hpp>
 #include <dynd/kernels/string_assignment_kernels.hpp>
+#include <dynd/kernels/string_numeric_assignment_kernels.hpp>
 #include <dynd/dtypes/fixedstring_dtype.hpp>
 #include <dynd/exceptions.hpp>
 
@@ -211,9 +212,13 @@ void string_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const dtype&
             }
         }
     } else {
-        stringstream ss;
-        ss << "assignment from " << src_dt << " to " << dst_dt << " is not implemented yet";
-        throw runtime_error(ss.str());
+        if (dst_dt.extended() == NULL) {
+            get_string_to_builtin_assignment_kernel(dst_dt.get_type_id(), src_dt, errmode, out_kernel);
+        } else {
+            stringstream ss;
+            ss << "assignment from " << src_dt << " to " << dst_dt << " is not implemented yet";
+            throw runtime_error(ss.str());
+        }
     }
 }
 
