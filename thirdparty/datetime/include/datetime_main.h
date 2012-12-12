@@ -115,6 +115,12 @@ struct datetime_fields {
     void add_minutes(int minutes);
 };
 
+bool is_valid_ymd(int32_t year, int32_t month, int32_t day);
+
+inline bool is_valid_ymd(const date_ymd& ymd) {
+    return is_valid_ymd(ymd.year, ymd.month, ymd.day);
+}
+
 /** 
  * Converts any date value into a 'days' date and filled date_yd/date_ymd structures.
  */
@@ -166,7 +172,7 @@ int64_t ymd_to_days(int64_t year, int32_t month, int32_t day);
 
 void date_val_to_struct_tm(date_val_t date, datetime_unit_t unit, struct tm& out_tm);
 
-extern int days_per_month_table[2][12];
+extern const int days_per_month_table[2][12];
 
 /*
  * Returns true if the given year is a leap year, false otherwise.

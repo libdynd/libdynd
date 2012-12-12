@@ -44,6 +44,40 @@ date_dtype::date_dtype(date_unit_t unit)
     }
 }
 
+void date_dtype::set_ymd(const char *DYND_UNUSED(metadata), char *data,
+                assign_error_mode errmode, int32_t year, int32_t month, int32_t day) const
+{
+    if (errmode != assign_error_none && !datetime::is_valid_ymd(year, month, day)) {
+        stringstream ss;
+        ss << "invalid input year/month/day " << year << "/" << month << "/" << day;
+        throw runtime_error(ss.str());
+    }
+
+    switch (m_unit) {
+        case date_unit_year:
+            if (errmode != assign_error_none && (month != 1 || day != 1)) {
+                stringstream ss;
+                ss << "out of range year/month/day " << year << "/" << month << "/" << day << " for years unit";
+                throw runtime_error(ss.str());
+            }
+            *reinterpret_cast<int32_t *>(data) = year - 1970;
+            break;
+        case date_unit_month:
+            if (errmode != assign_error_none && (day != 1)) {
+                stringstream ss;
+                ss << "out of range year/month/day " << year << "/" << month << "/" << day << " for months unit";
+                throw runtime_error(ss.str());
+            }
+            *reinterpret_cast<int32_t *>(data) = 12 * (year - 1970) + (month - 1);
+            break;
+        case date_unit_day:
+            *reinterpret_cast<int32_t *>(data) = datetime::ymd_to_days(year, month, day);
+            break;
+        default:
+            throw runtime_error("date dtype has corrupted date unit");
+    }
+}
+
 void date_dtype::print_element(std::ostream& o, const char *DYND_UNUSED(metadata), const char *data) const
 {
     int32_t value = *reinterpret_cast<const int32_t *>(data);

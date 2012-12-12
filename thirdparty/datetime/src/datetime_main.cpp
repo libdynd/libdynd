@@ -89,10 +89,25 @@ std::ostream& datetime::operator<<(std::ostream& o, datetime_conversion_rule_t r
 }
 
 /* Days per month, regular year and leap year */
-int datetime::days_per_month_table[2][12] = {
+const int datetime::days_per_month_table[2][12] = {
     { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 },
     { 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 }
 };
+
+bool datetime::is_valid_ymd(int32_t year, int32_t month, int32_t day)
+{
+    if (year == DATETIME_DATE_NAT) {
+        return false;
+    }
+    if (month < 1 || month > 12) {
+        return false;
+    }
+    const int *month_lengths = days_per_month_table[is_leapyear(year)];
+    if (day < 1 || day > month_lengths[month-1]) {
+        return false;
+    }
+    return true;
+}
 
 void datetime::date_to_ymd(date_val_t date, datetime_unit_t unit, date_ymd& out_ymd)
 {
@@ -288,12 +303,10 @@ int64_t datetime::days_to_yeardays(int64_t* inout_days)
 
 void datetime::yeardays_to_ymd(int32_t year, int32_t days, date_ymd& out_ymd)
 {
-    int *month_lengths, i;
-
-    month_lengths = days_per_month_table[is_leapyear(year)];
+    const int *month_lengths = days_per_month_table[is_leapyear(year)];
 
     out_ymd.year = year;
-    for (i = 0; i < 12; ++i) {
+    for (int i = 0; i < 12; ++i) {
         if (days < month_lengths[i]) {
             out_ymd.month = i + 1;
             out_ymd.day = (int32_t)days + 1;
@@ -311,7 +324,6 @@ inline T ymd_to_days_templ(T year, int32_t month, int32_t day)
     T original_year = year;
     int i;
     T days = 0;
-    int *month_lengths;
 
     year = year - 1970;
     days = year * 365;
@@ -351,7 +363,7 @@ inline T ymd_to_days_templ(T year, int32_t month, int32_t day)
         days += year / 400;
     }
 
-    month_lengths = days_per_month_table[is_leapyear(original_year)];
+    const int *month_lengths = days_per_month_table[is_leapyear(original_year)];
     month = month - 1;
 
     /* Add the months */
@@ -396,12 +408,11 @@ datetime_val_t datetime::datetime_fields::as_minutes() const
 int datetime::days_to_month_number(datetime_val_t days)
 {
     int64_t year;
-    int *month_lengths, i;
 
     year = days_to_yeardays(&days);
-    month_lengths = days_per_month_table[is_leapyear(year)];
+    const int *month_lengths = days_per_month_table[is_leapyear(year)];
 
-    for (i = 0; i < 12; ++i) {
+    for (int i = 0; i < 12; ++i) {
         if (days < month_lengths[i]) {
             return i + 1;
         }
@@ -420,12 +431,10 @@ int datetime::days_to_month_number(datetime_val_t days)
  */
 void datetime::datetime_fields::fill_from_days(datetime_val_t days)
 {
-    int *month_lengths, i;
-
     this->year = days_to_yeardays(&days);
-    month_lengths = days_per_month_table[is_leapyear(this->year)];
+    const int *month_lengths = days_per_month_table[is_leapyear(this->year)];
 
-    for (i = 0; i < 12; ++i) {
+    for (int i = 0; i < 12; ++i) {
         if (days < month_lengths[i]) {
             this->month = i + 1;
             this->day = (int)days + 1;

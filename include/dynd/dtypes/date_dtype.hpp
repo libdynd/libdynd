@@ -61,6 +61,9 @@ public:
         return m_unit;
     }
 
+    void set_ymd(const char *metadata, char *data, assign_error_mode errmode,
+                    int32_t year, int32_t month, int32_t day) const;
+
     void print_element(std::ostream& o, const char *metadata, const char *data) const;
 
     void print_dtype(std::ostream& o) const;
