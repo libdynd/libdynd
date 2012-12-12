@@ -93,6 +93,9 @@ namespace {
     };
 } // anonymous namespace
 
+/////////////////////////////////////////
+// builtin to string assignment
+
 static void raise_string_cast_error(const dtype& dst_dt, const dtype& string_dt, const char *metadata, const char *data)
 {
     stringstream ss;
@@ -392,6 +395,58 @@ void dynd::get_string_to_builtin_assignment_kernel(type_id_t dst_type_id,
     } else {
         stringstream ss;
         ss << "get_string_to_builtin_assignment_kernel: destination type id " << dst_type_id << " is not builtin";
+        throw runtime_error(ss.str());
+    }
+}
+
+/////////////////////////////////////////
+// string to builtin assignment
+
+namespace {
+    struct builtin_to_string_auxdata {
+        dtype dst_string_dt;
+        type_id_t src_type_id;
+        assign_error_mode errmode;
+    };
+} // anonymous namespace
+
+static void builtin_to_string_kernel_single(char *dst, const char *src, unary_kernel_static_data *extra)
+{
+    builtin_to_string_auxdata& ad = get_auxiliary_data<builtin_to_string_auxdata>(extra->auxdata);
+    // Get the string from the source
+    const extended_string_dtype *esd = static_cast<const extended_string_dtype *>(ad.dst_string_dt.extended());
+
+    // TODO: There are much faster ways to do this, but it's very generic!
+    //       Also, for floating point values, a printing scheme like Python's,
+    //       where it prints the shortest string that's guaranteed to parse to
+    //       the same float number, would be better.
+    stringstream ss;
+    dtype(ad.src_type_id).print_element(ss, extra->src_metadata, src);
+    esd->set_utf8_string(extra->dst_metadata, dst, ad.errmode, ss.str());
+}
+
+void dynd::get_builtin_to_string_assignment_kernel(const dtype& dst_string_dt,
+                type_id_t src_type_id,
+                assign_error_mode errmode,
+                kernel_instance<unary_operation_pair_t>& out_kernel)
+{
+    if (dst_string_dt.get_kind() != string_kind) {
+        stringstream ss;
+        ss << "get_string_to_builtin_assignment_kernel: source dtype " << dst_string_dt << " is not a string dtype";
+        throw runtime_error(ss.str());
+    }
+
+    if (src_type_id >= 0 && src_type_id < builtin_type_id_count) {
+        out_kernel.kernel.single = &builtin_to_string_kernel_single;
+        out_kernel.kernel.contig = NULL;
+        make_auxiliary_data<builtin_to_string_auxdata>(out_kernel.auxdata);
+        builtin_to_string_auxdata& ad = out_kernel.auxdata.get<builtin_to_string_auxdata>();
+        ad.errmode = errmode;
+        ad.src_type_id = src_type_id;
+        ad.dst_string_dt = dst_string_dt;
+    } else {
+        stringstream ss;
+        ss << "get_string_to_builtin_assignment_kernel: destination type id " << src_type_id << " is not builtin";
         throw runtime_error(ss.str());
     }
 }

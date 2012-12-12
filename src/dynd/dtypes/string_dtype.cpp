@@ -204,9 +204,7 @@ void string_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const dtype&
                 if (src_dt.extended()) {
                     src_dt.extended()->get_dtype_assignment_kernel(dst_dt, src_dt, errmode, out_kernel);
                 } else {
-                    stringstream ss;
-                    ss << "assignment from " << src_dt << " to " << dst_dt << " is not implemented yet";
-                    throw runtime_error(ss.str());
+                    get_builtin_to_string_assignment_kernel(dst_dt, src_dt.get_type_id(), errmode, out_kernel);
                 }
                 break;
             }
