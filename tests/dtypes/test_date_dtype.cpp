@@ -159,12 +159,12 @@ TEST(DateDType, DateDaysUnitProperties) {
     EXPECT_EQ(25, a.p("day").at(2).as<int32_t>());
 }
 
-TEST(DateDType, DateDaysUnitStructProperty) {
+TEST(DateDType, DateDaysUnitStructFunction) {
     dtype d = make_date_dtype();
     ndobject a, b;
 
     a = ndobject("1955-03-13").cast_scalars(d).vals();
-    b = a.p("struct");
+    b = a.f("to_struct").call(a);
     EXPECT_EQ(make_convert_dtype(make_fixedstruct_dtype(make_dtype<int32_t>(), "year", make_dtype<int8_t>(), "month", make_dtype<int8_t>(), "day"), d),
                     b.get_dtype());
     b = b.vals();
@@ -368,3 +368,12 @@ TEST(DateDType, StrFTime) {
 #endif
 }
 
+TEST(DateDType, WeekDay) {
+    dtype d = make_date_dtype(), ds;
+    ndobject a, b;
+
+    a = ndobject("1955-03-13").cast_scalars(d).vals();
+    EXPECT_EQ(6, a.f("weekday").call(a).as<int32_t>());
+    a = ndobject("2002-12-04").cast_scalars(d).vals();
+    EXPECT_EQ(2, a.f("weekday").call(a).as<int32_t>());
+}

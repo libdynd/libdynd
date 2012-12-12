@@ -94,6 +94,92 @@ int datetime::days_per_month_table[2][12] = {
     { 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 }
 };
 
+void datetime::date_to_ymd(date_val_t date, datetime_unit_t unit, date_ymd& out_ymd)
+{
+    if (date == DATETIME_DATE_NAT) {
+        out_ymd.year = DATETIME_DATE_NAT;
+        out_ymd.month = 0;
+        out_ymd.day = 0;
+        return;
+    }
+
+    switch (unit) {
+        case datetime_unit_year: {
+            out_ymd.year = 1970 + date;
+            out_ymd.month = 1;
+            out_ymd.day = 1;
+            break;
+        }
+        case datetime_unit_month: {
+            if (date >= 0) {
+                out_ymd.year  = 1970 + date / 12;
+                out_ymd.month = date % 12 + 1;
+                out_ymd.day = 1;
+            }
+            else {
+                out_ymd.year  = 1969 + (date + 1) / 12;
+                out_ymd.month = 12 + (date + 1)% 12;
+                out_ymd.day = 1;
+            }
+            break;
+        }
+        case datetime_unit_day: {
+            date_yd yd;
+            days_to_yeardays(date, yd);
+            yeardays_to_ymd(yd.year, yd.day, out_ymd);
+            break;
+        }
+        default: {
+            stringstream ss;
+            ss << "datetime unit " << unit << " cannot be used as a date unit";
+            throw runtime_error(ss.str());
+        }
+    }
+}
+
+void datetime::date_to_days(date_val_t date, datetime_unit_t unit, int32_t& out_days)
+{
+    if (date == DATETIME_DATE_NAT) {
+        out_days = DATETIME_DATE_NAT;
+        return;
+    }
+
+    switch (unit) {
+        case datetime_unit_year: {
+            date_ymd ymd;
+            ymd.year = 1970 + date;
+            ymd.month = 1;
+            ymd.day = 1;
+            out_days = ymd_to_days(ymd);
+            break;
+        }
+        case datetime_unit_month: {
+            date_ymd ymd;
+            if (date >= 0) {
+                ymd.year  = 1970 + date / 12;
+                ymd.month = date % 12 + 1;
+                ymd.day = 1;
+            }
+            else {
+                ymd.year  = 1969 + (date + 1) / 12;
+                ymd.month = 12 + (date + 1)% 12;
+                ymd.day = 1;
+            }
+            out_days = ymd_to_days(ymd);
+            break;
+        }
+        case datetime_unit_day: {
+            out_days = date;
+            break;
+        }
+        default: {
+            stringstream ss;
+            ss << "datetime unit " << unit << " cannot be used as a date unit";
+            throw runtime_error(ss.str());
+        }
+    }
+}
+
 void datetime::date_to_days_yd_and_ymd(date_val_t date, datetime_unit_t unit,
                 int32_t& out_days, date_yd& out_yd, date_ymd& out_ymd)
 {

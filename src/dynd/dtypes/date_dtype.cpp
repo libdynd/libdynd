@@ -159,13 +159,6 @@ void date_dtype::get_dynamic_dtype_properties(const std::pair<std::string, gfunc
 
 ///////// properties on the ndobject
 
-static ndobject property_ndo_get_struct(const ndobject& n) {
-    dtype array_dt = n.get_dtype();
-    dtype dt = array_dt.get_dtype_at_dimension(NULL, array_dt.get_uniform_ndim()).value_dtype();
-    const date_dtype *dd = static_cast<const date_dtype *>(dt.extended());
-    return n.cast_scalars(date_dtype_default_struct_dtypes[dd->get_unit()]);
-}
-
 static ndobject property_ndo_get_year(const ndobject& n) {
     dtype array_dt = n.get_dtype();
     dtype dt = array_dt.get_dtype_at_dimension(NULL, array_dt.get_uniform_ndim());
@@ -185,7 +178,6 @@ static ndobject property_ndo_get_day(const ndobject& n) {
 }
 
 static pair<string, gfunc::callable> date_ndobject_properties[] = {
-    pair<string, gfunc::callable>("struct", gfunc::make_callable(&property_ndo_get_struct, "self")),
     pair<string, gfunc::callable>("year", gfunc::make_callable(&property_ndo_get_year, "self")),
     pair<string, gfunc::callable>("month", gfunc::make_callable(&property_ndo_get_month, "self")),
     pair<string, gfunc::callable>("day", gfunc::make_callable(&property_ndo_get_day, "self"))
@@ -204,6 +196,13 @@ void date_dtype::get_dynamic_ndobject_properties(const std::pair<std::string, gf
 }
 
 ///////// functions on the ndobject
+
+static ndobject function_ndo_to_struct(const ndobject& n) {
+    dtype array_dt = n.get_dtype();
+    dtype dt = array_dt.get_dtype_at_dimension(NULL, array_dt.get_uniform_ndim()).value_dtype();
+    const date_dtype *dd = static_cast<const date_dtype *>(dt.extended());
+    return n.cast_scalars(date_dtype_default_struct_dtypes[dd->get_unit()]);
+}
 
 static ndobject function_ndo_strftime(const ndobject& n, const std::string& format) {
     if (format.empty()) {
@@ -267,9 +266,16 @@ static ndobject function_ndo_strftime(const ndobject& n, const std::string& form
     return result;
 }
 
+static ndobject function_ndo_weekday(const ndobject& n) {
+    dtype array_dt = n.get_dtype();
+    dtype dt = array_dt.get_dtype_at_dimension(NULL, array_dt.get_uniform_ndim());
+    return n.view_scalars(make_date_property_dtype(dt, "weekday"));
+}
 
 static pair<string, gfunc::callable> date_ndobject_functions[] = {
-    pair<string, gfunc::callable>("strftime", gfunc::make_callable(&function_ndo_strftime, "self", "format"))
+    pair<string, gfunc::callable>("to_struct", gfunc::make_callable(&function_ndo_to_struct, "self")),
+    pair<string, gfunc::callable>("strftime", gfunc::make_callable(&function_ndo_strftime, "self", "format")),
+    pair<string, gfunc::callable>("weekday", gfunc::make_callable(&function_ndo_weekday, "self"))
 };
 
 void date_dtype::get_dynamic_ndobject_functions(const std::pair<std::string, gfunc::callable> **out_functions, int *out_count) const
@@ -284,18 +290,18 @@ namespace {
     void property_kernel_year_single(char *dst, const char *src, unary_kernel_static_data *extra)
     {
         datetime::datetime_unit_t unit = static_cast<datetime::datetime_unit_t>(get_raw_auxiliary_data(extra->auxdata)>>1);
-        datetime::datetime_fields fld;
-        fld.set_from_date_val(*reinterpret_cast<const int32_t *>(src), unit);
+        datetime::date_ymd fld;
+        datetime::date_to_ymd(*reinterpret_cast<const int32_t *>(src), unit, fld);
         *reinterpret_cast<int32_t *>(dst) = fld.year;
     }
     void property_kernel_year_contig(char *dst, const char *src, size_t count, unary_kernel_static_data *extra)
     {
         datetime::datetime_unit_t unit = static_cast<datetime::datetime_unit_t>(get_raw_auxiliary_data(extra->auxdata)>>1);
-        datetime::datetime_fields fld;
+        datetime::date_ymd fld;
         int32_t *dst_array = reinterpret_cast<int32_t *>(dst);
         const int32_t *src_array = reinterpret_cast<const int32_t *>(src);
         for (size_t i = 0; i != count; ++i, ++src_array, ++dst_array) {
-            fld.set_from_date_val(*src_array, unit);
+            datetime::date_to_ymd(*src_array, unit, fld);
             *dst_array = fld.year;
         }
     }
@@ -303,18 +309,18 @@ namespace {
     void property_kernel_month_single(char *dst, const char *src, unary_kernel_static_data *extra)
     {
         datetime::datetime_unit_t unit = static_cast<datetime::datetime_unit_t>(get_raw_auxiliary_data(extra->auxdata)>>1);
-        datetime::datetime_fields fld;
-        fld.set_from_date_val(*reinterpret_cast<const int32_t *>(src), unit);
+        datetime::date_ymd fld;
+        datetime::date_to_ymd(*reinterpret_cast<const int32_t *>(src), unit, fld);
         *reinterpret_cast<int32_t *>(dst) = fld.month;
     }
     void property_kernel_month_contig(char *dst, const char *src, size_t count, unary_kernel_static_data *extra)
     {
         datetime::datetime_unit_t unit = static_cast<datetime::datetime_unit_t>(get_raw_auxiliary_data(extra->auxdata)>>1);
-        datetime::datetime_fields fld;
+        datetime::date_ymd fld;
         int32_t *dst_array = reinterpret_cast<int32_t *>(dst);
         const int32_t *src_array = reinterpret_cast<const int32_t *>(src);
         for (size_t i = 0; i != count; ++i, ++src_array, ++dst_array) {
-            fld.set_from_date_val(*src_array, unit);
+            datetime::date_to_ymd(*src_array, unit, fld);
             *dst_array = fld.month;
         }
     }
@@ -322,19 +328,48 @@ namespace {
     void property_kernel_day_single(char *dst, const char *src, unary_kernel_static_data *extra)
     {
         datetime::datetime_unit_t unit = static_cast<datetime::datetime_unit_t>(get_raw_auxiliary_data(extra->auxdata)>>1);
-        datetime::datetime_fields fld;
-        fld.set_from_date_val(*reinterpret_cast<const int32_t *>(src), unit);
+        datetime::date_ymd fld;
+        datetime::date_to_ymd(*reinterpret_cast<const int32_t *>(src), unit, fld);
         *reinterpret_cast<int32_t *>(dst) = fld.day;
     }
     void property_kernel_day_contig(char *dst, const char *src, size_t count, unary_kernel_static_data *extra)
     {
         datetime::datetime_unit_t unit = static_cast<datetime::datetime_unit_t>(get_raw_auxiliary_data(extra->auxdata)>>1);
-        datetime::datetime_fields fld;
+        datetime::date_ymd fld;
         int32_t *dst_array = reinterpret_cast<int32_t *>(dst);
         const int32_t *src_array = reinterpret_cast<const int32_t *>(src);
         for (size_t i = 0; i != count; ++i, ++src_array, ++dst_array) {
-            fld.set_from_date_val(*src_array, unit);
+            datetime::date_to_ymd(*src_array, unit, fld);
             *dst_array = fld.day;
+        }
+    }
+
+    void property_kernel_weekday_single(char *dst, const char *src, unary_kernel_static_data *extra)
+    {
+        datetime::datetime_unit_t unit = static_cast<datetime::datetime_unit_t>(get_raw_auxiliary_data(extra->auxdata)>>1);
+        datetime::date_val_t days;
+        datetime::date_to_days(*reinterpret_cast<const int32_t *>(src), unit, days);
+        // 1970-01-05 is Monday
+        int weekday = (int)((days - 4) % 7);
+        if (weekday < 0) {
+            weekday += 7;
+        }
+        *reinterpret_cast<int32_t *>(dst) = weekday;
+    }
+    void property_kernel_weekday_contig(char *dst, const char *src, size_t count, unary_kernel_static_data *extra)
+    {
+        datetime::datetime_unit_t unit = static_cast<datetime::datetime_unit_t>(get_raw_auxiliary_data(extra->auxdata)>>1);
+        datetime::date_val_t days;
+        int32_t *dst_array = reinterpret_cast<int32_t *>(dst);
+        const int32_t *src_array = reinterpret_cast<const int32_t *>(src);
+        for (size_t i = 0; i != count; ++i, ++src_array, ++dst_array) {
+            datetime::date_to_days(*src_array, unit, days);
+            // 1970-01-05 is Monday
+            int weekday = (int)((days - 4) % 7);
+            if (weekday < 0) {
+                weekday += 7;
+            }
+            *dst_array = weekday;
         }
     }
 } // anonymous namespace
@@ -355,6 +390,9 @@ void date_dtype::get_property_getter_kernel(const std::string& property_name,
     } else if (m_unit <= date_unit_day && property_name == "day") {
         out_to_value_kernel.kernel.single = &property_kernel_day_single;
         out_to_value_kernel.kernel.contig = &property_kernel_day_contig;
+    } else if (m_unit <= date_unit_day && property_name == "weekday") {
+        out_to_value_kernel.kernel.single = &property_kernel_weekday_single;
+        out_to_value_kernel.kernel.contig = &property_kernel_weekday_contig;
     } else {
         stringstream ss;
         ss << "dynd date dtype does not have a kernel for property " << property_name;

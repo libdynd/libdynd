@@ -116,10 +116,20 @@ struct datetime_fields {
 };
 
 /** 
- * Converts any date value into a 'days' date and filled date_ymd structure.
+ * Converts any date value into a 'days' date and filled date_yd/date_ymd structures.
  */
 void date_to_days_yd_and_ymd(date_val_t date, datetime_unit_t unit,
                 int32_t& out_days, date_yd& out_yd, date_ymd& out_ymd);
+
+/** 
+ * Converts any date value into a filled date_ymd structure.
+ */
+void date_to_ymd(date_val_t date, datetime_unit_t unit, date_ymd& out_ymd);
+
+/** 
+ * Converts any date value into a days unit.
+ */
+void date_to_days(date_val_t date, datetime_unit_t unit, int32_t& out_days);
 
 /*
  * Converts a 'days' date into a date_yd year + day offset structure.
