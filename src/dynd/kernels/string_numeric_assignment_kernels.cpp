@@ -5,6 +5,7 @@
 
 #include <stdexcept>
 #include <sstream>
+#include <cctype>
 
 #include <dynd/dtype.hpp>
 #include <dynd/diagnostics.hpp>
@@ -15,68 +16,58 @@ using namespace std;
 using namespace dynd;
 
 // Trim taken from boost string algorithms library
-template< typename ForwardIteratorT, typename PredicateT >
+template< typename ForwardIteratorT>
 inline ForwardIteratorT trim_begin( 
     ForwardIteratorT InBegin, 
-    ForwardIteratorT InEnd, 
-    PredicateT IsSpace )
+    ForwardIteratorT InEnd )
 {
     ForwardIteratorT It=InBegin;
     for(; It!=InEnd; ++It )
     {
-        if (!IsSpace(*It))
+        if (!isspace(*It))
             return It;
     }
 
     return It;
 }
-template< typename ForwardIteratorT, typename PredicateT >
+template< typename ForwardIteratorT>
 inline ForwardIteratorT trim_end( 
     ForwardIteratorT InBegin, 
-    ForwardIteratorT InEnd, 
-    PredicateT IsSpace )
+    ForwardIteratorT InEnd )
 {
     for( ForwardIteratorT It=InEnd; It!=InBegin;  )
     {
-        if ( !IsSpace(*(--It)) )
+        if ( !isspace(*(--It)) )
             return ++It;
     }
 
     return InBegin;
 }
-template<typename SequenceT, typename PredicateT>
-inline void trim_left_if(SequenceT& Input, PredicateT IsSpace)
+template<typename SequenceT>
+inline void trim_left_if(SequenceT& Input)
 {
     Input.erase( 
         Input.begin(),
         trim_begin( 
             Input.begin(), 
-            Input.end(), 
-            IsSpace));
+            Input.end() )
+        );
 }
-template<typename SequenceT, typename PredicateT>
-inline void trim_right_if(SequenceT& Input, PredicateT IsSpace)
+template<typename SequenceT>
+inline void trim_right_if(SequenceT& Input)
 {
     Input.erase(
         trim_end( 
             Input.begin(), 
-            Input.end(), 
-            IsSpace ),
+            Input.end() ),
         Input.end()
         );
-}
-template<typename SequenceT, typename PredicateT>
-inline void trim_if(SequenceT& Input, PredicateT IsSpace)
-{
-    trim_right_if( Input, IsSpace );
-    trim_left_if( Input, IsSpace );
 }
 template<typename SequenceT>
 inline void trim(SequenceT& Input)
 {
-    trim_if(
-        Input, 
-        isspace );
+    trim_right_if( Input );
+    trim_left_if( Input );
 }
 // End trim taken from boost string algorithms
 void to_lower(std::string& s)
@@ -177,28 +168,28 @@ static uint64_t parse_uint64(const std::string& s, bool& out_overflow, bool& out
 }
 
 template <class T> struct overflow_check;
-template <> struct overflow_check<int8_t> { static bool is_overflow(uint64_t value, bool negative) {
+template <> struct overflow_check<int8_t> { inline static bool is_overflow(uint64_t value, bool negative) {
     return (value&~0x7fULL) != 0 && !(negative && value == 0x80ULL);
 }};
-template <> struct overflow_check<int16_t> { static bool is_overflow(uint64_t value, bool negative) {
+template <> struct overflow_check<int16_t> { inline static bool is_overflow(uint64_t value, bool negative) {
     return (value&~0x7fffULL) != 0 && !(negative && value == 0x8000ULL);
 }};
-template <> struct overflow_check<int32_t> { static bool is_overflow(uint64_t value, bool negative) {
+template <> struct overflow_check<int32_t> { inline static bool is_overflow(uint64_t value, bool negative) {
     return (value&~0x7fffffffULL) != 0 && !(negative && value == 0x80000000ULL);
 }};
-template <> struct overflow_check<int64_t> { static bool is_overflow(uint64_t value, bool negative) {
+template <> struct overflow_check<int64_t> { inline static bool is_overflow(uint64_t value, bool negative) {
     return (value&~0x7fffffffffffffffULL) != 0 && !(negative && value == 0x8000000000000000ULL);
 }};
-template <> struct overflow_check<uint8_t> { static bool is_overflow(uint64_t value) {
+template <> struct overflow_check<uint8_t> { inline static bool is_overflow(uint64_t value) {
     return (value&~0xffULL) != 0;
 }};
-template <> struct overflow_check<uint16_t> { static bool is_overflow(uint64_t value) {
+template <> struct overflow_check<uint16_t> { inline static bool is_overflow(uint64_t value) {
     return (value&~0xffffULL) != 0;
 }};
-template <> struct overflow_check<uint32_t> { static bool is_overflow(uint64_t value) {
+template <> struct overflow_check<uint32_t> { inline static bool is_overflow(uint64_t value) {
     return (value&~0xffffffffULL) != 0;
 }};
-template <> struct overflow_check<uint64_t> { static bool is_overflow(uint64_t value) {
+template <> struct overflow_check<uint64_t> { inline static bool is_overflow(uint64_t DYND_UNUSED(value)) {
     return false;
 }};
 
@@ -289,7 +280,7 @@ static void string_to_float32_single_kernel(char *dst, const char *src, unary_ke
     char *end_ptr;
     // TODO: use a different parsing code that's guaranteed to round correctly in a cross-platform fashion
     double value = strtod(s.c_str(), &end_ptr);
-    if (ad.errmode != assign_error_none && end_ptr - s.c_str() != s.size()) {
+    if (ad.errmode != assign_error_none && (size_t)(end_ptr - s.c_str()) != s.size()) {
         raise_string_cast_error(make_dtype<float>(), ad.src_string_dt, extra->src_metadata, src);
     } else {
         // Assign double -> float according to the error mode
@@ -347,7 +338,7 @@ static void string_to_float64_single_kernel(char *dst, const char *src, unary_ke
     char *end_ptr;
     // TODO: use a different parsing code that's guaranteed to round correctly in a cross-platform fashion
     double value = strtod(s.c_str(), &end_ptr);
-    if (ad.errmode != assign_error_none && end_ptr - s.c_str() != s.size()) {
+    if (ad.errmode != assign_error_none && (size_t)(end_ptr - s.c_str()) != s.size()) {
         raise_string_cast_error(make_dtype<double>(), ad.src_string_dt, extra->src_metadata, src);
     } else {
         *reinterpret_cast<double *>(dst) = value;

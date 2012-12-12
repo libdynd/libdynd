@@ -335,32 +335,32 @@ TEST(StringDType, StringToInteger) {
     EXPECT_THROW(ndobject(ndobject("-32769").cast_scalars<int16_t>().vals()), runtime_error);
     EXPECT_THROW(ndobject(ndobject("32768").cast_scalars<int16_t>().vals()), runtime_error);
 
-    EXPECT_EQ(-2147483648, ndobject("-2147483648").cast_scalars<int32_t>().as<int32_t>());
+    EXPECT_EQ(-2147483648LL, ndobject("-2147483648").cast_scalars<int32_t>().as<int32_t>());
     EXPECT_EQ(2147483647, ndobject("2147483647").cast_scalars<int32_t>().as<int32_t>());
     EXPECT_THROW(ndobject(ndobject("-2147483649").cast_scalars<int32_t>().vals()), runtime_error);
     EXPECT_THROW(ndobject(ndobject("2147483648").cast_scalars<int32_t>().vals()), runtime_error);
 
-    EXPECT_EQ(-9223372036854775808LL, ndobject("-9223372036854775808").cast_scalars<int64_t>().as<int64_t>());
+    EXPECT_EQ(-9223372036854775807LL - 1, ndobject("-9223372036854775808").cast_scalars<int64_t>().as<int64_t>());
     EXPECT_EQ(9223372036854775807LL, ndobject("9223372036854775807").cast_scalars<int64_t>().as<int64_t>());
     EXPECT_THROW(ndobject(ndobject("-9223372036854775809").cast_scalars<int64_t>().vals()), runtime_error);
     EXPECT_THROW(ndobject(ndobject("9223372036854775808").cast_scalars<int64_t>().vals()), runtime_error);
 
-    EXPECT_EQ(0, ndobject("0").cast_scalars<uint8_t>().as<uint8_t>());
-    EXPECT_EQ(255, ndobject("255").cast_scalars<uint8_t>().as<uint8_t>());
+    EXPECT_EQ(0u, ndobject("0").cast_scalars<uint8_t>().as<uint8_t>());
+    EXPECT_EQ(255u, ndobject("255").cast_scalars<uint8_t>().as<uint8_t>());
     EXPECT_THROW(ndobject(ndobject("-1").cast_scalars<uint8_t>().vals()), runtime_error);
     EXPECT_THROW(ndobject(ndobject("256").cast_scalars<uint8_t>().vals()), runtime_error);
 
-    EXPECT_EQ(0, ndobject("0").cast_scalars<uint16_t>().as<uint16_t>());
-    EXPECT_EQ(65535, ndobject("65535").cast_scalars<uint16_t>().as<uint16_t>());
+    EXPECT_EQ(0u, ndobject("0").cast_scalars<uint16_t>().as<uint16_t>());
+    EXPECT_EQ(65535u, ndobject("65535").cast_scalars<uint16_t>().as<uint16_t>());
     EXPECT_THROW(ndobject(ndobject("-1").cast_scalars<uint16_t>().vals()), runtime_error);
     EXPECT_THROW(ndobject(ndobject("65536").cast_scalars<uint16_t>().vals()), runtime_error);
 
-    EXPECT_EQ(0, ndobject("0").cast_scalars<uint32_t>().as<uint32_t>());
-    EXPECT_EQ(4294967295U, ndobject("4294967295").cast_scalars<uint32_t>().as<uint32_t>());
+    EXPECT_EQ(0u, ndobject("0").cast_scalars<uint32_t>().as<uint32_t>());
+    EXPECT_EQ(4294967295ULL, ndobject("4294967295").cast_scalars<uint32_t>().as<uint32_t>());
     EXPECT_THROW(ndobject(ndobject("-1").cast_scalars<uint32_t>().vals()), runtime_error);
     EXPECT_THROW(ndobject(ndobject("4294967296").cast_scalars<uint32_t>().vals()), runtime_error);
 
-    EXPECT_EQ(0, ndobject("0").cast_scalars<uint64_t>().as<uint64_t>());
+    EXPECT_EQ(0u, ndobject("0").cast_scalars<uint64_t>().as<uint64_t>());
     EXPECT_EQ(18446744073709551615ULL, ndobject("18446744073709551615").cast_scalars<uint64_t>().as<uint64_t>());
     EXPECT_THROW(ndobject(ndobject("-1").cast_scalars<uint64_t>().vals()), runtime_error);
     EXPECT_THROW(ndobject(ndobject("18446744073709551616").cast_scalars<uint64_t>().vals()), runtime_error);

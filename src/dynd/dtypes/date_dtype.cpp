@@ -245,14 +245,16 @@ static ndobject function_ndo_strftime(const ndobject& n, const std::string& form
             disable_invalid_parameter_handler raii;
 #endif
             for(int i = 0; i < 3; ++i) {
+                // Force errno to zero
+                errno = 0;
                 size_t len = strftime(&str[0], str.size(), format.c_str(), &tm_val);
                 if (len > 0) {
                     str.resize(len);
                     break;
                 } else {
-                    if (errno == EINVAL) {
+                    if (errno != 0) {
                         stringstream ss;
-                        ss << "invalid format string \"" << format << "\" to strftime";
+                        ss << "error in strftime with format string \"" << format << "\" to strftime";
                         throw runtime_error(ss.str());
                     }
                     str.resize(str.size() * 2);
@@ -359,3 +361,4 @@ void date_dtype::get_property_getter_kernel(const std::string& property_name,
         throw runtime_error(ss.str());
     }
 }
+
