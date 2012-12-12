@@ -104,7 +104,6 @@ namespace detail {
             // Setting from a known-sized character string array
             if (paramtype.get_type_id() == string_type_id &&
                     static_cast<const string_dtype *>(paramtype.extended())->get_encoding() == string_encoding_utf_8) {
-                reinterpret_cast<string_dtype_metadata*>(metadata)->blockref = NULL;
                 reinterpret_cast<string_dtype_data*>(data)->begin = const_cast<char *>(value);
                 reinterpret_cast<string_dtype_data*>(data)->end = const_cast<char *>(value + N);
             } else {

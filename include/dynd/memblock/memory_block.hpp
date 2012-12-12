@@ -45,6 +45,7 @@ struct memory_block_data {
     explicit memory_block_data(long use_count, memory_block_type_t type)
         : m_use_count(use_count), m_type(type)
     {
+        //std::cout << "memblock " << (void *)this << " cre: " << this->m_use_count << std::endl;
     }
 };
 
@@ -101,6 +102,7 @@ namespace detail {
  */
 inline void memory_block_incref(memory_block_data *memblock)
 {
+    //std::cout << "memblock " << (void *)memblock << " inc: " << memblock->m_use_count + 1 << std::endl;
     ++memblock->m_use_count;
 }
 
@@ -110,6 +112,8 @@ inline void memory_block_incref(memory_block_data *memblock)
  */
 inline void memory_block_decref(memory_block_data *memblock)
 {
+    //std::cout << "memblock " << (void *)memblock << " dec: " << memblock->m_use_count - 1 << std::endl;
+    //if (memblock->m_use_count == 1) {std::cout << "memblock " << (void *)memblock << " fre: " << memblock->m_use_count - 1 << std::endl;}
     if (--memblock->m_use_count == 0) {
         detail::memory_block_free(memblock);
     }
