@@ -28,7 +28,7 @@ TEST(GFuncCallable, OneParameter) {
     EXPECT_EQ(make_fixedstruct_dtype(make_dtype<int>(), "x"),
             c.get_parameters_dtype());
 
-    // Call it and see that it gave what we want
+    // Call it with the generic interface and see that it gave what we want
     ndobject a, r;
     a = ndobject(c.get_parameters_dtype());
 
@@ -41,6 +41,27 @@ TEST(GFuncCallable, OneParameter) {
     r = c.call_generic(a);
     EXPECT_EQ(make_dtype<int>(), r.get_dtype());
     EXPECT_EQ(9, r.as<int>());
+
+    // Also call it through the C++ interface
+    EXPECT_EQ(3, c.call(1).as<int>());
+    EXPECT_EQ(-15, c.call(-5).as<int>());
+    // Should throw with the wrong number of arguments
+    EXPECT_THROW(c.call(), runtime_error);
+    EXPECT_THROW(c.call(1,2), runtime_error);
+}
+
+TEST(GFuncCallable, OneParameterWithDefault) {
+    // Create the callable
+    gfunc::callable c = gfunc::make_callable_with_default(&one_parameter, "x", 12);
+    EXPECT_EQ(make_fixedstruct_dtype(make_dtype<int>(), "x"),
+            c.get_parameters_dtype());
+
+    // Call it through the C++ interface with and without a parameter
+    EXPECT_EQ(3, c.call(1).as<int>());
+    EXPECT_EQ(-15, c.call(-5).as<int>());
+    EXPECT_EQ(36, c.call().as<int>());
+    // Should throw with the wrong number of arguments
+    EXPECT_THROW(c.call(1,2), runtime_error);
 }
 
 static double two_parameters(double a, long b) {
@@ -68,6 +89,35 @@ TEST(GFuncCallable, TwoParameters) {
     r = c.call_generic(a);
     EXPECT_EQ(make_dtype<double>(), r.get_dtype());
     EXPECT_EQ(-3, r.as<double>());
+}
+
+TEST(GFuncCallable, TwoParametersWithOneDefault) {
+    // Create the callable
+    gfunc::callable c = gfunc::make_callable_with_default(&two_parameters, "a", "b", 5);
+    EXPECT_EQ(make_fixedstruct_dtype(make_dtype<double>(), "a", make_dtype<long>(), "b"),
+            c.get_parameters_dtype());
+
+    // Call it through the C++ interface with various numbers of parameters
+    EXPECT_EQ(15, c.call(3, 5).as<double>());
+    EXPECT_EQ(-4.5, c.call(2.25, -2).as<double>());
+    EXPECT_EQ(-7.5, c.call(-1.5).as<double>());
+    EXPECT_EQ(-10, c.call(-2).as<double>());
+    // Should throw with the wrong number of arguments
+    EXPECT_THROW(c.call(), runtime_error);
+}
+
+TEST(GFuncCallable, TwoParametersWithTwoDefaults) {
+    // Create the callable
+    gfunc::callable c = gfunc::make_callable_with_default(&two_parameters, "a", "b", 1.5, 7);
+    EXPECT_EQ(make_fixedstruct_dtype(make_dtype<double>(), "a", make_dtype<long>(), "b"),
+            c.get_parameters_dtype());
+
+    // Call it through the C++ interface with and without a parameter
+    EXPECT_EQ(15, c.call(3, 5).as<double>());
+    EXPECT_EQ(-4.5, c.call(2.25, -2).as<double>());
+    EXPECT_EQ(-10.5, c.call(-1.5).as<double>());
+    EXPECT_EQ(-14, c.call(-2).as<double>());
+    EXPECT_EQ(10.5, c.call().as<double>());
 }
 
 static complex<float> three_parameters(bool x, int a, int b) {
@@ -101,6 +151,59 @@ TEST(GFuncCallable, ThreeParameters) {
     r = c.call_generic(a);
     EXPECT_EQ(make_dtype<complex<float> >(), r.get_dtype());
     EXPECT_EQ(complex<float>(6, 5), r.as<complex<float> >());
+}
+
+TEST(GFuncCallable, ThreeParametersWithOneDefault) {
+    // Create the callable
+    gfunc::callable c = gfunc::make_callable_with_default(&three_parameters, "x", "a", "b", 12);
+    EXPECT_EQ(make_fixedstruct_dtype(make_dtype<dynd_bool>(), "s", make_dtype<int>(), "a", make_dtype<int>(), "b"),
+            c.get_parameters_dtype());
+
+    // Call it through the C++ interface with various numbers of parameters
+    EXPECT_EQ(complex<float>(3,4), c.call(true, 3, 4).as<complex<float> >());
+    EXPECT_EQ(complex<float>(6,5), c.call(false, 5, 6).as<complex<float> >());
+    EXPECT_EQ(complex<float>(7,12), c.call(true, 7).as<complex<float> >());
+    EXPECT_EQ(complex<float>(12,5), c.call(false, 5).as<complex<float> >());
+    // Should throw with the wrong number of arguments
+    EXPECT_THROW(c.call(), runtime_error);
+    EXPECT_THROW(c.call(false), runtime_error);
+    EXPECT_THROW(c.call(false, 1.5, 2, 12), runtime_error);
+}
+
+TEST(GFuncCallable, ThreeParametersWithTwoDefaults) {
+    // Create the callable
+    gfunc::callable c = gfunc::make_callable_with_default(&three_parameters, "x", "a", "b", 6, 12);
+    EXPECT_EQ(make_fixedstruct_dtype(make_dtype<dynd_bool>(), "s", make_dtype<int>(), "a", make_dtype<int>(), "b"),
+            c.get_parameters_dtype());
+
+    // Call it through the C++ interface with various numbers of parameters
+    EXPECT_EQ(complex<float>(3,4), c.call(true, 3, 4).as<complex<float> >());
+    EXPECT_EQ(complex<float>(6,5), c.call(false, 5, 6).as<complex<float> >());
+    EXPECT_EQ(complex<float>(7,12), c.call(true, 7).as<complex<float> >());
+    EXPECT_EQ(complex<float>(12,5), c.call(false, 5).as<complex<float> >());
+    EXPECT_EQ(complex<float>(6,12), c.call(true).as<complex<float> >());
+    EXPECT_EQ(complex<float>(12,6), c.call(false).as<complex<float> >());
+    // Should throw with the wrong number of arguments
+    EXPECT_THROW(c.call(), runtime_error);
+    EXPECT_THROW(c.call(false, 1.5, 2, 12), runtime_error);
+}
+
+TEST(GFuncCallable, ThreeParametersWithThreeDefaults) {
+    // Create the callable
+    gfunc::callable c = gfunc::make_callable_with_default(&three_parameters, "x", "a", "b", false, 6, 12);
+    EXPECT_EQ(make_fixedstruct_dtype(make_dtype<dynd_bool>(), "s", make_dtype<int>(), "a", make_dtype<int>(), "b"),
+            c.get_parameters_dtype());
+
+    // Call it through the C++ interface with various numbers of parameters
+    EXPECT_EQ(complex<float>(3,4), c.call(true, 3, 4).as<complex<float> >());
+    EXPECT_EQ(complex<float>(6,5), c.call(false, 5, 6).as<complex<float> >());
+    EXPECT_EQ(complex<float>(7,12), c.call(true, 7).as<complex<float> >());
+    EXPECT_EQ(complex<float>(12,5), c.call(false, 5).as<complex<float> >());
+    EXPECT_EQ(complex<float>(6,12), c.call(true).as<complex<float> >());
+    EXPECT_EQ(complex<float>(12,6), c.call(false).as<complex<float> >());
+    EXPECT_EQ(complex<float>(12,6), c.call().as<complex<float> >());
+    // Should throw with the wrong number of arguments
+    EXPECT_THROW(c.call(false, 1.5, 2, 12), runtime_error);
 }
 
 static uint8_t four_parameters(int8_t x, int16_t y, double alpha, uint32_t z) {

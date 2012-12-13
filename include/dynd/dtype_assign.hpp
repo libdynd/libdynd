@@ -38,6 +38,19 @@ std::ostream& operator<<(std::ostream& o, assign_error_mode errmode);
 /** If 'src' can always be cast to 'dst' with no loss of information */
 bool is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt);
 
+/**
+ * Copies a value from one location to another, where the dtypes of the source
+ * and destination are the same.
+ *
+ * \param dt  The dtype for the copy operation.
+ * \param dst_metadata  The metadata of the destination.
+ * \param dst_data  The data where the destination element is stored.
+ * \param src_metadata  The metadata of the source.
+ * \param src_data  The data where the source element is stored.
+ */
+void dtype_copy(const dtype& dt, const char *dst_metadata, char *dst_data,
+                const char *src_metadata, const char *src_data);
+
 /** 
  * Assign one element where src and dst may have different dtypes.
  * Requires that the data be aligned. To assign unaligned data,

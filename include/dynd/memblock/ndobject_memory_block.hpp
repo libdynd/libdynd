@@ -28,7 +28,7 @@ struct ndobject_preamble {
      */
     const extended_dtype *m_dtype;
     char *m_data_pointer;
-    int64_t m_flags;
+    uint64_t m_flags;
     memory_block_data *m_data_reference;
 
     /** Returns true if the dtype is builtin */
