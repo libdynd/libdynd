@@ -78,6 +78,17 @@ void date_dtype::set_ymd(const char *DYND_UNUSED(metadata), char *data,
     }
 }
 
+void date_dtype::get_ymd(const char *metadata, const char *data,
+                int32_t &out_year, int32_t &out_month, int32_t &out_day) const
+{
+    datetime::date_ymd ymd;
+    datetime::date_to_ymd(*reinterpret_cast<const int32_t *>(data),
+                    datetime_unit_from_date_unit(m_unit), ymd);
+    out_year = ymd.year;
+    out_month = ymd.month;
+    out_day = ymd.day;
+}
+
 void date_dtype::print_element(std::ostream& o, const char *DYND_UNUSED(metadata), const char *data) const
 {
     int32_t value = *reinterpret_cast<const int32_t *>(data);

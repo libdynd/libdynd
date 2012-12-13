@@ -1016,15 +1016,6 @@ public:
         return m_element_size;
     }
 
-    /** For string dtypes, their encoding */
-    string_encoding_t string_encoding() const {
-        if (m_kind == string_kind) {
-            return static_cast<const extended_string_dtype *>(m_extended)->get_encoding();
-        } else {
-            throw std::runtime_error("Can only get the string encoding from string_kind types");
-        }
-    }
-
     inline dtype_memory_management_t get_memory_management() const {
         if (m_extended != NULL) {
             return m_extended->get_memory_management();
