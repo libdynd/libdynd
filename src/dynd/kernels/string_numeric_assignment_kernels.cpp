@@ -263,7 +263,7 @@ static void string_to_float32_single_kernel(char *dst, const char *src, unary_ke
     if (s == "nan" || s == "1.#qnan") {
         *reinterpret_cast<uint32_t *>(dst) = 0x7fc00000;
         return;
-    } else if (s == "-nan" || s == "-1.#qnan") {
+    } else if (s == "-nan" || s == "-1.#ind") {
         *reinterpret_cast<uint32_t *>(dst) = 0xffc00000;
         return;
     } else if (s == "inf" || s == "infinity" || s == "1.#inf") {
@@ -321,7 +321,7 @@ static void string_to_float64_single_kernel(char *dst, const char *src, unary_ke
     if (s == "nan" || s == "1.#qnan") {
         *reinterpret_cast<uint64_t *>(dst) = 0x7ff8000000000000ULL;
         return;
-    } else if (s == "-nan" || s == "-1.#qnan") {
+    } else if (s == "-nan" || s == "-1.#ind") {
         *reinterpret_cast<uint64_t *>(dst) = 0xfff8000000000000ULL;
         return;
     } else if (s == "inf" || s == "infinity" || s == "1.#inf") {

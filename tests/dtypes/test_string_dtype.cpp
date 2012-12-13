@@ -365,3 +365,45 @@ TEST(StringDType, StringToInteger) {
     EXPECT_THROW(ndobject(ndobject("-1").cast_scalars<uint64_t>().vals()), runtime_error);
     EXPECT_THROW(ndobject(ndobject("18446744073709551616").cast_scalars<uint64_t>().vals()), runtime_error);
 }
+
+TEST(StringDType, StringToFloat32SpecialValues) {
+    // +NaN with default payload
+    EXPECT_EQ(0x7fc00000u, ndobject("NaN").cast_scalars<float>().view_scalars<uint32_t>().as<uint32_t>());
+    EXPECT_EQ(0x7fc00000u, ndobject("nan").cast_scalars<float>().view_scalars<uint32_t>().as<uint32_t>());
+    EXPECT_EQ(0x7fc00000u, ndobject("1.#QNAN").cast_scalars<float>().view_scalars<uint32_t>().as<uint32_t>());
+    // -NaN with default payload
+    EXPECT_EQ(0xffc00000u, ndobject("-NaN").cast_scalars<float>().view_scalars<uint32_t>().as<uint32_t>());
+    EXPECT_EQ(0xffc00000u, ndobject("-nan").cast_scalars<float>().view_scalars<uint32_t>().as<uint32_t>());
+    EXPECT_EQ(0xffc00000u, ndobject("-1.#IND").cast_scalars<float>().view_scalars<uint32_t>().as<uint32_t>());
+    // +Inf
+    EXPECT_EQ(0x7f800000u, ndobject("Inf").cast_scalars<float>().view_scalars<uint32_t>().as<uint32_t>());
+    EXPECT_EQ(0x7f800000u, ndobject("inf").cast_scalars<float>().view_scalars<uint32_t>().as<uint32_t>());
+    EXPECT_EQ(0x7f800000u, ndobject("Infinity").cast_scalars<float>().view_scalars<uint32_t>().as<uint32_t>());
+    EXPECT_EQ(0x7f800000u, ndobject("1.#INF").cast_scalars<float>().view_scalars<uint32_t>().as<uint32_t>());
+    // -Inf
+    EXPECT_EQ(0xff800000u, ndobject("-Inf").cast_scalars<float>().view_scalars<uint32_t>().as<uint32_t>());
+    EXPECT_EQ(0xff800000u, ndobject("-inf").cast_scalars<float>().view_scalars<uint32_t>().as<uint32_t>());
+    EXPECT_EQ(0xff800000u, ndobject("-Infinity").cast_scalars<float>().view_scalars<uint32_t>().as<uint32_t>());
+    EXPECT_EQ(0xff800000u, ndobject("-1.#INF").cast_scalars<float>().view_scalars<uint32_t>().as<uint32_t>());
+}
+
+TEST(StringDType, StringToFloat64SpecialValues) {
+    // +NaN with default payload
+    EXPECT_EQ(0x7ff8000000000000ULL, ndobject("NaN").cast_scalars<double>().view_scalars<uint64_t>().as<uint64_t>());
+    EXPECT_EQ(0x7ff8000000000000ULL, ndobject("nan").cast_scalars<double>().view_scalars<uint64_t>().as<uint64_t>());
+    EXPECT_EQ(0x7ff8000000000000ULL, ndobject("1.#QNAN").cast_scalars<double>().view_scalars<uint64_t>().as<uint64_t>());
+    // -NaN with default payload
+    EXPECT_EQ(0xfff8000000000000ULL, ndobject("-NaN").cast_scalars<double>().view_scalars<uint64_t>().as<uint64_t>());
+    EXPECT_EQ(0xfff8000000000000ULL, ndobject("-nan").cast_scalars<double>().view_scalars<uint64_t>().as<uint64_t>());
+    EXPECT_EQ(0xfff8000000000000ULL, ndobject("-1.#IND").cast_scalars<double>().view_scalars<uint64_t>().as<uint64_t>());
+    // +Inf
+    EXPECT_EQ(0x7ff0000000000000ULL, ndobject("Inf").cast_scalars<double>().view_scalars<uint64_t>().as<uint64_t>());
+    EXPECT_EQ(0x7ff0000000000000ULL, ndobject("inf").cast_scalars<double>().view_scalars<uint64_t>().as<uint64_t>());
+    EXPECT_EQ(0x7ff0000000000000ULL, ndobject("Infinity").cast_scalars<double>().view_scalars<uint64_t>().as<uint64_t>());
+    EXPECT_EQ(0x7ff0000000000000ULL, ndobject("1.#INF").cast_scalars<double>().view_scalars<uint64_t>().as<uint64_t>());
+    // -Inf
+    EXPECT_EQ(0xfff0000000000000ULL, ndobject("-Inf").cast_scalars<double>().view_scalars<uint64_t>().as<uint64_t>());
+    EXPECT_EQ(0xfff0000000000000ULL, ndobject("-inf").cast_scalars<double>().view_scalars<uint64_t>().as<uint64_t>());
+    EXPECT_EQ(0xfff0000000000000ULL, ndobject("-Infinity").cast_scalars<double>().view_scalars<uint64_t>().as<uint64_t>());
+    EXPECT_EQ(0xfff0000000000000ULL, ndobject("-1.#INF").cast_scalars<double>().view_scalars<uint64_t>().as<uint64_t>());
+}
