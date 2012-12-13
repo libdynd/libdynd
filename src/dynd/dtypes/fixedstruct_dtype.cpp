@@ -472,7 +472,7 @@ static ndobject_preamble *property_get_ndobject_field(const ndobject_preamble *p
     // Get the ndobject 'self' parameter
     ndobject n = ndobject(*(ndobject_preamble **)params->m_data_pointer, true);
     intptr_t i = reinterpret_cast<intptr_t>(extra);
-    int ndim = n.get_dtype().get_uniform_ndim();
+    int ndim = n.get_dtype().get_undim();
     if (ndim == 0) {
         return n.at(i).release();
     } else {

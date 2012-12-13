@@ -195,19 +195,19 @@ void date_dtype::get_dynamic_dtype_properties(const std::pair<std::string, gfunc
 
 static ndobject property_ndo_get_year(const ndobject& n) {
     dtype array_dt = n.get_dtype();
-    dtype dt = array_dt.get_dtype_at_dimension(NULL, array_dt.get_uniform_ndim());
+    dtype dt = array_dt.get_dtype_at_dimension(NULL, array_dt.get_undim());
     return n.view_scalars(make_date_property_dtype(dt, "year"));
 }
 
 static ndobject property_ndo_get_month(const ndobject& n) {
     dtype array_dt = n.get_dtype();
-    dtype dt = array_dt.get_dtype_at_dimension(NULL, array_dt.get_uniform_ndim());
+    dtype dt = array_dt.get_dtype_at_dimension(NULL, array_dt.get_undim());
     return n.view_scalars(make_date_property_dtype(dt, "month"));
 }
 
 static ndobject property_ndo_get_day(const ndobject& n) {
     dtype array_dt = n.get_dtype();
-    dtype dt = array_dt.get_dtype_at_dimension(NULL, array_dt.get_uniform_ndim());
+    dtype dt = array_dt.get_dtype_at_dimension(NULL, array_dt.get_undim());
     return n.view_scalars(make_date_property_dtype(dt, "day"));
 }
 
@@ -233,7 +233,7 @@ void date_dtype::get_dynamic_ndobject_properties(const std::pair<std::string, gf
 
 static ndobject function_ndo_to_struct(const ndobject& n) {
     dtype array_dt = n.get_dtype();
-    dtype dt = array_dt.get_dtype_at_dimension(NULL, array_dt.get_uniform_ndim()).value_dtype();
+    dtype dt = array_dt.get_dtype_at_dimension(NULL, array_dt.get_undim()).value_dtype();
     const date_dtype *dd = static_cast<const date_dtype *>(dt.extended());
     return n.cast_scalars(date_dtype_default_struct_dtypes[dd->get_unit()]);
 }
@@ -302,7 +302,7 @@ static ndobject function_ndo_strftime(const ndobject& n, const std::string& form
 
 static ndobject function_ndo_weekday(const ndobject& n) {
     dtype array_dt = n.get_dtype();
-    dtype dt = array_dt.get_dtype_at_dimension(NULL, array_dt.get_uniform_ndim());
+    dtype dt = array_dt.get_dtype_at_dimension(NULL, array_dt.get_undim());
     return n.view_scalars(make_date_property_dtype(dt, "weekday"));
 }
 

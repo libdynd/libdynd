@@ -107,9 +107,9 @@ intptr_t pointer_dtype::apply_linear_index(int nindices, const irange *indices, 
     return 0;
 }
 
-int pointer_dtype::get_uniform_ndim() const
+int pointer_dtype::get_undim() const
 {
-    return m_target_dtype.get_uniform_ndim();
+    return m_target_dtype.get_undim();
 }
 
 dtype pointer_dtype::get_dtype_at_dimension(char **inout_metadata, int i, int total_ndim) const

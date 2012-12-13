@@ -83,7 +83,7 @@ public:
                     memory_block_data *embedded_reference,
                     int current_i, const dtype& root_dt) const;
 
-    int get_uniform_ndim() const;
+    int get_undim() const;
     dtype get_dtype_at_dimension(char **inout_metadata, int i, int total_ndim = 0) const;
 
     intptr_t get_dim_size(const char *data, const char *metadata) const;

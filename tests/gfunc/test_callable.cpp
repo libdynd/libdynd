@@ -190,7 +190,7 @@ TEST(GFuncCallable, NDObjectReturn) {
 }
 
 static int ndobject_param(const ndobject& n) {
-    return n.get_dtype().get_uniform_ndim();
+    return n.get_dtype().get_undim();
 }
 
 TEST(GFuncCallable, NDObjectParam) {

@@ -70,7 +70,7 @@ public:
                     int current_i, const dtype& root_dt) const;
     dtype at(intptr_t i0, const char **inout_metadata, const char **inout_data) const;
 
-    int get_uniform_ndim() const;
+    int get_undim() const;
     dtype get_dtype_at_dimension(char **inout_metadata, int i, int total_ndim = 0) const;
 
     intptr_t get_dim_size(const char *data, const char *metadata) const;

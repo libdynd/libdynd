@@ -462,7 +462,7 @@ public:
     /**
      * Retrieves the number of initial uniform dimensions.
      */
-    virtual int get_uniform_ndim() const;
+    virtual int get_undim() const;
 
     /**
      * Retrieves the dtype starting at the requested dimension. This is
@@ -490,7 +490,7 @@ public:
      * Retrieves the shape of the dtype, expanding the vector as needed. For dimensions with
      * unknown or variable shape, -1 is returned.
      *
-     * The output must be pre-initialized to have get_uniform_ndim() elements.
+     * The output must be pre-initialized to have get_undim() elements.
      */
     virtual void get_shape(int i, intptr_t *out_shape) const;
 
@@ -498,7 +498,7 @@ public:
      * Retrieves the shape of the dtype ndobject instance, expanding the vector as needed. For dimensions with
      * variable shape, -1 is returned.
      *
-     * The output must be pre-initialized to have get_uniform_ndim() elements.
+     * The output must be pre-initialized to have get_undim() elements.
      */
     virtual void get_shape(int i, intptr_t *out_shape, const char *metadata) const;
 
@@ -507,7 +507,7 @@ public:
      * where there is not a simple stride (e.g. a tuple/struct dtype), 0 is returned and
      * the caller should handle this.
      *
-     * The output must be pre-initialized to have get_uniform_ndim() elements.
+     * The output must be pre-initialized to have get_undim() elements.
      */
     virtual void get_strides(int i, intptr_t *out_strides, const char *metadata) const;
 
@@ -1092,11 +1092,25 @@ public:
         }
     }
 
-    inline int get_uniform_ndim() const {
+    /**
+     * Gets the number of uniform dimensions in the dtype.
+     */
+    inline int get_undim() const {
         if (m_extended) {
-            return m_extended->get_uniform_ndim();
+            return m_extended->get_undim();
         } else {
             return 0;
+        }
+    }
+
+    /**
+     * Gets the dtype with all the unifom dimensions stripped away.
+     */
+    inline dtype get_udtype() const {
+        if (m_extended) {
+            return m_extended->get_dtype_at_dimension(NULL, m_extended->get_undim());
+        } else {
+            return *this;
         }
     }
 

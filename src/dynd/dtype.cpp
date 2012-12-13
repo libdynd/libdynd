@@ -94,7 +94,7 @@ dtype extended_dtype::at(intptr_t DYND_UNUSED(i0), const char **DYND_UNUSED(inou
     throw too_many_indices(1, 0);
 }
 
-int extended_dtype::get_uniform_ndim() const
+int extended_dtype::get_undim() const
 {
     // Default to heterogeneous dimension/scalar behavior
     return 0;
@@ -244,7 +244,7 @@ void extended_dtype::get_nonuniform_ndobject_properties_and_functions(
     // the requested vectors. It is for use by uniform dtypes, which by convention
     // expose the properties from the first non-uniform dtypes, and possibly add
     // additional properties of their own.
-    int ndim = get_uniform_ndim();
+    int ndim = get_undim();
     int properties_count = 0, functions_count = 0;
     const std::pair<std::string, gfunc::callable> *properties = NULL, *functions = NULL;
     if (ndim == 0) {

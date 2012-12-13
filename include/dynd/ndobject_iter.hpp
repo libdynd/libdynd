@@ -37,7 +37,7 @@ class ndobject_iter<1, 0> {
 public:
     ndobject_iter(const ndobject& op0) {
         m_array_dtype = op0.get_dtype();
-        m_iter_ndim = m_array_dtype.get_uniform_ndim();
+        m_iter_ndim = m_array_dtype.get_undim();
         m_itersize = 1;
         if (m_iter_ndim != 0) {
             m_iterindex.init(m_iter_ndim);
@@ -127,12 +127,12 @@ public:
         m_array_dtype[1] = op1.get_dtype();
         m_itersize = 1;
         // The destination shape
-        m_iter_ndim[0] = m_array_dtype[0].get_uniform_ndim();
+        m_iter_ndim[0] = m_array_dtype[0].get_undim();
         m_itershape.init(m_iter_ndim[0]);
         op0.get_shape(m_itershape.get());
         // The source shape
         dimvector src_shape;
-        m_iter_ndim[1] = m_array_dtype[1].get_uniform_ndim();
+        m_iter_ndim[1] = m_array_dtype[1].get_undim();
         src_shape.init(m_iter_ndim[1]);
         op1.get_shape(src_shape.get());
         // Check that the source shape broadcasts ok

@@ -104,9 +104,9 @@ dtype array_dtype::at(intptr_t i0, const char **inout_metadata, const char **ino
     return m_element_dtype;
 }
 
-int array_dtype::get_uniform_ndim() const
+int array_dtype::get_undim() const
 {
-    return 1 + m_element_dtype.get_uniform_ndim();
+    return 1 + m_element_dtype.get_undim();
 }
 
 dtype array_dtype::get_dtype_at_dimension(char **inout_metadata, int i, int total_ndim) const

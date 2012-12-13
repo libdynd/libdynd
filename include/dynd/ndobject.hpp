@@ -245,7 +245,7 @@ public:
     }
 
     inline std::vector<intptr_t> get_shape() const {
-        std::vector<intptr_t> result(get_dtype().get_uniform_ndim());
+        std::vector<intptr_t> result(get_dtype().get_undim());
         get_shape(&result[0]);
         return result;
     }
@@ -263,7 +263,7 @@ public:
     }
 
     std::vector<intptr_t> get_strides() const {
-        std::vector<intptr_t> result(get_dtype().get_uniform_ndim());
+        std::vector<intptr_t> result(get_dtype().get_undim());
         get_strides(&result[0]);
         return result;
     }

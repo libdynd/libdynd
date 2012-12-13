@@ -575,7 +575,7 @@ ndobject ndobject::eval_immutable(const eval::eval_context *ectx) const
         // Create a canonical dtype for the result
         const dtype& current_dtype = get_dtype();
         const dtype& dt = current_dtype.get_canonical_dtype();
-        int ndim = current_dtype.get_uniform_ndim();
+        int ndim = current_dtype.get_undim();
         dimvector shape(ndim);
         get_shape(shape.get());
         ndobject result(make_ndobject_memory_block(dt, ndim, shape.get()));
@@ -591,7 +591,7 @@ ndobject ndobject::eval_copy(const eval::eval_context *ectx,
 {
     const dtype& current_dtype = get_dtype();
     const dtype& dt = current_dtype.get_canonical_dtype();
-    int ndim = current_dtype.get_uniform_ndim();
+    int ndim = current_dtype.get_undim();
     dimvector shape(ndim);
     get_shape(shape.get());
     ndobject result(make_ndobject_memory_block(dt, ndim, shape.get()));
@@ -637,7 +637,7 @@ namespace {
 ndobject ndobject::view_scalars(const dtype& scalar_dtype) const
 {
     const dtype& array_dtype = get_dtype();
-    int uniform_ndim = array_dtype.get_uniform_ndim();
+    int uniform_ndim = array_dtype.get_undim();
     // First check if we're dealing with a simple one dimensional block of memory we can reinterpret
     // at will.
     if (uniform_ndim == 1 && array_dtype.get_type_id() == strided_array_type_id) {
@@ -756,7 +756,7 @@ ndobject dynd::empty_like(const ndobject& rhs, const dtype& uniform_dtype)
         return ndobject(uniform_dtype);
     } else {
         dtype dt = rhs.get_ndo()->m_dtype->get_canonical_dtype();
-        int ndim = dt.extended()->get_uniform_ndim();
+        int ndim = dt.extended()->get_undim();
         dt = make_strided_array_dtype(uniform_dtype, ndim);
         dimvector shape(ndim);
         rhs.get_shape(shape.get());
@@ -774,7 +774,7 @@ ndobject dynd::empty_like(const ndobject& rhs)
         return ndobject(rhs.get_dtype());
     } else {
         dtype dt = rhs.get_ndo()->m_dtype->get_canonical_dtype();
-        int ndim = dt.extended()->get_uniform_ndim();
+        int ndim = dt.extended()->get_undim();
         dimvector shape(ndim);
         rhs.get_shape(shape.get());
         ndobject result(make_ndobject_memory_block(dt, ndim, shape.get()));
@@ -794,7 +794,7 @@ ndobject_vals::operator ndobject() const
     } else {
         // If there is any expression in the dtype, make a copy using the canonical dtype
         const dtype& dt = current_dtype.get_canonical_dtype();
-        int ndim = current_dtype.get_uniform_ndim();
+        int ndim = current_dtype.get_undim();
         dimvector shape(ndim);
         m_arr.get_shape(shape.get());
         ndobject result(make_ndobject_memory_block(dt, ndim, shape.get()));
