@@ -317,10 +317,93 @@ static ndobject function_ndo_weekday(const ndobject& n) {
     return n.view_scalars(make_date_property_dtype(dt, "weekday"));
 }
 
+static ndobject function_ndo_replace(const ndobject& n, int32_t year, int32_t month, int32_t day) {
+    // TODO: lazy evaluation?
+    if (year == numeric_limits<int32_t>::max() && month == numeric_limits<int32_t>::max() &&
+                    day == numeric_limits<int32_t>::max()) {
+        throw std::runtime_error("no parameters provided to date.replace, should provide at least one");
+    }
+    // Create the result array
+    ndobject result = empty_like(n);
+    ndobject_iter<1, 1> iter(result, n);
+
+    // Get a kernel to produce elements if the input is an expression
+    kernel_instance<unary_operation_pair_t> kernel;
+    unary_kernel_static_data extra;
+    if (iter.get_uniform_dtype<1>().get_kind() == expression_kind) {
+        get_dtype_assignment_kernel(iter.get_uniform_dtype<1>().value_dtype(), iter.get_uniform_dtype<1>(),
+                        assign_error_none, NULL, kernel);
+        extra.auxdata = kernel.auxdata;
+        extra.dst_metadata = NULL;
+        extra.src_metadata = iter.metadata<1>();
+    }
+    int32_t date;
+    const date_dtype *dd = static_cast<const date_dtype *>(iter.get_uniform_dtype<1>().value_dtype().extended());
+    datetime::datetime_unit_t datetime_unit = datetime_unit_from_date_unit(dd->get_unit());
+    datetime::date_ymd ymd;
+    if (!iter.empty()) {
+        // Loop over all the elements
+        do {
+            // Get the date
+            if (kernel.kernel.single) {
+                kernel.kernel.single(reinterpret_cast<char *>(&date), iter.data<1>(), &extra);
+            } else {
+                date = *reinterpret_cast<const int32_t *>(iter.data<1>());
+            }
+            // Convert the date to a 'struct tm'
+            datetime::date_to_ymd(date, datetime_unit, ymd);
+            // Replace the values as requested
+            if (year != numeric_limits<int32_t>::max()) {
+                ymd.year = year;
+            }
+            if (month != numeric_limits<int32_t>::max()) {
+                ymd.month = month;
+                if (-12 <= month && month <= -1) {
+                    // Use negative months to count from the end (like Python slicing, though
+                    // the standard Python datetime.date doesn't support this)
+                    ymd.month = month + 13;
+                } else if (1 <= month && month <= 12) {
+                    ymd.month = month;
+                } else {
+                    stringstream ss;
+                    ss << "invalid month value " << month;
+                    throw runtime_error(ss.str());
+                }
+                // If the day isn't also being replaced, make sure the resulting date is valid
+                if (day == numeric_limits<int32_t>::max()) {
+                    if (!datetime::is_valid_ymd(ymd)) {
+                        stringstream ss;
+                        ss << "invalid replace resulting year/month/day " << year << "/" << month << "/" << day;
+                        throw runtime_error(ss.str());
+                    }
+                }
+            }
+            if (day != numeric_limits<int32_t>::max()) {
+                int month_size = datetime::get_month_size(ymd.year, ymd.month);
+                if (1 <= day && day <= month_size) {
+                    ymd.day = day;
+                } else if (-month_size <= day && day <= -1) {
+                    // Use negative days to count from the end (like Python slicing, though
+                    // the standard Python datetime.date doesn't support this)
+                    ymd.day = day + month_size + 1;
+                } else {
+                    stringstream ss;
+                    ss << "invalid day value " << day << " for year/month " << year << "/" << month;
+                    throw runtime_error(ss.str());
+                }
+            }
+            dd->set_ymd(iter.metadata<0>(), iter.data<0>(), assign_error_none, ymd.year, ymd.month, ymd.day);
+        } while(iter.next());
+    }
+    return result;
+}
+
 static pair<string, gfunc::callable> date_ndobject_functions[] = {
     pair<string, gfunc::callable>("to_struct", gfunc::make_callable(&function_ndo_to_struct, "self")),
     pair<string, gfunc::callable>("strftime", gfunc::make_callable(&function_ndo_strftime, "self", "format")),
-    pair<string, gfunc::callable>("weekday", gfunc::make_callable(&function_ndo_weekday, "self"))
+    pair<string, gfunc::callable>("weekday", gfunc::make_callable(&function_ndo_weekday, "self")),
+    pair<string, gfunc::callable>("replace", gfunc::make_callable_with_default(&function_ndo_replace, "self", "year", "month", "day",
+                    numeric_limits<int32_t>::max(), numeric_limits<int32_t>::max(), numeric_limits<int32_t>::max()))
 };
 
 void date_dtype::get_dynamic_ndobject_functions(const std::pair<std::string, gfunc::callable> **out_functions, int *out_count) const

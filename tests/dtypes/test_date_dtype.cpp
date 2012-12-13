@@ -376,11 +376,47 @@ TEST(DateDType, StrFTimeBadFormat) {
 #endif
 
 TEST(DateDType, WeekDay) {
-    dtype d = make_date_dtype(), ds;
-    ndobject a, b;
+    dtype d = make_date_dtype();
+    ndobject a;
 
     a = ndobject("1955-03-13").cast_scalars(d).vals();
     EXPECT_EQ(6, a.f("weekday").call(a).as<int32_t>());
     a = ndobject("2002-12-04").cast_scalars(d).vals();
     EXPECT_EQ(2, a.f("weekday").call(a).as<int32_t>());
+}
+
+TEST(DateDType, Replace) {
+    dtype d = make_date_dtype();
+    ndobject a;
+
+    a = ndobject("1955-03-13").cast_scalars(d).vals();
+    EXPECT_EQ("2013-03-13", a.f("replace").call(a, 2013).as<string>());
+    EXPECT_EQ("2012-12-13", a.f("replace").call(a, 2012, 12).as<string>());
+    EXPECT_EQ("2012-12-15", a.f("replace").call(a, 2012, 12, 15).as<string>());
+    // Custom extension, allow -1 indexing from the end for months and days
+    EXPECT_EQ("2012-12-30", a.f("replace").call(a, 2012, -1, 30).as<string>());
+    EXPECT_EQ("2012-05-31", a.f("replace").call(a, 2012, -8, -1).as<string>());
+    // The C++ call interface doesn't let you skip arguments (yet, there is no keyword argument mechanism),
+    // so test this manually
+    ndobject param = a.f("replace").get_default_parameters().eval_copy();
+    *reinterpret_cast<void **>(param.at(0).get_readwrite_originptr()) = (void*)a.get_ndo();
+    param.at(2).vals() = 7;
+    EXPECT_EQ("1955-07-13", a.f("replace").call_generic(param).as<string>());
+    param.at(3).vals() = -1;
+    EXPECT_EQ("1955-07-31", a.f("replace").call_generic(param).as<string>());
+    param.at(2).vals() = 2;
+    EXPECT_EQ("1955-02-28", a.f("replace").call_generic(param).as<string>());
+    param.at(1).vals() = 2012;
+    EXPECT_EQ("2012-02-29", a.f("replace").call_generic(param).as<string>());
+    // Should throw an exception when no arguments or out of bounds arguments are provided
+    EXPECT_THROW(a.f("replace").call(a), runtime_error);
+    EXPECT_THROW(a.f("replace").call(a, 2000, -13), runtime_error);
+    EXPECT_THROW(a.f("replace").call(a, 2000, 0), runtime_error);
+    EXPECT_THROW(a.f("replace").call(a, 2000, 13), runtime_error);
+    EXPECT_THROW(a.f("replace").call(a, 1900, 2, -29), runtime_error);
+    EXPECT_THROW(a.f("replace").call(a, 1900, 2, 0), runtime_error);
+    EXPECT_THROW(a.f("replace").call(a, 1900, 2, 29), runtime_error);
+    EXPECT_THROW(a.f("replace").call(a, 2000, 2, -30), runtime_error);
+    EXPECT_THROW(a.f("replace").call(a, 2000, 2, 0), runtime_error);
+    EXPECT_THROW(a.f("replace").call(a, 2000, 2, 30), runtime_error);
 }

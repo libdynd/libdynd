@@ -94,6 +94,18 @@ const int datetime::days_per_month_table[2][12] = {
     { 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 }
 };
 
+int datetime::get_month_size(int32_t year, int32_t month)
+{
+    const int *month_lengths = days_per_month_table[is_leapyear(year)];
+    if (1 <= month && month <= 12) {
+        return month_lengths[month-1];
+    } else {
+        stringstream ss;
+        ss << "invalid month value " << month;
+        throw runtime_error(ss.str());
+    }
+}
+
 bool datetime::is_valid_ymd(int32_t year, int32_t month, int32_t day)
 {
     if (year == DATETIME_DATE_NAT) {

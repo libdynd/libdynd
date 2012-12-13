@@ -94,6 +94,14 @@ public:
         return m_function;
     }
 
+    inline int get_first_default_parameter() const {
+        return m_first_default_parameter;
+    }
+
+    inline const ndobject& get_default_parameters() const {
+        return m_default_parameters;
+    }
+
     inline ndobject call_generic(const ndobject& n) const {
         return ndobject(m_function(n.get_ndo(), m_extra), false);
     }

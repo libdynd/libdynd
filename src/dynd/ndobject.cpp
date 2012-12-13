@@ -770,10 +770,16 @@ ndobject dynd::empty_like(const ndobject& rhs, const dtype& uniform_dtype)
 
 ndobject dynd::empty_like(const ndobject& rhs)
 {
-    if (rhs.is_scalar()) {
-        return ndobject(rhs.get_dtype());
+    dtype dt;
+    if (rhs.get_ndo()->is_builtin_dtype()) {
+        dt = dtype(rhs.get_ndo()->get_builtin_type_id());
     } else {
-        dtype dt = rhs.get_ndo()->m_dtype->get_canonical_dtype();
+        dt = rhs.get_ndo()->m_dtype->get_canonical_dtype();
+    }
+
+    if (rhs.is_scalar()) {
+        return ndobject(dt);
+    } else {
         int ndim = dt.extended()->get_undim();
         dimvector shape(ndim);
         rhs.get_shape(shape.get());

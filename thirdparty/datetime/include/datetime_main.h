@@ -115,6 +115,16 @@ struct datetime_fields {
     void add_minutes(int minutes);
 };
 
+/**
+ * Returns the number of days in the specified month.
+ *
+ * \param year  The year of the requested month.
+ * \param month  The month whose length is requested.
+ *
+ * \returns  The number of days in the month specified.
+ */
+int get_month_size(int32_t year, int32_t month);
+
 bool is_valid_ymd(int32_t year, int32_t month, int32_t day);
 
 inline bool is_valid_ymd(const date_ymd& ymd) {
