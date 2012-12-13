@@ -19,21 +19,33 @@ TEST(NDObjectArange, Basic) {
     ndobject a;
 
     a = arange(1, 10);
-    cout << a << "\n";
+    EXPECT_EQ(make_dtype<int32_t>(), a.get_dtype().get_udtype());
+    EXPECT_EQ(1u, a.get_shape().size());
+    EXPECT_EQ(9u, a.get_shape()[0]);
+    for (int i = 0; i < 9; ++i) {
+        EXPECT_EQ(i+1, a.at(i).as<int32_t>());
+    }
+
     a = arange(1., 10., 0.5);
-    cout << a << "\n";
-    cout << arange(25.f) << "\n";
-    cout << arange(0.,1.,0.1) << "\n";
-    cout << arange(0.f,1.f,0.1f) << "\n";
-    cout << arange(0.f,1.f,0.01f) << "\n";
+    EXPECT_EQ(make_dtype<double>(), a.get_dtype().get_udtype());
+    EXPECT_EQ(1u, a.get_shape().size());
+    EXPECT_EQ(18u, a.get_shape()[0]);
+    for (int i = 0; i < 18; ++i) {
+        EXPECT_EQ(0.5*(i+2), a.at(i).as<double>());
+    }
 
-    cout << ndobject(2) << "\n";
-    //cout << ndobject(2) * arange(20) << "\n";
-    //cout << 2 * arange(20) << "\n";
-    cout << arange(3 <= irange() <= 20) << "\n";
+    a = arange(0.,1.,0.1);
+    EXPECT_EQ(make_dtype<double>(), a.get_dtype().get_udtype());
+    EXPECT_EQ(10, a.get_shape()[0]);
 
-    cout << linspace(10, 20) << "\n";
-    cout << linspace(0, 5.0, 10) << "\n";
+    a = arange(0.f,1.f,0.01f);
+    EXPECT_EQ(make_dtype<float>(), a.get_dtype().get_udtype());
+    EXPECT_EQ(100, a.get_shape()[0]);
+
+    a = arange(3 <= irange() <= 20);
+    for (int i = 3; i <= 20; ++i) {
+        EXPECT_EQ(i, a.at(i-3).as<int32_t>());
+    }
 }
 
 TEST(NDObjectArange, CastScalars) {

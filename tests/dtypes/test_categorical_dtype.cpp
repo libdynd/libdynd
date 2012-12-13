@@ -31,8 +31,6 @@ TEST(CategoricalDType, Create) {
     EXPECT_EQ(4u, d.get_alignment());
     EXPECT_EQ(4u, d.get_element_size());
     EXPECT_FALSE(d.is_expression());
-
-    cout << d << endl;
 }
 
 TEST(CategoricalDType, Convert) {
@@ -79,9 +77,6 @@ TEST(CategoricalDType, Compare) {
 
     dtype di = make_categorical_dtype(i);
     EXPECT_FALSE(da == di);
-
-    // cout << di << endl;
-
 }
 
 TEST(CategoricalDType, Unique) {
@@ -161,10 +156,8 @@ TEST(CategoricalDType, AssignFixedString) {
     EXPECT_EQ("foo", a.at(0).as<std::string>());
     EXPECT_EQ("bar", a.at(1).as<std::string>());
     EXPECT_EQ("baz", a.at(2).as<std::string>());
-    cout << a << endl;
     a.at(0).vals() = cat.at(2);
     EXPECT_EQ("baz", a.at(0).as<std::string>());
-    cout << a << endl;
 
     cat.at(0).vals() = std::string("zzz");
     EXPECT_THROW(a.at(0).vals() = cat.at(0), std::runtime_error);
@@ -178,11 +171,8 @@ TEST(CategoricalDType, AssignFixedString) {
     EXPECT_EQ("baz", tmp.at(0).as<std::string>());
     EXPECT_EQ("bar", tmp.at(1).as<std::string>());
     EXPECT_EQ("baz", tmp.at(2).as<std::string>());
-    cout << tmp << endl;
     tmp.at(0).vals() = a.at(1);
     EXPECT_EQ("bar", tmp.at(0).as<std::string>());
-    cout << tmp << endl;
-
 }
 
 TEST(CategoricalDType, AssignInt) {
@@ -199,10 +189,8 @@ TEST(CategoricalDType, AssignInt) {
     EXPECT_EQ(10, a.at(0).as<int32_t>());
     EXPECT_EQ(100, a.at(1).as<int32_t>());
     EXPECT_EQ(1000, a.at(2).as<int32_t>());
-    cout << a << endl;
     a.at(0).vals() = cat.at(2);
     EXPECT_EQ(1000, a.at(0).as<int32_t>());
-    cout << a << endl;
 
     // TODO implicit conversion?
     //a(0).vals() = std::string("bar");
@@ -213,10 +201,8 @@ TEST(CategoricalDType, AssignInt) {
     EXPECT_EQ(1000, tmp.at(0).as<int32_t>());
     EXPECT_EQ(100, tmp.at(1).as<int32_t>());
     EXPECT_EQ(1000, tmp.at(2).as<int32_t>());
-    cout << tmp << endl;
     tmp.at(0).vals() = a.at(1);
     EXPECT_EQ(100, tmp.at(0).as<int32_t>());
-    cout << tmp << endl;
 
 }
 
