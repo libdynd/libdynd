@@ -357,11 +357,78 @@ inline callable make_callable_with_default(FN *f, const char *name0, const char 
                 0, defaults);
 }
 
+// Four parameters, no defaults
 template<typename FN>
 inline callable make_callable(FN *f, const char *name0, const char *name1, const char *name2, const char *name3) {
     return callable(detail::callable_maker<FN *>::make_parameters_dtype(name0, name1, name2, name3),
                 &detail::callable_maker<FN *>::wrapper,
                 reinterpret_cast<void *>(f));
+}
+
+// Four parameters, one default
+template<typename FN, typename D3>
+inline callable make_callable_with_default(FN *f, const char *name0, const char *name1, const char *name2,
+                const char *name3, const D3& default3) {
+    dtype pdt = detail::callable_maker<FN *>::make_parameters_dtype(name0, name1, name2, name3);
+    ndobject defaults(pdt);
+    defaults.at(3).vals() = default3;
+    // Make defaults immutable (which is ok, because we have the only reference to it)
+    defaults.get_ndo()->m_flags = (defaults.get_ndo()->m_flags&~(uint64_t)write_access_flag)|immutable_access_flag;
+    return callable(pdt,
+                &detail::callable_maker<FN *>::wrapper,
+                reinterpret_cast<void *>(f),
+                3, defaults);
+}
+
+// Four parameters, two defaults
+template<typename FN, typename D2, typename D3>
+inline callable make_callable_with_default(FN *f, const char *name0, const char *name1, const char *name2,
+                const char *name3, const D2& default2, const D3& default3) {
+    dtype pdt = detail::callable_maker<FN *>::make_parameters_dtype(name0, name1, name2, name3);
+    ndobject defaults(pdt);
+    defaults.at(2).vals() = default2;
+    defaults.at(3).vals() = default3;
+    // Make defaults immutable (which is ok, because we have the only reference to it)
+    defaults.get_ndo()->m_flags = (defaults.get_ndo()->m_flags&~(uint64_t)write_access_flag)|immutable_access_flag;
+    return callable(pdt,
+                &detail::callable_maker<FN *>::wrapper,
+                reinterpret_cast<void *>(f),
+                2, defaults);
+}
+
+// Four parameters, three defaults
+template<typename FN, typename D1, typename D2, typename D3>
+inline callable make_callable_with_default(FN *f, const char *name0, const char *name1, const char *name2,
+                const char *name3, const D1& default1, const D2& default2, const D3& default3) {
+    dtype pdt = detail::callable_maker<FN *>::make_parameters_dtype(name0, name1, name2, name3);
+    ndobject defaults(pdt);
+    defaults.at(1).vals() = default1;
+    defaults.at(2).vals() = default2;
+    defaults.at(3).vals() = default3;
+    // Make defaults immutable (which is ok, because we have the only reference to it)
+    defaults.get_ndo()->m_flags = (defaults.get_ndo()->m_flags&~(uint64_t)write_access_flag)|immutable_access_flag;
+    return callable(pdt,
+                &detail::callable_maker<FN *>::wrapper,
+                reinterpret_cast<void *>(f),
+                1, defaults);
+}
+
+// Four parameters, four defaults
+template<typename FN, typename D0, typename D1, typename D2, typename D3>
+inline callable make_callable_with_default(FN *f, const char *name0, const char *name1, const char *name2,
+                const char *name3, const D0& default0, const D1& default1, const D2& default2, const D3& default3) {
+    dtype pdt = detail::callable_maker<FN *>::make_parameters_dtype(name0, name1, name2, name3);
+    ndobject defaults(pdt);
+    defaults.at(0).vals() = default0;
+    defaults.at(1).vals() = default1;
+    defaults.at(2).vals() = default2;
+    defaults.at(3).vals() = default3;
+    // Make defaults immutable (which is ok, because we have the only reference to it)
+    defaults.get_ndo()->m_flags = (defaults.get_ndo()->m_flags&~(uint64_t)write_access_flag)|immutable_access_flag;
+    return callable(pdt,
+                &detail::callable_maker<FN *>::wrapper,
+                reinterpret_cast<void *>(f),
+                0, defaults);
 }
 
 template<typename FN>

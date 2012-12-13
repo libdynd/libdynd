@@ -238,6 +238,78 @@ TEST(GFuncCallable, FourParameters) {
     EXPECT_EQ(14, r.as<uint8_t>());
 }
 
+TEST(GFuncCallable, FourParametersWithOneDefault) {
+    // Create the callable
+    gfunc::callable c = gfunc::make_callable_with_default(&four_parameters, "x", "y", "alpha", "z", 240u);
+    EXPECT_EQ(make_fixedstruct_dtype(make_dtype<int8_t>(), "x", make_dtype<int16_t>(), "y",
+                    make_dtype<double>(), "alpha", make_dtype<uint32_t>(), "z"),
+            c.get_parameters_dtype());
+
+    // Call it through the C++ interface with various numbers of parameters
+    EXPECT_EQ(4u, c.call(-1, 7, 0.25, 3).as<uint8_t>());
+    EXPECT_EQ(14u, c.call(1, 3, 0.5, 12).as<uint8_t>());
+    EXPECT_EQ(242u, c.call(1, 3, 0.5).as<uint8_t>());
+    // Should throw with the wrong number of arguments
+    EXPECT_THROW(c.call(), runtime_error);
+    EXPECT_THROW(c.call(2), runtime_error);
+    EXPECT_THROW(c.call(2, 5), runtime_error);
+    EXPECT_THROW(c.call(2, 5, 0.1, 3, 9), runtime_error);
+}
+
+TEST(GFuncCallable, FourParametersWithTwoDefaults) {
+    // Create the callable
+    gfunc::callable c = gfunc::make_callable_with_default(&four_parameters, "x", "y", "alpha", "z", 0.75, 240u);
+    EXPECT_EQ(make_fixedstruct_dtype(make_dtype<int8_t>(), "x", make_dtype<int16_t>(), "y",
+                    make_dtype<double>(), "alpha", make_dtype<uint32_t>(), "z"),
+            c.get_parameters_dtype());
+
+    // Call it through the C++ interface with various numbers of parameters
+    EXPECT_EQ(4u, c.call(-1, 7, 0.25, 3).as<uint8_t>());
+    EXPECT_EQ(14u, c.call(1, 3, 0.5, 12).as<uint8_t>());
+    EXPECT_EQ(242u, c.call(1, 3, 0.5).as<uint8_t>());
+    EXPECT_EQ(245u, c.call(-1, 7).as<uint8_t>());
+    // Should throw with the wrong number of arguments
+    EXPECT_THROW(c.call(), runtime_error);
+    EXPECT_THROW(c.call(2), runtime_error);
+    EXPECT_THROW(c.call(2, 5, 0.1, 3, 9), runtime_error);
+}
+
+TEST(GFuncCallable, FourParametersWithThreeDefaults) {
+    // Create the callable
+    gfunc::callable c = gfunc::make_callable_with_default(&four_parameters, "x", "y", "alpha", "z", 8, 0.75, 240u);
+    EXPECT_EQ(make_fixedstruct_dtype(make_dtype<int8_t>(), "x", make_dtype<int16_t>(), "y",
+                    make_dtype<double>(), "alpha", make_dtype<uint32_t>(), "z"),
+            c.get_parameters_dtype());
+
+    // Call it through the C++ interface with various numbers of parameters
+    EXPECT_EQ(4u, c.call(-1, 7, 0.25, 3).as<uint8_t>());
+    EXPECT_EQ(14u, c.call(1, 3, 0.5, 12).as<uint8_t>());
+    EXPECT_EQ(242u, c.call(1, 3, 0.5).as<uint8_t>());
+    EXPECT_EQ(245u, c.call(-1, 7).as<uint8_t>());
+    EXPECT_EQ(246u, c.call(0).as<uint8_t>());
+    // Should throw with the wrong number of arguments
+    EXPECT_THROW(c.call(), runtime_error);
+    EXPECT_THROW(c.call(2, 5, 0.1, 3, 9), runtime_error);
+}
+
+TEST(GFuncCallable, FourParametersWithFourDefaults) {
+    // Create the callable
+    gfunc::callable c = gfunc::make_callable_with_default(&four_parameters, "x", "y", "alpha", "z", -8, 8, 0.75, 240u);
+    EXPECT_EQ(make_fixedstruct_dtype(make_dtype<int8_t>(), "x", make_dtype<int16_t>(), "y",
+                    make_dtype<double>(), "alpha", make_dtype<uint32_t>(), "z"),
+            c.get_parameters_dtype());
+
+    // Call it through the C++ interface with various numbers of parameters
+    EXPECT_EQ(4u, c.call(-1, 7, 0.25, 3).as<uint8_t>());
+    EXPECT_EQ(14u, c.call(1, 3, 0.5, 12).as<uint8_t>());
+    EXPECT_EQ(242u, c.call(1, 3, 0.5).as<uint8_t>());
+    EXPECT_EQ(245u, c.call(-1, 7).as<uint8_t>());
+    EXPECT_EQ(246u, c.call(0).as<uint8_t>());
+    EXPECT_EQ(244u, c.call().as<uint8_t>());
+    // Should throw with the wrong number of arguments
+    EXPECT_THROW(c.call(2, 5, 0.1, 3, 9), runtime_error);
+}
+
 static double five_parameters(float (&x)[3], uint16_t a1, uint32_t a2, uint64_t a3, double (&y)[3]) {
     return x[0] * a1 * y[0] + x[1] * a2 * y[1] + x[2] * a3 * y[2];
 }

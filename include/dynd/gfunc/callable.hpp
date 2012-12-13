@@ -112,6 +112,9 @@ public:
     template<class T0, class T1, class T2, class T3>
     ndobject call(const T0& p0, const T1& p1, const T2& p2, const T3& p3) const;
 
+    template<class T0, class T1, class T2, class T3, class T4>
+    ndobject call(const T0& p0, const T1& p1, const T2& p2, const T3& p3, const T4& p4) const;
+
     void debug_print(std::ostream& o, const std::string& indent = "") const;
 };
 
@@ -341,6 +344,53 @@ inline ndobject callable::call(const T0& p0, const T1& p1, const T2& p2, const T
                     params.get_ndo_meta() + fsdt->get_metadata_offsets()[3],
                     params.get_ndo()->m_data_pointer + fsdt->get_data_offsets()[3],
                     p3);
+    return call_generic(params);
+}
+
+template<class T0, class T1, class T2, class T3, class T4>
+inline ndobject callable::call(const T0& p0, const T1& p1, const T2& p2, const T3& p3, const T4& p4) const
+{
+    const fixedstruct_dtype *fsdt = static_cast<const fixedstruct_dtype *>(m_parameters_dtype.extended());
+    size_t parameter_count = fsdt->get_field_count();
+    ndobject params(m_parameters_dtype);
+    if (fsdt->get_field_types().size() != 5) {
+        if (parameter_count > 5 && m_first_default_parameter <= 5) {
+            // Fill the missing parameters with their defaults, if available
+            for (int i = 5; i < parameter_count; ++i) {
+                size_t metadata_offset = fsdt->get_metadata_offsets()[i];
+                size_t data_offset = fsdt->get_data_offsets()[i];
+                dtype_copy(fsdt->get_field_types()[i],
+                                params.get_ndo_meta() + metadata_offset,
+                                params.get_ndo()->m_data_pointer + data_offset,
+                                m_default_parameters.get_ndo_meta() + metadata_offset,
+                                m_default_parameters.get_ndo()->m_data_pointer + data_offset);
+            }
+        } else {
+            std::stringstream ss;
+            ss << "incorrect number of arguments (received 5) for dynd callable with parameters " << m_parameters_dtype;
+            throw std::runtime_error(ss.str());
+        }
+    }
+    detail::callable_argument_setter<T0>::set(fsdt->get_field_types()[0],
+                    params.get_ndo_meta() + fsdt->get_metadata_offsets()[0],
+                    params.get_ndo()->m_data_pointer + fsdt->get_data_offsets()[0],
+                    p0);
+    detail::callable_argument_setter<T1>::set(fsdt->get_field_types()[1],
+                    params.get_ndo_meta() + fsdt->get_metadata_offsets()[1],
+                    params.get_ndo()->m_data_pointer + fsdt->get_data_offsets()[1],
+                    p1);
+    detail::callable_argument_setter<T2>::set(fsdt->get_field_types()[2],
+                    params.get_ndo_meta() + fsdt->get_metadata_offsets()[2],
+                    params.get_ndo()->m_data_pointer + fsdt->get_data_offsets()[2],
+                    p2);
+    detail::callable_argument_setter<T3>::set(fsdt->get_field_types()[3],
+                    params.get_ndo_meta() + fsdt->get_metadata_offsets()[3],
+                    params.get_ndo()->m_data_pointer + fsdt->get_data_offsets()[3],
+                    p3);
+    detail::callable_argument_setter<T4>::set(fsdt->get_field_types()[4],
+                    params.get_ndo_meta() + fsdt->get_metadata_offsets()[4],
+                    params.get_ndo()->m_data_pointer + fsdt->get_data_offsets()[4],
+                    p4);
     return call_generic(params);
 }
 
