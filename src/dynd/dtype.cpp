@@ -46,15 +46,21 @@ bool extended_dtype::is_scalar() const
     return true;
 }
 
+bool extended_dtype::is_uniform_dim() const
+{
+    return false;
+}
+
 bool extended_dtype::is_expression() const
 {
     return false;
 }
 
-dtype extended_dtype::with_transformed_scalar_types(dtype_transform_fn_t transform_fn, const void *extra) const
+void extended_dtype::transform_child_dtypes(dtype_transform_fn_t DYND_UNUSED(transform_fn), const void *DYND_UNUSED(extra),
+                dtype& out_transformed_dtype, bool& DYND_UNUSED(out_was_transformed)) const
 {
-    // Default to scalar behavior
-    return transform_fn(dtype(this, true), extra);
+    // Default to behavior with no child dtypes
+    out_transformed_dtype = dtype(this, true);
 }
 
 dtype extended_dtype::get_canonical_dtype() const
@@ -573,21 +579,26 @@ namespace {
         const dtype& scalar_dtype;
         assign_error_mode errmode;
     };
-    static dtype replace_scalar_type(const dtype& dt, const void *extra)
+    static void replace_scalar_types(const dtype& dt, const void *extra,
+                dtype& out_transformed_dtype, bool& out_was_transformed)
     {
         const replace_scalar_type_extra *e = reinterpret_cast<const replace_scalar_type_extra *>(extra);
-        return make_convert_dtype(e->scalar_dtype, dt, e->errmode);
+        if (dt.is_scalar()) {
+            out_transformed_dtype = make_convert_dtype(e->scalar_dtype, dt, e->errmode);
+            out_was_transformed = true;
+        } else {
+            dt.extended()->transform_child_dtypes(&replace_scalar_types, extra, out_transformed_dtype, out_was_transformed);
+        }
     }
 } // anonymous namespace
 
 dtype dynd::dtype::with_replaced_scalar_types(const dtype& scalar_dtype, assign_error_mode errmode) const
 {
-    if (m_extended) {
-        replace_scalar_type_extra extra(scalar_dtype, errmode);
-        return m_extended->with_transformed_scalar_types(&replace_scalar_type, &extra);
-    } else {
-        return make_convert_dtype(scalar_dtype, *this, errmode);
-    }
+    dtype result;
+    bool was_transformed;
+    replace_scalar_type_extra extra(scalar_dtype, errmode);
+    replace_scalar_types(*this, &extra, result, was_transformed);
+    return result;
 }
 
 

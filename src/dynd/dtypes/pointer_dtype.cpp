@@ -48,6 +48,11 @@ bool pointer_dtype::is_scalar() const
     return m_target_dtype.is_scalar();
 }
 
+bool pointer_dtype::is_uniform_dim() const
+{
+    return m_target_dtype.extended() ? m_target_dtype.extended()->is_uniform_dim() : false;
+}
+
 bool pointer_dtype::is_expression() const
 {
     // Even though the pointer is an instance of an extended_expression_dtype,
@@ -55,15 +60,20 @@ bool pointer_dtype::is_expression() const
     return m_target_dtype.is_expression();
 }
 
-dtype pointer_dtype::with_transformed_scalar_types(dtype_transform_fn_t transform_fn, const void *extra) const
+void pointer_dtype::transform_child_dtypes(dtype_transform_fn_t transform_fn, const void *extra,
+                dtype& out_transformed_dtype, bool& out_was_transformed) const
 {
-    dtype dt = m_target_dtype.with_transformed_scalar_types(transform_fn, extra);
-    if (dt == m_target_dtype) {
-        return dtype(this, true);
+    dtype tmp_dtype;
+    bool was_transformed = false;
+    transform_fn(m_target_dtype, extra, tmp_dtype, was_transformed);
+    if (was_transformed) {
+        out_transformed_dtype = dtype(new pointer_dtype(tmp_dtype));
+        out_was_transformed = true;
     } else {
-        return dtype(new pointer_dtype(dt));
+        out_transformed_dtype = dtype(this, true);
     }
 }
+
 
 dtype pointer_dtype::get_canonical_dtype() const
 {

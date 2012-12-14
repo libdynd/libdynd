@@ -73,7 +73,8 @@ public:
 
     bool is_scalar() const;
     bool is_expression() const;
-    dtype with_transformed_scalar_types(dtype_transform_fn_t transform_fn, const void *extra) const;
+    void transform_child_dtypes(dtype_transform_fn_t transform_fn, const void *extra,
+                    dtype& out_transformed_dtype, bool& out_was_transformed) const;
     dtype get_canonical_dtype() const;
 
     dtype apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& root_dt) const;

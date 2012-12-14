@@ -101,15 +101,21 @@ bool struct_dtype::is_expression() const
     return false;
 }
 
-dtype struct_dtype::with_transformed_scalar_types(dtype_transform_fn_t transform_fn, const void *extra) const
+void struct_dtype::transform_child_dtypes(dtype_transform_fn_t transform_fn, const void *extra,
+                dtype& out_transformed_dtype, bool& out_was_transformed) const
 {
-    std::vector<dtype> fields(m_field_types.size());
+    std::vector<dtype> tmp_field_types(m_field_types.size());
 
+    bool was_transformed = false;
     for (size_t i = 0, i_end = m_field_types.size(); i != i_end; ++i) {
-        fields[i] = m_field_types[i].with_transformed_scalar_types(transform_fn, extra);
+        transform_fn(m_field_types[i], extra, tmp_field_types[i], was_transformed);
     }
-
-    return dtype(new struct_dtype(fields, m_field_names));
+    if (was_transformed) {
+        out_transformed_dtype = dtype(new struct_dtype(tmp_field_types, m_field_names));
+        out_was_transformed = true;
+    } else {
+        out_transformed_dtype = dtype(this, true);
+    }
 }
 
 dtype struct_dtype::get_canonical_dtype() const

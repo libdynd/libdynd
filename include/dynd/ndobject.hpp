@@ -386,6 +386,11 @@ public:
     }
 
     /**
+     * Converts the uniform dtype of the array into the specified dtype.
+     */
+    ndobject cast_udtype(const dtype& scalar_dtype, assign_error_mode errmode = assign_error_default) const;
+
+    /**
      * Views the array's memory as another dtype, where such an operation
      * makes sense. This is analogous to reinterpret_cast<>.
      */

@@ -319,7 +319,8 @@ typedef char * (*iterdata_increment_fn_t)(iterdata_common *iterdata, int level);
  */
 typedef char * (*iterdata_reset_fn_t)(iterdata_common *iterdata, char *data, int ndim);
 
-typedef dtype (*dtype_transform_fn_t)(const dtype& dt, const void *extra);
+typedef void (*dtype_transform_fn_t)(const dtype& dt, const void *extra,
+                dtype& out_transformed_dtype, bool& out_was_transformed);
 
 struct iterdata_common {
     iterdata_increment_fn_t incr;
@@ -378,7 +379,7 @@ public:
     virtual dtype_memory_management_t get_memory_management() const = 0;
 
     /**
-     * \brief Returns true if the dtype is a scalar.
+     * Returns true if the dtype is a scalar.
      *
      * This precludes a dynamic dtype from switching between scalar and array behavior,
      * but the simplicity seems to probably be worth it.
@@ -386,17 +387,27 @@ public:
     virtual bool is_scalar() const;
 
     /**
-     * \brief Returns true if the dtype contains an expression dtype anywhere within it.
+     * Returns true if the first dimension of the dtype is a uniform dimension.
+     */
+    virtual bool is_uniform_dim() const;
+
+    /**
+     * Returns true if the dtype contains an expression dtype anywhere within it.
      */
     virtual bool is_expression() const;
 
     /**
-     * For array types, recursively applies itself, and for
-     * scalar types, applies the provided function.
+     * Applies the transform function to all the child dtypes, creating
+     * a new dtype of the same type but with the transformed children.
      *
-     * \param transform_fn  The function for transforming scalar dtypes.
+     * \param transform_fn  The function for transforming dtypes.
+     * \param extra  Extra data to pass to the transform function
+     * \param out_transformed_dtype  The transformed dtype is placed here.
+     * \param out_was_transformed  Is set to true if a transformation was done,
+     *                             is left alone otherwise.
      */
-    virtual dtype with_transformed_scalar_types(dtype_transform_fn_t transform_fn, const void *extra) const;
+    virtual void transform_child_dtypes(dtype_transform_fn_t transform_fn, const void *extra,
+                    dtype& out_transformed_dtype, bool& out_was_transformed) const;
 
     /**
      * Returns a modified dtype with all expression dtypes replaced with
@@ -1057,22 +1068,6 @@ public:
      * \param errmode       The error mode for the conversion.
      */
     dtype with_replaced_scalar_types(const dtype& scalar_dtype, assign_error_mode errmode = assign_error_default) const;
-
-    /**
-     * For array types, recursively applies itself, and for
-     * scalar types, applies the provided function.
-     *
-     * \param transform_fn  The function for transforming scalar dtypes.
-     * \param extra         Extra data to pass to transform_fn.
-     */
-    inline dtype with_transformed_scalar_types(dtype_transform_fn_t transform_fn, const void *extra) const
-    {
-        if (extended()) {
-            return extended()->with_transformed_scalar_types(transform_fn, extra);
-        } else {
-            return transform_fn(*this, extra);
-        }
-    }
 
     /**
      * Returns a modified dtype with all expression dtypes replaced with

@@ -98,15 +98,34 @@ bool fixedstruct_dtype::is_expression() const
     return false;
 }
 
-dtype fixedstruct_dtype::with_transformed_scalar_types(dtype_transform_fn_t transform_fn, const void *extra) const
+void fixedstruct_dtype::transform_child_dtypes(dtype_transform_fn_t transform_fn, const void *extra,
+                dtype& out_transformed_dtype, bool& out_was_transformed) const
 {
-    std::vector<dtype> field_types(m_field_types.size());
+    std::vector<dtype> tmp_field_types(m_field_types.size());
 
+    bool switch_to_struct = false;
+    bool was_any_transformed = false;
     for (size_t i = 0, i_end = m_field_types.size(); i != i_end; ++i) {
-        field_types[i] = m_field_types[i].with_transformed_scalar_types(transform_fn, extra);
+        bool was_transformed = false;
+        transform_fn(m_field_types[i], extra, tmp_field_types[i], was_transformed);
+        if (was_transformed) {
+            // If the dtype turned into one without fixed size, have to use struct instead of fixedstruct
+            if (tmp_field_types[i].get_element_size() == 0) {
+                switch_to_struct = true;
+            }
+            was_any_transformed = true;
+        }
     }
-
-    return dtype(new fixedstruct_dtype(field_types, m_field_names));
+    if (was_any_transformed) {
+        if (!switch_to_struct) {
+            out_transformed_dtype = dtype(new fixedstruct_dtype(tmp_field_types, m_field_names));
+        } else {
+            out_transformed_dtype = dtype(new struct_dtype(tmp_field_types, m_field_names));
+        }
+        out_was_transformed = true;
+    } else {
+        out_transformed_dtype = dtype(this, true);
+    }
 }
 
 dtype fixedstruct_dtype::get_canonical_dtype() const

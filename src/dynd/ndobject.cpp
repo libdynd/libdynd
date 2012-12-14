@@ -11,6 +11,7 @@
 #include <dynd/dtypes/string_dtype.hpp>
 #include <dynd/dtypes/bytes_dtype.hpp>
 #include <dynd/dtypes/fixedbytes_dtype.hpp>
+#include <dynd/dtypes/convert_dtype.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/exceptions.hpp>
 #include <dynd/gfunc/callable.hpp>
@@ -384,26 +385,45 @@ ndobject::ndobject(const dtype& dt, intptr_t dim0, intptr_t dim1, intptr_t dim2)
 }
 
 namespace {
-    static dtype as_storage_type(const dtype& dt, const void *DYND_UNUSED(extra))
+    static void as_storage_type(const dtype& dt, const void *DYND_UNUSED(extra),
+                dtype& out_transformed_dtype, bool& out_was_transformed)
     {
         // If the dtype is a simple POD, switch it to a bytes dtype. Otherwise, keep it
         // the same so that the metadata layout is identical.
-        const dtype& storage_dt = dt.storage_dtype();
-        if (!storage_dt.extended() || (storage_dt.get_memory_management() == pod_memory_management &&
-                                storage_dt.extended()->get_metadata_size() == 0)) {
-            return make_fixedbytes_dtype(storage_dt.get_element_size(), storage_dt.get_alignment());
-        } else if (storage_dt.get_type_id() == string_type_id) {
-            return make_bytes_dtype(static_cast<const string_dtype *>(storage_dt.extended())->get_data_alignment());
+        if (dt.is_scalar() && dt.get_type_id() != pointer_type_id) {
+            const dtype& storage_dt = dt.storage_dtype();
+            if (!storage_dt.extended() || (storage_dt.get_memory_management() == pod_memory_management &&
+                                    storage_dt.extended()->get_metadata_size() == 0)) {
+                out_transformed_dtype = make_fixedbytes_dtype(storage_dt.get_element_size(), storage_dt.get_alignment());
+                out_was_transformed = true;
+            } else if (storage_dt.get_type_id() == string_type_id) {
+                out_transformed_dtype = make_bytes_dtype(static_cast<const string_dtype *>(storage_dt.extended())->get_data_alignment());
+                out_was_transformed = true;
+            } else {
+                if (dt.get_kind() == expression_kind) {
+                    out_transformed_dtype = storage_dt;
+                    out_was_transformed = true;
+                } else {
+                    // No transformation
+                    out_transformed_dtype = dt;
+                }
+            }
         } else {
-            return storage_dt;
+            dt.extended()->transform_child_dtypes(&as_storage_type, NULL, out_transformed_dtype, out_was_transformed);
         }
     }
 } // anonymous namespace
 
 ndobject ndobject::storage() const
 {
-    dtype storage_dt = get_dtype().with_transformed_scalar_types(&as_storage_type, NULL);
-    return make_ndobject_clone_with_new_dtype(*this, storage_dt);
+    dtype storage_dt = get_dtype();
+    bool was_transformed;
+    as_storage_type(get_dtype(), NULL, storage_dt, was_transformed);
+    if (was_transformed) {
+        return make_ndobject_clone_with_new_dtype(*this, storage_dt);
+    } else {
+        return *this;
+    }
 }
 
 ndobject ndobject::at_array(int nindices, const irange *indices) const
@@ -620,16 +640,65 @@ ndobject ndobject::cast_scalars(const dtype& scalar_dtype, assign_error_mode err
 }
 
 namespace {
-    static dtype view_scalar_type(const dtype& dt, const void *extra)
+    struct switch_udtype_extra {
+        switch_udtype_extra(const dtype& dt, assign_error_mode em)
+            : replacement_dtype(dt), errmode(em)
+        {
+        }
+        const dtype& replacement_dtype;
+        assign_error_mode errmode;
+    };
+    static void switch_udtype(const dtype& dt, const void *extra,
+                dtype& out_transformed_dtype, bool& out_was_transformed)
     {
         const dtype *e = reinterpret_cast<const dtype *>(extra);
         // If things aren't simple, use a view_dtype
-        if (dt.get_kind() == expression_kind || dt.get_element_size() != e->get_element_size() ||
-                    dt.get_memory_management() != pod_memory_management ||
-                    e->get_memory_management() != pod_memory_management) {
-            return make_view_dtype(*e, dt);
+        if (dt.extended() && dt.extended()->is_uniform_dim()) {
+            dt.extended()->transform_child_dtypes(&switch_udtype, extra, out_transformed_dtype, out_was_transformed);
         } else {
-            return *e;
+            const switch_udtype_extra *e = reinterpret_cast<const switch_udtype_extra *>(extra);
+            out_transformed_dtype = make_convert_dtype(e->replacement_dtype, dt, e->errmode);
+            out_was_transformed= true;
+        }
+    }
+} // anonymous namespace
+
+ndobject ndobject::cast_udtype(const dtype& scalar_dtype, assign_error_mode errmode) const
+{
+    // This creates a dtype which has a convert dtype for every scalar of different dtype.
+    // The result has the exact same metadata and data, so we just have to swap in the new
+    // dtype in a shallow copy.
+    dtype replaced_dtype;
+    bool was_transformed;
+    switch_udtype_extra extra(scalar_dtype, errmode);
+    switch_udtype(get_dtype(), &extra, replaced_dtype, was_transformed);
+    if (was_transformed) {
+        return make_ndobject_clone_with_new_dtype(*this, replaced_dtype);
+    } else {
+        return *this;
+    }
+}
+
+namespace {
+    static void view_scalar_types(const dtype& dt, const void *extra,
+                dtype& out_transformed_dtype, bool& out_was_transformed)
+    {
+        if (dt.is_scalar()) {
+            const dtype *e = reinterpret_cast<const dtype *>(extra);
+            // If things aren't simple, use a view_dtype
+            if (dt.get_kind() == expression_kind || dt.get_element_size() != e->get_element_size() ||
+                        dt.get_memory_management() != pod_memory_management ||
+                        e->get_memory_management() != pod_memory_management) {
+                out_transformed_dtype = make_view_dtype(*e, dt);
+                out_was_transformed = true;
+            } else {
+                out_transformed_dtype = *e;
+                if (dt != *e) {
+                    out_was_transformed = true;
+                }
+            }
+        } else {
+            dt.extended()->transform_child_dtypes(&view_scalar_types, extra, out_transformed_dtype, out_was_transformed);
         }
     }
 } // anonymous namespace
@@ -684,7 +753,10 @@ ndobject ndobject::view_scalars(const dtype& scalar_dtype) const
         }
     }
 
-    const dtype& viewed_dtype = array_dtype.with_transformed_scalar_types(view_scalar_type, &scalar_dtype);
+    // Transform the scalars into view dtypes
+    dtype viewed_dtype;
+    bool was_transformed;
+    view_scalar_types(get_dtype(), &scalar_dtype, viewed_dtype, was_transformed);
     return make_ndobject_clone_with_new_dtype(*this, viewed_dtype);
 }
 

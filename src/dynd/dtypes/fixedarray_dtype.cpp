@@ -88,22 +88,34 @@ bool fixedarray_dtype::is_scalar() const
     return false;
 }
 
+bool fixedarray_dtype::is_uniform_dim() const
+{
+    return true;
+}
+
 bool fixedarray_dtype::is_expression() const
 {
     return m_element_dtype.is_expression();
 }
 
-dtype fixedarray_dtype::with_transformed_scalar_types(dtype_transform_fn_t transform_fn, const void *extra) const
+void fixedarray_dtype::transform_child_dtypes(dtype_transform_fn_t transform_fn, const void *extra,
+                dtype& out_transformed_dtype, bool& out_was_transformed) const
 {
-    dtype transformed_element_dtype = m_element_dtype.with_transformed_scalar_types(transform_fn, extra);
-    // The transformed dtype may no longer have a fixed size, so check whether
-    // we have to switch to the more flexible strided_array_dtype
-    if (transformed_element_dtype.get_element_size() != 0) {
-        return dtype(new fixedarray_dtype(transformed_element_dtype, m_dimension_size));
+    dtype tmp_dtype;
+    bool was_transformed = false;
+    transform_fn(m_element_dtype, extra, tmp_dtype, was_transformed);
+    if (was_transformed) {
+        if (tmp_dtype.get_element_size() != 0) {
+            out_transformed_dtype = dtype(new fixedarray_dtype(tmp_dtype, m_dimension_size));
+        } else {
+            out_transformed_dtype = dtype(new strided_array_dtype(tmp_dtype));
+        }
+        out_was_transformed = true;
     } else {
-        return dtype(new strided_array_dtype(transformed_element_dtype));
+        out_transformed_dtype = dtype(this, true);
     }
 }
+
 
 dtype fixedarray_dtype::get_canonical_dtype() const
 {
