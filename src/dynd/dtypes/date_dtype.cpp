@@ -20,6 +20,7 @@
 #include <dynd/ndobject_iter.hpp>
 
 #include <datetime_strings.h>
+#include <datetime_localtime.h>
 
 using namespace std;
 using namespace dynd;
@@ -185,7 +186,7 @@ bool date_dtype::operator==(const extended_dtype& rhs) const
 
 ///////// properties on the dtype
 
-static string property_get_encoding(const dtype& dt) {
+static string property_get_unit(const dtype& dt) {
     const date_dtype *d = static_cast<const date_dtype *>(dt.extended());
     stringstream ss;
     ss << d->get_unit();
@@ -193,13 +194,48 @@ static string property_get_encoding(const dtype& dt) {
 }
 
 static pair<string, gfunc::callable> date_dtype_properties[] = {
-    pair<string, gfunc::callable>("unit", gfunc::make_callable(&property_get_encoding, "self"))
+    pair<string, gfunc::callable>("unit", gfunc::make_callable(&property_get_unit, "self"))
 };
 
 void date_dtype::get_dynamic_dtype_properties(const std::pair<std::string, gfunc::callable> **out_properties, int *out_count) const
 {
     *out_properties = date_dtype_properties;
     *out_count = sizeof(date_dtype_properties) / sizeof(date_dtype_properties[0]);
+}
+
+///////// functions on the ndobject
+
+static ndobject function_dtype_today(const dtype& dt) {
+    datetime::date_ymd ymd;
+    datetime::fill_current_local_date(&ymd);
+    const date_dtype *d = static_cast<const date_dtype *>(dt.extended());
+    ndobject result(dt);
+    switch (d->get_unit()) {
+        case date_unit_year:
+            *reinterpret_cast<int32_t *>(result.get_readwrite_originptr()) = ymd.year - 1970;
+            break;
+        case date_unit_month:
+            *reinterpret_cast<int32_t *>(result.get_readwrite_originptr()) = 12 * (ymd.year - 1970) + (ymd.month - 1);
+            break;
+        case date_unit_day:
+            *reinterpret_cast<int32_t *>(result.get_readwrite_originptr()) = datetime::ymd_to_days(ymd);
+            break;
+        default:
+            throw runtime_error("date dtype has corrupted date unit");
+    }
+    // Make the result immutable (we own the only reference to the data at this point)
+    result.get_ndo()->m_flags = (result.get_ndo()->m_flags&~(uint64_t)write_access_flag)|immutable_access_flag;
+    return result;
+}
+
+static pair<string, gfunc::callable> date_dtype_functions[] = {
+    pair<string, gfunc::callable>("today", gfunc::make_callable(&function_dtype_today, "self"))
+};
+
+void date_dtype::get_dynamic_dtype_functions(const std::pair<std::string, gfunc::callable> **out_functions, int *out_count) const
+{
+    *out_functions = date_dtype_functions;
+    *out_count = sizeof(date_dtype_functions) / sizeof(date_dtype_functions[0]);
 }
 
 ///////// properties on the ndobject
@@ -280,7 +316,7 @@ static ndobject function_ndo_strftime(const ndobject& n, const std::string& form
                 date = *reinterpret_cast<const int32_t *>(iter.data<1>());
             }
             // Convert the date to a 'struct tm'
-            datetime::date_val_to_struct_tm(date, datetime_unit, tm_val);
+            datetime::date_to_struct_tm(date, datetime_unit, tm_val);
             // Call strftime, growing the string buffer if needed so it fits
             str.resize(format.size() + 16);
 #ifdef _MSC_VER

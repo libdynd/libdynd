@@ -626,6 +626,11 @@ public:
     virtual void get_dynamic_dtype_properties(const std::pair<std::string, gfunc::callable> **out_properties, int *out_count) const;
 
     /**
+     * Additional dynamic functions exposed by the dtype as gfunc::callable.
+     */
+    virtual void get_dynamic_dtype_functions(const std::pair<std::string, gfunc::callable> **out_functions, int *out_count) const;
+
+    /**
      * Additional dynamic properties exposed by any ndobject of this dtype as gfunc::callable.
      *
      * \note Uniform dtypes copy these properties from the first non-uniform dtype, so such properties must

@@ -99,50 +99,6 @@ void datetime::parse_iso_8601_datetime(const char *str, size_t len,
         }
     }
 
-    /*
-     * The string "today" means take today's date in local time, and
-     * convert it to a date representation. This date representation, if
-     * forced into a time unit, will be at midnight UTC.
-     * This is perhaps a little weird, but done so that the
-     * 'datetime64[D]' type produces the date you expect, rather than
-     * switching to an adjacent day depending on the current time and your
-     * timezone.
-     */
-    if (len == 5 && tolower(str[0]) == 't' &&
-                    tolower(str[1]) == 'o' &&
-                    tolower(str[2]) == 'd' &&
-                    tolower(str[3]) == 'a' &&
-                    tolower(str[4]) == 'y') {
-        fill_current_local_date(out);
-
-        bestunit = datetime_unit_day;
-
-        /*
-         * Indicate that this was a special value, and
-         * is a date (unit 'D').
-         */
-        if (out_local != NULL) {
-            *out_local = false;
-        }
-        if (out_bestunit != NULL) {
-            *out_bestunit = bestunit;
-        }
-        if (out_special != NULL) {
-            *out_special = true;
-        }
-
-        /* Check the casting rule */
-        if (unit != datetime_unit_unspecified &&
-                    !satisfies_conversion_rule(unit, bestunit, casting)) {
-            std::stringstream ss;
-            ss << "cannot parse \"" << str << "\" as a datetime with unit ";
-            ss << unit << " and " << casting << " casting";
-            throw std::runtime_error(ss.str());
-        }
-
-        return;
-    }
-
     /* The string "now" resolves to the current UTC time */
     if (len == 3 && tolower(str[0]) == 'n' &&
                     tolower(str[1]) == 'o' &&

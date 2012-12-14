@@ -222,6 +222,22 @@ void datetime::fill_current_local_date(datetime_fields *out)
     out->day = tm_.tm_mday;
 }
 
+void datetime::fill_current_local_date(date_ymd *out)
+{
+    os_time_t rawtime = 0;
+    struct tm tm_;
+
+#if defined(_MSC_VER)
+    _time64(&rawtime);
+#else
+    time(&rawtime);
+#endif
+    get_localtime(&rawtime, &tm_);
+    out->year = tm_.tm_year + 1900;
+    out->month = tm_.tm_mon + 1;
+    out->day = tm_.tm_mday;
+}
+
 datetime_val_t datetime::get_current_utc_datetime_seconds()
 {
     os_time_t rawtime = 0;

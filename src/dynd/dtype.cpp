@@ -274,6 +274,13 @@ void extended_dtype::get_dynamic_dtype_properties(const std::pair<std::string, g
     *out_count = 0;
 }
 
+void extended_dtype::get_dynamic_dtype_functions(const std::pair<std::string, gfunc::callable> **out_functions, int *out_count) const
+{
+    // Default to no functions
+    *out_functions = NULL;
+    *out_count = 0;
+}
+
 void extended_dtype::get_dynamic_ndobject_properties(const std::pair<std::string, gfunc::callable> **out_properties, int *out_count) const
 {
     // Default to no properties

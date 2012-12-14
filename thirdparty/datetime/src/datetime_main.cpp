@@ -868,7 +868,7 @@ void datetime::datetime_fields::add_minutes(int minutes)
     }
 }
 
-void datetime::date_val_to_struct_tm(date_val_t date, datetime_unit_t unit, struct tm& out_tm)
+void datetime::date_to_struct_tm(date_val_t date, datetime_unit_t unit, struct tm& out_tm)
 {
     int32_t days;
     date_yd yd;

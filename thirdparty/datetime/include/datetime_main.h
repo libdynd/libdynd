@@ -147,6 +147,11 @@ void date_to_ymd(date_val_t date, datetime_unit_t unit, date_ymd& out_ymd);
  */
 void date_to_days(date_val_t date, datetime_unit_t unit, int32_t& out_days);
 
+/**
+ * Converts any date value into a standard C 'struct tm'.
+ */
+void date_to_struct_tm(date_val_t date, datetime_unit_t unit, struct tm& out_tm);
+
 /*
  * Converts a 'days' date into a date_yd year + day offset structure.
  */
@@ -179,8 +184,6 @@ inline int32_t ymd_to_days(const date_ymd& ymd) {
  * Converts a year/month/day date into a 64-bit days date.
  */
 int64_t ymd_to_days(int64_t year, int32_t month, int32_t day);
-
-void date_val_to_struct_tm(date_val_t date, datetime_unit_t unit, struct tm& out_tm);
 
 extern const int days_per_month_table[2][12];
 
