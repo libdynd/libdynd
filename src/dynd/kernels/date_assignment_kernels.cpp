@@ -277,7 +277,6 @@ namespace {
         {
             auxdata_storage& ad = get_auxiliary_data<auxdata_storage>(extra->auxdata);
             datetime::datetime_fields fld;
-            fld.set_from_date_val(*reinterpret_cast<const int32_t *>(src), ad.unit);
             // Copy the source struct into our default struct layout
             date_dtype_default_struct tmp_date;
             unary_kernel_static_data kernel_extra(ad.kernel.auxdata, NULL, extra->src_metadata);
