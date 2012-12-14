@@ -8,6 +8,7 @@
 
 #include <dynd/ndobject.hpp>
 #include <dynd/ndobject_arange.hpp>
+#include <dynd/dtype_promotion.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -179,6 +180,24 @@ static void linspace_specialization(complex<double> start, complex<double> stop,
         double alpha = double(i) / double(count - 1);
         *reinterpret_cast<complex<double> *>(dst) = (1 - alpha) * start + alpha * stop;
     }
+}
+
+ndobject dynd::linspace(const ndobject& start, const ndobject& stop, intptr_t count)
+{
+    dtype dt = promote_dtypes_arithmetic(start.get_udtype(), stop.get_udtype());
+    // Make sure it's at least floating point
+    if (dt.get_kind() == bool_kind || dt.get_kind() == int_kind || dt.get_kind() == uint_kind) {
+        dt = make_dtype<double>();
+    }
+    ndobject start_cleaned = start.cast_udtype(dt, assign_error_none).vals();
+    ndobject stop_cleaned = stop.cast_udtype(dt, assign_error_none).vals();
+
+    if (start_cleaned.is_scalar() && stop_cleaned.is_scalar()) {
+        return linspace(dt, start_cleaned.get_readonly_originptr(), stop_cleaned.get_readonly_originptr(), count);
+    } else {
+        throw runtime_error("dynd::linspace presently only supports scalar parameters");
+    }
+
 }
 
 ndobject dynd::linspace(const dtype& dt, const void *startval, const void *stopval, intptr_t count)

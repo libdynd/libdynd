@@ -239,6 +239,15 @@ public:
         }
     }
 
+    /** The uniform dtype (Most similar to numpy ndarray.dtype property) */
+    inline dtype get_udtype() const {
+        if (get_ndo()->is_builtin_dtype()) {
+            return dtype(get_ndo()->get_builtin_type_id());
+        } else {
+            return get_ndo()->m_dtype->get_dtype_at_dimension(NULL, get_ndo()->m_dtype->get_undim());
+        }
+    }
+
     /** The flags, including access permissions. */
     inline int64_t get_flags() const {
         return get_ndo()->m_flags;
