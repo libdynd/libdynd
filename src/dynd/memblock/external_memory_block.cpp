@@ -3,6 +3,9 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
+#include <iostream>
+#include <string>
+
 #include <dynd/memblock/external_memory_block.hpp>
 
 using namespace dynd;
@@ -39,3 +42,10 @@ void free_external_memory_block(memory_block_data *memblock)
 }
 
 }} // namespace dynd::detail
+
+void dynd::external_memory_block_debug_print(const memory_block_data *memblock, std::ostream& o, const std::string& indent)
+{
+    const external_memory_block *mb = reinterpret_cast<const external_memory_block *>(memblock);
+    o << indent << " object void pointer: " << mb->m_object << "\n";
+    o << indent << " free function: " << (const void *)mb->m_free_fn << "\n";
+}

@@ -129,10 +129,6 @@ void dynd::ndobject_memory_block_debug_print(const memory_block_data *memblock, 
         dtype dt = preamble->is_builtin_dtype() ? dtype(preamble->get_type_id())
                         : dtype(preamble->m_dtype, true);
         o << indent << " dtype: " << dt << "\n";
-        o << indent << " data pointer: " << (const void *)preamble->m_data_pointer << "\n";
-        o << indent << " data memblock:\n";
-        memory_block_debug_print(preamble->m_data_reference, o, indent + " ");
-        preamble->m_dtype->metadata_debug_print(metadata, o, indent + " ");
     } else {
         o << indent << " uninitialized ndobject\n";
     }

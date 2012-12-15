@@ -8,6 +8,7 @@
 #include <dynd/memblock/fixed_size_pod_memory_block.hpp>
 #include <dynd/memblock/executable_memory_block.hpp>
 #include <dynd/memblock/ndobject_memory_block.hpp>
+#include <dynd/memblock/external_memory_block.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -88,6 +89,7 @@ void dynd::memory_block_debug_print(const memory_block_data *memblock, std::ostr
         switch ((memory_block_type_t)memblock->m_type) {
             case external_memory_block_type:
                 o << indent << " type: external\n";
+                external_memory_block_debug_print(memblock, o, indent);
                 break;
             case fixed_size_pod_memory_block_type:
                 o << indent << " type: fixed_size_pod\n";

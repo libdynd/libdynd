@@ -781,23 +781,29 @@ void ndobject::debug_print(std::ostream& o, const std::string& indent) const
         const ndobject_preamble *ndo = get_ndo();
         o << " address: " << (void *)m_memblock.get() << "\n";
         o << " refcount: " << ndo->m_memblockdata.m_use_count << "\n";
-        o << " data pointer: " << (void *)ndo->m_data_pointer << "\n";
-        o << " data reference: " << (void *)ndo->m_data_reference;
+        o << " dtype:\n";
+        o << "  pointer: " << (void *)ndo->m_dtype << "\n";
+        o << "  type: " << get_dtype() << "\n";
+        o << " metadata:\n";
+        o << "  flags: " << ndo->m_flags << " (";
+        if (ndo->m_flags & read_access_flag) o << "read_access ";
+        if (ndo->m_flags & write_access_flag) o << "write_access ";
+        if (ndo->m_flags & immutable_access_flag) o << "immutable ";
+        o << ")\n";
+        if (!ndo->is_builtin_dtype()) {
+            o << "  dtype-specific metadata:\n";
+            ndo->m_dtype->metadata_debug_print(get_ndo_meta(), o, indent + "   ");
+        }
+        o << " data:\n";
+        o << "   pointer: " << (void *)ndo->m_data_pointer << "\n";
+        o << "   reference: " << (void *)ndo->m_data_reference;
         if (ndo->m_data_reference == NULL) {
             o << " (embedded in ndobject memory)\n";
         } else {
             o << "\n";
         }
-        o << " flags: " << ndo->m_flags << " (";
-        if (ndo->m_flags & read_access_flag) o << "read_access ";
-        if (ndo->m_flags & write_access_flag) o << "write_access ";
-        if (ndo->m_flags & immutable_access_flag) o << "immutable ";
-        o << ")\n";
-        o << " dtype raw value: " << (void *)ndo->m_dtype << "\n";
-        o << " dtype: " << get_dtype() << "\n";
-        if (!ndo->is_builtin_dtype()) {
-            o << " metadata:\n";
-            ndo->m_dtype->metadata_debug_print(get_ndo_meta(), o, indent + "  ");
+        if (ndo->m_data_reference != NULL) {
+            memory_block_debug_print(ndo->m_data_reference, o, "    ");
         }
     } else {
         o << indent << "NULL\n";
