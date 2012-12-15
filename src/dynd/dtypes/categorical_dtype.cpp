@@ -99,7 +99,7 @@ namespace {
             const categorical_dtype *cat = reinterpret_cast<const categorical_dtype *>(
                 get_raw_auxiliary_data(extra->auxdata)&~1
             );
-            size_t src_size = cat->get_category_dtype().get_element_size();
+            size_t src_size = cat->get_category_dtype().get_data_size();
 
             uint32_t *dst_vals = reinterpret_cast<uint32_t *>(dst);
             for (size_t i = 0; i != count; ++i) {
@@ -190,8 +190,8 @@ categorical_dtype::categorical_dtype(const ndobject& categories)
     vector<char *> categories_user_order(num_categories);
     for (uint32_t i = 0; i < m_category_index_to_value.size(); ++i) {
         m_category_index_to_value[i] = i;
-        categories_user_order[i] = new char[m_category_dtype.get_element_size()];
-        memcpy(categories_user_order[i], categories.at(i).get_readonly_originptr(), m_category_dtype.get_element_size());
+        categories_user_order[i] = new char[m_category_dtype.get_data_size()];
+        memcpy(categories_user_order[i], categories.at(i).get_readonly_originptr(), m_category_dtype.get_data_size());
 
         if (uniques.find(categories_user_order[i]) == uniques.end()) {
             uniques.insert(categories_user_order[i]);
@@ -326,7 +326,7 @@ void categorical_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const d
             categorical_to_other_assign::auxdata_storage& ad =
                         out_kernel.auxdata.get<categorical_to_other_assign::auxdata_storage>();
             ad.cat_dt = src_dt;
-            ad.dst_size = dst_dt.get_element_size();
+            ad.dst_size = dst_dt.get_data_size();
             ::get_dtype_assignment_kernel(dst_dt, m_category_dtype, errmode, NULL, ad.kernel);
         }
         else {

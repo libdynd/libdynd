@@ -196,7 +196,7 @@ void string_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const dtype&
             case fixedstring_type_id: {
                 const extended_string_dtype *src_fs = static_cast<const extended_string_dtype *>(src_dt.extended());
                 get_fixedstring_to_blockref_string_assignment_kernel(m_encoding,
-                                        src_fs->get_element_size(), src_fs->get_encoding(),
+                                        src_fs->get_data_size(), src_fs->get_encoding(),
                                         errmode, out_kernel);
                 break;
             }

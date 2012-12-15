@@ -66,7 +66,7 @@ memory_block_ptr dynd::make_ndobject_memory_block(const dtype& dt, int ndim, con
 
     if (dt.extended() == NULL) {
         metadata_size = 0;
-        element_size = dt.get_element_size();
+        element_size = dt.get_data_size();
     } else {
         metadata_size = dt.extended()->get_metadata_size();
         element_size = dt.extended()->get_default_element_size(ndim, shape);

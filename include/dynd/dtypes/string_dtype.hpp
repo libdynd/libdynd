@@ -45,7 +45,7 @@ public:
     size_t get_alignment() const {
         return sizeof(const char *);
     }
-    size_t get_element_size() const {
+    size_t get_data_size() const {
         return sizeof(string_dtype_data);
     }
 

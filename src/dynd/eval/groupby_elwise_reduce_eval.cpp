@@ -129,7 +129,7 @@ ndarray_node_ptr dynd::eval::evaluate_groupby_elwise_reduce(ndarray_node *node, 
 
     // Allocate the memoryblock for the data
     char *result_originptr = NULL;
-    intptr_t result_stride = result_dt.get_element_size();
+    intptr_t result_stride = result_dt.get_data_size();
     memory_block_ptr result_memblock = make_fixed_size_pod_memory_block(result_stride * num_groups,
                     result_dt.get_alignment(), &result_originptr,
                     NULL, NULL);
@@ -159,7 +159,7 @@ ndarray_node_ptr dynd::eval::evaluate_groupby_elwise_reduce(ndarray_node *node, 
 
     if (rnode->get_identity() != NULL) {
         // Fill the result with the identity
-        dtype_strided_assign(result_dt, result_originptr, result_dt.get_element_size(),
+        dtype_strided_assign(result_dt, result_originptr, result_dt.get_data_size(),
                             result_dt, rnode->get_identity()->get_readonly_originptr(), 0,
                             num_groups, assign_error_none, ectx);
 
@@ -172,7 +172,7 @@ ndarray_node_ptr dynd::eval::evaluate_groupby_elwise_reduce(ndarray_node *node, 
             kernel_instance<unary_operation_pair_t> by_operation;
             make_buffered_chain_unary_kernel(by_kernels, by_element_sizes, by_operation);
             unary_operation_t by_func = by_operation.specializations[
-                        get_unary_specialization(groups_dt.get_element_size(), groups_dt.get_element_size(), by_stride, by_element_sizes.front())];
+                        get_unary_specialization(groups_dt.get_data_size(), groups_dt.get_data_size(), by_stride, by_element_sizes.front())];
             buffer_storage by_buf(by_element_sizes.back(), size);
             intptr_t count = size;
             do {
@@ -181,10 +181,10 @@ ndarray_node_ptr dynd::eval::evaluate_groupby_elwise_reduce(ndarray_node *node, 
                     block_count = count;
                 }
 
-                by_func(by_buf.storage(), groups_dt.get_element_size(), by_ptr, by_stride, block_count, by_operation.auxdata);
+                by_func(by_buf.storage(), groups_dt.get_data_size(), by_ptr, by_stride, block_count, by_operation.auxdata);
 
                 groupby_elwise_reduce_loop(result_originptr, result_stride,
-                            data_ptr, data_stride, by_buf.storage(), groups_dt.get_element_size(),
+                            data_ptr, data_stride, by_buf.storage(), groups_dt.get_data_size(),
                             size, num_groups,
                             reduce_operation, groups_dt);
 
@@ -219,7 +219,7 @@ ndarray_node_ptr dynd::eval::evaluate_groupby_elwise_reduce(ndarray_node *node, 
             make_buffered_chain_unary_kernel(by_kernels, by_element_sizes, by_operation);
             make_buffered_chain_unary_kernel(data_kernels, data_element_sizes, data_operation);
             unary_operation_t by_func = by_operation.specializations[
-                        get_unary_specialization(groups_dt.get_element_size(), groups_dt.get_element_size(), by_stride, by_element_sizes.front())];
+                        get_unary_specialization(groups_dt.get_data_size(), groups_dt.get_data_size(), by_stride, by_element_sizes.front())];
             unary_operation_t data_func = data_operation.specializations[
                         get_unary_specialization(data_element_sizes.back(), data_element_sizes.back(), data_stride, data_element_sizes.front())];
             buffer_storage by_buf(by_element_sizes.back(), size);
@@ -231,11 +231,11 @@ ndarray_node_ptr dynd::eval::evaluate_groupby_elwise_reduce(ndarray_node *node, 
                     block_count = count;
                 }
 
-                by_func(by_buf.storage(), groups_dt.get_element_size(), by_ptr, by_stride, block_count, by_operation.auxdata);
+                by_func(by_buf.storage(), groups_dt.get_data_size(), by_ptr, by_stride, block_count, by_operation.auxdata);
                 data_func(data_buf.storage(), data_element_sizes.back(), data_ptr, data_stride, block_count, data_operation.auxdata);
 
                 groupby_elwise_reduce_loop(result_originptr, result_stride,
-                            data_buf.storage(), data_element_sizes.back(), by_buf.storage(), groups_dt.get_element_size(),
+                            data_buf.storage(), data_element_sizes.back(), by_buf.storage(), groups_dt.get_data_size(),
                             size, num_groups,
                             reduce_operation, groups_dt);
 
@@ -268,7 +268,7 @@ ndarray_node_ptr dynd::eval::evaluate_groupby_elwise_reduce(ndarray_node *node, 
             kernel_instance<unary_operation_pair_t> by_operation;
             make_buffered_chain_unary_kernel(by_kernels, by_element_sizes, by_operation);
             unary_operation_t by_func = by_operation.specializations[
-                        get_unary_specialization(groups_dt.get_element_size(), groups_dt.get_element_size(), by_stride, by_element_sizes.front())];
+                        get_unary_specialization(groups_dt.get_data_size(), groups_dt.get_data_size(), by_stride, by_element_sizes.front())];
             buffer_storage by_buf(by_element_sizes.back(), size);
             intptr_t count = size;
             do {
@@ -277,10 +277,10 @@ ndarray_node_ptr dynd::eval::evaluate_groupby_elwise_reduce(ndarray_node *node, 
                     block_count = count;
                 }
 
-                by_func(by_buf.storage(), groups_dt.get_element_size(), by_ptr, by_stride, block_count, by_operation.auxdata);
+                by_func(by_buf.storage(), groups_dt.get_data_size(), by_ptr, by_stride, block_count, by_operation.auxdata);
 
                 groupby_elwise_reduce_loop_no_identity(result_originptr, result_stride,
-                            data_ptr, data_stride, by_buf.storage(), groups_dt.get_element_size(),
+                            data_ptr, data_stride, by_buf.storage(), groups_dt.get_data_size(),
                             size, num_groups,
                             group_seen, copy_one_data_func, data_operation.auxdata,
                             reduce_operation, groups_dt);
@@ -314,7 +314,7 @@ ndarray_node_ptr dynd::eval::evaluate_groupby_elwise_reduce(ndarray_node *node, 
             kernel_instance<unary_operation_pair_t> by_operation;
             make_buffered_chain_unary_kernel(by_kernels, by_element_sizes, by_operation);
             unary_operation_t by_func = by_operation.specializations[
-                        get_unary_specialization(groups_dt.get_element_size(), groups_dt.get_element_size(), by_stride, by_element_sizes.front())];
+                        get_unary_specialization(groups_dt.get_data_size(), groups_dt.get_data_size(), by_stride, by_element_sizes.front())];
             unary_operation_t data_func = data_operation.specializations[
                         get_unary_specialization(data_element_sizes.back(), data_element_sizes.back(), data_stride, data_element_sizes.front())];
             buffer_storage by_buf(by_element_sizes.back(), size);
@@ -326,11 +326,11 @@ ndarray_node_ptr dynd::eval::evaluate_groupby_elwise_reduce(ndarray_node *node, 
                     block_count = count;
                 }
 
-                by_func(by_buf.storage(), groups_dt.get_element_size(), by_ptr, by_stride, block_count, by_operation.auxdata);
+                by_func(by_buf.storage(), groups_dt.get_data_size(), by_ptr, by_stride, block_count, by_operation.auxdata);
                 data_func(data_buf.storage(), data_element_sizes.back(), data_ptr, data_stride, block_count, data_operation.auxdata);
 
                 groupby_elwise_reduce_loop_no_identity(result_originptr, result_stride,
-                            data_buf.storage(), data_element_sizes.back(), by_buf.storage(), groups_dt.get_element_size(),
+                            data_buf.storage(), data_element_sizes.back(), by_buf.storage(), groups_dt.get_data_size(),
                             size, num_groups,
                             group_seen, copy_one_data_func, data_operation.auxdata,
                             reduce_operation, groups_dt);

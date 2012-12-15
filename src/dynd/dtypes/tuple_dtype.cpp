@@ -29,7 +29,7 @@ dynd::tuple_dtype::tuple_dtype(const std::vector<dtype>& fields)
         offset = (offset + field_alignment - 1) & (-field_alignment);
         // Save the offset
         m_offsets[i] = offset;
-        offset += fields[i].get_element_size();
+        offset += fields[i].get_data_size();
         // Accumulate the correct memory management
         // TODO: Handle object, and object+blockref memory management types as well
         if (fields[i].get_memory_management() == blockref_memory_management) {
@@ -62,7 +62,7 @@ dynd::tuple_dtype::tuple_dtype(const std::vector<dtype>& fields, const std::vect
     m_memory_management = pod_memory_management;
     for (size_t i = 0, i_end = fields.size(); i != i_end; ++i) {
         // Check that the field is within bounds
-        if (offsets[i] + fields[i].get_element_size() > element_size) {
+        if (offsets[i] + fields[i].get_data_size() > element_size) {
             stringstream ss;
             ss << "tuple type cannot be created with field " << i << " of type " << fields[i];
             ss << " at offset " << offsets[i] << ", not fitting within the total element size of " << element_size;
@@ -106,7 +106,7 @@ bool dynd::tuple_dtype::compute_is_standard_layout() const
         if (m_offsets[i] != standard_offset) {
             return false;
         }
-        standard_offset += m_fields[i].get_element_size();
+        standard_offset += m_fields[i].get_data_size();
     }
     // Pad to get the standard element size
     size_t standard_element_size = (standard_offset + standard_alignment - 1) & (-standard_alignment);

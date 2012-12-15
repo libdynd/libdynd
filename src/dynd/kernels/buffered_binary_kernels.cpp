@@ -34,21 +34,21 @@ static void buffered_binary_out_in0_in1_kernel(char *dst, intptr_t dst_stride,
         }
 
         // First input kernel
-        ad.adapter_kernels[1].kernel(ad.bufs[1].storage(), ad.bufs[1].get_element_size(),
+        ad.adapter_kernels[1].kernel(ad.bufs[1].storage(), ad.bufs[1].get_data_size(),
                             src0, src0_stride,
                             block_count, ad.adapter_kernels[1].auxdata);
         // Second input kernel
-        ad.adapter_kernels[2].kernel(ad.bufs[2].storage(), ad.bufs[2].get_element_size(),
+        ad.adapter_kernels[2].kernel(ad.bufs[2].storage(), ad.bufs[2].get_data_size(),
                             src1, src1_stride,
                             block_count, ad.adapter_kernels[2].auxdata);
         // Binary kernel
-        ad.kernel.kernel(ad.bufs[0].storage(), ad.bufs[0].get_element_size(),
-                            ad.bufs[1].storage(), ad.bufs[1].get_element_size(),
-                            ad.bufs[2].storage(), ad.bufs[2].get_element_size(),
+        ad.kernel.kernel(ad.bufs[0].storage(), ad.bufs[0].get_data_size(),
+                            ad.bufs[1].storage(), ad.bufs[1].get_data_size(),
+                            ad.bufs[2].storage(), ad.bufs[2].get_data_size(),
                             block_count, ad.kernel.auxdata);
         // Output kernel
         ad.adapter_kernels[0].kernel(dst, dst_stride,
-                            ad.bufs[0].storage(), ad.bufs[0].get_element_size(),
+                            ad.bufs[0].storage(), ad.bufs[0].get_data_size(),
                             block_count, ad.adapter_kernels[0].auxdata);
 
         src0 += block_count * src0_stride;
@@ -76,17 +76,17 @@ static void buffered_binary_out_in0_kernel(char *dst, intptr_t dst_stride,
         }
 
         // First input kernel
-        ad.adapter_kernels[1].kernel(ad.bufs[1].storage(), ad.bufs[1].get_element_size(),
+        ad.adapter_kernels[1].kernel(ad.bufs[1].storage(), ad.bufs[1].get_data_size(),
                             src0, src0_stride,
                             block_count, ad.adapter_kernels[1].auxdata);
         // Binary kernel
-        ad.kernel.kernel(ad.bufs[0].storage(), ad.bufs[0].get_element_size(),
-                            ad.bufs[1].storage(), ad.bufs[1].get_element_size(),
+        ad.kernel.kernel(ad.bufs[0].storage(), ad.bufs[0].get_data_size(),
+                            ad.bufs[1].storage(), ad.bufs[1].get_data_size(),
                             src1, src1_stride,
                             block_count, ad.kernel.auxdata);
         // Output kernel
         ad.adapter_kernels[0].kernel(dst, dst_stride,
-                            ad.bufs[0].storage(), ad.bufs[0].get_element_size(),
+                            ad.bufs[0].storage(), ad.bufs[0].get_data_size(),
                             block_count, ad.adapter_kernels[0].auxdata);
 
         src0 += block_count * src0_stride;
@@ -114,17 +114,17 @@ static void buffered_binary_out_in1_kernel(char *dst, intptr_t dst_stride,
         }
 
         // Second input kernel
-        ad.adapter_kernels[1].kernel(ad.bufs[1].storage(), ad.bufs[1].get_element_size(),
+        ad.adapter_kernels[1].kernel(ad.bufs[1].storage(), ad.bufs[1].get_data_size(),
                             src1, src1_stride,
                             block_count, ad.adapter_kernels[1].auxdata);
         // Binary kernel
-        ad.kernel.kernel(ad.bufs[0].storage(), ad.bufs[0].get_element_size(),
+        ad.kernel.kernel(ad.bufs[0].storage(), ad.bufs[0].get_data_size(),
                             src0, src0_stride,
-                            ad.bufs[1].storage(), ad.bufs[1].get_element_size(),
+                            ad.bufs[1].storage(), ad.bufs[1].get_data_size(),
                             block_count, ad.kernel.auxdata);
         // Output kernel
         ad.adapter_kernels[0].kernel(dst, dst_stride,
-                            ad.bufs[0].storage(), ad.bufs[0].get_element_size(),
+                            ad.bufs[0].storage(), ad.bufs[0].get_data_size(),
                             block_count, ad.adapter_kernels[0].auxdata);
 
         src0 += block_count * src0_stride;
@@ -152,13 +152,13 @@ static void buffered_binary_out_kernel(char *dst, intptr_t dst_stride,
         }
 
         // Binary kernel
-        ad.kernel.kernel(ad.bufs[0].storage(), ad.bufs[0].get_element_size(),
+        ad.kernel.kernel(ad.bufs[0].storage(), ad.bufs[0].get_data_size(),
                             src0, src0_stride,
                             src1, src1_stride,
                             block_count, ad.kernel.auxdata);
         // Output kernel
         ad.adapter_kernels[0].kernel(dst, dst_stride,
-                            ad.bufs[0].storage(), ad.bufs[0].get_element_size(),
+                            ad.bufs[0].storage(), ad.bufs[0].get_data_size(),
                             block_count, ad.adapter_kernels[0].auxdata);
 
         src0 += block_count * src0_stride;
@@ -186,17 +186,17 @@ static void buffered_binary_in0_in1_kernel(char *dst, intptr_t dst_stride,
         }
 
         // First input kernel
-        ad.adapter_kernels[0].kernel(ad.bufs[0].storage(), ad.bufs[0].get_element_size(),
+        ad.adapter_kernels[0].kernel(ad.bufs[0].storage(), ad.bufs[0].get_data_size(),
                             src0, src0_stride,
                             block_count, ad.adapter_kernels[0].auxdata);
         // Second input kernel
-        ad.adapter_kernels[1].kernel(ad.bufs[1].storage(), ad.bufs[1].get_element_size(),
+        ad.adapter_kernels[1].kernel(ad.bufs[1].storage(), ad.bufs[1].get_data_size(),
                             src1, src1_stride,
                             block_count, ad.adapter_kernels[1].auxdata);
         // Binary kernel
         ad.kernel.kernel(dst, dst_stride,
-                            ad.bufs[0].storage(), ad.bufs[0].get_element_size(),
-                            ad.bufs[1].storage(), ad.bufs[1].get_element_size(),
+                            ad.bufs[0].storage(), ad.bufs[0].get_data_size(),
+                            ad.bufs[1].storage(), ad.bufs[1].get_data_size(),
                             block_count, ad.kernel.auxdata);
 
         src0 += block_count * src0_stride;
@@ -224,12 +224,12 @@ static void buffered_binary_in0_kernel(char *dst, intptr_t dst_stride,
         }
 
         // First input kernel
-        ad.adapter_kernels[0].kernel(ad.bufs[0].storage(), ad.bufs[0].get_element_size(),
+        ad.adapter_kernels[0].kernel(ad.bufs[0].storage(), ad.bufs[0].get_data_size(),
                             src0, src0_stride,
                             block_count, ad.adapter_kernels[0].auxdata);
         // Binary kernel
         ad.kernel.kernel(dst, dst_stride,
-                            ad.bufs[0].storage(), ad.bufs[0].get_element_size(),
+                            ad.bufs[0].storage(), ad.bufs[0].get_data_size(),
                             src1, src1_stride,
                             block_count, ad.kernel.auxdata);
 
@@ -258,13 +258,13 @@ static void buffered_binary_in1_kernel(char *dst, intptr_t dst_stride,
         }
 
         // Second input kernel
-        ad.adapter_kernels[0].kernel(ad.bufs[0].storage(), ad.bufs[0].get_element_size(),
+        ad.adapter_kernels[0].kernel(ad.bufs[0].storage(), ad.bufs[0].get_data_size(),
                             src1, src1_stride,
                             block_count, ad.adapter_kernels[0].auxdata);
         // Binary kernel
         ad.kernel.kernel(dst, dst_stride,
                             src0, src0_stride,
-                            ad.bufs[0].storage(), ad.bufs[0].get_element_size(),
+                            ad.bufs[0].storage(), ad.bufs[0].get_data_size(),
                             block_count, ad.kernel.auxdata);
 
         src0 += block_count * src0_stride;

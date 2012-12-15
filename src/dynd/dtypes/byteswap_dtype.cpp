@@ -12,16 +12,16 @@ using namespace std;
 using namespace dynd;
 
 dynd::byteswap_dtype::byteswap_dtype(const dtype& value_dtype)
-    : m_value_dtype(value_dtype), m_operand_dtype(make_fixedbytes_dtype(value_dtype.get_element_size(), value_dtype.get_alignment()))
+    : m_value_dtype(value_dtype), m_operand_dtype(make_fixedbytes_dtype(value_dtype.get_data_size(), value_dtype.get_alignment()))
 {
     if (value_dtype.extended() != 0) {
         throw std::runtime_error("byteswap_dtype: Only built-in dtypes are supported presently");
     }
 
     if(m_value_dtype.get_kind() != complex_kind) {
-        get_byteswap_kernel(value_dtype.get_element_size(), value_dtype.get_alignment(), m_byteswap_kernel);
+        get_byteswap_kernel(value_dtype.get_data_size(), value_dtype.get_alignment(), m_byteswap_kernel);
     } else {
-        get_pairwise_byteswap_kernel(m_value_dtype.get_element_size(), m_value_dtype.get_alignment(), m_byteswap_kernel);
+        get_pairwise_byteswap_kernel(m_value_dtype.get_data_size(), m_value_dtype.get_alignment(), m_byteswap_kernel);
     }
 }
 
@@ -36,13 +36,13 @@ dynd::byteswap_dtype::byteswap_dtype(const dtype& value_dtype, const dtype& oper
     }
     // Automatically realign if needed
     if (operand_dtype.value_dtype().get_alignment() < value_dtype.get_alignment()) {
-        m_operand_dtype = make_view_dtype(operand_dtype, make_fixedbytes_dtype(operand_dtype.get_element_size(), value_dtype.get_alignment()));
+        m_operand_dtype = make_view_dtype(operand_dtype, make_fixedbytes_dtype(operand_dtype.get_data_size(), value_dtype.get_alignment()));
     }
 
     if(m_value_dtype.get_kind() != complex_kind) {
-        get_byteswap_kernel(value_dtype.get_element_size(), value_dtype.get_alignment(), m_byteswap_kernel);
+        get_byteswap_kernel(value_dtype.get_data_size(), value_dtype.get_alignment(), m_byteswap_kernel);
     } else {
-        get_pairwise_byteswap_kernel(m_value_dtype.get_element_size(), m_value_dtype.get_alignment(), m_byteswap_kernel);
+        get_pairwise_byteswap_kernel(m_value_dtype.get_data_size(), m_value_dtype.get_alignment(), m_byteswap_kernel);
     }
 }
 

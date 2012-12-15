@@ -21,7 +21,7 @@ TEST(DType, BasicConstructor) {
     EXPECT_EQ(void_type_id, d.get_type_id());
     EXPECT_EQ(void_kind, d.get_kind());
     EXPECT_EQ(1u, d.get_alignment());
-    EXPECT_EQ(0u, d.get_element_size());
+    EXPECT_EQ(0u, d.get_data_size());
     EXPECT_EQ(NULL, d.extended());
 
     // bool dtype
@@ -29,7 +29,7 @@ TEST(DType, BasicConstructor) {
     EXPECT_EQ(bool_type_id, d.get_type_id());
     EXPECT_EQ(bool_kind, d.get_kind());
     EXPECT_EQ(1u, d.get_alignment());
-    EXPECT_EQ(1u, d.get_element_size());
+    EXPECT_EQ(1u, d.get_data_size());
     EXPECT_EQ(NULL, d.extended());
 
     // int8 dtype
@@ -37,14 +37,14 @@ TEST(DType, BasicConstructor) {
     EXPECT_EQ(int8_type_id, d.get_type_id());
     EXPECT_EQ(int_kind, d.get_kind());
     EXPECT_EQ(1u, d.get_alignment());
-    EXPECT_EQ(1u, d.get_element_size());
+    EXPECT_EQ(1u, d.get_data_size());
     EXPECT_EQ(NULL, d.extended());
 
     // int16 dtype
     d = dtype(int16_type_id);
     EXPECT_EQ(int_kind, d.get_kind());
     EXPECT_EQ(2u, d.get_alignment());
-    EXPECT_EQ(2u, d.get_element_size());
+    EXPECT_EQ(2u, d.get_data_size());
     EXPECT_EQ(NULL, d.extended());
 
     // int32 dtype
@@ -52,7 +52,7 @@ TEST(DType, BasicConstructor) {
     EXPECT_EQ(int32_type_id, d.get_type_id());
     EXPECT_EQ(int_kind, d.get_kind());
     EXPECT_EQ(4u, d.get_alignment());
-    EXPECT_EQ(4u, d.get_element_size());
+    EXPECT_EQ(4u, d.get_data_size());
     EXPECT_EQ(NULL, d.extended());
 
     // int
@@ -60,14 +60,14 @@ TEST(DType, BasicConstructor) {
     EXPECT_EQ(int32_type_id, d.get_type_id());
     EXPECT_EQ(int_kind, d.get_kind());
     EXPECT_EQ(sizeof(int), d.get_alignment());
-    EXPECT_EQ(sizeof(int), d.get_element_size());
+    EXPECT_EQ(sizeof(int), d.get_data_size());
     EXPECT_EQ(NULL, d.extended());
 
     // long
     d = make_dtype<long>();
     EXPECT_EQ(int_kind, d.get_kind());
     EXPECT_EQ(sizeof(long), d.get_alignment());
-    EXPECT_EQ(sizeof(long), d.get_element_size());
+    EXPECT_EQ(sizeof(long), d.get_data_size());
     EXPECT_EQ(NULL, d.extended());
 
     // long long
@@ -75,7 +75,7 @@ TEST(DType, BasicConstructor) {
     EXPECT_EQ(int64_type_id, d.get_type_id());
     EXPECT_EQ(int_kind, d.get_kind());
     EXPECT_EQ(sizeof(long long), d.get_alignment());
-    EXPECT_EQ(sizeof(long long), d.get_element_size());
+    EXPECT_EQ(sizeof(long long), d.get_data_size());
     EXPECT_EQ(NULL, d.extended());
 
     // unsigned int
@@ -83,14 +83,14 @@ TEST(DType, BasicConstructor) {
     EXPECT_EQ(uint32_type_id, d.get_type_id());
     EXPECT_EQ(uint_kind, d.get_kind());
     EXPECT_EQ(sizeof(unsigned int), d.get_alignment());
-    EXPECT_EQ(sizeof(unsigned int), d.get_element_size());
+    EXPECT_EQ(sizeof(unsigned int), d.get_data_size());
     EXPECT_EQ(NULL, d.extended());
 
     // unsigned long
     d = make_dtype<unsigned long>();
     EXPECT_EQ(uint_kind, d.get_kind());
     EXPECT_EQ(sizeof(unsigned long), d.get_alignment());
-    EXPECT_EQ(sizeof(unsigned long), d.get_element_size());
+    EXPECT_EQ(sizeof(unsigned long), d.get_data_size());
     EXPECT_EQ(NULL, d.extended());
 
     // unsigned long long
@@ -98,7 +98,7 @@ TEST(DType, BasicConstructor) {
     EXPECT_EQ(uint64_type_id, d.get_type_id());
     EXPECT_EQ(uint_kind, d.get_kind());
     EXPECT_EQ(sizeof(unsigned long long), d.get_alignment());
-    EXPECT_EQ(sizeof(unsigned long long), d.get_element_size());
+    EXPECT_EQ(sizeof(unsigned long long), d.get_data_size());
     EXPECT_EQ(NULL, d.extended());
 
     // float
@@ -106,7 +106,7 @@ TEST(DType, BasicConstructor) {
     EXPECT_EQ(float32_type_id, d.get_type_id());
     EXPECT_EQ(real_kind, d.get_kind());
     EXPECT_EQ(sizeof(float), d.get_alignment());
-    EXPECT_EQ(sizeof(float), d.get_element_size());
+    EXPECT_EQ(sizeof(float), d.get_data_size());
     EXPECT_EQ(NULL, d.extended());
 
     // double
@@ -114,7 +114,7 @@ TEST(DType, BasicConstructor) {
     EXPECT_EQ(float64_type_id, d.get_type_id());
     EXPECT_EQ(real_kind, d.get_kind());
     EXPECT_EQ(sizeof(double), d.get_alignment());
-    EXPECT_EQ(sizeof(double), d.get_element_size());
+    EXPECT_EQ(sizeof(double), d.get_data_size());
     EXPECT_EQ(NULL, d.extended());
 }
 

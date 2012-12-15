@@ -78,13 +78,13 @@ bool dynd::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt)
                     case bool_kind:
                         return false;
                     case int_kind:
-                        return dst_dt.get_element_size() >= src_dt.get_element_size();
+                        return dst_dt.get_data_size() >= src_dt.get_data_size();
                     case uint_kind:
                         return false;
                     case real_kind:
-                        return dst_dt.get_element_size() > src_dt.get_element_size();
+                        return dst_dt.get_data_size() > src_dt.get_data_size();
                     case complex_kind:
-                        return dst_dt.get_element_size() > 2 * src_dt.get_element_size();
+                        return dst_dt.get_data_size() > 2 * src_dt.get_data_size();
                     case bytes_kind:
                         return false;
                     default:
@@ -96,13 +96,13 @@ bool dynd::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt)
                     case bool_kind:
                         return false;
                     case int_kind:
-                        return dst_dt.get_element_size() > src_dt.get_element_size();
+                        return dst_dt.get_data_size() > src_dt.get_data_size();
                     case uint_kind:
-                        return dst_dt.get_element_size() >= src_dt.get_element_size();
+                        return dst_dt.get_data_size() >= src_dt.get_data_size();
                     case real_kind:
-                        return dst_dt.get_element_size() > src_dt.get_element_size();
+                        return dst_dt.get_data_size() > src_dt.get_data_size();
                     case complex_kind:
-                        return dst_dt.get_element_size() > 2 * src_dt.get_element_size();
+                        return dst_dt.get_data_size() > 2 * src_dt.get_data_size();
                     case bytes_kind:
                         return false;
                     default:
@@ -116,9 +116,9 @@ bool dynd::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt)
                     case uint_kind:
                         return false;
                     case real_kind:
-                        return dst_dt.get_element_size() >= src_dt.get_element_size();
+                        return dst_dt.get_data_size() >= src_dt.get_data_size();
                     case complex_kind:
-                        return dst_dt.get_element_size() >= 2 * src_dt.get_element_size();
+                        return dst_dt.get_data_size() >= 2 * src_dt.get_data_size();
                     case bytes_kind:
                         return false;
                     default:
@@ -132,7 +132,7 @@ bool dynd::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt)
                     case real_kind:
                         return false;
                     case complex_kind:
-                        return dst_dt.get_element_size() >= src_dt.get_element_size();
+                        return dst_dt.get_data_size() >= src_dt.get_data_size();
                     case bytes_kind:
                         return false;
                     default:
@@ -153,7 +153,7 @@ bool dynd::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt)
                 }
             case bytes_kind:
                 return dst_dt.get_kind() == bytes_kind  &&
-                        dst_dt.get_element_size() == src_dt.get_element_size();
+                        dst_dt.get_data_size() == src_dt.get_data_size();
             default:
                 break;
         }
@@ -174,7 +174,7 @@ bool dynd::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt)
 void dynd::dtype_copy(const dtype& dt, const char *dst_metadata, char *dst_data,
                 const char *src_metadata, const char *src_data)
 {
-    size_t element_size = dt.get_element_size();
+    size_t element_size = dt.get_data_size();
     if (dt.extended() == NULL || (dt.get_memory_management() == pod_memory_management && element_size != 0)) {
         memcpy(dst_data, src_data, element_size);
     } else {

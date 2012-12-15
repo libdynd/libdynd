@@ -26,8 +26,8 @@ namespace {
      *       // Allocate the buffering memory
      *       auxdata.buf.allocate(intermediate_element_size);
      *       // Get the two kernels in the chain
-     *       produce_first_kernel(auxdata.buf.get_element_size(), src_fixedstride, auxdata.kernels[0]);
-     *       produce_second_kernel(dst_fixedstride, auxdata.buf.get_element_size(), auxdata.kernels[1]);
+     *       produce_first_kernel(auxdata.buf.get_data_size(), src_fixedstride, auxdata.kernels[0]);
+     *       produce_second_kernel(dst_fixedstride, auxdata.buf.get_data_size(), auxdata.kernels[1]);
      *   }
      */
     struct buffered_2chain_unary_kernel_auxdata {
@@ -250,8 +250,8 @@ void dynd::make_buffered_chain_unary_kernel(std::deque<kernel_instance<unary_ope
                 buffered_2chain_unary_kernel_auxdata &auxdata = out_kernel.auxdata.get<buffered_2chain_unary_kernel_auxdata>();
 
                 auxdata.buf.allocate(dtypes[1]);
-                auxdata.src_item_size = dtypes.front().get_element_size();
-                auxdata.dst_item_size = dtypes.back().get_element_size();
+                auxdata.src_item_size = dtypes.front().get_data_size();
+                auxdata.dst_item_size = dtypes.back().get_data_size();
 
                 auxdata.kernels[0].swap(kernels[0]);
                 auxdata.kernels[1].swap(kernels[1]);
@@ -281,8 +281,8 @@ void dynd::make_buffered_chain_unary_kernel(std::deque<kernel_instance<unary_ope
 
                 auxdata.bufs[0].allocate(dtypes[1]);
                 auxdata.bufs[1].allocate(dtypes[2]);
-                auxdata.src_item_size = dtypes.front().get_element_size();
-                auxdata.dst_item_size = dtypes.back().get_element_size();
+                auxdata.src_item_size = dtypes.front().get_data_size();
+                auxdata.dst_item_size = dtypes.back().get_data_size();
 
                 auxdata.kernels[0].swap(kernels[0]);
                 auxdata.kernels[1].swap(kernels[1]);
@@ -323,8 +323,8 @@ void dynd::make_buffered_chain_unary_kernel(std::deque<kernel_instance<unary_ope
             for (size_t i = 0, i_end = kernels.size()-1; i != i_end; ++i) {
                 auxdata.bufs[i].allocate(dtypes[i+1]);
             }
-            auxdata.src_item_size = dtypes.front().get_element_size();
-            auxdata.dst_item_size = dtypes.back().get_element_size();
+            auxdata.src_item_size = dtypes.front().get_data_size();
+            auxdata.dst_item_size = dtypes.back().get_data_size();
 
             for (size_t i = 0; i < kernels.size(); ++i) {
                 auxdata.kernels[i].swap(kernels[i]);

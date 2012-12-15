@@ -71,7 +71,7 @@ static ndarray_node_ptr copy_strided_array(ndarray_node* node, uint32_t access_f
     intptr_t innersize = iter.innersize();
     intptr_t dst_innerstride = iter.innerstride<0>(), src_innerstride = iter.innerstride<1>();
     unary_operation_t assign_fn = kernel.specializations[
-        get_unary_specialization(dst_innerstride, dt.get_element_size(), src_innerstride, dt.get_element_size())];
+        get_unary_specialization(dst_innerstride, dt.get_data_size(), src_innerstride, dt.get_data_size())];
     if (innersize > 0) {
         do {
             assign_fn(iter.data<0>(), dst_innerstride,

@@ -52,7 +52,7 @@ ndobject dynd::make_strided_ndobject(const dtype& uniform_dtype, int ndim, const
     if (uniform_dtype.extended()) {
         element_size = uniform_dtype.extended()->get_default_element_size(0, NULL);
     } else {
-        element_size = uniform_dtype.get_element_size();
+        element_size = uniform_dtype.get_data_size();
     }
     intptr_t size = element_size;
     for (int i = 0; i < ndim; ++i) {
@@ -143,7 +143,7 @@ ndobject dynd::make_strided_ndobject_from_data(const dtype& uniform_dtype, int n
 
 ndobject dynd::make_scalar_ndobject(const dtype& scalar_dtype, const void *data)
 {
-    size_t size = scalar_dtype.get_element_size();
+    size_t size = scalar_dtype.get_data_size();
     if (scalar_dtype.extended() && (size == 0 ||
                 scalar_dtype.get_memory_management() != pod_memory_management ||
                 scalar_dtype.extended()->get_kind() == uniform_array_kind ||
@@ -179,9 +179,9 @@ ndobject dynd::make_string_ndobject(const char *str, size_t len, string_encoding
     char *data_ptr = NULL, *string_ptr;
     dtype dt = make_string_dtype(encoding);
     ndobject result(make_ndobject_memory_block(dt.extended()->get_metadata_size(),
-                        dt.get_element_size() + len, dt.get_alignment(), &data_ptr));
+                        dt.get_data_size() + len, dt.get_alignment(), &data_ptr));
     // Set the string extents
-    string_ptr = data_ptr + dt.get_element_size();
+    string_ptr = data_ptr + dt.get_data_size();
     ((char **)data_ptr)[0] = string_ptr;
     ((char **)data_ptr)[1] = string_ptr + len;
     // Copy the string data
@@ -394,7 +394,7 @@ namespace {
             const dtype& storage_dt = dt.storage_dtype();
             if (!storage_dt.extended() || (storage_dt.get_memory_management() == pod_memory_management &&
                                     storage_dt.extended()->get_metadata_size() == 0)) {
-                out_transformed_dtype = make_fixedbytes_dtype(storage_dt.get_element_size(), storage_dt.get_alignment());
+                out_transformed_dtype = make_fixedbytes_dtype(storage_dt.get_data_size(), storage_dt.get_alignment());
                 out_was_transformed = true;
             } else if (storage_dt.get_type_id() == string_type_id) {
                 out_transformed_dtype = make_bytes_dtype(static_cast<const string_dtype *>(storage_dt.extended())->get_data_alignment());
@@ -686,7 +686,7 @@ namespace {
         if (dt.is_scalar()) {
             const dtype *e = reinterpret_cast<const dtype *>(extra);
             // If things aren't simple, use a view_dtype
-            if (dt.get_kind() == expression_kind || dt.get_element_size() != e->get_element_size() ||
+            if (dt.get_kind() == expression_kind || dt.get_data_size() != e->get_data_size() ||
                         dt.get_memory_management() != pod_memory_management ||
                         e->get_memory_management() != pod_memory_management) {
                 out_transformed_dtype = make_view_dtype(*e, dt);
@@ -712,16 +712,16 @@ ndobject ndobject::view_scalars(const dtype& scalar_dtype) const
     if (uniform_ndim == 1 && array_dtype.get_type_id() == strided_array_type_id) {
         const strided_array_dtype *sad = static_cast<const strided_array_dtype *>(array_dtype.extended());
         const strided_array_dtype_metadata *md = reinterpret_cast<const strided_array_dtype_metadata *>(get_ndo_meta());
-        size_t element_size = sad->get_element_dtype().get_element_size();
+        size_t element_size = sad->get_element_dtype().get_data_size();
         if (element_size != 0 && (intptr_t)element_size == md->stride &&
                     sad->get_element_dtype().get_kind() != expression_kind &&
                     sad->get_element_dtype().get_memory_management() == pod_memory_management) {
             intptr_t nbytes = md->size * element_size;
             // Make sure the element size divides into the # of bytes
-            if (nbytes % scalar_dtype.get_element_size() != 0) {
+            if (nbytes % scalar_dtype.get_data_size() != 0) {
                 std::stringstream ss;
                 ss << "cannot view ndobject with " << nbytes << " bytes as dtype ";
-                ss << scalar_dtype << ", because its element size " << scalar_dtype.get_element_size();
+                ss << scalar_dtype << ", because its element size " << scalar_dtype.get_data_size();
                 ss << " doesn't divide evenly into the total array size " << nbytes;
                 throw std::runtime_error(ss.str());
             }
@@ -747,8 +747,8 @@ ndobject ndobject::view_scalars(const dtype& scalar_dtype) const
             result.get_ndo()->m_flags = get_ndo()->m_flags;
             // The result has one strided ndarray field
             strided_array_dtype_metadata *result_md = reinterpret_cast<strided_array_dtype_metadata *>(result.get_ndo_meta());
-            result_md->size = nbytes / scalar_dtype.get_element_size();
-            result_md->stride = scalar_dtype.get_element_size();
+            result_md->size = nbytes / scalar_dtype.get_data_size();
+            result_md->stride = scalar_dtype.get_data_size();
             return result;
         }
     }

@@ -54,7 +54,7 @@ public:
     size_t get_alignment() const {
         return 4;
     }
-    size_t get_element_size() const {
+    size_t get_data_size() const {
         return 4;
     }
 

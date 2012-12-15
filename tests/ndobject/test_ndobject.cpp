@@ -282,7 +282,7 @@ TEST(NDObject, StdVectorStringConstructor) {
     EXPECT_EQ(1u, a.get_shape().size());
     EXPECT_EQ(5, a.get_shape()[0]);
     EXPECT_EQ(1u, a.get_strides().size());
-    EXPECT_EQ((intptr_t)a.get_dtype().at(0).get_element_size(), a.get_strides()[0]);
+    EXPECT_EQ((intptr_t)a.get_dtype().at(0).get_data_size(), a.get_strides()[0]);
     for (int i = 0; i < 5; ++i) {
         EXPECT_EQ(v[i], a.at(i).as<string>());
     }
@@ -349,7 +349,7 @@ TEST(NDObject, ConstructorMemoryLayouts) {
             // Test constructing the array using the perm
             a = make_strided_ndobject(dt, ndim, shape, read_access_flag|write_access_flag, axisperm);
             EXPECT_EQ(ndim, (int)a.get_strides().size());
-            intptr_t s = dt.get_element_size();
+            intptr_t s = dt.get_data_size();
             for (int i = 0; i < ndim; ++i) {
                 EXPECT_EQ(s, a.get_strides()[axisperm[i]]);
                 s *= shape[axisperm[i]];

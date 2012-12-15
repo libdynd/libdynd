@@ -42,7 +42,7 @@ public:
     size_t get_alignment() const {
         return m_alignment;
     }
-    size_t get_element_size() const {
+    size_t get_data_size() const {
         return m_element_size;
     }
     size_t get_default_element_size(int DYND_UNUSED(ndim), const intptr_t *DYND_UNUSED(shape)) const {
@@ -219,7 +219,7 @@ inline bool is_fixedstruct_compatible_offsets(int nfields, const dtype *field_ty
     size_t offset = 0, max_alignment = 1;
     for (int i = 0; i < nfields; ++i) {
         size_t field_alignment = field_types[i].get_alignment();
-        size_t field_data_size = field_types[i].get_element_size();
+        size_t field_data_size = field_types[i].get_data_size();
         offset = inc_to_alignment(offset, field_alignment);
         if (field_offsets[i] != offset || field_data_size == 0) {
             return false;

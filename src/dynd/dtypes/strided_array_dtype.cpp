@@ -28,7 +28,7 @@ size_t strided_array_dtype::get_default_element_size(int ndim, const intptr_t *s
     if (m_element_dtype.extended()) {
         return shape[0] * m_element_dtype.extended()->get_default_element_size(ndim-1, shape+1);
     } else {
-        return shape[0] * m_element_dtype.get_element_size();
+        return shape[0] * m_element_dtype.get_data_size();
     }
 }
 
@@ -287,7 +287,7 @@ void strided_array_dtype::metadata_default_construct(char *metadata, int ndim, c
         throw std::runtime_error("the strided_array dtype requires a shape be specified for default construction");
     }
     size_t element_size = m_element_dtype.extended() ? m_element_dtype.extended()->get_default_element_size(ndim-1, shape+1)
-                                                     : m_element_dtype.get_element_size();
+                                                     : m_element_dtype.get_data_size();
 
     strided_array_dtype_metadata *md = reinterpret_cast<strided_array_dtype_metadata *>(metadata);
     md->size = shape[0];

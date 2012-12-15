@@ -57,7 +57,7 @@ public:
             m_allocated = false;
         } else {
             // Make a converted copy into an aligned buffer
-            char *tmp = allocate_data(dst_dtype.get_element_size());
+            char *tmp = allocate_data(dst_dtype.get_data_size());
             dtype_assign(dst_dtype, tmp, src_dtype, src_data, errmode, ectx);
         }
     }

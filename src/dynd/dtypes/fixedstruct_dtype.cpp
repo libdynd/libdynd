@@ -41,7 +41,7 @@ fixedstruct_dtype::fixedstruct_dtype(const std::vector<dtype>& field_types, cons
         // Calculate the data offsets
         data_offset = inc_to_alignment(data_offset, field_types[i].get_alignment());
         m_data_offsets[i] = data_offset;
-        size_t field_element_size = field_types[i].get_element_size();
+        size_t field_element_size = field_types[i].get_data_size();
         if (field_element_size == 0) {
             stringstream ss;
             ss << "Cannot create fixedstruct dtype with type " << field_types[i];
@@ -110,7 +110,7 @@ void fixedstruct_dtype::transform_child_dtypes(dtype_transform_fn_t transform_fn
         transform_fn(m_field_types[i], extra, tmp_field_types[i], was_transformed);
         if (was_transformed) {
             // If the dtype turned into one without fixed size, have to use struct instead of fixedstruct
-            if (tmp_field_types[i].get_element_size() == 0) {
+            if (tmp_field_types[i].get_data_size() == 0) {
                 switch_to_struct = true;
             }
             was_any_transformed = true;

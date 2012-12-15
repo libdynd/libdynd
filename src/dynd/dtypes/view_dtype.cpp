@@ -14,7 +14,7 @@ using namespace dynd;
 dynd::view_dtype::view_dtype(const dtype& value_dtype, const dtype& operand_dtype)
     : m_value_dtype(value_dtype), m_operand_dtype(operand_dtype)
 {
-    if (value_dtype.get_element_size() != operand_dtype.value_dtype().get_element_size()) {
+    if (value_dtype.get_data_size() != operand_dtype.value_dtype().get_data_size()) {
         std::stringstream ss;
         ss << "view_dtype: Cannot view " << operand_dtype.value_dtype() << " as " << value_dtype << " because they have different sizes";
         throw std::runtime_error(ss.str());
@@ -23,7 +23,7 @@ dynd::view_dtype::view_dtype(const dtype& value_dtype, const dtype& operand_dtyp
         throw std::runtime_error("view_dtype: Only POD dtypes are supported");
     }
 
-    get_pod_dtype_assignment_kernel(m_value_dtype.get_element_size(),
+    get_pod_dtype_assignment_kernel(m_value_dtype.get_data_size(),
                     std::min(m_value_dtype.get_alignment(), m_operand_dtype.get_alignment()),
                     m_copy_kernel);
 }
@@ -33,7 +33,7 @@ void dynd::view_dtype::print_element(std::ostream& o, const char *metadata, cons
     // Allow calling print_element in the special case that the view
     // is being used just to align the data
     if (m_operand_dtype.get_type_id() == fixedbytes_type_id) {
-        switch (m_operand_dtype.get_element_size()) {
+        switch (m_operand_dtype.get_data_size()) {
             case 1:
                 m_value_dtype.print_element(o, metadata, data);
                 return;
@@ -56,11 +56,11 @@ void dynd::view_dtype::print_element(std::ostream& o, const char *metadata, cons
                 return;
             }
             default: {
-                vector<char> storage(m_value_dtype.get_element_size() + m_value_dtype.get_alignment());
+                vector<char> storage(m_value_dtype.get_data_size() + m_value_dtype.get_alignment());
                 char *buffer = &storage[0];
                 // Make the storage aligned as needed
                 buffer = (char *)(((uintptr_t)buffer + (uintptr_t)m_value_dtype.get_alignment() - 1) & (m_value_dtype.get_alignment() - 1));
-                memcpy(buffer, data, m_value_dtype.get_element_size());
+                memcpy(buffer, data, m_value_dtype.get_data_size());
                 m_value_dtype.print_element(o, metadata, reinterpret_cast<const char *>(&buffer));
                 return;
             }

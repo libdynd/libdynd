@@ -17,14 +17,14 @@ using namespace dynd;
 fixedarray_dtype::fixedarray_dtype(const dtype& element_dtype, size_t dimension_size)
     : m_element_dtype(element_dtype), m_dimension_size(dimension_size)
 {
-    size_t child_element_size = element_dtype.get_element_size();
+    size_t child_element_size = element_dtype.get_data_size();
     if (child_element_size == 0) {
         stringstream ss;
         ss << "Cannot create fixedarray dtype with element type " << element_dtype;
         ss << ", as it does not have a fixed size";
         throw runtime_error(ss.str());
     }
-    m_stride = m_dimension_size > 1 ? element_dtype.get_element_size() : 0;
+    m_stride = m_dimension_size > 1 ? element_dtype.get_data_size() : 0;
     m_element_size = m_dimension_size > 1 ? m_stride * m_dimension_size : m_dimension_size * child_element_size;
 
     // Copy ndobject properties and functions from the first non-uniform dimension
@@ -34,7 +34,7 @@ fixedarray_dtype::fixedarray_dtype(const dtype& element_dtype, size_t dimension_
 fixedarray_dtype::fixedarray_dtype(const dtype& element_dtype, size_t dimension_size, intptr_t stride)
     : m_element_dtype(element_dtype), m_stride(stride), m_dimension_size(dimension_size)
 {
-    size_t child_element_size = element_dtype.get_element_size();
+    size_t child_element_size = element_dtype.get_data_size();
     if (child_element_size == 0) {
         stringstream ss;
         ss << "Cannot create fixedarray dtype with element type " << element_dtype;
@@ -76,7 +76,7 @@ void fixedarray_dtype::print_dtype(std::ostream& o) const
 {
     o << "fixedarray<";
     o << m_dimension_size;
-    if ((size_t)m_stride != m_element_dtype.get_element_size()) {
+    if ((size_t)m_stride != m_element_dtype.get_data_size()) {
         o << ", stride=" << m_stride;
     }
     o << ", " << m_element_dtype;
@@ -105,7 +105,7 @@ void fixedarray_dtype::transform_child_dtypes(dtype_transform_fn_t transform_fn,
     bool was_transformed = false;
     transform_fn(m_element_dtype, extra, tmp_dtype, was_transformed);
     if (was_transformed) {
-        if (tmp_dtype.get_element_size() != 0) {
+        if (tmp_dtype.get_data_size() != 0) {
             out_transformed_dtype = dtype(new fixedarray_dtype(tmp_dtype, m_dimension_size));
         } else {
             out_transformed_dtype = dtype(new strided_array_dtype(tmp_dtype));
@@ -122,7 +122,7 @@ dtype fixedarray_dtype::get_canonical_dtype() const
     dtype canonical_element_dtype = m_element_dtype.get_canonical_dtype();
     // The transformed dtype may no longer have a fixed size, so check whether
     // we have to switch to the more flexible strided_array_dtype
-    if (canonical_element_dtype.get_element_size() != 0) {
+    if (canonical_element_dtype.get_data_size() != 0) {
         return dtype(new fixedarray_dtype(canonical_element_dtype, m_dimension_size));
     } else {
         return dtype(new strided_array_dtype(canonical_element_dtype));
@@ -451,7 +451,7 @@ dtype dynd::make_fixedarray_dtype(const dtype& uniform_dtype, int ndim, const in
     } else {
         // Create strides with the axis permutation
         dimvector strides(ndim);
-        intptr_t stride = uniform_dtype.get_element_size();
+        intptr_t stride = uniform_dtype.get_data_size();
         for (int i = 0; i < ndim; ++i) {
             int i_perm = axis_perm[i];
             size_t dim_size = shape[i_perm];

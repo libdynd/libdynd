@@ -104,7 +104,7 @@ void bytes_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const dtype& 
             case fixedbytes_type_id: {
                 const fixedbytes_dtype *src_fs = static_cast<const fixedbytes_dtype *>(src_dt.extended());
                 get_fixedbytes_to_blockref_bytes_assignment_kernel(m_alignment,
-                                        src_fs->get_element_size(), src_fs->get_alignment(), out_kernel);
+                                        src_fs->get_data_size(), src_fs->get_alignment(), out_kernel);
                 break;
             }
             default: {

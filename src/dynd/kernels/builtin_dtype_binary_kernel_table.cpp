@@ -14,7 +14,7 @@ binary_operation_t dynd::get_binary_operation_from_builtin_dtype_table(
                                 intptr_t src0_fixedstride, intptr_t src1_fixedstride)
 {
     static int compress_type_id[builtin_type_id_count] = {-1, -1, -1, 0, 1, -1, -1, 2, 3, 4, 5, 6, 7};
-    intptr_t element_size = dt.get_element_size();
+    intptr_t element_size = dt.get_data_size();
     int cid = compress_type_id[dt.get_type_id()];
 
     // Pick out a specialized inner loop based on the strides

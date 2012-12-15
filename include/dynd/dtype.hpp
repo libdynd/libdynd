@@ -357,7 +357,7 @@ public:
     virtual type_id_t get_type_id() const = 0;
     virtual dtype_kind_t get_kind() const = 0;
     virtual size_t get_alignment() const = 0;
-    virtual size_t get_element_size() const = 0;
+    virtual size_t get_data_size() const = 0;
     virtual size_t get_default_element_size(int ndim, const intptr_t *shape) const;
 
     /**
@@ -801,7 +801,7 @@ public:
     /** Constructor from an extended_dtype. This claims ownership of the 'extended' reference by default, be careful! */
     explicit dtype(const extended_dtype *extended, bool incref = false)
         : m_type_id(extended->get_type_id()), m_kind(extended->get_kind()), m_alignment((unsigned char)extended->get_alignment()),
-            m_element_size(extended->get_element_size()), m_extended(extended) {
+            m_element_size(extended->get_data_size()), m_extended(extended) {
         if (incref) {
             extended_dtype_incref(m_extended);
         }
@@ -1028,7 +1028,7 @@ public:
     }
 
     /** The element size of the dtype */
-    size_t get_element_size() const {
+    size_t get_data_size() const {
         return m_element_size;
     }
 

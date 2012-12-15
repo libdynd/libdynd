@@ -230,7 +230,7 @@ size_t array_dtype::get_metadata_size() const
 void array_dtype::metadata_default_construct(char *metadata, int ndim, const intptr_t* shape) const
 {
     size_t element_size = m_element_dtype.extended() ? m_element_dtype.extended()->get_default_element_size(ndim-1, shape+1)
-                                                     : m_element_dtype.get_element_size();
+                                                     : m_element_dtype.get_data_size();
 
     array_dtype_metadata *md = reinterpret_cast<array_dtype_metadata *>(metadata);
     md->stride = element_size;

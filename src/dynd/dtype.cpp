@@ -151,7 +151,7 @@ intptr_t extended_dtype::get_representative_stride(const char *DYND_UNUSED(metad
 
 size_t extended_dtype::get_default_element_size(int DYND_UNUSED(ndim), const intptr_t *DYND_UNUSED(shape)) const
 {
-    return get_element_size();
+    return get_data_size();
 }
 
 // TODO: Make this a pure virtual function eventually

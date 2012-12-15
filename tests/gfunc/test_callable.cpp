@@ -385,7 +385,7 @@ TEST(GFuncCallable, NDObjectParam) {
 }
 
 static size_t dtype_param(const dtype& d) {
-    return d.get_element_size();
+    return d.get_data_size();
 }
 
 TEST(GFuncCallable, DTypeParam) {

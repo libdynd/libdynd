@@ -39,7 +39,7 @@ namespace {
 
             // Allocate the output array data
             allocator->allocate(dst_md->blockref,
-                        ad.dst_dtype.get_element_size() * src_size,
+                        ad.dst_dtype.get_data_size() * src_size,
                         ad.dst_dtype.get_alignment(), &dst_begin, &dst_end);
 
             // Set the output
@@ -51,8 +51,8 @@ namespace {
                             extra->src_metadata + sizeof(array_dtype_metadata));
             intptr_t dst_stride = dst_md->stride, src_stride = src_md->stride;
             if (ad.assign_elements.kernel.contig == NULL ||
-                            dst_stride != (intptr_t)ad.dst_dtype.get_element_size() ||
-                            src_stride != (intptr_t)ad.src_dtype.get_element_size()) {
+                            dst_stride != (intptr_t)ad.dst_dtype.get_data_size() ||
+                            src_stride != (intptr_t)ad.src_dtype.get_data_size()) {
                 unary_single_operation_t assign_single = ad.assign_elements.kernel.single;
                 for (size_t i = 0; i != src_size; ++i) {
                     assign_single(dst_begin, src_begin, &assign_elements_extra);

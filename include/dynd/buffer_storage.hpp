@@ -21,7 +21,7 @@ class buffer_storage {
 
     void internal_allocate()
     {
-        m_storage = new char[element_count * m_dtype.get_element_size()];
+        m_storage = new char[element_count * m_dtype.get_data_size()];
         size_t metasize = m_dtype.extended() ? m_dtype.extended()->get_metadata_size() : 0;
         if (metasize != 0) {
             try {

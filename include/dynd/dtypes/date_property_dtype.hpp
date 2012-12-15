@@ -34,8 +34,8 @@ public:
     size_t get_alignment() const {
         return m_operand_dtype.get_alignment();
     }
-    size_t get_element_size() const {
-        return m_operand_dtype.get_element_size();
+    size_t get_data_size() const {
+        return m_operand_dtype.get_data_size();
     }
 
     const dtype& get_value_dtype() const {

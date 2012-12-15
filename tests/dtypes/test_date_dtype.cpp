@@ -26,7 +26,7 @@ TEST(DateDType, Create) {
     const date_dtype *dd;
 
     d = make_date_dtype();
-    EXPECT_EQ(4u, d.get_element_size());
+    EXPECT_EQ(4u, d.get_data_size());
     EXPECT_EQ(4u, d.get_alignment());
     dd = static_cast<const date_dtype *>(d.extended());
     EXPECT_EQ(dd->get_unit(), date_unit_day);

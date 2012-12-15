@@ -25,7 +25,7 @@ TEST(FixedArrayDType, Create) {
     EXPECT_EQ(fixedarray_type_id, d.get_type_id());
     EXPECT_EQ(uniform_array_kind, d.get_kind());
     EXPECT_EQ(4u, d.get_alignment());
-    EXPECT_EQ(12u, d.get_element_size());
+    EXPECT_EQ(12u, d.get_data_size());
     EXPECT_FALSE(d.is_expression());
     EXPECT_EQ(make_dtype<int32_t>(), d.at(-3));
     EXPECT_EQ(make_dtype<int32_t>(), d.at(-2));
@@ -43,7 +43,7 @@ TEST(FixedArrayDType, Create) {
     EXPECT_EQ(fixedarray_type_id, d.get_type_id());
     EXPECT_EQ(uniform_array_kind, d.get_kind());
     EXPECT_EQ(4u, d.get_alignment());
-    EXPECT_EQ(4u, d.get_element_size());
+    EXPECT_EQ(4u, d.get_data_size());
     EXPECT_FALSE(d.is_expression());
     fad = static_cast<const fixedarray_dtype *>(d.extended());
     EXPECT_EQ(0, fad->get_fixed_stride());

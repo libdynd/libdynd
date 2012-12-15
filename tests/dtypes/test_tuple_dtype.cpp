@@ -22,7 +22,7 @@ TEST(TupleDType, CreateOneField) {
     // Tuple with one field
     dt = make_tuple_dtype(make_dtype<int32_t>());
     EXPECT_EQ(tuple_type_id, dt.get_type_id());
-    EXPECT_EQ(4u, dt.get_element_size());
+    EXPECT_EQ(4u, dt.get_data_size());
     EXPECT_EQ(4u, dt.get_alignment());
     EXPECT_EQ(pod_memory_management, dt.get_memory_management());
     tdt = static_cast<const tuple_dtype *>(dt.extended());
@@ -41,7 +41,7 @@ TEST(TupleDType, CreateTwoField) {
     // Tuple with two fields
     dt = make_tuple_dtype(make_dtype<int64_t>(), make_dtype<int32_t>());
     EXPECT_EQ(tuple_type_id, dt.get_type_id());
-    EXPECT_EQ(16u, dt.get_element_size());
+    EXPECT_EQ(16u, dt.get_data_size());
     EXPECT_EQ(8u, dt.get_alignment());
     EXPECT_EQ(pod_memory_management, dt.get_memory_management());
     tdt = static_cast<const tuple_dtype *>(dt.extended());
@@ -64,7 +64,7 @@ TEST(TupleDType, CreateThreeField) {
     dtype d3 = make_fixedstring_dtype(string_encoding_utf_8, 5);
     dt = make_tuple_dtype(d1, d2, d3);
     EXPECT_EQ(tuple_type_id, dt.get_type_id());
-    EXPECT_EQ(24u, dt.get_element_size());
+    EXPECT_EQ(24u, dt.get_data_size());
     EXPECT_EQ(8u, dt.get_alignment());
     EXPECT_EQ(pod_memory_management, dt.get_memory_management());
     tdt = static_cast<const tuple_dtype *>(dt.extended());

@@ -19,7 +19,7 @@ TEST(PointerDType, VoidPointer) {
     d = make_pointer_dtype<void>();
     EXPECT_EQ(void_pointer_type_id, d.get_type_id());
     EXPECT_EQ(void_kind, d.get_kind());
-    EXPECT_EQ(sizeof(void *), d.get_element_size());
+    EXPECT_EQ(sizeof(void *), d.get_data_size());
     EXPECT_EQ(sizeof(void *), d.get_alignment());
     EXPECT_EQ(blockref_memory_management, d.get_memory_management());
     EXPECT_FALSE(d.is_expression());
@@ -31,7 +31,7 @@ TEST(PointerDType, PointerToBuiltIn) {
     d = make_pointer_dtype<char>();
     EXPECT_EQ(pointer_type_id, d.get_type_id());
     EXPECT_EQ(expression_kind, d.get_kind());
-    EXPECT_EQ(sizeof(void *), d.get_element_size());
+    EXPECT_EQ(sizeof(void *), d.get_data_size());
     EXPECT_EQ(sizeof(void *), d.get_alignment());
     EXPECT_EQ(blockref_memory_management, d.get_memory_management());
     EXPECT_EQ(make_dtype<char>(), d.value_dtype());

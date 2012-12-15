@@ -53,7 +53,7 @@ size_t struct_dtype::get_default_element_size(int ndim, const intptr_t *shape) c
         if (m_field_types[i].extended()) {
             s += m_field_types[i].extended()->get_default_element_size(ndim, shape);
         } else {
-            s += m_field_types[i].get_element_size();
+            s += m_field_types[i].get_data_size();
         }
     }
     s = inc_to_alignment(s, m_alignment);
@@ -341,7 +341,7 @@ void struct_dtype::metadata_default_construct(char *metadata, int ndim, const in
             }
             offs += m_field_types[i].extended()->get_default_element_size(ndim, shape);
         } else {
-            offs += m_field_types[i].get_element_size();
+            offs += m_field_types[i].get_data_size();
         }
     }
 }

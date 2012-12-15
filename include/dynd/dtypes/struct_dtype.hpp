@@ -40,7 +40,7 @@ public:
     size_t get_alignment() const {
         return m_alignment;
     }
-    size_t get_element_size() const {
+    size_t get_data_size() const {
         return 0;
     }
     size_t get_default_element_size(int ndim, const intptr_t *shape) const;

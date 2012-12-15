@@ -39,7 +39,7 @@ public:
     size_t get_alignment() const {
         return m_element_dtype.get_alignment();
     }
-    size_t get_element_size() const {
+    size_t get_data_size() const {
         return m_element_size;
     }
     size_t get_default_element_size(int DYND_UNUSED(ndim), const intptr_t *DYND_UNUSED(shape)) const {
