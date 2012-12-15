@@ -79,3 +79,28 @@ might be:
 
 The same logic will apply for variable-sized arrays when they are fully implemented.
 
+NDObject
+--------
+
+The NDObject is a specific type of memory block, with its 'type' set to
+the value ndobject_memory_block_type (from dynd/memblock/memory_block.hpp).
+Its primary structure is defined (in dynd/memblock/ndobject_memory_block.hpp)
+by the struct ndobject_preamble. This struct looks like
+
+    struct ndobject_preamble {
+        memory_block_data m_memblockdata;
+        const extended_dtype *m_dtype;
+        char *m_data_pointer;
+        uint64_t m_flags;
+        memory_block_data *m_data_reference;
+    };
+
+This struct begins with the standard memory block data (use count and type), then
+has a reference to a dtype, a pointer to the data, and a small bit of metadata that
+exists in all ndobjects, including some flags and a memblock reference for the data.
+Presently the flags are only used for access control (read, write, and immutable).
+
+Many dtypes require additional metadata, and this is stored in memory immediately after
+the ndobject_preamble. The dtype has a method get_metadata_size() which returns how much
+memory is needed here.
+
