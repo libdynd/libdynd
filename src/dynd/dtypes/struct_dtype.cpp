@@ -44,14 +44,14 @@ struct_dtype::struct_dtype(const std::vector<dtype>& fields, const std::vector<s
     create_ndobject_properties();
 }
 
-size_t struct_dtype::get_default_element_size(int ndim, const intptr_t *shape) const
+size_t struct_dtype::get_default_data_size(int ndim, const intptr_t *shape) const
 {
     // Default layout is to match the field order - could reorder the elements for more efficient packing
     size_t s = 0;
     for (size_t i = 0, i_end = m_field_types.size(); i != i_end; ++i) {
         s = inc_to_alignment(s, m_field_types[i].get_alignment());
         if (m_field_types[i].extended()) {
-            s += m_field_types[i].extended()->get_default_element_size(ndim, shape);
+            s += m_field_types[i].extended()->get_default_data_size(ndim, shape);
         } else {
             s += m_field_types[i].get_data_size();
         }
@@ -61,12 +61,12 @@ size_t struct_dtype::get_default_element_size(int ndim, const intptr_t *shape) c
 }
 
 
-void struct_dtype::print_element(std::ostream& o, const char *metadata, const char *data) const
+void struct_dtype::print_data(std::ostream& o, const char *metadata, const char *data) const
 {
     const size_t *offsets = reinterpret_cast<const size_t *>(metadata);
     o << "[";
     for (size_t i = 0, i_end = m_field_types.size(); i != i_end; ++i) {
-        m_field_types[i].print_element(o, metadata + m_metadata_offsets[i], data + offsets[i]);
+        m_field_types[i].print_data(o, metadata + m_metadata_offsets[i], data + offsets[i]);
         if (i != i_end - 1) {
             o << ", ";
         }
@@ -339,7 +339,7 @@ void struct_dtype::metadata_default_construct(char *metadata, int ndim, const in
                 }
                 throw;
             }
-            offs += m_field_types[i].extended()->get_default_element_size(ndim, shape);
+            offs += m_field_types[i].extended()->get_default_data_size(ndim, shape);
         } else {
             offs += m_field_types[i].get_data_size();
         }

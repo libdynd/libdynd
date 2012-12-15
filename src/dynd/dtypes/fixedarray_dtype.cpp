@@ -59,12 +59,12 @@ fixedarray_dtype::fixedarray_dtype(const dtype& element_dtype, size_t dimension_
     get_nonuniform_ndobject_properties_and_functions(m_ndobject_properties, m_ndobject_functions);
 }
 
-void fixedarray_dtype::print_element(std::ostream& o, const char *metadata, const char *data) const
+void fixedarray_dtype::print_data(std::ostream& o, const char *metadata, const char *data) const
 {
     size_t stride = m_stride;
     o << "[";
     for (size_t i = 0, i_end = m_dimension_size; i != i_end; ++i, data += stride) {
-        m_element_dtype.print_element(o, metadata, data);
+        m_element_dtype.print_data(o, metadata, data);
         if (i != i_end - 1) {
             o << ", ";
         }

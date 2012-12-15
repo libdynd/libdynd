@@ -90,7 +90,7 @@ void date_dtype::get_ymd(const char *metadata, const char *data,
     out_day = ymd.day;
 }
 
-void date_dtype::print_element(std::ostream& o, const char *DYND_UNUSED(metadata), const char *data) const
+void date_dtype::print_data(std::ostream& o, const char *DYND_UNUSED(metadata), const char *data) const
 {
     int32_t value = *reinterpret_cast<const int32_t *>(data);
     switch (m_unit) {

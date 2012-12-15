@@ -50,7 +50,7 @@ ndobject dynd::make_strided_ndobject(const dtype& uniform_dtype, int ndim, const
     // Determine the total data size
     intptr_t element_size;
     if (uniform_dtype.extended()) {
-        element_size = uniform_dtype.extended()->get_default_element_size(0, NULL);
+        element_size = uniform_dtype.extended()->get_default_data_size(0, NULL);
     } else {
         element_size = uniform_dtype.get_data_size();
     }
@@ -819,7 +819,7 @@ std::ostream& dynd::operator<<(std::ostream& o, const ndobject& rhs)
         if (v.get_ndo()->is_builtin_dtype()) {
             print_builtin_scalar(v.get_ndo()->get_builtin_type_id(), o, v.get_ndo()->m_data_pointer);
         } else {
-            v.get_ndo()->m_dtype->print_element(o, v.get_ndo_meta(), v.get_ndo()->m_data_pointer);
+            v.get_ndo()->m_dtype->print_data(o, v.get_ndo_meta(), v.get_ndo()->m_data_pointer);
         }
         o << ", " << rhs.get_dtype() << ")";
     } else {

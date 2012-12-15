@@ -42,13 +42,13 @@ public:
     size_t get_data_size() const {
         return 0;
     }
-    size_t get_default_element_size(int ndim, const intptr_t *shape) const;
+    size_t get_default_data_size(int ndim, const intptr_t *shape) const;
 
     const dtype& get_element_dtype() const {
         return m_element_dtype;
     }
 
-    void print_element(std::ostream& o, const char *metadata, const char *data) const;
+    void print_data(std::ostream& o, const char *metadata, const char *data) const;
 
     void print_dtype(std::ostream& o) const;
 

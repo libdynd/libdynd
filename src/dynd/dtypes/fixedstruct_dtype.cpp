@@ -59,11 +59,11 @@ fixedstruct_dtype::fixedstruct_dtype(const std::vector<dtype>& field_types, cons
     create_ndobject_properties();
 }
 
-void fixedstruct_dtype::print_element(std::ostream& o, const char *metadata, const char *data) const
+void fixedstruct_dtype::print_data(std::ostream& o, const char *metadata, const char *data) const
 {
     o << "[";
     for (size_t i = 0, i_end = m_field_types.size(); i != i_end; ++i) {
-        m_field_types[i].print_element(o, metadata + m_metadata_offsets[i], data + m_data_offsets[i]);
+        m_field_types[i].print_data(o, metadata + m_metadata_offsets[i], data + m_data_offsets[i]);
         if (i != i_end - 1) {
             o << ", ";
         }

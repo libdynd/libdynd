@@ -47,7 +47,7 @@ public:
     const dtype& get_operand_dtype() const {
         return m_operand_dtype;
     }
-    void print_element(std::ostream& o, const char *metadata, const char *data) const;
+    void print_data(std::ostream& o, const char *metadata, const char *data) const;
 
     void print_dtype(std::ostream& o) const;
 

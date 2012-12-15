@@ -67,7 +67,7 @@ public:
     void get_ymd(const char *metadata, const char *data,
                     int32_t &out_year, int32_t &out_month, int32_t &out_day) const;
 
-    void print_element(std::ostream& o, const char *metadata, const char *data) const;
+    void print_data(std::ostream& o, const char *metadata, const char *data) const;
 
     void print_dtype(std::ostream& o) const;
 

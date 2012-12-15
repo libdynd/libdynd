@@ -19,28 +19,28 @@ strided_array_dtype::strided_array_dtype(const dtype& element_dtype)
     get_nonuniform_ndobject_properties_and_functions(m_ndobject_properties, m_ndobject_functions);
 }
 
-size_t strided_array_dtype::get_default_element_size(int ndim, const intptr_t *shape) const
+size_t strided_array_dtype::get_default_data_size(int ndim, const intptr_t *shape) const
 {
     if (ndim == 0 || shape[0] < 0) {
         throw std::runtime_error("the strided_array dtype requires a shape be specified for default construction");
     }
 
     if (m_element_dtype.extended()) {
-        return shape[0] * m_element_dtype.extended()->get_default_element_size(ndim-1, shape+1);
+        return shape[0] * m_element_dtype.extended()->get_default_data_size(ndim-1, shape+1);
     } else {
         return shape[0] * m_element_dtype.get_data_size();
     }
 }
 
 
-void strided_array_dtype::print_element(std::ostream& o, const char *metadata, const char *data) const
+void strided_array_dtype::print_data(std::ostream& o, const char *metadata, const char *data) const
 {
     const strided_array_dtype_metadata *md = reinterpret_cast<const strided_array_dtype_metadata *>(metadata);
     size_t stride = md->stride;
     metadata += sizeof(strided_array_dtype_metadata);
     o << "[";
     for (size_t i = 0, i_end = md->size; i != i_end; ++i, data += stride) {
-        m_element_dtype.print_element(o, metadata, data);
+        m_element_dtype.print_data(o, metadata, data);
         if (i != i_end - 1) {
             o << ", ";
         }
@@ -286,7 +286,7 @@ void strided_array_dtype::metadata_default_construct(char *metadata, int ndim, c
     if (ndim == 0 || shape[0] < 0) {
         throw std::runtime_error("the strided_array dtype requires a shape be specified for default construction");
     }
-    size_t element_size = m_element_dtype.extended() ? m_element_dtype.extended()->get_default_element_size(ndim-1, shape+1)
+    size_t element_size = m_element_dtype.extended() ? m_element_dtype.extended()->get_default_data_size(ndim-1, shape+1)
                                                      : m_element_dtype.get_data_size();
 
     strided_array_dtype_metadata *md = reinterpret_cast<strided_array_dtype_metadata *>(metadata);

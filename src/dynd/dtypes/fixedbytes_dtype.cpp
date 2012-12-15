@@ -34,7 +34,7 @@ dynd::fixedbytes_dtype::fixedbytes_dtype(intptr_t element_size, intptr_t alignme
     }
 }
 
-void dynd::fixedbytes_dtype::print_element(std::ostream& o, const char *DYND_UNUSED(metadata), const char *data) const
+void dynd::fixedbytes_dtype::print_data(std::ostream& o, const char *DYND_UNUSED(metadata), const char *data) const
 {
     o << "0x";
     hexadecimal_print(o, data, m_element_size);

@@ -28,31 +28,31 @@ dynd::view_dtype::view_dtype(const dtype& value_dtype, const dtype& operand_dtyp
                     m_copy_kernel);
 }
 
-void dynd::view_dtype::print_element(std::ostream& o, const char *metadata, const char *data) const
+void dynd::view_dtype::print_data(std::ostream& o, const char *metadata, const char *data) const
 {
-    // Allow calling print_element in the special case that the view
+    // Allow calling print_data in the special case that the view
     // is being used just to align the data
     if (m_operand_dtype.get_type_id() == fixedbytes_type_id) {
         switch (m_operand_dtype.get_data_size()) {
             case 1:
-                m_value_dtype.print_element(o, metadata, data);
+                m_value_dtype.print_data(o, metadata, data);
                 return;
             case 2: {
                 uint16_t tmp;
                 memcpy(&tmp, data, sizeof(tmp));
-                m_value_dtype.print_element(o, metadata, reinterpret_cast<const char *>(&tmp));
+                m_value_dtype.print_data(o, metadata, reinterpret_cast<const char *>(&tmp));
                 return;
             }
             case 4: {
                 uint32_t tmp;
                 memcpy(&tmp, data, sizeof(tmp));
-                m_value_dtype.print_element(o, metadata, reinterpret_cast<const char *>(&tmp));
+                m_value_dtype.print_data(o, metadata, reinterpret_cast<const char *>(&tmp));
                 return;
             }
             case 8: {
                 uint64_t tmp;
                 memcpy(&tmp, data, sizeof(tmp));
-                m_value_dtype.print_element(o, metadata, reinterpret_cast<const char *>(&tmp));
+                m_value_dtype.print_data(o, metadata, reinterpret_cast<const char *>(&tmp));
                 return;
             }
             default: {
@@ -61,13 +61,13 @@ void dynd::view_dtype::print_element(std::ostream& o, const char *metadata, cons
                 // Make the storage aligned as needed
                 buffer = (char *)(((uintptr_t)buffer + (uintptr_t)m_value_dtype.get_alignment() - 1) & (m_value_dtype.get_alignment() - 1));
                 memcpy(buffer, data, m_value_dtype.get_data_size());
-                m_value_dtype.print_element(o, metadata, reinterpret_cast<const char *>(&buffer));
+                m_value_dtype.print_data(o, metadata, reinterpret_cast<const char *>(&buffer));
                 return;
             }
         }
     }
 
-    throw runtime_error("internal error: view_dtype::print_element isn't supposed to be called");
+    throw runtime_error("internal error: view_dtype::print_data isn't supposed to be called");
 }
 
 void dynd::view_dtype::print_dtype(std::ostream& o) const

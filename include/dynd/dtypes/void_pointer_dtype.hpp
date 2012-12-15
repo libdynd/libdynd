@@ -35,7 +35,7 @@ public:
         return sizeof(void *);
     }
 
-    void print_element(std::ostream& o, const char *metadata, const char *data) const;
+    void print_data(std::ostream& o, const char *metadata, const char *data) const;
 
     void print_dtype(std::ostream& o) const;
 

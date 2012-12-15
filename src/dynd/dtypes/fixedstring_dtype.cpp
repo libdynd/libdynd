@@ -93,7 +93,7 @@ void fixedstring_dtype::set_utf8_string(const char *DYND_UNUSED(metadata), char 
     }
 }
 
-void fixedstring_dtype::print_element(std::ostream& o, const char *DYND_UNUSED(metadata), const char *data) const
+void fixedstring_dtype::print_data(std::ostream& o, const char *DYND_UNUSED(metadata), const char *data) const
 {
     uint32_t cp;
     next_unicode_codepoint_t next_fn;

@@ -149,7 +149,7 @@ intptr_t extended_dtype::get_representative_stride(const char *DYND_UNUSED(metad
     throw std::runtime_error(ss.str());
 }
 
-size_t extended_dtype::get_default_element_size(int DYND_UNUSED(ndim), const intptr_t *DYND_UNUSED(shape)) const
+size_t extended_dtype::get_default_data_size(int DYND_UNUSED(ndim), const intptr_t *DYND_UNUSED(shape)) const
 {
     return get_data_size();
 }
@@ -791,10 +791,10 @@ void dynd::print_builtin_scalar(type_id_t type_id, std::ostream& o, const char *
     }
 }
 
-void dynd::dtype::print_element(std::ostream& o, const char *metadata, const char *data) const
+void dynd::dtype::print_data(std::ostream& o, const char *metadata, const char *data) const
 {
     if (extended() != NULL) {
-        extended()->print_element(o, metadata, data);
+        extended()->print_data(o, metadata, data);
     } else {
         print_builtin_scalar(get_type_id(), o, data);
     }

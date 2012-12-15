@@ -91,7 +91,7 @@ static void raise_string_cast_error(const dtype& dst_dt, const dtype& string_dt,
 {
     stringstream ss;
     ss << "cannot cast string ";
-    string_dt.print_element(ss, metadata, data);
+    string_dt.print_data(ss, metadata, data);
     ss << " to " << dst_dt;
     throw runtime_error(ss.str());
 }
@@ -100,7 +100,7 @@ static void raise_string_cast_overflow_error(const dtype& dst_dt, const dtype& s
 {
     stringstream ss;
     ss << "overflow converting string ";
-    string_dt.print_element(ss, metadata, data);
+    string_dt.print_data(ss, metadata, data);
     ss << " to " << dst_dt;
     throw runtime_error(ss.str());
 }
@@ -418,7 +418,7 @@ static void builtin_to_string_kernel_single(char *dst, const char *src, unary_ke
     //       where it prints the shortest string that's guaranteed to parse to
     //       the same float number, would be better.
     stringstream ss;
-    dtype(ad.src_type_id).print_element(ss, extra->src_metadata, src);
+    dtype(ad.src_type_id).print_data(ss, extra->src_metadata, src);
     esd->set_utf8_string(extra->dst_metadata, dst, ad.errmode, ss.str());
 }
 

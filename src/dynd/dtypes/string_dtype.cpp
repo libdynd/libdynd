@@ -80,7 +80,7 @@ void string_dtype::set_utf8_string(const char *data_metadata, char *data, assign
     reinterpret_cast<string_dtype_data*>(data)->end = dst_end;
 }
 
-void string_dtype::print_element(std::ostream& o, const char *DYND_UNUSED(metadata), const char *data) const
+void string_dtype::print_data(std::ostream& o, const char *DYND_UNUSED(metadata), const char *data) const
 {
     uint32_t cp;
     next_unicode_codepoint_t next_fn;

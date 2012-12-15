@@ -358,7 +358,7 @@ public:
     virtual dtype_kind_t get_kind() const = 0;
     virtual size_t get_alignment() const = 0;
     virtual size_t get_data_size() const = 0;
-    virtual size_t get_default_element_size(int ndim, const intptr_t *shape) const;
+    virtual size_t get_default_data_size(int ndim, const intptr_t *shape) const;
 
     /**
      * Print the raw data interpreted as a single value of this dtype.
@@ -366,7 +366,7 @@ public:
      * \param o the std::ostream to print to
      * \param data pointer to the data element to print
      */
-    virtual void print_element(std::ostream& o, const char *metadata, const char *data) const = 0;
+    virtual void print_data(std::ostream& o, const char *metadata, const char *data) const = 0;
 
     /**
      * Print a representation of the dtype itself
@@ -567,7 +567,7 @@ public:
     virtual size_t get_metadata_size() const;
     /**
      * Constructs the ndobject metadata for this dtype, prepared for writing.
-     * The element size of the result must match that from get_default_element_size().
+     * The element size of the result must match that from get_default_data_size().
      */
     virtual void metadata_default_construct(char *metadata, int ndim, const intptr_t* shape) const;
     /**
@@ -1210,7 +1210,7 @@ public:
      * \param data      pointer to the data element to print
      * \param metadata  pointer to the ndobject metadata for the data element
      */
-    void print_element(std::ostream& o, const char *metadata, const char *data) const;
+    void print_data(std::ostream& o, const char *metadata, const char *data) const;
 
     friend /* TODO: DYND_CONSTEXPR*/ dtype detail::internal_make_raw_dtype(char type_id, char kind, intptr_t element_size, char alignment);
     friend std::ostream& operator<<(std::ostream& o, const dtype& rhs);

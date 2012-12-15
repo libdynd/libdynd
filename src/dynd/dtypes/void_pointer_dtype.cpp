@@ -13,7 +13,7 @@
 using namespace std;
 using namespace dynd;
 
-void dynd::void_pointer_dtype::print_element(std::ostream& o, const char *DYND_UNUSED(metadata), const char *data) const
+void dynd::void_pointer_dtype::print_data(std::ostream& o, const char *DYND_UNUSED(metadata), const char *data) const
 {
     uintptr_t target_ptr = *reinterpret_cast<const uintptr_t *>(data);
     o << "0x";

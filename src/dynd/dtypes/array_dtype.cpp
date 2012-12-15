@@ -18,7 +18,7 @@ array_dtype::array_dtype(const dtype& element_dtype)
 {
 }
 
-void array_dtype::print_element(std::ostream& o, const char *metadata, const char *data) const
+void array_dtype::print_data(std::ostream& o, const char *metadata, const char *data) const
 {
     const array_dtype_metadata *md = reinterpret_cast<const array_dtype_metadata *>(metadata);
     const array_dtype_data *d = reinterpret_cast<const array_dtype_data *>(data);
@@ -26,7 +26,7 @@ void array_dtype::print_element(std::ostream& o, const char *metadata, const cha
     metadata += sizeof(array_dtype_metadata);
     o << "[";
     for (size_t i = 0, i_end = d->size; i != i_end; ++i, data += stride) {
-        m_element_dtype.print_element(o, metadata, data);
+        m_element_dtype.print_data(o, metadata, data);
         if (i != i_end - 1) {
             o << ", ";
         }
@@ -229,7 +229,7 @@ size_t array_dtype::get_metadata_size() const
 
 void array_dtype::metadata_default_construct(char *metadata, int ndim, const intptr_t* shape) const
 {
-    size_t element_size = m_element_dtype.extended() ? m_element_dtype.extended()->get_default_element_size(ndim-1, shape+1)
+    size_t element_size = m_element_dtype.extended() ? m_element_dtype.extended()->get_default_data_size(ndim-1, shape+1)
                                                      : m_element_dtype.get_data_size();
 
     array_dtype_metadata *md = reinterpret_cast<array_dtype_metadata *>(metadata);

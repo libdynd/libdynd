@@ -45,7 +45,7 @@ public:
     size_t get_data_size() const {
         return sizeof(array_dtype_data);
     }
-    size_t get_default_element_size(int DYND_UNUSED(ndim), const intptr_t *DYND_UNUSED(shape)) const {
+    size_t get_default_data_size(int DYND_UNUSED(ndim), const intptr_t *DYND_UNUSED(shape)) const {
         return sizeof(array_dtype_data);
     }
 
@@ -59,7 +59,7 @@ public:
         return m_element_dtype.get_alignment();
     }
 
-    void print_element(std::ostream& o, const char *metadata, const char *data) const;
+    void print_data(std::ostream& o, const char *metadata, const char *data) const;
 
     void print_dtype(std::ostream& o) const;
 

@@ -43,7 +43,7 @@ public:
     size_t get_data_size() const {
         return 0;
     }
-    size_t get_default_element_size(int ndim, const intptr_t *shape) const;
+    size_t get_default_data_size(int ndim, const intptr_t *shape) const;
 
     size_t get_field_count() const {
         return m_field_types.size();
@@ -61,7 +61,7 @@ public:
         return m_metadata_offsets;
     }
 
-    void print_element(std::ostream& o, const char *metadata, const char *data) const;
+    void print_data(std::ostream& o, const char *metadata, const char *data) const;
 
     void print_dtype(std::ostream& o) const;
 

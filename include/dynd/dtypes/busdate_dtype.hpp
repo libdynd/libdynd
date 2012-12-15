@@ -78,7 +78,7 @@ public:
     void print_workweek(std::ostream& o) const;
     void print_holidays(std::ostream& o) const;
 
-    void print_element(std::ostream& o, const char *metadata, const char *data) const;
+    void print_data(std::ostream& o, const char *metadata, const char *data) const;
 
     void print_dtype(std::ostream& o) const;
 

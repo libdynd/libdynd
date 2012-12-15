@@ -23,9 +23,9 @@ dynd::date_property_dtype::date_property_dtype(const dtype& operand_dtype, const
     dd->get_property_getter_kernel(property_name, m_value_dtype, m_to_value_kernel);
 }
 
-void dynd::date_property_dtype::print_element(std::ostream& DYND_UNUSED(o), const char *DYND_UNUSED(metadata), const char *DYND_UNUSED(data)) const
+void dynd::date_property_dtype::print_data(std::ostream& DYND_UNUSED(o), const char *DYND_UNUSED(metadata), const char *DYND_UNUSED(data)) const
 {
-    throw runtime_error("internal error: date_property_dtype::print_element isn't supposed to be called");
+    throw runtime_error("internal error: date_property_dtype::print_data isn't supposed to be called");
 }
 
 void dynd::date_property_dtype::print_dtype(std::ostream& o) const

@@ -198,7 +198,7 @@ categorical_dtype::categorical_dtype(const ndobject& categories)
         } else {
             stringstream ss;
             ss << "categories must be unique: category value ";
-            m_category_dtype.print_element(ss, NULL, categories_user_order[i]);
+            m_category_dtype.print_data(ss, NULL, categories_user_order[i]);
             ss << " appears more than once";
             throw std::runtime_error(ss.str());
         }
@@ -219,11 +219,11 @@ categorical_dtype::~categorical_dtype() {
 
 }
 
-void categorical_dtype::print_element(std::ostream& o, const char *metadata, const char *data) const
+void categorical_dtype::print_data(std::ostream& o, const char *metadata, const char *data) const
 {
     uint32_t value = *reinterpret_cast<const uint32_t*>(data);
     if (value < m_value_to_category_index.size()) {
-        m_category_dtype.print_element(o, metadata, m_categories[m_value_to_category_index[value]]);
+        m_category_dtype.print_data(o, metadata, m_categories[m_value_to_category_index[value]]);
     }
     else {
         o << "UNK"; // TODO better outpout?
@@ -235,10 +235,10 @@ void categorical_dtype::print_dtype(std::ostream& o) const
 {
     o << "categorical<" << m_category_dtype;
     o << ", [";
-    m_category_dtype.print_element(o, NULL, m_categories[m_value_to_category_index[0]]); // TODO: ndobject metadata
+    m_category_dtype.print_data(o, NULL, m_categories[m_value_to_category_index[0]]); // TODO: ndobject metadata
     for (uint32_t i = 1; i < m_categories.size(); ++i) {
         o << ", ";
-        m_category_dtype.print_element(o, NULL, m_categories[m_value_to_category_index[i]]); // TODO: ndobject metadata
+        m_category_dtype.print_data(o, NULL, m_categories[m_value_to_category_index[i]]); // TODO: ndobject metadata
     }
     o << "]>";
 }
@@ -269,7 +269,7 @@ uint32_t categorical_dtype::get_value_from_category(const char *category) const
     );
     if (bounds.first == m_categories.end() || bounds.first == bounds.second) {
         stringstream ss;
-        m_category_dtype.print_element(ss, NULL, category); // TODO: ndobject metadata
+        m_category_dtype.print_data(ss, NULL, category); // TODO: ndobject metadata
         throw std::runtime_error("Unknown category: '" + ss.str() + "'");
     }
     else {

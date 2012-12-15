@@ -27,7 +27,7 @@ TEST(FixedStructDType, CreateOneField) {
     dt = make_fixedstruct_dtype(make_dtype<int32_t>(), "x");
     EXPECT_EQ(fixedstruct_type_id, dt.get_type_id());
     EXPECT_EQ(4u, dt.get_data_size());
-    EXPECT_EQ(4u, dt.extended()->get_default_element_size(0, NULL));
+    EXPECT_EQ(4u, dt.extended()->get_default_data_size(0, NULL));
     EXPECT_EQ(4u, dt.get_alignment());
     EXPECT_EQ(pod_memory_management, dt.get_memory_management());
     tdt = static_cast<const fixedstruct_dtype *>(dt.extended());
@@ -47,7 +47,7 @@ TEST(FixedStructDType, CreateTwoField) {
     dt = make_fixedstruct_dtype(make_dtype<int64_t>(), "a", make_dtype<int32_t>(), "b");
     EXPECT_EQ(fixedstruct_type_id, dt.get_type_id());
     EXPECT_EQ(16u, dt.get_data_size());
-    EXPECT_EQ(16u, dt.extended()->get_default_element_size(0, NULL));
+    EXPECT_EQ(16u, dt.extended()->get_default_data_size(0, NULL));
     EXPECT_EQ(8u, dt.get_alignment());
     EXPECT_EQ(pod_memory_management, dt.get_memory_management());
     tdt = static_cast<const fixedstruct_dtype *>(dt.extended());
@@ -73,7 +73,7 @@ TEST(FixedStructDType, CreateThreeField) {
     dt = make_fixedstruct_dtype(d1, "x", d2, "y", d3, "z");
     EXPECT_EQ(fixedstruct_type_id, dt.get_type_id());
     EXPECT_EQ(24u, dt.get_data_size());
-    EXPECT_EQ(24u, dt.extended()->get_default_element_size(0, NULL));
+    EXPECT_EQ(24u, dt.extended()->get_default_data_size(0, NULL));
     EXPECT_EQ(8u, dt.get_alignment());
     EXPECT_EQ(pod_memory_management, dt.get_memory_management());
     tdt = static_cast<const fixedstruct_dtype *>(dt.extended());
