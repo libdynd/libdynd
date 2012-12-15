@@ -74,8 +74,11 @@ struct memory_block_pod_allocator_api {
     void (*resize)(memory_block_data *self, intptr_t size_bytes, char **inout_begin, char **inout_end);
     /**
      * Finalizes the memory block so it can no longer be used to allocate more
-     * memory. This call uses realloc to try and shrink the destination memory as
-     * much as possible.
+     * memory. This call may use something like realloc to try and shrink the
+     * destination memory as much as possible.
+     * NOTE: realloc itself may move memory for any call to it, so cannot be used
+     *       (e.g. on OS X it was found that shrinking memory to 8 bytes caused it to
+     *       move, likely to a special small object heap).
      */
     void (*finalize)(memory_block_data *self);
 };
