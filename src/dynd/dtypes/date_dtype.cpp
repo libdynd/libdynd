@@ -83,7 +83,7 @@ void date_dtype::set_ymd(const char *DYND_UNUSED(metadata), char *data,
     }
 }
 
-void date_dtype::get_ymd(const char *metadata, const char *data,
+void date_dtype::get_ymd(const char *DYND_UNUSED(metadata), const char *data,
                 int32_t &out_year, int32_t &out_month, int32_t &out_day) const
 {
     datetime::date_ymd ymd;

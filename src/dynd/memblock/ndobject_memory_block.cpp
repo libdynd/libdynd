@@ -124,7 +124,6 @@ memory_block_ptr dynd::shallow_copy_ndobject_memory_block(const memory_block_ptr
 void dynd::ndobject_memory_block_debug_print(const memory_block_data *memblock, std::ostream& o, const std::string& indent)
 {
     const ndobject_preamble *preamble = reinterpret_cast<const ndobject_preamble *>(memblock);
-    const char *metadata = reinterpret_cast<const char *>(preamble + 1);
     if (preamble->m_dtype != NULL) {
         dtype dt = preamble->is_builtin_dtype() ? dtype(preamble->get_type_id())
                         : dtype(preamble->m_dtype, true);

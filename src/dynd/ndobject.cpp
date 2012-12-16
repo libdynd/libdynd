@@ -649,7 +649,6 @@ namespace {
     static void switch_udtype(const dtype& dt, const void *extra,
                 dtype& out_transformed_dtype, bool& out_was_transformed)
     {
-        const dtype *e = reinterpret_cast<const dtype *>(extra);
         // If things aren't simple, use a view_dtype
         if (!dt.is_builtin() && dt.extended()->is_uniform_dim()) {
             dt.extended()->transform_child_dtypes(&switch_udtype, extra, out_transformed_dtype, out_was_transformed);

@@ -130,7 +130,7 @@ namespace detail {
     template<class T>
     struct callable_argument_setter {
         static typename enable_if<is_dtype_scalar<T>::value, void>::type set(const dtype& paramtype, char *metadata, char *data, const T& value) {
-            if (paramtype.get_type_id() == type_id_of<T>::value) {
+            if (paramtype.get_type_id() == static_cast<type_id_t>(type_id_of<T>::value)) {
                 *reinterpret_cast<T *>(data) = value;
             } else {
                 dtype_assign(paramtype, metadata, data, make_dtype<T>(), NULL, reinterpret_cast<const char *>(&value));
@@ -189,7 +189,7 @@ inline ndobject callable::call() const
     if (parameter_count != 0) {
         if (m_first_default_parameter <= 0) {
             // Fill the missing parameters with their defaults, if available
-            for (int i = 0; i < parameter_count; ++i) {
+            for (size_t i = 0; i < parameter_count; ++i) {
                 size_t metadata_offset = fsdt->get_metadata_offsets()[i];
                 size_t data_offset = fsdt->get_data_offsets()[i];
                 dtype_copy(fsdt->get_field_types()[i],
@@ -216,7 +216,7 @@ inline ndobject callable::call(const T& p0) const
     if (parameter_count != 1) {
         if (parameter_count > 1 && m_first_default_parameter <= 1) {
             // Fill the missing parameters with their defaults, if available
-            for (int i = 1; i < parameter_count; ++i) {
+            for (size_t i = 1; i < parameter_count; ++i) {
                 size_t metadata_offset = fsdt->get_metadata_offsets()[i];
                 size_t data_offset = fsdt->get_data_offsets()[i];
                 dtype_copy(fsdt->get_field_types()[i],
@@ -247,7 +247,7 @@ inline ndobject callable::call(const T0& p0, const T1& p1) const
     if (fsdt->get_field_types().size() != 2) {
         if (parameter_count > 2 && m_first_default_parameter <= 2) {
             // Fill the missing parameters with their defaults, if available
-            for (int i = 2; i < parameter_count; ++i) {
+            for (size_t i = 2; i < parameter_count; ++i) {
                 size_t metadata_offset = fsdt->get_metadata_offsets()[i];
                 size_t data_offset = fsdt->get_data_offsets()[i];
                 dtype_copy(fsdt->get_field_types()[i],
@@ -282,7 +282,7 @@ inline ndobject callable::call(const T0& p0, const T1& p1, const T2& p2) const
     if (fsdt->get_field_types().size() != 3) {
         if (parameter_count > 3 && m_first_default_parameter <= 3) {
             // Fill the missing parameters with their defaults, if available
-            for (int i = 3; i < parameter_count; ++i) {
+            for (size_t i = 3; i < parameter_count; ++i) {
                 size_t metadata_offset = fsdt->get_metadata_offsets()[i];
                 size_t data_offset = fsdt->get_data_offsets()[i];
                 dtype_copy(fsdt->get_field_types()[i],
@@ -321,7 +321,7 @@ inline ndobject callable::call(const T0& p0, const T1& p1, const T2& p2, const T
     if (fsdt->get_field_types().size() != 4) {
         if (parameter_count > 4 && m_first_default_parameter <= 4) {
             // Fill the missing parameters with their defaults, if available
-            for (int i = 4; i < parameter_count; ++i) {
+            for (size_t i = 4; i < parameter_count; ++i) {
                 size_t metadata_offset = fsdt->get_metadata_offsets()[i];
                 size_t data_offset = fsdt->get_data_offsets()[i];
                 dtype_copy(fsdt->get_field_types()[i],
@@ -364,7 +364,7 @@ inline ndobject callable::call(const T0& p0, const T1& p1, const T2& p2, const T
     if (fsdt->get_field_types().size() != 5) {
         if (parameter_count > 5 && m_first_default_parameter <= 5) {
             // Fill the missing parameters with their defaults, if available
-            for (int i = 5; i < parameter_count; ++i) {
+            for (size_t i = 5; i < parameter_count; ++i) {
                 size_t metadata_offset = fsdt->get_metadata_offsets()[i];
                 size_t data_offset = fsdt->get_data_offsets()[i];
                 dtype_copy(fsdt->get_field_types()[i],
