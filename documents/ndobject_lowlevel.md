@@ -104,3 +104,16 @@ Many dtypes require additional metadata, and this is stored in memory immediatel
 the ndobject_preamble. The dtype has a method get_metadata_size() which returns how much
 memory is needed here.
 
+DType
+-----
+
+DTypes are represented in one of two ways. The most basic types, like the ones
+built into C/C++, are classified as "builtin dtypes", and represented simply by an
+enumeration value. This means there are no atomic reference increments/decrements when
+these dtypes are passed around, and no memory is ever allocated or freed for them.
+More complex types are subclasses of the virtual base class extended_dtype, which defines
+the interface for dtypes.
+
+To distinguish between these two cases, there is a constant `builtin_type_id_mask`, which
+indicates the bits used for the builtin type id. This is used by the dtype.is_builtin()
+method to test whether only the lowest bits are set.

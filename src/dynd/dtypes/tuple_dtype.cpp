@@ -57,7 +57,7 @@ dynd::tuple_dtype::tuple_dtype(const std::vector<dtype>& fields, const std::vect
     : extended_dtype(tuple_type_id, struct_kind, data_size, alignment),
             m_fields(fields), m_offsets(offsets), m_metadata_offsets(fields.size())
 {
-    if ((data_size & (alignment - 1)) != 0) {
+    if (!offset_is_aligned(data_size, alignment)) {
         stringstream ss;
         ss << "tuple type cannot be created with size " << data_size;
         ss << " and alignment " << alignment << ", the alignment must divide into the element size";
