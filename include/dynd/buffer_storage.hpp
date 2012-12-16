@@ -22,7 +22,7 @@ class buffer_storage {
     void internal_allocate()
     {
         m_storage = new char[element_count * m_dtype.get_data_size()];
-        size_t metasize = m_dtype.extended() ? m_dtype.extended()->get_metadata_size() : 0;
+        size_t metasize = m_dtype.is_builtin() ? 0 : m_dtype.extended()->get_metadata_size();
         if (metasize != 0) {
             try {
                 m_metadata = NULL;
@@ -85,7 +85,7 @@ public:
     }
 
     inline void reset_metadata() {
-        if (m_metadata && m_dtype.extended()) {
+        if (m_metadata && !m_dtype.is_builtin()) {
             m_dtype.extended()->metadata_reset_buffers(m_metadata);
         }
     }

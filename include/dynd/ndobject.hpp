@@ -767,7 +767,8 @@ dynd::ndobject::ndobject(const T (&rhs)[N])
     intptr_t shape[ndim];
     size_t size = detail::fill_shape<T[N]>::fill(shape);
 
-    *this = make_strided_ndobject(dtype(detail::uniform_type_from_array<T>::type_id), ndim, shape, read_access_flag|write_access_flag, NULL);
+    *this = make_strided_ndobject(dtype(static_cast<type_id_t>(detail::uniform_type_from_array<T>::type_id)),
+                    ndim, shape, read_access_flag|write_access_flag, NULL);
     DYND_MEMCPY(get_ndo()->m_data_pointer, reinterpret_cast<const void *>(&rhs), size);
 }
 

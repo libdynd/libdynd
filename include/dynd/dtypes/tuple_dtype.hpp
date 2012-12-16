@@ -17,31 +17,16 @@ class tuple_dtype : public extended_dtype {
     std::vector<size_t> m_offsets;
     std::vector<size_t> m_metadata_offsets;
     size_t m_metadata_size;
-    uintptr_t m_element_size;
     dtype_memory_management_t m_memory_management;
-    unsigned char m_alignment;
     bool m_is_standard_layout;
 
     bool compute_is_standard_layout() const;
 public:
     tuple_dtype(const std::vector<dtype>& fields);
     tuple_dtype(const std::vector<dtype>& fields, const std::vector<size_t> offsets,
-                        size_t element_size, size_t alignment);
+                        size_t data_size, size_t alignment);
 
-    type_id_t get_type_id() const {
-        return tuple_type_id;
-    }
-    dtype_kind_t get_kind() const {
-        // TODO: what kind should this have?
-        return struct_kind;
-    }
-    // Expose the storage traits here
-    size_t get_alignment() const {
-        return m_alignment;
-    }
-    size_t get_data_size() const {
-        return m_element_size;
-    }
+    virtual ~tuple_dtype();
 
     const std::vector<dtype>& get_fields() const {
         return m_fields;
@@ -53,7 +38,7 @@ public:
 
     /**
      * Returns true if the layout is standard, i.e. constructable without
-     * specifying the offsets/alignment/element_size.
+     * specifying the offsets/alignment/data_size.
      */
     bool is_standard_layout() const {
         return m_is_standard_layout;
@@ -91,9 +76,9 @@ inline dtype make_tuple_dtype(const std::vector<dtype>& fields) {
 
 /** Makes a tuple dtype with the specified fields and layout */
 inline dtype make_tuple_dtype(const std::vector<dtype>& fields, const std::vector<size_t> offsets,
-                size_t element_size, size_t alignment)
+                size_t data_size, size_t alignment)
 {
-    return dtype(new tuple_dtype(fields, offsets, element_size, alignment));
+    return dtype(new tuple_dtype(fields, offsets, data_size, alignment));
 }
 
 /** Makes a tuple dtype with the specified fields, using the standard layout */

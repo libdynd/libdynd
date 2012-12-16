@@ -258,7 +258,7 @@ void extended_dtype::get_nonuniform_ndobject_properties_and_functions(
         get_dynamic_ndobject_functions(&functions, &functions_count);
     } else {
         dtype dt = get_dtype_at_dimension(NULL, ndim);
-        if (dt.extended()) {
+        if (!dt.is_builtin()) {
             dt.extended()->get_dynamic_ndobject_properties(&properties, &properties_count);
             dt.extended()->get_dynamic_ndobject_functions(&functions, &functions_count);
         }
@@ -354,6 +354,10 @@ void extended_string_dtype::get_dynamic_dtype_properties(const std::pair<std::st
     *out_count = sizeof(extended_string_dtype_properties) / sizeof(extended_string_dtype_properties[0]);
 }
 
+extended_expression_dtype::~extended_expression_dtype()
+{
+}
+
 bool extended_expression_dtype::is_expression() const
 {
     return true;
@@ -367,7 +371,7 @@ dtype extended_expression_dtype::get_canonical_dtype() const
 size_t extended_expression_dtype::get_metadata_size() const
 {
     const dtype& dt = get_operand_dtype();
-    if (dt.extended()) {
+    if (!dt.is_builtin()) {
         return dt.extended()->get_metadata_size();
     } else {
         return 0;
@@ -377,7 +381,7 @@ size_t extended_expression_dtype::get_metadata_size() const
 void extended_expression_dtype::metadata_default_construct(char *metadata, int ndim, const intptr_t* shape) const
 {
     const dtype& dt = get_operand_dtype();
-    if (dt.extended()) {
+    if (!dt.is_builtin()) {
         dt.extended()->metadata_default_construct(metadata, ndim, shape);
     }
 }
@@ -385,7 +389,7 @@ void extended_expression_dtype::metadata_default_construct(char *metadata, int n
 void extended_expression_dtype::metadata_copy_construct(char *dst_metadata, const char *src_metadata, memory_block_data *embedded_reference) const
 {
     const dtype& dt = get_operand_dtype();
-    if (dt.extended()) {
+    if (!dt.is_builtin()) {
         dt.extended()->metadata_copy_construct(dst_metadata, src_metadata, embedded_reference);
     }
 }
@@ -393,7 +397,7 @@ void extended_expression_dtype::metadata_copy_construct(char *dst_metadata, cons
 void extended_expression_dtype::metadata_destruct(char *metadata) const
 {
     const dtype& dt = get_operand_dtype();
-    if (dt.extended()) {
+    if (!dt.is_builtin()) {
         dt.extended()->metadata_destruct(metadata);
     }
 }
@@ -401,7 +405,7 @@ void extended_expression_dtype::metadata_destruct(char *metadata) const
 void extended_expression_dtype::metadata_debug_print(const char *metadata, std::ostream& o, const std::string& indent) const
 {
     const dtype& dt = get_operand_dtype();
-    if (dt.extended()) {
+    if (!dt.is_builtin()) {
         dt.extended()->metadata_debug_print(metadata, o, indent);
     }
 }
@@ -411,97 +415,78 @@ size_t extended_expression_dtype::get_iterdata_size(int DYND_UNUSED(ndim)) const
     return 0;
 }
 
-inline /* TODO: DYND_CONSTEXPR */ dtype dynd::detail::internal_make_raw_dtype(char type_id, char kind, intptr_t element_size, char alignment)
-{
-    return dtype(type_id, kind, element_size, alignment);
-}
-
 const dtype dynd::static_builtin_dtypes[builtin_type_id_count + 1] = {
-    dynd::detail::internal_make_raw_dtype(bool_type_id, bool_kind, 1, 1),
-    dynd::detail::internal_make_raw_dtype(int8_type_id, int_kind, 1, 1),
-    dynd::detail::internal_make_raw_dtype(int16_type_id, int_kind, 2, 2),
-    dynd::detail::internal_make_raw_dtype(int32_type_id, int_kind, 4, 4),
-    dynd::detail::internal_make_raw_dtype(int64_type_id, int_kind, 8, 8),
-    dynd::detail::internal_make_raw_dtype(uint8_type_id, uint_kind, 1, 1),
-    dynd::detail::internal_make_raw_dtype(uint16_type_id, uint_kind, 2, 2),
-    dynd::detail::internal_make_raw_dtype(uint32_type_id, uint_kind, 4, 4),
-    dynd::detail::internal_make_raw_dtype(uint64_type_id, uint_kind, 8, 8),
-    dynd::detail::internal_make_raw_dtype(float32_type_id, real_kind, 4, 4),
-    dynd::detail::internal_make_raw_dtype(float64_type_id, real_kind, 8, 8),
-    dynd::detail::internal_make_raw_dtype(complex_float32_type_id, complex_kind, 8, 4),
-    dynd::detail::internal_make_raw_dtype(complex_float64_type_id, complex_kind, 16, 8),
-    dynd::detail::internal_make_raw_dtype(void_type_id, void_kind, 0, 1)
+    dtype(bool_type_id),
+    dtype(int8_type_id),
+    dtype(int16_type_id),
+    dtype(int32_type_id),
+    dtype(int64_type_id),
+    dtype(uint8_type_id),
+    dtype(uint16_type_id),
+    dtype(uint32_type_id),
+    dtype(uint64_type_id),
+    dtype(float32_type_id),
+    dtype(float64_type_id),
+    dtype(complex_float32_type_id),
+    dtype(complex_float64_type_id),
+    dtype(void_type_id)
 };
 
-namespace {
-    struct builtin_type_details {
-        dtype_kind_t kind;
-        unsigned char data_size;
-        unsigned char data_alignment;
+uint8_t dtype::builtin_kinds[builtin_type_id_count + 1] = {
+        bool_kind,
+        int_kind,
+        int_kind,
+        int_kind,
+        int_kind,
+        uint_kind,
+        uint_kind,
+        uint_kind,
+        uint_kind,
+        real_kind,
+        real_kind,
+        complex_kind,
+        complex_kind,
+        void_kind
     };
-    const builtin_type_details static_builtin_type_details[builtin_type_id_count + 1] = {
-        {bool_kind, 1, 1},
-        {int_kind, 1, 1},
-        {int_kind, 2, 2},
-        {int_kind, 4, 4},
-        {int_kind, 8, 8},
-        {uint_kind, 1, 1},
-        {uint_kind, 2, 2},
-        {uint_kind, 4, 4},
-        {uint_kind, 8, 8},
-        {real_kind, 4, 4},
-        {real_kind, 8, 8},
-        {complex_kind, 8, 4},
-        {complex_kind, 16, 8},
-        {void_kind, 0, 1}
-        };
-} // anonymous namespace
+uint8_t dtype::builtin_data_sizes[builtin_type_id_count + 1] = {
+        1,
+        1,
+        2,
+        4,
+        8,
+        1,
+        2,
+        4,
+        8,
+        4,
+        8,
+        8,
+        16,
+        0
+    };
+uint8_t dtype::builtin_data_alignments[builtin_type_id_count + 1] = {
+        1,
+        1,
+        2,
+        4,
+        8,
+        1,
+        2,
+        4,
+        8,
+        4,
+        8,
+        4,
+        8,
+        1
+    };
 
-/**
- * Validates that the given type ID is a proper ID. Throws
- * an exception if not.
- *
- * @param type_id  The type id to validate.
- */
-static inline int validate_type_id(type_id_t type_id)
-{
-    // 0 <= type_id < builtin_type_id_count
-    if ((unsigned int)type_id < builtin_type_id_count + 1) {
-        return type_id;
-    } else {
-        throw invalid_type_id((int)type_id);
-    }
-}
 
-dtype::dtype()
-    : m_type_id(void_type_id), m_kind(void_kind), m_alignment(1),
-      m_element_size(0), m_extended(NULL)
-{
-    // Default to a generic type with zero size
-}
-
-dtype::dtype(type_id_t type_id)
-    : m_type_id(validate_type_id(type_id)),
-      m_kind(static_builtin_type_details[type_id].kind),
-      m_alignment(static_builtin_type_details[type_id].data_alignment),
-      m_element_size(static_builtin_type_details[type_id].data_size),
-      m_extended(NULL)
-{
-}
-
-dtype::dtype(int type_id)
-    : m_type_id(validate_type_id((type_id_t)type_id)),
-      m_kind(static_builtin_type_details[type_id].kind),
-      m_alignment(static_builtin_type_details[type_id].data_alignment),
-      m_element_size(static_builtin_type_details[type_id].data_size),
-      m_extended(NULL)
-{
-}
 
 dtype::dtype(const std::string& rep)
     : m_extended(NULL)
 {
-    static const char *type_id_names[builtin_type_id_count] = {
+    static const char *type_id_names[builtin_type_id_count + 1] = {
         "bool",
         "int8",
         "int16",
@@ -515,25 +500,15 @@ dtype::dtype(const std::string& rep)
         "float64",
         "complex<float32>",
         "complex<float64>",
+        "void",
     };
 
     // TODO: make a decent efficient parser
-    for (int id = 0; id < builtin_type_id_count; ++id) {
+    for (int id = 0; id < builtin_type_id_count + 1; ++id) {
         if (rep == type_id_names[id]) {
-            m_type_id = (type_id_t)id;
-            m_kind = static_builtin_dtypes[id].m_kind;
-            m_alignment = static_builtin_dtypes[id].m_alignment;
-            m_element_size = static_builtin_dtypes[id].m_element_size;
+            m_extended = reinterpret_cast<const extended_dtype *>(id);
             return;
         }
-    }
-
-    if (rep == "void") {
-        m_type_id = void_type_id;
-        m_kind = void_kind;
-        m_alignment = 1;
-        m_element_size = 0;
-        return;
     }
 
     if (rep == "date") {
@@ -541,12 +516,12 @@ dtype::dtype(const std::string& rep)
         return;
     }
 
-    throw std::runtime_error(std::string() + "invalid type string \"" + rep + "\"");
+    throw std::runtime_error(std::string() + "invalid dynd type string \"" + rep + "\"");
 }
 
-dtype dynd::dtype::at_array(int nindices, const irange *indices) const
+dtype dtype::at_array(int nindices, const irange *indices) const
 {
-    if (m_extended == NULL) {
+    if (this->is_builtin()) {
         if (nindices == 0) {
             return *this;
         } else {
@@ -557,9 +532,9 @@ dtype dynd::dtype::at_array(int nindices, const irange *indices) const
     }
 }
 
-dtype dynd::dtype::apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& root_dt) const
+dtype dtype::apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& root_dt) const
 {
-    if (m_extended == NULL) {
+    if (is_builtin()) {
         if (nindices == 0) {
             return *this;
         } else {
@@ -592,7 +567,7 @@ namespace {
     }
 } // anonymous namespace
 
-dtype dynd::dtype::with_replaced_scalar_types(const dtype& scalar_dtype, assign_error_mode errmode) const
+dtype dtype::with_replaced_scalar_types(const dtype& scalar_dtype, assign_error_mode errmode) const
 {
     dtype result;
     bool was_transformed;
@@ -603,14 +578,10 @@ dtype dynd::dtype::with_replaced_scalar_types(const dtype& scalar_dtype, assign_
 
 
 void dtype::get_single_compare_kernel(single_compare_kernel_instance &out_kernel) const {
-    if (extended() != NULL) {
-        return extended()->get_single_compare_kernel(out_kernel);
-    } else if (get_type_id() >= 0 && get_type_id() < builtin_type_id_count) {
-        out_kernel.comparisons = builtin_dtype_comparisons_table[get_type_id()];
+    if (is_builtin()) {
+        out_kernel.comparisons = builtin_dtype_comparisons_table[reinterpret_cast<intptr_t>(m_extended)];
     } else {
-        stringstream ss;
-        ss << "Cannot get single compare kernels for dtype " << *this;
-        throw runtime_error(ss.str());
+        return extended()->get_single_compare_kernel(out_kernel);
     }
 }
 
@@ -663,11 +634,7 @@ std::ostream& dynd::operator<<(std::ostream& o, const dtype& rhs)
             o << "pattern";
             break;
         default:
-            if (rhs.extended()) {
-                rhs.extended()->print_dtype(o);
-            } else {
-                o << "<internal error: builtin dtype without formatting support>";
-            }
+            rhs.extended()->print_dtype(o);
             break;
     }
 
@@ -791,11 +758,11 @@ void dynd::print_builtin_scalar(type_id_t type_id, std::ostream& o, const char *
     }
 }
 
-void dynd::dtype::print_data(std::ostream& o, const char *metadata, const char *data) const
+void dtype::print_data(std::ostream& o, const char *metadata, const char *data) const
 {
-    if (extended() != NULL) {
-        extended()->print_data(o, metadata, data);
-    } else {
+    if (is_builtin()) {
         print_builtin_scalar(get_type_id(), o, data);
+    } else {
+        extended()->print_data(o, metadata, data);
     }
 }

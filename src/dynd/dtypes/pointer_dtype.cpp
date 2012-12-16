@@ -18,7 +18,8 @@ dtype pointer_dtype::m_void_pointer_dtype(new void_pointer_dtype());
 
 
 pointer_dtype::pointer_dtype(const dtype& target_dtype)
-    : m_target_dtype(target_dtype)
+    : extended_expression_dtype(pointer_type_id, expression_kind, sizeof(void *), sizeof(void *)),
+            m_target_dtype(target_dtype)
 {
     // I'm not 100% sure how blockref pointer dtypes should interact with
     // the computational subsystem, the details will have to shake out
@@ -29,6 +30,10 @@ pointer_dtype::pointer_dtype(const dtype& target_dtype)
         ss << target_dtype;
         throw runtime_error(ss.str());
     }
+}
+
+pointer_dtype::~pointer_dtype()
+{
 }
 
 void pointer_dtype::print_data(std::ostream& o, const char *metadata, const char *data) const
@@ -50,7 +55,7 @@ bool pointer_dtype::is_scalar() const
 
 bool pointer_dtype::is_uniform_dim() const
 {
-    return m_target_dtype.extended() ? m_target_dtype.extended()->is_uniform_dim() : false;
+    return m_target_dtype.is_builtin() ? false : m_target_dtype.extended()->is_uniform_dim();
 }
 
 bool pointer_dtype::is_expression() const
@@ -106,7 +111,7 @@ intptr_t pointer_dtype::apply_linear_index(int nindices, const irange *indices, 
     out_md->blockref = md->blockref;
     memory_block_incref(out_md->blockref);
     out_md->offset = md->offset;
-    if (m_target_dtype.extended()) {
+    if (!m_target_dtype.is_builtin()) {
         const pointer_dtype *pdt = static_cast<const pointer_dtype *>(result_dtype.extended());
         // The indexing may cause a change to the metadata offset
         out_md->offset += m_target_dtype.extended()->apply_linear_index(nindices, indices, data,
@@ -140,7 +145,7 @@ intptr_t pointer_dtype::get_dim_size(const char *data, const char *metadata) con
 
 void pointer_dtype::get_shape(int i, intptr_t *out_shape) const
 {
-    if (m_target_dtype.extended()) {
+    if (!m_target_dtype.is_builtin()) {
         m_target_dtype.extended()->get_shape(i, out_shape);
     }
 }
@@ -227,7 +232,7 @@ dtype pointer_dtype::with_replaced_storage_dtype(const dtype& /*replacement_dtyp
 size_t pointer_dtype::get_metadata_size() const
 {
     return sizeof(pointer_dtype_metadata) +
-                m_target_dtype.extended() ? m_target_dtype.extended()->get_metadata_size() : 0;
+                m_target_dtype.is_builtin() ? 0 : m_target_dtype.extended()->get_metadata_size();
 }
 
 void pointer_dtype::metadata_default_construct(char *metadata, int ndim, const intptr_t* shape) const
@@ -236,7 +241,7 @@ void pointer_dtype::metadata_default_construct(char *metadata, int ndim, const i
     // TODO: Will need a different kind of memory block if the data isn't POD.
     pointer_dtype_metadata *md = reinterpret_cast<pointer_dtype_metadata *>(metadata);
     md->blockref = make_pod_memory_block().release();
-    if (m_target_dtype.extended()) {
+    if (!m_target_dtype.is_builtin()) {
         m_target_dtype.extended()->metadata_default_construct(metadata + sizeof(pointer_dtype_metadata), ndim, shape);
     }
 }
@@ -280,7 +285,7 @@ void pointer_dtype::metadata_debug_print(const char *metadata, std::ostream& o, 
     const pointer_dtype_metadata *md = reinterpret_cast<const pointer_dtype_metadata *>(metadata);
     o << indent << "pointer metadata\n";
     memory_block_debug_print(md->blockref, o, indent + " ");
-    if (m_target_dtype.extended()) {
+    if (!m_target_dtype.is_builtin()) {
         m_target_dtype.extended()->metadata_debug_print(metadata + sizeof(pointer_dtype_metadata), o, indent + " ");
     }
 }

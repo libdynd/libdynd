@@ -19,19 +19,7 @@ class view_dtype : public extended_expression_dtype {
 public:
     view_dtype(const dtype& value_dtype, const dtype& operand_dtype);
 
-    type_id_t get_type_id() const {
-        return view_type_id;
-    }
-    dtype_kind_t get_kind() const {
-        return expression_kind;
-    }
-    // Expose the storage traits here
-    size_t get_alignment() const {
-        return m_operand_dtype.get_alignment();
-    }
-    size_t get_data_size() const {
-        return m_operand_dtype.get_data_size();
-    }
+    virtual ~view_dtype();
 
     const dtype& get_value_dtype() const {
         return m_value_dtype;

@@ -37,19 +37,6 @@ public:
 
     ~categorical_dtype();
 
-    type_id_t get_type_id() const {
-        return categorical_type_id;
-    }
-    dtype_kind_t get_kind() const {
-        return custom_kind;
-    }
-    size_t get_alignment() const {
-        return 4; // TODO
-    }
-    size_t get_data_size() const {
-        return 4; // TODO
-    }
-
     void print_data(std::ostream& o, const char *metadata, const char *data) const;
 
     void print_dtype(std::ostream& o) const;

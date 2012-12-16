@@ -15,7 +15,8 @@ using namespace std;
 using namespace dynd;
 
 fixedarray_dtype::fixedarray_dtype(const dtype& element_dtype, size_t dimension_size)
-    : m_element_dtype(element_dtype), m_dimension_size(dimension_size)
+    : extended_dtype(fixedarray_type_id, uniform_array_kind, 0, 1),
+            m_element_dtype(element_dtype), m_dimension_size(dimension_size)
 {
     size_t child_element_size = element_dtype.get_data_size();
     if (child_element_size == 0) {
@@ -25,14 +26,16 @@ fixedarray_dtype::fixedarray_dtype(const dtype& element_dtype, size_t dimension_
         throw runtime_error(ss.str());
     }
     m_stride = m_dimension_size > 1 ? element_dtype.get_data_size() : 0;
-    m_element_size = m_dimension_size > 1 ? m_stride * m_dimension_size : m_dimension_size * child_element_size;
+    m_data_size = m_dimension_size > 1 ? m_stride * m_dimension_size : m_dimension_size * child_element_size;
+    m_alignment = m_element_dtype.get_alignment();
 
     // Copy ndobject properties and functions from the first non-uniform dimension
     get_nonuniform_ndobject_properties_and_functions(m_ndobject_properties, m_ndobject_functions);
 }
 
 fixedarray_dtype::fixedarray_dtype(const dtype& element_dtype, size_t dimension_size, intptr_t stride)
-    : m_element_dtype(element_dtype), m_stride(stride), m_dimension_size(dimension_size)
+    : extended_dtype(fixedarray_type_id, uniform_array_kind, 0, 1),
+            m_element_dtype(element_dtype), m_stride(stride), m_dimension_size(dimension_size)
 {
     size_t child_element_size = element_dtype.get_data_size();
     if (child_element_size == 0) {
@@ -53,10 +56,15 @@ fixedarray_dtype::fixedarray_dtype(const dtype& element_dtype, size_t dimension_
         ss << " and stride 0, as the stride must be non-zero when the dimension size is > 1";
         throw runtime_error(ss.str());
     }
-    m_element_size = stride ? stride * m_dimension_size : dimension_size * child_element_size;
+    m_data_size = stride ? stride * m_dimension_size : dimension_size * child_element_size;
+    m_alignment = m_element_dtype.get_alignment();
 
     // Copy ndobject properties and functions from the first non-uniform dimension
     get_nonuniform_ndobject_properties_and_functions(m_ndobject_properties, m_ndobject_functions);
+}
+
+fixedarray_dtype::~fixedarray_dtype()
+{
 }
 
 void fixedarray_dtype::print_data(std::ostream& o, const char *metadata, const char *data) const
@@ -155,7 +163,7 @@ intptr_t fixedarray_dtype::apply_linear_index(int nindices, const irange *indice
 {
     if (nindices == 0) {
         // If there are no more indices, copy the rest verbatim
-        if (m_element_dtype.extended()) {
+        if (!m_element_dtype.is_builtin()) {
             return m_element_dtype.extended()->apply_linear_index(0, NULL, data, metadata,
                             m_element_dtype, out_metadata, embedded_reference, current_i + 1, root_dt);
         }
@@ -167,7 +175,7 @@ intptr_t fixedarray_dtype::apply_linear_index(int nindices, const irange *indice
         if (remove_dimension) {
             // Apply the strided offset and continue applying the index
             intptr_t offset = m_stride * start_index;
-            if (m_element_dtype.extended()) {
+            if (!m_element_dtype.is_builtin()) {
                 offset += m_element_dtype.extended()->apply_linear_index(nindices - 1, indices + 1,
                                 data + offset, metadata,
                                 result_dtype, out_metadata, embedded_reference, current_i + 1, root_dt);
@@ -180,7 +188,7 @@ intptr_t fixedarray_dtype::apply_linear_index(int nindices, const irange *indice
             intptr_t offset = m_stride * start_index;
             out_md->stride = m_stride * index_stride;
             out_md->size = dimension_size;
-            if (m_element_dtype.extended()) {
+            if (!m_element_dtype.is_builtin()) {
                 const fixedarray_dtype *result_edtype = static_cast<const fixedarray_dtype *>(result_dtype.extended());
                 offset += m_element_dtype.extended()->apply_linear_index(nindices - 1, indices + 1,
                                 data + offset, metadata,
@@ -228,7 +236,7 @@ void fixedarray_dtype::get_shape(int i, intptr_t *out_shape) const
     out_shape[i] = m_dimension_size;
 
     // Process the later shape values
-    if (m_element_dtype.extended()) {
+    if (!m_element_dtype.is_builtin()) {
         m_element_dtype.extended()->get_shape(i+1, out_shape);
     }
 }
@@ -238,7 +246,7 @@ void fixedarray_dtype::get_shape(int i, intptr_t *out_shape, const char *metadat
     out_shape[i] = m_dimension_size;
 
     // Process the later shape values
-    if (m_element_dtype.extended()) {
+    if (!m_element_dtype.is_builtin()) {
         m_element_dtype.extended()->get_shape(i+1, out_shape, metadata);
     }
 }
@@ -248,7 +256,7 @@ void fixedarray_dtype::get_strides(int i, intptr_t *out_strides, const char *met
     out_strides[i] = m_stride;
 
     // Process the later shape values
-    if (m_element_dtype.extended()) {
+    if (!m_element_dtype.is_builtin()) {
         m_element_dtype.extended()->get_strides(i+1, out_strides, metadata);
     }
 }
@@ -309,42 +317,42 @@ void fixedarray_dtype::metadata_default_construct(char *metadata, int ndim, cons
         }
     }
 
-    if (m_element_dtype.extended()) {
+    if (!m_element_dtype.is_builtin()) {
         m_element_dtype.extended()->metadata_default_construct(metadata, ndim-1, shape+1);
     }
 }
 
 void fixedarray_dtype::metadata_copy_construct(char *dst_metadata, const char *src_metadata, memory_block_data *embedded_reference) const
 {
-    if (m_element_dtype.extended()) {
+    if (!m_element_dtype.is_builtin()) {
         m_element_dtype.extended()->metadata_copy_construct(dst_metadata, src_metadata, embedded_reference);
     }
 }
 
 void fixedarray_dtype::metadata_reset_buffers(char *metadata) const
 {
-    if (m_element_dtype.extended()) {
+    if (!m_element_dtype.is_builtin()) {
         m_element_dtype.extended()->metadata_reset_buffers(metadata);
     }
 }
 
 void fixedarray_dtype::metadata_finalize_buffers(char *metadata) const
 {
-    if (m_element_dtype.extended()) {
+    if (!m_element_dtype.is_builtin()) {
         m_element_dtype.extended()->metadata_finalize_buffers(metadata);
     }
 }
 
 void fixedarray_dtype::metadata_destruct(char *metadata) const
 {
-    if (m_element_dtype.extended()) {
+    if (!m_element_dtype.is_builtin()) {
         m_element_dtype.extended()->metadata_destruct(metadata);
     }
 }
 
 void fixedarray_dtype::metadata_debug_print(const char *metadata, std::ostream& o, const std::string& indent) const
 {
-    if (m_element_dtype.extended()) {
+    if (!m_element_dtype.is_builtin()) {
         m_element_dtype.extended()->metadata_debug_print(metadata, o, indent);
     }
 }

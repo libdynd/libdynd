@@ -22,7 +22,7 @@ TEST(DType, BasicConstructor) {
     EXPECT_EQ(void_kind, d.get_kind());
     EXPECT_EQ(1u, d.get_alignment());
     EXPECT_EQ(0u, d.get_data_size());
-    EXPECT_EQ(NULL, d.extended());
+    EXPECT_TRUE(d.is_builtin());
 
     // bool dtype
     d = dtype(bool_type_id);
@@ -30,7 +30,7 @@ TEST(DType, BasicConstructor) {
     EXPECT_EQ(bool_kind, d.get_kind());
     EXPECT_EQ(1u, d.get_alignment());
     EXPECT_EQ(1u, d.get_data_size());
-    EXPECT_EQ(NULL, d.extended());
+    EXPECT_TRUE(d.is_builtin());
 
     // int8 dtype
     d = dtype(int8_type_id);
@@ -38,14 +38,14 @@ TEST(DType, BasicConstructor) {
     EXPECT_EQ(int_kind, d.get_kind());
     EXPECT_EQ(1u, d.get_alignment());
     EXPECT_EQ(1u, d.get_data_size());
-    EXPECT_EQ(NULL, d.extended());
+    EXPECT_TRUE(d.is_builtin());
 
     // int16 dtype
     d = dtype(int16_type_id);
     EXPECT_EQ(int_kind, d.get_kind());
     EXPECT_EQ(2u, d.get_alignment());
     EXPECT_EQ(2u, d.get_data_size());
-    EXPECT_EQ(NULL, d.extended());
+    EXPECT_TRUE(d.is_builtin());
 
     // int32 dtype
     d = dtype(int32_type_id);
@@ -53,7 +53,7 @@ TEST(DType, BasicConstructor) {
     EXPECT_EQ(int_kind, d.get_kind());
     EXPECT_EQ(4u, d.get_alignment());
     EXPECT_EQ(4u, d.get_data_size());
-    EXPECT_EQ(NULL, d.extended());
+    EXPECT_TRUE(d.is_builtin());
 
     // int
     d = make_dtype<int>();
@@ -61,14 +61,14 @@ TEST(DType, BasicConstructor) {
     EXPECT_EQ(int_kind, d.get_kind());
     EXPECT_EQ(sizeof(int), d.get_alignment());
     EXPECT_EQ(sizeof(int), d.get_data_size());
-    EXPECT_EQ(NULL, d.extended());
+    EXPECT_TRUE(d.is_builtin());
 
     // long
     d = make_dtype<long>();
     EXPECT_EQ(int_kind, d.get_kind());
     EXPECT_EQ(sizeof(long), d.get_alignment());
     EXPECT_EQ(sizeof(long), d.get_data_size());
-    EXPECT_EQ(NULL, d.extended());
+    EXPECT_TRUE(d.is_builtin());
 
     // long long
     d = make_dtype<long long>();
@@ -76,7 +76,7 @@ TEST(DType, BasicConstructor) {
     EXPECT_EQ(int_kind, d.get_kind());
     EXPECT_EQ(sizeof(long long), d.get_alignment());
     EXPECT_EQ(sizeof(long long), d.get_data_size());
-    EXPECT_EQ(NULL, d.extended());
+    EXPECT_TRUE(d.is_builtin());
 
     // unsigned int
     d = make_dtype<unsigned int>();
@@ -84,14 +84,14 @@ TEST(DType, BasicConstructor) {
     EXPECT_EQ(uint_kind, d.get_kind());
     EXPECT_EQ(sizeof(unsigned int), d.get_alignment());
     EXPECT_EQ(sizeof(unsigned int), d.get_data_size());
-    EXPECT_EQ(NULL, d.extended());
+    EXPECT_TRUE(d.is_builtin());
 
     // unsigned long
     d = make_dtype<unsigned long>();
     EXPECT_EQ(uint_kind, d.get_kind());
     EXPECT_EQ(sizeof(unsigned long), d.get_alignment());
     EXPECT_EQ(sizeof(unsigned long), d.get_data_size());
-    EXPECT_EQ(NULL, d.extended());
+    EXPECT_TRUE(d.is_builtin());
 
     // unsigned long long
     d = make_dtype<unsigned long long>();
@@ -99,7 +99,7 @@ TEST(DType, BasicConstructor) {
     EXPECT_EQ(uint_kind, d.get_kind());
     EXPECT_EQ(sizeof(unsigned long long), d.get_alignment());
     EXPECT_EQ(sizeof(unsigned long long), d.get_data_size());
-    EXPECT_EQ(NULL, d.extended());
+    EXPECT_TRUE(d.is_builtin());
 
     // float
     d = make_dtype<float>();
@@ -107,7 +107,7 @@ TEST(DType, BasicConstructor) {
     EXPECT_EQ(real_kind, d.get_kind());
     EXPECT_EQ(sizeof(float), d.get_alignment());
     EXPECT_EQ(sizeof(float), d.get_data_size());
-    EXPECT_EQ(NULL, d.extended());
+    EXPECT_TRUE(d.is_builtin());
 
     // double
     d = make_dtype<double>();
@@ -115,7 +115,7 @@ TEST(DType, BasicConstructor) {
     EXPECT_EQ(real_kind, d.get_kind());
     EXPECT_EQ(sizeof(double), d.get_alignment());
     EXPECT_EQ(sizeof(double), d.get_data_size());
-    EXPECT_EQ(NULL, d.extended());
+    EXPECT_TRUE(d.is_builtin());
 }
 
 

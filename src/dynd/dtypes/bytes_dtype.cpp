@@ -16,13 +16,17 @@ using namespace std;
 using namespace dynd;
 
 bytes_dtype::bytes_dtype(size_t alignment)
-    : m_alignment(alignment)
+    : extended_dtype(bytes_type_id, bytes_kind, sizeof(bytes_dtype_data), sizeof(const char *)), m_alignment(alignment)
 {
     if (alignment != 1 && alignment != 2 && alignment != 4 && alignment != 8 && alignment != 16) {
         std::stringstream ss;
         ss << "Cannot make a bytes<" << alignment << "> dtype, its alignment is not a small power of two";
         throw std::runtime_error(ss.str());
     }
+}
+
+bytes_dtype::~bytes_dtype()
+{
 }
 
 void bytes_dtype::print_data(std::ostream& o, const char *DYND_UNUSED(metadata), const char *data) const
@@ -108,7 +112,7 @@ void bytes_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const dtype& 
                 break;
             }
             default: {
-                if (src_dt.extended()) {
+                if (!src_dt.is_builtin()) {
                     src_dt.extended()->get_dtype_assignment_kernel(dst_dt, src_dt, errmode, out_kernel);
                 } else {
                     stringstream ss;

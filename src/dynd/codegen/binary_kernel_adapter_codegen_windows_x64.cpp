@@ -11,7 +11,7 @@
 using namespace std;
 using namespace dynd;
 
-static unsigned int get_arg_id_from_type_id(unsigned int type_id)
+static unsigned int get_arg_id_from_type_id(type_id_t type_id)
 {
     switch (type_id) {
         case bool_type_id:

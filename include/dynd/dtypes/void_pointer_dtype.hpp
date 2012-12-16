@@ -18,22 +18,9 @@ namespace dynd {
 
 class void_pointer_dtype : public extended_dtype {
 public:
-    void_pointer_dtype() {
-    }
-
-    type_id_t get_type_id() const {
-        return void_pointer_type_id;
-    }
-    dtype_kind_t get_kind() const {
-        return void_kind;
-    }
-    // Expose the storage traits here
-    size_t get_alignment() const {
-        return sizeof(void *);
-    }
-    size_t get_data_size() const {
-        return sizeof(void *);
-    }
+    void_pointer_dtype()
+        : extended_dtype(void_pointer_type_id, void_kind, sizeof(void *), sizeof(void *))
+    {}
 
     void print_data(std::ostream& o, const char *metadata, const char *data) const;
 

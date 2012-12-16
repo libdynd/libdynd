@@ -14,24 +14,10 @@
 namespace dynd {
 
 class fixedbytes_dtype : public extended_dtype {
-    intptr_t m_element_size, m_alignment;
-
 public:
     fixedbytes_dtype(intptr_t element_size, intptr_t alignment);
 
-    type_id_t get_type_id() const {
-        return fixedbytes_type_id;
-    }
-    dtype_kind_t get_kind() const {
-        return bytes_kind;
-    }
-    // Expose the storage traits here
-    size_t get_alignment() const {
-        return m_alignment;
-    }
-    size_t get_data_size() const {
-        return m_element_size;
-    }
+    virtual ~fixedbytes_dtype();
 
     void print_data(std::ostream& o, const char *metadata, const char *data) const;
 

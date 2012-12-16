@@ -43,19 +43,7 @@ class date_dtype : public extended_dtype {
 public:
     date_dtype(date_unit_t unit);
 
-    type_id_t get_type_id() const {
-        return date_type_id;
-    }
-    dtype_kind_t get_kind() const {
-        return datetime_kind;
-    }
-    // Expose the storage traits here
-    size_t get_alignment() const {
-        return 4;
-    }
-    size_t get_data_size() const {
-        return 4;
-    }
+    virtual ~date_dtype();
 
     date_unit_t get_unit() const {
         return m_unit;

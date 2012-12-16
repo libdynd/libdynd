@@ -13,10 +13,15 @@ using namespace std;
 using namespace dynd;
 
 strided_array_dtype::strided_array_dtype(const dtype& element_dtype)
-    : m_element_dtype(element_dtype)
+    : extended_dtype(strided_array_type_id, uniform_array_kind, 0, element_dtype.get_alignment()),
+            m_element_dtype(element_dtype)
 {
     // Copy ndobject properties and functions from the first non-uniform dimension
     get_nonuniform_ndobject_properties_and_functions(m_ndobject_properties, m_ndobject_functions);
+}
+
+strided_array_dtype::~strided_array_dtype()
+{
 }
 
 size_t strided_array_dtype::get_default_data_size(int ndim, const intptr_t *shape) const
@@ -25,7 +30,7 @@ size_t strided_array_dtype::get_default_data_size(int ndim, const intptr_t *shap
         throw std::runtime_error("the strided_array dtype requires a shape be specified for default construction");
     }
 
-    if (m_element_dtype.extended()) {
+    if (!m_element_dtype.is_builtin()) {
         return shape[0] * m_element_dtype.extended()->get_default_data_size(ndim-1, shape+1);
     } else {
         return shape[0] * m_element_dtype.get_data_size();
@@ -117,7 +122,7 @@ intptr_t strided_array_dtype::apply_linear_index(int nindices, const irange *ind
     if (nindices == 0) {
         // If there are no more indices, copy the rest verbatim
         *out_md = *md;
-        if (m_element_dtype.extended()) {
+        if (!m_element_dtype.is_builtin()) {
             return m_element_dtype.extended()->apply_linear_index(0, NULL, data, metadata + sizeof(strided_array_dtype_metadata),
                             m_element_dtype, out_metadata + sizeof(strided_array_dtype_metadata),
                             embedded_reference, current_i + 1, root_dt);
@@ -130,7 +135,7 @@ intptr_t strided_array_dtype::apply_linear_index(int nindices, const irange *ind
         if (remove_dimension) {
             // Apply the strided offset and continue applying the index
             intptr_t offset = md->stride * start_index;
-            if (m_element_dtype.extended()) {
+            if (!m_element_dtype.is_builtin()) {
                 offset += m_element_dtype.extended()->apply_linear_index(nindices - 1, indices + 1, data + offset,
                                 metadata + sizeof(strided_array_dtype_metadata),
                                 result_dtype, out_metadata,
@@ -142,7 +147,7 @@ intptr_t strided_array_dtype::apply_linear_index(int nindices, const irange *ind
             intptr_t offset = md->stride * start_index;
             out_md->stride = md->stride * index_stride;
             out_md->size = dimension_size;
-            if (m_element_dtype.extended()) {
+            if (!m_element_dtype.is_builtin()) {
                 const strided_array_dtype *result_edtype = static_cast<const strided_array_dtype *>(result_dtype.extended());
                 offset += m_element_dtype.extended()->apply_linear_index(nindices - 1, indices + 1, data + offset,
                                 metadata + sizeof(strided_array_dtype_metadata),
@@ -199,7 +204,7 @@ void strided_array_dtype::get_shape(int i, intptr_t *out_shape) const
     out_shape[i] = shape_signal_varying;
 
     // Process the later shape values
-    if (m_element_dtype.extended()) {
+    if (!m_element_dtype.is_builtin()) {
         m_element_dtype.extended()->get_shape(i+1, out_shape);
     }
 }
@@ -211,7 +216,7 @@ void strided_array_dtype::get_shape(int i, intptr_t *out_shape, const char *meta
     out_shape[i] = md->size;
 
     // Process the later shape values
-    if (m_element_dtype.extended()) {
+    if (!m_element_dtype.is_builtin()) {
         m_element_dtype.extended()->get_shape(i+1, out_shape, metadata + sizeof(strided_array_dtype_metadata));
     }
 }
@@ -223,7 +228,7 @@ void strided_array_dtype::get_strides(int i, intptr_t *out_strides, const char *
     out_strides[i] = md->stride;
 
     // Process the later shape values
-    if (m_element_dtype.extended()) {
+    if (!m_element_dtype.is_builtin()) {
         m_element_dtype.extended()->get_strides(i+1, out_strides, metadata + sizeof(strided_array_dtype_metadata));
     }
 }
@@ -274,7 +279,7 @@ bool strided_array_dtype::operator==(const extended_dtype& rhs) const
 size_t strided_array_dtype::get_metadata_size() const
 {
     size_t result = sizeof(strided_array_dtype_metadata);
-    if (m_element_dtype.extended()) {
+    if (!m_element_dtype.is_builtin()) {
         result += m_element_dtype.extended()->get_metadata_size();
     }
     return result;
@@ -286,8 +291,8 @@ void strided_array_dtype::metadata_default_construct(char *metadata, int ndim, c
     if (ndim == 0 || shape[0] < 0) {
         throw std::runtime_error("the strided_array dtype requires a shape be specified for default construction");
     }
-    size_t element_size = m_element_dtype.extended() ? m_element_dtype.extended()->get_default_data_size(ndim-1, shape+1)
-                                                     : m_element_dtype.get_data_size();
+    size_t element_size = m_element_dtype.is_builtin() ? m_element_dtype.get_data_size()
+                                                     : m_element_dtype.extended()->get_default_data_size(ndim-1, shape+1);
 
     strided_array_dtype_metadata *md = reinterpret_cast<strided_array_dtype_metadata *>(metadata);
     md->size = shape[0];
@@ -296,7 +301,7 @@ void strided_array_dtype::metadata_default_construct(char *metadata, int ndim, c
     } else {
         md->stride = 0;
     }
-    if (m_element_dtype.extended()) {
+    if (!m_element_dtype.is_builtin()) {
         m_element_dtype.extended()->metadata_default_construct(metadata + sizeof(strided_array_dtype_metadata), ndim-1, shape+1);
     }
 }
@@ -307,7 +312,7 @@ void strided_array_dtype::metadata_copy_construct(char *dst_metadata, const char
     strided_array_dtype_metadata *dst_md = reinterpret_cast<strided_array_dtype_metadata *>(dst_metadata);
     dst_md->size = src_md->size;
     dst_md->stride = src_md->stride;
-    if (m_element_dtype.extended()) {
+    if (!m_element_dtype.is_builtin()) {
         m_element_dtype.extended()->metadata_copy_construct(dst_metadata + sizeof(strided_array_dtype_metadata),
                         src_metadata + sizeof(strided_array_dtype_metadata), embedded_reference);
     }
@@ -315,21 +320,21 @@ void strided_array_dtype::metadata_copy_construct(char *dst_metadata, const char
 
 void strided_array_dtype::metadata_reset_buffers(char *metadata) const
 {
-    if (m_element_dtype.extended()) {
+    if (!m_element_dtype.is_builtin()) {
         m_element_dtype.extended()->metadata_reset_buffers(metadata + sizeof(strided_array_dtype_metadata));
     }
 }
 
 void strided_array_dtype::metadata_finalize_buffers(char *metadata) const
 {
-    if (m_element_dtype.extended()) {
+    if (!m_element_dtype.is_builtin()) {
         m_element_dtype.extended()->metadata_finalize_buffers(metadata + sizeof(strided_array_dtype_metadata));
     }
 }
 
 void strided_array_dtype::metadata_destruct(char *metadata) const
 {
-    if (m_element_dtype.extended()) {
+    if (!m_element_dtype.is_builtin()) {
         m_element_dtype.extended()->metadata_destruct(metadata + sizeof(strided_array_dtype_metadata));
     }
 }
@@ -340,7 +345,7 @@ void strided_array_dtype::metadata_debug_print(const char *metadata, std::ostrea
     o << indent << "strided_array metadata\n";
     o << indent << " stride: " << md->stride << "\n";
     o << indent << " size: " << md->size << "\n";
-    if (m_element_dtype.extended()) {
+    if (!m_element_dtype.is_builtin()) {
         m_element_dtype.extended()->metadata_debug_print(metadata + sizeof(strided_array_dtype_metadata), o, indent + " ");
     }
 }
@@ -430,7 +435,7 @@ void strided_array_dtype::reorder_default_constructed_strides(char *dst_metadata
 {
     // If the next dimension isn't also strided, then nothing can be reordered
     if (m_element_dtype.get_type_id() != strided_array_type_id) {
-        if (m_element_dtype.extended()) {
+        if (!m_element_dtype.is_builtin()) {
             dtype src_child_dtype = src_dtype.at_single(0, &src_metadata);
             m_element_dtype.extended()->reorder_default_constructed_strides(dst_metadata + sizeof(strided_array_dtype_metadata),
                             src_child_dtype, src_metadata);
@@ -484,7 +489,7 @@ void strided_array_dtype::reorder_default_constructed_strides(char *dst_metadata
     }
 
     // Allow further subtypes to reorder their strides as well
-    if (last_dt.extended()) {
+    if (!last_dt.is_builtin()) {
         last_dt.extended()->reorder_default_constructed_strides(dst_metadata + ndim * sizeof(strided_array_dtype_metadata),
                         last_src_dtype, src_metadata);
     }

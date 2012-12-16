@@ -20,10 +20,8 @@ class fixedstruct_dtype : public extended_dtype {
     std::vector<size_t> m_data_offsets;
     std::vector<size_t> m_metadata_offsets;
     std::vector<std::pair<std::string, gfunc::callable> > m_ndobject_properties;
-    size_t m_element_size;
     size_t m_metadata_size;
     dtype_memory_management_t m_memory_management;
-    unsigned char m_alignment;
 
     void create_ndobject_properties();
 
@@ -32,21 +30,10 @@ class fixedstruct_dtype : public extended_dtype {
 public:
     fixedstruct_dtype(const std::vector<dtype>& field_types, const std::vector<std::string>& field_names);
 
-    type_id_t get_type_id() const {
-        return fixedstruct_type_id;
-    }
-    dtype_kind_t get_kind() const {
-        return struct_kind;
-    }
-    // Expose the storage traits here
-    size_t get_alignment() const {
-        return m_alignment;
-    }
-    size_t get_data_size() const {
-        return m_element_size;
-    }
+    virtual ~fixedstruct_dtype();
+
     size_t get_default_data_size(int DYND_UNUSED(ndim), const intptr_t *DYND_UNUSED(shape)) const {
-        return m_element_size;
+        return m_data_size;
     }
 
     size_t get_field_count() const {

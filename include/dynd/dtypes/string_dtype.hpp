@@ -35,19 +35,7 @@ class string_dtype : public extended_string_dtype {
 public:
     string_dtype(string_encoding_t encoding);
 
-    type_id_t get_type_id() const {
-        return string_type_id;
-    }
-    dtype_kind_t get_kind() const {
-        return string_kind;
-    }
-    // Expose the storage traits here
-    size_t get_alignment() const {
-        return sizeof(const char *);
-    }
-    size_t get_data_size() const {
-        return sizeof(string_dtype_data);
-    }
+    virtual ~string_dtype();
 
     string_encoding_t get_encoding() const {
         return m_encoding;

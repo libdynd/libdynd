@@ -36,14 +36,9 @@ dtype dynd::promote_dtypes_arithmetic(const dtype& dt0, const dtype& dt1)
     const dtype& dt0_val = dt0.value_dtype();
     const dtype& dt1_val = dt1.value_dtype();
 
-    const extended_dtype *dt0_ext, *dt1_ext;
-
-    dt0_ext = dt0_val.extended();
-    dt1_ext = dt1_val.extended();
-
     //cout << "Doing type promotion with value types " << dt0_val << " and " << dt1_val << endl;
 
-    if (dt0_ext == NULL && dt1_ext == NULL) {
+    if (dt0_val.is_builtin() && dt1_val.is_builtin()) {
         const size_t int_size = sizeof(int);
         switch (dt0_val.get_kind()) {
             case bool_kind:
@@ -198,5 +193,7 @@ dtype dynd::promote_dtypes_arithmetic(const dtype& dt0, const dtype& dt1)
         return dt0_val;
     }
 
-    throw std::runtime_error("type promotion of custom dtypes is not yet supported");
+    stringstream ss;
+    ss << "type promotion of " << dt0 << " and " << dt1 << " is not yet supported";
+    throw std::runtime_error(ss.str());
 }

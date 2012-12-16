@@ -25,19 +25,7 @@ class convert_dtype : public extended_expression_dtype {
 public:
     convert_dtype(const dtype& value_dtype, const dtype& operand_dtype, assign_error_mode errmode);
 
-    type_id_t get_type_id() const {
-        return convert_type_id;
-    }
-    dtype_kind_t get_kind() const {
-        return expression_kind;
-    }
-    // Expose the storage traits here
-    size_t get_alignment() const {
-        return m_operand_dtype.get_alignment();
-    }
-    size_t get_data_size() const {
-        return m_operand_dtype.get_data_size();
-    }
+    virtual ~convert_dtype();
 
     const dtype& get_value_dtype() const {
         return m_value_dtype;

@@ -17,25 +17,13 @@
 namespace dynd {
 
 class fixedstring_dtype : public extended_string_dtype {
-    intptr_t m_element_size, m_alignment, m_stringsize;
+    intptr_t m_stringsize;
     string_encoding_t m_encoding;
 
 public:
     fixedstring_dtype(string_encoding_t encoding, intptr_t stringsize);
 
-    type_id_t get_type_id() const {
-        return fixedstring_type_id;
-    }
-    dtype_kind_t get_kind() const {
-        return string_kind;
-    }
-    // Expose the storage traits here
-    size_t get_alignment() const {
-        return m_alignment;
-    }
-    size_t get_data_size() const {
-        return m_element_size;
-    }
+    virtual ~fixedstring_dtype();
 
     string_encoding_t get_encoding() const {
         return m_encoding;

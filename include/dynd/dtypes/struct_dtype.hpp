@@ -21,7 +21,6 @@ class struct_dtype : public extended_dtype {
     std::vector<std::pair<std::string, gfunc::callable> > m_ndobject_properties;
     size_t m_metadata_size;
     dtype_memory_management_t m_memory_management;
-    unsigned char m_alignment;
 
     void create_ndobject_properties();
 
@@ -30,19 +29,8 @@ class struct_dtype : public extended_dtype {
 public:
     struct_dtype(const std::vector<dtype>& fields, const std::vector<std::string>& field_names);
 
-    type_id_t get_type_id() const {
-        return struct_type_id;
-    }
-    dtype_kind_t get_kind() const {
-        return struct_kind;
-    }
-    // Expose the storage traits here
-    size_t get_alignment() const {
-        return m_alignment;
-    }
-    size_t get_data_size() const {
-        return 0;
-    }
+    virtual ~struct_dtype();
+
     size_t get_default_data_size(int ndim, const intptr_t *shape) const;
 
     size_t get_field_count() const {

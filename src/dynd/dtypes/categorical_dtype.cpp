@@ -155,9 +155,8 @@ namespace {
 
 } // anoymous namespace
 
-
 categorical_dtype::categorical_dtype(const ndobject& categories)
-    : extended_dtype()
+    : extended_dtype(categorical_type_id, custom_kind, 4, 4)
 {
     const dtype& cdt = categories.get_dtype();
     if (cdt.get_type_id() != strided_array_type_id) {
@@ -254,7 +253,7 @@ dtype dynd::categorical_dtype::apply_linear_index(int nindices, const irange *in
 
 void dynd::categorical_dtype::get_shape(int i, intptr_t *out_shape) const
 {
-    if (m_category_dtype.extended()) {
+    if (!m_category_dtype.is_builtin()) {
         m_category_dtype.extended()->get_shape(i, out_shape);
     }
 }
@@ -365,7 +364,7 @@ bool categorical_dtype::operator==(const extended_dtype& rhs) const
 
 size_t categorical_dtype::get_metadata_size() const
 {
-    if (m_category_dtype.extended()) {
+    if (!m_category_dtype.is_builtin()) {
         return m_category_dtype.extended()->get_metadata_size();
     } else {
         return 0;
@@ -374,28 +373,28 @@ size_t categorical_dtype::get_metadata_size() const
 
 void categorical_dtype::metadata_default_construct(char *metadata, int ndim, const intptr_t* shape) const
 {
-    if (m_category_dtype.extended()) {
+    if (!m_category_dtype.is_builtin()) {
         m_category_dtype.extended()->metadata_default_construct(metadata, ndim, shape);
     }
 }
 
 void categorical_dtype::metadata_copy_construct(char *dst_metadata, const char *src_metadata, memory_block_data *embedded_reference) const
 {
-    if (m_category_dtype.extended()) {
+    if (!m_category_dtype.is_builtin()) {
         m_category_dtype.extended()->metadata_copy_construct(dst_metadata, src_metadata, embedded_reference);
     }
 }
 
 void categorical_dtype::metadata_destruct(char *metadata) const
 {
-    if (m_category_dtype.extended()) {
+    if (!m_category_dtype.is_builtin()) {
         m_category_dtype.extended()->metadata_destruct(metadata);
     }
 }
 
 void categorical_dtype::metadata_debug_print(const char *metadata, std::ostream& o, const std::string& indent) const
 {
-    if (m_category_dtype.extended()) {
+    if (!m_category_dtype.is_builtin()) {
         m_category_dtype.extended()->metadata_debug_print(metadata, o, indent);
     }
 }

@@ -50,12 +50,7 @@ std::ostream& dynd::operator<<(ostream& o, assign_error_mode errmode)
 // types.
 bool dynd::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt)
 {
-    const extended_dtype *dst_ext, *src_ext;
-
-    dst_ext = dst_dt.extended();
-    src_ext = src_dt.extended();
-
-    if (dst_ext == NULL && src_ext == NULL) {
+    if (dst_dt.is_builtin() && src_dt.is_builtin()) {
         switch (src_dt.get_kind()) {
             case pattern_kind: // TODO: raise an error?
                 return true;
@@ -162,12 +157,12 @@ bool dynd::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt)
     }
 
     // Use the available extended_dtype to check the casting
-    if (dst_ext != NULL) {
+    if (!dst_dt.is_builtin()) {
         // Call with dst_dt (the first parameter) first
-        return dst_ext->is_lossless_assignment(dst_dt, src_dt);
+        return dst_dt.extended()->is_lossless_assignment(dst_dt, src_dt);
     } else {
         // Fall back to src_dt if the dst's extended is NULL
-        return src_ext->is_lossless_assignment(dst_dt, src_dt);
+        return src_dt.extended()->is_lossless_assignment(dst_dt, src_dt);
     }
 }
 
@@ -175,7 +170,7 @@ void dynd::dtype_copy(const dtype& dt, const char *dst_metadata, char *dst_data,
                 const char *src_metadata, const char *src_data)
 {
     size_t element_size = dt.get_data_size();
-    if (dt.extended() == NULL || (dt.get_memory_management() == pod_memory_management && element_size != 0)) {
+    if (dt.is_builtin() || (dt.get_memory_management() == pod_memory_management && element_size != 0)) {
         memcpy(dst_data, src_data, element_size);
     } else {
         unary_kernel_static_data extra;
@@ -212,7 +207,7 @@ void dynd::dtype_assign(const dtype& dst_dt, const char *dst_metadata, char *dst
     extra.dst_metadata = dst_metadata;
     extra.src_metadata = src_metadata;
 
-    if (dst_dt.extended() == NULL && src_dt.extended() == NULL) {
+    if (dst_dt.is_builtin() && src_dt.is_builtin()) {
         // Try to use the simple single-value assignment for built-in types
         unary_operation_pair_t asn = get_builtin_dtype_assignment_function(dst_dt.get_type_id(), src_dt.get_type_id(), errmode);
         if (asn.single != NULL) {

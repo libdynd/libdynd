@@ -14,7 +14,12 @@ using namespace std;
 using namespace dynd;
 
 array_dtype::array_dtype(const dtype& element_dtype)
-    : m_element_dtype(element_dtype)
+    : extended_dtype(array_type_id, uniform_array_kind, sizeof(array_dtype_data), sizeof(const char *)),
+            m_element_dtype(element_dtype)
+{
+}
+
+array_dtype::~array_dtype()
 {
 }
 
@@ -147,7 +152,7 @@ void array_dtype::get_shape(int i, intptr_t *out_shape) const
     out_shape[i] = shape_signal_varying;
 
     // Process the later shape values
-    if (m_element_dtype.extended()) {
+    if (!m_element_dtype.is_builtin()) {
         m_element_dtype.extended()->get_shape(i+1, out_shape);
     }
 }
@@ -158,7 +163,7 @@ void array_dtype::get_shape(int i, intptr_t *out_shape, const char *metadata) co
     out_shape[i] = shape_signal_varying;
 
     // Process the later shape values
-    if (m_element_dtype.extended()) {
+    if (!m_element_dtype.is_builtin()) {
         m_element_dtype.extended()->get_shape(i+1, out_shape, metadata);
     }
 }
@@ -170,7 +175,7 @@ void array_dtype::get_strides(int i, intptr_t *out_strides, const char *metadata
     out_strides[i] = md->stride;
 
     // Process the later shape values
-    if (m_element_dtype.extended()) {
+    if (!m_element_dtype.is_builtin()) {
         m_element_dtype.extended()->get_strides(i+1, out_strides, metadata + sizeof(array_dtype_metadata));
     }
 }
@@ -221,7 +226,7 @@ bool array_dtype::operator==(const extended_dtype& rhs) const
 size_t array_dtype::get_metadata_size() const
 {
     size_t result = sizeof(array_dtype_metadata);
-    if (m_element_dtype.extended()) {
+    if (!m_element_dtype.is_builtin()) {
         result += m_element_dtype.extended()->get_metadata_size();
     }
     return result;
@@ -229,14 +234,14 @@ size_t array_dtype::get_metadata_size() const
 
 void array_dtype::metadata_default_construct(char *metadata, int ndim, const intptr_t* shape) const
 {
-    size_t element_size = m_element_dtype.extended() ? m_element_dtype.extended()->get_default_data_size(ndim-1, shape+1)
-                                                     : m_element_dtype.get_data_size();
+    size_t element_size = m_element_dtype.is_builtin() ? m_element_dtype.get_data_size()
+                                                     : m_element_dtype.extended()->get_default_data_size(ndim-1, shape+1);
 
     array_dtype_metadata *md = reinterpret_cast<array_dtype_metadata *>(metadata);
     md->stride = element_size;
     // Allocate a POD memory block
     md->blockref = make_pod_memory_block().release();
-    if (m_element_dtype.extended()) {
+    if (!m_element_dtype.is_builtin()) {
         m_element_dtype.extended()->metadata_default_construct(metadata + sizeof(array_dtype_metadata), ndim-1, shape+1);
     }
 }
@@ -248,7 +253,7 @@ void array_dtype::metadata_copy_construct(char *dst_metadata, const char *src_me
     dst_md->stride = src_md->stride;
     dst_md->blockref = src_md->blockref ? src_md->blockref : embedded_reference;
     memory_block_incref(dst_md->blockref);
-    if (m_element_dtype.extended()) {
+    if (!m_element_dtype.is_builtin()) {
         m_element_dtype.extended()->metadata_copy_construct(dst_metadata + sizeof(array_dtype_metadata),
                         src_metadata + sizeof(array_dtype_metadata), embedded_reference);
     }
@@ -262,7 +267,7 @@ void array_dtype::metadata_reset_buffers(char *DYND_UNUSED(metadata)) const
 void array_dtype::metadata_finalize_buffers(char *metadata) const
 {
     // Finalize any child metadata
-    if (m_element_dtype.extended() != NULL) {
+    if (!m_element_dtype.is_builtin()) {
         m_element_dtype.extended()->metadata_finalize_buffers(metadata + sizeof(array_dtype_metadata));
     }
 
@@ -283,7 +288,7 @@ void array_dtype::metadata_destruct(char *metadata) const
     if (md->blockref) {
         memory_block_decref(md->blockref);
     }
-    if (m_element_dtype.extended()) {
+    if (!m_element_dtype.is_builtin()) {
         m_element_dtype.extended()->metadata_destruct(metadata + sizeof(array_dtype_metadata));
     }
 }
@@ -294,7 +299,7 @@ void array_dtype::metadata_debug_print(const char *metadata, std::ostream& o, co
     o << indent << "array metadata\n";
     o << indent << " stride: " << md->stride << "\n";
     memory_block_debug_print(md->blockref, o, indent + " ");
-    if (m_element_dtype.extended()) {
+    if (!m_element_dtype.is_builtin()) {
         m_element_dtype.extended()->metadata_debug_print(metadata + sizeof(array_dtype_metadata), o, indent + "  ");
     }
 }
@@ -330,7 +335,7 @@ void array_dtype::reorder_default_constructed_strides(char *dst_metadata,
                 const dtype& src_dtype, const char *src_metadata) const
 {
     // The blockref array dtype can't be reordered, so just let any deeper dtypes do their reordering.
-    if (m_element_dtype.extended()) {
+    if (!m_element_dtype.is_builtin()) {
         dtype src_child_dtype = src_dtype.at_single(0, &src_metadata);
         m_element_dtype.extended()->reorder_default_constructed_strides(dst_metadata + sizeof(array_dtype_metadata),
                         src_child_dtype, src_metadata);

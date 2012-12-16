@@ -104,7 +104,7 @@ namespace {
 
 ndobject dynd::arange(const dtype& scalar_dtype, const void *beginval, const void *endval, const void *stepval)
 {
-    if (scalar_dtype.extended() == NULL) {
+    if (scalar_dtype.is_builtin()) {
 
 #define ONE_ARANGE_SPECIALIZATION(type) \
         case type_id_of<type>::value: { \
@@ -206,42 +206,36 @@ ndobject dynd::linspace(const dtype& dt, const void *startval, const void *stopv
         throw runtime_error("linspace needs a count of at least 2");
     }
 
-    if (dt.extended() == NULL) {
-        switch (dt.get_type_id()) {
-            case float32_type_id: {
-                ndobject result = make_strided_ndobject(count, dt);
-                linspace_specialization(*reinterpret_cast<const float *>(startval),
-                                *reinterpret_cast<const float *>(stopval), count, result);
-                return DYND_MOVE(result);
-            }
-            case float64_type_id: {
-                ndobject result = make_strided_ndobject(count, dt);
-                linspace_specialization(*reinterpret_cast<const double *>(startval),
-                                *reinterpret_cast<const double *>(stopval), count, result);
-                return DYND_MOVE(result);
-            }
-            case complex_float32_type_id: {
-                ndobject result = make_strided_ndobject(count, dt);
-                linspace_specialization(*reinterpret_cast<const complex<float> *>(startval),
-                                *reinterpret_cast<const complex<float> *>(stopval), count, result);
-                return DYND_MOVE(result);
-            }
-            case complex_float64_type_id: {
-                ndobject result = make_strided_ndobject(count, dt);
-                linspace_specialization(*reinterpret_cast<const complex<double> *>(startval),
-                                *reinterpret_cast<const complex<double> *>(stopval), count, result);
-                return DYND_MOVE(result);
-            }
-            default:
-                break;
+    switch (dt.get_type_id()) {
+        case float32_type_id: {
+            ndobject result = make_strided_ndobject(count, dt);
+            linspace_specialization(*reinterpret_cast<const float *>(startval),
+                            *reinterpret_cast<const float *>(stopval), count, result);
+            return DYND_MOVE(result);
         }
-
-        stringstream ss;
-        ss << "linspace doesn't support built-in dtype " << dt;
-        throw runtime_error(ss.str());
-    } else {
-        stringstream ss;
-        ss << "linspace doesn't support extended dtype " << dt;
-        throw runtime_error(ss.str());
+        case float64_type_id: {
+            ndobject result = make_strided_ndobject(count, dt);
+            linspace_specialization(*reinterpret_cast<const double *>(startval),
+                            *reinterpret_cast<const double *>(stopval), count, result);
+            return DYND_MOVE(result);
+        }
+        case complex_float32_type_id: {
+            ndobject result = make_strided_ndobject(count, dt);
+            linspace_specialization(*reinterpret_cast<const complex<float> *>(startval),
+                            *reinterpret_cast<const complex<float> *>(stopval), count, result);
+            return DYND_MOVE(result);
+        }
+        case complex_float64_type_id: {
+            ndobject result = make_strided_ndobject(count, dt);
+            linspace_specialization(*reinterpret_cast<const complex<double> *>(startval),
+                            *reinterpret_cast<const complex<double> *>(stopval), count, result);
+            return DYND_MOVE(result);
+        }
+        default:
+            break;
     }
+
+    stringstream ss;
+    ss << "linspace doesn't support dtype " << dt;
+    throw runtime_error(ss.str());
 }

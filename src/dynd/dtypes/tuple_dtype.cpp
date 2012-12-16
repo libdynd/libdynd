@@ -12,8 +12,10 @@ using namespace std;
 using namespace dynd;
 
 dynd::tuple_dtype::tuple_dtype(const std::vector<dtype>& fields)
-    : m_fields(fields), m_offsets(fields.size()), m_metadata_offsets(fields.size())
+    : extended_dtype(tuple_type_id, struct_kind, 0, 1),
+            m_fields(fields), m_offsets(fields.size()), m_metadata_offsets(fields.size())
 {
+    // TODO: tuple_dtype should probably not have kind struct_kind?
     // Calculate the offsets and element size
     size_t metadata_offset = 0;
     size_t offset = 0;
@@ -37,23 +39,27 @@ dynd::tuple_dtype::tuple_dtype(const std::vector<dtype>& fields)
         }
         // Calculate the metadata offsets
         m_metadata_offsets[i] = metadata_offset;
-        metadata_offset += m_fields[i].extended() ? m_fields[i].extended()->get_metadata_size() : 0;
+        metadata_offset += m_fields[i].is_builtin() ? 0 : m_fields[i].extended()->get_metadata_size();
     }
     m_metadata_size = metadata_offset;
     // Pad to get the final element size
-    m_element_size = (offset + m_alignment - 1) & (-m_alignment);
+    m_data_size = (offset + m_alignment - 1) & (-m_alignment);
     // This is the standard layout
     m_is_standard_layout = true;
 }
 
-dynd::tuple_dtype::tuple_dtype(const std::vector<dtype>& fields, const std::vector<size_t> offsets,
-                    size_t element_size, size_t alignment)
-    : m_fields(fields), m_offsets(offsets), m_metadata_offsets(fields.size()),
-        m_element_size(element_size), m_alignment(alignment)
+tuple_dtype::~tuple_dtype()
 {
-    if ((element_size & (alignment - 1)) != 0) {
+}
+
+dynd::tuple_dtype::tuple_dtype(const std::vector<dtype>& fields, const std::vector<size_t> offsets,
+                    size_t data_size, size_t alignment)
+    : extended_dtype(tuple_type_id, struct_kind, data_size, alignment),
+            m_fields(fields), m_offsets(offsets), m_metadata_offsets(fields.size())
+{
+    if ((data_size & (alignment - 1)) != 0) {
         stringstream ss;
-        ss << "tuple type cannot be created with size " << element_size;
+        ss << "tuple type cannot be created with size " << data_size;
         ss << " and alignment " << alignment << ", the alignment must divide into the element size";
         throw runtime_error(ss.str());
     }
@@ -62,10 +68,10 @@ dynd::tuple_dtype::tuple_dtype(const std::vector<dtype>& fields, const std::vect
     m_memory_management = pod_memory_management;
     for (size_t i = 0, i_end = fields.size(); i != i_end; ++i) {
         // Check that the field is within bounds
-        if (offsets[i] + fields[i].get_data_size() > element_size) {
+        if (offsets[i] + fields[i].get_data_size() > data_size) {
             stringstream ss;
             ss << "tuple type cannot be created with field " << i << " of type " << fields[i];
-            ss << " at offset " << offsets[i] << ", not fitting within the total element size of " << element_size;
+            ss << " at offset " << offsets[i] << ", not fitting within the total element size of " << data_size;
             throw runtime_error(ss.str());
         }
         // Check that the field has proper alignment
@@ -85,7 +91,7 @@ dynd::tuple_dtype::tuple_dtype(const std::vector<dtype>& fields, const std::vect
         }
         // Calculate the metadata offsets
         m_metadata_offsets[i] = metadata_offset;
-        metadata_offset += m_fields[i].extended() ? m_fields[i].extended()->get_metadata_size() : 0;
+        metadata_offset += m_fields[i].is_builtin() ? 0 : m_fields[i].extended()->get_metadata_size();
     }
     m_metadata_size = metadata_offset;
     // Check whether the layout we were given is standard
@@ -111,7 +117,7 @@ bool dynd::tuple_dtype::compute_is_standard_layout() const
     // Pad to get the standard element size
     size_t standard_element_size = (standard_offset + standard_alignment - 1) & (-standard_alignment);
 
-    return m_element_size == standard_element_size && m_alignment == standard_alignment;
+    return m_data_size == standard_element_size && m_alignment == standard_alignment;
 }
 
 void dynd::tuple_dtype::print_data(std::ostream& o, const char *metadata, const char *data) const
@@ -154,7 +160,7 @@ void dynd::tuple_dtype::print_dtype(std::ostream& o) const
             }
         }
         o << ")";
-        o << ", size=" << m_element_size;
+        o << ", size=" << m_data_size;
         o << ", alignment=" << (unsigned int)m_alignment;
         o << ">";
     }
@@ -181,7 +187,7 @@ dtype dynd::tuple_dtype::apply_linear_index(int nindices, const irange *indices,
                 offsets[i] = m_offsets[idx];
             }
 
-            return dtype(new tuple_dtype(fields, offsets, m_element_size, m_alignment));
+            return dtype(new tuple_dtype(fields, offsets, m_data_size, m_alignment));
         }
     }
 }
@@ -204,7 +210,7 @@ void dynd::tuple_dtype::get_shape(int i, intptr_t *out_shape) const
 
     // Process the later shape values
     for (size_t j = 0; j < m_fields.size(); ++j) {
-        if (m_fields[j].extended()) {
+        if (!m_fields[j].is_builtin()) {
             m_fields[j].extended()->get_shape(i+1, out_shape);
         }
     }
@@ -243,7 +249,7 @@ bool dynd::tuple_dtype::operator==(const extended_dtype& rhs) const
         return false;
     } else {
         const tuple_dtype *dt = static_cast<const tuple_dtype*>(&rhs);
-        return m_element_size == dt->m_element_size &&
+        return m_data_size == dt->m_data_size &&
                 m_alignment == dt->m_alignment &&
                 m_memory_management == dt->m_memory_management &&
                 m_fields == dt->m_fields &&

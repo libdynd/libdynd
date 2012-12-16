@@ -12,9 +12,10 @@ using namespace std;
 using namespace dynd;
 
 dynd::byteswap_dtype::byteswap_dtype(const dtype& value_dtype)
-    : m_value_dtype(value_dtype), m_operand_dtype(make_fixedbytes_dtype(value_dtype.get_data_size(), value_dtype.get_alignment()))
+    : extended_expression_dtype(byteswap_type_id, expression_kind, value_dtype.get_data_size(), value_dtype.get_alignment()),
+            m_value_dtype(value_dtype), m_operand_dtype(make_fixedbytes_dtype(value_dtype.get_data_size(), value_dtype.get_alignment()))
 {
-    if (value_dtype.extended() != 0) {
+    if (!value_dtype.is_builtin()) {
         throw std::runtime_error("byteswap_dtype: Only built-in dtypes are supported presently");
     }
 
@@ -26,7 +27,8 @@ dynd::byteswap_dtype::byteswap_dtype(const dtype& value_dtype)
 }
 
 dynd::byteswap_dtype::byteswap_dtype(const dtype& value_dtype, const dtype& operand_dtype)
-    : m_value_dtype(value_dtype), m_operand_dtype(operand_dtype)
+    : extended_expression_dtype(byteswap_type_id, expression_kind, operand_dtype.get_data_size(), operand_dtype.get_alignment()),
+            m_value_dtype(value_dtype), m_operand_dtype(operand_dtype)
 {
     // Only a bytes dtype be the operand to the byteswap
     if (operand_dtype.value_dtype().get_type_id() != fixedbytes_type_id) {
@@ -44,6 +46,10 @@ dynd::byteswap_dtype::byteswap_dtype(const dtype& value_dtype, const dtype& oper
     } else {
         get_pairwise_byteswap_kernel(m_value_dtype.get_data_size(), m_value_dtype.get_alignment(), m_byteswap_kernel);
     }
+}
+
+byteswap_dtype::~byteswap_dtype()
+{
 }
 
 void dynd::byteswap_dtype::print_data(std::ostream& DYND_UNUSED(o), const char *DYND_UNUSED(metadata), const char *DYND_UNUSED(data)) const
@@ -71,7 +77,7 @@ dtype dynd::byteswap_dtype::apply_linear_index(int nindices, const irange *indic
 
 void dynd::byteswap_dtype::get_shape(int i, intptr_t *out_shape) const
 {
-    if (m_operand_dtype.extended()) {
+    if (!m_operand_dtype.is_builtin()) {
         m_operand_dtype.extended()->get_shape(i, out_shape);
     }
 }

@@ -12,7 +12,8 @@ using namespace std;
 using namespace dynd;
 
 dynd::view_dtype::view_dtype(const dtype& value_dtype, const dtype& operand_dtype)
-    : m_value_dtype(value_dtype), m_operand_dtype(operand_dtype)
+    : extended_expression_dtype(view_type_id, expression_kind, operand_dtype.get_data_size(), operand_dtype.get_alignment()),
+            m_value_dtype(value_dtype), m_operand_dtype(operand_dtype)
 {
     if (value_dtype.get_data_size() != operand_dtype.value_dtype().get_data_size()) {
         std::stringstream ss;
@@ -26,6 +27,10 @@ dynd::view_dtype::view_dtype(const dtype& value_dtype, const dtype& operand_dtyp
     get_pod_dtype_assignment_kernel(m_value_dtype.get_data_size(),
                     std::min(m_value_dtype.get_alignment(), m_operand_dtype.get_alignment()),
                     m_copy_kernel);
+}
+
+view_dtype::~view_dtype()
+{
 }
 
 void dynd::view_dtype::print_data(std::ostream& o, const char *metadata, const char *data) const
@@ -92,7 +97,7 @@ dtype dynd::view_dtype::apply_linear_index(int nindices, const irange *indices, 
 
 void dynd::view_dtype::get_shape(int i, intptr_t *out_shape) const
 {
-    if (m_value_dtype.extended()) {
+    if (!m_value_dtype.is_builtin()) {
         m_value_dtype.extended()->get_shape(i, out_shape);
     }
 }

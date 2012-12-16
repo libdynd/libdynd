@@ -144,7 +144,7 @@ void dynd::get_dtype_assignment_kernel(
     }
 
     // Assignment of built-in types
-    if (dst_dt.extended() == NULL && src_dt.extended() == NULL) {
+    if (dst_dt.is_builtin() && src_dt.is_builtin()) {
         get_builtin_dtype_assignment_kernel(dst_dt.get_type_id(),
                             src_dt.get_type_id(), errmode, ectx, out_kernel);
         return;
@@ -183,7 +183,7 @@ void dynd::get_dtype_assignment_kernel(
         return;
     }
 
-    if (dst_dt.extended() != 0) {
+    if (!dst_dt.is_builtin()) {
         dst_dt.extended()->get_dtype_assignment_kernel(dst_dt, src_dt, errmode, out_kernel);
     } else {
         src_dt.extended()->get_dtype_assignment_kernel(dst_dt, src_dt, errmode, out_kernel);

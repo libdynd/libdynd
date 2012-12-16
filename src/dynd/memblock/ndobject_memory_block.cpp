@@ -64,7 +64,7 @@ memory_block_ptr dynd::make_ndobject_memory_block(const dtype& dt, int ndim, con
 {
     size_t metadata_size, element_size;
 
-    if (dt.extended() == NULL) {
+    if (dt.is_builtin()) {
         metadata_size = 0;
         element_size = dt.get_data_size();
     } else {
@@ -75,7 +75,7 @@ memory_block_ptr dynd::make_ndobject_memory_block(const dtype& dt, int ndim, con
     char *data = NULL;
     memory_block_ptr result = make_ndobject_memory_block(metadata_size, element_size, dt.get_alignment(), &data);
     ndobject_preamble *preamble = reinterpret_cast<ndobject_preamble *>(result.get());
-    if (dt.extended() == NULL) {
+    if (dt.is_builtin()) {
         preamble->m_dtype = reinterpret_cast<extended_dtype *>(dt.get_type_id());
     } else {
         preamble->m_dtype = dt.extended();

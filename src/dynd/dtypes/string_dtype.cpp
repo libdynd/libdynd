@@ -17,7 +17,8 @@ using namespace std;
 using namespace dynd;
 
 string_dtype::string_dtype(string_encoding_t encoding)
-    : m_encoding(encoding)
+    : extended_string_dtype(string_type_id, string_kind, sizeof(string_dtype_data), sizeof(const char *)),
+            m_encoding(encoding)
 {
     switch (encoding) {
         case string_encoding_ascii:
@@ -29,6 +30,10 @@ string_dtype::string_dtype(string_encoding_t encoding)
         default:
             throw runtime_error("Unrecognized string encoding in string dtype constructor");
     }
+}
+
+string_dtype::~string_dtype()
+{
 }
 
 void string_dtype::get_string_range(const char **out_begin, const char**out_end,
@@ -168,7 +173,7 @@ bool string_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_
                 default:
                     return false;
             }
-        } else if (src_dt.extended() != NULL) {
+        } else if (!src_dt.is_builtin()) {
             return src_dt.extended()->is_lossless_assignment(dst_dt, src_dt);
         } else {
             return false;
@@ -201,7 +206,7 @@ void string_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const dtype&
                 break;
             }
             default: {
-                if (src_dt.extended()) {
+                if (!src_dt.is_builtin()) {
                     src_dt.extended()->get_dtype_assignment_kernel(dst_dt, src_dt, errmode, out_kernel);
                 } else {
                     get_builtin_to_string_assignment_kernel(dst_dt, src_dt.get_type_id(), errmode, out_kernel);
@@ -210,7 +215,7 @@ void string_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const dtype&
             }
         }
     } else {
-        if (dst_dt.extended() == NULL) {
+        if (dst_dt.is_builtin()) {
             get_string_to_builtin_assignment_kernel(dst_dt.get_type_id(), src_dt, errmode, out_kernel);
         } else {
             stringstream ss;

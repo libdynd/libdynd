@@ -16,7 +16,8 @@ using namespace std;
 using namespace dynd;
 
 fixedstruct_dtype::fixedstruct_dtype(const std::vector<dtype>& field_types, const std::vector<std::string>& field_names)
-    : m_field_types(field_types), m_field_names(field_names),
+    : extended_dtype(fixedstruct_type_id, struct_kind, 0, 1),
+            m_field_types(field_types), m_field_names(field_names),
             m_data_offsets(field_types.size()), m_metadata_offsets(field_types.size())
 {
     if (field_types.size() != field_names.size()) {
@@ -51,12 +52,16 @@ fixedstruct_dtype::fixedstruct_dtype(const std::vector<dtype>& field_types, cons
         data_offset += field_element_size;
         // Calculate the metadata offsets
         m_metadata_offsets[i] = metadata_offset;
-        metadata_offset += m_field_types[i].extended() ? m_field_types[i].extended()->get_metadata_size() : 0;
+        metadata_offset += m_field_types[i].is_builtin() ? 0 : m_field_types[i].extended()->get_metadata_size();
     }
     m_metadata_size = metadata_offset;
-    m_element_size = inc_to_alignment(data_offset, m_alignment);
+    m_data_size = inc_to_alignment(data_offset, m_alignment);
 
     create_ndobject_properties();
+}
+
+fixedstruct_dtype::~fixedstruct_dtype()
+{
 }
 
 void fixedstruct_dtype::print_data(std::ostream& o, const char *metadata, const char *data) const
@@ -177,7 +182,7 @@ intptr_t fixedstruct_dtype::apply_linear_index(int nindices, const irange *indic
     if (nindices == 0) {
         // Process each element verbatim
         for (size_t i = 0, i_end = m_field_types.size(); i != i_end; ++i) {
-            if (m_field_types[i].extended()) {
+            if (!m_field_types[i].is_builtin()) {
                 if (m_field_types[i].extended()->apply_linear_index(0, NULL, data + m_data_offsets[i],
                                 metadata + m_metadata_offsets[i], m_field_types[i], out_metadata + m_metadata_offsets[i],
                                 embedded_reference, current_i + 1, root_dt) != 0) {
@@ -195,7 +200,7 @@ intptr_t fixedstruct_dtype::apply_linear_index(int nindices, const irange *indic
         if (remove_dimension) {
             const dtype& dt = m_field_types[start_index];
             intptr_t offset = m_data_offsets[start_index];
-            if (dt.extended()) {
+            if (!dt.is_builtin()) {
                 offset += dt.extended()->apply_linear_index(nindices - 1, indices + 1, data + offset,
                                 metadata + m_metadata_offsets[start_index], result_dtype,
                                 out_metadata, embedded_reference, current_i + 1, root_dt);
@@ -204,7 +209,7 @@ intptr_t fixedstruct_dtype::apply_linear_index(int nindices, const irange *indic
         } else if (result_dtype.get_type_id() == fixedstruct_type_id) {
             // This was a no-op, so copy everything verbatim
             for (size_t i = 0, i_end = m_field_types.size(); i != i_end; ++i) {
-                if (m_field_types[i].extended()) {
+                if (!m_field_types[i].is_builtin()) {
                     if (m_field_types[i].extended()->apply_linear_index(0, NULL, data + m_data_offsets[i],
                                     metadata + m_metadata_offsets[i], m_field_types[i], out_metadata + m_metadata_offsets[i],
                                     embedded_reference, current_i + 1, root_dt) != 0) {
@@ -222,7 +227,7 @@ intptr_t fixedstruct_dtype::apply_linear_index(int nindices, const irange *indic
                 intptr_t idx = start_index + i * index_stride;
                 out_offsets[i] = m_data_offsets[idx];
                 const dtype& dt = result_e_dt->get_field_types()[i];
-                if (dt.extended()) {
+                if (!dt.is_builtin()) {
                     out_offsets[i] += dt.extended()->apply_linear_index(nindices - 1, indices + 1,
                                     data + out_offsets[i], metadata + m_metadata_offsets[idx],
                                     dt, out_metadata + result_e_dt->get_metadata_offsets()[i],
@@ -272,7 +277,7 @@ void fixedstruct_dtype::get_shape(int i, intptr_t *out_shape) const
 
     // Process the later shape values
     for (size_t j = 0; j < m_field_types.size(); ++j) {
-        if (m_field_types[j].extended()) {
+        if (!m_field_types[j].is_builtin()) {
             m_field_types[j].extended()->get_shape(i+1, out_shape);
         }
     }
@@ -314,12 +319,12 @@ void fixedstruct_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const d
 {
     if (this == dst_dt.extended()) {
         if (this == src_dt.extended()) {
-            get_pod_dtype_assignment_kernel(m_element_size, m_alignment, out_kernel);
+            get_pod_dtype_assignment_kernel(m_data_size, m_alignment, out_kernel);
         } else if (src_dt.get_type_id() == fixedstruct_type_id) {
             get_fixedstruct_assignment_kernel(dst_dt, src_dt, errmode, out_kernel);
         } else if (src_dt.get_type_id() == struct_type_id) {
             get_struct_to_fixedstruct_assignment_kernel(dst_dt, src_dt, errmode, out_kernel);
-        } else if (src_dt.extended()) {
+        } else if (!src_dt.is_builtin()) {
             src_dt.extended()->get_dtype_assignment_kernel(dst_dt, src_dt, errmode, out_kernel);
         } else {
             stringstream ss;
@@ -366,14 +371,14 @@ void fixedstruct_dtype::metadata_default_construct(char *metadata, int ndim, con
 
     for (size_t i = 0; i < m_field_types.size(); ++i) {
         const dtype& field_dt = m_field_types[i];
-        if (field_dt.extended()) {
+        if (!field_dt.is_builtin()) {
             try {
                 field_dt.extended()->metadata_default_construct(
                             metadata + m_metadata_offsets[i], ndim, shape);
             } catch(...) {
                 // Since we're explicitly controlling the memory, need to manually do the cleanup too
                 for (size_t j = 0; j < i; ++j) {
-                    if (m_field_types[j].extended()) {
+                    if (!m_field_types[j].is_builtin()) {
                         m_field_types[j].extended()->metadata_destruct(metadata + m_metadata_offsets[i]);
                     }
                 }
@@ -388,7 +393,7 @@ void fixedstruct_dtype::metadata_copy_construct(char *dst_metadata, const char *
     // Copy construct all the field's metadata
     for (size_t i = 0; i < m_field_types.size(); ++i) {
         const dtype& field_dt = m_field_types[i];
-        if (field_dt.extended()) {
+        if (!field_dt.is_builtin()) {
             field_dt.extended()->metadata_copy_construct(dst_metadata + m_metadata_offsets[i],
                             src_metadata + m_metadata_offsets[i],
                             embedded_reference);
@@ -400,7 +405,7 @@ void fixedstruct_dtype::metadata_reset_buffers(char *metadata) const
 {
     for (size_t i = 0; i < m_field_types.size(); ++i) {
         const dtype& field_dt = m_field_types[i];
-        if (field_dt.extended()) {
+        if (!field_dt.is_builtin()) {
             field_dt.extended()->metadata_reset_buffers(metadata + m_metadata_offsets[i]);
         }
     }
@@ -410,7 +415,7 @@ void fixedstruct_dtype::metadata_finalize_buffers(char *metadata) const
 {
     for (size_t i = 0; i < m_field_types.size(); ++i) {
         const dtype& field_dt = m_field_types[i];
-        if (field_dt.extended()) {
+        if (!field_dt.is_builtin()) {
             field_dt.extended()->metadata_finalize_buffers(metadata + m_metadata_offsets[i]);
         }
     }
@@ -420,7 +425,7 @@ void fixedstruct_dtype::metadata_destruct(char *metadata) const
 {
     for (size_t i = 0; i < m_field_types.size(); ++i) {
         const dtype& field_dt = m_field_types[i];
-        if (field_dt.extended()) {
+        if (!field_dt.is_builtin()) {
             field_dt.extended()->metadata_destruct(metadata + m_metadata_offsets[i]);
         }
     }
@@ -431,7 +436,7 @@ void fixedstruct_dtype::metadata_debug_print(const char *metadata, std::ostream&
     o << indent << "fixedstruct metadata\n";
     for (size_t i = 0; i < m_field_types.size(); ++i) {
         const dtype& field_dt = m_field_types[i];
-        if (field_dt.extended() && field_dt.extended()->get_metadata_size() > 0) {
+        if (!field_dt.is_builtin() && field_dt.extended()->get_metadata_size() > 0) {
             o << indent << " field " << i << " (name " << m_field_names[i] << ") metadata:\n";
             field_dt.extended()->metadata_debug_print(metadata + m_metadata_offsets[i], o, indent + "  ");
         }

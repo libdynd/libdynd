@@ -22,7 +22,7 @@ ndobject dynd::gfunc::serialize(const ndobject& val)
     }
     const strided_array_dtype *sad = static_cast<const strided_array_dtype *>(dt.extended());
     const dtype& et = sad->get_element_dtype();
-    if (et.extended()) {
+    if (!et.is_builtin()) {
         stringstream ss;
         ss << "dynd::gfunc::serialize is currently only a prototype, does not support dtype " << dt;
         throw runtime_error(ss.str());

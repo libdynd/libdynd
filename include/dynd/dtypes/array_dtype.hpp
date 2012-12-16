@@ -32,19 +32,8 @@ class array_dtype : public extended_dtype {
 public:
     array_dtype(const dtype& element_dtype);
 
-    type_id_t get_type_id() const {
-        return array_type_id;
-    }
-    dtype_kind_t get_kind() const {
-        return uniform_array_kind;
-    }
-    // Expose the storage traits here
-    size_t get_alignment() const {
-        return sizeof(const char *);
-    }
-    size_t get_data_size() const {
-        return sizeof(array_dtype_data);
-    }
+    virtual ~array_dtype();
+
     size_t get_default_data_size(int DYND_UNUSED(ndim), const intptr_t *DYND_UNUSED(shape)) const {
         return sizeof(array_dtype_data);
     }

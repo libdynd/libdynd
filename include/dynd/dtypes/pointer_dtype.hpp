@@ -37,19 +37,7 @@ class pointer_dtype : public extended_expression_dtype {
 public:
     pointer_dtype(const dtype& target_dtype);
 
-    type_id_t get_type_id() const {
-        return pointer_type_id;
-    }
-    dtype_kind_t get_kind() const {
-        return expression_kind;
-    }
-    // Expose the storage traits here
-    size_t get_alignment() const {
-        return sizeof(void *);
-    }
-    size_t get_data_size() const {
-        return sizeof(void *);
-    }
+    virtual ~pointer_dtype();
 
     const dtype& get_value_dtype() const {
         return m_target_dtype;

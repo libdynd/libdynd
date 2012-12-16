@@ -340,6 +340,12 @@ char *iterdata_broadcasting_terminator_reset(iterdata_common *iterdata, char *da
 class extended_dtype {
     /** Embedded reference counting */
     mutable atomic_refcount m_use_count;
+protected:
+    /** Standard dtype data */
+    uint16_t m_type_id;
+    uint8_t m_kind, m_alignment;
+    size_t m_data_size;
+    
 
 protected:
     // Helper function for uniform dimension dtypes
@@ -348,16 +354,25 @@ protected:
                     std::vector<std::pair<std::string, gfunc::callable> >& out_functions) const;
 public:
     /** Starts off the extended dtype instance with a use count of 1. */
-    extended_dtype()
-        : m_use_count(1)
+    inline extended_dtype(type_id_t type_id, dtype_kind_t kind, size_t data_size, size_t alignment)
+        : m_use_count(1), m_type_id(static_cast<uint16_t>(type_id)), m_kind(static_cast<uint8_t>(kind)),
+                m_alignment(static_cast<uint8_t>(alignment)), m_data_size(data_size)
     {}
 
     virtual ~extended_dtype();
 
-    virtual type_id_t get_type_id() const = 0;
-    virtual dtype_kind_t get_kind() const = 0;
-    virtual size_t get_alignment() const = 0;
-    virtual size_t get_data_size() const = 0;
+    inline type_id_t get_type_id() const {
+        return static_cast<type_id_t>(m_type_id);
+    }
+    inline dtype_kind_t get_kind() const {
+        return static_cast<dtype_kind_t>(m_kind);
+    }
+    inline size_t get_alignment() const {
+        return m_alignment;
+    }
+    inline size_t get_data_size() const {
+        return m_data_size;
+    }
     virtual size_t get_default_data_size(int ndim, const intptr_t *shape) const;
 
     /**
@@ -693,6 +708,10 @@ inline void extended_dtype_decref(const extended_dtype *ed)
  */
 class extended_string_dtype : public extended_dtype {
 public:
+    inline extended_string_dtype(type_id_t type_id, dtype_kind_t kind, size_t data_size, size_t alignment)
+        : extended_dtype(type_id, kind, data_size, alignment)
+    {}
+
     virtual ~extended_string_dtype();
     /** The encoding used by the string */
     virtual string_encoding_t get_encoding() const = 0;
@@ -716,6 +735,12 @@ public:
  */
 class extended_expression_dtype : public extended_dtype {
 public:
+    inline extended_expression_dtype(type_id_t type_id, dtype_kind_t kind, size_t data_size, size_t alignment)
+        : extended_dtype(type_id, kind, data_size, alignment)
+    {}
+
+    virtual ~extended_expression_dtype();
+
     /**
      * Should return a reference to the dtype representing the value which
      * is for calculation. This should never be an expression dtype.
@@ -786,101 +811,112 @@ namespace detail {
  */
 class dtype {
 private:
-    unsigned char m_type_id, m_kind, m_alignment;
-    size_t m_element_size;
     const extended_dtype *m_extended;
 
-    /** Unchecked built-in dtype constructor from raw parameters */
-    /* TODO: DYND_CONSTEXPR */ dtype(char type_id, char kind, size_t element_size, char alignment)
-        : m_type_id(type_id), m_kind(kind),
-          m_alignment(alignment), m_element_size(element_size), m_extended(NULL)
-    {}
+    inline static bool is_builtin(const extended_dtype *ext) {
+        return (reinterpret_cast<uintptr_t>(ext)&(~builtin_type_id_mask)) == 0;
+    }
+    /**
+     * Validates that the given type ID is a proper ID and casts to
+     * an extended_dtype pointer if it is. Throws
+     * an exception if not.
+     *
+     * \param type_id  The type id to validate.
+     */
+    static inline const extended_dtype *validate_builtin_type_id(type_id_t type_id)
+    {
+        // 0 <= type_id < (builtin_type_id_count + 1)
+        // The + 1 is for void_type_id
+        if ((unsigned int)type_id < builtin_type_id_count + 1) {
+            return reinterpret_cast<const extended_dtype *>(type_id);
+        } else {
+            throw invalid_type_id((int)type_id);
+        }
+    }
+
+    static uint8_t builtin_kinds[builtin_type_id_count + 1];
+    static uint8_t builtin_data_sizes[builtin_type_id_count + 1];
+    static uint8_t builtin_data_alignments[builtin_type_id_count + 1];
 public:
     /** Constructor */
-    dtype();
+    dtype()
+        : m_extended(reinterpret_cast<const extended_dtype *>(void_type_id))
+    {}
     /** Constructor from an extended_dtype. This claims ownership of the 'extended' reference by default, be careful! */
     explicit dtype(const extended_dtype *extended, bool incref = false)
-        : m_type_id(extended->get_type_id()), m_kind(extended->get_kind()), m_alignment((unsigned char)extended->get_alignment()),
-            m_element_size(extended->get_data_size()), m_extended(extended) {
-        if (incref) {
+        : m_extended(extended)
+    {
+        if (incref && !dtype::is_builtin(extended)) {
             extended_dtype_incref(m_extended);
         }
     }
     /** Copy constructor (should be "= default" in C++11) */
     dtype(const dtype& rhs)
-        : m_type_id(rhs.m_type_id), m_kind(rhs.m_kind), m_alignment(rhs.m_alignment),
-          m_element_size(rhs.m_element_size), m_extended(rhs.m_extended)
+        : m_extended(rhs.m_extended)
     {
-        if (m_extended != NULL) {
+        if (!dtype::is_builtin(m_extended)) {
             extended_dtype_incref(m_extended);
         }
     }
     /** Assignment operator (should be "= default" in C++11) */
     dtype& operator=(const dtype& rhs) {
-        m_type_id = rhs.m_type_id;
-        m_kind = rhs.m_kind;
-        m_alignment = rhs.m_alignment;
-        m_element_size = rhs.m_element_size;
         m_extended = rhs.m_extended;
-        if (m_extended != NULL) {
+        if (!dtype::is_builtin(m_extended)) {
             extended_dtype_incref(m_extended);
         }
         return *this;
     }
 #ifdef DYND_RVALUE_REFS
-    /** Move constructor (should be "= default" in C++11) */
+    /** Move constructor */
     dtype(dtype&& rhs)
-        : m_type_id(rhs.m_type_id), m_kind(rhs.m_kind), m_alignment(rhs.m_alignment),
-          m_element_size(rhs.m_element_size),
-          m_extended(rhs.m_extended)
+        : m_extended(rhs.m_extended)
     {
-        rhs.m_extended = NULL;
+        rhs.m_extended = reinterpret_cast<const extended_dtype *>(void_type_id);
     }
-    /** Move assignment operator (should be "= default" in C++11) */
+    /** Move assignment operator */
     dtype& operator=(dtype&& rhs) {
-        m_type_id = rhs.m_type_id;
-        m_kind = rhs.m_kind;
-        m_alignment = rhs.m_alignment;
-        m_element_size = rhs.m_element_size;
         m_extended = rhs.m_extended;
-        rhs.m_extended = NULL;
+        rhs.m_extended = reinterpret_cast<const extended_dtype *>(void_type_id);
         return *this;
     }
 #endif // DYND_RVALUE_REFS
 
-    /** Construct from a type ID */
-    explicit dtype(type_id_t type_id);
-    explicit dtype(int type_id);
+    /** Construct from a builtin type ID */
+    explicit dtype(type_id_t type_id)
+        : m_extended(dtype::validate_builtin_type_id(type_id))
+    {}
 
     /** Construct from a string representation */
     explicit dtype(const std::string& rep);
 
     ~dtype() {
-        if (m_extended != NULL) {
+        if (!is_builtin()) {
             extended_dtype_decref(m_extended);
         }
     }
 
     void swap(dtype& rhs) {
-        std::swap(m_type_id, rhs.m_type_id);
-        std::swap(m_kind, rhs.m_kind);
-        std::swap(m_alignment, rhs.m_alignment);
-        std::swap(m_element_size, rhs.m_element_size);
         std::swap(m_extended, rhs.m_extended);
     }
 
-    bool operator==(const dtype& rhs) const {
-        if (m_extended && rhs.m_extended) {
+    inline bool operator==(const dtype& rhs) const {
+        if (is_builtin() || rhs.is_builtin()) {
+            return m_extended == rhs.m_extended;
+        } else {
             return *m_extended == *rhs.m_extended;
         }
-        return m_type_id == rhs.m_type_id &&
-                m_element_size == rhs.m_element_size &&
-                m_kind == rhs.m_kind &&
-                m_alignment == rhs.m_alignment &&
-                m_extended == rhs.m_extended;
     }
     bool operator!=(const dtype& rhs) const {
         return !(operator==(rhs));
+    }
+
+    /**
+     * Returns true if this dtype is of a builtin dtype, which
+     * means the type id is encoded directly in the m_extended
+     * pointer.
+     */
+    inline bool is_builtin() const {
+        return dtype::is_builtin(m_extended);
     }
 
     /**
@@ -909,7 +945,7 @@ public:
      * \returns  The dtype that results from the indexing operation.
      */
     inline dtype at_single(intptr_t i0, const char **inout_metadata = NULL, const char **inout_data = NULL) const {
-        if (m_extended) {
+        if (!is_builtin()) {
             return m_extended->at(i0, inout_metadata, inout_data);
         } else {
             throw too_many_indices(1, 0);
@@ -958,7 +994,7 @@ public:
      */
     const dtype& value_dtype() const {
         // Only expression_kind dtypes have different value_dtype
-        if (m_kind != expression_kind) {
+        if (is_builtin() || m_extended->get_kind() != expression_kind) {
             return *this;
         } else {
             // All chaining happens in the operand_dtype
@@ -973,7 +1009,7 @@ public:
      */
     const dtype& operand_dtype() const {
         // Only expression_kind dtypes have different operand_dtype
-        if (m_kind != expression_kind) {
+        if (is_builtin() || m_extended->get_kind() != expression_kind) {
             return *this;
         } else {
             return static_cast<const extended_expression_dtype *>(m_extended)->get_operand_dtype();
@@ -987,7 +1023,7 @@ public:
      */
     const dtype& storage_dtype() const {
         // Only expression_kind dtypes have different storage_dtype
-        if (m_kind != expression_kind) {
+        if (is_builtin() || m_extended->get_kind() != expression_kind) {
             return *this;
         } else {
             // Follow the operand dtype chain to get the storage dtype
@@ -1006,12 +1042,46 @@ public:
      * to have the default
      */
     type_id_t get_type_id() const {
-        return (type_id_t)m_type_id;
+        if (is_builtin()) {
+            return static_cast<type_id_t>(reinterpret_cast<intptr_t>(m_extended));
+        } else {
+            return m_extended->get_type_id();
+        }
     }
 
     /** The 'kind' of the dtype (int, uint, float, etc) */
     dtype_kind_t get_kind() const {
-        return (dtype_kind_t)m_kind;
+        if (is_builtin()) {
+            return static_cast<dtype_kind_t>(dtype::builtin_kinds[reinterpret_cast<intptr_t>(m_extended)]);
+        } else {
+            return m_extended->get_kind();
+        }
+    }
+
+    /** The alignment of the dtype */
+    size_t get_alignment() const {
+        if (is_builtin()) {
+            return static_cast<size_t>(dtype::builtin_data_alignments[reinterpret_cast<intptr_t>(m_extended)]);
+        } else {
+            return m_extended->get_alignment();
+        }
+    }
+
+    /** The element size of the dtype */
+    size_t get_data_size() const {
+        if (is_builtin()) {
+            return static_cast<size_t>(dtype::builtin_data_sizes[reinterpret_cast<intptr_t>(m_extended)]);
+        } else {
+            return m_extended->get_data_size();
+        }
+    }
+
+    inline dtype_memory_management_t get_memory_management() const {
+        if (is_builtin()) {
+            return pod_memory_management;
+        } else {
+            return m_extended->get_memory_management();
+        }
     }
 
     /*
@@ -1022,29 +1092,11 @@ public:
      */
     void get_single_compare_kernel(single_compare_kernel_instance& out_kernel) const;
 
-    /** The alignment of the dtype */
-    size_t get_alignment() const {
-        return m_alignment;
-    }
-
-    /** The element size of the dtype */
-    size_t get_data_size() const {
-        return m_element_size;
-    }
-
-    inline dtype_memory_management_t get_memory_management() const {
-        if (m_extended != NULL) {
-            return m_extended->get_memory_management();
-        } else {
-            return pod_memory_management;
-        }
-    }
-
     inline bool is_scalar() const {
-        if (m_extended != NULL) {
-            return m_extended->is_scalar();
-        } else {
+        if (is_builtin()) {
             return true;
+        } else {
+            return m_extended->is_scalar();
         }
     }
 
@@ -1053,10 +1105,10 @@ public:
      * dtype within it somewhere.
      */
     inline bool is_expression() const {
-        if (m_extended != NULL) {
-            return m_extended->is_expression();
-        } else {
+        if (is_builtin()) {
             return false;
+        } else {
+            return m_extended->is_expression();
         }
     }
 
@@ -1076,10 +1128,10 @@ public:
      * would be replaced by a strided uniform array.
      */
     inline dtype get_canonical_dtype() const {
-        if (m_extended) {
-            return m_extended->get_canonical_dtype();
-        } else {
+        if (is_builtin()) {
             return *this;
+        } else {
+            return m_extended->get_canonical_dtype();
         }
     }
 
@@ -1087,10 +1139,10 @@ public:
      * Gets the number of uniform dimensions in the dtype.
      */
     inline int get_undim() const {
-        if (m_extended) {
-            return m_extended->get_undim();
-        } else {
+        if (is_builtin()) {
             return 0;
+        } else {
+            return m_extended->get_undim();
         }
     }
 
@@ -1098,15 +1150,15 @@ public:
      * Gets the dtype with all the unifom dimensions stripped away.
      */
     inline dtype get_udtype() const {
-        if (m_extended) {
-            return m_extended->get_dtype_at_dimension(NULL, m_extended->get_undim());
-        } else {
+        if (is_builtin()) {
             return *this;
+        } else {
+            return m_extended->get_dtype_at_dimension(NULL, m_extended->get_undim());
         }
     }
 
     intptr_t get_dim_size(const char *data, const char *metadata) const {
-        if (m_extended) {
+        if (!is_builtin()) {
             return m_extended->get_dim_size(data, metadata);
         } else {
             std::stringstream ss;
@@ -1116,7 +1168,7 @@ public:
     }
 
     inline dtype get_dtype_at_dimension(char **inout_metadata, int i, int total_ndim = 0) const {
-        if (m_extended) {
+        if (!is_builtin()) {
             return m_extended->get_dtype_at_dimension(inout_metadata, i, total_ndim);
         } else if (i == 0) {
             return *this;
@@ -1132,16 +1184,16 @@ public:
      * dtype information exists. The returned pointer is only valid during
      * the lifetime of the dtype.
      */
-    const extended_dtype* extended() const {
+    inline const extended_dtype* extended() const {
         return m_extended;
     }
 
     /** The size of the data required for uniform iteration */
     inline size_t get_iterdata_size(int ndim) const {
-        if (m_extended) {
-            return m_extended->get_iterdata_size(ndim);
-        } else {
+        if (is_builtin()) {
             return 0;
+        } else {
+            return m_extended->get_iterdata_size(ndim);
         }
     }
     /**
@@ -1157,7 +1209,7 @@ public:
     inline void iterdata_construct(iterdata_common *iterdata, const char **inout_metadata,
                     int ndim, const intptr_t* shape, dtype& out_uniform_dtype) const
     {
-        if (m_extended) {
+        if (!is_builtin()) {
             m_extended->iterdata_construct(iterdata, inout_metadata, ndim, shape, out_uniform_dtype);
         }
     }
@@ -1165,16 +1217,16 @@ public:
     /** Destructs any references or other state contained in the iterdata */
     inline void iterdata_destruct(iterdata_common *iterdata, int ndim) const
     {
-        if (m_extended) {
+        if (!is_builtin()) {
             m_extended->iterdata_destruct(iterdata, ndim);
         }
     }
 
     inline size_t get_broadcasted_iterdata_size(int ndim) const {
-        if (m_extended) {
-            return m_extended->get_iterdata_size(ndim) + sizeof(iterdata_broadcasting_terminator);
-        } else {
+        if (is_builtin()) {
             return sizeof(iterdata_broadcasting_terminator);
+        } else {
+            return m_extended->get_iterdata_size(ndim) + sizeof(iterdata_broadcasting_terminator);
         }
     }
 
@@ -1192,10 +1244,10 @@ public:
                     int ndim, const intptr_t* shape, dtype& out_uniform_dtype) const
     {
         size_t size;
-        if (m_extended) {
-            size = m_extended->iterdata_construct(iterdata, inout_metadata, ndim, shape, out_uniform_dtype);
-        } else {
+        if (is_builtin()) {
             size = 0;
+        } else {
+            size = m_extended->iterdata_construct(iterdata, inout_metadata, ndim, shape, out_uniform_dtype);
         }
         iterdata_broadcasting_terminator *id = reinterpret_cast<iterdata_broadcasting_terminator *>(
                         reinterpret_cast<char *>(iterdata) + size);
@@ -1220,7 +1272,7 @@ public:
 template<class T>
 dtype make_dtype()
 {
-    return dtype(type_id_of<T>::value);
+    return dtype(static_cast<type_id_t>(type_id_of<T>::value));
 }
 
 /**

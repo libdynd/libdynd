@@ -33,19 +33,7 @@ class bytes_dtype : public extended_dtype {
 public:
     bytes_dtype(size_t alignment);
 
-    type_id_t get_type_id() const {
-        return bytes_type_id;
-    }
-    dtype_kind_t get_kind() const {
-        return bytes_kind;
-    }
-    // Expose the storage traits here
-    size_t get_alignment() const {
-        return sizeof(const char *);
-    }
-    size_t get_data_size() const {
-        return 2 * sizeof(const char *);
-    }
+    virtual ~bytes_dtype();
 
     /** Alignment of the bytes data being pointed to. */
     size_t get_data_alignment() const {

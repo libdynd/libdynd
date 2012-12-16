@@ -10,8 +10,10 @@
 using namespace std;
 using namespace dynd;
 
+
 dynd::date_property_dtype::date_property_dtype(const dtype& operand_dtype, const std::string& property_name)
-    : m_value_dtype(), m_operand_dtype(operand_dtype), m_property_name(property_name)
+    : extended_expression_dtype(date_property_type_id, expression_kind, operand_dtype.get_data_size(), operand_dtype.get_alignment()),
+            m_value_dtype(), m_operand_dtype(operand_dtype), m_property_name(property_name)
 {
     if (operand_dtype.value_dtype().get_type_id() != date_type_id) {
         std::stringstream ss;
@@ -21,6 +23,10 @@ dynd::date_property_dtype::date_property_dtype(const dtype& operand_dtype, const
 
     const date_dtype *dd = static_cast<const date_dtype *>(m_operand_dtype.value_dtype().extended());
     dd->get_property_getter_kernel(property_name, m_value_dtype, m_to_value_kernel);
+}
+
+date_property_dtype::~date_property_dtype()
+{
 }
 
 void dynd::date_property_dtype::print_data(std::ostream& DYND_UNUSED(o), const char *DYND_UNUSED(metadata), const char *DYND_UNUSED(data)) const
@@ -44,7 +50,7 @@ dtype dynd::date_property_dtype::apply_linear_index(int nindices, const irange *
 
 void dynd::date_property_dtype::get_shape(int i, intptr_t *out_shape) const
 {
-    if (m_value_dtype.extended()) {
+    if (!m_value_dtype.is_builtin()) {
         m_value_dtype.extended()->get_shape(i, out_shape);
     }
 }

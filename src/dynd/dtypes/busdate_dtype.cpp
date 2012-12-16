@@ -17,7 +17,7 @@ using namespace std;
 using namespace dynd;
 
 dynd::busdate_dtype::busdate_dtype(busdate_roll_t roll, const bool *weekmask, const ndobject& holidays)
-    : m_roll(roll)
+    : extended_dtype(busdate_type_id, datetime_kind, 4, 4), m_roll(roll)
 {
     memcpy(m_workweek, weekmask, sizeof(m_workweek));
     if (!holidays.empty()) {
@@ -25,6 +25,10 @@ dynd::busdate_dtype::busdate_dtype(busdate_roll_t roll, const bool *weekmask, co
         // TODO: Make sure hol is contiguous and one-dimensional
         m_holidays = hol;
     }
+}
+
+busdate_dtype::~busdate_dtype()
+{
 }
 
 void dynd::busdate_dtype::print_workweek(std::ostream& o) const

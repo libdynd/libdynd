@@ -10,7 +10,8 @@ using namespace std;
 using namespace dynd;
 
 dynd::convert_dtype::convert_dtype(const dtype& value_dtype, const dtype& operand_dtype, assign_error_mode errmode)
-    : m_value_dtype(value_dtype), m_operand_dtype(operand_dtype), m_errmode(errmode)
+    : extended_expression_dtype(convert_type_id, expression_kind, operand_dtype.get_data_size(), operand_dtype.get_alignment()),
+            m_value_dtype(value_dtype), m_operand_dtype(operand_dtype), m_errmode(errmode)
 {
     // An alternative to this error would be to use value_dtype.value_dtype(), cutting
     // away the expression part of the given value_dtype.
@@ -42,6 +43,11 @@ dynd::convert_dtype::convert_dtype(const dtype& value_dtype, const dtype& operan
     }
 }
 
+convert_dtype::~convert_dtype()
+{
+}
+
+
 void dynd::convert_dtype::print_data(std::ostream& DYND_UNUSED(o), const char *DYND_UNUSED(metadata), const char *DYND_UNUSED(data)) const
 {
     throw runtime_error("internal error: convert_dtype::print_data isn't supposed to be called");
@@ -67,7 +73,7 @@ dtype dynd::convert_dtype::apply_linear_index(int nindices, const irange *indice
 
 void dynd::convert_dtype::get_shape(int i, intptr_t *out_shape) const
 {
-    if (m_value_dtype.extended()) {
+    if (!m_value_dtype.is_builtin()) {
         m_value_dtype.extended()->get_shape(i, out_shape);
     }
 }

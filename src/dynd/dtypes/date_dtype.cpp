@@ -33,7 +33,7 @@ inline datetime::datetime_unit_t datetime_unit_from_date_unit(date_unit_t unit)
 }
 
 date_dtype::date_dtype(date_unit_t unit)
-    : m_unit(unit)
+    : extended_dtype(date_type_id, datetime_kind, 4, 4), m_unit(unit)
 {
     switch (unit) {
         case date_unit_year:
@@ -43,6 +43,10 @@ date_dtype::date_dtype(date_unit_t unit)
         default:
             throw runtime_error("Unrecognized date unit in date dtype constructor");
     }
+}
+
+date_dtype::~date_dtype()
+{
 }
 
 void date_dtype::set_ymd(const char *DYND_UNUSED(metadata), char *data,
@@ -150,7 +154,7 @@ void date_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const dtype& s
         } else if (src_dt.get_kind() == struct_kind) {
             get_struct_to_date_assignment_kernel(m_unit, src_dt, errmode, out_kernel);
             return;
-        } else if (src_dt.extended()) {
+        } else if (!src_dt.is_builtin()) {
             src_dt.extended()->get_dtype_assignment_kernel(dst_dt, src_dt, errmode, out_kernel);
         }
         // TODO
@@ -241,21 +245,15 @@ void date_dtype::get_dynamic_dtype_functions(const std::pair<std::string, gfunc:
 ///////// properties on the ndobject
 
 static ndobject property_ndo_get_year(const ndobject& n) {
-    dtype array_dt = n.get_dtype();
-    dtype dt = array_dt.get_dtype_at_dimension(NULL, array_dt.get_undim());
-    return n.view_scalars(make_date_property_dtype(dt, "year"));
+    return n.view_scalars(make_date_property_dtype(n.get_udtype(), "year"));
 }
 
 static ndobject property_ndo_get_month(const ndobject& n) {
-    dtype array_dt = n.get_dtype();
-    dtype dt = array_dt.get_dtype_at_dimension(NULL, array_dt.get_undim());
-    return n.view_scalars(make_date_property_dtype(dt, "month"));
+    return n.view_scalars(make_date_property_dtype(n.get_udtype(), "month"));
 }
 
 static ndobject property_ndo_get_day(const ndobject& n) {
-    dtype array_dt = n.get_dtype();
-    dtype dt = array_dt.get_dtype_at_dimension(NULL, array_dt.get_undim());
-    return n.view_scalars(make_date_property_dtype(dt, "day"));
+    return n.view_scalars(make_date_property_dtype(n.get_udtype(), "day"));
 }
 
 static pair<string, gfunc::callable> date_ndobject_properties[] = {

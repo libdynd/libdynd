@@ -39,7 +39,7 @@ void multiple_assignment_kernel(char *dst, intptr_t dst_stride, const char *src,
  *
  * This function is only for the built-in data types like int,
  * float, complex. A built-in data type can be detected by
- * checking whether (dtype_instance.extended() == NULL).
+ * checking dtype_instance.is_builtin().
  */
 void get_builtin_dtype_assignment_kernel(
                     type_id_t dst_type_id, type_id_t src_type_id,

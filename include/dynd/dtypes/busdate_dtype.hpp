@@ -44,19 +44,7 @@ class busdate_dtype : public extended_dtype {
 public:
     busdate_dtype(busdate_roll_t roll, const bool *weekmask, const ndobject& holidays);
 
-    type_id_t get_type_id() const {
-        return busdate_type_id;
-    }
-    dtype_kind_t get_kind() const {
-        return datetime_kind;
-    }
-    // Expose the storage traits here
-    size_t get_alignment() const {
-        return 4;
-    }
-    size_t get_data_size() const {
-        return 4;
-    }
+    virtual ~busdate_dtype();
 
     busdate_roll_t get_roll() const {
         return m_roll;

@@ -29,19 +29,8 @@ class strided_array_dtype : public extended_dtype {
 public:
     strided_array_dtype(const dtype& element_dtype);
 
-    type_id_t get_type_id() const {
-        return strided_array_type_id;
-    }
-    dtype_kind_t get_kind() const {
-        return uniform_array_kind;
-    }
-    // Expose the storage traits here
-    size_t get_alignment() const {
-        return m_element_dtype.get_alignment();
-    }
-    size_t get_data_size() const {
-        return 0;
-    }
+    virtual ~strided_array_dtype();
+
     size_t get_default_data_size(int ndim, const intptr_t *shape) const;
 
     const dtype& get_element_dtype() const {

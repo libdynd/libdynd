@@ -49,7 +49,7 @@ ndobject dynd::make_strided_ndobject(const dtype& uniform_dtype, int ndim, const
 {
     // Determine the total data size
     intptr_t element_size;
-    if (uniform_dtype.extended()) {
+    if (!uniform_dtype.is_builtin()) {
         element_size = uniform_dtype.extended()->get_default_data_size(0, NULL);
     } else {
         element_size = uniform_dtype.get_data_size();
@@ -77,7 +77,7 @@ ndobject dynd::make_strided_ndobject(const dtype& uniform_dtype, int ndim, const
     // Fill in the ndobject metadata with strides and sizes
     strided_array_dtype_metadata *meta = reinterpret_cast<strided_array_dtype_metadata *>(ndo + 1);
     // Use the default construction to handle the uniform_dtype's metadata
-    if (uniform_dtype.extended()) {
+    if (!uniform_dtype.is_builtin()) {
         uniform_dtype.extended()->metadata_default_construct(reinterpret_cast<char *>(meta + ndim), 0, NULL);
     }
     intptr_t stride = element_size;
@@ -105,7 +105,7 @@ ndobject dynd::make_strided_ndobject_from_data(const dtype& uniform_dtype, int n
                 const intptr_t *strides, int64_t access_flags, char *data_ptr,
                 const memory_block_ptr& data_reference, char **out_uniform_metadata)
 {
-    if (out_uniform_metadata == NULL && uniform_dtype.extended() && uniform_dtype.extended()->get_metadata_size() > 0) {
+    if (out_uniform_metadata == NULL && !uniform_dtype.is_builtin() && uniform_dtype.extended()->get_metadata_size() > 0) {
         stringstream ss;
         ss << "Cannot make a strided ndobject with dtype " << uniform_dtype << " from a preexisting data pointer";
         throw runtime_error(ss.str());
@@ -144,7 +144,7 @@ ndobject dynd::make_strided_ndobject_from_data(const dtype& uniform_dtype, int n
 ndobject dynd::make_scalar_ndobject(const dtype& scalar_dtype, const void *data)
 {
     size_t size = scalar_dtype.get_data_size();
-    if (scalar_dtype.extended() && (size == 0 ||
+    if (!scalar_dtype.is_builtin() && (size == 0 ||
                 scalar_dtype.get_memory_management() != pod_memory_management ||
                 scalar_dtype.extended()->get_kind() == uniform_array_kind ||
                 scalar_dtype.extended()->get_metadata_size() != 0)) {
@@ -159,7 +159,7 @@ ndobject dynd::make_scalar_ndobject(const dtype& scalar_dtype, const void *data)
 
     // Fill in the preamble metadata
     ndobject_preamble *ndo = reinterpret_cast<ndobject_preamble *>(result.get());
-    if (scalar_dtype.extended()) {
+    if (!scalar_dtype.is_builtin()) {
         ndo->m_dtype = scalar_dtype.extended();
         extended_dtype_incref(ndo->m_dtype);
     } else {
@@ -230,11 +230,9 @@ static ndobject make_ndobject_clone_with_new_dtype(const ndobject& n, const dtyp
     if (!preamble->is_builtin_dtype()) {
         extended_dtype_decref(preamble->m_dtype);
     }
-    if(new_dt.extended()) {
-        preamble->m_dtype = new_dt.extended();
+    preamble->m_dtype = new_dt.extended();
+    if(!new_dt.is_builtin()) {
         extended_dtype_incref(preamble->m_dtype);
-    } else {
-        preamble->m_dtype = reinterpret_cast<extended_dtype *>(new_dt.get_type_id());
     }
     return result;
 }
@@ -392,7 +390,7 @@ namespace {
         // the same so that the metadata layout is identical.
         if (dt.is_scalar() && dt.get_type_id() != pointer_type_id) {
             const dtype& storage_dt = dt.storage_dtype();
-            if (!storage_dt.extended() || (storage_dt.get_memory_management() == pod_memory_management &&
+            if (storage_dt.is_builtin() || (storage_dt.get_memory_management() == pod_memory_management &&
                                     storage_dt.extended()->get_metadata_size() == 0)) {
                 out_transformed_dtype = make_fixedbytes_dtype(storage_dt.get_data_size(), storage_dt.get_alignment());
                 out_was_transformed = true;
@@ -437,7 +435,7 @@ ndobject ndobject::at_array(int nindices, const irange *indices) const
         dtype this_dt(get_ndo()->m_dtype, true);
         dtype dt = get_ndo()->m_dtype->apply_linear_index(nindices, indices, 0, this_dt);
         ndobject result;
-        if (dt.extended()) {
+        if (!dt.is_builtin()) {
             result.set(make_ndobject_memory_block(dt.extended()->get_metadata_size()));
             result.get_ndo()->m_dtype = dt.extended();
             extended_dtype_incref(result.get_ndo()->m_dtype);
@@ -524,7 +522,7 @@ void ndobject::val_assign(const dtype& rhs_dt, const char *rhs_metadata, const c
 ndobject ndobject::p(const char *property_name) const
 {
     dtype dt = get_dtype();
-    if (dt.extended()) {
+    if (!dt.is_builtin()) {
         const std::pair<std::string, gfunc::callable> *properties;
         int count;
         dt.extended()->get_dynamic_ndobject_properties(&properties, &count);
@@ -546,7 +544,7 @@ ndobject ndobject::p(const char *property_name) const
 ndobject ndobject::p(const std::string& property_name) const
 {
     dtype dt = get_dtype();
-    if (dt.extended()) {
+    if (!dt.is_builtin()) {
         const std::pair<std::string, gfunc::callable> *properties;
         int count;
         dt.extended()->get_dynamic_ndobject_properties(&properties, &count);
@@ -568,7 +566,7 @@ ndobject ndobject::p(const std::string& property_name) const
 const gfunc::callable& ndobject::f(const char *function_name) const
 {
     dtype dt = get_dtype();
-    if (dt.extended()) {
+    if (!dt.is_builtin()) {
         const std::pair<std::string, gfunc::callable> *properties;
         int count;
         dt.extended()->get_dynamic_ndobject_functions(&properties, &count);
@@ -653,7 +651,7 @@ namespace {
     {
         const dtype *e = reinterpret_cast<const dtype *>(extra);
         // If things aren't simple, use a view_dtype
-        if (dt.extended() && dt.extended()->is_uniform_dim()) {
+        if (!dt.is_builtin() && dt.extended()->is_uniform_dim()) {
             dt.extended()->transform_child_dtypes(&switch_udtype, extra, out_transformed_dtype, out_was_transformed);
         } else {
             const switch_udtype_extra *e = reinterpret_cast<const switch_udtype_extra *>(extra);
@@ -882,7 +880,7 @@ ndobject_vals::operator ndobject() const
         dimvector shape(ndim);
         m_arr.get_shape(shape.get());
         ndobject result(make_ndobject_memory_block(dt, ndim, shape.get()));
-        if (dt.extended()) {
+        if (!dt.is_builtin()) {
             // Reorder strides of output strided dimensions in a KEEPORDER fashion
             dt.extended()->reorder_default_constructed_strides(result.get_ndo_meta(),
                             m_arr.get_dtype(), m_arr.get_ndo_meta());

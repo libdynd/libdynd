@@ -21,7 +21,7 @@ struct fixedarray_dtype_iterdata {
 class fixedarray_dtype : public extended_dtype {
     dtype m_element_dtype;
     intptr_t m_stride;
-    size_t m_dimension_size, m_element_size;
+    size_t m_dimension_size;
     std::vector<std::pair<std::string, gfunc::callable> > m_ndobject_properties, m_ndobject_functions;
 
     void create_ndobject_properties();
@@ -29,21 +29,10 @@ public:
     fixedarray_dtype(const dtype& element_dtype, size_t dimension_size);
     fixedarray_dtype(const dtype& element_dtype, size_t dimension_size, intptr_t stride);
 
-    type_id_t get_type_id() const {
-        return fixedarray_type_id;
-    }
-    dtype_kind_t get_kind() const {
-        return uniform_array_kind;
-    }
-    // Expose the storage traits here
-    size_t get_alignment() const {
-        return m_element_dtype.get_alignment();
-    }
-    size_t get_data_size() const {
-        return m_element_size;
-    }
+    virtual ~fixedarray_dtype();
+
     size_t get_default_data_size(int DYND_UNUSED(ndim), const intptr_t *DYND_UNUSED(shape)) const {
-        return m_element_size;
+        return m_data_size;
     }
 
     const dtype& get_element_dtype() const {

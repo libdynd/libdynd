@@ -40,6 +40,14 @@ TEST(DateDType, Create) {
     EXPECT_EQ(dd->get_unit(), date_unit_year);
 }
 
+TEST(DateDType, Equality) {
+    EXPECT_EQ(make_date_dtype(), make_date_dtype(date_unit_day));
+    EXPECT_EQ(make_date_dtype(date_unit_month), make_date_dtype(date_unit_month));
+    EXPECT_EQ(make_date_dtype(date_unit_year), make_date_dtype(date_unit_year));
+    EXPECT_FALSE(make_date_dtype() == make_date_dtype(date_unit_month));
+    EXPECT_FALSE(make_date_dtype() == make_date_dtype(date_unit_year));
+}
+
 TEST(DateDType, ValueCreation) {
     dtype d = make_date_dtype(), di = make_dtype<int32_t>();
 
