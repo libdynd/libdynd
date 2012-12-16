@@ -860,6 +860,9 @@ public:
     }
     /** Assignment operator (should be "= default" in C++11) */
     dtype& operator=(const dtype& rhs) {
+        if (!dtype::is_builtin(m_extended)) {
+            extended_dtype_decref(m_extended);
+        }
         m_extended = rhs.m_extended;
         if (!dtype::is_builtin(m_extended)) {
             extended_dtype_incref(m_extended);
@@ -875,6 +878,9 @@ public:
     }
     /** Move assignment operator */
     dtype& operator=(dtype&& rhs) {
+        if (!dtype::is_builtin(m_extended)) {
+            extended_dtype_decref(m_extended);
+        }
         m_extended = rhs.m_extended;
         rhs.m_extended = reinterpret_cast<const extended_dtype *>(void_type_id);
         return *this;
