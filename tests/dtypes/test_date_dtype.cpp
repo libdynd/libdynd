@@ -29,23 +29,7 @@ TEST(DateDType, Create) {
     EXPECT_EQ(4u, d.get_data_size());
     EXPECT_EQ(4u, d.get_alignment());
     dd = static_cast<const date_dtype *>(d.extended());
-    EXPECT_EQ(dd->get_unit(), date_unit_day);
-
-    d = make_date_dtype(date_unit_month);
-    dd = static_cast<const date_dtype *>(d.extended());
-    EXPECT_EQ(dd->get_unit(), date_unit_month);
-
-    d = make_date_dtype(date_unit_year);
-    dd = static_cast<const date_dtype *>(d.extended());
-    EXPECT_EQ(dd->get_unit(), date_unit_year);
-}
-
-TEST(DateDType, Equality) {
-    EXPECT_EQ(make_date_dtype(), make_date_dtype(date_unit_day));
-    EXPECT_EQ(make_date_dtype(date_unit_month), make_date_dtype(date_unit_month));
-    EXPECT_EQ(make_date_dtype(date_unit_year), make_date_dtype(date_unit_year));
-    EXPECT_FALSE(make_date_dtype() == make_date_dtype(date_unit_month));
-    EXPECT_FALSE(make_date_dtype() == make_date_dtype(date_unit_year));
+    EXPECT_EQ(make_date_dtype(), make_date_dtype());
 }
 
 TEST(DateDType, ValueCreation) {
@@ -142,7 +126,7 @@ TEST(DateDType, BadInputStrings) {
     EXPECT_THROW(ndobject(ndobject("1980-02-03 q").cast_scalars(d).vals()), runtime_error);
 }
 
-TEST(DateDType, DateDaysUnitProperties) {
+TEST(DateDType, DateProperties) {
     dtype d = make_date_dtype();
     ndobject a;
 
@@ -167,7 +151,7 @@ TEST(DateDType, DateDaysUnitProperties) {
     EXPECT_EQ(25, a.p("day").at(2).as<int32_t>());
 }
 
-TEST(DateDType, DateDaysUnitStructFunction) {
+TEST(DateDType, ToStructFunction) {
     dtype d = make_date_dtype();
     ndobject a, b;
 
@@ -183,47 +167,7 @@ TEST(DateDType, DateDaysUnitStructFunction) {
     EXPECT_EQ(13, b.p("day").as<int32_t>());
 }
 
-TEST(DateDType, DateMonthsUnitProperties) {
-    dtype d = make_date_dtype(date_unit_month);
-    ndobject a = ndobject("1955-03").cast_scalars(d).vals();
-    EXPECT_EQ(make_date_property_dtype(d, "year"), a.p("year").get_dtype());
-    EXPECT_EQ(make_date_property_dtype(d, "month"), a.p("month").get_dtype());
-    EXPECT_THROW(make_date_property_dtype(d, "day"), runtime_error);
-    EXPECT_EQ(1955, a.p("year").as<int32_t>());
-    EXPECT_EQ(3, a.p("month").as<int32_t>());
-    EXPECT_THROW(a.p("day"), runtime_error);
-
-    const char *strs[] = {"1931-12", "2013-05", "2012-12"};
-    a = ndobject(strs).cast_scalars(d).vals();
-    EXPECT_EQ(1931, a.p("year").at(0).as<int32_t>());
-    EXPECT_EQ(12, a.p("month").at(0).as<int32_t>());
-    EXPECT_EQ(2013, a.p("year").at(1).as<int32_t>());
-    EXPECT_EQ(5, a.p("month").at(1).as<int32_t>());
-    EXPECT_EQ(2012, a.p("year").at(2).as<int32_t>());
-    EXPECT_EQ(12, a.p("month").at(2).as<int32_t>());
-    EXPECT_THROW(a.p("day"), runtime_error);
-}
-
-TEST(DateDType, DateYearsUnitProperties) {
-    dtype d = make_date_dtype(date_unit_year);
-    ndobject a = ndobject("1955").cast_scalars(d).vals();
-    EXPECT_EQ(make_date_property_dtype(d, "year"), a.p("year").get_dtype());
-    EXPECT_THROW(make_date_property_dtype(d, "month"), runtime_error);
-    EXPECT_THROW(make_date_property_dtype(d, "day"), runtime_error);
-    EXPECT_EQ(1955, a.p("year").as<int32_t>());
-    EXPECT_THROW(a.p("month"), runtime_error);
-    EXPECT_THROW(a.p("day"), runtime_error);
-
-    const char *strs[] = {"1931", "2013", "2012"};
-    a = ndobject(strs).cast_scalars(d).vals();
-    EXPECT_EQ(1931, a.p("year").at(0).as<int32_t>());
-    EXPECT_EQ(2013, a.p("year").at(1).as<int32_t>());
-    EXPECT_EQ(2012, a.p("year").at(2).as<int32_t>());
-    EXPECT_THROW(a.p("month"), runtime_error);
-    EXPECT_THROW(a.p("day"), runtime_error);
-}
-
-TEST(DateDType, DaysUnitToStruct) {
+TEST(DateDType, ToStruct) {
     dtype d = make_date_dtype(), ds;
     ndobject a, b;
 
@@ -254,60 +198,7 @@ TEST(DateDType, DaysUnitToStruct) {
     EXPECT_EQ(13, b.at(2).as<float>());
 }
 
-TEST(DateDType, MonthsUnitToStruct) {
-    dtype d = make_date_dtype(date_unit_month), ds;
-    ndobject a, b;
-
-    a = ndobject("1955-03").cast_scalars(d).vals();
-
-    // This is the default struct produced
-    ds = make_fixedstruct_dtype(make_dtype<int32_t>(), "year", make_dtype<int8_t>(), "month");
-    b = ndobject(ds);
-    b.val_assign(a);
-    EXPECT_EQ(1955, b.at(0).as<int32_t>());
-    EXPECT_EQ(3, b.at(1).as<int8_t>());
-
-    // This should work too
-    ds = make_fixedstruct_dtype(make_dtype<int16_t>(), "month", make_dtype<int16_t>(), "year");
-    b = ndobject(ds);
-    b.val_assign(a);
-    EXPECT_EQ(1955, b.at(1).as<int16_t>());
-    EXPECT_EQ(3, b.at(0).as<int16_t>());
-
-    // This should work too
-    ds = make_struct_dtype(make_dtype<int16_t>(), "month", make_dtype<int16_t>(), "year");
-    b = ndobject(ds);
-    b.val_assign(a);
-    EXPECT_EQ(1955, b.at(1).as<int16_t>());
-    EXPECT_EQ(3, b.at(0).as<int16_t>());
-}
-
-TEST(DateDType, YearsUnitToStruct) {
-    dtype d = make_date_dtype(date_unit_year), ds;
-    ndobject a, b;
-
-    a = ndobject("1955").cast_scalars(d).vals();
-
-    // This is the default struct produced
-    ds = make_fixedstruct_dtype(make_dtype<int32_t>(), "year");
-    b = ndobject(ds);
-    b.val_assign(a);
-    EXPECT_EQ(1955, b.at(0).as<int32_t>());
-
-    // This should work too
-    ds = make_fixedstruct_dtype(make_dtype<float>(), "year");
-    b = ndobject(ds);
-    b.val_assign(a);
-    EXPECT_EQ(1955, b.at(0).as<float>());
-
-    // This should work too
-    ds = make_struct_dtype(make_dtype<float>(), "year");
-    b = ndobject(ds);
-    b.val_assign(a);
-    EXPECT_EQ(1955, b.at(0).as<float>());
-}
-
-TEST(DateDType, StructToDaysUnit) {
+TEST(DateDType, FromStruct) {
     dtype d = make_date_dtype(), ds;
     ndobject a, b;
 

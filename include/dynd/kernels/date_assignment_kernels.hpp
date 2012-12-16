@@ -14,8 +14,7 @@ namespace dynd {
 /**
  * Gets a kernel which converts strings to dates.
  */
-void get_string_to_date_assignment_kernel(date_unit_t dst_unit,
-                const dtype& src_string_dtype,
+void get_string_to_date_assignment_kernel(const dtype& src_string_dtype,
                 assign_error_mode errmode,
                 kernel_instance<unary_operation_pair_t>& out_kernel);
 
@@ -23,7 +22,6 @@ void get_string_to_date_assignment_kernel(date_unit_t dst_unit,
  * Gets a kernel which converts dates to strings.
  */
 void get_date_to_string_assignment_kernel(const dtype& dst_string_dtype,
-                date_unit_t src_unit,
                 assign_error_mode errmode,
                 kernel_instance<unary_operation_pair_t>& out_kernel);
 
@@ -31,15 +29,13 @@ void get_date_to_string_assignment_kernel(const dtype& dst_string_dtype,
  * Gets a kernel which converts dates to structs.
  */
 void get_date_to_struct_assignment_kernel(const dtype& dst_struct_dtype,
-                date_unit_t src_unit,
                 assign_error_mode errmode,
                 kernel_instance<unary_operation_pair_t>& out_kernel);
 
 /**
  * Gets a kernel which converts dates to structs.
  */
-void get_struct_to_date_assignment_kernel(date_unit_t dst_unit,
-                const dtype& src_struct_dtype,
+void get_struct_to_date_assignment_kernel(const dtype& src_struct_dtype,
                 assign_error_mode errmode,
                 kernel_instance<unary_operation_pair_t>& out_kernel);
 
@@ -57,7 +53,7 @@ struct date_dtype_default_struct {
  * date_unit_t, which is the layout of the default struct
  * converted to/from date dtypes.
  */
-extern const dtype date_dtype_default_struct_dtypes[3];
+extern const dtype date_dtype_default_struct_dtype;
 
 } // namespace dynd
 

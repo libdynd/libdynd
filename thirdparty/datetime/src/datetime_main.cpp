@@ -304,8 +304,28 @@ inline T days_to_yeardays_templ(T* inout_days)
 
 void datetime::days_to_yeardays(int32_t days, date_yd& out_yd)
 {
+    if (days == DATETIME_DATE_NAT) {
+        out_yd.year = DATETIME_DATE_NAT;
+        out_yd.day = 0;
+        return;
+    }
+
     out_yd.day = days;
     out_yd.year = days_to_yeardays_templ<int32_t>(&out_yd.day);
+}
+
+void datetime::days_to_ymd(int32_t days, date_ymd& out_ymd)
+{
+    if (days == DATETIME_DATE_NAT) {
+        out_ymd.year = DATETIME_DATE_NAT;
+        out_ymd.month = 0;
+        out_ymd.day = 0;
+        return;
+    }
+
+    date_yd yd;
+    days_to_yeardays(days, yd);
+    yeardays_to_ymd(yd.year, yd.day, out_ymd);
 }
 
 int64_t datetime::days_to_yeardays(int64_t* inout_days)
@@ -315,6 +335,13 @@ int64_t datetime::days_to_yeardays(int64_t* inout_days)
 
 void datetime::yeardays_to_ymd(int32_t year, int32_t days, date_ymd& out_ymd)
 {
+    if (year == DATETIME_DATE_NAT) {
+        out_ymd.year = DATETIME_DATE_NAT;
+        out_ymd.month = 0;
+        out_ymd.day = 0;
+        return;
+    }
+
     const int *month_lengths = days_per_month_table[is_leapyear(year)];
 
     out_ymd.year = year;

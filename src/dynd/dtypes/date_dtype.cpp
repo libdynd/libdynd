@@ -25,24 +25,9 @@
 using namespace std;
 using namespace dynd;
 
-inline datetime::datetime_unit_t datetime_unit_from_date_unit(date_unit_t unit)
+date_dtype::date_dtype()
+    : extended_dtype(date_type_id, datetime_kind, 4, 4)
 {
-    return unit == date_unit_day ? datetime::datetime_unit_day :
-                                   unit == date_unit_month ? datetime::datetime_unit_month :
-                                   datetime::datetime_unit_year;
-}
-
-date_dtype::date_dtype(date_unit_t unit)
-    : extended_dtype(date_type_id, datetime_kind, 4, 4), m_unit(unit)
-{
-    switch (unit) {
-        case date_unit_year:
-        case date_unit_month:
-        case date_unit_day:
-            break;
-        default:
-            throw runtime_error("Unrecognized date unit in date dtype constructor");
-    }
 }
 
 date_dtype::~date_dtype()
@@ -58,37 +43,14 @@ void date_dtype::set_ymd(const char *DYND_UNUSED(metadata), char *data,
         throw runtime_error(ss.str());
     }
 
-    switch (m_unit) {
-        case date_unit_year:
-            if (errmode != assign_error_none && (month != 1 || day != 1)) {
-                stringstream ss;
-                ss << "out of range year/month/day " << year << "/" << month << "/" << day << " for years unit";
-                throw runtime_error(ss.str());
-            }
-            *reinterpret_cast<int32_t *>(data) = year - 1970;
-            break;
-        case date_unit_month:
-            if (errmode != assign_error_none && (day != 1)) {
-                stringstream ss;
-                ss << "out of range year/month/day " << year << "/" << month << "/" << day << " for months unit";
-                throw runtime_error(ss.str());
-            }
-            *reinterpret_cast<int32_t *>(data) = 12 * (year - 1970) + (month - 1);
-            break;
-        case date_unit_day:
-            *reinterpret_cast<int32_t *>(data) = datetime::ymd_to_days(year, month, day);
-            break;
-        default:
-            throw runtime_error("date dtype has corrupted date unit");
-    }
+    *reinterpret_cast<int32_t *>(data) = datetime::ymd_to_days(year, month, day);
 }
 
 void date_dtype::get_ymd(const char *DYND_UNUSED(metadata), const char *data,
                 int32_t &out_year, int32_t &out_month, int32_t &out_day) const
 {
     datetime::date_ymd ymd;
-    datetime::date_to_ymd(*reinterpret_cast<const int32_t *>(data),
-                    datetime_unit_from_date_unit(m_unit), ymd);
+    datetime::days_to_ymd(*reinterpret_cast<const int32_t *>(data), ymd);
     out_year = ymd.year;
     out_month = ymd.month;
     out_day = ymd.day;
@@ -97,29 +59,12 @@ void date_dtype::get_ymd(const char *DYND_UNUSED(metadata), const char *data,
 void date_dtype::print_data(std::ostream& o, const char *DYND_UNUSED(metadata), const char *data) const
 {
     int32_t value = *reinterpret_cast<const int32_t *>(data);
-    switch (m_unit) {
-        case date_unit_year:
-            o << datetime::make_iso_8601_date(value, datetime::datetime_unit_year);
-            break;
-        case date_unit_month:
-            o << datetime::make_iso_8601_date(value, datetime::datetime_unit_month);
-            break;
-        case date_unit_day:
-            o << datetime::make_iso_8601_date(value, datetime::datetime_unit_day);
-            break;
-        default:
-            o << "<corrupt date dtype>";
-            break;
-    }
+    o << datetime::make_iso_8601_date(value, datetime::datetime_unit_day);
 }
 
 void date_dtype::print_dtype(std::ostream& o) const
 {
-    if (m_unit == date_unit_day) {
-        o << "date";
-    } else {
-        o << "date<" << m_unit << ">";
-    }
+    o << "date";
 }
 
 bool date_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const
@@ -128,8 +73,8 @@ bool date_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt
         if (src_dt.extended() == this) {
             return true;
         } else if (src_dt.get_type_id() == date_type_id) {
-            const date_dtype *src_fs = static_cast<const date_dtype*>(src_dt.extended());
-            return src_fs->m_unit == m_unit;
+            // There is only one possibility for the date dtype (TODO: timezones!)
+            return true;
         } else {
             return false;
         }
@@ -149,10 +94,10 @@ void date_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const dtype& s
     if (this == dst_dt.extended()) {
         if (src_dt.get_kind() == string_kind) {
             // Assignment from strings
-            get_string_to_date_assignment_kernel(m_unit, src_dt, errmode, out_kernel);
+            get_string_to_date_assignment_kernel(src_dt, errmode, out_kernel);
             return;
         } else if (src_dt.get_kind() == struct_kind) {
-            get_struct_to_date_assignment_kernel(m_unit, src_dt, errmode, out_kernel);
+            get_struct_to_date_assignment_kernel(src_dt, errmode, out_kernel);
             return;
         } else if (!src_dt.is_builtin()) {
             src_dt.extended()->get_dtype_assignment_kernel(dst_dt, src_dt, errmode, out_kernel);
@@ -161,10 +106,10 @@ void date_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const dtype& s
     } else {
         if (dst_dt.get_kind() == string_kind) {
             // Assignment to strings
-            get_date_to_string_assignment_kernel(dst_dt, m_unit, errmode, out_kernel);
+            get_date_to_string_assignment_kernel(dst_dt, errmode, out_kernel);
             return;
         } else if (dst_dt.get_kind() == struct_kind) {
-            get_date_to_struct_assignment_kernel(dst_dt, m_unit, errmode, out_kernel);
+            get_date_to_struct_assignment_kernel(dst_dt, errmode, out_kernel);
             return;
         }
         // TODO
@@ -183,28 +128,20 @@ bool date_dtype::operator==(const extended_dtype& rhs) const
     } else if (rhs.get_type_id() != date_type_id) {
         return false;
     } else {
-        const date_dtype *dt = static_cast<const date_dtype*>(&rhs);
-        return m_unit == dt->m_unit;
+        // There is only one possibility for the date dtype (TODO: timezones!)
+        return true;
     }
 }
 
 ///////// properties on the dtype
 
-static string property_get_unit(const dtype& dt) {
-    const date_dtype *d = static_cast<const date_dtype *>(dt.extended());
-    stringstream ss;
-    ss << d->get_unit();
-    return ss.str();
-}
-
-static pair<string, gfunc::callable> date_dtype_properties[] = {
-    pair<string, gfunc::callable>("unit", gfunc::make_callable(&property_get_unit, "self"))
-};
+//static pair<string, gfunc::callable> date_dtype_properties[] = {
+//};
 
 void date_dtype::get_dynamic_dtype_properties(const std::pair<std::string, gfunc::callable> **out_properties, int *out_count) const
 {
-    *out_properties = date_dtype_properties;
-    *out_count = sizeof(date_dtype_properties) / sizeof(date_dtype_properties[0]);
+    *out_properties = NULL; //date_dtype_properties;
+    *out_count = 0; //sizeof(date_dtype_properties) / sizeof(date_dtype_properties[0]);
 }
 
 ///////// functions on the ndobject
@@ -214,19 +151,7 @@ static ndobject function_dtype_today(const dtype& dt) {
     datetime::fill_current_local_date(&ymd);
     const date_dtype *d = static_cast<const date_dtype *>(dt.extended());
     ndobject result(dt);
-    switch (d->get_unit()) {
-        case date_unit_year:
-            *reinterpret_cast<int32_t *>(result.get_readwrite_originptr()) = ymd.year - 1970;
-            break;
-        case date_unit_month:
-            *reinterpret_cast<int32_t *>(result.get_readwrite_originptr()) = 12 * (ymd.year - 1970) + (ymd.month - 1);
-            break;
-        case date_unit_day:
-            *reinterpret_cast<int32_t *>(result.get_readwrite_originptr()) = datetime::ymd_to_days(ymd);
-            break;
-        default:
-            throw runtime_error("date dtype has corrupted date unit");
-    }
+    *reinterpret_cast<int32_t *>(result.get_readwrite_originptr()) = datetime::ymd_to_days(ymd);
     // Make the result immutable (we own the only reference to the data at this point)
     result.get_ndo()->m_flags = (result.get_ndo()->m_flags&~(uint64_t)write_access_flag)|immutable_access_flag;
     return result;
@@ -266,12 +191,6 @@ void date_dtype::get_dynamic_ndobject_properties(const std::pair<std::string, gf
 {
     *out_properties = date_ndobject_properties;
     *out_count = sizeof(date_ndobject_properties) / sizeof(date_ndobject_properties[0]);
-    // Exclude the day and/or month properties for the larger units
-    if (m_unit == date_unit_month) {
-        *out_count -= 1;
-    } else if (m_unit == date_unit_year) {
-        *out_count -= 2;
-    }
 }
 
 ///////// functions on the ndobject
@@ -280,7 +199,7 @@ static ndobject function_ndo_to_struct(const ndobject& n) {
     dtype array_dt = n.get_dtype();
     dtype dt = array_dt.get_dtype_at_dimension(NULL, array_dt.get_undim()).value_dtype();
     const date_dtype *dd = static_cast<const date_dtype *>(dt.extended());
-    return n.cast_scalars(date_dtype_default_struct_dtypes[dd->get_unit()]);
+    return n.cast_scalars(date_dtype_default_struct_dtype);
 }
 
 static ndobject function_ndo_strftime(const ndobject& n, const std::string& format) {
@@ -302,7 +221,6 @@ static ndobject function_ndo_strftime(const ndobject& n, const std::string& form
     int32_t date;
     const date_dtype *dd = static_cast<const date_dtype *>(iter.get_uniform_dtype<1>().value_dtype().extended());
     const extended_string_dtype *esd = static_cast<const extended_string_dtype *>(iter.get_uniform_dtype<0>().extended());
-    datetime::datetime_unit_t datetime_unit = datetime_unit_from_date_unit(dd->get_unit());
     struct tm tm_val;
     string str;
     if (!iter.empty()) {
@@ -314,7 +232,7 @@ static ndobject function_ndo_strftime(const ndobject& n, const std::string& form
                 date = *reinterpret_cast<const int32_t *>(iter.data<1>());
             }
             // Convert the date to a 'struct tm'
-            datetime::date_to_struct_tm(date, datetime_unit, tm_val);
+            datetime::date_to_struct_tm(date, datetime::datetime_unit_day, tm_val);
             // Call strftime, growing the string buffer if needed so it fits
             str.resize(format.size() + 16);
 #ifdef _MSC_VER
@@ -373,7 +291,6 @@ static ndobject function_ndo_replace(const ndobject& n, int32_t year, int32_t mo
     }
     int32_t date;
     const date_dtype *dd = static_cast<const date_dtype *>(iter.get_uniform_dtype<1>().value_dtype().extended());
-    datetime::datetime_unit_t datetime_unit = datetime_unit_from_date_unit(dd->get_unit());
     datetime::date_ymd ymd;
     if (!iter.empty()) {
         // Loop over all the elements
@@ -385,7 +302,7 @@ static ndobject function_ndo_replace(const ndobject& n, int32_t year, int32_t mo
                 date = *reinterpret_cast<const int32_t *>(iter.data<1>());
             }
             // Convert the date to a 'struct tm'
-            datetime::date_to_ymd(date, datetime_unit, ymd);
+            datetime::date_to_ymd(date, datetime::datetime_unit_day, ymd);
             // Replace the values as requested
             if (year != numeric_limits<int32_t>::max()) {
                 ymd.year = year;
@@ -451,66 +368,58 @@ void date_dtype::get_dynamic_ndobject_functions(const std::pair<std::string, gfu
 namespace {
     void property_kernel_year_single(char *dst, const char *src, unary_kernel_static_data *extra)
     {
-        datetime::datetime_unit_t unit = static_cast<datetime::datetime_unit_t>(get_raw_auxiliary_data(extra->auxdata)>>1);
         datetime::date_ymd fld;
-        datetime::date_to_ymd(*reinterpret_cast<const int32_t *>(src), unit, fld);
+        datetime::days_to_ymd(*reinterpret_cast<const int32_t *>(src), fld);
         *reinterpret_cast<int32_t *>(dst) = fld.year;
     }
     void property_kernel_year_contig(char *dst, const char *src, size_t count, unary_kernel_static_data *extra)
     {
-        datetime::datetime_unit_t unit = static_cast<datetime::datetime_unit_t>(get_raw_auxiliary_data(extra->auxdata)>>1);
         datetime::date_ymd fld;
         int32_t *dst_array = reinterpret_cast<int32_t *>(dst);
         const int32_t *src_array = reinterpret_cast<const int32_t *>(src);
         for (size_t i = 0; i != count; ++i, ++src_array, ++dst_array) {
-            datetime::date_to_ymd(*src_array, unit, fld);
+            datetime::days_to_ymd(*src_array, fld);
             *dst_array = fld.year;
         }
     }
 
     void property_kernel_month_single(char *dst, const char *src, unary_kernel_static_data *extra)
     {
-        datetime::datetime_unit_t unit = static_cast<datetime::datetime_unit_t>(get_raw_auxiliary_data(extra->auxdata)>>1);
         datetime::date_ymd fld;
-        datetime::date_to_ymd(*reinterpret_cast<const int32_t *>(src), unit, fld);
+        datetime::days_to_ymd(*reinterpret_cast<const int32_t *>(src), fld);
         *reinterpret_cast<int32_t *>(dst) = fld.month;
     }
     void property_kernel_month_contig(char *dst, const char *src, size_t count, unary_kernel_static_data *extra)
     {
-        datetime::datetime_unit_t unit = static_cast<datetime::datetime_unit_t>(get_raw_auxiliary_data(extra->auxdata)>>1);
         datetime::date_ymd fld;
         int32_t *dst_array = reinterpret_cast<int32_t *>(dst);
         const int32_t *src_array = reinterpret_cast<const int32_t *>(src);
         for (size_t i = 0; i != count; ++i, ++src_array, ++dst_array) {
-            datetime::date_to_ymd(*src_array, unit, fld);
+            datetime::days_to_ymd(*src_array, fld);
             *dst_array = fld.month;
         }
     }
 
     void property_kernel_day_single(char *dst, const char *src, unary_kernel_static_data *extra)
     {
-        datetime::datetime_unit_t unit = static_cast<datetime::datetime_unit_t>(get_raw_auxiliary_data(extra->auxdata)>>1);
         datetime::date_ymd fld;
-        datetime::date_to_ymd(*reinterpret_cast<const int32_t *>(src), unit, fld);
+        datetime::days_to_ymd(*reinterpret_cast<const int32_t *>(src), fld);
         *reinterpret_cast<int32_t *>(dst) = fld.day;
     }
     void property_kernel_day_contig(char *dst, const char *src, size_t count, unary_kernel_static_data *extra)
     {
-        datetime::datetime_unit_t unit = static_cast<datetime::datetime_unit_t>(get_raw_auxiliary_data(extra->auxdata)>>1);
         datetime::date_ymd fld;
         int32_t *dst_array = reinterpret_cast<int32_t *>(dst);
         const int32_t *src_array = reinterpret_cast<const int32_t *>(src);
         for (size_t i = 0; i != count; ++i, ++src_array, ++dst_array) {
-            datetime::date_to_ymd(*src_array, unit, fld);
+            datetime::days_to_ymd(*src_array, fld);
             *dst_array = fld.day;
         }
     }
 
     void property_kernel_weekday_single(char *dst, const char *src, unary_kernel_static_data *extra)
     {
-        datetime::datetime_unit_t unit = static_cast<datetime::datetime_unit_t>(get_raw_auxiliary_data(extra->auxdata)>>1);
-        datetime::date_val_t days;
-        datetime::date_to_days(*reinterpret_cast<const int32_t *>(src), unit, days);
+        datetime::date_val_t days = *reinterpret_cast<const int32_t *>(src);
         // 1970-01-05 is Monday
         int weekday = (int)((days - 4) % 7);
         if (weekday < 0) {
@@ -520,12 +429,11 @@ namespace {
     }
     void property_kernel_weekday_contig(char *dst, const char *src, size_t count, unary_kernel_static_data *extra)
     {
-        datetime::datetime_unit_t unit = static_cast<datetime::datetime_unit_t>(get_raw_auxiliary_data(extra->auxdata)>>1);
         datetime::date_val_t days;
         int32_t *dst_array = reinterpret_cast<int32_t *>(dst);
         const int32_t *src_array = reinterpret_cast<const int32_t *>(src);
         for (size_t i = 0; i != count; ++i, ++src_array, ++dst_array) {
-            datetime::date_to_days(*src_array, unit, days);
+            days = *src_array;
             // 1970-01-05 is Monday
             int weekday = (int)((days - 4) % 7);
             if (weekday < 0) {
@@ -539,20 +447,18 @@ namespace {
 void date_dtype::get_property_getter_kernel(const std::string& property_name,
                 dtype& out_value_dtype, kernel_instance<unary_operation_pair_t>& out_to_value_kernel) const
 {
-    datetime::datetime_unit_t unit = datetime_unit_from_date_unit(m_unit);
-
     out_value_dtype = make_dtype<int32_t>();
-    make_raw_auxiliary_data(out_to_value_kernel.auxdata, static_cast<uintptr_t>(unit)<<1);
+    out_to_value_kernel.auxdata.free();
     if (property_name == "year") {
         out_to_value_kernel.kernel.single = &property_kernel_year_single;
         out_to_value_kernel.kernel.contig = &property_kernel_year_contig;
-    } else if (m_unit <= date_unit_month && property_name == "month") {
+    } else if (property_name == "month") {
         out_to_value_kernel.kernel.single = &property_kernel_month_single;
         out_to_value_kernel.kernel.contig = &property_kernel_month_contig;
-    } else if (m_unit <= date_unit_day && property_name == "day") {
+    } else if (property_name == "day") {
         out_to_value_kernel.kernel.single = &property_kernel_day_single;
         out_to_value_kernel.kernel.contig = &property_kernel_day_contig;
-    } else if (m_unit <= date_unit_day && property_name == "weekday") {
+    } else if (property_name == "weekday") {
         out_to_value_kernel.kernel.single = &property_kernel_weekday_single;
         out_to_value_kernel.kernel.contig = &property_kernel_weekday_contig;
     } else {

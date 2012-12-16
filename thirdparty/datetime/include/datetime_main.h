@@ -158,6 +158,11 @@ void date_to_struct_tm(date_val_t date, datetime_unit_t unit, struct tm& out_tm)
 void days_to_yeardays(int32_t days, date_yd& out_yd);
 
 /*
+ * Converts a 'days' date into a date_ymd structure.
+ */
+void days_to_ymd(int32_t days, date_ymd& out_ymd);
+
+/*
  * Modifies 'days' in place to be the day offset within the year,
  * and returns the year.
  */

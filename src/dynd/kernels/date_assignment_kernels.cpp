@@ -18,7 +18,6 @@ namespace { struct string_to_date_assign_kernel {
     struct auxdata_storage {
         dtype src_string_dtype;
         assign_error_mode errmode;
-        datetime::datetime_unit_t unit;
         datetime::datetime_conversion_rule_t casting;
     };
 
@@ -28,12 +27,11 @@ namespace { struct string_to_date_assign_kernel {
         const extended_string_dtype *esd = static_cast<const extended_string_dtype *>(ad.src_string_dtype.extended());
         *reinterpret_cast<int32_t *>(dst) = datetime::parse_iso_8601_date(
                                 esd->get_utf8_string(extra->src_metadata, src, ad.errmode),
-                                ad.unit, ad.casting);
+                                datetime::datetime_unit_day, ad.casting);
     }
 };} // anonymous namespace
 
-void dynd::get_string_to_date_assignment_kernel(date_unit_t dst_unit,
-                const dtype& src_string_dtype,
+void dynd::get_string_to_date_assignment_kernel(const dtype& src_string_dtype,
                 assign_error_mode errmode,
                 kernel_instance<unary_operation_pair_t>& out_kernel)
 {
@@ -50,22 +48,6 @@ void dynd::get_string_to_date_assignment_kernel(date_unit_t dst_unit,
     string_to_date_assign_kernel::auxdata_storage& ad = out_kernel.auxdata.get<string_to_date_assign_kernel::auxdata_storage>();
     ad.errmode = errmode;
     ad.src_string_dtype = src_string_dtype;
-    switch (dst_unit) {
-        case date_unit_day:
-            ad.unit = datetime::datetime_unit_day;
-            break;
-        case date_unit_month:
-            ad.unit = datetime::datetime_unit_month;
-            break;
-        case date_unit_year:
-            ad.unit = datetime::datetime_unit_year;
-            break;
-        default: {
-            stringstream ss;
-            ss << "unrecognized dynd date unit " << dst_unit;
-            throw runtime_error(ss.str());
-        }
-    }
     switch (errmode) {
         case assign_error_fractional:
         case assign_error_inexact:
@@ -84,7 +66,6 @@ namespace {
         struct auxdata_storage {
             dtype dst_string_dtype;
             assign_error_mode errmode;
-            datetime::datetime_unit_t unit;
         };
 
         /** Does a single fixed-string copy */
@@ -93,13 +74,13 @@ namespace {
             auxdata_storage& ad = get_auxiliary_data<auxdata_storage>(extra->auxdata);
             const extended_string_dtype *esd = static_cast<const extended_string_dtype *>(ad.dst_string_dtype.extended());
             int32_t date = *reinterpret_cast<const int32_t *>(src);
-            esd->set_utf8_string(extra->dst_metadata, dst, ad.errmode, datetime::make_iso_8601_date(date, ad.unit));
+            esd->set_utf8_string(extra->dst_metadata, dst, ad.errmode,
+                            datetime::make_iso_8601_date(date, datetime::datetime_unit_day));
         }
     };
 } // anonymous namespace
 
 void dynd::get_date_to_string_assignment_kernel(const dtype& dst_string_dtype,
-                date_unit_t src_unit,
                 assign_error_mode errmode,
                 kernel_instance<unary_operation_pair_t>& out_kernel)
 {
@@ -116,33 +97,13 @@ void dynd::get_date_to_string_assignment_kernel(const dtype& dst_string_dtype,
     date_to_string_assign_kernel::auxdata_storage& ad = out_kernel.auxdata.get<date_to_string_assign_kernel::auxdata_storage>();
     ad.errmode = errmode;
     ad.dst_string_dtype = dst_string_dtype;
-    switch (src_unit) {
-        case date_unit_day:
-            ad.unit = datetime::datetime_unit_day;
-            break;
-        case date_unit_month:
-            ad.unit = datetime::datetime_unit_month;
-            break;
-        case date_unit_year:
-            ad.unit = datetime::datetime_unit_year;
-            break;
-        default: {
-            stringstream ss;
-            ss << "unrecognized dynd date unit " << src_unit;
-            throw runtime_error(ss.str());
-        }
-    }
 }
 
 /////////////////////////////////////////
 // data for date to/from struct assignment
 
-const dtype dynd::date_dtype_default_struct_dtypes[3] = {
-    make_fixedstruct_dtype(make_dtype<int32_t>(), "year", make_dtype<int8_t>(), "month", make_dtype<int8_t>(), "day"),
-    make_fixedstruct_dtype(make_dtype<int32_t>(), "year", make_dtype<int8_t>(), "month"),
-    make_fixedstruct_dtype(make_dtype<int32_t>(), "year")
-};
-
+const dtype dynd::date_dtype_default_struct_dtype =
+        make_fixedstruct_dtype(make_dtype<int32_t>(), "year", make_dtype<int8_t>(), "month", make_dtype<int8_t>(), "day");
 /////////////////////////////////////////
 // date to struct assignment
 
@@ -151,27 +112,17 @@ namespace {
         /** When the destination struct is exactly our desired layout */
         static void single(char *dst, const char *src, unary_kernel_static_data *extra)
         {
-            datetime::datetime_unit_t unit = static_cast<datetime::datetime_unit_t>(get_raw_auxiliary_data(extra->auxdata)>>1);
-            datetime::datetime_fields fld;
-            fld.set_from_date_val(*reinterpret_cast<const int32_t *>(src), unit);
+            datetime::date_ymd fld;
+            datetime::days_to_ymd(*reinterpret_cast<const int32_t *>(src), fld);
             date_dtype_default_struct *dst_struct = reinterpret_cast<date_dtype_default_struct *>(dst);
-            switch (unit) {
-                case datetime::datetime_unit_day:
-                    dst_struct->day = fld.day;
-                case datetime::datetime_unit_month:
-                    dst_struct->month = fld.month;
-                case datetime::datetime_unit_year:
-                    dst_struct->year = fld.year != DATETIME_DATETIME_NAT ? fld.year : DATETIME_DATE_NAT;
-                    break;
-                default:
-                    break;
-            }
+            dst_struct->year = fld.year;
+            dst_struct->month = static_cast<int8_t>(fld.month);
+            dst_struct->day = static_cast<int8_t>(fld.day);
         }
     };
 
     struct date_to_struct_assign_kernel {
         struct auxdata_storage {
-            datetime::datetime_unit_t unit;
             kernel_instance<unary_operation_pair_t> kernel;
         };
 
@@ -179,13 +130,13 @@ namespace {
         static void single(char *dst, const char *src, unary_kernel_static_data *extra)
         {
             auxdata_storage& ad = get_auxiliary_data<auxdata_storage>(extra->auxdata);
-            datetime::datetime_fields fld;
-            fld.set_from_date_val(*reinterpret_cast<const int32_t *>(src), ad.unit);
+            datetime::date_ymd fld;
+            datetime::days_to_ymd(*reinterpret_cast<const int32_t *>(src), fld);
             // Put the date in our default struct layout
             date_dtype_default_struct tmp_date;
-            tmp_date.year = fld.year != DATETIME_DATETIME_NAT ? fld.year : DATETIME_DATE_NAT;
-            tmp_date.month = fld.month;
-            tmp_date.day = fld.day;
+            tmp_date.year = fld.year;
+            tmp_date.month = static_cast<int8_t>(fld.month);
+            tmp_date.day = static_cast<int8_t>(fld.day);
             // Copy to the destination
             unary_kernel_static_data kernel_extra(ad.kernel.auxdata, extra->dst_metadata, NULL);
             ad.kernel.kernel.single(dst, reinterpret_cast<const char *>(&tmp_date), &kernel_extra);
@@ -195,7 +146,6 @@ namespace {
 } // anonymous namespace
 
 void dynd::get_date_to_struct_assignment_kernel(const dtype& dst_struct_dtype,
-                date_unit_t src_unit,
                 assign_error_mode errmode,
                 kernel_instance<unary_operation_pair_t>& out_kernel)
 {
@@ -205,28 +155,10 @@ void dynd::get_date_to_struct_assignment_kernel(const dtype& dst_struct_dtype,
         throw runtime_error(ss.str());
     }
 
-    datetime::datetime_unit_t src_datetime_unit;
-    switch (src_unit) {
-        case date_unit_day:
-            src_datetime_unit = datetime::datetime_unit_day;
-            break;
-        case date_unit_month:
-            src_datetime_unit = datetime::datetime_unit_month;
-            break;
-        case date_unit_year:
-            src_datetime_unit = datetime::datetime_unit_year;
-            break;
-        default: {
-            stringstream ss;
-            ss << "unrecognized dynd date unit " << src_unit;
-            throw runtime_error(ss.str());
-        }
-    }
-
-    if (dst_struct_dtype == date_dtype_default_struct_dtypes[src_unit]) {
+    if (dst_struct_dtype == date_dtype_default_struct_dtype) {
         out_kernel.kernel.single = &date_to_struct_trivial_assign_kernel::single;
         out_kernel.kernel.contig = NULL;
-        make_raw_auxiliary_data(out_kernel.auxdata, static_cast<uintptr_t>(src_datetime_unit)<<1);
+        out_kernel.auxdata.free();
         return;
     }
 
@@ -235,8 +167,7 @@ void dynd::get_date_to_struct_assignment_kernel(const dtype& dst_struct_dtype,
 
     make_auxiliary_data<date_to_struct_assign_kernel::auxdata_storage>(out_kernel.auxdata);
     date_to_struct_assign_kernel::auxdata_storage& ad = out_kernel.auxdata.get<date_to_struct_assign_kernel::auxdata_storage>();
-    ad.unit = src_datetime_unit;
-    get_dtype_assignment_kernel(dst_struct_dtype, date_dtype_default_struct_dtypes[src_unit], errmode, NULL, ad.kernel);
+    get_dtype_assignment_kernel(dst_struct_dtype, date_dtype_default_struct_dtype, errmode, NULL, ad.kernel);
 }
 
 /////////////////////////////////////////
@@ -248,27 +179,17 @@ namespace {
         /** When the source struct is exactly our desired layout */
         static void single(char *dst, const char *src, unary_kernel_static_data *extra)
         {
-            datetime::datetime_unit_t unit = static_cast<datetime::datetime_unit_t>(get_raw_auxiliary_data(extra->auxdata)>>1);
-            datetime::datetime_fields fld;
+            datetime::date_ymd fld;
             const date_dtype_default_struct *src_struct = reinterpret_cast<const date_dtype_default_struct *>(src);
-            switch (unit) {
-                case datetime::datetime_unit_day:
-                    fld.day = src_struct->day;
-                case datetime::datetime_unit_month:
-                    fld.month = src_struct->month;
-                case datetime::datetime_unit_year:
-                    fld.year = src_struct->year != DATETIME_DATE_NAT ? src_struct->year : DATETIME_DATETIME_NAT;
-                    break;
-                default:
-                    break;
-            }
-            *reinterpret_cast<int32_t *>(dst) = fld.as_date_val(unit);
+            fld.year = src_struct->year;
+            fld.month = src_struct->month;
+            fld.day = src_struct->day;
+            *reinterpret_cast<int32_t *>(dst) = datetime::ymd_to_days(fld);
         }
     };
 
     struct struct_to_date_assign_kernel {
         struct auxdata_storage {
-            datetime::datetime_unit_t unit;
             kernel_instance<unary_operation_pair_t> kernel;
         };
 
@@ -276,31 +197,22 @@ namespace {
         static void single(char *dst, const char *src, unary_kernel_static_data *extra)
         {
             auxdata_storage& ad = get_auxiliary_data<auxdata_storage>(extra->auxdata);
-            datetime::datetime_fields fld;
+            datetime::date_ymd fld;
             // Copy the source struct into our default struct layout
             date_dtype_default_struct tmp_date;
             unary_kernel_static_data kernel_extra(ad.kernel.auxdata, NULL, extra->src_metadata);
             ad.kernel.kernel.single(reinterpret_cast<char *>(&tmp_date), src, &kernel_extra);
             // Convert to datetime_fields, then to the result date dtype
-            switch (ad.unit) {
-                case datetime::datetime_unit_day:
-                    fld.day = tmp_date.day;
-                case datetime::datetime_unit_month:
-                    fld.month = tmp_date.month;
-                case datetime::datetime_unit_year:
-                    fld.year = tmp_date.year != DATETIME_DATE_NAT ? tmp_date.year : DATETIME_DATETIME_NAT;
-                    break;
-                default:
-                    break;
-            }
-            *reinterpret_cast<int32_t *>(dst) = fld.as_date_val(ad.unit);
+            fld.day = tmp_date.day;
+            fld.month = tmp_date.month;
+            fld.year = tmp_date.year;
+            *reinterpret_cast<int32_t *>(dst) = datetime::ymd_to_days(fld);
         }
     };
 
 } // anonymous namespace
 
-void dynd::get_struct_to_date_assignment_kernel(date_unit_t dst_unit,
-                const dtype& src_struct_dtype,
+void dynd::get_struct_to_date_assignment_kernel(const dtype& src_struct_dtype,
                 assign_error_mode errmode,
                 kernel_instance<unary_operation_pair_t>& out_kernel)
 {
@@ -310,28 +222,10 @@ void dynd::get_struct_to_date_assignment_kernel(date_unit_t dst_unit,
         throw runtime_error(ss.str());
     }
 
-    datetime::datetime_unit_t dst_datetime_unit;
-    switch (dst_unit) {
-        case date_unit_day:
-            dst_datetime_unit = datetime::datetime_unit_day;
-            break;
-        case date_unit_month:
-            dst_datetime_unit = datetime::datetime_unit_month;
-            break;
-        case date_unit_year:
-            dst_datetime_unit = datetime::datetime_unit_year;
-            break;
-        default: {
-            stringstream ss;
-            ss << "unrecognized dynd date unit " << dst_unit;
-            throw runtime_error(ss.str());
-        }
-    }
-
-    if (src_struct_dtype == date_dtype_default_struct_dtypes[dst_unit]) {
+    if (src_struct_dtype == date_dtype_default_struct_dtype) {
         out_kernel.kernel.single = &struct_to_date_trivial_assign_kernel::single;
         out_kernel.kernel.contig = NULL;
-        make_raw_auxiliary_data(out_kernel.auxdata, static_cast<uintptr_t>(dst_datetime_unit)<<1);
+        out_kernel.auxdata.free();
         return;
     }
 
@@ -340,6 +234,5 @@ void dynd::get_struct_to_date_assignment_kernel(date_unit_t dst_unit,
 
     make_auxiliary_data<struct_to_date_assign_kernel::auxdata_storage>(out_kernel.auxdata);
     struct_to_date_assign_kernel::auxdata_storage& ad = out_kernel.auxdata.get<struct_to_date_assign_kernel::auxdata_storage>();
-    ad.unit = dst_datetime_unit;
-    get_dtype_assignment_kernel(date_dtype_default_struct_dtypes[dst_unit], src_struct_dtype, errmode, NULL, ad.kernel);
+    get_dtype_assignment_kernel(date_dtype_default_struct_dtype, src_struct_dtype, errmode, NULL, ad.kernel);
 }

@@ -13,41 +13,11 @@
 
 namespace dynd {
 
-enum date_unit_t {
-    date_unit_day,
-    date_unit_month,
-    date_unit_year
-};
-
-inline std::ostream& operator<<(std::ostream& o, date_unit_t unit) {
-    switch (unit) {
-        case date_unit_day:
-            o << "day";
-            break;
-        case date_unit_month:
-            o << "month";
-            break;
-        case date_unit_year:
-            o << "year";
-            break;
-        default:
-            o << "invalid (" << (int)unit << ")";
-            break;
-    }
-    return o;
-}
-
 class date_dtype : public extended_dtype {
-    date_unit_t m_unit;
-
 public:
-    date_dtype(date_unit_t unit);
+    date_dtype();
 
     virtual ~date_dtype();
-
-    date_unit_t get_unit() const {
-        return m_unit;
-    }
 
     void set_ymd(const char *metadata, char *data, assign_error_mode errmode,
                     int32_t year, int32_t month, int32_t day) const;
@@ -105,8 +75,8 @@ public:
 
 };
 
-inline dtype make_date_dtype(date_unit_t unit = date_unit_day) {
-    return dtype(new date_dtype(unit));
+inline dtype make_date_dtype() {
+    return dtype(new date_dtype());
 }
 
 } // namespace dynd
