@@ -142,7 +142,7 @@ inline bool is_valid_perm(size_t size, const int *perm) {
     memset(flags.get(), 0, size);
     for (size_t i = 0; i < size; ++i) {
         int v = perm[i];
-        if (v < 0 || v > size || flags[v]) {
+        if (static_cast<unsigned int>(v) >= size || flags[v]) {
             return false;
         }
         flags[v] = 1;
@@ -151,6 +151,7 @@ inline bool is_valid_perm(size_t size, const int *perm) {
 }
 
 inline bool strides_are_c_contiguous(size_t ndim, intptr_t element_size, const intptr_t *shape, const intptr_t *strides) {
+    // The loop counter must be a signed integer for this reverse loop to work
     for (intptr_t i = static_cast<intptr_t>(ndim)-1; i >= 0; --i) {
         if (shape[i] != 1 && strides[i] != element_size) {
             return false;

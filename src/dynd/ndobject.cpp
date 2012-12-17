@@ -528,7 +528,7 @@ ndobject ndobject::p(const char *property_name) const
         dt.extended()->get_dynamic_ndobject_properties(&properties, &count);
         // TODO: We probably want to make some kind of acceleration structure for the name lookup
         if (count > 0) {
-            for (int i = 0; i < count; ++i) {
+            for (size_t i = 0; i < count; ++i) {
                 if (properties[i].first == property_name) {
                     return properties[i].second.call(*this);
                 }
@@ -550,7 +550,7 @@ ndobject ndobject::p(const std::string& property_name) const
         dt.extended()->get_dynamic_ndobject_properties(&properties, &count);
         // TODO: We probably want to make some kind of acceleration structure for the name lookup
         if (count > 0) {
-            for (int i = 0; i < count; ++i) {
+            for (size_t i = 0; i < count; ++i) {
                 if (properties[i].first == property_name) {
                     return properties[i].second.call(*this);
                 }
@@ -572,7 +572,7 @@ const gfunc::callable& ndobject::f(const char *function_name) const
         dt.extended()->get_dynamic_ndobject_functions(&properties, &count);
         // TODO: We probably want to make some kind of acceleration structure for the name lookup
         if (count > 0) {
-            for (int i = 0; i < count; ++i) {
+            for (size_t i = 0; i < count; ++i) {
                 if (properties[i].first == function_name) {
                     return properties[i].second;
                 }

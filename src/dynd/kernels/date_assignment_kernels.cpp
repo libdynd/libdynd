@@ -110,7 +110,7 @@ const dtype dynd::date_dtype_default_struct_dtype =
 namespace {
     struct date_to_struct_trivial_assign_kernel {
         /** When the destination struct is exactly our desired layout */
-        static void single(char *dst, const char *src, unary_kernel_static_data *extra)
+        static void single(char *dst, const char *src, unary_kernel_static_data *DYND_UNUSED(extra))
         {
             datetime::date_ymd fld;
             datetime::days_to_ymd(*reinterpret_cast<const int32_t *>(src), fld);
@@ -177,7 +177,7 @@ void dynd::get_date_to_struct_assignment_kernel(const dtype& dst_struct_dtype,
 namespace {
     struct struct_to_date_trivial_assign_kernel {
         /** When the source struct is exactly our desired layout */
-        static void single(char *dst, const char *src, unary_kernel_static_data *extra)
+        static void single(char *dst, const char *src, unary_kernel_static_data *DYND_UNUSED(extra))
         {
             datetime::date_ymd fld;
             const date_dtype_default_struct *src_struct = reinterpret_cast<const date_dtype_default_struct *>(src);
