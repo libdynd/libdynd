@@ -7,7 +7,7 @@ they might integrate with Numba.
 Memory Block
 ------------
 
-#include <dynd/memblock/memory_block.hpp>
+    #include <dynd/memblock/memory_block.hpp>
 
 The memory block is DyND's reference counted object for storing ndobjects
 and data. It always starts with two 32-bit members, an atomic use count and
@@ -82,6 +82,8 @@ The same logic will apply for variable-sized arrays when they are fully implemen
 NDObject
 --------
 
+    #include <dynd/ndobject.hpp>
+
 The NDObject is a specific type of memory block, with its 'type' set to
 the value ndobject_memory_block_type (from dynd/memblock/memory_block.hpp).
 Its primary structure is defined (in dynd/memblock/ndobject_memory_block.hpp)
@@ -106,6 +108,8 @@ memory is needed here.
 
 DType
 -----
+
+    #include <dynd/dtype.hpp>
 
 DTypes are represented in one of two ways. The most basic types, like the ones
 built into C/C++, are classified as "builtin dtypes", and represented simply by an
