@@ -138,13 +138,13 @@ bool date_dtype::operator==(const extended_dtype& rhs) const
 //static pair<string, gfunc::callable> date_dtype_properties[] = {
 //};
 
-void date_dtype::get_dynamic_dtype_properties(const std::pair<std::string, gfunc::callable> **out_properties, int *out_count) const
+void date_dtype::get_dynamic_dtype_properties(const std::pair<std::string, gfunc::callable> **out_properties, size_t *out_count) const
 {
     *out_properties = NULL; //date_dtype_properties;
     *out_count = 0; //sizeof(date_dtype_properties) / sizeof(date_dtype_properties[0]);
 }
 
-///////// functions on the ndobject
+///////// functions on the dtype
 
 static ndobject function_dtype_today(const dtype& dt) {
     datetime::date_ymd ymd;
@@ -157,11 +157,17 @@ static ndobject function_dtype_today(const dtype& dt) {
     return result;
 }
 
+static ndobject function_dtype_construct(const dtype& dt, const ndobject& year, const ndobject& month, const ndobject& day)
+{
+    return ndobject(dt);
+}
+
 static pair<string, gfunc::callable> date_dtype_functions[] = {
-    pair<string, gfunc::callable>("today", gfunc::make_callable(&function_dtype_today, "self"))
+    pair<string, gfunc::callable>("today", gfunc::make_callable(&function_dtype_today, "self")),
+    pair<string, gfunc::callable>("__construct__", gfunc::make_callable(&function_dtype_construct, "self", "year", "month", "day"))
 };
 
-void date_dtype::get_dynamic_dtype_functions(const std::pair<std::string, gfunc::callable> **out_functions, int *out_count) const
+void date_dtype::get_dynamic_dtype_functions(const std::pair<std::string, gfunc::callable> **out_functions, size_t *out_count) const
 {
     *out_functions = date_dtype_functions;
     *out_count = sizeof(date_dtype_functions) / sizeof(date_dtype_functions[0]);
@@ -187,7 +193,7 @@ static pair<string, gfunc::callable> date_ndobject_properties[] = {
     pair<string, gfunc::callable>("day", gfunc::make_callable(&property_ndo_get_day, "self"))
 };
 
-void date_dtype::get_dynamic_ndobject_properties(const std::pair<std::string, gfunc::callable> **out_properties, int *out_count) const
+void date_dtype::get_dynamic_ndobject_properties(const std::pair<std::string, gfunc::callable> **out_properties, size_t *out_count) const
 {
     *out_properties = date_ndobject_properties;
     *out_count = sizeof(date_ndobject_properties) / sizeof(date_ndobject_properties[0]);
@@ -357,7 +363,7 @@ static pair<string, gfunc::callable> date_ndobject_functions[] = {
                     numeric_limits<int32_t>::max(), numeric_limits<int32_t>::max(), numeric_limits<int32_t>::max()))
 };
 
-void date_dtype::get_dynamic_ndobject_functions(const std::pair<std::string, gfunc::callable> **out_functions, int *out_count) const
+void date_dtype::get_dynamic_ndobject_functions(const std::pair<std::string, gfunc::callable> **out_functions, size_t *out_count) const
 {
     *out_functions = date_ndobject_functions;
     *out_count = sizeof(date_ndobject_functions) / sizeof(date_ndobject_functions[0]);

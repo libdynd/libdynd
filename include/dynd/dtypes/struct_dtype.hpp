@@ -72,7 +72,7 @@ public:
                     int current_i, const dtype& root_dt) const;
 
     intptr_t get_dim_size(const char *data, const char *metadata) const;
-    void get_shape(int i, intptr_t *out_shape) const;
+    void get_shape(size_t i, intptr_t *out_shape) const;
     intptr_t get_representative_stride(const char *metadata) const;
 
     bool is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const;
@@ -95,8 +95,8 @@ public:
 
     void foreach_leading(char *data, const char *metadata, foreach_fn_t callback, void *callback_data) const;
 
-    void get_dynamic_dtype_properties(const std::pair<std::string, gfunc::callable> **out_properties, int *out_count) const;
-    void get_dynamic_ndobject_properties(const std::pair<std::string, gfunc::callable> **out_properties, int *out_count) const;
+    void get_dynamic_dtype_properties(const std::pair<std::string, gfunc::callable> **out_properties, size_t *out_count) const;
+    void get_dynamic_ndobject_properties(const std::pair<std::string, gfunc::callable> **out_properties, size_t *out_count) const;
 }; // class struct_dtype
 
 /** Makes a tuple dtype with the specified fields, using the standard layout */

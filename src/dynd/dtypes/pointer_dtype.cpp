@@ -18,7 +18,7 @@ dtype pointer_dtype::m_void_pointer_dtype(new void_pointer_dtype());
 
 
 pointer_dtype::pointer_dtype(const dtype& target_dtype)
-    : extended_expression_dtype(pointer_type_id, expression_kind, sizeof(void *), sizeof(void *)),
+    : extended_expression_dtype(pointer_type_id, expression_kind, sizeof(void *), sizeof(void *), target_dtype.get_undim()),
             m_target_dtype(target_dtype)
 {
     // I'm not 100% sure how blockref pointer dtypes should interact with
@@ -122,12 +122,7 @@ intptr_t pointer_dtype::apply_linear_index(int nindices, const irange *indices, 
     return 0;
 }
 
-int pointer_dtype::get_undim() const
-{
-    return m_target_dtype.get_undim();
-}
-
-dtype pointer_dtype::get_dtype_at_dimension(char **inout_metadata, int i, int total_ndim) const
+dtype pointer_dtype::get_dtype_at_dimension(char **inout_metadata, size_t i, size_t total_ndim) const
 {
     if (i == 0) {
         return dtype(this, true);
@@ -143,7 +138,7 @@ intptr_t pointer_dtype::get_dim_size(const char *data, const char *metadata) con
     return m_target_dtype.get_dim_size(data + md->offset, metadata + sizeof(pointer_dtype_metadata));
 }
 
-void pointer_dtype::get_shape(int i, intptr_t *out_shape) const
+void pointer_dtype::get_shape(size_t i, intptr_t *out_shape) const
 {
     if (!m_target_dtype.is_builtin()) {
         m_target_dtype.extended()->get_shape(i, out_shape);

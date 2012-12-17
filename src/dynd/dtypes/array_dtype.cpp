@@ -14,7 +14,8 @@ using namespace std;
 using namespace dynd;
 
 array_dtype::array_dtype(const dtype& element_dtype)
-    : extended_dtype(array_type_id, uniform_array_kind, sizeof(array_dtype_data), sizeof(const char *)),
+    : extended_dtype(array_type_id, uniform_array_kind, sizeof(array_dtype_data),
+                    sizeof(const char *), element_dtype.get_undim() + 1),
             m_element_dtype(element_dtype)
 {
 }
@@ -123,12 +124,7 @@ dtype array_dtype::at(intptr_t i0, const char **inout_metadata, const char **ino
     return m_element_dtype;
 }
 
-int array_dtype::get_undim() const
-{
-    return 1 + m_element_dtype.get_undim();
-}
-
-dtype array_dtype::get_dtype_at_dimension(char **inout_metadata, int i, int total_ndim) const
+dtype array_dtype::get_dtype_at_dimension(char **inout_metadata, size_t i, size_t total_ndim) const
 {
     if (i == 0) {
         return dtype(this, true);
@@ -146,7 +142,7 @@ intptr_t array_dtype::get_dim_size(const char *data, const char *DYND_UNUSED(met
     return d->size;
 }
 
-void array_dtype::get_shape(int i, intptr_t *out_shape) const
+void array_dtype::get_shape(size_t i, intptr_t *out_shape) const
 {
     // Adjust the current shape if necessary
     out_shape[i] = shape_signal_varying;
@@ -157,7 +153,7 @@ void array_dtype::get_shape(int i, intptr_t *out_shape) const
     }
 }
 
-void array_dtype::get_shape(int i, intptr_t *out_shape, const char *metadata) const
+void array_dtype::get_shape(size_t i, intptr_t *out_shape, const char *metadata) const
 {
     // Adjust the current shape if necessary
     out_shape[i] = shape_signal_varying;
@@ -168,7 +164,7 @@ void array_dtype::get_shape(int i, intptr_t *out_shape, const char *metadata) co
     }
 }
 
-void array_dtype::get_strides(int i, intptr_t *out_strides, const char *metadata) const
+void array_dtype::get_strides(size_t i, intptr_t *out_strides, const char *metadata) const
 {
     const array_dtype_metadata *md = reinterpret_cast<const array_dtype_metadata *>(metadata);
 

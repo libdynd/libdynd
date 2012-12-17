@@ -13,7 +13,8 @@ using namespace std;
 using namespace dynd;
 
 strided_array_dtype::strided_array_dtype(const dtype& element_dtype)
-    : extended_dtype(strided_array_type_id, uniform_array_kind, 0, element_dtype.get_alignment()),
+    : extended_dtype(strided_array_type_id, uniform_array_kind, 0, element_dtype.get_alignment(),
+                    element_dtype.get_undim() + 1),
             m_element_dtype(element_dtype)
 {
     // Copy ndobject properties and functions from the first non-uniform dimension
@@ -175,12 +176,7 @@ dtype strided_array_dtype::at(intptr_t i0, const char **inout_metadata, const ch
     return m_element_dtype;
 }
 
-int strided_array_dtype::get_undim() const
-{
-    return 1 + m_element_dtype.get_undim();
-}
-
-dtype strided_array_dtype::get_dtype_at_dimension(char **inout_metadata, int i, int total_ndim) const
+dtype strided_array_dtype::get_dtype_at_dimension(char **inout_metadata, size_t i, size_t total_ndim) const
 {
     if (i == 0) {
         return dtype(this, true);
@@ -198,7 +194,7 @@ intptr_t strided_array_dtype::get_dim_size(const char *DYND_UNUSED(data), const 
     return md->size;
 }
 
-void strided_array_dtype::get_shape(int i, intptr_t *out_shape) const
+void strided_array_dtype::get_shape(size_t i, intptr_t *out_shape) const
 {
     // Adjust the current shape if necessary
     out_shape[i] = shape_signal_varying;
@@ -209,7 +205,7 @@ void strided_array_dtype::get_shape(int i, intptr_t *out_shape) const
     }
 }
 
-void strided_array_dtype::get_shape(int i, intptr_t *out_shape, const char *metadata) const
+void strided_array_dtype::get_shape(size_t i, intptr_t *out_shape, const char *metadata) const
 {
     const strided_array_dtype_metadata *md = reinterpret_cast<const strided_array_dtype_metadata *>(metadata);
 
@@ -221,7 +217,7 @@ void strided_array_dtype::get_shape(int i, intptr_t *out_shape, const char *meta
     }
 }
 
-void strided_array_dtype::get_strides(int i, intptr_t *out_strides, const char *metadata) const
+void strided_array_dtype::get_strides(size_t i, intptr_t *out_strides, const char *metadata) const
 {
     const strided_array_dtype_metadata *md = reinterpret_cast<const strided_array_dtype_metadata *>(metadata);
 
@@ -495,13 +491,13 @@ void strided_array_dtype::reorder_default_constructed_strides(char *dst_metadata
     }
 }
 
-void strided_array_dtype::get_dynamic_ndobject_properties(const std::pair<std::string, gfunc::callable> **out_properties, int *out_count) const
+void strided_array_dtype::get_dynamic_ndobject_properties(const std::pair<std::string, gfunc::callable> **out_properties, size_t *out_count) const
 {
     *out_properties = m_ndobject_properties.empty() ? NULL : &m_ndobject_properties[0];
     *out_count = (int)m_ndobject_properties.size();
 }
 
-void strided_array_dtype::get_dynamic_ndobject_functions(const std::pair<std::string, gfunc::callable> **out_functions, int *out_count) const
+void strided_array_dtype::get_dynamic_ndobject_functions(const std::pair<std::string, gfunc::callable> **out_functions, size_t *out_count) const
 {
     *out_functions = m_ndobject_functions.empty() ? NULL : &m_ndobject_functions[0];
     *out_count = (int)m_ndobject_functions.size();

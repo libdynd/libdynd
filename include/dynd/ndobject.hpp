@@ -239,6 +239,14 @@ public:
         }
     }
 
+    inline size_t get_undim() const {
+        if (get_ndo()->is_builtin_dtype()) {
+            return 0;
+        } else {
+            return get_ndo()->m_dtype->get_undim();
+        }
+    }
+
     /** The uniform dtype (Most similar to numpy ndarray.dtype property) */
     inline dtype get_udtype() const {
         if (get_ndo()->is_builtin_dtype()) {
@@ -254,7 +262,7 @@ public:
     }
 
     inline std::vector<intptr_t> get_shape() const {
-        std::vector<intptr_t> result(get_dtype().get_undim());
+        std::vector<intptr_t> result(get_undim());
         get_shape(&result[0]);
         return result;
     }
@@ -272,7 +280,7 @@ public:
     }
 
     std::vector<intptr_t> get_strides() const {
-        std::vector<intptr_t> result(get_dtype().get_undim());
+        std::vector<intptr_t> result(get_undim());
         get_strides(&result[0]);
         return result;
     }

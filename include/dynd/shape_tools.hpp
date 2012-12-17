@@ -107,7 +107,7 @@ inline intptr_t apply_single_index(intptr_t i0, intptr_t dimension_size, const d
             return i0;
         } else {
             if (error_dt) {
-                int ndim = error_dt->extended()->get_undim();
+                size_t ndim = error_dt->extended()->get_undim();
                 dimvector shape(ndim);
                 error_dt->extended()->get_shape(0, shape.get());
                 throw index_out_of_bounds(i0, 0, ndim, shape.get());
@@ -119,7 +119,7 @@ inline intptr_t apply_single_index(intptr_t i0, intptr_t dimension_size, const d
         return i0 + dimension_size;
     } else {
         if (error_dt) {
-            int ndim = error_dt->extended()->get_undim();
+            size_t ndim = error_dt->extended()->get_undim();
             dimvector shape(ndim);
             error_dt->extended()->get_shape(0, shape.get());
             throw index_out_of_bounds(i0, 0, ndim, shape.get());
@@ -137,10 +137,10 @@ inline intptr_t apply_single_index(intptr_t i0, intptr_t dimension_size, const d
  *
  * \returns  True if it's a valid permutation, false otherwise.
  */
-inline bool is_valid_perm(int size, const int *perm) {
+inline bool is_valid_perm(size_t size, const int *perm) {
     shortvector<char> flags(size);
     memset(flags.get(), 0, size);
-    for (int i = 0; i < size; ++i) {
+    for (size_t i = 0; i < size; ++i) {
         int v = perm[i];
         if (v < 0 || v > size || flags[v]) {
             return false;
@@ -150,8 +150,8 @@ inline bool is_valid_perm(int size, const int *perm) {
     return true;
 }
 
-inline bool strides_are_c_contiguous(int ndim, intptr_t element_size, const intptr_t *shape, const intptr_t *strides) {
-    for (int i = ndim-1; i >= 0; --i) {
+inline bool strides_are_c_contiguous(size_t ndim, intptr_t element_size, const intptr_t *shape, const intptr_t *strides) {
+    for (intptr_t i = static_cast<intptr_t>(ndim)-1; i >= 0; --i) {
         if (shape[i] != 1 && strides[i] != element_size) {
             return false;
         }
@@ -160,8 +160,8 @@ inline bool strides_are_c_contiguous(int ndim, intptr_t element_size, const intp
     return true;
 }
 
-inline bool strides_are_f_contiguous(int ndim, intptr_t element_size, const intptr_t *shape, const intptr_t *strides) {
-    for (int i = 0; i < ndim; ++i) {
+inline bool strides_are_f_contiguous(size_t ndim, intptr_t element_size, const intptr_t *shape, const intptr_t *strides) {
+    for (size_t i = 0; i < ndim; ++i) {
         if (shape[i] != 1 && strides[i] != element_size) {
             return false;
         }

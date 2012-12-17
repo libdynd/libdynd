@@ -34,7 +34,7 @@ dtype dynd::void_pointer_dtype::apply_linear_index(int nindices, const irange *D
     }
 }
 
-void dynd::void_pointer_dtype::get_shape(int DYND_UNUSED(i), std::vector<intptr_t>& DYND_UNUSED(out_shape)) const
+void dynd::void_pointer_dtype::get_shape(size_t DYND_UNUSED(i), std::vector<intptr_t>& DYND_UNUSED(out_shape)) const
 {
 }
 

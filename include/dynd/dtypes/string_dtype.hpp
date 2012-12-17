@@ -67,7 +67,7 @@ public:
 
     dtype get_canonical_dtype() const;
 
-    void get_shape(int i, std::vector<intptr_t>& out_shape) const;
+    void get_shape(size_t i, std::vector<intptr_t>& out_shape) const;
 
     bool is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const;
 

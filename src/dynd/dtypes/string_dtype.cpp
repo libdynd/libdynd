@@ -149,7 +149,7 @@ dtype string_dtype::get_canonical_dtype() const
 }
 
 
-void string_dtype::get_shape(int DYND_UNUSED(i), std::vector<intptr_t>& DYND_UNUSED(out_shape)) const
+void string_dtype::get_shape(size_t DYND_UNUSED(i), std::vector<intptr_t>& DYND_UNUSED(out_shape)) const
 {
 }
 

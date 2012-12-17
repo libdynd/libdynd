@@ -335,16 +335,30 @@ struct iterdata_broadcasting_terminator {
 char *iterdata_broadcasting_terminator_incr(iterdata_common *iterdata, int level);
 char *iterdata_broadcasting_terminator_reset(iterdata_common *iterdata, char *data, int level);
 
-// The extended_dtype class is for dtypes which require more data
-// than a type_id, kind, and element_size, and endianness.
+/**
+ * This is the virtual base class for defining new dtypes which are not so basic
+ * that we want them in the small list of builtin dtypes. This is a reference
+ * counted class, and is immutable, so once an extended_dtype instance is constructed,
+ * it should never be modified.
+ *
+ * Typically, the extended_dtype is used by manipulating a dtype instance, which acts
+ * as a smart pointer to extended_dtype, which special handling for the builtin types.
+ */
 class extended_dtype {
     /** Embedded reference counting */
     mutable atomic_refcount m_use_count;
 protected:
-    /** Standard dtype data */
+    /// Standard dtype data
+    /** The dtype's type id (type_id_t is the enum) */
     uint16_t m_type_id;
-    uint8_t m_kind, m_alignment;
+    /** The dtype's kind (dtype_kind_t is the enum) */
+    uint8_t m_kind;
+    /** The dtype's data alignment */
+    uint8_t m_alignment;
+    /** The size of one instance of the dtype, or 0 if there is not one fixed size. */
     size_t m_data_size;
+    /** The number of uniform dimensions this dtype has */
+    uint8_t m_undim;
     
 
 protected:
@@ -354,39 +368,48 @@ protected:
                     std::vector<std::pair<std::string, gfunc::callable> >& out_functions) const;
 public:
     /** Starts off the extended dtype instance with a use count of 1. */
-    inline extended_dtype(type_id_t type_id, dtype_kind_t kind, size_t data_size, size_t alignment)
+    inline extended_dtype(type_id_t type_id, dtype_kind_t kind, size_t data_size, size_t alignment, size_t undim=0)
         : m_use_count(1), m_type_id(static_cast<uint16_t>(type_id)), m_kind(static_cast<uint8_t>(kind)),
-                m_alignment(static_cast<uint8_t>(alignment)), m_data_size(data_size)
+                m_alignment(static_cast<uint8_t>(alignment)), m_data_size(data_size), m_undim(static_cast<uint8_t>(undim))
     {}
 
     virtual ~extended_dtype();
 
+    /** The dtype's type id */
     inline type_id_t get_type_id() const {
         return static_cast<type_id_t>(m_type_id);
     }
+    /** The dtype's kind */
     inline dtype_kind_t get_kind() const {
         return static_cast<dtype_kind_t>(m_kind);
     }
+    /** The size of one instance of the dtype, or 0 if there is not one fixed size. */
+    inline size_t get_data_size() const {
+        return m_data_size;
+    }
+    /** The dtype's data alignment. Every data pointer for this dtype _must_ be aligned. */
     inline size_t get_alignment() const {
         return m_alignment;
     }
-    inline size_t get_data_size() const {
-        return m_data_size;
+    /** The number of uniform dimensions this dtype has */
+    inline size_t get_undim() const {
+        return m_undim;
     }
     virtual size_t get_default_data_size(int ndim, const intptr_t *shape) const;
 
     /**
-     * Print the raw data interpreted as a single value of this dtype.
+     * Print the raw data interpreted as a single instance of this dtype.
      *
-     * \param o the std::ostream to print to
-     * \param data pointer to the data element to print
+     * \param o  The std::ostream to print to.
+     * \param metadata  Pointer to the dtype metadata of the data element to print.
+     * \param data  Pointer to the data element to print.
      */
     virtual void print_data(std::ostream& o, const char *metadata, const char *data) const = 0;
 
     /**
      * Print a representation of the dtype itself
      *
-     * \param o the std::ostream to print to
+     * \param o  The std::ostream to print to.
      */
     virtual void print_dtype(std::ostream& o) const = 0;
 
@@ -486,11 +509,6 @@ public:
     virtual dtype at(intptr_t i0, const char **inout_metadata, const char **inout_data) const;
 
     /**
-     * Retrieves the number of initial uniform dimensions.
-     */
-    virtual int get_undim() const;
-
-    /**
      * Retrieves the dtype starting at the requested dimension. This is
      * generally equivalent to apply_linear_index with a count of 'dim'
      * scalar indices.
@@ -502,7 +520,7 @@ public:
      * \param total_ndim  A count of how many dimensions have been traversed from the
      *                    dtype start, for producing error messages.
      */
-    virtual dtype get_dtype_at_dimension(char **inout_metadata, int i, int total_ndim = 0) const;
+    virtual dtype get_dtype_at_dimension(char **inout_metadata, size_t i, size_t total_ndim = 0) const;
 
     /**
      * Retrieves the leading dimension size of the shape.
@@ -518,7 +536,7 @@ public:
      *
      * The output must be pre-initialized to have get_undim() elements.
      */
-    virtual void get_shape(int i, intptr_t *out_shape) const;
+    virtual void get_shape(size_t i, intptr_t *out_shape) const;
 
     /**
      * Retrieves the shape of the dtype ndobject instance, expanding the vector as needed. For dimensions with
@@ -526,7 +544,7 @@ public:
      *
      * The output must be pre-initialized to have get_undim() elements.
      */
-    virtual void get_shape(int i, intptr_t *out_shape, const char *metadata) const;
+    virtual void get_shape(size_t i, intptr_t *out_shape, const char *metadata) const;
 
     /**
      * Retrieves the strides of the dtype ndobject instance, expanding the vector as needed. For dimensions
@@ -535,7 +553,7 @@ public:
      *
      * The output must be pre-initialized to have get_undim() elements.
      */
-    virtual void get_strides(int i, intptr_t *out_strides, const char *metadata) const;
+    virtual void get_strides(size_t i, intptr_t *out_strides, const char *metadata) const;
 
     /**
      * \brief Returns a value representative of a stride for the dimension, used for axis sorting.
@@ -649,12 +667,12 @@ public:
     /**
      * Additional dynamic properties exposed by the dtype as gfunc::callable.
      */
-    virtual void get_dynamic_dtype_properties(const std::pair<std::string, gfunc::callable> **out_properties, int *out_count) const;
+    virtual void get_dynamic_dtype_properties(const std::pair<std::string, gfunc::callable> **out_properties, size_t *out_count) const;
 
     /**
      * Additional dynamic functions exposed by the dtype as gfunc::callable.
      */
-    virtual void get_dynamic_dtype_functions(const std::pair<std::string, gfunc::callable> **out_functions, int *out_count) const;
+    virtual void get_dynamic_dtype_functions(const std::pair<std::string, gfunc::callable> **out_functions, size_t *out_count) const;
 
     /**
      * Additional dynamic properties exposed by any ndobject of this dtype as gfunc::callable.
@@ -663,7 +681,7 @@ public:
      *       be able to handle the case where they are the first non-uniform dtype in an array type, not
      *       just strictly of the non-uniform dtype.
      */
-    virtual void get_dynamic_ndobject_properties(const std::pair<std::string, gfunc::callable> **out_properties, int *out_count) const;
+    virtual void get_dynamic_ndobject_properties(const std::pair<std::string, gfunc::callable> **out_properties, size_t *out_count) const;
 
     /**
      * Additional dynamic functions exposed by any ndobject of this dtype as gfunc::callable.
@@ -672,7 +690,7 @@ public:
      *       be able to handle the case where they are the first non-uniform dtype in an array type, not
      *       just strictly of the non-uniform dtype.
      */
-    virtual void get_dynamic_ndobject_functions(const std::pair<std::string, gfunc::callable> **out_functions, int *out_count) const;
+    virtual void get_dynamic_ndobject_functions(const std::pair<std::string, gfunc::callable> **out_functions, size_t *out_count) const;
 
     friend void extended_dtype_incref(const extended_dtype *ed);
     friend void extended_dtype_decref(const extended_dtype *ed);
@@ -727,7 +745,7 @@ public:
     // TODO: Maybe it should be more flexible?
     size_t get_iterdata_size(int ndim) const;
 
-    void get_dynamic_dtype_properties(const std::pair<std::string, gfunc::callable> **out_properties, int *out_count) const;
+    void get_dynamic_dtype_properties(const std::pair<std::string, gfunc::callable> **out_properties, size_t *out_count) const;
 };
 
 /**
@@ -735,8 +753,8 @@ public:
  */
 class extended_expression_dtype : public extended_dtype {
 public:
-    inline extended_expression_dtype(type_id_t type_id, dtype_kind_t kind, size_t data_size, size_t alignment)
-        : extended_dtype(type_id, kind, data_size, alignment)
+    inline extended_expression_dtype(type_id_t type_id, dtype_kind_t kind, size_t data_size, size_t alignment, size_t undim=0)
+        : extended_dtype(type_id, kind, data_size, alignment, undim)
     {}
 
     virtual ~extended_expression_dtype();
@@ -1144,7 +1162,7 @@ public:
     /**
      * Gets the number of uniform dimensions in the dtype.
      */
-    inline int get_undim() const {
+    inline size_t get_undim() const {
         if (is_builtin()) {
             return 0;
         } else {
@@ -1173,7 +1191,7 @@ public:
         }
     }
 
-    inline dtype get_dtype_at_dimension(char **inout_metadata, int i, int total_ndim = 0) const {
+    inline dtype get_dtype_at_dimension(char **inout_metadata, size_t i, size_t total_ndim = 0) const {
         if (!is_builtin()) {
             return m_extended->get_dtype_at_dimension(inout_metadata, i, total_ndim);
         } else if (i == 0) {

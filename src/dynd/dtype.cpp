@@ -100,13 +100,7 @@ dtype extended_dtype::at(intptr_t DYND_UNUSED(i0), const char **DYND_UNUSED(inou
     throw too_many_indices(1, 0);
 }
 
-int extended_dtype::get_undim() const
-{
-    // Default to heterogeneous dimension/scalar behavior
-    return 0;
-}
-
-dtype extended_dtype::get_dtype_at_dimension(char **DYND_UNUSED(inout_metadata), int i, int total_ndim) const
+dtype extended_dtype::get_dtype_at_dimension(char **DYND_UNUSED(inout_metadata), size_t i, size_t total_ndim) const
 {
     // Default to heterogeneous dimension/scalar behavior
     if (i == 0) {
@@ -124,18 +118,18 @@ intptr_t extended_dtype::get_dim_size(const char *DYND_UNUSED(data), const char 
     throw std::runtime_error(ss.str());
 }
 
-void extended_dtype::get_shape(int DYND_UNUSED(i), intptr_t *DYND_UNUSED(out_shape)) const
+void extended_dtype::get_shape(size_t DYND_UNUSED(i), intptr_t *DYND_UNUSED(out_shape)) const
 {
     // Default to scalar behavior
 }
 
-void extended_dtype::get_shape(int DYND_UNUSED(i), intptr_t *DYND_UNUSED(out_shape),
+void extended_dtype::get_shape(size_t DYND_UNUSED(i), intptr_t *DYND_UNUSED(out_shape),
                     const char *DYND_UNUSED(metadata)) const
 {
     // Default to scalar behavior
 }
 
-void extended_dtype::get_strides(int DYND_UNUSED(i), intptr_t *DYND_UNUSED(out_strides),
+void extended_dtype::get_strides(size_t DYND_UNUSED(i), intptr_t *DYND_UNUSED(out_strides),
                     const char *DYND_UNUSED(metadata)) const
 {
     // Default to scalar behavior
@@ -250,8 +244,8 @@ void extended_dtype::get_nonuniform_ndobject_properties_and_functions(
     // the requested vectors. It is for use by uniform dtypes, which by convention
     // expose the properties from the first non-uniform dtypes, and possibly add
     // additional properties of their own.
-    int ndim = get_undim();
-    int properties_count = 0, functions_count = 0;
+    size_t ndim = get_undim();
+    size_t properties_count = 0, functions_count = 0;
     const std::pair<std::string, gfunc::callable> *properties = NULL, *functions = NULL;
     if (ndim == 0) {
         get_dynamic_ndobject_properties(&properties, &properties_count);
@@ -264,37 +258,37 @@ void extended_dtype::get_nonuniform_ndobject_properties_and_functions(
         }
     }
     out_properties.resize(properties_count);
-    for (int i = 0; i < properties_count; ++i) {
+    for (size_t i = 0; i < properties_count; ++i) {
         out_properties[i] = properties[i];
     }
     out_functions.resize(functions_count);
-    for (int i = 0; i < functions_count; ++i) {
+    for (size_t i = 0; i < functions_count; ++i) {
         out_functions[i] = functions[i];
     }
 }
 
-void extended_dtype::get_dynamic_dtype_properties(const std::pair<std::string, gfunc::callable> **out_properties, int *out_count) const
+void extended_dtype::get_dynamic_dtype_properties(const std::pair<std::string, gfunc::callable> **out_properties, size_t *out_count) const
 {
     // Default to no properties
     *out_properties = NULL;
     *out_count = 0;
 }
 
-void extended_dtype::get_dynamic_dtype_functions(const std::pair<std::string, gfunc::callable> **out_functions, int *out_count) const
+void extended_dtype::get_dynamic_dtype_functions(const std::pair<std::string, gfunc::callable> **out_functions, size_t *out_count) const
 {
     // Default to no functions
     *out_functions = NULL;
     *out_count = 0;
 }
 
-void extended_dtype::get_dynamic_ndobject_properties(const std::pair<std::string, gfunc::callable> **out_properties, int *out_count) const
+void extended_dtype::get_dynamic_ndobject_properties(const std::pair<std::string, gfunc::callable> **out_properties, size_t *out_count) const
 {
     // Default to no properties
     *out_properties = NULL;
     *out_count = 0;
 }
 
-void extended_dtype::get_dynamic_ndobject_functions(const std::pair<std::string, gfunc::callable> **out_functions, int *out_count) const
+void extended_dtype::get_dynamic_ndobject_functions(const std::pair<std::string, gfunc::callable> **out_functions, size_t *out_count) const
 {
     // Default to no functions
     *out_functions = NULL;
@@ -348,7 +342,7 @@ static pair<string, gfunc::callable> extended_string_dtype_properties[] = {
     pair<string, gfunc::callable>("encoding", gfunc::make_callable(&get_extended_string_encoding, "self"))
 };
 
-void extended_string_dtype::get_dynamic_dtype_properties(const std::pair<std::string, gfunc::callable> **out_properties, int *out_count) const
+void extended_string_dtype::get_dynamic_dtype_properties(const std::pair<std::string, gfunc::callable> **out_properties, size_t *out_count) const
 {
     *out_properties = extended_string_dtype_properties;
     *out_count = sizeof(extended_string_dtype_properties) / sizeof(extended_string_dtype_properties[0]);

@@ -524,7 +524,7 @@ ndobject ndobject::p(const char *property_name) const
     dtype dt = get_dtype();
     if (!dt.is_builtin()) {
         const std::pair<std::string, gfunc::callable> *properties;
-        int count;
+        size_t count;
         dt.extended()->get_dynamic_ndobject_properties(&properties, &count);
         // TODO: We probably want to make some kind of acceleration structure for the name lookup
         if (count > 0) {
@@ -546,7 +546,7 @@ ndobject ndobject::p(const std::string& property_name) const
     dtype dt = get_dtype();
     if (!dt.is_builtin()) {
         const std::pair<std::string, gfunc::callable> *properties;
-        int count;
+        size_t count;
         dt.extended()->get_dynamic_ndobject_properties(&properties, &count);
         // TODO: We probably want to make some kind of acceleration structure for the name lookup
         if (count > 0) {
@@ -568,7 +568,7 @@ const gfunc::callable& ndobject::f(const char *function_name) const
     dtype dt = get_dtype();
     if (!dt.is_builtin()) {
         const std::pair<std::string, gfunc::callable> *properties;
-        int count;
+        size_t count;
         dt.extended()->get_dynamic_ndobject_functions(&properties, &count);
         // TODO: We probably want to make some kind of acceleration structure for the name lookup
         if (count > 0) {
@@ -593,7 +593,7 @@ ndobject ndobject::eval_immutable(const eval::eval_context *ectx) const
         // Create a canonical dtype for the result
         const dtype& current_dtype = get_dtype();
         const dtype& dt = current_dtype.get_canonical_dtype();
-        int ndim = current_dtype.get_undim();
+        size_t ndim = current_dtype.get_undim();
         dimvector shape(ndim);
         get_shape(shape.get());
         ndobject result(make_ndobject_memory_block(dt, ndim, shape.get()));
@@ -609,7 +609,7 @@ ndobject ndobject::eval_copy(const eval::eval_context *ectx,
 {
     const dtype& current_dtype = get_dtype();
     const dtype& dt = current_dtype.get_canonical_dtype();
-    int ndim = current_dtype.get_undim();
+    size_t ndim = current_dtype.get_undim();
     dimvector shape(ndim);
     get_shape(shape.get());
     ndobject result(make_ndobject_memory_block(dt, ndim, shape.get()));
@@ -703,7 +703,7 @@ namespace {
 ndobject ndobject::view_scalars(const dtype& scalar_dtype) const
 {
     const dtype& array_dtype = get_dtype();
-    int uniform_ndim = array_dtype.get_undim();
+    size_t uniform_ndim = array_dtype.get_undim();
     // First check if we're dealing with a simple one dimensional block of memory we can reinterpret
     // at will.
     if (uniform_ndim == 1 && array_dtype.get_type_id() == strided_array_type_id) {
@@ -831,7 +831,7 @@ ndobject dynd::empty_like(const ndobject& rhs, const dtype& uniform_dtype)
         return ndobject(uniform_dtype);
     } else {
         dtype dt = rhs.get_ndo()->m_dtype->get_canonical_dtype();
-        int ndim = dt.extended()->get_undim();
+        size_t ndim = dt.extended()->get_undim();
         dt = make_strided_array_dtype(uniform_dtype, ndim);
         dimvector shape(ndim);
         rhs.get_shape(shape.get());
@@ -855,7 +855,7 @@ ndobject dynd::empty_like(const ndobject& rhs)
     if (rhs.is_scalar()) {
         return ndobject(dt);
     } else {
-        int ndim = dt.extended()->get_undim();
+        size_t ndim = dt.extended()->get_undim();
         dimvector shape(ndim);
         rhs.get_shape(shape.get());
         ndobject result(make_ndobject_memory_block(dt, ndim, shape.get()));
@@ -875,7 +875,7 @@ ndobject_vals::operator ndobject() const
     } else {
         // If there is any expression in the dtype, make a copy using the canonical dtype
         const dtype& dt = current_dtype.get_canonical_dtype();
-        int ndim = current_dtype.get_undim();
+        size_t ndim = current_dtype.get_undim();
         dimvector shape(ndim);
         m_arr.get_shape(shape.get());
         ndobject result(make_ndobject_memory_block(dt, ndim, shape.get()));

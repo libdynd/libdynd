@@ -259,7 +259,7 @@ intptr_t fixedstruct_dtype::get_dim_size(const char *DYND_UNUSED(data), const ch
     return m_field_types.size();
 }
 
-void fixedstruct_dtype::get_shape(int i, intptr_t *out_shape) const
+void fixedstruct_dtype::get_shape(size_t i, intptr_t *out_shape) const
 {
     // Adjust the current shape if necessary
     switch (out_shape[i]) {
@@ -481,7 +481,7 @@ static pair<string, gfunc::callable> dtype_properties[] = {
     pair<string, gfunc::callable>("metadata_offsets", gfunc::make_callable(&property_get_metadata_offsets, "self"))
 };
 
-void fixedstruct_dtype::get_dynamic_dtype_properties(const std::pair<std::string, gfunc::callable> **out_properties, int *out_count) const
+void fixedstruct_dtype::get_dynamic_dtype_properties(const std::pair<std::string, gfunc::callable> **out_properties, size_t *out_count) const
 {
     *out_properties = dtype_properties;
     *out_count = sizeof(dtype_properties) / sizeof(dtype_properties[0]);
@@ -496,7 +496,7 @@ static ndobject_preamble *property_get_ndobject_field(const ndobject_preamble *p
     // Get the ndobject 'self' parameter
     ndobject n = ndobject(*(ndobject_preamble **)params->m_data_pointer, true);
     intptr_t i = reinterpret_cast<intptr_t>(extra);
-    int ndim = n.get_dtype().get_undim();
+    size_t ndim = n.get_undim();
     if (ndim == 0) {
         return n.at(i).release();
     } else {
@@ -516,7 +516,7 @@ void fixedstruct_dtype::create_ndobject_properties()
     }
 }
 
-void fixedstruct_dtype::get_dynamic_ndobject_properties(const std::pair<std::string, gfunc::callable> **out_properties, int *out_count) const
+void fixedstruct_dtype::get_dynamic_ndobject_properties(const std::pair<std::string, gfunc::callable> **out_properties, size_t *out_count) const
 {
     *out_properties = m_ndobject_properties.empty() ? NULL : &m_ndobject_properties[0];
     *out_count = (int)m_ndobject_properties.size();

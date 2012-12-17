@@ -192,7 +192,7 @@ dtype dynd::tuple_dtype::apply_linear_index(int nindices, const irange *indices,
     }
 }
 
-void dynd::tuple_dtype::get_shape(int i, intptr_t *out_shape) const
+void dynd::tuple_dtype::get_shape(size_t i, intptr_t *out_shape) const
 {
     // Adjust the current shape if necessary
     switch (out_shape[i]) {

@@ -284,7 +284,7 @@ void dynd::apply_single_linear_index(const irange& irnge, intptr_t dimension_siz
                 out_dimension_size = 1;
             } else {
                 if (error_dt) {
-                    int ndim = error_dt->extended()->get_undim();
+                    size_t ndim = error_dt->extended()->get_undim();
                     dimvector shape(ndim);
                     error_dt->extended()->get_shape(0, shape.get());
                     throw index_out_of_bounds(idx, error_i, ndim, shape.get());
@@ -298,7 +298,7 @@ void dynd::apply_single_linear_index(const irange& irnge, intptr_t dimension_siz
             out_dimension_size = 1;
         } else {
             if (error_dt) {
-                int ndim = error_dt->extended()->get_undim();
+                size_t ndim = error_dt->get_undim();
                 dimvector shape(ndim);
                 error_dt->extended()->get_shape(0, shape.get());
                 throw index_out_of_bounds(idx, error_i, ndim, shape.get());
@@ -314,7 +314,7 @@ void dynd::apply_single_linear_index(const irange& irnge, intptr_t dimension_siz
                 // Starts with a positive index
             } else {
                 if (error_dt) {
-                    int ndim = error_dt->extended()->get_undim();
+                    size_t ndim = error_dt->get_undim();
                     dimvector shape(ndim);
                     error_dt->extended()->get_shape(0, shape.get());
                     throw irange_out_of_bounds(irnge, error_i, ndim, shape.get());
@@ -330,7 +330,7 @@ void dynd::apply_single_linear_index(const irange& irnge, intptr_t dimension_siz
             start = 0;
         } else {
             if (error_dt) {
-                int ndim = error_dt->extended()->get_undim();
+                size_t ndim = error_dt->get_undim();
                 dimvector shape(ndim);
                 error_dt->extended()->get_shape(0, shape.get());
                 throw irange_out_of_bounds(irnge, error_i, ndim, shape.get());
@@ -348,7 +348,7 @@ void dynd::apply_single_linear_index(const irange& irnge, intptr_t dimension_siz
                 end = dimension_size;
             } else {
                 if (error_dt) {
-                    int ndim = error_dt->extended()->get_undim();
+                    size_t ndim = error_dt->get_undim();
                     dimvector shape(ndim);
                     error_dt->extended()->get_shape(0, shape.get());
                     throw irange_out_of_bounds(irnge, error_i, ndim, shape.get());
@@ -361,7 +361,7 @@ void dynd::apply_single_linear_index(const irange& irnge, intptr_t dimension_siz
             end += dimension_size;
         } else {
             if (error_dt) {
-                int ndim = error_dt->extended()->get_undim();
+                size_t ndim = error_dt->get_undim();
                 dimvector shape(ndim);
                 error_dt->extended()->get_shape(0, shape.get());
                 throw irange_out_of_bounds(irnge, error_i, ndim, shape.get());
@@ -398,7 +398,7 @@ void dynd::apply_single_linear_index(const irange& irnge, intptr_t dimension_siz
                 // Starts with a positive index
             } else {
                 if (error_dt) {
-                    int ndim = error_dt->extended()->get_undim();
+                    size_t ndim = error_dt->get_undim();
                     dimvector shape(ndim);
                     error_dt->extended()->get_shape(0, shape.get());
                     throw irange_out_of_bounds(irnge, error_i, ndim, shape.get());
@@ -414,7 +414,7 @@ void dynd::apply_single_linear_index(const irange& irnge, intptr_t dimension_siz
             start = dimension_size - 1;
         } else {
             if (error_dt) {
-                int ndim = error_dt->extended()->get_undim();
+                size_t ndim = error_dt->get_undim();
                 dimvector shape(ndim);
                 error_dt->extended()->get_shape(0, shape.get());
                 throw irange_out_of_bounds(irnge, error_i, ndim, shape.get());
@@ -432,7 +432,7 @@ void dynd::apply_single_linear_index(const irange& irnge, intptr_t dimension_siz
                 end = -1;
             } else {
                 if (error_dt) {
-                    int ndim = error_dt->extended()->get_undim();
+                    size_t ndim = error_dt->get_undim();
                     dimvector shape(ndim);
                     error_dt->extended()->get_shape(0, shape.get());
                     throw irange_out_of_bounds(irnge, error_i, ndim, shape.get());
@@ -445,7 +445,7 @@ void dynd::apply_single_linear_index(const irange& irnge, intptr_t dimension_siz
             end += dimension_size;
         } else {
             if (error_dt) {
-                int ndim = error_dt->extended()->get_undim();
+                size_t ndim = error_dt->get_undim();
                 dimvector shape(ndim);
                 error_dt->extended()->get_shape(0, shape.get());
                 throw irange_out_of_bounds(irnge, error_i, ndim, shape.get());

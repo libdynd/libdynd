@@ -15,7 +15,7 @@ using namespace std;
 using namespace dynd;
 
 fixedarray_dtype::fixedarray_dtype(const dtype& element_dtype, size_t dimension_size)
-    : extended_dtype(fixedarray_type_id, uniform_array_kind, 0, 1),
+    : extended_dtype(fixedarray_type_id, uniform_array_kind, 0, 1, element_dtype.get_undim() + 1),
             m_element_dtype(element_dtype), m_dimension_size(dimension_size)
 {
     size_t child_element_size = element_dtype.get_data_size();
@@ -212,12 +212,7 @@ dtype fixedarray_dtype::at(intptr_t i0, const char **DYND_UNUSED(inout_metadata)
     return m_element_dtype;
 }
 
-int fixedarray_dtype::get_undim() const
-{
-    return 1 + m_element_dtype.get_undim();
-}
-
-dtype fixedarray_dtype::get_dtype_at_dimension(char **inout_metadata, int i, int total_ndim) const
+dtype fixedarray_dtype::get_dtype_at_dimension(char **inout_metadata, size_t i, size_t total_ndim) const
 {
     if (i == 0) {
         return dtype(this, true);
@@ -231,7 +226,7 @@ intptr_t fixedarray_dtype::get_dim_size(const char *DYND_UNUSED(data), const cha
     return m_dimension_size;
 }
 
-void fixedarray_dtype::get_shape(int i, intptr_t *out_shape) const
+void fixedarray_dtype::get_shape(size_t i, intptr_t *out_shape) const
 {
     out_shape[i] = m_dimension_size;
 
@@ -241,7 +236,7 @@ void fixedarray_dtype::get_shape(int i, intptr_t *out_shape) const
     }
 }
 
-void fixedarray_dtype::get_shape(int i, intptr_t *out_shape, const char *metadata) const
+void fixedarray_dtype::get_shape(size_t i, intptr_t *out_shape, const char *metadata) const
 {
     out_shape[i] = m_dimension_size;
 
@@ -251,7 +246,7 @@ void fixedarray_dtype::get_shape(int i, intptr_t *out_shape, const char *metadat
     }
 }
 
-void fixedarray_dtype::get_strides(int i, intptr_t *out_strides, const char *metadata) const
+void fixedarray_dtype::get_strides(size_t i, intptr_t *out_strides, const char *metadata) const
 {
     out_strides[i] = m_stride;
 
@@ -475,13 +470,13 @@ dtype dynd::make_fixedarray_dtype(const dtype& uniform_dtype, int ndim, const in
     }
 }
 
-void fixedarray_dtype::get_dynamic_ndobject_properties(const std::pair<std::string, gfunc::callable> **out_properties, int *out_count) const
+void fixedarray_dtype::get_dynamic_ndobject_properties(const std::pair<std::string, gfunc::callable> **out_properties, size_t *out_count) const
 {
     *out_properties = m_ndobject_properties.empty() ? NULL : &m_ndobject_properties[0];
     *out_count = (int)m_ndobject_properties.size();
 }
 
-void fixedarray_dtype::get_dynamic_ndobject_functions(const std::pair<std::string, gfunc::callable> **out_functions, int *out_count) const
+void fixedarray_dtype::get_dynamic_ndobject_functions(const std::pair<std::string, gfunc::callable> **out_functions, size_t *out_count) const
 {
     *out_functions = m_ndobject_functions.empty() ? NULL : &m_ndobject_functions[0];
     *out_count = (int)m_ndobject_functions.size();
