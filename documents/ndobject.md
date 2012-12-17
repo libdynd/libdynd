@@ -88,8 +88,7 @@ The memory block itself doesn't know where within it the data an
 ndobject needs is, so whereever ndobjects need memory block references,
 they also need a raw data pointer.
 
-Indexing Example
-~~~~~~~~~~~~~~~~
+### Indexing Example
 
 Here's a small example showing the result of a simple
 indexing operation.
@@ -144,38 +143,37 @@ address, which you can see at the top of the printout. That's because
 the array data was embedded in the ndobject's memory, so a reference
 to that ndobject gets substituted for NULL while indexing.
 
-NumPy Example
-~~~~~~~~~~~~~
+### NumPy Example
 
 Here's an example of an array sourced from NumPy. To make it
 more interesting, we cause the memory of the array to be unaligned.
 
->>> mem = np.zeros(9, dtype='i1')
->>> a = mem[1:].view(dtype='i4')
->>> b = nd.ndobject(a)
->>> b.debug_print()
------- ndobject
- address: 0000000002F98D50
- refcount: 1
- dtype:
-  pointer: 0000000002F9D010
-  type: strided_array<unaligned<int32>>
- metadata:
-  flags: 3 (read_access write_access )
-  dtype-specific metadata:
-   strided_array metadata
-    stride: 4
-    size: 2
- data:
-   pointer: 000000000289C5E1
-   reference: 0000000002F9E3A0
-    ------ memory_block at 0000000002F9E3A0
-     reference count: 1
-     type: external
-     object void pointer: 00000000033AF780
-     free function: 000007FEFB7D1C26
+    >>> mem = np.zeros(9, dtype='i1')
+    >>> a = mem[1:].view(dtype='i4')
+    >>> b = nd.ndobject(a)
+    >>> b.debug_print()
+    ------ ndobject
+     address: 0000000002F98D50
+     refcount: 1
+     dtype:
+      pointer: 0000000002F9D010
+      type: strided_array<unaligned<int32>>
+     metadata:
+      flags: 3 (read_access write_access )
+      dtype-specific metadata:
+       strided_array metadata
+        stride: 4
+        size: 2
+     data:
+       pointer: 000000000289C5E1
+       reference: 0000000002F9E3A0
+        ------ memory_block at 0000000002F9E3A0
+         reference count: 1
+         type: external
+         object void pointer: 00000000033AF780
+         free function: 000007FEFB7D1C26
+        ------
     ------
-------
 
 Because the data isn't aligned, the ndobject can't have a straight
 int32 dtype. The solution is to make an unaligned<int32>
@@ -189,8 +187,7 @@ another option that permits ndobjects to be used safely across multiple threads.
 For memory blocks themselves, an atomic increment/decrement is used to provide this
 thread safety.
 
-Variable-Length String Example
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+### Variable-Length String Example
 
 The default string dtype for dynd is parameterized by its encoding and is
 variable-length.  This is handled by having a memory block reference in the
