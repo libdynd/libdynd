@@ -15,6 +15,7 @@
 namespace dynd {
 
 // Forward declaration of object class, for broadcast_error
+class dtype;
 class ndobject;
 
 class dynd_exception : public std::exception {
@@ -73,7 +74,7 @@ public:
      * An exception for when too many indices are provided in
      * an indexing operation (nindex > ndim).
      */
-    too_many_indices(size_t nindices, size_t ndim);
+    too_many_indices(const dtype& dt, size_t nindices, size_t ndim);
 
     virtual ~too_many_indices() throw() {
     }

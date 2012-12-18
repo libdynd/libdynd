@@ -66,7 +66,7 @@ dtype dynd::fixedbytes_dtype::apply_linear_index(int nindices, const irange *ind
             return make_fixedbytes_dtype(dimension_size, 1);
         }
     } else {
-        throw too_many_indices(nindices, current_i + 1);
+        throw too_many_indices(dtype(this, true), nindices, current_i + 1);
     }
 }
 

@@ -110,8 +110,13 @@ ndobject dynd::make_strided_ndobject(const dtype& uniform_dtype, size_t ndim, co
             }
         }
     } else {
-        // Maybe force C-order in this case?
-        throw runtime_error("TODO: make_strided_ndobject handling variable-sized dim");
+        if (axis_perm != NULL) {
+            // Maybe force C-order in this case?
+            throw runtime_error("dynd presently only supports C-order with variable-sized arrays");
+        }
+        // Fill in the ndobject metadata with strides and sizes
+        char *meta = reinterpret_cast<char *>(ndo + 1);
+        array_dtype.extended()->metadata_default_construct(meta, ndim, shape);
     }
 
     return ndobject(result);
@@ -444,7 +449,7 @@ ndobject ndobject::at_array(int nindices, const irange *indices) const
 {
     if (is_scalar()) {
         if (nindices != 0) {
-            throw too_many_indices(nindices, 0);
+            throw too_many_indices(get_dtype(), nindices, 0);
         }
         return *this;
     } else {

@@ -125,7 +125,7 @@ dtype string_dtype::apply_linear_index(int nindices, const irange *DYND_UNUSED(i
         }
         */
     } else {
-        throw too_many_indices(nindices, current_i + 1);
+        throw too_many_indices(dtype(this, true), nindices, current_i + 1);
     }
 }
 

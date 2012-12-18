@@ -16,8 +16,6 @@ namespace {
         /** Every memory block object needs this at the front */
         memory_block_data m_mbd;
         intptr_t m_total_allocated_capacity;
-        /** References to other memory_blocks */
-        vector<memory_block_data *> m_blockrefs;
         /** The malloc'd memory */
         vector<char *> m_memory_handles;
         /** The current malloc'd memory being doled out */
@@ -43,28 +41,13 @@ namespace {
 
         pod_memory_block(intptr_t initial_capacity_bytes)
             : m_mbd(1, pod_memory_block_type), m_total_allocated_capacity(0),
-                    m_blockrefs(0), m_memory_handles()
+                    m_memory_handles()
         {
-            append_memory(initial_capacity_bytes);
-        }
-
-        pod_memory_block(memory_block_ptr *blockrefs_begin, memory_block_ptr *blockrefs_end, intptr_t initial_capacity_bytes)
-            : m_mbd(1, pod_memory_block_type), m_total_allocated_capacity(0),
-                    m_blockrefs(blockrefs_end - blockrefs_begin), m_memory_handles()
-        {
-            for (int i = 0; i < blockrefs_end - blockrefs_begin; ++i) {
-                memory_block_data *ref = blockrefs_begin[i].get();
-                memory_block_incref(ref);
-                m_blockrefs[i] = ref;
-            }
             append_memory(initial_capacity_bytes);
         }
 
         ~pod_memory_block()
         {
-            for (size_t i = 0, i_end = m_blockrefs.size(); i != i_end; ++i) {
-                memory_block_decref(m_blockrefs[i]);
-            }
             for (size_t i = 0, i_end = m_memory_handles.size(); i != i_end; ++i) {
                 free(m_memory_handles[i]);
             }
@@ -75,13 +58,6 @@ namespace {
 memory_block_ptr dynd::make_pod_memory_block(intptr_t initial_capacity_bytes)
 {
     pod_memory_block *pmb = new pod_memory_block(initial_capacity_bytes);
-    return memory_block_ptr(reinterpret_cast<memory_block_data *>(pmb), false);
-}
-
-memory_block_ptr dynd::make_pod_memory_block(memory_block_ptr *blockrefs_begin, memory_block_ptr *blockrefs_end,
-                        intptr_t initial_capacity_bytes)
-{
-    pod_memory_block *pmb = new pod_memory_block(blockrefs_begin, blockrefs_end, initial_capacity_bytes);
     return memory_block_ptr(reinterpret_cast<memory_block_data *>(pmb), false);
 }
 
@@ -179,13 +155,4 @@ void dynd::pod_memory_block_debug_print(const memory_block_data *memblock, std::
     } else {
         o << indent << " finalized: " << emb->m_total_allocated_capacity << "\n";
     } 
-    int blockrefs_size = (int)emb->m_blockrefs.size();
-    if (blockrefs_size == 0) {
-        o << indent << " no blockrefs\n";
-    } else {
-        o << indent << " " << blockrefs_size << " blockrefs\n";
-        for (int i = 0; i < blockrefs_size; ++i) {
-            memory_block_debug_print(emb->m_blockrefs[i], o, indent + " ");
-        }
-    }
 }

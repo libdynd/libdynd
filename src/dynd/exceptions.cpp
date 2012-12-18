@@ -75,18 +75,18 @@ broadcast_error::broadcast_error(size_t ninputs, const ndobject *inputs)
 }
 
 
-inline string too_many_indices_message(size_t nindices, size_t ndim)
+inline string too_many_indices_message(const dtype& dt, size_t nindices, size_t ndim)
 {
     std::stringstream ss;
 
-    ss << "provided " << nindices << " indices, but array has only ";
-    ss << ndim << " dimensions";
+    ss << "provided " << nindices << " indices to dynd dtype " << dt << ", but only ";
+    ss << ndim << " dimensions available";
 
     return ss.str();
 }
 
-dynd::too_many_indices::too_many_indices(size_t nindices, size_t ndim)
-    : dynd_exception("too many indices", too_many_indices_message(nindices, ndim))
+dynd::too_many_indices::too_many_indices(const dtype& dt, size_t nindices, size_t ndim)
+    : dynd_exception("too many indices", too_many_indices_message(dt, nindices, ndim))
 {
     //cout << "throwing too_many_indices\n";
 }

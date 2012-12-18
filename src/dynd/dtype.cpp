@@ -76,7 +76,7 @@ dtype extended_dtype::apply_linear_index(int nindices, const irange *DYND_UNUSED
     if (nindices == 0) {
         return dtype(this, true);
     } else {
-        throw too_many_indices(current_i + nindices, current_i);
+        throw too_many_indices(dtype(this, true), current_i + nindices, current_i);
     }
 }
 
@@ -89,7 +89,7 @@ intptr_t extended_dtype::apply_linear_index(int nindices, const irange *DYND_UNU
     if (nindices == 0) {
         return 0;
     } else {
-        throw too_many_indices(current_i + nindices, current_i);
+        throw too_many_indices(dtype(this, true), current_i + nindices, current_i);
     }
 }
 
@@ -97,7 +97,7 @@ dtype extended_dtype::at(intptr_t DYND_UNUSED(i0), const char **DYND_UNUSED(inou
                 const char **DYND_UNUSED(inout_data)) const
 {
     // Default to scalar behavior
-    throw too_many_indices(1, 0);
+    throw too_many_indices(dtype(this, true), 1, 0);
 }
 
 dtype extended_dtype::get_dtype_at_dimension(char **DYND_UNUSED(inout_metadata), size_t i, size_t total_ndim) const
@@ -106,7 +106,7 @@ dtype extended_dtype::get_dtype_at_dimension(char **DYND_UNUSED(inout_metadata),
     if (i == 0) {
         return dtype(this, true);
     } else {
-        throw too_many_indices(total_ndim + i, total_ndim);
+        throw too_many_indices(dtype(this, true), total_ndim + i, total_ndim);
     }
 }
 
@@ -519,7 +519,7 @@ dtype dtype::at_array(int nindices, const irange *indices) const
         if (nindices == 0) {
             return *this;
         } else {
-            throw too_many_indices(nindices, 0);
+            throw too_many_indices(*this, nindices, 0);
         }
     } else {
         return m_extended->apply_linear_index(nindices, indices, 0, *this);
@@ -532,7 +532,7 @@ dtype dtype::apply_linear_index(int nindices, const irange *indices, int current
         if (nindices == 0) {
             return *this;
         } else {
-            throw too_many_indices(nindices + current_i, current_i);
+            throw too_many_indices(*this, nindices + current_i, current_i);
         }
     } else {
         return m_extended->apply_linear_index(nindices, indices, current_i, root_dt);

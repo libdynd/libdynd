@@ -21,17 +21,6 @@ namespace dynd {
  */
 memory_block_ptr make_pod_memory_block(intptr_t initial_capacity_bytes = 2048);
 
-/**
- * Creates a memory block which can be used to allocate POD output memory
- * for blockref dtypes. This version of the the function includes a list of
- * other memory_blocks that this memory_block should hold a reference to,
- * intended for use when the memory allocated in this block is itself another
- * blockref dtype pointing into another memory block.
- *
- * The initial capacity can be set if a good estimate is known.
- */
-memory_block_ptr make_pod_memory_block(memory_block_ptr *blockrefs_begin, memory_block_ptr *blockrefs_end, intptr_t initial_capacity_bytes = 2048);
-
 void pod_memory_block_debug_print(const memory_block_data *memblock, std::ostream& o, const std::string& indent);
 
 } // namespace dynd

@@ -8,25 +8,34 @@
 #include <stdexcept>
 #include "inc_gtest.hpp"
 
-#include "dynd/dtype_assign.hpp"
-#include "dynd/dtypes/tuple_dtype.hpp"
-#include "dynd/dtypes/array_dtype.hpp"
+#include <dynd/ndobject.hpp>
+#include <dynd/dtypes/tuple_dtype.hpp>
+#include <dynd/dtypes/array_dtype.hpp>
+#include <dynd/dtypes/strided_array_dtype.hpp>
 
 using namespace std;
 using namespace dynd;
+
+TEST(ArrayDType, Shape) {
+    dtype dfloat = make_dtype<float>();
+    dtype darr1 = make_strided_array_dtype(dfloat);
+    dtype darr2 = make_array_dtype(darr1);
+    dtype darr3 = make_strided_array_dtype(darr2);
+
+    intptr_t shape[3] = {3, -1, 2};
+    ndobject a = make_strided_ndobject(dfloat, 3, shape);
+    EXPECT_EQ(darr3, a.get_dtype());
+    EXPECT_EQ(3u, a.get_shape().size());
+    EXPECT_EQ(3, a.get_shape()[0]);
+    EXPECT_EQ(-1, a.get_shape()[1]);
+    EXPECT_EQ(2, a.get_shape()[2]);
+}
 
 TEST(ArrayDType, DTypeSubscript) {
     dtype dfloat = make_dtype<float>();
     dtype darr1 = make_array_dtype(dfloat);
     dtype darr2 = make_array_dtype(darr1);
     dtype dtest;
-
-    // Indexing an array like this creates a result with a known array size
-    dtest = darr1.at(1 <= irange() < 3);
-    // TODO!
-    //EXPECT_EQ(make_strided_array_dtype(), dtest);
-    //dtest = darr2.index(1, ss);
-    //EXPECT_EQ(darr1, dtest);
 
 }
 

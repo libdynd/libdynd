@@ -28,11 +28,12 @@ void array_dtype::print_data(std::ostream& o, const char *metadata, const char *
 {
     const array_dtype_metadata *md = reinterpret_cast<const array_dtype_metadata *>(metadata);
     const array_dtype_data *d = reinterpret_cast<const array_dtype_data *>(data);
+    const char *element_data = d->begin;
     size_t stride = md->stride;
     metadata += sizeof(array_dtype_metadata);
     o << "[";
-    for (size_t i = 0, i_end = d->size; i != i_end; ++i, data += stride) {
-        m_element_dtype.print_data(o, metadata, data);
+    for (size_t i = 0, i_end = d->size; i != i_end; ++i, element_data += stride) {
+        m_element_dtype.print_data(o, metadata, element_data);
         if (i != i_end - 1) {
             o << ", ";
         }
@@ -42,7 +43,7 @@ void array_dtype::print_data(std::ostream& o, const char *metadata, const char *
 
 void array_dtype::print_dtype(std::ostream& o) const
 {
-    o << "strided_array<" << m_element_dtype << ">";
+    o << "array<" << m_element_dtype << ">";
 }
 
 bool array_dtype::is_scalar() const
@@ -160,7 +161,7 @@ void array_dtype::get_shape(size_t i, intptr_t *out_shape, const char *metadata)
 
     // Process the later shape values
     if (!m_element_dtype.is_builtin()) {
-        m_element_dtype.extended()->get_shape(i+1, out_shape, metadata);
+        m_element_dtype.extended()->get_shape(i+1, out_shape, metadata + sizeof(array_dtype_metadata));
     }
 }
 

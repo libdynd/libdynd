@@ -972,7 +972,7 @@ public:
         if (!is_builtin()) {
             return m_extended->at(i0, inout_metadata, inout_data);
         } else {
-            throw too_many_indices(1, 0);
+            throw too_many_indices(*this, 1, 0);
         }
     }
 
@@ -1198,7 +1198,7 @@ public:
         } else if (i == 0) {
             return *this;
         } else {
-            throw too_many_indices(total_ndim + i, total_ndim);
+            throw too_many_indices(*this, total_ndim + i, total_ndim);
         }
     }
 

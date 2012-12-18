@@ -30,7 +30,7 @@ dtype dynd::void_pointer_dtype::apply_linear_index(int nindices, const irange *D
     if (nindices == 0) {
         return dtype(this, true);
     } else {
-        throw too_many_indices(current_i + nindices, current_i);
+        throw too_many_indices(dtype(this, true), current_i + nindices, current_i);
     }
 }
 
