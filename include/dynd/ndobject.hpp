@@ -252,7 +252,12 @@ public:
         if (get_ndo()->is_builtin_dtype()) {
             return dtype(get_ndo()->get_builtin_type_id());
         } else {
-            return get_ndo()->m_dtype->get_dtype_at_dimension(NULL, get_ndo()->m_dtype->get_undim());
+            size_t undim = get_ndo()->m_dtype->get_undim();
+            if (undim == 0) {
+                return dtype(get_ndo()->m_dtype, true);
+            } else {
+                return get_ndo()->m_dtype->get_dtype_at_dimension(NULL, undim);
+            }
         }
     }
 
@@ -504,8 +509,8 @@ public:
 };
 
 /** Makes a strided ndobject with uninitialized data. If axis_perm is NULL, it is C-order */
-ndobject make_strided_ndobject(const dtype& uniform_dtype, int ndim, const intptr_t *shape,
-                int64_t access_flags, const int *axis_perm);
+ndobject make_strided_ndobject(const dtype& uniform_dtype, size_t ndim, const intptr_t *shape,
+                int64_t access_flags = read_access_flag|write_access_flag, const int *axis_perm = NULL);
 
 /**
  * \brief Makes a strided ndobject pointing to existing data
@@ -524,7 +529,7 @@ ndobject make_strided_ndobject(const dtype& uniform_dtype, int ndim, const intpt
  *
  * \returns  The created ndobject.
  */
-ndobject make_strided_ndobject_from_data(const dtype& uniform_dtype, int ndim, const intptr_t *shape,
+ndobject make_strided_ndobject_from_data(const dtype& uniform_dtype, size_t ndim, const intptr_t *shape,
                 const intptr_t *strides, int64_t access_flags, char *data_ptr,
                 const memory_block_ptr& data_reference, char **out_uniform_metadata = NULL);
 

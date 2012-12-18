@@ -6,6 +6,7 @@
 #include <dynd/ndobject.hpp>
 #include <dynd/ndobject_iter.hpp>
 #include <dynd/dtypes/strided_array_dtype.hpp>
+#include <dynd/dtypes/array_dtype.hpp>
 #include <dynd/dtypes/dtype_alignment.hpp>
 #include <dynd/dtypes/view_dtype.hpp>
 #include <dynd/dtypes/string_dtype.hpp>
@@ -44,27 +45,33 @@ make_immutable_builtin_scalar_ndobject(const T& value)
     return result;
 }
 
-ndobject dynd::make_strided_ndobject(const dtype& uniform_dtype, int ndim, const intptr_t *shape,
+ndobject dynd::make_strided_ndobject(const dtype& uniform_dtype, size_t ndim, const intptr_t *shape,
                 int64_t access_flags, const int *axis_perm)
 {
-    // Determine the total data size
-    intptr_t element_size;
-    if (!uniform_dtype.is_builtin()) {
-        element_size = uniform_dtype.extended()->get_default_data_size(0, NULL);
-    } else {
-        element_size = uniform_dtype.get_data_size();
-    }
-    intptr_t size = element_size;
-    for (int i = 0; i < ndim; ++i) {
-        size *= shape[i];
+    // Create the dtype of the result
+    dtype array_dtype = uniform_dtype;
+    bool any_variable_dims = false;
+    for (intptr_t i = ndim-1; i >= 0; --i) {
+        if (shape[i] >= 0) {
+            array_dtype = make_strided_array_dtype(array_dtype);
+        } else {
+            array_dtype = make_array_dtype(array_dtype);
+            any_variable_dims = true;
+        }
     }
 
-    dtype array_dtype = make_strided_array_dtype(uniform_dtype, ndim);
+    // Determine the total data size
+    size_t data_size;
+    if (array_dtype.is_builtin()) {
+        data_size = array_dtype.get_data_size();
+    } else {
+        data_size = array_dtype.extended()->get_default_data_size(ndim, shape);
+    }
 
     // Allocate the ndobject metadata and data in one memory block
     char *data_ptr = NULL;
     memory_block_ptr result = make_ndobject_memory_block(array_dtype.extended()->get_metadata_size(),
-                    size, uniform_dtype.get_alignment(), &data_ptr);
+                    data_size, uniform_dtype.get_alignment(), &data_ptr);
 
     // Fill in the preamble metadata
     ndobject_preamble *ndo = reinterpret_cast<ndobject_preamble *>(result.get());
@@ -74,34 +81,42 @@ ndobject dynd::make_strided_ndobject(const dtype& uniform_dtype, int ndim, const
     ndo->m_data_reference = NULL;
     ndo->m_flags = access_flags;
 
-    // Fill in the ndobject metadata with strides and sizes
-    strided_array_dtype_metadata *meta = reinterpret_cast<strided_array_dtype_metadata *>(ndo + 1);
-    // Use the default construction to handle the uniform_dtype's metadata
-    if (!uniform_dtype.is_builtin()) {
-        uniform_dtype.extended()->metadata_default_construct(reinterpret_cast<char *>(meta + ndim), 0, NULL);
-    }
-    intptr_t stride = element_size;
-    if (axis_perm == NULL) {
-        for (int i = ndim - 1; i >= 0; --i) {
-            intptr_t dim_size = shape[i];
-            meta[i].stride = dim_size > 1 ? stride : 0;
-            meta[i].size = dim_size;
-            stride *= dim_size;
+    if (!any_variable_dims) {
+        // Fill in the ndobject metadata with strides and sizes
+        strided_array_dtype_metadata *meta = reinterpret_cast<strided_array_dtype_metadata *>(ndo + 1);
+        // Use the default construction to handle the uniform_dtype's metadata
+        intptr_t stride = uniform_dtype.get_data_size();
+        if (stride == 0) {
+            stride = uniform_dtype.extended()->get_default_data_size(0, NULL);
+        }
+        if (!uniform_dtype.is_builtin()) {
+            uniform_dtype.extended()->metadata_default_construct(reinterpret_cast<char *>(meta + ndim), 0, NULL);
+        }
+        if (axis_perm == NULL) {
+            for (int i = ndim - 1; i >= 0; --i) {
+                intptr_t dim_size = shape[i];
+                meta[i].stride = dim_size > 1 ? stride : 0;
+                meta[i].size = dim_size;
+                stride *= dim_size;
+            }
+        } else {
+            for (int i = 0; i < ndim; ++i) {
+                int i_perm = axis_perm[i];
+                intptr_t dim_size = shape[i_perm];
+                meta[i_perm].stride = dim_size > 1 ? stride : 0;
+                meta[i_perm].size = dim_size;
+                stride *= dim_size;
+            }
         }
     } else {
-        for (int i = 0; i < ndim; ++i) {
-            int i_perm = axis_perm[i];
-            intptr_t dim_size = shape[i_perm];
-            meta[i_perm].stride = dim_size > 1 ? stride : 0;
-            meta[i_perm].size = dim_size;
-            stride *= dim_size;
-        }
+        // Maybe force C-order in this case?
+        throw runtime_error("TODO: make_strided_ndobject handling variable-sized dim");
     }
 
     return ndobject(result);
 }
 
-ndobject dynd::make_strided_ndobject_from_data(const dtype& uniform_dtype, int ndim, const intptr_t *shape,
+ndobject dynd::make_strided_ndobject_from_data(const dtype& uniform_dtype, size_t ndim, const intptr_t *shape,
                 const intptr_t *strides, int64_t access_flags, char *data_ptr,
                 const memory_block_ptr& data_reference, char **out_uniform_metadata)
 {
@@ -127,7 +142,7 @@ ndobject dynd::make_strided_ndobject_from_data(const dtype& uniform_dtype, int n
 
     // Fill in the ndobject metadata with the shape and strides
     strided_array_dtype_metadata *meta = reinterpret_cast<strided_array_dtype_metadata *>(ndo + 1);
-    for (int i = 0; i < ndim; ++i) {
+    for (size_t i = 0; i < ndim; ++i) {
         intptr_t dim_size = shape[i];
         meta[i].stride = dim_size > 1 ? strides[i] : 0;
         meta[i].size = dim_size;

@@ -14,15 +14,14 @@
 
 namespace dynd {
 
-// Forward declaration of ndarray class, for broadcast_error
-class ndarray_node_ptr;
+// Forward declaration of object class, for broadcast_error
 class ndobject;
 
-class dnd_exception : public std::exception {
+class dynd_exception : public std::exception {
 protected:
     std::string m_message, m_what;
 public:
-    dnd_exception(const char *exception_name, const std::string& msg)
+    dynd_exception(const char *exception_name, const std::string& msg)
         : m_message(msg), m_what(std::string() + exception_name + ": " + msg)
     {
     }
@@ -34,14 +33,14 @@ public:
         return m_what.c_str();
     }
 
-    virtual ~dnd_exception() throw() {
+    virtual ~dynd_exception() throw() {
     }
 };
 
 /**
  * An exception for various kinds of broadcast errors.
  */
-class broadcast_error : public dnd_exception {
+class broadcast_error : public dynd_exception {
 public:
 
     /**
@@ -59,7 +58,7 @@ public:
      * An exception for when a number of input operands can't be broadcast
      * together.
      */
-    broadcast_error(int noperands, const ndarray_node_ptr *operands);
+    broadcast_error(size_t ninputs, const ndobject *inputs);
 
     virtual ~broadcast_error() throw() {
     }
@@ -68,7 +67,7 @@ public:
 /**
  * An exception for an index out of bounds
  */
-class too_many_indices : public dnd_exception {
+class too_many_indices : public dynd_exception {
 public:
     /**
      * An exception for when too many indices are provided in
@@ -80,7 +79,7 @@ public:
     }
 };
 
-class index_out_of_bounds : public dnd_exception {
+class index_out_of_bounds : public dynd_exception {
 public:
     /**
      * An exception for when 'i' isn't within bounds for
@@ -94,7 +93,7 @@ public:
     }
 };
 
-class axis_out_of_bounds : public dnd_exception {
+class axis_out_of_bounds : public dynd_exception {
 public:
     /**
      * An exception for when 'i' isn't a valid axis
@@ -109,7 +108,7 @@ public:
 /**
  * An exception for a range out of bounds.
  */
-class irange_out_of_bounds : public dnd_exception {
+class irange_out_of_bounds : public dynd_exception {
 public:
     /**
      * An exception for when 'i' isn't within bounds for
@@ -126,7 +125,7 @@ public:
 /**
  * An exception for an invalid type ID.
  */
-class invalid_type_id : public dnd_exception {
+class invalid_type_id : public dynd_exception {
 public:
     invalid_type_id(int type_id);
 

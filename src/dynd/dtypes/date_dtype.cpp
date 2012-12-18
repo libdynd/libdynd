@@ -156,10 +156,31 @@ static ndobject function_dtype_today(const dtype& dt) {
     return result;
 }
 
-static ndobject function_dtype_construct(const dtype& dt, const ndobject& /*year*/, const ndobject& /*month*/, const ndobject& /*day*/)
+static ndobject function_dtype_construct(const dtype& dt, const ndobject& year, const ndobject& month, const ndobject& day)
 {
-    // TODO
-    return ndobject(dt);
+    // TODO proper buffering
+    ndobject year_as_int = year.cast_udtype(make_dtype<int32_t>()).vals();
+    ndobject month_as_int = month.cast_udtype(make_dtype<int32_t>()).vals();
+    ndobject day_as_int = day.cast_udtype(make_dtype<int32_t>()).vals();
+    ndobject result;
+
+    ndobject_iter<1,3> iter(make_date_dtype(), result, year_as_int, month_as_int, day_as_int);
+    if (!iter.empty()) {
+        datetime::date_ymd ymd;
+        do {
+            ymd.year = *reinterpret_cast<const int32_t *>(iter.data<1>());
+            ymd.month = *reinterpret_cast<const int32_t *>(iter.data<2>());
+            ymd.day = *reinterpret_cast<const int32_t *>(iter.data<3>());
+            if (!datetime::is_valid_ymd(ymd)) {
+                stringstream ss;
+                ss << "invalid year/month/day " << ymd.year << "/" << ymd.month << "/" << ymd.day;
+                throw runtime_error(ss.str());
+            }
+            *reinterpret_cast<int32_t *>(iter.data<0>()) = datetime::ymd_to_days(ymd);
+        } while (iter.next());
+    }
+
+    return result;
 }
 
 static pair<string, gfunc::callable> date_dtype_functions[] = {
@@ -306,7 +327,7 @@ static ndobject function_ndo_replace(const ndobject& n, int32_t year, int32_t mo
                 date = *reinterpret_cast<const int32_t *>(iter.data<1>());
             }
             // Convert the date to a 'struct tm'
-            datetime::date_to_ymd(date, datetime::datetime_unit_day, ymd);
+            datetime::days_to_ymd(date, ymd);
             // Replace the values as requested
             if (year != numeric_limits<int32_t>::max()) {
                 ymd.year = year;

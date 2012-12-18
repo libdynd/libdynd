@@ -1174,10 +1174,11 @@ public:
      * Gets the dtype with all the unifom dimensions stripped away.
      */
     inline dtype get_udtype() const {
-        if (is_builtin()) {
+        size_t undim = get_undim();
+        if (get_undim() == 0) {
             return *this;
         } else {
-            return m_extended->get_dtype_at_dimension(NULL, m_extended->get_undim());
+            return m_extended->get_dtype_at_dimension(NULL, undim);
         }
     }
 
