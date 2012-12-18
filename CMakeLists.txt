@@ -113,6 +113,7 @@ set(dynd_SRC
     src/dynd/gfunc/elwise_reduce_gfunc.cpp
     src/dynd/gfunc/serialize.cpp
     include/dynd/gfunc/callable.hpp
+    include/dynd/gfunc/call_callable.hpp
     include/dynd/gfunc/elwise_gfunc.hpp
     include/dynd/gfunc/elwise_reduce_gfunc.hpp
     include/dynd/gfunc/make_callable.hpp

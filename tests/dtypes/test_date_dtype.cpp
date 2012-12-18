@@ -17,6 +17,7 @@
 #include <dynd/dtypes/fixedstruct_dtype.hpp>
 #include <dynd/dtypes/struct_dtype.hpp>
 #include <dynd/gfunc/callable.hpp>
+#include <dynd/gfunc/call_callable.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -154,7 +155,7 @@ TEST(DateDType, ToStructFunction) {
     ndobject a, b;
 
     a = ndobject("1955-03-13").cast_scalars(d).vals();
-    b = a.f("to_struct").call(a);
+    b = a.f("to_struct");
     EXPECT_EQ(make_convert_dtype(make_fixedstruct_dtype(make_dtype<int32_t>(), "year", make_dtype<int8_t>(), "month", make_dtype<int8_t>(), "day"), d),
                     b.get_dtype());
     b = b.vals();
@@ -243,17 +244,17 @@ TEST(DateDType, StrFTime) {
 
     a = ndobject("1955-03-13").cast_scalars(d).vals();
 
-    b = a.f("strftime").call(a, "%Y");
+    b = a.f("strftime", "%Y");
     EXPECT_EQ("1955", b.as<string>());
-    b = a.f("strftime").call(a, "%m/%d/%y");
+    b = a.f("strftime", "%m/%d/%y");
     EXPECT_EQ("03/13/55", b.as<string>());
-    b = a.f("strftime").call(a, "%Y and %j");
+    b = a.f("strftime", "%Y and %j");
     EXPECT_EQ("1955 and 072", b.as<string>());
 
     const char *strs[] = {"1931-12-12", "2013-05-14", "2012-12-25"};
     a = ndobject(strs).cast_scalars(d).vals();
 
-    b = a.f("strftime").call(a, "%Y-%m-%d %j %U %w %W");
+    b = a.f("strftime", "%Y-%m-%d %j %U %w %W");
     EXPECT_EQ("1931-12-12 346 49 6 49", b.at(0).as<string>());
     EXPECT_EQ("2013-05-14 134 19 2 19", b.at(1).as<string>());
     EXPECT_EQ("2012-12-25 360 52 2 52", b.at(2).as<string>());
@@ -268,7 +269,7 @@ TEST(DateDType, StrFTimeBadFormat) {
 
     a = ndobject("1955-03-13").cast_scalars(d).vals();
     // Invalid format string should raise an error.
-    EXPECT_THROW(a.f("strftime").call(a, "%Y %x %s"), runtime_error);
+    EXPECT_THROW(a.f("strftime", "%Y %x %s"), runtime_error);
 }
 #endif
 
@@ -277,9 +278,9 @@ TEST(DateDType, WeekDay) {
     ndobject a;
 
     a = ndobject("1955-03-13").cast_scalars(d).vals();
-    EXPECT_EQ(6, a.f("weekday").call(a).as<int32_t>());
+    EXPECT_EQ(6, a.f("weekday").as<int32_t>());
     a = ndobject("2002-12-04").cast_scalars(d).vals();
-    EXPECT_EQ(2, a.f("weekday").call(a).as<int32_t>());
+    EXPECT_EQ(2, a.f("weekday").as<int32_t>());
 }
 
 TEST(DateDType, Replace) {
@@ -287,33 +288,33 @@ TEST(DateDType, Replace) {
     ndobject a;
 
     a = ndobject("1955-03-13").cast_scalars(d).vals();
-    EXPECT_EQ("2013-03-13", a.f("replace").call(a, 2013).as<string>());
-    EXPECT_EQ("2012-12-13", a.f("replace").call(a, 2012, 12).as<string>());
-    EXPECT_EQ("2012-12-15", a.f("replace").call(a, 2012, 12, 15).as<string>());
+    EXPECT_EQ("2013-03-13", a.f("replace", 2013).as<string>());
+    EXPECT_EQ("2012-12-13", a.f("replace", 2012, 12).as<string>());
+    EXPECT_EQ("2012-12-15", a.f("replace", 2012, 12, 15).as<string>());
     // Custom extension, allow -1 indexing from the end for months and days
-    EXPECT_EQ("2012-12-30", a.f("replace").call(a, 2012, -1, 30).as<string>());
-    EXPECT_EQ("2012-05-31", a.f("replace").call(a, 2012, -8, -1).as<string>());
+    EXPECT_EQ("2012-12-30", a.f("replace", 2012, -1, 30).as<string>());
+    EXPECT_EQ("2012-05-31", a.f("replace", 2012, -8, -1).as<string>());
     // The C++ call interface doesn't let you skip arguments (yet, there is no keyword argument mechanism),
     // so test this manually
-    ndobject param = a.f("replace").get_default_parameters().eval_copy();
+    ndobject param = a.find_dynamic_function("replace").get_default_parameters().eval_copy();
     *reinterpret_cast<void **>(param.at(0).get_readwrite_originptr()) = (void*)a.get_ndo();
     param.at(2).vals() = 7;
-    EXPECT_EQ("1955-07-13", a.f("replace").call_generic(param).as<string>());
+    EXPECT_EQ("1955-07-13", a.find_dynamic_function("replace").call_generic(param).as<string>());
     param.at(3).vals() = -1;
-    EXPECT_EQ("1955-07-31", a.f("replace").call_generic(param).as<string>());
+    EXPECT_EQ("1955-07-31", a.find_dynamic_function("replace").call_generic(param).as<string>());
     param.at(2).vals() = 2;
-    EXPECT_EQ("1955-02-28", a.f("replace").call_generic(param).as<string>());
+    EXPECT_EQ("1955-02-28", a.find_dynamic_function("replace").call_generic(param).as<string>());
     param.at(1).vals() = 2012;
-    EXPECT_EQ("2012-02-29", a.f("replace").call_generic(param).as<string>());
+    EXPECT_EQ("2012-02-29", a.find_dynamic_function("replace").call_generic(param).as<string>());
     // Should throw an exception when no arguments or out of bounds arguments are provided
-    EXPECT_THROW(a.f("replace").call(a), runtime_error);
-    EXPECT_THROW(a.f("replace").call(a, 2000, -13), runtime_error);
-    EXPECT_THROW(a.f("replace").call(a, 2000, 0), runtime_error);
-    EXPECT_THROW(a.f("replace").call(a, 2000, 13), runtime_error);
-    EXPECT_THROW(a.f("replace").call(a, 1900, 2, -29), runtime_error);
-    EXPECT_THROW(a.f("replace").call(a, 1900, 2, 0), runtime_error);
-    EXPECT_THROW(a.f("replace").call(a, 1900, 2, 29), runtime_error);
-    EXPECT_THROW(a.f("replace").call(a, 2000, 2, -30), runtime_error);
-    EXPECT_THROW(a.f("replace").call(a, 2000, 2, 0), runtime_error);
-    EXPECT_THROW(a.f("replace").call(a, 2000, 2, 30), runtime_error);
+    EXPECT_THROW(a.f("replace"), runtime_error);
+    EXPECT_THROW(a.f("replace", 2000, -13), runtime_error);
+    EXPECT_THROW(a.f("replace", 2000, 0), runtime_error);
+    EXPECT_THROW(a.f("replace", 2000, 13), runtime_error);
+    EXPECT_THROW(a.f("replace", 1900, 2, -29), runtime_error);
+    EXPECT_THROW(a.f("replace", 1900, 2, 0), runtime_error);
+    EXPECT_THROW(a.f("replace", 1900, 2, 29), runtime_error);
+    EXPECT_THROW(a.f("replace", 2000, 2, -30), runtime_error);
+    EXPECT_THROW(a.f("replace", 2000, 2, 0), runtime_error);
+    EXPECT_THROW(a.f("replace", 2000, 2, 30), runtime_error);
 }

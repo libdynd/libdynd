@@ -16,6 +16,7 @@
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/exceptions.hpp>
 #include <dynd/gfunc/callable.hpp>
+#include <dynd/gfunc/call_callable.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -578,7 +579,7 @@ ndobject ndobject::p(const std::string& property_name) const
     throw runtime_error(ss.str());
 }
 
-const gfunc::callable& ndobject::f(const char *function_name) const
+const gfunc::callable& ndobject::find_dynamic_function(const char *function_name) const
 {
     dtype dt = get_dtype();
     if (!dt.is_builtin()) {

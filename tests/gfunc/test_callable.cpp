@@ -12,6 +12,7 @@
 
 #include <dynd/gfunc/callable.hpp>
 #include <dynd/gfunc/make_callable.hpp>
+#include <dynd/gfunc/call_callable.hpp>
 #include <dynd/dtypes/strided_array_dtype.hpp>
 #include <dynd/dtypes/string_dtype.hpp>
 
