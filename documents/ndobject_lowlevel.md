@@ -121,3 +121,52 @@ the interface for dtypes.
 To distinguish between these two cases, there is a constant `builtin_type_id_mask`, which
 indicates the bits used for the builtin type id. This is used by the dtype.is_builtin()
 method to test whether only the lowest bits are set.
+
+The interface to a dtype is defined by virtual functions in the base class extended_dtype.
+These functions can be broadly grouped into three different kinds, functions which operate
+on just dtypes, functions which use the dtype and metadata together, and functions
+which use dtype, metadata, and data together.
+
+This API is presently designed for use from C++, and with some stabilization of the
+fundamental dtypes for arrays and various primitives, an important development will
+be to create a C API that wraps the C++ implementation. Whether and how to create a mechanism
+to create new dtypes in other languages like C or Python is something for later.
+
+One likely development path is to restructure the extended_dtype type hierarchy so that
+is has a predictable memory layout irrespective of the C++ compiler it is created with.
+The tricky part of this is to maintain the convenience, performance, and brevity of C++ virtual
+functions in creating such a scheme.
+
+
+### Example: Accessing a One-dimensional Strided Array
+
+The structure of a simple 1D strided array is as follows, as seen from Python:
+
+    In [9]: a.debug_print()
+    ------ ndobject
+     address: 000000000705A200
+     refcount: 1
+     dtype:
+      pointer: 0000000007059480
+      type: strided_array<int32>
+     metadata:
+      flags: 3 (read_access write_access )
+      dtype-specific metadata:
+       strided_array metadata
+        stride: 4
+        size: 4
+     data:
+       pointer: 000000000705A240
+       reference: 0000000000000000 (embedded in ndobject memory)
+    ------
+
+    In [10]: a.dtype
+    Out[10]: nd.dtype('strided_array<int32>')
+
+    In [11]: a.dtype[0]
+    Out[11]: nd.dt.int32
+
+If you have a raw pointer to this object, you can first check its dtype by inspecting
+it as a pointer to `ndobject_preamble`, whose structure is given above. After checking
+that the type_id of the dtype is `strided_array_type_id`, the dtype can be cast
+to a strided_array_dtype pointer. The method 
