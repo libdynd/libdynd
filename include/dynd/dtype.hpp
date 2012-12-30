@@ -319,11 +319,24 @@ typedef char * (*iterdata_increment_fn_t)(iterdata_common *iterdata, int level);
  */
 typedef char * (*iterdata_reset_fn_t)(iterdata_common *iterdata, char *data, int ndim);
 
+/**
+ * This is a generic function which applies a transformation to a dtype.
+ * Usage of the function pointer is typically paired with the
+ * extended_dtype::transform_child_dtypes virtual function on the dtype
+ *
+ * An implementation of this function should either copy 'dt' into
+ * 'out_transformed_dtype', and leave 'out_was_transformed alone', or it
+ * should place a different dtype in 'out_transformed_dtype', then set
+ * 'out_was_transformed' to true.
+ */
 typedef void (*dtype_transform_fn_t)(const dtype& dt, const void *extra,
                 dtype& out_transformed_dtype, bool& out_was_transformed);
 
+// Common preamble of all iterdata instances
 struct iterdata_common {
+    // This increments the iterator at the requested level
     iterdata_increment_fn_t incr;
+    // This resets the data pointers of the iterator
     iterdata_reset_fn_t reset;
 };
 
