@@ -18,7 +18,7 @@ struct fixedarray_dtype_iterdata {
     intptr_t stride;
 };
 
-class fixedarray_dtype : public extended_dtype {
+class fixedarray_dtype : public base_dtype {
     dtype m_element_dtype;
     intptr_t m_stride;
     size_t m_dimension_size;
@@ -32,7 +32,7 @@ public:
     virtual ~fixedarray_dtype();
 
     size_t get_default_data_size(int DYND_UNUSED(ndim), const intptr_t *DYND_UNUSED(shape)) const {
-        return m_data_size;
+        return get_data_size();
     }
 
     const dtype& get_element_dtype() const {
@@ -87,7 +87,7 @@ public:
                     assign_error_mode errmode,
                     kernel_instance<unary_operation_pair_t>& out_kernel) const;
 
-    bool operator==(const extended_dtype& rhs) const;
+    bool operator==(const base_dtype& rhs) const;
 
     size_t get_metadata_size() const {
         return 0;

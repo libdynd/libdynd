@@ -10,7 +10,7 @@ using namespace std;
 using namespace dynd;
 
 dynd::convert_dtype::convert_dtype(const dtype& value_dtype, const dtype& operand_dtype, assign_error_mode errmode)
-    : extended_expression_dtype(convert_type_id, expression_kind, operand_dtype.get_data_size(), operand_dtype.get_alignment()),
+    : base_expression_dtype(convert_type_id, expression_kind, operand_dtype.get_data_size(), operand_dtype.get_alignment()),
             m_value_dtype(value_dtype), m_operand_dtype(operand_dtype), m_errmode(errmode)
 {
     // An alternative to this error would be to use value_dtype.value_dtype(), cutting
@@ -88,7 +88,7 @@ bool dynd::convert_dtype::is_lossless_assignment(const dtype& dst_dt, const dtyp
     }
 }
 
-bool dynd::convert_dtype::operator==(const extended_dtype& rhs) const
+bool dynd::convert_dtype::operator==(const base_dtype& rhs) const
 {
     if (this == &rhs) {
         return true;
@@ -136,7 +136,7 @@ dtype dynd::convert_dtype::with_replaced_storage_dtype(const dtype& replacement_
 {
     if (m_operand_dtype.get_kind() == expression_kind) {
         return dtype(new convert_dtype(m_value_dtype,
-                        static_cast<const extended_expression_dtype *>(m_operand_dtype.extended())->with_replaced_storage_dtype(replacement_dtype),
+                        static_cast<const base_expression_dtype *>(m_operand_dtype.extended())->with_replaced_storage_dtype(replacement_dtype),
                         m_errmode));
     } else {
         if (m_operand_dtype != replacement_dtype.value_dtype()) {

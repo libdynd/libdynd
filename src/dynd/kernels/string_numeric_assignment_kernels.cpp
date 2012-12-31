@@ -109,7 +109,7 @@ static void string_to_bool_single_kernel(char *dst, const char *src, unary_kerne
 {
     string_to_builtin_auxdata& ad = get_auxiliary_data<string_to_builtin_auxdata>(extra->auxdata);
     // Get the string from the source
-    const extended_string_dtype *esd = static_cast<const extended_string_dtype *>(ad.src_string_dt.extended());
+    const base_string_dtype *esd = static_cast<const base_string_dtype *>(ad.src_string_dt.extended());
     string s = esd->get_utf8_string(extra->src_metadata, src, ad.errmode);
     trim(s);
     to_lower(s);
@@ -198,7 +198,7 @@ namespace { template<typename T> struct string_to_int {
     {
         string_to_builtin_auxdata& ad = get_auxiliary_data<string_to_builtin_auxdata>(extra->auxdata);
         // Get the string from the source
-        const extended_string_dtype *esd = static_cast<const extended_string_dtype *>(ad.src_string_dt.extended());
+        const base_string_dtype *esd = static_cast<const base_string_dtype *>(ad.src_string_dt.extended());
         string s = esd->get_utf8_string(extra->src_metadata, src, ad.errmode);
         trim(s);
         bool negative = false;
@@ -227,7 +227,7 @@ namespace { template<typename T> struct string_to_uint {
     {
         string_to_builtin_auxdata& ad = get_auxiliary_data<string_to_builtin_auxdata>(extra->auxdata);
         // Get the string from the source
-        const extended_string_dtype *esd = static_cast<const extended_string_dtype *>(ad.src_string_dt.extended());
+        const base_string_dtype *esd = static_cast<const base_string_dtype *>(ad.src_string_dt.extended());
         string s = esd->get_utf8_string(extra->src_metadata, src, ad.errmode);
         trim(s);
         bool negative = false;
@@ -255,7 +255,7 @@ static void string_to_float32_single_kernel(char *dst, const char *src, unary_ke
 {
     string_to_builtin_auxdata& ad = get_auxiliary_data<string_to_builtin_auxdata>(extra->auxdata);
     // Get the string from the source
-    const extended_string_dtype *esd = static_cast<const extended_string_dtype *>(ad.src_string_dt.extended());
+    const base_string_dtype *esd = static_cast<const base_string_dtype *>(ad.src_string_dt.extended());
     string s = esd->get_utf8_string(extra->src_metadata, src, ad.errmode);
     trim(s);
     to_lower(s);
@@ -313,7 +313,7 @@ static void string_to_float64_single_kernel(char *dst, const char *src, unary_ke
 {
     string_to_builtin_auxdata& ad = get_auxiliary_data<string_to_builtin_auxdata>(extra->auxdata);
     // Get the string from the source
-    const extended_string_dtype *esd = static_cast<const extended_string_dtype *>(ad.src_string_dt.extended());
+    const base_string_dtype *esd = static_cast<const base_string_dtype *>(ad.src_string_dt.extended());
     string s = esd->get_utf8_string(extra->src_metadata, src, ad.errmode);
     trim(s);
     to_lower(s);
@@ -411,7 +411,7 @@ static void builtin_to_string_kernel_single(char *dst, const char *src, unary_ke
 {
     builtin_to_string_auxdata& ad = get_auxiliary_data<builtin_to_string_auxdata>(extra->auxdata);
     // Get the string from the source
-    const extended_string_dtype *esd = static_cast<const extended_string_dtype *>(ad.dst_string_dt.extended());
+    const base_string_dtype *esd = static_cast<const base_string_dtype *>(ad.dst_string_dt.extended());
 
     // TODO: There are much faster ways to do this, but it's very generic!
     //       Also, for floating point values, a printing scheme like Python's,

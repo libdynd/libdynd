@@ -14,7 +14,7 @@
 
 namespace dynd {
 
-class fixedstruct_dtype : public extended_dtype {
+class fixedstruct_dtype : public base_dtype {
     std::vector<dtype> m_field_types;
     std::vector<std::string> m_field_names;
     std::vector<size_t> m_data_offsets;
@@ -33,7 +33,7 @@ public:
     virtual ~fixedstruct_dtype();
 
     size_t get_default_data_size(int DYND_UNUSED(ndim), const intptr_t *DYND_UNUSED(shape)) const {
-        return m_data_size;
+        return get_data_size();
     }
 
     size_t get_field_count() const {
@@ -91,7 +91,7 @@ public:
                     assign_error_mode errmode,
                     kernel_instance<unary_operation_pair_t>& out_kernel) const;
 
-    bool operator==(const extended_dtype& rhs) const;
+    bool operator==(const base_dtype& rhs) const;
 
     size_t get_metadata_size() const;
     void metadata_default_construct(char *metadata, int ndim, const intptr_t* shape) const;

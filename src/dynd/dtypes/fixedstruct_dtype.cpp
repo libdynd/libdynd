@@ -16,7 +16,7 @@ using namespace std;
 using namespace dynd;
 
 fixedstruct_dtype::fixedstruct_dtype(const std::vector<dtype>& field_types, const std::vector<std::string>& field_names)
-    : extended_dtype(fixedstruct_type_id, struct_kind, 0, 1),
+    : base_dtype(fixedstruct_type_id, struct_kind, 0, 1),
             m_field_types(field_types), m_field_names(field_names),
             m_data_offsets(field_types.size()), m_metadata_offsets(field_types.size())
 {
@@ -26,13 +26,13 @@ fixedstruct_dtype::fixedstruct_dtype(const std::vector<dtype>& field_types, cons
 
     // Calculate all the resulting struct data
     size_t metadata_offset = 0, data_offset = 0;
-    m_alignment = 1;
+    m_members.alignment = 1;
     m_memory_management = pod_memory_management;
     for (size_t i = 0, i_end = field_types.size(); i != i_end; ++i) {
         size_t field_alignment = field_types[i].get_alignment();
         // Accumulate the biggest field alignment as the dtype alignment
-        if (field_alignment > m_alignment) {
-            m_alignment = field_alignment;
+        if (field_alignment > m_members.alignment) {
+            m_members.alignment = field_alignment;
         }
         // Accumulate the correct memory management
         // TODO: Handle object, and object+blockref memory management types as well
@@ -55,7 +55,7 @@ fixedstruct_dtype::fixedstruct_dtype(const std::vector<dtype>& field_types, cons
         metadata_offset += m_field_types[i].is_builtin() ? 0 : m_field_types[i].extended()->get_metadata_size();
     }
     m_metadata_size = metadata_offset;
-    m_data_size = inc_to_alignment(data_offset, m_alignment);
+    m_members.data_size = inc_to_alignment(data_offset, m_members.alignment);
 
     create_ndobject_properties();
 }
@@ -319,7 +319,7 @@ void fixedstruct_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const d
 {
     if (this == dst_dt.extended()) {
         if (this == src_dt.extended()) {
-            get_pod_dtype_assignment_kernel(m_data_size, m_alignment, out_kernel);
+            get_pod_dtype_assignment_kernel(get_data_size(), get_alignment(), out_kernel);
         } else if (src_dt.get_type_id() == fixedstruct_type_id) {
             get_fixedstruct_assignment_kernel(dst_dt, src_dt, errmode, out_kernel);
         } else if (src_dt.get_type_id() == struct_type_id) {
@@ -338,7 +338,7 @@ void fixedstruct_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const d
     }
 }
 
-bool fixedstruct_dtype::operator==(const extended_dtype& rhs) const
+bool fixedstruct_dtype::operator==(const base_dtype& rhs) const
 {
     if (this == &rhs) {
         return true;
@@ -346,8 +346,8 @@ bool fixedstruct_dtype::operator==(const extended_dtype& rhs) const
         return false;
     } else {
         const fixedstruct_dtype *dt = static_cast<const fixedstruct_dtype*>(&rhs);
-        return m_alignment == dt->m_alignment &&
-                m_memory_management == dt->m_memory_management &&
+        return get_alignment() == dt->get_alignment() &&
+                get_memory_management() == dt->get_memory_management() &&
                 m_field_types == dt->m_field_types;
     }
 }

@@ -14,7 +14,7 @@ using namespace std;
 using namespace dynd;
 
 struct_dtype::struct_dtype(const std::vector<dtype>& fields, const std::vector<std::string>& field_names)
-    : extended_dtype(struct_type_id, struct_kind, 0, 1),
+    : base_dtype(struct_type_id, struct_kind, 0, 1),
             m_field_types(fields), m_field_names(field_names), m_metadata_offsets(fields.size())
 {
     if (fields.size() != field_names.size()) {
@@ -23,13 +23,13 @@ struct_dtype::struct_dtype(const std::vector<dtype>& fields, const std::vector<s
 
     // Calculate the needed element alignment
     size_t metadata_offset = fields.size() * sizeof(size_t);
-    m_alignment = 1;
+    m_members.alignment = 1;
     m_memory_management = pod_memory_management;
     for (size_t i = 0, i_end = fields.size(); i != i_end; ++i) {
         size_t field_alignment = fields[i].get_alignment();
         // Accumulate the biggest field alignment as the dtype alignment
-        if (field_alignment > m_alignment) {
-            m_alignment = field_alignment;
+        if (field_alignment > m_members.alignment) {
+            m_members.alignment = field_alignment;
         }
         // Accumulate the correct memory management
         // TODO: Handle object, and object+blockref memory management types as well
@@ -61,7 +61,7 @@ size_t struct_dtype::get_default_data_size(int ndim, const intptr_t *shape) cons
             s += m_field_types[i].get_data_size();
         }
     }
-    s = inc_to_alignment(s, m_alignment);
+    s = inc_to_alignment(s, m_members.alignment);
     return s;
 }
 
@@ -294,7 +294,7 @@ void struct_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const dtype&
     }
 }
 
-bool struct_dtype::operator==(const extended_dtype& rhs) const
+bool struct_dtype::operator==(const base_dtype& rhs) const
 {
     if (this == &rhs) {
         return true;
@@ -302,8 +302,8 @@ bool struct_dtype::operator==(const extended_dtype& rhs) const
         return false;
     } else {
         const struct_dtype *dt = static_cast<const struct_dtype*>(&rhs);
-        return m_alignment == dt->m_alignment &&
-                m_memory_management == dt->m_memory_management &&
+        return get_alignment() == dt->get_alignment() &&
+                get_memory_management() == dt->get_memory_management() &&
                 m_field_types == dt->m_field_types;
     }
 }

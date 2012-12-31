@@ -12,20 +12,20 @@ using namespace std;
 using namespace dynd;
 
 dynd::tuple_dtype::tuple_dtype(const std::vector<dtype>& fields)
-    : extended_dtype(tuple_type_id, struct_kind, 0, 1),
+    : base_dtype(tuple_type_id, struct_kind, 0, 1),
             m_fields(fields), m_offsets(fields.size()), m_metadata_offsets(fields.size())
 {
     // TODO: tuple_dtype should probably not have kind struct_kind?
     // Calculate the offsets and element size
     size_t metadata_offset = 0;
     size_t offset = 0;
-    m_alignment = 1;
+    m_members.alignment = 1;
     m_memory_management = pod_memory_management;
     for (size_t i = 0, i_end = fields.size(); i != i_end; ++i) {
         size_t field_alignment = fields[i].get_alignment();
         // Accumulate the biggest field alignment as the dtype alignment
-        if (field_alignment > m_alignment) {
-            m_alignment = field_alignment;
+        if (field_alignment > m_members.alignment) {
+            m_members.alignment = field_alignment;
         }
         // Add padding bytes as necessary
         offset = (offset + field_alignment - 1) & (-field_alignment);
@@ -43,7 +43,7 @@ dynd::tuple_dtype::tuple_dtype(const std::vector<dtype>& fields)
     }
     m_metadata_size = metadata_offset;
     // Pad to get the final element size
-    m_data_size = (offset + m_alignment - 1) & (-m_alignment);
+    m_members.data_size = inc_to_alignment(offset, m_members.alignment);
     // This is the standard layout
     m_is_standard_layout = true;
 }
@@ -54,7 +54,7 @@ tuple_dtype::~tuple_dtype()
 
 dynd::tuple_dtype::tuple_dtype(const std::vector<dtype>& fields, const std::vector<size_t> offsets,
                     size_t data_size, size_t alignment)
-    : extended_dtype(tuple_type_id, struct_kind, data_size, alignment),
+    : base_dtype(tuple_type_id, struct_kind, data_size, alignment),
             m_fields(fields), m_offsets(offsets), m_metadata_offsets(fields.size())
 {
     if (!offset_is_aligned(data_size, alignment)) {
@@ -75,10 +75,10 @@ dynd::tuple_dtype::tuple_dtype(const std::vector<dtype>& fields, const std::vect
             throw runtime_error(ss.str());
         }
         // Check that the field has proper alignment
-        if (((m_alignment | offsets[i]) & (fields[i].get_alignment() - 1)) != 0) {
+        if (((m_members.alignment | offsets[i]) & (fields[i].get_alignment() - 1)) != 0) {
             stringstream ss;
             ss << "tuple type cannot be created with field " << i << " of type " << fields[i];
-            ss << " at offset " << offsets[i] << " and tuple alignment " << m_alignment;
+            ss << " at offset " << offsets[i] << " and tuple alignment " << m_members.alignment;
             ss << " because the field is not properly aligned";
             throw runtime_error(ss.str());
         }
@@ -117,7 +117,7 @@ bool dynd::tuple_dtype::compute_is_standard_layout() const
     // Pad to get the standard element size
     size_t standard_element_size = (standard_offset + standard_alignment - 1) & (-standard_alignment);
 
-    return m_data_size == standard_element_size && m_alignment == standard_alignment;
+    return get_data_size() == standard_element_size && get_alignment() == standard_alignment;
 }
 
 void dynd::tuple_dtype::print_data(std::ostream& o, const char *metadata, const char *data) const
@@ -160,8 +160,8 @@ void dynd::tuple_dtype::print_dtype(std::ostream& o) const
             }
         }
         o << ")";
-        o << ", size=" << m_data_size;
-        o << ", alignment=" << (unsigned int)m_alignment;
+        o << ", size=" << get_data_size();
+        o << ", alignment=" << get_alignment();
         o << ">";
     }
 }
@@ -187,7 +187,7 @@ dtype dynd::tuple_dtype::apply_linear_index(int nindices, const irange *indices,
                 offsets[i] = m_offsets[idx];
             }
 
-            return dtype(new tuple_dtype(fields, offsets, m_data_size, m_alignment));
+            return dtype(new tuple_dtype(fields, offsets, get_data_size(), get_alignment()));
         }
     }
 }
@@ -241,7 +241,7 @@ void dynd::tuple_dtype::get_dtype_assignment_kernel(const dtype& DYND_UNUSED(dst
     throw runtime_error("tuple_dtype::get_dtype_assignment_kernel is unimplemented"); 
 }
 
-bool dynd::tuple_dtype::operator==(const extended_dtype& rhs) const
+bool dynd::tuple_dtype::operator==(const base_dtype& rhs) const
 {
     if (this == &rhs) {
         return true;
@@ -249,9 +249,9 @@ bool dynd::tuple_dtype::operator==(const extended_dtype& rhs) const
         return false;
     } else {
         const tuple_dtype *dt = static_cast<const tuple_dtype*>(&rhs);
-        return m_data_size == dt->m_data_size &&
-                m_alignment == dt->m_alignment &&
-                m_memory_management == dt->m_memory_management &&
+        return get_data_size() == dt->get_data_size() &&
+                get_alignment() == dt->get_alignment() &&
+                get_memory_management() == dt->get_memory_management() &&
                 m_fields == dt->m_fields &&
                 m_offsets == dt->m_offsets;
     }

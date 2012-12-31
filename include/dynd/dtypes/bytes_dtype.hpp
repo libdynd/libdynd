@@ -27,7 +27,7 @@ struct bytes_dtype_data {
     char *end;
 };
 
-class bytes_dtype : public extended_dtype {
+class bytes_dtype : public base_dtype {
     size_t m_alignment;
 
 public:
@@ -66,7 +66,7 @@ public:
                     assign_error_mode errmode,
                     kernel_instance<unary_operation_pair_t>& out_kernel) const;
 
-    bool operator==(const extended_dtype& rhs) const;
+    bool operator==(const base_dtype& rhs) const;
 
     size_t get_metadata_size() const;
     void metadata_default_construct(char *metadata, int ndim, const intptr_t* shape) const;

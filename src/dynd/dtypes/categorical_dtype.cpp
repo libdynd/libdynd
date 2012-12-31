@@ -156,7 +156,7 @@ namespace {
 } // anoymous namespace
 
 categorical_dtype::categorical_dtype(const ndobject& categories)
-    : extended_dtype(categorical_type_id, custom_kind, 4, 4)
+    : base_dtype(categorical_type_id, custom_kind, 4, 4)
 {
     const dtype& cdt = categories.get_dtype();
     if (cdt.get_type_id() != strided_array_type_id) {
@@ -338,7 +338,7 @@ void categorical_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const d
 
 }
 
-bool categorical_dtype::operator==(const extended_dtype& rhs) const
+bool categorical_dtype::operator==(const base_dtype& rhs) const
 {
     if (this == &rhs) return true;
 

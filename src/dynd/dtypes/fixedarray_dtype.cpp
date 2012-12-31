@@ -15,7 +15,7 @@ using namespace std;
 using namespace dynd;
 
 fixedarray_dtype::fixedarray_dtype(const dtype& element_dtype, size_t dimension_size)
-    : extended_dtype(fixedarray_type_id, uniform_array_kind, 0, 1, element_dtype.get_undim() + 1),
+    : base_dtype(fixedarray_type_id, uniform_array_kind, 0, 1, element_dtype.get_undim() + 1),
             m_element_dtype(element_dtype), m_dimension_size(dimension_size)
 {
     size_t child_element_size = element_dtype.get_data_size();
@@ -26,15 +26,15 @@ fixedarray_dtype::fixedarray_dtype(const dtype& element_dtype, size_t dimension_
         throw runtime_error(ss.str());
     }
     m_stride = m_dimension_size > 1 ? element_dtype.get_data_size() : 0;
-    m_data_size = m_dimension_size > 1 ? m_stride * m_dimension_size : m_dimension_size * child_element_size;
-    m_alignment = m_element_dtype.get_alignment();
+    m_members.data_size = m_dimension_size > 1 ? m_stride * m_dimension_size : m_dimension_size * child_element_size;
+    m_members.alignment = m_element_dtype.get_alignment();
 
     // Copy ndobject properties and functions from the first non-uniform dimension
     get_nonuniform_ndobject_properties_and_functions(m_ndobject_properties, m_ndobject_functions);
 }
 
 fixedarray_dtype::fixedarray_dtype(const dtype& element_dtype, size_t dimension_size, intptr_t stride)
-    : extended_dtype(fixedarray_type_id, uniform_array_kind, 0, 1),
+    : base_dtype(fixedarray_type_id, uniform_array_kind, 0, 1),
             m_element_dtype(element_dtype), m_stride(stride), m_dimension_size(dimension_size)
 {
     size_t child_element_size = element_dtype.get_data_size();
@@ -56,8 +56,8 @@ fixedarray_dtype::fixedarray_dtype(const dtype& element_dtype, size_t dimension_
         ss << " and stride 0, as the stride must be non-zero when the dimension size is > 1";
         throw runtime_error(ss.str());
     }
-    m_data_size = stride ? stride * m_dimension_size : dimension_size * child_element_size;
-    m_alignment = m_element_dtype.get_alignment();
+    m_members.data_size = stride ? stride * m_dimension_size : dimension_size * child_element_size;
+    m_members.alignment = m_element_dtype.get_alignment();
 
     // Copy ndobject properties and functions from the first non-uniform dimension
     get_nonuniform_ndobject_properties_and_functions(m_ndobject_properties, m_ndobject_functions);
@@ -286,7 +286,7 @@ void fixedarray_dtype::get_dtype_assignment_kernel(const dtype& DYND_UNUSED(dst_
     throw runtime_error("fixedarray_dtype::get_dtype_assignment_kernel is unimplemented"); 
 }
 
-bool fixedarray_dtype::operator==(const extended_dtype& rhs) const
+bool fixedarray_dtype::operator==(const base_dtype& rhs) const
 {
     if (this == &rhs) {
         return true;

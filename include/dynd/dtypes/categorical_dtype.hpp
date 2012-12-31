@@ -22,7 +22,7 @@ struct assign_to_same_category_type;
 
 namespace dynd {
 
-class categorical_dtype : public extended_dtype {
+class categorical_dtype : public base_dtype {
     // The data type of the category
     dtype m_category_dtype;
     // list of categories, sorted lexicographically
@@ -72,7 +72,7 @@ public:
                     assign_error_mode errmode,
                     kernel_instance<unary_operation_pair_t>& out_kernel) const;
 
-    bool operator==(const extended_dtype& rhs) const;
+    bool operator==(const base_dtype& rhs) const;
 
     size_t get_metadata_size() const;
     void metadata_default_construct(char *metadata, int ndim, const intptr_t* shape) const;

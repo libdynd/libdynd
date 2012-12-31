@@ -13,7 +13,7 @@
 
 namespace dynd {
 
-class fixedbytes_dtype : public extended_dtype {
+class fixedbytes_dtype : public base_dtype {
 public:
     fixedbytes_dtype(intptr_t element_size, intptr_t alignment);
 
@@ -39,7 +39,7 @@ public:
                     assign_error_mode errmode,
                     kernel_instance<unary_operation_pair_t>& out_kernel) const;
 
-    bool operator==(const extended_dtype& rhs) const;
+    bool operator==(const base_dtype& rhs) const;
 
     size_t get_metadata_size() const {
         return 0;

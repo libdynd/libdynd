@@ -29,7 +29,7 @@ struct string_dtype_data {
     char *end;
 };
 
-class string_dtype : public extended_string_dtype {
+class string_dtype : public base_string_dtype {
     string_encoding_t m_encoding;
 
 public:
@@ -77,7 +77,7 @@ public:
                     assign_error_mode errmode,
                     kernel_instance<unary_operation_pair_t>& out_kernel) const;
 
-    bool operator==(const extended_dtype& rhs) const;
+    bool operator==(const base_dtype& rhs) const;
 
     size_t get_metadata_size() const;
     void metadata_default_construct(char *metadata, int ndim, const intptr_t* shape) const;

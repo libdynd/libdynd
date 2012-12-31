@@ -4,7 +4,7 @@
 //
 
 // This is being initially written as a "date" property type, but
-// with an appropriate extended_dtype interface which generates the
+// with an appropriate base_dtype interface which generates the
 // to_value_kernel, this can be switched to just a property type using
 // that interface.
 
@@ -17,7 +17,7 @@
 
 namespace dynd {
 
-class date_property_dtype : public extended_expression_dtype {
+class date_property_dtype : public base_expression_dtype {
     dtype m_value_dtype, m_operand_dtype;
     std::string m_property_name;
     kernel_instance<unary_operation_pair_t> m_to_value_kernel;
@@ -48,7 +48,7 @@ public:
 
     bool is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const;
 
-    bool operator==(const extended_dtype& rhs) const;
+    bool operator==(const base_dtype& rhs) const;
 
     // For expression_kind dtypes - converts to/from the storage's value dtype
     void get_operand_to_value_kernel(const eval::eval_context *ectx,

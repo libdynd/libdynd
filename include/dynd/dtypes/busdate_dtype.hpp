@@ -28,7 +28,7 @@ enum busdate_roll_t {
     busdate_roll_throw
 };
 
-class busdate_dtype : public extended_dtype {
+class busdate_dtype : public base_dtype {
     /** Strategy for handling dates that are not business dates */
     busdate_roll_t m_roll;
     /** Which days of the week are work days vs weekend */
@@ -84,7 +84,7 @@ public:
                     assign_error_mode errmode,
                     kernel_instance<unary_operation_pair_t>& out_kernel) const;
 
-    bool operator==(const extended_dtype& rhs) const;
+    bool operator==(const base_dtype& rhs) const;
 
     size_t get_metadata_size() const {
         return 0;

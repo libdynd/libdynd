@@ -26,7 +26,7 @@ using namespace std;
 using namespace dynd;
 
 date_dtype::date_dtype()
-    : extended_dtype(date_type_id, datetime_kind, 4, 4)
+    : base_dtype(date_type_id, datetime_kind, 4, 4)
 {
 }
 
@@ -121,7 +121,7 @@ void date_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const dtype& s
 }
 
 
-bool date_dtype::operator==(const extended_dtype& rhs) const
+bool date_dtype::operator==(const base_dtype& rhs) const
 {
     if (this == &rhs) {
         return true;
@@ -245,7 +245,7 @@ static ndobject function_ndo_strftime(const ndobject& n, const std::string& form
         extra.src_metadata = iter.metadata<1>();
     }
     int32_t date;
-    const extended_string_dtype *esd = static_cast<const extended_string_dtype *>(iter.get_uniform_dtype<0>().extended());
+    const base_string_dtype *esd = static_cast<const base_string_dtype *>(iter.get_uniform_dtype<0>().extended());
     struct tm tm_val;
     string str;
     if (!iter.empty()) {

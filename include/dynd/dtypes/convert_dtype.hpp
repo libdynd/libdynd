@@ -18,7 +18,7 @@
 
 namespace dynd {
 
-class convert_dtype : public extended_expression_dtype {
+class convert_dtype : public base_expression_dtype {
     dtype m_value_dtype, m_operand_dtype;
     assign_error_mode m_errmode;
     kernel_instance<unary_operation_pair_t> m_to_value_kernel, m_to_operand_kernel;
@@ -49,7 +49,7 @@ public:
 
     bool is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const;
 
-    bool operator==(const extended_dtype& rhs) const;
+    bool operator==(const base_dtype& rhs) const;
 
     // For expression_kind dtypes - converts to/from the storage's value dtype
     void get_operand_to_value_kernel(const eval::eval_context *ectx,
@@ -71,10 +71,10 @@ inline dtype make_convert_dtype(const dtype& value_dtype, const dtype& operand_d
             return dtype(new convert_dtype(value_dtype, operand_dtype, errmode));
         } else if (value_dtype.storage_dtype() == operand_dtype.value_dtype()) {
             // No conversion required at the connection
-            return static_cast<const extended_expression_dtype *>(value_dtype.extended())->with_replaced_storage_dtype(operand_dtype);
+            return static_cast<const base_expression_dtype *>(value_dtype.extended())->with_replaced_storage_dtype(operand_dtype);
         } else {
             // A conversion required at the connection
-            return static_cast<const extended_expression_dtype *>(value_dtype.extended())->with_replaced_storage_dtype(
+            return static_cast<const base_expression_dtype *>(value_dtype.extended())->with_replaced_storage_dtype(
                 dtype(new convert_dtype(value_dtype.storage_dtype(), operand_dtype, errmode)));
         }
     } else {

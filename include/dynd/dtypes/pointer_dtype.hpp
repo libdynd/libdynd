@@ -30,7 +30,7 @@ struct pointer_dtype_metadata {
     intptr_t offset;
 };
 
-class pointer_dtype : public extended_expression_dtype {
+class pointer_dtype : public base_expression_dtype {
     dtype m_target_dtype;
     static dtype m_void_pointer_dtype;
 
@@ -82,7 +82,7 @@ public:
 
     void get_single_compare_kernel(single_compare_kernel_instance& out_kernel) const;
 
-    bool operator==(const extended_dtype& rhs) const;
+    bool operator==(const base_dtype& rhs) const;
 
     // Converts to/from the storage's value dtype
     void get_operand_to_value_kernel(const eval::eval_context *ectx,

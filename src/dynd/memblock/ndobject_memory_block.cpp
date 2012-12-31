@@ -20,7 +20,7 @@ void free_ndobject_memory_block(memory_block_data *memblock)
         // First free the references contained in the metadata
         if (!preamble->is_builtin_dtype()) {
             preamble->m_dtype->metadata_destruct(metadata);
-            extended_dtype_decref(preamble->m_dtype);
+            base_dtype_decref(preamble->m_dtype);
         }
         // Then free the reference to the ndobject data
         if (preamble->m_data_reference != NULL) {
@@ -76,10 +76,10 @@ memory_block_ptr dynd::make_ndobject_memory_block(const dtype& dt, int ndim, con
     memory_block_ptr result = make_ndobject_memory_block(metadata_size, element_size, dt.get_alignment(), &data);
     ndobject_preamble *preamble = reinterpret_cast<ndobject_preamble *>(result.get());
     if (dt.is_builtin()) {
-        preamble->m_dtype = reinterpret_cast<extended_dtype *>(dt.get_type_id());
+        preamble->m_dtype = reinterpret_cast<base_dtype *>(dt.get_type_id());
     } else {
         preamble->m_dtype = dt.extended();
-        extended_dtype_incref(preamble->m_dtype);
+        base_dtype_incref(preamble->m_dtype);
         dt.extended()->metadata_default_construct(reinterpret_cast<char *>(preamble + 1), ndim, shape);
     }
     preamble->m_data_pointer = data;
@@ -113,7 +113,7 @@ memory_block_ptr dynd::shallow_copy_ndobject_memory_block(const memory_block_ptr
     // Clone the dtype
     result_preamble->m_dtype = preamble->m_dtype;
     if (!preamble->is_builtin_dtype()) {
-        extended_dtype_incref(preamble->m_dtype);
+        base_dtype_incref(preamble->m_dtype);
         preamble->m_dtype->metadata_copy_construct(reinterpret_cast<char *>(result.get()) + sizeof(ndobject_preamble),
                         reinterpret_cast<const char *>(ndo.get()) + sizeof(ndobject_preamble), ndo.get());
     }

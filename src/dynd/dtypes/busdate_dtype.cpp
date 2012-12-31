@@ -17,7 +17,7 @@ using namespace std;
 using namespace dynd;
 
 dynd::busdate_dtype::busdate_dtype(busdate_roll_t roll, const bool *weekmask, const ndobject& holidays)
-    : extended_dtype(busdate_type_id, datetime_kind, 4, 4), m_roll(roll)
+    : base_dtype(busdate_type_id, datetime_kind, 4, 4), m_roll(roll)
 {
     memcpy(m_workweek, weekmask, sizeof(m_workweek));
     if (!holidays.empty()) {
@@ -110,7 +110,7 @@ void dynd::busdate_dtype::get_dtype_assignment_kernel(const dtype& /*dst_dt*/, c
 }
 
 
-bool dynd::busdate_dtype::operator==(const extended_dtype& rhs) const
+bool dynd::busdate_dtype::operator==(const base_dtype& rhs) const
 {
     if (this == &rhs) {
         return true;

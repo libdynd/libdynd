@@ -33,7 +33,7 @@ template <> struct parameter_type_of<float> {typedef float type;};
 template <> struct parameter_type_of<double> {typedef double type;};
 template <typename T> struct parameter_type_of<std::complex<T> > {typedef std::complex<T> type;};
 template <> struct parameter_type_of<ndobject> {typedef ndobject_preamble *type;};
-template <> struct parameter_type_of<dtype> {typedef extended_dtype *type;};
+template <> struct parameter_type_of<dtype> {typedef base_dtype *type;};
 template <> struct parameter_type_of<std::string> {typedef string_dtype_data type;};
 
 template <typename T> struct make_parameter_dtype {inline static dtype make() {
@@ -100,7 +100,7 @@ template <> struct unbox_param<ndobject> {
     }
 };
 template <> struct unbox_param<dtype> {
-    inline static dtype unbox(extended_dtype *v) {
+    inline static dtype unbox(base_dtype *v) {
         if ((reinterpret_cast<uintptr_t>(v)&(~builtin_type_id_mask)) == 0) {
             return dtype(static_cast<type_id_t>(reinterpret_cast<uintptr_t>(v)));
         } else {

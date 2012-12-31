@@ -23,7 +23,7 @@ struct strided_array_dtype_iterdata {
     intptr_t stride;
 };
 
-class strided_array_dtype : public extended_dtype {
+class strided_array_dtype : public base_dtype {
     dtype m_element_dtype;
     std::vector<std::pair<std::string, gfunc::callable> > m_ndobject_properties, m_ndobject_functions;
 public:
@@ -77,7 +77,7 @@ public:
                     assign_error_mode errmode,
                     kernel_instance<unary_operation_pair_t>& out_kernel) const;
 
-    bool operator==(const extended_dtype& rhs) const;
+    bool operator==(const base_dtype& rhs) const;
 
     size_t get_metadata_size() const;
     void metadata_default_construct(char *metadata, int ndim, const intptr_t* shape) const;

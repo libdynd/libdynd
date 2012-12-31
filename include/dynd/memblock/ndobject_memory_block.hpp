@@ -26,7 +26,7 @@ struct ndobject_preamble {
      * simply contains the type id. If (m_dtype&~builtin_type_id_mask)
      * is 0, its a builtin type.
      */
-    const extended_dtype *m_dtype;
+    const base_dtype *m_dtype;
     char *m_data_pointer;
     uint64_t m_flags;
     memory_block_data *m_data_reference;

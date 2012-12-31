@@ -17,23 +17,23 @@ using namespace std;
 using namespace dynd;
 
 fixedstring_dtype::fixedstring_dtype(string_encoding_t encoding, intptr_t stringsize)
-    : extended_string_dtype(fixedstring_type_id, string_kind, 0, 1),
+    : base_string_dtype(fixedstring_type_id, string_kind, 0, 1),
             m_stringsize(stringsize), m_encoding(encoding)
 {
     switch (encoding) {
         case string_encoding_ascii:
         case string_encoding_utf_8:
-            m_data_size = m_stringsize;
-            m_alignment = 1;
+            m_members.data_size = m_stringsize;
+            m_members.alignment = 1;
             break;
         case string_encoding_ucs_2:
         case string_encoding_utf_16:
-            m_data_size = m_stringsize * 2;
-            m_alignment = 2;
+            m_members.data_size = m_stringsize * 2;
+            m_members.alignment = 2;
             break;
         case string_encoding_utf_32:
-            m_data_size = m_stringsize * 4;
-            m_alignment = 4;
+            m_members.data_size = m_stringsize * 4;
+            m_members.alignment = 4;
             break;
         default:
             throw runtime_error("Unrecognized string encoding in fixedstring dtype constructor");
@@ -52,12 +52,12 @@ void fixedstring_dtype::get_string_range(const char **out_begin, const char**out
 
     switch (string_encoding_char_size_table[m_encoding]) {
         case 1: {
-            *out_end = data + strnlen(data, m_data_size);
+            *out_end = data + strnlen(data, get_data_size());
             break;
         }
         case 2: {
             const uint16_t *ptr = reinterpret_cast<const uint16_t *>(data);
-            const uint16_t *ptr_max = ptr + m_data_size / sizeof(uint16_t);
+            const uint16_t *ptr_max = ptr + get_data_size() / sizeof(uint16_t);
             while (ptr < ptr_max && *ptr != 0) {
                 ++ptr;
             }
@@ -66,7 +66,7 @@ void fixedstring_dtype::get_string_range(const char **out_begin, const char**out
         }
         case 4: {
             const uint32_t *ptr = reinterpret_cast<const uint32_t *>(data);
-            const uint32_t *ptr_max = ptr + m_data_size / sizeof(uint32_t);
+            const uint32_t *ptr_max = ptr + get_data_size() / sizeof(uint32_t);
             while (ptr < ptr_max && *ptr != 0) {
                 ++ptr;
             }
@@ -78,7 +78,7 @@ void fixedstring_dtype::get_string_range(const char **out_begin, const char**out
 
 void fixedstring_dtype::set_utf8_string(const char *DYND_UNUSED(metadata), char *dst, assign_error_mode errmode, const std::string& utf8_str) const
 {
-    char *dst_end = dst + m_data_size;
+    char *dst_end = dst + get_data_size();
     const char *src = utf8_str.data();
     const char *src_end = src + utf8_str.size();
     next_unicode_codepoint_t next_fn = get_next_unicode_codepoint_function(string_encoding_utf_8, errmode);
@@ -103,7 +103,7 @@ void fixedstring_dtype::print_data(std::ostream& o, const char *DYND_UNUSED(meta
     uint32_t cp;
     next_unicode_codepoint_t next_fn;
     next_fn = get_next_unicode_codepoint_function(m_encoding, assign_error_none);
-    const char *data_end = data + m_data_size;
+    const char *data_end = data + get_data_size();
 
     // Print as an escaped string
     o << "\"";
@@ -361,13 +361,13 @@ void fixedstring_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const d
         switch (src_dt.get_type_id()) {
             case fixedstring_type_id: {
                 const fixedstring_dtype *src_fs = static_cast<const fixedstring_dtype *>(src_dt.extended());
-                get_fixedstring_assignment_kernel(m_data_size, m_encoding, src_fs->m_data_size, src_fs->m_encoding,
+                get_fixedstring_assignment_kernel(get_data_size(), m_encoding, src_fs->get_data_size(), src_fs->m_encoding,
                                         errmode, out_kernel);
                 break;
             }
             case string_type_id: {
-                const extended_string_dtype *src_fs = static_cast<const extended_string_dtype *>(src_dt.extended());
-                get_blockref_string_to_fixedstring_assignment_kernel(m_data_size, m_encoding, src_fs->get_encoding(),
+                const base_string_dtype *src_fs = static_cast<const base_string_dtype *>(src_dt.extended());
+                get_blockref_string_to_fixedstring_assignment_kernel(get_data_size(), m_encoding, src_fs->get_encoding(),
                                         errmode, out_kernel);
                 break;
             }
@@ -392,7 +392,7 @@ void fixedstring_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const d
 }
 
 
-bool fixedstring_dtype::operator==(const extended_dtype& rhs) const
+bool fixedstring_dtype::operator==(const base_dtype& rhs) const
 {
     if (this == &rhs) {
         return true;

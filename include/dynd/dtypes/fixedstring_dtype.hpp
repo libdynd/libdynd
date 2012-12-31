@@ -16,7 +16,7 @@
 
 namespace dynd {
 
-class fixedstring_dtype : public extended_string_dtype {
+class fixedstring_dtype : public base_string_dtype {
     intptr_t m_stringsize;
     string_encoding_t m_encoding;
 
@@ -54,7 +54,7 @@ public:
                     assign_error_mode errmode,
                     kernel_instance<unary_operation_pair_t>& out_kernel) const;
 
-    bool operator==(const extended_dtype& rhs) const;
+    bool operator==(const base_dtype& rhs) const;
 
     size_t get_metadata_size() const {
         return 0;

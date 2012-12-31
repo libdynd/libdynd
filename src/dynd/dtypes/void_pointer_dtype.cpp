@@ -47,7 +47,7 @@ void dynd::void_pointer_dtype::get_single_compare_kernel(single_compare_kernel_i
     throw std::runtime_error("void_pointer_dtype::get_single_compare_kernel not supported yet");
 }
 
-bool dynd::void_pointer_dtype::operator==(const extended_dtype& rhs) const
+bool dynd::void_pointer_dtype::operator==(const base_dtype& rhs) const
 {
     return rhs.get_type_id() == void_pointer_type_id;
 }

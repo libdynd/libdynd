@@ -156,7 +156,7 @@ bool dynd::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt)
         throw std::runtime_error("unhandled built-in case in is_lossless_assignmently");
     }
 
-    // Use the available extended_dtype to check the casting
+    // Use the available base_dtype to check the casting
     if (!dst_dt.is_builtin()) {
         // Call with dst_dt (the first parameter) first
         return dst_dt.extended()->is_lossless_assignment(dst_dt, src_dt);

@@ -16,10 +16,10 @@
 
 namespace dynd {
 
-class void_pointer_dtype : public extended_dtype {
+class void_pointer_dtype : public base_dtype {
 public:
     void_pointer_dtype()
-        : extended_dtype(void_pointer_type_id, void_kind, sizeof(void *), sizeof(void *))
+        : base_dtype(void_pointer_type_id, void_kind, sizeof(void *), sizeof(void *))
     {}
 
     void print_data(std::ostream& o, const char *metadata, const char *data) const;
@@ -44,7 +44,7 @@ public:
                     assign_error_mode errmode,
                     kernel_instance<unary_operation_pair_t>& out_kernel) const;
 
-    bool operator==(const extended_dtype& rhs) const;
+    bool operator==(const base_dtype& rhs) const;
 
     size_t get_metadata_size() const {
         return 0;

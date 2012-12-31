@@ -175,9 +175,9 @@ dtype dynd::promote_dtypes_arithmetic(const dtype& dt0, const dtype& dt1)
     // HACK for getting simple string dtype promotions.
     // TODO: Do this properly in a pluggable manner.
     if (dt0_val.get_type_id() == string_type_id && dt1_val.get_type_id() == string_type_id) {
-        const extended_string_dtype *ext0 = static_cast<const extended_string_dtype *>(
+        const base_string_dtype *ext0 = static_cast<const base_string_dtype *>(
                         dt0_val.extended());
-        const extended_string_dtype *ext1 = static_cast<const extended_string_dtype *>(
+        const base_string_dtype *ext1 = static_cast<const base_string_dtype *>(
                         dt1_val.extended());
         if (ext0->get_encoding() > ext1->get_encoding()) {
             return dt0_val;

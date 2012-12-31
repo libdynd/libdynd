@@ -12,7 +12,7 @@ using namespace std;
 using namespace dynd;
 
 dynd::byteswap_dtype::byteswap_dtype(const dtype& value_dtype)
-    : extended_expression_dtype(byteswap_type_id, expression_kind, value_dtype.get_data_size(), value_dtype.get_alignment()),
+    : base_expression_dtype(byteswap_type_id, expression_kind, value_dtype.get_data_size(), value_dtype.get_alignment()),
             m_value_dtype(value_dtype), m_operand_dtype(make_fixedbytes_dtype(value_dtype.get_data_size(), value_dtype.get_alignment()))
 {
     if (!value_dtype.is_builtin()) {
@@ -27,7 +27,7 @@ dynd::byteswap_dtype::byteswap_dtype(const dtype& value_dtype)
 }
 
 dynd::byteswap_dtype::byteswap_dtype(const dtype& value_dtype, const dtype& operand_dtype)
-    : extended_expression_dtype(byteswap_type_id, expression_kind, operand_dtype.get_data_size(), operand_dtype.get_alignment()),
+    : base_expression_dtype(byteswap_type_id, expression_kind, operand_dtype.get_data_size(), operand_dtype.get_alignment()),
             m_value_dtype(value_dtype), m_operand_dtype(operand_dtype)
 {
     // Only a bytes dtype be the operand to the byteswap
@@ -92,7 +92,7 @@ bool dynd::byteswap_dtype::is_lossless_assignment(const dtype& dst_dt, const dty
     }
 }
 
-bool dynd::byteswap_dtype::operator==(const extended_dtype& rhs) const
+bool dynd::byteswap_dtype::operator==(const base_dtype& rhs) const
 {
     if (this == &rhs) {
         return true;
@@ -124,6 +124,6 @@ dtype dynd::byteswap_dtype::with_replaced_storage_dtype(const dtype& replacement
     } else {
         // With an expression operand, replace it farther down the chain
         return dtype(new byteswap_dtype(m_value_dtype,
-                reinterpret_cast<const extended_expression_dtype *>(replacement_dtype.extended())->with_replaced_storage_dtype(replacement_dtype)));
+                reinterpret_cast<const base_expression_dtype *>(replacement_dtype.extended())->with_replaced_storage_dtype(replacement_dtype)));
     }
 }

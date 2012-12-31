@@ -24,7 +24,7 @@ namespace { struct string_to_date_assign_kernel {
     static void single(char *dst, const char *src, unary_kernel_static_data *extra)
     {
         auxdata_storage& ad = get_auxiliary_data<auxdata_storage>(extra->auxdata);
-        const extended_string_dtype *esd = static_cast<const extended_string_dtype *>(ad.src_string_dtype.extended());
+        const base_string_dtype *esd = static_cast<const base_string_dtype *>(ad.src_string_dtype.extended());
         *reinterpret_cast<int32_t *>(dst) = datetime::parse_iso_8601_date(
                                 esd->get_utf8_string(extra->src_metadata, src, ad.errmode),
                                 datetime::datetime_unit_day, ad.casting);
@@ -72,7 +72,7 @@ namespace {
         static void single(char *dst, const char *src, unary_kernel_static_data *extra)
         {
             auxdata_storage& ad = get_auxiliary_data<auxdata_storage>(extra->auxdata);
-            const extended_string_dtype *esd = static_cast<const extended_string_dtype *>(ad.dst_string_dtype.extended());
+            const base_string_dtype *esd = static_cast<const base_string_dtype *>(ad.dst_string_dtype.extended());
             int32_t date = *reinterpret_cast<const int32_t *>(src);
             esd->set_utf8_string(extra->dst_metadata, dst, ad.errmode,
                             datetime::make_iso_8601_date(date, datetime::datetime_unit_day));

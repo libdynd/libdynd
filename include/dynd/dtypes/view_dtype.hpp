@@ -12,7 +12,7 @@
 
 namespace dynd {
 
-class view_dtype : public extended_expression_dtype {
+class view_dtype : public base_expression_dtype {
     dtype m_value_dtype, m_operand_dtype;
     kernel_instance<unary_operation_pair_t> m_copy_kernel;
 
@@ -42,7 +42,7 @@ public:
 
     bool is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const;
 
-    bool operator==(const extended_dtype& rhs) const;
+    bool operator==(const base_dtype& rhs) const;
 
     // For expression_kind dtypes - converts to/from the storage's value dtype
     void get_operand_to_value_kernel(const eval::eval_context *ectx,
@@ -61,7 +61,7 @@ inline dtype make_view_dtype(const dtype& value_dtype, const dtype& operand_dtyp
     } else {
         // When the value dtype has an expression_kind, we need to chain things together
         // so that the view operation happens just at the primitive level.
-        return static_cast<const extended_expression_dtype *>(value_dtype.extended())->with_replaced_storage_dtype(
+        return static_cast<const base_expression_dtype *>(value_dtype.extended())->with_replaced_storage_dtype(
             dtype(new view_dtype(value_dtype.storage_dtype(), operand_dtype)));
     }
 }

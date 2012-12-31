@@ -18,7 +18,7 @@ dtype pointer_dtype::m_void_pointer_dtype(new void_pointer_dtype());
 
 
 pointer_dtype::pointer_dtype(const dtype& target_dtype)
-    : extended_expression_dtype(pointer_type_id, expression_kind, sizeof(void *), sizeof(void *), target_dtype.get_undim()),
+    : base_expression_dtype(pointer_type_id, expression_kind, sizeof(void *), sizeof(void *), target_dtype.get_undim()),
             m_target_dtype(target_dtype)
 {
     // I'm not 100% sure how blockref pointer dtypes should interact with
@@ -60,7 +60,7 @@ bool pointer_dtype::is_uniform_dim() const
 
 bool pointer_dtype::is_expression() const
 {
-    // Even though the pointer is an instance of an extended_expression_dtype,
+    // Even though the pointer is an instance of an base_expression_dtype,
     // we'll only call it an expression if the target is.
     return m_target_dtype.is_expression();
 }
@@ -196,7 +196,7 @@ namespace {
     };
 } // anonymous namespace
 
-bool pointer_dtype::operator==(const extended_dtype& rhs) const
+bool pointer_dtype::operator==(const base_dtype& rhs) const
 {
     if (this == &rhs) {
         return true;

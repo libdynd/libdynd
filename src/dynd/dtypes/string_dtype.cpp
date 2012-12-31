@@ -17,7 +17,7 @@ using namespace std;
 using namespace dynd;
 
 string_dtype::string_dtype(string_encoding_t encoding)
-    : extended_string_dtype(string_type_id, string_kind, sizeof(string_dtype_data), sizeof(const char *)),
+    : base_string_dtype(string_type_id, string_kind, sizeof(string_dtype_data), sizeof(const char *)),
             m_encoding(encoding)
 {
     switch (encoding) {
@@ -158,7 +158,7 @@ bool string_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_
     if (dst_dt.extended() == this) {
         if (src_dt.get_kind() == string_kind) {
             // If the source is a string, only the encoding matters because the dest is variable sized
-            const extended_string_dtype *src_esd = static_cast<const extended_string_dtype*>(src_dt.extended());
+            const base_string_dtype *src_esd = static_cast<const base_string_dtype*>(src_dt.extended());
             string_encoding_t src_encoding = src_esd->get_encoding();
             switch (m_encoding) {
                 case string_encoding_ascii:
@@ -199,7 +199,7 @@ void string_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const dtype&
                 break;
             }
             case fixedstring_type_id: {
-                const extended_string_dtype *src_fs = static_cast<const extended_string_dtype *>(src_dt.extended());
+                const base_string_dtype *src_fs = static_cast<const base_string_dtype *>(src_dt.extended());
                 get_fixedstring_to_blockref_string_assignment_kernel(m_encoding,
                                         src_fs->get_data_size(), src_fs->get_encoding(),
                                         errmode, out_kernel);
@@ -226,7 +226,7 @@ void string_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const dtype&
 }
 
 
-bool string_dtype::operator==(const extended_dtype& rhs) const
+bool string_dtype::operator==(const base_dtype& rhs) const
 {
     if (this == &rhs) {
         return true;

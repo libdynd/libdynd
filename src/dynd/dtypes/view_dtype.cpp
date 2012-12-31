@@ -12,7 +12,7 @@ using namespace std;
 using namespace dynd;
 
 dynd::view_dtype::view_dtype(const dtype& value_dtype, const dtype& operand_dtype)
-    : extended_expression_dtype(view_type_id, expression_kind, operand_dtype.get_data_size(), operand_dtype.get_alignment()),
+    : base_expression_dtype(view_type_id, expression_kind, operand_dtype.get_data_size(), operand_dtype.get_alignment()),
             m_value_dtype(value_dtype), m_operand_dtype(operand_dtype)
 {
     if (value_dtype.get_data_size() != operand_dtype.value_dtype().get_data_size()) {
@@ -112,7 +112,7 @@ bool dynd::view_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& 
     }
 }
 
-bool dynd::view_dtype::operator==(const extended_dtype& rhs) const
+bool dynd::view_dtype::operator==(const base_dtype& rhs) const
 {
     if (this == &rhs) {
         return true;
@@ -140,7 +140,7 @@ dtype dynd::view_dtype::with_replaced_storage_dtype(const dtype& replacement_dty
 {
     if (m_operand_dtype.get_kind() == expression_kind) {
         return dtype(new view_dtype(m_value_dtype,
-                        static_cast<const extended_expression_dtype *>(m_operand_dtype.extended())->with_replaced_storage_dtype(replacement_dtype)));
+                        static_cast<const base_expression_dtype *>(m_operand_dtype.extended())->with_replaced_storage_dtype(replacement_dtype)));
     } else {
         if (m_operand_dtype != replacement_dtype.value_dtype()) {
             std::stringstream ss;

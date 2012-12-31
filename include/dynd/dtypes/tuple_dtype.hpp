@@ -12,7 +12,7 @@
 
 namespace dynd {
 
-class tuple_dtype : public extended_dtype {
+class tuple_dtype : public base_dtype {
     std::vector<dtype> m_fields;
     std::vector<size_t> m_offsets;
     std::vector<size_t> m_metadata_offsets;
@@ -66,7 +66,7 @@ public:
                     assign_error_mode errmode,
                     kernel_instance<unary_operation_pair_t>& out_kernel) const;
 
-    bool operator==(const extended_dtype& rhs) const;
+    bool operator==(const base_dtype& rhs) const;
 }; // class tuple_dtype
 
 /** Makes a tuple dtype with the specified fields, using the standard layout */

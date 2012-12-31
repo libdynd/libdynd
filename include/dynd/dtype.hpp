@@ -9,24 +9,15 @@
 #include <iostream>
 #include <complex>
 #include <stdexcept>
-#include <vector>
 
-#include <dynd/config.hpp>
-#include <dynd/atomic_refcount.hpp>
-#include <dynd/dtype_assign.hpp>
+#include <dynd/dtypes/base_dtype.hpp>
+#include <dynd/dtypes/base_expression_dtype.hpp>
+#include <dynd/dtypes/base_string_dtype.hpp>
 #include <dynd/dtype_comparisons.hpp>
-#include <dynd/kernels/single_compare_kernel_instance.hpp>
-#include <dynd/string_encodings.hpp>
 #include <dynd/eval/eval_context.hpp>
-#include <dynd/irange.hpp>
 #include <dynd/exceptions.hpp>
 
 namespace dynd {
-
-// Forward definition from dynd/gfunc/callable.hpp
-namespace gfunc {
-    class callable;
-};
 
 // A boolean class for dynamicndarray which is one-byte big
 class dynd_bool {
@@ -43,106 +34,6 @@ public:
     operator bool() const {
         return m_value != 0;
     }
-};
-
-enum dtype_kind_t {
-    bool_kind,
-    int_kind,
-    uint_kind,
-    real_kind,
-    complex_kind,
-    // string_kind means subclass of extended_string_dtype
-    string_kind,
-    bytes_kind,
-    void_kind,
-    datetime_kind,
-    // For any array dtypes which have elements of all the same type
-    uniform_array_kind,
-    // For struct_type_id and fixedstruct_type_id
-    struct_kind,
-    // For dtypes whose value_dtype != the dtype, signals
-    // that calculations should look at the value_dtype for
-    // type promotion, etc.
-    expression_kind,
-    // For pattern-matching dtypes
-    pattern_kind,
-    // For use when it becomes possible to register custom dtypes
-    custom_kind
-};
-
-enum type_id_t {
-    // A 1-byte boolean type
-    bool_type_id,
-    // Signed integer types
-    int8_type_id,
-    int16_type_id,
-    int32_type_id,
-    int64_type_id,
-    // Unsigned integer types
-    uint8_type_id,
-    uint16_type_id,
-    uint32_type_id,
-    uint64_type_id,
-    // Floating point types
-    float32_type_id,
-    float64_type_id,
-    // Complex floating-point types
-    complex_float32_type_id,
-    complex_float64_type_id,
-    // Means no type, just like in C. (Different from NumPy)
-    void_type_id,
-    void_pointer_type_id,
-
-    // Other primitives (not builtin)
-    fixedbytes_type_id,
-    fixedstring_type_id,
-    categorical_type_id,
-    date_type_id,
-    busdate_type_id,
-    pointer_type_id,
-
-    date_property_type_id,
-
-    // blockref primitive dtypes
-    bytes_type_id,
-    string_type_id,
-
-    // blockref composite dtypes
-    array_type_id,
-
-    // Composite dtypes
-    strided_array_type_id,
-    fixedarray_type_id,
-    struct_type_id,
-    fixedstruct_type_id,
-    tuple_type_id,
-    ndobject_type_id,
-
-    // Adapter dtypes
-    convert_type_id,
-    byteswap_type_id,
-    align_type_id,
-    view_type_id,
-
-    // pattern matches against other types - cannot instantiate
-    pattern_type_id,
-
-    // The number of built-in, atomic types
-    builtin_type_id_count = 13
-};
-
-enum {
-    /** A mask within which alll the built-in type ids are guaranteed to fit */
-    builtin_type_id_mask = 0x1f
-};
-
-enum dtype_memory_management_t {
-    /** The dtype's memory is POD (plain old data) */
-    pod_memory_management,
-    /** The dtype contains pointers into another memory_block */
-    blockref_memory_management,
-    /** The dtype requires full object lifetime management (construct/copy/move/destroy) */
-    object_memory_management
 };
 
 
@@ -300,46 +191,6 @@ inline bool offset_is_aligned(size_t offset, size_t alignment) {
 /** Prints a single scalar of a builtin dtype to the stream */
 void print_builtin_scalar(type_id_t type_id, std::ostream& o, const char *data);
 
-class dtype;
-class extended_dtype;
-struct iterdata_common;
-
-/** This is the callback function type used by the extended_dtype::foreach function */
-typedef void (*foreach_fn_t)(const dtype &dt, char *data, const char *metadata, void *callback_data);
-
-/**
- * This is the iteration increment function used by iterdata. It increments the
- * iterator at the specified level, resetting all the more inner levels to 0.
- */
-typedef char * (*iterdata_increment_fn_t)(iterdata_common *iterdata, int level);
-/**
- * This is the reset function which is called when an outer dimension
- * increment resets all the lower dimensions to index 0. It returns
- * the data pointer for the next inner level of iteration.
- */
-typedef char * (*iterdata_reset_fn_t)(iterdata_common *iterdata, char *data, int ndim);
-
-/**
- * This is a generic function which applies a transformation to a dtype.
- * Usage of the function pointer is typically paired with the
- * extended_dtype::transform_child_dtypes virtual function on the dtype
- *
- * An implementation of this function should either copy 'dt' into
- * 'out_transformed_dtype', and leave 'out_was_transformed alone', or it
- * should place a different dtype in 'out_transformed_dtype', then set
- * 'out_was_transformed' to true.
- */
-typedef void (*dtype_transform_fn_t)(const dtype& dt, const void *extra,
-                dtype& out_transformed_dtype, bool& out_was_transformed);
-
-// Common preamble of all iterdata instances
-struct iterdata_common {
-    // This increments the iterator at the requested level
-    iterdata_increment_fn_t incr;
-    // This resets the data pointers of the iterator
-    iterdata_reset_fn_t reset;
-};
-
 /** Special iterdata which broadcasts to any number of additional dimensions */
 struct iterdata_broadcasting_terminator {
     iterdata_common common;
@@ -349,492 +200,13 @@ char *iterdata_broadcasting_terminator_incr(iterdata_common *iterdata, int level
 char *iterdata_broadcasting_terminator_reset(iterdata_common *iterdata, char *data, int level);
 
 /**
- * This is the virtual base class for defining new dtypes which are not so basic
- * that we want them in the small list of builtin dtypes. This is a reference
- * counted class, and is immutable, so once an extended_dtype instance is constructed,
- * it should never be modified.
- *
- * Typically, the extended_dtype is used by manipulating a dtype instance, which acts
- * as a smart pointer to extended_dtype, which special handling for the builtin types.
- */
-class extended_dtype {
-    /** Embedded reference counting */
-    mutable atomic_refcount m_use_count;
-protected:
-    /// Standard dtype data
-    /** The dtype's type id (type_id_t is the enum) */
-    uint16_t m_type_id;
-    /** The dtype's kind (dtype_kind_t is the enum) */
-    uint8_t m_kind;
-    /** The dtype's data alignment */
-    uint8_t m_alignment;
-    /** The size of one instance of the dtype, or 0 if there is not one fixed size. */
-    size_t m_data_size;
-    /** The number of uniform dimensions this dtype has */
-    uint8_t m_undim;
-    
-
-protected:
-    // Helper function for uniform dimension dtypes
-    void get_nonuniform_ndobject_properties_and_functions(
-                    std::vector<std::pair<std::string, gfunc::callable> >& out_properties,
-                    std::vector<std::pair<std::string, gfunc::callable> >& out_functions) const;
-public:
-    /** Starts off the extended dtype instance with a use count of 1. */
-    inline extended_dtype(type_id_t type_id, dtype_kind_t kind, size_t data_size, size_t alignment, size_t undim=0)
-        : m_use_count(1), m_type_id(static_cast<uint16_t>(type_id)), m_kind(static_cast<uint8_t>(kind)),
-                m_alignment(static_cast<uint8_t>(alignment)), m_data_size(data_size), m_undim(static_cast<uint8_t>(undim))
-    {}
-
-    virtual ~extended_dtype();
-
-    /** The dtype's type id */
-    inline type_id_t get_type_id() const {
-        return static_cast<type_id_t>(m_type_id);
-    }
-    /** The dtype's kind */
-    inline dtype_kind_t get_kind() const {
-        return static_cast<dtype_kind_t>(m_kind);
-    }
-    /** The size of one instance of the dtype, or 0 if there is not one fixed size. */
-    inline size_t get_data_size() const {
-        return m_data_size;
-    }
-    /** The dtype's data alignment. Every data pointer for this dtype _must_ be aligned. */
-    inline size_t get_alignment() const {
-        return m_alignment;
-    }
-    /** The number of uniform dimensions this dtype has */
-    inline size_t get_undim() const {
-        return m_undim;
-    }
-    virtual size_t get_default_data_size(int ndim, const intptr_t *shape) const;
-
-    /**
-     * Print the raw data interpreted as a single instance of this dtype.
-     *
-     * \param o  The std::ostream to print to.
-     * \param metadata  Pointer to the dtype metadata of the data element to print.
-     * \param data  Pointer to the data element to print.
-     */
-    virtual void print_data(std::ostream& o, const char *metadata, const char *data) const = 0;
-
-    /**
-     * Print a representation of the dtype itself
-     *
-     * \param o  The std::ostream to print to.
-     */
-    virtual void print_dtype(std::ostream& o) const = 0;
-
-    /** Returns what kind of memory management the dtype uses, e.g. construct/copy/move/destruct semantics */
-    virtual dtype_memory_management_t get_memory_management() const = 0;
-
-    /**
-     * Returns true if the dtype is a scalar.
-     *
-     * This precludes a dynamic dtype from switching between scalar and array behavior,
-     * but the simplicity seems to probably be worth it.
-     */
-    virtual bool is_scalar() const;
-
-    /**
-     * Returns true if the first dimension of the dtype is a uniform dimension.
-     */
-    virtual bool is_uniform_dim() const;
-
-    /**
-     * Returns true if the dtype contains an expression dtype anywhere within it.
-     */
-    virtual bool is_expression() const;
-
-    /**
-     * Applies the transform function to all the child dtypes, creating
-     * a new dtype of the same type but with the transformed children.
-     *
-     * \param transform_fn  The function for transforming dtypes.
-     * \param extra  Extra data to pass to the transform function
-     * \param out_transformed_dtype  The transformed dtype is placed here.
-     * \param out_was_transformed  Is set to true if a transformation was done,
-     *                             is left alone otherwise.
-     */
-    virtual void transform_child_dtypes(dtype_transform_fn_t transform_fn, const void *extra,
-                    dtype& out_transformed_dtype, bool& out_was_transformed) const;
-
-    /**
-     * Returns a modified dtype with all expression dtypes replaced with
-     * their value dtypes, and dtypes replaced with "standard versions"
-     * whereever appropriate. For example, an offset-based uniform array
-     * would be replaced by a strided uniform array.
-     */
-    virtual dtype get_canonical_dtype() const;
-
-    /**
-     * Indexes into the dtype. This function returns the dtype which results
-     * from applying the same index to an ndarray of this dtype.
-     *
-     * \param nindices     The number of elements in the 'indices' array. This is shrunk by one for each recursive call.
-     * \param indices      The indices to apply. This is incremented by one for each recursive call.
-     * \param current_i    The current index position. Used for error messages.
-     * \param root_dt      The data type in the first call, before any recursion. Used for error messages.
-     */
-    virtual dtype apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& root_dt) const;
-
-    /**
-     * Indexes into an ndobject using the provided linear index, and a dtype and freshly allocated output
-     * set to point to the same base data reference.
-     *
-     * \param nindices     The number of elements in the 'indices' array. This is shrunk by one for each recursive call.
-     * \param indices      The indices to apply. This is incremented by one for each recursive call.
-     * \param data         The data of the input array.
-     * \param metadata     The metadata of the input array.
-     * \param result_dtype The result of an apply_linear_index call.
-     * \param out_metadata The metadata of the output array. The output data should all be references to the data
-     *                     of the input array, so there is no out_data parameter.
-     * \param embedded_reference  For references which are NULL, add this reference in the output.
-     *                            A NULL means the data was embedded in the original ndobject, so
-     *                            when putting it in a new ndobject, need to hold a reference to
-     *                            that memory.
-     * \param current_i    The current index position. Used for error messages.
-     * \param root_dt      The data type in the first call, before any recursion. Used for error messages.
-     *
-     * @return  An offset to apply to the data pointer.
-     */
-    virtual intptr_t apply_linear_index(int nindices, const irange *indices, char *data, const char *metadata,
-                    const dtype& result_dtype, char *out_metadata,
-                    memory_block_data *embedded_reference,
-                    int current_i, const dtype& root_dt) const;
-
-    /**
-     * The 'at' function is used for indexing. Indexing one dimension with
-     * an integer index is special-cased, both for higher performance and
-     * to provide a way to get a metadata pointer for the result dtype.
-     *
-     * \param i0  The index to apply.
-     * \param inout_metadata  If non-NULL, points to a metadata pointer for
-     *                        this dtype that is modified to point to the
-     *                        result's metadata.
-     * \param inout_data  If non-NULL, points to a data pointer that is modified
-     *                    to point to the result's data. If `inout_data` is non-NULL,
-     *                    `inout_metadata` must also be non-NULL.
-     *
-     * \returns  The dtype that results from the indexing operation.
-     */
-    virtual dtype at(intptr_t i0, const char **inout_metadata, const char **inout_data) const;
-
-    /**
-     * Retrieves the dtype starting at the requested dimension. This is
-     * generally equivalent to apply_linear_index with a count of 'dim'
-     * scalar indices.
-     *
-     * \param inout_metadata  NULL to ignore, or point it at some metadata for the dtype,
-     *                        and it will be updated to point to the metadata for the returned
-     *                        dtype.
-     * \param i         The dimension number to retrieve.
-     * \param total_ndim  A count of how many dimensions have been traversed from the
-     *                    dtype start, for producing error messages.
-     */
-    virtual dtype get_dtype_at_dimension(char **inout_metadata, size_t i, size_t total_ndim = 0) const;
-
-    /**
-     * Retrieves the leading dimension size of the shape.
-     *
-     * \param data      Data corresponding to the dtype.
-     * \param metadata  Metadata corresponding to the data.
-     */
-    virtual intptr_t get_dim_size(const char *data, const char *metadata) const;
-
-    /**
-     * Retrieves the shape of the dtype, expanding the vector as needed. For dimensions with
-     * unknown or variable shape, -1 is returned.
-     *
-     * The output must be pre-initialized to have get_undim() elements.
-     */
-    virtual void get_shape(size_t i, intptr_t *out_shape) const;
-
-    /**
-     * Retrieves the shape of the dtype ndobject instance, expanding the vector as needed. For dimensions with
-     * variable shape, -1 is returned.
-     *
-     * The output must be pre-initialized to have get_undim() elements.
-     */
-    virtual void get_shape(size_t i, intptr_t *out_shape, const char *metadata) const;
-
-    /**
-     * Retrieves the strides of the dtype ndobject instance, expanding the vector as needed. For dimensions
-     * where there is not a simple stride (e.g. a tuple/struct dtype), 0 is returned and
-     * the caller should handle this.
-     *
-     * The output must be pre-initialized to have get_undim() elements.
-     */
-    virtual void get_strides(size_t i, intptr_t *out_strides, const char *metadata) const;
-
-    /**
-     * \brief Returns a value representative of a stride for the dimension, used for axis sorting.
-     *
-     * For dimensions which are strided, returns the stride. For dimensions which
-     * are not, for example a dimension with an array of offsets, returns a
-     * non-zero value which represents roughly what a stride would be. In this
-     * example, the first non-zero offset would work.
-     *
-     * \param metadata  Metadata corresponding to the dtype.
-     *
-     * \returns  The representative stride.
-     */
-    virtual intptr_t get_representative_stride(const char *metadata) const;
-
-    /**
-     * Called by ::dynd::is_lossless_assignment, with (this == dst_dt->extended()).
-     */
-    virtual bool is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const = 0;
-
-    /*
-     * Return a comparison kernel that can perform the requested single comparison on
-     * data of this dtype
-     *
-     * \param compare_id the identifier of the comparison
-     */
-    virtual void get_single_compare_kernel(single_compare_kernel_instance& out_kernel) const;
-
-    /**
-     * Called by ::dynd::get_dtype_assignment_kernel with (this == dst_dt.extended()) or
-     * by another implementation of this function with (this == src_dt.extended()).
-     *
-     * If (this == dst_dt.extended()), and the function can't produce an assignment kernel,
-     * should call dst_dt.extended()->get_dtype_assignment_kernel(...) to let the other
-     * dtype provide the function if it can be done.
-     */
-    virtual void get_dtype_assignment_kernel(const dtype& dst_dt, const dtype& src_dt,
-                    assign_error_mode errmode,
-                    kernel_instance<unary_operation_pair_t>& out_kernel) const;
-
-    virtual bool operator==(const extended_dtype& rhs) const = 0;
-
-    /** The size of the ndobject metadata for this dtype */
-    virtual size_t get_metadata_size() const;
-    /**
-     * Constructs the ndobject metadata for this dtype, prepared for writing.
-     * The element size of the result must match that from get_default_data_size().
-     */
-    virtual void metadata_default_construct(char *metadata, int ndim, const intptr_t* shape) const;
-    /**
-     * Constructs the ndobject metadata for this dtype, copying everything exactly from
-     * input metadata for the same dtype.
-     *
-     * \param out_metadata  The new metadata memory which is constructed.
-     * \param in_metadata   Existing metadata memory from which to copy.
-     * \param embedded_reference  For references which are NULL, add this reference in the output.
-     *                            A NULL means the data was embedded in the original ndobject, so
-     *                            when putting it in a new ndobject, need to hold a reference to
-     *                            that memory.
-     */
-    virtual void metadata_copy_construct(char *dst_metadata, const char *src_metadata, memory_block_data *embedded_reference) const;
-    /** Destructs any references or other state contained in the ndobjects' metdata */
-    virtual void metadata_destruct(char *metadata) const;
-    /**
-     * When metadata is used for temporary buffers of a dtype, and that usage is finished one
-     * execution cycle, this function is called to clear usage of that memory so it can be reused in
-     * the next cycle.
-     */
-    virtual void metadata_reset_buffers(char *metadata) const;
-    /**
-     * For blockref dtypes, once all the elements have been written we want to turn off further
-     * memory allocation, and possibly trim excess memory that was allocated. This function
-     * does this.
-     */
-    virtual void metadata_finalize_buffers(char *metadata) const;
-    /** Debug print of the metdata */
-    virtual void metadata_debug_print(const char *metadata, std::ostream& o, const std::string& indent) const;
-
-    /** The size of the data required for uniform iteration */
-    virtual size_t get_iterdata_size(int ndim) const;
-    /**
-     * Constructs the iterdata for processing iteration at this level of the datashape
-     */
-    virtual size_t iterdata_construct(iterdata_common *iterdata, const char **inout_metadata, int ndim, const intptr_t* shape, dtype& out_uniform_dtype) const;
-    /** Destructs any references or other state contained in the iterdata */
-    virtual size_t iterdata_destruct(iterdata_common *iterdata, int ndim) const;
-
-    /**
-     * Call the callback on each element of the array with given data/metadata along the leading
-     * dimension. For uniform dimensions, the dtype provided is the same each call, but for
-     * heterogeneous dimensions it changes.
-     *
-     * \param data  The ndobject data.
-     * \param metadata  The ndobject metadata.
-     * \param callback  Callback function called for each subelement.
-     * \param callback_data  Data provided to the callback function.
-     */
-    virtual void foreach_leading(char *data, const char *metadata, foreach_fn_t callback, void *callback_data) const;
-
-    /**
-     * Modifies metadata allocated using the metadata_default_construct function, to be used
-     * immediately after ndobject construction. Given an input dtype/metadata, edits the output
-     * metadata in place to match.
-     *
-     * \param dst_metadata  The metadata created by metadata_default_construct, which is modified in place
-     * \param src_dtype  The dtype of the input ndobject whose stride ordering is to be matched.
-     * \param src_metadata  The metadata of the input ndobject whose stride ordering is to be matched.
-     */
-    virtual void reorder_default_constructed_strides(char *dst_metadata, const dtype& src_dtype, const char *src_metadata) const;
-
-    /**
-     * Additional dynamic properties exposed by the dtype as gfunc::callable.
-     */
-    virtual void get_dynamic_dtype_properties(const std::pair<std::string, gfunc::callable> **out_properties, size_t *out_count) const;
-
-    /**
-     * Additional dynamic functions exposed by the dtype as gfunc::callable.
-     */
-    virtual void get_dynamic_dtype_functions(const std::pair<std::string, gfunc::callable> **out_functions, size_t *out_count) const;
-
-    /**
-     * Additional dynamic properties exposed by any ndobject of this dtype as gfunc::callable.
-     *
-     * \note Uniform dtypes copy these properties from the first non-uniform dtype, so such properties must
-     *       be able to handle the case where they are the first non-uniform dtype in an array type, not
-     *       just strictly of the non-uniform dtype.
-     */
-    virtual void get_dynamic_ndobject_properties(const std::pair<std::string, gfunc::callable> **out_properties, size_t *out_count) const;
-
-    /**
-     * Additional dynamic functions exposed by any ndobject of this dtype as gfunc::callable.
-     *
-     * \note Uniform dtypes copy these functions from the first non-uniform dtype, so such properties must
-     *       be able to handle the case where they are the first non-uniform dtype in an array type, not
-     *       just strictly of the non-uniform dtype.
-     */
-    virtual void get_dynamic_ndobject_functions(const std::pair<std::string, gfunc::callable> **out_functions, size_t *out_count) const;
-
-    friend void extended_dtype_incref(const extended_dtype *ed);
-    friend void extended_dtype_decref(const extended_dtype *ed);
-};
-
-/**
- * Increments the reference count of a memory block object.
- */
-inline void extended_dtype_incref(const extended_dtype *ed)
-{
-    //std::cout << "dtype " << (void *)ed << " inc: " << ed->m_use_count + 1 << "\t"; ed->print_dtype(std::cout); std::cout << std::endl;
-    ++ed->m_use_count;
-}
-
-/**
- * Decrements the reference count of a memory block object,
- * freeing it if the count reaches zero.
- */
-inline void extended_dtype_decref(const extended_dtype *ed)
-{
-    //std::cout << "dtype " << (void *)ed << " dec: " << ed->m_use_count - 1 << "\t"; ed->print_dtype(std::cout); std::cout << std::endl;
-    if (--ed->m_use_count == 0) {
-        delete ed;
-    }
-}
-
-
-
-/**
- * Base class for all string extended dtypes. If a dtype
- * has kind string_kind, it must be a subclass of
- * extended_string_dtype.
- */
-class extended_string_dtype : public extended_dtype {
-public:
-    inline extended_string_dtype(type_id_t type_id, dtype_kind_t kind, size_t data_size, size_t alignment)
-        : extended_dtype(type_id, kind, data_size, alignment)
-    {}
-
-    virtual ~extended_string_dtype();
-    /** The encoding used by the string */
-    virtual string_encoding_t get_encoding() const = 0;
-
-    /** Retrieves the data range in which a string is stored */
-    virtual void get_string_range(const char **out_begin, const char**out_end, const char *metadata, const char *data) const = 0;
-    /** Converts a string element into a C++ std::string with a UTF8 encoding */
-    std::string get_utf8_string(const char *metadata, const char *data, assign_error_mode errmode) const;
-    /** Copies a C++ std::string with a UTF8 encoding to a string element */
-    virtual void set_utf8_string(const char *metadata, char *data, assign_error_mode errmode, const std::string& utf8_str) const = 0;
-
-    // String dtypes stop the iterdata chain
-    // TODO: Maybe it should be more flexible?
-    size_t get_iterdata_size(int ndim) const;
-
-    void get_dynamic_dtype_properties(const std::pair<std::string, gfunc::callable> **out_properties, size_t *out_count) const;
-};
-
-/**
- * Base class for all dtypes of expression_kind.
- */
-class extended_expression_dtype : public extended_dtype {
-public:
-    inline extended_expression_dtype(type_id_t type_id, dtype_kind_t kind, size_t data_size, size_t alignment, size_t undim=0)
-        : extended_dtype(type_id, kind, data_size, alignment, undim)
-    {}
-
-    virtual ~extended_expression_dtype();
-
-    /**
-     * Should return a reference to the dtype representing the value which
-     * is for calculation. This should never be an expression dtype.
-     */
-    virtual const dtype& get_value_dtype() const = 0;
-    /**
-     * Should return a reference to a dtype representing the data this dtype
-     * uses to produce the value.
-     */
-    virtual const dtype& get_operand_dtype() const = 0;
-
-    /** Returns a kernel which converts from (operand_dtype().value_dtype()) to (value_dtype()) */
-    virtual void get_operand_to_value_kernel(const eval::eval_context *ectx,
-                            kernel_instance<unary_operation_pair_t>& out_borrowed_kernel) const = 0;
-    /** Returns a kernel which converts from (value_dtype()) to (operand_dtype().value_dtype()) */
-    virtual void get_value_to_operand_kernel(const eval::eval_context *ectx,
-                            kernel_instance<unary_operation_pair_t>& out_borrowed_kernel) const = 0;
-
-    /**
-     * This method is for expression dtypes, and is a way to substitute
-     * the storage dtype (deepest operand dtype) of an existing dtype.
-     *
-     * The value_dtype of the replacement should match the storage dtype
-     * of this instance. Implementations of this should raise an exception
-     * when this is not true.
-     */
-    virtual dtype with_replaced_storage_dtype(const dtype& replacement_dtype) const = 0;
-
-    // Always return true for expression dtypes
-    bool is_expression() const;
-
-    // The canonical dtype for expression dtypes is always the value dtype
-    dtype get_canonical_dtype() const;
-
-    // Expression dtypes use the values from their operand dtype.
-    size_t get_metadata_size() const;
-    void metadata_default_construct(char *metadata, int ndim, const intptr_t* shape) const;
-    void metadata_copy_construct(char *dst_metadata, const char *src_metadata, memory_block_data *embedded_reference) const;
-    void metadata_destruct(char *metadata) const;
-    void metadata_debug_print(const char *metadata, std::ostream& o, const std::string& indent) const;
-
-    // Expression dtypes stop the iterdata chain
-    // TODO: Maybe it should be more flexible?
-    size_t get_iterdata_size(int ndim) const;
-};
-
-namespace detail {
-    /**
-     * Internal implementation detail - makes a builtin dtype from its raw values.
-     */
-    /* TODO: DYND_CONSTEXPR */ dtype internal_make_raw_dtype(char type_id, char kind, intptr_t element_size, char alignment);
-
-} // namespace detail
-
-
-/**
  * This class represents a data type.
  *
  * The purpose of this data type is to describe the data layout
  * of elements in ndarrays. The class stores a number of common
  * properties, like a type id, a kind, an alignment, a byte-swapped
  * flag, and an element_size. Some data types have additional data
- * which is stored as a dynamically allocated extended_dtype object.
+ * which is stored as a dynamically allocated base_dtype object.
  *
  * For the simple built-in dtypes, no extended data is needed, in
  * which case this is entirely a value type with no allocated memory.
@@ -842,24 +214,24 @@ namespace detail {
  */
 class dtype {
 private:
-    const extended_dtype *m_extended;
+    const base_dtype *m_extended;
 
-    inline static bool is_builtin(const extended_dtype *ext) {
+    inline static bool is_builtin(const base_dtype *ext) {
         return (reinterpret_cast<uintptr_t>(ext)&(~builtin_type_id_mask)) == 0;
     }
     /**
      * Validates that the given type ID is a proper ID and casts to
-     * an extended_dtype pointer if it is. Throws
+     * an base_dtype pointer if it is. Throws
      * an exception if not.
      *
      * \param type_id  The type id to validate.
      */
-    static inline const extended_dtype *validate_builtin_type_id(type_id_t type_id)
+    static inline const base_dtype *validate_builtin_type_id(type_id_t type_id)
     {
         // 0 <= type_id < (builtin_type_id_count + 1)
         // The + 1 is for void_type_id
         if ((unsigned int)type_id < builtin_type_id_count + 1) {
-            return reinterpret_cast<const extended_dtype *>(type_id);
+            return reinterpret_cast<const base_dtype *>(type_id);
         } else {
             throw invalid_type_id((int)type_id);
         }
@@ -871,14 +243,14 @@ private:
 public:
     /** Constructor */
     dtype()
-        : m_extended(reinterpret_cast<const extended_dtype *>(void_type_id))
+        : m_extended(reinterpret_cast<const base_dtype *>(void_type_id))
     {}
-    /** Constructor from an extended_dtype. This claims ownership of the 'extended' reference by default, be careful! */
-    explicit dtype(const extended_dtype *extended, bool incref = false)
+    /** Constructor from an base_dtype. This claims ownership of the 'extended' reference by default, be careful! */
+    explicit dtype(const base_dtype *extended, bool incref = false)
         : m_extended(extended)
     {
         if (incref && !dtype::is_builtin(extended)) {
-            extended_dtype_incref(m_extended);
+            base_dtype_incref(m_extended);
         }
     }
     /** Copy constructor (should be "= default" in C++11) */
@@ -886,17 +258,17 @@ public:
         : m_extended(rhs.m_extended)
     {
         if (!dtype::is_builtin(m_extended)) {
-            extended_dtype_incref(m_extended);
+            base_dtype_incref(m_extended);
         }
     }
     /** Assignment operator (should be "= default" in C++11) */
     dtype& operator=(const dtype& rhs) {
         if (!dtype::is_builtin(m_extended)) {
-            extended_dtype_decref(m_extended);
+            base_dtype_decref(m_extended);
         }
         m_extended = rhs.m_extended;
         if (!dtype::is_builtin(m_extended)) {
-            extended_dtype_incref(m_extended);
+            base_dtype_incref(m_extended);
         }
         return *this;
     }
@@ -905,15 +277,15 @@ public:
     dtype(dtype&& rhs)
         : m_extended(rhs.m_extended)
     {
-        rhs.m_extended = reinterpret_cast<const extended_dtype *>(void_type_id);
+        rhs.m_extended = reinterpret_cast<const base_dtype *>(void_type_id);
     }
     /** Move assignment operator */
     dtype& operator=(dtype&& rhs) {
         if (!dtype::is_builtin(m_extended)) {
-            extended_dtype_decref(m_extended);
+            base_dtype_decref(m_extended);
         }
         m_extended = rhs.m_extended;
-        rhs.m_extended = reinterpret_cast<const extended_dtype *>(void_type_id);
+        rhs.m_extended = reinterpret_cast<const base_dtype *>(void_type_id);
         return *this;
     }
 #endif // DYND_RVALUE_REFS
@@ -928,7 +300,7 @@ public:
 
     ~dtype() {
         if (!is_builtin()) {
-            extended_dtype_decref(m_extended);
+            base_dtype_decref(m_extended);
         }
     }
 
@@ -1020,7 +392,7 @@ public:
 
     /**
      * Indexes into the dtype, intended for recursive calls from the extended-dtype version. See
-     * the function in extended_dtype with the same name for more details.
+     * the function in base_dtype with the same name for more details.
      */
     dtype apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& root_dt) const;
 
@@ -1035,7 +407,7 @@ public:
             return *this;
         } else {
             // All chaining happens in the operand_dtype
-            return static_cast<const extended_expression_dtype *>(m_extended)->get_value_dtype();
+            return static_cast<const base_expression_dtype *>(m_extended)->get_value_dtype();
         }
     }
 
@@ -1049,7 +421,7 @@ public:
         if (is_builtin() || m_extended->get_kind() != expression_kind) {
             return *this;
         } else {
-            return static_cast<const extended_expression_dtype *>(m_extended)->get_operand_dtype();
+            return static_cast<const base_expression_dtype *>(m_extended)->get_operand_dtype();
         }
     }
 
@@ -1064,9 +436,9 @@ public:
             return *this;
         } else {
             // Follow the operand dtype chain to get the storage dtype
-            const dtype* dt = &static_cast<const extended_expression_dtype *>(m_extended)->get_operand_dtype();
+            const dtype* dt = &static_cast<const base_expression_dtype *>(m_extended)->get_operand_dtype();
             while (dt->get_kind() == expression_kind) {
-                dt = &static_cast<const extended_expression_dtype *>(dt->m_extended)->get_operand_dtype();
+                dt = &static_cast<const base_expression_dtype *>(dt->m_extended)->get_operand_dtype();
             }
             return *dt;
         }
@@ -1217,12 +589,12 @@ public:
 
 
     /**
-     * Returns a const pointer to the extended_dtype object which
+     * Returns a const pointer to the base_dtype object which
      * contains information about the dtype, or NULL if no extended
      * dtype information exists. The returned pointer is only valid during
      * the lifetime of the dtype.
      */
-    inline const extended_dtype* extended() const {
+    inline const base_dtype* extended() const {
         return m_extended;
     }
 
@@ -1302,7 +674,6 @@ public:
      */
     void print_data(std::ostream& o, const char *metadata, const char *data) const;
 
-    friend /* TODO: DYND_CONSTEXPR*/ dtype detail::internal_make_raw_dtype(char type_id, char kind, intptr_t element_size, char alignment);
     friend std::ostream& operator<<(std::ostream& o, const dtype& rhs);
 };
 

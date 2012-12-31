@@ -12,7 +12,7 @@ using namespace dynd;
 
 
 dynd::date_property_dtype::date_property_dtype(const dtype& operand_dtype, const std::string& property_name)
-    : extended_expression_dtype(date_property_type_id, expression_kind, operand_dtype.get_data_size(), operand_dtype.get_alignment()),
+    : base_expression_dtype(date_property_type_id, expression_kind, operand_dtype.get_data_size(), operand_dtype.get_alignment()),
             m_value_dtype(), m_operand_dtype(operand_dtype), m_property_name(property_name)
 {
     if (operand_dtype.value_dtype().get_type_id() != date_type_id) {
@@ -65,7 +65,7 @@ bool dynd::date_property_dtype::is_lossless_assignment(const dtype& dst_dt, cons
     }
 }
 
-bool dynd::date_property_dtype::operator==(const extended_dtype& rhs) const
+bool dynd::date_property_dtype::operator==(const base_dtype& rhs) const
 {
     if (this == &rhs) {
         return true;
@@ -106,7 +106,7 @@ dtype dynd::date_property_dtype::with_replaced_storage_dtype(const dtype& replac
 {
     if (m_operand_dtype.get_kind() == expression_kind) {
         return dtype(new date_property_dtype(
-                        static_cast<const extended_expression_dtype *>(m_operand_dtype.extended())->with_replaced_storage_dtype(replacement_dtype),
+                        static_cast<const base_expression_dtype *>(m_operand_dtype.extended())->with_replaced_storage_dtype(replacement_dtype),
                         m_property_name));
     } else {
         if (m_operand_dtype != replacement_dtype.value_dtype()) {

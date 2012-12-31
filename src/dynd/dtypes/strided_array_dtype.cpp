@@ -13,7 +13,7 @@ using namespace std;
 using namespace dynd;
 
 strided_array_dtype::strided_array_dtype(const dtype& element_dtype)
-    : extended_dtype(strided_array_type_id, uniform_array_kind, 0, element_dtype.get_alignment(),
+    : base_dtype(strided_array_type_id, uniform_array_kind, 0, element_dtype.get_alignment(),
                     element_dtype.get_undim() + 1),
             m_element_dtype(element_dtype)
 {
@@ -260,7 +260,7 @@ void strided_array_dtype::get_dtype_assignment_kernel(const dtype& DYND_UNUSED(d
     throw runtime_error("strided_array_dtype::get_dtype_assignment_kernel is unimplemented"); 
 }
 
-bool strided_array_dtype::operator==(const extended_dtype& rhs) const
+bool strided_array_dtype::operator==(const base_dtype& rhs) const
 {
     if (this == &rhs) {
         return true;

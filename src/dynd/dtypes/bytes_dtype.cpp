@@ -16,7 +16,7 @@ using namespace std;
 using namespace dynd;
 
 bytes_dtype::bytes_dtype(size_t alignment)
-    : extended_dtype(bytes_type_id, bytes_kind, sizeof(bytes_dtype_data), sizeof(const char *)), m_alignment(alignment)
+    : base_dtype(bytes_type_id, bytes_kind, sizeof(bytes_dtype_data), sizeof(const char *)), m_alignment(alignment)
 {
     if (alignment != 1 && alignment != 2 && alignment != 4 && alignment != 8 && alignment != 16) {
         std::stringstream ss;
@@ -130,7 +130,7 @@ void bytes_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const dtype& 
 }
 
 
-bool bytes_dtype::operator==(const extended_dtype& rhs) const
+bool bytes_dtype::operator==(const base_dtype& rhs) const
 {
     if (this == &rhs) {
         return true;

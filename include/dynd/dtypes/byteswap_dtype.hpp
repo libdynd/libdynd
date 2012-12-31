@@ -19,7 +19,7 @@
 
 namespace dynd {
 
-class byteswap_dtype : public extended_expression_dtype {
+class byteswap_dtype : public base_expression_dtype {
     dtype m_value_dtype, m_operand_dtype;
     kernel_instance<unary_operation_pair_t> m_byteswap_kernel;
 
@@ -51,7 +51,7 @@ public:
 
     bool is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const;
 
-    bool operator==(const extended_dtype& rhs) const;
+    bool operator==(const base_dtype& rhs) const;
 
     // Converts to/from the storage's value dtype
     void get_operand_to_value_kernel(const eval::eval_context *ectx,

@@ -348,8 +348,8 @@ void dynd::push_front_dtype_storage_to_value_kernels(const dynd::dtype& dt,
                     std::deque<dtype>& out_dtypes)
 {
     const dtype* front_dt = &dt;
-    const extended_expression_dtype* front_dt_extended = static_cast<const extended_expression_dtype *>(front_dt->extended());
-    const dtype* next_dt = &static_cast<const extended_expression_dtype *>(dt.extended())->get_operand_dtype();
+    const base_expression_dtype* front_dt_extended = static_cast<const base_expression_dtype *>(front_dt->extended());
+    const dtype* next_dt = &static_cast<const base_expression_dtype *>(dt.extended())->get_operand_dtype();
     if (next_dt->get_kind() != expression_kind) {
         // Special case when there is just one
         if (out_kernels.empty()) {
@@ -370,7 +370,7 @@ void dynd::push_front_dtype_storage_to_value_kernels(const dynd::dtype& dt,
             front_dt_extended->get_operand_to_value_kernel(ectx, out_kernels.front());
             // Shift to the next dtype
             front_dt = next_dt;
-            front_dt_extended = static_cast<const extended_expression_dtype *>(front_dt->extended());
+            front_dt_extended = static_cast<const base_expression_dtype *>(front_dt->extended());
             next_dt = &front_dt_extended->get_operand_dtype();
         } while (next_dt->get_kind() == expression_kind);
         // Add the final kernel from the source
@@ -386,7 +386,7 @@ void dynd::push_back_dtype_value_to_storage_kernels(const dynd::dtype& dt,
                     std::deque<dtype>& out_dtypes)
 {
     const dtype* back_dt = &dt;
-    const extended_expression_dtype* back_dt_extended = static_cast<const extended_expression_dtype *>(back_dt->extended());
+    const base_expression_dtype* back_dt_extended = static_cast<const base_expression_dtype *>(back_dt->extended());
     const dtype* next_dt = &back_dt_extended->get_operand_dtype();
     if (next_dt->get_kind() != expression_kind) {
         // Special case when there is just one
@@ -408,7 +408,7 @@ void dynd::push_back_dtype_value_to_storage_kernels(const dynd::dtype& dt,
             back_dt_extended->get_value_to_operand_kernel(ectx, out_kernels.back());
             // Shift to the next dtype
             back_dt = next_dt;
-            back_dt_extended = static_cast<const extended_expression_dtype *>(back_dt->extended());
+            back_dt_extended = static_cast<const base_expression_dtype *>(back_dt->extended());
             next_dt = &back_dt_extended->get_operand_dtype();
         } while (next_dt->get_kind() == expression_kind);
         // Add the final kernel from the source
