@@ -286,8 +286,8 @@ void dynd::make_buffered_binary_kernel(kernel_instance<binary_operation_t>& kern
             if (adapters[2].kernel != 0) {
                 // All three adapter kernels are there
                 out_kernel.kernel = &buffered_binary_out_in0_in1_kernel;
-                make_auxiliary_data<buffered_binary_out_in0_in1_kernel_auxdata>(out_kernel.auxdata);
-                buffered_binary_out_in0_in1_kernel_auxdata &auxdata = out_kernel.auxdata.get<buffered_binary_out_in0_in1_kernel_auxdata>();
+                make_auxiliary_data<buffered_binary_out_in0_in1_kernel_auxdata>(out_kernel.extra.auxdata);
+                buffered_binary_out_in0_in1_kernel_auxdata &auxdata = out_kernel.extra.auxdata.get<buffered_binary_out_in0_in1_kernel_auxdata>();
 
                 auxdata.bufs[0].allocate(buffer_element_sizes[0]); // TODO: pass buffering data through here
                 auxdata.bufs[1].allocate(buffer_element_sizes[1]);
@@ -300,8 +300,8 @@ void dynd::make_buffered_binary_kernel(kernel_instance<binary_operation_t>& kern
             } else {  // adapters[2].kernel is NULL
                 // The output and first input kernels are there
                 out_kernel.kernel = &buffered_binary_out_in0_kernel;
-                make_auxiliary_data<buffered_binary_out_in0_kernel_auxdata>(out_kernel.auxdata);
-                buffered_binary_out_in0_kernel_auxdata &auxdata = out_kernel.auxdata.get<buffered_binary_out_in0_kernel_auxdata>();
+                make_auxiliary_data<buffered_binary_out_in0_kernel_auxdata>(out_kernel.extra.auxdata);
+                buffered_binary_out_in0_kernel_auxdata &auxdata = out_kernel.extra.auxdata.get<buffered_binary_out_in0_kernel_auxdata>();
 
                 auxdata.bufs[0].allocate(buffer_element_sizes[0]); // TODO: pass buffering data through here
                 auxdata.bufs[1].allocate(buffer_element_sizes[1]);
@@ -314,8 +314,8 @@ void dynd::make_buffered_binary_kernel(kernel_instance<binary_operation_t>& kern
             if (adapters[2].kernel != 0) {
                 // The output and second input kernels are there
                 out_kernel.kernel = &buffered_binary_out_in1_kernel;
-                make_auxiliary_data<buffered_binary_out_in1_kernel_auxdata>(out_kernel.auxdata);
-                buffered_binary_out_in1_kernel_auxdata &auxdata = out_kernel.auxdata.get<buffered_binary_out_in1_kernel_auxdata>();
+                make_auxiliary_data<buffered_binary_out_in1_kernel_auxdata>(out_kernel.extra.auxdata);
+                buffered_binary_out_in1_kernel_auxdata &auxdata = out_kernel.extra.auxdata.get<buffered_binary_out_in1_kernel_auxdata>();
 
                 auxdata.bufs[0].allocate(buffer_element_sizes[0]); // TODO: pass buffering data through here
                 auxdata.bufs[1].allocate(buffer_element_sizes[2]);
@@ -326,8 +326,8 @@ void dynd::make_buffered_binary_kernel(kernel_instance<binary_operation_t>& kern
             } else {  // adapters[2].kernel is NULL
                 // The output kernel is there
                 out_kernel.kernel = &buffered_binary_out_kernel;
-                make_auxiliary_data<buffered_binary_out_kernel_auxdata>(out_kernel.auxdata);
-                buffered_binary_out_kernel_auxdata &auxdata = out_kernel.auxdata.get<buffered_binary_out_kernel_auxdata>();
+                make_auxiliary_data<buffered_binary_out_kernel_auxdata>(out_kernel.extra.auxdata);
+                buffered_binary_out_kernel_auxdata &auxdata = out_kernel.extra.auxdata.get<buffered_binary_out_kernel_auxdata>();
 
                 auxdata.bufs[0].allocate(buffer_element_sizes[0]); // TODO: pass buffering data through here
 
@@ -340,8 +340,8 @@ void dynd::make_buffered_binary_kernel(kernel_instance<binary_operation_t>& kern
             if (adapters[2].kernel != 0) {
                 // The first and second input kernels are there
                 out_kernel.kernel = &buffered_binary_in0_in1_kernel;
-                make_auxiliary_data<buffered_binary_in0_in1_kernel_auxdata>(out_kernel.auxdata);
-                buffered_binary_in0_in1_kernel_auxdata &auxdata = out_kernel.auxdata.get<buffered_binary_in0_in1_kernel_auxdata>();
+                make_auxiliary_data<buffered_binary_in0_in1_kernel_auxdata>(out_kernel.extra.auxdata);
+                buffered_binary_in0_in1_kernel_auxdata &auxdata = out_kernel.extra.auxdata.get<buffered_binary_in0_in1_kernel_auxdata>();
 
                 auxdata.bufs[0].allocate(buffer_element_sizes[1]); // TODO: pass buffering data through here
                 auxdata.bufs[1].allocate(buffer_element_sizes[2]);
@@ -352,8 +352,8 @@ void dynd::make_buffered_binary_kernel(kernel_instance<binary_operation_t>& kern
             } else {  // adapters[2].kernel is NULL
                 // The first input kernel is there
                 out_kernel.kernel = &buffered_binary_in0_kernel;
-                make_auxiliary_data<buffered_binary_in0_kernel_auxdata>(out_kernel.auxdata);
-                buffered_binary_in0_kernel_auxdata &auxdata = out_kernel.auxdata.get<buffered_binary_in0_kernel_auxdata>();
+                make_auxiliary_data<buffered_binary_in0_kernel_auxdata>(out_kernel.extra.auxdata);
+                buffered_binary_in0_kernel_auxdata &auxdata = out_kernel.extra.auxdata.get<buffered_binary_in0_kernel_auxdata>();
 
                 auxdata.bufs[0].allocate(buffer_element_sizes[1]); // TODO: pass buffering data through here
 
@@ -364,8 +364,8 @@ void dynd::make_buffered_binary_kernel(kernel_instance<binary_operation_t>& kern
             if (adapters[2].kernel != 0) {
                 // The second input kernel is there
                 out_kernel.kernel = &buffered_binary_in1_kernel;
-                make_auxiliary_data<buffered_binary_in1_kernel_auxdata>(out_kernel.auxdata);
-                buffered_binary_in1_kernel_auxdata &auxdata = out_kernel.auxdata.get<buffered_binary_in1_kernel_auxdata>();
+                make_auxiliary_data<buffered_binary_in1_kernel_auxdata>(out_kernel.extra.auxdata);
+                buffered_binary_in1_kernel_auxdata &auxdata = out_kernel.extra.auxdata.get<buffered_binary_in1_kernel_auxdata>();
 
                 auxdata.bufs[0].allocate(buffer_element_sizes[2]); // TODO: pass buffering data through here
 

@@ -264,7 +264,7 @@ bool struct_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_
     return false;
 }
 
-void struct_dtype::get_single_compare_kernel(single_compare_kernel_instance& DYND_UNUSED(out_kernel)) const
+void struct_dtype::get_single_compare_kernel(kernel_instance<compare_operations_t>& DYND_UNUSED(out_kernel)) const
 {
     throw runtime_error("struct_dtype::get_single_compare_kernel is unimplemented");
 }

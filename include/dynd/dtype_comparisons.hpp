@@ -7,12 +7,12 @@
 #define _DYND__DTYPE_COMPARISONS_HPP_
 
 #include <dynd/auxiliary_data.hpp>
-#include <dynd/kernels/single_compare_kernel_instance.hpp>
+#include <dynd/kernels/kernel_instance.hpp>
 
 
 namespace dynd {
 
-extern single_compare_operation_table_t builtin_dtype_comparisons_table[13];
+extern single_compare_operation_t builtin_dtype_comparisons_table[builtin_type_id_count][6];
 
 }
 

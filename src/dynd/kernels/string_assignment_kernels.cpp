@@ -62,10 +62,10 @@ void dynd::get_fixedstring_assignment_kernel(intptr_t dst_element_size, string_e
                 kernel_instance<unary_operation_pair_t>& out_kernel)
 {
     out_kernel.kernel.single = &fixedstring_assign_single;
-    out_kernel.kernel.contig = NULL;
+    out_kernel.kernel.strided = NULL;
 
-    make_auxiliary_data<fixedstring_assign_kernel_auxdata>(out_kernel.auxdata);
-    fixedstring_assign_kernel_auxdata& ad = out_kernel.auxdata.get<fixedstring_assign_kernel_auxdata>();
+    make_auxiliary_data<fixedstring_assign_kernel_auxdata>(out_kernel.extra.auxdata);
+    fixedstring_assign_kernel_auxdata& ad = out_kernel.extra.auxdata.get<fixedstring_assign_kernel_auxdata>();
     ad.dst_element_size = dst_element_size;
     ad.src_element_size = src_element_size;
     ad.overflow_check = (errmode != assign_error_none);
@@ -144,10 +144,10 @@ void dynd::get_blockref_string_assignment_kernel(string_encoding_t dst_encoding,
                 kernel_instance<unary_operation_pair_t>& out_kernel)
 {
     out_kernel.kernel.single = &blockref_string_assign_single;
-    out_kernel.kernel.contig = NULL;
+    out_kernel.kernel.strided = NULL;
 
-    make_auxiliary_data<blockref_string_assign_kernel_auxdata>(out_kernel.auxdata);
-    blockref_string_assign_kernel_auxdata& ad = out_kernel.auxdata.get<blockref_string_assign_kernel_auxdata>();
+    make_auxiliary_data<blockref_string_assign_kernel_auxdata>(out_kernel.extra.auxdata);
+    blockref_string_assign_kernel_auxdata& ad = out_kernel.extra.auxdata.get<blockref_string_assign_kernel_auxdata>();
     ad.dst_encoding = dst_encoding;
     ad.src_encoding = src_encoding;
     ad.append_fn = get_append_unicode_codepoint_function(dst_encoding, errmode);
@@ -223,11 +223,11 @@ void dynd::get_fixedstring_to_blockref_string_assignment_kernel(string_encoding_
                 kernel_instance<unary_operation_pair_t>& out_kernel)
 {
     out_kernel.kernel.single = &fixedstring_to_blockref_string_assign;
-    out_kernel.kernel.contig = NULL;
+    out_kernel.kernel.strided = NULL;
 
-    make_auxiliary_data<fixedstring_to_blockref_string_assign_kernel_auxdata>(out_kernel.auxdata);
+    make_auxiliary_data<fixedstring_to_blockref_string_assign_kernel_auxdata>(out_kernel.extra.auxdata);
     fixedstring_to_blockref_string_assign_kernel_auxdata& ad =
-                out_kernel.auxdata.get<fixedstring_to_blockref_string_assign_kernel_auxdata>();
+                out_kernel.extra.auxdata.get<fixedstring_to_blockref_string_assign_kernel_auxdata>();
     ad.dst_encoding = dst_encoding;
     ad.src_encoding = src_encoding;
     ad.src_element_size = src_element_size;
@@ -278,11 +278,11 @@ void dynd::get_blockref_string_to_fixedstring_assignment_kernel(intptr_t dst_ele
                 kernel_instance<unary_operation_pair_t>& out_kernel)
 {
     out_kernel.kernel.single = &blockref_string_to_fixedstring_assign;
-    out_kernel.kernel.contig = NULL;
+    out_kernel.kernel.strided = NULL;
 
-    make_auxiliary_data<fixedstring_assign_kernel_auxdata>(out_kernel.auxdata);
+    make_auxiliary_data<fixedstring_assign_kernel_auxdata>(out_kernel.extra.auxdata);
     blockref_string_to_fixedstring_assign_kernel_auxdata& ad =
-                out_kernel.auxdata.get<blockref_string_to_fixedstring_assign_kernel_auxdata>();
+                out_kernel.extra.auxdata.get<blockref_string_to_fixedstring_assign_kernel_auxdata>();
     ad.dst_element_size = dst_element_size;
     ad.overflow_check = (errmode != assign_error_none);
     ad.append_fn = get_append_unicode_codepoint_function(dst_encoding, errmode);

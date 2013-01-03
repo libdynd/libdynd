@@ -196,7 +196,7 @@ bool array_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_d
     return false;
 }
 
-void array_dtype::get_single_compare_kernel(single_compare_kernel_instance& DYND_UNUSED(out_kernel)) const
+void array_dtype::get_single_compare_kernel(kernel_instance<compare_operations_t>& DYND_UNUSED(out_kernel)) const
 {
     throw runtime_error("array_dtype::get_single_compare_kernel is unimplemented"); 
 }

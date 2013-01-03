@@ -6,7 +6,6 @@
 #include <algorithm>
 
 #include <dynd/dtypes/fixedbytes_dtype.hpp>
-#include <dynd/kernels/single_compare_kernel_instance.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/shape_tools.hpp>
 #include <dynd/exceptions.hpp>
@@ -70,7 +69,7 @@ dtype dynd::fixedbytes_dtype::apply_linear_index(int nindices, const irange *ind
     }
 }
 
-void dynd::fixedbytes_dtype::get_single_compare_kernel(single_compare_kernel_instance& DYND_UNUSED(out_kernel)) const {
+void dynd::fixedbytes_dtype::get_single_compare_kernel(kernel_instance<compare_operations_t>& DYND_UNUSED(out_kernel)) const {
     throw std::runtime_error("fixedbytes_dtype::get_single_compare_kernel not supported yet");
 }
 

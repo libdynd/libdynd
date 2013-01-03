@@ -498,10 +498,11 @@ void ndobject::val_assign(const ndobject& rhs, assign_error_mode errmode,
         // TODO: Performance optimization
         ndobject_iter<1, 0> iter(*this);
         get_dtype_assignment_kernel(iter.get_uniform_dtype(), rhs.get_dtype(), errmode, ectx, assign);
-        unary_kernel_static_data extra(assign.auxdata, iter.metadata(), rhs.get_ndo_meta());
+        assign.extra.dst_metadata = iter.metadata();
+        assign.extra.src_metadata = rhs.get_ndo_meta();
         if (!iter.empty()) {
             do {
-                assign.kernel.single(iter.data(), src_ptr, &extra);
+                assign.kernel.single(iter.data(), src_ptr, &assign.extra);
             } while (iter.next());
         }
     } else {
@@ -510,10 +511,11 @@ void ndobject::val_assign(const ndobject& rhs, assign_error_mode errmode,
         // TODO: Performance optimization
         ndobject_iter<1, 1> iter(*this, rhs);
         get_dtype_assignment_kernel(iter.get_uniform_dtype<0>(), iter.get_uniform_dtype<1>(), errmode, ectx, assign);
-        unary_kernel_static_data extra(assign.auxdata, iter.metadata<0>(), iter.metadata<1>());
+        assign.extra.dst_metadata = iter.metadata<0>();
+        assign.extra.src_metadata = iter.metadata<1>();
         if (!iter.empty()) {
             do {
-                assign.kernel.single(iter.data<0>(), iter.data<1>(), &extra);
+                assign.kernel.single(iter.data<0>(), iter.data<1>(), &assign.extra);
             } while (iter.next());
         }
     }
@@ -532,10 +534,11 @@ void ndobject::val_assign(const dtype& rhs_dt, const char *rhs_metadata, const c
     // TODO: Performance optimization
     ndobject_iter<1, 0> iter(*this);
     get_dtype_assignment_kernel(iter.get_uniform_dtype(), rhs_dt, errmode, ectx, assign);
+    assign.extra.dst_metadata = iter.metadata();
+    assign.extra.src_metadata = rhs_metadata;
     if (!iter.empty()) {
-        unary_kernel_static_data extra(assign.auxdata, iter.metadata(), rhs_metadata);
         do {
-            assign.kernel.single(iter.data(), rhs_data, &extra);
+            assign.kernel.single(iter.data(), rhs_data, &assign.extra);
         } while (iter.next());
     }
 }

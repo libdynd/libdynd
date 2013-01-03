@@ -14,50 +14,195 @@ namespace dynd {
  * Data which remains static across multiple unary operation calls.
  */
 struct unary_kernel_static_data {
-    AuxDataBase *auxdata;
+    auxiliary_data auxdata;
     const char *dst_metadata, *src_metadata;
 
     unary_kernel_static_data()
         : auxdata(), dst_metadata(), src_metadata()
     {}
-    unary_kernel_static_data(AuxDataBase *ad, const char *dm, const char *sm)
-        : auxdata(ad), dst_metadata(dm), src_metadata(sm)
+    unary_kernel_static_data(const unary_kernel_static_data& rhs)
+        : auxdata(), dst_metadata(rhs.dst_metadata), src_metadata(rhs.src_metadata)
+    {
+        auxdata.clone_from(rhs.auxdata);
+    }
+    void clone_from(const unary_kernel_static_data& rhs)
+    {
+        auxdata.clone_from(rhs.auxdata);
+        dst_metadata = rhs.dst_metadata;
+        src_metadata = rhs.src_metadata;
+    }
+    void borrow_from(const unary_kernel_static_data& rhs)
+    {
+        auxdata.borrow_from(rhs.auxdata);
+        dst_metadata = rhs.dst_metadata;
+        src_metadata = rhs.src_metadata;
+    }
+    void swap(unary_kernel_static_data& rhs)
+    {
+        auxdata.swap(rhs.auxdata);
+        std::swap(dst_metadata, rhs.dst_metadata);
+        std::swap(src_metadata, rhs.src_metadata);
+    }
+};
+
+/**
+ * Data which remains static across multiple binary operation calls.
+ */
+struct binary_kernel_static_data {
+    auxiliary_data auxdata;
+    const char *dst_metadata, *src0_metadata, *src1_metadata;
+
+    binary_kernel_static_data()
+        : auxdata(), dst_metadata(), src0_metadata(), src1_metadata()
     {}
+    binary_kernel_static_data(const binary_kernel_static_data& rhs)
+        : auxdata(), dst_metadata(rhs.dst_metadata), src0_metadata(rhs.src0_metadata), src1_metadata(rhs.src1_metadata)
+    {
+        auxdata.clone_from(rhs.auxdata);
+    }
+    void clone_from(const binary_kernel_static_data& rhs)
+    {
+        auxdata.clone_from(rhs.auxdata);
+        dst_metadata = rhs.dst_metadata;
+        src0_metadata = rhs.src0_metadata;
+        src1_metadata = rhs.src1_metadata;
+    }
+    void borrow_from(const binary_kernel_static_data& rhs)
+    {
+        auxdata.borrow_from(rhs.auxdata);
+        dst_metadata = rhs.dst_metadata;
+        src0_metadata = rhs.src0_metadata;
+        src1_metadata = rhs.src1_metadata;
+    }
+    void swap(binary_kernel_static_data& rhs)
+    {
+        auxdata.swap(rhs.auxdata);
+        std::swap(dst_metadata, rhs.dst_metadata);
+        std::swap(src0_metadata, rhs.src0_metadata);
+        std::swap(src1_metadata, rhs.src1_metadata);
+    }
+};
+
+/**
+ * Data which remains static across multiple unary operation calls.
+ */
+struct single_compare_static_data {
+    auxiliary_data auxdata;
+    const char *src0_metadata, *src1_metadata;
+
+    single_compare_static_data()
+        : auxdata(), src0_metadata(), src1_metadata()
+    {}
+    single_compare_static_data(const single_compare_static_data& rhs)
+        : auxdata(), src0_metadata(rhs.src0_metadata), src1_metadata(rhs.src1_metadata)
+    {
+        auxdata.clone_from(rhs.auxdata);
+    }
+    void clone_from(const single_compare_static_data& rhs)
+    {
+        auxdata.clone_from(rhs.auxdata);
+        src0_metadata = rhs.src0_metadata;
+        src1_metadata = rhs.src1_metadata;
+    }
+    void borrow_from(const single_compare_static_data& rhs)
+    {
+        auxdata.borrow_from(rhs.auxdata);
+        src0_metadata = rhs.src0_metadata;
+        src1_metadata = rhs.src1_metadata;
+    }
+    void swap(single_compare_static_data& rhs)
+    {
+        auxdata.swap(rhs.auxdata);
+        std::swap(src0_metadata, rhs.src0_metadata);
+        std::swap(src1_metadata, rhs.src1_metadata);
+    }
 };
 
 /** Typedef for a unary operation on a single element */
 typedef void (*unary_single_operation_t)(char *dst, const char *src, unary_kernel_static_data *extra);
-/** Typedef for a unary operation on a contiguous segment of elements */
-typedef void (*unary_contig_operation_t)(char *dst, const char *src, size_t count, unary_kernel_static_data *extra);
+/** Typedef for a unary operation on a strided segment of elements */
+typedef void (*unary_strided_operation_t)(char *dst, intptr_t dst_stride,
+                const char *src, intptr_t src_stride, size_t count, unary_kernel_static_data *extra);
+
+/** Typedef for a binary operation on a single element */
+typedef void (*binary_single_operation_t)(char *dst, const char *src0, const char *src1, binary_kernel_static_data *extra);
+/** Typedef for a binary operation on a strided segment of elements */
+typedef void (*binary_strided_operation_t)(char *dst, intptr_t dst_stride,
+                const char *src0, intptr_t src0_stride,
+                const char *src1, intptr_t src1_stride,
+                size_t count, binary_kernel_static_data *extra);
+
+
+typedef bool (*single_compare_operation_t)(const char *src0, const char *src1,
+                        single_compare_static_data *extra);
 
 /**
- * A structure containing a pair of unary operation pointers, for single and contiguous elements.
- * It is permitted for the 'contig' specialization to be NULL, in which case any code using this
+ * A structure containing a pair of unary operation pointers, for single and strided elements.
+ * It is permitted for the 'strided' specialization to be NULL, in which case any code using this
  * must call the 'single' version repeatedly.
  */
 struct unary_operation_pair_t {
     unary_single_operation_t single;
-    unary_contig_operation_t contig;
+    unary_strided_operation_t strided;
+
+    typedef unary_kernel_static_data extra_type;
 
     unary_operation_pair_t()
-        : single(), contig()
+        : single(), strided()
     {}
-    unary_operation_pair_t(unary_single_operation_t s, unary_contig_operation_t c)
-        : single(s), contig(c)
+    unary_operation_pair_t(unary_single_operation_t single_, unary_strided_operation_t strided_)
+        : single(single_), strided(strided_)
+    {}
+};
+
+/**
+ * A structure containing a pair of binary operation pointers, for single and strided elements.
+ * It is permitted for the 'contig' specialization to be NULL, in which case any code using this
+ * must call the 'single' version repeatedly.
+ */
+struct binary_operation_pair_t {
+    binary_single_operation_t single;
+    binary_strided_operation_t strided;
+
+    typedef binary_kernel_static_data extra_type;
+
+    binary_operation_pair_t()
+        : single(), strided()
+    {}
+    binary_operation_pair_t(binary_single_operation_t single_, binary_strided_operation_t strided_)
+        : single(single_), strided(strided_)
     {}
 };
 
 
-typedef void (*nullary_operation_t)(char *dst, intptr_t dst_stride,
-                        intptr_t count, const AuxDataBase *auxdata);
+/**
+ * Comparison operations support six specializations as a standardized
+ * set, in the order defined by comparison_id_t. Use the
+ * function get_unary_specialization to get an index into an
+ * instance of this table.
+ */
+struct compare_operations_t {
+    single_compare_operation_t ops[6];
 
-typedef void (*binary_operation_t)(char *dst, intptr_t dst_stride,
-                        const char *src0, intptr_t src0_stride,
-                        const char *src1, intptr_t src1_stride,
-                        intptr_t count, const AuxDataBase *auxdata);
+    static enum comparison_id_t {
+        less_id,
+        less_equal_id,
+        equal_id,
+        not_equal_id,
+        greater_equal_id,
+        greater_id
+    };
 
-typedef bool (*single_compare_operation_t)(const char *src0, const char *src1,
-                        const AuxDataBase *auxdata);
+    typedef single_compare_static_data extra_type;
+
+    compare_operations_t()
+    {}
+    compare_operations_t(single_compare_operation_t (&o)[6])
+    {
+        memcpy(ops, o, sizeof(ops));
+    }
+};
+
 
 /**
  * This class holds an instance of a kernel function, with its
@@ -69,33 +214,34 @@ class kernel_instance {
     kernel_instance& operator=(const kernel_instance&);
 public:
     kernel_instance()
-        : kernel()
+        : kernel(), extra()
     {
     }
     // Copying a kernel_instance clones the auxiliary data
     kernel_instance(const kernel_instance& rhs)
-        : kernel(rhs.kernel)
+        : kernel(rhs.kernel), extra(rhs.extra)
     {
-        auxdata.clone_from(rhs.auxdata);
     }
 
     void swap(kernel_instance& rhs) {
         std::swap(kernel, rhs.kernel);
-        auxdata.swap(rhs.auxdata);
+        extra.swap(rhs.extra);
     }
 
     void copy_from(const kernel_instance& rhs) {
         kernel = rhs.kernel;
-        auxdata.clone_from(rhs.auxdata);
+        extra.clone_from(rhs.extra);
     }
 
     void borrow_from(const kernel_instance& rhs) {
         kernel = rhs.kernel;
-        auxdata.borrow_from(rhs.auxdata);
+        extra.borrow_from(rhs.extra);
     }
 
+    /** The kernel functions */
     FT kernel;
-    auxiliary_data auxdata;
+    /** The structure that contains extra data, including auxiliary data and the operands' metadata */
+    typename FT::extra_type extra;
 };
 
 } // namespace dynd;

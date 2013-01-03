@@ -499,7 +499,7 @@ public:
      *
      * \param compare_id the identifier of the comparison
      */
-    void get_single_compare_kernel(single_compare_kernel_instance& out_kernel) const;
+    void get_single_compare_kernel(kernel_instance<compare_operations_t>& out_kernel) const;
 
     inline bool is_scalar() const {
         if (is_builtin()) {

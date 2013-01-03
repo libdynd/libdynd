@@ -7,7 +7,6 @@
 
 #include <dynd/dtypes/busdate_dtype.hpp>
 #include <dynd/dtypes/date_dtype.hpp>
-#include <dynd/kernels/single_compare_kernel_instance.hpp>
 #include <dynd/kernels/string_assignment_kernels.hpp>
 #include <dynd/exceptions.hpp>
 
@@ -98,7 +97,7 @@ bool dynd::busdate_dtype::is_lossless_assignment(const dtype& dst_dt, const dtyp
     }
 }
 
-void dynd::busdate_dtype::get_single_compare_kernel(single_compare_kernel_instance& /*out_kernel*/) const {
+void dynd::busdate_dtype::get_single_compare_kernel(kernel_instance<compare_operations_t>& /*out_kernel*/) const {
     throw runtime_error("get_single_compare_kernel for date are not implemented");
 }
 

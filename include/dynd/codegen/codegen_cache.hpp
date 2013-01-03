@@ -26,7 +26,7 @@ class codegen_cache {
     /** A mapping from unary kernel adapter unique id to the generated kernel adapter */
     std::map<uint64_t, unary_operation_pair_t> m_cached_unary_kernel_adapters;
     /** A mapping from binary kernel adapter unique id to the generated kernel adapter */
-    std::map<uint64_t, binary_operation_t> m_cached_binary_kernel_adapters;
+    std::map<uint64_t, binary_operation_pair_t> m_cached_binary_kernel_adapters;
 public:
     codegen_cache();
 
@@ -60,19 +60,19 @@ public:
                     calling_convention_t callconv,
                     void *function_pointer,
                     memory_block_data *function_pointer_owner,
-                    kernel_instance<binary_operation_t>& out_kernel);
+                    kernel_instance<binary_operation_pair_t>& out_kernel);
 
     void codegen_left_associative_binary_reduce_function_adapter(
                     const dtype& reduce_type,calling_convention_t callconv,
                     void *function_pointer,
                     memory_block_data *function_pointer_owner,
-                    kernel_instance<unary_single_operation_t>& out_kernel);
+                    kernel_instance<unary_operation_pair_t>& out_kernel);
 
     void codegen_right_associative_binary_reduce_function_adapter(
                     const dtype& reduce_type,calling_convention_t callconv,
                     void *function_pointer,
                     memory_block_data *function_pointer_owner,
-                    kernel_instance<unary_single_operation_t>& out_kernel);
+                    kernel_instance<unary_operation_pair_t>& out_kernel);
 
     void debug_print(std::ostream& o, const std::string& indent = "") const;
 };

@@ -59,7 +59,7 @@ std::string get_binary_reduce_function_adapter_unique_id_string(uint64_t unique_
  *
  * @return A pointer to the binary adapter kernel.
  */
-unary_single_operation_t codegen_left_associative_binary_reduce_function_adapter(
+unary_operation_pair_t codegen_left_associative_binary_reduce_function_adapter(
                     const dtype& reduce_type,calling_convention_t callconv);
 
 /**
@@ -74,7 +74,7 @@ unary_single_operation_t codegen_left_associative_binary_reduce_function_adapter
  *
  * @return A pointer to the binary adapter kernel.
  */
-unary_single_operation_t codegen_right_associative_binary_reduce_function_adapter(
+unary_operation_pair_t codegen_right_associative_binary_reduce_function_adapter(
                     const dtype& reduce_type,calling_convention_t callconv);
 
 } // namespace dynd

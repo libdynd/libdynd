@@ -11,7 +11,6 @@
 #include <dynd/dtypes/date_property_dtype.hpp>
 #include <dynd/dtypes/fixedstruct_dtype.hpp>
 #include <dynd/dtypes/string_dtype.hpp>
-#include <dynd/kernels/single_compare_kernel_instance.hpp>
 #include <dynd/kernels/string_assignment_kernels.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/exceptions.hpp>
@@ -83,7 +82,7 @@ bool date_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt
     }
 }
 
-void date_dtype::get_single_compare_kernel(single_compare_kernel_instance& /*out_kernel*/) const {
+void date_dtype::get_single_compare_kernel(kernel_instance<compare_operations_t>& /*out_kernel*/) const {
     throw runtime_error("get_single_compare_kernel for date are not implemented");
 }
 
@@ -236,13 +235,11 @@ static ndobject function_ndo_strftime(const ndobject& n, const std::string& form
     ndobject result = empty_like(n, make_string_dtype(string_encoding_utf_8));
     ndobject_iter<1, 1> iter(result, n);
     kernel_instance<unary_operation_pair_t> kernel;
-    unary_kernel_static_data extra;
     if (iter.get_uniform_dtype<1>().get_kind() == expression_kind) {
         get_dtype_assignment_kernel(iter.get_uniform_dtype<1>().value_dtype(), iter.get_uniform_dtype<1>(),
                         assign_error_none, NULL, kernel);
-        extra.auxdata = kernel.auxdata;
-        extra.dst_metadata = NULL;
-        extra.src_metadata = iter.metadata<1>();
+        kernel.extra.dst_metadata = NULL;
+        kernel.extra.src_metadata = iter.metadata<1>();
     }
     int32_t date;
     const base_string_dtype *esd = static_cast<const base_string_dtype *>(iter.get_uniform_dtype<0>().extended());
@@ -252,7 +249,7 @@ static ndobject function_ndo_strftime(const ndobject& n, const std::string& form
         do {
             // Get the date
             if (kernel.kernel.single) {
-                kernel.kernel.single(reinterpret_cast<char *>(&date), iter.data<1>(), &extra);
+                kernel.kernel.single(reinterpret_cast<char *>(&date), iter.data<1>(), &kernel.extra);
             } else {
                 date = *reinterpret_cast<const int32_t *>(iter.data<1>());
             }
@@ -306,13 +303,11 @@ static ndobject function_ndo_replace(const ndobject& n, int32_t year, int32_t mo
 
     // Get a kernel to produce elements if the input is an expression
     kernel_instance<unary_operation_pair_t> kernel;
-    unary_kernel_static_data extra;
     if (iter.get_uniform_dtype<1>().get_kind() == expression_kind) {
         get_dtype_assignment_kernel(iter.get_uniform_dtype<1>().value_dtype(), iter.get_uniform_dtype<1>(),
                         assign_error_none, NULL, kernel);
-        extra.auxdata = kernel.auxdata;
-        extra.dst_metadata = NULL;
-        extra.src_metadata = iter.metadata<1>();
+        kernel.extra.dst_metadata = NULL;
+        kernel.extra.src_metadata = iter.metadata<1>();
     }
     int32_t date;
     const date_dtype *dd = static_cast<const date_dtype *>(iter.get_uniform_dtype<1>().value_dtype().extended());
@@ -322,7 +317,7 @@ static ndobject function_ndo_replace(const ndobject& n, int32_t year, int32_t mo
         do {
             // Get the date
             if (kernel.kernel.single) {
-                kernel.kernel.single(reinterpret_cast<char *>(&date), iter.data<1>(), &extra);
+                kernel.kernel.single(reinterpret_cast<char *>(&date), iter.data<1>(), &kernel.extra);
             } else {
                 date = *reinterpret_cast<const int32_t *>(iter.data<1>());
             }
@@ -397,14 +392,13 @@ namespace {
         datetime::days_to_ymd(*reinterpret_cast<const int32_t *>(src), fld);
         *reinterpret_cast<int32_t *>(dst) = fld.year;
     }
-    void property_kernel_year_contig(char *dst, const char *src, size_t count, unary_kernel_static_data *DYND_UNUSED(extra))
+    void property_kernel_year_strided(char *dst, intptr_t dst_stride, const char *src, intptr_t src_stride,
+                    size_t count, unary_kernel_static_data *DYND_UNUSED(extra))
     {
         datetime::date_ymd fld;
-        int32_t *dst_array = reinterpret_cast<int32_t *>(dst);
-        const int32_t *src_array = reinterpret_cast<const int32_t *>(src);
-        for (size_t i = 0; i != count; ++i, ++src_array, ++dst_array) {
-            datetime::days_to_ymd(*src_array, fld);
-            *dst_array = fld.year;
+        for (size_t i = 0; i != count; ++i, dst += dst_stride, src += src_stride) {
+            datetime::days_to_ymd(*reinterpret_cast<const int32_t *>(src), fld);
+            *reinterpret_cast<int32_t *>(dst) = fld.year;
         }
     }
 
@@ -414,14 +408,13 @@ namespace {
         datetime::days_to_ymd(*reinterpret_cast<const int32_t *>(src), fld);
         *reinterpret_cast<int32_t *>(dst) = fld.month;
     }
-    void property_kernel_month_contig(char *dst, const char *src, size_t count, unary_kernel_static_data *DYND_UNUSED(extra))
+    void property_kernel_month_strided(char *dst, intptr_t dst_stride, const char *src, intptr_t src_stride,
+                    size_t count, unary_kernel_static_data *DYND_UNUSED(extra))
     {
         datetime::date_ymd fld;
-        int32_t *dst_array = reinterpret_cast<int32_t *>(dst);
-        const int32_t *src_array = reinterpret_cast<const int32_t *>(src);
-        for (size_t i = 0; i != count; ++i, ++src_array, ++dst_array) {
-            datetime::days_to_ymd(*src_array, fld);
-            *dst_array = fld.month;
+        for (size_t i = 0; i != count; ++i, dst += dst_stride, src += src_stride) {
+            datetime::days_to_ymd(*reinterpret_cast<const int32_t *>(src), fld);
+            *reinterpret_cast<int32_t *>(dst) = fld.month;
         }
     }
 
@@ -431,14 +424,13 @@ namespace {
         datetime::days_to_ymd(*reinterpret_cast<const int32_t *>(src), fld);
         *reinterpret_cast<int32_t *>(dst) = fld.day;
     }
-    void property_kernel_day_contig(char *dst, const char *src, size_t count, unary_kernel_static_data *DYND_UNUSED(extra))
+    void property_kernel_day_strided(char *dst, intptr_t dst_stride, const char *src, intptr_t src_stride,
+                    size_t count, unary_kernel_static_data *DYND_UNUSED(extra))
     {
         datetime::date_ymd fld;
-        int32_t *dst_array = reinterpret_cast<int32_t *>(dst);
-        const int32_t *src_array = reinterpret_cast<const int32_t *>(src);
-        for (size_t i = 0; i != count; ++i, ++src_array, ++dst_array) {
-            datetime::days_to_ymd(*src_array, fld);
-            *dst_array = fld.day;
+        for (size_t i = 0; i != count; ++i, dst += dst_stride, src += src_stride) {
+            datetime::days_to_ymd(*reinterpret_cast<const int32_t *>(src), fld);
+            *reinterpret_cast<int32_t *>(dst) = fld.day;
         }
     }
 
@@ -452,19 +444,18 @@ namespace {
         }
         *reinterpret_cast<int32_t *>(dst) = weekday;
     }
-    void property_kernel_weekday_contig(char *dst, const char *src, size_t count, unary_kernel_static_data *DYND_UNUSED(extra))
+    void property_kernel_weekday_strided(char *dst, intptr_t dst_stride, const char *src, intptr_t src_stride,
+                    size_t count, unary_kernel_static_data *DYND_UNUSED(extra))
     {
         datetime::date_val_t days;
-        int32_t *dst_array = reinterpret_cast<int32_t *>(dst);
-        const int32_t *src_array = reinterpret_cast<const int32_t *>(src);
-        for (size_t i = 0; i != count; ++i, ++src_array, ++dst_array) {
-            days = *src_array;
+        for (size_t i = 0; i != count; ++i, dst += dst_stride, src += src_stride) {
+            days = *reinterpret_cast<const int32_t *>(src);
             // 1970-01-05 is Monday
             int weekday = (int)((days - 4) % 7);
             if (weekday < 0) {
                 weekday += 7;
             }
-            *dst_array = weekday;
+            *reinterpret_cast<int32_t *>(dst) = weekday;
         }
     }
 } // anonymous namespace
@@ -473,19 +464,19 @@ void date_dtype::get_property_getter_kernel(const std::string& property_name,
                 dtype& out_value_dtype, kernel_instance<unary_operation_pair_t>& out_to_value_kernel) const
 {
     out_value_dtype = make_dtype<int32_t>();
-    out_to_value_kernel.auxdata.free();
+    out_to_value_kernel.extra.auxdata.free();
     if (property_name == "year") {
         out_to_value_kernel.kernel.single = &property_kernel_year_single;
-        out_to_value_kernel.kernel.contig = &property_kernel_year_contig;
+        out_to_value_kernel.kernel.strided = &property_kernel_year_strided;
     } else if (property_name == "month") {
         out_to_value_kernel.kernel.single = &property_kernel_month_single;
-        out_to_value_kernel.kernel.contig = &property_kernel_month_contig;
+        out_to_value_kernel.kernel.strided = &property_kernel_month_strided;
     } else if (property_name == "day") {
         out_to_value_kernel.kernel.single = &property_kernel_day_single;
-        out_to_value_kernel.kernel.contig = &property_kernel_day_contig;
+        out_to_value_kernel.kernel.strided = &property_kernel_day_strided;
     } else if (property_name == "weekday") {
         out_to_value_kernel.kernel.single = &property_kernel_weekday_single;
-        out_to_value_kernel.kernel.contig = &property_kernel_weekday_contig;
+        out_to_value_kernel.kernel.strided = &property_kernel_weekday_strided;
     } else {
         stringstream ss;
         ss << "dynd date dtype does not have a kernel for property " << property_name;

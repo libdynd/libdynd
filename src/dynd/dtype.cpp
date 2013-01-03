@@ -197,11 +197,11 @@ dtype dtype::with_replaced_scalar_types(const dtype& scalar_dtype, assign_error_
 }
 
 
-void dtype::get_single_compare_kernel(single_compare_kernel_instance &out_kernel) const {
+void dtype::get_single_compare_kernel(kernel_instance<compare_operations_t> &out_kernel) const {
     if (is_builtin()) {
-        out_kernel.comparisons = builtin_dtype_comparisons_table[reinterpret_cast<intptr_t>(m_extended)];
+        memcpy(out_kernel.kernel.ops, builtin_dtype_comparisons_table[reinterpret_cast<intptr_t>(m_extended)], sizeof(out_kernel.kernel.ops));
     } else {
-        return extended()->get_single_compare_kernel(out_kernel);
+        extended()->get_single_compare_kernel(out_kernel);
     }
 }
 

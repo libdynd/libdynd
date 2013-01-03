@@ -53,13 +53,11 @@ namespace { struct struct_asn_kernel {
         const size_t *dst_data_offsets = reinterpret_cast<const size_t *>(extra->dst_metadata);
         const size_t *src_data_offsets = reinterpret_cast<const size_t *>(extra->src_metadata);
 
-        unary_kernel_static_data kernel_extra;
         size_t field_count = ad.field_count;
         for (size_t i = 0; i < field_count; ++i) {
-            kernel_extra.auxdata = kernels[i].auxdata;
-            kernel_extra.dst_metadata = extra->dst_metadata + metadata_offsets[i];
-            kernel_extra.src_metadata = extra->src_metadata + metadata_offsets[i];
-            kernels[i].kernel.single(dst + dst_data_offsets[i], src + src_data_offsets[i], &kernel_extra);
+            kernels[i].extra.dst_metadata = extra->dst_metadata + metadata_offsets[i];
+            kernels[i].extra.src_metadata = extra->src_metadata + metadata_offsets[i];
+            kernels[i].kernel.single(dst + dst_data_offsets[i], src + src_data_offsets[i], &kernels[i].extra);
         }
     }
 };} // anonymous namespace
@@ -76,10 +74,10 @@ void dynd::get_struct_assignment_kernel(const dtype& val_struct_dtype,
     size_t field_count = sd->get_field_count();
 
     out_kernel.kernel.single = &struct_asn_kernel::single;
-    out_kernel.kernel.contig = NULL;
+    out_kernel.kernel.strided = NULL;
 
-    make_auxiliary_data<struct_asn_kernel::auxdata_storage>(out_kernel.auxdata);
-    struct_asn_kernel::auxdata_storage& ad = out_kernel.auxdata.get<struct_asn_kernel::auxdata_storage>();
+    make_auxiliary_data<struct_asn_kernel::auxdata_storage>(out_kernel.extra.auxdata);
+    struct_asn_kernel::auxdata_storage& ad = out_kernel.extra.auxdata.get<struct_asn_kernel::auxdata_storage>();
     ad.init(val_struct_dtype, field_count);
     for (size_t i = 0, i_end = sd->get_field_types().size(); i != i_end; ++i) {
         ::get_dtype_assignment_kernel(sd->get_field_types()[i], ad.kernels[i]);
@@ -133,13 +131,11 @@ namespace { struct struct_struct_asn_kernel {
         const size_t *src_data_offsets = reinterpret_cast<const size_t *>(extra->src_metadata);
         size_t field_count = ad.field_count;
 
-        unary_kernel_static_data kernel_extra;
         for (size_t i = 0; i < field_count; ++i) {
-            kernel_extra.auxdata = kernels[i].auxdata;
             size_t i_src = ad.field_reorder[i];
-            kernel_extra.dst_metadata = extra->dst_metadata + dst_metadata_offsets[i];
-            kernel_extra.src_metadata = extra->src_metadata + src_metadata_offsets[i_src];
-            kernels[i].kernel.single(dst + dst_data_offsets[i], src + src_data_offsets[i_src], &kernel_extra);
+            kernels[i].extra.dst_metadata = extra->dst_metadata + dst_metadata_offsets[i];
+            kernels[i].extra.src_metadata = extra->src_metadata + src_metadata_offsets[i_src];
+            kernels[i].kernel.single(dst + dst_data_offsets[i], src + src_data_offsets[i_src], &kernels[i].extra);
         }
     }
 };} // anonymous namespace
@@ -170,10 +166,10 @@ void dynd::get_struct_assignment_kernel(const dtype& dst_struct_dtype, const dty
     }
 
     out_kernel.kernel.single = &struct_struct_asn_kernel::single;
-    out_kernel.kernel.contig = NULL;
+    out_kernel.kernel.strided = NULL;
 
-    make_auxiliary_data<struct_struct_asn_kernel::auxdata_storage>(out_kernel.auxdata);
-    struct_struct_asn_kernel::auxdata_storage& ad = out_kernel.auxdata.get<struct_struct_asn_kernel::auxdata_storage>();
+    make_auxiliary_data<struct_struct_asn_kernel::auxdata_storage>(out_kernel.extra.auxdata);
+    struct_struct_asn_kernel::auxdata_storage& ad = out_kernel.extra.auxdata.get<struct_struct_asn_kernel::auxdata_storage>();
     ad.init(dst_struct_dtype, src_struct_dtype, field_count);
     // Match up the fields
     const vector<string>& dst_field_names = dst_sd->get_field_names();
@@ -245,12 +241,10 @@ namespace { struct fixedstruct_fixedstruct_asn_kernel {
         const size_t *src_data_offsets = &ad.src_data_offsets[0];
         size_t field_count = ad.field_count;
 
-        unary_kernel_static_data kernel_extra;
         for (size_t i = 0; i < field_count; ++i) {
-            kernel_extra.auxdata = kernels[i].auxdata;
-            kernel_extra.dst_metadata = extra->dst_metadata + dst_metadata_offsets[i];
-            kernel_extra.src_metadata = extra->src_metadata + src_metadata_offsets[i];
-            kernels[i].kernel.single(dst + dst_data_offsets[i], src + src_data_offsets[i], &kernel_extra);
+            kernels[i].extra.dst_metadata = extra->dst_metadata + dst_metadata_offsets[i];
+            kernels[i].extra.src_metadata = extra->src_metadata + src_metadata_offsets[i];
+            kernels[i].kernel.single(dst + dst_data_offsets[i], src + src_data_offsets[i], &kernels[i].extra);
         }
     }
 };} // anonymous namespace
@@ -281,10 +275,10 @@ void dynd::get_fixedstruct_assignment_kernel(const dtype& dst_fixedstruct_dtype,
     }
 
     out_kernel.kernel.single = &fixedstruct_fixedstruct_asn_kernel::single;
-    out_kernel.kernel.contig = NULL;
+    out_kernel.kernel.strided = NULL;
 
-    make_auxiliary_data<fixedstruct_fixedstruct_asn_kernel::auxdata_storage>(out_kernel.auxdata);
-    fixedstruct_fixedstruct_asn_kernel::auxdata_storage& ad = out_kernel.auxdata.get<fixedstruct_fixedstruct_asn_kernel::auxdata_storage>();
+    make_auxiliary_data<fixedstruct_fixedstruct_asn_kernel::auxdata_storage>(out_kernel.extra.auxdata);
+    fixedstruct_fixedstruct_asn_kernel::auxdata_storage& ad = out_kernel.extra.auxdata.get<fixedstruct_fixedstruct_asn_kernel::auxdata_storage>();
     ad.init(dst_fixedstruct_dtype, field_count);
     // Match up the fields
     const vector<string>& dst_field_names = dst_sd->get_field_names();
@@ -359,12 +353,10 @@ namespace { struct fixedstruct_struct_asn_kernel {
         const size_t *src_data_offsets = &ad.src_data_offsets[0];
         size_t field_count = ad.field_count;
 
-        unary_kernel_static_data kernel_extra;
         for (size_t i = 0; i < field_count; ++i) {
-            kernel_extra.auxdata = kernels[i].auxdata;
-            kernel_extra.dst_metadata = extra->dst_metadata + dst_metadata_offsets[i];
-            kernel_extra.src_metadata = extra->src_metadata + src_metadata_offsets[i];
-            kernels[i].kernel.single(dst + dst_data_offsets[i], src + src_data_offsets[i], &kernel_extra);
+            kernels[i].extra.dst_metadata = extra->dst_metadata + dst_metadata_offsets[i];
+            kernels[i].extra.src_metadata = extra->src_metadata + src_metadata_offsets[i];
+            kernels[i].kernel.single(dst + dst_data_offsets[i], src + src_data_offsets[i], &kernels[i].extra);
         }
     }
 };} // anonymous namespace
@@ -395,10 +387,10 @@ void dynd::get_fixedstruct_to_struct_assignment_kernel(const dtype& dst_struct_d
     }
 
     out_kernel.kernel.single = &fixedstruct_struct_asn_kernel::single;
-    out_kernel.kernel.contig = NULL;
+    out_kernel.kernel.strided = NULL;
 
-    make_auxiliary_data<fixedstruct_struct_asn_kernel::auxdata_storage>(out_kernel.auxdata);
-    fixedstruct_struct_asn_kernel::auxdata_storage& ad = out_kernel.auxdata.get<fixedstruct_struct_asn_kernel::auxdata_storage>();
+    make_auxiliary_data<fixedstruct_struct_asn_kernel::auxdata_storage>(out_kernel.extra.auxdata);
+    fixedstruct_struct_asn_kernel::auxdata_storage& ad = out_kernel.extra.auxdata.get<fixedstruct_struct_asn_kernel::auxdata_storage>();
     ad.init(dst_struct_dtype, field_count);
     // Match up the fields
     const vector<string>& dst_field_names = dst_sd->get_field_names();
@@ -474,12 +466,10 @@ namespace { struct struct_fixedstruct_asn_kernel {
         const size_t *src_data_offsets = reinterpret_cast<const size_t *>(extra->src_metadata);
         size_t field_count = ad.field_count;
 
-        unary_kernel_static_data kernel_extra;
         for (size_t i = 0; i < field_count; ++i) {
-            kernel_extra.auxdata = kernels[i].auxdata;
-            kernel_extra.dst_metadata = extra->dst_metadata + dst_metadata_offsets[i];
-            kernel_extra.src_metadata = extra->src_metadata + src_metadata_offsets[i];
-            kernels[i].kernel.single(dst + dst_data_offsets[i], src + src_data_offsets[i], &kernel_extra);
+            kernels[i].extra.dst_metadata = extra->dst_metadata + dst_metadata_offsets[i];
+            kernels[i].extra.src_metadata = extra->src_metadata + src_metadata_offsets[i];
+            kernels[i].kernel.single(dst + dst_data_offsets[i], src + src_data_offsets[i], &kernels[i].extra);
         }
     }
 };} // anonymous namespace
@@ -510,10 +500,10 @@ void dynd::get_struct_to_fixedstruct_assignment_kernel(const dtype& dst_fixedstr
     }
 
     out_kernel.kernel.single = &struct_fixedstruct_asn_kernel::single;
-    out_kernel.kernel.contig = NULL;
+    out_kernel.kernel.strided = NULL;
 
-    make_auxiliary_data<struct_fixedstruct_asn_kernel::auxdata_storage>(out_kernel.auxdata);
-    struct_fixedstruct_asn_kernel::auxdata_storage& ad = out_kernel.auxdata.get<struct_fixedstruct_asn_kernel::auxdata_storage>();
+    make_auxiliary_data<struct_fixedstruct_asn_kernel::auxdata_storage>(out_kernel.extra.auxdata);
+    struct_fixedstruct_asn_kernel::auxdata_storage& ad = out_kernel.extra.auxdata.get<struct_fixedstruct_asn_kernel::auxdata_storage>();
     ad.init(src_struct_dtype, field_count);
     // Match up the fields
     const vector<string>& dst_field_names = dst_sd->get_field_names();

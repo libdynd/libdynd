@@ -42,10 +42,10 @@ void dynd::get_string_to_date_assignment_kernel(const dtype& src_string_dtype,
     }
 
     out_kernel.kernel.single = &string_to_date_assign_kernel::single;
-    out_kernel.kernel.contig = NULL;
+    out_kernel.kernel.strided = NULL;
 
-    make_auxiliary_data<string_to_date_assign_kernel::auxdata_storage>(out_kernel.auxdata);
-    string_to_date_assign_kernel::auxdata_storage& ad = out_kernel.auxdata.get<string_to_date_assign_kernel::auxdata_storage>();
+    make_auxiliary_data<string_to_date_assign_kernel::auxdata_storage>(out_kernel.extra.auxdata);
+    string_to_date_assign_kernel::auxdata_storage& ad = out_kernel.extra.auxdata.get<string_to_date_assign_kernel::auxdata_storage>();
     ad.errmode = errmode;
     ad.src_string_dtype = src_string_dtype;
     switch (errmode) {
@@ -91,10 +91,10 @@ void dynd::get_date_to_string_assignment_kernel(const dtype& dst_string_dtype,
     }
 
     out_kernel.kernel.single = &date_to_string_assign_kernel::single;
-    out_kernel.kernel.contig = NULL;
+    out_kernel.kernel.strided = NULL;
 
-    make_auxiliary_data<date_to_string_assign_kernel::auxdata_storage>(out_kernel.auxdata);
-    date_to_string_assign_kernel::auxdata_storage& ad = out_kernel.auxdata.get<date_to_string_assign_kernel::auxdata_storage>();
+    make_auxiliary_data<date_to_string_assign_kernel::auxdata_storage>(out_kernel.extra.auxdata);
+    date_to_string_assign_kernel::auxdata_storage& ad = out_kernel.extra.auxdata.get<date_to_string_assign_kernel::auxdata_storage>();
     ad.errmode = errmode;
     ad.dst_string_dtype = dst_string_dtype;
 }
@@ -138,8 +138,8 @@ namespace {
             tmp_date.month = static_cast<int8_t>(fld.month);
             tmp_date.day = static_cast<int8_t>(fld.day);
             // Copy to the destination
-            unary_kernel_static_data kernel_extra(ad.kernel.auxdata, extra->dst_metadata, NULL);
-            ad.kernel.kernel.single(dst, reinterpret_cast<const char *>(&tmp_date), &kernel_extra);
+            ad.kernel.extra.dst_metadata = extra->dst_metadata;
+            ad.kernel.kernel.single(dst, reinterpret_cast<const char *>(&tmp_date), &ad.kernel.extra);
         }
     };
 
@@ -157,16 +157,16 @@ void dynd::get_date_to_struct_assignment_kernel(const dtype& dst_struct_dtype,
 
     if (dst_struct_dtype == date_dtype_default_struct_dtype) {
         out_kernel.kernel.single = &date_to_struct_trivial_assign_kernel::single;
-        out_kernel.kernel.contig = NULL;
-        out_kernel.auxdata.free();
+        out_kernel.kernel.strided = NULL;
+        out_kernel.extra.auxdata.free();
         return;
     }
 
     out_kernel.kernel.single = &date_to_struct_assign_kernel::single;
-    out_kernel.kernel.contig = NULL;
+    out_kernel.kernel.strided = NULL;
 
-    make_auxiliary_data<date_to_struct_assign_kernel::auxdata_storage>(out_kernel.auxdata);
-    date_to_struct_assign_kernel::auxdata_storage& ad = out_kernel.auxdata.get<date_to_struct_assign_kernel::auxdata_storage>();
+    make_auxiliary_data<date_to_struct_assign_kernel::auxdata_storage>(out_kernel.extra.auxdata);
+    date_to_struct_assign_kernel::auxdata_storage& ad = out_kernel.extra.auxdata.get<date_to_struct_assign_kernel::auxdata_storage>();
     get_dtype_assignment_kernel(dst_struct_dtype, date_dtype_default_struct_dtype, errmode, NULL, ad.kernel);
 }
 
@@ -200,8 +200,8 @@ namespace {
             datetime::date_ymd fld;
             // Copy the source struct into our default struct layout
             date_dtype_default_struct tmp_date;
-            unary_kernel_static_data kernel_extra(ad.kernel.auxdata, NULL, extra->src_metadata);
-            ad.kernel.kernel.single(reinterpret_cast<char *>(&tmp_date), src, &kernel_extra);
+            ad.kernel.extra.src_metadata = extra->src_metadata;
+            ad.kernel.kernel.single(reinterpret_cast<char *>(&tmp_date), src, &ad.kernel.extra);
             // Convert to datetime_fields, then to the result date dtype
             fld.day = tmp_date.day;
             fld.month = tmp_date.month;
@@ -224,15 +224,15 @@ void dynd::get_struct_to_date_assignment_kernel(const dtype& src_struct_dtype,
 
     if (src_struct_dtype == date_dtype_default_struct_dtype) {
         out_kernel.kernel.single = &struct_to_date_trivial_assign_kernel::single;
-        out_kernel.kernel.contig = NULL;
-        out_kernel.auxdata.free();
+        out_kernel.kernel.strided = NULL;
+        out_kernel.extra.auxdata.free();
         return;
     }
 
     out_kernel.kernel.single = &struct_to_date_assign_kernel::single;
-    out_kernel.kernel.contig = NULL;
+    out_kernel.kernel.strided = NULL;
 
-    make_auxiliary_data<struct_to_date_assign_kernel::auxdata_storage>(out_kernel.auxdata);
-    struct_to_date_assign_kernel::auxdata_storage& ad = out_kernel.auxdata.get<struct_to_date_assign_kernel::auxdata_storage>();
+    make_auxiliary_data<struct_to_date_assign_kernel::auxdata_storage>(out_kernel.extra.auxdata);
+    struct_to_date_assign_kernel::auxdata_storage& ad = out_kernel.extra.auxdata.get<struct_to_date_assign_kernel::auxdata_storage>();
     get_dtype_assignment_kernel(date_dtype_default_struct_dtype, src_struct_dtype, errmode, NULL, ad.kernel);
 }

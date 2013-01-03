@@ -4,7 +4,6 @@
 //
 
 #include <dynd/dtypes/void_pointer_dtype.hpp>
-#include <dynd/kernels/single_compare_kernel_instance.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/exceptions.hpp>
 
@@ -43,7 +42,7 @@ bool dynd::void_pointer_dtype::is_lossless_assignment(const dtype& DYND_UNUSED(d
     return false;
 }
 
-void dynd::void_pointer_dtype::get_single_compare_kernel(single_compare_kernel_instance& DYND_UNUSED(out_kernel)) const {
+void dynd::void_pointer_dtype::get_single_compare_kernel(kernel_instance<compare_operations_t>& DYND_UNUSED(out_kernel)) const {
     throw std::runtime_error("void_pointer_dtype::get_single_compare_kernel not supported yet");
 }
 

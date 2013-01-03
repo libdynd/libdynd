@@ -64,23 +64,47 @@ namespace {
     struct binary_reduce_function_adapters {
         typedef T (*cdecl_func_ptr_t)(T, T);
 
-        static void left_associative(char *dst, const char *src, unary_kernel_static_data *extra)
+        static void single_left_associative(char *dst, const char *src, unary_kernel_static_data *extra)
         {
             cdecl_func_ptr_t kfunc = get_auxiliary_data<cdecl_func_ptr_t>(extra->auxdata);
             *reinterpret_cast<T *>(dst) = kfunc(*reinterpret_cast<T *>(dst),
                                             *reinterpret_cast<const T *>(src));
         }
 
-        static void right_associative(char *dst, const char *src, unary_kernel_static_data *extra)
+        static void strided_left_associative(char *dst, intptr_t dst_stride, const char *src, intptr_t src_stride,
+                        size_t count, unary_kernel_static_data *extra)
+        {
+            cdecl_func_ptr_t kfunc = get_auxiliary_data<cdecl_func_ptr_t>(extra->auxdata);
+            for (size_t i = 0; i != count; ++i) {
+                *reinterpret_cast<T *>(dst) = kfunc(*reinterpret_cast<T *>(dst),
+                                                *reinterpret_cast<const T *>(src));
+                dst += dst_stride;
+                src += src_stride;
+            }
+        }
+
+        static void single_right_associative(char *dst, const char *src, unary_kernel_static_data *extra)
         {
             cdecl_func_ptr_t kfunc = get_auxiliary_data<cdecl_func_ptr_t>(extra->auxdata);
             *reinterpret_cast<T *>(dst) = kfunc(*reinterpret_cast<const T *>(src),
                                             *reinterpret_cast<T *>(dst));
         }
+
+        static void strided_right_associative(char *dst, intptr_t dst_stride, const char *src, intptr_t src_stride,
+                        size_t count, unary_kernel_static_data *extra)
+        {
+            cdecl_func_ptr_t kfunc = get_auxiliary_data<cdecl_func_ptr_t>(extra->auxdata);
+            for (size_t i = 0; i != count; ++i) {
+                *reinterpret_cast<T *>(dst) = kfunc(*reinterpret_cast<const T *>(src),
+                                                *reinterpret_cast<T *>(dst));
+                dst += dst_stride;
+                src += src_stride;
+            }
+        }
     };
 } // anonymous namespace
 
-unary_single_operation_t dynd::codegen_left_associative_binary_reduce_function_adapter(
+unary_operation_pair_t dynd::codegen_left_associative_binary_reduce_function_adapter(
                     const dtype& reduce_type, calling_convention_t DYND_UNUSED(callconv))
 {
     // TODO: If there's a platform where there are differences in the calling convention
@@ -89,20 +113,26 @@ unary_single_operation_t dynd::codegen_left_associative_binary_reduce_function_a
         case bool_type_id:
         case int8_type_id:
         case uint8_type_id:
-            return &binary_reduce_function_adapters<int8_t>::left_associative;
+            return unary_operation_pair_t(&binary_reduce_function_adapters<int8_t>::single_left_associative,
+                            &binary_reduce_function_adapters<int8_t>::strided_left_associative);
         case int16_type_id:
         case uint16_type_id:
-            return &binary_reduce_function_adapters<int16_t>::left_associative;
+            return unary_operation_pair_t(&binary_reduce_function_adapters<int16_t>::single_left_associative,
+                            &binary_reduce_function_adapters<int16_t>::strided_left_associative);
         case int32_type_id:
         case uint32_type_id:
-            return &binary_reduce_function_adapters<int32_t>::left_associative;
+            return unary_operation_pair_t(&binary_reduce_function_adapters<int32_t>::single_left_associative,
+                            &binary_reduce_function_adapters<int32_t>::strided_left_associative);
         case int64_type_id:
         case uint64_type_id:
-            return &binary_reduce_function_adapters<int64_t>::left_associative;
+            return unary_operation_pair_t(&binary_reduce_function_adapters<int64_t>::single_left_associative,
+                            &binary_reduce_function_adapters<int64_t>::strided_left_associative);
         case float32_type_id:
-            return &binary_reduce_function_adapters<float>::left_associative;
+            return unary_operation_pair_t(&binary_reduce_function_adapters<float>::single_left_associative,
+                            &binary_reduce_function_adapters<float>::strided_left_associative);
         case float64_type_id:
-            return &binary_reduce_function_adapters<double>::left_associative;
+            return unary_operation_pair_t(&binary_reduce_function_adapters<double>::single_left_associative,
+                            &binary_reduce_function_adapters<double>::strided_left_associative);
         default: {
             stringstream ss;
             ss << "The binary reduce function adapter does not support " << reduce_type;
@@ -111,7 +141,7 @@ unary_single_operation_t dynd::codegen_left_associative_binary_reduce_function_a
     }
 }
 
-unary_single_operation_t dynd::codegen_right_associative_binary_reduce_function_adapter(
+unary_operation_pair_t dynd::codegen_right_associative_binary_reduce_function_adapter(
                     const dtype& reduce_type, calling_convention_t DYND_UNUSED(callconv))
 {
     // TODO: If there's a platform where there are differences in the calling convention
@@ -120,20 +150,26 @@ unary_single_operation_t dynd::codegen_right_associative_binary_reduce_function_
         case bool_type_id:
         case int8_type_id:
         case uint8_type_id:
-            return &binary_reduce_function_adapters<int8_t>::right_associative;
+            return unary_operation_pair_t(&binary_reduce_function_adapters<int8_t>::single_right_associative,
+                            &binary_reduce_function_adapters<int8_t>::strided_right_associative);
         case int16_type_id:
         case uint16_type_id:
-            return &binary_reduce_function_adapters<int16_t>::right_associative;
+            return unary_operation_pair_t(&binary_reduce_function_adapters<int16_t>::single_right_associative,
+                            &binary_reduce_function_adapters<int16_t>::strided_right_associative);
         case int32_type_id:
         case uint32_type_id:
-            return &binary_reduce_function_adapters<int32_t>::right_associative;
+            return unary_operation_pair_t(&binary_reduce_function_adapters<int32_t>::single_right_associative,
+                            &binary_reduce_function_adapters<int32_t>::strided_right_associative);
         case int64_type_id:
         case uint64_type_id:
-            return &binary_reduce_function_adapters<int64_t>::right_associative;
+            return unary_operation_pair_t(&binary_reduce_function_adapters<int64_t>::single_right_associative,
+                            &binary_reduce_function_adapters<int64_t>::strided_right_associative);
         case float32_type_id:
-            return &binary_reduce_function_adapters<float>::right_associative;
+            return unary_operation_pair_t(&binary_reduce_function_adapters<float>::single_right_associative,
+                            &binary_reduce_function_adapters<float>::strided_right_associative);
         case float64_type_id:
-            return &binary_reduce_function_adapters<double>::right_associative;
+            return unary_operation_pair_t(&binary_reduce_function_adapters<double>::single_right_associative,
+                            &binary_reduce_function_adapters<double>::strided_right_associative);
         default: {
             stringstream ss;
             ss << "The binary reduce function adapter does not support " << reduce_type;

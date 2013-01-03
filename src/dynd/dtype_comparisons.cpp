@@ -18,27 +18,27 @@ namespace {
 
 template <typename T>
 struct compare_kernel {
-    static bool less_as(const char *a, const char *b, const AuxDataBase *DYND_UNUSED(auxdata)) {
+    static bool less_as(const char *a, const char *b, single_compare_static_data *DYND_UNUSED(extra)) {
         return *reinterpret_cast<const T *>(a) < *reinterpret_cast<const T *>(b);
     }
 
-    static bool less_equal_as(const char *a, const char *b, const AuxDataBase *DYND_UNUSED(auxdata)) {
+    static bool less_equal_as(const char *a, const char *b, single_compare_static_data *DYND_UNUSED(extra)) {
         return *reinterpret_cast<const T *>(a) <= *reinterpret_cast<const T *>(b);
     }
 
-    static bool equal_as(const char *a, const char *b, const AuxDataBase *DYND_UNUSED(auxdata)) {
+    static bool equal_as(const char *a, const char *b, single_compare_static_data *DYND_UNUSED(extra)) {
         return *reinterpret_cast<const T *>(a) == *reinterpret_cast<const T *>(b);
     }
 
-    static bool not_equal_as(const char *a, const char *b, const AuxDataBase *DYND_UNUSED(auxdata)) {
+    static bool not_equal_as(const char *a, const char *b, single_compare_static_data *DYND_UNUSED(extra)) {
         return *reinterpret_cast<const T *>(a) != *reinterpret_cast<const T *>(b);
     }
 
-    static bool greater_equal_as(const char *a, const char *b, const AuxDataBase *DYND_UNUSED(auxdata)) {
+    static bool greater_equal_as(const char *a, const char *b, single_compare_static_data *DYND_UNUSED(extra)) {
         return *reinterpret_cast<const T *>(a) >= *reinterpret_cast<const T *>(b);
     }
 
-    static bool greater_as(const char *a, const char *b, const AuxDataBase *DYND_UNUSED(auxdata)) {
+    static bool greater_as(const char *a, const char *b, single_compare_static_data *DYND_UNUSED(extra)) {
         return *reinterpret_cast<const T *>(a) > *reinterpret_cast<const T *>(b);
     }
 };
@@ -54,27 +54,27 @@ struct compare_kernel {
 
 template <typename T>
 struct compare_kernel< complex<T> > {
-    static bool less_as(const char *a, const char *b, const AuxDataBase *DYND_UNUSED(auxdata)) {
+    static bool less_as(const char *a, const char *b, single_compare_static_data *DYND_UNUSED(extra)) {
         COMPLEX_COMPARE(<)
     }
 
-    static bool less_equal_as(const char *a, const char *b, const AuxDataBase *DYND_UNUSED(auxdata)) {
+    static bool less_equal_as(const char *a, const char *b, single_compare_static_data *DYND_UNUSED(extra)) {
         COMPLEX_COMPARE(<=)
     }
 
-    static bool equal_as(const char *a, const char *b, const AuxDataBase *DYND_UNUSED(auxdata)) {
+    static bool equal_as(const char *a, const char *b, single_compare_static_data *DYND_UNUSED(extra)) {
         return *reinterpret_cast<const complex<T> *>(a) == *reinterpret_cast<const complex<T> *>(b);
     }
 
-    static bool not_equal_as(const char *a, const char *b, const AuxDataBase *DYND_UNUSED(auxdata)) {
+    static bool not_equal_as(const char *a, const char *b, single_compare_static_data *DYND_UNUSED(extra)) {
         return *reinterpret_cast<const complex<T> *>(a) != *reinterpret_cast<const complex<T> *>(b);
     }
 
-    static bool greater_equal_as(const char *a, const char *b, const AuxDataBase *DYND_UNUSED(auxdata)) {
+    static bool greater_equal_as(const char *a, const char *b, single_compare_static_data *DYND_UNUSED(extra)) {
         COMPLEX_COMPARE(>=)
     }
 
-    static bool greater_as(const char *a, const char *b, const AuxDataBase *DYND_UNUSED(auxdata)) {
+    static bool greater_as(const char *a, const char *b, single_compare_static_data *DYND_UNUSED(extra)) {
         COMPLEX_COMPARE(>)
     }
 
@@ -86,17 +86,17 @@ struct compare_kernel< complex<T> > {
 
 
 #define DYND_BUILTIN_DTYPE_COMPARISON_TABLE_TYPE_LEVEL(type) { \
-    (single_compare_operation_t)compare_kernel<type>::less_as, \
-    (single_compare_operation_t)compare_kernel<type>::less_equal_as, \
-    (single_compare_operation_t)compare_kernel<type>::equal_as, \
-    (single_compare_operation_t)compare_kernel<type>::not_equal_as, \
-    (single_compare_operation_t)compare_kernel<type>::greater_equal_as, \
-    (single_compare_operation_t)compare_kernel<type>::greater_as \
+    compare_kernel<type>::less_as, \
+    compare_kernel<type>::less_equal_as, \
+    compare_kernel<type>::equal_as, \
+    compare_kernel<type>::not_equal_as, \
+    compare_kernel<type>::greater_equal_as, \
+    compare_kernel<type>::greater_as \
     }
 
 namespace dynd {
 
-single_compare_operation_table_t builtin_dtype_comparisons_table[builtin_type_id_count] = {
+single_compare_operation_t builtin_dtype_comparisons_table[builtin_type_id_count][6] = {
     DYND_BUILTIN_DTYPE_COMPARISON_TABLE_TYPE_LEVEL(dynd_bool), \
     DYND_BUILTIN_DTYPE_COMPARISON_TABLE_TYPE_LEVEL(int8_t), \
     DYND_BUILTIN_DTYPE_COMPARISON_TABLE_TYPE_LEVEL(int16_t), \

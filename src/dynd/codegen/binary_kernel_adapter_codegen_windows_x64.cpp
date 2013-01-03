@@ -67,7 +67,7 @@ std::string dynd::get_binary_function_adapter_unique_id_string(uint64_t unique_i
     return ss.str();
 }
 
-binary_operation_t dynd::codegen_binary_function_adapter(const memory_block_ptr& exec_memblock, const dtype& restype,
+binary_operation_pair_t dynd::codegen_binary_function_adapter(const memory_block_ptr& exec_memblock, const dtype& restype,
                     const dtype& arg0type, const dtype& arg1type, calling_convention_t DYND_UNUSED(callconv))
 {
     // This code generation always uses the same prolog structure,
@@ -401,7 +401,8 @@ binary_operation_t dynd::codegen_binary_function_adapter(const memory_block_ptr&
                     code_begin,
                     code_function_end, code_unwind_info);
 
-    return reinterpret_cast<binary_operation_t>(code_begin);
+    throw runtime_error("TODO: adapt this code to new structures");
+    //return reinterpret_cast<binary_operation_t>(code_begin);
 }
 
 #endif // defined(_WIN32) && defined(_M_X64)

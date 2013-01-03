@@ -384,9 +384,9 @@ void dynd::get_string_to_builtin_assignment_kernel(type_id_t dst_type_id,
 
     if (dst_type_id >= 0 && dst_type_id < builtin_type_id_count) {
         out_kernel.kernel.single = static_string_to_builtin_kernels[dst_type_id];
-        out_kernel.kernel.contig = NULL;
-        make_auxiliary_data<string_to_builtin_auxdata>(out_kernel.auxdata);
-        string_to_builtin_auxdata& ad = out_kernel.auxdata.get<string_to_builtin_auxdata>();
+        out_kernel.kernel.strided = NULL;
+        make_auxiliary_data<string_to_builtin_auxdata>(out_kernel.extra.auxdata);
+        string_to_builtin_auxdata& ad = out_kernel.extra.auxdata.get<string_to_builtin_auxdata>();
         ad.errmode = errmode;
         ad.src_string_dt = src_string_dt;
     } else {
@@ -435,9 +435,9 @@ void dynd::get_builtin_to_string_assignment_kernel(const dtype& dst_string_dt,
 
     if (src_type_id >= 0 && src_type_id < builtin_type_id_count) {
         out_kernel.kernel.single = &builtin_to_string_kernel_single;
-        out_kernel.kernel.contig = NULL;
-        make_auxiliary_data<builtin_to_string_auxdata>(out_kernel.auxdata);
-        builtin_to_string_auxdata& ad = out_kernel.auxdata.get<builtin_to_string_auxdata>();
+        out_kernel.kernel.strided = NULL;
+        make_auxiliary_data<builtin_to_string_auxdata>(out_kernel.extra.auxdata);
+        builtin_to_string_auxdata& ad = out_kernel.extra.auxdata.get<builtin_to_string_auxdata>();
         ad.errmode = errmode;
         ad.src_type_id = src_type_id;
         ad.dst_string_dt = dst_string_dt;

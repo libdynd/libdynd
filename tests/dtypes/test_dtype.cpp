@@ -124,16 +124,16 @@ TEST(DType, SingleCompare) {
 
 #define TEST_COMPARISONS(type_id, type, lhs, rhs) \
     { \
-        single_compare_kernel_instance k; \
+        kernel_instance<compare_operations_t> k; \
         dtype d = dtype(type_id); \
         d.get_single_compare_kernel(k); \
         type v1 = lhs; type v2 = rhs; \
-        EXPECT_EQ(k.comparisons[less_id]((char *)&v1, (char *)&v2, k.auxdata), (type)lhs < (type)rhs); \
-        EXPECT_EQ(k.comparisons[less_equal_id]((char *)&v1, (char *)&v2, k.auxdata), (type)lhs <= (type)rhs); \
-        EXPECT_EQ(k.comparisons[equal_id]((char *)&v1, (char *)&v2, k.auxdata), (type)lhs == (type)rhs); \
-        EXPECT_EQ(k.comparisons[not_equal_id]((char *)&v1, (char *)&v2, k.auxdata), (type)lhs != (type)rhs); \
-        EXPECT_EQ(k.comparisons[greater_equal_id]((char *)&v1, (char *)&v2, k.auxdata), (type)lhs >= (type)rhs); \
-        EXPECT_EQ(k.comparisons[greater_id]((char *)&v1, (char *)&v2, k.auxdata), (type)lhs > (type)rhs); \
+        EXPECT_EQ(k.kernel.ops[compare_operations_t::less_id]((char *)&v1, (char *)&v2, &k.extra), (type)lhs < (type)rhs); \
+        EXPECT_EQ(k.kernel.ops[compare_operations_t::less_equal_id]((char *)&v1, (char *)&v2, &k.extra), (type)lhs <= (type)rhs); \
+        EXPECT_EQ(k.kernel.ops[compare_operations_t::equal_id]((char *)&v1, (char *)&v2, &k.extra), (type)lhs == (type)rhs); \
+        EXPECT_EQ(k.kernel.ops[compare_operations_t::not_equal_id]((char *)&v1, (char *)&v2, &k.extra), (type)lhs != (type)rhs); \
+        EXPECT_EQ(k.kernel.ops[compare_operations_t::greater_equal_id]((char *)&v1, (char *)&v2, &k.extra), (type)lhs >= (type)rhs); \
+        EXPECT_EQ(k.kernel.ops[compare_operations_t::greater_id]((char *)&v1, (char *)&v2, &k.extra), (type)lhs > (type)rhs); \
     }
 
     TEST_COMPARISONS(bool_type_id, bool, 0, 1)
@@ -202,12 +202,12 @@ TEST(DType, SingleCompare) {
 // TODO: ordered comparisons for complex numbers
 #define TEST_COMPLEX_COMPARISONS(type_id, type, lhs, rhs) \
     { \
-        single_compare_kernel_instance k; \
+        kernel_instance<compare_operations_t> k; \
         dtype d = dtype(type_id); \
         d.get_single_compare_kernel(k); \
         type v1 = lhs; type v2 = rhs; \
-        EXPECT_EQ(lhs == rhs, k.comparisons[equal_id]((char *)&v1, (char *)&v2, k.auxdata)); \
-        EXPECT_EQ(lhs != rhs, k.comparisons[not_equal_id]((char *)&v1, (char *)&v2, k.auxdata)); \
+        EXPECT_EQ(lhs == rhs, k.kernel.ops[compare_operations_t::equal_id]((char *)&v1, (char *)&v2, &k.extra)); \
+        EXPECT_EQ(lhs != rhs, k.kernel.ops[compare_operations_t::not_equal_id]((char *)&v1, (char *)&v2, &k.extra)); \
     }
 
     TEST_COMPLEX_COMPARISONS(complex_float32_type_id, complex<float>, complex<float>(1.0), complex<float>(2.0))

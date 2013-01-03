@@ -151,7 +151,7 @@ namespace detail {
     DYND_BUILTIN_DTYPE_BINARY_TABLE_SPECIALIZATION_LEVEL(complex<double>, operation) \
     }
 
-typedef binary_operation_t specialized_binary_operation_table_t[6];
+typedef binary_single_operation_t specialized_binary_operation_table_t[6];
 
 /**
  * This macro defines a binary operation specialization table for
@@ -178,7 +178,7 @@ typedef binary_operation_t specialized_binary_operation_table_t[6];
  * This returns a specialized binary kernel operation function from
  * a table created by the DYND_BUILTIN_DTYPE_BINARY_OPERATION_TABLE macro.
  */
-binary_operation_t get_binary_operation_from_builtin_dtype_table(
+binary_single_operation_t get_binary_operation_from_builtin_dtype_table(
                                 specialized_binary_operation_table_t *builtin_optable,
                                 const dtype& dt, intptr_t dst_fixedstride,
                                 intptr_t src0_fixedstride, intptr_t src1_fixedstride);

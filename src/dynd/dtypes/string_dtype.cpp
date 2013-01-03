@@ -5,7 +5,6 @@
 
 #include <dynd/dtypes/string_dtype.hpp>
 #include <dynd/memblock/pod_memory_block.hpp>
-#include <dynd/kernels/single_compare_kernel_instance.hpp>
 #include <dynd/kernels/string_assignment_kernels.hpp>
 #include <dynd/kernels/string_numeric_assignment_kernels.hpp>
 #include <dynd/dtypes/fixedstring_dtype.hpp>
@@ -183,7 +182,7 @@ bool string_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_
     }
 }
 
-void string_dtype::get_single_compare_kernel(single_compare_kernel_instance& DYND_UNUSED(out_kernel)) const {
+void string_dtype::get_single_compare_kernel(kernel_instance<compare_operations_t>& DYND_UNUSED(out_kernel)) const {
     throw std::runtime_error("string_dtype::get_single_compare_kernel not supported yet");
 }
 

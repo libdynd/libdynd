@@ -56,10 +56,10 @@ void dynd::get_blockref_bytes_assignment_kernel(size_t dst_alignment,
                 kernel_instance<unary_operation_pair_t>& out_kernel)
 {
     out_kernel.kernel.single = &blockref_bytes_assign_single;
-    out_kernel.kernel.contig = NULL;
+    out_kernel.kernel.strided = NULL;
 
-    make_auxiliary_data<blockref_bytes_assign_kernel_auxdata>(out_kernel.auxdata);
-    blockref_bytes_assign_kernel_auxdata& ad = out_kernel.auxdata.get<blockref_bytes_assign_kernel_auxdata>();
+    make_auxiliary_data<blockref_bytes_assign_kernel_auxdata>(out_kernel.extra.auxdata);
+    blockref_bytes_assign_kernel_auxdata& ad = out_kernel.extra.auxdata.get<blockref_bytes_assign_kernel_auxdata>();
     ad.dst_alignment = dst_alignment;
     ad.src_alignment = src_alignment;
 }
@@ -101,11 +101,11 @@ void dynd::get_fixedbytes_to_blockref_bytes_assignment_kernel(size_t dst_alignme
                 kernel_instance<unary_operation_pair_t>& out_kernel)
 {
     out_kernel.kernel.single = &fixedbytes_to_blockref_bytes_assign_single;
-    out_kernel.kernel.contig = NULL;
+    out_kernel.kernel.strided = NULL;
 
-    make_auxiliary_data<fixedbytes_to_blockref_bytes_assign_kernel_auxdata>(out_kernel.auxdata);
+    make_auxiliary_data<fixedbytes_to_blockref_bytes_assign_kernel_auxdata>(out_kernel.extra.auxdata);
     fixedbytes_to_blockref_bytes_assign_kernel_auxdata& ad =
-                out_kernel.auxdata.get<fixedbytes_to_blockref_bytes_assign_kernel_auxdata>();
+                out_kernel.extra.auxdata.get<fixedbytes_to_blockref_bytes_assign_kernel_auxdata>();
     ad.dst_alignment = dst_alignment;
     ad.src_alignment = src_alignment;
     ad.src_element_size = src_element_size;

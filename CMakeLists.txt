@@ -149,7 +149,6 @@ set(dynd_SRC
     include/dynd/kernels/byteswap_kernels.hpp
     include/dynd/kernels/date_assignment_kernels.hpp
     include/dynd/kernels/kernel_instance.hpp
-    include/dynd/kernels/single_compare_kernel_instance.hpp
     include/dynd/kernels/string_assignment_kernels.hpp
     include/dynd/kernels/string_algorithm_kernels.hpp
     include/dynd/kernels/string_numeric_assignment_kernels.hpp

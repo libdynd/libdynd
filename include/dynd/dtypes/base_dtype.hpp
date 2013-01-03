@@ -12,7 +12,7 @@
 #include <dynd/atomic_refcount.hpp>
 #include <dynd/irange.hpp>
 #include <dynd/memblock/memory_block.hpp>
-#include <dynd/kernels/single_compare_kernel_instance.hpp>
+#include <dynd/kernels/kernel_instance.hpp>
 #include <dynd/dtype_assign.hpp>
 
 
@@ -419,7 +419,7 @@ public:
      *
      * \param compare_id the identifier of the comparison
      */
-    virtual void get_single_compare_kernel(single_compare_kernel_instance& out_kernel) const;
+    virtual void get_single_compare_kernel(kernel_instance<compare_operations_t>& out_kernel) const;
 
     /**
      * Called by ::dynd::get_dtype_assignment_kernel with (this == dst_dt.extended()) or

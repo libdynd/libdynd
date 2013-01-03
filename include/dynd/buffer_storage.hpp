@@ -15,13 +15,15 @@ class buffer_storage {
     char *m_storage;
     char *m_metadata;
     dtype m_dtype;
+    intptr_t m_stride;
 
     // Non-assignable
     buffer_storage& operator=(const buffer_storage&);
 
     void internal_allocate()
     {
-        m_storage = new char[element_count * m_dtype.get_data_size()];
+        m_stride = m_dtype.get_data_size();
+        m_storage = new char[element_count * m_stride];
         size_t metasize = m_dtype.is_builtin() ? 0 : m_dtype.extended()->get_metadata_size();
         if (metasize != 0) {
             try {
@@ -70,6 +72,10 @@ public:
         }
         m_dtype = dt;
         internal_allocate();
+    }
+
+    inline intptr_t get_stride() const {
+        return m_stride;
     }
 
     inline const dtype& get_dtype() const {

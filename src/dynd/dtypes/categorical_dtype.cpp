@@ -10,7 +10,6 @@
 #include <dynd/ndobject_iter.hpp>
 #include <dynd/dtypes/categorical_dtype.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
-#include <dynd/kernels/single_compare_kernel_instance.hpp>
 #include <dynd/dtypes/strided_array_dtype.hpp>
 
 using namespace dynd;
@@ -21,23 +20,24 @@ namespace {
     class sorter {
         const vector<char *>& m_categories;
         const single_compare_operation_t m_less;
-        const auxiliary_data& m_auxdata;
+        single_compare_static_data *m_extra;
     public:
-        sorter(vector<char *>& values, const single_compare_operation_t less, const auxiliary_data& auxdata) :
-            m_categories(values), m_less(less), m_auxdata(auxdata) {}
+        sorter(vector<char *>& values, const single_compare_operation_t less, single_compare_static_data *extra) :
+            m_categories(values), m_less(less), m_extra(extra) {}
         bool operator()(intptr_t i, intptr_t j) const {
-            return m_less(m_categories[i], m_categories[j], m_auxdata);
+            return m_less(m_categories[i], m_categories[j], m_extra);
         }
     };
 
     class cmp {
         const single_compare_operation_t m_less;
-        const auxiliary_data& m_auxdata;
+        single_compare_static_data *m_extra;
     public:
-        cmp(const single_compare_operation_t less, const auxiliary_data& auxdata) :
-            m_less(less), m_auxdata(auxdata) {}
+        cmp(const single_compare_operation_t less, single_compare_static_data *extra) :
+            m_less(less), m_extra(extra) {}
         bool operator()(const char *a, const char *b) const {
-            return m_less(a, b, m_auxdata);
+            bool result = m_less(a, b, m_extra);
+            return result;
         }
     };
 
@@ -53,31 +53,29 @@ namespace {
         {
             auxdata_storage& ad = get_auxiliary_data<auxdata_storage>(extra->auxdata);
             const categorical_dtype *cat = static_cast<const categorical_dtype *>(ad.cat_dt.extended());
-            unary_kernel_static_data kernel_extra(ad.kernel.auxdata, extra->dst_metadata, extra->src_metadata);
+            ad.kernel.extra.dst_metadata = extra->dst_metadata;
+            ad.kernel.extra.src_metadata = extra->src_metadata;
 
             uint32_t value = *reinterpret_cast<const uint32_t *>(src);
             const char *src_val = cat->get_category_from_value(value);
-            ad.kernel.kernel.single(dst, src_val, &kernel_extra);
+            ad.kernel.kernel.single(dst, src_val, &ad.kernel.extra);
         }
 
-        static void contig_kernel(char *dst, const char *src, size_t count, unary_kernel_static_data *extra)
+        static void strided_kernel(char *dst, intptr_t dst_stride, const char *src, intptr_t src_stride,
+                        size_t count, unary_kernel_static_data *extra)
         {
             auxdata_storage& ad = get_auxiliary_data<auxdata_storage>(extra->auxdata);
             const categorical_dtype *cat = static_cast<const categorical_dtype *>(ad.cat_dt.extended());
-            size_t dst_size = ad.dst_size;
-            unary_kernel_static_data kernel_extra;
-            kernel_extra.auxdata = ad.kernel.auxdata;
-            kernel_extra.dst_metadata = extra->dst_metadata;
-            kernel_extra.src_metadata = extra->src_metadata;
+            ad.kernel.extra.dst_metadata = extra->dst_metadata;
+            ad.kernel.extra.src_metadata = extra->src_metadata;
 
-            const uint32_t *src_vals = reinterpret_cast<const uint32_t *>(src);
             for (size_t i = 0; i != count; ++i) {
-                uint32_t value = *src_vals;
+                uint32_t value = *reinterpret_cast<const uint32_t *>(src);
                 const char *src_val = cat->get_category_from_value(value);
-                ad.kernel.kernel.single(dst, src_val, &kernel_extra);
+                ad.kernel.kernel.single(dst, src_val, &ad.kernel.extra);
 
-                dst += dst_size;
-                ++src_vals;
+                dst += dst_stride;
+                src += src_stride;
             }
         }
     };
@@ -94,20 +92,18 @@ namespace {
             *reinterpret_cast<uint32_t *>(dst) = src_val;
         }
 
-        static void contig_kernel(char *dst, const char *src, size_t count, unary_kernel_static_data *extra)
+        static void strided_kernel(char *dst, intptr_t dst_stride, const char *src, intptr_t src_stride, size_t count, unary_kernel_static_data *extra)
         {
             const categorical_dtype *cat = reinterpret_cast<const categorical_dtype *>(
                 get_raw_auxiliary_data(extra->auxdata)&~1
             );
-            size_t src_size = cat->get_category_dtype().get_data_size();
 
-            uint32_t *dst_vals = reinterpret_cast<uint32_t *>(dst);
             for (size_t i = 0; i != count; ++i) {
                 uint32_t src_val = cat->get_value_from_category(src);
-                *dst_vals = src_val;
+                *reinterpret_cast<uint32_t *>(dst) = src_val;
 
-                ++dst;
-                src += src_size;
+                dst += dst_stride;
+                src += src_stride;
             }
         }
     };
@@ -175,10 +171,10 @@ categorical_dtype::categorical_dtype(const ndobject& categories)
     intptr_t num_categories;
     categories.get_shape(&num_categories);
 
-    single_compare_kernel_instance k;
+    kernel_instance<compare_operations_t> k;
     m_category_dtype.get_single_compare_kernel(k);
 
-    cmp less(k.comparisons[less_id], k.auxdata);
+    cmp less(k.kernel.ops[compare_operations_t::less_id], &k.extra);
     set<char *, cmp> uniques(less);
 
     m_categories.resize(num_categories);
@@ -202,7 +198,8 @@ categorical_dtype::categorical_dtype(const ndobject& categories)
             throw std::runtime_error(ss.str());
         }
     }
-    std::sort(m_category_index_to_value.begin(), m_category_index_to_value.end(), sorter(categories_user_order, k.comparisons[less_id], k.auxdata));
+    std::sort(m_category_index_to_value.begin(), m_category_index_to_value.end(),
+                    sorter(categories_user_order, k.kernel.ops[compare_operations_t::less_id], &k.extra));
 
     // reorder categories lexicographically, and create mapping from values to indices of (lexicographically sorted) categories
     for (uint32_t i = 0; i < m_category_index_to_value.size(); ++i) {
@@ -260,11 +257,11 @@ void dynd::categorical_dtype::get_shape(size_t i, intptr_t *out_shape) const
 
 uint32_t categorical_dtype::get_value_from_category(const char *category) const
 {
-    single_compare_kernel_instance k;
+    kernel_instance<compare_operations_t> k;
     m_category_dtype.get_single_compare_kernel(k);
     pair<vector<const char *>::const_iterator,vector<const char *>::const_iterator> bounds;
     bounds = equal_range(
-        m_categories.begin(), m_categories.end(), category, cmp(k.comparisons[less_id], k.auxdata)
+        m_categories.begin(), m_categories.end(), category, cmp(k.kernel.ops[compare_operations_t::less_id], &k.extra)
     );
     if (bounds.first == m_categories.end() || bounds.first == bounds.second) {
         stringstream ss;
@@ -308,8 +305,8 @@ void categorical_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const d
         // assign from the same category value dtype
         else if (src_dt.value_dtype() == m_category_dtype) {
             out_kernel.kernel = unary_operation_pair_t(category_to_categorical_assign::single_kernel,
-                            category_to_categorical_assign::contig_kernel);
-            make_raw_auxiliary_data(out_kernel.auxdata, reinterpret_cast<uintptr_t>(this));
+                            category_to_categorical_assign::strided_kernel);
+            make_raw_auxiliary_data(out_kernel.extra.auxdata, reinterpret_cast<uintptr_t>(this));
         }
         else {
             stringstream ss;
@@ -320,10 +317,10 @@ void categorical_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const d
     else {
         if (dst_dt.value_dtype().get_type_id() != categorical_type_id) {
             out_kernel.kernel = unary_operation_pair_t(categorical_to_other_assign::single_kernel,
-                            categorical_to_other_assign::contig_kernel);
-            make_auxiliary_data<categorical_to_other_assign::auxdata_storage>(out_kernel.auxdata);
+                            categorical_to_other_assign::strided_kernel);
+            make_auxiliary_data<categorical_to_other_assign::auxdata_storage>(out_kernel.extra.auxdata);
             categorical_to_other_assign::auxdata_storage& ad =
-                        out_kernel.auxdata.get<categorical_to_other_assign::auxdata_storage>();
+                        out_kernel.extra.auxdata.get<categorical_to_other_assign::auxdata_storage>();
             ad.cat_dt = src_dt;
             ad.dst_size = dst_dt.get_data_size();
             ::get_dtype_assignment_kernel(dst_dt, m_category_dtype, errmode, NULL, ad.kernel);
@@ -340,23 +337,24 @@ void categorical_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const d
 
 bool categorical_dtype::operator==(const base_dtype& rhs) const
 {
-    if (this == &rhs) return true;
+    if (this == &rhs)
+        return true;
+    if (rhs.get_type_id() != categorical_type_id)
+        return false;
+    if (static_cast<const categorical_dtype&>(rhs).m_categories.size() != m_categories.size())
+        return false;
+    if (static_cast<const categorical_dtype&>(rhs).m_category_index_to_value != m_category_index_to_value)
+        return false;
+    if (static_cast<const categorical_dtype&>(rhs).m_value_to_category_index != m_value_to_category_index)
+        return false;
+    if (static_cast<const categorical_dtype&>(rhs).m_category_dtype != m_category_dtype)
+        return false;
 
-    if (rhs.get_type_id() != categorical_type_id) return false;
-
-    if (static_cast<const categorical_dtype&>(rhs).m_category_index_to_value != m_category_index_to_value) return false;
-
-    if (static_cast<const categorical_dtype&>(rhs).m_value_to_category_index != m_value_to_category_index) return false;
-
-    if (static_cast<const categorical_dtype&>(rhs).m_categories.size() != m_categories.size()) return false;
-
-    if (static_cast<const categorical_dtype&>(rhs).m_category_dtype!= m_category_dtype) return false;
-
-    single_compare_kernel_instance k;
+    kernel_instance<compare_operations_t> k;
     m_category_dtype.get_single_compare_kernel(k);
-    single_compare_operation_t cmp_equal = k.comparisons[equal_id];
+    single_compare_operation_t cmp_equal = k.kernel.ops[compare_operations_t::equal_id];
     for (uint32_t i = 0; i < m_categories.size(); ++i) {
-        if (!cmp_equal(static_cast<const categorical_dtype&>(rhs).m_categories[i], m_categories[i], k.auxdata)) return false;
+        if (!cmp_equal(static_cast<const categorical_dtype&>(rhs).m_categories[i], m_categories[i], &k.extra)) return false;
     }
     return true;
 
@@ -401,12 +399,12 @@ void categorical_dtype::metadata_debug_print(const char *metadata, std::ostream&
 
 dtype dynd::factor_categorical_dtype(const ndobject& values)
 {
-    single_compare_kernel_instance k;
+    kernel_instance<compare_operations_t> k;
 
     ndobject_iter<1, 0> iter(values);
 
     iter.get_uniform_dtype().get_single_compare_kernel(k);
-    cmp less(k.comparisons[less_id], k.auxdata);
+    cmp less(k.kernel.ops[compare_operations_t::less_id], &k.extra);
     set<const char *, cmp> uniques(less);
 
     if (!iter.empty()) {
@@ -427,10 +425,10 @@ dtype dynd::factor_categorical_dtype(const ndobject& values)
     intptr_t stride = reinterpret_cast<const strided_array_dtype_metadata *>(categories.get_ndo_meta())->stride;
     char *dst_ptr = categories.get_readwrite_originptr();
     uint32_t i = 0;
-    unary_kernel_static_data extra(kernel.auxdata, categories.get_ndo_meta() + sizeof(strided_array_dtype_metadata),
-                    iter.metadata());
+    kernel.extra.dst_metadata = categories.get_ndo_meta() + sizeof(strided_array_dtype_metadata);
+    kernel.extra.src_metadata = iter.metadata();
     for (set<const char *, cmp>::const_iterator it = uniques.begin(); it != uniques.end(); ++it) {
-        kernel.kernel.single(dst_ptr, *it, &extra);
+        kernel.kernel.single(dst_ptr, *it, &kernel.extra);
         ++i;
         dst_ptr += stride;
     }

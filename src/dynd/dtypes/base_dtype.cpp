@@ -283,7 +283,7 @@ void base_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const dtype& s
     throw std::runtime_error(ss.str());
 }
 
-void base_dtype::get_single_compare_kernel(single_compare_kernel_instance& DYND_UNUSED(out_kernel)) const
+void base_dtype::get_single_compare_kernel(kernel_instance<compare_operations_t>& DYND_UNUSED(out_kernel)) const
 {
         throw std::runtime_error("get_single_compare_kernel: this dtypes does not support comparisons");
 }

@@ -5,7 +5,6 @@
 
 #include <dynd/dtypes/bytes_dtype.hpp>
 #include <dynd/memblock/pod_memory_block.hpp>
-#include <dynd/kernels/single_compare_kernel_instance.hpp>
 #include <dynd/kernels/bytes_assignment_kernels.hpp>
 #include <dynd/dtypes/fixedbytes_dtype.hpp>
 #include <dynd/exceptions.hpp>
@@ -91,7 +90,7 @@ bool bytes_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_d
     }
 }
 
-void bytes_dtype::get_single_compare_kernel(single_compare_kernel_instance& DYND_UNUSED(out_kernel)) const {
+void bytes_dtype::get_single_compare_kernel(kernel_instance<compare_operations_t>& DYND_UNUSED(out_kernel)) const {
     throw std::runtime_error("bytes_dtype::get_single_compare_kernel not supported yet");
 }
 

@@ -72,7 +72,7 @@ namespace {
             out_kernel.kernel = get_binary_operation_from_builtin_dtype_table(m_builtin_optable,
                                 m_dtype, dst_fixedstride,
                                 src1_fixedstride, src2_fixedstride);
-            out_kernel.auxdata.free();
+            out_kernel.extra.auxdata.free();
         }
 
         const char *node_name() const {

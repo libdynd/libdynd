@@ -8,7 +8,7 @@
 using namespace std;
 using namespace dynd;
 
-binary_operation_t dynd::get_binary_operation_from_builtin_dtype_table(
+binary_single_operation_t dynd::get_binary_operation_from_builtin_dtype_table(
                                 specialized_binary_operation_table_t *builtin_optable,
                                 const dtype& dt, intptr_t dst_fixedstride,
                                 intptr_t src0_fixedstride, intptr_t src1_fixedstride)

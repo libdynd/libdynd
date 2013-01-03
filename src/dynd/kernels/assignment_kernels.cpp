@@ -14,17 +14,12 @@ using namespace dynd;
 namespace {
     template<typename dst_type, typename src_type, assign_error_mode errmode>
     struct multiple_assignment_builtin {
-        static void contig_assign(char *dst, const char *src,
+        static void strided_assign(char *dst, intptr_t dst_stride, const char *src, intptr_t src_stride,
                             size_t count, unary_kernel_static_data *DYND_UNUSED(extra))
         {
-            dst_type *dst_cached = reinterpret_cast<dst_type *>(dst);
-            const src_type *src_cached = reinterpret_cast<const src_type *>(src);
-
-            for (size_t i = 0; i != count; ++i) {
-                single_assigner_builtin<dst_type, src_type, errmode>::assign(dst_cached, src_cached, NULL);
-
-                ++dst_cached;
-                ++src_cached;
+            for (size_t i = 0; i != count; ++i, dst += dst_stride, src += src_stride) {
+                single_assigner_builtin<dst_type, src_type, errmode>::assign(reinterpret_cast<dst_type *>(dst),
+                                reinterpret_cast<const src_type *>(src), NULL);
             }
         }
     };
@@ -35,7 +30,7 @@ static unary_operation_pair_t assign_table[builtin_type_id_count][builtin_type_i
 {
 #define SINGLE_OPERATION_PAIR_LEVEL(dst_type, src_type, errmode) unary_operation_pair_t( \
             (unary_single_operation_t)&single_assigner_builtin<dst_type, src_type, errmode>::assign, \
-            multiple_assignment_builtin<dst_type, src_type, errmode>::contig_assign)
+            multiple_assignment_builtin<dst_type, src_type, errmode>::strided_assign)
         
 #define ERROR_MODE_LEVEL(dst_type, src_type) { \
         SINGLE_OPERATION_PAIR_LEVEL(dst_type, src_type, assign_error_none), \
@@ -105,7 +100,7 @@ void dynd::get_builtin_dtype_assignment_kernel(
             // Behavior is to return NULL for default mode if no
             // evaluation context is provided
             out_kernel.kernel = unary_operation_pair_t();
-            out_kernel.auxdata.free();
+            out_kernel.extra.auxdata.free();
             return;
         }
     }
@@ -114,7 +109,7 @@ void dynd::get_builtin_dtype_assignment_kernel(
             src_type_id >= bool_type_id && src_type_id <= complex_float64_type_id &&
             errmode != assign_error_default) {
         out_kernel.kernel = assign_table[dst_type_id][src_type_id][errmode];
-        out_kernel.auxdata.free();
+        out_kernel.extra.auxdata.free();
     } else {
         stringstream ss;
         ss << "Could not construct dynd assignment kernel from " << dtype(src_type_id) << " to ";
@@ -198,9 +193,11 @@ namespace {
             *(T *)dst = *(T *)src;
         }
 
-        static void contig(char *dst, const char *src, size_t count, unary_kernel_static_data *DYND_UNUSED(extra))
+        static void strided(char *dst, intptr_t dst_stride, const char *src, intptr_t src_stride, size_t count, unary_kernel_static_data *DYND_UNUSED(extra))
         {
-            memcpy(dst, src, count * sizeof(T));
+            for (size_t i = 0; i != count; ++i, dst += dst_stride, src += src_stride) {
+                *(T *)dst = *(T *)src;
+            }
         }
     };
 
@@ -213,9 +210,11 @@ namespace {
             *dst = *src;
         }
 
-        static void contig(char *dst, const char *src, size_t count, unary_kernel_static_data *DYND_UNUSED(extra))
+        static void strided(char *dst, intptr_t dst_stride, const char *src, intptr_t src_stride, size_t count, unary_kernel_static_data *DYND_UNUSED(extra))
         {
-            memcpy(dst, src, count);
+            for (size_t i = 0; i != count; ++i, dst += dst_stride, src += src_stride) {
+                *dst = *src;
+            }
         }
     };
     template<>
@@ -232,9 +231,12 @@ namespace {
             memcpy(dst, src, N);
         }
 
-        static void contig(char *dst, const char *src, size_t count, unary_kernel_static_data *DYND_UNUSED(extra))
+        static void strided(char *dst, intptr_t dst_stride, const char *src, intptr_t src_stride,
+                        size_t count, unary_kernel_static_data *DYND_UNUSED(extra))
         {
-            memcpy(dst, src, count * N);
+            for (size_t i = 0; i != count; ++i, dst += dst_stride, src += src_stride) {
+                memcpy(dst, src, N);
+            }
         }
     };
 }
@@ -243,10 +245,13 @@ static void unaligned_copy_single(char *dst, const char *src, unary_kernel_stati
     size_t element_size = static_cast<size_t>(get_raw_auxiliary_data(extra->auxdata)>>1);
     memcpy(dst, src, element_size);
 }
-static void unaligned_copy_contig(char *dst, const char *src, size_t count, unary_kernel_static_data *extra)
+static void unaligned_copy_strided(char *dst, intptr_t dst_stride, const char *src, intptr_t src_stride,
+                size_t count, unary_kernel_static_data *extra)
 {
     size_t element_size = static_cast<size_t>(get_raw_auxiliary_data(extra->auxdata)>>1);
-    memcpy(dst, src, element_size * count);
+    for (size_t i = 0; i != count; ++i, dst += dst_stride, src += src_stride) {
+        memcpy(dst, src, element_size);
+    }
 }
 
 void dynd::get_pod_dtype_assignment_kernel(
@@ -258,23 +263,23 @@ void dynd::get_pod_dtype_assignment_kernel(
         switch (element_size) {
             case 1:
                 out_kernel.kernel.single = &aligned_fixed_size_copy_assign<1>::single;
-                out_kernel.kernel.contig = &aligned_fixed_size_copy_assign<1>::contig;
+                out_kernel.kernel.strided = &aligned_fixed_size_copy_assign<1>::strided;
                 break;
             case 2:
                 out_kernel.kernel.single = &aligned_fixed_size_copy_assign<2>::single;
-                out_kernel.kernel.contig = &aligned_fixed_size_copy_assign<2>::contig;
+                out_kernel.kernel.strided = &aligned_fixed_size_copy_assign<2>::strided;
                 break;
             case 4:
                 out_kernel.kernel.single = &aligned_fixed_size_copy_assign<4>::single;
-                out_kernel.kernel.contig = &aligned_fixed_size_copy_assign<4>::contig;
+                out_kernel.kernel.strided = &aligned_fixed_size_copy_assign<4>::strided;
                 break;
             case 8:
                 out_kernel.kernel.single = &aligned_fixed_size_copy_assign<8>::single;
-                out_kernel.kernel.contig = &aligned_fixed_size_copy_assign<8>::contig;
+                out_kernel.kernel.strided = &aligned_fixed_size_copy_assign<8>::strided;
                 break;
             default:
                 out_kernel.kernel.single = &unaligned_copy_single;
-                out_kernel.kernel.contig = &unaligned_copy_contig;
+                out_kernel.kernel.strided = &unaligned_copy_strided;
                 break;
         }
     } else {
@@ -282,23 +287,23 @@ void dynd::get_pod_dtype_assignment_kernel(
         switch (element_size) {
             case 2:
                 out_kernel.kernel.single = unaligned_fixed_size_copy_assign<2>::single;
-                out_kernel.kernel.contig = unaligned_fixed_size_copy_assign<2>::contig;
+                out_kernel.kernel.strided = unaligned_fixed_size_copy_assign<2>::strided;
                 break;
             case 4:
                 out_kernel.kernel.single = unaligned_fixed_size_copy_assign<4>::single;
-                out_kernel.kernel.contig = unaligned_fixed_size_copy_assign<4>::contig;
+                out_kernel.kernel.strided = unaligned_fixed_size_copy_assign<4>::strided;
                 break;
             case 8:
                 out_kernel.kernel.single = unaligned_fixed_size_copy_assign<8>::single;
-                out_kernel.kernel.contig = unaligned_fixed_size_copy_assign<8>::contig;
+                out_kernel.kernel.strided = unaligned_fixed_size_copy_assign<8>::strided;
                 break;
             default:
                 out_kernel.kernel.single = &unaligned_copy_single;
-                out_kernel.kernel.contig = &unaligned_copy_contig;
+                out_kernel.kernel.strided = &unaligned_copy_strided;
                 break;
         }
     }
-    make_raw_auxiliary_data(out_kernel.auxdata, static_cast<uintptr_t>(element_size)<<1);
+    make_raw_auxiliary_data(out_kernel.extra.auxdata, static_cast<uintptr_t>(element_size)<<1);
 }
 
 void dynd::get_dtype_assignment_kernel(const dtype& dt,

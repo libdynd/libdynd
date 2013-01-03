@@ -5,7 +5,6 @@
 
 #include <dynd/dtypes/pointer_dtype.hpp>
 #include <dynd/memblock/pod_memory_block.hpp>
-#include <dynd/kernels/single_compare_kernel_instance.hpp>
 #include <dynd/kernels/string_assignment_kernels.hpp>
 
 #include <algorithm>
@@ -154,7 +153,7 @@ bool pointer_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src
     }
 }
 
-void pointer_dtype::get_single_compare_kernel(single_compare_kernel_instance& DYND_UNUSED(out_kernel)) const {
+void pointer_dtype::get_single_compare_kernel(kernel_instance<compare_operations_t>& DYND_UNUSED(out_kernel)) const {
     throw std::runtime_error("pointer_dtype::get_single_compare_kernel not supported yet");
 }
 
@@ -168,29 +167,22 @@ namespace {
         static void single_kernel(char *dst, const char *src, unary_kernel_static_data *extra)
         {
             auxdata_storage& ad = get_auxiliary_data<auxdata_storage>(extra->auxdata);
-            unary_kernel_static_data kernel_extra(ad.m_assign_kernel.auxdata,
-                            extra->dst_metadata + sizeof(pointer_dtype_metadata),
-                            extra->src_metadata);
+            ad.m_assign_kernel.extra.dst_metadata = extra->dst_metadata;
+            ad.m_assign_kernel.extra.src_metadata = extra->src_metadata;
 
             char *dst_target = *reinterpret_cast<char **>(dst);
-            ad.m_assign_kernel.kernel.single(dst_target, src, &kernel_extra);
+            ad.m_assign_kernel.kernel.single(dst_target, src, &ad.m_assign_kernel.extra);
         }
 
-        static void contig_kernel(char *dst, const char *src, size_t count, unary_kernel_static_data *extra)
+        static void strided_kernel(char *dst, intptr_t dst_stride, const char *src, intptr_t src_stride, size_t count, unary_kernel_static_data *extra)
         {
             auxdata_storage& ad = get_auxiliary_data<auxdata_storage>(extra->auxdata);
-            unary_kernel_static_data kernel_extra(ad.m_assign_kernel.auxdata,
-                            extra->dst_metadata + sizeof(pointer_dtype_metadata),
-                            extra->src_metadata);
-            size_t src_size = ad.src_size;
+            ad.m_assign_kernel.extra.dst_metadata = extra->dst_metadata;
+            ad.m_assign_kernel.extra.src_metadata = extra->src_metadata;
 
-            char **dst_vals = reinterpret_cast<char **>(dst);
-            for (size_t i = 0; i != count; ++i) {
-                char *dst_target = *dst_vals;
-                ad.m_assign_kernel.kernel.single(dst_target, src, &kernel_extra);
-
-                ++dst_vals;
-                src += src_size;
+            for (size_t i = 0; i != count; ++i, dst += dst_stride, src += src_stride) {
+                char *dst_target = *reinterpret_cast<char **>(dst);
+                ad.m_assign_kernel.kernel.single(dst_target, src, &ad.m_assign_kernel.extra);
             }
         }
     };

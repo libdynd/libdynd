@@ -173,14 +173,11 @@ void dynd::dtype_copy(const dtype& dt, const char *dst_metadata, char *dst_data,
     if (dt.is_builtin() || (dt.get_memory_management() == pod_memory_management && element_size != 0)) {
         memcpy(dst_data, src_data, element_size);
     } else {
-        unary_kernel_static_data extra;
-        extra.dst_metadata = dst_metadata;
-        extra.src_metadata = src_metadata;
-
         kernel_instance<unary_operation_pair_t> op;
         get_dtype_assignment_kernel(dt, op);
-        extra.auxdata = op.auxdata;
-        op.kernel.single(dst_data, src_data, &extra);
+        op.extra.dst_metadata = dst_metadata;
+        op.extra.src_metadata = src_metadata;
+        op.kernel.single(dst_data, src_data, &op.extra);
     }
 }
 
@@ -203,16 +200,11 @@ void dynd::dtype_assign(const dtype& dst_dt, const char *dst_metadata, char *dst
         }
     }
 
-    unary_kernel_static_data extra;
-    extra.dst_metadata = dst_metadata;
-    extra.src_metadata = src_metadata;
-
     if (dst_dt.is_builtin() && src_dt.is_builtin()) {
         // Try to use the simple single-value assignment for built-in types
         unary_operation_pair_t asn = get_builtin_dtype_assignment_function(dst_dt.get_type_id(), src_dt.get_type_id(), errmode);
         if (asn.single != NULL) {
-            extra.auxdata = NULL;
-            asn.single(dst_data, src_data, &extra);
+            asn.single(dst_data, src_data, NULL);
             return;
         }
 
@@ -220,11 +212,11 @@ void dynd::dtype_assign(const dtype& dst_dt, const char *dst_metadata, char *dst
         ss << "assignment from " << src_dt << " to " << dst_dt << " with error mode " << errmode << " isn't yet supported";
         throw std::runtime_error(ss.str());
     } else {
-        // Fall back to the strided assignment functions for the extended dtypes
         kernel_instance<unary_operation_pair_t> op;
         get_dtype_assignment_kernel(dst_dt, src_dt, errmode, ectx, op);
-        extra.auxdata = op.auxdata;
-        op.kernel.single(dst_data, src_data, &extra);
+        op.extra.dst_metadata = dst_metadata;
+        op.extra.src_metadata = src_metadata;
+        op.kernel.single(dst_data, src_data, &op.extra);
         return;
     }
 }

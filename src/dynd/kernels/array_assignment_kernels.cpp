@@ -46,21 +46,17 @@ namespace {
             reinterpret_cast<array_dtype_data *>(dst)->begin = dst_begin;
             reinterpret_cast<array_dtype_data *>(dst)->size = src_size;
 
-            unary_kernel_static_data assign_elements_extra(ad.assign_elements.auxdata,
-                            extra->dst_metadata + sizeof(array_dtype_metadata),
-                            extra->src_metadata + sizeof(array_dtype_metadata));
             intptr_t dst_stride = dst_md->stride, src_stride = src_md->stride;
-            if (ad.assign_elements.kernel.contig == NULL ||
-                            dst_stride != (intptr_t)ad.dst_dtype.get_data_size() ||
-                            src_stride != (intptr_t)ad.src_dtype.get_data_size()) {
+            if (ad.assign_elements.kernel.strided == NULL) {
                 unary_single_operation_t assign_single = ad.assign_elements.kernel.single;
                 for (size_t i = 0; i != src_size; ++i) {
-                    assign_single(dst_begin, src_begin, &assign_elements_extra);
+                    assign_single(dst_begin, src_begin, &ad.assign_elements.extra);
                     dst_begin += dst_stride;
                     src_begin += src_stride;
                 }
             } else {
-                ad.assign_elements.kernel.contig(dst_begin, src_begin, src_size, &assign_elements_extra);
+                ad.assign_elements.kernel.strided(dst_begin, dst_stride, src_begin, src_stride,
+                                src_size, &ad.assign_elements.extra);
             }
         } else {
             // Copy the pointers directly, reuse the same data
@@ -76,8 +72,8 @@ void dynd::get_blockref_array_assignment_kernel(const dtype& dst_element_type,
 {
     out_kernel.kernel = unary_operation_pair_t(blockref_array_assign_single, NULL);
 
-    make_auxiliary_data<blockref_array_assign_kernel_auxdata>(out_kernel.auxdata);
-    blockref_array_assign_kernel_auxdata& ad = out_kernel.auxdata.get<blockref_array_assign_kernel_auxdata>();
+    make_auxiliary_data<blockref_array_assign_kernel_auxdata>(out_kernel.extra.auxdata);
+    blockref_array_assign_kernel_auxdata& ad = out_kernel.extra.auxdata.get<blockref_array_assign_kernel_auxdata>();
     ad.dst_dtype = dst_element_type;
     ad.src_dtype = src_element_type;
     ::dynd::get_dtype_assignment_kernel(dst_element_type, src_element_type, errmode, NULL, ad.assign_elements);
