@@ -260,7 +260,7 @@ inline callable make_callable_with_default(FN *f, const char *name0, const D0& d
     ndobject defaults(pdt);
     defaults.at(0).vals() = default0;
     // Make defaults immutable (which is ok, because we have the only reference to it)
-    defaults.get_ndo()->m_flags = (defaults.get_ndo()->m_flags&~(uint64_t)write_access_flag)|immutable_access_flag;
+    defaults.flag_as_immutable();
     return callable(pdt,
                 &detail::callable_maker<FN *>::wrapper,
                 reinterpret_cast<void *>(f),
@@ -282,7 +282,7 @@ inline callable make_callable_with_default(FN *f, const char *name0, const char 
     ndobject defaults(pdt);
     defaults.at(1).vals() = default1;
     // Make defaults immutable (which is ok, because we have the only reference to it)
-    defaults.get_ndo()->m_flags = (defaults.get_ndo()->m_flags&~(uint64_t)write_access_flag)|immutable_access_flag;
+    defaults.flag_as_immutable();
     return callable(pdt,
                 &detail::callable_maker<FN *>::wrapper,
                 reinterpret_cast<void *>(f),
@@ -297,7 +297,7 @@ inline callable make_callable_with_default(FN *f, const char *name0, const char 
     defaults.at(0).vals() = default0;
     defaults.at(1).vals() = default1;
     // Make defaults immutable (which is ok, because we have the only reference to it)
-    defaults.get_ndo()->m_flags = (defaults.get_ndo()->m_flags&~(uint64_t)write_access_flag)|immutable_access_flag;
+    defaults.flag_as_immutable();
     return callable(pdt,
                 &detail::callable_maker<FN *>::wrapper,
                 reinterpret_cast<void *>(f),
@@ -319,7 +319,7 @@ inline callable make_callable_with_default(FN *f, const char *name0, const char 
     ndobject defaults(pdt);
     defaults.at(2).vals() = default2;
     // Make defaults immutable (which is ok, because we have the only reference to it)
-    defaults.get_ndo()->m_flags = (defaults.get_ndo()->m_flags&~(uint64_t)write_access_flag)|immutable_access_flag;
+    defaults.flag_as_immutable();
     return callable(pdt,
                 &detail::callable_maker<FN *>::wrapper,
                 reinterpret_cast<void *>(f),
@@ -334,7 +334,7 @@ inline callable make_callable_with_default(FN *f, const char *name0, const char 
     defaults.at(1).vals() = default1;
     defaults.at(2).vals() = default2;
     // Make defaults immutable (which is ok, because we have the only reference to it)
-    defaults.get_ndo()->m_flags = (defaults.get_ndo()->m_flags&~(uint64_t)write_access_flag)|immutable_access_flag;
+    defaults.flag_as_immutable();
     return callable(pdt,
                 &detail::callable_maker<FN *>::wrapper,
                 reinterpret_cast<void *>(f),
@@ -350,7 +350,7 @@ inline callable make_callable_with_default(FN *f, const char *name0, const char 
     defaults.at(1).vals() = default1;
     defaults.at(2).vals() = default2;
     // Make defaults immutable (which is ok, because we have the only reference to it)
-    defaults.get_ndo()->m_flags = (defaults.get_ndo()->m_flags&~(uint64_t)write_access_flag)|immutable_access_flag;
+    defaults.flag_as_immutable();
     return callable(pdt,
                 &detail::callable_maker<FN *>::wrapper,
                 reinterpret_cast<void *>(f),
@@ -373,7 +373,7 @@ inline callable make_callable_with_default(FN *f, const char *name0, const char 
     ndobject defaults(pdt);
     defaults.at(3).vals() = default3;
     // Make defaults immutable (which is ok, because we have the only reference to it)
-    defaults.get_ndo()->m_flags = (defaults.get_ndo()->m_flags&~(uint64_t)write_access_flag)|immutable_access_flag;
+    defaults.flag_as_immutable();
     return callable(pdt,
                 &detail::callable_maker<FN *>::wrapper,
                 reinterpret_cast<void *>(f),
@@ -389,7 +389,7 @@ inline callable make_callable_with_default(FN *f, const char *name0, const char 
     defaults.at(2).vals() = default2;
     defaults.at(3).vals() = default3;
     // Make defaults immutable (which is ok, because we have the only reference to it)
-    defaults.get_ndo()->m_flags = (defaults.get_ndo()->m_flags&~(uint64_t)write_access_flag)|immutable_access_flag;
+    defaults.flag_as_immutable();
     return callable(pdt,
                 &detail::callable_maker<FN *>::wrapper,
                 reinterpret_cast<void *>(f),
@@ -406,7 +406,7 @@ inline callable make_callable_with_default(FN *f, const char *name0, const char 
     defaults.at(2).vals() = default2;
     defaults.at(3).vals() = default3;
     // Make defaults immutable (which is ok, because we have the only reference to it)
-    defaults.get_ndo()->m_flags = (defaults.get_ndo()->m_flags&~(uint64_t)write_access_flag)|immutable_access_flag;
+    defaults.flag_as_immutable();
     return callable(pdt,
                 &detail::callable_maker<FN *>::wrapper,
                 reinterpret_cast<void *>(f),
@@ -424,7 +424,7 @@ inline callable make_callable_with_default(FN *f, const char *name0, const char 
     defaults.at(2).vals() = default2;
     defaults.at(3).vals() = default3;
     // Make defaults immutable (which is ok, because we have the only reference to it)
-    defaults.get_ndo()->m_flags = (defaults.get_ndo()->m_flags&~(uint64_t)write_access_flag)|immutable_access_flag;
+    defaults.flag_as_immutable();
     return callable(pdt,
                 &detail::callable_maker<FN *>::wrapper,
                 reinterpret_cast<void *>(f),

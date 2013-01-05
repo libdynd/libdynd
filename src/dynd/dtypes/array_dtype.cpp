@@ -61,6 +61,21 @@ bool array_dtype::is_expression() const
     return m_element_dtype.is_expression();
 }
 
+bool array_dtype::is_unique_data_owner(const char *metadata) const
+{
+    const array_dtype_metadata *md = reinterpret_cast<const array_dtype_metadata *>(*metadata);
+    if (md->blockref != NULL &&
+            (md->blockref->m_use_count != 1 ||
+             md->blockref->m_type != pod_memory_block_type)) {
+        return false;
+    }
+    if (m_element_dtype.is_builtin()) {
+        return true;
+    } else {
+        return m_element_dtype.extended()->is_unique_data_owner(metadata + sizeof(array_dtype_metadata));
+    }
+}
+
 void array_dtype::transform_child_dtypes(dtype_transform_fn_t transform_fn, const void *extra,
                 dtype& out_transformed_dtype, bool& out_was_transformed) const
 {

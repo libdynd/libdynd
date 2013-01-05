@@ -261,6 +261,12 @@ public:
         }
     }
 
+    /**
+     * If the caller has the only reference to this ndobject and its data,
+     * makes the access flags into read-only and immutable.
+     */
+    void flag_as_immutable();
+
     /** The flags, including access permissions. */
     inline int64_t get_flags() const {
         return get_ndo()->m_flags;
@@ -899,6 +905,14 @@ ndobject empty_like(const ndobject& rhs, const dtype& uniform_dtype);
  * @param rhs  The array whose shape, memory layout, and dtype to emulate.
  */
 ndobject empty_like(const ndobject& rhs);
+
+/**
+ * Performs a binary search of the first dimension of the ndobject, which
+ * should be sorted. The data/metadata must correspond to the dtype n.get_dtype().at(0).
+ *
+ * \returns  The index of the found element, or -1 if not found.
+ */
+intptr_t binary_search(const ndobject& n, const char *data, const char *metadata);
 
 } // namespace dynd
 

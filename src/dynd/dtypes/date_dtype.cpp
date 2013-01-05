@@ -151,7 +151,7 @@ static ndobject function_dtype_today(const dtype& dt) {
     ndobject result(dt);
     *reinterpret_cast<int32_t *>(result.get_readwrite_originptr()) = datetime::ymd_to_days(ymd);
     // Make the result immutable (we own the only reference to the data at this point)
-    result.get_ndo()->m_flags = (result.get_ndo()->m_flags&~(uint64_t)write_access_flag)|immutable_access_flag;
+    result.flag_as_immutable();
     return result;
 }
 

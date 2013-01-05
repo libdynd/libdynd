@@ -67,6 +67,17 @@ intptr_t bytes_dtype::apply_linear_index(int DYND_UNUSED(nindices), const irange
     return 0;
 }
 
+bool bytes_dtype::is_unique_data_owner(const char *metadata) const
+{
+    const bytes_dtype_metadata *md = reinterpret_cast<const bytes_dtype_metadata *>(*metadata);
+    if (md->blockref != NULL &&
+            (md->blockref->m_use_count != 1 ||
+             md->blockref->m_type != pod_memory_block_type)) {
+        return false;
+    }
+    return true;
+}
+
 dtype bytes_dtype::get_canonical_dtype() const
 {
     return dtype(this, true);

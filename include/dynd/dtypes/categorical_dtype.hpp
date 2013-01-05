@@ -12,6 +12,7 @@
 
 #include <dynd/dtype.hpp>
 #include <dynd/ndobject.hpp>
+#include <dynd/dtypes/strided_array_dtype.hpp>
 
 
 namespace {
@@ -25,17 +26,18 @@ namespace dynd {
 class categorical_dtype : public base_dtype {
     // The data type of the category
     dtype m_category_dtype;
-    // list of categories, sorted lexicographically
-    std::vector<const char *> m_categories;
+    // list of categories, in sorted order
+    ndobject m_categories;
     // mapping from category indices to values
     std::vector<intptr_t> m_category_index_to_value;
     // mapping from values to category indices
     std::vector<intptr_t> m_value_to_category_index;
 
 public:
-    categorical_dtype(const ndobject& categories);
+    categorical_dtype(const ndobject& categories, bool presorted=false);
 
-    ~categorical_dtype();
+    virtual ~categorical_dtype() {
+    }
 
     void print_data(std::ostream& o, const char *metadata, const char *data) const;
 
@@ -50,20 +52,22 @@ public:
     void get_shape(size_t i, intptr_t *out_shape) const;
 
     intptr_t get_category_count() const {
-        return m_categories.size();
+        return reinterpret_cast<const strided_array_dtype_metadata *>(m_categories.get_ndo_meta())->size;
     }
 
     const dtype& get_category_dtype() const {
         return m_category_dtype;
     }
 
-    uint32_t get_value_from_category(const char *category) const;
+    uint32_t get_value_from_category(const char *category_metadata, const char *category_data) const;
+    uint32_t get_value_from_category(const ndobject& category) const;
 
-    const char *get_category_from_value(uint32_t value) const {
+    const char *get_category_data_from_value(uint32_t value) const {
         if (value >= get_category_count()) {
             throw std::runtime_error("category value is out of bounds");
         }
-        return m_categories[m_value_to_category_index[value]];
+        return m_categories.get_readonly_originptr() +
+                    m_value_to_category_index[value] * reinterpret_cast<const strided_array_dtype_metadata *>(m_categories.get_ndo_meta())->stride;
     }
 
     bool is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const;

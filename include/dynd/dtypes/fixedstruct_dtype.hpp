@@ -68,6 +68,7 @@ public:
 
     bool is_scalar() const;
     bool is_expression() const;
+    bool is_unique_data_owner(const char *metadata) const;
     void transform_child_dtypes(dtype_transform_fn_t transform_fn, const void *extra,
                     dtype& out_transformed_dtype, bool& out_was_transformed) const;
     dtype get_canonical_dtype() const;

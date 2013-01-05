@@ -65,6 +65,7 @@ public:
                     memory_block_data *embedded_reference,
                     int current_i, const dtype& root_dt) const;
 
+    bool is_unique_data_owner(const char *metadata) const;
     dtype get_canonical_dtype() const;
 
     void get_shape(size_t i, std::vector<intptr_t>& out_shape) const;

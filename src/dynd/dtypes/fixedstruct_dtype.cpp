@@ -103,6 +103,17 @@ bool fixedstruct_dtype::is_expression() const
     return false;
 }
 
+bool fixedstruct_dtype::is_unique_data_owner(const char *metadata) const
+{
+    for (size_t i = 0, i_end = m_field_types.size(); i != i_end; ++i) {
+        if (!m_field_types[i].is_builtin() &&
+                !m_field_types[i].extended()->is_unique_data_owner(metadata + m_metadata_offsets[i])) {
+            return false;
+        }
+    }
+    return true;
+}
+
 void fixedstruct_dtype::transform_child_dtypes(dtype_transform_fn_t transform_fn, const void *extra,
                 dtype& out_transformed_dtype, bool& out_was_transformed) const
 {

@@ -6,6 +6,7 @@
 #include <dynd/dtypes/string_dtype.hpp>
 #include <dynd/memblock/pod_memory_block.hpp>
 #include <dynd/kernels/string_assignment_kernels.hpp>
+#include <dynd/kernels/string_comparison_kernels.hpp>
 #include <dynd/kernels/string_numeric_assignment_kernels.hpp>
 #include <dynd/dtypes/fixedstring_dtype.hpp>
 #include <dynd/exceptions.hpp>
@@ -142,6 +143,17 @@ intptr_t string_dtype::apply_linear_index(int DYND_UNUSED(nindices), const irang
     return 0;
 }
 
+bool string_dtype::is_unique_data_owner(const char *metadata) const
+{
+    const string_dtype_metadata *md = reinterpret_cast<const string_dtype_metadata *>(metadata);
+    if (md->blockref != NULL &&
+            (md->blockref->m_use_count != 1 ||
+             md->blockref->m_type != pod_memory_block_type)) {
+        return false;
+    }
+    return true;
+}
+
 dtype string_dtype::get_canonical_dtype() const
 {
     return dtype(this, true);
@@ -182,8 +194,9 @@ bool string_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_
     }
 }
 
-void string_dtype::get_single_compare_kernel(kernel_instance<compare_operations_t>& DYND_UNUSED(out_kernel)) const {
-    throw std::runtime_error("string_dtype::get_single_compare_kernel not supported yet");
+void string_dtype::get_single_compare_kernel(kernel_instance<compare_operations_t>& out_kernel) const
+{
+    get_string_comparison_kernel(m_encoding, out_kernel);
 }
 
 void string_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const dtype& src_dt,

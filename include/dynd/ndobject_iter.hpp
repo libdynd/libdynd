@@ -245,6 +245,111 @@ public:
 };
 
 template<>
+class ndobject_iter<0, 2> {
+    intptr_t m_itersize;
+    size_t m_iter_ndim;
+    dimvector m_iterindex;
+    dimvector m_itershape;
+    char *m_data[2];
+    const char *m_metadata[2];
+    iterdata_common *m_iterdata[2];
+    dtype m_array_dtype[2], m_uniform_dtype[2];
+public:
+    ndobject_iter(const ndobject& op0, const ndobject& op1) {
+        ndobject ops[2] = {op0, op1};
+        m_array_dtype[0] = op0.get_dtype();
+        m_array_dtype[1] = op1.get_dtype();
+        m_itersize = 1;
+        shortvector<int> axis_perm; // TODO: Use this to affect the iteration order
+        broadcast_input_shapes(2, ops, m_iter_ndim, m_itershape, axis_perm);
+        // Allocate and initialize the iterdata
+        if (m_iter_ndim != 0) {
+            m_iterindex.init(m_iter_ndim);
+            memset(m_iterindex.get(), 0, sizeof(intptr_t) * m_iter_ndim);
+            // The op iterdata
+            for (int i = 0; i < 2; ++i) {
+                size_t iter_ndim_i = m_array_dtype[i].get_undim();
+                size_t iterdata_size = m_array_dtype[i].get_broadcasted_iterdata_size(iter_ndim_i);
+                m_iterdata[i] = reinterpret_cast<iterdata_common *>(malloc(iterdata_size));
+                if (!m_iterdata[i]) {
+                    throw std::bad_alloc();
+                }
+                m_metadata[i] = ops[i].get_ndo_meta();
+                m_array_dtype[i].broadcasted_iterdata_construct(m_iterdata[i],
+                                &m_metadata[i], iter_ndim_i,
+                                m_itershape.get() + (m_iter_ndim - iter_ndim_i), m_uniform_dtype[i]);
+                m_data[i] = m_iterdata[i]->reset(m_iterdata[i], ops[i].get_ndo()->m_data_pointer, m_iter_ndim);
+            }
+
+            for (size_t i = 0, i_end = m_iter_ndim; i != i_end; ++i) {
+                m_itersize *= m_itershape[i];
+            }
+        } else {
+            for (size_t i = 0; i < 2; ++i) {
+                m_iterdata[i] = NULL;
+                m_uniform_dtype[i] = m_array_dtype[i];
+                m_data[i] = ops[i].get_ndo()->m_data_pointer;
+                m_metadata[i] = ops[i].get_ndo_meta();
+            }
+        }
+    }
+
+    ~ndobject_iter() {
+        for (size_t i = 0; i < 2; ++i) {
+            if (m_iterdata[i]) {
+                m_array_dtype[i].iterdata_destruct(m_iterdata[i], m_array_dtype[i].get_undim());
+                free(m_iterdata[i]);
+            }
+        }
+    }
+
+    size_t itersize() const {
+        return m_itersize;
+    }
+
+    bool empty() const {
+        return m_itersize == 0;
+    }
+
+    bool next() {
+        size_t i = m_iter_ndim;
+        if (i != 0) {
+            do {
+                --i;
+                if (++m_iterindex[i] != m_itershape[i]) {
+                    for (size_t j = 0; j < 2; ++j) {
+                        m_data[j] = m_iterdata[j]->incr(m_iterdata[j], m_iter_ndim - i - 1);
+                    }
+                    return true;
+                } else {
+                    m_iterindex[i] = 0;
+                }
+            } while (i != 0);
+        }
+
+        return false;
+    }
+
+    /**
+     * Provide const access to all the operands.
+     */
+    template<int K>
+    inline typename enable_if<detail::is_value_within_bounds<K, 0, 2>::value, const char *>::type data() const {
+        return m_data[K];
+    }
+
+    template<int K>
+    inline typename enable_if<detail::is_value_within_bounds<K, 0, 2>::value, const char *>::type metadata() const {
+        return m_metadata[K];
+    }
+
+    template<int K>
+    inline typename enable_if<detail::is_value_within_bounds<K, 0, 2>::value, const dtype&>::type get_uniform_dtype() const {
+        return m_uniform_dtype[K];
+    }
+};
+
+template<>
 class ndobject_iter<1, 3> {
     intptr_t m_itersize;
     size_t m_iter_ndim[4];

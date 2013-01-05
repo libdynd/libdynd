@@ -97,7 +97,7 @@ TEST(CategoricalDType, Unique) {
 
 }
 
-TEST(CategoricalDType, FactorString) {
+TEST(CategoricalDType, FactorFixedString) {
     ndobject string_cats = make_strided_ndobject(2, make_fixedstring_dtype(string_encoding_ascii, 3));
     string_cats.at(0).vals() = "bar";
     string_cats.at(1).vals() = "foo";
@@ -109,6 +109,15 @@ TEST(CategoricalDType, FactorString) {
 
     dtype da = factor_categorical_dtype(a);
     EXPECT_EQ(make_categorical_dtype(string_cats), da);
+}
+
+TEST(CategoricalDType, FactorString) {
+    const char *cats_vals[] = {"bar", "foo", "foot"};
+    const char *a_vals[] = {"foo", "bar", "foot", "foo", "bar"};
+    ndobject cats = cats_vals, a = a_vals;
+
+    dtype da = factor_categorical_dtype(a);
+    EXPECT_EQ(make_categorical_dtype(cats), da);
 }
 
 TEST(CategoricalDType, FactorInt) {
@@ -134,13 +143,15 @@ TEST(CategoricalDType, Values) {
 
     dtype dt = make_categorical_dtype(a);
 
-    EXPECT_EQ(0u, static_cast<const categorical_dtype*>(dt.extended())->get_value_from_category(a.at(0).get_readonly_originptr()));
-    EXPECT_EQ(1u, static_cast<const categorical_dtype*>(dt.extended())->get_value_from_category(a.at(1).get_readonly_originptr()));
-    EXPECT_EQ(2u, static_cast<const categorical_dtype*>(dt.extended())->get_value_from_category(a.at(2).get_readonly_originptr()));
+    EXPECT_EQ(0u, static_cast<const categorical_dtype*>(dt.extended())->get_value_from_category(a.at(0)));
+    EXPECT_EQ(1u, static_cast<const categorical_dtype*>(dt.extended())->get_value_from_category(a.at(1)));
+    EXPECT_EQ(2u, static_cast<const categorical_dtype*>(dt.extended())->get_value_from_category(a.at(2)));
+    EXPECT_EQ(0u, static_cast<const categorical_dtype*>(dt.extended())->get_value_from_category("foo"));
+    EXPECT_EQ(1u, static_cast<const categorical_dtype*>(dt.extended())->get_value_from_category("bar"));
+    EXPECT_EQ(2u, static_cast<const categorical_dtype*>(dt.extended())->get_value_from_category("baz"));
     EXPECT_THROW(static_cast<const categorical_dtype*>(dt.extended())->get_value_from_category("aaa"), std::runtime_error);
     EXPECT_THROW(static_cast<const categorical_dtype*>(dt.extended())->get_value_from_category("ddd"), std::runtime_error);
     EXPECT_THROW(static_cast<const categorical_dtype*>(dt.extended())->get_value_from_category("zzz"), std::runtime_error);
-
 }
 
 TEST(CategoricalDType, AssignFixedString) {

@@ -74,6 +74,15 @@ bool strided_array_dtype::is_expression() const
     return m_element_dtype.is_expression();
 }
 
+bool strided_array_dtype::is_unique_data_owner(const char *metadata) const
+{
+    if (m_element_dtype.is_builtin()) {
+        return true;
+    } else {
+        return m_element_dtype.extended()->is_unique_data_owner(metadata + sizeof(strided_array_dtype_metadata));
+    }
+}
+
 void strided_array_dtype::transform_child_dtypes(dtype_transform_fn_t transform_fn, const void *extra,
                 dtype& out_transformed_dtype, bool& out_was_transformed) const
 {

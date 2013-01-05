@@ -274,6 +274,13 @@ public:
     virtual bool is_expression() const;
 
     /**
+     * Should return true if there is no additional blockref which might point
+     * to data not owned by the metadata. For example, a blockref which points
+     * to an 'external' memory block does not own its data uniquely.
+     */
+    virtual bool is_unique_data_owner(const char *metadata) const;
+
+    /**
      * Applies the transform function to all the child dtypes, creating
      * a new dtype of the same type but with the transformed children.
      *

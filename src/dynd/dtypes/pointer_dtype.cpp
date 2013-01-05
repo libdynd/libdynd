@@ -64,6 +64,18 @@ bool pointer_dtype::is_expression() const
     return m_target_dtype.is_expression();
 }
 
+bool pointer_dtype::is_unique_data_owner(const char *metadata) const
+{
+    const pointer_dtype_metadata *md = reinterpret_cast<const pointer_dtype_metadata *>(*metadata);
+    if (md->blockref != NULL &&
+            (md->blockref->m_use_count != 1 ||
+             (md->blockref->m_type != pod_memory_block_type &&
+              md->blockref->m_type != fixed_size_pod_memory_block_type))) {
+        return false;
+    }
+    return true;
+}
+
 void pointer_dtype::transform_child_dtypes(dtype_transform_fn_t transform_fn, const void *extra,
                 dtype& out_transformed_dtype, bool& out_was_transformed) const
 {

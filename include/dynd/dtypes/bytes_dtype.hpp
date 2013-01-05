@@ -54,6 +54,7 @@ public:
     intptr_t apply_linear_index(int nindices, const irange *indices, char *data, const char *metadata,
                     const dtype& result_dtype, char *out_metadata, int current_i, const dtype& root_dt) const;
 
+    bool is_unique_data_owner(const char *metadata) const;
     dtype get_canonical_dtype() const;
 
     void get_shape(size_t i, std::vector<intptr_t>& out_shape) const;

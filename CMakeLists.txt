@@ -137,6 +137,7 @@ set(dynd_SRC
     src/dynd/kernels/string_assignment_kernels.cpp
     src/dynd/kernels/string_algorithm_kernels.cpp
     src/dynd/kernels/string_numeric_assignment_kernels.cpp
+    src/dynd/kernels/string_comparison_kernels.cpp
     src/dynd/kernels/struct_assignment_kernels.cpp
     src/dynd/kernels/kernels_for_disassembly.cpp
     src/dynd/kernels/single_assigner_builtin.hpp
@@ -152,6 +153,7 @@ set(dynd_SRC
     include/dynd/kernels/string_assignment_kernels.hpp
     include/dynd/kernels/string_algorithm_kernels.hpp
     include/dynd/kernels/string_numeric_assignment_kernels.hpp
+    include/dynd/kernels/string_comparison_kernels.hpp
     include/dynd/kernels/struct_assignment_kernels.hpp
     # MemBlock
     src/dynd/memblock/memory_block.cpp

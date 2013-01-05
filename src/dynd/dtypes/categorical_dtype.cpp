@@ -18,14 +18,15 @@ using namespace std;
 namespace {
 
     class sorter {
-        const vector<char *>& m_categories;
+        const char *m_originptr;
+        intptr_t m_stride;
         const single_compare_operation_t m_less;
         single_compare_static_data *m_extra;
     public:
-        sorter(vector<char *>& values, const single_compare_operation_t less, single_compare_static_data *extra) :
-            m_categories(values), m_less(less), m_extra(extra) {}
+        sorter(const char *originptr, intptr_t stride, const single_compare_operation_t less, single_compare_static_data *extra) :
+            m_originptr(originptr), m_stride(stride), m_less(less), m_extra(extra) {}
         bool operator()(intptr_t i, intptr_t j) const {
-            return m_less(m_categories[i], m_categories[j], m_extra);
+            return m_less(m_originptr + i * m_stride, m_originptr + j * m_stride, m_extra);
         }
     };
 
@@ -57,7 +58,7 @@ namespace {
             ad.kernel.extra.src_metadata = extra->src_metadata;
 
             uint32_t value = *reinterpret_cast<const uint32_t *>(src);
-            const char *src_val = cat->get_category_from_value(value);
+            const char *src_val = cat->get_category_data_from_value(value);
             ad.kernel.kernel.single(dst, src_val, &ad.kernel.extra);
         }
 
@@ -71,7 +72,7 @@ namespace {
 
             for (size_t i = 0; i != count; ++i) {
                 uint32_t value = *reinterpret_cast<const uint32_t *>(src);
-                const char *src_val = cat->get_category_from_value(value);
+                const char *src_val = cat->get_category_data_from_value(value);
                 ad.kernel.kernel.single(dst, src_val, &ad.kernel.extra);
 
                 dst += dst_stride;
@@ -88,7 +89,7 @@ namespace {
                 get_raw_auxiliary_data(extra->auxdata)&~1
             );
 
-            uint32_t src_val = cat->get_value_from_category(src);
+            uint32_t src_val = cat->get_value_from_category(extra->src_metadata, src);
             *reinterpret_cast<uint32_t *>(dst) = src_val;
         }
 
@@ -99,7 +100,7 @@ namespace {
             );
 
             for (size_t i = 0; i != count; ++i) {
-                uint32_t src_val = cat->get_value_from_category(src);
+                uint32_t src_val = cat->get_value_from_category(extra->src_metadata, src);
                 *reinterpret_cast<uint32_t *>(dst) = src_val;
 
                 dst += dst_stride;
@@ -151,9 +152,47 @@ namespace {
 
 } // anoymous namespace
 
-categorical_dtype::categorical_dtype(const ndobject& categories)
+/** This function converts the set of char* pointers into a strided immutable ndobject of the categories */
+static ndobject make_sorted_categories(const set<const char *, cmp>& uniques, const dtype& udtype, const char *metadata)
+{
+    ndobject categories = make_strided_ndobject(uniques.size(), udtype);
+    kernel_instance<unary_operation_pair_t> assign;
+    get_dtype_assignment_kernel(udtype, assign);
+
+    intptr_t stride = reinterpret_cast<const strided_array_dtype_metadata *>(categories.get_ndo_meta())->stride;
+    char *dst_ptr = categories.get_readwrite_originptr();
+    assign.extra.dst_metadata = categories.get_ndo_meta() + sizeof(strided_array_dtype_metadata);
+    assign.extra.src_metadata = metadata;
+    for (set<const char *, cmp>::const_iterator it = uniques.begin(); it != uniques.end(); ++it) {
+        assign.kernel.single(dst_ptr, *it, &assign.extra);
+        dst_ptr += stride;
+    }
+    categories.get_dtype().extended()->metadata_finalize_buffers(categories.get_ndo_meta());
+    categories.flag_as_immutable();
+
+    return categories;
+}
+
+categorical_dtype::categorical_dtype(const ndobject& categories, bool presorted)
     : base_dtype(categorical_type_id, custom_kind, 4, 4)
 {
+    if (presorted) {
+        // This is construction shortcut, for the case when the categories are already
+        // sorted. No validation of this is done, the caller should have ensured it
+        // was correct already, typically by construction.
+        m_categories = categories.eval_immutable();
+        m_category_dtype = m_categories.get_dtype().at(0);
+
+        intptr_t num_categories = categories.get_dim_size();
+        m_value_to_category_index.resize(num_categories);
+        m_category_index_to_value.resize(num_categories);
+        for (size_t i = 0; i != num_categories; ++i) {
+            m_value_to_category_index[i] = i;
+            m_category_index_to_value[i] = i;
+        }
+        return;
+    }
+
     const dtype& cdt = categories.get_dtype();
     if (cdt.get_type_id() != strided_array_type_id) {
         throw runtime_error("categorical_dtype only supports construction from a strided_array of categories");
@@ -162,64 +201,54 @@ categorical_dtype::categorical_dtype(const ndobject& categories)
     if (!m_category_dtype.is_scalar()) {
         throw runtime_error("categorical_dtype only supports construction from a 1-dimensional strided_array of categories");
     }
-    if (m_category_dtype.get_memory_management() != pod_memory_management) {
-        stringstream ss;
-        ss << "categorical_dtype does not yet support " << m_category_dtype << " as the category because it is not POD";
-        throw runtime_error(ss.str());
-    }
 
-    intptr_t num_categories;
-    categories.get_shape(&num_categories);
+    intptr_t num_categories = categories.get_dim_size();
+    intptr_t categories_stride = reinterpret_cast<const strided_array_dtype_metadata *>(categories.get_ndo_meta())->stride;
 
     kernel_instance<compare_operations_t> k;
     m_category_dtype.get_single_compare_kernel(k);
+    k.extra.src0_metadata = k.extra.src1_metadata = categories.get_ndo_meta() + sizeof(strided_array_dtype_metadata);
 
     cmp less(k.kernel.ops[compare_operations_t::less_id], &k.extra);
-    set<char *, cmp> uniques(less);
+    set<const char *, cmp> uniques(less);
 
-    m_categories.resize(num_categories);
     m_value_to_category_index.resize(num_categories);
     m_category_index_to_value.resize(num_categories);
 
     // create the mapping from indices of (to be lexicographically sorted) categories to values
-    vector<char *> categories_user_order(num_categories);
-    for (uint32_t i = 0; i < m_category_index_to_value.size(); ++i) {
+    for (size_t i = 0; i != num_categories; ++i) {
         m_category_index_to_value[i] = i;
-        categories_user_order[i] = new char[m_category_dtype.get_data_size()];
-        memcpy(categories_user_order[i], categories.at(i).get_readonly_originptr(), m_category_dtype.get_data_size());
+        const char *category_value = categories.get_readonly_originptr() +
+                        i * categories_stride;
 
-        if (uniques.find(categories_user_order[i]) == uniques.end()) {
-            uniques.insert(categories_user_order[i]);
+        if (uniques.find(category_value) == uniques.end()) {
+            uniques.insert(category_value);
         } else {
             stringstream ss;
             ss << "categories must be unique: category value ";
-            m_category_dtype.print_data(ss, NULL, categories_user_order[i]);
+            m_category_dtype.print_data(ss, k.extra.src0_metadata, category_value);
             ss << " appears more than once";
             throw std::runtime_error(ss.str());
         }
     }
+    // TODO: Putting everything in a set already caused a sort operation to occur,
+    //       there's no reason we should need a second sort.
     std::sort(m_category_index_to_value.begin(), m_category_index_to_value.end(),
-                    sorter(categories_user_order, k.kernel.ops[compare_operations_t::less_id], &k.extra));
+                    sorter(categories.get_readonly_originptr(), categories_stride, k.kernel.ops[compare_operations_t::less_id], &k.extra));
 
-    // reorder categories lexicographically, and create mapping from values to indices of (lexicographically sorted) categories
+    // invert the m_category_index_to_value permutation
     for (uint32_t i = 0; i < m_category_index_to_value.size(); ++i) {
-        m_categories[i] = categories_user_order[m_category_index_to_value[i]];
-        m_value_to_category_index[i] = m_category_index_to_value[m_category_index_to_value[i]];
-    }
-}
-
-categorical_dtype::~categorical_dtype() {
-    for (vector<const char *>::iterator it = m_categories.begin(); it != m_categories.end(); ++it) {
-        delete[] *it;
+        m_value_to_category_index[m_category_index_to_value[i]] = i;
     }
 
+    m_categories = make_sorted_categories(uniques, m_category_dtype, k.extra.src0_metadata);
 }
 
 void categorical_dtype::print_data(std::ostream& o, const char *metadata, const char *data) const
 {
     uint32_t value = *reinterpret_cast<const uint32_t*>(data);
     if (value < m_value_to_category_index.size()) {
-        m_category_dtype.print_data(o, metadata, m_categories[m_value_to_category_index[value]]);
+        m_category_dtype.print_data(o, metadata, get_category_data_from_value(value));
     }
     else {
         o << "UNK"; // TODO better outpout?
@@ -229,12 +258,15 @@ void categorical_dtype::print_data(std::ostream& o, const char *metadata, const 
 
 void categorical_dtype::print_dtype(std::ostream& o) const
 {
+    size_t category_count = get_category_count();
+    const char *metadata = m_categories.get_ndo_meta() + sizeof(strided_array_dtype_metadata);
+
     o << "categorical<" << m_category_dtype;
     o << ", [";
-    m_category_dtype.print_data(o, NULL, m_categories[m_value_to_category_index[0]]); // TODO: ndobject metadata
-    for (uint32_t i = 1; i < m_categories.size(); ++i) {
+    m_category_dtype.print_data(o, metadata, get_category_data_from_value(0));
+    for (size_t i = 1; i != category_count; ++i) {
         o << ", ";
-        m_category_dtype.print_data(o, NULL, m_categories[m_value_to_category_index[i]]); // TODO: ndobject metadata
+        m_category_dtype.print_data(o, metadata, get_category_data_from_value(i));
     }
     o << "]>";
 }
@@ -255,23 +287,29 @@ void dynd::categorical_dtype::get_shape(size_t i, intptr_t *out_shape) const
     }
 }
 
-uint32_t categorical_dtype::get_value_from_category(const char *category) const
+uint32_t categorical_dtype::get_value_from_category(const char *category_metadata, const char *category_data) const
 {
-    kernel_instance<compare_operations_t> k;
-    m_category_dtype.get_single_compare_kernel(k);
-    pair<vector<const char *>::const_iterator,vector<const char *>::const_iterator> bounds;
-    bounds = equal_range(
-        m_categories.begin(), m_categories.end(), category, cmp(k.kernel.ops[compare_operations_t::less_id], &k.extra)
-    );
-    if (bounds.first == m_categories.end() || bounds.first == bounds.second) {
+    intptr_t i = dynd::binary_search(m_categories, category_metadata, category_data);
+    if (i < 0) {
         stringstream ss;
-        m_category_dtype.print_data(ss, NULL, category); // TODO: ndobject metadata
+        m_category_dtype.print_data(ss, category_metadata, category_data);
         throw std::runtime_error("Unknown category: '" + ss.str() + "'");
+    } else {
+        return m_category_index_to_value[i];
     }
-    else {
-        return m_category_index_to_value[bounds.first-m_categories.begin()];
-    }
+}
 
+uint32_t categorical_dtype::get_value_from_category(const ndobject& category) const
+{
+    if (category.get_dtype() == m_category_dtype) {
+        // If the dtype is right, get the category value directly
+        return get_value_from_category(category.get_ndo_meta(), category.get_readonly_originptr());
+    } else {
+        // Otherwise convert to the correct dtype, then get the category value
+        ndobject c(m_category_dtype);
+        c.val_assign(category);
+        return get_value_from_category(c.get_ndo_meta(), c.get_readonly_originptr());
+    }
 }
 
 bool categorical_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const
@@ -341,21 +379,13 @@ bool categorical_dtype::operator==(const base_dtype& rhs) const
         return true;
     if (rhs.get_type_id() != categorical_type_id)
         return false;
-    if (static_cast<const categorical_dtype&>(rhs).m_categories.size() != m_categories.size())
+    if (!m_categories.equals_exact(static_cast<const categorical_dtype&>(rhs).m_categories))
         return false;
     if (static_cast<const categorical_dtype&>(rhs).m_category_index_to_value != m_category_index_to_value)
         return false;
     if (static_cast<const categorical_dtype&>(rhs).m_value_to_category_index != m_value_to_category_index)
         return false;
-    if (static_cast<const categorical_dtype&>(rhs).m_category_dtype != m_category_dtype)
-        return false;
 
-    kernel_instance<compare_operations_t> k;
-    m_category_dtype.get_single_compare_kernel(k);
-    single_compare_operation_t cmp_equal = k.kernel.ops[compare_operations_t::equal_id];
-    for (uint32_t i = 0; i < m_categories.size(); ++i) {
-        if (!cmp_equal(static_cast<const categorical_dtype&>(rhs).m_categories[i], m_categories[i], &k.extra)) return false;
-    }
     return true;
 
 }
@@ -404,6 +434,8 @@ dtype dynd::factor_categorical_dtype(const ndobject& values)
     ndobject_iter<1, 0> iter(values);
 
     iter.get_uniform_dtype().get_single_compare_kernel(k);
+    k.extra.src0_metadata = iter.metadata();
+    k.extra.src1_metadata = iter.metadata();
     cmp less(k.kernel.ops[compare_operations_t::less_id], &k.extra);
     set<const char *, cmp> uniques(less);
 
@@ -415,24 +447,9 @@ dtype dynd::factor_categorical_dtype(const ndobject& values)
         } while (iter.next());
     }
 
-    // TODO: This voodoo needs to be simplified so it's easy to understand what's going on
-
     // Copy the values (now sorted and unique) into a new ndobject
-    ndobject categories = make_strided_ndobject(uniques.size(), iter.get_uniform_dtype());
-    kernel_instance<unary_operation_pair_t> kernel;
-    get_dtype_assignment_kernel(iter.get_uniform_dtype(), kernel);
+    ndobject categories = make_sorted_categories(uniques, iter.get_uniform_dtype(), iter.metadata());
 
-    intptr_t stride = reinterpret_cast<const strided_array_dtype_metadata *>(categories.get_ndo_meta())->stride;
-    char *dst_ptr = categories.get_readwrite_originptr();
-    uint32_t i = 0;
-    kernel.extra.dst_metadata = categories.get_ndo_meta() + sizeof(strided_array_dtype_metadata);
-    kernel.extra.src_metadata = iter.metadata();
-    for (set<const char *, cmp>::const_iterator it = uniques.begin(); it != uniques.end(); ++it) {
-        kernel.kernel.single(dst_ptr, *it, &kernel.extra);
-        ++i;
-        dst_ptr += stride;
-    }
-
-    return make_categorical_dtype(categories);
+    return dtype(new categorical_dtype(categories, true));
 }
 

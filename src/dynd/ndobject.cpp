@@ -543,6 +543,41 @@ void ndobject::val_assign(const dtype& rhs_dt, const char *rhs_metadata, const c
     }
 }
 
+void ndobject::flag_as_immutable()
+{
+    // If it's already immutable, everything's ok
+    if ((get_flags()&immutable_access_flag) != 0) {
+        return;
+    }
+
+    // Check that nobody else is peeking into our data
+    bool ok = true;
+    if (m_memblock.get()->m_use_count != 1) {
+        // More than one reference to the ndobject itself
+        ok = false;
+    } else if (get_ndo()->m_data_reference != NULL &&
+            (get_ndo()->m_data_reference->m_use_count != 1 ||
+             !(get_ndo()->m_data_reference->m_type == fixed_size_pod_memory_block_type ||
+               get_ndo()->m_data_reference->m_type == pod_memory_block_type))) {
+        // More than one reference to the ndobject's data, or the reference is to something
+        // other than a memblock owning its data, such as an external memblock.
+        ok = false;
+    } else if (!get_ndo()->is_builtin_dtype() &&
+            !get_ndo()->m_dtype->is_unique_data_owner(get_ndo_meta())) {
+        ok = false;
+    }
+
+    if (ok) {
+        // Clear the write flag, and set the immutable flag
+        get_ndo()->m_flags = (get_ndo()->m_flags&~(uint64_t)write_access_flag)|immutable_access_flag;
+    } else {
+        stringstream ss;
+        ss << "Unable to flag ndobject of dtype " << get_dtype() << " as immutable, because ";
+        ss << "it does not uniquely own all of its data";
+        throw runtime_error(ss.str());
+    }
+}
+
 ndobject ndobject::p(const char *property_name) const
 {
     dtype dt = get_dtype();
@@ -647,8 +682,42 @@ bool dynd::ndobject::equals_exact(const ndobject& rhs) const
 {
     if (get_ndo() == rhs.get_ndo()) {
         return true;
+    } else if (get_dtype() != rhs.get_dtype()) {
+        return false;
+    } else if (get_undim() == 0) {
+        kernel_instance<compare_operations_t> k;
+        get_dtype().get_single_compare_kernel(k);
+        k.extra.src0_metadata = get_ndo_meta();
+        k.extra.src1_metadata = rhs.get_ndo_meta();
+        return k.kernel.ops[compare_operations_t::equal_id](get_readonly_originptr(),
+                        rhs.get_readonly_originptr(), &k.extra);
     } else {
-        throw runtime_error("ndarray::equals_exact is not yet implemented");
+        // First compare the shape, to avoid triggering an exception in common cases
+        size_t undim = get_undim();
+        dimvector shape0(undim), shape1(undim);
+        get_shape(shape0.get());
+        rhs.get_shape(shape1.get());
+        if (memcmp(shape0.get(), shape1.get(), undim * sizeof(intptr_t)) != 0) {
+            return false;
+        }
+        try {
+            ndobject_iter<0,2> iter(*this, rhs);
+            if (!iter.empty()) {
+                kernel_instance<compare_operations_t> k;
+                iter.get_uniform_dtype<0>().get_single_compare_kernel(k);
+                k.extra.src0_metadata = iter.metadata<0>();
+                k.extra.src1_metadata = iter.metadata<1>();
+                do {
+                    if (k.kernel.ops[compare_operations_t::not_equal_id](iter.data<0>(), iter.data<1>(), &k.extra)) {
+                        return false;
+                    }
+                } while (iter.next());
+            }
+            return true;
+        } catch(const broadcast_error&) {
+            // If there's a broadcast error in a variable-sized dimension, return false for it too
+            return false;
+        }
     }
 }
 
@@ -888,6 +957,48 @@ ndobject dynd::empty_like(const ndobject& rhs)
                         rhs.get_dtype(), rhs.get_ndo_meta());
         return result;
     }
+}
+
+intptr_t dynd::binary_search(const ndobject& n, const char *metadata, const char *data)
+{
+    if (n.get_undim() == 0) {
+        stringstream ss;
+        ss << "cannot do a dynd binary_search on ndobject with dtype " << n.get_dtype() << " without a leading uniform dimension";
+        throw runtime_error(ss.str());
+    }
+    const char *n_metadata = n.get_ndo_meta();
+    dtype element_dtype = n.get_dtype().at_single(0, &n_metadata);
+    kernel_instance<compare_operations_t> k;
+    element_dtype.get_single_compare_kernel(k);
+    k.extra.src0_metadata = n_metadata;
+    k.extra.src1_metadata = metadata;
+
+    // TODO: support any type of uniform dimension
+    if (n.get_dtype().get_type_id() != strided_array_type_id) {
+        stringstream ss;
+        ss << "TODO: binary_search on ndobject with dtype " << n.get_dtype() << " is not implemented";
+        throw runtime_error(ss.str());
+    }
+
+    const char *n_data = n.get_readonly_originptr();
+    intptr_t n_stride = reinterpret_cast<const strided_array_dtype_metadata *>(n.get_ndo_meta())->stride;
+    intptr_t first = 0, last = n.get_dim_size();
+    while (first < last) {
+        intptr_t trial = first + (last - first) / 2;
+        const char *trial_data = n_data + trial * n_stride;
+
+        // In order for the data to always match up with the metadata, need to have
+        // trial_data first and data second in the comparison operations.
+        if (k.kernel.ops[compare_operations_t::greater_id](trial_data, data, &k.extra)) {
+            last = trial;
+        } else if (k.kernel.ops[compare_operations_t::less_id](trial_data, data, &k.extra)) {
+            first = trial + 1;
+        }
+        else {
+            return trial;
+        }
+    }
+    return -1;
 }
 
 ndobject_vals::operator ndobject() const

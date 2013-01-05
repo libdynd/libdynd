@@ -29,6 +29,11 @@ bool base_dtype::is_expression() const
     return false;
 }
 
+bool base_dtype::is_unique_data_owner(const char *DYND_UNUSED(metadata)) const
+{
+    return true;
+}
+
 void base_dtype::transform_child_dtypes(dtype_transform_fn_t DYND_UNUSED(transform_fn), const void *DYND_UNUSED(extra),
                 dtype& out_transformed_dtype, bool& DYND_UNUSED(out_was_transformed)) const
 {
