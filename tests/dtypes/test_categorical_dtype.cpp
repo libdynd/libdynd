@@ -120,6 +120,14 @@ TEST(CategoricalDType, FactorString) {
     EXPECT_EQ(make_categorical_dtype(cats), da);
 }
 
+TEST(CategoricalDType, FactorStringLonger) {
+    const char *cats_vals[] = {"a", "abcdefghijklmnopqrstuvwxyz", "bar", "foo", "foot", "z"};
+    const char *a_vals[] = {"foo", "bar", "foot", "foo", "bar", "abcdefghijklmnopqrstuvwxyz",
+                    "foot", "foo", "z", "a", "abcdefghijklmnopqrstuvwxyz"};
+    dtype da = factor_categorical_dtype(a_vals);
+    EXPECT_EQ(make_categorical_dtype(cats_vals), da);
+}
+
 TEST(CategoricalDType, FactorInt) {
     ndobject int_cats = make_strided_ndobject(2, make_dtype<int32_t>());
     int_cats.at(0).vals() = 0;
@@ -135,7 +143,6 @@ TEST(CategoricalDType, FactorInt) {
 }
 
 TEST(CategoricalDType, Values) {
-
     ndobject a = make_strided_ndobject(3, make_fixedstring_dtype(string_encoding_ascii, 3));
     a.at(0).vals() = "foo";
     a.at(1).vals() = "bar";
@@ -152,6 +159,30 @@ TEST(CategoricalDType, Values) {
     EXPECT_THROW(static_cast<const categorical_dtype*>(dt.extended())->get_value_from_category("aaa"), std::runtime_error);
     EXPECT_THROW(static_cast<const categorical_dtype*>(dt.extended())->get_value_from_category("ddd"), std::runtime_error);
     EXPECT_THROW(static_cast<const categorical_dtype*>(dt.extended())->get_value_from_category("zzz"), std::runtime_error);
+}
+
+TEST(CategoricalDType, ValuesLonger) {
+    const char *cats_vals[] = {"foo", "abcdefghijklmnopqrstuvwxyz", "z", "bar", "a", "foot"};
+    const char *a_vals[] = {"foo", "z", "abcdefghijklmnopqrstuvwxyz",
+                    "z", "bar", "a", "foot", "a", "abcdefghijklmnopqrstuvwxyz", "foo", "bar", "foo", "foot"};
+    uint32_t a_uints[] = {0, 2, 1, 2, 3, 4, 5, 4, 1, 0, 3, 0, 5};
+    int cats_count = sizeof(cats_vals) / sizeof(cats_vals[0]);
+    int a_count = sizeof(a_uints) / sizeof(a_uints[0]);
+
+    dtype dt = make_categorical_dtype(cats_vals);
+    ndobject a = ndobject(a_vals).cast_udtype(dt).vals();
+    ndobject a_view = a.view_scalars<uint32_t>();
+
+    // Check that the categories got the right values
+    for (int i = 0; i < cats_count; ++i) {
+        EXPECT_EQ((uint32_t)i, static_cast<const categorical_dtype*>(dt.extended())->get_value_from_category(cats_vals[i]));
+    }
+
+    // Check that everything in 'a' is right
+    for (int i = 0; i < a_count; ++i) {
+        EXPECT_EQ(a_vals[i], a.at(i).as<string>());
+        EXPECT_EQ(a_uints[i], a_view.at(i).as<uint32_t>());
+    }
 }
 
 TEST(CategoricalDType, AssignFixedString) {
