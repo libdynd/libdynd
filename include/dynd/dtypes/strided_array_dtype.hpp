@@ -101,7 +101,7 @@ public:
 };
 
 inline dtype make_strided_array_dtype(const dtype& element_dtype) {
-    return dtype(new strided_array_dtype(element_dtype));
+    return dtype(new strided_array_dtype(element_dtype), false);
 }
 
 inline dtype make_strided_array_dtype(const dtype& uniform_dtype, size_t ndim) {

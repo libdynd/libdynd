@@ -70,7 +70,7 @@ public:
 };
 
 inline dtype make_fixedstring_dtype(string_encoding_t encoding, intptr_t stringsize) {
-    return dtype(new fixedstring_dtype(encoding, stringsize));
+    return dtype(new fixedstring_dtype(encoding, stringsize), false);
 }
 
 } // namespace dynd

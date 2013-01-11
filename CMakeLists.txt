@@ -69,6 +69,7 @@ set(dynd_SRC
     src/dynd/dtypes/fixedbytes_dtype.cpp
     src/dynd/dtypes/fixedstring_dtype.cpp
     src/dynd/dtypes/fixedstruct_dtype.cpp
+    src/dynd/dtypes/groupby_dtype.cpp
     src/dynd/dtypes/pointer_dtype.cpp
     src/dynd/dtypes/strided_array_dtype.cpp
     src/dynd/dtypes/string_dtype.cpp
@@ -93,6 +94,7 @@ set(dynd_SRC
     include/dynd/dtypes/fixedbytes_dtype.hpp
     include/dynd/dtypes/fixedstring_dtype.hpp
     include/dynd/dtypes/fixedstruct_dtype.hpp
+    include/dynd/dtypes/groupby_dtype.hpp
     include/dynd/dtypes/pointer_dtype.hpp
     include/dynd/dtypes/strided_array_dtype.hpp
     include/dynd/dtypes/string_dtype.hpp

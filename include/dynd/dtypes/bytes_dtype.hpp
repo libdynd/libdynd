@@ -79,7 +79,7 @@ public:
 };
 
 inline dtype make_bytes_dtype(size_t alignment) {
-    return dtype(new bytes_dtype(alignment));
+    return dtype(new bytes_dtype(alignment), false);
 }
 
 } // namespace dynd

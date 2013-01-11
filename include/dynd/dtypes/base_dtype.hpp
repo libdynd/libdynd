@@ -105,6 +105,9 @@ enum type_id_t {
     align_type_id,
     view_type_id,
 
+    // Advanced expression dtypes
+    groupby_type_id,
+
     // pattern matches against other types - cannot instantiate
     pattern_type_id,
 

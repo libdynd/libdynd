@@ -102,7 +102,7 @@ public:
 
 /** Makes a tuple dtype with the specified fields, using the standard layout */
 inline dtype make_struct_dtype(const std::vector<dtype>& fields, const std::vector<std::string>& field_names) {
-    return dtype(new struct_dtype(fields, field_names));
+    return dtype(new struct_dtype(fields, field_names), false);
 }
 
 /** Makes a tuple dtype with the specified fields, using the standard layout */

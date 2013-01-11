@@ -134,9 +134,9 @@ void fixedstruct_dtype::transform_child_dtypes(dtype_transform_fn_t transform_fn
     }
     if (was_any_transformed) {
         if (!switch_to_struct) {
-            out_transformed_dtype = dtype(new fixedstruct_dtype(tmp_field_types, m_field_names));
+            out_transformed_dtype = dtype(new fixedstruct_dtype(tmp_field_types, m_field_names), false);
         } else {
-            out_transformed_dtype = dtype(new struct_dtype(tmp_field_types, m_field_names));
+            out_transformed_dtype = dtype(new struct_dtype(tmp_field_types, m_field_names), false);
         }
         out_was_transformed = true;
     } else {
@@ -152,7 +152,7 @@ dtype fixedstruct_dtype::get_canonical_dtype() const
         field_types[i] = m_field_types[i].get_canonical_dtype();
     }
 
-    return dtype(new fixedstruct_dtype(field_types, m_field_names));
+    return dtype(new fixedstruct_dtype(field_types, m_field_names), false);
 }
 
 dtype fixedstruct_dtype::apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& root_dt) const
@@ -180,7 +180,7 @@ dtype fixedstruct_dtype::apply_linear_index(int nindices, const irange *indices,
                 field_names[i] = m_field_names[idx];
             }
             // Return a struct dtype, because the offsets are now not in standard form anymore
-            return dtype(new struct_dtype(field_types, field_names));
+            return dtype(new struct_dtype(field_types, field_names), false);
         }
     }
 }
@@ -500,7 +500,7 @@ void fixedstruct_dtype::get_dynamic_dtype_properties(const std::pair<std::string
 
 ///////// properties on the ndobject
 
-dtype fixedstruct_dtype::ndobject_parameters_dtype = make_fixedstruct_dtype(dtype(new void_pointer_dtype), "self");
+dtype fixedstruct_dtype::ndobject_parameters_dtype = make_fixedstruct_dtype(dtype(new void_pointer_dtype, false), "self");
 
 static ndobject_preamble *property_get_ndobject_field(const ndobject_preamble *params, void *extra)
 {

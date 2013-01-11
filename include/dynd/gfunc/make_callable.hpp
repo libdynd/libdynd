@@ -48,10 +48,10 @@ template <typename T, int N> struct make_parameter_dtype<T[N]> {inline static dt
 // rely on using them in the right context. To pass these properly will require
 // dynd to grow the ability to manage object memory.
 template <> struct make_parameter_dtype<ndobject> {inline static dtype make() {
-        return dtype(new void_pointer_dtype);
+        return dtype(new void_pointer_dtype, false);
     }};
 template <> struct make_parameter_dtype<dtype> {inline static dtype make() {
-        return dtype(new void_pointer_dtype);
+        return dtype(new void_pointer_dtype, false);
     }};
 template <> struct make_parameter_dtype<std::string> {inline static dtype make() {
         return make_string_dtype(string_encoding_utf_8);

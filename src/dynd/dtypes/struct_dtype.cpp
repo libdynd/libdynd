@@ -127,7 +127,7 @@ void struct_dtype::transform_child_dtypes(dtype_transform_fn_t transform_fn, con
         transform_fn(m_field_types[i], extra, tmp_field_types[i], was_transformed);
     }
     if (was_transformed) {
-        out_transformed_dtype = dtype(new struct_dtype(tmp_field_types, m_field_names));
+        out_transformed_dtype = dtype(new struct_dtype(tmp_field_types, m_field_names), false);
         out_was_transformed = true;
     } else {
         out_transformed_dtype = dtype(this, true);
@@ -142,7 +142,7 @@ dtype struct_dtype::get_canonical_dtype() const
         fields[i] = m_field_types[i].get_canonical_dtype();
     }
 
-    return dtype(new struct_dtype(fields, m_field_names));
+    return dtype(new struct_dtype(fields, m_field_names), false);
 }
 
 dtype struct_dtype::apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& root_dt) const
@@ -166,7 +166,7 @@ dtype struct_dtype::apply_linear_index(int nindices, const irange *indices, int 
                 field_names[i] = m_field_names[idx];
             }
 
-            return dtype(new struct_dtype(fields, field_names));
+            return dtype(new struct_dtype(fields, field_names), false);
         }
     }
 }
@@ -464,7 +464,7 @@ void struct_dtype::get_dynamic_dtype_properties(const std::pair<std::string, gfu
     *out_count = sizeof(dtype_properties) / sizeof(dtype_properties[0]);
 }
 
-dtype struct_dtype::ndobject_parameters_dtype = make_fixedstruct_dtype(dtype(new void_pointer_dtype), "self");
+dtype struct_dtype::ndobject_parameters_dtype = make_fixedstruct_dtype(dtype(new void_pointer_dtype, false), "self");
 
 static ndobject_preamble *property_get_ndobject_field(const ndobject_preamble *params, void *extra)
 {

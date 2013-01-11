@@ -103,9 +103,9 @@ public:
 
 inline dtype make_pointer_dtype(const dtype& target_dtype) {
     if (target_dtype.get_type_id() != void_type_id) {
-        return dtype(new pointer_dtype(target_dtype));
+        return dtype(new pointer_dtype(target_dtype), false);
     } else {
-        return dtype(new void_pointer_dtype());
+        return dtype(new void_pointer_dtype(), false);
     }
 }
 

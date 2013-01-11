@@ -195,26 +195,26 @@ TEST(CategoricalDType, AssignFixedString) {
 
     ndobject a = make_strided_ndobject(3, dt);
     a.val_assign(cat);
-    EXPECT_EQ("foo", a.at(0).as<std::string>());
-    EXPECT_EQ("bar", a.at(1).as<std::string>());
-    EXPECT_EQ("baz", a.at(2).as<std::string>());
+    EXPECT_EQ("foo", a.at(0).as<string>());
+    EXPECT_EQ("bar", a.at(1).as<string>());
+    EXPECT_EQ("baz", a.at(2).as<string>());
     a.at(0).vals() = cat.at(2);
-    EXPECT_EQ("baz", a.at(0).as<std::string>());
+    EXPECT_EQ("baz", a.at(0).as<string>());
 
-    cat.at(0).vals() = std::string("zzz");
+    cat.at(0).vals() = string("zzz");
     EXPECT_THROW(a.at(0).vals() = cat.at(0), std::runtime_error);
 
     // TODO implicit conversion?
-    //a(0).vals() = std::string("bar");
+    //a(0).vals() = string("bar");
     //cout << a << endl;
 
     ndobject tmp = make_strided_ndobject(3, cat.get_dtype().at(0));
     tmp.val_assign(a);
-    EXPECT_EQ("baz", tmp.at(0).as<std::string>());
-    EXPECT_EQ("bar", tmp.at(1).as<std::string>());
-    EXPECT_EQ("baz", tmp.at(2).as<std::string>());
+    EXPECT_EQ("baz", tmp.at(0).as<string>());
+    EXPECT_EQ("bar", tmp.at(1).as<string>());
+    EXPECT_EQ("baz", tmp.at(2).as<string>());
     tmp.at(0).vals() = a.at(1);
-    EXPECT_EQ("bar", tmp.at(0).as<std::string>());
+    EXPECT_EQ("bar", tmp.at(0).as<string>());
 }
 
 TEST(CategoricalDType, AssignInt) {
@@ -235,7 +235,7 @@ TEST(CategoricalDType, AssignInt) {
     EXPECT_EQ(1000, a.at(0).as<int32_t>());
 
     // TODO implicit conversion?
-    //a(0).vals() = std::string("bar");
+    //a(0).vals() = string("bar");
     //cout << a << endl;
 
     ndobject tmp = make_strided_ndobject(3, cat.get_dtype().at(0));
@@ -266,15 +266,14 @@ TEST(CategoricalDType, AssignRange) {
     d.val_assign(cat.at(1));
     a.at(7).vals() = cat.at(2);
 
-    EXPECT_EQ("foo", a.at(0).as<std::string>());
-    EXPECT_EQ("bar", a.at(1).as<std::string>());
-    EXPECT_EQ("baz", a.at(2).as<std::string>());
-    EXPECT_EQ("foo", a.at(3).as<std::string>());
-    EXPECT_EQ("foo", a.at(4).as<std::string>());
-    EXPECT_EQ("foo", a.at(5).as<std::string>());
-    EXPECT_EQ("bar", a.at(6).as<std::string>());
-    EXPECT_EQ("baz", a.at(7).as<std::string>());
-    EXPECT_EQ("bar", a.at(8).as<std::string>());
-
+    EXPECT_EQ("foo", a.at(0).as<string>());
+    EXPECT_EQ("bar", a.at(1).as<string>());
+    EXPECT_EQ("baz", a.at(2).as<string>());
+    EXPECT_EQ("foo", a.at(3).as<string>());
+    EXPECT_EQ("foo", a.at(4).as<string>());
+    EXPECT_EQ("foo", a.at(5).as<string>());
+    EXPECT_EQ("bar", a.at(6).as<string>());
+    EXPECT_EQ("baz", a.at(7).as<string>());
+    EXPECT_EQ("bar", a.at(8).as<string>());
 }
 

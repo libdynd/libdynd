@@ -83,7 +83,7 @@ void array_dtype::transform_child_dtypes(dtype_transform_fn_t transform_fn, cons
     bool was_transformed = false;
     transform_fn(m_element_dtype, extra, tmp_dtype, was_transformed);
     if (was_transformed) {
-        out_transformed_dtype = dtype(new array_dtype(tmp_dtype));
+        out_transformed_dtype = dtype(new array_dtype(tmp_dtype), false);
         out_was_transformed = true;
     } else {
         out_transformed_dtype = dtype(this, true);
@@ -92,7 +92,7 @@ void array_dtype::transform_child_dtypes(dtype_transform_fn_t transform_fn, cons
 
 dtype array_dtype::get_canonical_dtype() const
 {
-    return dtype(new array_dtype(m_element_dtype.get_canonical_dtype()));
+    return dtype(new array_dtype(m_element_dtype.get_canonical_dtype()), false);
 }
 
 dtype array_dtype::apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& root_dt) const
@@ -110,7 +110,7 @@ dtype array_dtype::apply_linear_index(int nindices, const irange *indices, int c
             return make_pointer_dtype(m_element_dtype.apply_linear_index(nindices-1, indices+1, current_i+1, root_dt));
         } else {
             // TODO: sliced_array_dtype
-            return dtype(new array_dtype(m_element_dtype.apply_linear_index(nindices-1, indices+1, current_i+1, root_dt)));
+            return dtype(new array_dtype(m_element_dtype.apply_linear_index(nindices-1, indices+1, current_i+1, root_dt)), false);
         }
     }
 }

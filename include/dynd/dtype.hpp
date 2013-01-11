@@ -246,7 +246,7 @@ public:
         : m_extended(reinterpret_cast<const base_dtype *>(void_type_id))
     {}
     /** Constructor from an base_dtype. This claims ownership of the 'extended' reference by default, be careful! */
-    explicit dtype(const base_dtype *extended, bool incref = false)
+    inline explicit dtype(const base_dtype *extended, bool incref)
         : m_extended(extended)
     {
         if (incref && !dtype::is_builtin(extended)) {

@@ -90,7 +90,7 @@ public:
 };
 
 inline dtype make_string_dtype(string_encoding_t encoding) {
-    return dtype(new string_dtype(encoding));
+    return dtype(new string_dtype(encoding), false);
 }
 
 } // namespace dynd

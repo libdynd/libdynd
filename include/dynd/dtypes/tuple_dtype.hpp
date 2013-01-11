@@ -71,14 +71,14 @@ public:
 
 /** Makes a tuple dtype with the specified fields, using the standard layout */
 inline dtype make_tuple_dtype(const std::vector<dtype>& fields) {
-    return dtype(new tuple_dtype(fields));
+    return dtype(new tuple_dtype(fields), false);
 }
 
 /** Makes a tuple dtype with the specified fields and layout */
 inline dtype make_tuple_dtype(const std::vector<dtype>& fields, const std::vector<size_t> offsets,
                 size_t data_size, size_t alignment)
 {
-    return dtype(new tuple_dtype(fields, offsets, data_size, alignment));
+    return dtype(new tuple_dtype(fields, offsets, data_size, alignment), false);
 }
 
 /** Makes a tuple dtype with the specified fields, using the standard layout */

@@ -107,7 +107,7 @@ dtype dynd::date_property_dtype::with_replaced_storage_dtype(const dtype& replac
     if (m_operand_dtype.get_kind() == expression_kind) {
         return dtype(new date_property_dtype(
                         static_cast<const base_expression_dtype *>(m_operand_dtype.extended())->with_replaced_storage_dtype(replacement_dtype),
-                        m_property_name));
+                        m_property_name), false);
     } else {
         if (m_operand_dtype != replacement_dtype.value_dtype()) {
             std::stringstream ss;
@@ -115,6 +115,6 @@ dtype dynd::date_property_dtype::with_replaced_storage_dtype(const dtype& replac
             ss << ", does not match the replacement's value dtype, " << replacement_dtype.value_dtype();
             throw std::runtime_error(ss.str());
         }
-        return dtype(new date_property_dtype(replacement_dtype, m_property_name));
+        return dtype(new date_property_dtype(replacement_dtype, m_property_name), false);
     }
 }

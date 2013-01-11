@@ -109,7 +109,7 @@ public:
 };
 
 inline dtype make_array_dtype(const dtype& element_dtype) {
-    return dtype(new array_dtype(element_dtype));
+    return dtype(new array_dtype(element_dtype), false);
 }
 
 } // namespace dynd

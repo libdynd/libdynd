@@ -59,7 +59,7 @@ public:
  * raw, uninterpreted bytes.
  */
 inline dtype make_fixedbytes_dtype(intptr_t element_size, intptr_t alignment) {
-    return dtype(new fixedbytes_dtype(element_size, alignment));
+    return dtype(new fixedbytes_dtype(element_size, alignment), false);
 }
 
 } // namespace dynd

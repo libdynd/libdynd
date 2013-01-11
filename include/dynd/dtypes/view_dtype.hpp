@@ -57,12 +57,12 @@ public:
  */
 inline dtype make_view_dtype(const dtype& value_dtype, const dtype& operand_dtype) {
     if (value_dtype.get_kind() != expression_kind) {
-        return dtype(new view_dtype(value_dtype, operand_dtype));
+        return dtype(new view_dtype(value_dtype, operand_dtype), false);
     } else {
         // When the value dtype has an expression_kind, we need to chain things together
         // so that the view operation happens just at the primitive level.
         return static_cast<const base_expression_dtype *>(value_dtype.extended())->with_replaced_storage_dtype(
-            dtype(new view_dtype(value_dtype.storage_dtype(), operand_dtype)));
+            dtype(new view_dtype(value_dtype.storage_dtype(), operand_dtype), false));
     }
 }
 

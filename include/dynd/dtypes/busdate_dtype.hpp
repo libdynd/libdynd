@@ -100,7 +100,7 @@ public:
 };
 
 inline dtype make_busdate_dtype(busdate_roll_t roll = busdate_roll_following, const bool *weekmask = NULL, const ndobject& holidays = ndobject()) {
-    return dtype(new busdate_dtype(roll, weekmask, holidays));
+    return dtype(new busdate_dtype(roll, weekmask, holidays), false);
 }
 
 } // namespace dynd

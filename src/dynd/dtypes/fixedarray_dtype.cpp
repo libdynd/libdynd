@@ -123,9 +123,9 @@ void fixedarray_dtype::transform_child_dtypes(dtype_transform_fn_t transform_fn,
     transform_fn(m_element_dtype, extra, tmp_dtype, was_transformed);
     if (was_transformed) {
         if (tmp_dtype.get_data_size() != 0) {
-            out_transformed_dtype = dtype(new fixedarray_dtype(tmp_dtype, m_dimension_size));
+            out_transformed_dtype = dtype(new fixedarray_dtype(tmp_dtype, m_dimension_size), false);
         } else {
-            out_transformed_dtype = dtype(new strided_array_dtype(tmp_dtype));
+            out_transformed_dtype = dtype(new strided_array_dtype(tmp_dtype), false);
         }
         out_was_transformed = true;
     } else {
@@ -140,9 +140,9 @@ dtype fixedarray_dtype::get_canonical_dtype() const
     // The transformed dtype may no longer have a fixed size, so check whether
     // we have to switch to the more flexible strided_array_dtype
     if (canonical_element_dtype.get_data_size() != 0) {
-        return dtype(new fixedarray_dtype(canonical_element_dtype, m_dimension_size));
+        return dtype(new fixedarray_dtype(canonical_element_dtype, m_dimension_size), false);
     } else {
-        return dtype(new strided_array_dtype(canonical_element_dtype));
+        return dtype(new strided_array_dtype(canonical_element_dtype), false);
     }
 }
 
@@ -160,7 +160,7 @@ dtype fixedarray_dtype::apply_linear_index(int nindices, const irange *indices, 
         if (indices->step() == 0) {
             return m_element_dtype.apply_linear_index(nindices-1, indices+1, current_i+1, root_dt);
         } else {
-            return dtype(new strided_array_dtype(m_element_dtype.apply_linear_index(nindices-1, indices+1, current_i+1, root_dt)));
+            return dtype(new strided_array_dtype(m_element_dtype.apply_linear_index(nindices-1, indices+1, current_i+1, root_dt)), false);
         }
     }
 }

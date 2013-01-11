@@ -76,7 +76,7 @@ public:
 };
 
 inline dtype make_date_dtype() {
-    return dtype(new date_dtype());
+    return dtype(new date_dtype(), false);
 }
 
 } // namespace dynd

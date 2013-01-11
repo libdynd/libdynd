@@ -137,7 +137,7 @@ dtype dynd::convert_dtype::with_replaced_storage_dtype(const dtype& replacement_
     if (m_operand_dtype.get_kind() == expression_kind) {
         return dtype(new convert_dtype(m_value_dtype,
                         static_cast<const base_expression_dtype *>(m_operand_dtype.extended())->with_replaced_storage_dtype(replacement_dtype),
-                        m_errmode));
+                        m_errmode), false);
     } else {
         if (m_operand_dtype != replacement_dtype.value_dtype()) {
             std::stringstream ss;
@@ -145,6 +145,6 @@ dtype dynd::convert_dtype::with_replaced_storage_dtype(const dtype& replacement_
             ss << ", does not match the replacement's value dtype, " << replacement_dtype.value_dtype();
             throw std::runtime_error(ss.str());
         }
-        return dtype(new convert_dtype(m_value_dtype, replacement_dtype, m_errmode));
+        return dtype(new convert_dtype(m_value_dtype, replacement_dtype, m_errmode), false);
     }
 }

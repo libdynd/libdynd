@@ -187,7 +187,7 @@ dtype dynd::tuple_dtype::apply_linear_index(int nindices, const irange *indices,
                 offsets[i] = m_offsets[idx];
             }
 
-            return dtype(new tuple_dtype(fields, offsets, get_data_size(), get_alignment()));
+            return dtype(new tuple_dtype(fields, offsets, get_data_size(), get_alignment()), false);
         }
     }
 }

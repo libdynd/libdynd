@@ -450,6 +450,6 @@ dtype dynd::factor_categorical_dtype(const ndobject& values)
     // Copy the values (now sorted and unique) into a new ndobject
     ndobject categories = make_sorted_categories(uniques, iter.get_uniform_dtype(), iter.metadata());
 
-    return dtype(new categorical_dtype(categories, true));
+    return dtype(new categorical_dtype(categories, true), false);
 }
 

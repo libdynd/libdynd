@@ -110,7 +110,7 @@ public:
 
 /** Makes a struct dtype with the specified fields */
 inline dtype make_fixedstruct_dtype(const std::vector<dtype>& field_types, const std::vector<std::string>& field_names) {
-    return dtype(new fixedstruct_dtype(field_types, field_names));
+    return dtype(new fixedstruct_dtype(field_types, field_names), false);
 }
 
 /** Makes a struct dtype with the specified fields */

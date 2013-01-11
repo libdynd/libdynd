@@ -65,16 +65,16 @@ public:
  * Makes a byteswapped dtype to view the given dtype with a swapped byte order.
  */
 inline dtype make_byteswap_dtype(const dtype& native_dtype) {
-    return dtype(new byteswap_dtype(native_dtype));
+    return dtype(new byteswap_dtype(native_dtype), false);
 }
 
 inline dtype make_byteswap_dtype(const dtype& native_dtype, const dtype& operand_dtype) {
-    return dtype(new byteswap_dtype(native_dtype, operand_dtype));
+    return dtype(new byteswap_dtype(native_dtype, operand_dtype), false);
 }
 
 template<typename Tnative>
 dtype make_byteswap_dtype() {
-    return dtype(new byteswap_dtype(make_dtype<Tnative>()));
+    return dtype(new byteswap_dtype(make_dtype<Tnative>()), false);
 }
 
 } // namespace dynd

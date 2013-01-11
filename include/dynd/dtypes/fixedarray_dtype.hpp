@@ -113,11 +113,11 @@ public:
 };
 
 inline dtype make_fixedarray_dtype(const dtype& element_dtype, size_t size) {
-    return dtype(new fixedarray_dtype(element_dtype, size));
+    return dtype(new fixedarray_dtype(element_dtype, size), false);
 }
 
 inline dtype make_fixedarray_dtype(const dtype& element_dtype, size_t size, intptr_t stride) {
-    return dtype(new fixedarray_dtype(element_dtype, size, stride));
+    return dtype(new fixedarray_dtype(element_dtype, size, stride), false);
 }
 
 dtype make_fixedarray_dtype(const dtype& uniform_dtype, int ndim, const intptr_t *shape, const int *axis_perm);

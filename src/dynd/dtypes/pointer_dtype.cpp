@@ -13,7 +13,7 @@ using namespace std;
 using namespace dynd;
 
 // Static instance of a void pointer to use as the storage of pointer dtypes
-dtype pointer_dtype::m_void_pointer_dtype(new void_pointer_dtype());
+dtype pointer_dtype::m_void_pointer_dtype(new void_pointer_dtype(), false);
 
 
 pointer_dtype::pointer_dtype(const dtype& target_dtype)
@@ -83,7 +83,7 @@ void pointer_dtype::transform_child_dtypes(dtype_transform_fn_t transform_fn, co
     bool was_transformed = false;
     transform_fn(m_target_dtype, extra, tmp_dtype, was_transformed);
     if (was_transformed) {
-        out_transformed_dtype = dtype(new pointer_dtype(tmp_dtype));
+        out_transformed_dtype = dtype(new pointer_dtype(tmp_dtype), false);
         out_was_transformed = true;
     } else {
         out_transformed_dtype = dtype(this, true);
@@ -106,7 +106,7 @@ dtype pointer_dtype::apply_linear_index(int nindices, const irange *indices, int
         if (dt == m_target_dtype) {
             return dtype(this, true);
         } else {
-            return dtype(new pointer_dtype(dt));
+            return dtype(new pointer_dtype(dt), false);
         }
     }
 }

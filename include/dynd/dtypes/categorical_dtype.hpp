@@ -90,7 +90,7 @@ public:
 };
 
 inline dtype make_categorical_dtype(const ndobject& values) {
-    return dtype(new categorical_dtype(values));
+    return dtype(new categorical_dtype(values), false);
 }
 
 

@@ -120,10 +120,10 @@ dtype dynd::byteswap_dtype::with_replaced_storage_dtype(const dtype& replacement
 {
     if (m_operand_dtype.get_kind() != expression_kind) {
         // If there's no expression in the operand, just try substituting (the constructor will error-check)
-        return dtype(new byteswap_dtype(m_value_dtype, replacement_dtype));
+        return dtype(new byteswap_dtype(m_value_dtype, replacement_dtype), false);
     } else {
         // With an expression operand, replace it farther down the chain
         return dtype(new byteswap_dtype(m_value_dtype,
-                reinterpret_cast<const base_expression_dtype *>(replacement_dtype.extended())->with_replaced_storage_dtype(replacement_dtype)));
+                reinterpret_cast<const base_expression_dtype *>(replacement_dtype.extended())->with_replaced_storage_dtype(replacement_dtype)), false);
     }
 }
