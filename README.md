@@ -1,5 +1,5 @@
-Dynamic NDArray Library
-=======================
+DyND Library
+============
 
 This is a C++ library for dynamic, multidimensional arrays, inspired by
 the success of Numpy and based on ideas for how it could be better. It
@@ -16,5 +16,5 @@ details about how to build the library.
 Running The Tests
 =================
 
-The tests are built using Google Tests, run the built `dnd_tests` program
+The tests are built using Google Tests, run the built `test_dynd` program
 to execute the test suite.

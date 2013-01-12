@@ -4,7 +4,7 @@
 #
 
 cmake_minimum_required(VERSION 2.6)
-project(dynamicndarray)
+project(dynd)
 
 set(CMAKE_VERBOSE_MAKEFILE 1)
 set(BUILD_SHARED_LIBS 1)
@@ -236,11 +236,11 @@ source_group("VM Headers" REGULAR_EXPRESSION "include/dynd/vm/.*hpp")
 source_group("Internal Headers" REGULAR_EXPRESSION "src/dynd/.*hpp")
 
 if(WIN32)
-    add_library(dynamicndarray STATIC ${dynd_SRC})
+    add_library(dynd STATIC ${dynd_SRC})
 else()
-    add_library(dynamicndarray SHARED ${dynd_SRC})
+    add_library(dynd SHARED ${dynd_SRC})
 endif()
-target_link_libraries(dynamicndarray
+target_link_libraries(dynd
     datetime
     )
 

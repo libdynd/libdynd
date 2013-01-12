@@ -26,29 +26,29 @@ Visual Studio 2010 or newer is recommended.
 1. Run CMake-gui.
 
 2. For the 'source code' folder, choose the
-    dynamicndarray folder which is the root of the project.
+    dynd folder which is the root of the project.
 
 3. For the 'build the binaries' folder, create a 'build'
     subdirectory so that your build is isolated from the
     source code files.
 
-4. Double-click on the generated dynamicndarray.sln
+4. Double-click on the generated dynd.sln
     to open Visual Studio. The RelWithDebInfo configuration is
     recommended for most purposes.
 
 *OR*
 
 Start a command prompt window, and navigate to the
-dynamicndarray folder which is the root of the project.
+dynd folder which is the root of the project.
 Switch the "-G" argument below to "Visual Studio 10" if using
 32-bit Python.
 Execute the following commands:
 
-    D:\dynamicndarray>mkdir build
-    D:\dynamicndarray>cd build
-    D:\dynamicndarray\build>cmake -G "Visual Studio 10 Win64" ..
+    D:\dynd>mkdir build
+    D:\dynd>cd build
+    D:\dynd\build>cmake -G "Visual Studio 10 Win64" ..
        [output, check it for errors]
-    D:\dynamicndarray\build>start dynamicndarray.sln
+    D:\dynd\build>start dynd.sln
        [Visual Studio should start and load the project]
 
 The RelWithDebInfo configuration is recommended for most purposes.
@@ -56,7 +56,7 @@ The RelWithDebInfo configuration is recommended for most purposes.
 Linux
 -----
 
-Execute the following commands from the dynamicndarray folder,
+Execute the following commands from the dynd folder,
 which is the root of the project:
 
     $ mkdir build
@@ -69,7 +69,7 @@ Mac OS X
 
 Switch the "-DCMAKE\_OSX\_ARCHITECTURES" argument below to "i386" if
 you're using 32-bit Python. Execute the following commands
-from the dynamicndarray folder, which is the root of the project:
+from the dynd folder, which is the root of the project:
 
     $ mkdir build
     $ cd build
