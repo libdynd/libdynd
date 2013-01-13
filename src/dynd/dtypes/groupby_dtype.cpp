@@ -16,27 +16,28 @@
 using namespace std;
 using namespace dynd;
 
-groupby_dtype::groupby_dtype(const dtype& values_dtype, const dtype& by_dtype, const dtype& groups_dtype)
-    : base_expression_dtype(groupby_type_id, expression_kind, 2*sizeof(void *), sizeof(void *))
+groupby_dtype::groupby_dtype(const dtype& data_values_dtype,
+                const dtype& by_values_dtype, const dtype& groups_dtype)
+    : base_expression_dtype(groupby_type_id, expression_kind, sizeof(groupby_dtype_data), sizeof(void *))
 {
     if (groups_dtype.get_type_id() != categorical_type_id) {
         throw runtime_error("to construct a groupby dtype, its groups dtype must be categorical");
     }
-    if (values_dtype.get_undim() < 1) {
+    if (data_values_dtype.get_undim() < 1) {
         throw runtime_error("to construct a groupby dtype, its values dtype must have at least one uniform dimension");
     }
-    if (by_dtype.get_undim() < 1) {
+    if (by_values_dtype.get_undim() < 1) {
         throw runtime_error("to construct a groupby dtype, its values dtype must have at least one uniform dimension");
     }
-    if (by_dtype.at_single(0).value_dtype() !=
+    if (by_values_dtype.at_single(0).value_dtype() !=
                     reinterpret_cast<const categorical_dtype *>(groups_dtype.extended())->get_category_dtype()) {
         stringstream ss;
-        ss << "to construct a groupby dtype, the by dtype, " << by_dtype.at_single(0);
+        ss << "to construct a groupby dtype, the by dtype, " << by_values_dtype.at_single(0);
         ss << ", should match the category dtype, " << reinterpret_cast<const categorical_dtype *>(groups_dtype.extended())->get_category_dtype();
     }
-    m_operand_dtype = make_fixedstruct_dtype(make_pointer_dtype(values_dtype), "values",
-                    make_pointer_dtype(by_dtype), "by");
-    m_value_dtype = make_strided_array_dtype(make_array_dtype(values_dtype.at_single(0)));
+    m_operand_dtype = make_fixedstruct_dtype(make_pointer_dtype(data_values_dtype), "data",
+                    make_pointer_dtype(by_values_dtype), "by");
+    m_value_dtype = make_strided_array_dtype(make_array_dtype(data_values_dtype.at_single(0)));
     m_groups_dtype = groups_dtype;
 }
 

@@ -185,12 +185,7 @@ public:
     }
 
     /** Low level access to the ndobject preamble */
-    inline const ndobject_preamble *get_ndo() const {
-        return reinterpret_cast<const ndobject_preamble *>(m_memblock.get());
-    }
-
-    /** Low level access to the ndobject preamble */
-    inline ndobject_preamble *get_ndo() {
+    inline ndobject_preamble *get_ndo() const {
         return reinterpret_cast<ndobject_preamble *>(m_memblock.get());
     }
 
@@ -913,6 +908,8 @@ ndobject empty_like(const ndobject& rhs);
  * \returns  The index of the found element, or -1 if not found.
  */
 intptr_t binary_search(const ndobject& n, const char *data, const char *metadata);
+
+ndobject groupby(const dynd::ndobject& data_values, const dynd::ndobject& by, const dynd::dtype& groups);
 
 } // namespace dynd
 

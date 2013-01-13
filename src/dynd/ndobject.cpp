@@ -17,6 +17,7 @@
 #include <dynd/exceptions.hpp>
 #include <dynd/gfunc/callable.hpp>
 #include <dynd/gfunc/call_callable.hpp>
+#include <dynd/dtypes/groupby_dtype.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -999,6 +1000,38 @@ intptr_t dynd::binary_search(const ndobject& n, const char *metadata, const char
         }
     }
     return -1;
+}
+
+ndobject dynd::groupby(const dynd::ndobject& data_values, const dynd::ndobject& by_values, const dynd::dtype& groups)
+{
+    dtype gbdt = make_groupby_dtype(data_values.get_dtype(), by_values.get_dtype(), groups);
+    const groupby_dtype *gbdt_ext = static_cast<const groupby_dtype *>(gbdt.extended());
+    char *data_ptr = NULL;
+    ndobject result(make_ndobject_memory_block(gbdt.extended()->get_metadata_size(),
+                    gbdt.extended()->get_data_size(), gbdt.extended()->get_alignment(), &data_ptr));
+    // Set the metadata for the data and by values data
+    pointer_dtype_metadata *pmeta;
+    pmeta = gbdt_ext->get_data_values_pointer_metadata(result.get_ndo_meta());
+    pmeta->offset = 0;
+    pmeta->blockref = data_values.get_ndo()->m_data_reference
+                    ? data_values.get_ndo()->m_data_reference
+                    : &data_values.get_ndo()->m_memblockdata;
+    memory_block_incref(pmeta->blockref);
+    pmeta = gbdt_ext->get_by_values_pointer_metadata(result.get_ndo_meta());
+    pmeta->offset = 0;
+    pmeta->blockref = by_values.get_ndo()->m_data_reference
+                    ? by_values.get_ndo()->m_data_reference
+                    : &by_values.get_ndo()->m_memblockdata;
+    memory_block_incref(pmeta->blockref);
+    // Set the pointers to the data and by values data
+    groupby_dtype_data *groupby_data_ptr = reinterpret_cast<groupby_dtype_data *>(data_ptr);
+    groupby_data_ptr->data_values_pointer = data_values.get_readonly_originptr();
+    groupby_data_ptr->by_values_pointer = by_values.get_readonly_originptr();
+    result.get_ndo()->m_dtype = gbdt.release();
+    result.get_ndo()->m_data_pointer = data_ptr;
+    result.get_ndo()->m_data_reference = NULL;
+    result.get_ndo()->m_flags = read_access_flag | immutable_access_flag;
+    return result;
 }
 
 ndobject_vals::operator ndobject() const

@@ -304,6 +304,18 @@ public:
         }
     }
 
+    /**
+     * The dtype class operates as a smart pointer for dynamically
+     * allocated base_dtype instances, with raw storage of type id
+     * for the built-in types. This function gives away the held
+     * reference, leaving behind a void dtype.
+     */
+    const base_dtype *release() {
+        const base_dtype *result = m_extended;
+        m_extended = reinterpret_cast<const base_dtype *>(void_type_id);
+        return result;
+    }
+
     void swap(dtype& rhs) {
         std::swap(m_extended, rhs.m_extended);
     }
