@@ -1012,16 +1012,21 @@ ndobject dynd::groupby(const dynd::ndobject& data_values, const dynd::ndobject& 
                     ? data_values.get_ndo()->m_data_reference
                     : &data_values.get_ndo()->m_memblockdata;
     memory_block_incref(pmeta->blockref);
+    data_values.get_dtype().extended()->metadata_copy_construct(reinterpret_cast<char *>(pmeta + 1),
+                    data_values.get_ndo_meta(), &data_values.get_ndo()->m_memblockdata);
     pmeta = gbdt_ext->get_by_values_pointer_metadata(result.get_ndo_meta());
     pmeta->offset = 0;
     pmeta->blockref = by_values.get_ndo()->m_data_reference
                     ? by_values.get_ndo()->m_data_reference
                     : &by_values.get_ndo()->m_memblockdata;
     memory_block_incref(pmeta->blockref);
+    data_values.get_dtype().extended()->metadata_copy_construct(reinterpret_cast<char *>(pmeta + 1),
+                    by_values.get_ndo_meta(), &by_values.get_ndo()->m_memblockdata);
     // Set the pointers to the data and by values data
     groupby_dtype_data *groupby_data_ptr = reinterpret_cast<groupby_dtype_data *>(data_ptr);
     groupby_data_ptr->data_values_pointer = data_values.get_readonly_originptr();
     groupby_data_ptr->by_values_pointer = by_values.get_readonly_originptr();
+    // Set the ndobject properties
     result.get_ndo()->m_dtype = gbdt.release();
     result.get_ndo()->m_data_pointer = data_ptr;
     result.get_ndo()->m_data_reference = NULL;

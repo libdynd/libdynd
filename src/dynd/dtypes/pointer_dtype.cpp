@@ -231,7 +231,7 @@ dtype pointer_dtype::with_replaced_storage_dtype(const dtype& /*replacement_dtyp
 size_t pointer_dtype::get_metadata_size() const
 {
     return sizeof(pointer_dtype_metadata) +
-                m_target_dtype.is_builtin() ? 0 : m_target_dtype.extended()->get_metadata_size();
+                (m_target_dtype.is_builtin() ? 0 : m_target_dtype.extended()->get_metadata_size());
 }
 
 void pointer_dtype::metadata_default_construct(char *metadata, int ndim, const intptr_t* shape) const
@@ -283,6 +283,7 @@ void pointer_dtype::metadata_debug_print(const char *metadata, std::ostream& o, 
 {
     const pointer_dtype_metadata *md = reinterpret_cast<const pointer_dtype_metadata *>(metadata);
     o << indent << "pointer metadata\n";
+    o << indent << " offset: " << md->offset << "\n";
     memory_block_debug_print(md->blockref, o, indent + " ");
     if (!m_target_dtype.is_builtin()) {
         m_target_dtype.extended()->metadata_debug_print(metadata + sizeof(pointer_dtype_metadata), o, indent + " ");

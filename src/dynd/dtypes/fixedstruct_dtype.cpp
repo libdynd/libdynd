@@ -448,7 +448,7 @@ void fixedstruct_dtype::metadata_debug_print(const char *metadata, std::ostream&
     for (size_t i = 0; i < m_field_types.size(); ++i) {
         const dtype& field_dt = m_field_types[i];
         if (!field_dt.is_builtin() && field_dt.extended()->get_metadata_size() > 0) {
-            o << indent << " field " << i << " (name " << m_field_names[i] << ") metadata:\n";
+            o << indent << " field " << i << " (" << m_field_names[i] << ") metadata:\n";
             field_dt.extended()->metadata_debug_print(metadata + m_metadata_offsets[i], o, indent + "  ");
         }
     }
