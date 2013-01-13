@@ -60,11 +60,11 @@ add_executable(test_dynd ${tests_SRC})
 
 if(WIN32)
     target_link_libraries(test_dynd
-        dynamicndarray
+        dynd
         )
 elseif(APPLE)
     target_link_libraries(test_dynd
-        dynamicndarray
+        dynd
         )
 else()
     set_target_properties(test_dynd
@@ -72,7 +72,7 @@ else()
                 "-Wno-unnamed-type-template-args -pthread")
 
     target_link_libraries(test_dynd
-        dynamicndarray
+        dynd
         pthread
         )
 endif()

@@ -15,5 +15,5 @@ add_executable(simple_example
     )
 
 target_link_libraries(simple_example
-    dynamicndarray
+    dynd
     )
