@@ -77,8 +77,7 @@ ndobject dynd::make_strided_ndobject(const dtype& uniform_dtype, size_t ndim, co
 
     // Fill in the preamble metadata
     ndobject_preamble *ndo = reinterpret_cast<ndobject_preamble *>(result.get());
-    ndo->m_dtype = array_dtype.extended();
-    base_dtype_incref(ndo->m_dtype);
+    ndo->m_dtype = array_dtype.release();
     ndo->m_data_pointer = data_ptr;
     ndo->m_data_reference = NULL;
     ndo->m_flags = access_flags;
@@ -117,7 +116,7 @@ ndobject dynd::make_strided_ndobject(const dtype& uniform_dtype, size_t ndim, co
         }
         // Fill in the ndobject metadata with strides and sizes
         char *meta = reinterpret_cast<char *>(ndo + 1);
-        array_dtype.extended()->metadata_default_construct(meta, ndim, shape);
+        ndo->m_dtype->metadata_default_construct(meta, ndim, shape);
     }
 
     return ndobject(result);
@@ -140,8 +139,7 @@ ndobject dynd::make_strided_ndobject_from_data(const dtype& uniform_dtype, size_
 
     // Fill in the preamble metadata
     ndobject_preamble *ndo = reinterpret_cast<ndobject_preamble *>(result.get());
-    ndo->m_dtype = array_dtype.extended();
-    base_dtype_incref(ndo->m_dtype);
+    ndo->m_dtype = array_dtype.release();
     ndo->m_data_pointer = data_ptr;
     ndo->m_data_reference = data_reference.get();
     memory_block_incref(ndo->m_data_reference);
@@ -210,8 +208,7 @@ ndobject dynd::make_string_ndobject(const char *str, size_t len, string_encoding
     memcpy(string_ptr, str, len);
     // Set the ndobject metadata
     ndobject_preamble *ndo = result.get_ndo();
-    ndo->m_dtype = dt.extended();
-    base_dtype_incref(ndo->m_dtype);
+    ndo->m_dtype = dt.release();
     ndo->m_data_pointer = data_ptr;
     ndo->m_data_reference = NULL;
     ndo->m_flags = read_access_flag | immutable_access_flag;
@@ -361,8 +358,7 @@ ndobject dynd::detail::make_from_vec<std::string>::make(const std::vector<std::s
     ndobject_preamble *preamble = result.get_ndo();
     preamble->m_data_pointer = data_ptr;
     preamble->m_data_reference = NULL;
-    preamble->m_dtype = dt.extended();
-    base_dtype_incref(preamble->m_dtype);
+    preamble->m_dtype = dt.release();
     preamble->m_flags = read_access_flag | immutable_access_flag;
     // The metadata for the strided and string parts of the dtype
     strided_array_dtype_metadata *sa_md = reinterpret_cast<strided_array_dtype_metadata *>(
@@ -833,8 +829,7 @@ ndobject ndobject::view_scalars(const dtype& scalar_dtype) const
                 result.get_ndo()->m_data_reference = m_memblock.get();
             }
             memory_block_incref(result.get_ndo()->m_data_reference);
-            result.get_ndo()->m_dtype = result_dtype.extended();
-            base_dtype_incref(result.get_ndo()->m_dtype);
+            result.get_ndo()->m_dtype = result_dtype.release();
             result.get_ndo()->m_flags = get_ndo()->m_flags;
             // The result has one strided ndarray field
             strided_array_dtype_metadata *result_md = reinterpret_cast<strided_array_dtype_metadata *>(result.get_ndo_meta());
