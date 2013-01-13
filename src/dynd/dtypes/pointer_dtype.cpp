@@ -39,7 +39,7 @@ void pointer_dtype::print_data(std::ostream& o, const char *metadata, const char
 {
     const pointer_dtype_metadata *md = reinterpret_cast<const pointer_dtype_metadata *>(metadata);
     const char *target_data = *reinterpret_cast<const char * const *>(data) + md->offset;
-    m_target_dtype.print_data(o, metadata, target_data);
+    m_target_dtype.print_data(o, metadata + sizeof(pointer_dtype_metadata), target_data);
 }
 
 void pointer_dtype::print_dtype(std::ostream& o) const
