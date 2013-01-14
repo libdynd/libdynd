@@ -69,7 +69,7 @@ void dynd::broadcast_input_shapes(size_t ninputs, const ndobject* inputs,
 {
     // Get the number of broadcast dimensions
     size_t undim = inputs[0].get_undim();
-    for (int i = 0; i < ninputs; ++i) {
+    for (size_t i = 0; i < ninputs; ++i) {
         size_t candidate_undim = inputs[i].get_undim();
         if (candidate_undim > undim) {
             undim = candidate_undim;

@@ -206,7 +206,7 @@ namespace {
                 reinterpret_cast<const T *>(db->begin), reinterpret_cast<const T *>(db->end));
         }
 
-        static bool less_equal(const char *a, const char *b, single_compare_static_data *extra) {
+        static bool less_equal(const char *a, const char *b, single_compare_static_data *DYND_UNUSED(extra)) {
             const string_dtype_data *da = reinterpret_cast<const string_dtype_data *>(a);
             const string_dtype_data *db = reinterpret_cast<const string_dtype_data *>(b);
             return !lexicographical_compare(
@@ -214,21 +214,21 @@ namespace {
                 reinterpret_cast<const T *>(da->begin), reinterpret_cast<const T *>(da->end));
         }
 
-        static bool equal(const char *a, const char *b, single_compare_static_data *extra) {
+        static bool equal(const char *a, const char *b, single_compare_static_data *DYND_UNUSED(extra)) {
             const string_dtype_data *da = reinterpret_cast<const string_dtype_data *>(a);
             const string_dtype_data *db = reinterpret_cast<const string_dtype_data *>(b);
             return (da->end - da->begin == db->end - db->begin) &&
                     memcmp(da->begin, db->begin, da->end - da->begin) == 0;
         }
 
-        static bool not_equal(const char *a, const char *b, single_compare_static_data *extra) {
+        static bool not_equal(const char *a, const char *b, single_compare_static_data *DYND_UNUSED(extra)) {
             const string_dtype_data *da = reinterpret_cast<const string_dtype_data *>(a);
             const string_dtype_data *db = reinterpret_cast<const string_dtype_data *>(b);
             return (da->end - da->begin != db->end - db->begin) ||
                     memcmp(da->begin, db->begin, da->end - da->begin) != 0;
         }
 
-        static bool greater_equal(const char *a, const char *b, single_compare_static_data *extra) {
+        static bool greater_equal(const char *a, const char *b, single_compare_static_data *DYND_UNUSED(extra)) {
             const string_dtype_data *da = reinterpret_cast<const string_dtype_data *>(a);
             const string_dtype_data *db = reinterpret_cast<const string_dtype_data *>(b);
             return !lexicographical_compare(
@@ -236,7 +236,7 @@ namespace {
                 reinterpret_cast<const T *>(db->begin), reinterpret_cast<const T *>(db->end));
         }
 
-        static bool greater(const char *a, const char *b, single_compare_static_data *extra) {
+        static bool greater(const char *a, const char *b, single_compare_static_data *DYND_UNUSED(extra)) {
             const string_dtype_data *da = reinterpret_cast<const string_dtype_data *>(a);
             const string_dtype_data *db = reinterpret_cast<const string_dtype_data *>(b);
             return lexicographical_compare(

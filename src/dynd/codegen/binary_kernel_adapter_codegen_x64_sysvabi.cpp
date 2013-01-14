@@ -14,6 +14,8 @@
 
 #include <assert.h>
 
+using namespace std;
+
 namespace // nameless
 {
     void* ptr_offset(void* ptr, std::ptrdiff_t offset)
@@ -472,7 +474,7 @@ namespace // nameless
     };
 } // anonymous namespace
 
-dynd::binary_operation_t dynd::codegen_binary_function_adapter(const memory_block_ptr& exec_memblock
+dynd::binary_operation_pair_t dynd::codegen_binary_function_adapter(const memory_block_ptr& exec_memblock
                                                         , const dtype& restype
                                                         , const dtype& arg0type
                                                         , const dtype& arg1type
@@ -488,7 +490,7 @@ dynd::binary_operation_t dynd::codegen_binary_function_adapter(const memory_bloc
         || (ret_idx >= ccrc_count)
         )
     {
-        return 0;
+        return binary_operation_pair_t();
     }
         
     size_t estimated_size = sizeof(binary_adapter_prolog)
@@ -529,12 +531,13 @@ dynd::binary_operation_t dynd::codegen_binary_function_adapter(const memory_bloc
                 
         fbuilder.finish();
         
-        return reinterpret_cast<binary_operation_t>(ptr_offset(base, entry_point));
+        throw runtime_error("FIXME: codegen function return");
+        //return reinterpret_cast<binary_operation_t>(ptr_offset(base, entry_point));
     }
     
     // function construction failed... fbuilder destructor will take care of
     // releasing memory (it acts as RAII, kind of -- exception safe as well)
-    return 0;
+    return binary_operation_pair_t();
 }
 
 #endif // DYND_CALL_SYSV_X64

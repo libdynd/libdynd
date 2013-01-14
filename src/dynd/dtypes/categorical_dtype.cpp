@@ -186,7 +186,7 @@ categorical_dtype::categorical_dtype(const ndobject& categories, bool presorted)
         intptr_t num_categories = categories.get_dim_size();
         m_value_to_category_index.resize(num_categories);
         m_category_index_to_value.resize(num_categories);
-        for (size_t i = 0; i != num_categories; ++i) {
+        for (size_t i = 0; i != (size_t)num_categories; ++i) {
             m_value_to_category_index[i] = i;
             m_category_index_to_value[i] = i;
         }
@@ -216,7 +216,7 @@ categorical_dtype::categorical_dtype(const ndobject& categories, bool presorted)
     m_category_index_to_value.resize(num_categories);
 
     // create the mapping from indices of (to be lexicographically sorted) categories to values
-    for (size_t i = 0; i != num_categories; ++i) {
+    for (size_t i = 0; i != (size_t)num_categories; ++i) {
         m_category_index_to_value[i] = i;
         const char *category_value = categories.get_readonly_originptr() +
                         i * categories_stride;

@@ -33,6 +33,7 @@ memory_block_ptr dynd::make_fixed_size_pod_memory_block(intptr_t size_bytes, int
     return memory_block_ptr(new (result) memory_block_data(1, fixed_size_pod_memory_block_type), false);
 }
 
-void dynd::fixed_size_pod_memory_block_debug_print(const memory_block_data *memblock, std::ostream& o, const std::string& indent)
+void dynd::fixed_size_pod_memory_block_debug_print(const memory_block_data *DYND_UNUSED(memblock),
+                std::ostream& DYND_UNUSED(o), const std::string& DYND_UNUSED(indent))
 {
 }

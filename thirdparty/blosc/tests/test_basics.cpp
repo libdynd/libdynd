@@ -23,7 +23,7 @@ size_t size = 1000;             /* must be divisible by 4 */
 
 
 /* Check maxout with maxout < size */
-static char *test_maxout_less() {
+static const char *test_maxout_less() {
 
   /* Get a compressed buffer */
   cbytes = blosc_compress(clevel, doshuffle, typesize, size, src,
@@ -34,7 +34,7 @@ static char *test_maxout_less() {
 }
 
 /* Check maxout with maxout == size */
-static char *test_maxout_equal() {
+static const char *test_maxout_equal() {
 
   /* Get a compressed buffer */
   cbytes = blosc_compress(clevel, doshuffle, typesize, size, src,
@@ -50,7 +50,7 @@ static char *test_maxout_equal() {
 
 
 /* Check maxout with maxout > size */
-static char *test_maxout_great() {
+static const char *test_maxout_great() {
   /* Get a compressed buffer */
   cbytes = blosc_compress(clevel, doshuffle, typesize, size, src,
                           dest, size+17);
@@ -64,7 +64,7 @@ static char *test_maxout_great() {
 }
 
 
-static char *all_tests() {
+static const char *all_tests() {
   mu_run_test(test_maxout_less);
   mu_run_test(test_maxout_equal);
   mu_run_test(test_maxout_great);
@@ -91,7 +91,7 @@ int main(int argc, char **argv) {
   memcpy(srccpy, src, size);
 
   /* Run all the suite */
-  char *result = all_tests();
+  const char *result = all_tests();
   if (result != 0) {
     printf(" (%s)\n", result);
   }

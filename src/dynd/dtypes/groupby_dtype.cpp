@@ -45,7 +45,8 @@ groupby_dtype::~groupby_dtype()
 {
 }
 
-void groupby_dtype::print_data(std::ostream& o, const char *metadata, const char *data) const
+void groupby_dtype::print_data(std::ostream& DYND_UNUSED(o),
+                const char *DYND_UNUSED(metadata), const char *DYND_UNUSED(data)) const
 {
     throw runtime_error("internal error: groupby_dtype::print_data isn't supposed to be called");
 }
@@ -56,7 +57,8 @@ void groupby_dtype::print_dtype(std::ostream& o) const
     o << ", groups=" << m_groups_dtype << ">";
 }
 
-dtype groupby_dtype::apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& root_dt) const
+dtype groupby_dtype::apply_linear_index(int nindices, const irange *DYND_UNUSED(indices),
+                int DYND_UNUSED(current_i), const dtype& DYND_UNUSED(root_dt)) const
 {
     if (nindices == 0) {
         return dtype(this, true);
@@ -95,18 +97,18 @@ bool groupby_dtype::operator==(const base_dtype& rhs) const
 }
 
 void groupby_dtype::get_operand_to_value_kernel(const eval::eval_context *DYND_UNUSED(ectx),
-                        kernel_instance<unary_operation_pair_t>& out_borrowed_kernel) const
+                        kernel_instance<unary_operation_pair_t>& DYND_UNUSED(out_borrowed_kernel)) const
 {
     throw runtime_error("TODO: implement groupby_dtype::get_operand_to_value_kernel");
 }
 
 void groupby_dtype::get_value_to_operand_kernel(const eval::eval_context *DYND_UNUSED(ectx),
-                        kernel_instance<unary_operation_pair_t>& out_borrowed_kernel) const
+                        kernel_instance<unary_operation_pair_t>& DYND_UNUSED(out_borrowed_kernel)) const
 {
     throw runtime_error("TODO: implement groupby_dtype::get_value_to_operand_kernel");
 }
 
-dtype groupby_dtype::with_replaced_storage_dtype(const dtype& replacement_dtype) const
+dtype groupby_dtype::with_replaced_storage_dtype(const dtype& DYND_UNUSED(replacement_dtype)) const
 {
     throw runtime_error("TODO: implement groupby_dtype::with_replaced_storage_dtype");
 }

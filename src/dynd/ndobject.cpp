@@ -101,7 +101,7 @@ ndobject dynd::make_strided_ndobject(const dtype& uniform_dtype, size_t ndim, co
                 stride *= dim_size;
             }
         } else {
-            for (int i = 0; i < ndim; ++i) {
+            for (size_t i = 0; i < ndim; ++i) {
                 int i_perm = axis_perm[i];
                 intptr_t dim_size = shape[i_perm];
                 meta[i_perm].stride = dim_size > 1 ? stride : 0;

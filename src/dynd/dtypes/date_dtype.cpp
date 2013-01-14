@@ -155,7 +155,7 @@ static ndobject function_dtype_today(const dtype& dt) {
     return result;
 }
 
-static ndobject function_dtype_construct(const dtype& dt, const ndobject& year, const ndobject& month, const ndobject& day)
+static ndobject function_dtype_construct(const dtype& DYND_UNUSED(dt), const ndobject& year, const ndobject& month, const ndobject& day)
 {
     // TODO proper buffering
     ndobject year_as_int = year.cast_udtype(make_dtype<int32_t>()).vals();

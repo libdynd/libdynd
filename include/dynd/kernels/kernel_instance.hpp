@@ -184,7 +184,7 @@ struct binary_operation_pair_t {
 struct compare_operations_t {
     single_compare_operation_t ops[6];
 
-    static enum comparison_id_t {
+    enum comparison_id_t {
         less_id,
         less_equal_id,
         equal_id,

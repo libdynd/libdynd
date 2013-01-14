@@ -23,7 +23,7 @@ size_t size = 1*MB;
 
 
 
-static char *test_cbuffer_sizes() {
+static const char *test_cbuffer_sizes() {
   size_t nbytes_, cbytes_, blocksize;
 
   blosc_cbuffer_sizes(dest, &nbytes_, &cbytes_, &blocksize);
@@ -34,7 +34,7 @@ static char *test_cbuffer_sizes() {
   return 0;
 }
 
-static char *test_cbuffer_metainfo() {
+static const char *test_cbuffer_metainfo() {
   size_t typesize_;
   int flags;
 
@@ -45,7 +45,7 @@ static char *test_cbuffer_metainfo() {
 }
 
 
-static char *test_cbuffer_versions() {
+static const char *test_cbuffer_versions() {
   int version_;
   int versionlz_;
 
@@ -56,7 +56,7 @@ static char *test_cbuffer_versions() {
 }
 
 
-static char *all_tests() {
+static const char *all_tests() {
   mu_run_test(test_cbuffer_sizes);
   mu_run_test(test_cbuffer_metainfo);
   mu_run_test(test_cbuffer_versions);
@@ -84,7 +84,7 @@ int main(int argc, char **argv) {
   nbytes = blosc_decompress(dest, dest2, size);
 
   /* Run all the suite */
-  char *result = all_tests();
+  const char *result = all_tests();
   if (result != 0) {
     printf(" (%s)\n", result);
   }
