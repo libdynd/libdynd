@@ -156,6 +156,13 @@ void pointer_dtype::get_shape(size_t i, intptr_t *out_shape) const
     }
 }
 
+void pointer_dtype::get_shape(size_t i, intptr_t *out_shape, const char *metadata) const
+{
+    if (get_undim() > 0) {
+        m_target_dtype.extended()->get_shape(i, out_shape, metadata + sizeof(pointer_dtype_metadata));
+    }
+}
+
 bool pointer_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const
 {
     if (dst_dt.extended() == this) {

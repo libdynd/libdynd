@@ -18,7 +18,8 @@ using namespace dynd;
 
 groupby_dtype::groupby_dtype(const dtype& data_values_dtype,
                 const dtype& by_values_dtype, const dtype& groups_dtype)
-    : base_expression_dtype(groupby_type_id, expression_kind, sizeof(groupby_dtype_data), sizeof(void *))
+    : base_expression_dtype(groupby_type_id, expression_kind,
+                    sizeof(groupby_dtype_data), sizeof(void *), 2 + data_values_dtype.get_undim())
 {
     if (groups_dtype.get_type_id() != categorical_type_id) {
         throw runtime_error("to construct a groupby dtype, its groups dtype must be categorical");
@@ -70,7 +71,22 @@ dtype groupby_dtype::apply_linear_index(int nindices, const irange *DYND_UNUSED(
 void groupby_dtype::get_shape(size_t i, intptr_t *out_shape) const
 {
     if (!m_value_dtype.is_builtin()) {
-        m_value_dtype.extended()->get_shape(i, out_shape);
+        m_value_dtype.extended()->get_shape(i + 2, out_shape);
+    }
+}
+
+void groupby_dtype::get_shape(size_t i, intptr_t *out_shape, const char *metadata) const
+{
+    // The first dimension is the groups, the second variable-sized
+    out_shape[i] = reinterpret_cast<const categorical_dtype *>(m_groups_dtype.extended())->get_category_count();
+    out_shape[i+1] = -1;
+    // Get the rest of the shape if necessary
+    if (get_undim() > 2) {
+        // Get the dtype for a single data_value element, and its corresponding metadata
+        dtype data_values_dtype = m_operand_dtype.at_single(0, &metadata);
+        data_values_dtype.at_single(0, &metadata);
+        // Use this to get the rest of the shape
+        data_values_dtype.extended()->get_shape(i + 2, out_shape, metadata);
     }
 }
 
