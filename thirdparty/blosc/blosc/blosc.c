@@ -741,10 +741,11 @@ int blosc_compress(int clevel, int doshuffle, size_t typesize, size_t nbytes,
       ntbytes = 0;
     }
     else if (((nbytes_ % L1) == 0) || (nthreads > 1)) {
+      int ntbytes_check;
       /* More effective with large buffers that are multiples of the
        cache size or multi-cores */
       params.ntbytes = BLOSC_MAX_OVERHEAD;
-      int ntbytes_check = do_job();
+      ntbytes_check = do_job();
       if (ntbytes_check < 0) {
         return -1;
       }
