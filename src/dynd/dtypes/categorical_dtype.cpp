@@ -399,32 +399,28 @@ size_t categorical_dtype::get_metadata_size() const
     }
 }
 
-void categorical_dtype::metadata_default_construct(char *metadata, int ndim, const intptr_t* shape) const
+void categorical_dtype::metadata_default_construct(char *DYND_UNUSED(metadata),
+                int DYND_UNUSED(ndim), const intptr_t* DYND_UNUSED(shape)) const
 {
-    if (!m_category_dtype.is_builtin()) {
-        m_category_dtype.extended()->metadata_default_construct(metadata, ndim, shape);
-    }
+    // Data is stored as int32, no metadata to process
 }
 
-void categorical_dtype::metadata_copy_construct(char *dst_metadata, const char *src_metadata, memory_block_data *embedded_reference) const
+void categorical_dtype::metadata_copy_construct(char *DYND_UNUSED(dst_metadata),
+                const char *DYND_UNUSED(src_metadata),
+                memory_block_data *DYND_UNUSED(embedded_reference)) const
 {
-    if (!m_category_dtype.is_builtin()) {
-        m_category_dtype.extended()->metadata_copy_construct(dst_metadata, src_metadata, embedded_reference);
-    }
+    // Data is stored as int32, no metadata to process
 }
 
-void categorical_dtype::metadata_destruct(char *metadata) const
+void categorical_dtype::metadata_destruct(char *DYND_UNUSED(metadata)) const
 {
-    if (!m_category_dtype.is_builtin()) {
-        m_category_dtype.extended()->metadata_destruct(metadata);
-    }
+    // Data is stored as int32, no metadata to process
 }
 
-void categorical_dtype::metadata_debug_print(const char *metadata, std::ostream& o, const std::string& indent) const
+void categorical_dtype::metadata_debug_print(const char *DYND_UNUSED(metadata),
+                std::ostream& DYND_UNUSED(o), const std::string& DYND_UNUSED(indent)) const
 {
-    if (!m_category_dtype.is_builtin()) {
-        m_category_dtype.extended()->metadata_debug_print(metadata, o, indent);
-    }
+    // Data is stored as int32, no metadata to process
 }
 
 dtype dynd::factor_categorical_dtype(const ndobject& values)
