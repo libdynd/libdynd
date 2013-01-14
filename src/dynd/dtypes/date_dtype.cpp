@@ -5,6 +5,7 @@
 
 #include <time.h>
 
+#include <cerrno>
 #include <algorithm>
 
 #include <dynd/dtypes/date_dtype.hpp>

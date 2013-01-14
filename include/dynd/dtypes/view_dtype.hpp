@@ -68,7 +68,7 @@ inline dtype make_view_dtype(const dtype& value_dtype, const dtype& operand_dtyp
 
 template<typename Tvalue, typename Toperand>
 dtype make_view_dtype() {
-    return dtype(new view_dtype(make_dtype<Tvalue>()));
+    return dtype(new view_dtype(make_dtype<Tvalue>()), false);
 }
 
 } // namespace dynd

@@ -578,6 +578,8 @@ int datetime::get_datetime_iso_8601_strlen(bool local, datetime_unit_t unit)
         case datetime_unit_year:
             len += 21; /* 64-bit year */
             break;
+        default:
+            throw runtime_error("Unrecognized datetime unit");
     }
 
     if (unit >= datetime_unit_hour) {

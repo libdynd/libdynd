@@ -80,7 +80,7 @@
  * Use inlined functions for supported systems.
  */
 #if defined(__GNUC__) || defined(__DMC__) || defined(__POCC__) || defined(__WATCOMC__) || defined(__SUNPRO_C)
-#define BLOSCLZ_INLINE inline
+#define BLOSCLZ_INLINE static inline
 #elif defined(__BORLANDC__) || defined(_MSC_VER) || defined(__LCC__)
 #define BLOSCLZ_INLINE __inline
 #else

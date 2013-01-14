@@ -722,10 +722,11 @@ int blosc_compress(int clevel, int doshuffle, size_t typesize, size_t nbytes,
 
   if (!(*flags & BLOSC_MEMCPYED)) {
     /* Do the actual compression */
-    ntbytes = do_job();
-    if (ntbytes < 0) {
+    int ntbytes_check = do_job();
+    if (ntbytes_check < 0) {
       return -1;
     }
+    ntbytes = (uint32_t)ntbytes_check;
     if ((ntbytes == 0) && (nbytes_+BLOSC_MAX_OVERHEAD <= maxbytes)) {
       /* Last chance for fitting `src` buffer in `dest`.  Update flags
        and do a memcpy later on. */
@@ -743,10 +744,11 @@ int blosc_compress(int clevel, int doshuffle, size_t typesize, size_t nbytes,
       /* More effective with large buffers that are multiples of the
        cache size or multi-cores */
       params.ntbytes = BLOSC_MAX_OVERHEAD;
-      ntbytes = do_job();
-      if (ntbytes < 0) {
-	return -1;
+      int ntbytes_check = do_job();
+      if (ntbytes_check < 0) {
+        return -1;
       }
+      ntbytes = (uint32_t)ntbytes_check;
     }
     else {
       memcpy((uint8_t *)dest+BLOSC_MAX_OVERHEAD, src, nbytes_);

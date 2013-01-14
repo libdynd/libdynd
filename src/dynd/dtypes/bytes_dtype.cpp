@@ -57,12 +57,13 @@ dtype bytes_dtype::apply_linear_index(int nindices, const irange *DYND_UNUSED(in
 intptr_t bytes_dtype::apply_linear_index(int DYND_UNUSED(nindices), const irange *DYND_UNUSED(indices),
                 char *DYND_UNUSED(data), const char *metadata,
                 const dtype& DYND_UNUSED(result_dtype), char *out_metadata,
+                memory_block_data *embedded_reference,
                 int DYND_UNUSED(current_i), const dtype& DYND_UNUSED(root_dt)) const
 {
     const bytes_dtype_metadata *md = reinterpret_cast<const bytes_dtype_metadata *>(metadata);
     bytes_dtype_metadata *out_md = reinterpret_cast<bytes_dtype_metadata *>(out_metadata);
-    // Just copy the blockref
-    out_md->blockref = md->blockref;
+    // Just copy the blockref, switching to the reference we were embedded in if necessary
+    out_md->blockref = md->blockref ? md->blockref : embedded_reference;
     memory_block_incref(out_md->blockref);
     return 0;
 }
@@ -84,7 +85,14 @@ dtype bytes_dtype::get_canonical_dtype() const
 }
 
 
-void bytes_dtype::get_shape(size_t DYND_UNUSED(i), std::vector<intptr_t>& DYND_UNUSED(out_shape)) const
+void bytes_dtype::get_shape(size_t DYND_UNUSED(i),
+                intptr_t *DYND_UNUSED(out_shape)) const
+{
+}
+
+void bytes_dtype::get_shape(size_t DYND_UNUSED(i),
+                intptr_t *DYND_UNUSED(out_shape),
+                const char *DYND_UNUSED(metadata)) const
 {
 }
 

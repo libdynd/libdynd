@@ -160,7 +160,13 @@ dtype string_dtype::get_canonical_dtype() const
 }
 
 
-void string_dtype::get_shape(size_t DYND_UNUSED(i), std::vector<intptr_t>& DYND_UNUSED(out_shape)) const
+void string_dtype::get_shape(size_t DYND_UNUSED(i),
+                intptr_t *DYND_UNUSED(out_shape)) const
+{
+}
+
+void string_dtype::get_shape(size_t DYND_UNUSED(i),
+                intptr_t *DYND_UNUSED(out_shape), const char *DYND_UNUSED(metadata)) const
 {
 }
 
