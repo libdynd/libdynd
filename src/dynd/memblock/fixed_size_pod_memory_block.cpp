@@ -3,6 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
+#include <cstdlib>
+
 #include <dynd/memblock/fixed_size_pod_memory_block.hpp>
 
 using namespace std;

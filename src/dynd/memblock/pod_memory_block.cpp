@@ -5,6 +5,7 @@
 
 #include <stdexcept>
 #include <vector>
+#include <cstdlib>
 
 #include <dynd/memblock/pod_memory_block.hpp>
 
