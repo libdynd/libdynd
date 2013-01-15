@@ -14,6 +14,13 @@ typedef __int64 int64_t;
 #include <stdint.h>
 #endif
 
+#ifndef INT32_MIN
+#define INT32_MIN INT_MIN
+#endif
+#ifndef INT64_MIN
+#define INT64_MIN LONGLONG_MIN
+#endif
+
 namespace datetime {
 
 // Value storage types for date, time, datetime
