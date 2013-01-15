@@ -148,7 +148,7 @@ void dynd::get_dtype_assignment_kernel(
     // Assignment of expression dtypes
     if (src_dt.get_kind() == expression_kind || dst_dt.get_kind() == expression_kind) {
         // Chain the kernels together
-        deque<kernel_instance<unary_operation_pair_t>> kernels;
+        deque<kernel_instance<unary_operation_pair_t> > kernels;
         deque<dtype> dtypes;
         const dtype& src_dt_vdt = src_dt.value_dtype();
         const dtype& dst_dt_vdt = dst_dt.value_dtype();

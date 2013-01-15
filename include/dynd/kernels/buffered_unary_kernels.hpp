@@ -26,7 +26,7 @@ namespace dynd {
  * For efficiency, the kernels are swapped out of the deque instead of copied,
  * so the deque 'kernels' no longer contains them on exit.
  */
-void make_buffered_chain_unary_kernel(std::deque<kernel_instance<unary_operation_pair_t>>& kernels,
+void make_buffered_chain_unary_kernel(std::deque<kernel_instance<unary_operation_pair_t> >& kernels,
                     std::deque<dtype>& dtypes, kernel_instance<unary_operation_pair_t>& out_kernel);
 
 /**
@@ -40,7 +40,7 @@ void make_buffered_chain_unary_kernel(std::deque<kernel_instance<unary_operation
  */
 void push_front_dtype_storage_to_value_kernels(const dynd::dtype& dt,
                     const eval::eval_context *ectx,
-                    std::deque<kernel_instance<unary_operation_pair_t>>& out_kernels,
+                    std::deque<kernel_instance<unary_operation_pair_t> >& out_kernels,
                     std::deque<dtype>& out_dtypes);
 
 /**
@@ -54,7 +54,7 @@ void push_front_dtype_storage_to_value_kernels(const dynd::dtype& dt,
  */
 void push_back_dtype_value_to_storage_kernels(const dynd::dtype& dt,
                     const eval::eval_context *ectx,
-                    std::deque<kernel_instance<unary_operation_pair_t>>& out_kernels,
+                    std::deque<kernel_instance<unary_operation_pair_t> >& out_kernels,
                     std::deque<dtype>& out_dtypes);
 
 } // namespace dynd

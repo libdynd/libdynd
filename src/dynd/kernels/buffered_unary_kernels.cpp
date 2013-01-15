@@ -235,7 +235,7 @@ namespace {
     };
 } // anonymous namespace
 
-void dynd::make_buffered_chain_unary_kernel(std::deque<kernel_instance<unary_operation_pair_t>>& kernels,
+void dynd::make_buffered_chain_unary_kernel(std::deque<kernel_instance<unary_operation_pair_t> >& kernels,
                     std::deque<dtype>& dtypes, kernel_instance<unary_operation_pair_t>& out_kernel)
 {
     if (kernels.size() != dtypes.size() - 1) {
@@ -340,7 +340,7 @@ void dynd::make_buffered_chain_unary_kernel(std::deque<kernel_instance<unary_ope
 
 void dynd::push_front_dtype_storage_to_value_kernels(const dynd::dtype& dt,
                     const eval::eval_context *ectx,
-                    std::deque<kernel_instance<unary_operation_pair_t>>& out_kernels,
+                    std::deque<kernel_instance<unary_operation_pair_t> >& out_kernels,
                     std::deque<dtype>& out_dtypes)
 {
     const dtype* front_dt = &dt;
@@ -378,7 +378,7 @@ void dynd::push_front_dtype_storage_to_value_kernels(const dynd::dtype& dt,
 
 void dynd::push_back_dtype_value_to_storage_kernels(const dynd::dtype& dt,
                     const eval::eval_context *ectx,
-                    std::deque<kernel_instance<unary_operation_pair_t>>& out_kernels,
+                    std::deque<kernel_instance<unary_operation_pair_t> >& out_kernels,
                     std::deque<dtype>& out_dtypes)
 {
     const dtype* back_dt = &dt;
