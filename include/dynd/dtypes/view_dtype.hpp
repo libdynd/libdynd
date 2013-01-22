@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2011-12, Dynamic NDArray Developers
+// Copyright (C) 2011-13, DyND Developers
 // BSD 2-Clause License, see LICENSE.txt
 //
 // The view dtype reinterprets the bytes of
