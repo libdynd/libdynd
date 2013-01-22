@@ -111,7 +111,7 @@ dtype pointer_dtype::apply_linear_index(int nindices, const irange *indices, int
     }
 }
 
-intptr_t pointer_dtype::apply_linear_index(int nindices, const irange *indices, char *data, const char *metadata,
+intptr_t pointer_dtype::apply_linear_index(int nindices, const irange *indices, const char *metadata,
                 const dtype& result_dtype, char *out_metadata,
                 memory_block_data *embedded_reference,
                 int current_i, const dtype& root_dt) const
@@ -125,7 +125,7 @@ intptr_t pointer_dtype::apply_linear_index(int nindices, const irange *indices, 
     if (!m_target_dtype.is_builtin()) {
         const pointer_dtype *pdt = static_cast<const pointer_dtype *>(result_dtype.extended());
         // The indexing may cause a change to the metadata offset
-        out_md->offset += m_target_dtype.extended()->apply_linear_index(nindices, indices, data,
+        out_md->offset += m_target_dtype.extended()->apply_linear_index(nindices, indices,
                         metadata + sizeof(pointer_dtype_metadata),
                         pdt->m_target_dtype, out_metadata + sizeof(pointer_dtype_metadata),
                         embedded_reference, current_i, root_dt);

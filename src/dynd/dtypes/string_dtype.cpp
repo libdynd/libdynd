@@ -130,7 +130,7 @@ dtype string_dtype::apply_linear_index(int nindices, const irange *DYND_UNUSED(i
 }
 
 intptr_t string_dtype::apply_linear_index(int DYND_UNUSED(nindices), const irange *DYND_UNUSED(indices),
-                char *DYND_UNUSED(data), const char *metadata,
+                const char *metadata,
                 const dtype& DYND_UNUSED(result_dtype), char *out_metadata,
                 memory_block_data *embedded_reference,
                 int DYND_UNUSED(current_i), const dtype& DYND_UNUSED(root_dt)) const

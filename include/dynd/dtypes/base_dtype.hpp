@@ -321,7 +321,6 @@ public:
      *
      * \param nindices     The number of elements in the 'indices' array. This is shrunk by one for each recursive call.
      * \param indices      The indices to apply. This is incremented by one for each recursive call.
-     * \param data         The data of the input array.
      * \param metadata     The metadata of the input array.
      * \param result_dtype The result of an apply_linear_index call.
      * \param out_metadata The metadata of the output array. The output data should all be references to the data
@@ -335,7 +334,7 @@ public:
      *
      * @return  An offset to apply to the data pointer.
      */
-    virtual intptr_t apply_linear_index(int nindices, const irange *indices, char *data, const char *metadata,
+    virtual intptr_t apply_linear_index(int nindices, const irange *indices, const char *metadata,
                     const dtype& result_dtype, char *out_metadata,
                     memory_block_data *embedded_reference,
                     int current_i, const dtype& root_dt) const;

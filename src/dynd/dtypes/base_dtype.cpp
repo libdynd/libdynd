@@ -58,7 +58,7 @@ dtype base_dtype::apply_linear_index(int nindices, const irange *DYND_UNUSED(ind
     }
 }
 
-intptr_t base_dtype::apply_linear_index(int nindices, const irange *DYND_UNUSED(indices), char *DYND_UNUSED(data), const char *DYND_UNUSED(metadata),
+intptr_t base_dtype::apply_linear_index(int nindices, const irange *DYND_UNUSED(indices), const char *DYND_UNUSED(metadata),
                 const dtype& DYND_UNUSED(result_dtype), char *DYND_UNUSED(out_metadata),
                 memory_block_data *DYND_UNUSED(embedded_reference),
                 int current_i, const dtype& DYND_UNUSED(root_dt)) const

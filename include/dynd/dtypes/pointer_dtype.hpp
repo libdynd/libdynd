@@ -40,7 +40,7 @@ public:
     virtual ~pointer_dtype();
 
     const dtype& get_value_dtype() const {
-        return m_target_dtype;
+        return m_target_dtype.value_dtype();
     }
     const dtype& get_operand_dtype() const {
         if (m_target_dtype.get_type_id() == pointer_type_id) {
@@ -48,6 +48,10 @@ public:
         } else {
             return m_void_pointer_dtype;
         }
+    }
+
+    const dtype& get_target_dtype() const {
+        return m_target_dtype;
     }
 
     void print_data(std::ostream& o, const char *metadata, const char *data) const;
@@ -69,7 +73,7 @@ public:
     dtype get_canonical_dtype() const;
 
     dtype apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& root_dt) const;
-    intptr_t apply_linear_index(int nindices, const irange *indices, char *data, const char *metadata,
+    intptr_t apply_linear_index(int nindices, const irange *indices, const char *metadata,
                     const dtype& result_dtype, char *out_metadata,
                     memory_block_data *embedded_reference,
                     int current_i, const dtype& root_dt) const;

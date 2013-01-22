@@ -461,7 +461,7 @@ ndobject ndobject::at_array(int nindices, const irange *indices) const
             result.set(make_ndobject_memory_block(0));
             result.get_ndo()->m_dtype = reinterpret_cast<const base_dtype *>(dt.get_type_id());
         }
-        intptr_t offset = get_ndo()->m_dtype->apply_linear_index(nindices, indices, get_ndo()->m_data_pointer,
+        intptr_t offset = get_ndo()->m_dtype->apply_linear_index(nindices, indices,
                         get_ndo_meta(), dt, result.get_ndo_meta(),
                         m_memblock.get(), 0, this_dt);
         result.get_ndo()->m_data_pointer = get_ndo()->m_data_pointer + offset;

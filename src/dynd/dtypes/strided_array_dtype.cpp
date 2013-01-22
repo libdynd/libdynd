@@ -122,7 +122,7 @@ dtype strided_array_dtype::apply_linear_index(int nindices, const irange *indice
     }
 }
 
-intptr_t strided_array_dtype::apply_linear_index(int nindices, const irange *indices, char *data, const char *metadata,
+intptr_t strided_array_dtype::apply_linear_index(int nindices, const irange *indices, const char *metadata,
                 const dtype& result_dtype, char *out_metadata,
                 memory_block_data *embedded_reference,
                 int current_i, const dtype& root_dt) const
@@ -133,7 +133,7 @@ intptr_t strided_array_dtype::apply_linear_index(int nindices, const irange *ind
         // If there are no more indices, copy the rest verbatim
         *out_md = *md;
         if (!m_element_dtype.is_builtin()) {
-            return m_element_dtype.extended()->apply_linear_index(0, NULL, data, metadata + sizeof(strided_array_dtype_metadata),
+            return m_element_dtype.extended()->apply_linear_index(0, NULL, metadata + sizeof(strided_array_dtype_metadata),
                             m_element_dtype, out_metadata + sizeof(strided_array_dtype_metadata),
                             embedded_reference, current_i + 1, root_dt);
         }
@@ -146,7 +146,7 @@ intptr_t strided_array_dtype::apply_linear_index(int nindices, const irange *ind
             // Apply the strided offset and continue applying the index
             intptr_t offset = md->stride * start_index;
             if (!m_element_dtype.is_builtin()) {
-                offset += m_element_dtype.extended()->apply_linear_index(nindices - 1, indices + 1, data + offset,
+                offset += m_element_dtype.extended()->apply_linear_index(nindices - 1, indices + 1,
                                 metadata + sizeof(strided_array_dtype_metadata),
                                 result_dtype, out_metadata,
                                 embedded_reference, current_i + 1, root_dt);
@@ -159,7 +159,7 @@ intptr_t strided_array_dtype::apply_linear_index(int nindices, const irange *ind
             out_md->size = dimension_size;
             if (!m_element_dtype.is_builtin()) {
                 const strided_array_dtype *result_edtype = static_cast<const strided_array_dtype *>(result_dtype.extended());
-                offset += m_element_dtype.extended()->apply_linear_index(nindices - 1, indices + 1, data + offset,
+                offset += m_element_dtype.extended()->apply_linear_index(nindices - 1, indices + 1,
                                 metadata + sizeof(strided_array_dtype_metadata),
                                 result_edtype->m_element_dtype, out_metadata + sizeof(strided_array_dtype_metadata),
                                 embedded_reference, current_i + 1, root_dt);

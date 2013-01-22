@@ -66,7 +66,7 @@ public:
     dtype get_canonical_dtype() const;
 
     dtype apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& root_dt) const;
-    intptr_t apply_linear_index(int nindices, const irange *indices, char *data, const char *metadata,
+    intptr_t apply_linear_index(int nindices, const irange *indices, const char *metadata,
                     const dtype& result_dtype, char *out_metadata,
                     memory_block_data *embedded_reference,
                     int current_i, const dtype& root_dt) const;

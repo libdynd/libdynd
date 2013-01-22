@@ -101,26 +101,69 @@ dtype array_dtype::apply_linear_index(int nindices, const irange *indices, int c
         return dtype(this, true);
     } else if (nindices == 1) {
         if (indices->step() == 0) {
+            // TODO: This is incorrect, but is here as a stopgap to be replaced by a sliced<> dtype
             return make_pointer_dtype(m_element_dtype);
         } else {
-            return dtype(this, true);
+            // TODO: sliced_array_dtype
+            throw runtime_error("TODO: implement array_dtype::apply_linear_index for general slices");
         }
     } else {
         if (indices->step() == 0) {
+            // TODO: This is incorrect, but is here as a stopgap to be replaced by a sliced<> dtype
             return make_pointer_dtype(m_element_dtype.apply_linear_index(nindices-1, indices+1, current_i+1, root_dt));
         } else {
             // TODO: sliced_array_dtype
-            return dtype(new array_dtype(m_element_dtype.apply_linear_index(nindices-1, indices+1, current_i+1, root_dt)), false);
+            throw runtime_error("TODO: implement array_dtype::apply_linear_index for general slices");
+            //return dtype(new array_dtype(m_element_dtype.apply_linear_index(nindices-1, indices+1, current_i+1, root_dt)), false);
         }
     }
 }
 
-intptr_t array_dtype::apply_linear_index(int DYND_UNUSED(nindices), const irange *DYND_UNUSED(indices), char *DYND_UNUSED(data), const char *DYND_UNUSED(metadata),
-                const dtype& DYND_UNUSED(result_dtype), char *DYND_UNUSED(out_metadata),
-                memory_block_data *DYND_UNUSED(embedded_reference),
-                int DYND_UNUSED(current_i), const dtype& DYND_UNUSED(root_dt)) const
+intptr_t array_dtype::apply_linear_index(int nindices, const irange *indices, const char *metadata,
+                const dtype& result_dtype, char *out_metadata,
+                memory_block_data *embedded_reference,
+                int current_i, const dtype& root_dt) const
 {
-    throw runtime_error("TODO: implement array_dtype::apply_linear_index");
+    if (nindices == 0) {
+        // If there are no more indices, copy the metadata verbatim
+        metadata_copy_construct(out_metadata, metadata, embedded_reference);
+        return 0;
+    } else if (nindices == 1) {
+        if (indices->step() == 0) {
+            // TODO: This is incorrect, but is here as a stopgap to be replaced by a sliced<> dtype
+            const array_dtype_metadata *md = reinterpret_cast<const array_dtype_metadata *>(metadata);
+            pointer_dtype_metadata *out_md = reinterpret_cast<pointer_dtype_metadata *>(out_metadata);
+            out_md->blockref = md->blockref ? md->blockref : embedded_reference;
+            memory_block_incref(out_md->blockref);
+            out_md->offset = indices->start() * md->stride;
+            return 0;
+        } else {
+            // TODO: sliced_array_dtype
+            throw runtime_error("TODO: implement array_dtype::apply_linear_index for general slices");
+            //return dtype(this, true);
+        }
+    } else {
+        if (indices->step() == 0) {
+            // TODO: This is incorrect, but is here as a stopgap to be replaced by a sliced<> dtype
+            const array_dtype_metadata *md = reinterpret_cast<const array_dtype_metadata *>(metadata);
+            pointer_dtype_metadata *out_md = reinterpret_cast<pointer_dtype_metadata *>(out_metadata);
+            out_md->blockref = md->blockref ? md->blockref : embedded_reference;
+            memory_block_incref(out_md->blockref);
+            out_md->offset = indices->start() * md->stride;
+            if (!m_element_dtype.is_builtin()) {
+                const pointer_dtype *result_edtype = static_cast<const pointer_dtype *>(result_dtype.extended());
+                out_md->offset += m_element_dtype.extended()->apply_linear_index(nindices - 1, indices + 1,
+                                metadata + sizeof(array_dtype_metadata),
+                                result_edtype->get_target_dtype(), out_metadata + sizeof(pointer_dtype_metadata),
+                                embedded_reference, current_i + 1, root_dt);
+            }
+            return 0;        
+        } else {
+            // TODO: sliced_array_dtype
+            throw runtime_error("TODO: implement array_dtype::apply_linear_index for general slices");
+            //return dtype(new array_dtype(m_element_dtype.apply_linear_index(nindices-1, indices+1, current_i+1, root_dt)), false);
+        }
+    }
 }
 
 dtype array_dtype::at(intptr_t i0, const char **inout_metadata, const char **inout_data) const

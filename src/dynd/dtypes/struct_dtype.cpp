@@ -171,7 +171,7 @@ dtype struct_dtype::apply_linear_index(int nindices, const irange *indices, int 
     }
 }
 
-intptr_t struct_dtype::apply_linear_index(int nindices, const irange *indices, char *data, const char *metadata,
+intptr_t struct_dtype::apply_linear_index(int nindices, const irange *indices, const char *metadata,
                 const dtype& result_dtype, char *out_metadata,
                 memory_block_data *embedded_reference,
                 int current_i, const dtype& root_dt) const
@@ -179,16 +179,8 @@ intptr_t struct_dtype::apply_linear_index(int nindices, const irange *indices, c
     const intptr_t *offsets = reinterpret_cast<const intptr_t *>(metadata);
     intptr_t *out_offsets = reinterpret_cast<intptr_t *>(out_metadata);
     if (nindices == 0) {
-        // Copy the struct offset metadata verbatim
-        memcpy(out_metadata, metadata, m_field_types.size() * sizeof(size_t));
-        // Then process each element verbatim as well
-        for (size_t i = 0, i_end = m_field_types.size(); i != i_end; ++i) {
-            if (!m_field_types[i].is_builtin()) {
-                out_offsets[i] += m_field_types[i].extended()->apply_linear_index(0, NULL, data + offsets[i],
-                                metadata + m_metadata_offsets[i], m_field_types[i], out_metadata + m_metadata_offsets[i],
-                                embedded_reference, current_i + 1, root_dt);
-            }
-        }
+        // If there are no more indices, copy the metadata verbatim
+        metadata_copy_construct(out_metadata, metadata, embedded_reference);
         return 0;
     } else {
         bool remove_dimension;
@@ -198,7 +190,7 @@ intptr_t struct_dtype::apply_linear_index(int nindices, const irange *indices, c
             const dtype& dt = m_field_types[start_index];
             intptr_t offset = offsets[start_index];
             if (!dt.is_builtin()) {
-                offset += dt.extended()->apply_linear_index(nindices - 1, indices + 1, data + offset,
+                offset += dt.extended()->apply_linear_index(nindices - 1, indices + 1,
                                 metadata + m_metadata_offsets[start_index], result_dtype,
                                 out_metadata, embedded_reference, current_i + 1, root_dt);
             }
@@ -210,7 +202,7 @@ intptr_t struct_dtype::apply_linear_index(int nindices, const irange *indices, c
                 out_offsets[i] = offsets[idx];
                 const dtype& dt = result_e_dt->m_field_types[i];
                 if (!dt.is_builtin()) {
-                    out_offsets[i] += dt.extended()->apply_linear_index(nindices - 1, indices + 1, data + out_offsets[i],
+                    out_offsets[i] += dt.extended()->apply_linear_index(nindices - 1, indices + 1,
                                     metadata + m_metadata_offsets[idx], dt, out_metadata + result_e_dt->m_metadata_offsets[i],
                                     embedded_reference, current_i + 1, root_dt);
                 }
