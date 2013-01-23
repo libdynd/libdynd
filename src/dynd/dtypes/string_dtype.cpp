@@ -104,8 +104,10 @@ void string_dtype::print_data(std::ostream& o, const char *DYND_UNUSED(metadata)
 
 void string_dtype::print_dtype(std::ostream& o) const {
 
-    o << "string<" << m_encoding << ">";
-
+    o << "string";
+    if (m_encoding != string_encoding_utf_8) {
+        o << "<" << m_encoding << ">";
+    }
 }
 
 dtype string_dtype::apply_linear_index(int nindices, const irange *DYND_UNUSED(indices),
