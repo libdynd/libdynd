@@ -11,6 +11,7 @@
 #include <dynd/dtypes/fixedarray_dtype.hpp>
 #include <dynd/dtypes/fixedstruct_dtype.hpp>
 #include <dynd/dtypes/string_dtype.hpp>
+#include <dynd/dtypes/date_dtype.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -43,6 +44,7 @@ static map<string, dtype> builtin_types;
 namespace {
     struct init_bit {
         init_bit() {
+            builtin_types["void"] = make_dtype<void>();
             builtin_types["bool"] = make_dtype<dynd_bool>();
             builtin_types["int8"] = make_dtype<int8_t>();
             builtin_types["int16"] = make_dtype<int16_t>();
@@ -57,6 +59,7 @@ namespace {
             builtin_types["complex64"] = make_dtype<complex<float> >();
             builtin_types["complex128"] = make_dtype<complex<double> >();
             builtin_types["string"] = make_string_dtype(string_encoding_utf_8);
+            builtin_types["date"] = make_date_dtype();
         }
     };
     static init_bit builtin_types_initializer;
@@ -153,7 +156,7 @@ static bool parse_record_item(const char *&begin, const char *end, map<string, d
         parens = true;
     }
     out_field_type = parse_rhs_expression(begin, end, symtable);
-    if (out_field_type.get_type_id() == void_type_id) {
+    if (out_field_type.get_type_id() == uninitialized_type_id) {
         throw datashape_parse_error(begin, "expected a data type");
     }
     if (parens && !parse_token(begin, end, ")")) {
@@ -172,7 +175,7 @@ static dtype parse_record(const char *&begin, const char *end, map<string, dtype
     dtype field_type;
 
     if (!parse_token(begin, end, "{")) {
-        return dtype(void_type_id);
+        return dtype(uninitialized_type_id);
     }
     for (;;) {
         if (parse_record_item(begin, end, symtable, field_name, field_type)) {
@@ -226,13 +229,13 @@ static dtype parse_rhs_expression(const char *&begin, const char *end, map<strin
     }
     // record
     result = parse_record(begin, end, symtable);
-    if (result.get_type_id() == void_type_id) {
+    if (result.get_type_id() == uninitialized_type_id) {
         const char *begin_saved = begin;
         // NAME
         string n = parse_name(begin, end);
         if (n.empty()) {
             if (shape.empty()) {
-                return dtype(void_type_id);
+                return dtype(uninitialized_type_id);
             } else {
                 throw datashape_parse_error(begin, "expected data type");
             }
@@ -256,7 +259,7 @@ static dtype parse_rhs_expression(const char *&begin, const char *end, map<strin
         }
     }
 
-    if (result.get_type_id() != void_type_id) {
+    if (result.get_type_id() != uninitialized_type_id) {
         // Apply the shape
         if (!shape.empty()) {
             for (int i = shape.size() - 1; i >= 0; --i) {
@@ -287,7 +290,7 @@ static dtype parse_stmt(const char *&begin, const char *end, map<string, dtype>&
             throw datashape_parse_error(begin, "expected an '='");
         }
         dtype result = parse_rhs_expression(begin, end, symtable);
-        if (result.get_type_id() == void_type_id) {
+        if (result.get_type_id() == uninitialized_type_id) {
             throw datashape_parse_error(begin, "expected a data type");
         }
         // ACTION: Put the parsed type in the symbol table
@@ -310,12 +313,12 @@ static dtype parse_stmt(const char *&begin, const char *end, map<string, dtype>&
 static dtype parse_top(const char *&begin, const char *end, map<string, dtype>& symtable)
 {
     dtype result = parse_stmt(begin, end, symtable);
-    if (result.get_type_id() == void_type_id) {
+    if (result.get_type_id() == uninitialized_type_id) {
         throw datashape_parse_error(begin, "expected a datashape statement");
     }
     for (;;) {
         dtype next = parse_stmt(begin, end, symtable);
-        if (next.get_type_id() == void_type_id) {
+        if (next.get_type_id() == uninitialized_type_id) {
             begin = skip_whitespace(begin, end);
             if (begin != end) {
                 throw datashape_parse_error(begin, "unexpected token in datashape");

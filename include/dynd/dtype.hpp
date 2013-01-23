@@ -228,22 +228,21 @@ private:
      */
     static inline const base_dtype *validate_builtin_type_id(type_id_t type_id)
     {
-        // 0 <= type_id < (builtin_type_id_count + 1)
-        // The + 1 is for void_type_id
-        if ((unsigned int)type_id < builtin_type_id_count + 1) {
+        // 0 <= type_id < builtin_type_id_count
+        if ((unsigned int)type_id < builtin_type_id_count) {
             return reinterpret_cast<const base_dtype *>(type_id);
         } else {
             throw invalid_type_id((int)type_id);
         }
     }
 
-    static uint8_t builtin_kinds[builtin_type_id_count + 1];
-    static uint8_t builtin_data_sizes[builtin_type_id_count + 1];
-    static uint8_t builtin_data_alignments[builtin_type_id_count + 1];
+    static uint8_t builtin_kinds[builtin_type_id_count];
+    static uint8_t builtin_data_sizes[builtin_type_id_count];
+    static uint8_t builtin_data_alignments[builtin_type_id_count];
 public:
     /** Constructor */
     dtype()
-        : m_extended(reinterpret_cast<const base_dtype *>(void_type_id))
+        : m_extended(reinterpret_cast<const base_dtype *>(uninitialized_type_id))
     {}
     /** Constructor from an base_dtype. This claims ownership of the 'extended' reference by default, be careful! */
     inline explicit dtype(const base_dtype *extended, bool incref)
@@ -277,7 +276,7 @@ public:
     dtype(dtype&& rhs)
         : m_extended(rhs.m_extended)
     {
-        rhs.m_extended = reinterpret_cast<const base_dtype *>(void_type_id);
+        rhs.m_extended = reinterpret_cast<const base_dtype *>(uninitialized_type_id);
     }
     /** Move assignment operator */
     dtype& operator=(dtype&& rhs) {
@@ -285,7 +284,7 @@ public:
             base_dtype_decref(m_extended);
         }
         m_extended = rhs.m_extended;
-        rhs.m_extended = reinterpret_cast<const base_dtype *>(void_type_id);
+        rhs.m_extended = reinterpret_cast<const base_dtype *>(uninitialized_type_id);
         return *this;
     }
 #endif // DYND_RVALUE_REFS
@@ -312,7 +311,7 @@ public:
      */
     const base_dtype *release() {
         const base_dtype *result = m_extended;
-        m_extended = reinterpret_cast<const base_dtype *>(void_type_id);
+        m_extended = reinterpret_cast<const base_dtype *>(uninitialized_type_id);
         return result;
     }
 
@@ -702,7 +701,7 @@ dtype make_dtype()
  * static_builtin_dtypes[type_id_of<int>::value] as a fast
  * way to get a const reference to its dtype.
  */
-extern const dtype static_builtin_dtypes[builtin_type_id_count + 1];
+extern const dtype static_builtin_dtypes[builtin_type_id_count];
 
 std::ostream& operator<<(std::ostream& o, const dtype& rhs);
 /** Prints raw bytes as hexadecimal */

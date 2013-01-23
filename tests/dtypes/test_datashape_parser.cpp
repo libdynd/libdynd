@@ -13,11 +13,14 @@
 #include <dynd/dtypes/fixedarray_dtype.hpp>
 #include <dynd/dtypes/array_dtype.hpp>
 #include <dynd/dtypes/fixedstruct_dtype.hpp>
+#include <dynd/dtypes/date_dtype.hpp>
+#include <dynd/dtypes/string_dtype.hpp>
 
 using namespace std;
 using namespace dynd;
 
 TEST(DataShapeParser, Basic) {
+    EXPECT_EQ(make_dtype<void>(), dtype_from_datashape("void"));
     EXPECT_EQ(make_dtype<dynd_bool>(), dtype_from_datashape("bool"));
     EXPECT_EQ(make_dtype<int8_t>(), dtype_from_datashape("int8"));
     EXPECT_EQ(make_dtype<int16_t>(), dtype_from_datashape("int16"));
@@ -31,6 +34,8 @@ TEST(DataShapeParser, Basic) {
     EXPECT_EQ(make_dtype<double>(), dtype_from_datashape("float64"));
     EXPECT_EQ(make_dtype<complex<float> >(), dtype_from_datashape("complex64"));
     EXPECT_EQ(make_dtype<complex<double> >(), dtype_from_datashape("complex128"));
+    EXPECT_EQ(make_string_dtype(string_encoding_utf_8), dtype_from_datashape("string"));
+    EXPECT_EQ(make_date_dtype(), dtype_from_datashape("date"));
 }
 
 TEST(DataShapeParser, StridedDim) {

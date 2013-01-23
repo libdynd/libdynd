@@ -12,7 +12,7 @@
 #include <dynd/gfunc/make_callable.hpp>
 
 #include <dynd/dtypes/convert_dtype.hpp>
-#include <dynd/dtypes/date_dtype.hpp>
+#include <dynd/dtypes/datashape_parser.hpp>
 
 #include <sstream>
 #include <cstring>
@@ -35,7 +35,8 @@ char *dynd::iterdata_broadcasting_terminator_reset(iterdata_common *iterdata, ch
     return data;
 }
 
-const dtype dynd::static_builtin_dtypes[builtin_type_id_count + 1] = {
+const dtype dynd::static_builtin_dtypes[builtin_type_id_count] = {
+    dtype(uninitialized_type_id),
     dtype(bool_type_id),
     dtype(int8_type_id),
     dtype(int16_type_id),
@@ -52,7 +53,8 @@ const dtype dynd::static_builtin_dtypes[builtin_type_id_count + 1] = {
     dtype(void_type_id)
 };
 
-uint8_t dtype::builtin_kinds[builtin_type_id_count + 1] = {
+uint8_t dtype::builtin_kinds[builtin_type_id_count] = {
+        void_kind,
         bool_kind,
         int_kind,
         int_kind,
@@ -68,7 +70,8 @@ uint8_t dtype::builtin_kinds[builtin_type_id_count + 1] = {
         complex_kind,
         void_kind
     };
-uint8_t dtype::builtin_data_sizes[builtin_type_id_count + 1] = {
+uint8_t dtype::builtin_data_sizes[builtin_type_id_count] = {
+        0,
         1,
         1,
         2,
@@ -84,7 +87,8 @@ uint8_t dtype::builtin_data_sizes[builtin_type_id_count + 1] = {
         16,
         0
     };
-uint8_t dtype::builtin_data_alignments[builtin_type_id_count + 1] = {
+uint8_t dtype::builtin_data_alignments[builtin_type_id_count] = {
+        1,
         1,
         1,
         2,
@@ -106,37 +110,7 @@ uint8_t dtype::builtin_data_alignments[builtin_type_id_count + 1] = {
 dtype::dtype(const std::string& rep)
     : m_extended(NULL)
 {
-    static const char *type_id_names[builtin_type_id_count + 1] = {
-        "bool",
-        "int8",
-        "int16",
-        "int32",
-        "int64",
-        "uint8",
-        "uint16",
-        "uint32",
-        "uint64",
-        "float32",
-        "float64",
-        "complex<float32>",
-        "complex<float64>",
-        "void",
-    };
-
-    // TODO: make a decent efficient parser
-    for (int id = 0; id < builtin_type_id_count + 1; ++id) {
-        if (rep == type_id_names[id]) {
-            m_extended = reinterpret_cast<const base_dtype *>(id);
-            return;
-        }
-    }
-
-    if (rep == "date") {
-        *this = make_date_dtype();
-        return;
-    }
-
-    throw std::runtime_error(std::string() + "invalid dynd type string \"" + rep + "\"");
+    dtype_from_datashape(rep).swap(*this);
 }
 
 dtype dtype::at_array(int nindices, const irange *indices) const
@@ -199,7 +173,9 @@ dtype dtype::with_replaced_scalar_types(const dtype& scalar_dtype, assign_error_
 
 void dtype::get_single_compare_kernel(kernel_instance<compare_operations_t> &out_kernel) const {
     if (is_builtin()) {
-        memcpy(out_kernel.kernel.ops, builtin_dtype_comparisons_table[reinterpret_cast<intptr_t>(m_extended)], sizeof(out_kernel.kernel.ops));
+        memcpy(out_kernel.kernel.ops,
+                        builtin_dtype_comparisons_table[reinterpret_cast<intptr_t>(m_extended)-bool_type_id],
+                        sizeof(out_kernel.kernel.ops));
     } else {
         extended()->get_single_compare_kernel(out_kernel);
     }

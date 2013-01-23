@@ -18,6 +18,14 @@ TEST(DType, BasicConstructor) {
     dtype d;
 
     // Default-constructed dtype properties
+    EXPECT_EQ(uninitialized_type_id, d.get_type_id());
+    EXPECT_EQ(void_kind, d.get_kind());
+    EXPECT_EQ(1u, d.get_alignment());
+    EXPECT_EQ(0u, d.get_data_size());
+    EXPECT_TRUE(d.is_builtin());
+
+    // void dtype
+    d = dtype(void_type_id);
     EXPECT_EQ(void_type_id, d.get_type_id());
     EXPECT_EQ(void_kind, d.get_kind());
     EXPECT_EQ(1u, d.get_alignment());

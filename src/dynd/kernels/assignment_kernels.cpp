@@ -26,7 +26,7 @@ namespace {
 } // anonymous namespace
 
 
-static unary_operation_pair_t assign_table[builtin_type_id_count][builtin_type_id_count][4] =
+static unary_operation_pair_t assign_table[builtin_type_id_count-2][builtin_type_id_count-2][4] =
 {
 #define SINGLE_OPERATION_PAIR_LEVEL(dst_type, src_type, errmode) unary_operation_pair_t( \
             (unary_single_operation_t)&single_assigner_builtin<dst_type, src_type, errmode>::assign, \
@@ -80,7 +80,7 @@ unary_operation_pair_t dynd::get_builtin_dtype_assignment_function(type_id_t dst
     if (dst_type_id >= bool_type_id && dst_type_id <= complex_float64_type_id &&
             src_type_id >= bool_type_id && src_type_id <= complex_float64_type_id &&
             errmode != assign_error_default) {
-        return assign_table[dst_type_id][src_type_id][errmode];
+        return assign_table[dst_type_id-bool_type_id][src_type_id-bool_type_id][errmode];
     } else {
         return unary_operation_pair_t();
     }
@@ -108,7 +108,7 @@ void dynd::get_builtin_dtype_assignment_kernel(
     if (dst_type_id >= bool_type_id && dst_type_id <= complex_float64_type_id &&
             src_type_id >= bool_type_id && src_type_id <= complex_float64_type_id &&
             errmode != assign_error_default) {
-        out_kernel.kernel = assign_table[dst_type_id][src_type_id][errmode];
+        out_kernel.kernel = assign_table[dst_type_id-bool_type_id][src_type_id-bool_type_id][errmode];
         out_kernel.extra.auxdata.free();
     } else {
         stringstream ss;

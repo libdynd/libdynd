@@ -52,6 +52,8 @@ enum dtype_kind_t {
 };
 
 enum type_id_t {
+    // The value zero is reserved for an uninitialized dtype.
+    uninitialized_type_id,
     // A 1-byte boolean type
     bool_type_id,
     // Signed integer types
@@ -111,8 +113,8 @@ enum type_id_t {
     // pattern matches against other types - cannot instantiate
     pattern_type_id,
 
-    // The number of built-in, atomic types
-    builtin_type_id_count = 13
+    // The number of built-in, atomic types (including uninitialized and void)
+    builtin_type_id_count = 15
 };
 
 enum {

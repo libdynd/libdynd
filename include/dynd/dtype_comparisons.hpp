@@ -12,7 +12,7 @@
 
 namespace dynd {
 
-extern single_compare_operation_t builtin_dtype_comparisons_table[builtin_type_id_count][6];
+extern single_compare_operation_t builtin_dtype_comparisons_table[builtin_type_id_count-2][6];
 
 }
 

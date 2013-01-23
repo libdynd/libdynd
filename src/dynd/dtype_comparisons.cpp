@@ -96,7 +96,7 @@ struct compare_kernel< complex<T> > {
 
 namespace dynd {
 
-single_compare_operation_t builtin_dtype_comparisons_table[builtin_type_id_count][6] = {
+single_compare_operation_t builtin_dtype_comparisons_table[builtin_type_id_count-2][6] = {
     DYND_BUILTIN_DTYPE_COMPARISON_TABLE_TYPE_LEVEL(dynd_bool), \
     DYND_BUILTIN_DTYPE_COMPARISON_TABLE_TYPE_LEVEL(int8_t), \
     DYND_BUILTIN_DTYPE_COMPARISON_TABLE_TYPE_LEVEL(int16_t), \

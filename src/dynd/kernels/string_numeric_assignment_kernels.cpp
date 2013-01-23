@@ -355,7 +355,7 @@ static void string_to_complex_float64_single_kernel(char *DYND_UNUSED(dst), cons
     throw std::runtime_error("TODO: implement string_to_complex_float64_single_kernel");
 }
 
-static unary_single_operation_t static_string_to_builtin_kernels[builtin_type_id_count] = {
+static unary_single_operation_t static_string_to_builtin_kernels[builtin_type_id_count-2] = {
         &string_to_bool_single_kernel,
         &string_to_int<int8_t>::single_kernel,
         &string_to_int<int16_t>::single_kernel,
@@ -382,8 +382,8 @@ void dynd::get_string_to_builtin_assignment_kernel(type_id_t dst_type_id,
         throw runtime_error(ss.str());
     }
 
-    if (dst_type_id >= 0 && dst_type_id < builtin_type_id_count) {
-        out_kernel.kernel.single = static_string_to_builtin_kernels[dst_type_id];
+    if (dst_type_id >= bool_type_id && dst_type_id <= complex_float64_type_id) {
+        out_kernel.kernel.single = static_string_to_builtin_kernels[dst_type_id-bool_type_id];
         out_kernel.kernel.strided = NULL;
         make_auxiliary_data<string_to_builtin_auxdata>(out_kernel.extra.auxdata);
         string_to_builtin_auxdata& ad = out_kernel.extra.auxdata.get<string_to_builtin_auxdata>();
