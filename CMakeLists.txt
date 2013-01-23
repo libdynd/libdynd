@@ -62,6 +62,7 @@ set(dynd_SRC
     src/dynd/dtypes/byteswap_dtype.cpp
     src/dynd/dtypes/categorical_dtype.cpp
     src/dynd/dtypes/convert_dtype.cpp
+    src/dynd/dtypes/datashape_parser.cpp
     src/dynd/dtypes/date_dtype.cpp
     src/dynd/dtypes/date_property_dtype.cpp
     src/dynd/dtypes/dtype_alignment.cpp
@@ -87,6 +88,7 @@ set(dynd_SRC
     include/dynd/dtypes/byteswap_dtype.hpp
     include/dynd/dtypes/categorical_dtype.hpp
     include/dynd/dtypes/convert_dtype.hpp
+    include/dynd/dtypes/datashape_parser.hpp
     include/dynd/dtypes/date_dtype.hpp
     include/dynd/dtypes/date_property_dtype.hpp
     include/dynd/dtypes/dtype_alignment.hpp

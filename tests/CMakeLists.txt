@@ -17,6 +17,7 @@ set(tests_SRC
     dtypes/test_categorical_dtype.cpp
     dtypes/test_convert_dtype.cpp
     dtypes/test_align_dtype.cpp
+    dtypes/test_datashape_parser.cpp
     dtypes/test_date_dtype.cpp
     dtypes/test_dtype.cpp
     dtypes/test_dtype_assign.cpp
