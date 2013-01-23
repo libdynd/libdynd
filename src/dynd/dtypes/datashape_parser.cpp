@@ -11,6 +11,7 @@
 #include <dynd/dtypes/fixedarray_dtype.hpp>
 #include <dynd/dtypes/fixedstruct_dtype.hpp>
 #include <dynd/dtypes/string_dtype.hpp>
+#include <dynd/dtypes/fixedstring_dtype.hpp>
 #include <dynd/dtypes/date_dtype.hpp>
 
 using namespace std;
@@ -56,9 +57,13 @@ namespace {
             builtin_types["uint64"] = make_dtype<uint64_t>();
             builtin_types["float32"] = make_dtype<float>();
             builtin_types["float64"] = make_dtype<double>();
-            builtin_types["complex64"] = make_dtype<complex<float> >();
-            builtin_types["complex128"] = make_dtype<complex<double> >();
+            builtin_types["cfloat32"] = builtin_types["complex64"] = make_dtype<complex<float> >();
+            builtin_types["cfloat64"] = builtin_types["complex128"] = make_dtype<complex<double> >();
             builtin_types["string"] = make_string_dtype(string_encoding_utf_8);
+            builtin_types["string1"] = make_fixedstring_dtype(string_encoding_utf_8, 1);
+            builtin_types["string2"] = make_fixedstring_dtype(string_encoding_utf_8, 2);
+            builtin_types["string3"] = make_fixedstring_dtype(string_encoding_utf_8, 3);
+            builtin_types["string4"] = make_fixedstring_dtype(string_encoding_utf_8, 4);
             builtin_types["date"] = make_date_dtype();
         }
     };
