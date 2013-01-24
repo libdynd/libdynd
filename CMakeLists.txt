@@ -53,7 +53,6 @@ set(dynd_SRC
     include/dynd/codegen/calling_conventions.hpp
     include/dynd/codegen/codegen_cache.hpp
     # DTypes
-    src/dynd/dtypes/array_dtype.cpp
     src/dynd/dtypes/base_bytes_dtype.cpp
     src/dynd/dtypes/base_dtype.cpp
     src/dynd/dtypes/base_expression_dtype.cpp
@@ -77,9 +76,9 @@ set(dynd_SRC
     src/dynd/dtypes/string_dtype.cpp
     src/dynd/dtypes/struct_dtype.cpp
     src/dynd/dtypes/tuple_dtype.cpp
+    src/dynd/dtypes/var_array_dtype.cpp
     src/dynd/dtypes/view_dtype.cpp
     src/dynd/dtypes/void_pointer_dtype.cpp
-    include/dynd/dtypes/array_dtype.hpp
     include/dynd/dtypes/base_bytes_dtype.hpp
     include/dynd/dtypes/base_dtype.hpp
     include/dynd/dtypes/base_expression_dtype.hpp
@@ -105,6 +104,7 @@ set(dynd_SRC
     include/dynd/dtypes/struct_dtype.hpp
     include/dynd/dtypes/fixedstruct_dtype.hpp
     include/dynd/dtypes/tuple_dtype.hpp
+    include/dynd/dtypes/var_array_dtype.hpp
     include/dynd/dtypes/view_dtype.hpp
     include/dynd/dtypes/void_pointer_dtype.hpp
     # Eval

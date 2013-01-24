@@ -6,7 +6,7 @@
 #include <dynd/ndobject.hpp>
 #include <dynd/ndobject_iter.hpp>
 #include <dynd/dtypes/strided_array_dtype.hpp>
-#include <dynd/dtypes/array_dtype.hpp>
+#include <dynd/dtypes/var_array_dtype.hpp>
 #include <dynd/dtypes/dtype_alignment.hpp>
 #include <dynd/dtypes/view_dtype.hpp>
 #include <dynd/dtypes/string_dtype.hpp>

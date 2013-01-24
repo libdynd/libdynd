@@ -10,7 +10,7 @@
 #include <dynd/diagnostics.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/kernels/array_assignment_kernels.hpp>
-#include <dynd/dtypes/array_dtype.hpp>
+#include <dynd/dtypes/var_array_dtype.hpp>
 
 using namespace std;
 using namespace dynd;

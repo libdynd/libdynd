@@ -10,7 +10,7 @@
 #include <dynd/dtypes/fixedstruct_dtype.hpp>
 #include <dynd/dtypes/pointer_dtype.hpp>
 #include <dynd/dtypes/strided_array_dtype.hpp>
-#include <dynd/dtypes/array_dtype.hpp>
+#include <dynd/dtypes/var_array_dtype.hpp>
 #include <dynd/dtypes/categorical_dtype.hpp>
 
 using namespace std;

@@ -10,7 +10,7 @@
 
 #include <dynd/ndobject.hpp>
 #include <dynd/dtypes/tuple_dtype.hpp>
-#include <dynd/dtypes/array_dtype.hpp>
+#include <dynd/dtypes/var_array_dtype.hpp>
 #include <dynd/dtypes/strided_array_dtype.hpp>
 
 using namespace std;
