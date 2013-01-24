@@ -50,8 +50,8 @@ TEST(DataShapeParser, FixedDim) {
 }
 
 TEST(DataShapeParser, VarDim) {
-    EXPECT_EQ(make_array_dtype(make_dtype<dynd_bool>()), dtype_from_datashape("VarDim, bool"));
-    EXPECT_EQ(make_array_dtype(make_array_dtype(make_dtype<float>())),
+    EXPECT_EQ(make_var_array_dtype(make_dtype<dynd_bool>()), dtype_from_datashape("VarDim, bool"));
+    EXPECT_EQ(make_var_array_dtype(make_var_array_dtype(make_dtype<float>())),
                     dtype_from_datashape("VarDim, VarDim, float32"));
 }
 
@@ -61,7 +61,7 @@ TEST(DataShapeParser, StridedFixedDim) {
 }
 
 TEST(DataShapeParser, StridedVarFixedDim) {
-    EXPECT_EQ(make_strided_array_dtype(make_array_dtype(make_fixedarray_dtype(make_dtype<float>(), 3))),
+    EXPECT_EQ(make_strided_array_dtype(make_var_array_dtype(make_fixedarray_dtype(make_dtype<float>(), 3))),
                     dtype_from_datashape("M, VarDim, 3, float32"));
 }
 

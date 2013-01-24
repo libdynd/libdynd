@@ -28,13 +28,13 @@ namespace {
     static void blockref_array_assign_single(char *dst, const char *src, unary_kernel_static_data *extra)
     {
         blockref_array_assign_kernel_auxdata& ad = get_auxiliary_data<blockref_array_assign_kernel_auxdata>(extra->auxdata);
-        const array_dtype_metadata *dst_md = reinterpret_cast<const array_dtype_metadata *>(extra->dst_metadata);
-        const array_dtype_metadata *src_md = reinterpret_cast<const array_dtype_metadata *>(extra->src_metadata);
+        const var_array_dtype_metadata *dst_md = reinterpret_cast<const var_array_dtype_metadata *>(extra->dst_metadata);
+        const var_array_dtype_metadata *src_md = reinterpret_cast<const var_array_dtype_metadata *>(extra->src_metadata);
         // If the blockrefs are different, require a copy operation
         if (dst_md->blockref != src_md->blockref) {
             char *dst_begin = NULL, *dst_end = NULL;
-            const char *src_begin = reinterpret_cast<const array_dtype_data *>(src)->begin;
-            size_t src_size = reinterpret_cast<const array_dtype_data *>(src)->size;
+            const char *src_begin = reinterpret_cast<const var_array_dtype_data *>(src)->begin;
+            size_t src_size = reinterpret_cast<const var_array_dtype_data *>(src)->size;
             memory_block_pod_allocator_api *allocator = get_memory_block_pod_allocator_api(dst_md->blockref);
 
             // Allocate the output array data
@@ -43,8 +43,8 @@ namespace {
                         ad.dst_dtype.get_alignment(), &dst_begin, &dst_end);
 
             // Set the output
-            reinterpret_cast<array_dtype_data *>(dst)->begin = dst_begin;
-            reinterpret_cast<array_dtype_data *>(dst)->size = src_size;
+            reinterpret_cast<var_array_dtype_data *>(dst)->begin = dst_begin;
+            reinterpret_cast<var_array_dtype_data *>(dst)->size = src_size;
 
             intptr_t dst_stride = dst_md->stride, src_stride = src_md->stride;
             if (ad.assign_elements.kernel.strided == NULL) {
@@ -60,7 +60,7 @@ namespace {
             }
         } else {
             // Copy the pointers directly, reuse the same data
-            memcpy(dst, src, sizeof(array_dtype_data));
+            memcpy(dst, src, sizeof(var_array_dtype_data));
         }
     }
 } // anonymous namespace

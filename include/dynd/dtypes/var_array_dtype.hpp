@@ -13,7 +13,7 @@
 
 namespace dynd {
 
-struct array_dtype_metadata {
+struct var_array_dtype_metadata {
     /**
      * A reference to the memory block which contains the array's data.
      */
@@ -21,21 +21,21 @@ struct array_dtype_metadata {
     intptr_t stride;
 };
 
-struct array_dtype_data {
+struct var_array_dtype_data {
     char *begin;
     size_t size;
 };
 
-class array_dtype : public base_dtype {
+class var_array_dtype : public base_dtype {
     dtype m_element_dtype;
 
 public:
-    array_dtype(const dtype& element_dtype);
+    var_array_dtype(const dtype& element_dtype);
 
-    virtual ~array_dtype();
+    virtual ~var_array_dtype();
 
     size_t get_default_data_size(int DYND_UNUSED(ndim), const intptr_t *DYND_UNUSED(shape)) const {
-        return sizeof(array_dtype_data);
+        return sizeof(var_array_dtype_data);
     }
 
 
@@ -108,8 +108,8 @@ public:
     void reorder_default_constructed_strides(char *dst_metadata, const dtype& src_dtype, const char *src_metadata) const;
 };
 
-inline dtype make_array_dtype(const dtype& element_dtype) {
-    return dtype(new array_dtype(element_dtype), false);
+inline dtype make_var_array_dtype(const dtype& element_dtype) {
+    return dtype(new var_array_dtype(element_dtype), false);
 }
 
 } // namespace dynd

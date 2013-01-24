@@ -38,7 +38,7 @@ groupby_dtype::groupby_dtype(const dtype& data_values_dtype,
     }
     m_operand_dtype = make_fixedstruct_dtype(make_pointer_dtype(data_values_dtype), "data",
                     make_pointer_dtype(by_values_dtype), "by");
-    m_value_dtype = make_strided_array_dtype(make_array_dtype(data_values_dtype.at_single(0)));
+    m_value_dtype = make_strided_array_dtype(make_var_array_dtype(data_values_dtype.at_single(0)));
     m_groups_dtype = groups_dtype;
 }
 

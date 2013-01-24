@@ -271,7 +271,7 @@ static dtype parse_rhs_expression(const char *&begin, const char *end, map<strin
                 if (shape[i] == -2) {
                     result = make_strided_array_dtype(result);
                 } else if (shape[i] == -1) {
-                    result = make_array_dtype(result);
+                    result = make_var_array_dtype(result);
                 } else {
                     result = make_fixedarray_dtype(result, shape[i]);
                 }

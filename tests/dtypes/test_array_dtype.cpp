@@ -19,7 +19,7 @@ using namespace dynd;
 TEST(ArrayDType, Shape) {
     dtype dfloat = make_dtype<float>();
     dtype darr1 = make_strided_array_dtype(dfloat);
-    dtype darr2 = make_array_dtype(darr1);
+    dtype darr2 = make_var_array_dtype(darr1);
     dtype darr3 = make_strided_array_dtype(darr2);
 
     intptr_t shape[3] = {3, -1, 2};
@@ -33,8 +33,8 @@ TEST(ArrayDType, Shape) {
 
 TEST(ArrayDType, DTypeSubscript) {
     dtype dfloat = make_dtype<float>();
-    dtype darr1 = make_array_dtype(dfloat);
-    dtype darr2 = make_array_dtype(darr1);
+    dtype darr1 = make_var_array_dtype(dfloat);
+    dtype darr2 = make_var_array_dtype(darr1);
     dtype dtest;
 
 }

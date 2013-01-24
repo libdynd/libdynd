@@ -12,6 +12,7 @@ using namespace dynd;
 
 ndobject dynd::parse_json(const dtype& dt, const ndobject& json)
 {
+    // Check the dtype of 'json', and get pointers to the begin/end of a UTF-8 buffer
     ndobject json_tmp;
     const char *json_begin = NULL, *json_end = NULL;
 
@@ -49,4 +50,18 @@ ndobject dynd::parse_json(const dtype& dt, const ndobject& json)
     }
 
     return parse_json(dt, json_begin, json_end);
+}
+
+ndobject dynd::parse_json(const dtype& dt, const char *json_begin, const char *json_end)
+{
+    ndobject result;
+    if (dt.get_data_size() != 0) {
+        result = ndobject(dt);
+    } else {
+        stringstream ss;
+        ss << "The dtype provided to parse_json, " << dt << ", cannot be used because it requires additional shape information";
+        throw runtime_error(ss.str());
+    }
+
+    throw runtime_error("TODO: finish parse_json");
 }

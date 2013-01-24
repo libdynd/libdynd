@@ -57,7 +57,7 @@ ndobject dynd::make_strided_ndobject(const dtype& uniform_dtype, size_t ndim, co
         if (shape[i] >= 0) {
             array_dtype = make_strided_array_dtype(array_dtype);
         } else {
-            array_dtype = make_array_dtype(array_dtype);
+            array_dtype = make_var_array_dtype(array_dtype);
             any_variable_dims = true;
         }
     }

@@ -16,9 +16,8 @@ namespace dynd {
  * ndobject representation, interpreting the data as the requested type
  * on the fly.
  *
- * If additional shape information is required to construct
- * the ndobject, the parsing will happen in two passes - first
- * to deduce the shape, then to populate the ndobject.
+ * The dtype must have a fixed data size, so every dimension must be
+ * either variable-sized or fixed-sized, not a free variable.
  *
  * \param dt  The dtype to interpret the JSON data.
  * \param json_begin  The beginning of the UTF-8 buffer containing the JSON.
