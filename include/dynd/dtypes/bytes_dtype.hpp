@@ -9,6 +9,7 @@
 #define _DYND__BYTES_DTYPE_HPP_
 
 #include <dynd/dtype.hpp>
+#include <dynd/dtypes/base_bytes_dtype.hpp>
 #include <dynd/dtype_assign.hpp>
 
 namespace dynd {
@@ -27,7 +28,7 @@ struct bytes_dtype_data {
     char *end;
 };
 
-class bytes_dtype : public base_dtype {
+class bytes_dtype : public base_bytes_dtype {
     size_t m_alignment;
 
 public:
@@ -49,6 +50,8 @@ public:
     dtype_memory_management_t get_memory_management() const {
         return blockref_memory_management;
     }
+
+    void get_bytes_range(const char **out_begin, const char**out_end, const char *metadata, const char *data) const;
 
     dtype apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& root_dt) const;
     intptr_t apply_linear_index(int nindices, const irange *indices, const char *metadata,

@@ -54,6 +54,7 @@ set(dynd_SRC
     include/dynd/codegen/codegen_cache.hpp
     # DTypes
     src/dynd/dtypes/array_dtype.cpp
+    src/dynd/dtypes/base_bytes_dtype.cpp
     src/dynd/dtypes/base_dtype.cpp
     src/dynd/dtypes/base_expression_dtype.cpp
     src/dynd/dtypes/base_string_dtype.cpp
@@ -79,6 +80,7 @@ set(dynd_SRC
     src/dynd/dtypes/view_dtype.cpp
     src/dynd/dtypes/void_pointer_dtype.cpp
     include/dynd/dtypes/array_dtype.hpp
+    include/dynd/dtypes/base_bytes_dtype.hpp
     include/dynd/dtypes/base_dtype.hpp
     include/dynd/dtypes/base_expression_dtype.hpp
     include/dynd/dtypes/base_string_dtype.hpp

@@ -14,7 +14,7 @@ using namespace std;
 using namespace dynd;
 
 dynd::fixedbytes_dtype::fixedbytes_dtype(intptr_t data_size, intptr_t alignment)
-    : base_dtype(fixedbytes_type_id, bytes_kind, data_size, alignment)
+    : base_bytes_dtype(fixedbytes_type_id, bytes_kind, data_size, alignment)
 {
     if (alignment > data_size) {
         std::stringstream ss;
@@ -35,6 +35,13 @@ dynd::fixedbytes_dtype::fixedbytes_dtype(intptr_t data_size, intptr_t alignment)
 
 fixedbytes_dtype::~fixedbytes_dtype()
 {
+}
+
+void fixedbytes_dtype::get_bytes_range(const char **out_begin, const char**out_end,
+                const char *DYND_UNUSED(metadata), const char *data) const
+{
+    *out_begin = data;
+    *out_end = data + get_data_size();
 }
 
 void dynd::fixedbytes_dtype::print_data(std::ostream& o, const char *DYND_UNUSED(metadata), const char *data) const

@@ -8,12 +8,12 @@
 
 #include <dynd/dtype.hpp>
 #include <dynd/dtype_assign.hpp>
+#include <dynd/dtypes/base_bytes_dtype.hpp>
 #include <dynd/dtypes/view_dtype.hpp>
-#include <dynd/string_encodings.hpp>
 
 namespace dynd {
 
-class fixedbytes_dtype : public base_dtype {
+class fixedbytes_dtype : public base_bytes_dtype {
 public:
     fixedbytes_dtype(intptr_t element_size, intptr_t alignment);
 
@@ -28,6 +28,8 @@ public:
     dtype_memory_management_t get_memory_management() const {
         return pod_memory_management;
     }
+
+    void get_bytes_range(const char **out_begin, const char**out_end, const char *metadata, const char *data) const;
 
     dtype apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& root_dt) const;
 

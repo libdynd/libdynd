@@ -39,8 +39,8 @@ string_dtype::~string_dtype()
 void string_dtype::get_string_range(const char **out_begin, const char**out_end,
                 const char *DYND_UNUSED(metadata), const char *data) const
 {
-    *out_begin = reinterpret_cast<const char * const *>(data)[0];
-    *out_end = reinterpret_cast<const char * const *>(data)[1];
+    *out_begin = reinterpret_cast<const string_dtype_data *>(data)->begin;
+    *out_end = reinterpret_cast<const string_dtype_data *>(data)->end;
 }
 
 void string_dtype::set_utf8_string(const char *data_metadata, char *data, assign_error_mode errmode, const std::string& utf8_str) const

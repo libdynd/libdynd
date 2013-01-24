@@ -15,7 +15,7 @@ using namespace std;
 using namespace dynd;
 
 bytes_dtype::bytes_dtype(size_t alignment)
-    : base_dtype(bytes_type_id, bytes_kind, sizeof(bytes_dtype_data), sizeof(const char *)), m_alignment(alignment)
+    : base_bytes_dtype(bytes_type_id, bytes_kind, sizeof(bytes_dtype_data), sizeof(const char *)), m_alignment(alignment)
 {
     if (alignment != 1 && alignment != 2 && alignment != 4 && alignment != 8 && alignment != 16) {
         std::stringstream ss;
@@ -26,6 +26,13 @@ bytes_dtype::bytes_dtype(size_t alignment)
 
 bytes_dtype::~bytes_dtype()
 {
+}
+
+void bytes_dtype::get_bytes_range(const char **out_begin, const char**out_end,
+                const char *DYND_UNUSED(metadata), const char *data) const
+{
+    *out_begin = reinterpret_cast<const bytes_dtype_data *>(data)->begin;
+    *out_end = reinterpret_cast<const bytes_dtype_data *>(data)->end;
 }
 
 void bytes_dtype::print_data(std::ostream& o, const char *DYND_UNUSED(metadata), const char *data) const
