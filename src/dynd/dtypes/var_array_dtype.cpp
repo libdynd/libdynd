@@ -14,7 +14,7 @@ using namespace std;
 using namespace dynd;
 
 var_array_dtype::var_array_dtype(const dtype& element_dtype)
-    : base_dtype(array_type_id, uniform_array_kind, sizeof(var_array_dtype_data),
+    : base_dtype(var_array_type_id, uniform_array_kind, sizeof(var_array_dtype_data),
                     sizeof(const char *), element_dtype.get_undim() + 1),
             m_element_dtype(element_dtype)
 {
@@ -246,7 +246,7 @@ bool var_array_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& s
     if (dst_dt.extended() == this) {
         if (src_dt.extended() == this) {
             return true;
-        } else if (src_dt.get_type_id() == array_type_id) {
+        } else if (src_dt.get_type_id() == var_array_type_id) {
             return *dst_dt.extended() == *src_dt.extended();
         }
     }
@@ -270,7 +270,7 @@ bool var_array_dtype::operator==(const base_dtype& rhs) const
 {
     if (this == &rhs) {
         return true;
-    } else if (rhs.get_type_id() != array_type_id) {
+    } else if (rhs.get_type_id() != var_array_type_id) {
         return false;
     } else {
         const var_array_dtype *dt = static_cast<const var_array_dtype*>(&rhs);

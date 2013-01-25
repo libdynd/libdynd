@@ -64,6 +64,17 @@ fixedstruct_dtype::~fixedstruct_dtype()
 {
 }
 
+intptr_t fixedstruct_dtype::get_field_index(const std::string& field_name) const
+{
+    // TODO: Put a map<> or unordered_map<> in the dtype to accelerate this lookup
+    vector<string>::const_iterator i = find(m_field_names.begin(), m_field_names.end(), field_name);
+    if (i != m_field_names.end()) {
+        return i - m_field_names.begin();
+    } else {
+        return -1;
+    }
+}
+
 void fixedstruct_dtype::print_data(std::ostream& o, const char *metadata, const char *data) const
 {
     o << "[";

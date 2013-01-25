@@ -48,6 +48,17 @@ public:
         return m_field_names;
     }
 
+    /**
+     * Gets the field index for the given name. Returns -1 if
+     * the struct doesn't have a field of the given name.
+     *
+     * \param field_name  The name of the field.
+     *
+     * \returns  The field index, or -1 if there is not field
+     *           of the given name.
+     */
+    intptr_t get_field_index(const std::string& field_name) const;
+
     const std::vector<size_t>& get_data_offsets() const {
         return m_data_offsets;
     }

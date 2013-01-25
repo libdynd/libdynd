@@ -102,6 +102,8 @@ std::string string_range_as_utf8_string(string_encoding_t encoding, const char *
  */
 void print_escaped_unicode_codepoint(std::ostream& o, uint32_t cp);
 
+void append_utf8_codepoint(uint32_t cp, std::string& out_str);
+
 } // namespace dynd
 
 #endif // _DYND__STRING_ENCODINGS_HPP_

@@ -91,7 +91,7 @@ enum type_id_t {
     string_type_id,
 
     // blockref composite dtypes
-    array_type_id,
+    var_array_type_id,
 
     // Composite dtypes
     strided_array_type_id,

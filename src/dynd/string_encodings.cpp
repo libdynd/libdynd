@@ -214,7 +214,7 @@ namespace {
         }
     }
 
-    void string_append_utf8(uint32_t cp, string& s)
+    inline void string_append_utf8(uint32_t cp, string& s)
     {
         char tmp[6];
         char *tmp_ptr = tmp, *tmp_ptr_end;
@@ -440,6 +440,12 @@ void dynd::print_escaped_unicode_codepoint(std::ostream& o, uint32_t cp)
 {
     if (cp < 0x80) {
         switch (cp) {
+            case '\b':
+                o << "\\b";
+                break;
+            case '\f':
+                o << "\\f";
+                break;
             case '\n':
                 o << "\\n";
                 break;
@@ -471,4 +477,9 @@ void dynd::print_escaped_unicode_codepoint(std::ostream& o, uint32_t cp)
         o << "\\U";
         hexadecimal_print(o, static_cast<uint32_t>(cp));
     }
+}
+
+void append_utf8_codepoint(uint32_t cp, std::string& out_str)
+{
+    string_append_utf8(cp, out_str);
 }
