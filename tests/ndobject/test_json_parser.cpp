@@ -13,6 +13,8 @@
 #include <dynd/json_parser.hpp>
 #include <dynd/dtypes/var_array_dtype.hpp>
 #include <dynd/dtypes/fixedarray_dtype.hpp>
+#include <dynd/dtypes/fixedstruct_dtype.hpp>
+#include <dynd/dtypes/date_dtype.hpp>
 #include <dynd/dtypes/string_dtype.hpp>
 
 using namespace std;
@@ -156,4 +158,106 @@ TEST(JSONParser, NestedListInts) {
     EXPECT_EQ(7, n.at(2,1).as<int>());
     EXPECT_EQ(-10, n.at(2,2).as<int>());
     EXPECT_EQ(1000, n.at(2,3).as<int>());
+
+    n = parse_json(make_var_array_dtype(make_fixedarray_dtype(make_dtype<int>(), 3)),
+                    "  [[1,2,3], [4,5,2] ]  ");
+    EXPECT_EQ(make_var_array_dtype(make_fixedarray_dtype(make_dtype<int>(), 3)), n.get_dtype());
+    EXPECT_EQ(1, n.at(0,0).as<int>());
+    EXPECT_EQ(2, n.at(0,1).as<int>());
+    EXPECT_EQ(3, n.at(0,2).as<int>());
+    EXPECT_EQ(4, n.at(1,0).as<int>());
+    EXPECT_EQ(5, n.at(1,1).as<int>());
+    EXPECT_EQ(2, n.at(1,2).as<int>());
+}
+
+TEST(JSONParser, Struct) {
+    ndobject n;
+    dtype sdt = make_fixedstruct_dtype(make_dtype<int>(), "id", make_dtype<double>(), "amount",
+                    make_string_dtype(), "name", make_date_dtype(), "when");
+
+    // A straightforward struct
+    n = parse_json(sdt, "{\"amount\":3.75,\"id\":24601,"
+                    " \"when\":\"2012-09-19\",\"name\":\"Jean\"}");
+    EXPECT_EQ(sdt, n.get_dtype());
+    EXPECT_EQ(24601,        n.at(0).as<int>());
+    EXPECT_EQ(3.75,         n.at(1).as<double>());
+    EXPECT_EQ("Jean",       n.at(2).as<string>());
+    EXPECT_EQ("2012-09-19", n.at(3).as<string>());
+
+    // Default parsing policy discards extra JSON fields
+    n = parse_json(sdt, "{\"amount\":3.75,\"id\":24601,\"discarded\":[1,2,3],"
+                    " \"when\":\"2012-09-19\",\"name\":\"Jean\"}");
+    EXPECT_EQ(sdt, n.get_dtype());
+    EXPECT_EQ(24601,        n.at(0).as<int>());
+    EXPECT_EQ(3.75,         n.at(1).as<double>());
+    EXPECT_EQ("Jean",       n.at(2).as<string>());
+    EXPECT_EQ("2012-09-19", n.at(3).as<string>());
+
+    // Every field must be populated, though
+    EXPECT_THROW(parse_json(sdt, "{\"amount\":3.75,\"discarded\":[1,2,3],"
+                    " \"when\":\"2012-09-19\",\"name\":\"Jean\"}"),
+                    runtime_error);
+}
+
+TEST(JSONParser, NestedStruct) {
+    ndobject n;
+    dtype sdt = make_fixedstruct_dtype(make_fixedarray_dtype(make_dtype<float>(),3), "position",
+                    make_dtype<double>(), "amount",
+                    make_fixedstruct_dtype(make_string_dtype(), "name", make_date_dtype(), "when"), "data");
+
+    n = parse_json(sdt, "{\"data\":{\"name\":\"Harvey\", \"when\":\"1970-02-13\"}, "
+                    "\"amount\": 10.5, \"position\": [3.5,1.0,1e10] }");
+    EXPECT_EQ(sdt, n.get_dtype());
+    EXPECT_EQ(3.5,          n.at(0,0).as<float>());
+    EXPECT_EQ(1.0,          n.at(0,1).as<float>());
+    EXPECT_EQ(1e10,         n.at(0,2).as<float>());
+    EXPECT_EQ(10.5,         n.at(1).as<double>());
+    EXPECT_EQ("Harvey",     n.at(2,0).as<string>());
+    EXPECT_EQ("1970-02-13", n.at(2,1).as<string>());
+
+    // Too many entries in "position"
+    EXPECT_THROW(parse_json(sdt, "{\"data\":{\"name\":\"Harvey\", \"when\":\"1970-02-13\"}, "
+                    "\"amount\": 10.5, \"position\": [1.5,3.5,1.0,1e10] }"),
+                    runtime_error);
+
+    // Too few entries in "position"
+    EXPECT_THROW(parse_json(sdt, "{\"data\":{\"name\":\"Harvey\", \"when\":\"1970-02-13\"}, "
+                    "\"amount\": 10.5, \"position\": [1.0,1e10] }"),
+                    runtime_error);
+
+    // Missing field "when"
+    EXPECT_THROW(parse_json(sdt, "{\"data\":{\"name\":\"Harvey\", \"when2\":\"1970-02-13\"}, "
+                    "\"amount\": 10.5, \"position\": [3.5,1.0,1e10] }"),
+                    runtime_error);
+}
+
+TEST(JSONParser, ListOfStruct) {
+    ndobject n;
+    dtype sdt = make_var_array_dtype(make_fixedstruct_dtype(make_fixedarray_dtype(make_dtype<float>(),3), "position",
+                    make_dtype<double>(), "amount",
+                    make_fixedstruct_dtype(make_string_dtype(), "name", make_date_dtype(), "when"), "data"));
+
+    n = parse_json(sdt, "[{\"data\":{\"name\":\"Harvey\", \"when\":\"1970-02-13\"}, \n"
+                    "\"amount\": 10.5, \"position\": [3.5,1.0,1e10] },\n"
+                    "{\"position\":[1,2,3], \"amount\": 3.125,\n"
+                    "\"data\":{ \"when\":\"2013-12-25\", \"name\":\"Frank\"}}]");
+    EXPECT_EQ(3.5,          n.at(0,0,0).as<float>());
+    EXPECT_EQ(1.0,          n.at(0,0,1).as<float>());
+    EXPECT_EQ(1e10,         n.at(0,0,2).as<float>());
+    EXPECT_EQ(10.5,         n.at(0,1).as<double>());
+    EXPECT_EQ("Harvey",     n.at(0,2,0).as<string>());
+    EXPECT_EQ("1970-02-13", n.at(0,2,1).as<string>());
+    EXPECT_EQ(1,            n.at(1,0,0).as<float>());
+    EXPECT_EQ(2,            n.at(1,0,1).as<float>());
+    EXPECT_EQ(3,            n.at(1,0,2).as<float>());
+    EXPECT_EQ(3.125,        n.at(1,1).as<double>());
+    EXPECT_EQ("Frank",      n.at(1,2,0).as<string>());
+    EXPECT_EQ("2013-12-25", n.at(1,2,1).as<string>());
+
+    // Spurious '#' inserted
+    EXPECT_THROW(parse_json(sdt, "[{\"data\":{\"name\":\"Harvey\", \"when\":\"1970-02-13\"}, \n"
+                    "\"amount\": 10.5, \"position\": [3.5,1.0,1e10] },\n"
+                    "{\"position\":[1,2,3], \"amount\": 3.125#,\n"
+                    "\"data\":{ \"when\":\"2013-12-25\", \"name\":\"Frank\"}}]"),
+                    runtime_error);
 }

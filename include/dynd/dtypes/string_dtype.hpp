@@ -90,7 +90,7 @@ public:
     void metadata_debug_print(const char *metadata, std::ostream& o, const std::string& indent) const;
 };
 
-inline dtype make_string_dtype(string_encoding_t encoding) {
+inline dtype make_string_dtype(string_encoding_t encoding = string_encoding_utf_8) {
     return dtype(new string_dtype(encoding), false);
 }
 

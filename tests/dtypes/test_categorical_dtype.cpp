@@ -177,7 +177,6 @@ TEST(CategoricalDType, ValuesLonger) {
     for (int i = 0; i < cats_count; ++i) {
         EXPECT_EQ((uint32_t)i, static_cast<const categorical_dtype*>(dt.extended())->get_value_from_category(cats_vals[i]));
     }
-
     // Check that everything in 'a' is right
     for (int i = 0; i < a_count; ++i) {
         EXPECT_EQ(a_vals[i], a.at(i).as<string>());

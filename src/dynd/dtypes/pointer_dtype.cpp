@@ -302,6 +302,7 @@ void pointer_dtype::metadata_copy_construct(char *dst_metadata, const char *src_
     pointer_dtype_metadata *dst_md = reinterpret_cast<pointer_dtype_metadata *>(dst_metadata);
     dst_md->blockref = src_md->blockref ? src_md->blockref : embedded_reference;
     memory_block_incref(dst_md->blockref);
+    dst_md->offset = src_md->offset;
     // Copy the target metadata
     if (!m_target_dtype.is_builtin()) {
         m_target_dtype.extended()->metadata_copy_construct(dst_metadata + sizeof(pointer_dtype_metadata),

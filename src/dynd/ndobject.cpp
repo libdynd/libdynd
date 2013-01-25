@@ -724,7 +724,11 @@ ndobject ndobject::cast_scalars(const dtype& scalar_dtype, assign_error_mode err
     // The result has the exact same metadata and data, so we just have to swap in the new
     // dtype in a shallow copy.
     dtype replaced_dtype = get_dtype().with_replaced_scalar_types(scalar_dtype, errmode);
-    return make_ndobject_clone_with_new_dtype(*this, replaced_dtype);
+    if (replaced_dtype == get_dtype()) {
+        return *this;
+    } else {
+        return make_ndobject_clone_with_new_dtype(*this, replaced_dtype);
+    }
 }
 
 namespace {
@@ -1034,12 +1038,45 @@ ndobject dynd::groupby(const dynd::ndobject& data_values, const dynd::ndobject& 
     return result;
 }
 
+static ndobject follow_ndobject_pointers(const ndobject& n)
+{
+    // Follow the pointers to eliminate them
+    dtype dt = n.get_dtype();
+    const char *metadata = n.get_ndo_meta();
+    char *data = n.get_ndo()->m_data_pointer;
+    memory_block_data *dataref = NULL;
+    uint64_t flags = n.get_ndo()->m_flags;
+    while (dt.get_type_id() == pointer_type_id) {
+        const pointer_dtype_metadata *md = reinterpret_cast<const pointer_dtype_metadata *>(metadata);
+        const pointer_dtype *pd = static_cast<const pointer_dtype *>(dt.extended());
+        dt = pd->get_target_dtype();
+        metadata += sizeof(pointer_dtype_metadata);
+        data = *reinterpret_cast<char **>(data) + md->offset;
+        dataref = md->blockref;
+    }
+    // Create an ndobject without the pointers
+    ndobject result(make_ndobject_memory_block(dt.is_builtin() ? 0 : dt.extended()->get_metadata_size()));
+    if (!dt.is_builtin()) {
+        dt.extended()->metadata_copy_construct(result.get_ndo_meta(), metadata, &n.get_ndo()->m_memblockdata);
+    }
+    result.get_ndo()->m_dtype = dt.release();
+    result.get_ndo()->m_data_pointer = data;
+    result.get_ndo()->m_data_reference = dataref ? dataref : &n.get_ndo()->m_memblockdata;
+    memory_block_incref(result.get_ndo()->m_data_reference);
+    result.get_ndo()->m_flags = flags;
+    return result;
+}
+
 ndobject_vals::operator ndobject() const
 {
     const dtype& current_dtype = m_arr.get_dtype();
 
     if (!current_dtype.is_expression()) {
-        return m_arr;
+        if (current_dtype.get_type_id() != pointer_type_id) {
+            return m_arr;
+        } else {
+            return follow_ndobject_pointers(m_arr);
+        }
     } else {
         // If there is any expression in the dtype, make a copy using the canonical dtype
         const dtype& dt = current_dtype.get_canonical_dtype();

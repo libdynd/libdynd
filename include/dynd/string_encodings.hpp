@@ -102,6 +102,11 @@ std::string string_range_as_utf8_string(string_encoding_t encoding, const char *
  */
 void print_escaped_unicode_codepoint(std::ostream& o, uint32_t cp);
 
+/**
+ * Prints the utf8 string, escaping as necessary.
+ */
+void print_escaped_utf8_string(std::ostream& o, const std::string& str);
+
 void append_utf8_codepoint(uint32_t cp, std::string& out_str);
 
 } // namespace dynd

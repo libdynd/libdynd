@@ -479,6 +479,21 @@ void dynd::print_escaped_unicode_codepoint(std::ostream& o, uint32_t cp)
     }
 }
 
+void dynd::print_escaped_utf8_string(std::ostream& o, const std::string& str)
+{
+    uint32_t cp;
+    const char *begin = str.data();
+    const char *end = str.data() + str.size();
+
+    // Print as an escaped string
+    o << "\"";
+    while (begin < end) {
+        cp = next_utf8(begin, end);
+        print_escaped_unicode_codepoint(o, cp);
+    }
+    o << "\"";
+}
+
 void dynd::append_utf8_codepoint(uint32_t cp, std::string& out_str)
 {
     string_append_utf8(cp, out_str);

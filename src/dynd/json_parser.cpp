@@ -432,7 +432,8 @@ static void parse_fixedstruct_json(const dtype& dt, const char *metadata, char *
     for (size_t i = 0; i < field_count; ++i) {
         if (!populated_fields[i]) {
             stringstream ss;
-            ss << "object dict does not contain the field " << field_names[i];
+            ss << "object dict does not contain the field ";
+            print_escaped_utf8_string(ss, field_names[i]);
             ss << " as required by the data type";
             throw json_parse_error(skip_whitespace(saved_begin, end), ss.str(), dt);
         }
