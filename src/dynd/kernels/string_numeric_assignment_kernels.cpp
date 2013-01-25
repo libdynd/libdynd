@@ -8,6 +8,7 @@
 #include <cctype>
 
 #include <dynd/dtype.hpp>
+#include <dynd/dtypes/string_dtype.hpp>
 #include <dynd/diagnostics.hpp>
 #include <dynd/kernels/string_numeric_assignment_kernels.hpp>
 #include "single_assigner_builtin.hpp"
@@ -429,7 +430,7 @@ void dynd::get_builtin_to_string_assignment_kernel(const dtype& dst_string_dt,
 {
     if (dst_string_dt.get_kind() != string_kind) {
         stringstream ss;
-        ss << "get_string_to_builtin_assignment_kernel: source dtype " << dst_string_dt << " is not a string dtype";
+        ss << "get_string_to_builtin_assignment_kernel: destination dtype " << dst_string_dt << " is not a string dtype";
         throw runtime_error(ss.str());
     }
 
@@ -443,7 +444,23 @@ void dynd::get_builtin_to_string_assignment_kernel(const dtype& dst_string_dt,
         ad.dst_string_dt = dst_string_dt;
     } else {
         stringstream ss;
-        ss << "get_string_to_builtin_assignment_kernel: destination type id " << src_type_id << " is not builtin";
+        ss << "get_string_to_builtin_assignment_kernel: source type id " << src_type_id << " is not builtin";
         throw runtime_error(ss.str());
     }
+}
+
+void dynd::assign_utf8_string_to_builtin(type_id_t dst_type_id, char *dst,
+                const char *str_begin, const char *str_end, assign_error_mode errmode)
+{
+    dtype dt = make_string_dtype(string_encoding_utf_8);
+    string_dtype_data d;
+    string_dtype_metadata md;
+    d.begin = const_cast<char *>(str_begin);
+    d.end = const_cast<char *>(str_end);
+    md.blockref = NULL;
+
+    kernel_instance<unary_operation_pair_t> k;
+    get_string_to_builtin_assignment_kernel(dst_type_id, dt, errmode, k);
+    k.extra.dst_metadata = reinterpret_cast<const char *>(&md);
+    k.kernel.single(dst, reinterpret_cast<const char *>(&d), &k.extra);
 }

@@ -9,6 +9,8 @@
 #include <dynd/dtypes/fixedarray_dtype.hpp>
 #include <dynd/dtypes/var_array_dtype.hpp>
 #include <dynd/dtypes/fixedstruct_dtype.hpp>
+#include <dynd/dtypes/date_dtype.hpp>
+#include <dynd/kernels/string_numeric_assignment_kernels.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -16,10 +18,10 @@ using namespace dynd;
 namespace {
     class json_parse_error {
         const char *m_position;
-        const char *m_message;
+        string m_message;
         dtype m_dtype;
     public:
-        json_parse_error(const char *position, const char *message, const dtype& dt)
+        json_parse_error(const char *position, const std::string& message, const dtype& dt)
             : m_position(position), m_message(message), m_dtype(dt) {
         }
         virtual ~json_parse_error() {
@@ -28,7 +30,7 @@ namespace {
             return m_position;
         }
         const char *get_message() const {
-            return m_message;
+            return m_message.c_str();
         }
         const dtype& get_dtype() const {
             return m_dtype;
@@ -428,52 +430,126 @@ static void parse_fixedstruct_json(const dtype& dt, const char *metadata, char *
 
     for (size_t i = 0; i < field_count; ++i) {
         if (!populated_fields[i]) {
-            // TODO: Improve error message by listing the specific fields
-            throw json_parse_error(skip_whitespace(saved_begin, end),
-                    "object dict does not contain all the fields required by the data type", dt);
+            stringstream ss;
+            ss << "object dict does not contain the field " << field_names[i];
+            ss << " as required by the data type";
+            throw json_parse_error(skip_whitespace(saved_begin, end), ss.str(), dt);
         }
     }
 }
 
 static void parse_bool_json(const dtype& dt, const char *metadata, char *out_data,
-                const char *&json_begin, const char *json_end)
+                const char *&begin, const char *end)
 {
+    char value;
+    if (parse_token(begin, end, "true")) {
+        value = true;
+    } else if (parse_token(begin, end, "false")) {
+        value = false;
+    } else if (parse_token(begin, end, "null")) {
+        // TODO: error handling policy for NULL in this case
+        value = false;
+    } else {
+        // TODO: allow more general input (strings, integers) with a boolean parsing policy
+        throw json_parse_error(begin, "expected a boolean true or false", dt);
+    }
+
+    if (dt.get_type_id() == bool_type_id) {
+        *out_data = value;
+    } else {
+        dtype_assign(dt, metadata, out_data, make_dtype<dynd_bool>(), NULL, &value);
+    }
+}
+
+static void parse_dynd_builtin_json(const dtype& dt, const char *metadata, char *out_data,
+                const char *&begin, const char *end)
+{
+    const char *saved_begin = begin;
+    const char *nbegin = NULL, *nend = NULL;
+    string val;
+    if (parse_json_number(begin, end, nbegin, nend)) {
+        try {
+            assign_utf8_string_to_builtin(dt.get_type_id(), out_data, nbegin, nend);
+        } catch (const std::exception& e) {
+            throw json_parse_error(skip_whitespace(saved_begin, begin), e.what(), dt);
+        }
+    } else if (parse_json_string(begin, end, val)) {
+        try {
+            assign_utf8_string_to_builtin(dt.get_type_id(), out_data, val.data(), val.data() + val.size());
+        } catch (const std::exception& e) {
+            throw json_parse_error(skip_whitespace(saved_begin, begin), e.what(), dt);
+        }
+    } else {
+        throw json_parse_error(begin, "invalid input", dt);
+    }
 }
 
 static void parse_integer_json(const dtype& dt, const char *metadata, char *out_data,
-                const char *&json_begin, const char *json_end)
+                const char *&begin, const char *end)
 {
+    // TODO: Parsing policy for how to handle integers
+    parse_dynd_builtin_json(dt, metadata, out_data, begin, end);
 }
 
 static void parse_real_json(const dtype& dt, const char *metadata, char *out_data,
-                const char *json_begin, const char *json_end)
+                const char *&begin, const char *end)
 {
+    // TODO: Parsing policy for how to handle reals
+    parse_dynd_builtin_json(dt, metadata, out_data, begin, end);
 }
 
 static void parse_complex_json(const dtype& dt, const char *metadata, char *out_data,
-                const char *&json_begin, const char *json_end)
+                const char *&begin, const char *end)
 {
+    // TODO: Parsing policy for how to handle complex
+    parse_dynd_builtin_json(dt, metadata, out_data, begin, end);
 }
 
 static void parse_string_json(const dtype& dt, const char *metadata, char *out_data,
-                const char *&json_begin, const char *json_end)
+                const char *&begin, const char *end)
 {
+    const char *saved_begin = begin;
+    string val;
+    if (parse_json_string(begin, end, val)) {
+        const base_string_dtype *bsd = static_cast<const base_string_dtype *>(dt.extended());
+        try {
+            bsd->set_utf8_string(metadata, out_data, assign_error_fractional, val);
+        } catch (const std::exception& e) {
+            throw json_parse_error(skip_whitespace(saved_begin, begin), e.what(), dt);
+        }
+    } else {
+        throw json_parse_error(begin, "expected a string", dt);
+    }
 }
 
 static void parse_datetime_json(const dtype& dt, const char *metadata, char *out_data,
-                const char *&json_begin, const char *json_end)
+                const char *&begin, const char *end)
 {
+    const char *saved_begin = begin;
+    string val;
+    if (parse_json_string(begin, end, val)) {
+        if (dt.get_type_id() == date_type_id) {
+            const date_dtype *dd = static_cast<const date_dtype *>(dt.extended());
+            try {
+                dd->set_utf8_string(metadata, out_data, assign_error_fractional, val);
+            } catch (const std::exception& e) {
+                throw json_parse_error(skip_whitespace(saved_begin, begin), e.what(), dt);
+            }
+        }
+    } else {
+        throw json_parse_error(begin, "expected a string", dt);
+    }
 }
 
 static void parse_uniform_array_json(const dtype& dt, const char *metadata, char *out_data,
-                const char *&json_begin, const char *json_end)
+                const char *&begin, const char *end)
 {
     switch (dt.get_type_id()) {
         case fixedarray_type_id:
-            parse_fixedarray_json(dt, metadata, out_data, json_begin, json_end);
+            parse_fixedarray_json(dt, metadata, out_data, begin, end);
             break;
         case var_array_type_id:
-            parse_var_array_json(dt, metadata, out_data, json_begin, json_end);
+            parse_var_array_json(dt, metadata, out_data, begin, end);
             break;
         default: {
             stringstream ss;

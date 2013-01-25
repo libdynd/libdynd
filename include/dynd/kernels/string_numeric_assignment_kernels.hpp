@@ -12,6 +12,12 @@
 namespace dynd {
 
 /**
+ * Converts a single UTF8 string to an integer type.
+ */
+void assign_utf8_string_to_builtin(type_id_t dst_type_id, char *dst,
+                const char *str_begin, const char *str_end, assign_error_mode errmode = assign_error_fractional);
+
+/**
  * Gets a kernel which converts strings to values of a builtin type id.
  */
 void get_string_to_builtin_assignment_kernel(type_id_t dst_type_id,
