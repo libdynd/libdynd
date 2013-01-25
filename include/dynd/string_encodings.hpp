@@ -105,7 +105,15 @@ void print_escaped_unicode_codepoint(std::ostream& o, uint32_t cp);
 /**
  * Prints the utf8 string, escaping as necessary.
  */
-void print_escaped_utf8_string(std::ostream& o, const std::string& str);
+void print_escaped_utf8_string(std::ostream& o, const char *str_begin, const char *str_end);
+
+/**
+ * Prints the utf8 string, escaping as necessary.
+ */
+inline void print_escaped_utf8_string(std::ostream& o, const std::string& str) {
+    print_escaped_utf8_string(o, str.data(), str.data() + str.size());
+}
+
 
 void append_utf8_codepoint(uint32_t cp, std::string& out_str);
 

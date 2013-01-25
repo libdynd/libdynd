@@ -87,11 +87,36 @@ void fixedstruct_dtype::print_data(std::ostream& o, const char *metadata, const 
     o << "]";
 }
 
+static bool is_simple_identifier_name(const string& s)
+{
+    if (s.empty()) {
+        return false;
+    } else {
+        char c = s[0];
+        if (!(('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z') || c == '_')) {
+            return false;
+        }
+        for (size_t i = 1, i_end = s.size(); i < i_end; ++i) {
+            c = s[i];
+            if (!(('0' <= c && c <= '9') || ('a' <= c && c <= 'z')
+                            || ('A' <= c && c <= 'Z') || c == '_')) {
+                return false;
+            }
+        }
+        return true;
+    }
+}
+
 void fixedstruct_dtype::print_dtype(std::ostream& o) const
 {
     o << "fixedstruct<";
     for (size_t i = 0, i_end = m_field_types.size(); i != i_end; ++i) {
-        o << m_field_types[i] << " " << m_field_names[i];
+        o << m_field_types[i] << " ";
+        if (is_simple_identifier_name(m_field_names[i])) {
+            o << m_field_names[i];
+        } else {
+            print_escaped_utf8_string(o, m_field_names[i]);
+        }
         if (i != i_end - 1) {
             o << ", ";
         }
@@ -449,7 +474,9 @@ void fixedstruct_dtype::metadata_debug_print(const char *metadata, std::ostream&
     for (size_t i = 0; i < m_field_types.size(); ++i) {
         const dtype& field_dt = m_field_types[i];
         if (!field_dt.is_builtin() && field_dt.extended()->get_metadata_size() > 0) {
-            o << indent << " field " << i << " (" << m_field_names[i] << ") metadata:\n";
+            o << indent << " field " << i << " (";
+            print_escaped_utf8_string(o, m_field_names[i]);
+            o << ") metadata:\n";
             field_dt.extended()->metadata_debug_print(metadata + m_metadata_offsets[i], o, indent + "  ");
         }
     }
