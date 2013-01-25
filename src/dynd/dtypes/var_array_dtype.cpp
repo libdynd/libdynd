@@ -43,7 +43,7 @@ void var_array_dtype::print_data(std::ostream& o, const char *metadata, const ch
 
 void var_array_dtype::print_dtype(std::ostream& o) const
 {
-    o << "array<" << m_element_dtype << ">";
+    o << "var_array<" << m_element_dtype << ">";
 }
 
 bool var_array_dtype::is_scalar() const

@@ -31,6 +31,14 @@ ndobject parse_json(const dtype& dt, const char *json_begin, const char *json_en
  */
 ndobject parse_json(const dtype& dt, const ndobject& json);
 
+inline ndobject parse_json(const dtype& dt, const std::string& json) {
+    return parse_json(dt, json.data(), json.data() + json.size());
+}
+
+inline ndobject parse_json(const dtype& dt, const char *json) {
+    return parse_json(dt, json, json + strlen(json));
+}
+
 } // namespace dynd
 
 #endif // _DYND__JSON_PARSER_HPP_

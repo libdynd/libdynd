@@ -234,6 +234,7 @@ static bool parse_json_number(const char *&begin, const char *end, const char *&
     }
     out_nbegin = saved_begin;
     out_nend = pos;
+    begin = pos;
     return true;
 }
 
@@ -329,11 +330,11 @@ static void parse_fixedarray_json(const dtype& dt, const char *metadata, char *o
     for (intptr_t i = 0; i < size; ++i) {
         parse_json(fad->get_element_dtype(), metadata, out_data + i * stride, begin, end);
         if (i < size-1 && !parse_token(begin, end, ",")) {
-            throw json_parse_error(begin, "expected ',' list item separator", dt);
+            throw json_parse_error(begin, "array is too short, expected ',' list item separator", dt);
         }
     }
     if (!parse_token(begin, end, "]")) {
-        throw json_parse_error(begin, "expected list terminator ']'", dt);
+        throw json_parse_error(begin, "array is too long, expected list terminator ']'", dt);
     }
 }
 
@@ -611,7 +612,7 @@ static void parse_json(const dtype& dt, const char *metadata, char *out_data,
  * Returns the row/column where the error occured, as well as the current and previous
  * lines for printing some context.
  */
-void get_error_line_column(const char *begin, const char *end, const char *position,
+static void get_error_line_column(const char *begin, const char *end, const char *position,
         std::string& out_line_prev, std::string& out_line_cur, int& out_line, int& out_column)
 {
     out_line_prev = "";
@@ -656,6 +657,10 @@ ndobject dynd::parse_json(const dtype& dt, const char *json_begin, const char *j
         ::parse_json(result.get_dtype(), result.get_ndo_meta(), result.get_ndo()->m_data_pointer, begin, end);
         if (!dt.is_builtin()) {
             dt.extended()->metadata_finalize_buffers(result.get_ndo_meta());
+        }
+        begin = skip_whitespace(begin, end);
+        if (begin != end) {
+            throw json_parse_error(begin, "unexpected trailing JSON text", dt);
         }
         return result;
     } catch (const json_parse_error& e) {

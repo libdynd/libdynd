@@ -339,7 +339,7 @@ static dtype parse_top(const char *&begin, const char *end, map<string, dtype>& 
  * Returns the row/column where the error occured, as well as the current and previous
  * lines for printing some context.
  */
-void get_error_line_column(const char *begin, const char *end, const char *position,
+static void get_error_line_column(const char *begin, const char *end, const char *position,
         std::string& out_line_prev, std::string& out_line_cur, int& out_line, int& out_column)
 {
     out_line_prev = "";

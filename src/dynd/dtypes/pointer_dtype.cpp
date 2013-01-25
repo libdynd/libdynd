@@ -6,6 +6,7 @@
 #include <dynd/dtypes/pointer_dtype.hpp>
 #include <dynd/memblock/pod_memory_block.hpp>
 #include <dynd/kernels/string_assignment_kernels.hpp>
+#include <dynd/kernels/assignment_kernels.hpp>
 
 #include <algorithm>
 
@@ -219,10 +220,52 @@ bool pointer_dtype::operator==(const base_dtype& rhs) const
     }
 }
 
-void pointer_dtype::get_operand_to_value_kernel(const eval::eval_context * /*ectx*/,
-                        kernel_instance<unary_operation_pair_t>& /*out_borrowed_kernel*/) const
+namespace {
+   struct pointer_to_value_assign {
+        // Assign from a categorical dtype to some other dtype
+        struct auxdata_storage {
+            kernel_instance<unary_operation_pair_t> kernel;
+        };
+
+        static void single_kernel(char *dst, const char *src, unary_kernel_static_data *extra)
+        {
+            const pointer_dtype_metadata *md = reinterpret_cast<const pointer_dtype_metadata *>(extra->src_metadata);
+            auxdata_storage& ad = get_auxiliary_data<auxdata_storage>(extra->auxdata);
+            ad.kernel.extra.dst_metadata = extra->dst_metadata;
+            ad.kernel.extra.src_metadata = extra->src_metadata + sizeof(pointer_dtype_metadata);
+            intptr_t offset = md->offset;
+
+            ad.kernel.kernel.single(dst, *reinterpret_cast<const char *const*>(src) + offset, &ad.kernel.extra);
+        }
+
+        static void strided_kernel(char *dst, intptr_t dst_stride, const char *src, intptr_t src_stride,
+                        size_t count, unary_kernel_static_data *extra)
+        {
+            const pointer_dtype_metadata *md = reinterpret_cast<const pointer_dtype_metadata *>(extra->src_metadata);
+            auxdata_storage& ad = get_auxiliary_data<auxdata_storage>(extra->auxdata);
+            ad.kernel.extra.dst_metadata = extra->dst_metadata;
+            ad.kernel.extra.src_metadata = extra->src_metadata + sizeof(pointer_dtype_metadata);
+            intptr_t offset = md->offset;
+
+            for (size_t i = 0; i != count; ++i) {
+                ad.kernel.kernel.single(dst, *reinterpret_cast<const char *const*>(src) + offset, &ad.kernel.extra);
+
+                dst += dst_stride;
+                src += src_stride;
+            }
+        }
+    };
+} // anonymous namespace
+
+void pointer_dtype::get_operand_to_value_kernel(const eval::eval_context * ectx,
+                        kernel_instance<unary_operation_pair_t>& out_kernel) const
 {
-    throw runtime_error("TODO: implement pointer_dtype::get_operand_to_value_kernel");
+    out_kernel.kernel = unary_operation_pair_t(pointer_to_value_assign::single_kernel,
+                    pointer_to_value_assign::strided_kernel);
+    make_auxiliary_data<pointer_to_value_assign::auxdata_storage>(out_kernel.extra.auxdata);
+    pointer_to_value_assign::auxdata_storage& ad =
+                out_kernel.extra.auxdata.get<pointer_to_value_assign::auxdata_storage>();
+    ::get_dtype_assignment_kernel(m_target_dtype, ad.kernel);
 }
 void pointer_dtype::get_value_to_operand_kernel(const eval::eval_context * /*ectx*/,
                         kernel_instance<unary_operation_pair_t>& /*out_borrowed_kernel*/) const

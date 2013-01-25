@@ -479,7 +479,7 @@ void dynd::print_escaped_unicode_codepoint(std::ostream& o, uint32_t cp)
     }
 }
 
-void append_utf8_codepoint(uint32_t cp, std::string& out_str)
+void dynd::append_utf8_codepoint(uint32_t cp, std::string& out_str)
 {
     string_append_utf8(cp, out_str);
 }
