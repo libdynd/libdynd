@@ -103,7 +103,8 @@ dtype strided_array_dtype::get_canonical_dtype() const
     return dtype(new strided_array_dtype(m_element_dtype.get_canonical_dtype()), false);
 }
 
-dtype strided_array_dtype::apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& root_dt) const
+dtype strided_array_dtype::apply_linear_index(int nindices, const irange *indices,
+                int current_i, const dtype& root_dt, bool leading_dimension) const
 {
     if (nindices == 0) {
         return dtype(this, true);
@@ -115,9 +116,11 @@ dtype strided_array_dtype::apply_linear_index(int nindices, const irange *indice
         }
     } else {
         if (indices->step() == 0) {
-            return m_element_dtype.apply_linear_index(nindices-1, indices+1, current_i+1, root_dt);
+            return m_element_dtype.apply_linear_index(nindices-1, indices+1,
+                            current_i+1, root_dt, leading_dimension);
         } else {
-            return dtype(new strided_array_dtype(m_element_dtype.apply_linear_index(nindices-1, indices+1, current_i+1, root_dt)), false);
+            return dtype(new strided_array_dtype(m_element_dtype.apply_linear_index(nindices-1, indices+1,
+                            current_i+1, root_dt, false)), false);
         }
     }
 }
@@ -125,31 +128,42 @@ dtype strided_array_dtype::apply_linear_index(int nindices, const irange *indice
 intptr_t strided_array_dtype::apply_linear_index(int nindices, const irange *indices, const char *metadata,
                 const dtype& result_dtype, char *out_metadata,
                 memory_block_data *embedded_reference,
-                int current_i, const dtype& root_dt) const
+                int current_i, const dtype& root_dt,
+                bool leading_dimension, char **inout_data,
+                memory_block_data **inout_dataref) const
 {
     const strided_array_dtype_metadata *md = reinterpret_cast<const strided_array_dtype_metadata *>(metadata);
     strided_array_dtype_metadata *out_md = reinterpret_cast<strided_array_dtype_metadata *>(out_metadata);
     if (nindices == 0) {
         // If there are no more indices, copy the rest verbatim
-        *out_md = *md;
-        if (!m_element_dtype.is_builtin()) {
-            return m_element_dtype.extended()->apply_linear_index(0, NULL, metadata + sizeof(strided_array_dtype_metadata),
-                            m_element_dtype, out_metadata + sizeof(strided_array_dtype_metadata),
-                            embedded_reference, current_i + 1, root_dt);
-        }
+        metadata_copy_construct(out_metadata, metadata, embedded_reference);
         return 0;
     } else {
         bool remove_dimension;
         intptr_t start_index, index_stride, dimension_size;
-        apply_single_linear_index(*indices, md->size, current_i, &root_dt, remove_dimension, start_index, index_stride, dimension_size);
+        apply_single_linear_index(*indices, md->size, current_i, &root_dt,
+                        remove_dimension, start_index, index_stride, dimension_size);
         if (remove_dimension) {
             // Apply the strided offset and continue applying the index
             intptr_t offset = md->stride * start_index;
             if (!m_element_dtype.is_builtin()) {
-                offset += m_element_dtype.extended()->apply_linear_index(nindices - 1, indices + 1,
-                                metadata + sizeof(strided_array_dtype_metadata),
-                                result_dtype, out_metadata,
-                                embedded_reference, current_i + 1, root_dt);
+                if (leading_dimension) {
+                    // In the case of a leading dimension, first bake the offset into
+                    // the data pointer, so that it's pointing at the right element
+                    // for the collapsing of leading dimensions to work correctly.
+                    *inout_data += offset;
+                    offset = m_element_dtype.extended()->apply_linear_index(nindices - 1, indices + 1,
+                                    metadata + sizeof(strided_array_dtype_metadata),
+                                    result_dtype, out_metadata,
+                                    embedded_reference, current_i + 1, root_dt,
+                                    true, inout_data, inout_dataref);
+                } else {
+                    offset += m_element_dtype.extended()->apply_linear_index(nindices - 1, indices + 1,
+                                    metadata + sizeof(strided_array_dtype_metadata),
+                                    result_dtype, out_metadata,
+                                    embedded_reference, current_i + 1, root_dt,
+                                    false, NULL, NULL);
+                }
             }
             return offset;
         } else {
@@ -162,7 +176,8 @@ intptr_t strided_array_dtype::apply_linear_index(int nindices, const irange *ind
                 offset += m_element_dtype.extended()->apply_linear_index(nindices - 1, indices + 1,
                                 metadata + sizeof(strided_array_dtype_metadata),
                                 result_edtype->m_element_dtype, out_metadata + sizeof(strided_array_dtype_metadata),
-                                embedded_reference, current_i + 1, root_dt);
+                                embedded_reference, current_i + 1, root_dt,
+                                false, NULL, NULL);
             }
             return offset;
         }

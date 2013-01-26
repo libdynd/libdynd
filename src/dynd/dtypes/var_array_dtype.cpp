@@ -4,6 +4,7 @@
 //
 
 #include <dynd/dtypes/var_array_dtype.hpp>
+#include <dynd/dtypes/strided_array_dtype.hpp>
 #include <dynd/dtypes/dtype_alignment.hpp>
 #include <dynd/dtypes/pointer_dtype.hpp>
 #include <dynd/memblock/pod_memory_block.hpp>
@@ -95,26 +96,58 @@ dtype var_array_dtype::get_canonical_dtype() const
     return dtype(new var_array_dtype(m_element_dtype.get_canonical_dtype()), false);
 }
 
-dtype var_array_dtype::apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& root_dt) const
+dtype var_array_dtype::apply_linear_index(int nindices, const irange *indices,
+                int current_i, const dtype& root_dt, bool leading_dimension) const
 {
     if (nindices == 0) {
-        return dtype(this, true);
+        if (leading_dimension) {
+            // In leading dimensions, we convert var_array to strided_array
+            return dtype(new strided_array_dtype(m_element_dtype), false);
+        } else {
+            return dtype(this, true);
+        }
     } else if (nindices == 1) {
         if (indices->step() == 0) {
-            // TODO: This is incorrect, but is here as a stopgap to be replaced by a sliced<> dtype
-            return make_pointer_dtype(m_element_dtype);
+            if (leading_dimension) {
+                if (m_element_dtype.is_builtin()) {
+                    return m_element_dtype;
+                } else {
+                    return m_element_dtype.apply_linear_index(0, NULL, current_i, root_dt, true);
+                }
+            } else {
+                // TODO: This is incorrect, but is here as a stopgap to be replaced by a sliced<> dtype
+                return make_pointer_dtype(m_element_dtype);
+            }
         } else {
-            // TODO: sliced_var_array_dtype
-            throw runtime_error("TODO: implement var_array_dtype::apply_linear_index for general slices");
+            if (leading_dimension) {
+                // In leading dimensions, we convert var_array to strided_array
+                return dtype(new strided_array_dtype(m_element_dtype), false);
+            } else {
+                // TODO: sliced_var_array_dtype
+                throw runtime_error("TODO: implement var_array_dtype::apply_linear_index for general slices");
+            }
         }
     } else {
         if (indices->step() == 0) {
-            // TODO: This is incorrect, but is here as a stopgap to be replaced by a sliced<> dtype
-            return make_pointer_dtype(m_element_dtype.apply_linear_index(nindices-1, indices+1, current_i+1, root_dt));
+            if (leading_dimension) {
+                return m_element_dtype.apply_linear_index(nindices-1, indices+1,
+                                current_i+1, root_dt, true);
+            } else {
+                // TODO: This is incorrect, but is here as a stopgap to be replaced by a sliced<> dtype
+                return make_pointer_dtype(m_element_dtype.apply_linear_index(nindices-1, indices+1,
+                                current_i+1, root_dt, false));
+            }
         } else {
-            // TODO: sliced_var_array_dtype
-            throw runtime_error("TODO: implement var_array_dtype::apply_linear_index for general slices");
-            //return dtype(new var_array_dtype(m_element_dtype.apply_linear_index(nindices-1, indices+1, current_i+1, root_dt)), false);
+            if (leading_dimension) {
+                // In leading dimensions, we convert var_array to strided_array
+                dtype edt = m_element_dtype.apply_linear_index(nindices-1, indices+1,
+                                current_i+1, root_dt, true);
+                return dtype(new strided_array_dtype(edt), false);
+            } else {
+                // TODO: sliced_var_array_dtype
+                throw runtime_error("TODO: implement var_array_dtype::apply_linear_index for general slices");
+                //return dtype(new var_array_dtype(m_element_dtype.apply_linear_index(nindices-1, indices+1, current_i+1, root_dt)), false);
+            }
         }
     }
 }
@@ -122,46 +155,167 @@ dtype var_array_dtype::apply_linear_index(int nindices, const irange *indices, i
 intptr_t var_array_dtype::apply_linear_index(int nindices, const irange *indices, const char *metadata,
                 const dtype& result_dtype, char *out_metadata,
                 memory_block_data *embedded_reference,
-                int current_i, const dtype& root_dt) const
+                int current_i, const dtype& root_dt,
+                bool leading_dimension, char **inout_data,
+                memory_block_data **inout_dataref) const
 {
     if (nindices == 0) {
-        // If there are no more indices, copy the metadata verbatim
-        metadata_copy_construct(out_metadata, metadata, embedded_reference);
+        if (leading_dimension) {
+            // Copy the full var_array into a strided_array
+            const var_array_dtype_metadata *md = reinterpret_cast<const var_array_dtype_metadata *>(metadata);
+            const var_array_dtype_data *d = reinterpret_cast<const var_array_dtype_data *>(*inout_data);
+            strided_array_dtype_metadata *out_md = reinterpret_cast<strided_array_dtype_metadata *>(out_metadata);
+            out_md->size = d->size;
+            out_md->stride = md->stride;
+            *inout_data = d->begin;
+            if (*inout_dataref) {
+                memory_block_decref(*inout_dataref);
+            }
+            *inout_dataref = md->blockref ? md->blockref : embedded_reference;
+            memory_block_incref(*inout_dataref);
+            if (!m_element_dtype.is_builtin()) {
+                metadata_copy_construct(out_metadata + sizeof(strided_array_dtype_metadata),
+                                metadata + sizeof(var_array_dtype_metadata),
+                                embedded_reference);
+            }
+        } else {
+            // If there are no more indices, copy the metadata verbatim
+            metadata_copy_construct(out_metadata, metadata, embedded_reference);
+        }
         return 0;
     } else if (nindices == 1) {
         if (indices->step() == 0) {
-            // TODO: This is incorrect, but is here as a stopgap to be replaced by a sliced<> dtype
-            const var_array_dtype_metadata *md = reinterpret_cast<const var_array_dtype_metadata *>(metadata);
-            pointer_dtype_metadata *out_md = reinterpret_cast<pointer_dtype_metadata *>(out_metadata);
-            out_md->blockref = md->blockref ? md->blockref : embedded_reference;
-            memory_block_incref(out_md->blockref);
-            out_md->offset = indices->start() * md->stride;
-            return 0;
+            if (leading_dimension) {
+                // First dereference to point at the actual element
+                const var_array_dtype_metadata *md = reinterpret_cast<const var_array_dtype_metadata *>(metadata);
+                const var_array_dtype_data *d = reinterpret_cast<const var_array_dtype_data *>(*inout_data);
+                *inout_data = d->begin + indices->start() * md->stride;
+                if (*inout_dataref) {
+                    memory_block_decref(*inout_dataref);
+                }
+                *inout_dataref = md->blockref ? md->blockref : embedded_reference;
+                memory_block_incref(*inout_dataref);
+                // Then apply a 0-sized index to the element type
+                if (!m_element_dtype.is_builtin()) {
+                    return m_element_dtype.extended()->apply_linear_index(0, NULL,
+                                    metadata + sizeof(var_array_dtype_metadata),
+                                    result_dtype, out_metadata, embedded_reference,
+                                    current_i, root_dt,
+                                    true, inout_data, inout_dataref);
+                } else {
+                    return 0;
+                }
+            } else {
+                // TODO: This is incorrect, but is here as a stopgap to be replaced by a sliced<> dtype
+                const var_array_dtype_metadata *md = reinterpret_cast<const var_array_dtype_metadata *>(metadata);
+                pointer_dtype_metadata *out_md = reinterpret_cast<pointer_dtype_metadata *>(out_metadata);
+                out_md->blockref = md->blockref ? md->blockref : embedded_reference;
+                memory_block_incref(out_md->blockref);
+                out_md->offset = indices->start() * md->stride;
+                return 0;
+            }
         } else {
-            // TODO: sliced_var_array_dtype
-            throw runtime_error("TODO: implement var_array_dtype::apply_linear_index for general slices");
-            //return dtype(this, true);
+            if (leading_dimension) {
+                // If it's a leading dimension, we can dereference the pointer as we
+                // index it and produce a strided array result
+                const var_array_dtype_metadata *md = reinterpret_cast<const var_array_dtype_metadata *>(metadata);
+                const var_array_dtype_data *d = reinterpret_cast<const var_array_dtype_data *>(*inout_data);
+                strided_array_dtype_metadata *out_md = reinterpret_cast<strided_array_dtype_metadata *>(out_metadata);
+                bool remove_dimension;
+                intptr_t start_index, index_stride, dimension_size;
+                apply_single_linear_index(*indices, d->size, current_i, &root_dt,
+                                remove_dimension, start_index, index_stride, dimension_size);
+                out_md->size = dimension_size;
+                out_md->stride = md->stride * index_stride;
+                *inout_data = d->begin + md->stride * start_index;
+                if (*inout_dataref) {
+                    memory_block_decref(*inout_dataref);
+                }
+                *inout_dataref = md->blockref ? md->blockref : embedded_reference;
+                memory_block_incref(*inout_dataref);
+                // Copy the rest of the metadata verbatim, because that part of
+                // the dtype didn't change
+                metadata_copy_construct(out_metadata + sizeof(strided_array_dtype_metadata),
+                                metadata + sizeof(var_array_dtype_metadata),
+                                embedded_reference);
+                return 0;
+            } else {
+                // TODO: sliced_var_array_dtype
+                throw runtime_error("TODO: implement var_array_dtype::apply_linear_index for general slices");
+                //return dtype(this, true);
+            }
         }
     } else {
         if (indices->step() == 0) {
-            // TODO: This is incorrect, but is here as a stopgap to be replaced by a sliced<> dtype
-            const var_array_dtype_metadata *md = reinterpret_cast<const var_array_dtype_metadata *>(metadata);
-            pointer_dtype_metadata *out_md = reinterpret_cast<pointer_dtype_metadata *>(out_metadata);
-            out_md->blockref = md->blockref ? md->blockref : embedded_reference;
-            memory_block_incref(out_md->blockref);
-            out_md->offset = indices->start() * md->stride;
-            if (!m_element_dtype.is_builtin()) {
-                const pointer_dtype *result_edtype = static_cast<const pointer_dtype *>(result_dtype.extended());
-                out_md->offset += m_element_dtype.extended()->apply_linear_index(nindices - 1, indices + 1,
-                                metadata + sizeof(var_array_dtype_metadata),
-                                result_edtype->get_target_dtype(), out_metadata + sizeof(pointer_dtype_metadata),
-                                embedded_reference, current_i + 1, root_dt);
+            if (leading_dimension) {
+                // First dereference to point at the actual element
+                const var_array_dtype_metadata *md = reinterpret_cast<const var_array_dtype_metadata *>(metadata);
+                const var_array_dtype_data *d = reinterpret_cast<const var_array_dtype_data *>(*inout_data);
+                *inout_data = d->begin + indices->start() * md->stride;
+                if (*inout_dataref) {
+                    memory_block_decref(*inout_dataref);
+                }
+                *inout_dataref = md->blockref ? md->blockref : embedded_reference;
+                memory_block_incref(*inout_dataref);
+                // Then apply a the rest of the index to the element type
+                if (!m_element_dtype.is_builtin()) {
+                    return m_element_dtype.extended()->apply_linear_index(nindices - 1, indices + 1,
+                                    metadata + sizeof(var_array_dtype_metadata),
+                                    result_dtype, out_metadata, embedded_reference,
+                                    current_i, root_dt,
+                                    true, inout_data, inout_dataref);
+                } else {
+                    return 0;
+                }
+            } else {
+                // TODO: This is incorrect, but is here as a stopgap to be replaced by a sliced<> dtype
+                const var_array_dtype_metadata *md = reinterpret_cast<const var_array_dtype_metadata *>(metadata);
+                pointer_dtype_metadata *out_md = reinterpret_cast<pointer_dtype_metadata *>(out_metadata);
+                out_md->blockref = md->blockref ? md->blockref : embedded_reference;
+                memory_block_incref(out_md->blockref);
+                out_md->offset = indices->start() * md->stride;
+                if (!m_element_dtype.is_builtin()) {
+                    const pointer_dtype *result_edtype = static_cast<const pointer_dtype *>(result_dtype.extended());
+                    out_md->offset += m_element_dtype.extended()->apply_linear_index(nindices - 1, indices + 1,
+                                    metadata + sizeof(var_array_dtype_metadata),
+                                    result_edtype->get_target_dtype(), out_metadata + sizeof(pointer_dtype_metadata),
+                                    embedded_reference, current_i + 1, root_dt,
+                                    false, NULL, NULL);
+                }
+                return 0;
             }
-            return 0;        
         } else {
-            // TODO: sliced_var_array_dtype
-            throw runtime_error("TODO: implement var_array_dtype::apply_linear_index for general slices");
-            //return dtype(new var_array_dtype(m_element_dtype.apply_linear_index(nindices-1, indices+1, current_i+1, root_dt)), false);
+            if (leading_dimension) {
+                // If it's a leading dimension, we can dereference the pointer as we
+                // index it and produce a strided array result
+                const var_array_dtype_metadata *md = reinterpret_cast<const var_array_dtype_metadata *>(metadata);
+                const var_array_dtype_data *d = reinterpret_cast<const var_array_dtype_data *>(*inout_data);
+                strided_array_dtype_metadata *out_md = reinterpret_cast<strided_array_dtype_metadata *>(out_metadata);
+                bool remove_dimension;
+                intptr_t start_index, index_stride, dimension_size;
+                apply_single_linear_index(*indices, d->size, current_i, &root_dt,
+                                remove_dimension, start_index, index_stride, dimension_size);
+                out_md->size = dimension_size;
+                out_md->stride = md->stride * index_stride;
+                *inout_data = d->begin + md->stride * start_index;
+                if (*inout_dataref) {
+                    memory_block_decref(*inout_dataref);
+                }
+                *inout_dataref = md->blockref ? md->blockref : embedded_reference;
+                memory_block_incref(*inout_dataref);
+                // Apply the rest of the index
+                const strided_array_dtype *sad = static_cast<const strided_array_dtype *>(result_dtype.extended());
+                return m_element_dtype.extended()->apply_linear_index(nindices - 1, indices + 1,
+                                metadata + sizeof(var_array_dtype_metadata),
+                                sad->get_element_dtype(),
+                                out_metadata + sizeof(strided_array_dtype_metadata), embedded_reference,
+                                current_i, root_dt,
+                                false, NULL, NULL);
+            } else {
+                // TODO: sliced_var_array_dtype
+                throw runtime_error("TODO: implement var_array_dtype::apply_linear_index for general slices");
+                //return dtype(new var_array_dtype(m_element_dtype.apply_linear_index(nindices-1, indices+1, current_i+1, root_dt)), false);
+            }
         }
     }
 }

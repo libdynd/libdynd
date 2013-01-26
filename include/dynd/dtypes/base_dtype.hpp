@@ -314,8 +314,13 @@ public:
      * \param indices      The indices to apply. This is incremented by one for each recursive call.
      * \param current_i    The current index position. Used for error messages.
      * \param root_dt      The data type in the first call, before any recursion. Used for error messages.
+     * \param leading_dimension  If this is true, the current dimension is one for which there is only a single
+     *                           data instance, and the dtype can do operations relying on the data. An example
+     *                           of this is a pointer data throwing away the pointer part, so the result
+     *                           doesn't contain that indirection.
      */
-    virtual dtype apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& root_dt) const;
+    virtual dtype apply_linear_index(int nindices, const irange *indices,
+                int current_i, const dtype& root_dt, bool leading_dimension) const;
 
     /**
      * Indexes into an ndobject using the provided linear index, and a dtype and freshly allocated output
@@ -332,14 +337,33 @@ public:
      *                            when putting it in a new ndobject, need to hold a reference to
      *                            that memory.
      * \param current_i    The current index position. Used for error messages.
-     * \param root_dt      The data type in the first call, before any recursion. Used for error messages.
+     * \param root_dt      The data type in the first call, before any recursion.
+     *                     Used for error messages.
+     * \param leading_dimension  If this is true, the current dimension is one for
+     *                           which there is only a single data instance, and
+     *                           the dtype can do operations relying on the data.
+     *                           An example of this is a pointer data throwing away
+     *                           the pointer part, so the result doesn't contain
+     *                           that indirection.
+     * \param inout_data  This may *only* be used/modified if leading_dimension
+     *                    is true. In the case of eliminating a pointer, this is
+     *                    a pointer to the pointer data. The pointer dtype would
+     *                    dereference the pointer data, and modify both the data
+     *                    pointer and the data reference to reflect that change.
+     * \param inout_dataref  This may only be used/modified if leading_dimension
+     *                       is true. If the target of inout_data is modified, then
+     *                       in many cases the data will be pointing into a different
+     *                       memory block than before. This must be modified to
+     *                       be a reference to the updated memory block.
      *
-     * @return  An offset to apply to the data pointer.
+     * @return  An offset to apply to the data pointer(s).
      */
     virtual intptr_t apply_linear_index(int nindices, const irange *indices, const char *metadata,
                     const dtype& result_dtype, char *out_metadata,
                     memory_block_data *embedded_reference,
-                    int current_i, const dtype& root_dt) const;
+                    int current_i, const dtype& root_dt,
+                    bool leading_dimension, char **inout_data,
+                    memory_block_data **inout_dataref) const;
 
     /**
      * The 'at' function is used for indexing. Indexing one dimension with

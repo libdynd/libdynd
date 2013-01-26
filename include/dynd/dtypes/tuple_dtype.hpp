@@ -54,7 +54,8 @@ public:
         return m_memory_management;
     }
 
-    dtype apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& root_dt) const;
+    dtype apply_linear_index(int nindices, const irange *indices,
+                int current_i, const dtype& root_dt, bool leading_dimension) const;
 
     void get_shape(size_t i, intptr_t *out_shape) const;
 

@@ -408,7 +408,8 @@ public:
      * Indexes into the dtype, intended for recursive calls from the extended-dtype version. See
      * the function in base_dtype with the same name for more details.
      */
-    dtype apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& root_dt) const;
+    dtype apply_linear_index(int nindices, const irange *indices,
+                int current_i, const dtype& root_dt, bool leading_dimension) const;
 
     /**
      * Returns the non-expression dtype that this

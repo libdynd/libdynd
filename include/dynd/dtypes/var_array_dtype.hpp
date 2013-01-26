@@ -66,11 +66,14 @@ public:
                     dtype& out_transformed_dtype, bool& out_was_transformed) const;
     dtype get_canonical_dtype() const;
 
-    dtype apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& root_dt) const;
+    dtype apply_linear_index(int nindices, const irange *indices,
+                int current_i, const dtype& root_dt, bool leading_dimension) const;
     intptr_t apply_linear_index(int nindices, const irange *indices, const char *metadata,
                     const dtype& result_dtype, char *out_metadata,
                     memory_block_data *embedded_reference,
-                    int current_i, const dtype& root_dt) const;
+                    int current_i, const dtype& root_dt,
+                    bool leading_dimension, char **inout_data,
+                    memory_block_data **inout_dataref) const;
     dtype at(intptr_t i0, const char **inout_metadata, const char **inout_data) const;
 
     dtype get_dtype_at_dimension(char **inout_metadata, size_t i, size_t total_ndim = 0) const;

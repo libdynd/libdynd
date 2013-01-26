@@ -156,28 +156,36 @@ dtype struct_dtype::get_canonical_dtype() const
     return dtype(new struct_dtype(fields, m_field_names), false);
 }
 
-dtype struct_dtype::apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& root_dt) const
+dtype struct_dtype::apply_linear_index(int nindices, const irange *indices,
+                int current_i, const dtype& root_dt, bool leading_dimension) const
 {
     if (nindices == 0) {
         return dtype(this, true);
     } else {
         bool remove_dimension;
         intptr_t start_index, index_stride, dimension_size;
-        apply_single_linear_index(*indices, m_field_types.size(), current_i, &root_dt, remove_dimension, start_index, index_stride, dimension_size);
+        apply_single_linear_index(*indices, m_field_types.size(), current_i, &root_dt,
+                        remove_dimension, start_index, index_stride, dimension_size);
         if (remove_dimension) {
-            return m_field_types[start_index].apply_linear_index(nindices - 1, indices + 1, current_i + 1, root_dt);
+            return m_field_types[start_index].apply_linear_index(nindices - 1, indices + 1,
+                            current_i + 1, root_dt, leading_dimension);
+        } else if (nindices == 1 && start_index == 0 && index_stride == 1 &&
+                        (size_t)dimension_size == m_field_types.size()) {
+            // This is a do-nothing index, keep the same dtype
+            return dtype(this, true);
         } else {
             // Take the subset of the fixed fields in-place
-            std::vector<dtype> fields(dimension_size);
+            std::vector<dtype> field_types(dimension_size);
             std::vector<std::string> field_names(dimension_size);
 
             for (intptr_t i = 0; i < dimension_size; ++i) {
                 intptr_t idx = start_index + i * index_stride;
-                fields[i] = m_field_types[idx].apply_linear_index(nindices-1, indices+1, current_i+1, root_dt);
+                field_types[i] = m_field_types[idx].apply_linear_index(nindices-1, indices+1,
+                                current_i+1, root_dt, false);
                 field_names[i] = m_field_names[idx];
             }
 
-            return dtype(new struct_dtype(fields, field_names), false);
+            return dtype(new struct_dtype(field_types, field_names), false);
         }
     }
 }
@@ -185,25 +193,40 @@ dtype struct_dtype::apply_linear_index(int nindices, const irange *indices, int 
 intptr_t struct_dtype::apply_linear_index(int nindices, const irange *indices, const char *metadata,
                 const dtype& result_dtype, char *out_metadata,
                 memory_block_data *embedded_reference,
-                int current_i, const dtype& root_dt) const
+                int current_i, const dtype& root_dt,
+                bool leading_dimension, char **inout_data,
+                memory_block_data **inout_dataref) const
 {
-    const intptr_t *offsets = reinterpret_cast<const intptr_t *>(metadata);
-    intptr_t *out_offsets = reinterpret_cast<intptr_t *>(out_metadata);
     if (nindices == 0) {
         // If there are no more indices, copy the metadata verbatim
         metadata_copy_construct(out_metadata, metadata, embedded_reference);
         return 0;
     } else {
+        const intptr_t *offsets = reinterpret_cast<const intptr_t *>(metadata);
+        intptr_t *out_offsets = reinterpret_cast<intptr_t *>(out_metadata);
         bool remove_dimension;
         intptr_t start_index, index_stride, dimension_size;
-        apply_single_linear_index(*indices, m_field_types.size(), current_i, &root_dt, remove_dimension, start_index, index_stride, dimension_size);
+        apply_single_linear_index(*indices, m_field_types.size(), current_i, &root_dt,
+                        remove_dimension, start_index, index_stride, dimension_size);
         if (remove_dimension) {
             const dtype& dt = m_field_types[start_index];
             intptr_t offset = offsets[start_index];
             if (!dt.is_builtin()) {
-                offset += dt.extended()->apply_linear_index(nindices - 1, indices + 1,
-                                metadata + m_metadata_offsets[start_index], result_dtype,
-                                out_metadata, embedded_reference, current_i + 1, root_dt);
+                if (leading_dimension) {
+                    // In the case of a leading dimension, first bake the offset into
+                    // the data pointer, so that it's pointing at the right element
+                    // for the collapsing of leading dimensions to work correctly.
+                    *inout_data += offset;
+                    offset = dt.extended()->apply_linear_index(nindices - 1, indices + 1,
+                                    metadata + m_metadata_offsets[start_index], result_dtype,
+                                    out_metadata, embedded_reference, current_i + 1, root_dt,
+                                    true, inout_data, inout_dataref);
+                } else {
+                    offset += dt.extended()->apply_linear_index(nindices - 1, indices + 1,
+                                    metadata + m_metadata_offsets[start_index], result_dtype,
+                                    out_metadata, embedded_reference, current_i + 1, root_dt,
+                                    false, NULL, NULL);
+                }
             }
             return offset;
         } else {
@@ -214,8 +237,10 @@ intptr_t struct_dtype::apply_linear_index(int nindices, const irange *indices, c
                 const dtype& dt = result_e_dt->m_field_types[i];
                 if (!dt.is_builtin()) {
                     out_offsets[i] += dt.extended()->apply_linear_index(nindices - 1, indices + 1,
-                                    metadata + m_metadata_offsets[idx], dt, out_metadata + result_e_dt->m_metadata_offsets[i],
-                                    embedded_reference, current_i + 1, root_dt);
+                                    metadata + m_metadata_offsets[idx], dt,
+                                    out_metadata + result_e_dt->m_metadata_offsets[i],
+                                    embedded_reference, current_i + 1, root_dt,
+                                    false, NULL, NULL);
                 }
             }
             return 0;

@@ -51,30 +51,6 @@ void bytes_dtype::print_dtype(std::ostream& o) const {
 
 }
 
-dtype bytes_dtype::apply_linear_index(int nindices, const irange *DYND_UNUSED(indices),
-                int current_i, const dtype& DYND_UNUSED(root_dt)) const
-{
-    if (nindices == 0) {
-        return dtype(this, true);
-    } else {
-        throw too_many_indices(dtype(this, true), nindices, current_i + 1);
-    }
-}
-
-intptr_t bytes_dtype::apply_linear_index(int DYND_UNUSED(nindices), const irange *DYND_UNUSED(indices),
-                const char *metadata,
-                const dtype& DYND_UNUSED(result_dtype), char *out_metadata,
-                memory_block_data *embedded_reference,
-                int DYND_UNUSED(current_i), const dtype& DYND_UNUSED(root_dt)) const
-{
-    const bytes_dtype_metadata *md = reinterpret_cast<const bytes_dtype_metadata *>(metadata);
-    bytes_dtype_metadata *out_md = reinterpret_cast<bytes_dtype_metadata *>(out_metadata);
-    // Just copy the blockref, switching to the reference we were embedded in if necessary
-    out_md->blockref = md->blockref ? md->blockref : embedded_reference;
-    memory_block_incref(out_md->blockref);
-    return 0;
-}
-
 bool bytes_dtype::is_unique_data_owner(const char *metadata) const
 {
     const bytes_dtype_metadata *md = reinterpret_cast<const bytes_dtype_metadata *>(*metadata);

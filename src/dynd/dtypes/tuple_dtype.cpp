@@ -166,30 +166,10 @@ void dynd::tuple_dtype::print_dtype(std::ostream& o) const
     }
 }
 
-dtype dynd::tuple_dtype::apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& root_dt) const
+dtype dynd::tuple_dtype::apply_linear_index(int nindices, const irange *indices,
+                int current_i, const dtype& root_dt, bool leading_dimension) const
 {
-    if (nindices == 0) {
-        return dtype(this, true);
-    } else {
-        bool remove_dimension;
-        intptr_t start_index, index_stride, dimension_size;
-        apply_single_linear_index(*indices, m_fields.size(), current_i, &root_dt, remove_dimension, start_index, index_stride, dimension_size);
-        if (remove_dimension) {
-            return m_fields[start_index];
-        } else {
-            // Take the subset of the fixed fields in-place
-            std::vector<dtype> fields(dimension_size);
-            std::vector<size_t> offsets(dimension_size);
-
-            for (intptr_t i = 0; i < dimension_size; ++i) {
-                intptr_t idx = start_index + i * index_stride;
-                fields[i] = m_fields[idx].apply_linear_index(nindices-1, indices+1, current_i+1, root_dt);
-                offsets[i] = m_offsets[idx];
-            }
-
-            return dtype(new tuple_dtype(fields, offsets, get_data_size(), get_alignment()), false);
-        }
-    }
+    throw runtime_error("TODO: tuple_dtype::apply_linear_index");
 }
 
 void dynd::tuple_dtype::get_shape(size_t i, intptr_t *out_shape) const

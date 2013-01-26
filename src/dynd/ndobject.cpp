@@ -451,7 +451,7 @@ ndobject ndobject::at_array(int nindices, const irange *indices) const
         return *this;
     } else {
         dtype this_dt(get_ndo()->m_dtype, true);
-        dtype dt = get_ndo()->m_dtype->apply_linear_index(nindices, indices, 0, this_dt);
+        dtype dt = get_ndo()->m_dtype->apply_linear_index(nindices, indices, 0, this_dt, true);
         ndobject result;
         if (!dt.is_builtin()) {
             result.set(make_ndobject_memory_block(dt.extended()->get_metadata_size()));
@@ -461,16 +461,18 @@ ndobject ndobject::at_array(int nindices, const irange *indices) const
             result.set(make_ndobject_memory_block(0));
             result.get_ndo()->m_dtype = reinterpret_cast<const base_dtype *>(dt.get_type_id());
         }
-        intptr_t offset = get_ndo()->m_dtype->apply_linear_index(nindices, indices,
-                        get_ndo_meta(), dt, result.get_ndo_meta(),
-                        m_memblock.get(), 0, this_dt);
-        result.get_ndo()->m_data_pointer = get_ndo()->m_data_pointer + offset;
+        result.get_ndo()->m_data_pointer = get_ndo()->m_data_pointer;
         if (get_ndo()->m_data_reference) {
             result.get_ndo()->m_data_reference = get_ndo()->m_data_reference;
         } else {
             // If the data reference is NULL, the data is embedded in the ndobject itself
             result.get_ndo()->m_data_reference = m_memblock.get();
         }
+        intptr_t offset = get_ndo()->m_dtype->apply_linear_index(nindices, indices,
+                        get_ndo_meta(), dt, result.get_ndo_meta(),
+                        m_memblock.get(), 0, this_dt,
+                        true, &result.get_ndo()->m_data_pointer, &result.get_ndo()->m_data_reference);
+        result.get_ndo()->m_data_pointer += offset;
         memory_block_incref(result.get_ndo()->m_data_reference);
         result.get_ndo()->m_flags = get_ndo()->m_flags;
         return result;

@@ -36,8 +36,6 @@ public:
         return pod_memory_management;
     }
 
-    dtype apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& root_dt) const;
-
     void get_shape(size_t i, intptr_t *out_shape) const;
 
     bool is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const;

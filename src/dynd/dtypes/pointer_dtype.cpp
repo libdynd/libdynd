@@ -98,13 +98,22 @@ dtype pointer_dtype::get_canonical_dtype() const
     return m_target_dtype;
 }
 
-dtype pointer_dtype::apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& root_dt) const
+dtype pointer_dtype::apply_linear_index(int nindices, const irange *indices,
+                int current_i, const dtype& root_dt, bool leading_dimension) const
 {
     if (nindices == 0) {
-        return dtype(this, true);
+        if (leading_dimension) {
+            // Even with 0 indices, throw away the pointer when it's a leading dimension
+            return m_target_dtype.apply_linear_index(0, NULL, current_i, root_dt, true);
+        } else {
+            return dtype(this, true);
+        }
     } else {
-        dtype dt = m_target_dtype.apply_linear_index(nindices, indices, current_i, root_dt);
-        if (dt == m_target_dtype) {
+        dtype dt = m_target_dtype.apply_linear_index(nindices, indices, current_i, root_dt, leading_dimension);
+        if (leading_dimension) {
+            // If it's a leading dimension, throw away the pointer
+            return dt;
+        } else if (dt == m_target_dtype) {
             return dtype(this, true);
         } else {
             return dtype(new pointer_dtype(dt), false);
@@ -115,23 +124,46 @@ dtype pointer_dtype::apply_linear_index(int nindices, const irange *indices, int
 intptr_t pointer_dtype::apply_linear_index(int nindices, const irange *indices, const char *metadata,
                 const dtype& result_dtype, char *out_metadata,
                 memory_block_data *embedded_reference,
-                int current_i, const dtype& root_dt) const
+                int current_i, const dtype& root_dt,
+                bool leading_dimension, char **inout_data,
+                memory_block_data **inout_dataref) const
 {
-    const pointer_dtype_metadata *md = reinterpret_cast<const pointer_dtype_metadata *>(metadata);
-    pointer_dtype_metadata *out_md = reinterpret_cast<pointer_dtype_metadata *>(out_metadata);
-    // If there are no more indices, copy the rest verbatim
-    out_md->blockref = md->blockref;
-    memory_block_incref(out_md->blockref);
-    out_md->offset = md->offset;
-    if (!m_target_dtype.is_builtin()) {
-        const pointer_dtype *pdt = static_cast<const pointer_dtype *>(result_dtype.extended());
-        // The indexing may cause a change to the metadata offset
-        out_md->offset += m_target_dtype.extended()->apply_linear_index(nindices, indices,
-                        metadata + sizeof(pointer_dtype_metadata),
-                        pdt->m_target_dtype, out_metadata + sizeof(pointer_dtype_metadata),
-                        embedded_reference, current_i, root_dt);
+    if (leading_dimension) {
+        // If it's a leading dimension, we always throw away the pointer
+        const pointer_dtype_metadata *md = reinterpret_cast<const pointer_dtype_metadata *>(metadata);
+        *inout_data = *reinterpret_cast<char **>(*inout_data) + md->offset;
+        if (*inout_dataref) {
+            memory_block_decref(*inout_dataref);
+        }
+        *inout_dataref = md->blockref ? md->blockref : embedded_reference;
+        memory_block_incref(*inout_dataref);
+        if (m_target_dtype.is_builtin()) {
+            return 0;
+        } else {
+            return m_target_dtype.extended()->apply_linear_index(nindices, indices,
+                            metadata + sizeof(pointer_dtype_metadata),
+                            result_dtype, out_metadata,
+                            embedded_reference, current_i, root_dt,
+                            true, inout_data, inout_dataref);
+        }
+    } else {
+        const pointer_dtype_metadata *md = reinterpret_cast<const pointer_dtype_metadata *>(metadata);
+        pointer_dtype_metadata *out_md = reinterpret_cast<pointer_dtype_metadata *>(out_metadata);
+        // If there are no more indices, copy the rest verbatim
+        out_md->blockref = md->blockref;
+        memory_block_incref(out_md->blockref);
+        out_md->offset = md->offset;
+        if (!m_target_dtype.is_builtin()) {
+            const pointer_dtype *pdt = static_cast<const pointer_dtype *>(result_dtype.extended());
+            // The indexing may cause a change to the metadata offset
+            out_md->offset += m_target_dtype.extended()->apply_linear_index(nindices, indices,
+                            metadata + sizeof(pointer_dtype_metadata),
+                            pdt->m_target_dtype, out_metadata + sizeof(pointer_dtype_metadata),
+                            embedded_reference, current_i, root_dt,
+                            false, NULL, NULL);
+        }
+        return 0;
     }
-    return 0;
 }
 
 dtype pointer_dtype::get_dtype_at_dimension(char **inout_metadata, size_t i, size_t total_ndim) const

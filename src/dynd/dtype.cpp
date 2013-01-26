@@ -129,11 +129,12 @@ dtype dtype::at_array(int nindices, const irange *indices) const
             throw too_many_indices(*this, nindices, 0);
         }
     } else {
-        return m_extended->apply_linear_index(nindices, indices, 0, *this);
+        return m_extended->apply_linear_index(nindices, indices, 0, *this, true);
     }
 }
 
-dtype dtype::apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& root_dt) const
+dtype dtype::apply_linear_index(int nindices, const irange *indices,
+                int current_i, const dtype& root_dt, bool leading_dimension) const
 {
     if (is_builtin()) {
         if (nindices == 0) {
@@ -142,7 +143,7 @@ dtype dtype::apply_linear_index(int nindices, const irange *indices, int current
             throw too_many_indices(*this, nindices + current_i, current_i);
         }
     } else {
-        return m_extended->apply_linear_index(nindices, indices, current_i, root_dt);
+        return m_extended->apply_linear_index(nindices, indices, current_i, root_dt, leading_dimension);
     }
 }
 

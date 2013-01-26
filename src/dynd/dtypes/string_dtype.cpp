@@ -110,41 +110,6 @@ void string_dtype::print_dtype(std::ostream& o) const {
     }
 }
 
-dtype string_dtype::apply_linear_index(int nindices, const irange *DYND_UNUSED(indices),
-                int current_i, const dtype& DYND_UNUSED(root_dt)) const
-{
-    if (nindices == 0) {
-        return dtype(this, true);
-        /* TODO:
-    } else if (nindices == 1) {
-        if (indices->step() == 0) {
-            // Return a fixedstring dtype, since it's always one character.
-            // If the string encoding is variable-length switch to UTF32 so that the result can always
-            // store a single character.
-            return make_fixedstring_dtype(is_variable_length_string_encoding(m_encoding) ? string_encoding_utf_32 : m_encoding, 1);
-        } else {
-            return dtype(this, true);
-        }
-        */
-    } else {
-        throw too_many_indices(dtype(this, true), nindices, current_i + 1);
-    }
-}
-
-intptr_t string_dtype::apply_linear_index(int DYND_UNUSED(nindices), const irange *DYND_UNUSED(indices),
-                const char *metadata,
-                const dtype& DYND_UNUSED(result_dtype), char *out_metadata,
-                memory_block_data *embedded_reference,
-                int DYND_UNUSED(current_i), const dtype& DYND_UNUSED(root_dt)) const
-{
-    const string_dtype_metadata *md = reinterpret_cast<const string_dtype_metadata *>(metadata);
-    string_dtype_metadata *out_md = reinterpret_cast<string_dtype_metadata *>(out_metadata);
-    // Copy the blockref, switching to the reference we were embedded in if necessary
-    out_md->blockref = md->blockref ? md->blockref : embedded_reference;
-    memory_block_incref(out_md->blockref);
-    return 0;
-}
-
 bool string_dtype::is_unique_data_owner(const char *metadata) const
 {
     const string_dtype_metadata *md = reinterpret_cast<const string_dtype_metadata *>(metadata);

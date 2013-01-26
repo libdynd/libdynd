@@ -146,7 +146,8 @@ dtype fixedarray_dtype::get_canonical_dtype() const
     }
 }
 
-dtype fixedarray_dtype::apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& root_dt) const
+dtype fixedarray_dtype::apply_linear_index(int nindices, const irange *indices,
+                int current_i, const dtype& root_dt, bool leading_dimension) const
 {
     if (nindices == 0) {
         return dtype(this, true);
@@ -158,9 +159,11 @@ dtype fixedarray_dtype::apply_linear_index(int nindices, const irange *indices, 
         }
     } else {
         if (indices->step() == 0) {
-            return m_element_dtype.apply_linear_index(nindices-1, indices+1, current_i+1, root_dt);
+            return m_element_dtype.apply_linear_index(nindices-1, indices+1,
+                            current_i+1, root_dt, leading_dimension);
         } else {
-            return dtype(new strided_array_dtype(m_element_dtype.apply_linear_index(nindices-1, indices+1, current_i+1, root_dt)), false);
+            return dtype(new strided_array_dtype(m_element_dtype.apply_linear_index(nindices-1, indices+1,
+                            current_i+1, root_dt, false)), false);
         }
     }
 }
@@ -168,7 +171,9 @@ dtype fixedarray_dtype::apply_linear_index(int nindices, const irange *indices, 
 intptr_t fixedarray_dtype::apply_linear_index(int nindices, const irange *indices, const char *metadata,
                 const dtype& result_dtype, char *out_metadata,
                 memory_block_data *embedded_reference,
-                int current_i, const dtype& root_dt) const
+                int current_i, const dtype& root_dt,
+                bool leading_dimension, char **inout_data,
+                memory_block_data **inout_dataref) const
 {
     if (nindices == 0) {
         // If there are no more indices, copy the metadata verbatim
@@ -177,14 +182,25 @@ intptr_t fixedarray_dtype::apply_linear_index(int nindices, const irange *indice
     } else {
         bool remove_dimension;
         intptr_t start_index, index_stride, dimension_size;
-        apply_single_linear_index(*indices, m_dimension_size, current_i, &root_dt, remove_dimension, start_index, index_stride, dimension_size);
+        apply_single_linear_index(*indices, m_dimension_size, current_i, &root_dt,
+                        remove_dimension, start_index, index_stride, dimension_size);
         if (remove_dimension) {
             // Apply the strided offset and continue applying the index
             intptr_t offset = m_stride * start_index;
             if (!m_element_dtype.is_builtin()) {
-                offset += m_element_dtype.extended()->apply_linear_index(nindices - 1, indices + 1,
-                                metadata,
-                                result_dtype, out_metadata, embedded_reference, current_i + 1, root_dt);
+                if (leading_dimension) {
+                    // In the case of a leading dimension, first bake the offset into
+                    // the data pointer, so that it's pointing at the right element
+                    // for the collapsing of leading dimensions to work correctly.
+                    *inout_data += offset;
+                    offset = m_element_dtype.extended()->apply_linear_index(nindices - 1, indices + 1,
+                                    metadata, result_dtype, out_metadata, embedded_reference, current_i + 1, root_dt,
+                                    true, inout_data, inout_dataref);
+                } else {
+                    offset += m_element_dtype.extended()->apply_linear_index(nindices - 1, indices + 1,
+                                    metadata, result_dtype, out_metadata, embedded_reference, current_i + 1, root_dt,
+                                    false, NULL, NULL);
+                }
             }
             return offset;
         } else {
@@ -199,7 +215,8 @@ intptr_t fixedarray_dtype::apply_linear_index(int nindices, const irange *indice
                 offset += m_element_dtype.extended()->apply_linear_index(nindices - 1, indices + 1,
                                 metadata,
                                 result_edtype->m_element_dtype, out_metadata + sizeof(strided_array_dtype_metadata),
-                                embedded_reference, current_i + 1, root_dt);
+                                embedded_reference, current_i + 1, root_dt,
+                                false, NULL, NULL);
             }
             return offset;
         }
