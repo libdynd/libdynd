@@ -113,6 +113,13 @@ dtype::dtype(const std::string& rep)
     dtype_from_datashape(rep).swap(*this);
 }
 
+dtype::dtype(const char *rep_begin, const char *rep_end)
+    : m_extended(NULL)
+{
+    dtype_from_datashape(rep_begin, rep_end).swap(*this);
+}
+
+
 dtype dtype::at_array(int nindices, const irange *indices) const
 {
     if (this->is_builtin()) {

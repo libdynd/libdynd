@@ -297,6 +297,9 @@ public:
     /** Construct from a string representation */
     explicit dtype(const std::string& rep);
 
+    /** Construct from a string representation */
+    dtype(const char *rep_begin, const char *rep_end);
+
     ~dtype() {
         if (!is_builtin()) {
             base_dtype_decref(m_extended);

@@ -39,6 +39,12 @@ inline ndobject parse_json(const dtype& dt, const char *json) {
     return parse_json(dt, json, json + strlen(json));
 }
 
+/** Interface to the JSON parser for an input of two string literals */
+template<int M, int N>
+inline ndobject parse_json(const char (&dt)[M], const char (&json)[N]) {
+    return parse_json(dtype(dt, dt+M-1), json, json+N-1);
+}
+
 } // namespace dynd
 
 #endif // _DYND__JSON_PARSER_HPP_

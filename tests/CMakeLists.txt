@@ -11,7 +11,6 @@ set(tests_SRC
     codegen/test_unary_kernel_adapter.cpp
     codegen/test_binary_kernel_adapter.cpp
 #    codegen/assembly_samples/asm_tests.cpp
-    dtypes/test_array_dtype.cpp
     dtypes/test_bytes_dtype.cpp
     dtypes/test_byteswap_dtype.cpp
     dtypes/test_categorical_dtype.cpp
@@ -26,11 +25,12 @@ set(tests_SRC
     dtypes/test_fixedarray_dtype.cpp
     dtypes/test_fixedstring_dtype.cpp
     dtypes/test_fixedstruct_dtype.cpp
+    dtypes/test_pointer_dtype.cpp
     dtypes/test_strided_array_dtype.cpp
     dtypes/test_string_dtype.cpp
     dtypes/test_struct_dtype.cpp
     dtypes/test_tuple_dtype.cpp
-    dtypes/test_pointer_dtype.cpp
+    dtypes/test_var_array_dtype.cpp
     gfunc/test_callable.cpp
     ndobject/test_json_parser.cpp
     ndobject/test_ndobject.cpp

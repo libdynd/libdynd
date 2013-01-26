@@ -12,11 +12,12 @@
 #include <dynd/dtypes/tuple_dtype.hpp>
 #include <dynd/dtypes/var_array_dtype.hpp>
 #include <dynd/dtypes/strided_array_dtype.hpp>
+#include <dynd/json_parser.hpp>
 
 using namespace std;
 using namespace dynd;
 
-TEST(ArrayDType, Shape) {
+TEST(VarArrayDType, Shape) {
     dtype dfloat = make_dtype<float>();
     dtype darr1 = make_strided_array_dtype(dfloat);
     dtype darr2 = make_var_array_dtype(darr1);
@@ -31,15 +32,15 @@ TEST(ArrayDType, Shape) {
     EXPECT_EQ(2, a.get_shape()[2]);
 }
 
-TEST(ArrayDType, DTypeSubscript) {
-    dtype dfloat = make_dtype<float>();
-    dtype darr1 = make_var_array_dtype(dfloat);
-    dtype darr2 = make_var_array_dtype(darr1);
-    dtype dtest;
-
+TEST(VarArrayDType, DTypeSubscript) {
+    ndobject n = parse_json("VarDim, int32", "[2,4,6,8]");
+    EXPECT_EQ(2, n.at(0).as<int>());
+    EXPECT_EQ(4, n.at(1).as<int>());
+    EXPECT_EQ(6, n.at(2).as<int>());
+    EXPECT_EQ(8, n.at(3).as<int>());
 }
 
-TEST(ArrayDType, LosslessCasting) {
+TEST(VarArrayDType, LosslessCasting) {
 /*
     intptr_t shape_235[] = {2,3,5}, shape_215[] = {2,1,5}, shape_35[] = {3,5};
     dtype adt_int_235 = make_ndobject_dtype<int>(3, shape_235);
@@ -66,7 +67,7 @@ TEST(ArrayDType, LosslessCasting) {
 */
 }
 
-TEST(ArrayDType, StringOutput) {
+TEST(VarArrayDType, StringOutput) {
 /*
     intptr_t shape_235[] = {2,3,5};
     dtype adt_int_235 = make_ndobject_dtype<int>(3, shape_235);
