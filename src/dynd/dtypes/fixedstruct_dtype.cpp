@@ -16,7 +16,7 @@ using namespace std;
 using namespace dynd;
 
 fixedstruct_dtype::fixedstruct_dtype(const std::vector<dtype>& field_types, const std::vector<std::string>& field_names)
-    : base_dtype(fixedstruct_type_id, struct_kind, 0, 1),
+    : base_struct_dtype(fixedstruct_type_id, 0, 1),
             m_field_types(field_types), m_field_names(field_names),
             m_data_offsets(field_types.size()), m_metadata_offsets(field_types.size())
 {
@@ -497,20 +497,20 @@ void fixedstruct_dtype::foreach_leading(char *data, const char *metadata, foreac
 
 static ndobject property_get_field_names(const dtype& dt) {
     const fixedstruct_dtype *d = static_cast<const fixedstruct_dtype *>(dt.extended());
-    // TODO: This property could be an immutable ndobject, which we would just return.
-    return ndobject(d->get_field_names());
+    // TODO: This property should be an immutable ndobject, which we would just return.
+    return ndobject(d->get_field_names_vector());
 }
 
 static ndobject property_get_data_offsets(const dtype& dt) {
     const fixedstruct_dtype *d = static_cast<const fixedstruct_dtype *>(dt.extended());
-    // TODO: This property could be an immutable ndobject, which we would just return.
-    return ndobject(d->get_data_offsets());
+    // TODO: This property should be an immutable ndobject, which we would just return.
+    return ndobject(d->get_data_offsets_vector());
 }
 
 static ndobject property_get_metadata_offsets(const dtype& dt) {
     const fixedstruct_dtype *d = static_cast<const fixedstruct_dtype *>(dt.extended());
-    // TODO: This property could be an immutable ndobject, which we would just return.
-    return ndobject(d->get_metadata_offsets());
+    // TODO: This property should be an immutable ndobject, which we would just return.
+    return ndobject(d->get_metadata_offsets_vector());
 }
 
 static pair<string, gfunc::callable> dtype_properties[] = {

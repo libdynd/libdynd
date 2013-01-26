@@ -79,7 +79,7 @@ void dynd::get_struct_assignment_kernel(const dtype& val_struct_dtype,
     make_auxiliary_data<struct_asn_kernel::auxdata_storage>(out_kernel.extra.auxdata);
     struct_asn_kernel::auxdata_storage& ad = out_kernel.extra.auxdata.get<struct_asn_kernel::auxdata_storage>();
     ad.init(val_struct_dtype, field_count);
-    for (size_t i = 0, i_end = sd->get_field_types().size(); i != i_end; ++i) {
+    for (size_t i = 0, i_end = sd->get_field_count(); i != i_end; ++i) {
         ::get_dtype_assignment_kernel(sd->get_field_types()[i], ad.kernels[i]);
     }
 }
@@ -172,19 +172,19 @@ void dynd::get_struct_assignment_kernel(const dtype& dst_struct_dtype, const dty
     struct_struct_asn_kernel::auxdata_storage& ad = out_kernel.extra.auxdata.get<struct_struct_asn_kernel::auxdata_storage>();
     ad.init(dst_struct_dtype, src_struct_dtype, field_count);
     // Match up the fields
-    const vector<string>& dst_field_names = dst_sd->get_field_names();
-    const vector<string>& src_field_names = src_sd->get_field_names();
+    const string *dst_field_names = dst_sd->get_field_names();
+    const string *src_field_names = src_sd->get_field_names();
     for (size_t i = 0; i != field_count; ++i) {
         const std::string& dst_name = dst_field_names[i];
         // TODO: accelerate this linear search if there are lots of fields?
-        vector<string>::const_iterator it = std::find(src_field_names.begin(), src_field_names.end(), dst_name);
-        if (it == src_field_names.end()) {
+        const string *it = std::find(src_field_names, src_field_names + field_count, dst_name);
+        if (it == src_field_names + field_count) {
             stringstream ss;
             ss << "cannot assign dynd struct " << src_struct_dtype << " to " << dst_struct_dtype;
             ss << " because they have different field names";
             throw runtime_error(ss.str());
         }
-        ad.field_reorder[i] = it - src_field_names.begin();
+        ad.field_reorder[i] = it - src_field_names;
     }
     // Create the kernels for copying individual fields
     for (size_t i = 0; i != field_count; ++i) {
@@ -235,9 +235,9 @@ namespace { struct fixedstruct_fixedstruct_asn_kernel {
         auxdata_storage& ad = get_auxiliary_data<auxdata_storage>(extra->auxdata);
         const fixedstruct_dtype *dst_sd = static_cast<const fixedstruct_dtype *>(ad.dst_dt.extended());
         kernel_instance<unary_operation_pair_t> *kernels = &ad.kernels[0];
-        const size_t *dst_metadata_offsets = &dst_sd->get_metadata_offsets()[0];
+        const size_t *dst_metadata_offsets = dst_sd->get_metadata_offsets();
         const size_t *src_metadata_offsets = &ad.src_metadata_offsets[0];
-        const size_t *dst_data_offsets = &dst_sd->get_data_offsets()[0];
+        const size_t *dst_data_offsets = dst_sd->get_data_offsets(extra->dst_metadata);
         const size_t *src_data_offsets = &ad.src_data_offsets[0];
         size_t field_count = ad.field_count;
 
@@ -281,27 +281,27 @@ void dynd::get_fixedstruct_assignment_kernel(const dtype& dst_fixedstruct_dtype,
     fixedstruct_fixedstruct_asn_kernel::auxdata_storage& ad = out_kernel.extra.auxdata.get<fixedstruct_fixedstruct_asn_kernel::auxdata_storage>();
     ad.init(dst_fixedstruct_dtype, field_count);
     // Match up the fields
-    const vector<string>& dst_field_names = dst_sd->get_field_names();
-    const vector<string>& src_field_names = src_sd->get_field_names();
+    const string *dst_field_names = dst_sd->get_field_names();
+    const string *src_field_names = src_sd->get_field_names();
     vector<int> field_reorder(field_count);
     for (size_t i = 0; i != field_count; ++i) {
         const std::string& dst_name = dst_field_names[i];
         // TODO: accelerate this linear search if there are lots of fields?
-        vector<string>::const_iterator it = std::find(src_field_names.begin(), src_field_names.end(), dst_name);
-        if (it == src_field_names.end()) {
+        const string *it = std::find(src_field_names, src_field_names + field_count, dst_name);
+        if (it == src_field_names + field_count) {
             stringstream ss;
             ss << "cannot assign dynd struct " << src_fixedstruct_dtype << " to " << dst_fixedstruct_dtype;
             ss << " because they have different field names";
             throw runtime_error(ss.str());
         }
-        field_reorder[i] = it - src_field_names.begin();
+        field_reorder[i] = it - src_field_names;
     }
     // Create the kernels and src offsets for copying individual fields
     for (size_t i = 0; i != field_count; ++i) {
         int i_src = field_reorder[i];
         ::get_dtype_assignment_kernel(dst_sd->get_field_types()[i], src_sd->get_field_types()[i_src],
                             errmode, NULL, ad.kernels[i]);
-        ad.src_data_offsets[i] = src_sd->get_data_offsets()[i_src];
+        ad.src_data_offsets[i] = src_sd->get_data_offsets_vector()[i_src];
         ad.src_metadata_offsets[i] = src_sd->get_metadata_offsets()[i_src];
     }
 }
@@ -393,27 +393,27 @@ void dynd::get_fixedstruct_to_struct_assignment_kernel(const dtype& dst_struct_d
     fixedstruct_struct_asn_kernel::auxdata_storage& ad = out_kernel.extra.auxdata.get<fixedstruct_struct_asn_kernel::auxdata_storage>();
     ad.init(dst_struct_dtype, field_count);
     // Match up the fields
-    const vector<string>& dst_field_names = dst_sd->get_field_names();
-    const vector<string>& src_field_names = src_sd->get_field_names();
+    const string *dst_field_names = dst_sd->get_field_names();
+    const string *src_field_names = src_sd->get_field_names();
     vector<int> field_reorder(field_count);
     for (size_t i = 0; i != field_count; ++i) {
         const std::string& dst_name = dst_field_names[i];
         // TODO: accelerate this linear search if there are lots of fields?
-        vector<string>::const_iterator it = std::find(src_field_names.begin(), src_field_names.end(), dst_name);
-        if (it == src_field_names.end()) {
+        const string *it = std::find(src_field_names, src_field_names + field_count, dst_name);
+        if (it == src_field_names + field_count) {
             stringstream ss;
             ss << "cannot assign dynd struct " << src_fixedstruct_dtype << " to " << dst_struct_dtype;
             ss << " because they have different field names";
             throw runtime_error(ss.str());
         }
-        field_reorder[i] = it - src_field_names.begin();
+        field_reorder[i] = it - src_field_names;
     }
     // Create the kernels and src offsets for copying individual fields
     for (size_t i = 0; i != field_count; ++i) {
         int i_src = field_reorder[i];
         ::get_dtype_assignment_kernel(dst_sd->get_field_types()[i], src_sd->get_field_types()[i_src],
                             errmode, NULL, ad.kernels[i]);
-        ad.src_data_offsets[i] = src_sd->get_data_offsets()[i_src];
+        ad.src_data_offsets[i] = src_sd->get_data_offsets_vector()[i_src];
         ad.src_metadata_offsets[i] = src_sd->get_metadata_offsets()[i_src];
     }
 }
@@ -506,27 +506,27 @@ void dynd::get_struct_to_fixedstruct_assignment_kernel(const dtype& dst_fixedstr
     struct_fixedstruct_asn_kernel::auxdata_storage& ad = out_kernel.extra.auxdata.get<struct_fixedstruct_asn_kernel::auxdata_storage>();
     ad.init(src_struct_dtype, field_count);
     // Match up the fields
-    const vector<string>& dst_field_names = dst_sd->get_field_names();
-    const vector<string>& src_field_names = src_sd->get_field_names();
+    const string *dst_field_names = dst_sd->get_field_names();
+    const string *src_field_names = src_sd->get_field_names();
     vector<int> field_reorder(field_count);
     for (size_t i = 0; i != field_count; ++i) {
         const std::string& src_name = src_field_names[i];
         // TODO: accelerate this linear search if there are lots of fields?
-        vector<string>::const_iterator it = std::find(dst_field_names.begin(), dst_field_names.end(), src_name);
-        if (it == dst_field_names.end()) {
+        const string *it = std::find(dst_field_names, dst_field_names + field_count, src_name);
+        if (it == dst_field_names + field_count) {
             stringstream ss;
             ss << "cannot assign dynd struct " << src_struct_dtype << " to " << dst_fixedstruct_dtype;
             ss << " because they have different field names";
             throw runtime_error(ss.str());
         }
-        field_reorder[i] = it - dst_field_names.begin();
+        field_reorder[i] = it - dst_field_names;
     }
     // Create the kernels and dst offsets for copying individual fields
     for (size_t i = 0; i != field_count; ++i) {
         int i_dst = field_reorder[i];
         ::get_dtype_assignment_kernel(dst_sd->get_field_types()[i_dst], src_sd->get_field_types()[i],
                             errmode, NULL, ad.kernels[i]);
-        ad.dst_data_offsets[i] = dst_sd->get_data_offsets()[i_dst];
+        ad.dst_data_offsets[i] = dst_sd->get_data_offsets_vector()[i_dst];
         ad.dst_metadata_offsets[i] = dst_sd->get_metadata_offsets()[i_dst];
     }
 }

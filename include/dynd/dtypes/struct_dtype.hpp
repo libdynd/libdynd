@@ -10,11 +10,12 @@
 #include <string>
 
 #include <dynd/dtype.hpp>
+#include <dynd/dtypes/base_struct_dtype.hpp>
 #include <dynd/memblock/memory_block.hpp>
 
 namespace dynd {
 
-class struct_dtype : public base_dtype {
+class struct_dtype : public base_struct_dtype {
     std::vector<dtype> m_field_types;
     std::vector<std::string> m_field_names;
     std::vector<size_t> m_metadata_offsets;
@@ -37,16 +38,30 @@ public:
         return m_field_types.size();
     }
 
-    const std::vector<dtype>& get_field_types() const {
-        return m_field_types;
+    const dtype *get_field_types() const {
+        return &m_field_types[0];
     }
 
-    const std::vector<std::string>& get_field_names() const {
+    const std::string *get_field_names() const {
+        return &m_field_names[0];
+    }
+
+    const std::vector<std::string>& get_field_names_vector() const {
         return m_field_names;
     }
 
-    const std::vector<size_t>& get_metadata_offsets() const {
+    intptr_t get_field_index(const std::string& field_name) const;
+
+    const size_t *get_metadata_offsets() const {
+        return &m_metadata_offsets[0];
+    }
+
+    const std::vector<size_t>& get_metadata_offsets_vector() const {
         return m_metadata_offsets;
+    }
+
+    const size_t *get_data_offsets(const char *metadata) const {
+        return reinterpret_cast<const size_t *>(metadata);
     }
 
     void print_data(std::ostream& o, const char *metadata, const char *data) const;

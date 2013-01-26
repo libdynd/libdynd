@@ -14,7 +14,7 @@ using namespace std;
 using namespace dynd;
 
 struct_dtype::struct_dtype(const std::vector<dtype>& fields, const std::vector<std::string>& field_names)
-    : base_dtype(struct_type_id, struct_kind, 0, 1),
+    : base_struct_dtype(struct_type_id, 0, 1),
             m_field_types(fields), m_field_names(field_names), m_metadata_offsets(fields.size())
 {
     if (fields.size() != field_names.size()) {
@@ -47,6 +47,17 @@ struct_dtype::struct_dtype(const std::vector<dtype>& fields, const std::vector<s
 
 struct_dtype::~struct_dtype()
 {
+}
+
+intptr_t struct_dtype::get_field_index(const std::string& field_name) const
+{
+    // TODO: Put a map<> or unordered_map<> in the dtype to accelerate this lookup
+    vector<string>::const_iterator i = find(m_field_names.begin(), m_field_names.end(), field_name);
+    if (i != m_field_names.end()) {
+        return i - m_field_names.begin();
+    } else {
+        return -1;
+    }
 }
 
 size_t struct_dtype::get_default_data_size(int ndim, const intptr_t *shape) const
@@ -435,13 +446,13 @@ void struct_dtype::foreach_leading(char *data, const char *metadata, foreach_fn_
 static ndobject property_get_field_names(const dtype& dt) {
     const struct_dtype *d = static_cast<const struct_dtype *>(dt.extended());
     // TODO: This property could be an immutable ndobject, which we would just return.
-    return ndobject(d->get_field_names());
+    return ndobject(d->get_field_names_vector());
 }
 
 static ndobject property_get_metadata_offsets(const dtype& dt) {
     const struct_dtype *d = static_cast<const struct_dtype *>(dt.extended());
     // TODO: This property could be an immutable ndobject, which we would just return.
-    return ndobject(d->get_metadata_offsets());
+    return ndobject(d->get_metadata_offsets_vector());
 }
 
 static pair<string, gfunc::callable> dtype_properties[] = {

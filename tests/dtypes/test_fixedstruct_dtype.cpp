@@ -31,11 +31,9 @@ TEST(FixedStructDType, CreateOneField) {
     EXPECT_EQ(4u, dt.get_alignment());
     EXPECT_EQ(pod_memory_management, dt.get_memory_management());
     tdt = static_cast<const fixedstruct_dtype *>(dt.extended());
-    EXPECT_EQ(1u, tdt->get_field_types().size());
+    EXPECT_EQ(1u, tdt->get_field_count());
     EXPECT_EQ(make_dtype<int32_t>(), tdt->get_field_types()[0]);
-    EXPECT_EQ(1u, tdt->get_data_offsets().size());
-    EXPECT_EQ(0u, tdt->get_data_offsets()[0]);
-    EXPECT_EQ(1u, tdt->get_field_names().size());
+    EXPECT_EQ(0u, tdt->get_data_offsets_vector()[0]);
     EXPECT_EQ("x", tdt->get_field_names()[0]);
 }
 
@@ -51,13 +49,11 @@ TEST(FixedStructDType, CreateTwoField) {
     EXPECT_EQ(8u, dt.get_alignment());
     EXPECT_EQ(pod_memory_management, dt.get_memory_management());
     tdt = static_cast<const fixedstruct_dtype *>(dt.extended());
-    EXPECT_EQ(2u, tdt->get_field_types().size());
+    EXPECT_EQ(2u, tdt->get_field_count());
     EXPECT_EQ(make_dtype<int64_t>(), tdt->get_field_types()[0]);
     EXPECT_EQ(make_dtype<int32_t>(), tdt->get_field_types()[1]);
-    EXPECT_EQ(2u, tdt->get_data_offsets().size());
-    EXPECT_EQ(0u, tdt->get_data_offsets()[0]);
-    EXPECT_EQ(8u, tdt->get_data_offsets()[1]);
-    EXPECT_EQ(2u, tdt->get_field_names().size());
+    EXPECT_EQ(0u, tdt->get_data_offsets_vector()[0]);
+    EXPECT_EQ(8u, tdt->get_data_offsets_vector()[1]);
     EXPECT_EQ("a", tdt->get_field_names()[0]);
     EXPECT_EQ("b", tdt->get_field_names()[1]);
 }
@@ -77,15 +73,13 @@ TEST(FixedStructDType, CreateThreeField) {
     EXPECT_EQ(8u, dt.get_alignment());
     EXPECT_EQ(pod_memory_management, dt.get_memory_management());
     tdt = static_cast<const fixedstruct_dtype *>(dt.extended());
-    EXPECT_EQ(3u, tdt->get_field_types().size());
+    EXPECT_EQ(3u, tdt->get_field_count());
     EXPECT_EQ(make_dtype<int64_t>(), tdt->get_field_types()[0]);
     EXPECT_EQ(make_dtype<int32_t>(), tdt->get_field_types()[1]);
     EXPECT_EQ(make_fixedstring_dtype(string_encoding_utf_8, 5), tdt->get_field_types()[2]);
-    EXPECT_EQ(3u, tdt->get_data_offsets().size());
-    EXPECT_EQ(0u, tdt->get_data_offsets()[0]);
-    EXPECT_EQ(8u, tdt->get_data_offsets()[1]);
-    EXPECT_EQ(12u, tdt->get_data_offsets()[2]);
-    EXPECT_EQ(3u, tdt->get_field_names().size());
+    EXPECT_EQ(0u, tdt->get_data_offsets_vector()[0]);
+    EXPECT_EQ(8u, tdt->get_data_offsets_vector()[1]);
+    EXPECT_EQ(12u, tdt->get_data_offsets_vector()[2]);
     EXPECT_EQ("x", tdt->get_field_names()[0]);
     EXPECT_EQ("y", tdt->get_field_names()[1]);
     EXPECT_EQ("z", tdt->get_field_names()[2]);

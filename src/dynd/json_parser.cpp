@@ -383,15 +383,15 @@ static void parse_var_array_json(const dtype& dt, const char *metadata, char *ou
     out->size = size;
 }
 
-static void parse_fixedstruct_json(const dtype& dt, const char *metadata, char *out_data,
+static void parse_struct_json(const dtype& dt, const char *metadata, char *out_data,
                 const char *&begin, const char *end)
 {
-    const fixedstruct_dtype *fsd = static_cast<const fixedstruct_dtype *>(dt.extended());
+    const base_struct_dtype *fsd = static_cast<const fixedstruct_dtype *>(dt.extended());
     size_t field_count = fsd->get_field_count();
-    const vector<string>& field_names = fsd->get_field_names();
-    const vector<dtype>& field_types = fsd->get_field_types();
-    const vector<size_t>& data_offsets = fsd->get_data_offsets();
-    const vector<size_t>& metadata_offsets = fsd->get_metadata_offsets();
+    const string *field_names = fsd->get_field_names();
+    const dtype *field_types = fsd->get_field_types();
+    const size_t *data_offsets = fsd->get_data_offsets(metadata);
+    const size_t *metadata_offsets = fsd->get_metadata_offsets();
 
     // Keep track of which fields we've seen
     shortvector<bool> populated_fields(field_count);
@@ -561,22 +561,6 @@ static void parse_uniform_array_json(const dtype& dt, const char *metadata, char
     }
 }
 
-static void parse_struct_json(const dtype& dt, const char *metadata, char *out_data,
-                const char *&json_begin, const char *json_end)
-{
-    switch (dt.get_type_id()) {
-        case fixedstruct_type_id:
-            parse_fixedstruct_json(dt, metadata, out_data, json_begin, json_end);
-            break;
-        default: {
-            stringstream ss;
-            ss << "parse_json: unsupported struct dtype " << dt;
-            throw runtime_error(ss.str());
-        }
-    }
-}
-
-
 static void parse_json(const dtype& dt, const char *metadata, char *out_data,
                 const char *&json_begin, const char *json_end)
 {
@@ -675,14 +659,33 @@ ndobject dynd::parse_json(const dtype& dt, const char *json_begin, const char *j
             ss << "DType: " << e.get_dtype() << "\n";
         }
         ss << "Message: " << e.get_message() << "\n";
-        if (line > 1) {
-            ss << line_prev << "\n";
+        if (line_cur.size() < 200) {
+            // If the line is short, print the lines and indicate the error
+            if (line > 1) {
+                ss << line_prev << "\n";
+            }
+            ss << line_cur << "\n";
+            for (int i = 0; i < column-1; ++i) {
+                ss << " ";
+            }
+            ss << "^\n";
+        } else {
+            // If the line is long, print a part of the line and indicate the error
+            if (column < 80) {
+                ss << line_cur.substr(0, 80) << " ...\n";
+                for (int i = 0; i < column-1; ++i) {
+                    ss << " ";
+                }
+                ss << "^\n";
+            } else {
+                int start = column - 60;
+                ss << " ... " << line_cur.substr(start - 1, 80) << " ...\n";
+                for (int i = 0; i < 65; ++i) {
+                    ss << " ";
+                }
+                ss << "^\n";
+            }
         }
-        ss << line_cur << "\n";
-        for (int i = 0; i < column-1; ++i) {
-            ss << " ";
-        }
-        ss << "^\n";
         throw runtime_error(ss.str());
     }
 }
