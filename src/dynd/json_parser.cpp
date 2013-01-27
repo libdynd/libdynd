@@ -6,6 +6,7 @@
 #include <dynd/json_parser.hpp>
 #include <dynd/dtypes/base_bytes_dtype.hpp>
 #include <dynd/dtypes/string_dtype.hpp>
+#include <dynd/dtypes/json_dtype.hpp>
 #include <dynd/dtypes/fixedarray_dtype.hpp>
 #include <dynd/dtypes/var_array_dtype.hpp>
 #include <dynd/dtypes/fixedstruct_dtype.hpp>
@@ -67,6 +68,7 @@ ndobject dynd::parse_json(const dtype& dt, const ndobject& json)
         case bytes_kind: {
             const base_bytes_dtype *bdt = static_cast<const base_bytes_dtype *>(json_dtype.extended());
             bdt->get_bytes_range(&json_begin, &json_end, json.get_ndo_meta(), json.get_readonly_originptr());
+            break;
         }
         default: {
             stringstream ss;
@@ -238,7 +240,7 @@ static bool parse_json_number(const char *&begin, const char *end, const char *&
     return true;
 }
 
-static void skip_json_element(const char *&begin, const char *end)
+static void skip_json_value(const char *&begin, const char *end)
 {
     begin = skip_whitespace(begin, end);
     if (begin == end) {
@@ -258,7 +260,7 @@ static void skip_json_element(const char *&begin, const char *end)
                     if (!parse_token(begin, end, ":")) {
                         throw json_parse_error(begin, "expected ':' separating name from value in object dict", dtype());
                     }
-                    skip_json_element(begin, end);
+                    skip_json_value(begin, end);
                     if (!parse_token(begin, end, ",")) {
                         break;
                     }
@@ -273,7 +275,7 @@ static void skip_json_element(const char *&begin, const char *end)
             ++begin;
             if (!parse_token(begin, end, "]")) {
                 for (;;) {
-                    skip_json_element(begin, end);
+                    skip_json_value(begin, end);
                     if (!parse_token(begin, end, ",")) {
                         break;
                     }
@@ -415,7 +417,7 @@ static void parse_struct_json(const dtype& dt, const char *metadata, char *out_d
             if (i == -1) {
                 // TODO: Add an error policy to this parser of whether to throw an error
                 //       or not. For now, just throw away fields not in the destination.
-                skip_json_element(begin, end);
+                skip_json_value(begin, end);
             } else {
                 parse_json(field_types[i], metadata + metadata_offsets[i], out_data + data_offsets[i], begin, end);
                 populated_fields[i] = true;
@@ -507,6 +509,17 @@ static void parse_complex_json(const dtype& dt, const char *metadata, char *out_
     parse_dynd_builtin_json(dt, metadata, out_data, begin, end);
 }
 
+static void parse_jsonstring_json(const dtype& dt, const char *metadata, char *out_data,
+                const char *&begin, const char *end)
+{
+    const char *saved_begin = skip_whitespace(begin, end);
+    skip_json_value(begin, end);
+    const base_string_dtype *bsd = static_cast<const base_string_dtype *>(dt.extended());
+    // The skipped JSON value gets copied verbatim into the json string
+    bsd->set_utf8_string(metadata, out_data, assign_error_none,
+            saved_begin, begin);
+}
+
 static void parse_string_json(const dtype& dt, const char *metadata, char *out_data,
                 const char *&begin, const char *end)
 {
@@ -585,7 +598,13 @@ static void parse_json(const dtype& dt, const char *metadata, char *out_data,
             parse_complex_json(dt, metadata, out_data, json_begin, json_end);
             return;
         case string_kind:
-            parse_string_json(dt, metadata, out_data, json_begin, json_end);
+            if (dt.get_type_id() == json_type_id) {
+                // The json type is a special string type that contains JSON directly
+                // Copy the JSON verbatim in this case.
+                parse_jsonstring_json(dt, metadata, out_data, json_begin, json_end);
+            } else {
+                parse_string_json(dt, metadata, out_data, json_begin, json_end);
+            }
             return;
         case datetime_kind:
             parse_datetime_json(dt, metadata, out_data, json_begin, json_end);
@@ -662,7 +681,7 @@ void dynd::validate_json(const char *json_begin, const char *json_end)
 {
     try {
         const char *begin = json_begin, *end = json_end;
-        ::skip_json_element(begin, end);
+        ::skip_json_value(begin, end);
         begin = skip_whitespace(begin, end);
         if (begin != end) {
             throw json_parse_error(begin, "unexpected trailing JSON text", dtype());

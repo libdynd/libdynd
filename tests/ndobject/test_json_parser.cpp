@@ -16,6 +16,7 @@
 #include <dynd/dtypes/fixedstruct_dtype.hpp>
 #include <dynd/dtypes/date_dtype.hpp>
 #include <dynd/dtypes/string_dtype.hpp>
+#include <dynd/dtypes/json_dtype.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -260,4 +261,22 @@ TEST(JSONParser, ListOfStruct) {
                     "{\"position\":[1,2,3], \"amount\": 3.125#,\n"
                     "\"data\":{ \"when\":\"2013-12-25\", \"name\":\"Frank\"}}]"),
                     runtime_error);
+}
+
+TEST(JSONParser, JSONDType) {
+    ndobject n;
+
+    // Parsing JSON with the output being just a json string
+    n = parse_json("json", "{\"a\":3.14}");
+    EXPECT_EQ(make_json_dtype(), n.get_dtype());
+    EXPECT_EQ("{\"a\":3.14}", n.as<string>());
+
+    // Parsing JSON with a piece of it being a json string
+    n = parse_json("{a: json; b: int32; c: string}",
+                    "{\"c\": \"testing string\", \"a\": [3.1, {\"X\":2}, [1,2]], \"b\":12}");
+    EXPECT_EQ(make_fixedstruct_dtype(make_json_dtype(), "a", make_dtype<int32_t>(), "b", make_string_dtype(), "c"),
+                    n.get_dtype());
+    EXPECT_EQ("[3.1, {\"X\":2}, [1,2]]", n.at(0).as<string>());
+    EXPECT_EQ(12, n.at(1).as<int>());
+    EXPECT_EQ("testing string", n.at(2).as<string>());
 }
