@@ -32,49 +32,105 @@ TEST(VarArrayDType, Shape) {
     EXPECT_EQ(2, a.get_shape()[2]);
 }
 
-TEST(VarArrayDType, DTypeSubscript) {
+TEST(VarArrayDType, DTypeSubscriptSimpleSingle) {
     ndobject n = parse_json("VarDim, int32", "[2,4,6,8]");
+
+    // Indexing collapses the leading dimension to just the int
+    EXPECT_EQ(make_dtype<int>(), n.at(0).get_dtype());
+
     EXPECT_EQ(2, n.at(0).as<int>());
     EXPECT_EQ(4, n.at(1).as<int>());
     EXPECT_EQ(6, n.at(2).as<int>());
     EXPECT_EQ(8, n.at(3).as<int>());
+    EXPECT_EQ(2, n.at(-4).as<int>());
+    EXPECT_EQ(4, n.at(-3).as<int>());
+    EXPECT_EQ(6, n.at(-2).as<int>());
+    EXPECT_EQ(8, n.at(-1).as<int>());
+
+    EXPECT_THROW(n.at(4), index_out_of_bounds);
+    EXPECT_THROW(n.at(-5), index_out_of_bounds);
 }
 
-TEST(VarArrayDType, LosslessCasting) {
-/*
-    intptr_t shape_235[] = {2,3,5}, shape_215[] = {2,1,5}, shape_35[] = {3,5};
-    dtype adt_int_235 = make_ndobject_dtype<int>(3, shape_235);
-    dtype adt_int_215 = make_ndobject_dtype<int>(3, shape_215);
-    dtype adt_int_35 = make_ndobject_dtype<int>(2, shape_35);
+TEST(VarArrayDType, DTypeSubscriptSimpleSlice) {
+    ndobject n = parse_json("VarDim, int32", "[2,4,6,8]");
 
-    dtype adt_int16_215 = make_ndobject_dtype<int16_t>(3, shape_215);
-    dtype adt_int64_215 = make_ndobject_dtype<int64_t>(3, shape_215);
+    // Slicing collapses the leading dimension to a strided array
+    EXPECT_EQ(make_strided_array_dtype(make_dtype<int>()), n.at(irange()).get_dtype());
+    EXPECT_EQ(make_strided_array_dtype(make_dtype<int>()), n.at(irange() / -1).get_dtype());
+    EXPECT_EQ(make_strided_array_dtype(make_dtype<int>()), n.at(1 <= irange() < 3).get_dtype());
+    // In particular, indexing with a zero-sized index converts from var to strided
+    EXPECT_EQ(make_strided_array_dtype(make_dtype<int>()), n.at_array(0, NULL).get_dtype());
 
-    // Broadcasting equal types treated as lossless
-    EXPECT_TRUE(is_lossless_assignment(adt_int_235, adt_int_215));
-    EXPECT_TRUE(is_lossless_assignment(adt_int_235, adt_int_35));
-    EXPECT_FALSE(is_lossless_assignment(adt_int_215, adt_int_235));
-    EXPECT_TRUE(is_lossless_assignment(adt_int_235, make_dtype<int>()));
+    EXPECT_EQ(2, n.at(1 <= irange() < 3).get_shape()[0]);
+    EXPECT_EQ(4, n.at(1 <= irange() < 3).at(0).as<int>());
+    EXPECT_EQ(6, n.at(1 <= irange() < 3).at(1).as<int>());
 
-    // Broadcasting unequal type follows the element type's rules
-    EXPECT_TRUE(is_lossless_assignment(adt_int_235, adt_int16_215));
-    EXPECT_FALSE(is_lossless_assignment(adt_int_235, adt_int64_215));
+    EXPECT_EQ(4, n.at(irange() / -1).get_shape()[0]);
+    EXPECT_EQ(8, n.at(irange() / -1).at(0).as<int>());
+    EXPECT_EQ(6, n.at(irange() / -1).at(1).as<int>());
+    EXPECT_EQ(4, n.at(irange() / -1).at(2).as<int>());
+    EXPECT_EQ(2, n.at(irange() / -1).at(3).as<int>());
 
-    // Scalars broadcast to arrays
-    EXPECT_TRUE(is_lossless_assignment(adt_int_235, make_dtype<int16_t>()));
-    EXPECT_FALSE(is_lossless_assignment(adt_int_235, make_dtype<int64_t>()));
-    EXPECT_FALSE(is_lossless_assignment(make_dtype<int64_t>(), adt_int_235));
-*/
+    EXPECT_EQ(4, n.at_array(0, NULL).get_shape()[0]);
+    EXPECT_EQ(2, n.at_array(0, NULL).at(0).as<int>());
+    EXPECT_EQ(4, n.at_array(0, NULL).at(1).as<int>());
+    EXPECT_EQ(6, n.at_array(0, NULL).at(2).as<int>());
+    EXPECT_EQ(8, n.at_array(0, NULL).at(3).as<int>());
+
+    EXPECT_THROW(n.at(2 <= irange() <= 4), irange_out_of_bounds);
 }
 
-TEST(VarArrayDType, StringOutput) {
-/*
-    intptr_t shape_235[] = {2,3,5};
-    dtype adt_int_235 = make_ndobject_dtype<int>(3, shape_235);
+TEST(VarArrayDType, DTypeSubscriptNested) {
+    ndobject n = parse_json("VarDim, VarDim, int32",
+                    "[[2,4,6,8], [1,3,5,7,9], [], [-1,-2,-3]]");
 
-    // Verify the current string representation [note it does not include strides at the moment]
-    stringstream ss;
-    ss << adt_int_235;
-    EXPECT_EQ("array<int32, (2,3,5)>", ss.str());
-*/
+    // Indexing with a zero-sized index converts the leading dim from var to strided
+    EXPECT_EQ(dtype("M, VarDim, int32"), n.at_array(0, NULL).get_dtype());
+    // Indexing with a single index converts the next dim from var to strided
+    EXPECT_EQ(dtype("M, int32"), n.at(0).get_dtype());
+    EXPECT_EQ(dtype("int32"), n.at(0,0).get_dtype());
+
+    // Validate the shapes after one level of indexing
+    EXPECT_EQ(4, n.at(0).get_shape()[0]);
+    EXPECT_EQ(5, n.at(1).get_shape()[0]);
+    EXPECT_EQ(0, n.at(2).get_shape()[0]);
+    EXPECT_EQ(3, n.at(3).get_shape()[0]);
+
+    // Check the individual values with positive indexes
+    EXPECT_EQ(2, n.at(0,0).as<int>());
+    EXPECT_EQ(4, n.at(0,1).as<int>());
+    EXPECT_EQ(6, n.at(0,2).as<int>());
+    EXPECT_EQ(8, n.at(0,3).as<int>());
+    EXPECT_EQ(1, n.at(1,0).as<int>());
+    EXPECT_EQ(3, n.at(1,1).as<int>());
+    EXPECT_EQ(5, n.at(1,2).as<int>());
+    EXPECT_EQ(7, n.at(1,3).as<int>());
+    EXPECT_EQ(9, n.at(1,4).as<int>());
+    EXPECT_EQ(-1, n.at(3,0).as<int>());
+    EXPECT_EQ(-2, n.at(3,1).as<int>());
+    EXPECT_EQ(-3, n.at(3,2).as<int>());
+
+    // Check the individual values with negative indexes
+    EXPECT_EQ(2, n.at(-4,-4).as<int>());
+    EXPECT_EQ(4, n.at(-4,-3).as<int>());
+    EXPECT_EQ(6, n.at(-4,-2).as<int>());
+    EXPECT_EQ(8, n.at(-4,-1).as<int>());
+    EXPECT_EQ(1, n.at(-3,-5).as<int>());
+    EXPECT_EQ(3, n.at(-3,-4).as<int>());
+    EXPECT_EQ(5, n.at(-3,-3).as<int>());
+    EXPECT_EQ(7, n.at(-3,-2).as<int>());
+    EXPECT_EQ(9, n.at(-3,-1).as<int>());
+    EXPECT_EQ(-1, n.at(-1,-3).as<int>());
+    EXPECT_EQ(-2, n.at(-1,-2).as<int>());
+    EXPECT_EQ(-3, n.at(-1,-1).as<int>());
+
+    // Out of bounds accesses
+    EXPECT_THROW(n.at(0, 4), index_out_of_bounds);
+    EXPECT_THROW(n.at(0, -5), index_out_of_bounds);
+    EXPECT_THROW(n.at(1, 5), index_out_of_bounds);
+    EXPECT_THROW(n.at(1, -6), index_out_of_bounds);
+    EXPECT_THROW(n.at(2, 0), index_out_of_bounds);
+    EXPECT_THROW(n.at(2, -1), index_out_of_bounds);
+    EXPECT_THROW(n.at(3, 3), index_out_of_bounds);
+    EXPECT_THROW(n.at(3, -4), index_out_of_bounds);
 }

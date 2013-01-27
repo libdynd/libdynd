@@ -468,12 +468,12 @@ ndobject ndobject::at_array(int nindices, const irange *indices) const
             // If the data reference is NULL, the data is embedded in the ndobject itself
             result.get_ndo()->m_data_reference = m_memblock.get();
         }
+        memory_block_incref(result.get_ndo()->m_data_reference);
         intptr_t offset = get_ndo()->m_dtype->apply_linear_index(nindices, indices,
                         get_ndo_meta(), dt, result.get_ndo_meta(),
                         m_memblock.get(), 0, this_dt,
                         true, &result.get_ndo()->m_data_pointer, &result.get_ndo()->m_data_reference);
         result.get_ndo()->m_data_pointer += offset;
-        memory_block_incref(result.get_ndo()->m_data_reference);
         result.get_ndo()->m_flags = get_ndo()->m_flags;
         return result;
     }
