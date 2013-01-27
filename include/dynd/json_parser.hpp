@@ -11,6 +11,15 @@
 namespace dynd {
 
 /**
+ * Validates UTF-8 encoded JSON, throwing an exception if it
+ * is not valid.
+ *
+ * \param json_begin  The beginning of the UTF-8 buffer containing the JSON.
+ * \param json_end  One past the end of the UTF-8 buffer containing the JSON.
+ */
+void validate_json(const char *json_begin, const char *json_end);
+
+/**
  * This function parses the JSON, encoded as UTF-8, into an ndobject
  * of the specified dtype. This parser works directly from JSON to the
  * ndobject representation, interpreting the data as the requested type

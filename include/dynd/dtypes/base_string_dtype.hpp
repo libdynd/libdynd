@@ -28,11 +28,18 @@ public:
     virtual string_encoding_t get_encoding() const = 0;
 
     /** Retrieves the data range in which a string is stored */
-    virtual void get_string_range(const char **out_begin, const char**out_end, const char *metadata, const char *data) const = 0;
+    virtual void get_string_range(const char **out_begin, const char**out_end,
+                    const char *metadata, const char *data) const = 0;
     /** Converts a string element into a C++ std::string with a UTF8 encoding */
     std::string get_utf8_string(const char *metadata, const char *data, assign_error_mode errmode) const;
+    /** Copies a string with a UTF8 encoding to a string element */
+    virtual void set_utf8_string(const char *metadata, char *data, assign_error_mode errmode,
+                    const char* utf8_begin, const char *utf8_end) const = 0;
     /** Copies a C++ std::string with a UTF8 encoding to a string element */
-    virtual void set_utf8_string(const char *metadata, char *data, assign_error_mode errmode, const std::string& utf8_str) const = 0;
+    inline void set_utf8_string(const char *metadata, char *data, assign_error_mode errmode,
+                    const std::string& utf8_str) const {
+        set_utf8_string(metadata, data, errmode, utf8_str.data(), utf8_str.data() + utf8_str.size());
+    }
 
     // String dtypes stop the iterdata chain
     // TODO: Maybe it should be more flexible?

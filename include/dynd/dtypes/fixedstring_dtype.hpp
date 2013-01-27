@@ -30,7 +30,8 @@ public:
     }
 
     void get_string_range(const char **out_begin, const char**out_end, const char *metadata, const char *data) const;
-    void set_utf8_string(const char *metadata, char *dst, assign_error_mode errmode, const std::string& utf8_str) const;
+    void set_utf8_string(const char *metadata, char *data, assign_error_mode errmode,
+                    const char* utf8_begin, const char *utf8_end) const;
 
     void print_data(std::ostream& o, const char *metadata, const char *data) const;
 

@@ -782,6 +782,30 @@ namespace {
             if (dt.get_kind() == expression_kind || dt.get_data_size() != e->get_data_size() ||
                         dt.get_memory_management() != pod_memory_management ||
                         e->get_memory_management() != pod_memory_management) {
+                // Some special cases that have the same memory layouts
+                switch (dt.get_type_id()) {
+                    case string_type_id:
+                    case json_type_id:
+                    case bytes_type_id:
+                        switch (e->get_type_id()) {
+                            case string_type_id:
+                            case json_type_id:
+                            case bytes_type_id:
+                                // All these dtypes have the same data/metadata layout,
+                                // allow a view whenever the alignment allows it
+                                if (e->get_alignment() <= dt.get_alignment()) {
+                                    out_transformed_dtype = *e;
+                                    out_was_transformed = true;
+                                    return;
+                                }
+                                break;
+                            default:
+                                break;
+                        }
+                        break;
+                    default:
+                        break;
+                }
                 out_transformed_dtype = make_view_dtype(*e, dt);
                 out_was_transformed = true;
             } else {

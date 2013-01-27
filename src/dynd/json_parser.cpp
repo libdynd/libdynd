@@ -626,6 +626,61 @@ static void get_error_line_column(const char *begin, const char *end, const char
     throw runtime_error("Cannot get line number of error, its position is out of range");
 }
 
+void print_json_parse_error_marker(std::ostream& o, const std::string& line_prev,
+                const std::string& line_cur, int line, int column)
+{
+    if (line_cur.size() < 200) {
+        // If the line is short, print the lines and indicate the error
+        if (line > 1) {
+            o << line_prev << "\n";
+        }
+        o << line_cur << "\n";
+        for (int i = 0; i < column-1; ++i) {
+            o << " ";
+        }
+        o << "^\n";
+    } else {
+        // If the line is long, print a part of the line and indicate the error
+        if (column < 80) {
+            o << line_cur.substr(0, 80) << " ...\n";
+            for (int i = 0; i < column-1; ++i) {
+                o << " ";
+            }
+            o << "^\n";
+        } else {
+            int start = column - 60;
+            o << " ... " << line_cur.substr(start - 1, 80) << " ...\n";
+            for (int i = 0; i < 65; ++i) {
+                o << " ";
+            }
+            o << "^\n";
+        }
+    }
+}
+
+void dynd::validate_json(const char *json_begin, const char *json_end)
+{
+    try {
+        const char *begin = json_begin, *end = json_end;
+        ::skip_json_element(begin, end);
+        begin = skip_whitespace(begin, end);
+        if (begin != end) {
+            throw json_parse_error(begin, "unexpected trailing JSON text", dtype());
+        }
+    } catch (const json_parse_error& e) {
+        stringstream ss;
+        string line_prev, line_cur;
+        int line, column;
+        get_error_line_column(json_begin, json_end, e.get_position(),
+                        line_prev, line_cur, line, column);
+        ss << "Error validating JSON at line " << line << ", column " << column << "\n";
+        ss << "Message: " << e.get_message() << "\n";
+        print_json_parse_error_marker(ss, line_prev, line_cur, line, column);
+        throw runtime_error(ss.str());
+    }
+}
+
+
 ndobject dynd::parse_json(const dtype& dt, const char *json_begin, const char *json_end)
 {
     ndobject result;
@@ -647,6 +702,7 @@ ndobject dynd::parse_json(const dtype& dt, const char *json_begin, const char *j
         if (begin != end) {
             throw json_parse_error(begin, "unexpected trailing JSON text", dt);
         }
+        // TODO: Make this optional
         result.flag_as_immutable();
         return result;
     } catch (const json_parse_error& e) {
@@ -660,33 +716,7 @@ ndobject dynd::parse_json(const dtype& dt, const char *json_begin, const char *j
             ss << "DType: " << e.get_dtype() << "\n";
         }
         ss << "Message: " << e.get_message() << "\n";
-        if (line_cur.size() < 200) {
-            // If the line is short, print the lines and indicate the error
-            if (line > 1) {
-                ss << line_prev << "\n";
-            }
-            ss << line_cur << "\n";
-            for (int i = 0; i < column-1; ++i) {
-                ss << " ";
-            }
-            ss << "^\n";
-        } else {
-            // If the line is long, print a part of the line and indicate the error
-            if (column < 80) {
-                ss << line_cur.substr(0, 80) << " ...\n";
-                for (int i = 0; i < column-1; ++i) {
-                    ss << " ";
-                }
-                ss << "^\n";
-            } else {
-                int start = column - 60;
-                ss << " ... " << line_cur.substr(start - 1, 80) << " ...\n";
-                for (int i = 0; i < 65; ++i) {
-                    ss << " ";
-                }
-                ss << "^\n";
-            }
-        }
+        print_json_parse_error_marker(ss, line_prev, line_cur, line, column);
         throw runtime_error(ss.str());
     }
 }

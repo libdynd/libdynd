@@ -234,9 +234,6 @@ std::ostream& dynd::operator<<(std::ostream& o, const dtype& rhs)
         case void_type_id:
             o << "void";
             break;
-        case pattern_type_id:
-            o << "pattern";
-            break;
         default:
             rhs.extended()->print_dtype(o);
             break;

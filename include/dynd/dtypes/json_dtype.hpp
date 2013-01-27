@@ -2,48 +2,27 @@
 // Copyright (C) 2011-13, DyND Developers
 // BSD 2-Clause License, see LICENSE.txt
 //
-// The string dtype uses memory_block references to store
-// arbitrarily sized strings.
-//
-#ifndef _DYND__STRING_DTYPE_HPP_
-#define _DYND__STRING_DTYPE_HPP_
 
-#include <dynd/dtype.hpp>
-#include <dynd/dtype_assign.hpp>
-#include <dynd/dtypes/view_dtype.hpp>
-#include <dynd/string_encodings.hpp>
+#ifndef _DYND__JSON_DTYPE_HPP_
+#define _DYND__JSON_DTYPE_HPP_
+
+#include <dynd/dtypes/string_dtype.hpp>
 
 namespace dynd {
 
-struct string_dtype_metadata {
-    /**
-     * A reference to the memory block which contains the string's data.
-     * NOTE: This is identical to bytes_dtype_metadata, by design. Maybe
-     *       both should become a typedef to a common class?
-     */
-    memory_block_data *blockref;
-};
+// The json dtype is stored as a string, but limited to
+// UTF-8 and is supposed to contain JSON data.
+typedef string_dtype_metadata json_dtype_metadata;
+typedef string_dtype_data json_dtype_data;
 
-struct string_dtype_data {
-    char *begin;
-    char *end;
-};
-
-class string_dtype : public base_string_dtype {
-    string_encoding_t m_encoding;
-
+class json_dtype : public base_string_dtype {
 public:
-    string_dtype(string_encoding_t encoding);
+    json_dtype();
 
-    virtual ~string_dtype();
+    virtual ~json_dtype();
 
     string_encoding_t get_encoding() const {
-        return m_encoding;
-    }
-
-    /** Alignment of the string data being pointed to. */
-    size_t get_data_alignment() const {
-        return string_encoding_char_size_table[m_encoding];
+        return string_encoding_utf_8;
     }
 
     void get_string_range(const char **out_begin, const char**out_end, const char *metadata, const char *data) const;
@@ -85,10 +64,10 @@ public:
     void metadata_debug_print(const char *metadata, std::ostream& o, const std::string& indent) const;
 };
 
-inline dtype make_string_dtype(string_encoding_t encoding = string_encoding_utf_8) {
-    return dtype(new string_dtype(encoding), false);
+inline dtype make_json_dtype() {
+    return dtype(new json_dtype(), false);
 }
 
 } // namespace dynd
 
-#endif // _DYND__STRING_DTYPE_HPP_
+#endif // _DYND__JSON_DTYPE_HPP_

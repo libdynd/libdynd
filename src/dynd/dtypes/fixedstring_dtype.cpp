@@ -76,20 +76,20 @@ void fixedstring_dtype::get_string_range(const char **out_begin, const char**out
     }
 }
 
-void fixedstring_dtype::set_utf8_string(const char *DYND_UNUSED(metadata), char *dst, assign_error_mode errmode, const std::string& utf8_str) const
+void fixedstring_dtype::set_utf8_string(const char *DYND_UNUSED(metadata), char *dst,
+                assign_error_mode errmode,
+                const char* utf8_begin, const char *utf8_end) const
 {
     char *dst_end = dst + get_data_size();
-    const char *src = utf8_str.data();
-    const char *src_end = src + utf8_str.size();
     next_unicode_codepoint_t next_fn = get_next_unicode_codepoint_function(string_encoding_utf_8, errmode);
     append_unicode_codepoint_t append_fn = get_append_unicode_codepoint_function(m_encoding, errmode);
     uint32_t cp;
 
-    while (src < src_end && dst < dst_end) {
-        cp = next_fn(src, src_end);
+    while (utf8_begin < utf8_end && dst < dst_end) {
+        cp = next_fn(utf8_begin, utf8_end);
         append_fn(cp, dst, dst_end);
     }
-    if (src < src_end) {
+    if (utf8_begin < utf8_end) {
         if (errmode != assign_error_none) {
             throw std::runtime_error("Input is too large to convert to destination fixed-size string");
         }

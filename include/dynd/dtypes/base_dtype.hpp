@@ -74,29 +74,41 @@ enum type_id_t {
     complex_float64_type_id,
     // Means no type, just like in C. (Different from NumPy)
     void_type_id,
+    // Like C/C++ (void*), the storage of pointer_dtype
     void_pointer_type_id,
 
-    // Other primitives (not builtin)
-    fixedbytes_type_id,
-    fixedstring_type_id,
-    categorical_type_id,
-    date_type_id,
-    busdate_type_id,
+    // A pointer type
     pointer_type_id,
-
-    date_property_type_id,
 
     // blockref primitive dtypes
     bytes_type_id,
-    string_type_id,
+    // A bytes buffer of a fixed size
+    fixedbytes_type_id,
 
-    // blockref composite dtypes
+    // A variable-sized string type
+    string_type_id,
+    // A NULL-terminated string buffer of a fixed size
+    fixedstring_type_id,
+
+    // A categorical (enum-like) type
+    categorical_type_id,
+    // A 32-bit date type
+    date_type_id,
+    // A 32-bit date type limited to business days
+    busdate_type_id,
+    // A UTF-8 encoded string type for holding JSON
+    json_type_id,
+
+    // A strided array dimension type (like NumPy)
+    strided_array_type_id,
+    // A fixed-sized array dimension type
+    fixedarray_type_id,
+    // A variable-sized array dimension type
     var_array_type_id,
 
-    // Composite dtypes
-    strided_array_type_id,
-    fixedarray_type_id,
+    // A struct type with variable layout
     struct_type_id,
+    // A struct type with fixed layout
     fixedstruct_type_id,
     tuple_type_id,
     ndobject_type_id,
@@ -107,11 +119,11 @@ enum type_id_t {
     align_type_id,
     view_type_id,
 
+    // A type for holding property access in the 'date' type (will generalize to property_type_id)
+    date_property_type_id,
+
     // Advanced expression dtypes
     groupby_type_id,
-
-    // pattern matches against other types - cannot instantiate
-    pattern_type_id,
 
     // The number of built-in, atomic types (including uninitialized and void)
     builtin_type_id_count = 15
