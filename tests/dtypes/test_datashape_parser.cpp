@@ -15,6 +15,7 @@
 #include <dynd/dtypes/fixedstruct_dtype.hpp>
 #include <dynd/dtypes/date_dtype.hpp>
 #include <dynd/dtypes/string_dtype.hpp>
+#include <dynd/dtypes/json_dtype.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -35,6 +36,7 @@ TEST(DataShapeParser, Basic) {
     EXPECT_EQ(make_dtype<complex<float> >(), dtype_from_datashape("complex64"));
     EXPECT_EQ(make_dtype<complex<double> >(), dtype_from_datashape("complex128"));
     EXPECT_EQ(make_string_dtype(string_encoding_utf_8), dtype_from_datashape("string"));
+    EXPECT_EQ(make_json_dtype(), dtype_from_datashape("json"));
     EXPECT_EQ(make_date_dtype(), dtype_from_datashape("date"));
 }
 

@@ -12,6 +12,7 @@
 #include <dynd/dtypes/fixedstruct_dtype.hpp>
 #include <dynd/dtypes/string_dtype.hpp>
 #include <dynd/dtypes/fixedstring_dtype.hpp>
+#include <dynd/dtypes/json_dtype.hpp>
 #include <dynd/dtypes/date_dtype.hpp>
 
 using namespace std;
@@ -64,6 +65,7 @@ namespace {
             builtin_types["string2"] = make_fixedstring_dtype(string_encoding_utf_8, 2);
             builtin_types["string3"] = make_fixedstring_dtype(string_encoding_utf_8, 3);
             builtin_types["string4"] = make_fixedstring_dtype(string_encoding_utf_8, 4);
+            builtin_types["json"] = make_json_dtype();
             builtin_types["date"] = make_date_dtype();
         }
     };
