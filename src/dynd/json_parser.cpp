@@ -647,6 +647,7 @@ ndobject dynd::parse_json(const dtype& dt, const char *json_begin, const char *j
         if (begin != end) {
             throw json_parse_error(begin, "unexpected trailing JSON text", dt);
         }
+        result.flag_as_immutable();
         return result;
     } catch (const json_parse_error& e) {
         stringstream ss;

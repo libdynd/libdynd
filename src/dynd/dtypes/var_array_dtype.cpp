@@ -64,7 +64,7 @@ bool var_array_dtype::is_expression() const
 
 bool var_array_dtype::is_unique_data_owner(const char *metadata) const
 {
-    const var_array_dtype_metadata *md = reinterpret_cast<const var_array_dtype_metadata *>(*metadata);
+    const var_array_dtype_metadata *md = reinterpret_cast<const var_array_dtype_metadata *>(metadata);
     if (md->blockref != NULL &&
             (md->blockref->m_use_count != 1 ||
              md->blockref->m_type != pod_memory_block_type)) {
