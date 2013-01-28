@@ -19,7 +19,7 @@ bytes_dtype::bytes_dtype(size_t alignment)
 {
     if (alignment != 1 && alignment != 2 && alignment != 4 && alignment != 8 && alignment != 16) {
         std::stringstream ss;
-        ss << "Cannot make a bytes<" << alignment << "> dtype, its alignment is not a small power of two";
+        ss << "Cannot make a bytes dtype with alignment " << alignment << ", it must be a small power of two";
         throw std::runtime_error(ss.str());
     }
 }
@@ -45,10 +45,12 @@ void bytes_dtype::print_data(std::ostream& o, const char *DYND_UNUSED(metadata),
     hexadecimal_print(o, begin, end - begin);
 }
 
-void bytes_dtype::print_dtype(std::ostream& o) const {
-
-    o << "bytes<" << m_alignment << ">";
-
+void bytes_dtype::print_dtype(std::ostream& o) const
+{
+    o << "bytes";
+    if (m_alignment != 1) {
+        o << "<align=" << m_alignment << ">";
+    }
 }
 
 bool bytes_dtype::is_unique_data_owner(const char *metadata) const
