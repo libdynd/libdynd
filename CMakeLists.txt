@@ -192,6 +192,7 @@ set(dynd_SRC
     src/dynd/dtype_comparisons.cpp
     src/dynd/dtype_promotion.cpp
     src/dynd/exceptions.cpp
+    src/dynd/json_formatter.cpp
     src/dynd/json_parser.cpp
     src/dynd/ndobject.cpp
     src/dynd/ndobject_arange.cpp
@@ -209,6 +210,7 @@ set(dynd_SRC
     include/dynd/dtype_promotion.hpp
     include/dynd/exceptions.hpp
     include/dynd/fpstatus.hpp
+    include/dynd/json_formatter.hpp
     include/dynd/json_parser.hpp
     include/dynd/irange.hpp
     include/dynd/ndobject.hpp

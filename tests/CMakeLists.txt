@@ -33,6 +33,7 @@ set(tests_SRC
     dtypes/test_tuple_dtype.cpp
     dtypes/test_var_array_dtype.cpp
     gfunc/test_callable.cpp
+    ndobject/test_json_formatter.cpp
     ndobject/test_json_parser.cpp
     ndobject/test_ndobject.cpp
     ndobject/test_ndobject_arange.cpp
