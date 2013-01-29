@@ -134,3 +134,34 @@ TEST(VarArrayDType, DTypeSubscriptNested) {
     EXPECT_THROW(n.at(3, 3), index_out_of_bounds);
     EXPECT_THROW(n.at(3, -4), index_out_of_bounds);
 }
+
+TEST(VarArrayDType, DTypeSubscriptFixedVarNested) {
+    ndobject n = parse_json("4, VarDim, int32",
+                    "[[2,4,6,8], [1,3,5,7,9], [], [-1,-2,-3]]");
+
+    EXPECT_EQ(dtype("4, VarDim, int32"), n.get_dtype());
+    EXPECT_EQ(dtype("M, int32"), n.at(0).get_dtype());
+
+    // Validate the shapes after one level of indexing
+    EXPECT_EQ(4, n.at(0).get_shape()[0]);
+    EXPECT_EQ(5, n.at(1).get_shape()[0]);
+    EXPECT_EQ(0, n.at(2).get_shape()[0]);
+    EXPECT_EQ(3, n.at(3).get_shape()[0]);
+}
+
+
+TEST(VarArrayDType, DTypeSubscriptStridedVarNested) {
+    ndobject n = parse_json("VarDim, VarDim, int32",
+                    "[[2,4,6,8], [1,3,5,7,9], [], [-1,-2,-3]]");
+    // By indexing with an empty index, switch the var dim to strided
+    n = n.at_array(0, NULL);
+
+    EXPECT_EQ(dtype("M, VarDim, int32"), n.get_dtype());
+    EXPECT_EQ(dtype("M, int32"), n.at(0).get_dtype());
+
+    // Validate the shapes after one level of indexing
+    EXPECT_EQ(4, n.at(0).get_shape()[0]);
+    EXPECT_EQ(5, n.at(1).get_shape()[0]);
+    EXPECT_EQ(0, n.at(2).get_shape()[0]);
+    EXPECT_EQ(3, n.at(3).get_shape()[0]);
+}

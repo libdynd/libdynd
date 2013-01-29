@@ -202,12 +202,8 @@ intptr_t var_array_dtype::apply_linear_index(int nindices, const irange *indices
             const var_array_dtype_data *d = reinterpret_cast<const var_array_dtype_data *>(*inout_data);
             bool remove_dimension;
             intptr_t start_index, index_stride, dimension_size;
-cout << "original size " << d->size << endl;
             apply_single_linear_index(*indices, d->size, current_i, &root_dt,
                             remove_dimension, start_index, index_stride, dimension_size);
-cout << "indexed slice [" << indices->start() << ":" <<
-                indices->finish() << ":" << indices->step() << "]" << endl;
-cout << "start " << start_index << ", stride " << index_stride << ", size " << dimension_size << endl;
             if (remove_dimension) {
                 // First dereference to point at the actual element
                 const var_array_dtype_metadata *md = reinterpret_cast<const var_array_dtype_metadata *>(metadata);
@@ -297,7 +293,7 @@ cout << "start " << start_index << ", stride " << index_stride << ", size " << d
                                     nindices - 1, indices + 1,
                                     metadata + sizeof(var_array_dtype_metadata),
                                     vad->get_element_dtype(),
-                                    out_metadata + sizeof(strided_array_dtype_metadata), embedded_reference,
+                                    out_metadata + sizeof(var_array_dtype_metadata), embedded_reference,
                                     current_i, root_dt,
                                     false, NULL, NULL);
                 }

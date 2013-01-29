@@ -110,7 +110,13 @@ dtype strided_array_dtype::apply_linear_index(int nindices, const irange *indice
         return dtype(this, true);
     } else if (nindices == 1) {
         if (indices->step() == 0) {
-            return m_element_dtype;
+            if (leading_dimension && !m_element_dtype.is_builtin()) {
+                // For leading dimensions, need to give the next dtype a chance
+                // to collapse itself even though indexing doesn't continue further.
+                return m_element_dtype.extended()->apply_linear_index(0, NULL, current_i, root_dt, true);
+            } else {
+                return m_element_dtype;
+            }
         } else {
             return dtype(this, true);
         }
