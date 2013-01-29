@@ -123,8 +123,13 @@ dtype var_array_dtype::apply_linear_index(int nindices, const irange *indices,
                 // In leading dimensions, we convert var_array to strided_array
                 return dtype(new strided_array_dtype(m_element_dtype), false);
             } else {
-                // TODO: sliced_var_array_dtype
-                throw runtime_error("TODO: implement var_array_dtype::apply_linear_index for general slices");
+                if (indices->is_nop()) {
+                    // If the indexing operation does nothing, then leave things unchanged
+                    return dtype(this, true);
+                } else {
+                    // TODO: sliced_var_array_dtype
+                    throw runtime_error("TODO: implement var_array_dtype::apply_linear_index for general slices");
+                }
             }
         }
     } else {
@@ -144,9 +149,16 @@ dtype var_array_dtype::apply_linear_index(int nindices, const irange *indices,
                                 current_i+1, root_dt, true);
                 return dtype(new strided_array_dtype(edt), false);
             } else {
-                // TODO: sliced_var_array_dtype
-                throw runtime_error("TODO: implement var_array_dtype::apply_linear_index for general slices");
-                //return dtype(new var_array_dtype(m_element_dtype.apply_linear_index(nindices-1, indices+1, current_i+1, root_dt)), false);
+                if (indices->is_nop()) {
+                    // If the indexing operation does nothing, then leave things unchanged
+                    dtype edt = m_element_dtype.apply_linear_index(nindices-1, indices+1,
+                                    current_i+1, root_dt, true);
+                    return dtype(new var_array_dtype(edt), false);
+                } else {
+                    // TODO: sliced_var_array_dtype
+                    throw runtime_error("TODO: implement var_array_dtype::apply_linear_index for general slices");
+                    //return dtype(new var_array_dtype(m_element_dtype.apply_linear_index(nindices-1, indices+1, current_i+1, root_dt)), false);
+                }
             }
         }
     }
@@ -190,8 +202,12 @@ intptr_t var_array_dtype::apply_linear_index(int nindices, const irange *indices
             const var_array_dtype_data *d = reinterpret_cast<const var_array_dtype_data *>(*inout_data);
             bool remove_dimension;
             intptr_t start_index, index_stride, dimension_size;
+cout << "original size " << d->size << endl;
             apply_single_linear_index(*indices, d->size, current_i, &root_dt,
                             remove_dimension, start_index, index_stride, dimension_size);
+cout << "indexed slice [" << indices->start() << ":" <<
+                indices->finish() << ":" << indices->step() << "]" << endl;
+cout << "start " << start_index << ", stride " << index_stride << ", size " << dimension_size << endl;
             if (remove_dimension) {
                 // First dereference to point at the actual element
                 const var_array_dtype_metadata *md = reinterpret_cast<const var_array_dtype_metadata *>(metadata);
@@ -267,6 +283,24 @@ intptr_t var_array_dtype::apply_linear_index(int nindices, const irange *indices
                                     false, NULL, NULL);
                 }
                 return 0;
+            } else if (indices->is_nop()) {
+                // If the indexing operation does nothing, then leave things unchanged
+                var_array_dtype_metadata *out_md = reinterpret_cast<var_array_dtype_metadata *>(out_metadata);
+                out_md->blockref = md->blockref ? md->blockref : embedded_reference;
+                memory_block_incref(out_md->blockref);
+                out_md->stride = md->stride;
+                if (m_element_dtype.is_builtin()) {
+                    return 0;
+                } else {
+                    const var_array_dtype *vad = static_cast<const var_array_dtype *>(result_dtype.extended());
+                    return m_element_dtype.extended()->apply_linear_index(
+                                    nindices - 1, indices + 1,
+                                    metadata + sizeof(var_array_dtype_metadata),
+                                    vad->get_element_dtype(),
+                                    out_metadata + sizeof(strided_array_dtype_metadata), embedded_reference,
+                                    current_i, root_dt,
+                                    false, NULL, NULL);
+                }
             } else {
                 // TODO: sliced_var_array_dtype
                 throw runtime_error("TODO: implement var_array_dtype::apply_linear_index for general slices");

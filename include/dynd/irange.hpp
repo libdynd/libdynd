@@ -40,41 +40,48 @@ namespace dynd {
 class irange {
     intptr_t m_start, m_finish, m_step;
 public:
-    /*DYND_CONSTEXPR*/ irange()
+    inline /*DYND_CONSTEXPR*/ irange()
         : m_start(std::numeric_limits<intptr_t>::min()),
           m_finish(std::numeric_limits<intptr_t>::max()), m_step(1) {
     }
 
-    DYND_CONSTEXPR irange(intptr_t idx)
+    inline DYND_CONSTEXPR irange(intptr_t idx)
         : m_start(idx), m_finish(idx), m_step(0) {
     }
 
-    DYND_CONSTEXPR irange(intptr_t start, intptr_t finish, intptr_t step = 1)
+    inline DYND_CONSTEXPR irange(intptr_t start, intptr_t finish, intptr_t step = 1)
         : m_start(start), m_finish(finish), m_step(step) {
     }
 
-    DYND_CONSTEXPR const intptr_t& start() const {
+    inline DYND_CONSTEXPR const intptr_t& start() const {
         return m_start;
     }
 
-    DYND_CONSTEXPR const intptr_t& finish() const {
+    inline DYND_CONSTEXPR const intptr_t& finish() const {
         return m_finish;
     }
 
-    DYND_CONSTEXPR const intptr_t& step() const {
+    inline DYND_CONSTEXPR const intptr_t& step() const {
         return m_step;
     }
 
-    void set_start(intptr_t value) {
+    inline void set_start(intptr_t value) {
         m_start = value;
     }
 
-    void set_finish(intptr_t value) {
+    inline void set_finish(intptr_t value) {
         m_finish = value;
     }
 
-    void set_step(intptr_t value) {
+    inline void set_step(intptr_t value) {
         m_step = value;
+    }
+
+    /** Returns true if this irange does nothing, e.g. [:] */
+    inline bool is_nop() const {
+        return m_start == std::numeric_limits<intptr_t>::min() &&
+            m_finish == std::numeric_limits<intptr_t>::max() &&
+            m_step == 1;
     }
 
     /**
