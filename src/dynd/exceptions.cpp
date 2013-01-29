@@ -141,15 +141,34 @@ dynd::axis_out_of_bounds::axis_out_of_bounds(size_t i, size_t ndim)
     //cout << "throwing axis_out_of_bounds\n";
 }
 
+inline void print_slice(std::ostream& o, const irange& i)
+{
+    if (i.step() == 0) {
+        o << '[' << i.start() << ']';
+    } else {
+        o << '[';
+        if (i.start() != std::numeric_limits<intptr_t>::min()) {
+            o << i.start();
+        }
+        o << ':';
+        if (i.finish() != std::numeric_limits<intptr_t>::max()) {
+            o << i.finish();
+        }
+        if (i.step() != 1) {
+            o << ':';
+            o << i.step();
+        }
+        o << ']';
+    }
+}
+
 inline string irange_out_of_bounds_message(const irange& i, size_t axis, size_t ndim, const intptr_t *shape)
 {
     stringstream ss;
 
-    ss << "index range (" << i.start() << " to " << i.finish();
-    if (i.step() != 1) {
-        ss << " step " << i.step();
-    }
-    ss << ") is out of bounds for axis " << axis;
+    ss << "index range ";
+    print_slice(ss, i);
+    ss << " is out of bounds for axis " << axis;
     ss << " in shape ";
     print_shape(ss, ndim, shape);
 
@@ -160,11 +179,9 @@ inline string irange_out_of_bounds_message(const irange& i, intptr_t dimension_s
 {
     stringstream ss;
 
-    ss << "index range (" << i.start() << " to " << i.finish();
-    if (i.step() != 1) {
-        ss << " step " << i.step();
-    }
-    ss << ") is out of bounds for dimension of size " << dimension_size;
+    ss << "index range ";
+    print_slice(ss, i);
+    ss << " is out of bounds for dimension of size " << dimension_size;
 
     return ss.str();
 }
