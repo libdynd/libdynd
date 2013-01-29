@@ -10,6 +10,7 @@
 #include <dynd/shortvector.hpp>
 #include <dynd/exceptions.hpp>
 #include <dynd/gfunc/callable.hpp>
+#include <dynd/gfunc/make_callable.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -491,6 +492,27 @@ dtype dynd::make_fixedarray_dtype(const dtype& uniform_dtype, int ndim, const in
         }
         return result;
     }
+}
+
+static size_t get_fixed_dim_size(const dtype& dt) {
+    const fixedarray_dtype *d = static_cast<const fixedarray_dtype *>(dt.extended());
+    return d->get_fixed_dim_size();
+}
+
+static intptr_t get_fixed_dim_stride(const dtype& dt) {
+    const fixedarray_dtype *d = static_cast<const fixedarray_dtype *>(dt.extended());
+    return d->get_fixed_stride();
+}
+
+static pair<string, gfunc::callable> fixedarray_dtype_properties[] = {
+    pair<string, gfunc::callable>("fixed_dim_size", gfunc::make_callable(&get_fixed_dim_size, "self")),
+    pair<string, gfunc::callable>("fixed_dim_stride", gfunc::make_callable(&get_fixed_dim_stride, "self"))
+};
+
+void fixedarray_dtype::get_dynamic_dtype_properties(const std::pair<std::string, gfunc::callable> **out_properties, size_t *out_count) const
+{
+    *out_properties = fixedarray_dtype_properties;
+    *out_count = sizeof(fixedarray_dtype_properties) / sizeof(fixedarray_dtype_properties[0]);
 }
 
 void fixedarray_dtype::get_dynamic_ndobject_properties(const std::pair<std::string, gfunc::callable> **out_properties, size_t *out_count) const
