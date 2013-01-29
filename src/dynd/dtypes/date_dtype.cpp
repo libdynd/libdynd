@@ -46,7 +46,8 @@ void date_dtype::set_ymd(const char *DYND_UNUSED(metadata), char *data,
     *reinterpret_cast<int32_t *>(data) = datetime::ymd_to_days(year, month, day);
 }
 
-void date_dtype::set_utf8_string(const char *metadata, char *data, assign_error_mode errmode, const std::string& utf8_str) const
+void date_dtype::set_utf8_string(const char *DYND_UNUSED(metadata),
+                char *data, assign_error_mode errmode, const std::string& utf8_str) const
 {
     datetime::datetime_conversion_rule_t casting;
     switch (errmode) {
