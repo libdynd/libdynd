@@ -55,27 +55,6 @@ void dynd::fixedbytes_dtype::print_dtype(std::ostream& o) const
     o << "fixedbytes<" << get_data_size() << "," << get_alignment() << ">";
 }
 
-dtype dynd::fixedbytes_dtype::apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& root_dt) const
-{
-    if (nindices == 0) {
-        return dtype(this, true);
-    } else if (nindices == 1) {
-        if (indices->step() == 0) {
-            // If the string encoding is variable-length switch to UTF32 so that the result can always
-            // store a single character.
-            return make_fixedbytes_dtype(1, 1);
-        } else {
-            // Get the size of the type after applying the index
-            bool remove_dimension;
-            intptr_t start_index, index_stride, dimension_size;
-            apply_single_linear_index(*indices, get_data_size(), current_i, &root_dt, remove_dimension, start_index, index_stride, dimension_size);
-            return make_fixedbytes_dtype(dimension_size, 1);
-        }
-    } else {
-        throw too_many_indices(dtype(this, true), nindices, current_i + 1);
-    }
-}
-
 void dynd::fixedbytes_dtype::get_single_compare_kernel(kernel_instance<compare_operations_t>& DYND_UNUSED(out_kernel)) const {
     throw std::runtime_error("fixedbytes_dtype::get_single_compare_kernel not supported yet");
 }
