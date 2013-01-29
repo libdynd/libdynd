@@ -29,7 +29,7 @@ void var_array_dtype::print_data(std::ostream& o, const char *metadata, const ch
 {
     const var_array_dtype_metadata *md = reinterpret_cast<const var_array_dtype_metadata *>(metadata);
     const var_array_dtype_data *d = reinterpret_cast<const var_array_dtype_data *>(data);
-    const char *element_data = d->begin;
+    const char *element_data = d->begin + md->offset;
     size_t stride = md->stride;
     metadata += sizeof(var_array_dtype_metadata);
     o << "[";
@@ -179,7 +179,7 @@ intptr_t var_array_dtype::apply_linear_index(int nindices, const irange *indices
             strided_array_dtype_metadata *out_md = reinterpret_cast<strided_array_dtype_metadata *>(out_metadata);
             out_md->size = d->size;
             out_md->stride = md->stride;
-            *inout_data = d->begin;
+            *inout_data = d->begin + md->offset;
             if (*inout_dataref) {
                 memory_block_decref(*inout_dataref);
             }
@@ -208,7 +208,7 @@ intptr_t var_array_dtype::apply_linear_index(int nindices, const irange *indices
                 // First dereference to point at the actual element
                 const var_array_dtype_metadata *md = reinterpret_cast<const var_array_dtype_metadata *>(metadata);
                 const var_array_dtype_data *d = reinterpret_cast<const var_array_dtype_data *>(*inout_data);
-                *inout_data = d->begin + start_index * md->stride;
+                *inout_data = d->begin + md->offset + start_index * md->stride;
                 if (*inout_dataref) {
                     memory_block_decref(*inout_dataref);
                 }
@@ -231,7 +231,7 @@ intptr_t var_array_dtype::apply_linear_index(int nindices, const irange *indices
                 strided_array_dtype_metadata *out_md = reinterpret_cast<strided_array_dtype_metadata *>(out_metadata);
                 out_md->size = dimension_size;
                 out_md->stride = md->stride * index_stride;
-                *inout_data = d->begin + md->stride * start_index;
+                *inout_data = d->begin + md->offset + md->stride * start_index;
                 if (*inout_dataref) {
                     memory_block_decref(*inout_dataref);
                 }
@@ -285,11 +285,10 @@ intptr_t var_array_dtype::apply_linear_index(int nindices, const irange *indices
                 out_md->blockref = md->blockref ? md->blockref : embedded_reference;
                 memory_block_incref(out_md->blockref);
                 out_md->stride = md->stride;
-                if (m_element_dtype.is_builtin()) {
-                    return 0;
-                } else {
+                out_md->offset = md->offset;
+                if (!m_element_dtype.is_builtin()) {
                     const var_array_dtype *vad = static_cast<const var_array_dtype *>(result_dtype.extended());
-                    return m_element_dtype.extended()->apply_linear_index(
+                    out_md->offset += m_element_dtype.extended()->apply_linear_index(
                                     nindices - 1, indices + 1,
                                     metadata + sizeof(var_array_dtype_metadata),
                                     vad->get_element_dtype(),
@@ -297,6 +296,7 @@ intptr_t var_array_dtype::apply_linear_index(int nindices, const irange *indices
                                     current_i, root_dt,
                                     false, NULL, NULL);
                 }
+                return 0;
             } else {
                 // TODO: sliced_var_array_dtype
                 throw runtime_error("TODO: implement var_array_dtype::apply_linear_index for general slices");
@@ -317,7 +317,7 @@ dtype var_array_dtype::at(intptr_t i0, const char **inout_metadata, const char *
             const var_array_dtype_data *d = reinterpret_cast<const var_array_dtype_data *>(*inout_data);
             // Bounds-checking of the index
             i0 = apply_single_index(i0, d->size, NULL);
-            *inout_data = d->begin + i0 * md->stride;
+            *inout_data = d->begin + md->offset + i0 * md->stride;
         }
     }
     return m_element_dtype;
@@ -434,6 +434,7 @@ void var_array_dtype::metadata_default_construct(char *metadata, int ndim, const
 
     var_array_dtype_metadata *md = reinterpret_cast<var_array_dtype_metadata *>(metadata);
     md->stride = element_size;
+    md->offset = 0;
     // Allocate a POD memory block
     md->blockref = make_pod_memory_block().release();
     if (!m_element_dtype.is_builtin()) {
@@ -446,6 +447,7 @@ void var_array_dtype::metadata_copy_construct(char *dst_metadata, const char *sr
     const var_array_dtype_metadata *src_md = reinterpret_cast<const var_array_dtype_metadata *>(src_metadata);
     var_array_dtype_metadata *dst_md = reinterpret_cast<var_array_dtype_metadata *>(dst_metadata);
     dst_md->stride = src_md->stride;
+    dst_md->offset = src_md->offset;
     dst_md->blockref = src_md->blockref ? src_md->blockref : embedded_reference;
     memory_block_incref(dst_md->blockref);
     if (!m_element_dtype.is_builtin()) {
@@ -491,8 +493,9 @@ void var_array_dtype::metadata_destruct(char *metadata) const
 void var_array_dtype::metadata_debug_print(const char *metadata, std::ostream& o, const std::string& indent) const
 {
     const var_array_dtype_metadata *md = reinterpret_cast<const var_array_dtype_metadata *>(metadata);
-    o << indent << "array metadata\n";
+    o << indent << "var_array metadata\n";
     o << indent << " stride: " << md->stride << "\n";
+    o << indent << " offset: " << md->offset << "\n";
     memory_block_debug_print(md->blockref, o, indent + " ");
     if (!m_element_dtype.is_builtin()) {
         m_element_dtype.extended()->metadata_debug_print(metadata + sizeof(var_array_dtype_metadata), o, indent + "  ");
@@ -519,7 +522,7 @@ void var_array_dtype::foreach_leading(char *data, const char *metadata, foreach_
     const var_array_dtype_metadata *md = reinterpret_cast<const var_array_dtype_metadata *>(metadata);
     const char *child_metadata = metadata + sizeof(var_array_dtype_metadata);
     const var_array_dtype_data *d = reinterpret_cast<const var_array_dtype_data *>(data);
-    data = d->begin;
+    data = d->begin + md->offset;
     intptr_t stride = md->stride;
     for (intptr_t i = 0, i_end = d->size; i < i_end; ++i, data += stride) {
         callback(m_element_dtype, data, child_metadata, callback_data);

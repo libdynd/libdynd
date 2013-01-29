@@ -242,7 +242,7 @@ static void format_json_uniform_array(output_data& out, const dtype& dt, const c
             const var_array_dtype_data *d = reinterpret_cast<const var_array_dtype_data *>(data);
             dtype element_dtype = vad->get_element_dtype();
             intptr_t size = d->size, stride = md->stride;
-            const char *begin = d->begin;
+            const char *begin = d->begin + md->offset;
             metadata += sizeof(var_array_dtype_metadata);
             for (intptr_t i = 0; i < size; ++i) {
                 ::format_json(out, element_dtype, metadata, begin + i * stride);

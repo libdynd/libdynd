@@ -125,7 +125,6 @@ dtype string_dtype::get_canonical_dtype() const
     return dtype(this, true);
 }
 
-
 void string_dtype::get_shape(size_t DYND_UNUSED(i),
                 intptr_t *DYND_UNUSED(out_shape)) const
 {

@@ -19,6 +19,8 @@ struct var_array_dtype_metadata {
      */
     memory_block_data *blockref;
     intptr_t stride;
+    /* Each pointed-to destination is offset by this amount */
+    intptr_t offset;
 };
 
 struct var_array_dtype_data {

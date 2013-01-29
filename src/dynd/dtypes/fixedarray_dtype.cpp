@@ -162,7 +162,11 @@ dtype fixedarray_dtype::apply_linear_index(int nindices, const irange *indices,
                 return m_element_dtype;
             }
         } else {
-            return dtype(this, true);
+            if (indices->is_nop()) {
+                return dtype(this, true);
+            } else {
+                return dtype(new strided_array_dtype(m_element_dtype), false);
+            }
         }
     } else {
         if (indices->step() == 0) {
@@ -182,8 +186,10 @@ intptr_t fixedarray_dtype::apply_linear_index(int nindices, const irange *indice
                 bool leading_dimension, char **inout_data,
                 memory_block_data **inout_dataref) const
 {
-    if (nindices == 0) {
-        // If there are no more indices, copy the metadata verbatim
+    if (nindices == 0 || result_dtype.get_type_id() == fixedarray_type_id) {
+        // If there are no more indices, or the operation is a no-op
+        // as signaled by retaining the fixed array dtype,
+        // copy the metadata verbatim
         metadata_copy_construct(out_metadata, metadata, embedded_reference);
         return 0;
     } else {
@@ -218,10 +224,11 @@ intptr_t fixedarray_dtype::apply_linear_index(int nindices, const irange *indice
             out_md->stride = m_stride * index_stride;
             out_md->size = dimension_size;
             if (!m_element_dtype.is_builtin()) {
-                const fixedarray_dtype *result_edtype = static_cast<const fixedarray_dtype *>(result_dtype.extended());
+                const strided_array_dtype *result_edtype = static_cast<const strided_array_dtype *>(result_dtype.extended());
                 offset += m_element_dtype.extended()->apply_linear_index(nindices - 1, indices + 1,
                                 metadata,
-                                result_edtype->m_element_dtype, out_metadata + sizeof(strided_array_dtype_metadata),
+                                result_edtype->get_element_dtype(),
+                                out_metadata + sizeof(strided_array_dtype_metadata),
                                 embedded_reference, current_i + 1, root_dt,
                                 false, NULL, NULL);
             }

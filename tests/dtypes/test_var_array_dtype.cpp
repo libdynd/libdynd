@@ -165,3 +165,20 @@ TEST(VarArrayDType, DTypeSubscriptStridedVarNested) {
     EXPECT_EQ(0, n.at(2).get_shape()[0]);
     EXPECT_EQ(3, n.at(3).get_shape()[0]);
 }
+
+TEST(VarArrayDType, DTypeSubscriptFixedVarStruct) {
+    ndobject n = parse_json("2, VarDim, {first_name: string; last_name: string; "
+                    "gender: string1; pictured: bool;}",
+                    "[[{\"first_name\":\"Frank\",\"last_name\":\"Abrams\",\"gender\":\"M\",\"pictured\":true}],"
+                    "[{\"first_name\":\"Melissa\",\"last_name\":\"Philips\",\"gender\":\"F\",\"pictured\":false}]]");
+
+    ndobject nlastname = n.at(irange(), irange(), 1);
+    EXPECT_EQ(dtype("M, VarDim, string"), nlastname.get_dtype());
+    EXPECT_EQ("Abrams", nlastname.at(0,0).as<string>());
+    EXPECT_EQ("Philips", nlastname.at(1,0).as<string>());
+
+    ndobject ngender = n.p("gender");
+    EXPECT_EQ(dtype("M, VarDim, string1"), ngender.get_dtype());
+    EXPECT_EQ("M", ngender.at(0,0).as<string>());
+    EXPECT_EQ("F", ngender.at(1,0).as<string>());
+}

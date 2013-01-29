@@ -178,15 +178,17 @@ dtype base_dtype::apply_linear_index(int nindices, const irange *DYND_UNUSED(ind
     }
 }
 
-intptr_t base_dtype::apply_linear_index(int nindices, const irange *DYND_UNUSED(indices), const char *DYND_UNUSED(metadata),
-                const dtype& DYND_UNUSED(result_dtype), char *DYND_UNUSED(out_metadata),
-                memory_block_data *DYND_UNUSED(embedded_reference),
+intptr_t base_dtype::apply_linear_index(int nindices, const irange *DYND_UNUSED(indices), const char *metadata,
+                const dtype& DYND_UNUSED(result_dtype), char *out_metadata,
+                memory_block_data *embedded_reference,
                 int current_i, const dtype& DYND_UNUSED(root_dt),
                 bool DYND_UNUSED(leading_dimension), char **DYND_UNUSED(inout_data),
                 memory_block_data **DYND_UNUSED(inout_dataref)) const
 {
     // Default to scalar behavior
     if (nindices == 0) {
+        // Copy any metadata verbatim
+        metadata_copy_construct(out_metadata, metadata, embedded_reference);
         return 0;
     } else {
         throw too_many_indices(dtype(this, true), current_i + nindices, current_i);

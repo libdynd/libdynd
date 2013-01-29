@@ -24,16 +24,19 @@ namespace {
         dtype dst_dtype, src_dtype;
     };
 
-    /** Does a single blockref-string copy */
+    /** Does a single blockref-array copy */
     static void blockref_array_assign_single(char *dst, const char *src, unary_kernel_static_data *extra)
     {
         blockref_array_assign_kernel_auxdata& ad = get_auxiliary_data<blockref_array_assign_kernel_auxdata>(extra->auxdata);
         const var_array_dtype_metadata *dst_md = reinterpret_cast<const var_array_dtype_metadata *>(extra->dst_metadata);
         const var_array_dtype_metadata *src_md = reinterpret_cast<const var_array_dtype_metadata *>(extra->src_metadata);
+        if (dst_md->offset != 0) {
+            throw runtime_error("Cannot assign to a dynd var_array which has a non-zero offset");
+        }
         // If the blockrefs are different, require a copy operation
         if (dst_md->blockref != src_md->blockref) {
             char *dst_begin = NULL, *dst_end = NULL;
-            const char *src_begin = reinterpret_cast<const var_array_dtype_data *>(src)->begin;
+            const char *src_begin = reinterpret_cast<const var_array_dtype_data *>(src)->begin + src_md->offset;
             size_t src_size = reinterpret_cast<const var_array_dtype_data *>(src)->size;
             memory_block_pod_allocator_api *allocator = get_memory_block_pod_allocator_api(dst_md->blockref);
 
