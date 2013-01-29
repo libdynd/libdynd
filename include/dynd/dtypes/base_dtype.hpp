@@ -129,6 +129,9 @@ enum type_id_t {
     builtin_type_id_count = 15
 };
 
+std::ostream& operator<<(std::ostream& o, dtype_kind_t kind);
+std::ostream& operator<<(std::ostream& o, type_id_t tid);
+
 enum {
     /** A mask within which alll the built-in type ids are guaranteed to fit */
     builtin_type_id_mask = 0x1f
