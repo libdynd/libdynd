@@ -39,12 +39,9 @@ namespace {
     };
 } // anonymous namespace
 
-ndobject dynd::parse_json(const dtype& dt, const ndobject& json)
+static void json_as_buffer(const ndobject& json, ndobject& out_tmp_ref, const char *&begin, const char *&end)
 {
     // Check the dtype of 'json', and get pointers to the begin/end of a UTF-8 buffer
-    ndobject json_tmp;
-    const char *json_begin = NULL, *json_end = NULL;
-
     dtype json_dtype = json.get_dtype().value_dtype();
     switch (json_dtype.get_kind()) {
         case string_kind: {
@@ -52,25 +49,28 @@ ndobject dynd::parse_json(const dtype& dt, const ndobject& json)
             switch (sdt->get_encoding()) {
                 case string_encoding_ascii:
                 case string_encoding_utf_8:
-                    json_tmp = json.vals();
+                    out_tmp_ref = json.vals();
                     // The data is already UTF-8, so use the buffer directly
-                    sdt->get_string_range(&json_begin, &json_end, json_tmp.get_ndo_meta(), json_tmp.get_readonly_originptr());
+                    sdt->get_string_range(&begin, &end,
+                                    out_tmp_ref.get_ndo_meta(), out_tmp_ref.get_readonly_originptr());
                     break;
                 default: {
                     // The data needs to be converted to UTF-8 before parsing
                     dtype utf8_dt = make_string_dtype(string_encoding_utf_8);
-                    json_tmp = json.cast_scalars(utf8_dt).vals();
+                    out_tmp_ref = json.cast_scalars(utf8_dt).vals();
                     sdt = static_cast<const base_string_dtype *>(utf8_dt.extended());
-                    sdt->get_string_range(&json_begin, &json_end, json_tmp.get_ndo_meta(), json_tmp.get_readonly_originptr());
+                    sdt->get_string_range(&begin, &end,
+                                    out_tmp_ref.get_ndo_meta(), out_tmp_ref.get_readonly_originptr());
                     break;
                 }
             }
             break;
         }
         case bytes_kind: {
-            json_tmp = json.vals();
+            out_tmp_ref = json.vals();
             const base_bytes_dtype *bdt = static_cast<const base_bytes_dtype *>(json_dtype.extended());
-            bdt->get_bytes_range(&json_begin, &json_end, json_tmp.get_ndo_meta(), json_tmp.get_readonly_originptr());
+            bdt->get_bytes_range(&begin, &end,
+                            out_tmp_ref.get_ndo_meta(), out_tmp_ref.get_readonly_originptr());
             break;
         }
         default: {
@@ -81,7 +81,21 @@ ndobject dynd::parse_json(const dtype& dt, const ndobject& json)
             break;
         }
     }
+}
 
+void dynd::parse_json(ndobject& out, const ndobject& json)
+{
+    const char *json_begin = NULL, *json_end = NULL;
+    ndobject tmp_ref;
+    json_as_buffer(json, tmp_ref, json_begin, json_end);
+    parse_json(out, json_begin, json_end);
+}
+
+ndobject dynd::parse_json(const dtype& dt, const ndobject& json)
+{
+    const char *json_begin = NULL, *json_end = NULL;
+    ndobject tmp_ref;
+    json_as_buffer(json, tmp_ref, json_begin, json_end);
     return parse_json(dt, json_begin, json_end);
 }
 
@@ -702,31 +716,16 @@ void dynd::validate_json(const char *json_begin, const char *json_end)
     }
 }
 
-
-ndobject dynd::parse_json(const dtype& dt, const char *json_begin, const char *json_end)
+void dynd::parse_json(ndobject& out, const char *json_begin, const char *json_end)
 {
-    ndobject result;
-    if (dt.get_data_size() != 0) {
-        result = ndobject(dt);
-    } else {
-        stringstream ss;
-        ss << "The dtype provided to parse_json, " << dt << ", cannot be used because it requires additional shape information";
-        throw runtime_error(ss.str());
-    }
-
     try {
         const char *begin = json_begin, *end = json_end;
-        ::parse_json(result.get_dtype(), result.get_ndo_meta(), result.get_ndo()->m_data_pointer, begin, end);
-        if (!dt.is_builtin()) {
-            dt.extended()->metadata_finalize_buffers(result.get_ndo_meta());
-        }
+        dtype dt = out.get_dtype();
+        ::parse_json(dt, out.get_ndo_meta(), out.get_readwrite_originptr(), begin, end);
         begin = skip_whitespace(begin, end);
         if (begin != end) {
             throw json_parse_error(begin, "unexpected trailing JSON text", dt);
         }
-        // TODO: Make this optional
-        result.flag_as_immutable();
-        return result;
     } catch (const json_parse_error& e) {
         stringstream ss;
         string line_prev, line_cur;
@@ -739,6 +738,24 @@ ndobject dynd::parse_json(const dtype& dt, const char *json_begin, const char *j
         }
         ss << "Message: " << e.get_message() << "\n";
         print_json_parse_error_marker(ss, line_prev, line_cur, line, column);
+        throw runtime_error(ss.str());
+    }
+}
+
+ndobject dynd::parse_json(const dtype& dt, const char *json_begin, const char *json_end)
+{
+    ndobject result;
+    if (dt.get_data_size() != 0) {
+        result = ndobject(dt);
+        parse_json(result, json_begin, json_end);
+        if (!dt.is_builtin()) {
+            dt.extended()->metadata_finalize_buffers(result.get_ndo_meta());
+        }
+        result.flag_as_immutable();
+        return result;
+    } else {
+        stringstream ss;
+        ss << "The dtype provided to parse_json, " << dt << ", cannot be used because it requires additional shape information";
         throw runtime_error(ss.str());
     }
 }

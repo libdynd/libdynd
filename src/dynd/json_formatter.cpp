@@ -86,7 +86,7 @@ static void format_json_number(output_data& out, const dtype& dt, const char *me
     out.write(ss.str());
 }
 
-static void print_escaped_unicode_codepoint(output_data& out, uint32_t cp)
+static void print_escaped_unicode_codepoint(output_data& out, uint32_t cp, append_unicode_codepoint_t append_fn)
 {
     if (cp < 0x80) {
         switch (cp) {
@@ -125,7 +125,13 @@ static void print_escaped_unicode_codepoint(output_data& out, uint32_t cp)
                 }
                 break;
         }
-    } else if (cp < 0x10000) {
+    } else {
+        out.ensure_capacity(16);
+        append_fn(cp, out.out_end, out.out_capacity_end);
+    }
+    // TODO: Could have an ASCII output mode where unicode is always escaped
+    /*
+    else if (cp < 0x10000) {
         stringstream ss;
         ss << "\\u";
         hexadecimal_print(ss, static_cast<uint16_t>(cp));
@@ -136,17 +142,20 @@ static void print_escaped_unicode_codepoint(output_data& out, uint32_t cp)
         hexadecimal_print(ss, static_cast<uint32_t>(cp));
         out.write(ss.str());
     }
+    */
 }
 
 static void format_json_encoded_string(output_data& out, const char *begin, const char *end, string_encoding_t encoding)
 {
     uint32_t cp;
     next_unicode_codepoint_t next_fn;
+    append_unicode_codepoint_t append_fn;
     next_fn = get_next_unicode_codepoint_function(encoding, assign_error_none);
+    append_fn = get_append_unicode_codepoint_function(string_encoding_utf_8, assign_error_none);
     out.write('\"');
     while (begin < end) {
         cp = next_fn(begin, end);
-        print_escaped_unicode_codepoint(out, cp);
+        print_escaped_unicode_codepoint(out, cp, append_fn);
     }
     out.write('\"');
 }

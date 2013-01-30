@@ -35,10 +35,22 @@ void validate_json(const char *json_begin, const char *json_end);
 ndobject parse_json(const dtype& dt, const char *json_begin, const char *json_end);
 
 /**
+ * Same as the version given a dtype, but parses the JSON into an uninitialized
+ * dynd ndobject.
+ */
+void parse_json(ndobject& out, const char *json_begin, const char *json_end);
+
+/**
  * Parses the input json as the requested dtype. The input can be a string or a
  * bytes ndobject. If the input is bytes, the parser assumes it is UTF-8 data.
  */
 ndobject parse_json(const dtype& dt, const ndobject& json);
+
+/**
+ * Same as the version given a dtype, but parses the JSON into an uninitialized
+ * dynd ndobject.
+ */
+void parse_json(ndobject& out, const ndobject& json);
 
 inline ndobject parse_json(const dtype& dt, const std::string& json) {
     return parse_json(dt, json.data(), json.data() + json.size());
