@@ -166,12 +166,6 @@ void dynd::tuple_dtype::print_dtype(std::ostream& o) const
     }
 }
 
-dtype dynd::tuple_dtype::apply_linear_index(int nindices, const irange *indices,
-                int current_i, const dtype& root_dt, bool leading_dimension) const
-{
-    throw runtime_error("TODO: tuple_dtype::apply_linear_index");
-}
-
 void dynd::tuple_dtype::get_shape(size_t i, intptr_t *out_shape) const
 {
     // Adjust the current shape if necessary

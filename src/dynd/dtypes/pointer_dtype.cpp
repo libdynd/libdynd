@@ -289,7 +289,7 @@ namespace {
     };
 } // anonymous namespace
 
-void pointer_dtype::get_operand_to_value_kernel(const eval::eval_context * ectx,
+void pointer_dtype::get_operand_to_value_kernel(const eval::eval_context *DYND_UNUSED(ectx),
                         kernel_instance<unary_operation_pair_t>& out_kernel) const
 {
     out_kernel.kernel = unary_operation_pair_t(pointer_to_value_assign::single_kernel,
