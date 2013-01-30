@@ -51,8 +51,6 @@ public:
         return pod_memory_management;
     }
 
-    dtype apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& root_dt) const;
-
     /**
      * Given some metadata for the groupby dtype, returns the
      * metadata for the pointer dtype that points at the data

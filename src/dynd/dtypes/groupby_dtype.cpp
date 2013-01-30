@@ -58,16 +58,6 @@ void groupby_dtype::print_dtype(std::ostream& o) const
     o << ", groups=" << m_groups_dtype << ">";
 }
 
-dtype groupby_dtype::apply_linear_index(int nindices, const irange *DYND_UNUSED(indices),
-                int DYND_UNUSED(current_i), const dtype& DYND_UNUSED(root_dt)) const
-{
-    if (nindices == 0) {
-        return dtype(this, true);
-    } else {
-        throw runtime_error("TODO groupby_dtype::apply_linear_index");
-    }
-}
-
 void groupby_dtype::get_shape(size_t i, intptr_t *out_shape) const
 {
     if (!m_value_dtype.is_builtin()) {
