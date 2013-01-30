@@ -55,16 +55,16 @@ TEST(JSONParser, BuiltinsFromInteger) {
 
     n = parse_json(make_dtype<uint8_t>(), "123");
     EXPECT_EQ(make_dtype<uint8_t>(), n.get_dtype());
-    EXPECT_EQ(123, n.as<uint8_t>());
+    EXPECT_EQ(123u, n.as<uint8_t>());
     n = parse_json(make_dtype<uint16_t>(), "50000");
     EXPECT_EQ(make_dtype<uint16_t>(), n.get_dtype());
-    EXPECT_EQ(50000, n.as<uint16_t>());
+    EXPECT_EQ(50000u, n.as<uint16_t>());
     n = parse_json(make_dtype<uint32_t>(), "500000");
     EXPECT_EQ(make_dtype<uint32_t>(), n.get_dtype());
-    EXPECT_EQ(500000, n.as<uint32_t>());
+    EXPECT_EQ(500000u, n.as<uint32_t>());
     n = parse_json(make_dtype<uint64_t>(), "3000000000");
     EXPECT_EQ(make_dtype<uint64_t>(), n.get_dtype());
-    EXPECT_EQ(3000000000LL, n.as<uint64_t>());
+    EXPECT_EQ(3000000000ULL, n.as<uint64_t>());
 }
 
 TEST(JSONParser, BuiltinsFromFloat) {
