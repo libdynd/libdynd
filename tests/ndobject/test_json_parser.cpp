@@ -26,13 +26,13 @@ TEST(JSONParser, BuiltinsFromBool) {
 
     n = parse_json(make_dtype<dynd_bool>(), "true");
     EXPECT_EQ(make_dtype<dynd_bool>(), n.get_dtype());
-    EXPECT_EQ(true, n.as<bool>());
+    EXPECT_TRUE(n.as<bool>());
     n = parse_json(make_dtype<dynd_bool>(), "false");
     EXPECT_EQ(make_dtype<dynd_bool>(), n.get_dtype());
-    EXPECT_EQ(false, n.as<bool>());
+    EXPECT_FALSE(n.as<bool>());
     n = parse_json(make_dtype<dynd_bool>(), "null");
     EXPECT_EQ(make_dtype<dynd_bool>(), n.get_dtype());
-    EXPECT_EQ(false, n.as<bool>());
+    EXPECT_FALSE(n.as<bool>());
 
     EXPECT_THROW(parse_json(make_dtype<dynd_bool>(), "flase"), runtime_error);
 }
@@ -117,18 +117,18 @@ TEST(JSONParser, ListBools) {
     n = parse_json(make_var_array_dtype(make_dtype<dynd_bool>()),
                     "  [true, true, false, null]  ");
     EXPECT_EQ(make_var_array_dtype(make_dtype<dynd_bool>()), n.get_dtype());
-    EXPECT_EQ(true, n.at(0).as<bool>());
-    EXPECT_EQ(true, n.at(1).as<bool>());
-    EXPECT_EQ(false, n.at(2).as<bool>());
-    EXPECT_EQ(false, n.at(3).as<bool>());
+    EXPECT_TRUE(n.at(0).as<bool>());
+    EXPECT_TRUE(n.at(1).as<bool>());
+    EXPECT_FALSE(n.at(2).as<bool>());
+    EXPECT_FALSE(n.at(3).as<bool>());
 
     n = parse_json(make_fixedarray_dtype(make_dtype<dynd_bool>(),4),
                     "  [true, true, false, null]  ");
     EXPECT_EQ(make_fixedarray_dtype(make_dtype<dynd_bool>(),4), n.get_dtype());
-    EXPECT_EQ(true, n.at(0).as<bool>());
-    EXPECT_EQ(true, n.at(1).as<bool>());
-    EXPECT_EQ(false, n.at(2).as<bool>());
-    EXPECT_EQ(false, n.at(3).as<bool>());
+    EXPECT_TRUE(n.at(0).as<bool>());
+    EXPECT_TRUE(n.at(1).as<bool>());
+    EXPECT_FALSE(n.at(2).as<bool>());
+    EXPECT_FALSE(n.at(3).as<bool>());
 
     EXPECT_THROW(parse_json(make_var_array_dtype(make_dtype<dynd_bool>()),
                     "[true, true, false, null] 3.5"),

@@ -210,7 +210,7 @@ void json_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const dtype& s
                 const base_string_dtype *src_fs = static_cast<const base_string_dtype *>(src_dt.extended());
                 get_fixedstring_to_blockref_string_assignment_kernel(string_encoding_utf_8,
                                         src_fs->get_data_size(), src_fs->get_encoding(),
-                                        errmode, out_kernel);
+                                        errmode, *out_kernel_ptr);
                 break;
             }
             default: {
