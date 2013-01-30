@@ -131,24 +131,6 @@ void fixedstring_dtype::print_dtype(std::ostream& o) const
     }
 }
 
-dtype fixedstring_dtype::apply_linear_index(int nindices, const irange *indices, int current_i, const dtype& DYND_UNUSED(root_dt)) const
-{
-    if (nindices == 0) {
-        return dtype(this, true);
-    } else if (nindices == 1) {
-        if (indices->step() == 0) {
-            // If the string encoding is variable-length switch to UTF32 so that the result can always
-            // store a single character.
-            return make_fixedstring_dtype(is_variable_length_string_encoding(m_encoding) ? string_encoding_utf_32 : m_encoding, 1);
-        } else {
-            // Just use the same string width, no big reason to be "too smart" and shrink it
-            return dtype(this, true);
-        }
-    } else {
-        throw too_many_indices(dtype(this, true), nindices, current_i + 1);
-    }
-}
-
 dtype fixedstring_dtype::get_canonical_dtype() const
 {
     return dtype(this, true);
