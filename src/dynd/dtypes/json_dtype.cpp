@@ -42,8 +42,6 @@ void json_dtype::set_utf8_string(const char *data_metadata, char *data,
     }
 
     const json_dtype_metadata *data_md = reinterpret_cast<const json_dtype_metadata *>(data_metadata);
-    const intptr_t src_charsize = 1;
-    char *dst_begin = NULL, *dst_current, *dst_end = NULL;
 
     memory_block_pod_allocator_api *allocator = get_memory_block_pod_allocator_api(data_md->blockref);
 
