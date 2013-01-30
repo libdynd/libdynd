@@ -482,7 +482,7 @@ static void parse_bool_json(const dtype& dt, const char *metadata, char *out_dat
     }
 }
 
-static void parse_dynd_builtin_json(const dtype& dt, const char *metadata, char *out_data,
+static void parse_dynd_builtin_json(const dtype& dt, const char *DYND_UNUSED(metadata), char *out_data,
                 const char *&begin, const char *end)
 {
     const char *saved_begin = begin;
@@ -626,6 +626,11 @@ static void parse_json(const dtype& dt, const char *metadata, char *out_data,
         case datetime_kind:
             parse_datetime_json(dt, metadata, out_data, json_begin, json_end);
             return;
+        default: {
+            stringstream ss;
+            ss << "parse_json: unsupported dtype " << dt;
+            throw runtime_error(ss.str());
+        }
     }
 }
 
