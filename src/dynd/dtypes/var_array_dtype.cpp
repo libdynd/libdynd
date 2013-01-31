@@ -10,6 +10,7 @@
 #include <dynd/memblock/pod_memory_block.hpp>
 #include <dynd/shape_tools.hpp>
 #include <dynd/exceptions.hpp>
+#include <dynd/gfunc/callable.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -19,6 +20,8 @@ var_array_dtype::var_array_dtype(const dtype& element_dtype)
                     sizeof(const char *), element_dtype.get_undim() + 1),
             m_element_dtype(element_dtype)
 {
+    // Copy ndobject properties and functions from the first non-uniform dimension
+    get_nonuniform_ndobject_properties_and_functions(m_ndobject_properties, m_ndobject_functions);
 }
 
 var_array_dtype::~var_array_dtype()
@@ -146,13 +149,13 @@ dtype var_array_dtype::apply_linear_index(int nindices, const irange *indices,
             if (leading_dimension) {
                 // In leading dimensions, we convert var_array to strided_array
                 dtype edt = m_element_dtype.apply_linear_index(nindices-1, indices+1,
-                                current_i+1, root_dt, true);
+                                current_i+1, root_dt, false);
                 return dtype(new strided_array_dtype(edt), false);
             } else {
                 if (indices->is_nop()) {
                     // If the indexing operation does nothing, then leave things unchanged
                     dtype edt = m_element_dtype.apply_linear_index(nindices-1, indices+1,
-                                    current_i+1, root_dt, true);
+                                    current_i+1, root_dt, false);
                     return dtype(new var_array_dtype(edt), false);
                 } else {
                     // TODO: sliced_var_array_dtype
@@ -538,4 +541,16 @@ void var_array_dtype::reorder_default_constructed_strides(char *dst_metadata,
         m_element_dtype.extended()->reorder_default_constructed_strides(dst_metadata + sizeof(var_array_dtype_metadata),
                         src_child_dtype, src_metadata);
     }
+}
+
+void var_array_dtype::get_dynamic_ndobject_properties(const std::pair<std::string, gfunc::callable> **out_properties, size_t *out_count) const
+{
+    *out_properties = m_ndobject_properties.empty() ? NULL : &m_ndobject_properties[0];
+    *out_count = (int)m_ndobject_properties.size();
+}
+
+void var_array_dtype::get_dynamic_ndobject_functions(const std::pair<std::string, gfunc::callable> **out_functions, size_t *out_count) const
+{
+    *out_functions = m_ndobject_functions.empty() ? NULL : &m_ndobject_functions[0];
+    *out_count = (int)m_ndobject_functions.size();
 }

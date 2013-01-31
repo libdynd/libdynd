@@ -595,7 +595,7 @@ ndobject ndobject::p(const char *property_name) const
     }
 
     stringstream ss;
-    ss << "dynd nobject does not have property " << property_name;
+    ss << "dynd ndobject does not have property " << property_name;
     throw runtime_error(ss.str());
 }
 
@@ -617,7 +617,7 @@ ndobject ndobject::p(const std::string& property_name) const
     }
 
     stringstream ss;
-    ss << "dynd nobject does not have property " << property_name;
+    ss << "dynd ndobject does not have property " << property_name;
     throw runtime_error(ss.str());
 }
 
@@ -639,7 +639,7 @@ const gfunc::callable& ndobject::find_dynamic_function(const char *function_name
     }
 
     stringstream ss;
-    ss << "dynd nobject does not have function " << function_name;
+    ss << "dynd ndobject does not have function " << function_name;
     throw runtime_error(ss.str());
 }
 

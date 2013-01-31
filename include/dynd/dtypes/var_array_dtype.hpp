@@ -30,7 +30,7 @@ struct var_array_dtype_data {
 
 class var_array_dtype : public base_dtype {
     dtype m_element_dtype;
-
+    std::vector<std::pair<std::string, gfunc::callable> > m_ndobject_properties, m_ndobject_functions;
 public:
     var_array_dtype(const dtype& element_dtype);
 
@@ -111,6 +111,9 @@ public:
     void foreach_leading(char *data, const char *metadata, foreach_fn_t callback, void *callback_data) const;
     
     void reorder_default_constructed_strides(char *dst_metadata, const dtype& src_dtype, const char *src_metadata) const;
+
+    void get_dynamic_ndobject_properties(const std::pair<std::string, gfunc::callable> **out_properties, size_t *out_count) const;
+    void get_dynamic_ndobject_functions(const std::pair<std::string, gfunc::callable> **out_functions, size_t *out_count) const;
 };
 
 inline dtype make_var_array_dtype(const dtype& element_dtype) {
