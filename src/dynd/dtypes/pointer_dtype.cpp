@@ -102,6 +102,7 @@ dtype pointer_dtype::get_canonical_dtype() const
 dtype pointer_dtype::apply_linear_index(int nindices, const irange *indices,
                 int current_i, const dtype& root_dt, bool leading_dimension) const
 {
+cout << "PD " << __LINE__ << endl;
     if (nindices == 0) {
         if (leading_dimension) {
             // Even with 0 indices, throw away the pointer when it's a leading dimension
@@ -129,6 +130,7 @@ intptr_t pointer_dtype::apply_linear_index(int nindices, const irange *indices, 
                 bool leading_dimension, char **inout_data,
                 memory_block_data **inout_dataref) const
 {
+cout << "PD " << __LINE__ << endl;
     if (leading_dimension) {
         // If it's a leading dimension, we always throw away the pointer
         const pointer_dtype_metadata *md = reinterpret_cast<const pointer_dtype_metadata *>(metadata);
@@ -165,6 +167,21 @@ intptr_t pointer_dtype::apply_linear_index(int nindices, const irange *indices, 
         }
         return 0;
     }
+}
+
+dtype pointer_dtype::at_single(intptr_t i0, const char **inout_metadata, const char **inout_data) const
+{
+    // If metadata/data is provided, follow the pointer and call the target dtype's at_single
+    if (inout_metadata) {
+        const pointer_dtype_metadata *md = reinterpret_cast<const pointer_dtype_metadata *>(*inout_metadata);
+        // Modify the metadata
+        *inout_metadata += sizeof(pointer_dtype_metadata);
+        // If requested, modify the data pointer
+        if (inout_data) {
+            *inout_data = *reinterpret_cast<const char * const *>(inout_data) + md->offset;
+        }
+    }
+    return m_target_dtype.at_single(i0, inout_metadata, inout_data);
 }
 
 dtype pointer_dtype::get_dtype_at_dimension(char **inout_metadata, size_t i, size_t total_ndim) const

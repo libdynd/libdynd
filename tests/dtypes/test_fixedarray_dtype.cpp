@@ -33,8 +33,6 @@ TEST(FixedArrayDType, Create) {
     EXPECT_EQ(make_dtype<int32_t>(), d.at(0));
     EXPECT_EQ(make_dtype<int32_t>(), d.at(1));
     EXPECT_EQ(make_dtype<int32_t>(), d.at(2));
-    EXPECT_THROW(d.at(-4), index_out_of_bounds);
-    EXPECT_THROW(d.at(3), index_out_of_bounds);
     fad = static_cast<const fixedarray_dtype *>(d.extended());
     EXPECT_EQ(4, fad->get_fixed_stride());
     EXPECT_EQ(3u, fad->get_fixed_dim_size());

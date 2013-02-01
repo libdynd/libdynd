@@ -51,6 +51,8 @@ public:
         return pod_memory_management;
     }
 
+    bool is_scalar() const;
+
     dtype get_data_values_dtype() const;
     dtype get_by_values_dtype() const;
 

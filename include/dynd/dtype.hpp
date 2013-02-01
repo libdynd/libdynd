@@ -352,7 +352,9 @@ public:
     dtype at_array(int nindices, const irange *indices) const;
 
     /**
-     * The 'at' function is used for indexing. Overloading operator[] isn't
+     * The 'at_single' function is used for indexing by a single dimension, without
+     * touching any leading dimensions after the first, in contrast to the 'at'
+     * function. Overloading operator[] isn't
      * practical for multidimensional objects. Indexing one dimension with
      * an integer index is special-cased, both for higher performance and
      * to provide a way to get a metadata pointer for the result dtype.
@@ -375,13 +377,13 @@ public:
         }
     }
 
-    inline dtype at(intptr_t i0) const {
-        return at_single(i0);
-    }
-
     /**
      * The 'at' function is used for indexing. Overloading operator[] isn't
      * practical for multidimensional objects.
+     *
+     * NOTE: Calling 'at' may simplify the leading dimension after the indices,
+     *       e.g. convert a var_array to a strided_array, or collapsing pointers.
+     *       If you do not want this collapsing behavior, use the 'at_single' function.
      */
     inline dtype at(const irange& i0) const {
         return at_array(1, &i0);

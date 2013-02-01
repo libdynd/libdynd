@@ -75,6 +75,11 @@ void groupby_dtype::print_dtype(std::ostream& o) const
     o << ", groups=" << m_groups_dtype << ">";
 }
 
+bool groupby_dtype::is_scalar() const
+{
+    return false;
+}
+
 void groupby_dtype::get_shape(size_t i, intptr_t *out_shape) const
 {
     if (!m_value_dtype.is_builtin()) {

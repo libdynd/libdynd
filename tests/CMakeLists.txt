@@ -25,6 +25,7 @@ set(tests_SRC
     dtypes/test_fixedarray_dtype.cpp
     dtypes/test_fixedstring_dtype.cpp
     dtypes/test_fixedstruct_dtype.cpp
+    dtypes/test_groupby_dtype.cpp
     dtypes/test_json_dtype.cpp
     dtypes/test_pointer_dtype.cpp
     dtypes/test_strided_array_dtype.cpp

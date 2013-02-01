@@ -80,6 +80,7 @@ public:
                     int current_i, const dtype& root_dt,
                     bool leading_dimension, char **inout_data,
                     memory_block_data **inout_dataref) const;
+    dtype at_single(intptr_t i0, const char **inout_metadata, const char **inout_data) const;
 
     dtype get_dtype_at_dimension(char **inout_metadata, size_t i, size_t total_ndim = 0) const;
 

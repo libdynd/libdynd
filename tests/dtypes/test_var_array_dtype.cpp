@@ -141,6 +141,8 @@ TEST(VarArrayDType, DTypeSubscriptFixedVarNested) {
 
     EXPECT_EQ(dtype("4, VarDim, int32"), n.get_dtype());
     EXPECT_EQ(dtype("M, int32"), n.at(0).get_dtype());
+    EXPECT_EQ(dtype("M, int32"), n.get_dtype().at(0));
+    EXPECT_EQ(dtype("VarDim, int32"), n.get_dtype().at_single(0));
 
     // Validate the shapes after one level of indexing
     EXPECT_EQ(4, n.at(0).get_shape()[0]);
