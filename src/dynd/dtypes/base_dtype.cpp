@@ -149,6 +149,21 @@ bool base_dtype::is_expression() const
     return false;
 }
 
+bool base_dtype::is_strided() const
+{
+    return false;
+}
+
+void base_dtype::process_strided(const char *DYND_UNUSED(metadata), const char *DYND_UNUSED(data),
+                dtype& DYND_UNUSED(out_dt), const char *&DYND_UNUSED(out_origin),
+                intptr_t& DYND_UNUSED(out_stride), intptr_t& DYND_UNUSED(out_dim_size)) const
+{
+    stringstream ss;
+    ss << "dynd dtype " << dtype(this, true) << " is not strided, so process_strided should not be called";
+    throw runtime_error(ss.str());
+}
+
+
 bool base_dtype::is_unique_data_owner(const char *DYND_UNUSED(metadata)) const
 {
     return true;
@@ -195,7 +210,7 @@ intptr_t base_dtype::apply_linear_index(int nindices, const irange *DYND_UNUSED(
     }
 }
 
-dtype base_dtype::at(intptr_t DYND_UNUSED(i0), const char **DYND_UNUSED(inout_metadata),
+dtype base_dtype::at_single(intptr_t DYND_UNUSED(i0), const char **DYND_UNUSED(inout_metadata),
                 const char **DYND_UNUSED(inout_data)) const
 {
     // Default to scalar behavior

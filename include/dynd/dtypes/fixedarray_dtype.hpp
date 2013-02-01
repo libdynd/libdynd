@@ -64,6 +64,10 @@ public:
     void transform_child_dtypes(dtype_transform_fn_t transform_fn, const void *extra,
                     dtype& out_transformed_dtype, bool& out_was_transformed) const;
     dtype get_canonical_dtype() const;
+    bool is_strided() const;
+    void process_strided(const char *metadata, const char *data,
+                    dtype& out_dt, const char *&out_origin,
+                    intptr_t& out_stride, intptr_t& out_dim_size) const;
 
     dtype apply_linear_index(int nindices, const irange *indices,
                 int current_i, const dtype& root_dt, bool leading_dimension) const;
@@ -73,7 +77,7 @@ public:
                     int current_i, const dtype& root_dt,
                     bool leading_dimension, char **inout_data,
                     memory_block_data **inout_dataref) const;
-    dtype at(intptr_t i0, const char **inout_metadata, const char **inout_data) const;
+    dtype at_single(intptr_t i0, const char **inout_metadata, const char **inout_data) const;
 
     dtype get_dtype_at_dimension(char **inout_metadata, size_t i, size_t total_ndim = 0) const;
 

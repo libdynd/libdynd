@@ -12,6 +12,7 @@
 #include <dynd/dtypes/fixedarray_dtype.hpp>
 #include <dynd/dtypes/var_array_dtype.hpp>
 #include <dynd/dtypes/categorical_dtype.hpp>
+#include <dynd/ndobject_iter.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -128,14 +129,92 @@ namespace {
             kernel_instance<unary_operation_pair_t> value_copy;
         };
 
+        template<typename UIntType>
         static void single_kernel(char *dst, const char *src, unary_kernel_static_data *extra)
         {
             auxdata_storage& ad = get_auxiliary_data<auxdata_storage>(extra->auxdata);
             const groupby_dtype *gd = static_cast<const groupby_dtype *>(ad.gb.extended());
-            ad.value_copy.extra.dst_metadata = extra->dst_metadata +
-                            sizeof(strided_array_dtype_metadata) + sizeof(var_array_dtype_metadata);
-            ad.value_copy.extra.src_metadata = gd->get_data_value_metadata(extra->src_metadata);
+            ad.value_copy.extra.dst_metadata = extra->dst_metadata + sizeof(var_array_dtype_metadata);
 
+            // Get the by_values raw ndobject
+            dtype by_values_dt = gd->get_operand_dtype();
+            const char *by_values_metadata = extra->src_metadata, *by_values_data = src;
+            by_values_dt = by_values_dt.extended()->at_single(0, &by_values_metadata, &by_values_data);
+            by_values_dt = static_cast<const pointer_dtype *>(by_values_dt.extended())->get_target_dtype();
+            by_values_metadata += sizeof(pointer_dtype_metadata);
+            by_values_data = *reinterpret_cast<const char * const *>(by_values_data);
+            // If by_values is an expression, evaluate it since we're doing two passes through them
+            ndobject by_values_tmp;
+            if (by_values_dt.is_expression() || !by_values_dt.extended()->is_strided()) {
+                by_values_tmp = eval_raw_copy(by_values_dt, by_values_metadata, by_values_data);
+                by_values_dt = by_values_tmp.get_dtype();
+                by_values_metadata = by_values_tmp.get_ndo_meta();
+                by_values_data = by_values_tmp.get_readonly_originptr();
+            }
+            // Get a strided representation of by_values for processing
+            const char *by_values_origin = NULL;
+            intptr_t by_values_stride, by_values_size;
+            by_values_dt.extended()->process_strided(by_values_metadata, by_values_data,
+                            by_values_dt, by_values_origin, by_values_stride, by_values_size);
+
+            // Get the data_values raw ndobject
+            dtype data_values_dt = gd->get_operand_dtype();
+            const char *data_values_metadata = extra->src_metadata, *data_values_data = src;
+            data_values_dt = data_values_dt.extended()->at_single(1, &data_values_metadata, &data_values_data);
+            data_values_dt = static_cast<const pointer_dtype *>(data_values_dt.extended())->get_target_dtype();
+            data_values_metadata += sizeof(pointer_dtype_metadata);
+            data_values_data = *reinterpret_cast<const char * const *>(data_values_data);
+
+            const dtype& result_dt = gd->get_value_dtype();
+            const fixedarray_dtype *fad = static_cast<const fixedarray_dtype *>(result_dt.extended());
+            intptr_t fad_stride = fad->get_fixed_stride();
+            const var_array_dtype *vad = static_cast<const var_array_dtype *>(fad->get_element_dtype().extended());
+            const var_array_dtype_metadata *vad_md = reinterpret_cast<const var_array_dtype_metadata *>(extra->dst_metadata);
+            if (vad_md->offset != 0) {
+                throw runtime_error("dynd groupby: destination var_array offset must be zero to allocate output");
+            }
+            intptr_t vad_stride = vad_md->stride;
+
+            // Do a pass through by_values to get the size of each variable-sized dimension
+            vector<size_t> cat_sizes(fad->get_fixed_dim_size());
+            const char *by_values_ptr = by_values_origin;
+            for (intptr_t i = 0; i < by_values_size; ++i, by_values_ptr += by_values_stride) {
+                UIntType value = *reinterpret_cast<const UIntType *>(by_values_ptr);
+                if (value >= cat_sizes.size()) {
+                    throw runtime_error("dynd groupby: 'by' array contains an out of bounds value");
+                }
+                ++cat_sizes[value];
+            }
+
+            // Allocate the output, and create a vector of pointers to the start
+            // of each group's output
+            memory_block_pod_allocator_api *allocator = get_memory_block_pod_allocator_api(vad_md->blockref);
+            char *out_begin = NULL, *out_end = NULL;
+            allocator->allocate(vad_md->blockref, by_values_size * vad_stride,
+                            vad->get_element_dtype().get_alignment(), &out_begin, &out_end);
+            vector<char *> cat_pointers(cat_sizes.size());
+            for (size_t i = 0, i_end = cat_pointers.size(); i != i_end; ++i) {
+                cat_pointers[i] = out_begin;
+                reinterpret_cast<var_array_dtype_data *>(dst + i * fad_stride)->begin = out_begin;
+                size_t csize = cat_sizes[i];
+                reinterpret_cast<var_array_dtype_data *>(dst + i * fad_stride)->size = csize;
+                out_begin += csize * vad_stride;
+            }
+
+            // Loop through both by_values and data_values,
+            // copying the data to the right place in the output
+            ndobject_iter<0, 1> iter(data_values_dt, data_values_metadata, data_values_data);
+            if (!iter.empty()) {
+                ad.value_copy.extra.src_metadata = iter.metadata();
+                by_values_ptr = by_values_origin;
+                do {
+                    UIntType value = *reinterpret_cast<const UIntType *>(by_values_ptr);
+                    char *&cp = cat_pointers[value];
+                    ad.value_copy.kernel.single(cp, iter.data(), &ad.value_copy.extra);
+                    ++cp;
+                    by_values_ptr += by_values_stride;
+                } while (iter.next());
+            }
         }
     };
 } // anonymous namespace
@@ -143,7 +222,23 @@ namespace {
 void groupby_dtype::get_operand_to_value_kernel(const eval::eval_context *ectx,
                         kernel_instance<unary_operation_pair_t>& out_kernel) const
 {
-    out_kernel.kernel = unary_operation_pair_t(groupby_to_value_assign::single_kernel, NULL);
+    const categorical_dtype *cd = static_cast<const categorical_dtype *>(m_groups_dtype.extended());
+    switch (cd->get_category_int_dtype().get_type_id()) {
+        case uint8_type_id:
+            out_kernel.kernel = unary_operation_pair_t(
+                            groupby_to_value_assign::single_kernel<uint8_t>, NULL);
+            break;
+        case uint16_type_id:
+            out_kernel.kernel = unary_operation_pair_t(
+                            groupby_to_value_assign::single_kernel<uint16_t>, NULL);
+            break;
+        case uint32_type_id:
+            out_kernel.kernel = unary_operation_pair_t(
+                            groupby_to_value_assign::single_kernel<uint32_t>, NULL);
+            break;
+        default:
+            throw runtime_error("internal error in groupby_dtype::get_operand_to_value_kernel");
+    }
     make_auxiliary_data<groupby_to_value_assign::auxdata_storage>(out_kernel.extra.auxdata);
     groupby_to_value_assign::auxdata_storage& ad =
                 out_kernel.extra.auxdata.get<groupby_to_value_assign::auxdata_storage>();

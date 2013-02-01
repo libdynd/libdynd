@@ -364,7 +364,7 @@ public:
      * Evaluates the ndobject node into a newly allocated strided array,
      * with the requested access flags.
      *
-     * @param access_flags  The access flags for the result, default read and write.
+     * \param access_flags  The access flags for the result, default read and write.
      */
     ndobject eval_copy(const eval::eval_context *ectx = &eval::default_eval_context,
                         uint32_t access_flags=read_access_flag|write_access_flag) const;
@@ -452,7 +452,7 @@ public:
      * requested template type. This function may be extended in the future for
      * 1D vectors (as<std::vector<T>>), matrices, etc.
      *
-     * @param errmode  The assignment error mode to use.
+     * \param errmode  The assignment error mode to use.
      */
     template<class T>
     T as(assign_error_mode errmode = assign_error_default) const;
@@ -885,19 +885,25 @@ T dynd::ndobject::as(assign_error_mode errmode) const {
     return detail::ndobject_as_helper<T>::as(*this, errmode);
 }
 
+/** 
+ * Given the dtype/metadata/data of an ndobject (or sub-component of an ndobject),
+ * evaluates a new copy of it as the canonical dtype.
+ */
+ndobject eval_raw_copy(const dtype& dt, const char *metadata, const char *data);
+
 /**
  * Constructs an array with the same shape and memory layout
  * of the one given, but replacing the
  *
- * @param rhs  The array whose shape and memory layout to emulate.
- * @param dt   The uniform dtype of the new array.
+ * \param rhs  The array whose shape and memory layout to emulate.
+ * \param dt   The uniform dtype of the new array.
  */
 ndobject empty_like(const ndobject& rhs, const dtype& uniform_dtype);
 
 /**
  * Constructs an empty array matching the parameters of 'rhs'
  *
- * @param rhs  The array whose shape, memory layout, and dtype to emulate.
+ * \param rhs  The array whose shape, memory layout, and dtype to emulate.
  */
 ndobject empty_like(const ndobject& rhs);
 

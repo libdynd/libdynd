@@ -944,6 +944,42 @@ std::ostream& dynd::operator<<(std::ostream& o, const ndobject& rhs)
     return o;
 }
 
+ndobject dynd::eval_raw_copy(const dtype& dt, const char *metadata, const char *data)
+{
+    // Allocate an output array with the canonical version of the dtype
+    dtype cdt = dt.get_canonical_dtype();
+    size_t undim = dt.get_undim();
+    ndobject result;
+    if (undim > 0) {
+        dimvector shape(undim);
+        dt.extended()->get_shape(0, shape.get(), metadata);
+        result.set(make_ndobject_memory_block(cdt, undim, shape.get()));
+        // Reorder strides of output strided dimensions in a KEEPORDER fashion
+        cdt.extended()->reorder_default_constructed_strides(result.get_ndo_meta(),
+                        dt, metadata);
+
+        kernel_instance<unary_operation_pair_t> assign;
+
+        // TODO: Performance optimization
+        ndobject_iter<1, 1> iter(cdt, result.get_ndo_meta(), result.get_readwrite_originptr(),
+                        dt, metadata, data);
+        get_dtype_assignment_kernel(iter.get_uniform_dtype<0>(),
+                        iter.get_uniform_dtype<1>(), assign_error_none, NULL, assign);
+        assign.extra.dst_metadata = iter.metadata<0>();
+        assign.extra.src_metadata = iter.metadata<1>();
+        if (!iter.empty()) {
+            do {
+                assign.kernel.single(iter.data<0>(), iter.data<1>(), &assign.extra);
+            } while (iter.next());
+        }
+    } else {
+        result.set(make_ndobject_memory_block(cdt, 0, NULL));
+        dtype_assign(cdt, result.get_ndo_meta(), result.get_readwrite_originptr(),
+                        dt, metadata, data);
+    }
+    return result;
+}
+
 ndobject dynd::empty_like(const ndobject& rhs, const dtype& uniform_dtype)
 {
     if (rhs.is_scalar()) {

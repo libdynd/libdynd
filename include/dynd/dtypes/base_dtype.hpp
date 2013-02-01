@@ -322,6 +322,21 @@ public:
     virtual dtype get_canonical_dtype() const;
 
     /**
+     * Returns true if this level of the dtype can be processed as an
+     * origin pointer, a stride, and a size.
+     */
+    virtual bool is_strided() const;
+
+    /**
+     * When is_strided() returns true, this function can be used to
+     * get the striding parameters for a given metadata/data instance
+     * of the dtype.
+     */
+    virtual void process_strided(const char *metadata, const char *data,
+                    dtype& out_dt, const char *&out_origin,
+                    intptr_t& out_stride, intptr_t& out_dim_size) const;
+
+    /**
      * Indexes into the dtype. This function returns the dtype which results
      * from applying the same index to an ndarray of this dtype.
      *
@@ -395,7 +410,7 @@ public:
      *
      * \returns  The dtype that results from the indexing operation.
      */
-    virtual dtype at(intptr_t i0, const char **inout_metadata, const char **inout_data) const;
+    virtual dtype at_single(intptr_t i0, const char **inout_metadata, const char **inout_data) const;
 
     /**
      * Retrieves the dtype starting at the requested dimension. This is

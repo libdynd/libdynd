@@ -103,6 +103,22 @@ dtype strided_array_dtype::get_canonical_dtype() const
     return dtype(new strided_array_dtype(m_element_dtype.get_canonical_dtype()), false);
 }
 
+bool strided_array_dtype::is_strided() const
+{
+    return true;
+}
+
+void strided_array_dtype::process_strided(const char *metadata, const char *data,
+                dtype& out_dt, const char *&out_origin,
+                intptr_t& out_stride, intptr_t& out_dim_size) const
+{
+    const strided_array_dtype_metadata *md = reinterpret_cast<const strided_array_dtype_metadata *>(metadata);
+    out_dt = m_element_dtype;
+    out_origin = data;
+    out_stride = md->stride;
+    out_dim_size = md->size;
+}
+
 dtype strided_array_dtype::apply_linear_index(int nindices, const irange *indices,
                 int current_i, const dtype& root_dt, bool leading_dimension) const
 {
@@ -190,7 +206,7 @@ intptr_t strided_array_dtype::apply_linear_index(int nindices, const irange *ind
     }
 }
 
-dtype strided_array_dtype::at(intptr_t i0, const char **inout_metadata, const char **inout_data) const
+dtype strided_array_dtype::at_single(intptr_t i0, const char **inout_metadata, const char **inout_data) const
 {
     if (inout_metadata) {
         const strided_array_dtype_metadata *md = reinterpret_cast<const strided_array_dtype_metadata *>(*inout_metadata);
@@ -497,7 +513,7 @@ void strided_array_dtype::reorder_default_constructed_strides(char *dst_metadata
             previous_stride = stride;
         }
         strides[i] = stride;
-        last_src_dtype = last_src_dtype.extended()->at(0, &src_metadata, NULL);
+        last_src_dtype = last_src_dtype.extended()->at_single(0, &src_metadata, NULL);
     }
 
     if (!c_order) {

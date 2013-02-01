@@ -147,6 +147,21 @@ dtype fixedarray_dtype::get_canonical_dtype() const
     }
 }
 
+bool fixedarray_dtype::is_strided() const
+{
+    return true;
+}
+
+void fixedarray_dtype::process_strided(const char *DYND_UNUSED(metadata), const char *data,
+                dtype& out_dt, const char *&out_origin,
+                intptr_t& out_stride, intptr_t& out_dim_size) const
+{
+    out_dt = m_element_dtype;
+    out_origin = data;
+    out_stride = m_stride;
+    out_dim_size = m_dimension_size;
+}
+
 dtype fixedarray_dtype::apply_linear_index(int nindices, const irange *indices,
                 int current_i, const dtype& root_dt, bool leading_dimension) const
 {
@@ -237,7 +252,8 @@ intptr_t fixedarray_dtype::apply_linear_index(int nindices, const irange *indice
     }
 }
 
-dtype fixedarray_dtype::at(intptr_t i0, const char **DYND_UNUSED(inout_metadata), const char **inout_data) const
+dtype fixedarray_dtype::at_single(intptr_t i0,
+                const char **DYND_UNUSED(inout_metadata), const char **inout_data) const
 {
     // Bounds-checking of the index
     i0 = apply_single_index(i0, m_dimension_size, NULL);

@@ -96,7 +96,7 @@ public:
                     int current_i, const dtype& root_dt,
                     bool leading_dimension, char **inout_data,
                     memory_block_data **inout_dataref) const;
-    dtype at(intptr_t i0, const char **inout_metadata, const char **inout_data) const;
+    dtype at_single(intptr_t i0, const char **inout_metadata, const char **inout_data) const;
 
     intptr_t get_dim_size(const char *data, const char *metadata) const;
     void get_shape(size_t i, intptr_t *out_shape) const;

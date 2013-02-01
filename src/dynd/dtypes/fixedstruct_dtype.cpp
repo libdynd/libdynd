@@ -297,7 +297,8 @@ intptr_t fixedstruct_dtype::apply_linear_index(int nindices, const irange *indic
     }
 }
 
-dtype fixedstruct_dtype::at(intptr_t i0, const char **inout_metadata, const char **inout_data) const
+dtype fixedstruct_dtype::at_single(intptr_t i0,
+                const char **inout_metadata, const char **inout_data) const
 {
     // Bounds-checking of the index
     i0 = apply_single_index(i0, m_field_types.size(), NULL);

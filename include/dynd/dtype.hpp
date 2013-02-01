@@ -369,7 +369,7 @@ public:
      */
     inline dtype at_single(intptr_t i0, const char **inout_metadata = NULL, const char **inout_data = NULL) const {
         if (!is_builtin()) {
-            return m_extended->at(i0, inout_metadata, inout_data);
+            return m_extended->at_single(i0, inout_metadata, inout_data);
         } else {
             throw too_many_indices(*this, 1, 0);
         }
