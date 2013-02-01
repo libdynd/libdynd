@@ -13,6 +13,7 @@
 #include <dynd/dtypes/fixedstring_dtype.hpp>
 #include <dynd/dtypes/string_dtype.hpp>
 #include <dynd/dtypes/convert_dtype.hpp>
+#include <dynd/ndobject_arange.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -24,13 +25,34 @@ TEST(CategoricalDType, Create) {
     a.at(2).vals() = "baz";
 
     dtype d;
-
     d = make_categorical_dtype(a);
     EXPECT_EQ(categorical_type_id, d.get_type_id());
     EXPECT_EQ(custom_kind, d.get_kind());
+    EXPECT_EQ(1u, d.get_alignment());
+    EXPECT_EQ(1u, d.get_data_size());
+    EXPECT_FALSE(d.is_expression());
+
+    // With < 256 categories, storage is a uint8
+    a = arange(256);
+    d = make_categorical_dtype(a);
+    EXPECT_EQ(1u, d.get_alignment());
+    EXPECT_EQ(1u, d.get_data_size());
+
+    // With < 32768 categories, storage is a uint16
+    a = arange(257);
+    d = make_categorical_dtype(a);
+    EXPECT_EQ(2u, d.get_alignment());
+    EXPECT_EQ(2u, d.get_data_size());
+    a = arange(32768);
+    d = make_categorical_dtype(a);
+    EXPECT_EQ(2u, d.get_alignment());
+    EXPECT_EQ(2u, d.get_data_size());
+
+    // Otherwise, storage is a uint32
+    a = arange(32769);
+    d = make_categorical_dtype(a);
     EXPECT_EQ(4u, d.get_alignment());
     EXPECT_EQ(4u, d.get_data_size());
-    EXPECT_FALSE(d.is_expression());
 }
 
 TEST(CategoricalDType, Convert) {
@@ -171,7 +193,7 @@ TEST(CategoricalDType, ValuesLonger) {
 
     dtype dt = make_categorical_dtype(cats_vals);
     ndobject a = ndobject(a_vals).cast_udtype(dt).vals();
-    ndobject a_view = a.view_scalars<uint32_t>();
+    ndobject a_view = a.p("category_ints");
 
     // Check that the categories got the right values
     for (int i = 0; i < cats_count; ++i) {

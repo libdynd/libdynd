@@ -11,6 +11,7 @@
 #include <dynd/dtypes/categorical_dtype.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/dtypes/strided_array_dtype.hpp>
+#include <dynd/gfunc/make_callable.hpp>
 
 using namespace dynd;
 using namespace std;
@@ -50,6 +51,7 @@ namespace {
             size_t dst_size;
         };
 
+        template<typename UIntType>
         static void single_kernel(char *dst, const char *src, unary_kernel_static_data *extra)
         {
             auxdata_storage& ad = get_auxiliary_data<auxdata_storage>(extra->auxdata);
@@ -57,11 +59,12 @@ namespace {
             ad.kernel.extra.dst_metadata = extra->dst_metadata;
             ad.kernel.extra.src_metadata = extra->src_metadata;
 
-            uint32_t value = *reinterpret_cast<const uint32_t *>(src);
+            uint32_t value = *reinterpret_cast<const UIntType *>(src);
             const char *src_val = cat->get_category_data_from_value(value);
             ad.kernel.kernel.single(dst, src_val, &ad.kernel.extra);
         }
 
+        template<typename UIntType>
         static void strided_kernel(char *dst, intptr_t dst_stride, const char *src, intptr_t src_stride,
                         size_t count, unary_kernel_static_data *extra)
         {
@@ -71,7 +74,7 @@ namespace {
             ad.kernel.extra.src_metadata = extra->src_metadata;
 
             for (size_t i = 0; i != count; ++i) {
-                uint32_t value = *reinterpret_cast<const uint32_t *>(src);
+                uint32_t value = *reinterpret_cast<const UIntType *>(src);
                 const char *src_val = cat->get_category_data_from_value(value);
                 ad.kernel.kernel.single(dst, src_val, &ad.kernel.extra);
 
@@ -83,6 +86,7 @@ namespace {
 
     struct category_to_categorical_assign {
         // Assign from an input matching the category dtype to a categorical type
+        template<typename UIntType>
         static void single_kernel(char *dst, const char *src, unary_kernel_static_data *extra)
         {
             const categorical_dtype *cat = reinterpret_cast<const categorical_dtype *>(
@@ -90,9 +94,10 @@ namespace {
             );
 
             uint32_t src_val = cat->get_value_from_category(extra->src_metadata, src);
-            *reinterpret_cast<uint32_t *>(dst) = src_val;
+            *reinterpret_cast<UIntType *>(dst) = src_val;
         }
 
+        template<typename UIntType>
         static void strided_kernel(char *dst, intptr_t dst_stride, const char *src, intptr_t src_stride, size_t count, unary_kernel_static_data *extra)
         {
             const categorical_dtype *cat = reinterpret_cast<const categorical_dtype *>(
@@ -101,7 +106,7 @@ namespace {
 
             for (size_t i = 0; i != count; ++i) {
                 uint32_t src_val = cat->get_value_from_category(extra->src_metadata, src);
-                *reinterpret_cast<uint32_t *>(dst) = src_val;
+                *reinterpret_cast<UIntType *>(dst) = src_val;
 
                 dst += dst_stride;
                 src += src_stride;
@@ -176,6 +181,7 @@ static ndobject make_sorted_categories(const set<const char *, cmp>& uniques, co
 categorical_dtype::categorical_dtype(const ndobject& categories, bool presorted)
     : base_dtype(categorical_type_id, custom_kind, 4, 4)
 {
+    intptr_t category_count;
     if (presorted) {
         // This is construction shortcut, for the case when the categories are already
         // sorted. No validation of this is done, the caller should have ensured it
@@ -183,70 +189,95 @@ categorical_dtype::categorical_dtype(const ndobject& categories, bool presorted)
         m_categories = categories.eval_immutable();
         m_category_dtype = m_categories.get_dtype().at(0);
 
-        intptr_t num_categories = categories.get_dim_size();
-        m_value_to_category_index.resize(num_categories);
-        m_category_index_to_value.resize(num_categories);
-        for (size_t i = 0; i != (size_t)num_categories; ++i) {
+        category_count = categories.get_dim_size();
+        m_value_to_category_index.resize(category_count);
+        m_category_index_to_value.resize(category_count);
+        for (size_t i = 0; i != (size_t)category_count; ++i) {
             m_value_to_category_index[i] = i;
             m_category_index_to_value[i] = i;
         }
-        return;
-    }
 
-    const dtype& cdt = categories.get_dtype();
-    if (cdt.get_type_id() != strided_array_type_id) {
-        throw runtime_error("categorical_dtype only supports construction from a strided_array of categories");
-    }
-    m_category_dtype = categories.get_dtype().at(0);
-    if (!m_category_dtype.is_scalar()) {
-        throw runtime_error("categorical_dtype only supports construction from a 1-dimensional strided_array of categories");
-    }
-
-    intptr_t num_categories = categories.get_dim_size();
-    intptr_t categories_stride = reinterpret_cast<const strided_array_dtype_metadata *>(categories.get_ndo_meta())->stride;
-
-    kernel_instance<compare_operations_t> k;
-    m_category_dtype.get_single_compare_kernel(k);
-    k.extra.src0_metadata = k.extra.src1_metadata = categories.get_ndo_meta() + sizeof(strided_array_dtype_metadata);
-
-    cmp less(k.kernel.ops[compare_operations_t::less_id], &k.extra);
-    set<const char *, cmp> uniques(less);
-
-    m_value_to_category_index.resize(num_categories);
-    m_category_index_to_value.resize(num_categories);
-
-    // create the mapping from indices of (to be lexicographically sorted) categories to values
-    for (size_t i = 0; i != (size_t)num_categories; ++i) {
-        m_category_index_to_value[i] = i;
-        const char *category_value = categories.get_readonly_originptr() +
-                        i * categories_stride;
-
-        if (uniques.find(category_value) == uniques.end()) {
-            uniques.insert(category_value);
-        } else {
-            stringstream ss;
-            ss << "categories must be unique: category value ";
-            m_category_dtype.print_data(ss, k.extra.src0_metadata, category_value);
-            ss << " appears more than once";
-            throw std::runtime_error(ss.str());
+    } else {
+        // Process the categories array to make sure it's valid
+        const dtype& cdt = categories.get_dtype();
+        if (cdt.get_type_id() != strided_array_type_id) {
+            throw runtime_error("categorical_dtype only supports construction from a strided_array of categories");
         }
-    }
-    // TODO: Putting everything in a set already caused a sort operation to occur,
-    //       there's no reason we should need a second sort.
-    std::sort(m_category_index_to_value.begin(), m_category_index_to_value.end(),
-                    sorter(categories.get_readonly_originptr(), categories_stride, k.kernel.ops[compare_operations_t::less_id], &k.extra));
+        m_category_dtype = categories.get_dtype().at(0);
+        if (!m_category_dtype.is_scalar()) {
+            throw runtime_error("categorical_dtype only supports construction from a 1-dimensional strided_array of categories");
+        }
 
-    // invert the m_category_index_to_value permutation
-    for (uint32_t i = 0; i < m_category_index_to_value.size(); ++i) {
-        m_value_to_category_index[m_category_index_to_value[i]] = i;
+        category_count = categories.get_dim_size();
+        intptr_t categories_stride = reinterpret_cast<const strided_array_dtype_metadata *>(categories.get_ndo_meta())->stride;
+
+        kernel_instance<compare_operations_t> k;
+        m_category_dtype.get_single_compare_kernel(k);
+        k.extra.src0_metadata = k.extra.src1_metadata = categories.get_ndo_meta() + sizeof(strided_array_dtype_metadata);
+
+        cmp less(k.kernel.ops[compare_operations_t::less_id], &k.extra);
+        set<const char *, cmp> uniques(less);
+
+        m_value_to_category_index.resize(category_count);
+        m_category_index_to_value.resize(category_count);
+
+        // create the mapping from indices of (to be lexicographically sorted) categories to values
+        for (size_t i = 0; i != (size_t)category_count; ++i) {
+            m_category_index_to_value[i] = i;
+            const char *category_value = categories.get_readonly_originptr() +
+                            i * categories_stride;
+
+            if (uniques.find(category_value) == uniques.end()) {
+                uniques.insert(category_value);
+            } else {
+                stringstream ss;
+                ss << "categories must be unique: category value ";
+                m_category_dtype.print_data(ss, k.extra.src0_metadata, category_value);
+                ss << " appears more than once";
+                throw std::runtime_error(ss.str());
+            }
+        }
+        // TODO: Putting everything in a set already caused a sort operation to occur,
+        //       there's no reason we should need a second sort.
+        std::sort(m_category_index_to_value.begin(), m_category_index_to_value.end(),
+                        sorter(categories.get_readonly_originptr(), categories_stride, k.kernel.ops[compare_operations_t::less_id], &k.extra));
+
+        // invert the m_category_index_to_value permutation
+        for (uint32_t i = 0; i < m_category_index_to_value.size(); ++i) {
+            m_value_to_category_index[m_category_index_to_value[i]] = i;
+        }
+
+        m_categories = make_sorted_categories(uniques, m_category_dtype, k.extra.src0_metadata);
     }
 
-    m_categories = make_sorted_categories(uniques, m_category_dtype, k.extra.src0_metadata);
+    // Use the number of categories to set which underlying integer storage to use
+    if (category_count <= 256) {
+        m_category_int_dtype = make_dtype<uint8_t>();
+    } else if (category_count <= 32768) {
+        m_category_int_dtype = make_dtype<uint16_t>();
+    } else {
+        m_category_int_dtype = make_dtype<uint32_t>();
+    }
+    m_members.data_size = m_category_int_dtype.get_data_size();
+    m_members.alignment = m_category_int_dtype.get_alignment();
 }
 
 void categorical_dtype::print_data(std::ostream& o, const char *metadata, const char *data) const
 {
-    uint32_t value = *reinterpret_cast<const uint32_t*>(data);
+    uint32_t value;
+    switch (m_category_int_dtype.get_type_id()) {
+        case uint8_type_id:
+            value = *reinterpret_cast<const uint8_t*>(data);
+            break;
+        case uint16_type_id:
+            value = *reinterpret_cast<const uint16_t*>(data);
+            break;
+        case uint32_type_id:
+            value = *reinterpret_cast<const uint32_t*>(data);
+            break;
+        default:
+            throw runtime_error("internal error in categorical_dtype::print_data");
+    }
     if (value < m_value_to_category_index.size()) {
         m_category_dtype.print_data(o, metadata, get_category_data_from_value(value));
     }
@@ -333,8 +364,25 @@ void categorical_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const d
         }
         // assign from the same category value dtype
         else if (src_dt.value_dtype() == m_category_dtype) {
-            out_kernel.kernel = unary_operation_pair_t(category_to_categorical_assign::single_kernel,
-                            category_to_categorical_assign::strided_kernel);
+            switch (m_category_int_dtype.get_type_id()) {
+                case uint8_type_id:
+                    out_kernel.kernel = unary_operation_pair_t(
+                                    category_to_categorical_assign::single_kernel<uint8_t>,
+                                    category_to_categorical_assign::strided_kernel<uint8_t>);
+                    break;
+                case uint16_type_id:
+                    out_kernel.kernel = unary_operation_pair_t(
+                                    category_to_categorical_assign::single_kernel<uint16_t>,
+                                    category_to_categorical_assign::strided_kernel<uint16_t>);
+                    break;
+                case uint32_type_id:
+                    out_kernel.kernel = unary_operation_pair_t(
+                                    category_to_categorical_assign::single_kernel<uint32_t>,
+                                    category_to_categorical_assign::strided_kernel<uint32_t>);
+                    break;
+                default:
+                    throw runtime_error("internal error in categorical_dtype::get_dtype_assignment_kernel");
+            }
             make_raw_auxiliary_data(out_kernel.extra.auxdata, reinterpret_cast<uintptr_t>(this));
         }
         else {
@@ -345,8 +393,25 @@ void categorical_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const d
     }
     else {
         if (dst_dt.value_dtype().get_type_id() != categorical_type_id) {
-            out_kernel.kernel = unary_operation_pair_t(categorical_to_other_assign::single_kernel,
-                            categorical_to_other_assign::strided_kernel);
+            switch (m_category_int_dtype.get_type_id()) {
+                case uint8_type_id:
+                    out_kernel.kernel = unary_operation_pair_t(
+                                    categorical_to_other_assign::single_kernel<uint8_t>,
+                                    categorical_to_other_assign::strided_kernel<uint8_t>);
+                    break;
+                case uint16_type_id:
+                    out_kernel.kernel = unary_operation_pair_t(
+                                    categorical_to_other_assign::single_kernel<uint16_t>,
+                                    categorical_to_other_assign::strided_kernel<uint16_t>);
+                    break;
+                case uint32_type_id:
+                    out_kernel.kernel = unary_operation_pair_t(
+                                    categorical_to_other_assign::single_kernel<uint32_t>,
+                                    categorical_to_other_assign::strided_kernel<uint32_t>);
+                    break;
+                default:
+                    throw runtime_error("internal error in categorical_dtype::get_dtype_assignment_kernel");
+            }
             make_auxiliary_data<categorical_to_other_assign::auxdata_storage>(out_kernel.extra.auxdata);
             categorical_to_other_assign::auxdata_storage& ad =
                         out_kernel.extra.auxdata.get<categorical_to_other_assign::auxdata_storage>();
@@ -383,35 +448,31 @@ bool categorical_dtype::operator==(const base_dtype& rhs) const
 
 size_t categorical_dtype::get_metadata_size() const
 {
-    if (!m_category_dtype.is_builtin()) {
-        return m_category_dtype.extended()->get_metadata_size();
-    } else {
-        return 0;
-    }
+    return 0;
 }
 
 void categorical_dtype::metadata_default_construct(char *DYND_UNUSED(metadata),
                 int DYND_UNUSED(ndim), const intptr_t* DYND_UNUSED(shape)) const
 {
-    // Data is stored as int32, no metadata to process
+    // Data is stored as uint##, no metadata to process
 }
 
 void categorical_dtype::metadata_copy_construct(char *DYND_UNUSED(dst_metadata),
                 const char *DYND_UNUSED(src_metadata),
                 memory_block_data *DYND_UNUSED(embedded_reference)) const
 {
-    // Data is stored as int32, no metadata to process
+    // Data is stored as uint##, no metadata to process
 }
 
 void categorical_dtype::metadata_destruct(char *DYND_UNUSED(metadata)) const
 {
-    // Data is stored as int32, no metadata to process
+    // Data is stored as uint##, no metadata to process
 }
 
 void categorical_dtype::metadata_debug_print(const char *DYND_UNUSED(metadata),
                 std::ostream& DYND_UNUSED(o), const std::string& DYND_UNUSED(indent)) const
 {
-    // Data is stored as int32, no metadata to process
+    // Data is stored as uint##, no metadata to process
 }
 
 dtype dynd::factor_categorical_dtype(const ndobject& values)
@@ -438,5 +499,22 @@ dtype dynd::factor_categorical_dtype(const ndobject& values)
     ndobject categories = make_sorted_categories(uniques, iter.get_uniform_dtype(), iter.metadata());
 
     return dtype(new categorical_dtype(categories, true), false);
+}
+
+static ndobject property_ndo_get_category_ints(const ndobject& n) {
+    dtype udt = n.get_udtype().value_dtype();
+    const categorical_dtype *cd = static_cast<const categorical_dtype *>(udt.extended());
+    return n.view_scalars(cd->get_category_int_dtype());
+}
+
+static pair<string, gfunc::callable> categorical_ndobject_properties[] = {
+    pair<string, gfunc::callable>("category_ints",
+                    gfunc::make_callable(&property_ndo_get_category_ints, "self"))
+};
+
+void categorical_dtype::get_dynamic_ndobject_properties(const std::pair<std::string, gfunc::callable> **out_properties, size_t *out_count) const
+{
+    *out_properties = categorical_ndobject_properties;
+    *out_count = sizeof(categorical_ndobject_properties) / sizeof(categorical_ndobject_properties[0]);
 }
 

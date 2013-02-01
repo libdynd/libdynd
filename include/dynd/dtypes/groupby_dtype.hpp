@@ -63,6 +63,7 @@ public:
         dtype d = m_operand_dtype.at_single(0, &metadata);
         // Second at_single gets us to the data_value dtype
         d.at_single(0, &metadata);
+        return metadata;
     }
 
     /**

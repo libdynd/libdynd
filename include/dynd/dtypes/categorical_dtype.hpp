@@ -26,6 +26,8 @@ namespace dynd {
 class categorical_dtype : public base_dtype {
     // The data type of the category
     dtype m_category_dtype;
+    // The integer type used for storage
+    dtype m_category_int_dtype;
     // list of categories, in sorted order
     ndobject m_categories;
     // mapping from category indices to values
@@ -53,8 +55,19 @@ public:
         return reinterpret_cast<const strided_array_dtype_metadata *>(m_categories.get_ndo_meta())->size;
     }
 
+    /**
+     * Returns the dtype of the category values.
+     */
     const dtype& get_category_dtype() const {
         return m_category_dtype;
+    }
+
+    /**
+     * Return the dtype of the underlying integer used
+     * to index the category list.
+     */
+    const dtype& get_category_int_dtype() const {
+        return m_category_int_dtype;
     }
 
     uint32_t get_value_from_category(const char *category_metadata, const char *category_data) const;
@@ -81,6 +94,8 @@ public:
     void metadata_copy_construct(char *dst_metadata, const char *src_metadata, memory_block_data *embedded_reference) const;
     void metadata_destruct(char *metadata) const;
     void metadata_debug_print(const char *metadata, std::ostream& o, const std::string& indent) const;
+
+    void get_dynamic_ndobject_properties(const std::pair<std::string, gfunc::callable> **out_properties, size_t *out_count) const;
 
     friend struct assign_to_same_category_type;
     friend struct assign_from_same_category_type;
