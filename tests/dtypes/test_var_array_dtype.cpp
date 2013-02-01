@@ -183,7 +183,7 @@ TEST(VarArrayDType, DTypeSubscriptFixedVarStruct) {
     EXPECT_EQ("F", ngender.at(1,0).as<string>());
 }
 
-TEST(FixedStructDType, AccessFixedStructOfVar) {
+TEST(VarArrayDType, AccessFixedStructOfVar) {
     // A slightly complicated case of property access/indexing
     ndobject n = parse_json("VarDim, {a: int32; b: VarDim, int32}",
                     "[{\"a\":10, \"b\":[1,2,3,4,5]},"
@@ -191,7 +191,7 @@ TEST(FixedStructDType, AccessFixedStructOfVar) {
 
     EXPECT_EQ(dtype("VarDim, {a: int32; b: VarDim, int32}"), n.get_dtype());
 
-    // In the property access, the first dimension will collapse to strided,
+    // In the property access, the first dimension will simplify to strided,
     // but the second shouldn't
     ndobject n2 = n.p("b");
     EXPECT_EQ(dtype("M, VarDim, int32"), n2.get_dtype());

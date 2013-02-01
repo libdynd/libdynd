@@ -9,7 +9,7 @@
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/dtypes/fixedstruct_dtype.hpp>
 #include <dynd/dtypes/pointer_dtype.hpp>
-#include <dynd/dtypes/strided_array_dtype.hpp>
+#include <dynd/dtypes/fixedarray_dtype.hpp>
 #include <dynd/dtypes/var_array_dtype.hpp>
 #include <dynd/dtypes/categorical_dtype.hpp>
 
@@ -34,11 +34,14 @@ groupby_dtype::groupby_dtype(const dtype& data_values_dtype,
                     reinterpret_cast<const categorical_dtype *>(groups_dtype.extended())->get_category_dtype()) {
         stringstream ss;
         ss << "to construct a groupby dtype, the by dtype, " << by_values_dtype.at_single(0);
-        ss << ", should match the category dtype, " << reinterpret_cast<const categorical_dtype *>(groups_dtype.extended())->get_category_dtype();
+        ss << ", should match the category dtype, ";
+        ss << reinterpret_cast<const categorical_dtype *>(groups_dtype.extended())->get_category_dtype();
     }
     m_operand_dtype = make_fixedstruct_dtype(make_pointer_dtype(data_values_dtype), "data",
                     make_pointer_dtype(by_values_dtype), "by");
-    m_value_dtype = make_strided_array_dtype(make_var_array_dtype(data_values_dtype.at_single(0)));
+    const categorical_dtype *cd = static_cast<const categorical_dtype *>(groups_dtype.extended());
+    m_value_dtype = make_fixedarray_dtype(make_var_array_dtype(
+                    data_values_dtype.at_single(0)), cd->get_category_count());
     m_groups_dtype = groups_dtype;
 }
 
@@ -52,9 +55,22 @@ void groupby_dtype::print_data(std::ostream& DYND_UNUSED(o),
     throw runtime_error("internal error: groupby_dtype::print_data isn't supposed to be called");
 }
 
+dtype groupby_dtype::get_data_values_dtype() const
+{
+    const pointer_dtype *pd = static_cast<const pointer_dtype *>(m_operand_dtype.at_single(0).extended());
+    return pd->get_target_dtype();
+}
+
+dtype groupby_dtype::get_by_values_dtype() const
+{
+    const pointer_dtype *pd = static_cast<const pointer_dtype *>(m_operand_dtype.at_single(1).extended());
+    return pd->get_target_dtype();
+}
+
 void groupby_dtype::print_dtype(std::ostream& o) const
 {
-    o << "groupby<values=" << m_operand_dtype.at_single(0) << ", by=" << m_operand_dtype.at_single(1);
+    o << "groupby<values=" << get_data_values_dtype();
+    o << ", by=" << get_by_values_dtype();
     o << ", groups=" << m_groups_dtype << ">";
 }
 
@@ -102,10 +118,40 @@ bool groupby_dtype::operator==(const base_dtype& rhs) const
     }
 }
 
-void groupby_dtype::get_operand_to_value_kernel(const eval::eval_context *DYND_UNUSED(ectx),
-                        kernel_instance<unary_operation_pair_t>& DYND_UNUSED(out_borrowed_kernel)) const
+namespace {
+   struct groupby_to_value_assign {
+        // Assign from a categorical dtype to some other dtype
+        struct auxdata_storage {
+            // The groupby dtype
+            dtype gb;
+            // Kernel for copying a data_value
+            kernel_instance<unary_operation_pair_t> value_copy;
+        };
+
+        static void single_kernel(char *dst, const char *src, unary_kernel_static_data *extra)
+        {
+            auxdata_storage& ad = get_auxiliary_data<auxdata_storage>(extra->auxdata);
+            const groupby_dtype *gd = static_cast<const groupby_dtype *>(ad.gb.extended());
+            ad.value_copy.extra.dst_metadata = extra->dst_metadata +
+                            sizeof(strided_array_dtype_metadata) + sizeof(var_array_dtype_metadata);
+            ad.value_copy.extra.src_metadata = gd->get_data_value_metadata(extra->src_metadata);
+
+        }
+    };
+} // anonymous namespace
+
+void groupby_dtype::get_operand_to_value_kernel(const eval::eval_context *ectx,
+                        kernel_instance<unary_operation_pair_t>& out_kernel) const
 {
-    throw runtime_error("TODO: implement groupby_dtype::get_operand_to_value_kernel");
+    out_kernel.kernel = unary_operation_pair_t(groupby_to_value_assign::single_kernel, NULL);
+    make_auxiliary_data<groupby_to_value_assign::auxdata_storage>(out_kernel.extra.auxdata);
+    groupby_to_value_assign::auxdata_storage& ad =
+                out_kernel.extra.auxdata.get<groupby_to_value_assign::auxdata_storage>();
+    // A reference to this dtype
+    ad.gb = dtype(this, true);
+    dtype dvdt = get_data_values_dtype().at_single(0);
+    // A kernel assigning from the data_values array to a value in the result
+    ::get_dtype_assignment_kernel(dvdt.value_dtype(), dvdt, assign_error_default, ectx, ad.value_copy);
 }
 
 void groupby_dtype::get_value_to_operand_kernel(const eval::eval_context *DYND_UNUSED(ectx),

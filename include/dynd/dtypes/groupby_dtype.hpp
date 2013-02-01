@@ -51,6 +51,20 @@ public:
         return pod_memory_management;
     }
 
+    dtype get_data_values_dtype() const;
+    dtype get_by_values_dtype() const;
+
+    /**
+     * Given some metadata for the groupby dtype, return metadata
+     * for a single element of the data_values array.
+     */
+    const char *get_data_value_metadata(const char *metadata) const {
+        // First at_single gets us to the pointer<array<data_value>> dtype
+        dtype d = m_operand_dtype.at_single(0, &metadata);
+        // Second at_single gets us to the data_value dtype
+        d.at_single(0, &metadata);
+    }
+
     /**
      * Given some metadata for the groupby dtype, returns the
      * metadata for the pointer dtype that points at the data
@@ -97,7 +111,7 @@ public:
 };
 
 /**
- * Makes an unaligned dtype to view the given dtype without alignment requirements.
+ * Makes a groupby dtype.
  */
 inline dtype make_groupby_dtype(const dtype& data_values_dtype,
                 const dtype& by_values_dtype, const dtype& groups_dtype)
