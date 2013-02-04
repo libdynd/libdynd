@@ -356,7 +356,7 @@ static void string_to_complex_float64_single_kernel(char *DYND_UNUSED(dst), cons
     throw std::runtime_error("TODO: implement string_to_complex_float64_single_kernel");
 }
 
-static unary_single_operation_t static_string_to_builtin_kernels[builtin_type_id_count-2] = {
+static unary_single_operation_deprecated_t static_string_to_builtin_kernels[builtin_type_id_count-2] = {
         &string_to_bool_single_kernel,
         &string_to_int<int8_t>::single_kernel,
         &string_to_int<int16_t>::single_kernel,

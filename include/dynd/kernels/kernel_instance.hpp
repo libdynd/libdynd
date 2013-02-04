@@ -119,9 +119,9 @@ struct single_compare_static_data {
 };
 
 /** Typedef for a unary operation on a single element */
-typedef void (*unary_single_operation_t)(char *dst, const char *src, unary_kernel_static_data *extra);
+typedef void (*unary_single_operation_deprecated_t)(char *dst, const char *src, unary_kernel_static_data *extra);
 /** Typedef for a unary operation on a strided segment of elements */
-typedef void (*unary_strided_operation_t)(char *dst, intptr_t dst_stride,
+typedef void (*unary_strided_operation_deprecated_t)(char *dst, intptr_t dst_stride,
                 const char *src, intptr_t src_stride, size_t count, unary_kernel_static_data *extra);
 
 /** Typedef for a binary operation on a single element */
@@ -142,15 +142,15 @@ typedef bool (*single_compare_operation_t)(const char *src0, const char *src1,
  * must call the 'single' version repeatedly.
  */
 struct unary_operation_pair_t {
-    unary_single_operation_t single;
-    unary_strided_operation_t strided;
+    unary_single_operation_deprecated_t single;
+    unary_strided_operation_deprecated_t strided;
 
     typedef unary_kernel_static_data extra_type;
 
     unary_operation_pair_t()
         : single(), strided()
     {}
-    unary_operation_pair_t(unary_single_operation_t single_, unary_strided_operation_t strided_)
+    unary_operation_pair_t(unary_single_operation_deprecated_t single_, unary_strided_operation_deprecated_t strided_)
         : single(single_), strided(strided_)
     {}
 };

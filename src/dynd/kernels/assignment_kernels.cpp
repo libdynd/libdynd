@@ -29,7 +29,7 @@ namespace {
 static unary_operation_pair_t assign_table[builtin_type_id_count-2][builtin_type_id_count-2][4] =
 {
 #define SINGLE_OPERATION_PAIR_LEVEL(dst_type, src_type, errmode) unary_operation_pair_t( \
-            (unary_single_operation_t)&single_assigner_builtin<dst_type, src_type, errmode>::assign, \
+            (unary_single_operation_deprecated_t)&single_assigner_builtin<dst_type, src_type, errmode>::assign, \
             multiple_assignment_builtin<dst_type, src_type, errmode>::strided_assign)
         
 #define ERROR_MODE_LEVEL(dst_type, src_type) { \
@@ -188,11 +188,19 @@ void dynd::get_dtype_assignment_kernel(
 namespace {
     template<class T>
     struct aligned_fixed_size_copy_assign_type {
+        static void single_kernel(char *dst, const char *src,
+                        hierarchical_kernel_common_base *DYND_UNUSED(extra))
+        {
+            *(T *)dst = *(T *)src;
+        }
+
+        // Deprecated
         static void single(char *dst, const char *src, unary_kernel_static_data *DYND_UNUSED(extra))
         {
             *(T *)dst = *(T *)src;
         }
 
+        // Deprecated
         static void strided(char *dst, intptr_t dst_stride, const char *src, intptr_t src_stride, size_t count, unary_kernel_static_data *DYND_UNUSED(extra))
         {
             for (size_t i = 0; i != count; ++i, dst += dst_stride, src += src_stride) {
@@ -205,6 +213,12 @@ namespace {
     struct aligned_fixed_size_copy_assign;
     template<>
     struct aligned_fixed_size_copy_assign<1> {
+        static void single_kernel(char *dst, const char *src,
+                            hierarchical_kernel_common_base *DYND_UNUSED(extra))
+        {
+            *dst = *src;
+        }
+
         static void single(char *dst, const char *src, unary_kernel_static_data *DYND_UNUSED(extra))
         {
             *dst = *src;
@@ -226,6 +240,12 @@ namespace {
 
     template<int N>
     struct unaligned_fixed_size_copy_assign {
+        static void single_kernel(char *dst, const char *src,
+                        hierarchical_kernel_common_base *DYND_UNUSED(extra))
+        {
+            memcpy(dst, src, N);
+        }
+
         static void single(char *dst, const char *src, unary_kernel_static_data *DYND_UNUSED(extra))
         {
             memcpy(dst, src, N);
@@ -239,6 +259,15 @@ namespace {
             }
         }
     };
+}
+struct unaligned_copy_single_kernel_extra {
+    hierarchical_kernel_common_base base;
+    size_t data_size;
+};
+static void unaligned_copy_single_kernel(char *dst, const char *src, hierarchical_kernel_common_base *extra)
+{
+    size_t data_size = reinterpret_cast<unaligned_copy_single_kernel_extra *>(extra)->data_size;
+    memcpy(dst, src, data_size);
 }
 static void unaligned_copy_single(char *dst, const char *src, unary_kernel_static_data *extra)
 {
@@ -314,5 +343,178 @@ void dynd::get_dtype_assignment_kernel(const dtype& dt,
         get_pod_dtype_assignment_kernel(dt.get_data_size(), dt.get_alignment(), out_kernel);
     } else {
         dt.extended()->get_dtype_assignment_kernel(dt, dt, assign_error_none, out_kernel);
+    }
+}
+
+// ---------------------- PART BEFORE THIS IS DEPRECATED -------------------------------------
+
+void dynd::make_assignment_kernel(
+                    hierarchical_kernel<unary_single_operation_t> *out,
+                    size_t out_offset,
+                    const dtype& dst_dt, const char *dst_metadata,
+                    const dtype& src_dt, const char *src_metadata,
+                    assign_error_mode errmode,
+                    const dynd::eval::eval_context *ectx)
+{
+    if (errmode == assign_error_default && ectx != NULL) {
+        errmode = ectx->default_assign_error_mode;
+    }
+
+    if (dst_dt.is_builtin()) {
+        if (src_dt.is_builtin()) {
+            // If the casting can be done losslessly, disable the error check to find faster code paths
+            if (errmode != assign_error_none && is_lossless_assignment(dst_dt, src_dt)) {
+                errmode = assign_error_none;
+            }
+
+            if (dst_dt.extended() == src_dt.extended()) {
+                make_pod_dtype_assignment_kernel(out, out_offset,
+                                dst_dt.get_data_size(),dst_dt.get_alignment());
+            } else {
+            }
+
+        } else {
+            src_dt.extended()->make_assignment_kernel(out, out_offset,
+                            dst_dt, dst_metadata,
+                            src_dt, src_metadata,
+                            errmode, ectx);
+        }
+    } else {
+        dst_dt.extended()->make_assignment_kernel(out, out_offset,
+                        dst_dt, dst_metadata,
+                        src_dt, src_metadata,
+                        errmode, ectx);
+    }
+}
+
+void dynd::make_pod_dtype_assignment_kernel(
+                    hierarchical_kernel<unary_single_operation_t> *out,
+                    size_t out_offset,
+                    size_t data_size, size_t data_alignment)
+{
+    hierarchical_kernel_common_base *result = NULL;
+    if (data_size == data_alignment) {
+        // Aligned specialization tables
+        switch (data_size) {
+            case 1:
+                out->ensure_capacity(out_offset + sizeof(hierarchical_kernel_common_base));
+                result = out->get_at(out_offset);
+                result->function = &aligned_fixed_size_copy_assign<1>::single_kernel;
+                break;
+            case 2:
+                out->ensure_capacity(out_offset + sizeof(hierarchical_kernel_common_base));
+                result = out->get_at(out_offset);
+                result->function = &aligned_fixed_size_copy_assign<2>::single_kernel;
+                break;
+            case 4:
+                out->ensure_capacity(out_offset + sizeof(hierarchical_kernel_common_base));
+                result = out->get_at(out_offset);
+                result->function = &aligned_fixed_size_copy_assign<4>::single_kernel;
+                break;
+            case 8:
+                out->ensure_capacity(out_offset + sizeof(hierarchical_kernel_common_base));
+                result = out->get_at(out_offset);
+                result->function = &aligned_fixed_size_copy_assign<8>::single_kernel;
+                break;
+            default:
+                out->ensure_capacity(out_offset + sizeof(unaligned_copy_single_kernel_extra));
+                result = out->get_at(out_offset);
+                result->function = &unaligned_copy_single_kernel;
+                reinterpret_cast<unaligned_copy_single_kernel_extra *>(result)->data_size = data_size;
+                break;
+        }
+    } else {
+        // Unaligned specialization tables
+        switch (data_size) {
+            case 2:
+                out->ensure_capacity(out_offset + sizeof(hierarchical_kernel_common_base));
+                result = out->get_at(out_offset);
+                result->function = unaligned_fixed_size_copy_assign<2>::single_kernel;
+                break;
+            case 4:
+                out->ensure_capacity(out_offset + sizeof(hierarchical_kernel_common_base));
+                result = out->get_at(out_offset);
+                result->function = unaligned_fixed_size_copy_assign<4>::single_kernel;
+                break;
+            case 8:
+                out->ensure_capacity(out_offset + sizeof(hierarchical_kernel_common_base));
+                result = out->get_at(out_offset);
+                result->function = unaligned_fixed_size_copy_assign<8>::single_kernel;
+                break;
+            default:
+                out->ensure_capacity(out_offset + sizeof(unaligned_copy_single_kernel_extra));
+                result = out->get_at(out_offset);
+                result->function = &unaligned_copy_single_kernel;
+                reinterpret_cast<unaligned_copy_single_kernel_extra *>(result)->data_size = data_size;
+                break;
+        }
+    }
+    result->destructor = NULL;
+}
+
+static unary_single_operation_t assign_table_single_kernel[builtin_type_id_count-2][builtin_type_id_count-2][4] =
+{
+#define SINGLE_OPERATION_PAIR_LEVEL(dst_type, src_type, errmode) \
+            (unary_single_operation_t)&single_assigner_builtin<dst_type, src_type, errmode>::assign
+        
+#define ERROR_MODE_LEVEL(dst_type, src_type) { \
+        SINGLE_OPERATION_PAIR_LEVEL(dst_type, src_type, assign_error_none), \
+        SINGLE_OPERATION_PAIR_LEVEL(dst_type, src_type, assign_error_overflow), \
+        SINGLE_OPERATION_PAIR_LEVEL(dst_type, src_type, assign_error_fractional), \
+        SINGLE_OPERATION_PAIR_LEVEL(dst_type, src_type, assign_error_inexact) \
+    }
+
+#define SRC_TYPE_LEVEL(dst_type) { \
+        ERROR_MODE_LEVEL(dst_type, dynd_bool), \
+        ERROR_MODE_LEVEL(dst_type, int8_t), \
+        ERROR_MODE_LEVEL(dst_type, int16_t), \
+        ERROR_MODE_LEVEL(dst_type, int32_t), \
+        ERROR_MODE_LEVEL(dst_type, int64_t), \
+        ERROR_MODE_LEVEL(dst_type, uint8_t), \
+        ERROR_MODE_LEVEL(dst_type, uint16_t), \
+        ERROR_MODE_LEVEL(dst_type, uint32_t), \
+        ERROR_MODE_LEVEL(dst_type, uint64_t), \
+        ERROR_MODE_LEVEL(dst_type, float), \
+        ERROR_MODE_LEVEL(dst_type, double), \
+        ERROR_MODE_LEVEL(dst_type, complex<float>), \
+        ERROR_MODE_LEVEL(dst_type, complex<double>) \
+    }
+
+    SRC_TYPE_LEVEL(dynd_bool),
+    SRC_TYPE_LEVEL(int8_t),
+    SRC_TYPE_LEVEL(int16_t),
+    SRC_TYPE_LEVEL(int32_t),
+    SRC_TYPE_LEVEL(int64_t),
+    SRC_TYPE_LEVEL(uint8_t),
+    SRC_TYPE_LEVEL(uint16_t),
+    SRC_TYPE_LEVEL(uint32_t),
+    SRC_TYPE_LEVEL(uint64_t),
+    SRC_TYPE_LEVEL(float),
+    SRC_TYPE_LEVEL(double),
+    SRC_TYPE_LEVEL(complex<float>),
+    SRC_TYPE_LEVEL(complex<double>)
+#undef SRC_TYPE_LEVEL
+#undef ERROR_MODE_LEVEL
+#undef SINGLE_OPERATION_PAIR_LEVEL
+};
+
+void dynd::make_builtin_dtype_assignment_function(
+                hierarchical_kernel<unary_single_operation_t> *out,
+                size_t out_offset,
+                type_id_t dst_type_id, type_id_t src_type_id,
+                assign_error_mode errmode)
+{
+    // Do a table lookup for the built-in range of dtypes
+    if (dst_type_id >= bool_type_id && dst_type_id <= complex_float64_type_id &&
+                    src_type_id >= bool_type_id && src_type_id <= complex_float64_type_id &&
+                    errmode != assign_error_default) {
+        out->ensure_capacity(out_offset + sizeof(hierarchical_kernel_common_base));
+        hierarchical_kernel_common_base *result = out->get_at(out_offset);
+        result->function = assign_table_single_kernel[dst_type_id-bool_type_id][src_type_id-bool_type_id][errmode];
+        result->destructor = NULL;
+    } else {
+        stringstream ss;
+        ss << "Cannot assign from " << dtype(src_type_id) << " to " << dtype(dst_type_id);
+        throw runtime_error(ss.str());
     }
 }

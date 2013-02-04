@@ -441,7 +441,7 @@ unary_operation_pair_t dynd::codegen_unary_function_adapter(const memory_block_p
         char* loop_continue_offset = static_cast<char*>(ptr_offset(base, loop_end)) - 1;
         *loop_continue_offset = - loop_size;
         
-        //unary_single_operation_t func_ptr = reinterpret_cast<unary_single_operation_t>(ptr_offset(base, entry_point));
+        //unary_single_operation_deprecated_t func_ptr = reinterpret_cast<unary_single_operation_deprecated_t>(ptr_offset(base, entry_point));
 
         fbuilder.finish();
 

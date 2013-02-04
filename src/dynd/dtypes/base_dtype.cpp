@@ -337,6 +337,23 @@ size_t base_dtype::iterdata_destruct(iterdata_common *DYND_UNUSED(iterdata), int
     throw std::runtime_error(ss.str());
 }
 
+void base_dtype::make_assignment_kernel(
+                hierarchical_kernel<unary_single_operation_t> *out,
+                size_t out_offset,
+                const dtype& dst_dt, const char *dst_metadata,
+                const dtype& src_dt, const char *src_metadata,
+                assign_error_mode errmode,
+                const eval::eval_context *ectx) const
+{
+    stringstream ss;
+    ss << "make_assignment_kernel has not been implemented for ";
+    if (this == dst_dt.extended()) {
+        ss << dst_dt;
+    } else {
+        ss << src_dt;
+    }
+    throw std::runtime_error(ss.str());
+}
 
 void base_dtype::foreach_leading(char *DYND_UNUSED(data), const char *DYND_UNUSED(metadata),
                 foreach_fn_t DYND_UNUSED(callback), void *DYND_UNUSED(callback_data)) const

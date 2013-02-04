@@ -14,7 +14,7 @@
 #include <dynd/memblock/memory_block.hpp>
 #include <dynd/kernels/kernel_instance.hpp>
 #include <dynd/dtype_assign.hpp>
-
+#include <dynd/kernels/hierarchical_kernels.hpp>
 
 namespace dynd {
 
@@ -544,6 +544,24 @@ public:
     virtual size_t iterdata_construct(iterdata_common *iterdata, const char **inout_metadata, int ndim, const intptr_t* shape, dtype& out_uniform_dtype) const;
     /** Destructs any references or other state contained in the iterdata */
     virtual size_t iterdata_destruct(iterdata_common *iterdata, int ndim) const;
+
+    /**
+     * Creates an assignment kernel for one data value from the
+     * src dtype/metadata to the dst dtype/metadata. This adds the
+     * kernel at the 'out_offset' position in 'out's data, as part
+     * of a hierarchy matching the dtype's hierarchy.
+     *
+     * This function should always be called with this == dst_dt first,
+     * and dtypes which don't support the particular assignment should
+     * then call the corresponding function with this == src_dt.
+     */
+    virtual void make_assignment_kernel(
+                    hierarchical_kernel<unary_single_operation_t> *out,
+                    size_t out_offset,
+                    const dtype& dst_dt, const char *dst_metadata,
+                    const dtype& src_dt, const char *src_metadata,
+                    assign_error_mode errmode,
+                    const eval::eval_context *ectx) const;
 
     /**
      * Call the callback on each element of the array with given data/metadata along the leading

@@ -77,6 +77,43 @@ void get_dtype_assignment_kernel(const dtype& dst_dt, const dtype& src_dt,
 void get_dtype_assignment_kernel(const dtype& dt,
                     kernel_instance<unary_operation_pair_t>& out_kernel);
 
+/**
+ * Creates an assignment kernel for one data value from the
+ * src dtype/metadata to the dst dtype/metadata. This adds the
+ * kernel at the 'out_offset' position in 'out's data, as part
+ * of a hierarchy matching the dtype's hierarchy.
+ *
+ * This function should always be called with this == dst_dt first,
+ * and dtypes which don't support the particular assignment should
+ * then call the corresponding function with this == src_dt.
+ */
+void make_assignment_kernel(
+                    hierarchical_kernel<unary_single_operation_t> *out,
+                    size_t out_offset,
+                    const dtype& dst_dt, const char *dst_metadata,
+                    const dtype& src_dt, const char *src_metadata,
+                    assign_error_mode errmode,
+                    const eval::eval_context *ectx);
+
+/**
+ * Creates an assignment kernel when the src and the dst are the same,
+ * and are POD (plain old data).
+ */
+void make_pod_dtype_assignment_kernel(
+                    hierarchical_kernel<unary_single_operation_t> *out,
+                    size_t out_offset,
+                    size_t data_size, size_t data_alignment);
+
+/**
+ * Creates an assignment kernel from the src to the dst built in
+ * type ids.
+ */
+void make_builtin_dtype_assignment_function(
+                hierarchical_kernel<unary_single_operation_t> *out,
+                size_t out_offset,
+                type_id_t dst_type_id, type_id_t src_type_id,
+                assign_error_mode errmode);
+
 } // namespace dynd
 
 #endif // _DYND__ASSIGNMENT_KERNELS_HPP_

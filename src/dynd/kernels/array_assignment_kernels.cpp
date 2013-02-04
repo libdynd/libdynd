@@ -51,7 +51,7 @@ namespace {
 
             intptr_t dst_stride = dst_md->stride, src_stride = src_md->stride;
             if (ad.assign_elements.kernel.strided == NULL) {
-                unary_single_operation_t assign_single = ad.assign_elements.kernel.single;
+                unary_single_operation_deprecated_t assign_single = ad.assign_elements.kernel.single;
                 for (size_t i = 0; i != src_size; ++i) {
                     assign_single(dst_begin, src_begin, &ad.assign_elements.extra);
                     dst_begin += dst_stride;

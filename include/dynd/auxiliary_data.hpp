@@ -23,38 +23,11 @@ struct AuxDataBase;
 typedef void (*auxdata_free_function_t) (AuxDataBase *);
 typedef AuxDataBase *(*auxdata_clone_function_t) (const AuxDataBase *);
 
-struct auxdata_kernel_api {
-    /**
-     * When the dtype has memory_block references, or its components
-     * have them, the structure must match up between the dtype and
-     * the kernel's auxdata. Chaining through child APIs is how to initialize
-     * the growable memory_block members of the kernel.
-     */
-    auxdata_kernel_api *(*get_child_api)(const AuxDataBase *auxdata, int index);
-
-    /**
-     * Whether this kernel may reference an input memory_block instead
-     * of requiring a destination memory_block.
-     */
-    int (*supports_referencing_src_memory_blocks)(const AuxDataBase *auxdata);
-
-    /**
-     * Sets the memory_block this memblockref dtype should use to allocate
-     * destination variable-sized data. Set to NULL to reference the input's
-     * memory_block, when the kernel indicates this is permitted.
-     */
-    void (*set_dst_memory_block)(AuxDataBase *auxdata, memory_block_data *memblock);
-
-    // TODO: Temporary buffer management APIs
-};
-
 struct AuxDataBase {
     /** Mandatory free and clone functions */
     auxdata_free_function_t free;
     auxdata_clone_function_t clone;
-    /** Additional API exposed by the kernel when necessary */
-    auxdata_kernel_api *kernel_api;
-    void *reserved; /* for future expansion */
+    void *reserved0, *reserved1; /* for future expansion */
 };
 
 class auxiliary_data;
@@ -222,16 +195,6 @@ public:
 
     void swap(auxiliary_data& rhs) {
         std::swap(m_auxdata, rhs.m_auxdata);
-    }
-
-    /**
-     * Returns the kernel API, assuming the auxdata is either
-     * originally allocated or borrowed. The caller must be sure
-     * that it is ok to get this, for example if the kernel api is
-     * required for a blockref destination dtype.
-     */
-    auxdata_kernel_api *get_kernel_api() const {
-        return reinterpret_cast<AuxDataBase *>(m_auxdata&~1)->kernel_api;
     }
 
     /**
