@@ -14,6 +14,11 @@
 using namespace std;
 using namespace dynd;
 
+broadcast_error::broadcast_error(const std::string& m)
+    : dynd_exception("broadcast error", m)
+{
+}
+
 inline string broadcast_error_message(int dst_ndim, const intptr_t *dst_shape,
                     int src_ndim, const intptr_t *src_shape)
 {

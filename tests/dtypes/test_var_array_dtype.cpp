@@ -12,6 +12,7 @@
 #include <dynd/dtypes/tuple_dtype.hpp>
 #include <dynd/dtypes/var_array_dtype.hpp>
 #include <dynd/dtypes/strided_array_dtype.hpp>
+#include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/json_parser.hpp>
 
 using namespace std;
@@ -208,4 +209,124 @@ TEST(VarArrayDType, AccessFixedStructOfVar) {
     EXPECT_EQ(7, n2.at(1, 0).as<int>());
     EXPECT_EQ(8, n2.at(1, 1).as<int>());
     EXPECT_EQ(9, n2.at(1, 2).as<int>());
+}
+
+
+TEST(VarArrayDType, AssignKernel) {
+    ndobject a, b;
+    hierarchical_kernel<unary_single_operation_t> k;
+
+    // Assignment scalar -> uninitialized var array
+    a = ndobject(make_var_array_dtype(make_dtype<int>()));
+    b = 9.0;
+    EXPECT_EQ(var_array_type_id, a.get_dtype().get_type_id());
+cout << "vad " << __LINE__ << endl;
+    make_assignment_kernel(&k, 0, a.get_dtype(), a.get_ndo_meta(),
+                    b.get_dtype(), b.get_ndo_meta(), assign_error_default, &eval::default_eval_context);
+cout << "vad " << __LINE__ << endl;
+    k.get_function()(a.get_readwrite_originptr(), b.get_readonly_originptr(), k.get());
+cout << "vad " << __LINE__ << endl;
+    EXPECT_EQ(1, a.at_array(0, NULL).get_shape()[0]);
+    EXPECT_EQ(9, a.at(0).as<int>());
+    k.reset();
+
+    // Assignment scalar -> initialized var array
+    a = ndobject(make_var_array_dtype(make_dtype<int>()));
+    parse_json(a, "[3, 5, 7]");
+    b = 9.0;
+    EXPECT_EQ(var_array_type_id, a.get_dtype().get_type_id());
+cout << "vad " << __LINE__ << endl;
+    make_assignment_kernel(&k, 0, a.get_dtype(), a.get_ndo_meta(),
+                    b.get_dtype(), b.get_ndo_meta(), assign_error_default, &eval::default_eval_context);
+cout << "vad " << __LINE__ << endl;
+    k.get_function()(a.get_readwrite_originptr(), b.get_readonly_originptr(), k.get());
+cout << "vad " << __LINE__ << endl;
+    EXPECT_EQ(3, a.at_array(0, NULL).get_shape()[0]);
+    EXPECT_EQ(9, a.at(0).as<int>());
+    EXPECT_EQ(9, a.at(1).as<int>());
+    EXPECT_EQ(9, a.at(2).as<int>());
+    k.reset();
+
+    // Assignment initialized var array -> uninitialized var array
+    a = ndobject(make_var_array_dtype(make_dtype<int>()));
+    b = parse_json("VarDim, int32", "[3, 5, 7]");
+    EXPECT_EQ(var_array_type_id, a.get_dtype().get_type_id());
+    EXPECT_EQ(var_array_type_id, b.get_dtype().get_type_id());
+cout << "vad " << __LINE__ << endl;
+    make_assignment_kernel(&k, 0, a.get_dtype(), a.get_ndo_meta(),
+                    b.get_dtype(), b.get_ndo_meta(), assign_error_default, &eval::default_eval_context);
+cout << "vad " << __LINE__ << endl;
+    k.get_function()(a.get_readwrite_originptr(), b.get_readonly_originptr(), k.get());
+cout << "vad " << __LINE__ << endl;
+    EXPECT_EQ(3, a.at_array(0, NULL).get_shape()[0]);
+    EXPECT_EQ(3, a.at(0).as<int>());
+    EXPECT_EQ(5, a.at(1).as<int>());
+    EXPECT_EQ(7, a.at(2).as<int>());
+    k.reset();
+
+    // Assignment initialized var array -> initialized var array
+    a = ndobject(make_var_array_dtype(make_dtype<int>()));
+    parse_json(a, "[0, 0, 0]");
+    b = parse_json("VarDim, int32", "[3, 5, 7]");
+    EXPECT_EQ(var_array_type_id, a.get_dtype().get_type_id());
+    EXPECT_EQ(var_array_type_id, b.get_dtype().get_type_id());
+cout << "vad " << __LINE__ << endl;
+    make_assignment_kernel(&k, 0, a.get_dtype(), a.get_ndo_meta(),
+                    b.get_dtype(), b.get_ndo_meta(), assign_error_default, &eval::default_eval_context);
+cout << "vad " << __LINE__ << endl;
+    k.get_function()(a.get_readwrite_originptr(), b.get_readonly_originptr(), k.get());
+cout << "vad " << __LINE__ << endl;
+    EXPECT_EQ(3, a.at_array(0, NULL).get_shape()[0]);
+    EXPECT_EQ(3, a.at(0).as<int>());
+    EXPECT_EQ(5, a.at(1).as<int>());
+    EXPECT_EQ(7, a.at(2).as<int>());
+    k.reset();
+
+    // Broadcasting assignment initialized var array -> initialized var array
+    a = ndobject(make_var_array_dtype(make_dtype<int>()));
+    parse_json(a, "[0, 0, 0]");
+    b = parse_json("VarDim, int32", "[9]");
+    EXPECT_EQ(var_array_type_id, a.get_dtype().get_type_id());
+    EXPECT_EQ(var_array_type_id, b.get_dtype().get_type_id());
+    make_assignment_kernel(&k, 0, a.get_dtype(), a.get_ndo_meta(),
+                    b.get_dtype(), b.get_ndo_meta(), assign_error_default, &eval::default_eval_context);
+    k.get_function()(a.get_readwrite_originptr(), b.get_readonly_originptr(), k.get());
+    EXPECT_EQ(3, a.at_array(0, NULL).get_shape()[0]);
+    EXPECT_EQ(9, a.at(0).as<int>());
+    EXPECT_EQ(9, a.at(1).as<int>());
+    EXPECT_EQ(9, a.at(2).as<int>());
+    k.reset();
+
+    // No-op assignment uninitialized var array -> uinitialized var array
+    a = ndobject(make_var_array_dtype(make_dtype<int>()));
+    b = ndobject(make_var_array_dtype(make_dtype<int>()));
+    EXPECT_EQ(var_array_type_id, a.get_dtype().get_type_id());
+    EXPECT_EQ(var_array_type_id, b.get_dtype().get_type_id());
+    make_assignment_kernel(&k, 0, a.get_dtype(), a.get_ndo_meta(),
+                    b.get_dtype(), b.get_ndo_meta(), assign_error_default, &eval::default_eval_context);
+    k.get_function()(a.get_readwrite_originptr(), b.get_readonly_originptr(), k.get());
+    // No error, a is still uninitialized
+    k.reset();
+
+    // Error assignment var array -> scalar
+    a = 9.0;
+    b = parse_json("VarDim, int32", "[3, 5, 7]");
+    EXPECT_EQ(var_array_type_id, b.get_dtype().get_type_id());
+    EXPECT_THROW(make_assignment_kernel(&k, 0, a.get_dtype(), a.get_ndo_meta(),
+                    b.get_dtype(), b.get_ndo_meta(), assign_error_default, &eval::default_eval_context),
+                broadcast_error);
+
+    // Error assignment initialized var array -> initialized var array
+    a = ndobject(make_var_array_dtype(make_dtype<int>()));
+    parse_json(a, "[0, 0, 0]");
+    b = parse_json("VarDim, int32", "[9, 2]");
+    EXPECT_EQ(var_array_type_id, a.get_dtype().get_type_id());
+    EXPECT_EQ(var_array_type_id, b.get_dtype().get_type_id());
+    make_assignment_kernel(&k, 0, a.get_dtype(), a.get_ndo_meta(),
+                    b.get_dtype(), b.get_ndo_meta(), assign_error_default, &eval::default_eval_context);
+    EXPECT_THROW(k.get_function()(a.get_readwrite_originptr(),
+                        b.get_readonly_originptr(), k.get()),
+                    broadcast_error);
+    k.reset();
+
 }

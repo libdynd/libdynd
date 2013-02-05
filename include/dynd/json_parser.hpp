@@ -56,8 +56,16 @@ inline ndobject parse_json(const dtype& dt, const std::string& json) {
     return parse_json(dt, json.data(), json.data() + json.size());
 }
 
+inline void parse_json(ndobject& out, const std::string& json) {
+    parse_json(out, json.data(), json.data() + json.size());
+}
+
 inline ndobject parse_json(const dtype& dt, const char *json) {
     return parse_json(dt, json, json + strlen(json));
+}
+
+inline void parse_json(ndobject& out, const char *json) {
+    return parse_json(out, json, json + strlen(json));
 }
 
 /** Interface to the JSON parser for an input of two string literals */

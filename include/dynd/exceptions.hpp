@@ -43,6 +43,7 @@ public:
  */
 class broadcast_error : public dynd_exception {
 public:
+    broadcast_error(const std::string& m);
 
     /**
      * An exception for when 'src' doesn't broadcast to 'dst'
