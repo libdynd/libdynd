@@ -25,6 +25,7 @@ namespace gfunc {
 
 // Forward definition from dynd/dtype.hpp
 class dtype;
+class base_dtype;
 
 enum dtype_kind_t {
     bool_kind,
@@ -145,6 +146,10 @@ enum {
     /** A mask within which alll the built-in type ids are guaranteed to fit */
     builtin_type_id_mask = 0x1f
 };
+
+inline bool is_builtin_dtype(const base_dtype *dt) {
+    return (reinterpret_cast<uintptr_t>(dt)&(~static_cast<uintptr_t>(builtin_type_id_mask))) == 0;
+}
 
 enum dtype_memory_management_t {
     /** The dtype's memory is POD (plain old data) */

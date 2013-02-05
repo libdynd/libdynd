@@ -494,34 +494,10 @@ void ndobject::val_assign(const ndobject& rhs, assign_error_mode errmode,
         throw runtime_error("tried to read from a dynd array that is not readable");
     }
 
-    if (rhs.is_scalar()) {
-        kernel_instance<unary_operation_pair_t> assign;
-        const char *src_ptr = rhs.get_ndo()->m_data_pointer;
-
-        // TODO: Performance optimization
-        ndobject_iter<1, 0> iter(*this);
-        get_dtype_assignment_kernel(iter.get_uniform_dtype(), rhs.get_dtype(), errmode, ectx, assign);
-        assign.extra.dst_metadata = iter.metadata();
-        assign.extra.src_metadata = rhs.get_ndo_meta();
-        if (!iter.empty()) {
-            do {
-                assign.kernel.single(iter.data(), src_ptr, &assign.extra);
-            } while (iter.next());
-        }
-    } else {
-        kernel_instance<unary_operation_pair_t> assign;
-
-        // TODO: Performance optimization
-        ndobject_iter<1, 1> iter(*this, rhs);
-        get_dtype_assignment_kernel(iter.get_uniform_dtype<0>(), iter.get_uniform_dtype<1>(), errmode, ectx, assign);
-        assign.extra.dst_metadata = iter.metadata<0>();
-        assign.extra.src_metadata = iter.metadata<1>();
-        if (!iter.empty()) {
-            do {
-                assign.kernel.single(iter.data<0>(), iter.data<1>(), &assign.extra);
-            } while (iter.next());
-        }
-    }
+    hierarchical_kernel<unary_single_operation_t> k;
+    make_assignment_kernel(&k, 0, get_dtype(), get_ndo_meta(),
+                    rhs.get_dtype(), rhs.get_ndo_meta(), errmode, ectx);
+    k.get_function()(get_ndo()->m_data_pointer, rhs.get_readonly_originptr(), k.get());
 }
 
 void ndobject::val_assign(const dtype& rhs_dt, const char *rhs_metadata, const char *rhs_data,
@@ -532,18 +508,10 @@ void ndobject::val_assign(const dtype& rhs_dt, const char *rhs_metadata, const c
         throw runtime_error("tried to write to a dynd array that is not writeable");
     }
 
-    kernel_instance<unary_operation_pair_t> assign;
-
-    // TODO: Performance optimization
-    ndobject_iter<1, 0> iter(*this);
-    get_dtype_assignment_kernel(iter.get_uniform_dtype(), rhs_dt, errmode, ectx, assign);
-    assign.extra.dst_metadata = iter.metadata();
-    assign.extra.src_metadata = rhs_metadata;
-    if (!iter.empty()) {
-        do {
-            assign.kernel.single(iter.data(), rhs_data, &assign.extra);
-        } while (iter.next());
-    }
+    hierarchical_kernel<unary_single_operation_t> k;
+    make_assignment_kernel(&k, 0, get_dtype(), get_ndo_meta(),
+                    rhs_dt, rhs_metadata, errmode, ectx);
+    k.get_function()(get_ndo()->m_data_pointer, rhs_data, k.get());
 }
 
 void ndobject::flag_as_immutable()

@@ -216,9 +216,6 @@ class dtype {
 private:
     const base_dtype *m_extended;
 
-    inline static bool is_builtin(const base_dtype *ext) {
-        return (reinterpret_cast<uintptr_t>(ext)&(~builtin_type_id_mask)) == 0;
-    }
     /**
      * Validates that the given type ID is a proper ID and casts to
      * an base_dtype pointer if it is. Throws
@@ -248,7 +245,7 @@ public:
     inline explicit dtype(const base_dtype *extended, bool incref)
         : m_extended(extended)
     {
-        if (incref && !dtype::is_builtin(extended)) {
+        if (incref && !is_builtin_dtype(extended)) {
             base_dtype_incref(m_extended);
         }
     }
@@ -256,17 +253,17 @@ public:
     dtype(const dtype& rhs)
         : m_extended(rhs.m_extended)
     {
-        if (!dtype::is_builtin(m_extended)) {
+        if (!is_builtin_dtype(m_extended)) {
             base_dtype_incref(m_extended);
         }
     }
     /** Assignment operator (should be "= default" in C++11) */
     dtype& operator=(const dtype& rhs) {
-        if (!dtype::is_builtin(m_extended)) {
+        if (!is_builtin_dtype(m_extended)) {
             base_dtype_decref(m_extended);
         }
         m_extended = rhs.m_extended;
-        if (!dtype::is_builtin(m_extended)) {
+        if (!is_builtin_dtype(m_extended)) {
             base_dtype_incref(m_extended);
         }
         return *this;
@@ -280,7 +277,7 @@ public:
     }
     /** Move assignment operator */
     dtype& operator=(dtype&& rhs) {
-        if (!dtype::is_builtin(m_extended)) {
+        if (!is_builtin_dtype(m_extended)) {
             base_dtype_decref(m_extended);
         }
         m_extended = rhs.m_extended;
@@ -339,7 +336,7 @@ public:
      * pointer.
      */
     inline bool is_builtin() const {
-        return dtype::is_builtin(m_extended);
+        return is_builtin_dtype(m_extended);
     }
 
     /**
