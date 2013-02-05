@@ -11,7 +11,7 @@
 using namespace std;
 using namespace dynd;
 
-dynd::byteswap_dtype::byteswap_dtype(const dtype& value_dtype)
+byteswap_dtype::byteswap_dtype(const dtype& value_dtype)
     : base_expression_dtype(byteswap_type_id, expression_kind, value_dtype.get_data_size(),
                             value_dtype.get_alignment(), dtype_flag_scalar),
                     m_value_dtype(value_dtype),
@@ -28,7 +28,7 @@ dynd::byteswap_dtype::byteswap_dtype(const dtype& value_dtype)
     }
 }
 
-dynd::byteswap_dtype::byteswap_dtype(const dtype& value_dtype, const dtype& operand_dtype)
+byteswap_dtype::byteswap_dtype(const dtype& value_dtype, const dtype& operand_dtype)
     : base_expression_dtype(byteswap_type_id, expression_kind, operand_dtype.get_data_size(),
                     operand_dtype.get_alignment(), dtype_flag_scalar),
             m_value_dtype(value_dtype), m_operand_dtype(operand_dtype)
@@ -55,12 +55,12 @@ byteswap_dtype::~byteswap_dtype()
 {
 }
 
-void dynd::byteswap_dtype::print_data(std::ostream& DYND_UNUSED(o), const char *DYND_UNUSED(metadata), const char *DYND_UNUSED(data)) const
+void byteswap_dtype::print_data(std::ostream& DYND_UNUSED(o), const char *DYND_UNUSED(metadata), const char *DYND_UNUSED(data)) const
 {
     throw runtime_error("internal error: byteswap_dtype::print_data isn't supposed to be called");
 }
 
-void dynd::byteswap_dtype::print_dtype(std::ostream& o) const
+void byteswap_dtype::print_dtype(std::ostream& o) const
 {
     o << "byteswap<" << m_value_dtype;
     if (m_operand_dtype.get_type_id() != fixedbytes_type_id) {
@@ -69,14 +69,14 @@ void dynd::byteswap_dtype::print_dtype(std::ostream& o) const
     o << ">";
 }
 
-void dynd::byteswap_dtype::get_shape(size_t i, intptr_t *out_shape) const
+void byteswap_dtype::get_shape(size_t i, intptr_t *out_shape) const
 {
     if (!m_operand_dtype.is_builtin()) {
         m_operand_dtype.extended()->get_shape(i, out_shape);
     }
 }
 
-bool dynd::byteswap_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const
+bool byteswap_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const
 {
     // Treat this dtype as the value dtype for whether assignment is always lossless
     if (src_dt.extended() == this) {
@@ -86,7 +86,7 @@ bool dynd::byteswap_dtype::is_lossless_assignment(const dtype& dst_dt, const dty
     }
 }
 
-bool dynd::byteswap_dtype::operator==(const base_dtype& rhs) const
+bool byteswap_dtype::operator==(const base_dtype& rhs) const
 {
     if (this == &rhs) {
         return true;
@@ -98,19 +98,19 @@ bool dynd::byteswap_dtype::operator==(const base_dtype& rhs) const
     }
 }
 
-void dynd::byteswap_dtype::get_operand_to_value_kernel(const eval::eval_context *DYND_UNUSED(ectx),
+void byteswap_dtype::get_operand_to_value_kernel(const eval::eval_context *DYND_UNUSED(ectx),
                         kernel_instance<unary_operation_pair_t>& out_borrowed_kernel) const
 {
     out_borrowed_kernel.borrow_from(m_byteswap_kernel);
 }
 
-void dynd::byteswap_dtype::get_value_to_operand_kernel(const eval::eval_context *DYND_UNUSED(ectx),
+void byteswap_dtype::get_value_to_operand_kernel(const eval::eval_context *DYND_UNUSED(ectx),
                         kernel_instance<unary_operation_pair_t>& out_borrowed_kernel) const
 {
     out_borrowed_kernel.borrow_from(m_byteswap_kernel);
 }
 
-dtype dynd::byteswap_dtype::with_replaced_storage_dtype(const dtype& replacement_dtype) const
+dtype byteswap_dtype::with_replaced_storage_dtype(const dtype& replacement_dtype) const
 {
     if (m_operand_dtype.get_kind() != expression_kind) {
         // If there's no expression in the operand, just try substituting (the constructor will error-check)
@@ -119,5 +119,35 @@ dtype dynd::byteswap_dtype::with_replaced_storage_dtype(const dtype& replacement
         // With an expression operand, replace it farther down the chain
         return dtype(new byteswap_dtype(m_value_dtype,
                 reinterpret_cast<const base_expression_dtype *>(replacement_dtype.extended())->with_replaced_storage_dtype(replacement_dtype)), false);
+    }
+}
+
+size_t byteswap_dtype::make_operand_to_value_assignment_kernel(
+                hierarchical_kernel<unary_single_operation_t> *out,
+                size_t offset_out,
+                const char *DYND_UNUSED(dst_metadata), const char *DYND_UNUSED(src_metadata),
+                const eval::eval_context *DYND_UNUSED(ectx)) const
+{
+    if(m_value_dtype.get_kind() != complex_kind) {
+        return make_byteswap_assignment_function(out, offset_out,
+                        m_value_dtype.get_data_size(), m_value_dtype.get_alignment());
+    } else {
+        return make_pairwise_byteswap_assignment_function(out, offset_out,
+                        m_value_dtype.get_data_size(), m_value_dtype.get_alignment());
+    }
+}
+
+size_t byteswap_dtype::make_value_to_operand_assignment_kernel(
+                hierarchical_kernel<unary_single_operation_t> *out,
+                size_t offset_out,
+                const char *DYND_UNUSED(dst_metadata), const char *DYND_UNUSED(src_metadata),
+                const eval::eval_context *DYND_UNUSED(ectx)) const
+{
+    if(m_value_dtype.get_kind() != complex_kind) {
+        return make_byteswap_assignment_function(out, offset_out,
+                        m_value_dtype.get_data_size(), m_value_dtype.get_alignment());
+    } else {
+        return make_pairwise_byteswap_assignment_function(out, offset_out,
+                        m_value_dtype.get_data_size(), m_value_dtype.get_alignment());
     }
 }

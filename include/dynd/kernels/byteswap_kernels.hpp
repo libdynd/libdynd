@@ -7,6 +7,7 @@
 #define _DYND__BYTESWAP_KERNELS_HPP_
 
 #include <dynd/kernels/kernel_instance.hpp>
+#include <dynd/kernels/hierarchical_kernels.hpp>
 
 namespace dynd {
 
@@ -57,6 +58,24 @@ void get_byteswap_kernel(intptr_t element_size, intptr_t alignment,
  */
 void get_pairwise_byteswap_kernel(intptr_t element_size, intptr_t alignment,
                 kernel_instance<unary_operation_pair_t>& out_kernel);
+
+/**
+ * Creates an assignment kernel which does a byteswap
+ * of the specified data size.
+ */
+size_t make_byteswap_assignment_function(
+                hierarchical_kernel<unary_single_operation_t> *out,
+                size_t offset_out,
+                intptr_t data_size, intptr_t data_alignment);
+
+/**
+ * Creates an assignment kernel which does a byteswap
+ * of the specified data size.
+ */
+size_t make_pairwise_byteswap_assignment_function(
+                hierarchical_kernel<unary_single_operation_t> *out,
+                size_t offset_out,
+                intptr_t data_size, intptr_t data_alignment);
 
 } // namespace dynd
 
