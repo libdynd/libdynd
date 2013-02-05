@@ -114,6 +114,19 @@ void make_builtin_dtype_assignment_function(
                 type_id_t dst_type_id, type_id_t src_type_id,
                 assign_error_mode errmode);
 
+/**
+ * Generic assignment kernel + destructor for a strided dimension.
+ */
+struct strided_assign_kernel_extra {
+    hierarchical_kernel_common_base base;
+    intptr_t size;
+    intptr_t dst_stride, src_stride;
+
+    static void single(char *dst, const char *src,
+                        hierarchical_kernel_common_base *extra);
+    static void destruct(hierarchical_kernel_common_base *extra);
+};
+
 } // namespace dynd
 
 #endif // _DYND__ASSIGNMENT_KERNELS_HPP_

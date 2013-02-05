@@ -518,3 +518,24 @@ void dynd::make_builtin_dtype_assignment_function(
         throw runtime_error(ss.str());
     }
 }
+
+void dynd::strided_assign_kernel_extra::single(char *dst, const char *src,
+                    hierarchical_kernel_common_base *extra)
+{
+    strided_assign_kernel_extra *e = reinterpret_cast<strided_assign_kernel_extra *>(extra);
+    hierarchical_kernel_common_base *echild = &(e + 1)->base;
+    unary_single_operation_t opchild = (e + 1)->base.get_function<unary_single_operation_t>();
+    intptr_t size = e->size, dst_stride = e->dst_stride, src_stride = e->src_stride;
+    for (intptr_t i = 0; i < size; ++i, dst += dst_stride, src += src_stride) {
+        opchild(dst, src, echild);
+    }
+}
+void dynd::strided_assign_kernel_extra::destruct(
+                hierarchical_kernel_common_base *extra)
+{
+    strided_assign_kernel_extra *e = reinterpret_cast<strided_assign_kernel_extra *>(extra);
+    hierarchical_kernel_common_base *echild = &(e + 1)->base;
+    if (echild->destructor) {
+        echild->destructor(echild);
+    }
+}

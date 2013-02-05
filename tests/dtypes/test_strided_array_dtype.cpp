@@ -88,6 +88,7 @@ TEST(StridedArrayDType, AssignKernel) {
     // Assignment scalar -> strided array
     a = vals_int;
     b = 9.0;
+    EXPECT_EQ(strided_array_type_id, a.get_dtype().get_type_id());
     make_assignment_kernel(&k, 0, a.get_dtype(), a.get_ndo_meta(),
                     b.get_dtype(), b.get_ndo_meta(), assign_error_default, &eval::default_eval_context);
     k.get_function()(a.get_readwrite_originptr(), b.get_readonly_originptr(), k.get());
@@ -100,6 +101,8 @@ TEST(StridedArrayDType, AssignKernel) {
     a = make_strided_ndobject(3, make_dtype<float>());
     a.vals() = 0;
     b = vals_int;
+    EXPECT_EQ(strided_array_type_id, a.get_dtype().get_type_id());
+    EXPECT_EQ(strided_array_type_id, b.get_dtype().get_type_id());
     make_assignment_kernel(&k, 0, a.get_dtype(), a.get_ndo_meta(),
                     b.get_dtype(), b.get_ndo_meta(), assign_error_default, &eval::default_eval_context);
     k.get_function()(a.get_readwrite_originptr(), b.get_readonly_originptr(), k.get());
@@ -111,6 +114,7 @@ TEST(StridedArrayDType, AssignKernel) {
     // Assignment strided array -> scalar
     a = 9.0;
     b = vals_int;
+    EXPECT_EQ(strided_array_type_id, b.get_dtype().get_type_id());
     EXPECT_THROW(make_assignment_kernel(&k, 0, a.get_dtype(), a.get_ndo_meta(),
                     b.get_dtype(), b.get_ndo_meta(), assign_error_default, &eval::default_eval_context),
                 broadcast_error);

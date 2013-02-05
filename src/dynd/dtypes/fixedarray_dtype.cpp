@@ -9,6 +9,7 @@
 #include <dynd/shape_tools.hpp>
 #include <dynd/shortvector.hpp>
 #include <dynd/exceptions.hpp>
+#include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/gfunc/callable.hpp>
 #include <dynd/gfunc/make_callable.hpp>
 
@@ -478,6 +479,85 @@ size_t fixedarray_dtype::iterdata_destruct(iterdata_common *iterdata, int ndim) 
     }
     // No dynamic data to free
     return inner_size + sizeof(fixedarray_dtype_iterdata);
+}
+
+void fixedarray_dtype::make_assignment_kernel(
+                hierarchical_kernel<unary_single_operation_t> *out,
+                size_t out_offset,
+                const dtype& dst_dt, const char *dst_metadata,
+                const dtype& src_dt, const char *src_metadata,
+                assign_error_mode errmode,
+                const eval::eval_context *ectx) const
+{
+    if (this == dst_dt.extended()) {
+        out->ensure_capacity(out_offset + sizeof(strided_assign_kernel_extra));
+        strided_assign_kernel_extra *e = out->get_at<strided_assign_kernel_extra>(out_offset);
+        e->base.function = &strided_assign_kernel_extra::single;
+        e->base.destructor = strided_assign_kernel_extra::destruct;
+        if (src_dt.get_undim() < dst_dt.get_undim()) {
+            // If the src has fewer dimensions, broadcast it across this one
+            e->size = get_fixed_dim_size();
+            e->dst_stride = get_fixed_stride();
+            e->src_stride = 0;
+            ::make_assignment_kernel(out, out_offset + sizeof(strided_assign_kernel_extra),
+                            m_element_dtype, dst_metadata + sizeof(strided_array_dtype_metadata),
+                            src_dt, src_metadata,
+                            errmode, ectx);
+        } else if (src_dt.get_type_id() == fixedarray_type_id) {
+            // fixed_array -> strided_array
+            const fixedarray_dtype *src_fad = static_cast<const fixedarray_dtype *>(src_dt.extended());
+            intptr_t src_size = src_fad->get_fixed_dim_size();
+            intptr_t dst_size = get_fixed_dim_size();
+            // Check for a broadcasting error
+            if (src_size != 1 && dst_size != src_size) {
+                throw broadcast_error(dst_dt, dst_metadata, src_dt, src_metadata);
+            }
+            e->size = dst_size;
+            e->dst_stride = get_fixed_stride();
+            // In DyND, the src stride is required to be zero for size-one dimensions,
+            // so we don't have to check the size here.
+            e->src_stride = src_fad->get_fixed_stride();
+            ::make_assignment_kernel(out, out_offset + sizeof(strided_assign_kernel_extra),
+                            m_element_dtype, dst_metadata,
+                            src_fad->get_element_dtype(), src_metadata,
+                            errmode, ectx);
+        } else if (src_dt.get_type_id() == strided_array_type_id) {
+            // strided_array -> strided_array
+            const strided_array_dtype *src_sad = static_cast<const strided_array_dtype *>(src_dt.extended());
+            const strided_array_dtype_metadata *src_md =
+                        reinterpret_cast<const strided_array_dtype_metadata *>(src_metadata);
+            intptr_t dst_size = get_fixed_dim_size();
+            // Check for a broadcasting error
+            if (src_md->size != 1 && dst_size != src_md->size) {
+                throw broadcast_error(dst_dt, dst_metadata, src_dt, src_metadata);
+            }
+            e->size = dst_size;
+            e->dst_stride = get_fixed_stride();
+            // In DyND, the src stride is required to be zero for size-one dimensions,
+            // so we don't have to check the size here.
+            e->src_stride = src_md->stride;
+            ::make_assignment_kernel(out, out_offset + sizeof(strided_assign_kernel_extra),
+                            m_element_dtype, dst_metadata,
+                            src_sad->get_element_dtype(), src_metadata + sizeof(strided_array_dtype_metadata),
+                            errmode, ectx);
+        } else if (!src_dt.is_builtin()) {
+            // Give the src dtype a chance to make a kernel
+            src_dt.extended()->make_assignment_kernel(out, out_offset,
+                            dst_dt, dst_metadata,
+                            src_dt, src_metadata,
+                            errmode, ectx);
+        } else {
+            stringstream ss;
+            ss << "Cannot assign from " << src_dt << " to " << dst_dt;
+            throw runtime_error(ss.str());
+        }
+    } else if (dst_dt.get_undim() < src_dt.get_undim()) {
+        throw broadcast_error(dst_dt, dst_metadata, src_dt, src_metadata);
+    } else {
+        stringstream ss;
+        ss << "Cannot assign from " << src_dt << " to " << dst_dt;
+        throw runtime_error(ss.str());
+    }
 }
 
 void fixedarray_dtype::foreach_leading(char *data, const char *metadata, foreach_fn_t callback, void *callback_data) const
