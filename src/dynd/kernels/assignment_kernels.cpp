@@ -522,7 +522,7 @@ void dynd::make_builtin_dtype_assignment_function(
 void dynd::strided_assign_kernel_extra::single(char *dst, const char *src,
                     hierarchical_kernel_common_base *extra)
 {
-    strided_assign_kernel_extra *e = reinterpret_cast<strided_assign_kernel_extra *>(extra);
+    extra_type *e = reinterpret_cast<extra_type *>(extra);
     hierarchical_kernel_common_base *echild = &(e + 1)->base;
     unary_single_operation_t opchild = (e + 1)->base.get_function<unary_single_operation_t>();
     intptr_t size = e->size, dst_stride = e->dst_stride, src_stride = e->src_stride;
@@ -533,7 +533,7 @@ void dynd::strided_assign_kernel_extra::single(char *dst, const char *src,
 void dynd::strided_assign_kernel_extra::destruct(
                 hierarchical_kernel_common_base *extra)
 {
-    strided_assign_kernel_extra *e = reinterpret_cast<strided_assign_kernel_extra *>(extra);
+    extra_type *e = reinterpret_cast<extra_type *>(extra);
     hierarchical_kernel_common_base *echild = &(e + 1)->base;
     if (echild->destructor) {
         echild->destructor(echild);

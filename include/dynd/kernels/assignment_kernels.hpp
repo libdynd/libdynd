@@ -118,6 +118,8 @@ void make_builtin_dtype_assignment_function(
  * Generic assignment kernel + destructor for a strided dimension.
  */
 struct strided_assign_kernel_extra {
+    typedef strided_assign_kernel_extra extra_type;
+
     hierarchical_kernel_common_base base;
     intptr_t size;
     intptr_t dst_stride, src_stride;

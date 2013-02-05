@@ -542,6 +542,8 @@ size_t var_array_dtype::iterdata_destruct(iterdata_common *DYND_UNUSED(iterdata)
 
 namespace {
     struct broadcast_to_var_assign_kernel_extra {
+        typedef broadcast_to_var_assign_kernel_extra extra_type;
+
         hierarchical_kernel_common_base base;
         intptr_t dst_target_alignment;
         const var_array_dtype_metadata *dst_md;
@@ -550,7 +552,7 @@ namespace {
                             hierarchical_kernel_common_base *extra)
         {
             var_array_dtype_data *dst_d = reinterpret_cast<var_array_dtype_data *>(dst);
-            broadcast_to_var_assign_kernel_extra *e = reinterpret_cast<broadcast_to_var_assign_kernel_extra *>(extra);
+            extra_type *e = reinterpret_cast<extra_type *>(extra);
             hierarchical_kernel_common_base *echild = &(e + 1)->base;
             unary_single_operation_t opchild = (e + 1)->base.get_function<unary_single_operation_t>();
             if (dst_d->begin == NULL) {
@@ -579,7 +581,7 @@ namespace {
 
         static void destruct(hierarchical_kernel_common_base *extra)
         {
-            broadcast_to_var_assign_kernel_extra *e = reinterpret_cast<broadcast_to_var_assign_kernel_extra *>(extra);
+            extra_type *e = reinterpret_cast<extra_type *>(extra);
             hierarchical_kernel_common_base *echild = &(e + 1)->base;
             if (echild->destructor) {
                 echild->destructor(echild);
@@ -588,6 +590,8 @@ namespace {
     };
 
     struct var_assign_kernel_extra {
+        typedef var_assign_kernel_extra extra_type;
+
         hierarchical_kernel_common_base base;
         intptr_t dst_target_alignment;
         const var_array_dtype_metadata *dst_md, *src_md;
@@ -597,7 +601,7 @@ namespace {
         {
             var_array_dtype_data *dst_d = reinterpret_cast<var_array_dtype_data *>(dst);
             const var_array_dtype_data *src_d = reinterpret_cast<const var_array_dtype_data *>(src);
-            var_assign_kernel_extra *e = reinterpret_cast<var_assign_kernel_extra *>(extra);
+            extra_type *e = reinterpret_cast<extra_type *>(extra);
             hierarchical_kernel_common_base *echild = &(e + 1)->base;
             unary_single_operation_t opchild = (e + 1)->base.get_function<unary_single_operation_t>();
             if (dst_d->begin == NULL) {
@@ -646,7 +650,7 @@ namespace {
 
         static void destruct(hierarchical_kernel_common_base *extra)
         {
-            var_assign_kernel_extra *e = reinterpret_cast<var_assign_kernel_extra *>(extra);
+            extra_type *e = reinterpret_cast<extra_type *>(extra);
             hierarchical_kernel_common_base *echild = &(e + 1)->base;
             if (echild->destructor) {
                 echild->destructor(echild);
@@ -655,6 +659,8 @@ namespace {
     };
 
     struct strided_to_var_assign_kernel_extra {
+        typedef strided_to_var_assign_kernel_extra extra_type;
+
         hierarchical_kernel_common_base base;
         intptr_t dst_target_alignment;
         const var_array_dtype_metadata *dst_md;
@@ -664,7 +670,7 @@ namespace {
                             hierarchical_kernel_common_base *extra)
         {
             var_array_dtype_data *dst_d = reinterpret_cast<var_array_dtype_data *>(dst);
-            strided_to_var_assign_kernel_extra *e = reinterpret_cast<strided_to_var_assign_kernel_extra *>(extra);
+            extra_type *e = reinterpret_cast<extra_type *>(extra);
             hierarchical_kernel_common_base *echild = &(e + 1)->base;
             unary_single_operation_t opchild = (e + 1)->base.get_function<unary_single_operation_t>();
             if (dst_d->begin == NULL) {
@@ -705,7 +711,7 @@ namespace {
 
         static void destruct(hierarchical_kernel_common_base *extra)
         {
-            var_assign_kernel_extra *e = reinterpret_cast<var_assign_kernel_extra *>(extra);
+            extra_type *e = reinterpret_cast<extra_type *>(extra);
             hierarchical_kernel_common_base *echild = &(e + 1)->base;
             if (echild->destructor) {
                 echild->destructor(echild);
@@ -799,9 +805,12 @@ void var_array_dtype::make_assignment_kernel(
     } else if (dst_dt.get_undim() < src_dt.get_undim()) {
         throw broadcast_error(dst_dt, dst_metadata, src_dt, src_metadata);
     } else {
-        stringstream ss;
-        ss << "Cannot assign from " << src_dt << " to " << dst_dt;
-        throw runtime_error(ss.str());
+        if (dst_dt.get_type_id() == strided_array_type_id) {
+        } else {
+            stringstream ss;
+            ss << "Cannot assign from " << src_dt << " to " << dst_dt;
+            throw runtime_error(ss.str());
+        }
     }
 }
 
