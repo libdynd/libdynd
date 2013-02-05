@@ -718,6 +718,49 @@ namespace {
             }
         }
     };
+
+    struct var_to_strided_assign_kernel_extra {
+        typedef var_to_strided_assign_kernel_extra extra_type;
+
+        hierarchical_kernel_common_base base;
+        intptr_t dst_stride, dst_dim_size;
+        const var_array_dtype_metadata *src_md;
+
+        static void single(char *dst, const char *src,
+                            hierarchical_kernel_common_base *extra)
+        {
+            const var_array_dtype_data *src_d = reinterpret_cast<const var_array_dtype_data *>(src);
+            extra_type *e = reinterpret_cast<extra_type *>(extra);
+            hierarchical_kernel_common_base *echild = &(e + 1)->base;
+            unary_single_operation_t opchild = (e + 1)->base.get_function<unary_single_operation_t>();
+            if (src_d->begin == NULL) {
+                throw runtime_error("Cannot assign an uninitialized dynd var array to a strided one");
+            }
+
+            intptr_t dst_dim_size = e->dst_dim_size, src_dim_size = src_d->size;
+            intptr_t dst_stride = e->dst_stride, src_stride = src_dim_size != 1 ? e->src_md->stride : 0;
+            // Check for a broadcasting error
+            if (src_dim_size != 1 && dst_dim_size != src_dim_size) {
+                stringstream ss;
+                ss << "error broadcasting input var array sized " << src_dim_size << " to output strided array sized " << dst_dim_size;
+                throw broadcast_error(ss.str());
+            }
+            // Copying/broadcasting elements
+            src = src_d->begin + e->src_md->offset;
+            for (intptr_t i = 0; i < dst_dim_size; ++i, dst += dst_stride, src += src_stride) {
+                opchild(dst, src, echild);
+            }
+        }
+
+        static void destruct(hierarchical_kernel_common_base *extra)
+        {
+            extra_type *e = reinterpret_cast<extra_type *>(extra);
+            hierarchical_kernel_common_base *echild = &(e + 1)->base;
+            if (echild->destructor) {
+                echild->destructor(echild);
+            }
+        }
+    };
 } // anonymous namespace
 
 void var_array_dtype::make_assignment_kernel(
@@ -806,6 +849,23 @@ void var_array_dtype::make_assignment_kernel(
         throw broadcast_error(dst_dt, dst_metadata, src_dt, src_metadata);
     } else {
         if (dst_dt.get_type_id() == strided_array_type_id) {
+            // var_array to strided_array
+            const strided_array_dtype *dst_sad = static_cast<const strided_array_dtype *>(dst_dt.extended());
+            out->ensure_capacity(out_offset + sizeof(var_to_strided_assign_kernel_extra));
+            const strided_array_dtype_metadata *dst_md =
+                            reinterpret_cast<const strided_array_dtype_metadata *>(dst_metadata);
+            const var_array_dtype_metadata *src_md =
+                            reinterpret_cast<const var_array_dtype_metadata *>(src_metadata);
+            var_to_strided_assign_kernel_extra *e = out->get_at<var_to_strided_assign_kernel_extra>(out_offset);
+            e->base.function = &var_to_strided_assign_kernel_extra::single;
+            e->base.destructor = &var_to_strided_assign_kernel_extra::destruct;
+            e->dst_stride = dst_md->stride;
+            e->dst_dim_size = dst_md->size;
+            e->src_md = src_md;
+            ::make_assignment_kernel(out, out_offset + sizeof(var_to_strided_assign_kernel_extra),
+                            dst_sad->get_element_dtype(), dst_metadata + sizeof(strided_array_dtype_metadata),
+                            m_element_dtype, src_metadata + sizeof(var_array_dtype_metadata),
+                            errmode, ectx);
         } else {
             stringstream ss;
             ss << "Cannot assign from " << src_dt << " to " << dst_dt;

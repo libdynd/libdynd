@@ -366,6 +366,46 @@ TEST(VarArrayDType, AssignVarStridedKernel) {
                     broadcast_error);
     k.reset();
 
+    // Assignment initialized var array -> strided array
+    a = make_strided_ndobject(3, make_dtype<int>());
+    a.vals() = 0;
+    b = parse_json("VarDim, int32", "[3, 5, 7]");
+    EXPECT_EQ(strided_array_type_id, a.get_dtype().get_type_id());
+    EXPECT_EQ(var_array_type_id, b.get_dtype().get_type_id());
+    make_assignment_kernel(&k, 0, a.get_dtype(), a.get_ndo_meta(),
+                    b.get_dtype(), b.get_ndo_meta(), assign_error_default, &eval::default_eval_context);
+    k.get_function()(a.get_readwrite_originptr(), b.get_readonly_originptr(), k.get());
+    EXPECT_EQ(3, a.at(0).as<int>());
+    EXPECT_EQ(5, a.at(1).as<int>());
+    EXPECT_EQ(7, a.at(2).as<int>());
+    k.reset();
+
+    // Error assignment initialized var array -> strided array
+    a = make_strided_ndobject(3, make_dtype<int>());
+    a.vals() = 0;
+    b = parse_json("VarDim, int32", "[3, 5, 7, 9]");
+    EXPECT_EQ(strided_array_type_id, a.get_dtype().get_type_id());
+    EXPECT_EQ(var_array_type_id, b.get_dtype().get_type_id());
+    make_assignment_kernel(&k, 0, a.get_dtype(), a.get_ndo_meta(),
+                    b.get_dtype(), b.get_ndo_meta(), assign_error_default, &eval::default_eval_context);
+    EXPECT_THROW(k.get_function()(a.get_readwrite_originptr(),
+                        b.get_readonly_originptr(), k.get()),
+                    broadcast_error);
+    k.reset();
+
+    // Error assignment uninitialized var array -> strided array
+    a = make_strided_ndobject(3, make_dtype<int>());
+    a.vals() = 0;
+    b = ndobject(make_var_array_dtype(make_dtype<int>()));
+    EXPECT_EQ(strided_array_type_id, a.get_dtype().get_type_id());
+    EXPECT_EQ(var_array_type_id, b.get_dtype().get_type_id());
+    make_assignment_kernel(&k, 0, a.get_dtype(), a.get_ndo_meta(),
+                    b.get_dtype(), b.get_ndo_meta(), assign_error_default, &eval::default_eval_context);
+    EXPECT_THROW(k.get_function()(a.get_readwrite_originptr(),
+                        b.get_readonly_originptr(), k.get()),
+                    runtime_error);
+    k.reset();
+
 }
 
 TEST(VarArrayDType, AssignVarFixedKernel) {
