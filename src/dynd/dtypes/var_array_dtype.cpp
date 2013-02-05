@@ -866,6 +866,22 @@ void var_array_dtype::make_assignment_kernel(
                             dst_sad->get_element_dtype(), dst_metadata + sizeof(strided_array_dtype_metadata),
                             m_element_dtype, src_metadata + sizeof(var_array_dtype_metadata),
                             errmode, ectx);
+        } else if (dst_dt.get_type_id() == fixedarray_type_id) {
+            // var_array to fixedarray
+            const fixedarray_dtype *dst_fad = static_cast<const fixedarray_dtype *>(dst_dt.extended());
+            out->ensure_capacity(out_offset + sizeof(var_to_strided_assign_kernel_extra));
+            const var_array_dtype_metadata *src_md =
+                            reinterpret_cast<const var_array_dtype_metadata *>(src_metadata);
+            var_to_strided_assign_kernel_extra *e = out->get_at<var_to_strided_assign_kernel_extra>(out_offset);
+            e->base.function = &var_to_strided_assign_kernel_extra::single;
+            e->base.destructor = &var_to_strided_assign_kernel_extra::destruct;
+            e->dst_stride = dst_fad->get_fixed_stride();
+            e->dst_dim_size = dst_fad->get_fixed_dim_size();
+            e->src_md = src_md;
+            ::make_assignment_kernel(out, out_offset + sizeof(var_to_strided_assign_kernel_extra),
+                            dst_fad->get_element_dtype(), dst_metadata,
+                            m_element_dtype, src_metadata + sizeof(var_array_dtype_metadata),
+                            errmode, ectx);
         } else {
             stringstream ss;
             ss << "Cannot assign from " << src_dt << " to " << dst_dt;
