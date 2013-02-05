@@ -61,6 +61,9 @@ public:
      */
     broadcast_error(size_t ninputs, const ndobject *inputs);
 
+    broadcast_error(const dtype& dst_dt, const char *dst_metadata,
+                    const dtype& src_dt, const char *src_metadata);
+
     virtual ~broadcast_error() throw() {
     }
 };

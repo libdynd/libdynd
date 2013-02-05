@@ -9,6 +9,7 @@
 #include <dynd/exceptions.hpp>
 #include <dynd/ndobject.hpp>
 #include <dynd/shape_tools.hpp>
+#include <dynd/dtypes/datashape_formatter.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -71,6 +72,25 @@ inline string broadcast_error_message(size_t ninputs, const ndobject* inputs)
 
 broadcast_error::broadcast_error(size_t ninputs, const ndobject *inputs)
     : dynd_exception("broadcast error", broadcast_error_message(ninputs, inputs))
+{
+}
+
+inline string broadcast_error_message(const dtype& dst_dt, const char *dst_metadata,
+                const dtype& src_dt, const char *src_metadata)
+{
+    stringstream ss;
+    ss << "cannot broadcast input datashape '";
+    format_datashape(ss, src_dt, src_metadata);
+    ss << "' into datashape '";
+    format_datashape(ss, dst_dt, dst_metadata);
+    ss << "'";
+    return ss.str();
+}
+
+broadcast_error::broadcast_error(const dtype& dst_dt, const char *dst_metadata,
+                const dtype& src_dt, const char *src_metadata)
+    : dynd_exception("broadcast error", broadcast_error_message(
+                    dst_dt, dst_metadata, src_dt, src_metadata))
 {
 }
 

@@ -77,6 +77,11 @@ static void format_datashape(std::ostream& o, const dtype& dt, const char *metad
     }
 }
 
+void dynd::format_datashape(std::ostream& o, const dtype& dt, const char *metadata)
+{
+    ::format_datashape(o, dt, metadata, "");
+}
+
 string dynd::format_datashape(const ndobject& n)
 {
     stringstream ss;

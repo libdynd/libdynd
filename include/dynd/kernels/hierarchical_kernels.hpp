@@ -50,14 +50,8 @@ class hierarchical_kernel {
     inline bool using_static_data() const {
         return m_data == reinterpret_cast<const hierarchical_kernel_common_base *>(&m_static_data[0]);
     }
-public:
-    hierarchical_kernel() {
-        m_data = reinterpret_cast<hierarchical_kernel_common_base *>(&m_static_data[0]);
-        m_capacity = sizeof(m_static_data);
-        memset(m_static_data, 0, sizeof(m_static_data));
-    }
 
-    ~hierarchical_kernel() {
+    inline void destroy() {
         if (m_data != NULL) {
             // Destroy whatever was created
             if (m_data->destructor != NULL) {
@@ -69,14 +63,38 @@ public:
              }
         }
     }
+public:
+    hierarchical_kernel() {
+        m_data = reinterpret_cast<hierarchical_kernel_common_base *>(&m_static_data[0]);
+        m_capacity = sizeof(m_static_data);
+        memset(m_static_data, 0, sizeof(m_static_data));
+    }
+
+    ~hierarchical_kernel() {
+        destroy();
+    }
+
+    void reset() {
+        destroy();
+        m_data = reinterpret_cast<hierarchical_kernel_common_base *>(&m_static_data[0]);
+        m_capacity = sizeof(m_static_data);
+        memset(m_static_data, 0, sizeof(m_static_data));
+    }
 
     /**
      * This function ensures that the kernel's data
      * is at least the required number of bytes. It
      * should only be called during the construction phase
      * of the kernel.
+     *
+     * NOTE: This function ensures that there is room for
+     *       another base at the end, so that calling the
+     *       destructor doesn't access uninitialized memory
+     *       at the end. When creating a leaf kernel,
+     *       you can use this to avoid over-allocating.
      */
     void ensure_capacity(size_t size) {
+        size += sizeof(hierarchical_kernel_common_base);
         if (m_capacity < size) {
             // At least double the capacity
             if (size < 2 * m_capacity) {
@@ -115,16 +133,17 @@ public:
      * For use during construction, get's the kernel component
      * at the requested offset.
      */
-    hierarchical_kernel_common_base *get_at(size_t offset) {
-        return reinterpret_cast<hierarchical_kernel_common_base *>(
+    template<class T>
+    T *get_at(size_t offset) {
+        return reinterpret_cast<T *>(
                         reinterpret_cast<char *>(m_data) + offset);
     }
 
-    const hierarchical_kernel_common_base *get() const {
+    hierarchical_kernel_common_base *get() const {
         return m_data;
     }
 
-    const FT& get_function() const {
+    FT get_function() const {
         return m_data->get_function<FT>();
     }
 };

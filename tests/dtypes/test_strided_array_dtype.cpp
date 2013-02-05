@@ -1,4 +1,4 @@
-//
+
 // Copyright (C) 2011-13, DyND Developers
 // BSD 2-Clause License, see LICENSE.txt
 //
@@ -13,6 +13,8 @@
 #include <dynd/dtypes/strided_array_dtype.hpp>
 #include <dynd/dtypes/convert_dtype.hpp>
 #include <dynd/exceptions.hpp>
+#include <dynd/ndobject.hpp>
+#include <dynd/kernels/assignment_kernels.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -76,4 +78,40 @@ TEST(StridedArrayDType, IsExpression) {
 
     EXPECT_TRUE(darr1.is_expression());
     EXPECT_TRUE(darr2.is_expression());
+}
+
+TEST(StridedArrayDType, AssignKernel) {
+    ndobject a, b;
+    hierarchical_kernel<unary_single_operation_t> k;
+    int vals_int[] = {3,5,7};
+
+    // Assignment scalar -> strided array
+    a = vals_int;
+    b = 9.0;
+    make_assignment_kernel(&k, 0, a.get_dtype(), a.get_ndo_meta(),
+                    b.get_dtype(), b.get_ndo_meta(), assign_error_default, &eval::default_eval_context);
+    k.get_function()(a.get_readwrite_originptr(), b.get_readonly_originptr(), k.get());
+    EXPECT_EQ(9, a.at(0).as<int>());
+    EXPECT_EQ(9, a.at(1).as<int>());
+    EXPECT_EQ(9, a.at(2).as<int>());
+    k.reset();
+
+    // Assignment strided array -> strided array
+    a = make_strided_ndobject(3, make_dtype<float>());
+    a.vals() = 0;
+    b = vals_int;
+    make_assignment_kernel(&k, 0, a.get_dtype(), a.get_ndo_meta(),
+                    b.get_dtype(), b.get_ndo_meta(), assign_error_default, &eval::default_eval_context);
+    k.get_function()(a.get_readwrite_originptr(), b.get_readonly_originptr(), k.get());
+    EXPECT_EQ(3, a.at(0).as<int>());
+    EXPECT_EQ(5, a.at(1).as<int>());
+    EXPECT_EQ(7, a.at(2).as<int>());
+    k.reset();
+
+    // Assignment strided array -> scalar
+    a = 9.0;
+    b = vals_int;
+    EXPECT_THROW(make_assignment_kernel(&k, 0, a.get_dtype(), a.get_ndo_meta(),
+                    b.get_dtype(), b.get_ndo_meta(), assign_error_default, &eval::default_eval_context),
+                broadcast_error);
 }
