@@ -574,10 +574,13 @@ public:
      * This function should always be called with this == dst_dt first,
      * and dtypes which don't support the particular assignment should
      * then call the corresponding function with this == src_dt.
+     *
+     * \returns  The offset at the end of 'out' after adding this
+     *           kernel.
      */
-    virtual void make_assignment_kernel(
+    virtual size_t make_assignment_kernel(
                     hierarchical_kernel<unary_single_operation_t> *out,
-                    size_t out_offset,
+                    size_t offset_out,
                     const dtype& dst_dt, const char *dst_metadata,
                     const dtype& src_dt, const char *src_metadata,
                     assign_error_mode errmode,

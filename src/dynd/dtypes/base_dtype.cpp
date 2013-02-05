@@ -332,13 +332,13 @@ size_t base_dtype::iterdata_destruct(iterdata_common *DYND_UNUSED(iterdata), int
     throw std::runtime_error(ss.str());
 }
 
-void base_dtype::make_assignment_kernel(
-                hierarchical_kernel<unary_single_operation_t> *out,
-                size_t out_offset,
-                const dtype& dst_dt, const char *dst_metadata,
-                const dtype& src_dt, const char *src_metadata,
-                assign_error_mode errmode,
-                const eval::eval_context *ectx) const
+size_t base_dtype::make_assignment_kernel(
+                hierarchical_kernel<unary_single_operation_t> *DYND_UNUSED(out),
+                size_t DYND_UNUSED(offset_out),
+                const dtype& dst_dt, const char *DYND_UNUSED(dst_metadata),
+                const dtype& src_dt, const char *DYND_UNUSED(src_metadata),
+                assign_error_mode DYND_UNUSED(errmode),
+                const eval::eval_context *DYND_UNUSED(ectx)) const
 {
     stringstream ss;
     ss << "make_assignment_kernel has not been implemented for ";

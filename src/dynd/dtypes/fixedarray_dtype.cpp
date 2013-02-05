@@ -480,17 +480,17 @@ size_t fixedarray_dtype::iterdata_destruct(iterdata_common *iterdata, int ndim) 
     return inner_size + sizeof(fixedarray_dtype_iterdata);
 }
 
-void fixedarray_dtype::make_assignment_kernel(
+size_t fixedarray_dtype::make_assignment_kernel(
                 hierarchical_kernel<unary_single_operation_t> *out,
-                size_t out_offset,
+                size_t offset_out,
                 const dtype& dst_dt, const char *dst_metadata,
                 const dtype& src_dt, const char *src_metadata,
                 assign_error_mode errmode,
                 const eval::eval_context *ectx) const
 {
     if (this == dst_dt.extended()) {
-        out->ensure_capacity(out_offset + sizeof(strided_assign_kernel_extra));
-        strided_assign_kernel_extra *e = out->get_at<strided_assign_kernel_extra>(out_offset);
+        out->ensure_capacity(offset_out + sizeof(strided_assign_kernel_extra));
+        strided_assign_kernel_extra *e = out->get_at<strided_assign_kernel_extra>(offset_out);
         e->base.function = &strided_assign_kernel_extra::single;
         e->base.destructor = strided_assign_kernel_extra::destruct;
         if (src_dt.get_undim() < dst_dt.get_undim()) {
@@ -498,7 +498,7 @@ void fixedarray_dtype::make_assignment_kernel(
             e->size = get_fixed_dim_size();
             e->dst_stride = get_fixed_stride();
             e->src_stride = 0;
-            ::make_assignment_kernel(out, out_offset + sizeof(strided_assign_kernel_extra),
+            return ::make_assignment_kernel(out, offset_out + sizeof(strided_assign_kernel_extra),
                             m_element_dtype, dst_metadata + sizeof(strided_array_dtype_metadata),
                             src_dt, src_metadata,
                             errmode, ectx);
@@ -516,7 +516,7 @@ void fixedarray_dtype::make_assignment_kernel(
             // In DyND, the src stride is required to be zero for size-one dimensions,
             // so we don't have to check the size here.
             e->src_stride = src_fad->get_fixed_stride();
-            ::make_assignment_kernel(out, out_offset + sizeof(strided_assign_kernel_extra),
+            return ::make_assignment_kernel(out, offset_out + sizeof(strided_assign_kernel_extra),
                             m_element_dtype, dst_metadata,
                             src_fad->get_element_dtype(), src_metadata,
                             errmode, ectx);
@@ -535,13 +535,13 @@ void fixedarray_dtype::make_assignment_kernel(
             // In DyND, the src stride is required to be zero for size-one dimensions,
             // so we don't have to check the size here.
             e->src_stride = src_md->stride;
-            ::make_assignment_kernel(out, out_offset + sizeof(strided_assign_kernel_extra),
+            return ::make_assignment_kernel(out, offset_out + sizeof(strided_assign_kernel_extra),
                             m_element_dtype, dst_metadata,
                             src_sad->get_element_dtype(), src_metadata + sizeof(strided_array_dtype_metadata),
                             errmode, ectx);
         } else if (!src_dt.is_builtin()) {
             // Give the src dtype a chance to make a kernel
-            src_dt.extended()->make_assignment_kernel(out, out_offset,
+            return src_dt.extended()->make_assignment_kernel(out, offset_out,
                             dst_dt, dst_metadata,
                             src_dt, src_metadata,
                             errmode, ectx);

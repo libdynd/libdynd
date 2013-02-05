@@ -541,6 +541,7 @@ size_t var_array_dtype::iterdata_destruct(iterdata_common *DYND_UNUSED(iterdata)
 }
 
 namespace {
+    // TODO move these into var_array_kernels.hpp/.cpp
     struct broadcast_to_var_assign_kernel_extra {
         typedef broadcast_to_var_assign_kernel_extra extra_type;
 
@@ -763,9 +764,9 @@ namespace {
     };
 } // anonymous namespace
 
-void var_array_dtype::make_assignment_kernel(
+size_t var_array_dtype::make_assignment_kernel(
                 hierarchical_kernel<unary_single_operation_t> *out,
-                size_t out_offset,
+                size_t offset_out,
                 const dtype& dst_dt, const char *dst_metadata,
                 const dtype& src_dt, const char *src_metadata,
                 assign_error_mode errmode,
@@ -774,69 +775,69 @@ void var_array_dtype::make_assignment_kernel(
     if (this == dst_dt.extended()) {
         if (src_dt.get_undim() < dst_dt.get_undim()) {
             // If the src has fewer dimensions, broadcast it across this one
-            out->ensure_capacity(out_offset + sizeof(broadcast_to_var_assign_kernel_extra));
+            out->ensure_capacity(offset_out + sizeof(broadcast_to_var_assign_kernel_extra));
             const var_array_dtype_metadata *dst_md =
                             reinterpret_cast<const var_array_dtype_metadata *>(dst_metadata);
-            broadcast_to_var_assign_kernel_extra *e = out->get_at<broadcast_to_var_assign_kernel_extra>(out_offset);
+            broadcast_to_var_assign_kernel_extra *e = out->get_at<broadcast_to_var_assign_kernel_extra>(offset_out);
             e->base.function = &broadcast_to_var_assign_kernel_extra::single;
             e->base.destructor = &broadcast_to_var_assign_kernel_extra::destruct;
             e->dst_target_alignment = m_element_dtype.get_alignment();
             e->dst_md = dst_md;
-            ::make_assignment_kernel(out, out_offset + sizeof(broadcast_to_var_assign_kernel_extra),
+            return ::make_assignment_kernel(out, offset_out + sizeof(broadcast_to_var_assign_kernel_extra),
                             m_element_dtype, dst_metadata + sizeof(var_array_dtype_metadata),
                             src_dt, src_metadata,
                             errmode, ectx);
         } else if (src_dt.get_type_id() == var_array_type_id) {
             // var_array to var_array
             const var_array_dtype *src_vad = static_cast<const var_array_dtype *>(src_dt.extended());
-            out->ensure_capacity(out_offset + sizeof(var_assign_kernel_extra));
+            out->ensure_capacity(offset_out + sizeof(var_assign_kernel_extra));
             const var_array_dtype_metadata *dst_md =
                             reinterpret_cast<const var_array_dtype_metadata *>(dst_metadata);
             const var_array_dtype_metadata *src_md =
                             reinterpret_cast<const var_array_dtype_metadata *>(src_metadata);
-            var_assign_kernel_extra *e = out->get_at<var_assign_kernel_extra>(out_offset);
+            var_assign_kernel_extra *e = out->get_at<var_assign_kernel_extra>(offset_out);
             e->base.function = &var_assign_kernel_extra::single;
             e->base.destructor = &var_assign_kernel_extra::destruct;
             e->dst_target_alignment = m_element_dtype.get_alignment();
             e->dst_md = dst_md;
             e->src_md = src_md;
-            ::make_assignment_kernel(out, out_offset + sizeof(var_assign_kernel_extra),
+            return ::make_assignment_kernel(out, offset_out + sizeof(var_assign_kernel_extra),
                             m_element_dtype, dst_metadata + sizeof(var_array_dtype_metadata),
                             src_vad->get_element_dtype(), src_metadata + sizeof(var_array_dtype_metadata),
                             errmode, ectx);
         } else if (src_dt.get_type_id() == strided_array_type_id) {
             // strided_array to var_array
             const strided_array_dtype *src_sad = static_cast<const strided_array_dtype *>(src_dt.extended());
-            out->ensure_capacity(out_offset + sizeof(strided_to_var_assign_kernel_extra));
+            out->ensure_capacity(offset_out + sizeof(strided_to_var_assign_kernel_extra));
             const var_array_dtype_metadata *dst_md =
                             reinterpret_cast<const var_array_dtype_metadata *>(dst_metadata);
             const strided_array_dtype_metadata *src_md =
                             reinterpret_cast<const strided_array_dtype_metadata *>(src_metadata);
-            strided_to_var_assign_kernel_extra *e = out->get_at<strided_to_var_assign_kernel_extra>(out_offset);
+            strided_to_var_assign_kernel_extra *e = out->get_at<strided_to_var_assign_kernel_extra>(offset_out);
             e->base.function = &strided_to_var_assign_kernel_extra::single;
             e->base.destructor = &strided_to_var_assign_kernel_extra::destruct;
             e->dst_target_alignment = m_element_dtype.get_alignment();
             e->dst_md = dst_md;
             e->src_stride = src_md->stride;
             e->src_dim_size = src_md->size;
-            ::make_assignment_kernel(out, out_offset + sizeof(strided_to_var_assign_kernel_extra),
+            return ::make_assignment_kernel(out, offset_out + sizeof(strided_to_var_assign_kernel_extra),
                             m_element_dtype, dst_metadata + sizeof(var_array_dtype_metadata),
                             src_sad->get_element_dtype(), src_metadata + sizeof(strided_array_dtype_metadata),
                             errmode, ectx);
         } else if (src_dt.get_type_id() == fixedarray_type_id) {
             // fixedarray to var_array
             const fixedarray_dtype *src_fad = static_cast<const fixedarray_dtype *>(src_dt.extended());
-            out->ensure_capacity(out_offset + sizeof(strided_to_var_assign_kernel_extra));
+            out->ensure_capacity(offset_out + sizeof(strided_to_var_assign_kernel_extra));
             const var_array_dtype_metadata *dst_md =
                             reinterpret_cast<const var_array_dtype_metadata *>(dst_metadata);
-            strided_to_var_assign_kernel_extra *e = out->get_at<strided_to_var_assign_kernel_extra>(out_offset);
+            strided_to_var_assign_kernel_extra *e = out->get_at<strided_to_var_assign_kernel_extra>(offset_out);
             e->base.function = &strided_to_var_assign_kernel_extra::single;
             e->base.destructor = &strided_to_var_assign_kernel_extra::destruct;
             e->dst_target_alignment = m_element_dtype.get_alignment();
             e->dst_md = dst_md;
             e->src_stride = src_fad->get_fixed_stride();
             e->src_dim_size = src_fad->get_fixed_dim_size();
-            ::make_assignment_kernel(out, out_offset + sizeof(strided_to_var_assign_kernel_extra),
+            return ::make_assignment_kernel(out, offset_out + sizeof(strided_to_var_assign_kernel_extra),
                             m_element_dtype, dst_metadata + sizeof(var_array_dtype_metadata),
                             src_fad->get_element_dtype(), src_metadata,
                             errmode, ectx);
@@ -851,34 +852,34 @@ void var_array_dtype::make_assignment_kernel(
         if (dst_dt.get_type_id() == strided_array_type_id) {
             // var_array to strided_array
             const strided_array_dtype *dst_sad = static_cast<const strided_array_dtype *>(dst_dt.extended());
-            out->ensure_capacity(out_offset + sizeof(var_to_strided_assign_kernel_extra));
+            out->ensure_capacity(offset_out + sizeof(var_to_strided_assign_kernel_extra));
             const strided_array_dtype_metadata *dst_md =
                             reinterpret_cast<const strided_array_dtype_metadata *>(dst_metadata);
             const var_array_dtype_metadata *src_md =
                             reinterpret_cast<const var_array_dtype_metadata *>(src_metadata);
-            var_to_strided_assign_kernel_extra *e = out->get_at<var_to_strided_assign_kernel_extra>(out_offset);
+            var_to_strided_assign_kernel_extra *e = out->get_at<var_to_strided_assign_kernel_extra>(offset_out);
             e->base.function = &var_to_strided_assign_kernel_extra::single;
             e->base.destructor = &var_to_strided_assign_kernel_extra::destruct;
             e->dst_stride = dst_md->stride;
             e->dst_dim_size = dst_md->size;
             e->src_md = src_md;
-            ::make_assignment_kernel(out, out_offset + sizeof(var_to_strided_assign_kernel_extra),
+            return ::make_assignment_kernel(out, offset_out + sizeof(var_to_strided_assign_kernel_extra),
                             dst_sad->get_element_dtype(), dst_metadata + sizeof(strided_array_dtype_metadata),
                             m_element_dtype, src_metadata + sizeof(var_array_dtype_metadata),
                             errmode, ectx);
         } else if (dst_dt.get_type_id() == fixedarray_type_id) {
             // var_array to fixedarray
             const fixedarray_dtype *dst_fad = static_cast<const fixedarray_dtype *>(dst_dt.extended());
-            out->ensure_capacity(out_offset + sizeof(var_to_strided_assign_kernel_extra));
+            out->ensure_capacity(offset_out + sizeof(var_to_strided_assign_kernel_extra));
             const var_array_dtype_metadata *src_md =
                             reinterpret_cast<const var_array_dtype_metadata *>(src_metadata);
-            var_to_strided_assign_kernel_extra *e = out->get_at<var_to_strided_assign_kernel_extra>(out_offset);
+            var_to_strided_assign_kernel_extra *e = out->get_at<var_to_strided_assign_kernel_extra>(offset_out);
             e->base.function = &var_to_strided_assign_kernel_extra::single;
             e->base.destructor = &var_to_strided_assign_kernel_extra::destruct;
             e->dst_stride = dst_fad->get_fixed_stride();
             e->dst_dim_size = dst_fad->get_fixed_dim_size();
             e->src_md = src_md;
-            ::make_assignment_kernel(out, out_offset + sizeof(var_to_strided_assign_kernel_extra),
+            return ::make_assignment_kernel(out, offset_out + sizeof(var_to_strided_assign_kernel_extra),
                             dst_fad->get_element_dtype(), dst_metadata,
                             m_element_dtype, src_metadata + sizeof(var_array_dtype_metadata),
                             errmode, ectx);

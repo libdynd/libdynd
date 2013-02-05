@@ -111,9 +111,9 @@ public:
     size_t iterdata_construct(iterdata_common *iterdata, const char **inout_metadata, int ndim, const intptr_t* shape, dtype& out_uniform_dtype) const;
     size_t iterdata_destruct(iterdata_common *iterdata, int ndim) const;
 
-    void make_assignment_kernel(
+    size_t make_assignment_kernel(
                     hierarchical_kernel<unary_single_operation_t> *out,
-                    size_t out_offset,
+                    size_t offset_out,
                     const dtype& dst_dt, const char *dst_metadata,
                     const dtype& src_dt, const char *src_metadata,
                     assign_error_mode errmode,
