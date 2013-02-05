@@ -75,6 +75,10 @@ ndobject dynd::make_strided_ndobject(const dtype& uniform_dtype, size_t ndim, co
     memory_block_ptr result = make_ndobject_memory_block(array_dtype.extended()->get_metadata_size(),
                     data_size, uniform_dtype.get_alignment(), &data_ptr);
 
+    if (array_dtype.get_flags()&dtype_flag_zeroinit) {
+        memset(data_ptr, 0, data_size);
+    }
+
     // Fill in the preamble metadata
     ndobject_preamble *ndo = reinterpret_cast<ndobject_preamble *>(result.get());
     ndo->m_dtype = array_dtype.release();

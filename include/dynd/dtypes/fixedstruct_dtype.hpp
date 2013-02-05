@@ -81,7 +81,6 @@ public:
         return m_memory_management;
     }
 
-    bool is_scalar() const;
     bool is_expression() const;
     bool is_unique_data_owner(const char *metadata) const;
     void transform_child_dtypes(dtype_transform_fn_t transform_fn, const void *extra,

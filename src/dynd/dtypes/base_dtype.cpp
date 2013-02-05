@@ -134,11 +134,6 @@ base_dtype::~base_dtype()
 {
 }
 
-bool base_dtype::is_scalar() const
-{
-    return true;
-}
-
 bool base_dtype::is_uniform_dim() const
 {
     return false;

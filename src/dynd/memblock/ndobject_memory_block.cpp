@@ -62,18 +62,23 @@ memory_block_ptr dynd::make_ndobject_memory_block(size_t metadata_size, size_t e
 
 memory_block_ptr dynd::make_ndobject_memory_block(const dtype& dt, int ndim, const intptr_t *shape)
 {
-    size_t metadata_size, element_size;
+    size_t metadata_size, data_size;
 
     if (dt.is_builtin()) {
         metadata_size = 0;
-        element_size = dt.get_data_size();
+        data_size = dt.get_data_size();
     } else {
         metadata_size = dt.extended()->get_metadata_size();
-        element_size = dt.extended()->get_default_data_size(ndim, shape);
+        data_size = dt.extended()->get_default_data_size(ndim, shape);
     }
 
-    char *data = NULL;
-    memory_block_ptr result = make_ndobject_memory_block(metadata_size, element_size, dt.get_alignment(), &data);
+    char *data_ptr = NULL;
+    memory_block_ptr result = make_ndobject_memory_block(metadata_size, data_size, dt.get_alignment(), &data_ptr);
+
+    if (dt.get_flags()&dtype_flag_zeroinit) {
+        memset(data_ptr, 0, data_size);
+    }
+
     ndobject_preamble *preamble = reinterpret_cast<ndobject_preamble *>(result.get());
     if (dt.is_builtin()) {
         preamble->m_dtype = reinterpret_cast<base_dtype *>(dt.get_type_id());
@@ -82,7 +87,7 @@ memory_block_ptr dynd::make_ndobject_memory_block(const dtype& dt, int ndim, con
         base_dtype_incref(preamble->m_dtype);
         dt.extended()->metadata_default_construct(reinterpret_cast<char *>(preamble + 1), ndim, shape);
     }
-    preamble->m_data_pointer = data;
+    preamble->m_data_pointer = data_ptr;
     preamble->m_data_reference = NULL;
     preamble->m_flags = read_access_flag|write_access_flag;
     return result;

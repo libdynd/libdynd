@@ -16,9 +16,12 @@ using namespace dynd;
 
 strided_array_dtype::strided_array_dtype(const dtype& element_dtype)
     : base_dtype(strided_array_type_id, uniform_array_kind, 0, element_dtype.get_alignment(),
-                    element_dtype.get_undim() + 1),
+                    dtype_flag_none, element_dtype.get_undim() + 1),
             m_element_dtype(element_dtype)
 {
+    // Propagate the zeroinit flag from the element
+    m_members.flags |= (element_dtype.get_flags()&dtype_flag_zeroinit);
+
     // Copy ndobject properties and functions from the first non-uniform dimension
     get_nonuniform_ndobject_properties_and_functions(m_ndobject_properties, m_ndobject_functions);
 }
@@ -59,11 +62,6 @@ void strided_array_dtype::print_data(std::ostream& o, const char *metadata, cons
 void strided_array_dtype::print_dtype(std::ostream& o) const
 {
     o << "strided_array<" << m_element_dtype << ">";
-}
-
-bool strided_array_dtype::is_scalar() const
-{
-    return false;
 }
 
 bool strided_array_dtype::is_uniform_dim() const

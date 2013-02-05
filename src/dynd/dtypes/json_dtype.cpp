@@ -18,7 +18,7 @@ using namespace std;
 using namespace dynd;
 
 json_dtype::json_dtype()
-    : base_string_dtype(json_type_id, sizeof(json_dtype_data), sizeof(const char *))
+    : base_string_dtype(json_type_id, sizeof(json_dtype_data), sizeof(const char *), dtype_flag_scalar|dtype_flag_zeroinit)
 {
 }
 

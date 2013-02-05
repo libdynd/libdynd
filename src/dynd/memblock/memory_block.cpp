@@ -5,6 +5,7 @@
 
 #include <dynd/memblock/memory_block.hpp>
 #include <dynd/memblock/pod_memory_block.hpp>
+#include <dynd/memblock/zeroinit_memory_block.hpp>
 #include <dynd/memblock/fixed_size_pod_memory_block.hpp>
 #include <dynd/memblock/executable_memory_block.hpp>
 #include <dynd/memblock/ndobject_memory_block.hpp>
@@ -31,6 +32,11 @@ void free_fixed_size_pod_memory_block(memory_block_data *memblock);
  */
 void free_pod_memory_block(memory_block_data *memblock);
 /**
+ * INTERNAL: Frees a memory_block created by make_zeroinit_memory_block.
+ * This should only be called by the memory_block decref code.
+ */
+void free_zeroinit_memory_block(memory_block_data *memblock);
+/**
  * INTERNAL: Frees a memory_block created by make_executable_memory_block.
  * This should only be called by the memory_block decref code.
  */
@@ -46,6 +52,10 @@ void free_ndobject_memory_block(memory_block_data *memblock);
  * INTERNAL: Static instance of the pod allocator API for the POD memory block.
  */
 extern memory_block_pod_allocator_api pod_memory_block_allocator_api;
+/**
+ * INTERNAL: Static instance of the pod allocator API for the zeroinit memory block.
+ */
+extern memory_block_pod_allocator_api zeroinit_memory_block_allocator_api;
 
 }} // namespace dynd::detail
 
@@ -64,6 +74,10 @@ void dynd::detail::memory_block_free(memory_block_data *memblock)
         }
         case pod_memory_block_type: {
             free_pod_memory_block(memblock);
+            return;
+        }
+        case zeroinit_memory_block_type: {
+            free_zeroinit_memory_block(memblock);
             return;
         }
         case object_memory_block_type:
@@ -99,6 +113,10 @@ void dynd::memory_block_debug_print(const memory_block_data *memblock, std::ostr
                 o << indent << " type: pod\n";
                 pod_memory_block_debug_print(memblock, o, indent);
                 break;
+            case zeroinit_memory_block_type:
+                o << indent << " type: zeroinit\n";
+                zeroinit_memory_block_debug_print(memblock, o, indent);
+                break;
             case object_memory_block_type:
                 o << indent << " type: object\n";
                 break;
@@ -126,6 +144,8 @@ memory_block_pod_allocator_api *dynd::get_memory_block_pod_allocator_api(memory_
             throw runtime_error("Cannot get a POD allocator API from an fixed_size_pod_memory_block");
         case pod_memory_block_type:
             return &dynd::detail::pod_memory_block_allocator_api;
+        case zeroinit_memory_block_type:
+            return &dynd::detail::zeroinit_memory_block_allocator_api;
         case object_memory_block_type:
             throw runtime_error("Cannot get a POD allocator API from an object_memory_block");
         case executable_memory_block_type:

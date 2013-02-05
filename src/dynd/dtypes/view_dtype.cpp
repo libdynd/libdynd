@@ -12,7 +12,9 @@ using namespace std;
 using namespace dynd;
 
 dynd::view_dtype::view_dtype(const dtype& value_dtype, const dtype& operand_dtype)
-    : base_expression_dtype(view_type_id, expression_kind, operand_dtype.get_data_size(), operand_dtype.get_alignment()),
+    : base_expression_dtype(view_type_id, expression_kind, operand_dtype.get_data_size(),
+                    operand_dtype.get_alignment(),
+                    (value_dtype.get_flags()&dtype_flag_scalar)|(operand_dtype.get_flags()&dtype_flag_zeroinit)),
             m_value_dtype(value_dtype), m_operand_dtype(operand_dtype)
 {
     if (value_dtype.get_data_size() != operand_dtype.value_dtype().get_data_size()) {

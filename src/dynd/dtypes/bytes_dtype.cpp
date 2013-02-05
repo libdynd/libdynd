@@ -15,7 +15,8 @@ using namespace std;
 using namespace dynd;
 
 bytes_dtype::bytes_dtype(size_t alignment)
-    : base_bytes_dtype(bytes_type_id, bytes_kind, sizeof(bytes_dtype_data), sizeof(const char *)), m_alignment(alignment)
+    : base_bytes_dtype(bytes_type_id, bytes_kind, sizeof(bytes_dtype_data),
+                    sizeof(const char *), dtype_flag_scalar|dtype_flag_zeroinit), m_alignment(alignment)
 {
     if (alignment != 1 && alignment != 2 && alignment != 4 && alignment != 8 && alignment != 16) {
         std::stringstream ss;

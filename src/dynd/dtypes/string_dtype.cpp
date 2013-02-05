@@ -17,7 +17,7 @@ using namespace std;
 using namespace dynd;
 
 string_dtype::string_dtype(string_encoding_t encoding)
-    : base_string_dtype(string_type_id, sizeof(string_dtype_data), sizeof(const char *)),
+    : base_string_dtype(string_type_id, sizeof(string_dtype_data), sizeof(const char *), dtype_flag_scalar|dtype_flag_zeroinit),
             m_encoding(encoding)
 {
     switch (encoding) {

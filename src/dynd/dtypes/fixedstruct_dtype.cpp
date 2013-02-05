@@ -16,7 +16,7 @@ using namespace std;
 using namespace dynd;
 
 fixedstruct_dtype::fixedstruct_dtype(const std::vector<dtype>& field_types, const std::vector<std::string>& field_names)
-    : base_struct_dtype(fixedstruct_type_id, 0, 1),
+    : base_struct_dtype(fixedstruct_type_id, 0, 1, dtype_flag_none),
             m_field_types(field_types), m_field_names(field_names),
             m_data_offsets(field_types.size()), m_metadata_offsets(field_types.size())
 {
@@ -39,6 +39,8 @@ fixedstruct_dtype::fixedstruct_dtype(const std::vector<dtype>& field_types, cons
         if (field_types[i].get_memory_management() == blockref_memory_management) {
             m_memory_management = blockref_memory_management;
         }
+        // If any fields require zero-initialization, flag the struct as requiring it
+        m_members.flags |= (field_types[i].get_flags()&dtype_flag_zeroinit);
         // Calculate the data offsets
         data_offset = inc_to_alignment(data_offset, field_types[i].get_alignment());
         m_data_offsets[i] = data_offset;
@@ -122,11 +124,6 @@ void fixedstruct_dtype::print_dtype(std::ostream& o) const
         }
     }
     o << ">";
-}
-
-bool fixedstruct_dtype::is_scalar() const
-{
-    return false;
 }
 
 bool fixedstruct_dtype::is_expression() const

@@ -15,8 +15,9 @@ namespace dynd {
  */
 class base_expression_dtype : public base_dtype {
 public:
-    inline base_expression_dtype(type_id_t type_id, dtype_kind_t kind, size_t data_size, size_t alignment, size_t undim=0)
-        : base_dtype(type_id, kind, data_size, alignment, undim)
+    inline base_expression_dtype(type_id_t type_id, dtype_kind_t kind,
+                    size_t data_size, size_t alignment, flags_type flags, size_t undim=0)
+        : base_dtype(type_id, kind, data_size, alignment, flags, undim)
     {}
 
     virtual ~base_expression_dtype();

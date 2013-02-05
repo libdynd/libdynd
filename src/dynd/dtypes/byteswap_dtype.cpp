@@ -12,8 +12,10 @@ using namespace std;
 using namespace dynd;
 
 dynd::byteswap_dtype::byteswap_dtype(const dtype& value_dtype)
-    : base_expression_dtype(byteswap_type_id, expression_kind, value_dtype.get_data_size(), value_dtype.get_alignment()),
-            m_value_dtype(value_dtype), m_operand_dtype(make_fixedbytes_dtype(value_dtype.get_data_size(), value_dtype.get_alignment()))
+    : base_expression_dtype(byteswap_type_id, expression_kind, value_dtype.get_data_size(),
+                            value_dtype.get_alignment(), dtype_flag_scalar),
+                    m_value_dtype(value_dtype),
+                    m_operand_dtype(make_fixedbytes_dtype(value_dtype.get_data_size(), value_dtype.get_alignment()))
 {
     if (!value_dtype.is_builtin()) {
         throw std::runtime_error("byteswap_dtype: Only built-in dtypes are supported presently");
@@ -27,7 +29,8 @@ dynd::byteswap_dtype::byteswap_dtype(const dtype& value_dtype)
 }
 
 dynd::byteswap_dtype::byteswap_dtype(const dtype& value_dtype, const dtype& operand_dtype)
-    : base_expression_dtype(byteswap_type_id, expression_kind, operand_dtype.get_data_size(), operand_dtype.get_alignment()),
+    : base_expression_dtype(byteswap_type_id, expression_kind, operand_dtype.get_data_size(),
+                    operand_dtype.get_alignment(), dtype_flag_scalar),
             m_value_dtype(value_dtype), m_operand_dtype(operand_dtype)
 {
     // Only a bytes dtype be the operand to the byteswap

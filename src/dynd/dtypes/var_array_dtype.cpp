@@ -8,6 +8,7 @@
 #include <dynd/dtypes/dtype_alignment.hpp>
 #include <dynd/dtypes/pointer_dtype.hpp>
 #include <dynd/memblock/pod_memory_block.hpp>
+#include <dynd/memblock/zeroinit_memory_block.hpp>
 #include <dynd/shape_tools.hpp>
 #include <dynd/exceptions.hpp>
 #include <dynd/gfunc/callable.hpp>
@@ -17,7 +18,7 @@ using namespace dynd;
 
 var_array_dtype::var_array_dtype(const dtype& element_dtype)
     : base_dtype(var_array_type_id, uniform_array_kind, sizeof(var_array_dtype_data),
-                    sizeof(const char *), element_dtype.get_undim() + 1),
+                    sizeof(const char *), dtype_flag_zeroinit, element_dtype.get_undim() + 1),
             m_element_dtype(element_dtype)
 {
     // Copy ndobject properties and functions from the first non-uniform dimension
@@ -50,11 +51,6 @@ void var_array_dtype::print_dtype(std::ostream& o) const
     o << "var_array<" << m_element_dtype << ">";
 }
 
-bool var_array_dtype::is_scalar() const
-{
-    return false;
-}
-
 bool var_array_dtype::is_uniform_dim() const
 {
     return true;
@@ -70,7 +66,8 @@ bool var_array_dtype::is_unique_data_owner(const char *metadata) const
     const var_array_dtype_metadata *md = reinterpret_cast<const var_array_dtype_metadata *>(metadata);
     if (md->blockref != NULL &&
             (md->blockref->m_use_count != 1 ||
-             md->blockref->m_type != pod_memory_block_type)) {
+             (md->blockref->m_type != pod_memory_block_type &&
+              md->blockref->m_type != zeroinit_memory_block_type))) {
         return false;
     }
     if (m_element_dtype.is_builtin()) {
@@ -456,7 +453,11 @@ void var_array_dtype::metadata_default_construct(char *metadata, int ndim, const
     md->stride = element_size;
     md->offset = 0;
     // Allocate a POD memory block
-    md->blockref = make_pod_memory_block().release();
+    if (m_element_dtype.get_flags()&dtype_flag_zeroinit) {
+        md->blockref = make_zeroinit_memory_block().release();
+    } else {
+        md->blockref = make_pod_memory_block().release();
+    }
     if (!m_element_dtype.is_builtin()) {
         m_element_dtype.extended()->metadata_default_construct(metadata + sizeof(var_array_dtype_metadata), ndim-1, shape+1);
     }
@@ -535,6 +536,28 @@ size_t var_array_dtype::iterdata_construct(iterdata_common *DYND_UNUSED(iterdata
 size_t var_array_dtype::iterdata_destruct(iterdata_common *DYND_UNUSED(iterdata), int DYND_UNUSED(ndim)) const
 {
     throw runtime_error("TODO: implement var_array_dtype::iterdata_destruct");
+}
+
+void var_array_dtype::make_assignment_kernel(
+                hierarchical_kernel<unary_single_operation_t> *out,
+                size_t out_offset,
+                const dtype& dst_dt, const char *dst_metadata,
+                const dtype& src_dt, const char *src_metadata,
+                assign_error_mode errmode,
+                const eval::eval_context *ectx) const
+{
+    if (this == dst_dt.extended()) {
+        if (src_dt.get_undim() < dst_dt.get_undim()) {
+            // If the src has fewer dimensions, broadcast it across this one
+            // TODO
+        }
+    } else if (dst_dt.get_undim() < src_dt.get_undim()) {
+        throw broadcast_error(dst_dt, dst_metadata, src_dt, src_metadata);
+    } else {
+        stringstream ss;
+        ss << "Cannot assign from " << src_dt << " to " << dst_dt;
+        throw runtime_error(ss.str());
+    }
 }
 
 void var_array_dtype::foreach_leading(char *data, const char *metadata, foreach_fn_t callback, void *callback_data) const

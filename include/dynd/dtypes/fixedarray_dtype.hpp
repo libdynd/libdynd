@@ -57,7 +57,6 @@ public:
         return pod_memory_management;
     }
 
-    bool is_scalar() const;
     bool is_uniform_dim() const;
     bool is_expression() const;
     bool is_unique_data_owner(const char *metadata) const;

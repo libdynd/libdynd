@@ -13,29 +13,31 @@
 using namespace std;
 using namespace dynd;
 
-struct_dtype::struct_dtype(const std::vector<dtype>& fields, const std::vector<std::string>& field_names)
-    : base_struct_dtype(struct_type_id, 0, 1),
-            m_field_types(fields), m_field_names(field_names), m_metadata_offsets(fields.size())
+struct_dtype::struct_dtype(const std::vector<dtype>& field_types, const std::vector<std::string>& field_names)
+    : base_struct_dtype(struct_type_id, 0, 1, dtype_flag_none),
+            m_field_types(field_types), m_field_names(field_names), m_metadata_offsets(field_types.size())
 {
-    if (fields.size() != field_names.size()) {
+    if (field_types.size() != field_names.size()) {
         throw runtime_error("The field names for a struct dtypes must match the size of the field dtypes");
     }
 
     // Calculate the needed element alignment
-    size_t metadata_offset = fields.size() * sizeof(size_t);
+    size_t metadata_offset = field_types.size() * sizeof(size_t);
     m_members.alignment = 1;
     m_memory_management = pod_memory_management;
-    for (size_t i = 0, i_end = fields.size(); i != i_end; ++i) {
-        size_t field_alignment = fields[i].get_alignment();
+    for (size_t i = 0, i_end = field_types.size(); i != i_end; ++i) {
+        size_t field_alignment = field_types[i].get_alignment();
         // Accumulate the biggest field alignment as the dtype alignment
         if (field_alignment > m_members.alignment) {
             m_members.alignment = field_alignment;
         }
         // Accumulate the correct memory management
         // TODO: Handle object, and object+blockref memory management types as well
-        if (fields[i].get_memory_management() == blockref_memory_management) {
+        if (field_types[i].get_memory_management() == blockref_memory_management) {
             m_memory_management = blockref_memory_management;
         }
+        // If any fields require zero-initialization, flag the struct as requiring it
+        m_members.flags |= (field_types[i].get_flags()&dtype_flag_zeroinit);
         // Calculate the metadata offsets
         m_metadata_offsets[i] = metadata_offset;
         metadata_offset += m_field_types[i].is_builtin() ? 0 : m_field_types[i].extended()->get_metadata_size();
@@ -100,11 +102,6 @@ void struct_dtype::print_dtype(std::ostream& o) const
         }
     }
     o << ">";
-}
-
-bool struct_dtype::is_scalar() const
-{
-    return false;
 }
 
 bool struct_dtype::is_expression() const

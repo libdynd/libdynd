@@ -12,7 +12,8 @@ using namespace dynd;
 
 
 dynd::date_property_dtype::date_property_dtype(const dtype& operand_dtype, const std::string& property_name)
-    : base_expression_dtype(date_property_type_id, expression_kind, operand_dtype.get_data_size(), operand_dtype.get_alignment()),
+    : base_expression_dtype(date_property_type_id, expression_kind,
+                    operand_dtype.get_data_size(), operand_dtype.get_alignment(), dtype_flag_scalar),
             m_value_dtype(), m_operand_dtype(operand_dtype), m_property_name(property_name)
 {
     if (operand_dtype.value_dtype().get_type_id() != date_type_id) {

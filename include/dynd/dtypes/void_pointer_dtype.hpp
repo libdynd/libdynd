@@ -19,7 +19,8 @@ namespace dynd {
 class void_pointer_dtype : public base_dtype {
 public:
     void_pointer_dtype()
-        : base_dtype(void_pointer_type_id, void_kind, sizeof(void *), sizeof(void *))
+        : base_dtype(void_pointer_type_id, void_kind, sizeof(void *),
+                        sizeof(void *), dtype_flag_scalar|dtype_flag_zeroinit, 0)
     {}
 
     void print_data(std::ostream& o, const char *metadata, const char *data) const;

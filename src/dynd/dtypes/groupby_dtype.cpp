@@ -20,7 +20,7 @@ using namespace dynd;
 groupby_dtype::groupby_dtype(const dtype& data_values_dtype,
                 const dtype& by_values_dtype, const dtype& groups_dtype)
     : base_expression_dtype(groupby_type_id, expression_kind,
-                    sizeof(groupby_dtype_data), sizeof(void *), 2 + data_values_dtype.get_undim())
+                    sizeof(groupby_dtype_data), sizeof(void *), dtype_flag_none, 2 + data_values_dtype.get_undim())
 {
     if (groups_dtype.get_type_id() != categorical_type_id) {
         throw runtime_error("to construct a groupby dtype, its groups dtype must be categorical");
@@ -73,11 +73,6 @@ void groupby_dtype::print_dtype(std::ostream& o) const
     o << "groupby<values=" << get_data_values_dtype();
     o << ", by=" << get_by_values_dtype();
     o << ", groups=" << m_groups_dtype << ">";
-}
-
-bool groupby_dtype::is_scalar() const
-{
-    return false;
 }
 
 void groupby_dtype::get_shape(size_t i, intptr_t *out_shape) const

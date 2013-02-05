@@ -17,7 +17,7 @@ using namespace std;
 using namespace dynd;
 
 fixedarray_dtype::fixedarray_dtype(const dtype& element_dtype, size_t dimension_size)
-    : base_dtype(fixedarray_type_id, uniform_array_kind, 0, 1, element_dtype.get_undim() + 1),
+    : base_dtype(fixedarray_type_id, uniform_array_kind, 0, 1, dtype_flag_none, element_dtype.get_undim() + 1),
             m_element_dtype(element_dtype), m_dimension_size(dimension_size)
 {
     size_t child_element_size = element_dtype.get_data_size();
@@ -30,13 +30,15 @@ fixedarray_dtype::fixedarray_dtype(const dtype& element_dtype, size_t dimension_
     m_stride = m_dimension_size > 1 ? element_dtype.get_data_size() : 0;
     m_members.data_size = m_dimension_size > 1 ? m_stride * m_dimension_size : m_dimension_size * child_element_size;
     m_members.alignment = m_element_dtype.get_alignment();
+    // Propagate the zeroinit flag from the element
+    m_members.flags |= (element_dtype.get_flags()&dtype_flag_zeroinit);
 
     // Copy ndobject properties and functions from the first non-uniform dimension
     get_nonuniform_ndobject_properties_and_functions(m_ndobject_properties, m_ndobject_functions);
 }
 
 fixedarray_dtype::fixedarray_dtype(const dtype& element_dtype, size_t dimension_size, intptr_t stride)
-    : base_dtype(fixedarray_type_id, uniform_array_kind, 0, 1),
+    : base_dtype(fixedarray_type_id, uniform_array_kind, 0, 1, dtype_flag_none, element_dtype.get_undim() + 1),
             m_element_dtype(element_dtype), m_stride(stride), m_dimension_size(dimension_size)
 {
     size_t child_element_size = element_dtype.get_data_size();
@@ -60,6 +62,8 @@ fixedarray_dtype::fixedarray_dtype(const dtype& element_dtype, size_t dimension_
     }
     m_members.data_size = stride ? stride * m_dimension_size : dimension_size * child_element_size;
     m_members.alignment = m_element_dtype.get_alignment();
+    // Propagate the zeroinit flag from the element
+    m_members.flags |= (element_dtype.get_flags()&dtype_flag_zeroinit);
 
     // Copy ndobject properties and functions from the first non-uniform dimension
     get_nonuniform_ndobject_properties_and_functions(m_ndobject_properties, m_ndobject_functions);
@@ -91,11 +95,6 @@ void fixedarray_dtype::print_dtype(std::ostream& o) const
     }
     o << ", " << m_element_dtype;
     o << ">";
-}
-
-bool fixedarray_dtype::is_scalar() const
-{
-    return false;
 }
 
 bool fixedarray_dtype::is_uniform_dim() const

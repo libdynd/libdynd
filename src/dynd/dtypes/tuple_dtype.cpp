@@ -12,7 +12,7 @@ using namespace std;
 using namespace dynd;
 
 dynd::tuple_dtype::tuple_dtype(const std::vector<dtype>& fields)
-    : base_dtype(tuple_type_id, struct_kind, 0, 1),
+    : base_dtype(tuple_type_id, struct_kind, 0, 1, dtype_flag_none, 0),
             m_fields(fields), m_offsets(fields.size()), m_metadata_offsets(fields.size())
 {
     // TODO: tuple_dtype should probably not have kind struct_kind?
@@ -54,7 +54,7 @@ tuple_dtype::~tuple_dtype()
 
 dynd::tuple_dtype::tuple_dtype(const std::vector<dtype>& fields, const std::vector<size_t> offsets,
                     size_t data_size, size_t alignment)
-    : base_dtype(tuple_type_id, struct_kind, data_size, alignment),
+    : base_dtype(tuple_type_id, struct_kind, data_size, alignment, dtype_flag_none, 0),
             m_fields(fields), m_offsets(offsets), m_metadata_offsets(fields.size())
 {
     if (!offset_is_aligned(data_size, alignment)) {

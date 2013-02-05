@@ -129,6 +129,15 @@ enum type_id_t {
     builtin_type_id_count = 15
 };
 
+enum dtype_flags_t {
+    // A symbolic name instead of just "0"
+    dtype_flag_none = 0x00000000,
+    // The dtype should be considered as a scalar
+    dtype_flag_scalar = 0x00000001,
+    // Memory of this dtype should be zero-initialized
+    dtype_flag_zeroinit = 0x00000002
+};
+
 std::ostream& operator<<(std::ostream& o, dtype_kind_t kind);
 std::ostream& operator<<(std::ostream& o, type_id_t tid);
 
@@ -185,20 +194,24 @@ struct iterdata_common {
 };
 
 struct base_dtype_members {
+    typedef uint32_t flags_type;
+
     /** The dtype's type id (type_id_t is the enum) */
     uint16_t type_id;
     /** The dtype's kind (dtype_kind_t is the enum) */
     uint8_t kind;
     /** The dtype's data alignment */
     uint8_t alignment;
+    /** The dtype's flags */
+    flags_type flags;
     /** The size of one instance of the dtype, or 0 if there is not one fixed size. */
     size_t data_size;
     /** The number of uniform dimensions this dtype has */
     uint8_t undim;
 
     base_dtype_members(uint16_t type_id_, uint8_t kind_, uint8_t alignment_,
-                    size_t data_size_, uint8_t undim_)
-        : type_id(type_id_), kind(kind_), alignment(alignment_),
+                    flags_type flags_, size_t data_size_, uint8_t undim_)
+        : type_id(type_id_), kind(kind_), alignment(alignment_), flags(flags_),
                 data_size(data_size_), undim(undim_)
     {}
 };
@@ -226,10 +239,12 @@ protected:
                     std::vector<std::pair<std::string, gfunc::callable> >& out_properties,
                     std::vector<std::pair<std::string, gfunc::callable> >& out_functions) const;
 public:
+    typedef base_dtype_members::flags_type flags_type;
+
     /** Starts off the extended dtype instance with a use count of 1. */
-    inline base_dtype(type_id_t type_id, dtype_kind_t kind, size_t data_size, size_t alignment, size_t undim=0)
+    inline base_dtype(type_id_t type_id, dtype_kind_t kind, size_t data_size, size_t alignment, flags_type flags, size_t undim)
         : m_use_count(1), m_members(static_cast<uint16_t>(type_id), static_cast<uint8_t>(kind),
-                static_cast<uint8_t>(alignment), data_size, static_cast<uint8_t>(undim))
+                static_cast<uint8_t>(alignment), flags, data_size, static_cast<uint8_t>(undim))
     {}
 
     virtual ~base_dtype();
@@ -253,6 +268,9 @@ public:
     /** The number of uniform dimensions this dtype has */
     inline size_t get_undim() const {
         return m_members.undim;
+    }
+    inline base_dtype_members::flags_type get_flags() const {
+        return m_members.flags;
     }
     virtual size_t get_default_data_size(int ndim, const intptr_t *shape) const;
 
@@ -281,7 +299,9 @@ public:
      * This precludes a dynamic dtype from switching between scalar and array behavior,
      * but the simplicity seems to probably be worth it.
      */
-    virtual bool is_scalar() const;
+    inline bool is_scalar() const {
+        return (m_members.flags & dtype_flag_scalar) != 0;
+    }
 
     /**
      * Returns true if the first dimension of the dtype is a uniform dimension.

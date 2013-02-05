@@ -561,6 +561,14 @@ public:
         }
     }
 
+    inline base_dtype::flags_type get_flags() const {
+        if (is_builtin()) {
+            return dtype_flag_scalar;
+        } else {
+            return m_extended->get_flags();
+        }
+    }
+
     /**
      * Gets the number of uniform dimensions in the dtype.
      */

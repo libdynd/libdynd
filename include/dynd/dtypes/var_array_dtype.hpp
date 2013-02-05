@@ -60,7 +60,6 @@ public:
         return blockref_memory_management;
     }
 
-    bool is_scalar() const;
     bool is_uniform_dim() const;
     bool is_expression() const;
     bool is_unique_data_owner(const char *metadata) const;
@@ -111,6 +110,14 @@ public:
     size_t get_iterdata_size(int ndim) const;
     size_t iterdata_construct(iterdata_common *iterdata, const char **inout_metadata, int ndim, const intptr_t* shape, dtype& out_uniform_dtype) const;
     size_t iterdata_destruct(iterdata_common *iterdata, int ndim) const;
+
+    void make_assignment_kernel(
+                    hierarchical_kernel<unary_single_operation_t> *out,
+                    size_t out_offset,
+                    const dtype& dst_dt, const char *dst_metadata,
+                    const dtype& src_dt, const char *src_metadata,
+                    assign_error_mode errmode,
+                    const eval::eval_context *ectx) const;
 
     void foreach_leading(char *data, const char *metadata, foreach_fn_t callback, void *callback_data) const;
     

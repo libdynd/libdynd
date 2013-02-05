@@ -18,8 +18,8 @@ namespace dynd {
  */
 class base_bytes_dtype : public base_dtype {
 public:
-    inline base_bytes_dtype(type_id_t type_id, dtype_kind_t kind, size_t data_size, size_t alignment)
-        : base_dtype(type_id, kind, data_size, alignment)
+    inline base_bytes_dtype(type_id_t type_id, dtype_kind_t kind, size_t data_size, size_t alignment, flags_type flags)
+        : base_dtype(type_id, kind, data_size, alignment, flags, 0)
     {}
 
     virtual ~base_bytes_dtype();

@@ -19,8 +19,9 @@ dtype pointer_dtype::m_void_pointer_dtype(new void_pointer_dtype(), false);
 
 
 pointer_dtype::pointer_dtype(const dtype& target_dtype)
-    : base_expression_dtype(pointer_type_id, expression_kind, sizeof(void *), sizeof(void *), target_dtype.get_undim()),
-            m_target_dtype(target_dtype)
+    : base_expression_dtype(pointer_type_id, expression_kind, sizeof(void *),
+                    sizeof(void *), target_dtype.get_undim(), dtype_flag_scalar|dtype_flag_zeroinit),
+                    m_target_dtype(target_dtype)
 {
     // I'm not 100% sure how blockref pointer dtypes should interact with
     // the computational subsystem, the details will have to shake out
@@ -47,11 +48,6 @@ void pointer_dtype::print_data(std::ostream& o, const char *metadata, const char
 void pointer_dtype::print_dtype(std::ostream& o) const
 {
     o << "pointer<" << m_target_dtype << ">";
-}
-
-bool pointer_dtype::is_scalar() const
-{
-    return m_target_dtype.is_scalar();
 }
 
 bool pointer_dtype::is_uniform_dim() const
