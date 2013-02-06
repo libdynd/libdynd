@@ -14,464 +14,34 @@
 using namespace std;
 using namespace dynd;
 
-/////////////////////////////////////////
-// struct to identical struct assignment
-
-namespace { struct struct_asn_kernel {
-    struct auxdata_storage {
-        dtype dt;
-        size_t field_count;
-        kernel_instance<unary_operation_pair_t> *kernels;
-
-        auxdata_storage()
-            : dt(), kernels(NULL)
-        {}
-        auxdata_storage(const auxdata_storage& rhs)
-            : dt(rhs.dt), field_count(rhs.field_count), kernels(new kernel_instance<unary_operation_pair_t>[field_count])
-        {
-            for (size_t i = 0; i < field_count; ++i) {
-                kernels[i].copy_from(rhs.kernels[i]);
-            }
-        }
-        ~auxdata_storage() {
-            delete[] kernels;
-        }
-
-        void init(const dtype& d, size_t fcount) {
-            dt = d;
-            field_count = fcount;
-            kernels = new kernel_instance<unary_operation_pair_t>[fcount];
-        }
-    };
-
-    static void single(char *dst, const char *src, unary_kernel_static_data *extra)
-    {
-        auxdata_storage& ad = get_auxiliary_data<auxdata_storage>(extra->auxdata);
-        const struct_dtype *sd = static_cast<const struct_dtype *>(ad.dt.extended());
-        kernel_instance<unary_operation_pair_t> *kernels = &ad.kernels[0];
-        const size_t *metadata_offsets = &sd->get_metadata_offsets()[0];
-        const size_t *dst_data_offsets = reinterpret_cast<const size_t *>(extra->dst_metadata);
-        const size_t *src_data_offsets = reinterpret_cast<const size_t *>(extra->src_metadata);
-
-        size_t field_count = ad.field_count;
-        for (size_t i = 0; i < field_count; ++i) {
-            kernels[i].extra.dst_metadata = extra->dst_metadata + metadata_offsets[i];
-            kernels[i].extra.src_metadata = extra->src_metadata + metadata_offsets[i];
-            kernels[i].kernel.single(dst + dst_data_offsets[i], src + src_data_offsets[i], &kernels[i].extra);
-        }
-    }
-};} // anonymous namespace
-
-void dynd::get_struct_assignment_kernel(const dtype& val_struct_dtype,
-                kernel_instance<unary_operation_pair_t>& out_kernel)
-{
-    if (val_struct_dtype.get_type_id() != struct_type_id) {
-        stringstream ss;
-        ss << "get_struct_assignment_kernel: provided dtype " << val_struct_dtype << " is not a struct dtype";
-        throw runtime_error(ss.str());
-    }
-    const struct_dtype *sd = static_cast<const struct_dtype *>(val_struct_dtype.extended());
-    size_t field_count = sd->get_field_count();
-
-    out_kernel.kernel.single = &struct_asn_kernel::single;
-    out_kernel.kernel.strided = NULL;
-
-    make_auxiliary_data<struct_asn_kernel::auxdata_storage>(out_kernel.extra.auxdata);
-    struct_asn_kernel::auxdata_storage& ad = out_kernel.extra.auxdata.get<struct_asn_kernel::auxdata_storage>();
-    ad.init(val_struct_dtype, field_count);
-    for (size_t i = 0, i_end = sd->get_field_count(); i != i_end; ++i) {
-        ::get_dtype_assignment_kernel(sd->get_field_types()[i], ad.kernels[i]);
-    }
-}
-
-/////////////////////////////////////////
-// struct to different struct assignment
-
-namespace { struct struct_struct_asn_kernel {
-    struct auxdata_storage {
-        dtype dst_dt, src_dt;
-        size_t field_count;
-        vector<int> field_reorder;
-        kernel_instance<unary_operation_pair_t> *kernels;
-
-        auxdata_storage()
-            : dst_dt(), src_dt(), field_reorder(), kernels(NULL)
-        {}
-        auxdata_storage(const auxdata_storage& rhs)
-            : dst_dt(rhs.dst_dt), src_dt(rhs.src_dt), field_count(rhs.field_count),
-                    field_reorder(rhs.field_reorder),
-                    kernels(new kernel_instance<unary_operation_pair_t>[field_count])
-        {
-            for (size_t i = 0; i < field_count; ++i) {
-                kernels[i].copy_from(rhs.kernels[i]);
-            }
-        }
-        ~auxdata_storage() {
-            delete[] kernels;
-        }
-
-        void init(const dtype& dst_d, const dtype& src_d, size_t fcount) {
-            dst_dt = dst_d;
-            src_dt = src_d;
-            field_count = fcount;
-            field_reorder.resize(fcount);
-            kernels = new kernel_instance<unary_operation_pair_t>[fcount];
-        }
-    };
-
-    static void single(char *dst, const char *src, unary_kernel_static_data *extra)
-    {
-        auxdata_storage& ad = get_auxiliary_data<auxdata_storage>(extra->auxdata);
-        const struct_dtype *dst_sd = static_cast<const struct_dtype *>(ad.dst_dt.extended());
-        const struct_dtype *src_sd = static_cast<const struct_dtype *>(ad.src_dt.extended());
-        kernel_instance<unary_operation_pair_t> *kernels = &ad.kernels[0];
-        const size_t *dst_metadata_offsets = &dst_sd->get_metadata_offsets()[0];
-        const size_t *src_metadata_offsets = &src_sd->get_metadata_offsets()[0];
-        const size_t *dst_data_offsets = reinterpret_cast<const size_t *>(extra->dst_metadata);
-        const size_t *src_data_offsets = reinterpret_cast<const size_t *>(extra->src_metadata);
-        size_t field_count = ad.field_count;
-
-        for (size_t i = 0; i < field_count; ++i) {
-            size_t i_src = ad.field_reorder[i];
-            kernels[i].extra.dst_metadata = extra->dst_metadata + dst_metadata_offsets[i];
-            kernels[i].extra.src_metadata = extra->src_metadata + src_metadata_offsets[i_src];
-            kernels[i].kernel.single(dst + dst_data_offsets[i], src + src_data_offsets[i_src], &kernels[i].extra);
-        }
-    }
-};} // anonymous namespace
-
-void dynd::get_struct_assignment_kernel(const dtype& dst_struct_dtype, const dtype& src_struct_dtype,
-                assign_error_mode errmode,
-                kernel_instance<unary_operation_pair_t>& out_kernel)
-{
-    if (src_struct_dtype.get_type_id() != struct_type_id) {
-        stringstream ss;
-        ss << "get_struct_assignment_kernel: provided source dtype " << src_struct_dtype << " is not a struct dtype";
-        throw runtime_error(ss.str());
-    }
-    if (dst_struct_dtype.get_type_id() != struct_type_id) {
-        stringstream ss;
-        ss << "get_struct_assignment_kernel: provided destination dtype " << dst_struct_dtype << " is not a struct dtype";
-        throw runtime_error(ss.str());
-    }
-    const struct_dtype *dst_sd = static_cast<const struct_dtype *>(dst_struct_dtype.extended());
-    const struct_dtype *src_sd = static_cast<const struct_dtype *>(src_struct_dtype.extended());
-    size_t field_count = dst_sd->get_field_count();
-
-    if (field_count != src_sd->get_field_count()) {
-        stringstream ss;
-        ss << "cannot assign dynd struct " << src_struct_dtype << " to " << dst_struct_dtype;
-        ss << " because they have different numbers of fields";
-        throw runtime_error(ss.str());
-    }
-
-    out_kernel.kernel.single = &struct_struct_asn_kernel::single;
-    out_kernel.kernel.strided = NULL;
-
-    make_auxiliary_data<struct_struct_asn_kernel::auxdata_storage>(out_kernel.extra.auxdata);
-    struct_struct_asn_kernel::auxdata_storage& ad = out_kernel.extra.auxdata.get<struct_struct_asn_kernel::auxdata_storage>();
-    ad.init(dst_struct_dtype, src_struct_dtype, field_count);
-    // Match up the fields
-    const string *dst_field_names = dst_sd->get_field_names();
-    const string *src_field_names = src_sd->get_field_names();
-    for (size_t i = 0; i != field_count; ++i) {
-        const std::string& dst_name = dst_field_names[i];
-        // TODO: accelerate this linear search if there are lots of fields?
-        const string *it = std::find(src_field_names, src_field_names + field_count, dst_name);
-        if (it == src_field_names + field_count) {
-            stringstream ss;
-            ss << "cannot assign dynd struct " << src_struct_dtype << " to " << dst_struct_dtype;
-            ss << " because they have different field names";
-            throw runtime_error(ss.str());
-        }
-        ad.field_reorder[i] = it - src_field_names;
-    }
-    // Create the kernels for copying individual fields
-    for (size_t i = 0; i != field_count; ++i) {
-        int i_src = ad.field_reorder[i];
-        ::get_dtype_assignment_kernel(dst_sd->get_field_types()[i], src_sd->get_field_types()[i_src],
-                            errmode, NULL, ad.kernels[i]);
-    }
-}
-
-/////////////////////////////////////////
-// fixedstruct to different fixedstruct assignment
-
 namespace {
-    struct fixedstruct_to_fixedstruct_kernel_extra {
-        typedef fixedstruct_to_fixedstruct_kernel_extra extra_type;
+    struct struct_kernel_extra {
+        typedef struct_kernel_extra extra_type;
 
         hierarchical_kernel_common_base base;
-        const fixedstruct_dtype *dst_fixedstruct_dt;
-        const char *dst_metadata;
-        size_t field_count;
-        // After this, there are 'field_count' of
-        // the following in a row
-        struct field_items {
-            size_t child_kernel_offset;
-            size_t src_data_offset;
-        };
-
-        static void single(char *dst, const char *src, hierarchical_kernel_common_base *extra)
-        {
-            char *eraw = reinterpret_cast<char *>(extra);
-            extra_type *e = reinterpret_cast<extra_type *>(extra);
-            const field_items *fi = reinterpret_cast<const field_items *>(e + 1);
-            const fixedstruct_dtype *dst_sd = e->dst_fixedstruct_dt;
-            const size_t *dst_data_offsets = dst_sd->get_data_offsets(e->dst_metadata);
-            size_t field_count = e->field_count;
-            hierarchical_kernel_common_base *echild;
-            unary_single_operation_t opchild;
-
-            for (size_t i = 0; i < field_count; ++i) {
-                echild  = reinterpret_cast<hierarchical_kernel_common_base *>(eraw + fi[i].child_kernel_offset);
-                opchild = echild->get_function<unary_single_operation_t>();
-                opchild(dst + dst_data_offsets[i], src + fi[i].src_data_offset, echild);
-            }
-        }
-
-        static void destruct(hierarchical_kernel_common_base *extra)
-        {
-            char *eraw = reinterpret_cast<char *>(extra);
-            extra_type *e = reinterpret_cast<extra_type *>(extra);
-            hierarchical_kernel_common_base *echild;
-            if (e->dst_fixedstruct_dt != NULL) {
-                base_dtype_decref(e->dst_fixedstruct_dt);
-            }
-            const field_items *fi = reinterpret_cast<const field_items *>(e + 1);
-            size_t field_count = e->field_count;
-            for (size_t i = 0; i < field_count; ++i) {
-                if (fi[i].child_kernel_offset != 0) {
-                    echild  = reinterpret_cast<hierarchical_kernel_common_base *>(eraw + fi[i].child_kernel_offset);
-                    if (echild->destructor != NULL) {
-                        echild->destructor(echild);
-                    }
-                }
-            }
-        }
-    };
-} // anonymous namespace
-
-size_t dynd::make_fixedstruct_assignment_kernel(
-                hierarchical_kernel<unary_single_operation_t> *out,
-                size_t offset_out,
-                const dtype& dst_fixedstruct_dt, const char *dst_metadata,
-                const dtype& src_fixedstruct_dt, const char *src_metadata,
-                assign_error_mode errmode,
-                const eval::eval_context *ectx)
-{
-    if (src_fixedstruct_dt.get_type_id() != fixedstruct_type_id) {
-        stringstream ss;
-        ss << "get_fixedstruct_assignment_kernel: provided source dtype " << src_fixedstruct_dt << " is not a fixedstruct dtype";
-        throw runtime_error(ss.str());
-    }
-    if (dst_fixedstruct_dt.get_type_id() != fixedstruct_type_id) {
-        stringstream ss;
-        ss << "get_fixedstruct_assignment_kernel: provided destination dtype " << dst_fixedstruct_dt << " is not a fixedstruct dtype";
-        throw runtime_error(ss.str());
-    }
-    const fixedstruct_dtype *dst_sd = static_cast<const fixedstruct_dtype *>(dst_fixedstruct_dt.extended());
-    const fixedstruct_dtype *src_sd = static_cast<const fixedstruct_dtype *>(src_fixedstruct_dt.extended());
-    size_t field_count = dst_sd->get_field_count();
-
-    if (field_count != src_sd->get_field_count()) {
-        stringstream ss;
-        ss << "cannot assign dynd struct " << src_fixedstruct_dt << " to " << dst_fixedstruct_dt;
-        ss << " because they have different numbers of fields";
-        throw runtime_error(ss.str());
-    }
-
-    size_t extra_size = sizeof(fixedstruct_to_fixedstruct_kernel_extra) +
-                    field_count * sizeof(fixedstruct_to_fixedstruct_kernel_extra::field_items);
-    out->ensure_capacity(offset_out + extra_size);
-    fixedstruct_to_fixedstruct_kernel_extra *e = out->get_at<fixedstruct_to_fixedstruct_kernel_extra>(offset_out);
-    e->base.function = &fixedstruct_to_fixedstruct_kernel_extra::single;
-    e->base.destructor = &fixedstruct_to_fixedstruct_kernel_extra::destruct;
-    e->dst_fixedstruct_dt = static_cast<const fixedstruct_dtype *>(dtype(dst_fixedstruct_dt).release());
-    e->dst_metadata = dst_metadata;
-    e->field_count = field_count;
-
-    // Match up the fields
-    const string *dst_field_names = dst_sd->get_field_names();
-    const string *src_field_names = src_sd->get_field_names();
-    vector<int> field_reorder(field_count);
-    for (size_t i = 0; i != field_count; ++i) {
-        const std::string& dst_name = dst_field_names[i];
-        // TODO: accelerate this linear search if there are lots of fields?
-        const string *it = std::find(src_field_names, src_field_names + field_count, dst_name);
-        if (it == src_field_names + field_count) {
-            stringstream ss;
-            ss << "cannot assign dynd struct " << src_fixedstruct_dt << " to " << dst_fixedstruct_dt;
-            ss << " because they have different field names";
-            throw runtime_error(ss.str());
-        }
-        field_reorder[i] = it - src_field_names;
-    }
-    // Create the kernels and dst offsets for copying individual fields
-    size_t current_offset = offset_out + extra_size;
-    fixedstruct_to_fixedstruct_kernel_extra::field_items *fi;
-    for (size_t i = 0; i != field_count; ++i) {
-        int i_src = field_reorder[i];
-        fi = reinterpret_cast<fixedstruct_to_fixedstruct_kernel_extra::field_items *>(e + 1);
-        fi[i].src_data_offset = src_sd->get_data_offsets_vector()[i_src];
-        out->ensure_capacity(current_offset);
-        fi[i].child_kernel_offset = current_offset - offset_out;
-        current_offset = ::make_assignment_kernel(out, current_offset,
-                        dst_sd->get_field_types()[i], dst_metadata + dst_sd->get_metadata_offsets()[i],
-                        src_sd->get_field_types()[i_src], src_metadata + src_sd->get_metadata_offsets()[i_src],
-                        errmode, ectx);
-        // Adding another kernel may have invalidated 'e', so get it again
-        e = out->get_at<fixedstruct_to_fixedstruct_kernel_extra>(offset_out);
-    }
-    return current_offset;
-}
-
-/////////////////////////////////////////
-// fixedstruct to struct assignment
-
-namespace { struct fixedstruct_struct_asn_kernel {
-    struct auxdata_storage {
-        dtype dst_dt;
-        size_t field_count;
-        vector<size_t> src_data_offsets;
-        vector<size_t> src_metadata_offsets;
-        kernel_instance<unary_operation_pair_t> *kernels;
-
-        auxdata_storage()
-            : dst_dt(), field_count(), src_data_offsets(), src_metadata_offsets(), kernels(NULL)
-        {}
-        auxdata_storage(const auxdata_storage& rhs)
-            : dst_dt(rhs.dst_dt), field_count(rhs.field_count),
-                    src_data_offsets(rhs.src_data_offsets), src_metadata_offsets(rhs.src_metadata_offsets),
-                    kernels(new kernel_instance<unary_operation_pair_t>[field_count])
-        {
-            for (size_t i = 0; i < field_count; ++i) {
-                kernels[i].copy_from(rhs.kernels[i]);
-            }
-        }
-        ~auxdata_storage() {
-            delete[] kernels;
-        }
-
-        void init(const dtype& dst_d, size_t fcount) {
-            dst_dt = dst_d;
-            field_count = fcount;
-            src_data_offsets.resize(fcount);
-            src_metadata_offsets.resize(fcount);
-            kernels = new kernel_instance<unary_operation_pair_t>[fcount];
-        }
-    };
-
-    static void single(char *dst, const char *src, unary_kernel_static_data *extra)
-    {
-        auxdata_storage& ad = get_auxiliary_data<auxdata_storage>(extra->auxdata);
-        const struct_dtype *dst_sd = static_cast<const struct_dtype *>(ad.dst_dt.extended());
-        kernel_instance<unary_operation_pair_t> *kernels = &ad.kernels[0];
-        const size_t *dst_metadata_offsets = &dst_sd->get_metadata_offsets()[0];
-        const size_t *src_metadata_offsets = &ad.src_metadata_offsets[0];
-        const size_t *dst_data_offsets = reinterpret_cast<const size_t *>(extra->dst_metadata);
-        const size_t *src_data_offsets = &ad.src_data_offsets[0];
-        size_t field_count = ad.field_count;
-
-        for (size_t i = 0; i < field_count; ++i) {
-            kernels[i].extra.dst_metadata = extra->dst_metadata + dst_metadata_offsets[i];
-            kernels[i].extra.src_metadata = extra->src_metadata + src_metadata_offsets[i];
-            kernels[i].kernel.single(dst + dst_data_offsets[i], src + src_data_offsets[i], &kernels[i].extra);
-        }
-    }
-};} // anonymous namespace
-
-void dynd::get_fixedstruct_to_struct_assignment_kernel(const dtype& dst_struct_dtype, const dtype& src_fixedstruct_dtype,
-                assign_error_mode errmode,
-                kernel_instance<unary_operation_pair_t>& out_kernel)
-{
-    if (src_fixedstruct_dtype.get_type_id() != fixedstruct_type_id) {
-        stringstream ss;
-        ss << "get_fixedstruct_to_struct_assignment_kernel: provided source dtype " << src_fixedstruct_dtype << " is not a fixedstruct dtype";
-        throw runtime_error(ss.str());
-    }
-    if (dst_struct_dtype.get_type_id() != struct_type_id) {
-        stringstream ss;
-        ss << "get_fixedstruct_to_struct_assignment_kernel: provided destination dtype " << dst_struct_dtype << " is not a struct dtype";
-        throw runtime_error(ss.str());
-    }
-    const struct_dtype *dst_sd = static_cast<const struct_dtype *>(dst_struct_dtype.extended());
-    const fixedstruct_dtype *src_sd = static_cast<const fixedstruct_dtype *>(src_fixedstruct_dtype.extended());
-    size_t field_count = dst_sd->get_field_count();
-
-    if (field_count != src_sd->get_field_count()) {
-        stringstream ss;
-        ss << "cannot assign dynd struct " << src_fixedstruct_dtype << " to " << dst_struct_dtype;
-        ss << " because they have different numbers of fields";
-        throw runtime_error(ss.str());
-    }
-
-    out_kernel.kernel.single = &fixedstruct_struct_asn_kernel::single;
-    out_kernel.kernel.strided = NULL;
-
-    make_auxiliary_data<fixedstruct_struct_asn_kernel::auxdata_storage>(out_kernel.extra.auxdata);
-    fixedstruct_struct_asn_kernel::auxdata_storage& ad = out_kernel.extra.auxdata.get<fixedstruct_struct_asn_kernel::auxdata_storage>();
-    ad.init(dst_struct_dtype, field_count);
-    // Match up the fields
-    const string *dst_field_names = dst_sd->get_field_names();
-    const string *src_field_names = src_sd->get_field_names();
-    vector<int> field_reorder(field_count);
-    for (size_t i = 0; i != field_count; ++i) {
-        const std::string& dst_name = dst_field_names[i];
-        // TODO: accelerate this linear search if there are lots of fields?
-        const string *it = std::find(src_field_names, src_field_names + field_count, dst_name);
-        if (it == src_field_names + field_count) {
-            stringstream ss;
-            ss << "cannot assign dynd struct " << src_fixedstruct_dtype << " to " << dst_struct_dtype;
-            ss << " because they have different field names";
-            throw runtime_error(ss.str());
-        }
-        field_reorder[i] = it - src_field_names;
-    }
-    // Create the kernels and src offsets for copying individual fields
-    for (size_t i = 0; i != field_count; ++i) {
-        int i_src = field_reorder[i];
-        ::get_dtype_assignment_kernel(dst_sd->get_field_types()[i], src_sd->get_field_types()[i_src],
-                            errmode, NULL, ad.kernels[i]);
-        ad.src_data_offsets[i] = src_sd->get_data_offsets_vector()[i_src];
-        ad.src_metadata_offsets[i] = src_sd->get_metadata_offsets()[i_src];
-    }
-}
-
-
-/////////////////////////////////////////
-// struct to fixedstruct assignment
-
-namespace {
-    struct struct_to_fixedstruct_kernel_extra {
-        typedef struct_to_fixedstruct_kernel_extra extra_type;
-
-        hierarchical_kernel_common_base base;
-        const struct_dtype *src_struct_dt;
-        const char *src_metadata;
         size_t field_count;
         // After this, there are 'field_count' of
         // the following in a row
         struct field_items {
             size_t child_kernel_offset;
             size_t dst_data_offset;
+            size_t src_data_offset;
         };
 
-        static void single(char *dst, const char *src, hierarchical_kernel_common_base *extra)
+        static void single(char *dst, const char *src, unary_kernel_static_data *extra)
         {
             char *eraw = reinterpret_cast<char *>(extra);
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             const field_items *fi = reinterpret_cast<const field_items *>(e + 1);
-            const struct_dtype *src_sd = e->src_struct_dt;
-            const size_t *src_data_offsets = reinterpret_cast<const size_t *>(e->src_metadata);
             size_t field_count = e->field_count;
             hierarchical_kernel_common_base *echild;
             unary_single_operation_t opchild;
 
             for (size_t i = 0; i < field_count; ++i) {
-                echild  = reinterpret_cast<hierarchical_kernel_common_base *>(eraw + fi[i].child_kernel_offset);
+                const field_items& item = fi[i];
+                echild  = reinterpret_cast<hierarchical_kernel_common_base *>(eraw + item.child_kernel_offset);
                 opchild = echild->get_function<unary_single_operation_t>();
-                opchild(dst + fi[i].dst_data_offset, src + src_data_offsets[i], echild);
+                opchild(dst + item.dst_data_offset, src + item.src_data_offset, echild);
             }
         }
 
@@ -480,14 +50,12 @@ namespace {
             char *eraw = reinterpret_cast<char *>(extra);
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             hierarchical_kernel_common_base *echild;
-            if (e->src_struct_dt != NULL) {
-                base_dtype_decref(e->src_struct_dt);
-            }
             const field_items *fi = reinterpret_cast<const field_items *>(e + 1);
             size_t field_count = e->field_count;
             for (size_t i = 0; i < field_count; ++i) {
-                if (fi[i].child_kernel_offset != 0) {
-                    echild  = reinterpret_cast<hierarchical_kernel_common_base *>(eraw + fi[i].child_kernel_offset);
+                const field_items& item = fi[i];
+                if (item.child_kernel_offset != 0) {
+                    echild  = reinterpret_cast<hierarchical_kernel_common_base *>(eraw + item.child_kernel_offset);
                     if (echild->destructor != NULL) {
                         echild->destructor(echild);
                     }
@@ -497,43 +65,100 @@ namespace {
     };
 } // anonymous namespace
 
-size_t dynd::make_struct_to_fixedstruct_assignment_kernel(
+/////////////////////////////////////////
+// struct to identical struct assignment
+
+size_t dynd::make_struct_identical_assignment_kernel(
                 hierarchical_kernel<unary_single_operation_t> *out,
                 size_t offset_out,
-                const dtype& dst_fixedstruct_dt, const char *dst_metadata,
+                const dtype& val_struct_dt,
+                const char *dst_metadata, const char *src_metadata,
+                assign_error_mode errmode,
+                const eval::eval_context *ectx)
+{
+    if (val_struct_dt.get_kind() != struct_kind) {
+        stringstream ss;
+        ss << "make_struct_identical_assignment_kernel: provided dtype " << val_struct_dt << " is not of struct kind";
+        throw runtime_error(ss.str());
+    }
+    if (val_struct_dt.get_type_id() == fixedstruct_type_id &&
+                    val_struct_dt.get_memory_management() == pod_memory_management) {
+        // For POD fixedstructs, get a trivial memory copy kernel
+        return make_pod_dtype_assignment_kernel(out, offset_out,
+                        val_struct_dt.get_data_size(), val_struct_dt.get_alignment());
+    }
+
+    const base_struct_dtype *sd = static_cast<const base_struct_dtype *>(val_struct_dt.extended());
+    size_t field_count = sd->get_field_count();
+
+    size_t extra_size = sizeof(struct_kernel_extra) +
+                    field_count * sizeof(struct_kernel_extra::field_items);
+    out->ensure_capacity(offset_out + extra_size);
+    struct_kernel_extra *e = out->get_at<struct_kernel_extra>(offset_out);
+    e->base.function = &struct_kernel_extra::single;
+    e->base.destructor = &struct_kernel_extra::destruct;
+    e->field_count = field_count;
+
+    const size_t *dst_data_offsets = sd->get_data_offsets(dst_metadata);
+    const size_t *src_data_offsets = sd->get_data_offsets(dst_metadata);
+
+    // Create the kernels and dst offsets for copying individual fields
+    size_t current_offset = offset_out + extra_size;
+    struct_kernel_extra::field_items *fi;
+    for (size_t i = 0; i != field_count; ++i) {
+        out->ensure_capacity(current_offset);
+        fi = reinterpret_cast<struct_kernel_extra::field_items *>(e + 1) + i;
+        fi->child_kernel_offset = current_offset - offset_out;
+        fi->dst_data_offset = dst_data_offsets[i];
+        fi->src_data_offset = src_data_offsets[i];
+        current_offset = ::make_assignment_kernel(out, current_offset,
+                        sd->get_field_types()[i], dst_metadata + sd->get_metadata_offsets()[i],
+                        sd->get_field_types()[i], src_metadata + sd->get_metadata_offsets()[i],
+                        errmode, ectx);
+        // Adding another kernel may have invalidated 'e', so get it again
+        e = out->get_at<struct_kernel_extra>(offset_out);
+    }
+    return current_offset;
+}
+
+/////////////////////////////////////////
+// struct to different struct assignment
+
+size_t dynd::make_struct_assignment_kernel(
+                hierarchical_kernel<unary_single_operation_t> *out,
+                size_t offset_out,
+                const dtype& dst_struct_dt, const char *dst_metadata,
                 const dtype& src_struct_dt, const char *src_metadata,
                 assign_error_mode errmode,
                 const eval::eval_context *ectx)
 {
-    if (src_struct_dt.get_type_id() != struct_type_id) {
+    if (src_struct_dt.get_kind() != struct_kind) {
         stringstream ss;
-        ss << "make_struct_to_fixedstruct_assignment_kernel: provided source dtype " << src_struct_dt << " is not a struct dtype";
+        ss << "make_struct_assignment_kernel: provided source dtype " << src_struct_dt << " is not of struct kind";
         throw runtime_error(ss.str());
     }
-    if (dst_fixedstruct_dt.get_type_id() != fixedstruct_type_id) {
+    if (dst_struct_dt.get_kind() != struct_kind) {
         stringstream ss;
-        ss << "make_struct_to_fixedstruct_assignment_kernel: provided destination dtype " << dst_fixedstruct_dt << " is not a fixedstruct dtype";
+        ss << "make_struct_assignment_kernel: provided destination dtype " << dst_struct_dt << " is not of struct kind";
         throw runtime_error(ss.str());
     }
-    const fixedstruct_dtype *dst_sd = static_cast<const fixedstruct_dtype *>(dst_fixedstruct_dt.extended());
-    const struct_dtype *src_sd = static_cast<const struct_dtype *>(src_struct_dt.extended());
-    size_t field_count = src_sd->get_field_count();
+    const base_struct_dtype *dst_sd = static_cast<const base_struct_dtype *>(dst_struct_dt.extended());
+    const base_struct_dtype *src_sd = static_cast<const base_struct_dtype *>(src_struct_dt.extended());
+    size_t field_count = dst_sd->get_field_count();
 
-    if (field_count != dst_sd->get_field_count()) {
+    if (field_count != src_sd->get_field_count()) {
         stringstream ss;
-        ss << "cannot assign dynd struct " << src_struct_dt << " to " << dst_fixedstruct_dt;
+        ss << "cannot assign dynd struct " << src_struct_dt << " to " << dst_struct_dt;
         ss << " because they have different numbers of fields";
         throw runtime_error(ss.str());
     }
 
-    size_t extra_size = sizeof(struct_to_fixedstruct_kernel_extra) +
-                    field_count * sizeof(struct_to_fixedstruct_kernel_extra::field_items);
+    size_t extra_size = sizeof(struct_kernel_extra) +
+                    field_count * sizeof(struct_kernel_extra::field_items);
     out->ensure_capacity(offset_out + extra_size);
-    struct_to_fixedstruct_kernel_extra *e = out->get_at<struct_to_fixedstruct_kernel_extra>(offset_out);
-    e->base.function = &struct_to_fixedstruct_kernel_extra::single;
-    e->base.destructor = &struct_to_fixedstruct_kernel_extra::destruct;
-    e->src_struct_dt = static_cast<const struct_dtype *>(dtype(src_struct_dt).release());
-    e->src_metadata = src_metadata;
+    struct_kernel_extra *e = out->get_at<struct_kernel_extra>(offset_out);
+    e->base.function = &struct_kernel_extra::single;
+    e->base.destructor = &struct_kernel_extra::destruct;
     e->field_count = field_count;
 
     // Match up the fields
@@ -541,32 +166,41 @@ size_t dynd::make_struct_to_fixedstruct_assignment_kernel(
     const string *src_field_names = src_sd->get_field_names();
     vector<int> field_reorder(field_count);
     for (size_t i = 0; i != field_count; ++i) {
-        const std::string& src_name = src_field_names[i];
+        const std::string& dst_name = dst_field_names[i];
         // TODO: accelerate this linear search if there are lots of fields?
-        const string *it = std::find(dst_field_names, dst_field_names + field_count, src_name);
-        if (it == dst_field_names + field_count) {
+        const string *it = std::find(src_field_names, src_field_names + field_count, dst_name);
+        if (it == src_field_names + field_count) {
             stringstream ss;
-            ss << "cannot assign dynd struct " << src_struct_dt << " to " << dst_fixedstruct_dt;
+            ss << "cannot assign dynd struct " << src_struct_dt << " to " << dst_struct_dt;
             ss << " because they have different field names";
             throw runtime_error(ss.str());
         }
-        field_reorder[i] = it - dst_field_names;
+        field_reorder[i] = it - src_field_names;
     }
+
+    const dtype *src_field_types = src_sd->get_field_types();
+    const dtype *dst_field_types = dst_sd->get_field_types();
+    const size_t *src_data_offsets = src_sd->get_data_offsets(src_metadata);
+    const size_t *dst_data_offsets = dst_sd->get_data_offsets(dst_metadata);
+    const size_t *src_metadata_offsets = src_sd->get_metadata_offsets();
+    const size_t *dst_metadata_offsets = dst_sd->get_metadata_offsets();
+
     // Create the kernels and dst offsets for copying individual fields
     size_t current_offset = offset_out + extra_size;
-    struct_to_fixedstruct_kernel_extra::field_items *fi;
+    struct_kernel_extra::field_items *fi;
     for (size_t i = 0; i != field_count; ++i) {
-        int i_dst = field_reorder[i];
-        fi = reinterpret_cast<struct_to_fixedstruct_kernel_extra::field_items *>(e + 1);
-        fi[i].dst_data_offset = dst_sd->get_data_offsets_vector()[i_dst];
+        int i_src = field_reorder[i];
         out->ensure_capacity(current_offset);
-        fi[i].child_kernel_offset = current_offset - offset_out;
+        fi = reinterpret_cast<struct_kernel_extra::field_items *>(e + 1) + i;
+        fi->child_kernel_offset = current_offset - offset_out;
+        fi->dst_data_offset = dst_data_offsets[i];
+        fi->src_data_offset = src_data_offsets[i_src];
         current_offset = ::make_assignment_kernel(out, current_offset,
-                        dst_sd->get_field_types()[i_dst], dst_metadata + dst_sd->get_metadata_offsets()[i_dst],
-                        src_sd->get_field_types()[i], src_metadata + src_sd->get_metadata_offsets()[i],
+                        dst_field_types[i], dst_metadata + dst_metadata_offsets[i],
+                        src_field_types[i_src], src_metadata + src_metadata_offsets[i_src],
                         errmode, ectx);
         // Adding another kernel may have invalidated 'e', so get it again
-        e = out->get_at<struct_to_fixedstruct_kernel_extra>(offset_out);
+        e = out->get_at<struct_kernel_extra>(offset_out);
     }
     return current_offset;
 }

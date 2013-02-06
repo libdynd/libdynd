@@ -216,6 +216,7 @@ TEST(DType, SingleCompareFloat) {
     kernel_instance<compare_operations_t> k;
     dtype d;
 
+    d = make_dtype<float>();
     TEST_COMPARISONS(float, 1.0, 2.0);
     TEST_COMPARISONS(float, 2.0, 2.0);
     TEST_COMPARISONS(float, 1.0, 0.0);
@@ -223,6 +224,7 @@ TEST(DType, SingleCompareFloat) {
     TEST_COMPARISONS(float, -1.0, -1.0);
     TEST_COMPARISONS(float, -1.0, -2.0);
 
+    d = make_dtype<double>();
     TEST_COMPARISONS(double, 1.0, 2.0);
     TEST_COMPARISONS(double, 2.0, 2.0);
     TEST_COMPARISONS(double, 1.0, 0.0);

@@ -305,29 +305,36 @@ void struct_dtype::get_single_compare_kernel(kernel_instance<compare_operations_
     throw runtime_error("struct_dtype::get_single_compare_kernel is unimplemented");
 }
 
-void struct_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const dtype& src_dt,
+size_t struct_dtype::make_assignment_kernel(
+                hierarchical_kernel<unary_single_operation_t> *out,
+                size_t offset_out,
+                const dtype& dst_dt, const char *dst_metadata,
+                const dtype& src_dt, const char *src_metadata,
                 assign_error_mode errmode,
-                kernel_instance<unary_operation_pair_t>& out_kernel) const
+                const eval::eval_context *ectx) const
 {
     if (this == dst_dt.extended()) {
         if (this == src_dt.extended()) {
-            get_struct_assignment_kernel(dst_dt, out_kernel);
-        } else if (src_dt.get_type_id() == struct_type_id) {
-            get_struct_assignment_kernel(dst_dt, src_dt, errmode, out_kernel);
-        } else if (src_dt.get_type_id() == fixedstruct_type_id) {
-            get_fixedstruct_to_struct_assignment_kernel(dst_dt, src_dt, errmode, out_kernel);
+            return make_struct_identical_assignment_kernel(out, offset_out,
+                            dst_dt,
+                            dst_metadata, src_metadata,
+                            errmode, ectx);
+        } else if (src_dt.get_kind() == struct_kind) {
+            return make_struct_assignment_kernel(out, offset_out,
+                            dst_dt, dst_metadata,
+                            src_dt, src_metadata,
+                            errmode, ectx);
         } else if (!src_dt.is_builtin()) {
-            src_dt.extended()->get_dtype_assignment_kernel(dst_dt, src_dt, errmode, out_kernel);
-        } else {
-            stringstream ss;
-            ss << "assignment from " << src_dt << " to " << dst_dt << " is not implemented yet";
-            throw runtime_error(ss.str());
+            return src_dt.extended()->make_assignment_kernel(out, offset_out,
+                            dst_dt, dst_metadata,
+                            src_dt, src_metadata,
+                            errmode, ectx);
         }
-    } else {
-        stringstream ss;
-        ss << "assignment from " << src_dt << " to " << dst_dt << " is not implemented yet";
-        throw runtime_error(ss.str());
     }
+
+    stringstream ss;
+    ss << "Cannot assign from " << src_dt << " to " << dst_dt;
+    throw runtime_error(ss.str());
 }
 
 bool struct_dtype::operator==(const base_dtype& rhs) const

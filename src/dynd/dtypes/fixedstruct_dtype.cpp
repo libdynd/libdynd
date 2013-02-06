@@ -379,15 +379,12 @@ size_t fixedstruct_dtype::make_assignment_kernel(
 {
     if (this == dst_dt.extended()) {
         if (this == src_dt.extended()) {
-            return ::make_pod_dtype_assignment_kernel(out, offset_out,
-                            get_data_size(), get_alignment());
-        } else if (src_dt.get_type_id() == fixedstruct_type_id) {
-            return make_fixedstruct_assignment_kernel(out, offset_out,
-                            dst_dt, dst_metadata,
-                            src_dt, src_metadata,
+            return make_struct_identical_assignment_kernel(out, offset_out,
+                            dst_dt,
+                            dst_metadata, src_metadata,
                             errmode, ectx);
-        } else if (src_dt.get_type_id() == struct_type_id) {
-            return make_struct_to_fixedstruct_assignment_kernel(out, offset_out,
+        } else if (src_dt.get_kind() == struct_kind) {
+            return make_struct_assignment_kernel(out, offset_out,
                             dst_dt, dst_metadata,
                             src_dt, src_metadata,
                             errmode, ectx);
