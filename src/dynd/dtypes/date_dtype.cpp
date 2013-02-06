@@ -335,12 +335,14 @@ static ndobject function_ndo_replace(const ndobject& n, int32_t year, int32_t mo
     ndobject_iter<1, 1> iter(result, n);
 
     // Get a kernel to produce elements if the input is an expression
-    kernel_instance<unary_operation_pair_t> kernel;
+    hierarchical_kernel<unary_single_operation_t> k;
+    bool use_kernel = false;
     if (iter.get_uniform_dtype<1>().get_kind() == expression_kind) {
-        get_dtype_assignment_kernel(iter.get_uniform_dtype<1>().value_dtype(), iter.get_uniform_dtype<1>(),
-                        assign_error_none, NULL, kernel);
-        kernel.extra.dst_metadata = NULL;
-        kernel.extra.src_metadata = iter.metadata<1>();
+        make_assignment_kernel(&k, 0,
+                        iter.get_uniform_dtype<1>().value_dtype(), NULL,
+                        iter.get_uniform_dtype<1>(), iter.metadata<1>(),
+                        assign_error_default, &eval::default_eval_context);
+        use_kernel = true;
     }
     int32_t date;
     const date_dtype *dd = static_cast<const date_dtype *>(iter.get_uniform_dtype<1>().value_dtype().extended());
@@ -349,8 +351,10 @@ static ndobject function_ndo_replace(const ndobject& n, int32_t year, int32_t mo
         // Loop over all the elements
         do {
             // Get the date
-            if (kernel.kernel.single) {
-                kernel.kernel.single(reinterpret_cast<char *>(&date), iter.data<1>(), &kernel.extra);
+            if (use_kernel) {
+                k.get()->get_function<unary_single_operation_t>()(
+                                reinterpret_cast<char *>(&date),
+                                iter.data<1>(), k.get());
             } else {
                 date = *reinterpret_cast<const int32_t *>(iter.data<1>());
             }

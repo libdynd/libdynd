@@ -332,3 +332,14 @@ TEST(DateDType, Replace) {
     EXPECT_THROW(a.f("replace", 2000, 2, 0), runtime_error);
     EXPECT_THROW(a.f("replace", 2000, 2, 30), runtime_error);
 }
+
+TEST(DateDType, ReplaceOfConvert) {
+    ndobject a;
+
+    // Make an expression dtype with value type 'date'
+    a = ndobject("1955-03-13").cast_scalars(make_date_dtype());
+    EXPECT_EQ(make_convert_dtype(make_date_dtype(), make_string_dtype()),
+                    a.get_dtype());
+    // Call replace on it
+    EXPECT_EQ("2013-03-13", a.f("replace", 2013).as<string>());
+}
