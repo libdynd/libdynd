@@ -147,8 +147,47 @@ namespace {
         }
     };
 
+   struct string_to_json_kernel_extra {
+        typedef string_to_json_kernel_extra extra_type;
+
+        hierarchical_kernel_common_base base;
+        const char *dst_metadata;
+        bool validate;
+
+        static void single(char *dst, const char *src, hierarchical_kernel_common_base *extra)
+        {
+            extra_type *e = reinterpret_cast<extra_type *>(extra);
+            const json_dtype_metadata *md = reinterpret_cast<const json_dtype_metadata *>(e->dst_metadata);
+            json_dtype_data *out_d = reinterpret_cast<json_dtype_data *>(dst);
+            // First copy it as a string
+            (e+1)->base.get_function<unary_single_operation_t>()(dst, src, &(e+1)->base);
+            // Then validate that it's correct JSON
+            if (e->validate) {
+                try {
+                    validate_json(out_d->begin, out_d->end);
+                } catch(const std::exception&) {
+                    // Free the memory allocated for the output json data
+                    memory_block_pod_allocator_api *allocator = get_memory_block_pod_allocator_api(md->blockref);
+                    allocator->allocate(md->blockref, 0, 1, &out_d->begin, &out_d->end);
+                    out_d->begin = NULL;
+                    out_d->end = NULL;
+                    throw;
+                }
+            }
+        }
+
+        static void destruct(hierarchical_kernel_common_base *extra)
+        {
+            extra_type *e = reinterpret_cast<extra_type *>(extra);
+            hierarchical_kernel_common_base *echild = &(e + 1)->base;
+            if (echild->destructor) {
+                echild->destructor(echild);
+            }
+        }
+    };
+
    struct json_to_string_assign {
-        // Assign from a categorical dtype to some other dtype
+        // Assign from a json string to some other string
         struct auxdata_storage {
             dtype dst_string_dtype;
             assign_error_mode errmode;
@@ -302,4 +341,73 @@ void json_dtype::metadata_debug_print(const char *metadata, std::ostream& o, con
     const json_dtype_metadata *md = reinterpret_cast<const json_dtype_metadata *>(metadata);
     o << indent << "json metadata\n";
     memory_block_debug_print(md->blockref, o, indent + " ");
+}
+
+size_t json_dtype::make_assignment_kernel(
+                hierarchical_kernel<unary_single_operation_t> *out,
+                size_t offset_out,
+                const dtype& dst_dt, const char *dst_metadata,
+                const dtype& src_dt, const char *src_metadata,
+                assign_error_mode errmode,
+                const eval::eval_context *ectx) const
+{
+    if (this == dst_dt.extended()) {
+        switch (src_dt.get_type_id()) {
+            case json_type_id: {
+                // Assume the input is valid JSON when copying from json to json types
+                return make_blockref_string_assignment_kernel(out, offset_out,
+                                dst_metadata, string_encoding_utf_8,
+                                src_metadata, string_encoding_utf_8,
+                                errmode, ectx);
+            }
+            case string_type_id:
+            case fixedstring_type_id: {
+                out->ensure_capacity(offset_out + sizeof(string_to_json_kernel_extra));
+                string_to_json_kernel_extra *e = out->get_at<string_to_json_kernel_extra>(offset_out);
+                e->base.function = string_to_json_kernel_extra::single;
+                e->base.destructor = string_to_json_kernel_extra::destruct;
+                e->dst_metadata = dst_metadata;
+                e->validate = (errmode != assign_error_none);
+                if (src_dt.get_type_id() == string_type_id) {
+                    return make_blockref_string_assignment_kernel(
+                                    out, offset_out + sizeof(string_to_json_kernel_extra),
+                                    dst_metadata, string_encoding_utf_8,
+                                    src_metadata,
+                                    static_cast<const base_string_dtype *>(src_dt.extended())->get_encoding(),
+                                    errmode, ectx);
+                } else {
+                    return make_fixedstring_to_blockref_string_assignment_kernel(
+                                    out, offset_out + sizeof(string_to_json_kernel_extra),
+                                    dst_metadata, string_encoding_utf_8,
+                                    src_dt.get_data_size(),
+                                    static_cast<const base_string_dtype *>(src_dt.extended())->get_encoding(),
+                                    errmode, ectx);
+                }
+            }
+            default: {
+                if (!src_dt.is_builtin()) {
+                    return src_dt.extended()->make_assignment_kernel(out, offset_out,
+                                    dst_dt, dst_metadata,
+                                    src_dt, src_metadata,
+                                    errmode, ectx);
+                } else {
+                    return make_builtin_to_string_assignment_kernel(out, offset_out,
+                                dst_dt, dst_metadata,
+                                src_dt.get_type_id(),
+                                errmode, ectx);
+                }
+            }
+        }
+    } else {
+        if (dst_dt.is_builtin()) {
+            return make_string_to_builtin_assignment_kernel(out, offset_out,
+                            dst_dt.get_type_id(),
+                            src_dt, src_metadata,
+                            errmode, ectx);
+        } else {
+            stringstream ss;
+            ss << "Cannot assign from " << src_dt << " to " << dst_dt;
+            throw runtime_error(ss.str());
+        }
+    }
 }
