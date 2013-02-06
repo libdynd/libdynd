@@ -11,6 +11,7 @@
 #include <dynd/ndobject.hpp>
 #include <dynd/dtypes/date_dtype.hpp>
 #include <dynd/dtypes/date_property_dtype.hpp>
+#include <dynd/dtypes/strided_array_dtype.hpp>
 #include <dynd/dtypes/fixedstring_dtype.hpp>
 #include <dynd/dtypes/string_dtype.hpp>
 #include <dynd/dtypes/convert_dtype.hpp>
@@ -258,6 +259,19 @@ TEST(DateDType, StrFTime) {
     EXPECT_EQ("1931-12-12 346 49 6 49", b.at(0).as<string>());
     EXPECT_EQ("2013-05-14 134 19 2 19", b.at(1).as<string>());
     EXPECT_EQ("2012-12-25 360 52 2 52", b.at(2).as<string>());
+}
+
+TEST(DateDType, StrFTimeOfConvert) {
+    // First create a date array which is still a convert expression dtype
+    const char *vals[] = {"1920-03-12", "2013-01-01", "2000-12-25"};
+    ndobject a = ndobject(vals).cast_scalars(make_date_dtype());
+    EXPECT_EQ(make_strided_array_dtype(make_convert_dtype(make_date_dtype(), make_string_dtype())),
+                    a.get_dtype());
+
+    ndobject b = a.f("strftime", "%Y %m %d");
+    EXPECT_EQ("1920 03 12", b.at(0).as<string>());
+    EXPECT_EQ("2013 01 01", b.at(1).as<string>());
+    EXPECT_EQ("2000 12 25", b.at(2).as<string>());
 }
 
 #if defined(_MSC_VER)

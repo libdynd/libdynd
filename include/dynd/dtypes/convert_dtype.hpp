@@ -64,6 +64,23 @@ public:
                     const char *dst_metadata, const char *src_metadata,
                     const eval::eval_context *ectx) const;
 
+    // Propagate properties and functions from the value dtype
+    void get_dynamic_ndobject_properties(
+                    const std::pair<std::string, gfunc::callable> **out_properties,
+                    size_t *out_count) const
+    {
+        if (!m_value_dtype.is_builtin()) {
+            m_value_dtype.extended()->get_dynamic_ndobject_properties(out_properties, out_count);
+        }
+    }
+    void get_dynamic_ndobject_functions(
+                    const std::pair<std::string, gfunc::callable> **out_functions,
+                    size_t *out_count) const
+    {
+        if (!m_value_dtype.is_builtin()) {
+            m_value_dtype.extended()->get_dynamic_ndobject_functions(out_functions, out_count);
+        }
+    }
 };
 
 /**

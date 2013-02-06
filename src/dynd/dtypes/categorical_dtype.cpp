@@ -392,7 +392,7 @@ size_t categorical_dtype::make_assignment_kernel(
                     e->base.function = &category_to_categorical_kernel_extra::single_uint32;
                     break;
                 default:
-                    throw runtime_error("internal error in categorical_dtype::get_dtype_assignment_kernel");
+                    throw runtime_error("internal error in categorical_dtype::make_assignment_kernel");
             }
             e->base.destructor = &category_to_categorical_kernel_extra::destruct;
             // The kernel dtype owns a reference to this dtype
@@ -426,7 +426,7 @@ size_t categorical_dtype::make_assignment_kernel(
                     e->base.function = &categorical_to_other_kernel_extra::single_uint32;
                     break;
                 default:
-                    throw runtime_error("internal error in categorical_dtype::get_dtype_assignment_kernel");
+                    throw runtime_error("internal error in categorical_dtype::make_assignment_kernel");
             }
             e->base.destructor = &categorical_to_other_kernel_extra::destruct;
             // The kernel dtype owns a reference to this dtype

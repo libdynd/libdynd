@@ -263,12 +263,14 @@ static ndobject function_ndo_strftime(const ndobject& n, const std::string& form
     // TODO: lazy evaluation?
     ndobject result = empty_like(n, make_string_dtype(string_encoding_utf_8));
     ndobject_iter<1, 1> iter(result, n);
-    kernel_instance<unary_operation_pair_t> kernel;
+    hierarchical_kernel<unary_single_operation_t> k;
+    bool use_kernel = false;
     if (iter.get_uniform_dtype<1>().get_kind() == expression_kind) {
-        get_dtype_assignment_kernel(iter.get_uniform_dtype<1>().value_dtype(), iter.get_uniform_dtype<1>(),
-                        assign_error_none, NULL, kernel);
-        kernel.extra.dst_metadata = NULL;
-        kernel.extra.src_metadata = iter.metadata<1>();
+        make_assignment_kernel(&k, 0,
+                        iter.get_uniform_dtype<1>().value_dtype(), NULL,
+                        iter.get_uniform_dtype<1>(), iter.metadata<1>(),
+                        assign_error_default, &eval::default_eval_context);
+        use_kernel = true;
     }
     int32_t date;
     const base_string_dtype *esd = static_cast<const base_string_dtype *>(iter.get_uniform_dtype<0>().extended());
@@ -277,8 +279,10 @@ static ndobject function_ndo_strftime(const ndobject& n, const std::string& form
     if (!iter.empty()) {
         do {
             // Get the date
-            if (kernel.kernel.single) {
-                kernel.kernel.single(reinterpret_cast<char *>(&date), iter.data<1>(), &kernel.extra);
+            if (use_kernel) {
+                k.get()->get_function<unary_single_operation_t>()(
+                                reinterpret_cast<char *>(&date),
+                                iter.data<1>(), k.get());
             } else {
                 date = *reinterpret_cast<const int32_t *>(iter.data<1>());
             }
