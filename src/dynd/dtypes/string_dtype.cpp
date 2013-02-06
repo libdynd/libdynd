@@ -170,45 +170,6 @@ void string_dtype::get_single_compare_kernel(kernel_instance<compare_operations_
     get_string_comparison_kernel(m_encoding, out_kernel);
 }
 
-void string_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const dtype& src_dt,
-                assign_error_mode errmode,
-                kernel_instance<unary_operation_pair_t>& out_kernel) const
-{
-    if (this == dst_dt.extended()) {
-        switch (src_dt.get_type_id()) {
-            case string_type_id: {
-                const string_dtype *src_fs = static_cast<const string_dtype *>(src_dt.extended());
-                get_blockref_string_assignment_kernel(m_encoding, src_fs->m_encoding, errmode, out_kernel);
-                break;
-            }
-            case fixedstring_type_id: {
-                const base_string_dtype *src_fs = static_cast<const base_string_dtype *>(src_dt.extended());
-                get_fixedstring_to_blockref_string_assignment_kernel(m_encoding,
-                                        src_fs->get_data_size(), src_fs->get_encoding(),
-                                        errmode, out_kernel);
-                break;
-            }
-            default: {
-                if (!src_dt.is_builtin()) {
-                    src_dt.extended()->get_dtype_assignment_kernel(dst_dt, src_dt, errmode, out_kernel);
-                } else {
-                    get_builtin_to_string_assignment_kernel(dst_dt, src_dt.get_type_id(), errmode, out_kernel);
-                }
-                break;
-            }
-        }
-    } else {
-        if (dst_dt.is_builtin()) {
-            get_string_to_builtin_assignment_kernel(dst_dt.get_type_id(), src_dt, errmode, out_kernel);
-        } else {
-            stringstream ss;
-            ss << "assignment from " << src_dt << " to " << dst_dt << " is not implemented yet";
-            throw runtime_error(ss.str());
-        }
-    }
-}
-
-
 bool string_dtype::operator==(const base_dtype& rhs) const
 {
     if (this == &rhs) {

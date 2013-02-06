@@ -9,7 +9,6 @@
 #include "inc_gtest.hpp"
 
 #include <dynd/dtype.hpp>
-#include <dynd/dtypes/fixedstring_dtype.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -126,10 +125,6 @@ TEST(DType, BasicConstructor) {
     EXPECT_TRUE(d.is_builtin());
 }
 
-
-TEST(DType, SingleCompare) {
-
-
 #define TEST_COMPARISONS(type_id, type, lhs, rhs) \
     { \
         kernel_instance<compare_operations_t> k; \
@@ -144,11 +139,16 @@ TEST(DType, SingleCompare) {
         EXPECT_EQ(k.kernel.ops[compare_operations_t::greater_id]((char *)&v1, (char *)&v2, &k.extra), (type)lhs > (type)rhs); \
     }
 
+
+TEST(DType, SingleCompareBool) {
     TEST_COMPARISONS(bool_type_id, bool, 0, 1)
     TEST_COMPARISONS(bool_type_id, bool, 0, 0)
     TEST_COMPARISONS(bool_type_id, bool, 1, 0)
     TEST_COMPARISONS(bool_type_id, bool, 1, 1)
+}
 
+
+TEST(DType, SingleCompareInt) {
     TEST_COMPARISONS(int8_type_id, int8_t, 1, 2)
     TEST_COMPARISONS(int8_type_id, int8_t, 2, 2)
     TEST_COMPARISONS(int8_type_id, int8_t, 1, 0)
@@ -176,7 +176,9 @@ TEST(DType, SingleCompare) {
     TEST_COMPARISONS(int64_type_id, int64_t, -1, 0)
     TEST_COMPARISONS(int64_type_id, int64_t, -1, -1)
     TEST_COMPARISONS(int64_type_id, int64_t, -1, -2)
+}
 
+TEST(DType, SingleCompareUInt) {
     TEST_COMPARISONS(uint8_type_id, uint8_t, 1, 2)
     TEST_COMPARISONS(uint8_type_id, uint8_t, 2, 2)
     TEST_COMPARISONS(uint8_type_id, uint8_t, 1, 0)
@@ -192,7 +194,9 @@ TEST(DType, SingleCompare) {
     TEST_COMPARISONS(uint64_type_id, uint64_t, 1, 2)
     TEST_COMPARISONS(uint64_type_id, uint64_t, 2, 2)
     TEST_COMPARISONS(uint64_type_id, uint64_t, 1, 0)
+}
 
+TEST(DType, SingleCompareFloat) {
     TEST_COMPARISONS(float32_type_id, float, 1.0, 2.0)
     TEST_COMPARISONS(float32_type_id, float, 2.0, 2.0)
     TEST_COMPARISONS(float32_type_id, float, 1.0, 0.0)
@@ -206,6 +210,8 @@ TEST(DType, SingleCompare) {
     TEST_COMPARISONS(float64_type_id, double, -1.0, 0.0)
     TEST_COMPARISONS(float64_type_id, double, -1.0, -1.0)
     TEST_COMPARISONS(float64_type_id, double, -1.0, -2.0)
+}
+#undef TEST_COMPARISONS
 
 // TODO: ordered comparisons for complex numbers
 #define TEST_COMPLEX_COMPARISONS(type_id, type, lhs, rhs) \
@@ -218,6 +224,7 @@ TEST(DType, SingleCompare) {
         EXPECT_EQ(lhs != rhs, k.kernel.ops[compare_operations_t::not_equal_id]((char *)&v1, (char *)&v2, &k.extra)); \
     }
 
+TEST(DType, SingleCompareComplex) {
     TEST_COMPLEX_COMPARISONS(complex_float32_type_id, complex<float>, complex<float>(1.0), complex<float>(2.0))
     TEST_COMPLEX_COMPARISONS(complex_float32_type_id, complex<float>, complex<float>(2.0), complex<float>(2.0))
     TEST_COMPLEX_COMPARISONS(complex_float32_type_id, complex<float>, complex<float>(1.0), complex<float>(0.0))
@@ -243,12 +250,6 @@ TEST(DType, SingleCompare) {
     TEST_COMPLEX_COMPARISONS(complex_float64_type_id, complex<double>, complex<double>(0.0, -1.0), complex<double>(0.0, 2.0))
     TEST_COMPLEX_COMPARISONS(complex_float64_type_id, complex<double>, complex<double>(0.0, -2.0), complex<double>(0.0, -2.0))
     TEST_COMPLEX_COMPARISONS(complex_float64_type_id, complex<double>, complex<double>(0.0, -1.0), complex<double>(0.0, 0.0))
-
-#undef TEST_COMPARISONS
-#undef TEST_COMPLEX_COMPARISONS
-
 }
-
-
-
+#undef TEST_COMPLEX_COMPARISONS
 

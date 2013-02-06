@@ -175,45 +175,6 @@ void fixedstring_dtype::get_single_compare_kernel(kernel_instance<compare_operat
     get_fixedstring_comparison_kernel(m_stringsize, m_encoding, out_kernel);
 }
 
-void fixedstring_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const dtype& src_dt,
-                assign_error_mode errmode,
-                kernel_instance<unary_operation_pair_t>& out_kernel) const
-{
-    if (this == dst_dt.extended()) {
-        switch (src_dt.get_type_id()) {
-            case fixedstring_type_id: {
-                const fixedstring_dtype *src_fs = static_cast<const fixedstring_dtype *>(src_dt.extended());
-                get_fixedstring_assignment_kernel(get_data_size(), m_encoding, src_fs->get_data_size(), src_fs->m_encoding,
-                                        errmode, out_kernel);
-                break;
-            }
-            case string_type_id: {
-                const base_string_dtype *src_fs = static_cast<const base_string_dtype *>(src_dt.extended());
-                get_blockref_string_to_fixedstring_assignment_kernel(get_data_size(), m_encoding, src_fs->get_encoding(),
-                                        errmode, out_kernel);
-                break;
-            }
-            default: {
-                if (!src_dt.is_builtin()) {
-                    src_dt.extended()->get_dtype_assignment_kernel(dst_dt, src_dt, errmode, out_kernel);
-                } else {
-                    get_builtin_to_string_assignment_kernel(dst_dt, src_dt.get_type_id(), errmode, out_kernel);
-                }
-                break;
-            }
-        }
-    } else {
-        if (dst_dt.is_builtin()) {
-            get_string_to_builtin_assignment_kernel(dst_dt.get_type_id(), src_dt, errmode, out_kernel);
-        } else {
-            stringstream ss;
-            ss << "assignment from " << src_dt << " to " << dst_dt << " is not implemented yet";
-            throw runtime_error(ss.str());
-        }
-    }
-}
-
-
 bool fixedstring_dtype::operator==(const base_dtype& rhs) const
 {
     if (this == &rhs) {

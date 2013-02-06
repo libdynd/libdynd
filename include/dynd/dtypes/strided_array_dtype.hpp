@@ -80,10 +80,6 @@ public:
 
     void get_single_compare_kernel(kernel_instance<compare_operations_t>& out_kernel) const;
 
-    void get_dtype_assignment_kernel(const dtype& dst_dt, const dtype& src_dt,
-                    assign_error_mode errmode,
-                    kernel_instance<unary_operation_pair_t>& out_kernel) const;
-
     bool operator==(const base_dtype& rhs) const;
 
     size_t get_metadata_size() const;
