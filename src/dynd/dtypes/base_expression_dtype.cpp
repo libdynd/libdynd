@@ -90,13 +90,15 @@ namespace {
             base.destructor = &destruct;
             // The kernel data owns a reference in buffer_dt
             buffer_dt = dtype(buffer_dt_).release();
-            if (buffer_dt_.is_builtin()) {
+            if (!buffer_dt_.is_builtin()) {
                 size_t buffer_metadata_size = buffer_dt_.extended()->get_metadata_size();
-                buffer_metadata = reinterpret_cast<char *>(malloc(buffer_metadata_size));
-                if (buffer_metadata == NULL) {
-                    throw bad_alloc();
+                if (buffer_metadata_size > 0) {
+                    buffer_metadata = reinterpret_cast<char *>(malloc(buffer_metadata_size));
+                    if (buffer_metadata == NULL) {
+                        throw bad_alloc();
+                    }
+                    buffer_dt->metadata_default_construct(buffer_metadata, 0, NULL);
                 }
-                buffer_dt->metadata_default_construct(buffer_metadata, 0, NULL);
                 // Make sure the buffer data size is pointer size-aligned
                 buffer_data_size = inc_to_alignment(buffer_dt->get_default_data_size(0, NULL), sizeof(void *));
             } else {
@@ -120,7 +122,7 @@ namespace {
             echild_second = reinterpret_cast<hierarchical_kernel_common_base *>(eraw + e->second_kernel_offset);
 
             // If the type needs it, initialize the buffer data to zero
-            if (buffer_dt->get_flags()&dtype_flag_zeroinit) {
+            if (!is_builtin_dtype(buffer_dt) && (buffer_dt->get_flags()&dtype_flag_zeroinit) != 0) {
                 memset(buffer_data_ptr, 0, e->buffer_data_size);
             }
             // First kernel (src -> buffer)
@@ -195,6 +197,7 @@ size_t base_expression_dtype::make_assignment_kernel(
                 assign_error_mode errmode,
                 const eval::eval_context *ectx) const
 {
+
     if (dst_dt.extended() == this) {
         if (src_dt == get_value_dtype()) {
             // In this case, it's just a chain of value -> operand on the dst side
@@ -208,20 +211,22 @@ size_t base_expression_dtype::make_assignment_kernel(
                 out->ensure_capacity(offset_out + sizeof(buffered_kernel_extra));
                 buffered_kernel_extra *e = out->get_at<buffered_kernel_extra>(offset_out);
                 e->init(buffer_dt);
+                size_t buffer_data_size = e->buffer_data_size;
                 // Construct the first kernel (src -> buffer)
                 e->first_kernel_offset = sizeof(buffered_kernel_extra);
                 size_t buffer_data_offset;
-                buffer_data_offset = make_value_to_operand_assignment_kernel(out, e->first_kernel_offset,
+                buffer_data_offset = make_value_to_operand_assignment_kernel(out, offset_out + e->first_kernel_offset,
                                 e->buffer_metadata, src_metadata, ectx);
                 // Allocate the buffer data
                 buffer_data_offset = inc_to_alignment(buffer_data_offset, buffer_dt.get_alignment());
+                out->ensure_capacity(offset_out + buffer_data_offset + buffer_data_size);
                 // This may have invalidated the 'e' pointer, so get it again!
                 e = out->get_at<buffered_kernel_extra>(offset_out);
                 e->buffer_data_offset = buffer_data_offset;
                 // Construct the second kernel (buffer -> dst)
                 e->second_kernel_offset = buffer_data_offset + e->buffer_data_size;
-                return ::make_assignment_kernel(out, e->second_kernel_offset,
-                                dst_dt, dst_metadata,
+                return ::make_assignment_kernel(out, offset_out + e->second_kernel_offset,
+                                opdt, dst_metadata,
                                 buffer_dt, e->buffer_metadata,
                                 errmode, ectx);
             }
@@ -239,21 +244,23 @@ size_t base_expression_dtype::make_assignment_kernel(
             out->ensure_capacity(offset_out + sizeof(buffered_kernel_extra));
             buffered_kernel_extra *e = out->get_at<buffered_kernel_extra>(offset_out);
             e->init(buffer_dt);
+            size_t buffer_data_size = e->buffer_data_size;
             // Construct the first kernel (src -> buffer)
             e->first_kernel_offset = sizeof(buffered_kernel_extra);
             size_t buffer_data_offset;
-            buffer_data_offset = ::make_assignment_kernel(out, e->first_kernel_offset,
+            buffer_data_offset = ::make_assignment_kernel(out, offset_out + e->first_kernel_offset,
                             buffer_dt, e->buffer_metadata,
                             src_dt, src_metadata,
                             errmode, ectx);
             // Allocate the buffer data
             buffer_data_offset = inc_to_alignment(buffer_data_offset, buffer_dt.get_alignment());
+            out->ensure_capacity(offset_out + buffer_data_offset + buffer_data_size);
             // This may have invalidated the 'e' pointer, so get it again!
             e = out->get_at<buffered_kernel_extra>(offset_out);
             e->buffer_data_offset = buffer_data_offset;
             // Construct the second kernel (buffer -> dst)
             e->second_kernel_offset = buffer_data_offset + e->buffer_data_size;
-            return ::make_assignment_kernel(out, e->second_kernel_offset,
+            return ::make_assignment_kernel(out, offset_out + e->second_kernel_offset,
                             dst_dt, dst_metadata,
                             buffer_dt, e->buffer_metadata,
                             errmode, ectx);
@@ -271,21 +278,23 @@ size_t base_expression_dtype::make_assignment_kernel(
                 out->ensure_capacity(offset_out + sizeof(buffered_kernel_extra));
                 buffered_kernel_extra *e = out->get_at<buffered_kernel_extra>(offset_out);
                 e->init(buffer_dt);
+                size_t buffer_data_size = e->buffer_data_size;
                 // Construct the first kernel (src -> buffer)
                 e->first_kernel_offset = sizeof(buffered_kernel_extra);
                 size_t buffer_data_offset;
-                buffer_data_offset = ::make_assignment_kernel(out, e->first_kernel_offset,
+                buffer_data_offset = ::make_assignment_kernel(out, offset_out + e->first_kernel_offset,
                                 buffer_dt, e->buffer_metadata,
-                               src_dt, src_metadata,
+                                opdt, src_metadata,
                                 errmode, ectx);
                 // Allocate the buffer data
                 buffer_data_offset = inc_to_alignment(buffer_data_offset, buffer_dt.get_alignment());
+                out->ensure_capacity(offset_out + buffer_data_offset + buffer_data_size);
                 // This may have invalidated the 'e' pointer, so get it again!
                 e = out->get_at<buffered_kernel_extra>(offset_out);
                 e->buffer_data_offset = buffer_data_offset;
                 // Construct the second kernel (buffer -> dst)
                 e->second_kernel_offset = buffer_data_offset + e->buffer_data_size;
-                return make_operand_to_value_assignment_kernel(out, e->second_kernel_offset,
+                return make_operand_to_value_assignment_kernel(out, offset_out + e->second_kernel_offset,
                                 dst_metadata, e->buffer_metadata, ectx);
             }
         } else {
@@ -295,21 +304,23 @@ size_t base_expression_dtype::make_assignment_kernel(
             out->ensure_capacity(offset_out + sizeof(buffered_kernel_extra));
             buffered_kernel_extra *e = out->get_at<buffered_kernel_extra>(offset_out);
             e->init(buffer_dt);
+            size_t buffer_data_size = e->buffer_data_size;
             // Construct the first kernel (src -> buffer)
             e->first_kernel_offset = sizeof(buffered_kernel_extra);
             size_t buffer_data_offset;
-            buffer_data_offset = ::make_assignment_kernel(out, e->first_kernel_offset,
+            buffer_data_offset = ::make_assignment_kernel(out, offset_out + e->first_kernel_offset,
                             buffer_dt, e->buffer_metadata,
                             src_dt, src_metadata,
                             errmode, ectx);
             // Allocate the buffer data
             buffer_data_offset = inc_to_alignment(buffer_data_offset, buffer_dt.get_alignment());
+            out->ensure_capacity(offset_out + buffer_data_offset + buffer_data_size);
             // This may have invalidated the 'e' pointer, so get it again!
             e = out->get_at<buffered_kernel_extra>(offset_out);
             e->buffer_data_offset = buffer_data_offset;
             // Construct the second kernel (buffer -> dst)
             e->second_kernel_offset = buffer_data_offset + e->buffer_data_size;
-            return ::make_assignment_kernel(out, e->second_kernel_offset,
+            return ::make_assignment_kernel(out, offset_out + e->second_kernel_offset,
                             dst_dt, dst_metadata,
                             buffer_dt, e->buffer_metadata,
                             errmode, ectx);

@@ -21,6 +21,9 @@ namespace dynd {
 class convert_dtype : public base_expression_dtype {
     dtype m_value_dtype, m_operand_dtype;
     assign_error_mode m_errmode;
+    // These error modes may be set to assign_error_none if the
+    // assignment is lossless in that direction.
+    assign_error_mode m_errmode_to_value, m_errmode_to_operand;
     kernel_instance<unary_operation_pair_t> m_to_value_kernel, m_to_operand_kernel;
 public:
     convert_dtype(const dtype& value_dtype, const dtype& operand_dtype, assign_error_mode errmode);
@@ -55,6 +58,18 @@ public:
     void get_value_to_operand_kernel(const eval::eval_context *ectx,
                             kernel_instance<unary_operation_pair_t>& out_borrowed_kernel) const;
     dtype with_replaced_storage_dtype(const dtype& replacement_dtype) const;
+
+    size_t make_operand_to_value_assignment_kernel(
+                    hierarchical_kernel<unary_single_operation_t> *out,
+                    size_t offset_out,
+                    const char *dst_metadata, const char *src_metadata,
+                    const eval::eval_context *ectx) const;
+    size_t make_value_to_operand_assignment_kernel(
+                    hierarchical_kernel<unary_single_operation_t> *out,
+                    size_t offset_out,
+                    const char *dst_metadata, const char *src_metadata,
+                    const eval::eval_context *ectx) const;
+
 };
 
 /**
