@@ -144,3 +144,25 @@ dtype dynd::view_dtype::with_replaced_storage_dtype(const dtype& replacement_dty
         return dtype(new view_dtype(m_value_dtype, replacement_dtype), false);
     }
 }
+
+size_t view_dtype::make_operand_to_value_assignment_kernel(
+                hierarchical_kernel<unary_single_operation_t> *out,
+                size_t offset_out,
+                const char *dst_metadata, const char *src_metadata,
+                const eval::eval_context *ectx) const
+{
+    return ::make_pod_dtype_assignment_kernel(out, offset_out,
+                    m_value_dtype.get_data_size(),
+                    std::min(m_value_dtype.get_alignment(), m_operand_dtype.get_alignment()));
+}
+
+size_t view_dtype::make_value_to_operand_assignment_kernel(
+                hierarchical_kernel<unary_single_operation_t> *out,
+                size_t offset_out,
+                const char *dst_metadata, const char *src_metadata,
+                const eval::eval_context *ectx) const
+{
+    return ::make_pod_dtype_assignment_kernel(out, offset_out,
+                    m_value_dtype.get_data_size(),
+                    std::min(m_value_dtype.get_alignment(), m_operand_dtype.get_alignment()));
+}
