@@ -34,16 +34,20 @@ void get_struct_assignment_kernel(const dtype& dst_struct_dtype, const dtype& sr
                 kernel_instance<unary_operation_pair_t>& out_kernel);
 
 /**
- * Gets a kernel which converts from one fixedstruct to another.
+ * Makes a kernel which converts from one fixedstruct to another.
  *
- * \param dst_fixedstruct_dtype  The dtype of the destination fixedstruct.
- * \param src_fixedstruct_dtype  The dtype of the source fixedstruct.
+ * \param dst_fixedstruct_dt  The dtype of the destination fixedstruct.
+ * \param src_fixedstruct_dt  The dtype of the source fixedstruct.
  * \param errmode  The error handling mode of the assignment.
  * \param out_kernel  The output where the kernel is placed.
  */
-void get_fixedstruct_assignment_kernel(const dtype& dst_fixedstruct_dtype, const dtype& src_fixedstruct_dtype,
+size_t make_fixedstruct_assignment_kernel(
+                hierarchical_kernel<unary_single_operation_t> *out,
+                size_t offset_out,
+                const dtype& dst_fixedstruct_dt, const char *dst_metadata,
+                const dtype& src_fixedstruct_dt, const char *src_metadata,
                 assign_error_mode errmode,
-                kernel_instance<unary_operation_pair_t>& out_kernel);
+                const eval::eval_context *ectx);
 
 /**
  * Gets a kernel which converts from a fixedstruct to a struct.
@@ -58,16 +62,19 @@ void get_fixedstruct_to_struct_assignment_kernel(const dtype& dst_struct_dtype, 
                 kernel_instance<unary_operation_pair_t>& out_kernel);
 
 /**
- * Gets a kernel which converts from a struct to a fixedstruct.
+ * Makes a kernel which converts from a struct to a fixedstruct.
  *
- * \param dst_struct_dtype  The dtype of the destination struct.
- * \param src_fixedstruct_dtype  The dtype of the source fixedstruct.
+ * \param dst_struct_dt  The dtype of the destination struct.
+ * \param src_fixedstruct_dt  The dtype of the source fixedstruct.
  * \param errmode  The error handling mode of the assignment.
- * \param out_kernel  The output where the kernel is placed.
  */
-void get_struct_to_fixedstruct_assignment_kernel(const dtype& dst_fixedstruct_dtype, const dtype& src_struct_dtype,
+size_t make_struct_to_fixedstruct_assignment_kernel(
+                hierarchical_kernel<unary_single_operation_t> *out,
+                size_t offset_out,
+                const dtype& dst_fixedstruct_dt, const char *dst_metadata,
+                const dtype& src_struct_dt, const char *src_metadata,
                 assign_error_mode errmode,
-                kernel_instance<unary_operation_pair_t>& out_kernel);
+                const eval::eval_context *ectx);
 
 } // namespace dynd
 

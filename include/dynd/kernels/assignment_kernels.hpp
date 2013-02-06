@@ -88,21 +88,21 @@ void get_dtype_assignment_kernel(const dtype& dt,
  * then call the corresponding function with this == src_dt.
  */
 size_t make_assignment_kernel(
-                    hierarchical_kernel<unary_single_operation_t> *out,
-                    size_t offset_out,
-                    const dtype& dst_dt, const char *dst_metadata,
-                    const dtype& src_dt, const char *src_metadata,
-                    assign_error_mode errmode,
-                    const eval::eval_context *ectx);
+                hierarchical_kernel<unary_single_operation_t> *out,
+                size_t offset_out,
+                const dtype& dst_dt, const char *dst_metadata,
+                const dtype& src_dt, const char *src_metadata,
+                assign_error_mode errmode,
+                const eval::eval_context *ectx);
 
 /**
  * Creates an assignment kernel when the src and the dst are the same,
  * and are POD (plain old data).
  */
 size_t make_pod_dtype_assignment_kernel(
-                    hierarchical_kernel<unary_single_operation_t> *out,
-                    size_t offset_out,
-                    size_t data_size, size_t data_alignment);
+                hierarchical_kernel<unary_single_operation_t> *out,
+                size_t offset_out,
+                size_t data_size, size_t data_alignment);
 
 /**
  * Creates an assignment kernel from the src to the dst built in
