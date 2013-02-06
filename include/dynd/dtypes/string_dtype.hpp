@@ -83,6 +83,14 @@ public:
     void metadata_finalize_buffers(char *metadata) const;
     void metadata_destruct(char *metadata) const;
     void metadata_debug_print(const char *metadata, std::ostream& o, const std::string& indent) const;
+
+    size_t make_assignment_kernel(
+                    hierarchical_kernel<unary_single_operation_t> *out,
+                    size_t offset_out,
+                    const dtype& dst_dt, const char *dst_metadata,
+                    const dtype& src_dt, const char *src_metadata,
+                    assign_error_mode errmode,
+                    const eval::eval_context *ectx) const;
 };
 
 inline dtype make_string_dtype(string_encoding_t encoding = string_encoding_utf_8) {

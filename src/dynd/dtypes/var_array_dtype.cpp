@@ -730,8 +730,8 @@ namespace {
         static void single(char *dst, const char *src,
                             hierarchical_kernel_common_base *extra)
         {
-            const var_array_dtype_data *src_d = reinterpret_cast<const var_array_dtype_data *>(src);
             extra_type *e = reinterpret_cast<extra_type *>(extra);
+            const var_array_dtype_data *src_d = reinterpret_cast<const var_array_dtype_data *>(src);
             hierarchical_kernel_common_base *echild = &(e + 1)->base;
             unary_single_operation_t opchild = (e + 1)->base.get_function<unary_single_operation_t>();
             if (src_d->begin == NULL) {
@@ -776,9 +776,9 @@ size_t var_array_dtype::make_assignment_kernel(
         if (src_dt.get_undim() < dst_dt.get_undim()) {
             // If the src has fewer dimensions, broadcast it across this one
             out->ensure_capacity(offset_out + sizeof(broadcast_to_var_assign_kernel_extra));
+            broadcast_to_var_assign_kernel_extra *e = out->get_at<broadcast_to_var_assign_kernel_extra>(offset_out);
             const var_array_dtype_metadata *dst_md =
                             reinterpret_cast<const var_array_dtype_metadata *>(dst_metadata);
-            broadcast_to_var_assign_kernel_extra *e = out->get_at<broadcast_to_var_assign_kernel_extra>(offset_out);
             e->base.function = &broadcast_to_var_assign_kernel_extra::single;
             e->base.destructor = &broadcast_to_var_assign_kernel_extra::destruct;
             e->dst_target_alignment = m_element_dtype.get_alignment();

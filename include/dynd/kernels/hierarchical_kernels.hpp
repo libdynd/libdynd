@@ -88,10 +88,9 @@ public:
      * of the kernel.
      *
      * NOTE: This function ensures that there is room for
-     *       another base at the end, so that calling the
-     *       destructor doesn't access uninitialized memory
-     *       at the end. When creating a leaf kernel,
-     *       you can use this to avoid over-allocating.
+     *       another base at the end, so if you are sure
+     *       that you're a leaf kernel, use ensure_capacity_leaf
+     *       instead.
      */
     void ensure_capacity(size_t size) {
         size += sizeof(hierarchical_kernel_common_base);
@@ -127,6 +126,16 @@ public:
             // Zero out the newly allocated capacity
             memset(new_data + m_capacity, 0, size - m_capacity);
         }
+    }
+
+    /**
+     * This function ensures that the kernel's data
+     * is at least the required number of bytes. It
+     * should only be called during the construction phase
+     * of the kernel when constructing a leaf kernel.
+     */
+    inline void ensure_capacity_leaf(size_t size) {
+        ensure_capacity(size - sizeof(hierarchical_kernel_common_base));
     }
 
     /**
