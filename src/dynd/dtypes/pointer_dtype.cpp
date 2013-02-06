@@ -303,22 +303,6 @@ namespace {
     };
 } // anonymous namespace
 
-void pointer_dtype::get_operand_to_value_kernel(const eval::eval_context *DYND_UNUSED(ectx),
-                        kernel_instance<unary_operation_pair_t>& out_kernel) const
-{
-    out_kernel.kernel = unary_operation_pair_t(pointer_to_value_assign::single_kernel,
-                    pointer_to_value_assign::strided_kernel);
-    make_auxiliary_data<pointer_to_value_assign::auxdata_storage>(out_kernel.extra.auxdata);
-    pointer_to_value_assign::auxdata_storage& ad =
-                out_kernel.extra.auxdata.get<pointer_to_value_assign::auxdata_storage>();
-    ::get_dtype_assignment_kernel(m_target_dtype, ad.kernel);
-}
-void pointer_dtype::get_value_to_operand_kernel(const eval::eval_context * /*ectx*/,
-                        kernel_instance<unary_operation_pair_t>& /*out_borrowed_kernel*/) const
-{
-    throw runtime_error("TODO: implement pointer_dtype::get_value_to_operand_kernel");
-}
-
 dtype pointer_dtype::with_replaced_storage_dtype(const dtype& /*replacement_dtype*/) const
 {
     throw runtime_error("TODO: implement pointer_dtype::with_replaced_storage_dtype");

@@ -80,12 +80,12 @@ public:
         return m_categories.get_readonly_originptr() +
                     m_value_to_category_index[value] * reinterpret_cast<const strided_array_dtype_metadata *>(m_categories.get_ndo_meta())->stride;
     }
+    /** Returns the metadata corresponding to data from get_category_data_from_value */
+    const char *get_category_metadata() const {
+        return m_categories.get_ndo_meta();
+    }
 
     bool is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const;
-
-    void get_dtype_assignment_kernel(const dtype& dst_dt, const dtype& src_dt,
-                    assign_error_mode errmode,
-                    kernel_instance<unary_operation_pair_t>& out_kernel) const;
 
     bool operator==(const base_dtype& rhs) const;
 
@@ -94,6 +94,14 @@ public:
     void metadata_copy_construct(char *dst_metadata, const char *src_metadata, memory_block_data *embedded_reference) const;
     void metadata_destruct(char *metadata) const;
     void metadata_debug_print(const char *metadata, std::ostream& o, const std::string& indent) const;
+
+    size_t make_assignment_kernel(
+                    hierarchical_kernel<unary_single_operation_t> *out,
+                    size_t offset_out,
+                    const dtype& dst_dt, const char *dst_metadata,
+                    const dtype& src_dt, const char *src_metadata,
+                    assign_error_mode errmode,
+                    const eval::eval_context *ectx) const;
 
     void get_dynamic_ndobject_properties(const std::pair<std::string, gfunc::callable> **out_properties, size_t *out_count) const;
 

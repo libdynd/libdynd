@@ -10,21 +10,6 @@
 using namespace std;
 using namespace dynd;
 
-unary_operation_pair_t dynd::get_builtin_dtype_assignment_function(type_id_t dst_type_id, type_id_t src_type_id,
-                                                                assign_error_mode errmode)
-{
-    throw runtime_error("dynd::get_builtin_dtype_assignment_function is to be removed");
-}
-
-void dynd::get_builtin_dtype_assignment_kernel(
-                    type_id_t dst_type_id, type_id_t src_type_id,
-                    assign_error_mode errmode,
-                    const eval::eval_context *ectx,
-                    kernel_instance<unary_operation_pair_t>& out_kernel)
-{
-    throw runtime_error("dynd::get_builtin_dtype_assignment_kernel is to be removed");
-}
-
 void dynd::get_dtype_assignment_kernel(
                     const dtype& dst_dt, const dtype& src_dt,
                     assign_error_mode errmode,
@@ -79,14 +64,6 @@ static void unaligned_copy_single(char *dst, const char *src, hierarchical_kerne
     size_t data_size = reinterpret_cast<unaligned_copy_single_kernel_extra *>(extra)->data_size;
     memcpy(dst, src, data_size);
 }
-
-void dynd::get_dtype_assignment_kernel(const dtype& dt,
-                    kernel_instance<unary_operation_pair_t>& out_kernel)
-{
-    throw runtime_error("dynd::get_dtype_assignment_kernel is to be removed");
-}
-
-// ---------------------- PART BEFORE THIS IS DEPRECATED -------------------------------------
 
 size_t dynd::make_assignment_kernel(
                     hierarchical_kernel<unary_single_operation_t> *out,
@@ -264,7 +241,7 @@ void dynd::strided_assign_kernel_extra::single(char *dst, const char *src,
 {
     extra_type *e = reinterpret_cast<extra_type *>(extra);
     hierarchical_kernel_common_base *echild = &(e + 1)->base;
-    unary_single_operation_t opchild = (e + 1)->base.get_function<unary_single_operation_t>();
+    unary_single_operation_t opchild = echild->get_function<unary_single_operation_t>();
     intptr_t size = e->size, dst_stride = e->dst_stride, src_stride = e->src_stride;
     for (intptr_t i = 0; i < size; ++i, dst += dst_stride, src += src_stride) {
         opchild(dst, src, echild);

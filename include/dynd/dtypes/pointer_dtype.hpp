@@ -93,11 +93,6 @@ public:
 
     bool operator==(const base_dtype& rhs) const;
 
-    // Converts to/from the storage's value dtype
-    void get_operand_to_value_kernel(const eval::eval_context *ectx,
-                            kernel_instance<unary_operation_pair_t>& out_borrowed_kernel) const;
-    void get_value_to_operand_kernel(const eval::eval_context *ectx,
-                            kernel_instance<unary_operation_pair_t>& out_borrowed_kernel) const;
     dtype with_replaced_storage_dtype(const dtype& replacement_dtype) const;
 
     size_t get_metadata_size() const;
