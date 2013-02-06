@@ -54,6 +54,46 @@ namespace {
             memset(dst, 0, dst_end - dst);
         }
     }
+
+    struct fixedstring_assign_kernel_extra {
+        typedef fixedstring_assign_kernel_extra extra_type;
+
+        hierarchical_kernel_common_base base;
+        next_unicode_codepoint_t next_fn;
+        append_unicode_codepoint_t append_fn;
+        intptr_t dst_data_size, src_data_size;
+        bool overflow_check;
+
+        static void single(char *dst, const char *src,
+                        hierarchical_kernel_common_base *extra)
+        {
+            extra_type *e = reinterpret_cast<extra_type *>(extra);
+            char *dst_end = dst + e->dst_data_size;
+            const char *src_end = src + e->src_data_size;
+            next_unicode_codepoint_t next_fn = e->next_fn;
+            append_unicode_codepoint_t append_fn = e->append_fn;
+            uint32_t cp;
+
+            while (src < src_end && dst < dst_end) {
+                cp = next_fn(src, src_end);
+                // The fixedstring dtype uses null-terminated strings
+                if (cp == 0) {
+                    // Null-terminate the destination string, and we're done
+                    memset(dst, 0, dst_end - dst);
+                    return;
+                } else {
+                    append_fn(cp, dst, dst_end);
+                }
+            }
+            if (src < src_end) {
+                if (e->overflow_check) {
+                    throw std::runtime_error("Input string is too large to convert to destination fixed-size string");
+                }
+            } else if (dst < dst_end) {
+                memset(dst, 0, dst_end - dst);
+            }
+        }
+    };
 } // anonymous namespace
 
 void dynd::get_fixedstring_assignment_kernel(intptr_t dst_element_size, string_encoding_t dst_encoding,
@@ -71,6 +111,25 @@ void dynd::get_fixedstring_assignment_kernel(intptr_t dst_element_size, string_e
     ad.overflow_check = (errmode != assign_error_none);
     ad.append_fn = get_append_unicode_codepoint_function(dst_encoding, errmode);
     ad.next_fn = get_next_unicode_codepoint_function(src_encoding, errmode);
+}
+
+size_t dynd::make_fixedstring_assignment_kernel(
+                hierarchical_kernel<unary_single_operation_t> *out,
+                size_t offset_out,
+                intptr_t dst_data_size, string_encoding_t dst_encoding,
+                intptr_t src_data_size, string_encoding_t src_encoding,
+                assign_error_mode errmode,
+                const eval::eval_context *ectx)
+{
+    out->ensure_capacity_leaf(offset_out + sizeof(fixedstring_assign_kernel_extra));
+    fixedstring_assign_kernel_extra *e = out->get_at<fixedstring_assign_kernel_extra>(offset_out);
+    e->base.function = &fixedstring_assign_kernel_extra::single;
+    e->next_fn = get_next_unicode_codepoint_function(src_encoding, errmode);
+    e->append_fn = get_append_unicode_codepoint_function(dst_encoding, errmode);
+    e->dst_data_size = dst_data_size;
+    e->src_data_size = src_data_size;
+    e->overflow_check = (errmode != assign_error_none);
+    return offset_out + sizeof(fixedstring_assign_kernel_extra);
 }
 
 /////////////////////////////////////////
@@ -450,6 +509,40 @@ namespace {
             memset(dst, 0, dst_end - dst);
         }
     }
+    struct blockref_string_to_fixedstring_assign_kernel_extra {
+        typedef blockref_string_to_fixedstring_assign_kernel_extra extra_type;
+
+        hierarchical_kernel_common_base base;
+        next_unicode_codepoint_t next_fn;
+        append_unicode_codepoint_t append_fn;
+        intptr_t dst_data_size, src_element_size;
+        bool overflow_check;
+
+        static void single(char *dst, const char *src,
+                        hierarchical_kernel_common_base *extra)
+        {
+            extra_type *e = reinterpret_cast<extra_type *>(extra);
+            char *dst_end = dst + e->dst_data_size;
+            const string_dtype_data *src_d = reinterpret_cast<const string_dtype_data *>(src);
+            const char *src_begin = src_d->begin;
+            const char *src_end = src_d->end;
+            next_unicode_codepoint_t next_fn = e->next_fn;
+            append_unicode_codepoint_t append_fn = e->append_fn;
+            uint32_t cp;
+
+            while (src_begin < src_end && dst < dst_end) {
+                cp = next_fn(src_begin, src_end);
+                append_fn(cp, dst, dst_end);
+            }
+            if (src_begin < src_end) {
+                if (e->overflow_check) {
+                    throw std::runtime_error("Input string is too large to convert to destination fixed-size string");
+                }
+            } else if (dst < dst_end) {
+                memset(dst, 0, dst_end - dst);
+            }
+        }
+    };
 } // anonymous namespace
 
 void dynd::get_blockref_string_to_fixedstring_assignment_kernel(intptr_t dst_element_size, string_encoding_t dst_encoding,
@@ -467,4 +560,22 @@ void dynd::get_blockref_string_to_fixedstring_assignment_kernel(intptr_t dst_ele
     ad.overflow_check = (errmode != assign_error_none);
     ad.append_fn = get_append_unicode_codepoint_function(dst_encoding, errmode);
     ad.next_fn = get_next_unicode_codepoint_function(src_encoding, errmode);
+}
+
+size_t dynd::make_blockref_string_to_fixedstring_assignment_kernel(
+                hierarchical_kernel<unary_single_operation_t> *out,
+                size_t offset_out,
+                intptr_t dst_data_size, string_encoding_t dst_encoding,
+                string_encoding_t src_encoding,
+                assign_error_mode errmode,
+                const eval::eval_context *ectx)
+{
+    out->ensure_capacity_leaf(offset_out + sizeof(blockref_string_to_fixedstring_assign_kernel_extra));
+    blockref_string_to_fixedstring_assign_kernel_extra *e = out->get_at<blockref_string_to_fixedstring_assign_kernel_extra>(offset_out);
+    e->base.function = &blockref_string_to_fixedstring_assign_kernel_extra::single;
+    e->next_fn = get_next_unicode_codepoint_function(src_encoding, errmode);
+    e->append_fn = get_append_unicode_codepoint_function(dst_encoding, errmode);
+    e->dst_data_size = dst_data_size;
+    e->overflow_check = (errmode != assign_error_none);
+    return offset_out + sizeof(blockref_string_to_fixedstring_assign_kernel_extra);
 }
