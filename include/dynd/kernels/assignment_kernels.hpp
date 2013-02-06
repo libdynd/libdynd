@@ -48,16 +48,6 @@ void get_builtin_dtype_assignment_kernel(
                     kernel_instance<unary_operation_pair_t>& out_kernel);
 
 /**
- * Gets a unary kernel for assigning a pod dtype, i.e. a raw
- * byte-copy. The returned specialization
- * instance contains auxdata and a pointer to a static array
- * of kernel specializations.
- */
-void get_pod_dtype_assignment_kernel(
-                    intptr_t element_size, intptr_t alignment,
-                    kernel_instance<unary_operation_pair_t>& out_kernel);
-
-/**
  * Returns a kernel for assigning from the source data type
  * to the destination data type. The returned specialization
  * instance contains auxdata and a pointer to a static array

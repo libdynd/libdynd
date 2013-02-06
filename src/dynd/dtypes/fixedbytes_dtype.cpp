@@ -13,7 +13,7 @@
 using namespace std;
 using namespace dynd;
 
-dynd::fixedbytes_dtype::fixedbytes_dtype(intptr_t data_size, intptr_t alignment)
+fixedbytes_dtype::fixedbytes_dtype(intptr_t data_size, intptr_t alignment)
     : base_bytes_dtype(fixedbytes_type_id, bytes_kind, data_size, alignment, dtype_flag_scalar)
 {
     if (alignment > data_size) {
@@ -44,22 +44,22 @@ void fixedbytes_dtype::get_bytes_range(const char **out_begin, const char**out_e
     *out_end = data + get_data_size();
 }
 
-void dynd::fixedbytes_dtype::print_data(std::ostream& o, const char *DYND_UNUSED(metadata), const char *data) const
+void fixedbytes_dtype::print_data(std::ostream& o, const char *DYND_UNUSED(metadata), const char *data) const
 {
     o << "0x";
     hexadecimal_print(o, data, get_data_size());
 }
 
-void dynd::fixedbytes_dtype::print_dtype(std::ostream& o) const
+void fixedbytes_dtype::print_dtype(std::ostream& o) const
 {
     o << "fixedbytes<" << get_data_size() << "," << get_alignment() << ">";
 }
 
-void dynd::fixedbytes_dtype::get_single_compare_kernel(kernel_instance<compare_operations_t>& DYND_UNUSED(out_kernel)) const {
+void fixedbytes_dtype::get_single_compare_kernel(kernel_instance<compare_operations_t>& DYND_UNUSED(out_kernel)) const {
     throw std::runtime_error("fixedbytes_dtype::get_single_compare_kernel not supported yet");
 }
 
-bool dynd::fixedbytes_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const
+bool fixedbytes_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const
 {
     if (dst_dt.extended() == this) {
         if (src_dt.extended() == this) {
@@ -75,33 +75,7 @@ bool dynd::fixedbytes_dtype::is_lossless_assignment(const dtype& dst_dt, const d
     }
 }
 
-void dynd::fixedbytes_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const dtype& src_dt,
-                assign_error_mode errmode,
-                kernel_instance<unary_operation_pair_t>& out_kernel) const
-{
-    if (this == dst_dt.extended()) {
-        switch (src_dt.get_type_id()) {
-            case fixedbytes_type_id: {
-                const fixedbytes_dtype *src_fs = static_cast<const fixedbytes_dtype *>(src_dt.extended());
-                if (get_data_size() != src_fs->get_data_size()) {
-                    throw runtime_error("cannot assign to a fixedbytes dtype of a different size");
-                }
-                get_pod_dtype_assignment_kernel(get_data_size(),
-                                std::min(get_alignment(), src_fs->get_alignment()), out_kernel);
-                break;
-            }
-            default: {
-                src_dt.extended()->get_dtype_assignment_kernel(dst_dt, src_dt, errmode, out_kernel);
-                break;
-            }
-        }
-    } else {
-        throw runtime_error("conversions from bytes to non-bytes are not implemented");
-    }
-}
-
-
-bool dynd::fixedbytes_dtype::operator==(const base_dtype& rhs) const
+bool fixedbytes_dtype::operator==(const base_dtype& rhs) const
 {
     if (this == &rhs) {
         return true;
@@ -112,3 +86,36 @@ bool dynd::fixedbytes_dtype::operator==(const base_dtype& rhs) const
         return get_data_size() == dt->get_data_size() && get_alignment() == dt->get_alignment();
     }
 }
+
+size_t fixedbytes_dtype::make_assignment_kernel(
+                hierarchical_kernel<unary_single_operation_t> *out,
+                size_t offset_out,
+                const dtype& dst_dt, const char *dst_metadata,
+                const dtype& src_dt, const char *src_metadata,
+                assign_error_mode errmode,
+                const eval::eval_context *ectx) const
+{
+    if (this == dst_dt.extended()) {
+        switch (src_dt.get_type_id()) {
+            case fixedbytes_type_id: {
+                const fixedbytes_dtype *src_fs = static_cast<const fixedbytes_dtype *>(src_dt.extended());
+                if (get_data_size() != src_fs->get_data_size()) {
+                    throw runtime_error("cannot assign to a fixedbytes dtype of a different size");
+                }
+                return ::make_pod_dtype_assignment_kernel(out, offset_out,
+                                get_data_size(), std::min(get_alignment(), src_fs->get_alignment()));
+            }
+            default: {
+                return src_dt.extended()->make_assignment_kernel(out, offset_out,
+                                dst_dt, dst_metadata,
+                                src_dt, src_metadata,
+                                errmode, ectx);
+            }
+        }
+    } else {
+        stringstream ss;
+        ss << "Cannot assign from " << src_dt << " to " << dst_dt;
+        throw runtime_error(ss.str());
+    }
+}
+

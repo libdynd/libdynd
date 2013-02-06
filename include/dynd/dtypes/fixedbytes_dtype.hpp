@@ -35,10 +35,6 @@ public:
 
     void get_single_compare_kernel(kernel_instance<compare_operations_t>& out_kernel) const;
 
-    void get_dtype_assignment_kernel(const dtype& dst_dt, const dtype& src_dt,
-                    assign_error_mode errmode,
-                    kernel_instance<unary_operation_pair_t>& out_kernel) const;
-
     bool operator==(const base_dtype& rhs) const;
 
     size_t get_metadata_size() const {
@@ -52,6 +48,14 @@ public:
     }
     void metadata_debug_print(const char *DYND_UNUSED(metadata), std::ostream& DYND_UNUSED(o), const std::string& DYND_UNUSED(indent)) const {
     }
+
+    size_t make_assignment_kernel(
+                    hierarchical_kernel<unary_single_operation_t> *out,
+                    size_t offset_out,
+                    const dtype& dst_dt, const char *dst_metadata,
+                    const dtype& src_dt, const char *src_metadata,
+                    assign_error_mode errmode,
+                    const eval::eval_context *ectx) const;
 };
 
 /**
