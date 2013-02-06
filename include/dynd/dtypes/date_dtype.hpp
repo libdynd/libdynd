@@ -68,6 +68,16 @@ public:
     void get_dynamic_ndobject_functions(const std::pair<std::string, gfunc::callable> **out_functions, size_t *out_count) const;
 
     /**
+     * Returns the index for the property of the given name.
+     */
+    size_t get_property_index(const std::string& property_name) const;
+
+    /**
+     * Returns the dtype for the property of the given name.
+     */
+    dtype get_property_dtype(size_t property_index) const;
+
+    /**
      * Returns a kernel to transform instances of this date dtype into values of the
      * property.
      *
@@ -75,9 +85,12 @@ public:
      * \param out_value_dtype  This is filled with the dtype of the property.
      * \param out_to_value_kernel  This is filled with a kernel extracting the property from the dtype.
      */
-    void get_property_getter_kernel(const std::string& property_name,
-                    dtype& out_value_dtype, kernel_instance<unary_operation_pair_t>& out_to_value_kernel) const;
-
+    size_t make_property_getter_kernel(
+                    hierarchical_kernel<unary_single_operation_t> *out,
+                    size_t offset_out,
+                    const char *dst_metadata,
+                    const char *src_metadata, size_t src_property_index,
+                    const eval::eval_context *ectx) const;
 };
 
 inline dtype make_date_dtype() {

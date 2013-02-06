@@ -11,7 +11,7 @@ using namespace std;
 using namespace dynd;
 
 
-dynd::date_property_dtype::date_property_dtype(const dtype& operand_dtype, const std::string& property_name)
+date_property_dtype::date_property_dtype(const dtype& operand_dtype, const std::string& property_name)
     : base_expression_dtype(date_property_type_id, expression_kind,
                     operand_dtype.get_data_size(), operand_dtype.get_alignment(), dtype_flag_scalar),
             m_value_dtype(), m_operand_dtype(operand_dtype), m_property_name(property_name)
@@ -23,31 +23,32 @@ dynd::date_property_dtype::date_property_dtype(const dtype& operand_dtype, const
     }
 
     const date_dtype *dd = static_cast<const date_dtype *>(m_operand_dtype.value_dtype().extended());
-    dd->get_property_getter_kernel(property_name, m_value_dtype, m_to_value_kernel);
+    m_property_index = dd->get_property_index(property_name);
+    m_value_dtype = dd->get_property_dtype(m_property_index);
 }
 
 date_property_dtype::~date_property_dtype()
 {
 }
 
-void dynd::date_property_dtype::print_data(std::ostream& DYND_UNUSED(o), const char *DYND_UNUSED(metadata), const char *DYND_UNUSED(data)) const
+void date_property_dtype::print_data(std::ostream& DYND_UNUSED(o), const char *DYND_UNUSED(metadata), const char *DYND_UNUSED(data)) const
 {
     throw runtime_error("internal error: date_property_dtype::print_data isn't supposed to be called");
 }
 
-void dynd::date_property_dtype::print_dtype(std::ostream& o) const
+void date_property_dtype::print_dtype(std::ostream& o) const
 {
     o << "property<name=" << m_property_name << ", type=" << m_operand_dtype << ">";
 }
 
-void dynd::date_property_dtype::get_shape(size_t i, intptr_t *out_shape) const
+void date_property_dtype::get_shape(size_t i, intptr_t *out_shape) const
 {
     if (!m_value_dtype.is_builtin()) {
         m_value_dtype.extended()->get_shape(i, out_shape);
     }
 }
 
-bool dynd::date_property_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const
+bool date_property_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const
 {
     // Treat this dtype as the value dtype for whether assignment is always lossless
     if (src_dt.extended() == this) {
@@ -57,7 +58,7 @@ bool dynd::date_property_dtype::is_lossless_assignment(const dtype& dst_dt, cons
     }
 }
 
-bool dynd::date_property_dtype::operator==(const base_dtype& rhs) const
+bool date_property_dtype::operator==(const base_dtype& rhs) const
 {
     if (this == &rhs) {
         return true;
@@ -71,30 +72,31 @@ bool dynd::date_property_dtype::operator==(const base_dtype& rhs) const
     }
 }
 
-void dynd::date_property_dtype::get_operand_to_value_kernel(const eval::eval_context *ectx,
-                        kernel_instance<unary_operation_pair_t>& out_borrowed_kernel) const
+size_t date_property_dtype::make_operand_to_value_assignment_kernel(
+                hierarchical_kernel<unary_single_operation_t> *out,
+                size_t offset_out,
+                const char *dst_metadata, const char *src_metadata,
+                const eval::eval_context *ectx) const
 {
-    if (m_to_value_kernel.kernel.single != NULL) {
-        out_borrowed_kernel.borrow_from(m_to_value_kernel);
-    } else if (ectx != NULL) {
-        // If the kernel wasn't set, errmode is assign_error_default, so we must use the eval_context
-        ::dynd::get_dtype_assignment_kernel(m_value_dtype, m_operand_dtype.value_dtype(),
-                            ectx->default_assign_error_mode, ectx, out_borrowed_kernel);
-    } else {
-        // An evaluation context is needed to get the kernel, set the output to NULL
-        out_borrowed_kernel.kernel = unary_operation_pair_t();
-    }
+    const date_dtype *dd = static_cast<const date_dtype *>(m_operand_dtype.value_dtype().extended());
+    return dd->make_property_getter_kernel(out, offset_out,
+                    dst_metadata,
+                    src_metadata, m_property_index,
+                    ectx);
 }
 
-void dynd::date_property_dtype::get_value_to_operand_kernel(const eval::eval_context *DYND_UNUSED(ectx),
-                        kernel_instance<unary_operation_pair_t>& DYND_UNUSED(out_borrowed_kernel)) const
+size_t date_property_dtype::make_value_to_operand_assignment_kernel(
+                hierarchical_kernel<unary_single_operation_t> *DYND_UNUSED(out),
+                size_t DYND_UNUSED(offset_out),
+                const char *DYND_UNUSED(dst_metadata), const char *DYND_UNUSED(src_metadata),
+                const eval::eval_context *DYND_UNUSED(ectx)) const
 {
     stringstream ss;
     ss << "cannot write to property " << dtype(this, true);
     throw runtime_error(ss.str());
 }
 
-dtype dynd::date_property_dtype::with_replaced_storage_dtype(const dtype& replacement_dtype) const
+dtype date_property_dtype::with_replaced_storage_dtype(const dtype& replacement_dtype) const
 {
     if (m_operand_dtype.get_kind() == expression_kind) {
         return dtype(new date_property_dtype(
