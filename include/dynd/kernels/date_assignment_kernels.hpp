@@ -12,32 +12,24 @@
 namespace dynd {
 
 /**
- * Gets a kernel which converts strings to dates.
+ * Makes a kernel which converts dates to structs.
  */
-void get_string_to_date_assignment_kernel(const dtype& src_string_dtype,
+size_t make_date_to_struct_assignment_kernel(
+                hierarchical_kernel<unary_single_operation_t> *out,
+                size_t offset_out,
+                const dtype& dst_struct_dt, const char *dst_metadata,
                 assign_error_mode errmode,
-                kernel_instance<unary_operation_pair_t>& out_kernel);
+                const eval::eval_context *ectx);
 
 /**
- * Gets a kernel which converts dates to strings.
+ * Makes a kernel which converts structs to dates.
  */
-void get_date_to_string_assignment_kernel(const dtype& dst_string_dtype,
+size_t make_struct_to_date_assignment_kernel(
+                hierarchical_kernel<unary_single_operation_t> *out,
+                size_t offset_out,
+                const dtype& src_struct_dt, const char *src_metadata,
                 assign_error_mode errmode,
-                kernel_instance<unary_operation_pair_t>& out_kernel);
-
-/**
- * Gets a kernel which converts dates to structs.
- */
-void get_date_to_struct_assignment_kernel(const dtype& dst_struct_dtype,
-                assign_error_mode errmode,
-                kernel_instance<unary_operation_pair_t>& out_kernel);
-
-/**
- * Gets a kernel which converts dates to structs.
- */
-void get_struct_to_date_assignment_kernel(const dtype& src_struct_dtype,
-                assign_error_mode errmode,
-                kernel_instance<unary_operation_pair_t>& out_kernel);
+                const eval::eval_context *ectx);
 
 /**
  * Makes a kernel which converts strings to dates.

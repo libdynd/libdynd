@@ -105,40 +105,6 @@ void date_dtype::get_single_compare_kernel(kernel_instance<compare_operations_t>
     throw runtime_error("get_single_compare_kernel for date are not implemented");
 }
 
-void date_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const dtype& src_dt,
-                assign_error_mode errmode,
-                kernel_instance<unary_operation_pair_t>& out_kernel) const
-{
-    if (this == dst_dt.extended()) {
-        if (src_dt.get_kind() == string_kind) {
-            // Assignment from strings
-            get_string_to_date_assignment_kernel(src_dt, errmode, out_kernel);
-            return;
-        } else if (src_dt.get_kind() == struct_kind) {
-            get_struct_to_date_assignment_kernel(src_dt, errmode, out_kernel);
-            return;
-        } else if (!src_dt.is_builtin()) {
-            src_dt.extended()->get_dtype_assignment_kernel(dst_dt, src_dt, errmode, out_kernel);
-        }
-        // TODO
-    } else {
-        if (dst_dt.get_kind() == string_kind) {
-            // Assignment to strings
-            get_date_to_string_assignment_kernel(dst_dt, errmode, out_kernel);
-            return;
-        } else if (dst_dt.get_kind() == struct_kind) {
-            get_date_to_struct_assignment_kernel(dst_dt, errmode, out_kernel);
-            return;
-        }
-        // TODO
-    }
-
-    stringstream ss;
-    ss << "assignment from " << src_dt << " to " << dst_dt << " is not implemented yet";
-    throw runtime_error(ss.str());
-}
-
-
 bool date_dtype::operator==(const base_dtype& rhs) const
 {
     if (this == &rhs) {
@@ -166,8 +132,9 @@ size_t date_dtype::make_assignment_kernel(
                             src_dt, src_metadata,
                             errmode, ectx);
         } else if (src_dt.get_kind() == struct_kind) {
-            //get_struct_to_date_assignment_kernel(src_dt, errmode, out_kernel);
-            //return;
+            return make_struct_to_date_assignment_kernel(out, offset_out,
+                            src_dt, src_metadata,
+                            errmode, ectx);
         } else if (!src_dt.is_builtin()) {
             return src_dt.extended()->make_assignment_kernel(out, offset_out,
                             dst_dt, dst_metadata,
@@ -181,8 +148,9 @@ size_t date_dtype::make_assignment_kernel(
                             dst_dt, dst_metadata,
                             errmode, ectx);
         } else if (dst_dt.get_kind() == struct_kind) {
-            //get_date_to_struct_assignment_kernel(dst_dt, errmode, out_kernel);
-            //return;
+            return make_date_to_struct_assignment_kernel(out, offset_out,
+                            dst_dt, dst_metadata,
+                            errmode, ectx);
         }
         // TODO
     }
