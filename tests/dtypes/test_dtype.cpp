@@ -125,10 +125,8 @@ TEST(DType, BasicConstructor) {
     EXPECT_TRUE(d.is_builtin());
 }
 
-#define TEST_COMPARISONS(type_id, type, lhs, rhs) \
+#define TEST_COMPARISONS(type, lhs, rhs) \
     { \
-        kernel_instance<compare_operations_t> k; \
-        dtype d = dtype(type_id); \
         d.get_single_compare_kernel(k); \
         type v1 = lhs; type v2 = rhs; \
         EXPECT_EQ(k.kernel.ops[compare_operations_t::less_id]((char *)&v1, (char *)&v2, &k.extra), (type)lhs < (type)rhs); \
@@ -141,83 +139,103 @@ TEST(DType, BasicConstructor) {
 
 
 TEST(DType, SingleCompareBool) {
-    TEST_COMPARISONS(bool_type_id, bool, 0, 1)
-    TEST_COMPARISONS(bool_type_id, bool, 0, 0)
-    TEST_COMPARISONS(bool_type_id, bool, 1, 0)
-    TEST_COMPARISONS(bool_type_id, bool, 1, 1)
+    kernel_instance<compare_operations_t> k;
+    dtype d;
+
+    d = make_dtype<dynd_bool>();
+    TEST_COMPARISONS(bool, 0, 1);
+    TEST_COMPARISONS(bool, 0, 0);
+    TEST_COMPARISONS(bool, 1, 0);
+    TEST_COMPARISONS(bool, 1, 1);
 }
 
 
 TEST(DType, SingleCompareInt) {
-    TEST_COMPARISONS(int8_type_id, int8_t, 1, 2)
-    TEST_COMPARISONS(int8_type_id, int8_t, 2, 2)
-    TEST_COMPARISONS(int8_type_id, int8_t, 1, 0)
-    TEST_COMPARISONS(int8_type_id, int8_t, -1, 0)
-    TEST_COMPARISONS(int8_type_id, int8_t, -1, -1)
-    TEST_COMPARISONS(int8_type_id, int8_t, -1, -2)
+    kernel_instance<compare_operations_t> k;
+    dtype d;
 
-    TEST_COMPARISONS(int16_type_id, int16_t, 1, 2)
-    TEST_COMPARISONS(int16_type_id, int16_t, 2, 2)
-    TEST_COMPARISONS(int16_type_id, int16_t, 1, 0)
-    TEST_COMPARISONS(int16_type_id, int16_t, -1, 0)
-    TEST_COMPARISONS(int16_type_id, int16_t, -1, -1)
-    TEST_COMPARISONS(int16_type_id, int16_t, -1, -2)
+    d = make_dtype<int8_t>();
+    TEST_COMPARISONS(int8_t, 1, 2);
+    TEST_COMPARISONS(int8_t, 2, 2);
+    TEST_COMPARISONS(int8_t, 1, 0);
+    TEST_COMPARISONS(int8_t, -1, 0);
+    TEST_COMPARISONS(int8_t, -1, -1);
+    TEST_COMPARISONS(int8_t, -1, -2);
 
-    TEST_COMPARISONS(int32_type_id, int32_t, 1, 2)
-    TEST_COMPARISONS(int32_type_id, int32_t, 2, 2)
-    TEST_COMPARISONS(int32_type_id, int32_t, 1, 0)
-    TEST_COMPARISONS(int32_type_id, int32_t, -1, 0)
-    TEST_COMPARISONS(int32_type_id, int32_t, -1, -1)
-    TEST_COMPARISONS(int32_type_id, int32_t, -1, -2)
+    d = make_dtype<int16_t>();
+    TEST_COMPARISONS(int16_t, 1, 2);
+    TEST_COMPARISONS(int16_t, 2, 2);
+    TEST_COMPARISONS(int16_t, 1, 0);
+    TEST_COMPARISONS(int16_t, -1, 0);
+    TEST_COMPARISONS(int16_t, -1, -1);
+    TEST_COMPARISONS(int16_t, -1, -2);
 
-    TEST_COMPARISONS(int64_type_id, int64_t, 1, 2)
-    TEST_COMPARISONS(int64_type_id, int64_t, 2, 2)
-    TEST_COMPARISONS(int64_type_id, int64_t, 1, 0)
-    TEST_COMPARISONS(int64_type_id, int64_t, -1, 0)
-    TEST_COMPARISONS(int64_type_id, int64_t, -1, -1)
-    TEST_COMPARISONS(int64_type_id, int64_t, -1, -2)
+    d = make_dtype<int32_t>();
+    TEST_COMPARISONS(int32_t, 1, 2);
+    TEST_COMPARISONS(int32_t, 2, 2);
+    TEST_COMPARISONS(int32_t, 1, 0);
+    TEST_COMPARISONS(int32_t, -1, 0);
+    TEST_COMPARISONS(int32_t, -1, -1);
+    TEST_COMPARISONS(int32_t, -1, -2);
+
+    d = make_dtype<int64_t>();
+    TEST_COMPARISONS(int64_t, 1, 2);
+    TEST_COMPARISONS(int64_t, 2, 2);
+    TEST_COMPARISONS(int64_t, 1, 0);
+    TEST_COMPARISONS(int64_t, -1, 0);
+    TEST_COMPARISONS(int64_t, -1, -1);
+    TEST_COMPARISONS(int64_t, -1, -2);
 }
 
 TEST(DType, SingleCompareUInt) {
-    TEST_COMPARISONS(uint8_type_id, uint8_t, 1, 2)
-    TEST_COMPARISONS(uint8_type_id, uint8_t, 2, 2)
-    TEST_COMPARISONS(uint8_type_id, uint8_t, 1, 0)
+    kernel_instance<compare_operations_t> k;
+    dtype d;
 
-    TEST_COMPARISONS(uint16_type_id, uint16_t, 1, 2)
-    TEST_COMPARISONS(uint16_type_id, uint16_t, 2, 2)
-    TEST_COMPARISONS(uint16_type_id, uint16_t, 1, 0)
+    d = make_dtype<uint8_t>();
+    TEST_COMPARISONS(uint8_t, 1, 2);
+    TEST_COMPARISONS(uint8_t, 2, 2);
+    TEST_COMPARISONS(uint8_t, 1, 0);
 
-    TEST_COMPARISONS(uint32_type_id, uint32_t, 1, 2)
-    TEST_COMPARISONS(uint32_type_id, uint32_t, 2, 2)
-    TEST_COMPARISONS(uint32_type_id, uint32_t, 1, 0)
+    d = make_dtype<uint16_t>();
+    TEST_COMPARISONS(uint16_t, 1, 2);
+    TEST_COMPARISONS(uint16_t, 2, 2);
+    TEST_COMPARISONS(uint16_t, 1, 0);
 
-    TEST_COMPARISONS(uint64_type_id, uint64_t, 1, 2)
-    TEST_COMPARISONS(uint64_type_id, uint64_t, 2, 2)
-    TEST_COMPARISONS(uint64_type_id, uint64_t, 1, 0)
+    d = make_dtype<uint32_t>();
+    TEST_COMPARISONS(uint32_t, 1, 2);
+    TEST_COMPARISONS(uint32_t, 2, 2);
+    TEST_COMPARISONS(uint32_t, 1, 0);
+
+    d = make_dtype<uint64_t>();
+    TEST_COMPARISONS(uint64_t, 1, 2);
+    TEST_COMPARISONS(uint64_t, 2, 2);
+    TEST_COMPARISONS(uint64_t, 1, 0);
 }
 
 TEST(DType, SingleCompareFloat) {
-    TEST_COMPARISONS(float32_type_id, float, 1.0, 2.0)
-    TEST_COMPARISONS(float32_type_id, float, 2.0, 2.0)
-    TEST_COMPARISONS(float32_type_id, float, 1.0, 0.0)
-    TEST_COMPARISONS(float32_type_id, float, -1.0, 0.0)
-    TEST_COMPARISONS(float32_type_id, float, -1.0, -1.0)
-    TEST_COMPARISONS(float32_type_id, float, -1.0, -2.0)
+    kernel_instance<compare_operations_t> k;
+    dtype d;
 
-    TEST_COMPARISONS(float64_type_id, double, 1.0, 2.0)
-    TEST_COMPARISONS(float64_type_id, double, 2.0, 2.0)
-    TEST_COMPARISONS(float64_type_id, double, 1.0, 0.0)
-    TEST_COMPARISONS(float64_type_id, double, -1.0, 0.0)
-    TEST_COMPARISONS(float64_type_id, double, -1.0, -1.0)
-    TEST_COMPARISONS(float64_type_id, double, -1.0, -2.0)
+    TEST_COMPARISONS(float, 1.0, 2.0);
+    TEST_COMPARISONS(float, 2.0, 2.0);
+    TEST_COMPARISONS(float, 1.0, 0.0);
+    TEST_COMPARISONS(float, -1.0, 0.0);
+    TEST_COMPARISONS(float, -1.0, -1.0);
+    TEST_COMPARISONS(float, -1.0, -2.0);
+
+    TEST_COMPARISONS(double, 1.0, 2.0);
+    TEST_COMPARISONS(double, 2.0, 2.0);
+    TEST_COMPARISONS(double, 1.0, 0.0);
+    TEST_COMPARISONS(double, -1.0, 0.0);
+    TEST_COMPARISONS(double, -1.0, -1.0);
+    TEST_COMPARISONS(double, -1.0, -2.0);
 }
 #undef TEST_COMPARISONS
 
 // TODO: ordered comparisons for complex numbers
-#define TEST_COMPLEX_COMPARISONS(type_id, type, lhs, rhs) \
+#define TEST_COMPLEX_COMPARISONS(type, lhs, rhs) \
     { \
-        kernel_instance<compare_operations_t> k; \
-        dtype d = dtype(type_id); \
+        dtype d = make_dtype<type>(); \
         d.get_single_compare_kernel(k); \
         type v1 = lhs; type v2 = rhs; \
         EXPECT_EQ(lhs == rhs, k.kernel.ops[compare_operations_t::equal_id]((char *)&v1, (char *)&v2, &k.extra)); \
@@ -225,31 +243,33 @@ TEST(DType, SingleCompareFloat) {
     }
 
 TEST(DType, SingleCompareComplex) {
-    TEST_COMPLEX_COMPARISONS(complex_float32_type_id, complex<float>, complex<float>(1.0), complex<float>(2.0))
-    TEST_COMPLEX_COMPARISONS(complex_float32_type_id, complex<float>, complex<float>(2.0), complex<float>(2.0))
-    TEST_COMPLEX_COMPARISONS(complex_float32_type_id, complex<float>, complex<float>(1.0), complex<float>(0.0))
-    TEST_COMPLEX_COMPARISONS(complex_float32_type_id, complex<float>, complex<float>(-1.0), complex<float>(2.0))
-    TEST_COMPLEX_COMPARISONS(complex_float32_type_id, complex<float>, complex<float>(-2.0), complex<float>(-2.0))
-    TEST_COMPLEX_COMPARISONS(complex_float32_type_id, complex<float>, complex<float>(-1.0), complex<float>(0.0))
-    TEST_COMPLEX_COMPARISONS(complex_float32_type_id, complex<float>, complex<float>(0.0, 1.0), complex<float>(0.0, 2.0))
-    TEST_COMPLEX_COMPARISONS(complex_float32_type_id, complex<float>, complex<float>(0.0, 2.0), complex<float>(0.0, 2.0))
-    TEST_COMPLEX_COMPARISONS(complex_float32_type_id, complex<float>, complex<float>(0.0, 1.0), complex<float>(0.0, 0.0))
-    TEST_COMPLEX_COMPARISONS(complex_float32_type_id, complex<float>, complex<float>(0.0, -1.0), complex<float>(0.0, 2.0))
-    TEST_COMPLEX_COMPARISONS(complex_float32_type_id, complex<float>, complex<float>(0.0, -2.0), complex<float>(0.0, -2.0))
-    TEST_COMPLEX_COMPARISONS(complex_float32_type_id, complex<float>, complex<float>(0.0, -1.0), complex<float>(0.0, 0.0))
+    kernel_instance<compare_operations_t> k;
 
-    TEST_COMPLEX_COMPARISONS(complex_float64_type_id, complex<double>, complex<double>(1.0), complex<double>(2.0))
-    TEST_COMPLEX_COMPARISONS(complex_float64_type_id, complex<double>, complex<double>(2.0), complex<double>(2.0))
-    TEST_COMPLEX_COMPARISONS(complex_float64_type_id, complex<double>, complex<double>(1.0), complex<double>(0.0))
-    TEST_COMPLEX_COMPARISONS(complex_float64_type_id, complex<double>, complex<double>(-1.0), complex<double>(2.0))
-    TEST_COMPLEX_COMPARISONS(complex_float64_type_id, complex<double>, complex<double>(-2.0), complex<double>(-2.0))
-    TEST_COMPLEX_COMPARISONS(complex_float64_type_id, complex<double>, complex<double>(-1.0), complex<double>(0.0))
-    TEST_COMPLEX_COMPARISONS(complex_float64_type_id, complex<double>, complex<double>(0.0, 1.0), complex<double>(0.0, 2.0))
-    TEST_COMPLEX_COMPARISONS(complex_float64_type_id, complex<double>, complex<double>(0.0, 2.0), complex<double>(0.0, 2.0))
-    TEST_COMPLEX_COMPARISONS(complex_float64_type_id, complex<double>, complex<double>(0.0, 1.0), complex<double>(0.0, 0.0))
-    TEST_COMPLEX_COMPARISONS(complex_float64_type_id, complex<double>, complex<double>(0.0, -1.0), complex<double>(0.0, 2.0))
-    TEST_COMPLEX_COMPARISONS(complex_float64_type_id, complex<double>, complex<double>(0.0, -2.0), complex<double>(0.0, -2.0))
-    TEST_COMPLEX_COMPARISONS(complex_float64_type_id, complex<double>, complex<double>(0.0, -1.0), complex<double>(0.0, 0.0))
+    TEST_COMPLEX_COMPARISONS(complex<float>, complex<float>(1.0), complex<float>(2.0));
+    TEST_COMPLEX_COMPARISONS(complex<float>, complex<float>(2.0), complex<float>(2.0));
+    TEST_COMPLEX_COMPARISONS(complex<float>, complex<float>(1.0), complex<float>(0.0));
+    TEST_COMPLEX_COMPARISONS(complex<float>, complex<float>(-1.0), complex<float>(2.0));
+    TEST_COMPLEX_COMPARISONS(complex<float>, complex<float>(-2.0), complex<float>(-2.0));
+    TEST_COMPLEX_COMPARISONS(complex<float>, complex<float>(-1.0), complex<float>(0.0));
+    TEST_COMPLEX_COMPARISONS(complex<float>, complex<float>(0.0, 1.0), complex<float>(0.0, 2.0));
+    TEST_COMPLEX_COMPARISONS(complex<float>, complex<float>(0.0, 2.0), complex<float>(0.0, 2.0));
+    TEST_COMPLEX_COMPARISONS(complex<float>, complex<float>(0.0, 1.0), complex<float>(0.0, 0.0));
+    TEST_COMPLEX_COMPARISONS(complex<float>, complex<float>(0.0, -1.0), complex<float>(0.0, 2.0));
+    TEST_COMPLEX_COMPARISONS(complex<float>, complex<float>(0.0, -2.0), complex<float>(0.0, -2.0));
+    TEST_COMPLEX_COMPARISONS(complex<float>, complex<float>(0.0, -1.0), complex<float>(0.0, 0.0));
+
+    TEST_COMPLEX_COMPARISONS(complex<double>, complex<double>(1.0), complex<double>(2.0));
+    TEST_COMPLEX_COMPARISONS(complex<double>, complex<double>(2.0), complex<double>(2.0));
+    TEST_COMPLEX_COMPARISONS(complex<double>, complex<double>(1.0), complex<double>(0.0));
+    TEST_COMPLEX_COMPARISONS(complex<double>, complex<double>(-1.0), complex<double>(2.0));
+    TEST_COMPLEX_COMPARISONS(complex<double>, complex<double>(-2.0), complex<double>(-2.0));
+    TEST_COMPLEX_COMPARISONS(complex<double>, complex<double>(-1.0), complex<double>(0.0));
+    TEST_COMPLEX_COMPARISONS(complex<double>, complex<double>(0.0, 1.0), complex<double>(0.0, 2.0));
+    TEST_COMPLEX_COMPARISONS(complex<double>, complex<double>(0.0, 2.0), complex<double>(0.0, 2.0));
+    TEST_COMPLEX_COMPARISONS(complex<double>, complex<double>(0.0, 1.0), complex<double>(0.0, 0.0));
+    TEST_COMPLEX_COMPARISONS(complex<double>, complex<double>(0.0, -1.0), complex<double>(0.0, 2.0));
+    TEST_COMPLEX_COMPARISONS(complex<double>, complex<double>(0.0, -2.0), complex<double>(0.0, -2.0));
+    TEST_COMPLEX_COMPARISONS(complex<double>, complex<double>(0.0, -1.0), complex<double>(0.0, 0.0));
 }
 #undef TEST_COMPLEX_COMPARISONS
 

@@ -20,12 +20,6 @@ byteswap_dtype::byteswap_dtype(const dtype& value_dtype)
     if (!value_dtype.is_builtin()) {
         throw std::runtime_error("byteswap_dtype: Only built-in dtypes are supported presently");
     }
-
-    if(m_value_dtype.get_kind() != complex_kind) {
-        get_byteswap_kernel(value_dtype.get_data_size(), value_dtype.get_alignment(), m_byteswap_kernel);
-    } else {
-        get_pairwise_byteswap_kernel(m_value_dtype.get_data_size(), m_value_dtype.get_alignment(), m_byteswap_kernel);
-    }
 }
 
 byteswap_dtype::byteswap_dtype(const dtype& value_dtype, const dtype& operand_dtype)
@@ -42,12 +36,6 @@ byteswap_dtype::byteswap_dtype(const dtype& value_dtype, const dtype& operand_dt
     // Automatically realign if needed
     if (operand_dtype.value_dtype().get_alignment() < value_dtype.get_alignment()) {
         m_operand_dtype = make_view_dtype(operand_dtype, make_fixedbytes_dtype(operand_dtype.get_data_size(), value_dtype.get_alignment()));
-    }
-
-    if(m_value_dtype.get_kind() != complex_kind) {
-        get_byteswap_kernel(value_dtype.get_data_size(), value_dtype.get_alignment(), m_byteswap_kernel);
-    } else {
-        get_pairwise_byteswap_kernel(m_value_dtype.get_data_size(), m_value_dtype.get_alignment(), m_byteswap_kernel);
     }
 }
 
@@ -96,18 +84,6 @@ bool byteswap_dtype::operator==(const base_dtype& rhs) const
         const byteswap_dtype *dt = static_cast<const byteswap_dtype*>(&rhs);
         return m_value_dtype == dt->m_value_dtype;
     }
-}
-
-void byteswap_dtype::get_operand_to_value_kernel(const eval::eval_context *DYND_UNUSED(ectx),
-                        kernel_instance<unary_operation_pair_t>& out_borrowed_kernel) const
-{
-    out_borrowed_kernel.borrow_from(m_byteswap_kernel);
-}
-
-void byteswap_dtype::get_value_to_operand_kernel(const eval::eval_context *DYND_UNUSED(ectx),
-                        kernel_instance<unary_operation_pair_t>& out_borrowed_kernel) const
-{
-    out_borrowed_kernel.borrow_from(m_byteswap_kernel);
 }
 
 dtype byteswap_dtype::with_replaced_storage_dtype(const dtype& replacement_dtype) const

@@ -141,7 +141,6 @@ set(dynd_SRC
     src/dynd/kernels/assignment_kernels.cpp
     src/dynd/kernels/array_assignment_kernels.cpp
     src/dynd/kernels/builtin_dtype_binary_kernel_table.cpp
-    src/dynd/kernels/buffered_unary_kernels.cpp
     src/dynd/kernels/buffered_binary_kernels.cpp
     src/dynd/kernels/bytes_assignment_kernels.cpp
     src/dynd/kernels/byteswap_kernels.cpp
@@ -156,7 +155,6 @@ set(dynd_SRC
     include/dynd/kernels/assignment_kernels.hpp
     include/dynd/kernels/array_assignment_kernels.hpp
     include/dynd/kernels/builtin_dtype_binary_kernel_table.hpp
-    include/dynd/kernels/buffered_unary_kernels.hpp
     include/dynd/kernels/buffered_binary_kernels.hpp
     include/dynd/kernels/bytes_assignment_kernels.hpp
     include/dynd/kernels/byteswap_kernels.hpp

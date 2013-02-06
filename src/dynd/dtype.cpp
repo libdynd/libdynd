@@ -8,7 +8,6 @@
 #include <dynd/dtype_assign.hpp>
 #include <dynd/buffer_storage.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
-#include <dynd/kernels/buffered_unary_kernels.hpp>
 #include <dynd/gfunc/make_callable.hpp>
 
 #include <dynd/dtypes/convert_dtype.hpp>

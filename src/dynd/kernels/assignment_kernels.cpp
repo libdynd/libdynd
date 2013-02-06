@@ -5,7 +5,6 @@
 
 #include <dynd/dtype.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
-#include <dynd/kernels/buffered_unary_kernels.hpp>
 #include "single_assigner_builtin.hpp"
 
 using namespace std;
@@ -142,39 +141,6 @@ void dynd::get_dtype_assignment_kernel(
     if (dst_dt.is_builtin() && src_dt.is_builtin()) {
         get_builtin_dtype_assignment_kernel(dst_dt.get_type_id(),
                             src_dt.get_type_id(), errmode, ectx, out_kernel);
-        return;
-    }
-
-    // Assignment of expression dtypes
-    if (src_dt.get_kind() == expression_kind || dst_dt.get_kind() == expression_kind) {
-        // Chain the kernels together
-        deque<kernel_instance<unary_operation_pair_t> > kernels;
-        deque<dtype> dtypes;
-        const dtype& src_dt_vdt = src_dt.value_dtype();
-        const dtype& dst_dt_vdt = dst_dt.value_dtype();
-        //intptr_t next_element_size = 0;
-
-        if (src_dt.get_kind() == expression_kind) {
-            // kernel operations from src's storage to value
-            push_front_dtype_storage_to_value_kernels(src_dt, ectx, kernels, dtypes);
-        }
-
-        if (src_dt_vdt != dst_dt_vdt) {
-            // A cast operation from src_dt.value_dtype() to dst_dt
-            if (kernels.empty()) {
-                dtypes.push_back(src_dt_vdt);
-            }
-            dtypes.push_back(dst_dt_vdt);
-            kernels.push_back(kernel_instance<unary_operation_pair_t>());
-            get_dtype_assignment_kernel(dst_dt_vdt, src_dt_vdt,
-                                errmode, ectx, kernels.back());
-        }
-
-        if (dst_dt.get_kind() == expression_kind) {
-            push_back_dtype_value_to_storage_kernels(dst_dt, ectx, kernels, dtypes);
-        }
-
-        make_buffered_chain_unary_kernel(kernels, dtypes, out_kernel);
         return;
     }
 
