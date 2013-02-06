@@ -169,15 +169,14 @@ bool dynd::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt)
 void dynd::dtype_copy(const dtype& dt, const char *dst_metadata, char *dst_data,
                 const char *src_metadata, const char *src_data)
 {
-    size_t element_size = dt.get_data_size();
-    if (dt.is_builtin() || (dt.get_memory_management() == pod_memory_management && element_size != 0)) {
-        memcpy(dst_data, src_data, element_size);
+    size_t data_size = dt.get_data_size();
+    if (dt.is_builtin() || (dt.get_memory_management() == pod_memory_management && data_size != 0)) {
+        memcpy(dst_data, src_data, data_size);
     } else {
-        kernel_instance<unary_operation_pair_t> op;
-        get_dtype_assignment_kernel(dt, op);
-        op.extra.dst_metadata = dst_metadata;
-        op.extra.src_metadata = src_metadata;
-        op.kernel.single(dst_data, src_data, &op.extra);
+        hierarchical_kernel<unary_single_operation_t> k;
+        make_assignment_kernel(&k, 0, dt, dst_metadata,
+                        dt, src_metadata, assign_error_none, &eval::default_eval_context);
+        k.get_function()(dst_data, src_data, k.get());
     }
 }
 
@@ -200,23 +199,9 @@ void dynd::dtype_assign(const dtype& dst_dt, const char *dst_metadata, char *dst
         }
     }
 
-    if (dst_dt.is_builtin() && src_dt.is_builtin()) {
-        // Try to use the simple single-value assignment for built-in types
-        unary_operation_pair_t asn = get_builtin_dtype_assignment_function(dst_dt.get_type_id(), src_dt.get_type_id(), errmode);
-        if (asn.single != NULL) {
-            asn.single(dst_data, src_data, NULL);
-            return;
-        }
-
-        stringstream ss;
-        ss << "assignment from " << src_dt << " to " << dst_dt << " with error mode " << errmode << " isn't yet supported";
-        throw std::runtime_error(ss.str());
-    } else {
-        kernel_instance<unary_operation_pair_t> op;
-        get_dtype_assignment_kernel(dst_dt, src_dt, errmode, ectx, op);
-        op.extra.dst_metadata = dst_metadata;
-        op.extra.src_metadata = src_metadata;
-        op.kernel.single(dst_data, src_data, &op.extra);
-        return;
-    }
+    hierarchical_kernel<unary_single_operation_t> k;
+    make_assignment_kernel(&k, 0, dst_dt, dst_metadata,
+                    src_dt, src_metadata,
+                    errmode, ectx);
+    k.get_function()(dst_data, src_data, k.get());
 }

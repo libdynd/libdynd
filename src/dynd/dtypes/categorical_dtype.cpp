@@ -161,15 +161,15 @@ namespace {
 static ndobject make_sorted_categories(const set<const char *, cmp>& uniques, const dtype& udtype, const char *metadata)
 {
     ndobject categories = make_strided_ndobject(uniques.size(), udtype);
-    kernel_instance<unary_operation_pair_t> assign;
-    get_dtype_assignment_kernel(udtype, assign);
+    hierarchical_kernel<unary_single_operation_t> k;
+    make_assignment_kernel(&k, 0, udtype, categories.get_ndo_meta() + sizeof(strided_array_dtype_metadata),
+                    udtype, metadata, assign_error_default, &eval::default_eval_context);
+    unary_single_operation_t kf = k.get_function();
 
     intptr_t stride = reinterpret_cast<const strided_array_dtype_metadata *>(categories.get_ndo_meta())->stride;
     char *dst_ptr = categories.get_readwrite_originptr();
-    assign.extra.dst_metadata = categories.get_ndo_meta() + sizeof(strided_array_dtype_metadata);
-    assign.extra.src_metadata = metadata;
     for (set<const char *, cmp>::const_iterator it = uniques.begin(); it != uniques.end(); ++it) {
-        assign.kernel.single(dst_ptr, *it, &assign.extra);
+        kf(dst_ptr, *it, k.get());
         dst_ptr += stride;
     }
     categories.get_dtype().extended()->metadata_finalize_buffers(categories.get_ndo_meta());
