@@ -13,6 +13,7 @@
 #include <dynd/dtypes/strided_array_dtype.hpp>
 #include <dynd/dtypes/fixedbytes_dtype.hpp>
 #include <dynd/dtypes/convert_dtype.hpp>
+#include <dynd/dtypes/string_dtype.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -55,4 +56,17 @@ TEST(BytesDType, Create) {
     EXPECT_EQ(bytes_kind, d.get_kind());
     EXPECT_EQ(sizeof(void *), d.get_alignment());
     EXPECT_EQ(16u, static_cast<const bytes_dtype *>(d.extended())->get_data_alignment());
+}
+
+TEST(BytesDType, Assign) {
+    ndobject a, b, c;
+
+    // Round-trip a string through a bytes assignment
+    a = ndobject("testing").view_scalars(make_bytes_dtype(1));
+    EXPECT_EQ(a.get_dtype(), make_bytes_dtype(1));
+    b = ndobject(make_bytes_dtype(1));
+    b.vals() = a;
+    c = b.view_scalars(make_string_dtype());
+    EXPECT_EQ(c.get_dtype(), make_string_dtype());
+    EXPECT_EQ("testing", c.as<string>());
 }

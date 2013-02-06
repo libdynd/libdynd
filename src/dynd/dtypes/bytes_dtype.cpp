@@ -99,38 +99,43 @@ void bytes_dtype::get_single_compare_kernel(kernel_instance<compare_operations_t
     throw std::runtime_error("bytes_dtype::get_single_compare_kernel not supported yet");
 }
 
-void bytes_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const dtype& src_dt,
+size_t bytes_dtype::make_assignment_kernel(
+                hierarchical_kernel<unary_single_operation_t> *out,
+                size_t offset_out,
+                const dtype& dst_dt, const char *dst_metadata,
+                const dtype& src_dt, const char *src_metadata,
                 assign_error_mode errmode,
-                kernel_instance<unary_operation_pair_t>& out_kernel) const
+                const eval::eval_context *ectx) const
 {
     if (this == dst_dt.extended()) {
         switch (src_dt.get_type_id()) {
             case bytes_type_id: {
-                get_blockref_bytes_assignment_kernel(m_alignment, errmode, out_kernel);
-                break;
+                return make_blockref_bytes_assignment_kernel(out, offset_out,
+                                get_alignment(), dst_metadata,
+                                src_dt.get_alignment(), src_metadata,
+                                ectx);
             }
             case fixedbytes_type_id: {
-                const fixedbytes_dtype *src_fs = static_cast<const fixedbytes_dtype *>(src_dt.extended());
-                get_fixedbytes_to_blockref_bytes_assignment_kernel(m_alignment,
-                                        src_fs->get_data_size(), src_fs->get_alignment(), out_kernel);
-                break;
+                return make_fixedbytes_to_blockref_bytes_assignment_kernel(out, offset_out,
+                                get_alignment(), dst_metadata,
+                                src_dt.get_data_size(), src_dt.get_alignment(),
+                                ectx);
             }
             default: {
                 if (!src_dt.is_builtin()) {
-                    src_dt.extended()->get_dtype_assignment_kernel(dst_dt, src_dt, errmode, out_kernel);
-                } else {
-                    stringstream ss;
-                    ss << "assignment from " << src_dt << " to " << dst_dt << " is not implemented yet";
-                    throw runtime_error(ss.str());
+                    src_dt.extended()->make_assignment_kernel(out, offset_out,
+                                    dst_dt, dst_metadata,
+                                    src_dt, src_metadata,
+                                    errmode, ectx);
                 }
                 break;
             }
         }
-    } else {
-        stringstream ss;
-        ss << "assignment from " << src_dt << " to " << dst_dt << " is not implemented yet";
-        throw runtime_error(ss.str());
     }
+
+    stringstream ss;
+    ss << "Cannot assign from " << src_dt << " to " << dst_dt;
+    throw runtime_error(ss.str());
 }
 
 

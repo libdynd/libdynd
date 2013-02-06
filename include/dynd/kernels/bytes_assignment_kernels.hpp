@@ -12,18 +12,24 @@
 namespace dynd {
 
 /**
- * Gets a kernel which copies blockref bytes.
+ * Makes a kernel which copies blockref bytes.
  */
-void get_blockref_bytes_assignment_kernel(size_t dst_alignment,
-                size_t src_alignment,
-                kernel_instance<unary_operation_pair_t>& out_kernel);
+size_t make_blockref_bytes_assignment_kernel(
+                hierarchical_kernel<unary_single_operation_t> *out,
+                size_t offset_out,
+                size_t dst_alignment, const char *dst_metadata,
+                size_t src_alignment, const char *src_metadata,
+                const eval::eval_context *ectx);
 
 /**
- * Gets a kernel which copies fixed-size bytes to bytes.
+ * Makes a kernel which copies fixed-size bytes to bytes.
  */
-void get_fixedbytes_to_blockref_bytes_assignment_kernel(size_t dst_alignment,
+size_t make_fixedbytes_to_blockref_bytes_assignment_kernel(
+                hierarchical_kernel<unary_single_operation_t> *out,
+                size_t offset_out,
+                size_t dst_alignment, const char *dst_metadata,
                 intptr_t src_element_size, size_t src_alignment,
-                kernel_instance<unary_operation_pair_t>& out_kernel);
+                const eval::eval_context *ectx);
 
 } // namespace dynd
 

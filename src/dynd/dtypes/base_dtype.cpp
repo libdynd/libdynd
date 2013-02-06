@@ -424,21 +424,6 @@ void base_dtype::get_dynamic_ndobject_functions(const std::pair<std::string, gfu
     *out_count = 0;
 }
 
-
-void base_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const dtype& src_dt,
-                assign_error_mode DYND_UNUSED(errmode),
-                kernel_instance<unary_operation_pair_t>& DYND_UNUSED(out_kernel)) const
-{
-    stringstream ss;
-    ss << "get_dtype_assignment_kernel has not been implemented for ";
-    if (this == dst_dt.extended()) {
-        ss << dst_dt;
-    } else {
-        ss << src_dt;
-    }
-    throw std::runtime_error(ss.str());
-}
-
 void base_dtype::get_single_compare_kernel(kernel_instance<compare_operations_t>& DYND_UNUSED(out_kernel)) const
 {
         throw std::runtime_error("get_single_compare_kernel: this dtypes does not support comparisons");

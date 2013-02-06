@@ -511,18 +511,6 @@ public:
      */
     virtual void get_single_compare_kernel(kernel_instance<compare_operations_t>& out_kernel) const;
 
-    /**
-     * Called by ::dynd::get_dtype_assignment_kernel with (this == dst_dt.extended()) or
-     * by another implementation of this function with (this == src_dt.extended()).
-     *
-     * If (this == dst_dt.extended()), and the function can't produce an assignment kernel,
-     * should call dst_dt.extended()->get_dtype_assignment_kernel(...) to let the other
-     * dtype provide the function if it can be done.
-     */
-    virtual void get_dtype_assignment_kernel(const dtype& dst_dt, const dtype& src_dt,
-                    assign_error_mode errmode,
-                    kernel_instance<unary_operation_pair_t>& out_kernel) const;
-
     virtual bool operator==(const base_dtype& rhs) const = 0;
 
     /** The size of the ndobject metadata for this dtype */
