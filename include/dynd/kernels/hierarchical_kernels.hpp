@@ -92,8 +92,17 @@ public:
      *       that you're a leaf kernel, use ensure_capacity_leaf
      *       instead.
      */
-    void ensure_capacity(size_t size) {
-        size += sizeof(hierarchical_kernel_common_base);
+    inline void ensure_capacity(size_t size) {
+        ensure_capacity_leaf(size + sizeof(hierarchical_kernel_common_base));
+    }
+
+    /**
+     * This function ensures that the kernel's data
+     * is at least the required number of bytes. It
+     * should only be called during the construction phase
+     * of the kernel when constructing a leaf kernel.
+     */
+    void ensure_capacity_leaf(size_t size) {
         if (m_capacity < size) {
             // At least double the capacity
             if (size < 2 * m_capacity) {
@@ -124,18 +133,10 @@ public:
                 throw std::bad_alloc();
             }
             // Zero out the newly allocated capacity
-            memset(new_data + m_capacity, 0, size - m_capacity);
+            memset(reinterpret_cast<char *>(new_data) + m_capacity, 0, size - m_capacity);
+            m_data = new_data;
+            m_capacity = size;
         }
-    }
-
-    /**
-     * This function ensures that the kernel's data
-     * is at least the required number of bytes. It
-     * should only be called during the construction phase
-     * of the kernel when constructing a leaf kernel.
-     */
-    inline void ensure_capacity_leaf(size_t size) {
-        ensure_capacity(size - sizeof(hierarchical_kernel_common_base));
     }
 
     /**
