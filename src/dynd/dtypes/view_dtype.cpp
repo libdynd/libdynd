@@ -25,10 +25,6 @@ dynd::view_dtype::view_dtype(const dtype& value_dtype, const dtype& operand_dtyp
     if (value_dtype.get_memory_management() != pod_memory_management) {
         throw std::runtime_error("view_dtype: Only POD dtypes are supported");
     }
-
-    get_pod_dtype_assignment_kernel(m_value_dtype.get_data_size(),
-                    std::min(m_value_dtype.get_alignment(), m_operand_dtype.get_alignment()),
-                    m_copy_kernel);
 }
 
 view_dtype::~view_dtype()
@@ -115,18 +111,6 @@ bool dynd::view_dtype::operator==(const base_dtype& rhs) const
         const view_dtype *dt = static_cast<const view_dtype*>(&rhs);
         return m_value_dtype == dt->m_value_dtype;
     }
-}
-
-void dynd::view_dtype::get_operand_to_value_kernel(const eval::eval_context *DYND_UNUSED(ectx),
-                        kernel_instance<unary_operation_pair_t>& out_borrowed_kernel) const
-{
-    out_borrowed_kernel.borrow_from(m_copy_kernel);
-}
-
-void dynd::view_dtype::get_value_to_operand_kernel(const eval::eval_context *DYND_UNUSED(ectx),
-                        kernel_instance<unary_operation_pair_t>& out_borrowed_kernel) const
-{
-    out_borrowed_kernel.borrow_from(m_copy_kernel);
 }
 
 dtype dynd::view_dtype::with_replaced_storage_dtype(const dtype& replacement_dtype) const

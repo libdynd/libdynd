@@ -35,10 +35,14 @@ public:
 
     /** Returns a kernel which converts from (operand_dtype().value_dtype()) to (value_dtype()) */
     virtual void get_operand_to_value_kernel(const eval::eval_context *ectx,
-                            kernel_instance<unary_operation_pair_t>& out_borrowed_kernel) const = 0;
+                            kernel_instance<unary_operation_pair_t>& out_borrowed_kernel) const {
+        throw std::runtime_error("get_operand_to_value_kernel is deprecated");
+    }
     /** Returns a kernel which converts from (value_dtype()) to (operand_dtype().value_dtype()) */
     virtual void get_value_to_operand_kernel(const eval::eval_context *ectx,
-                            kernel_instance<unary_operation_pair_t>& out_borrowed_kernel) const = 0;
+                            kernel_instance<unary_operation_pair_t>& out_borrowed_kernel) const {
+        throw std::runtime_error("get_value_to_operand_kernel is deprecated");
+    }
 
     /**
      * This method is for expression dtypes, and is a way to substitute

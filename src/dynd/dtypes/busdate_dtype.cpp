@@ -101,14 +101,6 @@ void dynd::busdate_dtype::get_single_compare_kernel(kernel_instance<compare_oper
     throw runtime_error("get_single_compare_kernel for date are not implemented");
 }
 
-void dynd::busdate_dtype::get_dtype_assignment_kernel(const dtype& /*dst_dt*/, const dtype& /*src_dt*/,
-                assign_error_mode /*errmode*/,
-                kernel_instance<unary_operation_pair_t>& /*out_kernel*/) const
-{
-    throw runtime_error("conversions for date are not implemented");
-}
-
-
 bool dynd::busdate_dtype::operator==(const base_dtype& rhs) const
 {
     if (this == &rhs) {

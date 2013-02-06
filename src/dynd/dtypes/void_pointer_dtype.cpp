@@ -47,22 +47,3 @@ bool dynd::void_pointer_dtype::operator==(const base_dtype& rhs) const
 {
     return rhs.get_type_id() == void_pointer_type_id;
 }
-
-void dynd::void_pointer_dtype::get_dtype_assignment_kernel(const dtype& dst_dt, const dtype& src_dt,
-                assign_error_mode DYND_UNUSED(errmode),
-                kernel_instance<unary_operation_pair_t>& out_kernel) const
-{
-    if (this == dst_dt.extended()) {
-        if (src_dt.get_type_id() == void_type_id) {
-            // Get a POD assignment kernel. The code handling the blockref should see
-            // that this kernel doesn't define a kernel_api, and raise an error if
-            // a copy is attempted instead of maintaining existing blockrefs.
-            // TODO: Validate this, needs more work fleshing out blockrefs in general.
-            get_pod_dtype_assignment_kernel(sizeof(void *), sizeof(void *), out_kernel);
-        }
-    }
-
-    stringstream ss;
-    ss << "Cannot assign from " << src_dt << " to " << dst_dt;
-    throw runtime_error(ss.str());
-}

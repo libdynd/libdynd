@@ -14,7 +14,6 @@ namespace dynd {
 
 class view_dtype : public base_expression_dtype {
     dtype m_value_dtype, m_operand_dtype;
-    kernel_instance<unary_operation_pair_t> m_copy_kernel;
 
 public:
     view_dtype(const dtype& value_dtype, const dtype& operand_dtype);
@@ -42,11 +41,6 @@ public:
 
     bool operator==(const base_dtype& rhs) const;
 
-    // For expression_kind dtypes - converts to/from the storage's value dtype
-    void get_operand_to_value_kernel(const eval::eval_context *ectx,
-                            kernel_instance<unary_operation_pair_t>& out_borrowed_kernel) const;
-    void get_value_to_operand_kernel(const eval::eval_context *ectx,
-                            kernel_instance<unary_operation_pair_t>& out_borrowed_kernel) const;
     dtype with_replaced_storage_dtype(const dtype& replacement_dtype) const;
 
     size_t make_operand_to_value_assignment_kernel(
