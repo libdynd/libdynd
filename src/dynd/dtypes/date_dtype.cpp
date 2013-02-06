@@ -151,6 +151,48 @@ bool date_dtype::operator==(const base_dtype& rhs) const
     }
 }
 
+size_t date_dtype::make_assignment_kernel(
+                hierarchical_kernel<unary_single_operation_t> *out,
+                size_t offset_out,
+                const dtype& dst_dt, const char *dst_metadata,
+                const dtype& src_dt, const char *src_metadata,
+                assign_error_mode errmode,
+                const eval::eval_context *ectx) const
+{
+    if (this == dst_dt.extended()) {
+        if (src_dt.get_kind() == string_kind) {
+            // Assignment from strings
+            return make_string_to_date_assignment_kernel(out, offset_out,
+                            src_dt, src_metadata,
+                            errmode, ectx);
+        } else if (src_dt.get_kind() == struct_kind) {
+            //get_struct_to_date_assignment_kernel(src_dt, errmode, out_kernel);
+            //return;
+        } else if (!src_dt.is_builtin()) {
+            return src_dt.extended()->make_assignment_kernel(out, offset_out,
+                            dst_dt, dst_metadata,
+                            src_dt, src_metadata,
+                            errmode, ectx);
+        }
+    } else {
+        if (dst_dt.get_kind() == string_kind) {
+            // Assignment to strings
+            return make_date_to_string_assignment_kernel(out, offset_out,
+                            dst_dt, dst_metadata,
+                            errmode, ectx);
+        } else if (dst_dt.get_kind() == struct_kind) {
+            //get_date_to_struct_assignment_kernel(dst_dt, errmode, out_kernel);
+            //return;
+        }
+        // TODO
+    }
+
+    stringstream ss;
+    ss << "Cannot assign from " << src_dt << " to " << dst_dt;
+    throw runtime_error(ss.str());
+}
+
+
 ///////// properties on the dtype
 
 //static pair<string, gfunc::callable> date_dtype_properties[] = {

@@ -58,6 +58,14 @@ public:
     void metadata_debug_print(const char *DYND_UNUSED(metadata), std::ostream& DYND_UNUSED(o), const std::string& DYND_UNUSED(indent)) const {
     }
 
+    size_t make_assignment_kernel(
+                    hierarchical_kernel<unary_single_operation_t> *out,
+                    size_t offset_out,
+                    const dtype& dst_dt, const char *dst_metadata,
+                    const dtype& src_dt, const char *src_metadata,
+                    assign_error_mode errmode,
+                    const eval::eval_context *ectx) const;
+
     void get_dynamic_dtype_properties(const std::pair<std::string, gfunc::callable> **out_properties, size_t *out_count) const;
     void get_dynamic_dtype_functions(const std::pair<std::string, gfunc::callable> **out_functions, size_t *out_count) const;
     void get_dynamic_ndobject_properties(const std::pair<std::string, gfunc::callable> **out_properties, size_t *out_count) const;
