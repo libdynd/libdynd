@@ -322,8 +322,10 @@ uint32_t categorical_dtype::get_value_from_category(const char *category_metadat
     intptr_t i = dynd::binary_search(m_categories, category_metadata, category_data);
     if (i < 0) {
         stringstream ss;
+        ss << "Unrecognized category value '";
         m_category_dtype.print_data(ss, category_metadata, category_data);
-        throw std::runtime_error("Unknown category: '" + ss.str() + "'");
+        ss << "' assigning to dtype " << dtype(this, true);
+        throw std::runtime_error(ss.str());
     } else {
         return m_category_index_to_value[i];
     }

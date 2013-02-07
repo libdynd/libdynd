@@ -19,8 +19,9 @@ TEST(GroupByDType, Create) {
     int by[] = {15,16,16};
     int groups[] = {15,16};
     ndobject g = groupby(data, by, make_categorical_dtype(groups));
-    g.debug_print(cout);
-    g = g.vals();
-    g.debug_print(cout);
-    cout << g << endl;
+    EXPECT_EQ(1, g.at(0).get_shape()[0]);
+    EXPECT_EQ(2, g.at(1).get_shape()[0]);
+    EXPECT_EQ(10, g.at(0,0).as<int>());
+    EXPECT_EQ(20, g.at(1,0).as<int>());
+    EXPECT_EQ(30, g.at(1,1).as<int>());
 }

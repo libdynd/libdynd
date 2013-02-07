@@ -135,34 +135,38 @@ namespace {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             const groupby_dtype *gd = e->src_groupby_dt;
 
+            // Get the data_values raw ndobject
+            dtype data_values_dt = gd->get_operand_dtype();
+            const char *data_values_metadata = e->src_metadata, *data_values_data = src;
+            data_values_dt = data_values_dt.extended()->at_single(0, &data_values_metadata, &data_values_data);
+            data_values_dt = static_cast<const pointer_dtype *>(data_values_dt.extended())->get_target_dtype();
+            data_values_metadata += sizeof(pointer_dtype_metadata);
+            data_values_data = *reinterpret_cast<const char * const *>(data_values_data);
+
             // Get the by_values raw ndobject
             dtype by_values_dt = gd->get_operand_dtype();
             const char *by_values_metadata = e->src_metadata, *by_values_data = src;
-            by_values_dt = by_values_dt.extended()->at_single(0, &by_values_metadata, &by_values_data);
+            by_values_dt = by_values_dt.extended()->at_single(1, &by_values_metadata, &by_values_data);
             by_values_dt = static_cast<const pointer_dtype *>(by_values_dt.extended())->get_target_dtype();
             by_values_metadata += sizeof(pointer_dtype_metadata);
             by_values_data = *reinterpret_cast<const char * const *>(by_values_data);
+
             // If by_values is an expression, evaluate it since we're doing two passes through them
             ndobject by_values_tmp;
             if (by_values_dt.is_expression() || !by_values_dt.extended()->is_strided()) {
+cout << "evaluating by values temp" << endl;
                 by_values_tmp = eval_raw_copy(by_values_dt, by_values_metadata, by_values_data);
+cout << by_values_tmp << endl;
                 by_values_dt = by_values_tmp.get_dtype();
                 by_values_metadata = by_values_tmp.get_ndo_meta();
                 by_values_data = by_values_tmp.get_readonly_originptr();
             }
+
             // Get a strided representation of by_values for processing
             const char *by_values_origin = NULL;
             intptr_t by_values_stride, by_values_size;
             by_values_dt.extended()->process_strided(by_values_metadata, by_values_data,
                             by_values_dt, by_values_origin, by_values_stride, by_values_size);
-
-            // Get the data_values raw ndobject
-            dtype data_values_dt = gd->get_operand_dtype();
-            const char *data_values_metadata = e->src_metadata, *data_values_data = src;
-            data_values_dt = data_values_dt.extended()->at_single(1, &data_values_metadata, &data_values_data);
-            data_values_dt = static_cast<const pointer_dtype *>(data_values_dt.extended())->get_target_dtype();
-            data_values_metadata += sizeof(pointer_dtype_metadata);
-            data_values_data = *reinterpret_cast<const char * const *>(data_values_data);
 
             const dtype& result_dt = gd->get_value_dtype();
             const fixedarray_dtype *fad = static_cast<const fixedarray_dtype *>(result_dt.extended());
@@ -214,6 +218,8 @@ namespace {
                     UIntType value = *reinterpret_cast<const UIntType *>(by_values_ptr);
                     char *&cp = cat_pointers[value];
                     opchild(cp, iter.data(), echild);
+                    // Advance the pointer inside the cat_pointers array
+                    cp += vad_stride;
                     by_values_ptr += by_values_stride;
                 } while (iter.next());
             }
@@ -279,10 +285,10 @@ size_t groupby_dtype::make_operand_to_value_assignment_kernel(
                     static_cast<const fixedarray_dtype *>(m_value_dtype.extended())->get_element_dtype().extended()
                     )->get_element_dtype();
     const char *dst_element_metadata = dst_metadata + 0 + sizeof(var_array_dtype_metadata);
-    // Get srouce element type and metadata
+    // Get source element type and metadata
     dtype src_element_dtype = m_operand_dtype;
     const char *src_element_metadata = e->src_metadata;
-    src_element_dtype = src_element_dtype.extended()->at_single(1, &src_element_metadata, NULL);
+    src_element_dtype = src_element_dtype.extended()->at_single(0, &src_element_metadata, NULL);
     src_element_dtype = static_cast<const pointer_dtype *>(src_element_dtype.extended())->get_target_dtype();
     src_element_metadata += sizeof(pointer_dtype_metadata);
     src_element_dtype = src_element_dtype.extended()->at_single(0, &src_element_metadata, NULL);
