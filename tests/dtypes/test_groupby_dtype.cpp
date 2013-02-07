@@ -9,6 +9,7 @@
 #include "inc_gtest.hpp"
 
 #include <dynd/ndobject.hpp>
+#include <dynd/ndobject_arange.hpp>
 #include <dynd/dtypes/groupby_dtype.hpp>
 #include <dynd/dtypes/categorical_dtype.hpp>
 #include <dynd/dtypes/string_dtype.hpp>
@@ -35,7 +36,7 @@ TEST(GroupByDType, Basic) {
     EXPECT_EQ(30, g.at(1,1).as<int>());
 }
 
-TEST(GroupByDType, DeduceGroups) {
+TEST(GroupByDType, BasicDeduceGroups) {
     const char *data[] = {"a", "test", "is", "here", "now"};
     const char *by[] = {"beta", "alpha", "beta", "beta", "alpha"};
     ndobject g = groupby(data, by);
@@ -53,4 +54,39 @@ TEST(GroupByDType, DeduceGroups) {
     EXPECT_EQ("a",      g.at(1,0).as<string>());
     EXPECT_EQ("is",     g.at(1,1).as<string>());
     EXPECT_EQ("here",   g.at(1,2).as<string>());
+}
+
+TEST(GroupByDType, MediumDeduceGroups) {
+    ndobject data = arange(100);
+    ndobject by = make_strided_ndobject(100, make_dtype<int>());
+    // Since at this point dynd doesn't have a very sophisticated
+    // calculation mechanism, construct by as a series of runs
+    by.at(0 <= irange() < 10).vals() = arange(10);
+    by.at(10 <= irange() < 25).vals() = arange(15);
+    by.at(25 <= irange() < 35).vals() = arange(10);
+    by.at(35 <= irange() < 55).vals() = arange(20);
+    by.at(55 <= irange() < 60).vals() = arange(5);
+    by.at(60 <= irange() < 80).vals() = arange(20);
+    by.at(80 <= irange() < 95).vals() = arange(15);
+    by.at(95 <= irange() < 100).vals() = arange(5);
+    ndobject g = groupby(data, by);
+    EXPECT_EQ(make_groupby_dtype(make_strided_array_dtype(make_dtype<int>()),
+                        make_strided_array_dtype(make_convert_dtype(
+                            make_categorical_dtype(arange(20)), make_dtype<int>())),
+                        make_categorical_dtype(arange(20))),
+                    g.get_dtype());
+    EXPECT_EQ(g.get_shape()[0], 20);
+    int group_0[] =  { 0, 10, 25, 35, 55, 60, 80, 95};
+    int group_6[] =  { 6, 16, 31, 41,     66, 86    };
+    int group_9[] =  { 9, 19, 34, 44,     69, 89    };
+    int group_10[] = {    20,     45,     70, 90    };
+    int group_15[] = {            50,     75        };
+    int group_19[] = {            54,     79        };
+    g = g.vals();
+    EXPECT_TRUE(ndobject(group_0).equals_exact(g.at(0).vals()));
+    EXPECT_TRUE(ndobject(group_6).equals_exact(g.at(6).vals()));
+    EXPECT_TRUE(ndobject(group_9).equals_exact(g.at(9).vals()));
+    EXPECT_TRUE(ndobject(group_10).equals_exact(g.at(10).vals()));
+    EXPECT_TRUE(ndobject(group_15).equals_exact(g.at(15).vals()));
+    EXPECT_TRUE(ndobject(group_19).equals_exact(g.at(19).vals()));
 }
