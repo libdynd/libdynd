@@ -31,12 +31,12 @@ groupby_dtype::groupby_dtype(const dtype& data_values_dtype,
     if (by_values_dtype.get_undim() < 1) {
         throw runtime_error("to construct a groupby dtype, its values dtype must have at least one uniform dimension");
     }
-    if (by_values_dtype.at_single(0).value_dtype() !=
-                    reinterpret_cast<const categorical_dtype *>(groups_dtype.extended())->get_category_dtype()) {
+    if (by_values_dtype.at_single(0).value_dtype() != groups_dtype) {
         stringstream ss;
         ss << "to construct a groupby dtype, the by dtype, " << by_values_dtype.at_single(0);
-        ss << ", should match the category dtype, ";
-        ss << reinterpret_cast<const categorical_dtype *>(groups_dtype.extended())->get_category_dtype();
+        ss << ", should match the group dtype, ";
+        ss << groups_dtype;
+        throw runtime_error(ss.str());
     }
     m_operand_dtype = make_fixedstruct_dtype(make_pointer_dtype(data_values_dtype), "data",
                     make_pointer_dtype(by_values_dtype), "by");
@@ -120,25 +120,24 @@ bool groupby_dtype::operator==(const base_dtype& rhs) const
 }
 
 namespace {
-   struct groupby_to_value_assign {
-        // Assign from a categorical dtype to some other dtype
-        struct auxdata_storage {
-            // The groupby dtype
-            dtype gb;
-            // Kernel for copying a data_value
-            kernel_instance<unary_operation_pair_t> value_copy;
-        };
+    // Assign from a categorical dtype to some other dtype
+    struct groupby_to_value_assign_extra {
+        typedef groupby_to_value_assign_extra extra_type;
+
+        hierarchical_kernel_common_base base;
+        // The groupby dtype
+        const groupby_dtype *src_groupby_dt;
+        const char *src_metadata, *dst_metadata;
 
         template<typename UIntType>
-        static void single_kernel(char *dst, const char *src, unary_kernel_static_data *extra)
+        inline static void single(char *dst, const char *src, hierarchical_kernel_common_base *extra)
         {
-            auxdata_storage& ad = get_auxiliary_data<auxdata_storage>(extra->auxdata);
-            const groupby_dtype *gd = static_cast<const groupby_dtype *>(ad.gb.extended());
-            ad.value_copy.extra.dst_metadata = extra->dst_metadata + sizeof(var_array_dtype_metadata);
+            extra_type *e = reinterpret_cast<extra_type *>(extra);
+            const groupby_dtype *gd = e->src_groupby_dt;
 
             // Get the by_values raw ndobject
             dtype by_values_dt = gd->get_operand_dtype();
-            const char *by_values_metadata = extra->src_metadata, *by_values_data = src;
+            const char *by_values_metadata = e->src_metadata, *by_values_data = src;
             by_values_dt = by_values_dt.extended()->at_single(0, &by_values_metadata, &by_values_data);
             by_values_dt = static_cast<const pointer_dtype *>(by_values_dt.extended())->get_target_dtype();
             by_values_metadata += sizeof(pointer_dtype_metadata);
@@ -159,7 +158,7 @@ namespace {
 
             // Get the data_values raw ndobject
             dtype data_values_dt = gd->get_operand_dtype();
-            const char *data_values_metadata = extra->src_metadata, *data_values_data = src;
+            const char *data_values_metadata = e->src_metadata, *data_values_data = src;
             data_values_dt = data_values_dt.extended()->at_single(1, &data_values_metadata, &data_values_data);
             data_values_dt = static_cast<const pointer_dtype *>(data_values_dt.extended())->get_target_dtype();
             data_values_metadata += sizeof(pointer_dtype_metadata);
@@ -169,7 +168,7 @@ namespace {
             const fixedarray_dtype *fad = static_cast<const fixedarray_dtype *>(result_dt.extended());
             intptr_t fad_stride = fad->get_fixed_stride();
             const var_array_dtype *vad = static_cast<const var_array_dtype *>(fad->get_element_dtype().extended());
-            const var_array_dtype_metadata *vad_md = reinterpret_cast<const var_array_dtype_metadata *>(extra->dst_metadata);
+            const var_array_dtype_metadata *vad_md = reinterpret_cast<const var_array_dtype_metadata *>(e->dst_metadata);
             if (vad_md->offset != 0) {
                 throw runtime_error("dynd groupby: destination var_array offset must be zero to allocate output");
             }
@@ -181,7 +180,10 @@ namespace {
             for (intptr_t i = 0; i < by_values_size; ++i, by_values_ptr += by_values_stride) {
                 UIntType value = *reinterpret_cast<const UIntType *>(by_values_ptr);
                 if (value >= cat_sizes.size()) {
-                    throw runtime_error("dynd groupby: 'by' array contains an out of bounds value");
+                    stringstream ss;
+                    ss << "dynd groupby: 'by' array contains an out of bounds value " << (uint32_t)value;
+                    ss << ", range is [0, " << cat_sizes.size() << ")";
+                    throw runtime_error(ss.str());
                 }
                 ++cat_sizes[value];
             }
@@ -203,59 +205,104 @@ namespace {
 
             // Loop through both by_values and data_values,
             // copying the data to the right place in the output
+            hierarchical_kernel_common_base *echild = &(e + 1)->base;
+            unary_single_operation_t opchild = echild->get_function<unary_single_operation_t>();
             ndobject_iter<0, 1> iter(data_values_dt, data_values_metadata, data_values_data);
             if (!iter.empty()) {
-                ad.value_copy.extra.src_metadata = iter.metadata();
                 by_values_ptr = by_values_origin;
                 do {
                     UIntType value = *reinterpret_cast<const UIntType *>(by_values_ptr);
                     char *&cp = cat_pointers[value];
-                    ad.value_copy.kernel.single(cp, iter.data(), &ad.value_copy.extra);
-                    ++cp;
+                    opchild(cp, iter.data(), echild);
                     by_values_ptr += by_values_stride;
                 } while (iter.next());
+            }
+        }
+
+        // Some compilers are finicky about getting single<T> as a function pointer, so this...
+        static void single_uint8(char *dst, const char *src, hierarchical_kernel_common_base *extra) {
+            single<uint8_t>(dst, src, extra);
+        }
+        static void single_uint16(char *dst, const char *src, hierarchical_kernel_common_base *extra) {
+            single<uint16_t>(dst, src, extra);
+        }
+        static void single_uint32(char *dst, const char *src, hierarchical_kernel_common_base *extra) {
+            single<uint32_t>(dst, src, extra);
+        }
+
+        static void destruct(hierarchical_kernel_common_base *extra)
+        {
+            extra_type *e = reinterpret_cast<extra_type *>(extra);
+            if (e->src_groupby_dt != NULL) {
+                base_dtype_decref(e->src_groupby_dt);
+            }
+            hierarchical_kernel_common_base *echild = &(e + 1)->base;
+            if (echild->destructor) {
+                echild->destructor(echild);
             }
         }
     };
 } // anonymous namespace
 
-void groupby_dtype::get_operand_to_value_kernel(const eval::eval_context *ectx,
-                        kernel_instance<unary_operation_pair_t>& out_kernel) const
+size_t groupby_dtype::make_operand_to_value_assignment_kernel(
+                hierarchical_kernel<unary_single_operation_t> *out,
+                size_t offset_out,
+                const char *dst_metadata, const char *src_metadata,
+                const eval::eval_context *ectx) const
 {
+    out->ensure_capacity_leaf(offset_out + sizeof(groupby_to_value_assign_extra));
+    groupby_to_value_assign_extra *e = out->get_at<groupby_to_value_assign_extra>(offset_out);
     const categorical_dtype *cd = static_cast<const categorical_dtype *>(m_groups_dtype.extended());
     switch (cd->get_category_int_dtype().get_type_id()) {
         case uint8_type_id:
-            out_kernel.kernel = unary_operation_pair_t(
-                            groupby_to_value_assign::single_kernel<uint8_t>, NULL);
+            e->base.function = &groupby_to_value_assign_extra::single_uint8;
             break;
         case uint16_type_id:
-            out_kernel.kernel = unary_operation_pair_t(
-                            groupby_to_value_assign::single_kernel<uint16_t>, NULL);
+            e->base.function = &groupby_to_value_assign_extra::single_uint16;
             break;
         case uint32_type_id:
-            out_kernel.kernel = unary_operation_pair_t(
-                            groupby_to_value_assign::single_kernel<uint32_t>, NULL);
+            e->base.function = &groupby_to_value_assign_extra::single_uint32;
             break;
         default:
             throw runtime_error("internal error in groupby_dtype::get_operand_to_value_kernel");
     }
-    make_auxiliary_data<groupby_to_value_assign::auxdata_storage>(out_kernel.extra.auxdata);
-    groupby_to_value_assign::auxdata_storage& ad =
-                out_kernel.extra.auxdata.get<groupby_to_value_assign::auxdata_storage>();
-    // A reference to this dtype
-    ad.gb = dtype(this, true);
-    dtype dvdt = get_data_values_dtype().at_single(0);
-    // A kernel assigning from the data_values array to a value in the result
-//    ::get_dtype_assignment_kernel(dvdt.value_dtype(), dvdt, assign_error_default, ectx, ad.value_copy);
+    e->base.destructor = &groupby_to_value_assign_extra::destruct;
+    // The kernel dtype owns a reference to this dtype
+    e->src_groupby_dt = this;
+    base_dtype_incref(e->src_groupby_dt);
+    e->src_metadata = src_metadata;
+    e->dst_metadata = dst_metadata;
+
+    // The following is the setup for copying a single 'data' value to the output
+    // The destination element type and metadata
+    const dtype& dst_element_dtype = static_cast<const var_array_dtype *>(
+                    static_cast<const fixedarray_dtype *>(m_value_dtype.extended())->get_element_dtype().extended()
+                    )->get_element_dtype();
+    const char *dst_element_metadata = dst_metadata + 0 + sizeof(var_array_dtype_metadata);
+    // Get srouce element type and metadata
+    dtype src_element_dtype = m_operand_dtype;
+    const char *src_element_metadata = e->src_metadata;
+    src_element_dtype = src_element_dtype.extended()->at_single(1, &src_element_metadata, NULL);
+    src_element_dtype = static_cast<const pointer_dtype *>(src_element_dtype.extended())->get_target_dtype();
+    src_element_metadata += sizeof(pointer_dtype_metadata);
+    src_element_dtype = src_element_dtype.extended()->at_single(0, &src_element_metadata, NULL);
+
+    return ::make_assignment_kernel(out, offset_out + sizeof(groupby_to_value_assign_extra),
+                    dst_element_dtype, dst_element_metadata,
+                    src_element_dtype, src_element_metadata,
+                    assign_error_none, ectx);
 }
 
-void groupby_dtype::get_value_to_operand_kernel(const eval::eval_context *DYND_UNUSED(ectx),
-                        kernel_instance<unary_operation_pair_t>& DYND_UNUSED(out_borrowed_kernel)) const
+size_t groupby_dtype::make_value_to_operand_assignment_kernel(
+                hierarchical_kernel<unary_single_operation_t> *DYND_UNUSED(out),
+                size_t DYND_UNUSED(offset_out),
+                const char *DYND_UNUSED(dst_metadata), const char *DYND_UNUSED(src_metadata),
+                const eval::eval_context *DYND_UNUSED(ectx)) const
 {
-    throw runtime_error("TODO: implement groupby_dtype::get_value_to_operand_kernel");
+    throw runtime_error("Cannot assign to a dynd groupby object value");
 }
 
-dtype groupby_dtype::with_replaced_storage_dtype(const dtype& DYND_UNUSED(replacement_dtype)) const
+dtype groupby_dtype::with_replaced_storage_dtype(const dtype& replacement_dtype) const
 {
     throw runtime_error("TODO: implement groupby_dtype::with_replaced_storage_dtype");
 }

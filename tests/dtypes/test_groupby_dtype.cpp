@@ -15,12 +15,12 @@ using namespace std;
 using namespace dynd;
 
 TEST(GroupByDType, Create) {
-    int data[] = {1,2,3};
-    int by[] = {1,1,2};
-    int groups[] = {1,2};
+    int data[] = {10,20,30};
+    int by[] = {15,16,16};
+    int groups[] = {15,16};
     ndobject g = groupby(data, by, make_categorical_dtype(groups));
-    //g.debug_print(cout);
-    //g = g.vals();
-    //g.debug_print(cout);
-    //cout << g << endl;
+    g.debug_print(cout);
+    g = g.vals();
+    g.debug_print(cout);
+    cout << g << endl;
 }
