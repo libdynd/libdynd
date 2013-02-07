@@ -14,7 +14,8 @@ using namespace std;
 using namespace dynd;
 
 fixedbytes_dtype::fixedbytes_dtype(intptr_t data_size, intptr_t alignment)
-    : base_bytes_dtype(fixedbytes_type_id, bytes_kind, data_size, alignment, dtype_flag_scalar)
+    : base_bytes_dtype(fixedbytes_type_id, bytes_kind, data_size,
+                    alignment, dtype_flag_scalar, 0)
 {
     if (alignment > data_size) {
         std::stringstream ss;

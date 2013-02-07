@@ -20,7 +20,8 @@ class void_pointer_dtype : public base_dtype {
 public:
     void_pointer_dtype()
         : base_dtype(void_pointer_type_id, void_kind, sizeof(void *),
-                        sizeof(void *), dtype_flag_scalar|dtype_flag_zeroinit, 0)
+                        sizeof(void *), dtype_flag_scalar|dtype_flag_zeroinit,
+                        0, 0)
     {}
 
     void print_data(std::ostream& o, const char *metadata, const char *data) const;
@@ -42,9 +43,6 @@ public:
 
     bool operator==(const base_dtype& rhs) const;
 
-    size_t get_metadata_size() const {
-        return 0;
-    }
     void metadata_default_construct(char *DYND_UNUSED(metadata), int DYND_UNUSED(ndim), const intptr_t* DYND_UNUSED(shape)) const {
     }
     void metadata_copy_construct(char *DYND_UNUSED(dst_metadata), const char *DYND_UNUSED(src_metadata), memory_block_data *DYND_UNUSED(embedded_reference)) const {

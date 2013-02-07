@@ -21,7 +21,8 @@ using namespace dynd;
 groupby_dtype::groupby_dtype(const dtype& data_values_dtype,
                 const dtype& by_values_dtype, const dtype& groups_dtype)
     : base_expression_dtype(groupby_type_id, expression_kind,
-                    sizeof(groupby_dtype_data), sizeof(void *), dtype_flag_none, 2 + data_values_dtype.get_undim())
+                    sizeof(groupby_dtype_data), sizeof(void *), dtype_flag_none,
+                    0, 2 + data_values_dtype.get_undim())
 {
     if (groups_dtype.get_type_id() != categorical_type_id) {
         throw runtime_error("to construct a groupby dtype, its groups dtype must be categorical");
@@ -41,6 +42,7 @@ groupby_dtype::groupby_dtype(const dtype& data_values_dtype,
     }
     m_operand_dtype = make_fixedstruct_dtype(make_pointer_dtype(data_values_dtype), "data",
                     make_pointer_dtype(by_values_dtype), "by");
+    m_members.metadata_size = m_operand_dtype.get_metadata_size();
     const categorical_dtype *cd = static_cast<const categorical_dtype *>(groups_dtype.extended());
     m_value_dtype = make_fixedarray_dtype(make_var_array_dtype(
                     data_values_dtype.at_single(0)), cd->get_category_count());

@@ -498,7 +498,7 @@ public:
     }
 
     /** The alignment of the dtype */
-    size_t get_alignment() const {
+    inline size_t get_alignment() const {
         if (is_builtin()) {
             return static_cast<size_t>(dtype::builtin_data_alignments[reinterpret_cast<intptr_t>(m_extended)]);
         } else {
@@ -507,11 +507,19 @@ public:
     }
 
     /** The element size of the dtype */
-    size_t get_data_size() const {
+    inline size_t get_data_size() const {
         if (is_builtin()) {
             return static_cast<size_t>(dtype::builtin_data_sizes[reinterpret_cast<intptr_t>(m_extended)]);
         } else {
             return m_extended->get_data_size();
+        }
+    }
+
+    inline size_t get_metadata_size() const {
+        if (is_builtin()) {
+            return 0;
+        } else {
+            return m_extended->get_metadata_size();
         }
     }
 

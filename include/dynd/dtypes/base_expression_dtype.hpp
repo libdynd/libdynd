@@ -16,8 +16,8 @@ namespace dynd {
 class base_expression_dtype : public base_dtype {
 public:
     inline base_expression_dtype(type_id_t type_id, dtype_kind_t kind,
-                    size_t data_size, size_t alignment, flags_type flags, size_t undim=0)
-        : base_dtype(type_id, kind, data_size, alignment, flags, undim)
+                    size_t data_size, size_t alignment, flags_type flags, size_t metadata_size, size_t undim=0)
+        : base_dtype(type_id, kind, data_size, alignment, flags, metadata_size, undim)
     {}
 
     virtual ~base_expression_dtype();
@@ -50,7 +50,6 @@ public:
     dtype get_canonical_dtype() const;
 
     // Expression dtypes use the values from their operand dtype.
-    size_t get_metadata_size() const;
     void metadata_default_construct(char *metadata, int ndim, const intptr_t* shape) const;
     void metadata_copy_construct(char *dst_metadata, const char *src_metadata, memory_block_data *embedded_reference) const;
     void metadata_destruct(char *metadata) const;

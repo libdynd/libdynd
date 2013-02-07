@@ -13,7 +13,7 @@ using namespace dynd;
 
 byteswap_dtype::byteswap_dtype(const dtype& value_dtype)
     : base_expression_dtype(byteswap_type_id, expression_kind, value_dtype.get_data_size(),
-                            value_dtype.get_alignment(), dtype_flag_scalar),
+                            value_dtype.get_alignment(), dtype_flag_scalar, 0),
                     m_value_dtype(value_dtype),
                     m_operand_dtype(make_fixedbytes_dtype(value_dtype.get_data_size(), value_dtype.get_alignment()))
 {
@@ -24,7 +24,7 @@ byteswap_dtype::byteswap_dtype(const dtype& value_dtype)
 
 byteswap_dtype::byteswap_dtype(const dtype& value_dtype, const dtype& operand_dtype)
     : base_expression_dtype(byteswap_type_id, expression_kind, operand_dtype.get_data_size(),
-                    operand_dtype.get_alignment(), dtype_flag_scalar),
+                    operand_dtype.get_alignment(), dtype_flag_scalar, 0),
             m_value_dtype(value_dtype), m_operand_dtype(operand_dtype)
 {
     // Only a bytes dtype be the operand to the byteswap

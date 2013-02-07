@@ -17,7 +17,7 @@ using namespace std;
 using namespace dynd;
 
 fixedstring_dtype::fixedstring_dtype(string_encoding_t encoding, intptr_t stringsize)
-    : base_string_dtype(fixedstring_type_id, 0, 1, dtype_flag_scalar),
+    : base_string_dtype(fixedstring_type_id, 0, 1, dtype_flag_scalar, 0),
             m_stringsize(stringsize), m_encoding(encoding)
 {
     switch (encoding) {

@@ -21,7 +21,9 @@ using namespace dynd;
 
 var_array_dtype::var_array_dtype(const dtype& element_dtype)
     : base_dtype(var_array_type_id, uniform_array_kind, sizeof(var_array_dtype_data),
-                    sizeof(const char *), dtype_flag_zeroinit, element_dtype.get_undim() + 1),
+                    sizeof(const char *), dtype_flag_zeroinit,
+                    element_dtype.get_metadata_size() + sizeof(var_array_dtype_metadata),
+                    element_dtype.get_undim() + 1),
             m_element_dtype(element_dtype)
 {
     // Copy ndobject properties and functions from the first non-uniform dimension
@@ -429,15 +431,6 @@ bool var_array_dtype::operator==(const base_dtype& rhs) const
         const var_array_dtype *dt = static_cast<const var_array_dtype*>(&rhs);
         return m_element_dtype == dt->m_element_dtype;
     }
-}
-
-size_t var_array_dtype::get_metadata_size() const
-{
-    size_t result = sizeof(var_array_dtype_metadata);
-    if (!m_element_dtype.is_builtin()) {
-        result += m_element_dtype.extended()->get_metadata_size();
-    }
-    return result;
 }
 
 void var_array_dtype::metadata_default_construct(char *metadata, int ndim, const intptr_t* shape) const

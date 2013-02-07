@@ -12,7 +12,7 @@ using namespace std;
 using namespace dynd;
 
 dynd::tuple_dtype::tuple_dtype(const std::vector<dtype>& fields)
-    : base_dtype(tuple_type_id, struct_kind, 0, 1, dtype_flag_none, 0),
+    : base_dtype(tuple_type_id, struct_kind, 0, 1, dtype_flag_none, 0, 0),
             m_fields(fields), m_offsets(fields.size()), m_metadata_offsets(fields.size())
 {
     // TODO: tuple_dtype should probably not have kind struct_kind?
@@ -41,7 +41,7 @@ dynd::tuple_dtype::tuple_dtype(const std::vector<dtype>& fields)
         m_metadata_offsets[i] = metadata_offset;
         metadata_offset += m_fields[i].is_builtin() ? 0 : m_fields[i].extended()->get_metadata_size();
     }
-    m_metadata_size = metadata_offset;
+    m_members.metadata_size = metadata_offset;
     // Pad to get the final element size
     m_members.data_size = inc_to_alignment(offset, m_members.alignment);
     // This is the standard layout
@@ -54,7 +54,7 @@ tuple_dtype::~tuple_dtype()
 
 dynd::tuple_dtype::tuple_dtype(const std::vector<dtype>& fields, const std::vector<size_t> offsets,
                     size_t data_size, size_t alignment)
-    : base_dtype(tuple_type_id, struct_kind, data_size, alignment, dtype_flag_none, 0),
+    : base_dtype(tuple_type_id, struct_kind, data_size, alignment, dtype_flag_none, 0, 0),
             m_fields(fields), m_offsets(offsets), m_metadata_offsets(fields.size())
 {
     if (!offset_is_aligned(data_size, alignment)) {
@@ -93,7 +93,7 @@ dynd::tuple_dtype::tuple_dtype(const std::vector<dtype>& fields, const std::vect
         m_metadata_offsets[i] = metadata_offset;
         metadata_offset += m_fields[i].is_builtin() ? 0 : m_fields[i].extended()->get_metadata_size();
     }
-    m_metadata_size = metadata_offset;
+    m_members.metadata_size = metadata_offset;
     // Check whether the layout we were given is standard
     m_is_standard_layout = compute_is_standard_layout();
 }

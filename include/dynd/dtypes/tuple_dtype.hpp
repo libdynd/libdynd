@@ -16,7 +16,6 @@ class tuple_dtype : public base_dtype {
     std::vector<dtype> m_fields;
     std::vector<size_t> m_offsets;
     std::vector<size_t> m_metadata_offsets;
-    size_t m_metadata_size;
     dtype_memory_management_t m_memory_management;
     bool m_is_standard_layout;
 

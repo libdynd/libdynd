@@ -102,7 +102,7 @@ inline ndobject callable::call() const
             }
         } else {
             std::stringstream ss;
-            ss << "incorrect number of arguments (received 1) for dynd callable with parameters " << m_parameters_dtype;
+            ss << "incorrect number of arguments (received 0) for dynd callable with parameters " << m_parameters_dtype;
             throw std::runtime_error(ss.str());
         }
     }

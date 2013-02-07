@@ -211,13 +211,15 @@ struct base_dtype_members {
     flags_type flags;
     /** The size of one instance of the dtype, or 0 if there is not one fixed size. */
     size_t data_size;
+    /** The size of a metadata instance for the dtype. */
+    size_t metadata_size;
     /** The number of uniform dimensions this dtype has */
     uint8_t undim;
 
     base_dtype_members(uint16_t type_id_, uint8_t kind_, uint8_t alignment_,
-                    flags_type flags_, size_t data_size_, uint8_t undim_)
+                    flags_type flags_, size_t data_size_, size_t metadata_size_, uint8_t undim_)
         : type_id(type_id_), kind(kind_), alignment(alignment_), flags(flags_),
-                data_size(data_size_), undim(undim_)
+                data_size(data_size_), metadata_size(metadata_size_), undim(undim_)
     {}
 };
 
@@ -247,9 +249,10 @@ public:
     typedef base_dtype_members::flags_type flags_type;
 
     /** Starts off the extended dtype instance with a use count of 1. */
-    inline base_dtype(type_id_t type_id, dtype_kind_t kind, size_t data_size, size_t alignment, flags_type flags, size_t undim)
+    inline base_dtype(type_id_t type_id, dtype_kind_t kind, size_t data_size,
+                    size_t alignment, flags_type flags, size_t metadata_size, size_t undim)
         : m_use_count(1), m_members(static_cast<uint16_t>(type_id), static_cast<uint8_t>(kind),
-                static_cast<uint8_t>(alignment), flags, data_size, static_cast<uint8_t>(undim))
+                static_cast<uint8_t>(alignment), flags, data_size, metadata_size, static_cast<uint8_t>(undim))
     {}
 
     virtual ~base_dtype();
@@ -514,7 +517,9 @@ public:
     virtual bool operator==(const base_dtype& rhs) const = 0;
 
     /** The size of the ndobject metadata for this dtype */
-    virtual size_t get_metadata_size() const;
+    inline size_t get_metadata_size() const {
+        return m_members.metadata_size;
+    }
     /**
      * Constructs the ndobject metadata for this dtype, prepared for writing.
      * The element size of the result must match that from get_default_data_size().

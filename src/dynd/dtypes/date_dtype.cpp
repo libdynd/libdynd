@@ -26,7 +26,7 @@ using namespace std;
 using namespace dynd;
 
 date_dtype::date_dtype()
-    : base_dtype(date_type_id, datetime_kind, 4, 4, dtype_flag_scalar, 0)
+    : base_dtype(date_type_id, datetime_kind, 4, 4, dtype_flag_scalar, 0, 0)
 {
 }
 

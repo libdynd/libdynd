@@ -19,8 +19,9 @@ namespace dynd {
  */
 class base_string_dtype : public base_dtype {
 public:
-    inline base_string_dtype(type_id_t type_id, size_t data_size, size_t alignment, flags_type flags)
-        : base_dtype(type_id, string_kind, data_size, alignment, flags, 0)
+    inline base_string_dtype(type_id_t type_id, size_t data_size,
+                    size_t alignment, flags_type flags, size_t metadata_size)
+        : base_dtype(type_id, string_kind, data_size, alignment, flags, metadata_size, 0)
     {}
 
     virtual ~base_string_dtype();

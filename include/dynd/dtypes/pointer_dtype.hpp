@@ -95,7 +95,6 @@ public:
 
     dtype with_replaced_storage_dtype(const dtype& replacement_dtype) const;
 
-    size_t get_metadata_size() const;
     void metadata_default_construct(char *metadata, int ndim, const intptr_t* shape) const;
     void metadata_copy_construct(char *dst_metadata, const char *src_metadata, memory_block_data *embedded_reference) const;
     void metadata_reset_buffers(char *metadata) const;

@@ -12,7 +12,8 @@ using namespace dynd;
 convert_dtype::convert_dtype(const dtype& value_dtype, const dtype& operand_dtype, assign_error_mode errmode)
     : base_expression_dtype(convert_type_id, expression_kind, operand_dtype.get_data_size(),
                         operand_dtype.get_alignment(),
-                        (value_dtype.get_flags()&dtype_flag_scalar)|(operand_dtype.get_flags()&dtype_flag_zeroinit)),
+                        (value_dtype.get_flags()&dtype_flag_scalar)|(operand_dtype.get_flags()&dtype_flag_zeroinit),
+                        operand_dtype.get_metadata_size()),
                 m_value_dtype(value_dtype), m_operand_dtype(operand_dtype), m_errmode(errmode)
 {
     // An alternative to this error would be to use value_dtype.value_dtype(), cutting

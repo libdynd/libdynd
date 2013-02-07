@@ -17,7 +17,9 @@ using namespace std;
 using namespace dynd;
 
 string_dtype::string_dtype(string_encoding_t encoding)
-    : base_string_dtype(string_type_id, sizeof(string_dtype_data), sizeof(const char *), dtype_flag_scalar|dtype_flag_zeroinit),
+    : base_string_dtype(string_type_id, sizeof(string_dtype_data),
+                    sizeof(const char *), dtype_flag_scalar|dtype_flag_zeroinit,
+                    sizeof(string_dtype_metadata)),
             m_encoding(encoding)
 {
     switch (encoding) {
@@ -180,11 +182,6 @@ bool string_dtype::operator==(const base_dtype& rhs) const
         const string_dtype *dt = static_cast<const string_dtype*>(&rhs);
         return m_encoding == dt->m_encoding;
     }
-}
-
-size_t string_dtype::get_metadata_size() const
-{
-    return sizeof(string_dtype_metadata);
 }
 
 void string_dtype::metadata_default_construct(char *metadata, int DYND_UNUSED(ndim), const intptr_t* DYND_UNUSED(shape)) const

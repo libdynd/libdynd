@@ -187,7 +187,7 @@ static ndobject make_sorted_categories(const set<const char *, cmp>& uniques, co
 }
 
 categorical_dtype::categorical_dtype(const ndobject& categories, bool presorted)
-    : base_dtype(categorical_type_id, custom_kind, 4, 4, dtype_flag_scalar, 0)
+    : base_dtype(categorical_type_id, custom_kind, 4, 4, dtype_flag_scalar, 0, 0)
 {
     intptr_t category_count;
     if (presorted) {
@@ -492,11 +492,6 @@ bool categorical_dtype::operator==(const base_dtype& rhs) const
 
     return true;
 
-}
-
-size_t categorical_dtype::get_metadata_size() const
-{
-    return 0;
 }
 
 void categorical_dtype::metadata_default_construct(char *DYND_UNUSED(metadata),

@@ -20,7 +20,9 @@ dtype pointer_dtype::m_void_pointer_dtype(new void_pointer_dtype(), false);
 
 pointer_dtype::pointer_dtype(const dtype& target_dtype)
     : base_expression_dtype(pointer_type_id, expression_kind, sizeof(void *),
-                    sizeof(void *), target_dtype.get_undim(), dtype_flag_scalar|dtype_flag_zeroinit),
+                    sizeof(void *), dtype_flag_scalar|dtype_flag_zeroinit,
+                    sizeof(pointer_dtype_metadata) + target_dtype.get_metadata_size(),
+                    target_dtype.get_undim()),
                     m_target_dtype(target_dtype)
 {
     // I'm not 100% sure how blockref pointer dtypes should interact with
@@ -237,12 +239,6 @@ bool pointer_dtype::operator==(const base_dtype& rhs) const
 dtype pointer_dtype::with_replaced_storage_dtype(const dtype& /*replacement_dtype*/) const
 {
     throw runtime_error("TODO: implement pointer_dtype::with_replaced_storage_dtype");
-}
-
-size_t pointer_dtype::get_metadata_size() const
-{
-    return sizeof(pointer_dtype_metadata) +
-                (m_target_dtype.is_builtin() ? 0 : m_target_dtype.extended()->get_metadata_size());
 }
 
 void pointer_dtype::metadata_default_construct(char *metadata, int ndim, const intptr_t* shape) const

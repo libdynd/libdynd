@@ -14,7 +14,7 @@ using namespace std;
 using namespace dynd;
 
 struct_dtype::struct_dtype(const std::vector<dtype>& field_types, const std::vector<std::string>& field_names)
-    : base_struct_dtype(struct_type_id, 0, 1, dtype_flag_none),
+    : base_struct_dtype(struct_type_id, 0, 1, dtype_flag_none, 0),
             m_field_types(field_types), m_field_names(field_names), m_metadata_offsets(field_types.size())
 {
     if (field_types.size() != field_names.size()) {
@@ -42,7 +42,7 @@ struct_dtype::struct_dtype(const std::vector<dtype>& field_types, const std::vec
         m_metadata_offsets[i] = metadata_offset;
         metadata_offset += m_field_types[i].is_builtin() ? 0 : m_field_types[i].extended()->get_metadata_size();
     }
-    m_metadata_size = metadata_offset;
+    m_members.metadata_size = metadata_offset;
 
     create_ndobject_properties();
 }
@@ -349,11 +349,6 @@ bool struct_dtype::operator==(const base_dtype& rhs) const
                 get_memory_management() == dt->get_memory_management() &&
                 m_field_types == dt->m_field_types;
     }
-}
-
-size_t struct_dtype::get_metadata_size() const
-{
-    return m_metadata_size;
 }
 
 void struct_dtype::metadata_default_construct(char *metadata, int ndim, const intptr_t* shape) const

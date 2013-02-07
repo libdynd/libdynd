@@ -17,7 +17,8 @@ using namespace std;
 using namespace dynd;
 
 fixedarray_dtype::fixedarray_dtype(const dtype& element_dtype, size_t dimension_size)
-    : base_dtype(fixedarray_type_id, uniform_array_kind, 0, 1, dtype_flag_none, element_dtype.get_undim() + 1),
+    : base_dtype(fixedarray_type_id, uniform_array_kind, 0, 1, dtype_flag_none,
+                    element_dtype.get_metadata_size(), element_dtype.get_undim() + 1),
             m_element_dtype(element_dtype), m_dimension_size(dimension_size)
 {
     size_t child_element_size = element_dtype.get_data_size();
@@ -38,7 +39,8 @@ fixedarray_dtype::fixedarray_dtype(const dtype& element_dtype, size_t dimension_
 }
 
 fixedarray_dtype::fixedarray_dtype(const dtype& element_dtype, size_t dimension_size, intptr_t stride)
-    : base_dtype(fixedarray_type_id, uniform_array_kind, 0, 1, dtype_flag_none, element_dtype.get_undim() + 1),
+    : base_dtype(fixedarray_type_id, uniform_array_kind, 0, 1, dtype_flag_none,
+                    element_dtype.get_metadata_size(), element_dtype.get_undim() + 1),
             m_element_dtype(element_dtype), m_stride(stride), m_dimension_size(dimension_size)
 {
     size_t child_element_size = element_dtype.get_data_size();

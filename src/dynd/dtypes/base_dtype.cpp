@@ -261,14 +261,6 @@ size_t base_dtype::get_default_data_size(int DYND_UNUSED(ndim), const intptr_t *
 }
 
 // TODO: Make this a pure virtual function eventually
-size_t base_dtype::get_metadata_size() const
-{
-    stringstream ss;
-    ss << "TODO: get_metadata_size for " << dtype(this, true) << " is not implemented";
-    throw std::runtime_error(ss.str());
-}
-
-// TODO: Make this a pure virtual function eventually
 void base_dtype::metadata_default_construct(char *DYND_UNUSED(metadata),
                 int DYND_UNUSED(ndim), const intptr_t* DYND_UNUSED(shape)) const
 {

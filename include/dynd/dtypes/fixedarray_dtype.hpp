@@ -92,9 +92,6 @@ public:
 
     bool operator==(const base_dtype& rhs) const;
 
-    size_t get_metadata_size() const {
-        return m_element_dtype.is_builtin() ? 0 : m_element_dtype.extended()->get_metadata_size();
-    }
     void metadata_default_construct(char *metadata, int ndim, const intptr_t* shape) const;
     void metadata_copy_construct(char *dst_metadata, const char *src_metadata, memory_block_data *embedded_reference) const;
     void metadata_reset_buffers(char *metadata) const;

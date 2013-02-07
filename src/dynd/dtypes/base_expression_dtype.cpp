@@ -23,16 +23,6 @@ dtype base_expression_dtype::get_canonical_dtype() const
     return get_value_dtype();
 }
 
-size_t base_expression_dtype::get_metadata_size() const
-{
-    const dtype& dt = get_operand_dtype();
-    if (!dt.is_builtin()) {
-        return dt.extended()->get_metadata_size();
-    } else {
-        return 0;
-    }
-}
-
 void base_expression_dtype::metadata_default_construct(char *metadata, int ndim, const intptr_t* shape) const
 {
     const dtype& dt = get_operand_dtype();

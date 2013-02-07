@@ -21,7 +21,6 @@ class fixedstruct_dtype : public base_struct_dtype {
     std::vector<size_t> m_data_offsets;
     std::vector<size_t> m_metadata_offsets;
     std::vector<std::pair<std::string, gfunc::callable> > m_ndobject_properties;
-    size_t m_metadata_size;
     dtype_memory_management_t m_memory_management;
 
     void create_ndobject_properties();
@@ -107,7 +106,6 @@ public:
 
     bool operator==(const base_dtype& rhs) const;
 
-    size_t get_metadata_size() const;
     void metadata_default_construct(char *metadata, int ndim, const intptr_t* shape) const;
     void metadata_copy_construct(char *dst_metadata, const char *src_metadata, memory_block_data *embedded_reference) const;
     void metadata_reset_buffers(char *metadata) const;

@@ -18,7 +18,9 @@ using namespace std;
 using namespace dynd;
 
 json_dtype::json_dtype()
-    : base_string_dtype(json_type_id, sizeof(json_dtype_data), sizeof(const char *), dtype_flag_scalar|dtype_flag_zeroinit)
+    : base_string_dtype(json_type_id, sizeof(json_dtype_data),
+                    sizeof(const char *), dtype_flag_scalar|dtype_flag_zeroinit,
+                    sizeof(json_dtype_metadata))
 {
 }
 
@@ -127,11 +129,6 @@ bool json_dtype::operator==(const base_dtype& rhs) const
     } else {
         return rhs.get_type_id() == json_type_id;
     }
-}
-
-size_t json_dtype::get_metadata_size() const
-{
-    return sizeof(json_dtype_metadata);
 }
 
 void json_dtype::metadata_default_construct(char *metadata, int DYND_UNUSED(ndim), const intptr_t* DYND_UNUSED(shape)) const

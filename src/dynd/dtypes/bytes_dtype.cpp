@@ -16,7 +16,8 @@ using namespace dynd;
 
 bytes_dtype::bytes_dtype(size_t alignment)
     : base_bytes_dtype(bytes_type_id, bytes_kind, sizeof(bytes_dtype_data),
-                    sizeof(const char *), dtype_flag_scalar|dtype_flag_zeroinit), m_alignment(alignment)
+                    sizeof(const char *), dtype_flag_scalar|dtype_flag_zeroinit,
+                    sizeof(bytes_dtype_metadata)), m_alignment(alignment)
 {
     if (alignment != 1 && alignment != 2 && alignment != 4 && alignment != 8 && alignment != 16) {
         std::stringstream ss;
@@ -149,11 +150,6 @@ bool bytes_dtype::operator==(const base_dtype& rhs) const
         const bytes_dtype *dt = static_cast<const bytes_dtype*>(&rhs);
         return m_alignment == dt->m_alignment;
     }
-}
-
-size_t bytes_dtype::get_metadata_size() const
-{
-    return sizeof(bytes_dtype_metadata);
 }
 
 void bytes_dtype::metadata_default_construct(char *metadata, int DYND_UNUSED(ndim), const intptr_t* DYND_UNUSED(shape)) const
