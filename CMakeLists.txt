@@ -139,7 +139,7 @@ set(dynd_SRC
     include/dynd/gfunc/serialize.hpp
     # Kernels
     src/dynd/kernels/assignment_kernels.cpp
-    src/dynd/kernels/array_assignment_kernels.cpp
+    src/dynd/kernels/var_array_assignment_kernels.cpp
     src/dynd/kernels/builtin_dtype_binary_kernel_table.cpp
     src/dynd/kernels/buffered_binary_kernels.cpp
     src/dynd/kernels/bytes_assignment_kernels.cpp
@@ -153,7 +153,7 @@ set(dynd_SRC
     src/dynd/kernels/kernels_for_disassembly.cpp
     src/dynd/kernels/single_assigner_builtin.hpp
     include/dynd/kernels/assignment_kernels.hpp
-    include/dynd/kernels/array_assignment_kernels.hpp
+    include/dynd/kernels/var_array_assignment_kernels.hpp
     include/dynd/kernels/builtin_dtype_binary_kernel_table.hpp
     include/dynd/kernels/buffered_binary_kernels.hpp
     include/dynd/kernels/bytes_assignment_kernels.hpp

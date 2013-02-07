@@ -929,26 +929,17 @@ ndobject dynd::eval_raw_copy(const dtype& dt, const char *metadata, const char *
         // Reorder strides of output strided dimensions in a KEEPORDER fashion
         cdt.extended()->reorder_default_constructed_strides(result.get_ndo_meta(),
                         dt, metadata);
-
-        kernel_instance<unary_operation_pair_t> assign;
-
-        // TODO: Performance optimization
-        ndobject_iter<1, 1> iter(cdt, result.get_ndo_meta(), result.get_readwrite_originptr(),
-                        dt, metadata, data);
-        get_dtype_assignment_kernel(iter.get_uniform_dtype<0>(),
-                        iter.get_uniform_dtype<1>(), assign_error_none, NULL, assign);
-        assign.extra.dst_metadata = iter.metadata<0>();
-        assign.extra.src_metadata = iter.metadata<1>();
-        if (!iter.empty()) {
-            do {
-                assign.kernel.single(iter.data<0>(), iter.data<1>(), &assign.extra);
-            } while (iter.next());
-        }
     } else {
         result.set(make_ndobject_memory_block(cdt, 0, NULL));
-        dtype_assign(cdt, result.get_ndo_meta(), result.get_readwrite_originptr(),
-                        dt, metadata, data);
     }
+
+    hierarchical_kernel<unary_single_operation_t> k;
+    make_assignment_kernel(&k, 0,
+                    cdt, result.get_ndo_meta(),
+                    dt, metadata,
+                    assign_error_default, &eval::default_eval_context);
+    k.get_function()(result.get_readwrite_originptr(), data, k.get());
+
     return result;
 }
 

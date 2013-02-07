@@ -10,15 +10,6 @@
 using namespace std;
 using namespace dynd;
 
-void dynd::get_dtype_assignment_kernel(
-                    const dtype& dst_dt, const dtype& src_dt,
-                    assign_error_mode errmode,
-                    const eval::eval_context *ectx,
-                    kernel_instance<unary_operation_pair_t>& out_kernel)
-{
-    throw runtime_error("dynd::get_dtype_assignment_kernel is to be removed");
-}
-
 namespace {
     template<class T>
     struct aligned_fixed_size_copy_assign_type {

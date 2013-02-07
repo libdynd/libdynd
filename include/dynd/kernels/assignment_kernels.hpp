@@ -14,17 +14,6 @@
 namespace dynd {
 
 /**
- * Returns a kernel for assigning from the source data type
- * to the destination data type. The returned specialization
- * instance contains auxdata and a pointer to a static array
- * of kernel specializations.
- */
-void get_dtype_assignment_kernel(const dtype& dst_dt, const dtype& src_dt,
-                    assign_error_mode errmode,
-                    const eval::eval_context *ectx,
-                    kernel_instance<unary_operation_pair_t>& out_kernel);
-
-/**
  * Creates an assignment kernel for one data value from the
  * src dtype/metadata to the dst dtype/metadata. This adds the
  * kernel at the 'out_offset' position in 'out's data, as part

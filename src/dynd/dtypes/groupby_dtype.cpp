@@ -246,7 +246,7 @@ void groupby_dtype::get_operand_to_value_kernel(const eval::eval_context *ectx,
     ad.gb = dtype(this, true);
     dtype dvdt = get_data_values_dtype().at_single(0);
     // A kernel assigning from the data_values array to a value in the result
-    ::get_dtype_assignment_kernel(dvdt.value_dtype(), dvdt, assign_error_default, ectx, ad.value_copy);
+//    ::get_dtype_assignment_kernel(dvdt.value_dtype(), dvdt, assign_error_default, ectx, ad.value_copy);
 }
 
 void groupby_dtype::get_value_to_operand_kernel(const eval::eval_context *DYND_UNUSED(ectx),

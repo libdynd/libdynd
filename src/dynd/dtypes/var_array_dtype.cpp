@@ -13,6 +13,7 @@
 #include <dynd/shape_tools.hpp>
 #include <dynd/exceptions.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
+#include <dynd/kernels/var_array_assignment_kernels.hpp>
 #include <dynd/gfunc/callable.hpp>
 
 using namespace std;
@@ -533,230 +534,6 @@ size_t var_array_dtype::iterdata_destruct(iterdata_common *DYND_UNUSED(iterdata)
     throw runtime_error("TODO: implement var_array_dtype::iterdata_destruct");
 }
 
-namespace {
-    // TODO move these into var_array_kernels.hpp/.cpp
-    struct broadcast_to_var_assign_kernel_extra {
-        typedef broadcast_to_var_assign_kernel_extra extra_type;
-
-        hierarchical_kernel_common_base base;
-        intptr_t dst_target_alignment;
-        const var_array_dtype_metadata *dst_md;
-
-        static void single(char *dst, const char *src,
-                            hierarchical_kernel_common_base *extra)
-        {
-            var_array_dtype_data *dst_d = reinterpret_cast<var_array_dtype_data *>(dst);
-            extra_type *e = reinterpret_cast<extra_type *>(extra);
-            hierarchical_kernel_common_base *echild = &(e + 1)->base;
-            unary_single_operation_t opchild = (e + 1)->base.get_function<unary_single_operation_t>();
-            if (dst_d->begin == NULL) {
-                if (e->dst_md->offset != 0) {
-                    throw runtime_error("Cannot assign to an uninitialized dynd var_array which has a non-zero offset");
-                }
-                // If we're writing to an empty array, have to allocate the output
-                memory_block_pod_allocator_api *allocator = get_memory_block_pod_allocator_api(e->dst_md->blockref);
-
-                // Allocate the output array data
-                char *dst_end = NULL;
-                allocator->allocate(e->dst_md->blockref, e->dst_md->stride,
-                            e->dst_target_alignment, &dst_d->begin, &dst_end);
-                dst_d->size = 1;
-                // Copy a single input to the newly allocated element
-                opchild(dst_d->begin, src, echild);
-            } else {
-                // We're broadcasting elements to an already allocated array segment
-                dst = dst_d->begin + e->dst_md->offset;
-                intptr_t size = dst_d->size, dst_stride = e->dst_md->stride;
-                for (intptr_t i = 0; i < size; ++i, dst += dst_stride) {
-                    opchild(dst, src, echild);
-                }
-            }
-        }
-
-        static void destruct(hierarchical_kernel_common_base *extra)
-        {
-            extra_type *e = reinterpret_cast<extra_type *>(extra);
-            hierarchical_kernel_common_base *echild = &(e + 1)->base;
-            if (echild->destructor) {
-                echild->destructor(echild);
-            }
-        }
-    };
-
-    struct var_assign_kernel_extra {
-        typedef var_assign_kernel_extra extra_type;
-
-        hierarchical_kernel_common_base base;
-        intptr_t dst_target_alignment;
-        const var_array_dtype_metadata *dst_md, *src_md;
-
-        static void single(char *dst, const char *src,
-                            hierarchical_kernel_common_base *extra)
-        {
-            var_array_dtype_data *dst_d = reinterpret_cast<var_array_dtype_data *>(dst);
-            const var_array_dtype_data *src_d = reinterpret_cast<const var_array_dtype_data *>(src);
-            extra_type *e = reinterpret_cast<extra_type *>(extra);
-            hierarchical_kernel_common_base *echild = &(e + 1)->base;
-            unary_single_operation_t opchild = (e + 1)->base.get_function<unary_single_operation_t>();
-            if (dst_d->begin == NULL) {
-                if (e->dst_md->offset != 0) {
-                    throw runtime_error("Cannot assign to an uninitialized dynd var_array which has a non-zero offset");
-                }
-                // As a special case, allow uninitialized -> uninitialized assignment as a no-op
-                if (src_d->begin != NULL) {
-                    intptr_t dim_size = src_d->size;
-                    intptr_t dst_stride = e->dst_md->stride, src_stride = e->src_md->stride;
-                    // If we're writing to an empty array, have to allocate the output
-                    memory_block_pod_allocator_api *allocator = get_memory_block_pod_allocator_api(e->dst_md->blockref);
-
-                    // Allocate the output array data
-                    char *dst_end = NULL;
-                    allocator->allocate(e->dst_md->blockref, dim_size * dst_stride,
-                                e->dst_target_alignment, &dst_d->begin, &dst_end);
-                    dst_d->size = dim_size;
-                    // Copy to the newly allocated element
-                    dst = dst_d->begin;
-                    src = src_d->begin + e->src_md->offset;
-                    for (intptr_t i = 0; i < dim_size; ++i, dst += dst_stride, src += src_stride) {
-                        opchild(dst, src, echild);
-                    }
-                }
-            } else {
-                if (src_d->begin == NULL) {
-                    throw runtime_error("Cannot assign an uninitialized dynd var_array to an initialized one");
-                }
-                intptr_t dst_dim_size = dst_d->size, src_dim_size = src_d->size;
-                intptr_t dst_stride = e->dst_md->stride, src_stride = src_dim_size != 1 ? e->src_md->stride : 0;
-                // Check for a broadcasting error
-                if (src_dim_size != 1 && dst_dim_size != src_dim_size) {
-                    stringstream ss;
-                    ss << "error broadcasting input var_array sized " << src_dim_size << " to output var_array sized " << dst_dim_size;
-                    throw broadcast_error(ss.str());
-                }
-                // We're copying/broadcasting elements to an already allocated array segment
-                dst = dst_d->begin + e->dst_md->offset;
-                src = src_d->begin + e->src_md->offset;
-                for (intptr_t i = 0; i < dst_dim_size; ++i, dst += dst_stride, src += src_stride) {
-                    opchild(dst, src, echild);
-                }
-            }
-        }
-
-        static void destruct(hierarchical_kernel_common_base *extra)
-        {
-            extra_type *e = reinterpret_cast<extra_type *>(extra);
-            hierarchical_kernel_common_base *echild = &(e + 1)->base;
-            if (echild->destructor) {
-                echild->destructor(echild);
-            }
-        }
-    };
-
-    struct strided_to_var_assign_kernel_extra {
-        typedef strided_to_var_assign_kernel_extra extra_type;
-
-        hierarchical_kernel_common_base base;
-        intptr_t dst_target_alignment;
-        const var_array_dtype_metadata *dst_md;
-        intptr_t src_stride, src_dim_size;
-
-        static void single(char *dst, const char *src,
-                            hierarchical_kernel_common_base *extra)
-        {
-            var_array_dtype_data *dst_d = reinterpret_cast<var_array_dtype_data *>(dst);
-            extra_type *e = reinterpret_cast<extra_type *>(extra);
-            hierarchical_kernel_common_base *echild = &(e + 1)->base;
-            unary_single_operation_t opchild = (e + 1)->base.get_function<unary_single_operation_t>();
-            if (dst_d->begin == NULL) {
-                if (e->dst_md->offset != 0) {
-                    throw runtime_error("Cannot assign to an uninitialized dynd var_array which has a non-zero offset");
-                }
-                intptr_t dim_size = e->src_dim_size;
-                intptr_t dst_stride = e->dst_md->stride, src_stride = e->src_stride;
-                // If we're writing to an empty array, have to allocate the output
-                memory_block_pod_allocator_api *allocator = get_memory_block_pod_allocator_api(e->dst_md->blockref);
-
-                // Allocate the output array data
-                char *dst_end = NULL;
-                allocator->allocate(e->dst_md->blockref, dim_size * dst_stride,
-                            e->dst_target_alignment, &dst_d->begin, &dst_end);
-                dst_d->size = dim_size;
-                // Copy to the newly allocated element
-                dst = dst_d->begin;
-                for (intptr_t i = 0; i < dim_size; ++i, dst += dst_stride, src += src_stride) {
-                    opchild(dst, src, echild);
-                }
-            } else {
-                intptr_t dst_dim_size = dst_d->size, src_dim_size = e->src_dim_size;
-                intptr_t dst_stride = e->dst_md->stride, src_stride = e->src_stride;
-                // Check for a broadcasting error
-                if (src_dim_size != 1 && dst_dim_size != src_dim_size) {
-                    stringstream ss;
-                    ss << "error broadcasting input strided array sized " << src_dim_size << " to output var_array sized " << dst_dim_size;
-                    throw broadcast_error(ss.str());
-                }
-                // We're copying/broadcasting elements to an already allocated array segment
-                dst = dst_d->begin + e->dst_md->offset;
-                for (intptr_t i = 0; i < dst_dim_size; ++i, dst += dst_stride, src += src_stride) {
-                    opchild(dst, src, echild);
-                }
-            }
-        }
-
-        static void destruct(hierarchical_kernel_common_base *extra)
-        {
-            extra_type *e = reinterpret_cast<extra_type *>(extra);
-            hierarchical_kernel_common_base *echild = &(e + 1)->base;
-            if (echild->destructor) {
-                echild->destructor(echild);
-            }
-        }
-    };
-
-    struct var_to_strided_assign_kernel_extra {
-        typedef var_to_strided_assign_kernel_extra extra_type;
-
-        hierarchical_kernel_common_base base;
-        intptr_t dst_stride, dst_dim_size;
-        const var_array_dtype_metadata *src_md;
-
-        static void single(char *dst, const char *src,
-                            hierarchical_kernel_common_base *extra)
-        {
-            extra_type *e = reinterpret_cast<extra_type *>(extra);
-            const var_array_dtype_data *src_d = reinterpret_cast<const var_array_dtype_data *>(src);
-            hierarchical_kernel_common_base *echild = &(e + 1)->base;
-            unary_single_operation_t opchild = (e + 1)->base.get_function<unary_single_operation_t>();
-            if (src_d->begin == NULL) {
-                throw runtime_error("Cannot assign an uninitialized dynd var array to a strided one");
-            }
-
-            intptr_t dst_dim_size = e->dst_dim_size, src_dim_size = src_d->size;
-            intptr_t dst_stride = e->dst_stride, src_stride = src_dim_size != 1 ? e->src_md->stride : 0;
-            // Check for a broadcasting error
-            if (src_dim_size != 1 && dst_dim_size != src_dim_size) {
-                stringstream ss;
-                ss << "error broadcasting input var array sized " << src_dim_size << " to output strided array sized " << dst_dim_size;
-                throw broadcast_error(ss.str());
-            }
-            // Copying/broadcasting elements
-            src = src_d->begin + e->src_md->offset;
-            for (intptr_t i = 0; i < dst_dim_size; ++i, dst += dst_stride, src += src_stride) {
-                opchild(dst, src, echild);
-            }
-        }
-
-        static void destruct(hierarchical_kernel_common_base *extra)
-        {
-            extra_type *e = reinterpret_cast<extra_type *>(extra);
-            hierarchical_kernel_common_base *echild = &(e + 1)->base;
-            if (echild->destructor) {
-                echild->destructor(echild);
-            }
-        }
-    };
-} // anonymous namespace
-
 size_t var_array_dtype::make_assignment_kernel(
                 hierarchical_kernel<unary_single_operation_t> *out,
                 size_t offset_out,
@@ -768,71 +545,22 @@ size_t var_array_dtype::make_assignment_kernel(
     if (this == dst_dt.extended()) {
         if (src_dt.get_undim() < dst_dt.get_undim()) {
             // If the src has fewer dimensions, broadcast it across this one
-            out->ensure_capacity(offset_out + sizeof(broadcast_to_var_assign_kernel_extra));
-            broadcast_to_var_assign_kernel_extra *e = out->get_at<broadcast_to_var_assign_kernel_extra>(offset_out);
-            const var_array_dtype_metadata *dst_md =
-                            reinterpret_cast<const var_array_dtype_metadata *>(dst_metadata);
-            e->base.function = &broadcast_to_var_assign_kernel_extra::single;
-            e->base.destructor = &broadcast_to_var_assign_kernel_extra::destruct;
-            e->dst_target_alignment = m_element_dtype.get_alignment();
-            e->dst_md = dst_md;
-            return ::make_assignment_kernel(out, offset_out + sizeof(broadcast_to_var_assign_kernel_extra),
-                            m_element_dtype, dst_metadata + sizeof(var_array_dtype_metadata),
+            return make_broadcast_to_var_array_assignment_kernel(out, offset_out,
+                            dst_dt, dst_metadata,
                             src_dt, src_metadata,
                             errmode, ectx);
         } else if (src_dt.get_type_id() == var_array_type_id) {
             // var_array to var_array
-            const var_array_dtype *src_vad = static_cast<const var_array_dtype *>(src_dt.extended());
-            out->ensure_capacity(offset_out + sizeof(var_assign_kernel_extra));
-            const var_array_dtype_metadata *dst_md =
-                            reinterpret_cast<const var_array_dtype_metadata *>(dst_metadata);
-            const var_array_dtype_metadata *src_md =
-                            reinterpret_cast<const var_array_dtype_metadata *>(src_metadata);
-            var_assign_kernel_extra *e = out->get_at<var_assign_kernel_extra>(offset_out);
-            e->base.function = &var_assign_kernel_extra::single;
-            e->base.destructor = &var_assign_kernel_extra::destruct;
-            e->dst_target_alignment = m_element_dtype.get_alignment();
-            e->dst_md = dst_md;
-            e->src_md = src_md;
-            return ::make_assignment_kernel(out, offset_out + sizeof(var_assign_kernel_extra),
-                            m_element_dtype, dst_metadata + sizeof(var_array_dtype_metadata),
-                            src_vad->get_element_dtype(), src_metadata + sizeof(var_array_dtype_metadata),
+            return make_var_array_assignment_kernel(out, offset_out,
+                            dst_dt, dst_metadata,
+                            src_dt, src_metadata,
                             errmode, ectx);
-        } else if (src_dt.get_type_id() == strided_array_type_id) {
+        } else if (src_dt.get_type_id() == strided_array_type_id ||
+                        src_dt.get_type_id() == fixedarray_type_id) {
             // strided_array to var_array
-            const strided_array_dtype *src_sad = static_cast<const strided_array_dtype *>(src_dt.extended());
-            out->ensure_capacity(offset_out + sizeof(strided_to_var_assign_kernel_extra));
-            const var_array_dtype_metadata *dst_md =
-                            reinterpret_cast<const var_array_dtype_metadata *>(dst_metadata);
-            const strided_array_dtype_metadata *src_md =
-                            reinterpret_cast<const strided_array_dtype_metadata *>(src_metadata);
-            strided_to_var_assign_kernel_extra *e = out->get_at<strided_to_var_assign_kernel_extra>(offset_out);
-            e->base.function = &strided_to_var_assign_kernel_extra::single;
-            e->base.destructor = &strided_to_var_assign_kernel_extra::destruct;
-            e->dst_target_alignment = m_element_dtype.get_alignment();
-            e->dst_md = dst_md;
-            e->src_stride = src_md->stride;
-            e->src_dim_size = src_md->size;
-            return ::make_assignment_kernel(out, offset_out + sizeof(strided_to_var_assign_kernel_extra),
-                            m_element_dtype, dst_metadata + sizeof(var_array_dtype_metadata),
-                            src_sad->get_element_dtype(), src_metadata + sizeof(strided_array_dtype_metadata),
-                            errmode, ectx);
-        } else if (src_dt.get_type_id() == fixedarray_type_id) {
-            // fixedarray to var_array
-            const fixedarray_dtype *src_fad = static_cast<const fixedarray_dtype *>(src_dt.extended());
-            out->ensure_capacity(offset_out + sizeof(strided_to_var_assign_kernel_extra));
-            const var_array_dtype_metadata *dst_md =
-                            reinterpret_cast<const var_array_dtype_metadata *>(dst_metadata);
-            strided_to_var_assign_kernel_extra *e = out->get_at<strided_to_var_assign_kernel_extra>(offset_out);
-            e->base.function = &strided_to_var_assign_kernel_extra::single;
-            e->base.destructor = &strided_to_var_assign_kernel_extra::destruct;
-            e->dst_target_alignment = m_element_dtype.get_alignment();
-            e->dst_md = dst_md;
-            e->src_stride = src_fad->get_fixed_stride();
-            e->src_dim_size = src_fad->get_fixed_dim_size();
-            return ::make_assignment_kernel(out, offset_out + sizeof(strided_to_var_assign_kernel_extra),
-                            m_element_dtype, dst_metadata + sizeof(var_array_dtype_metadata),
-                            src_fad->get_element_dtype(), src_metadata,
+            return make_strided_to_var_array_assignment_kernel(out, offset_out,
+                            dst_dt, dst_metadata,
+                            src_dt, src_metadata,
                             errmode, ectx);
         } else {
             stringstream ss;
@@ -842,39 +570,12 @@ size_t var_array_dtype::make_assignment_kernel(
     } else if (dst_dt.get_undim() < src_dt.get_undim()) {
         throw broadcast_error(dst_dt, dst_metadata, src_dt, src_metadata);
     } else {
-        if (dst_dt.get_type_id() == strided_array_type_id) {
+        if (dst_dt.get_type_id() == strided_array_type_id ||
+                        dst_dt.get_type_id() == fixedarray_type_id) {
             // var_array to strided_array
-            const strided_array_dtype *dst_sad = static_cast<const strided_array_dtype *>(dst_dt.extended());
-            out->ensure_capacity(offset_out + sizeof(var_to_strided_assign_kernel_extra));
-            const strided_array_dtype_metadata *dst_md =
-                            reinterpret_cast<const strided_array_dtype_metadata *>(dst_metadata);
-            const var_array_dtype_metadata *src_md =
-                            reinterpret_cast<const var_array_dtype_metadata *>(src_metadata);
-            var_to_strided_assign_kernel_extra *e = out->get_at<var_to_strided_assign_kernel_extra>(offset_out);
-            e->base.function = &var_to_strided_assign_kernel_extra::single;
-            e->base.destructor = &var_to_strided_assign_kernel_extra::destruct;
-            e->dst_stride = dst_md->stride;
-            e->dst_dim_size = dst_md->size;
-            e->src_md = src_md;
-            return ::make_assignment_kernel(out, offset_out + sizeof(var_to_strided_assign_kernel_extra),
-                            dst_sad->get_element_dtype(), dst_metadata + sizeof(strided_array_dtype_metadata),
-                            m_element_dtype, src_metadata + sizeof(var_array_dtype_metadata),
-                            errmode, ectx);
-        } else if (dst_dt.get_type_id() == fixedarray_type_id) {
-            // var_array to fixedarray
-            const fixedarray_dtype *dst_fad = static_cast<const fixedarray_dtype *>(dst_dt.extended());
-            out->ensure_capacity(offset_out + sizeof(var_to_strided_assign_kernel_extra));
-            const var_array_dtype_metadata *src_md =
-                            reinterpret_cast<const var_array_dtype_metadata *>(src_metadata);
-            var_to_strided_assign_kernel_extra *e = out->get_at<var_to_strided_assign_kernel_extra>(offset_out);
-            e->base.function = &var_to_strided_assign_kernel_extra::single;
-            e->base.destructor = &var_to_strided_assign_kernel_extra::destruct;
-            e->dst_stride = dst_fad->get_fixed_stride();
-            e->dst_dim_size = dst_fad->get_fixed_dim_size();
-            e->src_md = src_md;
-            return ::make_assignment_kernel(out, offset_out + sizeof(var_to_strided_assign_kernel_extra),
-                            dst_fad->get_element_dtype(), dst_metadata,
-                            m_element_dtype, src_metadata + sizeof(var_array_dtype_metadata),
+            return make_var_to_strided_array_assignment_kernel(out, offset_out,
+                            dst_dt, dst_metadata,
+                            src_dt, src_metadata,
                             errmode, ectx);
         } else {
             stringstream ss;
