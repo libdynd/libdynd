@@ -22,7 +22,7 @@ groupby_dtype::groupby_dtype(const dtype& data_values_dtype,
                 const dtype& by_values_dtype, const dtype& groups_dtype)
     : base_expression_dtype(groupby_type_id, expression_kind,
                     sizeof(groupby_dtype_data), sizeof(void *), dtype_flag_none,
-                    0, 2 + data_values_dtype.get_undim())
+                    0, 1 + data_values_dtype.get_undim())
 {
     if (groups_dtype.get_type_id() != categorical_type_id) {
         throw runtime_error("to construct a groupby dtype, its groups dtype must be categorical");

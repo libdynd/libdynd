@@ -1143,10 +1143,10 @@ ndobject_vals::operator ndobject() const
     } else {
         // If there is any expression in the dtype, make a copy using the canonical dtype
         const dtype& dt = current_dtype.get_canonical_dtype();
-        size_t ndim = current_dtype.get_undim();
-        dimvector shape(ndim);
+        size_t undim = current_dtype.get_undim();
+        dimvector shape(undim);
         m_arr.get_shape(shape.get());
-        ndobject result(make_ndobject_memory_block(dt, ndim, shape.get()));
+        ndobject result(make_ndobject_memory_block(dt, undim, shape.get()));
         if (!dt.is_builtin()) {
             // Reorder strides of output strided dimensions in a KEEPORDER fashion
             dt.extended()->reorder_default_constructed_strides(result.get_ndo_meta(),
