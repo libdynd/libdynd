@@ -3,7 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#if defined(_WIN32) && defined(_M_X64)
+#if 0 // (temporarily disabled) defined(_WIN32) && defined(_M_X64)
 
 #include <dynd/codegen/unary_kernel_adapter_codegen.hpp>
 #include <dynd/memblock/executable_memory_block.hpp>

@@ -365,16 +365,6 @@ static void string_to_float64_single(char *dst, const char *src,
     }
 }
 
-static void string_to_complex_float32_single_kernel(char *DYND_UNUSED(dst), const char *DYND_UNUSED(src), unary_kernel_static_data *DYND_UNUSED(extra))
-{
-    throw std::runtime_error("TODO: implement string_to_complex_float64_single_kernel");
-}
-
-static void string_to_complex_float64_single_kernel(char *DYND_UNUSED(dst), const char *DYND_UNUSED(src), unary_kernel_static_data *DYND_UNUSED(extra))
-{
-    throw std::runtime_error("TODO: implement string_to_complex_float64_single_kernel");
-}
-
 static void string_to_complex_float32_single(char *DYND_UNUSED(dst), const char *DYND_UNUSED(src),
                 hierarchical_kernel_common_base *DYND_UNUSED(extra))
 {

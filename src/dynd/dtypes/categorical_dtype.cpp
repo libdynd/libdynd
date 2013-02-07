@@ -95,7 +95,7 @@ namespace {
 
         // Assign from an input matching the category dtype to a categorical type
         template<typename UIntType>
-        inline static void single(char *dst, const char *src, unary_kernel_static_data *extra)
+        inline static void single(char *dst, const char *src, hierarchical_kernel_common_base *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             uint32_t src_val = e->dst_cat_dt->get_value_from_category(e->src_metadata, src);
@@ -103,13 +103,13 @@ namespace {
         }
 
         // Some compilers are finicky about getting single<T> as a function pointer, so this...
-        static void single_uint8(char *dst, const char *src, unary_kernel_static_data *extra) {
+        static void single_uint8(char *dst, const char *src, hierarchical_kernel_common_base *extra) {
             single<uint8_t>(dst, src, extra);
         }
-        static void single_uint16(char *dst, const char *src, unary_kernel_static_data *extra) {
+        static void single_uint16(char *dst, const char *src, hierarchical_kernel_common_base *extra) {
             single<uint16_t>(dst, src, extra);
         }
-        static void single_uint32(char *dst, const char *src, unary_kernel_static_data *extra) {
+        static void single_uint32(char *dst, const char *src, hierarchical_kernel_common_base *extra) {
             single<uint32_t>(dst, src, extra);
         }
 

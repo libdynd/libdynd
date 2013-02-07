@@ -3,6 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
+#if 0 // Temporarily disabled
+
 #include <dynd/codegen/binary_reduce_kernel_adapter_codegen.hpp>
 
 using namespace std;
@@ -177,3 +179,5 @@ unary_operation_pair_t dynd::codegen_right_associative_binary_reduce_function_ad
         }
     }
 }
+
+#endif // temporarily disabled

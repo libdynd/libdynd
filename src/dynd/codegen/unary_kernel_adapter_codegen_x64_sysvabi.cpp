@@ -6,7 +6,7 @@
 
 #include <dynd/platform_definitions.h>
 
-#if defined(DYND_CALL_SYSV_X64)
+#if 0 // (temporarily disabled) defined(DYND_CALL_SYSV_X64)
 
 #include <sstream>
 #include <stdexcept>

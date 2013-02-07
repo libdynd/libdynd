@@ -3,6 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
+#if 0 // Temporarily disabled
+
 #include <dynd/codegen/codegen_cache.hpp>
 #include <dynd/memblock/executable_memory_block.hpp>
 #include <dynd/codegen/unary_kernel_adapter_codegen.hpp>
@@ -130,3 +132,5 @@ void dynd::codegen_cache::debug_print(std::ostream& o, const std::string& indent
     memory_block_debug_print(m_exec_memblock.get(), o, indent + " ");
     o << indent << "------" << endl;
 }
+
+#endif // temporarily disabled

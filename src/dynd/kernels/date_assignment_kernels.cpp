@@ -154,7 +154,7 @@ namespace {
         hierarchical_kernel_common_base base;
 
         /** Does a single copy */
-        static void single(char *dst, const char *src, unary_kernel_static_data *extra)
+        static void single(char *dst, const char *src, hierarchical_kernel_common_base *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             datetime::date_ymd fld;

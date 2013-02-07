@@ -126,7 +126,6 @@ intptr_t pointer_dtype::apply_linear_index(int nindices, const irange *indices, 
                 bool leading_dimension, char **inout_data,
                 memory_block_data **inout_dataref) const
 {
-cout << "PD " << __LINE__ << endl;
     if (leading_dimension) {
         // If it's a leading dimension, we always throw away the pointer
         const pointer_dtype_metadata *md = reinterpret_cast<const pointer_dtype_metadata *>(metadata);
@@ -223,37 +222,6 @@ void pointer_dtype::get_single_compare_kernel(kernel_instance<compare_operations
     throw std::runtime_error("pointer_dtype::get_single_compare_kernel not supported yet");
 }
 
-namespace {
-    struct pointer_dst_assign_kernel {
-        struct auxdata_storage {
-            kernel_instance<unary_operation_pair_t> m_assign_kernel;
-            size_t src_size;
-        };
-
-        static void single_kernel(char *dst, const char *src, unary_kernel_static_data *extra)
-        {
-            auxdata_storage& ad = get_auxiliary_data<auxdata_storage>(extra->auxdata);
-            ad.m_assign_kernel.extra.dst_metadata = extra->dst_metadata;
-            ad.m_assign_kernel.extra.src_metadata = extra->src_metadata;
-
-            char *dst_target = *reinterpret_cast<char **>(dst);
-            ad.m_assign_kernel.kernel.single(dst_target, src, &ad.m_assign_kernel.extra);
-        }
-
-        static void strided_kernel(char *dst, intptr_t dst_stride, const char *src, intptr_t src_stride, size_t count, unary_kernel_static_data *extra)
-        {
-            auxdata_storage& ad = get_auxiliary_data<auxdata_storage>(extra->auxdata);
-            ad.m_assign_kernel.extra.dst_metadata = extra->dst_metadata;
-            ad.m_assign_kernel.extra.src_metadata = extra->src_metadata;
-
-            for (size_t i = 0; i != count; ++i, dst += dst_stride, src += src_stride) {
-                char *dst_target = *reinterpret_cast<char **>(dst);
-                ad.m_assign_kernel.kernel.single(dst_target, src, &ad.m_assign_kernel.extra);
-            }
-        }
-    };
-} // anonymous namespace
-
 bool pointer_dtype::operator==(const base_dtype& rhs) const
 {
     if (this == &rhs) {
@@ -265,43 +233,6 @@ bool pointer_dtype::operator==(const base_dtype& rhs) const
         return m_target_dtype == dt->m_target_dtype;
     }
 }
-
-namespace {
-   struct pointer_to_value_assign {
-        // Assign from a categorical dtype to some other dtype
-        struct auxdata_storage {
-            kernel_instance<unary_operation_pair_t> kernel;
-        };
-
-        static void single_kernel(char *dst, const char *src, unary_kernel_static_data *extra)
-        {
-            const pointer_dtype_metadata *md = reinterpret_cast<const pointer_dtype_metadata *>(extra->src_metadata);
-            auxdata_storage& ad = get_auxiliary_data<auxdata_storage>(extra->auxdata);
-            ad.kernel.extra.dst_metadata = extra->dst_metadata;
-            ad.kernel.extra.src_metadata = extra->src_metadata + sizeof(pointer_dtype_metadata);
-            intptr_t offset = md->offset;
-
-            ad.kernel.kernel.single(dst, *reinterpret_cast<const char *const*>(src) + offset, &ad.kernel.extra);
-        }
-
-        static void strided_kernel(char *dst, intptr_t dst_stride, const char *src, intptr_t src_stride,
-                        size_t count, unary_kernel_static_data *extra)
-        {
-            const pointer_dtype_metadata *md = reinterpret_cast<const pointer_dtype_metadata *>(extra->src_metadata);
-            auxdata_storage& ad = get_auxiliary_data<auxdata_storage>(extra->auxdata);
-            ad.kernel.extra.dst_metadata = extra->dst_metadata;
-            ad.kernel.extra.src_metadata = extra->src_metadata + sizeof(pointer_dtype_metadata);
-            intptr_t offset = md->offset;
-
-            for (size_t i = 0; i != count; ++i) {
-                ad.kernel.kernel.single(dst, *reinterpret_cast<const char *const*>(src) + offset, &ad.kernel.extra);
-
-                dst += dst_stride;
-                src += src_stride;
-            }
-        }
-    };
-} // anonymous namespace
 
 dtype pointer_dtype::with_replaced_storage_dtype(const dtype& /*replacement_dtype*/) const
 {

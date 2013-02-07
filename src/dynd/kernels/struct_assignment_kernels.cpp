@@ -28,7 +28,7 @@ namespace {
             size_t src_data_offset;
         };
 
-        static void single(char *dst, const char *src, unary_kernel_static_data *extra)
+        static void single(char *dst, const char *src, hierarchical_kernel_common_base *extra)
         {
             char *eraw = reinterpret_cast<char *>(extra);
             extra_type *e = reinterpret_cast<extra_type *>(extra);

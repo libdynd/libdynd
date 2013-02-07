@@ -20,13 +20,13 @@ class elwise_kernel {
 public:
     dtype m_returntype;
     std::vector<dynd::dtype> m_paramtypes;
-    dynd::kernel_instance<unary_operation_pair_t> m_unary_kernel;
+    //dynd::kernel_instance<unary_operation_pair_t> m_unary_kernel;
     dynd::kernel_instance<dynd::binary_operation_pair_t> m_binary_kernel;
 
     void swap(elwise_kernel& rhs) {
         m_returntype.swap(rhs.m_returntype);
         m_paramtypes.swap(rhs.m_paramtypes);
-        m_unary_kernel.swap(rhs.m_unary_kernel);
+//        m_unary_kernel.swap(rhs.m_unary_kernel);
         m_binary_kernel.swap(rhs.m_binary_kernel);
     }
 };

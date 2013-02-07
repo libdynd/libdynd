@@ -11,41 +11,6 @@
 namespace dynd {
 
 /**
- * Data which remains static across multiple unary operation calls.
- */
-struct unary_kernel_static_data {
-    auxiliary_data auxdata;
-    const char *dst_metadata, *src_metadata;
-
-    unary_kernel_static_data()
-        : auxdata(), dst_metadata(), src_metadata()
-    {}
-    unary_kernel_static_data(const unary_kernel_static_data& rhs)
-        : auxdata(), dst_metadata(rhs.dst_metadata), src_metadata(rhs.src_metadata)
-    {
-        auxdata.clone_from(rhs.auxdata);
-    }
-    void clone_from(const unary_kernel_static_data& rhs)
-    {
-        auxdata.clone_from(rhs.auxdata);
-        dst_metadata = rhs.dst_metadata;
-        src_metadata = rhs.src_metadata;
-    }
-    void borrow_from(const unary_kernel_static_data& rhs)
-    {
-        auxdata.borrow_from(rhs.auxdata);
-        dst_metadata = rhs.dst_metadata;
-        src_metadata = rhs.src_metadata;
-    }
-    void swap(unary_kernel_static_data& rhs)
-    {
-        auxdata.swap(rhs.auxdata);
-        std::swap(dst_metadata, rhs.dst_metadata);
-        std::swap(src_metadata, rhs.src_metadata);
-    }
-};
-
-/**
  * Data which remains static across multiple binary operation calls.
  */
 struct binary_kernel_static_data {
@@ -118,12 +83,6 @@ struct single_compare_static_data {
     }
 };
 
-/** Typedef for a unary operation on a single element */
-typedef void (*unary_single_operation_deprecated_t)(char *dst, const char *src, unary_kernel_static_data *extra);
-/** Typedef for a unary operation on a strided segment of elements */
-typedef void (*unary_strided_operation_deprecated_t)(char *dst, intptr_t dst_stride,
-                const char *src, intptr_t src_stride, size_t count, unary_kernel_static_data *extra);
-
 /** Typedef for a binary operation on a single element */
 typedef void (*binary_single_operation_t)(char *dst, const char *src0, const char *src1, binary_kernel_static_data *extra);
 /** Typedef for a binary operation on a strided segment of elements */
@@ -135,25 +94,6 @@ typedef void (*binary_strided_operation_t)(char *dst, intptr_t dst_stride,
 
 typedef bool (*single_compare_operation_t)(const char *src0, const char *src1,
                         single_compare_static_data *extra);
-
-/**
- * A structure containing a pair of unary operation pointers, for single and strided elements.
- * It is permitted for the 'strided' specialization to be NULL, in which case any code using this
- * must call the 'single' version repeatedly.
- */
-struct unary_operation_pair_t {
-    unary_single_operation_deprecated_t single;
-    unary_strided_operation_deprecated_t strided;
-
-    typedef unary_kernel_static_data extra_type;
-
-    unary_operation_pair_t()
-        : single(), strided()
-    {}
-    unary_operation_pair_t(unary_single_operation_deprecated_t single_, unary_strided_operation_deprecated_t strided_)
-        : single(single_), strided(strided_)
-    {}
-};
 
 /**
  * A structure containing a pair of binary operation pointers, for single and strided elements.
