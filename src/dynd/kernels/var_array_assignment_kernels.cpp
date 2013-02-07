@@ -89,7 +89,7 @@ size_t dynd::make_broadcast_to_var_array_assignment_kernel(
     broadcast_to_var_assign_kernel_extra *e = out->get_at<broadcast_to_var_assign_kernel_extra>(offset_out);
     const var_array_dtype_metadata *dst_md =
                     reinterpret_cast<const var_array_dtype_metadata *>(dst_metadata);
-    e->base.function = &broadcast_to_var_assign_kernel_extra::single;
+    e->base.set_function<unary_single_operation_t>(&broadcast_to_var_assign_kernel_extra::single);
     e->base.destructor = &broadcast_to_var_assign_kernel_extra::destruct;
     e->dst_target_alignment = dst_vad->get_element_dtype().get_alignment();
     e->dst_md = dst_md;
@@ -200,7 +200,7 @@ size_t dynd::make_var_array_assignment_kernel(
     const var_array_dtype_metadata *src_md =
                     reinterpret_cast<const var_array_dtype_metadata *>(src_metadata);
     var_assign_kernel_extra *e = out->get_at<var_assign_kernel_extra>(offset_out);
-    e->base.function = &var_assign_kernel_extra::single;
+    e->base.set_function<unary_single_operation_t>(&var_assign_kernel_extra::single);
     e->base.destructor = &var_assign_kernel_extra::destruct;
     e->dst_target_alignment = dst_vad->get_element_dtype().get_alignment();
     e->dst_md = dst_md;
@@ -296,7 +296,7 @@ size_t dynd::make_strided_to_var_array_assignment_kernel(
     const var_array_dtype_metadata *dst_md =
                     reinterpret_cast<const var_array_dtype_metadata *>(dst_metadata);
     strided_to_var_assign_kernel_extra *e = out->get_at<strided_to_var_assign_kernel_extra>(offset_out);
-    e->base.function = &strided_to_var_assign_kernel_extra::single;
+    e->base.set_function<unary_single_operation_t>(&strided_to_var_assign_kernel_extra::single);
     e->base.destructor = &strided_to_var_assign_kernel_extra::destruct;
     e->dst_target_alignment = dst_vad->get_element_dtype().get_alignment();
     e->dst_md = dst_md;
@@ -396,7 +396,7 @@ size_t dynd::make_var_to_strided_array_assignment_kernel(
     const var_array_dtype_metadata *src_md =
                     reinterpret_cast<const var_array_dtype_metadata *>(src_metadata);
     var_to_strided_assign_kernel_extra *e = out->get_at<var_to_strided_assign_kernel_extra>(offset_out);
-    e->base.function = &var_to_strided_assign_kernel_extra::single;
+    e->base.set_function<unary_single_operation_t>(&var_to_strided_assign_kernel_extra::single);
     e->base.destructor = &var_to_strided_assign_kernel_extra::destruct;
 
     dtype dst_element_dt;

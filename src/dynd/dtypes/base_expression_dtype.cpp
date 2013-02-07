@@ -86,7 +86,7 @@ namespace {
         // NOTE: This does NOT initialize the buffer_data_offset,
         //       just the buffer_data_size.
         void init(const dtype& buffer_dt_) {
-            base.function = &single;
+            base.set_function<unary_single_operation_t>(&single);
             base.destructor = &destruct;
             // The kernel data owns a reference in buffer_dt
             buffer_dt = dtype(buffer_dt_).release();
@@ -168,10 +168,10 @@ namespace {
 } // anonymous namespace
 
 size_t base_expression_dtype::make_operand_to_value_assignment_kernel(
-                hierarchical_kernel<unary_single_operation_t> *out,
-                size_t offset_out,
-                const char *dst_metadata, const char *src_metadata,
-                const eval::eval_context *ectx) const
+                hierarchical_kernel<unary_single_operation_t> *DYND_UNUSED(out),
+                size_t DYND_UNUSED(offset_out),
+                const char *DYND_UNUSED(dst_metadata), const char *DYND_UNUSED(src_metadata),
+                const eval::eval_context *DYND_UNUSED(ectx)) const
 {
     stringstream ss;
     ss << "dynd dtype " << dtype(this, true) << " does not support reading of its values";
@@ -179,10 +179,10 @@ size_t base_expression_dtype::make_operand_to_value_assignment_kernel(
 }
 
 size_t base_expression_dtype::make_value_to_operand_assignment_kernel(
-                hierarchical_kernel<unary_single_operation_t> *out,
-                size_t offset_out,
-                const char *dst_metadata, const char *src_metadata,
-                const eval::eval_context *ectx) const
+                hierarchical_kernel<unary_single_operation_t> *DYND_UNUSED(out),
+                size_t DYND_UNUSED(offset_out),
+                const char *DYND_UNUSED(dst_metadata), const char *DYND_UNUSED(src_metadata),
+                const eval::eval_context *DYND_UNUSED(ectx)) const
 {
     stringstream ss;
     ss << "dynd dtype " << dtype(this, true) << " does not support writing to its values";

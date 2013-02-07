@@ -57,7 +57,7 @@ size_t dynd::make_string_to_date_assignment_kernel(
 
     out->ensure_capacity(offset_out + sizeof(string_to_date_kernel_extra));
     string_to_date_kernel_extra *e = out->get_at<string_to_date_kernel_extra>(offset_out);
-    e->base.function = &string_to_date_kernel_extra::single;
+    e->base.set_function<unary_single_operation_t>(&string_to_date_kernel_extra::single);
     e->base.destructor = &string_to_date_kernel_extra::destruct;
     // The kernel data owns a reference to this dtype
     e->src_string_dt = static_cast<const base_string_dtype *>(dtype(src_string_dt).release());
@@ -109,7 +109,7 @@ size_t dynd::make_date_to_string_assignment_kernel(
                 size_t offset_out,
                 const dtype& dst_string_dt, const char *dst_metadata,
                 assign_error_mode errmode,
-                const eval::eval_context *ectx)
+                const eval::eval_context *DYND_UNUSED(ectx))
 {
     if (dst_string_dt.get_kind() != string_kind) {
         stringstream ss;
@@ -119,7 +119,7 @@ size_t dynd::make_date_to_string_assignment_kernel(
 
     out->ensure_capacity(offset_out + sizeof(date_to_string_kernel_extra));
     date_to_string_kernel_extra *e = out->get_at<date_to_string_kernel_extra>(offset_out);
-    e->base.function = &date_to_string_kernel_extra::single;
+    e->base.set_function<unary_single_operation_t>(&date_to_string_kernel_extra::single);
     e->base.destructor = &date_to_string_kernel_extra::destruct;
     // The kernel data owns a reference to this dtype
     e->dst_string_dt = static_cast<const base_string_dtype *>(dtype(dst_string_dt).release());
@@ -198,13 +198,13 @@ size_t dynd::make_date_to_struct_assignment_kernel(
     if (dst_struct_dt == date_dtype_default_struct_dtype) {
         // It's a simple leaf kernel in this case, the capacity is already there
         hierarchical_kernel_common_base *e = out->get_at<hierarchical_kernel_common_base>(offset_out);
-        e->function = &date_to_struct_trivial_single;
+        e->set_function<unary_single_operation_t>(&date_to_struct_trivial_single);
         return offset_out + sizeof(hierarchical_kernel_common_base);
     }
 
     out->ensure_capacity(offset_out + sizeof(date_to_struct_kernel_extra));
     date_to_struct_kernel_extra *e = out->get_at<date_to_struct_kernel_extra>(offset_out);
-    e->base.function = &date_to_struct_kernel_extra::single;
+    e->base.set_function<unary_single_operation_t>(&date_to_struct_kernel_extra::single);
     e->base.destructor = &date_to_struct_kernel_extra::destruct;
     return ::make_assignment_kernel(out, offset_out + sizeof(date_to_struct_kernel_extra),
                     dst_struct_dt, dst_metadata,
@@ -277,13 +277,13 @@ size_t dynd::make_struct_to_date_assignment_kernel(
     if (src_struct_dt == date_dtype_default_struct_dtype) {
         // It's a simple leaf kernel in this case, the capacity is already there
         hierarchical_kernel_common_base *e = out->get_at<hierarchical_kernel_common_base>(offset_out);
-        e->function = &struct_to_date_trivial_single;
+        e->set_function<unary_single_operation_t>(&struct_to_date_trivial_single);
         return offset_out + sizeof(hierarchical_kernel_common_base);
     }
 
     out->ensure_capacity(offset_out + sizeof(struct_to_date_kernel_extra));
     struct_to_date_kernel_extra *e = out->get_at<struct_to_date_kernel_extra>(offset_out);
-    e->base.function = &struct_to_date_kernel_extra::single;
+    e->base.set_function<unary_single_operation_t>(&struct_to_date_kernel_extra::single);
     e->base.destructor = &struct_to_date_kernel_extra::destruct;
     return ::make_assignment_kernel(out, offset_out + sizeof(struct_to_date_kernel_extra),
                     date_dtype_default_struct_dtype, NULL,

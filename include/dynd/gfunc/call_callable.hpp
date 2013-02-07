@@ -52,7 +52,7 @@ namespace detail {
 
     template<>
     struct callable_argument_setter<dtype> {
-        static void set(const dtype& paramtype, char *metadata, char *data, const dtype& value) {
+        static void set(const dtype& paramtype, char *DYND_UNUSED(metadata), char *data, const dtype& value) {
             if (paramtype.get_type_id() == void_pointer_type_id) {
                 // TODO: switch to a better mechanism for passing dtype references
                 *reinterpret_cast<const base_dtype **>(data) = value.extended();

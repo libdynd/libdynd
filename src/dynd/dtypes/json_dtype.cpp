@@ -244,7 +244,7 @@ size_t json_dtype::make_assignment_kernel(
             case fixedstring_type_id: {
                 out->ensure_capacity(offset_out + sizeof(string_to_json_kernel_extra));
                 string_to_json_kernel_extra *e = out->get_at<string_to_json_kernel_extra>(offset_out);
-                e->base.function = &string_to_json_kernel_extra::single;
+                e->base.set_function<unary_single_operation_t>(&string_to_json_kernel_extra::single);
                 e->base.destructor = &string_to_json_kernel_extra::destruct;
                 e->dst_metadata = dst_metadata;
                 e->validate = (errmode != assign_error_none);

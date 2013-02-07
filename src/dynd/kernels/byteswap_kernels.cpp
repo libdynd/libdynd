@@ -49,11 +49,11 @@ namespace {
             // so this one kernel function works correctly for both cases.
             if (src == dst) {
                 // In-place swap
-                for (intptr_t j = 0; j < data_size/2; ++j) {
+                for (size_t j = 0; j < data_size/2; ++j) {
                     std::swap(dst[j], dst[data_size-j-1]);
                 }
             } else {
-                for (intptr_t j = 0; j < data_size; ++j) {
+                for (size_t j = 0; j < data_size; ++j) {
                     dst[j] = src[data_size-j-1];
                 }
             }
@@ -73,17 +73,17 @@ namespace {
             // so this one kernel function works correctly for both cases.
             if (src == dst) {
                 // In-place swap
-                for (intptr_t j = 0; j < data_size/4; ++j) {
+                for (size_t j = 0; j < data_size/4; ++j) {
                     std::swap(dst[j], dst[data_size/2-j-1]);
                 }
-                for (intptr_t j = 0; j < data_size/4; ++j) {
+                for (size_t j = 0; j < data_size/4; ++j) {
                     std::swap(dst[data_size/2 + j], dst[data_size-j-1]);
                 }
             } else {
-                for (intptr_t j = 0; j < data_size/2; ++j) {
+                for (size_t j = 0; j < data_size/2; ++j) {
                     dst[j] = src[data_size/2-j-1];
                 }
-                for (intptr_t j = 0; j < data_size/2; ++j) {
+                for (size_t j = 0; j < data_size/2; ++j) {
                     dst[data_size/2 + j] = src[data_size-j-1];
                 }
             }
@@ -102,16 +102,16 @@ size_t dynd::make_byteswap_assignment_function(
         switch (data_size) {
         case 2:
             result = out->get_at<hierarchical_kernel_common_base>(offset_out);
-            result->function = &aligned_fixed_size_byteswap<uint16_t>::single;
+            result->set_function<unary_single_operation_t>(&aligned_fixed_size_byteswap<uint16_t>::single);
             return offset_out + sizeof(hierarchical_kernel_common_base);
         case 4:
             result = out->get_at<hierarchical_kernel_common_base>(offset_out);
-            result->function = &aligned_fixed_size_byteswap<uint32_t>::single;
+            result->set_function<unary_single_operation_t>(&aligned_fixed_size_byteswap<uint32_t>::single);
             return offset_out + sizeof(hierarchical_kernel_common_base);
             break;
         case 8:
             result = out->get_at<hierarchical_kernel_common_base>(offset_out);
-            result->function = &aligned_fixed_size_byteswap<uint64_t>::single;
+            result->set_function<unary_single_operation_t>(&aligned_fixed_size_byteswap<uint64_t>::single);
             return offset_out + sizeof(hierarchical_kernel_common_base);
             break;
         default:
@@ -123,7 +123,7 @@ size_t dynd::make_byteswap_assignment_function(
     out->ensure_capacity(offset_out + sizeof(byteswap_single_kernel_extra) -
                     sizeof(hierarchical_kernel_common_base));
     result = out->get_at<hierarchical_kernel_common_base>(offset_out);
-    result->function = &byteswap_single_kernel_extra::single;
+    result->set_function<unary_single_operation_t>(&byteswap_single_kernel_extra::single);
     reinterpret_cast<byteswap_single_kernel_extra *>(result)->data_size = data_size;
     return offset_out + sizeof(byteswap_single_kernel_extra);
 }
@@ -139,16 +139,16 @@ size_t dynd::make_pairwise_byteswap_assignment_function(
         switch (data_size) {
         case 4:
             result = out->get_at<hierarchical_kernel_common_base>(offset_out);
-            result->function = &aligned_fixed_size_pairwise_byteswap_kernel<uint16_t>::single;
+            result->set_function<unary_single_operation_t>(&aligned_fixed_size_pairwise_byteswap_kernel<uint16_t>::single);
             return offset_out + sizeof(hierarchical_kernel_common_base);
         case 8:
             result = out->get_at<hierarchical_kernel_common_base>(offset_out);
-            result->function = &aligned_fixed_size_pairwise_byteswap_kernel<uint32_t>::single;
+            result->set_function<unary_single_operation_t>(&aligned_fixed_size_pairwise_byteswap_kernel<uint32_t>::single);
             return offset_out + sizeof(hierarchical_kernel_common_base);
             break;
         case 16:
             result = out->get_at<hierarchical_kernel_common_base>(offset_out);
-            result->function = &aligned_fixed_size_pairwise_byteswap_kernel<uint64_t>::single;
+            result->set_function<unary_single_operation_t>(&aligned_fixed_size_pairwise_byteswap_kernel<uint64_t>::single);
             return offset_out + sizeof(hierarchical_kernel_common_base);
             break;
         default:
@@ -160,7 +160,7 @@ size_t dynd::make_pairwise_byteswap_assignment_function(
     out->ensure_capacity(offset_out + sizeof(pairwise_byteswap_single_kernel_extra) -
                     sizeof(hierarchical_kernel_common_base));
     result = out->get_at<hierarchical_kernel_common_base>(offset_out);
-    result->function = &pairwise_byteswap_single_kernel_extra::single;
+    result->set_function<unary_single_operation_t>(&pairwise_byteswap_single_kernel_extra::single);
     reinterpret_cast<pairwise_byteswap_single_kernel_extra *>(result)->data_size = data_size;
     return offset_out + sizeof(pairwise_byteswap_single_kernel_extra);
 }

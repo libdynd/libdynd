@@ -260,13 +260,13 @@ size_t groupby_dtype::make_operand_to_value_assignment_kernel(
     const categorical_dtype *cd = static_cast<const categorical_dtype *>(m_groups_dtype.extended());
     switch (cd->get_category_int_dtype().get_type_id()) {
         case uint8_type_id:
-            e->base.function = &groupby_to_value_assign_extra::single_uint8;
+            e->base.set_function<unary_single_operation_t>(&groupby_to_value_assign_extra::single_uint8);
             break;
         case uint16_type_id:
-            e->base.function = &groupby_to_value_assign_extra::single_uint16;
+            e->base.set_function<unary_single_operation_t>(&groupby_to_value_assign_extra::single_uint16);
             break;
         case uint32_type_id:
-            e->base.function = &groupby_to_value_assign_extra::single_uint32;
+            e->base.set_function<unary_single_operation_t>(&groupby_to_value_assign_extra::single_uint32);
             break;
         default:
             throw runtime_error("internal error in groupby_dtype::get_operand_to_value_kernel");
@@ -307,7 +307,7 @@ size_t groupby_dtype::make_value_to_operand_assignment_kernel(
     throw runtime_error("Cannot assign to a dynd groupby object value");
 }
 
-dtype groupby_dtype::with_replaced_storage_dtype(const dtype& replacement_dtype) const
+dtype groupby_dtype::with_replaced_storage_dtype(const dtype& DYND_UNUSED(replacement_dtype)) const
 {
     throw runtime_error("TODO: implement groupby_dtype::with_replaced_storage_dtype");
 }

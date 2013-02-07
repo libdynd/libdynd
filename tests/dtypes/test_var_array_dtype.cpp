@@ -323,7 +323,6 @@ TEST(VarArrayDType, AssignVarStridedKernel) {
     ndobject a, b;
     hierarchical_kernel<unary_single_operation_t> k;
     int vals_int[] = {3,5,7};
-    int vals_int_single[] = {9};
 
     // Assignment strided array -> uninitialized var array
     a = ndobject(make_var_array_dtype(make_dtype<int>()));

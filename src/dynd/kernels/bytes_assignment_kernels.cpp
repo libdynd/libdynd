@@ -75,7 +75,7 @@ size_t dynd::make_blockref_bytes_assignment_kernel(
 {
     out->ensure_capacity_leaf(offset_out + sizeof(blockref_bytes_kernel_extra));
     blockref_bytes_kernel_extra *e = out->get_at<blockref_bytes_kernel_extra>(offset_out);
-    e->base.function = &blockref_bytes_kernel_extra::single;
+    e->base.set_function<unary_single_operation_t>(&blockref_bytes_kernel_extra::single);
     e->dst_alignment = dst_alignment;
     e->src_alignment = src_alignment;
     e->dst_metadata = reinterpret_cast<const bytes_dtype_metadata *>(dst_metadata);
@@ -130,11 +130,11 @@ size_t dynd::make_fixedbytes_to_blockref_bytes_assignment_kernel(
                 size_t offset_out,
                 size_t dst_alignment, const char *dst_metadata,
                 intptr_t src_data_size, size_t src_alignment,
-                const eval::eval_context *ectx)
+                const eval::eval_context *DYND_UNUSED(ectx))
 {
     out->ensure_capacity_leaf(offset_out + sizeof(fixedbytes_to_blockref_bytes_kernel_extra));
     fixedbytes_to_blockref_bytes_kernel_extra *e = out->get_at<fixedbytes_to_blockref_bytes_kernel_extra>(offset_out);
-    e->base.function = &fixedbytes_to_blockref_bytes_kernel_extra::single;
+    e->base.set_function<unary_single_operation_t>(&fixedbytes_to_blockref_bytes_kernel_extra::single);
     e->dst_alignment = dst_alignment;
     e->src_data_size = src_data_size;
     e->src_alignment = src_alignment;

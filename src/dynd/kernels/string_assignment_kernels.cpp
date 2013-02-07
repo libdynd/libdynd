@@ -65,11 +65,11 @@ size_t dynd::make_fixedstring_assignment_kernel(
                 intptr_t dst_data_size, string_encoding_t dst_encoding,
                 intptr_t src_data_size, string_encoding_t src_encoding,
                 assign_error_mode errmode,
-                const eval::eval_context *ectx)
+                const eval::eval_context *DYND_UNUSED(ectx))
 {
     out->ensure_capacity_leaf(offset_out + sizeof(fixedstring_assign_kernel_extra));
     fixedstring_assign_kernel_extra *e = out->get_at<fixedstring_assign_kernel_extra>(offset_out);
-    e->base.function = &fixedstring_assign_kernel_extra::single;
+    e->base.set_function<unary_single_operation_t>(&fixedstring_assign_kernel_extra::single);
     e->next_fn = get_next_unicode_codepoint_function(src_encoding, errmode);
     e->append_fn = get_append_unicode_codepoint_function(dst_encoding, errmode);
     e->dst_data_size = dst_data_size;
@@ -167,7 +167,7 @@ size_t dynd::make_blockref_string_assignment_kernel(
 {
     out->ensure_capacity_leaf(offset_out + sizeof(blockref_string_assign_kernel_extra));
     blockref_string_assign_kernel_extra *e = out->get_at<blockref_string_assign_kernel_extra>(offset_out);
-    e->base.function = &blockref_string_assign_kernel_extra::single;
+    e->base.set_function<unary_single_operation_t>(&blockref_string_assign_kernel_extra::single);
     e->dst_encoding = dst_encoding;
     e->src_encoding = src_encoding;
     e->next_fn = get_next_unicode_codepoint_function(src_encoding, errmode);
@@ -258,7 +258,7 @@ size_t dynd::make_fixedstring_to_blockref_string_assignment_kernel(
     out->ensure_capacity_leaf(offset_out + sizeof(blockref_string_assign_kernel_extra));
     fixedstring_to_blockref_string_assign_kernel_extra *e =
                     out->get_at<fixedstring_to_blockref_string_assign_kernel_extra>(offset_out);
-    e->base.function = &fixedstring_to_blockref_string_assign_kernel_extra::single;
+    e->base.set_function<unary_single_operation_t>(&fixedstring_to_blockref_string_assign_kernel_extra::single);
     e->dst_encoding = dst_encoding;
     e->src_encoding = src_encoding;
     e->src_element_size = src_element_size;
@@ -314,11 +314,11 @@ size_t dynd::make_blockref_string_to_fixedstring_assignment_kernel(
                 intptr_t dst_data_size, string_encoding_t dst_encoding,
                 string_encoding_t src_encoding,
                 assign_error_mode errmode,
-                const eval::eval_context *ectx)
+                const eval::eval_context *DYND_UNUSED(ectx))
 {
     out->ensure_capacity_leaf(offset_out + sizeof(blockref_string_to_fixedstring_assign_kernel_extra));
     blockref_string_to_fixedstring_assign_kernel_extra *e = out->get_at<blockref_string_to_fixedstring_assign_kernel_extra>(offset_out);
-    e->base.function = &blockref_string_to_fixedstring_assign_kernel_extra::single;
+    e->base.set_function<unary_single_operation_t>(&blockref_string_to_fixedstring_assign_kernel_extra::single);
     e->next_fn = get_next_unicode_codepoint_function(src_encoding, errmode);
     e->append_fn = get_append_unicode_codepoint_function(dst_encoding, errmode);
     e->dst_data_size = dst_data_size;

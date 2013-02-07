@@ -414,13 +414,13 @@ size_t categorical_dtype::make_assignment_kernel(
             category_to_categorical_kernel_extra *e = out->get_at<category_to_categorical_kernel_extra>(offset_out);
             switch (m_category_int_dtype.get_type_id()) {
                 case uint8_type_id:
-                    e->base.function = &category_to_categorical_kernel_extra::single_uint8;
+                    e->base.set_function<unary_single_operation_t>(&category_to_categorical_kernel_extra::single_uint8);
                     break;
                 case uint16_type_id:
-                    e->base.function = &category_to_categorical_kernel_extra::single_uint16;
+                    e->base.set_function<unary_single_operation_t>(&category_to_categorical_kernel_extra::single_uint16);
                     break;
                 case uint32_type_id:
-                    e->base.function = &category_to_categorical_kernel_extra::single_uint32;
+                    e->base.set_function<unary_single_operation_t>(&category_to_categorical_kernel_extra::single_uint32);
                     break;
                 default:
                     throw runtime_error("internal error in categorical_dtype::make_assignment_kernel");
@@ -448,13 +448,13 @@ size_t categorical_dtype::make_assignment_kernel(
             categorical_to_other_kernel_extra *e = out->get_at<categorical_to_other_kernel_extra>(offset_out);
             switch (m_category_int_dtype.get_type_id()) {
                 case uint8_type_id:
-                    e->base.function = &categorical_to_other_kernel_extra::single_uint8;
+                    e->base.set_function<unary_single_operation_t>(&categorical_to_other_kernel_extra::single_uint8);
                     break;
                 case uint16_type_id:
-                    e->base.function = &categorical_to_other_kernel_extra::single_uint16;
+                    e->base.set_function<unary_single_operation_t>(&categorical_to_other_kernel_extra::single_uint16);
                     break;
                 case uint32_type_id:
-                    e->base.function = &categorical_to_other_kernel_extra::single_uint32;
+                    e->base.set_function<unary_single_operation_t>(&categorical_to_other_kernel_extra::single_uint32);
                     break;
                 default:
                     throw runtime_error("internal error in categorical_dtype::make_assignment_kernel");

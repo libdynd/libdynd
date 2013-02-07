@@ -474,7 +474,7 @@ size_t date_dtype::get_property_index(const std::string& property_name) const
     }
 }
 
-dtype date_dtype::get_property_dtype(size_t property_index) const
+dtype date_dtype::get_property_dtype(size_t DYND_UNUSED(property_index)) const
 {
     // All the properties are int32 for now
     return make_dtype<int32_t>();
@@ -491,16 +491,16 @@ size_t date_dtype::make_property_getter_kernel(
     // TODO: Use an enum for the property index
     switch (src_property_index) {
         case 0:
-            e->function = &property_kernel_year_single;
+            e->set_function<unary_single_operation_t>(&property_kernel_year_single);
             return offset_out + sizeof(hierarchical_kernel_common_base);
         case 1:
-            e->function = &property_kernel_month_single;
+            e->set_function<unary_single_operation_t>(&property_kernel_month_single);
             return offset_out + sizeof(hierarchical_kernel_common_base);
         case 2:
-            e->function = &property_kernel_day_single;
+            e->set_function<unary_single_operation_t>(&property_kernel_day_single);
             return offset_out + sizeof(hierarchical_kernel_common_base);
         case 3:
-            e->function = &property_kernel_weekday_single;
+            e->set_function<unary_single_operation_t>(&property_kernel_weekday_single);
             return offset_out + sizeof(hierarchical_kernel_common_base);
         default:
             stringstream ss;

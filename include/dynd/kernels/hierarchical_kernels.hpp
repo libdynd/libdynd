@@ -28,6 +28,11 @@ struct hierarchical_kernel_common_base {
     T get_function() const {
         return reinterpret_cast<T>(function);
     }
+
+    template<typename T>
+    void set_function(T fnptr) {
+        function = reinterpret_cast<void *>(fnptr);
+    }
 };
 
 /**

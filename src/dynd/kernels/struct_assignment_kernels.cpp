@@ -95,7 +95,7 @@ size_t dynd::make_struct_identical_assignment_kernel(
                     field_count * sizeof(struct_kernel_extra::field_items);
     out->ensure_capacity(offset_out + extra_size);
     struct_kernel_extra *e = out->get_at<struct_kernel_extra>(offset_out);
-    e->base.function = &struct_kernel_extra::single;
+    e->base.set_function<unary_single_operation_t>(&struct_kernel_extra::single);
     e->base.destructor = &struct_kernel_extra::destruct;
     e->field_count = field_count;
 
@@ -157,7 +157,7 @@ size_t dynd::make_struct_assignment_kernel(
                     field_count * sizeof(struct_kernel_extra::field_items);
     out->ensure_capacity(offset_out + extra_size);
     struct_kernel_extra *e = out->get_at<struct_kernel_extra>(offset_out);
-    e->base.function = &struct_kernel_extra::single;
+    e->base.set_function<unary_single_operation_t>(&struct_kernel_extra::single);
     e->base.destructor = &struct_kernel_extra::destruct;
     e->field_count = field_count;
 

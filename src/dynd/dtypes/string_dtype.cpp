@@ -246,14 +246,12 @@ size_t string_dtype::make_assignment_kernel(
     if (this == dst_dt.extended()) {
         switch (src_dt.get_type_id()) {
             case string_type_id: {
-                const string_dtype *src_fs = static_cast<const string_dtype *>(src_dt.extended());
                 return make_blockref_string_assignment_kernel(out, offset_out,
                                 dst_metadata, get_encoding(),
                                 src_metadata, static_cast<const base_string_dtype *>(src_dt.extended())->get_encoding(),
                                 errmode, ectx);
             }
             case fixedstring_type_id: {
-                const base_string_dtype *src_fs = static_cast<const base_string_dtype *>(src_dt.extended());
                 return make_fixedstring_to_blockref_string_assignment_kernel(out, offset_out,
                                 dst_metadata, get_encoding(),
                                 src_dt.get_data_size(),

@@ -399,7 +399,7 @@ size_t dynd::make_string_to_builtin_assignment_kernel(
                 type_id_t dst_type_id,
                 const dtype& src_string_dt, const char *src_metadata,
                 assign_error_mode errmode,
-                const eval::eval_context *ectx)
+                const eval::eval_context *DYND_UNUSED(ectx))
 {
     if (src_string_dt.get_kind() != string_kind) {
         stringstream ss;
@@ -410,7 +410,7 @@ size_t dynd::make_string_to_builtin_assignment_kernel(
     if (dst_type_id >= bool_type_id && dst_type_id <= complex_float64_type_id) {
         out->ensure_capacity_leaf(offset_out + sizeof(string_to_builtin_kernel_extra));
         string_to_builtin_kernel_extra *e = out->get_at<string_to_builtin_kernel_extra>(offset_out);
-        e->base.function = static_string_to_builtin_kernels[dst_type_id-bool_type_id];
+        e->base.set_function<unary_single_operation_t>(static_string_to_builtin_kernels[dst_type_id-bool_type_id]);
         e->base.destructor = string_to_builtin_kernel_extra::destruct;
         // The kernel data owns this reference
         e->src_string_dt = static_cast<const base_string_dtype *>(dtype(src_string_dt).release());
@@ -467,7 +467,7 @@ size_t dynd::make_builtin_to_string_assignment_kernel(
                 const dtype& dst_string_dt, const char *dst_metadata,
                 type_id_t src_type_id,
                 assign_error_mode errmode,
-                const eval::eval_context *ectx)
+                const eval::eval_context *DYND_UNUSED(ectx))
 {
     if (dst_string_dt.get_kind() != string_kind) {
         stringstream ss;
@@ -478,7 +478,7 @@ size_t dynd::make_builtin_to_string_assignment_kernel(
     if (src_type_id >= 0 && src_type_id < builtin_type_id_count) {
         out->ensure_capacity_leaf(offset_out + sizeof(builtin_to_string_kernel_extra));
         builtin_to_string_kernel_extra *e = out->get_at<builtin_to_string_kernel_extra>(offset_out);
-        e->base.function = builtin_to_string_kernel_extra::single;
+        e->base.set_function<unary_single_operation_t>(builtin_to_string_kernel_extra::single);
         e->base.destructor = builtin_to_string_kernel_extra::destruct;
         // The kernel data owns this reference
         e->dst_string_dt = static_cast<const base_string_dtype *>(dtype(dst_string_dt).release());

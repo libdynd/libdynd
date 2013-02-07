@@ -468,7 +468,7 @@ size_t strided_array_dtype::make_assignment_kernel(
         const strided_array_dtype_metadata *dst_md =
                         reinterpret_cast<const strided_array_dtype_metadata *>(dst_metadata);
         strided_assign_kernel_extra *e = out->get_at<strided_assign_kernel_extra>(offset_out);
-        e->base.function = &strided_assign_kernel_extra::single;
+        e->base.set_function<unary_single_operation_t>(&strided_assign_kernel_extra::single);
         e->base.destructor = strided_assign_kernel_extra::destruct;
         if (src_dt.get_undim() < dst_dt.get_undim()) {
             // If the src has fewer dimensions, broadcast it across this one
