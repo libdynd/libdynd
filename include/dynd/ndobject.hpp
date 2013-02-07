@@ -915,7 +915,7 @@ ndobject empty_like(const ndobject& rhs);
  */
 intptr_t binary_search(const ndobject& n, const char *data, const char *metadata);
 
-ndobject groupby(const dynd::ndobject& data_values, const dynd::ndobject& by, const dynd::dtype& groups);
+ndobject groupby(const dynd::ndobject& data_values, const dynd::ndobject& by, const dynd::dtype& groups = dynd::dtype());
 
 } // namespace dynd
 

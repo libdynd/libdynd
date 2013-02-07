@@ -111,11 +111,11 @@ bool groupby_dtype::operator==(const base_dtype& rhs) const
 {
     if (this == &rhs) {
         return true;
-    } else if (rhs.get_type_id() != view_type_id) {
+    } else if (rhs.get_type_id() != groupby_type_id) {
         return false;
     } else {
         const groupby_dtype *dt = static_cast<const groupby_dtype*>(&rhs);
-        return m_value_dtype == dt->m_value_dtype;
+        return m_value_dtype == dt->m_value_dtype && m_operand_dtype == dt->m_operand_dtype;
     }
 }
 
@@ -154,9 +154,7 @@ namespace {
             // If by_values is an expression, evaluate it since we're doing two passes through them
             ndobject by_values_tmp;
             if (by_values_dt.is_expression() || !by_values_dt.extended()->is_strided()) {
-cout << "evaluating by values temp" << endl;
                 by_values_tmp = eval_raw_copy(by_values_dt, by_values_metadata, by_values_data);
-cout << by_values_tmp << endl;
                 by_values_dt = by_values_tmp.get_dtype();
                 by_values_metadata = by_values_tmp.get_ndo_meta();
                 by_values_data = by_values_tmp.get_readonly_originptr();

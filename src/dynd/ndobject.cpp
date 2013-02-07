@@ -18,6 +18,7 @@
 #include <dynd/gfunc/callable.hpp>
 #include <dynd/gfunc/call_callable.hpp>
 #include <dynd/dtypes/groupby_dtype.hpp>
+#include <dynd/dtypes/categorical_dtype.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -1028,8 +1029,25 @@ intptr_t dynd::binary_search(const ndobject& n, const char *metadata, const char
 
 ndobject dynd::groupby(const dynd::ndobject& data_values, const dynd::ndobject& by_values, const dynd::dtype& groups)
 {
-    ndobject by_values_as_groups = by_values.cast_udtype(groups);
-    dtype gbdt = make_groupby_dtype(data_values.get_dtype(), by_values_as_groups.get_dtype(), groups);
+    // If no groups dtype is specified, determine one from 'by'
+    dtype groups_final;
+    if (groups.get_type_id() == uninitialized_type_id) {
+        dtype by_dt = by_values.get_udtype();
+        if (by_dt.value_dtype().get_type_id() == categorical_type_id) {
+            // If 'by' already has a categorical dtype, use that
+            groups_final = by_dt.value_dtype();
+        } else {
+            // Otherwise make a categorical type from the values
+            groups_final = factor_categorical_dtype(by_values);
+        }
+    } else {
+        groups_final = groups;
+    }
+
+    // Make sure the 'by' values have the 'groups' dtype
+    ndobject by_values_as_groups = by_values.cast_udtype(groups_final);
+
+    dtype gbdt = make_groupby_dtype(data_values.get_dtype(), by_values_as_groups.get_dtype(), groups_final);
     const groupby_dtype *gbdt_ext = static_cast<const groupby_dtype *>(gbdt.extended());
     char *data_ptr = NULL;
 
