@@ -90,3 +90,11 @@ TEST(GroupByDType, MediumDeduceGroups) {
     EXPECT_TRUE(ndobject(group_15).equals_exact(g.at(15).vals()));
     EXPECT_TRUE(ndobject(group_19).equals_exact(g.at(19).vals()));
 }
+
+TEST(GroupByDType, MismatchedSizes) {
+    int data[] = {10,20,30};
+    int by[] = {15,16,16,15};
+    int groups[] = {15,16};
+    EXPECT_THROW(groupby(data, by, make_categorical_dtype(groups)),
+            runtime_error);
+}

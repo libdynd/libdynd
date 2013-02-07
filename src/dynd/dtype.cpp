@@ -9,6 +9,7 @@
 #include <dynd/buffer_storage.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/gfunc/make_callable.hpp>
+#include <dynd/gfunc/call_callable.hpp>
 
 #include <dynd/dtypes/convert_dtype.hpp>
 #include <dynd/dtypes/datashape_parser.hpp>
@@ -132,6 +133,48 @@ dtype dtype::at_array(int nindices, const irange *indices) const
     }
 }
 
+ndobject dtype::p(const char *property_name) const
+{
+    if (!is_builtin()) {
+        const std::pair<std::string, gfunc::callable> *properties;
+        size_t count;
+        extended()->get_dynamic_dtype_properties(&properties, &count);
+        // TODO: We probably want to make some kind of acceleration structure for the name lookup
+        if (count > 0) {
+            for (size_t i = 0; i < count; ++i) {
+                if (properties[i].first == property_name) {
+                    return properties[i].second.call(*this);
+                }
+            }
+        }
+    }
+
+    stringstream ss;
+    ss << "dynd dtype does not have property " << property_name;
+    throw runtime_error(ss.str());
+}
+
+ndobject dtype::p(const std::string& property_name) const
+{
+    if (!is_builtin()) {
+        const std::pair<std::string, gfunc::callable> *properties;
+        size_t count;
+        extended()->get_dynamic_dtype_properties(&properties, &count);
+        // TODO: We probably want to make some kind of acceleration structure for the name lookup
+        if (count > 0) {
+            for (size_t i = 0; i < count; ++i) {
+                if (properties[i].first == property_name) {
+                    return properties[i].second.call(*this);
+                }
+            }
+        }
+    }
+
+    stringstream ss;
+    ss << "dynd dtype does not have property " << property_name;
+    throw runtime_error(ss.str());
+}
+
 dtype dtype::apply_linear_index(int nindices, const irange *indices,
                 int current_i, const dtype& root_dt, bool leading_dimension) const
 {
@@ -191,6 +234,9 @@ void dtype::get_single_compare_kernel(kernel_instance<compare_operations_t> &out
 std::ostream& dynd::operator<<(std::ostream& o, const dtype& rhs)
 {
     switch (rhs.get_type_id()) {
+        case uninitialized_type_id:
+            o << "uninitialized";
+            break;
         case bool_type_id:
             o << "bool";
             break;

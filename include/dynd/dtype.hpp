@@ -199,6 +199,9 @@ struct iterdata_broadcasting_terminator {
 char *iterdata_broadcasting_terminator_incr(iterdata_common *iterdata, int level);
 char *iterdata_broadcasting_terminator_reset(iterdata_common *iterdata, char *data, int level);
 
+// Forward declaration of the ndobject
+class ndobject;
+
 /**
  * This class represents a data type.
  *
@@ -402,6 +405,19 @@ public:
         irange i[4] = {i0, i1, i2, i3};
         return at_array(4, i);
     }
+
+    /**
+     * Accesses a dynamic property of the dtype.
+     *
+     * \param property_name  The property to access.
+     */
+    ndobject p(const char *property_name) const;
+    /**
+     * Accesses a dynamic property of the dtype.
+     *
+     * \param property_name  The property to access.
+     */
+    ndobject p(const std::string& property_name) const;
 
     /**
      * Indexes into the dtype, intended for recursive calls from the extended-dtype version. See

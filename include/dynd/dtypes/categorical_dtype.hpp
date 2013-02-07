@@ -81,9 +81,10 @@ public:
                     m_value_to_category_index[value] * reinterpret_cast<const strided_array_dtype_metadata *>(m_categories.get_ndo_meta())->stride;
     }
     /** Returns the metadata corresponding to data from get_category_data_from_value */
-    const char *get_category_metadata() const {
-        return m_categories.get_ndo_meta();
-    }
+    const char *get_category_metadata() const;
+
+    /** Returns the categories as an immutable ndobject */
+    ndobject get_categories() const;
 
     bool is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const;
 
@@ -103,7 +104,12 @@ public:
                     assign_error_mode errmode,
                     const eval::eval_context *ectx) const;
 
-    void get_dynamic_ndobject_properties(const std::pair<std::string, gfunc::callable> **out_properties, size_t *out_count) const;
+    void get_dynamic_ndobject_properties(
+                    const std::pair<std::string, gfunc::callable> **out_properties,
+                    size_t *out_count) const;
+    void get_dynamic_dtype_properties(
+                    const std::pair<std::string, gfunc::callable> **out_properties,
+                    size_t *out_count) const;
 
     friend struct assign_to_same_category_type;
     friend struct assign_from_same_category_type;

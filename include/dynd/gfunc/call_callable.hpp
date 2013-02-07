@@ -50,6 +50,20 @@ namespace detail {
         }
     };
 
+    template<>
+    struct callable_argument_setter<dtype> {
+        static void set(const dtype& paramtype, char *metadata, char *data, const dtype& value) {
+            if (paramtype.get_type_id() == void_pointer_type_id) {
+                // TODO: switch to a better mechanism for passing dtype references
+                *reinterpret_cast<const base_dtype **>(data) = value.extended();
+            } else {
+                std::stringstream ss;
+                ss << "cannot pass a dtype as a parameter to dynd callable parameter of type " << paramtype;
+                throw std::runtime_error(ss.str());
+            }
+        }
+    };
+
     template<int N>
     struct callable_argument_setter<const char[N]> {
         static void set(const dtype& paramtype, char *metadata, char *data, const char (&value)[N]) {

@@ -344,6 +344,35 @@ uint32_t categorical_dtype::get_value_from_category(const ndobject& category) co
     }
 }
 
+const char *categorical_dtype::get_category_metadata() const
+{
+    const char *metadata = m_categories.get_ndo_meta();
+    m_categories.get_dtype().extended()->at_single(0, &metadata, NULL);
+    return metadata;
+}
+
+ndobject categorical_dtype::get_categories() const
+{
+    // TODO: store categories in their original order
+    //       so this is simply "return m_categories".
+    ndobject categories = make_strided_ndobject(get_category_count(), m_category_dtype);
+    ndobject_iter<1,0> iter(categories);
+    hierarchical_kernel<unary_single_operation_t> k;
+    ::make_assignment_kernel(&k, 0, iter.get_uniform_dtype(), iter.metadata(),
+                    m_category_dtype, get_category_metadata(),
+                    assign_error_default, &eval::default_eval_context);
+    unary_single_operation_t kf = k.get_function();
+    if (!iter.empty()) {
+        intptr_t i = 0;
+        do {
+            kf(iter.data(), get_category_data_from_value(i), k.get());
+            ++i;
+        } while(iter.next());
+    }
+    return categories;
+}
+
+
 bool categorical_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const
 {
     if (dst_dt.extended() == this) {
@@ -531,9 +560,29 @@ static pair<string, gfunc::callable> categorical_ndobject_properties[] = {
                     gfunc::make_callable(&property_ndo_get_category_ints, "self"))
 };
 
-void categorical_dtype::get_dynamic_ndobject_properties(const std::pair<std::string, gfunc::callable> **out_properties, size_t *out_count) const
+void categorical_dtype::get_dynamic_ndobject_properties(
+                const std::pair<std::string, gfunc::callable> **out_properties,
+                size_t *out_count) const
 {
     *out_properties = categorical_ndobject_properties;
     *out_count = sizeof(categorical_ndobject_properties) / sizeof(categorical_ndobject_properties[0]);
+}
+
+static ndobject property_dtype_get_categories(const dtype& d) {
+    const categorical_dtype *cd = static_cast<const categorical_dtype *>(d.extended());
+    return cd->get_categories();
+}
+
+static pair<string, gfunc::callable> categorical_dtype_properties[] = {
+    pair<string, gfunc::callable>("categories",
+                    gfunc::make_callable(&property_dtype_get_categories, "self"))
+};
+
+void categorical_dtype::get_dynamic_dtype_properties(
+                const std::pair<std::string, gfunc::callable> **out_properties,
+                size_t *out_count) const
+{
+    *out_properties = categorical_dtype_properties;
+    *out_count = sizeof(categorical_dtype_properties) / sizeof(categorical_dtype_properties[0]);
 }
 

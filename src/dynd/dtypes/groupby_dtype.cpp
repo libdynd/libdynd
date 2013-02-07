@@ -13,6 +13,7 @@
 #include <dynd/dtypes/var_array_dtype.hpp>
 #include <dynd/dtypes/categorical_dtype.hpp>
 #include <dynd/ndobject_iter.hpp>
+#include <dynd/gfunc/make_callable.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -309,4 +310,25 @@ size_t groupby_dtype::make_value_to_operand_assignment_kernel(
 dtype groupby_dtype::with_replaced_storage_dtype(const dtype& replacement_dtype) const
 {
     throw runtime_error("TODO: implement groupby_dtype::with_replaced_storage_dtype");
+}
+
+///////// properties on the ndobject
+
+static ndobject property_ndo_get_groups(const ndobject& n) {
+    dtype d = n.get_dtype();
+    while (d.get_type_id() != groupby_type_id) {
+        d = d.at_single(0);
+    }
+    const groupby_dtype *gd = static_cast<const groupby_dtype *>(d.extended());
+    return gd->get_groups_dtype().p("categories");
+}
+
+static pair<string, gfunc::callable> groupby_ndobject_properties[] = {
+    pair<string, gfunc::callable>("groups", gfunc::make_callable(&property_ndo_get_groups, "self")),
+};
+
+void groupby_dtype::get_dynamic_ndobject_properties(const std::pair<std::string, gfunc::callable> **out_properties, size_t *out_count) const
+{
+    *out_properties = groupby_ndobject_properties;
+    *out_count = sizeof(groupby_ndobject_properties) / sizeof(groupby_ndobject_properties[0]);
 }

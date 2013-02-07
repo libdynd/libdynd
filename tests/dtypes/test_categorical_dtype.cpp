@@ -298,3 +298,9 @@ TEST(CategoricalDType, AssignRange) {
     EXPECT_EQ("bar", a.at(8).as<string>());
 }
 
+TEST(CategoricalDType, CategoriesProperty) {
+    const char *cats_vals[] = {"this", "is", "a", "test"};
+    ndobject cats = cats_vals;
+    dtype cd = make_categorical_dtype(cats_vals);
+    EXPECT_TRUE(cats.equals_exact(cd.p("categories")));
+}

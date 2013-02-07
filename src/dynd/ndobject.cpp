@@ -1029,6 +1029,19 @@ intptr_t dynd::binary_search(const ndobject& n, const char *metadata, const char
 
 ndobject dynd::groupby(const dynd::ndobject& data_values, const dynd::ndobject& by_values, const dynd::dtype& groups)
 {
+    if (data_values.get_undim() == 0) {
+        throw runtime_error("'data' values provided to dynd groupby must have at least one dimension");
+    }
+    if (by_values.get_undim() == 0) {
+        throw runtime_error("'by' values provided to dynd groupby must have at least one dimension");
+    }
+    if (data_values.get_dim_size() != by_values.get_dim_size()) {
+        stringstream ss;
+        ss << "'data' and 'by' values provided to dynd groupby have different sizes, ";
+        ss << data_values.get_dim_size() << " and " << by_values.get_dim_size();
+        throw runtime_error(ss.str());
+    }
+
     // If no groups dtype is specified, determine one from 'by'
     dtype groups_final;
     if (groups.get_type_id() == uninitialized_type_id) {
