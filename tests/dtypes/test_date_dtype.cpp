@@ -151,6 +151,35 @@ TEST(DateDType, DateProperties) {
     EXPECT_EQ(25, a.p("day").at(2).as<int32_t>());
 }
 
+TEST(DateDType, DatePropertyConvertOfString) {
+    ndobject a, b, c;
+    const char *strs[] = {"1931-12-12", "2013-05-14", "2012-12-25"};
+    a = ndobject(strs).cast_scalars(make_fixedstring_dtype(string_encoding_ascii, 10)).vals();
+    b = a.cast_scalars(make_date_dtype());
+    EXPECT_EQ(make_strided_array_dtype(make_fixedstring_dtype(string_encoding_ascii, 10)),
+                    a.get_dtype());
+    EXPECT_EQ(make_strided_array_dtype(make_convert_dtype(make_date_dtype(), make_fixedstring_dtype(string_encoding_ascii, 10))),
+                    b.get_dtype());
+
+    // year property
+    c = b.p("year");
+    EXPECT_EQ(date_property_type_id, c.get_udtype().get_type_id());
+    c = c.vals();
+    EXPECT_EQ(make_strided_array_dtype(make_dtype<int>()), c.get_dtype());
+    EXPECT_EQ(1931, c.at(0).as<int>());
+    EXPECT_EQ(2013, c.at(1).as<int>());
+    EXPECT_EQ(2012, c.at(2).as<int>());
+
+    // weekday function
+    c = b.f("weekday");
+    EXPECT_EQ(date_property_type_id, c.get_udtype().get_type_id());
+    c = c.vals();
+    EXPECT_EQ(make_strided_array_dtype(make_dtype<int>()), c.get_dtype());
+    EXPECT_EQ(5, c.at(0).as<int>());
+    EXPECT_EQ(1, c.at(1).as<int>());
+    EXPECT_EQ(1, c.at(2).as<int>());
+}
+
 TEST(DateDType, ToStructFunction) {
     dtype d = make_date_dtype();
     ndobject a, b;

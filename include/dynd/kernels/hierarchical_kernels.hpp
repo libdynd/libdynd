@@ -109,9 +109,11 @@ public:
      */
     void ensure_capacity_leaf(size_t size) {
         if (m_capacity < size) {
-            // At least double the capacity
-            if (size < 2 * m_capacity) {
-                size = 2 * m_capacity;
+            // Grow by a factor of 1.5
+            // https://github.com/facebook/folly/blob/master/folly/docs/FBVector.md
+            size_t grown_capacity = m_capacity * 3 / 2;
+            if (size < grown_capacity) {
+                size = grown_capacity;
             }
             hierarchical_kernel_common_base *new_data;
             if (using_static_data()) {

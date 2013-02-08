@@ -225,15 +225,15 @@ void date_dtype::get_dynamic_dtype_functions(const std::pair<std::string, gfunc:
 ///////// properties on the ndobject
 
 static ndobject property_ndo_get_year(const ndobject& n) {
-    return n.view_scalars(make_date_property_dtype(n.get_udtype(), "year"));
+    return n.replace_udtype(make_date_property_dtype(n.get_udtype(), "year"));
 }
 
 static ndobject property_ndo_get_month(const ndobject& n) {
-    return n.view_scalars(make_date_property_dtype(n.get_udtype(), "month"));
+    return n.replace_udtype(make_date_property_dtype(n.get_udtype(), "month"));
 }
 
 static ndobject property_ndo_get_day(const ndobject& n) {
-    return n.view_scalars(make_date_property_dtype(n.get_udtype(), "day"));
+    return n.replace_udtype(make_date_property_dtype(n.get_udtype(), "day"));
 }
 
 static pair<string, gfunc::callable> date_ndobject_properties[] = {
@@ -319,9 +319,7 @@ static ndobject function_ndo_strftime(const ndobject& n, const std::string& form
 }
 
 static ndobject function_ndo_weekday(const ndobject& n) {
-    dtype array_dt = n.get_dtype();
-    dtype dt = array_dt.get_dtype_at_dimension(NULL, array_dt.get_undim());
-    return n.view_scalars(make_date_property_dtype(dt, "weekday"));
+    return n.replace_udtype(make_date_property_dtype(n.get_udtype(), "weekday"));
 }
 
 static ndobject function_ndo_replace(const ndobject& n, int32_t year, int32_t month, int32_t day) {

@@ -220,6 +220,46 @@ dtype dtype::with_replaced_scalar_types(const dtype& scalar_dtype, assign_error_
     return result;
 }
 
+bool dtype::data_layout_compatible_with(const dtype& rhs) const
+{
+    if (extended() == rhs.extended()) {
+        // If they're trivially identical, quickly return true
+        return true;
+    }
+    if (get_data_size() != rhs.get_data_size() ||
+                    get_metadata_size() != rhs.get_metadata_size()) {
+        // The size of the data and metadata must be the same
+        return false;
+    }
+    if (get_metadata_size() == 0 &&
+                get_memory_management() == pod_memory_management &&
+                rhs.get_memory_management() == pod_memory_management) {
+        // If both are POD with no metadata, then they're compatible
+        return true;
+    }
+    if (get_kind() == expression_kind || rhs.get_kind() == expression_kind) {
+        // If either is an expression dtype, check compatibility with
+        // the storage dtypes
+        return storage_dtype().data_layout_compatible_with(rhs.storage_dtype());
+    }
+    // Rules for the rest of the types
+    switch (get_type_id()) {
+        case string_type_id:
+        case bytes_type_id:
+        case json_type_id:
+            switch (rhs.get_type_id()) {
+                case string_type_id:
+                case bytes_type_id:
+                case json_type_id:
+                    // All of string, bytes, json are compatible
+                    return true;
+                default:
+                    return false;
+            }
+        default:
+            return false;
+    }
+}
 
 void dtype::get_single_compare_kernel(kernel_instance<compare_operations_t> &out_kernel) const {
     if (is_builtin()) {

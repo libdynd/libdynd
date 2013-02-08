@@ -531,6 +531,13 @@ public:
         }
     }
 
+    /**
+     * Returns true if the data layout (both data and metadata)
+     * is compatible with that of 'rhs'. If this returns true,
+     * the dtypes can be substituted for each other in an ndobject.
+     */
+    bool data_layout_compatible_with(const dtype& rhs) const;
+
     /*
      * Return a comparison kernel that can perform the requested single comparison on
      * data of this dtype

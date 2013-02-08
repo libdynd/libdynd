@@ -433,6 +433,13 @@ public:
     ndobject cast_udtype(const dtype& scalar_dtype, assign_error_mode errmode = assign_error_default) const;
 
     /**
+     * Replaces the uniform dtype with a new one, returning a view to
+     * the result. The new dtype must have the same storage as the
+     * existing dtype.
+     */
+    ndobject replace_udtype(const dtype& new_udtype) const;
+
+    /**
      * Views the array's memory as another dtype, where such an operation
      * makes sense. This is analogous to reinterpret_cast<>.
      */
