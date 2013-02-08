@@ -29,7 +29,7 @@ class groupby_dtype : public base_expression_dtype {
     dtype m_value_dtype, m_operand_dtype, m_groups_dtype;
 
 public:
-    groupby_dtype(const dtype& data_values_dtype, const dtype& by_values_dtype, const dtype& groups_dtype);
+    groupby_dtype(const dtype& data_values_dtype, const dtype& by_values_dtype);
 
     virtual ~groupby_dtype();
 
@@ -123,10 +123,10 @@ public:
  * Makes a groupby dtype.
  */
 inline dtype make_groupby_dtype(const dtype& data_values_dtype,
-                const dtype& by_values_dtype, const dtype& groups_dtype)
+                const dtype& by_values_dtype)
 {
     return dtype(new groupby_dtype(data_values_dtype,
-                    by_values_dtype, groups_dtype), false);
+                    by_values_dtype), false);
 }
 
 } // namespace dynd

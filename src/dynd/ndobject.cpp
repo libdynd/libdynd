@@ -1097,7 +1097,7 @@ ndobject dynd::groupby(const dynd::ndobject& data_values, const dynd::ndobject& 
     // Make sure the 'by' values have the 'groups' dtype
     ndobject by_values_as_groups = by_values.cast_udtype(groups_final);
 
-    dtype gbdt = make_groupby_dtype(data_values.get_dtype(), by_values_as_groups.get_dtype(), groups_final);
+    dtype gbdt = make_groupby_dtype(data_values.get_dtype(), by_values_as_groups.get_dtype());
     const groupby_dtype *gbdt_ext = static_cast<const groupby_dtype *>(gbdt.extended());
     char *data_ptr = NULL;
 

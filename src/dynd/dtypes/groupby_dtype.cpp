@@ -19,13 +19,17 @@ using namespace std;
 using namespace dynd;
 
 groupby_dtype::groupby_dtype(const dtype& data_values_dtype,
-                const dtype& by_values_dtype, const dtype& groups_dtype)
+                const dtype& by_values_dtype)
     : base_expression_dtype(groupby_type_id, expression_kind,
                     sizeof(groupby_dtype_data), sizeof(void *), dtype_flag_none,
                     0, 1 + data_values_dtype.get_undim())
 {
-    if (groups_dtype.get_type_id() != categorical_type_id) {
-        throw runtime_error("to construct a groupby dtype, its groups dtype must be categorical");
+    m_groups_dtype = by_values_dtype.at_single(0).value_dtype();
+    if (m_groups_dtype.get_type_id() != categorical_type_id) {
+        stringstream ss;
+        ss << "to construct a groupby dtype, the by dtype, " << by_values_dtype.at_single(0);
+        ss << ", must have a categorical value type";
+        throw runtime_error(ss.str());
     }
     if (data_values_dtype.get_undim() < 1) {
         throw runtime_error("to construct a groupby dtype, its values dtype must have at least one uniform dimension");
@@ -33,20 +37,12 @@ groupby_dtype::groupby_dtype(const dtype& data_values_dtype,
     if (by_values_dtype.get_undim() < 1) {
         throw runtime_error("to construct a groupby dtype, its values dtype must have at least one uniform dimension");
     }
-    if (by_values_dtype.at_single(0).value_dtype() != groups_dtype) {
-        stringstream ss;
-        ss << "to construct a groupby dtype, the by dtype, " << by_values_dtype.at_single(0);
-        ss << ", should match the group dtype, ";
-        ss << groups_dtype;
-        throw runtime_error(ss.str());
-    }
     m_operand_dtype = make_fixedstruct_dtype(make_pointer_dtype(data_values_dtype), "data",
                     make_pointer_dtype(by_values_dtype), "by");
     m_members.metadata_size = m_operand_dtype.get_metadata_size();
-    const categorical_dtype *cd = static_cast<const categorical_dtype *>(groups_dtype.extended());
+    const categorical_dtype *cd = static_cast<const categorical_dtype *>(m_groups_dtype.extended());
     m_value_dtype = make_fixedarray_dtype(make_var_array_dtype(
                     data_values_dtype.at_single(0)), cd->get_category_count());
-    m_groups_dtype = groups_dtype;
 }
 
 groupby_dtype::~groupby_dtype()
@@ -74,8 +70,7 @@ dtype groupby_dtype::get_by_values_dtype() const
 void groupby_dtype::print_dtype(std::ostream& o) const
 {
     o << "groupby<values=" << get_data_values_dtype();
-    o << ", by=" << get_by_values_dtype();
-    o << ", groups=" << m_groups_dtype << ">";
+    o << ", by=" << get_by_values_dtype() << ">";
 }
 
 void groupby_dtype::get_shape(size_t i, intptr_t *out_shape) const

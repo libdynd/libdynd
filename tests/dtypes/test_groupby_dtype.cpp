@@ -27,8 +27,7 @@ TEST(GroupByDType, Basic) {
     ndobject g = groupby(data, by, make_categorical_dtype(groups));
     EXPECT_EQ(make_groupby_dtype(make_strided_array_dtype(make_dtype<int>()),
                         make_strided_array_dtype(make_convert_dtype(
-                            make_categorical_dtype(groups), make_dtype<int>())),
-                        make_categorical_dtype(groups)),
+                            make_categorical_dtype(groups), make_dtype<int>()))),
                     g.get_dtype());
     g = g.vals();
     EXPECT_EQ(1, g.at(0).get_shape()[0]);
@@ -45,8 +44,7 @@ TEST(GroupByDType, BasicDeduceGroups) {
     const char *expected_groups[] = {"alpha", "beta"};
     EXPECT_EQ(make_groupby_dtype(make_strided_array_dtype(make_string_dtype()),
                         make_strided_array_dtype(make_convert_dtype(
-                            make_categorical_dtype(expected_groups), make_string_dtype())),
-                        make_categorical_dtype(expected_groups)),
+                            make_categorical_dtype(expected_groups), make_string_dtype()))),
                     g.get_dtype());
     g = g.vals();
     EXPECT_EQ(2, g.at(0).get_shape()[0]);
@@ -74,8 +72,7 @@ TEST(GroupByDType, MediumDeduceGroups) {
     ndobject g = groupby(data, by);
     EXPECT_EQ(make_groupby_dtype(make_strided_array_dtype(make_dtype<int>()),
                         make_strided_array_dtype(make_convert_dtype(
-                            make_categorical_dtype(arange(20)), make_dtype<int>())),
-                        make_categorical_dtype(arange(20))),
+                            make_categorical_dtype(arange(20)), make_dtype<int>()))),
                     g.get_dtype());
     EXPECT_EQ(g.get_shape()[0], 20);
     int group_0[] =  { 0, 10, 25, 35, 55, 60, 80, 95};
@@ -112,8 +109,7 @@ TEST(GroupByDType, Struct) {
     ndobject g = groupby(a, a.p("gender"));
     EXPECT_EQ(make_groupby_dtype(make_strided_array_dtype(d),
                         make_strided_array_dtype(make_convert_dtype(
-                            make_categorical_dtype(gender_cats), gender_cats.get_udtype())),
-                        make_categorical_dtype(gender_cats)),
+                            make_categorical_dtype(gender_cats), gender_cats.get_udtype()))),
                     g.get_dtype());
     g = g.vals();
     EXPECT_EQ(2, g.at_array(0, NULL).get_shape()[0]);
