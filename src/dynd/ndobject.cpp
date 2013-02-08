@@ -1134,7 +1134,12 @@ ndobject dynd::groupby(const dynd::ndobject& data_values, const dynd::ndobject& 
     result.get_ndo()->m_dtype = gbdt.release();
     result.get_ndo()->m_data_pointer = data_ptr;
     result.get_ndo()->m_data_reference = NULL;
-    result.get_ndo()->m_flags = read_access_flag | immutable_access_flag;
+    result.get_ndo()->m_flags = read_access_flag;
+    // If the inputs are immutable, the result is too
+    if ((data_values.get_access_flags()&immutable_access_flag) != 0 && 
+                    (by_values.get_access_flags()&immutable_access_flag) != 0) {
+        result.get_ndo()->m_flags |= immutable_access_flag;
+    }
     return result;
 }
 

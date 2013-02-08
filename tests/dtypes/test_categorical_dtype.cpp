@@ -286,3 +286,30 @@ TEST(CategoricalDType, CategoriesProperty) {
     dtype cd = make_categorical_dtype(cats_vals);
     EXPECT_TRUE(cats.equals_exact(cd.p("categories")));
 }
+
+TEST(CategoricalDType, AssignFromOther) {
+    int cats_values[] = {3, 6, 100, 1000};
+    dtype cd = make_categorical_dtype(cats_values);
+    int16_t a_values[] = {6, 3, 100, 3, 1000, 100, 6, 1000};
+    ndobject a = ndobject(a_values).cast_udtype(cd);
+    EXPECT_EQ(make_strided_array_dtype(make_convert_dtype(cd, make_dtype<int16_t>())),
+                    a.get_dtype());
+    a = a.vals();
+    EXPECT_EQ(make_strided_array_dtype(cd), a.get_dtype());
+    EXPECT_EQ(6,    a.at(0).as<int>());
+    EXPECT_EQ(3,    a.at(1).as<int>());
+    EXPECT_EQ(100,  a.at(2).as<int>());
+    EXPECT_EQ(3,    a.at(3).as<int>());
+    EXPECT_EQ(1000, a.at(4).as<int>());
+    EXPECT_EQ(100,  a.at(5).as<int>());
+    EXPECT_EQ(6,    a.at(6).as<int>());
+    EXPECT_EQ(1000, a.at(7).as<int>());
+
+    // Assignments from a few different input dtypes
+    a.at(3).vals() = "1000";
+    EXPECT_EQ(1000, a.at(3).as<int>());
+    a.at(4).vals() = 6.0;
+    EXPECT_EQ(6, a.at(4).as<int>());
+    a.at(5).vals() = (uint16_t)3;
+    EXPECT_EQ(3, a.at(5).as<int>());
+}

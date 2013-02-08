@@ -11,6 +11,7 @@
 #include <dynd/dtypes/categorical_dtype.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/dtypes/strided_array_dtype.hpp>
+#include <dynd/dtypes/convert_dtype.hpp>
 #include <dynd/gfunc/make_callable.hpp>
 
 using namespace dynd;
@@ -409,7 +410,7 @@ size_t categorical_dtype::make_assignment_kernel(
             throw std::runtime_error("assignment between different categorical dtypes isn't supported yet");
         }
         // assign from the same category value dtype
-        else if (src_dt.value_dtype() == m_category_dtype) {
+        else if (src_dt == m_category_dtype) {
             out->ensure_capacity_leaf(offset_out + sizeof(category_to_categorical_kernel_extra));
             category_to_categorical_kernel_extra *e = out->get_at<category_to_categorical_kernel_extra>(offset_out);
             switch (m_category_int_dtype.get_type_id()) {
@@ -430,16 +431,20 @@ size_t categorical_dtype::make_assignment_kernel(
             e->dst_cat_dt = static_cast<const categorical_dtype *>(dtype(dst_dt).release());
             e->src_metadata = src_metadata;
             return offset_out + sizeof(category_to_categorical_kernel_extra);
-        } else if (!src_dt.is_builtin()) {
-            // Let the src dtype create the kernel
+        } else if (src_dt.value_dtype() != m_category_dtype &&
+                        src_dt.value_dtype().get_type_id() != categorical_type_id) {
+            // Make a convert dtype to the category dtype, and have it do the chaining
+            dtype src_cvt_dt = make_convert_dtype(m_category_dtype, src_dt);
+            return src_cvt_dt.extended()->make_assignment_kernel(out, offset_out,
+                            dst_dt, dst_metadata,
+                            src_cvt_dt, src_metadata,
+                            errmode, ectx);
+        } else {
+            // Let the src_dt handle it
             return src_dt.extended()->make_assignment_kernel(out, offset_out,
                             dst_dt, dst_metadata,
                             src_dt, src_metadata,
                             errmode, ectx);
-        } else {
-            stringstream ss;
-            ss << "Cannot assign from " << src_dt << " to " << dst_dt;
-            throw runtime_error(ss.str());
         }
     }
     else {
