@@ -19,10 +19,9 @@ using namespace std;
 using namespace dynd;
 
 TEST(CategoricalDType, Create) {
+    const char *a_vals[] = {"foo", "bar", "baz"};
     ndobject a = make_strided_ndobject(3, make_fixedstring_dtype(string_encoding_ascii, 3));
-    a.at(0).vals() = "foo";
-    a.at(1).vals() = "bar";
-    a.at(2).vals() = "baz";
+    a.vals() = a_vals;
 
     dtype d;
     d = make_categorical_dtype(a);
@@ -56,10 +55,9 @@ TEST(CategoricalDType, Create) {
 }
 
 TEST(CategoricalDType, Convert) {
+    const char *a_vals[] = {"foo", "bar", "baz"};
     ndobject a = make_strided_ndobject(3, make_fixedstring_dtype(string_encoding_ascii, 3));
-    a.at(0).vals() = "foo";
-    a.at(1).vals() = "bar";
-    a.at(2).vals() = "baz";
+    a.vals() = a_vals;
 
     dtype cd = make_categorical_dtype(a);
     dtype sd = make_string_dtype(string_encoding_utf_8);
@@ -74,15 +72,13 @@ TEST(CategoricalDType, Convert) {
 }
 
 TEST(CategoricalDType, Compare) {
-
+    const char *a_vals[] = {"foo", "bar", "baz"};
     ndobject a = make_strided_ndobject(3, make_fixedstring_dtype(string_encoding_ascii, 3));
-    a.at(0).vals() = "foo";
-    a.at(1).vals() = "bar";
-    a.at(2).vals() = "baz";
+    a.vals() = a_vals;
 
+    const char *b_vals[] = {"foo", "bar"};
     ndobject b = make_strided_ndobject(2, make_fixedstring_dtype(string_encoding_ascii, 3));
-    b.at(0).vals() = "foo";
-    b.at(1).vals() = "bar";
+    b.vals() = b_vals;
 
     dtype da = make_categorical_dtype(a);
     dtype da2 = make_categorical_dtype(a);
@@ -102,32 +98,26 @@ TEST(CategoricalDType, Compare) {
 }
 
 TEST(CategoricalDType, Unique) {
-
+    const char *a_vals[] = {"foo", "bar", "foo"};
     ndobject a = make_strided_ndobject(3, make_fixedstring_dtype(string_encoding_ascii, 3));
-    a.at(0).vals() = "foo";
-    a.at(1).vals() = "bar";
-    a.at(2).vals() = "foo";
+    a.vals() = a_vals;
 
     EXPECT_THROW(make_categorical_dtype(a), std::runtime_error);
 
-    ndobject i = make_strided_ndobject(3, make_dtype<int32_t>());
-    i.at(0).vals() = 0;
-    i.at(1).vals() = 10;
-    i.at(2).vals() = 10;
+    int i_vals[] = {0, 10, 10};
+    ndobject i = i_vals;
 
     EXPECT_THROW(make_categorical_dtype(i), std::runtime_error);
-
 }
 
 TEST(CategoricalDType, FactorFixedString) {
+    const char *string_cats_vals[] = {"bar", "foo"};
     ndobject string_cats = make_strided_ndobject(2, make_fixedstring_dtype(string_encoding_ascii, 3));
-    string_cats.at(0).vals() = "bar";
-    string_cats.at(1).vals() = "foo";
+    string_cats.vals() = string_cats_vals;
 
+    const char *a_vals[] = {"foo", "bar", "foo"};
     ndobject a = make_strided_ndobject(3, make_fixedstring_dtype(string_encoding_ascii, 3));
-    a.at(0).vals() = "foo";
-    a.at(1).vals() = "bar";
-    a.at(2).vals() = "foo";
+    a.vals() = a_vals;
 
     dtype da = factor_categorical_dtype(a);
     EXPECT_EQ(make_categorical_dtype(string_cats), da);
@@ -151,24 +141,22 @@ TEST(CategoricalDType, FactorStringLonger) {
 }
 
 TEST(CategoricalDType, FactorInt) {
+    int int_cats_vals[] = {0, 10};
     ndobject int_cats = make_strided_ndobject(2, make_dtype<int32_t>());
-    int_cats.at(0).vals() = 0;
-    int_cats.at(1).vals() = 10;
+    int_cats.vals() = int_cats_vals;
 
+    int i_vals[] = {10, 10, 0};
     ndobject i = make_strided_ndobject(3, make_dtype<int32_t>());
-    i.at(0).vals() = 10;
-    i.at(1).vals() = 10;
-    i.at(2).vals() = 0;
+    i.vals() = i_vals;
 
     dtype di = factor_categorical_dtype(i);
     EXPECT_EQ(make_categorical_dtype(int_cats), di);
 }
 
 TEST(CategoricalDType, Values) {
+    const char *a_vals[] = {"foo", "bar", "baz"};
     ndobject a = make_strided_ndobject(3, make_fixedstring_dtype(string_encoding_ascii, 3));
-    a.at(0).vals() = "foo";
-    a.at(1).vals() = "bar";
-    a.at(2).vals() = "baz";
+    a.vals() = a_vals;
 
     dtype dt = make_categorical_dtype(a);
 
@@ -207,10 +195,9 @@ TEST(CategoricalDType, ValuesLonger) {
 }
 
 TEST(CategoricalDType, AssignFixedString) {
+    const char *cat_vals[] = {"foo", "bar", "baz"};
     ndobject cat = make_strided_ndobject(3, make_fixedstring_dtype(string_encoding_ascii, 3));
-    cat.at(0).vals() = "foo";
-    cat.at(1).vals() = "bar";
-    cat.at(2).vals() = "baz";
+    cat.vals() = cat_vals;
 
     dtype dt = make_categorical_dtype(cat);
 
@@ -239,11 +226,8 @@ TEST(CategoricalDType, AssignFixedString) {
 }
 
 TEST(CategoricalDType, AssignInt) {
-
-    ndobject cat = make_strided_ndobject(3, make_dtype<int32_t>());
-    cat.at(0).vals() = 10;
-    cat.at(1).vals() = 100;
-    cat.at(2).vals() = 1000;
+    int32_t cat_vals[] = {10, 100, 1000};
+    ndobject cat = cat_vals;
 
     dtype dt = make_categorical_dtype(cat);
 
@@ -270,11 +254,9 @@ TEST(CategoricalDType, AssignInt) {
 }
 
 TEST(CategoricalDType, AssignRange) {
-
+    const char *cat_vals[] = {"foo", "bar", "baz"};
     ndobject cat = make_strided_ndobject(3, make_fixedstring_dtype(string_encoding_ascii, 3));
-    cat.at(0).vals() = "foo";
-    cat.at(1).vals() = "bar";
-    cat.at(2).vals() = "baz";
+    cat.vals() = cat_vals;
 
     dtype dt = make_categorical_dtype(cat);
 
