@@ -46,31 +46,33 @@ struct hierarchical_kernel_common_base {
 template<typename FT>
 class hierarchical_kernel {
     // Pointer to the kernel function pointers + data
-    hierarchical_kernel_common_base *m_data;
+    intptr_t *m_data;
     size_t m_capacity;
     // When the amount of data is small, this static data is used,
     // otherwise dynamic memory is allocated when it gets too big
     intptr_t m_static_data[16];
 
     inline bool using_static_data() const {
-        return m_data == reinterpret_cast<const hierarchical_kernel_common_base *>(&m_static_data[0]);
+        return m_data == &m_static_data[0];
     }
 
     inline void destroy() {
         if (m_data != NULL) {
+            hierarchical_kernel_common_base *data;
+            data = reinterpret_cast<hierarchical_kernel_common_base *>(m_data);
             // Destroy whatever was created
-            if (m_data->destructor != NULL) {
-                m_data->destructor(m_data);
+            if (data->destructor != NULL) {
+                data->destructor(data);
             }
              if (!using_static_data()) {
                 // Free the memory
-                free(m_data);
+                free(data);
              }
         }
     }
 public:
     hierarchical_kernel() {
-        m_data = reinterpret_cast<hierarchical_kernel_common_base *>(&m_static_data[0]);
+        m_data = &m_static_data[0];
         m_capacity = sizeof(m_static_data);
         memset(m_static_data, 0, sizeof(m_static_data));
     }
@@ -81,7 +83,7 @@ public:
 
     void reset() {
         destroy();
-        m_data = reinterpret_cast<hierarchical_kernel_common_base *>(&m_static_data[0]);
+        m_data = &m_static_data[0];
         m_capacity = sizeof(m_static_data);
         memset(m_static_data, 0, sizeof(m_static_data));
     }
@@ -115,27 +117,20 @@ public:
             if (size < grown_capacity) {
                 size = grown_capacity;
             }
-            hierarchical_kernel_common_base *new_data;
+            intptr_t *new_data;
             if (using_static_data()) {
                 // If we were previously using the static data, do a malloc
-                new_data = reinterpret_cast<hierarchical_kernel_common_base *>(malloc(size));
+                new_data = reinterpret_cast<intptr_t *>(malloc(size));
                 // If the allocation succeeded, copy the old data as the realloc would
                 if (new_data != NULL) {
                     memcpy(new_data, m_data, m_capacity);
                 }
             } else {
                 // Otherwise do a realloc
-                new_data = reinterpret_cast<hierarchical_kernel_common_base *>(realloc(m_data, size));
+                new_data = reinterpret_cast<intptr_t *>(realloc(m_data, size));
             }
             if (new_data == NULL) {
-                // Destroy whatever was created
-                if (m_data->destructor != NULL) {
-                    m_data->destructor(m_data);
-                }
-                // Free the memory
-                if (!using_static_data()) {
-                    free(m_data);
-                }
+                destroy();
                 m_data = NULL;
                 throw std::bad_alloc();
             }
@@ -157,11 +152,11 @@ public:
     }
 
     hierarchical_kernel_common_base *get() const {
-        return m_data;
+        return reinterpret_cast<hierarchical_kernel_common_base *>(m_data);
     }
 
     FT get_function() const {
-        return m_data->get_function<FT>();
+        return reinterpret_cast<hierarchical_kernel_common_base *>(m_data)->get_function<FT>();
     }
 };
 
