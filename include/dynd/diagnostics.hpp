@@ -6,6 +6,8 @@
 #ifndef _DYND__DIAGNOSTICS_HPP_
 #define _DYND__DIAGNOSTICS_HPP_
 
+#include <string>
+
 #include <dynd/config.hpp>
 
 #define DYND_XSTRINGIFY(s) #s
