@@ -378,7 +378,7 @@ public:
     /**
      * General irange-based indexing operation.
      */
-    ndobject at_array(int nindices, const irange *indices) const;
+    ndobject at_array(size_t nindices, const irange *indices) const;
 
     /**
      * The 'at' function is used for indexing. Overloading operator[] isn't

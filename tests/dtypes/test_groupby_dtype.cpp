@@ -106,7 +106,18 @@ TEST(GroupByDType, Struct) {
     a.p("gender").vals() = gender_vals;
 
     // Group based on gender
-    ndobject g = groupby(a, a.p("gender"));
+    a.debug_print(cout);
+    ndobject x = a.p("gender");
+    a.debug_print(cout);
+    ndobject g = groupby(a, x);
+    a.debug_print(cout);
+    x = 0;
+    a.debug_print(cout);
+    g.debug_print(cout);
+    g = 0;
+    a.debug_print(cout);
+    return;
+
     EXPECT_EQ(make_groupby_dtype(make_strided_array_dtype(d),
                         make_strided_array_dtype(make_convert_dtype(
                             make_categorical_dtype(gender_cats), gender_cats.get_udtype()))),

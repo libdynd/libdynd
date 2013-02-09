@@ -11,12 +11,12 @@
 using namespace std;
 using namespace dynd;
 
-bool dynd::shape_can_broadcast(int dst_ndim, const intptr_t *dst_shape,
-                            int src_ndim, const intptr_t *src_shape)
+bool dynd::shape_can_broadcast(size_t dst_ndim, const intptr_t *dst_shape,
+                            size_t src_ndim, const intptr_t *src_shape)
 {
     if (dst_ndim >= src_ndim) {
         dst_shape += (dst_ndim - src_ndim);
-        for (int i = 0; i < src_ndim; ++i) {
+        for (size_t i = 0; i < src_ndim; ++i) {
             if (src_shape[i] != 1 && src_shape[i] != dst_shape[i]) {
                 return false;
             }
@@ -28,8 +28,8 @@ bool dynd::shape_can_broadcast(int dst_ndim, const intptr_t *dst_shape,
     }
 }
 
-void dynd::broadcast_to_shape(int dst_ndim, const intptr_t *dst_shape,
-                int src_ndim, const intptr_t *src_shape, const intptr_t *src_strides,
+void dynd::broadcast_to_shape(size_t dst_ndim, const intptr_t *dst_shape,
+                size_t src_ndim, const intptr_t *src_shape, const intptr_t *src_strides,
                 intptr_t *out_strides)
 {
     //cout << "broadcast_to_shape(" << dst_ndim << ", (";
@@ -44,12 +44,12 @@ void dynd::broadcast_to_shape(int dst_ndim, const intptr_t *dst_shape,
         throw broadcast_error(dst_ndim, dst_shape, src_ndim, src_shape);
     }
 
-    int dimdelta = dst_ndim - src_ndim;
-    for (int i = 0; i < dimdelta; ++i) {
+    size_t dimdelta = dst_ndim - src_ndim;
+    for (size_t i = 0; i < dimdelta; ++i) {
         out_strides[i] = 0;
     }
-    for (int i = dimdelta; i < dst_ndim; ++i) {
-        int src_i = i - dimdelta;
+    for (size_t i = dimdelta; i < dst_ndim; ++i) {
+        size_t src_i = i - dimdelta;
         if (src_shape[src_i] == 1) {
             out_strides[i] = 0;
         } else if (src_shape[src_i] == dst_shape[i]) {
@@ -89,7 +89,7 @@ void dynd::broadcast_input_shapes(size_t ninputs, const ndobject* inputs,
     for (size_t i = 0; i < ninputs; ++i) {
         size_t input_undim = inputs[i].get_undim();
         inputs[i].get_shape(tmpshape.get());
-        int dimdelta = undim - input_undim;
+        size_t dimdelta = undim - input_undim;
         for (size_t k = dimdelta; k < undim; ++k) {
             intptr_t size = tmpshape[k - dimdelta];
             intptr_t itershape_size = shape[k];
@@ -121,7 +121,7 @@ void dynd::broadcast_input_shapes(size_t ninputs, const ndobject* inputs,
         int *axis_perm = out_axis_perm.get();
         // TODO: keeporder behavior, currently always C order
         for (size_t i = 0; i < undim; ++i) {
-            axis_perm[i] = undim - i - 1;
+            axis_perm[i] = int(undim - i - 1);
         }
     } else if (undim == 1) {
         out_axis_perm[0] = 0;
@@ -160,7 +160,7 @@ namespace {
 
 } // anonymous namespace
 
-void dynd::strides_to_axis_perm(int ndim, const intptr_t *strides, int *out_axis_perm)
+void dynd::strides_to_axis_perm(size_t ndim, const intptr_t *strides, int *out_axis_perm)
 {
     switch (ndim) {
         case 0: {
@@ -222,7 +222,7 @@ void dynd::strides_to_axis_perm(int ndim, const intptr_t *strides, int *out_axis
         default: {
             // Initialize to a reversal perm (i.e. so C-order is a no-op)
             for (int i = 0; i < ndim; ++i) {
-                out_axis_perm[i] = ndim - i - 1;
+                out_axis_perm[i] = int(ndim - i - 1);
             }
             // Sort based on the absolute value of the strides
             std::sort(out_axis_perm, out_axis_perm + ndim, abs_intptr_compare(strides));
@@ -261,7 +261,7 @@ static inline void compare_strides(int i, int j, int noperands, const intptr_t *
     }
 }
 
-void dynd::multistrides_to_axis_perm(int ndim, int noperands, const intptr_t **operstrides, int *out_axis_perm)
+void dynd::multistrides_to_axis_perm(size_t ndim, int noperands, const intptr_t **operstrides, int *out_axis_perm)
 {
     switch (ndim) {
         case 0: {
@@ -289,17 +289,17 @@ void dynd::multistrides_to_axis_perm(int ndim, int noperands, const intptr_t **o
         }
         default: {
             // Initialize to a reversal perm (i.e. so C-order is a no-op)
-            for (int i = 0; i < ndim; ++i) {
-                out_axis_perm[i] = ndim - i - 1;
+            for (size_t i = 0; i < ndim; ++i) {
+                out_axis_perm[i] = int(ndim - i - 1);
             }
             // Here we do a custom stable insertion sort, which avoids a swap when a comparison
             // is ambiguous
-            for (int i0 = 1; i0 < ndim; ++i0) {
+            for (size_t i0 = 1; i0 < ndim; ++i0) {
                 // 'ipos' is the position where axis_perm[i0] will get inserted
-                int ipos = i0;
+                ptrdiff_t ipos = i0;
                 int perm_i0 = out_axis_perm[i0];
 
-                for (int i1 = i0 - 1; i1 >= 0; --i1) {
+                for (ptrdiff_t i1 = (ptrdiff_t)i0 - 1; i1 >= 0; --i1) {
                     bool ambiguous = true, lessthan = false;
                     int perm_i1 = out_axis_perm[i1];
 
@@ -309,7 +309,7 @@ void dynd::multistrides_to_axis_perm(int ndim, int noperands, const intptr_t **o
                     // stop looking for an insertion point
                     if (!ambiguous) {
                         if (!lessthan) {
-                            ipos = i1;
+                            ipos = int(i1);
                         } else {
                             break;
                         }
@@ -318,7 +318,7 @@ void dynd::multistrides_to_axis_perm(int ndim, int noperands, const intptr_t **o
 
                 // Insert axis_perm[i0] into axis_perm[ipos]
                 if (ipos != i0) {
-                    for (int i = i0; i > ipos; --i) {
+                    for (ptrdiff_t i = (ptrdiff_t)i0; i > ipos; --i) {
                         out_axis_perm[i] = out_axis_perm[i - 1];
                     }
                     out_axis_perm[ipos] = perm_i0;
@@ -329,10 +329,10 @@ void dynd::multistrides_to_axis_perm(int ndim, int noperands, const intptr_t **o
     }
 }
 
-void dynd::print_shape(std::ostream& o, int ndim, const intptr_t *shape)
+void dynd::print_shape(std::ostream& o, size_t ndim, const intptr_t *shape)
 {
     o << "(";
-    for (int i = 0; i < ndim; ++i) {
+    for (size_t i = 0; i < ndim; ++i) {
         intptr_t size = shape[i];
         if (size >= 0) {
             o << size;
@@ -346,7 +346,7 @@ void dynd::print_shape(std::ostream& o, int ndim, const intptr_t *shape)
     o << ")";
 }
 
-void dynd::apply_single_linear_index(const irange& irnge, intptr_t dimension_size, int error_i, const dtype* error_dt,
+void dynd::apply_single_linear_index(const irange& irnge, intptr_t dimension_size, size_t error_i, const dtype* error_dt,
         bool& out_remove_dimension, intptr_t& out_start_index, intptr_t& out_index_stride, intptr_t& out_dimension_size)
 {
     intptr_t step = irnge.step();

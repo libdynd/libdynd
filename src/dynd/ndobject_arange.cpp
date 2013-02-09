@@ -23,7 +23,7 @@ namespace {
             //cout << "arange with count " << count << endl;
             char *dst = result.get_readwrite_originptr();
             for (intptr_t i = 0; i < count; ++i, dst += stride) {
-                *reinterpret_cast<T *>(dst) = begin + i * step;
+                *reinterpret_cast<T *>(dst) = static_cast<T>(begin + i * step);
             }
         }
     };

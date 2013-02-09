@@ -117,7 +117,7 @@ void dynd::vm::elwise_program::debug_print(std::ostream& o, const std::string& i
         int arity = vm::opcode_info[opcode].arity;
         // operation
         o << indent << "  " << vm::opcode_info[opcode].name << " ";
-        for (int i = 0, i_end = 12 - strlen(vm::opcode_info[opcode].name); i < i_end; ++i) {
+        for (size_t i = 0, i_end = 12 - strlen(vm::opcode_info[opcode].name); i != i_end; ++i) {
             o << " ";
         }
         // output

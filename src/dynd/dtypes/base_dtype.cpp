@@ -177,8 +177,8 @@ dtype base_dtype::get_canonical_dtype() const
     return dtype(this, true);
 }
 
-dtype base_dtype::apply_linear_index(int nindices, const irange *DYND_UNUSED(indices),
-                int current_i, const dtype& DYND_UNUSED(root_dt), bool DYND_UNUSED(leading_dimension)) const
+dtype base_dtype::apply_linear_index(size_t nindices, const irange *DYND_UNUSED(indices),
+                size_t current_i, const dtype& DYND_UNUSED(root_dt), bool DYND_UNUSED(leading_dimension)) const
 {
     // Default to scalar behavior
     if (nindices == 0) {
@@ -188,10 +188,10 @@ dtype base_dtype::apply_linear_index(int nindices, const irange *DYND_UNUSED(ind
     }
 }
 
-intptr_t base_dtype::apply_linear_index(int nindices, const irange *DYND_UNUSED(indices), const char *metadata,
+intptr_t base_dtype::apply_linear_index(size_t nindices, const irange *DYND_UNUSED(indices), const char *metadata,
                 const dtype& DYND_UNUSED(result_dtype), char *out_metadata,
                 memory_block_data *embedded_reference,
-                int current_i, const dtype& DYND_UNUSED(root_dt),
+                size_t current_i, const dtype& DYND_UNUSED(root_dt),
                 bool DYND_UNUSED(leading_dimension), char **DYND_UNUSED(inout_data),
                 memory_block_data **DYND_UNUSED(inout_dataref)) const
 {
@@ -255,14 +255,14 @@ intptr_t base_dtype::get_representative_stride(const char *DYND_UNUSED(metadata)
     throw std::runtime_error(ss.str());
 }
 
-size_t base_dtype::get_default_data_size(int DYND_UNUSED(ndim), const intptr_t *DYND_UNUSED(shape)) const
+size_t base_dtype::get_default_data_size(size_t DYND_UNUSED(ndim), const intptr_t *DYND_UNUSED(shape)) const
 {
     return get_data_size();
 }
 
 // TODO: Make this a pure virtual function eventually
 void base_dtype::metadata_default_construct(char *DYND_UNUSED(metadata),
-                int DYND_UNUSED(ndim), const intptr_t* DYND_UNUSED(shape)) const
+                size_t DYND_UNUSED(ndim), const intptr_t* DYND_UNUSED(shape)) const
 {
     stringstream ss;
     ss << "TODO: metadata_default_construct for " << dtype(this, true) << " is not implemented";
@@ -302,7 +302,7 @@ void base_dtype::metadata_debug_print(const char *DYND_UNUSED(metadata), std::os
     throw std::runtime_error(ss.str());
 }
 
-size_t base_dtype::get_iterdata_size(int DYND_UNUSED(ndim)) const
+size_t base_dtype::get_iterdata_size(size_t DYND_UNUSED(ndim)) const
 {
     stringstream ss;
     ss << "get_iterdata_size: dynd dtype " << dtype(this, true) << " is not uniformly iterable";
@@ -310,14 +310,14 @@ size_t base_dtype::get_iterdata_size(int DYND_UNUSED(ndim)) const
 }
 
 size_t base_dtype::iterdata_construct(iterdata_common *DYND_UNUSED(iterdata), const char **DYND_UNUSED(inout_metadata),
-                int DYND_UNUSED(ndim), const intptr_t* DYND_UNUSED(shape), dtype& DYND_UNUSED(out_uniform_dtype)) const
+                size_t DYND_UNUSED(ndim), const intptr_t* DYND_UNUSED(shape), dtype& DYND_UNUSED(out_uniform_dtype)) const
 {
     stringstream ss;
     ss << "iterdata_default_construct: dynd dtype " << dtype(this, true) << " is not uniformly iterable";
     throw std::runtime_error(ss.str());
 }
 
-size_t base_dtype::iterdata_destruct(iterdata_common *DYND_UNUSED(iterdata), int DYND_UNUSED(ndim)) const
+size_t base_dtype::iterdata_destruct(iterdata_common *DYND_UNUSED(iterdata), size_t DYND_UNUSED(ndim)) const
 {
     stringstream ss;
     ss << "iterdata_destruct: dynd dtype " << dtype(this, true) << " is not uniformly iterable";

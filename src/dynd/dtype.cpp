@@ -21,14 +21,14 @@
 using namespace std;
 using namespace dynd;
 
-char *dynd::iterdata_broadcasting_terminator_incr(iterdata_common *iterdata, int DYND_UNUSED(level))
+char *dynd::iterdata_broadcasting_terminator_incr(iterdata_common *iterdata, size_t DYND_UNUSED(level))
 {
     // This repeats the same data over and over again, broadcasting additional leftmost dimensions
     iterdata_broadcasting_terminator *id = reinterpret_cast<iterdata_broadcasting_terminator *>(iterdata);
     return id->data;
 }
 
-char *dynd::iterdata_broadcasting_terminator_reset(iterdata_common *iterdata, char *data, int DYND_UNUSED(level))
+char *dynd::iterdata_broadcasting_terminator_reset(iterdata_common *iterdata, char *data, size_t DYND_UNUSED(level))
 {
     iterdata_broadcasting_terminator *id = reinterpret_cast<iterdata_broadcasting_terminator *>(iterdata);
     id->data = data;
@@ -175,8 +175,8 @@ ndobject dtype::p(const std::string& property_name) const
     throw runtime_error(ss.str());
 }
 
-dtype dtype::apply_linear_index(int nindices, const irange *indices,
-                int current_i, const dtype& root_dt, bool leading_dimension) const
+dtype dtype::apply_linear_index(size_t nindices, const irange *indices,
+                size_t current_i, const dtype& root_dt, bool leading_dimension) const
 {
     if (is_builtin()) {
         if (nindices == 0) {

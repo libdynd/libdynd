@@ -268,7 +268,7 @@ categorical_dtype::categorical_dtype(const ndobject& categories, bool presorted)
         m_category_int_dtype = make_dtype<uint32_t>();
     }
     m_members.data_size = m_category_int_dtype.get_data_size();
-    m_members.alignment = m_category_int_dtype.get_alignment();
+    m_members.alignment = (uint8_t)m_category_int_dtype.get_alignment();
 }
 
 void categorical_dtype::print_data(std::ostream& o, const char *metadata, const char *data) const
@@ -306,7 +306,7 @@ void categorical_dtype::print_dtype(std::ostream& o) const
     m_category_dtype.print_data(o, metadata, get_category_data_from_value(0));
     for (size_t i = 1; i != category_count; ++i) {
         o << ", ";
-        m_category_dtype.print_data(o, metadata, get_category_data_from_value(i));
+        m_category_dtype.print_data(o, metadata, get_category_data_from_value((uint32_t)i));
     }
     o << "]>";
 }
@@ -328,7 +328,7 @@ uint32_t categorical_dtype::get_value_from_category(const char *category_metadat
         ss << "' assigning to dtype " << dtype(this, true);
         throw std::runtime_error(ss.str());
     } else {
-        return m_category_index_to_value[i];
+        return (uint32_t)m_category_index_to_value[i];
     }
 }
 
@@ -364,7 +364,7 @@ ndobject categorical_dtype::get_categories() const
                     assign_error_default, &eval::default_eval_context);
     unary_single_operation_t kf = k.get_function();
     if (!iter.empty()) {
-        intptr_t i = 0;
+        uint32_t i = 0;
         do {
             kf(iter.data(), get_category_data_from_value(i), k.get());
             ++i;
@@ -500,7 +500,7 @@ bool categorical_dtype::operator==(const base_dtype& rhs) const
 }
 
 void categorical_dtype::metadata_default_construct(char *DYND_UNUSED(metadata),
-                int DYND_UNUSED(ndim), const intptr_t* DYND_UNUSED(shape)) const
+                size_t DYND_UNUSED(ndim), const intptr_t* DYND_UNUSED(shape)) const
 {
     // Data is stored as uint##, no metadata to process
 }

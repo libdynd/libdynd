@@ -313,7 +313,7 @@ TEST(NDObjectAssign, Overflow) {
 
 
 TEST(NDObjectAssign, ChainedCastingRead) {
-    float v0[5] = {3.5f, 1.3f, -2.4999f, -2.999, 1000.50001f};
+    float v0[5] = {3.5f, 1.3f, -2.4999f, -2.999f, 1000.50001f};
     ndobject a = v0, b;
 
     b = a.cast_scalars<int>(assign_error_overflow);
@@ -389,7 +389,7 @@ TEST(NDObjectAssign, ChainedCastingWrite) {
 }
 
 TEST(NDObjectAssign, ChainedCastingReadWrite) {
-    float v0[3] = {0.5, -1000, -2.2};
+    float v0[3] = {0.5f, -1000.f, -2.2f};
     int16_t v1[3] = {0, 0, 0};
     ndobject a = v0, b = v1;
 

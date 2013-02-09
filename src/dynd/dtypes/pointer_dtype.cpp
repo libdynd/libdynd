@@ -97,8 +97,8 @@ dtype pointer_dtype::get_canonical_dtype() const
     return m_target_dtype;
 }
 
-dtype pointer_dtype::apply_linear_index(int nindices, const irange *indices,
-                int current_i, const dtype& root_dt, bool leading_dimension) const
+dtype pointer_dtype::apply_linear_index(size_t nindices, const irange *indices,
+                size_t current_i, const dtype& root_dt, bool leading_dimension) const
 {
 cout << "PD " << __LINE__ << endl;
     if (nindices == 0) {
@@ -121,10 +121,10 @@ cout << "PD " << __LINE__ << endl;
     }
 }
 
-intptr_t pointer_dtype::apply_linear_index(int nindices, const irange *indices, const char *metadata,
+intptr_t pointer_dtype::apply_linear_index(size_t nindices, const irange *indices, const char *metadata,
                 const dtype& result_dtype, char *out_metadata,
                 memory_block_data *embedded_reference,
-                int current_i, const dtype& root_dt,
+                size_t current_i, const dtype& root_dt,
                 bool leading_dimension, char **inout_data,
                 memory_block_data **inout_dataref) const
 {
@@ -241,7 +241,7 @@ dtype pointer_dtype::with_replaced_storage_dtype(const dtype& /*replacement_dtyp
     throw runtime_error("TODO: implement pointer_dtype::with_replaced_storage_dtype");
 }
 
-void pointer_dtype::metadata_default_construct(char *metadata, int ndim, const intptr_t* shape) const
+void pointer_dtype::metadata_default_construct(char *metadata, size_t ndim, const intptr_t* shape) const
 {
     // Simply allocate a POD memory block
     // TODO: Will need a different kind of memory block if the data isn't POD.

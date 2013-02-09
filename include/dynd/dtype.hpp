@@ -196,8 +196,8 @@ struct iterdata_broadcasting_terminator {
     iterdata_common common;
     char *data;
 };
-char *iterdata_broadcasting_terminator_incr(iterdata_common *iterdata, int level);
-char *iterdata_broadcasting_terminator_reset(iterdata_common *iterdata, char *data, int level);
+char *iterdata_broadcasting_terminator_incr(iterdata_common *iterdata, size_t level);
+char *iterdata_broadcasting_terminator_reset(iterdata_common *iterdata, char *data, size_t level);
 
 // Forward declaration of the ndobject
 class ndobject;
@@ -423,8 +423,8 @@ public:
      * Indexes into the dtype, intended for recursive calls from the extended-dtype version. See
      * the function in base_dtype with the same name for more details.
      */
-    dtype apply_linear_index(int nindices, const irange *indices,
-                int current_i, const dtype& root_dt, bool leading_dimension) const;
+    dtype apply_linear_index(size_t nindices, const irange *indices,
+                size_t current_i, const dtype& root_dt, bool leading_dimension) const;
 
     /**
      * Returns the non-expression dtype that this
@@ -652,7 +652,7 @@ public:
     }
 
     /** The size of the data required for uniform iteration */
-    inline size_t get_iterdata_size(int ndim) const {
+    inline size_t get_iterdata_size(size_t ndim) const {
         if (is_builtin()) {
             return 0;
         } else {
@@ -670,7 +670,7 @@ public:
      * \param out_uniform_dtype  This is populated with the dtype of each iterated element
      */
     inline void iterdata_construct(iterdata_common *iterdata, const char **inout_metadata,
-                    int ndim, const intptr_t* shape, dtype& out_uniform_dtype) const
+                    size_t ndim, const intptr_t* shape, dtype& out_uniform_dtype) const
     {
         if (!is_builtin()) {
             m_extended->iterdata_construct(iterdata, inout_metadata, ndim, shape, out_uniform_dtype);
@@ -678,14 +678,14 @@ public:
     }
 
     /** Destructs any references or other state contained in the iterdata */
-    inline void iterdata_destruct(iterdata_common *iterdata, int ndim) const
+    inline void iterdata_destruct(iterdata_common *iterdata, size_t ndim) const
     {
         if (!is_builtin()) {
             m_extended->iterdata_destruct(iterdata, ndim);
         }
     }
 
-    inline size_t get_broadcasted_iterdata_size(int ndim) const {
+    inline size_t get_broadcasted_iterdata_size(size_t ndim) const {
         if (is_builtin()) {
             return sizeof(iterdata_broadcasting_terminator);
         } else {
@@ -704,7 +704,7 @@ public:
      * \param out_uniform_dtype  This is populated with the dtype of each iterated element
      */
     inline void broadcasted_iterdata_construct(iterdata_common *iterdata, const char **inout_metadata,
-                    int ndim, const intptr_t* shape, dtype& out_uniform_dtype) const
+                    size_t ndim, const intptr_t* shape, dtype& out_uniform_dtype) const
     {
         size_t size;
         if (is_builtin()) {

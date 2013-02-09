@@ -123,9 +123,9 @@ TEST(GFuncCallable, TwoParametersWithTwoDefaults) {
 
 static complex<float> three_parameters(bool x, int a, int b) {
     if (x) {
-        return complex<float>(a, b);
+        return complex<float>((float)a, (float)b);
     } else {
-        return complex<float>(b, a);
+        return complex<float>((float)b, (float)a);
     }
 }
 
@@ -365,7 +365,7 @@ TEST(GFuncCallable, NDObjectReturn) {
     EXPECT_EQ(1000, r.at(2).as<int>());
 }
 
-static int ndobject_param(const ndobject& n) {
+static size_t ndobject_param(const ndobject& n) {
     return n.get_dtype().get_undim();
 }
 
@@ -381,7 +381,7 @@ TEST(GFuncCallable, NDObjectParam) {
     tmp = make_strided_ndobject(2, 3, 1, make_dtype<int>());
     *(void**)a.get_ndo()->m_data_pointer = tmp.get_ndo();
     r = c.call_generic(a);
-    EXPECT_EQ(make_dtype<int>(), r.get_dtype());
+    EXPECT_EQ(make_dtype<size_t>(), r.get_dtype());
     EXPECT_EQ(3, r.as<int>());
 }
 

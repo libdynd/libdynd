@@ -50,14 +50,14 @@ public:
     dtype get_canonical_dtype() const;
 
     // Expression dtypes use the values from their operand dtype.
-    void metadata_default_construct(char *metadata, int ndim, const intptr_t* shape) const;
+    void metadata_default_construct(char *metadata, size_t ndim, const intptr_t* shape) const;
     void metadata_copy_construct(char *dst_metadata, const char *src_metadata, memory_block_data *embedded_reference) const;
     void metadata_destruct(char *metadata) const;
     void metadata_debug_print(const char *metadata, std::ostream& o, const std::string& indent) const;
 
     // Expression dtypes stop the iterdata chain
     // TODO: Maybe it should be more flexible?
-    size_t get_iterdata_size(int ndim) const;
+    size_t get_iterdata_size(size_t ndim) const;
 
     /** Makes a kernel which converts from (operand_dtype().value_dtype()) to (value_dtype()) */
     virtual size_t make_operand_to_value_assignment_kernel(

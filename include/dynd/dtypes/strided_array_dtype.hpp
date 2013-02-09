@@ -31,7 +31,7 @@ public:
 
     virtual ~strided_array_dtype();
 
-    size_t get_default_data_size(int ndim, const intptr_t *shape) const;
+    size_t get_default_data_size(size_t ndim, const intptr_t *shape) const;
 
     const dtype& get_element_dtype() const {
         return m_element_dtype;
@@ -58,12 +58,12 @@ public:
                     dtype& out_dt, const char *&out_origin,
                     intptr_t& out_stride, intptr_t& out_dim_size) const;
 
-    dtype apply_linear_index(int nindices, const irange *indices,
-                int current_i, const dtype& root_dt, bool leading_dimension) const;
-    intptr_t apply_linear_index(int nindices, const irange *indices, const char *metadata,
+    dtype apply_linear_index(size_t nindices, const irange *indices,
+                size_t current_i, const dtype& root_dt, bool leading_dimension) const;
+    intptr_t apply_linear_index(size_t nindices, const irange *indices, const char *metadata,
                     const dtype& result_dtype, char *out_metadata,
                     memory_block_data *embedded_reference,
-                    int current_i, const dtype& root_dt,
+                    size_t current_i, const dtype& root_dt,
                     bool leading_dimension, char **inout_data,
                     memory_block_data **inout_dataref) const;
     dtype at_single(intptr_t i0, const char **inout_metadata, const char **inout_data) const;
@@ -82,16 +82,16 @@ public:
 
     bool operator==(const base_dtype& rhs) const;
 
-    void metadata_default_construct(char *metadata, int ndim, const intptr_t* shape) const;
+    void metadata_default_construct(char *metadata, size_t ndim, const intptr_t* shape) const;
     void metadata_copy_construct(char *dst_metadata, const char *src_metadata, memory_block_data *embedded_reference) const;
     void metadata_reset_buffers(char *metadata) const;
     void metadata_finalize_buffers(char *metadata) const;
     void metadata_destruct(char *metadata) const;
     void metadata_debug_print(const char *metadata, std::ostream& o, const std::string& indent) const;
 
-    size_t get_iterdata_size(int ndim) const;
-    size_t iterdata_construct(iterdata_common *iterdata, const char **inout_metadata, int ndim, const intptr_t* shape, dtype& out_uniform_dtype) const;
-    size_t iterdata_destruct(iterdata_common *iterdata, int ndim) const;
+    size_t get_iterdata_size(size_t ndim) const;
+    size_t iterdata_construct(iterdata_common *iterdata, const char **inout_metadata, size_t ndim, const intptr_t* shape, dtype& out_uniform_dtype) const;
+    size_t iterdata_destruct(iterdata_common *iterdata, size_t ndim) const;
 
     size_t make_assignment_kernel(
                     hierarchical_kernel<unary_single_operation_t> *out,

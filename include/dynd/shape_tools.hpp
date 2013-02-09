@@ -21,14 +21,14 @@ namespace dynd {
  * dimension size must be broadcastable with everything
  * shoved to the right.
  */
-bool shape_can_broadcast(int dst_ndim, const intptr_t *dst_shape,
-                        int src_ndim, const intptr_t *src_shape);
+bool shape_can_broadcast(size_t dst_ndim, const intptr_t *dst_shape,
+                        size_t src_ndim, const intptr_t *src_shape);
 
 inline bool shape_can_broadcast(const std::vector<intptr_t>& dst_shape,
                         const std::vector<intptr_t>& src_shape)
 {
-    return shape_can_broadcast((int)dst_shape.size(), dst_shape.empty() ? NULL : &dst_shape[0],
-                        (int)src_shape.size(), src_shape.empty() ? NULL : &src_shape[0]);
+    return shape_can_broadcast(dst_shape.size(), dst_shape.empty() ? NULL : &dst_shape[0],
+                        src_shape.size(), src_shape.empty() ? NULL : &src_shape[0]);
 }
 
 /**
@@ -42,8 +42,8 @@ inline bool shape_can_broadcast(const std::vector<intptr_t>& dst_shape,
  * \param src_strides The strides of the input which is to be broadcast.
  * \param out_strides The resulting strides after broadcasting (with length 'ndim').
  */
-void broadcast_to_shape(int ndim, const intptr_t *shape,
-                int src_ndim, const intptr_t *src_shape, const intptr_t *src_strides,
+void broadcast_to_shape(size_t ndim, const intptr_t *shape,
+                size_t src_ndim, const intptr_t *src_shape, const intptr_t *src_strides,
                 intptr_t *out_strides);
 
 /**
@@ -88,23 +88,23 @@ void create_broadcast_result(const dtype& result_inner_dt,
  * \param strides  The strides values used for sorting.
  * \param out_axis_perm  A permutation which corresponds to the input strides.
  */
-void strides_to_axis_perm(int ndim, const intptr_t *strides, int *out_axis_perm);
+void strides_to_axis_perm(size_t ndim, const intptr_t *strides, int *out_axis_perm);
 
 /**
  * This function creates a permutation based on the array of operand strides,
  * trying to match the memory ordering of both where possible and defaulting to
  * C-order where not possible.
  */
-void multistrides_to_axis_perm(int ndim, int noperands, const intptr_t **operstrides, int *out_axis_perm);
+void multistrides_to_axis_perm(size_t ndim, int noperands, const intptr_t **operstrides, int *out_axis_perm);
 
 // For some reason casting 'intptr_t **' to 'const intptr_t **' causes
 // a warning in g++ 4.6.1, this overload works around that.
-inline void multistrides_to_axis_perm(int ndim, int noperands, intptr_t **operstrides, int *out_axis_perm) {
+inline void multistrides_to_axis_perm(size_t ndim, int noperands, intptr_t **operstrides, int *out_axis_perm) {
     multistrides_to_axis_perm(ndim, noperands,
                 const_cast<const intptr_t **>(operstrides), out_axis_perm);
 }
 
-void print_shape(std::ostream& o, int ndim, const intptr_t *shape);
+void print_shape(std::ostream& o, size_t ndim, const intptr_t *shape);
 
 inline void print_shape(std::ostream& o, const std::vector<intptr_t>& shape) {
     print_shape(o, (int)shape.size(), shape.empty() ? NULL : &shape[0]);
@@ -123,7 +123,7 @@ inline void print_shape(std::ostream& o, const std::vector<intptr_t>& shape) {
  * \param out_index_stride  The index stride of the resolved indexing.
  * \param out_dimension_size  The size of the resulting dimension from the resolved indexing.
  */
-void apply_single_linear_index(const irange& idx, intptr_t dimension_size, int error_i, const dtype* error_dt,
+void apply_single_linear_index(const irange& idx, intptr_t dimension_size, size_t error_i, const dtype* error_dt,
         bool& out_remove_dimension, intptr_t& out_start_index, intptr_t& out_index_stride, intptr_t& out_dimension_size);
 
 /**

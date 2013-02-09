@@ -60,7 +60,7 @@ memory_block_ptr dynd::make_ndobject_memory_block(size_t metadata_size, size_t e
     return memory_block_ptr(new (result) memory_block_data(1, ndobject_memory_block_type), false);
 }
 
-memory_block_ptr dynd::make_ndobject_memory_block(const dtype& dt, int ndim, const intptr_t *shape)
+memory_block_ptr dynd::make_ndobject_memory_block(const dtype& dt, size_t ndim, const intptr_t *shape)
 {
     size_t metadata_size, data_size;
 

@@ -48,8 +48,8 @@ public:
     /**
      * An exception for when 'src' doesn't broadcast to 'dst'
      */
-    broadcast_error(int dst_ndim, const intptr_t *dst_shape,
-                        int src_ndim, const intptr_t *src_shape);
+    broadcast_error(size_t dst_ndim, const intptr_t *dst_shape,
+                        size_t src_ndim, const intptr_t *src_shape);
 
     /**
      * An exception for when 'src' doesn't broadcast to 'dst'

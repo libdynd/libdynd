@@ -169,13 +169,13 @@ typedef void (*foreach_fn_t)(const dtype &dt, char *data, const char *metadata, 
  * This is the iteration increment function used by iterdata. It increments the
  * iterator at the specified level, resetting all the more inner levels to 0.
  */
-typedef char * (*iterdata_increment_fn_t)(iterdata_common *iterdata, int level);
+typedef char * (*iterdata_increment_fn_t)(iterdata_common *iterdata, size_t level);
 /**
  * This is the reset function which is called when an outer dimension
  * increment resets all the lower dimensions to index 0. It returns
  * the data pointer for the next inner level of iteration.
  */
-typedef char * (*iterdata_reset_fn_t)(iterdata_common *iterdata, char *data, int ndim);
+typedef char * (*iterdata_reset_fn_t)(iterdata_common *iterdata, char *data, size_t ndim);
 
 /**
  * This is a generic function which applies a transformation to a dtype.
@@ -280,7 +280,7 @@ public:
     inline base_dtype_members::flags_type get_flags() const {
         return m_members.flags;
     }
-    virtual size_t get_default_data_size(int ndim, const intptr_t *shape) const;
+    virtual size_t get_default_data_size(size_t ndim, const intptr_t *shape) const;
 
     /**
      * Print the raw data interpreted as a single instance of this dtype.
@@ -377,8 +377,8 @@ public:
      *                           of this is a pointer data throwing away the pointer part, so the result
      *                           doesn't contain that indirection.
      */
-    virtual dtype apply_linear_index(int nindices, const irange *indices,
-                int current_i, const dtype& root_dt, bool leading_dimension) const;
+    virtual dtype apply_linear_index(size_t nindices, const irange *indices,
+                size_t current_i, const dtype& root_dt, bool leading_dimension) const;
 
     /**
      * Indexes into an ndobject using the provided linear index, and a dtype and freshly allocated output
@@ -416,10 +416,10 @@ public:
      *
      * @return  An offset to apply to the data pointer(s).
      */
-    virtual intptr_t apply_linear_index(int nindices, const irange *indices, const char *metadata,
+    virtual intptr_t apply_linear_index(size_t nindices, const irange *indices, const char *metadata,
                     const dtype& result_dtype, char *out_metadata,
                     memory_block_data *embedded_reference,
-                    int current_i, const dtype& root_dt,
+                    size_t current_i, const dtype& root_dt,
                     bool leading_dimension, char **inout_data,
                     memory_block_data **inout_dataref) const;
 
@@ -524,7 +524,7 @@ public:
      * Constructs the ndobject metadata for this dtype, prepared for writing.
      * The element size of the result must match that from get_default_data_size().
      */
-    virtual void metadata_default_construct(char *metadata, int ndim, const intptr_t* shape) const;
+    virtual void metadata_default_construct(char *metadata, size_t ndim, const intptr_t* shape) const;
     /**
      * Constructs the ndobject metadata for this dtype, copying everything exactly from
      * input metadata for the same dtype.
@@ -555,13 +555,13 @@ public:
     virtual void metadata_debug_print(const char *metadata, std::ostream& o, const std::string& indent) const;
 
     /** The size of the data required for uniform iteration */
-    virtual size_t get_iterdata_size(int ndim) const;
+    virtual size_t get_iterdata_size(size_t ndim) const;
     /**
      * Constructs the iterdata for processing iteration at this level of the datashape
      */
-    virtual size_t iterdata_construct(iterdata_common *iterdata, const char **inout_metadata, int ndim, const intptr_t* shape, dtype& out_uniform_dtype) const;
+    virtual size_t iterdata_construct(iterdata_common *iterdata, const char **inout_metadata, size_t ndim, const intptr_t* shape, dtype& out_uniform_dtype) const;
     /** Destructs any references or other state contained in the iterdata */
-    virtual size_t iterdata_destruct(iterdata_common *iterdata, int ndim) const;
+    virtual size_t iterdata_destruct(iterdata_common *iterdata, size_t ndim) const;
 
     /**
      * Creates an assignment kernel for one data value from the

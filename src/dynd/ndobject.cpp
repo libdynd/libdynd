@@ -99,7 +99,7 @@ ndobject dynd::make_strided_ndobject(const dtype& uniform_dtype, size_t ndim, co
             uniform_dtype.extended()->metadata_default_construct(reinterpret_cast<char *>(meta + ndim), 0, NULL);
         }
         if (axis_perm == NULL) {
-            for (int i = ndim - 1; i >= 0; --i) {
+            for (ptrdiff_t i = (ptrdiff_t)ndim - 1; i >= 0; --i) {
                 intptr_t dim_size = shape[i];
                 meta[i].stride = dim_size > 1 ? stride : 0;
                 meta[i].size = dim_size;
@@ -447,7 +447,7 @@ ndobject ndobject::storage() const
     }
 }
 
-ndobject ndobject::at_array(int nindices, const irange *indices) const
+ndobject ndobject::at_array(size_t nindices, const irange *indices) const
 {
     if (is_scalar()) {
         if (nindices != 0) {
@@ -1112,6 +1112,7 @@ ndobject dynd::groupby(const dynd::ndobject& data_values, const dynd::ndobject& 
                     ? data_values.get_ndo()->m_data_reference
                     : &data_values.get_ndo()->m_memblockdata;
     memory_block_incref(pmeta->blockref);
+cout << "incref on " << (void *)pmeta->blockref << ", count is " << pmeta->blockref->m_use_count << endl;
     data_values.get_dtype().extended()->metadata_copy_construct(reinterpret_cast<char *>(pmeta + 1),
                     data_values.get_ndo_meta(), &data_values.get_ndo()->m_memblockdata);
 
@@ -1122,6 +1123,7 @@ ndobject dynd::groupby(const dynd::ndobject& data_values, const dynd::ndobject& 
                     ? by_values_as_groups.get_ndo()->m_data_reference
                     : &by_values_as_groups.get_ndo()->m_memblockdata;
     memory_block_incref(pmeta->blockref);
+cout << "incref on " << (void *)pmeta->blockref << ", count is " << pmeta->blockref->m_use_count << endl;
     data_values.get_dtype().extended()->metadata_copy_construct(reinterpret_cast<char *>(pmeta + 1),
                     by_values_as_groups.get_ndo_meta(), &by_values_as_groups.get_ndo()->m_memblockdata);
 

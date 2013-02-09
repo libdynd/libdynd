@@ -118,8 +118,8 @@ void var_array_dtype::process_strided(const char *metadata, const char *data,
     out_dim_size = d->size;
 }
 
-dtype var_array_dtype::apply_linear_index(int nindices, const irange *indices,
-                int current_i, const dtype& root_dt, bool leading_dimension) const
+dtype var_array_dtype::apply_linear_index(size_t nindices, const irange *indices,
+                size_t current_i, const dtype& root_dt, bool leading_dimension) const
 {
     if (nindices == 0) {
         if (leading_dimension) {
@@ -186,10 +186,10 @@ dtype var_array_dtype::apply_linear_index(int nindices, const irange *indices,
     }
 }
 
-intptr_t var_array_dtype::apply_linear_index(int nindices, const irange *indices, const char *metadata,
+intptr_t var_array_dtype::apply_linear_index(size_t nindices, const irange *indices, const char *metadata,
                 const dtype& result_dtype, char *out_metadata,
                 memory_block_data *embedded_reference,
-                int current_i, const dtype& root_dt,
+                size_t current_i, const dtype& root_dt,
                 bool leading_dimension, char **inout_data,
                 memory_block_data **inout_dataref) const
 {
@@ -433,7 +433,7 @@ bool var_array_dtype::operator==(const base_dtype& rhs) const
     }
 }
 
-void var_array_dtype::metadata_default_construct(char *metadata, int ndim, const intptr_t* shape) const
+void var_array_dtype::metadata_default_construct(char *metadata, size_t ndim, const intptr_t* shape) const
 {
     size_t element_size = m_element_dtype.is_builtin() ? m_element_dtype.get_data_size()
                                                      : m_element_dtype.extended()->get_default_data_size(ndim-1, shape+1);
@@ -448,7 +448,7 @@ void var_array_dtype::metadata_default_construct(char *metadata, int ndim, const
         md->blockref = make_pod_memory_block().release();
     }
     if (!m_element_dtype.is_builtin()) {
-        m_element_dtype.extended()->metadata_default_construct(metadata + sizeof(var_array_dtype_metadata), ndim-1, shape+1);
+        m_element_dtype.extended()->metadata_default_construct(metadata + sizeof(var_array_dtype_metadata), ndim ? (ndim-1) : 0, shape+1);
     }
 }
 
@@ -512,17 +512,17 @@ void var_array_dtype::metadata_debug_print(const char *metadata, std::ostream& o
     }
 }
 
-size_t var_array_dtype::get_iterdata_size(int DYND_UNUSED(ndim)) const
+size_t var_array_dtype::get_iterdata_size(size_t DYND_UNUSED(ndim)) const
 {
     throw runtime_error("TODO: implement var_array_dtype::get_iterdata_size");
 }
 
-size_t var_array_dtype::iterdata_construct(iterdata_common *DYND_UNUSED(iterdata), const char **DYND_UNUSED(inout_metadata), int DYND_UNUSED(ndim), const intptr_t* DYND_UNUSED(shape), dtype& DYND_UNUSED(out_uniform_dtype)) const
+size_t var_array_dtype::iterdata_construct(iterdata_common *DYND_UNUSED(iterdata), const char **DYND_UNUSED(inout_metadata), size_t DYND_UNUSED(ndim), const intptr_t* DYND_UNUSED(shape), dtype& DYND_UNUSED(out_uniform_dtype)) const
 {
     throw runtime_error("TODO: implement var_array_dtype::iterdata_construct");
 }
 
-size_t var_array_dtype::iterdata_destruct(iterdata_common *DYND_UNUSED(iterdata), int DYND_UNUSED(ndim)) const
+size_t var_array_dtype::iterdata_destruct(iterdata_common *DYND_UNUSED(iterdata), size_t DYND_UNUSED(ndim)) const
 {
     throw runtime_error("TODO: implement var_array_dtype::iterdata_destruct");
 }

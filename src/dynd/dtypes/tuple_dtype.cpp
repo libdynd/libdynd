@@ -25,10 +25,10 @@ dynd::tuple_dtype::tuple_dtype(const std::vector<dtype>& fields)
         size_t field_alignment = fields[i].get_alignment();
         // Accumulate the biggest field alignment as the dtype alignment
         if (field_alignment > m_members.alignment) {
-            m_members.alignment = field_alignment;
+            m_members.alignment = (uint8_t)field_alignment;
         }
         // Add padding bytes as necessary
-        offset = (offset + field_alignment - 1) & (-field_alignment);
+        offset = inc_to_alignment(offset, field_alignment);
         // Save the offset
         m_offsets[i] = offset;
         offset += fields[i].get_data_size();
@@ -108,14 +108,14 @@ bool dynd::tuple_dtype::compute_is_standard_layout() const
             standard_alignment = field_alignment;
         }
         // Add padding bytes as necessary
-        standard_offset = (standard_offset + field_alignment - 1) & (-field_alignment);
+        standard_offset = inc_to_alignment(standard_offset, field_alignment);
         if (m_offsets[i] != standard_offset) {
             return false;
         }
         standard_offset += m_fields[i].get_data_size();
     }
     // Pad to get the standard element size
-    size_t standard_element_size = (standard_offset + standard_alignment - 1) & (-standard_alignment);
+    size_t standard_element_size = inc_to_alignment(standard_offset, standard_alignment);
 
     return get_data_size() == standard_element_size && get_alignment() == standard_alignment;
 }

@@ -31,7 +31,7 @@ public:
 
     virtual ~struct_dtype();
 
-    size_t get_default_data_size(int ndim, const intptr_t *shape) const;
+    size_t get_default_data_size(size_t ndim, const intptr_t *shape) const;
 
     size_t get_field_count() const {
         return m_field_types.size();
@@ -79,12 +79,12 @@ public:
                     dtype& out_transformed_dtype, bool& out_was_transformed) const;
     dtype get_canonical_dtype() const;
 
-    dtype apply_linear_index(int nindices, const irange *indices,
-                int current_i, const dtype& root_dt, bool leading_dimension) const;
-    intptr_t apply_linear_index(int nindices, const irange *indices, const char *metadata,
+    dtype apply_linear_index(size_t nindices, const irange *indices,
+                size_t current_i, const dtype& root_dt, bool leading_dimension) const;
+    intptr_t apply_linear_index(size_t nindices, const irange *indices, const char *metadata,
                     const dtype& result_dtype, char *out_metadata,
                     memory_block_data *embedded_reference,
-                    int current_i, const dtype& root_dt,
+                    size_t current_i, const dtype& root_dt,
                     bool leading_dimension, char **inout_data,
                     memory_block_data **inout_dataref) const;
 
@@ -98,7 +98,7 @@ public:
 
     bool operator==(const base_dtype& rhs) const;
 
-    void metadata_default_construct(char *metadata, int ndim, const intptr_t* shape) const;
+    void metadata_default_construct(char *metadata, size_t ndim, const intptr_t* shape) const;
     void metadata_copy_construct(char *dst_metadata, const char *src_metadata, memory_block_data *embedded_reference) const;
     void metadata_reset_buffers(char *metadata) const;
     void metadata_finalize_buffers(char *metadata) const;

@@ -649,14 +649,14 @@ static void get_error_line_column(const char *begin, const char *end, const char
         out_line_prev.swap(out_line_cur);
         // If no \n was found
         if (line_end == NULL) {
-            out_column = position - begin + 1;
+            out_column = int(position - begin + 1);
             out_line_cur = string(begin, end);
             return;
         } else {
             out_line_cur = string(begin, line_end);
             ++line_end;
             if (position < line_end) {
-                out_column = position - begin + 1;
+                out_column = int(position - begin + 1);
                 return;
             }
         }

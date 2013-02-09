@@ -30,7 +30,7 @@ public:
 
     // Bytes dtypes stop the iterdata chain
     // TODO: Maybe it should be more flexible?
-    size_t get_iterdata_size(int ndim) const;
+    size_t get_iterdata_size(size_t ndim) const;
 };
 
 

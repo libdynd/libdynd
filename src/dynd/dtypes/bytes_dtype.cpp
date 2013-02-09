@@ -152,7 +152,7 @@ bool bytes_dtype::operator==(const base_dtype& rhs) const
     }
 }
 
-void bytes_dtype::metadata_default_construct(char *metadata, int DYND_UNUSED(ndim), const intptr_t* DYND_UNUSED(shape)) const
+void bytes_dtype::metadata_default_construct(char *metadata, size_t DYND_UNUSED(ndim), const intptr_t* DYND_UNUSED(shape)) const
 {
     // Simply allocate a POD memory block
     bytes_dtype_metadata *md = reinterpret_cast<bytes_dtype_metadata *>(metadata);

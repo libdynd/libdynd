@@ -184,7 +184,7 @@ bool string_dtype::operator==(const base_dtype& rhs) const
     }
 }
 
-void string_dtype::metadata_default_construct(char *metadata, int DYND_UNUSED(ndim), const intptr_t* DYND_UNUSED(shape)) const
+void string_dtype::metadata_default_construct(char *metadata, size_t DYND_UNUSED(ndim), const intptr_t* DYND_UNUSED(shape)) const
 {
     // Simply allocate a POD memory block
     string_dtype_metadata *md = reinterpret_cast<string_dtype_metadata *>(metadata);

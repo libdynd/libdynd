@@ -19,8 +19,8 @@ broadcast_error::broadcast_error(const std::string& m)
 {
 }
 
-inline string broadcast_error_message(int dst_ndim, const intptr_t *dst_shape,
-                    int src_ndim, const intptr_t *src_shape)
+inline string broadcast_error_message(size_t dst_ndim, const intptr_t *dst_shape,
+                    size_t src_ndim, const intptr_t *src_shape)
 {
     stringstream ss;
 
@@ -32,8 +32,8 @@ inline string broadcast_error_message(int dst_ndim, const intptr_t *dst_shape,
     return ss.str();
 }
 
-broadcast_error::broadcast_error(int dst_ndim, const intptr_t *dst_shape,
-                    int src_ndim, const intptr_t *src_shape)
+broadcast_error::broadcast_error(size_t dst_ndim, const intptr_t *dst_shape,
+                    size_t src_ndim, const intptr_t *src_shape)
     : dynd_exception("broadcast error", broadcast_error_message(dst_ndim, dst_shape, src_ndim, src_shape))
 {
 }
@@ -116,7 +116,7 @@ dynd::too_many_indices::too_many_indices(const dtype& dt, size_t nindices, size_
     //cout << "throwing too_many_indices\n";
 }
 
-inline string index_out_of_bounds_message(intptr_t i, int axis, int ndim, const intptr_t *shape)
+inline string index_out_of_bounds_message(intptr_t i, size_t axis, size_t ndim, const intptr_t *shape)
 {
     stringstream ss;
 

@@ -32,7 +32,7 @@ strided_array_dtype::~strided_array_dtype()
 {
 }
 
-size_t strided_array_dtype::get_default_data_size(int ndim, const intptr_t *shape) const
+size_t strided_array_dtype::get_default_data_size(size_t ndim, const intptr_t *shape) const
 {
     if (ndim == 0 || shape[0] < 0) {
         throw std::runtime_error("the strided_array dtype requires a shape be specified for default construction");
@@ -121,8 +121,8 @@ void strided_array_dtype::process_strided(const char *metadata, const char *data
     out_dim_size = md->size;
 }
 
-dtype strided_array_dtype::apply_linear_index(int nindices, const irange *indices,
-                int current_i, const dtype& root_dt, bool leading_dimension) const
+dtype strided_array_dtype::apply_linear_index(size_t nindices, const irange *indices,
+                size_t current_i, const dtype& root_dt, bool leading_dimension) const
 {
     if (nindices == 0) {
         return dtype(this, true);
@@ -149,10 +149,10 @@ dtype strided_array_dtype::apply_linear_index(int nindices, const irange *indice
     }
 }
 
-intptr_t strided_array_dtype::apply_linear_index(int nindices, const irange *indices, const char *metadata,
+intptr_t strided_array_dtype::apply_linear_index(size_t nindices, const irange *indices, const char *metadata,
                 const dtype& result_dtype, char *out_metadata,
                 memory_block_data *embedded_reference,
-                int current_i, const dtype& root_dt,
+                size_t current_i, const dtype& root_dt,
                 bool leading_dimension, char **inout_data,
                 memory_block_data **inout_dataref) const
 {
@@ -313,7 +313,7 @@ bool strided_array_dtype::operator==(const base_dtype& rhs) const
     }
 }
 
-void strided_array_dtype::metadata_default_construct(char *metadata, int ndim, const intptr_t* shape) const
+void strided_array_dtype::metadata_default_construct(char *metadata, size_t ndim, const intptr_t* shape) const
 {
     // Validate that the shape is ok
     if (ndim == 0 || shape[0] < 0) {
@@ -378,7 +378,7 @@ void strided_array_dtype::metadata_debug_print(const char *metadata, std::ostrea
     }
 }
 
-size_t strided_array_dtype::get_iterdata_size(int ndim) const
+size_t strided_array_dtype::get_iterdata_size(size_t ndim) const
 {
     if (ndim == 0) {
         return 0;
@@ -390,7 +390,7 @@ size_t strided_array_dtype::get_iterdata_size(int ndim) const
 }
 
 // Does one iterator increment for this dtype
-static char *iterdata_incr(iterdata_common *iterdata, int level)
+static char *iterdata_incr(iterdata_common *iterdata, size_t level)
 {
     strided_array_dtype_iterdata *id = reinterpret_cast<strided_array_dtype_iterdata *>(iterdata);
     if (level == 0) {
@@ -402,7 +402,7 @@ static char *iterdata_incr(iterdata_common *iterdata, int level)
     }
 }
 
-static char *iterdata_reset(iterdata_common *iterdata, char *data, int ndim)
+static char *iterdata_reset(iterdata_common *iterdata, char *data, size_t ndim)
 {
     strided_array_dtype_iterdata *id = reinterpret_cast<strided_array_dtype_iterdata *>(iterdata);
     if (ndim == 1) {
@@ -414,7 +414,7 @@ static char *iterdata_reset(iterdata_common *iterdata, char *data, int ndim)
     }
 }
 
-size_t strided_array_dtype::iterdata_construct(iterdata_common *iterdata, const char **inout_metadata, int ndim, const intptr_t* shape, dtype& out_uniform_dtype) const
+size_t strided_array_dtype::iterdata_construct(iterdata_common *iterdata, const char **inout_metadata, size_t ndim, const intptr_t* shape, dtype& out_uniform_dtype) const
 {
     const strided_array_dtype_metadata *md = reinterpret_cast<const strided_array_dtype_metadata *>(*inout_metadata);
     *inout_metadata += sizeof(strided_array_dtype_metadata);
@@ -438,7 +438,7 @@ size_t strided_array_dtype::iterdata_construct(iterdata_common *iterdata, const 
     return inner_size + sizeof(strided_array_dtype_iterdata);
 }
 
-size_t strided_array_dtype::iterdata_destruct(iterdata_common *iterdata, int ndim) const
+size_t strided_array_dtype::iterdata_destruct(iterdata_common *iterdata, size_t ndim) const
 {
     size_t inner_size = 0;
     if (ndim > 1) {

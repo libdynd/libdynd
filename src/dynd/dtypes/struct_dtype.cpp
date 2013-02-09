@@ -29,7 +29,7 @@ struct_dtype::struct_dtype(const std::vector<dtype>& field_types, const std::vec
         size_t field_alignment = field_types[i].get_alignment();
         // Accumulate the biggest field alignment as the dtype alignment
         if (field_alignment > m_members.alignment) {
-            m_members.alignment = field_alignment;
+            m_members.alignment = (uint8_t)field_alignment;
         }
         // Accumulate the correct memory management
         // TODO: Handle object, and object+blockref memory management types as well
@@ -62,7 +62,7 @@ intptr_t struct_dtype::get_field_index(const std::string& field_name) const
     }
 }
 
-size_t struct_dtype::get_default_data_size(int ndim, const intptr_t *shape) const
+size_t struct_dtype::get_default_data_size(size_t ndim, const intptr_t *shape) const
 {
     // Default layout is to match the field order - could reorder the elements for more efficient packing
     size_t s = 0;
@@ -153,8 +153,8 @@ dtype struct_dtype::get_canonical_dtype() const
     return dtype(new struct_dtype(fields, m_field_names), false);
 }
 
-dtype struct_dtype::apply_linear_index(int nindices, const irange *indices,
-                int current_i, const dtype& root_dt, bool leading_dimension) const
+dtype struct_dtype::apply_linear_index(size_t nindices, const irange *indices,
+                size_t current_i, const dtype& root_dt, bool leading_dimension) const
 {
     if (nindices == 0) {
         return dtype(this, true);
@@ -187,10 +187,10 @@ dtype struct_dtype::apply_linear_index(int nindices, const irange *indices,
     }
 }
 
-intptr_t struct_dtype::apply_linear_index(int nindices, const irange *indices, const char *metadata,
+intptr_t struct_dtype::apply_linear_index(size_t nindices, const irange *indices, const char *metadata,
                 const dtype& result_dtype, char *out_metadata,
                 memory_block_data *embedded_reference,
-                int current_i, const dtype& root_dt,
+                size_t current_i, const dtype& root_dt,
                 bool leading_dimension, char **inout_data,
                 memory_block_data **inout_dataref) const
 {
@@ -351,7 +351,7 @@ bool struct_dtype::operator==(const base_dtype& rhs) const
     }
 }
 
-void struct_dtype::metadata_default_construct(char *metadata, int ndim, const intptr_t* shape) const
+void struct_dtype::metadata_default_construct(char *metadata, size_t ndim, const intptr_t* shape) const
 {
     // Validate that the shape is ok
     if (ndim > 0) {

@@ -271,7 +271,7 @@ static dtype parse_rhs_expression(const char *&begin, const char *end, map<strin
     if (result.get_type_id() != uninitialized_type_id) {
         // Apply the shape
         if (!shape.empty()) {
-            for (int i = shape.size() - 1; i >= 0; --i) {
+            for (ptrdiff_t i = (ptrdiff_t)shape.size() - 1; i >= 0; --i) {
                 if (shape[i] == -2) {
                     result = make_strided_array_dtype(result);
                 } else if (shape[i] == -1) {
@@ -354,14 +354,14 @@ static void get_error_line_column(const char *begin, const char *end, const char
         out_line_prev.swap(out_line_cur);
         // If no \n was found
         if (line_end == NULL) {
-            out_column = position - begin + 1;
+            out_column = int(position - begin + 1);
             out_line_cur = string(begin, end);
             return;
         } else {
             out_line_cur = string(begin, line_end);
             ++line_end;
             if (position < line_end) {
-                out_column = position - begin + 1;
+                out_column = int(position - begin + 1);
                 return;
             }
         }

@@ -30,7 +30,7 @@ fixedarray_dtype::fixedarray_dtype(const dtype& element_dtype, size_t dimension_
     }
     m_stride = m_dimension_size > 1 ? element_dtype.get_data_size() : 0;
     m_members.data_size = m_dimension_size > 1 ? m_stride * m_dimension_size : m_dimension_size * child_element_size;
-    m_members.alignment = m_element_dtype.get_alignment();
+    m_members.alignment = (uint8_t)m_element_dtype.get_alignment();
     // Propagate the zeroinit flag from the element
     m_members.flags |= (element_dtype.get_flags()&dtype_flag_zeroinit);
 
@@ -63,7 +63,7 @@ fixedarray_dtype::fixedarray_dtype(const dtype& element_dtype, size_t dimension_
         throw runtime_error(ss.str());
     }
     m_members.data_size = stride ? stride * m_dimension_size : dimension_size * child_element_size;
-    m_members.alignment = m_element_dtype.get_alignment();
+    m_members.alignment = (uint8_t)m_element_dtype.get_alignment();
     // Propagate the zeroinit flag from the element
     m_members.flags |= (element_dtype.get_flags()&dtype_flag_zeroinit);
 
@@ -164,8 +164,8 @@ void fixedarray_dtype::process_strided(const char *DYND_UNUSED(metadata), const 
     out_dim_size = m_dimension_size;
 }
 
-dtype fixedarray_dtype::apply_linear_index(int nindices, const irange *indices,
-                int current_i, const dtype& root_dt, bool leading_dimension) const
+dtype fixedarray_dtype::apply_linear_index(size_t nindices, const irange *indices,
+                size_t current_i, const dtype& root_dt, bool leading_dimension) const
 {
     if (nindices == 0) {
         return dtype(this, true);
@@ -196,10 +196,10 @@ dtype fixedarray_dtype::apply_linear_index(int nindices, const irange *indices,
     }
 }
 
-intptr_t fixedarray_dtype::apply_linear_index(int nindices, const irange *indices, const char *metadata,
+intptr_t fixedarray_dtype::apply_linear_index(size_t nindices, const irange *indices, const char *metadata,
                 const dtype& result_dtype, char *out_metadata,
                 memory_block_data *embedded_reference,
-                int current_i, const dtype& root_dt,
+                size_t current_i, const dtype& root_dt,
                 bool leading_dimension, char **inout_data,
                 memory_block_data **inout_dataref) const
 {
@@ -348,7 +348,7 @@ bool fixedarray_dtype::operator==(const base_dtype& rhs) const
     }
 }
 
-void fixedarray_dtype::metadata_default_construct(char *metadata, int ndim, const intptr_t* shape) const
+void fixedarray_dtype::metadata_default_construct(char *metadata, size_t ndim, const intptr_t* shape) const
 {
     // Validate that the shape is ok
     if (ndim > 0) {
@@ -361,7 +361,7 @@ void fixedarray_dtype::metadata_default_construct(char *metadata, int ndim, cons
     }
 
     if (!m_element_dtype.is_builtin()) {
-        m_element_dtype.extended()->metadata_default_construct(metadata, ndim-1, shape+1);
+        m_element_dtype.extended()->metadata_default_construct(metadata, ndim ? (ndim-1) : 0, shape+1);
     }
 }
 
@@ -400,7 +400,7 @@ void fixedarray_dtype::metadata_debug_print(const char *metadata, std::ostream& 
     }
 }
 
-size_t fixedarray_dtype::get_iterdata_size(int ndim) const
+size_t fixedarray_dtype::get_iterdata_size(size_t ndim) const
 {
     if (ndim == 0) {
         return 0;
@@ -412,7 +412,7 @@ size_t fixedarray_dtype::get_iterdata_size(int ndim) const
 }
 
 // Does one iterator increment for this dtype
-static char *iterdata_incr(iterdata_common *iterdata, int level)
+static char *iterdata_incr(iterdata_common *iterdata, size_t level)
 {
     fixedarray_dtype_iterdata *id = reinterpret_cast<fixedarray_dtype_iterdata *>(iterdata);
     if (level == 0) {
@@ -424,7 +424,7 @@ static char *iterdata_incr(iterdata_common *iterdata, int level)
     }
 }
 
-static char *iterdata_reset(iterdata_common *iterdata, char *data, int ndim)
+static char *iterdata_reset(iterdata_common *iterdata, char *data, size_t ndim)
 {
     fixedarray_dtype_iterdata *id = reinterpret_cast<fixedarray_dtype_iterdata *>(iterdata);
     if (ndim == 1) {
@@ -436,7 +436,7 @@ static char *iterdata_reset(iterdata_common *iterdata, char *data, int ndim)
     }
 }
 
-size_t fixedarray_dtype::iterdata_construct(iterdata_common *iterdata, const char **inout_metadata, int ndim, const intptr_t* shape, dtype& out_uniform_dtype) const
+size_t fixedarray_dtype::iterdata_construct(iterdata_common *iterdata, const char **inout_metadata, size_t ndim, const intptr_t* shape, dtype& out_uniform_dtype) const
 {
     size_t inner_size = 0;
     if (ndim > 1) {
@@ -465,7 +465,7 @@ size_t fixedarray_dtype::iterdata_construct(iterdata_common *iterdata, const cha
     return inner_size + sizeof(fixedarray_dtype_iterdata);
 }
 
-size_t fixedarray_dtype::iterdata_destruct(iterdata_common *iterdata, int ndim) const
+size_t fixedarray_dtype::iterdata_destruct(iterdata_common *iterdata, size_t ndim) const
 {
     size_t inner_size = 0;
     if (ndim > 1) {
@@ -569,12 +569,12 @@ void fixedarray_dtype::reorder_default_constructed_strides(char *DYND_UNUSED(dst
     // be reordered. This makes this function a NOP
 }
 
-dtype dynd::make_fixedarray_dtype(const dtype& uniform_dtype, int ndim, const intptr_t *shape, const int *axis_perm)
+dtype dynd::make_fixedarray_dtype(const dtype& uniform_dtype, size_t ndim, const intptr_t *shape, const int *axis_perm)
 {
     if (axis_perm == NULL) {
         // Build a C-order fixed array dtype
         dtype result = uniform_dtype;
-        for (int i = ndim-1; i >= 0; --i) {
+        for (ptrdiff_t i = (ptrdiff_t)ndim-1; i >= 0; --i) {
             result = make_fixedarray_dtype(result, shape[i]);
         }
         return result;
@@ -582,7 +582,7 @@ dtype dynd::make_fixedarray_dtype(const dtype& uniform_dtype, int ndim, const in
         // Create strides with the axis permutation
         dimvector strides(ndim);
         intptr_t stride = uniform_dtype.get_data_size();
-        for (int i = 0; i < ndim; ++i) {
+        for (size_t i = 0; i < ndim; ++i) {
             int i_perm = axis_perm[i];
             size_t dim_size = shape[i_perm];
             strides[i_perm] = dim_size > 1 ? stride : 0;
@@ -590,7 +590,7 @@ dtype dynd::make_fixedarray_dtype(const dtype& uniform_dtype, int ndim, const in
         }
         // Build the fixed array dtype
         dtype result = uniform_dtype;
-        for (int i = ndim-1; i >= 0; --i) {
+        for (ptrdiff_t i = (ptrdiff_t)ndim-1; i >= 0; --i) {
             result = make_fixedarray_dtype(result, shape[i], strides[i]);
         }
         return result;
