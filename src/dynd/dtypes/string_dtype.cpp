@@ -200,9 +200,16 @@ void string_dtype::metadata_copy_construct(char *dst_metadata, const char *src_m
     memory_block_incref(dst_md->blockref);
 }
 
-void string_dtype::metadata_reset_buffers(char *DYND_UNUSED(metadata)) const
+void string_dtype::metadata_reset_buffers(char *metadata) const
 {
-    throw runtime_error("TODO implement string_dtype::metadata_reset_buffers");
+    const string_dtype_metadata *md = reinterpret_cast<const string_dtype_metadata *>(metadata);
+    if (md->blockref != NULL && md->blockref->m_type == pod_memory_block_type) {
+        memory_block_pod_allocator_api *allocator = get_memory_block_pod_allocator_api(md->blockref);
+        allocator->reset(md->blockref);
+    } else {
+        throw runtime_error("can only reset the buffers of a dynd string "
+                        "dtype if the memory block reference was constructed by default");
+    }
 }
 
 void string_dtype::metadata_finalize_buffers(char *metadata) const

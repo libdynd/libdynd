@@ -140,10 +140,31 @@ static void finalize(memory_block_data *self)
     emb->m_memory_end = NULL;
 }
 
+static void reset(memory_block_data *self)
+{
+    // Resets the POD memory so it can reuse it from the start
+    pod_memory_block *emb = reinterpret_cast<pod_memory_block *>(self);
+   
+    if (emb->m_memory_handles.size() > 1) {
+        // If there are more than one allocated memory chunks,
+        // throw them all away except the last
+        for (size_t i = 0, i_end = emb->m_memory_handles.size() - 1; i != i_end; ++i) {
+            free(emb->m_memory_handles[i]);
+        }
+        emb->m_memory_handles.front() = emb->m_memory_handles.back();
+        emb->m_memory_handles.resize(1);
+    }
+
+    // Reset to use the whole chunk
+    emb->m_memory_current = emb->m_memory_begin;
+    emb->m_total_allocated_capacity = emb->m_memory_end - emb->m_memory_begin;
+}
+
 memory_block_pod_allocator_api pod_memory_block_allocator_api = {
     &allocate,
     &resize,
-    &finalize
+    &finalize,
+    &reset
 };
 
 }} // namespace dynd::detail

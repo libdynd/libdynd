@@ -136,7 +136,6 @@ TEST(GroupByDType, Struct) {
     EXPECT_EQ(170.5f,   g.at(0,2).p("height").as<float>());
     EXPECT_EQ(171.5f,   g.at(1,0).p("height").as<float>());
     EXPECT_EQ(177.0f,   g.at(1,1).p("height").as<float>());
-
 }
 
 TEST(GroupByDType, MismatchedSizes) {
@@ -146,3 +145,43 @@ TEST(GroupByDType, MismatchedSizes) {
     EXPECT_THROW(groupby(data, by, make_categorical_dtype(groups)),
             runtime_error);
 }
+
+TEST(GroupByDType, StructUnsortedCats) {
+    // The categories are not in alphabetical order
+    const char *gender_cats_vals[] = {"M", "F"};
+    ndobject gender_cats = ndobject(gender_cats_vals);
+
+    // Create a simple structured array
+    dtype d = make_fixedstruct_dtype(make_string_dtype(), "name", make_dtype<float>(), "height",
+                    make_fixedstring_dtype(string_encoding_ascii, 1), "gender");
+    ndobject a = make_strided_ndobject(5, d);
+    const char *name_vals[] = {"Paul", "Jennifer", "Frank", "Louise", "Anne"};
+    float height_vals[] = {171.5f, 156.25f, 177.0f, 164.75f, 170.5f};
+    const char *gender_vals[] = {"M", "F", "M", "F", "F"};
+    a.p("name").vals() = name_vals;
+    a.p("height").vals() = height_vals;
+    a.p("gender").vals() = gender_vals;
+
+    // Group based on gender
+    ndobject g = groupby(a, a.p("gender"), make_categorical_dtype(gender_cats));
+
+    EXPECT_EQ(make_groupby_dtype(make_strided_array_dtype(d),
+                        make_strided_array_dtype(make_convert_dtype(
+                            make_categorical_dtype(gender_cats), a.p("gender").get_udtype()))),
+                    g.get_dtype());
+    g = g.vals();
+    EXPECT_EQ(2, g.at_array(0, NULL).get_shape()[0]);
+    EXPECT_EQ(2, g.at(0).get_shape()[0]);
+    EXPECT_EQ(3, g.at(1).get_shape()[0]);
+    EXPECT_EQ("Paul",       g.at(0,0).p("name").as<string>());
+    EXPECT_EQ("Frank",      g.at(0,1).p("name").as<string>());
+    EXPECT_EQ("Jennifer",   g.at(1,0).p("name").as<string>());
+    EXPECT_EQ("Louise",     g.at(1,1).p("name").as<string>());
+    EXPECT_EQ("Anne",       g.at(1,2).p("name").as<string>());
+    EXPECT_EQ(171.5f,   g.at(0,0).p("height").as<float>());
+    EXPECT_EQ(177.0f,   g.at(0,1).p("height").as<float>());
+    EXPECT_EQ(156.25f,  g.at(1,0).p("height").as<float>());
+    EXPECT_EQ(164.75f,  g.at(1,1).p("height").as<float>());
+    EXPECT_EQ(170.5f,   g.at(1,2).p("height").as<float>());
+}
+

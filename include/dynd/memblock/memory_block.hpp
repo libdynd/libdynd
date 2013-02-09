@@ -83,6 +83,13 @@ struct memory_block_pod_allocator_api {
      *       move, likely to a special small object heap).
      */
     void (*finalize)(memory_block_data *self);
+    /**
+     * When a memory block is being used as a temporary buffer, resets it to
+     * a state throwing away existing used memory. This allows the same memory
+     * to be used for variable-sized data to be reused repeatedly in such
+     * a temporary buffer.
+     */
+    void (*reset)(memory_block_data *self);
 };
 
 /**
