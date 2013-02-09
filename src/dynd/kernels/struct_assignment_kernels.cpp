@@ -107,6 +107,8 @@ size_t dynd::make_struct_identical_assignment_kernel(
     struct_kernel_extra::field_items *fi;
     for (size_t i = 0; i != field_count; ++i) {
         out->ensure_capacity(current_offset);
+        // Adding another kernel may have invalidated 'e', so get it again
+        e = out->get_at<struct_kernel_extra>(offset_out);
         fi = reinterpret_cast<struct_kernel_extra::field_items *>(e + 1) + i;
         fi->child_kernel_offset = current_offset - offset_out;
         fi->dst_data_offset = dst_data_offsets[i];
@@ -115,8 +117,6 @@ size_t dynd::make_struct_identical_assignment_kernel(
                         sd->get_field_types()[i], dst_metadata + sd->get_metadata_offsets()[i],
                         sd->get_field_types()[i], src_metadata + sd->get_metadata_offsets()[i],
                         errmode, ectx);
-        // Adding another kernel may have invalidated 'e', so get it again
-        e = out->get_at<struct_kernel_extra>(offset_out);
     }
     return current_offset;
 }
