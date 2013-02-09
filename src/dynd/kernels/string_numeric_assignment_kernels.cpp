@@ -226,7 +226,7 @@ namespace { template<typename T> struct string_to_int {
         T result;
         if (e->errmode == assign_error_none) {
             uint64_t value = parse_uint64_noerror(s);
-            result = negative ? static_cast<T>(-value) : static_cast<T>(value);
+            result = negative ? static_cast<T>(-static_cast<int64_t>(value)) : static_cast<T>(value);
         } else {
             bool overflow = false, badparse = false;
             uint64_t value = parse_uint64(s, overflow, badparse);
@@ -235,7 +235,7 @@ namespace { template<typename T> struct string_to_int {
             } else if (overflow || overflow_check<T>::is_overflow(value, negative)) {
                 raise_string_cast_overflow_error(make_dtype<T>(), dtype(e->src_string_dt, true), e->src_metadata, src);
             }
-            result = negative ? static_cast<T>(-value) : static_cast<T>(value);
+            result = negative ? static_cast<T>(-static_cast<int64_t>(value)) : static_cast<T>(value);
         }
         *reinterpret_cast<T *>(dst) = result;
     }

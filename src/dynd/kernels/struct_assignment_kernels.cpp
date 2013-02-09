@@ -164,7 +164,7 @@ size_t dynd::make_struct_assignment_kernel(
     // Match up the fields
     const string *dst_field_names = dst_sd->get_field_names();
     const string *src_field_names = src_sd->get_field_names();
-    vector<int> field_reorder(field_count);
+    vector<size_t> field_reorder(field_count);
     for (size_t i = 0; i != field_count; ++i) {
         const std::string& dst_name = dst_field_names[i];
         // TODO: accelerate this linear search if there are lots of fields?
@@ -189,7 +189,7 @@ size_t dynd::make_struct_assignment_kernel(
     size_t current_offset = offset_out + extra_size;
     struct_kernel_extra::field_items *fi;
     for (size_t i = 0; i != field_count; ++i) {
-        int i_src = field_reorder[i];
+        size_t i_src = field_reorder[i];
         out->ensure_capacity(current_offset);
         // Ensuring capacity may have invalidated 'e', so get it again
         e = out->get_at<struct_kernel_extra>(offset_out);

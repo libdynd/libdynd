@@ -64,6 +64,17 @@ struct single_assigner_builtin_base<dst_type, std::complex<src_real_type>, real_
     }
 };
 
+// Anything -> boolean with no checking
+template<class src_type, dtype_kind_t src_kind>
+struct single_assigner_builtin_base<dynd_bool, src_type, bool_kind, src_kind, assign_error_none>
+{
+    static void assign(dynd_bool *dst, const src_type *src, hierarchical_kernel_common_base *DYND_UNUSED(extra)) {
+        DYND_TRACE_ASSIGNMENT((bool)(s != src_type(0)), dynd_bool, s, src_type);
+
+        *dst = (*src != src_type(0));
+    }
+};
+
 // Anything -> boolean with overflow checking
 template<class src_type, dtype_kind_t src_kind>
 struct single_assigner_builtin_base<dynd_bool, src_type, bool_kind, src_kind, assign_error_overflow>
@@ -297,6 +308,17 @@ template<class dst_type, class src_type>
 struct single_assigner_builtin_base<dst_type, src_type, real_kind, int_kind, assign_error_fractional>
     : public single_assigner_builtin_base<dst_type, src_type, real_kind, int_kind, assign_error_none> {};
 
+// Signed int -> complex floating point with no checking
+template<class dst_real_type, class src_type>
+struct single_assigner_builtin_base<std::complex<dst_real_type>, src_type, complex_kind, int_kind, assign_error_none>
+{
+    static void assign(std::complex<dst_real_type> *dst, const src_type *src, hierarchical_kernel_common_base *DYND_UNUSED(extra)) {
+        DYND_TRACE_ASSIGNMENT(d, std::complex<dst_real_type>, *src, src_type);
+
+        *dst = static_cast<dst_real_type>(*src);
+    }
+};
+
 // Signed int -> complex floating point with inexact checking
 template<class dst_real_type, class src_type>
 struct single_assigner_builtin_base<std::complex<dst_real_type>, src_type, complex_kind, int_kind, assign_error_inexact>
@@ -352,6 +374,17 @@ struct single_assigner_builtin_base<dst_type, src_type, real_kind, uint_kind, as
 template<class dst_type, class src_type>
 struct single_assigner_builtin_base<dst_type, src_type, real_kind, uint_kind, assign_error_fractional>
     : public single_assigner_builtin_base<dst_type, src_type, real_kind, uint_kind, assign_error_none> {};
+
+// Unsigned int -> complex floating point with no checking
+template<class dst_real_type, class src_type>
+struct single_assigner_builtin_base<std::complex<dst_real_type>, src_type, complex_kind, uint_kind, assign_error_none>
+{
+    static void assign(std::complex<dst_real_type> *dst, const src_type *src, hierarchical_kernel_common_base *DYND_UNUSED(extra)) {
+        DYND_TRACE_ASSIGNMENT(d, std::complex<dst_real_type>, *src, src_type);
+
+        *dst = static_cast<dst_real_type>(*src);
+    }
+};
 
 // Unsigned int -> complex floating point with inexact checking
 template<class dst_real_type, class src_type>
@@ -862,6 +895,16 @@ template<typename real_type>
 struct single_assigner_builtin_base<real_type, std::complex<real_type>, real_kind, complex_kind, assign_error_inexact>
     : public single_assigner_builtin_base<real_type, std::complex<real_type>, real_kind, complex_kind, assign_error_overflow> {};
 
+// double -> complex<float>
+template<>
+struct single_assigner_builtin_base<std::complex<float>, double, complex_kind, real_kind, assign_error_none>
+{
+    static void assign(std::complex<float> *dst, const double *src, hierarchical_kernel_common_base *DYND_UNUSED(extra)) {
+        DYND_TRACE_ASSIGNMENT(static_cast<std::complex<float> >(*src), std::complex<float>, *src, double);
+
+        *dst = static_cast<float>(*src);
+    }
+};
 // T -> complex<T>
 template<typename real_type>
 struct single_assigner_builtin_base<std::complex<real_type>, real_type, complex_kind, real_kind, assign_error_none>
