@@ -19,6 +19,10 @@ dynd::busdate_dtype::busdate_dtype(busdate_roll_t roll, const bool *weekmask, co
     : base_dtype(busdate_type_id, datetime_kind, 4, 4, dtype_flag_scalar, 0, 0), m_roll(roll)
 {
     memcpy(m_workweek, weekmask, sizeof(m_workweek));
+    m_busdays_in_weekmask = 0;
+    for (int i = 0; i < 7; ++i) {
+        m_busdays_in_weekmask += weekmask[i] ? 1 : 0;
+    }
     if (!holidays.empty()) {
         ndobject hol = holidays.cast_scalars(make_date_dtype()).eval_immutable();
         // TODO: Make sure hol is contiguous and one-dimensional

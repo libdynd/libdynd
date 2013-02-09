@@ -54,6 +54,10 @@ public:
         return m_workweek;
     }
 
+    int get_busdays_in_weekmask() const {
+        return m_busdays_in_weekmask;
+    }
+
     ndobject get_holidays() const {
         return m_holidays;
     }
