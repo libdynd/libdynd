@@ -286,9 +286,14 @@ void pointer_dtype::metadata_finalize_buffers(char *metadata) const
 
 void pointer_dtype::metadata_destruct(char *metadata) const
 {
-    pointer_dtype_metadata *md = reinterpret_cast<pointer_dtype_metadata *>(metadata);
+    pointer_dtype_metadata *md =
+                    reinterpret_cast<pointer_dtype_metadata *>(metadata);
     if (md->blockref) {
         memory_block_decref(md->blockref);
+    }
+    if (!m_target_dtype.is_builtin()) {
+        m_target_dtype.extended()->metadata_destruct(
+                        metadata + sizeof(pointer_dtype_metadata));
     }
 }
 
