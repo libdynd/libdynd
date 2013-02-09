@@ -88,7 +88,7 @@ public:
      * The notation "irange() / step" is a way to specify
      * the step of the range. Think of it as the word "by".
      */
-    DYND_CONSTEXPR irange operator/(intptr_t step) {
+    DYND_CONSTEXPR irange operator/(intptr_t step) const {
         return irange(m_start, m_finish, step);
     }
 
@@ -96,39 +96,23 @@ public:
      * The notation "irange() < finish" is a way to specify
      * the end of a range with a positive step.
      */
-    DYND_CONSTEXPR irange operator<(int64_t finish) {
-        return irange(m_start, (intptr_t)finish, m_step);
-    }
-
-    /**
-     * The notation "irange() < finish" is a way to specify
-     * the end of a range with a positive step.
-     */
-    DYND_CONSTEXPR irange operator<(int32_t finish) {
-        return irange(m_start, (intptr_t)finish, m_step);
+    DYND_CONSTEXPR irange operator<(intptr_t finish) const {
+        return irange(m_start, finish, m_step);
     }
 
     /**
      * The notation "irange() <= last" is a way to specify
      * the end of a range with a positive step.
      */
-    DYND_CONSTEXPR irange operator<=(int64_t last) {
-        return irange(m_start, (last != -1) ? ((intptr_t)last+1) : std::numeric_limits<intptr_t>::max(), m_step);
-    }
-
-    /**
-     * The notation "irange() <= last" is a way to specify
-     * the end of a range with a positive step.
-     */
-    DYND_CONSTEXPR irange operator<=(int32_t last) {
-        return irange(m_start, (last != -1) ? ((intptr_t)last+1) : std::numeric_limits<intptr_t>::max(), m_step);
+    DYND_CONSTEXPR irange operator<=(intptr_t last) const {
+        return irange(m_start, (last != -1) ? (last+1) : std::numeric_limits<intptr_t>::max(), m_step);
     }
 
     /**
      * The notation "irange() > finish" is a way to specify
      * the end of a range with a negative step.
      */
-    DYND_CONSTEXPR irange operator>(intptr_t finish) {
+    DYND_CONSTEXPR irange operator>(intptr_t finish) const {
         return irange(m_start, finish, m_step);
     }
 
@@ -136,7 +120,7 @@ public:
      * The notation "irange() >= last" is a way to specify
      * the end of a range with a negative step.
      */
-    DYND_CONSTEXPR irange operator>=(intptr_t last) {
+    DYND_CONSTEXPR irange operator>=(intptr_t last) const {
         return irange(m_start, (last != 0) ? (last-1) : std::numeric_limits<intptr_t>::max(), m_step);
     }
 
