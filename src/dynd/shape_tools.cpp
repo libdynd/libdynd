@@ -221,7 +221,7 @@ void dynd::strides_to_axis_perm(size_t ndim, const intptr_t *strides, int *out_a
         }
         default: {
             // Initialize to a reversal perm (i.e. so C-order is a no-op)
-            for (int i = 0; i < ndim; ++i) {
+            for (size_t i = 0; i < ndim; ++i) {
                 out_axis_perm[i] = int(ndim - i - 1);
             }
             // Sort based on the absolute value of the strides
@@ -317,7 +317,7 @@ void dynd::multistrides_to_axis_perm(size_t ndim, int noperands, const intptr_t 
                 }
 
                 // Insert axis_perm[i0] into axis_perm[ipos]
-                if (ipos != i0) {
+                if (ipos != (ptrdiff_t)i0) {
                     for (ptrdiff_t i = (ptrdiff_t)i0; i > ipos; --i) {
                         out_axis_perm[i] = out_axis_perm[i - 1];
                     }

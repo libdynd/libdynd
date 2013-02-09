@@ -348,7 +348,7 @@ TEST(NDObject, ConstructorMemoryLayouts) {
         do {
             // Test constructing the array using the perm
             a = make_strided_ndobject(dt, ndim, shape, read_access_flag|write_access_flag, axisperm);
-            EXPECT_EQ(ndim, (int)a.get_strides().size());
+            EXPECT_EQ(ndim, a.get_strides().size());
             intptr_t s = dt.get_data_size();
             for (size_t i = 0; i < ndim; ++i) {
                 EXPECT_EQ(s, a.get_strides()[axisperm[i]]);
@@ -356,13 +356,13 @@ TEST(NDObject, ConstructorMemoryLayouts) {
             }
             // Test constructing the array using empty_like, which preserves the memory layout
             b = empty_like(a);
-            EXPECT_EQ(ndim, (int)b.get_strides().size());
+            EXPECT_EQ(ndim, b.get_strides().size());
             for (size_t i = 0; i < ndim; ++i) {
                 EXPECT_EQ(a.get_strides()[i], b.get_strides()[i]);
             }
             // Test constructing the array using empty_like with a different dtype, which preserves the memory layout
             b = empty_like(a, dt2);
-            EXPECT_EQ(ndim, (int)b.get_strides().size());
+            EXPECT_EQ(ndim, b.get_strides().size());
             for (size_t i = 0; i < ndim; ++i) {
                 EXPECT_EQ(2 * a.get_strides()[i], b.get_strides()[i]);
             }
