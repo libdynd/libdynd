@@ -35,7 +35,7 @@ namespace {
             const char *src_end = src + e->src_data_size;
             next_unicode_codepoint_t next_fn = e->next_fn;
             append_unicode_codepoint_t append_fn = e->append_fn;
-            uint32_t cp;
+            uint32_t cp = 0;
 
             while (src < src_end && dst < dst_end) {
                 cp = next_fn(src, src_end);

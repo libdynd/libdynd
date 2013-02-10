@@ -394,7 +394,7 @@ template<next_unicode_codepoint_t next_fn>
 std::string string_range_as_utf8_string_templ(const char *begin, const char *end)
 {
     string result;
-    uint32_t cp;
+    uint32_t cp = 0;
     while (begin < end) {
         cp = next_fn(begin, end);
         string_append_utf8(cp, result);
@@ -481,7 +481,7 @@ void dynd::print_escaped_unicode_codepoint(std::ostream& o, uint32_t cp)
 
 void dynd::print_escaped_utf8_string(std::ostream& o, const char *str_begin, const char *str_end)
 {
-    uint32_t cp;
+    uint32_t cp = 0;
 
     // Print as an escaped string
     o << "\"";

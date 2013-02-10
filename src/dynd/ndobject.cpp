@@ -438,7 +438,7 @@ namespace {
 ndobject ndobject::storage() const
 {
     dtype storage_dt = get_dtype();
-    bool was_transformed;
+    bool was_transformed = false;
     as_storage_type(get_dtype(), NULL, storage_dt, was_transformed);
     if (was_transformed) {
         return make_ndobject_clone_with_new_dtype(*this, storage_dt);
@@ -773,7 +773,7 @@ ndobject ndobject::replace_udtype(const dtype& new_udtype) const
     // the existing one. It raises an error if the data layout
     // is incompatible
     dtype replaced_dtype;
-    bool was_transformed;
+    bool was_transformed = false;
     replace_compatible_udtype(get_dtype(), &new_udtype, replaced_dtype, was_transformed);
     if (was_transformed) {
         return make_ndobject_clone_with_new_dtype(*this, replaced_dtype);

@@ -12,9 +12,13 @@ dynd::vm::register_allocation::register_allocation(const std::vector<dtype>& reg
                         intptr_t max_element_count, intptr_t max_byte_count)
     : m_regtypes(regtypes), m_registers(m_regtypes.size()), m_blockrefs(m_regtypes.size()), m_allocated_memory(NULL)
 {
+    if (regtypes.empty()) {
+        throw runtime_error("Cannot do a register allocation with no registers");
+    }
+
     // Get the number of bytes per element across all the registers
-    intptr_t bytes_per_element = 0;
-    for (size_t i = 0; i < regtypes.size(); ++i) {
+    intptr_t bytes_per_element = regtypes[0].get_data_size();
+    for (size_t i = 1; i < regtypes.size(); ++i) {
         bytes_per_element += regtypes[i].get_data_size();
     }
     // Turn it into an element count, clamped to [1, max_element_count
