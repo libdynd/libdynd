@@ -1112,7 +1112,6 @@ ndobject dynd::groupby(const dynd::ndobject& data_values, const dynd::ndobject& 
                     ? data_values.get_ndo()->m_data_reference
                     : &data_values.get_ndo()->m_memblockdata;
     memory_block_incref(pmeta->blockref);
-cout << "incref on " << (void *)pmeta->blockref << ", count is " << pmeta->blockref->m_use_count << endl;
     data_values.get_dtype().extended()->metadata_copy_construct(reinterpret_cast<char *>(pmeta + 1),
                     data_values.get_ndo_meta(), &data_values.get_ndo()->m_memblockdata);
 
@@ -1123,8 +1122,7 @@ cout << "incref on " << (void *)pmeta->blockref << ", count is " << pmeta->block
                     ? by_values_as_groups.get_ndo()->m_data_reference
                     : &by_values_as_groups.get_ndo()->m_memblockdata;
     memory_block_incref(pmeta->blockref);
-cout << "incref on " << (void *)pmeta->blockref << ", count is " << pmeta->blockref->m_use_count << endl;
-    data_values.get_dtype().extended()->metadata_copy_construct(reinterpret_cast<char *>(pmeta + 1),
+    by_values_as_groups.get_dtype().extended()->metadata_copy_construct(reinterpret_cast<char *>(pmeta + 1),
                     by_values_as_groups.get_ndo_meta(), &by_values_as_groups.get_ndo()->m_memblockdata);
 
     // Set the pointers to the data and by values data
