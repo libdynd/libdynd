@@ -13,6 +13,9 @@
 
 namespace dynd {
 
+#define DYND_DATE_NA (std::numeric_limits<int32_t>::min())
+
+
 class date_dtype : public base_dtype {
 public:
     date_dtype();
