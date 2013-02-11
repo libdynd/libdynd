@@ -226,12 +226,8 @@ public:
     }
 
     /** The dtype */
-    inline dtype get_dtype() const {
-        if (get_ndo()->is_builtin_dtype()) {
-            return dtype(get_ndo()->get_builtin_type_id());
-        } else {
-            return dtype(get_ndo()->m_dtype, true);
-        }
+    inline const dtype& get_dtype() const {
+        return *reinterpret_cast<const dtype *>(&get_ndo()->m_dtype);
     }
 
     inline size_t get_undim() const {
