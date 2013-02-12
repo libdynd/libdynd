@@ -22,6 +22,9 @@ public:
 
     virtual ~date_dtype();
 
+    // A static instance of a struct dtype used by default for a date
+    static const dtype default_struct_dtype;
+
     void set_ymd(const char *metadata, char *data, assign_error_mode errmode,
                     int32_t year, int32_t month, int32_t day) const;
     void set_utf8_string(const char *metadata, char *data, assign_error_mode errmode, const std::string& utf8_str) const;

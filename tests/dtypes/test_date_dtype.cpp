@@ -186,10 +186,12 @@ TEST(DateDType, ToStructFunction) {
 
     a = ndobject("1955-03-13").cast_scalars(d).vals();
     b = a.f("to_struct");
-    EXPECT_EQ(make_convert_dtype(make_fixedstruct_dtype(make_dtype<int32_t>(), "year", make_dtype<int8_t>(), "month", make_dtype<int8_t>(), "day"), d),
+    EXPECT_EQ(make_property_dtype(d, "struct"),
                     b.get_dtype());
     b = b.vals();
-    EXPECT_EQ(make_fixedstruct_dtype(make_dtype<int32_t>(), "year", make_dtype<int8_t>(), "month", make_dtype<int8_t>(), "day"),
+    EXPECT_EQ(make_fixedstruct_dtype(make_dtype<int32_t>(), "year",
+                        make_dtype<int16_t>(), "month",
+                        make_dtype<int16_t>(), "day"),
                     b.get_dtype());
     EXPECT_EQ(1955, b.p("year").as<int32_t>());
     EXPECT_EQ(3, b.p("month").as<int32_t>());

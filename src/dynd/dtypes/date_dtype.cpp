@@ -34,6 +34,20 @@ date_dtype::~date_dtype()
 {
 }
 
+const dtype date_dtype::default_struct_dtype =
+        make_fixedstruct_dtype(
+            make_dtype<int32_t>(), "year",
+            make_dtype<int16_t>(), "month",
+            make_dtype<int16_t>(), "day");
+namespace {
+    struct default_date_struct_t {
+        int32_t year;
+        int16_t month;
+        int16_t day;
+    };
+}
+
+
 void date_dtype::set_ymd(const char *DYND_UNUSED(metadata), char *data,
                 assign_error_mode errmode, int32_t year, int32_t month, int32_t day) const
 {
@@ -132,9 +146,11 @@ size_t date_dtype::make_assignment_kernel(
                             src_dt, src_metadata,
                             errmode, ectx);
         } else if (src_dt.get_kind() == struct_kind) {
-            return make_struct_to_date_assignment_kernel(out, offset_out,
-                            src_dt, src_metadata,
-                            errmode, ectx);
+            // Convert to struct using the "struct" property
+            return ::make_assignment_kernel(out, offset_out,
+                make_property_dtype(dst_dt, "struct"), dst_metadata,
+                src_dt, src_metadata,
+                errmode, ectx);
         } else if (!src_dt.is_builtin()) {
             return src_dt.extended()->make_assignment_kernel(out, offset_out,
                             dst_dt, dst_metadata,
@@ -148,9 +164,11 @@ size_t date_dtype::make_assignment_kernel(
                             dst_dt, dst_metadata,
                             errmode, ectx);
         } else if (dst_dt.get_kind() == struct_kind) {
-            return make_date_to_struct_assignment_kernel(out, offset_out,
-                            dst_dt, dst_metadata,
-                            errmode, ectx);
+            // Convert to struct using the "struct" property
+            return ::make_assignment_kernel(out, offset_out,
+                dst_dt, dst_metadata,
+                make_property_dtype(src_dt, "struct"), src_metadata,
+                errmode, ectx);
         }
         // TODO
     }
@@ -251,9 +269,7 @@ void date_dtype::get_dynamic_ndobject_properties(const std::pair<std::string, gf
 ///////// functions on the ndobject
 
 static ndobject function_ndo_to_struct(const ndobject& n) {
-    dtype array_dt = n.get_dtype();
-    dtype dt = array_dt.get_dtype_at_dimension(NULL, array_dt.get_undim()).value_dtype();
-    return n.cast_scalars(date_dtype_default_struct_dtype);
+    return n.replace_udtype(make_property_dtype(n.get_udtype(), "struct"));
 }
 
 static ndobject function_ndo_strftime(const ndobject& n, const std::string& format) {
@@ -421,28 +437,32 @@ void date_dtype::get_dynamic_ndobject_functions(const std::pair<std::string, gfu
 ///////// property accessor kernels (used by date_property_dtype)
 
 namespace {
-    void get_property_kernel_year_single(char *dst, const char *src, hierarchical_kernel_common_base *DYND_UNUSED(extra))
+    void get_property_kernel_year_single(char *dst, const char *src,
+                    hierarchical_kernel_common_base *DYND_UNUSED(extra))
     {
         datetime::date_ymd fld;
         datetime::days_to_ymd(*reinterpret_cast<const int32_t *>(src), fld);
         *reinterpret_cast<int32_t *>(dst) = fld.year;
     }
 
-    void get_property_kernel_month_single(char *dst, const char *src, hierarchical_kernel_common_base *DYND_UNUSED(extra))
+    void get_property_kernel_month_single(char *dst, const char *src,
+                    hierarchical_kernel_common_base *DYND_UNUSED(extra))
     {
         datetime::date_ymd fld;
         datetime::days_to_ymd(*reinterpret_cast<const int32_t *>(src), fld);
         *reinterpret_cast<int32_t *>(dst) = fld.month;
     }
 
-    void get_property_kernel_day_single(char *dst, const char *src, hierarchical_kernel_common_base *DYND_UNUSED(extra))
+    void get_property_kernel_day_single(char *dst, const char *src,
+                    hierarchical_kernel_common_base *DYND_UNUSED(extra))
     {
         datetime::date_ymd fld;
         datetime::days_to_ymd(*reinterpret_cast<const int32_t *>(src), fld);
         *reinterpret_cast<int32_t *>(dst) = fld.day;
     }
 
-    void get_property_kernel_weekday_single(char *dst, const char *src, hierarchical_kernel_common_base *DYND_UNUSED(extra))
+    void get_property_kernel_weekday_single(char *dst, const char *src,
+                    hierarchical_kernel_common_base *DYND_UNUSED(extra))
     {
         datetime::date_val_t days = *reinterpret_cast<const int32_t *>(src);
         // 1970-01-05 is Monday
@@ -453,7 +473,8 @@ namespace {
         *reinterpret_cast<int32_t *>(dst) = weekday;
     }
 
-    void get_property_kernel_days_after_1970_int64(char *dst, const char *src, hierarchical_kernel_common_base *DYND_UNUSED(extra))
+    void get_property_kernel_days_after_1970_int64_single(char *dst, const char *src,
+                    hierarchical_kernel_common_base *DYND_UNUSED(extra))
     {
         datetime::date_val_t days = *reinterpret_cast<const int32_t *>(src);
         if (days == DYND_DATE_NA) {
@@ -463,7 +484,8 @@ namespace {
         }
     }
 
-    void set_property_kernel_days_after_1970_int64(char *dst, const char *src, hierarchical_kernel_common_base *DYND_UNUSED(extra))
+    void set_property_kernel_days_after_1970_int64_single(char *dst, const char *src,
+                    hierarchical_kernel_common_base *DYND_UNUSED(extra))
     {
         int64_t days = *reinterpret_cast<const int64_t *>(src);
         if (days == numeric_limits<int64_t>::min()) {
@@ -472,7 +494,40 @@ namespace {
             *reinterpret_cast<int32_t *>(dst) = static_cast<datetime::date_val_t>(days);
         }
     }
+
+    void get_property_kernel_struct_single(char *dst, const char *src,
+                    hierarchical_kernel_common_base *DYND_UNUSED(extra))
+    {
+        datetime::date_ymd fld;
+        datetime::days_to_ymd(*reinterpret_cast<const int32_t *>(src), fld);
+        default_date_struct_t *dst_struct = reinterpret_cast<default_date_struct_t *>(dst);
+        dst_struct->year = fld.year;
+        dst_struct->month = static_cast<int8_t>(fld.month);
+        dst_struct->day = static_cast<int8_t>(fld.day);
+    }
+
+    void set_property_kernel_struct_single(char *dst, const char *src,
+                    hierarchical_kernel_common_base *DYND_UNUSED(extra))
+    {
+        datetime::date_ymd fld;
+        const default_date_struct_t *src_struct = reinterpret_cast<const default_date_struct_t *>(src);
+        fld.year = src_struct->year;
+        fld.month = src_struct->month;
+        fld.day = src_struct->day;
+        *reinterpret_cast<int32_t *>(dst) = datetime::ymd_to_days(fld);
+    }
 } // anonymous namespace
+
+namespace {
+    enum date_properties_t {
+        dateprop_year,
+        dateprop_month,
+        dateprop_day,
+        dateprop_weekday,
+        dateprop_days_after_1970_int64,
+        dateprop_struct
+    };
+}
 
 size_t date_dtype::get_elwise_property_index(const std::string& property_name,
             bool& out_readable, bool& out_writable) const
@@ -481,17 +536,21 @@ size_t date_dtype::get_elwise_property_index(const std::string& property_name,
     out_writable = false;
     // TODO: Use an enum here
     if (property_name == "year") {
-        return 0;
+        return dateprop_year;
     } else if (property_name == "month") {
-        return 1;
+        return dateprop_month;
     } else if (property_name == "day") {
-        return 2;
+        return dateprop_day;
     } else if (property_name == "weekday") {
-        return 3;
+        return dateprop_weekday;
     } else if (property_name == "days_after_1970_int64") {
         // A read/write property for NumPy datetime64[D] compatibility
         out_writable = true;
-        return 4;
+        return dateprop_days_after_1970_int64;
+    } else if (property_name == "struct") {
+        // A read/write property for accessing a date as a struct
+        out_writable = true;
+        return dateprop_struct;
     } else {
         stringstream ss;
         ss << "dynd date dtype does not have a kernel for property " << property_name;
@@ -502,13 +561,15 @@ size_t date_dtype::get_elwise_property_index(const std::string& property_name,
 dtype date_dtype::get_elwise_property_dtype(size_t property_index) const
 {
     switch (property_index) {
-        case 0:
-        case 1:
-        case 2:
-        case 3:
+        case dateprop_year:
+        case dateprop_month:
+        case dateprop_day:
+        case dateprop_weekday:
             return make_dtype<int32_t>();
-        case 4:
+        case dateprop_days_after_1970_int64:
             return make_dtype<int64_t>();
+        case dateprop_struct:
+            return date_dtype::default_struct_dtype;
         default:
             return make_dtype<void>();
     }
@@ -524,20 +585,23 @@ size_t date_dtype::make_elwise_property_getter_kernel(
     hierarchical_kernel_common_base *e = out->get_at<hierarchical_kernel_common_base>(offset_out);
     // TODO: Use an enum for the property index
     switch (src_property_index) {
-        case 0:
+        case dateprop_year:
             e->set_function<unary_single_operation_t>(&get_property_kernel_year_single);
             return offset_out + sizeof(hierarchical_kernel_common_base);
-        case 1:
+        case dateprop_month:
             e->set_function<unary_single_operation_t>(&get_property_kernel_month_single);
             return offset_out + sizeof(hierarchical_kernel_common_base);
-        case 2:
+        case dateprop_day:
             e->set_function<unary_single_operation_t>(&get_property_kernel_day_single);
             return offset_out + sizeof(hierarchical_kernel_common_base);
-        case 3:
+        case dateprop_weekday:
             e->set_function<unary_single_operation_t>(&get_property_kernel_weekday_single);
             return offset_out + sizeof(hierarchical_kernel_common_base);
-        case 4:
-            e->set_function<unary_single_operation_t>(&get_property_kernel_days_after_1970_int64);
+        case dateprop_days_after_1970_int64:
+            e->set_function<unary_single_operation_t>(&get_property_kernel_days_after_1970_int64_single);
+            return offset_out + sizeof(hierarchical_kernel_common_base);
+        case dateprop_struct:
+            e->set_function<unary_single_operation_t>(&get_property_kernel_struct_single);
             return offset_out + sizeof(hierarchical_kernel_common_base);
         default:
             stringstream ss;
@@ -556,8 +620,11 @@ size_t date_dtype::make_elwise_property_setter_kernel(
     hierarchical_kernel_common_base *e = out->get_at<hierarchical_kernel_common_base>(offset_out);
     // TODO: Use an enum for the property index
     switch (dst_property_index) {
-        case 4:
-            e->set_function<unary_single_operation_t>(&set_property_kernel_days_after_1970_int64);
+        case dateprop_days_after_1970_int64:
+            e->set_function<unary_single_operation_t>(&set_property_kernel_days_after_1970_int64_single);
+            return offset_out + sizeof(hierarchical_kernel_common_base);
+        case dateprop_struct:
+            e->set_function<unary_single_operation_t>(&set_property_kernel_struct_single);
             return offset_out + sizeof(hierarchical_kernel_common_base);
         default:
             stringstream ss;
