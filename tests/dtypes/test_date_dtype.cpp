@@ -10,7 +10,7 @@
 
 #include <dynd/ndobject.hpp>
 #include <dynd/dtypes/date_dtype.hpp>
-#include <dynd/dtypes/date_property_dtype.hpp>
+#include <dynd/dtypes/property_dtype.hpp>
 #include <dynd/dtypes/strided_array_dtype.hpp>
 #include <dynd/dtypes/fixedstring_dtype.hpp>
 #include <dynd/dtypes/string_dtype.hpp>
@@ -131,9 +131,9 @@ TEST(DateDType, DateProperties) {
     ndobject a;
 
     a = ndobject("1955-03-13").cast_scalars(d).vals();
-    EXPECT_EQ(make_date_property_dtype(d, "year"), a.p("year").get_dtype());
-    EXPECT_EQ(make_date_property_dtype(d, "month"), a.p("month").get_dtype());
-    EXPECT_EQ(make_date_property_dtype(d, "day"), a.p("day").get_dtype());
+    EXPECT_EQ(make_property_dtype(d, "year"), a.p("year").get_dtype());
+    EXPECT_EQ(make_property_dtype(d, "month"), a.p("month").get_dtype());
+    EXPECT_EQ(make_property_dtype(d, "day"), a.p("day").get_dtype());
     EXPECT_EQ(1955, a.p("year").as<int32_t>());
     EXPECT_EQ(3, a.p("month").as<int32_t>());
     EXPECT_EQ(13, a.p("day").as<int32_t>());

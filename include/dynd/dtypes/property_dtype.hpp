@@ -3,13 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-// This is being initially written as a "date" property type, but
-// with an appropriate base_dtype interface which generates the
-// to_value_kernel, this can be switched to just a property type using
-// that interface.
-
-#ifndef _DYND__DATE_PROPERTY_DTYPE_HPP_
-#define _DYND__DATE_PROPERTY_DTYPE_HPP_
+#ifndef _DYND__PROPERTY_DTYPE_HPP_
+#define _DYND__PROPERTY_DTYPE_HPP_
 
 #include <dynd/dtype.hpp>
 #include <dynd/dtype_assign.hpp>
@@ -17,14 +12,15 @@
 
 namespace dynd {
 
-class date_property_dtype : public base_expression_dtype {
+class property_dtype : public base_expression_dtype {
     dtype m_value_dtype, m_operand_dtype;
+    bool m_readable, m_writable;
     std::string m_property_name;
     size_t m_property_index;
 public:
-    date_property_dtype(const dtype& operand_dtype, const std::string& property_name);
+    property_dtype(const dtype& operand_dtype, const std::string& property_name);
 
-    virtual ~date_property_dtype();
+    virtual ~property_dtype();
 
     const dtype& get_value_dtype() const {
         return m_value_dtype;
@@ -64,14 +60,13 @@ public:
 };
 
 /**
- * Makes a conversion dtype to convert from the operand_dtype to the value_dtype.
- * If the value_dtype has expression_kind, it chains operand_dtype.value_dtype()
- * into value_dtype.storage_dtype().
+ * Makes a property dtype for accessing a named element-wise property
+ * of the provided operand dtype.
  */
-inline dtype make_date_property_dtype(const dtype& operand_dtype, const std::string& property_name) {
-    return dtype(new date_property_dtype(operand_dtype, property_name), false);
+inline dtype make_property_dtype(const dtype& operand_dtype, const std::string& property_name) {
+    return dtype(new property_dtype(operand_dtype, property_name), false);
 }
 
 } // namespace dynd
 
-#endif // _DYND__DATE_PROPERTY_DTYPE_HPP_
+#endif // _DYND__PROPERTY_DTYPE_HPP_

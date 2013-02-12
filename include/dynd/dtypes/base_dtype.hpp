@@ -635,6 +635,67 @@ public:
      */
     virtual void get_dynamic_ndobject_functions(const std::pair<std::string, gfunc::callable> **out_functions, size_t *out_count) const;
 
+    /**
+     * Returns the index for the element-wise property of the given name.
+     *
+     * \param property_name  The name of the element-wise property.
+     * \param out_readable  The dtype should set this to true/false depending on
+     *                      whether the property is readable.
+     * \param out_writable  The dtype should set this to true/false depending on
+     *                      whether the property is writable.
+     *
+     * \returns  The index of the property, to be provided to the other elwise_property
+     *           functions.
+     */
+    virtual size_t get_elwise_property_index(const std::string& property_name,
+            bool& out_readable, bool& out_writable) const;
+
+    /**
+     * Returns the dtype for the element-wise property of the given index.
+     */
+    virtual dtype get_elwise_property_dtype(size_t elwise_property_index) const;
+
+    /**
+     * Returns a kernel to transform instances of this dtype into values of the
+     * element-wise property.
+     *
+     * \param out  The hierarchical assignment kernel being constructed.
+     * \param offset_out  The offset within 'out'.
+     * \param dst_metadata  Metadata for the destination property being written to.
+     * \param src_metadata  Metadata for the operand dtype being read from.
+     * \param src_elwise_property_index  The index of the property, from get_elwise_property_index().
+     * \param ectx  DyND evaluation contrext.
+     */
+    virtual size_t make_elwise_property_getter_kernel(
+                    hierarchical_kernel<unary_single_operation_t> *out,
+                    size_t offset_out,
+                    const char *dst_metadata,
+                    const char *src_metadata, size_t src_elwise_property_index,
+                    const eval::eval_context *ectx) const;
+
+    /**
+     * Returns a kernel to transform instances of the element-wise property
+     * into values of this dtype.
+     *
+     * \note This can only be used when the source value sets all of the
+     *       destination, not when it only sets part of it. For example,
+     *       setting just the "year" property of a date is not possible
+     *       with this mechanism.
+     *
+     * \param out  The hierarchical assignment kernel being constructed.
+     * \param offset_out  The offset within 'out'.
+     * \param dst_metadata  Metadata for the operand dtype being written to.
+     * \param dst_elwise_property_index  The index of the property, from get_elwise_property_index().
+     * \param src_metadata  Metadata for the source property being read from.
+     * \param ectx  DyND evaluation contrext.
+     */
+    virtual size_t make_elwise_property_setter_kernel(
+                    hierarchical_kernel<unary_single_operation_t> *out,
+                    size_t offset_out,
+                    const char *dst_metadata, size_t dst_elwise_property_index,
+                    const char *src_metadata,
+                    const eval::eval_context *ectx) const;
+
     friend void base_dtype_incref(const base_dtype *ed);
     friend void base_dtype_decref(const base_dtype *ed);
 };

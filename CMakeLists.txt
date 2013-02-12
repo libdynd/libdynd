@@ -66,7 +66,7 @@ set(dynd_SRC
     src/dynd/dtypes/datashape_formatter.cpp
     src/dynd/dtypes/datashape_parser.cpp
     src/dynd/dtypes/date_dtype.cpp
-    src/dynd/dtypes/date_property_dtype.cpp
+    src/dynd/dtypes/property_dtype.cpp
     src/dynd/dtypes/dtype_alignment.cpp
     src/dynd/dtypes/fixedarray_dtype.cpp
     src/dynd/dtypes/fixedbytes_dtype.cpp
@@ -96,7 +96,7 @@ set(dynd_SRC
     include/dynd/dtypes/datashape_formatter.hpp
     include/dynd/dtypes/datashape_parser.hpp
     include/dynd/dtypes/date_dtype.hpp
-    include/dynd/dtypes/date_property_dtype.hpp
+    include/dynd/dtypes/property_dtype.hpp
     include/dynd/dtypes/dtype_alignment.hpp
     include/dynd/dtypes/fixedarray_dtype.hpp
     include/dynd/dtypes/fixedbytes_dtype.hpp

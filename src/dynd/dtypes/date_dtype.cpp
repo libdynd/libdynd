@@ -9,7 +9,7 @@
 #include <algorithm>
 
 #include <dynd/dtypes/date_dtype.hpp>
-#include <dynd/dtypes/date_property_dtype.hpp>
+#include <dynd/dtypes/property_dtype.hpp>
 #include <dynd/dtypes/fixedstruct_dtype.hpp>
 #include <dynd/dtypes/string_dtype.hpp>
 #include <dynd/kernels/string_assignment_kernels.hpp>
@@ -225,15 +225,15 @@ void date_dtype::get_dynamic_dtype_functions(const std::pair<std::string, gfunc:
 ///////// properties on the ndobject
 
 static ndobject property_ndo_get_year(const ndobject& n) {
-    return n.replace_udtype(make_date_property_dtype(n.get_udtype(), "year"));
+    return n.replace_udtype(make_property_dtype(n.get_udtype(), "year"));
 }
 
 static ndobject property_ndo_get_month(const ndobject& n) {
-    return n.replace_udtype(make_date_property_dtype(n.get_udtype(), "month"));
+    return n.replace_udtype(make_property_dtype(n.get_udtype(), "month"));
 }
 
 static ndobject property_ndo_get_day(const ndobject& n) {
-    return n.replace_udtype(make_date_property_dtype(n.get_udtype(), "day"));
+    return n.replace_udtype(make_property_dtype(n.get_udtype(), "day"));
 }
 
 static pair<string, gfunc::callable> date_ndobject_properties[] = {
@@ -319,7 +319,7 @@ static ndobject function_ndo_strftime(const ndobject& n, const std::string& form
 }
 
 static ndobject function_ndo_weekday(const ndobject& n) {
-    return n.replace_udtype(make_date_property_dtype(n.get_udtype(), "weekday"));
+    return n.replace_udtype(make_property_dtype(n.get_udtype(), "weekday"));
 }
 
 static ndobject function_ndo_replace(const ndobject& n, int32_t year, int32_t month, int32_t day) {
@@ -454,8 +454,11 @@ namespace {
     }
 } // anonymous namespace
 
-size_t date_dtype::get_property_index(const std::string& property_name) const
+size_t date_dtype::get_elwise_property_index(const std::string& property_name,
+            bool& out_readable, bool& out_writable) const
 {
+    out_readable = true;
+    out_writable = false;
     // TODO: Use an enum here
     if (property_name == "year") {
         return 0;
@@ -472,13 +475,13 @@ size_t date_dtype::get_property_index(const std::string& property_name) const
     }
 }
 
-dtype date_dtype::get_property_dtype(size_t DYND_UNUSED(property_index)) const
+dtype date_dtype::get_elwise_property_dtype(size_t DYND_UNUSED(property_index)) const
 {
     // All the properties are int32 for now
     return make_dtype<int32_t>();
 }
 
-size_t date_dtype::make_property_getter_kernel(
+size_t date_dtype::make_elwise_property_getter_kernel(
                 hierarchical_kernel<unary_single_operation_t> *out,
                 size_t offset_out,
                 const char *DYND_UNUSED(dst_metadata),

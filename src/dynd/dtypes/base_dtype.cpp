@@ -416,8 +416,51 @@ void base_dtype::get_dynamic_ndobject_functions(const std::pair<std::string, gfu
     *out_count = 0;
 }
 
+size_t base_dtype::get_elwise_property_index(const std::string& property_name,
+            bool& DYND_UNUSED(out_readable), bool& DYND_UNUSED(out_writable)) const
+{
+    std::stringstream ss;
+    ss << "the dtype " << dtype(this, true);
+    ss << " doesn't have a property \"" << property_name << "\"";
+    throw std::runtime_error(ss.str());
+}
+
+dtype base_dtype::get_elwise_property_dtype(size_t DYND_UNUSED(elwise_property_index)) const
+{
+    throw std::runtime_error("get_elwise_property_dtype: this dtype does not have any properties");
+}
+
+size_t base_dtype::make_elwise_property_getter_kernel(
+                hierarchical_kernel<unary_single_operation_t> *DYND_UNUSED(out),
+                size_t DYND_UNUSED(offset_out),
+                const char *DYND_UNUSED(dst_metadata),
+                const char *DYND_UNUSED(src_metadata),
+                size_t DYND_UNUSED(src_elwise_property_index),
+                const eval::eval_context *DYND_UNUSED(ectx)) const
+{
+    std::stringstream ss;
+    ss << "the dtype " << dtype(this, true);
+    ss << " doesn't have any readable properties";
+    throw std::runtime_error(ss.str());
+}
+
+size_t base_dtype::make_elwise_property_setter_kernel(
+                hierarchical_kernel<unary_single_operation_t> *DYND_UNUSED(out),
+                size_t DYND_UNUSED(offset_out),
+                const char *DYND_UNUSED(dst_metadata),
+                size_t DYND_UNUSED(dst_elwise_property_index),
+                const char *DYND_UNUSED(src_metadata),
+                const eval::eval_context *DYND_UNUSED(ectx)) const
+{
+    std::stringstream ss;
+    ss << "the dtype " << dtype(this, true);
+    ss << " doesn't have any writable properties";
+    throw std::runtime_error(ss.str());
+}
+
+
 void base_dtype::get_single_compare_kernel(kernel_instance<compare_operations_t>& DYND_UNUSED(out_kernel)) const
 {
-        throw std::runtime_error("get_single_compare_kernel: this dtypes does not support comparisons");
+        throw std::runtime_error("get_single_compare_kernel: this dtype does not support comparisons");
 }
 
