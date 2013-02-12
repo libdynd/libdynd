@@ -259,7 +259,7 @@ public:
     void flag_as_immutable();
 
     /** The flags, including access permissions. */
-    inline int64_t get_flags() const {
+    inline uint64_t get_flags() const {
         return get_ndo()->m_flags;
     }
 

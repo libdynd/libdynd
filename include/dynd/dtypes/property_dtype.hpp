@@ -32,6 +32,14 @@ public:
 
     virtual ~property_dtype();
 
+    inline bool is_reversed_property() const {
+        return m_reversed_property;
+    }
+
+    inline const std::string& get_property_name() const {
+        return m_property_name;
+    }
+
     const dtype& get_value_dtype() const {
         return m_value_dtype;
     }
