@@ -120,8 +120,8 @@ enum type_id_t {
     align_type_id,
     view_type_id,
 
-    // A type for holding property access in the 'date' type (will generalize to property_type_id)
-    date_property_type_id,
+    // A type for property access
+    property_type_id,
 
     // Advanced expression dtypes
     groupby_type_id,

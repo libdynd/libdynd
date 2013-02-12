@@ -12,7 +12,7 @@ using namespace dynd;
 
 
 property_dtype::property_dtype(const dtype& operand_dtype, const std::string& property_name)
-    : base_expression_dtype(date_property_type_id, expression_kind,
+    : base_expression_dtype(property_type_id, expression_kind,
                     operand_dtype.get_data_size(), operand_dtype.get_alignment(), dtype_flag_scalar,
                     operand_dtype.get_metadata_size()),
             m_value_dtype(), m_operand_dtype(operand_dtype),
@@ -35,7 +35,7 @@ property_dtype::property_dtype(const dtype& operand_dtype, const std::string& pr
 
 property_dtype::property_dtype(const dtype& value_dtype, const dtype& operand_dtype,
                 const std::string& property_name)
-    : base_expression_dtype(date_property_type_id, expression_kind,
+    : base_expression_dtype(property_type_id, expression_kind,
                     operand_dtype.get_data_size(), operand_dtype.get_alignment(), dtype_flag_scalar,
                     operand_dtype.get_metadata_size()),
             m_value_dtype(value_dtype), m_operand_dtype(operand_dtype),
@@ -109,13 +109,14 @@ bool property_dtype::operator==(const base_dtype& rhs) const
 {
     if (this == &rhs) {
         return true;
-    } else if (rhs.get_type_id() != date_property_type_id) {
+    } else if (rhs.get_type_id() != property_type_id) {
         return false;
     } else {
         const property_dtype *dt = static_cast<const property_dtype*>(&rhs);
         return m_value_dtype == dt->m_value_dtype &&
             m_operand_dtype == dt->m_operand_dtype &&
-            m_property_name == dt->m_property_name;
+            m_property_name == dt->m_property_name &&
+            m_reversed_property == dt->m_reversed_property;
     }
 }
 

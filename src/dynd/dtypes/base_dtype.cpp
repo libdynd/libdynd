@@ -120,8 +120,8 @@ std::ostream& dynd::operator<<(std::ostream& o, type_id_t tid)
             return (o << "align");
         case view_type_id:
             return (o << "view");
-        case date_property_type_id:
-            return (o << "date_property");
+        case property_type_id:
+            return (o << "property");
         case groupby_type_id:
             return (o << "groupby");
         default:

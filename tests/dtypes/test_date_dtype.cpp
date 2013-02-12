@@ -163,7 +163,7 @@ TEST(DateDType, DatePropertyConvertOfString) {
 
     // year property
     c = b.p("year");
-    EXPECT_EQ(date_property_type_id, c.get_udtype().get_type_id());
+    EXPECT_EQ(property_type_id, c.get_udtype().get_type_id());
     c = c.vals();
     EXPECT_EQ(make_strided_array_dtype(make_dtype<int>()), c.get_dtype());
     EXPECT_EQ(1931, c.at(0).as<int>());
@@ -172,7 +172,7 @@ TEST(DateDType, DatePropertyConvertOfString) {
 
     // weekday function
     c = b.f("weekday");
-    EXPECT_EQ(date_property_type_id, c.get_udtype().get_type_id());
+    EXPECT_EQ(property_type_id, c.get_udtype().get_type_id());
     c = c.vals();
     EXPECT_EQ(make_strided_array_dtype(make_dtype<int>()), c.get_dtype());
     EXPECT_EQ(5, c.at(0).as<int>());
@@ -375,7 +375,6 @@ TEST(DateDType, ReplaceOfConvert) {
 
 TEST(DateDType, NumPyCompatibleProperty) {
     int64_t vals64[] = {-16730, 0, 11001, numeric_limits<int64_t>::min()};
-    char *vals[] = {"1924-03-13", "1970-01-01", "2000-02-14", "NA"};
 
     ndobject a = vals64;
     ndobject a_date = a.view_scalars(make_reversed_property_dtype(make_date_dtype(),
