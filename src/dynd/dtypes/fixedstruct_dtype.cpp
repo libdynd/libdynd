@@ -549,7 +549,27 @@ void fixedstruct_dtype::get_dynamic_dtype_properties(const std::pair<std::string
 
 ///////// properties on the ndobject
 
-dtype fixedstruct_dtype::ndobject_parameters_dtype = make_fixedstruct_dtype(dtype(new void_pointer_dtype, false), "self");
+fixedstruct_dtype::fixedstruct_dtype(int, int)
+    : base_struct_dtype(fixedstruct_type_id, 0, 1, dtype_flag_none, 0)
+{
+    // Equivalent to make_fixedstruct_dtype(dtype(new void_pointer_dtype, false), "self");
+    // but hardcoded to break the dependency of fixedstruct_dtype::ndobject_parameters_dtype
+    m_field_types.push_back(dtype(new void_pointer_dtype, 0));
+    m_field_names.push_back("self");
+    m_data_offsets.push_back(0);
+    m_metadata_offsets.push_back(0);
+    m_memory_management = pod_memory_management;
+    // TODO: Handle object, and object+blockref memory management types as well
+    if (m_field_types[0].get_memory_management() == blockref_memory_management) {
+        m_memory_management = blockref_memory_management;
+    }
+    // If any fields require zero-initialization, flag the struct as requiring it
+    m_members.flags |= (m_field_types[0].get_flags()&dtype_flag_zeroinit);
+    m_members.alignment = (uint8_t)m_field_types[0].get_alignment();
+    m_members.metadata_size = m_field_types[0].get_metadata_size();
+    m_members.data_size = m_field_types[0].get_data_size();
+    // Leave m_ndobject_properties so there is no reference loop
+}
 
 static ndobject_preamble *property_get_ndobject_field(const ndobject_preamble *params, void *extra)
 {
@@ -568,6 +588,8 @@ static ndobject_preamble *property_get_ndobject_field(const ndobject_preamble *p
 
 void fixedstruct_dtype::create_ndobject_properties()
 {
+    dtype ndobject_parameters_dtype(new fixedstruct_dtype(0, 0), false);
+
     m_ndobject_properties.resize(m_field_types.size());
     for (size_t i = 0, i_end = m_field_types.size(); i != i_end; ++i) {
         // TODO: Transform the name into a valid Python symbol?

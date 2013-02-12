@@ -25,8 +25,9 @@ class fixedstruct_dtype : public base_struct_dtype {
 
     void create_ndobject_properties();
 
-    // Used as the parameters dtype for the ndobject properties callables
-    static dtype ndobject_parameters_dtype;
+    // Special constructor to break the property parameter cycle in
+    // create_ndobject_properties
+    fixedstruct_dtype(int, int);
 public:
     fixedstruct_dtype(const std::vector<dtype>& field_types, const std::vector<std::string>& field_names);
 
