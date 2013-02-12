@@ -549,9 +549,9 @@ size_t date_dtype::make_elwise_property_getter_kernel(
 size_t date_dtype::make_elwise_property_setter_kernel(
                 hierarchical_kernel<unary_single_operation_t> *out,
                 size_t offset_out,
-                const char *dst_metadata, size_t dst_property_index,
-                const char *src_metadata,
-                const eval::eval_context *ectx) const
+                const char *DYND_UNUSED(dst_metadata), size_t dst_property_index,
+                const char *DYND_UNUSED(src_metadata),
+                const eval::eval_context *DYND_UNUSED(ectx)) const
 {
     hierarchical_kernel_common_base *e = out->get_at<hierarchical_kernel_common_base>(offset_out);
     // TODO: Use an enum for the property index
