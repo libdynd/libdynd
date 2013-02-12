@@ -6,6 +6,7 @@
 #ifndef _DYND__HIERARCHICAL_KERNELS_HPP_
 #define _DYND__HIERARCHICAL_KERNELS_HPP_
 
+#include <stdlib.h>
 #include <stdexcept>
 
 #include <dynd/config.hpp>
