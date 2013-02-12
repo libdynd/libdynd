@@ -372,3 +372,23 @@ TEST(DateDType, ReplaceOfConvert) {
     // Call replace on it
     EXPECT_EQ("2013-03-13", a.f("replace", 2013).as<string>());
 }
+
+TEST(DateDType, NumPyCompatibleProperty) {
+    int64_t vals64[] = {-16730, 0, 11001, numeric_limits<int64_t>::min()};
+    char *vals[] = {"1924-03-13", "1970-01-01", "2000-02-14", "NA"};
+
+    ndobject a = vals64;
+    ndobject a_date = a.view_scalars(make_reversed_property_dtype(make_date_dtype(),
+                    make_dtype<int64_t>(), "days_after_1970_int64"));
+    // Reading from the 'int64 as date' view
+    EXPECT_EQ("1924-03-13", a_date.at(0).as<string>());
+    EXPECT_EQ("1970-01-01", a_date.at(1).as<string>());
+    EXPECT_EQ("2000-02-14", a_date.at(2).as<string>());
+    EXPECT_EQ("NA",         a_date.at(3).as<string>());
+
+    // Writing to the 'int64 as date' view
+    a_date.at(0).vals() = "1975-01-30";
+    EXPECT_EQ(1855, a.at(0).as<int64_t>());
+    a_date.at(0).vals() = "NA";
+    EXPECT_EQ(numeric_limits<int64_t>::min(), a.at(0).as<int64_t>());
+}

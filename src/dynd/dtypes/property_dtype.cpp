@@ -4,6 +4,7 @@
 //
 
 #include <dynd/dtypes/property_dtype.hpp>
+#include <dynd/dtypes/convert_dtype.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 
 using namespace std;
@@ -15,7 +16,9 @@ property_dtype::property_dtype(const dtype& operand_dtype, const std::string& pr
                     operand_dtype.get_data_size(), operand_dtype.get_alignment(), dtype_flag_scalar,
                     operand_dtype.get_metadata_size()),
             m_value_dtype(), m_operand_dtype(operand_dtype),
-            m_readable(false), m_writable(false), m_property_name(property_name),
+            m_readable(false), m_writable(false),
+            m_reversed_property(false),
+            m_property_name(property_name),
             m_property_index(0)
 {
     if (operand_dtype.value_dtype().is_builtin()) {
@@ -30,6 +33,41 @@ property_dtype::property_dtype(const dtype& operand_dtype, const std::string& pr
     m_value_dtype = m_operand_dtype.value_dtype().extended()->get_elwise_property_dtype(m_property_index);
 }
 
+property_dtype::property_dtype(const dtype& value_dtype, const dtype& operand_dtype,
+                const std::string& property_name)
+    : base_expression_dtype(date_property_type_id, expression_kind,
+                    operand_dtype.get_data_size(), operand_dtype.get_alignment(), dtype_flag_scalar,
+                    operand_dtype.get_metadata_size()),
+            m_value_dtype(value_dtype), m_operand_dtype(operand_dtype),
+            m_readable(false), m_writable(false),
+            m_reversed_property(true),
+            m_property_name(property_name),
+            m_property_index(0)
+{
+    if (value_dtype.is_builtin()) {
+        stringstream ss;
+        ss << "the dtype " << operand_dtype;
+        ss << " doesn't have a property \"" << property_name << "\"";
+        throw std::runtime_error(ss.str());
+    }
+    if (m_value_dtype.get_kind() == expression_kind) {
+        stringstream ss;
+        ss << "property_dtype: The destination dtype " << m_value_dtype;
+        ss << " should not be an expression_kind";
+        throw std::runtime_error(ss.str());
+    }
+
+    m_property_index = m_value_dtype.extended()->get_elwise_property_index(
+                    property_name, m_writable, m_readable);
+    // If the operand dtype doesn't match the property, add a
+    // convertion to the correct dtype
+    dtype property_dtype = m_value_dtype.extended()->get_elwise_property_dtype(
+                    m_property_index);
+    if (m_operand_dtype.value_dtype() != property_dtype) {
+        m_operand_dtype = make_convert_dtype(property_dtype, m_operand_dtype);
+    }
+}
+
 property_dtype::~property_dtype()
 {
 }
@@ -41,7 +79,13 @@ void property_dtype::print_data(std::ostream& DYND_UNUSED(o), const char *DYND_U
 
 void property_dtype::print_dtype(std::ostream& o) const
 {
-    o << "property<name=" << m_property_name << ", type=" << m_operand_dtype << ">";
+    if (!m_reversed_property) {
+        o << "property<name=" << m_property_name << ", operand=" << m_operand_dtype << ">";
+    } else {
+        o << "property<reversed, name=" << m_property_name;
+        o << ", value=" << m_value_dtype;
+        o << ", operand=" << m_operand_dtype << ">";
+    }
 }
 
 void property_dtype::get_shape(size_t i, intptr_t *out_shape) const
@@ -81,17 +125,32 @@ size_t property_dtype::make_operand_to_value_assignment_kernel(
                 const char *dst_metadata, const char *src_metadata,
                 const eval::eval_context *ectx) const
 {
-    if (m_readable) {
-        return m_operand_dtype.value_dtype().extended()->make_elwise_property_getter_kernel(
-                        out, offset_out,
-                        dst_metadata,
-                        src_metadata, m_property_index,
-                        ectx);
+    if (!m_reversed_property) {
+        if (m_readable) {
+            return m_operand_dtype.value_dtype().extended()->make_elwise_property_getter_kernel(
+                            out, offset_out,
+                            dst_metadata,
+                            src_metadata, m_property_index,
+                            ectx);
+        } else {
+            stringstream ss;
+            ss << "cannot read from property \"" << m_property_name << "\"";
+            ss << " of dtype " << m_operand_dtype;
+            throw runtime_error(ss.str());
+        }
     } else {
-        stringstream ss;
-        ss << "cannot read from property \"" << m_property_name << "\"";
-        ss << " of dtype " << m_operand_dtype;
-        throw runtime_error(ss.str());
+        if (m_readable) {
+            return m_value_dtype.extended()->make_elwise_property_setter_kernel(
+                            out, offset_out,
+                            dst_metadata, m_property_index,
+                            src_metadata,
+                            ectx);
+        } else {
+            stringstream ss;
+            ss << "cannot write to property \"" << m_property_name << "\"";
+            ss << " of dtype " << m_value_dtype;
+            throw runtime_error(ss.str());
+        }
     }
 }
 
@@ -101,17 +160,32 @@ size_t property_dtype::make_value_to_operand_assignment_kernel(
                 const char *dst_metadata, const char *src_metadata,
                 const eval::eval_context *ectx) const
 {
-    if (m_readable) {
-        return m_operand_dtype.value_dtype().extended()->make_elwise_property_setter_kernel(
-                        out, offset_out,
-                        dst_metadata, m_property_index,
-                        src_metadata,
-                        ectx);
+    if (!m_reversed_property) {
+        if (m_readable) {
+            return m_operand_dtype.value_dtype().extended()->make_elwise_property_setter_kernel(
+                            out, offset_out,
+                            dst_metadata, m_property_index,
+                            src_metadata,
+                            ectx);
+        } else {
+            stringstream ss;
+            ss << "cannot write to property \"" << m_property_name << "\"";
+            ss << " of dtype " << m_operand_dtype;
+            throw runtime_error(ss.str());
+        }
     } else {
-        stringstream ss;
-        ss << "cannot write to property \"" << m_property_name << "\"";
-        ss << " of dtype " << m_operand_dtype;
-        throw runtime_error(ss.str());
+        if (m_readable) {
+            return m_value_dtype.extended()->make_elwise_property_getter_kernel(
+                            out, offset_out,
+                            dst_metadata,
+                            src_metadata, m_property_index,
+                            ectx);
+        } else {
+            stringstream ss;
+            ss << "cannot read from property \"" << m_property_name << "\"";
+            ss << " of dtype " << m_value_dtype;
+            throw runtime_error(ss.str());
+        }
     }
 }
 
@@ -128,6 +202,10 @@ dtype property_dtype::with_replaced_storage_dtype(const dtype& replacement_dtype
             ss << ", does not match the replacement's value dtype, " << replacement_dtype.value_dtype();
             throw std::runtime_error(ss.str());
         }
-        return dtype(new property_dtype(replacement_dtype, m_property_name), false);
+        if (!m_reversed_property) {
+            return dtype(new property_dtype(replacement_dtype, m_property_name), false);
+        } else {
+            return dtype(new property_dtype(m_value_dtype, replacement_dtype, m_property_name), false);
+        }
     }
 }

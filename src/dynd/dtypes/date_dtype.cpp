@@ -421,28 +421,28 @@ void date_dtype::get_dynamic_ndobject_functions(const std::pair<std::string, gfu
 ///////// property accessor kernels (used by date_property_dtype)
 
 namespace {
-    void property_kernel_year_single(char *dst, const char *src, hierarchical_kernel_common_base *DYND_UNUSED(extra))
+    void get_property_kernel_year_single(char *dst, const char *src, hierarchical_kernel_common_base *DYND_UNUSED(extra))
     {
         datetime::date_ymd fld;
         datetime::days_to_ymd(*reinterpret_cast<const int32_t *>(src), fld);
         *reinterpret_cast<int32_t *>(dst) = fld.year;
     }
 
-    void property_kernel_month_single(char *dst, const char *src, hierarchical_kernel_common_base *DYND_UNUSED(extra))
+    void get_property_kernel_month_single(char *dst, const char *src, hierarchical_kernel_common_base *DYND_UNUSED(extra))
     {
         datetime::date_ymd fld;
         datetime::days_to_ymd(*reinterpret_cast<const int32_t *>(src), fld);
         *reinterpret_cast<int32_t *>(dst) = fld.month;
     }
 
-    void property_kernel_day_single(char *dst, const char *src, hierarchical_kernel_common_base *DYND_UNUSED(extra))
+    void get_property_kernel_day_single(char *dst, const char *src, hierarchical_kernel_common_base *DYND_UNUSED(extra))
     {
         datetime::date_ymd fld;
         datetime::days_to_ymd(*reinterpret_cast<const int32_t *>(src), fld);
         *reinterpret_cast<int32_t *>(dst) = fld.day;
     }
 
-    void property_kernel_weekday_single(char *dst, const char *src, hierarchical_kernel_common_base *DYND_UNUSED(extra))
+    void get_property_kernel_weekday_single(char *dst, const char *src, hierarchical_kernel_common_base *DYND_UNUSED(extra))
     {
         datetime::date_val_t days = *reinterpret_cast<const int32_t *>(src);
         // 1970-01-05 is Monday
@@ -451,6 +451,26 @@ namespace {
             weekday += 7;
         }
         *reinterpret_cast<int32_t *>(dst) = weekday;
+    }
+
+    void get_property_kernel_days_after_1970_int64(char *dst, const char *src, hierarchical_kernel_common_base *DYND_UNUSED(extra))
+    {
+        datetime::date_val_t days = *reinterpret_cast<const int32_t *>(src);
+        if (days == DYND_DATE_NA) {
+            *reinterpret_cast<int64_t *>(dst) = numeric_limits<int64_t>::min();
+        } else {
+            *reinterpret_cast<int64_t *>(dst) = days;
+        }
+    }
+
+    void set_property_kernel_days_after_1970_int64(char *dst, const char *src, hierarchical_kernel_common_base *DYND_UNUSED(extra))
+    {
+        int64_t days = *reinterpret_cast<const int64_t *>(src);
+        if (days == numeric_limits<int64_t>::min()) {
+            *reinterpret_cast<int32_t *>(dst) = DYND_DATE_NA;
+        } else {
+            *reinterpret_cast<int32_t *>(dst) = static_cast<datetime::date_val_t>(days);
+        }
     }
 } // anonymous namespace
 
@@ -468,6 +488,10 @@ size_t date_dtype::get_elwise_property_index(const std::string& property_name,
         return 2;
     } else if (property_name == "weekday") {
         return 3;
+    } else if (property_name == "days_after_1970_int64") {
+        // A read/write property for NumPy datetime64[D] compatibility
+        out_writable = true;
+        return 4;
     } else {
         stringstream ss;
         ss << "dynd date dtype does not have a kernel for property " << property_name;
@@ -475,10 +499,19 @@ size_t date_dtype::get_elwise_property_index(const std::string& property_name,
     }
 }
 
-dtype date_dtype::get_elwise_property_dtype(size_t DYND_UNUSED(property_index)) const
+dtype date_dtype::get_elwise_property_dtype(size_t property_index) const
 {
-    // All the properties are int32 for now
-    return make_dtype<int32_t>();
+    switch (property_index) {
+        case 0:
+        case 1:
+        case 2:
+        case 3:
+            return make_dtype<int32_t>();
+        case 4:
+            return make_dtype<int64_t>();
+        default:
+            return make_dtype<void>();
+    }
 }
 
 size_t date_dtype::make_elwise_property_getter_kernel(
@@ -492,20 +525,43 @@ size_t date_dtype::make_elwise_property_getter_kernel(
     // TODO: Use an enum for the property index
     switch (src_property_index) {
         case 0:
-            e->set_function<unary_single_operation_t>(&property_kernel_year_single);
+            e->set_function<unary_single_operation_t>(&get_property_kernel_year_single);
             return offset_out + sizeof(hierarchical_kernel_common_base);
         case 1:
-            e->set_function<unary_single_operation_t>(&property_kernel_month_single);
+            e->set_function<unary_single_operation_t>(&get_property_kernel_month_single);
             return offset_out + sizeof(hierarchical_kernel_common_base);
         case 2:
-            e->set_function<unary_single_operation_t>(&property_kernel_day_single);
+            e->set_function<unary_single_operation_t>(&get_property_kernel_day_single);
             return offset_out + sizeof(hierarchical_kernel_common_base);
         case 3:
-            e->set_function<unary_single_operation_t>(&property_kernel_weekday_single);
+            e->set_function<unary_single_operation_t>(&get_property_kernel_weekday_single);
+            return offset_out + sizeof(hierarchical_kernel_common_base);
+        case 4:
+            e->set_function<unary_single_operation_t>(&get_property_kernel_days_after_1970_int64);
             return offset_out + sizeof(hierarchical_kernel_common_base);
         default:
             stringstream ss;
             ss << "dynd date dtype given an invalid property index" << src_property_index;
+            throw runtime_error(ss.str());
+    }
+}
+
+size_t date_dtype::make_elwise_property_setter_kernel(
+                hierarchical_kernel<unary_single_operation_t> *out,
+                size_t offset_out,
+                const char *dst_metadata, size_t dst_property_index,
+                const char *src_metadata,
+                const eval::eval_context *ectx) const
+{
+    hierarchical_kernel_common_base *e = out->get_at<hierarchical_kernel_common_base>(offset_out);
+    // TODO: Use an enum for the property index
+    switch (dst_property_index) {
+        case 4:
+            e->set_function<unary_single_operation_t>(&set_property_kernel_days_after_1970_int64);
+            return offset_out + sizeof(hierarchical_kernel_common_base);
+        default:
+            stringstream ss;
+            ss << "dynd date dtype given an invalid property index" << dst_property_index;
             throw runtime_error(ss.str());
     }
 }

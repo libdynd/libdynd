@@ -76,12 +76,16 @@ void datetime::parse_iso_8601_datetime(const char *str, size_t len,
     out->day = 1;
 
     /*
-     * Convert the empty string and case-variants of "NaT" to not-a-time.
+     * Convert the empty string, case-variants of "NaT",
+     * and case-variants of "NA" to not-a-time.
      */
     if (len <= 0 || (len == 3 &&
                         tolower(str[0]) == 'n' &&
                         tolower(str[1]) == 'a' &&
-                        tolower(str[2]) == 't')) {
+                        tolower(str[2]) == 't') ||
+                    (len == 2 &&
+                        tolower(str[0]) == 'n' &&
+                        tolower(str[1]) == 'a')) {
         out->year = DATETIME_DATETIME_NAT;
 
         /*
@@ -97,6 +101,7 @@ void datetime::parse_iso_8601_datetime(const char *str, size_t len,
         if (out_special != NULL) {
             *out_special = true;
         }
+        return;
     }
 
     /* The string "now" resolves to the current UTC time */
@@ -677,19 +682,18 @@ size_t datetime::make_iso_8601_datetime(const datetime_fields *dts, char *outstr
     ptrdiff_t sublen = outlen;
     int tmplen;
 
-    /* Handle NaT, and treat a datetime with generic units as NaT */
+    /* Handle NaT, and treat a datetime with generic units as NA */
     if (dts->year == DATETIME_DATETIME_NAT || unit == datetime_unit_unspecified) {
-        if (outlen < 3) {
+        if (outlen < 2) {
             goto string_too_short;
         }
         outstr[0] = 'N';
-        outstr[1] = 'a';
-        outstr[2] = 'T';
-        if (outlen > 3) {
-            outstr[3] = '\0';
+        outstr[1] = 'A';
+        if (outlen > 2) {
+            outstr[2] = '\0';
         }
 
-        return 3;
+        return 2;
     }
 
     /*

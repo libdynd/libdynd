@@ -15,10 +15,20 @@ namespace dynd {
 class property_dtype : public base_expression_dtype {
     dtype m_value_dtype, m_operand_dtype;
     bool m_readable, m_writable;
+    // If this is true, the property is actually on
+    // the value_dtype, and the getters/setters are
+    // exchanged.
+    bool m_reversed_property;
     std::string m_property_name;
     size_t m_property_index;
 public:
+    /** Constructs a normal property dtype */
     property_dtype(const dtype& operand_dtype, const std::string& property_name);
+    /**
+     * Constructs a reversed property dtype (property is from value_dtype
+     * instead of operand_dtype).
+     */
+    property_dtype(const dtype& value_dtype, const dtype& operand_dtype, const std::string& property_name);
 
     virtual ~property_dtype();
 
@@ -65,6 +75,15 @@ public:
  */
 inline dtype make_property_dtype(const dtype& operand_dtype, const std::string& property_name) {
     return dtype(new property_dtype(operand_dtype, property_name), false);
+}
+
+/**
+ * Makes a reversed property dtype for viewing the operand as the output
+ * of a property of value_dtype (with its getters/setters exchanged).
+ */
+inline dtype make_reversed_property_dtype(const dtype& value_dtype,
+                const dtype& operand_dtype, const std::string& property_name) {
+    return dtype(new property_dtype(value_dtype, operand_dtype, property_name), false);
 }
 
 } // namespace dynd

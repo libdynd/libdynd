@@ -117,7 +117,7 @@ std::string make_iso_8601_datetime(const datetime_fields *dtf,
 
 inline std::string make_iso_8601_date(date_val_t date, datetime_unit_t unit = datetime_unit_day) {
     datetime_fields dtf;
-    dtf.set_from_datetime_val(date, unit);
+    dtf.set_from_date_val(date, unit);
     return make_iso_8601_datetime(&dtf, false, unit);
 }
 

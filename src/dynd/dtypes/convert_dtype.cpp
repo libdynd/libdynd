@@ -20,7 +20,8 @@ convert_dtype::convert_dtype(const dtype& value_dtype, const dtype& operand_dtyp
     // away the expression part of the given value_dtype.
     if (m_value_dtype.get_kind() == expression_kind) {
         std::stringstream ss;
-        ss << "convert_dtype: The destination dtype " << m_value_dtype << " should not be an expression_kind";
+        ss << "convert_dtype: The destination dtype " << m_value_dtype;
+        ss << " should not be an expression_kind";
         throw std::runtime_error(ss.str());
     }
 
