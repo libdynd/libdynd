@@ -42,7 +42,7 @@ template <typename T> struct make_parameter_dtype {inline static dtype make() {
 template <typename T> struct make_parameter_dtype<T &> : public make_parameter_dtype<T> {};
 template <typename T> struct make_parameter_dtype<const T> : public make_parameter_dtype<T> {};
 template <typename T, int N> struct make_parameter_dtype<T[N]> {inline static dtype make() {
-        return make_fixedarray_dtype(make_dtype<T>(), N);
+        return make_fixedarray_dtype(N, make_dtype<T>());
     }};
 // Use void* to pass ndobject and dtype as parameters, correctness currently will
 // rely on using them in the right context. To pass these properly will require

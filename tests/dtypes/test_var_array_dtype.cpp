@@ -454,7 +454,7 @@ TEST(VarArrayDType, AssignVarFixedKernel) {
     k.reset();
 
     // Assignment initialized var array -> fixed array
-    a = ndobject(make_fixedarray_dtype(make_dtype<int>(), 3));
+    a = ndobject(make_fixedarray_dtype(3, make_dtype<int>()));
     a.vals() = 0;
     b = parse_json("VarDim, int32", "[3, 5, 7]");
     EXPECT_EQ(fixedarray_type_id, a.get_dtype().get_type_id());
@@ -468,7 +468,7 @@ TEST(VarArrayDType, AssignVarFixedKernel) {
     k.reset();
 
     // Error assignment initialized var array -> fixed array
-    a = ndobject(make_fixedarray_dtype(make_dtype<int>(), 3));
+    a = ndobject(make_fixedarray_dtype(3, make_dtype<int>()));
     a.vals() = 0;
     b = parse_json("VarDim, int32", "[3, 5, 7, 9]");
     EXPECT_EQ(fixedarray_type_id, a.get_dtype().get_type_id());
@@ -481,7 +481,7 @@ TEST(VarArrayDType, AssignVarFixedKernel) {
     k.reset();
 
     // Error assignment uninitialized var array -> strided array
-    a = ndobject(make_fixedarray_dtype(make_dtype<int>(), 3));
+    a = ndobject(make_fixedarray_dtype(3, make_dtype<int>()));
     a.vals() = 0;
     b = ndobject(make_var_array_dtype(make_dtype<int>()));
     EXPECT_EQ(fixedarray_type_id, a.get_dtype().get_type_id());

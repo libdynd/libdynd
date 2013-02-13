@@ -46,8 +46,8 @@ TEST(DataShapeParser, StridedDim) {
 }
 
 TEST(DataShapeParser, FixedDim) {
-    EXPECT_EQ(make_fixedarray_dtype(make_dtype<dynd_bool>(), 3), dtype_from_datashape("3, bool"));
-    EXPECT_EQ(make_fixedarray_dtype(make_fixedarray_dtype(make_dtype<float>(), 3), 4),
+    EXPECT_EQ(make_fixedarray_dtype(3, make_dtype<dynd_bool>()), dtype_from_datashape("3, bool"));
+    EXPECT_EQ(make_fixedarray_dtype(4, make_fixedarray_dtype(3, make_dtype<float>())),
                     dtype_from_datashape("4, 3, float32"));
 }
 
@@ -58,12 +58,12 @@ TEST(DataShapeParser, VarDim) {
 }
 
 TEST(DataShapeParser, StridedFixedDim) {
-    EXPECT_EQ(make_strided_array_dtype(make_fixedarray_dtype(make_dtype<float>(), 3)),
+    EXPECT_EQ(make_strided_array_dtype(make_fixedarray_dtype(3, make_dtype<float>())),
                     dtype_from_datashape("M, 3, float32"));
 }
 
 TEST(DataShapeParser, StridedVarFixedDim) {
-    EXPECT_EQ(make_strided_array_dtype(make_var_array_dtype(make_fixedarray_dtype(make_dtype<float>(), 3))),
+    EXPECT_EQ(make_strided_array_dtype(make_var_array_dtype(make_fixedarray_dtype(3, make_dtype<float>()))),
                     dtype_from_datashape("M, VarDim, 3, float32"));
 }
 

@@ -318,9 +318,9 @@ static double five_parameters(float (&x)[3], uint16_t a1, uint32_t a2, uint64_t 
 TEST(GFuncCallable, FiveParameters) {
     // Create the callable
     gfunc::callable c = gfunc::make_callable(&five_parameters, "x", "a1", "a2", "a3", "y");
-    EXPECT_EQ(make_fixedstruct_dtype(make_fixedarray_dtype(make_dtype<float>(), 3), "x", make_dtype<uint16_t>(), "a1",
+    EXPECT_EQ(make_fixedstruct_dtype(make_fixedarray_dtype(3, make_dtype<float>()), "x", make_dtype<uint16_t>(), "a1",
                     make_dtype<uint32_t>(), "a2", make_dtype<uint64_t>(), "a3",
-                    make_fixedarray_dtype(make_dtype<double>(), 3), "y"),
+                    make_fixedarray_dtype(3, make_dtype<double>()), "y"),
             c.get_parameters_dtype());
 
     // Call it and see that it gave what we want

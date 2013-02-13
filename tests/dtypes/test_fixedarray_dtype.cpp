@@ -23,7 +23,7 @@ TEST(FixedArrayDType, Create) {
     const fixedarray_dtype *fad;
 
     // Strings with various encodings and sizes
-    d = make_fixedarray_dtype(make_dtype<int32_t>(), 3);
+    d = make_fixedarray_dtype(3, make_dtype<int32_t>());
     EXPECT_EQ(fixedarray_type_id, d.get_type_id());
     EXPECT_EQ(uniform_array_kind, d.get_kind());
     EXPECT_EQ(4u, d.get_alignment());
@@ -39,7 +39,7 @@ TEST(FixedArrayDType, Create) {
     EXPECT_EQ(4, fad->get_fixed_stride());
     EXPECT_EQ(3u, fad->get_fixed_dim_size());
 
-    d = make_fixedarray_dtype(make_dtype<int32_t>(), 1);
+    d = make_fixedarray_dtype(1, make_dtype<int32_t>());
     EXPECT_EQ(fixedarray_type_id, d.get_type_id());
     EXPECT_EQ(uniform_array_kind, d.get_kind());
     EXPECT_EQ(4u, d.get_alignment());
@@ -52,10 +52,10 @@ TEST(FixedArrayDType, Create) {
 
 TEST(FixedArrayDType, CreateCOrder) {
     intptr_t shape[3] = {2, 3, 4};
-    dtype d = make_fixedarray_dtype(make_dtype<int16_t>(), 3, shape, NULL);
+    dtype d = make_fixedarray_dtype(3, shape, make_dtype<int16_t>(), NULL);
     EXPECT_EQ(fixedarray_type_id, d.get_type_id());
-    EXPECT_EQ(make_fixedarray_dtype(make_dtype<int16_t>(), 2, shape+1, NULL), d.at(0));
-    EXPECT_EQ(make_fixedarray_dtype(make_dtype<int16_t>(), 1, shape+2, NULL), d.at(0,0));
+    EXPECT_EQ(make_fixedarray_dtype(2, shape+1, make_dtype<int16_t>(), NULL), d.at(0));
+    EXPECT_EQ(make_fixedarray_dtype(1, shape+2, make_dtype<int16_t>(), NULL), d.at(0,0));
     EXPECT_EQ(make_dtype<int16_t>(), d.at(0,0,0));
     // Check that the shape is right and the strides are in F-order
     EXPECT_EQ(2u, static_cast<const fixedarray_dtype *>(d.extended())->get_fixed_dim_size());
@@ -69,7 +69,7 @@ TEST(FixedArrayDType, CreateCOrder) {
 TEST(FixedArrayDType, CreateFOrder) {
     int axis_perm[3] = {0, 1, 2};
     intptr_t shape[3] = {2, 3, 4};
-    dtype d = make_fixedarray_dtype(make_dtype<int16_t>(), 3, shape, axis_perm);
+    dtype d = make_fixedarray_dtype(3, shape, make_dtype<int16_t>(), axis_perm);
     EXPECT_EQ(fixedarray_type_id, d.get_type_id());
     EXPECT_EQ(fixedarray_type_id, d.at(0).get_type_id());
     EXPECT_EQ(fixedarray_type_id, d.at(0,0).get_type_id());
@@ -87,10 +87,10 @@ TEST(FixedArrayDType, Basic) {
     ndobject a;
     float vals[3] = {1.5f, 2.5f, -1.5f};
 
-    a = ndobject(make_fixedarray_dtype(make_dtype<float>(), 3));
+    a = ndobject(make_fixedarray_dtype(3, make_dtype<float>()));
     a.vals() = vals;
 
-    EXPECT_EQ(make_fixedarray_dtype(make_dtype<float>(), 3), a.get_dtype());
+    EXPECT_EQ(make_fixedarray_dtype(3, make_dtype<float>()), a.get_dtype());
     EXPECT_EQ(1u, a.get_shape().size());
     EXPECT_EQ(3, a.get_shape()[0]);
     EXPECT_EQ(1u, a.get_strides().size());
@@ -111,7 +111,7 @@ TEST(FixedArrayDType, AssignKernel) {
     hierarchical_kernel<unary_single_operation_t> k;
 
     // Assignment scalar -> fixed array
-    a = ndobject(make_fixedarray_dtype(make_dtype<int>(), 3));
+    a = ndobject(make_fixedarray_dtype(3, make_dtype<int>()));
     a.vals() = 0;
     b = 9.0;
     EXPECT_EQ(fixedarray_type_id, a.get_dtype().get_type_id());
@@ -124,7 +124,7 @@ TEST(FixedArrayDType, AssignKernel) {
     k.reset();
 
     // Assignment fixed array -> fixed array
-    a = ndobject(make_fixedarray_dtype(make_dtype<int>(), 3));
+    a = ndobject(make_fixedarray_dtype(3, make_dtype<int>()));
     a.vals() = 0;
     b = parse_json("3, int32", "[3, 5, 7]");
     EXPECT_EQ(fixedarray_type_id, a.get_dtype().get_type_id());
@@ -153,7 +153,7 @@ TEST(FixedArrayDType, AssignFixedStridedKernel) {
     int vals_int_single[] = {9};
 
     // Assignment strided array -> fixed array
-    a = ndobject(make_fixedarray_dtype(make_dtype<int>(), 3));
+    a = ndobject(make_fixedarray_dtype(3, make_dtype<int>()));
     a.vals() = 0;
     b = vals_int;
     EXPECT_EQ(fixedarray_type_id, a.get_dtype().get_type_id());
@@ -167,7 +167,7 @@ TEST(FixedArrayDType, AssignFixedStridedKernel) {
     k.reset();
 
     // Broadcasting assignment strided array -> fixed array
-    a = ndobject(make_fixedarray_dtype(make_dtype<int>(), 3));
+    a = ndobject(make_fixedarray_dtype(3, make_dtype<int>()));
     a.vals() = 0;
     b = vals_int_single;
     EXPECT_EQ(fixedarray_type_id, a.get_dtype().get_type_id());

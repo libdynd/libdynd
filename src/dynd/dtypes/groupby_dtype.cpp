@@ -41,8 +41,8 @@ groupby_dtype::groupby_dtype(const dtype& data_values_dtype,
                     make_pointer_dtype(by_values_dtype), "by");
     m_members.metadata_size = m_operand_dtype.get_metadata_size();
     const categorical_dtype *cd = static_cast<const categorical_dtype *>(m_groups_dtype.extended());
-    m_value_dtype = make_fixedarray_dtype(make_var_array_dtype(
-                    data_values_dtype.at_single(0)), cd->get_category_count());
+    m_value_dtype = make_fixedarray_dtype(cd->get_category_count(),
+                    make_var_array_dtype(data_values_dtype.at_single(0)));
 }
 
 groupby_dtype::~groupby_dtype()

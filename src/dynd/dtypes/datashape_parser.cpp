@@ -277,7 +277,7 @@ static dtype parse_rhs_expression(const char *&begin, const char *end, map<strin
                 } else if (shape[i] == -1) {
                     result = make_var_array_dtype(result);
                 } else {
-                    result = make_fixedarray_dtype(result, shape[i]);
+                    result = make_fixedarray_dtype(shape[i], result);
                 }
             }
         }
