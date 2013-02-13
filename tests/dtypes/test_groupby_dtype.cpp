@@ -92,11 +92,12 @@ TEST(GroupByDType, MediumDeduceGroups) {
 
 TEST(GroupByDType, Struct) {
     const char *gender_cats_vals[] = {"F", "M"};
-    ndobject gender_cats = ndobject(gender_cats_vals).cast_scalars(make_fixedstring_dtype(string_encoding_ascii, 1)).vals();
+    ndobject gender_cats = ndobject(gender_cats_vals).cast_scalars(
+                    make_fixedstring_dtype(1, string_encoding_ascii)).vals();
 
     // Create a simple structured array
     dtype d = make_fixedstruct_dtype(make_string_dtype(), "name", make_dtype<float>(), "height",
-                    make_fixedstring_dtype(string_encoding_ascii, 1), "gender");
+                    make_fixedstring_dtype(1, string_encoding_ascii), "gender");
     ndobject a = make_strided_ndobject(5, d);
     const char *name_vals[] = {"Paul", "Jennifer", "Frank", "Louise", "Anne"};
     float height_vals[] = {171.5f, 156.25f, 177.0f, 164.75f, 170.5f};
@@ -143,7 +144,7 @@ TEST(GroupByDType, StructUnsortedCats) {
 
     // Create a simple structured array
     dtype d = make_fixedstruct_dtype(make_string_dtype(), "name", make_dtype<float>(), "height",
-                    make_fixedstring_dtype(string_encoding_ascii, 1), "gender");
+                    make_fixedstring_dtype(1, string_encoding_ascii), "gender");
     ndobject a = make_strided_ndobject(5, d);
     const char *name_vals[] = {"Paul", "Jennifer", "Frank", "Louise", "Anne"};
     float height_vals[] = {171.5f, 156.25f, 177.0f, 164.75f, 170.5f};

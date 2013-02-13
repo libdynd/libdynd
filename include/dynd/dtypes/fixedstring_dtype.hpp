@@ -21,7 +21,7 @@ class fixedstring_dtype : public base_string_dtype {
     string_encoding_t m_encoding;
 
 public:
-    fixedstring_dtype(string_encoding_t encoding, intptr_t stringsize);
+    fixedstring_dtype(intptr_t stringsize, string_encoding_t encoding);
 
     virtual ~fixedstring_dtype();
 
@@ -69,8 +69,9 @@ public:
                     const eval::eval_context *ectx) const;
 };
 
-inline dtype make_fixedstring_dtype(string_encoding_t encoding, intptr_t stringsize) {
-    return dtype(new fixedstring_dtype(encoding, stringsize), false);
+inline dtype make_fixedstring_dtype(intptr_t stringsize,
+                string_encoding_t encoding = string_encoding_utf_8) {
+    return dtype(new fixedstring_dtype(stringsize, encoding), false);
 }
 
 } // namespace dynd

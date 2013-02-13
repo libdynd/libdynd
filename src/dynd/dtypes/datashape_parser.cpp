@@ -62,10 +62,10 @@ namespace {
             builtin_types["cfloat32"] = builtin_types["complex64"] = make_dtype<complex<float> >();
             builtin_types["cfloat64"] = builtin_types["complex128"] = make_dtype<complex<double> >();
             builtin_types["string"] = make_string_dtype(string_encoding_utf_8);
-            builtin_types["string1"] = make_fixedstring_dtype(string_encoding_utf_8, 1);
-            builtin_types["string2"] = make_fixedstring_dtype(string_encoding_utf_8, 2);
-            builtin_types["string3"] = make_fixedstring_dtype(string_encoding_utf_8, 3);
-            builtin_types["string4"] = make_fixedstring_dtype(string_encoding_utf_8, 4);
+            builtin_types["string1"] = make_fixedstring_dtype(1, string_encoding_utf_8);
+            builtin_types["string2"] = make_fixedstring_dtype(2, string_encoding_utf_8);
+            builtin_types["string3"] = make_fixedstring_dtype(3, string_encoding_utf_8);
+            builtin_types["string4"] = make_fixedstring_dtype(4, string_encoding_utf_8);
             builtin_types["json"] = make_json_dtype();
             builtin_types["date"] = make_date_dtype();
             builtin_types["bytes"] = make_bytes_dtype(1);

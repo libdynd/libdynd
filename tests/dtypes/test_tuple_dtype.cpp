@@ -61,7 +61,7 @@ TEST(TupleDType, CreateThreeField) {
     // Tuple with three fields
     dtype d1 = make_dtype<int64_t>();
     dtype d2 = make_dtype<int32_t>();
-    dtype d3 = make_fixedstring_dtype(string_encoding_utf_8, 5);
+    dtype d3 = make_fixedstring_dtype(5, string_encoding_utf_8);
     dt = make_tuple_dtype(d1, d2, d3);
     EXPECT_EQ(tuple_type_id, dt.get_type_id());
     EXPECT_EQ(24u, dt.get_data_size());
@@ -73,7 +73,7 @@ TEST(TupleDType, CreateThreeField) {
     EXPECT_EQ(3u, tdt->get_offsets().size());
     EXPECT_EQ(make_dtype<int64_t>(), tdt->get_fields()[0]);
     EXPECT_EQ(make_dtype<int32_t>(), tdt->get_fields()[1]);
-    EXPECT_EQ(make_fixedstring_dtype(string_encoding_utf_8, 5), tdt->get_fields()[2]);
+    EXPECT_EQ(make_fixedstring_dtype(5, string_encoding_utf_8), tdt->get_fields()[2]);
     EXPECT_EQ(0u, tdt->get_offsets()[0]);
     EXPECT_EQ(8u, tdt->get_offsets()[1]);
     EXPECT_EQ(12u, tdt->get_offsets()[2]);

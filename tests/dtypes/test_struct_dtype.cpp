@@ -62,7 +62,7 @@ TEST(StructDType, CreateThreeField) {
     // Struct with three fields
     dtype d1 = make_dtype<int64_t>();
     dtype d2 = make_dtype<int32_t>();
-    dtype d3 = make_fixedstring_dtype(string_encoding_utf_8, 5);
+    dtype d3 = make_fixedstring_dtype(5, string_encoding_utf_8);
     dt = make_struct_dtype(d1, "x", d2, "y", d3, "z");
     EXPECT_EQ(struct_type_id, dt.get_type_id());
     EXPECT_EQ(0u, dt.get_data_size());
@@ -73,7 +73,7 @@ TEST(StructDType, CreateThreeField) {
     EXPECT_EQ(3u, tdt->get_field_count());
     EXPECT_EQ(make_dtype<int64_t>(), tdt->get_field_types()[0]);
     EXPECT_EQ(make_dtype<int32_t>(), tdt->get_field_types()[1]);
-    EXPECT_EQ(make_fixedstring_dtype(string_encoding_utf_8, 5), tdt->get_field_types()[2]);
+    EXPECT_EQ(make_fixedstring_dtype(5, string_encoding_utf_8), tdt->get_field_types()[2]);
     EXPECT_EQ("x", tdt->get_field_names()[0]);
     EXPECT_EQ("y", tdt->get_field_names()[1]);
     EXPECT_EQ("z", tdt->get_field_names()[2]);
@@ -85,7 +85,7 @@ TEST(StructDType, ReplaceScalarTypes) {
     // Struct with three fields
     dtype d1 = make_dtype<std::complex<double> >();
     dtype d2 = make_dtype<int32_t>();
-    dtype d3 = make_fixedstring_dtype(string_encoding_utf_8, 5);
+    dtype d3 = make_fixedstring_dtype(5, string_encoding_utf_8);
     dt = make_struct_dtype(d1, "x", d2, "y", d3, "z");
     dt2 = dt.with_replaced_scalar_types(make_dtype<int16_t>());
     EXPECT_EQ(make_struct_dtype(
@@ -101,7 +101,7 @@ TEST(StructDType, DTypeAt) {
     // Struct with three fields
     dtype d1 = make_dtype<std::complex<double> >();
     dtype d2 = make_dtype<int32_t>();
-    dtype d3 = make_fixedstring_dtype(string_encoding_utf_8, 5);
+    dtype d3 = make_fixedstring_dtype(5, string_encoding_utf_8);
     dt = make_struct_dtype(d1, "x", d2, "y", d3, "z");
 
     // indexing into a dtype with a slice produces another
@@ -117,7 +117,7 @@ TEST(StructDType, CanonicalDType) {
     // Struct with three fields
     dtype d1 = make_convert_dtype<std::complex<double>, float>();
     dtype d2 = make_byteswap_dtype<int32_t>();
-    dtype d3 = make_fixedstring_dtype(string_encoding_utf_32, 5);
+    dtype d3 = make_fixedstring_dtype(5, string_encoding_utf_32);
     dt = make_struct_dtype(d1, "x", d2, "y", d3, "z");
     EXPECT_EQ(make_struct_dtype(make_dtype<std::complex<double> >(), "x",
                                 make_dtype<int32_t>(), "y",
@@ -128,7 +128,7 @@ TEST(StructDType, CanonicalDType) {
 TEST(StructDType, IsExpression) {
     dtype d1 = make_dtype<float>();
     dtype d2 = make_byteswap_dtype<int32_t>();
-    dtype d3 = make_fixedstring_dtype(string_encoding_utf_32, 5);
+    dtype d3 = make_fixedstring_dtype(5, string_encoding_utf_32);
     dtype d = make_struct_dtype(d1, "x", d2, "y", d3, "z");
 
     EXPECT_TRUE(d.is_expression());

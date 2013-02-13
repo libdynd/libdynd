@@ -154,11 +154,14 @@ TEST(DateDType, DateProperties) {
 TEST(DateDType, DatePropertyConvertOfString) {
     ndobject a, b, c;
     const char *strs[] = {"1931-12-12", "2013-05-14", "2012-12-25"};
-    a = ndobject(strs).cast_scalars(make_fixedstring_dtype(string_encoding_ascii, 10)).vals();
+    a = ndobject(strs).cast_scalars(make_fixedstring_dtype(10, string_encoding_ascii)).vals();
     b = a.cast_scalars(make_date_dtype());
-    EXPECT_EQ(make_strided_array_dtype(make_fixedstring_dtype(string_encoding_ascii, 10)),
+    EXPECT_EQ(make_strided_array_dtype(
+                    make_fixedstring_dtype(10, string_encoding_ascii)),
                     a.get_dtype());
-    EXPECT_EQ(make_strided_array_dtype(make_convert_dtype(make_date_dtype(), make_fixedstring_dtype(string_encoding_ascii, 10))),
+    EXPECT_EQ(make_strided_array_dtype(
+                    make_convert_dtype(make_date_dtype(),
+                        make_fixedstring_dtype(10, string_encoding_ascii))),
                     b.get_dtype());
 
     // year property

@@ -20,32 +20,32 @@ TEST(FixedstringDType, Create) {
     dtype d;
 
     // Strings with various encodings and sizes
-    d = make_fixedstring_dtype(string_encoding_utf_8, 3);
+    d = make_fixedstring_dtype(3, string_encoding_utf_8);
     EXPECT_EQ(fixedstring_type_id, d.get_type_id());
     EXPECT_EQ(string_kind, d.get_kind());
     EXPECT_EQ(1u, d.get_alignment());
     EXPECT_EQ(3u, d.get_data_size());
     EXPECT_FALSE(d.is_expression());
 
-    d = make_fixedstring_dtype(string_encoding_utf_8, 129);
+    d = make_fixedstring_dtype(129, string_encoding_utf_8);
     EXPECT_EQ(fixedstring_type_id, d.get_type_id());
     EXPECT_EQ(string_kind, d.get_kind());
     EXPECT_EQ(1u, d.get_alignment());
     EXPECT_EQ(129u, d.get_data_size());
 
-    d = make_fixedstring_dtype(string_encoding_ascii, 129);
+    d = make_fixedstring_dtype(129, string_encoding_ascii);
     EXPECT_EQ(fixedstring_type_id, d.get_type_id());
     EXPECT_EQ(string_kind, d.get_kind());
     EXPECT_EQ(1u, d.get_alignment());
     EXPECT_EQ(129u, d.get_data_size());
 
-    d = make_fixedstring_dtype(string_encoding_utf_16, 129);
+    d = make_fixedstring_dtype(129, string_encoding_utf_16);
     EXPECT_EQ(fixedstring_type_id, d.get_type_id());
     EXPECT_EQ(string_kind, d.get_kind());
     EXPECT_EQ(2u, d.get_alignment());
     EXPECT_EQ(2u*129u, d.get_data_size());
 
-    d = make_fixedstring_dtype(string_encoding_utf_32, 129);
+    d = make_fixedstring_dtype(129, string_encoding_utf_32);
     EXPECT_EQ(fixedstring_type_id, d.get_type_id());
     EXPECT_EQ(string_kind, d.get_kind());
     EXPECT_EQ(4u, d.get_alignment());
@@ -59,14 +59,15 @@ TEST(FixedstringDType, Basic) {
     a = std::string("abcdefg");
     EXPECT_EQ(make_string_dtype(string_encoding_utf_8), a.get_dtype());
     // Convert to a fixedstring dtype for testing
-    a = a.cast_scalars(make_fixedstring_dtype(string_encoding_utf_8, 7)).vals();
+    a = a.cast_scalars(make_fixedstring_dtype(7, string_encoding_utf_8)).vals();
     EXPECT_EQ(std::string("abcdefg"), a.as<std::string>());
 
-    a = a.cast_scalars(make_fixedstring_dtype(string_encoding_utf_16, 7));
-    EXPECT_EQ(make_convert_dtype(make_fixedstring_dtype(string_encoding_utf_16, 7), make_fixedstring_dtype(string_encoding_utf_8, 7)),
+    a = a.cast_scalars(make_fixedstring_dtype(7, string_encoding_utf_16));
+    EXPECT_EQ(make_convert_dtype(make_fixedstring_dtype(7, string_encoding_utf_16),
+                    make_fixedstring_dtype(7, string_encoding_utf_8)),
                 a.get_dtype());
     a = a.vals();
-    EXPECT_EQ(make_fixedstring_dtype(string_encoding_utf_16, 7),
+    EXPECT_EQ(make_fixedstring_dtype(7, string_encoding_utf_16),
                     a.get_dtype());
     //cout << a << endl;
 }
@@ -74,7 +75,7 @@ TEST(FixedstringDType, Basic) {
 TEST(FixedstringDType, Casting) {
     ndobject a;
 
-    a = ndobject(make_fixedstring_dtype(string_encoding_utf_16, 16));
+    a = ndobject(make_fixedstring_dtype(16, string_encoding_utf_16));
     // Fill up the string with values
     a.vals() = std::string("0123456789012345");
     EXPECT_EQ("0123456789012345", a.as<std::string>());
@@ -84,7 +85,8 @@ TEST(FixedstringDType, Casting) {
 }
 
 TEST(FixedstringDType, SingleCompare) {
-    ndobject a = make_strided_ndobject(3, make_fixedstring_dtype(string_encoding_utf_8, 7));
+    ndobject a = make_strided_ndobject(3,
+                    make_fixedstring_dtype(7, string_encoding_utf_8));
     kernel_instance<compare_operations_t> k;
 
     a.at(0).vals() = std::string("abc");
@@ -103,7 +105,7 @@ TEST(FixedstringDType, SingleCompare) {
     // TODO: means for not hardcoding expected results in utf string comparison tests
 
     // test utf8 kernel
-    a = a.cast_scalars(make_fixedstring_dtype(string_encoding_utf_8, 7));
+    a = a.cast_scalars(make_fixedstring_dtype(7, string_encoding_utf_8));
     a = a.vals();
     a.get_dtype().at(0).get_single_compare_kernel(k);
     EXPECT_EQ(k.kernel.ops[compare_operations_t::less_id](a.at(0).get_readonly_originptr(), a.at(1).get_readonly_originptr(), &k.extra), true);
@@ -114,7 +116,7 @@ TEST(FixedstringDType, SingleCompare) {
     EXPECT_EQ(k.kernel.ops[compare_operations_t::greater_id](a.at(0).get_readonly_originptr(), a.at(1).get_readonly_originptr(), &k.extra), false);
 
     // test utf16 kernel
-    a = a.cast_scalars(make_fixedstring_dtype(string_encoding_utf_16, 7));
+    a = a.cast_scalars(make_fixedstring_dtype(7, string_encoding_utf_16));
     a = a.vals();
     a.get_dtype().at(0).get_single_compare_kernel(k);
     EXPECT_EQ(k.kernel.ops[compare_operations_t::less_id](a.at(0).get_readonly_originptr(), a.at(1).get_readonly_originptr(), &k.extra), true);
@@ -125,7 +127,7 @@ TEST(FixedstringDType, SingleCompare) {
     EXPECT_EQ(k.kernel.ops[compare_operations_t::greater_id](a.at(0).get_readonly_originptr(), a.at(1).get_readonly_originptr(), &k.extra), false);
 
     // test utf32 kernel
-    a = a.cast_scalars(make_fixedstring_dtype(string_encoding_utf_32, 7));
+    a = a.cast_scalars(make_fixedstring_dtype(7, string_encoding_utf_32));
     a = a.vals();
     a.get_dtype().at(0).get_single_compare_kernel(k);
     EXPECT_EQ(k.kernel.ops[compare_operations_t::less_id](a.at(0).get_readonly_originptr(), a.at(1).get_readonly_originptr(), &k.extra), true);
@@ -137,12 +139,12 @@ TEST(FixedstringDType, SingleCompare) {
 }
 
 TEST(FixedstringDType, CanonicalDType) {
-    EXPECT_EQ((make_fixedstring_dtype(string_encoding_ascii, 12)),
-                (make_fixedstring_dtype(string_encoding_ascii, 12).get_canonical_dtype()));
-    EXPECT_EQ((make_fixedstring_dtype(string_encoding_utf_8, 14)),
-                (make_fixedstring_dtype(string_encoding_utf_8, 14).get_canonical_dtype()));
-    EXPECT_EQ((make_fixedstring_dtype(string_encoding_utf_16, 17)),
-                (make_fixedstring_dtype(string_encoding_utf_16, 17).get_canonical_dtype()));
-    EXPECT_EQ((make_fixedstring_dtype(string_encoding_utf_32, 21)),
-                (make_fixedstring_dtype(string_encoding_utf_32, 21).get_canonical_dtype()));
+    EXPECT_EQ((make_fixedstring_dtype(12, string_encoding_ascii)),
+                (make_fixedstring_dtype(12, string_encoding_ascii).get_canonical_dtype()));
+    EXPECT_EQ((make_fixedstring_dtype(14, string_encoding_utf_8)),
+                (make_fixedstring_dtype(14, string_encoding_utf_8).get_canonical_dtype()));
+    EXPECT_EQ((make_fixedstring_dtype(17, string_encoding_utf_16)),
+                (make_fixedstring_dtype(17, string_encoding_utf_16).get_canonical_dtype()));
+    EXPECT_EQ((make_fixedstring_dtype(21, string_encoding_utf_32)),
+                (make_fixedstring_dtype(21, string_encoding_utf_32).get_canonical_dtype()));
 }

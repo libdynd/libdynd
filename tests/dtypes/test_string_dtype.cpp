@@ -94,11 +94,12 @@ TEST(StringDType, Basic) {
     EXPECT_EQ(make_string_dtype(string_encoding_utf_8), a.get_dtype());
     EXPECT_EQ(std::string("abcdefg"), a.as<std::string>());
     // Make it a fixedstring for this test
-    a = a.cast_scalars(make_fixedstring_dtype(string_encoding_utf_8, 7)).vals();
+    a = a.cast_scalars(make_fixedstring_dtype(7, string_encoding_utf_8)).vals();
 
     // Convert to a blockref string dtype with the same utf8 codec
     b = a.cast_scalars(make_string_dtype(string_encoding_utf_8));
-    EXPECT_EQ(make_convert_dtype(make_string_dtype(string_encoding_utf_8), make_fixedstring_dtype(string_encoding_utf_8, 7)),
+    EXPECT_EQ(make_convert_dtype(make_string_dtype(string_encoding_utf_8),
+                    make_fixedstring_dtype(7, string_encoding_utf_8)),
                 b.get_dtype());
     b = b.vals();
     EXPECT_EQ(make_string_dtype(string_encoding_utf_8),
@@ -107,7 +108,8 @@ TEST(StringDType, Basic) {
 
     // Convert to a blockref string dtype with the utf16 codec
     b = a.cast_scalars(make_string_dtype(string_encoding_utf_16));
-    EXPECT_EQ(make_convert_dtype(make_string_dtype(string_encoding_utf_16), make_fixedstring_dtype(string_encoding_utf_8, 7)),
+    EXPECT_EQ(make_convert_dtype(make_string_dtype(string_encoding_utf_16),
+                    make_fixedstring_dtype(7, string_encoding_utf_8)),
                 b.get_dtype());
     b = b.vals();
     EXPECT_EQ(make_string_dtype(string_encoding_utf_16),
@@ -116,7 +118,8 @@ TEST(StringDType, Basic) {
 
     // Convert to a blockref string dtype with the utf32 codec
     b = a.cast_scalars(make_string_dtype(string_encoding_utf_32));
-    EXPECT_EQ(make_convert_dtype(make_string_dtype(string_encoding_utf_32), make_fixedstring_dtype(string_encoding_utf_8, 7)),
+    EXPECT_EQ(make_convert_dtype(make_string_dtype(string_encoding_utf_32),
+                    make_fixedstring_dtype(7, string_encoding_utf_8)),
                 b.get_dtype());
     b = b.vals();
     EXPECT_EQ(make_string_dtype(string_encoding_utf_32),
@@ -125,7 +128,8 @@ TEST(StringDType, Basic) {
 
     // Convert to a blockref string dtype with the ascii codec
     b = a.cast_scalars(make_string_dtype(string_encoding_ascii));
-    EXPECT_EQ(make_convert_dtype(make_string_dtype(string_encoding_ascii), make_fixedstring_dtype(string_encoding_utf_8, 7)),
+    EXPECT_EQ(make_convert_dtype(make_string_dtype(string_encoding_ascii),
+                    make_fixedstring_dtype(7, string_encoding_utf_8)),
                 b.get_dtype());
     b = b.vals();
     EXPECT_EQ(make_string_dtype(string_encoding_ascii),
@@ -140,8 +144,8 @@ TEST(StringDType, AccessFlags) {
     a = std::string("testing one two three testing one two three four five testing one two three four five six seven");
     EXPECT_EQ(read_access_flag | immutable_access_flag, (int)a.get_access_flags());
     // Turn it into a fixedstring dtype for this test
-    a = a.cast_scalars(make_fixedstring_dtype(string_encoding_utf_8, 95)).vals();
-    EXPECT_EQ(make_fixedstring_dtype(string_encoding_utf_8, 95), a.get_dtype());
+    a = a.cast_scalars(make_fixedstring_dtype(95, string_encoding_utf_8)).vals();
+    EXPECT_EQ(make_fixedstring_dtype(95, string_encoding_utf_8), a.get_dtype());
 
     // Converting to a blockref string of the same encoding produces a reference
     // into the fixedstring value
