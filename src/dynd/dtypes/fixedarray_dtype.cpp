@@ -29,7 +29,7 @@ fixedarray_dtype::fixedarray_dtype(size_t dimension_size, const dtype& element_d
         throw runtime_error(ss.str());
     }
     m_stride = m_dimension_size > 1 ? element_dtype.get_data_size() : 0;
-    m_members.data_size = m_dimension_size > 1 ? m_stride * m_dimension_size : m_dimension_size * child_element_size;
+    m_members.data_size = m_stride * (m_dimension_size-1) + child_element_size;
     m_members.alignment = (uint8_t)m_element_dtype.get_alignment();
     // Propagate the zeroinit flag from the element
     m_members.flags |= (element_dtype.get_flags()&dtype_flag_zeroinit);
@@ -62,7 +62,7 @@ fixedarray_dtype::fixedarray_dtype(size_t dimension_size, const dtype& element_d
         ss << " and stride 0, as the stride must be non-zero when the dimension size is > 1";
         throw runtime_error(ss.str());
     }
-    m_members.data_size = stride ? stride * m_dimension_size : dimension_size * child_element_size;
+    m_members.data_size = m_stride * (m_dimension_size-1) + child_element_size;
     m_members.alignment = (uint8_t)m_element_dtype.get_alignment();
     // Propagate the zeroinit flag from the element
     m_members.flags |= (element_dtype.get_flags()&dtype_flag_zeroinit);

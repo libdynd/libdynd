@@ -70,6 +70,7 @@ TEST(FixedArrayDType, CreateFOrder) {
     int axis_perm[3] = {0, 1, 2};
     intptr_t shape[3] = {2, 3, 4};
     dtype d = make_fixedarray_dtype(3, shape, make_dtype<int16_t>(), axis_perm);
+    EXPECT_EQ(48u, d.get_data_size());
     EXPECT_EQ(fixedarray_type_id, d.get_type_id());
     EXPECT_EQ(fixedarray_type_id, d.at(0).get_type_id());
     EXPECT_EQ(fixedarray_type_id, d.at(0,0).get_type_id());
