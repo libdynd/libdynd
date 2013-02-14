@@ -101,7 +101,7 @@ enum type_id_t {
     json_type_id,
 
     // A strided array dimension type (like NumPy)
-    strided_array_type_id,
+    strided_dim_type_id,
     // A fixed-sized array dimension type
     fixedarray_type_id,
     // A variable-sized array dimension type

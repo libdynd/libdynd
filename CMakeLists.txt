@@ -76,7 +76,7 @@ set(dynd_SRC
     src/dynd/dtypes/groupby_dtype.cpp
     src/dynd/dtypes/json_dtype.cpp
     src/dynd/dtypes/pointer_dtype.cpp
-    src/dynd/dtypes/strided_array_dtype.cpp
+    src/dynd/dtypes/strided_dim_dtype.cpp
     src/dynd/dtypes/string_dtype.cpp
     src/dynd/dtypes/struct_dtype.cpp
     src/dynd/dtypes/tuple_dtype.cpp
@@ -107,7 +107,7 @@ set(dynd_SRC
     include/dynd/dtypes/groupby_dtype.hpp
     include/dynd/dtypes/json_dtype.hpp
     include/dynd/dtypes/pointer_dtype.hpp
-    include/dynd/dtypes/strided_array_dtype.hpp
+    include/dynd/dtypes/strided_dim_dtype.hpp
     include/dynd/dtypes/string_dtype.hpp
     include/dynd/dtypes/struct_dtype.hpp
     include/dynd/dtypes/fixedstruct_dtype.hpp

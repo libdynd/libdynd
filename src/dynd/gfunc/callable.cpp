@@ -4,7 +4,7 @@
 //
 
 #include <dynd/gfunc/callable.hpp>
-#include <dynd/dtypes/strided_array_dtype.hpp>
+#include <dynd/dtypes/strided_dim_dtype.hpp>
 
 using namespace std;
 using namespace dynd;

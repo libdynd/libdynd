@@ -10,7 +10,7 @@
 #include <dynd/ndobject_iter.hpp>
 #include <dynd/dtypes/categorical_dtype.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
-#include <dynd/dtypes/strided_array_dtype.hpp>
+#include <dynd/dtypes/strided_dim_dtype.hpp>
 #include <dynd/dtypes/convert_dtype.hpp>
 #include <dynd/gfunc/make_callable.hpp>
 
@@ -171,11 +171,11 @@ static ndobject make_sorted_categories(const set<const char *, cmp>& uniques, co
 {
     ndobject categories = make_strided_ndobject(uniques.size(), udtype);
     hierarchical_kernel<unary_single_operation_t> k;
-    make_assignment_kernel(&k, 0, udtype, categories.get_ndo_meta() + sizeof(strided_array_dtype_metadata),
+    make_assignment_kernel(&k, 0, udtype, categories.get_ndo_meta() + sizeof(strided_dim_dtype_metadata),
                     udtype, metadata, assign_error_default, &eval::default_eval_context);
     unary_single_operation_t kf = k.get_function();
 
-    intptr_t stride = reinterpret_cast<const strided_array_dtype_metadata *>(categories.get_ndo_meta())->stride;
+    intptr_t stride = reinterpret_cast<const strided_dim_dtype_metadata *>(categories.get_ndo_meta())->stride;
     char *dst_ptr = categories.get_readwrite_originptr();
     for (set<const char *, cmp>::const_iterator it = uniques.begin(); it != uniques.end(); ++it) {
         kf(dst_ptr, *it, k.get());
@@ -209,20 +209,20 @@ categorical_dtype::categorical_dtype(const ndobject& categories, bool presorted)
     } else {
         // Process the categories array to make sure it's valid
         const dtype& cdt = categories.get_dtype();
-        if (cdt.get_type_id() != strided_array_type_id) {
-            throw runtime_error("categorical_dtype only supports construction from a strided_array of categories");
+        if (cdt.get_type_id() != strided_dim_type_id) {
+            throw runtime_error("categorical_dtype only supports construction from a strided array of categories");
         }
         m_category_dtype = categories.get_dtype().at(0);
         if (!m_category_dtype.is_scalar()) {
-            throw runtime_error("categorical_dtype only supports construction from a 1-dimensional strided_array of categories");
+            throw runtime_error("categorical_dtype only supports construction from a 1-dimensional strided array of categories");
         }
 
         category_count = categories.get_dim_size();
-        intptr_t categories_stride = reinterpret_cast<const strided_array_dtype_metadata *>(categories.get_ndo_meta())->stride;
+        intptr_t categories_stride = reinterpret_cast<const strided_dim_dtype_metadata *>(categories.get_ndo_meta())->stride;
 
         kernel_instance<compare_operations_t> k;
         m_category_dtype.get_single_compare_kernel(k);
-        k.extra.src0_metadata = k.extra.src1_metadata = categories.get_ndo_meta() + sizeof(strided_array_dtype_metadata);
+        k.extra.src0_metadata = k.extra.src1_metadata = categories.get_ndo_meta() + sizeof(strided_dim_dtype_metadata);
 
         cmp less(k.kernel.ops[compare_operations_t::less_id], &k.extra);
         set<const char *, cmp> uniques(less);
@@ -299,7 +299,7 @@ void categorical_dtype::print_data(std::ostream& o, const char *metadata, const 
 void categorical_dtype::print_dtype(std::ostream& o) const
 {
     size_t category_count = get_category_count();
-    const char *metadata = m_categories.get_ndo_meta() + sizeof(strided_array_dtype_metadata);
+    const char *metadata = m_categories.get_ndo_meta() + sizeof(strided_dim_dtype_metadata);
 
     o << "categorical<" << m_category_dtype;
     o << ", [";

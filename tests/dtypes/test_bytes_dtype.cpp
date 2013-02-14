@@ -10,7 +10,7 @@
 
 #include <dynd/ndobject.hpp>
 #include <dynd/dtypes/bytes_dtype.hpp>
-#include <dynd/dtypes/strided_array_dtype.hpp>
+#include <dynd/dtypes/strided_dim_dtype.hpp>
 #include <dynd/dtypes/fixedbytes_dtype.hpp>
 #include <dynd/dtypes/convert_dtype.hpp>
 #include <dynd/dtypes/string_dtype.hpp>

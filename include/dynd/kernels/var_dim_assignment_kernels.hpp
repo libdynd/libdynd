@@ -34,23 +34,23 @@ size_t make_var_dim_assignment_kernel(
                 const eval::eval_context *ectx);
 
 /**
- * Makes a kernel which assigns strided arrays to var arrays
+ * Makes a kernel which assigns strided dims to var dims
  */
 size_t make_strided_to_var_dim_assignment_kernel(
                 hierarchical_kernel<unary_single_operation_t> *out,
                 size_t offset_out,
                 const dtype& dst_var_dim_dt, const char *dst_metadata,
-                const dtype& src_strided_array_dt, const char *src_metadata,
+                const dtype& src_strided_dim_dt, const char *src_metadata,
                 assign_error_mode errmode,
                 const eval::eval_context *ectx);
 
 /**
- * Makes a kernel which assigns var arrays to strided arrays
+ * Makes a kernel which assigns var dims to strided dims
  */
-size_t make_var_to_strided_array_assignment_kernel(
+size_t make_var_to_strided_dim_assignment_kernel(
                 hierarchical_kernel<unary_single_operation_t> *out,
                 size_t offset_out,
-                const dtype& dst_strided_array_dt, const char *dst_metadata,
+                const dtype& dst_strided_dim_dt, const char *dst_metadata,
                 const dtype& src_var_dim_dt, const char *src_metadata,
                 assign_error_mode errmode,
                 const eval::eval_context *ectx);

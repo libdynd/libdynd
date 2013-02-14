@@ -292,10 +292,10 @@ TEST(CategoricalDType, AssignFromOther) {
     dtype cd = make_categorical_dtype(cats_values);
     int16_t a_values[] = {6, 3, 100, 3, 1000, 100, 6, 1000};
     ndobject a = ndobject(a_values).cast_udtype(cd);
-    EXPECT_EQ(make_strided_array_dtype(make_convert_dtype(cd, make_dtype<int16_t>())),
+    EXPECT_EQ(make_strided_dim_dtype(make_convert_dtype(cd, make_dtype<int16_t>())),
                     a.get_dtype());
     a = a.vals();
-    EXPECT_EQ(make_strided_array_dtype(cd), a.get_dtype());
+    EXPECT_EQ(make_strided_dim_dtype(cd), a.get_dtype());
     EXPECT_EQ(6,    a.at(0).as<int>());
     EXPECT_EQ(3,    a.at(1).as<int>());
     EXPECT_EQ(100,  a.at(2).as<int>());

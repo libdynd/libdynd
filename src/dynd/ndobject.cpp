@@ -5,7 +5,7 @@
 
 #include <dynd/ndobject.hpp>
 #include <dynd/ndobject_iter.hpp>
-#include <dynd/dtypes/strided_array_dtype.hpp>
+#include <dynd/dtypes/strided_dim_dtype.hpp>
 #include <dynd/dtypes/var_dim_dtype.hpp>
 #include <dynd/dtypes/dtype_alignment.hpp>
 #include <dynd/dtypes/view_dtype.hpp>
@@ -56,7 +56,7 @@ ndobject dynd::make_strided_ndobject(const dtype& uniform_dtype, size_t ndim, co
     bool any_variable_dims = false;
     for (intptr_t i = ndim-1; i >= 0; --i) {
         if (shape[i] >= 0) {
-            array_dtype = make_strided_array_dtype(array_dtype);
+            array_dtype = make_strided_dim_dtype(array_dtype);
         } else {
             array_dtype = make_var_dim_dtype(array_dtype);
             any_variable_dims = true;
@@ -89,7 +89,7 @@ ndobject dynd::make_strided_ndobject(const dtype& uniform_dtype, size_t ndim, co
 
     if (!any_variable_dims) {
         // Fill in the ndobject metadata with strides and sizes
-        strided_array_dtype_metadata *meta = reinterpret_cast<strided_array_dtype_metadata *>(ndo + 1);
+        strided_dim_dtype_metadata *meta = reinterpret_cast<strided_dim_dtype_metadata *>(ndo + 1);
         // Use the default construction to handle the uniform_dtype's metadata
         intptr_t stride = uniform_dtype.get_data_size();
         if (stride == 0) {
@@ -137,7 +137,7 @@ ndobject dynd::make_strided_ndobject_from_data(const dtype& uniform_dtype, size_
         throw runtime_error(ss.str());
     }
 
-    dtype array_dtype = make_strided_array_dtype(uniform_dtype, ndim);
+    dtype array_dtype = make_strided_dim_dtype(uniform_dtype, ndim);
 
     // Allocate the ndobject metadata and data in one memory block
     memory_block_ptr result = make_ndobject_memory_block(array_dtype.extended()->get_metadata_size());
@@ -151,7 +151,7 @@ ndobject dynd::make_strided_ndobject_from_data(const dtype& uniform_dtype, size_
     ndo->m_flags = access_flags;
 
     // Fill in the ndobject metadata with the shape and strides
-    strided_array_dtype_metadata *meta = reinterpret_cast<strided_array_dtype_metadata *>(ndo + 1);
+    strided_dim_dtype_metadata *meta = reinterpret_cast<strided_dim_dtype_metadata *>(ndo + 1);
     for (size_t i = 0; i < ndim; ++i) {
         intptr_t dim_size = shape[i];
         meta[i].stride = dim_size > 1 ? strides[i] : 0;
@@ -228,7 +228,7 @@ ndobject dynd::make_utf8_array_ndobject(const char **cstr_array, size_t array_si
     dtype dt = make_string_dtype(string_encoding_utf_8);
     ndobject result = make_strided_ndobject(array_size, dt);
     // Get the allocator for the output string dtype
-    const string_dtype_metadata *md = reinterpret_cast<const string_dtype_metadata *>(result.get_ndo_meta() + sizeof(strided_array_dtype_metadata));
+    const string_dtype_metadata *md = reinterpret_cast<const string_dtype_metadata *>(result.get_ndo_meta() + sizeof(strided_dim_dtype_metadata));
     memory_block_data *dst_memblock = md->blockref;
     memory_block_pod_allocator_api *allocator = get_memory_block_pod_allocator_api(dst_memblock);
     char **out_data = reinterpret_cast<char **>(result.get_ndo()->m_data_pointer);
@@ -351,7 +351,7 @@ ndobject dynd::detail::make_from_vec<std::string>::make(const std::vector<std::s
         total_string_size += vec[i].size();
     }
 
-    dtype dt = make_strided_array_dtype(make_string_dtype(string_encoding_utf_8));
+    dtype dt = make_strided_dim_dtype(make_string_dtype(string_encoding_utf_8));
     char *data_ptr = NULL;
     // Make an ndobject memory block which contains both the string pointers and
     // the string data
@@ -366,7 +366,7 @@ ndobject dynd::detail::make_from_vec<std::string>::make(const std::vector<std::s
     preamble->m_dtype = dt.release();
     preamble->m_flags = read_access_flag | immutable_access_flag;
     // The metadata for the strided and string parts of the dtype
-    strided_array_dtype_metadata *sa_md = reinterpret_cast<strided_array_dtype_metadata *>(
+    strided_dim_dtype_metadata *sa_md = reinterpret_cast<strided_dim_dtype_metadata *>(
                                             result.get_ndo_meta());
     sa_md->size = vec.size();
     sa_md->stride = vec.empty() ? 0 : sizeof(string_dtype_data);
@@ -840,9 +840,9 @@ ndobject ndobject::view_scalars(const dtype& scalar_dtype) const
     size_t uniform_ndim = array_dtype.get_undim();
     // First check if we're dealing with a simple one dimensional block of memory we can reinterpret
     // at will.
-    if (uniform_ndim == 1 && array_dtype.get_type_id() == strided_array_type_id) {
-        const strided_array_dtype *sad = static_cast<const strided_array_dtype *>(array_dtype.extended());
-        const strided_array_dtype_metadata *md = reinterpret_cast<const strided_array_dtype_metadata *>(get_ndo_meta());
+    if (uniform_ndim == 1 && array_dtype.get_type_id() == strided_dim_type_id) {
+        const strided_dim_dtype *sad = static_cast<const strided_dim_dtype *>(array_dtype.extended());
+        const strided_dim_dtype_metadata *md = reinterpret_cast<const strided_dim_dtype_metadata *>(get_ndo_meta());
         size_t element_size = sad->get_element_dtype().get_data_size();
         if (element_size != 0 && (intptr_t)element_size == md->stride &&
                     sad->get_element_dtype().get_kind() != expression_kind &&
@@ -860,9 +860,9 @@ ndobject ndobject::view_scalars(const dtype& scalar_dtype) const
             char *data_ptr = get_ndo()->m_data_pointer;
             dtype result_dtype;
             if ((((uintptr_t)data_ptr)&(scalar_dtype.get_alignment()-1)) == 0) {
-                result_dtype = make_strided_array_dtype(scalar_dtype);
+                result_dtype = make_strided_dim_dtype(scalar_dtype);
             } else {
-                result_dtype = make_strided_array_dtype(make_unaligned_dtype(scalar_dtype));
+                result_dtype = make_strided_dim_dtype(make_unaligned_dtype(scalar_dtype));
             }
             ndobject result(make_ndobject_memory_block(result_dtype.extended()->get_metadata_size()));
             // Copy all the ndobject metadata fields
@@ -876,7 +876,7 @@ ndobject ndobject::view_scalars(const dtype& scalar_dtype) const
             result.get_ndo()->m_dtype = result_dtype.release();
             result.get_ndo()->m_flags = get_ndo()->m_flags;
             // The result has one strided ndarray field
-            strided_array_dtype_metadata *result_md = reinterpret_cast<strided_array_dtype_metadata *>(result.get_ndo_meta());
+            strided_dim_dtype_metadata *result_md = reinterpret_cast<strided_dim_dtype_metadata *>(result.get_ndo_meta());
             result_md->size = nbytes / scalar_dtype.get_data_size();
             result_md->stride = scalar_dtype.get_data_size();
             return result;
@@ -992,7 +992,7 @@ ndobject dynd::empty_like(const ndobject& rhs, const dtype& uniform_dtype)
     } else {
         dtype dt = rhs.get_ndo()->m_dtype->get_canonical_dtype();
         size_t ndim = dt.extended()->get_undim();
-        dt = make_strided_array_dtype(uniform_dtype, ndim);
+        dt = make_strided_dim_dtype(uniform_dtype, ndim);
         dimvector shape(ndim);
         rhs.get_shape(shape.get());
         ndobject result(make_ndobject_memory_block(dt, ndim, shape.get()));
@@ -1041,14 +1041,14 @@ intptr_t dynd::binary_search(const ndobject& n, const char *metadata, const char
     k.extra.src1_metadata = metadata;
 
     // TODO: support any type of uniform dimension
-    if (n.get_dtype().get_type_id() != strided_array_type_id) {
+    if (n.get_dtype().get_type_id() != strided_dim_type_id) {
         stringstream ss;
         ss << "TODO: binary_search on ndobject with dtype " << n.get_dtype() << " is not implemented";
         throw runtime_error(ss.str());
     }
 
     const char *n_data = n.get_readonly_originptr();
-    intptr_t n_stride = reinterpret_cast<const strided_array_dtype_metadata *>(n.get_ndo_meta())->stride;
+    intptr_t n_stride = reinterpret_cast<const strided_dim_dtype_metadata *>(n.get_ndo_meta())->stride;
     intptr_t first = 0, last = n.get_dim_size();
     while (first < last) {
         intptr_t trial = first + (last - first) / 2;

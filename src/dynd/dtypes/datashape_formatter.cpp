@@ -5,7 +5,7 @@
 
 #include <dynd/dtypes/datashape_formatter.hpp>
 #include <dynd/dtypes/base_struct_dtype.hpp>
-#include <dynd/dtypes/strided_array_dtype.hpp>
+#include <dynd/dtypes/strided_dim_dtype.hpp>
 #include <dynd/dtypes/fixedarray_dtype.hpp>
 #include <dynd/dtypes/var_dim_dtype.hpp>
 #include <dynd/dtypes/string_dtype.hpp>
@@ -59,15 +59,15 @@ static void format_uniform_array_datashape(std::ostream& o,
                 const std::string& indent, bool multiline, int *identifier)
 {
     switch (dt.get_type_id()) {
-        case strided_array_type_id: {
-            const strided_array_dtype *sad = static_cast<const strided_array_dtype *>(dt.extended());
+        case strided_dim_type_id: {
+            const strided_dim_dtype *sad = static_cast<const strided_dim_dtype *>(dt.extended());
             if (metadata) {
                 // If metadata is provided, use the actual dimension size
-                const strided_array_dtype_metadata *md =
-                                reinterpret_cast<const strided_array_dtype_metadata *>(metadata);
+                const strided_dim_dtype_metadata *md =
+                                reinterpret_cast<const strided_dim_dtype_metadata *>(metadata);
                 o << md->size << ", ";
                 format_datashape(o, sad->get_element_dtype(),
-                                metadata + sizeof(strided_array_dtype_metadata),
+                                metadata + sizeof(strided_dim_dtype_metadata),
                                 indent, multiline, identifier);
             } else {
                 // If no metadata, use a symbol

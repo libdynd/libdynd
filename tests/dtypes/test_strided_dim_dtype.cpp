@@ -10,7 +10,7 @@
 
 #include <dynd/dtype_assign.hpp>
 #include <dynd/dtypes/tuple_dtype.hpp>
-#include <dynd/dtypes/strided_array_dtype.hpp>
+#include <dynd/dtypes/strided_dim_dtype.hpp>
 #include <dynd/dtypes/convert_dtype.hpp>
 #include <dynd/exceptions.hpp>
 #include <dynd/ndobject.hpp>
@@ -21,24 +21,24 @@ using namespace dynd;
 
 TEST(StridedArrayDType, ReplaceScalarTypes) {
     dtype dafloat, dadouble, daint32;
-    dafloat = make_strided_array_dtype(make_dtype<float>());
-    dadouble = make_strided_array_dtype(make_dtype<double>());
+    dafloat = make_strided_dim_dtype(make_dtype<float>());
+    dadouble = make_strided_dim_dtype(make_dtype<double>());
 
-    EXPECT_EQ(make_strided_array_dtype(make_convert_dtype<float, double>()),
+    EXPECT_EQ(make_strided_dim_dtype(make_convert_dtype<float, double>()),
             dadouble.with_replaced_scalar_types(make_dtype<float>()));
 
     // Two dimensional array
-    dafloat = make_strided_array_dtype(dafloat);
-    dadouble = make_strided_array_dtype(dadouble);
+    dafloat = make_strided_dim_dtype(dafloat);
+    dadouble = make_strided_dim_dtype(dadouble);
 
-    EXPECT_EQ(make_strided_array_dtype(make_strided_array_dtype(make_convert_dtype<double, float>())),
+    EXPECT_EQ(make_strided_dim_dtype(make_strided_dim_dtype(make_convert_dtype<double, float>())),
             dafloat.with_replaced_scalar_types(make_dtype<double>()));
 }
 
 TEST(StridedArrayDType, DTypeAt) {
     dtype dfloat = make_dtype<float>();
-    dtype darr1 = make_strided_array_dtype(dfloat);
-    dtype darr2 = make_strided_array_dtype(darr1);
+    dtype darr1 = make_strided_dim_dtype(dfloat);
+    dtype darr2 = make_strided_dim_dtype(darr1);
     dtype dtest;
 
     // indexing into a dtype with a slice produces another
@@ -66,15 +66,15 @@ TEST(StridedArrayDType, DTypeAt) {
 
 TEST(StridedArrayDType, IsExpression) {
     dtype dfloat = make_dtype<float>();
-    dtype darr1 = make_strided_array_dtype(dfloat);
-    dtype darr2 = make_strided_array_dtype(darr1);
+    dtype darr1 = make_strided_dim_dtype(dfloat);
+    dtype darr2 = make_strided_dim_dtype(darr1);
 
     EXPECT_FALSE(darr1.is_expression());
     EXPECT_FALSE(darr2.is_expression());
 
     dfloat = make_convert_dtype(make_dtype<double>(), dfloat);
-    darr1 = make_strided_array_dtype(dfloat);
-    darr2 = make_strided_array_dtype(darr1);
+    darr1 = make_strided_dim_dtype(dfloat);
+    darr2 = make_strided_dim_dtype(darr1);
 
     EXPECT_TRUE(darr1.is_expression());
     EXPECT_TRUE(darr2.is_expression());
@@ -88,7 +88,7 @@ TEST(StridedArrayDType, AssignKernel) {
     // Assignment scalar -> strided array
     a = vals_int;
     b = 9.0;
-    EXPECT_EQ(strided_array_type_id, a.get_dtype().get_type_id());
+    EXPECT_EQ(strided_dim_type_id, a.get_dtype().get_type_id());
     make_assignment_kernel(&k, 0, a.get_dtype(), a.get_ndo_meta(),
                     b.get_dtype(), b.get_ndo_meta(), assign_error_default, &eval::default_eval_context);
     k.get_function()(a.get_readwrite_originptr(), b.get_readonly_originptr(), k.get());
@@ -101,8 +101,8 @@ TEST(StridedArrayDType, AssignKernel) {
     a = make_strided_ndobject(3, make_dtype<float>());
     a.vals() = 0;
     b = vals_int;
-    EXPECT_EQ(strided_array_type_id, a.get_dtype().get_type_id());
-    EXPECT_EQ(strided_array_type_id, b.get_dtype().get_type_id());
+    EXPECT_EQ(strided_dim_type_id, a.get_dtype().get_type_id());
+    EXPECT_EQ(strided_dim_type_id, b.get_dtype().get_type_id());
     make_assignment_kernel(&k, 0, a.get_dtype(), a.get_ndo_meta(),
                     b.get_dtype(), b.get_ndo_meta(), assign_error_default, &eval::default_eval_context);
     k.get_function()(a.get_readwrite_originptr(), b.get_readonly_originptr(), k.get());
@@ -114,7 +114,7 @@ TEST(StridedArrayDType, AssignKernel) {
     // Assignment strided array -> scalar
     a = 9.0;
     b = vals_int;
-    EXPECT_EQ(strided_array_type_id, b.get_dtype().get_type_id());
+    EXPECT_EQ(strided_dim_type_id, b.get_dtype().get_type_id());
     EXPECT_THROW(make_assignment_kernel(&k, 0, a.get_dtype(), a.get_ndo_meta(),
                     b.get_dtype(), b.get_ndo_meta(), assign_error_default, &eval::default_eval_context),
                 broadcast_error);

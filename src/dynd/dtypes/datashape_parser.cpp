@@ -7,7 +7,7 @@
 #include <set>
 
 #include <dynd/dtypes/datashape_parser.hpp>
-#include <dynd/dtypes/strided_array_dtype.hpp>
+#include <dynd/dtypes/strided_dim_dtype.hpp>
 #include <dynd/dtypes/var_dim_dtype.hpp>
 #include <dynd/dtypes/fixedarray_dtype.hpp>
 #include <dynd/dtypes/fixedstruct_dtype.hpp>
@@ -441,7 +441,7 @@ static dtype parse_rhs_expression(const char *&begin, const char *end, map<strin
         if (!shape.empty()) {
             for (ptrdiff_t i = (ptrdiff_t)shape.size() - 1; i >= 0; --i) {
                 if (shape[i] == -2) {
-                    result = make_strided_array_dtype(result);
+                    result = make_strided_dim_dtype(result);
                 } else if (shape[i] == -1) {
                     result = make_var_dim_dtype(result);
                 } else {

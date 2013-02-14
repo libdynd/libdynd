@@ -34,7 +34,7 @@ set(tests_SRC
     dtypes/test_groupby_dtype.cpp
     dtypes/test_json_dtype.cpp
     dtypes/test_pointer_dtype.cpp
-    dtypes/test_strided_array_dtype.cpp
+    dtypes/test_strided_dim_dtype.cpp
     dtypes/test_string_dtype.cpp
     dtypes/test_struct_dtype.cpp
     dtypes/test_tuple_dtype.cpp

@@ -4,7 +4,7 @@
 //
 
 #include <dynd/dtypes/var_dim_dtype.hpp>
-#include <dynd/dtypes/strided_array_dtype.hpp>
+#include <dynd/dtypes/strided_dim_dtype.hpp>
 #include <dynd/dtypes/fixedarray_dtype.hpp>
 #include <dynd/dtypes/dtype_alignment.hpp>
 #include <dynd/dtypes/pointer_dtype.hpp>
@@ -123,8 +123,8 @@ dtype var_dim_dtype::apply_linear_index(size_t nindices, const irange *indices,
 {
     if (nindices == 0) {
         if (leading_dimension) {
-            // In leading dimensions, we convert var_dim to strided_array
-            return dtype(new strided_array_dtype(m_element_dtype), false);
+            // In leading dimensions, we convert var_dim to strided_dim
+            return dtype(new strided_dim_dtype(m_element_dtype), false);
         } else {
             return dtype(this, true);
         }
@@ -142,8 +142,8 @@ dtype var_dim_dtype::apply_linear_index(size_t nindices, const irange *indices,
             }
         } else {
             if (leading_dimension) {
-                // In leading dimensions, we convert var_dim to strided_array
-                return dtype(new strided_array_dtype(m_element_dtype), false);
+                // In leading dimensions, we convert var_dim to strided_dim
+                return dtype(new strided_dim_dtype(m_element_dtype), false);
             } else {
                 if (indices->is_nop()) {
                     // If the indexing operation does nothing, then leave things unchanged
@@ -166,10 +166,10 @@ dtype var_dim_dtype::apply_linear_index(size_t nindices, const irange *indices,
             }
         } else {
             if (leading_dimension) {
-                // In leading dimensions, we convert var_dim to strided_array
+                // In leading dimensions, we convert var_dim to strided_dim
                 dtype edt = m_element_dtype.apply_linear_index(nindices-1, indices+1,
                                 current_i+1, root_dt, false);
-                return dtype(new strided_array_dtype(edt), false);
+                return dtype(new strided_dim_dtype(edt), false);
             } else {
                 if (indices->is_nop()) {
                     // If the indexing operation does nothing, then leave things unchanged
@@ -195,10 +195,10 @@ intptr_t var_dim_dtype::apply_linear_index(size_t nindices, const irange *indice
 {
     if (nindices == 0) {
         if (leading_dimension) {
-            // Copy the full var_dim into a strided_array
+            // Copy the full var_dim into a strided_dim
             const var_dim_dtype_metadata *md = reinterpret_cast<const var_dim_dtype_metadata *>(metadata);
             const var_dim_dtype_data *d = reinterpret_cast<const var_dim_dtype_data *>(*inout_data);
-            strided_array_dtype_metadata *out_md = reinterpret_cast<strided_array_dtype_metadata *>(out_metadata);
+            strided_dim_dtype_metadata *out_md = reinterpret_cast<strided_dim_dtype_metadata *>(out_metadata);
             out_md->size = d->size;
             out_md->stride = md->stride;
             *inout_data = d->begin + md->offset;
@@ -209,7 +209,7 @@ intptr_t var_dim_dtype::apply_linear_index(size_t nindices, const irange *indice
             memory_block_incref(*inout_dataref);
             if (!m_element_dtype.is_builtin()) {
                 m_element_dtype.extended()->metadata_copy_construct(
-                                out_metadata + sizeof(strided_array_dtype_metadata),
+                                out_metadata + sizeof(strided_dim_dtype_metadata),
                                 metadata + sizeof(var_dim_dtype_metadata),
                                 embedded_reference);
             }
@@ -250,7 +250,7 @@ intptr_t var_dim_dtype::apply_linear_index(size_t nindices, const irange *indice
             } else {
                 // We can dereference the pointer as we
                 // index it and produce a strided array result
-                strided_array_dtype_metadata *out_md = reinterpret_cast<strided_array_dtype_metadata *>(out_metadata);
+                strided_dim_dtype_metadata *out_md = reinterpret_cast<strided_dim_dtype_metadata *>(out_metadata);
                 out_md->size = dimension_size;
                 out_md->stride = md->stride * index_stride;
                 *inout_data = d->begin + md->offset + md->stride * start_index;
@@ -264,7 +264,7 @@ intptr_t var_dim_dtype::apply_linear_index(size_t nindices, const irange *indice
                     // the dtype didn't change
                     if (!m_element_dtype.is_builtin()) {
                         m_element_dtype.extended()->metadata_copy_construct(
-                                        out_metadata + sizeof(strided_array_dtype_metadata),
+                                        out_metadata + sizeof(strided_dim_dtype_metadata),
                                         metadata + sizeof(var_dim_dtype_metadata),
                                         embedded_reference);
                     }
@@ -273,12 +273,12 @@ intptr_t var_dim_dtype::apply_linear_index(size_t nindices, const irange *indice
                     if (m_element_dtype.is_builtin()) {
                         return 0;
                     } else {
-                        const strided_array_dtype *sad = static_cast<const strided_array_dtype *>(result_dtype.extended());
+                        const strided_dim_dtype *sad = static_cast<const strided_dim_dtype *>(result_dtype.extended());
                         return m_element_dtype.extended()->apply_linear_index(
                                         nindices - 1, indices + 1,
                                         metadata + sizeof(var_dim_dtype_metadata),
                                         sad->get_element_dtype(),
-                                        out_metadata + sizeof(strided_array_dtype_metadata), embedded_reference,
+                                        out_metadata + sizeof(strided_dim_dtype_metadata), embedded_reference,
                                         current_i, root_dt,
                                         false, NULL, NULL);
                     }
@@ -548,9 +548,9 @@ size_t var_dim_dtype::make_assignment_kernel(
                             dst_dt, dst_metadata,
                             src_dt, src_metadata,
                             errmode, ectx);
-        } else if (src_dt.get_type_id() == strided_array_type_id ||
+        } else if (src_dt.get_type_id() == strided_dim_type_id ||
                         src_dt.get_type_id() == fixedarray_type_id) {
-            // strided_array to var_dim
+            // strided_dim to var_dim
             return make_strided_to_var_dim_assignment_kernel(out, offset_out,
                             dst_dt, dst_metadata,
                             src_dt, src_metadata,
@@ -563,10 +563,10 @@ size_t var_dim_dtype::make_assignment_kernel(
     } else if (dst_dt.get_undim() < src_dt.get_undim()) {
         throw broadcast_error(dst_dt, dst_metadata, src_dt, src_metadata);
     } else {
-        if (dst_dt.get_type_id() == strided_array_type_id ||
+        if (dst_dt.get_type_id() == strided_dim_type_id ||
                         dst_dt.get_type_id() == fixedarray_type_id) {
-            // var_dim to strided_array
-            return make_var_to_strided_array_assignment_kernel(out, offset_out,
+            // var_dim to strided_dim
+            return make_var_to_strided_dim_assignment_kernel(out, offset_out,
                             dst_dt, dst_metadata,
                             src_dt, src_metadata,
                             errmode, ectx);

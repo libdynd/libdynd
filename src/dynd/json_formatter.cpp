@@ -8,7 +8,7 @@
 #include <dynd/dtypes/json_dtype.hpp>
 #include <dynd/dtypes/date_dtype.hpp>
 #include <dynd/dtypes/base_struct_dtype.hpp>
-#include <dynd/dtypes/strided_array_dtype.hpp>
+#include <dynd/dtypes/strided_dim_dtype.hpp>
 #include <dynd/dtypes/fixedarray_dtype.hpp>
 #include <dynd/dtypes/var_dim_dtype.hpp>
 
@@ -219,12 +219,12 @@ static void format_json_uniform_array(output_data& out, const dtype& dt, const c
 {
     out.write('[');
     switch (dt.get_type_id()) {
-        case strided_array_type_id: {
-            const strided_array_dtype *sad = static_cast<const strided_array_dtype *>(dt.extended());
-            const strided_array_dtype_metadata *md = reinterpret_cast<const strided_array_dtype_metadata *>(metadata);
+        case strided_dim_type_id: {
+            const strided_dim_dtype *sad = static_cast<const strided_dim_dtype *>(dt.extended());
+            const strided_dim_dtype_metadata *md = reinterpret_cast<const strided_dim_dtype_metadata *>(metadata);
             dtype element_dtype = sad->get_element_dtype();
             intptr_t size = md->size, stride = md->stride;
-            metadata += sizeof(strided_array_dtype_metadata);
+            metadata += sizeof(strided_dim_dtype_metadata);
             for (intptr_t i = 0; i < size; ++i) {
                 ::format_json(out, element_dtype, metadata, data + i * stride);
                 if (i != size - 1) {

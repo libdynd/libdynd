@@ -10,7 +10,7 @@
 
 #include <dynd/ndobject.hpp>
 #include <dynd/dtypes/fixedarray_dtype.hpp>
-#include <dynd/dtypes/strided_array_dtype.hpp>
+#include <dynd/dtypes/strided_dim_dtype.hpp>
 #include <dynd/dtypes/convert_dtype.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/json_parser.hpp>
@@ -158,7 +158,7 @@ TEST(FixedArrayDType, AssignFixedStridedKernel) {
     a.vals() = 0;
     b = vals_int;
     EXPECT_EQ(fixedarray_type_id, a.get_dtype().get_type_id());
-    EXPECT_EQ(strided_array_type_id, b.get_dtype().get_type_id());
+    EXPECT_EQ(strided_dim_type_id, b.get_dtype().get_type_id());
     make_assignment_kernel(&k, 0, a.get_dtype(), a.get_ndo_meta(),
                     b.get_dtype(), b.get_ndo_meta(), assign_error_default, &eval::default_eval_context);
     k.get_function()(a.get_readwrite_originptr(), b.get_readonly_originptr(), k.get());
@@ -172,7 +172,7 @@ TEST(FixedArrayDType, AssignFixedStridedKernel) {
     a.vals() = 0;
     b = vals_int_single;
     EXPECT_EQ(fixedarray_type_id, a.get_dtype().get_type_id());
-    EXPECT_EQ(strided_array_type_id, b.get_dtype().get_type_id());
+    EXPECT_EQ(strided_dim_type_id, b.get_dtype().get_type_id());
     make_assignment_kernel(&k, 0, a.get_dtype(), a.get_ndo_meta(),
                     b.get_dtype(), b.get_ndo_meta(), assign_error_default, &eval::default_eval_context);
     k.get_function()(a.get_readwrite_originptr(), b.get_readonly_originptr(), k.get());
@@ -185,7 +185,7 @@ TEST(FixedArrayDType, AssignFixedStridedKernel) {
     a = make_strided_ndobject(3, make_dtype<float>());
     a.vals() = 0;
     b = parse_json("3, int32", "[3, 5, 7]");
-    EXPECT_EQ(strided_array_type_id, a.get_dtype().get_type_id());
+    EXPECT_EQ(strided_dim_type_id, a.get_dtype().get_type_id());
     EXPECT_EQ(fixedarray_type_id, b.get_dtype().get_type_id());
     make_assignment_kernel(&k, 0, a.get_dtype(), a.get_ndo_meta(),
                     b.get_dtype(), b.get_ndo_meta(), assign_error_default, &eval::default_eval_context);
@@ -199,7 +199,7 @@ TEST(FixedArrayDType, AssignFixedStridedKernel) {
     a = make_strided_ndobject(3, make_dtype<float>());
     a.vals() = 0;
     b = parse_json("1, int32", "[9]");
-    EXPECT_EQ(strided_array_type_id, a.get_dtype().get_type_id());
+    EXPECT_EQ(strided_dim_type_id, a.get_dtype().get_type_id());
     EXPECT_EQ(fixedarray_type_id, b.get_dtype().get_type_id());
     make_assignment_kernel(&k, 0, a.get_dtype(), a.get_ndo_meta(),
                     b.get_dtype(), b.get_ndo_meta(), assign_error_default, &eval::default_eval_context);

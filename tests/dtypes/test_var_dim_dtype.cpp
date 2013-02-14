@@ -11,7 +11,7 @@
 #include <dynd/ndobject.hpp>
 #include <dynd/dtypes/tuple_dtype.hpp>
 #include <dynd/dtypes/var_dim_dtype.hpp>
-#include <dynd/dtypes/strided_array_dtype.hpp>
+#include <dynd/dtypes/strided_dim_dtype.hpp>
 #include <dynd/dtypes/fixedarray_dtype.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/json_parser.hpp>
@@ -21,9 +21,9 @@ using namespace dynd;
 
 TEST(VarArrayDType, Shape) {
     dtype dfloat = make_dtype<float>();
-    dtype darr1 = make_strided_array_dtype(dfloat);
+    dtype darr1 = make_strided_dim_dtype(dfloat);
     dtype darr2 = make_var_dim_dtype(darr1);
-    dtype darr3 = make_strided_array_dtype(darr2);
+    dtype darr3 = make_strided_dim_dtype(darr2);
 
     intptr_t shape[3] = {3, -1, 2};
     ndobject a = make_strided_ndobject(dfloat, 3, shape);
@@ -57,11 +57,11 @@ TEST(VarArrayDType, DTypeSubscriptSimpleSlice) {
     ndobject n = parse_json("VarDim, int32", "[2,4,6,8]");
 
     // Slicing collapses the leading dimension to a strided array
-    EXPECT_EQ(make_strided_array_dtype(make_dtype<int>()), n.at(irange()).get_dtype());
-    EXPECT_EQ(make_strided_array_dtype(make_dtype<int>()), n.at(irange() / -1).get_dtype());
-    EXPECT_EQ(make_strided_array_dtype(make_dtype<int>()), n.at(1 <= irange() < 3).get_dtype());
+    EXPECT_EQ(make_strided_dim_dtype(make_dtype<int>()), n.at(irange()).get_dtype());
+    EXPECT_EQ(make_strided_dim_dtype(make_dtype<int>()), n.at(irange() / -1).get_dtype());
+    EXPECT_EQ(make_strided_dim_dtype(make_dtype<int>()), n.at(1 <= irange() < 3).get_dtype());
     // In particular, indexing with a zero-sized index converts from var to strided
-    EXPECT_EQ(make_strided_array_dtype(make_dtype<int>()), n.at_array(0, NULL).get_dtype());
+    EXPECT_EQ(make_strided_dim_dtype(make_dtype<int>()), n.at_array(0, NULL).get_dtype());
 
     EXPECT_EQ(2, n.at(1 <= irange() < 3).get_shape()[0]);
     EXPECT_EQ(4, n.at(1 <= irange() < 3).at(0).as<int>());
@@ -328,7 +328,7 @@ TEST(VarArrayDType, AssignVarStridedKernel) {
     a = ndobject(make_var_dim_dtype(make_dtype<int>()));
     b = vals_int;
     EXPECT_EQ(var_dim_type_id, a.get_dtype().get_type_id());
-    EXPECT_EQ(strided_array_type_id, b.get_dtype().get_type_id());
+    EXPECT_EQ(strided_dim_type_id, b.get_dtype().get_type_id());
     make_assignment_kernel(&k, 0, a.get_dtype(), a.get_ndo_meta(),
                     b.get_dtype(), b.get_ndo_meta(), assign_error_default, &eval::default_eval_context);
     k.get_function()(a.get_readwrite_originptr(), b.get_readonly_originptr(), k.get());
@@ -343,7 +343,7 @@ TEST(VarArrayDType, AssignVarStridedKernel) {
     parse_json(a, "[0, 0, 0]");
     b = vals_int;
     EXPECT_EQ(var_dim_type_id, a.get_dtype().get_type_id());
-    EXPECT_EQ(strided_array_type_id, b.get_dtype().get_type_id());
+    EXPECT_EQ(strided_dim_type_id, b.get_dtype().get_type_id());
     make_assignment_kernel(&k, 0, a.get_dtype(), a.get_ndo_meta(),
                     b.get_dtype(), b.get_ndo_meta(), assign_error_default, &eval::default_eval_context);
     k.get_function()(a.get_readwrite_originptr(), b.get_readonly_originptr(), k.get());
@@ -358,7 +358,7 @@ TEST(VarArrayDType, AssignVarStridedKernel) {
     parse_json(a, "[0, 0, 0, 0]");
     b = vals_int;
     EXPECT_EQ(var_dim_type_id, a.get_dtype().get_type_id());
-    EXPECT_EQ(strided_array_type_id, b.get_dtype().get_type_id());
+    EXPECT_EQ(strided_dim_type_id, b.get_dtype().get_type_id());
     make_assignment_kernel(&k, 0, a.get_dtype(), a.get_ndo_meta(),
                     b.get_dtype(), b.get_ndo_meta(), assign_error_default, &eval::default_eval_context);
     EXPECT_THROW(k.get_function()(a.get_readwrite_originptr(),
@@ -370,7 +370,7 @@ TEST(VarArrayDType, AssignVarStridedKernel) {
     a = make_strided_ndobject(3, make_dtype<int>());
     a.vals() = 0;
     b = parse_json("VarDim, int32", "[3, 5, 7]");
-    EXPECT_EQ(strided_array_type_id, a.get_dtype().get_type_id());
+    EXPECT_EQ(strided_dim_type_id, a.get_dtype().get_type_id());
     EXPECT_EQ(var_dim_type_id, b.get_dtype().get_type_id());
     make_assignment_kernel(&k, 0, a.get_dtype(), a.get_ndo_meta(),
                     b.get_dtype(), b.get_ndo_meta(), assign_error_default, &eval::default_eval_context);
@@ -384,7 +384,7 @@ TEST(VarArrayDType, AssignVarStridedKernel) {
     a = make_strided_ndobject(3, make_dtype<int>());
     a.vals() = 0;
     b = parse_json("VarDim, int32", "[3, 5, 7, 9]");
-    EXPECT_EQ(strided_array_type_id, a.get_dtype().get_type_id());
+    EXPECT_EQ(strided_dim_type_id, a.get_dtype().get_type_id());
     EXPECT_EQ(var_dim_type_id, b.get_dtype().get_type_id());
     make_assignment_kernel(&k, 0, a.get_dtype(), a.get_ndo_meta(),
                     b.get_dtype(), b.get_ndo_meta(), assign_error_default, &eval::default_eval_context);
@@ -397,7 +397,7 @@ TEST(VarArrayDType, AssignVarStridedKernel) {
     a = make_strided_ndobject(3, make_dtype<int>());
     a.vals() = 0;
     b = ndobject(make_var_dim_dtype(make_dtype<int>()));
-    EXPECT_EQ(strided_array_type_id, a.get_dtype().get_type_id());
+    EXPECT_EQ(strided_dim_type_id, a.get_dtype().get_type_id());
     EXPECT_EQ(var_dim_type_id, b.get_dtype().get_type_id());
     make_assignment_kernel(&k, 0, a.get_dtype(), a.get_ndo_meta(),
                     b.get_dtype(), b.get_ndo_meta(), assign_error_default, &eval::default_eval_context);

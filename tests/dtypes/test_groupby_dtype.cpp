@@ -25,8 +25,8 @@ TEST(GroupByDType, Basic) {
     int by[] = {15,16,16};
     int groups[] = {15,16};
     ndobject g = groupby(data, by, make_categorical_dtype(groups));
-    EXPECT_EQ(make_groupby_dtype(make_strided_array_dtype(make_dtype<int>()),
-                        make_strided_array_dtype(make_convert_dtype(
+    EXPECT_EQ(make_groupby_dtype(make_strided_dim_dtype(make_dtype<int>()),
+                        make_strided_dim_dtype(make_convert_dtype(
                             make_categorical_dtype(groups), make_dtype<int>()))),
                     g.get_dtype());
     g = g.vals();
@@ -42,8 +42,8 @@ TEST(GroupByDType, BasicDeduceGroups) {
     const char *by[] = {"beta", "alpha", "beta", "beta", "alpha"};
     ndobject g = groupby(data, by);
     const char *expected_groups[] = {"alpha", "beta"};
-    EXPECT_EQ(make_groupby_dtype(make_strided_array_dtype(make_string_dtype()),
-                        make_strided_array_dtype(make_convert_dtype(
+    EXPECT_EQ(make_groupby_dtype(make_strided_dim_dtype(make_string_dtype()),
+                        make_strided_dim_dtype(make_convert_dtype(
                             make_categorical_dtype(expected_groups), make_string_dtype()))),
                     g.get_dtype());
     g = g.vals();
@@ -70,8 +70,8 @@ TEST(GroupByDType, MediumDeduceGroups) {
     by.at(80 <= irange() < 95).vals() = arange(15);
     by.at(95 <= irange() < 100).vals() = arange(5);
     ndobject g = groupby(data, by);
-    EXPECT_EQ(make_groupby_dtype(make_strided_array_dtype(make_dtype<int>()),
-                        make_strided_array_dtype(make_convert_dtype(
+    EXPECT_EQ(make_groupby_dtype(make_strided_dim_dtype(make_dtype<int>()),
+                        make_strided_dim_dtype(make_convert_dtype(
                             make_categorical_dtype(arange(20)), make_dtype<int>()))),
                     g.get_dtype());
     EXPECT_EQ(g.get_shape()[0], 20);
@@ -109,8 +109,8 @@ TEST(GroupByDType, Struct) {
     // Group based on gender
     ndobject g = groupby(a, a.p("gender"));
 
-    EXPECT_EQ(make_groupby_dtype(make_strided_array_dtype(d),
-                        make_strided_array_dtype(make_convert_dtype(
+    EXPECT_EQ(make_groupby_dtype(make_strided_dim_dtype(d),
+                        make_strided_dim_dtype(make_convert_dtype(
                             make_categorical_dtype(gender_cats), gender_cats.get_udtype()))),
                     g.get_dtype());
     g = g.vals();
@@ -156,8 +156,8 @@ TEST(GroupByDType, StructUnsortedCats) {
     // Group based on gender
     ndobject g = groupby(a, a.p("gender"), make_categorical_dtype(gender_cats));
 
-    EXPECT_EQ(make_groupby_dtype(make_strided_array_dtype(d),
-                        make_strided_array_dtype(make_convert_dtype(
+    EXPECT_EQ(make_groupby_dtype(make_strided_dim_dtype(d),
+                        make_strided_dim_dtype(make_convert_dtype(
                             make_categorical_dtype(gender_cats), a.p("gender").get_udtype()))),
                     g.get_dtype());
     g = g.vals();

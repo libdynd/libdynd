@@ -4,7 +4,7 @@
 //
 
 #include <dynd/dtypes/fixedarray_dtype.hpp>
-#include <dynd/dtypes/strided_array_dtype.hpp>
+#include <dynd/dtypes/strided_dim_dtype.hpp>
 #include <dynd/dtypes/dtype_alignment.hpp>
 #include <dynd/shape_tools.hpp>
 #include <dynd/shortvector.hpp>
@@ -128,7 +128,7 @@ void fixedarray_dtype::transform_child_dtypes(dtype_transform_fn_t transform_fn,
         if (tmp_dtype.get_data_size() != 0) {
             out_transformed_dtype = dtype(new fixedarray_dtype(m_dimension_size, tmp_dtype), false);
         } else {
-            out_transformed_dtype = dtype(new strided_array_dtype(tmp_dtype), false);
+            out_transformed_dtype = dtype(new strided_dim_dtype(tmp_dtype), false);
         }
         out_was_transformed = true;
     } else {
@@ -141,11 +141,11 @@ dtype fixedarray_dtype::get_canonical_dtype() const
 {
     dtype canonical_element_dtype = m_element_dtype.get_canonical_dtype();
     // The transformed dtype may no longer have a fixed size, so check whether
-    // we have to switch to the more flexible strided_array_dtype
+    // we have to switch to the more flexible strided_dim_dtype
     if (canonical_element_dtype.get_data_size() != 0) {
         return dtype(new fixedarray_dtype(m_dimension_size, canonical_element_dtype), false);
     } else {
-        return dtype(new strided_array_dtype(canonical_element_dtype), false);
+        return dtype(new strided_dim_dtype(canonical_element_dtype), false);
     }
 }
 
@@ -182,7 +182,7 @@ dtype fixedarray_dtype::apply_linear_index(size_t nindices, const irange *indice
             if (indices->is_nop()) {
                 return dtype(this, true);
             } else {
-                return dtype(new strided_array_dtype(m_element_dtype), false);
+                return dtype(new strided_dim_dtype(m_element_dtype), false);
             }
         }
     } else {
@@ -190,7 +190,7 @@ dtype fixedarray_dtype::apply_linear_index(size_t nindices, const irange *indice
             return m_element_dtype.apply_linear_index(nindices-1, indices+1,
                             current_i+1, root_dt, leading_dimension);
         } else {
-            return dtype(new strided_array_dtype(m_element_dtype.apply_linear_index(nindices-1, indices+1,
+            return dtype(new strided_dim_dtype(m_element_dtype.apply_linear_index(nindices-1, indices+1,
                             current_i+1, root_dt, false)), false);
         }
     }
@@ -234,18 +234,18 @@ intptr_t fixedarray_dtype::apply_linear_index(size_t nindices, const irange *ind
             }
             return offset;
         } else {
-            strided_array_dtype_metadata *out_md = reinterpret_cast<strided_array_dtype_metadata *>(out_metadata);
+            strided_dim_dtype_metadata *out_md = reinterpret_cast<strided_dim_dtype_metadata *>(out_metadata);
             // Produce the new offset data, stride, and size for the resulting array,
-            // which is now a strided_array instead of a fixedarray
+            // which is now a strided_dim instead of a fixedarray
             intptr_t offset = m_stride * start_index;
             out_md->stride = m_stride * index_stride;
             out_md->size = dimension_size;
             if (!m_element_dtype.is_builtin()) {
-                const strided_array_dtype *result_edtype = static_cast<const strided_array_dtype *>(result_dtype.extended());
+                const strided_dim_dtype *result_edtype = static_cast<const strided_dim_dtype *>(result_dtype.extended());
                 offset += m_element_dtype.extended()->apply_linear_index(nindices - 1, indices + 1,
                                 metadata,
                                 result_edtype->get_element_dtype(),
-                                out_metadata + sizeof(strided_array_dtype_metadata),
+                                out_metadata + sizeof(strided_dim_dtype_metadata),
                                 embedded_reference, current_i + 1, root_dt,
                                 false, NULL, NULL);
             }
@@ -494,11 +494,11 @@ size_t fixedarray_dtype::make_assignment_kernel(
             e->dst_stride = get_fixed_stride();
             e->src_stride = 0;
             return ::make_assignment_kernel(out, offset_out + sizeof(strided_assign_kernel_extra),
-                            m_element_dtype, dst_metadata + sizeof(strided_array_dtype_metadata),
+                            m_element_dtype, dst_metadata + sizeof(strided_dim_dtype_metadata),
                             src_dt, src_metadata,
                             errmode, ectx);
         } else if (src_dt.get_type_id() == fixedarray_type_id) {
-            // fixed_array -> strided_array
+            // fixed_array -> strided_dim
             const fixedarray_dtype *src_fad = static_cast<const fixedarray_dtype *>(src_dt.extended());
             intptr_t src_size = src_fad->get_fixed_dim_size();
             intptr_t dst_size = get_fixed_dim_size();
@@ -515,11 +515,11 @@ size_t fixedarray_dtype::make_assignment_kernel(
                             m_element_dtype, dst_metadata,
                             src_fad->get_element_dtype(), src_metadata,
                             errmode, ectx);
-        } else if (src_dt.get_type_id() == strided_array_type_id) {
-            // strided_array -> strided_array
-            const strided_array_dtype *src_sad = static_cast<const strided_array_dtype *>(src_dt.extended());
-            const strided_array_dtype_metadata *src_md =
-                        reinterpret_cast<const strided_array_dtype_metadata *>(src_metadata);
+        } else if (src_dt.get_type_id() == strided_dim_type_id) {
+            // strided_dim -> strided_dim
+            const strided_dim_dtype *src_sad = static_cast<const strided_dim_dtype *>(src_dt.extended());
+            const strided_dim_dtype_metadata *src_md =
+                        reinterpret_cast<const strided_dim_dtype_metadata *>(src_metadata);
             intptr_t dst_size = get_fixed_dim_size();
             // Check for a broadcasting error
             if (src_md->size != 1 && dst_size != src_md->size) {
@@ -532,7 +532,7 @@ size_t fixedarray_dtype::make_assignment_kernel(
             e->src_stride = src_md->stride;
             return ::make_assignment_kernel(out, offset_out + sizeof(strided_assign_kernel_extra),
                             m_element_dtype, dst_metadata,
-                            src_sad->get_element_dtype(), src_metadata + sizeof(strided_array_dtype_metadata),
+                            src_sad->get_element_dtype(), src_metadata + sizeof(strided_dim_dtype_metadata),
                             errmode, ectx);
         } else if (!src_dt.is_builtin()) {
             // Give the src dtype a chance to make a kernel

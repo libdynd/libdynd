@@ -382,7 +382,7 @@ public:
      * practical for multidimensional objects.
      *
      * NOTE: Calling 'at' may simplify the leading dimension after the indices,
-     *       e.g. convert a var_dim to a strided_array, or collapsing pointers.
+     *       e.g. convert a var_dim to a strided_dim, or collapsing pointers.
      *       If you do not want this collapsing behavior, use the 'at_single' function.
      */
     inline dtype at(const irange& i0) const {

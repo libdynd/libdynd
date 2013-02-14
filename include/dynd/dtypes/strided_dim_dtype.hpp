@@ -12,24 +12,24 @@
 
 namespace dynd {
 
-struct strided_array_dtype_metadata {
+struct strided_dim_dtype_metadata {
     intptr_t size;
     intptr_t stride;
 };
 
-struct strided_array_dtype_iterdata {
+struct strided_dim_dtype_iterdata {
     iterdata_common common;
     char *data;
     intptr_t stride;
 };
 
-class strided_array_dtype : public base_dtype {
+class strided_dim_dtype : public base_dtype {
     dtype m_element_dtype;
     std::vector<std::pair<std::string, gfunc::callable> > m_ndobject_properties, m_ndobject_functions;
 public:
-    strided_array_dtype(const dtype& element_dtype);
+    strided_dim_dtype(const dtype& element_dtype);
 
-    virtual ~strided_array_dtype();
+    virtual ~strided_dim_dtype();
 
     size_t get_default_data_size(size_t ndim, const intptr_t *shape) const;
 
@@ -109,14 +109,14 @@ public:
     void get_dynamic_ndobject_functions(const std::pair<std::string, gfunc::callable> **out_functions, size_t *out_count) const;
 };
 
-inline dtype make_strided_array_dtype(const dtype& element_dtype) {
-    return dtype(new strided_array_dtype(element_dtype), false);
+inline dtype make_strided_dim_dtype(const dtype& element_dtype) {
+    return dtype(new strided_dim_dtype(element_dtype), false);
 }
 
-inline dtype make_strided_array_dtype(const dtype& uniform_dtype, size_t ndim) {
+inline dtype make_strided_dim_dtype(const dtype& uniform_dtype, size_t ndim) {
     dtype result = uniform_dtype;
     for (size_t i = 0; i < ndim; ++i) {
-        result = make_strided_array_dtype(result);
+        result = make_strided_dim_dtype(result);
     }
     return result;
 }

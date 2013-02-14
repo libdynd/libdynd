@@ -600,7 +600,7 @@ inline ndobject make_utf32_ndobject(const uint32_t (&static_string)[N]) {
  * \param cstr_array  An array of NULL-terminated UTF8 strings.
  * \param array_size  The number of elements in `cstr_array`.
  *
- * \returns  An ndobject of type strided_array<string<utf_8>>.
+ * \returns  An ndobject of type strided_dim<string<utf_8>>.
  */
 ndobject make_utf8_array_ndobject(const char **cstr_array, size_t array_size);
 

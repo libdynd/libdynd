@@ -11,7 +11,7 @@
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/kernels/var_dim_assignment_kernels.hpp>
 #include <dynd/dtypes/var_dim_dtype.hpp>
-#include <dynd/dtypes/strided_array_dtype.hpp>
+#include <dynd/dtypes/strided_dim_dtype.hpp>
 #include <dynd/dtypes/fixedarray_dtype.hpp>
 
 using namespace std;
@@ -281,7 +281,7 @@ size_t dynd::make_strided_to_var_dim_assignment_kernel(
                 hierarchical_kernel<unary_single_operation_t> *out,
                 size_t offset_out,
                 const dtype& dst_var_dim_dt, const char *dst_metadata,
-                const dtype& src_strided_array_dt, const char *src_metadata,
+                const dtype& src_strided_dim_dt, const char *src_metadata,
                 assign_error_mode errmode,
                 const eval::eval_context *ectx)
 {
@@ -303,23 +303,23 @@ size_t dynd::make_strided_to_var_dim_assignment_kernel(
 
     dtype src_element_dt;
     const char *src_element_metadata;
-    if (src_strided_array_dt.get_type_id() == strided_array_type_id) {
-        const strided_array_dtype *src_sad = static_cast<const strided_array_dtype *>(src_strided_array_dt.extended());
-        const strided_array_dtype_metadata *src_md =
-                        reinterpret_cast<const strided_array_dtype_metadata *>(src_metadata);
+    if (src_strided_dim_dt.get_type_id() == strided_dim_type_id) {
+        const strided_dim_dtype *src_sad = static_cast<const strided_dim_dtype *>(src_strided_dim_dt.extended());
+        const strided_dim_dtype_metadata *src_md =
+                        reinterpret_cast<const strided_dim_dtype_metadata *>(src_metadata);
         e->src_stride = src_md->stride;
         e->src_dim_size = src_md->size;
         src_element_dt = src_sad->get_element_dtype();
-        src_element_metadata = src_metadata + sizeof(strided_array_dtype_metadata);
-    } else if (src_strided_array_dt.get_type_id() == fixedarray_type_id) {
-        const fixedarray_dtype *src_fad = static_cast<const fixedarray_dtype *>(src_strided_array_dt.extended());
+        src_element_metadata = src_metadata + sizeof(strided_dim_dtype_metadata);
+    } else if (src_strided_dim_dt.get_type_id() == fixedarray_type_id) {
+        const fixedarray_dtype *src_fad = static_cast<const fixedarray_dtype *>(src_strided_dim_dt.extended());
         e->src_stride = src_fad->get_fixed_stride();
         e->src_dim_size = src_fad->get_fixed_dim_size();
         src_element_dt = src_fad->get_element_dtype();
         src_element_metadata = src_metadata;
     } else {
         stringstream ss;
-        ss << "make_strided_to_var_dim_assignment_kernel: provided source dtype " << src_strided_array_dt << " is not a strided_array or fixed_array";
+        ss << "make_strided_to_var_dim_assignment_kernel: provided source dtype " << src_strided_dim_dt << " is not a strided_dim or fixed_array";
         throw runtime_error(ss.str());
     }
 
@@ -377,17 +377,17 @@ namespace {
     };
 } // anonymous namespace
 
-size_t dynd::make_var_to_strided_array_assignment_kernel(
+size_t dynd::make_var_to_strided_dim_assignment_kernel(
                 hierarchical_kernel<unary_single_operation_t> *out,
                 size_t offset_out,
-                const dtype& dst_strided_array_dt, const char *dst_metadata,
+                const dtype& dst_strided_dim_dt, const char *dst_metadata,
                 const dtype& src_var_dim_dt, const char *src_metadata,
                 assign_error_mode errmode,
                 const eval::eval_context *ectx)
 {
     if (src_var_dim_dt.get_type_id() != var_dim_type_id) {
         stringstream ss;
-        ss << "make_var_to_strided_array_assignment_kernel: provided source dtype " << src_var_dim_dt << " is not a var_dim";
+        ss << "make_var_to_strided_dim_assignment_kernel: provided source dtype " << src_var_dim_dt << " is not a var_dim";
         throw runtime_error(ss.str());
     }
     const var_dim_dtype *src_vad = static_cast<const var_dim_dtype *>(src_var_dim_dt.extended());
@@ -401,23 +401,23 @@ size_t dynd::make_var_to_strided_array_assignment_kernel(
 
     dtype dst_element_dt;
     const char *dst_element_metadata;
-    if (dst_strided_array_dt.get_type_id() == strided_array_type_id) {
-        const strided_array_dtype *dst_sad = static_cast<const strided_array_dtype *>(dst_strided_array_dt.extended());
-        const strided_array_dtype_metadata *dst_md =
-                        reinterpret_cast<const strided_array_dtype_metadata *>(dst_metadata);
+    if (dst_strided_dim_dt.get_type_id() == strided_dim_type_id) {
+        const strided_dim_dtype *dst_sad = static_cast<const strided_dim_dtype *>(dst_strided_dim_dt.extended());
+        const strided_dim_dtype_metadata *dst_md =
+                        reinterpret_cast<const strided_dim_dtype_metadata *>(dst_metadata);
         e->dst_stride = dst_md->stride;
         e->dst_dim_size = dst_md->size;
         dst_element_dt = dst_sad->get_element_dtype();
-        dst_element_metadata = dst_metadata + sizeof(strided_array_dtype_metadata);
-    } else if (dst_strided_array_dt.get_type_id() == fixedarray_type_id) {
-        const fixedarray_dtype *dst_fad = static_cast<const fixedarray_dtype *>(dst_strided_array_dt.extended());
+        dst_element_metadata = dst_metadata + sizeof(strided_dim_dtype_metadata);
+    } else if (dst_strided_dim_dt.get_type_id() == fixedarray_type_id) {
+        const fixedarray_dtype *dst_fad = static_cast<const fixedarray_dtype *>(dst_strided_dim_dt.extended());
         e->dst_stride = dst_fad->get_fixed_stride();
         e->dst_dim_size = dst_fad->get_fixed_dim_size();
         dst_element_dt = dst_fad->get_element_dtype();
         dst_element_metadata = dst_metadata;
     } else {
         stringstream ss;
-        ss << "make_var_to_strided_array_assignment_kernel: provided destination dtype " << dst_strided_array_dt << " is not a strided_array or fixed_array";
+        ss << "make_var_to_strided_dim_assignment_kernel: provided destination dtype " << dst_strided_dim_dt << " is not a strided_dim or fixed_array";
         throw runtime_error(ss.str());
     }
 

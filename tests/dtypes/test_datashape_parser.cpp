@@ -9,7 +9,7 @@
 #include "inc_gtest.hpp"
 
 #include <dynd/dtypes/datashape_parser.hpp>
-#include <dynd/dtypes/strided_array_dtype.hpp>
+#include <dynd/dtypes/strided_dim_dtype.hpp>
 #include <dynd/dtypes/fixedarray_dtype.hpp>
 #include <dynd/dtypes/var_dim_dtype.hpp>
 #include <dynd/dtypes/fixedstruct_dtype.hpp>
@@ -67,8 +67,8 @@ TEST(DataShapeParser, StringAtoms) {
 }
 
 TEST(DataShapeParser, StridedDim) {
-    EXPECT_EQ(make_strided_array_dtype(make_dtype<dynd_bool>()), dtype_from_datashape("M, bool"));
-    EXPECT_EQ(make_strided_array_dtype(make_dtype<float>(), 2), dtype_from_datashape("M, N, float32"));
+    EXPECT_EQ(make_strided_dim_dtype(make_dtype<dynd_bool>()), dtype_from_datashape("M, bool"));
+    EXPECT_EQ(make_strided_dim_dtype(make_dtype<float>(), 2), dtype_from_datashape("M, N, float32"));
 }
 
 TEST(DataShapeParser, FixedDim) {
@@ -84,12 +84,12 @@ TEST(DataShapeParser, VarDim) {
 }
 
 TEST(DataShapeParser, StridedFixedDim) {
-    EXPECT_EQ(make_strided_array_dtype(make_fixedarray_dtype(3, make_dtype<float>())),
+    EXPECT_EQ(make_strided_dim_dtype(make_fixedarray_dtype(3, make_dtype<float>())),
                     dtype_from_datashape("M, 3, float32"));
 }
 
 TEST(DataShapeParser, StridedVarFixedDim) {
-    EXPECT_EQ(make_strided_array_dtype(make_var_dim_dtype(make_fixedarray_dtype(3, make_dtype<float>()))),
+    EXPECT_EQ(make_strided_dim_dtype(make_var_dim_dtype(make_fixedarray_dtype(3, make_dtype<float>()))),
                     dtype_from_datashape("M, VarDim, 3, float32"));
 }
 
