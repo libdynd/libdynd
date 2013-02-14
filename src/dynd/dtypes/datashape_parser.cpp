@@ -4,6 +4,7 @@
 //
 
 #include <map>
+#include <set>
 
 #include <dynd/dtypes/datashape_parser.hpp>
 #include <dynd/dtypes/strided_array_dtype.hpp>
@@ -44,6 +45,7 @@ namespace {
 static dtype parse_rhs_expression(const char *&begin, const char *end, map<string, dtype>& symtable);
 
 static map<string, dtype> builtin_types;
+static set<string> reserved_typenames;
 namespace {
     struct init_bit {
         init_bit() {
@@ -61,14 +63,14 @@ namespace {
             builtin_types["float64"] = make_dtype<double>();
             builtin_types["cfloat32"] = builtin_types["complex64"] = make_dtype<complex<float> >();
             builtin_types["cfloat64"] = builtin_types["complex128"] = make_dtype<complex<double> >();
-            builtin_types["string"] = make_string_dtype(string_encoding_utf_8);
-            builtin_types["string1"] = make_fixedstring_dtype(1, string_encoding_utf_8);
-            builtin_types["string2"] = make_fixedstring_dtype(2, string_encoding_utf_8);
-            builtin_types["string3"] = make_fixedstring_dtype(3, string_encoding_utf_8);
-            builtin_types["string4"] = make_fixedstring_dtype(4, string_encoding_utf_8);
             builtin_types["json"] = make_json_dtype();
             builtin_types["date"] = make_date_dtype();
             builtin_types["bytes"] = make_bytes_dtype(1);
+            for (map<string, dtype>::iterator i = builtin_types.begin();
+                            i != builtin_types.end(); ++i) {
+                reserved_typenames.insert(i->first);
+            }
+            reserved_typenames.insert("string");
         }
     };
     static init_bit builtin_types_initializer;
@@ -105,6 +107,17 @@ static bool parse_token(const char *&begin, const char *end, const char (&token)
     }
 }
 
+static bool parse_token(const char *&begin, const char *end, char token)
+{
+    const char *begin_skipws = skip_whitespace(begin, end);
+    if (1 <= end - begin_skipws && *begin_skipws == token) {
+        begin = begin_skipws + 1;
+        return true;
+    } else {
+        return false;
+    }
+}
+
 // NAME : [a-zA-Z_][a-zA-Z0-9_]*
 static string parse_name(const char *&begin, const char *end)
 {
@@ -130,23 +143,172 @@ static string parse_name(const char *&begin, const char *end)
     return string(begin_skipws, pos);
 }
 
+static string parse_number(const char *&begin, const char *end)
+{
+    const char *begin_skipws = skip_whitespace(begin, end);
+    const char *pos = begin_skipws;
+    while (pos < end && ('0' <= *pos && *pos <= '9')) {
+        ++pos;
+    }
+    if (pos > begin_skipws) {
+        begin = pos;
+        return string(begin_skipws, pos);
+    } else {
+        return string();
+    }
+}
+
 static string parse_name_or_number(const char *&begin, const char *end)
 {
     // NAME
     string result = parse_name(begin, end);
     if (result.empty()) {
         // NUMBER
-        const char *begin_skipws = skip_whitespace(begin, end);
-        const char *pos = begin_skipws;
-        while (pos < end && ('0' <= *pos && *pos <= '9')) {
-            ++pos;
-        }
-        if (pos > begin_skipws) {
-            begin = pos;
-            result = string(begin_skipws, pos);
-        }
+        return parse_number(begin, end);
     }
     return result;
+}
+
+static bool parse_quoted_string(const char *&begin, const char *end, string& out_val)
+{
+    out_val = "";
+    const char *saved_begin = begin;
+    char beginning_quote = 0;
+    if (parse_token(begin, end, '\'')) {
+        beginning_quote = '\'';
+    } else if (parse_token(begin, end, '"')) {
+        beginning_quote = '"';
+    } else {
+        return false;
+    }
+    for (;;) {
+        if (begin == end) {
+            throw datashape_parse_error(skip_whitespace(saved_begin, end),
+                            "string has no ending quote");
+        }
+        char c = *begin++;
+        if (c == '\\') {
+            if (begin == end) {
+                throw datashape_parse_error(skip_whitespace(saved_begin, end),
+                                "string has no ending quote");
+            }
+            c = *begin++;
+            switch (c) {
+                case '"':
+                case '\'':
+                case '\\':
+                case '/':
+                    out_val += c;
+                    break;
+                case 'b':
+                    out_val += '\b';
+                    break;
+                case 'f':
+                    out_val += '\f';
+                    break;
+                case 'n':
+                    out_val += '\n';
+                    break;
+                case 'r':
+                    out_val += '\r';
+                    break;
+                case 't':
+                    out_val += '\t';
+                    break;
+                case 'u': {
+                    if (end - begin < 4) {
+                        throw datashape_parse_error(begin-2,
+                                        "invalid unicode escape sequence in string");
+                    }
+                    uint32_t cp = 0;
+                    for (int i = 0; i < 4; ++i) {
+                        char c = *begin++;
+                        cp *= 16;
+                        if ('0' <= c && c <= '9') {
+                            cp += c - '0';
+                        } else if ('A' <= c && c <= 'F') {
+                            cp += c - 'A' + 10;
+                        } else if ('a' <= c && c <= 'f') {
+                            cp += c - 'a' + 10;
+                        } else {
+                            throw datashape_parse_error(begin-1,
+                                            "invalid unicode escape sequence in string");
+                        }
+                    }
+                    append_utf8_codepoint(cp, out_val);
+                    break;
+                }
+                default:
+                    throw datashape_parse_error(begin-2,
+                                    "invalid escape sequence in string");
+            }
+        } else if (c != beginning_quote) {
+            out_val += c;
+        } else {
+            return true;
+        }
+    }
+}
+
+static string_encoding_t string_to_encoding(const char *error_begin, const string& estr)
+{
+    if (estr == "A" || estr == "ascii" || estr == "us-ascii") {
+        return string_encoding_ascii;
+    } else if (estr == "U8" || estr == "utf8" || estr == "utf-8" || estr == "utf_8") {
+        return string_encoding_utf_8;
+    } else if (estr == "U16" || estr == "utf16" || estr == "utf-16" || estr == "utf_16") {
+        return string_encoding_utf_16;
+    } else if (estr == "U32" || estr == "utf32" || estr == "utf-32" || estr == "utf_32") {
+        return string_encoding_utf_32;
+    } else if (estr == "ucs2" || estr == "ucs-2" || estr == "ucs_2") {
+        return string_encoding_ucs_2;
+    } else {
+        throw datashape_parse_error(error_begin, "unrecognized string encoding");
+    }
+}
+
+// string_type : string |
+//               string('encoding')
+//               string(NUMBER) |
+//               string(NUMBER,'encoding')
+// This is called after 'string' is already matched
+static dtype parse_string_parameters(const char *&begin, const char *end)
+{
+    if (parse_token(begin, end, '(')) {
+        const char *saved_begin = begin;
+        string value = parse_number(begin, end);
+        string encoding_str;
+        string_encoding_t encoding = string_encoding_utf_8;
+        int string_size = 0;
+        if (!value.empty()) {
+            string_size = atoi(value.c_str());
+            if (string_size == 0) {
+                throw datashape_parse_error(saved_begin, "string size cannot be zero");
+            }
+            if (parse_token(begin, end, ',')) {
+                saved_begin = begin;
+                if (!parse_quoted_string(begin, end, encoding_str)) {
+                    throw datashape_parse_error(saved_begin, "expected a string encoding");
+                }
+                encoding = string_to_encoding(saved_begin, encoding_str);
+            }
+        } else {
+            if (!parse_quoted_string(begin, end, encoding_str)) {
+                throw datashape_parse_error(saved_begin, "expected a size integer or string encoding");
+            }
+            encoding = string_to_encoding(saved_begin, encoding_str);
+        }
+        if (!parse_token(begin, end, ')')) {
+            throw datashape_parse_error(begin, "expected closing ')'");
+        }
+        if (string_size != 0) {
+            return make_fixedstring_dtype(string_size, encoding);
+        } else {
+            return make_string_dtype(encoding);
+        }
+    } else {
+        return make_string_dtype(string_encoding_utf_8);
+    }
 }
 
 // record_item : NAME COLON rhs_expression
@@ -157,18 +319,18 @@ static bool parse_record_item(const char *&begin, const char *end, map<string, d
     if (out_field_name.empty()) {
         return false;
     }
-    if (!parse_token(begin, end , ":")) {
+    if (!parse_token(begin, end , ':')) {
         throw datashape_parse_error(begin, "expected ':' after record item name");
     }
     bool parens = false;
-    if (parse_token(begin, end, "(")) {
+    if (parse_token(begin, end, '(')) {
         parens = true;
     }
     out_field_type = parse_rhs_expression(begin, end, symtable);
     if (out_field_type.get_type_id() == uninitialized_type_id) {
         throw datashape_parse_error(begin, "expected a data type");
     }
-    if (parens && !parse_token(begin, end, ")")) {
+    if (parens && !parse_token(begin, end, ')')) {
         throw datashape_parse_error(begin, "expected closing ')'");
     }
 
@@ -183,7 +345,7 @@ static dtype parse_record(const char *&begin, const char *end, map<string, dtype
     string field_name;
     dtype field_type;
 
-    if (!parse_token(begin, end, "{")) {
+    if (!parse_token(begin, end, '{')) {
         return dtype(uninitialized_type_id);
     }
     for (;;) {
@@ -194,11 +356,11 @@ static dtype parse_record(const char *&begin, const char *end, map<string, dtype
             throw datashape_parse_error(begin, "expected a record item");
         }
         
-        if (parse_token(begin, end, ";")) {
-            if (!field_name_list.empty() && parse_token(begin, end, "}")) {
+        if (parse_token(begin, end, ';')) {
+            if (!field_name_list.empty() && parse_token(begin, end, '}')) {
                 break;
             }
-        } else if (parse_token(begin, end, "}")) {
+        } else if (parse_token(begin, end, '}')) {
             break;
         } else {
             throw datashape_parse_error(begin, "expected ';' or '}'");
@@ -218,7 +380,7 @@ static dtype parse_rhs_expression(const char *&begin, const char *end, map<strin
         string n = parse_name_or_number(begin, end); // NAME | NUMBER
         if (n.empty()) {
             break;
-        } else if (!parse_token(begin, end, ",")) { // COMMA
+        } else if (!parse_token(begin, end, ',')) { // COMMA
             begin = saved_begin;
             break;
         } else {
@@ -227,7 +389,8 @@ static dtype parse_rhs_expression(const char *&begin, const char *end, map<strin
             } else if (n == "VarDim") { // TODO: This isn't in the Blaze datashape grammar
                 // Use -1 to signal a variable-length dimension
                 shape.push_back(-1);
-            } else if (builtin_types.find(n) == builtin_types.end() && symtable.find(n) == symtable.end()) {
+            } else if (reserved_typenames.find(n) == reserved_typenames.end() &&
+                            symtable.find(n) == symtable.end()) {
                 // Use -2 to signal a free dimension
                 shape.push_back(-2);
             } else {
@@ -248,21 +411,26 @@ static dtype parse_rhs_expression(const char *&begin, const char *end, map<strin
             } else {
                 throw datashape_parse_error(begin, "expected data type");
             }
-        }
-        map<string,dtype>::const_iterator i = builtin_types.find(n);
-        if (i != builtin_types.end()) {
-            result = i->second;
+        } else if (n == "string") {
+            result = parse_string_parameters(begin, end);
         } else {
-            i = symtable.find(n);
-            if (i != symtable.end()) {
+            map<string,dtype>::const_iterator i = builtin_types.find(n);
+            if (i != builtin_types.end()) {
                 result = i->second;
             } else {
-                // LPAREN rhs_expression RPAREN
-                const char *begin_tmp = begin;
-                if (parse_token(begin_tmp, end, "(")) {
-                    throw datashape_parse_error(begin, "DyND does not support this kind of datashape parsing yet");
+                i = symtable.find(n);
+                if (i != symtable.end()) {
+                    result = i->second;
                 } else {
-                    throw datashape_parse_error(skip_whitespace(begin_saved, end), "unrecognized data type");
+                    // LPAREN rhs_expression RPAREN
+                    const char *begin_tmp = begin;
+                    if (parse_token(begin_tmp, end, '(')) {
+                        throw datashape_parse_error(begin,
+                                        "DyND does not support this kind of datashape parsing yet");
+                    } else {
+                        throw datashape_parse_error(skip_whitespace(begin_saved, end),
+                                        "unrecognized data type");
+                    }
                 }
             }
         }
@@ -295,7 +463,7 @@ static dtype parse_stmt(const char *&begin, const char *end, map<string, dtype>&
         if (tname.empty()) {
             throw datashape_parse_error(begin, "expected an identifier for a type name");
         }
-        if (!parse_token(begin, end, "=")) {
+        if (!parse_token(begin, end, '=')) {
             throw datashape_parse_error(begin, "expected an '='");
         }
         dtype result = parse_rhs_expression(begin, end, symtable);

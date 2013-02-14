@@ -15,6 +15,7 @@
 #include <dynd/dtypes/fixedstruct_dtype.hpp>
 #include <dynd/dtypes/date_dtype.hpp>
 #include <dynd/dtypes/string_dtype.hpp>
+#include <dynd/dtypes/fixedstring_dtype.hpp>
 #include <dynd/dtypes/json_dtype.hpp>
 
 using namespace std;
@@ -35,9 +36,34 @@ TEST(DataShapeParser, Basic) {
     EXPECT_EQ(make_dtype<double>(), dtype_from_datashape("float64"));
     EXPECT_EQ(make_dtype<complex<float> >(), dtype_from_datashape("complex64"));
     EXPECT_EQ(make_dtype<complex<double> >(), dtype_from_datashape("complex128"));
-    EXPECT_EQ(make_string_dtype(string_encoding_utf_8), dtype_from_datashape("string"));
     EXPECT_EQ(make_json_dtype(), dtype_from_datashape("json"));
     EXPECT_EQ(make_date_dtype(), dtype_from_datashape("date"));
+}
+
+TEST(DataShapeParser, StringAtoms) {
+    // Default string
+    EXPECT_EQ(make_string_dtype(string_encoding_utf_8), dtype_from_datashape("string"));
+    // String with encoding
+    EXPECT_EQ(make_string_dtype(string_encoding_ascii), dtype_from_datashape("string('A')"));
+    EXPECT_EQ(make_string_dtype(string_encoding_ascii), dtype_from_datashape("string('ascii')"));
+    EXPECT_EQ(make_string_dtype(string_encoding_utf_8), dtype_from_datashape("string('U8')"));
+    EXPECT_EQ(make_string_dtype(string_encoding_utf_8), dtype_from_datashape("string('utf8')"));
+    EXPECT_EQ(make_string_dtype(string_encoding_utf_8), dtype_from_datashape("string('utf-8')"));
+    EXPECT_EQ(make_string_dtype(string_encoding_utf_16), dtype_from_datashape("string('U16')"));
+    EXPECT_EQ(make_string_dtype(string_encoding_utf_16), dtype_from_datashape("string('utf16')"));
+    EXPECT_EQ(make_string_dtype(string_encoding_utf_16), dtype_from_datashape("string('utf-16')"));
+    EXPECT_EQ(make_string_dtype(string_encoding_utf_32), dtype_from_datashape("string('U32')"));
+    EXPECT_EQ(make_string_dtype(string_encoding_utf_32), dtype_from_datashape("string('utf32')"));
+    EXPECT_EQ(make_string_dtype(string_encoding_utf_32), dtype_from_datashape("string('utf-32')"));
+    EXPECT_EQ(make_string_dtype(string_encoding_ucs_2), dtype_from_datashape("string('ucs2')"));
+    EXPECT_EQ(make_string_dtype(string_encoding_ucs_2), dtype_from_datashape("string('ucs-2')"));
+    // String with size
+    EXPECT_EQ(make_fixedstring_dtype(1, string_encoding_utf_8), dtype_from_datashape("string(1)"));
+    EXPECT_EQ(make_fixedstring_dtype(100, string_encoding_utf_8), dtype_from_datashape("string(100)"));
+    // String with size and encoding
+    EXPECT_EQ(make_fixedstring_dtype(1, string_encoding_ascii), dtype_from_datashape("string(1, 'A')"));
+    EXPECT_EQ(make_fixedstring_dtype(10, string_encoding_utf_8), dtype_from_datashape("string(10, 'U8')"));
+    EXPECT_EQ(make_fixedstring_dtype(1000, string_encoding_utf_16), dtype_from_datashape("string(1000,'U16')"));
 }
 
 TEST(DataShapeParser, StridedDim) {
@@ -111,6 +137,57 @@ TEST(DataShapeParser, ErrorBasic) {
         string msg = e.what();
         EXPECT_TRUE(msg.find("line 1, column 4") != string::npos);
         EXPECT_TRUE(msg.find("only free variables") != string::npos);
+    }
+}
+
+TEST(DataShapeParser, ErrorString) {
+    try {
+        dtype_from_datashape("string(");
+        EXPECT_TRUE(false);
+    } catch (const runtime_error& e) {
+        string msg = e.what();
+        EXPECT_TRUE(msg.find("line 1, column 8") != string::npos);
+        EXPECT_TRUE(msg.find("expected a size integer or string encoding") != string::npos);
+    }
+    try {
+        dtype_from_datashape("string(0)");
+        EXPECT_TRUE(false);
+    } catch (const runtime_error& e) {
+        string msg = e.what();
+        EXPECT_TRUE(msg.find("line 1, column 8") != string::npos);
+        EXPECT_TRUE(msg.find("string size cannot be zero") != string::npos);
+    }
+    try {
+        dtype_from_datashape("string('badencoding')");
+        EXPECT_TRUE(false);
+    } catch (const runtime_error& e) {
+        string msg = e.what();
+        EXPECT_TRUE(msg.find("line 1, column 8") != string::npos);
+        EXPECT_TRUE(msg.find("unrecognized string encoding") != string::npos);
+    }
+    try {
+        dtype_from_datashape("string('U8',)");
+        EXPECT_TRUE(false);
+    } catch (const runtime_error& e) {
+        string msg = e.what();
+        EXPECT_TRUE(msg.find("line 1, column 12") != string::npos);
+        EXPECT_TRUE(msg.find("expected closing ')'") != string::npos);
+    }
+    try {
+        dtype_from_datashape("string(3,'U8',10)");
+        EXPECT_TRUE(false);
+    } catch (const runtime_error& e) {
+        string msg = e.what();
+        EXPECT_TRUE(msg.find("line 1, column 14") != string::npos);
+        EXPECT_TRUE(msg.find("expected closing ')'") != string::npos);
+    }
+    try {
+        dtype_from_datashape("string(3,3)");
+        EXPECT_TRUE(false);
+    } catch (const runtime_error& e) {
+        string msg = e.what();
+        EXPECT_TRUE(msg.find("line 1, column 10") != string::npos);
+        EXPECT_TRUE(msg.find("expected a string encoding") != string::npos);
     }
 }
 
@@ -256,8 +333,8 @@ TEST(DataShapeParser, KivaLoanDataShape) {
         "    id: int64;\n"
         "    name: string;\n"
         "    description: {\n"
-        "        languages: VarDim, string2;\n"
-        "    #    texts: map<string2, string>;\n"
+        "        languages: VarDim, string(2);\n"
+        "    #    texts: map<string(2), string>;\n"
         "    };\n"
         "    status: string; # LoanStatusType;\n"
         "    funded_amount: float64;\n"
@@ -277,7 +354,7 @@ TEST(DataShapeParser, KivaLoanDataShape) {
         "    # For 'delinquent', saw values \"null\" and \"true\" in brief search, map null -> false on import?\n"
         "    delinquent: bool;\n"
         "    location: {\n"
-        "        country_code: string2;\n"
+        "        country_code: string(2);\n"
         "        country: string;\n"
         "        town: string;\n"
         "        geo: {\n"
@@ -294,7 +371,7 @@ TEST(DataShapeParser, KivaLoanDataShape) {
         "    borrowers: VarDim, {\n"
         "        first_name: string;\n"
         "        last_name: string;\n"
-        "        gender: string2; # GenderType\n"
+        "        gender: string(2); # GenderType\n"
         "        pictured: bool;\n"
         "    };\n"
         "    terms: {\n"
