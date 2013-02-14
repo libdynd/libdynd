@@ -120,15 +120,11 @@ void fixedstring_dtype::print_data(std::ostream& o, const char *DYND_UNUSED(meta
 
 void fixedstring_dtype::print_dtype(std::ostream& o) const
 {
-    if (m_encoding == string_encoding_utf_8 && m_stringsize <= 4) {
-        o << "string" << m_stringsize;
-    } else {
-        o << "string<" << m_stringsize;
-        if (m_encoding != string_encoding_utf_8) {
-            o << "," << m_encoding;
-        }
-        o << ">";
+    o << "string<" << m_stringsize;
+    if (m_encoding != string_encoding_utf_8) {
+        o << "," << m_encoding;
     }
+    o << ">";
 }
 
 dtype fixedstring_dtype::get_canonical_dtype() const

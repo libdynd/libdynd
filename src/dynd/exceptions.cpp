@@ -85,9 +85,9 @@ inline string broadcast_error_message(const dtype& dst_dt, const char *dst_metad
 {
     stringstream ss;
     ss << "cannot broadcast input datashape '";
-    format_datashape(ss, src_dt, src_metadata);
+    format_datashape(ss, src_dt, src_metadata, false);
     ss << "' into datashape '";
-    format_datashape(ss, dst_dt, dst_metadata);
+    format_datashape(ss, dst_dt, dst_metadata, false);
     ss << "'";
     return ss.str();
 }

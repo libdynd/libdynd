@@ -15,8 +15,12 @@ namespace dynd {
  * Blaze datashape.
  *
  * \param n  The object whose datashape to produce
+ * \param prefix  Prepends the datashape with this string
+ * \param multiline  If true, split the datashape across multiple lines.
  */
-std::string format_datashape(const ndobject& n);
+std::string format_datashape(const ndobject& n,
+                const std::string& prefix = "type BlazeDataShape = ",
+                bool multiline = true);
 
 /**
  * Formats the given dtype + metadata as a Blaze
@@ -25,8 +29,10 @@ std::string format_datashape(const ndobject& n);
  * \param o  The stream where to write the datashape.
  * \param dt  The data type.
  * \param metadata  The data type's metadata.
+ * \param multiline  If true, split the datashape across multiple lines.
  */
-void format_datashape(std::ostream& o, const dtype& dt, const char *metadata);
+void format_datashape(std::ostream& o, const dtype& dt, const char *metadata,
+                bool multiline);
 
 
 } // namespace dynd

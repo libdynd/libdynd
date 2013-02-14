@@ -8,29 +8,43 @@
 #include <dynd/dtypes/strided_array_dtype.hpp>
 #include <dynd/dtypes/fixedarray_dtype.hpp>
 #include <dynd/dtypes/var_array_dtype.hpp>
+#include <dynd/dtypes/string_dtype.hpp>
+#include <dynd/dtypes/fixedstring_dtype.hpp>
 
 using namespace std;
 using namespace dynd;
 
-static void format_datashape(std::ostream& o, const dtype& dt, const char *metadata, const std::string& indent);
+static void format_datashape(std::ostream& o, const dtype& dt, const char *metadata,
+                const std::string& indent, bool multiline);
 
-static void format_struct_datashape(std::ostream& o, const dtype& dt, const char *metadata, const std::string& indent)
+static void format_struct_datashape(std::ostream& o, const dtype& dt, const char *metadata,
+                const std::string& indent, bool multiline)
 {
     const base_struct_dtype *bsd = static_cast<const base_struct_dtype *>(dt.extended());
     size_t field_count = bsd->get_field_count();
     const string *field_names = bsd->get_field_names();
     const dtype *field_types = bsd->get_field_types();
     const size_t *metadata_offsets = bsd->get_metadata_offsets();
-    o << "{\n";
+    o << (multiline ? "{\n" : "{");
     for (size_t i = 0; i < field_count; ++i) {
-        o << indent << "  " << field_names[i] << ": ";
-        format_datashape(o, field_types[i], metadata + metadata_offsets[i], indent + "  ");
-        o << ";\n";
+        if (multiline) {
+            o << indent << "  ";
+        }
+        o << field_names[i] << ": ";
+        format_datashape(o, field_types[i], metadata + metadata_offsets[i],
+                        multiline ? (indent + "  ") : indent, multiline);
+        if (multiline) {
+            o << ";\n";
+        } else if (i != field_count - 1) {
+            o << "; ";
+        }
     }
     o << indent << "}";
 }
 
-static void format_uniform_array_datashape(std::ostream& o, const dtype& dt, const char *metadata, const std::string& indent)
+static void format_uniform_array_datashape(std::ostream& o,
+                const dtype& dt, const char *metadata,
+                const std::string& indent, bool multiline)
 {
     switch (dt.get_type_id()) {
         case strided_array_type_id: {
@@ -38,20 +52,20 @@ static void format_uniform_array_datashape(std::ostream& o, const dtype& dt, con
             const strided_array_dtype_metadata *md = reinterpret_cast<const strided_array_dtype_metadata *>(metadata);
             o << md->size << ", ";
             format_datashape(o, sad->get_element_dtype(),
-                            metadata + sizeof(strided_array_dtype_metadata), indent);
+                            metadata + sizeof(strided_array_dtype_metadata), indent, multiline);
             break;
         }
         case fixedarray_type_id: {
             const fixedarray_dtype *fad = static_cast<const fixedarray_dtype *>(dt.extended());
             o << fad->get_fixed_dim_size() << ", ";
-            format_datashape(o, fad->get_element_dtype(), metadata, indent);
+            format_datashape(o, fad->get_element_dtype(), metadata, indent, multiline);
             break;
         }
         case var_array_type_id: {
             const var_array_dtype *vad = static_cast<const var_array_dtype *>(dt.extended());
             o << "VarDim, ";
             format_datashape(o, vad->get_element_dtype(),
-                            metadata + sizeof(var_array_dtype_metadata), indent);
+                            metadata + sizeof(var_array_dtype_metadata), indent, multiline);
             break;
         }
         default: {
@@ -62,14 +76,104 @@ static void format_uniform_array_datashape(std::ostream& o, const dtype& dt, con
     }
 }
 
-static void format_datashape(std::ostream& o, const dtype& dt, const char *metadata, const std::string& indent)
+static void format_string_encoding(std::ostream& o, string_encoding_t enc)
+{
+    switch (enc) {
+        case string_encoding_ascii:
+            o << "'A'";
+            break;
+        case string_encoding_utf_8:
+            o << "'U8'";
+            break;
+        case string_encoding_ucs_2:
+            o << "'ucs2'";
+            break;
+        case string_encoding_utf_16:
+            o << "'U16'";
+            break;
+        case string_encoding_utf_32:
+            o << "'U32'";
+            break;
+        default: {
+            stringstream ss;
+            ss << "unrecognized string encoding " << enc << " while formatting datashape";
+            throw runtime_error(ss.str());
+        }
+    }
+}
+
+static void format_string_datashape(std::ostream& o, const dtype& dt,
+                const char *metadata)
+{
+    switch (dt.get_type_id()) {
+        case string_type_id: {
+            const string_dtype *sd = static_cast<const string_dtype *>(dt.extended());
+            o << "string";
+            string_encoding_t enc = sd->get_encoding();
+            if (enc != string_encoding_utf_8) {
+                o << "(";
+                format_string_encoding(o, enc);
+                o << ")";
+            }
+            break;
+        }
+        case fixedstring_type_id: {
+            const fixedstring_dtype *fsd = static_cast<const fixedstring_dtype *>(dt.extended());
+            o << "string(";
+            o << fsd->get_data_size() / fsd->get_alignment();
+            string_encoding_t enc = fsd->get_encoding();
+            if (enc != string_encoding_utf_8) {
+                o << ",";
+                format_string_encoding(o, enc);
+            }
+            o << ")";
+            break;
+        }
+        case json_type_id: {
+            o << "json";
+            break;
+        }
+        default: {
+            stringstream ss;
+            ss << "unrecognized string dynd type " << dt << " while formatting datashape";
+            throw runtime_error(ss.str());
+        }
+    }
+}
+
+static void format_complex_datashape(std::ostream& o, const dtype& dt,
+                const char *metadata)
+{
+    switch (dt.get_type_id()) {
+        case complex_float32_type_id:
+            o << "cfloat32";
+            break;
+        case complex_float64_type_id:
+            o << "cfloat64";
+            break;
+        default: {
+            stringstream ss;
+            ss << "unrecognized string complex type " << dt << " while formatting datashape";
+            throw runtime_error(ss.str());
+        }
+    }
+}
+
+static void format_datashape(std::ostream& o, const dtype& dt, const char *metadata,
+                const std::string& indent, bool multiline)
 {
     switch (dt.get_kind()) {
         case struct_kind:
-            format_struct_datashape(o, dt, metadata, indent);
+            format_struct_datashape(o, dt, metadata, indent, multiline);
             break;
         case uniform_array_kind:
-            format_uniform_array_datashape(o, dt, metadata, indent);
+            format_uniform_array_datashape(o, dt, metadata, indent, multiline);
+            break;
+        case string_kind:
+            format_string_datashape(o, dt, metadata);
+            break;
+        case complex_kind:
+            format_complex_datashape(o, dt, metadata);
             break;
         default:
             o << dt;
@@ -77,15 +181,17 @@ static void format_datashape(std::ostream& o, const dtype& dt, const char *metad
     }
 }
 
-void dynd::format_datashape(std::ostream& o, const dtype& dt, const char *metadata)
+void dynd::format_datashape(std::ostream& o, const dtype& dt, const char *metadata,
+                bool multiline)
 {
-    ::format_datashape(o, dt, metadata, "");
+    ::format_datashape(o, dt, metadata, "", multiline);
 }
 
-string dynd::format_datashape(const ndobject& n)
+string dynd::format_datashape(const ndobject& n,
+                const std::string& prefix, bool multiline)
 {
     stringstream ss;
-    ss << "type BlazeDataShape = ";
-    ::format_datashape(ss, n.get_dtype(), n.get_ndo_meta(), "");
+    ss << prefix;
+    ::format_datashape(ss, n.get_dtype(), n.get_ndo_meta(), "", multiline);
     return ss.str();
 }
