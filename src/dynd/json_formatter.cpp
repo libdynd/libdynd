@@ -9,7 +9,7 @@
 #include <dynd/dtypes/date_dtype.hpp>
 #include <dynd/dtypes/base_struct_dtype.hpp>
 #include <dynd/dtypes/strided_dim_dtype.hpp>
-#include <dynd/dtypes/fixedarray_dtype.hpp>
+#include <dynd/dtypes/fixed_dim_dtype.hpp>
 #include <dynd/dtypes/var_dim_dtype.hpp>
 
 using namespace std;
@@ -233,8 +233,8 @@ static void format_json_uniform_array(output_data& out, const dtype& dt, const c
             }
             break;
         }
-        case fixedarray_type_id: {
-            const fixedarray_dtype *fad = static_cast<const fixedarray_dtype *>(dt.extended());
+        case fixed_dim_type_id: {
+            const fixed_dim_dtype *fad = static_cast<const fixed_dim_dtype *>(dt.extended());
             dtype element_dtype = fad->get_element_dtype();
             intptr_t size = (intptr_t)fad->get_fixed_dim_size(), stride = fad->get_fixed_stride();
             for (intptr_t i = 0; i < size; ++i) {
@@ -291,7 +291,7 @@ static void format_json(output_data& out, const dtype& dt, const char *metadata,
         case struct_kind:
             format_json_struct(out, dt, metadata, data);
             break;
-        case uniform_array_kind:
+        case uniform_dim_kind:
             format_json_uniform_array(out, dt, metadata, data);
             break;
         default: {

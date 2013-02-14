@@ -4,7 +4,7 @@
 //
 
 #include <dynd/dtypes/strided_dim_dtype.hpp>
-#include <dynd/dtypes/fixedarray_dtype.hpp>
+#include <dynd/dtypes/fixed_dim_dtype.hpp>
 #include <dynd/dtypes/dtype_alignment.hpp>
 #include <dynd/shape_tools.hpp>
 #include <dynd/exceptions.hpp>
@@ -15,7 +15,7 @@ using namespace std;
 using namespace dynd;
 
 strided_dim_dtype::strided_dim_dtype(const dtype& element_dtype)
-    : base_dtype(strided_dim_type_id, uniform_array_kind, 0,
+    : base_dtype(strided_dim_type_id, uniform_dim_kind, 0,
                     element_dtype.get_alignment(), dtype_flag_none,
                     element_dtype.get_metadata_size() + sizeof(strided_dim_dtype_metadata),
                     element_dtype.get_undim() + 1),
@@ -490,9 +490,9 @@ size_t strided_dim_dtype::make_assignment_kernel(
                             m_element_dtype, dst_metadata + sizeof(strided_dim_dtype_metadata),
                             src_sad->get_element_dtype(), src_metadata + sizeof(strided_dim_dtype_metadata),
                             errmode, ectx);
-        } else if (src_dt.get_type_id() == fixedarray_type_id) {
+        } else if (src_dt.get_type_id() == fixed_dim_type_id) {
             // fixed_array -> strided_dim
-            const fixedarray_dtype *src_fad = static_cast<const fixedarray_dtype *>(src_dt.extended());
+            const fixed_dim_dtype *src_fad = static_cast<const fixed_dim_dtype *>(src_dt.extended());
             intptr_t src_size = src_fad->get_fixed_dim_size();
             // Check for a broadcasting error
             if (src_size != 1 && dst_md->size != src_size) {

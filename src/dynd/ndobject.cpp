@@ -171,7 +171,7 @@ ndobject dynd::make_scalar_ndobject(const dtype& scalar_dtype, const void *data)
     size_t size = scalar_dtype.get_data_size();
     if (!scalar_dtype.is_builtin() && (size == 0 ||
                 scalar_dtype.get_memory_management() != pod_memory_management ||
-                scalar_dtype.extended()->get_kind() == uniform_array_kind ||
+                scalar_dtype.extended()->get_kind() == uniform_dim_kind ||
                 scalar_dtype.extended()->get_metadata_size() != 0)) {
         stringstream ss;
         ss << "Cannot make a dynd scalar from raw data using dtype " << scalar_dtype;

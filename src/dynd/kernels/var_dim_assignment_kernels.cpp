@@ -12,7 +12,7 @@
 #include <dynd/kernels/var_dim_assignment_kernels.hpp>
 #include <dynd/dtypes/var_dim_dtype.hpp>
 #include <dynd/dtypes/strided_dim_dtype.hpp>
-#include <dynd/dtypes/fixedarray_dtype.hpp>
+#include <dynd/dtypes/fixed_dim_dtype.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -311,8 +311,8 @@ size_t dynd::make_strided_to_var_dim_assignment_kernel(
         e->src_dim_size = src_md->size;
         src_element_dt = src_sad->get_element_dtype();
         src_element_metadata = src_metadata + sizeof(strided_dim_dtype_metadata);
-    } else if (src_strided_dim_dt.get_type_id() == fixedarray_type_id) {
-        const fixedarray_dtype *src_fad = static_cast<const fixedarray_dtype *>(src_strided_dim_dt.extended());
+    } else if (src_strided_dim_dt.get_type_id() == fixed_dim_type_id) {
+        const fixed_dim_dtype *src_fad = static_cast<const fixed_dim_dtype *>(src_strided_dim_dt.extended());
         e->src_stride = src_fad->get_fixed_stride();
         e->src_dim_size = src_fad->get_fixed_dim_size();
         src_element_dt = src_fad->get_element_dtype();
@@ -409,8 +409,8 @@ size_t dynd::make_var_to_strided_dim_assignment_kernel(
         e->dst_dim_size = dst_md->size;
         dst_element_dt = dst_sad->get_element_dtype();
         dst_element_metadata = dst_metadata + sizeof(strided_dim_dtype_metadata);
-    } else if (dst_strided_dim_dt.get_type_id() == fixedarray_type_id) {
-        const fixedarray_dtype *dst_fad = static_cast<const fixedarray_dtype *>(dst_strided_dim_dt.extended());
+    } else if (dst_strided_dim_dt.get_type_id() == fixed_dim_type_id) {
+        const fixed_dim_dtype *dst_fad = static_cast<const fixed_dim_dtype *>(dst_strided_dim_dt.extended());
         e->dst_stride = dst_fad->get_fixed_stride();
         e->dst_dim_size = dst_fad->get_fixed_dim_size();
         dst_element_dt = dst_fad->get_element_dtype();

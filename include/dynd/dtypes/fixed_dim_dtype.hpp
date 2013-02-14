@@ -12,13 +12,13 @@
 
 namespace dynd {
 
-struct fixedarray_dtype_iterdata {
+struct fixed_dim_dtype_iterdata {
     iterdata_common common;
     char *data;
     intptr_t stride;
 };
 
-class fixedarray_dtype : public base_dtype {
+class fixed_dim_dtype : public base_dtype {
     dtype m_element_dtype;
     intptr_t m_stride;
     size_t m_dimension_size;
@@ -26,10 +26,10 @@ class fixedarray_dtype : public base_dtype {
 
     void create_ndobject_properties();
 public:
-    fixedarray_dtype(size_t dimension_size, const dtype& element_dtype);
-    fixedarray_dtype(size_t dimension_size, const dtype& element_dtype, intptr_t stride);
+    fixed_dim_dtype(size_t dimension_size, const dtype& element_dtype);
+    fixed_dim_dtype(size_t dimension_size, const dtype& element_dtype, intptr_t stride);
 
-    virtual ~fixedarray_dtype();
+    virtual ~fixed_dim_dtype();
 
     size_t get_default_data_size(size_t DYND_UNUSED(ndim), const intptr_t *DYND_UNUSED(shape)) const {
         return get_data_size();
@@ -120,15 +120,15 @@ public:
     void get_dynamic_ndobject_functions(const std::pair<std::string, gfunc::callable> **out_functions, size_t *out_count) const;
 };
 
-inline dtype make_fixedarray_dtype(size_t size, const dtype& element_dtype) {
-    return dtype(new fixedarray_dtype(size, element_dtype), false);
+inline dtype make_fixed_dim_dtype(size_t size, const dtype& element_dtype) {
+    return dtype(new fixed_dim_dtype(size, element_dtype), false);
 }
 
-inline dtype make_fixedarray_dtype(size_t size, const dtype& element_dtype, intptr_t stride) {
-    return dtype(new fixedarray_dtype(size, element_dtype, stride), false);
+inline dtype make_fixed_dim_dtype(size_t size, const dtype& element_dtype, intptr_t stride) {
+    return dtype(new fixed_dim_dtype(size, element_dtype, stride), false);
 }
 
-dtype make_fixedarray_dtype(size_t ndim, const intptr_t *shape, const dtype& uniform_dtype, const int *axis_perm);
+dtype make_fixed_dim_dtype(size_t ndim, const intptr_t *shape, const dtype& uniform_dtype, const int *axis_perm);
 
 } // namespace dynd
 

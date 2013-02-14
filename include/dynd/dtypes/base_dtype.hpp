@@ -38,8 +38,8 @@ enum dtype_kind_t {
     bytes_kind,
     void_kind,
     datetime_kind,
-    // For any array dtypes which have elements of all the same type
-    uniform_array_kind,
+    // For any dimension dtypes which have elements of all the same type
+    uniform_dim_kind,
     // For struct_type_id and fixedstruct_type_id
     struct_kind,
     // For dtypes whose value_dtype != the dtype, signals
@@ -103,7 +103,7 @@ enum type_id_t {
     // A strided array dimension type (like NumPy)
     strided_dim_type_id,
     // A fixed-sized array dimension type
-    fixedarray_type_id,
+    fixed_dim_type_id,
     // A variable-sized array dimension type
     var_dim_type_id,
 

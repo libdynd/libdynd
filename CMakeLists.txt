@@ -69,7 +69,7 @@ set(dynd_SRC
     src/dynd/dtypes/expr_dtype.cpp
     src/dynd/dtypes/property_dtype.cpp
     src/dynd/dtypes/dtype_alignment.cpp
-    src/dynd/dtypes/fixedarray_dtype.cpp
+    src/dynd/dtypes/fixed_dim_dtype.cpp
     src/dynd/dtypes/fixedbytes_dtype.cpp
     src/dynd/dtypes/fixedstring_dtype.cpp
     src/dynd/dtypes/fixedstruct_dtype.cpp
@@ -100,7 +100,7 @@ set(dynd_SRC
     include/dynd/dtypes/expr_dtype.hpp
     include/dynd/dtypes/property_dtype.hpp
     include/dynd/dtypes/dtype_alignment.hpp
-    include/dynd/dtypes/fixedarray_dtype.hpp
+    include/dynd/dtypes/fixed_dim_dtype.hpp
     include/dynd/dtypes/fixedbytes_dtype.hpp
     include/dynd/dtypes/fixedstring_dtype.hpp
     include/dynd/dtypes/fixedstruct_dtype.hpp

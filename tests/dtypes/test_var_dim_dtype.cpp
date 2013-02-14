@@ -12,7 +12,7 @@
 #include <dynd/dtypes/tuple_dtype.hpp>
 #include <dynd/dtypes/var_dim_dtype.hpp>
 #include <dynd/dtypes/strided_dim_dtype.hpp>
-#include <dynd/dtypes/fixedarray_dtype.hpp>
+#include <dynd/dtypes/fixed_dim_dtype.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/json_parser.hpp>
 
@@ -415,7 +415,7 @@ TEST(VarArrayDType, AssignVarFixedKernel) {
     a = ndobject(make_var_dim_dtype(make_dtype<int>()));
     b = parse_json("3, int32", "[3, 5, 7]");
     EXPECT_EQ(var_dim_type_id, a.get_dtype().get_type_id());
-    EXPECT_EQ(fixedarray_type_id, b.get_dtype().get_type_id());
+    EXPECT_EQ(fixed_dim_type_id, b.get_dtype().get_type_id());
     make_assignment_kernel(&k, 0, a.get_dtype(), a.get_ndo_meta(),
                     b.get_dtype(), b.get_ndo_meta(), assign_error_default, &eval::default_eval_context);
     k.get_function()(a.get_readwrite_originptr(), b.get_readonly_originptr(), k.get());
@@ -430,7 +430,7 @@ TEST(VarArrayDType, AssignVarFixedKernel) {
     parse_json(a, "[0, 0, 0]");
     b = parse_json("3, int32", "[3, 5, 7]");
     EXPECT_EQ(var_dim_type_id, a.get_dtype().get_type_id());
-    EXPECT_EQ(fixedarray_type_id, b.get_dtype().get_type_id());
+    EXPECT_EQ(fixed_dim_type_id, b.get_dtype().get_type_id());
     make_assignment_kernel(&k, 0, a.get_dtype(), a.get_ndo_meta(),
                     b.get_dtype(), b.get_ndo_meta(), assign_error_default, &eval::default_eval_context);
     k.get_function()(a.get_readwrite_originptr(), b.get_readonly_originptr(), k.get());
@@ -445,7 +445,7 @@ TEST(VarArrayDType, AssignVarFixedKernel) {
     parse_json(a, "[0, 0, 0, 0]");
     b = parse_json("3, int32", "[3, 5, 7]");
     EXPECT_EQ(var_dim_type_id, a.get_dtype().get_type_id());
-    EXPECT_EQ(fixedarray_type_id, b.get_dtype().get_type_id());
+    EXPECT_EQ(fixed_dim_type_id, b.get_dtype().get_type_id());
     make_assignment_kernel(&k, 0, a.get_dtype(), a.get_ndo_meta(),
                     b.get_dtype(), b.get_ndo_meta(), assign_error_default, &eval::default_eval_context);
     EXPECT_THROW(k.get_function()(a.get_readwrite_originptr(),
@@ -454,10 +454,10 @@ TEST(VarArrayDType, AssignVarFixedKernel) {
     k.reset();
 
     // Assignment initialized var array -> fixed array
-    a = ndobject(make_fixedarray_dtype(3, make_dtype<int>()));
+    a = ndobject(make_fixed_dim_dtype(3, make_dtype<int>()));
     a.vals() = 0;
     b = parse_json("VarDim, int32", "[3, 5, 7]");
-    EXPECT_EQ(fixedarray_type_id, a.get_dtype().get_type_id());
+    EXPECT_EQ(fixed_dim_type_id, a.get_dtype().get_type_id());
     EXPECT_EQ(var_dim_type_id, b.get_dtype().get_type_id());
     make_assignment_kernel(&k, 0, a.get_dtype(), a.get_ndo_meta(),
                     b.get_dtype(), b.get_ndo_meta(), assign_error_default, &eval::default_eval_context);
@@ -468,10 +468,10 @@ TEST(VarArrayDType, AssignVarFixedKernel) {
     k.reset();
 
     // Error assignment initialized var array -> fixed array
-    a = ndobject(make_fixedarray_dtype(3, make_dtype<int>()));
+    a = ndobject(make_fixed_dim_dtype(3, make_dtype<int>()));
     a.vals() = 0;
     b = parse_json("VarDim, int32", "[3, 5, 7, 9]");
-    EXPECT_EQ(fixedarray_type_id, a.get_dtype().get_type_id());
+    EXPECT_EQ(fixed_dim_type_id, a.get_dtype().get_type_id());
     EXPECT_EQ(var_dim_type_id, b.get_dtype().get_type_id());
     make_assignment_kernel(&k, 0, a.get_dtype(), a.get_ndo_meta(),
                     b.get_dtype(), b.get_ndo_meta(), assign_error_default, &eval::default_eval_context);
@@ -481,10 +481,10 @@ TEST(VarArrayDType, AssignVarFixedKernel) {
     k.reset();
 
     // Error assignment uninitialized var array -> strided array
-    a = ndobject(make_fixedarray_dtype(3, make_dtype<int>()));
+    a = ndobject(make_fixed_dim_dtype(3, make_dtype<int>()));
     a.vals() = 0;
     b = ndobject(make_var_dim_dtype(make_dtype<int>()));
-    EXPECT_EQ(fixedarray_type_id, a.get_dtype().get_type_id());
+    EXPECT_EQ(fixed_dim_type_id, a.get_dtype().get_type_id());
     EXPECT_EQ(var_dim_type_id, b.get_dtype().get_type_id());
     make_assignment_kernel(&k, 0, a.get_dtype(), a.get_ndo_meta(),
                     b.get_dtype(), b.get_ndo_meta(), assign_error_default, &eval::default_eval_context);

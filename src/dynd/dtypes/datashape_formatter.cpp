@@ -6,7 +6,7 @@
 #include <dynd/dtypes/datashape_formatter.hpp>
 #include <dynd/dtypes/base_struct_dtype.hpp>
 #include <dynd/dtypes/strided_dim_dtype.hpp>
-#include <dynd/dtypes/fixedarray_dtype.hpp>
+#include <dynd/dtypes/fixed_dim_dtype.hpp>
 #include <dynd/dtypes/var_dim_dtype.hpp>
 #include <dynd/dtypes/string_dtype.hpp>
 #include <dynd/dtypes/fixedstring_dtype.hpp>
@@ -78,8 +78,8 @@ static void format_uniform_array_datashape(std::ostream& o,
             }
             break;
         }
-        case fixedarray_type_id: {
-            const fixedarray_dtype *fad = static_cast<const fixedarray_dtype *>(dt.extended());
+        case fixed_dim_type_id: {
+            const fixed_dim_dtype *fad = static_cast<const fixed_dim_dtype *>(dt.extended());
             o << fad->get_fixed_dim_size() << ", ";
             format_datashape(o, fad->get_element_dtype(), metadata, indent, multiline, identifier);
             break;
@@ -188,7 +188,7 @@ static void format_datashape(std::ostream& o, const dtype& dt, const char *metad
         case struct_kind:
             format_struct_datashape(o, dt, metadata, indent, multiline, identifier);
             break;
-        case uniform_array_kind:
+        case uniform_dim_kind:
             format_uniform_array_datashape(o, dt, metadata, indent, multiline, identifier);
             break;
         case string_kind:

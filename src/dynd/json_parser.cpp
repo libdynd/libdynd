@@ -7,7 +7,7 @@
 #include <dynd/dtypes/base_bytes_dtype.hpp>
 #include <dynd/dtypes/string_dtype.hpp>
 #include <dynd/dtypes/json_dtype.hpp>
-#include <dynd/dtypes/fixedarray_dtype.hpp>
+#include <dynd/dtypes/fixed_dim_dtype.hpp>
 #include <dynd/dtypes/var_dim_dtype.hpp>
 #include <dynd/dtypes/fixedstruct_dtype.hpp>
 #include <dynd/dtypes/date_dtype.hpp>
@@ -336,10 +336,10 @@ static void skip_json_value(const char *&begin, const char *end)
     }
 }
 
-static void parse_fixedarray_json(const dtype& dt, const char *metadata, char *out_data,
+static void parse_fixed_dim_json(const dtype& dt, const char *metadata, char *out_data,
                 const char *&begin, const char *end)
 {
-    const fixedarray_dtype *fad = static_cast<const fixedarray_dtype *>(dt.extended());
+    const fixed_dim_dtype *fad = static_cast<const fixed_dim_dtype *>(dt.extended());
     intptr_t size = fad->get_fixed_dim_size();
     intptr_t stride = fad->get_fixed_stride();
 
@@ -573,12 +573,12 @@ static void parse_datetime_json(const dtype& dt, const char *metadata, char *out
     }
 }
 
-static void parse_uniform_array_json(const dtype& dt, const char *metadata, char *out_data,
+static void parse_uniform_dim_json(const dtype& dt, const char *metadata, char *out_data,
                 const char *&begin, const char *end)
 {
     switch (dt.get_type_id()) {
-        case fixedarray_type_id:
-            parse_fixedarray_json(dt, metadata, out_data, begin, end);
+        case fixed_dim_type_id:
+            parse_fixed_dim_json(dt, metadata, out_data, begin, end);
             break;
         case var_dim_type_id:
             parse_var_dim_json(dt, metadata, out_data, begin, end);
@@ -595,8 +595,8 @@ static void parse_json(const dtype& dt, const char *metadata, char *out_data,
                 const char *&json_begin, const char *json_end)
 {
     switch (dt.get_kind()) {
-        case uniform_array_kind:
-            parse_uniform_array_json(dt, metadata, out_data, json_begin, json_end);
+        case uniform_dim_kind:
+            parse_uniform_dim_json(dt, metadata, out_data, json_begin, json_end);
             break;
         case struct_kind:
             parse_struct_json(dt, metadata, out_data, json_begin, json_end);

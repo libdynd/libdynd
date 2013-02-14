@@ -9,7 +9,7 @@
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/dtypes/fixedstruct_dtype.hpp>
 #include <dynd/dtypes/pointer_dtype.hpp>
-#include <dynd/dtypes/fixedarray_dtype.hpp>
+#include <dynd/dtypes/fixed_dim_dtype.hpp>
 #include <dynd/dtypes/var_dim_dtype.hpp>
 #include <dynd/dtypes/categorical_dtype.hpp>
 #include <dynd/ndobject_iter.hpp>
@@ -41,7 +41,7 @@ groupby_dtype::groupby_dtype(const dtype& data_values_dtype,
                     make_pointer_dtype(by_values_dtype), "by");
     m_members.metadata_size = m_operand_dtype.get_metadata_size();
     const categorical_dtype *cd = static_cast<const categorical_dtype *>(m_groups_dtype.extended());
-    m_value_dtype = make_fixedarray_dtype(cd->get_category_count(),
+    m_value_dtype = make_fixed_dim_dtype(cd->get_category_count(),
                     make_var_dim_dtype(data_values_dtype.at_single(0)));
 }
 
@@ -165,7 +165,7 @@ namespace {
                             by_values_dt, by_values_origin, by_values_stride, by_values_size);
 
             const dtype& result_dt = gd->get_value_dtype();
-            const fixedarray_dtype *fad = static_cast<const fixedarray_dtype *>(result_dt.extended());
+            const fixed_dim_dtype *fad = static_cast<const fixed_dim_dtype *>(result_dt.extended());
             intptr_t fad_stride = fad->get_fixed_stride();
             const var_dim_dtype *vad = static_cast<const var_dim_dtype *>(fad->get_element_dtype().extended());
             const var_dim_dtype_metadata *vad_md = reinterpret_cast<const var_dim_dtype_metadata *>(e->dst_metadata);
@@ -278,7 +278,7 @@ size_t groupby_dtype::make_operand_to_value_assignment_kernel(
     // The following is the setup for copying a single 'data' value to the output
     // The destination element type and metadata
     const dtype& dst_element_dtype = static_cast<const var_dim_dtype *>(
-                    static_cast<const fixedarray_dtype *>(m_value_dtype.extended())->get_element_dtype().extended()
+                    static_cast<const fixed_dim_dtype *>(m_value_dtype.extended())->get_element_dtype().extended()
                     )->get_element_dtype();
     const char *dst_element_metadata = dst_metadata + 0 + sizeof(var_dim_dtype_metadata);
     // Get source element type and metadata

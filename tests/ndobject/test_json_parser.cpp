@@ -12,7 +12,7 @@
 
 #include <dynd/json_parser.hpp>
 #include <dynd/dtypes/var_dim_dtype.hpp>
-#include <dynd/dtypes/fixedarray_dtype.hpp>
+#include <dynd/dtypes/fixed_dim_dtype.hpp>
 #include <dynd/dtypes/fixedstruct_dtype.hpp>
 #include <dynd/dtypes/date_dtype.hpp>
 #include <dynd/dtypes/string_dtype.hpp>
@@ -122,9 +122,9 @@ TEST(JSONParser, ListBools) {
     EXPECT_FALSE(n.at(2).as<bool>());
     EXPECT_FALSE(n.at(3).as<bool>());
 
-    n = parse_json(make_fixedarray_dtype(4, make_dtype<dynd_bool>()),
+    n = parse_json(make_fixed_dim_dtype(4, make_dtype<dynd_bool>()),
                     "  [true, true, false, null]  ");
-    EXPECT_EQ(make_fixedarray_dtype(4, make_dtype<dynd_bool>()), n.get_dtype());
+    EXPECT_EQ(make_fixed_dim_dtype(4, make_dtype<dynd_bool>()), n.get_dtype());
     EXPECT_TRUE(n.at(0).as<bool>());
     EXPECT_TRUE(n.at(1).as<bool>());
     EXPECT_FALSE(n.at(2).as<bool>());
@@ -133,13 +133,13 @@ TEST(JSONParser, ListBools) {
     EXPECT_THROW(parse_json(make_var_dim_dtype(make_dtype<dynd_bool>()),
                     "[true, true, false, null] 3.5"),
                     runtime_error);
-    EXPECT_THROW(parse_json(make_fixedarray_dtype(4, make_dtype<dynd_bool>()),
+    EXPECT_THROW(parse_json(make_fixed_dim_dtype(4, make_dtype<dynd_bool>()),
                     "[true, true, false, null] 3.5"),
                     runtime_error);
-    EXPECT_THROW(parse_json(make_fixedarray_dtype(3, make_dtype<dynd_bool>()),
+    EXPECT_THROW(parse_json(make_fixed_dim_dtype(3, make_dtype<dynd_bool>()),
                     "[true, true, false, null]"),
                     runtime_error);
-    EXPECT_THROW(parse_json(make_fixedarray_dtype(5, make_dtype<dynd_bool>()),
+    EXPECT_THROW(parse_json(make_fixed_dim_dtype(5, make_dtype<dynd_bool>()),
                     "[true, true, false, null]"),
                     runtime_error);
 }
@@ -147,9 +147,9 @@ TEST(JSONParser, ListBools) {
 TEST(JSONParser, NestedListInts) {
     ndobject n;
 
-    n = parse_json(make_fixedarray_dtype(3, make_var_dim_dtype(make_dtype<int>())),
+    n = parse_json(make_fixed_dim_dtype(3, make_var_dim_dtype(make_dtype<int>())),
                     "  [[1,2,3], [4,5], [6,7,-10,1000] ]  ");
-    EXPECT_EQ(make_fixedarray_dtype(3, make_var_dim_dtype(make_dtype<int>())), n.get_dtype());
+    EXPECT_EQ(make_fixed_dim_dtype(3, make_var_dim_dtype(make_dtype<int>())), n.get_dtype());
     EXPECT_EQ(1, n.at(0,0).as<int>());
     EXPECT_EQ(2, n.at(0,1).as<int>());
     EXPECT_EQ(3, n.at(0,2).as<int>());
@@ -160,9 +160,9 @@ TEST(JSONParser, NestedListInts) {
     EXPECT_EQ(-10, n.at(2,2).as<int>());
     EXPECT_EQ(1000, n.at(2,3).as<int>());
 
-    n = parse_json(make_var_dim_dtype(make_fixedarray_dtype(3, make_dtype<int>())),
+    n = parse_json(make_var_dim_dtype(make_fixed_dim_dtype(3, make_dtype<int>())),
                     "  [[1,2,3], [4,5,2] ]  ");
-    EXPECT_EQ(make_var_dim_dtype(make_fixedarray_dtype(3, make_dtype<int>())), n.get_dtype());
+    EXPECT_EQ(make_var_dim_dtype(make_fixed_dim_dtype(3, make_dtype<int>())), n.get_dtype());
     EXPECT_EQ(1, n.at(0,0).as<int>());
     EXPECT_EQ(2, n.at(0,1).as<int>());
     EXPECT_EQ(3, n.at(0,2).as<int>());
@@ -202,7 +202,7 @@ TEST(JSONParser, Struct) {
 
 TEST(JSONParser, NestedStruct) {
     ndobject n;
-    dtype sdt = make_fixedstruct_dtype(make_fixedarray_dtype(3, make_dtype<float>()), "position",
+    dtype sdt = make_fixedstruct_dtype(make_fixed_dim_dtype(3, make_dtype<float>()), "position",
                     make_dtype<double>(), "amount",
                     make_fixedstruct_dtype(make_string_dtype(), "name", make_date_dtype(), "when"), "data");
 
@@ -234,7 +234,7 @@ TEST(JSONParser, NestedStruct) {
 
 TEST(JSONParser, ListOfStruct) {
     ndobject n;
-    dtype sdt = make_var_dim_dtype(make_fixedstruct_dtype(make_fixedarray_dtype(3, make_dtype<float>()), "position",
+    dtype sdt = make_var_dim_dtype(make_fixedstruct_dtype(make_fixed_dim_dtype(3, make_dtype<float>()), "position",
                     make_dtype<double>(), "amount",
                     make_fixedstruct_dtype(make_string_dtype(), "name", make_date_dtype(), "when"), "data"));
 

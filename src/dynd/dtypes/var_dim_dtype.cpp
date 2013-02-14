@@ -5,7 +5,7 @@
 
 #include <dynd/dtypes/var_dim_dtype.hpp>
 #include <dynd/dtypes/strided_dim_dtype.hpp>
-#include <dynd/dtypes/fixedarray_dtype.hpp>
+#include <dynd/dtypes/fixed_dim_dtype.hpp>
 #include <dynd/dtypes/dtype_alignment.hpp>
 #include <dynd/dtypes/pointer_dtype.hpp>
 #include <dynd/memblock/pod_memory_block.hpp>
@@ -20,7 +20,7 @@ using namespace std;
 using namespace dynd;
 
 var_dim_dtype::var_dim_dtype(const dtype& element_dtype)
-    : base_dtype(var_dim_type_id, uniform_array_kind, sizeof(var_dim_dtype_data),
+    : base_dtype(var_dim_type_id, uniform_dim_kind, sizeof(var_dim_dtype_data),
                     sizeof(const char *), dtype_flag_zeroinit,
                     element_dtype.get_metadata_size() + sizeof(var_dim_dtype_metadata),
                     element_dtype.get_undim() + 1),
@@ -549,7 +549,7 @@ size_t var_dim_dtype::make_assignment_kernel(
                             src_dt, src_metadata,
                             errmode, ectx);
         } else if (src_dt.get_type_id() == strided_dim_type_id ||
-                        src_dt.get_type_id() == fixedarray_type_id) {
+                        src_dt.get_type_id() == fixed_dim_type_id) {
             // strided_dim to var_dim
             return make_strided_to_var_dim_assignment_kernel(out, offset_out,
                             dst_dt, dst_metadata,
@@ -564,7 +564,7 @@ size_t var_dim_dtype::make_assignment_kernel(
         throw broadcast_error(dst_dt, dst_metadata, src_dt, src_metadata);
     } else {
         if (dst_dt.get_type_id() == strided_dim_type_id ||
-                        dst_dt.get_type_id() == fixedarray_type_id) {
+                        dst_dt.get_type_id() == fixed_dim_type_id) {
             // var_dim to strided_dim
             return make_var_to_strided_dim_assignment_kernel(out, offset_out,
                             dst_dt, dst_metadata,

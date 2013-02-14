@@ -30,7 +30,7 @@ std::ostream& dynd::operator<<(std::ostream& o, dtype_kind_t kind)
             return (o << "void");
         case datetime_kind:
             return (o << "datetime");
-        case uniform_array_kind:
+        case uniform_dim_kind:
             return (o << "uniform_array");
         case struct_kind:
             return (o << "struct");
@@ -100,8 +100,8 @@ std::ostream& dynd::operator<<(std::ostream& o, type_id_t tid)
             return (o << "json");
         case strided_dim_type_id:
             return (o << "strided_dim");
-        case fixedarray_type_id:
-            return (o << "fixedarray");
+        case fixed_dim_type_id:
+            return (o << "fixed_dim");
         case var_dim_type_id:
             return (o << "var_dim");
         case struct_type_id:

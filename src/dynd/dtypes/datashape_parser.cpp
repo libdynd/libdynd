@@ -9,7 +9,7 @@
 #include <dynd/dtypes/datashape_parser.hpp>
 #include <dynd/dtypes/strided_dim_dtype.hpp>
 #include <dynd/dtypes/var_dim_dtype.hpp>
-#include <dynd/dtypes/fixedarray_dtype.hpp>
+#include <dynd/dtypes/fixed_dim_dtype.hpp>
 #include <dynd/dtypes/fixedstruct_dtype.hpp>
 #include <dynd/dtypes/string_dtype.hpp>
 #include <dynd/dtypes/fixedstring_dtype.hpp>
@@ -445,7 +445,7 @@ static dtype parse_rhs_expression(const char *&begin, const char *end, map<strin
                 } else if (shape[i] == -1) {
                     result = make_var_dim_dtype(result);
                 } else {
-                    result = make_fixedarray_dtype(shape[i], result);
+                    result = make_fixed_dim_dtype(shape[i], result);
                 }
             }
         }
