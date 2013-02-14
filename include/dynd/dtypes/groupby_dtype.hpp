@@ -46,9 +46,8 @@ public:
 
     void print_dtype(std::ostream& o) const;
 
-    // Only support POD data for now (TODO: support blockref)
     dtype_memory_management_t get_memory_management() const {
-        return pod_memory_management;
+        return blockref_memory_management;
     }
 
     dtype get_data_values_dtype() const;

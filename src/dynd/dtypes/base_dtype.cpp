@@ -116,8 +116,6 @@ std::ostream& dynd::operator<<(std::ostream& o, type_id_t tid)
             return (o << "convert");
         case byteswap_type_id:
             return (o << "byteswap");
-        case align_type_id:
-            return (o << "align");
         case view_type_id:
             return (o << "view");
         case property_type_id:

@@ -117,13 +117,13 @@ enum type_id_t {
     // Adapter dtypes
     convert_type_id,
     byteswap_type_id,
-    align_type_id,
     view_type_id,
 
     // A type for property access
     property_type_id,
 
     // Advanced expression dtypes
+    expr_type_id,
     groupby_type_id,
 
     // The number of built-in, atomic types (including uninitialized and void)
