@@ -540,6 +540,10 @@ void ndobject::flag_as_immutable()
     }
 
     if (ok) {
+        // Finalize any allocated data in the metadata
+        if (!is_builtin_dtype(get_ndo()->m_dtype)) {
+            get_ndo()->m_dtype->metadata_finalize_buffers(get_ndo_meta());
+        }
         // Clear the write flag, and set the immutable flag
         get_ndo()->m_flags = (get_ndo()->m_flags&~(uint64_t)write_access_flag)|immutable_access_flag;
     } else {
