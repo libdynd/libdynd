@@ -88,7 +88,7 @@ set(dynd_SRC
     include/dynd/dtypes/base_expression_dtype.hpp
     include/dynd/dtypes/base_string_dtype.hpp
     include/dynd/dtypes/base_struct_dtype.hpp
-    include/dynd/dtypes/base_uniform_array_dtype.hpp
+    include/dynd/dtypes/base_uniform_dim_dtype.hpp
     include/dynd/dtypes/busdate_dtype.hpp
     include/dynd/dtypes/bytes_dtype.hpp
     include/dynd/dtypes/byteswap_dtype.hpp

@@ -31,7 +31,7 @@ std::ostream& dynd::operator<<(std::ostream& o, dtype_kind_t kind)
         case datetime_kind:
             return (o << "datetime");
         case uniform_dim_kind:
-            return (o << "uniform_array");
+            return (o << "uniform_dim");
         case struct_kind:
             return (o << "struct");
         case expression_kind:

@@ -215,7 +215,7 @@ static void format_json_struct(output_data& out, const dtype& dt, const char *me
     out.write('}');
 }
 
-static void format_json_uniform_array(output_data& out, const dtype& dt, const char *metadata, const char *data)
+static void format_json_uniform_dim(output_data& out, const dtype& dt, const char *metadata, const char *data)
 {
     out.write('[');
     switch (dt.get_type_id()) {
@@ -292,7 +292,7 @@ static void format_json(output_data& out, const dtype& dt, const char *metadata,
             format_json_struct(out, dt, metadata, data);
             break;
         case uniform_dim_kind:
-            format_json_uniform_array(out, dt, metadata, data);
+            format_json_uniform_dim(out, dt, metadata, data);
             break;
         default: {
             stringstream ss;
