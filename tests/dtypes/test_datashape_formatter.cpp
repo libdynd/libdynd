@@ -10,7 +10,7 @@
 
 #include <dynd/dtypes/datashape_formatter.hpp>
 #include <dynd/dtypes/strided_array_dtype.hpp>
-#include <dynd/dtypes/var_array_dtype.hpp>
+#include <dynd/dtypes/var_dim_dtype.hpp>
 #include <dynd/dtypes/fixedarray_dtype.hpp>
 #include <dynd/dtypes/struct_dtype.hpp>
 #include <dynd/dtypes/fixedstruct_dtype.hpp>
@@ -108,9 +108,9 @@ TEST(DataShapeFormatter, NDObjectUniformArrays) {
     EXPECT_EQ("3, int32", format_datashape(
                     make_strided_ndobject(3, make_dtype<int32_t>()), "", false));
     EXPECT_EQ("VarDim, int32", format_datashape(
-                    ndobject(make_var_array_dtype(make_dtype<int32_t>())), "", false));
+                    ndobject(make_var_dim_dtype(make_dtype<int32_t>())), "", false));
     EXPECT_EQ("VarDim, 3, int32", format_datashape(
-                    ndobject(make_var_array_dtype(
+                    ndobject(make_var_dim_dtype(
                         make_fixedarray_dtype(3, make_dtype<int32_t>()))), "", false));
 }
 
@@ -118,12 +118,12 @@ TEST(DataShapeFormatter, DTypeUniformArrays) {
     EXPECT_EQ("A, B, C, int32", format_datashape(
                     make_strided_array_dtype(make_dtype<int32_t>(), 3), "", false));
     EXPECT_EQ("VarDim, int32", format_datashape(
-                    make_var_array_dtype(make_dtype<int32_t>()), "", false));
+                    make_var_dim_dtype(make_dtype<int32_t>()), "", false));
     EXPECT_EQ("VarDim, 3, int32", format_datashape(
-                    make_var_array_dtype(
+                    make_var_dim_dtype(
                         make_fixedarray_dtype(3, make_dtype<int32_t>())), "", false));
     EXPECT_EQ("VarDim, A, int32", format_datashape(
-                    make_var_array_dtype(
+                    make_var_dim_dtype(
                         make_strided_array_dtype(make_dtype<int32_t>())), "", false));
 }
 
@@ -134,10 +134,10 @@ TEST(DataShapeFormatter, NDObjectStructs) {
                                     make_dtype<double>(), "y")), "", false));
     EXPECT_EQ("{x: VarDim, {a: int32; b: int8}; y: 5, VarDim, uint8}",
                     format_datashape(ndobject(make_struct_dtype(
-                                    make_var_array_dtype(make_fixedstruct_dtype(
+                                    make_var_dim_dtype(make_fixedstruct_dtype(
                                         make_dtype<int32_t>(), "a",
                                         make_dtype<int8_t>(), "b")), "x",
-                                    make_fixedarray_dtype(5, make_var_array_dtype(
+                                    make_fixedarray_dtype(5, make_var_dim_dtype(
                                         make_dtype<uint8_t>())), "y")), "", false));
 }
 
@@ -148,16 +148,16 @@ TEST(DataShapeFormatter, DTypeStructs) {
                                     make_dtype<double>(), "y"), "", false));
     EXPECT_EQ("{x: VarDim, {a: int32; b: int8}; y: 5, VarDim, uint8}",
                     format_datashape(make_struct_dtype(
-                                    make_var_array_dtype(make_fixedstruct_dtype(
+                                    make_var_dim_dtype(make_fixedstruct_dtype(
                                         make_dtype<int32_t>(), "a",
                                         make_dtype<int8_t>(), "b")), "x",
-                                    make_fixedarray_dtype(5, make_var_array_dtype(
+                                    make_fixedarray_dtype(5, make_var_dim_dtype(
                                         make_dtype<uint8_t>())), "y"), "", false));
     EXPECT_EQ("{x: A, {a: int32; b: int8}; y: VarDim, B, uint8}",
                     format_datashape(make_struct_dtype(
                                     make_strided_array_dtype(make_fixedstruct_dtype(
                                         make_dtype<int32_t>(), "a",
                                         make_dtype<int8_t>(), "b")), "x",
-                                    make_var_array_dtype(make_strided_array_dtype(
+                                    make_var_dim_dtype(make_strided_array_dtype(
                                         make_dtype<uint8_t>())), "y"), "", false));
 }

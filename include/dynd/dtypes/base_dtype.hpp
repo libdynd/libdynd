@@ -105,7 +105,7 @@ enum type_id_t {
     // A fixed-sized array dimension type
     fixedarray_type_id,
     // A variable-sized array dimension type
-    var_array_type_id,
+    var_dim_type_id,
 
     // A struct type with variable layout
     struct_type_id,

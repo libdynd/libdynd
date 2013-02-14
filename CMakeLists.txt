@@ -80,7 +80,7 @@ set(dynd_SRC
     src/dynd/dtypes/string_dtype.cpp
     src/dynd/dtypes/struct_dtype.cpp
     src/dynd/dtypes/tuple_dtype.cpp
-    src/dynd/dtypes/var_array_dtype.cpp
+    src/dynd/dtypes/var_dim_dtype.cpp
     src/dynd/dtypes/view_dtype.cpp
     src/dynd/dtypes/void_pointer_dtype.cpp
     include/dynd/dtypes/base_bytes_dtype.hpp
@@ -112,7 +112,7 @@ set(dynd_SRC
     include/dynd/dtypes/struct_dtype.hpp
     include/dynd/dtypes/fixedstruct_dtype.hpp
     include/dynd/dtypes/tuple_dtype.hpp
-    include/dynd/dtypes/var_array_dtype.hpp
+    include/dynd/dtypes/var_dim_dtype.hpp
     include/dynd/dtypes/view_dtype.hpp
     include/dynd/dtypes/void_pointer_dtype.hpp
     # Eval
@@ -141,7 +141,7 @@ set(dynd_SRC
     include/dynd/gfunc/serialize.hpp
     # Kernels
     src/dynd/kernels/assignment_kernels.cpp
-    src/dynd/kernels/var_array_assignment_kernels.cpp
+    src/dynd/kernels/var_dim_assignment_kernels.cpp
     src/dynd/kernels/builtin_dtype_binary_kernel_table.cpp
     src/dynd/kernels/buffered_binary_kernels.cpp
     src/dynd/kernels/bytes_assignment_kernels.cpp
@@ -155,7 +155,7 @@ set(dynd_SRC
     src/dynd/kernels/kernels_for_disassembly.cpp
     src/dynd/kernels/single_assigner_builtin.hpp
     include/dynd/kernels/assignment_kernels.hpp
-    include/dynd/kernels/var_array_assignment_kernels.hpp
+    include/dynd/kernels/var_dim_assignment_kernels.hpp
     include/dynd/kernels/builtin_dtype_binary_kernel_table.hpp
     include/dynd/kernels/buffered_binary_kernels.hpp
     include/dynd/kernels/bytes_assignment_kernels.hpp

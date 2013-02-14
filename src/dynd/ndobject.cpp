@@ -6,7 +6,7 @@
 #include <dynd/ndobject.hpp>
 #include <dynd/ndobject_iter.hpp>
 #include <dynd/dtypes/strided_array_dtype.hpp>
-#include <dynd/dtypes/var_array_dtype.hpp>
+#include <dynd/dtypes/var_dim_dtype.hpp>
 #include <dynd/dtypes/dtype_alignment.hpp>
 #include <dynd/dtypes/view_dtype.hpp>
 #include <dynd/dtypes/string_dtype.hpp>
@@ -58,7 +58,7 @@ ndobject dynd::make_strided_ndobject(const dtype& uniform_dtype, size_t ndim, co
         if (shape[i] >= 0) {
             array_dtype = make_strided_array_dtype(array_dtype);
         } else {
-            array_dtype = make_var_array_dtype(array_dtype);
+            array_dtype = make_var_dim_dtype(array_dtype);
             any_variable_dims = true;
         }
     }

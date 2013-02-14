@@ -10,7 +10,7 @@
 #include <dynd/dtypes/fixedstruct_dtype.hpp>
 #include <dynd/dtypes/pointer_dtype.hpp>
 #include <dynd/dtypes/fixedarray_dtype.hpp>
-#include <dynd/dtypes/var_array_dtype.hpp>
+#include <dynd/dtypes/var_dim_dtype.hpp>
 #include <dynd/dtypes/categorical_dtype.hpp>
 #include <dynd/ndobject_iter.hpp>
 #include <dynd/gfunc/make_callable.hpp>
@@ -42,7 +42,7 @@ groupby_dtype::groupby_dtype(const dtype& data_values_dtype,
     m_members.metadata_size = m_operand_dtype.get_metadata_size();
     const categorical_dtype *cd = static_cast<const categorical_dtype *>(m_groups_dtype.extended());
     m_value_dtype = make_fixedarray_dtype(cd->get_category_count(),
-                    make_var_array_dtype(data_values_dtype.at_single(0)));
+                    make_var_dim_dtype(data_values_dtype.at_single(0)));
 }
 
 groupby_dtype::~groupby_dtype()
@@ -167,10 +167,10 @@ namespace {
             const dtype& result_dt = gd->get_value_dtype();
             const fixedarray_dtype *fad = static_cast<const fixedarray_dtype *>(result_dt.extended());
             intptr_t fad_stride = fad->get_fixed_stride();
-            const var_array_dtype *vad = static_cast<const var_array_dtype *>(fad->get_element_dtype().extended());
-            const var_array_dtype_metadata *vad_md = reinterpret_cast<const var_array_dtype_metadata *>(e->dst_metadata);
+            const var_dim_dtype *vad = static_cast<const var_dim_dtype *>(fad->get_element_dtype().extended());
+            const var_dim_dtype_metadata *vad_md = reinterpret_cast<const var_dim_dtype_metadata *>(e->dst_metadata);
             if (vad_md->offset != 0) {
-                throw runtime_error("dynd groupby: destination var_array offset must be zero to allocate output");
+                throw runtime_error("dynd groupby: destination var_dim offset must be zero to allocate output");
             }
             intptr_t vad_stride = vad_md->stride;
 
@@ -197,9 +197,9 @@ namespace {
             vector<char *> cat_pointers(cat_sizes.size());
             for (size_t i = 0, i_end = cat_pointers.size(); i != i_end; ++i) {
                 cat_pointers[i] = out_begin;
-                reinterpret_cast<var_array_dtype_data *>(dst + i * fad_stride)->begin = out_begin;
+                reinterpret_cast<var_dim_dtype_data *>(dst + i * fad_stride)->begin = out_begin;
                 size_t csize = cat_sizes[i];
-                reinterpret_cast<var_array_dtype_data *>(dst + i * fad_stride)->size = csize;
+                reinterpret_cast<var_dim_dtype_data *>(dst + i * fad_stride)->size = csize;
                 out_begin += csize * vad_stride;
             }
 
@@ -277,10 +277,10 @@ size_t groupby_dtype::make_operand_to_value_assignment_kernel(
 
     // The following is the setup for copying a single 'data' value to the output
     // The destination element type and metadata
-    const dtype& dst_element_dtype = static_cast<const var_array_dtype *>(
+    const dtype& dst_element_dtype = static_cast<const var_dim_dtype *>(
                     static_cast<const fixedarray_dtype *>(m_value_dtype.extended())->get_element_dtype().extended()
                     )->get_element_dtype();
-    const char *dst_element_metadata = dst_metadata + 0 + sizeof(var_array_dtype_metadata);
+    const char *dst_element_metadata = dst_metadata + 0 + sizeof(var_dim_dtype_metadata);
     // Get source element type and metadata
     dtype src_element_dtype = m_operand_dtype;
     const char *src_element_metadata = e->src_metadata;

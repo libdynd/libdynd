@@ -8,7 +8,7 @@
 #include <dynd/dtypes/string_dtype.hpp>
 #include <dynd/dtypes/json_dtype.hpp>
 #include <dynd/dtypes/fixedarray_dtype.hpp>
-#include <dynd/dtypes/var_array_dtype.hpp>
+#include <dynd/dtypes/var_dim_dtype.hpp>
 #include <dynd/dtypes/fixedstruct_dtype.hpp>
 #include <dynd/dtypes/date_dtype.hpp>
 #include <dynd/kernels/string_numeric_assignment_kernels.hpp>
@@ -357,15 +357,15 @@ static void parse_fixedarray_json(const dtype& dt, const char *metadata, char *o
     }
 }
 
-static void parse_var_array_json(const dtype& dt, const char *metadata, char *out_data,
+static void parse_var_dim_json(const dtype& dt, const char *metadata, char *out_data,
                 const char *&begin, const char *end)
 {
-    const var_array_dtype *vad = static_cast<const var_array_dtype *>(dt.extended());
-    const var_array_dtype_metadata *md = reinterpret_cast<const var_array_dtype_metadata *>(metadata);
+    const var_dim_dtype *vad = static_cast<const var_dim_dtype *>(dt.extended());
+    const var_dim_dtype_metadata *md = reinterpret_cast<const var_dim_dtype_metadata *>(metadata);
     intptr_t stride = md->stride;
     const dtype& element_dtype = vad->get_element_dtype();
 
-    var_array_dtype_data *out = reinterpret_cast<var_array_dtype_data *>(out_data);
+    var_dim_dtype_data *out = reinterpret_cast<var_dim_dtype_data *>(out_data);
     char *out_end = NULL;
 
     memory_block_pod_allocator_api *allocator = get_memory_block_pod_allocator_api(md->blockref);
@@ -386,7 +386,7 @@ static void parse_var_array_json(const dtype& dt, const char *metadata, char *ou
             }
             ++size;
             out->size = size;
-            parse_json(element_dtype, metadata + sizeof(var_array_dtype_metadata),
+            parse_json(element_dtype, metadata + sizeof(var_dim_dtype_metadata),
                             out->begin + (size-1) * stride, begin, end);
             if (!parse_token(begin, end, ",")) {
                 break;
@@ -580,8 +580,8 @@ static void parse_uniform_array_json(const dtype& dt, const char *metadata, char
         case fixedarray_type_id:
             parse_fixedarray_json(dt, metadata, out_data, begin, end);
             break;
-        case var_array_type_id:
-            parse_var_array_json(dt, metadata, out_data, begin, end);
+        case var_dim_type_id:
+            parse_var_dim_json(dt, metadata, out_data, begin, end);
             break;
         default: {
             stringstream ss;

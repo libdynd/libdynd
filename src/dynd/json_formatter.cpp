@@ -10,7 +10,7 @@
 #include <dynd/dtypes/base_struct_dtype.hpp>
 #include <dynd/dtypes/strided_array_dtype.hpp>
 #include <dynd/dtypes/fixedarray_dtype.hpp>
-#include <dynd/dtypes/var_array_dtype.hpp>
+#include <dynd/dtypes/var_dim_dtype.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -245,14 +245,14 @@ static void format_json_uniform_array(output_data& out, const dtype& dt, const c
             }
             break;
         }
-        case var_array_type_id: {
-            const var_array_dtype *vad = static_cast<const var_array_dtype *>(dt.extended());
-            const var_array_dtype_metadata *md = reinterpret_cast<const var_array_dtype_metadata *>(metadata);
-            const var_array_dtype_data *d = reinterpret_cast<const var_array_dtype_data *>(data);
+        case var_dim_type_id: {
+            const var_dim_dtype *vad = static_cast<const var_dim_dtype *>(dt.extended());
+            const var_dim_dtype_metadata *md = reinterpret_cast<const var_dim_dtype_metadata *>(metadata);
+            const var_dim_dtype_data *d = reinterpret_cast<const var_dim_dtype_data *>(data);
             dtype element_dtype = vad->get_element_dtype();
             intptr_t size = d->size, stride = md->stride;
             const char *begin = d->begin + md->offset;
-            metadata += sizeof(var_array_dtype_metadata);
+            metadata += sizeof(var_dim_dtype_metadata);
             for (intptr_t i = 0; i < size; ++i) {
                 ::format_json(out, element_dtype, metadata, begin + i * stride);
                 if (i != size - 1) {

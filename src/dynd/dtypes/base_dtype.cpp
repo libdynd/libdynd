@@ -102,8 +102,8 @@ std::ostream& dynd::operator<<(std::ostream& o, type_id_t tid)
             return (o << "strided_array");
         case fixedarray_type_id:
             return (o << "fixedarray");
-        case var_array_type_id:
-            return (o << "var_array");
+        case var_dim_type_id:
+            return (o << "var_dim");
         case struct_type_id:
             return (o << "struct");
         case fixedstruct_type_id:

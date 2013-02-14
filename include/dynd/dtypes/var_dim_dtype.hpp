@@ -3,8 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__ARRAY_DTYPE_HPP_
-#define _DYND__ARRAY_DTYPE_HPP_
+#ifndef _DYND__VAR_DIM_DTYPE_HPP_
+#define _DYND__VAR_DIM_DTYPE_HPP_
 
 #include <dynd/dtype.hpp>
 #include <dynd/dtype_assign.hpp>
@@ -13,7 +13,7 @@
 
 namespace dynd {
 
-struct var_array_dtype_metadata {
+struct var_dim_dtype_metadata {
     /**
      * A reference to the memory block which contains the array's data.
      */
@@ -23,21 +23,21 @@ struct var_array_dtype_metadata {
     intptr_t offset;
 };
 
-struct var_array_dtype_data {
+struct var_dim_dtype_data {
     char *begin;
     size_t size;
 };
 
-class var_array_dtype : public base_dtype {
+class var_dim_dtype : public base_dtype {
     dtype m_element_dtype;
     std::vector<std::pair<std::string, gfunc::callable> > m_ndobject_properties, m_ndobject_functions;
 public:
-    var_array_dtype(const dtype& element_dtype);
+    var_dim_dtype(const dtype& element_dtype);
 
-    virtual ~var_array_dtype();
+    virtual ~var_dim_dtype();
 
     size_t get_default_data_size(size_t DYND_UNUSED(ndim), const intptr_t *DYND_UNUSED(shape)) const {
-        return sizeof(var_array_dtype_data);
+        return sizeof(var_dim_dtype_data);
     }
 
 
@@ -122,10 +122,10 @@ public:
     void get_dynamic_ndobject_functions(const std::pair<std::string, gfunc::callable> **out_functions, size_t *out_count) const;
 };
 
-inline dtype make_var_array_dtype(const dtype& element_dtype) {
-    return dtype(new var_array_dtype(element_dtype), false);
+inline dtype make_var_dim_dtype(const dtype& element_dtype) {
+    return dtype(new var_dim_dtype(element_dtype), false);
 }
 
 } // namespace dynd
 
-#endif // _DYND__ARRAY_DTYPE_HPP_
+#endif // _DYND__VAR_DIM_DTYPE_HPP_

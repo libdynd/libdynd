@@ -12,7 +12,7 @@
 
 #include <dynd/json_formatter.hpp>
 #include <dynd/json_parser.hpp>
-#include <dynd/dtypes/var_array_dtype.hpp>
+#include <dynd/dtypes/var_dim_dtype.hpp>
 #include <dynd/dtypes/fixedarray_dtype.hpp>
 #include <dynd/dtypes/fixedstruct_dtype.hpp>
 #include <dynd/dtypes/date_dtype.hpp>

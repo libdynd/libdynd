@@ -7,7 +7,7 @@
 #include <dynd/dtypes/base_struct_dtype.hpp>
 #include <dynd/dtypes/strided_array_dtype.hpp>
 #include <dynd/dtypes/fixedarray_dtype.hpp>
-#include <dynd/dtypes/var_array_dtype.hpp>
+#include <dynd/dtypes/var_dim_dtype.hpp>
 #include <dynd/dtypes/string_dtype.hpp>
 #include <dynd/dtypes/fixedstring_dtype.hpp>
 
@@ -84,11 +84,11 @@ static void format_uniform_array_datashape(std::ostream& o,
             format_datashape(o, fad->get_element_dtype(), metadata, indent, multiline, identifier);
             break;
         }
-        case var_array_type_id: {
-            const var_array_dtype *vad = static_cast<const var_array_dtype *>(dt.extended());
+        case var_dim_type_id: {
+            const var_dim_dtype *vad = static_cast<const var_dim_dtype *>(dt.extended());
             o << "VarDim, ";
             format_datashape(o, vad->get_element_dtype(),
-                            metadata ? (metadata + sizeof(var_array_dtype_metadata)) : NULL,
+                            metadata ? (metadata + sizeof(var_dim_dtype_metadata)) : NULL,
                             indent, multiline, identifier);
             break;
         }

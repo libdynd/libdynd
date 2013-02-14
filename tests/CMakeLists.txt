@@ -38,7 +38,7 @@ set(tests_SRC
     dtypes/test_string_dtype.cpp
     dtypes/test_struct_dtype.cpp
     dtypes/test_tuple_dtype.cpp
-    dtypes/test_var_array_dtype.cpp
+    dtypes/test_var_dim_dtype.cpp
     gfunc/test_callable.cpp
     ndobject/test_json_formatter.cpp
     ndobject/test_json_parser.cpp
