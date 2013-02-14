@@ -19,7 +19,19 @@ namespace dynd {
  * \param multiline  If true, split the datashape across multiple lines.
  */
 std::string format_datashape(const ndobject& n,
-                const std::string& prefix = "type BlazeDataShape = ",
+                const std::string& prefix = "",
+                bool multiline = true);
+
+/**
+ * Formats the dtype as a
+ * Blaze datashape.
+ *
+ * \param d  The dtype whose datashape to produce
+ * \param prefix  Prepends the datashape with this string
+ * \param multiline  If true, split the datashape across multiple lines.
+ */
+std::string format_datashape(const dtype& d,
+                const std::string& prefix = "",
                 bool multiline = true);
 
 /**
@@ -28,7 +40,7 @@ std::string format_datashape(const ndobject& n,
  *
  * \param o  The stream where to write the datashape.
  * \param dt  The data type.
- * \param metadata  The data type's metadata.
+ * \param metadata  The data type's metadata. This may be NULL.
  * \param multiline  If true, split the datashape across multiple lines.
  */
 void format_datashape(std::ostream& o, const dtype& dt, const char *metadata,

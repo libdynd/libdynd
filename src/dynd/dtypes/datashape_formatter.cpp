@@ -15,10 +15,22 @@ using namespace std;
 using namespace dynd;
 
 static void format_datashape(std::ostream& o, const dtype& dt, const char *metadata,
-                const std::string& indent, bool multiline);
+                const std::string& indent, bool multiline, int *identifier);
+
+static void format_identifier_string(std::ostream& o, int *identifier)
+{
+    if (*identifier < 26) {
+        string result("A");
+        result[0] += *identifier;
+        o << result;
+    } else {
+        o << "X" << identifier - 26;
+    }
+    ++(*identifier);
+}
 
 static void format_struct_datashape(std::ostream& o, const dtype& dt, const char *metadata,
-                const std::string& indent, bool multiline)
+                const std::string& indent, bool multiline, int *identifier)
 {
     const base_struct_dtype *bsd = static_cast<const base_struct_dtype *>(dt.extended());
     size_t field_count = bsd->get_field_count();
@@ -31,8 +43,8 @@ static void format_struct_datashape(std::ostream& o, const dtype& dt, const char
             o << indent << "  ";
         }
         o << field_names[i] << ": ";
-        format_datashape(o, field_types[i], metadata + metadata_offsets[i],
-                        multiline ? (indent + "  ") : indent, multiline);
+        format_datashape(o, field_types[i], metadata ? (metadata + metadata_offsets[i]) : NULL,
+                        multiline ? (indent + "  ") : indent, multiline, identifier);
         if (multiline) {
             o << ";\n";
         } else if (i != field_count - 1) {
@@ -44,28 +56,40 @@ static void format_struct_datashape(std::ostream& o, const dtype& dt, const char
 
 static void format_uniform_array_datashape(std::ostream& o,
                 const dtype& dt, const char *metadata,
-                const std::string& indent, bool multiline)
+                const std::string& indent, bool multiline, int *identifier)
 {
     switch (dt.get_type_id()) {
         case strided_array_type_id: {
             const strided_array_dtype *sad = static_cast<const strided_array_dtype *>(dt.extended());
-            const strided_array_dtype_metadata *md = reinterpret_cast<const strided_array_dtype_metadata *>(metadata);
-            o << md->size << ", ";
-            format_datashape(o, sad->get_element_dtype(),
-                            metadata + sizeof(strided_array_dtype_metadata), indent, multiline);
+            if (metadata) {
+                // If metadata is provided, use the actual dimension size
+                const strided_array_dtype_metadata *md =
+                                reinterpret_cast<const strided_array_dtype_metadata *>(metadata);
+                o << md->size << ", ";
+                format_datashape(o, sad->get_element_dtype(),
+                                metadata + sizeof(strided_array_dtype_metadata),
+                                indent, multiline, identifier);
+            } else {
+                // If no metadata, use a symbol
+                format_identifier_string(o, identifier);
+                o << ", ";
+                format_datashape(o, sad->get_element_dtype(), NULL,
+                                indent, multiline, identifier);
+            }
             break;
         }
         case fixedarray_type_id: {
             const fixedarray_dtype *fad = static_cast<const fixedarray_dtype *>(dt.extended());
             o << fad->get_fixed_dim_size() << ", ";
-            format_datashape(o, fad->get_element_dtype(), metadata, indent, multiline);
+            format_datashape(o, fad->get_element_dtype(), metadata, indent, multiline, identifier);
             break;
         }
         case var_array_type_id: {
             const var_array_dtype *vad = static_cast<const var_array_dtype *>(dt.extended());
             o << "VarDim, ";
             format_datashape(o, vad->get_element_dtype(),
-                            metadata + sizeof(var_array_dtype_metadata), indent, multiline);
+                            metadata ? (metadata + sizeof(var_array_dtype_metadata)) : NULL,
+                            indent, multiline, identifier);
             break;
         }
         default: {
@@ -102,8 +126,7 @@ static void format_string_encoding(std::ostream& o, string_encoding_t enc)
     }
 }
 
-static void format_string_datashape(std::ostream& o, const dtype& dt,
-                const char *metadata)
+static void format_string_datashape(std::ostream& o, const dtype& dt)
 {
     switch (dt.get_type_id()) {
         case string_type_id: {
@@ -141,8 +164,7 @@ static void format_string_datashape(std::ostream& o, const dtype& dt,
     }
 }
 
-static void format_complex_datashape(std::ostream& o, const dtype& dt,
-                const char *metadata)
+static void format_complex_datashape(std::ostream& o, const dtype& dt)
 {
     switch (dt.get_type_id()) {
         case complex_float32_type_id:
@@ -160,20 +182,20 @@ static void format_complex_datashape(std::ostream& o, const dtype& dt,
 }
 
 static void format_datashape(std::ostream& o, const dtype& dt, const char *metadata,
-                const std::string& indent, bool multiline)
+                const std::string& indent, bool multiline, int *identifier)
 {
     switch (dt.get_kind()) {
         case struct_kind:
-            format_struct_datashape(o, dt, metadata, indent, multiline);
+            format_struct_datashape(o, dt, metadata, indent, multiline, identifier);
             break;
         case uniform_array_kind:
-            format_uniform_array_datashape(o, dt, metadata, indent, multiline);
+            format_uniform_array_datashape(o, dt, metadata, indent, multiline, identifier);
             break;
         case string_kind:
-            format_string_datashape(o, dt, metadata);
+            format_string_datashape(o, dt);
             break;
         case complex_kind:
-            format_complex_datashape(o, dt, metadata);
+            format_complex_datashape(o, dt);
             break;
         default:
             o << dt;
@@ -184,7 +206,7 @@ static void format_datashape(std::ostream& o, const dtype& dt, const char *metad
 void dynd::format_datashape(std::ostream& o, const dtype& dt, const char *metadata,
                 bool multiline)
 {
-    ::format_datashape(o, dt, metadata, "", multiline);
+    ::format_datashape(o, dt, metadata, "", multiline, 0);
 }
 
 string dynd::format_datashape(const ndobject& n,
@@ -192,6 +214,17 @@ string dynd::format_datashape(const ndobject& n,
 {
     stringstream ss;
     ss << prefix;
-    ::format_datashape(ss, n.get_dtype(), n.get_ndo_meta(), "", multiline);
+    int identifier = 0;
+    ::format_datashape(ss, n.get_dtype(), n.get_ndo_meta(), "", multiline, &identifier);
+    return ss.str();
+}
+
+string dynd::format_datashape(const dtype& d,
+                const std::string& prefix, bool multiline)
+{
+    stringstream ss;
+    ss << prefix;
+    int identifier = 0;
+    ::format_datashape(ss, d, NULL, "", multiline, &identifier);
     return ss.str();
 }
