@@ -143,8 +143,8 @@ public:
  * An exception for when input can't be decoded
  */
 class string_decode_error : public dynd_exception {
-    string_encoding_t m_encoding;
     uint32_t m_cp;
+    string_encoding_t m_encoding;
 public:
     string_decode_error(uint32_t cp, string_encoding_t encoding);
 
@@ -165,8 +165,8 @@ public:
  * the destination.
  */
 class string_encode_error : public dynd_exception {
-    string_encoding_t m_encoding;
     uint32_t m_cp;
+    string_encoding_t m_encoding;
 public:
     string_encode_error(uint32_t cp, string_encoding_t encoding);
 

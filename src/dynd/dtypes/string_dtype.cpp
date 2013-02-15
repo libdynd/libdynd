@@ -137,7 +137,9 @@ void string_dtype::get_shape(size_t DYND_UNUSED(i),
 {
 }
 
-bool string_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const
+bool string_dtype::is_lossless_assignment(
+                const dtype& DYND_UNUSED(dst_dt),
+                const dtype& DYND_UNUSED(src_dt)) const
 {
     // Don't shortcut anything to 'none' error checking, so that
     // decoding errors get caught appropriately.
