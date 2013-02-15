@@ -41,7 +41,7 @@ namespace {
     {
         uint32_t result = *reinterpret_cast<const uint8_t *>(it);
         if (result&0x80) {
-            throw std::runtime_error("Ascii input string had an invalid character with the highest bit set.");
+            throw string_decode_error(result, string_encoding_ascii);
         }
         ++it;
         return result;
@@ -57,11 +57,7 @@ namespace {
     static void append_ascii(uint32_t cp, char *&it, char *DYND_UNUSED(end))
     {
         if ((cp&~0x7f) != 0) {
-            stringstream ss;
-            ss << "Cannot encode input code point U+";
-            hexadecimal_print(ss, cp);
-            ss << " as ascii.";
-            throw std::runtime_error(ss.str());
+            throw string_encode_error(cp, string_encoding_ascii);
         }
         *it = static_cast<char>(cp);
         ++it;
@@ -82,11 +78,7 @@ namespace {
         uint32_t cp = *it;
         ++it;
         if (utf8::internal::is_surrogate(cp)) {
-            stringstream ss;
-            ss << "Decoding error, surrogate U+";
-            hexadecimal_print(ss, cp);
-            ss << " is invalid in ucs2 input.";
-            throw std::runtime_error(ss.str());
+            throw string_decode_error(cp, string_encoding_ucs_2);
         }
         return cp;
     }
@@ -106,11 +98,7 @@ namespace {
     {
         uint16_t *&it = reinterpret_cast<uint16_t *&>(it_raw);
         if ((cp&~0xffff) != 0 || utf8::internal::is_surrogate(cp)) {
-            stringstream ss;
-            ss << "Cannot encode input code point U+";
-            hexadecimal_print(ss, cp);
-            ss << " as ucs2.";
-            throw std::runtime_error(ss.str());
+            throw string_encode_error(cp, string_encoding_ucs_2);
         }
         *it = static_cast<uint16_t>(cp);
         ++it;
@@ -235,16 +223,16 @@ namespace {
                 if (utf8::internal::is_trail_surrogate(trail_surrogate)) {
                     cp = (cp << 10) + trail_surrogate + utf8::internal::SURROGATE_OFFSET;
                 } else {
-                    throw utf8::invalid_utf16(static_cast<uint16_t>(trail_surrogate));
+                    throw string_decode_error(trail_surrogate, string_encoding_utf_16);
                 }
             }
             else {
-                throw utf8::invalid_utf16(static_cast<uint16_t>(cp));
+                throw string_decode_error(cp, string_encoding_utf_16);
             }
 
         } else if (utf8::internal::is_trail_surrogate(cp)) {
             // Lone trail surrogate
-            throw utf8::invalid_utf16(static_cast<uint16_t>(cp));
+            throw string_decode_error(cp, string_encoding_utf_16);
         }
         return cp;
     }
@@ -320,7 +308,7 @@ namespace {
         const uint32_t *&it = reinterpret_cast<const uint32_t *&>(it_raw);
         uint32_t result = *it;
         if (!utf8::internal::is_code_point_valid(result)) {
-            throw std::runtime_error("UTF32 input string had an invalid code point.");
+            throw string_decode_error(result, string_encoding_utf_32);
         }
         ++it;
         return result;
@@ -431,7 +419,9 @@ std::string dynd::string_range_as_utf8_string(string_encoding_t encoding, const 
         }
         default: {
             stringstream ss;
-            throw runtime_error("string_range_as_utf8_string: Unrecognized string encoding");
+            ss << "string_range_as_utf8_string: Unrecognized string encoding";
+            ss << encoding;
+            throw runtime_error(ss.str());
         }
     }
 }

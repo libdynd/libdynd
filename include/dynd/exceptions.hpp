@@ -11,6 +11,7 @@
 #include <vector>
 
 #include <dynd/irange.hpp>
+#include <dynd/string_encodings.hpp>
 
 namespace dynd {
 
@@ -135,6 +136,49 @@ public:
     invalid_type_id(int type_id);
 
     virtual ~invalid_type_id() throw() {
+    }
+};
+
+/**
+ * An exception for when input can't be decoded
+ */
+class string_decode_error : public dynd_exception {
+    string_encoding_t m_encoding;
+    uint32_t m_cp;
+public:
+    string_decode_error(uint32_t cp, string_encoding_t encoding);
+
+    virtual ~string_decode_error() throw() {
+    }
+
+    uint32_t cp() const {
+        return m_cp;
+    }
+
+    string_encoding_t encoding() const {
+        return m_encoding;
+    }
+};
+
+/**
+ * An exception for when a codepoint can't encode to
+ * the destination.
+ */
+class string_encode_error : public dynd_exception {
+    string_encoding_t m_encoding;
+    uint32_t m_cp;
+public:
+    string_encode_error(uint32_t cp, string_encoding_t encoding);
+
+    virtual ~string_encode_error() throw() {
+    }
+
+    uint32_t cp() const {
+        return m_cp;
+    }
+
+    string_encoding_t encoding() const {
+        return m_encoding;
     }
 };
 

@@ -70,14 +70,14 @@ TEST(DTypeCasting, IsLosslessAssignment) {
     EXPECT_TRUE( is_lossless_assignment(dtype(complex_float64_type_id), dtype(complex_float64_type_id)));
 
     // String casting
-    EXPECT_TRUE(is_lossless_assignment(make_fixedstring_dtype(16, string_encoding_utf_16),
+    // String conversions report false, so that assignments encodings
+    // get validated on assignment
+    EXPECT_FALSE(is_lossless_assignment(make_fixedstring_dtype(16, string_encoding_utf_16),
                             make_fixedstring_dtype(16, string_encoding_utf_16)));
-    EXPECT_TRUE(is_lossless_assignment(make_fixedstring_dtype(16, string_encoding_utf_8),
+    EXPECT_FALSE(is_lossless_assignment(make_fixedstring_dtype(16, string_encoding_utf_8),
                             make_fixedstring_dtype(12, string_encoding_utf_8)));
     EXPECT_FALSE(is_lossless_assignment(make_fixedstring_dtype(12, string_encoding_utf_32),
                             make_fixedstring_dtype(16, string_encoding_utf_32)));
-    // Converting from larger to smaller UTF representations with the same number of
-    // units is not always lossless
     EXPECT_FALSE(is_lossless_assignment(make_fixedstring_dtype(16, string_encoding_utf_16),
                             make_fixedstring_dtype(16, string_encoding_utf_32)));
     EXPECT_FALSE(is_lossless_assignment(make_fixedstring_dtype(16, string_encoding_utf_8),

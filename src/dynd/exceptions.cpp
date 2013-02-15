@@ -11,6 +11,8 @@
 #include <dynd/shape_tools.hpp>
 #include <dynd/dtypes/datashape_formatter.hpp>
 
+#include <utf8.h>
+
 using namespace std;
 using namespace dynd;
 
@@ -237,9 +239,51 @@ inline string invalid_type_id_message(int type_id)
     return ss.str();
 }
 
-dynd::invalid_type_id::invalid_type_id(int type_id)
+invalid_type_id::invalid_type_id(int type_id)
     : dynd_exception("invalid type id", invalid_type_id_message(type_id))
 {
     //cout << "throwing invalid_type_id\n";
 }
 
+inline string string_decode_error_message(uint32_t cp, string_encoding_t encoding)
+{
+    stringstream ss;
+    if (!utf8::internal::is_code_point_valid(cp)) {
+        ss << "encoded value U+";
+        hexadecimal_print(ss, cp);
+        ss << " is an invalid code point in " << encoding << " input.";
+    } else {
+        ss << "Error decoding code point U+";
+        hexadecimal_print(ss, cp);
+        ss << " from " << encoding;
+    }
+    return ss.str();
+}
+
+string_decode_error::string_decode_error(uint32_t cp, string_encoding_t encoding)
+    : dynd_exception("string decode error", string_decode_error_message(cp, encoding)),
+                    m_cp(cp), m_encoding(encoding)
+{
+}
+
+inline string string_encode_error_message(uint32_t cp, string_encoding_t encoding)
+{
+    stringstream ss;
+    if (!utf8::internal::is_code_point_valid(cp)) {
+        ss << "Cannot encode invalid code point U+";
+        hexadecimal_print(ss, cp);
+        ss << " as " << encoding;
+        return ss.str();
+    } else {
+        ss << "Cannot encode input code point U+";
+        hexadecimal_print(ss, cp);
+        ss << " as " << encoding;
+        return ss.str();
+    }
+}
+
+string_encode_error::string_encode_error(uint32_t cp, string_encoding_t encoding)
+    : dynd_exception("string encode error", string_encode_error_message(cp, encoding)),
+                    m_cp(cp), m_encoding(encoding)
+{
+}

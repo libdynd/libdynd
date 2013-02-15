@@ -46,16 +46,16 @@ inline std::ostream& operator<<(std::ostream& o, string_encoding_t encoding)
             o << "ascii";
             break;
         case string_encoding_ucs_2:
-            o << "ucs_2";
+            o << "ucs-2";
             break;
         case string_encoding_utf_8:
-            o << "utf_8";
+            o << "utf-8";
             break;
         case string_encoding_utf_16:
-            o << "utf_16";
+            o << "utf-16";
             break;
         case string_encoding_utf_32:
-            o << "utf_32";
+            o << "utf-32";
             break;
         default:
             o << "unknown string encoding";

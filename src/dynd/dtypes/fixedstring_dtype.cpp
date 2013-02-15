@@ -122,7 +122,7 @@ void fixedstring_dtype::print_dtype(std::ostream& o) const
 {
     o << "string<" << m_stringsize;
     if (m_encoding != string_encoding_utf_8) {
-        o << "," << m_encoding;
+        o << ",'" << m_encoding << "'";
     }
     o << ">";
 }
@@ -134,35 +134,9 @@ dtype fixedstring_dtype::get_canonical_dtype() const
 
 bool fixedstring_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const
 {
-    if (dst_dt.extended() == this) {
-        if (src_dt.extended() == this) {
-            return true;
-        } else if (src_dt.get_type_id() == fixedstring_type_id) {
-            const fixedstring_dtype *src_fs = static_cast<const fixedstring_dtype*>(src_dt.extended());
-            if (m_encoding == src_fs->m_encoding) {
-                return m_stringsize >= src_fs->m_stringsize;
-            } else if (m_stringsize < src_fs->m_stringsize) {
-                return false;
-            } else {
-                switch (src_fs->m_encoding) {
-                    case string_encoding_ascii:
-                        return true;
-                    case string_encoding_utf_8:
-                    case string_encoding_ucs_2:
-                        return m_encoding == string_encoding_utf_16 ||
-                                m_encoding == string_encoding_utf_32;
-                    case string_encoding_utf_16:
-                        return m_encoding == string_encoding_utf_32;
-                    default:
-                        return false;
-                }
-            }
-        } else {
-            return false;
-        }
-    } else {
-        return false;
-    }
+    // Don't shortcut anything to 'none' error checking, so that
+    // decoding errors get caught appropriately.
+    return false;
 }
 
 

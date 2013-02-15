@@ -62,7 +62,9 @@ TEST(CategoricalDType, Convert) {
     dtype cd = make_categorical_dtype(a);
     dtype sd = make_string_dtype(string_encoding_utf_8);
 
-    EXPECT_TRUE(is_lossless_assignment(sd, cd));
+    // String conversions report false, so that assignments encodings
+    // get validated on assignment
+    EXPECT_FALSE(is_lossless_assignment(sd, cd));
     EXPECT_FALSE(is_lossless_assignment(cd, sd));
 
     // This operation was crashing, hence the test

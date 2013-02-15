@@ -14,6 +14,7 @@
 #include <dynd/dtypes/strided_dim_dtype.hpp>
 #include <dynd/dtypes/fixedstring_dtype.hpp>
 #include <dynd/dtypes/convert_dtype.hpp>
+#include <dynd/json_parser.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -410,4 +411,10 @@ TEST(StringDType, StringToFloat64SpecialValues) {
     EXPECT_EQ(0xfff0000000000000ULL, ndobject("-inf").cast_scalars<double>().view_scalars<uint64_t>().as<uint64_t>());
     EXPECT_EQ(0xfff0000000000000ULL, ndobject("-Infinity").cast_scalars<double>().view_scalars<uint64_t>().as<uint64_t>());
     EXPECT_EQ(0xfff0000000000000ULL, ndobject("-1.#INF").cast_scalars<double>().view_scalars<uint64_t>().as<uint64_t>());
+}
+
+TEST(StringDType, StringEncodeError) {
+    ndobject a = parse_json("string", "\"\\uc548\\ub155\""), b;
+    EXPECT_THROW((b = a.cast_scalars(make_string_dtype(string_encoding_ascii)).vals()),
+                    string_encode_error);
 }
