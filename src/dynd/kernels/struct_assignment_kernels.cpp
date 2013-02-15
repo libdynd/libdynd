@@ -18,7 +18,7 @@ namespace {
     struct struct_kernel_extra {
         typedef struct_kernel_extra extra_type;
 
-        hierarchical_kernel_common_base base;
+        kernel_data_prefix base;
         size_t field_count;
         // After this, there are 'field_count' of
         // the following in a row
@@ -28,34 +28,34 @@ namespace {
             size_t src_data_offset;
         };
 
-        static void single(char *dst, const char *src, hierarchical_kernel_common_base *extra)
+        static void single(char *dst, const char *src, kernel_data_prefix *extra)
         {
             char *eraw = reinterpret_cast<char *>(extra);
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             const field_items *fi = reinterpret_cast<const field_items *>(e + 1);
             size_t field_count = e->field_count;
-            hierarchical_kernel_common_base *echild;
+            kernel_data_prefix *echild;
             unary_single_operation_t opchild;
 
             for (size_t i = 0; i < field_count; ++i) {
                 const field_items& item = fi[i];
-                echild  = reinterpret_cast<hierarchical_kernel_common_base *>(eraw + item.child_kernel_offset);
+                echild  = reinterpret_cast<kernel_data_prefix *>(eraw + item.child_kernel_offset);
                 opchild = echild->get_function<unary_single_operation_t>();
                 opchild(dst + item.dst_data_offset, src + item.src_data_offset, echild);
             }
         }
 
-        static void destruct(hierarchical_kernel_common_base *extra)
+        static void destruct(kernel_data_prefix *extra)
         {
             char *eraw = reinterpret_cast<char *>(extra);
             extra_type *e = reinterpret_cast<extra_type *>(extra);
-            hierarchical_kernel_common_base *echild;
+            kernel_data_prefix *echild;
             const field_items *fi = reinterpret_cast<const field_items *>(e + 1);
             size_t field_count = e->field_count;
             for (size_t i = 0; i < field_count; ++i) {
                 const field_items& item = fi[i];
                 if (item.child_kernel_offset != 0) {
-                    echild  = reinterpret_cast<hierarchical_kernel_common_base *>(eraw + item.child_kernel_offset);
+                    echild  = reinterpret_cast<kernel_data_prefix *>(eraw + item.child_kernel_offset);
                     if (echild->destructor != NULL) {
                         echild->destructor(echild);
                     }
@@ -69,7 +69,7 @@ namespace {
 // struct to identical struct assignment
 
 size_t dynd::make_struct_identical_assignment_kernel(
-                hierarchical_kernel<unary_single_operation_t> *out,
+                assignment_kernel *out,
                 size_t offset_out,
                 const dtype& val_struct_dt,
                 const char *dst_metadata, const char *src_metadata,
@@ -125,7 +125,7 @@ size_t dynd::make_struct_identical_assignment_kernel(
 // struct to different struct assignment
 
 size_t dynd::make_struct_assignment_kernel(
-                hierarchical_kernel<unary_single_operation_t> *out,
+                assignment_kernel *out,
                 size_t offset_out,
                 const dtype& dst_struct_dt, const char *dst_metadata,
                 const dtype& src_struct_dt, const char *src_metadata,

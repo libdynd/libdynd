@@ -160,7 +160,7 @@ bool fixedstring_dtype::operator==(const base_dtype& rhs) const
 }
 
 size_t fixedstring_dtype::make_assignment_kernel(
-                hierarchical_kernel<unary_single_operation_t> *out,
+                assignment_kernel *out,
                 size_t offset_out,
                 const dtype& dst_dt, const char *dst_metadata,
                 const dtype& src_dt, const char *src_metadata,

@@ -21,14 +21,14 @@ namespace {
     struct fixedstring_assign_kernel_extra {
         typedef fixedstring_assign_kernel_extra extra_type;
 
-        hierarchical_kernel_common_base base;
+        kernel_data_prefix base;
         next_unicode_codepoint_t next_fn;
         append_unicode_codepoint_t append_fn;
         intptr_t dst_data_size, src_data_size;
         bool overflow_check;
 
         static void single(char *dst, const char *src,
-                        hierarchical_kernel_common_base *extra)
+                        kernel_data_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             char *dst_end = dst + e->dst_data_size;
@@ -60,7 +60,7 @@ namespace {
 } // anonymous namespace
 
 size_t dynd::make_fixedstring_assignment_kernel(
-                hierarchical_kernel<unary_single_operation_t> *out,
+                assignment_kernel *out,
                 size_t offset_out,
                 intptr_t dst_data_size, string_encoding_t dst_encoding,
                 intptr_t src_data_size, string_encoding_t src_encoding,
@@ -85,14 +85,14 @@ namespace {
     struct blockref_string_assign_kernel_extra {
         typedef blockref_string_assign_kernel_extra extra_type;
 
-        hierarchical_kernel_common_base base;
+        kernel_data_prefix base;
         string_encoding_t dst_encoding, src_encoding;
         next_unicode_codepoint_t next_fn;
         append_unicode_codepoint_t append_fn;
         const string_dtype_metadata *dst_metadata, *src_metadata;
 
         static void single(char *dst, const char *src,
-                        hierarchical_kernel_common_base *extra)
+                        kernel_data_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             const string_dtype_metadata *dst_md = e->dst_metadata;
@@ -158,7 +158,7 @@ namespace {
 } // anonymous namespace
 
 size_t dynd::make_blockref_string_assignment_kernel(
-                hierarchical_kernel<unary_single_operation_t> *out,
+                assignment_kernel *out,
                 size_t offset_out,
                 const char *dst_metadata, string_encoding_t dst_encoding,
                 const char *src_metadata, string_encoding_t src_encoding,
@@ -184,7 +184,7 @@ namespace {
     struct fixedstring_to_blockref_string_assign_kernel_extra {
         typedef fixedstring_to_blockref_string_assign_kernel_extra extra_type;
 
-        hierarchical_kernel_common_base base;
+        kernel_data_prefix base;
         string_encoding_t dst_encoding, src_encoding;
         intptr_t src_element_size;
         next_unicode_codepoint_t next_fn;
@@ -192,7 +192,7 @@ namespace {
         const string_dtype_metadata *dst_metadata;
 
         static void single(char *dst, const char *src,
-                        hierarchical_kernel_common_base *extra)
+                        kernel_data_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             const string_dtype_metadata *dst_md = e->dst_metadata;
@@ -248,7 +248,7 @@ namespace {
 } // anonymous namespace
 
 size_t dynd::make_fixedstring_to_blockref_string_assignment_kernel(
-                hierarchical_kernel<unary_single_operation_t> *out,
+                assignment_kernel *out,
                 size_t offset_out,
                 const char *dst_metadata, string_encoding_t dst_encoding,
                 intptr_t src_element_size, string_encoding_t src_encoding,
@@ -275,14 +275,14 @@ namespace {
     struct blockref_string_to_fixedstring_assign_kernel_extra {
         typedef blockref_string_to_fixedstring_assign_kernel_extra extra_type;
 
-        hierarchical_kernel_common_base base;
+        kernel_data_prefix base;
         next_unicode_codepoint_t next_fn;
         append_unicode_codepoint_t append_fn;
         intptr_t dst_data_size, src_element_size;
         bool overflow_check;
 
         static void single(char *dst, const char *src,
-                        hierarchical_kernel_common_base *extra)
+                        kernel_data_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             char *dst_end = dst + e->dst_data_size;
@@ -309,7 +309,7 @@ namespace {
 } // anonymous namespace
 
 size_t dynd::make_blockref_string_to_fixedstring_assignment_kernel(
-                hierarchical_kernel<unary_single_operation_t> *out,
+                assignment_kernel *out,
                 size_t offset_out,
                 intptr_t dst_data_size, string_encoding_t dst_encoding,
                 string_encoding_t src_encoding,

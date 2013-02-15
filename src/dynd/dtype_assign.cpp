@@ -166,17 +166,18 @@ bool dynd::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt)
     }
 }
 
-void dynd::dtype_copy(const dtype& dt, const char *dst_metadata, char *dst_data,
+void dynd::dtype_copy(const dtype& dt,
+                const char *dst_metadata, char *dst_data,
                 const char *src_metadata, const char *src_data)
 {
     size_t data_size = dt.get_data_size();
     if (dt.is_builtin() || (dt.get_memory_management() == pod_memory_management && data_size != 0)) {
         memcpy(dst_data, src_data, data_size);
     } else {
-        hierarchical_kernel<unary_single_operation_t> k;
+        assignment_kernel k;
         make_assignment_kernel(&k, 0, dt, dst_metadata,
                         dt, src_metadata, assign_error_none, &eval::default_eval_context);
-        k.get_function()(dst_data, src_data, k.get());
+        k(dst_data, src_data);
     }
 }
 
@@ -199,9 +200,9 @@ void dynd::dtype_assign(const dtype& dst_dt, const char *dst_metadata, char *dst
         }
     }
 
-    hierarchical_kernel<unary_single_operation_t> k;
+    assignment_kernel k;
     make_assignment_kernel(&k, 0, dst_dt, dst_metadata,
                     src_dt, src_metadata,
                     errmode, ectx);
-    k.get_function()(dst_data, src_data, k.get());
+    k(dst_data, src_data);
 }

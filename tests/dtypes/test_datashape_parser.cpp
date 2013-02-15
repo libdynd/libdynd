@@ -42,33 +42,54 @@ TEST(DataShapeParser, Basic) {
 
 TEST(DataShapeParser, StringAtoms) {
     // Default string
-    EXPECT_EQ(make_string_dtype(string_encoding_utf_8), dtype_from_datashape("string"));
+    EXPECT_EQ(make_string_dtype(string_encoding_utf_8),
+                    dtype_from_datashape("string"));
     // String with encoding
-    EXPECT_EQ(make_string_dtype(string_encoding_ascii), dtype_from_datashape("string('A')"));
-    EXPECT_EQ(make_string_dtype(string_encoding_ascii), dtype_from_datashape("string('ascii')"));
-    EXPECT_EQ(make_string_dtype(string_encoding_utf_8), dtype_from_datashape("string('U8')"));
-    EXPECT_EQ(make_string_dtype(string_encoding_utf_8), dtype_from_datashape("string('utf8')"));
-    EXPECT_EQ(make_string_dtype(string_encoding_utf_8), dtype_from_datashape("string('utf-8')"));
-    EXPECT_EQ(make_string_dtype(string_encoding_utf_16), dtype_from_datashape("string('U16')"));
-    EXPECT_EQ(make_string_dtype(string_encoding_utf_16), dtype_from_datashape("string('utf16')"));
-    EXPECT_EQ(make_string_dtype(string_encoding_utf_16), dtype_from_datashape("string('utf-16')"));
-    EXPECT_EQ(make_string_dtype(string_encoding_utf_32), dtype_from_datashape("string('U32')"));
-    EXPECT_EQ(make_string_dtype(string_encoding_utf_32), dtype_from_datashape("string('utf32')"));
-    EXPECT_EQ(make_string_dtype(string_encoding_utf_32), dtype_from_datashape("string('utf-32')"));
-    EXPECT_EQ(make_string_dtype(string_encoding_ucs_2), dtype_from_datashape("string('ucs2')"));
-    EXPECT_EQ(make_string_dtype(string_encoding_ucs_2), dtype_from_datashape("string('ucs-2')"));
+    EXPECT_EQ(make_string_dtype(string_encoding_ascii),
+                    dtype_from_datashape("string('A')"));
+    EXPECT_EQ(make_string_dtype(string_encoding_ascii),
+                    dtype_from_datashape("string('ascii')"));
+    EXPECT_EQ(make_string_dtype(string_encoding_utf_8),
+                    dtype_from_datashape("string('U8')"));
+    EXPECT_EQ(make_string_dtype(string_encoding_utf_8),
+                    dtype_from_datashape("string('utf8')"));
+    EXPECT_EQ(make_string_dtype(string_encoding_utf_8),
+                    dtype_from_datashape("string('utf-8')"));
+    EXPECT_EQ(make_string_dtype(string_encoding_utf_16),
+                    dtype_from_datashape("string('U16')"));
+    EXPECT_EQ(make_string_dtype(string_encoding_utf_16),
+                    dtype_from_datashape("string('utf16')"));
+    EXPECT_EQ(make_string_dtype(string_encoding_utf_16),
+                    dtype_from_datashape("string('utf-16')"));
+    EXPECT_EQ(make_string_dtype(string_encoding_utf_32),
+                    dtype_from_datashape("string('U32')"));
+    EXPECT_EQ(make_string_dtype(string_encoding_utf_32),
+                    dtype_from_datashape("string('utf32')"));
+    EXPECT_EQ(make_string_dtype(string_encoding_utf_32),
+                    dtype_from_datashape("string('utf-32')"));
+    EXPECT_EQ(make_string_dtype(string_encoding_ucs_2),
+                    dtype_from_datashape("string('ucs2')"));
+    EXPECT_EQ(make_string_dtype(string_encoding_ucs_2),
+                    dtype_from_datashape("string('ucs-2')"));
     // String with size
-    EXPECT_EQ(make_fixedstring_dtype(1, string_encoding_utf_8), dtype_from_datashape("string(1)"));
-    EXPECT_EQ(make_fixedstring_dtype(100, string_encoding_utf_8), dtype_from_datashape("string(100)"));
+    EXPECT_EQ(make_fixedstring_dtype(1, string_encoding_utf_8),
+                    dtype_from_datashape("string(1)"));
+    EXPECT_EQ(make_fixedstring_dtype(100, string_encoding_utf_8),
+                    dtype_from_datashape("string(100)"));
     // String with size and encoding
-    EXPECT_EQ(make_fixedstring_dtype(1, string_encoding_ascii), dtype_from_datashape("string(1, 'A')"));
-    EXPECT_EQ(make_fixedstring_dtype(10, string_encoding_utf_8), dtype_from_datashape("string(10, 'U8')"));
-    EXPECT_EQ(make_fixedstring_dtype(1000, string_encoding_utf_16), dtype_from_datashape("string(1000,'U16')"));
+    EXPECT_EQ(make_fixedstring_dtype(1, string_encoding_ascii),
+                    dtype_from_datashape("string(1, 'A')"));
+    EXPECT_EQ(make_fixedstring_dtype(10, string_encoding_utf_8),
+                    dtype_from_datashape("string(10, 'U8')"));
+    EXPECT_EQ(make_fixedstring_dtype(1000, string_encoding_utf_16),
+                    dtype_from_datashape("string(1000,'U16')"));
 }
 
 TEST(DataShapeParser, StridedDim) {
-    EXPECT_EQ(make_strided_dim_dtype(make_dtype<dynd_bool>()), dtype_from_datashape("M, bool"));
-    EXPECT_EQ(make_strided_dim_dtype(make_dtype<float>(), 2), dtype_from_datashape("M, N, float32"));
+    EXPECT_EQ(make_strided_dim_dtype(make_dtype<dynd_bool>()),
+                    dtype_from_datashape("M, bool"));
+    EXPECT_EQ(make_strided_dim_dtype(make_dtype<float>(), 2),
+                    dtype_from_datashape("M, N, float32"));
 }
 
 TEST(DataShapeParser, FixedDim) {
@@ -334,7 +355,7 @@ TEST(DataShapeParser, KivaLoanDataShape) {
         "    name: string;\n"
         "    description: {\n"
         "        languages: VarDim, string(2);\n"
-        "    #    texts: map<string(2), string>;\n"
+        "    #    texts: map(string(2), string);\n"
         "    };\n"
         "    status: string; # LoanStatusType;\n"
         "    funded_amount: float64;\n"
@@ -411,6 +432,5 @@ TEST(DataShapeParser, KivaLoanDataShape) {
         "    }\n"
         "}\n";
     dtype d = dtype_from_datashape(klds);
-    cout << d << endl;
     EXPECT_EQ(fixedstruct_type_id, d.get_type_id());
 }

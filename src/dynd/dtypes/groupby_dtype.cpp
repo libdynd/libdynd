@@ -122,13 +122,13 @@ namespace {
     struct groupby_to_value_assign_extra {
         typedef groupby_to_value_assign_extra extra_type;
 
-        hierarchical_kernel_common_base base;
+        kernel_data_prefix base;
         // The groupby dtype
         const groupby_dtype *src_groupby_dt;
         const char *src_metadata, *dst_metadata;
 
         template<typename UIntType>
-        inline static void single(char *dst, const char *src, hierarchical_kernel_common_base *extra)
+        inline static void single(char *dst, const char *src, kernel_data_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             const groupby_dtype *gd = e->src_groupby_dt;
@@ -205,7 +205,7 @@ namespace {
 
             // Loop through both by_values and data_values,
             // copying the data to the right place in the output
-            hierarchical_kernel_common_base *echild = &(e + 1)->base;
+            kernel_data_prefix *echild = &(e + 1)->base;
             unary_single_operation_t opchild = echild->get_function<unary_single_operation_t>();
             ndobject_iter<0, 1> iter(data_values_dt, data_values_metadata, data_values_data);
             if (!iter.empty()) {
@@ -222,23 +222,23 @@ namespace {
         }
 
         // Some compilers are finicky about getting single<T> as a function pointer, so this...
-        static void single_uint8(char *dst, const char *src, hierarchical_kernel_common_base *extra) {
+        static void single_uint8(char *dst, const char *src, kernel_data_prefix *extra) {
             single<uint8_t>(dst, src, extra);
         }
-        static void single_uint16(char *dst, const char *src, hierarchical_kernel_common_base *extra) {
+        static void single_uint16(char *dst, const char *src, kernel_data_prefix *extra) {
             single<uint16_t>(dst, src, extra);
         }
-        static void single_uint32(char *dst, const char *src, hierarchical_kernel_common_base *extra) {
+        static void single_uint32(char *dst, const char *src, kernel_data_prefix *extra) {
             single<uint32_t>(dst, src, extra);
         }
 
-        static void destruct(hierarchical_kernel_common_base *extra)
+        static void destruct(kernel_data_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             if (e->src_groupby_dt != NULL) {
                 base_dtype_decref(e->src_groupby_dt);
             }
-            hierarchical_kernel_common_base *echild = &(e + 1)->base;
+            kernel_data_prefix *echild = &(e + 1)->base;
             if (echild->destructor) {
                 echild->destructor(echild);
             }
@@ -247,7 +247,7 @@ namespace {
 } // anonymous namespace
 
 size_t groupby_dtype::make_operand_to_value_assignment_kernel(
-                hierarchical_kernel<unary_single_operation_t> *out,
+                assignment_kernel *out,
                 size_t offset_out,
                 const char *dst_metadata, const char *src_metadata,
                 const eval::eval_context *ectx) const
@@ -296,7 +296,7 @@ size_t groupby_dtype::make_operand_to_value_assignment_kernel(
 }
 
 size_t groupby_dtype::make_value_to_operand_assignment_kernel(
-                hierarchical_kernel<unary_single_operation_t> *DYND_UNUSED(out),
+                assignment_kernel *DYND_UNUSED(out),
                 size_t DYND_UNUSED(offset_out),
                 const char *DYND_UNUSED(dst_metadata), const char *DYND_UNUSED(src_metadata),
                 const eval::eval_context *DYND_UNUSED(ectx)) const

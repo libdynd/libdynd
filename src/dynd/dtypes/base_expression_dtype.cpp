@@ -64,7 +64,7 @@ namespace {
     struct buffered_kernel_extra {
         typedef buffered_kernel_extra extra_type;
 
-        hierarchical_kernel_common_base base;
+        kernel_data_prefix base;
         // Offsets, from the start of &base, to the kernels
         // before and after the buffer
         size_t first_kernel_offset, second_kernel_offset;
@@ -99,17 +99,17 @@ namespace {
         }
 
         static void single(char *dst, const char *src,
-                            hierarchical_kernel_common_base *extra)
+                            kernel_data_prefix *extra)
         {
             char *eraw = reinterpret_cast<char *>(extra);
             extra_type *e = reinterpret_cast<extra_type *>(extra);
-            hierarchical_kernel_common_base *echild_first, *echild_second;
+            kernel_data_prefix *echild_first, *echild_second;
             unary_single_operation_t opchild;
             const base_dtype *buffer_dt = e->buffer_dt;
             char *buffer_metadata = e->buffer_metadata;
             char *buffer_data_ptr = eraw + e->buffer_data_offset;
-            echild_first = reinterpret_cast<hierarchical_kernel_common_base *>(eraw + e->first_kernel_offset);
-            echild_second = reinterpret_cast<hierarchical_kernel_common_base *>(eraw + e->second_kernel_offset);
+            echild_first = reinterpret_cast<kernel_data_prefix *>(eraw + e->first_kernel_offset);
+            echild_second = reinterpret_cast<kernel_data_prefix *>(eraw + e->second_kernel_offset);
 
             // If the type needs it, initialize the buffer data to zero
             if (!is_builtin_dtype(buffer_dt) && (buffer_dt->get_flags()&dtype_flag_zeroinit) != 0) {
@@ -126,7 +126,7 @@ namespace {
                 buffer_dt->metadata_reset_buffers(buffer_metadata);
             }
         }
-        static void destruct(hierarchical_kernel_common_base *extra)
+        static void destruct(kernel_data_prefix *extra)
         {
             char *eraw = reinterpret_cast<char *>(extra);
             extra_type *e = reinterpret_cast<extra_type *>(extra);
@@ -138,17 +138,17 @@ namespace {
                 buffer_dt.extended()->metadata_destruct(buffer_metadata);
                 free(buffer_metadata);
             }
-            hierarchical_kernel_common_base *echild;
+            kernel_data_prefix *echild;
             // Destruct the first kernel
             if (e->first_kernel_offset != 0) {
-                echild = reinterpret_cast<hierarchical_kernel_common_base *>(eraw + e->first_kernel_offset);
+                echild = reinterpret_cast<kernel_data_prefix *>(eraw + e->first_kernel_offset);
                 if (echild->destructor) {
                     echild->destructor(echild);
                 }
             }
             // Destruct the second kernel
             if (e->second_kernel_offset != 0) {
-                echild = reinterpret_cast<hierarchical_kernel_common_base *>(eraw + e->second_kernel_offset);
+                echild = reinterpret_cast<kernel_data_prefix *>(eraw + e->second_kernel_offset);
                 if (echild->destructor) {
                     echild->destructor(echild);
                 }
@@ -158,7 +158,7 @@ namespace {
 } // anonymous namespace
 
 size_t base_expression_dtype::make_operand_to_value_assignment_kernel(
-                hierarchical_kernel<unary_single_operation_t> *DYND_UNUSED(out),
+                assignment_kernel *DYND_UNUSED(out),
                 size_t DYND_UNUSED(offset_out),
                 const char *DYND_UNUSED(dst_metadata), const char *DYND_UNUSED(src_metadata),
                 const eval::eval_context *DYND_UNUSED(ectx)) const
@@ -169,7 +169,7 @@ size_t base_expression_dtype::make_operand_to_value_assignment_kernel(
 }
 
 size_t base_expression_dtype::make_value_to_operand_assignment_kernel(
-                hierarchical_kernel<unary_single_operation_t> *DYND_UNUSED(out),
+                assignment_kernel *DYND_UNUSED(out),
                 size_t DYND_UNUSED(offset_out),
                 const char *DYND_UNUSED(dst_metadata), const char *DYND_UNUSED(src_metadata),
                 const eval::eval_context *DYND_UNUSED(ectx)) const
@@ -180,7 +180,7 @@ size_t base_expression_dtype::make_value_to_operand_assignment_kernel(
 }
 
 size_t base_expression_dtype::make_assignment_kernel(
-                hierarchical_kernel<unary_single_operation_t> *out,
+                assignment_kernel *out,
                 size_t offset_out,
                 const dtype& dst_dt, const char *dst_metadata,
                 const dtype& src_dt, const char *src_metadata,

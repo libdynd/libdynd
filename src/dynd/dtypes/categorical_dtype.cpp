@@ -48,14 +48,14 @@ namespace {
     struct categorical_to_other_kernel_extra {
         typedef categorical_to_other_kernel_extra extra_type;
 
-        hierarchical_kernel_common_base base;
+        kernel_data_prefix base;
         const categorical_dtype *src_cat_dt;
 
         template<typename UIntType>
-        inline static void single(char *dst, const char *src, hierarchical_kernel_common_base *extra)
+        inline static void single(char *dst, const char *src, kernel_data_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
-            hierarchical_kernel_common_base *echild = &(e + 1)->base;
+            kernel_data_prefix *echild = &(e + 1)->base;
             unary_single_operation_t opchild = echild->get_function<unary_single_operation_t>();
 
             uint32_t value = *reinterpret_cast<const UIntType *>(src);
@@ -64,23 +64,23 @@ namespace {
         }
 
         // Some compilers are finicky about getting single<T> as a function pointer, so this...
-        static void single_uint8(char *dst, const char *src, hierarchical_kernel_common_base *extra) {
+        static void single_uint8(char *dst, const char *src, kernel_data_prefix *extra) {
             single<uint8_t>(dst, src, extra);
         }
-        static void single_uint16(char *dst, const char *src, hierarchical_kernel_common_base *extra) {
+        static void single_uint16(char *dst, const char *src, kernel_data_prefix *extra) {
             single<uint16_t>(dst, src, extra);
         }
-        static void single_uint32(char *dst, const char *src, hierarchical_kernel_common_base *extra) {
+        static void single_uint32(char *dst, const char *src, kernel_data_prefix *extra) {
             single<uint32_t>(dst, src, extra);
         }
 
-        static void destruct(hierarchical_kernel_common_base *extra)
+        static void destruct(kernel_data_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             if (e->src_cat_dt != NULL) {
                 base_dtype_decref(e->src_cat_dt);
             }
-            hierarchical_kernel_common_base *echild = &(e + 1)->base;
+            kernel_data_prefix *echild = &(e + 1)->base;
             if (echild->destructor) {
                 echild->destructor(echild);
             }
@@ -90,13 +90,13 @@ namespace {
     struct category_to_categorical_kernel_extra {
         typedef category_to_categorical_kernel_extra extra_type;
 
-        hierarchical_kernel_common_base base;
+        kernel_data_prefix base;
         const categorical_dtype *dst_cat_dt;
         const char *src_metadata;
 
         // Assign from an input matching the category dtype to a categorical type
         template<typename UIntType>
-        inline static void single(char *dst, const char *src, hierarchical_kernel_common_base *extra)
+        inline static void single(char *dst, const char *src, kernel_data_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             uint32_t src_val = e->dst_cat_dt->get_value_from_category(e->src_metadata, src);
@@ -104,17 +104,17 @@ namespace {
         }
 
         // Some compilers are finicky about getting single<T> as a function pointer, so this...
-        static void single_uint8(char *dst, const char *src, hierarchical_kernel_common_base *extra) {
+        static void single_uint8(char *dst, const char *src, kernel_data_prefix *extra) {
             single<uint8_t>(dst, src, extra);
         }
-        static void single_uint16(char *dst, const char *src, hierarchical_kernel_common_base *extra) {
+        static void single_uint16(char *dst, const char *src, kernel_data_prefix *extra) {
             single<uint16_t>(dst, src, extra);
         }
-        static void single_uint32(char *dst, const char *src, hierarchical_kernel_common_base *extra) {
+        static void single_uint32(char *dst, const char *src, kernel_data_prefix *extra) {
             single<uint32_t>(dst, src, extra);
         }
 
-        static void destruct(hierarchical_kernel_common_base *extra)
+        static void destruct(kernel_data_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             if (e->dst_cat_dt != NULL) {
@@ -170,15 +170,14 @@ namespace {
 static ndobject make_sorted_categories(const set<const char *, cmp>& uniques, const dtype& udtype, const char *metadata)
 {
     ndobject categories = make_strided_ndobject(uniques.size(), udtype);
-    hierarchical_kernel<unary_single_operation_t> k;
+    assignment_kernel k;
     make_assignment_kernel(&k, 0, udtype, categories.get_ndo_meta() + sizeof(strided_dim_dtype_metadata),
                     udtype, metadata, assign_error_default, &eval::default_eval_context);
-    unary_single_operation_t kf = k.get_function();
 
     intptr_t stride = reinterpret_cast<const strided_dim_dtype_metadata *>(categories.get_ndo_meta())->stride;
     char *dst_ptr = categories.get_readwrite_originptr();
     for (set<const char *, cmp>::const_iterator it = uniques.begin(); it != uniques.end(); ++it) {
-        kf(dst_ptr, *it, k.get());
+        k(dst_ptr, *it);
         dst_ptr += stride;
     }
     categories.get_dtype().extended()->metadata_finalize_buffers(categories.get_ndo_meta());
@@ -358,15 +357,14 @@ ndobject categorical_dtype::get_categories() const
     //       so this is simply "return m_categories".
     ndobject categories = make_strided_ndobject(get_category_count(), m_category_dtype);
     ndobject_iter<1,0> iter(categories);
-    hierarchical_kernel<unary_single_operation_t> k;
+    assignment_kernel k;
     ::make_assignment_kernel(&k, 0, iter.get_uniform_dtype(), iter.metadata(),
                     m_category_dtype, get_category_metadata(),
                     assign_error_default, &eval::default_eval_context);
-    unary_single_operation_t kf = k.get_function();
     if (!iter.empty()) {
         uint32_t i = 0;
         do {
-            kf(iter.data(), get_category_data_from_value(i), k.get());
+            k(iter.data(), get_category_data_from_value(i));
             ++i;
         } while(iter.next());
     }
@@ -390,7 +388,7 @@ bool categorical_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype&
 }
 
 size_t categorical_dtype::make_assignment_kernel(
-                hierarchical_kernel<unary_single_operation_t> *out,
+                assignment_kernel *out,
                 size_t offset_out,
                 const dtype& dst_dt, const char *dst_metadata,
                 const dtype& src_dt, const char *src_metadata,

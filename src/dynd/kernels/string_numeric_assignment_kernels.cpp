@@ -87,12 +87,12 @@ namespace {
     struct string_to_builtin_kernel_extra {
         typedef string_to_builtin_kernel_extra extra_type;
 
-        hierarchical_kernel_common_base base;
+        kernel_data_prefix base;
         const base_string_dtype *src_string_dt;
         assign_error_mode errmode;
         const char *src_metadata;
 
-        static void destruct(hierarchical_kernel_common_base *extra)
+        static void destruct(kernel_data_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             if (e->src_string_dt) {
@@ -124,7 +124,7 @@ static void raise_string_cast_overflow_error(const dtype& dst_dt, const dtype& s
 }
 
 static void string_to_bool_single(char *dst, const char *src,
-                        hierarchical_kernel_common_base *extra)
+                        kernel_data_prefix *extra)
 {
     string_to_builtin_kernel_extra *e = reinterpret_cast<string_to_builtin_kernel_extra *>(extra);
     // Get the string from the source
@@ -213,7 +213,7 @@ template <> struct overflow_check<uint64_t> { inline static bool is_overflow(uin
 
 namespace { template<typename T> struct string_to_int {
     static void single(char *dst, const char *src, 
-                        hierarchical_kernel_common_base *extra)
+                        kernel_data_prefix *extra)
     {
         string_to_builtin_kernel_extra *e = reinterpret_cast<string_to_builtin_kernel_extra *>(extra);
         string s = e->src_string_dt->get_utf8_string(e->src_metadata, src, e->errmode);
@@ -243,7 +243,7 @@ namespace { template<typename T> struct string_to_int {
 
 namespace { template<typename T> struct string_to_uint {
     static void single(char *dst, const char *src, 
-                        hierarchical_kernel_common_base *extra)
+                        kernel_data_prefix *extra)
     {
         string_to_builtin_kernel_extra *e = reinterpret_cast<string_to_builtin_kernel_extra *>(extra);
         string s = e->src_string_dt->get_utf8_string(e->src_metadata, src, e->errmode);
@@ -272,7 +272,7 @@ namespace { template<typename T> struct string_to_uint {
 };}
 
 static void string_to_float32_single(char *dst, const char *src,
-                        hierarchical_kernel_common_base *extra)
+                        kernel_data_prefix *extra)
 {
     string_to_builtin_kernel_extra *e = reinterpret_cast<string_to_builtin_kernel_extra *>(extra);
     // Get the string from the source
@@ -330,7 +330,7 @@ static void string_to_float32_single(char *dst, const char *src,
 }
 
 static void string_to_float64_single(char *dst, const char *src,
-                        hierarchical_kernel_common_base *extra)
+                        kernel_data_prefix *extra)
 {
     string_to_builtin_kernel_extra *e = reinterpret_cast<string_to_builtin_kernel_extra *>(extra);
     // Get the string from the source
@@ -366,13 +366,13 @@ static void string_to_float64_single(char *dst, const char *src,
 }
 
 static void string_to_complex_float32_single(char *DYND_UNUSED(dst), const char *DYND_UNUSED(src),
-                hierarchical_kernel_common_base *DYND_UNUSED(extra))
+                kernel_data_prefix *DYND_UNUSED(extra))
 {
     throw std::runtime_error("TODO: implement string_to_complex_float32_single");
 }
 
 static void string_to_complex_float64_single(char *DYND_UNUSED(dst), const char *DYND_UNUSED(src),
-                hierarchical_kernel_common_base *DYND_UNUSED(extra))
+                kernel_data_prefix *DYND_UNUSED(extra))
 {
     throw std::runtime_error("TODO: implement string_to_complex_float64_single");
 }
@@ -394,7 +394,7 @@ static unary_single_operation_t static_string_to_builtin_kernels[builtin_type_id
     };
 
 size_t dynd::make_string_to_builtin_assignment_kernel(
-                hierarchical_kernel<unary_single_operation_t> *out,
+                assignment_kernel *out,
                 size_t offset_out,
                 type_id_t dst_type_id,
                 const dtype& src_string_dt, const char *src_metadata,
@@ -431,14 +431,14 @@ namespace {
     struct builtin_to_string_kernel_extra {
         typedef builtin_to_string_kernel_extra extra_type;
 
-        hierarchical_kernel_common_base base;
+        kernel_data_prefix base;
         const base_string_dtype *dst_string_dt;
         type_id_t src_type_id;
         assign_error_mode errmode;
         const char *dst_metadata;
 
         static void single(char *dst, const char *src,
-                            hierarchical_kernel_common_base *extra)
+                            kernel_data_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
 
@@ -451,7 +451,7 @@ namespace {
             e->dst_string_dt->set_utf8_string(e->dst_metadata, dst, e->errmode, ss.str());
         }
 
-        static void destruct(hierarchical_kernel_common_base *extra)
+        static void destruct(kernel_data_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             if (e->dst_string_dt) {
@@ -462,7 +462,7 @@ namespace {
 } // anonymous namespace
 
 size_t dynd::make_builtin_to_string_assignment_kernel(
-                hierarchical_kernel<unary_single_operation_t> *out,
+                assignment_kernel *out,
                 size_t offset_out,
                 const dtype& dst_string_dt, const char *dst_metadata,
                 type_id_t src_type_id,
@@ -504,10 +504,10 @@ void dynd::assign_utf8_string_to_builtin(type_id_t dst_type_id, char *dst,
     d.end = const_cast<char *>(str_end);
     md.blockref = NULL;
 
-    hierarchical_kernel<unary_single_operation_t> k;
+    assignment_kernel k;
     make_string_to_builtin_assignment_kernel(&k, 0,
                     dst_type_id,
                     dt, reinterpret_cast<const char *>(&md),
                     errmode, &eval::default_eval_context);
-    k.get_function()(dst, reinterpret_cast<const char *>(&d), k.get());
+    k(dst, reinterpret_cast<const char *>(&d));
 }

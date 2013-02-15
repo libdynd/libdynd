@@ -14,7 +14,7 @@ namespace {
     template<class T>
     struct aligned_fixed_size_copy_assign_type {
         static void single(char *dst, const char *src,
-                        hierarchical_kernel_common_base *DYND_UNUSED(extra))
+                        kernel_data_prefix *DYND_UNUSED(extra))
         {
             *(T *)dst = *(T *)src;
         }
@@ -25,7 +25,7 @@ namespace {
     template<>
     struct aligned_fixed_size_copy_assign<1> {
         static void single(char *dst, const char *src,
-                            hierarchical_kernel_common_base *DYND_UNUSED(extra))
+                            kernel_data_prefix *DYND_UNUSED(extra))
         {
             *dst = *src;
         }
@@ -40,24 +40,24 @@ namespace {
     template<int N>
     struct unaligned_fixed_size_copy_assign {
         static void single(char *dst, const char *src,
-                        hierarchical_kernel_common_base *DYND_UNUSED(extra))
+                        kernel_data_prefix *DYND_UNUSED(extra))
         {
             memcpy(dst, src, N);
         }
     };
 }
 struct unaligned_copy_single_kernel_extra {
-    hierarchical_kernel_common_base base;
+    kernel_data_prefix base;
     size_t data_size;
 };
-static void unaligned_copy_single(char *dst, const char *src, hierarchical_kernel_common_base *extra)
+static void unaligned_copy_single(char *dst, const char *src, kernel_data_prefix *extra)
 {
     size_t data_size = reinterpret_cast<unaligned_copy_single_kernel_extra *>(extra)->data_size;
     memcpy(dst, src, data_size);
 }
 
 size_t dynd::make_assignment_kernel(
-                    hierarchical_kernel<unary_single_operation_t> *out,
+                    assignment_kernel *out,
                     size_t offset_out,
                     const dtype& dst_dt, const char *dst_metadata,
                     const dtype& src_dt, const char *src_metadata,
@@ -99,36 +99,36 @@ size_t dynd::make_assignment_kernel(
 }
 
 size_t dynd::make_pod_dtype_assignment_kernel(
-                    hierarchical_kernel<unary_single_operation_t> *out,
+                    assignment_kernel *out,
                     size_t offset_out,
                     size_t data_size, size_t data_alignment)
 {
-    hierarchical_kernel_common_base *result = NULL;
+    kernel_data_prefix *result = NULL;
     if (data_size == data_alignment) {
         // Aligned specialization tables
         // No need to reserve more space in the trivial cases, the space for a leaf is already there
         switch (data_size) {
             case 1:
-                result = out->get_at<hierarchical_kernel_common_base>(offset_out);
+                result = out->get_at<kernel_data_prefix>(offset_out);
                 result->set_function<unary_single_operation_t>(&aligned_fixed_size_copy_assign<1>::single);
-                return offset_out + sizeof(hierarchical_kernel_common_base);
+                return offset_out + sizeof(kernel_data_prefix);
             case 2:
-                result = out->get_at<hierarchical_kernel_common_base>(offset_out);
+                result = out->get_at<kernel_data_prefix>(offset_out);
                 result->set_function<unary_single_operation_t>(&aligned_fixed_size_copy_assign<2>::single);
-                return offset_out + sizeof(hierarchical_kernel_common_base);
+                return offset_out + sizeof(kernel_data_prefix);
             case 4:
-                result = out->get_at<hierarchical_kernel_common_base>(offset_out);
+                result = out->get_at<kernel_data_prefix>(offset_out);
                 result->set_function<unary_single_operation_t>(&aligned_fixed_size_copy_assign<4>::single);
-                return offset_out + sizeof(hierarchical_kernel_common_base);
+                return offset_out + sizeof(kernel_data_prefix);
             case 8:
-                result = out->get_at<hierarchical_kernel_common_base>(offset_out);
+                result = out->get_at<kernel_data_prefix>(offset_out);
                 result->set_function<unary_single_operation_t>(&aligned_fixed_size_copy_assign<8>::single);
-                return offset_out + sizeof(hierarchical_kernel_common_base);
+                return offset_out + sizeof(kernel_data_prefix);
             default:
                 // Subtract the base amount to avoid over-reserving memory in this leaf case
                 out->ensure_capacity(offset_out + sizeof(unaligned_copy_single_kernel_extra) -
-                                sizeof(hierarchical_kernel_common_base));
-                result = out->get_at<hierarchical_kernel_common_base>(offset_out);
+                                sizeof(kernel_data_prefix));
+                result = out->get_at<kernel_data_prefix>(offset_out);
                 result->set_function<unary_single_operation_t>(&unaligned_copy_single);
                 reinterpret_cast<unaligned_copy_single_kernel_extra *>(result)->data_size = data_size;
                 return offset_out + sizeof(unaligned_copy_single_kernel_extra);
@@ -137,22 +137,22 @@ size_t dynd::make_pod_dtype_assignment_kernel(
         // Unaligned specialization tables
         switch (data_size) {
             case 2:
-                result = out->get_at<hierarchical_kernel_common_base>(offset_out);
+                result = out->get_at<kernel_data_prefix>(offset_out);
                 result->set_function<unary_single_operation_t>(unaligned_fixed_size_copy_assign<2>::single);
-                return offset_out + sizeof(hierarchical_kernel_common_base);
+                return offset_out + sizeof(kernel_data_prefix);
             case 4:
-                result = out->get_at<hierarchical_kernel_common_base>(offset_out);
+                result = out->get_at<kernel_data_prefix>(offset_out);
                 result->set_function<unary_single_operation_t>(unaligned_fixed_size_copy_assign<4>::single);
-                return offset_out + sizeof(hierarchical_kernel_common_base);
+                return offset_out + sizeof(kernel_data_prefix);
             case 8:
-                result = out->get_at<hierarchical_kernel_common_base>(offset_out);
+                result = out->get_at<kernel_data_prefix>(offset_out);
                 result->set_function<unary_single_operation_t>(unaligned_fixed_size_copy_assign<8>::single);
-                return offset_out + sizeof(hierarchical_kernel_common_base);
+                return offset_out + sizeof(kernel_data_prefix);
             default:
                 // Subtract the base amount to avoid over-reserving memory in this leaf case
                 out->ensure_capacity(offset_out + sizeof(unaligned_copy_single_kernel_extra) -
-                                sizeof(hierarchical_kernel_common_base));
-                result = out->get_at<hierarchical_kernel_common_base>(offset_out);
+                                sizeof(kernel_data_prefix));
+                result = out->get_at<kernel_data_prefix>(offset_out);
                 result->set_function<unary_single_operation_t>(&unaligned_copy_single);
                 reinterpret_cast<unaligned_copy_single_kernel_extra *>(result)->data_size = data_size;
                 return offset_out + sizeof(unaligned_copy_single_kernel_extra);
@@ -207,7 +207,7 @@ static unary_single_operation_t assign_table_single_kernel[builtin_type_id_count
 };
 
 size_t dynd::make_builtin_dtype_assignment_function(
-                hierarchical_kernel<unary_single_operation_t> *out,
+                assignment_kernel *out,
                 size_t offset_out,
                 type_id_t dst_type_id, type_id_t src_type_id,
                 assign_error_mode errmode)
@@ -217,9 +217,9 @@ size_t dynd::make_builtin_dtype_assignment_function(
                     src_type_id >= bool_type_id && src_type_id <= complex_float64_type_id &&
                     errmode != assign_error_default) {
         // No need to reserve more space, the space for a leaf is already there
-        hierarchical_kernel_common_base *result = out->get_at<hierarchical_kernel_common_base>(offset_out);
+        kernel_data_prefix *result = out->get_at<kernel_data_prefix>(offset_out);
         result->set_function<unary_single_operation_t>(assign_table_single_kernel[dst_type_id-bool_type_id][src_type_id-bool_type_id][errmode]);
-        return offset_out + sizeof(hierarchical_kernel_common_base);
+        return offset_out + sizeof(kernel_data_prefix);
     } else {
         stringstream ss;
         ss << "Cannot assign from " << dtype(src_type_id) << " to " << dtype(dst_type_id);
@@ -228,10 +228,10 @@ size_t dynd::make_builtin_dtype_assignment_function(
 }
 
 void dynd::strided_assign_kernel_extra::single(char *dst, const char *src,
-                    hierarchical_kernel_common_base *extra)
+                    kernel_data_prefix *extra)
 {
     extra_type *e = reinterpret_cast<extra_type *>(extra);
-    hierarchical_kernel_common_base *echild = &(e + 1)->base;
+    kernel_data_prefix *echild = &(e + 1)->base;
     unary_single_operation_t opchild = echild->get_function<unary_single_operation_t>();
     intptr_t size = e->size, dst_stride = e->dst_stride, src_stride = e->src_stride;
     for (intptr_t i = 0; i < size; ++i, dst += dst_stride, src += src_stride) {
@@ -239,10 +239,10 @@ void dynd::strided_assign_kernel_extra::single(char *dst, const char *src,
     }
 }
 void dynd::strided_assign_kernel_extra::destruct(
-                hierarchical_kernel_common_base *extra)
+                kernel_data_prefix *extra)
 {
     extra_type *e = reinterpret_cast<extra_type *>(extra);
-    hierarchical_kernel_common_base *echild = &(e + 1)->base;
+    kernel_data_prefix *echild = &(e + 1)->base;
     if (echild->destructor) {
         echild->destructor(echild);
     }

@@ -64,7 +64,7 @@ bool expr_dtype::operator==(const base_dtype& rhs) const
 }
 
 size_t expr_dtype::make_operand_to_value_assignment_kernel(
-                hierarchical_kernel<unary_single_operation_t> *DYND_UNUSED(out),
+                assignment_kernel *DYND_UNUSED(out),
                 size_t DYND_UNUSED(offset_out),
                 const char *DYND_UNUSED(dst_metadata), const char *DYND_UNUSED(src_metadata),
                 const eval::eval_context *DYND_UNUSED(ectx)) const
@@ -73,7 +73,7 @@ size_t expr_dtype::make_operand_to_value_assignment_kernel(
 }
 
 size_t expr_dtype::make_value_to_operand_assignment_kernel(
-                hierarchical_kernel<unary_single_operation_t> *DYND_UNUSED(out),
+                assignment_kernel *DYND_UNUSED(out),
                 size_t DYND_UNUSED(offset_out),
                 const char *DYND_UNUSED(dst_metadata), const char *DYND_UNUSED(src_metadata),
                 const eval::eval_context *DYND_UNUSED(ectx)) const

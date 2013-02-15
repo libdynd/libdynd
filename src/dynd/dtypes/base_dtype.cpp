@@ -323,7 +323,7 @@ size_t base_dtype::iterdata_destruct(iterdata_common *DYND_UNUSED(iterdata), siz
 }
 
 size_t base_dtype::make_assignment_kernel(
-                hierarchical_kernel<unary_single_operation_t> *DYND_UNUSED(out),
+                assignment_kernel *DYND_UNUSED(out),
                 size_t DYND_UNUSED(offset_out),
                 const dtype& dst_dt, const char *DYND_UNUSED(dst_metadata),
                 const dtype& src_dt, const char *DYND_UNUSED(src_metadata),
@@ -429,7 +429,7 @@ dtype base_dtype::get_elwise_property_dtype(size_t DYND_UNUSED(elwise_property_i
 }
 
 size_t base_dtype::make_elwise_property_getter_kernel(
-                hierarchical_kernel<unary_single_operation_t> *DYND_UNUSED(out),
+                assignment_kernel *DYND_UNUSED(out),
                 size_t DYND_UNUSED(offset_out),
                 const char *DYND_UNUSED(dst_metadata),
                 const char *DYND_UNUSED(src_metadata),
@@ -443,7 +443,7 @@ size_t base_dtype::make_elwise_property_getter_kernel(
 }
 
 size_t base_dtype::make_elwise_property_setter_kernel(
-                hierarchical_kernel<unary_single_operation_t> *DYND_UNUSED(out),
+                assignment_kernel *DYND_UNUSED(out),
                 size_t DYND_UNUSED(offset_out),
                 const char *DYND_UNUSED(dst_metadata),
                 size_t DYND_UNUSED(dst_elwise_property_index),

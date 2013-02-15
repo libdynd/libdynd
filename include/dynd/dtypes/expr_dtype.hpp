@@ -48,12 +48,12 @@ public:
     dtype with_replaced_storage_dtype(const dtype& replacement_dtype) const;
 
     size_t make_operand_to_value_assignment_kernel(
-                    hierarchical_kernel<unary_single_operation_t> *out,
+                    assignment_kernel *out,
                     size_t offset_out,
                     const char *dst_metadata, const char *src_metadata,
                     const eval::eval_context *ectx) const;
     size_t make_value_to_operand_assignment_kernel(
-                    hierarchical_kernel<unary_single_operation_t> *out,
+                    assignment_kernel *out,
                     size_t offset_out,
                     const char *dst_metadata, const char *src_metadata,
                     const eval::eval_context *ectx) const;

@@ -21,12 +21,12 @@ namespace {
     struct blockref_bytes_kernel_extra {
         typedef blockref_bytes_kernel_extra extra_type;
 
-        hierarchical_kernel_common_base base;
+        kernel_data_prefix base;
         size_t dst_alignment, src_alignment;
         const bytes_dtype_metadata *dst_metadata, *src_metadata;
 
         /** Does a single blockref-string copy */
-        static void single(char *dst, const char *src, hierarchical_kernel_common_base *extra)
+        static void single(char *dst, const char *src, kernel_data_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             const bytes_dtype_metadata *dst_md = e->dst_metadata;
@@ -67,7 +67,7 @@ namespace {
 } // anonymous namespace
 
 size_t dynd::make_blockref_bytes_assignment_kernel(
-                hierarchical_kernel<unary_single_operation_t> *out,
+                assignment_kernel *out,
                 size_t offset_out,
                 size_t dst_alignment, const char *dst_metadata,
                 size_t src_alignment, const char *src_metadata,
@@ -90,14 +90,14 @@ namespace {
     struct fixedbytes_to_blockref_bytes_kernel_extra {
         typedef fixedbytes_to_blockref_bytes_kernel_extra extra_type;
 
-        hierarchical_kernel_common_base base;
+        kernel_data_prefix base;
         size_t dst_alignment;
         intptr_t src_data_size;
         size_t src_alignment;
         const bytes_dtype_metadata *dst_metadata;
 
         /** Does a single fixed-bytes copy */
-        static void single(char *dst, const char *src, hierarchical_kernel_common_base *extra)
+        static void single(char *dst, const char *src, kernel_data_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             const bytes_dtype_metadata *dst_md = e->dst_metadata;
@@ -126,7 +126,7 @@ namespace {
 } // anonymous namespace
 
 size_t dynd::make_fixedbytes_to_blockref_bytes_assignment_kernel(
-                hierarchical_kernel<unary_single_operation_t> *out,
+                assignment_kernel *out,
                 size_t offset_out,
                 size_t dst_alignment, const char *dst_metadata,
                 intptr_t src_data_size, size_t src_alignment,

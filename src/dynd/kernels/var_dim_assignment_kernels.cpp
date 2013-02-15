@@ -24,16 +24,16 @@ namespace {
     struct broadcast_to_var_assign_kernel_extra {
         typedef broadcast_to_var_assign_kernel_extra extra_type;
 
-        hierarchical_kernel_common_base base;
+        kernel_data_prefix base;
         intptr_t dst_target_alignment;
         const var_dim_dtype_metadata *dst_md;
 
         static void single(char *dst, const char *src,
-                            hierarchical_kernel_common_base *extra)
+                            kernel_data_prefix *extra)
         {
             var_dim_dtype_data *dst_d = reinterpret_cast<var_dim_dtype_data *>(dst);
             extra_type *e = reinterpret_cast<extra_type *>(extra);
-            hierarchical_kernel_common_base *echild = &(e + 1)->base;
+            kernel_data_prefix *echild = &(e + 1)->base;
             unary_single_operation_t opchild = (e + 1)->base.get_function<unary_single_operation_t>();
             if (dst_d->begin == NULL) {
                 if (e->dst_md->offset != 0) {
@@ -59,10 +59,10 @@ namespace {
             }
         }
 
-        static void destruct(hierarchical_kernel_common_base *extra)
+        static void destruct(kernel_data_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
-            hierarchical_kernel_common_base *echild = &(e + 1)->base;
+            kernel_data_prefix *echild = &(e + 1)->base;
             if (echild->destructor) {
                 echild->destructor(echild);
             }
@@ -71,7 +71,7 @@ namespace {
 } // anonymous namespace
 
 size_t dynd::make_broadcast_to_var_dim_assignment_kernel(
-                hierarchical_kernel<unary_single_operation_t> *out,
+                assignment_kernel *out,
                 size_t offset_out,
                 const dtype& dst_var_dim_dt, const char *dst_metadata,
                 const dtype& src_dt, const char *src_metadata,
@@ -106,17 +106,17 @@ namespace {
     struct var_assign_kernel_extra {
         typedef var_assign_kernel_extra extra_type;
 
-        hierarchical_kernel_common_base base;
+        kernel_data_prefix base;
         intptr_t dst_target_alignment;
         const var_dim_dtype_metadata *dst_md, *src_md;
 
         static void single(char *dst, const char *src,
-                            hierarchical_kernel_common_base *extra)
+                            kernel_data_prefix *extra)
         {
             var_dim_dtype_data *dst_d = reinterpret_cast<var_dim_dtype_data *>(dst);
             const var_dim_dtype_data *src_d = reinterpret_cast<const var_dim_dtype_data *>(src);
             extra_type *e = reinterpret_cast<extra_type *>(extra);
-            hierarchical_kernel_common_base *echild = &(e + 1)->base;
+            kernel_data_prefix *echild = &(e + 1)->base;
             unary_single_operation_t opchild = (e + 1)->base.get_function<unary_single_operation_t>();
             if (dst_d->begin == NULL) {
                 if (e->dst_md->offset != 0) {
@@ -162,10 +162,10 @@ namespace {
             }
         }
 
-        static void destruct(hierarchical_kernel_common_base *extra)
+        static void destruct(kernel_data_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
-            hierarchical_kernel_common_base *echild = &(e + 1)->base;
+            kernel_data_prefix *echild = &(e + 1)->base;
             if (echild->destructor) {
                 echild->destructor(echild);
             }
@@ -174,7 +174,7 @@ namespace {
 } // anonymous namespace
 
 size_t dynd::make_var_dim_assignment_kernel(
-                hierarchical_kernel<unary_single_operation_t> *out,
+                assignment_kernel *out,
                 size_t offset_out,
                 const dtype& dst_var_dim_dt, const char *dst_metadata,
                 const dtype& src_var_dim_dt, const char *src_metadata,
@@ -218,17 +218,17 @@ namespace {
     struct strided_to_var_assign_kernel_extra {
         typedef strided_to_var_assign_kernel_extra extra_type;
 
-        hierarchical_kernel_common_base base;
+        kernel_data_prefix base;
         intptr_t dst_target_alignment;
         const var_dim_dtype_metadata *dst_md;
         intptr_t src_stride, src_dim_size;
 
         static void single(char *dst, const char *src,
-                            hierarchical_kernel_common_base *extra)
+                            kernel_data_prefix *extra)
         {
             var_dim_dtype_data *dst_d = reinterpret_cast<var_dim_dtype_data *>(dst);
             extra_type *e = reinterpret_cast<extra_type *>(extra);
-            hierarchical_kernel_common_base *echild = &(e + 1)->base;
+            kernel_data_prefix *echild = &(e + 1)->base;
             unary_single_operation_t opchild = (e + 1)->base.get_function<unary_single_operation_t>();
             if (dst_d->begin == NULL) {
                 if (e->dst_md->offset != 0) {
@@ -266,10 +266,10 @@ namespace {
             }
         }
 
-        static void destruct(hierarchical_kernel_common_base *extra)
+        static void destruct(kernel_data_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
-            hierarchical_kernel_common_base *echild = &(e + 1)->base;
+            kernel_data_prefix *echild = &(e + 1)->base;
             if (echild->destructor) {
                 echild->destructor(echild);
             }
@@ -278,7 +278,7 @@ namespace {
 } // anonymous namespace
 
 size_t dynd::make_strided_to_var_dim_assignment_kernel(
-                hierarchical_kernel<unary_single_operation_t> *out,
+                assignment_kernel *out,
                 size_t offset_out,
                 const dtype& dst_var_dim_dt, const char *dst_metadata,
                 const dtype& src_strided_dim_dt, const char *src_metadata,
@@ -336,16 +336,16 @@ namespace {
     struct var_to_strided_assign_kernel_extra {
         typedef var_to_strided_assign_kernel_extra extra_type;
 
-        hierarchical_kernel_common_base base;
+        kernel_data_prefix base;
         intptr_t dst_stride, dst_dim_size;
         const var_dim_dtype_metadata *src_md;
 
         static void single(char *dst, const char *src,
-                            hierarchical_kernel_common_base *extra)
+                            kernel_data_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             const var_dim_dtype_data *src_d = reinterpret_cast<const var_dim_dtype_data *>(src);
-            hierarchical_kernel_common_base *echild = &(e + 1)->base;
+            kernel_data_prefix *echild = &(e + 1)->base;
             unary_single_operation_t opchild = (e + 1)->base.get_function<unary_single_operation_t>();
             if (src_d->begin == NULL) {
                 throw runtime_error("Cannot assign an uninitialized dynd var array to a strided one");
@@ -366,10 +366,10 @@ namespace {
             }
         }
 
-        static void destruct(hierarchical_kernel_common_base *extra)
+        static void destruct(kernel_data_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
-            hierarchical_kernel_common_base *echild = &(e + 1)->base;
+            kernel_data_prefix *echild = &(e + 1)->base;
             if (echild->destructor) {
                 echild->destructor(echild);
             }
@@ -378,7 +378,7 @@ namespace {
 } // anonymous namespace
 
 size_t dynd::make_var_to_strided_dim_assignment_kernel(
-                hierarchical_kernel<unary_single_operation_t> *out,
+                assignment_kernel *out,
                 size_t offset_out,
                 const dtype& dst_strided_dim_dt, const char *dst_metadata,
                 const dtype& src_var_dim_dt, const char *src_metadata,

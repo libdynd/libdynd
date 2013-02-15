@@ -487,32 +487,22 @@ ndobject ndobject::at_array(size_t nindices, const irange *indices) const
 void ndobject::val_assign(const ndobject& rhs, assign_error_mode errmode,
                     const eval::eval_context *ectx) const
 {
-    // Verify access permissions
-    if (!(get_flags()&write_access_flag)) {
-        throw runtime_error("tried to write to a dynd array that is not writeable");
-    }
+    // Verify read access permission
     if (!(rhs.get_flags()&read_access_flag)) {
         throw runtime_error("tried to read from a dynd array that is not readable");
     }
 
-    hierarchical_kernel<unary_single_operation_t> k;
-    make_assignment_kernel(&k, 0, get_dtype(), get_ndo_meta(),
-                    rhs.get_dtype(), rhs.get_ndo_meta(), errmode, ectx);
-    k.get_function()(get_ndo()->m_data_pointer, rhs.get_readonly_originptr(), k.get());
+    dtype_assign(get_dtype(), get_ndo_meta(), get_readwrite_originptr(),
+                    rhs.get_dtype(), rhs.get_ndo_meta(), rhs.get_readonly_originptr(),
+                    errmode, ectx);
 }
 
 void ndobject::val_assign(const dtype& rhs_dt, const char *rhs_metadata, const char *rhs_data,
                     assign_error_mode errmode, const eval::eval_context *ectx) const
 {
-    // Verify access permissions
-    if (!(get_flags()&write_access_flag)) {
-        throw runtime_error("tried to write to a dynd array that is not writeable");
-    }
-
-    hierarchical_kernel<unary_single_operation_t> k;
-    make_assignment_kernel(&k, 0, get_dtype(), get_ndo_meta(),
-                    rhs_dt, rhs_metadata, errmode, ectx);
-    k.get_function()(get_ndo()->m_data_pointer, rhs_data, k.get());
+    dtype_assign(get_dtype(), get_ndo_meta(), get_readwrite_originptr(),
+                    rhs_dt, rhs_metadata, rhs_data,
+                    errmode, ectx);
 }
 
 void ndobject::flag_as_immutable()
@@ -975,12 +965,9 @@ ndobject dynd::eval_raw_copy(const dtype& dt, const char *metadata, const char *
         result.set(make_ndobject_memory_block(cdt, 0, NULL));
     }
 
-    hierarchical_kernel<unary_single_operation_t> k;
-    make_assignment_kernel(&k, 0,
-                    cdt, result.get_ndo_meta(),
-                    dt, metadata,
+    dtype_assign(cdt, result.get_ndo_meta(), result.get_readwrite_originptr(),
+                    dt, metadata, data,
                     assign_error_default, &eval::default_eval_context);
-    k.get_function()(result.get_readwrite_originptr(), data, k.get());
 
     return result;
 }

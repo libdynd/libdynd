@@ -577,7 +577,7 @@ public:
      *           kernel.
      */
     virtual size_t make_assignment_kernel(
-                    hierarchical_kernel<unary_single_operation_t> *out,
+                    assignment_kernel *out,
                     size_t offset_out,
                     const dtype& dst_dt, const char *dst_metadata,
                     const dtype& src_dt, const char *src_metadata,
@@ -667,7 +667,7 @@ public:
      * \param ectx  DyND evaluation contrext.
      */
     virtual size_t make_elwise_property_getter_kernel(
-                    hierarchical_kernel<unary_single_operation_t> *out,
+                    assignment_kernel *out,
                     size_t offset_out,
                     const char *dst_metadata,
                     const char *src_metadata, size_t src_elwise_property_index,
@@ -690,7 +690,7 @@ public:
      * \param ectx  DyND evaluation contrext.
      */
     virtual size_t make_elwise_property_setter_kernel(
-                    hierarchical_kernel<unary_single_operation_t> *out,
+                    assignment_kernel *out,
                     size_t offset_out,
                     const char *dst_metadata, size_t dst_elwise_property_index,
                     const char *src_metadata,

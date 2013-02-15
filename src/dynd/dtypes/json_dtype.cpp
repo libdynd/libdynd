@@ -183,11 +183,11 @@ namespace {
    struct string_to_json_kernel_extra {
         typedef string_to_json_kernel_extra extra_type;
 
-        hierarchical_kernel_common_base base;
+        kernel_data_prefix base;
         const char *dst_metadata;
         bool validate;
 
-        static void single(char *dst, const char *src, hierarchical_kernel_common_base *extra)
+        static void single(char *dst, const char *src, kernel_data_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             const json_dtype_metadata *md = reinterpret_cast<const json_dtype_metadata *>(e->dst_metadata);
@@ -209,10 +209,10 @@ namespace {
             }
         }
 
-        static void destruct(hierarchical_kernel_common_base *extra)
+        static void destruct(kernel_data_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
-            hierarchical_kernel_common_base *echild = &(e + 1)->base;
+            kernel_data_prefix *echild = &(e + 1)->base;
             if (echild->destructor) {
                 echild->destructor(echild);
             }
@@ -221,7 +221,7 @@ namespace {
 } // anonymous namespace
 
 size_t json_dtype::make_assignment_kernel(
-                hierarchical_kernel<unary_single_operation_t> *out,
+                assignment_kernel *out,
                 size_t offset_out,
                 const dtype& dst_dt, const char *dst_metadata,
                 const dtype& src_dt, const char *src_metadata,

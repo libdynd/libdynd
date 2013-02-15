@@ -208,7 +208,7 @@ public:
         if (get_ndo()->m_flags & write_access_flag) {
             return get_ndo()->m_data_pointer;
         } else {
-            throw std::runtime_error("dynd::ndobject is not writeable");
+            throw std::runtime_error("tried to write to a dynd array that is not writeable");
         }
     }
 

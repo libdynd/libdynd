@@ -82,7 +82,7 @@ TEST(StridedArrayDType, IsExpression) {
 
 TEST(StridedArrayDType, AssignKernel) {
     ndobject a, b;
-    hierarchical_kernel<unary_single_operation_t> k;
+    assignment_kernel k;
     int vals_int[] = {3,5,7};
 
     // Assignment scalar -> strided array
@@ -91,7 +91,7 @@ TEST(StridedArrayDType, AssignKernel) {
     EXPECT_EQ(strided_dim_type_id, a.get_dtype().get_type_id());
     make_assignment_kernel(&k, 0, a.get_dtype(), a.get_ndo_meta(),
                     b.get_dtype(), b.get_ndo_meta(), assign_error_default, &eval::default_eval_context);
-    k.get_function()(a.get_readwrite_originptr(), b.get_readonly_originptr(), k.get());
+    k(a.get_readwrite_originptr(), b.get_readonly_originptr());
     EXPECT_EQ(9, a.at(0).as<int>());
     EXPECT_EQ(9, a.at(1).as<int>());
     EXPECT_EQ(9, a.at(2).as<int>());
@@ -105,7 +105,7 @@ TEST(StridedArrayDType, AssignKernel) {
     EXPECT_EQ(strided_dim_type_id, b.get_dtype().get_type_id());
     make_assignment_kernel(&k, 0, a.get_dtype(), a.get_ndo_meta(),
                     b.get_dtype(), b.get_ndo_meta(), assign_error_default, &eval::default_eval_context);
-    k.get_function()(a.get_readwrite_originptr(), b.get_readonly_originptr(), k.get());
+    k(a.get_readwrite_originptr(), b.get_readonly_originptr());
     EXPECT_EQ(3, a.at(0).as<int>());
     EXPECT_EQ(5, a.at(1).as<int>());
     EXPECT_EQ(7, a.at(2).as<int>());
