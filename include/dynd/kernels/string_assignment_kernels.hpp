@@ -6,7 +6,7 @@
 #ifndef _DYND__STRING_ASSIGNMENT_KERNELS_HPP_
 #define _DYND__STRING_ASSIGNMENT_KERNELS_HPP_
 
-#include <dynd/kernels/hierarchical_kernels.hpp>
+#include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/string_encodings.hpp>
 
 namespace dynd {

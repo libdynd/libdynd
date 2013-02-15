@@ -6,7 +6,7 @@
 #ifndef _DYND__BYTESWAP_KERNELS_HPP_
 #define _DYND__BYTESWAP_KERNELS_HPP_
 
-#include <dynd/kernels/hierarchical_kernels.hpp>
+#include <dynd/kernels/assignment_kernels.hpp>
 
 namespace dynd {
 

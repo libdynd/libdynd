@@ -80,6 +80,7 @@ set(dynd_SRC
     src/dynd/dtypes/string_dtype.cpp
     src/dynd/dtypes/struct_dtype.cpp
     src/dynd/dtypes/tuple_dtype.cpp
+    src/dynd/dtypes/type_id.cpp
     src/dynd/dtypes/var_dim_dtype.cpp
     src/dynd/dtypes/view_dtype.cpp
     src/dynd/dtypes/void_pointer_dtype.cpp
@@ -112,6 +113,7 @@ set(dynd_SRC
     include/dynd/dtypes/struct_dtype.hpp
     include/dynd/dtypes/fixedstruct_dtype.hpp
     include/dynd/dtypes/tuple_dtype.hpp
+    include/dynd/dtypes/type_id.hpp
     include/dynd/dtypes/var_dim_dtype.hpp
     include/dynd/dtypes/view_dtype.hpp
     include/dynd/dtypes/void_pointer_dtype.hpp
@@ -162,7 +164,6 @@ set(dynd_SRC
     include/dynd/kernels/byteswap_kernels.hpp
     include/dynd/kernels/date_assignment_kernels.hpp
     include/dynd/kernels/kernel_instance.hpp
-    include/dynd/kernels/hierarchical_kernels.hpp
     include/dynd/kernels/string_assignment_kernels.hpp
     include/dynd/kernels/string_algorithm_kernels.hpp
     include/dynd/kernels/string_numeric_assignment_kernels.hpp

@@ -7,7 +7,7 @@
 #define _DYND__VAR_DIM_ASSIGNMENT_KERNELS_HPP_
 
 #include <dynd/dtype.hpp>
-#include <dynd/kernels/hierarchical_kernels.hpp>
+#include <dynd/kernels/assignment_kernels.hpp>
 
 namespace dynd {
 
