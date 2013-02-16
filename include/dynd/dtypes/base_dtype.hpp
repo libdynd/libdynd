@@ -454,8 +454,7 @@ public:
      *           kernel.
      */
     virtual size_t make_assignment_kernel(
-                    assignment_kernel *out,
-                    size_t offset_out,
+                    assignment_kernel *out, size_t offset_out,
                     const dtype& dst_dt, const char *dst_metadata,
                     const dtype& src_dt, const char *src_metadata,
                     assign_error_mode errmode,
@@ -471,7 +470,8 @@ public:
      * \param callback  Callback function called for each subelement.
      * \param callback_data  Data provided to the callback function.
      */
-    virtual void foreach_leading(char *data, const char *metadata, foreach_fn_t callback, void *callback_data) const;
+    virtual void foreach_leading(char *data, const char *metadata,
+                    foreach_fn_t callback, void *callback_data) const;
 
     /**
      * Modifies metadata allocated using the metadata_default_construct function, to be used
@@ -482,17 +482,22 @@ public:
      * \param src_dtype  The dtype of the input ndobject whose stride ordering is to be matched.
      * \param src_metadata  The metadata of the input ndobject whose stride ordering is to be matched.
      */
-    virtual void reorder_default_constructed_strides(char *dst_metadata, const dtype& src_dtype, const char *src_metadata) const;
+    virtual void reorder_default_constructed_strides(char *dst_metadata,
+                    const dtype& src_dtype, const char *src_metadata) const;
 
     /**
      * Additional dynamic properties exposed by the dtype as gfunc::callable.
      */
-    virtual void get_dynamic_dtype_properties(const std::pair<std::string, gfunc::callable> **out_properties, size_t *out_count) const;
+    virtual void get_dynamic_dtype_properties(
+                    const std::pair<std::string, gfunc::callable> **out_properties,
+                    size_t *out_count) const;
 
     /**
      * Additional dynamic functions exposed by the dtype as gfunc::callable.
      */
-    virtual void get_dynamic_dtype_functions(const std::pair<std::string, gfunc::callable> **out_functions, size_t *out_count) const;
+    virtual void get_dynamic_dtype_functions(
+                    const std::pair<std::string, gfunc::callable> **out_functions,
+                    size_t *out_count) const;
 
     /**
      * Additional dynamic properties exposed by any ndobject of this dtype as gfunc::callable.
@@ -501,7 +506,9 @@ public:
      *       be able to handle the case where they are the first non-uniform dtype in an array type, not
      *       just strictly of the non-uniform dtype.
      */
-    virtual void get_dynamic_ndobject_properties(const std::pair<std::string, gfunc::callable> **out_properties, size_t *out_count) const;
+    virtual void get_dynamic_ndobject_properties(
+                    const std::pair<std::string, gfunc::callable> **out_properties,
+                    size_t *out_count) const;
 
     /**
      * Additional dynamic functions exposed by any ndobject of this dtype as gfunc::callable.
@@ -510,7 +517,9 @@ public:
      *       be able to handle the case where they are the first non-uniform dtype in an array type, not
      *       just strictly of the non-uniform dtype.
      */
-    virtual void get_dynamic_ndobject_functions(const std::pair<std::string, gfunc::callable> **out_functions, size_t *out_count) const;
+    virtual void get_dynamic_ndobject_functions(
+                    const std::pair<std::string, gfunc::callable> **out_functions,
+                    size_t *out_count) const;
 
     /**
      * Returns the index for the element-wise property of the given name.
@@ -544,8 +553,7 @@ public:
      * \param ectx  DyND evaluation contrext.
      */
     virtual size_t make_elwise_property_getter_kernel(
-                    assignment_kernel *out,
-                    size_t offset_out,
+                    assignment_kernel *out, size_t offset_out,
                     const char *dst_metadata,
                     const char *src_metadata, size_t src_elwise_property_index,
                     const eval::eval_context *ectx) const;
@@ -567,8 +575,7 @@ public:
      * \param ectx  DyND evaluation contrext.
      */
     virtual size_t make_elwise_property_setter_kernel(
-                    assignment_kernel *out,
-                    size_t offset_out,
+                    assignment_kernel *out, size_t offset_out,
                     const char *dst_metadata, size_t dst_elwise_property_index,
                     const char *src_metadata,
                     const eval::eval_context *ectx) const;

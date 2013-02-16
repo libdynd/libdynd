@@ -15,8 +15,7 @@ namespace dynd {
  * Makes a kernel which broadcasts the input to a var dim.
  */
 size_t make_broadcast_to_var_dim_assignment_kernel(
-                assignment_kernel *out,
-                size_t offset_out,
+                assignment_kernel *out, size_t offset_out,
                 const dtype& dst_var_dim_dt, const char *dst_metadata,
                 const dtype& src_dt, const char *src_metadata,
                 assign_error_mode errmode,
@@ -26,8 +25,7 @@ size_t make_broadcast_to_var_dim_assignment_kernel(
  * Makes a kernel which assigns var dims.
  */
 size_t make_var_dim_assignment_kernel(
-                assignment_kernel *out,
-                size_t offset_out,
+                assignment_kernel *out, size_t offset_out,
                 const dtype& dst_var_dim_dt, const char *dst_metadata,
                 const dtype& src_var_dim_dt, const char *src_metadata,
                 assign_error_mode errmode,
@@ -37,8 +35,7 @@ size_t make_var_dim_assignment_kernel(
  * Makes a kernel which assigns strided dims to var dims
  */
 size_t make_strided_to_var_dim_assignment_kernel(
-                assignment_kernel *out,
-                size_t offset_out,
+                assignment_kernel *out, size_t offset_out,
                 const dtype& dst_var_dim_dt, const char *dst_metadata,
                 const dtype& src_strided_dim_dt, const char *src_metadata,
                 assign_error_mode errmode,
@@ -48,8 +45,7 @@ size_t make_strided_to_var_dim_assignment_kernel(
  * Makes a kernel which assigns var dims to strided dims
  */
 size_t make_var_to_strided_dim_assignment_kernel(
-                assignment_kernel *out,
-                size_t offset_out,
+                assignment_kernel *out, size_t offset_out,
                 const dtype& dst_strided_dim_dt, const char *dst_metadata,
                 const dtype& src_var_dim_dt, const char *src_metadata,
                 assign_error_mode errmode,

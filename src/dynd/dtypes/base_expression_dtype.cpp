@@ -180,8 +180,7 @@ size_t base_expression_dtype::make_value_to_operand_assignment_kernel(
 }
 
 size_t base_expression_dtype::make_assignment_kernel(
-                assignment_kernel *out,
-                size_t offset_out,
+                assignment_kernel *out, size_t offset_out,
                 const dtype& dst_dt, const char *dst_metadata,
                 const dtype& src_dt, const char *src_metadata,
                 assign_error_mode errmode,

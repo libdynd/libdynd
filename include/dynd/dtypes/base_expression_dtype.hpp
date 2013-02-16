@@ -61,21 +61,18 @@ public:
 
     /** Makes a kernel which converts from (operand_dtype().value_dtype()) to (value_dtype()) */
     virtual size_t make_operand_to_value_assignment_kernel(
-                    assignment_kernel *out,
-                    size_t offset_out,
+                    assignment_kernel *out, size_t offset_out,
                     const char *dst_metadata, const char *src_metadata,
                     const eval::eval_context *ectx) const;
 
     /** Makes a kernel which converts from (value_dtype()) to (operand_dtype().value_dtype()) */
     virtual size_t make_value_to_operand_assignment_kernel(
-                    assignment_kernel *out,
-                    size_t offset_out,
+                    assignment_kernel *out, size_t offset_out,
                     const char *dst_metadata, const char *src_metadata,
                     const eval::eval_context *ectx) const;
 
     size_t make_assignment_kernel(
-                    assignment_kernel *out,
-                    size_t offset_out,
+                    assignment_kernel *out, size_t offset_out,
                     const dtype& dst_dt, const char *dst_metadata,
                     const dtype& src_dt, const char *src_metadata,
                     assign_error_mode errmode,

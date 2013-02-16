@@ -121,8 +121,7 @@ bool property_dtype::operator==(const base_dtype& rhs) const
 }
 
 size_t property_dtype::make_operand_to_value_assignment_kernel(
-                assignment_kernel *out,
-                size_t offset_out,
+                assignment_kernel *out, size_t offset_out,
                 const char *dst_metadata, const char *src_metadata,
                 const eval::eval_context *ectx) const
 {
@@ -156,8 +155,7 @@ size_t property_dtype::make_operand_to_value_assignment_kernel(
 }
 
 size_t property_dtype::make_value_to_operand_assignment_kernel(
-                assignment_kernel *out,
-                size_t offset_out,
+                assignment_kernel *out, size_t offset_out,
                 const char *dst_metadata, const char *src_metadata,
                 const eval::eval_context *ectx) const
 {

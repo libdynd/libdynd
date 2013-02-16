@@ -92,8 +92,7 @@ namespace {
 } // anonymous namespace
 
 size_t dynd::make_byteswap_assignment_function(
-                assignment_kernel *out,
-                size_t offset_out,
+                assignment_kernel *out, size_t offset_out,
                 intptr_t data_size, intptr_t data_alignment)
 {
     kernel_data_prefix *result = NULL;
@@ -129,8 +128,7 @@ size_t dynd::make_byteswap_assignment_function(
 }
 
 size_t dynd::make_pairwise_byteswap_assignment_function(
-                assignment_kernel *out,
-                size_t offset_out,
+                assignment_kernel *out, size_t offset_out,
                 intptr_t data_size, intptr_t data_alignment)
 {
     kernel_data_prefix *result = NULL;

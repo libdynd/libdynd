@@ -190,8 +190,7 @@ public:
  * then call the corresponding function with this == src_dt.
  */
 size_t make_assignment_kernel(
-                assignment_kernel *out,
-                size_t offset_out,
+                assignment_kernel *out, size_t offset_out,
                 const dtype& dst_dt, const char *dst_metadata,
                 const dtype& src_dt, const char *src_metadata,
                 assign_error_mode errmode,
@@ -202,8 +201,7 @@ size_t make_assignment_kernel(
  * and are POD (plain old data).
  */
 size_t make_pod_dtype_assignment_kernel(
-                assignment_kernel *out,
-                size_t offset_out,
+                assignment_kernel *out, size_t offset_out,
                 size_t data_size, size_t data_alignment);
 
 /**
@@ -211,8 +209,7 @@ size_t make_pod_dtype_assignment_kernel(
  * type ids.
  */
 size_t make_builtin_dtype_assignment_function(
-                assignment_kernel *out,
-                size_t offset_out,
+                assignment_kernel *out, size_t offset_out,
                 type_id_t dst_type_id, type_id_t src_type_id,
                 assign_error_mode errmode);
 

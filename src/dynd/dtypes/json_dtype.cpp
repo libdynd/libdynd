@@ -221,8 +221,7 @@ namespace {
 } // anonymous namespace
 
 size_t json_dtype::make_assignment_kernel(
-                assignment_kernel *out,
-                size_t offset_out,
+                assignment_kernel *out, size_t offset_out,
                 const dtype& dst_dt, const char *dst_metadata,
                 const dtype& src_dt, const char *src_metadata,
                 assign_error_mode errmode,

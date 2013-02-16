@@ -67,8 +67,7 @@ namespace {
 } // anonymous namespace
 
 size_t dynd::make_blockref_bytes_assignment_kernel(
-                assignment_kernel *out,
-                size_t offset_out,
+                assignment_kernel *out, size_t offset_out,
                 size_t dst_alignment, const char *dst_metadata,
                 size_t src_alignment, const char *src_metadata,
                 const eval::eval_context *DYND_UNUSED(ectx))
@@ -126,8 +125,7 @@ namespace {
 } // anonymous namespace
 
 size_t dynd::make_fixedbytes_to_blockref_bytes_assignment_kernel(
-                assignment_kernel *out,
-                size_t offset_out,
+                assignment_kernel *out, size_t offset_out,
                 size_t dst_alignment, const char *dst_metadata,
                 intptr_t src_data_size, size_t src_alignment,
                 const eval::eval_context *DYND_UNUSED(ectx))

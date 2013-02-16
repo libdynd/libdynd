@@ -15,8 +15,7 @@ namespace dynd {
  * Makes a kernel which converts strings to dates.
  */
 size_t make_string_to_date_assignment_kernel(
-                assignment_kernel *out,
-                size_t offset_out,
+                assignment_kernel *out, size_t offset_out,
                 const dtype& src_string_dt, const char *src_metadata,
                 assign_error_mode errmode,
                 const eval::eval_context *ectx);
@@ -25,8 +24,7 @@ size_t make_string_to_date_assignment_kernel(
  * Makes a kernel which converts dates to strings.
  */
 size_t make_date_to_string_assignment_kernel(
-                assignment_kernel *out,
-                size_t offset_out,
+                assignment_kernel *out, size_t offset_out,
                 const dtype& dst_string_dt, const char *dst_metadata,
                 assign_error_mode errmode,
                 const eval::eval_context *ectx);
