@@ -133,19 +133,21 @@ dtype dynd::view_dtype::with_replaced_storage_dtype(const dtype& replacement_dty
 size_t view_dtype::make_operand_to_value_assignment_kernel(
                 assignment_kernel *out, size_t offset_out,
                 const char *DYND_UNUSED(dst_metadata), const char *DYND_UNUSED(src_metadata),
-                const eval::eval_context *DYND_UNUSED(ectx)) const
+                kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx)) const
 {
     return ::make_pod_dtype_assignment_kernel(out, offset_out,
                     m_value_dtype.get_data_size(),
-                    std::min(m_value_dtype.get_alignment(), m_operand_dtype.get_alignment()));
+                    std::min(m_value_dtype.get_alignment(), m_operand_dtype.get_alignment()),
+                    kernreq);
 }
 
 size_t view_dtype::make_value_to_operand_assignment_kernel(
                 assignment_kernel *out, size_t offset_out,
                 const char *DYND_UNUSED(dst_metadata), const char *DYND_UNUSED(src_metadata),
-                const eval::eval_context *DYND_UNUSED(ectx)) const
+                kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx)) const
 {
     return ::make_pod_dtype_assignment_kernel(out, offset_out,
                     m_value_dtype.get_data_size(),
-                    std::min(m_value_dtype.get_alignment(), m_operand_dtype.get_alignment()));
+                    std::min(m_value_dtype.get_alignment(), m_operand_dtype.get_alignment()),
+                    kernreq);
 }

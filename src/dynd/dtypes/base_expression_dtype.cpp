@@ -3,11 +3,15 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
+#include <algorithm>
+
 #include <dynd/dtype.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 
 using namespace std;
 using namespace dynd;
+
+#define DYND_BUFFER_CHUNK_SIZE ((size_t)128)
 
 base_expression_dtype::~base_expression_dtype()
 {
@@ -71,12 +75,27 @@ namespace {
         const base_dtype *buffer_dt;
         char *buffer_metadata;
         size_t buffer_data_offset, buffer_data_size;
+        intptr_t buffer_stride;
 
         // Initializes the dtype and metadata for the buffer
         // NOTE: This does NOT initialize the buffer_data_offset,
         //       just the buffer_data_size.
-        void init(const dtype& buffer_dt_) {
-            base.set_function<unary_single_operation_t>(&single);
+        void init(const dtype& buffer_dt_, kernel_request_t kernreq) {
+            size_t element_count = 1;
+            switch (kernreq) {
+                case kernel_request_single:
+                    base.set_function<unary_single_operation_t>(&single);
+                    break;
+                case kernel_request_strided:
+                    base.set_function<unary_strided_operation_t>(&strided);
+                    element_count = DYND_BUFFER_CHUNK_SIZE;
+                    break;
+                default: {
+                    stringstream ss;
+                    ss << "buffered_kernel: unrecognized request " << (int)kernreq;
+                    throw runtime_error(ss.str());
+                }   
+            }
             base.destructor = &destruct;
             // The kernel data owns a reference in buffer_dt
             buffer_dt = dtype(buffer_dt_).release();
@@ -90,10 +109,12 @@ namespace {
                     buffer_dt->metadata_default_construct(buffer_metadata, 0, NULL);
                 }
                 // Make sure the buffer data size is pointer size-aligned
-                buffer_data_size = inc_to_alignment(buffer_dt->get_default_data_size(0, NULL), sizeof(void *));
+                buffer_stride = buffer_dt->get_default_data_size(0, NULL);
+                buffer_data_size = inc_to_alignment(element_count * buffer_stride, sizeof(void *));
             } else {
                 // Make sure the buffer data size is pointer size-aligned
-                buffer_data_size = inc_to_alignment(buffer_dt_.get_data_size(), sizeof(void *));
+                buffer_stride = buffer_dt_.get_data_size();
+                buffer_data_size = inc_to_alignment(element_count * buffer_stride, sizeof(void *));
             }
             
         }
@@ -124,6 +145,40 @@ namespace {
             // Reset the buffer storage if used
             if (buffer_metadata != NULL) {
                 buffer_dt->metadata_reset_buffers(buffer_metadata);
+            }
+        }
+        static void strided(char *dst, intptr_t dst_stride,
+                        const char *src, intptr_t src_stride,
+                        size_t count, kernel_data_prefix *extra)
+        {
+            char *eraw = reinterpret_cast<char *>(extra);
+            extra_type *e = reinterpret_cast<extra_type *>(extra);
+            kernel_data_prefix *echild_first, *echild_second;
+            unary_strided_operation_t opchild_first, opchild_second;
+            const base_dtype *buffer_dt = e->buffer_dt;
+            char *buffer_metadata = e->buffer_metadata;
+            char *buffer_data_ptr = eraw + e->buffer_data_offset;
+            size_t buffer_stride = e->buffer_stride;
+            echild_first = reinterpret_cast<kernel_data_prefix *>(eraw + e->first_kernel_offset);
+            echild_second = reinterpret_cast<kernel_data_prefix *>(eraw + e->second_kernel_offset);
+
+            opchild_first = echild_first->get_function<unary_strided_operation_t>();
+            opchild_second = echild_second->get_function<unary_strided_operation_t>();
+            while (count > 0) {
+                size_t chunk_size = min(DYND_BUFFER_CHUNK_SIZE, count);
+                // If the type needs it, initialize the buffer data to zero
+                if (!is_builtin_dtype(buffer_dt) && (buffer_dt->get_flags()&dtype_flag_zeroinit) != 0) {
+                    memset(buffer_data_ptr, 0, chunk_size * e->buffer_stride);
+                }
+                // First kernel (src -> buffer)
+                opchild_first(buffer_data_ptr, buffer_stride, src, src_stride, chunk_size, echild_first);
+                // Second kernel (buffer -> dst)
+                opchild_second(dst, dst_stride, buffer_data_ptr, buffer_stride, chunk_size, echild_second);
+                // Reset the buffer storage if used
+                if (buffer_metadata != NULL) {
+                    buffer_dt->metadata_reset_buffers(buffer_metadata);
+                }
+                count -= chunk_size;
             }
         }
         static void destruct(kernel_data_prefix *extra)
@@ -161,7 +216,7 @@ size_t base_expression_dtype::make_operand_to_value_assignment_kernel(
                 assignment_kernel *DYND_UNUSED(out),
                 size_t DYND_UNUSED(offset_out),
                 const char *DYND_UNUSED(dst_metadata), const char *DYND_UNUSED(src_metadata),
-                const eval::eval_context *DYND_UNUSED(ectx)) const
+                kernel_request_t DYND_UNUSED(kernreq), const eval::eval_context *DYND_UNUSED(ectx)) const
 {
     stringstream ss;
     ss << "dynd dtype " << dtype(this, true) << " does not support reading of its values";
@@ -172,7 +227,7 @@ size_t base_expression_dtype::make_value_to_operand_assignment_kernel(
                 assignment_kernel *DYND_UNUSED(out),
                 size_t DYND_UNUSED(offset_out),
                 const char *DYND_UNUSED(dst_metadata), const char *DYND_UNUSED(src_metadata),
-                const eval::eval_context *DYND_UNUSED(ectx)) const
+                kernel_request_t DYND_UNUSED(kernreq), const eval::eval_context *DYND_UNUSED(ectx)) const
 {
     stringstream ss;
     ss << "dynd dtype " << dtype(this, true) << " does not support writing to its values";
@@ -183,7 +238,7 @@ size_t base_expression_dtype::make_assignment_kernel(
                 assignment_kernel *out, size_t offset_out,
                 const dtype& dst_dt, const char *dst_metadata,
                 const dtype& src_dt, const char *src_metadata,
-                assign_error_mode errmode,
+                kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *ectx) const
 {
 
@@ -193,19 +248,20 @@ size_t base_expression_dtype::make_assignment_kernel(
             const dtype& opdt = get_operand_dtype();
             if (opdt.get_kind() != expression_kind) {
                 // Leaf case, just a single value -> operand kernel
-                return make_value_to_operand_assignment_kernel(out, offset_out, dst_metadata, src_metadata, ectx);
+                return make_value_to_operand_assignment_kernel(out, offset_out,
+                                dst_metadata, src_metadata, kernreq, ectx);
             } else {
                 // Chain case, buffer one segment of the chain
                 const dtype& buffer_dt = static_cast<const base_expression_dtype *>(opdt.extended())->get_value_dtype();
                 out->ensure_capacity(offset_out + sizeof(buffered_kernel_extra));
                 buffered_kernel_extra *e = out->get_at<buffered_kernel_extra>(offset_out);
-                e->init(buffer_dt);
+                e->init(buffer_dt, kernreq);
                 size_t buffer_data_size = e->buffer_data_size;
                 // Construct the first kernel (src -> buffer)
                 e->first_kernel_offset = sizeof(buffered_kernel_extra);
                 size_t buffer_data_offset;
                 buffer_data_offset = make_value_to_operand_assignment_kernel(out, offset_out + e->first_kernel_offset,
-                                e->buffer_metadata, src_metadata, ectx);
+                                e->buffer_metadata, src_metadata, kernreq, ectx);
                 // Allocate the buffer data
                 buffer_data_offset = inc_to_alignment(buffer_data_offset, buffer_dt.get_alignment());
                 out->ensure_capacity(offset_out + buffer_data_offset + buffer_data_size);
@@ -217,7 +273,7 @@ size_t base_expression_dtype::make_assignment_kernel(
                 return ::make_assignment_kernel(out, offset_out + e->second_kernel_offset,
                                 opdt, dst_metadata,
                                 buffer_dt, e->buffer_metadata,
-                                errmode, ectx);
+                                kernreq, errmode, ectx);
             }
         } else {
             dtype buffer_dt;
@@ -232,7 +288,7 @@ size_t base_expression_dtype::make_assignment_kernel(
             }
             out->ensure_capacity(offset_out + sizeof(buffered_kernel_extra));
             buffered_kernel_extra *e = out->get_at<buffered_kernel_extra>(offset_out);
-            e->init(buffer_dt);
+            e->init(buffer_dt, kernreq);
             size_t buffer_data_size = e->buffer_data_size;
             // Construct the first kernel (src -> buffer)
             e->first_kernel_offset = sizeof(buffered_kernel_extra);
@@ -240,7 +296,7 @@ size_t base_expression_dtype::make_assignment_kernel(
             buffer_data_offset = ::make_assignment_kernel(out, offset_out + e->first_kernel_offset,
                             buffer_dt, e->buffer_metadata,
                             src_dt, src_metadata,
-                            errmode, ectx);
+                            kernreq, errmode, ectx);
             // Allocate the buffer data
             buffer_data_offset = inc_to_alignment(buffer_data_offset, buffer_dt.get_alignment());
             out->ensure_capacity(offset_out + buffer_data_offset + buffer_data_size);
@@ -252,7 +308,7 @@ size_t base_expression_dtype::make_assignment_kernel(
             return ::make_assignment_kernel(out, offset_out + e->second_kernel_offset,
                             dst_dt, dst_metadata,
                             buffer_dt, e->buffer_metadata,
-                            errmode, ectx);
+                            kernreq, errmode, ectx);
         }
     } else {
         if (dst_dt == get_value_dtype()) {
@@ -260,13 +316,14 @@ size_t base_expression_dtype::make_assignment_kernel(
             const dtype& opdt = get_operand_dtype();
             if (opdt.get_kind() != expression_kind) {
                 // Leaf case, just a single value -> operand kernel
-                return make_operand_to_value_assignment_kernel(out, offset_out, dst_metadata, src_metadata, ectx);
+                return make_operand_to_value_assignment_kernel(out, offset_out,
+                                dst_metadata, src_metadata, kernreq, ectx);
             } else {
                 // Chain case, buffer one segment of the chain
                 const dtype& buffer_dt = static_cast<const base_expression_dtype *>(opdt.extended())->get_value_dtype();
                 out->ensure_capacity(offset_out + sizeof(buffered_kernel_extra));
                 buffered_kernel_extra *e = out->get_at<buffered_kernel_extra>(offset_out);
-                e->init(buffer_dt);
+                e->init(buffer_dt, kernreq);
                 size_t buffer_data_size = e->buffer_data_size;
                 // Construct the first kernel (src -> buffer)
                 e->first_kernel_offset = sizeof(buffered_kernel_extra);
@@ -274,7 +331,7 @@ size_t base_expression_dtype::make_assignment_kernel(
                 buffer_data_offset = ::make_assignment_kernel(out, offset_out + e->first_kernel_offset,
                                 buffer_dt, e->buffer_metadata,
                                 opdt, src_metadata,
-                                errmode, ectx);
+                                kernreq, errmode, ectx);
                 // Allocate the buffer data
                 buffer_data_offset = inc_to_alignment(buffer_data_offset, buffer_dt.get_alignment());
                 out->ensure_capacity(offset_out + buffer_data_offset + buffer_data_size);
@@ -284,7 +341,7 @@ size_t base_expression_dtype::make_assignment_kernel(
                 // Construct the second kernel (buffer -> dst)
                 e->second_kernel_offset = buffer_data_offset + e->buffer_data_size;
                 return make_operand_to_value_assignment_kernel(out, offset_out + e->second_kernel_offset,
-                                dst_metadata, e->buffer_metadata, ectx);
+                                dst_metadata, e->buffer_metadata, kernreq, ectx);
             }
         } else {
             // Put together the src expression chain and the src value dtype
@@ -292,7 +349,7 @@ size_t base_expression_dtype::make_assignment_kernel(
             const dtype& buffer_dt = src_dt.value_dtype();
             out->ensure_capacity(offset_out + sizeof(buffered_kernel_extra));
             buffered_kernel_extra *e = out->get_at<buffered_kernel_extra>(offset_out);
-            e->init(buffer_dt);
+            e->init(buffer_dt, kernreq);
             size_t buffer_data_size = e->buffer_data_size;
             // Construct the first kernel (src -> buffer)
             e->first_kernel_offset = sizeof(buffered_kernel_extra);
@@ -300,7 +357,7 @@ size_t base_expression_dtype::make_assignment_kernel(
             buffer_data_offset = ::make_assignment_kernel(out, offset_out + e->first_kernel_offset,
                             buffer_dt, e->buffer_metadata,
                             src_dt, src_metadata,
-                            errmode, ectx);
+                            kernreq, errmode, ectx);
             // Allocate the buffer data
             buffer_data_offset = inc_to_alignment(buffer_data_offset, buffer_dt.get_alignment());
             out->ensure_capacity(offset_out + buffer_data_offset + buffer_data_size);
@@ -312,7 +369,7 @@ size_t base_expression_dtype::make_assignment_kernel(
             return ::make_assignment_kernel(out, offset_out + e->second_kernel_offset,
                             dst_dt, dst_metadata,
                             buffer_dt, e->buffer_metadata,
-                            errmode, ectx);
+                            kernreq, errmode, ectx);
         }
     }
 }

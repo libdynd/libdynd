@@ -457,7 +457,7 @@ public:
                     assignment_kernel *out, size_t offset_out,
                     const dtype& dst_dt, const char *dst_metadata,
                     const dtype& src_dt, const char *src_metadata,
-                    assign_error_mode errmode,
+                    kernel_request_t kernreq, assign_error_mode errmode,
                     const eval::eval_context *ectx) const;
 
     /**
@@ -550,13 +550,13 @@ public:
      * \param dst_metadata  Metadata for the destination property being written to.
      * \param src_metadata  Metadata for the operand dtype being read from.
      * \param src_elwise_property_index  The index of the property, from get_elwise_property_index().
-     * \param ectx  DyND evaluation contrext.
+     * \param ectx  DyND evaluation context.
      */
     virtual size_t make_elwise_property_getter_kernel(
                     assignment_kernel *out, size_t offset_out,
                     const char *dst_metadata,
                     const char *src_metadata, size_t src_elwise_property_index,
-                    const eval::eval_context *ectx) const;
+                    kernel_request_t kernreq, const eval::eval_context *ectx) const;
 
     /**
      * Returns a kernel to transform instances of the element-wise property
@@ -578,7 +578,7 @@ public:
                     assignment_kernel *out, size_t offset_out,
                     const char *dst_metadata, size_t dst_elwise_property_index,
                     const char *src_metadata,
-                    const eval::eval_context *ectx) const;
+                    kernel_request_t kernreq, const eval::eval_context *ectx) const;
 
     friend void base_dtype_incref(const base_dtype *ed);
     friend void base_dtype_decref(const base_dtype *ed);

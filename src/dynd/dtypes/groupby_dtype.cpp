@@ -249,9 +249,10 @@ namespace {
 size_t groupby_dtype::make_operand_to_value_assignment_kernel(
                 assignment_kernel *out, size_t offset_out,
                 const char *dst_metadata, const char *src_metadata,
-                const eval::eval_context *ectx) const
+                kernel_request_t kernreq, const eval::eval_context *ectx) const
 {
-    out->ensure_capacity_leaf(offset_out + sizeof(groupby_to_value_assign_extra));
+    offset_out = make_kernreq_to_single_kernel_adapter(out, offset_out, kernreq);
+    out->ensure_capacity(offset_out + sizeof(groupby_to_value_assign_extra));
     groupby_to_value_assign_extra *e = out->get_at<groupby_to_value_assign_extra>(offset_out);
     const categorical_dtype *cd = static_cast<const categorical_dtype *>(m_groups_dtype.extended());
     switch (cd->get_category_int_dtype().get_type_id()) {
@@ -291,14 +292,14 @@ size_t groupby_dtype::make_operand_to_value_assignment_kernel(
     return ::make_assignment_kernel(out, offset_out + sizeof(groupby_to_value_assign_extra),
                     dst_element_dtype, dst_element_metadata,
                     src_element_dtype, src_element_metadata,
-                    assign_error_none, ectx);
+                    kernel_request_single, assign_error_none, ectx);
 }
 
 size_t groupby_dtype::make_value_to_operand_assignment_kernel(
                 assignment_kernel *DYND_UNUSED(out),
                 size_t DYND_UNUSED(offset_out),
                 const char *DYND_UNUSED(dst_metadata), const char *DYND_UNUSED(src_metadata),
-                const eval::eval_context *DYND_UNUSED(ectx)) const
+                kernel_request_t DYND_UNUSED(kernreq), const eval::eval_context *DYND_UNUSED(ectx)) const
 {
     throw runtime_error("Cannot assign to a dynd groupby object value");
 }

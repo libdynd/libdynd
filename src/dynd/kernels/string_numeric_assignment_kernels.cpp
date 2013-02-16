@@ -397,7 +397,7 @@ size_t dynd::make_string_to_builtin_assignment_kernel(
                 assignment_kernel *out, size_t offset_out,
                 type_id_t dst_type_id,
                 const dtype& src_string_dt, const char *src_metadata,
-                assign_error_mode errmode,
+                kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *DYND_UNUSED(ectx))
 {
     if (src_string_dt.get_kind() != string_kind) {
@@ -407,6 +407,7 @@ size_t dynd::make_string_to_builtin_assignment_kernel(
     }
 
     if (dst_type_id >= bool_type_id && dst_type_id <= complex_float64_type_id) {
+        offset_out = make_kernreq_to_single_kernel_adapter(out, offset_out, kernreq);
         out->ensure_capacity_leaf(offset_out + sizeof(string_to_builtin_kernel_extra));
         string_to_builtin_kernel_extra *e = out->get_at<string_to_builtin_kernel_extra>(offset_out);
         e->base.set_function<unary_single_operation_t>(static_string_to_builtin_kernels[dst_type_id-bool_type_id]);
@@ -464,7 +465,7 @@ size_t dynd::make_builtin_to_string_assignment_kernel(
                 assignment_kernel *out, size_t offset_out,
                 const dtype& dst_string_dt, const char *dst_metadata,
                 type_id_t src_type_id,
-                assign_error_mode errmode,
+                kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *DYND_UNUSED(ectx))
 {
     if (dst_string_dt.get_kind() != string_kind) {
@@ -474,6 +475,7 @@ size_t dynd::make_builtin_to_string_assignment_kernel(
     }
 
     if (src_type_id >= 0 && src_type_id < builtin_type_id_count) {
+        offset_out = make_kernreq_to_single_kernel_adapter(out, offset_out, kernreq);
         out->ensure_capacity_leaf(offset_out + sizeof(builtin_to_string_kernel_extra));
         builtin_to_string_kernel_extra *e = out->get_at<builtin_to_string_kernel_extra>(offset_out);
         e->base.set_function<unary_single_operation_t>(builtin_to_string_kernel_extra::single);
@@ -506,6 +508,6 @@ void dynd::assign_utf8_string_to_builtin(type_id_t dst_type_id, char *dst,
     make_string_to_builtin_assignment_kernel(&k, 0,
                     dst_type_id,
                     dt, reinterpret_cast<const char *>(&md),
-                    errmode, &eval::default_eval_context);
+                    kernel_request_single, errmode, &eval::default_eval_context);
     k(dst, reinterpret_cast<const char *>(&d));
 }

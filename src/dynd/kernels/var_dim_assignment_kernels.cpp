@@ -34,7 +34,7 @@ namespace {
             var_dim_dtype_data *dst_d = reinterpret_cast<var_dim_dtype_data *>(dst);
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             kernel_data_prefix *echild = &(e + 1)->base;
-            unary_single_operation_t opchild = (e + 1)->base.get_function<unary_single_operation_t>();
+            unary_strided_operation_t opchild = (e + 1)->base.get_function<unary_strided_operation_t>();
             if (dst_d->begin == NULL) {
                 if (e->dst_md->offset != 0) {
                     throw runtime_error("Cannot assign to an uninitialized dynd var_dim which has a non-zero offset");
@@ -48,14 +48,11 @@ namespace {
                             e->dst_target_alignment, &dst_d->begin, &dst_end);
                 dst_d->size = 1;
                 // Copy a single input to the newly allocated element
-                opchild(dst_d->begin, src, echild);
+                opchild(dst_d->begin, 0, src, 0, 1, echild);
             } else {
                 // We're broadcasting elements to an already allocated array segment
                 dst = dst_d->begin + e->dst_md->offset;
-                intptr_t size = dst_d->size, dst_stride = e->dst_md->stride;
-                for (intptr_t i = 0; i < size; ++i, dst += dst_stride) {
-                    opchild(dst, src, echild);
-                }
+                opchild(dst, e->dst_md->stride, src, 0, dst_d->size, echild);
             }
         }
 
@@ -74,7 +71,7 @@ size_t dynd::make_broadcast_to_var_dim_assignment_kernel(
                 assignment_kernel *out, size_t offset_out,
                 const dtype& dst_var_dim_dt, const char *dst_metadata,
                 const dtype& src_dt, const char *src_metadata,
-                assign_error_mode errmode,
+                kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *ectx)
 {
     if (dst_var_dim_dt.get_type_id() != var_dim_type_id) {
@@ -84,6 +81,7 @@ size_t dynd::make_broadcast_to_var_dim_assignment_kernel(
     }
     const var_dim_dtype *dst_vad = static_cast<const var_dim_dtype *>(dst_var_dim_dt.extended());
 
+    offset_out = make_kernreq_to_single_kernel_adapter(out, offset_out, kernreq);
     out->ensure_capacity(offset_out + sizeof(broadcast_to_var_assign_kernel_extra));
     broadcast_to_var_assign_kernel_extra *e = out->get_at<broadcast_to_var_assign_kernel_extra>(offset_out);
     const var_dim_dtype_metadata *dst_md =
@@ -95,7 +93,7 @@ size_t dynd::make_broadcast_to_var_dim_assignment_kernel(
     return ::make_assignment_kernel(out, offset_out + sizeof(broadcast_to_var_assign_kernel_extra),
                     dst_vad->get_element_dtype(), dst_metadata + sizeof(var_dim_dtype_metadata),
                     src_dt, src_metadata,
-                    errmode, ectx);
+                    kernel_request_strided, errmode, ectx);
 }
 
 /////////////////////////////////////////
@@ -116,7 +114,7 @@ namespace {
             const var_dim_dtype_data *src_d = reinterpret_cast<const var_dim_dtype_data *>(src);
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             kernel_data_prefix *echild = &(e + 1)->base;
-            unary_single_operation_t opchild = (e + 1)->base.get_function<unary_single_operation_t>();
+            unary_strided_operation_t opchild = (e + 1)->base.get_function<unary_strided_operation_t>();
             if (dst_d->begin == NULL) {
                 if (e->dst_md->offset != 0) {
                     throw runtime_error("Cannot assign to an uninitialized dynd var_dim which has a non-zero offset");
@@ -136,28 +134,27 @@ namespace {
                     // Copy to the newly allocated element
                     dst = dst_d->begin;
                     src = src_d->begin + e->src_md->offset;
-                    for (intptr_t i = 0; i < dim_size; ++i, dst += dst_stride, src += src_stride) {
-                        opchild(dst, src, echild);
-                    }
+                    opchild(dst, dst_stride, src, src_stride, dim_size, echild);
                 }
             } else {
                 if (src_d->begin == NULL) {
-                    throw runtime_error("Cannot assign an uninitialized dynd var_dim to an initialized one");
+                    throw runtime_error("Cannot assign an uninitialized dynd var_dim"
+                                    " to an initialized one");
                 }
                 intptr_t dst_dim_size = dst_d->size, src_dim_size = src_d->size;
-                intptr_t dst_stride = e->dst_md->stride, src_stride = src_dim_size != 1 ? e->src_md->stride : 0;
+                intptr_t dst_stride = e->dst_md->stride,
+                                src_stride = src_dim_size != 1 ? e->src_md->stride : 0;
                 // Check for a broadcasting error
                 if (src_dim_size != 1 && dst_dim_size != src_dim_size) {
                     stringstream ss;
-                    ss << "error broadcasting input var_dim sized " << src_dim_size << " to output var_dim sized " << dst_dim_size;
+                    ss << "error broadcasting input var_dim sized ";
+                    ss << src_dim_size << " to output var_dim sized " << dst_dim_size;
                     throw broadcast_error(ss.str());
                 }
                 // We're copying/broadcasting elements to an already allocated array segment
                 dst = dst_d->begin + e->dst_md->offset;
                 src = src_d->begin + e->src_md->offset;
-                for (intptr_t i = 0; i < dst_dim_size; ++i, dst += dst_stride, src += src_stride) {
-                    opchild(dst, src, echild);
-                }
+                opchild(dst, dst_stride, src, src_stride, dst_dim_size, echild);
             }
         }
 
@@ -176,7 +173,7 @@ size_t dynd::make_var_dim_assignment_kernel(
                 assignment_kernel *out, size_t offset_out,
                 const dtype& dst_var_dim_dt, const char *dst_metadata,
                 const dtype& src_var_dim_dt, const char *src_metadata,
-                assign_error_mode errmode,
+                kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *ectx)
 {
     if (dst_var_dim_dt.get_type_id() != var_dim_type_id) {
@@ -192,6 +189,7 @@ size_t dynd::make_var_dim_assignment_kernel(
     const var_dim_dtype *dst_vad = static_cast<const var_dim_dtype *>(dst_var_dim_dt.extended());
     const var_dim_dtype *src_vad = static_cast<const var_dim_dtype *>(src_var_dim_dt.extended());
 
+    offset_out = make_kernreq_to_single_kernel_adapter(out, offset_out, kernreq);
     out->ensure_capacity(offset_out + sizeof(var_assign_kernel_extra));
     const var_dim_dtype_metadata *dst_md =
                     reinterpret_cast<const var_dim_dtype_metadata *>(dst_metadata);
@@ -206,7 +204,7 @@ size_t dynd::make_var_dim_assignment_kernel(
     return ::make_assignment_kernel(out, offset_out + sizeof(var_assign_kernel_extra),
                     dst_vad->get_element_dtype(), dst_metadata + sizeof(var_dim_dtype_metadata),
                     src_vad->get_element_dtype(), src_metadata + sizeof(var_dim_dtype_metadata),
-                    errmode, ectx);
+                    kernel_request_strided, errmode, ectx);
 }
 
 /////////////////////////////////////////
@@ -227,7 +225,7 @@ namespace {
             var_dim_dtype_data *dst_d = reinterpret_cast<var_dim_dtype_data *>(dst);
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             kernel_data_prefix *echild = &(e + 1)->base;
-            unary_single_operation_t opchild = (e + 1)->base.get_function<unary_single_operation_t>();
+            unary_strided_operation_t opchild = (e + 1)->base.get_function<unary_strided_operation_t>();
             if (dst_d->begin == NULL) {
                 if (e->dst_md->offset != 0) {
                     throw runtime_error("Cannot assign to an uninitialized dynd var_dim which has a non-zero offset");
@@ -244,9 +242,7 @@ namespace {
                 dst_d->size = dim_size;
                 // Copy to the newly allocated element
                 dst = dst_d->begin;
-                for (intptr_t i = 0; i < dim_size; ++i, dst += dst_stride, src += src_stride) {
-                    opchild(dst, src, echild);
-                }
+                opchild(dst, dst_stride, src, src_stride, dim_size, echild);
             } else {
                 intptr_t dst_dim_size = dst_d->size, src_dim_size = e->src_dim_size;
                 intptr_t dst_stride = e->dst_md->stride, src_stride = e->src_stride;
@@ -258,9 +254,7 @@ namespace {
                 }
                 // We're copying/broadcasting elements to an already allocated array segment
                 dst = dst_d->begin + e->dst_md->offset;
-                for (intptr_t i = 0; i < dst_dim_size; ++i, dst += dst_stride, src += src_stride) {
-                    opchild(dst, src, echild);
-                }
+                opchild(dst, dst_stride, src, src_stride, dst_dim_size, echild);
             }
         }
 
@@ -279,7 +273,7 @@ size_t dynd::make_strided_to_var_dim_assignment_kernel(
                 assignment_kernel *out, size_t offset_out,
                 const dtype& dst_var_dim_dt, const char *dst_metadata,
                 const dtype& src_strided_dim_dt, const char *src_metadata,
-                assign_error_mode errmode,
+                kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *ectx)
 {
     if (dst_var_dim_dt.get_type_id() != var_dim_type_id) {
@@ -289,6 +283,7 @@ size_t dynd::make_strided_to_var_dim_assignment_kernel(
     }
     const var_dim_dtype *dst_vad = static_cast<const var_dim_dtype *>(dst_var_dim_dt.extended());
 
+    offset_out = make_kernreq_to_single_kernel_adapter(out, offset_out, kernreq);
     out->ensure_capacity(offset_out + sizeof(strided_to_var_assign_kernel_extra));
     const var_dim_dtype_metadata *dst_md =
                     reinterpret_cast<const var_dim_dtype_metadata *>(dst_metadata);
@@ -323,7 +318,7 @@ size_t dynd::make_strided_to_var_dim_assignment_kernel(
     return ::make_assignment_kernel(out, offset_out + sizeof(strided_to_var_assign_kernel_extra),
                     dst_vad->get_element_dtype(), dst_metadata + sizeof(var_dim_dtype_metadata),
                     src_element_dt, src_element_metadata,
-                    errmode, ectx);
+                    kernel_request_strided, errmode, ectx);
 }
 
 /////////////////////////////////////////
@@ -343,7 +338,7 @@ namespace {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             const var_dim_dtype_data *src_d = reinterpret_cast<const var_dim_dtype_data *>(src);
             kernel_data_prefix *echild = &(e + 1)->base;
-            unary_single_operation_t opchild = (e + 1)->base.get_function<unary_single_operation_t>();
+            unary_strided_operation_t opchild = (e + 1)->base.get_function<unary_strided_operation_t>();
             if (src_d->begin == NULL) {
                 throw runtime_error("Cannot assign an uninitialized dynd var array to a strided one");
             }
@@ -358,9 +353,7 @@ namespace {
             }
             // Copying/broadcasting elements
             src = src_d->begin + e->src_md->offset;
-            for (intptr_t i = 0; i < dst_dim_size; ++i, dst += dst_stride, src += src_stride) {
-                opchild(dst, src, echild);
-            }
+            opchild(dst, dst_stride, src, src_stride, dst_dim_size, echild);
         }
 
         static void destruct(kernel_data_prefix *extra)
@@ -378,7 +371,7 @@ size_t dynd::make_var_to_strided_dim_assignment_kernel(
                 assignment_kernel *out, size_t offset_out,
                 const dtype& dst_strided_dim_dt, const char *dst_metadata,
                 const dtype& src_var_dim_dt, const char *src_metadata,
-                assign_error_mode errmode,
+                kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *ectx)
 {
     if (src_var_dim_dt.get_type_id() != var_dim_type_id) {
@@ -388,6 +381,7 @@ size_t dynd::make_var_to_strided_dim_assignment_kernel(
     }
     const var_dim_dtype *src_vad = static_cast<const var_dim_dtype *>(src_var_dim_dt.extended());
 
+    offset_out = make_kernreq_to_single_kernel_adapter(out, offset_out, kernreq);
     out->ensure_capacity(offset_out + sizeof(var_to_strided_assign_kernel_extra));
     const var_dim_dtype_metadata *src_md =
                     reinterpret_cast<const var_dim_dtype_metadata *>(src_metadata);
@@ -421,5 +415,5 @@ size_t dynd::make_var_to_strided_dim_assignment_kernel(
     return ::make_assignment_kernel(out, offset_out + sizeof(var_to_strided_assign_kernel_extra),
                     dst_element_dt, dst_element_metadata,
                     src_vad->get_element_dtype(), src_metadata + sizeof(var_dim_dtype_metadata),
-                    errmode, ectx);
+                    kernel_request_strided, errmode, ectx);
 }

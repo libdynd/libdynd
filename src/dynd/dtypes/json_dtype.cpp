@@ -224,7 +224,7 @@ size_t json_dtype::make_assignment_kernel(
                 assignment_kernel *out, size_t offset_out,
                 const dtype& dst_dt, const char *dst_metadata,
                 const dtype& src_dt, const char *src_metadata,
-                assign_error_mode errmode,
+                kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *ectx) const
 {
     if (this == dst_dt.extended()) {
@@ -234,10 +234,11 @@ size_t json_dtype::make_assignment_kernel(
                 return make_blockref_string_assignment_kernel(out, offset_out,
                                 dst_metadata, string_encoding_utf_8,
                                 src_metadata, string_encoding_utf_8,
-                                errmode, ectx);
+                                kernreq, errmode, ectx);
             }
             case string_type_id:
             case fixedstring_type_id: {
+                offset_out = make_kernreq_to_single_kernel_adapter(out, offset_out, kernreq);
                 out->ensure_capacity(offset_out + sizeof(string_to_json_kernel_extra));
                 string_to_json_kernel_extra *e = out->get_at<string_to_json_kernel_extra>(offset_out);
                 e->base.set_function<unary_single_operation_t>(&string_to_json_kernel_extra::single);
@@ -250,14 +251,14 @@ size_t json_dtype::make_assignment_kernel(
                                     dst_metadata, string_encoding_utf_8,
                                     src_metadata,
                                     static_cast<const base_string_dtype *>(src_dt.extended())->get_encoding(),
-                                    errmode, ectx);
+                                    kernel_request_single, errmode, ectx);
                 } else {
                     return make_fixedstring_to_blockref_string_assignment_kernel(
                                     out, offset_out + sizeof(string_to_json_kernel_extra),
                                     dst_metadata, string_encoding_utf_8,
                                     src_dt.get_data_size(),
                                     static_cast<const base_string_dtype *>(src_dt.extended())->get_encoding(),
-                                    errmode, ectx);
+                                    kernel_request_single, errmode, ectx);
                 }
             }
             default: {
@@ -265,12 +266,12 @@ size_t json_dtype::make_assignment_kernel(
                     return src_dt.extended()->make_assignment_kernel(out, offset_out,
                                     dst_dt, dst_metadata,
                                     src_dt, src_metadata,
-                                    errmode, ectx);
+                                    kernreq, errmode, ectx);
                 } else {
                     return make_builtin_to_string_assignment_kernel(out, offset_out,
                                 dst_dt, dst_metadata,
                                 src_dt.get_type_id(),
-                                errmode, ectx);
+                                kernreq, errmode, ectx);
                 }
             }
         }
@@ -279,7 +280,7 @@ size_t json_dtype::make_assignment_kernel(
             return make_string_to_builtin_assignment_kernel(out, offset_out,
                             dst_dt.get_type_id(),
                             src_dt, src_metadata,
-                            errmode, ectx);
+                            kernreq, errmode, ectx);
         } else {
             stringstream ss;
             ss << "Cannot assign from " << src_dt << " to " << dst_dt;

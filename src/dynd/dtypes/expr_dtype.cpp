@@ -67,7 +67,7 @@ size_t expr_dtype::make_operand_to_value_assignment_kernel(
                 assignment_kernel *DYND_UNUSED(out),
                 size_t DYND_UNUSED(offset_out),
                 const char *DYND_UNUSED(dst_metadata), const char *DYND_UNUSED(src_metadata),
-                const eval::eval_context *DYND_UNUSED(ectx)) const
+                kernel_request_t DYND_UNUSED(kernreq), const eval::eval_context *DYND_UNUSED(ectx)) const
 {
     throw runtime_error("TODO: implement expr_dtype::make_operand_to_value_assignment_kernel");
 }
@@ -76,7 +76,7 @@ size_t expr_dtype::make_value_to_operand_assignment_kernel(
                 assignment_kernel *DYND_UNUSED(out),
                 size_t DYND_UNUSED(offset_out),
                 const char *DYND_UNUSED(dst_metadata), const char *DYND_UNUSED(src_metadata),
-                const eval::eval_context *DYND_UNUSED(ectx)) const
+                kernel_request_t DYND_UNUSED(kernreq), const eval::eval_context *DYND_UNUSED(ectx)) const
 {
     throw runtime_error("Cannot assign to a dynd expr object value");
 }

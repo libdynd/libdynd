@@ -107,21 +107,21 @@ dtype convert_dtype::with_replaced_storage_dtype(const dtype& replacement_dtype)
 size_t convert_dtype::make_operand_to_value_assignment_kernel(
                 assignment_kernel *out, size_t offset_out,
                 const char *dst_metadata, const char *src_metadata,
-                const eval::eval_context *ectx) const
+                kernel_request_t kernreq, const eval::eval_context *ectx) const
 {
     return ::make_assignment_kernel(out, offset_out,
                     m_value_dtype, dst_metadata,
                     m_operand_dtype.value_dtype(), src_metadata,
-                    m_errmode_to_value, ectx);
+                    kernreq, m_errmode_to_value, ectx);
 }
 
 size_t convert_dtype::make_value_to_operand_assignment_kernel(
                 assignment_kernel *out, size_t offset_out,
                 const char *dst_metadata, const char *src_metadata,
-                const eval::eval_context *ectx) const
+                kernel_request_t kernreq, const eval::eval_context *ectx) const
 {
     return ::make_assignment_kernel(out, offset_out,
                     m_operand_dtype.value_dtype(), dst_metadata,
                     m_value_dtype, src_metadata,
-                    m_errmode_to_value, ectx);
+                    kernreq, m_errmode_to_value, ectx);
 }

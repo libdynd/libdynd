@@ -61,7 +61,7 @@ public:
                     assignment_kernel *out, size_t offset_out,
                     const dtype& dst_dt, const char *dst_metadata,
                     const dtype& src_dt, const char *src_metadata,
-                    assign_error_mode errmode,
+                    kernel_request_t kernreq, assign_error_mode errmode,
                     const eval::eval_context *ectx) const;
 
     void get_dynamic_dtype_properties(const std::pair<std::string, gfunc::callable> **out_properties, size_t *out_count) const;
@@ -76,12 +76,12 @@ public:
                     assignment_kernel *out, size_t offset_out,
                     const char *dst_metadata,
                     const char *src_metadata, size_t src_elwise_property_index,
-                    const eval::eval_context *ectx) const;
+                    kernel_request_t kernreq, const eval::eval_context *ectx) const;
     size_t make_elwise_property_setter_kernel(
                     assignment_kernel *out, size_t offset_out,
                     const char *dst_metadata, size_t dst_elwise_property_index,
                     const char *src_metadata,
-                    const eval::eval_context *ectx) const;
+                    kernel_request_t kernreq, const eval::eval_context *ectx) const;
 };
 
 inline dtype make_date_dtype() {

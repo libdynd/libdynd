@@ -70,8 +70,10 @@ size_t dynd::make_blockref_bytes_assignment_kernel(
                 assignment_kernel *out, size_t offset_out,
                 size_t dst_alignment, const char *dst_metadata,
                 size_t src_alignment, const char *src_metadata,
-                const eval::eval_context *DYND_UNUSED(ectx))
+                kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx))
 {
+    // Adapt the incoming request to a 'single' kernel
+    offset_out = make_kernreq_to_single_kernel_adapter(out, offset_out, kernreq);
     out->ensure_capacity_leaf(offset_out + sizeof(blockref_bytes_kernel_extra));
     blockref_bytes_kernel_extra *e = out->get_at<blockref_bytes_kernel_extra>(offset_out);
     e->base.set_function<unary_single_operation_t>(&blockref_bytes_kernel_extra::single);
@@ -128,8 +130,10 @@ size_t dynd::make_fixedbytes_to_blockref_bytes_assignment_kernel(
                 assignment_kernel *out, size_t offset_out,
                 size_t dst_alignment, const char *dst_metadata,
                 intptr_t src_data_size, size_t src_alignment,
-                const eval::eval_context *DYND_UNUSED(ectx))
+                kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx))
 {
+    // Adapt the incoming request to a 'single' kernel
+    offset_out = make_kernreq_to_single_kernel_adapter(out, offset_out, kernreq);
     out->ensure_capacity_leaf(offset_out + sizeof(fixedbytes_to_blockref_bytes_kernel_extra));
     fixedbytes_to_blockref_bytes_kernel_extra *e = out->get_at<fixedbytes_to_blockref_bytes_kernel_extra>(offset_out);
     e->base.set_function<unary_single_operation_t>(&fixedbytes_to_blockref_bytes_kernel_extra::single);

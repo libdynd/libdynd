@@ -45,7 +45,7 @@ namespace {
 size_t dynd::make_string_to_date_assignment_kernel(
                 assignment_kernel *out, size_t offset_out,
                 const dtype& src_string_dt, const char *src_metadata,
-                assign_error_mode errmode,
+                kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *DYND_UNUSED(ectx))
 {
     if (src_string_dt.get_kind() != string_kind) {
@@ -54,6 +54,7 @@ size_t dynd::make_string_to_date_assignment_kernel(
         throw runtime_error(ss.str());
     }
 
+    offset_out = make_kernreq_to_single_kernel_adapter(out, offset_out, kernreq);
     out->ensure_capacity(offset_out + sizeof(string_to_date_kernel_extra));
     string_to_date_kernel_extra *e = out->get_at<string_to_date_kernel_extra>(offset_out);
     e->base.set_function<unary_single_operation_t>(&string_to_date_kernel_extra::single);
@@ -106,7 +107,7 @@ namespace {
 size_t dynd::make_date_to_string_assignment_kernel(
                 assignment_kernel *out, size_t offset_out,
                 const dtype& dst_string_dt, const char *dst_metadata,
-                assign_error_mode errmode,
+                kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *DYND_UNUSED(ectx))
 {
     if (dst_string_dt.get_kind() != string_kind) {
@@ -115,6 +116,7 @@ size_t dynd::make_date_to_string_assignment_kernel(
         throw runtime_error(ss.str());
     }
 
+    offset_out = make_kernreq_to_single_kernel_adapter(out, offset_out, kernreq);
     out->ensure_capacity(offset_out + sizeof(date_to_string_kernel_extra));
     date_to_string_kernel_extra *e = out->get_at<date_to_string_kernel_extra>(offset_out);
     e->base.set_function<unary_single_operation_t>(&date_to_string_kernel_extra::single);

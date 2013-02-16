@@ -20,7 +20,7 @@ size_t make_struct_identical_assignment_kernel(
                 assignment_kernel *out, size_t offset_out,
                 const dtype& val_struct_dt,
                 const char *dst_metadata, const char *src_metadata,
-                assign_error_mode errmode,
+                kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *ectx);
 
 /**
@@ -34,7 +34,7 @@ size_t make_struct_assignment_kernel(
                 assignment_kernel *out, size_t offset_out,
                 const dtype& dst_struct_dt, const char *dst_metadata,
                 const dtype& src_struct_dt, const char *src_metadata,
-                assign_error_mode errmode,
+                kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *ectx);
 
 } // namespace dynd

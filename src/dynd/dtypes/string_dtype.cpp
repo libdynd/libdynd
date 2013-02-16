@@ -222,7 +222,7 @@ size_t string_dtype::make_assignment_kernel(
                 assignment_kernel *out, size_t offset_out,
                 const dtype& dst_dt, const char *dst_metadata,
                 const dtype& src_dt, const char *src_metadata,
-                assign_error_mode errmode,
+                kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *ectx) const
 {
     if (this == dst_dt.extended()) {
@@ -231,26 +231,26 @@ size_t string_dtype::make_assignment_kernel(
                 return make_blockref_string_assignment_kernel(out, offset_out,
                                 dst_metadata, get_encoding(),
                                 src_metadata, static_cast<const base_string_dtype *>(src_dt.extended())->get_encoding(),
-                                errmode, ectx);
+                                kernreq, errmode, ectx);
             }
             case fixedstring_type_id: {
                 return make_fixedstring_to_blockref_string_assignment_kernel(out, offset_out,
                                 dst_metadata, get_encoding(),
                                 src_dt.get_data_size(),
                                 static_cast<const base_string_dtype *>(src_dt.extended())->get_encoding(),
-                                errmode, ectx);
+                                kernreq, errmode, ectx);
             }
             default: {
                 if (!src_dt.is_builtin()) {
                     return src_dt.extended()->make_assignment_kernel(out, offset_out,
                                     dst_dt, dst_metadata,
                                     src_dt, src_metadata,
-                                    errmode, ectx);
+                                    kernreq, errmode, ectx);
                 } else {
                     return make_builtin_to_string_assignment_kernel(out, offset_out,
                                 dst_dt, dst_metadata,
                                 src_dt.get_type_id(),
-                                errmode, ectx);
+                                kernreq, errmode, ectx);
                 }
             }
         }
@@ -259,7 +259,7 @@ size_t string_dtype::make_assignment_kernel(
             return make_string_to_builtin_assignment_kernel(out, offset_out,
                             dst_dt.get_type_id(),
                             src_dt, src_metadata,
-                            errmode, ectx);
+                            kernreq, errmode, ectx);
         } else {
             stringstream ss;
             ss << "Cannot assign from " << src_dt << " to " << dst_dt;

@@ -110,7 +110,7 @@ public:
                     assignment_kernel *out, size_t offset_out,
                     const dtype& dst_dt, const char *dst_metadata,
                     const dtype& src_dt, const char *src_metadata,
-                    assign_error_mode errmode,
+                    kernel_request_t kernreq, assign_error_mode errmode,
                     const eval::eval_context *ectx) const;
 
     void foreach_leading(char *data, const char *metadata, foreach_fn_t callback, void *callback_data) const;

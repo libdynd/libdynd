@@ -18,7 +18,7 @@ size_t make_blockref_bytes_assignment_kernel(
                 assignment_kernel *out, size_t offset_out,
                 size_t dst_alignment, const char *dst_metadata,
                 size_t src_alignment, const char *src_metadata,
-                const eval::eval_context *ectx);
+                kernel_request_t kernreq, const eval::eval_context *ectx);
 
 /**
  * Makes a kernel which copies fixed-size bytes to bytes.
@@ -27,7 +27,7 @@ size_t make_fixedbytes_to_blockref_bytes_assignment_kernel(
                 assignment_kernel *out, size_t offset_out,
                 size_t dst_alignment, const char *dst_metadata,
                 intptr_t src_element_size, size_t src_alignment,
-                const eval::eval_context *ectx);
+                kernel_request_t kernreq, const eval::eval_context *ectx);
 
 } // namespace dynd
 

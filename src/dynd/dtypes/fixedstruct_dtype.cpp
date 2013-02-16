@@ -373,7 +373,7 @@ size_t fixedstruct_dtype::make_assignment_kernel(
                 assignment_kernel *out, size_t offset_out,
                 const dtype& dst_dt, const char *dst_metadata,
                 const dtype& src_dt, const char *src_metadata,
-                assign_error_mode errmode,
+                kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *ectx) const
 {
     if (this == dst_dt.extended()) {
@@ -381,17 +381,17 @@ size_t fixedstruct_dtype::make_assignment_kernel(
             return make_struct_identical_assignment_kernel(out, offset_out,
                             dst_dt,
                             dst_metadata, src_metadata,
-                            errmode, ectx);
+                            kernreq, errmode, ectx);
         } else if (src_dt.get_kind() == struct_kind) {
             return make_struct_assignment_kernel(out, offset_out,
                             dst_dt, dst_metadata,
                             src_dt, src_metadata,
-                            errmode, ectx);
+                            kernreq, errmode, ectx);
         } else if (!src_dt.is_builtin()) {
             return src_dt.extended()->make_assignment_kernel(out, offset_out,
                             dst_dt, dst_metadata,
                             src_dt, src_metadata,
-                            errmode, ectx);
+                            kernreq, errmode, ectx);
         }
     }
 

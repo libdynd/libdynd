@@ -72,7 +72,7 @@ size_t dynd::make_struct_identical_assignment_kernel(
                 assignment_kernel *out, size_t offset_out,
                 const dtype& val_struct_dt,
                 const char *dst_metadata, const char *src_metadata,
-                assign_error_mode errmode,
+                kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *ectx)
 {
     if (val_struct_dt.get_kind() != struct_kind) {
@@ -84,8 +84,11 @@ size_t dynd::make_struct_identical_assignment_kernel(
                     val_struct_dt.get_memory_management() == pod_memory_management) {
         // For POD fixedstructs, get a trivial memory copy kernel
         return make_pod_dtype_assignment_kernel(out, offset_out,
-                        val_struct_dt.get_data_size(), val_struct_dt.get_alignment());
+                        val_struct_dt.get_data_size(), val_struct_dt.get_alignment(),
+                        kernreq);
     }
+
+    offset_out = make_kernreq_to_single_kernel_adapter(out, offset_out, kernreq);
 
     const base_struct_dtype *sd = static_cast<const base_struct_dtype *>(val_struct_dt.extended());
     size_t field_count = sd->get_field_count();
@@ -115,7 +118,7 @@ size_t dynd::make_struct_identical_assignment_kernel(
         current_offset = ::make_assignment_kernel(out, current_offset,
                         sd->get_field_types()[i], dst_metadata + sd->get_metadata_offsets()[i],
                         sd->get_field_types()[i], src_metadata + sd->get_metadata_offsets()[i],
-                        errmode, ectx);
+                        kernel_request_single, errmode, ectx);
     }
     return current_offset;
 }
@@ -127,7 +130,7 @@ size_t dynd::make_struct_assignment_kernel(
                 assignment_kernel *out, size_t offset_out,
                 const dtype& dst_struct_dt, const char *dst_metadata,
                 const dtype& src_struct_dt, const char *src_metadata,
-                assign_error_mode errmode,
+                kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *ectx)
 {
     if (src_struct_dt.get_kind() != struct_kind) {
@@ -150,6 +153,8 @@ size_t dynd::make_struct_assignment_kernel(
         ss << " because they have different numbers of fields";
         throw runtime_error(ss.str());
     }
+
+    offset_out = make_kernreq_to_single_kernel_adapter(out, offset_out, kernreq);
 
     size_t extra_size = sizeof(struct_kernel_extra) +
                     field_count * sizeof(struct_kernel_extra::field_items);
@@ -198,7 +203,7 @@ size_t dynd::make_struct_assignment_kernel(
         current_offset = ::make_assignment_kernel(out, current_offset,
                         dst_field_types[i], dst_metadata + dst_metadata_offsets[i],
                         src_field_types[i_src], src_metadata + src_metadata_offsets[i_src],
-                        errmode, ectx);
+                        kernel_request_single, errmode, ectx);
     }
     return current_offset;
 }

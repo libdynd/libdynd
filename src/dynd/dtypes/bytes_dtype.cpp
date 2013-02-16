@@ -104,7 +104,7 @@ size_t bytes_dtype::make_assignment_kernel(
                 assignment_kernel *out, size_t offset_out,
                 const dtype& dst_dt, const char *dst_metadata,
                 const dtype& src_dt, const char *src_metadata,
-                assign_error_mode errmode,
+                kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *ectx) const
 {
     if (this == dst_dt.extended()) {
@@ -113,20 +113,20 @@ size_t bytes_dtype::make_assignment_kernel(
                 return make_blockref_bytes_assignment_kernel(out, offset_out,
                                 get_alignment(), dst_metadata,
                                 src_dt.get_alignment(), src_metadata,
-                                ectx);
+                                kernreq, ectx);
             }
             case fixedbytes_type_id: {
                 return make_fixedbytes_to_blockref_bytes_assignment_kernel(out, offset_out,
                                 get_alignment(), dst_metadata,
                                 src_dt.get_data_size(), src_dt.get_alignment(),
-                                ectx);
+                                kernreq, ectx);
             }
             default: {
                 if (!src_dt.is_builtin()) {
                     src_dt.extended()->make_assignment_kernel(out, offset_out,
                                     dst_dt, dst_metadata,
                                     src_dt, src_metadata,
-                                    errmode, ectx);
+                                    kernreq, errmode, ectx);
                 }
                 break;
             }

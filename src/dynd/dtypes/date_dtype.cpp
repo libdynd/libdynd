@@ -135,7 +135,7 @@ size_t date_dtype::make_assignment_kernel(
                 assignment_kernel *out, size_t offset_out,
                 const dtype& dst_dt, const char *dst_metadata,
                 const dtype& src_dt, const char *src_metadata,
-                assign_error_mode errmode,
+                kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *ectx) const
 {
     if (this == dst_dt.extended()) {
@@ -143,31 +143,31 @@ size_t date_dtype::make_assignment_kernel(
             // Assignment from strings
             return make_string_to_date_assignment_kernel(out, offset_out,
                             src_dt, src_metadata,
-                            errmode, ectx);
+                            kernreq, errmode, ectx);
         } else if (src_dt.get_kind() == struct_kind) {
             // Convert to struct using the "struct" property
             return ::make_assignment_kernel(out, offset_out,
                 make_property_dtype(dst_dt, "struct"), dst_metadata,
                 src_dt, src_metadata,
-                errmode, ectx);
+                kernreq, errmode, ectx);
         } else if (!src_dt.is_builtin()) {
             return src_dt.extended()->make_assignment_kernel(out, offset_out,
                             dst_dt, dst_metadata,
                             src_dt, src_metadata,
-                            errmode, ectx);
+                            kernreq, errmode, ectx);
         }
     } else {
         if (dst_dt.get_kind() == string_kind) {
             // Assignment to strings
             return make_date_to_string_assignment_kernel(out, offset_out,
                             dst_dt, dst_metadata,
-                            errmode, ectx);
+                            kernreq, errmode, ectx);
         } else if (dst_dt.get_kind() == struct_kind) {
             // Convert to struct using the "struct" property
             return ::make_assignment_kernel(out, offset_out,
                 dst_dt, dst_metadata,
                 make_property_dtype(src_dt, "struct"), src_metadata,
-                errmode, ectx);
+                kernreq, errmode, ectx);
         }
         // TODO
     }
@@ -284,7 +284,7 @@ static ndobject function_ndo_strftime(const ndobject& n, const std::string& form
         make_assignment_kernel(&k, 0,
                         iter.get_uniform_dtype<1>().value_dtype(), NULL,
                         iter.get_uniform_dtype<1>(), iter.metadata<1>(),
-                        assign_error_default, &eval::default_eval_context);
+                        kernel_request_single, assign_error_default, &eval::default_eval_context);
         use_kernel = true;
     }
     int32_t date;
@@ -354,7 +354,7 @@ static ndobject function_ndo_replace(const ndobject& n, int32_t year, int32_t mo
         make_assignment_kernel(&k, 0,
                         iter.get_uniform_dtype<1>().value_dtype(), NULL,
                         iter.get_uniform_dtype<1>(), iter.metadata<1>(),
-                        assign_error_default, &eval::default_eval_context);
+                        kernel_request_single, assign_error_default, &eval::default_eval_context);
         use_kernel = true;
     }
     int32_t date;
@@ -578,8 +578,9 @@ size_t date_dtype::make_elwise_property_getter_kernel(
                 assignment_kernel *out, size_t offset_out,
                 const char *DYND_UNUSED(dst_metadata),
                 const char *DYND_UNUSED(src_metadata), size_t src_property_index,
-                const eval::eval_context *DYND_UNUSED(ectx)) const
+                kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx)) const
 {
+    offset_out = make_kernreq_to_single_kernel_adapter(out, offset_out, kernreq);
     kernel_data_prefix *e = out->get_at<kernel_data_prefix>(offset_out);
     // TODO: Use an enum for the property index
     switch (src_property_index) {
@@ -612,8 +613,9 @@ size_t date_dtype::make_elwise_property_setter_kernel(
                 assignment_kernel *out, size_t offset_out,
                 const char *DYND_UNUSED(dst_metadata), size_t dst_property_index,
                 const char *DYND_UNUSED(src_metadata),
-                const eval::eval_context *DYND_UNUSED(ectx)) const
+                kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx)) const
 {
+    offset_out = make_kernreq_to_single_kernel_adapter(out, offset_out, kernreq);
     kernel_data_prefix *e = out->get_at<kernel_data_prefix>(offset_out);
     // TODO: Use an enum for the property index
     switch (dst_property_index) {

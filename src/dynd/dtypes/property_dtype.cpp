@@ -123,7 +123,7 @@ bool property_dtype::operator==(const base_dtype& rhs) const
 size_t property_dtype::make_operand_to_value_assignment_kernel(
                 assignment_kernel *out, size_t offset_out,
                 const char *dst_metadata, const char *src_metadata,
-                const eval::eval_context *ectx) const
+                kernel_request_t kernreq, const eval::eval_context *ectx) const
 {
     if (!m_reversed_property) {
         if (m_readable) {
@@ -131,7 +131,7 @@ size_t property_dtype::make_operand_to_value_assignment_kernel(
                             out, offset_out,
                             dst_metadata,
                             src_metadata, m_property_index,
-                            ectx);
+                            kernreq, ectx);
         } else {
             stringstream ss;
             ss << "cannot read from property \"" << m_property_name << "\"";
@@ -144,7 +144,7 @@ size_t property_dtype::make_operand_to_value_assignment_kernel(
                             out, offset_out,
                             dst_metadata, m_property_index,
                             src_metadata,
-                            ectx);
+                            kernreq, ectx);
         } else {
             stringstream ss;
             ss << "cannot write to property \"" << m_property_name << "\"";
@@ -157,7 +157,7 @@ size_t property_dtype::make_operand_to_value_assignment_kernel(
 size_t property_dtype::make_value_to_operand_assignment_kernel(
                 assignment_kernel *out, size_t offset_out,
                 const char *dst_metadata, const char *src_metadata,
-                const eval::eval_context *ectx) const
+                kernel_request_t kernreq, const eval::eval_context *ectx) const
 {
     if (!m_reversed_property) {
         if (m_readable) {
@@ -165,7 +165,7 @@ size_t property_dtype::make_value_to_operand_assignment_kernel(
                             out, offset_out,
                             dst_metadata, m_property_index,
                             src_metadata,
-                            ectx);
+                            kernreq, ectx);
         } else {
             stringstream ss;
             ss << "cannot write to property \"" << m_property_name << "\"";
@@ -178,7 +178,7 @@ size_t property_dtype::make_value_to_operand_assignment_kernel(
                             out, offset_out,
                             dst_metadata,
                             src_metadata, m_property_index,
-                            ectx);
+                            kernreq, ectx);
         } else {
             stringstream ss;
             ss << "cannot read from property \"" << m_property_name << "\"";

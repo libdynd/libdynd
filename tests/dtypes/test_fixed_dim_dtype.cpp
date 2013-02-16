@@ -117,7 +117,8 @@ TEST(FixedArrayDType, AssignKernel) {
     b = 9.0;
     EXPECT_EQ(fixed_dim_type_id, a.get_dtype().get_type_id());
     make_assignment_kernel(&k, 0, a.get_dtype(), a.get_ndo_meta(),
-                    b.get_dtype(), b.get_ndo_meta(), assign_error_default, &eval::default_eval_context);
+                    b.get_dtype(), b.get_ndo_meta(),
+                    kernel_request_single, assign_error_default, &eval::default_eval_context);
     k(a.get_readwrite_originptr(), b.get_readonly_originptr());
     EXPECT_EQ(9, a.at(0).as<int>());
     EXPECT_EQ(9, a.at(1).as<int>());
@@ -131,7 +132,8 @@ TEST(FixedArrayDType, AssignKernel) {
     EXPECT_EQ(fixed_dim_type_id, a.get_dtype().get_type_id());
     EXPECT_EQ(fixed_dim_type_id, b.get_dtype().get_type_id());
     make_assignment_kernel(&k, 0, a.get_dtype(), a.get_ndo_meta(),
-                    b.get_dtype(), b.get_ndo_meta(), assign_error_default, &eval::default_eval_context);
+                    b.get_dtype(), b.get_ndo_meta(),
+                    kernel_request_single, assign_error_default, &eval::default_eval_context);
     k(a.get_readwrite_originptr(), b.get_readonly_originptr());
     EXPECT_EQ(3, a.at(0).as<int>());
     EXPECT_EQ(5, a.at(1).as<int>());
@@ -143,7 +145,8 @@ TEST(FixedArrayDType, AssignKernel) {
     b = parse_json("3, int32", "[3, 5, 7]");
     EXPECT_EQ(fixed_dim_type_id, b.get_dtype().get_type_id());
     EXPECT_THROW(make_assignment_kernel(&k, 0, a.get_dtype(), a.get_ndo_meta(),
-                    b.get_dtype(), b.get_ndo_meta(), assign_error_default, &eval::default_eval_context),
+                    b.get_dtype(), b.get_ndo_meta(),
+                    kernel_request_single, assign_error_default, &eval::default_eval_context),
                 broadcast_error);
 }
 
@@ -160,7 +163,8 @@ TEST(FixedArrayDType, AssignFixedStridedKernel) {
     EXPECT_EQ(fixed_dim_type_id, a.get_dtype().get_type_id());
     EXPECT_EQ(strided_dim_type_id, b.get_dtype().get_type_id());
     make_assignment_kernel(&k, 0, a.get_dtype(), a.get_ndo_meta(),
-                    b.get_dtype(), b.get_ndo_meta(), assign_error_default, &eval::default_eval_context);
+                    b.get_dtype(), b.get_ndo_meta(),
+                    kernel_request_single, assign_error_default, &eval::default_eval_context);
     k(a.get_readwrite_originptr(), b.get_readonly_originptr());
     EXPECT_EQ(3, a.at(0).as<int>());
     EXPECT_EQ(5, a.at(1).as<int>());
@@ -174,7 +178,8 @@ TEST(FixedArrayDType, AssignFixedStridedKernel) {
     EXPECT_EQ(fixed_dim_type_id, a.get_dtype().get_type_id());
     EXPECT_EQ(strided_dim_type_id, b.get_dtype().get_type_id());
     make_assignment_kernel(&k, 0, a.get_dtype(), a.get_ndo_meta(),
-                    b.get_dtype(), b.get_ndo_meta(), assign_error_default, &eval::default_eval_context);
+                    b.get_dtype(), b.get_ndo_meta(),
+                    kernel_request_single, assign_error_default, &eval::default_eval_context);
     k(a.get_readwrite_originptr(), b.get_readonly_originptr());
     EXPECT_EQ(9, a.at(0).as<int>());
     EXPECT_EQ(9, a.at(1).as<int>());
@@ -188,7 +193,8 @@ TEST(FixedArrayDType, AssignFixedStridedKernel) {
     EXPECT_EQ(strided_dim_type_id, a.get_dtype().get_type_id());
     EXPECT_EQ(fixed_dim_type_id, b.get_dtype().get_type_id());
     make_assignment_kernel(&k, 0, a.get_dtype(), a.get_ndo_meta(),
-                    b.get_dtype(), b.get_ndo_meta(), assign_error_default, &eval::default_eval_context);
+                    b.get_dtype(), b.get_ndo_meta(),
+                    kernel_request_single, assign_error_default, &eval::default_eval_context);
     k(a.get_readwrite_originptr(), b.get_readonly_originptr());
     EXPECT_EQ(3, a.at(0).as<int>());
     EXPECT_EQ(5, a.at(1).as<int>());
@@ -202,7 +208,8 @@ TEST(FixedArrayDType, AssignFixedStridedKernel) {
     EXPECT_EQ(strided_dim_type_id, a.get_dtype().get_type_id());
     EXPECT_EQ(fixed_dim_type_id, b.get_dtype().get_type_id());
     make_assignment_kernel(&k, 0, a.get_dtype(), a.get_ndo_meta(),
-                    b.get_dtype(), b.get_ndo_meta(), assign_error_default, &eval::default_eval_context);
+                    b.get_dtype(), b.get_ndo_meta(),
+                    kernel_request_single, assign_error_default, &eval::default_eval_context);
     k(a.get_readwrite_originptr(), b.get_readonly_originptr());
     EXPECT_EQ(9, a.at(0).as<int>());
     EXPECT_EQ(9, a.at(1).as<int>());

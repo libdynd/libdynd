@@ -452,7 +452,7 @@ size_t strided_dim_dtype::make_assignment_kernel(
                 assignment_kernel *out, size_t offset_out,
                 const dtype& dst_dt, const char *dst_metadata,
                 const dtype& src_dt, const char *src_metadata,
-                assign_error_mode errmode,
+                kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *ectx) const
 {
     if (this == dst_dt.extended()) {
@@ -460,7 +460,19 @@ size_t strided_dim_dtype::make_assignment_kernel(
         const strided_dim_dtype_metadata *dst_md =
                         reinterpret_cast<const strided_dim_dtype_metadata *>(dst_metadata);
         strided_assign_kernel_extra *e = out->get_at<strided_assign_kernel_extra>(offset_out);
-        e->base.set_function<unary_single_operation_t>(&strided_assign_kernel_extra::single);
+        switch (kernreq) {
+            case kernel_request_single:
+                e->base.set_function<unary_single_operation_t>(&strided_assign_kernel_extra::single);
+                break;
+            case kernel_request_strided:
+                e->base.set_function<unary_strided_operation_t>(&strided_assign_kernel_extra::strided);
+                break;
+            default: {
+                stringstream ss;
+                ss << "strided_dim_dtype::make_assignment_kernel: unrecognized request " << (int)kernreq;
+                throw runtime_error(ss.str());
+            }
+        }
         e->base.destructor = strided_assign_kernel_extra::destruct;
         if (src_dt.get_undim() < dst_dt.get_undim()) {
             // If the src has fewer dimensions, broadcast it across this one
@@ -470,7 +482,7 @@ size_t strided_dim_dtype::make_assignment_kernel(
             return ::make_assignment_kernel(out, offset_out + sizeof(strided_assign_kernel_extra),
                             m_element_dtype, dst_metadata + sizeof(strided_dim_dtype_metadata),
                             src_dt, src_metadata,
-                            errmode, ectx);
+                            kernel_request_strided, errmode, ectx);
         } else if (src_dt.get_type_id() == strided_dim_type_id) {
             // strided_dim -> strided_dim
             const strided_dim_dtype *src_sad = static_cast<const strided_dim_dtype *>(src_dt.extended());
@@ -488,7 +500,7 @@ size_t strided_dim_dtype::make_assignment_kernel(
             return ::make_assignment_kernel(out, offset_out + sizeof(strided_assign_kernel_extra),
                             m_element_dtype, dst_metadata + sizeof(strided_dim_dtype_metadata),
                             src_sad->get_element_dtype(), src_metadata + sizeof(strided_dim_dtype_metadata),
-                            errmode, ectx);
+                            kernel_request_strided, errmode, ectx);
         } else if (src_dt.get_type_id() == fixed_dim_type_id) {
             // fixed_array -> strided_dim
             const fixed_dim_dtype *src_fad = static_cast<const fixed_dim_dtype *>(src_dt.extended());
@@ -505,13 +517,13 @@ size_t strided_dim_dtype::make_assignment_kernel(
             return ::make_assignment_kernel(out, offset_out + sizeof(strided_assign_kernel_extra),
                             m_element_dtype, dst_metadata + sizeof(strided_dim_dtype_metadata),
                             src_fad->get_element_dtype(), src_metadata,
-                            errmode, ectx);
+                            kernel_request_strided, errmode, ectx);
         } else if (!src_dt.is_builtin()) {
             // Give the src dtype a chance to make a kernel
             return src_dt.extended()->make_assignment_kernel(out, offset_out,
                             dst_dt, dst_metadata,
                             src_dt, src_metadata,
-                            errmode, ectx);
+                            kernreq, errmode, ectx);
         } else {
             stringstream ss;
             ss << "Cannot assign from " << src_dt << " to " << dst_dt;

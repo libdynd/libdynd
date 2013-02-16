@@ -101,27 +101,31 @@ dtype byteswap_dtype::with_replaced_storage_dtype(const dtype& replacement_dtype
 size_t byteswap_dtype::make_operand_to_value_assignment_kernel(
                 assignment_kernel *out, size_t offset_out,
                 const char *DYND_UNUSED(dst_metadata), const char *DYND_UNUSED(src_metadata),
-                const eval::eval_context *DYND_UNUSED(ectx)) const
+                kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx)) const
 {
     if(m_value_dtype.get_kind() != complex_kind) {
         return make_byteswap_assignment_function(out, offset_out,
-                        m_value_dtype.get_data_size(), m_value_dtype.get_alignment());
+                        m_value_dtype.get_data_size(), m_value_dtype.get_alignment(),
+                        kernreq);
     } else {
         return make_pairwise_byteswap_assignment_function(out, offset_out,
-                        m_value_dtype.get_data_size(), m_value_dtype.get_alignment());
+                        m_value_dtype.get_data_size(), m_value_dtype.get_alignment(),
+                        kernreq);
     }
 }
 
 size_t byteswap_dtype::make_value_to_operand_assignment_kernel(
                 assignment_kernel *out, size_t offset_out,
                 const char *DYND_UNUSED(dst_metadata), const char *DYND_UNUSED(src_metadata),
-                const eval::eval_context *DYND_UNUSED(ectx)) const
+                kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx)) const
 {
     if(m_value_dtype.get_kind() != complex_kind) {
         return make_byteswap_assignment_function(out, offset_out,
-                        m_value_dtype.get_data_size(), m_value_dtype.get_alignment());
+                        m_value_dtype.get_data_size(), m_value_dtype.get_alignment(),
+                        kernreq);
     } else {
         return make_pairwise_byteswap_assignment_function(out, offset_out,
-                        m_value_dtype.get_data_size(), m_value_dtype.get_alignment());
+                        m_value_dtype.get_data_size(), m_value_dtype.get_alignment(),
+                        kernreq);
     }
 }

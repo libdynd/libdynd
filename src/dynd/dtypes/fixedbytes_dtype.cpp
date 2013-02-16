@@ -92,7 +92,7 @@ size_t fixedbytes_dtype::make_assignment_kernel(
                 assignment_kernel *out, size_t offset_out,
                 const dtype& dst_dt, const char *dst_metadata,
                 const dtype& src_dt, const char *src_metadata,
-                assign_error_mode errmode,
+                kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *ectx) const
 {
     if (this == dst_dt.extended()) {
@@ -103,13 +103,14 @@ size_t fixedbytes_dtype::make_assignment_kernel(
                     throw runtime_error("cannot assign to a fixedbytes dtype of a different size");
                 }
                 return ::make_pod_dtype_assignment_kernel(out, offset_out,
-                                get_data_size(), std::min(get_alignment(), src_fs->get_alignment()));
+                                get_data_size(), std::min(get_alignment(), src_fs->get_alignment()),
+                                kernreq);
             }
             default: {
                 return src_dt.extended()->make_assignment_kernel(out, offset_out,
                                 dst_dt, dst_metadata,
                                 src_dt, src_metadata,
-                                errmode, ectx);
+                                kernreq, errmode, ectx);
             }
         }
     } else {

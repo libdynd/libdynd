@@ -55,11 +55,11 @@ public:
     size_t make_operand_to_value_assignment_kernel(
                     assignment_kernel *out, size_t offset_out,
                     const char *dst_metadata, const char *src_metadata,
-                    const eval::eval_context *ectx) const;
+                    kernel_request_t kernreq, const eval::eval_context *ectx) const;
     size_t make_value_to_operand_assignment_kernel(
                     assignment_kernel *out, size_t offset_out,
                     const char *dst_metadata, const char *src_metadata,
-                    const eval::eval_context *ectx) const;
+                    kernel_request_t kernreq, const eval::eval_context *ectx) const;
 };
 
 /**

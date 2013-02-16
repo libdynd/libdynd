@@ -172,7 +172,8 @@ static ndobject make_sorted_categories(const set<const char *, cmp>& uniques, co
     ndobject categories = make_strided_ndobject(uniques.size(), udtype);
     assignment_kernel k;
     make_assignment_kernel(&k, 0, udtype, categories.get_ndo_meta() + sizeof(strided_dim_dtype_metadata),
-                    udtype, metadata, assign_error_default, &eval::default_eval_context);
+                    udtype, metadata, kernel_request_single,
+                    assign_error_default, &eval::default_eval_context);
 
     intptr_t stride = reinterpret_cast<const strided_dim_dtype_metadata *>(categories.get_ndo_meta())->stride;
     char *dst_ptr = categories.get_readwrite_originptr();
@@ -360,7 +361,7 @@ ndobject categorical_dtype::get_categories() const
     assignment_kernel k;
     ::make_assignment_kernel(&k, 0, iter.get_uniform_dtype(), iter.metadata(),
                     m_category_dtype, get_category_metadata(),
-                    assign_error_default, &eval::default_eval_context);
+                    kernel_request_single, assign_error_default, &eval::default_eval_context);
     if (!iter.empty()) {
         uint32_t i = 0;
         do {
@@ -391,14 +392,14 @@ size_t categorical_dtype::make_assignment_kernel(
                 assignment_kernel *out, size_t offset_out,
                 const dtype& dst_dt, const char *dst_metadata,
                 const dtype& src_dt, const char *src_metadata,
-                assign_error_mode errmode,
+                kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *ectx) const
 {
     if (this == dst_dt.extended()) {
         if (this == src_dt.extended()) {
             // When assigning identical types, just use a POD copy
             return make_pod_dtype_assignment_kernel(out, offset_out,
-                            get_data_size(), get_alignment());
+                            get_data_size(), get_alignment(), kernreq);
         }
         // try to assign from another categorical dtype if it can be mapped
         else if (src_dt.get_type_id() == categorical_type_id) {
@@ -408,17 +409,22 @@ size_t categorical_dtype::make_assignment_kernel(
         }
         // assign from the same category value dtype
         else if (src_dt == m_category_dtype) {
+            offset_out = make_kernreq_to_single_kernel_adapter(out, offset_out, kernreq);
             out->ensure_capacity_leaf(offset_out + sizeof(category_to_categorical_kernel_extra));
-            category_to_categorical_kernel_extra *e = out->get_at<category_to_categorical_kernel_extra>(offset_out);
+            category_to_categorical_kernel_extra *e =
+                            out->get_at<category_to_categorical_kernel_extra>(offset_out);
             switch (m_category_int_dtype.get_type_id()) {
                 case uint8_type_id:
-                    e->base.set_function<unary_single_operation_t>(&category_to_categorical_kernel_extra::single_uint8);
+                    e->base.set_function<unary_single_operation_t>(
+                                    &category_to_categorical_kernel_extra::single_uint8);
                     break;
                 case uint16_type_id:
-                    e->base.set_function<unary_single_operation_t>(&category_to_categorical_kernel_extra::single_uint16);
+                    e->base.set_function<unary_single_operation_t>(
+                                    &category_to_categorical_kernel_extra::single_uint16);
                     break;
                 case uint32_type_id:
-                    e->base.set_function<unary_single_operation_t>(&category_to_categorical_kernel_extra::single_uint32);
+                    e->base.set_function<unary_single_operation_t>(
+                                    &category_to_categorical_kernel_extra::single_uint32);
                     break;
                 default:
                     throw runtime_error("internal error in categorical_dtype::make_assignment_kernel");
@@ -435,17 +441,18 @@ size_t categorical_dtype::make_assignment_kernel(
             return src_cvt_dt.extended()->make_assignment_kernel(out, offset_out,
                             dst_dt, dst_metadata,
                             src_cvt_dt, src_metadata,
-                            errmode, ectx);
+                            kernreq, errmode, ectx);
         } else {
             // Let the src_dt handle it
             return src_dt.extended()->make_assignment_kernel(out, offset_out,
                             dst_dt, dst_metadata,
                             src_dt, src_metadata,
-                            errmode, ectx);
+                            kernreq, errmode, ectx);
         }
     }
     else {
         if (dst_dt.value_dtype().get_type_id() != categorical_type_id) {
+            offset_out = make_kernreq_to_single_kernel_adapter(out, offset_out, kernreq);
             out->ensure_capacity(offset_out + sizeof(categorical_to_other_kernel_extra));
             categorical_to_other_kernel_extra *e = out->get_at<categorical_to_other_kernel_extra>(offset_out);
             switch (m_category_int_dtype.get_type_id()) {
@@ -467,7 +474,7 @@ size_t categorical_dtype::make_assignment_kernel(
             return ::make_assignment_kernel(out, offset_out + sizeof(categorical_to_other_kernel_extra),
                             dst_dt, dst_metadata,
                             get_category_dtype(), get_category_metadata(),
-                            errmode, ectx);
+                            kernel_request_single, errmode, ectx);
         }
         else {
             stringstream ss;

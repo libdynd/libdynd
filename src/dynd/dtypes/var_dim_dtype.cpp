@@ -531,7 +531,7 @@ size_t var_dim_dtype::make_assignment_kernel(
                 assignment_kernel *out, size_t offset_out,
                 const dtype& dst_dt, const char *dst_metadata,
                 const dtype& src_dt, const char *src_metadata,
-                assign_error_mode errmode,
+                kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *ectx) const
 {
     if (this == dst_dt.extended()) {
@@ -540,20 +540,20 @@ size_t var_dim_dtype::make_assignment_kernel(
             return make_broadcast_to_var_dim_assignment_kernel(out, offset_out,
                             dst_dt, dst_metadata,
                             src_dt, src_metadata,
-                            errmode, ectx);
+                            kernreq, errmode, ectx);
         } else if (src_dt.get_type_id() == var_dim_type_id) {
             // var_dim to var_dim
             return make_var_dim_assignment_kernel(out, offset_out,
                             dst_dt, dst_metadata,
                             src_dt, src_metadata,
-                            errmode, ectx);
+                            kernreq, errmode, ectx);
         } else if (src_dt.get_type_id() == strided_dim_type_id ||
                         src_dt.get_type_id() == fixed_dim_type_id) {
             // strided_dim to var_dim
             return make_strided_to_var_dim_assignment_kernel(out, offset_out,
                             dst_dt, dst_metadata,
                             src_dt, src_metadata,
-                            errmode, ectx);
+                            kernreq, errmode, ectx);
         } else {
             stringstream ss;
             ss << "Cannot assign from " << src_dt << " to " << dst_dt;
@@ -568,7 +568,7 @@ size_t var_dim_dtype::make_assignment_kernel(
             return make_var_to_strided_dim_assignment_kernel(out, offset_out,
                             dst_dt, dst_metadata,
                             src_dt, src_metadata,
-                            errmode, ectx);
+                            kernreq, errmode, ectx);
         } else {
             stringstream ss;
             ss << "Cannot assign from " << src_dt << " to " << dst_dt;

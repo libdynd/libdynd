@@ -47,7 +47,8 @@ inline uint64_t byteswap_value(uint64_t value) {
  */
 size_t make_byteswap_assignment_function(
                 assignment_kernel *out, size_t offset_out,
-                intptr_t data_size, intptr_t data_alignment);
+                intptr_t data_size, intptr_t data_alignment,
+                kernel_request_t kernreq);
 
 /**
  * Creates an assignment kernel which does a byteswap
@@ -55,7 +56,8 @@ size_t make_byteswap_assignment_function(
  */
 size_t make_pairwise_byteswap_assignment_function(
                 assignment_kernel *out, size_t offset_out,
-                intptr_t data_size, intptr_t data_alignment);
+                intptr_t data_size, intptr_t data_alignment,
+                kernel_request_t kernreq);
 
 } // namespace dynd
 

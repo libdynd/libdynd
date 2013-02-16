@@ -209,7 +209,7 @@ size_t base_dtype::make_assignment_kernel(
                 size_t DYND_UNUSED(offset_out),
                 const dtype& dst_dt, const char *DYND_UNUSED(dst_metadata),
                 const dtype& src_dt, const char *DYND_UNUSED(src_metadata),
-                assign_error_mode DYND_UNUSED(errmode),
+                kernel_request_t DYND_UNUSED(kernreq), assign_error_mode DYND_UNUSED(errmode),
                 const eval::eval_context *DYND_UNUSED(ectx)) const
 {
     stringstream ss;
@@ -316,7 +316,7 @@ size_t base_dtype::make_elwise_property_getter_kernel(
                 const char *DYND_UNUSED(dst_metadata),
                 const char *DYND_UNUSED(src_metadata),
                 size_t DYND_UNUSED(src_elwise_property_index),
-                const eval::eval_context *DYND_UNUSED(ectx)) const
+                kernel_request_t DYND_UNUSED(kernreq), const eval::eval_context *DYND_UNUSED(ectx)) const
 {
     std::stringstream ss;
     ss << "the dtype " << dtype(this, true);
@@ -330,7 +330,7 @@ size_t base_dtype::make_elwise_property_setter_kernel(
                 const char *DYND_UNUSED(dst_metadata),
                 size_t DYND_UNUSED(dst_elwise_property_index),
                 const char *DYND_UNUSED(src_metadata),
-                const eval::eval_context *DYND_UNUSED(ectx)) const
+                kernel_request_t DYND_UNUSED(kernreq), const eval::eval_context *DYND_UNUSED(ectx)) const
 {
     std::stringstream ss;
     ss << "the dtype " << dtype(this, true);

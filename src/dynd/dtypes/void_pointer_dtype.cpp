@@ -52,18 +52,19 @@ size_t void_pointer_dtype::make_assignment_kernel(
                 assignment_kernel *out, size_t offset_out,
                 const dtype& dst_dt, const char *dst_metadata,
                 const dtype& src_dt, const char *src_metadata,
-                assign_error_mode errmode,
+                kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *ectx) const
 {
     if (this == dst_dt.extended()) {
         if (src_dt.get_type_id() == void_pointer_type_id) {
             return ::make_pod_dtype_assignment_kernel(out, offset_out,
-                    get_data_size(), get_alignment());
+                    get_data_size(), get_alignment(),
+                    kernreq);
         } else if (!src_dt.is_builtin()) {
             src_dt.extended()->make_assignment_kernel(out, offset_out,
                             dst_dt, dst_metadata,
                             src_dt, src_metadata,
-                            errmode, ectx);
+                            kernreq, errmode, ectx);
         }
     }
 

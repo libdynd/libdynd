@@ -63,9 +63,10 @@ size_t dynd::make_fixedstring_assignment_kernel(
                 assignment_kernel *out, size_t offset_out,
                 intptr_t dst_data_size, string_encoding_t dst_encoding,
                 intptr_t src_data_size, string_encoding_t src_encoding,
-                assign_error_mode errmode,
+                kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *DYND_UNUSED(ectx))
 {
+    offset_out = make_kernreq_to_single_kernel_adapter(out, offset_out, kernreq);
     out->ensure_capacity_leaf(offset_out + sizeof(fixedstring_assign_kernel_extra));
     fixedstring_assign_kernel_extra *e = out->get_at<fixedstring_assign_kernel_extra>(offset_out);
     e->base.set_function<unary_single_operation_t>(&fixedstring_assign_kernel_extra::single);
@@ -160,9 +161,10 @@ size_t dynd::make_blockref_string_assignment_kernel(
                 assignment_kernel *out, size_t offset_out,
                 const char *dst_metadata, string_encoding_t dst_encoding,
                 const char *src_metadata, string_encoding_t src_encoding,
-                assign_error_mode errmode,
+                kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *DYND_UNUSED(ectx))
 {
+    offset_out = make_kernreq_to_single_kernel_adapter(out, offset_out, kernreq);
     out->ensure_capacity_leaf(offset_out + sizeof(blockref_string_assign_kernel_extra));
     blockref_string_assign_kernel_extra *e = out->get_at<blockref_string_assign_kernel_extra>(offset_out);
     e->base.set_function<unary_single_operation_t>(&blockref_string_assign_kernel_extra::single);
@@ -249,9 +251,10 @@ size_t dynd::make_fixedstring_to_blockref_string_assignment_kernel(
                 assignment_kernel *out, size_t offset_out,
                 const char *dst_metadata, string_encoding_t dst_encoding,
                 intptr_t src_element_size, string_encoding_t src_encoding,
-                assign_error_mode errmode,
+                kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *DYND_UNUSED(ectx))
 {
+    offset_out = make_kernreq_to_single_kernel_adapter(out, offset_out, kernreq);
     out->ensure_capacity_leaf(offset_out + sizeof(blockref_string_assign_kernel_extra));
     fixedstring_to_blockref_string_assign_kernel_extra *e =
                     out->get_at<fixedstring_to_blockref_string_assign_kernel_extra>(offset_out);
@@ -309,9 +312,10 @@ size_t dynd::make_blockref_string_to_fixedstring_assignment_kernel(
                 assignment_kernel *out, size_t offset_out,
                 intptr_t dst_data_size, string_encoding_t dst_encoding,
                 string_encoding_t src_encoding,
-                assign_error_mode errmode,
+                kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *DYND_UNUSED(ectx))
 {
+    offset_out = make_kernreq_to_single_kernel_adapter(out, offset_out, kernreq);
     out->ensure_capacity_leaf(offset_out + sizeof(blockref_string_to_fixedstring_assign_kernel_extra));
     blockref_string_to_fixedstring_assign_kernel_extra *e = out->get_at<blockref_string_to_fixedstring_assign_kernel_extra>(offset_out);
     e->base.set_function<unary_single_operation_t>(&blockref_string_to_fixedstring_assign_kernel_extra::single);

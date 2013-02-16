@@ -176,7 +176,9 @@ void dynd::dtype_copy(const dtype& dt,
     } else {
         assignment_kernel k;
         make_assignment_kernel(&k, 0, dt, dst_metadata,
-                        dt, src_metadata, assign_error_none, &eval::default_eval_context);
+                        dt, src_metadata,
+                        kernel_request_single,
+                        assign_error_none, &eval::default_eval_context);
         k(dst_data, src_data);
     }
 }
@@ -203,6 +205,7 @@ void dynd::dtype_assign(const dtype& dst_dt, const char *dst_metadata, char *dst
     assignment_kernel k;
     make_assignment_kernel(&k, 0, dst_dt, dst_metadata,
                     src_dt, src_metadata,
+                    kernel_request_single,
                     errmode, ectx);
     k(dst_data, src_data);
 }
