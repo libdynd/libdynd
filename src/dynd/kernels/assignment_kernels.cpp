@@ -145,7 +145,7 @@ size_t dynd::make_pod_dtype_assignment_kernel(
                 kernel_request_t kernreq)
 {
     bool single = (kernreq == kernel_request_single);
-    if (!single == kernreq != kernel_request_strided) {
+    if (!single && kernreq != kernel_request_strided) {
         stringstream ss;
         ss << "make_pod_dtype_assignment_kernel: unrecognized request " << (int)kernreq;
         throw runtime_error(ss.str());
