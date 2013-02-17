@@ -346,7 +346,7 @@ public:
      * Indexes into the dtype. This function returns the dtype which results
      * from applying the same index to an ndarray of this dtype.
      *
-     * \param ndim         The number of elements in the 'indices' array
+     * \param nindices     The number of elements in the 'indices' array
      * \param indices      The indices to apply.
      */
     dtype at_array(int nindices, const irange *indices) const;

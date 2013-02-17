@@ -903,7 +903,7 @@ ndobject eval_raw_copy(const dtype& dt, const char *metadata, const char *data);
  * of the one given, but replacing the
  *
  * \param rhs  The array whose shape and memory layout to emulate.
- * \param dt   The uniform dtype of the new array.
+ * \param uniform_dtype   The uniform dtype of the new array.
  */
 ndobject empty_like(const ndobject& rhs, const dtype& uniform_dtype);
 

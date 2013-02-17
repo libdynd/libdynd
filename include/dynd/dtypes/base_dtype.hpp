@@ -406,14 +406,15 @@ public:
      * Constructs the ndobject metadata for this dtype, copying everything exactly from
      * input metadata for the same dtype.
      *
-     * \param out_metadata  The new metadata memory which is constructed.
-     * \param in_metadata   Existing metadata memory from which to copy.
+     * \param dst_metadata  The new metadata memory which is constructed.
+     * \param src_metadata   Existing metadata memory from which to copy.
      * \param embedded_reference  For references which are NULL, add this reference in the output.
      *                            A NULL means the data was embedded in the original ndobject, so
      *                            when putting it in a new ndobject, need to hold a reference to
      *                            that memory.
      */
-    virtual void metadata_copy_construct(char *dst_metadata, const char *src_metadata, memory_block_data *embedded_reference) const;
+    virtual void metadata_copy_construct(char *dst_metadata, const char *src_metadata,
+                    memory_block_data *embedded_reference) const;
     /** Destructs any references or other state contained in the ndobjects' metdata */
     virtual void metadata_destruct(char *metadata) const;
     /**

@@ -231,8 +231,8 @@ size_t make_pod_dtype_assignment_kernel(
  *
  * \param out  The hierarchical assignment kernel being constructed.
  * \param offset_out  The offset within 'out'.
- * \param dst_dt  The destination dynd type id.
- * \param src_dt  The srouce dynd type id.
+ * \param dst_type_id  The destination dynd type id.
+ * \param src_type_id  The srouce dynd type id.
  * \param kernreq  What kind of kernel must be placed in 'out'.
  * \param errmode  The error mode to use for assignments.
  */

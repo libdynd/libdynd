@@ -15,25 +15,24 @@ include_directories(thirdparty/blosc/blosc)
 add_subdirectory(thirdparty/datetime)
 include_directories(thirdparty/datetime/include)
 
-# If we're using gcc, check the version
-if (CMAKE_COMPILER_IS_GNUCXX)
-    execute_process(COMMAND ${CMAKE_C_COMPILER} -dumpversion
-                    OUTPUT_VARIABLE GCC_VERSION)
-endif()
-
 if(WIN32)
     # Treat warnings as errors (-WX does this)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -WX -EHsc")
 else()
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -fomit-frame-pointer -fstrict-aliasing -fPIC -Wall -Wextra -Werror")
-    if (CMAKE_COMPILER_IS_GNUCXX)
+    if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
         # The '-fmax-errors' flag was first supported in gcc 4.6
         # Use the c++0x flag only in 4.6 and later
-        if (NOT GCC_VERSION VERSION_LESS 4.6)
+        if (NOT "${CMAKE_CXX_COMPILER_VERSION}" VERSION_LESS "4.6")
             set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -fmax-errors=20")
         endif()
-    else()
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -ferror-limit=20")
+    elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ferror-limit=20")
+        if ("${CMAKE_CXX_COMPILER_VERSION}" VERSION_LESS "3.2")
+            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
+        else()
+            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wdocumentation")
+        endif()
     endif()
 endif()
 
