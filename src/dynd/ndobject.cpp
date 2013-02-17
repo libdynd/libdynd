@@ -447,7 +447,7 @@ ndobject ndobject::storage() const
     }
 }
 
-ndobject ndobject::at_array(size_t nindices, const irange *indices) const
+ndobject ndobject::at_array(size_t nindices, const irange *indices, bool collapse_leading) const
 {
     if (is_scalar()) {
         if (nindices != 0) {
@@ -456,7 +456,8 @@ ndobject ndobject::at_array(size_t nindices, const irange *indices) const
         return *this;
     } else {
         dtype this_dt(get_ndo()->m_dtype, true);
-        dtype dt = get_ndo()->m_dtype->apply_linear_index(nindices, indices, 0, this_dt, true);
+        dtype dt = get_ndo()->m_dtype->apply_linear_index(nindices, indices,
+                        0, this_dt, collapse_leading);
         ndobject result;
         if (!dt.is_builtin()) {
             result.set(make_ndobject_memory_block(dt.extended()->get_metadata_size()));
@@ -477,7 +478,8 @@ ndobject ndobject::at_array(size_t nindices, const irange *indices) const
         intptr_t offset = get_ndo()->m_dtype->apply_linear_index(nindices, indices,
                         get_ndo_meta(), dt, result.get_ndo_meta(),
                         m_memblock.get(), 0, this_dt,
-                        true, &result.get_ndo()->m_data_pointer, &result.get_ndo()->m_data_reference);
+                        collapse_leading,
+                        &result.get_ndo()->m_data_pointer, &result.get_ndo()->m_data_reference);
         result.get_ndo()->m_data_pointer += offset;
         result.get_ndo()->m_flags = get_ndo()->m_flags;
         return result;

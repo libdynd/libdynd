@@ -378,8 +378,16 @@ public:
 
     /**
      * General irange-based indexing operation.
+     *
+     * \param nindices  The number of 'irange' indices.
+     * \param indices  The array of indices to apply.
+     * \param collapse_leading  If true, collapses the leading dimension
+     *                          to simpler dtypes where possible. If false,
+     *                          does not. If you want to read values, typically
+     *                          use true, if you want to write values, typically
+     *                          use false.
      */
-    ndobject at_array(size_t nindices, const irange *indices) const;
+    ndobject at_array(size_t nindices, const irange *indices, bool collapse_leading = true) const;
 
     /**
      * The 'at' function is used for indexing. Overloading operator[] isn't
