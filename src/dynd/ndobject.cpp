@@ -1167,6 +1167,7 @@ ndobject dynd::groupby(const dynd::ndobject& data_values, const dynd::ndobject& 
     return result;
 }
 
+/*
 static ndobject follow_ndobject_pointers(const ndobject& n)
 {
     // Follow the pointers to eliminate them
@@ -1195,4 +1196,5 @@ static ndobject follow_ndobject_pointers(const ndobject& n)
     result.get_ndo()->m_flags = flags;
     return result;
 }
+*/
 
