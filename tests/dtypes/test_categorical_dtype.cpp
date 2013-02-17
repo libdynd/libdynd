@@ -214,10 +214,6 @@ TEST(CategoricalDType, AssignFixedString) {
     cat.at(0).vals() = "zzz";
     EXPECT_THROW(a.at(0).vals() = cat.at(0), std::runtime_error);
 
-    // TODO implicit conversion?
-    //a(0).vals() = string("bar");
-    //cout << a << endl;
-
     ndobject tmp = make_strided_ndobject(3, cat.get_dtype().at(0));
     tmp.val_assign(a);
     EXPECT_EQ("baz", tmp.at(0).as<string>());
@@ -225,6 +221,8 @@ TEST(CategoricalDType, AssignFixedString) {
     EXPECT_EQ("baz", tmp.at(2).as<string>());
     tmp.at(0).vals() = a.at(1);
     EXPECT_EQ("bar", tmp.at(0).as<string>());
+    tmp.at(0).vals() = "foo";
+    EXPECT_EQ("foo", tmp.at(0).as<string>());
 }
 
 TEST(CategoricalDType, AssignInt) {
