@@ -52,13 +52,13 @@ TEST(NDObjectArange, CastScalars) {
     ndobject a;
 
     a = arange(4).cast_scalars(make_dtype<int32_t>());
-    a = a.vals();
+    a = a.eval();
     EXPECT_EQ(0, a.at(0).as<int32_t>());
     EXPECT_EQ(1, a.at(1).as<int32_t>());
     EXPECT_EQ(2, a.at(2).as<int32_t>());
     EXPECT_EQ(3, a.at(3).as<int32_t>());
     a = a.cast_scalars(make_dtype<double>());
-    a = a.vals();
+    a = a.eval();
     EXPECT_EQ(0., a.at(0).as<double>());
     EXPECT_EQ(1., a.at(1).as<double>());
     EXPECT_EQ(2., a.at(2).as<double>());

@@ -610,19 +610,46 @@ const gfunc::callable& ndobject::find_dynamic_function(const char *function_name
     throw runtime_error(ss.str());
 }
 
-ndobject ndobject::eval_immutable(const eval::eval_context *ectx) const
+ndobject ndobject::eval(const eval::eval_context *ectx) const
 {
-    if (get_access_flags()&immutable_access_flag) {
+    const dtype& current_dtype = get_dtype();
+    if (!current_dtype.is_expression()) {
         return *this;
     } else {
         // Create a canonical dtype for the result
-        const dtype& current_dtype = get_dtype();
         const dtype& dt = current_dtype.get_canonical_dtype();
         size_t ndim = current_dtype.get_undim();
         dimvector shape(ndim);
         get_shape(shape.get());
         ndobject result(make_ndobject_memory_block(dt, ndim, shape.get()));
-        // TODO: Reorder strides of strided dimensions in a KEEPORDER fashion
+        if (dt.get_undim() > 1) {
+            // Reorder strides of output strided dimensions in a KEEPORDER fashion
+            dt.extended()->reorder_default_constructed_strides(result.get_ndo_meta(),
+                            get_dtype(), get_ndo_meta());
+        }
+        result.val_assign(*this, assign_error_default, ectx);
+        return result;
+    }
+}
+
+ndobject ndobject::eval_immutable(const eval::eval_context *ectx) const
+{
+    const dtype& current_dtype = get_dtype();
+    if ((get_access_flags()&immutable_access_flag) &&
+                    !current_dtype.is_expression()) {
+        return *this;
+    } else {
+        // Create a canonical dtype for the result
+        const dtype& dt = current_dtype.get_canonical_dtype();
+        size_t ndim = current_dtype.get_undim();
+        dimvector shape(ndim);
+        get_shape(shape.get());
+        ndobject result(make_ndobject_memory_block(dt, ndim, shape.get()));
+        if (dt.get_undim() > 1) {
+            // Reorder strides of output strided dimensions in a KEEPORDER fashion
+            dt.extended()->reorder_default_constructed_strides(result.get_ndo_meta(),
+                            get_dtype(), get_ndo_meta());
+        }
         result.val_assign(*this, assign_error_default, ectx);
         result.get_ndo()->m_flags = immutable_access_flag|read_access_flag;
         return result;
@@ -638,7 +665,11 @@ ndobject ndobject::eval_copy(const eval::eval_context *ectx,
     dimvector shape(ndim);
     get_shape(shape.get());
     ndobject result(make_ndobject_memory_block(dt, ndim, shape.get()));
-    // TODO: Reorder strides of strided dimensions in a KEEPORDER fashion
+    if (dt.get_undim() > 1) {
+        // Reorder strides of output strided dimensions in a KEEPORDER fashion
+        dt.extended()->reorder_default_constructed_strides(result.get_ndo_meta(),
+                        get_dtype(), get_ndo_meta());
+    }
     result.val_assign(*this, assign_error_default, ectx);
     result.get_ndo()->m_flags = access_flags;
     return result;
@@ -888,7 +919,7 @@ std::string dynd::detail::ndobject_as_string(const ndobject& lhs, assign_error_m
 
     ndobject temp = lhs;
     if (temp.get_dtype().get_kind() != string_kind) {
-        temp = temp.cast_scalars(make_string_dtype(string_encoding_utf_8)).vals();
+        temp = temp.cast_scalars(make_string_dtype(string_encoding_utf_8)).eval();
     }
     const base_string_dtype *esd = static_cast<const base_string_dtype *>(temp.get_dtype().extended());
     return esd->get_utf8_string(temp.get_ndo_meta(), temp.get_ndo()->m_data_pointer, assign_error_none);
@@ -935,7 +966,7 @@ std::ostream& dynd::operator<<(std::ostream& o, const ndobject& rhs)
 {
     if (!rhs.empty()) {
         o << "ndobject(";
-        ndobject v = rhs.vals();
+        ndobject v = rhs.eval();
         if (v.get_ndo()->is_builtin_dtype()) {
             print_builtin_scalar(v.get_ndo()->get_builtin_type_id(), o, v.get_ndo()->m_data_pointer);
         } else {
@@ -1163,30 +1194,3 @@ static ndobject follow_ndobject_pointers(const ndobject& n)
     return result;
 }
 
-ndobject_vals::operator ndobject() const
-{
-    const dtype& current_dtype = m_arr.get_dtype();
-
-    if (!current_dtype.is_expression()) {
-        if (current_dtype.get_type_id() != pointer_type_id) {
-            return m_arr;
-        } else {
-            return follow_ndobject_pointers(m_arr);
-        }
-    } else {
-        // If there is any expression in the dtype, make a copy using the canonical dtype
-        const dtype& dt = current_dtype.get_canonical_dtype();
-        size_t undim = current_dtype.get_undim();
-        dimvector shape(undim);
-        m_arr.get_shape(shape.get());
-        ndobject result(make_ndobject_memory_block(dt, undim, shape.get()));
-        if (!dt.is_builtin()) {
-            // Reorder strides of output strided dimensions in a KEEPORDER fashion
-            dt.extended()->reorder_default_constructed_strides(result.get_ndo_meta(),
-                            m_arr.get_dtype(), m_arr.get_ndo_meta());
-                            
-        }
-        result.val_assign(m_arr);
-        return result;
-    }
-}

@@ -49,7 +49,7 @@ static void json_as_buffer(const ndobject& json, ndobject& out_tmp_ref, const ch
             switch (sdt->get_encoding()) {
                 case string_encoding_ascii:
                 case string_encoding_utf_8:
-                    out_tmp_ref = json.vals();
+                    out_tmp_ref = json.eval();
                     // The data is already UTF-8, so use the buffer directly
                     sdt->get_string_range(&begin, &end,
                                     out_tmp_ref.get_ndo_meta(), out_tmp_ref.get_readonly_originptr());
@@ -57,7 +57,7 @@ static void json_as_buffer(const ndobject& json, ndobject& out_tmp_ref, const ch
                 default: {
                     // The data needs to be converted to UTF-8 before parsing
                     dtype utf8_dt = make_string_dtype(string_encoding_utf_8);
-                    out_tmp_ref = json.cast_scalars(utf8_dt).vals();
+                    out_tmp_ref = json.cast_scalars(utf8_dt).eval();
                     sdt = static_cast<const base_string_dtype *>(utf8_dt.extended());
                     sdt->get_string_range(&begin, &end,
                                     out_tmp_ref.get_ndo_meta(), out_tmp_ref.get_readonly_originptr());
@@ -67,7 +67,7 @@ static void json_as_buffer(const ndobject& json, ndobject& out_tmp_ref, const ch
             break;
         }
         case bytes_kind: {
-            out_tmp_ref = json.vals();
+            out_tmp_ref = json.eval();
             const base_bytes_dtype *bdt = static_cast<const base_bytes_dtype *>(json_dtype.extended());
             bdt->get_bytes_range(&begin, &end,
                             out_tmp_ref.get_ndo_meta(), out_tmp_ref.get_readonly_originptr());

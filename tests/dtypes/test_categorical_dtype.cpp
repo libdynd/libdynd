@@ -182,7 +182,7 @@ TEST(CategoricalDType, ValuesLonger) {
     int a_count = sizeof(a_uints) / sizeof(a_uints[0]);
 
     dtype dt = make_categorical_dtype(cats_vals);
-    ndobject a = ndobject(a_vals).cast_udtype(dt).vals();
+    ndobject a = ndobject(a_vals).cast_udtype(dt).eval();
     ndobject a_view = a.p("category_ints");
 
     // Check that the categories got the right values
@@ -211,7 +211,7 @@ TEST(CategoricalDType, AssignFixedString) {
     a.at(0).vals() = cat.at(2);
     EXPECT_EQ("baz", a.at(0).as<string>());
 
-    cat.at(0).vals() = string("zzz");
+    cat.at(0).vals() = "zzz";
     EXPECT_THROW(a.at(0).vals() = cat.at(0), std::runtime_error);
 
     // TODO implicit conversion?
@@ -296,7 +296,7 @@ TEST(CategoricalDType, AssignFromOther) {
     ndobject a = ndobject(a_values).cast_udtype(cd);
     EXPECT_EQ(make_strided_dim_dtype(make_convert_dtype(cd, make_dtype<int16_t>())),
                     a.get_dtype());
-    a = a.vals();
+    a = a.eval();
     EXPECT_EQ(make_strided_dim_dtype(cd), a.get_dtype());
     EXPECT_EQ(6,    a.at(0).as<int>());
     EXPECT_EQ(3,    a.at(1).as<int>());

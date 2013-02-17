@@ -58,7 +58,7 @@ TEST(ByteswapDType, Basic) {
     value64 = 0x112D4454FB210940LL;
     a = make_scalar_ndobject(make_byteswap_dtype<double>(), (char *)&value64);
     EXPECT_EQ(3.14159265358979, a.as<double>());
-    a = a.vals();
+    a = a.eval();
     EXPECT_EQ(3.14159265358979, a.as<double>());
 
     uint32_t value32_pair[2] = {0xDA0F4940, 0xC1B88FD3};

@@ -317,7 +317,7 @@ ndobject dynd::format_json(const ndobject& n)
     if (!n.get_dtype().is_expression()) {
         ::format_json(out, n.get_dtype(), n.get_ndo_meta(), n.get_readonly_originptr());
     } else {
-        ndobject tmp = n.vals();
+        ndobject tmp = n.eval();
         ::format_json(out, tmp.get_dtype(), tmp.get_ndo_meta(), tmp.get_readonly_originptr());
     }
 

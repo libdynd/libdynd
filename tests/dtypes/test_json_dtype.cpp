@@ -30,9 +30,9 @@ TEST(JSONDType, Create) {
 TEST(JSONDType, Validation) {
     ndobject a;
 
-    a = ndobject("[1,2,3]").cast_scalars(make_json_dtype()).vals();
+    a = ndobject("[1,2,3]").cast_scalars(make_json_dtype()).eval();
     EXPECT_EQ(make_json_dtype(), a.get_dtype());
     EXPECT_EQ("[1,2,3]", a.as<string>());
 
-    EXPECT_THROW((a = ndobject("[1,2,3]#").cast_scalars(make_json_dtype()).vals()), runtime_error);
+    EXPECT_THROW(ndobject("[1,2,3]#").cast_scalars(make_json_dtype()).eval(), runtime_error);
 }

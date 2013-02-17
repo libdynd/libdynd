@@ -56,9 +56,9 @@ TEST(JSONFormatter, String) {
     EXPECT_EQ("\"testing string\"", format_json(n).as<string>());
     n = " \" \\ / \b \f \n \r \t ";
     EXPECT_EQ("\" \\\" \\\\ \\/ \\b \\f \\n \\r \\t \"", format_json(n).as<string>());
-    n = ndobject("testing string").cast_scalars(make_string_dtype(string_encoding_utf_16)).vals();
+    n = ndobject("testing string").cast_scalars(make_string_dtype(string_encoding_utf_16)).eval();
     EXPECT_EQ("\"testing string\"", format_json(n).as<string>());
-    n = ndobject("testing string").cast_scalars(make_string_dtype(string_encoding_utf_32)).vals();
+    n = ndobject("testing string").cast_scalars(make_string_dtype(string_encoding_utf_32)).eval();
     EXPECT_EQ("\"testing string\"", format_json(n).as<string>());
 }
 

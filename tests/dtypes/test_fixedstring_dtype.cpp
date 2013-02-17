@@ -56,17 +56,17 @@ TEST(FixedstringDType, Basic) {
     ndobject a;
 
     // Trivial string going in and out of the system
-    a = std::string("abcdefg");
+    a = "abcdefg";
     EXPECT_EQ(make_string_dtype(string_encoding_utf_8), a.get_dtype());
     // Convert to a fixedstring dtype for testing
-    a = a.cast_scalars(make_fixedstring_dtype(7, string_encoding_utf_8)).vals();
-    EXPECT_EQ(std::string("abcdefg"), a.as<std::string>());
+    a = a.cast_scalars(make_fixedstring_dtype(7, string_encoding_utf_8)).eval();
+    EXPECT_EQ("abcdefg", a.as<string>());
 
     a = a.cast_scalars(make_fixedstring_dtype(7, string_encoding_utf_16));
     EXPECT_EQ(make_convert_dtype(make_fixedstring_dtype(7, string_encoding_utf_16),
                     make_fixedstring_dtype(7, string_encoding_utf_8)),
                 a.get_dtype());
-    a = a.vals();
+    a = a.eval();
     EXPECT_EQ(make_fixedstring_dtype(7, string_encoding_utf_16),
                     a.get_dtype());
     //cout << a << endl;
@@ -77,10 +77,10 @@ TEST(FixedstringDType, Casting) {
 
     a = ndobject(make_fixedstring_dtype(16, string_encoding_utf_16));
     // Fill up the string with values
-    a.vals() = std::string("0123456789012345");
+    a.vals() = "0123456789012345";
     EXPECT_EQ("0123456789012345", a.as<std::string>());
     // Confirm that now assigning a smaller string works
-    a.vals() = std::string("abc");
+    a.vals() = "abc";
     EXPECT_EQ("abc", a.as<std::string>());
 }
 
@@ -89,11 +89,11 @@ TEST(FixedstringDType, SingleCompare) {
                     make_fixedstring_dtype(7, string_encoding_utf_8));
     kernel_instance<compare_operations_t> k;
 
-    a.at(0).vals() = std::string("abc");
-    a.at(1).vals() = std::string("abd");
+    a.at(0).vals() = "abc";
+    a.at(1).vals() = "abd";
 
     // test ascii kernel
-    a = a.vals();
+    a = a.eval();
     a.get_dtype().at(0).get_single_compare_kernel(k);
     EXPECT_EQ(k.kernel.ops[compare_operations_t::less_id](a.at(0).get_readonly_originptr(), a.at(1).get_readonly_originptr(), &k.extra), a.at(0).as<std::string>() < a.at(1).as<std::string>());
     EXPECT_EQ(k.kernel.ops[compare_operations_t::less_equal_id](a.at(0).get_readonly_originptr(), a.at(1).get_readonly_originptr(), &k.extra), a.at(0).as<std::string>() <= a.at(1).as<std::string>());
@@ -106,7 +106,7 @@ TEST(FixedstringDType, SingleCompare) {
 
     // test utf8 kernel
     a = a.cast_scalars(make_fixedstring_dtype(7, string_encoding_utf_8));
-    a = a.vals();
+    a = a.eval();
     a.get_dtype().at(0).get_single_compare_kernel(k);
     EXPECT_EQ(k.kernel.ops[compare_operations_t::less_id](a.at(0).get_readonly_originptr(), a.at(1).get_readonly_originptr(), &k.extra), true);
     EXPECT_EQ(k.kernel.ops[compare_operations_t::less_equal_id](a.at(0).get_readonly_originptr(), a.at(1).get_readonly_originptr(), &k.extra), true);
@@ -117,7 +117,7 @@ TEST(FixedstringDType, SingleCompare) {
 
     // test utf16 kernel
     a = a.cast_scalars(make_fixedstring_dtype(7, string_encoding_utf_16));
-    a = a.vals();
+    a = a.eval();
     a.get_dtype().at(0).get_single_compare_kernel(k);
     EXPECT_EQ(k.kernel.ops[compare_operations_t::less_id](a.at(0).get_readonly_originptr(), a.at(1).get_readonly_originptr(), &k.extra), true);
     EXPECT_EQ(k.kernel.ops[compare_operations_t::less_equal_id](a.at(0).get_readonly_originptr(), a.at(1).get_readonly_originptr(), &k.extra), true);
@@ -128,7 +128,7 @@ TEST(FixedstringDType, SingleCompare) {
 
     // test utf32 kernel
     a = a.cast_scalars(make_fixedstring_dtype(7, string_encoding_utf_32));
-    a = a.vals();
+    a = a.eval();
     a.get_dtype().at(0).get_single_compare_kernel(k);
     EXPECT_EQ(k.kernel.ops[compare_operations_t::less_id](a.at(0).get_readonly_originptr(), a.at(1).get_readonly_originptr(), &k.extra), true);
     EXPECT_EQ(k.kernel.ops[compare_operations_t::less_equal_id](a.at(0).get_readonly_originptr(), a.at(1).get_readonly_originptr(), &k.extra), true);

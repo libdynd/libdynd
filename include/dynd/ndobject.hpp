@@ -162,15 +162,6 @@ public:
 #endif // DYND_RVALUE_REFS
 
     /**
-     * Assignment operator from an ndobject_vals object. This converts the
-     * array 'rhs' has a reference to into a strided array, evaluating
-     * it from the expression tree if necessary. If 'rhs' contains a
-     * strided array, this copies it by reference, use the function 'copy'
-     * when a copy is required.
-     */
-    ndobject& operator=(const ndobject_vals& rhs);
-
-    /**
      * This function releases the memory block reference, setting the
      * ndobject to NULL. The caller takes explicit ownership of the
      * reference.
@@ -345,13 +336,27 @@ public:
     ndobject f(const char *function_name, const T0& p0, const T1& p1, const T2& p2, const T3& p3);
 
     /**
-     * Returns a value-exposing helper object, which allows one to assign to
-     * the values of the ndobject, or collapse any expression dtypes.
+     * A helper for assigning to the values in 'this'. Normal assignment to
+     * an ndobject variable has reference semantics, the reference gets
+     * overwritten to point to the new array. The 'vals' function provides
+     * syntactic sugar for the 'val_assign' function, allowing for more
+     * natural looking assignments.
+     *
+     * Example:
+     *      ndobject a(make_dtype<float>());
+     *      a.vals() = 100;
      */
     ndobject_vals vals() const;
 
     /**
-     * Evaluates the ndobject node into an immutable strided array, or
+     * Evaluates the ndobject, attempting to do the minimum work
+     * required. If the ndobject is not ane expression, simply
+     * returns it as is, otherwise evaluates into a new copy.
+     */
+    ndobject eval(const eval::eval_context *ectx = &eval::default_eval_context) const;
+
+    /**
+     * Evaluates the ndobject into an immutable strided array, or
      * returns it untouched if it is already both immutable and strided.
      */
     ndobject eval_immutable(const eval::eval_context *ectx = &eval::default_eval_context) const;
@@ -524,9 +529,6 @@ public:
 
     // TODO: Could also do +=, -=, *=, etc.
 
-    // Can implicitly convert to an ndobject, by collapsing to a strided array
-    operator ndobject() const;
-
     friend class ndobject;
     friend ndobject_vals ndobject::vals() const;
 };
@@ -618,12 +620,6 @@ inline ndobject make_strided_ndobject(intptr_t shape0, intptr_t shape1, intptr_t
 
 inline ndobject_vals ndobject::vals() const {
     return ndobject_vals(*this);
-}
-
-inline ndobject& ndobject::operator=(const ndobject_vals& rhs) {
-    ndobject temp(rhs);
-    temp.swap(*this);
-    return *this;
 }
 
 ///////////// Initializer list constructor implementation /////////////////////////

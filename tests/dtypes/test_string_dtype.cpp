@@ -95,14 +95,14 @@ TEST(StringDType, Basic) {
     EXPECT_EQ(make_string_dtype(string_encoding_utf_8), a.get_dtype());
     EXPECT_EQ(std::string("abcdefg"), a.as<std::string>());
     // Make it a fixedstring for this test
-    a = a.cast_scalars(make_fixedstring_dtype(7, string_encoding_utf_8)).vals();
+    a = a.cast_scalars(make_fixedstring_dtype(7, string_encoding_utf_8)).eval();
 
     // Convert to a blockref string dtype with the same utf8 codec
     b = a.cast_scalars(make_string_dtype(string_encoding_utf_8));
     EXPECT_EQ(make_convert_dtype(make_string_dtype(string_encoding_utf_8),
                     make_fixedstring_dtype(7, string_encoding_utf_8)),
                 b.get_dtype());
-    b = b.vals();
+    b = b.eval();
     EXPECT_EQ(make_string_dtype(string_encoding_utf_8),
                     b.get_dtype());
     EXPECT_EQ(std::string("abcdefg"), b.as<std::string>());
@@ -112,7 +112,7 @@ TEST(StringDType, Basic) {
     EXPECT_EQ(make_convert_dtype(make_string_dtype(string_encoding_utf_16),
                     make_fixedstring_dtype(7, string_encoding_utf_8)),
                 b.get_dtype());
-    b = b.vals();
+    b = b.eval();
     EXPECT_EQ(make_string_dtype(string_encoding_utf_16),
                     b.get_dtype());
     EXPECT_EQ(std::string("abcdefg"), b.as<std::string>());
@@ -122,7 +122,7 @@ TEST(StringDType, Basic) {
     EXPECT_EQ(make_convert_dtype(make_string_dtype(string_encoding_utf_32),
                     make_fixedstring_dtype(7, string_encoding_utf_8)),
                 b.get_dtype());
-    b = b.vals();
+    b = b.eval();
     EXPECT_EQ(make_string_dtype(string_encoding_utf_32),
                     b.get_dtype());
     EXPECT_EQ(std::string("abcdefg"), b.as<std::string>());
@@ -132,7 +132,7 @@ TEST(StringDType, Basic) {
     EXPECT_EQ(make_convert_dtype(make_string_dtype(string_encoding_ascii),
                     make_fixedstring_dtype(7, string_encoding_utf_8)),
                 b.get_dtype());
-    b = b.vals();
+    b = b.eval();
     EXPECT_EQ(make_string_dtype(string_encoding_ascii),
                     b.get_dtype());
     EXPECT_EQ(std::string("abcdefg"), b.as<std::string>());
@@ -145,12 +145,12 @@ TEST(StringDType, AccessFlags) {
     a = std::string("testing one two three testing one two three four five testing one two three four five six seven");
     EXPECT_EQ(read_access_flag | immutable_access_flag, (int)a.get_access_flags());
     // Turn it into a fixedstring dtype for this test
-    a = a.cast_scalars(make_fixedstring_dtype(95, string_encoding_utf_8)).vals();
+    a = a.cast_scalars(make_fixedstring_dtype(95, string_encoding_utf_8)).eval();
     EXPECT_EQ(make_fixedstring_dtype(95, string_encoding_utf_8), a.get_dtype());
 
     // Converting to a blockref string of the same encoding produces a reference
     // into the fixedstring value
-    b = a.cast_scalars(make_string_dtype(string_encoding_utf_8)).vals();
+    b = a.cast_scalars(make_string_dtype(string_encoding_utf_8)).eval();
     EXPECT_EQ(read_access_flag | write_access_flag, (int)b.get_access_flags());
     EXPECT_EQ(make_string_dtype(string_encoding_utf_8), b.get_dtype());
     // The data array for 'a' matches the referenced data for 'b' (TODO: Restore this property)
@@ -158,7 +158,7 @@ TEST(StringDType, AccessFlags) {
 
     // Converting to a blockref string of a different encoding makes a new
     // copy, so gets read write access
-    b = a.cast_scalars(make_string_dtype(string_encoding_utf_16)).vals();
+    b = a.cast_scalars(make_string_dtype(string_encoding_utf_16)).eval();
     EXPECT_EQ(read_access_flag | write_access_flag, (int)b.get_access_flags());
     EXPECT_EQ(make_string_dtype(string_encoding_utf_16), b.get_dtype());
 }
@@ -218,43 +218,43 @@ TEST(StringDType, Unicode) {
     ndobject c(make_utf8_ndobject(utf8_string));
 
     // Convert all to utf32 and compare with the reference
-    x = a.cast_scalars(make_string_dtype(string_encoding_utf_32)).vals();
+    x = a.cast_scalars(make_string_dtype(string_encoding_utf_32)).eval();
     EXPECT_EQ(0, memcmp(utf32_string,
                 *reinterpret_cast<const char * const *>(x.get_readonly_originptr()),
                 sizeof(utf32_string)));
-    x = b.cast_scalars(make_string_dtype(string_encoding_utf_32)).vals();
+    x = b.cast_scalars(make_string_dtype(string_encoding_utf_32)).eval();
     EXPECT_EQ(0, memcmp(utf32_string,
                 *reinterpret_cast<const char * const *>(x.get_readonly_originptr()),
                 sizeof(utf32_string)));
-    x = c.cast_scalars(make_string_dtype(string_encoding_utf_32)).vals();
+    x = c.cast_scalars(make_string_dtype(string_encoding_utf_32)).eval();
     EXPECT_EQ(0, memcmp(utf32_string,
                 *reinterpret_cast<const char * const *>(x.get_readonly_originptr()),
                 sizeof(utf32_string)));
 
     // Convert all to utf16 and compare with the reference
-    x = a.cast_scalars(make_string_dtype(string_encoding_utf_16)).vals();
+    x = a.cast_scalars(make_string_dtype(string_encoding_utf_16)).eval();
     EXPECT_EQ(0, memcmp(utf16_string,
                 *reinterpret_cast<const char * const *>(x.get_readonly_originptr()),
                 sizeof(utf16_string)));
-    x = b.cast_scalars(make_string_dtype(string_encoding_utf_16)).vals();
+    x = b.cast_scalars(make_string_dtype(string_encoding_utf_16)).eval();
     EXPECT_EQ(0, memcmp(utf16_string,
                 *reinterpret_cast<const char * const *>(x.get_readonly_originptr()),
                 sizeof(utf16_string)));
-    x = c.cast_scalars(make_string_dtype(string_encoding_utf_16)).vals();
+    x = c.cast_scalars(make_string_dtype(string_encoding_utf_16)).eval();
     EXPECT_EQ(0, memcmp(utf16_string,
                 *reinterpret_cast<const char * const *>(x.get_readonly_originptr()),
                 sizeof(utf16_string)));
 
     // Convert all to utf8 and compare with the reference
-    x = a.cast_scalars(make_string_dtype(string_encoding_utf_8)).vals();
+    x = a.cast_scalars(make_string_dtype(string_encoding_utf_8)).eval();
     EXPECT_EQ(0, memcmp(utf8_string,
                 *reinterpret_cast<const char * const *>(x.get_readonly_originptr()),
                 sizeof(utf8_string)));
-    x = b.cast_scalars(make_string_dtype(string_encoding_utf_8)).vals();
+    x = b.cast_scalars(make_string_dtype(string_encoding_utf_8)).eval();
     EXPECT_EQ(0, memcmp(utf8_string,
                 *reinterpret_cast<const char * const *>(x.get_readonly_originptr()),
                 sizeof(utf8_string)));
-    x = c.cast_scalars(make_string_dtype(string_encoding_utf_8)).vals();
+    x = c.cast_scalars(make_string_dtype(string_encoding_utf_8)).eval();
     EXPECT_EQ(0, memcmp(utf8_string,
                 *reinterpret_cast<const char * const *>(x.get_readonly_originptr()),
                 sizeof(utf8_string)));
@@ -279,10 +279,10 @@ TEST(StringDType, Storage) {
     a = "testing";
     EXPECT_EQ(make_bytes_dtype(1), a.storage().get_dtype());
 
-    a = a.cast_scalars(make_string_dtype(string_encoding_utf_16)).vals();
+    a = a.cast_scalars(make_string_dtype(string_encoding_utf_16)).eval();
     EXPECT_EQ(make_bytes_dtype(2), a.storage().get_dtype());
 
-    a = a.cast_scalars(make_string_dtype(string_encoding_utf_32)).vals();
+    a = a.cast_scalars(make_string_dtype(string_encoding_utf_32)).eval();
     EXPECT_EQ(make_bytes_dtype(4), a.storage().get_dtype());
 }
 
@@ -318,57 +318,57 @@ TEST(StringDType, StringToBool) {
     EXPECT_FALSE(ndobject("0 ").cast_scalars<dynd_bool>().as<bool>());
 
     // By default, conversion to bool is not permissive
-    EXPECT_THROW(ndobject(ndobject("").cast_scalars<dynd_bool>().vals()), runtime_error);
-    EXPECT_THROW(ndobject(ndobject("2").cast_scalars<dynd_bool>().vals()), runtime_error);
-    EXPECT_THROW(ndobject(ndobject("flase").cast_scalars<dynd_bool>().vals()), runtime_error);
+    EXPECT_THROW(ndobject(ndobject("").cast_scalars<dynd_bool>().eval()), runtime_error);
+    EXPECT_THROW(ndobject(ndobject("2").cast_scalars<dynd_bool>().eval()), runtime_error);
+    EXPECT_THROW(ndobject(ndobject("flase").cast_scalars<dynd_bool>().eval()), runtime_error);
 
     // In "none" mode, it's a bit more permissive
-    EXPECT_FALSE(ndobject(ndobject("").cast_scalars<dynd_bool>(assign_error_none).vals()).as<bool>());
-    EXPECT_TRUE(ndobject(ndobject("2").cast_scalars<dynd_bool>(assign_error_none).vals()).as<bool>());
-    EXPECT_TRUE(ndobject(ndobject("flase").cast_scalars<dynd_bool>(assign_error_none).vals()).as<bool>());
+    EXPECT_FALSE(ndobject(ndobject("").cast_scalars<dynd_bool>(assign_error_none).eval()).as<bool>());
+    EXPECT_TRUE(ndobject(ndobject("2").cast_scalars<dynd_bool>(assign_error_none).eval()).as<bool>());
+    EXPECT_TRUE(ndobject(ndobject("flase").cast_scalars<dynd_bool>(assign_error_none).eval()).as<bool>());
 }
 
 TEST(StringDType, StringToInteger) {
     // Test the boundary cases of the various integers
     EXPECT_EQ(-128, ndobject("-128").cast_scalars<int8_t>().as<int8_t>());
     EXPECT_EQ(127, ndobject("127").cast_scalars<int8_t>().as<int8_t>());
-    EXPECT_THROW(ndobject(ndobject("-129").cast_scalars<int8_t>().vals()), runtime_error);
-    EXPECT_THROW(ndobject(ndobject("128").cast_scalars<int8_t>().vals()), runtime_error);
+    EXPECT_THROW(ndobject("-129").cast_scalars<int8_t>().eval(), runtime_error);
+    EXPECT_THROW(ndobject("128").cast_scalars<int8_t>().eval(), runtime_error);
 
     EXPECT_EQ(-32768, ndobject("-32768").cast_scalars<int16_t>().as<int16_t>());
     EXPECT_EQ(32767, ndobject("32767").cast_scalars<int16_t>().as<int16_t>());
-    EXPECT_THROW(ndobject(ndobject("-32769").cast_scalars<int16_t>().vals()), runtime_error);
-    EXPECT_THROW(ndobject(ndobject("32768").cast_scalars<int16_t>().vals()), runtime_error);
+    EXPECT_THROW(ndobject("-32769").cast_scalars<int16_t>().eval(), runtime_error);
+    EXPECT_THROW(ndobject("32768").cast_scalars<int16_t>().eval(), runtime_error);
 
     EXPECT_EQ(-2147483648LL, ndobject("-2147483648").cast_scalars<int32_t>().as<int32_t>());
     EXPECT_EQ(2147483647, ndobject("2147483647").cast_scalars<int32_t>().as<int32_t>());
-    EXPECT_THROW(ndobject(ndobject("-2147483649").cast_scalars<int32_t>().vals()), runtime_error);
-    EXPECT_THROW(ndobject(ndobject("2147483648").cast_scalars<int32_t>().vals()), runtime_error);
+    EXPECT_THROW(ndobject(ndobject("-2147483649").cast_scalars<int32_t>().eval()), runtime_error);
+    EXPECT_THROW(ndobject(ndobject("2147483648").cast_scalars<int32_t>().eval()), runtime_error);
 
     EXPECT_EQ(-9223372036854775807LL - 1, ndobject("-9223372036854775808").cast_scalars<int64_t>().as<int64_t>());
     EXPECT_EQ(9223372036854775807LL, ndobject("9223372036854775807").cast_scalars<int64_t>().as<int64_t>());
-    EXPECT_THROW(ndobject(ndobject("-9223372036854775809").cast_scalars<int64_t>().vals()), runtime_error);
-    EXPECT_THROW(ndobject(ndobject("9223372036854775808").cast_scalars<int64_t>().vals()), runtime_error);
+    EXPECT_THROW(ndobject("-9223372036854775809").cast_scalars<int64_t>().eval(), runtime_error);
+    EXPECT_THROW(ndobject("9223372036854775808").cast_scalars<int64_t>().eval(), runtime_error);
 
     EXPECT_EQ(0u, ndobject("0").cast_scalars<uint8_t>().as<uint8_t>());
     EXPECT_EQ(255u, ndobject("255").cast_scalars<uint8_t>().as<uint8_t>());
-    EXPECT_THROW(ndobject(ndobject("-1").cast_scalars<uint8_t>().vals()), runtime_error);
-    EXPECT_THROW(ndobject(ndobject("256").cast_scalars<uint8_t>().vals()), runtime_error);
+    EXPECT_THROW(ndobject("-1").cast_scalars<uint8_t>().eval(), runtime_error);
+    EXPECT_THROW(ndobject("256").cast_scalars<uint8_t>().eval(), runtime_error);
 
     EXPECT_EQ(0u, ndobject("0").cast_scalars<uint16_t>().as<uint16_t>());
     EXPECT_EQ(65535u, ndobject("65535").cast_scalars<uint16_t>().as<uint16_t>());
-    EXPECT_THROW(ndobject(ndobject("-1").cast_scalars<uint16_t>().vals()), runtime_error);
-    EXPECT_THROW(ndobject(ndobject("65536").cast_scalars<uint16_t>().vals()), runtime_error);
+    EXPECT_THROW(ndobject("-1").cast_scalars<uint16_t>().eval(), runtime_error);
+    EXPECT_THROW(ndobject("65536").cast_scalars<uint16_t>().eval(), runtime_error);
 
     EXPECT_EQ(0u, ndobject("0").cast_scalars<uint32_t>().as<uint32_t>());
     EXPECT_EQ(4294967295ULL, ndobject("4294967295").cast_scalars<uint32_t>().as<uint32_t>());
-    EXPECT_THROW(ndobject(ndobject("-1").cast_scalars<uint32_t>().vals()), runtime_error);
-    EXPECT_THROW(ndobject(ndobject("4294967296").cast_scalars<uint32_t>().vals()), runtime_error);
+    EXPECT_THROW(ndobject("-1").cast_scalars<uint32_t>().eval(), runtime_error);
+    EXPECT_THROW(ndobject("4294967296").cast_scalars<uint32_t>().eval(), runtime_error);
 
     EXPECT_EQ(0u, ndobject("0").cast_scalars<uint64_t>().as<uint64_t>());
     EXPECT_EQ(18446744073709551615ULL, ndobject("18446744073709551615").cast_scalars<uint64_t>().as<uint64_t>());
-    EXPECT_THROW(ndobject(ndobject("-1").cast_scalars<uint64_t>().vals()), runtime_error);
-    EXPECT_THROW(ndobject(ndobject("18446744073709551616").cast_scalars<uint64_t>().vals()), runtime_error);
+    EXPECT_THROW(ndobject("-1").cast_scalars<uint64_t>().eval(), runtime_error);
+    EXPECT_THROW(ndobject("18446744073709551616").cast_scalars<uint64_t>().eval(), runtime_error);
 }
 
 TEST(StringDType, StringToFloat32SpecialValues) {
@@ -415,6 +415,6 @@ TEST(StringDType, StringToFloat64SpecialValues) {
 
 TEST(StringDType, StringEncodeError) {
     ndobject a = parse_json("string", "\"\\uc548\\ub155\""), b;
-    EXPECT_THROW((b = a.cast_scalars(make_string_dtype(string_encoding_ascii)).vals()),
+    EXPECT_THROW(a.cast_scalars(make_string_dtype(string_encoding_ascii)).eval(),
                     string_encode_error);
 }

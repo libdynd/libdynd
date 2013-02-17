@@ -268,11 +268,11 @@ TEST(NDObjectAssign, Casting) {
     b = a.cast_scalars(make_dtype<int>());
     // This triggers the conversion from float to int,
     // but the default assign policy is 'fractional'
-    EXPECT_THROW(ndobject(b.vals()), runtime_error);
+    EXPECT_THROW(b.eval(), runtime_error);
 
     // Allow truncation of fractional part
     b = a.cast_scalars(make_dtype<int>(), assign_error_overflow);
-    b = b.vals();
+    b = b.eval();
     EXPECT_EQ(3, b.at(0).as<int>());
     EXPECT_EQ(1, b.at(1).as<int>());
     EXPECT_EQ(0, b.at(2).as<int>());
@@ -280,7 +280,7 @@ TEST(NDObjectAssign, Casting) {
 
     // cast_scalars<int>() should be equivalent to cast_scalars(make_dtype<int>())
     b = a.cast_scalars<int>(assign_error_overflow);
-    b = b.vals();
+    b = b.eval();
     EXPECT_EQ(3, b.at(0).as<int>());
     EXPECT_EQ(1, b.at(1).as<int>());
     EXPECT_EQ(0, b.at(2).as<int>());
@@ -289,12 +289,12 @@ TEST(NDObjectAssign, Casting) {
     b = a.cast_scalars(make_dtype<int8_t>(), assign_error_overflow);
     // This triggers conversion from float to int8,
     // which overflows
-    EXPECT_THROW(ndobject(b.vals()), runtime_error);
+    EXPECT_THROW(b.eval(), runtime_error);
 
     // Remove the overflowing value in 'a', so b.vals() no
     // longer triggers an overflow.
     a.at(3).val_assign(-120);
-    b = b.vals();
+    b = b.eval();
     EXPECT_EQ(3, b.at(0).as<int>());
     EXPECT_EQ(1, b.at(1).as<int>());
     EXPECT_EQ(0, b.at(2).as<int>());
@@ -325,7 +325,7 @@ TEST(NDObjectAssign, ChainedCastingRead) {
               b.get_dtype());
 
     // Evaluating the values should truncate them to integers
-    b = b.vals();
+    b = b.eval();
     // Now it's just the value dtype, no chaining
     EXPECT_EQ(make_strided_dim_dtype(make_dtype<float>()), b.get_dtype());
     EXPECT_EQ(3, b.at(0).as<float>());
@@ -356,7 +356,7 @@ TEST(NDObjectAssign, ChainedCastingRead) {
                     assign_error_overflow),
                 assign_error_overflow)),
             b.get_dtype());
-    b = b.vals();
+    b = b.eval();
     EXPECT_EQ(make_strided_dim_dtype(make_dtype<int32_t>()), b.get_dtype());
     EXPECT_EQ(3, b.at(0).as<int32_t>());
     EXPECT_EQ(1, b.at(1).as<int32_t>());

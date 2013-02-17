@@ -29,7 +29,7 @@ TEST(GroupByDType, Basic) {
                         make_strided_dim_dtype(make_convert_dtype(
                             make_categorical_dtype(groups), make_dtype<int>()))),
                     g.get_dtype());
-    g = g.vals();
+    g = g.eval();
     EXPECT_EQ(1, g.at(0).get_shape()[0]);
     EXPECT_EQ(2, g.at(1).get_shape()[0]);
     EXPECT_EQ(10, g.at(0,0).as<int>());
@@ -46,7 +46,7 @@ TEST(GroupByDType, BasicDeduceGroups) {
                         make_strided_dim_dtype(make_convert_dtype(
                             make_categorical_dtype(expected_groups), make_string_dtype()))),
                     g.get_dtype());
-    g = g.vals();
+    g = g.eval();
     EXPECT_EQ(2, g.at(0).get_shape()[0]);
     EXPECT_EQ(3, g.at(1).get_shape()[0]);
     EXPECT_EQ("test",   g.at(0,0).as<string>());
@@ -81,19 +81,19 @@ TEST(GroupByDType, MediumDeduceGroups) {
     int group_10[] = {    20,     45,     70, 90    };
     int group_15[] = {            50,     75        };
     int group_19[] = {            54,     79        };
-    g = g.vals();
-    EXPECT_TRUE(ndobject(group_0).equals_exact(g.at(0).vals()));
-    EXPECT_TRUE(ndobject(group_6).equals_exact(g.at(6).vals()));
-    EXPECT_TRUE(ndobject(group_9).equals_exact(g.at(9).vals()));
-    EXPECT_TRUE(ndobject(group_10).equals_exact(g.at(10).vals()));
-    EXPECT_TRUE(ndobject(group_15).equals_exact(g.at(15).vals()));
-    EXPECT_TRUE(ndobject(group_19).equals_exact(g.at(19).vals()));
+    g = g.eval();
+    EXPECT_TRUE(ndobject(group_0).equals_exact(g.at(0).eval()));
+    EXPECT_TRUE(ndobject(group_6).equals_exact(g.at(6).eval()));
+    EXPECT_TRUE(ndobject(group_9).equals_exact(g.at(9).eval()));
+    EXPECT_TRUE(ndobject(group_10).equals_exact(g.at(10).eval()));
+    EXPECT_TRUE(ndobject(group_15).equals_exact(g.at(15).eval()));
+    EXPECT_TRUE(ndobject(group_19).equals_exact(g.at(19).eval()));
 }
 
 TEST(GroupByDType, Struct) {
     const char *gender_cats_vals[] = {"F", "M"};
     ndobject gender_cats = ndobject(gender_cats_vals).cast_scalars(
-                    make_fixedstring_dtype(1, string_encoding_ascii)).vals();
+                    make_fixedstring_dtype(1, string_encoding_ascii)).eval();
 
     // Create a simple structured array
     dtype d = make_fixedstruct_dtype(make_string_dtype(), "name", make_dtype<float>(), "height",
@@ -113,7 +113,7 @@ TEST(GroupByDType, Struct) {
                         make_strided_dim_dtype(make_convert_dtype(
                             make_categorical_dtype(gender_cats), gender_cats.get_udtype()))),
                     g.get_dtype());
-    g = g.vals();
+    g = g.eval();
     EXPECT_EQ(2, g.at_array(0, NULL).get_shape()[0]);
     EXPECT_EQ(3, g.at(0).get_shape()[0]);
     EXPECT_EQ(2, g.at(1).get_shape()[0]);
@@ -160,7 +160,7 @@ TEST(GroupByDType, StructUnsortedCats) {
                         make_strided_dim_dtype(make_convert_dtype(
                             make_categorical_dtype(gender_cats), a.p("gender").get_udtype()))),
                     g.get_dtype());
-    g = g.vals();
+    g = g.eval();
     EXPECT_EQ(2, g.at_array(0, NULL).get_shape()[0]);
     EXPECT_EQ(2, g.at(0).get_shape()[0]);
     EXPECT_EQ(3, g.at(1).get_shape()[0]);

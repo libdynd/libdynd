@@ -204,9 +204,9 @@ static ndobject function_dtype_today(const dtype& dt) {
 static ndobject function_dtype_construct(const dtype& DYND_UNUSED(dt), const ndobject& year, const ndobject& month, const ndobject& day)
 {
     // TODO proper buffering
-    ndobject year_as_int = year.cast_udtype(make_dtype<int32_t>()).vals();
-    ndobject month_as_int = month.cast_udtype(make_dtype<int32_t>()).vals();
-    ndobject day_as_int = day.cast_udtype(make_dtype<int32_t>()).vals();
+    ndobject year_as_int = year.cast_udtype(make_dtype<int32_t>()).eval();
+    ndobject month_as_int = month.cast_udtype(make_dtype<int32_t>()).eval();
+    ndobject day_as_int = day.cast_udtype(make_dtype<int32_t>()).eval();
     ndobject result;
 
     ndobject_iter<1,3> iter(make_date_dtype(), result, year_as_int, month_as_int, day_as_int);
