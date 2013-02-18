@@ -215,3 +215,69 @@ TEST(FixedStructDType, FromStructAssign) {
     EXPECT_EQ(7.25, b.at(1,0).as<double>());
     EXPECT_EQ(8,    b.at(1,1).as<short>());
 }
+
+TEST(FixedStructDType, SingleCompare) {
+    ndobject a = make_strided_ndobject(7, dtype("{x : int32; y : float32; z : float64}"));
+    int32_t x_vals[] = {3,        2,    1,    2,     3,     1,    1};
+    float y_vals[] =   {1.5f, 2.25f, -1.f, 2.25f, 1.0f, -0.5f, -1.f};
+    double z_vals[] =  {3.5,    3.0,  0.0,   2.0,  4.0,  -1.0,  0.0};
+    a.p("x").vals() = x_vals;
+    a.p("y").vals() = y_vals;
+    a.p("z").vals() = z_vals;
+
+    // Get the dtype/metadata for the fixedstruct of 'a'
+    dtype dt = a.get_dtype();
+    const char *metadata = a.get_ndo_meta();
+    const char *data = a.get_readonly_originptr();
+    dt = dt.extended()->at_single(0, &metadata, &data);
+    intptr_t stride;
+    a.get_strides(&stride);
+
+    const char *first, *second;
+    kernel_instance<compare_operations_t> k;
+    dt.get_single_compare_kernel(k);
+    // equal
+    first = data + 2*stride; second = data + 6*stride;
+    EXPECT_TRUE(k.kernel.ops[compare_operations_t::equal_id](first, second, &k.extra));
+    EXPECT_TRUE(k.kernel.ops[compare_operations_t::greater_equal_id](first, second, &k.extra));
+    EXPECT_TRUE(k.kernel.ops[compare_operations_t::less_equal_id](first, second, &k.extra));
+    EXPECT_FALSE(k.kernel.ops[compare_operations_t::not_equal_id](first, second, &k.extra));
+    EXPECT_FALSE(k.kernel.ops[compare_operations_t::greater_id](first, second, &k.extra));
+    EXPECT_FALSE(k.kernel.ops[compare_operations_t::less_id](first, second, &k.extra));
+    // not equal on the first field
+    first = data + 1*stride; second = data + 0*stride;
+    EXPECT_FALSE(k.kernel.ops[compare_operations_t::equal_id](first, second, &k.extra));
+    EXPECT_TRUE(k.kernel.ops[compare_operations_t::not_equal_id](first, second, &k.extra));
+    EXPECT_TRUE(k.kernel.ops[compare_operations_t::less_id](first, second, &k.extra));
+    EXPECT_FALSE(k.kernel.ops[compare_operations_t::less_id](second, first, &k.extra));
+    EXPECT_TRUE(k.kernel.ops[compare_operations_t::less_equal_id](first, second, &k.extra));
+    EXPECT_FALSE(k.kernel.ops[compare_operations_t::less_equal_id](second, first, &k.extra));
+    EXPECT_TRUE(k.kernel.ops[compare_operations_t::greater_id](second, first, &k.extra));
+    EXPECT_FALSE(k.kernel.ops[compare_operations_t::greater_id](first, second, &k.extra));
+    EXPECT_TRUE(k.kernel.ops[compare_operations_t::greater_equal_id](second, first, &k.extra));
+    EXPECT_FALSE(k.kernel.ops[compare_operations_t::greater_equal_id](first, second, &k.extra));
+    // not equal on the second field
+    first = data + 2*stride; second = data + 5*stride;
+    EXPECT_FALSE(k.kernel.ops[compare_operations_t::equal_id](first, second, &k.extra));
+    EXPECT_TRUE(k.kernel.ops[compare_operations_t::not_equal_id](first, second, &k.extra));
+    EXPECT_TRUE(k.kernel.ops[compare_operations_t::less_id](first, second, &k.extra));
+    EXPECT_FALSE(k.kernel.ops[compare_operations_t::less_id](second, first, &k.extra));
+    EXPECT_TRUE(k.kernel.ops[compare_operations_t::less_equal_id](first, second, &k.extra));
+    EXPECT_FALSE(k.kernel.ops[compare_operations_t::less_equal_id](second, first, &k.extra));
+    EXPECT_TRUE(k.kernel.ops[compare_operations_t::greater_id](second, first, &k.extra));
+    EXPECT_FALSE(k.kernel.ops[compare_operations_t::greater_id](first, second, &k.extra));
+    EXPECT_TRUE(k.kernel.ops[compare_operations_t::greater_equal_id](second, first, &k.extra));
+    EXPECT_FALSE(k.kernel.ops[compare_operations_t::greater_equal_id](first, second, &k.extra));
+    // not equal on the third field
+    first = data + 3*stride; second = data + 1*stride;
+    EXPECT_FALSE(k.kernel.ops[compare_operations_t::equal_id](first, second, &k.extra));
+    EXPECT_TRUE(k.kernel.ops[compare_operations_t::not_equal_id](first, second, &k.extra));
+    EXPECT_TRUE(k.kernel.ops[compare_operations_t::less_id](first, second, &k.extra));
+    EXPECT_FALSE(k.kernel.ops[compare_operations_t::less_id](second, first, &k.extra));
+    EXPECT_TRUE(k.kernel.ops[compare_operations_t::less_equal_id](first, second, &k.extra));
+    EXPECT_FALSE(k.kernel.ops[compare_operations_t::less_equal_id](second, first, &k.extra));
+    EXPECT_TRUE(k.kernel.ops[compare_operations_t::greater_id](second, first, &k.extra));
+    EXPECT_FALSE(k.kernel.ops[compare_operations_t::greater_id](first, second, &k.extra));
+    EXPECT_TRUE(k.kernel.ops[compare_operations_t::greater_equal_id](second, first, &k.extra));
+    EXPECT_FALSE(k.kernel.ops[compare_operations_t::greater_equal_id](first, second, &k.extra));
+}
