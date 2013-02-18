@@ -91,6 +91,23 @@ void create_broadcast_result(const dtype& result_inner_dt,
 void strides_to_axis_perm(size_t ndim, const intptr_t *strides, int *out_axis_perm);
 
 /**
+ * This function creates fresh strides based on the provided axis
+ * permutation and element size. This function does not validate
+ * that axis_perm is a valid permutation, the caller must ensure
+ * this.
+ *
+ * \param ndim  The number of elements in axis_perm and out_strides.
+ * \param axis_perm  A permutation of the axes, must contain the values
+ *                   [0, ..., ndim) in some order.
+ * \param shape  The shape of the array for the created strides.
+ * \param element_size  The size of one array element (this is the smallest
+ *                      stride in the created strides array.
+ * \param out_strides  The calculated strides are placed here.
+ */
+void axis_perm_to_strides(size_t ndim, const int *axis_perm,
+                const intptr_t *shape, intptr_t element_size, intptr_t *out_strides);
+
+/**
  * This function creates a permutation based on the array of operand strides,
  * trying to match the memory ordering of both where possible and defaulting to
  * C-order where not possible.

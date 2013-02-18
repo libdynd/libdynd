@@ -231,6 +231,19 @@ void dynd::strides_to_axis_perm(size_t ndim, const intptr_t *strides, int *out_a
     }
 }
 
+void dynd::axis_perm_to_strides(size_t ndim, const int *axis_perm,
+                const intptr_t *shape, intptr_t element_size,
+                intptr_t *out_strides)
+{
+    for (size_t i = 0; i < ndim; ++i) {
+        int i_perm = axis_perm[i];
+        intptr_t dim_size = shape[i_perm];
+        out_strides[i_perm] = dim_size > 1 ? element_size : 0;
+        out_strides[i_perm] = dim_size;
+        element_size *= dim_size;
+    }
+}
+
 /**
  * Compares the strides of the operands for axes 'i' and 'j', and returns whether
  * the comparison is ambiguous and, when it's not ambiguous, whether 'i' should occur
