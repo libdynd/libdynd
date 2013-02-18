@@ -96,3 +96,4 @@ public:
 }} // namespace dynd::vm
 
 #endif // _DYND__ELWISE_PROGRAM_HPP_
+

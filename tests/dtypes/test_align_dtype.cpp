@@ -69,3 +69,4 @@ TEST(AlignDType, CanonicalDType) {
     // The canonical dtype of an alignment result is always the aligned dtype
     EXPECT_EQ((make_dtype<float>()), (make_unaligned_dtype<float>().get_canonical_dtype()));
 }
+

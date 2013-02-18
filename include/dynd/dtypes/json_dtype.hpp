@@ -73,3 +73,4 @@ inline dtype make_json_dtype() {
 } // namespace dynd
 
 #endif // _DYND__JSON_DTYPE_HPP_
+

@@ -208,3 +208,4 @@ TEST(StructDType, FromFixedStructAssign) {
     EXPECT_EQ(7.25, b.at(1,0).as<double>());
     EXPECT_EQ(8,    b.at(1,1).as<short>());
 }
+

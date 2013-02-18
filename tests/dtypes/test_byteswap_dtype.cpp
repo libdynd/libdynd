@@ -74,3 +74,4 @@ TEST(ByteswapDType, CanonicalDType) {
     // The canonical dtype of a byteswap dtype is always the non-swapped version
     EXPECT_EQ((make_dtype<float>()), (make_byteswap_dtype<float>().get_canonical_dtype()));
 }
+

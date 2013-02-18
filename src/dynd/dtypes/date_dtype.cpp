@@ -631,3 +631,4 @@ size_t date_dtype::make_elwise_property_setter_kernel(
             throw runtime_error(ss.str());
     }
 }
+

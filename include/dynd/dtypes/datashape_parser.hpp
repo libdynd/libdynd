@@ -41,3 +41,4 @@ inline dtype dtype_from_datashape(const char (&datashape)[N])
 } // namespace dynd
 
 #endif // _DYND__DATASHAPE_PARSER_HPP_
+

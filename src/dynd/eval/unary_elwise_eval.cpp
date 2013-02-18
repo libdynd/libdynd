@@ -169,3 +169,4 @@ ndarray_node_ptr dynd::eval::evaluate_unary_elwise_array(ndarray_node* node, con
 }
 
 #endif // TODO reenable?
+

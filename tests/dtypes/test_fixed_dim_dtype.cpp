@@ -216,3 +216,4 @@ TEST(FixedArrayDType, AssignFixedStridedKernel) {
     EXPECT_EQ(9, a.at(2).as<int>());
     k.reset();
 }
+

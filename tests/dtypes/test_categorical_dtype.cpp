@@ -313,3 +313,4 @@ TEST(CategoricalDType, AssignFromOther) {
     a.at(5).vals() = (uint16_t)3;
     EXPECT_EQ(3, a.at(5).as<int>());
 }
+

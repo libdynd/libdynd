@@ -380,3 +380,4 @@ void dynd::make_buffered_binary_kernel(kernel_instance<binary_operation_t>& kern
 }
 
 #endif // TODO reenable
+

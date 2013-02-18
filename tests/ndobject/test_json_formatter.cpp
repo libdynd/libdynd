@@ -90,3 +90,4 @@ TEST(JSONFormatter, UniformDim) {
     n = parse_json("3, string", "[\"testing\", \"one\", \"two\"] ");
     EXPECT_EQ("[\"testing\",\"one\",\"two\"]", format_json(n).as<string>());
 }
+

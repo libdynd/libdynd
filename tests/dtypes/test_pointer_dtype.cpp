@@ -41,3 +41,4 @@ TEST(PointerDType, PointerToBuiltIn) {
     // even though it is derived from base_expression_dtype
     EXPECT_FALSE(d.is_expression());
 }
+

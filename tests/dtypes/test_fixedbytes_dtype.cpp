@@ -58,3 +58,4 @@ TEST(FixedBytesDType, Assign) {
                  make_fixedbytes_dtype(3, 1), NULL, b),
                     runtime_error);
 }
+

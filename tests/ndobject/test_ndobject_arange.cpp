@@ -64,3 +64,4 @@ TEST(NDObjectArange, CastScalars) {
     EXPECT_EQ(2., a.at(2).as<double>());
     EXPECT_EQ(3., a.at(3).as<double>());
 }
+

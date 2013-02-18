@@ -72,3 +72,4 @@ size_t void_pointer_dtype::make_assignment_kernel(
     ss << "Cannot assign from " << src_dt << " to " << dst_dt;
     throw runtime_error(ss.str());
 }
+

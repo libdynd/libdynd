@@ -567,3 +567,4 @@ dtype dynd::dtype_from_datashape(const char *datashape_begin, const char *datash
         throw runtime_error(ss.str());
     }
 }
+

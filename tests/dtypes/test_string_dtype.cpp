@@ -418,3 +418,4 @@ TEST(StringDType, StringEncodeError) {
     EXPECT_THROW(a.cast_scalars(make_string_dtype(string_encoding_ascii)).eval(),
                     string_encode_error);
 }
+

@@ -33,3 +33,4 @@ public:
 }} // namespace dynd::vm
 
 #endif // _DYND__REGISTER_ALLOCATION_HPP_
+

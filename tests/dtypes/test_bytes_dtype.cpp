@@ -70,3 +70,4 @@ TEST(BytesDType, Assign) {
     EXPECT_EQ(c.get_dtype(), make_string_dtype());
     EXPECT_EQ("testing", c.as<string>());
 }
+

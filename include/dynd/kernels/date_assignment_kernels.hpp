@@ -32,3 +32,4 @@ size_t make_date_to_string_assignment_kernel(
 } // namespace dynd
 
 #endif // _DYND__DATE_ASSIGNMENT_KERNELS_HPP_
+

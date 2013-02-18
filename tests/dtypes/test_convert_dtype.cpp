@@ -27,3 +27,4 @@ TEST(ConvertDType, CanonicalDType) {
     // The canonical dtype of a convert dtype is always the value
     EXPECT_EQ((make_dtype<float>()), (make_convert_dtype<float, int>().get_canonical_dtype()));
 }
+

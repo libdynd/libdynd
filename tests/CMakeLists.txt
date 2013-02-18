@@ -80,7 +80,8 @@ elseif(APPLE)
 else()
     set_target_properties(test_dynd
                 PROPERTIES COMPILE_FLAGS
-                "-Wno-unnamed-type-template-args -pthread")
+                "-pthread")
+    #-Wno-unnamed-type-template-args 
 
     target_link_libraries(test_dynd
         dynd

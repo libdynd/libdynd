@@ -214,3 +214,4 @@ ndarray_node_ptr dynd::eval::evaluate(ndarray_node *node, const eval::eval_conte
 }
 
 #endif // TODO reenable?
+

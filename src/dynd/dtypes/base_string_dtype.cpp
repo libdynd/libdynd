@@ -42,3 +42,4 @@ void base_string_dtype::get_dynamic_dtype_properties(const std::pair<std::string
     *out_properties = base_string_dtype_properties;
     *out_count = sizeof(base_string_dtype_properties) / sizeof(base_string_dtype_properties[0]);
 }
+
