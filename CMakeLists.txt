@@ -165,6 +165,7 @@ set(dynd_SRC
     include/dynd/kernels/bytes_assignment_kernels.hpp
     include/dynd/kernels/byteswap_kernels.hpp
     include/dynd/kernels/date_assignment_kernels.hpp
+    include/dynd/kernels/hierarchical_kernels.hpp
     include/dynd/kernels/kernel_instance.hpp
     include/dynd/kernels/string_assignment_kernels.hpp
     include/dynd/kernels/string_algorithm_kernels.hpp
