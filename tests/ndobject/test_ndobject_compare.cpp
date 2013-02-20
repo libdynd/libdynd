@@ -81,126 +81,154 @@ TEST(NDObjectCompare, EqualityIntUInt) {
 }
 
 TEST(NDObjectCompare, InequalityInt8UInt8) {
-    EXPECT_TRUE(ndobject((int8_t)-1) < ndobject((uint8_t)0));
-    EXPECT_TRUE(ndobject((int8_t)-1) <= ndobject((uint8_t)0));
-    EXPECT_FALSE(ndobject((int8_t)-1) >= ndobject((uint8_t)0));
-    EXPECT_FALSE(ndobject((int8_t)-1) > ndobject((uint8_t)0));
+    ndobject a, b;
 
-    EXPECT_FALSE(ndobject((uint8_t)0) < ndobject((int8_t)-1));
-    EXPECT_FALSE(ndobject((uint8_t)0) <= ndobject((int8_t)-1));
-    EXPECT_TRUE(ndobject((uint8_t)0) >= ndobject((int8_t)-1));
-    EXPECT_TRUE(ndobject((uint8_t)0) > ndobject((int8_t)-1));
+    a = (int8_t)-1;
+    b = (uint8_t)0;
+    EXPECT_TRUE(a < b);
+    EXPECT_TRUE(a <= b);
+    EXPECT_FALSE(a >= b);
+    EXPECT_FALSE(a > b);
+    EXPECT_FALSE(b < a);
+    EXPECT_FALSE(b <= a);
+    EXPECT_TRUE(b >= a);
+    EXPECT_TRUE(b > a);
 
-    EXPECT_FALSE(ndobject((int8_t)0) < ndobject((uint8_t)0));
-    EXPECT_TRUE(ndobject((int8_t)0) <= ndobject((uint8_t)0));
-    EXPECT_TRUE(ndobject((int8_t)0) >= ndobject((uint8_t)0));
-    EXPECT_FALSE(ndobject((int8_t)0) > ndobject((uint8_t)0));
+    a = (int8_t)0;
+    b = (uint8_t)0;
+    EXPECT_FALSE(a < b);
+    EXPECT_TRUE(a <= b);
+    EXPECT_TRUE(a >= b);
+    EXPECT_FALSE(a > b);
+    EXPECT_FALSE(b < a);
+    EXPECT_TRUE(b <= a);
+    EXPECT_TRUE(b >= a);
+    EXPECT_FALSE(b > a);
 
-    EXPECT_FALSE(ndobject((uint8_t)0) < ndobject((int8_t)0));
-    EXPECT_TRUE(ndobject((uint8_t)0) <= ndobject((int8_t)0));
-    EXPECT_TRUE(ndobject((uint8_t)0) >= ndobject((int8_t)0));
-    EXPECT_FALSE(ndobject((uint8_t)0) > ndobject((int8_t)0));
+    a = (int8_t)1;
+    b = (uint8_t)0;
+    EXPECT_FALSE(a < b);
+    EXPECT_FALSE(a <= b);
+    EXPECT_TRUE(a >= b);
+    EXPECT_TRUE(a > b);
+    EXPECT_TRUE(b < a);
+    EXPECT_TRUE(b <= a);
+    EXPECT_FALSE(b >= a);
+    EXPECT_FALSE(b > a);
 
-    EXPECT_FALSE(ndobject((int8_t)1) < ndobject((uint8_t)0));
-    EXPECT_FALSE(ndobject((int8_t)1) <= ndobject((uint8_t)0));
-    EXPECT_TRUE(ndobject((int8_t)1) >= ndobject((uint8_t)0));
-    EXPECT_TRUE(ndobject((int8_t)1) > ndobject((uint8_t)0));
+    a = (int8_t)127;
+    b = (uint8_t)126;
+    EXPECT_FALSE(a < b);
+    EXPECT_FALSE(a <= b);
+    EXPECT_TRUE(a >= b);
+    EXPECT_TRUE(a > b);
+    EXPECT_TRUE(b < a);
+    EXPECT_TRUE(b <= a);
+    EXPECT_FALSE(b >= a);
+    EXPECT_FALSE(b > a);
 
-    EXPECT_TRUE(ndobject((uint8_t)0) < ndobject((int8_t)1));
-    EXPECT_TRUE(ndobject((uint8_t)0) <= ndobject((int8_t)1));
-    EXPECT_FALSE(ndobject((uint8_t)0) >= ndobject((int8_t)1));
-    EXPECT_FALSE(ndobject((uint8_t)0) > ndobject((int8_t)1));
+    a = (int8_t)127;
+    b = (uint8_t)127;
+    EXPECT_FALSE(a < b);
+    EXPECT_TRUE(a <= b);
+    EXPECT_TRUE(a >= b);
+    EXPECT_FALSE(a > b);
+    EXPECT_FALSE(b < a);
+    EXPECT_TRUE(b <= a);
+    EXPECT_TRUE(b >= a);
+    EXPECT_FALSE(b > a);
 
-    EXPECT_FALSE(ndobject((int8_t)127) < ndobject((uint8_t)126));
-    EXPECT_FALSE(ndobject((int8_t)127) <= ndobject((uint8_t)126));
-    EXPECT_TRUE(ndobject((int8_t)127) >= ndobject((uint8_t)126));
-    EXPECT_TRUE(ndobject((int8_t)127) > ndobject((uint8_t)126));
-
-    EXPECT_TRUE(ndobject((uint8_t)126) < ndobject((int8_t)127));
-    EXPECT_TRUE(ndobject((uint8_t)126) <= ndobject((int8_t)127));
-    EXPECT_FALSE(ndobject((uint8_t)126) >= ndobject((int8_t)127));
-    EXPECT_FALSE(ndobject((uint8_t)126) > ndobject((int8_t)127));
-
-    EXPECT_FALSE(ndobject((int8_t)127) < ndobject((uint8_t)127));
-    EXPECT_TRUE(ndobject((int8_t)127) <= ndobject((uint8_t)127));
-    EXPECT_TRUE(ndobject((int8_t)127) >= ndobject((uint8_t)127));
-    EXPECT_FALSE(ndobject((int8_t)127) > ndobject((uint8_t)127));
-
-    EXPECT_FALSE(ndobject((uint8_t)127) < ndobject((int8_t)127));
-    EXPECT_TRUE(ndobject((uint8_t)127) <= ndobject((int8_t)127));
-    EXPECT_TRUE(ndobject((uint8_t)127) >= ndobject((int8_t)127));
-    EXPECT_FALSE(ndobject((uint8_t)127) > ndobject((int8_t)127));
-
-    EXPECT_TRUE(ndobject((int8_t)127) < ndobject((uint8_t)128));
-    EXPECT_TRUE(ndobject((int8_t)127) <= ndobject((uint8_t)128));
-    EXPECT_FALSE(ndobject((int8_t)127) >= ndobject((uint8_t)128));
-    EXPECT_FALSE(ndobject((int8_t)127) > ndobject((uint8_t)128));
-
-    EXPECT_FALSE(ndobject((uint8_t)128) < ndobject((int8_t)127));
-    EXPECT_FALSE(ndobject((uint8_t)128) <= ndobject((int8_t)127));
-    EXPECT_TRUE(ndobject((uint8_t)128) >= ndobject((int8_t)127));
-    EXPECT_TRUE(ndobject((uint8_t)128) > ndobject((int8_t)127));
+    a = (int8_t)127;
+    b = (uint8_t)128;
+    EXPECT_TRUE(a < b);
+    EXPECT_TRUE(a <= b);
+    EXPECT_FALSE(a >= b);
+    EXPECT_FALSE(a > b);
+    EXPECT_FALSE(b < a);
+    EXPECT_FALSE(b <= a);
+    EXPECT_TRUE(b >= a);
+    EXPECT_TRUE(b > a);
 }
 
 
 TEST(NDObjectCompare, InequalityInt64UInt64) {
-    EXPECT_TRUE(ndobject((int64_t)-1) < ndobject((uint64_t)0));
-    EXPECT_TRUE(ndobject((int64_t)-1) <= ndobject((uint64_t)0));
-    EXPECT_FALSE(ndobject((int64_t)-1) >= ndobject((uint64_t)0));
-    EXPECT_FALSE(ndobject((int64_t)-1) > ndobject((uint64_t)0));
+    ndobject a, b;
 
-    EXPECT_FALSE(ndobject((uint64_t)0) < ndobject((int64_t)-1));
-    EXPECT_FALSE(ndobject((uint64_t)0) <= ndobject((int64_t)-1));
-    EXPECT_TRUE(ndobject((uint64_t)0) >= ndobject((int64_t)-1));
-    EXPECT_TRUE(ndobject((uint64_t)0) > ndobject((int64_t)-1));
+    a = (int64_t)-1;
+    b = (uint64_t)0;
+    EXPECT_TRUE(a < b);
+    EXPECT_TRUE(a <= b);
+    EXPECT_FALSE(a >= b);
+    EXPECT_FALSE(a > b);
+    EXPECT_FALSE(b < a);
+    EXPECT_FALSE(b <= a);
+    EXPECT_TRUE(b >= a);
+    EXPECT_TRUE(b > a);
 
-    EXPECT_FALSE(ndobject((int64_t)0) < ndobject((uint64_t)0));
-    EXPECT_TRUE(ndobject((int64_t)0) <= ndobject((uint64_t)0));
-    EXPECT_TRUE(ndobject((int64_t)0) >= ndobject((uint64_t)0));
-    EXPECT_FALSE(ndobject((int64_t)0) > ndobject((uint64_t)0));
+    a = (int64_t)0;
+    b = (uint64_t)0;
+    EXPECT_FALSE(a < b);
+    EXPECT_TRUE(a <= b);
+    EXPECT_TRUE(a >= b);
+    EXPECT_FALSE(a > b);
+    EXPECT_FALSE(b < a);
+    EXPECT_TRUE(b <= a);
+    EXPECT_TRUE(b >= a);
+    EXPECT_FALSE(b > a);
 
-    EXPECT_FALSE(ndobject((uint64_t)0) < ndobject((int64_t)0));
-    EXPECT_TRUE(ndobject((uint64_t)0) <= ndobject((int64_t)0));
-    EXPECT_TRUE(ndobject((uint64_t)0) >= ndobject((int64_t)0));
-    EXPECT_FALSE(ndobject((uint64_t)0) > ndobject((int64_t)0));
+    a = (int64_t)1;
+    b = (uint64_t)0;
+    EXPECT_FALSE(a < b);
+    EXPECT_FALSE(a <= b);
+    EXPECT_TRUE(a >= b);
+    EXPECT_TRUE(a > b);
+    EXPECT_TRUE(b < a);
+    EXPECT_TRUE(b <= a);
+    EXPECT_FALSE(b >= a);
+    EXPECT_FALSE(b > a);
 
-    EXPECT_FALSE(ndobject((int64_t)1) < ndobject((uint64_t)0));
-    EXPECT_FALSE(ndobject((int64_t)1) <= ndobject((uint64_t)0));
-    EXPECT_TRUE(ndobject((int64_t)1) >= ndobject((uint64_t)0));
-    EXPECT_TRUE(ndobject((int64_t)1) > ndobject((uint64_t)0));
+    a = (int64_t)9223372036854775807LL;
+    b = (uint64_t)9223372036854775806LL;
+    EXPECT_FALSE(a < b);
+    EXPECT_FALSE(a <= b);
+    EXPECT_TRUE(a >= b);
+    EXPECT_TRUE(a > b);
+    EXPECT_TRUE(b < a);
+    EXPECT_TRUE(b <= a);
+    EXPECT_FALSE(b >= a);
+    EXPECT_FALSE(b > a);
 
-    EXPECT_TRUE(ndobject((uint64_t)0) < ndobject((int64_t)1));
-    EXPECT_TRUE(ndobject((uint64_t)0) <= ndobject((int64_t)1));
-    EXPECT_FALSE(ndobject((uint64_t)0) >= ndobject((int64_t)1));
-    EXPECT_FALSE(ndobject((uint64_t)0) > ndobject((int64_t)1));
+    a = (int64_t)9223372036854775807LL;
+    b = (uint64_t)9223372036854775807LL;
+    EXPECT_FALSE(a < b);
+    EXPECT_TRUE(a <= b);
+    EXPECT_TRUE(a >= b);
+    EXPECT_FALSE(a > b);
+    EXPECT_FALSE(b < a);
+    EXPECT_TRUE(b <= a);
+    EXPECT_TRUE(b >= a);
+    EXPECT_FALSE(b > a);
 
-    EXPECT_FALSE(ndobject((int64_t)9223372036854775807LL) < ndobject((uint64_t)9223372036854775806LL));
-    EXPECT_FALSE(ndobject((int64_t)9223372036854775807LL) <= ndobject((uint64_t)9223372036854775806LL));
-    EXPECT_TRUE(ndobject((int64_t)9223372036854775807LL) >= ndobject((uint64_t)9223372036854775806LL));
-    EXPECT_TRUE(ndobject((int64_t)9223372036854775807LL) > ndobject((uint64_t)9223372036854775806LL));
+    a = (int64_t)9223372036854775807LL;
+    b = (uint64_t)9223372036854775808ULL;
+    EXPECT_TRUE(a < b);
+    EXPECT_TRUE(a <= b);
+    EXPECT_FALSE(a >= b);
+    EXPECT_FALSE(a > b);
+    EXPECT_FALSE(b < a);
+    EXPECT_FALSE(b <= a);
+    EXPECT_TRUE(b >= a);
+    EXPECT_TRUE(b > a);
 
-    EXPECT_TRUE(ndobject((uint64_t)9223372036854775806LL) < ndobject((int64_t)9223372036854775807LL));
-    EXPECT_TRUE(ndobject((uint64_t)9223372036854775806LL) <= ndobject((int64_t)9223372036854775807LL));
-    EXPECT_FALSE(ndobject((uint64_t)9223372036854775806LL) >= ndobject((int64_t)9223372036854775807LL));
-    EXPECT_FALSE(ndobject((uint64_t)9223372036854775806LL) > ndobject((int64_t)9223372036854775807LL));
-
-    EXPECT_FALSE(ndobject((int64_t)9223372036854775807LL) < ndobject((uint64_t)9223372036854775807LL));
-    EXPECT_TRUE(ndobject((int64_t)9223372036854775807LL) <= ndobject((uint64_t)9223372036854775807LL));
-    EXPECT_TRUE(ndobject((int64_t)9223372036854775807LL) >= ndobject((uint64_t)9223372036854775807LL));
-    EXPECT_FALSE(ndobject((int64_t)9223372036854775807LL) > ndobject((uint64_t)9223372036854775807LL));
-
-    EXPECT_FALSE(ndobject((uint64_t)9223372036854775807LL) < ndobject((int64_t)9223372036854775807LL));
-    EXPECT_TRUE(ndobject((uint64_t)9223372036854775807LL) <= ndobject((int64_t)9223372036854775807LL));
-    EXPECT_TRUE(ndobject((uint64_t)9223372036854775807LL) >= ndobject((int64_t)9223372036854775807LL));
-    EXPECT_FALSE(ndobject((uint64_t)9223372036854775807LL) > ndobject((int64_t)9223372036854775807LL));
-
-    EXPECT_TRUE(ndobject((int64_t)9223372036854775807LL) < ndobject((uint64_t)9223372036854775808ULL));
-    EXPECT_TRUE(ndobject((int64_t)9223372036854775807LL) <= ndobject((uint64_t)9223372036854775808ULL));
-    EXPECT_FALSE(ndobject((int64_t)9223372036854775807LL) >= ndobject((uint64_t)9223372036854775808ULL));
-    EXPECT_FALSE(ndobject((int64_t)9223372036854775807LL) > ndobject((uint64_t)9223372036854775808ULL));
-
-    EXPECT_FALSE(ndobject((uint64_t)9223372036854775808ULL) < ndobject((int64_t)9223372036854775807LL));
-    EXPECT_FALSE(ndobject((uint64_t)9223372036854775808ULL) <= ndobject((int64_t)9223372036854775807LL));
-    EXPECT_TRUE(ndobject((uint64_t)9223372036854775808ULL) >= ndobject((int64_t)9223372036854775807LL));
-    EXPECT_TRUE(ndobject((uint64_t)9223372036854775808ULL) > ndobject((int64_t)9223372036854775807LL));
+    // Smallest int64_t vs largest uint64_t
+    a = numeric_limits<int64_t>::min();
+    b = numeric_limits<uint64_t>::max();
+    EXPECT_TRUE(a < b);
+    EXPECT_TRUE(a <= b);
+    EXPECT_FALSE(a >= b);
+    EXPECT_FALSE(a > b);
+    EXPECT_FALSE(b < a);
+    EXPECT_FALSE(b <= a);
+    EXPECT_TRUE(b >= a);
+    EXPECT_TRUE(b > a);
 }
