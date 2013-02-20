@@ -473,6 +473,21 @@ public:
     template<class T>
     T as(assign_error_mode errmode = assign_error_default) const;
 
+    /** Sorting comparison between two ndobjects. (Returns a bool, does not broadcast) */
+    bool op_sorting_less(const ndobject& rhs) const;
+    /** Less than comparison between two ndobjects. (Returns a bool, does not broadcast) */
+    bool operator<(const ndobject& rhs) const;
+    /** Less equal comparison between two ndobjects. (Returns a bool, does not broadcast) */
+    bool operator<=(const ndobject& rhs) const;
+    /** Equality comparison between two ndobjects. (Returns a bool, does not broadcast) */
+    bool operator==(const ndobject& rhs) const;
+    /** Inequality comparison between two ndobjects. (Returns a bool, does not broadcast) */
+    bool operator!=(const ndobject& rhs) const;
+    /** Greator equal comparison between two ndobjects. (Returns a bool, does not broadcast) */
+    bool operator>=(const ndobject& rhs) const;
+    /** Greater than comparison between two ndobjects. (Returns a bool, does not broadcast) */
+    bool operator>(const ndobject& rhs) const;
+
     bool equals_exact(const ndobject& rhs) const;
 
     void debug_print(std::ostream& o, const std::string& indent = "") const;

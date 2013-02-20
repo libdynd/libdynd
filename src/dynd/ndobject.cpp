@@ -14,6 +14,7 @@
 #include <dynd/dtypes/fixedbytes_dtype.hpp>
 #include <dynd/dtypes/convert_dtype.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
+#include <dynd/kernels/comparison_kernels.hpp>
 #include <dynd/exceptions.hpp>
 #include <dynd/gfunc/callable.hpp>
 #include <dynd/gfunc/call_callable.hpp>
@@ -677,7 +678,77 @@ ndobject ndobject::eval_copy(const eval::eval_context *ectx,
     return result;
 }
 
-bool dynd::ndobject::equals_exact(const ndobject& rhs) const
+bool ndobject::op_sorting_less(const ndobject& rhs) const
+{
+    comparison_kernel k;
+    make_comparison_kernel(&k, 0, get_dtype(), get_ndo_meta(),
+                    rhs.get_dtype(), rhs.get_ndo_meta(),
+                    comparison_type_sorting_less,
+                    &eval::default_eval_context);
+    return k(get_readonly_originptr(), rhs.get_readonly_originptr());
+}
+
+bool ndobject::operator<(const ndobject& rhs) const
+{
+    comparison_kernel k;
+    make_comparison_kernel(&k, 0, get_dtype(), get_ndo_meta(),
+                    rhs.get_dtype(), rhs.get_ndo_meta(),
+                    comparison_type_less,
+                    &eval::default_eval_context);
+    return k(get_readonly_originptr(), rhs.get_readonly_originptr());
+}
+
+bool ndobject::operator<=(const ndobject& rhs) const
+{
+    comparison_kernel k;
+    make_comparison_kernel(&k, 0, get_dtype(), get_ndo_meta(),
+                    rhs.get_dtype(), rhs.get_ndo_meta(),
+                    comparison_type_less_equal,
+                    &eval::default_eval_context);
+    return k(get_readonly_originptr(), rhs.get_readonly_originptr());
+}
+
+bool ndobject::operator==(const ndobject& rhs) const
+{
+    comparison_kernel k;
+    make_comparison_kernel(&k, 0, get_dtype(), get_ndo_meta(),
+                    rhs.get_dtype(), rhs.get_ndo_meta(),
+                    comparison_type_equal,
+                    &eval::default_eval_context);
+    return k(get_readonly_originptr(), rhs.get_readonly_originptr());
+}
+
+bool ndobject::operator!=(const ndobject& rhs) const
+{
+    comparison_kernel k;
+    make_comparison_kernel(&k, 0, get_dtype(), get_ndo_meta(),
+                    rhs.get_dtype(), rhs.get_ndo_meta(),
+                    comparison_type_not_equal,
+                    &eval::default_eval_context);
+    return k(get_readonly_originptr(), rhs.get_readonly_originptr());
+}
+
+bool ndobject::operator>=(const ndobject& rhs) const
+{
+    comparison_kernel k;
+    make_comparison_kernel(&k, 0, get_dtype(), get_ndo_meta(),
+                    rhs.get_dtype(), rhs.get_ndo_meta(),
+                    comparison_type_greater_equal,
+                    &eval::default_eval_context);
+    return k(get_readonly_originptr(), rhs.get_readonly_originptr());
+}
+
+bool ndobject::operator>(const ndobject& rhs) const
+{
+    comparison_kernel k;
+    make_comparison_kernel(&k, 0, get_dtype(), get_ndo_meta(),
+                    rhs.get_dtype(), rhs.get_ndo_meta(),
+                    comparison_type_greater,
+                    &eval::default_eval_context);
+    return k(get_readonly_originptr(), rhs.get_readonly_originptr());
+}
+
+bool ndobject::equals_exact(const ndobject& rhs) const
 {
     if (get_ndo() == rhs.get_ndo()) {
         return true;

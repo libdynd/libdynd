@@ -13,6 +13,7 @@
 #include <dynd/irange.hpp>
 #include <dynd/memblock/memory_block.hpp>
 #include <dynd/kernels/kernel_instance.hpp>
+#include <dynd/kernels/comparison_kernels.hpp>
 #include <dynd/dtypes/type_id.hpp>
 #include <dynd/dtype_assign.hpp>
 
@@ -459,6 +460,26 @@ public:
                     const dtype& dst_dt, const char *dst_metadata,
                     const dtype& src_dt, const char *src_metadata,
                     kernel_request_t kernreq, assign_error_mode errmode,
+                    const eval::eval_context *ectx) const;
+
+    /**
+     * Creates a comparison kernel for one data value from one
+     * dtype/metadata to another dtype/metadata. This adds the
+     * kernel at the 'out_offset' position in 'out's data, as part
+     * of a hierarchy matching the dtype's hierarchy.
+     *
+     * This function should always be called with this == src0_dt first,
+     * and dtypes which don't support the particular comparison should
+     * then call the corresponding function with this == src1_dt.
+     *
+     * \returns  The offset at the end of 'out' after adding this
+     *           kernel.
+     */
+    virtual size_t make_comparison_kernel(
+                    comparison_kernel *out, size_t offset_out,
+                    const dtype& src0_dt, const char *src0_metadata,
+                    const dtype& src1_dt, const char *src1_metadata,
+                    comparison_type_t comptype,
                     const eval::eval_context *ectx) const;
 
     /**

@@ -120,7 +120,7 @@ size_t dynd::make_assignment_kernel(
                                 dst_dt.get_data_size(), dst_dt.get_alignment(),
                                 kernreq);
             } else {
-                return make_builtin_dtype_assignment_function(out, offset_out,
+                return make_builtin_dtype_assignment_kernel(out, offset_out,
                                 dst_dt.get_type_id(), src_dt.get_type_id(),
                                 kernreq, errmode);
             }
@@ -367,7 +367,7 @@ static unary_strided_operation_t assign_table_strided_kernel[builtin_type_id_cou
 #undef STRIDED_OPERATION_PAIR_LEVEL
 };
 
-size_t dynd::make_builtin_dtype_assignment_function(
+size_t dynd::make_builtin_dtype_assignment_kernel(
                 assignment_kernel *out, size_t offset_out,
                 type_id_t dst_type_id, type_id_t src_type_id,
                 kernel_request_t kernreq, assign_error_mode errmode)

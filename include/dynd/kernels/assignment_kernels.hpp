@@ -67,7 +67,7 @@ public:
  * \param dst_dt  The destination dynd type.
  * \param dst_metadata  Metadata for the destination data.
  * \param src_dt  The source dynd type.
- * \param src_metadata  Metadata for the cource data
+ * \param src_metadata  Metadata for the source data
  * \param kernreq  What kind of kernel must be placed in 'out'.
  * \param errmode  The error mode to use for assignments.
  * \param ectx  DyND evaluation context.
@@ -104,11 +104,11 @@ size_t make_pod_dtype_assignment_kernel(
  * \param out  The hierarchical assignment kernel being constructed.
  * \param offset_out  The offset within 'out'.
  * \param dst_type_id  The destination dynd type id.
- * \param src_type_id  The srouce dynd type id.
+ * \param src_type_id  The source dynd type id.
  * \param kernreq  What kind of kernel must be placed in 'out'.
  * \param errmode  The error mode to use for assignments.
  */
-size_t make_builtin_dtype_assignment_function(
+size_t make_builtin_dtype_assignment_kernel(
                 assignment_kernel *out, size_t offset_out,
                 type_id_t dst_type_id, type_id_t src_type_id,
                 kernel_request_t kernreq, assign_error_mode errmode);

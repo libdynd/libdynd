@@ -222,6 +222,23 @@ size_t base_dtype::make_assignment_kernel(
     throw std::runtime_error(ss.str());
 }
 
+size_t base_dtype::make_comparison_kernel(
+                comparison_kernel *out, size_t offset_out,
+                const dtype& src0_dt, const char *src0_metadata,
+                const dtype& src1_dt, const char *src1_metadata,
+                comparison_type_t comptype,
+                const eval::eval_context *ectx) const
+{
+    stringstream ss;
+    ss << "make_comparison_kernel has not been implemented for ";
+    if (this == src0_dt.extended()) {
+        ss << src0_dt;
+    } else {
+        ss << src1_dt;
+    }
+    throw std::runtime_error(ss.str());
+}
+
 void base_dtype::foreach_leading(char *DYND_UNUSED(data), const char *DYND_UNUSED(metadata),
                 foreach_fn_t DYND_UNUSED(callback), void *DYND_UNUSED(callback_data)) const
 {
