@@ -246,6 +246,101 @@ namespace dynd {
     struct op_gt<src0_type, src1_type, nord0_kind, nord1_kind, src0_bigger, src1_bigger> \
         : public op_cant_compare<src0_type, src1_type, '>'> {};
 
+    // real, real sorting comparison
+    template<class src0_type, class src1_type,
+                    bool src0_bigger, bool src1_bigger>
+    struct op_sort_lt<src0_type, src1_type, real_kind, real_kind, src0_bigger, src1_bigger> {
+        inline static bool f(const src0_type& v0, const src1_type& v1)
+        {
+            // This puts NaNs at the end
+            return v0 < v1 || (v1 != v1 && v0 == v0);
+        }
+    };
+
+    // int/uint, real comparison
+    template<class src0_type, class src1_type,
+                    bool src0_bigger, bool src1_bigger>
+    struct op_eq<src0_type, src1_type, int_kind, real_kind, src0_bigger, src1_bigger> {
+        inline static bool f(const src0_type& v0, const src1_type& v1)
+        {
+            // Slower, but more rigorous test
+            return v0 == static_cast<src0_type>(v1) &&
+                static_cast<src1_type>(v0) == v1;
+        }
+    };
+    template<class src0_type, class src1_type,
+                    bool src0_bigger, bool src1_bigger>
+    struct op_ne<src0_type, src1_type, int_kind, real_kind, src0_bigger, src1_bigger> {
+        inline static bool f(const src0_type& v0, const src1_type& v1)
+        {
+            // Slower, but more rigorous test
+            return v0 != static_cast<src0_type>(v1) ||
+                static_cast<src1_type>(v0) != v1;
+        }
+    };
+    template<class src0_type, class src1_type,
+                    bool src0_bigger, bool src1_bigger>
+    struct op_eq<src0_type, src1_type, uint_kind, real_kind, src0_bigger, src1_bigger> {
+        inline static bool f(const src0_type& v0, const src1_type& v1)
+        {
+            // Slower, but more rigorous test
+            return v0 == static_cast<src0_type>(v1) &&
+                static_cast<src1_type>(v0) == v1;
+        }
+    };
+    template<class src0_type, class src1_type,
+                    bool src0_bigger, bool src1_bigger>
+    struct op_ne<src0_type, src1_type, uint_kind, real_kind, src0_bigger, src1_bigger> {
+        inline static bool f(const src0_type& v0, const src1_type& v1)
+        {
+            // Slower, but more rigorous test
+            return v0 != static_cast<src0_type>(v1) ||
+                static_cast<src1_type>(v0) != v1;
+        }
+    };
+
+    // real, int/uint comparison
+    template<class src0_type, class src1_type,
+                    bool src0_bigger, bool src1_bigger>
+    struct op_eq<src0_type, src1_type, real_kind, int_kind, src0_bigger, src1_bigger> {
+        inline static bool f(const src0_type& v0, const src1_type& v1)
+        {
+            // Slower, but more rigorous test
+            return v0 == static_cast<src0_type>(v1) &&
+                static_cast<src1_type>(v0) == v1;
+        }
+    };
+    template<class src0_type, class src1_type,
+                    bool src0_bigger, bool src1_bigger>
+    struct op_ne<src0_type, src1_type, real_kind, int_kind, src0_bigger, src1_bigger> {
+        inline static bool f(const src0_type& v0, const src1_type& v1)
+        {
+            // Slower, but more rigorous test
+            return v0 != static_cast<src0_type>(v1) ||
+                static_cast<src1_type>(v0) != v1;
+        }
+    };
+    template<class src0_type, class src1_type,
+                    bool src0_bigger, bool src1_bigger>
+    struct op_eq<src0_type, src1_type, real_kind, uint_kind, src0_bigger, src1_bigger> {
+        inline static bool f(const src0_type& v0, const src1_type& v1)
+        {
+            // Slower, but more rigorous test
+            return v0 == static_cast<src0_type>(v1) &&
+                static_cast<src1_type>(v0) == v1;
+        }
+    };
+    template<class src0_type, class src1_type,
+                    bool src0_bigger, bool src1_bigger>
+    struct op_ne<src0_type, src1_type, real_kind, uint_kind, src0_bigger, src1_bigger> {
+        inline static bool f(const src0_type& v0, const src1_type& v1)
+        {
+            // Slower, but more rigorous test
+            return v0 != static_cast<src0_type>(v1) ||
+                static_cast<src1_type>(v0) != v1;
+        }
+    };
+
     // Complex isn't comparable (except sorting_less, equal, not_equal)
     NOT_ORDERABLE(complex_kind);
 

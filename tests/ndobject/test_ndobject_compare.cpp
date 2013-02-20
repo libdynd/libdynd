@@ -39,6 +39,23 @@ TEST(NDObjectCompare, Bool) {
     EXPECT_THROW((ndobject(false) <= ndobject(true)), runtime_error);
     EXPECT_THROW((ndobject(false) >= ndobject(true)), runtime_error);
     EXPECT_THROW((ndobject(false) > ndobject(true)), runtime_error);
+    // Compare Bool with other types
+    EXPECT_TRUE(ndobject(true) == ndobject(1));
+    EXPECT_TRUE(ndobject(true) == ndobject(1.f));
+    EXPECT_TRUE(ndobject(true) == ndobject(1.0));
+    EXPECT_TRUE(ndobject(true) == ndobject(complex<double>(1.0)));
+    EXPECT_TRUE(ndobject(false) == ndobject(0));
+    EXPECT_TRUE(ndobject(false) == ndobject(0.f));
+    EXPECT_TRUE(ndobject(false) == ndobject(0.0));
+    EXPECT_TRUE(ndobject(false) == ndobject(complex<double>()));
+    EXPECT_TRUE(ndobject(true) != ndobject(2));
+    EXPECT_TRUE(ndobject(true) != ndobject(2.f));
+    EXPECT_TRUE(ndobject(true) != ndobject(2.0));
+    EXPECT_TRUE(ndobject(true) != ndobject(complex<double>(1,1)));
+    EXPECT_TRUE(ndobject(false) != ndobject(-1));
+    EXPECT_TRUE(ndobject(false) != ndobject(-1.f));
+    EXPECT_TRUE(ndobject(false) != ndobject(-1.0));
+    EXPECT_TRUE(ndobject(false) != ndobject(complex<double>(0,1)));
 }
 
 TEST(NDObjectCompare, EqualityIntUInt) {
@@ -150,7 +167,6 @@ TEST(NDObjectCompare, InequalityInt8UInt8) {
     EXPECT_TRUE(b > a);
 }
 
-
 TEST(NDObjectCompare, InequalityInt64UInt64) {
     ndobject a, b;
 
@@ -231,4 +247,362 @@ TEST(NDObjectCompare, InequalityInt64UInt64) {
     EXPECT_FALSE(b <= a);
     EXPECT_TRUE(b >= a);
     EXPECT_TRUE(b > a);
+}
+
+TEST(NDObjectCompare, EqualityIntFloat) {
+    ndobject a, b;
+
+    // 2**24 is the end of the consecutive float32 integers
+    a = 16777216;
+    b = 16777216.f;
+    EXPECT_FALSE(a.op_sorting_less(b));
+    EXPECT_FALSE(a < b);
+    EXPECT_TRUE(a <= b);
+    EXPECT_TRUE(a == b);
+    EXPECT_FALSE(a != b);
+    EXPECT_TRUE(a >= b);
+    EXPECT_FALSE(a > b);
+    EXPECT_FALSE(b.op_sorting_less(a));
+    EXPECT_FALSE(b < a);
+    EXPECT_TRUE(b <= a);
+    EXPECT_TRUE(b == a);
+    EXPECT_FALSE(b != a);
+    EXPECT_TRUE(b >= a);
+    EXPECT_FALSE(b > a);
+
+    // Some of the following tests are excluded
+    // because they return the wrong answer.
+    // THIS IS COMMON TO C/C++/NumPy/etc, TOO.
+    // TODO: Implement rigorous comparisons between types.
+    a = 16777217;
+    b = 16777216.f;
+    EXPECT_FALSE(a.op_sorting_less(b));
+    EXPECT_FALSE(a < b);
+    //EXPECT_FALSE(a <= b);
+    EXPECT_FALSE(a == b);
+    EXPECT_TRUE(a != b);
+    EXPECT_TRUE(a >= b);
+    //EXPECT_TRUE(a > b);
+    //EXPECT_TRUE(b.op_sorting_less(a));
+    //EXPECT_TRUE(b < a);
+    EXPECT_TRUE(b <= a);
+    EXPECT_FALSE(b == a);
+    EXPECT_TRUE(b != a);
+    //EXPECT_FALSE(b >= a);
+    EXPECT_FALSE(b > a);
+
+    // The following work because the platforms tested on
+    // convert 16777217 -> 16777216.f before doing
+    // the operations.
+    a = 16777217;
+    b = 16777218.f;
+    EXPECT_TRUE(a.op_sorting_less(b));
+    EXPECT_TRUE(a < b);
+    EXPECT_TRUE(a <= b);
+    EXPECT_FALSE(a == b);
+    EXPECT_TRUE(a != b);
+    EXPECT_FALSE(a >= b);
+    EXPECT_FALSE(a > b);
+    EXPECT_FALSE(b.op_sorting_less(a));
+    EXPECT_FALSE(b < a);
+    EXPECT_FALSE(b <= a);
+    EXPECT_FALSE(b == a);
+    EXPECT_TRUE(b != a);
+    EXPECT_TRUE(b >= a);
+    EXPECT_TRUE(b > a);
+}
+
+TEST(NDObjectCompare, EqualityUIntFloat) {
+    ndobject a, b;
+
+    // 2**24 is the end of the consecutive float32 integers
+    a = (uint32_t)16777216;
+    b = 16777216.f;
+    EXPECT_FALSE(a.op_sorting_less(b));
+    EXPECT_FALSE(a < b);
+    EXPECT_TRUE(a <= b);
+    EXPECT_TRUE(a == b);
+    EXPECT_FALSE(a != b);
+    EXPECT_TRUE(a >= b);
+    EXPECT_FALSE(a > b);
+    EXPECT_FALSE(b.op_sorting_less(a));
+    EXPECT_FALSE(b < a);
+    EXPECT_TRUE(b <= a);
+    EXPECT_TRUE(b == a);
+    EXPECT_FALSE(b != a);
+    EXPECT_TRUE(b >= a);
+    EXPECT_FALSE(b > a);
+
+    // Some of the following tests are excluded
+    // because they return the wrong answer.
+    // THIS IS COMMON TO C/C++/NumPy/etc, TOO.
+    // TODO: Implement rigorous comparisons between types.
+    a = (uint32_t)16777217;
+    b = 16777216.f;
+    EXPECT_FALSE(a.op_sorting_less(b));
+    EXPECT_FALSE(a < b);
+    //EXPECT_FALSE(a <= b);
+    EXPECT_FALSE(a == b);
+    EXPECT_TRUE(a != b);
+    EXPECT_TRUE(a >= b);
+    //EXPECT_TRUE(a > b);
+    //EXPECT_TRUE(b.op_sorting_less(a));
+    //EXPECT_TRUE(b < a);
+    EXPECT_TRUE(b <= a);
+    EXPECT_FALSE(b == a);
+    EXPECT_TRUE(b != a);
+    //EXPECT_FALSE(b >= a);
+    EXPECT_FALSE(b > a);
+
+    // The following work because the platforms tested on
+    // convert 16777217 -> 16777216.f before doing
+    // the operations.
+    a = (uint32_t)16777217;
+    b = 16777218.f;
+    EXPECT_TRUE(a.op_sorting_less(b));
+    EXPECT_TRUE(a < b);
+    EXPECT_TRUE(a <= b);
+    EXPECT_FALSE(a == b);
+    EXPECT_TRUE(a != b);
+    EXPECT_FALSE(a >= b);
+    EXPECT_FALSE(a > b);
+    EXPECT_FALSE(b.op_sorting_less(a));
+    EXPECT_FALSE(b < a);
+    EXPECT_FALSE(b <= a);
+    EXPECT_FALSE(b == a);
+    EXPECT_TRUE(b != a);
+    EXPECT_TRUE(b >= a);
+    EXPECT_TRUE(b > a);
+}
+
+TEST(NDObjectCompare, NaNFloat32) {
+    ndobject a, b;
+    ndobject nan = ndobject("nan").cast_scalars<float>().eval();
+    ndobject pinf = ndobject("inf").cast_scalars<float>().eval();
+
+    // A NaN, compared against itself
+    a = nan;
+    EXPECT_FALSE(a.op_sorting_less(a));
+    EXPECT_FALSE(a < a);
+    EXPECT_FALSE(a <= a);
+    EXPECT_FALSE(a == a);
+    EXPECT_TRUE(a != a);
+    EXPECT_FALSE(a >= a);
+    EXPECT_FALSE(a > a);
+
+    // Compare NaN against zero.
+    // Special "sorting less than" orders them, other
+    // comparisons do not.
+    a = nan;
+    b = 0.f;
+    EXPECT_FALSE(a.op_sorting_less(b));
+    EXPECT_FALSE(a < b);
+    EXPECT_FALSE(a <= b);
+    EXPECT_FALSE(a == b);
+    EXPECT_TRUE(a != b);
+    EXPECT_FALSE(a >= b);
+    EXPECT_FALSE(a > b);
+    EXPECT_TRUE(b.op_sorting_less(a));
+    EXPECT_FALSE(b < a);
+    EXPECT_FALSE(b <= a);
+    EXPECT_FALSE(b == a);
+    EXPECT_TRUE(b != a);
+    EXPECT_FALSE(b >= a);
+    EXPECT_FALSE(b > a);
+
+    // Compare NaN against inf.
+    // Special "sorting less than" orders them, other
+    // comparisons do not.
+    a = nan;
+    b = pinf;
+    EXPECT_FALSE(a.op_sorting_less(b));
+    EXPECT_FALSE(a < b);
+    EXPECT_FALSE(a <= b);
+    EXPECT_FALSE(a == b);
+    EXPECT_TRUE(a != b);
+    EXPECT_FALSE(a >= b);
+    EXPECT_FALSE(a > b);
+    EXPECT_TRUE(b.op_sorting_less(a));
+    EXPECT_FALSE(b < a);
+    EXPECT_FALSE(b <= a);
+    EXPECT_FALSE(b == a);
+    EXPECT_TRUE(b != a);
+    EXPECT_FALSE(b >= a);
+    EXPECT_FALSE(b > a);
+}
+
+TEST(NDObjectCompare, NaNFloat64) {
+    ndobject a, b;
+    ndobject nan = ndobject("nan").cast_scalars<double>().eval();
+    ndobject pinf = ndobject("inf").cast_scalars<double>().eval();
+
+    // A NaN, compared against itself
+    a = nan;
+    EXPECT_FALSE(a.op_sorting_less(a));
+    EXPECT_FALSE(a < a);
+    EXPECT_FALSE(a <= a);
+    EXPECT_FALSE(a == a);
+    EXPECT_TRUE(a != a);
+    EXPECT_FALSE(a >= a);
+    EXPECT_FALSE(a > a);
+
+    // Compare NaN against zero.
+    // Special "sorting less than" orders them, other
+    // comparisons do not.
+    a = nan;
+    b = 0.0;
+    EXPECT_FALSE(a.op_sorting_less(b));
+    EXPECT_FALSE(a < b);
+    EXPECT_FALSE(a <= b);
+    EXPECT_FALSE(a == b);
+    EXPECT_TRUE(a != b);
+    EXPECT_FALSE(a >= b);
+    EXPECT_FALSE(a > b);
+    EXPECT_TRUE(b.op_sorting_less(a));
+    EXPECT_FALSE(b < a);
+    EXPECT_FALSE(b <= a);
+    EXPECT_FALSE(b == a);
+    EXPECT_TRUE(b != a);
+    EXPECT_FALSE(b >= a);
+    EXPECT_FALSE(b > a);
+
+    // Compare NaN against inf.
+    // Special "sorting less than" orders them, other
+    // comparisons do not.
+    a = nan;
+    b = pinf;
+    EXPECT_FALSE(a.op_sorting_less(b));
+    EXPECT_FALSE(a < b);
+    EXPECT_FALSE(a <= b);
+    EXPECT_FALSE(a == b);
+    EXPECT_TRUE(a != b);
+    EXPECT_FALSE(a >= b);
+    EXPECT_FALSE(a > b);
+    EXPECT_TRUE(b.op_sorting_less(a));
+    EXPECT_FALSE(b < a);
+    EXPECT_FALSE(b <= a);
+    EXPECT_FALSE(b == a);
+    EXPECT_TRUE(b != a);
+    EXPECT_FALSE(b >= a);
+    EXPECT_FALSE(b > a);
+}
+
+TEST(NDObjectCompare, ComplexFloat32) {
+    ndobject a, b;
+    // For complex, op_sorting_less is lexicographic,
+    // and other inequalities raise exceptions.
+
+    // Compare 0 with 0
+    a = complex<float>();
+    b = complex<float>();
+    EXPECT_FALSE(a.op_sorting_less(b));
+    EXPECT_THROW((a < b), runtime_error);
+    EXPECT_THROW((a <= b), runtime_error);
+    EXPECT_TRUE(a == b);
+    EXPECT_FALSE(a != b);
+    EXPECT_THROW((a >= b), runtime_error);
+    EXPECT_THROW((a > b), runtime_error);
+    EXPECT_FALSE(b.op_sorting_less(a));
+    EXPECT_THROW((b < a), runtime_error);
+    EXPECT_THROW((b <= a), runtime_error);
+    EXPECT_TRUE(b == a);
+    EXPECT_FALSE(b != a);
+    EXPECT_THROW((b >= a), runtime_error);
+    EXPECT_THROW((b > a), runtime_error);
+
+    // Compare 0+1j with 1+1j
+    a = complex<float>(0, 1);
+    b = complex<float>(1, 1);
+    EXPECT_TRUE(a.op_sorting_less(b));
+    EXPECT_THROW((a < b), runtime_error);
+    EXPECT_THROW((a <= b), runtime_error);
+    EXPECT_FALSE(a == b);
+    EXPECT_TRUE(a != b);
+    EXPECT_THROW((a >= b), runtime_error);
+    EXPECT_THROW((a > b), runtime_error);
+    EXPECT_FALSE(b.op_sorting_less(a));
+    EXPECT_THROW((b < a), runtime_error);
+    EXPECT_THROW((b <= a), runtime_error);
+    EXPECT_FALSE(b == a);
+    EXPECT_TRUE(b != a);
+    EXPECT_THROW((b >= a), runtime_error);
+    EXPECT_THROW((b > a), runtime_error);
+
+    // Compare 0+1j with 0+2j
+    a = complex<float>(0, 1);
+    b = complex<float>(0, 2);
+    EXPECT_TRUE(a.op_sorting_less(b));
+    EXPECT_THROW((a < b), runtime_error);
+    EXPECT_THROW((a <= b), runtime_error);
+    EXPECT_FALSE(a == b);
+    EXPECT_TRUE(a != b);
+    EXPECT_THROW((a >= b), runtime_error);
+    EXPECT_THROW((a > b), runtime_error);
+    EXPECT_FALSE(b.op_sorting_less(a));
+    EXPECT_THROW((b < a), runtime_error);
+    EXPECT_THROW((b <= a), runtime_error);
+    EXPECT_FALSE(b == a);
+    EXPECT_TRUE(b != a);
+    EXPECT_THROW((b >= a), runtime_error);
+    EXPECT_THROW((b > a), runtime_error);
+}
+
+TEST(NDObjectCompare, ComplexFloat64) {
+    ndobject a, b;
+    // For complex, op_sorting_less is lexicographic,
+    // and other inequalities raise exceptions.
+
+    // Compare 0 with 0
+    a = complex<double>();
+    b = complex<double>();
+    EXPECT_FALSE(a.op_sorting_less(b));
+    EXPECT_THROW((a < b), runtime_error);
+    EXPECT_THROW((a <= b), runtime_error);
+    EXPECT_TRUE(a == b);
+    EXPECT_FALSE(a != b);
+    EXPECT_THROW((a >= b), runtime_error);
+    EXPECT_THROW((a > b), runtime_error);
+    EXPECT_FALSE(b.op_sorting_less(a));
+    EXPECT_THROW((b < a), runtime_error);
+    EXPECT_THROW((b <= a), runtime_error);
+    EXPECT_TRUE(b == a);
+    EXPECT_FALSE(b != a);
+    EXPECT_THROW((b >= a), runtime_error);
+    EXPECT_THROW((b > a), runtime_error);
+
+    // Compare 0+1j with 1+1j
+    a = complex<double>(0, 1);
+    b = complex<double>(1, 1);
+    EXPECT_TRUE(a.op_sorting_less(b));
+    EXPECT_THROW((a < b), runtime_error);
+    EXPECT_THROW((a <= b), runtime_error);
+    EXPECT_FALSE(a == b);
+    EXPECT_TRUE(a != b);
+    EXPECT_THROW((a >= b), runtime_error);
+    EXPECT_THROW((a > b), runtime_error);
+    EXPECT_FALSE(b.op_sorting_less(a));
+    EXPECT_THROW((b < a), runtime_error);
+    EXPECT_THROW((b <= a), runtime_error);
+    EXPECT_FALSE(b == a);
+    EXPECT_TRUE(b != a);
+    EXPECT_THROW((b >= a), runtime_error);
+    EXPECT_THROW((b > a), runtime_error);
+
+    // Compare 0+1j with 0+2j
+    a = complex<double>(0, 1);
+    b = complex<double>(0, 2);
+    EXPECT_TRUE(a.op_sorting_less(b));
+    EXPECT_THROW((a < b), runtime_error);
+    EXPECT_THROW((a <= b), runtime_error);
+    EXPECT_FALSE(a == b);
+    EXPECT_TRUE(a != b);
+    EXPECT_THROW((a >= b), runtime_error);
+    EXPECT_THROW((a > b), runtime_error);
+    EXPECT_FALSE(b.op_sorting_less(a));
+    EXPECT_THROW((b < a), runtime_error);
+    EXPECT_THROW((b <= a), runtime_error);
+    EXPECT_FALSE(b == a);
+    EXPECT_TRUE(b != a);
+    EXPECT_THROW((b >= a), runtime_error);
+    EXPECT_THROW((b > a), runtime_error);
 }
