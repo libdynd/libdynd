@@ -5,6 +5,7 @@
 
 #include <dynd/dtype.hpp>
 #include <dynd/gfunc/callable.hpp>
+#include <dynd/dtypes/builtin_dtype_properties.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -273,6 +274,8 @@ void base_dtype::get_nonuniform_ndobject_properties_and_functions(
         if (!dt.is_builtin()) {
             dt.extended()->get_dynamic_ndobject_properties(&properties, &properties_count);
             dt.extended()->get_dynamic_ndobject_functions(&functions, &functions_count);
+        } else {
+            get_builtin_dtype_dynamic_ndobject_properties(dt.get_type_id(), &properties, &properties_count);
         }
     }
     out_properties.resize(properties_count);
