@@ -606,3 +606,40 @@ TEST(NDObjectCompare, ComplexFloat64) {
     EXPECT_THROW((b >= a), runtime_error);
     EXPECT_THROW((b > a), runtime_error);
 }
+
+TEST(NDObjectCompare, NaNComplexFloat32) {
+    ndobject a, b;
+    float nan = ndobject("nan").cast_scalars<float>().as<float>();
+
+    // A NaN, compared against itself
+    a = complex<float>(nan, 0.f);
+    EXPECT_FALSE(a.op_sorting_less(a));
+    EXPECT_THROW((a < a), runtime_error);
+    EXPECT_THROW((a <= a), runtime_error);
+    EXPECT_FALSE(a == a);
+    EXPECT_TRUE(a != a);
+    EXPECT_THROW((a >= a), runtime_error);
+    EXPECT_THROW((a > a), runtime_error);
+
+    // A NaN, compared against itself
+    a = complex<float>(0.f, nan);
+    EXPECT_FALSE(a.op_sorting_less(a));
+    EXPECT_THROW((a < a), runtime_error);
+    EXPECT_THROW((a <= a), runtime_error);
+    EXPECT_FALSE(a == a);
+    EXPECT_TRUE(a != a);
+    EXPECT_THROW((a >= a), runtime_error);
+    EXPECT_THROW((a > a), runtime_error);
+
+    // A NaN, compared against itself
+    a = complex<float>(nan, nan);
+    EXPECT_FALSE(a.op_sorting_less(a));
+    EXPECT_THROW((a < a), runtime_error);
+    EXPECT_THROW((a <= a), runtime_error);
+    EXPECT_FALSE(a == a);
+    EXPECT_TRUE(a != a);
+    EXPECT_THROW((a >= a), runtime_error);
+    EXPECT_THROW((a > a), runtime_error);
+
+}
+

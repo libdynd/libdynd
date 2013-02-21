@@ -6,6 +6,7 @@
 #include <dynd/dtypes/property_dtype.hpp>
 #include <dynd/dtypes/convert_dtype.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
+#include <dynd/dtypes/builtin_dtype_properties.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -21,16 +22,18 @@ property_dtype::property_dtype(const dtype& operand_dtype, const std::string& pr
             m_property_name(property_name),
             m_property_index(0)
 {
-    if (operand_dtype.value_dtype().is_builtin()) {
-        std::stringstream ss;
-        ss << "the dtype " << operand_dtype;
-        ss << " doesn't have a property \"" << property_name << "\"";
-        throw std::runtime_error(ss.str());
+    if (!operand_dtype.value_dtype().is_builtin()) {
+        m_property_index = m_operand_dtype.value_dtype().extended()->get_elwise_property_index(
+                        property_name, m_readable, m_writable);
+        m_value_dtype = m_operand_dtype.value_dtype().extended()->get_elwise_property_dtype(m_property_index);
+    } else {
+        m_property_index = get_builtin_dtype_elwise_property_index(
+                        operand_dtype.value_dtype().get_type_id(),
+                        property_name, m_readable, m_writable);
+        m_value_dtype = get_builtin_dtype_elwise_property_dtype(
+                        operand_dtype.value_dtype().get_type_id(),
+                        m_property_index);
     }
-
-    m_property_index = m_operand_dtype.value_dtype().extended()->get_elwise_property_index(
-                    property_name, m_readable, m_writable);
-    m_value_dtype = m_operand_dtype.value_dtype().extended()->get_elwise_property_dtype(m_property_index);
 }
 
 property_dtype::property_dtype(const dtype& value_dtype, const dtype& operand_dtype,
@@ -44,12 +47,6 @@ property_dtype::property_dtype(const dtype& value_dtype, const dtype& operand_dt
             m_property_name(property_name),
             m_property_index(0)
 {
-    if (value_dtype.is_builtin()) {
-        stringstream ss;
-        ss << "the dtype " << operand_dtype;
-        ss << " doesn't have a property \"" << property_name << "\"";
-        throw std::runtime_error(ss.str());
-    }
     if (m_value_dtype.get_kind() == expression_kind) {
         stringstream ss;
         ss << "property_dtype: The destination dtype " << m_value_dtype;
@@ -57,12 +54,21 @@ property_dtype::property_dtype(const dtype& value_dtype, const dtype& operand_dt
         throw std::runtime_error(ss.str());
     }
 
-    m_property_index = m_value_dtype.extended()->get_elwise_property_index(
-                    property_name, m_writable, m_readable);
+    dtype property_dtype;
+    if (!value_dtype.is_builtin()) {
+        m_property_index = m_value_dtype.extended()->get_elwise_property_index(
+                        property_name, m_writable, m_readable);
+        property_dtype = m_value_dtype.extended()->get_elwise_property_dtype(
+                        m_property_index);
+    } else {
+        m_property_index = get_builtin_dtype_elwise_property_index(
+                        value_dtype.get_type_id(), property_name,
+                        m_writable, m_readable);
+        property_dtype = get_builtin_dtype_elwise_property_dtype(
+                        value_dtype.get_type_id(), m_property_index);
+    }
     // If the operand dtype doesn't match the property, add a
     // convertion to the correct dtype
-    dtype property_dtype = m_value_dtype.extended()->get_elwise_property_dtype(
-                    m_property_index);
     if (m_operand_dtype.value_dtype() != property_dtype) {
         m_operand_dtype = make_convert_dtype(property_dtype, m_operand_dtype);
     }
@@ -127,11 +133,21 @@ size_t property_dtype::make_operand_to_value_assignment_kernel(
 {
     if (!m_reversed_property) {
         if (m_readable) {
-            return m_operand_dtype.value_dtype().extended()->make_elwise_property_getter_kernel(
-                            out, offset_out,
-                            dst_metadata,
-                            src_metadata, m_property_index,
-                            kernreq, ectx);
+            const dtype& ovdt = m_operand_dtype.value_dtype();
+            if (!ovdt.is_builtin()) {
+                return ovdt.extended()->make_elwise_property_getter_kernel(
+                                out, offset_out,
+                                dst_metadata,
+                                src_metadata, m_property_index,
+                                kernreq, ectx);
+            } else {
+                return make_builtin_dtype_elwise_property_getter_kernel(
+                                out, offset_out,
+                                ovdt.get_type_id(),
+                                dst_metadata,
+                                src_metadata, m_property_index,
+                                kernreq, ectx);
+            }
         } else {
             stringstream ss;
             ss << "cannot read from property \"" << m_property_name << "\"";
@@ -140,11 +156,20 @@ size_t property_dtype::make_operand_to_value_assignment_kernel(
         }
     } else {
         if (m_readable) {
-            return m_value_dtype.extended()->make_elwise_property_setter_kernel(
-                            out, offset_out,
-                            dst_metadata, m_property_index,
-                            src_metadata,
-                            kernreq, ectx);
+            if (!m_value_dtype.is_builtin()) {
+                return m_value_dtype.extended()->make_elwise_property_setter_kernel(
+                                out, offset_out,
+                                dst_metadata, m_property_index,
+                                src_metadata,
+                                kernreq, ectx);
+            } else {
+                return make_builtin_dtype_elwise_property_setter_kernel(
+                                out, offset_out,
+                                m_value_dtype.get_type_id(),
+                                dst_metadata, m_property_index,
+                                src_metadata,
+                                kernreq, ectx);
+            }
         } else {
             stringstream ss;
             ss << "cannot write to property \"" << m_property_name << "\"";
@@ -160,12 +185,22 @@ size_t property_dtype::make_value_to_operand_assignment_kernel(
                 kernel_request_t kernreq, const eval::eval_context *ectx) const
 {
     if (!m_reversed_property) {
-        if (m_readable) {
-            return m_operand_dtype.value_dtype().extended()->make_elwise_property_setter_kernel(
-                            out, offset_out,
-                            dst_metadata, m_property_index,
-                            src_metadata,
-                            kernreq, ectx);
+        if (m_writable) {
+            const dtype& ovdt = m_operand_dtype.value_dtype();
+            if (!ovdt.is_builtin()) {
+                return ovdt.extended()->make_elwise_property_setter_kernel(
+                                out, offset_out,
+                                dst_metadata, m_property_index,
+                                src_metadata,
+                                kernreq, ectx);
+            } else {
+                return make_builtin_dtype_elwise_property_setter_kernel(
+                                out, offset_out,
+                                ovdt.get_type_id(),
+                                dst_metadata, m_property_index,
+                                src_metadata,
+                                kernreq, ectx);
+            }
         } else {
             stringstream ss;
             ss << "cannot write to property \"" << m_property_name << "\"";
@@ -173,12 +208,21 @@ size_t property_dtype::make_value_to_operand_assignment_kernel(
             throw runtime_error(ss.str());
         }
     } else {
-        if (m_readable) {
-            return m_value_dtype.extended()->make_elwise_property_getter_kernel(
-                            out, offset_out,
-                            dst_metadata,
-                            src_metadata, m_property_index,
-                            kernreq, ectx);
+        if (m_writable) {
+            if (!m_value_dtype.is_builtin()) {
+                return m_value_dtype.extended()->make_elwise_property_getter_kernel(
+                                out, offset_out,
+                                dst_metadata,
+                                src_metadata, m_property_index,
+                                kernreq, ectx);
+            } else {
+                return make_builtin_dtype_elwise_property_getter_kernel(
+                                out, offset_out,
+                                m_value_dtype.get_type_id(),
+                                dst_metadata,
+                                src_metadata, m_property_index,
+                                kernreq, ectx);
+            }
         } else {
             stringstream ss;
             ss << "cannot read from property \"" << m_property_name << "\"";

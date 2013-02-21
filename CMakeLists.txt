@@ -61,6 +61,7 @@ set(dynd_SRC
     src/dynd/dtypes/base_string_dtype.cpp
     src/dynd/dtypes/base_struct_dtype.cpp
     src/dynd/dtypes/busdate_dtype.cpp
+    src/dynd/dtypes/builtin_dtype_properties.cpp
     src/dynd/dtypes/bytes_dtype.cpp
     src/dynd/dtypes/byteswap_dtype.cpp
     src/dynd/dtypes/categorical_dtype.cpp
@@ -93,6 +94,7 @@ set(dynd_SRC
     include/dynd/dtypes/base_struct_dtype.hpp
     include/dynd/dtypes/base_uniform_dim_dtype.hpp
     include/dynd/dtypes/busdate_dtype.hpp
+    include/dynd/dtypes/builtin_dtype_properties.hpp
     include/dynd/dtypes/bytes_dtype.hpp
     include/dynd/dtypes/byteswap_dtype.hpp
     include/dynd/dtypes/categorical_dtype.hpp

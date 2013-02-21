@@ -20,6 +20,7 @@
 #include <dynd/gfunc/call_callable.hpp>
 #include <dynd/dtypes/groupby_dtype.hpp>
 #include <dynd/dtypes/categorical_dtype.hpp>
+#include <dynd/dtypes/builtin_dtype_properties.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -550,16 +551,18 @@ void ndobject::flag_as_immutable()
 ndobject ndobject::p(const char *property_name) const
 {
     dtype dt = get_dtype();
+    const std::pair<std::string, gfunc::callable> *properties;
+    size_t count;
     if (!dt.is_builtin()) {
-        const std::pair<std::string, gfunc::callable> *properties;
-        size_t count;
         dt.extended()->get_dynamic_ndobject_properties(&properties, &count);
-        // TODO: We probably want to make some kind of acceleration structure for the name lookup
-        if (count > 0) {
-            for (size_t i = 0; i < count; ++i) {
-                if (properties[i].first == property_name) {
-                    return properties[i].second.call(*this);
-                }
+    } else {
+        get_builtin_dtype_dynamic_ndobject_properties(dt.get_type_id(), &properties, &count);
+    }
+    // TODO: We probably want to make some kind of acceleration structure for the name lookup
+    if (count > 0) {
+        for (size_t i = 0; i < count; ++i) {
+            if (properties[i].first == property_name) {
+                return properties[i].second.call(*this);
             }
         }
     }
@@ -572,16 +575,18 @@ ndobject ndobject::p(const char *property_name) const
 ndobject ndobject::p(const std::string& property_name) const
 {
     dtype dt = get_dtype();
+    const std::pair<std::string, gfunc::callable> *properties;
+    size_t count;
     if (!dt.is_builtin()) {
-        const std::pair<std::string, gfunc::callable> *properties;
-        size_t count;
         dt.extended()->get_dynamic_ndobject_properties(&properties, &count);
-        // TODO: We probably want to make some kind of acceleration structure for the name lookup
-        if (count > 0) {
-            for (size_t i = 0; i < count; ++i) {
-                if (properties[i].first == property_name) {
-                    return properties[i].second.call(*this);
-                }
+    } else {
+        get_builtin_dtype_dynamic_ndobject_properties(dt.get_type_id(), &properties, &count);
+    }
+    // TODO: We probably want to make some kind of acceleration structure for the name lookup
+    if (count > 0) {
+        for (size_t i = 0; i < count; ++i) {
+            if (properties[i].first == property_name) {
+                return properties[i].second.call(*this);
             }
         }
     }
