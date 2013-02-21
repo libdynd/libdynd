@@ -350,8 +350,16 @@ namespace dynd {
     struct op_sort_lt<complex<src0_real_type>, complex<src1_real_type>, complex_kind, complex_kind, src0_bigger, src1_bigger> {
         inline static bool f(const complex<src0_real_type>& v0, const complex<src1_real_type>& v1)
         {
-            return v0.real() < v1.real() ||
-                (v0.real() == v1.real() && v0.imag() < v1.imag());
+            // Sorts in the order like NumPy, [R + Rj, R + nanj, nan + Rj, nan + nanj]
+            if (v0.real() < v1.real()) {
+                return v0.imag() == v0.imag() || v1.imag() != v1.imag();
+            } else if (v0.real() > v1.real()) {
+                return v1.imag() != v1.imag() && v0.imag() == v0.imag();
+            } else if (v0.real() == v1.real() || (v0.real() != v0.real() && v1.real() != v1.real())) {
+                return v0.imag() < v1.imag() || (v1.imag() != v1.imag() && v0.imag() == v0.imag());
+            }  else {
+                return v1.real() != v1.real();
+            }
         }
     };
     template<class src0_type, class src1_real_type, dtype_kind_t src0_kind,

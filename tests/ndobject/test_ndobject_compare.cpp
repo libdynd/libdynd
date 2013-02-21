@@ -611,7 +611,7 @@ TEST(NDObjectCompare, NaNComplexFloat32) {
     ndobject a, b;
     float nan = ndobject("nan").cast_scalars<float>().as<float>();
 
-    // A NaN, compared against itself
+    // real component NaN, compared against itself
     a = complex<float>(nan, 0.f);
     EXPECT_FALSE(a.op_sorting_less(a));
     EXPECT_THROW((a < a), runtime_error);
@@ -621,7 +621,7 @@ TEST(NDObjectCompare, NaNComplexFloat32) {
     EXPECT_THROW((a >= a), runtime_error);
     EXPECT_THROW((a > a), runtime_error);
 
-    // A NaN, compared against itself
+    // imaginary component NaN, compared against itself
     a = complex<float>(0.f, nan);
     EXPECT_FALSE(a.op_sorting_less(a));
     EXPECT_THROW((a < a), runtime_error);
@@ -631,7 +631,7 @@ TEST(NDObjectCompare, NaNComplexFloat32) {
     EXPECT_THROW((a >= a), runtime_error);
     EXPECT_THROW((a > a), runtime_error);
 
-    // A NaN, compared against itself
+    // both components NaN, compared against itself
     a = complex<float>(nan, nan);
     EXPECT_FALSE(a.op_sorting_less(a));
     EXPECT_THROW((a < a), runtime_error);
@@ -641,5 +641,143 @@ TEST(NDObjectCompare, NaNComplexFloat32) {
     EXPECT_THROW((a >= a), runtime_error);
     EXPECT_THROW((a > a), runtime_error);
 
+    // NaNs compared against non-NaNs
+    a = complex<float>(nan, 0.f);
+    b = complex<float>(0.f, 1.f);
+    EXPECT_FALSE(a.op_sorting_less(b));
+    EXPECT_THROW((a < b), runtime_error);
+    EXPECT_THROW((a <= b), runtime_error);
+    EXPECT_FALSE(a == b);
+    EXPECT_TRUE(a != b);
+    EXPECT_THROW((a >= b), runtime_error);
+    EXPECT_THROW((a > b), runtime_error);
+    EXPECT_TRUE(b.op_sorting_less(a));
+    EXPECT_THROW((b < a), runtime_error);
+    EXPECT_THROW((b <= a), runtime_error);
+    EXPECT_FALSE(b == a);
+    EXPECT_TRUE(b != a);
+    EXPECT_THROW((b >= a), runtime_error);
+    EXPECT_THROW((b > a), runtime_error);
+
+    a = complex<float>(0.f, nan);
+    b = complex<float>(1.f, 1.f);
+    EXPECT_FALSE(a.op_sorting_less(b));
+    EXPECT_THROW((a < b), runtime_error);
+    EXPECT_THROW((a <= b), runtime_error);
+    EXPECT_FALSE(a == b);
+    EXPECT_TRUE(a != b);
+    EXPECT_THROW((a >= b), runtime_error);
+    EXPECT_THROW((a > b), runtime_error);
+    EXPECT_TRUE(b.op_sorting_less(a));
+    EXPECT_THROW((b < a), runtime_error);
+    EXPECT_THROW((b <= a), runtime_error);
+    EXPECT_FALSE(b == a);
+    EXPECT_TRUE(b != a);
+    EXPECT_THROW((b >= a), runtime_error);
+    EXPECT_THROW((b > a), runtime_error);
+
+    a = complex<float>(nan, nan);
+    b = complex<float>(1.f, 1.f);
+    EXPECT_FALSE(a.op_sorting_less(b));
+    EXPECT_THROW((a < b), runtime_error);
+    EXPECT_THROW((a <= b), runtime_error);
+    EXPECT_FALSE(a == b);
+    EXPECT_TRUE(a != b);
+    EXPECT_THROW((a >= b), runtime_error);
+    EXPECT_THROW((a > b), runtime_error);
+    EXPECT_TRUE(b.op_sorting_less(a));
+    EXPECT_THROW((b < a), runtime_error);
+    EXPECT_THROW((b <= a), runtime_error);
+    EXPECT_FALSE(b == a);
+    EXPECT_TRUE(b != a);
+    EXPECT_THROW((b >= a), runtime_error);
+    EXPECT_THROW((b > a), runtime_error);
+
+    // NaNs compared against NaNs
+    a = complex<float>(nan, 0.f);
+    b = complex<float>(nan, 1.f);
+    EXPECT_TRUE(a.op_sorting_less(b));
+    EXPECT_THROW((a < b), runtime_error);
+    EXPECT_THROW((a <= b), runtime_error);
+    EXPECT_FALSE(a == b);
+    EXPECT_TRUE(a != b);
+    EXPECT_THROW((a >= b), runtime_error);
+    EXPECT_THROW((a > b), runtime_error);
+    EXPECT_FALSE(b.op_sorting_less(a));
+    EXPECT_THROW((b < a), runtime_error);
+    EXPECT_THROW((b <= a), runtime_error);
+    EXPECT_FALSE(b == a);
+    EXPECT_TRUE(b != a);
+    EXPECT_THROW((b >= a), runtime_error);
+    EXPECT_THROW((b > a), runtime_error);
+
+    a = complex<float>(0.f, nan);
+    b = complex<float>(nan, 1.f);
+    EXPECT_TRUE(a.op_sorting_less(b));
+    EXPECT_THROW((a < b), runtime_error);
+    EXPECT_THROW((a <= b), runtime_error);
+    EXPECT_FALSE(a == b);
+    EXPECT_TRUE(a != b);
+    EXPECT_THROW((a >= b), runtime_error);
+    EXPECT_THROW((a > b), runtime_error);
+    EXPECT_FALSE(b.op_sorting_less(a));
+    EXPECT_THROW((b < a), runtime_error);
+    EXPECT_THROW((b <= a), runtime_error);
+    EXPECT_FALSE(b == a);
+    EXPECT_TRUE(b != a);
+    EXPECT_THROW((b >= a), runtime_error);
+    EXPECT_THROW((b > a), runtime_error);
+
+    a = complex<float>(nan, nan);
+    b = complex<float>(nan, 1.f);
+    EXPECT_FALSE(a.op_sorting_less(b));
+    EXPECT_THROW((a < b), runtime_error);
+    EXPECT_THROW((a <= b), runtime_error);
+    EXPECT_FALSE(a == b);
+    EXPECT_TRUE(a != b);
+    EXPECT_THROW((a >= b), runtime_error);
+    EXPECT_THROW((a > b), runtime_error);
+    EXPECT_TRUE(b.op_sorting_less(a));
+    EXPECT_THROW((b < a), runtime_error);
+    EXPECT_THROW((b <= a), runtime_error);
+    EXPECT_FALSE(b == a);
+    EXPECT_TRUE(b != a);
+    EXPECT_THROW((b >= a), runtime_error);
+    EXPECT_THROW((b > a), runtime_error);
+
+
+    a = complex<float>(0.f, nan);
+    b = complex<float>(1.f, nan);
+    EXPECT_TRUE(a.op_sorting_less(b));
+    EXPECT_THROW((a < b), runtime_error);
+    EXPECT_THROW((a <= b), runtime_error);
+    EXPECT_FALSE(a == b);
+    EXPECT_TRUE(a != b);
+    EXPECT_THROW((a >= b), runtime_error);
+    EXPECT_THROW((a > b), runtime_error);
+    EXPECT_FALSE(b.op_sorting_less(a));
+    EXPECT_THROW((b < a), runtime_error);
+    EXPECT_THROW((b <= a), runtime_error);
+    EXPECT_FALSE(b == a);
+    EXPECT_TRUE(b != a);
+    EXPECT_THROW((b >= a), runtime_error);
+    EXPECT_THROW((b > a), runtime_error);
+
+    a = complex<float>(nan, nan);
+    b = complex<float>(0.f, nan);
+    EXPECT_FALSE(a.op_sorting_less(b));
+    EXPECT_THROW((a < b), runtime_error);
+    EXPECT_THROW((a <= b), runtime_error);
+    EXPECT_FALSE(a == b);
+    EXPECT_TRUE(a != b);
+    EXPECT_THROW((a >= b), runtime_error);
+    EXPECT_THROW((a > b), runtime_error);
+    EXPECT_TRUE(b.op_sorting_less(a));
+    EXPECT_THROW((b < a), runtime_error);
+    EXPECT_THROW((b <= a), runtime_error);
+    EXPECT_FALSE(b == a);
+    EXPECT_TRUE(b != a);
+    EXPECT_THROW((b >= a), runtime_error);
+    EXPECT_THROW((b > a), runtime_error);
 }
 
