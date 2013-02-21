@@ -23,16 +23,13 @@
 // polymorphic macros. Our workaround
 // is to wrap this in inline functions.
 inline bool DYND_ISNAN(float x) {
-    using namespace std;
-    return isnan(x);
+    return std::isnan(x);
 }
 inline bool DYND_ISNAN(double x) {
-    using namespace std;
-    return isnan(x);
+    return std::isnan(x);
 }
 inline bool DYND_ISNAN(long double x) {
-    using namespace std;
-    return isnan(x);
+    return std::isnan(x);
 }
 
 #elif defined(__GNUC__)
