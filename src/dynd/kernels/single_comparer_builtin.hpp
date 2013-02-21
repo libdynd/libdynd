@@ -350,19 +350,14 @@ namespace dynd {
     struct op_sort_lt<complex<src0_real_type>, complex<src1_real_type>, complex_kind, complex_kind, src0_bigger, src1_bigger> {
         inline static bool f(const complex<src0_real_type>& v0, const complex<src1_real_type>& v1)
         {
-cout << "||||||| " << v0 << " vs " << v1 << endl;
             // Sorts in the order like NumPy, [R + Rj, R + nanj, nan + Rj, nan + nanj]
             if (v0.real() < v1.real()) {
-cout << "compare " << v0.real() << " < " << v1.real() << " is true" << endl;
                 return !DYND_ISNAN(v0.imag()) || DYND_ISNAN(v1.imag());
             } else if (v0.real() > v1.real()) {
-cout << "compare " << v0.real() << " > " << v1.real() << " is true" << endl;
                 return DYND_ISNAN(v1.imag()) && !DYND_ISNAN(v0.imag());
             } else if (v0.real() == v1.real() || (DYND_ISNAN(v0.real()) && DYND_ISNAN(v1.real()))) {
-cout << "compare " << v0.real() << " == " << v1.real() << " || (nan checks) is true" << endl;
                 return v0.imag() < v1.imag() || (DYND_ISNAN(v1.imag()) && !DYND_ISNAN(v0.imag()));
             }  else {
-cout << "last case " << endl;
                 return DYND_ISNAN(v1.real());
             }
         }
