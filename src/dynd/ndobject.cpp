@@ -1132,45 +1132,87 @@ intptr_t dynd::binary_search(const ndobject& n, const char *metadata, const char
     }
     const char *n_metadata = n.get_ndo_meta();
     dtype element_dtype = n.get_dtype().at_single(0, &n_metadata);
-    comparison_kernel k_n_less_d, k_d_less_n;
-    make_comparison_kernel(&k_n_less_d, 0,
-                    element_dtype, n_metadata,
-                    element_dtype, metadata,
-                    comparison_type_sorting_less,
-                    &eval::default_eval_context);
-    make_comparison_kernel(&k_d_less_n, 0,
-                    element_dtype, metadata,
-                    element_dtype, n_metadata,
-                    comparison_type_sorting_less,
-                    &eval::default_eval_context);
+    if (element_dtype.get_metadata_size() == 0 || n_metadata == metadata ||
+                    memcmp(n_metadata, metadata, n.get_dtype().get_metadata_size()) == 0) {
+        // First, a version where the metadata is identical, so we can
+        // make do with only a single comparison kernel
+        comparison_kernel k_n_less_d;
+        make_comparison_kernel(&k_n_less_d, 0,
+                        element_dtype, n_metadata,
+                        element_dtype, n_metadata,
+                        comparison_type_sorting_less,
+                        &eval::default_eval_context);
 
-    // TODO: support any type of uniform dimension
-    if (n.get_dtype().get_type_id() != strided_dim_type_id) {
-        stringstream ss;
-        ss << "TODO: binary_search on ndobject with dtype " << n.get_dtype() << " is not implemented";
-        throw runtime_error(ss.str());
-    }
-
-    const char *n_data = n.get_readonly_originptr();
-    intptr_t n_stride = reinterpret_cast<const strided_dim_dtype_metadata *>(n.get_ndo_meta())->stride;
-    intptr_t first = 0, last = n.get_dim_size();
-    while (first < last) {
-        intptr_t trial = first + (last - first) / 2;
-        const char *trial_data = n_data + trial * n_stride;
-
-        // In order for the data to always match up with the metadata, need to have
-        // trial_data first and data second in the comparison operations.
-        if (k_d_less_n(data, trial_data)) {
-            // value < arr[trial]
-            last = trial;
-        } else if (k_n_less_d(trial_data, data)) {
-            // value > arr[trial]
-            first = trial + 1;
-        } else {
-            return trial;
+        // TODO: support any type of uniform dimension
+        if (n.get_dtype().get_type_id() != strided_dim_type_id) {
+            stringstream ss;
+            ss << "TODO: binary_search on ndobject with dtype " << n.get_dtype() << " is not implemented";
+            throw runtime_error(ss.str());
         }
+
+        const char *n_data = n.get_readonly_originptr();
+        intptr_t n_stride = reinterpret_cast<const strided_dim_dtype_metadata *>(n.get_ndo_meta())->stride;
+        intptr_t first = 0, last = n.get_dim_size();
+        while (first < last) {
+            intptr_t trial = first + (last - first) / 2;
+            const char *trial_data = n_data + trial * n_stride;
+
+            // In order for the data to always match up with the metadata, need to have
+            // trial_data first and data second in the comparison operations.
+            if (k_n_less_d(data, trial_data)) {
+                // value < arr[trial]
+                last = trial;
+            } else if (k_n_less_d(trial_data, data)) {
+                // value > arr[trial]
+                first = trial + 1;
+            } else {
+                return trial;
+            }
+        }
+        return -1;
+    } else {
+        // Second, a version where the metadata are different, so
+        // we need to get a kernel for each comparison direction.
+        comparison_kernel k_n_less_d, k_d_less_n;
+        make_comparison_kernel(&k_n_less_d, 0,
+                        element_dtype, n_metadata,
+                        element_dtype, metadata,
+                        comparison_type_sorting_less,
+                        &eval::default_eval_context);
+        make_comparison_kernel(&k_d_less_n, 0,
+                        element_dtype, metadata,
+                        element_dtype, n_metadata,
+                        comparison_type_sorting_less,
+                        &eval::default_eval_context);
+
+        // TODO: support any type of uniform dimension
+        if (n.get_dtype().get_type_id() != strided_dim_type_id) {
+            stringstream ss;
+            ss << "TODO: binary_search on ndobject with dtype " << n.get_dtype() << " is not implemented";
+            throw runtime_error(ss.str());
+        }
+
+        const char *n_data = n.get_readonly_originptr();
+        intptr_t n_stride = reinterpret_cast<const strided_dim_dtype_metadata *>(n.get_ndo_meta())->stride;
+        intptr_t first = 0, last = n.get_dim_size();
+        while (first < last) {
+            intptr_t trial = first + (last - first) / 2;
+            const char *trial_data = n_data + trial * n_stride;
+
+            // In order for the data to always match up with the metadata, need to have
+            // trial_data first and data second in the comparison operations.
+            if (k_d_less_n(data, trial_data)) {
+                // value < arr[trial]
+                last = trial;
+            } else if (k_n_less_d(trial_data, data)) {
+                // value > arr[trial]
+                first = trial + 1;
+            } else {
+                return trial;
+            }
+        }
+        return -1;
     }
-    return -1;
 }
 
 ndobject dynd::groupby(const dynd::ndobject& data_values, const dynd::ndobject& by_values, const dynd::dtype& groups)
