@@ -68,8 +68,6 @@ public:
 
     bool is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const;
 
-    void get_single_compare_kernel(kernel_instance<compare_operations_t>& out_kernel) const;
-
     bool operator==(const base_dtype& rhs) const;
 
     void metadata_default_construct(char *metadata, size_t ndim, const intptr_t* shape) const;
@@ -84,6 +82,13 @@ public:
                     const dtype& dst_dt, const char *dst_metadata,
                     const dtype& src_dt, const char *src_metadata,
                     kernel_request_t kernreq, assign_error_mode errmode,
+                    const eval::eval_context *ectx) const;
+
+    size_t make_comparison_kernel(
+                    comparison_kernel *out, size_t offset_out,
+                    const dtype& src0_dt, const char *src0_metadata,
+                    const dtype& src1_dt, const char *src1_metadata,
+                    comparison_type_t comptype,
                     const eval::eval_context *ectx) const;
 };
 

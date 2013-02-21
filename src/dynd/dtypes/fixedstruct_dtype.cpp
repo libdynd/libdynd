@@ -364,11 +364,6 @@ bool fixedstruct_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype&
     return false;
 }
 
-void fixedstruct_dtype::get_single_compare_kernel(kernel_instance<compare_operations_t>& DYND_UNUSED(out_kernel)) const
-{
-    throw runtime_error("fixedstruct_dtype::get_single_compare_kernel is unimplemented");
-}
-
 size_t fixedstruct_dtype::make_assignment_kernel(
                 assignment_kernel *out, size_t offset_out,
                 const dtype& dst_dt, const char *dst_metadata,

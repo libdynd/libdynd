@@ -116,7 +116,24 @@ namespace {
 
     uint32_t next_utf8(const char *&it, const char *end)
     {
-        return utf8::next(reinterpret_cast<const uint8_t *&>(it), reinterpret_cast<const uint8_t *>(end));
+        //const char *saved_it = it;
+        uint32_t cp = 0;
+        utf8::internal::utf_error err_code = utf8::internal::validate_next(it, end, cp);
+        switch (err_code) {
+            case utf8::internal::UTF8_OK :
+                break;
+            case utf8::internal::NOT_ENOUGH_ROOM :
+                throw std::runtime_error("Partial UTF8 character at end of buffer");
+            case utf8::internal::INVALID_LEAD :
+            case utf8::internal::INCOMPLETE_SEQUENCE :
+            case utf8::internal::OVERLONG_SEQUENCE :
+                // TODO: put the invalid byte range in the exception
+                //cout << "invalid sequence: " << string(saved_it, it) << endl;
+                throw string_encode_error(cp, string_encoding_utf_8);
+            case utf8::internal::INVALID_CODE_POINT :
+                throw string_encode_error(cp, string_encoding_utf_8);
+        }
+        return cp;
     }
 
     uint32_t noerror_next_utf8(const char *&it, const char *end)

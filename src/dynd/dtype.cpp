@@ -261,16 +261,6 @@ bool dtype::data_layout_compatible_with(const dtype& rhs) const
     }
 }
 
-void dtype::get_single_compare_kernel(kernel_instance<compare_operations_t> &out_kernel) const {
-    if (is_builtin()) {
-        memcpy(out_kernel.kernel.ops,
-                        builtin_dtype_comparisons_table[reinterpret_cast<intptr_t>(m_extended)-bool_type_id],
-                        sizeof(out_kernel.kernel.ops));
-    } else {
-        extended()->get_single_compare_kernel(out_kernel);
-    }
-}
-
 std::ostream& dynd::operator<<(std::ostream& o, const dtype& rhs)
 {
     switch (rhs.get_type_id()) {

@@ -101,10 +101,6 @@ bool dynd::busdate_dtype::is_lossless_assignment(const dtype& dst_dt, const dtyp
     }
 }
 
-void dynd::busdate_dtype::get_single_compare_kernel(kernel_instance<compare_operations_t>& /*out_kernel*/) const {
-    throw runtime_error("get_single_compare_kernel for date are not implemented");
-}
-
 bool dynd::busdate_dtype::operator==(const base_dtype& rhs) const
 {
     if (this == &rhs) {

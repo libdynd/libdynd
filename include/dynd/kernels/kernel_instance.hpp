@@ -48,40 +48,6 @@ struct binary_kernel_static_data {
     }
 };
 
-/**
- * Data which remains static across multiple unary operation calls.
- */
-struct single_compare_static_data {
-    auxiliary_data auxdata;
-    const char *src0_metadata, *src1_metadata;
-
-    single_compare_static_data()
-        : auxdata(), src0_metadata(), src1_metadata()
-    {}
-    single_compare_static_data(const single_compare_static_data& rhs)
-        : auxdata(), src0_metadata(rhs.src0_metadata), src1_metadata(rhs.src1_metadata)
-    {
-        auxdata.clone_from(rhs.auxdata);
-    }
-    void clone_from(const single_compare_static_data& rhs)
-    {
-        auxdata.clone_from(rhs.auxdata);
-        src0_metadata = rhs.src0_metadata;
-        src1_metadata = rhs.src1_metadata;
-    }
-    void borrow_from(const single_compare_static_data& rhs)
-    {
-        auxdata.borrow_from(rhs.auxdata);
-        src0_metadata = rhs.src0_metadata;
-        src1_metadata = rhs.src1_metadata;
-    }
-    void swap(single_compare_static_data& rhs)
-    {
-        auxdata.swap(rhs.auxdata);
-        std::swap(src0_metadata, rhs.src0_metadata);
-        std::swap(src1_metadata, rhs.src1_metadata);
-    }
-};
 
 /** Typedef for a binary operation on a single element */
 typedef void (*binary_single_operation_t)(char *dst, const char *src0, const char *src1, binary_kernel_static_data *extra);
@@ -91,9 +57,6 @@ typedef void (*binary_strided_operation_t)(char *dst, intptr_t dst_stride,
                 const char *src1, intptr_t src1_stride,
                 size_t count, binary_kernel_static_data *extra);
 
-
-typedef bool (*single_compare_operation_t)(const char *src0, const char *src1,
-                        single_compare_static_data *extra);
 
 /**
  * A structure containing a pair of binary operation pointers, for single and strided elements.
@@ -113,36 +76,6 @@ struct binary_operation_pair_t {
         : single(single_), strided(strided_)
     {}
 };
-
-
-/**
- * Comparison operations support six specializations as a standardized
- * set, in the order defined by comparison_id_t. Use the
- * function get_unary_specialization to get an index into an
- * instance of this table.
- */
-struct compare_operations_t {
-    single_compare_operation_t ops[6];
-
-    enum comparison_id_t {
-        less_id,
-        less_equal_id,
-        equal_id,
-        not_equal_id,
-        greater_equal_id,
-        greater_id
-    };
-
-    typedef single_compare_static_data extra_type;
-
-    compare_operations_t()
-    {}
-    compare_operations_t(single_compare_operation_t (&o)[6])
-    {
-        memcpy(ops, o, sizeof(ops));
-    }
-};
-
 
 /**
  * This class holds an instance of a kernel function, with its

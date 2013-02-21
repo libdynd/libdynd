@@ -39,10 +39,6 @@ bool void_pointer_dtype::is_lossless_assignment(const dtype& DYND_UNUSED(dst_dt)
     return false;
 }
 
-void void_pointer_dtype::get_single_compare_kernel(kernel_instance<compare_operations_t>& DYND_UNUSED(out_kernel)) const {
-    throw std::runtime_error("void_pointer_dtype::get_single_compare_kernel not supported yet");
-}
-
 bool void_pointer_dtype::operator==(const base_dtype& rhs) const
 {
     return rhs.get_type_id() == void_pointer_type_id;

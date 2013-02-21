@@ -85,57 +85,64 @@ TEST(FixedstringDType, Casting) {
 }
 
 TEST(FixedstringDType, SingleCompare) {
-    ndobject a = make_strided_ndobject(3,
+    ndobject a = make_strided_ndobject(2,
                     make_fixedstring_dtype(7, string_encoding_utf_8));
-    kernel_instance<compare_operations_t> k;
 
     a.at(0).vals() = "abc";
     a.at(1).vals() = "abd";
 
     // test ascii kernel
     a = a.eval();
-    a.get_dtype().at(0).get_single_compare_kernel(k);
-    EXPECT_EQ(k.kernel.ops[compare_operations_t::less_id](a.at(0).get_readonly_originptr(), a.at(1).get_readonly_originptr(), &k.extra), a.at(0).as<std::string>() < a.at(1).as<std::string>());
-    EXPECT_EQ(k.kernel.ops[compare_operations_t::less_equal_id](a.at(0).get_readonly_originptr(), a.at(1).get_readonly_originptr(), &k.extra), a.at(0).as<std::string>() <= a.at(1).as<std::string>());
-    EXPECT_EQ(k.kernel.ops[compare_operations_t::equal_id](a.at(0).get_readonly_originptr(), a.at(1).get_readonly_originptr(), &k.extra), a.at(0).as<std::string>() == a.at(1).as<std::string>());
-    EXPECT_EQ(k.kernel.ops[compare_operations_t::not_equal_id](a.at(0).get_readonly_originptr(), a.at(1).get_readonly_originptr(), &k.extra), a.at(0).as<std::string>() != a.at(1).as<std::string>());
-    EXPECT_EQ(k.kernel.ops[compare_operations_t::greater_equal_id](a.at(0).get_readonly_originptr(), a.at(1).get_readonly_originptr(), &k.extra), a.at(0).as<std::string>() >= a.at(1).as<std::string>());
-    EXPECT_EQ(k.kernel.ops[compare_operations_t::greater_id](a.at(0).get_readonly_originptr(), a.at(1).get_readonly_originptr(), &k.extra), a.at(0).as<std::string>() > a.at(1).as<std::string>());
+    EXPECT_TRUE(a.at(0).op_sorting_less(a.at(1)));
+    EXPECT_TRUE(a.at(0) < a.at(1));
+    EXPECT_TRUE(a.at(0) <= a.at(1));
+    EXPECT_FALSE(a.at(0) == a.at(1));
+    EXPECT_TRUE(a.at(0) != a.at(1));
+    EXPECT_FALSE(a.at(0) >= a.at(1));
+    EXPECT_FALSE(a.at(0) > a.at(1));
+    EXPECT_FALSE(a.at(0).equals_exact(a.at(1)));
+    EXPECT_TRUE(a.at(0).equals_exact(a.at(0)));
 
     // TODO: means for not hardcoding expected results in utf string comparison tests
 
     // test utf8 kernel
     a = a.cast_scalars(make_fixedstring_dtype(7, string_encoding_utf_8));
     a = a.eval();
-    a.get_dtype().at(0).get_single_compare_kernel(k);
-    EXPECT_EQ(k.kernel.ops[compare_operations_t::less_id](a.at(0).get_readonly_originptr(), a.at(1).get_readonly_originptr(), &k.extra), true);
-    EXPECT_EQ(k.kernel.ops[compare_operations_t::less_equal_id](a.at(0).get_readonly_originptr(), a.at(1).get_readonly_originptr(), &k.extra), true);
-    EXPECT_EQ(k.kernel.ops[compare_operations_t::equal_id](a.at(0).get_readonly_originptr(), a.at(1).get_readonly_originptr(), &k.extra), false);
-    EXPECT_EQ(k.kernel.ops[compare_operations_t::not_equal_id](a.at(0).get_readonly_originptr(), a.at(1).get_readonly_originptr(), &k.extra), true);
-    EXPECT_EQ(k.kernel.ops[compare_operations_t::greater_equal_id](a.at(0).get_readonly_originptr(), a.at(1).get_readonly_originptr(), &k.extra), false);
-    EXPECT_EQ(k.kernel.ops[compare_operations_t::greater_id](a.at(0).get_readonly_originptr(), a.at(1).get_readonly_originptr(), &k.extra), false);
+    EXPECT_TRUE(a.at(0).op_sorting_less(a.at(1)));
+    EXPECT_TRUE(a.at(0) < a.at(1));
+    EXPECT_TRUE(a.at(0) <= a.at(1));
+    EXPECT_FALSE(a.at(0) == a.at(1));
+    EXPECT_TRUE(a.at(0) != a.at(1));
+    EXPECT_FALSE(a.at(0) >= a.at(1));
+    EXPECT_FALSE(a.at(0) > a.at(1));
+    EXPECT_FALSE(a.at(0).equals_exact(a.at(1)));
+    EXPECT_TRUE(a.at(0).equals_exact(a.at(0)));
 
     // test utf16 kernel
     a = a.cast_scalars(make_fixedstring_dtype(7, string_encoding_utf_16));
     a = a.eval();
-    a.get_dtype().at(0).get_single_compare_kernel(k);
-    EXPECT_EQ(k.kernel.ops[compare_operations_t::less_id](a.at(0).get_readonly_originptr(), a.at(1).get_readonly_originptr(), &k.extra), true);
-    EXPECT_EQ(k.kernel.ops[compare_operations_t::less_equal_id](a.at(0).get_readonly_originptr(), a.at(1).get_readonly_originptr(), &k.extra), true);
-    EXPECT_EQ(k.kernel.ops[compare_operations_t::equal_id](a.at(0).get_readonly_originptr(), a.at(1).get_readonly_originptr(), &k.extra), false);
-    EXPECT_EQ(k.kernel.ops[compare_operations_t::not_equal_id](a.at(0).get_readonly_originptr(), a.at(1).get_readonly_originptr(), &k.extra), true);
-    EXPECT_EQ(k.kernel.ops[compare_operations_t::greater_equal_id](a.at(0).get_readonly_originptr(), a.at(1).get_readonly_originptr(), &k.extra), false);
-    EXPECT_EQ(k.kernel.ops[compare_operations_t::greater_id](a.at(0).get_readonly_originptr(), a.at(1).get_readonly_originptr(), &k.extra), false);
+    EXPECT_TRUE(a.at(0).op_sorting_less(a.at(1)));
+    EXPECT_TRUE(a.at(0) < a.at(1));
+    EXPECT_TRUE(a.at(0) <= a.at(1));
+    EXPECT_FALSE(a.at(0) == a.at(1));
+    EXPECT_TRUE(a.at(0) != a.at(1));
+    EXPECT_FALSE(a.at(0) >= a.at(1));
+    EXPECT_FALSE(a.at(0) > a.at(1));
+    EXPECT_FALSE(a.at(0).equals_exact(a.at(1)));
+    EXPECT_TRUE(a.at(0).equals_exact(a.at(0)));
 
     // test utf32 kernel
     a = a.cast_scalars(make_fixedstring_dtype(7, string_encoding_utf_32));
     a = a.eval();
-    a.get_dtype().at(0).get_single_compare_kernel(k);
-    EXPECT_EQ(k.kernel.ops[compare_operations_t::less_id](a.at(0).get_readonly_originptr(), a.at(1).get_readonly_originptr(), &k.extra), true);
-    EXPECT_EQ(k.kernel.ops[compare_operations_t::less_equal_id](a.at(0).get_readonly_originptr(), a.at(1).get_readonly_originptr(), &k.extra), true);
-    EXPECT_EQ(k.kernel.ops[compare_operations_t::equal_id](a.at(0).get_readonly_originptr(), a.at(1).get_readonly_originptr(), &k.extra), false);
-    EXPECT_EQ(k.kernel.ops[compare_operations_t::not_equal_id](a.at(0).get_readonly_originptr(), a.at(1).get_readonly_originptr(), &k.extra), true);
-    EXPECT_EQ(k.kernel.ops[compare_operations_t::greater_equal_id](a.at(0).get_readonly_originptr(), a.at(1).get_readonly_originptr(), &k.extra), false);
-    EXPECT_EQ(k.kernel.ops[compare_operations_t::greater_id](a.at(0).get_readonly_originptr(), a.at(1).get_readonly_originptr(), &k.extra), false);
+    EXPECT_TRUE(a.at(0).op_sorting_less(a.at(1)));
+    EXPECT_TRUE(a.at(0) < a.at(1));
+    EXPECT_TRUE(a.at(0) <= a.at(1));
+    EXPECT_FALSE(a.at(0) == a.at(1));
+    EXPECT_TRUE(a.at(0) != a.at(1));
+    EXPECT_FALSE(a.at(0) >= a.at(1));
+    EXPECT_FALSE(a.at(0) > a.at(1));
+    EXPECT_FALSE(a.at(0).equals_exact(a.at(1)));
+    EXPECT_TRUE(a.at(0).equals_exact(a.at(0)));
 }
 
 TEST(FixedstringDType, CanonicalDType) {

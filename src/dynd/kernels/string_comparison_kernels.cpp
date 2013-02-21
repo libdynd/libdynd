@@ -19,60 +19,66 @@ using namespace dynd;
 // fixedstring comparison
 
 namespace {
+    struct fixedstring_compare_kernel_extra {
+        kernel_data_prefix base;
+        size_t string_size;
+    };
+
     struct ascii_utf8_fixedstring_compare_kernel {
-        static bool less(const char *a, const char *b, single_compare_static_data *extra) {
-            intptr_t stringsize = reinterpret_cast<uintptr_t>((const AuxDataBase *)extra->auxdata)>>1;
+        static bool less(const char *a, const char *b, kernel_data_prefix *extra) {
+            size_t stringsize = reinterpret_cast<fixedstring_compare_kernel_extra *>(extra)->string_size;
             return strncmp(a, b, stringsize) < 0;
         }
 
-        static bool less_equal(const char *a, const char *b, single_compare_static_data *extra) {
-            intptr_t stringsize = reinterpret_cast<uintptr_t>((const AuxDataBase *)extra->auxdata)>>1;
+        static bool less_equal(const char *a, const char *b, kernel_data_prefix *extra) {
+            size_t stringsize = reinterpret_cast<fixedstring_compare_kernel_extra *>(extra)->string_size;
             return strncmp(a, b, stringsize) <= 0;
         }
 
-        static bool equal(const char *a, const char *b, single_compare_static_data *extra) {
-            intptr_t stringsize = reinterpret_cast<uintptr_t>((const AuxDataBase *)extra->auxdata)>>1;
+        static bool equal(const char *a, const char *b, kernel_data_prefix *extra) {
+            size_t stringsize = reinterpret_cast<fixedstring_compare_kernel_extra *>(extra)->string_size;
             return strncmp(a, b, stringsize) == 0;
         }
 
-        static bool not_equal(const char *a, const char *b, single_compare_static_data *extra) {
-            intptr_t stringsize = reinterpret_cast<uintptr_t>((const AuxDataBase *)extra->auxdata)>>1;
+        static bool not_equal(const char *a, const char *b, kernel_data_prefix *extra) {
+            size_t stringsize = reinterpret_cast<fixedstring_compare_kernel_extra *>(extra)->string_size;
             return strncmp(a, b, stringsize) != 0;
         }
 
-        static bool greater_equal(const char *a, const char *b, single_compare_static_data *extra) {
-            intptr_t stringsize = reinterpret_cast<uintptr_t>((const AuxDataBase *)extra->auxdata)>>1;
+        static bool greater_equal(const char *a, const char *b, kernel_data_prefix *extra) {
+            size_t stringsize = reinterpret_cast<fixedstring_compare_kernel_extra *>(extra)->string_size;
             return strncmp(a, b, stringsize) >= 0;
         }
 
-        static bool greater(const char *a, const char *b, single_compare_static_data *extra) {
-            intptr_t stringsize = reinterpret_cast<uintptr_t>((const AuxDataBase *)extra->auxdata)>>1;
+        static bool greater(const char *a, const char *b, kernel_data_prefix *extra) {
+            size_t stringsize = reinterpret_cast<fixedstring_compare_kernel_extra *>(extra)->string_size;
             return strncmp(a, b, stringsize) > 0;
         }
     };
 
     struct utf16_fixedstring_compare_kernel {
-        static bool less(const char *a, const char *b, single_compare_static_data *extra) {
-            intptr_t stringsize = reinterpret_cast<uintptr_t>((const AuxDataBase *)extra->auxdata)>>1;
+        static bool less(const char *a, const char *b, kernel_data_prefix *extra) {
+            size_t stringsize = reinterpret_cast<fixedstring_compare_kernel_extra *>(extra)->string_size;
             return lexicographical_compare(
                 reinterpret_cast<const uint16_t *>(a), reinterpret_cast<const uint16_t *>(a) + stringsize,
                 reinterpret_cast<const uint16_t *>(b), reinterpret_cast<const uint16_t *>(b) + stringsize
             );
         }
 
-        static bool less_equal(const char *a, const char *b, single_compare_static_data *extra) {
-            intptr_t stringsize = reinterpret_cast<uintptr_t>((const AuxDataBase *)extra->auxdata)>>1;
+        static bool less_equal(const char *a, const char *b, kernel_data_prefix *extra) {
+            size_t stringsize = reinterpret_cast<fixedstring_compare_kernel_extra *>(extra)->string_size;
             return !lexicographical_compare(
                 reinterpret_cast<const uint16_t *>(b), reinterpret_cast<const uint16_t *>(b) + stringsize,
                 reinterpret_cast<const uint16_t *>(a), reinterpret_cast<const uint16_t *>(a) + stringsize
             );
         }
 
-        static bool equal(const char *a, const char *b, single_compare_static_data *extra) {
-            intptr_t stringsize = reinterpret_cast<uintptr_t>((const AuxDataBase *)extra->auxdata)>>1;
-            for (uint16_t *lhs = reinterpret_cast<uint16_t *>(const_cast<char *>(a)),
-                    *rhs = reinterpret_cast<uint16_t *>(const_cast<char *>(b));
-                    lhs < lhs + stringsize; ++lhs, ++rhs) {
+        static bool equal(const char *a, const char *b, kernel_data_prefix *extra)
+        {
+            size_t string_size = reinterpret_cast<fixedstring_compare_kernel_extra *>(extra)->string_size;
+            const uint16_t *lhs = reinterpret_cast<const uint16_t *>(a);
+            const uint16_t *rhs = reinterpret_cast<const uint16_t *>(b);
+            for (size_t i = 0; i != string_size; ++i, ++lhs, ++rhs) {
                 if (*lhs != *rhs) {
                     return false;
                 }
@@ -80,11 +86,12 @@ namespace {
             return true;
         }
 
-        static bool not_equal(const char *a, const char *b, single_compare_static_data *extra) {
-            intptr_t stringsize = reinterpret_cast<uintptr_t>((const AuxDataBase *)extra->auxdata)>>1;
-            for (uint16_t *lhs = reinterpret_cast<uint16_t *>(const_cast<char *>(a)),
-                    *rhs = reinterpret_cast<uint16_t *>(const_cast<char *>(b));
-                    lhs < lhs + stringsize; ++lhs, ++rhs) {
+        static bool not_equal(const char *a, const char *b, kernel_data_prefix *extra)
+        {
+            size_t string_size = reinterpret_cast<fixedstring_compare_kernel_extra *>(extra)->string_size;
+            const uint16_t *lhs = reinterpret_cast<const uint16_t *>(a);
+            const uint16_t *rhs = reinterpret_cast<const uint16_t *>(b);
+            for (size_t i = 0; i != string_size; ++i, ++lhs, ++rhs) {
                 if (*lhs != *rhs) {
                     return true;
                 }
@@ -92,16 +99,16 @@ namespace {
             return false;
         }
 
-        static bool greater_equal(const char *a, const char *b, single_compare_static_data *extra) {
-            intptr_t stringsize = reinterpret_cast<uintptr_t>((const AuxDataBase *)extra->auxdata)>>1;
+        static bool greater_equal(const char *a, const char *b, kernel_data_prefix *extra) {
+            size_t stringsize = reinterpret_cast<fixedstring_compare_kernel_extra *>(extra)->string_size;
             return !lexicographical_compare(
                 reinterpret_cast<const uint16_t *>(a), reinterpret_cast<const uint16_t *>(a) + stringsize,
                 reinterpret_cast<const uint16_t *>(b), reinterpret_cast<const uint16_t *>(b) + stringsize
             );
         }
 
-        static bool greater(const char *a, const char *b, single_compare_static_data *extra) {
-            intptr_t stringsize = reinterpret_cast<uintptr_t>((const AuxDataBase *)extra->auxdata)>>1;
+        static bool greater(const char *a, const char *b, kernel_data_prefix *extra) {
+            size_t stringsize = reinterpret_cast<fixedstring_compare_kernel_extra *>(extra)->string_size;
             return lexicographical_compare(
                 reinterpret_cast<const uint16_t *>(b), reinterpret_cast<const uint16_t *>(b) + stringsize,
                 reinterpret_cast<const uint16_t *>(a), reinterpret_cast<const uint16_t *>(a) + stringsize
@@ -110,27 +117,28 @@ namespace {
     };
 
     struct utf32_fixedstring_compare_kernel {
-        static bool less(const char *a, const char *b, single_compare_static_data *extra) {
-            intptr_t stringsize = reinterpret_cast<uintptr_t>((const AuxDataBase *)extra->auxdata)>>1;
+        static bool less(const char *a, const char *b, kernel_data_prefix *extra) {
+            size_t stringsize = reinterpret_cast<fixedstring_compare_kernel_extra *>(extra)->string_size;
             return lexicographical_compare(
                 reinterpret_cast<const uint32_t *>(a), reinterpret_cast<const uint32_t *>(a) + stringsize,
                 reinterpret_cast<const uint32_t *>(b), reinterpret_cast<const uint32_t *>(b) + stringsize
             );
         }
 
-        static bool less_equal(const char *a, const char *b, single_compare_static_data *extra) {
-            intptr_t stringsize = reinterpret_cast<uintptr_t>((const AuxDataBase *)extra->auxdata)>>1;
+        static bool less_equal(const char *a, const char *b, kernel_data_prefix *extra) {
+            size_t stringsize = reinterpret_cast<fixedstring_compare_kernel_extra *>(extra)->string_size;
             return !lexicographical_compare(
                 reinterpret_cast<const uint32_t *>(b), reinterpret_cast<const uint32_t *>(b) + stringsize,
                 reinterpret_cast<const uint32_t *>(a), reinterpret_cast<const uint32_t *>(a) + stringsize
             );
         }
 
-        static bool equal(const char *a, const char *b, single_compare_static_data *extra) {
-            intptr_t stringsize = reinterpret_cast<uintptr_t>((const AuxDataBase *)extra->auxdata)>>1;
-            for (uint32_t *lhs = reinterpret_cast<uint32_t *>(const_cast<char *>(a)),
-                    *rhs = reinterpret_cast<uint32_t *>(const_cast<char *>(b));
-                    lhs < lhs + stringsize; ++lhs, ++rhs) {
+        static bool equal(const char *a, const char *b, kernel_data_prefix *extra)
+        {
+            size_t string_size = reinterpret_cast<fixedstring_compare_kernel_extra *>(extra)->string_size;
+            const uint32_t *lhs = reinterpret_cast<const uint32_t *>(a);
+            const uint32_t *rhs = reinterpret_cast<const uint32_t *>(b);
+            for (size_t i = 0; i != string_size; ++i, ++lhs, ++rhs) {
                 if (*lhs != *rhs) {
                     return false;
                 }
@@ -138,11 +146,12 @@ namespace {
             return true;
         }
 
-        static bool not_equal(const char *a, const char *b, single_compare_static_data *extra) {
-            intptr_t stringsize = reinterpret_cast<uintptr_t>((const AuxDataBase *)extra->auxdata)>>1;
-            for (uint32_t *lhs = reinterpret_cast<uint32_t *>(const_cast<char *>(a)),
-                    *rhs = reinterpret_cast<uint32_t *>(const_cast<char *>(b));
-                    lhs < lhs + stringsize; ++lhs, ++rhs) {
+        static bool not_equal(const char *a, const char *b, kernel_data_prefix *extra)
+        {
+            size_t string_size = reinterpret_cast<fixedstring_compare_kernel_extra *>(extra)->string_size;
+            const uint32_t *lhs = reinterpret_cast<const uint32_t *>(a);
+            const uint32_t *rhs = reinterpret_cast<const uint32_t *>(b);
+            for (size_t i = 0; i != string_size; ++i, ++lhs, ++rhs) {
                 if (*lhs != *rhs) {
                     return true;
                 }
@@ -150,16 +159,16 @@ namespace {
             return false;
         }
 
-        static bool greater_equal(const char *a, const char *b, single_compare_static_data *extra) {
-            intptr_t stringsize = reinterpret_cast<uintptr_t>((const AuxDataBase *)extra->auxdata)>>1;
+        static bool greater_equal(const char *a, const char *b, kernel_data_prefix *extra) {
+            size_t stringsize = reinterpret_cast<fixedstring_compare_kernel_extra *>(extra)->string_size;
             return !lexicographical_compare(
                 reinterpret_cast<const uint32_t *>(a), reinterpret_cast<const uint32_t *>(a) + stringsize,
                 reinterpret_cast<const uint32_t *>(b), reinterpret_cast<const uint32_t *>(b) + stringsize
             );
         }
 
-        static bool greater(const char *a, const char *b, single_compare_static_data *extra) {
-            intptr_t stringsize = reinterpret_cast<uintptr_t>((const AuxDataBase *)extra->auxdata)>>1;
+        static bool greater(const char *a, const char *b, kernel_data_prefix *extra) {
+            size_t stringsize = reinterpret_cast<fixedstring_compare_kernel_extra *>(extra)->string_size;
             return lexicographical_compare(
                 reinterpret_cast<const uint32_t *>(b), reinterpret_cast<const uint32_t *>(b) + stringsize,
                 reinterpret_cast<const uint32_t *>(a), reinterpret_cast<const uint32_t *>(a) + stringsize
@@ -170,6 +179,7 @@ namespace {
 
 #define DYND_FIXEDSTRING_COMPARISON_TABLE_TYPE_LEVEL(type) { \
     type##_fixedstring_compare_kernel::less, \
+    type##_fixedstring_compare_kernel::less, \
     type##_fixedstring_compare_kernel::less_equal, \
     type##_fixedstring_compare_kernel::equal, \
     type##_fixedstring_compare_kernel::not_equal, \
@@ -177,17 +187,30 @@ namespace {
     type##_fixedstring_compare_kernel::greater \
     }
 
-void dynd::get_fixedstring_comparison_kernel(intptr_t string_size, string_encoding_t encoding,
-                kernel_instance<compare_operations_t>& out_kernel)
+size_t dynd::make_fixedstring_comparison_kernel(
+                comparison_kernel *out, size_t offset_out,
+                size_t string_size, string_encoding_t encoding,
+                comparison_type_t comptype,
+                const eval::eval_context *ectx)
 {
-    static single_compare_operation_t fixedstring_comparisons_table[3][6] = {
+    static int lookup[5] = {0, 1, 0, 1, 2};
+    static binary_single_predicate_t fixedstring_comparisons_table[3][7] = {
         DYND_FIXEDSTRING_COMPARISON_TABLE_TYPE_LEVEL(ascii_utf8),
         DYND_FIXEDSTRING_COMPARISON_TABLE_TYPE_LEVEL(utf16),
         DYND_FIXEDSTRING_COMPARISON_TABLE_TYPE_LEVEL(utf32)
     };
-    static int lookup[5] = {0, 1, 0, 1, 2};
-    memcpy(out_kernel.kernel.ops, fixedstring_comparisons_table[lookup[encoding]], sizeof(out_kernel.kernel.ops));
-    make_raw_auxiliary_data(out_kernel.extra.auxdata, static_cast<uintptr_t>(string_size)<<1);
+    if (0 <= encoding && encoding < 5 && 0 <= comptype && comptype < 7) {
+        out->ensure_capacity_leaf(offset_out + sizeof(fixedstring_compare_kernel_extra));
+        fixedstring_compare_kernel_extra *e = out->get_at<fixedstring_compare_kernel_extra>(offset_out);
+        e->base.set_function<binary_single_predicate_t>(fixedstring_comparisons_table[lookup[encoding]][comptype]);
+        e->string_size = string_size;
+        return offset_out + sizeof(fixedstring_compare_kernel_extra);
+    } else {
+        stringstream ss;
+        ss << "make_fixedstring_comparison_kernel: Unexpected encoding (" << encoding;
+        ss << ") or comparison type (" << comptype << ")";
+        throw runtime_error(ss.str());
+    }
 }
 
 #undef DYND_FIXEDSTRING_COMPARISON_TABLE_TYPE_LEVEL
@@ -198,7 +221,7 @@ void dynd::get_fixedstring_comparison_kernel(intptr_t string_size, string_encodi
 namespace {
     template<typename T>
     struct string_compare_kernel {
-        static bool less(const char *a, const char *b, single_compare_static_data *DYND_UNUSED(extra)) {
+        static bool less(const char *a, const char *b, kernel_data_prefix *DYND_UNUSED(extra)) {
             const string_dtype_data *da = reinterpret_cast<const string_dtype_data *>(a);
             const string_dtype_data *db = reinterpret_cast<const string_dtype_data *>(b);
             return lexicographical_compare(
@@ -206,7 +229,7 @@ namespace {
                 reinterpret_cast<const T *>(db->begin), reinterpret_cast<const T *>(db->end));
         }
 
-        static bool less_equal(const char *a, const char *b, single_compare_static_data *DYND_UNUSED(extra)) {
+        static bool less_equal(const char *a, const char *b, kernel_data_prefix *DYND_UNUSED(extra)) {
             const string_dtype_data *da = reinterpret_cast<const string_dtype_data *>(a);
             const string_dtype_data *db = reinterpret_cast<const string_dtype_data *>(b);
             return !lexicographical_compare(
@@ -214,21 +237,21 @@ namespace {
                 reinterpret_cast<const T *>(da->begin), reinterpret_cast<const T *>(da->end));
         }
 
-        static bool equal(const char *a, const char *b, single_compare_static_data *DYND_UNUSED(extra)) {
+        static bool equal(const char *a, const char *b, kernel_data_prefix *DYND_UNUSED(extra)) {
             const string_dtype_data *da = reinterpret_cast<const string_dtype_data *>(a);
             const string_dtype_data *db = reinterpret_cast<const string_dtype_data *>(b);
             return (da->end - da->begin == db->end - db->begin) &&
                     memcmp(da->begin, db->begin, da->end - da->begin) == 0;
         }
 
-        static bool not_equal(const char *a, const char *b, single_compare_static_data *DYND_UNUSED(extra)) {
+        static bool not_equal(const char *a, const char *b, kernel_data_prefix *DYND_UNUSED(extra)) {
             const string_dtype_data *da = reinterpret_cast<const string_dtype_data *>(a);
             const string_dtype_data *db = reinterpret_cast<const string_dtype_data *>(b);
             return (da->end - da->begin != db->end - db->begin) ||
                     memcmp(da->begin, db->begin, da->end - da->begin) != 0;
         }
 
-        static bool greater_equal(const char *a, const char *b, single_compare_static_data *DYND_UNUSED(extra)) {
+        static bool greater_equal(const char *a, const char *b, kernel_data_prefix *DYND_UNUSED(extra)) {
             const string_dtype_data *da = reinterpret_cast<const string_dtype_data *>(a);
             const string_dtype_data *db = reinterpret_cast<const string_dtype_data *>(b);
             return !lexicographical_compare(
@@ -236,7 +259,7 @@ namespace {
                 reinterpret_cast<const T *>(db->begin), reinterpret_cast<const T *>(db->end));
         }
 
-        static bool greater(const char *a, const char *b, single_compare_static_data *DYND_UNUSED(extra)) {
+        static bool greater(const char *a, const char *b, kernel_data_prefix *DYND_UNUSED(extra)) {
             const string_dtype_data *da = reinterpret_cast<const string_dtype_data *>(a);
             const string_dtype_data *db = reinterpret_cast<const string_dtype_data *>(b);
             return lexicographical_compare(
@@ -248,6 +271,7 @@ namespace {
 
 #define DYND_STRING_COMPARISON_TABLE_TYPE_LEVEL(type) { \
     string_compare_kernel<type>::less, \
+    string_compare_kernel<type>::less, \
     string_compare_kernel<type>::less_equal, \
     string_compare_kernel<type>::equal, \
     string_compare_kernel<type>::not_equal, \
@@ -255,17 +279,39 @@ namespace {
     string_compare_kernel<type>::greater \
     }
 
-void dynd::get_string_comparison_kernel(string_encoding_t encoding,
-                kernel_instance<compare_operations_t>& out_kernel)
+size_t dynd::make_string_comparison_kernel(
+                comparison_kernel *out, size_t offset_out,
+                string_encoding_t encoding,
+                comparison_type_t comptype,
+                const eval::eval_context *ectx)
 {
-    static single_compare_operation_t fixedstring_comparisons_table[3][6] = {
+    static int lookup[5] = {0, 1, 0, 1, 2};
+    static binary_single_predicate_t string_comparisons_table[3][7] = {
         DYND_STRING_COMPARISON_TABLE_TYPE_LEVEL(uint8_t),
         DYND_STRING_COMPARISON_TABLE_TYPE_LEVEL(uint16_t),
         DYND_STRING_COMPARISON_TABLE_TYPE_LEVEL(uint32_t)
     };
-    static int lookup[5] = {0, 1, 0, 1, 2};
-    memcpy(out_kernel.kernel.ops, fixedstring_comparisons_table[lookup[encoding]], sizeof(out_kernel.kernel.ops));
-    out_kernel.extra.auxdata.free();
+    if (0 <= encoding && encoding < 5 && 0 <= comptype && comptype < 7) {
+        out->ensure_capacity_leaf(offset_out + sizeof(kernel_data_prefix));
+        kernel_data_prefix *e = out->get_at<kernel_data_prefix>(offset_out);
+        e->set_function<binary_single_predicate_t>(string_comparisons_table[lookup[encoding]][comptype]);
+        return offset_out + sizeof(kernel_data_prefix);
+    } else {
+        stringstream ss;
+        ss << "make_string_comparison_kernel: Unexpected encoding (" << encoding;
+        ss << ") or comparison type (" << comptype << ")";
+        throw runtime_error(ss.str());
+    }
 }
 
 #undef DYND_STRING_COMPARISON_TABLE_TYPE_LEVEL
+
+size_t dynd::make_general_string_comparison_kernel(
+                comparison_kernel *out, size_t offset_out,
+                const dtype& src0_dt, const char *src0_metadata,
+                const dtype& src1_dt, const char *src1_metadata,
+                comparison_type_t comptype,
+                const eval::eval_context *ectx)
+{
+    throw runtime_error("TODO: implement make_general_string_comparison_kernel");
+}

@@ -96,10 +96,6 @@ bool bytes_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_d
     }
 }
 
-void bytes_dtype::get_single_compare_kernel(kernel_instance<compare_operations_t>& DYND_UNUSED(out_kernel)) const {
-    throw std::runtime_error("bytes_dtype::get_single_compare_kernel not supported yet");
-}
-
 size_t bytes_dtype::make_assignment_kernel(
                 assignment_kernel *out, size_t offset_out,
                 const dtype& dst_dt, const char *dst_metadata,

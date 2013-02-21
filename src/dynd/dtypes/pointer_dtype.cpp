@@ -220,10 +220,6 @@ bool pointer_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src
     }
 }
 
-void pointer_dtype::get_single_compare_kernel(kernel_instance<compare_operations_t>& DYND_UNUSED(out_kernel)) const {
-    throw std::runtime_error("pointer_dtype::get_single_compare_kernel not supported yet");
-}
-
 bool pointer_dtype::operator==(const base_dtype& rhs) const
 {
     if (this == &rhs) {

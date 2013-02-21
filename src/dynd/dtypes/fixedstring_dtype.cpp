@@ -141,12 +141,6 @@ bool fixedstring_dtype::is_lossless_assignment(
     return false;
 }
 
-
-void fixedstring_dtype::get_single_compare_kernel(kernel_instance<compare_operations_t>& out_kernel) const
-{
-    get_fixedstring_comparison_kernel(m_stringsize, m_encoding, out_kernel);
-}
-
 bool fixedstring_dtype::operator==(const base_dtype& rhs) const
 {
     if (this == &rhs) {
@@ -206,4 +200,29 @@ size_t fixedstring_dtype::make_assignment_kernel(
             throw runtime_error(ss.str());
         }
     }
+}
+
+size_t fixedstring_dtype::make_comparison_kernel(
+                comparison_kernel *out, size_t offset_out,
+                const dtype& src0_dt, const char *src0_metadata,
+                const dtype& src1_dt, const char *src1_metadata,
+                comparison_type_t comptype,
+                const eval::eval_context *ectx) const
+{
+    if (this == src0_dt.extended()) {
+        if (*this == *src1_dt.extended()) {
+            return make_fixedstring_comparison_kernel(out, offset_out,
+                            m_stringsize, m_encoding,
+                            comptype, ectx);
+        } else if (src1_dt.get_kind() == string_kind) {
+            return make_general_string_comparison_kernel(out, offset_out,
+                            src0_dt, src0_metadata,
+                            src1_dt, src1_metadata,
+                            comptype, ectx);
+        }
+    }
+
+    stringstream ss;
+    ss << "Cannot compare values of types " << src0_dt << " and " << src1_dt;
+    throw runtime_error(ss.str());
 }

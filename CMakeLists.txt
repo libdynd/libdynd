@@ -203,7 +203,6 @@ set(dynd_SRC
     src/dynd/arithmetic_op.cpp
     src/dynd/dtype.cpp
     src/dynd/dtype_assign.cpp
-    src/dynd/dtype_comparisons.cpp
     src/dynd/dtype_promotion.cpp
     src/dynd/exceptions.cpp
     src/dynd/json_formatter.cpp
@@ -219,7 +218,6 @@ set(dynd_SRC
     include/dynd/cling_all.hpp
     include/dynd/diagnostics.hpp
     include/dynd/dtype.hpp
-    include/dynd/dtype_comparisons.hpp
     include/dynd/dtype_assign.hpp
     include/dynd/dtype_promotion.hpp
     include/dynd/exceptions.hpp

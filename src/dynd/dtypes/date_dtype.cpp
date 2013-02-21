@@ -115,10 +115,6 @@ bool date_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt
     }
 }
 
-void date_dtype::get_single_compare_kernel(kernel_instance<compare_operations_t>& /*out_kernel*/) const {
-    throw runtime_error("get_single_compare_kernel for date are not implemented");
-}
-
 bool date_dtype::operator==(const base_dtype& rhs) const
 {
     if (this == &rhs) {

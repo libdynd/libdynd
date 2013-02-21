@@ -760,12 +760,12 @@ bool ndobject::equals_exact(const ndobject& rhs) const
     } else if (get_dtype() != rhs.get_dtype()) {
         return false;
     } else if (get_undim() == 0) {
-        kernel_instance<compare_operations_t> k;
-        get_dtype().get_single_compare_kernel(k);
-        k.extra.src0_metadata = get_ndo_meta();
-        k.extra.src1_metadata = rhs.get_ndo_meta();
-        return k.kernel.ops[compare_operations_t::equal_id](get_readonly_originptr(),
-                        rhs.get_readonly_originptr(), &k.extra);
+        comparison_kernel k;
+        make_comparison_kernel(&k, 0,
+                        get_dtype(), get_ndo_meta(),
+                        rhs.get_dtype(), rhs.get_ndo_meta(),
+                        comparison_type_equal, &eval::default_eval_context);
+        return k(get_readonly_originptr(), rhs.get_readonly_originptr());
     } else {
         // First compare the shape, to avoid triggering an exception in common cases
         size_t undim = get_undim();
@@ -778,12 +778,13 @@ bool ndobject::equals_exact(const ndobject& rhs) const
         try {
             ndobject_iter<0,2> iter(*this, rhs);
             if (!iter.empty()) {
-                kernel_instance<compare_operations_t> k;
-                iter.get_uniform_dtype<0>().get_single_compare_kernel(k);
-                k.extra.src0_metadata = iter.metadata<0>();
-                k.extra.src1_metadata = iter.metadata<1>();
+                comparison_kernel k;
+                make_comparison_kernel(&k, 0,
+                                iter.get_uniform_dtype<0>(), iter.metadata<0>(),
+                                iter.get_uniform_dtype<1>(), iter.metadata<1>(),
+                                comparison_type_not_equal, &eval::default_eval_context);
                 do {
-                    if (k.kernel.ops[compare_operations_t::not_equal_id](iter.data<0>(), iter.data<1>(), &k.extra)) {
+                    if (k(iter.data<0>(), iter.data<1>())) {
                         return false;
                     }
                 } while (iter.next());
@@ -1131,10 +1132,17 @@ intptr_t dynd::binary_search(const ndobject& n, const char *metadata, const char
     }
     const char *n_metadata = n.get_ndo_meta();
     dtype element_dtype = n.get_dtype().at_single(0, &n_metadata);
-    kernel_instance<compare_operations_t> k;
-    element_dtype.get_single_compare_kernel(k);
-    k.extra.src0_metadata = n_metadata;
-    k.extra.src1_metadata = metadata;
+    comparison_kernel k_n_less_d, k_d_less_n;
+    make_comparison_kernel(&k_n_less_d, 0,
+                    element_dtype, n_metadata,
+                    element_dtype, metadata,
+                    comparison_type_sorting_less,
+                    &eval::default_eval_context);
+    make_comparison_kernel(&k_d_less_n, 0,
+                    element_dtype, metadata,
+                    element_dtype, n_metadata,
+                    comparison_type_sorting_less,
+                    &eval::default_eval_context);
 
     // TODO: support any type of uniform dimension
     if (n.get_dtype().get_type_id() != strided_dim_type_id) {
@@ -1152,12 +1160,13 @@ intptr_t dynd::binary_search(const ndobject& n, const char *metadata, const char
 
         // In order for the data to always match up with the metadata, need to have
         // trial_data first and data second in the comparison operations.
-        if (k.kernel.ops[compare_operations_t::greater_id](trial_data, data, &k.extra)) {
+        if (k_d_less_n(data, trial_data)) {
+            // value < arr[trial]
             last = trial;
-        } else if (k.kernel.ops[compare_operations_t::less_id](trial_data, data, &k.extra)) {
+        } else if (k_n_less_d(trial_data, data)) {
+            // value > arr[trial]
             first = trial + 1;
-        }
-        else {
+        } else {
             return trial;
         }
     }

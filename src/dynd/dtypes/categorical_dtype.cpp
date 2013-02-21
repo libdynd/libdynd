@@ -10,6 +10,7 @@
 #include <dynd/ndobject_iter.hpp>
 #include <dynd/dtypes/categorical_dtype.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
+#include <dynd/kernels/comparison_kernels.hpp>
 #include <dynd/dtypes/strided_dim_dtype.hpp>
 #include <dynd/dtypes/convert_dtype.hpp>
 #include <dynd/gfunc/make_callable.hpp>
@@ -22,10 +23,11 @@ namespace {
     class sorter {
         const char *m_originptr;
         intptr_t m_stride;
-        const single_compare_operation_t m_less;
-        single_compare_static_data *m_extra;
+        const binary_single_predicate_t m_less;
+        kernel_data_prefix *m_extra;
     public:
-        sorter(const char *originptr, intptr_t stride, const single_compare_operation_t less, single_compare_static_data *extra) :
+        sorter(const char *originptr, intptr_t stride,
+                        const binary_single_predicate_t less, kernel_data_prefix *extra) :
             m_originptr(originptr), m_stride(stride), m_less(less), m_extra(extra) {}
         bool operator()(intptr_t i, intptr_t j) const {
             return m_less(m_originptr + i * m_stride, m_originptr + j * m_stride, m_extra);
@@ -33,10 +35,10 @@ namespace {
     };
 
     class cmp {
-        const single_compare_operation_t m_less;
-        single_compare_static_data *m_extra;
+        const binary_single_predicate_t m_less;
+        kernel_data_prefix *m_extra;
     public:
-        cmp(const single_compare_operation_t less, single_compare_static_data *extra) :
+        cmp(const binary_single_predicate_t less, kernel_data_prefix *extra) :
             m_less(less), m_extra(extra) {}
         bool operator()(const char *a, const char *b) const {
             bool result = m_less(a, b, m_extra);
@@ -220,11 +222,14 @@ categorical_dtype::categorical_dtype(const ndobject& categories, bool presorted)
         category_count = categories.get_dim_size();
         intptr_t categories_stride = reinterpret_cast<const strided_dim_dtype_metadata *>(categories.get_ndo_meta())->stride;
 
-        kernel_instance<compare_operations_t> k;
-        m_category_dtype.get_single_compare_kernel(k);
-        k.extra.src0_metadata = k.extra.src1_metadata = categories.get_ndo_meta() + sizeof(strided_dim_dtype_metadata);
+        const char *categories_element_metadata = categories.get_ndo_meta() + sizeof(strided_dim_dtype_metadata);
+        comparison_kernel k;
+        ::make_comparison_kernel(&k, 0,
+                        m_category_dtype, categories_element_metadata,
+                        m_category_dtype, categories_element_metadata,
+                        comparison_type_sorting_less, &eval::default_eval_context);
 
-        cmp less(k.kernel.ops[compare_operations_t::less_id], &k.extra);
+        cmp less(k.get_function(), k.get());
         set<const char *, cmp> uniques(less);
 
         m_value_to_category_index.resize(category_count);
@@ -241,7 +246,7 @@ categorical_dtype::categorical_dtype(const ndobject& categories, bool presorted)
             } else {
                 stringstream ss;
                 ss << "categories must be unique: category value ";
-                m_category_dtype.print_data(ss, k.extra.src0_metadata, category_value);
+                m_category_dtype.print_data(ss, categories_element_metadata, category_value);
                 ss << " appears more than once";
                 throw std::runtime_error(ss.str());
             }
@@ -249,14 +254,16 @@ categorical_dtype::categorical_dtype(const ndobject& categories, bool presorted)
         // TODO: Putting everything in a set already caused a sort operation to occur,
         //       there's no reason we should need a second sort.
         std::sort(m_category_index_to_value.begin(), m_category_index_to_value.end(),
-                        sorter(categories.get_readonly_originptr(), categories_stride, k.kernel.ops[compare_operations_t::less_id], &k.extra));
+                        sorter(categories.get_readonly_originptr(), categories_stride,
+                            k.get_function(), k.get()));
 
         // invert the m_category_index_to_value permutation
         for (uint32_t i = 0; i < m_category_index_to_value.size(); ++i) {
             m_value_to_category_index[m_category_index_to_value[i]] = i;
         }
 
-        m_categories = make_sorted_categories(uniques, m_category_dtype, k.extra.src0_metadata);
+        m_categories = make_sorted_categories(uniques, m_category_dtype,
+                        categories_element_metadata);
     }
 
     // Use the number of categories to set which underlying integer storage to use
@@ -529,14 +536,15 @@ void categorical_dtype::metadata_debug_print(const char *DYND_UNUSED(metadata),
 
 dtype dynd::factor_categorical_dtype(const ndobject& values)
 {
-    kernel_instance<compare_operations_t> k;
-
     ndobject_iter<1, 0> iter(values);
 
-    iter.get_uniform_dtype().get_single_compare_kernel(k);
-    k.extra.src0_metadata = iter.metadata();
-    k.extra.src1_metadata = iter.metadata();
-    cmp less(k.kernel.ops[compare_operations_t::less_id], &k.extra);
+    comparison_kernel k;
+    ::make_comparison_kernel(&k, 0,
+                    iter.get_uniform_dtype(), iter.metadata(),
+                    iter.get_uniform_dtype(), iter.metadata(),
+                    comparison_type_sorting_less, &eval::default_eval_context);
+
+    cmp less(k.get_function(), k.get());
     set<const char *, cmp> uniques(less);
 
     if (!iter.empty()) {

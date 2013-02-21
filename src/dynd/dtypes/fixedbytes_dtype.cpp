@@ -56,10 +56,6 @@ void fixedbytes_dtype::print_dtype(std::ostream& o) const
     o << "fixedbytes<" << get_data_size() << "," << get_alignment() << ">";
 }
 
-void fixedbytes_dtype::get_single_compare_kernel(kernel_instance<compare_operations_t>& DYND_UNUSED(out_kernel)) const {
-    throw std::runtime_error("fixedbytes_dtype::get_single_compare_kernel not supported yet");
-}
-
 bool fixedbytes_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const
 {
     if (dst_dt.extended() == this) {

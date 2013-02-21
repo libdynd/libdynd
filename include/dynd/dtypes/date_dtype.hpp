@@ -44,8 +44,6 @@ public:
 
     bool is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const;
 
-    void get_single_compare_kernel(kernel_instance<compare_operations_t>& out_kernel) const;
-
     bool operator==(const base_dtype& rhs) const;
 
     void metadata_default_construct(char *DYND_UNUSED(metadata), size_t DYND_UNUSED(ndim), const intptr_t* DYND_UNUSED(shape)) const {

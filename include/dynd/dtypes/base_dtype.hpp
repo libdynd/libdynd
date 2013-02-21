@@ -384,14 +384,6 @@ public:
      */
     virtual bool is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const = 0;
 
-    /*
-     * Return a comparison kernel that can perform the requested single comparison on
-     * data of this dtype
-     *
-     * \param compare_id the identifier of the comparison
-     */
-    virtual void get_single_compare_kernel(kernel_instance<compare_operations_t>& out_kernel) const;
-
     virtual bool operator==(const base_dtype& rhs) const = 0;
 
     /** The size of the ndobject metadata for this dtype */

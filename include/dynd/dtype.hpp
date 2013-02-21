@@ -13,7 +13,6 @@
 #include <dynd/dtypes/base_dtype.hpp>
 #include <dynd/dtypes/base_expression_dtype.hpp>
 #include <dynd/dtypes/base_string_dtype.hpp>
-#include <dynd/dtype_comparisons.hpp>
 #include <dynd/eval/eval_context.hpp>
 #include <dynd/exceptions.hpp>
 
@@ -537,14 +536,6 @@ public:
      * the dtypes can be substituted for each other in an ndobject.
      */
     bool data_layout_compatible_with(const dtype& rhs) const;
-
-    /*
-     * Return a comparison kernel that can perform the requested single comparison on
-     * data of this dtype
-     *
-     * \param compare_id the identifier of the comparison
-     */
-    void get_single_compare_kernel(kernel_instance<compare_operations_t>& out_kernel) const;
 
     inline bool is_scalar() const {
         if (is_builtin()) {

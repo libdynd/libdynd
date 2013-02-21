@@ -357,10 +357,3 @@ size_t base_dtype::make_elwise_property_setter_kernel(
     ss << " doesn't have any writable properties";
     throw std::runtime_error(ss.str());
 }
-
-
-void base_dtype::get_single_compare_kernel(kernel_instance<compare_operations_t>& DYND_UNUSED(out_kernel)) const
-{
-        throw std::runtime_error("get_single_compare_kernel: this dtype does not support comparisons");
-}
-

@@ -117,11 +117,6 @@ bool json_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt
     }
 }
 
-void json_dtype::get_single_compare_kernel(kernel_instance<compare_operations_t>& out_kernel) const
-{
-    get_string_comparison_kernel(string_encoding_utf_8, out_kernel);
-}
-
 bool json_dtype::operator==(const base_dtype& rhs) const
 {
     if (this == &rhs) {

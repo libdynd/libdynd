@@ -86,9 +86,9 @@ TEST(CategoricalDType, Compare) {
     dtype da2 = make_categorical_dtype(a);
     dtype db = make_categorical_dtype(b);
 
-    EXPECT_TRUE(da == da);
-    EXPECT_TRUE( da == da2);
-    EXPECT_FALSE(da == db);
+    EXPECT_EQ(da, da);
+    EXPECT_EQ(da, da2);
+    EXPECT_NE(da, db);
 
     ndobject i = make_strided_ndobject(3, make_dtype<int32_t>());
     i.at(0).vals() = 0;
