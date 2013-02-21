@@ -191,7 +191,7 @@ size_t dynd::make_fixedstring_comparison_kernel(
                 comparison_kernel *out, size_t offset_out,
                 size_t string_size, string_encoding_t encoding,
                 comparison_type_t comptype,
-                const eval::eval_context *ectx)
+                const eval::eval_context *DYND_UNUSED(ectx))
 {
     static int lookup[5] = {0, 1, 0, 1, 2};
     static binary_single_predicate_t fixedstring_comparisons_table[3][7] = {
@@ -283,7 +283,7 @@ size_t dynd::make_string_comparison_kernel(
                 comparison_kernel *out, size_t offset_out,
                 string_encoding_t encoding,
                 comparison_type_t comptype,
-                const eval::eval_context *ectx)
+                const eval::eval_context *DYND_UNUSED(ectx))
 {
     static int lookup[5] = {0, 1, 0, 1, 2};
     static binary_single_predicate_t string_comparisons_table[3][7] = {
@@ -307,11 +307,11 @@ size_t dynd::make_string_comparison_kernel(
 #undef DYND_STRING_COMPARISON_TABLE_TYPE_LEVEL
 
 size_t dynd::make_general_string_comparison_kernel(
-                comparison_kernel *out, size_t offset_out,
-                const dtype& src0_dt, const char *src0_metadata,
-                const dtype& src1_dt, const char *src1_metadata,
-                comparison_type_t comptype,
-                const eval::eval_context *ectx)
+                comparison_kernel *DYND_UNUSED(out), size_t DYND_UNUSED(offset_out),
+                const dtype& DYND_UNUSED(src0_dt), const char *DYND_UNUSED(src0_metadata),
+                const dtype& DYND_UNUSED(src1_dt), const char *DYND_UNUSED(src1_metadata),
+                comparison_type_t DYND_UNUSED(comptype),
+                const eval::eval_context *DYND_UNUSED(ectx))
 {
     throw runtime_error("TODO: implement make_general_string_comparison_kernel");
 }
