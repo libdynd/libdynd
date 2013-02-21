@@ -608,11 +608,19 @@ TEST(NDObjectCompare, ComplexFloat64) {
 }
 
 TEST(NDObjectCompare, NaNComplexFloat32) {
+    // The strange way to assign complex values is because
+    // on clang, complex<float>(0.f, nan) was creating (nan, nan)
+    // instead of the requested complex.
+    complex<float> cval;
     ndobject a, b;
     float nan = ndobject("nan").cast_scalars<float>().as<float>();
 
     // real component NaN, compared against itself
-    a = complex<float>(nan, 0.f);
+    cval.real(nan);
+    cval.imag(0.f);
+    a = cval;
+    EXPECT_TRUE(DYND_ISNAN(a.p("real").as<float>()));
+    EXPECT_FALSE(DYND_ISNAN(a.p("imag").as<float>()));
     EXPECT_FALSE(a.op_sorting_less(a));
     EXPECT_THROW((a < a), runtime_error);
     EXPECT_THROW((a <= a), runtime_error);
@@ -622,7 +630,11 @@ TEST(NDObjectCompare, NaNComplexFloat32) {
     EXPECT_THROW((a > a), runtime_error);
 
     // imaginary component NaN, compared against itself
-    a = complex<float>(0.f, nan);
+    cval.real(0.f);
+    cval.imag(nan);
+    a = cval;
+    EXPECT_FALSE(DYND_ISNAN(a.p("real").as<float>()));
+    EXPECT_TRUE(DYND_ISNAN(a.p("imag").as<float>()));
     EXPECT_FALSE(a.op_sorting_less(a));
     EXPECT_THROW((a < a), runtime_error);
     EXPECT_THROW((a <= a), runtime_error);
@@ -632,7 +644,11 @@ TEST(NDObjectCompare, NaNComplexFloat32) {
     EXPECT_THROW((a > a), runtime_error);
 
     // both components NaN, compared against itself
-    a = complex<float>(nan, nan);
+    cval.real(nan);
+    cval.imag(nan);
+    a = cval;
+    EXPECT_TRUE(DYND_ISNAN(a.p("real").as<float>()));
+    EXPECT_TRUE(DYND_ISNAN(a.p("imag").as<float>()));
     EXPECT_FALSE(a.op_sorting_less(a));
     EXPECT_THROW((a < a), runtime_error);
     EXPECT_THROW((a <= a), runtime_error);
@@ -642,7 +658,9 @@ TEST(NDObjectCompare, NaNComplexFloat32) {
     EXPECT_THROW((a > a), runtime_error);
 
     // NaNs compared against non-NaNs
-    a = complex<float>(nan, 0.f);
+    cval.real(nan);
+    cval.imag(0.f);
+    a = cval;
     b = complex<float>(0.f, 1.f);
     EXPECT_FALSE(a.op_sorting_less(b));
     EXPECT_THROW((a < b), runtime_error);
@@ -659,7 +677,9 @@ TEST(NDObjectCompare, NaNComplexFloat32) {
     EXPECT_THROW((b >= a), runtime_error);
     EXPECT_THROW((b > a), runtime_error);
 
-    a = complex<float>(0.f, nan);
+    cval.real(0.f);
+    cval.imag(nan);
+    a = cval;
     b = complex<float>(1.f, 1.f);
     EXPECT_FALSE(a.op_sorting_less(b));
     EXPECT_THROW((a < b), runtime_error);
@@ -676,7 +696,9 @@ TEST(NDObjectCompare, NaNComplexFloat32) {
     EXPECT_THROW((b >= a), runtime_error);
     EXPECT_THROW((b > a), runtime_error);
 
-    a = complex<float>(nan, nan);
+    cval.real(nan);
+    cval.imag(nan);
+    a = cval;
     b = complex<float>(1.f, 1.f);
     EXPECT_FALSE(a.op_sorting_less(b));
     EXPECT_THROW((a < b), runtime_error);
@@ -694,8 +716,12 @@ TEST(NDObjectCompare, NaNComplexFloat32) {
     EXPECT_THROW((b > a), runtime_error);
 
     // NaNs compared against NaNs
-    a = complex<float>(nan, 0.f);
-    b = complex<float>(nan, 1.f);
+    cval.real(nan);
+    cval.imag(0.f);
+    a = cval;
+    cval.real(nan);
+    cval.imag(1.f);
+    b = cval;
     EXPECT_TRUE(a.op_sorting_less(b));
     EXPECT_THROW((a < b), runtime_error);
     EXPECT_THROW((a <= b), runtime_error);
@@ -711,8 +737,14 @@ TEST(NDObjectCompare, NaNComplexFloat32) {
     EXPECT_THROW((b >= a), runtime_error);
     EXPECT_THROW((b > a), runtime_error);
 
-    a = complex<float>(0.f, nan);
-    b = complex<float>(nan, 1.f);
+    cval.real(0.f);
+    cval.imag(nan);
+    a = cval;
+    cval.real(nan);
+    cval.imag(1.f);
+    b = cval;
+    EXPECT_FALSE(DYND_ISNAN(a.p("real").as<float>()));
+    EXPECT_TRUE(DYND_ISNAN(a.p("imag").as<float>()));
     EXPECT_TRUE(a.op_sorting_less(b));
     EXPECT_THROW((a < b), runtime_error);
     EXPECT_THROW((a <= b), runtime_error);
@@ -728,8 +760,12 @@ TEST(NDObjectCompare, NaNComplexFloat32) {
     EXPECT_THROW((b >= a), runtime_error);
     EXPECT_THROW((b > a), runtime_error);
 
-    a = complex<float>(nan, nan);
-    b = complex<float>(nan, 1.f);
+    cval.real(nan);
+    cval.imag(nan);
+    a = cval;
+    cval.real(nan);
+    cval.imag(1.f);
+    b = cval;
     EXPECT_FALSE(a.op_sorting_less(b));
     EXPECT_THROW((a < b), runtime_error);
     EXPECT_THROW((a <= b), runtime_error);
@@ -745,9 +781,12 @@ TEST(NDObjectCompare, NaNComplexFloat32) {
     EXPECT_THROW((b >= a), runtime_error);
     EXPECT_THROW((b > a), runtime_error);
 
-
-    a = complex<float>(0.f, nan);
-    b = complex<float>(1.f, nan);
+    cval.real(0.f);
+    cval.imag(nan);
+    a = cval;
+    cval.real(1.f);
+    cval.imag(nan);
+    b = cval;
     EXPECT_TRUE(a.op_sorting_less(b));
     EXPECT_THROW((a < b), runtime_error);
     EXPECT_THROW((a <= b), runtime_error);
@@ -763,8 +802,12 @@ TEST(NDObjectCompare, NaNComplexFloat32) {
     EXPECT_THROW((b >= a), runtime_error);
     EXPECT_THROW((b > a), runtime_error);
 
-    a = complex<float>(nan, nan);
-    b = complex<float>(0.f, nan);
+    cval.real(nan);
+    cval.imag(nan);
+    a = cval;
+    cval.real(0.f);
+    cval.imag(nan);
+    b = cval;
     EXPECT_FALSE(a.op_sorting_less(b));
     EXPECT_THROW((a < b), runtime_error);
     EXPECT_THROW((a <= b), runtime_error);

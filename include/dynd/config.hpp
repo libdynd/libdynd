@@ -16,7 +16,21 @@
 
 # define DYND_USE_STDINT
 
-# define DYND_ISNAN(x) isnan(x)
+#include <cmath>
+
+// Ran into some weird issues with
+// clang + gcc std library's C11
+// polymorphic macros. Our workaround
+// is to wrap this in inline functions.
+inline bool DYND_ISNAN(float x) {
+    return isnan(x);
+}
+inline bool DYND_ISNAN(double x) {
+    return isnan(x);
+}
+inline bool DYND_ISNAN(long double x) {
+    return isnan(x);
+}
 
 #elif defined(__GNUC__)
 

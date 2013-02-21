@@ -72,7 +72,7 @@ size_t dynd::get_builtin_dtype_elwise_property_index(
 
 dtype dynd::get_builtin_dtype_elwise_property_dtype(
                 type_id_t builtin_type_id,
-                size_t elwise_property_index)
+                size_t DYND_UNUSED(elwise_property_index))
 {
     switch (builtin_type_id) {
         case complex_float32_type_id:
@@ -111,20 +111,25 @@ static void get_property_kernel_complex_float64_imag(char *dst, const char *src,
 size_t dynd::make_builtin_dtype_elwise_property_getter_kernel(
                 assignment_kernel *out, size_t offset_out,
                 type_id_t builtin_type_id,
-                const char *dst_metadata,
-                const char *src_metadata, size_t src_elwise_property_index,
-                kernel_request_t kernreq, const eval::eval_context *ectx)
+                const char *DYND_UNUSED(dst_metadata),
+                const char *DYND_UNUSED(src_metadata),
+                size_t src_elwise_property_index,
+                kernel_request_t kernreq,
+                const eval::eval_context *DYND_UNUSED(ectx))
 {
-    offset_out = make_kernreq_to_single_kernel_adapter(out, offset_out, kernreq);
+    offset_out = make_kernreq_to_single_kernel_adapter(
+                    out, offset_out, kernreq);
     kernel_data_prefix *e = out->get_at<kernel_data_prefix>(offset_out);
     switch (builtin_type_id) {
         case complex_float32_type_id:
             switch (src_elwise_property_index) {
                 case 0:
-                    e->set_function<unary_single_operation_t>(&get_property_kernel_complex_float32_real);
+                    e->set_function<unary_single_operation_t>(
+                                    &get_property_kernel_complex_float32_real);
                     return offset_out + sizeof(kernel_data_prefix);
                 case 1:
-                    e->set_function<unary_single_operation_t>(&get_property_kernel_complex_float32_imag);
+                    e->set_function<unary_single_operation_t>(
+                                    &get_property_kernel_complex_float32_imag);
                     return offset_out + sizeof(kernel_data_prefix);
                 default:
                     break;
@@ -133,10 +138,12 @@ size_t dynd::make_builtin_dtype_elwise_property_getter_kernel(
         case complex_float64_type_id:
             switch (src_elwise_property_index) {
                 case 0:
-                    e->set_function<unary_single_operation_t>(&get_property_kernel_complex_float64_real);
+                    e->set_function<unary_single_operation_t>(
+                                    &get_property_kernel_complex_float64_real);
                     return offset_out + sizeof(kernel_data_prefix);
                 case 1:
-                    e->set_function<unary_single_operation_t>(&get_property_kernel_complex_float64_imag);
+                    e->set_function<unary_single_operation_t>(
+                                    &get_property_kernel_complex_float64_imag);
                     return offset_out + sizeof(kernel_data_prefix);
                 default:
                     break;

@@ -223,11 +223,11 @@ size_t base_dtype::make_assignment_kernel(
 }
 
 size_t base_dtype::make_comparison_kernel(
-                comparison_kernel *out, size_t offset_out,
-                const dtype& src0_dt, const char *src0_metadata,
-                const dtype& src1_dt, const char *src1_metadata,
-                comparison_type_t comptype,
-                const eval::eval_context *ectx) const
+                comparison_kernel *DYND_UNUSED(out), size_t DYND_UNUSED(offset_out),
+                const dtype& src0_dt, const char *DYND_UNUSED(src0_metadata),
+                const dtype& src1_dt, const char *DYND_UNUSED(src1_metadata),
+                comparison_type_t DYND_UNUSED(comptype),
+                const eval::eval_context *DYND_UNUSED(ectx)) const
 {
     stringstream ss;
     ss << "make_comparison_kernel has not been implemented for ";

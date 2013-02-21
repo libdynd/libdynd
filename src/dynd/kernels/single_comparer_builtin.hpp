@@ -350,14 +350,19 @@ namespace dynd {
     struct op_sort_lt<complex<src0_real_type>, complex<src1_real_type>, complex_kind, complex_kind, src0_bigger, src1_bigger> {
         inline static bool f(const complex<src0_real_type>& v0, const complex<src1_real_type>& v1)
         {
+cout << "||||||| " << v0 << " vs " << v1 << endl;
             // Sorts in the order like NumPy, [R + Rj, R + nanj, nan + Rj, nan + nanj]
             if (v0.real() < v1.real()) {
+cout << "compare " << v0.real() << " < " << v1.real() << " is true" << endl;
                 return !DYND_ISNAN(v0.imag()) || DYND_ISNAN(v1.imag());
             } else if (v0.real() > v1.real()) {
+cout << "compare " << v0.real() << " > " << v1.real() << " is true" << endl;
                 return DYND_ISNAN(v1.imag()) && !DYND_ISNAN(v0.imag());
             } else if (v0.real() == v1.real() || (DYND_ISNAN(v0.real()) && DYND_ISNAN(v1.real()))) {
+cout << "compare " << v0.real() << " == " << v1.real() << " || (nan checks) is true" << endl;
                 return v0.imag() < v1.imag() || (DYND_ISNAN(v1.imag()) && !DYND_ISNAN(v0.imag()));
             }  else {
+cout << "last case " << endl;
                 return DYND_ISNAN(v1.real());
             }
         }
@@ -618,7 +623,7 @@ namespace dynd {
     template<class src0_type, class src1_type>
     struct single_comparison_builtin {
         inline static bool sorting_less(const char *src0, const char *src1,
-                        kernel_data_prefix *extra)
+                        kernel_data_prefix *DYND_UNUSED(extra))
         {
             src0_type v0 = *reinterpret_cast<const src0_type *>(src0);
             src1_type v1 = *reinterpret_cast<const src1_type *>(src1);
@@ -629,7 +634,7 @@ namespace dynd {
                             (sizeof(src0_type) < sizeof(src1_type))>::f(v0, v1);
         }
         inline static bool less(const char *src0, const char *src1,
-                        kernel_data_prefix *extra)
+                        kernel_data_prefix *DYND_UNUSED(extra))
         {
             src0_type v0 = *reinterpret_cast<const src0_type *>(src0);
             src1_type v1 = *reinterpret_cast<const src1_type *>(src1);
@@ -640,7 +645,7 @@ namespace dynd {
                             (sizeof(src0_type) < sizeof(src1_type))>::f(v0, v1);
         }
         inline static bool less_equal(const char *src0, const char *src1,
-                        kernel_data_prefix *extra)
+                        kernel_data_prefix *DYND_UNUSED(extra))
         {
             src0_type v0 = *reinterpret_cast<const src0_type *>(src0);
             src1_type v1 = *reinterpret_cast<const src1_type *>(src1);
@@ -651,7 +656,7 @@ namespace dynd {
                             (sizeof(src0_type) < sizeof(src1_type))>::f(v0, v1);
         }
         inline static bool equal(const char *src0, const char *src1,
-                        kernel_data_prefix *extra)
+                        kernel_data_prefix *DYND_UNUSED(extra))
         {
             src0_type v0 = *reinterpret_cast<const src0_type *>(src0);
             src1_type v1 = *reinterpret_cast<const src1_type *>(src1);
@@ -662,7 +667,7 @@ namespace dynd {
                             (sizeof(src0_type) < sizeof(src1_type))>::f(v0, v1);
         }
         inline static bool not_equal(const char *src0, const char *src1,
-                        kernel_data_prefix *extra)
+                        kernel_data_prefix *DYND_UNUSED(extra))
         {
             src0_type v0 = *reinterpret_cast<const src0_type *>(src0);
             src1_type v1 = *reinterpret_cast<const src1_type *>(src1);
@@ -673,7 +678,7 @@ namespace dynd {
                             (sizeof(src0_type) < sizeof(src1_type))>::f(v0, v1);
         }
         inline static bool greater_equal(const char *src0, const char *src1,
-                        kernel_data_prefix *extra)
+                        kernel_data_prefix *DYND_UNUSED(extra))
         {
             src0_type v0 = *reinterpret_cast<const src0_type *>(src0);
             src1_type v1 = *reinterpret_cast<const src1_type *>(src1);
@@ -684,7 +689,7 @@ namespace dynd {
                             (sizeof(src0_type) < sizeof(src1_type))>::f(v0, v1);
         }
         inline static bool greater(const char *src0, const char *src1,
-                        kernel_data_prefix *extra)
+                        kernel_data_prefix *DYND_UNUSED(extra))
         {
             src0_type v0 = *reinterpret_cast<const src0_type *>(src0);
             src1_type v1 = *reinterpret_cast<const src1_type *>(src1);
