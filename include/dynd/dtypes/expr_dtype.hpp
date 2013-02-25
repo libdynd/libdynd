@@ -8,6 +8,7 @@
 
 #include <dynd/dtype.hpp>
 #include <dynd/dtypes/pointer_dtype.hpp>
+#include <dynd/kernels/expr_kernel_generator.hpp>
 
 namespace dynd {
 
@@ -17,9 +18,11 @@ namespace dynd {
  */
 class expr_dtype : public base_expression_dtype {
     dtype m_value_dtype, m_operand_dtype;
+    const expr_kernel_generator *m_kgen;
 
 public:
-    expr_dtype(const dtype& value_dtype, const dtype& operand_dtype);
+    expr_dtype(const dtype& value_dtype, const dtype& operand_dtype,
+                    const expr_kernel_generator *kgen);
 
     virtual ~expr_dtype();
 
@@ -61,9 +64,10 @@ public:
  * Makes a groupby dtype.
  */
 inline dtype make_expr_dtype(const dtype& value_dtype,
-                const dtype& operand_dtype)
+                const dtype& operand_dtype,
+                const expr_kernel_generator *kgen)
 {
-    return dtype(new expr_dtype(value_dtype, operand_dtype), false);
+    return dtype(new expr_dtype(value_dtype, operand_dtype, kgen), false);
 }
 
 } // namespace dynd

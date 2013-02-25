@@ -1133,7 +1133,7 @@ intptr_t dynd::binary_search(const ndobject& n, const char *metadata, const char
     const char *n_metadata = n.get_ndo_meta();
     dtype element_dtype = n.get_dtype().at_single(0, &n_metadata);
     if (element_dtype.get_metadata_size() == 0 || n_metadata == metadata ||
-                    memcmp(n_metadata, metadata, n.get_dtype().get_metadata_size()) == 0) {
+                    memcmp(n_metadata, metadata, element_dtype.get_metadata_size()) == 0) {
         // First, a version where the metadata is identical, so we can
         // make do with only a single comparison kernel
         comparison_kernel k_n_less_d;
