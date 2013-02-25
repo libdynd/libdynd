@@ -194,17 +194,17 @@ namespace detail {
                             unbox_param<P2>::unbox(p->p2), unbox_param<P3>::unbox(p->p3)));
         }
         static dtype make_parameters_dtype(const char *name0, const char *name1, const char *name2, const char *name3) {
-            std::vector<dtype> fields;
-            std::vector<std::string> field_names;
-            fields.push_back(make_parameter_dtype<P0>::make());
-            fields.push_back(make_parameter_dtype<P1>::make());
-            fields.push_back(make_parameter_dtype<P2>::make());
-            fields.push_back(make_parameter_dtype<P3>::make());
-            field_names.push_back(name0);
-            field_names.push_back(name1);
-            field_names.push_back(name2);
-            field_names.push_back(name3);
-            return make_fixedstruct_dtype(fields, field_names);
+            dtype field_types[4];
+            std::string field_names[4];
+            field_types[0] = make_parameter_dtype<P0>::make();
+            field_types[1] = make_parameter_dtype<P1>::make();
+            field_types[2] = make_parameter_dtype<P2>::make();
+            field_types[3] = make_parameter_dtype<P3>::make();
+            field_names[0] = name0;
+            field_names[1] = name1;
+            field_names[2] = name2;
+            field_names[3] = name3;
+            return make_fixedstruct_dtype(4, field_types, field_names);
         }
     };
 
@@ -228,19 +228,19 @@ namespace detail {
         }
         static dtype make_parameters_dtype(const char *name0, const char *name1, const char *name2,
                         const char *name3, const char *name4) {
-            std::vector<dtype> fields;
-            std::vector<std::string> field_names;
-            fields.push_back(make_parameter_dtype<P0>::make());
-            fields.push_back(make_parameter_dtype<P1>::make());
-            fields.push_back(make_parameter_dtype<P2>::make());
-            fields.push_back(make_parameter_dtype<P3>::make());
-            fields.push_back(make_parameter_dtype<P4>::make());
-            field_names.push_back(name0);
-            field_names.push_back(name1);
-            field_names.push_back(name2);
-            field_names.push_back(name3);
-            field_names.push_back(name4);
-            return make_fixedstruct_dtype(fields, field_names);
+            dtype field_types[5];
+            std::string field_names[5];
+            field_types[0] = make_parameter_dtype<P0>::make();
+            field_types[1] = make_parameter_dtype<P1>::make();
+            field_types[2] = make_parameter_dtype<P2>::make();
+            field_types[3] = make_parameter_dtype<P3>::make();
+            field_types[4] = make_parameter_dtype<P4>::make();
+            field_names[0] = name0;
+            field_names[1] = name1;
+            field_names[2] = name2;
+            field_names[3] = name3;
+            field_names[4] = name4;
+            return make_fixedstruct_dtype(5, field_types, field_names);
         }
     };
 } // namespace detail

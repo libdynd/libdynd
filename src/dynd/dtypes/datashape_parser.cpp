@@ -367,7 +367,8 @@ static dtype parse_record(const char *&begin, const char *end, map<string, dtype
         }
     }
 
-    return make_fixedstruct_dtype(field_type_list, field_name_list);
+    return make_fixedstruct_dtype(field_type_list.size(),
+                    &field_type_list[0], &field_name_list[0]);
 }
 
 static dtype parse_rhs_expression(const char *&begin, const char *end, map<string, dtype>& symtable)

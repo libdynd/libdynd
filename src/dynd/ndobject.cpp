@@ -1294,6 +1294,58 @@ ndobject dynd::groupby(const dynd::ndobject& data_values, const dynd::ndobject& 
     return result;
 }
 
+ndobject dynd::combine_into_struct(size_t field_count, const std::string *field_names,
+                    const ndobject *field_values)
+{
+    // Make the pointer types
+    vector<dtype> field_types(field_count);
+    for (size_t i = 0; i != field_count; ++i) {
+        field_types[i] = make_pointer_dtype(field_values[i].get_dtype());
+    }
+    // The flags are the intersection of all the input flags
+    uint64_t flags = field_values[0].get_flags();
+    for (size_t i = 1; i != field_count; ++i) {
+        flags &= field_values[i].get_flags();
+    }
+
+    dtype result_type = make_fixedstruct_dtype(field_count, &field_types[0], field_names);
+    const fixedstruct_dtype *fsd = static_cast<const fixedstruct_dtype *>(result_type.extended());
+    char *data_ptr = NULL;
+
+    ndobject result(make_ndobject_memory_block(fsd->get_metadata_size(),
+                    fsd->get_data_size(),
+                    fsd->get_alignment(), &data_ptr));
+    // Set the ndobject properties
+    result.get_ndo()->m_dtype = result_type.release();
+    result.get_ndo()->m_data_pointer = data_ptr;
+    result.get_ndo()->m_data_reference = NULL;
+    result.get_ndo()->m_flags = flags;
+
+    // Copy all the needed metadata
+    const size_t *metadata_offsets = fsd->get_metadata_offsets();
+    for (size_t i = 0; i != field_count; ++i) {
+        pointer_dtype_metadata *pmeta;
+        pmeta = reinterpret_cast<pointer_dtype_metadata *>(result.get_ndo_meta() + metadata_offsets[i]);
+        pmeta->offset = 0;
+        pmeta->blockref = field_values[i].get_ndo()->m_data_reference
+                        ? field_values[i].get_ndo()->m_data_reference
+                        : &field_values[i].get_ndo()->m_memblockdata;
+        memory_block_incref(pmeta->blockref);
+
+        field_values[i].get_dtype().extended()->metadata_copy_construct(
+                        reinterpret_cast<char *>(pmeta + 1),
+                        field_values[i].get_ndo_meta(),
+                        &field_values[i].get_ndo()->m_memblockdata);
+    }
+
+    // Set the data pointers
+    const char **dp = reinterpret_cast<const char **>(data_ptr);
+    for (size_t i = 0; i != field_count; ++i) {
+        dp[i] = field_values[i].get_readonly_originptr();
+    }
+    return result;
+}
+
 /*
 static ndobject follow_ndobject_pointers(const ndobject& n)
 {

@@ -15,20 +15,18 @@
 using namespace std;
 using namespace dynd;
 
-fixedstruct_dtype::fixedstruct_dtype(const std::vector<dtype>& field_types, const std::vector<std::string>& field_names)
+fixedstruct_dtype::fixedstruct_dtype(size_t field_count, const dtype *field_types,
+                const std::string *field_names)
     : base_struct_dtype(fixedstruct_type_id, 0, 1, dtype_flag_none, 0),
-            m_field_types(field_types), m_field_names(field_names),
-            m_data_offsets(field_types.size()), m_metadata_offsets(field_types.size())
+            m_field_types(field_types, field_types + field_count),
+            m_field_names(field_names, field_names + field_count),
+            m_data_offsets(field_count), m_metadata_offsets(field_count)
 {
-    if (field_types.size() != field_names.size()) {
-        throw runtime_error("The field names for a struct dtypes must match the size of the field dtypes");
-    }
-
     // Calculate all the resulting struct data
     size_t metadata_offset = 0, data_offset = 0;
     m_members.alignment = 1;
     m_memory_management = pod_memory_management;
-    for (size_t i = 0, i_end = field_types.size(); i != i_end; ++i) {
+    for (size_t i = 0; i != field_count; ++i) {
         size_t field_alignment = field_types[i].get_alignment();
         // Accumulate the biggest field alignment as the dtype alignment
         if (field_alignment > m_members.alignment) {
@@ -167,7 +165,8 @@ void fixedstruct_dtype::transform_child_dtypes(dtype_transform_fn_t transform_fn
     }
     if (was_any_transformed) {
         if (!switch_to_struct) {
-            out_transformed_dtype = dtype(new fixedstruct_dtype(tmp_field_types, m_field_names), false);
+            out_transformed_dtype = dtype(new fixedstruct_dtype(
+                            tmp_field_types.size(), &tmp_field_types[0], &m_field_names[0]), false);
         } else {
             out_transformed_dtype = dtype(new struct_dtype(tmp_field_types, m_field_names), false);
         }
@@ -185,7 +184,7 @@ dtype fixedstruct_dtype::get_canonical_dtype() const
         field_types[i] = m_field_types[i].get_canonical_dtype();
     }
 
-    return dtype(new fixedstruct_dtype(field_types, m_field_names), false);
+    return dtype(new fixedstruct_dtype(m_field_types.size(), &field_types[0], &m_field_names[0]), false);
 }
 
 dtype fixedstruct_dtype::apply_linear_index(size_t nindices, const irange *indices,

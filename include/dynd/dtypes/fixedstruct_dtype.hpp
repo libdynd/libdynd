@@ -29,7 +29,8 @@ class fixedstruct_dtype : public base_struct_dtype {
     // create_ndobject_properties
     fixedstruct_dtype(int, int);
 public:
-    fixedstruct_dtype(const std::vector<dtype>& field_types, const std::vector<std::string>& field_names);
+    fixedstruct_dtype(size_t field_count, const dtype *field_types,
+                    const std::string *field_names);
 
     virtual ~fixedstruct_dtype();
 
@@ -126,44 +127,41 @@ public:
 }; // class fixedstruct_dtype
 
 /** Makes a struct dtype with the specified fields */
-inline dtype make_fixedstruct_dtype(const std::vector<dtype>& field_types, const std::vector<std::string>& field_names) {
-    return dtype(new fixedstruct_dtype(field_types, field_names), false);
+inline dtype make_fixedstruct_dtype(size_t field_count, const dtype *field_types,
+                const std::string *field_names) {
+    return dtype(new fixedstruct_dtype(field_count, field_types, field_names), false);
 }
 
 /** Makes a struct dtype with the specified fields */
 inline dtype make_fixedstruct_dtype(const dtype& dt0, const std::string& name0)
 {
-    std::vector<dtype> fields;
-    std::vector<std::string> field_names;
-    fields.push_back(dt0);
-    field_names.push_back(name0);
-    return make_fixedstruct_dtype(fields, field_names);
+    return make_fixedstruct_dtype(1, &dt0, &name0);
 }
 
 /** Makes a struct dtype with the specified fields */
 inline dtype make_fixedstruct_dtype(const dtype& dt0, const std::string& name0, const dtype& dt1, const std::string& name1)
 {
-    std::vector<dtype> fields;
-    std::vector<std::string> field_names;
-    fields.push_back(dt0);
-    fields.push_back(dt1);
-    field_names.push_back(name0);
-    field_names.push_back(name1);
-    return make_fixedstruct_dtype(fields, field_names);
+    dtype field_types[2];
+    std::string field_names[2];
+    field_types[0] = dt0;
+    field_types[1] = dt1;
+    field_names[0] = name0;
+    field_names[1] = name1;
+    return make_fixedstruct_dtype(2, field_types, field_names);
 }
 
 /** Makes a struct dtype with the specified fields */
 inline dtype make_fixedstruct_dtype(const dtype& dt0, const std::string& name0, const dtype& dt1, const std::string& name1, const dtype& dt2, const std::string& name2)
 {
-    std::vector<dtype> fields;
-    std::vector<std::string> field_names;
-    fields.push_back(dt0);
-    fields.push_back(dt1);
-    fields.push_back(dt2);
-    field_names.push_back(name0);
-    field_names.push_back(name1);
-    field_names.push_back(name2);
-    return make_fixedstruct_dtype(fields, field_names);
+    dtype field_types[3];
+    std::string field_names[3];
+    field_types[0] = dt0;
+    field_types[1] = dt1;
+    field_types[2] = dt2;
+    field_names[0] = name0;
+    field_names[1] = name1;
+    field_names[2] = name2;
+    return make_fixedstruct_dtype(3, field_types, field_names);
 }
 
 /** Makes a struct dtype with the specified fields */
@@ -171,17 +169,17 @@ inline dtype make_fixedstruct_dtype(const dtype& dt0, const std::string& name0,
                 const dtype& dt1, const std::string& name1, const dtype& dt2, const std::string& name2,
                 const dtype& dt3, const std::string& name3)
 {
-    std::vector<dtype> fields;
-    std::vector<std::string> field_names;
-    fields.push_back(dt0);
-    fields.push_back(dt1);
-    fields.push_back(dt2);
-    fields.push_back(dt3);
-    field_names.push_back(name0);
-    field_names.push_back(name1);
-    field_names.push_back(name2);
-    field_names.push_back(name3);
-    return make_fixedstruct_dtype(fields, field_names);
+    dtype field_types[4];
+    std::string field_names[4];
+    field_types[0] = dt0;
+    field_types[1] = dt1;
+    field_types[2] = dt2;
+    field_types[3] = dt3;
+    field_names[0] = name0;
+    field_names[1] = name1;
+    field_names[2] = name2;
+    field_names[3] = name3;
+    return make_fixedstruct_dtype(4, field_types, field_names);
 }
 
 /** Makes a struct dtype with the specified fields */
@@ -189,19 +187,19 @@ inline dtype make_fixedstruct_dtype(const dtype& dt0, const std::string& name0,
                 const dtype& dt1, const std::string& name1, const dtype& dt2, const std::string& name2,
                 const dtype& dt3, const std::string& name3, const dtype& dt4, const std::string& name4)
 {
-    std::vector<dtype> fields;
-    std::vector<std::string> field_names;
-    fields.push_back(dt0);
-    fields.push_back(dt1);
-    fields.push_back(dt2);
-    fields.push_back(dt3);
-    fields.push_back(dt4);
-    field_names.push_back(name0);
-    field_names.push_back(name1);
-    field_names.push_back(name2);
-    field_names.push_back(name3);
-    field_names.push_back(name4);
-    return make_fixedstruct_dtype(fields, field_names);
+    dtype field_types[5];
+    std::string field_names[5];
+    field_types[0] = dt0;
+    field_types[1] = dt1;
+    field_types[2] = dt2;
+    field_types[3] = dt3;
+    field_types[4] = dt4;
+    field_names[0] = name0;
+    field_names[1] = name1;
+    field_names[2] = name2;
+    field_names[3] = name3;
+    field_names[4] = name4;
+    return make_fixedstruct_dtype(5, field_types, field_names);
 }
 
 /**
@@ -211,7 +209,7 @@ inline dtype make_fixedstruct_dtype(const dtype& dt0, const std::string& name0,
  * that), this function can be used to check that offsets are compatible with
  * fixedstruct.
  *
- * \param nfields  The number of array entries in `field_types` and `field_offsets`
+ * \param field_count  The number of array entries in `field_types` and `field_offsets`
  * \param field_types  An array of the field dtypes.
  * \param field_offsets  The offsets corresponding to the types.
  * \param total_size  The total size of the struct in bytes.
@@ -219,10 +217,11 @@ inline dtype make_fixedstruct_dtype(const dtype& dt0, const std::string& name0,
  * \returns  True if constructing a fixedstruct with the same dtypes and field offsets will
  *           produce the provided offsets.
  */
-inline bool is_fixedstruct_compatible_offsets(int nfields, const dtype *field_types, const size_t *field_offsets, size_t total_size)
+inline bool is_fixedstruct_compatible_offsets(size_t field_count,
+                const dtype *field_types, const size_t *field_offsets, size_t total_size)
 {
     size_t offset = 0, max_alignment = 1;
-    for (int i = 0; i < nfields; ++i) {
+    for (size_t i = 0; i != field_count; ++i) {
         size_t field_alignment = field_types[i].get_alignment();
         size_t field_data_size = field_types[i].get_data_size();
         offset = inc_to_alignment(offset, field_alignment);

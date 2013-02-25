@@ -937,7 +937,19 @@ ndobject empty_like(const ndobject& rhs);
  */
 intptr_t binary_search(const ndobject& n, const char *data, const char *metadata);
 
-ndobject groupby(const dynd::ndobject& data_values, const dynd::ndobject& by, const dynd::dtype& groups = dynd::dtype());
+ndobject groupby(const dynd::ndobject& data_values, const dynd::ndobject& by,
+                const dynd::dtype& groups = dynd::dtype());
+
+/**
+ * Creates a fixedstruct ndobject with the given field names and
+ * pointers to the provided field values.
+ *
+ * \param  field_count  The number of fields.
+ * \param  field_names  The names of the fields.
+ * \param  field_values  The values of the fields.
+ */
+ndobject combine_into_struct(size_t field_count, const std::string *field_names,
+                    const ndobject *field_values);
 
 } // namespace dynd
 
