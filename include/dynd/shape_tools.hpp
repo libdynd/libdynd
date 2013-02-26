@@ -61,6 +61,43 @@ void broadcast_to_shape(size_t ndim, const intptr_t *shape,
 void broadcast_input_shapes(size_t ninputs, const ndobject* inputs,
                         size_t& out_undim, dimvector& out_shape, shortvector<int>& out_axis_perm);
 
+/**
+ * Adjusts out_shape to broadcast it with the input shape.
+ *
+ * \param out_undim  The number of dimensions in the output
+ *                   broadcast shape. This should be set to
+ *                   the maximum of all the input undim values
+ *                   that will be incrementally broadcasted.
+ * \param out_shape  The shape that gets updated to become the
+ *                   final broadcast shape. This should be
+ *                   initialized to all ones before incrementally
+ *                   broadcasting.
+ * \param undim  The number of dimensions in the input shape.
+ * \param shape  The input shape.
+ */
+inline void incremental_broadcast(size_t out_undim, intptr_t *out_shape,
+                size_t undim, const intptr_t *shape)
+{
+    if (out_undim < undim) {
+        throw broadcast_error(out_undim, out_shape, undim, shape);
+    }
+
+    out_shape += (out_undim - undim);
+    for (size_t i = 0; i < undim; ++i) {
+        intptr_t shape_i = shape[i];
+        if (shape_i != 1) {
+            if (shape_i == -1) {
+                if (out_shape[i] == 1) {
+                    out_shape[i] = -1;
+                }
+            } else if (out_shape[i] == 1) {
+                out_shape[i] = shape_i;
+            } else if (shape_i != out_shape[i]) {
+                throw broadcast_error(out_undim, out_shape, undim, shape);
+            }
+        }
+    }
+}
 
 /**
  * This function broadcasts the three operands together to create an output

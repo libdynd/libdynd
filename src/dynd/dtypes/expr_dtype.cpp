@@ -6,6 +6,7 @@
 #include <dynd/dtypes/expr_dtype.hpp>
 #include <dynd/shortvector.hpp>
 #include <dynd/dtypes/fixedstruct_dtype.hpp>
+#include <dynd/shape_tools.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -15,7 +16,7 @@ expr_dtype::expr_dtype(const dtype& value_dtype, const dtype& operand_dtype,
     : base_expression_dtype(expr_type_id, expression_kind,
                         operand_dtype.get_data_size(), operand_dtype.get_alignment(),
                         dtype_flag_none,
-                        0, value_dtype.get_undim()),
+                        operand_dtype.get_metadata_size(), value_dtype.get_undim()),
                     m_value_dtype(value_dtype), m_operand_dtype(operand_dtype),
                     m_kgen(kgen)
 {
@@ -37,16 +38,53 @@ void expr_dtype::print_dtype(std::ostream& o) const
     o << "expr<WIP>";
 }
 
-void expr_dtype::get_shape(size_t DYND_UNUSED(i), intptr_t *DYND_UNUSED(out_shape)) const
+void expr_dtype::get_shape(size_t i, intptr_t *out_shape) const
 {
-    throw runtime_error("TODO: implement expr_dtype::get_shape");
+    size_t undim = get_undim();
+    // Initialize the shape to all ones
+    out_shape += i;
+    for (size_t j = 0; j != undim; ++j) {
+        out_shape[j] = 1;
+    }
+
+    // Get each operand shape, and broadcast them together
+    dimvector shape(undim);
+    const fixedstruct_dtype *fsd = static_cast<const fixedstruct_dtype *>(m_operand_dtype.extended());
+    size_t field_count = fsd->get_field_count();
+    for (size_t fi = 0; fi != field_count; ++fi) {
+        const dtype& dt = fsd->get_field_types()[fi];
+        size_t field_undim = dt.get_undim();
+        if (field_undim > 0) {
+            dt.extended()->get_shape(0, shape.get());
+            incremental_broadcast(undim, out_shape, field_undim, shape.get());
+        }
+    }
 }
 
-void expr_dtype::get_shape(size_t DYND_UNUSED(i),
-                intptr_t *DYND_UNUSED(out_shape),
-                const char *DYND_UNUSED(metadata)) const
+void expr_dtype::get_shape(size_t i,
+                intptr_t *out_shape,
+                const char *metadata) const
 {
-    throw runtime_error("TODO: implement expr_dtype::get_shape");
+    size_t undim = get_undim();
+    // Initialize the shape to all ones
+    out_shape += i;
+    for (size_t j = 0; j != undim; ++j) {
+        out_shape[j] = 1;
+    }
+
+    // Get each operand shape, and broadcast them together
+    dimvector shape(undim);
+    const fixedstruct_dtype *fsd = static_cast<const fixedstruct_dtype *>(m_operand_dtype.extended());
+    const size_t *metadata_offsets = fsd->get_metadata_offsets();
+    size_t field_count = fsd->get_field_count();
+    for (size_t fi = 0; fi != field_count; ++fi) {
+        const dtype& dt = fsd->get_field_types()[fi];
+        size_t field_undim = dt.get_undim();
+        if (field_undim > 0) {
+            dt.extended()->get_shape(0, shape.get(), metadata + metadata_offsets[fi]);
+            incremental_broadcast(undim, out_shape, field_undim, shape.get());
+        }
+    }
 }
 
 bool expr_dtype::is_lossless_assignment(
@@ -80,12 +118,18 @@ size_t expr_dtype::make_operand_to_value_assignment_kernel(
     size_t input_count = fsd->get_field_count();
     const size_t *metadata_offsets = fsd->get_metadata_offsets();
     shortvector<const char *> src_metadata_array(input_count);
+    const dtype *src_ptr_dt = fsd->get_field_types();
+    vector<dtype> src_dt(input_count);
     for (size_t i = 0; i != input_count; ++i) {
-        src_metadata_array[i] = src_metadata + metadata_offsets[i];
+        const pointer_dtype *pd = static_cast<const pointer_dtype *>(src_ptr_dt[i].extended());
+        src_dt[i] = pd->get_target_dtype();
+    }
+    for (size_t i = 0; i != input_count; ++i) {
+        src_metadata_array[i] = src_metadata + metadata_offsets[i] + sizeof(pointer_dtype_metadata);
     }
     return m_kgen->make_expr_kernel(out, offset_out,
                     m_value_dtype, dst_metadata,
-                    input_count, fsd->get_field_types(),
+                    input_count, &src_dt[0],
                     src_metadata_array.get(),
                     kernel_request_single, ectx);
 }
