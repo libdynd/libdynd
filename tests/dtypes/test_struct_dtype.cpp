@@ -15,6 +15,7 @@
 #include <dynd/dtypes/convert_dtype.hpp>
 #include <dynd/dtypes/byteswap_dtype.hpp>
 #include <dynd/dtypes/fixedstruct_dtype.hpp>
+#include <dynd/json_parser.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -207,5 +208,217 @@ TEST(StructDType, FromFixedStructAssign) {
     EXPECT_EQ(6,    b.at(1,2).as<int>());
     EXPECT_EQ(7.25, b.at(1,0).as<double>());
     EXPECT_EQ(8,    b.at(1,1).as<short>());
+}
+
+TEST(StructDType, SingleCompare) {
+    ndobject a, b;
+    dtype sdt = make_struct_dtype(make_dtype<int32_t>(), "a",
+                    make_dtype<float>(), "b", make_dtype<int64_t>(), "c");
+    a = ndobject(sdt);
+    b = ndobject(sdt);
+
+    // Test lexicographic sorting
+
+    // a == b
+    a.p("a").vals() = 3;
+    a.p("b").vals() = -2.25;
+    a.p("c").vals() = 66;
+    b.p("a").vals() = 3;
+    b.p("b").vals() = -2.25;
+    b.p("c").vals() = 66;
+    EXPECT_FALSE(a.op_sorting_less(b));
+    EXPECT_THROW((a < b), runtime_error);
+    EXPECT_THROW((a <= b), runtime_error);
+    EXPECT_TRUE(a == b);
+    EXPECT_FALSE(a != b);
+    EXPECT_THROW((a >= b), runtime_error);
+    EXPECT_THROW((a > b), runtime_error);
+    EXPECT_FALSE(b.op_sorting_less(a));
+    EXPECT_THROW((b < a), runtime_error);
+    EXPECT_THROW((b <= a), runtime_error);
+    EXPECT_TRUE(b == a);
+    EXPECT_FALSE(b != a);
+    EXPECT_THROW((b >= a), runtime_error);
+    EXPECT_THROW((b > a), runtime_error);
+
+    // Different in the first field
+    a.p("a").vals() = 3;
+    a.p("b").vals() = -2.25;
+    a.p("c").vals() = 66;
+    b.p("a").vals() = 4;
+    b.p("b").vals() = -2.25;
+    b.p("c").vals() = 66;
+    EXPECT_TRUE(a.op_sorting_less(b));
+    EXPECT_THROW((a < b), runtime_error);
+    EXPECT_THROW((a <= b), runtime_error);
+    EXPECT_FALSE(a == b);
+    EXPECT_TRUE(a != b);
+    EXPECT_THROW((a >= b), runtime_error);
+    EXPECT_THROW((a > b), runtime_error);
+    EXPECT_FALSE(b.op_sorting_less(a));
+    EXPECT_THROW((b < a), runtime_error);
+    EXPECT_THROW((b <= a), runtime_error);
+    EXPECT_FALSE(b == a);
+    EXPECT_TRUE(b != a);
+    EXPECT_THROW((b >= a), runtime_error);
+    EXPECT_THROW((b > a), runtime_error);
+
+    // Different in the second field
+    a.p("a").vals() = 3;
+    a.p("b").vals() = -2.25;
+    a.p("c").vals() = 66;
+    b.p("a").vals() = 3;
+    b.p("b").vals() = -2.23;
+    b.p("c").vals() = 66;
+    EXPECT_TRUE(a.op_sorting_less(b));
+    EXPECT_THROW((a < b), runtime_error);
+    EXPECT_THROW((a <= b), runtime_error);
+    EXPECT_FALSE(a == b);
+    EXPECT_TRUE(a != b);
+    EXPECT_THROW((a >= b), runtime_error);
+    EXPECT_THROW((a > b), runtime_error);
+    EXPECT_FALSE(b.op_sorting_less(a));
+    EXPECT_THROW((b < a), runtime_error);
+    EXPECT_THROW((b <= a), runtime_error);
+    EXPECT_FALSE(b == a);
+    EXPECT_TRUE(b != a);
+    EXPECT_THROW((b >= a), runtime_error);
+    EXPECT_THROW((b > a), runtime_error);
+
+
+    // Different in the third field
+    a.p("a").vals() = 3;
+    a.p("b").vals() = -2.25;
+    a.p("c").vals() = 66;
+    b.p("a").vals() = 3;
+    b.p("b").vals() = -2.25;
+    b.p("c").vals() = 1000;
+    EXPECT_TRUE(a.op_sorting_less(b));
+    EXPECT_THROW((a < b), runtime_error);
+    EXPECT_THROW((a <= b), runtime_error);
+    EXPECT_FALSE(a == b);
+    EXPECT_TRUE(a != b);
+    EXPECT_THROW((a >= b), runtime_error);
+    EXPECT_THROW((a > b), runtime_error);
+    EXPECT_FALSE(b.op_sorting_less(a));
+    EXPECT_THROW((b < a), runtime_error);
+    EXPECT_THROW((b <= a), runtime_error);
+    EXPECT_FALSE(b == a);
+    EXPECT_TRUE(b != a);
+    EXPECT_THROW((b >= a), runtime_error);
+    EXPECT_THROW((b > a), runtime_error);
+}
+
+
+TEST(StructDType, SingleCompareDifferentMetadata) {
+    ndobject a, b;
+    dtype sdt = make_struct_dtype(make_dtype<int32_t>(), "a",
+                    make_dtype<float>(), "b", make_dtype<int64_t>(), "c");
+    dtype sdt_reverse = make_struct_dtype(make_dtype<int64_t>(), "c",
+                    make_dtype<float>(), "b", make_dtype<int32_t>(), "a");
+    a = ndobject(sdt);
+    b = ndobject(sdt_reverse).at(irange() / -1);
+
+    // Confirm that the metadata is different
+    EXPECT_EQ(a.get_dtype(), b.get_dtype());
+    const struct_dtype *a_sdt = static_cast<const struct_dtype *>(a.get_dtype().extended());
+    const struct_dtype *b_sdt = static_cast<const struct_dtype *>(b.get_dtype().extended());
+    EXPECT_NE(a_sdt->get_data_offsets(a.get_ndo_meta())[0],
+                    b_sdt->get_data_offsets(b.get_ndo_meta())[0]);
+    EXPECT_NE(a_sdt->get_data_offsets(a.get_ndo_meta())[1],
+                    b_sdt->get_data_offsets(b.get_ndo_meta())[1]);
+    EXPECT_NE(a_sdt->get_data_offsets(a.get_ndo_meta())[2],
+                    b_sdt->get_data_offsets(b.get_ndo_meta())[2]);
+
+    // Test lexicographic sorting
+
+    // a == b
+    a.p("a").vals() = 3;
+    a.p("b").vals() = -2.25;
+    a.p("c").vals() = 66;
+    b.p("a").vals() = 3;
+    b.p("b").vals() = -2.25;
+    b.p("c").vals() = 66;
+    EXPECT_FALSE(a.op_sorting_less(b));
+    EXPECT_THROW((a < b), runtime_error);
+    EXPECT_THROW((a <= b), runtime_error);
+    EXPECT_TRUE(a == b);
+    EXPECT_FALSE(a != b);
+    EXPECT_THROW((a >= b), runtime_error);
+    EXPECT_THROW((a > b), runtime_error);
+    EXPECT_FALSE(b.op_sorting_less(a));
+    EXPECT_THROW((b < a), runtime_error);
+    EXPECT_THROW((b <= a), runtime_error);
+    EXPECT_TRUE(b == a);
+    EXPECT_FALSE(b != a);
+    EXPECT_THROW((b >= a), runtime_error);
+    EXPECT_THROW((b > a), runtime_error);
+
+    // Different in the first field
+    a.p("a").vals() = 3;
+    a.p("b").vals() = -2.25;
+    a.p("c").vals() = 66;
+    b.p("a").vals() = 4;
+    b.p("b").vals() = -2.25;
+    b.p("c").vals() = 66;
+    EXPECT_TRUE(a.op_sorting_less(b));
+    EXPECT_THROW((a < b), runtime_error);
+    EXPECT_THROW((a <= b), runtime_error);
+    EXPECT_FALSE(a == b);
+    EXPECT_TRUE(a != b);
+    EXPECT_THROW((a >= b), runtime_error);
+    EXPECT_THROW((a > b), runtime_error);
+    EXPECT_FALSE(b.op_sorting_less(a));
+    EXPECT_THROW((b < a), runtime_error);
+    EXPECT_THROW((b <= a), runtime_error);
+    EXPECT_FALSE(b == a);
+    EXPECT_TRUE(b != a);
+    EXPECT_THROW((b >= a), runtime_error);
+    EXPECT_THROW((b > a), runtime_error);
+
+    // Different in the second field
+    a.p("a").vals() = 3;
+    a.p("b").vals() = -2.25;
+    a.p("c").vals() = 66;
+    b.p("a").vals() = 3;
+    b.p("b").vals() = -2.23;
+    b.p("c").vals() = 66;
+    EXPECT_TRUE(a.op_sorting_less(b));
+    EXPECT_THROW((a < b), runtime_error);
+    EXPECT_THROW((a <= b), runtime_error);
+    EXPECT_FALSE(a == b);
+    EXPECT_TRUE(a != b);
+    EXPECT_THROW((a >= b), runtime_error);
+    EXPECT_THROW((a > b), runtime_error);
+    EXPECT_FALSE(b.op_sorting_less(a));
+    EXPECT_THROW((b < a), runtime_error);
+    EXPECT_THROW((b <= a), runtime_error);
+    EXPECT_FALSE(b == a);
+    EXPECT_TRUE(b != a);
+    EXPECT_THROW((b >= a), runtime_error);
+    EXPECT_THROW((b > a), runtime_error);
+
+
+    // Different in the third field
+    a.p("a").vals() = 3;
+    a.p("b").vals() = -2.25;
+    a.p("c").vals() = 66;
+    b.p("a").vals() = 3;
+    b.p("b").vals() = -2.25;
+    b.p("c").vals() = 1000;
+    EXPECT_TRUE(a.op_sorting_less(b));
+    EXPECT_THROW((a < b), runtime_error);
+    EXPECT_THROW((a <= b), runtime_error);
+    EXPECT_FALSE(a == b);
+    EXPECT_TRUE(a != b);
+    EXPECT_THROW((a >= b), runtime_error);
+    EXPECT_THROW((a > b), runtime_error);
+    EXPECT_FALSE(b.op_sorting_less(a));
+    EXPECT_THROW((b < a), runtime_error);
+    EXPECT_THROW((b <= a), runtime_error);
+    EXPECT_FALSE(b == a);
+    EXPECT_TRUE(b != a);
+    EXPECT_THROW((b >= a), runtime_error);
+    EXPECT_THROW((b > a), runtime_error);
 }
 

@@ -9,6 +9,7 @@
 #include <dynd/exceptions.hpp>
 #include <dynd/gfunc/make_callable.hpp>
 #include <dynd/kernels/struct_assignment_kernels.hpp>
+#include <dynd/kernels/struct_comparison_kernels.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -328,6 +329,31 @@ size_t struct_dtype::make_assignment_kernel(
 
     stringstream ss;
     ss << "Cannot assign from " << src_dt << " to " << dst_dt;
+    throw runtime_error(ss.str());
+}
+
+size_t struct_dtype::make_comparison_kernel(
+                comparison_kernel *out, size_t offset_out,
+                const dtype& src0_dt, const char *src0_metadata,
+                const dtype& src1_dt, const char *src1_metadata,
+                comparison_type_t comptype,
+                const eval::eval_context *ectx) const
+{
+    if (this == src0_dt.extended()) {
+        if (*this == *src1_dt.extended()) {
+            return make_struct_comparison_kernel(out, offset_out,
+                            src0_dt, src0_metadata, src1_metadata,
+                            comptype, ectx);
+        } else if (src1_dt.get_kind() == struct_kind) {
+            return make_general_struct_comparison_kernel(out, offset_out,
+                            src0_dt, src0_metadata,
+                            src1_dt, src1_metadata,
+                            comptype, ectx);
+        }
+    }
+
+    stringstream ss;
+    ss << "Cannot compare values of types " << src0_dt << " and " << src1_dt;
     throw runtime_error(ss.str());
 }
 
