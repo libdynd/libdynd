@@ -8,3 +8,7 @@
 
 using namespace std;
 using namespace dynd;
+
+expr_kernel_generator::~expr_kernel_generator()
+{
+}

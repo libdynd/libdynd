@@ -34,6 +34,13 @@ class expr_kernel_generator {
     /** Embedded reference counting */
     mutable atomic_refcount m_use_count;
 public:
+    expr_kernel_generator()
+        : m_use_count(1)
+    {
+    }
+
+    virtual ~expr_kernel_generator();
+
     virtual size_t make_expr_kernel(
                 assignment_kernel *out, size_t offset_out,
                 const dtype& dst_dt, const char *dst_metadata,

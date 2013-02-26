@@ -89,6 +89,8 @@ enum type_id_t {
     strided_dim_type_id,
     // A fixed-sized array dimension type
     fixed_dim_type_id,
+    // A dimension made up of offsets
+    offset_dim_type_id,
     // A variable-sized array dimension type
     var_dim_type_id,
 
