@@ -102,7 +102,7 @@ size_t dynd::make_struct_identical_assignment_kernel(
     e->field_count = field_count;
 
     const size_t *dst_data_offsets = sd->get_data_offsets(dst_metadata);
-    const size_t *src_data_offsets = sd->get_data_offsets(dst_metadata);
+    const size_t *src_data_offsets = sd->get_data_offsets(src_metadata);
 
     // Create the kernels and dst offsets for copying individual fields
     size_t current_offset = offset_out + extra_size;

@@ -98,7 +98,8 @@ ndobject dynd::make_strided_ndobject(const dtype& uniform_dtype, size_t ndim, co
             stride = uniform_dtype.extended()->get_default_data_size(0, NULL);
         }
         if (!uniform_dtype.is_builtin()) {
-            uniform_dtype.extended()->metadata_default_construct(reinterpret_cast<char *>(meta + ndim), 0, NULL);
+            uniform_dtype.extended()->metadata_default_construct(
+                            reinterpret_cast<char *>(meta + ndim), 0, NULL);
         }
         if (axis_perm == NULL) {
             for (ptrdiff_t i = (ptrdiff_t)ndim - 1; i >= 0; --i) {

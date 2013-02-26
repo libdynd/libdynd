@@ -15,6 +15,7 @@
 #include <dynd/dtypes/string_dtype.hpp>
 #include <dynd/dtypes/fixedstring_dtype.hpp>
 #include <dynd/dtypes/convert_dtype.hpp>
+#include <dynd/dtypes/struct_dtype.hpp>
 #include <dynd/dtypes/fixedstruct_dtype.hpp>
 
 using namespace std;
@@ -129,6 +130,72 @@ TEST(GroupByDType, Struct) {
     EXPECT_EQ(177.0f,   g.at(1,1).p("height").as<float>());
 }
 
+TEST(GroupByDType, StructSubset) {
+    // Create a simple structured array
+    dtype d = make_fixedstruct_dtype(make_string_dtype(), "lastname",
+                    make_string_dtype(), "firstname",
+                    make_fixedstring_dtype(1, string_encoding_ascii), "gender");
+    ndobject a = make_strided_ndobject(7, d);
+    const char *lastname_vals[] = {"Wiebe", "Friesen", "Klippenstein", "Wiebe", "Friesen",
+                    "Friesen", "Friesen"};
+    const char *firstname_vals[] = {"Paul", "Jennifer", "Frank", "Louise", "Jake",
+                    "Arthur", "Anne"};
+    const char *gender_vals[] = {"M", "F", "M", "F", "M", "M", "F"};
+    a.p("lastname").vals() = lastname_vals;
+    a.p("firstname").vals() = firstname_vals;
+    a.p("gender").vals() = gender_vals;
+
+    // Group based on gender
+    ndobject g = groupby(a, a.p("gender"));
+
+    g = g.eval();
+    EXPECT_EQ(2, g.at_array(0, NULL).get_shape()[0]);
+    EXPECT_EQ(3, g.at(0).get_shape()[0]);
+    EXPECT_EQ(4, g.at(1).get_shape()[0]);
+    EXPECT_EQ("Jennifer",   g.at(0,0).p("firstname").as<string>());
+    EXPECT_EQ("Louise",     g.at(0,1).p("firstname").as<string>());
+    EXPECT_EQ("Anne",       g.at(0,2).p("firstname").as<string>());
+    EXPECT_EQ("Paul",       g.at(1,0).p("firstname").as<string>());
+    EXPECT_EQ("Frank",      g.at(1,1).p("firstname").as<string>());
+    EXPECT_EQ("Jake",       g.at(1,2).p("firstname").as<string>());
+    EXPECT_EQ("Arthur",     g.at(1,3).p("firstname").as<string>());
+
+    // Group based on last name, gender
+    g = groupby(a, a.at(irange(), irange(0, 3, 2))); // a.at(irange(), {"lastname", "gender"})
+
+    // Validate the list of groups it produced
+    ndobject groups_list = g.p("groups");
+    EXPECT_EQ(make_strided_dim_dtype(make_struct_dtype(make_string_dtype(), "lastname",
+                    make_fixedstring_dtype(1, string_encoding_ascii), "gender")),
+                        groups_list.get_dtype());
+    EXPECT_EQ(5, groups_list.get_shape()[0]);
+    EXPECT_EQ("Friesen",      groups_list.at(0,0).as<string>());
+    EXPECT_EQ("F",            groups_list.at(0,1).as<string>());
+    EXPECT_EQ("Friesen",      groups_list.at(1,0).as<string>());
+    EXPECT_EQ("M",            groups_list.at(1,1).as<string>());
+    EXPECT_EQ("Klippenstein", groups_list.at(2,0).as<string>());
+    EXPECT_EQ("M",            groups_list.at(2,1).as<string>());
+    EXPECT_EQ("Wiebe",        groups_list.at(3,0).as<string>());
+    EXPECT_EQ("F",            groups_list.at(3,1).as<string>());
+    EXPECT_EQ("Wiebe",        groups_list.at(4,0).as<string>());
+    EXPECT_EQ("M",            groups_list.at(4,1).as<string>());
+
+    g = g.eval();
+    EXPECT_EQ(5, g.at_array(0, NULL).get_shape()[0]);
+    EXPECT_EQ(2, g.at(0).get_shape()[0]);
+    EXPECT_EQ(2, g.at(1).get_shape()[0]);
+    EXPECT_EQ(1, g.at(2).get_shape()[0]);
+    EXPECT_EQ(1, g.at(3).get_shape()[0]);
+    EXPECT_EQ(1, g.at(4).get_shape()[0]);
+    EXPECT_EQ("Jennifer",   g.at(0,0).p("firstname").as<string>());
+    EXPECT_EQ("Anne",       g.at(0,1).p("firstname").as<string>());
+    EXPECT_EQ("Jake",       g.at(1,0).p("firstname").as<string>());
+    EXPECT_EQ("Arthur",     g.at(1,1).p("firstname").as<string>());
+    EXPECT_EQ("Frank",      g.at(2,0).p("firstname").as<string>());
+    EXPECT_EQ("Louise",     g.at(3,0).p("firstname").as<string>());
+    EXPECT_EQ("Paul",       g.at(4,0).p("firstname").as<string>());
+}
+
 TEST(GroupByDType, MismatchedSizes) {
     int data[] = {10,20,30};
     int by[] = {15,16,16,15};
@@ -175,4 +242,3 @@ TEST(GroupByDType, StructUnsortedCats) {
     EXPECT_EQ(164.75f,  g.at(1,1).p("height").as<float>());
     EXPECT_EQ(170.5f,   g.at(1,2).p("height").as<float>());
 }
-

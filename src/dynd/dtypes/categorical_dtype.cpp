@@ -173,9 +173,11 @@ static ndobject make_sorted_categories(const set<const char *, cmp>& uniques, co
 {
     ndobject categories = make_strided_ndobject(uniques.size(), udtype);
     assignment_kernel k;
-    make_assignment_kernel(&k, 0, udtype, categories.get_ndo_meta() + sizeof(strided_dim_dtype_metadata),
-                    udtype, metadata, kernel_request_single,
-                    assign_error_default, &eval::default_eval_context);
+    make_assignment_kernel(&k, 0,
+                    udtype, categories.get_ndo_meta() + sizeof(strided_dim_dtype_metadata),
+                    udtype, metadata,
+                    kernel_request_single, assign_error_default,
+                    &eval::default_eval_context);
 
     intptr_t stride = reinterpret_cast<const strided_dim_dtype_metadata *>(categories.get_ndo_meta())->stride;
     char *dst_ptr = categories.get_readwrite_originptr();
