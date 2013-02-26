@@ -120,6 +120,10 @@ static size_t make_elwise_strided_dimension_expr_kernel_for_N(
             const strided_dim_dtype *sdd = static_cast<const strided_dim_dtype *>(src_dt[i].extended());
             const strided_dim_dtype_metadata *src_md =
                             reinterpret_cast<const strided_dim_dtype_metadata *>(src_metadata[i]);
+            // Check for a broadcasting error
+            if (src_md->size != 1 && e->size != src_md->size) {
+                throw broadcast_error(dst_dt, dst_metadata, src_dt[i], src_metadata[i]);
+            }
             // In DyND, the src stride is required to be zero for size-one dimensions,
             // so we don't have to check the size here.
             e->src_stride[i] = src_md->stride;
@@ -127,6 +131,10 @@ static size_t make_elwise_strided_dimension_expr_kernel_for_N(
             src_child_dt[i] = sdd->get_element_dtype();
         } else {
             const fixed_dim_dtype *fdd = static_cast<const fixed_dim_dtype *>(src_dt[i].extended());
+            // Check for a broadcasting error
+            if (fdd->get_fixed_dim_size() != 1 && e->size != fdd->get_fixed_dim_size()) {
+                throw broadcast_error(dst_dt, dst_metadata, src_dt[i], src_metadata[i]);
+            }
             // In DyND, the src stride is required to be zero for size-one dimensions,
             // so we don't have to check the size here.
             e->src_stride[i] = fdd->get_fixed_stride();
