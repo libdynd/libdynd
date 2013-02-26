@@ -115,6 +115,16 @@ public:
         m_memblock = ndobj_memblock;
     }
 
+#ifdef DYND_RVALUE_REFS
+    void set(memory_block_ptr&& ndobj_memblock)
+    {
+        if (ndobj_memblock.get()->m_type != ndobject_memory_block_type) {
+            throw std::runtime_error("ndobject can only be constructed from a memblock with ndobject type");
+        }
+        m_memblock = DYND_MOVE(ndobj_memblock);
+    }
+#endif
+
     /**
      * Constructs a writeable uninitialized ndobject of the specified dtype.
      * This dtype should be scalar or already fully specify the datashape.

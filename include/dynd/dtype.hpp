@@ -321,6 +321,10 @@ public:
         std::swap(m_extended, rhs.m_extended);
     }
 
+    void swap(const base_dtype *&rhs) {
+        std::swap(m_extended, rhs);
+    }
+
     inline bool operator==(const dtype& rhs) const {
         if (is_builtin() || rhs.is_builtin()) {
             return m_extended == rhs.m_extended;
