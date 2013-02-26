@@ -139,7 +139,9 @@ void json_dtype::metadata_copy_construct(char *dst_metadata, const char *src_met
     const json_dtype_metadata *src_md = reinterpret_cast<const json_dtype_metadata *>(src_metadata);
     json_dtype_metadata *dst_md = reinterpret_cast<json_dtype_metadata *>(dst_metadata);
     dst_md->blockref = src_md->blockref ? src_md->blockref : embedded_reference;
-    memory_block_incref(dst_md->blockref);
+    if (dst_md->blockref) {
+        memory_block_incref(dst_md->blockref);
+    }
 }
 
 void json_dtype::metadata_reset_buffers(char *DYND_UNUSED(metadata)) const

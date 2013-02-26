@@ -454,7 +454,9 @@ void var_dim_dtype::metadata_copy_construct(char *dst_metadata, const char *src_
     dst_md->stride = src_md->stride;
     dst_md->offset = src_md->offset;
     dst_md->blockref = src_md->blockref ? src_md->blockref : embedded_reference;
-    memory_block_incref(dst_md->blockref);
+    if (dst_md->blockref) {
+        memory_block_incref(dst_md->blockref);
+    }
     if (!m_element_dtype.is_builtin()) {
         m_element_dtype.extended()->metadata_copy_construct(dst_metadata + sizeof(var_dim_dtype_metadata),
                         src_metadata + sizeof(var_dim_dtype_metadata), embedded_reference);
