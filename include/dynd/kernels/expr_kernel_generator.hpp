@@ -33,13 +33,18 @@ typedef void (*expr_strided_operation_t)(
 class expr_kernel_generator {
     /** Embedded reference counting */
     mutable atomic_refcount m_use_count;
+    bool m_elwise;
 public:
-    expr_kernel_generator()
-        : m_use_count(1)
+    expr_kernel_generator(bool elwise)
+        : m_use_count(1), m_elwise(elwise)
     {
     }
 
     virtual ~expr_kernel_generator();
+
+    inline bool is_elwise() const {
+        return m_elwise;
+    }
 
     virtual size_t make_expr_kernel(
                 assignment_kernel *out, size_t offset_out,

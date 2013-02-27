@@ -41,6 +41,15 @@ public:
         return blockref_memory_management;
     }
 
+    dtype apply_linear_index(size_t nindices, const irange *indices,
+                size_t current_i, const dtype& root_dt, bool leading_dimension) const;
+    intptr_t apply_linear_index(size_t nindices, const irange *indices, const char *metadata,
+                    const dtype& result_dtype, char *out_metadata,
+                    memory_block_data *embedded_reference,
+                    size_t current_i, const dtype& root_dt,
+                    bool leading_dimension, char **inout_data,
+                    memory_block_data **inout_dataref) const;
+
     void get_shape(size_t i, intptr_t *out_shape) const;
     void get_shape(size_t i, intptr_t *out_shape, const char *metadata) const;
 

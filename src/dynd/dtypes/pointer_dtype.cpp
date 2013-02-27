@@ -100,7 +100,6 @@ dtype pointer_dtype::get_canonical_dtype() const
 dtype pointer_dtype::apply_linear_index(size_t nindices, const irange *indices,
                 size_t current_i, const dtype& root_dt, bool leading_dimension) const
 {
-cout << "PD " << __LINE__ << endl;
     if (nindices == 0) {
         if (leading_dimension) {
             // Even with 0 indices, throw away the pointer when it's a leading dimension
