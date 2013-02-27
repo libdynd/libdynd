@@ -84,6 +84,7 @@ set(dynd_SRC
     src/dynd/dtypes/struct_dtype.cpp
     src/dynd/dtypes/tuple_dtype.cpp
     src/dynd/dtypes/type_id.cpp
+    src/dynd/dtypes/unary_expr_dtype.cpp
     src/dynd/dtypes/var_dim_dtype.cpp
     src/dynd/dtypes/view_dtype.cpp
     src/dynd/dtypes/void_pointer_dtype.cpp
@@ -118,6 +119,7 @@ set(dynd_SRC
     include/dynd/dtypes/fixedstruct_dtype.hpp
     include/dynd/dtypes/tuple_dtype.hpp
     include/dynd/dtypes/type_id.hpp
+    include/dynd/dtypes/unary_expr_dtype.hpp
     include/dynd/dtypes/var_dim_dtype.hpp
     include/dynd/dtypes/view_dtype.hpp
     include/dynd/dtypes/void_pointer_dtype.hpp

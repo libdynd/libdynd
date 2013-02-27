@@ -111,6 +111,7 @@ enum type_id_t {
 
     // Advanced expression dtypes
     expr_type_id,
+    unary_expr_type_id,
     groupby_type_id,
 
     // The number of built-in, atomic types (including uninitialized and void)

@@ -6,6 +6,7 @@
 #include <dynd/dtypes/expr_dtype.hpp>
 #include <dynd/shortvector.hpp>
 #include <dynd/dtypes/fixedstruct_dtype.hpp>
+#include <dynd/dtypes/builtin_dtype_properties.hpp>
 #include <dynd/shape_tools.hpp>
 
 using namespace std;
@@ -20,6 +21,26 @@ expr_dtype::expr_dtype(const dtype& value_dtype, const dtype& operand_dtype,
                     m_value_dtype(value_dtype), m_operand_dtype(operand_dtype),
                     m_kgen(kgen)
 {
+    if (operand_dtype.get_type_id() != fixedstruct_type_id) {
+        stringstream ss;
+        ss << "expr_dtype can only be constructed with a fixedstruct as its operand, given ";
+        ss << operand_dtype;
+        throw runtime_error(ss.str());
+    }
+    const fixedstruct_dtype *fsd = static_cast<const fixedstruct_dtype *>(operand_dtype.extended());
+    size_t field_count = fsd->get_field_count();
+    if (field_count == 1) {
+        throw runtime_error("expr_dtype is for 2 or more operands, use unary_expr_dtype for 1 operand");
+    }
+    const dtype *field_types = fsd->get_field_types();
+    for (size_t i = 0; i != field_count; ++i) {
+        if (field_types[i].get_type_id() != pointer_type_id) {
+            stringstream ss;
+            ss << "each field of the expr_dtype's operand must be a pointer, field " << i;
+            ss << " is " << field_types[i];
+            throw runtime_error(ss.str());
+        }
+    }
 }
 
 expr_dtype::~expr_dtype()
@@ -35,8 +56,16 @@ void expr_dtype::print_data(std::ostream& DYND_UNUSED(o),
 
 void expr_dtype::print_dtype(std::ostream& o) const
 {
+    const fixedstruct_dtype *fsd = static_cast<const fixedstruct_dtype *>(m_operand_dtype.extended());
+    size_t field_count = fsd->get_field_count();
+    const dtype *field_types = fsd->get_field_types();
     o << "expr<";
-    o << m_value_dtype << ", ";
+    o << m_value_dtype;
+    for (size_t i = 0; i != field_count; ++i) {
+        const pointer_dtype *pd = static_cast<const pointer_dtype *>(field_types[i].extended());
+        o << ", op" << i << "=" << pd->get_target_dtype();
+    }
+    o << ", expr=";
     m_kgen->print_dtype(o);
     o << ">";
 }
@@ -182,7 +211,9 @@ bool expr_dtype::operator==(const base_dtype& rhs) const
         return false;
     } else {
         const expr_dtype *dt = static_cast<const expr_dtype*>(&rhs);
-        return m_value_dtype == dt->m_value_dtype && m_operand_dtype == dt->m_operand_dtype;
+        return m_value_dtype == dt->m_value_dtype &&
+                        m_operand_dtype == dt->m_operand_dtype &&
+                        m_kgen == dt->m_kgen;
     }
 }
 
@@ -263,15 +294,8 @@ static size_t make_expr_dtype_offset_applier(
                 size_t src_count, const intptr_t *src_data_offsets)
 {
     // A few specializations with fixed size, and a general case version
+    // NOTE: src_count == 1 must never happen here, it is handled by the unary_expr dtype
     switch (src_count) {
-        case 1: {
-            out->ensure_capacity(offset_out + sizeof(expr_dtype_offset_applier_extra<1>));
-            expr_dtype_offset_applier_extra<1> *e = out->get_at<expr_dtype_offset_applier_extra<1> >(offset_out);
-            memcpy(e->offsets, src_data_offsets, sizeof(e->offsets));
-            e->base.set_function<expr_single_operation_t>(&expr_dtype_offset_applier_extra<1>::single);
-            e->base.destructor = &expr_dtype_offset_applier_extra<1>::destruct;
-            return offset_out + sizeof(expr_dtype_offset_applier_extra<1>);
-        }
         case 2: {
             out->ensure_capacity(offset_out + sizeof(expr_dtype_offset_applier_extra<2>));
             expr_dtype_offset_applier_extra<2> *e = out->get_at<expr_dtype_offset_applier_extra<2> >(offset_out);
@@ -368,3 +392,24 @@ dtype expr_dtype::with_replaced_storage_dtype(const dtype& DYND_UNUSED(replaceme
     throw runtime_error("TODO: implement expr_dtype::with_replaced_storage_dtype");
 }
 
+void expr_dtype::get_dynamic_ndobject_properties(const std::pair<std::string, gfunc::callable> **out_properties,
+                size_t *out_count) const
+{
+    const dtype& udt = m_value_dtype.get_udtype();
+    if (!udt.is_builtin()) {
+        udt.extended()->get_dynamic_ndobject_properties(out_properties, out_count);
+    } else {
+        get_builtin_dtype_dynamic_ndobject_properties(udt.get_type_id(), out_properties, out_count);
+    }
+}
+
+void expr_dtype::get_dynamic_ndobject_functions(const std::pair<std::string, gfunc::callable> **out_functions,
+                size_t *out_count) const
+{
+    const dtype& udt = m_value_dtype.get_udtype();
+    if (!udt.is_builtin()) {
+        udt.extended()->get_dynamic_ndobject_functions(out_functions, out_count);
+    } else {
+        //get_builtin_dtype_dynamic_ndobject_functions(udt.get_type_id(), out_functions, out_count);
+    }
+}

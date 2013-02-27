@@ -3,46 +3,36 @@
 // BSD 2-Clause License, see LICENSE.txt
 
 
-#ifndef _DYND__EXPR_DTYPE_HPP_
-#define _DYND__EXPR_DTYPE_HPP_
+#ifndef _DYND__UNARY_EXPR_DTYPE_HPP_
+#define _DYND__UNARY_EXPR_DTYPE_HPP_
 
 #include <dynd/dtype.hpp>
-#include <dynd/dtypes/pointer_dtype.hpp>
 #include <dynd/kernels/expr_kernel_generator.hpp>
 
 namespace dynd {
 
 /**
- * The expr dtype represents an expression on
- * an arbitrary number of operands. It stores
- * its operands as a structure of pointer types.
+ * The unary_expr dtype is like the expr dtype, but
+ * special-cased for unary operations. These specializations
+ * are:
  *
- * The computation is held by an expr_kernel_generator
- * instance, which is able to create the kernels
- * on demand, as a subkernel of an assignment_kernel
- * object.
- *
- * The unary kernel is always treated specially, it
- * doesn't go into an expr_dtype unless it's a component
- * of a larger kernel. Instead, it goes into the
- * unary_expr_dtype, which skips the extra pointer indirection
- * needed for multiple operands.
- *
- * TODO: It would be nice to put the expr_kernel_generator
- *       into the metadata, so that static expr_dtype instances
- *       could be shared between different operations like
- *       +, -, *, /. The operand dtype defines the metadata, though,
- *       so a special dtype just for this purpose may be required.
+ *  - The operand type is just the single operand, instead
+ *    of being a pointer to the operand as is done in the
+ *    expr dtype.
+ *  - Elementwise unary expr dtypes are applied at the
+ *    element level, so it can efficiently interoperate
+ *    with other elementwise expression dtypes such as
+ *    type conversion, byte swapping, etc.
  */
-class expr_dtype : public base_expression_dtype {
+class unary_expr_dtype : public base_expression_dtype {
     dtype m_value_dtype, m_operand_dtype;
     const expr_kernel_generator *m_kgen;
 
 public:
-    expr_dtype(const dtype& value_dtype, const dtype& operand_dtype,
+    unary_expr_dtype(const dtype& value_dtype, const dtype& operand_dtype,
                     const expr_kernel_generator *kgen);
 
-    virtual ~expr_dtype();
+    virtual ~unary_expr_dtype();
 
     const dtype& get_value_dtype() const {
         return m_value_dtype;
@@ -56,7 +46,7 @@ public:
     void print_dtype(std::ostream& o) const;
 
     dtype_memory_management_t get_memory_management() const {
-        return blockref_memory_management;
+        return m_operand_dtype.get_memory_management();
     }
 
     dtype apply_linear_index(size_t nindices, const irange *indices,
@@ -67,9 +57,6 @@ public:
                     size_t current_i, const dtype& root_dt,
                     bool leading_dimension, char **inout_data,
                     memory_block_data **inout_dataref) const;
-
-    void get_shape(size_t i, intptr_t *out_shape) const;
-    void get_shape(size_t i, intptr_t *out_shape, const char *metadata) const;
 
     bool is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const;
 
@@ -93,15 +80,15 @@ public:
 };
 
 /**
- * Makes an expr dtype.
+ * Makes a unary expr dtype.
  */
-inline dtype make_expr_dtype(const dtype& value_dtype,
+inline dtype make_unary_expr_dtype(const dtype& value_dtype,
                 const dtype& operand_dtype,
                 const expr_kernel_generator *kgen)
 {
-    return dtype(new expr_dtype(value_dtype, operand_dtype, kgen), false);
+    return dtype(new unary_expr_dtype(value_dtype, operand_dtype, kgen), false);
 }
 
 } // namespace dynd
 
-#endif // _DYND__EXPR_DTYPE_HPP_
+#endif // _DYND__UNARY_EXPR_DTYPE_HPP_
