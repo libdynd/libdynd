@@ -132,7 +132,7 @@ static size_t make_elwise_strided_dimension_expr_kernel_for_N(
         } else {
             const fixed_dim_dtype *fdd = static_cast<const fixed_dim_dtype *>(src_dt[i].extended());
             // Check for a broadcasting error
-            if (fdd->get_fixed_dim_size() != 1 && e->size != fdd->get_fixed_dim_size()) {
+            if (fdd->get_fixed_dim_size() != 1 && (size_t)e->size != fdd->get_fixed_dim_size()) {
                 throw broadcast_error(dst_dt, dst_metadata, src_dt[i], src_metadata[i]);
             }
             // In DyND, the src stride is required to be zero for size-one dimensions,
@@ -205,31 +205,31 @@ inline static size_t make_elwise_strided_dimension_expr_kernel(
 }
 
 static size_t make_elwise_strided_or_var_to_strided_dimension_expr_kernel(
-                assignment_kernel *out, size_t offset_out,
-                const dtype& dst_dt, const char *dst_metadata,
-                size_t src_count, const dtype *src_dt, const char **src_metadata,
-                kernel_request_t kernreq, const eval::eval_context *ectx,
-                const expr_kernel_generator *elwise_handler)
+                assignment_kernel *DYND_UNUSED(out), size_t DYND_UNUSED(offset_out),
+                const dtype& DYND_UNUSED(dst_dt), const char *DYND_UNUSED(dst_metadata),
+                size_t DYND_UNUSED(src_count), const dtype *DYND_UNUSED(src_dt), const char **DYND_UNUSED(src_metadata),
+                kernel_request_t DYND_UNUSED(kernreq), const eval::eval_context *DYND_UNUSED(ectx),
+                const expr_kernel_generator *DYND_UNUSED(elwise_handler))
 {
     throw runtime_error("TODO: make_elwise_strided_or_var_to_strided_dimension_expr_kernel");
 }
 
 static size_t make_elwise_strided_to_var_dimension_expr_kernel(
-                assignment_kernel *out, size_t offset_out,
-                const dtype& dst_dt, const char *dst_metadata,
-                size_t src_count, const dtype *src_dt, const char **src_metadata,
-                kernel_request_t kernreq, const eval::eval_context *ectx,
-                const expr_kernel_generator *elwise_handler)
+                assignment_kernel *DYND_UNUSED(out), size_t DYND_UNUSED(offset_out),
+                const dtype& DYND_UNUSED(dst_dt), const char *DYND_UNUSED(dst_metadata),
+                size_t DYND_UNUSED(src_count), const dtype *DYND_UNUSED(src_dt), const char **DYND_UNUSED(src_metadata),
+                kernel_request_t DYND_UNUSED(kernreq), const eval::eval_context *DYND_UNUSED(ectx),
+                const expr_kernel_generator *DYND_UNUSED(elwise_handler))
 {
     throw runtime_error("TODO: make_elwise_strided_to_var_dimension_expr_kernel");
 }
 
 static size_t make_elwise_strided_or_var_to_var_dimension_expr_kernel(
-                assignment_kernel *out, size_t offset_out,
-                const dtype& dst_dt, const char *dst_metadata,
-                size_t src_count, const dtype *src_dt, const char **src_metadata,
-                kernel_request_t kernreq, const eval::eval_context *ectx,
-                const expr_kernel_generator *elwise_handler)
+                assignment_kernel *DYND_UNUSED(out), size_t DYND_UNUSED(offset_out),
+                const dtype& DYND_UNUSED(dst_dt), const char *DYND_UNUSED(dst_metadata),
+                size_t DYND_UNUSED(src_count), const dtype *DYND_UNUSED(src_dt), const char **DYND_UNUSED(src_metadata),
+                kernel_request_t DYND_UNUSED(kernreq), const eval::eval_context *DYND_UNUSED(ectx),
+                const expr_kernel_generator *DYND_UNUSED(elwise_handler))
 {
     throw runtime_error("TODO: make_elwise_strided_or_var_to_var_dimension_expr_kernel");
 }
