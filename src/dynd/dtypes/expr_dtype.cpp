@@ -79,8 +79,8 @@ intptr_t expr_dtype::apply_linear_index(size_t nindices, const irange *indices, 
                 const dtype& result_dtype, char *out_metadata,
                 memory_block_data *embedded_reference,
                 size_t current_i, const dtype& root_dt,
-                bool leading_dimension, char **inout_data,
-                memory_block_data **inout_dataref) const
+                bool DYND_UNUSED(leading_dimension), char **DYND_UNUSED(inout_data),
+                memory_block_data **DYND_UNUSED(inout_dataref)) const
 {
     if (m_kgen->is_elwise()) {
         size_t undim = get_undim();
@@ -95,7 +95,6 @@ intptr_t expr_dtype::apply_linear_index(size_t nindices, const irange *indices, 
         // Apply the portion of the indexing to each of the src operand types
         for (size_t i = 0; i != field_count; ++i) {
             const pointer_dtype *pd = static_cast<const pointer_dtype *>(field_types[i].extended());
-            const pointer_dtype *out_pd = static_cast<const pointer_dtype *>(out_field_types[i].extended());
             size_t field_undim = pd->get_undim();
             if (nindices + field_undim <= undim) {
                 pd->metadata_copy_construct(out_metadata + out_metadata_offsets[i],
@@ -235,7 +234,7 @@ namespace {
             size_t src_count = e->src_count;
             const size_t *offsets = reinterpret_cast<const size_t *>(e + 1);
             shortvector<const char *> src_modified(src_count);
-            for (int i = 0; i < src_count; ++i) {
+            for (size_t i = 0; i != src_count; ++i) {
                 src_modified[i] = src[i] + offsets[i];
             }
             kernel_data_prefix *echild = reinterpret_cast<kernel_data_prefix *>(
@@ -269,7 +268,7 @@ static size_t make_expr_dtype_offset_applier(
             out->ensure_capacity(offset_out + sizeof(expr_dtype_offset_applier_extra<1>));
             expr_dtype_offset_applier_extra<1> *e = out->get_at<expr_dtype_offset_applier_extra<1> >(offset_out);
             memcpy(e->offsets, src_data_offsets, sizeof(e->offsets));
-            e->base.template set_function<expr_single_operation_t>(&expr_dtype_offset_applier_extra<1>::single);
+            e->base.set_function<expr_single_operation_t>(&expr_dtype_offset_applier_extra<1>::single);
             e->base.destructor = &expr_dtype_offset_applier_extra<1>::destruct;
             return offset_out + sizeof(expr_dtype_offset_applier_extra<1>);
         }
@@ -277,7 +276,7 @@ static size_t make_expr_dtype_offset_applier(
             out->ensure_capacity(offset_out + sizeof(expr_dtype_offset_applier_extra<2>));
             expr_dtype_offset_applier_extra<2> *e = out->get_at<expr_dtype_offset_applier_extra<2> >(offset_out);
             memcpy(e->offsets, src_data_offsets, sizeof(e->offsets));
-            e->base.template set_function<expr_single_operation_t>(&expr_dtype_offset_applier_extra<2>::single);
+            e->base.set_function<expr_single_operation_t>(&expr_dtype_offset_applier_extra<2>::single);
             e->base.destructor = &expr_dtype_offset_applier_extra<2>::destruct;
             return offset_out + sizeof(expr_dtype_offset_applier_extra<2>);
         }
@@ -285,7 +284,7 @@ static size_t make_expr_dtype_offset_applier(
             out->ensure_capacity(offset_out + sizeof(expr_dtype_offset_applier_extra<3>));
             expr_dtype_offset_applier_extra<3> *e = out->get_at<expr_dtype_offset_applier_extra<3> >(offset_out);
             memcpy(e->offsets, src_data_offsets, sizeof(e->offsets));
-            e->base.template set_function<expr_single_operation_t>(&expr_dtype_offset_applier_extra<3>::single);
+            e->base.set_function<expr_single_operation_t>(&expr_dtype_offset_applier_extra<3>::single);
             e->base.destructor = &expr_dtype_offset_applier_extra<3>::destruct;
             return offset_out + sizeof(expr_dtype_offset_applier_extra<3>);
         }
@@ -293,7 +292,7 @@ static size_t make_expr_dtype_offset_applier(
             out->ensure_capacity(offset_out + sizeof(expr_dtype_offset_applier_extra<4>));
             expr_dtype_offset_applier_extra<4> *e = out->get_at<expr_dtype_offset_applier_extra<4> >(offset_out);
             memcpy(e->offsets, src_data_offsets, sizeof(e->offsets));
-            e->base.template set_function<expr_single_operation_t>(&expr_dtype_offset_applier_extra<4>::single);
+            e->base.set_function<expr_single_operation_t>(&expr_dtype_offset_applier_extra<4>::single);
             e->base.destructor = &expr_dtype_offset_applier_extra<4>::destruct;
             return offset_out + sizeof(expr_dtype_offset_applier_extra<4>);
         }
