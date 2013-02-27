@@ -81,10 +81,10 @@ static size_t make_elwise_strided_dimension_expr_kernel_for_N(
     strided_expr_kernel_extra<N> *e = out->get_at<strided_expr_kernel_extra<N> >(offset_out);
     switch (kernreq) {
         case kernel_request_single:
-            e->base.set_function<expr_single_operation_t>(&strided_expr_kernel_extra<N>::single);
+            e->base.template set_function<expr_single_operation_t>(&strided_expr_kernel_extra<N>::single);
             break;
         case kernel_request_strided:
-            e->base.set_function<expr_strided_operation_t>(&strided_expr_kernel_extra<N>::strided);
+            e->base.template set_function<expr_strided_operation_t>(&strided_expr_kernel_extra<N>::strided);
             break;
         default: {
             stringstream ss;

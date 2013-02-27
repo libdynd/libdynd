@@ -35,7 +35,10 @@ void expr_dtype::print_data(std::ostream& DYND_UNUSED(o),
 
 void expr_dtype::print_dtype(std::ostream& o) const
 {
-    o << "expr<WIP>";
+    o << "expr<";
+    o << m_value_dtype << ", ";
+    m_kgen->print_dtype(o);
+    o << ">";
 }
 
 void expr_dtype::get_shape(size_t i, intptr_t *out_shape) const
