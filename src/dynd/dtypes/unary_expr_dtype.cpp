@@ -112,7 +112,7 @@ size_t unary_expr_dtype::make_operand_to_value_assignment_kernel(
     // expr_single_operation_t/expr_strided_operation_t
     return m_kgen->make_expr_kernel(out, offset_out,
                     m_value_dtype, dst_metadata,
-                    1, &m_operand_dtype,
+                    1, &m_operand_dtype.value_dtype(),
                     &src_metadata,
                     kernreq, ectx);
 }
