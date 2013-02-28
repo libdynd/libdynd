@@ -17,16 +17,21 @@ namespace dynd {
  * base_struct_dtype.
  */
 class base_struct_dtype : public base_dtype {
+protected:
+    size_t m_field_count;
 public:
     inline base_struct_dtype(type_id_t type_id, size_t data_size,
-                    size_t alignment, flags_type flags, size_t metadata_size)
-        : base_dtype(type_id, struct_kind, data_size, alignment, flags, metadata_size, 0)
+                    size_t alignment, size_t field_count, flags_type flags, size_t metadata_size)
+        : base_dtype(type_id, struct_kind, data_size, alignment, flags, metadata_size, 0),
+            m_field_count(field_count)
     {}
 
     virtual ~base_struct_dtype();
 
     /** The number of fields in the struct. This is the size of the other arrays. */
-    virtual size_t get_field_count() const = 0;
+    inline size_t get_field_count() const {
+        return m_field_count;
+    }
     /** The array of the field types */
     virtual const dtype *get_field_types() const = 0;
     /** The array of the field names */
@@ -45,6 +50,20 @@ public:
      *           of the given name.
      */
     virtual intptr_t get_field_index(const std::string& field_name) const = 0;
+
+    size_t get_elwise_property_index(const std::string& property_name) const;
+    dtype get_elwise_property_dtype(size_t elwise_property_index,
+                    bool& out_readable, bool& out_writable) const;
+    size_t make_elwise_property_getter_kernel(
+                    assignment_kernel *out, size_t offset_out,
+                    const char *dst_metadata,
+                    const char *src_metadata, size_t src_elwise_property_index,
+                    kernel_request_t kernreq, const eval::eval_context *ectx) const;
+    size_t make_elwise_property_setter_kernel(
+                    assignment_kernel *out, size_t offset_out,
+                    const char *dst_metadata, size_t dst_elwise_property_index,
+                    const char *src_metadata,
+                    kernel_request_t kernreq, const eval::eval_context *ectx) const;
 };
 
 

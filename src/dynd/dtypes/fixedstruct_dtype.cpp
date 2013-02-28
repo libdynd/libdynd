@@ -6,6 +6,7 @@
 #include <dynd/dtypes/fixedstruct_dtype.hpp>
 #include <dynd/dtypes/struct_dtype.hpp>
 #include <dynd/dtypes/dtype_alignment.hpp>
+#include <dynd/dtypes/property_dtype.hpp>
 #include <dynd/shape_tools.hpp>
 #include <dynd/exceptions.hpp>
 #include <dynd/gfunc/make_callable.hpp>
@@ -18,10 +19,10 @@ using namespace dynd;
 
 fixedstruct_dtype::fixedstruct_dtype(size_t field_count, const dtype *field_types,
                 const std::string *field_names)
-    : base_struct_dtype(fixedstruct_type_id, 0, 1, dtype_flag_none, 0),
+    : base_struct_dtype(fixedstruct_type_id, 0, 1, field_count, dtype_flag_none, 0),
             m_field_types(field_types, field_types + field_count),
             m_field_names(field_names, field_names + field_count),
-            m_data_offsets(field_count), m_metadata_offsets(field_count)
+           m_data_offsets(field_count), m_metadata_offsets(field_count)
 {
     // Calculate all the resulting struct data
     size_t metadata_offset = 0, data_offset = 0;
@@ -569,7 +570,7 @@ void fixedstruct_dtype::get_dynamic_dtype_properties(const std::pair<std::string
 ///////// properties on the ndobject
 
 fixedstruct_dtype::fixedstruct_dtype(int, int)
-    : base_struct_dtype(fixedstruct_type_id, 0, 1, dtype_flag_none, 0)
+    : base_struct_dtype(fixedstruct_type_id, 0, 1, 1, dtype_flag_none, 0)
 {
     // Equivalent to make_fixedstruct_dtype(dtype(new void_pointer_dtype, false), "self");
     // but hardcoded to break the dependency of fixedstruct_dtype::ndobject_parameters_dtype
@@ -595,13 +596,20 @@ static ndobject_preamble *property_get_ndobject_field(const ndobject_preamble *p
     // Get the ndobject 'self' parameter
     ndobject n = ndobject(*(ndobject_preamble **)params->m_data_pointer, true);
     intptr_t i = reinterpret_cast<intptr_t>(extra);
-    size_t ndim = n.get_undim();
-    if (ndim == 0) {
-        return n.at(i).release();
+    size_t undim = n.get_undim();
+    dtype udt = n.get_udtype();
+    if (udt.get_kind() == expression_kind) {
+        const string *field_names = static_cast<const fixedstruct_dtype *>(
+                        udt.value_dtype().extended())->get_field_names();
+        return n.replace_udtype(make_property_dtype(udt, field_names[i], i)).release();
     } else {
-        shortvector<irange> idx(ndim + 1);
-        idx[ndim] = irange(i);
-        return n.at_array(ndim + 1, idx.get()).release();
+        if (undim == 0) {
+            return n.at(i).release();
+        } else {
+            shortvector<irange> idx(undim + 1);
+            idx[undim] = irange(i);
+            return n.at_array(undim + 1, idx.get()).release();
+        }
     }
 }
 

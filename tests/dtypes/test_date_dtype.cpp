@@ -187,7 +187,7 @@ TEST(DateDType, ToStructFunction) {
     dtype d = make_date_dtype();
     ndobject a, b;
 
-    a = ndobject("1955-03-13").cast_scalars(d).eval();
+    a = ndobject("1955-03-13").cast_udtype(d).eval();
     b = a.f("to_struct");
     EXPECT_EQ(make_property_dtype(d, "struct"),
                     b.get_dtype());
@@ -199,6 +199,12 @@ TEST(DateDType, ToStructFunction) {
     EXPECT_EQ(1955, b.p("year").as<int32_t>());
     EXPECT_EQ(3, b.p("month").as<int32_t>());
     EXPECT_EQ(13, b.p("day").as<int32_t>());
+
+    // Do it again, but now with a chain of expressions
+    a = ndobject("1955-03-13").cast_udtype(d).f("to_struct");
+    EXPECT_EQ(1955, a.p("year").as<int32_t>());
+    EXPECT_EQ(3, a.p("month").as<int32_t>());
+    EXPECT_EQ(13, a.p("day").as<int32_t>());
 }
 
 TEST(DateDType, ToStruct) {

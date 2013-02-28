@@ -316,8 +316,7 @@ void base_dtype::get_dynamic_ndobject_functions(const std::pair<std::string, gfu
     *out_count = 0;
 }
 
-size_t base_dtype::get_elwise_property_index(const std::string& property_name,
-            bool& DYND_UNUSED(out_readable), bool& DYND_UNUSED(out_writable)) const
+size_t base_dtype::get_elwise_property_index(const std::string& property_name) const
 {
     std::stringstream ss;
     ss << "the dtype " << dtype(this, true);
@@ -325,7 +324,8 @@ size_t base_dtype::get_elwise_property_index(const std::string& property_name,
     throw std::runtime_error(ss.str());
 }
 
-dtype base_dtype::get_elwise_property_dtype(size_t DYND_UNUSED(elwise_property_index)) const
+dtype base_dtype::get_elwise_property_dtype(size_t DYND_UNUSED(elwise_property_index),
+            bool& DYND_UNUSED(out_readable), bool& DYND_UNUSED(out_writable)) const
 {
     throw std::runtime_error("get_elwise_property_dtype: this dtype does not have any properties");
 }

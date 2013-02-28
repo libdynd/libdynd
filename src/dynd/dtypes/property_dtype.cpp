@@ -26,18 +26,19 @@ property_dtype::property_dtype(const dtype& operand_dtype, const std::string& pr
     if (!operand_dtype.value_dtype().is_builtin()) {
         if (property_index == numeric_limits<size_t>::max()) {
             m_property_index = m_operand_dtype.value_dtype().extended()->get_elwise_property_index(
-                            property_name, m_readable, m_writable);
+                            property_name);
         }
-        m_value_dtype = m_operand_dtype.value_dtype().extended()->get_elwise_property_dtype(m_property_index);
+        m_value_dtype = m_operand_dtype.value_dtype().extended()->get_elwise_property_dtype(
+                        m_property_index, m_readable, m_writable);
     } else {
         if (property_index == numeric_limits<size_t>::max()) {
             m_property_index = get_builtin_dtype_elwise_property_index(
                             operand_dtype.value_dtype().get_type_id(),
-                            property_name, m_readable, m_writable);
+                            property_name);
         }
         m_value_dtype = get_builtin_dtype_elwise_property_dtype(
                         operand_dtype.value_dtype().get_type_id(),
-                        m_property_index);
+                        m_property_index, m_readable, m_writable);
     }
 }
 
@@ -63,18 +64,18 @@ property_dtype::property_dtype(const dtype& value_dtype, const dtype& operand_dt
     if (!value_dtype.is_builtin()) {
         if (property_index == numeric_limits<size_t>::max()) {
             m_property_index = m_value_dtype.extended()->get_elwise_property_index(
-                            property_name, m_writable, m_readable);
+                            property_name);
         }
         property_dtype = m_value_dtype.extended()->get_elwise_property_dtype(
-                        m_property_index);
+                        m_property_index, m_writable, m_readable);
     } else {
         if (property_index == numeric_limits<size_t>::max()) {
             m_property_index = get_builtin_dtype_elwise_property_index(
-                            value_dtype.get_type_id(), property_name,
-                            m_writable, m_readable);
+                            value_dtype.get_type_id(), property_name);
         }
         property_dtype = get_builtin_dtype_elwise_property_dtype(
-                        value_dtype.get_type_id(), m_property_index);
+                        value_dtype.get_type_id(), m_property_index,
+                            m_writable, m_readable);
     }
     // If the operand dtype doesn't match the property, add a
     // conversion to the correct dtype
@@ -182,7 +183,7 @@ size_t property_dtype::make_operand_to_value_assignment_kernel(
         } else {
             stringstream ss;
             ss << "cannot write to property \"" << m_property_name << "\"";
-            ss << " of dtype " << m_value_dtype;
+            ss << " of dynd ndobject with dtype " << m_value_dtype;
             throw runtime_error(ss.str());
         }
     }
@@ -213,7 +214,7 @@ size_t property_dtype::make_value_to_operand_assignment_kernel(
         } else {
             stringstream ss;
             ss << "cannot write to property \"" << m_property_name << "\"";
-            ss << " of dtype " << m_operand_dtype;
+            ss << " of dynd ndobject with dtype " << m_operand_dtype;
             throw runtime_error(ss.str());
         }
     } else {
@@ -259,5 +260,27 @@ dtype property_dtype::with_replaced_storage_dtype(const dtype& replacement_dtype
         } else {
             return dtype(new property_dtype(m_value_dtype, replacement_dtype, m_property_name), false);
         }
+    }
+}
+
+void property_dtype::get_dynamic_ndobject_properties(const std::pair<std::string, gfunc::callable> **out_properties,
+                size_t *out_count) const
+{
+    const dtype& udt = m_value_dtype.get_udtype();
+    if (!udt.is_builtin()) {
+        udt.extended()->get_dynamic_ndobject_properties(out_properties, out_count);
+    } else {
+        get_builtin_dtype_dynamic_ndobject_properties(udt.get_type_id(), out_properties, out_count);
+    }
+}
+
+void property_dtype::get_dynamic_ndobject_functions(const std::pair<std::string, gfunc::callable> **out_functions,
+                size_t *out_count) const
+{
+    const dtype& udt = m_value_dtype.get_udtype();
+    if (!udt.is_builtin()) {
+        udt.extended()->get_dynamic_ndobject_functions(out_functions, out_count);
+    } else {
+        //get_builtin_dtype_dynamic_ndobject_functions(udt.get_type_id(), out_functions, out_count);
     }
 }

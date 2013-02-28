@@ -38,10 +38,6 @@ public:
         return get_data_size();
     }
 
-    size_t get_field_count() const {
-        return m_field_types.size();
-    }
-
     const dtype *get_field_types() const {
         return &m_field_types[0];
     }

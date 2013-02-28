@@ -45,19 +45,14 @@ void dynd::get_builtin_dtype_dynamic_ndobject_properties(
 
 size_t dynd::get_builtin_dtype_elwise_property_index(
                 type_id_t builtin_type_id,
-                const std::string& property_name,
-                bool& out_readable, bool& out_writable)
+                const std::string& property_name)
 {
     switch (builtin_type_id) {
         case complex_float32_type_id:
         case complex_float64_type_id:
             if (property_name == "real") {
-                out_readable = true;
-                out_writable = false;
                 return 0;
             } else if (property_name == "imag") {
-                out_readable = true;
-                out_writable = false;
                 return 1;
             }
         default:
@@ -72,14 +67,21 @@ size_t dynd::get_builtin_dtype_elwise_property_index(
 
 dtype dynd::get_builtin_dtype_elwise_property_dtype(
                 type_id_t builtin_type_id,
-                size_t DYND_UNUSED(elwise_property_index))
+                size_t DYND_UNUSED(elwise_property_index),
+                bool& out_readable, bool& out_writable)
 {
     switch (builtin_type_id) {
         case complex_float32_type_id:
+            out_readable = true;
+            out_writable = false;
             return dtype(float32_type_id);
         case complex_float64_type_id:
+            out_readable = true;
+            out_writable = false;
             return dtype(float64_type_id);
         default:
+            out_readable = false;
+            out_writable = false;
             return dtype();
     }
 }

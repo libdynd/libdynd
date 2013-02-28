@@ -524,11 +524,8 @@ namespace {
     };
 }
 
-size_t date_dtype::get_elwise_property_index(const std::string& property_name,
-            bool& out_readable, bool& out_writable) const
+size_t date_dtype::get_elwise_property_index(const std::string& property_name) const
 {
-    out_readable = true;
-    out_writable = false;
     // TODO: Use an enum here
     if (property_name == "year") {
         return dateprop_year;
@@ -540,11 +537,9 @@ size_t date_dtype::get_elwise_property_index(const std::string& property_name,
         return dateprop_weekday;
     } else if (property_name == "days_after_1970_int64") {
         // A read/write property for NumPy datetime64[D] compatibility
-        out_writable = true;
         return dateprop_days_after_1970_int64;
     } else if (property_name == "struct") {
         // A read/write property for accessing a date as a struct
-        out_writable = true;
         return dateprop_struct;
     } else {
         stringstream ss;
@@ -553,19 +548,28 @@ size_t date_dtype::get_elwise_property_index(const std::string& property_name,
     }
 }
 
-dtype date_dtype::get_elwise_property_dtype(size_t property_index) const
+dtype date_dtype::get_elwise_property_dtype(size_t property_index,
+            bool& out_readable, bool& out_writable) const
 {
     switch (property_index) {
         case dateprop_year:
         case dateprop_month:
         case dateprop_day:
         case dateprop_weekday:
+            out_readable = true;
+            out_writable = false;
             return make_dtype<int32_t>();
         case dateprop_days_after_1970_int64:
+            out_readable = true;
+            out_writable = true;
             return make_dtype<int64_t>();
         case dateprop_struct:
+            out_readable = true;
+            out_writable = true;
             return date_dtype::default_struct_dtype;
         default:
+            out_readable = false;
+            out_writable = false;
             return make_dtype<void>();
     }
 }

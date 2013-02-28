@@ -89,14 +89,20 @@ public:
                     assignment_kernel *out, size_t offset_out,
                     const char *dst_metadata, const char *src_metadata,
                     kernel_request_t kernreq, const eval::eval_context *ectx) const;
+
+    void get_dynamic_ndobject_properties(const std::pair<std::string, gfunc::callable> **out_properties,
+                    size_t *out_count) const;
+    void get_dynamic_ndobject_functions(const std::pair<std::string, gfunc::callable> **out_functions,
+                    size_t *out_count) const;
 };
 
 /**
  * Makes a property dtype for accessing a named element-wise property
  * of the provided operand dtype.
  */
-inline dtype make_property_dtype(const dtype& operand_dtype, const std::string& property_name) {
-    return dtype(new property_dtype(operand_dtype, property_name), false);
+inline dtype make_property_dtype(const dtype& operand_dtype, const std::string& property_name,
+                size_t property_index = std::numeric_limits<size_t>::max()) {
+    return dtype(new property_dtype(operand_dtype, property_name, property_index), false);
 }
 
 /**
@@ -104,8 +110,9 @@ inline dtype make_property_dtype(const dtype& operand_dtype, const std::string& 
  * of a property of value_dtype (with its getters/setters exchanged).
  */
 inline dtype make_reversed_property_dtype(const dtype& value_dtype,
-                const dtype& operand_dtype, const std::string& property_name) {
-    return dtype(new property_dtype(value_dtype, operand_dtype, property_name), false);
+                const dtype& operand_dtype, const std::string& property_name,
+                size_t property_index = std::numeric_limits<size_t>::max()) {
+    return dtype(new property_dtype(value_dtype, operand_dtype, property_name, property_index), false);
 }
 
 } // namespace dynd

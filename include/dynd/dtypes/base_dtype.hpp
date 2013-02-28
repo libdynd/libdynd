@@ -539,21 +539,26 @@ public:
      * Returns the index for the element-wise property of the given name.
      *
      * \param property_name  The name of the element-wise property.
+     *
+     * \returns  The index of the property, to be provided to the other elwise_property
+     *           functions.
+     */
+    virtual size_t get_elwise_property_index(const std::string& property_name) const;
+
+    /**
+     * Returns the dtype for the element-wise property of the given index.
+     *
+     * \param elwise_property_index  The index of the property, typically from
+     *                               a call to get_elwise_property_index.
      * \param out_readable  The dtype should set this to true/false depending on
      *                      whether the property is readable.
      * \param out_writable  The dtype should set this to true/false depending on
      *                      whether the property is writable.
      *
-     * \returns  The index of the property, to be provided to the other elwise_property
-     *           functions.
+     * \returns  The dtype of the property.
      */
-    virtual size_t get_elwise_property_index(const std::string& property_name,
+    virtual dtype get_elwise_property_dtype(size_t elwise_property_index,
             bool& out_readable, bool& out_writable) const;
-
-    /**
-     * Returns the dtype for the element-wise property of the given index.
-     */
-    virtual dtype get_elwise_property_dtype(size_t elwise_property_index) const;
 
     /**
      * Returns a kernel to transform instances of this dtype into values of the
