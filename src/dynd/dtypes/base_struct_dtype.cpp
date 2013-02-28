@@ -107,7 +107,7 @@ size_t base_struct_dtype::make_elwise_property_getter_kernel(
         e->field_offset = get_data_offsets(src_metadata)[src_elwise_property_index];
         return ::make_assignment_kernel(out, offset_out + sizeof(struct_property_getter_extra),
                         field_type.value_dtype(), dst_metadata,
-                        field_type, src_metadata,
+                        field_type, src_metadata + metadata_offsets[src_elwise_property_index],
                         kernreq, assign_error_none, ectx);
     } else {
         stringstream ss;

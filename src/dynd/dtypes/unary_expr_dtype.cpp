@@ -43,8 +43,8 @@ void unary_expr_dtype::print_dtype(std::ostream& o) const
     o << ">";
 }
 
-dtype unary_expr_dtype::apply_linear_index(size_t nindices, const irange *indices,
-            size_t current_i, const dtype& root_dt, bool DYND_UNUSED(leading_dimension)) const
+dtype unary_expr_dtype::apply_linear_index(size_t nindices, const irange *DYND_UNUSED(indices),
+            size_t current_i, const dtype& DYND_UNUSED(root_dt), bool DYND_UNUSED(leading_dimension)) const
 {
     if (m_kgen->is_elwise()) {
         // Scalar behavior
@@ -58,10 +58,10 @@ dtype unary_expr_dtype::apply_linear_index(size_t nindices, const irange *indice
     }
 }
 
-intptr_t unary_expr_dtype::apply_linear_index(size_t nindices, const irange *indices, const char *metadata,
-                const dtype& result_dtype, char *out_metadata,
+intptr_t unary_expr_dtype::apply_linear_index(size_t nindices, const irange *DYND_UNUSED(indices), const char *metadata,
+                const dtype& DYND_UNUSED(result_dtype), char *out_metadata,
                 memory_block_data *embedded_reference,
-                size_t current_i, const dtype& root_dt,
+                size_t current_i, const dtype& DYND_UNUSED(root_dt),
                 bool DYND_UNUSED(leading_dimension), char **DYND_UNUSED(inout_data),
                 memory_block_data **DYND_UNUSED(inout_dataref)) const
 {
