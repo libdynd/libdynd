@@ -1333,10 +1333,13 @@ ndobject dynd::combine_into_struct(size_t field_count, const std::string *field_
                         : &field_values[i].get_ndo()->m_memblockdata;
         memory_block_incref(pmeta->blockref);
 
-        field_values[i].get_dtype().extended()->metadata_copy_construct(
-                        reinterpret_cast<char *>(pmeta + 1),
-                        field_values[i].get_ndo_meta(),
-                        &field_values[i].get_ndo()->m_memblockdata);
+        const dtype& field_dt = field_values[i].get_dtype();
+        if (field_dt.get_metadata_size() > 0) {
+            field_dt.extended()->metadata_copy_construct(
+                            reinterpret_cast<char *>(pmeta + 1),
+                            field_values[i].get_ndo_meta(),
+                            &field_values[i].get_ndo()->m_memblockdata);
+        }
     }
 
     // Set the data pointers
