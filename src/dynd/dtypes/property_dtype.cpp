@@ -12,7 +12,8 @@ using namespace std;
 using namespace dynd;
 
 
-property_dtype::property_dtype(const dtype& operand_dtype, const std::string& property_name)
+property_dtype::property_dtype(const dtype& operand_dtype, const std::string& property_name,
+                size_t property_index)
     : base_expression_dtype(property_type_id, expression_kind,
                     operand_dtype.get_data_size(), operand_dtype.get_alignment(), dtype_flag_scalar,
                     operand_dtype.get_metadata_size()),
@@ -20,16 +21,20 @@ property_dtype::property_dtype(const dtype& operand_dtype, const std::string& pr
             m_readable(false), m_writable(false),
             m_reversed_property(false),
             m_property_name(property_name),
-            m_property_index(0)
+            m_property_index(property_index)
 {
     if (!operand_dtype.value_dtype().is_builtin()) {
-        m_property_index = m_operand_dtype.value_dtype().extended()->get_elwise_property_index(
-                        property_name, m_readable, m_writable);
+        if (property_index == numeric_limits<size_t>::max()) {
+            m_property_index = m_operand_dtype.value_dtype().extended()->get_elwise_property_index(
+                            property_name, m_readable, m_writable);
+        }
         m_value_dtype = m_operand_dtype.value_dtype().extended()->get_elwise_property_dtype(m_property_index);
     } else {
-        m_property_index = get_builtin_dtype_elwise_property_index(
-                        operand_dtype.value_dtype().get_type_id(),
-                        property_name, m_readable, m_writable);
+        if (property_index == numeric_limits<size_t>::max()) {
+            m_property_index = get_builtin_dtype_elwise_property_index(
+                            operand_dtype.value_dtype().get_type_id(),
+                            property_name, m_readable, m_writable);
+        }
         m_value_dtype = get_builtin_dtype_elwise_property_dtype(
                         operand_dtype.value_dtype().get_type_id(),
                         m_property_index);
@@ -37,7 +42,7 @@ property_dtype::property_dtype(const dtype& operand_dtype, const std::string& pr
 }
 
 property_dtype::property_dtype(const dtype& value_dtype, const dtype& operand_dtype,
-                const std::string& property_name)
+                const std::string& property_name, size_t property_index)
     : base_expression_dtype(property_type_id, expression_kind,
                     operand_dtype.get_data_size(), operand_dtype.get_alignment(), dtype_flag_scalar,
                     operand_dtype.get_metadata_size()),
@@ -45,7 +50,7 @@ property_dtype::property_dtype(const dtype& value_dtype, const dtype& operand_dt
             m_readable(false), m_writable(false),
             m_reversed_property(true),
             m_property_name(property_name),
-            m_property_index(0)
+            m_property_index(property_index)
 {
     if (m_value_dtype.get_kind() == expression_kind) {
         stringstream ss;
@@ -56,19 +61,23 @@ property_dtype::property_dtype(const dtype& value_dtype, const dtype& operand_dt
 
     dtype property_dtype;
     if (!value_dtype.is_builtin()) {
-        m_property_index = m_value_dtype.extended()->get_elwise_property_index(
-                        property_name, m_writable, m_readable);
+        if (property_index == numeric_limits<size_t>::max()) {
+            m_property_index = m_value_dtype.extended()->get_elwise_property_index(
+                            property_name, m_writable, m_readable);
+        }
         property_dtype = m_value_dtype.extended()->get_elwise_property_dtype(
                         m_property_index);
     } else {
-        m_property_index = get_builtin_dtype_elwise_property_index(
-                        value_dtype.get_type_id(), property_name,
-                        m_writable, m_readable);
+        if (property_index == numeric_limits<size_t>::max()) {
+            m_property_index = get_builtin_dtype_elwise_property_index(
+                            value_dtype.get_type_id(), property_name,
+                            m_writable, m_readable);
+        }
         property_dtype = get_builtin_dtype_elwise_property_dtype(
                         value_dtype.get_type_id(), m_property_index);
     }
     // If the operand dtype doesn't match the property, add a
-    // convertion to the correct dtype
+    // conversion to the correct dtype
     if (m_operand_dtype.value_dtype() != property_dtype) {
         m_operand_dtype = make_convert_dtype(property_dtype, m_operand_dtype);
     }

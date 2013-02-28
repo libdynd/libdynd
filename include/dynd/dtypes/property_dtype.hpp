@@ -22,13 +22,29 @@ class property_dtype : public base_expression_dtype {
     std::string m_property_name;
     size_t m_property_index;
 public:
-    /** Constructs a normal property dtype */
-    property_dtype(const dtype& operand_dtype, const std::string& property_name);
+    /**
+     * Constructs a normal property dtype
+     *
+     * \param operand_dtype  The dtype of the operand, which has the given property.
+     * \param property_name  The property name.
+     * \param property_index  If already known, can be provided to avoid looking up
+     *                        the index from the name.
+     */
+    property_dtype(const dtype& operand_dtype, const std::string& property_name,
+                size_t property_index = std::numeric_limits<size_t>::max());
     /**
      * Constructs a reversed property dtype (property is from value_dtype
      * instead of operand_dtype).
+     *
+     * \param value_dtype  The dtype of the value, which has the given property.
+     * \param operand_dtype  The dtype of the operand, whose value dtype much match the
+     *                       type of the property on value_dtype.
+     * \param property_name  The property name.
+     * \param property_index  If already known, can be provided to avoid looking up
+     *                        the index from the name.
      */
-    property_dtype(const dtype& value_dtype, const dtype& operand_dtype, const std::string& property_name);
+    property_dtype(const dtype& value_dtype, const dtype& operand_dtype, const std::string& property_name,
+                size_t property_index = std::numeric_limits<size_t>::max());
 
     virtual ~property_dtype();
 
