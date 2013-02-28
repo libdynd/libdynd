@@ -182,6 +182,21 @@ public:
     }
 };
 
+enum comparison_type_t;
+
+/**
+ * An exception for when two dtypes cannot be compared
+ * a particular comparison operator.
+ */
+class not_comparable_error : public dynd_exception {
+public:
+    not_comparable_error(const dtype& lhs, const dtype& rhs,
+                    comparison_type_t comptype);
+
+    virtual ~not_comparable_error() throw() {
+    }
+};
+
 } // namespace dynd
 
 #endif // _DYND__EXCEPTIONS_HPP_

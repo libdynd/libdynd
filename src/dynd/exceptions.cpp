@@ -10,6 +10,7 @@
 #include <dynd/ndobject.hpp>
 #include <dynd/shape_tools.hpp>
 #include <dynd/dtypes/datashape_formatter.hpp>
+#include <dynd/kernels/comparison_kernels.hpp>
 
 #include <utf8.h>
 
@@ -285,5 +286,44 @@ inline string string_encode_error_message(uint32_t cp, string_encoding_t encodin
 string_encode_error::string_encode_error(uint32_t cp, string_encoding_t encoding)
     : dynd_exception("string encode error", string_encode_error_message(cp, encoding)),
                     m_cp(cp), m_encoding(encoding)
+{
+}
+
+inline string not_comparable_error_message(const dtype& lhs, const dtype& rhs,
+                comparison_type_t comptype)
+{
+    stringstream ss;
+    ss << "Cannot compare values of types " << lhs << " and " << rhs;
+    ss << " with comparison operator ";
+    switch (comptype) {
+        case comparison_type_sorting_less:
+            ss << "'sorting <'";
+            break;
+        case comparison_type_less:
+            ss << "'<'";
+            break;
+        case comparison_type_less_equal:
+            ss << "'<='";
+            break;
+        case comparison_type_equal:
+            ss << "'=='";
+            break;
+        case comparison_type_not_equal:
+            ss << "'!='";
+            break;
+        case comparison_type_greater_equal:
+            ss << "'>='";
+            break;
+        case comparison_type_greater:
+            ss << "'>'";
+            break;
+    }
+    return ss.str();
+}
+
+not_comparable_error::not_comparable_error(const dtype& lhs, const dtype& rhs,
+                comparison_type_t comptype)
+    : dynd_exception("not comparable error",
+                    not_comparable_error_message(lhs, rhs, comptype))
 {
 }

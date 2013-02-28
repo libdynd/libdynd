@@ -176,75 +176,67 @@ namespace dynd {
         }
     };
 
-    template<class src0_type, class src1_type, char op0, char op1 = 0>
+    template<class src0_type, class src1_type, comparison_type_t comptype>
     struct op_cant_compare {
         inline static bool f(const src0_type& DYND_UNUSED(src0), const src1_type& DYND_UNUSED(src1))
         {
-            stringstream ss;
-            ss << "Cannot compare " << make_dtype<src0_type>();
-            ss << " and " << make_dtype<src1_type>();
-            ss << " with '" << op0;
-            if (op1) {
-                ss << op1;
-            }
-            ss << "' operator";
-            throw runtime_error(ss.str());
+            throw not_comparable_error(make_dtype<src0_type>(), make_dtype<src1_type>(), comptype);
         }
     };
 
 #define NOT_ORDERABLE(nord_kind) \
     template<class src0_type, class src1_type, dtype_kind_t src0_kind, bool src0_bigger, bool src1_bigger> \
     struct op_lt<src0_type, src1_type, src0_kind, nord_kind, src0_bigger, src1_bigger> \
-        : public op_cant_compare<src0_type, src1_type, '<'> {}; \
+        : public op_cant_compare<src0_type, src1_type, comparison_type_less> {}; \
     template<class src0_type, class src1_type, dtype_kind_t src0_kind, bool src0_bigger, bool src1_bigger> \
     struct op_le<src0_type, src1_type, src0_kind, nord_kind, src0_bigger, src1_bigger> \
-        : public op_cant_compare<src0_type, src1_type, '<', '='> {}; \
+        : public op_cant_compare<src0_type, src1_type, comparison_type_less_equal> {}; \
     template<class src0_type, class src1_type, dtype_kind_t src0_kind, bool src0_bigger, bool src1_bigger> \
     struct op_ge<src0_type, src1_type, src0_kind, nord_kind, src0_bigger, src1_bigger> \
-        : public op_cant_compare<src0_type, src1_type, '>', '='> {}; \
+        : public op_cant_compare<src0_type, src1_type, comparison_type_greater_equal> {}; \
     template<class src0_type, class src1_type, dtype_kind_t src0_kind, bool src0_bigger, bool src1_bigger> \
     struct op_gt<src0_type, src1_type, src0_kind, nord_kind, src0_bigger, src1_bigger> \
-        : public op_cant_compare<src0_type, src1_type, '>'> {}; \
+        : public op_cant_compare<src0_type, src1_type, comparison_type_greater> {}; \
     \
     template<class src0_type, class src1_type, dtype_kind_t src1_kind, bool src0_bigger, bool src1_bigger> \
     struct op_lt<src0_type, src1_type, nord_kind, src1_kind, src0_bigger, src1_bigger> \
-        : public op_cant_compare<src0_type, src1_type, '<'> {}; \
+        : public op_cant_compare<src0_type, src1_type, comparison_type_less> {}; \
     template<class src0_type, class src1_type, dtype_kind_t src1_kind, bool src0_bigger, bool src1_bigger> \
     struct op_le<src0_type, src1_type, nord_kind, src1_kind, src0_bigger, src1_bigger> \
-        : public op_cant_compare<src0_type, src1_type, '<', '='> {}; \
+        : public op_cant_compare<src0_type, src1_type, comparison_type_less_equal> {}; \
     template<class src0_type, class src1_type, dtype_kind_t src1_kind, bool src0_bigger, bool src1_bigger> \
     struct op_ge<src0_type, src1_type, nord_kind, src1_kind, src0_bigger, src1_bigger> \
-        : public op_cant_compare<src0_type, src1_type, '>', '='> {}; \
+        : public op_cant_compare<src0_type, src1_type, comparison_type_greater_equal> {}; \
     template<class src0_type, class src1_type, dtype_kind_t src1_kind, bool src0_bigger, bool src1_bigger> \
     struct op_gt<src0_type, src1_type, nord_kind, src1_kind, src0_bigger, src1_bigger> \
-        : public op_cant_compare<src0_type, src1_type, '>'> {}; \
+        : public op_cant_compare<src0_type, src1_type, comparison_type_greater> {}; \
     \
     template<class src0_type, class src1_type, bool src0_bigger, bool src1_bigger> \
     struct op_lt<src0_type, src1_type, nord_kind, nord_kind, src0_bigger, src1_bigger> \
-        : public op_cant_compare<src0_type, src1_type, '<'> {}; \
+        : public op_cant_compare<src0_type, src1_type, comparison_type_less> {}; \
     template<class src0_type, class src1_type, bool src0_bigger, bool src1_bigger> \
     struct op_le<src0_type, src1_type, nord_kind, nord_kind, src0_bigger, src1_bigger> \
-        : public op_cant_compare<src0_type, src1_type, '<', '='> {}; \
+        : public op_cant_compare<src0_type, src1_type, comparison_type_less_equal> {}; \
     template<class src0_type, class src1_type, bool src0_bigger, bool src1_bigger> \
     struct op_ge<src0_type, src1_type, nord_kind, nord_kind, src0_bigger, src1_bigger> \
-        : public op_cant_compare<src0_type, src1_type, '>', '='> {}; \
+        : public op_cant_compare<src0_type, src1_type, comparison_type_greater_equal> {}; \
     template<class src0_type, class src1_type, bool src0_bigger, bool src1_bigger> \
     struct op_gt<src0_type, src1_type, nord_kind, nord_kind, src0_bigger, src1_bigger> \
-        : public op_cant_compare<src0_type, src1_type, '>'> {};
+        : public op_cant_compare<src0_type, src1_type, comparison_type_greater> {};
 
 #define NOT_ORDERABLE_PAIR(nord0_kind, nord1_kind) \
     template<class src0_type, class src1_type, bool src0_bigger, bool src1_bigger> \
     struct op_lt<src0_type, src1_type, nord0_kind, nord1_kind, src0_bigger, src1_bigger> \
-        : public op_cant_compare<src0_type, src1_type, '<'> {}; \
+        : public op_cant_compare<src0_type, src1_type, comparison_type_less> {}; \
     template<class src0_type, class src1_type, bool src0_bigger, bool src1_bigger> \
     struct op_le<src0_type, src1_type, nord0_kind, nord1_kind, src0_bigger, src1_bigger> \
-        : public op_cant_compare<src0_type, src1_type, '<', '='> {}; \
+        : public op_cant_compare<src0_type, src1_type, comparison_type_less_equal> {}; \
     template<class src0_type, class src1_type, bool src0_bigger, bool src1_bigger> \
     struct op_ge<src0_type, src1_type, nord0_kind, nord1_kind, src0_bigger, src1_bigger> \
-        : public op_cant_compare<src0_type, src1_type, '>', '='> {}; \
+        : public op_cant_compare<src0_type, src1_type, comparison_type_greater_equal> {}; \
     template<class src0_type, class src1_type, bool src0_bigger, bool src1_bigger> \
     struct op_gt<src0_type, src1_type, nord0_kind, nord1_kind, src0_bigger, src1_bigger> \
-        : public op_cant_compare<src0_type, src1_type, '>'> {};
+        : public op_cant_compare<src0_type, src1_type, comparison_type_greater> {};
 
     // real, real sorting comparison
     template<class src0_type, class src1_type,

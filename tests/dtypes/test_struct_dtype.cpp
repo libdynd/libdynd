@@ -227,19 +227,19 @@ TEST(StructDType, SingleCompare) {
     b.p("b").vals() = -2.25;
     b.p("c").vals() = 66;
     EXPECT_FALSE(a.op_sorting_less(b));
-    EXPECT_THROW((a < b), runtime_error);
-    EXPECT_THROW((a <= b), runtime_error);
+    EXPECT_THROW((a < b), not_comparable_error);
+    EXPECT_THROW((a <= b), not_comparable_error);
     EXPECT_TRUE(a == b);
     EXPECT_FALSE(a != b);
-    EXPECT_THROW((a >= b), runtime_error);
-    EXPECT_THROW((a > b), runtime_error);
+    EXPECT_THROW((a >= b), not_comparable_error);
+    EXPECT_THROW((a > b), not_comparable_error);
     EXPECT_FALSE(b.op_sorting_less(a));
-    EXPECT_THROW((b < a), runtime_error);
-    EXPECT_THROW((b <= a), runtime_error);
+    EXPECT_THROW((b < a), not_comparable_error);
+    EXPECT_THROW((b <= a), not_comparable_error);
     EXPECT_TRUE(b == a);
     EXPECT_FALSE(b != a);
-    EXPECT_THROW((b >= a), runtime_error);
-    EXPECT_THROW((b > a), runtime_error);
+    EXPECT_THROW((b >= a), not_comparable_error);
+    EXPECT_THROW((b > a), not_comparable_error);
 
     // Different in the first field
     a.p("a").vals() = 3;
@@ -249,19 +249,19 @@ TEST(StructDType, SingleCompare) {
     b.p("b").vals() = -2.25;
     b.p("c").vals() = 66;
     EXPECT_TRUE(a.op_sorting_less(b));
-    EXPECT_THROW((a < b), runtime_error);
-    EXPECT_THROW((a <= b), runtime_error);
+    EXPECT_THROW((a < b), not_comparable_error);
+    EXPECT_THROW((a <= b), not_comparable_error);
     EXPECT_FALSE(a == b);
     EXPECT_TRUE(a != b);
-    EXPECT_THROW((a >= b), runtime_error);
-    EXPECT_THROW((a > b), runtime_error);
+    EXPECT_THROW((a >= b), not_comparable_error);
+    EXPECT_THROW((a > b), not_comparable_error);
     EXPECT_FALSE(b.op_sorting_less(a));
-    EXPECT_THROW((b < a), runtime_error);
-    EXPECT_THROW((b <= a), runtime_error);
+    EXPECT_THROW((b < a), not_comparable_error);
+    EXPECT_THROW((b <= a), not_comparable_error);
     EXPECT_FALSE(b == a);
     EXPECT_TRUE(b != a);
-    EXPECT_THROW((b >= a), runtime_error);
-    EXPECT_THROW((b > a), runtime_error);
+    EXPECT_THROW((b >= a), not_comparable_error);
+    EXPECT_THROW((b > a), not_comparable_error);
 
     // Different in the second field
     a.p("a").vals() = 3;
@@ -271,19 +271,19 @@ TEST(StructDType, SingleCompare) {
     b.p("b").vals() = -2.23;
     b.p("c").vals() = 66;
     EXPECT_TRUE(a.op_sorting_less(b));
-    EXPECT_THROW((a < b), runtime_error);
-    EXPECT_THROW((a <= b), runtime_error);
+    EXPECT_THROW((a < b), not_comparable_error);
+    EXPECT_THROW((a <= b), not_comparable_error);
     EXPECT_FALSE(a == b);
     EXPECT_TRUE(a != b);
-    EXPECT_THROW((a >= b), runtime_error);
-    EXPECT_THROW((a > b), runtime_error);
+    EXPECT_THROW((a >= b), not_comparable_error);
+    EXPECT_THROW((a > b), not_comparable_error);
     EXPECT_FALSE(b.op_sorting_less(a));
-    EXPECT_THROW((b < a), runtime_error);
-    EXPECT_THROW((b <= a), runtime_error);
+    EXPECT_THROW((b < a), not_comparable_error);
+    EXPECT_THROW((b <= a), not_comparable_error);
     EXPECT_FALSE(b == a);
     EXPECT_TRUE(b != a);
-    EXPECT_THROW((b >= a), runtime_error);
-    EXPECT_THROW((b > a), runtime_error);
+    EXPECT_THROW((b >= a), not_comparable_error);
+    EXPECT_THROW((b > a), not_comparable_error);
 
 
     // Different in the third field
@@ -294,19 +294,19 @@ TEST(StructDType, SingleCompare) {
     b.p("b").vals() = -2.25;
     b.p("c").vals() = 1000;
     EXPECT_TRUE(a.op_sorting_less(b));
-    EXPECT_THROW((a < b), runtime_error);
-    EXPECT_THROW((a <= b), runtime_error);
+    EXPECT_THROW((a < b), not_comparable_error);
+    EXPECT_THROW((a <= b), not_comparable_error);
     EXPECT_FALSE(a == b);
     EXPECT_TRUE(a != b);
-    EXPECT_THROW((a >= b), runtime_error);
-    EXPECT_THROW((a > b), runtime_error);
+    EXPECT_THROW((a >= b), not_comparable_error);
+    EXPECT_THROW((a > b), not_comparable_error);
     EXPECT_FALSE(b.op_sorting_less(a));
-    EXPECT_THROW((b < a), runtime_error);
-    EXPECT_THROW((b <= a), runtime_error);
+    EXPECT_THROW((b < a), not_comparable_error);
+    EXPECT_THROW((b <= a), not_comparable_error);
     EXPECT_FALSE(b == a);
     EXPECT_TRUE(b != a);
-    EXPECT_THROW((b >= a), runtime_error);
-    EXPECT_THROW((b > a), runtime_error);
+    EXPECT_THROW((b >= a), not_comparable_error);
+    EXPECT_THROW((b > a), not_comparable_error);
 }
 
 
@@ -340,19 +340,19 @@ TEST(StructDType, SingleCompareDifferentMetadata) {
     b.p("b").vals() = -2.25;
     b.p("c").vals() = 66;
     EXPECT_FALSE(a.op_sorting_less(b));
-    EXPECT_THROW((a < b), runtime_error);
-    EXPECT_THROW((a <= b), runtime_error);
+    EXPECT_THROW((a < b), not_comparable_error);
+    EXPECT_THROW((a <= b), not_comparable_error);
     EXPECT_TRUE(a == b);
     EXPECT_FALSE(a != b);
-    EXPECT_THROW((a >= b), runtime_error);
-    EXPECT_THROW((a > b), runtime_error);
+    EXPECT_THROW((a >= b), not_comparable_error);
+    EXPECT_THROW((a > b), not_comparable_error);
     EXPECT_FALSE(b.op_sorting_less(a));
-    EXPECT_THROW((b < a), runtime_error);
-    EXPECT_THROW((b <= a), runtime_error);
+    EXPECT_THROW((b < a), not_comparable_error);
+    EXPECT_THROW((b <= a), not_comparable_error);
     EXPECT_TRUE(b == a);
     EXPECT_FALSE(b != a);
-    EXPECT_THROW((b >= a), runtime_error);
-    EXPECT_THROW((b > a), runtime_error);
+    EXPECT_THROW((b >= a), not_comparable_error);
+    EXPECT_THROW((b > a), not_comparable_error);
 
     // Different in the first field
     a.p("a").vals() = 3;
@@ -362,19 +362,19 @@ TEST(StructDType, SingleCompareDifferentMetadata) {
     b.p("b").vals() = -2.25;
     b.p("c").vals() = 66;
     EXPECT_TRUE(a.op_sorting_less(b));
-    EXPECT_THROW((a < b), runtime_error);
-    EXPECT_THROW((a <= b), runtime_error);
+    EXPECT_THROW((a < b), not_comparable_error);
+    EXPECT_THROW((a <= b), not_comparable_error);
     EXPECT_FALSE(a == b);
     EXPECT_TRUE(a != b);
-    EXPECT_THROW((a >= b), runtime_error);
-    EXPECT_THROW((a > b), runtime_error);
+    EXPECT_THROW((a >= b), not_comparable_error);
+    EXPECT_THROW((a > b), not_comparable_error);
     EXPECT_FALSE(b.op_sorting_less(a));
-    EXPECT_THROW((b < a), runtime_error);
-    EXPECT_THROW((b <= a), runtime_error);
+    EXPECT_THROW((b < a), not_comparable_error);
+    EXPECT_THROW((b <= a), not_comparable_error);
     EXPECT_FALSE(b == a);
     EXPECT_TRUE(b != a);
-    EXPECT_THROW((b >= a), runtime_error);
-    EXPECT_THROW((b > a), runtime_error);
+    EXPECT_THROW((b >= a), not_comparable_error);
+    EXPECT_THROW((b > a), not_comparable_error);
 
     // Different in the second field
     a.p("a").vals() = 3;
@@ -384,19 +384,19 @@ TEST(StructDType, SingleCompareDifferentMetadata) {
     b.p("b").vals() = -2.23;
     b.p("c").vals() = 66;
     EXPECT_TRUE(a.op_sorting_less(b));
-    EXPECT_THROW((a < b), runtime_error);
-    EXPECT_THROW((a <= b), runtime_error);
+    EXPECT_THROW((a < b), not_comparable_error);
+    EXPECT_THROW((a <= b), not_comparable_error);
     EXPECT_FALSE(a == b);
     EXPECT_TRUE(a != b);
-    EXPECT_THROW((a >= b), runtime_error);
-    EXPECT_THROW((a > b), runtime_error);
+    EXPECT_THROW((a >= b), not_comparable_error);
+    EXPECT_THROW((a > b), not_comparable_error);
     EXPECT_FALSE(b.op_sorting_less(a));
-    EXPECT_THROW((b < a), runtime_error);
-    EXPECT_THROW((b <= a), runtime_error);
+    EXPECT_THROW((b < a), not_comparable_error);
+    EXPECT_THROW((b <= a), not_comparable_error);
     EXPECT_FALSE(b == a);
     EXPECT_TRUE(b != a);
-    EXPECT_THROW((b >= a), runtime_error);
-    EXPECT_THROW((b > a), runtime_error);
+    EXPECT_THROW((b >= a), not_comparable_error);
+    EXPECT_THROW((b > a), not_comparable_error);
 
 
     // Different in the third field
@@ -407,18 +407,18 @@ TEST(StructDType, SingleCompareDifferentMetadata) {
     b.p("b").vals() = -2.25;
     b.p("c").vals() = 1000;
     EXPECT_TRUE(a.op_sorting_less(b));
-    EXPECT_THROW((a < b), runtime_error);
-    EXPECT_THROW((a <= b), runtime_error);
+    EXPECT_THROW((a < b), not_comparable_error);
+    EXPECT_THROW((a <= b), not_comparable_error);
     EXPECT_FALSE(a == b);
     EXPECT_TRUE(a != b);
-    EXPECT_THROW((a >= b), runtime_error);
-    EXPECT_THROW((a > b), runtime_error);
+    EXPECT_THROW((a >= b), not_comparable_error);
+    EXPECT_THROW((a > b), not_comparable_error);
     EXPECT_FALSE(b.op_sorting_less(a));
-    EXPECT_THROW((b < a), runtime_error);
-    EXPECT_THROW((b <= a), runtime_error);
+    EXPECT_THROW((b < a), not_comparable_error);
+    EXPECT_THROW((b <= a), not_comparable_error);
     EXPECT_FALSE(b == a);
     EXPECT_TRUE(b != a);
-    EXPECT_THROW((b >= a), runtime_error);
-    EXPECT_THROW((b > a), runtime_error);
+    EXPECT_THROW((b >= a), not_comparable_error);
+    EXPECT_THROW((b > a), not_comparable_error);
 }
 

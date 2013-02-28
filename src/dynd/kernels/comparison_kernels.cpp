@@ -97,8 +97,6 @@ size_t dynd::make_builtin_dtype_comparison_kernel(
                                         [src1_type_id-bool_type_id][comptype]);
         return offset_out + sizeof(kernel_data_prefix);
     } else {
-        stringstream ss;
-        ss << "Cannot compare values of types " << dtype(src0_type_id) << " and " << dtype(src1_type_id);
-        throw runtime_error(ss.str());
+        throw not_comparable_error(dtype(src0_type_id), dtype(src1_type_id), comptype);
     }
 }

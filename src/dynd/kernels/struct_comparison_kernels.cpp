@@ -321,9 +321,7 @@ size_t dynd::make_struct_comparison_kernel(
         }
         return field_kernel_offset;
     } else {
-        stringstream ss;
-        ss << "Cannot compare values of types " << src_dt;
-        throw runtime_error(ss.str());
+        throw not_comparable_error(src_dt, src_dt, comptype);
     }
 }
 

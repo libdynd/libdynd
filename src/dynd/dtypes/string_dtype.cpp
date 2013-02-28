@@ -285,7 +285,5 @@ size_t string_dtype::make_comparison_kernel(
         }
     }
 
-    stringstream ss;
-    ss << "Cannot compare values of types " << src0_dt << " and " << src1_dt;
-    throw runtime_error(ss.str());
+    throw not_comparable_error(src0_dt, src1_dt, comptype);
 }

@@ -35,10 +35,10 @@ TEST(NDObjectCompare, Bool) {
     EXPECT_FALSE(ndobject(true).op_sorting_less(ndobject(true)));
     EXPECT_FALSE(ndobject(true).op_sorting_less(ndobject(false)));
     // Other comparisons are not permitted
-    EXPECT_THROW((ndobject(false) < ndobject(true)), runtime_error);
-    EXPECT_THROW((ndobject(false) <= ndobject(true)), runtime_error);
-    EXPECT_THROW((ndobject(false) >= ndobject(true)), runtime_error);
-    EXPECT_THROW((ndobject(false) > ndobject(true)), runtime_error);
+    EXPECT_THROW((ndobject(false) < ndobject(true)), not_comparable_error);
+    EXPECT_THROW((ndobject(false) <= ndobject(true)), not_comparable_error);
+    EXPECT_THROW((ndobject(false) >= ndobject(true)), not_comparable_error);
+    EXPECT_THROW((ndobject(false) > ndobject(true)), not_comparable_error);
     // Compare Bool with other types
     EXPECT_TRUE(ndobject(true) == ndobject(1));
     EXPECT_TRUE(ndobject(true) == ndobject(1.f));
@@ -496,55 +496,55 @@ TEST(NDObjectCompare, ComplexFloat32) {
     a = complex<float>();
     b = complex<float>();
     EXPECT_FALSE(a.op_sorting_less(b));
-    EXPECT_THROW((a < b), runtime_error);
-    EXPECT_THROW((a <= b), runtime_error);
+    EXPECT_THROW((a < b), not_comparable_error);
+    EXPECT_THROW((a <= b), not_comparable_error);
     EXPECT_TRUE(a == b);
     EXPECT_FALSE(a != b);
-    EXPECT_THROW((a >= b), runtime_error);
-    EXPECT_THROW((a > b), runtime_error);
+    EXPECT_THROW((a >= b), not_comparable_error);
+    EXPECT_THROW((a > b), not_comparable_error);
     EXPECT_FALSE(b.op_sorting_less(a));
-    EXPECT_THROW((b < a), runtime_error);
-    EXPECT_THROW((b <= a), runtime_error);
+    EXPECT_THROW((b < a), not_comparable_error);
+    EXPECT_THROW((b <= a), not_comparable_error);
     EXPECT_TRUE(b == a);
     EXPECT_FALSE(b != a);
-    EXPECT_THROW((b >= a), runtime_error);
-    EXPECT_THROW((b > a), runtime_error);
+    EXPECT_THROW((b >= a), not_comparable_error);
+    EXPECT_THROW((b > a), not_comparable_error);
 
     // Compare 0+1j with 1+1j
     a = complex<float>(0, 1);
     b = complex<float>(1, 1);
     EXPECT_TRUE(a.op_sorting_less(b));
-    EXPECT_THROW((a < b), runtime_error);
-    EXPECT_THROW((a <= b), runtime_error);
+    EXPECT_THROW((a < b), not_comparable_error);
+    EXPECT_THROW((a <= b), not_comparable_error);
     EXPECT_FALSE(a == b);
     EXPECT_TRUE(a != b);
-    EXPECT_THROW((a >= b), runtime_error);
-    EXPECT_THROW((a > b), runtime_error);
+    EXPECT_THROW((a >= b), not_comparable_error);
+    EXPECT_THROW((a > b), not_comparable_error);
     EXPECT_FALSE(b.op_sorting_less(a));
-    EXPECT_THROW((b < a), runtime_error);
-    EXPECT_THROW((b <= a), runtime_error);
+    EXPECT_THROW((b < a), not_comparable_error);
+    EXPECT_THROW((b <= a), not_comparable_error);
     EXPECT_FALSE(b == a);
     EXPECT_TRUE(b != a);
-    EXPECT_THROW((b >= a), runtime_error);
-    EXPECT_THROW((b > a), runtime_error);
+    EXPECT_THROW((b >= a), not_comparable_error);
+    EXPECT_THROW((b > a), not_comparable_error);
 
     // Compare 0+1j with 0+2j
     a = complex<float>(0, 1);
     b = complex<float>(0, 2);
     EXPECT_TRUE(a.op_sorting_less(b));
-    EXPECT_THROW((a < b), runtime_error);
-    EXPECT_THROW((a <= b), runtime_error);
+    EXPECT_THROW((a < b), not_comparable_error);
+    EXPECT_THROW((a <= b), not_comparable_error);
     EXPECT_FALSE(a == b);
     EXPECT_TRUE(a != b);
-    EXPECT_THROW((a >= b), runtime_error);
-    EXPECT_THROW((a > b), runtime_error);
+    EXPECT_THROW((a >= b), not_comparable_error);
+    EXPECT_THROW((a > b), not_comparable_error);
     EXPECT_FALSE(b.op_sorting_less(a));
-    EXPECT_THROW((b < a), runtime_error);
-    EXPECT_THROW((b <= a), runtime_error);
+    EXPECT_THROW((b < a), not_comparable_error);
+    EXPECT_THROW((b <= a), not_comparable_error);
     EXPECT_FALSE(b == a);
     EXPECT_TRUE(b != a);
-    EXPECT_THROW((b >= a), runtime_error);
-    EXPECT_THROW((b > a), runtime_error);
+    EXPECT_THROW((b >= a), not_comparable_error);
+    EXPECT_THROW((b > a), not_comparable_error);
 }
 
 TEST(NDObjectCompare, ComplexFloat64) {
@@ -556,55 +556,55 @@ TEST(NDObjectCompare, ComplexFloat64) {
     a = complex<double>();
     b = complex<double>();
     EXPECT_FALSE(a.op_sorting_less(b));
-    EXPECT_THROW((a < b), runtime_error);
-    EXPECT_THROW((a <= b), runtime_error);
+    EXPECT_THROW((a < b), not_comparable_error);
+    EXPECT_THROW((a <= b), not_comparable_error);
     EXPECT_TRUE(a == b);
     EXPECT_FALSE(a != b);
-    EXPECT_THROW((a >= b), runtime_error);
-    EXPECT_THROW((a > b), runtime_error);
+    EXPECT_THROW((a >= b), not_comparable_error);
+    EXPECT_THROW((a > b), not_comparable_error);
     EXPECT_FALSE(b.op_sorting_less(a));
-    EXPECT_THROW((b < a), runtime_error);
-    EXPECT_THROW((b <= a), runtime_error);
+    EXPECT_THROW((b < a), not_comparable_error);
+    EXPECT_THROW((b <= a), not_comparable_error);
     EXPECT_TRUE(b == a);
     EXPECT_FALSE(b != a);
-    EXPECT_THROW((b >= a), runtime_error);
-    EXPECT_THROW((b > a), runtime_error);
+    EXPECT_THROW((b >= a), not_comparable_error);
+    EXPECT_THROW((b > a), not_comparable_error);
 
     // Compare 0+1j with 1+1j
     a = complex<double>(0, 1);
     b = complex<double>(1, 1);
     EXPECT_TRUE(a.op_sorting_less(b));
-    EXPECT_THROW((a < b), runtime_error);
-    EXPECT_THROW((a <= b), runtime_error);
+    EXPECT_THROW((a < b), not_comparable_error);
+    EXPECT_THROW((a <= b), not_comparable_error);
     EXPECT_FALSE(a == b);
     EXPECT_TRUE(a != b);
-    EXPECT_THROW((a >= b), runtime_error);
-    EXPECT_THROW((a > b), runtime_error);
+    EXPECT_THROW((a >= b), not_comparable_error);
+    EXPECT_THROW((a > b), not_comparable_error);
     EXPECT_FALSE(b.op_sorting_less(a));
-    EXPECT_THROW((b < a), runtime_error);
-    EXPECT_THROW((b <= a), runtime_error);
+    EXPECT_THROW((b < a), not_comparable_error);
+    EXPECT_THROW((b <= a), not_comparable_error);
     EXPECT_FALSE(b == a);
     EXPECT_TRUE(b != a);
-    EXPECT_THROW((b >= a), runtime_error);
-    EXPECT_THROW((b > a), runtime_error);
+    EXPECT_THROW((b >= a), not_comparable_error);
+    EXPECT_THROW((b > a), not_comparable_error);
 
     // Compare 0+1j with 0+2j
     a = complex<double>(0, 1);
     b = complex<double>(0, 2);
     EXPECT_TRUE(a.op_sorting_less(b));
-    EXPECT_THROW((a < b), runtime_error);
-    EXPECT_THROW((a <= b), runtime_error);
+    EXPECT_THROW((a < b), not_comparable_error);
+    EXPECT_THROW((a <= b), not_comparable_error);
     EXPECT_FALSE(a == b);
     EXPECT_TRUE(a != b);
-    EXPECT_THROW((a >= b), runtime_error);
-    EXPECT_THROW((a > b), runtime_error);
+    EXPECT_THROW((a >= b), not_comparable_error);
+    EXPECT_THROW((a > b), not_comparable_error);
     EXPECT_FALSE(b.op_sorting_less(a));
-    EXPECT_THROW((b < a), runtime_error);
-    EXPECT_THROW((b <= a), runtime_error);
+    EXPECT_THROW((b < a), not_comparable_error);
+    EXPECT_THROW((b <= a), not_comparable_error);
     EXPECT_FALSE(b == a);
     EXPECT_TRUE(b != a);
-    EXPECT_THROW((b >= a), runtime_error);
-    EXPECT_THROW((b > a), runtime_error);
+    EXPECT_THROW((b >= a), not_comparable_error);
+    EXPECT_THROW((b > a), not_comparable_error);
 }
 
 TEST(NDObjectCompare, NaNComplexFloat32) {
@@ -622,12 +622,12 @@ TEST(NDObjectCompare, NaNComplexFloat32) {
     EXPECT_TRUE(DYND_ISNAN(a.p("real").as<float>()));
     EXPECT_FALSE(DYND_ISNAN(a.p("imag").as<float>()));
     EXPECT_FALSE(a.op_sorting_less(a));
-    EXPECT_THROW((a < a), runtime_error);
-    EXPECT_THROW((a <= a), runtime_error);
+    EXPECT_THROW((a < a), not_comparable_error);
+    EXPECT_THROW((a <= a), not_comparable_error);
     EXPECT_FALSE(a == a);
     EXPECT_TRUE(a != a);
-    EXPECT_THROW((a >= a), runtime_error);
-    EXPECT_THROW((a > a), runtime_error);
+    EXPECT_THROW((a >= a), not_comparable_error);
+    EXPECT_THROW((a > a), not_comparable_error);
 
     // imaginary component NaN, compared against itself
     cval[0] = 0.f;
@@ -636,12 +636,12 @@ TEST(NDObjectCompare, NaNComplexFloat32) {
     EXPECT_FALSE(DYND_ISNAN(a.p("real").as<float>()));
     EXPECT_TRUE(DYND_ISNAN(a.p("imag").as<float>()));
     EXPECT_FALSE(a.op_sorting_less(a));
-    EXPECT_THROW((a < a), runtime_error);
-    EXPECT_THROW((a <= a), runtime_error);
+    EXPECT_THROW((a < a), not_comparable_error);
+    EXPECT_THROW((a <= a), not_comparable_error);
     EXPECT_FALSE(a == a);
     EXPECT_TRUE(a != a);
-    EXPECT_THROW((a >= a), runtime_error);
-    EXPECT_THROW((a > a), runtime_error);
+    EXPECT_THROW((a >= a), not_comparable_error);
+    EXPECT_THROW((a > a), not_comparable_error);
 
     // both components NaN, compared against itself
     cval[0] = nan;
@@ -650,12 +650,12 @@ TEST(NDObjectCompare, NaNComplexFloat32) {
     EXPECT_TRUE(DYND_ISNAN(a.p("real").as<float>()));
     EXPECT_TRUE(DYND_ISNAN(a.p("imag").as<float>()));
     EXPECT_FALSE(a.op_sorting_less(a));
-    EXPECT_THROW((a < a), runtime_error);
-    EXPECT_THROW((a <= a), runtime_error);
+    EXPECT_THROW((a < a), not_comparable_error);
+    EXPECT_THROW((a <= a), not_comparable_error);
     EXPECT_FALSE(a == a);
     EXPECT_TRUE(a != a);
-    EXPECT_THROW((a >= a), runtime_error);
-    EXPECT_THROW((a > a), runtime_error);
+    EXPECT_THROW((a >= a), not_comparable_error);
+    EXPECT_THROW((a > a), not_comparable_error);
 
     // NaNs compared against non-NaNs
     cval[0] = nan;
@@ -665,19 +665,19 @@ TEST(NDObjectCompare, NaNComplexFloat32) {
     cval[1] = 1.f;
     b.val_assign(make_dtype<complex<float> >(), NULL, reinterpret_cast<const char *>(&cval[0]));
     EXPECT_FALSE(a.op_sorting_less(b));
-    EXPECT_THROW((a < b), runtime_error);
-    EXPECT_THROW((a <= b), runtime_error);
+    EXPECT_THROW((a < b), not_comparable_error);
+    EXPECT_THROW((a <= b), not_comparable_error);
     EXPECT_FALSE(a == b);
     EXPECT_TRUE(a != b);
-    EXPECT_THROW((a >= b), runtime_error);
-    EXPECT_THROW((a > b), runtime_error);
+    EXPECT_THROW((a >= b), not_comparable_error);
+    EXPECT_THROW((a > b), not_comparable_error);
     EXPECT_TRUE(b.op_sorting_less(a));
-    EXPECT_THROW((b < a), runtime_error);
-    EXPECT_THROW((b <= a), runtime_error);
+    EXPECT_THROW((b < a), not_comparable_error);
+    EXPECT_THROW((b <= a), not_comparable_error);
     EXPECT_FALSE(b == a);
     EXPECT_TRUE(b != a);
-    EXPECT_THROW((b >= a), runtime_error);
-    EXPECT_THROW((b > a), runtime_error);
+    EXPECT_THROW((b >= a), not_comparable_error);
+    EXPECT_THROW((b > a), not_comparable_error);
 
     cval[0] = 0.f;
     cval[1] = nan;
@@ -686,19 +686,19 @@ TEST(NDObjectCompare, NaNComplexFloat32) {
     cval[1] = 1.f;
     b.val_assign(make_dtype<complex<float> >(), NULL, reinterpret_cast<const char *>(&cval[0]));
     EXPECT_FALSE(a.op_sorting_less(b));
-    EXPECT_THROW((a < b), runtime_error);
-    EXPECT_THROW((a <= b), runtime_error);
+    EXPECT_THROW((a < b), not_comparable_error);
+    EXPECT_THROW((a <= b), not_comparable_error);
     EXPECT_FALSE(a == b);
     EXPECT_TRUE(a != b);
-    EXPECT_THROW((a >= b), runtime_error);
-    EXPECT_THROW((a > b), runtime_error);
+    EXPECT_THROW((a >= b), not_comparable_error);
+    EXPECT_THROW((a > b), not_comparable_error);
     EXPECT_TRUE(b.op_sorting_less(a));
-    EXPECT_THROW((b < a), runtime_error);
-    EXPECT_THROW((b <= a), runtime_error);
+    EXPECT_THROW((b < a), not_comparable_error);
+    EXPECT_THROW((b <= a), not_comparable_error);
     EXPECT_FALSE(b == a);
     EXPECT_TRUE(b != a);
-    EXPECT_THROW((b >= a), runtime_error);
-    EXPECT_THROW((b > a), runtime_error);
+    EXPECT_THROW((b >= a), not_comparable_error);
+    EXPECT_THROW((b > a), not_comparable_error);
 
     cval[0] = nan;
     cval[1] = nan;
@@ -707,19 +707,19 @@ TEST(NDObjectCompare, NaNComplexFloat32) {
     cval[1] = 1.f;
     b.val_assign(make_dtype<complex<float> >(), NULL, reinterpret_cast<const char *>(&cval[0]));
     EXPECT_FALSE(a.op_sorting_less(b));
-    EXPECT_THROW((a < b), runtime_error);
-    EXPECT_THROW((a <= b), runtime_error);
+    EXPECT_THROW((a < b), not_comparable_error);
+    EXPECT_THROW((a <= b), not_comparable_error);
     EXPECT_FALSE(a == b);
     EXPECT_TRUE(a != b);
-    EXPECT_THROW((a >= b), runtime_error);
-    EXPECT_THROW((a > b), runtime_error);
+    EXPECT_THROW((a >= b), not_comparable_error);
+    EXPECT_THROW((a > b), not_comparable_error);
     EXPECT_TRUE(b.op_sorting_less(a));
-    EXPECT_THROW((b < a), runtime_error);
-    EXPECT_THROW((b <= a), runtime_error);
+    EXPECT_THROW((b < a), not_comparable_error);
+    EXPECT_THROW((b <= a), not_comparable_error);
     EXPECT_FALSE(b == a);
     EXPECT_TRUE(b != a);
-    EXPECT_THROW((b >= a), runtime_error);
-    EXPECT_THROW((b > a), runtime_error);
+    EXPECT_THROW((b >= a), not_comparable_error);
+    EXPECT_THROW((b > a), not_comparable_error);
 
     // NaNs compared against NaNs
     cval[0] = nan;
@@ -729,19 +729,19 @@ TEST(NDObjectCompare, NaNComplexFloat32) {
     cval[1] = 1.f;
     b.val_assign(make_dtype<complex<float> >(), NULL, reinterpret_cast<const char *>(&cval[0]));
     EXPECT_TRUE(a.op_sorting_less(b));
-    EXPECT_THROW((a < b), runtime_error);
-    EXPECT_THROW((a <= b), runtime_error);
+    EXPECT_THROW((a < b), not_comparable_error);
+    EXPECT_THROW((a <= b), not_comparable_error);
     EXPECT_FALSE(a == b);
     EXPECT_TRUE(a != b);
-    EXPECT_THROW((a >= b), runtime_error);
-    EXPECT_THROW((a > b), runtime_error);
+    EXPECT_THROW((a >= b), not_comparable_error);
+    EXPECT_THROW((a > b), not_comparable_error);
     EXPECT_FALSE(b.op_sorting_less(a));
-    EXPECT_THROW((b < a), runtime_error);
-    EXPECT_THROW((b <= a), runtime_error);
+    EXPECT_THROW((b < a), not_comparable_error);
+    EXPECT_THROW((b <= a), not_comparable_error);
     EXPECT_FALSE(b == a);
     EXPECT_TRUE(b != a);
-    EXPECT_THROW((b >= a), runtime_error);
-    EXPECT_THROW((b > a), runtime_error);
+    EXPECT_THROW((b >= a), not_comparable_error);
+    EXPECT_THROW((b > a), not_comparable_error);
 
     cval[0] = 0.f;
     cval[1] = nan;
@@ -752,19 +752,19 @@ TEST(NDObjectCompare, NaNComplexFloat32) {
     EXPECT_FALSE(DYND_ISNAN(a.p("real").as<float>()));
     EXPECT_TRUE(DYND_ISNAN(a.p("imag").as<float>()));
     EXPECT_TRUE(a.op_sorting_less(b));
-    EXPECT_THROW((a < b), runtime_error);
-    EXPECT_THROW((a <= b), runtime_error);
+    EXPECT_THROW((a < b), not_comparable_error);
+    EXPECT_THROW((a <= b), not_comparable_error);
     EXPECT_FALSE(a == b);
     EXPECT_TRUE(a != b);
-    EXPECT_THROW((a >= b), runtime_error);
-    EXPECT_THROW((a > b), runtime_error);
+    EXPECT_THROW((a >= b), not_comparable_error);
+    EXPECT_THROW((a > b), not_comparable_error);
     EXPECT_FALSE(b.op_sorting_less(a));
-    EXPECT_THROW((b < a), runtime_error);
-    EXPECT_THROW((b <= a), runtime_error);
+    EXPECT_THROW((b < a), not_comparable_error);
+    EXPECT_THROW((b <= a), not_comparable_error);
     EXPECT_FALSE(b == a);
     EXPECT_TRUE(b != a);
-    EXPECT_THROW((b >= a), runtime_error);
-    EXPECT_THROW((b > a), runtime_error);
+    EXPECT_THROW((b >= a), not_comparable_error);
+    EXPECT_THROW((b > a), not_comparable_error);
 
     cval[0] = nan;
     cval[1] = nan;
@@ -773,19 +773,19 @@ TEST(NDObjectCompare, NaNComplexFloat32) {
     cval[1] = 1.f;
     b.val_assign(make_dtype<complex<float> >(), NULL, reinterpret_cast<const char *>(&cval[0]));
     EXPECT_FALSE(a.op_sorting_less(b));
-    EXPECT_THROW((a < b), runtime_error);
-    EXPECT_THROW((a <= b), runtime_error);
+    EXPECT_THROW((a < b), not_comparable_error);
+    EXPECT_THROW((a <= b), not_comparable_error);
     EXPECT_FALSE(a == b);
     EXPECT_TRUE(a != b);
-    EXPECT_THROW((a >= b), runtime_error);
-    EXPECT_THROW((a > b), runtime_error);
+    EXPECT_THROW((a >= b), not_comparable_error);
+    EXPECT_THROW((a > b), not_comparable_error);
     EXPECT_TRUE(b.op_sorting_less(a));
-    EXPECT_THROW((b < a), runtime_error);
-    EXPECT_THROW((b <= a), runtime_error);
+    EXPECT_THROW((b < a), not_comparable_error);
+    EXPECT_THROW((b <= a), not_comparable_error);
     EXPECT_FALSE(b == a);
     EXPECT_TRUE(b != a);
-    EXPECT_THROW((b >= a), runtime_error);
-    EXPECT_THROW((b > a), runtime_error);
+    EXPECT_THROW((b >= a), not_comparable_error);
+    EXPECT_THROW((b > a), not_comparable_error);
 
     cval[0] = 0.f;
     cval[1] = nan;
@@ -794,19 +794,19 @@ TEST(NDObjectCompare, NaNComplexFloat32) {
     cval[1] = nan;
     b.val_assign(make_dtype<complex<float> >(), NULL, reinterpret_cast<const char *>(&cval[0]));
     EXPECT_TRUE(a.op_sorting_less(b));
-    EXPECT_THROW((a < b), runtime_error);
-    EXPECT_THROW((a <= b), runtime_error);
+    EXPECT_THROW((a < b), not_comparable_error);
+    EXPECT_THROW((a <= b), not_comparable_error);
     EXPECT_FALSE(a == b);
     EXPECT_TRUE(a != b);
-    EXPECT_THROW((a >= b), runtime_error);
-    EXPECT_THROW((a > b), runtime_error);
+    EXPECT_THROW((a >= b), not_comparable_error);
+    EXPECT_THROW((a > b), not_comparable_error);
     EXPECT_FALSE(b.op_sorting_less(a));
-    EXPECT_THROW((b < a), runtime_error);
-    EXPECT_THROW((b <= a), runtime_error);
+    EXPECT_THROW((b < a), not_comparable_error);
+    EXPECT_THROW((b <= a), not_comparable_error);
     EXPECT_FALSE(b == a);
     EXPECT_TRUE(b != a);
-    EXPECT_THROW((b >= a), runtime_error);
-    EXPECT_THROW((b > a), runtime_error);
+    EXPECT_THROW((b >= a), not_comparable_error);
+    EXPECT_THROW((b > a), not_comparable_error);
 
     cval[0] = nan;
     cval[1] = nan;
@@ -815,18 +815,18 @@ TEST(NDObjectCompare, NaNComplexFloat32) {
     cval[1] = nan;
     b.val_assign(make_dtype<complex<float> >(), NULL, reinterpret_cast<const char *>(&cval[0]));
     EXPECT_FALSE(a.op_sorting_less(b));
-    EXPECT_THROW((a < b), runtime_error);
-    EXPECT_THROW((a <= b), runtime_error);
+    EXPECT_THROW((a < b), not_comparable_error);
+    EXPECT_THROW((a <= b), not_comparable_error);
     EXPECT_FALSE(a == b);
     EXPECT_TRUE(a != b);
-    EXPECT_THROW((a >= b), runtime_error);
-    EXPECT_THROW((a > b), runtime_error);
+    EXPECT_THROW((a >= b), not_comparable_error);
+    EXPECT_THROW((a > b), not_comparable_error);
     EXPECT_TRUE(b.op_sorting_less(a));
-    EXPECT_THROW((b < a), runtime_error);
-    EXPECT_THROW((b <= a), runtime_error);
+    EXPECT_THROW((b < a), not_comparable_error);
+    EXPECT_THROW((b <= a), not_comparable_error);
     EXPECT_FALSE(b == a);
     EXPECT_TRUE(b != a);
-    EXPECT_THROW((b >= a), runtime_error);
-    EXPECT_THROW((b > a), runtime_error);
+    EXPECT_THROW((b >= a), not_comparable_error);
+    EXPECT_THROW((b > a), not_comparable_error);
 }
 
