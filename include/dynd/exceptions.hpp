@@ -12,6 +12,7 @@
 
 #include <dynd/irange.hpp>
 #include <dynd/string_encodings.hpp>
+#include <dynd/kernels/comparison_kernels.hpp>
 
 namespace dynd {
 
@@ -181,8 +182,6 @@ public:
         return m_encoding;
     }
 };
-
-enum comparison_type_t;
 
 /**
  * An exception for when two dtypes cannot be compared

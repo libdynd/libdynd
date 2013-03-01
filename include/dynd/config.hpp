@@ -6,6 +6,8 @@
 #ifndef _DYND__CONFIG_HPP_
 #define _DYND__CONFIG_HPP_
 
+#include <cstdlib>
+
 #ifdef __clang__
 
 //#  define DYND_RVALUE_REFS

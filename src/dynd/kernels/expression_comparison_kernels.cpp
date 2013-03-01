@@ -116,9 +116,9 @@ namespace {
                 // Steal the buffer0_dt reference count into a dtype
                 char *metadata = b.metadata;
                 // Destruct and free the metadata for the buffer
-                if (b.metadata != NULL) {
-                    dt.extended()->metadata_destruct(b.metadata);
-                    free(b.metadata);
+                if (metadata != NULL) {
+                    dt.extended()->metadata_destruct(metadata);
+                    free(metadata);
                 }
                 // Destruct the kernel for the buffer
                 if (b.kernel_offset != 0) {
