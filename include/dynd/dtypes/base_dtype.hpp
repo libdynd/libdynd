@@ -333,14 +333,6 @@ public:
     virtual dtype get_dtype_at_dimension(char **inout_metadata, size_t i, size_t total_ndim = 0) const;
 
     /**
-     * Retrieves the leading dimension size of the shape.
-     *
-     * \param data      Data corresponding to the dtype.
-     * \param metadata  Metadata corresponding to the data.
-     */
-    virtual intptr_t get_dim_size(const char *data, const char *metadata) const;
-
-    /**
      * Retrieves the shape of the dtype, expanding the vector as needed. For dimensions with
      * unknown or variable shape, -1 is returned.
      *

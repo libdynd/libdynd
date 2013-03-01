@@ -190,12 +190,6 @@ dtype pointer_dtype::get_dtype_at_dimension(char **inout_metadata, size_t i, siz
     }
 }
 
-intptr_t pointer_dtype::get_dim_size(const char *data, const char *metadata) const
-{
-    const pointer_dtype_metadata *md = reinterpret_cast<const pointer_dtype_metadata *>(metadata);
-    return m_target_dtype.get_dim_size(data + md->offset, metadata + sizeof(pointer_dtype_metadata));
-}
-
 void pointer_dtype::get_shape(size_t i, intptr_t *out_shape) const
 {
     if (!m_target_dtype.is_builtin()) {

@@ -7,6 +7,7 @@
 #define _DYND__VAR_DIM_DTYPE_HPP_
 
 #include <dynd/dtype.hpp>
+#include <dynd/dtypes/base_uniform_dim_dtype.hpp>
 #include <dynd/dtype_assign.hpp>
 #include <dynd/dtypes/view_dtype.hpp>
 #include <dynd/string_encodings.hpp>
@@ -28,8 +29,7 @@ struct var_dim_dtype_data {
     size_t size;
 };
 
-class var_dim_dtype : public base_dtype {
-    dtype m_element_dtype;
+class var_dim_dtype : public base_uniform_dim_dtype {
     std::vector<std::pair<std::string, gfunc::callable> > m_ndobject_properties, m_ndobject_functions;
 public:
     var_dim_dtype(const dtype& element_dtype);
@@ -40,10 +40,6 @@ public:
         return sizeof(var_dim_dtype_data);
     }
 
-
-    const dtype& get_element_dtype() const {
-        return m_element_dtype;
-    }
 
     /** Alignment of the data being pointed to. */
     size_t get_data_alignment() const {
@@ -83,7 +79,7 @@ public:
 
     dtype get_dtype_at_dimension(char **inout_metadata, size_t i, size_t total_ndim = 0) const;
 
-    intptr_t get_dim_size(const char *data, const char *metadata) const;
+    intptr_t get_dim_size(const char *metadata, const char *data) const;
     void get_shape(size_t i, intptr_t *out_shape) const;
     void get_shape(size_t i, intptr_t *out_shape, const char *metadata) const;
     void get_strides(size_t i, intptr_t *out_strides, const char *metadata) const;

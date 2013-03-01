@@ -1,0 +1,65 @@
+//
+// Copyright (C) 2011-13, DyND Developers
+// BSD 2-Clause License, see LICENSE.txt
+//
+
+#ifndef _DYND__BASE_UNIFORM_DIM_DTYPE_HPP_
+#define _DYND__BASE_UNIFORM_DIM_DTYPE_HPP_
+
+#include <dynd/dtypes/base_dtype.hpp>
+#include <dynd/dtype.hpp>
+
+namespace dynd {
+
+
+/**
+ * Base class for all uniform dimension dtypes. If a dtype
+ * has kind uniform_dim_kind, it must be a subclass of
+ * base_uniform_dim_dtype.
+ */
+class base_uniform_dim_dtype : public base_dtype {
+protected:
+    dtype m_element_dtype;
+    size_t m_element_metadata_offset;
+public:
+    inline base_uniform_dim_dtype(type_id_t type_id, const dtype& element_dtype, size_t data_size,
+                    size_t alignment, size_t element_metadata_offset,
+                    flags_type flags)
+        : base_dtype(type_id, uniform_dim_kind, data_size,
+                        alignment, flags, element_metadata_offset + element_dtype.get_metadata_size(),
+                        1 + element_dtype.get_undim()),
+            m_element_dtype(element_dtype), m_element_metadata_offset(element_metadata_offset)
+    {
+    }
+
+    virtual ~base_uniform_dim_dtype();
+
+    /** The element dtype. */
+    inline const dtype& get_element_dtype() const {
+        return m_element_dtype;
+    }
+
+    /**
+     * The offset to add to the metadata to get to the
+     * element_dtype's metadata.
+     */
+    inline size_t get_element_metadata_offset() const {
+        return m_element_metadata_offset;
+    }
+
+    /**
+     * The dimension size, or -1 if it can't be determined
+     * from the information given.
+     *
+     * \param metadata  A metadata instance for the dtype, or NULL.
+     * \param data  A data instance for the dtype/metadata, or NULL.
+     *
+     * \returns  The size of the dimension, or -1.
+     */
+    virtual intptr_t get_dim_size(const char *metadata = NULL, const char *data = NULL) const = 0;
+};
+
+
+} // namespace dynd
+
+#endif // _DYND__BASE_UNIFORM_DIM_DTYPE_HPP_

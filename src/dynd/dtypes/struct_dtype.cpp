@@ -247,11 +247,6 @@ intptr_t struct_dtype::apply_linear_index(size_t nindices, const irange *indices
     }
 }
 
-intptr_t struct_dtype::get_dim_size(const char *DYND_UNUSED(data), const char *DYND_UNUSED(metadata)) const
-{
-    return m_field_types.size();
-}
-
 void struct_dtype::get_shape(size_t i, intptr_t *out_shape) const
 {
     // Adjust the current shape if necessary

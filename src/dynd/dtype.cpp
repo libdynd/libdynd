@@ -4,6 +4,7 @@
 //
 
 #include <dynd/dtype.hpp>
+#include <dynd/dtypes/base_uniform_dim_dtype.hpp>
 #include <dynd/exceptions.hpp>
 #include <dynd/dtype_assign.hpp>
 #include <dynd/buffer_storage.hpp>
@@ -218,6 +219,20 @@ dtype dtype::with_replaced_scalar_types(const dtype& scalar_dtype, assign_error_
     replace_scalar_type_extra extra(scalar_dtype, errmode);
     replace_scalar_types(*this, &extra, result, was_transformed);
     return result;
+}
+
+intptr_t dtype::get_dim_size(const char *metadata, const char *data) const {
+    if (get_kind() == uniform_dim_kind) {
+        return static_cast<const base_uniform_dim_dtype *>(m_extended)->get_dim_size(metadata, data);
+    } else if (get_undim() > 0) {
+        dimvector shape(get_undim());
+        m_extended->get_shape(0, shape.get(), metadata);
+        return shape[0];
+    } else {
+        std::stringstream ss;
+        ss << "Cannot get the leading dimension size of ndobject with dtype " << *this;
+        throw std::runtime_error(ss.str());
+    }
 }
 
 bool dtype::data_layout_compatible_with(const dtype& rhs) const

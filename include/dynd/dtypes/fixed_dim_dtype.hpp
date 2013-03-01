@@ -9,6 +9,7 @@
 #include <dynd/dtype.hpp>
 #include <dynd/dtype_assign.hpp>
 #include <dynd/dtypes/view_dtype.hpp>
+#include <dynd/dtypes/base_uniform_dim_dtype.hpp>
 
 namespace dynd {
 
@@ -18,10 +19,9 @@ struct fixed_dim_dtype_iterdata {
     intptr_t stride;
 };
 
-class fixed_dim_dtype : public base_dtype {
-    dtype m_element_dtype;
+class fixed_dim_dtype : public base_uniform_dim_dtype {
     intptr_t m_stride;
-    size_t m_dimension_size;
+    size_t m_dim_size;
     std::vector<std::pair<std::string, gfunc::callable> > m_ndobject_properties, m_ndobject_functions;
 
     void create_ndobject_properties();
@@ -35,16 +35,12 @@ public:
         return get_data_size();
     }
 
-    const dtype& get_element_dtype() const {
-        return m_element_dtype;
-    }
-
     intptr_t get_fixed_stride() const {
         return m_stride;
     }
 
     size_t get_fixed_dim_size() const {
-        return m_dimension_size;
+        return m_dim_size;
     }
 
     void print_data(std::ostream& o, const char *metadata, const char *data) const;
@@ -80,7 +76,7 @@ public:
 
     dtype get_dtype_at_dimension(char **inout_metadata, size_t i, size_t total_ndim = 0) const;
 
-    intptr_t get_dim_size(const char *data, const char *metadata) const;
+    intptr_t get_dim_size(const char *metadata, const char *data) const;
     void get_shape(size_t i, intptr_t *out_shape) const;
     void get_shape(size_t i, intptr_t *out_shape, const char *metadata) const;
     void get_strides(size_t i, intptr_t *out_strides, const char *metadata) const;

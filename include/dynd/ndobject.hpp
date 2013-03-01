@@ -279,7 +279,7 @@ public:
      * Returns the size of the leading (leftmost) dimension.
      */
     inline intptr_t get_dim_size() const {
-        return get_dtype().get_dim_size(get_ndo()->m_data_pointer, get_ndo_meta());
+        return get_dtype().get_dim_size(get_ndo_meta(), get_ndo()->m_data_pointer);
     }
 
     std::vector<intptr_t> get_strides() const {

@@ -615,15 +615,7 @@ public:
         }
     }
 
-    intptr_t get_dim_size(const char *data, const char *metadata) const {
-        if (!is_builtin()) {
-            return m_extended->get_dim_size(data, metadata);
-        } else {
-            std::stringstream ss;
-            ss << "Cannot get the leading dimension size of ndobject with scalar dtype " << *this;
-            throw std::runtime_error(ss.str());
-        }
-    }
+    intptr_t get_dim_size(const char *metadata, const char *data) const;
 
     inline dtype get_dtype_at_dimension(char **inout_metadata, size_t i, size_t total_ndim = 0) const {
         if (!is_builtin()) {

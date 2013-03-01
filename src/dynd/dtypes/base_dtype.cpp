@@ -103,14 +103,6 @@ dtype base_dtype::get_dtype_at_dimension(char **DYND_UNUSED(inout_metadata), siz
     }
 }
 
-intptr_t base_dtype::get_dim_size(const char *DYND_UNUSED(data), const char *DYND_UNUSED(metadata)) const
-{
-    // Default to scalar behavior
-    stringstream ss;
-    ss << "Cannot get the leading dimension size of ndobject with scalar dtype " << dtype(this, true);
-    throw std::runtime_error(ss.str());
-}
-
 void base_dtype::get_shape(size_t DYND_UNUSED(i), intptr_t *DYND_UNUSED(out_shape)) const
 {
     // Default to scalar behavior

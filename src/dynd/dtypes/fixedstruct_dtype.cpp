@@ -311,11 +311,6 @@ dtype fixedstruct_dtype::at_single(intptr_t i0,
     return m_field_types[i0];
 }
 
-intptr_t fixedstruct_dtype::get_dim_size(const char *DYND_UNUSED(data), const char *DYND_UNUSED(metadata)) const
-{
-    return m_field_types.size();
-}
-
 void fixedstruct_dtype::get_shape(size_t i, intptr_t *out_shape) const
 {
     // Adjust the current shape if necessary

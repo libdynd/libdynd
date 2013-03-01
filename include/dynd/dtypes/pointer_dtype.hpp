@@ -83,7 +83,6 @@ public:
 
     dtype get_dtype_at_dimension(char **inout_metadata, size_t i, size_t total_ndim = 0) const;
 
-    intptr_t get_dim_size(const char *data, const char *metadata) const;
     void get_shape(size_t i, intptr_t *out_shape) const;
     void get_shape(size_t i, intptr_t *out_shape, const char *metadata) const;
 

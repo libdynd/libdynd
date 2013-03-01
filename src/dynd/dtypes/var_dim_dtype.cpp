@@ -20,11 +20,9 @@ using namespace std;
 using namespace dynd;
 
 var_dim_dtype::var_dim_dtype(const dtype& element_dtype)
-    : base_dtype(var_dim_type_id, uniform_dim_kind, sizeof(var_dim_dtype_data),
-                    sizeof(const char *), dtype_flag_zeroinit,
-                    element_dtype.get_metadata_size() + sizeof(var_dim_dtype_metadata),
-                    element_dtype.get_undim() + 1),
-            m_element_dtype(element_dtype)
+    : base_uniform_dim_dtype(var_dim_type_id, element_dtype, sizeof(var_dim_dtype_data),
+                    sizeof(const char *), sizeof(var_dim_dtype_metadata),
+                    dtype_flag_zeroinit)
 {
     // Copy ndobject properties and functions from the first non-uniform dimension
     get_nonuniform_ndobject_properties_and_functions(m_ndobject_properties, m_ndobject_functions);
@@ -357,10 +355,13 @@ dtype var_dim_dtype::get_dtype_at_dimension(char **inout_metadata, size_t i, siz
     }
 }
 
-intptr_t var_dim_dtype::get_dim_size(const char *data, const char *DYND_UNUSED(metadata)) const
+intptr_t var_dim_dtype::get_dim_size(const char *DYND_UNUSED(metadata), const char *data) const
 {
-    const var_dim_dtype_data *d = reinterpret_cast<const var_dim_dtype_data *>(data);
-    return d->size;
+    if (data != NULL) {
+        return reinterpret_cast<const var_dim_dtype_data *>(data)->size;
+    } else {
+        return -1;
+    }
 }
 
 void var_dim_dtype::get_shape(size_t i, intptr_t *out_shape) const

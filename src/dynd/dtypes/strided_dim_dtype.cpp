@@ -15,15 +15,11 @@ using namespace std;
 using namespace dynd;
 
 strided_dim_dtype::strided_dim_dtype(const dtype& element_dtype)
-    : base_dtype(strided_dim_type_id, uniform_dim_kind, 0,
-                    element_dtype.get_alignment(), dtype_flag_none,
-                    element_dtype.get_metadata_size() + sizeof(strided_dim_dtype_metadata),
-                    element_dtype.get_undim() + 1),
-            m_element_dtype(element_dtype)
+    : base_uniform_dim_dtype(strided_dim_type_id, element_dtype, 0, element_dtype.get_alignment(),
+                    sizeof(strided_dim_dtype_metadata), dtype_flag_none)
 {
     // Propagate the zeroinit flag from the element
     m_members.flags |= (element_dtype.get_flags()&dtype_flag_zeroinit);
-
     // Copy ndobject properties and functions from the first non-uniform dimension
     get_nonuniform_ndobject_properties_and_functions(m_ndobject_properties, m_ndobject_functions);
 }
@@ -236,10 +232,13 @@ dtype strided_dim_dtype::get_dtype_at_dimension(char **inout_metadata, size_t i,
     }
 }
 
-intptr_t strided_dim_dtype::get_dim_size(const char *DYND_UNUSED(data), const char *metadata) const
+intptr_t strided_dim_dtype::get_dim_size(const char *metadata, const char *DYND_UNUSED(data)) const
 {
-    const strided_dim_dtype_metadata *md = reinterpret_cast<const strided_dim_dtype_metadata *>(metadata);
-    return md->size;
+    if (metadata != NULL) {
+        return reinterpret_cast<const strided_dim_dtype_metadata *>(metadata)->size;
+    } else {
+        return -1;
+    }
 }
 
 void strided_dim_dtype::get_shape(size_t i, intptr_t *out_shape) const

@@ -17,9 +17,9 @@ using namespace std;
 using namespace dynd;
 
 fixed_dim_dtype::fixed_dim_dtype(size_t dimension_size, const dtype& element_dtype)
-    : base_dtype(fixed_dim_type_id, uniform_dim_kind, 0, 1, dtype_flag_none,
-                    element_dtype.get_metadata_size(), element_dtype.get_undim() + 1),
-            m_element_dtype(element_dtype), m_dimension_size(dimension_size)
+    : base_uniform_dim_dtype(fixed_dim_type_id, element_dtype, 0, element_dtype.get_alignment(),
+                    0, dtype_flag_none),
+            m_dim_size(dimension_size)
 {
     size_t child_element_size = element_dtype.get_data_size();
     if (child_element_size == 0) {
@@ -28,9 +28,8 @@ fixed_dim_dtype::fixed_dim_dtype(size_t dimension_size, const dtype& element_dty
         ss << ", as it does not have a fixed size";
         throw runtime_error(ss.str());
     }
-    m_stride = m_dimension_size > 1 ? element_dtype.get_data_size() : 0;
-    m_members.data_size = m_stride * (m_dimension_size-1) + child_element_size;
-    m_members.alignment = (uint8_t)m_element_dtype.get_alignment();
+    m_stride = m_dim_size > 1 ? element_dtype.get_data_size() : 0;
+    m_members.data_size = m_stride * (m_dim_size-1) + child_element_size;
     // Propagate the zeroinit flag from the element
     m_members.flags |= (element_dtype.get_flags()&dtype_flag_zeroinit);
 
@@ -39,9 +38,9 @@ fixed_dim_dtype::fixed_dim_dtype(size_t dimension_size, const dtype& element_dty
 }
 
 fixed_dim_dtype::fixed_dim_dtype(size_t dimension_size, const dtype& element_dtype, intptr_t stride)
-    : base_dtype(fixed_dim_type_id, uniform_dim_kind, 0, 1, dtype_flag_none,
-                    element_dtype.get_metadata_size(), element_dtype.get_undim() + 1),
-            m_element_dtype(element_dtype), m_stride(stride), m_dimension_size(dimension_size)
+    : base_uniform_dim_dtype(fixed_dim_type_id, element_dtype, 0, element_dtype.get_alignment(),
+                    0, dtype_flag_none),
+            m_stride(stride), m_dim_size(dimension_size)
 {
     size_t child_element_size = element_dtype.get_data_size();
     if (child_element_size == 0) {
@@ -62,8 +61,7 @@ fixed_dim_dtype::fixed_dim_dtype(size_t dimension_size, const dtype& element_dty
         ss << " and stride 0, as the stride must be non-zero when the dimension size is > 1";
         throw runtime_error(ss.str());
     }
-    m_members.data_size = m_stride * (m_dimension_size-1) + child_element_size;
-    m_members.alignment = (uint8_t)m_element_dtype.get_alignment();
+    m_members.data_size = m_stride * (m_dim_size-1) + child_element_size;
     // Propagate the zeroinit flag from the element
     m_members.flags |= (element_dtype.get_flags()&dtype_flag_zeroinit);
 
@@ -79,7 +77,7 @@ void fixed_dim_dtype::print_data(std::ostream& o, const char *metadata, const ch
 {
     size_t stride = m_stride;
     o << "[";
-    for (size_t i = 0, i_end = m_dimension_size; i != i_end; ++i, data += stride) {
+    for (size_t i = 0, i_end = m_dim_size; i != i_end; ++i, data += stride) {
         m_element_dtype.print_data(o, metadata, data);
         if (i != i_end - 1) {
             o << ", ";
@@ -91,7 +89,7 @@ void fixed_dim_dtype::print_data(std::ostream& o, const char *metadata, const ch
 void fixed_dim_dtype::print_dtype(std::ostream& o) const
 {
     o << "fixed_dim<";
-    o << m_dimension_size;
+    o << m_dim_size;
     if ((size_t)m_stride != m_element_dtype.get_data_size()) {
         o << ", stride=" << m_stride;
     }
@@ -126,7 +124,7 @@ void fixed_dim_dtype::transform_child_dtypes(dtype_transform_fn_t transform_fn, 
     transform_fn(m_element_dtype, extra, tmp_dtype, was_transformed);
     if (was_transformed) {
         if (tmp_dtype.get_data_size() != 0) {
-            out_transformed_dtype = dtype(new fixed_dim_dtype(m_dimension_size, tmp_dtype), false);
+            out_transformed_dtype = dtype(new fixed_dim_dtype(m_dim_size, tmp_dtype), false);
         } else {
             out_transformed_dtype = dtype(new strided_dim_dtype(tmp_dtype), false);
         }
@@ -143,7 +141,7 @@ dtype fixed_dim_dtype::get_canonical_dtype() const
     // The transformed dtype may no longer have a fixed size, so check whether
     // we have to switch to the more flexible strided_dim_dtype
     if (canonical_element_dtype.get_data_size() != 0) {
-        return dtype(new fixed_dim_dtype(m_dimension_size, canonical_element_dtype), false);
+        return dtype(new fixed_dim_dtype(m_dim_size, canonical_element_dtype), false);
     } else {
         return dtype(new strided_dim_dtype(canonical_element_dtype), false);
     }
@@ -161,7 +159,7 @@ void fixed_dim_dtype::process_strided(const char *DYND_UNUSED(metadata), const c
     out_dt = m_element_dtype;
     out_origin = data;
     out_stride = m_stride;
-    out_dim_size = m_dimension_size;
+    out_dim_size = m_dim_size;
 }
 
 dtype fixed_dim_dtype::apply_linear_index(size_t nindices, const irange *indices,
@@ -212,7 +210,7 @@ intptr_t fixed_dim_dtype::apply_linear_index(size_t nindices, const irange *indi
     } else {
         bool remove_dimension;
         intptr_t start_index, index_stride, dimension_size;
-        apply_single_linear_index(*indices, m_dimension_size, current_i, &root_dt,
+        apply_single_linear_index(*indices, m_dim_size, current_i, &root_dt,
                         remove_dimension, start_index, index_stride, dimension_size);
         if (remove_dimension) {
             // Apply the strided offset and continue applying the index
@@ -258,7 +256,7 @@ dtype fixed_dim_dtype::at_single(intptr_t i0,
                 const char **DYND_UNUSED(inout_metadata), const char **inout_data) const
 {
     // Bounds-checking of the index
-    i0 = apply_single_index(i0, m_dimension_size, NULL);
+    i0 = apply_single_index(i0, m_dim_size, NULL);
     // The fixed_dim dtype has no metadata
     // If requested, modify the data
     if (inout_data) {
@@ -276,14 +274,14 @@ dtype fixed_dim_dtype::get_dtype_at_dimension(char **inout_metadata, size_t i, s
     }
 }
 
-intptr_t fixed_dim_dtype::get_dim_size(const char *DYND_UNUSED(data), const char *DYND_UNUSED(metadata)) const
+intptr_t fixed_dim_dtype::get_dim_size(const char *DYND_UNUSED(metadata), const char *DYND_UNUSED(data)) const
 {
-    return m_dimension_size;
+    return m_dim_size;
 }
 
 void fixed_dim_dtype::get_shape(size_t i, intptr_t *out_shape) const
 {
-    out_shape[i] = m_dimension_size;
+    out_shape[i] = m_dim_size;
 
     // Process the later shape values
     if (!m_element_dtype.is_builtin()) {
@@ -293,7 +291,7 @@ void fixed_dim_dtype::get_shape(size_t i, intptr_t *out_shape) const
 
 void fixed_dim_dtype::get_shape(size_t i, intptr_t *out_shape, const char *metadata) const
 {
-    out_shape[i] = m_dimension_size;
+    out_shape[i] = m_dim_size;
 
     // Process the later shape values
     if (!m_element_dtype.is_builtin()) {
@@ -338,7 +336,7 @@ bool fixed_dim_dtype::operator==(const base_dtype& rhs) const
     } else {
         const fixed_dim_dtype *dt = static_cast<const fixed_dim_dtype*>(&rhs);
         return m_element_dtype == dt->m_element_dtype &&
-                m_dimension_size == dt->m_dimension_size &&
+                m_dim_size == dt->m_dim_size &&
                 m_stride == dt->m_stride;
     }
 }
@@ -347,10 +345,10 @@ void fixed_dim_dtype::metadata_default_construct(char *metadata, size_t ndim, co
 {
     // Validate that the shape is ok
     if (ndim > 0) {
-        if (shape[0] >= 0 && (size_t)shape[0] != m_dimension_size) {
+        if (shape[0] >= 0 && (size_t)shape[0] != m_dim_size) {
             stringstream ss;
             ss << "Cannot construct dynd object of dtype " << dtype(this, true);
-            ss << " with dimension size " << shape[0] << ", the size must be " << m_dimension_size;
+            ss << " with dimension size " << shape[0] << ", the size must be " << m_dim_size;
             throw runtime_error(ss.str());
         }
     }
@@ -443,10 +441,10 @@ size_t fixed_dim_dtype::iterdata_construct(iterdata_common *iterdata, const char
         out_uniform_dtype = m_element_dtype;
     }
 
-    if (m_dimension_size != 1 && (size_t)shape[0] != m_dimension_size) {
+    if (m_dim_size != 1 && (size_t)shape[0] != m_dim_size) {
         stringstream ss;
         ss << "Cannot construct dynd iterator of dtype " << dtype(this, true);
-        ss << " with dimension size " << shape[0] << ", the size must be " << m_dimension_size;
+        ss << " with dimension size " << shape[0] << ", the size must be " << m_dim_size;
         throw runtime_error(ss.str());
     }
 
@@ -563,7 +561,7 @@ size_t fixed_dim_dtype::make_assignment_kernel(
 void fixed_dim_dtype::foreach_leading(char *data, const char *metadata, foreach_fn_t callback, void *callback_data) const
 {
     intptr_t stride = m_stride;
-    for (intptr_t i = 0, i_end = m_dimension_size; i < i_end; ++i, data += stride) {
+    for (intptr_t i = 0, i_end = m_dim_size; i < i_end; ++i, data += stride) {
         callback(m_element_dtype, data, metadata, callback_data);
     }
 }

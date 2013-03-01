@@ -60,6 +60,7 @@ set(dynd_SRC
     src/dynd/dtypes/base_expression_dtype.cpp
     src/dynd/dtypes/base_string_dtype.cpp
     src/dynd/dtypes/base_struct_dtype.cpp
+    src/dynd/dtypes/base_uniform_dim_dtype.cpp
     src/dynd/dtypes/busdate_dtype.cpp
     src/dynd/dtypes/builtin_dtype_properties.cpp
     src/dynd/dtypes/bytes_dtype.cpp
