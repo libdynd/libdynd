@@ -14,6 +14,7 @@
 #include <dynd/dtypes/strided_dim_dtype.hpp>
 #include <dynd/dtypes/fixedbytes_dtype.hpp>
 #include <dynd/dtypes/string_dtype.hpp>
+#include <dynd/dtypes/date_dtype.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -830,3 +831,46 @@ TEST(NDObjectCompare, NaNComplexFloat32) {
     EXPECT_THROW((b > a), not_comparable_error);
 }
 
+TEST(NDObjectCompare, ExpressionDType) {
+    ndobject a, b;
+    // One expression operand
+    a = ndobject(3).cast_scalars<float>();
+    b = ndobject(4.0);
+    EXPECT_TRUE(a.op_sorting_less(b));
+    EXPECT_TRUE(a < b);
+    EXPECT_TRUE(a <= b);
+    EXPECT_FALSE(a == b);
+    EXPECT_TRUE(a != b);
+    EXPECT_FALSE(a >= b);
+    EXPECT_FALSE(a > b);
+    EXPECT_FALSE(b.op_sorting_less(a));
+    EXPECT_FALSE(b < a);
+    EXPECT_FALSE(b <= a);
+    EXPECT_FALSE(b == a);
+    EXPECT_TRUE(b != a);
+    EXPECT_TRUE(b >= a);
+    EXPECT_TRUE(b > a);
+
+    // Two expression operand
+    a = ndobject(3).cast_scalars<float>();
+    b = ndobject("2012-03-04").cast_scalars(make_date_dtype()).p("day");
+    EXPECT_TRUE(a.op_sorting_less(b));
+    EXPECT_TRUE(a < b);
+    EXPECT_TRUE(a <= b);
+    EXPECT_FALSE(a == b);
+    EXPECT_TRUE(a != b);
+    EXPECT_FALSE(a >= b);
+    EXPECT_FALSE(a > b);
+    EXPECT_FALSE(b.op_sorting_less(a));
+    EXPECT_FALSE(b < a);
+    EXPECT_FALSE(b <= a);
+    EXPECT_FALSE(b == a);
+    EXPECT_TRUE(b != a);
+    EXPECT_TRUE(b >= a);
+    EXPECT_TRUE(b > a);
+
+    // Non-comparable operands should raise
+    a = ndobject(3).cast_scalars<complex<float> >();
+    b = ndobject(4.0);
+    EXPECT_THROW((a < b), not_comparable_error);
+}
