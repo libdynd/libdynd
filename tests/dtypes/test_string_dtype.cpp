@@ -419,3 +419,60 @@ TEST(StringDType, StringEncodeError) {
                     string_encode_error);
 }
 
+TEST(StringDType, Comparisons) {
+    ndobject a, b;
+
+    // Basic test
+    a = ndobject("abc");
+    b = ndobject("abd");
+    EXPECT_TRUE(a.op_sorting_less(b));
+    EXPECT_TRUE(a < b);
+    EXPECT_TRUE(a <= b);
+    EXPECT_FALSE(a == b);
+    EXPECT_TRUE(a != b);
+    EXPECT_FALSE(a >= b);
+    EXPECT_FALSE(a > b);
+    EXPECT_FALSE(b.op_sorting_less(a));
+    EXPECT_FALSE(b < a);
+    EXPECT_FALSE(b <= a);
+    EXPECT_FALSE(b == a);
+    EXPECT_TRUE(b != a);
+    EXPECT_TRUE(b >= a);
+    EXPECT_TRUE(b > a);
+
+    // Different sizes
+    a = ndobject("abcd");
+    b = ndobject("abcde");
+    EXPECT_TRUE(a.op_sorting_less(b));
+    EXPECT_TRUE(a < b);
+    EXPECT_TRUE(a <= b);
+    EXPECT_FALSE(a == b);
+    EXPECT_TRUE(a != b);
+    EXPECT_FALSE(a >= b);
+    EXPECT_FALSE(a > b);
+    EXPECT_FALSE(b.op_sorting_less(a));
+    EXPECT_FALSE(b < a);
+    EXPECT_FALSE(b <= a);
+    EXPECT_FALSE(b == a);
+    EXPECT_TRUE(b != a);
+    EXPECT_TRUE(b >= a);
+    EXPECT_TRUE(b > a);
+
+    // Expression and different encodings
+    a = ndobject("abcd").cast_scalars(make_string_dtype(string_encoding_ucs_2));
+    b = ndobject("abcde").cast_scalars(make_string_dtype(string_encoding_utf_32)).eval();
+    EXPECT_TRUE(a.op_sorting_less(b));
+    EXPECT_TRUE(a < b);
+    EXPECT_TRUE(a <= b);
+    EXPECT_FALSE(a == b);
+    EXPECT_TRUE(a != b);
+    EXPECT_FALSE(a >= b);
+    EXPECT_FALSE(a > b);
+    EXPECT_FALSE(b.op_sorting_less(a));
+    EXPECT_FALSE(b < a);
+    EXPECT_FALSE(b <= a);
+    EXPECT_FALSE(b == a);
+    EXPECT_TRUE(b != a);
+    EXPECT_TRUE(b >= a);
+    EXPECT_TRUE(b > a);
+}

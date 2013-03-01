@@ -11,6 +11,7 @@
 #include <dynd/kernels/string_comparison_kernels.hpp>
 #include <dynd/dtypes/fixedstring_dtype.hpp>
 #include <dynd/dtypes/string_dtype.hpp>
+#include <dynd/dtypes/convert_dtype.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -307,11 +308,16 @@ size_t dynd::make_string_comparison_kernel(
 #undef DYND_STRING_COMPARISON_TABLE_TYPE_LEVEL
 
 size_t dynd::make_general_string_comparison_kernel(
-                hierarchical_kernel *DYND_UNUSED(out), size_t DYND_UNUSED(offset_out),
-                const dtype& DYND_UNUSED(src0_dt), const char *DYND_UNUSED(src0_metadata),
-                const dtype& DYND_UNUSED(src1_dt), const char *DYND_UNUSED(src1_metadata),
-                comparison_type_t DYND_UNUSED(comptype),
-                const eval::eval_context *DYND_UNUSED(ectx))
+                hierarchical_kernel *out, size_t offset_out,
+                const dtype& src0_dt, const char *src0_metadata,
+                const dtype& src1_dt, const char *src1_metadata,
+                comparison_type_t comptype,
+                const eval::eval_context *ectx)
 {
-    throw runtime_error("TODO: implement make_general_string_comparison_kernel");
+    // TODO: Make more efficient, direct comparison kernels
+    dtype sdt = make_string_dtype();
+    return make_comparison_kernel(out, offset_out,
+                    make_convert_dtype(sdt, src0_dt), src0_metadata,
+                    make_convert_dtype(sdt, src1_dt), src1_metadata,
+                    comptype, ectx);
 }

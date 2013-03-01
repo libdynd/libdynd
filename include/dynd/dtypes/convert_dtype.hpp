@@ -86,18 +86,22 @@ public:
  * If the value_dtype has expression_kind, it chains operand_dtype.value_dtype()
  * into value_dtype.storage_dtype().
  */
-inline dtype make_convert_dtype(const dtype& value_dtype, const dtype& operand_dtype, assign_error_mode errmode = assign_error_default) {
+inline dtype make_convert_dtype(const dtype& value_dtype, const dtype& operand_dtype,
+                assign_error_mode errmode = assign_error_default) {
     if (operand_dtype.value_dtype() != value_dtype) {
         if (value_dtype.get_kind() != expression_kind) {
             // Create a conversion dtype when the value kind is different
             return dtype(new convert_dtype(value_dtype, operand_dtype, errmode), false);
         } else if (value_dtype.storage_dtype() == operand_dtype.value_dtype()) {
             // No conversion required at the connection
-            return static_cast<const base_expression_dtype *>(value_dtype.extended())->with_replaced_storage_dtype(operand_dtype);
+            return static_cast<const base_expression_dtype *>(
+                            value_dtype.extended())->with_replaced_storage_dtype(operand_dtype);
         } else {
             // A conversion required at the connection
-            return static_cast<const base_expression_dtype *>(value_dtype.extended())->with_replaced_storage_dtype(
-                dtype(new convert_dtype(value_dtype.storage_dtype(), operand_dtype, errmode), false));
+            return static_cast<const base_expression_dtype *>(
+                            value_dtype.extended())->with_replaced_storage_dtype(
+                                dtype(new convert_dtype(
+                                    value_dtype.storage_dtype(), operand_dtype, errmode), false));
         }
     } else {
         return operand_dtype;

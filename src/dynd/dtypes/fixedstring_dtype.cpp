@@ -219,6 +219,11 @@ size_t fixedstring_dtype::make_comparison_kernel(
                             src0_dt, src0_metadata,
                             src1_dt, src1_metadata,
                             comptype, ectx);
+        } else if (!src1_dt.is_builtin()) {
+            return src1_dt.extended()->make_comparison_kernel(out, offset_out,
+                            src0_dt, src0_metadata,
+                            src1_dt, src1_metadata,
+                            comptype, ectx);
         }
     }
 
