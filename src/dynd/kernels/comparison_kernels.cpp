@@ -12,7 +12,7 @@ using namespace dynd;
 
 
 size_t dynd::make_comparison_kernel(
-                comparison_kernel *out, size_t offset_out,
+                hierarchical_kernel *out, size_t offset_out,
                 const dtype& src0_dt, const char *src0_metadata,
                 const dtype& src1_dt, const char *src1_metadata,
                 comparison_type_t comptype,
@@ -82,7 +82,7 @@ static binary_single_predicate_t compare_kernel_table[builtin_type_id_count-2][b
 };
 
 size_t dynd::make_builtin_dtype_comparison_kernel(
-                comparison_kernel *out, size_t offset_out,
+                hierarchical_kernel *out, size_t offset_out,
                 type_id_t src0_type_id, type_id_t src1_type_id,
                 comparison_type_t comptype)
 {

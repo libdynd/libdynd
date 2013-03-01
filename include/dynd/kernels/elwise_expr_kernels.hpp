@@ -10,7 +10,7 @@
 
 namespace dynd {
 
-size_t make_elwise_dimension_expr_kernel(assignment_kernel *out, size_t offset_out,
+size_t make_elwise_dimension_expr_kernel(hierarchical_kernel *out, size_t offset_out,
                 const dtype& dst_dt, const char *dst_metadata,
                 size_t src_count, const dtype *src_dt, const char **src_metadata,
                 kernel_request_t kernreq, const eval::eval_context *ectx,

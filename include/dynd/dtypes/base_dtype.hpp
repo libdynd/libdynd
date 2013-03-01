@@ -440,7 +440,7 @@ public:
      *           kernel.
      */
     virtual size_t make_assignment_kernel(
-                    assignment_kernel *out, size_t offset_out,
+                    hierarchical_kernel *out, size_t offset_out,
                     const dtype& dst_dt, const char *dst_metadata,
                     const dtype& src_dt, const char *src_metadata,
                     kernel_request_t kernreq, assign_error_mode errmode,
@@ -460,7 +460,7 @@ public:
      *           kernel.
      */
     virtual size_t make_comparison_kernel(
-                    comparison_kernel *out, size_t offset_out,
+                    hierarchical_kernel *out, size_t offset_out,
                     const dtype& src0_dt, const char *src0_metadata,
                     const dtype& src1_dt, const char *src1_metadata,
                     comparison_type_t comptype,
@@ -564,7 +564,7 @@ public:
      * \param ectx  DyND evaluation context.
      */
     virtual size_t make_elwise_property_getter_kernel(
-                    assignment_kernel *out, size_t offset_out,
+                    hierarchical_kernel *out, size_t offset_out,
                     const char *dst_metadata,
                     const char *src_metadata, size_t src_elwise_property_index,
                     kernel_request_t kernreq, const eval::eval_context *ectx) const;
@@ -586,7 +586,7 @@ public:
      * \param ectx  DyND evaluation contrext.
      */
     virtual size_t make_elwise_property_setter_kernel(
-                    assignment_kernel *out, size_t offset_out,
+                    hierarchical_kernel *out, size_t offset_out,
                     const char *dst_metadata, size_t dst_elwise_property_index,
                     const char *src_metadata,
                     kernel_request_t kernreq, const eval::eval_context *ectx) const;

@@ -158,8 +158,9 @@ set(dynd_SRC
     src/dynd/kernels/comparison_kernels.cpp
     src/dynd/kernels/date_assignment_kernels.cpp
     src/dynd/kernels/elwise_expr_kernels.cpp
-    src/dynd/kernels/expression_assignment_kernels.cpp
     src/dynd/kernels/expr_kernel_generator.cpp
+    src/dynd/kernels/expression_assignment_kernels.cpp
+    src/dynd/kernels/expression_comparison_kernels.cpp
     src/dynd/kernels/string_assignment_kernels.cpp
     src/dynd/kernels/string_algorithm_kernels.cpp
     src/dynd/kernels/string_numeric_assignment_kernels.cpp
@@ -178,8 +179,9 @@ set(dynd_SRC
     include/dynd/kernels/comparison_kernels.hpp
     include/dynd/kernels/date_assignment_kernels.hpp
     include/dynd/kernels/elwise_expr_kernels.hpp
-    include/dynd/kernels/expression_assignment_kernels.hpp
     include/dynd/kernels/expr_kernel_generator.hpp
+    include/dynd/kernels/expression_assignment_kernels.hpp
+    include/dynd/kernels/expression_comparison_kernels.hpp
     include/dynd/kernels/hierarchical_kernels.hpp
     include/dynd/kernels/kernel_instance.hpp
     include/dynd/kernels/string_assignment_kernels.hpp

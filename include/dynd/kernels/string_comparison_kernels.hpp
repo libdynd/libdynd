@@ -19,7 +19,7 @@ namespace dynd {
  * \param encoding  The encoding of the string.
  */
 size_t make_fixedstring_comparison_kernel(
-                comparison_kernel *out, size_t offset_out,
+                hierarchical_kernel *out, size_t offset_out,
                 size_t string_size, string_encoding_t encoding,
                 comparison_type_t comptype,
                 const eval::eval_context *ectx);
@@ -30,7 +30,7 @@ size_t make_fixedstring_comparison_kernel(
  * \param encoding  The encoding of the string.
  */
 size_t make_string_comparison_kernel(
-                comparison_kernel *out, size_t offset_out,
+                hierarchical_kernel *out, size_t offset_out,
                 string_encoding_t encoding,
                 comparison_type_t comptype,
                 const eval::eval_context *ectx);
@@ -41,7 +41,7 @@ size_t make_string_comparison_kernel(
  * \param encoding  The encoding of the string.
  */
 size_t make_general_string_comparison_kernel(
-                comparison_kernel *out, size_t offset_out,
+                hierarchical_kernel *out, size_t offset_out,
                 const dtype& src0_dt, const char *src0_metadata,
                 const dtype& src1_dt, const char *src1_metadata,
                 comparison_type_t comptype,

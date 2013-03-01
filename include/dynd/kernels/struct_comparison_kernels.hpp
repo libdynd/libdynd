@@ -16,7 +16,7 @@ namespace dynd {
  * instances of the same struct/fixedstruct.
  */
 size_t make_struct_comparison_kernel(
-                comparison_kernel *out, size_t offset_out,
+                hierarchical_kernel *out, size_t offset_out,
                 const dtype& src_dt,
                 const char *src0_metadata, const char *src1_metadata,
                 comparison_type_t comptype,
@@ -27,7 +27,7 @@ size_t make_struct_comparison_kernel(
  * instances with struct_kind.
  */
 size_t make_general_struct_comparison_kernel(
-                comparison_kernel *out, size_t offset_out,
+                hierarchical_kernel *out, size_t offset_out,
                 const dtype& src0_dt, const char *src0_metadata,
                 const dtype& src1_dt, const char *src1_metadata,
                 comparison_type_t comptype,

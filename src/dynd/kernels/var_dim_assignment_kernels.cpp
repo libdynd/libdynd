@@ -68,7 +68,7 @@ namespace {
 } // anonymous namespace
 
 size_t dynd::make_broadcast_to_var_dim_assignment_kernel(
-                assignment_kernel *out, size_t offset_out,
+                hierarchical_kernel *out, size_t offset_out,
                 const dtype& dst_var_dim_dt, const char *dst_metadata,
                 const dtype& src_dt, const char *src_metadata,
                 kernel_request_t kernreq, assign_error_mode errmode,
@@ -170,7 +170,7 @@ namespace {
 } // anonymous namespace
 
 size_t dynd::make_var_dim_assignment_kernel(
-                assignment_kernel *out, size_t offset_out,
+                hierarchical_kernel *out, size_t offset_out,
                 const dtype& dst_var_dim_dt, const char *dst_metadata,
                 const dtype& src_var_dim_dt, const char *src_metadata,
                 kernel_request_t kernreq, assign_error_mode errmode,
@@ -270,7 +270,7 @@ namespace {
 } // anonymous namespace
 
 size_t dynd::make_strided_to_var_dim_assignment_kernel(
-                assignment_kernel *out, size_t offset_out,
+                hierarchical_kernel *out, size_t offset_out,
                 const dtype& dst_var_dim_dt, const char *dst_metadata,
                 const dtype& src_strided_dim_dt, const char *src_metadata,
                 kernel_request_t kernreq, assign_error_mode errmode,
@@ -368,7 +368,7 @@ namespace {
 } // anonymous namespace
 
 size_t dynd::make_var_to_strided_dim_assignment_kernel(
-                assignment_kernel *out, size_t offset_out,
+                hierarchical_kernel *out, size_t offset_out,
                 const dtype& dst_strided_dim_dt, const char *dst_metadata,
                 const dtype& src_var_dim_dt, const char *src_metadata,
                 kernel_request_t kernreq, assign_error_mode errmode,

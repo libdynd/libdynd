@@ -69,7 +69,7 @@ namespace {
 // struct to identical struct assignment
 
 size_t dynd::make_struct_identical_assignment_kernel(
-                assignment_kernel *out, size_t offset_out,
+                hierarchical_kernel *out, size_t offset_out,
                 const dtype& val_struct_dt,
                 const char *dst_metadata, const char *src_metadata,
                 kernel_request_t kernreq, assign_error_mode errmode,
@@ -127,7 +127,7 @@ size_t dynd::make_struct_identical_assignment_kernel(
 // struct to different struct assignment
 
 size_t dynd::make_struct_assignment_kernel(
-                assignment_kernel *out, size_t offset_out,
+                hierarchical_kernel *out, size_t offset_out,
                 const dtype& dst_struct_dt, const char *dst_metadata,
                 const dtype& src_struct_dt, const char *src_metadata,
                 kernel_request_t kernreq, assign_error_mode errmode,

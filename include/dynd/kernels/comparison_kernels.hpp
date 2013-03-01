@@ -85,7 +85,7 @@ public:
  *           created kernel.
  */
 size_t make_comparison_kernel(
-                comparison_kernel *out, size_t offset_out,
+                hierarchical_kernel *out, size_t offset_out,
                 const dtype& src0_dt, const char *src0_metadata,
                 const dtype& src1_dt, const char *src1_metadata,
                 comparison_type_t comptype,
@@ -103,7 +103,7 @@ size_t make_comparison_kernel(
  * \param comptype  The type of comparison to do.
  */
 size_t make_builtin_dtype_comparison_kernel(
-                comparison_kernel *out, size_t offset_out,
+                hierarchical_kernel *out, size_t offset_out,
                 type_id_t src0_type_id, type_id_t src1_type_id,
                 comparison_type_t comptype);
 

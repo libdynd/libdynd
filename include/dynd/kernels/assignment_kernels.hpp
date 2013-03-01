@@ -76,7 +76,7 @@ public:
  *           created kernel.
  */
 size_t make_assignment_kernel(
-                assignment_kernel *out, size_t offset_out,
+                hierarchical_kernel *out, size_t offset_out,
                 const dtype& dst_dt, const char *dst_metadata,
                 const dtype& src_dt, const char *src_metadata,
                 kernel_request_t kernreq, assign_error_mode errmode,
@@ -93,7 +93,7 @@ size_t make_assignment_kernel(
  * \param kernreq  What kind of kernel must be placed in 'out'.
  */
 size_t make_pod_dtype_assignment_kernel(
-                assignment_kernel *out, size_t offset_out,
+                hierarchical_kernel *out, size_t offset_out,
                 size_t data_size, size_t data_alignment,
                 kernel_request_t kernreq);
 
@@ -109,7 +109,7 @@ size_t make_pod_dtype_assignment_kernel(
  * \param errmode  The error mode to use for assignments.
  */
 size_t make_builtin_dtype_assignment_kernel(
-                assignment_kernel *out, size_t offset_out,
+                hierarchical_kernel *out, size_t offset_out,
                 type_id_t dst_type_id, type_id_t src_type_id,
                 kernel_request_t kernreq, assign_error_mode errmode);
 
@@ -125,7 +125,7 @@ size_t make_builtin_dtype_assignment_kernel(
  *      // Proceed to create 'single' kernel...
  */
 size_t make_kernreq_to_single_kernel_adapter(
-                assignment_kernel *out, size_t offset_out,
+                hierarchical_kernel *out, size_t offset_out,
                 kernel_request_t kernreq);
 
 /**

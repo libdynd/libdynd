@@ -128,7 +128,7 @@ bool date_dtype::operator==(const base_dtype& rhs) const
 }
 
 size_t date_dtype::make_assignment_kernel(
-                assignment_kernel *out, size_t offset_out,
+                hierarchical_kernel *out, size_t offset_out,
                 const dtype& dst_dt, const char *dst_metadata,
                 const dtype& src_dt, const char *src_metadata,
                 kernel_request_t kernreq, assign_error_mode errmode,
@@ -575,7 +575,7 @@ dtype date_dtype::get_elwise_property_dtype(size_t property_index,
 }
 
 size_t date_dtype::make_elwise_property_getter_kernel(
-                assignment_kernel *out, size_t offset_out,
+                hierarchical_kernel *out, size_t offset_out,
                 const char *DYND_UNUSED(dst_metadata),
                 const char *DYND_UNUSED(src_metadata), size_t src_property_index,
                 kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx)) const
@@ -610,7 +610,7 @@ size_t date_dtype::make_elwise_property_getter_kernel(
 }
 
 size_t date_dtype::make_elwise_property_setter_kernel(
-                assignment_kernel *out, size_t offset_out,
+                hierarchical_kernel *out, size_t offset_out,
                 const char *DYND_UNUSED(dst_metadata), size_t dst_property_index,
                 const char *DYND_UNUSED(src_metadata),
                 kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx)) const

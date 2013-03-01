@@ -22,7 +22,7 @@ void assign_utf8_string_to_builtin(type_id_t dst_type_id, char *dst,
  * Makes a kernel which converts strings to values of a builtin type id.
  */
 size_t make_builtin_to_string_assignment_kernel(
-                assignment_kernel *out, size_t offset_out,
+                hierarchical_kernel *out, size_t offset_out,
                 const dtype& dst_string_dt, const char *dst_metadata,
                 type_id_t src_type_id,
                 kernel_request_t kernreq, assign_error_mode errmode,
@@ -32,7 +32,7 @@ size_t make_builtin_to_string_assignment_kernel(
  * Makes a kernel which converts values of a builtin type id to strings.
  */
 size_t make_string_to_builtin_assignment_kernel(
-                assignment_kernel *out, size_t offset_out,
+                hierarchical_kernel *out, size_t offset_out,
                 type_id_t dst_type_id,
                 const dtype& src_string_dt, const char *src_metadata,
                 kernel_request_t kernreq, assign_error_mode errmode,

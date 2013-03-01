@@ -65,7 +65,7 @@ struct strided_expr_kernel_extra {
 
 template<int N>
 static size_t make_elwise_strided_dimension_expr_kernel_for_N(
-                assignment_kernel *out, size_t offset_out,
+                hierarchical_kernel *out, size_t offset_out,
                 const dtype& dst_dt, const char *dst_metadata,
                 size_t DYND_UNUSED(src_count), const dtype *src_dt, const char **src_metadata,
                 kernel_request_t kernreq, const eval::eval_context *ectx,
@@ -150,7 +150,7 @@ static size_t make_elwise_strided_dimension_expr_kernel_for_N(
 }
 
 inline static size_t make_elwise_strided_dimension_expr_kernel(
-                assignment_kernel *out, size_t offset_out,
+                hierarchical_kernel *out, size_t offset_out,
                 const dtype& dst_dt, const char *dst_metadata,
                 size_t src_count, const dtype *src_dt, const char **src_metadata,
                 kernel_request_t kernreq, const eval::eval_context *ectx,
@@ -205,7 +205,7 @@ inline static size_t make_elwise_strided_dimension_expr_kernel(
 }
 
 static size_t make_elwise_strided_or_var_to_strided_dimension_expr_kernel(
-                assignment_kernel *DYND_UNUSED(out), size_t DYND_UNUSED(offset_out),
+                hierarchical_kernel *DYND_UNUSED(out), size_t DYND_UNUSED(offset_out),
                 const dtype& DYND_UNUSED(dst_dt), const char *DYND_UNUSED(dst_metadata),
                 size_t DYND_UNUSED(src_count), const dtype *DYND_UNUSED(src_dt), const char **DYND_UNUSED(src_metadata),
                 kernel_request_t DYND_UNUSED(kernreq), const eval::eval_context *DYND_UNUSED(ectx),
@@ -215,7 +215,7 @@ static size_t make_elwise_strided_or_var_to_strided_dimension_expr_kernel(
 }
 
 static size_t make_elwise_strided_to_var_dimension_expr_kernel(
-                assignment_kernel *DYND_UNUSED(out), size_t DYND_UNUSED(offset_out),
+                hierarchical_kernel *DYND_UNUSED(out), size_t DYND_UNUSED(offset_out),
                 const dtype& DYND_UNUSED(dst_dt), const char *DYND_UNUSED(dst_metadata),
                 size_t DYND_UNUSED(src_count), const dtype *DYND_UNUSED(src_dt), const char **DYND_UNUSED(src_metadata),
                 kernel_request_t DYND_UNUSED(kernreq), const eval::eval_context *DYND_UNUSED(ectx),
@@ -225,7 +225,7 @@ static size_t make_elwise_strided_to_var_dimension_expr_kernel(
 }
 
 static size_t make_elwise_strided_or_var_to_var_dimension_expr_kernel(
-                assignment_kernel *DYND_UNUSED(out), size_t DYND_UNUSED(offset_out),
+                hierarchical_kernel *DYND_UNUSED(out), size_t DYND_UNUSED(offset_out),
                 const dtype& DYND_UNUSED(dst_dt), const char *DYND_UNUSED(dst_metadata),
                 size_t DYND_UNUSED(src_count), const dtype *DYND_UNUSED(src_dt), const char **DYND_UNUSED(src_metadata),
                 kernel_request_t DYND_UNUSED(kernreq), const eval::eval_context *DYND_UNUSED(ectx),
@@ -234,7 +234,7 @@ static size_t make_elwise_strided_or_var_to_var_dimension_expr_kernel(
     throw runtime_error("TODO: make_elwise_strided_or_var_to_var_dimension_expr_kernel");
 }
 
-size_t dynd::make_elwise_dimension_expr_kernel(assignment_kernel *out, size_t offset_out,
+size_t dynd::make_elwise_dimension_expr_kernel(hierarchical_kernel *out, size_t offset_out,
                 const dtype& dst_dt, const char *dst_metadata,
                 size_t src_count, const dtype *src_dt, const char **src_metadata,
                 kernel_request_t kernreq, const eval::eval_context *ectx,

@@ -394,7 +394,7 @@ static unary_single_operation_t static_string_to_builtin_kernels[builtin_type_id
     };
 
 size_t dynd::make_string_to_builtin_assignment_kernel(
-                assignment_kernel *out, size_t offset_out,
+                hierarchical_kernel *out, size_t offset_out,
                 type_id_t dst_type_id,
                 const dtype& src_string_dt, const char *src_metadata,
                 kernel_request_t kernreq, assign_error_mode errmode,
@@ -462,7 +462,7 @@ namespace {
 } // anonymous namespace
 
 size_t dynd::make_builtin_to_string_assignment_kernel(
-                assignment_kernel *out, size_t offset_out,
+                hierarchical_kernel *out, size_t offset_out,
                 const dtype& dst_string_dt, const char *dst_metadata,
                 type_id_t src_type_id,
                 kernel_request_t kernreq, assign_error_mode errmode,

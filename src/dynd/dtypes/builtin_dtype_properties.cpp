@@ -111,7 +111,7 @@ static void get_property_kernel_complex_float64_imag(char *dst, const char *src,
 }
 
 size_t dynd::make_builtin_dtype_elwise_property_getter_kernel(
-                assignment_kernel *out, size_t offset_out,
+                hierarchical_kernel *out, size_t offset_out,
                 type_id_t builtin_type_id,
                 const char *DYND_UNUSED(dst_metadata),
                 const char *DYND_UNUSED(src_metadata),
@@ -160,7 +160,7 @@ size_t dynd::make_builtin_dtype_elwise_property_getter_kernel(
 }
 
 size_t dynd::make_builtin_dtype_elwise_property_setter_kernel(
-                assignment_kernel *DYND_UNUSED(out), size_t DYND_UNUSED(offset_out),
+                hierarchical_kernel *DYND_UNUSED(out), size_t DYND_UNUSED(offset_out),
                 type_id_t builtin_type_id,
                 const char *DYND_UNUSED(dst_metadata), size_t dst_elwise_property_index,
                 const char *DYND_UNUSED(src_metadata),

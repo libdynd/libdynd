@@ -7,6 +7,7 @@
 
 #include <dynd/dtype.hpp>
 #include <dynd/kernels/expression_assignment_kernels.hpp>
+#include <dynd/kernels/expression_comparison_kernels.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -63,8 +64,7 @@ size_t base_expression_dtype::get_iterdata_size(size_t DYND_UNUSED(ndim)) const
 }
 
 size_t base_expression_dtype::make_operand_to_value_assignment_kernel(
-                assignment_kernel *DYND_UNUSED(out),
-                size_t DYND_UNUSED(offset_out),
+                hierarchical_kernel *DYND_UNUSED(out), size_t DYND_UNUSED(offset_out),
                 const char *DYND_UNUSED(dst_metadata), const char *DYND_UNUSED(src_metadata),
                 kernel_request_t DYND_UNUSED(kernreq), const eval::eval_context *DYND_UNUSED(ectx)) const
 {
@@ -74,8 +74,7 @@ size_t base_expression_dtype::make_operand_to_value_assignment_kernel(
 }
 
 size_t base_expression_dtype::make_value_to_operand_assignment_kernel(
-                assignment_kernel *DYND_UNUSED(out),
-                size_t DYND_UNUSED(offset_out),
+                hierarchical_kernel *DYND_UNUSED(out), size_t DYND_UNUSED(offset_out),
                 const char *DYND_UNUSED(dst_metadata), const char *DYND_UNUSED(src_metadata),
                 kernel_request_t DYND_UNUSED(kernreq), const eval::eval_context *DYND_UNUSED(ectx)) const
 {
@@ -85,7 +84,7 @@ size_t base_expression_dtype::make_value_to_operand_assignment_kernel(
 }
 
 size_t base_expression_dtype::make_assignment_kernel(
-                assignment_kernel *out, size_t offset_out,
+                hierarchical_kernel *out, size_t offset_out,
                 const dtype& dst_dt, const char *dst_metadata,
                 const dtype& src_dt, const char *src_metadata,
                 kernel_request_t kernreq, assign_error_mode errmode,
@@ -94,4 +93,17 @@ size_t base_expression_dtype::make_assignment_kernel(
     return make_expression_assignment_kernel(out, offset_out,
                     dst_dt, dst_metadata, src_dt, src_metadata,
                     kernreq, errmode, ectx);
+}
+
+size_t base_expression_dtype::make_comparison_kernel(
+                hierarchical_kernel *out, size_t offset_out,
+                const dtype& src0_dt, const char *src0_metadata,
+                const dtype& src1_dt, const char *src1_metadata,
+                comparison_type_t comptype,
+                const eval::eval_context *ectx) const
+{
+    return make_expression_comparison_kernel(out, offset_out,
+                    src0_dt, src0_metadata,
+                    src1_dt, src1_metadata,
+                    comptype, ectx);
 }

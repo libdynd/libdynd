@@ -55,12 +55,12 @@ public:
     dtype get_elwise_property_dtype(size_t elwise_property_index,
                     bool& out_readable, bool& out_writable) const;
     size_t make_elwise_property_getter_kernel(
-                    assignment_kernel *out, size_t offset_out,
+                    hierarchical_kernel *out, size_t offset_out,
                     const char *dst_metadata,
                     const char *src_metadata, size_t src_elwise_property_index,
                     kernel_request_t kernreq, const eval::eval_context *ectx) const;
     size_t make_elwise_property_setter_kernel(
-                    assignment_kernel *out, size_t offset_out,
+                    hierarchical_kernel *out, size_t offset_out,
                     const char *dst_metadata, size_t dst_elwise_property_index,
                     const char *src_metadata,
                     kernel_request_t kernreq, const eval::eval_context *ectx) const;

@@ -198,8 +198,7 @@ size_t base_dtype::iterdata_destruct(iterdata_common *DYND_UNUSED(iterdata), siz
 }
 
 size_t base_dtype::make_assignment_kernel(
-                assignment_kernel *DYND_UNUSED(out),
-                size_t DYND_UNUSED(offset_out),
+                hierarchical_kernel *DYND_UNUSED(out), size_t DYND_UNUSED(offset_out),
                 const dtype& dst_dt, const char *DYND_UNUSED(dst_metadata),
                 const dtype& src_dt, const char *DYND_UNUSED(src_metadata),
                 kernel_request_t DYND_UNUSED(kernreq), assign_error_mode DYND_UNUSED(errmode),
@@ -216,7 +215,7 @@ size_t base_dtype::make_assignment_kernel(
 }
 
 size_t base_dtype::make_comparison_kernel(
-                comparison_kernel *DYND_UNUSED(out), size_t DYND_UNUSED(offset_out),
+                hierarchical_kernel *DYND_UNUSED(out), size_t DYND_UNUSED(offset_out),
                 const dtype& src0_dt, const char *DYND_UNUSED(src0_metadata),
                 const dtype& src1_dt, const char *DYND_UNUSED(src1_metadata),
                 comparison_type_t DYND_UNUSED(comptype),
@@ -323,8 +322,7 @@ dtype base_dtype::get_elwise_property_dtype(size_t DYND_UNUSED(elwise_property_i
 }
 
 size_t base_dtype::make_elwise_property_getter_kernel(
-                assignment_kernel *DYND_UNUSED(out),
-                size_t DYND_UNUSED(offset_out),
+                hierarchical_kernel *DYND_UNUSED(out), size_t DYND_UNUSED(offset_out),
                 const char *DYND_UNUSED(dst_metadata),
                 const char *DYND_UNUSED(src_metadata),
                 size_t DYND_UNUSED(src_elwise_property_index),
@@ -337,8 +335,7 @@ size_t base_dtype::make_elwise_property_getter_kernel(
 }
 
 size_t base_dtype::make_elwise_property_setter_kernel(
-                assignment_kernel *DYND_UNUSED(out),
-                size_t DYND_UNUSED(offset_out),
+                hierarchical_kernel *DYND_UNUSED(out), size_t DYND_UNUSED(offset_out),
                 const char *DYND_UNUSED(dst_metadata),
                 size_t DYND_UNUSED(dst_elwise_property_index),
                 const char *DYND_UNUSED(src_metadata),

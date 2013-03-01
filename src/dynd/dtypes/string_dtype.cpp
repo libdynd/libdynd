@@ -216,7 +216,7 @@ void string_dtype::metadata_debug_print(const char *metadata, std::ostream& o, c
 }
 
 size_t string_dtype::make_assignment_kernel(
-                assignment_kernel *out, size_t offset_out,
+                hierarchical_kernel *out, size_t offset_out,
                 const dtype& dst_dt, const char *dst_metadata,
                 const dtype& src_dt, const char *src_metadata,
                 kernel_request_t kernreq, assign_error_mode errmode,
@@ -266,7 +266,7 @@ size_t string_dtype::make_assignment_kernel(
 }
 
 size_t string_dtype::make_comparison_kernel(
-                comparison_kernel *out, size_t offset_out,
+                hierarchical_kernel *out, size_t offset_out,
                 const dtype& src0_dt, const char *src0_metadata,
                 const dtype& src1_dt, const char *src1_metadata,
                 comparison_type_t comptype,

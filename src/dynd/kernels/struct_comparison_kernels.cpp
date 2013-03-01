@@ -198,7 +198,7 @@ namespace {
 } // anonymous namespace
 
 size_t dynd::make_struct_comparison_kernel(
-                comparison_kernel *out, size_t offset_out,
+                hierarchical_kernel *out, size_t offset_out,
                 const dtype& src_dt,
                 const char *src0_metadata, const char *src1_metadata,
                 comparison_type_t comptype,
@@ -326,7 +326,7 @@ size_t dynd::make_struct_comparison_kernel(
 }
 
 size_t dynd::make_general_struct_comparison_kernel(
-                comparison_kernel *DYND_UNUSED(out), size_t DYND_UNUSED(offset_out),
+                hierarchical_kernel *DYND_UNUSED(out), size_t DYND_UNUSED(offset_out),
                 const dtype& DYND_UNUSED(src0_dt), const char *DYND_UNUSED(src0_metadata),
                 const dtype& DYND_UNUSED(src1_dt), const char *DYND_UNUSED(src1_metadata),
                 comparison_type_t DYND_UNUSED(comptype),

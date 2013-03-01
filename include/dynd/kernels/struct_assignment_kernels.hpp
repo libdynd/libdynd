@@ -17,7 +17,7 @@ namespace dynd {
  * \param val_struct_dt  The struct-kind dtype of both source and destination values.
  */
 size_t make_struct_identical_assignment_kernel(
-                assignment_kernel *out, size_t offset_out,
+                hierarchical_kernel *out, size_t offset_out,
                 const dtype& val_struct_dt,
                 const char *dst_metadata, const char *src_metadata,
                 kernel_request_t kernreq, assign_error_mode errmode,
@@ -31,7 +31,7 @@ size_t make_struct_identical_assignment_kernel(
  * \param errmode  The error handling mode of the assignment.
  */
 size_t make_struct_assignment_kernel(
-                assignment_kernel *out, size_t offset_out,
+                hierarchical_kernel *out, size_t offset_out,
                 const dtype& dst_struct_dt, const char *dst_metadata,
                 const dtype& src_struct_dt, const char *src_metadata,
                 kernel_request_t kernreq, assign_error_mode errmode,
