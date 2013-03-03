@@ -197,10 +197,10 @@ typedef size_t           uintptr_t;
 #endif
 
 namespace dynd {
-    // These are defined in git_sha1.cpp, generated from
-    // get_sha1.cpp.in by the CMake build configuration.
-    extern const char git_sha1[];
-    extern const char version_string[];
+    // These are defined in git_version.cpp, generated from
+    // git_version.cpp.in by the CMake build configuration.
+    extern const char dynd_git_sha1[];
+    extern const char dynd_version_string[];
 } // namespace dynd
 
 #endif // _DYND__CONFIG_HPP_
