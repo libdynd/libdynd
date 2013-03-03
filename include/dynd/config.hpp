@@ -196,4 +196,11 @@ typedef unsigned __int64 uint64_t;
 typedef size_t           uintptr_t;
 #endif
 
+namespace dynd {
+    // These are defined in git_sha1.cpp, generated from
+    // get_sha1.cpp.in by the CMake build configuration.
+    extern const char git_sha1[];
+    extern const char version_string[];
+} // namespace dynd
+
 #endif // _DYND__CONFIG_HPP_

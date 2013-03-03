@@ -37,24 +37,24 @@ and shape, and the data. Here's how this looks in NumPy:
 In the DyND ndobject's Python exposure, the same data is:
 
     >>> a = nd.ndobject([[1,2,3],[4,5,6]])
-    >>> a.debug_print()
+    >>> print(a.debug_repr())
     ------ ndobject
-     address: 0000000001CAD0F0
+     address: 00000000062090F0
      refcount: 1
      dtype:
-      pointer: 0000000001CAD080
-      type: strided_array<strided_array<int32>>
+      pointer: 0000000006209060
+      type: strided_dim<strided_dim<int32>>
      metadata:
       flags: 3 (read_access write_access )
       dtype-specific metadata:
-       strided_array metadata
+       strided_dim metadata
         stride: 12
         size: 2
-        strided_array metadata
+        strided_dim metadata
          stride: 4
          size: 3
      data:
-       pointer: 0000000001CAD140
+       pointer: 0000000006209140
        reference: 0000000000000000 (embedded in ndobject memory)
     ------
 
@@ -94,45 +94,45 @@ Here's a small example showing the result of a simple
 indexing operation.
 
     >>> a = nd.ndobject([1,2,3])
-    >>> a.debug_print()
+    >>> print(a.debug_repr())
     ------ ndobject
-     address: 0000000002F9E890
+     address: 000000000415C730
      refcount: 1
      dtype:
-      pointer: 0000000002F9D010
-      type: strided_array<int32>
+      pointer: 0000000006209160
+      type: strided_dim<int32>
      metadata:
       flags: 3 (read_access write_access )
       dtype-specific metadata:
-       strided_array metadata
+       strided_dim metadata
         stride: 4
         size: 3
      data:
-       pointer: 0000000002F9E8D0
+       pointer: 000000000415C770
        reference: 0000000000000000 (embedded in ndobject memory)
     ------
 
-    >>> a[1].debug_print()
+    >>> print(a[1].debug_repr())
     ------ ndobject
-     address: 0000000002F98CF0
+     address: 000000000415AA10
      refcount: 1
      dtype:
-      pointer: 0000000000000003
+      pointer: 0000000000000004
       type: int32
      metadata:
       flags: 3 (read_access write_access )
      data:
-       pointer: 0000000002F9E8D4
-       reference: 0000000002F9E890
-        ------ memory_block at 0000000002F9E890
+       pointer: 000000000415C774
+       reference: 000000000415C730
+        ------ memory_block at 000000000415C730
          reference count: 2
          type: ndobject
-         dtype: strided_array<int32>
+         dtype: strided_dim<int32>
         ------
     ------
 
 In the printout of a[1], the first thing to note is the
-dtype pointer, it's just the value 3. This is because
+dtype pointer, it's just the value 4. This is because
 for a small number of builtin dtypes, their dtype representation
 in the ndobject is just a type id.
 
@@ -151,27 +151,27 @@ more interesting, we cause the memory of the array to be unaligned.
     >>> mem = np.zeros(9, dtype='i1')
     >>> a = mem[1:].view(dtype='i4')
     >>> b = nd.ndobject(a)
-    >>> b.debug_print()
+    >>> print(b.debug_repr())
     ------ ndobject
-     address: 0000000002F98D50
+     address: 0000000006208500
      refcount: 1
      dtype:
-      pointer: 0000000002F9D010
-      type: strided_array<unaligned<int32>>
+      pointer: 0000000006208FD0
+      type: strided_dim<unaligned<int32>>
      metadata:
       flags: 3 (read_access write_access )
       dtype-specific metadata:
-       strided_array metadata
+       strided_dim metadata
         stride: 4
         size: 2
      data:
-       pointer: 000000000289C5E1
-       reference: 0000000002F9E3A0
-        ------ memory_block at 0000000002F9E3A0
+       pointer: 0000000003699541
+       reference: 00000000041586B0
+        ------ memory_block at 00000000041586B0
          reference count: 1
          type: external
-         object void pointer: 00000000033AF780
-         free function: 000007FEFB7D1C26
+         object void pointer: 000000000479B450
+         free function: 000007FEEC181988
         ------
     ------
 
@@ -196,25 +196,25 @@ to the beginning and one past the end of the string. For an example, here's
 how a single Python string converts to an ndobject:
 
     >>> a = nd.ndobject("This is a string")
-    >>> a.debug_print()
+    >>> print(a.debug_repr())
     ------ ndobject
-     address: 0000000002F9E890
+     address: 0000000006208550
      refcount: 1
      dtype:
-      pointer: 0000000002F9E400
-      type: string<ascii>
+      pointer: 000000000415AA50
+      type: string<'ascii'>
      metadata:
       flags: 5 (read_access immutable )
       dtype-specific metadata:
        string metadata
-        ------ memory_block at 0000000002F9E420
+        ------ memory_block at 00000000041586D0
          reference count: 1
          type: external
-         object void pointer: 0000000002837768
-         free function: 000007FEFB7D1C26
+         object void pointer: 000000000494F3E8
+         free function: 000007FEEC181988
         ------
      data:
-       pointer: 0000000002F9E8C8
+       pointer: 0000000006208588
        reference: 0000000000000000 (embedded in ndobject memory)
     ------
 
@@ -224,28 +224,27 @@ strings are. For comparison, let's do an array of unicode strings (these
 examples are in Python 2.7).
 
     >>> a = nd.ndobject([u"This", u"is", u"unicode."])
-    >>> a.debug_print()
+    >>> print(a.debug_repr())
     ------ ndobject
-     address: 0000000002F9E8E0
+     address: 00000000062090F0
      refcount: 1
      dtype:
-      pointer: 0000000002F9D080
-      type: strided_array<string<ucs_2>>
+      pointer: 0000000006209060
+      type: strided_dim<string<'ucs-2'>>
      metadata:
       flags: 3 (read_access write_access )
       dtype-specific metadata:
-       strided_array metadata
+       strided_dim metadata
         stride: 16
         size: 3
         string metadata
-         ------ memory_block at 0000000002F9D0F0
+         ------ memory_block at 00000000062085A0
           reference count: 1
           type: pod
           finalized: 28
-          no blockrefs
          ------
      data:
-       pointer: 0000000002F9E928
+       pointer: 0000000006209138
        reference: 0000000000000000 (embedded in ndobject memory)
     ------
 

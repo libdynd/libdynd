@@ -1,0 +1,19 @@
+//
+// Copyright (C) 2011-13, DyND Developers
+// BSD 2-Clause License, see LICENSE.txt
+//
+
+// NOTE: Only modify git_sha1.cpp.in, not the generated git_sha1.cpp.
+
+#include <dynd/config.hpp>
+
+#define DYND_GIT_SHA1 "@DYND_GIT_SHA1@"
+#define DYND_VERSION_STRING "@DYND_VERSION_STRING@"
+
+namespace dynd {
+
+const char git_sha1[] = DYND_GIT_SHA1;
+const char version_string[] = DYND_VERSION_STRING;
+
+} // namespace dynd
+

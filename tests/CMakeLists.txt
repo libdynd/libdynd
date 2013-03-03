@@ -6,8 +6,11 @@
 cmake_minimum_required(VERSION 2.6)
 project(test_dynd)
 
-if(NOT WIN32)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DGTEST_USE_OWN_TR1_TUPLE=1")
+# Disable optimizations so the tests build quicker
+if(WIN32)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Od")
+else()
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DGTEST_USE_OWN_TR1_TUPLE=1 -O0")
 endif()
 
 set(tests_SRC

@@ -6,6 +6,9 @@
 cmake_minimum_required(VERSION 2.6)
 project(dynd)
 
+list(APPEND CMAKE_MODULE_PATH
+    "${CMAKE_CURRENT_SOURCE_DIR}/cmake/")
+
 set(CMAKE_VERBOSE_MAKEFILE 1)
 set(BUILD_SHARED_LIBS 1)
 
@@ -38,6 +41,14 @@ else()
         endif()
     endif()
 endif()
+
+# Get the git revision
+include(GetGitRevisionDescriptionDyND)
+get_git_head_revision("${CMAKE_CURRENT_SOURCE_DIR}" GIT_REFSPEC DYND_GIT_SHA1)
+git_describe("${CMAKE_CURRENT_SOURCE_DIR}" DYND_VERSION_STRING --dirty)
+configure_file(
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/dynd/git_version.cpp.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/src/dynd/git_version.cpp" @ONLY)
 
 set(dynd_SRC
     # CodeGen
@@ -218,6 +229,8 @@ set(dynd_SRC
     src/dynd/dtype_assign.cpp
     src/dynd/dtype_promotion.cpp
     src/dynd/exceptions.cpp
+    src/dynd/git_version.cpp.in # Included here for ease of editing in IDEs
+    ${CMAKE_CURRENT_BINARY_DIR}/src/dynd/git_version.cpp
     src/dynd/json_formatter.cpp
     src/dynd/json_parser.cpp
     src/dynd/ndobject.cpp
