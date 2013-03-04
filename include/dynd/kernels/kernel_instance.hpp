@@ -2,6 +2,7 @@
 // Copyright (C) 2011-13, DyND Developers
 // BSD 2-Clause License, see LICENSE.txt
 //
+// DEPRECATED
 
 #ifndef _DYND__KERNEL_INSTANCE_HPP_
 #define _DYND__KERNEL_INSTANCE_HPP_

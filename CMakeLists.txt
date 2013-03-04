@@ -255,8 +255,6 @@ set(dynd_SRC
     include/dynd/ndobject.hpp
     include/dynd/ndobject_arange.hpp
     include/dynd/ndobject_iter.hpp
-    include/dynd/raw_iteration.hpp
-    include/dynd/scalars.hpp
     include/dynd/shortvector.hpp
     include/dynd/shape_tools.hpp
     include/dynd/string_encodings.hpp
