@@ -30,8 +30,8 @@ fixed_dim_dtype::fixed_dim_dtype(size_t dimension_size, const dtype& element_dty
     }
     m_stride = m_dim_size > 1 ? element_dtype.get_data_size() : 0;
     m_members.data_size = m_stride * (m_dim_size-1) + child_element_size;
-    // Propagate the zeroinit flag from the element
-    m_members.flags |= (element_dtype.get_flags()&dtype_flag_zeroinit);
+    // Propagate the operand flags from the element
+    m_members.flags |= (element_dtype.get_flags()&dtype_flags_operand_inherited);
 
     // Copy ndobject properties and functions from the first non-uniform dimension
     get_nonuniform_ndobject_properties_and_functions(m_ndobject_properties, m_ndobject_functions);

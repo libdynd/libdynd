@@ -18,7 +18,7 @@ using namespace dynd;
 
 string_dtype::string_dtype(string_encoding_t encoding)
     : base_string_dtype(string_type_id, sizeof(string_dtype_data),
-                    sizeof(const char *), dtype_flag_scalar|dtype_flag_zeroinit,
+                    sizeof(const char *), dtype_flag_scalar|dtype_flag_zeroinit|dtype_flag_blockref,
                     sizeof(string_dtype_metadata)),
             m_encoding(encoding)
 {

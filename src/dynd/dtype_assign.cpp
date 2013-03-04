@@ -171,7 +171,7 @@ void dynd::dtype_copy(const dtype& dt,
                 const char *src_metadata, const char *src_data)
 {
     size_t data_size = dt.get_data_size();
-    if (dt.is_builtin() || (dt.get_memory_management() == pod_memory_management && data_size != 0)) {
+    if (dt.is_pod()) {
         memcpy(dst_data, src_data, data_size);
     } else {
         assignment_kernel k;

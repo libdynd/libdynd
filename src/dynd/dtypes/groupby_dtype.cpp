@@ -43,6 +43,7 @@ groupby_dtype::groupby_dtype(const dtype& data_values_dtype,
     const categorical_dtype *cd = static_cast<const categorical_dtype *>(m_groups_dtype.extended());
     m_value_dtype = make_fixed_dim_dtype(cd->get_category_count(),
                     make_var_dim_dtype(data_values_dtype.at_single(0)));
+    m_members.flags = inherited_flags(m_value_dtype.get_flags(), m_operand_dtype.get_flags());
 }
 
 groupby_dtype::~groupby_dtype()

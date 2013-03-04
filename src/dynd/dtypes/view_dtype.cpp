@@ -14,7 +14,7 @@ using namespace dynd;
 dynd::view_dtype::view_dtype(const dtype& value_dtype, const dtype& operand_dtype)
     : base_expression_dtype(view_type_id, expression_kind, operand_dtype.get_data_size(),
                     operand_dtype.get_alignment(),
-                    (value_dtype.get_flags()&dtype_flag_scalar)|(operand_dtype.get_flags()&dtype_flag_zeroinit),
+                    inherited_flags(value_dtype.get_flags(), operand_dtype.get_flags()),
                     operand_dtype.get_metadata_size()),
             m_value_dtype(value_dtype), m_operand_dtype(operand_dtype)
 {
@@ -23,7 +23,7 @@ dynd::view_dtype::view_dtype(const dtype& value_dtype, const dtype& operand_dtyp
         ss << "view_dtype: Cannot view " << operand_dtype.value_dtype() << " as " << value_dtype << " because they have different sizes";
         throw std::runtime_error(ss.str());
     }
-    if (value_dtype.get_memory_management() != pod_memory_management) {
+    if (!value_dtype.is_pod()) {
         throw std::runtime_error("view_dtype: Only POD dtypes are supported");
     }
 }

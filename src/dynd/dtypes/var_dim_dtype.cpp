@@ -22,7 +22,7 @@ using namespace dynd;
 var_dim_dtype::var_dim_dtype(const dtype& element_dtype)
     : base_uniform_dim_dtype(var_dim_type_id, element_dtype, sizeof(var_dim_dtype_data),
                     sizeof(const char *), sizeof(var_dim_dtype_metadata),
-                    dtype_flag_zeroinit)
+                    dtype_flag_zeroinit|dtype_flag_blockref)
 {
     // Copy ndobject properties and functions from the first non-uniform dimension
     get_nonuniform_ndobject_properties_and_functions(m_ndobject_properties, m_ndobject_functions);
@@ -52,11 +52,6 @@ void var_dim_dtype::print_data(std::ostream& o, const char *metadata, const char
 void var_dim_dtype::print_dtype(std::ostream& o) const
 {
     o << "var_dim<" << m_element_dtype << ">";
-}
-
-bool var_dim_dtype::is_uniform_dim() const
-{
-    return true;
 }
 
 bool var_dim_dtype::is_expression() const

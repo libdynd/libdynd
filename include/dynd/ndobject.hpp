@@ -591,8 +591,8 @@ ndobject make_strided_ndobject_from_data(const dtype& uniform_dtype, size_t ndim
                 const intptr_t *strides, int64_t access_flags, char *data_ptr,
                 const memory_block_ptr& data_reference, char **out_uniform_metadata = NULL);
 
-/** Makes a scalar ndobject with data initialized by the provided pointer */
-ndobject make_scalar_ndobject(const dtype& scalar_dtype, const void *data);
+/** Makes a POD (plain old data) ndobject with data initialized by the provided pointer */
+ndobject make_pod_ndobject(const dtype& pod_dt, const void *data);
 
 ndobject make_string_ndobject(const char *str, size_t len, string_encoding_t encoding);
 inline ndobject make_ascii_ndobject(const char *str, size_t len) {

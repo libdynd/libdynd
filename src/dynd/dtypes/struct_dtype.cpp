@@ -26,20 +26,14 @@ struct_dtype::struct_dtype(const std::vector<dtype>& field_types, const std::vec
     // Calculate the needed element alignment
     size_t metadata_offset = field_types.size() * sizeof(size_t);
     m_members.alignment = 1;
-    m_memory_management = pod_memory_management;
     for (size_t i = 0, i_end = field_types.size(); i != i_end; ++i) {
         size_t field_alignment = field_types[i].get_alignment();
         // Accumulate the biggest field alignment as the dtype alignment
         if (field_alignment > m_members.alignment) {
             m_members.alignment = (uint8_t)field_alignment;
         }
-        // Accumulate the correct memory management
-        // TODO: Handle object, and object+blockref memory management types as well
-        if (field_types[i].get_memory_management() == blockref_memory_management) {
-            m_memory_management = blockref_memory_management;
-        }
-        // If any fields require zero-initialization, flag the struct as requiring it
-        m_members.flags |= (field_types[i].get_flags()&dtype_flag_zeroinit);
+        // Inherit any operand flags from the fields
+        m_members.flags |= (field_types[i].get_flags()&dtype_flags_operand_inherited);
         // Calculate the metadata offsets
         m_metadata_offsets[i] = metadata_offset;
         metadata_offset += m_field_types[i].is_builtin() ? 0 : m_field_types[i].extended()->get_metadata_size();
@@ -360,7 +354,6 @@ bool struct_dtype::operator==(const base_dtype& rhs) const
     } else {
         const struct_dtype *dt = static_cast<const struct_dtype*>(&rhs);
         return get_alignment() == dt->get_alignment() &&
-                get_memory_management() == dt->get_memory_management() &&
                 m_field_types == dt->m_field_types;
     }
 }

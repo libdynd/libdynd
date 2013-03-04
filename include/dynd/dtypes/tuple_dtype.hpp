@@ -16,7 +16,6 @@ class tuple_dtype : public base_dtype {
     std::vector<dtype> m_fields;
     std::vector<size_t> m_offsets;
     std::vector<size_t> m_metadata_offsets;
-    dtype_memory_management_t m_memory_management;
     bool m_is_standard_layout;
 
     bool compute_is_standard_layout() const;
@@ -46,12 +45,6 @@ public:
     void print_data(std::ostream& o, const char *metadata, const char *data) const;
 
     void print_dtype(std::ostream& o) const;
-
-    // This is about the native storage, buffering code needs to check whether
-    // the value_dtype is an object type separately.
-    dtype_memory_management_t get_memory_management() const {
-        return m_memory_management;
-    }
 
     void get_shape(size_t i, intptr_t *out_shape) const;
 

@@ -45,10 +45,6 @@ public:
 
     void print_dtype(std::ostream& o) const;
 
-    dtype_memory_management_t get_memory_management() const {
-        return pod_memory_management;
-    }
-
     void get_shape(size_t i, intptr_t *out_shape) const;
 
     intptr_t get_category_count() const {

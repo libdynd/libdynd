@@ -27,20 +27,14 @@ fixedstruct_dtype::fixedstruct_dtype(size_t field_count, const dtype *field_type
     // Calculate all the resulting struct data
     size_t metadata_offset = 0, data_offset = 0;
     m_members.alignment = 1;
-    m_memory_management = pod_memory_management;
     for (size_t i = 0; i != field_count; ++i) {
         size_t field_alignment = field_types[i].get_alignment();
         // Accumulate the biggest field alignment as the dtype alignment
         if (field_alignment > m_members.alignment) {
             m_members.alignment = (uint8_t)field_alignment;
         }
-        // Accumulate the correct memory management
-        // TODO: Handle object, and object+blockref memory management types as well
-        if (field_types[i].get_memory_management() == blockref_memory_management) {
-            m_memory_management = blockref_memory_management;
-        }
-        // If any fields require zero-initialization, flag the struct as requiring it
-        m_members.flags |= (field_types[i].get_flags()&dtype_flag_zeroinit);
+        // Inherit any operand flags from the fields
+        m_members.flags |= (field_types[i].get_flags()&dtype_flags_operand_inherited);
         // Calculate the data offsets
         data_offset = inc_to_alignment(data_offset, field_types[i].get_alignment());
         m_data_offsets[i] = data_offset;
@@ -423,7 +417,6 @@ bool fixedstruct_dtype::operator==(const base_dtype& rhs) const
     } else {
         const fixedstruct_dtype *dt = static_cast<const fixedstruct_dtype*>(&rhs);
         return get_alignment() == dt->get_alignment() &&
-                get_memory_management() == dt->get_memory_management() &&
                 m_field_types == dt->m_field_types;
     }
 }
@@ -571,13 +564,8 @@ fixedstruct_dtype::fixedstruct_dtype(int, int)
     m_field_names.push_back("self");
     m_data_offsets.push_back(0);
     m_metadata_offsets.push_back(0);
-    m_memory_management = pod_memory_management;
-    // TODO: Handle object, and object+blockref memory management types as well
-    if (m_field_types[0].get_memory_management() == blockref_memory_management) {
-        m_memory_management = blockref_memory_management;
-    }
-    // If any fields require zero-initialization, flag the struct as requiring it
-    m_members.flags |= (m_field_types[0].get_flags()&dtype_flag_zeroinit);
+    // Inherit any operand flags from the fields
+    m_members.flags |= (m_field_types[0].get_flags()&dtype_flags_operand_inherited);
     m_members.alignment = (uint8_t)m_field_types[0].get_alignment();
     m_members.metadata_size = m_field_types[0].get_metadata_size();
     m_members.data_size = m_field_types[0].get_data_size();

@@ -33,12 +33,6 @@ public:
 
     void print_dtype(std::ostream& o) const;
 
-    // This is about the native storage, buffering code needs to check whether
-    // the value_dtype is an object type separately.
-    dtype_memory_management_t get_memory_management() const {
-        return blockref_memory_management;
-    }
-
     bool is_unique_data_owner(const char *metadata) const;
     dtype get_canonical_dtype() const;
 

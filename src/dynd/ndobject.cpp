@@ -169,29 +169,31 @@ ndobject dynd::make_strided_ndobject_from_data(const dtype& uniform_dtype, size_
     return ndobject(result);
 }
 
-ndobject dynd::make_scalar_ndobject(const dtype& scalar_dtype, const void *data)
+ndobject dynd::make_pod_ndobject(const dtype& pod_dt, const void *data)
 {
-    size_t size = scalar_dtype.get_data_size();
-    if (!scalar_dtype.is_builtin() && (size == 0 ||
-                scalar_dtype.get_memory_management() != pod_memory_management ||
-                scalar_dtype.extended()->get_kind() == uniform_dim_kind ||
-                scalar_dtype.extended()->get_metadata_size() != 0)) {
+    size_t size = pod_dt.get_data_size();
+    if (!pod_dt.is_pod()) {
         stringstream ss;
-        ss << "Cannot make a dynd scalar from raw data using dtype " << scalar_dtype;
+        ss << "Cannot make a dynd ndobject from raw data using non-POD dtype " << pod_dt;
+        throw runtime_error(ss.str());
+    } else if (pod_dt.extended()->get_metadata_size() != 0) {
+        stringstream ss;
+        ss << "Cannot make a dynd ndobject from raw data using dtype " << pod_dt;
+        ss << " because it has non-empty dynd metadata";
         throw runtime_error(ss.str());
     }
 
     // Allocate the ndobject metadata and data in one memory block
     char *data_ptr = NULL;
-    memory_block_ptr result = make_ndobject_memory_block(0, size, scalar_dtype.get_alignment(), &data_ptr);
+    memory_block_ptr result = make_ndobject_memory_block(0, size, pod_dt.get_alignment(), &data_ptr);
 
     // Fill in the preamble metadata
     ndobject_preamble *ndo = reinterpret_cast<ndobject_preamble *>(result.get());
-    if (!scalar_dtype.is_builtin()) {
-        ndo->m_dtype = scalar_dtype.extended();
-        base_dtype_incref(ndo->m_dtype);
+    if (pod_dt.is_builtin()) {
+        ndo->m_dtype = reinterpret_cast<const base_dtype *>(pod_dt.get_type_id());
     } else {
-        ndo->m_dtype = reinterpret_cast<const base_dtype *>(scalar_dtype.get_type_id());
+        ndo->m_dtype = pod_dt.extended();
+        base_dtype_incref(ndo->m_dtype);
     }
     ndo->m_data_pointer = data_ptr;
     ndo->m_data_reference = NULL;
@@ -416,12 +418,17 @@ namespace {
         // the same so that the metadata layout is identical.
         if (dt.is_scalar() && dt.get_type_id() != pointer_type_id) {
             const dtype& storage_dt = dt.storage_dtype();
-            if (storage_dt.is_builtin() || (storage_dt.get_memory_management() == pod_memory_management &&
-                                    storage_dt.extended()->get_metadata_size() == 0)) {
-                out_transformed_dtype = make_fixedbytes_dtype(storage_dt.get_data_size(), storage_dt.get_alignment());
+            if (storage_dt.is_builtin()) {
+                out_transformed_dtype = make_fixedbytes_dtype(storage_dt.get_data_size(),
+                                storage_dt.get_alignment());
+                out_was_transformed = true;
+            } else if (storage_dt.is_pod() && storage_dt.extended()->get_metadata_size() == 0) {
+                out_transformed_dtype = make_fixedbytes_dtype(storage_dt.get_data_size(),
+                                storage_dt.get_alignment());
                 out_was_transformed = true;
             } else if (storage_dt.get_type_id() == string_type_id) {
-                out_transformed_dtype = make_bytes_dtype(static_cast<const string_dtype *>(storage_dt.extended())->get_data_alignment());
+                out_transformed_dtype = make_bytes_dtype(static_cast<const string_dtype *>(
+                                storage_dt.extended())->get_data_alignment());
                 out_was_transformed = true;
             } else {
                 if (dt.get_kind() == expression_kind) {
@@ -895,8 +902,7 @@ namespace {
             const dtype *e = reinterpret_cast<const dtype *>(extra);
             // If things aren't simple, use a view_dtype
             if (dt.get_kind() == expression_kind || dt.get_data_size() != e->get_data_size() ||
-                        dt.get_memory_management() != pod_memory_management ||
-                        e->get_memory_management() != pod_memory_management) {
+                        !dt.is_pod() || !e->is_pod()) {
                 // Some special cases that have the same memory layouts
                 switch (dt.get_type_id()) {
                     case string_type_id:
@@ -944,11 +950,10 @@ ndobject ndobject::view_scalars(const dtype& scalar_dtype) const
     if (uniform_ndim == 1 && array_dtype.get_type_id() == strided_dim_type_id) {
         const strided_dim_dtype *sad = static_cast<const strided_dim_dtype *>(array_dtype.extended());
         const strided_dim_dtype_metadata *md = reinterpret_cast<const strided_dim_dtype_metadata *>(get_ndo_meta());
-        size_t element_size = sad->get_element_dtype().get_data_size();
-        if (element_size != 0 && (intptr_t)element_size == md->stride &&
-                    sad->get_element_dtype().get_kind() != expression_kind &&
-                    sad->get_element_dtype().get_memory_management() == pod_memory_management) {
-            intptr_t nbytes = md->size * element_size;
+        const dtype& edt = sad->get_element_dtype();
+        if (edt.is_pod() && (intptr_t)edt.get_data_size() == md->stride &&
+                    sad->get_element_dtype().get_kind() != expression_kind) {
+            intptr_t nbytes = md->size * edt.get_data_size();
             // Make sure the element size divides into the # of bytes
             if (nbytes % scalar_dtype.get_data_size() != 0) {
                 std::stringstream ss;

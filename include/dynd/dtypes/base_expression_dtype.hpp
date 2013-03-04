@@ -34,6 +34,17 @@ public:
     virtual const dtype& get_operand_dtype() const = 0;
 
     /**
+     * Returns a flags value which inherits the appropriate flags from
+     * the value and operand dtypes.
+     */
+    static inline flags_type inherited_flags(flags_type value_flags,
+                    flags_type operand_flags)
+    {
+        return (value_flags&dtype_flags_value_inherited)|
+                        (operand_flags&dtype_flags_operand_inherited);
+    }
+
+    /**
      * This method is for expression dtypes, and is a way to substitute
      * the storage dtype (deepest operand dtype) of an existing dtype.
      *

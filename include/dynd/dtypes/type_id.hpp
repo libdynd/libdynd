@@ -125,7 +125,26 @@ enum dtype_flags_t {
     // The dtype should be considered as a scalar
     dtype_flag_scalar = 0x00000001,
     // Memory of this dtype should be zero-initialized
-    dtype_flag_zeroinit = 0x00000002
+    dtype_flag_zeroinit = 0x00000002,
+    // Instances of this dtype point into other memory
+    // blocks, e.g. string_dtype, var_dim_dtype.
+    dtype_flag_blockref = 0x00000004,
+    // Memory of this type must be destroyed,
+    // e.g. it might hold a reference count or similar state
+    dtype_flag_destructor = 0x00000008
+};
+
+enum {
+    // These are the flags expression dtypes should inherit
+    // from their operand type
+    dtype_flags_operand_inherited =
+                    dtype_flag_zeroinit|
+                    dtype_flag_blockref|
+                    dtype_flag_destructor,
+    // These are the flags expression dtypes should inherit
+    // from their value type
+    dtype_flags_value_inherited =
+                    dtype_flag_scalar
 };
 
 enum kernel_request_t {

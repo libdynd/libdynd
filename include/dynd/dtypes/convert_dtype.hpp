@@ -39,12 +39,6 @@ public:
 
     void print_dtype(std::ostream& o) const;
 
-    // This is about the native storage, buffering code needs to check whether
-    // the value_dtype is an object type separately.
-    dtype_memory_management_t get_memory_management() const {
-        return m_operand_dtype.get_memory_management();
-    }
-
     void get_shape(size_t i, intptr_t *out_shape) const;
 
     bool is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const;

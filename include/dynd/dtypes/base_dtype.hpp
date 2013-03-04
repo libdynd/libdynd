@@ -29,15 +29,6 @@ class dtype;
 class base_dtype;
 class assignment_kernel;
 
-enum dtype_memory_management_t {
-    /** The dtype's memory is POD (plain old data) */
-    pod_memory_management,
-    /** The dtype contains pointers into another memory_block */
-    blockref_memory_management,
-    /** The dtype requires full object lifetime management (construct/copy/move/destroy) */
-    object_memory_management
-};
-
 struct iterdata_common;
 
 /** This is the callback function type used by the base_dtype::foreach function */
@@ -175,9 +166,6 @@ public:
      * \param o  The std::ostream to print to.
      */
     virtual void print_dtype(std::ostream& o) const = 0;
-
-    /** Returns what kind of memory management the dtype uses, e.g. construct/copy/move/destruct semantics */
-    virtual dtype_memory_management_t get_memory_management() const = 0;
 
     /**
      * Returns true if the dtype is a scalar.

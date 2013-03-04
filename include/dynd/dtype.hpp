@@ -397,20 +397,26 @@ public:
         }
     }
 
-    inline dtype_memory_management_t get_memory_management() const {
-        if (is_builtin()) {
-            return pod_memory_management;
-        } else {
-            return m_extended->get_memory_management();
-        }
-    }
-
     /**
      * Returns true if the data layout (both data and metadata)
      * is compatible with that of 'rhs'. If this returns true,
      * the dtypes can be substituted for each other in an ndobject.
      */
     bool data_layout_compatible_with(const dtype& rhs) const;
+
+    /**
+     * Returns true if the dtype represents a chunk of
+     * consecutive memory of raw data.
+     */
+    inline bool is_pod() const {
+        if (is_builtin()) {
+            return true;
+        } else {
+            return m_extended->get_data_size() > 0 &&
+                            (m_extended->get_flags() & (dtype_flag_blockref|
+                                            dtype_flag_destructor)) == 0;
+        }
+    }
 
     inline bool is_scalar() const {
         if (is_builtin()) {

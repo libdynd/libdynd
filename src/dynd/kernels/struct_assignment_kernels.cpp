@@ -80,9 +80,8 @@ size_t dynd::make_struct_identical_assignment_kernel(
         ss << "make_struct_identical_assignment_kernel: provided dtype " << val_struct_dt << " is not of struct kind";
         throw runtime_error(ss.str());
     }
-    if (val_struct_dt.get_type_id() == fixedstruct_type_id &&
-                    val_struct_dt.get_memory_management() == pod_memory_management) {
-        // For POD fixedstructs, get a trivial memory copy kernel
+    if (val_struct_dt.is_pod()) {
+        // For POD structs, get a trivial memory copy kernel
         return make_pod_dtype_assignment_kernel(out, offset_out,
                         val_struct_dt.get_data_size(), val_struct_dt.get_alignment(),
                         kernreq);

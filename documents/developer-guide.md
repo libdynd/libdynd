@@ -146,3 +146,5 @@ and flagging the ndobject as immutable.
 
 ### GFunc Source
 
+GFuncs in DyND provide a mechanism for dynamic function calls, using
+DyND ndobjects as the parameter passing mechanism.

@@ -11,32 +11,28 @@
 using namespace std;
 using namespace dynd;
 
-dynd::tuple_dtype::tuple_dtype(const std::vector<dtype>& fields)
+dynd::tuple_dtype::tuple_dtype(const std::vector<dtype>& field_types)
     : base_dtype(tuple_type_id, struct_kind, 0, 1, dtype_flag_none, 0, 0),
-            m_fields(fields), m_offsets(fields.size()), m_metadata_offsets(fields.size())
+            m_fields(field_types), m_offsets(field_types.size()), m_metadata_offsets(field_types.size())
 {
     // TODO: tuple_dtype should probably not have kind struct_kind?
     // Calculate the offsets and element size
     size_t metadata_offset = 0;
     size_t offset = 0;
     m_members.alignment = 1;
-    m_memory_management = pod_memory_management;
-    for (size_t i = 0, i_end = fields.size(); i != i_end; ++i) {
-        size_t field_alignment = fields[i].get_alignment();
+    for (size_t i = 0, i_end = field_types.size(); i != i_end; ++i) {
+        size_t field_alignment = field_types[i].get_alignment();
         // Accumulate the biggest field alignment as the dtype alignment
         if (field_alignment > m_members.alignment) {
             m_members.alignment = (uint8_t)field_alignment;
         }
+        // Inherit any operand flags from the fields
+        m_members.flags |= (field_types[i].get_flags()&dtype_flags_operand_inherited);
         // Add padding bytes as necessary
         offset = inc_to_alignment(offset, field_alignment);
         // Save the offset
         m_offsets[i] = offset;
-        offset += fields[i].get_data_size();
-        // Accumulate the correct memory management
-        // TODO: Handle object, and object+blockref memory management types as well
-        if (fields[i].get_memory_management() == blockref_memory_management) {
-            m_memory_management = blockref_memory_management;
-        }
+        offset += field_types[i].get_data_size();
         // Calculate the metadata offsets
         m_metadata_offsets[i] = metadata_offset;
         metadata_offset += m_fields[i].is_builtin() ? 0 : m_fields[i].extended()->get_metadata_size();
@@ -52,10 +48,10 @@ tuple_dtype::~tuple_dtype()
 {
 }
 
-dynd::tuple_dtype::tuple_dtype(const std::vector<dtype>& fields, const std::vector<size_t> offsets,
+dynd::tuple_dtype::tuple_dtype(const std::vector<dtype>& field_types, const std::vector<size_t> offsets,
                     size_t data_size, size_t alignment)
     : base_dtype(tuple_type_id, struct_kind, data_size, alignment, dtype_flag_none, 0, 0),
-            m_fields(fields), m_offsets(offsets), m_metadata_offsets(fields.size())
+            m_fields(field_types), m_offsets(offsets), m_metadata_offsets(field_types.size())
 {
     if (!offset_is_aligned(data_size, alignment)) {
         stringstream ss;
@@ -65,30 +61,24 @@ dynd::tuple_dtype::tuple_dtype(const std::vector<dtype>& fields, const std::vect
     }
 
     size_t metadata_offset = 0;
-    m_memory_management = pod_memory_management;
-    for (size_t i = 0, i_end = fields.size(); i != i_end; ++i) {
+    for (size_t i = 0, i_end = field_types.size(); i != i_end; ++i) {
         // Check that the field is within bounds
-        if (offsets[i] + fields[i].get_data_size() > data_size) {
+        if (offsets[i] + field_types[i].get_data_size() > data_size) {
             stringstream ss;
-            ss << "tuple type cannot be created with field " << i << " of type " << fields[i];
+            ss << "tuple type cannot be created with field " << i << " of type " << field_types[i];
             ss << " at offset " << offsets[i] << ", not fitting within the total element size of " << data_size;
             throw runtime_error(ss.str());
         }
         // Check that the field has proper alignment
-        if (((m_members.alignment | offsets[i]) & (fields[i].get_alignment() - 1)) != 0) {
+        if (((m_members.alignment | offsets[i]) & (field_types[i].get_alignment() - 1)) != 0) {
             stringstream ss;
-            ss << "tuple type cannot be created with field " << i << " of type " << fields[i];
+            ss << "tuple type cannot be created with field " << i << " of type " << field_types[i];
             ss << " at offset " << offsets[i] << " and tuple alignment " << m_members.alignment;
             ss << " because the field is not properly aligned";
             throw runtime_error(ss.str());
         }
-        // Accumulate the correct memory management
-        // TODO: Handle object, and object+blockref memory management types as well
-        //       In particular, object/blockref dtypes should not overlap with each other so
-        //       need more code to test for that.
-        if (fields[i].get_memory_management() == blockref_memory_management) {
-            m_memory_management = blockref_memory_management;
-        }
+        // Inherit any operand flags from the fields
+        m_members.flags |= (field_types[i].get_flags()&dtype_flags_operand_inherited);
         // Calculate the metadata offsets
         m_metadata_offsets[i] = metadata_offset;
         metadata_offset += m_fields[i].is_builtin() ? 0 : m_fields[i].extended()->get_metadata_size();
@@ -213,7 +203,6 @@ bool dynd::tuple_dtype::operator==(const base_dtype& rhs) const
         const tuple_dtype *dt = static_cast<const tuple_dtype*>(&rhs);
         return get_data_size() == dt->get_data_size() &&
                 get_alignment() == dt->get_alignment() &&
-                get_memory_management() == dt->get_memory_management() &&
                 m_fields == dt->m_fields &&
                 m_offsets == dt->m_offsets;
     }

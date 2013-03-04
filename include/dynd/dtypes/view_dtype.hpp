@@ -29,12 +29,6 @@ public:
     void print_data(std::ostream& o, const char *metadata, const char *data) const;
 
     void print_dtype(std::ostream& o) const;
-
-    // Only support views of POD data for now (TODO: support blockref)
-    dtype_memory_management_t get_memory_management() const {
-        return pod_memory_management;
-    }
-
     void get_shape(size_t i, intptr_t *out_shape) const;
 
     bool is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const;

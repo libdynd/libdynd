@@ -15,7 +15,7 @@ using namespace dynd;
 property_dtype::property_dtype(const dtype& operand_dtype, const std::string& property_name,
                 size_t property_index)
     : base_expression_dtype(property_type_id, expression_kind,
-                    operand_dtype.get_data_size(), operand_dtype.get_alignment(), dtype_flag_scalar,
+                    operand_dtype.get_data_size(), operand_dtype.get_alignment(), dtype_flag_none,
                     operand_dtype.get_metadata_size()),
             m_value_dtype(), m_operand_dtype(operand_dtype),
             m_readable(false), m_writable(false),
@@ -40,12 +40,13 @@ property_dtype::property_dtype(const dtype& operand_dtype, const std::string& pr
                         operand_dtype.value_dtype().get_type_id(),
                         m_property_index, m_readable, m_writable);
     }
+    m_members.flags = inherited_flags(m_value_dtype.get_flags(), m_operand_dtype.get_flags());
 }
 
 property_dtype::property_dtype(const dtype& value_dtype, const dtype& operand_dtype,
                 const std::string& property_name, size_t property_index)
     : base_expression_dtype(property_type_id, expression_kind,
-                    operand_dtype.get_data_size(), operand_dtype.get_alignment(), dtype_flag_scalar,
+                    operand_dtype.get_data_size(), operand_dtype.get_alignment(), dtype_flag_none,
                     operand_dtype.get_metadata_size()),
             m_value_dtype(value_dtype), m_operand_dtype(operand_dtype),
             m_readable(false), m_writable(false),
@@ -82,6 +83,7 @@ property_dtype::property_dtype(const dtype& value_dtype, const dtype& operand_dt
     if (m_operand_dtype.value_dtype() != property_dtype) {
         m_operand_dtype = make_convert_dtype(property_dtype, m_operand_dtype);
     }
+    m_members.flags = inherited_flags(m_value_dtype.get_flags(), m_operand_dtype.get_flags());
 }
 
 property_dtype::~property_dtype()

@@ -18,8 +18,8 @@ strided_dim_dtype::strided_dim_dtype(const dtype& element_dtype)
     : base_uniform_dim_dtype(strided_dim_type_id, element_dtype, 0, element_dtype.get_alignment(),
                     sizeof(strided_dim_dtype_metadata), dtype_flag_none)
 {
-    // Propagate the zeroinit flag from the element
-    m_members.flags |= (element_dtype.get_flags()&dtype_flag_zeroinit);
+    // Propagate the operand flags from the element
+    m_members.flags |= (element_dtype.get_flags()&dtype_flags_operand_inherited);
     // Copy ndobject properties and functions from the first non-uniform dimension
     get_nonuniform_ndobject_properties_and_functions(m_ndobject_properties, m_ndobject_functions);
 }

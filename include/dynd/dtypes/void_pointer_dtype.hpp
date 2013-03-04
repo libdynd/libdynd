@@ -20,19 +20,13 @@ class void_pointer_dtype : public base_dtype {
 public:
     void_pointer_dtype()
         : base_dtype(void_pointer_type_id, void_kind, sizeof(void *),
-                        sizeof(void *), dtype_flag_scalar|dtype_flag_zeroinit,
+                        sizeof(void *), dtype_flag_scalar|dtype_flag_zeroinit|dtype_flag_blockref,
                         0, 0)
     {}
 
     void print_data(std::ostream& o, const char *metadata, const char *data) const;
 
     void print_dtype(std::ostream& o) const;
-
-    // This is about the native storage, buffering code needs to check whether
-    // the value_dtype is an object type separately.
-    dtype_memory_management_t get_memory_management() const {
-        return blockref_memory_management;
-    }
 
     void get_shape(size_t i, intptr_t *out_shape) const;
     void get_shape(size_t i, intptr_t *out_shape, const char *metadata) const;

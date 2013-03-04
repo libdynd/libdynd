@@ -45,10 +45,6 @@ public:
 
     void print_dtype(std::ostream& o) const;
 
-    dtype_memory_management_t get_memory_management() const {
-        return m_operand_dtype.get_memory_management();
-    }
-
     dtype apply_linear_index(size_t nindices, const irange *indices,
                 size_t current_i, const dtype& root_dt, bool leading_dimension) const;
     intptr_t apply_linear_index(size_t nindices, const irange *indices, const char *metadata,

@@ -246,9 +246,7 @@ bool dtype::data_layout_compatible_with(const dtype& rhs) const
         // The size of the data and metadata must be the same
         return false;
     }
-    if (get_metadata_size() == 0 &&
-                get_memory_management() == pod_memory_management &&
-                rhs.get_memory_management() == pod_memory_management) {
+    if (get_metadata_size() == 0 && is_pod() && rhs.is_pod()) {
         // If both are POD with no metadata, then they're compatible
         return true;
     }

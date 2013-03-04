@@ -20,7 +20,8 @@ dtype pointer_dtype::m_void_pointer_dtype(new void_pointer_dtype(), false);
 
 pointer_dtype::pointer_dtype(const dtype& target_dtype)
     : base_expression_dtype(pointer_type_id, expression_kind, sizeof(void *),
-                    sizeof(void *), dtype_flag_scalar|dtype_flag_zeroinit,
+                    sizeof(void *),
+                    inherited_flags(target_dtype.get_flags(), dtype_flag_zeroinit|dtype_flag_blockref),
                     sizeof(pointer_dtype_metadata) + target_dtype.get_metadata_size(),
                     target_dtype.get_undim()),
                     m_target_dtype(target_dtype)

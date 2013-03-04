@@ -24,7 +24,8 @@ TEST(TupleDType, CreateOneField) {
     EXPECT_EQ(tuple_type_id, dt.get_type_id());
     EXPECT_EQ(4u, dt.get_data_size());
     EXPECT_EQ(4u, dt.get_alignment());
-    EXPECT_EQ(pod_memory_management, dt.get_memory_management());
+    EXPECT_TRUE(dt.is_pod());
+    EXPECT_EQ(0u, (dt.get_flags()&(dtype_flag_blockref|dtype_flag_destructor)));
     tdt = static_cast<const tuple_dtype *>(dt.extended());
     EXPECT_TRUE(tdt->is_standard_layout());
     EXPECT_EQ(1u, tdt->get_fields().size());
@@ -43,7 +44,8 @@ TEST(TupleDType, CreateTwoField) {
     EXPECT_EQ(tuple_type_id, dt.get_type_id());
     EXPECT_EQ(16u, dt.get_data_size());
     EXPECT_EQ(8u, dt.get_alignment());
-    EXPECT_EQ(pod_memory_management, dt.get_memory_management());
+    EXPECT_TRUE(dt.is_pod());
+    EXPECT_EQ(0u, (dt.get_flags()&(dtype_flag_blockref|dtype_flag_destructor)));
     tdt = static_cast<const tuple_dtype *>(dt.extended());
     EXPECT_TRUE(tdt->is_standard_layout());
     EXPECT_EQ(2u, tdt->get_fields().size());
@@ -66,7 +68,8 @@ TEST(TupleDType, CreateThreeField) {
     EXPECT_EQ(tuple_type_id, dt.get_type_id());
     EXPECT_EQ(24u, dt.get_data_size());
     EXPECT_EQ(8u, dt.get_alignment());
-    EXPECT_EQ(pod_memory_management, dt.get_memory_management());
+    EXPECT_TRUE(dt.is_pod());
+    EXPECT_EQ(0u, (dt.get_flags()&(dtype_flag_blockref|dtype_flag_destructor)));
     tdt = static_cast<const tuple_dtype *>(dt.extended());
     EXPECT_TRUE(tdt->is_standard_layout());
     EXPECT_EQ(3u, tdt->get_fields().size());
