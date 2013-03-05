@@ -10,6 +10,7 @@
 #include <dynd/dtypes/pointer_dtype.hpp>
 #include <dynd/memblock/pod_memory_block.hpp>
 #include <dynd/memblock/zeroinit_memory_block.hpp>
+#include <dynd/memblock/objectarray_memory_block.hpp>
 #include <dynd/shape_tools.hpp>
 #include <dynd/exceptions.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
@@ -65,7 +66,8 @@ bool var_dim_dtype::is_unique_data_owner(const char *metadata) const
     if (md->blockref != NULL &&
             (md->blockref->m_use_count != 1 ||
              (md->blockref->m_type != pod_memory_block_type &&
-              md->blockref->m_type != zeroinit_memory_block_type))) {
+              md->blockref->m_type != zeroinit_memory_block_type &&
+              md->blockref->m_type != objectarray_memory_block_type))) {
         return false;
     }
     if (m_element_dtype.is_builtin()) {
@@ -427,19 +429,23 @@ bool var_dim_dtype::operator==(const base_dtype& rhs) const
 void var_dim_dtype::metadata_default_construct(char *metadata, size_t ndim, const intptr_t* shape) const
 {
     size_t element_size = m_element_dtype.is_builtin() ? m_element_dtype.get_data_size()
-                                                     : m_element_dtype.extended()->get_default_data_size(ndim-1, shape+1);
+                    : m_element_dtype.extended()->get_default_data_size(ndim-1, shape+1);
 
     var_dim_dtype_metadata *md = reinterpret_cast<var_dim_dtype_metadata *>(metadata);
     md->stride = element_size;
     md->offset = 0;
-    // Allocate a POD memory block
-    if (m_element_dtype.get_flags()&dtype_flag_zeroinit) {
+    // Allocate a memory block
+    base_dtype::flags_type flags = m_element_dtype.get_flags();
+    if (flags&dtype_flag_destructor) {
+        md->blockref = make_objectarray_memory_block(m_element_dtype, metadata, element_size).release();
+    } else if (flags&dtype_flag_zeroinit) {
         md->blockref = make_zeroinit_memory_block().release();
     } else {
         md->blockref = make_pod_memory_block().release();
     }
     if (!m_element_dtype.is_builtin()) {
-        m_element_dtype.extended()->metadata_default_construct(metadata + sizeof(var_dim_dtype_metadata), ndim ? (ndim-1) : 0, shape+1);
+        m_element_dtype.extended()->metadata_default_construct(
+                        metadata + sizeof(var_dim_dtype_metadata), ndim ? (ndim-1) : 0, shape+1);
     }
 }
 
@@ -475,9 +481,18 @@ void var_dim_dtype::metadata_finalize_buffers(char *metadata) const
     var_dim_dtype_metadata *md = reinterpret_cast<var_dim_dtype_metadata *>(metadata);
     if (md->blockref != NULL) {
         // Finalize the memory block
-        memory_block_pod_allocator_api *allocator = get_memory_block_pod_allocator_api(md->blockref);
-        if (allocator != NULL) {
-            allocator->finalize(md->blockref);
+        if (m_element_dtype.get_flags()&dtype_flag_destructor) {
+            memory_block_objectarray_allocator_api *allocator =
+                            get_memory_block_objectarray_allocator_api(md->blockref);
+            if (allocator != NULL) {
+                allocator->finalize(md->blockref);
+            }
+        } else {
+            memory_block_pod_allocator_api *allocator =
+                            get_memory_block_pod_allocator_api(md->blockref);
+            if (allocator != NULL) {
+                allocator->finalize(md->blockref);
+            }
         }
     }
 }
