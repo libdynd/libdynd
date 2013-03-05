@@ -213,6 +213,7 @@ set(dynd_SRC
     src/dynd/memblock/fixed_size_pod_memory_block.cpp
     src/dynd/memblock/pod_memory_block.cpp
     src/dynd/memblock/ndobject_memory_block.cpp
+    src/dynd/memblock/objectarray_memory_block.cpp
     src/dynd/memblock/zeroinit_memory_block.cpp
     include/dynd/memblock/memory_block.hpp
     include/dynd/memblock/executable_memory_block.hpp
@@ -220,6 +221,7 @@ set(dynd_SRC
     include/dynd/memblock/fixed_size_pod_memory_block.hpp
     include/dynd/memblock/pod_memory_block.hpp
     include/dynd/memblock/ndobject_memory_block.hpp
+    include/dynd/memblock/objectarray_memory_block.hpp
     include/dynd/memblock/zeroinit_memory_block.hpp
     # VM
     src/dynd/vm/elwise_program.cpp

@@ -56,6 +56,10 @@ extern memory_block_pod_allocator_api pod_memory_block_allocator_api;
  * INTERNAL: Static instance of the pod allocator API for the zeroinit memory block.
  */
 extern memory_block_pod_allocator_api zeroinit_memory_block_allocator_api;
+/**
+ * INTERNAL: Static instance of the objectarray allocator API for the objectarray memory block.
+ */
+extern memory_block_objectarray_allocator_api objectarray_memory_block_allocator_api;
 
 }} // namespace dynd::detail
 
@@ -80,7 +84,7 @@ void dynd::detail::memory_block_free(memory_block_data *memblock)
             free_zeroinit_memory_block(memblock);
             return;
         }
-        case object_memory_block_type:
+        case objectarray_memory_block_type:
             throw runtime_error("object_memory_block_type not supported yet");
         case executable_memory_block_type:
             free_executable_memory_block(memblock);
@@ -117,7 +121,7 @@ void dynd::memory_block_debug_print(const memory_block_data *memblock, std::ostr
                 o << indent << " type: zeroinit\n";
                 zeroinit_memory_block_debug_print(memblock, o, indent);
                 break;
-            case object_memory_block_type:
+            case objectarray_memory_block_type:
                 o << indent << " type: object\n";
                 break;
             case executable_memory_block_type:
@@ -146,10 +150,31 @@ memory_block_pod_allocator_api *dynd::get_memory_block_pod_allocator_api(memory_
             return &dynd::detail::pod_memory_block_allocator_api;
         case zeroinit_memory_block_type:
             return &dynd::detail::zeroinit_memory_block_allocator_api;
-        case object_memory_block_type:
-            throw runtime_error("Cannot get a POD allocator API from an object_memory_block");
+        case objectarray_memory_block_type:
+            throw runtime_error("Cannot get a POD allocator API from an objectarray_memory_block");
         case executable_memory_block_type:
             throw runtime_error("Cannot get a POD allocator API from an executable_memory_block");
+        default:
+            throw runtime_error("unknown memory block type");
+    }
+}
+
+memory_block_objectarray_allocator_api *dynd::get_memory_block_objectarray_allocator_api(
+                memory_block_data *memblock)
+{
+    switch (memblock->m_type) {
+        case external_memory_block_type:
+            throw runtime_error("Cannot get an objectarray allocator API from an external_memory_block");
+        case fixed_size_pod_memory_block_type:
+            throw runtime_error("Cannot get an objectarray allocator API from an fixed_size_pod_memory_block");
+        case pod_memory_block_type:
+            throw runtime_error("Cannot get an objectarray allocator API from a pod_memory_block");
+        case zeroinit_memory_block_type:
+            throw runtime_error("Cannot get an objectarray allocator API from a zeroinit_memory_block");
+        case objectarray_memory_block_type:
+            return &dynd::detail::objectarray_memory_block_allocator_api;
+        case executable_memory_block_type:
+            throw runtime_error("Cannot get an objectarray allocator API from an executable_memory_block");
         default:
             throw runtime_error("unknown memory block type");
     }

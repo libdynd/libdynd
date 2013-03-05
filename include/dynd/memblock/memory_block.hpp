@@ -25,10 +25,12 @@ enum memory_block_type_t {
     fixed_size_pod_memory_block_type,
     /** For when the data is POD, and the amount of memory needs to grow */
     pod_memory_block_type,
-    /** For when the data is POD, but requires zero-initialization */
+    /** Like pod_memory_block_type, but with zero-initialization */
     zeroinit_memory_block_type,
-    /** For when the data is object */
-    object_memory_block_type,
+    /**
+     * For when the data is object (requires destruction),
+     * and the amount of memory needs to grow */
+    objectarray_memory_block_type,
     /** For memory used by code generation */
     executable_memory_block_type
 };
@@ -93,10 +95,43 @@ struct memory_block_pod_allocator_api {
 };
 
 /**
+ * This is a struct of function pointers for allocating
+ * object data (of dtypes with a destructor) within a
+ * memory_block that supports it.
+ */
+struct memory_block_objectarray_allocator_api {
+    /**
+     * Allocates the requested amount of memory from the memory_block, returning
+     * a pointer pair.
+     *
+     * Call this once per output variable.
+     */
+    char *(*allocate)(memory_block_data *self, size_t count);
+    /**
+     * Finalizes the memory block so it can no longer be used to allocate more
+     * memory.
+     */
+    void (*finalize)(memory_block_data *self);
+    /**
+     * When a memory block is being used as a temporary buffer, resets it to
+     * a state throwing away existing used memory. This allows the same memory
+     * to be used for variable-sized data to be reused repeatedly in such
+     * a temporary buffer.
+     */
+    void (*reset)(memory_block_data *self);
+};
+
+/**
  * Returns a pointer to a static POD memory allocator API,
  * for the type of the memory block.
  */
 memory_block_pod_allocator_api *get_memory_block_pod_allocator_api(memory_block_data *memblock);
+
+/**
+ * Returns a pointer to a static objectarray memory allocator API,
+ * for the type of the memory block.
+ */
+memory_block_objectarray_allocator_api *get_memory_block_objectarray_allocator_api(memory_block_data *memblock);
 
 
 
