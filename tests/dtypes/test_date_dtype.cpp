@@ -215,7 +215,7 @@ TEST(DateDType, ToStruct) {
 
     // This is the default struct produced
     ds = make_fixedstruct_dtype(make_dtype<int32_t>(), "year", make_dtype<int8_t>(), "month", make_dtype<int8_t>(), "day");
-    b = ndobject(ds);
+    b = empty(ds);
     b.vals() = a;
     EXPECT_EQ(1955, b.at(0).as<int32_t>());
     EXPECT_EQ(3, b.at(1).as<int8_t>());
@@ -223,7 +223,7 @@ TEST(DateDType, ToStruct) {
 
     // This should work too
     ds = make_fixedstruct_dtype(make_dtype<int16_t>(), "month", make_dtype<int16_t>(), "year", make_dtype<float>(), "day");
-    b = ndobject(ds);
+    b = empty(ds);
     b.vals() = a;
     EXPECT_EQ(1955, b.at(1).as<int16_t>());
     EXPECT_EQ(3, b.at(0).as<int16_t>());
@@ -231,7 +231,7 @@ TEST(DateDType, ToStruct) {
 
     // This should work too
     ds = make_struct_dtype(make_dtype<int16_t>(), "month", make_dtype<int16_t>(), "year", make_dtype<float>(), "day");
-    b = ndobject(ds);
+    b = empty(ds);
     b.vals() = a;
     EXPECT_EQ(1955, b.at(1).as<int16_t>());
     EXPECT_EQ(3, b.at(0).as<int16_t>());
@@ -244,11 +244,11 @@ TEST(DateDType, FromStruct) {
 
     // This is the default struct accepted
     ds = make_fixedstruct_dtype(make_dtype<int32_t>(), "year", make_dtype<int8_t>(), "month", make_dtype<int8_t>(), "day");
-    a = ndobject(ds);
+    a = empty(ds);
     a.at(0).vals() = 1955;
     a.at(1).vals() = 3;
     a.at(2).vals() = 13;
-    b = ndobject(d);
+    b = empty(d);
     b.vals() = a;
     EXPECT_EQ(1955, b.p("year").as<int32_t>());
     EXPECT_EQ(3,    b.p("month").as<int32_t>());
@@ -256,11 +256,11 @@ TEST(DateDType, FromStruct) {
 
     // This should work too
     ds = make_fixedstruct_dtype(make_dtype<int16_t>(), "month", make_dtype<int16_t>(), "year", make_dtype<float>(), "day");
-    a = ndobject(ds);
+    a = empty(ds);
     a.p("year").vals() = 1955;
     a.p("month").vals() = 3;
     a.p("day").vals() = 13;
-    b = ndobject(d);
+    b = empty(d);
     b.vals() = a;
     EXPECT_EQ(1955, b.p("year").as<int32_t>());
     EXPECT_EQ(3,    b.p("month").as<int32_t>());
@@ -268,11 +268,11 @@ TEST(DateDType, FromStruct) {
 
     // This should work too
     ds = make_struct_dtype(make_dtype<int16_t>(), "month", make_dtype<int16_t>(), "year", make_dtype<float>(), "day");
-    a = ndobject(ds);
+    a = empty(ds);
     a.p("year").vals() = 1955;
     a.p("month").vals() = 3;
     a.p("day").vals() = 13;
-    b = ndobject(d);
+    b = empty(d);
     b.vals() = a;
     EXPECT_EQ(1955, b.p("year").as<int32_t>());
     EXPECT_EQ(3,    b.p("month").as<int32_t>());

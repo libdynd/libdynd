@@ -87,7 +87,7 @@ inline ndobject callable::call() const
 {
     const fixedstruct_dtype *fsdt = static_cast<const fixedstruct_dtype *>(m_parameters_dtype.extended());
     size_t parameter_count = fsdt->get_field_count();
-    ndobject params(m_parameters_dtype);
+    ndobject params = empty(m_parameters_dtype);
     if (parameter_count != 0) {
         if (m_first_default_parameter <= 0) {
             // Fill the missing parameters with their defaults, if available
@@ -114,7 +114,7 @@ inline ndobject callable::call(const T& p0) const
 {
     const fixedstruct_dtype *fsdt = static_cast<const fixedstruct_dtype *>(m_parameters_dtype.extended());
     size_t parameter_count = fsdt->get_field_count();
-    ndobject params(m_parameters_dtype);
+    ndobject params = empty(m_parameters_dtype);
     if (parameter_count != 1) {
         if (parameter_count > 1 && m_first_default_parameter <= 1) {
             // Fill the missing parameters with their defaults, if available
@@ -145,7 +145,7 @@ inline ndobject callable::call(const T0& p0, const T1& p1) const
 {
     const fixedstruct_dtype *fsdt = static_cast<const fixedstruct_dtype *>(m_parameters_dtype.extended());
     size_t parameter_count = fsdt->get_field_count();
-    ndobject params(m_parameters_dtype);
+    ndobject params = empty(m_parameters_dtype);
     if (fsdt->get_field_count() != 2) {
         if (parameter_count > 2 && m_first_default_parameter <= 2) {
             // Fill the missing parameters with their defaults, if available
@@ -180,7 +180,7 @@ inline ndobject callable::call(const T0& p0, const T1& p1, const T2& p2) const
 {
     const fixedstruct_dtype *fsdt = static_cast<const fixedstruct_dtype *>(m_parameters_dtype.extended());
     size_t parameter_count = fsdt->get_field_count();
-    ndobject params(m_parameters_dtype);
+    ndobject params = empty(m_parameters_dtype);
     if (fsdt->get_field_count() != 3) {
         if (parameter_count > 3 && m_first_default_parameter <= 3) {
             // Fill the missing parameters with their defaults, if available
@@ -219,7 +219,7 @@ inline ndobject callable::call(const T0& p0, const T1& p1, const T2& p2, const T
 {
     const fixedstruct_dtype *fsdt = static_cast<const fixedstruct_dtype *>(m_parameters_dtype.extended());
     size_t parameter_count = fsdt->get_field_count();
-    ndobject params(m_parameters_dtype);
+    ndobject params = empty(m_parameters_dtype);
     if (fsdt->get_field_count() != 4) {
         if (parameter_count > 4 && m_first_default_parameter <= 4) {
             // Fill the missing parameters with their defaults, if available
@@ -262,7 +262,7 @@ inline ndobject callable::call(const T0& p0, const T1& p1, const T2& p2, const T
 {
     const fixedstruct_dtype *fsdt = static_cast<const fixedstruct_dtype *>(m_parameters_dtype.extended());
     size_t parameter_count = fsdt->get_field_count();
-    ndobject params(m_parameters_dtype);
+    ndobject params = empty(m_parameters_dtype);
     if (fsdt->get_field_count() != 5) {
         if (parameter_count > 5 && m_first_default_parameter <= 5) {
             // Fill the missing parameters with their defaults, if available

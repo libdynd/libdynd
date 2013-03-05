@@ -348,7 +348,7 @@ uint32_t categorical_dtype::get_value_from_category(const ndobject& category) co
         return get_value_from_category(category.get_ndo_meta(), category.get_readonly_originptr());
     } else {
         // Otherwise convert to the correct dtype, then get the category value
-        ndobject c(m_category_dtype);
+        ndobject c = empty(m_category_dtype);
         c.val_assign(category);
         return get_value_from_category(c.get_ndo_meta(), c.get_readonly_originptr());
     }

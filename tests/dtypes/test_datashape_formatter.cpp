@@ -55,27 +55,27 @@ TEST(DataShapeFormatter, DTypeBuiltinAtoms) {
 TEST(DataShapeFormatter, NDObjectStringAtoms) {
     EXPECT_EQ("string", format_datashape(ndobject("test"), "", false));
     EXPECT_EQ("string", format_datashape(
-                    ndobject(make_string_dtype(string_encoding_utf_8)), "", false));
+                    empty(make_string_dtype(string_encoding_utf_8)), "", false));
     EXPECT_EQ("string('A')", format_datashape(
-                    ndobject(make_string_dtype(string_encoding_ascii)), "", false));
+                    empty(make_string_dtype(string_encoding_ascii)), "", false));
     EXPECT_EQ("string('U16')", format_datashape(
-                    ndobject(make_string_dtype(string_encoding_utf_16)), "", false));
+                    empty(make_string_dtype(string_encoding_utf_16)), "", false));
     EXPECT_EQ("string('U32')", format_datashape(
-                    ndobject(make_string_dtype(string_encoding_utf_32)), "", false));
+                    empty(make_string_dtype(string_encoding_utf_32)), "", false));
     EXPECT_EQ("string('ucs2')", format_datashape(
-                    ndobject(make_string_dtype(string_encoding_ucs_2)), "", false));
+                    empty(make_string_dtype(string_encoding_ucs_2)), "", false));
     EXPECT_EQ("string(1)", format_datashape(
-                    ndobject(make_fixedstring_dtype(1, string_encoding_utf_8)), "", false));
+                    empty(make_fixedstring_dtype(1, string_encoding_utf_8)), "", false));
     EXPECT_EQ("string(10)", format_datashape(
-                    ndobject(make_fixedstring_dtype(10, string_encoding_utf_8)), "", false));
+                    empty(make_fixedstring_dtype(10, string_encoding_utf_8)), "", false));
     EXPECT_EQ("string(10,'A')", format_datashape(
-                    ndobject(make_fixedstring_dtype(10, string_encoding_ascii)), "", false));
+                    empty(make_fixedstring_dtype(10, string_encoding_ascii)), "", false));
     EXPECT_EQ("string(10,'U16')", format_datashape(
-                    ndobject(make_fixedstring_dtype(10, string_encoding_utf_16)), "", false));
+                    empty(make_fixedstring_dtype(10, string_encoding_utf_16)), "", false));
     EXPECT_EQ("string(10,'U32')", format_datashape(
-                    ndobject(make_fixedstring_dtype(10, string_encoding_utf_32)), "", false));
+                    empty(make_fixedstring_dtype(10, string_encoding_utf_32)), "", false));
     EXPECT_EQ("string(10,'ucs2')", format_datashape(
-                    ndobject(make_fixedstring_dtype(10, string_encoding_ucs_2)), "", false));
+                    empty(make_fixedstring_dtype(10, string_encoding_ucs_2)), "", false));
 }
 
 TEST(DataShapeFormatter, DTypeStringAtoms) {
@@ -108,9 +108,9 @@ TEST(DataShapeFormatter, NDObjectUniformArrays) {
     EXPECT_EQ("3, int32", format_datashape(
                     make_strided_ndobject(3, make_dtype<int32_t>()), "", false));
     EXPECT_EQ("VarDim, int32", format_datashape(
-                    ndobject(make_var_dim_dtype(make_dtype<int32_t>())), "", false));
+                    empty(make_var_dim_dtype(make_dtype<int32_t>())), "", false));
     EXPECT_EQ("VarDim, 3, int32", format_datashape(
-                    ndobject(make_var_dim_dtype(
+                    empty(make_var_dim_dtype(
                         make_fixed_dim_dtype(3, make_dtype<int32_t>()))), "", false));
 }
 
@@ -129,11 +129,11 @@ TEST(DataShapeFormatter, DTypeUniformArrays) {
 
 TEST(DataShapeFormatter, NDObjectStructs) {
     EXPECT_EQ("{x: int32; y: float64}", format_datashape(
-                    ndobject(make_fixedstruct_dtype(
+                    empty(make_fixedstruct_dtype(
                                     make_dtype<int32_t>(), "x",
                                     make_dtype<double>(), "y")), "", false));
     EXPECT_EQ("{x: VarDim, {a: int32; b: int8}; y: 5, VarDim, uint8}",
-                    format_datashape(ndobject(make_struct_dtype(
+                    format_datashape(empty(make_struct_dtype(
                                     make_var_dim_dtype(make_fixedstruct_dtype(
                                         make_dtype<int32_t>(), "a",
                                         make_dtype<int8_t>(), "b")), "x",

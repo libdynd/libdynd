@@ -144,7 +144,7 @@ TEST(FixedStructDType, IsExpression) {
 
 TEST(FixedStructDType, PropertyAccess) {
     dtype dt = make_fixedstruct_dtype(make_dtype<int>(), "x", make_dtype<double>(), "y", make_dtype<short>(), "z");
-    ndobject a(dt);
+    ndobject a = empty(dt);
     a.at(0).vals() = 3;
     a.at(1).vals() = 4.25;
     a.at(2).vals() = 5;
@@ -220,8 +220,8 @@ TEST(FixedStructDType, SingleCompare) {
     ndobject a, b;
     dtype sdt = make_fixedstruct_dtype(make_dtype<int32_t>(), "a",
                     make_dtype<float>(), "b", make_dtype<int64_t>(), "c");
-    a = ndobject(sdt);
-    b = ndobject(sdt);
+    a = empty(sdt);
+    b = empty(sdt);
 
     // Test lexicographic sorting
 

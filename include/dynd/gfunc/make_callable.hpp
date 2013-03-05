@@ -257,7 +257,7 @@ inline callable make_callable(FN *f, const char *name0) {
 template<typename FN, typename D0>
 inline callable make_callable_with_default(FN *f, const char *name0, const D0& default0) {
     dtype pdt = detail::callable_maker<FN *>::make_parameters_dtype(name0);
-    ndobject defaults(pdt);
+    ndobject defaults = empty(pdt);
     defaults.at(0).vals() = default0;
     // Make defaults immutable (which is ok, because we have the only reference to it)
     defaults.flag_as_immutable();
@@ -279,7 +279,7 @@ inline callable make_callable(FN *f, const char *name0, const char *name1) {
 template<typename FN, typename D1>
 inline callable make_callable_with_default(FN *f, const char *name0, const char *name1, const D1& default1) {
     dtype pdt = detail::callable_maker<FN *>::make_parameters_dtype(name0, name1);
-    ndobject defaults(pdt);
+    ndobject defaults = empty(pdt);
     defaults.at(1).vals() = default1;
     // Make defaults immutable (which is ok, because we have the only reference to it)
     defaults.flag_as_immutable();
@@ -293,7 +293,7 @@ inline callable make_callable_with_default(FN *f, const char *name0, const char 
 template<typename FN, typename D0, typename D1>
 inline callable make_callable_with_default(FN *f, const char *name0, const char *name1, const D0& default0, const D1& default1) {
     dtype pdt = detail::callable_maker<FN *>::make_parameters_dtype(name0, name1);
-    ndobject defaults(pdt);
+    ndobject defaults = empty(pdt);
     defaults.at(0).vals() = default0;
     defaults.at(1).vals() = default1;
     // Make defaults immutable (which is ok, because we have the only reference to it)
@@ -316,7 +316,7 @@ inline callable make_callable(FN *f, const char *name0, const char *name1, const
 template<typename FN, typename D2>
 inline callable make_callable_with_default(FN *f, const char *name0, const char *name1, const char *name2, const D2& default2) {
     dtype pdt = detail::callable_maker<FN *>::make_parameters_dtype(name0, name1, name2);
-    ndobject defaults(pdt);
+    ndobject defaults = empty(pdt);
     defaults.at(2).vals() = default2;
     // Make defaults immutable (which is ok, because we have the only reference to it)
     defaults.flag_as_immutable();
@@ -330,7 +330,7 @@ inline callable make_callable_with_default(FN *f, const char *name0, const char 
 template<typename FN, typename D1, typename D2>
 inline callable make_callable_with_default(FN *f, const char *name0, const char *name1, const char *name2, const D1& default1, const D2& default2) {
     dtype pdt = detail::callable_maker<FN *>::make_parameters_dtype(name0, name1, name2);
-    ndobject defaults(pdt);
+    ndobject defaults = empty(pdt);
     defaults.at(1).vals() = default1;
     defaults.at(2).vals() = default2;
     // Make defaults immutable (which is ok, because we have the only reference to it)
@@ -345,7 +345,7 @@ inline callable make_callable_with_default(FN *f, const char *name0, const char 
 template<typename FN, typename D0, typename D1, typename D2>
 inline callable make_callable_with_default(FN *f, const char *name0, const char *name1, const char *name2, const D0& default0, const D1& default1, const D2& default2) {
     dtype pdt = detail::callable_maker<FN *>::make_parameters_dtype(name0, name1, name2);
-    ndobject defaults(pdt);
+    ndobject defaults = empty(pdt);
     defaults.at(0).vals() = default0;
     defaults.at(1).vals() = default1;
     defaults.at(2).vals() = default2;
@@ -370,7 +370,7 @@ template<typename FN, typename D3>
 inline callable make_callable_with_default(FN *f, const char *name0, const char *name1, const char *name2,
                 const char *name3, const D3& default3) {
     dtype pdt = detail::callable_maker<FN *>::make_parameters_dtype(name0, name1, name2, name3);
-    ndobject defaults(pdt);
+    ndobject defaults = empty(pdt);
     defaults.at(3).vals() = default3;
     // Make defaults immutable (which is ok, because we have the only reference to it)
     defaults.flag_as_immutable();
@@ -385,7 +385,7 @@ template<typename FN, typename D2, typename D3>
 inline callable make_callable_with_default(FN *f, const char *name0, const char *name1, const char *name2,
                 const char *name3, const D2& default2, const D3& default3) {
     dtype pdt = detail::callable_maker<FN *>::make_parameters_dtype(name0, name1, name2, name3);
-    ndobject defaults(pdt);
+    ndobject defaults = empty(pdt);
     defaults.at(2).vals() = default2;
     defaults.at(3).vals() = default3;
     // Make defaults immutable (which is ok, because we have the only reference to it)
@@ -401,7 +401,7 @@ template<typename FN, typename D1, typename D2, typename D3>
 inline callable make_callable_with_default(FN *f, const char *name0, const char *name1, const char *name2,
                 const char *name3, const D1& default1, const D2& default2, const D3& default3) {
     dtype pdt = detail::callable_maker<FN *>::make_parameters_dtype(name0, name1, name2, name3);
-    ndobject defaults(pdt);
+    ndobject defaults = empty(pdt);
     defaults.at(1).vals() = default1;
     defaults.at(2).vals() = default2;
     defaults.at(3).vals() = default3;
@@ -418,7 +418,7 @@ template<typename FN, typename D0, typename D1, typename D2, typename D3>
 inline callable make_callable_with_default(FN *f, const char *name0, const char *name1, const char *name2,
                 const char *name3, const D0& default0, const D1& default1, const D2& default2, const D3& default3) {
     dtype pdt = detail::callable_maker<FN *>::make_parameters_dtype(name0, name1, name2, name3);
-    ndobject defaults(pdt);
+    ndobject defaults = empty(pdt);
     defaults.at(0).vals() = default0;
     defaults.at(1).vals() = default1;
     defaults.at(2).vals() = default2;

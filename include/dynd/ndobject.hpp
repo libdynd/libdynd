@@ -125,30 +125,6 @@ public:
     }
 #endif
 
-    /**
-     * Constructs a writeable uninitialized ndobject of the specified dtype.
-     * This dtype should be scalar or already fully specify the datashape.
-     */
-    explicit ndobject(const dtype& dt);
-    /**
-     * Constructs a writeable uninitialized ndobject of the specified dtype.
-     * This dtype should be at least one dimensional, and is initialized
-     * using the specified dimension size.
-     */
-    ndobject(const dtype& dt, intptr_t dim0);
-    /**
-     * Constructs a writeable uninitialized ndobject of the specified dtype.
-     * This dtype should be at least two dimensional, and is initialized
-     * using the specified dimension size.
-     */
-    ndobject(const dtype& dt, intptr_t dim0, intptr_t dim1);
-    /**
-     * Constructs a writeable uninitialized ndobject of the specified dtype.
-     * This dtype should be at least three dimensional, and is initialized
-     * using the specified dimension size.
-     */
-    ndobject(const dtype& dt, intptr_t dim0, intptr_t dim1, intptr_t dim2);
-
     // TODO: Copy the initializer list mechanisms from ndarray
 
     /** Swap operation (should be "noexcept" in C++11) */
@@ -201,7 +177,7 @@ public:
     }
 
     /** Returns true if the ndobject is NULL */
-    inline bool empty() const {
+    inline bool is_empty() const {
         return m_memblock.get() == NULL;
     }
 
@@ -924,7 +900,33 @@ T dynd::ndobject::as(assign_error_mode errmode) const {
 ndobject eval_raw_copy(const dtype& dt, const char *metadata, const char *data);
 
 /**
- * Constructs an array with the same shape and memory layout
+ * Constructs an uninitialized ndobject of the given dtype.
+ */
+ndobject empty(const dtype& dt);
+
+/**
+ * Constructs a writeable uninitialized ndobject of the specified dtype.
+ * This dtype should be at least one dimensional, and is initialized
+ * using the specified dimension size.
+ */
+ndobject empty(intptr_t dim0, const dtype& dt);
+
+/**
+ * Constructs a writeable uninitialized ndobject of the specified dtype.
+ * This dtype should be at least two dimensional, and is initialized
+ * using the specified dimension sizes.
+ */
+ndobject empty(intptr_t dim0, intptr_t dim1, const dtype& dt);
+
+/**
+ * Constructs a writeable uninitialized ndobject of the specified dtype.
+ * This dtype should be at least three dimensional, and is initialized
+ * using the specified dimension sizes.
+ */
+ndobject empty(intptr_t dim0, intptr_t dim1, intptr_t dim2, const dtype& dt);
+
+/**
+ * Constructs an ndobject with the same shape and memory layout
  * of the one given, but replacing the
  *
  * \param rhs  The array whose shape and memory layout to emulate.

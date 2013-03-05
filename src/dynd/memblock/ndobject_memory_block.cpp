@@ -15,15 +15,26 @@ void free_ndobject_memory_block(memory_block_data *memblock)
 {
     ndobject_preamble *preamble = reinterpret_cast<ndobject_preamble *>(memblock);
     char *metadata = reinterpret_cast<char *>(preamble + 1);
-    // First free the references contained in the metadata
+
+    // Call the data destructor if necessary (i.e. the ndobject owns
+    // the data memory, and the dtype has a data destructor)
+    if (preamble->m_data_reference == NULL &&
+                    !preamble->is_builtin_dtype() &&
+                    (preamble->m_dtype->get_flags()&dtype_flag_destructor) != 0) {
+        preamble->m_dtype->data_destruct(metadata, preamble->m_data_pointer);
+    }
+
+    // Free the references contained in the metadata
     if (!preamble->is_builtin_dtype()) {
         preamble->m_dtype->metadata_destruct(metadata);
         base_dtype_decref(preamble->m_dtype);
     }
-    // Then free the reference to the ndobject data
+
+    // Free the reference to the ndobject data
     if (preamble->m_data_reference != NULL) {
         memory_block_decref(preamble->m_data_reference);
     }
+
     // Finally free the memory block itself
     free(reinterpret_cast<void *>(memblock));
 }

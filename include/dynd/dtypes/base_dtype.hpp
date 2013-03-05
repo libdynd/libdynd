@@ -362,7 +362,7 @@ public:
     /**
      * Called by ::dynd::is_lossless_assignment, with (this == dst_dt->extended()).
      */
-    virtual bool is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const = 0;
+    virtual bool is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const;
 
     virtual bool operator==(const base_dtype& rhs) const = 0;
 
@@ -391,26 +391,43 @@ public:
     /** Destructs any references or other state contained in the ndobjects' metdata */
     virtual void metadata_destruct(char *metadata) const;
     /**
-     * When metadata is used for temporary buffers of a dtype, and that usage is finished one
-     * execution cycle, this function is called to clear usage of that memory so it can be reused in
+     * When metadata is used for temporary buffers of a dtype,
+     * and that usage is finished one execution cycle, this function
+     * is called to clear usage of that memory so it can be reused in
      * the next cycle.
      */
     virtual void metadata_reset_buffers(char *metadata) const;
     /**
-     * For blockref dtypes, once all the elements have been written we want to turn off further
-     * memory allocation, and possibly trim excess memory that was allocated. This function
+     * For blockref dtypes, once all the elements have been written
+     * we want to turn off further memory allocation, and possibly
+     * trim excess memory that was allocated. This function
      * does this.
      */
     virtual void metadata_finalize_buffers(char *metadata) const;
     /** Debug print of the metdata */
-    virtual void metadata_debug_print(const char *metadata, std::ostream& o, const std::string& indent) const;
+    virtual void metadata_debug_print(const char *metadata, std::ostream& o,
+                    const std::string& indent) const;
+
+    /**
+     * For dtypes that have the flag dtype_flag_destructor set, this function
+     * or the strided version is called to destruct data.
+     */
+    virtual void data_destruct(const char *metadata, char *data) const;
+    /**
+     * For dtypes that have the flag dtype_flag_destructor set, this function
+     * or the non-strided version is called to destruct data.
+     */
+    virtual void data_destruct_strided(const char *metadata, char *data,
+                    intptr_t stride, size_t count) const;
 
     /** The size of the data required for uniform iteration */
     virtual size_t get_iterdata_size(size_t ndim) const;
     /**
      * Constructs the iterdata for processing iteration at this level of the datashape
      */
-    virtual size_t iterdata_construct(iterdata_common *iterdata, const char **inout_metadata, size_t ndim, const intptr_t* shape, dtype& out_uniform_dtype) const;
+    virtual size_t iterdata_construct(iterdata_common *iterdata,
+                    const char **inout_metadata, size_t ndim,
+                    const intptr_t* shape, dtype& out_uniform_dtype) const;
     /** Destructs any references or other state contained in the iterdata */
     virtual size_t iterdata_destruct(iterdata_common *iterdata, size_t ndim) const;
 
@@ -584,23 +601,46 @@ public:
 };
 
 /**
- * Increments the reference count of a memory block object.
+ * Increments the reference count of the dtype
  */
-inline void base_dtype_incref(const base_dtype *ed)
+inline void base_dtype_incref(const base_dtype *bd)
 {
     //std::cout << "dtype " << (void *)ed << " inc: " << ed->m_use_count + 1 << "\t"; ed->print_dtype(std::cout); std::cout << std::endl;
-    ++ed->m_use_count;
+    ++bd->m_use_count;
 }
 
 /**
- * Decrements the reference count of a memory block object,
+ * Checks if the dtype is builtin or not, and if not,
+ * increments the reference count of the dtype.
+ */
+inline void base_dtype_xincref(const base_dtype *bd)
+{
+    if (!is_builtin_dtype(bd)) {
+        base_dtype_incref(bd);
+    }
+}
+
+/**
+ * Decrements the reference count of the dtype,
  * freeing it if the count reaches zero.
  */
-inline void base_dtype_decref(const base_dtype *ed)
+inline void base_dtype_decref(const base_dtype *bd)
 {
     //std::cout << "dtype " << (void *)ed << " dec: " << ed->m_use_count - 1 << "\t"; ed->print_dtype(std::cout); std::cout << std::endl;
-    if (--ed->m_use_count == 0) {
-        delete ed;
+    if (--bd->m_use_count == 0) {
+        delete bd;
+    }
+}
+
+/**
+ * Checks if the dtype is builtin or not, and if not,
+ * decrements the reference count of the dtype,
+ * freeing it if the count reaches zero.
+ */
+inline void base_dtype_xdecref(const base_dtype *bd)
+{
+    if (!is_builtin_dtype(bd)) {
+        base_dtype_decref(bd);
     }
 }
 

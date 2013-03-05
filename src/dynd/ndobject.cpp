@@ -389,27 +389,6 @@ ndobject dynd::detail::make_from_vec<std::string>::make(const std::vector<std::s
     return result;
 }
 
-
-ndobject::ndobject(const dtype& dt)
-    : m_memblock(make_ndobject_memory_block(dt, 0, NULL))
-{
-}
-
-ndobject::ndobject(const dtype& dt, intptr_t dim0)
-    : m_memblock(make_ndobject_memory_block(dt, 1, &dim0))
-{
-}
-ndobject::ndobject(const dtype& dt, intptr_t dim0, intptr_t dim1)
-{
-    intptr_t dims[2] = {dim0, dim1};
-    m_memblock = make_ndobject_memory_block(dt, 2, dims);
-}
-ndobject::ndobject(const dtype& dt, intptr_t dim0, intptr_t dim1, intptr_t dim2)
-{
-    intptr_t dims[3] = {dim0, dim1, dim2};
-    m_memblock = make_ndobject_memory_block(dt, 3, dims);
-}
-
 namespace {
     static void as_storage_type(const dtype& dt, const void *DYND_UNUSED(extra),
                 dtype& out_transformed_dtype, bool& out_was_transformed)
@@ -1049,7 +1028,7 @@ void ndobject::debug_print(std::ostream& o, const std::string& indent) const
 
 std::ostream& dynd::operator<<(std::ostream& o, const ndobject& rhs)
 {
-    if (!rhs.empty()) {
+    if (!rhs.is_empty()) {
         o << "ndobject(";
         ndobject v = rhs.eval();
         if (v.get_ndo()->is_builtin_dtype()) {
@@ -1088,10 +1067,32 @@ ndobject dynd::eval_raw_copy(const dtype& dt, const char *metadata, const char *
     return result;
 }
 
+ndobject dynd::empty(const dtype& dt)
+{
+    return ndobject(make_ndobject_memory_block(dt, 0, NULL));
+}
+
+ndobject dynd::empty(intptr_t dim0, const dtype& dt)
+{
+    return ndobject(make_ndobject_memory_block(dt, 1, &dim0));
+}
+
+ndobject dynd::empty(intptr_t dim0, intptr_t dim1, const dtype& dt)
+{
+    intptr_t dims[2] = {dim0, dim1};
+    return ndobject(make_ndobject_memory_block(dt, 2, dims));
+}
+
+ndobject dynd::empty(intptr_t dim0, intptr_t dim1, intptr_t dim2, const dtype& dt)
+{
+    intptr_t dims[3] = {dim0, dim1, dim2};
+    return ndobject(make_ndobject_memory_block(dt, 3, dims));
+}
+
 ndobject dynd::empty_like(const ndobject& rhs, const dtype& uniform_dtype)
 {
     if (rhs.is_scalar()) {
-        return ndobject(uniform_dtype);
+        return empty(uniform_dtype);
     } else {
         dtype dt = rhs.get_ndo()->m_dtype->get_canonical_dtype();
         size_t ndim = dt.extended()->get_undim();
@@ -1116,7 +1117,7 @@ ndobject dynd::empty_like(const ndobject& rhs)
     }
 
     if (rhs.is_scalar()) {
-        return ndobject(dt);
+        return empty(dt);
     } else {
         size_t ndim = dt.extended()->get_undim();
         dimvector shape(ndim);

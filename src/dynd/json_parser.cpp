@@ -751,7 +751,7 @@ ndobject dynd::parse_json(const dtype& dt, const char *json_begin, const char *j
 {
     ndobject result;
     if (dt.get_data_size() != 0) {
-        result = ndobject(dt);
+        result = empty(dt);
         parse_json(result, json_begin, json_end);
         if (!dt.is_builtin()) {
             dt.extended()->metadata_finalize_buffers(result.get_ndo_meta());

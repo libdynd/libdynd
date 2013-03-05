@@ -88,7 +88,7 @@ TEST(FixedArrayDType, Basic) {
     ndobject a;
     float vals[3] = {1.5f, 2.5f, -1.5f};
 
-    a = ndobject(make_fixed_dim_dtype(3, make_dtype<float>()));
+    a = empty(make_fixed_dim_dtype(3, make_dtype<float>()));
     a.vals() = vals;
 
     EXPECT_EQ(make_fixed_dim_dtype(3, make_dtype<float>()), a.get_dtype());
@@ -112,7 +112,7 @@ TEST(FixedArrayDType, AssignKernel) {
     assignment_kernel k;
 
     // Assignment scalar -> fixed array
-    a = ndobject(make_fixed_dim_dtype(3, make_dtype<int>()));
+    a = empty(make_fixed_dim_dtype(3, make_dtype<int>()));
     a.vals() = 0;
     b = 9.0;
     EXPECT_EQ(fixed_dim_type_id, a.get_dtype().get_type_id());
@@ -126,7 +126,7 @@ TEST(FixedArrayDType, AssignKernel) {
     k.reset();
 
     // Assignment fixed array -> fixed array
-    a = ndobject(make_fixed_dim_dtype(3, make_dtype<int>()));
+    a = empty(make_fixed_dim_dtype(3, make_dtype<int>()));
     a.vals() = 0;
     b = parse_json("3, int32", "[3, 5, 7]");
     EXPECT_EQ(fixed_dim_type_id, a.get_dtype().get_type_id());
@@ -157,7 +157,7 @@ TEST(FixedArrayDType, AssignFixedStridedKernel) {
     int vals_int_single[] = {9};
 
     // Assignment strided array -> fixed array
-    a = ndobject(make_fixed_dim_dtype(3, make_dtype<int>()));
+    a = empty(make_fixed_dim_dtype(3, make_dtype<int>()));
     a.vals() = 0;
     b = vals_int;
     EXPECT_EQ(fixed_dim_type_id, a.get_dtype().get_type_id());
@@ -172,7 +172,7 @@ TEST(FixedArrayDType, AssignFixedStridedKernel) {
     k.reset();
 
     // Broadcasting assignment strided array -> fixed array
-    a = ndobject(make_fixed_dim_dtype(3, make_dtype<int>()));
+    a = empty(make_fixed_dim_dtype(3, make_dtype<int>()));
     a.vals() = 0;
     b = vals_int_single;
     EXPECT_EQ(fixed_dim_type_id, a.get_dtype().get_type_id());

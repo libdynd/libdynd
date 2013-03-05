@@ -2,9 +2,7 @@
 // Copyright (C) 2011-13, DyND Developers
 // BSD 2-Clause License, see LICENSE.txt
 //
-// The bytes dtype uses memory_block references to store
-// arbitrarily sized bytes.
-//
+
 #ifndef _DYND__BYTES_DTYPE_HPP_
 #define _DYND__BYTES_DTYPE_HPP_
 
@@ -28,6 +26,10 @@ struct bytes_dtype_data {
     char *end;
 };
 
+/**
+ * The bytes dtype uses memory_block references to store
+ * arbitrarily sized runs of bytes.
+ */
 class bytes_dtype : public base_bytes_dtype {
     size_t m_alignment;
 

@@ -31,7 +31,7 @@ TEST(GFuncCallable, OneParameter) {
 
     // Call it with the generic interface and see that it gave what we want
     ndobject a, r;
-    a = ndobject(c.get_parameters_dtype());
+    a = empty(c.get_parameters_dtype());
 
     a.at(0).val_assign(12);
     r = c.call_generic(a);
@@ -77,7 +77,7 @@ TEST(GFuncCallable, TwoParameters) {
 
     // Call it and see that it gave what we want
     ndobject a, r;
-    a = ndobject(c.get_parameters_dtype());
+    a = empty(c.get_parameters_dtype());
 
     a.at(0).val_assign(2.25);
     a.at(1).val_assign(3);
@@ -137,7 +137,7 @@ TEST(GFuncCallable, ThreeParameters) {
 
     // Call it and see that it gave what we want
     ndobject a, r;
-    a = ndobject(c.get_parameters_dtype());
+    a = empty(c.get_parameters_dtype());
 
     a.at(0).val_assign(true);
     a.at(1).val_assign(3);
@@ -220,7 +220,7 @@ TEST(GFuncCallable, FourParameters) {
 
     // Call it and see that it gave what we want
     ndobject a, r;
-    a = ndobject(c.get_parameters_dtype());
+    a = empty(c.get_parameters_dtype());
 
     a.at(0).val_assign(-1);
     a.at(1).val_assign(7);
@@ -325,7 +325,7 @@ TEST(GFuncCallable, FiveParameters) {
 
     // Call it and see that it gave what we want
     ndobject a, r;
-    a = ndobject(c.get_parameters_dtype());
+    a = empty(c.get_parameters_dtype());
 
     float f0[3] = {1, 2, 3};
     double d0[3] = {1.5, 2.5, 3.5};
@@ -353,7 +353,7 @@ TEST(GFuncCallable, NDObjectReturn) {
 
     // Call it and see that it gave what we want
     ndobject a, r;
-    a = ndobject(c.get_parameters_dtype());
+    a = empty(c.get_parameters_dtype());
 
     a.at(0).val_assign(-10);
     a.at(1).val_assign(20);
@@ -376,7 +376,7 @@ TEST(GFuncCallable, NDObjectParam) {
     // Call it and see that it gave what we want
     ndobject tmp;
     ndobject a, r;
-    a = ndobject(c.get_parameters_dtype());
+    a = empty(c.get_parameters_dtype());
 
     tmp = make_strided_ndobject(2, 3, 1, make_dtype<int>());
     *(void**)a.get_ndo()->m_data_pointer = tmp.get_ndo();
@@ -396,7 +396,7 @@ TEST(GFuncCallable, DTypeParam) {
     // Call it and see that it gave what we want
     dtype tmp;
     ndobject a, r;
-    a = ndobject(c.get_parameters_dtype());
+    a = empty(c.get_parameters_dtype());
 
     // With an base_dtype
     tmp = make_fixedstruct_dtype(make_dtype<complex<float> >(), "A", make_dtype<int8_t>(), "B");
@@ -425,7 +425,7 @@ TEST(GFuncCallable, StringReturn) {
 
     // Call it and see that it gave what we want
     ndobject a, r;
-    a = ndobject(c.get_parameters_dtype());
+    a = empty(c.get_parameters_dtype());
 
     a.at(0).val_assign(-10);
     a.at(1).val_assign(20);

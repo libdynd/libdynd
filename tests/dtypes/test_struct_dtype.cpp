@@ -141,7 +141,7 @@ TEST(StructDType, IsExpression) {
 
 TEST(StructDType, PropertyAccess) {
     dtype dt = make_struct_dtype(make_dtype<int>(), "x", make_dtype<double>(), "y", make_dtype<short>(), "z");
-    ndobject a(dt);
+    ndobject a = empty(dt);
     a.at(0).vals() = 3;
     a.at(1).vals() = 4.25;
     a.at(2).vals() = 5;
@@ -217,8 +217,8 @@ TEST(StructDType, SingleCompare) {
     ndobject a, b;
     dtype sdt = make_struct_dtype(make_dtype<int32_t>(), "a",
                     make_dtype<float>(), "b", make_dtype<int64_t>(), "c");
-    a = ndobject(sdt);
-    b = ndobject(sdt);
+    a = empty(sdt);
+    b = empty(sdt);
 
     // Test lexicographic sorting
 
@@ -319,8 +319,8 @@ TEST(StructDType, SingleCompareDifferentMetadata) {
                     make_dtype<float>(), "b", make_dtype<int64_t>(), "c");
     dtype sdt_reverse = make_struct_dtype(make_dtype<int64_t>(), "c",
                     make_dtype<float>(), "b", make_dtype<int32_t>(), "a");
-    a = ndobject(sdt);
-    b = ndobject(sdt_reverse).at(irange() / -1);
+    a = empty(sdt);
+    b = empty(sdt_reverse).at(irange() / -1);
 
     // Confirm that the metadata is different
     EXPECT_EQ(a.get_dtype(), b.get_dtype());

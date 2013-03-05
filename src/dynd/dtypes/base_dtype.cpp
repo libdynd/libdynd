@@ -128,6 +128,12 @@ intptr_t base_dtype::get_representative_stride(const char *DYND_UNUSED(metadata)
     throw std::runtime_error(ss.str());
 }
 
+bool base_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const
+{
+    // Default to just an equality check
+    return dst_dt == src_dt;
+}
+
 size_t base_dtype::get_default_data_size(size_t DYND_UNUSED(ndim), const intptr_t *DYND_UNUSED(shape)) const
 {
     return get_data_size();
@@ -173,6 +179,20 @@ void base_dtype::metadata_debug_print(const char *DYND_UNUSED(metadata), std::os
     stringstream ss;
     ss << "TODO: metadata_debug_print for " << dtype(this, true) << " is not implemented";
     throw std::runtime_error(ss.str());
+}
+
+void base_dtype::data_destruct(const char *metadata, char *data) const
+{
+    stringstream ss;
+    ss << "TODO: data_destruct for " << dtype(this, true) << " is not implemented";
+    throw runtime_error(ss.str());
+}
+
+void base_dtype::data_destruct_strided(const char *metadata, char *data, intptr_t stride, size_t count) const
+{
+    stringstream ss;
+    ss << "TODO: data_destruct_strided for " << dtype(this, true) << " is not implemented";
+    throw runtime_error(ss.str());
 }
 
 size_t base_dtype::get_iterdata_size(size_t DYND_UNUSED(ndim)) const

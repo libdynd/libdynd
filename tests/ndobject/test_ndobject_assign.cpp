@@ -19,7 +19,7 @@ TEST(NDObjectAssign, ScalarAssignment_Bool) {
     ndobject a;
 
     // assignment to a bool scalar
-    a = ndobject(make_dtype<dynd_bool>());
+    a = empty(make_dtype<dynd_bool>());
     const dynd_bool *ptr_b = (const dynd_bool *)a.get_ndo()->m_data_pointer;
     a.val_assign(true);
     EXPECT_TRUE(*ptr_b);
@@ -52,7 +52,7 @@ TEST(NDObjectAssign, ScalarAssignment_Int8) {
     const int8_t *ptr_i8;
 
     // Assignment to an int8_t scalar
-    a = ndobject(make_dtype<int8_t>());
+    a = empty(make_dtype<int8_t>());
     ptr_i8 = (const int8_t *)a.get_ndo()->m_data_pointer;
     a.val_assign(true);
     EXPECT_EQ(1, *ptr_i8);
@@ -88,7 +88,7 @@ TEST(NDObjectAssign, ScalarAssignment_UInt16) {
     const uint16_t *ptr_u16;
 
     // Assignment to a uint16_t scalar
-    a = ndobject(make_dtype<uint16_t>());
+    a = empty(make_dtype<uint16_t>());
     ptr_u16 = (const uint16_t *)a.get_ndo()->m_data_pointer;
     a.val_assign(true);
     EXPECT_EQ(1, *ptr_u16);
@@ -109,7 +109,7 @@ TEST(NDObjectAssign, ScalarAssignment_Float32) {
     const float *ptr_f32;
 
     // Assignment to a float scalar
-    a = ndobject(make_dtype<float>());
+    a = empty(make_dtype<float>());
     ptr_f32 = (const float *)a.get_ndo()->m_data_pointer;
     a.val_assign(true);
     EXPECT_EQ(1, *ptr_f32);
@@ -137,7 +137,7 @@ TEST(NDObjectAssign, ScalarAssignment_Float64) {
     const double *ptr_f64;
 
     // Assignment to a double scalar
-    a = ndobject(make_dtype<double>());
+    a = empty(make_dtype<double>());
     ptr_f64 = (const double *)a.get_ndo()->m_data_pointer;
     a.val_assign(true);
     EXPECT_EQ(1, *ptr_f64);
@@ -160,7 +160,7 @@ TEST(NDObjectAssign, ScalarAssignment_Complex_Float32) {
     const complex<float> *ptr_cf32;
 
     // Assignment to a complex float scalar
-    a = ndobject(make_dtype<complex<float> >());
+    a = empty(make_dtype<complex<float> >());
     ptr_cf32 = (const complex<float> *)a.get_ndo()->m_data_pointer;
     a.val_assign(true);
     EXPECT_EQ(complex<float>(1), *ptr_cf32);
@@ -189,7 +189,7 @@ TEST(NDObjectAssign, ScalarAssignment_Complex_Float64) {
     const complex<double> *ptr_cf64;
 
     // Assignment to a complex float scalar
-    a = ndobject(make_dtype<complex<double> >());
+    a = empty(make_dtype<complex<double> >());
     ptr_cf64 = (const complex<double> *)a.get_ndo()->m_data_pointer;
     a.val_assign(true);
     EXPECT_EQ(complex<double>(1), *ptr_cf64);

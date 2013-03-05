@@ -190,7 +190,7 @@ void date_dtype::get_dynamic_dtype_properties(const std::pair<std::string, gfunc
 static ndobject function_dtype_today(const dtype& dt) {
     datetime::date_ymd ymd;
     datetime::fill_current_local_date(&ymd);
-    ndobject result(dt);
+    ndobject result = empty(dt);
     *reinterpret_cast<int32_t *>(result.get_readwrite_originptr()) = datetime::ymd_to_days(ymd);
     // Make the result immutable (we own the only reference to the data at this point)
     result.flag_as_immutable();

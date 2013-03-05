@@ -218,7 +218,7 @@ TEST(VarArrayDType, AssignKernel) {
     assignment_kernel k;
 
     // Assignment scalar -> uninitialized var array
-    a = ndobject(make_var_dim_dtype(make_dtype<int>()));
+    a = empty(make_var_dim_dtype(make_dtype<int>()));
     b = 9.0;
     EXPECT_EQ(var_dim_type_id, a.get_dtype().get_type_id());
     make_assignment_kernel(&k, 0, a.get_dtype(), a.get_ndo_meta(),
@@ -230,7 +230,7 @@ TEST(VarArrayDType, AssignKernel) {
     k.reset();
 
     // Assignment scalar -> initialized var array
-    a = ndobject(make_var_dim_dtype(make_dtype<int>()));
+    a = empty(make_var_dim_dtype(make_dtype<int>()));
     parse_json(a, "[3, 5, 7]");
     b = 9.0;
     EXPECT_EQ(var_dim_type_id, a.get_dtype().get_type_id());
@@ -245,7 +245,7 @@ TEST(VarArrayDType, AssignKernel) {
     k.reset();
 
     // Assignment initialized var array -> uninitialized var array
-    a = ndobject(make_var_dim_dtype(make_dtype<int>()));
+    a = empty(make_var_dim_dtype(make_dtype<int>()));
     b = parse_json("VarDim, int32", "[3, 5, 7]");
     EXPECT_EQ(var_dim_type_id, a.get_dtype().get_type_id());
     EXPECT_EQ(var_dim_type_id, b.get_dtype().get_type_id());
@@ -260,7 +260,7 @@ TEST(VarArrayDType, AssignKernel) {
     k.reset();
 
     // Assignment initialized var array -> initialized var array
-    a = ndobject(make_var_dim_dtype(make_dtype<int>()));
+    a = empty(make_var_dim_dtype(make_dtype<int>()));
     parse_json(a, "[0, 0, 0]");
     b = parse_json("VarDim, int32", "[3, 5, 7]");
     EXPECT_EQ(var_dim_type_id, a.get_dtype().get_type_id());
@@ -276,7 +276,7 @@ TEST(VarArrayDType, AssignKernel) {
     k.reset();
 
     // Broadcasting assignment initialized var array -> initialized var array
-    a = ndobject(make_var_dim_dtype(make_dtype<int>()));
+    a = empty(make_var_dim_dtype(make_dtype<int>()));
     parse_json(a, "[0, 0, 0]");
     b = parse_json("VarDim, int32", "[9]");
     EXPECT_EQ(var_dim_type_id, a.get_dtype().get_type_id());
@@ -292,8 +292,8 @@ TEST(VarArrayDType, AssignKernel) {
     k.reset();
 
     // No-op assignment uninitialized var array -> uinitialized var array
-    a = ndobject(make_var_dim_dtype(make_dtype<int>()));
-    b = ndobject(make_var_dim_dtype(make_dtype<int>()));
+    a = empty(make_var_dim_dtype(make_dtype<int>()));
+    b = empty(make_var_dim_dtype(make_dtype<int>()));
     EXPECT_EQ(var_dim_type_id, a.get_dtype().get_type_id());
     EXPECT_EQ(var_dim_type_id, b.get_dtype().get_type_id());
     make_assignment_kernel(&k, 0, a.get_dtype(), a.get_ndo_meta(),
@@ -313,7 +313,7 @@ TEST(VarArrayDType, AssignKernel) {
                 broadcast_error);
 
     // Error assignment initialized var array -> initialized var array
-    a = ndobject(make_var_dim_dtype(make_dtype<int>()));
+    a = empty(make_var_dim_dtype(make_dtype<int>()));
     parse_json(a, "[0, 0, 0]");
     b = parse_json("VarDim, int32", "[9, 2]");
     EXPECT_EQ(var_dim_type_id, a.get_dtype().get_type_id());
@@ -333,7 +333,7 @@ TEST(VarArrayDType, AssignVarStridedKernel) {
     int vals_int[] = {3,5,7};
 
     // Assignment strided array -> uninitialized var array
-    a = ndobject(make_var_dim_dtype(make_dtype<int>()));
+    a = empty(make_var_dim_dtype(make_dtype<int>()));
     b = vals_int;
     EXPECT_EQ(var_dim_type_id, a.get_dtype().get_type_id());
     EXPECT_EQ(strided_dim_type_id, b.get_dtype().get_type_id());
@@ -348,7 +348,7 @@ TEST(VarArrayDType, AssignVarStridedKernel) {
     k.reset();
 
     // Assignment strided array -> initialized var array
-    a = ndobject(make_var_dim_dtype(make_dtype<int>()));
+    a = empty(make_var_dim_dtype(make_dtype<int>()));
     parse_json(a, "[0, 0, 0]");
     b = vals_int;
     EXPECT_EQ(var_dim_type_id, a.get_dtype().get_type_id());
@@ -364,7 +364,7 @@ TEST(VarArrayDType, AssignVarStridedKernel) {
     k.reset();
 
     // Error assignment strided array -> initialized var array
-    a = ndobject(make_var_dim_dtype(make_dtype<int>()));
+    a = empty(make_var_dim_dtype(make_dtype<int>()));
     parse_json(a, "[0, 0, 0, 0]");
     b = vals_int;
     EXPECT_EQ(var_dim_type_id, a.get_dtype().get_type_id());
@@ -409,7 +409,7 @@ TEST(VarArrayDType, AssignVarStridedKernel) {
     // Error assignment uninitialized var array -> strided array
     a = make_strided_ndobject(3, make_dtype<int>());
     a.vals() = 0;
-    b = ndobject(make_var_dim_dtype(make_dtype<int>()));
+    b = empty(make_var_dim_dtype(make_dtype<int>()));
     EXPECT_EQ(strided_dim_type_id, a.get_dtype().get_type_id());
     EXPECT_EQ(var_dim_type_id, b.get_dtype().get_type_id());
     make_assignment_kernel(&k, 0, a.get_dtype(), a.get_ndo_meta(),
@@ -426,7 +426,7 @@ TEST(VarArrayDType, AssignVarFixedKernel) {
     assignment_kernel k;
 
     // Assignment fixed array -> uninitialized var array
-    a = ndobject(make_var_dim_dtype(make_dtype<int>()));
+    a = empty(make_var_dim_dtype(make_dtype<int>()));
     b = parse_json("3, int32", "[3, 5, 7]");
     EXPECT_EQ(var_dim_type_id, a.get_dtype().get_type_id());
     EXPECT_EQ(fixed_dim_type_id, b.get_dtype().get_type_id());
@@ -441,7 +441,7 @@ TEST(VarArrayDType, AssignVarFixedKernel) {
     k.reset();
 
     // Assignment fixed array -> initialized var array
-    a = ndobject(make_var_dim_dtype(make_dtype<int>()));
+    a = empty(make_var_dim_dtype(make_dtype<int>()));
     parse_json(a, "[0, 0, 0]");
     b = parse_json("3, int32", "[3, 5, 7]");
     EXPECT_EQ(var_dim_type_id, a.get_dtype().get_type_id());
@@ -457,7 +457,7 @@ TEST(VarArrayDType, AssignVarFixedKernel) {
     k.reset();
 
     // Error assignment fixed array -> initialized var array
-    a = ndobject(make_var_dim_dtype(make_dtype<int>()));
+    a = empty(make_var_dim_dtype(make_dtype<int>()));
     parse_json(a, "[0, 0, 0, 0]");
     b = parse_json("3, int32", "[3, 5, 7]");
     EXPECT_EQ(var_dim_type_id, a.get_dtype().get_type_id());
@@ -471,7 +471,7 @@ TEST(VarArrayDType, AssignVarFixedKernel) {
     k.reset();
 
     // Assignment initialized var array -> fixed array
-    a = ndobject(make_fixed_dim_dtype(3, make_dtype<int>()));
+    a = empty(make_fixed_dim_dtype(3, make_dtype<int>()));
     a.vals() = 0;
     b = parse_json("VarDim, int32", "[3, 5, 7]");
     EXPECT_EQ(fixed_dim_type_id, a.get_dtype().get_type_id());
@@ -486,7 +486,7 @@ TEST(VarArrayDType, AssignVarFixedKernel) {
     k.reset();
 
     // Error assignment initialized var array -> fixed array
-    a = ndobject(make_fixed_dim_dtype(3, make_dtype<int>()));
+    a = empty(make_fixed_dim_dtype(3, make_dtype<int>()));
     a.vals() = 0;
     b = parse_json("VarDim, int32", "[3, 5, 7, 9]");
     EXPECT_EQ(fixed_dim_type_id, a.get_dtype().get_type_id());
@@ -500,9 +500,9 @@ TEST(VarArrayDType, AssignVarFixedKernel) {
     k.reset();
 
     // Error assignment uninitialized var array -> strided array
-    a = ndobject(make_fixed_dim_dtype(3, make_dtype<int>()));
+    a = empty(make_fixed_dim_dtype(3, make_dtype<int>()));
     a.vals() = 0;
-    b = ndobject(make_var_dim_dtype(make_dtype<int>()));
+    b = empty(make_var_dim_dtype(make_dtype<int>()));
     EXPECT_EQ(fixed_dim_type_id, a.get_dtype().get_type_id());
     EXPECT_EQ(var_dim_type_id, b.get_dtype().get_type_id());
     make_assignment_kernel(&k, 0, a.get_dtype(), a.get_ndo_meta(),

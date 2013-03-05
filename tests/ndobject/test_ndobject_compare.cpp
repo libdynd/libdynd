@@ -613,7 +613,9 @@ TEST(NDObjectCompare, NaNComplexFloat32) {
     // on clang, complex<float>(0.f, nan) was creating (nan, nan)
     // instead of the requested complex.
     float cval[2];
-    ndobject a(make_dtype<complex<float> >()), b(make_dtype<complex<float> >());
+    ndobject a, b;
+    a = empty(make_dtype<complex<float> >());
+    b = empty(make_dtype<complex<float> >());
     float nan = ndobject("nan").cast_scalars<float>().as<float>();
 
     // real component NaN, compared against itself
