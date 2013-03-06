@@ -809,7 +809,7 @@ namespace {
     static void convert_udtype(const dtype& dt, const void *extra,
                 dtype& out_transformed_dtype, bool& out_was_transformed)
     {
-        if (!dt.is_builtin() && dt.extended()->is_uniform_dim()) {
+        if (!dt.is_builtin() && dt.get_kind() == uniform_dim_kind) {
             dt.extended()->transform_child_dtypes(&convert_udtype, extra, out_transformed_dtype, out_was_transformed);
         } else {
             const convert_udtype_extra *e = reinterpret_cast<const convert_udtype_extra *>(extra);
@@ -839,7 +839,7 @@ namespace {
     static void replace_compatible_udtype(const dtype& dt, const void *extra,
                 dtype& out_transformed_dtype, bool& out_was_transformed)
     {
-        if (!dt.is_builtin() && dt.extended()->is_uniform_dim()) {
+        if (!dt.is_builtin() && dt.get_kind() == uniform_dim_kind) {
             dt.extended()->transform_child_dtypes(&replace_compatible_udtype, extra, out_transformed_dtype, out_was_transformed);
         } else {
             const dtype *e = reinterpret_cast<const dtype *>(extra);
@@ -1091,17 +1091,15 @@ ndobject dynd::empty(intptr_t dim0, intptr_t dim1, intptr_t dim2, const dtype& d
 
 ndobject dynd::empty_like(const ndobject& rhs, const dtype& uniform_dtype)
 {
-    if (rhs.is_scalar()) {
+    if (rhs.get_undim() == 0) {
         return empty(uniform_dtype);
     } else {
-        dtype dt = rhs.get_ndo()->m_dtype->get_canonical_dtype();
-        size_t ndim = dt.extended()->get_undim();
-        dt = make_strided_dim_dtype(uniform_dtype, ndim);
-        dimvector shape(ndim);
+        size_t undim = rhs.get_dtype().extended()->get_undim();
+        dimvector shape(undim);
         rhs.get_shape(shape.get());
-        ndobject result(make_ndobject_memory_block(dt, ndim, shape.get()));
+        ndobject result(make_strided_ndobject(uniform_dtype, undim, shape.get()));
         // Reorder strides of output strided dimensions in a KEEPORDER fashion
-        dt.extended()->reorder_default_constructed_strides(result.get_ndo_meta(),
+        result.get_dtype().extended()->reorder_default_constructed_strides(result.get_ndo_meta(),
                         rhs.get_dtype(), rhs.get_ndo_meta());
         return result;
     }

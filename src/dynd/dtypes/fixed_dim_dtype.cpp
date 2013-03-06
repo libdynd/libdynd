@@ -97,11 +97,6 @@ void fixed_dim_dtype::print_dtype(std::ostream& o) const
     o << ">";
 }
 
-bool fixed_dim_dtype::is_uniform_dim() const
-{
-    return true;
-}
-
 bool fixed_dim_dtype::is_expression() const
 {
     return m_element_dtype.is_expression();

@@ -15,11 +15,6 @@ base_dtype::~base_dtype()
 {
 }
 
-bool base_dtype::is_uniform_dim() const
-{
-    return false;
-}
-
 bool base_dtype::is_expression() const
 {
     return false;

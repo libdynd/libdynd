@@ -30,8 +30,12 @@ strided_dim_dtype::~strided_dim_dtype()
 
 size_t strided_dim_dtype::get_default_data_size(size_t ndim, const intptr_t *shape) const
 {
-    if (ndim == 0 || shape[0] < 0) {
-        throw std::runtime_error("the strided_dim dtype requires a shape be specified for default construction");
+    if (ndim == 0) {
+        throw std::runtime_error("the strided_dim dtype requires a shape "
+                        "be specified for default construction");
+    } else if (shape[0] < 0) {
+        throw std::runtime_error("the strided_dim dtype requires a non-negative "
+                        "shape to be specified for default construction");
     }
 
     if (!m_element_dtype.is_builtin()) {
@@ -60,11 +64,6 @@ void strided_dim_dtype::print_data(std::ostream& o, const char *metadata, const 
 void strided_dim_dtype::print_dtype(std::ostream& o) const
 {
     o << "strided_dim<" << m_element_dtype << ">";
-}
-
-bool strided_dim_dtype::is_uniform_dim() const
-{
-    return true;
 }
 
 bool strided_dim_dtype::is_expression() const

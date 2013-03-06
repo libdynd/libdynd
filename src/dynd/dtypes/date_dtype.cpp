@@ -12,11 +12,13 @@
 #include <dynd/dtypes/property_dtype.hpp>
 #include <dynd/dtypes/fixedstruct_dtype.hpp>
 #include <dynd/dtypes/string_dtype.hpp>
+#include <dynd/dtypes/unary_expr_dtype.hpp>
+#include <dynd/kernels/date_assignment_kernels.hpp>
+#include <dynd/kernels/date_expr_kernels.hpp>
 #include <dynd/kernels/string_assignment_kernels.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/exceptions.hpp>
 #include <dynd/gfunc/make_callable.hpp>
-#include <dynd/kernels/date_assignment_kernels.hpp>
 #include <dynd/ndobject_iter.hpp>
 
 #include <datetime_strings.h>
@@ -268,65 +270,12 @@ static ndobject function_ndo_to_struct(const ndobject& n) {
 }
 
 static ndobject function_ndo_strftime(const ndobject& n, const std::string& format) {
+    // TODO: Allow 'format' itself to be an array, with broadcasting, etc.
     if (format.empty()) {
         throw runtime_error("format string for strftime should not be empty");
     }
-    // TODO: lazy evaluation?
-    ndobject result = empty_like(n, make_string_dtype(string_encoding_utf_8));
-    ndobject_iter<1, 1> iter(result, n);
-    assignment_kernel k;
-    bool use_kernel = false;
-    if (iter.get_uniform_dtype<1>().get_kind() == expression_kind) {
-        make_assignment_kernel(&k, 0,
-                        iter.get_uniform_dtype<1>().value_dtype(), NULL,
-                        iter.get_uniform_dtype<1>(), iter.metadata<1>(),
-                        kernel_request_single, assign_error_default, &eval::default_eval_context);
-        use_kernel = true;
-    }
-    int32_t date;
-    const base_string_dtype *esd = static_cast<const base_string_dtype *>(iter.get_uniform_dtype<0>().extended());
-    struct tm tm_val;
-    string str;
-    if (!iter.empty()) {
-        do {
-            // Get the date
-            if (use_kernel) {
-                k.get()->get_function<unary_single_operation_t>()(
-                                reinterpret_cast<char *>(&date),
-                                iter.data<1>(), k.get());
-            } else {
-                date = *reinterpret_cast<const int32_t *>(iter.data<1>());
-            }
-            // Convert the date to a 'struct tm'
-            datetime::date_to_struct_tm(date, datetime::datetime_unit_day, tm_val);
-            // Call strftime, growing the string buffer if needed so it fits
-            str.resize(format.size() + 16);
-#ifdef _MSC_VER
-            // Given an invalid format string strftime will abort unless an invalid
-            // parameter handler is installed.
-            disable_invalid_parameter_handler raii;
-#endif
-            for(int i = 0; i < 3; ++i) {
-                // Force errno to zero
-                errno = 0;
-                size_t len = strftime(&str[0], str.size(), format.c_str(), &tm_val);
-                if (len > 0) {
-                    str.resize(len);
-                    break;
-                } else {
-                    if (errno != 0) {
-                        stringstream ss;
-                        ss << "error in strftime with format string \"" << format << "\" to strftime";
-                        throw runtime_error(ss.str());
-                    }
-                    str.resize(str.size() * 2);
-                }
-            }
-            // Copy the string to the output
-            esd->set_utf8_string(iter.metadata<0>(), iter.data<0>(), assign_error_none, str);
-        } while(iter.next());
-    }
-    return result;
+    return n.replace_udtype(make_unary_expr_dtype(make_string_dtype(), n.get_udtype(),
+                    make_strftime_kernelgen(format)));
 }
 
 static ndobject function_ndo_weekday(const ndobject& n) {

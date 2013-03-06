@@ -53,11 +53,6 @@ void pointer_dtype::print_dtype(std::ostream& o) const
     o << "pointer<" << m_target_dtype << ">";
 }
 
-bool pointer_dtype::is_uniform_dim() const
-{
-    return m_target_dtype.is_builtin() ? false : m_target_dtype.extended()->is_uniform_dim();
-}
-
 bool pointer_dtype::is_expression() const
 {
     // Even though the pointer is an instance of an base_expression_dtype,

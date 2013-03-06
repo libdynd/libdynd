@@ -178,11 +178,6 @@ public:
     }
 
     /**
-     * Returns true if the first dimension of the dtype is a uniform dimension.
-     */
-    virtual bool is_uniform_dim() const;
-
-    /**
      * Returns true if the dtype contains an expression dtype anywhere within it.
      */
     virtual bool is_expression() const;

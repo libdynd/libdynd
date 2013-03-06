@@ -71,7 +71,7 @@ namespace detail {
             if (paramtype.get_type_id() == string_type_id &&
                     static_cast<const string_dtype *>(paramtype.extended())->get_encoding() == string_encoding_utf_8) {
                 reinterpret_cast<string_dtype_data*>(data)->begin = const_cast<char *>(value);
-                reinterpret_cast<string_dtype_data*>(data)->end = const_cast<char *>(value + N);
+                reinterpret_cast<string_dtype_data*>(data)->end = const_cast<char *>(value + N - 1);
             } else {
                 dtype_assign(paramtype, metadata, data, make_fixedstring_dtype(N, string_encoding_utf_8),
                         NULL, value);

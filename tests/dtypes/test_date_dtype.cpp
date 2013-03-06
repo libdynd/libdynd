@@ -318,8 +318,6 @@ TEST(DateDType, StrFTimeOfMultiDim) {
     const char *vals_0[] = {"1920-03-12", "2013-01-01"};
     const char *vals_1[] = {"2000-12-25"};
     ndobject a = make_strided_ndobject(2, -1, make_date_dtype());
-    a.debug_print(cout);
-    cout << a << endl;
     a.vals_at(0) = vals_0;
     a.vals_at(1) = vals_1;
 
@@ -338,7 +336,7 @@ TEST(DateDType, StrFTimeBadFormat) {
 
     a = ndobject("1955-03-13").cast_scalars(d).eval();
     // Invalid format string should raise an error.
-    EXPECT_THROW(a.f("strftime", "%Y %x %s"), runtime_error);
+    EXPECT_THROW(a.f("strftime", "%Y %x %s").eval(), runtime_error);
 }
 #endif
 
