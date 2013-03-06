@@ -82,10 +82,13 @@ elseif(APPLE)
     target_link_libraries(test_dynd
         dynd
         )
+    add_custom_command(TARGET test_dynd
+        POST_BUILD COMMAND
+        ${CMAKE_INSTALL_NAME_TOOL} -add_rpath "@loader_path/../"
+        $<TARGET_FILE:test_dynd>)
 else()
-    set_target_properties(test_dynd
-                PROPERTIES COMPILE_FLAGS
-                "-pthread")
+    set_target_properties(test_dynd PROPERTIES
+        COMPILE_FLAGS "-pthread")
     #-Wno-unnamed-type-template-args 
 
     target_link_libraries(test_dynd
