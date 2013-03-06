@@ -53,7 +53,7 @@ configure_file(
 
 # Extract the version number from the version string
 string(REPLACE "v" "" DYND_VERSION "${DYND_VERSION_STRING}")
-string(REPLACE "-" ";" DYND_VERSION "${DYND_VERSION_STRING}")
+string(REPLACE "-" ";" DYND_VERSION "${DYND_VERSION}")
 list(GET DYND_VERSION 0 "${DYND_VERSION}")
 
 set(dynd_SRC
@@ -306,8 +306,7 @@ elseif(APPLE)
         PROPERTIES
         SOVERSION ${DYND_VERSION}
         VERSION ${DYND_VERSION}
-        BUILD_WITH_INSTALL_RPATH OFF
-        #INSTALL_RPATH "${LIB_INSTALL_RPATH}"
+        BUILD_WITH_INSTALL_RPATH ON
         INSTALL_NAME_DIR "@rpath"
         )
 else()
