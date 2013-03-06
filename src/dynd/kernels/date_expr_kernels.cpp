@@ -89,7 +89,7 @@ namespace {
                 datetime::date_to_struct_tm(date, datetime::datetime_unit_day, tm_val);
 
                 // Call strftime, growing the string buffer if needed so it fits
-                size_t str_size = e->format_size + 16;
+                size_t str_size = format_size + 16;
                 allocator->allocate(dst_md->blockref, str_size,
                                 1, &dst_d->begin, &dst_d->end);
                 for(int attempt = 0; attempt < 3; ++attempt) {
