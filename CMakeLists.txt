@@ -304,8 +304,8 @@ elseif(APPLE)
     add_library(dynd SHARED ${dynd_SRC})
     set_target_properties(dynd
         PROPERTIES
-        SOVERSION ${DYND_VERSION}
-        VERSION ${DYND_VERSION}
+        #SOVERSION ${DYND_VERSION}
+        #VERSION ${DYND_VERSION}
         BUILD_WITH_INSTALL_RPATH ON
         INSTALL_NAME_DIR "@rpath"
         )
