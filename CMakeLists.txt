@@ -304,6 +304,9 @@ elseif(APPLE)
     add_library(dynd SHARED ${dynd_SRC})
     set_target_properties(dynd
         PROPERTIES
+        # For now, during development, embed the full version string
+        # to reduce the chance of accidentally linking the wrong one.
+        OUTPUT_NAME "dynd_${DYND_VERSION_STRING}"
         #SOVERSION ${DYND_VERSION}
         #VERSION ${DYND_VERSION}
         BUILD_WITH_INSTALL_RPATH ON
