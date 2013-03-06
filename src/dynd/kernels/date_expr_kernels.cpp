@@ -4,6 +4,7 @@
 //
 
 #include <time.h>
+#include <cerrno>
 
 #include <dynd/kernels/date_expr_kernels.hpp>
 #include <dynd/kernels/elwise_expr_kernels.hpp>
