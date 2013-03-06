@@ -314,6 +314,21 @@ TEST(DateDType, StrFTimeOfConvert) {
     EXPECT_EQ("2000 12 25", b.at(2).as<string>());
 }
 
+TEST(DateDType, StrFTimeOfMultiDim) {
+    const char *vals_0[] = {"1920-03-12", "2013-01-01"};
+    const char *vals_1[] = {"2000-12-25"};
+    ndobject a = make_strided_ndobject(2, -1, make_date_dtype());
+    a.debug_print(cout);
+    cout << a << endl;
+    a.vals_at(0) = vals_0;
+    a.vals_at(1) = vals_1;
+
+    a = a.f("strftime", "%d/%m/%Y");
+    EXPECT_EQ("12/03/1920", a.at(0, 0).as<string>());
+    EXPECT_EQ("01/01/2013", a.at(0, 1).as<string>());
+    EXPECT_EQ("25/12/2000", a.at(1, 0).as<string>());
+}
+
 #if defined(_MSC_VER)
 // Only the Windows strftime seems to support this behavior without
 // writing our own strftime format parser.

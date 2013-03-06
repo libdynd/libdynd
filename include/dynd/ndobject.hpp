@@ -335,6 +335,27 @@ public:
     ndobject_vals vals() const;
 
     /**
+     * A helper for assigning to the values indexed in an ndobject.
+     */
+    ndobject_vals vals_at(const irange& i0) const;
+
+    /**
+     * A helper for assigning to the values indexed in an ndobject.
+     */
+    ndobject_vals vals_at(const irange& i0, const irange& i1) const;
+
+    /**
+     * A helper for assigning to the values indexed in an ndobject.
+     */
+    ndobject_vals vals_at(const irange& i0, const irange& i1, const irange& i2) const;
+
+    /**
+     * A helper for assigning to the values indexed in an ndobject.
+     */
+    ndobject_vals vals_at(const irange& i0, const irange& i1, const irange& i2, const irange& i3) const;
+
+
+    /**
      * Evaluates the ndobject, attempting to do the minimum work
      * required. If the ndobject is not ane expression, simply
      * returns it as is, otherwise evaluates into a new copy.
@@ -629,6 +650,27 @@ inline ndobject make_strided_ndobject(intptr_t shape0, intptr_t shape1, intptr_t
 
 inline ndobject_vals ndobject::vals() const {
     return ndobject_vals(*this);
+}
+
+inline ndobject_vals ndobject::vals_at(const irange& i0) const {
+    return ndobject_vals(at_array(1, &i0, false));
+}
+
+inline ndobject_vals ndobject::vals_at(const irange& i0, const irange& i1) const {
+    irange i[2] = {i0, i1};
+    return ndobject_vals(at_array(2, i, false));
+}
+
+inline ndobject_vals ndobject::vals_at(const irange& i0, const irange& i1,
+                const irange& i2) const {
+    irange i[3] = {i0, i1, i2};
+    return ndobject_vals(at_array(3, i, false));
+}
+
+inline ndobject_vals ndobject::vals_at(const irange& i0, const irange& i1,
+                const irange& i2, const irange& i3) const {
+    irange i[4] = {i0, i1, i2, i3};
+    return ndobject_vals(at_array(4, i, false));
 }
 
 ///////////// Initializer list constructor implementation /////////////////////////
