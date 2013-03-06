@@ -51,6 +51,11 @@ configure_file(
     "${CMAKE_CURRENT_SOURCE_DIR}/src/dynd/git_version.cpp.in"
     "${CMAKE_CURRENT_BINARY_DIR}/src/dynd/git_version.cpp" @ONLY)
 
+# Extract the version number from the version string
+string(REPLACE "v" "" DYND_VERSION "${DYND_VERSION_STRING}")
+string(REPLACE "-" ";" DYND_VERSION "${DYND_VERSION_STRING}")
+list(GET DYND_VERSION 0 "${DYND_VERSION}")
+
 set(dynd_SRC
     # CodeGen
     src/dynd/codegen/unary_kernel_adapter_codegen_windows_x64.cpp
@@ -290,6 +295,18 @@ source_group("Internal Headers" REGULAR_EXPRESSION "src/dynd/.*hpp")
 
 if(WIN32)
     add_library(dynd STATIC ${dynd_SRC})
+elseif(APPLE)
+    # MW: The INSTALL_NAME_DIR and rpath stuff is a bit confusing,
+    #     hopefully someone who really knows this stuff can fix it
+    #     up one day.
+    add_library(dynd SHARED ${dynd_SRC})
+    set_target_properties(dynd
+        PROPERTIES
+        SOVERSION ${DYND_VERSION}
+        VERSION ${DYND_VERSION}
+        #INSTALL_RPATH "${LIB_INSTALL_RPATH}"
+        INSTALL_NAME_DIR "@rpath"
+        )
 else()
     add_library(dynd SHARED ${dynd_SRC})
 endif()
