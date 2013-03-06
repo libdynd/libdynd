@@ -49,7 +49,7 @@ public:
                     const eval::eval_context *ectx) const;
 };
 
-inline dtype make_dtype_dtype(size_t alignment) {
+inline dtype make_dtype_dtype() {
     return dtype(new dtype_dtype(), false);
 }
 

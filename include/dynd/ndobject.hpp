@@ -35,6 +35,7 @@ enum ndobject_access_flags {
 std::ostream& operator<<(std::ostream& o, const ndobject& rhs);
 
 class ndobject_vals;
+class ndobject_vals_at;
 
 /**
  * This is the primary multi-dimensional array class.
@@ -337,22 +338,22 @@ public:
     /**
      * A helper for assigning to the values indexed in an ndobject.
      */
-    ndobject_vals vals_at(const irange& i0) const;
+    ndobject_vals_at vals_at(const irange& i0) const;
 
     /**
      * A helper for assigning to the values indexed in an ndobject.
      */
-    ndobject_vals vals_at(const irange& i0, const irange& i1) const;
+    ndobject_vals_at vals_at(const irange& i0, const irange& i1) const;
 
     /**
      * A helper for assigning to the values indexed in an ndobject.
      */
-    ndobject_vals vals_at(const irange& i0, const irange& i1, const irange& i2) const;
+    ndobject_vals_at vals_at(const irange& i0, const irange& i1, const irange& i2) const;
 
     /**
      * A helper for assigning to the values indexed in an ndobject.
      */
-    ndobject_vals vals_at(const irange& i0, const irange& i1, const irange& i2, const irange& i3) const;
+    ndobject_vals_at vals_at(const irange& i0, const irange& i1, const irange& i2, const irange& i3) const;
 
 
     /**
@@ -501,6 +502,7 @@ public:
 
     friend std::ostream& operator<<(std::ostream& o, const ndobject& rhs);
     friend class ndobject_vals;
+    friend class ndobject_vals_at;
 };
 
 ndobject operator+(const ndobject& op0, const ndobject& op1);
@@ -561,6 +563,66 @@ public:
 
     friend class ndobject;
     friend ndobject_vals ndobject::vals() const;
+};
+
+/**
+ * This is a helper class like ndobject_vals, but it holds a reference
+ * to the temporary ndobject. This is needed by vals_at.
+ *
+ */
+class ndobject_vals_at {
+    ndobject m_arr;
+    ndobject_vals_at(const ndobject& arr)
+        : m_arr(arr) {
+    }
+
+#ifdef DYND_RVALUE_REFS
+    ndobject_vals_at(ndobject&& arr)
+        : m_arr(DYND_MOVE(arr)) {
+    }
+#endif
+
+    // Non-copyable, not default-constructable
+    ndobject_vals_at(const ndobject_vals&);
+    ndobject_vals_at& operator=(const ndobject_vals_at&);
+public:
+    /**
+     * Assigns values from an array to the internally referenced array.
+     * this does a val_assign with the default assignment error mode.
+     */
+    ndobject_vals_at& operator=(const ndobject& rhs) {
+        m_arr.val_assign(rhs);
+        return *this;
+    }
+
+    /** Does a value-assignment from the rhs C++ scalar. */
+    template<class T>
+    typename enable_if<is_dtype_scalar<T>::value, ndobject_vals&>::type operator=(const T& rhs) {
+        m_arr.val_assign(make_dtype<T>(), NULL, (const char *)&rhs);
+        return *this;
+    }
+    /**
+     * Does a value-assignment from the rhs C++ boolean scalar.
+     *
+     * By default, many things are convertible to bool, and this will cause
+     * screwed up assignments if we accept any such thing. Thus, we use
+     * enable_if to only allow bools here instead of just accepting "const bool&"
+     * as would seem obvious.
+     */
+    template<class T>
+    typename enable_if<is_type_bool<T>::value, ndobject_vals&>::type  operator=(const T& rhs) {
+        dynd_bool v = rhs;
+        m_arr.val_assign(make_dtype<dynd_bool>(), NULL, (const char *)&v);
+        return *this;
+    }
+
+    // TODO: Could also do +=, -=, *=, etc.
+
+    friend class ndobject;
+    friend ndobject_vals_at ndobject::vals_at(const irange&) const;
+    friend ndobject_vals_at ndobject::vals_at(const irange&, const irange&) const;
+    friend ndobject_vals_at ndobject::vals_at(const irange&, const irange&, const irange&) const;
+    friend ndobject_vals_at ndobject::vals_at(const irange&, const irange&, const irange&, const irange&) const;
 };
 
 /** Makes a strided ndobject with uninitialized data. If axis_perm is NULL, it is C-order */
@@ -652,25 +714,25 @@ inline ndobject_vals ndobject::vals() const {
     return ndobject_vals(*this);
 }
 
-inline ndobject_vals ndobject::vals_at(const irange& i0) const {
-    return ndobject_vals(at_array(1, &i0, false));
+inline ndobject_vals_at ndobject::vals_at(const irange& i0) const {
+    return ndobject_vals_at(at_array(1, &i0, false));
 }
 
-inline ndobject_vals ndobject::vals_at(const irange& i0, const irange& i1) const {
+inline ndobject_vals_at ndobject::vals_at(const irange& i0, const irange& i1) const {
     irange i[2] = {i0, i1};
-    return ndobject_vals(at_array(2, i, false));
+    return ndobject_vals_at(at_array(2, i, false));
 }
 
-inline ndobject_vals ndobject::vals_at(const irange& i0, const irange& i1,
+inline ndobject_vals_at ndobject::vals_at(const irange& i0, const irange& i1,
                 const irange& i2) const {
     irange i[3] = {i0, i1, i2};
-    return ndobject_vals(at_array(3, i, false));
+    return ndobject_vals_at(at_array(3, i, false));
 }
 
-inline ndobject_vals ndobject::vals_at(const irange& i0, const irange& i1,
+inline ndobject_vals_at ndobject::vals_at(const irange& i0, const irange& i1,
                 const irange& i2, const irange& i3) const {
     irange i[4] = {i0, i1, i2, i3};
-    return ndobject_vals(at_array(4, i, false));
+    return ndobject_vals_at(at_array(4, i, false));
 }
 
 ///////////// Initializer list constructor implementation /////////////////////////

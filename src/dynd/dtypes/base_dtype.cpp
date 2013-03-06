@@ -174,21 +174,26 @@ void base_dtype::metadata_destruct(char *DYND_UNUSED(metadata)) const
 }
 
 // TODO: Make this a pure virtual function eventually
-void base_dtype::metadata_debug_print(const char *DYND_UNUSED(metadata), std::ostream& DYND_UNUSED(o), const std::string& DYND_UNUSED(indent)) const
+void base_dtype::metadata_debug_print(const char *DYND_UNUSED(metadata),
+                std::ostream& DYND_UNUSED(o),
+                const std::string& DYND_UNUSED(indent)) const
 {
     stringstream ss;
     ss << "TODO: metadata_debug_print for " << dtype(this, true) << " is not implemented";
     throw std::runtime_error(ss.str());
 }
 
-void base_dtype::data_destruct(const char *metadata, char *data) const
+void base_dtype::data_destruct(const char *DYND_UNUSED(metadata),
+                char *DYND_UNUSED(data)) const
 {
     stringstream ss;
     ss << "TODO: data_destruct for " << dtype(this, true) << " is not implemented";
     throw runtime_error(ss.str());
 }
 
-void base_dtype::data_destruct_strided(const char *metadata, char *data, intptr_t stride, size_t count) const
+void base_dtype::data_destruct_strided(const char *DYND_UNUSED(metadata),
+                char *DYND_UNUSED(data), intptr_t DYND_UNUSED(stride),
+                size_t DYND_UNUSED(count)) const
 {
     stringstream ss;
     ss << "TODO: data_destruct_strided for " << dtype(this, true) << " is not implemented";
