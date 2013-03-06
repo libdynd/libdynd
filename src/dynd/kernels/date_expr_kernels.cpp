@@ -95,7 +95,7 @@ namespace {
                 for(int attempt = 0; attempt < 3; ++attempt) {
                     // Force errno to zero
                     errno = 0;
-                    size_t len = strftime(dst_d->begin, str_size, e->format, &tm_val);
+                    size_t len = strftime(dst_d->begin, str_size, format, &tm_val);
                     if (len > 0) {
                         allocator->resize(dst_md->blockref, len, &dst_d->begin, &dst_d->end);
                         break;
