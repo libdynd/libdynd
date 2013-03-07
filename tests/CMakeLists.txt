@@ -28,6 +28,7 @@ set(tests_SRC
     dtypes/test_datashape_parser.cpp
     dtypes/test_date_dtype.cpp
     dtypes/test_dtype.cpp
+    dtypes/test_dtype_dtype.cpp
     dtypes/test_dtype_assign.cpp
     dtypes/test_dtype_casting.cpp
     dtypes/test_dtype_promotion.cpp

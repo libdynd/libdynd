@@ -126,6 +126,11 @@ public:
 
     virtual ~base_dtype();
 
+    /** For debugging purposes, the dtype's use count */
+    inline int32_t get_use_count() const {
+        return m_use_count;
+    }
+
     /** The dtype's type id */
     inline type_id_t get_type_id() const {
         return static_cast<type_id_t>(m_members.type_id);

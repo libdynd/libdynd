@@ -77,6 +77,12 @@ public:
     ndobject(const char *cstr);
     /** Construct a string from a UTF8 buffer and specified buffer size */
     ndobject(const char *str, size_t size);
+    /**
+     * Constructs a scalar with the 'dtype' dtype.
+     * NOTE: Does NOT create a scalar of the provided dtype,
+     *       use dynd::empty(dtype) for that!
+     */
+    ndobject(const dtype& dt);
 
     /**
      * Constructs an array from a multi-dimensional C-style array.
@@ -981,11 +987,19 @@ namespace detail {
     };
 
     std::string ndobject_as_string(const ndobject& lhs, assign_error_mode errmode);
+    dtype ndobject_as_dtype(const ndobject& lhs, assign_error_mode errmode);
 
     template <>
     struct ndobject_as_helper<std::string> {
         static std::string as(const ndobject& lhs, assign_error_mode errmode) {
             return ndobject_as_string(lhs, errmode);
+        }
+    };
+
+    template <>
+    struct ndobject_as_helper<dtype> {
+        static dtype as(const ndobject& lhs, assign_error_mode errmode) {
+            return ndobject_as_dtype(lhs, errmode);
         }
     };
 

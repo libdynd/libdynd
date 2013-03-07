@@ -12,6 +12,7 @@
 #include <dynd/dtypes/string_dtype.hpp>
 #include <dynd/dtypes/bytes_dtype.hpp>
 #include <dynd/dtypes/fixedbytes_dtype.hpp>
+#include <dynd/dtypes/dtype_dtype.hpp>
 #include <dynd/dtypes/convert_dtype.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/kernels/comparison_kernels.hpp>
@@ -347,6 +348,13 @@ ndobject::ndobject(const char *str, size_t size)
     ndobject temp = make_utf8_ndobject(str, size);
     temp.swap(*this);
 }
+ndobject::ndobject(const dtype& dt)
+{
+    ndobject temp = ndobject(make_ndobject_memory_block(make_dtype_dtype(), 0, NULL));
+    temp.swap(*this);
+    dtype(dt).swap(reinterpret_cast<dtype_dtype_data *>(get_ndo()->m_data_pointer)->dt);
+}
+
 
 ndobject dynd::detail::make_from_vec<std::string>::make(const std::vector<std::string>& vec)
 {
@@ -975,7 +983,7 @@ ndobject ndobject::view_scalars(const dtype& scalar_dtype) const
     return make_ndobject_clone_with_new_dtype(*this, viewed_dtype);
 }
 
-std::string dynd::detail::ndobject_as_string(const ndobject& lhs, assign_error_mode DYND_UNUSED(errmode))
+std::string dynd::detail::ndobject_as_string(const ndobject& lhs, assign_error_mode errmode)
 {
     if (!lhs.is_scalar()) {
         throw std::runtime_error("can only convert ndobjects with 0 dimensions to scalars");
@@ -986,7 +994,20 @@ std::string dynd::detail::ndobject_as_string(const ndobject& lhs, assign_error_m
         temp = temp.cast_scalars(make_string_dtype(string_encoding_utf_8)).eval();
     }
     const base_string_dtype *esd = static_cast<const base_string_dtype *>(temp.get_dtype().extended());
-    return esd->get_utf8_string(temp.get_ndo_meta(), temp.get_ndo()->m_data_pointer, assign_error_none);
+    return esd->get_utf8_string(temp.get_ndo_meta(), temp.get_ndo()->m_data_pointer, errmode);
+}
+
+dtype dynd::detail::ndobject_as_dtype(const ndobject& lhs, assign_error_mode errmode)
+{
+    if (!lhs.is_scalar()) {
+        throw std::runtime_error("can only convert ndobjects with 0 dimensions to scalars");
+    }
+
+    ndobject temp = lhs;
+    if (temp.get_dtype().get_type_id() != dtype_type_id) {
+        temp = temp.cast_scalars(make_dtype_dtype()).eval();
+    }
+    return dtype(reinterpret_cast<const dtype_dtype_data *>(temp.get_readonly_originptr())->dt, true);
 }
 
 void ndobject::debug_print(std::ostream& o, const std::string& indent) const

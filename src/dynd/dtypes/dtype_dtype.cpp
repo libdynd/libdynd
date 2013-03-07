@@ -15,7 +15,7 @@ using namespace std;
 using namespace dynd;
 
 dtype_dtype::dtype_dtype()
-    : base_dtype(dtype_type_id, expression_kind, sizeof(const base_dtype *),
+    : base_dtype(dtype_type_id, custom_kind, sizeof(const base_dtype *),
                     sizeof(const base_dtype *),
                     dtype_flag_scalar|dtype_flag_zeroinit|dtype_flag_destructor,
                     0, 0)

@@ -16,6 +16,7 @@
 #include <dynd/dtypes/json_dtype.hpp>
 #include <dynd/dtypes/date_dtype.hpp>
 #include <dynd/dtypes/bytes_dtype.hpp>
+#include <dynd/dtypes/dtype_dtype.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -66,6 +67,7 @@ namespace {
             builtin_types["json"] = make_json_dtype();
             builtin_types["date"] = make_date_dtype();
             builtin_types["bytes"] = make_bytes_dtype(1);
+            builtin_types["dtype"] = make_dtype_dtype();
             for (map<string, dtype>::iterator i = builtin_types.begin();
                             i != builtin_types.end(); ++i) {
                 reserved_typenames.insert(i->first);
