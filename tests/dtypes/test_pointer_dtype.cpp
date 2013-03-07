@@ -9,6 +9,7 @@
 #include "inc_gtest.hpp"
 
 #include <dynd/dtypes/pointer_dtype.hpp>
+#include <dynd/ndobject.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -35,6 +36,7 @@ TEST(PointerDType, PointerToBuiltIn) {
     EXPECT_EQ(sizeof(void *), d.get_alignment());
     EXPECT_NE(0u, d.get_flags()&dtype_flag_blockref);
     EXPECT_EQ(make_dtype<char>(), d.value_dtype());
+    EXPECT_EQ(make_dtype<char>(), d.p("target_dtype").as<dtype>());
     EXPECT_EQ(make_pointer_dtype<void>(), d.operand_dtype());
     EXPECT_EQ(make_pointer_dtype<void>(), d.storage_dtype());
     // As a special case, the pointer_dtype says it isn't an expression dtype,

@@ -8,8 +8,9 @@
 #include <dynd/dtypes/dtype_alignment.hpp>
 #include <dynd/shape_tools.hpp>
 #include <dynd/exceptions.hpp>
-#include <dynd/gfunc/callable.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
+#include <dynd/gfunc/callable.hpp>
+#include <dynd/gfunc/make_callable.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -628,6 +629,23 @@ void strided_dim_dtype::reorder_default_constructed_strides(char *dst_metadata,
     }
 }
 
+static dtype get_element_dtype(const dtype& dt) {
+    const strided_dim_dtype *d = static_cast<const strided_dim_dtype *>(dt.extended());
+    return d->get_element_dtype();
+}
+
+static pair<string, gfunc::callable> fixed_dim_dtype_properties[] = {
+    pair<string, gfunc::callable>("element_dtype", gfunc::make_callable(&get_element_dtype, "self"))
+};
+
+void strided_dim_dtype::get_dynamic_dtype_properties(
+                const std::pair<std::string, gfunc::callable> **out_properties,
+                size_t *out_count) const
+{
+    *out_properties = fixed_dim_dtype_properties;
+    *out_count = sizeof(fixed_dim_dtype_properties) / sizeof(fixed_dim_dtype_properties[0]);
+}
+
 void strided_dim_dtype::get_dynamic_ndobject_properties(const std::pair<std::string, gfunc::callable> **out_properties, size_t *out_count) const
 {
     *out_properties = m_ndobject_properties.empty() ? NULL : &m_ndobject_properties[0];
@@ -639,3 +657,4 @@ void strided_dim_dtype::get_dynamic_ndobject_functions(const std::pair<std::stri
     *out_functions = m_ndobject_functions.empty() ? NULL : &m_ndobject_functions[0];
     *out_count = (int)m_ndobject_functions.size();
 }
+

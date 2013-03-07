@@ -19,6 +19,12 @@
 using namespace std;
 using namespace dynd;
 
+TEST(StridedArrayDType, Basic) {
+    dtype d = make_strided_dim_dtype(make_dtype<int32_t>());
+
+    EXPECT_EQ(make_dtype<int32_t>(), d.p("element_dtype").as<dtype>());
+}
+
 TEST(StridedArrayDType, ReplaceScalarTypes) {
     dtype dafloat, dadouble, daint32;
     dafloat = make_strided_dim_dtype(make_dtype<float>());

@@ -8,6 +8,7 @@
 #include <dynd/memblock/pod_memory_block.hpp>
 #include <dynd/kernels/string_assignment_kernels.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
+#include <dynd/gfunc/make_callable.hpp>
 
 #include <algorithm>
 
@@ -294,3 +295,21 @@ void pointer_dtype::metadata_debug_print(const char *metadata, std::ostream& o, 
         m_target_dtype.extended()->metadata_debug_print(metadata + sizeof(pointer_dtype_metadata), o, indent + " ");
     }
 }
+
+static dtype property_get_target_dtype(const dtype& dt) {
+    const pointer_dtype *pd = static_cast<const pointer_dtype *>(dt.extended());
+    return pd->get_target_dtype();
+}
+
+static pair<string, gfunc::callable> dtype_properties[] = {
+    pair<string, gfunc::callable>("target_dtype", gfunc::make_callable(&property_get_target_dtype, "self"))
+};
+
+void pointer_dtype::get_dynamic_dtype_properties(
+                const std::pair<std::string, gfunc::callable> **out_properties,
+                size_t *out_count) const
+{
+    *out_properties = dtype_properties;
+    *out_count = sizeof(dtype_properties) / sizeof(dtype_properties[0]);
+}
+

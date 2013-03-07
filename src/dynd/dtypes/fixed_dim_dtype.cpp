@@ -625,24 +625,36 @@ static intptr_t get_fixed_dim_stride(const dtype& dt) {
     return d->get_fixed_stride();
 }
 
+static dtype get_element_dtype(const dtype& dt) {
+    const fixed_dim_dtype *d = static_cast<const fixed_dim_dtype *>(dt.extended());
+    return d->get_element_dtype();
+}
+
 static pair<string, gfunc::callable> fixed_dim_dtype_properties[] = {
     pair<string, gfunc::callable>("fixed_dim_size", gfunc::make_callable(&get_fixed_dim_size, "self")),
-    pair<string, gfunc::callable>("fixed_dim_stride", gfunc::make_callable(&get_fixed_dim_stride, "self"))
+    pair<string, gfunc::callable>("fixed_dim_stride", gfunc::make_callable(&get_fixed_dim_stride, "self")),
+    pair<string, gfunc::callable>("element_dtype", gfunc::make_callable(&get_element_dtype, "self"))
 };
 
-void fixed_dim_dtype::get_dynamic_dtype_properties(const std::pair<std::string, gfunc::callable> **out_properties, size_t *out_count) const
+void fixed_dim_dtype::get_dynamic_dtype_properties(
+                const std::pair<std::string, gfunc::callable> **out_properties,
+                size_t *out_count) const
 {
     *out_properties = fixed_dim_dtype_properties;
     *out_count = sizeof(fixed_dim_dtype_properties) / sizeof(fixed_dim_dtype_properties[0]);
 }
 
-void fixed_dim_dtype::get_dynamic_ndobject_properties(const std::pair<std::string, gfunc::callable> **out_properties, size_t *out_count) const
+void fixed_dim_dtype::get_dynamic_ndobject_properties(
+                const std::pair<std::string, gfunc::callable> **out_properties,
+                size_t *out_count) const
 {
     *out_properties = m_ndobject_properties.empty() ? NULL : &m_ndobject_properties[0];
     *out_count = (int)m_ndobject_properties.size();
 }
 
-void fixed_dim_dtype::get_dynamic_ndobject_functions(const std::pair<std::string, gfunc::callable> **out_functions, size_t *out_count) const
+void fixed_dim_dtype::get_dynamic_ndobject_functions(
+                const std::pair<std::string, gfunc::callable> **out_functions,
+                size_t *out_count) const
 {
     *out_functions = m_ndobject_functions.empty() ? NULL : &m_ndobject_functions[0];
     *out_count = (int)m_ndobject_functions.size();

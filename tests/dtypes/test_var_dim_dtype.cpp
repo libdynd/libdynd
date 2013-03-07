@@ -19,6 +19,12 @@
 using namespace std;
 using namespace dynd;
 
+TEST(VarArrayDType, Basic) {
+    dtype d = make_var_dim_dtype(make_dtype<int32_t>());
+
+    EXPECT_EQ(make_dtype<int32_t>(), d.p("element_dtype").as<dtype>());
+}
+
 TEST(VarArrayDType, Shape) {
     dtype dfloat = make_dtype<float>();
     dtype darr1 = make_strided_dim_dtype(dfloat);

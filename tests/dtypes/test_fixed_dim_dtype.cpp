@@ -29,6 +29,7 @@ TEST(FixedArrayDType, Create) {
     EXPECT_EQ(4u, d.get_alignment());
     EXPECT_EQ(12u, d.get_data_size());
     EXPECT_FALSE(d.is_expression());
+    EXPECT_EQ(make_dtype<int32_t>(), d.p("element_dtype").as<dtype>());
     EXPECT_EQ(make_dtype<int32_t>(), d.at(-3));
     EXPECT_EQ(make_dtype<int32_t>(), d.at(-2));
     EXPECT_EQ(make_dtype<int32_t>(), d.at(-1));

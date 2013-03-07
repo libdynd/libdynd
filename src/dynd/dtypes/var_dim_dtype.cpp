@@ -16,6 +16,7 @@
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/kernels/var_dim_assignment_kernels.hpp>
 #include <dynd/gfunc/callable.hpp>
+#include <dynd/gfunc/make_callable.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -611,6 +612,23 @@ void var_dim_dtype::reorder_default_constructed_strides(char *dst_metadata,
         m_element_dtype.extended()->reorder_default_constructed_strides(dst_metadata + sizeof(var_dim_dtype_metadata),
                         src_child_dtype, src_metadata);
     }
+}
+
+static dtype get_element_dtype(const dtype& dt) {
+    const strided_dim_dtype *d = static_cast<const strided_dim_dtype *>(dt.extended());
+    return d->get_element_dtype();
+}
+
+static pair<string, gfunc::callable> fixed_dim_dtype_properties[] = {
+    pair<string, gfunc::callable>("element_dtype", gfunc::make_callable(&get_element_dtype, "self"))
+};
+
+void var_dim_dtype::get_dynamic_dtype_properties(
+                const std::pair<std::string, gfunc::callable> **out_properties,
+                size_t *out_count) const
+{
+    *out_properties = fixed_dim_dtype_properties;
+    *out_count = sizeof(fixed_dim_dtype_properties) / sizeof(fixed_dim_dtype_properties[0]);
 }
 
 void var_dim_dtype::get_dynamic_ndobject_properties(const std::pair<std::string, gfunc::callable> **out_properties, size_t *out_count) const

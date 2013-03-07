@@ -71,6 +71,11 @@ template <> struct box_result<ndobject> {
         return const_cast<ndobject&>(v).release();
     }
 };
+template <> struct box_result<dtype> {
+    inline static ndobject_preamble *box(const dtype& v) {
+        return ndobject(v).release();
+    }
+};
 template <> struct box_result<std::string> {
     inline static ndobject_preamble *box(const std::string& v) {
         return ndobject(v).release();

@@ -91,6 +91,10 @@ public:
     void metadata_finalize_buffers(char *metadata) const;
     void metadata_destruct(char *metadata) const;
     void metadata_debug_print(const char *metadata, std::ostream& o, const std::string& indent) const;
+
+    void get_dynamic_dtype_properties(
+                    const std::pair<std::string, gfunc::callable> **out_properties,
+                    size_t *out_count) const;
 };
 
 inline dtype make_pointer_dtype(const dtype& target_dtype) {
