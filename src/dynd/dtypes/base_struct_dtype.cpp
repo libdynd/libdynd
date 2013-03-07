@@ -130,3 +130,45 @@ size_t base_struct_dtype::make_elwise_property_setter_kernel(
     throw runtime_error(ss.str());
 }
 
+void base_struct_dtype::data_destruct(const char *metadata, char *data) const
+{
+    const dtype *field_types = get_field_types();
+    const size_t *metadata_offsets = get_metadata_offsets();
+    const size_t *data_offsets = get_data_offsets(metadata);
+    size_t field_count = get_field_count();
+    for (size_t i = 0; i != field_count; ++i) {
+        const dtype& dt = field_types[i];
+        if (dt.get_flags()&dtype_flag_destructor) {
+            dt.extended()->data_destruct(
+                            metadata + metadata_offsets[i],
+                            data + data_offsets[i]);
+        }
+    }
+}
+
+void base_struct_dtype::data_destruct_strided(const char *metadata, char *data,
+                intptr_t stride, size_t count) const
+{
+    const dtype *field_types = get_field_types();
+    const size_t *metadata_offsets = get_metadata_offsets();
+    const size_t *data_offsets = get_data_offsets(metadata);
+    size_t field_count = get_field_count();
+    // Destruct all the fields a chunk at a time, in an
+    // attempt to have some kind of locality
+    while (count > 0) {
+        size_t chunk_size = min(count, DYND_BUFFER_CHUNK_SIZE);
+        for (size_t i = 0; i != field_count; ++i) {
+            const dtype& dt = field_types[i];
+            if (dt.get_flags()&dtype_flag_destructor) {
+                dt.extended()->data_destruct_strided(
+                                metadata + metadata_offsets[i],
+                                data + data_offsets[i],
+                                stride, chunk_size);
+            }
+        }
+        data += stride * chunk_size;
+        count -= chunk_size;
+    }
+}
+
+

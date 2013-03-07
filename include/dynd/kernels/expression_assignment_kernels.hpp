@@ -10,9 +10,6 @@
 
 namespace dynd {
 
-/** The number of elements buffered when chaining expressions */
-#define DYND_BUFFER_CHUNK_SIZE ((size_t)128)
-
 /**
  * Makes a kernel which does an assignment when
  * at least one of dst_dt and src_dt is an

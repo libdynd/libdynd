@@ -64,6 +64,10 @@ public:
                     const char *dst_metadata, size_t dst_elwise_property_index,
                     const char *src_metadata,
                     kernel_request_t kernreq, const eval::eval_context *ectx) const;
+
+    void data_destruct(const char *metadata, char *data) const;
+    void data_destruct_strided(const char *metadata, char *data,
+                    intptr_t stride, size_t count) const;
 };
 
 

@@ -13,6 +13,9 @@
 #include <dynd/dtype_assign.hpp>
 #include <dynd/dtypes/type_id.hpp>
 
+/** The number of elements buffered when chaining expressions */
+#define DYND_BUFFER_CHUNK_SIZE ((size_t)128)
+
 namespace dynd {
 
 /** Typedef for a unary operation on a single element */
