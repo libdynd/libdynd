@@ -353,8 +353,35 @@ ndobject::ndobject(const dtype& dt)
     ndobject temp = ndobject(make_ndobject_memory_block(make_dtype_dtype(), 0, NULL));
     temp.swap(*this);
     dtype(dt).swap(reinterpret_cast<dtype_dtype_data *>(get_ndo()->m_data_pointer)->dt);
+    get_ndo()->m_flags = read_access_flag | immutable_access_flag;
 }
 
+
+ndobject dynd::detail::make_from_vec<dtype>::make(const std::vector<dtype>& vec)
+{
+    dtype dt = make_strided_dim_dtype(make_dtype_dtype());
+    char *data_ptr = NULL;
+    ndobject result(make_ndobject_memory_block(dt.extended()->get_metadata_size(),
+                    sizeof(dtype_dtype_data) * vec.size(),
+                    dt.get_alignment(), &data_ptr));
+    // The main ndobject metadata
+    ndobject_preamble *preamble = result.get_ndo();
+    preamble->m_data_pointer = data_ptr;
+    preamble->m_data_reference = NULL;
+    preamble->m_dtype = dt.release();
+    preamble->m_flags = read_access_flag | immutable_access_flag;
+    // The metadata for the strided and string parts of the dtype
+    strided_dim_dtype_metadata *sa_md = reinterpret_cast<strided_dim_dtype_metadata *>(
+                                            result.get_ndo_meta());
+    sa_md->size = vec.size();
+    sa_md->stride = vec.empty() ? 0 : sizeof(dtype_dtype_data);
+    // The data
+    dtype_dtype_data *data = reinterpret_cast<dtype_dtype_data *>(data_ptr);
+    for (size_t i = 0, i_end = vec.size(); i != i_end; ++i) {
+        data[i].dt = dtype(vec[i]).release();
+    }
+    return result;
+}
 
 ndobject dynd::detail::make_from_vec<std::string>::make(const std::vector<std::string>& vec)
 {

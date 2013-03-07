@@ -951,6 +951,11 @@ namespace detail {
     };
 
     template <>
+    struct make_from_vec<dtype> {
+        static ndobject make(const std::vector<dtype>& vec);
+    };
+
+    template <>
     struct make_from_vec<std::string> {
         static ndobject make(const std::vector<std::string>& vec);
     };

@@ -41,6 +41,10 @@ public:
         return &m_field_types[0];
     }
 
+    const std::vector<dtype> get_field_types_vector() const {
+        return m_field_types;
+    }
+
     const std::string *get_field_names() const {
         return &m_field_names[0];
     }
@@ -117,8 +121,12 @@ public:
 
     void foreach_leading(char *data, const char *metadata, foreach_fn_t callback, void *callback_data) const;
 
-    void get_dynamic_dtype_properties(const std::pair<std::string, gfunc::callable> **out_properties, size_t *out_count) const;
-    void get_dynamic_ndobject_properties(const std::pair<std::string, gfunc::callable> **out_properties, size_t *out_count) const;
+    void get_dynamic_dtype_properties(
+                    const std::pair<std::string, gfunc::callable> **out_properties,
+                    size_t *out_count) const;
+    void get_dynamic_ndobject_properties(
+                    const std::pair<std::string, gfunc::callable> **out_properties,
+                    size_t *out_count) const;
 }; // class fixedstruct_dtype
 
 /** Makes a struct dtype with the specified fields */
