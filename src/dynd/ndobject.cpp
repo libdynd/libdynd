@@ -1032,7 +1032,7 @@ dtype dynd::detail::ndobject_as_dtype(const ndobject& lhs, assign_error_mode err
 
     ndobject temp = lhs;
     if (temp.get_dtype().get_type_id() != dtype_type_id) {
-        temp = temp.cast_scalars(make_dtype_dtype()).eval();
+        temp = temp.cast_udtype(make_dtype_dtype(), errmode).eval();
     }
     return dtype(reinterpret_cast<const dtype_dtype_data *>(temp.get_readonly_originptr())->dt, true);
 }
