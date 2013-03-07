@@ -90,6 +90,10 @@ public:
     size_t iterdata_construct(iterdata_common *iterdata, const char **inout_metadata, size_t ndim, const intptr_t* shape, dtype& out_uniform_dtype) const;
     size_t iterdata_destruct(iterdata_common *iterdata, size_t ndim) const;
 
+    void data_destruct(const char *metadata, char *data) const;
+    void data_destruct_strided(const char *metadata, char *data,
+                    intptr_t stride, size_t count) const;
+
     size_t make_assignment_kernel(
                     hierarchical_kernel *out, size_t offset_out,
                     const dtype& dst_dt, const char *dst_metadata,

@@ -441,6 +441,28 @@ size_t strided_dim_dtype::iterdata_destruct(iterdata_common *iterdata, size_t nd
     return inner_size + sizeof(strided_dim_dtype_iterdata);
 }
 
+void strided_dim_dtype::data_destruct(const char *metadata, char *data) const
+{
+    const strided_dim_dtype_metadata *md = reinterpret_cast<const strided_dim_dtype_metadata *>(metadata);
+    m_element_dtype.extended()->data_destruct_strided(
+                    metadata + sizeof(strided_dim_dtype_metadata),
+                    data, md->stride, md->size);
+}
+
+void strided_dim_dtype::data_destruct_strided(const char *metadata, char *data,
+                intptr_t stride, size_t count) const
+{
+    const strided_dim_dtype_metadata *md = reinterpret_cast<const strided_dim_dtype_metadata *>(metadata);
+    metadata += sizeof(strided_dim_dtype_metadata);
+    intptr_t child_stride = md->stride;
+    size_t child_size = md->size;
+
+    for (size_t i = 0; i != count; ++i, data += stride) {
+        m_element_dtype.extended()->data_destruct_strided(
+                        metadata, data, child_stride, child_size);
+    }
+}
+
 size_t strided_dim_dtype::make_assignment_kernel(
                 hierarchical_kernel *out, size_t offset_out,
                 const dtype& dst_dt, const char *dst_metadata,

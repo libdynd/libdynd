@@ -46,6 +46,11 @@ void free_executable_memory_block(memory_block_data *memblock);
  * This should only be called by the memory_block decref code.
  */
 void free_ndobject_memory_block(memory_block_data *memblock);
+/**
+ * INTERNAL: Frees a memory_block created by make_objectarray_memory_block.
+ * This should only be called by the memory_block decref code.
+ */
+void free_objectarray_memory_block(memory_block_data *memblock);
 
 
 /**
@@ -84,8 +89,10 @@ void dynd::detail::memory_block_free(memory_block_data *memblock)
             free_zeroinit_memory_block(memblock);
             return;
         }
-        case objectarray_memory_block_type:
-            throw runtime_error("object_memory_block_type not supported yet");
+        case objectarray_memory_block_type: {
+            free_objectarray_memory_block(memblock);
+            return;
+        }
         case executable_memory_block_type:
             free_executable_memory_block(memblock);
             return;

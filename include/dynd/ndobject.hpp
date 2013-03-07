@@ -1023,11 +1023,35 @@ ndobject eval_raw_copy(const dtype& dt, const char *metadata, const char *data);
 ndobject empty(const dtype& dt);
 
 /**
+ * Constructs an uninitialized ndobject of the given dtype,
+ * specified as a string. This is a shortcut for expressions
+ * like
+ *
+ *      ndobject a = empty("10, int32");
+ */
+template<int N>
+inline ndobject empty(const char (&dshape)[N]) {
+    return empty(dtype(dshape, dshape + N - 1));
+}
+
+/**
  * Constructs a writeable uninitialized ndobject of the specified dtype.
  * This dtype should be at least one dimensional, and is initialized
  * using the specified dimension size.
  */
 ndobject empty(intptr_t dim0, const dtype& dt);
+
+/**
+ * Constructs an uninitialized ndobject of the given dtype,
+ * specified as a string. This is a shortcut for expressions
+ * like
+ *
+ *      ndobject a = empty(10, "M, int32");
+ */
+template<int N>
+inline ndobject empty(intptr_t dim0, const char (&dshape)[N]) {
+    return empty(dim0, dtype(dshape, dshape + N - 1));
+}
 
 /**
  * Constructs a writeable uninitialized ndobject of the specified dtype.
@@ -1037,11 +1061,35 @@ ndobject empty(intptr_t dim0, const dtype& dt);
 ndobject empty(intptr_t dim0, intptr_t dim1, const dtype& dt);
 
 /**
+ * Constructs an uninitialized ndobject of the given dtype,
+ * specified as a string. This is a shortcut for expressions
+ * like
+ *
+ *      ndobject a = empty(10, 10, "M, N, int32");
+ */
+template<int N>
+inline ndobject empty(intptr_t dim0, intptr_t dim1, const char (&dshape)[N]) {
+    return empty(dim0, dim1, dtype(dshape, dshape + N - 1));
+}
+
+/**
  * Constructs a writeable uninitialized ndobject of the specified dtype.
  * This dtype should be at least three dimensional, and is initialized
  * using the specified dimension sizes.
  */
 ndobject empty(intptr_t dim0, intptr_t dim1, intptr_t dim2, const dtype& dt);
+
+/**
+ * Constructs an uninitialized ndobject of the given dtype,
+ * specified as a string. This is a shortcut for expressions
+ * like
+ *
+ *      ndobject a = empty(10, 10, 10, "M, N, R, int32");
+ */
+template<int N>
+inline ndobject empty(intptr_t dim0, intptr_t dim1, intptr_t dim2, const char (&dshape)[N]) {
+    return empty(dim0, dim1, dim2, dtype(dshape, dshape + N - 1));
+}
 
 /**
  * Constructs an ndobject with the same shape and memory layout

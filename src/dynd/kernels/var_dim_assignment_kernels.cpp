@@ -40,12 +40,22 @@ namespace {
                     throw runtime_error("Cannot assign to an uninitialized dynd var_dim which has a non-zero offset");
                 }
                 // If we're writing to an empty array, have to allocate the output
-                memory_block_pod_allocator_api *allocator = get_memory_block_pod_allocator_api(e->dst_md->blockref);
+                memory_block_data *memblock = e->dst_md->blockref;
+                if (memblock->m_type == objectarray_memory_block_type) {
+                    memory_block_objectarray_allocator_api *allocator =
+                                    get_memory_block_objectarray_allocator_api(memblock);
 
-                // Allocate the output array data
-                char *dst_end = NULL;
-                allocator->allocate(e->dst_md->blockref, e->dst_md->stride,
-                            e->dst_target_alignment, &dst_d->begin, &dst_end);
+                    // Allocate the output array data
+                    dst_d->begin = allocator->allocate(memblock, 1);
+                } else {
+                    memory_block_pod_allocator_api *allocator =
+                                    get_memory_block_pod_allocator_api(memblock);
+
+                    // Allocate the output array data
+                    char *dst_end = NULL;
+                    allocator->allocate(memblock, e->dst_md->stride,
+                                e->dst_target_alignment, &dst_d->begin, &dst_end);
+                }
                 dst_d->size = 1;
                 // Copy a single input to the newly allocated element
                 opchild(dst_d->begin, 0, src, 0, 1, echild);
@@ -124,12 +134,22 @@ namespace {
                     intptr_t dim_size = src_d->size;
                     intptr_t dst_stride = e->dst_md->stride, src_stride = e->src_md->stride;
                     // If we're writing to an empty array, have to allocate the output
-                    memory_block_pod_allocator_api *allocator = get_memory_block_pod_allocator_api(e->dst_md->blockref);
+                    memory_block_data *memblock = e->dst_md->blockref;
+                    if (memblock->m_type == objectarray_memory_block_type) {
+                        memory_block_objectarray_allocator_api *allocator =
+                                        get_memory_block_objectarray_allocator_api(memblock);
 
-                    // Allocate the output array data
-                    char *dst_end = NULL;
-                    allocator->allocate(e->dst_md->blockref, dim_size * dst_stride,
-                                e->dst_target_alignment, &dst_d->begin, &dst_end);
+                        // Allocate the output array data
+                        dst_d->begin = allocator->allocate(memblock, dim_size);
+                    } else {
+                        memory_block_pod_allocator_api *allocator =
+                                        get_memory_block_pod_allocator_api(memblock);
+
+                        // Allocate the output array data
+                        char *dst_end = NULL;
+                        allocator->allocate(memblock, dim_size * dst_stride,
+                                    e->dst_target_alignment, &dst_d->begin, &dst_end);
+                    }
                     dst_d->size = dim_size;
                     // Copy to the newly allocated element
                     dst = dst_d->begin;
@@ -233,12 +253,22 @@ namespace {
                 intptr_t dim_size = e->src_dim_size;
                 intptr_t dst_stride = e->dst_md->stride, src_stride = e->src_stride;
                 // If we're writing to an empty array, have to allocate the output
-                memory_block_pod_allocator_api *allocator = get_memory_block_pod_allocator_api(e->dst_md->blockref);
+                memory_block_data *memblock = e->dst_md->blockref;
+                if (memblock->m_type == objectarray_memory_block_type) {
+                    memory_block_objectarray_allocator_api *allocator =
+                                    get_memory_block_objectarray_allocator_api(memblock);
 
-                // Allocate the output array data
-                char *dst_end = NULL;
-                allocator->allocate(e->dst_md->blockref, dim_size * dst_stride,
-                            e->dst_target_alignment, &dst_d->begin, &dst_end);
+                    // Allocate the output array data
+                    dst_d->begin = allocator->allocate(memblock, dim_size);
+                } else {
+                    memory_block_pod_allocator_api *allocator =
+                                    get_memory_block_pod_allocator_api(memblock);
+
+                    // Allocate the output array data
+                    char *dst_end = NULL;
+                    allocator->allocate(memblock, dim_size * dst_stride,
+                                e->dst_target_alignment, &dst_d->begin, &dst_end);
+                }
                 dst_d->size = dim_size;
                 // Copy to the newly allocated element
                 dst = dst_d->begin;

@@ -25,6 +25,11 @@ var_dim_dtype::var_dim_dtype(const dtype& element_dtype)
                     sizeof(const char *), sizeof(var_dim_dtype_metadata),
                     dtype_flag_zeroinit|dtype_flag_blockref)
 {
+    // NOTE: The element dtype may have dtype_flag_destructor set. In this case,
+    //       the var_dim dtype does NOT need to also set it, because the lifetime
+    //       of the elements it allocates is owned by the objectarray_memory_block,
+    //       not by the var_dim elements.
+
     // Copy ndobject properties and functions from the first non-uniform dimension
     get_nonuniform_ndobject_properties_and_functions(m_ndobject_properties, m_ndobject_functions);
 }
