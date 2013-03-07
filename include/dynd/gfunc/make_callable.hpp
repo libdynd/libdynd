@@ -11,6 +11,7 @@
 #include <dynd/dtypes/fixed_dim_dtype.hpp>
 #include <dynd/dtypes/void_pointer_dtype.hpp>
 #include <dynd/dtypes/string_dtype.hpp>
+#include <dynd/dtypes/dtype_dtype.hpp>
 
 namespace dynd { namespace gfunc {
 
@@ -33,7 +34,7 @@ template <> struct parameter_type_of<float> {typedef float type;};
 template <> struct parameter_type_of<double> {typedef double type;};
 template <typename T> struct parameter_type_of<std::complex<T> > {typedef std::complex<T> type;};
 template <> struct parameter_type_of<ndobject> {typedef ndobject_preamble *type;};
-template <> struct parameter_type_of<dtype> {typedef base_dtype *type;};
+template <> struct parameter_type_of<dtype> {typedef const base_dtype *type;};
 template <> struct parameter_type_of<std::string> {typedef string_dtype_data type;};
 
 template <typename T> struct make_parameter_dtype {inline static dtype make() {
@@ -51,7 +52,7 @@ template <> struct make_parameter_dtype<ndobject> {inline static dtype make() {
         return dtype(new void_pointer_dtype, false);
     }};
 template <> struct make_parameter_dtype<dtype> {inline static dtype make() {
-        return dtype(new void_pointer_dtype, false);
+        return make_dtype_dtype();
     }};
 template <> struct make_parameter_dtype<std::string> {inline static dtype make() {
         return make_string_dtype(string_encoding_utf_8);
@@ -100,12 +101,8 @@ template <> struct unbox_param<ndobject> {
     }
 };
 template <> struct unbox_param<dtype> {
-    inline static dtype unbox(base_dtype *v) {
-        if ((reinterpret_cast<uintptr_t>(v)&(~builtin_type_id_mask)) == 0) {
-            return dtype(static_cast<type_id_t>(reinterpret_cast<uintptr_t>(v)));
-        } else {
-            return dtype(v, true);
-        }
+    inline static dtype unbox(const base_dtype *v) {
+        return dtype(v, true);
     }
 };
 template <> struct unbox_param<std::string> {
