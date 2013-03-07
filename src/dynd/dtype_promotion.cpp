@@ -186,6 +186,15 @@ dtype dynd::promote_dtypes_arithmetic(const dtype& dt0, const dtype& dt1)
         }
     }
 
+    // dtype, string -> dtype
+    if (dt0_val.get_type_id() == dtype_type_id && dt1_val.get_kind() == string_kind) {
+        return dt0_val;
+    }
+    // string, dtype -> dtype
+    if (dt0_val.get_kind() == string_kind && dt1_val.get_type_id() == dtype_type_id) {
+        return dt1_val;
+    }
+
     // In general, if one type is void, just return the other type
     if (dt0_val.get_type_id() == void_type_id) {
         return dt1_val;

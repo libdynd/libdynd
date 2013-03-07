@@ -114,11 +114,7 @@ namespace {
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             const string& s = e->src_string_dt->get_utf8_string(e->src_metadata, src, e->errmode);
-            dtype dt = dtype(s);
-            // Free the destination reference if necessary
-            base_dtype_decref(reinterpret_cast<const dtype_dtype_data *>(dst)->dt);
-            // Transfer dt's reference to dst
-            reinterpret_cast<dtype_dtype_data *>(dst)->dt = dt.release();
+            dtype(s).swap(reinterpret_cast<dtype_dtype_data *>(dst)->dt);
         }
 
         static void destruct(kernel_data_prefix *extra)
@@ -141,7 +137,11 @@ namespace {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             const base_dtype *bd = reinterpret_cast<const dtype_dtype_data *>(src)->dt;
             stringstream ss;
-            bd->print_dtype(ss);
+            if (is_builtin_dtype(bd)) {
+                ss << dtype(bd, true);
+            } else {
+                bd->print_dtype(ss);
+            }
             e->dst_string_dt->set_utf8_string(e->dst_metadata, dst, e->errmode,
                             ss.str());
         }
@@ -161,7 +161,7 @@ size_t dtype_dtype::make_assignment_kernel(
                 const dtype& dst_dt, const char *dst_metadata,
                 const dtype& src_dt, const char *src_metadata,
                 kernel_request_t kernreq, assign_error_mode errmode,
-                const eval::eval_context *DYND_UNUSED(ectx)) const
+                const eval::eval_context *ectx) const
 {
     offset_out = make_kernreq_to_single_kernel_adapter(out, offset_out, kernreq);
 
@@ -181,6 +181,11 @@ size_t dtype_dtype::make_assignment_kernel(
             e->src_metadata = src_metadata;
             e->errmode = errmode;
             return offset_out + sizeof(string_to_dtype_kernel_extra);
+        } else if (!src_dt.is_builtin()) {
+            return src_dt.extended()->make_assignment_kernel(out, offset_out,
+                            dst_dt, dst_metadata,
+                            src_dt, src_metadata,
+                            kernreq, errmode, ectx);
         }
     } else {
         if (dst_dt.get_kind() == string_kind) {

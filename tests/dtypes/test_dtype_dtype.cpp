@@ -38,6 +38,16 @@ TEST(DTypeDType, BasicNDobject) {
     EXPECT_EQ(make_dtype<int32_t>(), a.as<dtype>());
 }
 
+TEST(DTypeDType, StringCasting) {
+    ndobject a;
+
+    a = ndobject("int32").cast_udtype(make_dtype_dtype());
+    a = a.eval();
+    EXPECT_EQ(dtype_type_id, a.get_dtype().get_type_id());
+    EXPECT_EQ(make_dtype<int32_t>(), a.as<dtype>());
+    EXPECT_EQ("int32", a.as<string>());
+}
+
 TEST(DTypeDType, ScalarRefCount) {
     ndobject a;
     dtype d, d2;
