@@ -173,7 +173,7 @@ TEST(DTypeDType, VarArrayRefCount) {
     // 1D Var Array
     a = empty(make_var_dim_dtype(make_dtype_dtype()));
     // It should have an objectarray memory block type
-    EXPECT_EQ(objectarray_memory_block_type,
+    EXPECT_EQ((uint32_t)objectarray_memory_block_type,
                     reinterpret_cast<const var_dim_dtype_metadata *>(
                         a.get_ndo_meta())->blockref->m_type);
     a.vals() = empty("10, dtype");
