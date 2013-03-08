@@ -362,7 +362,7 @@ void fixed_dim_dtype::metadata_copy_construct(char *dst_metadata, const char *sr
 
 void fixed_dim_dtype::metadata_reset_buffers(char *metadata) const
 {
-    if (!m_element_dtype.is_builtin()) {
+    if (m_element_dtype.get_metadata_size() > 0) {
         m_element_dtype.extended()->metadata_reset_buffers(metadata);
     }
 }

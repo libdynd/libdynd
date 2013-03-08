@@ -144,9 +144,16 @@ void json_dtype::metadata_copy_construct(char *dst_metadata, const char *src_met
     }
 }
 
-void json_dtype::metadata_reset_buffers(char *DYND_UNUSED(metadata)) const
+void json_dtype::metadata_reset_buffers(char *metadata) const
 {
-    throw runtime_error("TODO implement json_dtype::metadata_reset_buffers");
+    const json_dtype_metadata *md = reinterpret_cast<const json_dtype_metadata *>(metadata);
+    if (md->blockref != NULL && md->blockref->m_type == pod_memory_block_type) {
+        memory_block_pod_allocator_api *allocator = get_memory_block_pod_allocator_api(md->blockref);
+        allocator->reset(md->blockref);
+    } else {
+        throw runtime_error("can only reset the buffers of a dynd json string "
+                        "dtype if the memory block reference was constructed by default");
+    }
 }
 
 void json_dtype::metadata_finalize_buffers(char *metadata) const

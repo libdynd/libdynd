@@ -342,8 +342,9 @@ void strided_dim_dtype::metadata_copy_construct(char *dst_metadata, const char *
 
 void strided_dim_dtype::metadata_reset_buffers(char *metadata) const
 {
-    if (!m_element_dtype.is_builtin()) {
-        m_element_dtype.extended()->metadata_reset_buffers(metadata + sizeof(strided_dim_dtype_metadata));
+    if (m_element_dtype.get_metadata_size() > 0) {
+        m_element_dtype.extended()->metadata_reset_buffers(
+                        metadata + sizeof(strided_dim_dtype_metadata));
     }
 }
 

@@ -471,9 +471,30 @@ void var_dim_dtype::metadata_copy_construct(char *dst_metadata, const char *src_
     }
 }
 
-void var_dim_dtype::metadata_reset_buffers(char *DYND_UNUSED(metadata)) const
+void var_dim_dtype::metadata_reset_buffers(char *metadata) const
 {
-    throw runtime_error("TODO implement var_dim_dtype::metadata_reset_buffers");
+    const var_dim_dtype_metadata *md = reinterpret_cast<const var_dim_dtype_metadata *>(metadata);
+    if (md->blockref != NULL) {
+        uint32_t br_type = md->blockref->m_type;
+        if (br_type == zeroinit_memory_block_type) {
+            memory_block_pod_allocator_api *allocator =
+                            get_memory_block_pod_allocator_api(md->blockref);
+            allocator->reset(md->blockref);
+            return;
+        } else if (br_type == objectarray_memory_block_type) {
+            memory_block_objectarray_allocator_api *allocator =
+                            get_memory_block_objectarray_allocator_api(md->blockref);
+            allocator->reset(md->blockref);
+            return;
+        }
+    }
+    if (m_element_dtype.get_metadata_size() > 0) {
+        m_element_dtype.extended()->metadata_reset_buffers(
+                        metadata + sizeof(var_dim_dtype_metadata));
+    }
+
+    throw runtime_error("can only reset the buffers of a var_dim "
+                    "dtype if the memory block reference was constructed by default");
 }
 
 void var_dim_dtype::metadata_finalize_buffers(char *metadata) const

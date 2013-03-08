@@ -416,7 +416,7 @@ void struct_dtype::metadata_reset_buffers(char *metadata) const
 {
     for (size_t i = 0; i < m_field_types.size(); ++i) {
         const dtype& field_dt = m_field_types[i];
-        if (!field_dt.is_builtin()) {
+        if (field_dt.get_metadata_size() > 0) {
             field_dt.extended()->metadata_reset_buffers(metadata + m_metadata_offsets[i]);
         }
     }
