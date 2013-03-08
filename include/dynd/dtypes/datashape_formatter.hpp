@@ -35,16 +35,21 @@ std::string format_datashape(const dtype& d,
                 bool multiline = true);
 
 /**
- * Formats the given dtype + metadata as a Blaze
- * datashape, writing the output to the stream.
+ * Formats the given dtype + metadata + data as a Blaze
+ * datashape, writing the output to the stream. One can
+ * provide just the dtype (NULL metadata/data) or just
+ * the dtype/metadata (NULL data) as well as specifying
+ * a full ndobject dtype/metadata/data.
  *
  * \param o  The stream where to write the datashape.
  * \param dt  The data type.
  * \param metadata  The data type's metadata. This may be NULL.
+ * \param data  The data for a leading element corresponding to the dtype/metadata.
+ *              This may be NULL.
  * \param multiline  If true, split the datashape across multiple lines.
  */
-void format_datashape(std::ostream& o, const dtype& dt, const char *metadata,
-                bool multiline);
+void format_datashape(std::ostream& o, const dtype& dt,
+                const char *metadata, const char *data, bool multiline);
 
 
 } // namespace dynd
