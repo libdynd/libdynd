@@ -108,7 +108,11 @@ static void format_uniform_dim_datashape(std::ostream& o,
                 o << "VarDim, ";
             } else {
                 const var_dim_dtype_data *d = reinterpret_cast<const var_dim_dtype_data *>(data);
-                o << d->size << ", ";
+                if (d->begin == NULL) {
+                    o << "VarDim, ";
+                } else {
+                    o << d->size << ", ";
+                }
             }
             format_datashape(o, vad->get_element_dtype(),
                             metadata ? (metadata + sizeof(var_dim_dtype_metadata)) : NULL, NULL,
