@@ -197,6 +197,9 @@ static void format_datashape(std::ostream& o, const dtype& dt, const char *metad
         case complex_kind:
             format_complex_datashape(o, dt);
             break;
+        case expression_kind:
+            format_datashape(o, dt.value_dtype(), NULL, indent, multiline, identifier);
+            break;
         default:
             o << dt;
             break;

@@ -22,7 +22,10 @@ using namespace dynd;
 TEST(FixedStructDType, Basic) {
     EXPECT_NE(make_fixedstruct_dtype(make_dtype<int>(), "x"),
                     make_fixedstruct_dtype(make_dtype<int>(), "y"));
+    EXPECT_NE(make_fixedstruct_dtype(make_dtype<float>(), "x"),
+                    make_fixedstruct_dtype(make_dtype<int>(), "x"));
     EXPECT_NE(dtype("{x: int32}"), dtype("{y: int32}"));
+    EXPECT_NE(dtype("{x: float32}"), dtype("{x: int32}"));
 }
 
 TEST(FixedStructDType, CreateOneField) {

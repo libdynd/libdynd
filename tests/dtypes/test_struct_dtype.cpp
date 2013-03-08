@@ -23,6 +23,8 @@ using namespace dynd;
 TEST(StructDType, Basic) {
     EXPECT_NE(make_struct_dtype(make_dtype<int>(), "x"),
                     make_struct_dtype(make_dtype<int>(), "y"));
+    EXPECT_NE(make_struct_dtype(make_dtype<float>(), "x"),
+                    make_struct_dtype(make_dtype<int>(), "x"));
 }
 
 TEST(StructDType, CreateOneField) {
