@@ -119,6 +119,10 @@ std::ostream& dynd::operator<<(std::ostream& o, type_id_t tid)
             return (o << "view");
         case property_type_id:
             return (o << "property");
+        case expr_type_id:
+            return (o << "expr");
+        case unary_expr_type_id:
+            return (o << "unary_expr");
         case groupby_type_id:
             return (o << "groupby");
         default:

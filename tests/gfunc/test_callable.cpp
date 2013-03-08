@@ -131,7 +131,7 @@ static complex<float> three_parameters(bool x, int a, int b) {
 
 TEST(GFuncCallable, ThreeParameters) {
     // Create the callable
-    gfunc::callable c = gfunc::make_callable(&three_parameters, "x", "a", "b");
+    gfunc::callable c = gfunc::make_callable(&three_parameters, "s", "a", "b");
     EXPECT_EQ(make_fixedstruct_dtype(make_dtype<dynd_bool>(), "s", make_dtype<int>(), "a", make_dtype<int>(), "b"),
             c.get_parameters_dtype());
 
@@ -156,7 +156,7 @@ TEST(GFuncCallable, ThreeParameters) {
 
 TEST(GFuncCallable, ThreeParametersWithOneDefault) {
     // Create the callable
-    gfunc::callable c = gfunc::make_callable_with_default(&three_parameters, "x", "a", "b", 12);
+    gfunc::callable c = gfunc::make_callable_with_default(&three_parameters, "s", "a", "b", 12);
     EXPECT_EQ(make_fixedstruct_dtype(make_dtype<dynd_bool>(), "s", make_dtype<int>(), "a", make_dtype<int>(), "b"),
             c.get_parameters_dtype());
 
@@ -173,7 +173,7 @@ TEST(GFuncCallable, ThreeParametersWithOneDefault) {
 
 TEST(GFuncCallable, ThreeParametersWithTwoDefaults) {
     // Create the callable
-    gfunc::callable c = gfunc::make_callable_with_default(&three_parameters, "x", "a", "b", 6, 12);
+    gfunc::callable c = gfunc::make_callable_with_default(&three_parameters, "s", "a", "b", 6, 12);
     EXPECT_EQ(make_fixedstruct_dtype(make_dtype<dynd_bool>(), "s", make_dtype<int>(), "a", make_dtype<int>(), "b"),
             c.get_parameters_dtype());
 
@@ -191,7 +191,7 @@ TEST(GFuncCallable, ThreeParametersWithTwoDefaults) {
 
 TEST(GFuncCallable, ThreeParametersWithThreeDefaults) {
     // Create the callable
-    gfunc::callable c = gfunc::make_callable_with_default(&three_parameters, "x", "a", "b", false, 6, 12);
+    gfunc::callable c = gfunc::make_callable_with_default(&three_parameters, "s", "a", "b", false, 6, 12);
     EXPECT_EQ(make_fixedstruct_dtype(make_dtype<dynd_bool>(), "s", make_dtype<int>(), "a", make_dtype<int>(), "b"),
             c.get_parameters_dtype());
 

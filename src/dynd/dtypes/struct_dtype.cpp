@@ -354,7 +354,8 @@ bool struct_dtype::operator==(const base_dtype& rhs) const
     } else {
         const struct_dtype *dt = static_cast<const struct_dtype*>(&rhs);
         return get_alignment() == dt->get_alignment() &&
-                m_field_types == dt->m_field_types;
+                m_field_types == dt->m_field_types &&
+                m_field_names == dt->m_field_names;
     }
 }
 

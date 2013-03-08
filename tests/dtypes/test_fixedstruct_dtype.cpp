@@ -19,6 +19,12 @@
 using namespace std;
 using namespace dynd;
 
+TEST(FixedStructDType, Basic) {
+    EXPECT_NE(make_fixedstruct_dtype(make_dtype<int>(), "x"),
+                    make_fixedstruct_dtype(make_dtype<int>(), "y"));
+    EXPECT_NE(dtype("{x: int32}"), dtype("{y: int32}"));
+}
+
 TEST(FixedStructDType, CreateOneField) {
     dtype dt;
     const fixedstruct_dtype *tdt;

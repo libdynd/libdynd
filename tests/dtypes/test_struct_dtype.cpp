@@ -20,6 +20,11 @@
 using namespace std;
 using namespace dynd;
 
+TEST(StructDType, Basic) {
+    EXPECT_NE(make_struct_dtype(make_dtype<int>(), "x"),
+                    make_struct_dtype(make_dtype<int>(), "y"));
+}
+
 TEST(StructDType, CreateOneField) {
     dtype dt;
     const struct_dtype *tdt;
