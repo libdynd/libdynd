@@ -283,85 +283,12 @@ static ndobject function_ndo_weekday(const ndobject& n) {
 }
 
 static ndobject function_ndo_replace(const ndobject& n, int32_t year, int32_t month, int32_t day) {
-    // TODO: lazy evaluation?
     if (year == numeric_limits<int32_t>::max() && month == numeric_limits<int32_t>::max() &&
                     day == numeric_limits<int32_t>::max()) {
         throw std::runtime_error("no parameters provided to date.replace, should provide at least one");
     }
-    // Create the result array
-    ndobject result = empty_like(n);
-    ndobject_iter<1, 1> iter(result, n);
-
-    // Get a kernel to produce elements if the input is an expression
-    assignment_kernel k;
-    bool use_kernel = false;
-    if (iter.get_uniform_dtype<1>().get_kind() == expression_kind) {
-        make_assignment_kernel(&k, 0,
-                        iter.get_uniform_dtype<1>().value_dtype(), NULL,
-                        iter.get_uniform_dtype<1>(), iter.metadata<1>(),
-                        kernel_request_single, assign_error_default, &eval::default_eval_context);
-        use_kernel = true;
-    }
-    int32_t date;
-    const date_dtype *dd = static_cast<const date_dtype *>(iter.get_uniform_dtype<1>().value_dtype().extended());
-    datetime::date_ymd ymd;
-    if (!iter.empty()) {
-        // Loop over all the elements
-        do {
-            // Get the date
-            if (use_kernel) {
-                k.get()->get_function<unary_single_operation_t>()(
-                                reinterpret_cast<char *>(&date),
-                                iter.data<1>(), k.get());
-            } else {
-                date = *reinterpret_cast<const int32_t *>(iter.data<1>());
-            }
-            // Convert the date to a 'struct tm'
-            datetime::days_to_ymd(date, ymd);
-            // Replace the values as requested
-            if (year != numeric_limits<int32_t>::max()) {
-                ymd.year = year;
-            }
-            if (month != numeric_limits<int32_t>::max()) {
-                ymd.month = month;
-                if (-12 <= month && month <= -1) {
-                    // Use negative months to count from the end (like Python slicing, though
-                    // the standard Python datetime.date doesn't support this)
-                    ymd.month = month + 13;
-                } else if (1 <= month && month <= 12) {
-                    ymd.month = month;
-                } else {
-                    stringstream ss;
-                    ss << "invalid month value " << month;
-                    throw runtime_error(ss.str());
-                }
-                // If the day isn't also being replaced, make sure the resulting date is valid
-                if (day == numeric_limits<int32_t>::max()) {
-                    if (!datetime::is_valid_ymd(ymd)) {
-                        stringstream ss;
-                        ss << "invalid replace resulting year/month/day " << year << "/" << month << "/" << day;
-                        throw runtime_error(ss.str());
-                    }
-                }
-            }
-            if (day != numeric_limits<int32_t>::max()) {
-                int month_size = datetime::get_month_size(ymd.year, ymd.month);
-                if (1 <= day && day <= month_size) {
-                    ymd.day = day;
-                } else if (-month_size <= day && day <= -1) {
-                    // Use negative days to count from the end (like Python slicing, though
-                    // the standard Python datetime.date doesn't support this)
-                    ymd.day = day + month_size + 1;
-                } else {
-                    stringstream ss;
-                    ss << "invalid day value " << day << " for year/month " << year << "/" << month;
-                    throw runtime_error(ss.str());
-                }
-            }
-            dd->set_ymd(iter.metadata<0>(), iter.data<0>(), assign_error_none, ymd.year, ymd.month, ymd.day);
-        } while(iter.next());
-    }
-    return result;
+    return n.replace_udtype(make_unary_expr_dtype(make_date_dtype(), n.get_udtype(),
+                    make_replace_kernelgen(year, month, day)));
 }
 
 static pair<string, gfunc::callable> date_ndobject_functions[] = {

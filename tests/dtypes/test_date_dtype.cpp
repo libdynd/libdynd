@@ -374,16 +374,16 @@ TEST(DateDType, Replace) {
     param.at(1).vals() = 2012;
     EXPECT_EQ("2012-02-29", a.find_dynamic_function("replace").call_generic(param).as<string>());
     // Should throw an exception when no arguments or out of bounds arguments are provided
-    EXPECT_THROW(a.f("replace"), runtime_error);
-    EXPECT_THROW(a.f("replace", 2000, -13), runtime_error);
-    EXPECT_THROW(a.f("replace", 2000, 0), runtime_error);
-    EXPECT_THROW(a.f("replace", 2000, 13), runtime_error);
-    EXPECT_THROW(a.f("replace", 1900, 2, -29), runtime_error);
-    EXPECT_THROW(a.f("replace", 1900, 2, 0), runtime_error);
-    EXPECT_THROW(a.f("replace", 1900, 2, 29), runtime_error);
-    EXPECT_THROW(a.f("replace", 2000, 2, -30), runtime_error);
-    EXPECT_THROW(a.f("replace", 2000, 2, 0), runtime_error);
-    EXPECT_THROW(a.f("replace", 2000, 2, 30), runtime_error);
+    EXPECT_THROW(a.f("replace").eval(), runtime_error);
+    EXPECT_THROW(a.f("replace", 2000, -13).eval(), runtime_error);
+    EXPECT_THROW(a.f("replace", 2000, 0).eval(), runtime_error);
+    EXPECT_THROW(a.f("replace", 2000, 13).eval(), runtime_error);
+    EXPECT_THROW(a.f("replace", 1900, 2, -29).eval(), runtime_error);
+    EXPECT_THROW(a.f("replace", 1900, 2, 0).eval(), runtime_error);
+    EXPECT_THROW(a.f("replace", 1900, 2, 29).eval(), runtime_error);
+    EXPECT_THROW(a.f("replace", 2000, 2, -30).eval(), runtime_error);
+    EXPECT_THROW(a.f("replace", 2000, 2, 0).eval(), runtime_error);
+    EXPECT_THROW(a.f("replace", 2000, 2, 30).eval(), runtime_error);
 }
 
 TEST(DateDType, ReplaceOfConvert) {

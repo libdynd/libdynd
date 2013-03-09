@@ -12,6 +12,7 @@
 namespace dynd {
 
 expr_kernel_generator *make_strftime_kernelgen(const std::string& format);
+expr_kernel_generator *make_replace_kernelgen(int32_t year, int32_t month, int32_t day);
 
 } // namespace dynd
 

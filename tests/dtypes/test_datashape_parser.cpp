@@ -40,6 +40,11 @@ TEST(DataShapeParser, Basic) {
     EXPECT_EQ(make_date_dtype(), dtype_from_datashape("date"));
 }
 
+TEST(DataShapeParser, BasicThrow) {
+    EXPECT_THROW(dtype_from_datashape("boot"), runtime_error);
+    EXPECT_THROW(dtype_from_datashape("int33"), runtime_error);
+}
+
 TEST(DataShapeParser, StringAtoms) {
     // Default string
     EXPECT_EQ(make_string_dtype(string_encoding_utf_8),
