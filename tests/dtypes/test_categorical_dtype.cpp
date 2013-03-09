@@ -182,7 +182,7 @@ TEST(CategoricalDType, ValuesLonger) {
     int a_count = sizeof(a_uints) / sizeof(a_uints[0]);
 
     dtype dt = make_categorical_dtype(cats_vals);
-    ndobject a = ndobject(a_vals).cast_udtype(dt).eval();
+    ndobject a = ndobject(a_vals).ucast(dt).eval();
     ndobject a_view = a.p("category_ints");
 
     // Check that the categories got the right values
@@ -291,7 +291,7 @@ TEST(CategoricalDType, AssignFromOther) {
     int cats_values[] = {3, 6, 100, 1000};
     dtype cd = make_categorical_dtype(cats_values);
     int16_t a_values[] = {6, 3, 100, 3, 1000, 100, 6, 1000};
-    ndobject a = ndobject(a_values).cast_udtype(cd);
+    ndobject a = ndobject(a_values).ucast(cd);
     EXPECT_EQ(make_strided_dim_dtype(make_convert_dtype(cd, make_dtype<int16_t>())),
                     a.get_dtype());
     a = a.eval();

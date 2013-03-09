@@ -93,7 +93,7 @@ TEST(GroupByDType, MediumDeduceGroups) {
 
 TEST(GroupByDType, Struct) {
     const char *gender_cats_vals[] = {"F", "M"};
-    ndobject gender_cats = ndobject(gender_cats_vals).cast_scalars(
+    ndobject gender_cats = ndobject(gender_cats_vals).ucast(
                     make_fixedstring_dtype(1, string_encoding_ascii)).eval();
 
     // Create a simple structured array

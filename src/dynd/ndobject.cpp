@@ -854,7 +854,7 @@ namespace {
     }
 } // anonymous namespace
 
-ndobject ndobject::cast_udtype(const dtype& scalar_dtype, assign_error_mode errmode) const
+ndobject ndobject::ucast(const dtype& scalar_dtype, assign_error_mode errmode) const
 {
     // This creates a dtype which has a convert dtype for every scalar of different dtype.
     // The result has the exact same metadata and data, so we just have to swap in the new
@@ -1018,7 +1018,7 @@ std::string dynd::detail::ndobject_as_string(const ndobject& lhs, assign_error_m
 
     ndobject temp = lhs;
     if (temp.get_dtype().get_kind() != string_kind) {
-        temp = temp.cast_scalars(make_string_dtype(string_encoding_utf_8)).eval();
+        temp = temp.ucast(make_string_dtype(string_encoding_utf_8)).eval();
     }
     const base_string_dtype *esd = static_cast<const base_string_dtype *>(temp.get_dtype().extended());
     return esd->get_utf8_string(temp.get_ndo_meta(), temp.get_ndo()->m_data_pointer, errmode);
@@ -1032,7 +1032,7 @@ dtype dynd::detail::ndobject_as_dtype(const ndobject& lhs, assign_error_mode err
 
     ndobject temp = lhs;
     if (temp.get_dtype().get_type_id() != dtype_type_id) {
-        temp = temp.cast_udtype(make_dtype_dtype(), errmode).eval();
+        temp = temp.ucast(make_dtype_dtype(), errmode).eval();
     }
     return dtype(reinterpret_cast<const dtype_dtype_data *>(temp.get_readonly_originptr())->dt, true);
 }
@@ -1299,7 +1299,7 @@ ndobject dynd::groupby(const dynd::ndobject& data_values, const dynd::ndobject& 
     }
 
     // Make sure the 'by' values have the 'groups' dtype
-    ndobject by_values_as_groups = by_values.cast_udtype(groups_final);
+    ndobject by_values_as_groups = by_values.ucast(groups_final);
 
     dtype gbdt = make_groupby_dtype(data_values.get_dtype(), by_values_as_groups.get_dtype());
     const groupby_dtype *gbdt_ext = static_cast<const groupby_dtype *>(gbdt.extended());

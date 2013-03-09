@@ -24,7 +24,7 @@ dynd::busdate_dtype::busdate_dtype(busdate_roll_t roll, const bool *weekmask, co
         m_busdays_in_weekmask += weekmask[i] ? 1 : 0;
     }
     if (!holidays.is_empty()) {
-        ndobject hol = holidays.cast_scalars(make_date_dtype()).eval_immutable();
+        ndobject hol = holidays.ucast(make_date_dtype()).eval_immutable();
         // TODO: Make sure hol is contiguous and one-dimensional
         m_holidays = hol;
     }

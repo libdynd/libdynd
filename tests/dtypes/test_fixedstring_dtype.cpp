@@ -59,10 +59,10 @@ TEST(FixedstringDType, Basic) {
     a = "abcdefg";
     EXPECT_EQ(make_string_dtype(string_encoding_utf_8), a.get_dtype());
     // Convert to a fixedstring dtype for testing
-    a = a.cast_scalars(make_fixedstring_dtype(7, string_encoding_utf_8)).eval();
+    a = a.ucast(make_fixedstring_dtype(7, string_encoding_utf_8)).eval();
     EXPECT_EQ("abcdefg", a.as<string>());
 
-    a = a.cast_scalars(make_fixedstring_dtype(7, string_encoding_utf_16));
+    a = a.ucast(make_fixedstring_dtype(7, string_encoding_utf_16));
     EXPECT_EQ(make_convert_dtype(make_fixedstring_dtype(7, string_encoding_utf_16),
                     make_fixedstring_dtype(7, string_encoding_utf_8)),
                 a.get_dtype());
@@ -106,7 +106,7 @@ TEST(FixedstringDType, SingleCompare) {
     // TODO: means for not hardcoding expected results in utf string comparison tests
 
     // test utf8 kernel
-    a = a.cast_scalars(make_fixedstring_dtype(7, string_encoding_utf_8));
+    a = a.ucast(make_fixedstring_dtype(7, string_encoding_utf_8));
     a = a.eval();
     EXPECT_TRUE(a.at(0).op_sorting_less(a.at(1)));
     EXPECT_TRUE(a.at(0) < a.at(1));
@@ -119,7 +119,7 @@ TEST(FixedstringDType, SingleCompare) {
     EXPECT_TRUE(a.at(0).equals_exact(a.at(0)));
 
     // test utf16 kernel
-    a = a.cast_scalars(make_fixedstring_dtype(7, string_encoding_utf_16));
+    a = a.ucast(make_fixedstring_dtype(7, string_encoding_utf_16));
     a = a.eval();
     EXPECT_TRUE(a.at(0).op_sorting_less(a.at(1)));
     EXPECT_TRUE(a.at(0) < a.at(1));
@@ -132,7 +132,7 @@ TEST(FixedstringDType, SingleCompare) {
     EXPECT_TRUE(a.at(0).equals_exact(a.at(0)));
 
     // test utf32 kernel
-    a = a.cast_scalars(make_fixedstring_dtype(7, string_encoding_utf_32));
+    a = a.ucast(make_fixedstring_dtype(7, string_encoding_utf_32));
     a = a.eval();
     EXPECT_TRUE(a.at(0).op_sorting_less(a.at(1)));
     EXPECT_TRUE(a.at(0) < a.at(1));

@@ -451,9 +451,17 @@ public:
     }
 
     /**
-     * Converts the uniform dtype of the array into the specified dtype.
+     * Casts the uniform dtype of the array into the specified dtype.
      */
-    ndobject cast_udtype(const dtype& scalar_dtype, assign_error_mode errmode = assign_error_default) const;
+    ndobject ucast(const dtype& scalar_dtype, assign_error_mode errmode = assign_error_default) const;
+
+    /**
+     * Casts the uniform dtype of the array into the type specified as the template parameter.
+     */
+    template<class T>
+    inline ndobject ucast(assign_error_mode errmode = assign_error_default) const {
+        return ucast(make_dtype<T>(), errmode);
+    }
 
     /**
      * Replaces the uniform dtype with a new one, returning a view to

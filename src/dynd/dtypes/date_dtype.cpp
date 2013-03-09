@@ -202,9 +202,9 @@ static ndobject function_dtype_today(const dtype& dt) {
 static ndobject function_dtype_construct(const dtype& DYND_UNUSED(dt), const ndobject& year, const ndobject& month, const ndobject& day)
 {
     // TODO proper buffering
-    ndobject year_as_int = year.cast_udtype(make_dtype<int32_t>()).eval();
-    ndobject month_as_int = month.cast_udtype(make_dtype<int32_t>()).eval();
-    ndobject day_as_int = day.cast_udtype(make_dtype<int32_t>()).eval();
+    ndobject year_as_int = year.ucast(make_dtype<int32_t>()).eval();
+    ndobject month_as_int = month.ucast(make_dtype<int32_t>()).eval();
+    ndobject day_as_int = day.ucast(make_dtype<int32_t>()).eval();
     ndobject result;
 
     ndobject_iter<1,3> iter(make_date_dtype(), result, year_as_int, month_as_int, day_as_int);
@@ -283,6 +283,7 @@ static ndobject function_ndo_weekday(const ndobject& n) {
 }
 
 static ndobject function_ndo_replace(const ndobject& n, int32_t year, int32_t month, int32_t day) {
+    // TODO: Allow 'year', 'month', and 'day' to be arrays, with broadcasting, etc.
     if (year == numeric_limits<int32_t>::max() && month == numeric_limits<int32_t>::max() &&
                     day == numeric_limits<int32_t>::max()) {
         throw std::runtime_error("no parameters provided to date.replace, should provide at least one");
