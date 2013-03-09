@@ -85,7 +85,7 @@ TEST(NDObjectViews, ExpressionDType) {
     // Create a conversion from uint32_t -> uint16_t, followed by a
     // view uint16_t -> int16_t
     a = values;
-    a_u2 = a.cast_scalars<uint16_t>();
+    a_u2 = a.ucast<uint16_t>();
     EXPECT_EQ(make_strided_dim_dtype(make_convert_dtype<uint16_t, uint32_t>(), 2), a_u2.get_dtype());
 
     // Wrong size, so should throw

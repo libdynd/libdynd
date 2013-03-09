@@ -378,8 +378,8 @@ TEST(NDObjectCompare, EqualityUIntFloat) {
 
 TEST(NDObjectCompare, NaNFloat32) {
     ndobject a, b;
-    ndobject nan = ndobject("nan").cast_scalars<float>().eval();
-    ndobject pinf = ndobject("inf").cast_scalars<float>().eval();
+    ndobject nan = ndobject("nan").ucast<float>().eval();
+    ndobject pinf = ndobject("inf").ucast<float>().eval();
 
     // A NaN, compared against itself
     a = nan;
@@ -434,8 +434,8 @@ TEST(NDObjectCompare, NaNFloat32) {
 
 TEST(NDObjectCompare, NaNFloat64) {
     ndobject a, b;
-    ndobject nan = ndobject("nan").cast_scalars<double>().eval();
-    ndobject pinf = ndobject("inf").cast_scalars<double>().eval();
+    ndobject nan = ndobject("nan").ucast<double>().eval();
+    ndobject pinf = ndobject("inf").ucast<double>().eval();
 
     // A NaN, compared against itself
     a = nan;
@@ -616,7 +616,7 @@ TEST(NDObjectCompare, NaNComplexFloat32) {
     ndobject a, b;
     a = empty(make_dtype<complex<float> >());
     b = empty(make_dtype<complex<float> >());
-    float nan = ndobject("nan").cast_scalars<float>().as<float>();
+    float nan = ndobject("nan").ucast<float>().as<float>();
 
     // real component NaN, compared against itself
     cval[0] = nan;
@@ -836,7 +836,7 @@ TEST(NDObjectCompare, NaNComplexFloat32) {
 TEST(NDObjectCompare, ExpressionDType) {
     ndobject a, b;
     // One expression operand
-    a = ndobject(3).cast_scalars<float>();
+    a = ndobject(3).ucast<float>();
     b = ndobject(4.0);
     EXPECT_TRUE(a.op_sorting_less(b));
     EXPECT_TRUE(a < b);
@@ -854,8 +854,8 @@ TEST(NDObjectCompare, ExpressionDType) {
     EXPECT_TRUE(b > a);
 
     // Two expression operand
-    a = ndobject(3).cast_scalars<float>();
-    b = ndobject("2012-03-04").cast_scalars(make_date_dtype()).p("day");
+    a = ndobject(3).ucast<float>();
+    b = ndobject("2012-03-04").ucast(make_date_dtype()).p("day");
     EXPECT_TRUE(a.op_sorting_less(b));
     EXPECT_TRUE(a < b);
     EXPECT_TRUE(a <= b);
@@ -872,7 +872,7 @@ TEST(NDObjectCompare, ExpressionDType) {
     EXPECT_TRUE(b > a);
 
     // Non-comparable operands should raise
-    a = ndobject(3).cast_scalars<complex<float> >();
+    a = ndobject(3).ucast<complex<float> >();
     b = ndobject(4.0);
     EXPECT_THROW((a < b), not_comparable_error);
 }

@@ -819,19 +819,6 @@ bool ndobject::equals_exact(const ndobject& rhs) const
     }
 }
 
-ndobject ndobject::cast_scalars(const dtype& scalar_dtype, assign_error_mode errmode) const
-{
-    // This creates a dtype which has a convert dtype for every scalar of different dtype.
-    // The result has the exact same metadata and data, so we just have to swap in the new
-    // dtype in a shallow copy.
-    dtype replaced_dtype = get_dtype().with_replaced_scalar_types(scalar_dtype, errmode);
-    if (replaced_dtype == get_dtype()) {
-        return *this;
-    } else {
-        return make_ndobject_clone_with_new_dtype(*this, replaced_dtype);
-    }
-}
-
 namespace {
     struct convert_udtype_extra {
         convert_udtype_extra(const dtype& dt, assign_error_mode em)

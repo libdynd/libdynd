@@ -437,20 +437,6 @@ public:
                         const eval::eval_context *ectx = &eval::default_eval_context) const;
 
     /**
-     * Converts all the scalar dtypes of the array into the specified scalar dtype.
-     */
-    ndobject cast_scalars(const dtype& scalar_dtype, assign_error_mode errmode = assign_error_default) const;
-
-    /**
-     * Converts the array into the specified explicit scalar dtype.
-     * For example, arr.cast_scalar<float>().
-     */
-    template<class T>
-    ndobject cast_scalars(assign_error_mode errmode = assign_error_default) const {
-        return cast_scalars(make_dtype<T>(), errmode);
-    }
-
-    /**
      * Casts the uniform dtype of the array into the specified dtype.
      */
     ndobject ucast(const dtype& scalar_dtype, assign_error_mode errmode = assign_error_default) const;
