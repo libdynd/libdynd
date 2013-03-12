@@ -50,6 +50,18 @@ inline ndobject arange(const irange& i) {
  * \param start  The value placed at index 0 of the result.
  * \param stop  The value placed at index count-1 of the result.
  * \param count  The size of the result's first dimension.
+ * \param dt  The required dtype of the output.
+ */
+ndobject linspace(const ndobject& start, const ndobject& stop, intptr_t count, const dtype& dt);
+
+/**
+ * Most general linspace function, creates an array of length 'count', linearly
+ * interpolating from the value 'start' to the value 'stop'. This version
+ * figures out the dtype from that of 'start' and 'stop'.
+ *
+ * \param start  The value placed at index 0 of the result.
+ * \param stop  The value placed at index count-1 of the result.
+ * \param count  The size of the result's first dimension.
  */
 ndobject linspace(const ndobject& start, const ndobject& stop, intptr_t count);
 

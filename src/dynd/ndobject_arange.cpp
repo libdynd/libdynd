@@ -104,42 +104,35 @@ namespace {
 
 ndobject dynd::arange(const dtype& scalar_dtype, const void *beginval, const void *endval, const void *stepval)
 {
-    if (scalar_dtype.is_builtin()) {
-
 #define ONE_ARANGE_SPECIALIZATION(type) \
-        case type_id_of<type>::value: { \
-            intptr_t dim_size = arange_counter<type, dtype_kind_of<type>::value>::count(beginval, endval, stepval); \
-            ndobject result = \
-                    make_strided_ndobject(dim_size, scalar_dtype); \
-            arange_specialization<type>::arange(beginval, stepval, result); \
-            return DYND_MOVE(result); \
-        }
+    case type_id_of<type>::value: { \
+        intptr_t dim_size = arange_counter<type, dtype_kind_of<type>::value>::count(beginval, endval, stepval); \
+        ndobject result = \
+                make_strided_ndobject(dim_size, scalar_dtype); \
+        arange_specialization<type>::arange(beginval, stepval, result); \
+        return DYND_MOVE(result); \
+    }
 
-        switch (scalar_dtype.get_type_id()) {
-            ONE_ARANGE_SPECIALIZATION(int8_t);
-            ONE_ARANGE_SPECIALIZATION(int16_t);
-            ONE_ARANGE_SPECIALIZATION(int32_t);
-            ONE_ARANGE_SPECIALIZATION(int64_t);
-            ONE_ARANGE_SPECIALIZATION(uint8_t);
-            ONE_ARANGE_SPECIALIZATION(uint16_t);
-            ONE_ARANGE_SPECIALIZATION(uint32_t);
-            ONE_ARANGE_SPECIALIZATION(uint64_t);
-            ONE_ARANGE_SPECIALIZATION(float);
-            ONE_ARANGE_SPECIALIZATION(double);
-            default:
-                break;
-        }
+    switch (scalar_dtype.get_type_id()) {
+        ONE_ARANGE_SPECIALIZATION(int8_t);
+        ONE_ARANGE_SPECIALIZATION(int16_t);
+        ONE_ARANGE_SPECIALIZATION(int32_t);
+        ONE_ARANGE_SPECIALIZATION(int64_t);
+        ONE_ARANGE_SPECIALIZATION(uint8_t);
+        ONE_ARANGE_SPECIALIZATION(uint16_t);
+        ONE_ARANGE_SPECIALIZATION(uint32_t);
+        ONE_ARANGE_SPECIALIZATION(uint64_t);
+        ONE_ARANGE_SPECIALIZATION(float);
+        ONE_ARANGE_SPECIALIZATION(double);
+        default:
+            break;
+    }
 
 #undef ONE_ARANGE_SPECIALIZATION
 
-        stringstream ss;
-        ss << "arange doesn't support built-in dtype " << scalar_dtype;
-        throw runtime_error(ss.str());
-    } else {
-        stringstream ss;
-        ss << "arange doesn't support extended dtype " << scalar_dtype;
-        throw runtime_error(ss.str());
-    }
+    stringstream ss;
+    ss << "dynd arange doesn't support dtype " << scalar_dtype;
+    throw runtime_error(ss.str());
 }
 
 static void linspace_specialization(float start, float stop, intptr_t count, ndobject& result)
@@ -147,8 +140,8 @@ static void linspace_specialization(float start, float stop, intptr_t count, ndo
     intptr_t stride = result.get_strides()[0];
     char *dst = result.get_readwrite_originptr();
     for (intptr_t i = 0; i < count; ++i, dst += stride) {
-        float alpha = float(double(i) / double(count - 1));
-        *reinterpret_cast<float *>(dst) = (1 - alpha) * start + alpha * stop;
+        double val = ((count - i - 1) * double(start) + i * double(stop)) / double(count - 1);
+        *reinterpret_cast<float *>(dst) = static_cast<float>(val);
     }
 }
 
@@ -157,8 +150,8 @@ static void linspace_specialization(double start, double stop, intptr_t count, n
     intptr_t stride = result.get_strides()[0];
     char *dst = result.get_readwrite_originptr();
     for (intptr_t i = 0; i < count; ++i, dst += stride) {
-        double alpha = double(i) / double(count - 1);
-        *reinterpret_cast<double *>(dst) = (1 - alpha) * start + alpha * stop;
+        double val = ((count - i - 1) * start + i * stop) / double(count - 1);
+        *reinterpret_cast<double *>(dst) = val;
     }
 }
 
@@ -167,8 +160,9 @@ static void linspace_specialization(complex<float> start, complex<float> stop, i
     intptr_t stride = result.get_strides()[0];
     char *dst = result.get_readwrite_originptr();
     for (intptr_t i = 0; i < count; ++i, dst += stride) {
-        float alpha = float(double(i) / double(count - 1));
-        *reinterpret_cast<complex<float> *>(dst) = (1 - alpha) * start + alpha * stop;
+        complex<double> val = (double(count - i - 1) * complex<double>(start) +
+                        double(i) * complex<double>(stop)) / double(count - 1);
+        *reinterpret_cast<complex<float> *>(dst) = complex<float>(val);
     }
 }
 
@@ -177,8 +171,21 @@ static void linspace_specialization(complex<double> start, complex<double> stop,
     intptr_t stride = result.get_strides()[0];
     char *dst = result.get_readwrite_originptr();
     for (intptr_t i = 0; i < count; ++i, dst += stride) {
-        double alpha = double(i) / double(count - 1);
-        *reinterpret_cast<complex<double> *>(dst) = (1 - alpha) * start + alpha * stop;
+        complex<double> val = (double(count - i - 1) * complex<double>(start) +
+                        double(i) * complex<double>(stop)) / double(count - 1);
+        *reinterpret_cast<complex<double> *>(dst) = val;
+    }
+}
+
+ndobject dynd::linspace(const ndobject& start, const ndobject& stop, intptr_t count, const dtype& dt)
+{
+    ndobject start_cleaned = start.ucast(dt).eval();
+    ndobject stop_cleaned = stop.ucast(dt).eval();
+
+    if (start_cleaned.is_scalar() && stop_cleaned.is_scalar()) {
+        return linspace(dt, start_cleaned.get_readonly_originptr(), stop_cleaned.get_readonly_originptr(), count);
+    } else {
+        throw runtime_error("dynd::linspace presently only supports scalar parameters");
     }
 }
 
@@ -189,15 +196,7 @@ ndobject dynd::linspace(const ndobject& start, const ndobject& stop, intptr_t co
     if (dt.get_kind() == bool_kind || dt.get_kind() == int_kind || dt.get_kind() == uint_kind) {
         dt = make_dtype<double>();
     }
-    ndobject start_cleaned = start.ucast(dt, assign_error_none).eval();
-    ndobject stop_cleaned = stop.ucast(dt, assign_error_none).eval();
-
-    if (start_cleaned.is_scalar() && stop_cleaned.is_scalar()) {
-        return linspace(dt, start_cleaned.get_readonly_originptr(), stop_cleaned.get_readonly_originptr(), count);
-    } else {
-        throw runtime_error("dynd::linspace presently only supports scalar parameters");
-    }
-
+    return linspace(start, stop, count, dt);
 }
 
 ndobject dynd::linspace(const dtype& dt, const void *startval, const void *stopval, intptr_t count)
@@ -236,6 +235,6 @@ ndobject dynd::linspace(const dtype& dt, const void *startval, const void *stopv
     }
 
     stringstream ss;
-    ss << "linspace doesn't support dtype " << dt;
+    ss << "dynd linspace doesn't support dtype " << dt;
     throw runtime_error(ss.str());
 }
