@@ -819,7 +819,7 @@ bool ndobject::equals_exact(const ndobject& rhs) const
     }
 }
 
-ndobject ndobject::cast(const dtype& dt, assign_error_mode errmode) const
+ndobject ndobject::cast(const dtype& DYND_UNUSED(dt), assign_error_mode DYND_UNUSED(errmode)) const
 {
     throw runtime_error("The ndobject.cast function is not yet implemented, "
                     "use ndobject.ucast to cast the uniform type");
@@ -856,7 +856,7 @@ ndobject ndobject::ucast(const dtype& scalar_dtype, assign_error_mode errmode) c
     // The result has the exact same metadata and data, so we just have to swap in the new
     // dtype in a shallow copy.
     dtype replaced_dtype;
-    bool was_transformed;
+    bool was_transformed = false;
     cast_udtype_extra extra(scalar_dtype, errmode);
     cast_udtype(get_dtype(), &extra, replaced_dtype, was_transformed);
     if (was_transformed) {
@@ -1016,7 +1016,8 @@ std::string dynd::detail::ndobject_as_string(const ndobject& lhs, assign_error_m
     if (temp.get_dtype().get_kind() != string_kind) {
         temp = temp.ucast(make_string_dtype(string_encoding_utf_8)).eval();
     }
-    const base_string_dtype *esd = static_cast<const base_string_dtype *>(temp.get_dtype().extended());
+    const base_string_dtype *esd =
+                    static_cast<const base_string_dtype *>(temp.get_dtype().extended());
     return esd->get_utf8_string(temp.get_ndo_meta(), temp.get_ndo()->m_data_pointer, errmode);
 }
 

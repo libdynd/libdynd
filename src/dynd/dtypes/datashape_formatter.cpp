@@ -15,22 +15,22 @@ using namespace std;
 using namespace dynd;
 
 static void format_datashape(std::ostream& o, const dtype& dt, const char *metadata, const char *data,
-                const std::string& indent, bool multiline, int *identifier);
+                const std::string& indent, bool multiline, int &identifier);
 
-static void format_identifier_string(std::ostream& o, int *identifier)
+static void format_identifier_string(std::ostream& o, int &identifier)
 {
-    if (*identifier < 26) {
+    if (identifier < 26) {
         string result("A");
-        result[0] += *identifier;
+        result[0] += identifier;
         o << result;
     } else {
-        o << "X" << identifier - 26;
+        o << "X" << (identifier - 26);
     }
-    ++(*identifier);
+    ++identifier;
 }
 
 static void format_struct_datashape(std::ostream& o, const dtype& dt, const char *metadata, const char *data,
-                const std::string& indent, bool multiline, int *identifier)
+                const std::string& indent, bool multiline, int &identifier)
 {
     // The data requires metadata
     if (metadata == NULL) {
@@ -65,7 +65,7 @@ static void format_struct_datashape(std::ostream& o, const dtype& dt, const char
 
 static void format_uniform_dim_datashape(std::ostream& o,
                 const dtype& dt, const char *metadata, const char *data,
-                const std::string& indent, bool multiline, int *identifier)
+                const std::string& indent, bool multiline, int &identifier)
 {
     switch (dt.get_type_id()) {
         case strided_dim_type_id: {
@@ -209,7 +209,7 @@ static void format_complex_datashape(std::ostream& o, const dtype& dt)
 }
 
 static void format_datashape(std::ostream& o, const dtype& dt, const char *metadata, const char *data,
-                const std::string& indent, bool multiline, int *identifier)
+                const std::string& indent, bool multiline, int &identifier)
 {
     switch (dt.get_kind()) {
         case struct_kind:
@@ -246,7 +246,7 @@ string dynd::format_datashape(const ndobject& n,
     ss << prefix;
     int identifier = 0;
     ::format_datashape(ss, n.get_dtype(), n.get_ndo_meta(),
-                    n.get_readonly_originptr(), "", multiline, &identifier);
+                    n.get_readonly_originptr(), "", multiline, identifier);
     return ss.str();
 }
 
@@ -256,6 +256,6 @@ string dynd::format_datashape(const dtype& d,
     stringstream ss;
     ss << prefix;
     int identifier = 0;
-    ::format_datashape(ss, d, NULL, NULL, "", multiline, &identifier);
+    ::format_datashape(ss, d, NULL, NULL, "", multiline, identifier);
     return ss.str();
 }
