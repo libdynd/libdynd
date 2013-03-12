@@ -437,12 +437,27 @@ public:
                         const eval::eval_context *ectx = &eval::default_eval_context) const;
 
     /**
-     * Casts the uniform dtype of the array into the specified dtype.
+     * Casts the dtype of the array into the specified dtype.
+     * This casts the entire dtype. If you want to cast the
+     * uniform dtype, use 'ucast' instead.
+     *
+     * \param dt  The dtype into which the ndobject should be cast.
+     * \param errmode  Policy for dealing with errors.
      */
-    ndobject ucast(const dtype& scalar_dtype, assign_error_mode errmode = assign_error_default) const;
+    ndobject cast(const dtype& dt, assign_error_mode errmode = assign_error_default) const;
 
     /**
-     * Casts the uniform dtype of the array into the type specified as the template parameter.
+     * Casts the uniform dtype of the array into the specified dtype.
+     *
+     * \param uniform_dt  The dtype into which the ndobject's
+     *                    uniform type should be cast.
+     * \param errmode  Policy for dealing with errors.
+     */
+    ndobject ucast(const dtype& uniform_dt, assign_error_mode errmode = assign_error_default) const;
+
+    /**
+     * Casts the uniform dtype of the array into the type specified
+     * as the template parameter.
      */
     template<class T>
     inline ndobject ucast(assign_error_mode errmode = assign_error_default) const {

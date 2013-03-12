@@ -819,24 +819,33 @@ bool ndobject::equals_exact(const ndobject& rhs) const
     }
 }
 
+ndobject ndobject::cast(const dtype& dt, assign_error_mode errmode) const
+{
+    throw runtime_error("The ndobject.cast function is not yet implemented, "
+                    "use ndobject.ucast to cast the uniform type");
+}
+
 namespace {
-    struct convert_udtype_extra {
-        convert_udtype_extra(const dtype& dt, assign_error_mode em)
-            : replacement_dtype(dt), errmode(em)
+    struct cast_udtype_extra {
+        cast_udtype_extra(const dtype& dt, assign_error_mode em)
+            : replacement_dt(dt), errmode(em)
         {
         }
-        const dtype& replacement_dtype;
+        const dtype& replacement_dt;
         assign_error_mode errmode;
     };
-    static void convert_udtype(const dtype& dt, const void *extra,
+    static void cast_udtype(const dtype& dt, const void *extra,
                 dtype& out_transformed_dtype, bool& out_was_transformed)
     {
-        if (!dt.is_builtin() && dt.get_kind() == uniform_dim_kind) {
-            dt.extended()->transform_child_dtypes(&convert_udtype, extra, out_transformed_dtype, out_was_transformed);
+        if (dt.get_kind() == uniform_dim_kind) {
+            dt.extended()->transform_child_dtypes(&cast_udtype, extra, out_transformed_dtype, out_was_transformed);
         } else {
-            const convert_udtype_extra *e = reinterpret_cast<const convert_udtype_extra *>(extra);
-            out_transformed_dtype = make_convert_dtype(e->replacement_dtype, dt, e->errmode);
-            out_was_transformed= true;
+            const cast_udtype_extra *e = reinterpret_cast<const cast_udtype_extra *>(extra);
+            out_transformed_dtype = make_convert_dtype(e->replacement_dt, dt, e->errmode);
+            // Only flag the transformation if this actually created a convert dtype
+            if (out_transformed_dtype.extended() != e->replacement_dt.extended()) {
+                out_was_transformed= true;
+            }
         }
     }
 } // anonymous namespace
@@ -848,8 +857,8 @@ ndobject ndobject::ucast(const dtype& scalar_dtype, assign_error_mode errmode) c
     // dtype in a shallow copy.
     dtype replaced_dtype;
     bool was_transformed;
-    convert_udtype_extra extra(scalar_dtype, errmode);
-    convert_udtype(get_dtype(), &extra, replaced_dtype, was_transformed);
+    cast_udtype_extra extra(scalar_dtype, errmode);
+    cast_udtype(get_dtype(), &extra, replaced_dtype, was_transformed);
     if (was_transformed) {
         return make_ndobject_clone_with_new_dtype(*this, replaced_dtype);
     } else {
