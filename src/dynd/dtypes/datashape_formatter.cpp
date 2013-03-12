@@ -236,7 +236,8 @@ static void format_datashape(std::ostream& o, const dtype& dt, const char *metad
 void dynd::format_datashape(std::ostream& o, const dtype& dt, const char *metadata, const char *data,
                 bool multiline)
 {
-    ::format_datashape(o, dt, metadata, data, "", multiline, 0);
+    int identifier = 0;
+    ::format_datashape(o, dt, metadata, data, "", multiline, identifier);
 }
 
 string dynd::format_datashape(const ndobject& n,
