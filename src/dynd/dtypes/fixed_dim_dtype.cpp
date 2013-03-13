@@ -511,7 +511,7 @@ size_t fixed_dim_dtype::make_assignment_kernel(
             e->dst_stride = get_fixed_stride();
             e->src_stride = 0;
             return ::make_assignment_kernel(out, offset_out + sizeof(strided_assign_kernel_extra),
-                            m_element_dtype, dst_metadata + sizeof(strided_dim_dtype_metadata),
+                            m_element_dtype, dst_metadata,
                             src_dt, src_metadata,
                             kernel_request_strided, errmode, ectx);
         } else if (src_dt.get_type_id() == fixed_dim_type_id) {
