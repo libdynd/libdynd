@@ -137,7 +137,10 @@ size_t date_dtype::make_assignment_kernel(
                 const eval::eval_context *ectx) const
 {
     if (this == dst_dt.extended()) {
-        if (src_dt.get_kind() == string_kind) {
+        if (src_dt.get_type_id() == date_type_id) {
+            return make_pod_dtype_assignment_kernel(out, offset_out,
+                            get_data_size(), get_alignment(), kernreq);
+        } else if (src_dt.get_kind() == string_kind) {
             // Assignment from strings
             return make_string_to_date_assignment_kernel(out, offset_out,
                             src_dt, src_metadata,
