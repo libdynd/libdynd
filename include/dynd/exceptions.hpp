@@ -67,6 +67,9 @@ public:
     broadcast_error(const dtype& dst_dt, const char *dst_metadata,
                     const dtype& src_dt, const char *src_metadata);
 
+    broadcast_error(const dtype& dst_dt, const char *dst_metadata,
+                    const char *src_name);
+
     virtual ~broadcast_error() throw() {
     }
 };

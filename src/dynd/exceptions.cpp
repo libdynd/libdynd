@@ -102,6 +102,24 @@ broadcast_error::broadcast_error(const dtype& dst_dt, const char *dst_metadata,
 {
 }
 
+inline string broadcast_error_message(const dtype& dst_dt, const char *dst_metadata,
+                const char *src_name)
+{
+    stringstream ss;
+    ss << "cannot broadcast input " << src_name << " into datashape '";
+    format_datashape(ss, dst_dt, dst_metadata, NULL, false);
+    ss << "'";
+    return ss.str();
+}
+
+broadcast_error::broadcast_error(const dtype& dst_dt, const char *dst_metadata,
+                const char *src_name)
+    : dynd_exception("broadcast error", broadcast_error_message(
+                    dst_dt, dst_metadata, src_name))
+{
+}
+
+
 
 inline string too_many_indices_message(const dtype& dt, size_t nindices, size_t ndim)
 {
