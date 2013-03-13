@@ -405,7 +405,7 @@ static void parse_var_dim_json(const dtype& dt, const char *metadata, char *out_
 static void parse_struct_json(const dtype& dt, const char *metadata, char *out_data,
                 const char *&begin, const char *end)
 {
-    const base_struct_dtype *fsd = static_cast<const fixedstruct_dtype *>(dt.extended());
+    const base_struct_dtype *fsd = static_cast<const base_struct_dtype *>(dt.extended());
     size_t field_count = fsd->get_field_count();
     const string *field_names = fsd->get_field_names();
     const dtype *field_types = fsd->get_field_types();
