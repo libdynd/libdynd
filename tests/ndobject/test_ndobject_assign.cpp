@@ -414,3 +414,20 @@ TEST(NDObjectAssign, ChainedCastingReadWrite) {
     EXPECT_EQ(-2, b.at(2).as<int>());
 
 }
+
+TEST(NDObjectAssign, ZeroSizedAssign) {
+    ndobject a = empty(0, "M, float64"), b = empty(0, "M, float32");
+    EXPECT_EQ(1, a.get_shape().size());
+    EXPECT_EQ(0, a.get_shape()[0]);
+    // Should be able to assign zero-sized array to zero-sized array
+    a.vals() = b;
+    b.vals() = a;
+    // Should be able to assign zero-sized input to a vardim output
+    a = empty("VarDim, float64");
+    a.vals() = b;
+    EXPECT_EQ(0, a.get_dim_size());
+    // With a struct
+    a = empty("VarDim, {a:int32; b:string}");
+    b = empty(0, "M, {a:int32; b:string}");
+    a.vals() = b;
+}

@@ -35,6 +35,8 @@ enum memory_block_type_t {
     executable_memory_block_type
 };
 
+std::ostream& operator<<(std::ostream& o, memory_block_type_t mbt);
+
 /**
  * This is the data that goes at the start of every memory block, including
  * an atomic reference count and a memory_block_type_t. There is a fixed set

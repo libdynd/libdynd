@@ -279,7 +279,8 @@ namespace {
                 // Check for a broadcasting error
                 if (src_dim_size != 1 && dst_dim_size != src_dim_size) {
                     stringstream ss;
-                    ss << "error broadcasting input strided array sized " << src_dim_size << " to output var_dim sized " << dst_dim_size;
+                    ss << "error broadcasting input strided array sized " << src_dim_size;
+                    ss << " to output var_dim sized " << dst_dim_size;
                     throw broadcast_error(ss.str());
                 }
                 // We're copying/broadcasting elements to an already allocated array segment
@@ -378,7 +379,8 @@ namespace {
             // Check for a broadcasting error
             if (src_dim_size != 1 && dst_dim_size != src_dim_size) {
                 stringstream ss;
-                ss << "error broadcasting input var array sized " << src_dim_size << " to output strided array sized " << dst_dim_size;
+                ss << "error broadcasting input var array sized " << src_dim_size;
+                ss << " to output strided array sized " << dst_dim_size;
                 throw broadcast_error(ss.str());
             }
             // Copying/broadcasting elements

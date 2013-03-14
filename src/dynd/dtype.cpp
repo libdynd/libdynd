@@ -224,6 +224,8 @@ dtype dtype::with_replaced_scalar_types(const dtype& scalar_dtype, assign_error_
 intptr_t dtype::get_dim_size(const char *metadata, const char *data) const {
     if (get_kind() == uniform_dim_kind) {
         return static_cast<const base_uniform_dim_dtype *>(m_extended)->get_dim_size(metadata, data);
+    } else if (get_kind() == struct_kind) {
+        return static_cast<const base_struct_dtype *>(m_extended)->get_field_count();
     } else if (get_undim() > 0) {
         dimvector shape(get_undim());
         m_extended->get_shape(0, shape.get(), metadata);

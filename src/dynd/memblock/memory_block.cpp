@@ -106,37 +106,62 @@ void dynd::detail::memory_block_free(memory_block_data *memblock)
     throw runtime_error(ss.str());
 }
 
+std::ostream& dynd::operator<<(std::ostream& o, memory_block_type_t mbt)
+{
+    switch (mbt) {
+        case external_memory_block_type:
+            o << "external";
+            break;
+        case fixed_size_pod_memory_block_type:
+            o << "fixed_size_pod";
+            break;
+        case pod_memory_block_type:
+            o << "pod";
+            break;
+        case zeroinit_memory_block_type:
+            o << "zeroinit";
+            break;
+        case objectarray_memory_block_type:
+            o << "objectarray";
+            break;
+        case executable_memory_block_type:
+            o << "executable";
+            break;
+        case ndobject_memory_block_type:
+            o << "ndobject";
+            break;
+        default:
+            o << "unknown memory_block_type(" << (int)mbt << ")";
+    }
+    return o;
+}
+
 void dynd::memory_block_debug_print(const memory_block_data *memblock, std::ostream& o, const std::string& indent)
 {
     if (memblock != NULL) {
         o << indent << "------ memory_block at " << (const void *)memblock << "\n";
         o << indent << " reference count: " << (int32_t)memblock->m_use_count << "\n";
+        o << indent << " type: " << (memory_block_type_t)memblock->m_type << "\n";
         switch ((memory_block_type_t)memblock->m_type) {
             case external_memory_block_type:
-                o << indent << " type: external\n";
                 external_memory_block_debug_print(memblock, o, indent);
                 break;
             case fixed_size_pod_memory_block_type:
-                o << indent << " type: fixed_size_pod\n";
                 fixed_size_pod_memory_block_debug_print(memblock, o, indent);
                 break;
             case pod_memory_block_type:
-                o << indent << " type: pod\n";
                 pod_memory_block_debug_print(memblock, o, indent);
                 break;
             case zeroinit_memory_block_type:
-                o << indent << " type: zeroinit\n";
                 zeroinit_memory_block_debug_print(memblock, o, indent);
                 break;
             case objectarray_memory_block_type:
-                o << indent << " type: object\n";
+                //objectarray_memory_block_debug_print(memblock, o, indent);
                 break;
             case executable_memory_block_type:
-                o << indent << " type: executable\n";
                 executable_memory_block_debug_print(memblock, o, indent);
                 break;
             case ndobject_memory_block_type:
-                o << indent << " type: ndobject\n";
                 ndobject_memory_block_debug_print(memblock, o, indent);
                 break;
         }
