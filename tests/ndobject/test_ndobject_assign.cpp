@@ -417,7 +417,7 @@ TEST(NDObjectAssign, ChainedCastingReadWrite) {
 
 TEST(NDObjectAssign, ZeroSizedAssign) {
     ndobject a = empty(0, "M, float64"), b = empty(0, "M, float32");
-    EXPECT_EQ(1, a.get_shape().size());
+    EXPECT_EQ(1u, a.get_shape().size());
     EXPECT_EQ(0, a.get_shape()[0]);
     // Should be able to assign zero-sized array to zero-sized array
     a.vals() = b;
