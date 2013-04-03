@@ -67,8 +67,7 @@ Note that the 'assignment_kernel' object is a subclass of
 'hierarchical_kernel', which overloads the call operator to
 provide a more convenient kernel function call syntax.
 
-Assignment Kernel Example
--------------------------
+### Assignment Kernel Example
 
 Kernels are constructed hierarchically, typically matching
 the hierarchical structure of the dtypes it is operating
@@ -131,8 +130,16 @@ to provide some more context.
     }
 ```
 
-Kernel Data Restrictions
-------------------------
+Constructing Kernels
+--------------------
+
+Kernels are constructed by ensuring the 'hierarchical_kernel'
+output object has enough space, building any child kernels,
+and populating the needed kernel data. For efficiency
+and correctness reasons, there are a number of restrictions
+on how data is stored in the kernel.
+
+### Kernel Data Restrictions
 
 A kernel may store nearly anything in its data, subject
 to one major constraint: it must be movable with
@@ -151,8 +158,7 @@ kernel memory is zero-initialized. This is done to allow
 for safe destruction of partially-constructed kernels
 when an exception is raised during kernel construction.
 
-Kernel Construction Cautions
-----------------------------
+### Kernel Construction Cautions
 
 Some care must be taken by code which is constructing
 kernels. First, the construction and destruction must
@@ -186,8 +192,7 @@ chain, it should use the 'ensure_capacity_leaf' function instead
 of 'ensure_capacity', to avoid overallocation of space for a child
 'kernel_data_prefix'.
 
-Trivial Leaf Kernel Construction Pattern
-----------------------------------------
+### Trivial Leaf Kernel Construction Pattern
 
 This is the simplest case, where all information about the
 data is included in the static function pointer. This is how
@@ -238,11 +243,10 @@ size_t make_int32_assignment_kernel(
 }
 ```
 
-Leaf Kernel Construction
-------------------------
+### Leaf Kernel Construction
 
 When a leaf kernel needs some additional data, it must also ensure
-the kernel its creating has enough buffer capacity. Here's a
+the kernel it's creating has enough buffer capacity. Here's a
 hypothetical kernel factory for unaligned data assignment.
 
 ```cpp
@@ -304,8 +308,7 @@ size_t make_unaligned_assignment_kernel(
 }
 ```
 
-Leaf Kernel Construction With Dynamic Resources
------------------------------------------------
+### Leaf Kernel Construction With Dynamic Resources
 
 The final kind of leaf kernels are ones with dynamically-allocated
 resources they are responsible for. The example we use is a kernel
@@ -338,7 +341,6 @@ static void destruct(kernel_data_prefix *extra)
     }
 }
 
-
 size_t make_jit_assignment_kernel(
                 hierarchical_kernel *out, size_t offset_out,
                 const dtype& dst_dt, const char *dst_metadata,
@@ -350,7 +352,7 @@ size_t make_jit_assignment_kernel(
     jit_kernel_extra *result;
     result = out->get_at<jit_kernel_extra>(offset_out);
 
-    // Set the destructor first, so that if things go wrong
+    // Always set the destructor first, so that if things go wrong
     // later, partially constructed resources are freed.
     result->base.destructor = &destruct;
 
