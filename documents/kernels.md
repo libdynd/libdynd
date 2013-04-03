@@ -186,6 +186,181 @@ chain, it should use the 'ensure_capacity_leaf' function instead
 of 'ensure_capacity', to avoid overallocation of space for a child
 'kernel_data_prefix'.
 
-Leaf Kernel Construction Pattern
---------------------------------
+Trivial Leaf Kernel Construction Pattern
+----------------------------------------
 
+This is the simplest case, where all information about the
+data is included in the static function pointer. This is how
+the assignment kernels for builtin types look. Here's a
+hypothetical kernel factory for int32.
+
+```cpp
+static void single_assign(char *dst, const char *src,
+                kernel_data_prefix *DYND_UNUSED(extra))
+{
+    *(int32_t *)dst = *(const int32_t *)src;
+}
+
+static void strided_assign(char *dst, intptr_t dst_stride,
+                        const char *src, intptr_t src_stride,
+                        size_t count, kernel_data_prefix *DYND_UNUSED(extra))
+{
+    for (size_t i = 0; i != count; ++i,
+                    dst += dst_stride, src += src_stride) {
+        *(int32_t *)dst = *(const int32_t *)src;
+    }
+}
+
+size_t make_int32_assignment_kernel(
+                hierarchical_kernel *out, size_t offset_out,
+                kernel_request_t kernreq)
+{
+    // No additional space needs to be allocated for this
+    // leaf kernel, because the minimal 'kernel_data_prefix'
+    // is always preallocated by the parent kernel.
+    kernel_data_prefix *result;
+    result = out->get_at<kernel_data_prefix>(offset_out);
+
+    // Set the appropriate function based on the type of kernel requested
+    switch (kernreq) {
+        case kernel_request_single:
+            result->set_function<unary_single_operation_t>(&single_assign);
+            break;
+        case kernel_request_strided:
+            result->set_function<unary_strided_operation_t>(&strided_assign);
+            break;
+        default:
+            throw runtime_error("...");
+    }
+
+    // Return the offset immediately after this kernel's data
+    return offset_out + sizeof(kernel_data_prefix);
+}
+```
+
+Leaf Kernel Construction
+------------------------
+
+When a leaf kernel needs some additional data, it must also ensure
+the kernel its creating has enough buffer capacity. Here's a
+hypothetical kernel factory for unaligned data assignment.
+
+```cpp
+// This is the data for the kernel. It starts with a
+// kernel_data_prefix, then has fields for other data.
+// Remember, this data must be movable by using a memcpy,
+// which is trivially true in this case.
+struct unaligned_kernel_extra {
+    kernel_data_prefix base;
+    size_t data_size;
+};
+
+static void single_assign(char *dst, const char *src,
+                kernel_data_prefix *extra)
+{
+    unaligned_kernel_extra *e = reinterpret_cast<unaligned_kernel_extra *>(extra);
+    size_t data_size = e->data_size;
+    memcpy(dst, src, data_size);
+}
+
+static void strided_assign(char *dst, intptr_t dst_stride,
+                        const char *src, intptr_t src_stride,
+                        size_t count, kernel_data_prefix *extra)
+{
+    unaligned_kernel_extra *e = reinterpret_cast<unaligned_kernel_extra *>(extra);
+    size_t data_size = e->data_size;
+    for (size_t i = 0; i != count; ++i,
+                    dst += dst_stride, src += src_stride) {
+        memcpy(dst, src, data_size);
+    }
+}
+
+size_t make_unaligned_assignment_kernel(
+                hierarchical_kernel *out, size_t offset_out,
+                size_t data_size,
+                kernel_request_t kernreq)
+{
+    // Allocate the necessary space in the output kernel buffer
+    out->ensure_capacity_leaf(offset_out + sizeof(unaligned_kernel_extra));
+    unaligned_kernel_extra *result;
+    result = out->get_at<unaligned_kernel_extra>(offset_out);
+
+    // Set the appropriate function based on the type of kernel requested
+    switch (kernreq) {
+        case kernel_request_single:
+            result->base.set_function<unary_single_operation_t>(&single_assign);
+            break;
+        case kernel_request_strided:
+            result->base.set_function<unary_strided_operation_t>(&strided_assign);
+            break;
+        default:
+            throw runtime_error("...");
+    }
+    // Set the kernel data
+    result->data_size = data_size;
+
+    // Return the offset immediately after this kernel's data
+    return offset_out + sizeof(unaligned_kernel_extra);
+}
+```
+
+Leaf Kernel Construction With Dynamic Resources
+-----------------------------------------------
+
+The final kind of leaf kernels are ones with dynamically-allocated
+resources they are responsible for. The example we use is a kernel
+created by a JIT engine. On destruction, the kernel must free
+its reference to the resources holding the JITted function.
+
+```cpp
+// A hypothetical JIT API
+void create_jit_assignment(const dtype& dst_dt, const char *dst_metadata,
+                const dtype& src_dt, const char *src_metadata,
+                kernel_request_t kernreq,
+                void **out_function_ptr,
+                void **out_jit_handle)
+void jit_free(void *jit_handle);
+
+// This is the data for the kernel. It starts with a
+// kernel_data_prefix, then has fields for other data.
+// Remember, this data must be movable by using a memcpy,
+// which is trivially true in this case.
+struct jit_kernel_extra {
+    kernel_data_prefix base;
+    void *jit_handle;
+};
+
+static void destruct(kernel_data_prefix *extra)
+{
+    jit_kernel_extra *e = reinterpret_cast<jit_kernel_extra *>(extra);
+    if (e->jit_handle != NULL) {
+        jit_free(e->jit_handle);
+    }
+}
+
+
+size_t make_jit_assignment_kernel(
+                hierarchical_kernel *out, size_t offset_out,
+                const dtype& dst_dt, const char *dst_metadata,
+                const dtype& src_dt, const char *src_metadata,
+                kernel_request_t kernreq)
+{
+    // Allocate the necessary space in the output kernel buffer
+    out->ensure_capacity_leaf(offset_out + sizeof(jit_kernel_extra));
+    jit_kernel_extra *result;
+    result = out->get_at<jit_kernel_extra>(offset_out);
+
+    // Set the destructor first, so that if things go wrong
+    // later, partially constructed resources are freed.
+    result->base.destructor = &destruct;
+
+    // Set the function and the jit handle at once.
+    // Assume the jit_assignment function raises an exception on error
+    create_jit_assignment(dst_dt, dst_metadata, src_dt, src_metadata, kernreq,
+                    &result->base.function,
+                    &result->jit_handle);
+
+    // Return the offset immediately after this kernel's data
+    return offset_out + sizeof(jit_kernel_extra);
+}
+```
