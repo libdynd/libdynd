@@ -44,6 +44,7 @@ int niter = 3;                  /* default number of iterations */
 double totalsize = 0.;          /* total compressed/decompressed size */
 
 #if defined(_WIN32) && !defined(__MINGW32__)
+#include <WinSock2.h>
 #include <windows.h>
 #if defined(_MSC_VER) || defined(_MSC_EXTENSIONS)
   #define DELTA_EPOCH_IN_MICROSECS  11644473600000000Ui64

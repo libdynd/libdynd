@@ -20,7 +20,7 @@ struct kernel_data_prefix {
      * Call to get the kernel function pointer, whose type
      * must be known by the context.
      *
-     *      hkcm.get<unary_single_operation_t>()
+     *      kdp->get<unary_single_operation_t>()
      */
     template<typename T>
     T get_function() const {
