@@ -36,7 +36,7 @@ The most basic kernel is the single assignment kernel, which
 assigns one element of data from input data to output data.
 Here's the function prototype:
 
-```
+```cpp
 /** Typedef for a unary operation on a single element */
 typedef void (*unary_single_operation_t)(char *dst, const char *src,
                 kernel_data_prefix *extra);
@@ -49,7 +49,7 @@ Likely another parameter will be added for a temporary buffer, to
 make things thread safe. Here's some example code which does one
 assignment using this mechanism.
 
-```
+```cpp
 void default_assign(const dtype& dst_dt, const char *dst_metadata, char *dst_data,
                 const dtype& src_dt, const char *src_metadata, const char *src_data)
 {
@@ -130,3 +130,62 @@ to provide some more context.
         }
     }
 ```
+
+Kernel Data Restrictions
+------------------------
+
+A kernel may store nearly anything in its data, subject
+to one major constraint: it must be movable with
+memcpy/memmove. This means, for example, that the kernel
+data must not contain a pointer to another field within
+the kernel data. This must be accomplished by using an
+offset instead.
+
+The data movability constraint allows the container
+class for construction to use the C realloc() function
+call when increasing the size of the kernel buffer.
+Normal C++ semantics do not permit this.
+
+The code constructing the kernel may assume that all
+kernel memory is zero-initialized. This is done to allow
+for safe destruction of partially-constructed kernels
+when an exception is raised during kernel construction.
+
+Kernel Construction Cautions
+----------------------------
+
+Some care must be taken by code which is constructing
+kernels. First, the construction and destruction must
+be crafted to account for exceptions. Second, any time
+additional space is requested for the kernel buffer,
+any pointers the kernel constructor has into the kernel
+buffer must be retrieved again, as the buffer may have moved.
+
+Because nearly any step of the construction may
+raise an exception, the kernel must always be in a state
+where calling its destructor will successfully free all
+allocated resources without crashing on some uninitialized
+memory.
+
+This is done by relying on the fact that all
+the kernel memory is zero-initialized. The destructor should
+check any value it is deallocating for NULL, and the constructor
+should populate the kernel in an order which would never
+cause the destructor to point at uninitialized memory.
+
+If a kernel uses a child kernel for part of its operation,
+its destructor must call that child kernel's destructor if
+it is not NULL. What this means is that, before the kernel's
+destructor function pointer is set, memory for the 'kernel_data_prefix'
+of the child kernel must already be allocated and initialized
+to zero. This is handled automatically by the 'ensure_capacity'
+function of the 'hierarchical_kernel'.
+
+If a kernel is a leaf, i.e. it terminates any hierarchy in the
+chain, it should use the 'ensure_capacity_leaf' function instead
+of 'ensure_capacity', to avoid overallocation of space for a child
+'kernel_data_prefix'.
+
+Leaf Kernel Construction Pattern
+--------------------------------
+
