@@ -196,9 +196,7 @@ size_t dynd::make_pod_dtype_assignment_kernel(
                 }
                 return offset_out + sizeof(kernel_data_prefix);
             default:
-                // Subtract the base amount to avoid over-reserving memory in this leaf case
-                out->ensure_capacity(offset_out + sizeof(unaligned_copy_single_kernel_extra) -
-                                sizeof(kernel_data_prefix));
+                out->ensure_capacity_leaf(offset_out + sizeof(unaligned_copy_single_kernel_extra));
                 result = out->get_at<kernel_data_prefix>(offset_out);
                 if (single) {
                     result->set_function<unary_single_operation_t>(&unaligned_copy_single);
