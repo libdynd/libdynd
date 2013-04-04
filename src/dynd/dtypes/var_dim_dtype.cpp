@@ -612,6 +612,12 @@ size_t var_dim_dtype::make_assignment_kernel(
                             dst_dt, dst_metadata,
                             src_dt, src_metadata,
                             kernreq, errmode, ectx);
+        } else if (!src_dt.is_builtin()) {
+            // Give the src dtype a chance to make a kernel
+            return src_dt.extended()->make_assignment_kernel(out, offset_out,
+                            dst_dt, dst_metadata,
+                            src_dt, src_metadata,
+                            kernreq, errmode, ectx);
         } else {
             stringstream ss;
             ss << "Cannot assign from " << src_dt << " to " << dst_dt;

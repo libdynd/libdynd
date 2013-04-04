@@ -13,7 +13,8 @@ convert_dtype::convert_dtype(const dtype& value_dtype, const dtype& operand_dtyp
     : base_expression_dtype(convert_type_id, expression_kind, operand_dtype.get_data_size(),
                         operand_dtype.get_alignment(),
                         inherited_flags(value_dtype.get_flags(), operand_dtype.get_flags()),
-                        operand_dtype.get_metadata_size()),
+                        operand_dtype.get_metadata_size(),
+                        value_dtype.get_undim()),
                 m_value_dtype(value_dtype), m_operand_dtype(operand_dtype), m_errmode(errmode)
 {
     // An alternative to this error would be to use value_dtype.value_dtype(), cutting

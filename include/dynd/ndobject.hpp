@@ -451,17 +451,25 @@ public:
      *
      * \param uniform_dt  The dtype into which the ndobject's
      *                    uniform type should be cast.
+     * \param replace_undim  The number of uniform dimensions of
+     *                       this dtype which should be replaced.
+     *                       E.g. the value 1 could cast the last
+     *                       uniform dimension and the uniform dtype
+     *                       to the replacement uniform_dt.
      * \param errmode  Policy for dealing with errors.
      */
-    ndobject ucast(const dtype& uniform_dt, assign_error_mode errmode = assign_error_default) const;
+    ndobject ucast(const dtype& uniform_dt,
+                    size_t replace_undim = 0,
+                    assign_error_mode errmode = assign_error_default) const;
 
     /**
      * Casts the uniform dtype of the array into the type specified
      * as the template parameter.
      */
     template<class T>
-    inline ndobject ucast(assign_error_mode errmode = assign_error_default) const {
-        return ucast(make_dtype<T>(), errmode);
+    inline ndobject ucast(size_t replace_undim = 0,
+                    assign_error_mode errmode = assign_error_default) const {
+        return ucast(make_dtype<T>(), replace_undim, errmode);
     }
 
     /**

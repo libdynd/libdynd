@@ -7,6 +7,7 @@
 #include <dynd/ndobject_iter.hpp>
 #include <dynd/dtypes/strided_dim_dtype.hpp>
 #include <dynd/dtypes/var_dim_dtype.hpp>
+#include <dynd/dtypes/fixed_dim_dtype.hpp>
 #include <dynd/dtypes/dtype_alignment.hpp>
 #include <dynd/dtypes/view_dtype.hpp>
 #include <dynd/dtypes/string_dtype.hpp>
@@ -827,20 +828,63 @@ ndobject ndobject::cast(const dtype& DYND_UNUSED(dt), assign_error_mode DYND_UNU
 
 namespace {
     struct cast_udtype_extra {
-        cast_udtype_extra(const dtype& dt, assign_error_mode em)
-            : replacement_dt(dt), errmode(em)
+        cast_udtype_extra(const dtype& dt, size_t ru, assign_error_mode em)
+            : replacement_dt(dt), replace_undim(ru), errmode(em)
         {
         }
         const dtype& replacement_dt;
         assign_error_mode errmode;
+        size_t replace_undim;
     };
     static void cast_udtype(const dtype& dt, const void *extra,
                 dtype& out_transformed_dtype, bool& out_was_transformed)
     {
-        if (dt.get_kind() == uniform_dim_kind) {
+        const cast_udtype_extra *e = reinterpret_cast<const cast_udtype_extra *>(extra);
+        size_t replace_undim = e->replace_undim;
+        if (dt.get_undim() > replace_undim) {
             dt.extended()->transform_child_dtypes(&cast_udtype, extra, out_transformed_dtype, out_was_transformed);
         } else {
-            const cast_udtype_extra *e = reinterpret_cast<const cast_udtype_extra *>(extra);
+            if (replace_undim > 0) {
+                // If the dimension we're replacing doesn't change, then
+                // avoid creating the convert dtype at this level
+                if (dt.get_type_id() == e->replacement_dt.get_type_id()) {
+                    bool can_keep_dim = false;
+                    dtype child_dt, child_replacement_dt;
+                    switch (dt.get_type_id()) {
+                        case fixed_dim_type_id: {
+                            const fixed_dim_dtype *dt_fdd = static_cast<const fixed_dim_dtype *>(dt.extended());
+                            const fixed_dim_dtype *r_fdd = static_cast<const fixed_dim_dtype *>(e->replacement_dt.extended());
+                            if (dt_fdd->get_fixed_dim_size() == r_fdd->get_fixed_dim_size() &&
+                                    dt_fdd->get_fixed_stride() == r_fdd->get_fixed_stride()) {
+                                can_keep_dim = true;
+                                child_dt = dt_fdd->get_element_dtype();
+                                child_replacement_dt = r_fdd->get_element_dtype();
+                            }
+                            break;
+                        }
+                        case strided_dim_type_id:
+                        case var_dim_type_id: {
+                            const base_uniform_dim_dtype *dt_budd =
+                                            static_cast<const base_uniform_dim_dtype *>(dt.extended());
+                            const base_uniform_dim_dtype *r_budd =
+                                            static_cast<const base_uniform_dim_dtype *>(e->replacement_dt.extended());
+                            can_keep_dim = true;
+                            child_dt = dt_budd->get_element_dtype();
+                            child_replacement_dt = r_budd->get_element_dtype();
+                            break;
+                        }
+                        default:
+                            break;
+                    }
+                    if (can_keep_dim) {
+                        cast_udtype_extra extra_child(child_replacement_dt,
+                                    replace_undim - 1, e->errmode);
+                        dt.extended()->transform_child_dtypes(&cast_udtype,
+                                        &extra_child, out_transformed_dtype, out_was_transformed);
+                        return;
+                    }
+                }
+            }
             out_transformed_dtype = make_convert_dtype(e->replacement_dt, dt, e->errmode);
             // Only flag the transformation if this actually created a convert dtype
             if (out_transformed_dtype.extended() != e->replacement_dt.extended()) {
@@ -850,14 +894,16 @@ namespace {
     }
 } // anonymous namespace
 
-ndobject ndobject::ucast(const dtype& scalar_dtype, assign_error_mode errmode) const
+ndobject ndobject::ucast(const dtype& scalar_dtype,
+                size_t replace_undim,
+                assign_error_mode errmode) const
 {
     // This creates a dtype which has a convert dtype for every scalar of different dtype.
     // The result has the exact same metadata and data, so we just have to swap in the new
     // dtype in a shallow copy.
     dtype replaced_dtype;
     bool was_transformed = false;
-    cast_udtype_extra extra(scalar_dtype, errmode);
+    cast_udtype_extra extra(scalar_dtype, replace_undim, errmode);
     cast_udtype(get_dtype(), &extra, replaced_dtype, was_transformed);
     if (was_transformed) {
         return make_ndobject_clone_with_new_dtype(*this, replaced_dtype);
