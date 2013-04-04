@@ -538,7 +538,7 @@ void categorical_dtype::metadata_debug_print(const char *DYND_UNUSED(metadata),
 
 dtype dynd::factor_categorical_dtype(const ndobject& values)
 {
-    ndobject_iter<1, 0> iter(values);
+    ndobject_iter<0, 1> iter(values);
 
     comparison_kernel k;
     ::make_comparison_kernel(&k, 0,
@@ -558,7 +558,8 @@ dtype dynd::factor_categorical_dtype(const ndobject& values)
     }
 
     // Copy the values (now sorted and unique) into a new ndobject
-    ndobject categories = make_sorted_categories(uniques, iter.get_uniform_dtype(), iter.metadata());
+    ndobject categories = make_sorted_categories(uniques,
+                    iter.get_uniform_dtype(), iter.metadata());
 
     return dtype(new categorical_dtype(categories, true), false);
 }
