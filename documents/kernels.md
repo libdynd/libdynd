@@ -451,4 +451,41 @@ for elementwise operations on simple strided data, it is often possible
 to coalesce the dimensions together and end up with a single strided
 loop.
 
-The design for doing this 
+The design for doing this using the 'kernel_request_t' parameter to
+the make_assignment_kernel functions. There are two kernel requests
+for assignment kernels, 'kernel_request_single' and 'kernel_request_strided'.
+These create kernels with a function prototype for assigning a single value,
+and for assigning a strided array of values, respectively. Two new
+kernel requests are added for simple strided dimensions,
+'kernel_request_single_multistride' and
+'kernel_request_strided_multistride'.
+
+The idea of the 'multistride' kernel requests is that they accumulate
+the dimension shape and strides in the kernel data as they go, without
+actually creating the kernel until they reach a dtype that isn't
+a simple strided dimension. That kernel factory calls a function to
+turn the list of sizes and strides into a kernel, then adds itself
+as a child.
+
+The function which handles converting the 'multistride'
+request into a kernel can analyze the shape and strides, for example
+reordering them, coalescing them, and converting them into a blocked
+assignment if the source and destination have incompatible striding
+patterns. In the case of builtin assignment, we could add special
+case kernels for two or three dimensional assignment to further
+optimize the common cases.
+
+Memory Allocation During Kernel Creation
+----------------------------------------
+
+The hierarchical kernel design is created in such a way that if
+used from C++, simple assignments will trigger no heap memory
+allocations at all. There is still the expense of the virtual
+function calls and if/switch statements figuring out the kernel
+to create, but only using stack-allocated memory is possible.
+
+This is handled by a trick inside the 'hierarchical_kernel' class,
+which handles memory allocation and resizing of the kernel data
+buffer. This class contains a small fixed-size array which is
+used to start. If no kernel factory uses more than this amount
+of memory, then no memory is allocated on the heap.
