@@ -491,14 +491,22 @@ public:
     }
 
     /**
-     * Gets the dtype with all the unifom dimensions stripped away.
+     * Gets the dtype with uniform dimensions stripped away.
+     *
+     * \param keep_undim  The number of uniform dimensions to keep
      */
-    inline dtype get_udtype() const {
+    inline dtype get_udtype(size_t keep_undim = 0) const {
         size_t undim = get_undim();
-        if (get_undim() == 0) {
+        if (undim == keep_undim) {
             return *this;
+        } else if (undim > keep_undim) {
+            return m_extended->get_dtype_at_dimension(NULL, undim - keep_undim);
         } else {
-            return m_extended->get_dtype_at_dimension(NULL, undim);
+            std::stringstream ss;
+            ss << "Cannot keep " << keep_undim << " uniform ";
+            ss << "dimensions from dynd type " << *this;
+            ss << ", it only has " << undim;
+            throw std::runtime_error(ss.str());
         }
     }
 
