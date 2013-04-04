@@ -366,3 +366,89 @@ size_t make_jit_assignment_kernel(
     return offset_out + sizeof(jit_kernel_extra);
 }
 ```
+
+### Simple Nested Kernel Construction
+
+Many DyND types are composed of other types, and constructing
+kernels for them typically involves composing kernels from
+their subtypes. The simplest case of this is a single child
+kernel. For this example, we show how an assignment from a
+pointer<T1> to T2 can be constructed.
+
+```cpp
+
+static void destruct(kernel_data_prefix *extra)
+{
+    kernel_data_prefix *echild = extra + 1;
+    if (echild->destructor) {
+        echild->destructor(echild);
+    }
+}
+
+static void single_assign(char *dst, const char *src,
+                kernel_data_prefix *extra)
+{
+    kernel_data_prefix *echild = extra + 1;
+    unary_single_operation_t opchild = echild->get_function<unary_single_operation_t>();
+    opchild(dst, *(const char **)src, echild);
+}
+
+static void strided_assign(char *dst, intptr_t dst_stride,
+                        const char *src, intptr_t src_stride,
+                        size_t count, kernel_data_prefix *extra)
+{
+    kernel_data_prefix *echild = extra + 1;
+    unary_single_operation_t opchild = echild->get_function<unary_single_operation_t>();
+    for (size_t i = 0; i != count; ++i,
+                    dst += dst_stride, src += src_stride) {
+        opchild(dst, *(const char **)src, echild);
+    }
+}
+
+size_t make_ptr_assignment_kernel(
+                hierarchical_kernel *out, size_t offset_out,
+                const dtype& dst_dt, const char *dst_metadata,
+                const dtype& src_target_dt, const char *src_target_metadata,
+                kernel_request_t kernreq)
+{
+    kernel_data_prefix *result;
+    result = out->get_at<kernel_data_prefix>(offset_out);
+
+    // Always set the destructor first, so that if things go wrong
+    // later, partially constructed resources are freed.
+    result->destructor = &destruct;
+
+    // Set the appropriate function based on the type of kernel requested
+    switch (kernreq) {
+        case kernel_request_single:
+            result->set_function<unary_single_operation_t>(&single_assign);
+            break;
+        case kernel_request_strided:
+            result->set_function<unary_strided_operation_t>(&strided_assign);
+            break;
+        default:
+            throw runtime_error("...");
+    }
+
+    // Construct the child assignment kernel, and
+    // return the offset immediately after the child kernel's data
+    return make_assignment_kernel(out, offset_out + sizeof(kernel_data_prefix),
+                    dst_dt, dst_metadata,
+                    src_target_dt, src_target_metadata,
+                    kernel_request_single,
+                    assign_error_default, &eval::default_eval_context);
+}
+```
+
+Making Efficient Strided Kernels
+--------------------------------
+
+One of the problems with the hierarchical kernel definitions presented
+so far is that they always process array data in C order. For arrays
+which are in F order or whose axes are permuted arbitrarily, it would
+be better to process the axes in a different order. Additionally,
+for elementwise operations on simple strided data, it is often possible
+to coalesce the dimensions together and end up with a single strided
+loop.
+
+The design for doing this 
