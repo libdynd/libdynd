@@ -302,9 +302,34 @@ bool dtype::data_layout_compatible_with(const dtype& rhs) const
                 default:
                     return false;
             }
+        case fixed_dim_type_id:
+            // For fixed dimensions, it's data layout compatible if
+            // the shape and strides match, and the element is data
+            // layout compatible.
+            if (rhs.get_type_id() == fixed_dim_type_id) {
+                const fixed_dim_dtype *fdd = static_cast<const fixed_dim_dtype *>(extended());
+                const fixed_dim_dtype *rhs_fdd = static_cast<const fixed_dim_dtype *>(rhs.extended());
+                return fdd->get_fixed_dim_size() == rhs_fdd->get_fixed_dim_size() &&
+                    fdd->get_fixed_stride() == rhs_fdd->get_fixed_stride() &&
+                    fdd->get_element_dtype().data_layout_compatible_with(
+                                    rhs_fdd->get_element_dtype());
+            }
+            break;
+        case strided_dim_type_id:
+        case var_dim_type_id:
+            // For strided and var dimensions, it's data layout
+            // compatible if the element is
+            if (rhs.get_type_id() == get_type_id()) {
+                const base_uniform_dim_dtype *budd = static_cast<const base_uniform_dim_dtype *>(extended());
+                const base_uniform_dim_dtype *rhs_budd = static_cast<const base_uniform_dim_dtype *>(rhs.extended());
+                return budd->get_element_dtype().data_layout_compatible_with(
+                                    rhs_budd->get_element_dtype());
+            }
+            break;
         default:
-            return false;
+            break;
     }
+    return false;
 }
 
 std::ostream& dynd::operator<<(std::ostream& o, const dtype& rhs)

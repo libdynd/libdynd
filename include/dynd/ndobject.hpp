@@ -476,8 +476,12 @@ public:
      * Replaces the uniform dtype with a new one, returning a view to
      * the result. The new dtype must have the same storage as the
      * existing dtype.
+     *
+     * \param new_udtype  The replacement dtype.
+     * \param replace_undim  The number of uniform dimensions to replace
+     *                       in addition to the uniform dtype.
      */
-    ndobject replace_udtype(const dtype& new_udtype) const;
+    ndobject replace_udtype(const dtype& new_udtype, size_t replace_undim = 0) const;
 
     /**
      * Views the array's memory as another dtype, where such an operation

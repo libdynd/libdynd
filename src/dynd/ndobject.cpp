@@ -913,36 +913,49 @@ ndobject ndobject::ucast(const dtype& scalar_dtype,
 }
 
 namespace {
+    struct replace_compatible_udtype_extra {
+        replace_compatible_udtype_extra(const dtype& udtype_, size_t replace_undim_)
+            : udtype(udtype_), replace_undim(replace_undim_)
+        {
+        }
+        const dtype& udtype;
+        size_t replace_undim;
+    };
     static void replace_compatible_udtype(const dtype& dt, const void *extra,
                 dtype& out_transformed_dtype, bool& out_was_transformed)
     {
-        if (!dt.is_builtin() && dt.get_kind() == uniform_dim_kind) {
-            dt.extended()->transform_child_dtypes(&replace_compatible_udtype, extra, out_transformed_dtype, out_was_transformed);
-        } else {
-            const dtype *e = reinterpret_cast<const dtype *>(extra);
-            if (dt != *e) {
-                if (!dt.data_layout_compatible_with(*e)) {
+        const replace_compatible_udtype_extra *e =
+                        reinterpret_cast<const replace_compatible_udtype_extra *>(extra);
+        const dtype& udtype = e->udtype;
+        if (dt.get_undim() == e->replace_undim) {
+            if (dt != udtype) {
+                if (!dt.data_layout_compatible_with(udtype)) {
                     stringstream ss;
                     ss << "The dynd dtype " << dt << " is not ";
-                    ss << " data layout compatible with " << *e;
+                    ss << " data layout compatible with " << udtype;
                     ss << ", so a substitution cannot be made.";
                     throw runtime_error(ss.str());
                 }
-                out_transformed_dtype = *e;
+                out_transformed_dtype = udtype;
                 out_was_transformed= true;
             }
+        } else {
+            dt.extended()->transform_child_dtypes(&replace_compatible_udtype,
+                            extra, out_transformed_dtype, out_was_transformed);
         }
     }
 } // anonymous namespace
 
-ndobject ndobject::replace_udtype(const dtype& new_udtype) const
+ndobject ndobject::replace_udtype(const dtype& new_udtype, size_t replace_undim) const
 {
     // This creates a dtype which swaps in the new udtype for
     // the existing one. It raises an error if the data layout
     // is incompatible
     dtype replaced_dtype;
     bool was_transformed = false;
-    replace_compatible_udtype(get_dtype(), &new_udtype, replaced_dtype, was_transformed);
+    replace_compatible_udtype_extra extra(new_udtype, replace_undim);
+    replace_compatible_udtype(get_dtype(), &extra,
+                    replaced_dtype, was_transformed);
     if (was_transformed) {
         return make_ndobject_clone_with_new_dtype(*this, replaced_dtype);
     } else {
