@@ -223,17 +223,18 @@ dtype dtype::with_replaced_scalar_types(const dtype& scalar_dtype, assign_error_
 
 namespace {
     struct replace_udtype_extra {
-        replace_udtype_extra(const dtype& udtype_)
-            : udtype(udtype_)
+        replace_udtype_extra(const dtype& udtype_, size_t replace_undim_)
+            : udtype(udtype_), replace_undim(replace_undim_)
         {
         }
         const dtype& udtype;
+        size_t replace_undim;
     };
     static void replace_udtype(const dtype& dt, const void *extra,
                 dtype& out_transformed_dtype, bool& out_was_transformed)
     {
         const replace_udtype_extra *e = reinterpret_cast<const replace_udtype_extra *>(extra);
-        if (dt.get_undim() == 0) {
+        if (dt.get_undim() == e->replace_undim) {
             out_transformed_dtype = e->udtype;
             out_was_transformed = true;
         } else {
@@ -242,11 +243,11 @@ namespace {
     }
 } // anonymous namespace
 
-dtype dtype::with_replaced_udtype(const dtype& udtype) const
+dtype dtype::with_replaced_udtype(const dtype& udtype, size_t replace_undim) const
 {
     dtype result;
     bool was_transformed;
-    replace_udtype_extra extra(udtype);
+    replace_udtype_extra extra(udtype, replace_undim);
     replace_udtype(*this, &extra, result, was_transformed);
     return result;
 }

@@ -445,14 +445,17 @@ public:
      * \param scalar_dtype  The scalar dtype to convert all scalars to.
      * \param errmode       The error mode for the conversion.
      */
-    dtype with_replaced_scalar_types(const dtype& scalar_dtype, assign_error_mode errmode = assign_error_default) const;
+    dtype with_replaced_scalar_types(const dtype& scalar_dtype,
+                    assign_error_mode errmode = assign_error_default) const;
 
     /**
      * Replaces the udtype of the this type with the provided one.
      *
      * \param udtype  The udtype to substitute for the existing one.
+     * \param replace_undim  The number of uniform dimensions to replace
+     *                       in addition to the uniform dtype.
      */
-    dtype with_replaced_udtype(const dtype& udtype) const;
+    dtype with_replaced_udtype(const dtype& udtype, size_t replace_undim = 0) const;
 
     /**
      * Returns a modified dtype with all expression dtypes replaced with
