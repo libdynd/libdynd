@@ -340,6 +340,16 @@ void strided_dim_dtype::metadata_copy_construct(char *dst_metadata, const char *
     }
 }
 
+size_t strided_dim_dtype::metadata_copy_construct_onedim(char *dst_metadata, const char *src_metadata,
+                memory_block_data *embedded_reference) const
+{
+    const strided_dim_dtype_metadata *src_md = reinterpret_cast<const strided_dim_dtype_metadata *>(src_metadata);
+    strided_dim_dtype_metadata *dst_md = reinterpret_cast<strided_dim_dtype_metadata *>(dst_metadata);
+    dst_md->size = src_md->size;
+    dst_md->stride = src_md->stride;
+    return sizeof(strided_dim_dtype_metadata);
+}
+
 void strided_dim_dtype::metadata_reset_buffers(char *metadata) const
 {
     if (m_element_dtype.get_metadata_size() > 0) {

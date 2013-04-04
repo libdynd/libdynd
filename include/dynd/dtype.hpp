@@ -448,6 +448,13 @@ public:
     dtype with_replaced_scalar_types(const dtype& scalar_dtype, assign_error_mode errmode = assign_error_default) const;
 
     /**
+     * Replaces the udtype of the this type with the provided one.
+     *
+     * \param udtype  The udtype to substitute for the existing one.
+     */
+    dtype with_replaced_udtype(const dtype& udtype) const;
+
+    /**
      * Returns a modified dtype with all expression dtypes replaced with
      * their value dtypes, and dtypes replaced with "standard versions"
      * whereever appropriate. For example, an offset-based uniform array

@@ -353,11 +353,21 @@ void fixed_dim_dtype::metadata_default_construct(char *metadata, size_t ndim, co
     }
 }
 
-void fixed_dim_dtype::metadata_copy_construct(char *dst_metadata, const char *src_metadata, memory_block_data *embedded_reference) const
+void fixed_dim_dtype::metadata_copy_construct(
+                char *dst_metadata, const char *src_metadata,
+                memory_block_data *embedded_reference) const
 {
     if (!m_element_dtype.is_builtin()) {
         m_element_dtype.extended()->metadata_copy_construct(dst_metadata, src_metadata, embedded_reference);
     }
+}
+
+size_t fixed_dim_dtype::metadata_copy_construct_onedim(
+                char *DYND_UNUSED(dst_metadata), const char *DYND_UNUSED(src_metadata),
+                memory_block_data *DYND_UNUSED(embedded_reference)) const
+{
+    // No metadata to copy for fixed_dim
+    return 0;
 }
 
 void fixed_dim_dtype::metadata_reset_buffers(char *metadata) const

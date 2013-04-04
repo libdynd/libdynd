@@ -88,6 +88,8 @@ public:
     void metadata_finalize_buffers(char *metadata) const;
     void metadata_destruct(char *metadata) const;
     void metadata_debug_print(const char *metadata, std::ostream& o, const std::string& indent) const;
+    size_t metadata_copy_construct_onedim(char *dst_metadata, const char *src_metadata,
+                    memory_block_data *embedded_reference) const;
 
     size_t get_iterdata_size(size_t ndim) const;
     size_t iterdata_construct(iterdata_common *iterdata, const char **inout_metadata, size_t ndim, const intptr_t* shape, dtype& out_uniform_dtype) const;

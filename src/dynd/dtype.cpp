@@ -221,6 +221,36 @@ dtype dtype::with_replaced_scalar_types(const dtype& scalar_dtype, assign_error_
     return result;
 }
 
+namespace {
+    struct replace_udtype_extra {
+        replace_udtype_extra(const dtype& udtype_)
+            : udtype(udtype_)
+        {
+        }
+        const dtype& udtype;
+    };
+    static void replace_udtype(const dtype& dt, const void *extra,
+                dtype& out_transformed_dtype, bool& out_was_transformed)
+    {
+        const replace_udtype_extra *e = reinterpret_cast<const replace_udtype_extra *>(extra);
+        if (dt.get_undim() == 0) {
+            out_transformed_dtype = e->udtype;
+            out_was_transformed = true;
+        } else {
+            dt.extended()->transform_child_dtypes(&replace_udtype, extra, out_transformed_dtype, out_was_transformed);
+        }
+    }
+} // anonymous namespace
+
+dtype dtype::with_replaced_udtype(const dtype& udtype) const
+{
+    dtype result;
+    bool was_transformed;
+    replace_udtype_extra extra(udtype);
+    replace_udtype(*this, &extra, result, was_transformed);
+    return result;
+}
+
 intptr_t dtype::get_dim_size(const char *metadata, const char *data) const {
     if (get_kind() == uniform_dim_kind) {
         return static_cast<const base_uniform_dim_dtype *>(m_extended)->get_dim_size(metadata, data);
