@@ -829,7 +829,7 @@ ndobject ndobject::cast(const dtype& DYND_UNUSED(dt), assign_error_mode DYND_UNU
 namespace {
     struct cast_udtype_extra {
         cast_udtype_extra(const dtype& dt, size_t ru, assign_error_mode em)
-            : replacement_dt(dt), replace_undim(ru), errmode(em)
+            : replacement_dt(dt), errmode(em), replace_undim(ru)
         {
         }
         const dtype& replacement_dt;
