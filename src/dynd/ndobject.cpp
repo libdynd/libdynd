@@ -1088,7 +1088,7 @@ dtype dynd::detail::ndobject_as_dtype(const ndobject& lhs, assign_error_mode err
 
     ndobject temp = lhs;
     if (temp.get_dtype().get_type_id() != dtype_type_id) {
-        temp = temp.ucast(make_dtype_dtype(), errmode).eval();
+        temp = temp.ucast(make_dtype_dtype(), 0, errmode).eval();
     }
     return dtype(reinterpret_cast<const dtype_dtype_data *>(temp.get_readonly_originptr())->dt, true);
 }

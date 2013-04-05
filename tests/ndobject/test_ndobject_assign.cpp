@@ -271,7 +271,7 @@ TEST(NDObjectAssign, Casting) {
     EXPECT_THROW(b.eval(), runtime_error);
 
     // Allow truncation of fractional part
-    b = a.ucast(make_dtype<int>(), assign_error_overflow);
+    b = a.ucast(make_dtype<int>(), 0, assign_error_overflow);
     b = b.eval();
     EXPECT_EQ(3, b.at(0).as<int>());
     EXPECT_EQ(1, b.at(1).as<int>());
@@ -279,14 +279,14 @@ TEST(NDObjectAssign, Casting) {
     EXPECT_EQ(1000, b.at(3).as<int>());
 
     // cast_scalars<int>() should be equivalent to cast_scalars(make_dtype<int>())
-    b = a.ucast<int>(assign_error_overflow);
+    b = a.ucast<int>(0, assign_error_overflow);
     b = b.eval();
     EXPECT_EQ(3, b.at(0).as<int>());
     EXPECT_EQ(1, b.at(1).as<int>());
     EXPECT_EQ(0, b.at(2).as<int>());
     EXPECT_EQ(1000, b.at(3).as<int>());
 
-    b = a.ucast(make_dtype<int8_t>(), assign_error_overflow);
+    b = a.ucast(make_dtype<int8_t>(), 0, assign_error_overflow);
     // This triggers conversion from float to int8,
     // which overflows
     EXPECT_THROW(b.eval(), runtime_error);
@@ -316,8 +316,8 @@ TEST(NDObjectAssign, ChainedCastingRead) {
     float v0[5] = {3.5f, 1.3f, -2.4999f, -2.999f, 1000.50001f};
     ndobject a = v0, b;
 
-    b = a.ucast<int>(assign_error_overflow);
-    b = b.ucast<float>(assign_error_inexact);
+    b = a.ucast<int>(0, assign_error_overflow);
+    b = b.ucast<float>(0, assign_error_inexact);
     // Multiple cast_scalars operations should make a chained conversion dtype
     EXPECT_EQ(make_strided_dim_dtype(
                     make_convert_dtype(make_dtype<float>(),
@@ -335,12 +335,12 @@ TEST(NDObjectAssign, ChainedCastingRead) {
     EXPECT_EQ(1000, b.at(4).as<float>());
 
     // Now try it with longer chaining through multiple element sizes
-    b = a.ucast<int16_t>(assign_error_overflow);
-    b = b.ucast<int32_t>(assign_error_overflow);
-    b = b.ucast<int16_t>(assign_error_overflow);
-    b = b.ucast<int64_t>(assign_error_overflow);
-    b = b.ucast<float>(assign_error_overflow);
-    b = b.ucast<int32_t>(assign_error_overflow);
+    b = a.ucast<int16_t>(0, assign_error_overflow);
+    b = b.ucast<int32_t>(0, assign_error_overflow);
+    b = b.ucast<int16_t>(0, assign_error_overflow);
+    b = b.ucast<int64_t>(0, assign_error_overflow);
+    b = b.ucast<float>(0, assign_error_overflow);
+    b = b.ucast<int32_t>(0, assign_error_overflow);
 
     EXPECT_EQ(make_strided_dim_dtype(
                 make_convert_dtype(make_dtype<int32_t>(),
@@ -369,8 +369,8 @@ TEST(NDObjectAssign, ChainedCastingWrite) {
     float v0[3] = {0, 0, 0};
     ndobject a = v0, b;
 
-    b = a.ucast<int>(assign_error_inexact);
-    b = b.ucast<float>(assign_error_overflow);
+    b = a.ucast<int>(0, assign_error_inexact);
+    b = b.ucast<float>(0, assign_error_overflow);
     // Multiple cast_scalars operations should make a chained conversion dtype
     EXPECT_EQ(make_strided_dim_dtype(make_convert_dtype(make_dtype<float>(),
                                     make_convert_dtype<int, float>(assign_error_inexact), assign_error_overflow)),
@@ -404,9 +404,9 @@ TEST(NDObjectAssign, ChainedCastingReadWrite) {
 
     // Now test with longer chains
     b.vals() = 123;
-    aview = aview.ucast<int32_t>(assign_error_overflow);
-    aview = aview.ucast<int16_t>(assign_error_overflow);
-    bview = bview.ucast<int64_t>(assign_error_overflow);
+    aview = aview.ucast<int32_t>(0, assign_error_overflow);
+    aview = aview.ucast<int16_t>(0, assign_error_overflow);
+    bview = bview.ucast<int64_t>(0, assign_error_overflow);
 
     bview.vals() = aview;
     EXPECT_EQ(0, b.at(0).as<int>());

@@ -323,9 +323,9 @@ TEST(StringDType, StringToBool) {
     EXPECT_THROW(ndobject(ndobject("flase").ucast<dynd_bool>().eval()), runtime_error);
 
     // In "none" mode, it's a bit more permissive
-    EXPECT_FALSE(ndobject(ndobject("").ucast<dynd_bool>(assign_error_none).eval()).as<bool>());
-    EXPECT_TRUE(ndobject(ndobject("2").ucast<dynd_bool>(assign_error_none).eval()).as<bool>());
-    EXPECT_TRUE(ndobject(ndobject("flase").ucast<dynd_bool>(assign_error_none).eval()).as<bool>());
+    EXPECT_FALSE(ndobject(ndobject("").ucast<dynd_bool>(0, assign_error_none).eval()).as<bool>());
+    EXPECT_TRUE(ndobject(ndobject("2").ucast<dynd_bool>(0, assign_error_none).eval()).as<bool>());
+    EXPECT_TRUE(ndobject(ndobject("flase").ucast<dynd_bool>(0, assign_error_none).eval()).as<bool>());
 }
 
 TEST(StringDType, StringToInteger) {
