@@ -8,78 +8,99 @@
 #include <dynd/ndobject.hpp>
 #include <dynd/ndobject_iter.hpp>
 #include <dynd/dtype_promotion.hpp>
-#include <dynd/kernels/builtin_dtype_binary_kernel_table.hpp>
+#include <dynd/kernels/expr_kernel_generator.hpp>
 
 using namespace std;
 using namespace dynd;
 
-#if 0 // TODO: Restore this code
-
 namespace {
-
-    class arithmetic_operator_factory {
-    protected:
-        dtype m_dtype;
-        specialized_binary_operation_table_t *m_builtin_optable;
-        const char *m_node_name;
-
-    public:
-        arithmetic_operator_factory()
-            : m_dtype(), m_builtin_optable(NULL), m_node_name("")
+    template<class OP>
+    struct binary_single_kernel {
+        static void func(char *dst, const char **src,
+                        kernel_data_prefix *DYND_UNUSED(extra))
         {
-        }
+            typedef typename OP::type T;
 
-        arithmetic_operator_factory(const arithmetic_operator_factory& rhs)
-            : m_dtype(rhs.m_dtype), m_builtin_optable(rhs.m_builtin_optable), m_node_name(rhs.m_node_name)
-        {
-        }
-
-        arithmetic_operator_factory(specialized_binary_operation_table_t *builtin_optable, const char *node_name)
-            : m_dtype(), m_builtin_optable(builtin_optable), m_node_name(node_name)
-        {
-        }
-
-        arithmetic_operator_factory& operator=(arithmetic_operator_factory& rhs)
-        {
-            m_dtype = rhs.m_dtype;
-            m_builtin_optable = rhs.m_builtin_optable;
-            m_node_name = rhs.m_node_name;
-
-            return *this;
-        }
-
-        void promote_dtypes(const dtype& dt1, const dtype& dt2) {
-            //cout << "promoting dtypes " << dt1 << ", " << dt2 << endl;
-            m_dtype = promote_dtypes_arithmetic(dt1, dt2);
-            //cout << "to " << m_dtype << endl;
-        }
-
-        const dtype& get_dtype(int) {
-            return m_dtype;
-        }
-
-        void swap(arithmetic_operator_factory& that) {
-            m_dtype.swap(that.m_dtype);
-            std::swap(m_builtin_optable, that.m_builtin_optable);
-            std::swap(m_node_name, that.m_node_name);
-        }
-
-        void get_binary_operation(intptr_t dst_fixedstride, intptr_t src1_fixedstride,
-                                    intptr_t src2_fixedstride,
-                                    const eval::eval_context *DYND_UNUSED(ectx),
-                                    kernel_instance<binary_operation_t>& out_kernel) const
-        {
-            out_kernel.kernel = get_binary_operation_from_builtin_dtype_table(m_builtin_optable,
-                                m_dtype, dst_fixedstride,
-                                src1_fixedstride, src2_fixedstride);
-            out_kernel.extra.auxdata.free();
-        }
-
-        const char *node_name() const {
-            return m_node_name;
+            *reinterpret_cast<T *>(dst) = OP::operate(
+                                        *reinterpret_cast<const T *>(src[0]),
+                                        *reinterpret_cast<const T *>(src[1]));
         }
     };
 
+    template<class OP>
+    struct binary_strided_kernel {
+        static void func(char *dst, intptr_t dst_stride,
+                        const char * const *src, const intptr_t *src_stride,
+                        size_t count, kernel_data_prefix *DYND_UNUSED(extra))
+        {
+            typedef typename OP::type T;
+            const char *src0 = src[0], *src1 = src[1];
+            intptr_t src_stride0 = src_stride[0], src_stride1 = src_stride[1];
+
+            for (intptr_t i = 0; i < count; ++i) {
+                *reinterpret_cast<T *>(dst) = OP::operate(
+                                            *reinterpret_cast<const T *>(src0),
+                                            *reinterpret_cast<const T *>(src1));
+                dst += dst_stride;
+                src0 += src0_stride;
+                src1 += src1_stride;
+            }
+        }
+    };
+
+    template<class OP>
+    class arithmetic_op_kernel_generator : public expr_kernel_generator {
+    public:
+        arithmetic_op_kernel_generator()
+            : expr_kernel_generator(true)
+        {
+        }
+
+        virtual ~arithmetic_op_kernel_generator() {
+        }
+
+        size_t make_expr_kernel(
+                    hierarchical_kernel *out, size_t offset_out,
+                    const dtype& dst_dt, const char *dst_metadata,
+                    size_t src_count, const dtype *src_dt, const char **src_metadata,
+                    kernel_request_t kernreq, const eval::eval_context *ectx) const
+        {
+            if (src_count != 2) {
+                stringstream ss;
+                ss << "The " << OP::name() << " kernel requires 2 src operands, ";
+                ss << "received " << src_count;
+                throw runtime_error(ss.str());
+            }
+            type_id_t tid = type_id_of<OP::type>::value;
+            if (dst_dt.get_type_id() != tid || src_dt[0].get_type_id() != tid ||
+                            src_dt[1].get_type_id() != tid) {
+                // If the dtypes don't match the ones for this generator,
+                // call the elementwise dimension handler to handle one dimension
+                // or handle input/output buffering, giving 'this' as the next
+                // kernel generator to call
+                return make_elwise_dimension_expr_kernel(out, offset_out,
+                                dst_dt, dst_metadata,
+                                src_count, src_dt, src_metadata,
+                                kernreq, ectx,
+                                this);
+            }
+            // This is a leaf kernel, so no additional allocation is needed
+            kernel_data_prefix *e = out->get_at<kernel_data_prefix>(offset_out);
+            switch (kernreq) {
+                case kernel_request_single:
+                    e->set_function<expr_single_operation_t>(&binary_single_kernel<OP>::func);
+                    break;
+                case kernel_request_strided:
+                    e->set_function<expr_strided_operation_t>(&binary_strided_kernel<OP>::func);
+                    break;
+                default: {
+                    stringstream ss;
+                    ss << "arithmetic_op_kernel_generator: unrecognized request " << (int)kernreq;
+                    throw runtime_error(ss.str());
+                }
+            }
+        }
+    };
 } // anonymous namespace
 
 namespace {
@@ -89,6 +110,7 @@ namespace {
         static inline T operate(T x, T y) {
             return x + y;
         }
+        inline static const char *name() {return "addition";}
     };
 
     template<class T>
@@ -97,6 +119,7 @@ namespace {
         static inline T operate(T x, T y) {
             return x - y;
         }
+        inline static const char *name() {return "subtraction";}
     };
 
     template<class T>
@@ -105,6 +128,7 @@ namespace {
         static inline T operate(T x, T y) {
             return x * y;
         }
+        inline static const char *name() {return "multiplication";}
     };
 
     template<class T>
@@ -113,17 +137,11 @@ namespace {
         static inline T operate(T x, T y) {
             return x / y;
         }
+        inline static const char *name() {return "division";}
     };
-
-
 } // anonymous namespace
 
-
-static DYND_BUILTIN_DTYPE_BINARY_OPERATION_TABLE(addition);
-static DYND_BUILTIN_DTYPE_BINARY_OPERATION_TABLE(subtraction);
-static DYND_BUILTIN_DTYPE_BINARY_OPERATION_TABLE(multiplication);
-static DYND_BUILTIN_DTYPE_BINARY_OPERATION_TABLE(division);
-
+#if 0
 // These operators are declared in ndarray.hpp
 
 ndarray dynd::operator+(const ndarray& op1, const ndarray& op2)
@@ -181,6 +199,4 @@ ndarray dynd::operator/(const ndarray& op1, const ndarray& op2)
     return ndarray(make_elwise_binary_kernel_node_steal_kernel(dt,
                     op1.get_node()->as_dtype(dt), op2.get_node()->as_dtype(dt), kernel));
 }
-
-#endif // TODO restore this code
-
+#endif
