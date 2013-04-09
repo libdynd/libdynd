@@ -228,6 +228,8 @@ namespace detail {
 // Type trait for the type id
 template <typename T> struct type_id_of;
 
+template <typename T> struct type_id_of<const T> {enum {value = type_id_of<T>::value};};
+
 // Can't use bool, because it doesn't have a guaranteed sizeof
 template <> struct type_id_of<dynd_bool> {enum {value = bool_type_id};};
 template <> struct type_id_of<char> {enum {value = ((char)-1) < 0 ? int8_type_id : uint8_type_id};};
