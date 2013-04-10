@@ -226,8 +226,9 @@ for each element it copies. If the size of the src dimension is
 1 or equal to the size of the dst dimension, broadcasting or
 copying can be done.
 
-The sequence of calls which occur when the kernel is called
-are as follows:
+The sequence of calls which occur when
+the kernel is called, assuming all single instead of
+strided kernels, are as follows:
 
 <table>
     <tr>
