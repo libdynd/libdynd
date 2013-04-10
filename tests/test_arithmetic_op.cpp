@@ -157,7 +157,7 @@ TEST(ArithmeticOp, MatchingDTypes_View) {
 
     // Check also partial indexing through another temporary
     d = c.at(0);
-    EXPECT_EQ(1, d.get_undim());
+    EXPECT_EQ(1u, d.get_undim());
     EXPECT_EQ(3, d.get_shape()[0]);
     a.val_assign(ndobject(v0));
     EXPECT_EQ(1, d.at(0).as<int>());
