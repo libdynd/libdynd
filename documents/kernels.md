@@ -8,6 +8,8 @@ cleanly to handle broadcasting and other operations on 'var' dimensions
 nicely. The solution was to define a new kernel mechanism, which
 is described here.
 
+See also the [Multi-dimensional kernel documentation](multidim_kernels.md].
+
 Headers and implementation for kernels are in the 'dynd/kernels'
 subdirectories.
 
@@ -439,41 +441,6 @@ size_t make_ptr_assignment_kernel(
                     assign_error_default, &eval::default_eval_context);
 }
 ```
-
-Making Efficient Strided Kernels
---------------------------------
-
-One of the problems with the hierarchical kernel definitions presented
-so far is that they always process array data in C order. For arrays
-which are in F order or whose axes are permuted arbitrarily, it would
-be better to process the axes in a different order. Additionally,
-for elementwise operations on simple strided data, it is often possible
-to coalesce the dimensions together and end up with a single strided
-loop.
-
-The design for doing this using the 'kernel_request_t' parameter to
-the make_assignment_kernel functions. There are two kernel requests
-for assignment kernels, 'kernel_request_single' and 'kernel_request_strided'.
-These create kernels with a function prototype for assigning a single value,
-and for assigning a strided array of values, respectively. Two new
-kernel requests are added for simple strided dimensions,
-'kernel_request_single_multistride' and
-'kernel_request_strided_multistride'.
-
-The idea of the 'multistride' kernel requests is that they accumulate
-the dimension shape and strides in the kernel data as they go, without
-actually creating the kernel until they reach a dtype that isn't
-a simple strided dimension. That kernel factory calls a function to
-turn the list of sizes and strides into a kernel, then adds itself
-as a child.
-
-The function which handles converting the 'multistride'
-request into a kernel can analyze the shape and strides, for example
-reordering them, coalescing them, and converting them into a blocked
-assignment if the source and destination have incompatible striding
-patterns. In the case of builtin assignment, we could add special
-case kernels for two or three dimensional assignment to further
-optimize the common cases.
 
 Memory Allocation During Kernel Creation
 ----------------------------------------
