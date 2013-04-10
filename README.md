@@ -13,6 +13,11 @@ Building
 The build system of this library is based on CMake. See BUILD.md for
 details about how to build the library.
 
+Documentation
+=============
+
+[Documentation Index](documents/index.md)
+
 Running The Tests
 =================
 
