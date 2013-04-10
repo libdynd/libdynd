@@ -231,59 +231,59 @@ are as follows:
 
 <table>
     <tr>
-        <th>src data</td>
-        <th>operation</td>
-        <th>dst data</td>
+        <th>src data</th>
+        <th>operation</th>
+        <th>dst data</th>
     </tr>
     <tr>
-        <th><b>[[1, 2, 3], [4]]</b></td>
-        <th>strided to strided</td>
-        <th><b>[[5, 6, 7], [8, 9, 10]]</b></td>
+        <td><b>[[1, 2, 3], [4]]</b></td>
+        <td>strided to strided</td>
+        <td><b>[[5, 6, 7], [8, 9, 10]]</b></td>
     </tr>
     <tr>
-        <th>[<b>[1, 2, 3]</b>, [4]]</td>
-        <th>&nbsp;&nbsp;&nbsp;var to strided</td>
-        <th>[<b>[5, 6, 7]</b>, [8, 9, 10]]</td>
+        <td>[<b>[1, 2, 3]</b>, [4]]</td>
+        <td>&nbsp;&nbsp;&nbsp;var to strided</td>
+        <td>[<b>[5, 6, 7]</b>, [8, 9, 10]]</td>
     </tr>
     <tr>
-        <th>[[<b>1</b>, 2, 3], [4]]</td>
-        <th>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 to int32</td>
-        <th>[[<b>5</b>, 6, 7], [8, 9, 10]]</td>
+        <td>[[<b>1</b>, 2, 3], [4]]</td>
+        <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 to int32</td>
+        <td>[[<b>5</b>, 6, 7], [8, 9, 10]]</td>
     </tr>
     <tr>
-        <th>[[1, <b>2</b>, 3], [4]]</td>
-        <th>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 to int32</td>
-        <th>[[1, <b>6</b>, 7], [8, 9, 10]]</td>
+        <td>[[1, <b>2</b>, 3], [4]]</td>
+        <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 to int32</td>
+        <td>[[1, <b>6</b>, 7], [8, 9, 10]]</td>
     </tr>
     <tr>
-        <th>[[1, 2, <b>3</b>], [4]]</td>
-        <th>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 to int32</td>
-        <th>[[1, 2, <b>7</b>], [8, 9, 10]]</td>
+        <td>[[1, 2, <b>3</b>], [4]]</td>
+        <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 to int32</td>
+        <td>[[1, 2, <b>7</b>], [8, 9, 10]]</td>
     </tr>
     <tr>
-        <th>[[1, 2, 3], <b>[4]</b>]</td>
-        <th>&nbsp;&nbsp;&nbsp;var to strided</td>
-        <th>[[1, 2, 3], <b>[8, 9, 10]</b>]</td>
+        <td>[[1, 2, 3], <b>[4]</b>]</td>
+        <td>&nbsp;&nbsp;&nbsp;var to strided</td>
+        <td>[[1, 2, 3], <b>[8, 9, 10]</b>]</td>
     </tr>
     <tr>
-        <th>[[1, 2, 3], [<b>4</b>]]</td>
-        <th>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 to int32</td>
-        <th>[[1, 2, 3], [<b>8</b>, 9, 10]]</td>
+        <td>[[1, 2, 3], [<b>4</b>]]</td>
+        <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 to int32</td>
+        <td>[[1, 2, 3], [<b>8</b>, 9, 10]]</td>
     </tr>
     <tr>
-        <th>[[1, 2, 3], [<b>4</b>]]</td>
-        <th>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 to int32</td>
-        <th>[[1, 2, 3], [4, <b>9</b>, 10]]</td>
+        <td>[[1, 2, 3], [<b>4</b>]]</td>
+        <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 to int32</td>
+        <td>[[1, 2, 3], [4, <b>9</b>, 10]]</td>
     </tr>
     <tr>
-        <th>[[1, 2, 3], [<b>4</b>]]</td>
-        <th>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 to int32</td>
-        <th>[[1, 2, 3], [4, 4, <b>10</b>]]</td>
+        <td>[[1, 2, 3], [<b>4</b>]]</td>
+        <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 to int32</td>
+        <td>[[1, 2, 3], [4, 4, <b>10</b>]]</td>
     </tr>
     <tr>
-        <th>[[1, 2, 3], [4]]</td>
-        <th></td>
-        <th>[[1, 2, 3], [4, 4, 4]]</td>
+        <td>[[1, 2, 3], [4]]</td>
+        <td></td>
+        <td>[[1, 2, 3], [4, 4, 4]]</td>
     </tr>
 </table>
 
