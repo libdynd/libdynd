@@ -10,8 +10,9 @@ trying to use it in practical settings.
 Building
 ========
 
-The build system of this library is based on CMake. See BUILD.md for
-details about how to build the library.
+The build system of this library is based on CMake. See
+the [build instructions](BUILD.md) for details about how
+to build the library.
 
 Documentation
 =============

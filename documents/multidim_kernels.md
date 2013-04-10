@@ -107,9 +107,8 @@ but not vice versa.
 
 ### Scalar To One-Dimensional Array Example
 
-Let's start with an example
-that broadcasts a scalar to a one-dimensional
-strided array.
+Let's start with an example that broadcasts a
+scalar to a one-dimensional strided array.
 
 ```python
 >>> from dynd import nd, ndt
@@ -134,9 +133,159 @@ of our previous examples, looks like:
 ```
 
 Let's trace through how DyND creates the kernel that
-performs this broadcasting assignment.
+performs this broadcasting assignment. The function called
+to create any assignment kernel is in called make_assignment_kernel
+in 'dynd/kernels/assignment_kernels.hpp'. In this case, it will
+call
 
-...
+```cpp
+dst_dt.extended()->make_assignment_kernel(...);
+```
+
+The destination dtype is 'strided_dim', which is defined in
+'dynd/dtypes/strided_dim_dtype.hpp'. This function has
+a test comparing the the number of uniform dimensions of
+the source and destination types.
+
+```cpp
+    // in this example, is "if (0 < 1)"
+    if (src_dt.get_undim() < dst_dt.get_undim()) {
+```
+
+In this case, the src_stride of the strided assignment
+kernel gets set to 0, and no dimensions from the source
+dtype are peeled off. The next call is to make_assignment_kernel
+with both the src and dst dtypes equal to 'int32', requesting
+a strided kernel. The resulting kernel is precisely the
+example in the [kernel documentation](kernels.md) with the
+struct called strided_int32_copy_kernel_data, where the value
+src_stride has been set to zero.
+
+### Var To Strided Array Example
+
+Our next example assigns from a ragged array to a strided
+array, doing the broadcasting during the assignment.
+
+```python
+>>> from dynd import nd, ndt
+>>> a = nd.ndobject([[5, 6, 7], [8, 9, 10]])
+>>> b = nd.ndobject([[1, 2, 3], [4]])
+>>> a.dtype
+nd.dtype('strided_dim<strided_dim<int32>>')
+>>> b.dtype
+nd.dtype('strided_dim<var_dim<int32>>')
+>>> a[...] = b
+>>> a
+nd.ndobject([[1, 2, 3], [4, 4, 4]], strided_dim<strided_dim<int32>>)
+```
+
+The assignment kernel here results in three
+levels of kernel functions, a "strided to strided" function,
+a "var to strided" function, and an "int32 to int32" function.
+
+```cpp
+    /** Typedef for a unary operation on a single element */
+    typedef void (*unary_single_operation_t)(char *dst, const char *src,
+                    kernel_data_prefix *extra);
+    /** Typedef for a unary operation on a strided segment of elements */
+    typedef void (*unary_strided_operation_t)(
+                    char *dst, intptr_t dst_stride,
+                    const char *src, intptr_t src_stride,
+                    size_t count, kernel_data_prefix *extra);
+
+    struct var_to_strided_copy_kernel_data {
+        // The first kernel_data_prefix ("strided to strided")
+        unary_single_operation_t dim0_kernel_func;
+        destructor_fn_t dim0_kernel_destructor;
+        // Data for the first kernel
+        intptr_t dim0_size;
+        intptr_t dim0_dst_stride, dim0_src_stride;
+
+        // The second kernel_data_prefix ("var to strided")
+        unary_strided_operation_t dim1_kernel_func;
+        destructor_fn_t dim1_kernel_destructor;
+        intptr_t dim1_dst_stride, dim1_dst_dim_size;
+        const var_dim_dtype_metadata *dim1_src_md;
+
+        // The final kernel_data_prefix ("int32 to int32")
+        unary_strided_operation_t scalar_kernel_func;
+        destructor_fn_t scalar_kernel_destructor;
+    };
+```
+
+The first kernel function, 'dim0_kernel_func', is exactly
+the same as the one in the last example. The second kernel
+function is defined in 'dynd/kernels/var_dimn_assignment_kernels.cpp',
+as var_to_strided_assign_kernel. The destination is strided,
+so the stride and size are stored for it. For the source, a
+pointer to its metadata is copied, though the individual fields
+needed could be copied as well to avoid the indirection.
+
+The 'dim1_kernel_func' does a check for a broadcasting error
+for each element it copies. If the size of the src dimension is
+1 or equal to the size of the dst dimension, broadcasting or
+copying can be done.
+
+The sequence of calls which occur when the kernel is called
+are as follows:
+
+<table>
+    <tr>
+        <th>src data</td>
+        <th>operation</td>
+        <th>dst data</td>
+    </tr>
+    <tr>
+        <th><b>[[1, 2, 3], [4]]</b></td>
+        <th>strided to strided</td>
+        <th><b>[[5, 6, 7], [8, 9, 10]]</b></td>
+    </tr>
+    <tr>
+        <th>[<b>[1, 2, 3]</b>, [4]]</td>
+        <th>&nbsp;&nbsp;&nbsp;var to strided</td>
+        <th>[<b>[5, 6, 7]</b>, [8, 9, 10]]</td>
+    </tr>
+    <tr>
+        <th>[[<b>1</b>, 2, 3], [4]]</td>
+        <th>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 to int32</td>
+        <th>[[<b>5</b>, 6, 7], [8, 9, 10]]</td>
+    </tr>
+    <tr>
+        <th>[[1, <b>2</b>, 3], [4]]</td>
+        <th>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 to int32</td>
+        <th>[[1, <b>6</b>, 7], [8, 9, 10]]</td>
+    </tr>
+    <tr>
+        <th>[[1, 2, <b>3</b>], [4]]</td>
+        <th>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 to int32</td>
+        <th>[[1, 2, <b>7</b>], [8, 9, 10]]</td>
+    </tr>
+    <tr>
+        <th>[[1, 2, 3], <b>[4]</b>]</td>
+        <th>&nbsp;&nbsp;&nbsp;var to strided</td>
+        <th>[[1, 2, 3], <b>[8, 9, 10]</b>]</td>
+    </tr>
+    <tr>
+        <th>[[1, 2, 3], [<b>4</b>]]</td>
+        <th>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 to int32</td>
+        <th>[[1, 2, 3], [<b>8</b>, 9, 10]]</td>
+    </tr>
+    <tr>
+        <th>[[1, 2, 3], [<b>4</b>]]</td>
+        <th>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 to int32</td>
+        <th>[[1, 2, 3], [4, <b>9</b>, 10]]</td>
+    </tr>
+    <tr>
+        <th>[[1, 2, 3], [<b>4</b>]]</td>
+        <th>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 to int32</td>
+        <th>[[1, 2, 3], [4, 4, <b>10</b>]]</td>
+    </tr>
+    <tr>
+        <th>[[1, 2, 3], [4]]</td>
+        <th></td>
+        <th>[[1, 2, 3], [4, 4, 4]]</td>
+    </tr>
+</table>
 
 Making Efficient Strided Kernels
 --------------------------------
