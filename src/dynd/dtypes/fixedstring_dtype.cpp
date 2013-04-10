@@ -52,7 +52,12 @@ void fixedstring_dtype::get_string_range(const char **out_begin, const char**out
 
     switch (string_encoding_char_size_table[m_encoding]) {
         case 1: {
-            *out_end = data + strnlen(data, get_data_size());
+            const char *end = reinterpret_cast<const char *>(memchr(data, 0, get_data_size()));
+            if (end != NULL) {
+                *out_end = end;
+            } else {
+                *out_end = data + get_data_size();
+            }
             break;
         }
         case 2: {
