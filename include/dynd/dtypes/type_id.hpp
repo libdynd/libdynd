@@ -137,6 +137,21 @@ enum dtype_flags_t {
     dtype_flag_destructor = 0x00000008
 };
 
+enum axis_order_classification_t {
+    // No order (0D, 1D arrays, higher-D arrays with at most one
+    // dimension size greater than 1)
+    axis_order_none,
+    // Includes striding that goes "big small big" or "small big small",
+    // so not compatible with C or F order
+    axis_order_neither,
+    // Includes at least one "small big" stride occurrence,
+    // and no "big small"
+    axis_order_f,
+    // Includes at least one "big small" stride occurrence,
+    // and no "small big"
+    axis_order_c
+};
+
 enum {
     // These are the flags expression dtypes should inherit
     // from their operand type

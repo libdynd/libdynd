@@ -265,19 +265,6 @@ void struct_dtype::get_shape(size_t i, intptr_t *out_shape) const
     }
 }
 
-intptr_t struct_dtype::get_representative_stride(const char *metadata) const
-{
-    const size_t *offsets = reinterpret_cast<const size_t *>(metadata);
-    // Return the first non-zero offset as the representative stride
-    for (size_t i = 0, i_end = m_field_types.size(); i != i_end; ++i) {
-        if (offsets[i] != 0) {
-            return offsets[i];
-        }
-    }
-    // Return 0 as the fallback
-    return 0;
-}
-
 bool struct_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const
 {
     if (dst_dt.extended() == this) {

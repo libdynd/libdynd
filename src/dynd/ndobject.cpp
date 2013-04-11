@@ -653,10 +653,11 @@ ndobject ndobject::eval(const eval::eval_context *ectx) const
         dimvector shape(ndim);
         get_shape(shape.get());
         ndobject result(make_ndobject_memory_block(dt, ndim, shape.get()));
-        if (dt.get_undim() > 1) {
+        if (dt.get_type_id() == strided_dim_type_id) {
             // Reorder strides of output strided dimensions in a KEEPORDER fashion
-            dt.extended()->reorder_default_constructed_strides(result.get_ndo_meta(),
-                            get_dtype(), get_ndo_meta());
+            static_cast<const strided_dim_dtype *>(
+                            dt.extended())->reorder_default_constructed_strides(
+                                            result.get_ndo_meta(), get_dtype(), get_ndo_meta());
         }
         result.val_assign(*this, assign_error_default, ectx);
         return result;
@@ -676,10 +677,11 @@ ndobject ndobject::eval_immutable(const eval::eval_context *ectx) const
         dimvector shape(ndim);
         get_shape(shape.get());
         ndobject result(make_ndobject_memory_block(dt, ndim, shape.get()));
-        if (dt.get_undim() > 1) {
+        if (dt.get_type_id() == strided_dim_type_id) {
             // Reorder strides of output strided dimensions in a KEEPORDER fashion
-            dt.extended()->reorder_default_constructed_strides(result.get_ndo_meta(),
-                            get_dtype(), get_ndo_meta());
+            static_cast<const strided_dim_dtype *>(
+                            dt.extended())->reorder_default_constructed_strides(
+                                            result.get_ndo_meta(), get_dtype(), get_ndo_meta());
         }
         result.val_assign(*this, assign_error_default, ectx);
         result.get_ndo()->m_flags = immutable_access_flag|read_access_flag;
@@ -696,10 +698,11 @@ ndobject ndobject::eval_copy(const eval::eval_context *ectx,
     dimvector shape(ndim);
     get_shape(shape.get());
     ndobject result(make_ndobject_memory_block(dt, ndim, shape.get()));
-    if (dt.get_undim() > 1) {
+    if (dt.get_type_id() == strided_dim_type_id) {
         // Reorder strides of output strided dimensions in a KEEPORDER fashion
-        dt.extended()->reorder_default_constructed_strides(result.get_ndo_meta(),
-                        get_dtype(), get_ndo_meta());
+        static_cast<const strided_dim_dtype *>(
+                        dt.extended())->reorder_default_constructed_strides(
+                                        result.get_ndo_meta(), get_dtype(), get_ndo_meta());
     }
     result.val_assign(*this, assign_error_default, ectx);
     result.get_ndo()->m_flags = access_flags;
@@ -1158,8 +1161,11 @@ ndobject dynd::eval_raw_copy(const dtype& dt, const char *metadata, const char *
         dt.extended()->get_shape(0, shape.get(), metadata);
         result.set(make_ndobject_memory_block(cdt, undim, shape.get()));
         // Reorder strides of output strided dimensions in a KEEPORDER fashion
-        cdt.extended()->reorder_default_constructed_strides(result.get_ndo_meta(),
-                        dt, metadata);
+        if (dt.get_type_id() == strided_dim_type_id) {
+            static_cast<const strided_dim_dtype *>(
+                        cdt.extended())->reorder_default_constructed_strides(result.get_ndo_meta(),
+                                    dt, metadata);
+        }
     } else {
         result.set(make_ndobject_memory_block(cdt, 0, NULL));
     }
@@ -1203,8 +1209,12 @@ ndobject dynd::empty_like(const ndobject& rhs, const dtype& uniform_dtype)
         rhs.get_shape(shape.get());
         ndobject result(make_strided_ndobject(uniform_dtype, undim, shape.get()));
         // Reorder strides of output strided dimensions in a KEEPORDER fashion
-        result.get_dtype().extended()->reorder_default_constructed_strides(result.get_ndo_meta(),
-                        rhs.get_dtype(), rhs.get_ndo_meta());
+        if (result.get_dtype().get_type_id() == strided_dim_type_id) {
+            static_cast<const strided_dim_dtype *>(
+                        result.get_dtype().extended())->reorder_default_constructed_strides(
+                                        result.get_ndo_meta(),
+                                        rhs.get_dtype(), rhs.get_ndo_meta());
+        }
         return result;
     }
 }
@@ -1221,13 +1231,17 @@ ndobject dynd::empty_like(const ndobject& rhs)
     if (rhs.is_scalar()) {
         return empty(dt);
     } else {
-        size_t ndim = dt.extended()->get_undim();
-        dimvector shape(ndim);
+        size_t undim = dt.extended()->get_undim();
+        dimvector shape(undim);
         rhs.get_shape(shape.get());
-        ndobject result(make_ndobject_memory_block(dt, ndim, shape.get()));
+        ndobject result(make_strided_ndobject(dt.get_udtype(), undim, shape.get()));
         // Reorder strides of output strided dimensions in a KEEPORDER fashion
-        dt.extended()->reorder_default_constructed_strides(result.get_ndo_meta(),
-                        rhs.get_dtype(), rhs.get_ndo_meta());
+        if (result.get_dtype().get_type_id() == strided_dim_type_id) {
+            static_cast<const strided_dim_dtype *>(
+                        result.get_dtype().extended())->reorder_default_constructed_strides(
+                                        result.get_ndo_meta(),
+                                        rhs.get_dtype(), rhs.get_ndo_meta());
+        }
         return result;
     }
 }

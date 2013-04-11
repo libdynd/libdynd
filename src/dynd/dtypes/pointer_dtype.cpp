@@ -201,6 +201,17 @@ void pointer_dtype::get_shape(size_t i, intptr_t *out_shape, const char *metadat
     }
 }
 
+axis_order_classification_t pointer_dtype::classify_axis_order(const char *metadata) const
+{
+    // Return the classification of the target dtype
+    if (m_target_dtype.get_undim() > 1) {
+        return m_target_dtype.extended()->classify_axis_order(
+                        metadata + sizeof(pointer_dtype_metadata));
+    } else {
+        return axis_order_none;
+    }
+}
+
 bool pointer_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const
 {
     if (dst_dt.extended() == this) {

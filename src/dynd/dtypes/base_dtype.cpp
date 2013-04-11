@@ -115,13 +115,12 @@ void base_dtype::get_strides(size_t DYND_UNUSED(i), intptr_t *DYND_UNUSED(out_st
     // Default to scalar behavior
 }
 
-intptr_t base_dtype::get_representative_stride(const char *DYND_UNUSED(metadata)) const
+axis_order_classification_t base_dtype::classify_axis_order(const char *metadata) const
 {
-    // Default to scalar behavior
-    stringstream ss;
-    ss << "Cannot get a representative stride for scalar dtype " << dtype(this, true);
-    throw std::runtime_error(ss.str());
+    // Scalar types have no axis order
+    return axis_order_none;
 }
+
 
 bool base_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const
 {
@@ -258,12 +257,6 @@ void base_dtype::foreach_leading(char *DYND_UNUSED(data), const char *DYND_UNUSE
     stringstream ss;
     ss << "dynd dtype " << dtype(this, true) << " is a scalar, foreach_leading cannot process";
     throw std::runtime_error(ss.str());
-}
-
-void base_dtype::reorder_default_constructed_strides(char *DYND_UNUSED(dst_metadata),
-                const dtype& DYND_UNUSED(src_dtype), const char *DYND_UNUSED(src_metadata)) const
-{
-    // Default to scalar behavior, which is to do no modifications.
 }
 
 void base_dtype::get_nonuniform_ndobject_properties_and_functions(

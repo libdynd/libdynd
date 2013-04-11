@@ -351,7 +351,7 @@ TEST(NDObject, ConstructorMemoryLayouts) {
         for (size_t i = 0; i < ndim; ++i) {
             shape[i] = i + 2;
             axisperm[i] = int(i);
-            num_elements *= shape[i];
+            num_elements *= shape[ i];
         }
         do {
             // Test constructing the array using the perm

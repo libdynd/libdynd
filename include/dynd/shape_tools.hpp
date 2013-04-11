@@ -238,6 +238,18 @@ inline bool strides_are_f_contiguous(size_t ndim, intptr_t element_size, const i
     return true;
 }
 
+/**
+ * Classifies the axis order of the dtype, where current_stride is
+ * the absolute value of the stride for the current dimension,
+ * and element_dt/element_metadata are for the element.
+ *
+ * \param current_stride  The stride of the current dimension It must be nonzero.
+ * \param element_dt  The dtype of the elements. It must have undim > 0.
+ * \param element_metadata  The metadata of the elements.
+ */
+axis_order_classification_t classify_strided_axis_order(size_t current_stride,
+                const dtype& element_dt, const char *element_metadata);
+
 enum shape_signal_t {
     /** Shape value that has never been initialized */
     shape_signal_uninitialized = -2,

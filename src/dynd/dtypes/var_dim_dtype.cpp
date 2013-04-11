@@ -401,10 +401,17 @@ void var_dim_dtype::get_strides(size_t i, intptr_t *out_strides, const char *met
     }
 }
 
-intptr_t var_dim_dtype::get_representative_stride(const char *metadata) const
+axis_order_classification_t var_dim_dtype::classify_axis_order(const char *metadata) const
 {
-    const var_dim_dtype_metadata *md = reinterpret_cast<const var_dim_dtype_metadata *>(metadata);
-    return md->stride;
+    // Treat the var_dim dtype as C-order
+    if (m_element_dtype.get_undim() > 1) {
+        axis_order_classification_t aoc = m_element_dtype.extended()->classify_axis_order(
+                        metadata + sizeof(var_dim_dtype_metadata));
+        return (aoc == axis_order_none || aoc == axis_order_c)
+                        ? axis_order_c : axis_order_neither;
+    } else {
+        return axis_order_c;
+    }
 }
 
 bool var_dim_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const
@@ -650,17 +657,6 @@ void var_dim_dtype::foreach_leading(char *data, const char *metadata, foreach_fn
     intptr_t stride = md->stride;
     for (intptr_t i = 0, i_end = d->size; i < i_end; ++i, data += stride) {
         callback(m_element_dtype, data, child_metadata, callback_data);
-    }
-}
-
-void var_dim_dtype::reorder_default_constructed_strides(char *dst_metadata,
-                const dtype& src_dtype, const char *src_metadata) const
-{
-    // The blockref array dtype can't be reordered, so just let any deeper dtypes do their reordering.
-    if (!m_element_dtype.is_builtin()) {
-        dtype src_child_dtype = src_dtype.at_single(0, &src_metadata);
-        m_element_dtype.extended()->reorder_default_constructed_strides(dst_metadata + sizeof(var_dim_dtype_metadata),
-                        src_child_dtype, src_metadata);
     }
 }
 

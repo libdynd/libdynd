@@ -304,9 +304,21 @@ void fixed_dim_dtype::get_strides(size_t i, intptr_t *out_strides, const char *m
     }
 }
 
-intptr_t fixed_dim_dtype::get_representative_stride(const char *DYND_UNUSED(metadata)) const
+axis_order_classification_t fixed_dim_dtype::classify_axis_order(const char *metadata) const
 {
-    return m_stride;
+    if (m_element_dtype.get_undim() > 0) {
+        if (m_stride != 0) {
+            // Call the helper function to do the classification
+            return classify_strided_axis_order(m_stride, m_element_dtype,
+                            metadata);
+        } else {
+            // Use the classification of the element dtype
+            return m_element_dtype.extended()->classify_axis_order(
+                            metadata);
+        }
+    } else {
+        return axis_order_none;
+    }
 }
 
 bool fixed_dim_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const
@@ -587,13 +599,6 @@ void fixed_dim_dtype::foreach_leading(char *data, const char *metadata, foreach_
     for (intptr_t i = 0, i_end = m_dim_size; i < i_end; ++i, data += stride) {
         callback(m_element_dtype, data, metadata, callback_data);
     }
-}
-
-void fixed_dim_dtype::reorder_default_constructed_strides(char *DYND_UNUSED(dst_metadata),
-                const dtype& DYND_UNUSED(src_dtype), const char *DYND_UNUSED(src_metadata)) const
-{
-    // Because everything contained in the fixed_dim must have fixed size, it can't
-    // be reordered. This makes this function a NOP
 }
 
 dtype dynd::make_fixed_dim_dtype(size_t ndim, const intptr_t *shape,

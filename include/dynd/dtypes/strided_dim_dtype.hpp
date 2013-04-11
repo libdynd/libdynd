@@ -63,7 +63,8 @@ public:
     void get_shape(size_t i, intptr_t *out_shape) const;
     void get_shape(size_t i, intptr_t *out_shape, const char *metadata) const;
     void get_strides(size_t i, intptr_t *out_strides, const char *metadata) const;
-    intptr_t get_representative_stride(const char *metadata) const;
+
+    axis_order_classification_t classify_axis_order(const char *metadata) const;
 
     bool is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const;
 
@@ -95,7 +96,18 @@ public:
 
     void foreach_leading(char *data, const char *metadata, foreach_fn_t callback, void *callback_data) const;
     
-    void reorder_default_constructed_strides(char *dst_metadata, const dtype& src_dtype, const char *src_metadata) const;
+    /**
+     * Modifies metadata allocated using the metadata_default_construct function, to be used
+     * immediately after ndobject construction. Given an input dtype/metadata, edits the output
+     * metadata in place to match.
+     *
+     * \param dst_metadata  The metadata created by metadata_default_construct, which is modified in place
+     * \param src_dt  The dtype of the input ndobject whose stride ordering is to be matched.
+     * \param src_metadata  The metadata of the input ndobject whose stride ordering is to be matched.
+     */
+    void reorder_default_constructed_strides(
+                    char *dst_metadata,
+                    const dtype& src_dt, const char *src_metadata) const;
 
     void get_dynamic_dtype_properties(
                     const std::pair<std::string, gfunc::callable> **out_properties,

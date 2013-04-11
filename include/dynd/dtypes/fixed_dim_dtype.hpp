@@ -73,7 +73,8 @@ public:
     void get_shape(size_t i, intptr_t *out_shape) const;
     void get_shape(size_t i, intptr_t *out_shape, const char *metadata) const;
     void get_strides(size_t i, intptr_t *out_strides, const char *metadata) const;
-    intptr_t get_representative_stride(const char *metadata) const;
+
+    axis_order_classification_t classify_axis_order(const char *metadata) const;
 
     bool is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const;
 
@@ -105,8 +106,6 @@ public:
 
     void foreach_leading(char *data, const char *metadata, foreach_fn_t callback, void *callback_data) const;
     
-    void reorder_default_constructed_strides(char *dst_metadata, const dtype& src_dtype, const char *src_metadata) const;
-
     void get_dynamic_dtype_properties(
                     const std::pair<std::string, gfunc::callable> **out_properties,
                     size_t *out_count) const;

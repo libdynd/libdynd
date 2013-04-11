@@ -7,6 +7,8 @@
 
 #include <dynd/shape_tools.hpp>
 #include <dynd/exceptions.hpp>
+#include <dynd/dtypes/strided_dim_dtype.hpp>
+#include <dynd/dtypes/fixed_dim_dtype.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -587,6 +589,94 @@ void dynd::apply_single_linear_index(const irange& irnge, intptr_t dimension_siz
             out_start_index = 0;
             out_index_stride = 1;
             out_dimension_size = 0;
+        }
+    }
+}
+
+axis_order_classification_t dynd::classify_strided_axis_order(size_t current_stride,
+                const dtype& element_dt, const char *element_metadata)
+{
+    switch (element_dt.get_type_id()) {
+        case fixed_dim_type_id: {
+            const fixed_dim_dtype *edt = static_cast<const fixed_dim_dtype *>(element_dt.extended());
+            size_t estride = abs(edt->get_fixed_stride());
+            if (estride != 0) {
+                axis_order_classification_t aoc;
+                // Get the classification from the next dimension onward
+                if (edt->get_undim() > 1) {
+                    aoc = classify_strided_axis_order(current_stride,
+                                edt->get_element_dtype(),
+                                element_metadata);
+                } else {
+                    aoc = axis_order_none;
+                }
+                if (current_stride > estride) {
+                    // C order
+                    return (aoc == axis_order_none || aoc == axis_order_c)
+                                    ? axis_order_c : axis_order_neither;
+                } else {
+                    // F order
+                    return (aoc == axis_order_none || aoc == axis_order_f)
+                                    ? axis_order_f : axis_order_neither;
+                }
+            } else if (element_dt.get_undim() > 1) {
+                // Skip the zero-stride dimensions (DyND requires that the stride
+                // be zero when the dimension size is one)
+                return classify_strided_axis_order(current_stride,
+                                edt->get_element_dtype(),
+                                element_metadata);
+            } else {
+                // There was only one dimension with a nonzero stride
+                return axis_order_none;
+            }
+        }
+        case strided_dim_type_id: {
+            const strided_dim_dtype *edt = static_cast<const strided_dim_dtype *>(element_dt.extended());
+            const strided_dim_dtype_metadata *emd = reinterpret_cast<const strided_dim_dtype_metadata *>(element_metadata);
+            size_t estride = abs(emd->stride);
+            if (estride != 0) {
+                axis_order_classification_t aoc;
+                // Get the classification from the next dimension onward
+                if (edt->get_undim() > 1) {
+                    aoc = classify_strided_axis_order(current_stride,
+                                edt->get_element_dtype(),
+                                element_metadata + sizeof(strided_dim_dtype_metadata));
+                } else {
+                    aoc = axis_order_none;
+                }
+                if (current_stride > estride) {
+                    // C order
+                    return (aoc == axis_order_none || aoc == axis_order_c)
+                                    ? axis_order_c : axis_order_neither;
+                } else {
+                    // F order
+                    return (aoc == axis_order_none || aoc == axis_order_f)
+                                    ? axis_order_f : axis_order_neither;
+                }
+            } else if (element_dt.get_undim() > 1) {
+                // Skip the zero-stride dimensions (DyND requires that the stride
+                // be zero when the dimension size is one)
+                return classify_strided_axis_order(current_stride,
+                                edt->get_element_dtype(),
+                                element_metadata + sizeof(strided_dim_dtype_metadata));
+            } else {
+                // There was only one dimension with a nonzero stride
+                return axis_order_none;
+            }
+        }
+        case pointer_type_id:
+        case var_dim_type_id: {
+            // A pointer or a var dtype is treated like C-order
+            axis_order_classification_t aoc =
+                            element_dt.extended()->classify_axis_order(element_metadata);
+            return (aoc == axis_order_none || aoc == axis_order_c)
+                            ? axis_order_c : axis_order_neither;
+        }
+        default: {
+            stringstream ss;
+            ss << "classify_strided_axis_order not implemented for dtype ";
+            ss << element_dt;
+            throw runtime_error(ss.str());
         }
     }
 }

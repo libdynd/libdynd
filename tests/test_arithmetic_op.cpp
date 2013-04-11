@@ -23,7 +23,7 @@ TEST(ArithmeticOp, SimpleBroadcast) {
     b = v1;
 
     c = (a + b).eval();
-    EXPECT_EQ(make_dtype<int>(), c.get_dtype());
+    EXPECT_EQ(make_dtype<int>(), c.get_udtype());
     EXPECT_EQ(1, c.at(0,0).as<int>());
     EXPECT_EQ(3, c.at(0,1).as<int>());
     EXPECT_EQ(4, c.at(0,2).as<int>());
@@ -31,7 +31,7 @@ TEST(ArithmeticOp, SimpleBroadcast) {
     EXPECT_EQ(7, c.at(1,1).as<int>());
     EXPECT_EQ(-7, c.at(1,2).as<int>());
     c = (a - b).eval();
-    EXPECT_EQ(make_dtype<int>(), c.get_dtype());
+    EXPECT_EQ(make_dtype<int>(), c.get_udtype());
     EXPECT_EQ(1, c.at(0,0).as<int>());
     EXPECT_EQ(1, c.at(0,1).as<int>());
     EXPECT_EQ(2, c.at(0,2).as<int>());
@@ -39,7 +39,7 @@ TEST(ArithmeticOp, SimpleBroadcast) {
     EXPECT_EQ(-3, c.at(1,1).as<int>());
     EXPECT_EQ(13, c.at(1,2).as<int>());
     c = (b * a).eval();
-    EXPECT_EQ(make_dtype<int>(), c.get_dtype());
+    EXPECT_EQ(make_dtype<int>(), c.get_udtype());
     EXPECT_EQ(0, c.at(0,0).as<int>());
     EXPECT_EQ(2, c.at(0,1).as<int>());
     EXPECT_EQ(3, c.at(0,2).as<int>());
@@ -47,7 +47,7 @@ TEST(ArithmeticOp, SimpleBroadcast) {
     EXPECT_EQ(10, c.at(1,1).as<int>());
     EXPECT_EQ(-30, c.at(1,2).as<int>());
     c = (b / a).eval();
-    EXPECT_EQ(make_dtype<int>(), c.get_dtype());
+    EXPECT_EQ(make_dtype<int>(), c.get_udtype());
     EXPECT_EQ(0, c.at(0,0).as<int>());
     EXPECT_EQ(0, c.at(0,1).as<int>());
     EXPECT_EQ(0, c.at(0,2).as<int>());

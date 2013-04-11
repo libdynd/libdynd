@@ -276,10 +276,22 @@ void strided_dim_dtype::get_strides(size_t i, intptr_t *out_strides, const char 
     }
 }
 
-intptr_t strided_dim_dtype::get_representative_stride(const char *metadata) const
+axis_order_classification_t strided_dim_dtype::classify_axis_order(const char *metadata) const
 {
     const strided_dim_dtype_metadata *md = reinterpret_cast<const strided_dim_dtype_metadata *>(metadata);
-    return md->stride;
+    if (m_element_dtype.get_undim() > 0) {
+        if (md->stride != 0) {
+            // Call the helper function to do the classification
+            return classify_strided_axis_order(abs(md->stride), m_element_dtype,
+                            metadata + sizeof(strided_dim_dtype_metadata));
+        } else {
+            // Use the classification of the element dtype
+            return m_element_dtype.extended()->classify_axis_order(
+                            metadata + sizeof(strided_dim_dtype_metadata));
+        }
+    } else {
+        return axis_order_none;
+    }
 }
 
 bool strided_dim_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const
@@ -576,14 +588,22 @@ void strided_dim_dtype::foreach_leading(char *data, const char *metadata, foreac
 }
 
 void strided_dim_dtype::reorder_default_constructed_strides(char *dst_metadata,
-                const dtype& src_dtype, const char *src_metadata) const
+                const dtype& src_dt, const char *src_metadata) const
 {
-    // If the next dimension isn't also strided, then nothing can be reordered
     if (m_element_dtype.get_type_id() != strided_dim_type_id) {
-        if (!m_element_dtype.is_builtin()) {
-            dtype src_child_dtype = src_dtype.at_single(0, &src_metadata);
-            m_element_dtype.extended()->reorder_default_constructed_strides(dst_metadata + sizeof(strided_dim_dtype_metadata),
-                            src_child_dtype, src_metadata);
+        // Nothing to do if there's just one reorderable dimension
+        return;
+    }
+
+    if (get_undim() > src_dt.get_undim()) {
+        // If the destination has more dimensions than the source,
+        // do the reordering starting from where they match, to
+        // follow the broadcasting rules.
+        if (m_element_dtype.get_type_id() == strided_dim_type_id) {
+            const strided_dim_dtype *sdd = static_cast<const strided_dim_dtype *>(m_element_dtype.extended());
+            sdd->reorder_default_constructed_strides(
+                            dst_metadata + sizeof(strided_dim_dtype_metadata),
+                            src_dt, src_metadata);
         }
         return;
     }
@@ -591,40 +611,71 @@ void strided_dim_dtype::reorder_default_constructed_strides(char *dst_metadata,
     // Find the total number of dimensions we might be reordering, then process
     // them all at once. This code handles a whole chain of strided_dim_dtype
     // instances at once.
-    int ndim = 1;
+    size_t ndim = 1;
     dtype last_dt = m_element_dtype;
     do {
         ++ndim;
         last_dt = static_cast<const strided_dim_dtype *>(last_dt.extended())->get_element_dtype();
     } while (last_dt.get_type_id() == strided_dim_type_id);
 
-    // Get the representative strides from all the dimensions, and
-    // advance the src_metadata pointer. Track if the
-    // result is C-order in which case we can skip all sorting and manipulation
     dimvector strides(ndim);
-    dtype last_src_dtype = src_dtype;
+    dtype last_src_dtype = src_dt;
     intptr_t previous_stride = 0;
+    size_t ndim_partial = 0;
+    // Get representative strides from all the strided source dimensions
     bool c_order = true;
-    for (int i = 0; i < ndim; ++i) {
-        intptr_t stride = last_src_dtype.extended()->get_representative_stride(src_metadata);
+    for (size_t i = 0; i < ndim; ++i) {
+        intptr_t stride;
+        switch (last_src_dtype.get_type_id()) {
+            case fixed_dim_type_id: {
+                const fixed_dim_dtype *fdd = static_cast<const fixed_dim_dtype *>(last_src_dtype.extended());
+                stride = fdd->get_fixed_stride();
+                last_src_dtype = fdd->get_element_dtype();
+                break;
+            }
+            case strided_dim_type_id: {
+                const strided_dim_dtype *sdd = static_cast<const strided_dim_dtype *>(last_src_dtype.extended());
+                const strided_dim_dtype_metadata *md = reinterpret_cast<const strided_dim_dtype_metadata *>(src_metadata);
+                stride = md->stride;
+                last_src_dtype = sdd->get_element_dtype();
+                src_metadata += sizeof(strided_dim_dtype_metadata);
+                break;
+            }
+            default:
+                stride = numeric_limits<size_t>::max();
+                break;
+        }
+        ndim_partial = i + 1;
         // To check for C-order, we skip over any 0-strides, and check if a stride ever gets
         // bigger instead of always getting smaller.
         if (stride != 0) {
+            if (stride == numeric_limits<size_t>::max()) {
+                break;
+            }
             if (previous_stride != 0 && previous_stride < stride) {
                 c_order = false;
             }
             previous_stride = stride;
         }
         strides[i] = stride;
-        last_src_dtype = last_src_dtype.extended()->at_single(0, &src_metadata, NULL);
     }
 
+    // If it wasn't all C-order, reorder the axes
     if (!c_order) {
-        shortvector<int> axis_perm(ndim);
-        strides_to_axis_perm(ndim, strides.get(), axis_perm.get());
-        strided_dim_dtype_metadata *md = reinterpret_cast<strided_dim_dtype_metadata *>(dst_metadata);
-        intptr_t stride = md[ndim-1].stride;
-        for (int i = 0; i < ndim; ++i) {
+        shortvector<int> axis_perm(ndim_partial);
+        strides_to_axis_perm(ndim_partial, strides.get(), axis_perm.get());
+        strided_dim_dtype_metadata *md =
+                        reinterpret_cast<strided_dim_dtype_metadata *>(dst_metadata);
+        intptr_t stride = md[ndim_partial-1].stride;
+        if (stride == 0) {
+            // Because of the rule that size one dimensions have
+            // zero stride, may have to look further
+            intptr_t i = ndim_partial-2;
+            do {
+                stride = md[i].stride;
+            } while (stride == 0 && i >= 0);
+        }
+        for (size_t i = 0; i < ndim_partial; ++i) {
             int i_perm = axis_perm[i];
             strided_dim_dtype_metadata& i_md = md[i_perm];
             intptr_t dim_size = i_md.size;
@@ -633,10 +684,30 @@ void strided_dim_dtype::reorder_default_constructed_strides(char *dst_metadata,
         }
     }
 
-    // Allow further subtypes to reorder their strides as well
-    if (!last_dt.is_builtin()) {
-        last_dt.extended()->reorder_default_constructed_strides(dst_metadata + ndim * sizeof(strided_dim_dtype_metadata),
-                        last_src_dtype, src_metadata);
+    // If that didn't cover all the dimensions, then get the
+    // axis order classification to handle the rest
+    if (ndim_partial < ndim && !last_src_dtype.is_builtin()) {
+        axis_order_classification_t aoc = last_src_dtype.extended()->classify_axis_order(src_metadata);
+        // TODO: Allow user control by adding a "default axis order" to the evaluation context
+        if (aoc == axis_order_f) {
+            // If it's F-order, reverse the ordering of the strides
+            strided_dim_dtype_metadata *md =
+                            reinterpret_cast<strided_dim_dtype_metadata *>(dst_metadata);
+            intptr_t stride = md[ndim-1].stride;
+            if (stride == 0) {
+                // Because of the rule that size one dimensions have
+                // zero stride, may have to look further
+                intptr_t i = ndim-2;
+                do {
+                    stride = md[i].stride;
+                } while (stride == 0 && i >= (intptr_t)ndim_partial);
+            }
+            for (size_t i = ndim_partial; i != ndim; ++i) {
+                intptr_t dim_size = md[i].size;
+                md[i].stride = dim_size > 1 ? stride : 0;
+                stride *= dim_size;
+            }
+        }
     }
 }
 

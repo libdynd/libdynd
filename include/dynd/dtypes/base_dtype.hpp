@@ -329,7 +329,8 @@ public:
     virtual void get_shape(size_t i, intptr_t *out_shape) const;
 
     /**
-     * Retrieves the shape of the dtype ndobject instance, expanding the vector as needed. For dimensions with
+     * Retrieves the shape of the dtype ndobject instance,
+     expanding the vector as needed. For dimensions with
      * variable shape, -1 is returned.
      *
      * The output must be pre-initialized to have get_undim() elements.
@@ -337,27 +338,20 @@ public:
     virtual void get_shape(size_t i, intptr_t *out_shape, const char *metadata) const;
 
     /**
-     * Retrieves the strides of the dtype ndobject instance, expanding the vector as needed. For dimensions
-     * where there is not a simple stride (e.g. a tuple/struct dtype), 0 is returned and
-     * the caller should handle this.
+     * Retrieves the strides of the dtype ndobject instance,
+     * expanding the vector as needed. For dimensions where
+     * there is not a simple stride (e.g. a tuple/struct dtype),
+     * 0 is returned and the caller should handle this.
      *
      * The output must be pre-initialized to have get_undim() elements.
      */
     virtual void get_strides(size_t i, intptr_t *out_strides, const char *metadata) const;
 
     /**
-     * \brief Returns a value representative of a stride for the dimension, used for axis sorting.
-     *
-     * For dimensions which are strided, returns the stride. For dimensions which
-     * are not, for example a dimension with an array of offsets, returns a
-     * non-zero value which represents roughly what a stride would be. In this
-     * example, the first non-zero offset would work.
-     *
-     * \param metadata  Metadata corresponding to the dtype.
-     *
-     * \returns  The representative stride.
+     * Classifies the order the axes occur in the memory
+     * layout of the array.
      */
-    virtual intptr_t get_representative_stride(const char *metadata) const;
+    virtual axis_order_classification_t classify_axis_order(const char *metadata) const;
 
     /**
      * Called by ::dynd::is_lossless_assignment, with (this == dst_dt->extended()).
@@ -483,18 +477,6 @@ public:
      */
     virtual void foreach_leading(char *data, const char *metadata,
                     foreach_fn_t callback, void *callback_data) const;
-
-    /**
-     * Modifies metadata allocated using the metadata_default_construct function, to be used
-     * immediately after ndobject construction. Given an input dtype/metadata, edits the output
-     * metadata in place to match.
-     *
-     * \param dst_metadata  The metadata created by metadata_default_construct, which is modified in place
-     * \param src_dtype  The dtype of the input ndobject whose stride ordering is to be matched.
-     * \param src_metadata  The metadata of the input ndobject whose stride ordering is to be matched.
-     */
-    virtual void reorder_default_constructed_strides(char *dst_metadata,
-                    const dtype& src_dtype, const char *src_metadata) const;
 
     /**
      * Additional dynamic properties exposed by the dtype as gfunc::callable.

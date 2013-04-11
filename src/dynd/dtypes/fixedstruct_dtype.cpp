@@ -329,18 +329,6 @@ void fixedstruct_dtype::get_shape(size_t i, intptr_t *out_shape) const
     }
 }
 
-intptr_t fixedstruct_dtype::get_representative_stride(const char *DYND_UNUSED(metadata)) const
-{
-    // Return the first non-zero offset as the representative stride
-    for (size_t i = 0, i_end = m_field_types.size(); i != i_end; ++i) {
-        if (m_data_offsets[i] != 0) {
-            return m_data_offsets[i];
-        }
-    }
-    // Return 0 as the fallback
-    return 0;
-}
-
 bool fixedstruct_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const
 {
     if (dst_dt.extended() == this) {
