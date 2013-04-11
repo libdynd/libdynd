@@ -642,14 +642,15 @@ void strided_dim_dtype::reorder_default_constructed_strides(char *dst_metadata,
                 break;
             }
             default:
-                stride = numeric_limits<size_t>::max();
+                stride = numeric_limits<intptr_t>::max();
                 break;
         }
         ndim_partial = i + 1;
-        // To check for C-order, we skip over any 0-strides, and check if a stride ever gets
-        // bigger instead of always getting smaller.
+        // To check for C-order, we skip over any 0-strides, and
+        // check if a stride ever gets  bigger instead of always
+        // getting smaller.
         if (stride != 0) {
-            if (stride == numeric_limits<size_t>::max()) {
+            if (stride == numeric_limits<intptr_t>::max()) {
                 break;
             }
             if (previous_stride != 0 && previous_stride < stride) {

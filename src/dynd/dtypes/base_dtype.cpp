@@ -109,33 +109,38 @@ void base_dtype::get_shape(size_t DYND_UNUSED(i), intptr_t *DYND_UNUSED(out_shap
     // Default to scalar behavior
 }
 
-void base_dtype::get_strides(size_t DYND_UNUSED(i), intptr_t *DYND_UNUSED(out_strides),
-                    const char *DYND_UNUSED(metadata)) const
+void base_dtype::get_strides(size_t DYND_UNUSED(i),
+                intptr_t *DYND_UNUSED(out_strides),
+                const char *DYND_UNUSED(metadata)) const
 {
     // Default to scalar behavior
 }
 
-axis_order_classification_t base_dtype::classify_axis_order(const char *metadata) const
+axis_order_classification_t base_dtype::classify_axis_order(
+                const char *DYND_UNUSED(metadata)) const
 {
     // Scalar types have no axis order
     return axis_order_none;
 }
 
 
-bool base_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const
+bool base_dtype::is_lossless_assignment(const dtype& dst_dt,
+                const dtype& src_dt) const
 {
     // Default to just an equality check
     return dst_dt == src_dt;
 }
 
-size_t base_dtype::get_default_data_size(size_t DYND_UNUSED(ndim), const intptr_t *DYND_UNUSED(shape)) const
+size_t base_dtype::get_default_data_size(size_t DYND_UNUSED(ndim),
+                const intptr_t *DYND_UNUSED(shape)) const
 {
     return get_data_size();
 }
 
 // TODO: Make this a pure virtual function eventually
 void base_dtype::metadata_default_construct(char *DYND_UNUSED(metadata),
-                size_t DYND_UNUSED(ndim), const intptr_t* DYND_UNUSED(shape)) const
+                size_t DYND_UNUSED(ndim),
+                const intptr_t* DYND_UNUSED(shape)) const
 {
     stringstream ss;
     ss << "TODO: metadata_default_construct for " << dtype(this, true) << " is not implemented";
