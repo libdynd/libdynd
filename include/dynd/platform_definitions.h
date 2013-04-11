@@ -69,6 +69,8 @@
 #if defined(DYND_PLATFORM_WINDOWS_ON_X64)
 // http://msdn.microsoft.com/en-us/library/ms235286(v=vs.80).aspx
 #   define DYND_CALL_MSFT_X64
+#elif defined(DYND_PLATFORM_WINDOWS_ON_X32)
+#   define DYND_CALL_MSFT_X32
 #elif defined(DYND_PLATFORM_LINUX_ON_X64) || defined(DYND_PLATFORM_DARWIN_ON_X64)
 // http://www.x86-64.org/documentation/abi.pdf
 #   define DYND_CALL_SYSV_X64

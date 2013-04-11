@@ -47,8 +47,8 @@ public:
 
     void get_shape(size_t i, intptr_t *out_shape) const;
 
-    intptr_t get_category_count() const {
-        return reinterpret_cast<const strided_dim_dtype_metadata *>(m_categories.get_ndo_meta())->size;
+    size_t get_category_count() const {
+        return (size_t)reinterpret_cast<const strided_dim_dtype_metadata *>(m_categories.get_ndo_meta())->size;
     }
 
     /**
@@ -69,7 +69,7 @@ public:
     uint32_t get_value_from_category(const char *category_metadata, const char *category_data) const;
     uint32_t get_value_from_category(const ndobject& category) const;
 
-    const char *get_category_data_from_value(uint32_t value) const {
+    const char *get_category_data_from_value(size_t value) const {
         if (value >= get_category_count()) {
             throw std::runtime_error("category value is out of bounds");
         }
