@@ -34,7 +34,7 @@ TEST(NDObjectArange, Basic) {
         EXPECT_EQ(0.5*(i+2), a.at(i).as<double>());
     }
 
-    a = arange(0.,1.,0.1);
+    a = arange(0., 1., 0.1);
     EXPECT_EQ(make_dtype<double>(), a.get_dtype().get_udtype());
     EXPECT_EQ(10, a.get_shape()[0]);
 

@@ -81,20 +81,16 @@ namespace {
                 if (end <= begin) {
                     return 0;
                 }
-                intptr_t count = (intptr_t)floor((end - begin) / step);
-                while (begin + count * step < end) {
-                    ++count;
-                }
-                return count;
+                // Add half a step to make the count robust. This requires
+                // that the range given is approximately a multiple of step
+                return (intptr_t)floor((end - begin + 0.5 * step) / step);
             } else if (step < 0) {
                 if (end >= begin) {
                     return 0;
                 }
-                intptr_t count = (intptr_t)floor((end - begin) / step);
-                while (begin + count * step > end) {
-                    ++count;
-                }
-                return count;
+                // Add half a step to make the count robust. This requires
+                // that the range given is approximately a multiple of step
+                return (intptr_t)floor((end - begin + 0.5 * step) / step);
             } else {
                 throw std::runtime_error("arange cannot have a zero-sized step");
             }

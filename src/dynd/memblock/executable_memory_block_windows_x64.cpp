@@ -3,7 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#if defined(_WIN32) && defined(_M_X64)
+#if defined(_WIN32)
 
 #include <Windows.h>
 
@@ -20,7 +20,9 @@ using namespace dynd;
 namespace {
     struct virtual_alloc_chunk {
         char *m_memory_begin;
+#ifdef _M_X64
         deque<RUNTIME_FUNCTION> m_functions;
+#endif
     };
 
     struct executable_memory_block {
@@ -61,9 +63,11 @@ namespace {
         {
             HANDLE hProcess = GetCurrentProcess();
             for (size_t i = 0, i_end = m_memory_handles.size(); i != i_end; ++i) {
+#ifdef _M_X64
                 for (size_t j = 0, j_end = m_memory_handles[i].m_functions.size(); j != j_end; ++j) {
                     RtlDeleteFunctionTable(&m_memory_handles[i].m_functions[j]);
                 }
+#endif
                 VirtualFreeEx(hProcess, m_memory_handles[i].m_memory_begin, 0, MEM_RELEASE);
             }
         }
@@ -146,6 +150,7 @@ void dynd::resize_executable_memory(memory_block_data *self, intptr_t size_bytes
 //    cout << "memory state after " << (void *)emb->m_memory_begin << " / " << (void *)emb->m_memory_current << " / " << (void *)emb->m_memory_end << endl;
 }
 
+#ifdef _M_X64
 void dynd::set_executable_memory_runtime_function(memory_block_data *self, char *begin, char *end, char *unwind_data)
 {
     // Sets the runtime function info for the most recently allocated memory
@@ -159,6 +164,7 @@ void dynd::set_executable_memory_runtime_function(memory_block_data *self, char 
     rf.UnwindData = (DWORD)(unwind_data - root);
     RtlAddFunctionTable(&rf, 1, (DWORD64)root);
 }
+#endif
 
 void dynd::executable_memory_block_debug_print(const memory_block_data *memblock, std::ostream& o, const std::string& indent)
 {
@@ -168,13 +174,15 @@ void dynd::executable_memory_block_debug_print(const memory_block_data *memblock
     for (size_t i = 0, i_end = emb->m_memory_handles.size(); i != i_end; ++i) {
         const virtual_alloc_chunk& vac = emb->m_memory_handles[i];
         o << indent << " allocated chunk at address " << (void *)vac.m_memory_begin << ":\n";
+#ifdef _M_X64
         for (size_t j = 0, j_end = vac.m_functions.size(); j != j_end; ++j) {
             const RUNTIME_FUNCTION &rf = vac.m_functions[j];
             o << indent << "  RUNTIME_FUNCTION{" << (void *)rf.BeginAddress;
             o << ", " << (void *)rf.EndAddress << ", " << (void *)rf.UnwindData << "}\n";
         }
+#endif
     }
 }
 
 
-#endif // defined(_WIN32) && defined(_M_X64)
+#endif // defined(_WIN32)

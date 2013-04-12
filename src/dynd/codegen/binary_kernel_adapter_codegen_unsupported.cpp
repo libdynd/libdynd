@@ -5,7 +5,7 @@
 
 #include <dynd/platform_definitions.h>
 
-#if !defined(DYND_CALL_MSFT_X64) && !defined(DYND_CALL_SYSV_X64)
+#if !defined(DYND_CALL_MSFT_X64) && !defined(DYND_CALL_MSFT_X32) && !defined(DYND_CALL_SYSV_X64)
 #include <dynd/codegen/binary_kernel_adapter_codegen.hpp>
 
 #include <stdexcept>
