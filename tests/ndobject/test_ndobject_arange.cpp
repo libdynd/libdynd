@@ -21,7 +21,7 @@ TEST(NDObjectArange, Basic) {
     a = arange(1, 10);
     EXPECT_EQ(make_dtype<int32_t>(), a.get_dtype().get_udtype());
     EXPECT_EQ(1u, a.get_shape().size());
-    EXPECT_EQ(9u, a.get_shape()[0]);
+    EXPECT_EQ(9, a.get_shape()[0]);
     for (int i = 0; i < 9; ++i) {
         EXPECT_EQ(i+1, a.at(i).as<int32_t>());
     }
@@ -29,7 +29,7 @@ TEST(NDObjectArange, Basic) {
     a = arange(1., 10., 0.5);
     EXPECT_EQ(make_dtype<double>(), a.get_dtype().get_udtype());
     EXPECT_EQ(1u, a.get_shape().size());
-    EXPECT_EQ(18u, a.get_shape()[0]);
+    EXPECT_EQ(18, a.get_shape()[0]);
     for (int i = 0; i < 18; ++i) {
         EXPECT_EQ(0.5*(i+2), a.at(i).as<double>());
     }
