@@ -40,7 +40,7 @@ TEST(JSONFormatter, Builtins) {
     EXPECT_EQ("200", format_json(n).as<string>());
     n = (uint16_t)40000;
     EXPECT_EQ("40000", format_json(n).as<string>());
-    n = (uint32_t)3000000000;
+    n = (uint32_t)3000000000u;
     EXPECT_EQ("3000000000", format_json(n).as<string>());
     n = (uint64_t)10000000000LL;
     EXPECT_EQ("10000000000", format_json(n).as<string>());
