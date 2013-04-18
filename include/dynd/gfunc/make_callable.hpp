@@ -15,6 +15,98 @@
 
 namespace dynd { namespace gfunc {
 
+// Metaprogram for determining size
+template<typename T> struct dcs_size_of;
+template <> struct dcs_size_of<dynd_bool> {enum {value = 1};};
+template <> struct dcs_size_of<char> {enum {value = 1};};
+template <> struct dcs_size_of<signed char> {enum {value = 1};};
+template <> struct dcs_size_of<short> {enum {value = sizeof(short)};};
+template <> struct dcs_size_of<int> {enum {value = sizeof(int)};};
+template <> struct dcs_size_of<long> {enum {value = sizeof(long)};};
+template <> struct dcs_size_of<long long> {enum {value = sizeof(long long)};};
+template <> struct dcs_size_of<unsigned char> {enum {value = 1};};
+template <> struct dcs_size_of<unsigned short> {enum {value = sizeof(unsigned short)};};
+template <> struct dcs_size_of<unsigned int> {enum {value = sizeof(unsigned int)};};
+template <> struct dcs_size_of<unsigned long> {enum {value = sizeof(unsigned long)};};
+template <> struct dcs_size_of<unsigned long long> {enum {value = sizeof(unsigned long long)};};
+template <> struct dcs_size_of<float> {enum {value = sizeof(long)};};
+template <> struct dcs_size_of<double> {enum {value = sizeof(double)};};
+template <> struct dcs_size_of<std::complex<float> > {enum {value = sizeof(std::complex<float>)};};
+template <> struct dcs_size_of<std::complex<double> > {enum {value = sizeof(std::complex<double>)};};
+template <> struct dcs_size_of<ndobject_preamble *> {enum {value = sizeof(ndobject_preamble *)};};
+template <> struct dcs_size_of<const base_dtype *> {enum {value = sizeof(const base_dtype *)};};
+template <> struct dcs_size_of<string_dtype_data> {enum {value = sizeof(string_dtype_data)};};
+template <typename T, int N> struct dcs_size_of<T[N]> {enum {value = N * sizeof(T)};};
+
+// Metaprogram for determining alignment
+template<typename T> struct dcs_align_of;
+template <> struct dcs_align_of<dynd_bool> {enum {value = 1};};
+template <> struct dcs_align_of<char> {enum {value = 1};};
+template <> struct dcs_align_of<signed char> {enum {value = 1};};
+template <> struct dcs_align_of<short> {enum {value = sizeof(short)};};
+template <> struct dcs_align_of<int> {enum {value = sizeof(int)};};
+template <> struct dcs_align_of<long> {enum {value = sizeof(long)};};
+template <> struct dcs_align_of<long long> {enum {value = sizeof(long long)};};
+template <> struct dcs_align_of<unsigned char> {enum {value = 1};};
+template <> struct dcs_align_of<unsigned short> {enum {value = sizeof(unsigned short)};};
+template <> struct dcs_align_of<unsigned int> {enum {value = sizeof(unsigned int)};};
+template <> struct dcs_align_of<unsigned long> {enum {value = sizeof(unsigned long)};};
+template <> struct dcs_align_of<unsigned long long> {enum {value = sizeof(unsigned long long)};};
+template <> struct dcs_align_of<float> {enum {value = sizeof(long)};};
+template <> struct dcs_align_of<double> {enum {value = sizeof(double)};};
+template <> struct dcs_align_of<std::complex<float> > {enum {value = sizeof(long)};};
+template <> struct dcs_align_of<std::complex<double> > {enum {value = sizeof(double)};};
+template <> struct dcs_align_of<ndobject_preamble *> {enum {value = sizeof(ndobject_preamble *)};};
+template <> struct dcs_align_of<const base_dtype *> {enum {value = sizeof(const base_dtype *)};};
+template <> struct dcs_align_of<string_dtype_data> {enum {value = sizeof(const char *)};};
+template <typename T, int N> struct dcs_align_of<T[N]> {enum {value = sizeof(T)};};
+
+/**
+ * Metaprogram which returns the field offset of the last field in the
+ * template argument list.
+ */
+template <typename T0, typename T1 = void, typename T2 = void, typename T3 = void, typename T4 = void>
+struct dcs_offset_of {
+    enum {partial_offset = dcs_offset_of<T0, T1, T2, T3, void>::value + dcs_size_of<T3>::value};
+    enum {field_align = dcs_align_of<T4>::value};
+
+    // The offset to the T4 value
+    enum {value = partial_offset + (((partial_offset & (field_align-1)) == 0) ? 0 : (field_align - (partial_offset & (field_align-1))))};
+};
+
+template <typename T0, typename T1, typename T2, typename T3>
+struct dcs_offset_of<T0, T1, T2, T3, void> {
+    enum {partial_offset = dcs_offset_of<T0, T1, T2, void, void>::value + dcs_size_of<T2>::value};
+    enum {field_align = dcs_align_of<T3>::value};
+
+    // The offset to the T3 value
+    enum {value = partial_offset + (((partial_offset & (field_align-1)) == 0) ? 0 : (field_align - (partial_offset & (field_align-1))))};
+};
+
+template <typename T0, typename T1, typename T2>
+struct dcs_offset_of<T0, T1, T2, void, void> {
+    enum {partial_offset = dcs_offset_of<T0, T1, void, void, void>::value + dcs_size_of<T1>::value};
+    enum {field_align = dcs_align_of<T2>::value};
+
+    // The offset to the T2 value
+    enum {value = partial_offset + (((partial_offset & (field_align-1)) == 0) ? 0 : (field_align - (partial_offset & (field_align-1))))};
+};
+
+template <typename T0, typename T1>
+struct dcs_offset_of<T0, T1, void, void, void> {
+    enum {partial_offset = dcs_offset_of<T0, void, void, void, void>::value + dcs_size_of<T0>::value};
+    enum {field_align = dcs_align_of<T1>::value};
+
+    // The offset to the T1 value
+    enum {value = partial_offset + (((partial_offset & (field_align-1)) == 0) ? 0 : (field_align - (partial_offset & (field_align-1))))};
+};
+
+template <typename T0>
+struct dcs_offset_of<T0, void, void, void, void> {
+    // The offset to the T0 value
+    enum {value = 0};
+};
+
 template <typename T> struct parameter_type_of;
 template <typename T> struct parameter_type_of<T &> : public parameter_type_of<T> {};
 template <typename T> struct parameter_type_of<const T> : public parameter_type_of<T> {};
@@ -83,36 +175,38 @@ template <> struct box_result<std::string> {
 };
 
 template <typename T> struct unbox_param {
-    inline static typename enable_if<is_dtype_scalar<T>::value, const T&>::type unbox(const T& v) {
-        return v;
+    inline static typename enable_if<is_dtype_scalar<T>::value, const T&>::type unbox(char *v) {
+        return *reinterpret_cast<T *>(v);
     }
 };
 template <> struct unbox_param<bool> {
-    inline static bool unbox(const dynd_bool& v) {
-        return v;
+    inline static bool unbox(char *v) {
+        return (*v != 0);
     }
 };
 template <typename T> struct unbox_param<T &> : public unbox_param<T> {};
 template <typename T> struct unbox_param<const T> : public unbox_param<T> {};
 template <typename T, int N> struct unbox_param<T[N]> {
     typedef T (&result_type)[N];
-    inline static result_type unbox(T (&v)[N]) {
-        return v;
+    typedef T (*result_type_ptr)[N];
+    inline static result_type unbox(char *v) {
+        return *reinterpret_cast<result_type_ptr>(v);
     }
 };
 template <> struct unbox_param<ndobject> {
-    inline static ndobject unbox(ndobject_preamble *v) {
-        return ndobject(v, true);
+    inline static ndobject unbox(char *v) {
+        return ndobject(*reinterpret_cast<ndobject_preamble **>(v), true);
     }
 };
 template <> struct unbox_param<dtype> {
-    inline static dtype unbox(const base_dtype *v) {
-        return dtype(v, true);
+    inline static dtype unbox(char *v) {
+        return dtype(*reinterpret_cast<base_dtype **>(v), true);
     }
 };
 template <> struct unbox_param<std::string> {
-    inline static std::string unbox(string_dtype_data& v) {
-        return std::string(v.begin, v.end);
+    inline static std::string unbox(char *v) {
+        string_dtype_data *p = reinterpret_cast<string_dtype_data *>(v);
+        return std::string(p->begin, p->end);
     }
 };
 
@@ -125,13 +219,11 @@ namespace detail {
     template<class R, class P0>
     struct callable_maker<R (*)(P0)> {
         typedef R (*function_pointer_t)(P0);
-        struct params_struct {
-            typename parameter_type_of<P0>::type p0;
-        };
+        typedef typename parameter_type_of<P0>::type T0;
         static ndobject_preamble *wrapper(const ndobject_preamble *params, void *extra) {
-            params_struct *p = reinterpret_cast<params_struct *>(params->m_data_pointer);
+            char *p = params->m_data_pointer;
             function_pointer_t f = reinterpret_cast<function_pointer_t>(extra);
-            return box_result<R>::box(f(unbox_param<P0>::unbox(p->p0)));
+            return box_result<R>::box(f(unbox_param<P0>::unbox(p + dcs_offset_of<T0>::value)));
         }
         static dtype make_parameters_dtype(const char *name0) {
             return make_fixedstruct_dtype(make_parameter_dtype<P0>::make(), name0);
@@ -142,14 +234,14 @@ namespace detail {
     template<class R, class P0, class P1>
     struct callable_maker<R (*)(P0, P1)> {
         typedef R (*function_pointer_t)(P0, P1);
-        struct params_struct {
-            typename parameter_type_of<P0>::type p0;
-            typename parameter_type_of<P1>::type p1;
-        };
+        typedef typename parameter_type_of<P0>::type T0;
+        typedef typename parameter_type_of<P1>::type T1;
         static ndobject_preamble *wrapper(const ndobject_preamble *params, void *extra) {
-            params_struct *p = reinterpret_cast<params_struct *>(params->m_data_pointer);
+            char *p = params->m_data_pointer;
             function_pointer_t f = reinterpret_cast<function_pointer_t>(extra);
-            return box_result<R>::box(f(unbox_param<P0>::unbox(p->p0), unbox_param<P1>::unbox(p->p1)));
+            return box_result<R>::box(f(
+                            unbox_param<P0>::unbox(p + dcs_offset_of<T0>::value),
+                            unbox_param<P1>::unbox(p + dcs_offset_of<T0, T1>::value)));
         }
         static dtype make_parameters_dtype(const char *name0, const char *name1) {
             return make_fixedstruct_dtype(make_parameter_dtype<P0>::make(), name0,
@@ -161,16 +253,16 @@ namespace detail {
     template<class R, class P0, class P1, class P2>
     struct callable_maker<R (*)(P0, P1, P2)> {
         typedef R (*function_pointer_t)(P0, P1, P2);
-        struct params_struct {
-            typename parameter_type_of<P0>::type p0;
-            typename parameter_type_of<P1>::type p1;
-            typename parameter_type_of<P2>::type p2;
-        };
+        typedef typename parameter_type_of<P0>::type T0;
+        typedef typename parameter_type_of<P1>::type T1;
+        typedef typename parameter_type_of<P2>::type T2;
         static ndobject_preamble *wrapper(const ndobject_preamble *params, void *extra) {
-            params_struct *p = reinterpret_cast<params_struct *>(params->m_data_pointer);
+            char *p = params->m_data_pointer;
             function_pointer_t f = reinterpret_cast<function_pointer_t>(extra);
-            return box_result<R>::box(f(unbox_param<P0>::unbox(p->p0), unbox_param<P1>::unbox(p->p1),
-                            unbox_param<P2>::unbox(p->p2)));
+            return box_result<R>::box(f(
+                            unbox_param<P0>::unbox(p + dcs_offset_of<T0>::value),
+                            unbox_param<P1>::unbox(p + dcs_offset_of<T0, T1>::value),
+                            unbox_param<P2>::unbox(p + dcs_offset_of<T0, T1, T2>::value)));
         }
         static dtype make_parameters_dtype(const char *name0, const char *name1, const char *name2) {
             return make_fixedstruct_dtype(make_parameter_dtype<P0>::make(), name0,
@@ -183,17 +275,18 @@ namespace detail {
     template<class R, class P0, class P1, class P2, class P3>
     struct callable_maker<R (*)(P0, P1, P2, P3)> {
         typedef R (*function_pointer_t)(P0, P1, P2, P3);
-        struct params_struct {
-            typename parameter_type_of<P0>::type p0;
-            typename parameter_type_of<P1>::type p1;
-            typename parameter_type_of<P2>::type p2;
-            typename parameter_type_of<P3>::type p3;
-        };
+        typedef typename parameter_type_of<P0>::type T0;
+        typedef typename parameter_type_of<P1>::type T1;
+        typedef typename parameter_type_of<P2>::type T2;
+        typedef typename parameter_type_of<P3>::type T3;
         static ndobject_preamble *wrapper(const ndobject_preamble *params, void *extra) {
-            params_struct *p = reinterpret_cast<params_struct *>(params->m_data_pointer);
+            char *p = params->m_data_pointer;
             function_pointer_t f = reinterpret_cast<function_pointer_t>(extra);
-            return box_result<R>::box(f(unbox_param<P0>::unbox(p->p0), unbox_param<P1>::unbox(p->p1),
-                            unbox_param<P2>::unbox(p->p2), unbox_param<P3>::unbox(p->p3)));
+            return box_result<R>::box(f(
+                            unbox_param<P0>::unbox(p + dcs_offset_of<T0>::value),
+                            unbox_param<P1>::unbox(p + dcs_offset_of<T0, T1>::value),
+                            unbox_param<P2>::unbox(p + dcs_offset_of<T0, T1, T2>::value),
+                            unbox_param<P3>::unbox(p + dcs_offset_of<T0, T1, T2, T3>::value)));
         }
         static dtype make_parameters_dtype(const char *name0, const char *name1, const char *name2, const char *name3) {
             dtype field_types[4];
@@ -214,19 +307,20 @@ namespace detail {
     template<class R, class P0, class P1, class P2, class P3, class P4>
     struct callable_maker<R (*)(P0, P1, P2, P3, P4)> {
         typedef R (*function_pointer_t)(P0, P1, P2, P3, P4);
-        struct params_struct {
-            typename parameter_type_of<P0>::type p0;
-            typename parameter_type_of<P1>::type p1;
-            typename parameter_type_of<P2>::type p2;
-            typename parameter_type_of<P3>::type p3;
-            typename parameter_type_of<P4>::type p4;
-        };
+        typedef typename parameter_type_of<P0>::type T0;
+        typedef typename parameter_type_of<P1>::type T1;
+        typedef typename parameter_type_of<P2>::type T2;
+        typedef typename parameter_type_of<P3>::type T3;
+        typedef typename parameter_type_of<P4>::type T4;
         static ndobject_preamble *wrapper(const ndobject_preamble *params, void *extra) {
-            params_struct *p = reinterpret_cast<params_struct *>(params->m_data_pointer);
+            char *p = params->m_data_pointer;
             function_pointer_t f = reinterpret_cast<function_pointer_t>(extra);
-            return box_result<R>::box(f(unbox_param<P0>::unbox(p->p0), unbox_param<P1>::unbox(p->p1),
-                            unbox_param<P2>::unbox(p->p2), unbox_param<P3>::unbox(p->p3),
-                            unbox_param<P4>::unbox(p->p4)));
+            return box_result<R>::box(f(
+                            unbox_param<P0>::unbox(p + dcs_offset_of<T0>::value),
+                            unbox_param<P1>::unbox(p + dcs_offset_of<T0, T1>::value),
+                            unbox_param<P2>::unbox(p + dcs_offset_of<T0, T1, T2>::value),
+                            unbox_param<P3>::unbox(p + dcs_offset_of<T0, T1, T2, T3>::value),
+                            unbox_param<P4>::unbox(p + dcs_offset_of<T0, T1, T2, T3, T4>::value)));
         }
         static dtype make_parameters_dtype(const char *name0, const char *name1, const char *name2,
                         const char *name3, const char *name4) {
