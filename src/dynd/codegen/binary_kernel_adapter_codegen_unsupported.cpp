@@ -37,15 +37,12 @@ get_binary_function_adapter_unique_id_string(uint64_t DYND_UNUSED(unique_id))
     return std::string();
 }
     
-binary_operation_t
-codegen_binary_function_adapter(const memory_block_ptr& DYND_UNUSED(exec_memblock)
-                                , const dtype& DYND_UNUSED(restype)
-                                , const dtype& DYND_UNUSED(arg0type)
-                                , const dtype& DYND_UNUSED(arg1type)
-                                , calling_convention_t DYND_UNUSED(callconv))
+binary_operation_pair_t codegen_binary_function_adapter(
+                const memory_block_ptr& DYND_UNUSED(exec_memblock), const dtype& DYND_UNUSED(restype),
+                const dtype& DYND_UNUSED(arg0type), const dtype& DYND_UNUSED(arg1type), calling_convention_t DYND_UNUSED(callconv))
 {
     unimplemented();
-    return 0;
+    return binary_operation_pair_t();
 }
 
 }
