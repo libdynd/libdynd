@@ -37,7 +37,8 @@ namespace dynd
         unimplemented();
         return std::string();
     }
-    
+
+/*
     binary_operation_t
     codegen_unary_function_adapter(const memory_block_ptr& DYND_UNUSED(exec_memblock)
                                     , const dtype& DYND_UNUSED(restype)
@@ -48,7 +49,7 @@ namespace dynd
         unimplemented();
         return 0;
     }
-    
+*/
 }
 
 
