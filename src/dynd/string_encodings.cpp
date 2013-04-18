@@ -85,9 +85,8 @@ namespace {
 
     uint32_t noerror_next_ucs2(const char *&it_raw, const char *DYND_UNUSED(end_raw))
     {
-        const uint16_t *&it = reinterpret_cast<const uint16_t *&>(it_raw);
-        uint32_t cp = *it;
-        ++it;
+        uint32_t cp = *reinterpret_cast<const uint16_t *>(it_raw);
+        it_raw += 2;
         if (utf8::internal::is_surrogate(cp)) {
             return ERROR_SUBSTITUTE_CODEPOINT;
         }
@@ -333,9 +332,8 @@ namespace {
 
     uint32_t noerror_next_utf32(const char *&it_raw, const char *DYND_UNUSED(end_raw))
     {
-        const uint32_t *&it = reinterpret_cast<const uint32_t *&>(it_raw);
-        uint32_t result = *it;
-        ++it;
+        uint32_t result = *reinterpret_cast<const uint32_t *>(it_raw);
+        it_raw += 4;
         if (!utf8::internal::is_code_point_valid(result)) {
             return ERROR_SUBSTITUTE_CODEPOINT;
         }
