@@ -74,8 +74,8 @@
 #elif defined(DYND_PLATFORM_LINUX_ON_X64) || defined(DYND_PLATFORM_DARWIN_ON_X64)
 // http://www.x86-64.org/documentation/abi.pdf
 #   define DYND_CALL_SYSV_X64
-#elif defined(DYND_PLATFORM_LINUX_ON_X64)
-#define DYND_CALL_SYSV_X32
+#elif defined(DYND_PLATFORM_LINUX_ON_X86)
+#define DYND_CALL_LINUX_X32
 #else
 #   error unknown calling convention
 #endif
