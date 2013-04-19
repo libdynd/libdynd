@@ -115,7 +115,11 @@ TEST(DTypeAssign, FixedSizeTestsNoExcept) {
     ONE_TEST(uint8_type_id, v_u8, (uint8_t)-10);
     ONE_TEST(uint16_type_id, v_u16, (uint16_t)-10);
     ONE_TEST(uint32_type_id, v_u32, (uint32_t)-10);
-    ONE_TEST(uint64_type_id, v_u64, (uint64_t)-10);
+    // This float64 -> uint64 if commented out because it
+    // behaves differently on linux 32. The behavior is
+    // not well-defined according to C/C++, so that should
+    // be ok.
+    //ONE_TEST(uint64_type_id, v_u64, (uint64_t)-10);
     ONE_TEST(float32_type_id, v_f32, -10.25);
     ONE_TEST(float64_type_id, v_f64, -10.25);
     ONE_TEST(complex_float32_type_id, v_cf32, complex<float>(-10.25f, 1.5f));
