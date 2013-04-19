@@ -163,9 +163,9 @@ TEST(NDObjectAssign, ScalarAssignment_Uint64) {
     a = empty(make_dtype<uint64_t>());
     ptr_u64 = (const uint64_t *)a.get_ndo()->m_data_pointer;
     a.val_assign(true);
-    EXPECT_EQ(1, *ptr_u64);
+    EXPECT_EQ(1u, *ptr_u64);
     a.val_assign(false);
-    EXPECT_EQ(0, *ptr_u64);
+    EXPECT_EQ(0u, *ptr_u64);
     // Assign some values that don't fit in 32-bits
     a.val_assign(1.0e10f);
     EXPECT_EQ(10000000000ULL, *ptr_u64);
