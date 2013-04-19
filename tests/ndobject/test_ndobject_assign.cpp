@@ -155,6 +155,33 @@ TEST(NDObjectAssign, ScalarAssignment_Float64) {
     EXPECT_THROW(a.val_assign(36028797018963969LL, assign_error_inexact), runtime_error);
 }
 
+TEST(NDObjectAssign, ScalarAssignment_Uint64) {
+    ndobject a;
+    const uint64_t *ptr_u64;
+
+    // Assignment to a double scalar
+    a = empty(make_dtype<uint64_t>());
+    ptr_u64 = (const uint64_t *)a.get_ndo()->m_data_pointer;
+    a.val_assign(true);
+    EXPECT_EQ(1, *ptr_u64);
+    a.val_assign(false);
+    EXPECT_EQ(0, *ptr_u64);
+    // Assign some values that don't fit in 32-bits
+    a.val_assign(1.0e10f);
+    EXPECT_EQ(10000000000ULL, *ptr_u64);
+    a.val_assign(2.0e10);
+    EXPECT_EQ(20000000000ULL, *ptr_u64);
+    // Assign some values that don't fit in signed 64-bits
+    a.val_assign(13835058055282163712.f);
+    EXPECT_EQ(13835058055282163712ULL, *ptr_u64);
+    a.val_assign(16140901064495857664.0);
+    EXPECT_EQ(16140901064495857664ULL, *ptr_u64);
+    a.val_assign(13835058055282163712.f, assign_error_none);
+    EXPECT_EQ(13835058055282163712ULL, *ptr_u64);
+    a.val_assign(16140901064495857664.0, assign_error_none);
+    EXPECT_EQ(16140901064495857664ULL, *ptr_u64);
+}
+
 TEST(NDObjectAssign, ScalarAssignment_Complex_Float32) {
     ndobject a;
     const complex<float> *ptr_cf32;
