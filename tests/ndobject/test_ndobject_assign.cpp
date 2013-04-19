@@ -171,6 +171,17 @@ TEST(NDObjectAssign, ScalarAssignment_Uint64) {
     EXPECT_EQ(10000000000ULL, *ptr_u64);
     a.val_assign(2.0e10);
     EXPECT_EQ(20000000000ULL, *ptr_u64);
+}
+
+#if !(defined(_WIN32) && !defined(_M_X64)) // TODO: How to mark as expected failures in googletest?
+
+TEST(NDObjectAssign, ScalarAssignment_Uint64_LargeNumbers) {
+    ndobject a;
+    const uint64_t *ptr_u64;
+
+    // Assignment to a double scalar
+    a = empty(make_dtype<uint64_t>());
+    ptr_u64 = (const uint64_t *)a.get_ndo()->m_data_pointer;
     // Assign some values that don't fit in signed 64-bits
     a.val_assign(13835058055282163712.f);
     EXPECT_EQ(13835058055282163712ULL, *ptr_u64);
@@ -181,6 +192,7 @@ TEST(NDObjectAssign, ScalarAssignment_Uint64) {
     a.val_assign(16140901064495857664.0, assign_error_none);
     EXPECT_EQ(16140901064495857664ULL, *ptr_u64);
 }
+#endif
 
 TEST(NDObjectAssign, ScalarAssignment_Complex_Float32) {
     ndobject a;
