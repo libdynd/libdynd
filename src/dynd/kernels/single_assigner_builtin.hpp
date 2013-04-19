@@ -547,6 +547,26 @@ struct single_assigner_builtin_base<dst_type, src_type, uint_kind, real_kind, as
     }
 };
 
+#if defined(__GNUC__) && defined(__linux__) && defined(__i386__)
+// Work around a floating point -> uint64 conversion quirk on 32-bit linux gcc
+// Floating point -> uint64 with no checking
+template<class src_type>
+struct single_assigner_builtin_base<uint64_t, src_type, uint_kind, real_kind, assign_error_none>
+{
+    static void assign(uint64_t *dst, const src_type *src, kernel_data_prefix *DYND_UNUSED(extra)) {
+        src_type s = *src;
+
+        DYND_TRACE_ASSIGNMENT(static_cast<uint64_t>(s), uint64_t, s, src_type);
+
+        if (s < 0) {
+            *dst = static_cast<uint64_t>(static_cast<int64_t>(s));
+        } else {
+            *dst = static_cast<uint64_t>(s);
+        }
+    }
+};
+#endif
+
 // Floating point -> unsigned int with fractional checking
 template<class dst_type, class src_type>
 struct single_assigner_builtin_base<dst_type, src_type, uint_kind, real_kind, assign_error_fractional>
