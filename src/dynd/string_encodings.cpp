@@ -41,7 +41,7 @@ namespace {
     {
         uint32_t result = *reinterpret_cast<const uint8_t *>(it);
         if (result&0x80) {
-            throw string_decode_error(result, string_encoding_ascii);
+            throw string_decode_error(it, it+1, string_encoding_ascii);
         }
         ++it;
         return result;
@@ -74,12 +74,11 @@ namespace {
 
     uint32_t next_ucs2(const char *&it_raw, const char *DYND_UNUSED(end_raw))
     {
-        const uint16_t *&it = reinterpret_cast<const uint16_t *&>(it_raw);
-        uint32_t cp = *it;
-        ++it;
+        uint32_t cp = *reinterpret_cast<const uint16_t *>(it_raw);
         if (utf8::internal::is_surrogate(cp)) {
-            throw string_decode_error(cp, string_encoding_ucs_2);
+            throw string_decode_error(it_raw, it_raw+2, string_encoding_ucs_2);
         }
+        it_raw += 2;
         return cp;
     }
 
@@ -229,39 +228,38 @@ namespace {
 
     uint32_t next_utf16(const char *&it_raw, const char *end_raw)
     {
-        const uint16_t *&it = reinterpret_cast<const uint16_t *&>(it_raw);
-        const uint16_t *end = reinterpret_cast<const uint16_t *>(end_raw);
-        uint32_t cp = *it++;
+        uint32_t cp = *reinterpret_cast<const uint16_t *>(it_raw);
         // Take care of surrogate pairs first
         if (utf8::internal::is_lead_surrogate(cp)) {
-            if (it != end) {
-                uint32_t trail_surrogate = utf8::internal::mask16(*it++);
+            if (it_raw + 4 <= end_raw) {
+                uint32_t trail_surrogate = *reinterpret_cast<const uint16_t *>(it_raw + 2);
                 if (utf8::internal::is_trail_surrogate(trail_surrogate)) {
                     cp = (cp << 10) + trail_surrogate + utf8::internal::SURROGATE_OFFSET;
                 } else {
-                    throw string_decode_error(trail_surrogate, string_encoding_utf_16);
+                    throw string_decode_error(it_raw, it_raw + 4, string_encoding_utf_16);
                 }
-            }
-            else {
-                throw string_decode_error(cp, string_encoding_utf_16);
+                it_raw += 2;
+            } else {
+                throw string_decode_error(it_raw, end_raw, string_encoding_utf_16);
             }
 
         } else if (utf8::internal::is_trail_surrogate(cp)) {
             // Lone trail surrogate
-            throw string_decode_error(cp, string_encoding_utf_16);
+            throw string_decode_error(it_raw, it_raw + 2, string_encoding_utf_16);
         }
+        it_raw += 2;
         return cp;
     }
 
     uint32_t noerror_next_utf16(const char *&it_raw, const char *end_raw)
     {
-        const uint16_t *&it = reinterpret_cast<const uint16_t *&>(it_raw);
-        const uint16_t *end = reinterpret_cast<const uint16_t *>(end_raw);
-        uint32_t cp = utf8::internal::mask16(*it++);
+        uint32_t cp = *reinterpret_cast<const uint16_t *>(it_raw);
+        it_raw += 2;
         // Take care of surrogate pairs first
         if (utf8::internal::is_lead_surrogate(cp)) {
-            if (it != end) {
-                uint32_t trail_surrogate = utf8::internal::mask16(*it++);
+            if (it_raw <= end_raw + 2) {
+                uint32_t trail_surrogate = *reinterpret_cast<const uint16_t *>(it_raw);
+                it_raw += 2;
                 if (utf8::internal::is_trail_surrogate(trail_surrogate)) {
                     cp = (cp << 10) + trail_surrogate + utf8::internal::SURROGATE_OFFSET;
                 } else {
@@ -321,12 +319,11 @@ namespace {
 
     uint32_t next_utf32(const char *&it_raw, const char *DYND_UNUSED(end_raw))
     {
-        const uint32_t *&it = reinterpret_cast<const uint32_t *&>(it_raw);
-        uint32_t result = *it;
+        uint32_t result = *reinterpret_cast<const uint32_t *>(it_raw);
         if (!utf8::internal::is_code_point_valid(result)) {
-            throw string_decode_error(result, string_encoding_utf_32);
+            throw string_decode_error(it_raw, it_raw + 4, string_encoding_utf_32);
         }
-        ++it;
+        it_raw += 4;
         return result;
     }
 

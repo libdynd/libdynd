@@ -147,16 +147,16 @@ public:
  * An exception for when input can't be decoded
  */
 class string_decode_error : public dynd_exception {
-    uint32_t m_cp;
+    std::string m_bytes;
     string_encoding_t m_encoding;
 public:
-    string_decode_error(uint32_t cp, string_encoding_t encoding);
+    string_decode_error(const char *begin, const char *end, string_encoding_t encoding);
 
     virtual ~string_decode_error() throw() {
     }
 
-    uint32_t cp() const {
-        return m_cp;
+    const std::string& bytes() const {
+        return m_bytes;
     }
 
     string_encoding_t encoding() const {

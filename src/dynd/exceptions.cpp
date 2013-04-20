@@ -264,24 +264,18 @@ invalid_type_id::invalid_type_id(int type_id)
     //cout << "throwing invalid_type_id\n";
 }
 
-inline string string_decode_error_message(uint32_t cp, string_encoding_t encoding)
+inline string string_decode_error_message(const char *begin, const char *end, string_encoding_t encoding)
 {
     stringstream ss;
-    if (!utf8::internal::is_code_point_valid(cp)) {
-        ss << "encoded value U+";
-        hexadecimal_print(ss, cp);
-        ss << " is an invalid code point in " << encoding << " input.";
-    } else {
-        ss << "Error decoding code point U+";
-        hexadecimal_print(ss, cp);
-        ss << " from " << encoding;
-    }
+    ss << "encoded bytes ";
+    hexadecimal_print(ss, begin, end - begin);
+    ss << " are invalid in " << encoding << " input.";
     return ss.str();
 }
 
-string_decode_error::string_decode_error(uint32_t cp, string_encoding_t encoding)
-    : dynd_exception("string decode error", string_decode_error_message(cp, encoding)),
-                    m_cp(cp), m_encoding(encoding)
+string_decode_error::string_decode_error(const char *begin, const char *end, string_encoding_t encoding)
+    : dynd_exception("string decode error", string_decode_error_message(begin, end, encoding)),
+                    m_bytes(begin, end), m_encoding(encoding)
 {
 }
 
