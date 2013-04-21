@@ -9,6 +9,7 @@
 #include <inc_gtest.hpp>
 
 #include <dynd/ndobject.hpp>
+#include <dynd/json_parser.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -54,6 +55,25 @@ TEST(ArithmeticOp, SimpleBroadcast) {
     EXPECT_EQ(2, c.at(1,0).as<int>());
     EXPECT_EQ(2, c.at(1,1).as<int>());
     EXPECT_EQ(-3, c.at(1,2).as<int>());
+}
+
+TEST(ArithmeticOp, VarToStridedBroadcast) {
+    ndobject a, b, c;
+
+    a = parse_json("2, VarDim, int32",
+                    "[[1, 2, 3], [4]]");
+    b = parse_json("2, 3, int32",
+                    "[[5, 6, 7], [8, 9, 10]]");
+    c = (a + b).eval();
+    ASSERT_EQ(dtype("M, N, int32"), c.get_dtype());
+    ASSERT_EQ(2, c.get_shape()[0]);
+    ASSERT_EQ(3, c.get_shape()[1]);
+    EXPECT_EQ(6, c.at(0,0).as<int>());
+    EXPECT_EQ(8, c.at(0,1).as<int>());
+    EXPECT_EQ(10, c.at(0,2).as<int>());
+    EXPECT_EQ(12, c.at(1,0).as<int>());
+    EXPECT_EQ(13, c.at(1,1).as<int>());
+    EXPECT_EQ(14, c.at(1,2).as<int>());
 }
 
 TEST(ArithmeticOp, ScalarOnTheRight) {

@@ -119,7 +119,21 @@ broadcast_error::broadcast_error(const dtype& dst_dt, const char *dst_metadata,
 {
 }
 
+inline string broadcast_error_message(intptr_t dst_size, intptr_t src_size,
+                const char *dst_name, const char *src_name)
+{
+    stringstream ss;
+    ss << "cannot broadcast input " << src_name << " with size " << src_size;
+    ss << " into output " << dst_name << " with size " << dst_size;
+    return ss.str();
+}
 
+broadcast_error::broadcast_error(intptr_t dst_size, intptr_t src_size,
+                const char *dst_name, const char *src_name)
+    : dynd_exception("broadcast error", broadcast_error_message(
+                    dst_size, src_size, dst_name, src_name))
+{
+}
 
 inline string too_many_indices_message(const dtype& dt, size_t nindices, size_t ndim)
 {

@@ -70,6 +70,14 @@ public:
     broadcast_error(const dtype& dst_dt, const char *dst_metadata,
                     const char *src_name);
 
+    /**
+     * For when broadcasting is occurring in a context where
+     * much of the global information about the broadcasting isn't
+     * available, e.g. broadcasting a var dim inside a kernel.
+     */
+    broadcast_error(intptr_t dst_size, intptr_t src_size,
+                    const char *dst_name, const char *src_name);
+
     virtual ~broadcast_error() throw() {
     }
 };

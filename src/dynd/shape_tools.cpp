@@ -158,7 +158,7 @@ void dynd::incremental_broadcast(size_t out_undim, intptr_t *out_shape,
                 if (out_shape[i] == 1) {
                     out_shape[i] = -1;
                 }
-            } else if (out_shape[i] == 1) {
+            } else if (out_shape[i] == 1 || out_shape[i] == -1) {
                 out_shape[i] = shape_i;
             } else if (shape_i != out_shape[i]) {
                 throw broadcast_error(out_undim, out_shape - (out_undim - undim), undim, shape);
