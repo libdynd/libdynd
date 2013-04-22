@@ -599,7 +599,7 @@ axis_order_classification_t dynd::classify_strided_axis_order(size_t current_str
     switch (element_dt.get_type_id()) {
         case fixed_dim_type_id: {
             const fixed_dim_dtype *edt = static_cast<const fixed_dim_dtype *>(element_dt.extended());
-            size_t estride = abs(edt->get_fixed_stride());
+            size_t estride = intptr_abs(edt->get_fixed_stride());
             if (estride != 0) {
                 axis_order_classification_t aoc;
                 // Get the classification from the next dimension onward
@@ -633,7 +633,7 @@ axis_order_classification_t dynd::classify_strided_axis_order(size_t current_str
         case strided_dim_type_id: {
             const strided_dim_dtype *edt = static_cast<const strided_dim_dtype *>(element_dt.extended());
             const strided_dim_dtype_metadata *emd = reinterpret_cast<const strided_dim_dtype_metadata *>(element_metadata);
-            size_t estride = abs(emd->stride);
+            size_t estride = intptr_abs(emd->stride);
             if (estride != 0) {
                 axis_order_classification_t aoc;
                 // Get the classification from the next dimension onward
