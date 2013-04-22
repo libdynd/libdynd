@@ -282,7 +282,7 @@ axis_order_classification_t strided_dim_dtype::classify_axis_order(const char *m
     if (m_element_dtype.get_undim() > 0) {
         if (md->stride != 0) {
             // Call the helper function to do the classification
-            return classify_strided_axis_order(abs(md->stride), m_element_dtype,
+            return classify_strided_axis_order(md->stride >= 0 ? md->stride : -md->stride, m_element_dtype,
                             metadata + sizeof(strided_dim_dtype_metadata));
         } else {
             // Use the classification of the element dtype
