@@ -233,7 +233,7 @@ struct strided_or_var_to_strided_expr_kernel_extra {
         kernel_data_prefix *echild = &(e + 1)->base;
         expr_strided_operation_t opchild = echild->get_function<expr_strided_operation_t>();
         // Broadcast all the src 'var' dimensions to dst
-        intptr_t size = e->size;
+        intptr_t dim_size = e->size;
         const char *modified_src[N];
         intptr_t modified_src_stride[N];
         for (int i = 0; i < N; ++i) {
@@ -242,10 +242,10 @@ struct strided_or_var_to_strided_expr_kernel_extra {
                 modified_src[i] = vddd->begin + e->src_offset[i];
                 if (vddd->size == 1) {
                     modified_src_stride[i] = 0;
-                } else if (vddd->size == size) {
+                } else if (vddd->size == static_cast<size_t>(dim_size)) {
                     modified_src_stride[i] = e->src_stride[i];
                 } else {
-                    throw broadcast_error(size, vddd->size, "strided dim", "var dim");
+                    throw broadcast_error(dim_size, vddd->size, "strided dim", "var dim");
                 }
             } else {
                 // strided dimensions were fully broadcast in the kernel factory
@@ -253,7 +253,7 @@ struct strided_or_var_to_strided_expr_kernel_extra {
                 modified_src_stride[i] = e->src_stride[i];
             }
         }
-        opchild(dst, e->dst_stride, modified_src, modified_src_stride, size, echild);
+        opchild(dst, e->dst_stride, modified_src, modified_src_stride, dim_size, echild);
     }
 
     static void strided(char *dst, intptr_t dst_stride,
@@ -480,7 +480,7 @@ struct strided_or_var_to_var_expr_kernel_extra {
                     modified_src[i] = vddd->begin + e->src_offset[i];
                     if (vddd->size == 1) {
                         modified_src_stride[i] = 0;
-                    } else if (vddd->size == dim_size) {
+                    } else if (vddd->size == static_cast<size_t>(dim_size)) {
                         modified_src_stride[i] = e->src_stride[i];
                     } else {
                         throw broadcast_error(dim_size, vddd->size, "var dim", "var dim");
@@ -506,7 +506,7 @@ struct strided_or_var_to_var_expr_kernel_extra {
                     } else if (dim_size == 1) {
                         dim_size = vddd->size;
                         modified_src_stride[i] = e->src_stride[i];
-                    } else if (vddd->size == dim_size) {
+                    } else if (vddd->size == static_cast<size_t>(dim_size)) {
                         modified_src_stride[i] = e->src_stride[i];
                     } else {
                         throw broadcast_error(dim_size, vddd->size, "var dim", "var dim");
