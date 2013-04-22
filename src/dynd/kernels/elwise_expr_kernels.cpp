@@ -743,7 +743,11 @@ size_t dynd::make_elwise_dimension_expr_kernel(hierarchical_kernel *out, size_t 
                 src_all_strided = false;
                 break;
             default:
-                src_all_strided_or_var = false;
+                // If it's a scalar, allow it to broadcast like
+                // a strided dimension
+                if (src_dt[i].get_undim() > 0) {
+                    src_all_strided_or_var = false;
+                }
                 break;
         }
     }

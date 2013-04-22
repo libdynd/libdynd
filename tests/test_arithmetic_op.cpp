@@ -57,6 +57,51 @@ TEST(ArithmeticOp, SimpleBroadcast) {
     EXPECT_EQ(-3, c.at(1,2).as<int>());
 }
 
+TEST(ArithmeticOp, StridedScalarBroadcast) {
+    ndobject a, b, c;
+
+    // Two arrays with broadcasting
+    const int v0[] = {2,4,6};
+    a = v0;
+    b = 2;
+
+    c = (a + b).eval();
+    EXPECT_EQ(make_dtype<int>(), c.get_udtype());
+    EXPECT_EQ(4, c.at(0).as<int>());
+    EXPECT_EQ(6, c.at(1).as<int>());
+    EXPECT_EQ(8, c.at(2).as<int>());
+    c = (b + a).eval();
+    EXPECT_EQ(make_dtype<int>(), c.get_udtype());
+    EXPECT_EQ(4, c.at(0).as<int>());
+    EXPECT_EQ(6, c.at(1).as<int>());
+    EXPECT_EQ(8, c.at(2).as<int>());
+    c = (a - b).eval();
+    EXPECT_EQ(make_dtype<int>(), c.get_udtype());
+    EXPECT_EQ(0, c.at(0).as<int>());
+    EXPECT_EQ(2, c.at(1).as<int>());
+    EXPECT_EQ(4, c.at(2).as<int>());
+    c = (b - a).eval();
+    EXPECT_EQ(make_dtype<int>(), c.get_udtype());
+    EXPECT_EQ(0, c.at(0).as<int>());
+    EXPECT_EQ(-2, c.at(1).as<int>());
+    EXPECT_EQ(-4, c.at(2).as<int>());
+    c = (a * b).eval();
+    EXPECT_EQ(make_dtype<int>(), c.get_udtype());
+    EXPECT_EQ(4, c.at(0).as<int>());
+    EXPECT_EQ(8, c.at(1).as<int>());
+    EXPECT_EQ(12, c.at(2).as<int>());
+    c = (b * a).eval();
+    EXPECT_EQ(make_dtype<int>(), c.get_udtype());
+    EXPECT_EQ(4, c.at(0).as<int>());
+    EXPECT_EQ(8, c.at(1).as<int>());
+    EXPECT_EQ(12, c.at(2).as<int>());
+    c = (a / b).eval();
+    EXPECT_EQ(make_dtype<int>(), c.get_udtype());
+    EXPECT_EQ(1, c.at(0).as<int>());
+    EXPECT_EQ(2, c.at(1).as<int>());
+    EXPECT_EQ(3, c.at(2).as<int>());
+}
+
 TEST(ArithmeticOp, VarToStridedBroadcast) {
     ndobject a, b, c;
 
