@@ -492,7 +492,7 @@ struct strided_or_var_to_var_expr_kernel_extra {
                 }
             }
         } else {
-            if (e->dst_offset != NULL) {
+            if (e->dst_offset != 0) {
                 throw runtime_error("Cannot assign to an uninitialized dynd var_dim which has a non-zero offset");
             }
             // Broadcast all the inputs together to get the destination size
@@ -589,10 +589,12 @@ static size_t make_elwise_strided_or_var_to_var_dimension_expr_kernel_for_N(
                     out->get_at<strided_or_var_to_var_expr_kernel_extra<N> >(offset_out);
     switch (kernreq) {
         case kernel_request_single:
-            e->base.template set_function<expr_single_operation_t>(&strided_or_var_to_var_expr_kernel_extra<N>::single);
+            e->base.template set_function<expr_single_operation_t>(
+                            &strided_or_var_to_var_expr_kernel_extra<N>::single);
             break;
         case kernel_request_strided:
-            e->base.template set_function<expr_strided_operation_t>(&strided_or_var_to_var_expr_kernel_extra<N>::strided);
+            e->base.template set_function<expr_strided_operation_t>(
+                            &strided_or_var_to_var_expr_kernel_extra<N>::strided);
             break;
         default: {
             stringstream ss;
