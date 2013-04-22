@@ -465,7 +465,7 @@ struct strided_or_var_to_var_expr_kernel_extra {
         expr_strided_operation_t opchild = echild->get_function<expr_strided_operation_t>();
         var_dim_dtype_data *dst_vddd = reinterpret_cast<var_dim_dtype_data *>(dst);
         char *modified_dst;
-        intptr_t modified_dst_stride;
+        intptr_t modified_dst_stride = 0;
         intptr_t dim_size;
         const char *modified_src[N];
         intptr_t modified_src_stride[N];
