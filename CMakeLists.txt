@@ -4,7 +4,7 @@
 #
 
 cmake_minimum_required(VERSION 2.6)
-project(dynd)
+project(libdynd)
 
 list(APPEND CMAKE_MODULE_PATH
     "${CMAKE_CURRENT_SOURCE_DIR}/cmake/")
@@ -56,7 +56,7 @@ string(REPLACE "v" "" DYND_VERSION "${DYND_VERSION_STRING}")
 string(REPLACE "-" ";" DYND_VERSION "${DYND_VERSION}")
 list(GET DYND_VERSION 0 "${DYND_VERSION}")
 
-set(dynd_SRC
+set(libdynd_SRC
     # CodeGen
     src/dynd/codegen/unary_kernel_adapter_codegen_windows_x64.cpp
     src/dynd/codegen/unary_kernel_adapter_codegen_x64_sysvabi.cpp
@@ -294,26 +294,34 @@ source_group("VM Headers" REGULAR_EXPRESSION "include/dynd/vm/.*hpp")
 source_group("Internal Headers" REGULAR_EXPRESSION "src/dynd/.*hpp")
 
 if(WIN32)
-    add_library(dynd STATIC ${dynd_SRC})
+    add_library(libdynd STATIC ${libdynd_SRC})
 elseif(APPLE)
     # MW: The INSTALL_NAME_DIR and rpath stuff is a bit confusing,
     #     hopefully someone who really knows this stuff can fix it
     #     up one day.
-    add_library(dynd SHARED ${dynd_SRC})
-    set_target_properties(dynd
+    add_library(libdynd SHARED ${libdynd_SRC})
+    set_target_properties(libdynd
         PROPERTIES
+        PREFIX ""
         # For now, during development, embed the full version string
         # to reduce the chance of accidentally linking the wrong one.
-        OUTPUT_NAME "dynd_${DYND_VERSION_STRING}"
+        OUTPUT_NAME "libdynd_${DYND_VERSION_STRING}"
         #SOVERSION ${DYND_VERSION}
         #VERSION ${DYND_VERSION}
         BUILD_WITH_INSTALL_RPATH ON
         INSTALL_NAME_DIR "@rpath"
         )
 else()
-    add_library(dynd SHARED ${dynd_SRC})
+    add_library(libdynd SHARED ${libdynd_SRC})
+    set_target_properties(libdynd
+        PROPERTIES
+        PREFIX ""
+        # For now, during development, embed the full version string
+        # to reduce the chance of accidentally linking the wrong one.
+        OUTPUT_NAME "libdynd_${DYND_VERSION_STRING}"
+        )
 endif()
-target_link_libraries(dynd
+target_link_libraries(libdynd
     datetime
     )
 
