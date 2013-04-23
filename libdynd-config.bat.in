@@ -1,0 +1,14 @@
+@echo off
+
+if NOT "%1"=="-libname" goto notlibname
+    echo @DYND_LIB_FILE@
+    exit /B 0
+:notlibname
+
+echo Usage: %0 OPTION
+echo Print information for linking libdynd.
+echo
+echo Options:
+echo   -libname    Prints the name of the libdynd library.
+exit /B 1
+

@@ -1,0 +1,20 @@
+#!/bin/bash
+
+if [[ "$1" == "-lflag" ]]; then
+    echo @DYND_LINK_FLAG@
+    exit 0
+fi
+
+if [[ "$1" == "-libname" ]]; then
+    echo @DYND_LIB_FILE@
+    exit 0
+fi
+
+echo Usage: $0 OPTION
+echo Print information for linking libdynd.
+echo
+echo Options:
+echo   -lflag      Prints the linker option to link libdynd.
+echo   -libname    Prints the name of the libdynd library.
+exit 1
+

@@ -10,7 +10,14 @@ list(APPEND CMAKE_MODULE_PATH
     "${CMAKE_CURRENT_SOURCE_DIR}/cmake/")
 
 set(CMAKE_VERBOSE_MAKEFILE 1)
-set(BUILD_SHARED_LIBS 1)
+
+# Some options
+if(WIN32)
+    option(DYND_SHARED_LIB "Build a libdynd shared library instead of a static library" OFF)
+else()
+    option(DYND_SHARED_LIB "Build a libdynd shared library instead of a static library" ON)
+endif()
+option(DYND_INSTALL_LIB "Do installation of the built libdynd library to the CMAKE_INSTALL_PREFIX" OFF)
 
 # Embedded libraries
 add_subdirectory(thirdparty/blosc)
@@ -293,32 +300,35 @@ source_group("VM Source" REGULAR_EXPRESSION "src/dynd/vm/.*cpp")
 source_group("VM Headers" REGULAR_EXPRESSION "include/dynd/vm/.*hpp")
 source_group("Internal Headers" REGULAR_EXPRESSION "src/dynd/.*hpp")
 
-if(WIN32)
+if (DYND_SHARED_LIB)
+    add_library(libdynd SHARED ${libdynd_SRC})
+    set_target_properties(libdynd
+        PROPERTIES
+        # For now, during development, embed the full version string
+        # to reduce the chance of accidentally linking the wrong one.
+        OUTPUT_NAME "dynd_${DYND_VERSION_STRING}"
+        )
+else()
     add_library(libdynd STATIC ${libdynd_SRC})
+    set_target_properties(libdynd
+        PROPERTIES
+        OUTPUT_NAME "dynd"
+        )
+endif()
+
+if(WIN32)
+    set_target_properties(libdynd
+        PROPERTIES
+        PREFIX "lib"
+        )
 elseif(APPLE)
     # MW: The INSTALL_NAME_DIR and rpath stuff is a bit confusing,
     #     hopefully someone who really knows this stuff can fix it
     #     up one day.
-    add_library(libdynd SHARED ${libdynd_SRC})
     set_target_properties(libdynd
         PROPERTIES
-        PREFIX ""
-        # For now, during development, embed the full version string
-        # to reduce the chance of accidentally linking the wrong one.
-        OUTPUT_NAME "libdynd_${DYND_VERSION_STRING}"
-        #SOVERSION ${DYND_VERSION}
-        #VERSION ${DYND_VERSION}
         BUILD_WITH_INSTALL_RPATH ON
         INSTALL_NAME_DIR "@rpath"
-        )
-else()
-    add_library(libdynd SHARED ${libdynd_SRC})
-    set_target_properties(libdynd
-        PROPERTIES
-        PREFIX ""
-        # For now, during development, embed the full version string
-        # to reduce the chance of accidentally linking the wrong one.
-        OUTPUT_NAME "libdynd_${DYND_VERSION_STRING}"
         )
 endif()
 target_link_libraries(libdynd
@@ -330,4 +340,42 @@ add_subdirectory(basic_kernels)
 add_subdirectory(tests)
 
 add_subdirectory(examples)
+
+# Create a libdynd-config script
+get_property(dynd_library_prefix TARGET libdynd PROPERTY PREFIX)
+get_property(dynd_output_name TARGET libdynd PROPERTY OUTPUT_NAME)
+set(DYND_LINK_FLAG "-l${dynd_output_name}")
+if (DYND_SHARED_LIB)
+    set(DYND_LIB_FILE "${dynd_library_prefix}${dynd_output_name}${CMAKE_IMPORT_LIBRARY_SUFFIX}")
+else()
+    set(DYND_LIB_FILE "${dynd_library_prefix}${dynd_output_name}${CMAKE_STATIC_LIBRARY_SUFFIX}")
+endif()
+if(WIN32)
+    configure_file(
+        "${CMAKE_CURRENT_SOURCE_DIR}/libdynd-config.bat.in"
+        "${CMAKE_CURRENT_BINARY_DIR}/libdynd-config.bat" @ONLY)
+else()
+    configure_file(
+        "${CMAKE_CURRENT_SOURCE_DIR}/libdynd-config.in"
+        "${CMAKE_CURRENT_BINARY_DIR}/libdynd-config" @ONLY)
+endif()
+
+# If requested, install the .lib/.so/.dll file and headers to the install prefix
+if (DYND_INSTALL_LIB)
+    # Install the libdynd binary
+    install(TARGETS libdynd
+        RUNTIME DESTINATION lib
+        LIBRARY DESTINATION lib
+        ARCHIVE DESTINATION lib/static)
+    # Install the libdynd headers
+    install(DIRECTORY "include/dynd" DESTINATION "${CMAKE_INSTALL_PREFIX}/include")
+    # Install the libdynd-config script
+    if(WIN32)
+        install(PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/libdynd-config.bat"
+            DESTINATION "${CMAKE_INSTALL_PREFIX}/bin")
+    else()
+        install(PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/libdynd-config"
+            DESTINATION "${CMAKE_INSTALL_PREFIX}/bin")
+    endif()
+endif()
 
