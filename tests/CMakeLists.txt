@@ -77,11 +77,11 @@ add_executable(test_dynd ${tests_SRC})
 
 if(WIN32)
     target_link_libraries(test_dynd
-        dynd
+        libdynd
         )
 elseif(APPLE)
     target_link_libraries(test_dynd
-        dynd
+        libdynd
         )
     add_custom_command(TARGET test_dynd
         POST_BUILD COMMAND
@@ -93,7 +93,7 @@ else()
     #-Wno-unnamed-type-template-args 
 
     target_link_libraries(test_dynd
-        dynd
+        libdynd
         pthread
         )
 endif()
