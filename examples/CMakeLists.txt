@@ -4,7 +4,7 @@
 #
 
 cmake_minimum_required(VERSION 2.6)
-project(dnd_examples)
+project(dynd_examples)
 
 include_directories(
     ../include

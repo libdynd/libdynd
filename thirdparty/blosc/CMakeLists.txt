@@ -3,20 +3,22 @@ project(blosc)
 
 set(CMAKE_VERBOSE_MAKEFILE 1)
 
+set(ABC "testing!")
+
 set(blosc_SRC
-    blosc/blosc.c
-    blosc/blosclz.c
-    blosc/shuffle.c
-    blosc/blosc.h
-    blosc/blosclz.h
-    blosc/shuffle.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/blosc/blosc.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/blosc/blosclz.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/blosc/shuffle.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/blosc/blosc.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/blosc/blosclz.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/blosc/shuffle.h
     )
 
 if(WIN32)
     set(blosc_SRC
         ${blosc_SRC}
-        blosc/win32/pthread.c
-        blosc/win32/pthread.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/blosc/win32/pthread.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/blosc/win32/pthread.h
         )
     include_directories(blosc/win32)
 endif()

@@ -300,6 +300,20 @@ source_group("VM Source" REGULAR_EXPRESSION "src/dynd/vm/.*cpp")
 source_group("VM Headers" REGULAR_EXPRESSION "include/dynd/vm/.*hpp")
 source_group("Internal Headers" REGULAR_EXPRESSION "src/dynd/.*hpp")
 
+if ((NOT DYND_SHARED_LIB) AND DYND_INSTALL_LIB)
+    # If we're making an installable static library,
+    # include the sublibraries source directly because
+    # including static libraries in other static libraries
+    # is a hassle
+    get_directory_property(datetime_SRC DIRECTORY "thirdparty/datetime" DEFINITION datetime_SRC)
+    get_directory_property(blosc_SRC DIRECTORY "thirdparty/blosc" DEFINITION blosc_SRC)
+    set(libdynd_SRC
+        ${libdynd_SRC}
+        ${datetime_SRC}
+        ${blosc_SRC}
+        )
+endif()
+
 if (DYND_SHARED_LIB)
     add_library(libdynd SHARED ${libdynd_SRC})
     set_target_properties(libdynd
@@ -331,11 +345,17 @@ elseif(APPLE)
         INSTALL_NAME_DIR "@rpath"
         )
 endif()
-target_link_libraries(libdynd
-    datetime
-    )
 
-add_subdirectory(basic_kernels)
+if (DYND_SHARED_LIB OR (NOT DYND_INSTALL_LIB))
+    # If we're not making an installable static library,
+    # link the sublibraries normally
+    target_link_libraries(libdynd
+        datetime
+        blosc
+        )
+endif()
+
+# add_subdirectory(basic_kernels)
 
 add_subdirectory(tests)
 

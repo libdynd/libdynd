@@ -4,15 +4,15 @@ project(datetime)
 set(CMAKE_VERBOSE_MAKEFILE 1)
 
 set(datetime_SRC
-    src/datetime_main.cpp
-    src/datetime_strings.cpp
-    src/datetime_localtime.cpp
-    src/datetime_busday.cpp
-    include/datetime_types.h
-    include/datetime_main.h
-    include/datetime_strings.h
-    include/datetime_localtime.h
-    include/datetime_busday.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/datetime_main.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/datetime_strings.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/datetime_localtime.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/datetime_busday.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/datetime_types.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/datetime_main.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/datetime_strings.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/datetime_localtime.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/datetime_busday.h
     )
 
 include_directories(include)
