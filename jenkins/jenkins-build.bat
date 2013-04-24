@@ -58,7 +58,7 @@ mkdir build
 cd build
 cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_INSTALL_PREFIX=install -G %CMAKE_BUILD_TARGET% ..
 IF %ERRORLEVEL% NEQ 0 exit /b 1
-devenv dynd-python.sln /Build "RelWithDebInfo|%MSVC_BUILD_PLATFORM%"
+devenv libdynd.sln /Build "RelWithDebInfo|%MSVC_BUILD_PLATFORM%"
 IF %ERRORLEVEL% NEQ 0 exit /b 1
 
 REM Run gtests
