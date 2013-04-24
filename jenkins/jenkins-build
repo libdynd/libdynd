@@ -1,0 +1,60 @@
+#!/bin/bash
+#
+#
+# Copyright (C) 2011-13, DyND Developers
+# BSD 2-Clause License, see LICENSE.txt
+#
+#
+#
+# This is the master linux/osx build + test script for building
+# libdynd.
+# Jenkins Requirements:
+#   - Use a jenkins build matrix for multiple
+#     platforms/python versions
+#   - Use the XShell plugin to launch this script
+#   - Call the script from the root workspace
+#     directory as ./jenkins/jenkins-build
+#   - Use a user-defined axis to select compiler versions with COMPILER_VERSION
+#
+
+# Require a compiler version to be selected
+if [ "${COMPILER_VERSION}" == "" ]; then
+ echo You must select a compiler version with the COMPILER_VERSION variable.
+ exit 1
+fi 
+
+# Use the COMPILER_VERSION variable to pick a compiler
+if [ `uname` == Darwin ]; then
+ if [ "${COMPILER_VERSION}" == "gcc" ]; then
+  export CC=gcc
+  export CXX=g++
+ elif [ "${COMPILER_VERSION}" == "clang" ]; then
+  export CC=clang
+  export CXX=clang++
+ else
+  echo Invalid compiler version on `uname`: ${COMPILER_VERSION}
+  exit 1
+ fi
+else
+ if [ "${COMPILER_VERSION}" == "gcc" ]; then
+  export CC=gcc
+  export CXX=g++
+ elif [ "${COMPILER_VERSION}" == "clang" ]; then
+  export CC=clang
+  export CXX=clang++
+ elif [ "${COMPILER_VERSION}" == "gcc44" ]; then
+  export CC=gcc44
+  export CXX=g++44
+ else
+  echo Invalid compiler version on `uname`: ${COMPILER_VERSION}
+  exit 1
+ fi
+fi
+
+rm -rf build
+
+cd build
+cmake -DCMAKE_INSTALL_PREFIX=install -DCMAKE_C_COMPILER=${CC} -DCMAKE_CXX_COMPILER=${CXX} .. || exit 1
+make -j5
+
+./tests/test_dynd  --gtest_output=xml:../test_results.xml || exit 1
