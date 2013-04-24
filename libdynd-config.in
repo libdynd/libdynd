@@ -37,7 +37,7 @@ echo
 echo Options:
 echo   -lflag       Prints the linker option to link libdynd.
 echo   -libname     Prints the name of the libdynd library.
-echo   -libname     Prints the full path of the libdynd library.
+echo   -libpath     Prints the full path of the libdynd library.
 echo   -includedir  Prints the directory with the libdynd include files.
 echo   -version     Prints the version of libdynd.
 exit 1
