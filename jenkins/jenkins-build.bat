@@ -54,6 +54,7 @@ REM Remove the build subdirectory from last time
 rd /q /s build
 
 REM Create a fresh visual studio solution with cmake, and do the build/install
+mkdir build
 cd build
 cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_INSTALL_PREFIX=install -G %CMAKE_BUILD_TARGET% ..
 IF %ERRORLEVEL% NEQ 0 exit /b 1
