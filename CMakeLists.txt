@@ -351,10 +351,20 @@ else()
     set(DYND_LIB_FILE "${dynd_library_prefix}${dynd_output_name}${CMAKE_STATIC_LIBRARY_SUFFIX}")
 endif()
 if(WIN32)
+    if (DYND_SHARED_LIB)
+        set(DYND_STATIC_LIB_DIR "")
+    else()
+        set(DYND_STATIC_LIB_DIR "\\static")
+    endif()
     configure_file(
         "${CMAKE_CURRENT_SOURCE_DIR}/libdynd-config.bat.in"
         "${CMAKE_CURRENT_BINARY_DIR}/libdynd-config.bat" @ONLY)
 else()
+    if (DYND_SHARED_LIB)
+        set(DYND_STATIC_LIB_DIR "")
+    else()
+        set(DYND_STATIC_LIB_DIR "/static")
+    endif()
     configure_file(
         "${CMAKE_CURRENT_SOURCE_DIR}/libdynd-config.in"
         "${CMAKE_CURRENT_BINARY_DIR}/libdynd-config" @ONLY)

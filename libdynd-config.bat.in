@@ -5,10 +5,34 @@ if NOT "%1"=="-libname" goto notlibname
     exit /B 0
 :notlibname
 
+if NOT "%1"=="-libpath" goto notlibname
+    REM This batch file should be in a ...\bin relative to ...\lib
+    pushd %~f0\..\..\lib@DYND_STATIC_LIB_DIR@
+    echo %CD%\@DYND_LIB_FILE@
+    popd
+    exit /B 0
+:notlibname
+
+if NOT "%1"=="-includedir" goto notincludedir
+    REM This batch file should be in a ...\bin relative to ...\include
+    pushd %~f0\..\..\include
+    echo %CD%
+    popd
+    exit /B 0
+:notincludedir
+
+if NOT "%1"=="-version" goto notversion
+    echo @DYND_VERSION_STRING@
+    exit /B 0
+:notversion
+
 echo Usage: %0 OPTION
 echo Print information for linking libdynd.
 echo
 echo Options:
-echo   -libname    Prints the name of the libdynd library.
+echo   -libname     Prints the name of the libdynd library.
+echo   -libpath     Prints the full path of the libdynd library.
+echo   -includedir  Prints the directory with the libdynd include files.
+echo   -version     Prints the version of libdynd.
 exit /B 1
 
