@@ -321,12 +321,14 @@ if (DYND_SHARED_LIB)
         # For now, during development, embed the full version string
         # to reduce the chance of accidentally linking the wrong one.
         OUTPUT_NAME "dynd_${DYND_VERSION_STRING}"
+        PREFIX "${CMAKE_SHARED_LIBRARY_PREFIX}"
         )
 else()
     add_library(libdynd STATIC ${libdynd_SRC})
     set_target_properties(libdynd
         PROPERTIES
         OUTPUT_NAME "dynd"
+        PREFIX "${CMAKE_STATIC_LIBRARY_PREFIX}"
         )
 endif()
 
