@@ -341,11 +341,11 @@ elseif(APPLE)
     # MW: The INSTALL_NAME_DIR and rpath stuff is a bit confusing,
     #     hopefully someone who really knows this stuff can fix it
     #     up one day.
-    set_target_properties(libdynd
-        PROPERTIES
-        BUILD_WITH_INSTALL_RPATH ON
-        INSTALL_NAME_DIR "@rpath"
-        )
+#    set_target_properties(libdynd
+#        PROPERTIES
+#        BUILD_WITH_INSTALL_RPATH ON
+#        INSTALL_NAME_DIR "@rpath"
+#        )
 endif()
 
 if (DYND_SHARED_LIB OR (NOT DYND_INSTALL_LIB))
