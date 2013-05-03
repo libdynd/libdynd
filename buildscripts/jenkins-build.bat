@@ -72,7 +72,7 @@ devenv libdynd.sln /Build "RelWithDebInfo|%MSVC_BUILD_PLATFORM%"
 IF %ERRORLEVEL% NEQ 0 exit /b 1
 
 REM Run gtests
-.\tests\RelWithDebInfo\test_dynd --gtest_output=xml:../test_results.xml
+.\tests\RelWithDebInfo\test_libdynd --gtest_output=xml:../test_results.xml
 IF %ERRORLEVEL% NEQ 0 exit /b 1
 
 exit /b 0
