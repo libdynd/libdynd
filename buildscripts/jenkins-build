@@ -65,4 +65,4 @@ cd build
 cmake ${EXTRA} -DCMAKE_INSTALL_PREFIX=install -DCMAKE_C_COMPILER=${CC} -DCMAKE_CXX_COMPILER=${CXX} .. || exit 1
 make -j5
 
-./tests/test_dynd  --gtest_output=xml:../test_results.xml || exit 1
+./tests/test_libdynd  --gtest_output=xml:../test_results.xml || exit 1
