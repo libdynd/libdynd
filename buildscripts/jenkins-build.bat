@@ -38,7 +38,7 @@ if "%COMPILER_VERSION%" == "MSVC2012" set MSVC_VERSION=11.0
 if "%MSVC_VERSION%" == "" exit /b 1
 
 REM Create variables for the various pieces
-if "%PROCESSOR_ARCHITECTURE%" == "AMD64" goto :amd64
+if "%COMPILER_3264%" == "64" goto :amd64
  set MSVC_VCVARS_PLATFORM=x86
  set MSVC_BUILD_PLATFORM=Win32
  if "%MSVC_VERSION%" == "9.0" set CMAKE_BUILD_TARGET="Visual Studio 9 2008"
