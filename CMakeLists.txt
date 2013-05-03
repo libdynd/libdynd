@@ -6,18 +6,47 @@
 cmake_minimum_required(VERSION 2.6)
 project(libdynd)
 
+################################################
+# Some options configurable from the CMAKE command execution
+#
+# -DDYND_SHARED_LIB=ON/OFF, whether to build a shared or a static library.
+if(WIN32)
+    option(DYND_SHARED_LIB
+        "Build a libdynd shared library instead of a static library"
+        OFF)
+else()
+    option(DYND_SHARED_LIB
+        "Build a libdynd shared library instead of a static library"
+        ON)
+endif()
+#
+# -DDYND_INSTALL_LIB=ON/OFF, whether to install libdynd into the
+#   CMAKE_INSTALL_PREFIX. Its main purpose is to allow separate
+#   building/linking of libdynd by the dynd-python or other projects.
+#   For the make target, use "make install" to do the actual installation.
+#   If this is enabled, specify -DUSE_SEPARATE_LIBDYND to the dynd-python
+#   cmake command indicating to link against a separately built libdynd
+#   instead of trying #   to use one inside the same source tree.
+option(DYND_INSTALL_LIB
+    "Do installation of the built libdynd library to the CMAKE_INSTALL_PREFIX"
+    OFF)
+# -DUSE_RELATIVE_RPATH=ON/OFF, For OSX, to use the @rpath mechanism
+#   for creating a build will be linked against with a relative path.
+#   Build dynd-python with -DUSE_RELATIVE_PATH=ON as well, and look in
+#   the CMakeLists.txt for dynd-python to see how to use this in other
+#   projects.
+if(APPLE)
+    option(USE_RELATIVE_RPATH
+        "OSX: Set the install name of libdynd to '@rpath'."
+        OFF)
+endif()
+#
+################################################
+
 list(APPEND CMAKE_MODULE_PATH
     "${CMAKE_CURRENT_SOURCE_DIR}/cmake/")
 
 set(CMAKE_VERBOSE_MAKEFILE 1)
-
-# Some options
-if(WIN32)
-    option(DYND_SHARED_LIB "Build a libdynd shared library instead of a static library" OFF)
-else()
-    option(DYND_SHARED_LIB "Build a libdynd shared library instead of a static library" ON)
-endif()
-option(DYND_INSTALL_LIB "Do installation of the built libdynd library to the CMAKE_INSTALL_PREFIX" OFF)
 
 # Embedded libraries
 add_subdirectory(thirdparty/blosc)
@@ -340,14 +369,16 @@ if(WIN32)
         PREFIX "lib"
         )
 elseif(APPLE)
-    # MW: The INSTALL_NAME_DIR and rpath stuff is a bit confusing,
-    #     hopefully someone who really knows this stuff can fix it
-    #     up one day.
-#    set_target_properties(libdynd
-#        PROPERTIES
-#        BUILD_WITH_INSTALL_RPATH ON
-#        INSTALL_NAME_DIR "@rpath"
-#        )
+    if(USE_RELATIVE_RPATH)
+        # MW: The INSTALL_NAME_DIR and rpath stuff is a bit confusing,
+        #     hopefully someone who really knows this stuff can fix it
+        #     up one day.
+        set_target_properties(libdynd
+            PROPERTIES
+            BUILD_WITH_INSTALL_RPATH ON
+            INSTALL_NAME_DIR "@rpath"
+            )
+    endif()
 endif()
 
 if (DYND_SHARED_LIB OR (NOT DYND_INSTALL_LIB))
