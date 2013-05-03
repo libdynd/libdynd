@@ -40,6 +40,10 @@ if(APPLE)
         "OSX: Set the install name of libdynd to '@rpath'."
         OFF)
 endif()
+# -DDYND_BUILD_TESTS=ON/OFF, whether to build the googletest unit tests.
+option(DYND_BUILD_TESTS
+    "Build the googletest unit tests for libdynd."
+    ON)
 #
 ################################################
 
@@ -391,8 +395,9 @@ if (DYND_SHARED_LIB OR (NOT DYND_INSTALL_LIB))
 endif()
 
 # add_subdirectory(basic_kernels)
-
-add_subdirectory(tests)
+if(DYND_BUILD_TESTS)
+    add_subdirectory(tests)
+endif()
 
 add_subdirectory(examples)
 
@@ -445,6 +450,10 @@ if (DYND_INSTALL_LIB)
     else()
         install(PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/libdynd-config"
             DESTINATION "${CMAKE_INSTALL_PREFIX}/bin")
+    endif()
+    if(DYND_BUILD_TESTS)
+        install(TARGETS test_libdynd
+            RUNTIME DESTINATION bin)
     endif()
 endif()
 

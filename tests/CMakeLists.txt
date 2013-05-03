@@ -4,7 +4,7 @@
 #
 
 cmake_minimum_required(VERSION 2.6)
-project(test_dynd)
+project(test_libdynd)
 
 # Disable optimizations so the tests build quicker
 if(WIN32)
@@ -73,26 +73,28 @@ source_group("DTypes Tests" REGULAR_EXPRESSION "\\/dtypes\\/test_[^\\/]*\\.cpp$"
 source_group("GFunc Tests" REGULAR_EXPRESSION "\\/gfunc\\/test_[^\\/]*\\.cpp$")
 source_group("VM Tests" REGULAR_EXPRESSION "\\/vm\\/test_[^\\/]*\\.cpp$")
 
-add_executable(test_dynd ${tests_SRC})
+add_executable(test_libdynd ${tests_SRC})
 
 if(WIN32)
-    target_link_libraries(test_dynd
+    target_link_libraries(test_libdynd
         libdynd
         )
 elseif(APPLE)
-    target_link_libraries(test_dynd
+    target_link_libraries(test_libdynd
         libdynd
         )
-    add_custom_command(TARGET test_dynd
-        POST_BUILD COMMAND
-        ${CMAKE_INSTALL_NAME_TOOL} -add_rpath "@loader_path/../"
-        $<TARGET_FILE:test_dynd>)
+    if(USE_RELATIVE_RPATH)
+        add_custom_command(TARGET test_libdynd
+            POST_BUILD COMMAND ${CMAKE_INSTALL_NAME_TOOL}
+                -add_rpath "@loader_path/../"
+                $<TARGET_FILE:test_libdynd>)
+    endif()
 else()
-    set_target_properties(test_dynd PROPERTIES
+    set_target_properties(test_libdynd PROPERTIES
         COMPILE_FLAGS "-pthread")
     #-Wno-unnamed-type-template-args 
 
-    target_link_libraries(test_dynd
+    target_link_libraries(test_libdynd
         libdynd
         pthread
         )
