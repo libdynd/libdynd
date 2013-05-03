@@ -377,6 +377,7 @@ if(WIN32)
         )
 elseif(APPLE)
     if(USE_RELATIVE_RPATH)
+        message(STATUS "Setting the libdynd install name to @rpath")
         # MW: The INSTALL_NAME_DIR and rpath stuff is a bit confusing,
         #     hopefully someone who really knows this stuff can fix it
         #     up one day.
