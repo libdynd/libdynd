@@ -17,6 +17,16 @@ REM
 REM Require a compiler version to be selected
 if "%COMPILER_VERSION%" == "" exit /b 1
 
+REM Determine 32/64-bit based on the machine name, or allow it to be already
+REM be specified from the COMPILER_3264 variable
+if not "%COMPILER_3264%" == "" goto compiler_3264_done
+REM Check if '32' is a substring in COMPUTERNAME, by using search/replace
+if "%COMPUTERNAME:32=XX%" == "%COMPUTERNAME%" set COMPILER_3264=32
+if "%COMPUTERNAME:64=XX%" == "%COMPUTERNAME%" set COMPILER_3264=32
+REM Require that COMPILER_3264 be selected
+is "%COMPILER_3264%" == "" exit /b 1
+:compiler_3264_done
+
 REM Jenkins has '/' in its workspace. Fix it to '\' to simplify the DOS commands.
 set WORKSPACE=%WORKSPACE:/=\%
 
