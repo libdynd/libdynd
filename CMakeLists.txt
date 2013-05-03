@@ -6,19 +6,21 @@
 cmake_minimum_required(VERSION 2.6)
 project(libdynd)
 
+# Only add these options if this is the top level CMakeLists.txt
+if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}")
 ################################################
 # Some options configurable from the CMAKE command execution
 #
 # -DDYND_SHARED_LIB=ON/OFF, whether to build a shared or a static library.
-if(WIN32)
-    option(DYND_SHARED_LIB
-        "Build a libdynd shared library instead of a static library"
-        OFF)
-else()
-    option(DYND_SHARED_LIB
-        "Build a libdynd shared library instead of a static library"
-        ON)
-endif()
+    if(WIN32)
+        option(DYND_SHARED_LIB
+            "Build a libdynd shared library instead of a static library"
+            OFF)
+    else()
+        option(DYND_SHARED_LIB
+            "Build a libdynd shared library instead of a static library"
+            ON)
+    endif()
 #
 # -DDYND_INSTALL_LIB=ON/OFF, whether to install libdynd into the
 #   CMAKE_INSTALL_PREFIX. Its main purpose is to allow separate
@@ -27,25 +29,26 @@ endif()
 #   If this is enabled, specify -DUSE_SEPARATE_LIBDYND to the dynd-python
 #   cmake command indicating to link against a separately built libdynd
 #   instead of trying #   to use one inside the same source tree.
-option(DYND_INSTALL_LIB
-    "Do installation of the built libdynd library to the CMAKE_INSTALL_PREFIX"
-    OFF)
+    option(DYND_INSTALL_LIB
+        "Do installation of the built libdynd library to the CMAKE_INSTALL_PREFIX"
+        OFF)
 # -DUSE_RELATIVE_RPATH=ON/OFF, For OSX, to use the @rpath mechanism
 #   for creating a build will be linked against with a relative path.
 #   Build dynd-python with -DUSE_RELATIVE_PATH=ON as well, and look in
 #   the CMakeLists.txt for dynd-python to see how to use this in other
 #   projects.
-if(APPLE)
-    option(USE_RELATIVE_RPATH
-        "OSX: Set the install name of libdynd to '@rpath'."
-        OFF)
-endif()
+    if(APPLE)
+        option(USE_RELATIVE_RPATH
+            "OSX: Set the install name of libdynd to '@rpath'."
+            OFF)
+    endif()
 # -DDYND_BUILD_TESTS=ON/OFF, whether to build the googletest unit tests.
-option(DYND_BUILD_TESTS
-    "Build the googletest unit tests for libdynd."
-    ON)
+    option(DYND_BUILD_TESTS
+        "Build the googletest unit tests for libdynd."
+        ON)
 #
 ################################################
+endif()
 
 list(APPEND CMAKE_MODULE_PATH
     "${CMAKE_CURRENT_SOURCE_DIR}/cmake/")
