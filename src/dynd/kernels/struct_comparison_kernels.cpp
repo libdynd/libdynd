@@ -25,7 +25,7 @@ namespace {
         // After this are field_count sorting_less kernel offsets, for
         // src#.field_i < src#.field_i with each 0 <= i < field_count
 
-        static bool sorting_less(const char *src0, const char *src1, kernel_data_prefix *extra) {
+        static int sorting_less(const char *src0, const char *src1, kernel_data_prefix *extra) {
             char *eraw = reinterpret_cast<char *>(extra);
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             size_t field_count = e->field_count;
@@ -78,7 +78,7 @@ namespace {
         // src0.field_i < src1.field_i and src1.field_i < src0.field_i
         // with each 0 <= i < field_count
 
-        static bool sorting_less(const char *src0, const char *src1, kernel_data_prefix *extra) {
+        static int sorting_less(const char *src0, const char *src1, kernel_data_prefix *extra) {
             char *eraw = reinterpret_cast<char *>(extra);
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             size_t field_count = e->field_count;
@@ -136,7 +136,7 @@ namespace {
         // src0.field_i <op> src1.field_i
         // with each 0 <= i < field_count
 
-        static bool equal(const char *src0, const char *src1, kernel_data_prefix *extra) {
+        static int equal(const char *src0, const char *src1, kernel_data_prefix *extra) {
             char *eraw = reinterpret_cast<char *>(extra);
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             size_t field_count = e->field_count;
@@ -158,7 +158,7 @@ namespace {
             return true;
         }
 
-        static bool not_equal(const char *src0, const char *src1, kernel_data_prefix *extra) {
+        static int not_equal(const char *src0, const char *src1, kernel_data_prefix *extra) {
             char *eraw = reinterpret_cast<char *>(extra);
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             size_t field_count = e->field_count;

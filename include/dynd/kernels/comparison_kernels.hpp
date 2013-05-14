@@ -30,8 +30,9 @@ enum comparison_type_t {
 };
 
 
-
-typedef bool (*binary_single_predicate_t)(const char *src0, const char *src1,
+// The predicate function type uses 'int' instead of 'bool' so
+// that it is a well-specified C function pointer.
+typedef int (*binary_single_predicate_t)(const char *src0, const char *src1,
                         kernel_data_prefix *extra);
 
 /**
@@ -54,11 +55,11 @@ public:
         return get()->get_function<binary_single_predicate_t>();
     }
 
-    /** Calls the function to do the assignment */
+    /** Calls the function to do the comparison */
     inline bool operator()(const char *src0, const char *src1) {
         kernel_data_prefix *kdp = get();
         binary_single_predicate_t fn = kdp->get_function<binary_single_predicate_t>();
-        return fn(src0, src1, kdp);
+        return fn(src0, src1, kdp) != 0;
     }
 };
 

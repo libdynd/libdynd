@@ -30,7 +30,7 @@ namespace {
                         const binary_single_predicate_t less, kernel_data_prefix *extra) :
             m_originptr(originptr), m_stride(stride), m_less(less), m_extra(extra) {}
         bool operator()(intptr_t i, intptr_t j) const {
-            return m_less(m_originptr + i * m_stride, m_originptr + j * m_stride, m_extra);
+            return m_less(m_originptr + i * m_stride, m_originptr + j * m_stride, m_extra) != 0;
         }
     };
 
@@ -41,7 +41,7 @@ namespace {
         cmp(const binary_single_predicate_t less, kernel_data_prefix *extra) :
             m_less(less), m_extra(extra) {}
         bool operator()(const char *a, const char *b) const {
-            bool result = m_less(a, b, m_extra);
+            bool result = m_less(a, b, m_extra) != 0;
             return result;
         }
     };

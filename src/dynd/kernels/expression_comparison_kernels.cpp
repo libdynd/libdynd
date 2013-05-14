@@ -73,7 +73,7 @@ namespace {
             return dst;
         }
 
-        static bool kernel(const char *src0, const char *src1, kernel_data_prefix *extra)
+        static int kernel(const char *src0, const char *src1, kernel_data_prefix *extra)
         {
             char *eraw = reinterpret_cast<char *>(extra);
             extra_type *e = reinterpret_cast<extra_type *>(extra);
@@ -90,7 +90,7 @@ namespace {
             binary_single_predicate_t opchild;
             echild = reinterpret_cast<kernel_data_prefix *>(eraw + e->cmp_kernel_offset);
             opchild = echild->get_function<binary_single_predicate_t>();
-            bool result = opchild(src0, src1, echild);
+            int result = opchild(src0, src1, echild);
 
             // Clear the buffer data if necessary
             if (e->buf[0].metadata != NULL) {
