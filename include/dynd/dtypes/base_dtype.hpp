@@ -131,6 +131,11 @@ public:
         return m_use_count;
     }
 
+    /** Returns the struct of data common to all dtypes. */
+    inline const base_dtype_members& get_base_dtype_members() const {
+        return m_members;
+    }
+
     /** The dtype's type id */
     inline type_id_t get_type_id() const {
         return static_cast<type_id_t>(m_members.type_id);
