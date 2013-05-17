@@ -16,5 +16,5 @@ using namespace dynd;
 
 TEST(NDObjectCast, BasicCast) {
     ndobject n = 3.5;
-    EXPECT_EQ(n.cast(3.5f, make_dtype<float>()).as<float>())
+    EXPECT_EQ(3.5f, n.cast(make_dtype<float>()).as<float>());
 }
