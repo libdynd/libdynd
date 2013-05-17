@@ -426,7 +426,7 @@ ndobject dynd::detail::make_from_vec<std::string>::make(const std::vector<std::s
 }
 
 namespace {
-    static void as_storage_type(const dtype& dt, const void *DYND_UNUSED(extra),
+    static void as_storage_type(const dtype& dt, void *DYND_UNUSED(extra),
                 dtype& out_transformed_dtype, bool& out_was_transformed)
     {
         // If the dtype is a simple POD, switch it to a bytes dtype. Otherwise, keep it
@@ -823,26 +823,27 @@ bool ndobject::equals_exact(const ndobject& rhs) const
     }
 }
 
-ndobject ndobject::cast(const dtype& DYND_UNUSED(dt), assign_error_mode DYND_UNUSED(errmode)) const
+ndobject ndobject::cast(const dtype& dt, assign_error_mode errmode) const
 {
-    throw runtime_error("The ndobject.cast function is not yet implemented, "
-                    "use ndobject.ucast to cast the uniform type");
+    // Use the ucast function specifying to replace all dimensions
+    return ucast(dt, get_dtype().get_undim(), errmode);
 }
 
 namespace {
     struct cast_udtype_extra {
         cast_udtype_extra(const dtype& dt, size_t ru, assign_error_mode em)
-            : replacement_dt(dt), errmode(em), replace_undim(ru)
+            : replacement_dt(dt), errmode(em), replace_undim(ru), out_can_view_data(true)
         {
         }
         const dtype& replacement_dt;
         assign_error_mode errmode;
         size_t replace_undim;
+        bool out_can_view_data;
     };
-    static void cast_udtype(const dtype& dt, const void *extra,
+    static void cast_udtype(const dtype& dt, void *extra,
                 dtype& out_transformed_dtype, bool& out_was_transformed)
     {
-        const cast_udtype_extra *e = reinterpret_cast<const cast_udtype_extra *>(extra);
+        cast_udtype_extra *e = reinterpret_cast<cast_udtype_extra *>(extra);
         size_t replace_undim = e->replace_undim;
         if (dt.get_undim() > replace_undim) {
             dt.extended()->transform_child_dtypes(&cast_udtype, extra, out_transformed_dtype, out_was_transformed);
@@ -892,6 +893,7 @@ namespace {
             // Only flag the transformation if this actually created a convert dtype
             if (out_transformed_dtype.extended() != e->replacement_dt.extended()) {
                 out_was_transformed= true;
+                e->out_can_view_data = false;
             }
         }
     }
@@ -924,7 +926,7 @@ namespace {
         const dtype& udtype;
         size_t replace_undim;
     };
-    static void replace_compatible_udtype(const dtype& dt, const void *extra,
+    static void replace_compatible_udtype(const dtype& dt, void *extra,
                 dtype& out_transformed_dtype, bool& out_was_transformed)
     {
         const replace_compatible_udtype_extra *e =
@@ -967,7 +969,7 @@ ndobject ndobject::replace_udtype(const dtype& new_udtype, size_t replace_undim)
 }
 
 namespace {
-    static void view_scalar_types(const dtype& dt, const void *extra,
+    static void view_scalar_types(const dtype& dt, void *extra,
                 dtype& out_transformed_dtype, bool& out_was_transformed)
     {
         if (dt.is_scalar()) {
@@ -1064,7 +1066,7 @@ ndobject ndobject::view_scalars(const dtype& scalar_dtype) const
     // Transform the scalars into view dtypes
     dtype viewed_dtype;
     bool was_transformed;
-    view_scalar_types(get_dtype(), &scalar_dtype, viewed_dtype, was_transformed);
+    view_scalar_types(get_dtype(), const_cast<void *>(reinterpret_cast<const void *>(&scalar_dtype)), viewed_dtype, was_transformed);
     return make_ndobject_clone_with_new_dtype(*this, viewed_dtype);
 }
 

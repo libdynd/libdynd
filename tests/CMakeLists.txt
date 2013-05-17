@@ -51,6 +51,7 @@ set(tests_SRC
     ndobject/test_ndobject_arange.cpp
     ndobject/test_ndobject_assign.cpp
     ndobject/test_ndobject_at.cpp
+    ndobject/test_ndobject_cast.cpp
     ndobject/test_ndobject_compare.cpp
     ndobject/test_ndobject_views.cpp
     vm/test_elwise_program.cpp

@@ -199,7 +199,7 @@ namespace {
         const dtype& scalar_dtype;
         assign_error_mode errmode;
     };
-    static void replace_scalar_types(const dtype& dt, const void *extra,
+    static void replace_scalar_types(const dtype& dt, void *extra,
                 dtype& out_transformed_dtype, bool& out_was_transformed)
     {
         const replace_scalar_type_extra *e = reinterpret_cast<const replace_scalar_type_extra *>(extra);
@@ -230,7 +230,7 @@ namespace {
         const dtype& udtype;
         size_t replace_undim;
     };
-    static void replace_udtype(const dtype& dt, const void *extra,
+    static void replace_udtype(const dtype& dt, void *extra,
                 dtype& out_transformed_dtype, bool& out_was_transformed)
     {
         const replace_udtype_extra *e = reinterpret_cast<const replace_udtype_extra *>(extra);

@@ -141,7 +141,7 @@ bool fixedstruct_dtype::is_unique_data_owner(const char *metadata) const
     return true;
 }
 
-void fixedstruct_dtype::transform_child_dtypes(dtype_transform_fn_t transform_fn, const void *extra,
+void fixedstruct_dtype::transform_child_dtypes(dtype_transform_fn_t transform_fn, void *extra,
                 dtype& out_transformed_dtype, bool& out_was_transformed) const
 {
     std::vector<dtype> tmp_field_types(m_field_types.size());

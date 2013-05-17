@@ -56,7 +56,7 @@ typedef char * (*iterdata_reset_fn_t)(iterdata_common *iterdata, char *data, siz
  * should place a different dtype in 'out_transformed_dtype', then set
  * 'out_was_transformed' to true.
  */
-typedef void (*dtype_transform_fn_t)(const dtype& dt, const void *extra,
+typedef void (*dtype_transform_fn_t)(const dtype& dt, void *extra,
                 dtype& out_transformed_dtype, bool& out_was_transformed);
 
 // Common preamble of all iterdata instances
@@ -209,7 +209,7 @@ public:
      * \param out_was_transformed  Is set to true if a transformation was done,
      *                             is left alone otherwise.
      */
-    virtual void transform_child_dtypes(dtype_transform_fn_t transform_fn, const void *extra,
+    virtual void transform_child_dtypes(dtype_transform_fn_t transform_fn, void *extra,
                     dtype& out_transformed_dtype, bool& out_was_transformed) const;
 
     /**

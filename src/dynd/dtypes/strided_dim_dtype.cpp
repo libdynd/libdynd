@@ -81,7 +81,7 @@ bool strided_dim_dtype::is_unique_data_owner(const char *metadata) const
     }
 }
 
-void strided_dim_dtype::transform_child_dtypes(dtype_transform_fn_t transform_fn, const void *extra,
+void strided_dim_dtype::transform_child_dtypes(dtype_transform_fn_t transform_fn, void *extra,
                 dtype& out_transformed_dtype, bool& out_was_transformed) const
 {
     dtype tmp_dtype;
