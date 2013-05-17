@@ -5,6 +5,7 @@
 
 #include <stdexcept>
 #include <sstream>
+#include <algorithm>
 
 #include <dynd/dtype.hpp>
 #include <dynd/diagnostics.hpp>

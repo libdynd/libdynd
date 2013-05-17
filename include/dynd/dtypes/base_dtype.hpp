@@ -12,7 +12,6 @@
 #include <dynd/atomic_refcount.hpp>
 #include <dynd/irange.hpp>
 #include <dynd/memblock/memory_block.hpp>
-#include <dynd/kernels/kernel_instance.hpp>
 #include <dynd/kernels/comparison_kernels.hpp>
 #include <dynd/dtypes/type_id.hpp>
 #include <dynd/dtype_assign.hpp>

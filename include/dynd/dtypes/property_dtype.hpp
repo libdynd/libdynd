@@ -8,7 +8,6 @@
 
 #include <dynd/dtype.hpp>
 #include <dynd/dtype_assign.hpp>
-#include <dynd/kernels/kernel_instance.hpp>
 
 namespace dynd {
 
