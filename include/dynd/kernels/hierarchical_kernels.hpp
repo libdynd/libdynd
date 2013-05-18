@@ -34,6 +34,48 @@ struct kernel_data_prefix {
 };
 
 /**
+ * This is a struct designed for interoperability at
+ * the C ABI level. It contains enough information
+ * to pass kernels from one library to another with
+ * no dependencies between them.
+ *
+ * To free a dynamic kernel instance, one must
+ * first call the destructor in the kernel_data_prefix,
+ * then call the free_func to deallocate the memory.
+ * The function free_dynamic_kernel_instance is provided
+ * here for this purpose.
+ */
+struct dynamic_kernel_instance {
+    /** Pointer to dynamically allocated kernel data */
+    kernel_data_prefix *kernel;
+    /**
+     * How many bytes in the kernel data. Because the
+     * kernel data must be movable, one may move the
+     * data somewhere else, and then free the kernel memory
+     * without calling the kernel destructor.
+     *
+     * This allows for kernels which are not complete,
+     * e.g. a kernel which handles some leading dimensions,
+     * and is expecting a child kernel immediately after
+     * it to handle the elements.
+     */
+    size_t kernel_size;
+    /** Pointer to a function for freeing 'kernel'. */
+    void (*free_func)(void *);
+};
+
+inline void free_dynamic_kernel_instance(dynamic_kernel_instance& dki)
+{
+    if (dki.kernel != NULL) {
+        if (dki.kernel->destructor != NULL) {
+            dki.kernel->destructor(dki.kernel);
+        }
+        dki.free_func(dki.kernel);
+        dki.kernel = NULL;
+    }
+}
+
+/**
  * Function pointers + data for a hierarchical
  * kernel which operates on dtype/metadata in
  * some configuration. Individual kernel types
@@ -46,7 +88,7 @@ struct kernel_data_prefix {
 class hierarchical_kernel {
     // Pointer to the kernel function pointers + data
     intptr_t *m_data;
-    size_t m_capacity, m_size;
+    size_t m_capacity;
     // When the amount of data is small, this static data is used,
     // otherwise dynamic memory is allocated when it gets too big
     intptr_t m_static_data[16];
@@ -74,7 +116,6 @@ public:
     hierarchical_kernel() {
         m_data = &m_static_data[0];
         m_capacity = sizeof(m_static_data);
-        m_size = 0;
         memset(m_static_data, 0, sizeof(m_static_data));
     }
 
@@ -86,7 +127,6 @@ public:
         destroy();
         m_data = &m_static_data[0];
         m_capacity = sizeof(m_static_data);
-        m_size = 0;
         memset(m_static_data, 0, sizeof(m_static_data));
     }
 
@@ -158,6 +198,40 @@ public:
 
     kernel_data_prefix *get() const {
         return reinterpret_cast<kernel_data_prefix *>(m_data);
+    }
+
+    /**
+     * Moves the kernel data held by this hierarchical kernel
+     * into the provide dynamic_kernel_instance struct. Ownership
+     * is transferred to 'dki'.
+     *
+     * Because the kernel size is not tracked by the hierarchical_kernel
+     * object, but rather produced by the factory functions, it
+     * is required as a parameter here.
+     *
+     * \param out  The dynamic_kernel_instance to populate.
+     * \param kernel_size  The size, in bytes, of the hierarchical_kernel.
+     */
+    void move_into_dki(dynamic_kernel_instance *out, size_t kernel_size) {
+        if (using_static_data()) {
+            // Allocate some memory and move the kernel data into it
+            out->kernel = reinterpret_cast<kernel_data_prefix *>(malloc(kernel_size));
+            if (out->kernel == NULL) {
+                out->free_func = NULL;
+                throw std::bad_alloc();
+            }
+            memcpy(out->kernel, m_data, kernel_size);
+            memset(m_static_data, 0, sizeof(m_static_data));
+        } else {
+            // Use the existing kernel data memory
+            out->kernel = reinterpret_cast<kernel_data_prefix *>(m_data);
+            // Switch this kernel back to an empty static data kernel
+            m_data = &m_static_data[0];
+            m_capacity = sizeof(m_static_data);
+            memset(m_static_data, 0, sizeof(m_static_data));
+        }
+        out->kernel_size = kernel_size;
+        out->free_func = free;
     }
 };
 
