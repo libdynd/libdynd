@@ -7,7 +7,7 @@
 #define _DYND__MAKE_CALLABLE_HPP_
 
 #include <dynd/gfunc/callable.hpp>
-#include <dynd/dtypes/fixedstruct_dtype.hpp>
+#include <dynd/dtypes/cstruct_dtype.hpp>
 #include <dynd/dtypes/fixed_dim_dtype.hpp>
 #include <dynd/dtypes/void_pointer_dtype.hpp>
 #include <dynd/dtypes/string_dtype.hpp>
@@ -226,7 +226,7 @@ namespace detail {
             return box_result<R>::box(f(unbox_param<P0>::unbox(p + dcs_offset_of<T0>::value)));
         }
         static dtype make_parameters_dtype(const char *name0) {
-            return make_fixedstruct_dtype(make_parameter_dtype<P0>::make(), name0);
+            return make_cstruct_dtype(make_parameter_dtype<P0>::make(), name0);
         }
     };
 
@@ -244,7 +244,7 @@ namespace detail {
                             unbox_param<P1>::unbox(p + dcs_offset_of<T0, T1>::value)));
         }
         static dtype make_parameters_dtype(const char *name0, const char *name1) {
-            return make_fixedstruct_dtype(make_parameter_dtype<P0>::make(), name0,
+            return make_cstruct_dtype(make_parameter_dtype<P0>::make(), name0,
                             make_parameter_dtype<P1>::make(), name1);
         }
     };
@@ -265,7 +265,7 @@ namespace detail {
                             unbox_param<P2>::unbox(p + dcs_offset_of<T0, T1, T2>::value)));
         }
         static dtype make_parameters_dtype(const char *name0, const char *name1, const char *name2) {
-            return make_fixedstruct_dtype(make_parameter_dtype<P0>::make(), name0,
+            return make_cstruct_dtype(make_parameter_dtype<P0>::make(), name0,
                             make_parameter_dtype<P1>::make(), name1,
                             make_parameter_dtype<P2>::make(), name2);
         }
@@ -299,7 +299,7 @@ namespace detail {
             field_names[1] = name1;
             field_names[2] = name2;
             field_names[3] = name3;
-            return make_fixedstruct_dtype(4, field_types, field_names);
+            return make_cstruct_dtype(4, field_types, field_names);
         }
     };
 
@@ -336,7 +336,7 @@ namespace detail {
             field_names[2] = name2;
             field_names[3] = name3;
             field_names[4] = name4;
-            return make_fixedstruct_dtype(5, field_types, field_names);
+            return make_cstruct_dtype(5, field_types, field_names);
         }
     };
 } // namespace detail

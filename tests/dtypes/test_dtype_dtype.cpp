@@ -218,14 +218,14 @@ TEST(DTypeDType, VarArrayRefCount) {
     EXPECT_EQ(1, d.extended()->get_use_count());
 }
 
-TEST(DTypeDType, FixedStructRefCount) {
+TEST(DTypeDType, CStructRefCount) {
     ndobject a;
     dtype d;
     d = make_strided_dim_dtype(make_dtype<int>());
 
-    // Single FixedStruct Instance
+    // Single CStruct Instance
     a = empty("{dt: dtype; more: {a: int32; b: dtype}; other: string}");
-    EXPECT_EQ(fixedstruct_type_id, a.get_dtype().get_type_id());
+    EXPECT_EQ(cstruct_type_id, a.get_dtype().get_type_id());
     EXPECT_EQ(1, d.extended()->get_use_count());
     a.p("dt").vals() = d;
     EXPECT_EQ(2, d.extended()->get_use_count());
@@ -245,9 +245,9 @@ TEST(DTypeDType, FixedStructRefCount) {
     a = 1.0;
     EXPECT_EQ(1, d.extended()->get_use_count());
 
-    // Array of FixedStruct Instance
+    // Array of CStruct Instance
     a = empty(10, "M, {dt: dtype; more: {a: int32; b: dtype}; other: string}");
-    EXPECT_EQ(fixedstruct_type_id, a.at(0).get_dtype().get_type_id());
+    EXPECT_EQ(cstruct_type_id, a.at(0).get_dtype().get_type_id());
     EXPECT_EQ(1, d.extended()->get_use_count());
     a.p("dt").vals() = d;
     EXPECT_EQ(11, d.extended()->get_use_count());
@@ -273,7 +273,7 @@ TEST(DTypeDType, StructRefCount) {
     dtype d;
     d = make_strided_dim_dtype(make_dtype<int>());
 
-    // Single FixedStruct Instance
+    // Single CStruct Instance
     a = empty("{dt: dtype; more: {a: int32; b: dtype}; other: string}").at(0 <= irange() < 2);
     EXPECT_EQ(struct_type_id, a.get_dtype().get_type_id());
     EXPECT_EQ(1, d.extended()->get_use_count());

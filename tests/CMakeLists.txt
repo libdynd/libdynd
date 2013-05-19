@@ -35,7 +35,7 @@ set(tests_SRC
     dtypes/test_fixedbytes_dtype.cpp
     dtypes/test_fixed_dim_dtype.cpp
     dtypes/test_fixedstring_dtype.cpp
-    dtypes/test_fixedstruct_dtype.cpp
+    dtypes/test_cstruct_dtype.cpp
     dtypes/test_groupby_dtype.cpp
     dtypes/test_json_dtype.cpp
     dtypes/test_pointer_dtype.cpp

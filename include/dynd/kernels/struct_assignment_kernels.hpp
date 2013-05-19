@@ -7,7 +7,7 @@
 #define _DYND__STRUCT_ASSIGNMENT_KERNELS_HPP_
 
 #include <dynd/dtypes/struct_dtype.hpp>
-#include <dynd/dtypes/fixedstruct_dtype.hpp>
+#include <dynd/dtypes/cstruct_dtype.hpp>
 
 namespace dynd {
 

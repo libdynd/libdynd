@@ -13,7 +13,7 @@ namespace dynd {
 
 /**
  * Makes a kernel which lexicographically compares two
- * instances of the same struct/fixedstruct.
+ * instances of the same struct/cstruct.
  */
 size_t make_struct_comparison_kernel(
                 hierarchical_kernel *out, size_t offset_out,

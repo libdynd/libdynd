@@ -469,7 +469,7 @@ static ndobject property_get_field_names(const dtype& dt) {
 }
 
 static ndobject property_get_field_types(const dtype& dt) {
-    const fixedstruct_dtype *d = static_cast<const fixedstruct_dtype *>(dt.extended());
+    const cstruct_dtype *d = static_cast<const cstruct_dtype *>(dt.extended());
     // TODO: This property should be an immutable ndobject, which we would just return.
     return ndobject(d->get_field_types_vector());
 }
@@ -492,7 +492,7 @@ void struct_dtype::get_dynamic_dtype_properties(const std::pair<std::string, gfu
     *out_count = sizeof(dtype_properties) / sizeof(dtype_properties[0]);
 }
 
-dtype struct_dtype::ndobject_parameters_dtype = make_fixedstruct_dtype(dtype(new void_pointer_dtype, false), "self");
+dtype struct_dtype::ndobject_parameters_dtype = make_cstruct_dtype(dtype(new void_pointer_dtype, false), "self");
 
 static ndobject_preamble *property_get_ndobject_field(const ndobject_preamble *params, void *extra)
 {

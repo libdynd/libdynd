@@ -1145,7 +1145,7 @@ ndobject groupby(const dynd::ndobject& data_values, const dynd::ndobject& by,
                 const dynd::dtype& groups = dynd::dtype());
 
 /**
- * Creates a fixedstruct ndobject with the given field names and
+ * Creates a cstruct ndobject with the given field names and
  * pointers to the provided field values.
  *
  * \param  field_count  The number of fields.

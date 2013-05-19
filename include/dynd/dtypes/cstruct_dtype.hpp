@@ -15,7 +15,7 @@
 
 namespace dynd {
 
-class fixedstruct_dtype : public base_struct_dtype {
+class cstruct_dtype : public base_struct_dtype {
     std::vector<dtype> m_field_types;
     std::vector<std::string> m_field_names;
     std::vector<size_t> m_data_offsets;
@@ -26,12 +26,12 @@ class fixedstruct_dtype : public base_struct_dtype {
 
     // Special constructor to break the property parameter cycle in
     // create_ndobject_properties
-    fixedstruct_dtype(int, int);
+    cstruct_dtype(int, int);
 public:
-    fixedstruct_dtype(size_t field_count, const dtype *field_types,
+    cstruct_dtype(size_t field_count, const dtype *field_types,
                     const std::string *field_names);
 
-    virtual ~fixedstruct_dtype();
+    virtual ~cstruct_dtype();
 
     size_t get_default_data_size(size_t DYND_UNUSED(ndim), const intptr_t *DYND_UNUSED(shape)) const {
         return get_data_size();
@@ -126,22 +126,22 @@ public:
     void get_dynamic_ndobject_properties(
                     const std::pair<std::string, gfunc::callable> **out_properties,
                     size_t *out_count) const;
-}; // class fixedstruct_dtype
+}; // class cstruct_dtype
 
 /** Makes a struct dtype with the specified fields */
-inline dtype make_fixedstruct_dtype(size_t field_count, const dtype *field_types,
+inline dtype make_cstruct_dtype(size_t field_count, const dtype *field_types,
                 const std::string *field_names) {
-    return dtype(new fixedstruct_dtype(field_count, field_types, field_names), false);
+    return dtype(new cstruct_dtype(field_count, field_types, field_names), false);
 }
 
 /** Makes a struct dtype with the specified fields */
-inline dtype make_fixedstruct_dtype(const dtype& dt0, const std::string& name0)
+inline dtype make_cstruct_dtype(const dtype& dt0, const std::string& name0)
 {
-    return make_fixedstruct_dtype(1, &dt0, &name0);
+    return make_cstruct_dtype(1, &dt0, &name0);
 }
 
 /** Makes a struct dtype with the specified fields */
-inline dtype make_fixedstruct_dtype(const dtype& dt0, const std::string& name0, const dtype& dt1, const std::string& name1)
+inline dtype make_cstruct_dtype(const dtype& dt0, const std::string& name0, const dtype& dt1, const std::string& name1)
 {
     dtype field_types[2];
     std::string field_names[2];
@@ -149,11 +149,11 @@ inline dtype make_fixedstruct_dtype(const dtype& dt0, const std::string& name0, 
     field_types[1] = dt1;
     field_names[0] = name0;
     field_names[1] = name1;
-    return make_fixedstruct_dtype(2, field_types, field_names);
+    return make_cstruct_dtype(2, field_types, field_names);
 }
 
 /** Makes a struct dtype with the specified fields */
-inline dtype make_fixedstruct_dtype(const dtype& dt0, const std::string& name0, const dtype& dt1, const std::string& name1, const dtype& dt2, const std::string& name2)
+inline dtype make_cstruct_dtype(const dtype& dt0, const std::string& name0, const dtype& dt1, const std::string& name1, const dtype& dt2, const std::string& name2)
 {
     dtype field_types[3];
     std::string field_names[3];
@@ -163,11 +163,11 @@ inline dtype make_fixedstruct_dtype(const dtype& dt0, const std::string& name0, 
     field_names[0] = name0;
     field_names[1] = name1;
     field_names[2] = name2;
-    return make_fixedstruct_dtype(3, field_types, field_names);
+    return make_cstruct_dtype(3, field_types, field_names);
 }
 
 /** Makes a struct dtype with the specified fields */
-inline dtype make_fixedstruct_dtype(const dtype& dt0, const std::string& name0,
+inline dtype make_cstruct_dtype(const dtype& dt0, const std::string& name0,
                 const dtype& dt1, const std::string& name1, const dtype& dt2, const std::string& name2,
                 const dtype& dt3, const std::string& name3)
 {
@@ -181,11 +181,11 @@ inline dtype make_fixedstruct_dtype(const dtype& dt0, const std::string& name0,
     field_names[1] = name1;
     field_names[2] = name2;
     field_names[3] = name3;
-    return make_fixedstruct_dtype(4, field_types, field_names);
+    return make_cstruct_dtype(4, field_types, field_names);
 }
 
 /** Makes a struct dtype with the specified fields */
-inline dtype make_fixedstruct_dtype(const dtype& dt0, const std::string& name0,
+inline dtype make_cstruct_dtype(const dtype& dt0, const std::string& name0,
                 const dtype& dt1, const std::string& name1, const dtype& dt2, const std::string& name2,
                 const dtype& dt3, const std::string& name3, const dtype& dt4, const std::string& name4)
 {
@@ -201,25 +201,25 @@ inline dtype make_fixedstruct_dtype(const dtype& dt0, const std::string& name0,
     field_names[2] = name2;
     field_names[3] = name3;
     field_names[4] = name4;
-    return make_fixedstruct_dtype(5, field_types, field_names);
+    return make_cstruct_dtype(5, field_types, field_names);
 }
 
 /**
- * \brief Checks whether a set of offsets can be used for fixedstruct.
+ * \brief Checks whether a set of offsets can be used for cstruct.
  *
- * Because fixedstruct does not support customizable offset (use struct for
+ * Because cstruct does not support customizable offset (use struct for
  * that), this function can be used to check that offsets are compatible with
- * fixedstruct.
+ * cstruct.
  *
  * \param field_count  The number of array entries in `field_types` and `field_offsets`
  * \param field_types  An array of the field dtypes.
  * \param field_offsets  The offsets corresponding to the types.
  * \param total_size  The total size of the struct in bytes.
  *
- * \returns  True if constructing a fixedstruct with the same dtypes and field offsets will
+ * \returns  True if constructing a cstruct with the same dtypes and field offsets will
  *           produce the provided offsets.
  */
-inline bool is_fixedstruct_compatible_offsets(size_t field_count,
+inline bool is_cstruct_compatible_offsets(size_t field_count,
                 const dtype *field_types, const size_t *field_offsets, size_t total_size)
 {
     size_t offset = 0, max_alignment = 1;

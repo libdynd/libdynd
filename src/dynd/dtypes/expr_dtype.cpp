@@ -5,7 +5,7 @@
 
 #include <dynd/dtypes/expr_dtype.hpp>
 #include <dynd/shortvector.hpp>
-#include <dynd/dtypes/fixedstruct_dtype.hpp>
+#include <dynd/dtypes/cstruct_dtype.hpp>
 #include <dynd/dtypes/builtin_dtype_properties.hpp>
 #include <dynd/shape_tools.hpp>
 
@@ -21,13 +21,13 @@ expr_dtype::expr_dtype(const dtype& value_dtype, const dtype& operand_dtype,
                     m_value_dtype(value_dtype), m_operand_dtype(operand_dtype),
                     m_kgen(kgen)
 {
-    if (operand_dtype.get_type_id() != fixedstruct_type_id) {
+    if (operand_dtype.get_type_id() != cstruct_type_id) {
         stringstream ss;
-        ss << "expr_dtype can only be constructed with a fixedstruct as its operand, given ";
+        ss << "expr_dtype can only be constructed with a cstruct as its operand, given ";
         ss << operand_dtype;
         throw runtime_error(ss.str());
     }
-    const fixedstruct_dtype *fsd = static_cast<const fixedstruct_dtype *>(operand_dtype.extended());
+    const cstruct_dtype *fsd = static_cast<const cstruct_dtype *>(operand_dtype.extended());
     size_t field_count = fsd->get_field_count();
     if (field_count == 1) {
         throw runtime_error("expr_dtype is for 2 or more operands, use unary_expr_dtype for 1 operand");
@@ -56,7 +56,7 @@ void expr_dtype::print_data(std::ostream& DYND_UNUSED(o),
 
 void expr_dtype::print_dtype(std::ostream& o) const
 {
-    const fixedstruct_dtype *fsd = static_cast<const fixedstruct_dtype *>(m_operand_dtype.extended());
+    const cstruct_dtype *fsd = static_cast<const cstruct_dtype *>(m_operand_dtype.extended());
     size_t field_count = fsd->get_field_count();
     const dtype *field_types = fsd->get_field_types();
     o << "expr<";
@@ -75,7 +75,7 @@ dtype expr_dtype::apply_linear_index(size_t nindices, const irange *indices,
 {
     if (m_kgen->is_elwise()) {
         size_t undim = get_undim();
-        const fixedstruct_dtype *fsd = static_cast<const fixedstruct_dtype *>(m_operand_dtype.extended());
+        const cstruct_dtype *fsd = static_cast<const cstruct_dtype *>(m_operand_dtype.extended());
         size_t field_count = fsd->get_field_count();
         const dtype *field_types = fsd->get_field_types();
 
@@ -95,7 +95,7 @@ dtype expr_dtype::apply_linear_index(size_t nindices, const irange *indices,
                                                 current_i, root_dt, false);
             }
         }
-        dtype result_operand_dtype = make_fixedstruct_dtype(field_count, &result_src_dt[0],
+        dtype result_operand_dtype = make_cstruct_dtype(field_count, &result_src_dt[0],
                         fsd->get_field_names());
         expr_kernel_generator_incref(m_kgen);
         return make_expr_dtype(result_value_dt, result_operand_dtype, m_kgen);
@@ -114,8 +114,8 @@ intptr_t expr_dtype::apply_linear_index(size_t nindices, const irange *indices, 
     if (m_kgen->is_elwise()) {
         size_t undim = get_undim();
         const expr_dtype *out_ed = static_cast<const expr_dtype *>(result_dtype.extended());
-        const fixedstruct_dtype *fsd = static_cast<const fixedstruct_dtype *>(m_operand_dtype.extended());
-        const fixedstruct_dtype *out_fsd = static_cast<const fixedstruct_dtype *>(out_ed->m_operand_dtype.extended());
+        const cstruct_dtype *fsd = static_cast<const cstruct_dtype *>(m_operand_dtype.extended());
+        const cstruct_dtype *out_fsd = static_cast<const cstruct_dtype *>(out_ed->m_operand_dtype.extended());
         const size_t *metadata_offsets = fsd->get_metadata_offsets();
         const size_t *out_metadata_offsets = out_fsd->get_metadata_offsets();
         size_t field_count = fsd->get_field_count();
@@ -158,7 +158,7 @@ void expr_dtype::get_shape(size_t i, intptr_t *out_shape) const
 
     // Get each operand shape, and broadcast them together
     dimvector shape(undim);
-    const fixedstruct_dtype *fsd = static_cast<const fixedstruct_dtype *>(m_operand_dtype.extended());
+    const cstruct_dtype *fsd = static_cast<const cstruct_dtype *>(m_operand_dtype.extended());
     size_t field_count = fsd->get_field_count();
     for (size_t fi = 0; fi != field_count; ++fi) {
         const dtype& dt = fsd->get_field_types()[fi];
@@ -183,7 +183,7 @@ void expr_dtype::get_shape(size_t i,
 
     // Get each operand shape, and broadcast them together
     dimvector shape(undim);
-    const fixedstruct_dtype *fsd = static_cast<const fixedstruct_dtype *>(m_operand_dtype.extended());
+    const cstruct_dtype *fsd = static_cast<const cstruct_dtype *>(m_operand_dtype.extended());
     const size_t *metadata_offsets = fsd->get_metadata_offsets();
     size_t field_count = fsd->get_field_count();
     for (size_t fi = 0; fi != field_count; ++fi) {
@@ -341,7 +341,7 @@ size_t expr_dtype::make_operand_to_value_assignment_kernel(
                 const char *dst_metadata, const char *src_metadata,
                 kernel_request_t kernreq, const eval::eval_context *ectx) const
 {
-    const fixedstruct_dtype *fsd = static_cast<const fixedstruct_dtype *>(m_operand_dtype.extended());
+    const cstruct_dtype *fsd = static_cast<const cstruct_dtype *>(m_operand_dtype.extended());
 
     offset_out = make_kernreq_to_single_kernel_adapter(out, offset_out, kernreq);
     size_t input_count = fsd->get_field_count();

@@ -16,7 +16,7 @@
 #include <dynd/dtypes/fixedstring_dtype.hpp>
 #include <dynd/dtypes/convert_dtype.hpp>
 #include <dynd/dtypes/struct_dtype.hpp>
-#include <dynd/dtypes/fixedstruct_dtype.hpp>
+#include <dynd/dtypes/cstruct_dtype.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -97,7 +97,7 @@ TEST(GroupByDType, Struct) {
                     make_fixedstring_dtype(1, string_encoding_ascii)).eval();
 
     // Create a simple structured array
-    dtype d = make_fixedstruct_dtype(make_string_dtype(), "name", make_dtype<float>(), "height",
+    dtype d = make_cstruct_dtype(make_string_dtype(), "name", make_dtype<float>(), "height",
                     make_fixedstring_dtype(1, string_encoding_ascii), "gender");
     ndobject a = make_strided_ndobject(5, d);
     const char *name_vals[] = {"Paul", "Jennifer", "Frank", "Louise", "Anne"};
@@ -132,7 +132,7 @@ TEST(GroupByDType, Struct) {
 
 TEST(GroupByDType, StructSubset) {
     // Create a simple structured array
-    dtype d = make_fixedstruct_dtype(make_string_dtype(), "lastname",
+    dtype d = make_cstruct_dtype(make_string_dtype(), "lastname",
                     make_string_dtype(), "firstname",
                     make_fixedstring_dtype(1, string_encoding_ascii), "gender");
     ndobject a = make_strided_ndobject(7, d);
@@ -210,7 +210,7 @@ TEST(GroupByDType, StructUnsortedCats) {
     ndobject gender_cats = ndobject(gender_cats_vals);
 
     // Create a simple structured array
-    dtype d = make_fixedstruct_dtype(make_string_dtype(), "name", make_dtype<float>(), "height",
+    dtype d = make_cstruct_dtype(make_string_dtype(), "name", make_dtype<float>(), "height",
                     make_fixedstring_dtype(1, string_encoding_ascii), "gender");
     ndobject a = make_strided_ndobject(5, d);
     const char *name_vals[] = {"Paul", "Jennifer", "Frank", "Louise", "Anne"};

@@ -10,7 +10,7 @@
 
 #include <dynd/dtypes/date_dtype.hpp>
 #include <dynd/dtypes/property_dtype.hpp>
-#include <dynd/dtypes/fixedstruct_dtype.hpp>
+#include <dynd/dtypes/cstruct_dtype.hpp>
 #include <dynd/dtypes/string_dtype.hpp>
 #include <dynd/dtypes/unary_expr_dtype.hpp>
 #include <dynd/kernels/date_assignment_kernels.hpp>
@@ -37,7 +37,7 @@ date_dtype::~date_dtype()
 }
 
 const dtype date_dtype::default_struct_dtype =
-        make_fixedstruct_dtype(
+        make_cstruct_dtype(
             make_dtype<int32_t>(), "year",
             make_dtype<int16_t>(), "month",
             make_dtype<int16_t>(), "day");

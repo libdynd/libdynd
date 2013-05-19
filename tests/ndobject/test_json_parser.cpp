@@ -13,7 +13,7 @@
 #include <dynd/json_parser.hpp>
 #include <dynd/dtypes/var_dim_dtype.hpp>
 #include <dynd/dtypes/fixed_dim_dtype.hpp>
-#include <dynd/dtypes/fixedstruct_dtype.hpp>
+#include <dynd/dtypes/cstruct_dtype.hpp>
 #include <dynd/dtypes/date_dtype.hpp>
 #include <dynd/dtypes/string_dtype.hpp>
 #include <dynd/dtypes/json_dtype.hpp>
@@ -173,7 +173,7 @@ TEST(JSONParser, NestedListInts) {
 
 TEST(JSONParser, Struct) {
     ndobject n;
-    dtype sdt = make_fixedstruct_dtype(make_dtype<int>(), "id", make_dtype<double>(), "amount",
+    dtype sdt = make_cstruct_dtype(make_dtype<int>(), "id", make_dtype<double>(), "amount",
                     make_string_dtype(), "name", make_date_dtype(), "when");
 
     // A straightforward struct
@@ -202,9 +202,9 @@ TEST(JSONParser, Struct) {
 
 TEST(JSONParser, NestedStruct) {
     ndobject n;
-    dtype sdt = make_fixedstruct_dtype(make_fixed_dim_dtype(3, make_dtype<float>()), "position",
+    dtype sdt = make_cstruct_dtype(make_fixed_dim_dtype(3, make_dtype<float>()), "position",
                     make_dtype<double>(), "amount",
-                    make_fixedstruct_dtype(make_string_dtype(), "name", make_date_dtype(), "when"), "data");
+                    make_cstruct_dtype(make_string_dtype(), "name", make_date_dtype(), "when"), "data");
 
     n = parse_json(sdt, "{\"data\":{\"name\":\"Harvey\", \"when\":\"1970-02-13\"}, "
                     "\"amount\": 10.5, \"position\": [3.5,1.0,1e10] }");
@@ -234,9 +234,9 @@ TEST(JSONParser, NestedStruct) {
 
 TEST(JSONParser, ListOfStruct) {
     ndobject n;
-    dtype sdt = make_var_dim_dtype(make_fixedstruct_dtype(make_fixed_dim_dtype(3, make_dtype<float>()), "position",
+    dtype sdt = make_var_dim_dtype(make_cstruct_dtype(make_fixed_dim_dtype(3, make_dtype<float>()), "position",
                     make_dtype<double>(), "amount",
-                    make_fixedstruct_dtype(make_string_dtype(), "name", make_date_dtype(), "when"), "data"));
+                    make_cstruct_dtype(make_string_dtype(), "name", make_date_dtype(), "when"), "data"));
 
     n = parse_json(sdt, "[{\"data\":{\"name\":\"Harvey\", \"when\":\"1970-02-13\"}, \n"
                     "\"amount\": 10.5, \"position\": [3.5,1.0,1e10] },\n"
@@ -274,7 +274,7 @@ TEST(JSONParser, JSONDType) {
     // Parsing JSON with a piece of it being a json string
     n = parse_json("{a: json; b: int32; c: string}",
                     "{\"c\": \"testing string\", \"a\": [3.1, {\"X\":2}, [1,2]], \"b\":12}");
-    EXPECT_EQ(make_fixedstruct_dtype(make_json_dtype(), "a", make_dtype<int32_t>(), "b", make_string_dtype(), "c"),
+    EXPECT_EQ(make_cstruct_dtype(make_json_dtype(), "a", make_dtype<int32_t>(), "b", make_string_dtype(), "c"),
                     n.get_dtype());
     EXPECT_EQ("[3.1, {\"X\":2}, [1,2]]", n.at(0).as<string>());
     EXPECT_EQ(12, n.at(1).as<int>());

@@ -26,7 +26,7 @@ enum dtype_kind_t {
     datetime_kind,
     // For any dimension dtypes which have elements of all the same type
     uniform_dim_kind,
-    // For struct_type_id and fixedstruct_type_id
+    // For struct_type_id and cstruct_type_id
     struct_kind,
     // For dtypes whose value_dtype != the dtype, signals
     // that calculations should look at the value_dtype for
@@ -98,7 +98,7 @@ enum type_id_t {
     // A struct type with variable layout
     struct_type_id,
     // A struct type with fixed layout
-    fixedstruct_type_id,
+    cstruct_type_id,
     tuple_type_id,
     ndobject_type_id,
 

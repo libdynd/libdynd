@@ -137,7 +137,7 @@ set(libdynd_SRC
     src/dynd/dtypes/fixed_dim_dtype.cpp
     src/dynd/dtypes/fixedbytes_dtype.cpp
     src/dynd/dtypes/fixedstring_dtype.cpp
-    src/dynd/dtypes/fixedstruct_dtype.cpp
+    src/dynd/dtypes/cstruct_dtype.cpp
     src/dynd/dtypes/groupby_dtype.cpp
     src/dynd/dtypes/json_dtype.cpp
     src/dynd/dtypes/pointer_dtype.cpp
@@ -172,14 +172,14 @@ set(libdynd_SRC
     include/dynd/dtypes/fixed_dim_dtype.hpp
     include/dynd/dtypes/fixedbytes_dtype.hpp
     include/dynd/dtypes/fixedstring_dtype.hpp
-    include/dynd/dtypes/fixedstruct_dtype.hpp
+    include/dynd/dtypes/cstruct_dtype.hpp
     include/dynd/dtypes/groupby_dtype.hpp
     include/dynd/dtypes/json_dtype.hpp
     include/dynd/dtypes/pointer_dtype.hpp
     include/dynd/dtypes/strided_dim_dtype.hpp
     include/dynd/dtypes/string_dtype.hpp
     include/dynd/dtypes/struct_dtype.hpp
-    include/dynd/dtypes/fixedstruct_dtype.hpp
+    include/dynd/dtypes/cstruct_dtype.hpp
     include/dynd/dtypes/tuple_dtype.hpp
     include/dynd/dtypes/type_id.hpp
     include/dynd/dtypes/unary_expr_dtype.hpp

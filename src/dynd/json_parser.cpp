@@ -9,7 +9,7 @@
 #include <dynd/dtypes/json_dtype.hpp>
 #include <dynd/dtypes/fixed_dim_dtype.hpp>
 #include <dynd/dtypes/var_dim_dtype.hpp>
-#include <dynd/dtypes/fixedstruct_dtype.hpp>
+#include <dynd/dtypes/cstruct_dtype.hpp>
 #include <dynd/dtypes/date_dtype.hpp>
 #include <dynd/kernels/string_numeric_assignment_kernels.hpp>
 

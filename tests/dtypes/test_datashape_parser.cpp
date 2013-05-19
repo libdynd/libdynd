@@ -12,7 +12,7 @@
 #include <dynd/dtypes/strided_dim_dtype.hpp>
 #include <dynd/dtypes/fixed_dim_dtype.hpp>
 #include <dynd/dtypes/var_dim_dtype.hpp>
-#include <dynd/dtypes/fixedstruct_dtype.hpp>
+#include <dynd/dtypes/cstruct_dtype.hpp>
 #include <dynd/dtypes/date_dtype.hpp>
 #include <dynd/dtypes/string_dtype.hpp>
 #include <dynd/dtypes/fixedstring_dtype.hpp>
@@ -120,19 +120,19 @@ TEST(DataShapeParser, StridedVarFixedDim) {
 }
 
 TEST(DataShapeParser, RecordOneField) {
-    EXPECT_EQ(make_fixedstruct_dtype(make_dtype<float>(), "val"),
+    EXPECT_EQ(make_cstruct_dtype(make_dtype<float>(), "val"),
                     dtype_from_datashape("{ val : float32 }"));
-    EXPECT_EQ(make_fixedstruct_dtype(make_dtype<float>(), "val"),
+    EXPECT_EQ(make_cstruct_dtype(make_dtype<float>(), "val"),
                     dtype_from_datashape("{ val : float32 ; }"));
 }
 
 TEST(DataShapeParser, RecordTwoFields) {
-    EXPECT_EQ(make_fixedstruct_dtype(make_dtype<float>(), "val", make_dtype<int64_t>(), "id"),
+    EXPECT_EQ(make_cstruct_dtype(make_dtype<float>(), "val", make_dtype<int64_t>(), "id"),
                     dtype_from_datashape("{\n"
                         "    val: float32;\n"
                         "    id: int64\n"
                         "}\n"));
-    EXPECT_EQ(make_fixedstruct_dtype(make_dtype<float>(), "val", make_dtype<int64_t>(), "id"),
+    EXPECT_EQ(make_cstruct_dtype(make_dtype<float>(), "val", make_dtype<int64_t>(), "id"),
                     dtype_from_datashape("{\n"
                         "    val: float32;\n"
                         "    id: int64;\n"
@@ -437,5 +437,5 @@ TEST(DataShapeParser, KivaLoanDataShape) {
         "    }\n"
         "}\n";
     dtype d = dtype_from_datashape(klds);
-    EXPECT_EQ(fixedstruct_type_id, d.get_type_id());
+    EXPECT_EQ(cstruct_type_id, d.get_type_id());
 }

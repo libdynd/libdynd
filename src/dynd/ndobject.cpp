@@ -1433,8 +1433,8 @@ ndobject dynd::combine_into_struct(size_t field_count, const std::string *field_
         flags &= field_values[i].get_flags();
     }
 
-    dtype result_type = make_fixedstruct_dtype(field_count, &field_types[0], field_names);
-    const fixedstruct_dtype *fsd = static_cast<const fixedstruct_dtype *>(result_type.extended());
+    dtype result_type = make_cstruct_dtype(field_count, &field_types[0], field_names);
+    const cstruct_dtype *fsd = static_cast<const cstruct_dtype *>(result_type.extended());
     char *data_ptr = NULL;
 
     ndobject result(make_ndobject_memory_block(fsd->get_metadata_size(),

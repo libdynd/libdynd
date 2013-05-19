@@ -105,8 +105,8 @@ std::ostream& dynd::operator<<(std::ostream& o, type_id_t tid)
             return (o << "var_dim");
         case struct_type_id:
             return (o << "struct");
-        case fixedstruct_type_id:
-            return (o << "fixedstruct");
+        case cstruct_type_id:
+            return (o << "cstruct");
         case tuple_type_id:
             return (o << "tuple");
         case ndobject_type_id:

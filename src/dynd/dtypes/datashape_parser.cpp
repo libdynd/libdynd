@@ -10,7 +10,7 @@
 #include <dynd/dtypes/strided_dim_dtype.hpp>
 #include <dynd/dtypes/var_dim_dtype.hpp>
 #include <dynd/dtypes/fixed_dim_dtype.hpp>
-#include <dynd/dtypes/fixedstruct_dtype.hpp>
+#include <dynd/dtypes/cstruct_dtype.hpp>
 #include <dynd/dtypes/string_dtype.hpp>
 #include <dynd/dtypes/fixedstring_dtype.hpp>
 #include <dynd/dtypes/json_dtype.hpp>
@@ -369,7 +369,7 @@ static dtype parse_record(const char *&begin, const char *end, map<string, dtype
         }
     }
 
-    return make_fixedstruct_dtype(field_type_list.size(),
+    return make_cstruct_dtype(field_type_list.size(),
                     &field_type_list[0], &field_name_list[0]);
 }
 

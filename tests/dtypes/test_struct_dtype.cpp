@@ -14,7 +14,7 @@
 #include <dynd/dtypes/string_dtype.hpp>
 #include <dynd/dtypes/convert_dtype.hpp>
 #include <dynd/dtypes/byteswap_dtype.hpp>
-#include <dynd/dtypes/fixedstruct_dtype.hpp>
+#include <dynd/dtypes/cstruct_dtype.hpp>
 #include <dynd/json_parser.hpp>
 
 using namespace std;
@@ -199,8 +199,8 @@ TEST(StructDType, DifferentDTypeAssign) {
     EXPECT_EQ(8,    b.at(1,1).as<short>());
 }
 
-TEST(StructDType, FromFixedStructAssign) {
-    dtype dt = make_fixedstruct_dtype(make_dtype<int>(), "x", make_dtype<double>(), "y", make_dtype<short>(), "z");
+TEST(StructDType, FromCStructAssign) {
+    dtype dt = make_cstruct_dtype(make_dtype<int>(), "x", make_dtype<double>(), "y", make_dtype<short>(), "z");
     ndobject a = make_strided_ndobject(2, dt);
     a.at(0,0).vals() = 3;
     a.at(0,1).vals() = 4.25;
