@@ -15,6 +15,19 @@
 
 namespace dynd {
 
+/**
+ * This defines a C-style structure dtype, which follows
+ * C rules for the field layout. For the various builtin
+ * types, a cstruct dtype should have a layout which matches
+ * the equivalent in C/C++. This dtype works together with
+ * the struct dtype, whose field layout is defined in the
+ * metadata and hence supports viewing existing structs
+ * with reordered and missing fields.
+ *
+ * Note that DyND doesn't support bitfields,
+ * for example, so there isn't a way to match 100% of all
+ * C structs.
+ */
 class cstruct_dtype : public base_struct_dtype {
     std::vector<dtype> m_field_types;
     std::vector<std::string> m_field_names;
