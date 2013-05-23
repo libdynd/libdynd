@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2011-13, DyND Developers
+// Copyright (C) 2011-13 Mark Wiebe, DyND Developers
 // BSD 2-Clause License, see LICENSE.txt
 //
 
@@ -29,32 +29,19 @@ TEST(CStructDType, Basic) {
 }
 
 struct align_test_struct {
-    char f0;
-    dynd_bool b_;
-    char f1;
-    int8_t i8_;
-    char f2;
-    int16_t i16_;
-    char f3;
-    int32_t i32_;
-    char f4;
-    int64_t i64_;
-    char f5;
-    uint8_t u8_;
-    char f6;
-    uint16_t u16_;
-    char f7;
-    uint32_t u32_;
-    char f8;
-    uint64_t u64_;
-    char f9;
-    float f32_;
-    char f10;
-    double f64_;
-    char f11;
-    complex<float> cf32_;
-    char f12;
-    complex<double> cf64_;
+    char f0;  dynd_bool b_;
+    char f1;  int8_t i8_;
+    char f2;  int16_t i16_;
+    char f3;  int32_t i32_;
+    char f4;  int64_t i64_;
+    char f5;  uint8_t u8_;
+    char f6;  uint16_t u16_;
+    char f7;  uint32_t u32_;
+    char f8;  uint64_t u64_;
+    char f9;  float f32_;
+    char f10; double f64_;
+    char f11; complex<float> cf32_;
+    char f12; complex<double> cf64_;
     char f13;
 };
 
@@ -98,7 +85,7 @@ TEST(CStructDType, CreateOneField) {
     EXPECT_EQ(cstruct_type_id, dt.get_type_id());
     EXPECT_EQ(4u, dt.get_data_size());
     EXPECT_EQ(4u, dt.extended()->get_default_data_size(0, NULL));
-    EXPECT_EQ(4u, dt.get_alignment());
+    EXPECT_EQ(make_dtype<int32_t>().get_alignment(), dt.get_alignment());
     EXPECT_TRUE(dt.is_pod());
     tdt = static_cast<const cstruct_dtype *>(dt.extended());
     EXPECT_EQ(1u, tdt->get_field_count());
@@ -116,7 +103,7 @@ TEST(CStructDType, CreateTwoField) {
     EXPECT_EQ(cstruct_type_id, dt.get_type_id());
     EXPECT_EQ(16u, dt.get_data_size());
     EXPECT_EQ(16u, dt.extended()->get_default_data_size(0, NULL));
-    EXPECT_EQ(8u, dt.get_alignment());
+    EXPECT_EQ(make_dtype<int64_t>().get_alignment(), dt.get_alignment());
     EXPECT_TRUE(dt.is_pod());
     tdt = static_cast<const cstruct_dtype *>(dt.extended());
     EXPECT_EQ(2u, tdt->get_field_count());
@@ -140,7 +127,7 @@ TEST(CStructDType, CreateThreeField) {
     EXPECT_EQ(cstruct_type_id, dt.get_type_id());
     EXPECT_EQ(24u, dt.get_data_size());
     EXPECT_EQ(24u, dt.extended()->get_default_data_size(0, NULL));
-    EXPECT_EQ(8u, dt.get_alignment());
+    EXPECT_EQ(d1.get_alignment(), dt.get_alignment());
     EXPECT_TRUE(dt.is_pod());
     tdt = static_cast<const cstruct_dtype *>(dt.extended());
     EXPECT_EQ(3u, tdt->get_field_count());
