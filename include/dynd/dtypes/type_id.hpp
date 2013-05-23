@@ -268,6 +268,16 @@ template <> struct type_id_of<std::complex<float> > {enum {value = complex_float
 template <> struct type_id_of<std::complex<double> > {enum {value = complex_float64_type_id};};
 template <> struct type_id_of<void> {enum {value = void_type_id};};
 
+// Type trait for the alignment
+template <typename T> struct dtype_align_of {
+    struct align_helper {
+        char x;
+        T t;
+    };
+    enum {value = sizeof(align_helper) - sizeof(T)};
+};
+
+
 // Type trait for the kind
 template <typename T> struct dtype_kind_of;
 

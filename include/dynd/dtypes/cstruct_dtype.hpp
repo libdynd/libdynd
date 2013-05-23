@@ -72,6 +72,10 @@ public:
         return &m_data_offsets[0];
     }
 
+    inline const size_t *get_data_offsets() const {
+        return &m_data_offsets[0];
+    }
+
     const std::vector<size_t>& get_data_offsets_vector() const {
         return m_data_offsets;
     }

@@ -28,6 +28,67 @@ TEST(CStructDType, Basic) {
     EXPECT_NE(dtype("{x: float32}"), dtype("{x: int32}"));
 }
 
+struct align_test_struct {
+    char f0;
+    dynd_bool b_;
+    char f1;
+    int8_t i8_;
+    char f2;
+    int16_t i16_;
+    char f3;
+    int32_t i32_;
+    char f4;
+    int64_t i64_;
+    char f5;
+    uint8_t u8_;
+    char f6;
+    uint16_t u16_;
+    char f7;
+    uint32_t u32_;
+    char f8;
+    uint64_t u64_;
+    char f9;
+    float f32_;
+    char f10;
+    double f64_;
+    char f11;
+    complex<float> cf32_;
+    char f12;
+    complex<double> cf64_;
+    char f13;
+};
+
+TEST(CStructType, Align) {
+    dtype asdt = dtype(
+            "{f0:  int8; b_:    bool;     f1:  int8; i8_:  int8;"
+            " f2:  int8; i16_:  int16;    f3:  int8; i32_: int32;"
+            " f4:  int8; i64_:  int64;    f5:  int8; u8_:  uint8;"
+            " f6:  int8; u16_:  uint16;   f7:  int8; u32_: uint32;"
+            " f8:  int8; u64_:  uint64;   f9:  int8; f32_: float32;"
+            " f10: int8; f64_:  float64;  f11: int8; cf32_: cfloat32;"
+            " f12: int8; cf64_: cfloat64; f13: int8}");
+    EXPECT_EQ(sizeof(align_test_struct), asdt.get_data_size());
+    EXPECT_EQ(dtype_align_of<align_test_struct>::value, asdt.get_alignment());
+    const cstruct_dtype *cd = static_cast<const cstruct_dtype *>(asdt.extended());
+    const size_t *data_offsets = cd->get_data_offsets();
+    align_test_struct ats;
+#define ATS_OFFSET(field) (reinterpret_cast<size_t>(&ats.field##_) - \
+                reinterpret_cast<size_t>(&ats))
+    EXPECT_EQ(ATS_OFFSET(b), data_offsets[1]);
+    EXPECT_EQ(ATS_OFFSET(i8), data_offsets[3]);
+    EXPECT_EQ(ATS_OFFSET(i16), data_offsets[5]);
+    EXPECT_EQ(ATS_OFFSET(i32), data_offsets[7]);
+    EXPECT_EQ(ATS_OFFSET(i64), data_offsets[9]);
+    EXPECT_EQ(ATS_OFFSET(u8), data_offsets[11]);
+    EXPECT_EQ(ATS_OFFSET(u16), data_offsets[13]);
+    EXPECT_EQ(ATS_OFFSET(u32), data_offsets[15]);
+    EXPECT_EQ(ATS_OFFSET(u64), data_offsets[17]);
+    EXPECT_EQ(ATS_OFFSET(f32), data_offsets[19]);
+    EXPECT_EQ(ATS_OFFSET(f64), data_offsets[21]);
+    EXPECT_EQ(ATS_OFFSET(cf32), data_offsets[23]);
+    EXPECT_EQ(ATS_OFFSET(cf64), data_offsets[25]);
+}
+
 TEST(CStructDType, CreateOneField) {
     dtype dt;
     const cstruct_dtype *tdt;
