@@ -15,11 +15,11 @@ namespace dynd {
     // Bigger type metaprogram
     template<class S, class T, bool Sbigger>
     struct big_type_helper {
-        typedef typename T type;
+        typedef T type;
     };
     template<class S, class T>
     struct big_type_helper<S, T, true> {
-        typedef typename S type;
+        typedef S type;
     };
 #define DYND_FORCE_BIG_TYPE(orig, forced) \
     template<class S> \

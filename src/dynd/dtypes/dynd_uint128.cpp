@@ -5,8 +5,13 @@
 
 #include <dynd/dtypes/dynd_uint128.hpp>
 #include <dynd/dtypes/dynd_int128.hpp>
+#include <dynd/dtypes/dynd_float16.hpp>
 
+#include <stdexcept>
 #include <sstream>
+#include <cmath>
+
+#if !defined(DYND_HAS_UINT128)
 
 using namespace std;
 using namespace dynd;
@@ -53,7 +58,12 @@ dynd::dynd_uint128::dynd_uint128(const dynd_int128& value)
 }
 #endif
 
-dynd::dynd_uint128::dynd_uint128(const dynd_float128& value)
+dynd::dynd_uint128::dynd_uint128(const dynd_float16& value)
+    : m_lo(int(float(value))), m_hi(0LL)
+{
+}
+
+dynd::dynd_uint128::dynd_uint128(const dynd_float128& DYND_UNUSED(value))
 {
     throw runtime_error("dynd float128 to uint128 conversion is not implemented");
 }
@@ -124,3 +134,4 @@ std::ostream& dynd::operator<<(ostream& out, const dynd_uint128& val)
     return (out << &buffer[idx+1]);
 }
 
+#endif // !defined(DYND_HAS_UINT128)

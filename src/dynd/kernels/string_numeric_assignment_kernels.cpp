@@ -271,14 +271,14 @@ namespace { template<typename T> struct string_to_uint {
     }
 };}
 
-static void string_to_int128_single(char *dst, const char *src,
-                        kernel_data_prefix *extra)
+static void string_to_int128_single(char *DYND_UNUSED(dst), const char *DYND_UNUSED(src),
+                        kernel_data_prefix *DYND_UNUSED(extra))
 {
     throw std::runtime_error("TODO: implement string_to_int128_single");
 }
 
-static void string_to_uint128_single(char *dst, const char *src,
-                        kernel_data_prefix *extra)
+static void string_to_uint128_single(char *DYND_UNUSED(dst), const char *DYND_UNUSED(src),
+                        kernel_data_prefix *DYND_UNUSED(extra))
 {
     throw std::runtime_error("TODO: implement string_to_uint128_single");
 }
@@ -386,8 +386,8 @@ static void string_to_float16_single(char *dst, const char *src,
     *reinterpret_cast<dynd_float16 *>(dst) = dynd_float16(tmp, e->errmode);
 }
 
-static void string_to_float128_single(char *dst, const char *src,
-                        kernel_data_prefix *extra)
+static void string_to_float128_single(char *DYND_UNUSED(dst), const char *DYND_UNUSED(src),
+                        kernel_data_prefix *DYND_UNUSED(extra))
 {
     throw std::runtime_error("TODO: implement string_to_float128_single");
 }

@@ -9,6 +9,7 @@
 #include <dynd/config.hpp>
 #include <dynd/dtype_assign.hpp>
 
+#include <limits>
 #include <iostream>
 
 #if !defined(DYND_HAS_UINT128)
@@ -21,6 +22,7 @@ class dynd_float128;
 #if !defined(DYND_HAS_INT128)
 class dynd_int128;
 #endif
+class dynd_float16;
 
 class dynd_uint128 {
 public:
@@ -47,6 +49,10 @@ public:
         : m_lo(value), m_hi(0ULL) {}
     inline dynd_uint128(unsigned int value)
         : m_lo(value), m_hi(0ULL) {}
+    inline dynd_uint128(long value)
+        : m_lo(value), m_hi(0ULL) {}
+    inline dynd_uint128(unsigned long value)
+        : m_lo(value), m_hi(0ULL) {}
     inline dynd_uint128(long long value)
         : m_lo(value), m_hi(0ULL) {}
     inline dynd_uint128(unsigned long long value)
@@ -54,6 +60,7 @@ public:
     dynd_uint128(float value);
     dynd_uint128(double value);
     dynd_uint128(const dynd_int128& value);
+    dynd_uint128(const dynd_float16& value);
     dynd_uint128(const dynd_float128& value);
 
     inline bool operator==(const dynd_uint128& rhs) const {
@@ -180,6 +187,12 @@ inline bool operator<(int lhs, const dynd_uint128& rhs) {
 inline bool operator<(unsigned int lhs, const dynd_uint128& rhs) {
     return dynd_uint128(lhs) < rhs;
 }
+inline bool operator<(long lhs, const dynd_uint128& rhs) {
+    return lhs < 0 || dynd_uint128(lhs) < rhs;
+}
+inline bool operator<(unsigned long lhs, const dynd_uint128& rhs) {
+    return dynd_uint128(lhs) < rhs;
+}
 inline bool operator<(long long lhs, const dynd_uint128& rhs) {
     return lhs < 0 || dynd_uint128(lhs) < rhs;
 }
@@ -194,7 +207,7 @@ std::ostream& operator<<(std::ostream& out, const dynd_uint128& val);
 namespace std {
 
 template<>
-class numeric_limits<::dynd::dynd_uint128> {
+class numeric_limits<dynd::dynd_uint128> {
 public:
   static const bool is_specialized = true;
   static ::dynd::dynd_uint128 min() throw() {

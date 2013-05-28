@@ -23,7 +23,7 @@ namespace dynd {
 
 template<class dst_type, class src_type, assign_error_mode errmode>
 struct single_assigner_builtin_base_error {
-    static void assign(dst_type *dst, const src_type *src, kernel_data_prefix *DYND_UNUSED(extra)) {
+    static void assign(dst_type *DYND_UNUSED(dst), const src_type *DYND_UNUSED(src), kernel_data_prefix *DYND_UNUSED(extra)) {
         //DYND_TRACE_ASSIGNMENT(static_cast<float>(*src), float, *src, double);
 
         std::stringstream ss;

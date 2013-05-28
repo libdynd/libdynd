@@ -10,6 +10,7 @@
 #include <dynd/dtype_assign.hpp>
 
 #include <iostream>
+#include <stdexcept>
 
 #if !defined(DYND_HAS_FLOAT128)
 
@@ -22,6 +23,8 @@ class dynd_int128;
 class dynd_uint128;
 #endif
 
+class dynd_float16;
+
 class dynd_float128 {
 public:
 #if defined(DYND_BIG_ENDIAN)
@@ -31,18 +34,25 @@ public:
 #endif
     inline dynd_float128() {}
     inline dynd_float128(uint64_t hi, uint64_t lo)
-        : m_hi(hi), m_lo(lo) {}
+        : m_lo(lo), m_hi(hi) {}
     dynd_float128(signed char value);
     dynd_float128(unsigned char value);
     dynd_float128(short value);
     dynd_float128(unsigned short value);
     dynd_float128(int value);
     dynd_float128(unsigned int value);
+    inline dynd_float128(long value) {
+        *this = dynd_float128((long long)value);
+    }
+    inline dynd_float128(unsigned long value) {
+        *this = dynd_float128((unsigned long long)value);
+    }
     dynd_float128(long long value);
     dynd_float128(unsigned long long value);
     dynd_float128(double value);
     dynd_float128(const dynd_int128& value);
     dynd_float128(const dynd_uint128& value);
+    dynd_float128(const dynd_float16& value);
 
     operator signed char() const {
         throw std::runtime_error("float128 conversions are not completed");
@@ -59,7 +69,13 @@ public:
     operator int() const {
         throw std::runtime_error("float128 conversions are not completed");
     }
-    operator unsigned() const {
+    operator unsigned int() const {
+        throw std::runtime_error("float128 conversions are not completed");
+    }
+    operator long() const {
+        throw std::runtime_error("float128 conversions are not completed");
+    }
+    operator unsigned long() const {
         throw std::runtime_error("float128 conversions are not completed");
     }
     operator long long() const {
@@ -74,7 +90,7 @@ public:
 
 
     inline explicit dynd_float128(const bool& rhs)
-        : m_hi(rhs ? 0x3fff000000000000ULL : 0ULL), m_lo(0ULL) {}
+        : m_lo(0ULL), m_hi(rhs ? 0x3fff000000000000ULL : 0ULL) {}
 
     inline bool iszero() const {
         return (m_hi&0x7fffffffffffffffULL) == 0 && m_lo == 0;
@@ -105,8 +121,8 @@ public:
         //   - If the values are both signed zeros, equal.
         return (!isnan() && !rhs.isnan()) &&
                ((m_hi == rhs.m_hi && m_lo == rhs.m_lo) ||
-                ((m_hi | rhs.m_hi) & 0x7fffffffffffffffULL) == 0ULL &&
-                    (m_lo | rhs.m_lo) == 0ULL);
+                (((m_hi | rhs.m_hi) & 0x7fffffffffffffffULL) == 0ULL &&
+                    (m_lo | rhs.m_lo) == 0ULL));
     }
 
     inline bool operator!=(const dynd_float128& rhs) const {

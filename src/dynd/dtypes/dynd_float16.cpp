@@ -9,6 +9,7 @@
 #include <dynd/dtypes/dynd_uint128.hpp>
 
 #include <sstream>
+#include <stdexcept>
 
 using namespace std;
 using namespace dynd;

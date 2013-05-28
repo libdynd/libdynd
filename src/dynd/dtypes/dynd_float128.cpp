@@ -4,8 +4,11 @@
 //
 
 #include <dynd/dtypes/dynd_float128.hpp>
+#include <dynd/dtypes/dynd_float16.hpp>
 
 #include <sstream>
+
+#if !defined(DYND_HAS_FLOAT128)
 
 using namespace std;
 using namespace dynd;
@@ -159,14 +162,19 @@ dynd::dynd_float128::dynd_float128(unsigned long long value)
     }
 }
 
-dynd::dynd_float128::dynd_float128(const dynd_int128& value)
+dynd::dynd_float128::dynd_float128(const dynd_int128& DYND_UNUSED(value))
 {
     throw runtime_error("dynd int128 to float128 conversion isn't implemented");
 }
 
-dynd::dynd_float128::dynd_float128(const dynd_uint128& value)
+dynd::dynd_float128::dynd_float128(const dynd_uint128& DYND_UNUSED(value))
 {
     throw runtime_error("dynd uint128 to float128 conversion isn't implemented");
+}
+
+dynd::dynd_float128::dynd_float128(const dynd_float16& value)
+{
+    *this = dynd_float128(double(value));
 }
 
 dynd::dynd_float128::dynd_float128(double value)
@@ -212,3 +220,6 @@ dynd::dynd_float128::dynd_float128(double value)
             break;
     }
 }
+
+#endif // !defined(DYND_HAS_FLOAT128)
+
