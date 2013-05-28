@@ -345,12 +345,16 @@ static unary_strided_operation_t assign_table_strided_kernel[builtin_type_id_cou
         ERROR_MODE_LEVEL(dst_type, int16_t), \
         ERROR_MODE_LEVEL(dst_type, int32_t), \
         ERROR_MODE_LEVEL(dst_type, int64_t), \
+        ERROR_MODE_LEVEL(dst_type, dynd_int128), \
         ERROR_MODE_LEVEL(dst_type, uint8_t), \
         ERROR_MODE_LEVEL(dst_type, uint16_t), \
         ERROR_MODE_LEVEL(dst_type, uint32_t), \
         ERROR_MODE_LEVEL(dst_type, uint64_t), \
+        ERROR_MODE_LEVEL(dst_type, dynd_int128), \
+        ERROR_MODE_LEVEL(dst_type, dynd_float16), \
         ERROR_MODE_LEVEL(dst_type, float), \
         ERROR_MODE_LEVEL(dst_type, double), \
+        ERROR_MODE_LEVEL(dst_type, dynd_float128), \
         ERROR_MODE_LEVEL(dst_type, complex<float>), \
         ERROR_MODE_LEVEL(dst_type, complex<double>) \
     }
@@ -360,12 +364,16 @@ static unary_strided_operation_t assign_table_strided_kernel[builtin_type_id_cou
     SRC_TYPE_LEVEL(int16_t),
     SRC_TYPE_LEVEL(int32_t),
     SRC_TYPE_LEVEL(int64_t),
+    SRC_TYPE_LEVEL(dynd_int128),
     SRC_TYPE_LEVEL(uint8_t),
     SRC_TYPE_LEVEL(uint16_t),
     SRC_TYPE_LEVEL(uint32_t),
     SRC_TYPE_LEVEL(uint64_t),
+    SRC_TYPE_LEVEL(dynd_uint128),
+    SRC_TYPE_LEVEL(dynd_float16),
     SRC_TYPE_LEVEL(float),
     SRC_TYPE_LEVEL(double),
+    SRC_TYPE_LEVEL(dynd_float128),
     SRC_TYPE_LEVEL(complex<float>),
     SRC_TYPE_LEVEL(complex<double>)
 #undef SRC_TYPE_LEVEL

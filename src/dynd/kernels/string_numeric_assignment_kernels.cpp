@@ -271,6 +271,18 @@ namespace { template<typename T> struct string_to_uint {
     }
 };}
 
+static void string_to_int128_single(char *dst, const char *src,
+                        kernel_data_prefix *extra)
+{
+    throw std::runtime_error("TODO: implement string_to_int128_single");
+}
+
+static void string_to_uint128_single(char *dst, const char *src,
+                        kernel_data_prefix *extra)
+{
+    throw std::runtime_error("TODO: implement string_to_uint128_single");
+}
+
 static void string_to_float32_single(char *dst, const char *src,
                         kernel_data_prefix *extra)
 {
@@ -365,6 +377,21 @@ static void string_to_float64_single(char *dst, const char *src,
     }
 }
 
+static void string_to_float16_single(char *dst, const char *src,
+                        kernel_data_prefix *extra)
+{
+    string_to_builtin_kernel_extra *e = reinterpret_cast<string_to_builtin_kernel_extra *>(extra);
+    double tmp;
+    string_to_float64_single(reinterpret_cast<char *>(&tmp), src, extra);
+    *reinterpret_cast<dynd_float16 *>(dst) = dynd_float16(tmp, e->errmode);
+}
+
+static void string_to_float128_single(char *dst, const char *src,
+                        kernel_data_prefix *extra)
+{
+    throw std::runtime_error("TODO: implement string_to_float128_single");
+}
+
 static void string_to_complex_float32_single(char *DYND_UNUSED(dst), const char *DYND_UNUSED(src),
                 kernel_data_prefix *DYND_UNUSED(extra))
 {
@@ -383,12 +410,16 @@ static unary_single_operation_t static_string_to_builtin_kernels[builtin_type_id
         &string_to_int<int16_t>::single,
         &string_to_int<int32_t>::single,
         &string_to_int<int64_t>::single,
+        &string_to_int128_single,
         &string_to_uint<uint8_t>::single,
         &string_to_uint<uint16_t>::single,
         &string_to_uint<uint32_t>::single,
         &string_to_uint<uint64_t>::single,
+        &string_to_uint128_single,
+        &string_to_float16_single,
         &string_to_float32_single,
         &string_to_float64_single,
+        &string_to_float128_single,
         &string_to_complex_float32_single,
         &string_to_complex_float64_single
     };

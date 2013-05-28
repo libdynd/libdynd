@@ -108,7 +108,7 @@ TEST(FixedDimDType, Basic) {
 }
 
 
-TEST(FixedDimDType, AssignKernel) {
+TEST(FixedDimDType, AssignKernel_ScalarToFixed) {
     ndobject a, b;
     assignment_kernel k;
 
@@ -124,7 +124,11 @@ TEST(FixedDimDType, AssignKernel) {
     EXPECT_EQ(9, a.at(0).as<int>());
     EXPECT_EQ(9, a.at(1).as<int>());
     EXPECT_EQ(9, a.at(2).as<int>());
-    k.reset();
+}
+
+TEST(FixedDimDType, AssignKernel_FixedToFixed) {
+    ndobject a, b;
+    assignment_kernel k;
 
     // Assignment fixed array -> fixed array
     a = empty(make_fixed_dim_dtype(3, make_dtype<int>()));
@@ -139,7 +143,11 @@ TEST(FixedDimDType, AssignKernel) {
     EXPECT_EQ(3, a.at(0).as<int>());
     EXPECT_EQ(5, a.at(1).as<int>());
     EXPECT_EQ(7, a.at(2).as<int>());
-    k.reset();
+}
+
+TEST(FixedDimDType, AssignKernel_FixedToScalarError) {
+    ndobject a, b;
+    assignment_kernel k;
 
     // Assignment fixed array -> scalar
     a = 9.0;

@@ -114,7 +114,7 @@ struct single_assigner_builtin_base<dynd_bool, src_type, bool_kind, src_kind, as
             std::stringstream ss;
             ss << "overflow while assigning " << make_dtype<src_type>() << " value ";
             ss << s << " to " << make_dtype<dynd_bool>();
-            throw std::runtime_error(ss.str());
+            throw std::overflow_error(ss.str());
         }
     }
 };
@@ -161,12 +161,12 @@ struct single_assigner_builtin_signed_to_signed_overflow_base<dst_type, src_type
     static void assign(dst_type *dst, const src_type *src, kernel_data_prefix *DYND_UNUSED(extra)) {
         src_type s = *src;
 
-        if (static_cast<dst_type>(s) < std::numeric_limits<dst_type>::min() ||
-                        static_cast<dst_type>(s) > std::numeric_limits<dst_type>::max()) {
+        if (s < static_cast<src_type>(std::numeric_limits<dst_type>::min()) ||
+                        s > static_cast<src_type>(std::numeric_limits<dst_type>::max())) {
             std::stringstream ss;
             ss << "overflow while assigning " << make_dtype<src_type>() << " value ";
             ss << s << " to " << make_dtype<dst_type>();
-            throw std::runtime_error(ss.str());
+            throw std::overflow_error(ss.str());
         }
         *dst = static_cast<dst_type>(s);
     }
@@ -201,7 +201,7 @@ struct single_assigner_builtin_unsigned_to_signed_overflow_base<dst_type, src_ty
             std::stringstream ss;
             ss << "overflow while assigning " << make_dtype<src_type>() << " value ";
             ss << s << " to " << make_dtype<dst_type>();
-            throw std::runtime_error(ss.str());
+            throw std::overflow_error(ss.str());
         }
         *dst = static_cast<dst_type>(s);
     }
@@ -232,7 +232,7 @@ struct single_assigner_builtin_signed_to_unsigned_overflow_base
             std::stringstream ss;
             ss << "overflow while assigning " << make_dtype<src_type>() << " value ";
             ss << s << " to " << make_dtype<dst_type>();
-            throw std::runtime_error(ss.str());
+            throw std::overflow_error(ss.str());
         }
         *dst = static_cast<dst_type>(s);
     }
@@ -249,7 +249,7 @@ struct single_assigner_builtin_signed_to_unsigned_overflow_base<dst_type, src_ty
             std::stringstream ss;
             ss << "overflow while assigning " << make_dtype<src_type>() << " value ";
             ss << s << " to " << make_dtype<dst_type>();
-            throw std::runtime_error(ss.str());
+            throw std::overflow_error(ss.str());
         }
         *dst = static_cast<dst_type>(s);
     }
@@ -285,7 +285,7 @@ struct single_assigner_builtin_unsigned_to_unsigned_overflow_base<dst_type, src_
             std::stringstream ss;
             ss << "overflow while assigning " << make_dtype<src_type>() << " value ";
             ss << s << " to " << make_dtype<dst_type>();
-            throw std::runtime_error(ss.str());
+            throw std::overflow_error(ss.str());
         }
         *dst = static_cast<dst_type>(s);
     }
@@ -450,7 +450,7 @@ struct single_assigner_builtin_base<dst_type, src_type, int_kind, real_kind, ass
             std::stringstream ss;
             ss << "overflow while assigning " << make_dtype<src_type>() << " value ";
             ss << s << " to " << make_dtype<dst_type>();
-            throw std::runtime_error(ss.str());
+            throw std::overflow_error(ss.str());
         }
         *dst = static_cast<dst_type>(s);
     }
@@ -469,7 +469,7 @@ struct single_assigner_builtin_base<dst_type, src_type, int_kind, real_kind, ass
             std::stringstream ss;
             ss << "overflow while assigning " << make_dtype<src_type>() << " value ";
             ss << s << " to " << make_dtype<dst_type>();
-            throw std::runtime_error(ss.str());
+            throw std::overflow_error(ss.str());
         }
 
         if (std::floor(s) != s) {
@@ -507,7 +507,7 @@ struct single_assigner_builtin_base<dst_type, std::complex<src_real_type>, int_k
             std::stringstream ss;
             ss << "overflow while assigning " << make_dtype<std::complex<src_real_type> >() << " value ";
             ss << s << " to " << make_dtype<dst_type>();
-            throw std::runtime_error(ss.str());
+            throw std::overflow_error(ss.str());
         }
         *dst = static_cast<dst_type>(s.real());
     }
@@ -533,7 +533,7 @@ struct single_assigner_builtin_base<dst_type, std::complex<src_real_type>, int_k
             std::stringstream ss;
             ss << "overflow while assigning " << make_dtype<std::complex<src_real_type> >() << " value ";
             ss << s << " to " << make_dtype<dst_type>();
-            throw std::runtime_error(ss.str());
+            throw std::overflow_error(ss.str());
         }
 
         if (std::floor(s.real()) != s.real()) {
@@ -564,7 +564,7 @@ struct single_assigner_builtin_base<dst_type, src_type, uint_kind, real_kind, as
             std::stringstream ss;
             ss << "overflow while assigning " << make_dtype<src_type>() << " value ";
             ss << s << " to " << make_dtype<dst_type>();
-            throw std::runtime_error(ss.str());
+            throw std::overflow_error(ss.str());
         }
         *dst = static_cast<dst_type>(s);
     }
@@ -583,7 +583,7 @@ struct single_assigner_builtin_base<dst_type, src_type, uint_kind, real_kind, as
             std::stringstream ss;
             ss << "overflow while assigning " << make_dtype<src_type>() << " value ";
             ss << s << " to " << make_dtype<dst_type>();
-            throw std::runtime_error(ss.str());
+            throw std::overflow_error(ss.str());
         }
 
         if (std::floor(s) != s) {
@@ -621,7 +621,7 @@ struct single_assigner_builtin_base<dst_type, std::complex<src_real_type>, uint_
             std::stringstream ss;
             ss << "overflow while assigning " << make_dtype<std::complex<src_real_type> >() << " value ";
             ss << s << " to " << make_dtype<dst_type>();
-            throw std::runtime_error(ss.str());
+            throw std::overflow_error(ss.str());
         }
         *dst = static_cast<dst_type>(s.real());
     }
@@ -647,7 +647,7 @@ struct single_assigner_builtin_base<dst_type, std::complex<src_real_type>, uint_
             std::stringstream ss;
             ss << "overflow while assigning " << make_dtype<std::complex<src_real_type> >() << " value ";
             ss << s << " to " << make_dtype<dst_type>();
-            throw std::runtime_error(ss.str());
+            throw std::overflow_error(ss.str());
         }
 
         if (std::floor(s.real()) != s.real()) {
@@ -745,7 +745,7 @@ struct single_assigner_builtin_base<float, double, real_kind, real_kind, assign_
             std::stringstream ss;
             ss << "overflow while assigning " << make_dtype<double>() << " value ";
             ss << *src << " to " << make_dtype<float>();
-            throw std::runtime_error(ss.str());
+            throw std::overflow_error(ss.str());
         }
 #else
         double s = *src;
@@ -753,7 +753,7 @@ struct single_assigner_builtin_base<float, double, real_kind, real_kind, assign_
             std::stringstream ss;
             ss << "overflow while assigning " << make_dtype<double>() << " value ";
             ss << *src << " to " << make_dtype<float>();
-            throw std::runtime_error(ss.str());
+            throw std::overflow_error(ss.str());
         }
         *dst = static_cast<float>(s);
 #endif // DYND_USE_FPSTATUS
@@ -782,7 +782,7 @@ struct single_assigner_builtin_base<float, double, real_kind, real_kind, assign_
             std::stringstream ss;
             ss << "overflow while assigning " << make_dtype<double>() << " value ";
             ss << *src << " to " << make_dtype<float>();
-            throw std::runtime_error(ss.str());
+            throw std::overflow_error(ss.str());
         }
 #else
         if (s < -std::numeric_limits<float>::max() || s > std::numeric_limits<float>::max()) {
@@ -823,7 +823,7 @@ struct single_assigner_builtin_base<std::complex<float>, std::complex<double>, c
             std::stringstream ss;
             ss << "overflow while assigning " << make_dtype<std::complex<double> >() << " value ";
             ss << *src << " to " << make_dtype<std::complex<float> >();
-            throw std::runtime_error(ss.str());
+            throw std::overflow_error(ss.str());
         }
 #else
         std::complex<double>(s) = *src;
@@ -832,7 +832,7 @@ struct single_assigner_builtin_base<std::complex<float>, std::complex<double>, c
             std::stringstream ss;
             ss << "overflow while assigning " << make_dtype<std::complex<double> >() << " value ";
             ss << *src << " to " << make_dtype<std::complex<float> >();
-            throw std::runtime_error(ss.str());
+            throw std::overflow_error(ss.str());
         }
         *dst = static_cast<std::complex<float> >(s);
 #endif // DYND_USE_FPSTATUS
@@ -862,7 +862,7 @@ struct single_assigner_builtin_base<std::complex<float>, std::complex<double>, c
             std::stringstream ss;
             ss << "overflow while assigning " << make_dtype<std::complex<double> >() << " value ";
             ss << *src << " to " << make_dtype<std::complex<float> >();
-            throw std::runtime_error(ss.str());
+            throw std::overflow_error(ss.str());
         }
 #else
         if (s.real() < -std::numeric_limits<float>::max() || s.real() > std::numeric_limits<float>::max() ||
@@ -870,7 +870,7 @@ struct single_assigner_builtin_base<std::complex<float>, std::complex<double>, c
             std::stringstream ss;
             ss << "overflow while assigning " << make_dtype<std::complex<double> >() << " value ";
             ss << *src << " to " << make_dtype<std::complex<float> >();
-            throw std::runtime_error(ss.str());
+            throw std::overflow_error(ss.str());
         }
         d = static_cast<std::complex<float> >(s);
 #endif // DYND_USE_FPSTATUS
@@ -1013,14 +1013,14 @@ struct single_assigner_builtin_base<float, std::complex<double>, real_kind, comp
             std::stringstream ss;
             ss << "overflow while assigning " << make_dtype<std::complex<double> >() << " value ";
             ss << *src << " to " << make_dtype<float>();
-            throw std::runtime_error(ss.str());
+            throw std::overflow_error(ss.str());
         }
 #else
         if (s.real() < -std::numeric_limits<float>::max() || s.real() > std::numeric_limits<float>::max()) {
             std::stringstream ss;
             ss << "overflow while assigning " << make_dtype<std::complex<double> >() << " value ";
             ss << *src << " to " << make_dtype<float>();
-            throw std::runtime_error(ss.str());
+            throw std::overflow_error(ss.str());
         }
         d = static_cast<float>(s.real());
 #endif // DYND_USE_FPSTATUS
@@ -1058,14 +1058,14 @@ struct single_assigner_builtin_base<float, std::complex<double>, real_kind, comp
             std::stringstream ss;
             ss << "overflow while assigning " << make_dtype<std::complex<double> >() << " value ";
             ss << s << " to " << make_dtype<float>();
-            throw std::runtime_error(ss.str());
+            throw std::overflow_error(ss.str());
         }
 #else
         if (s.real() < -std::numeric_limits<float>::max() || s.real() > std::numeric_limits<float>::max()) {
             std::stringstream ss;
             ss << "overflow while assigning " << make_dtype<std::complex<double> >() << " value ";
             ss << s << " to " << make_dtype<float>();
-            throw std::runtime_error(ss.str());
+            throw std::overflow_error(ss.str());
         }
         d = static_cast<float>(s.real());
 #endif // DYND_USE_FPSTATUS
@@ -1098,14 +1098,14 @@ struct single_assigner_builtin_base<std::complex<float>, double, complex_kind, r
             std::stringstream ss;
             ss << "overflow while assigning " << make_dtype<double>() << " value ";
             ss << s << " to " << make_dtype<std::complex<float> >();
-            throw std::runtime_error(ss.str());
+            throw std::overflow_error(ss.str());
         }
 #else
         if (s < -std::numeric_limits<float>::max() || s > std::numeric_limits<float>::max()) {
             std::stringstream ss;
             ss << "overflow while assigning " << make_dtype<double>() << " value ";
             ss << s << " to " << make_dtype<std::complex<float> >();
-            throw std::runtime_error(ss.str());
+            throw std::overflow_error(ss.str());
         }
         d = static_cast<float>(s);
 #endif // DYND_USE_FPSTATUS
@@ -1136,14 +1136,14 @@ struct single_assigner_builtin_base<std::complex<float>, double, complex_kind, r
             std::stringstream ss;
             ss << "overflow while assigning " << make_dtype<double>() << " value ";
             ss << s << " to " << make_dtype<std::complex<float> >();
-            throw std::runtime_error(ss.str());
+            throw std::overflow_error(ss.str());
         }
 #else
         if (s < -std::numeric_limits<float>::max() || s > std::numeric_limits<float>::max()) {
             std::stringstream ss;
             ss << "overflow while assigning " << make_dtype<double>() << " value ";
             ss << s << " to " << make_dtype<std::complex<float> >();
-            throw std::runtime_error(ss.str());
+            throw std::overflow_error(ss.str());
         }
         d = static_cast<float>(s);
 #endif // DYND_USE_FPSTATUS
