@@ -56,12 +56,16 @@ namespace {
             builtin_types["int16"] = make_dtype<int16_t>();
             builtin_types["int32"] = make_dtype<int32_t>();
             builtin_types["int64"] = make_dtype<int64_t>();
+            builtin_types["int128"] = make_dtype<dynd_int128>();
             builtin_types["uint8"] = make_dtype<uint8_t>();
             builtin_types["uint16"] = make_dtype<uint16_t>();
             builtin_types["uint32"] = make_dtype<uint32_t>();
             builtin_types["uint64"] = make_dtype<uint64_t>();
+            builtin_types["uint128"] = make_dtype<dynd_uint128>();
+            builtin_types["float16"] = make_dtype<dynd_float16>();
             builtin_types["float32"] = make_dtype<float>();
             builtin_types["float64"] = make_dtype<double>();
+            builtin_types["float128"] = make_dtype<dynd_float128>();
             builtin_types["cfloat32"] = builtin_types["complex64"] = make_dtype<complex<float> >();
             builtin_types["cfloat64"] = builtin_types["complex128"] = make_dtype<complex<double> >();
             builtin_types["json"] = make_json_dtype();

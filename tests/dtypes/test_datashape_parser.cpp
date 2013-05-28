@@ -28,14 +28,20 @@ TEST(DataShapeParser, Basic) {
     EXPECT_EQ(make_dtype<int16_t>(), dtype_from_datashape("int16"));
     EXPECT_EQ(make_dtype<int32_t>(), dtype_from_datashape("int32"));
     EXPECT_EQ(make_dtype<int64_t>(), dtype_from_datashape("int64"));
+    EXPECT_EQ(make_dtype<dynd_int128>(), dtype_from_datashape("int128"));
     EXPECT_EQ(make_dtype<uint8_t>(), dtype_from_datashape("uint8"));
     EXPECT_EQ(make_dtype<uint16_t>(), dtype_from_datashape("uint16"));
     EXPECT_EQ(make_dtype<uint32_t>(), dtype_from_datashape("uint32"));
     EXPECT_EQ(make_dtype<uint64_t>(), dtype_from_datashape("uint64"));
+    EXPECT_EQ(make_dtype<dynd_uint128>(), dtype_from_datashape("uint128"));
+    EXPECT_EQ(make_dtype<dynd_float16>(), dtype_from_datashape("float16"));
     EXPECT_EQ(make_dtype<float>(), dtype_from_datashape("float32"));
     EXPECT_EQ(make_dtype<double>(), dtype_from_datashape("float64"));
+    EXPECT_EQ(make_dtype<dynd_float128>(), dtype_from_datashape("float128"));
     EXPECT_EQ(make_dtype<complex<float> >(), dtype_from_datashape("complex64"));
     EXPECT_EQ(make_dtype<complex<double> >(), dtype_from_datashape("complex128"));
+    EXPECT_EQ(make_dtype<complex<float> >(), dtype_from_datashape("cfloat32"));
+    EXPECT_EQ(make_dtype<complex<double> >(), dtype_from_datashape("cfloat64"));
     EXPECT_EQ(make_json_dtype(), dtype_from_datashape("json"));
     EXPECT_EQ(make_date_dtype(), dtype_from_datashape("date"));
 }
