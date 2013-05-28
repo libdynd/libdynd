@@ -110,9 +110,9 @@ TEST(DataShapeParser, FixedDim) {
 }
 
 TEST(DataShapeParser, VarDim) {
-    EXPECT_EQ(make_var_dim_dtype(make_dtype<dynd_bool>()), dtype_from_datashape("VarDim, bool"));
+    EXPECT_EQ(make_var_dim_dtype(make_dtype<dynd_bool>()), dtype_from_datashape("Var, bool"));
     EXPECT_EQ(make_var_dim_dtype(make_var_dim_dtype(make_dtype<float>())),
-                    dtype_from_datashape("VarDim, VarDim, float32"));
+                    dtype_from_datashape("Var, Var, float32"));
 }
 
 TEST(DataShapeParser, StridedFixedDim) {
@@ -122,7 +122,7 @@ TEST(DataShapeParser, StridedFixedDim) {
 
 TEST(DataShapeParser, StridedVarFixedDim) {
     EXPECT_EQ(make_strided_dim_dtype(make_var_dim_dtype(make_fixed_dim_dtype(3, make_dtype<float>()))),
-                    dtype_from_datashape("M, VarDim, 3, float32"));
+                    dtype_from_datashape("M, Var, 3, float32"));
 }
 
 TEST(DataShapeParser, RecordOneField) {
@@ -365,7 +365,7 @@ TEST(DataShapeParser, KivaLoanDataShape) {
         "    id: int64;\n"
         "    name: string;\n"
         "    description: {\n"
-        "        languages: VarDim, string(2);\n"
+        "        languages: Var, string(2);\n"
         "    #    texts: map(string(2), string);\n"
         "    };\n"
         "    status: string; # LoanStatusType;\n"
@@ -400,7 +400,7 @@ TEST(DataShapeParser, KivaLoanDataShape) {
         "    #planned_expiration_date: Option(datetime<seconds>);\n"
         "    loan_amount: float64;\n"
         "    #currency_exchange_loss_amount: Option(float64);\n"
-        "    borrowers: VarDim, {\n"
+        "    borrowers: Var, {\n"
         "        first_name: string;\n"
         "        last_name: string;\n"
         "        gender: string(2); # GenderType\n"
@@ -411,11 +411,11 @@ TEST(DataShapeParser, KivaLoanDataShape) {
         "    #    disbursal_currency: Option(string);\n"
         "        disbursal_amount: float64;\n"
         "        loan_amount: float64;\n"
-        "        local_payments: VarDim, {\n"
+        "        local_payments: Var, {\n"
         "    #        due_date: datetime<seconds>;\n"
         "            amount: float64;\n"
         "        };\n"
-        "        scheduled_payments: VarDim, {\n"
+        "        scheduled_payments: Var, {\n"
         "    #        due_date: datetime<seconds>;\n"
         "            amount: float64;\n"
         "        };\n"
@@ -425,7 +425,7 @@ TEST(DataShapeParser, KivaLoanDataShape) {
         "    #        currency_exchange_coverage_rate: Option(float64);\n"
         "        }\n"
         "    };\n"
-        "    payments: VarDim, {\n"
+        "    payments: Var, {\n"
         "        amount: float64;\n"
         "        local_amount: float64;\n"
         "    #    processed_date: datetime<seconds>;\n"

@@ -462,11 +462,11 @@ TEST(NDObjectAssign, ZeroSizedAssign) {
     a.vals() = b;
     b.vals() = a;
     // Should be able to assign zero-sized input to a vardim output
-    a = empty("VarDim, float64");
+    a = empty("Var, float64");
     a.vals() = b;
     EXPECT_EQ(0, a.get_dim_size());
     // With a struct
-    a = empty("VarDim, {a:int32; b:string}");
+    a = empty("Var, {a:int32; b:string}");
     b = empty(0, "M, {a:int32; b:string}");
     a.vals() = b;
 }

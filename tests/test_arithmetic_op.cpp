@@ -105,7 +105,7 @@ TEST(ArithmeticOp, StridedScalarBroadcast) {
 TEST(ArithmeticOp, VarToStridedBroadcast) {
     ndobject a, b, c;
 
-    a = parse_json("2, VarDim, int32",
+    a = parse_json("2, Var, int32",
                     "[[1, 2, 3], [4]]");
     b = parse_json("2, 3, int32",
                     "[[5, 6, 7], [8, 9, 10]]");
@@ -138,14 +138,14 @@ TEST(ArithmeticOp, VarToStridedBroadcast) {
 TEST(ArithmeticOp, VarToVarBroadcast) {
     ndobject a, b, c;
 
-    a = parse_json("2, VarDim, int32",
+    a = parse_json("2, Var, int32",
                     "[[1, 2, 3], [4]]");
-    b = parse_json("2, VarDim, int32",
+    b = parse_json("2, Var, int32",
                     "[[5], [6, 7]]");
 
     // VarDim in both operands, produces VarDim
     c = (a + b).eval();
-    ASSERT_EQ(dtype("M, VarDim, int32"), c.get_dtype());
+    ASSERT_EQ(dtype("M, Var, int32"), c.get_dtype());
     ASSERT_EQ(2, c.get_shape()[0]);
     EXPECT_EQ(6, c.at(0,0).as<int>());
     EXPECT_EQ(7, c.at(0,1).as<int>());
@@ -153,13 +153,13 @@ TEST(ArithmeticOp, VarToVarBroadcast) {
     EXPECT_EQ(10, c.at(1,0).as<int>());
     EXPECT_EQ(11, c.at(1,1).as<int>());
 
-    a = parse_json("2, VarDim, int32",
+    a = parse_json("2, Var, int32",
                     "[[1, 2, 3], [4]]");
     b = parse_json("2, 1, int32",
                     "[[5], [6]]");
 
     // VarDim in first operand, strided of size 1 in the second
-    ASSERT_EQ(dtype("M, VarDim, int32"), c.get_dtype());
+    ASSERT_EQ(dtype("M, Var, int32"), c.get_dtype());
     c = (a + b).eval();
     ASSERT_EQ(2, c.get_shape()[0]);
     EXPECT_EQ(6, c.at(0,0).as<int>());
@@ -169,7 +169,7 @@ TEST(ArithmeticOp, VarToVarBroadcast) {
 
     // Strided of size 1 in the first operand, VarDim in second
     c = (b - a).eval();
-    ASSERT_EQ(dtype("M, VarDim, int32"), c.get_dtype());
+    ASSERT_EQ(dtype("M, Var, int32"), c.get_dtype());
     ASSERT_EQ(2, c.get_shape()[0]);
     EXPECT_EQ(4, c.at(0,0).as<int>());
     EXPECT_EQ(3, c.at(0,1).as<int>());

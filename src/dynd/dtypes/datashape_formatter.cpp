@@ -105,11 +105,11 @@ static void format_uniform_dim_datashape(std::ostream& o,
         case var_dim_type_id: {
             const var_dim_dtype *vad = static_cast<const var_dim_dtype *>(dt.extended());
             if (data == NULL) {
-                o << "VarDim, ";
+                o << "Var, ";
             } else {
                 const var_dim_dtype_data *d = reinterpret_cast<const var_dim_dtype_data *>(data);
                 if (d->begin == NULL) {
-                    o << "VarDim, ";
+                    o << "Var, ";
                 } else {
                     o << d->size << ", ";
                 }

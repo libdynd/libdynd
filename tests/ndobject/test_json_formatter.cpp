@@ -84,7 +84,7 @@ TEST(JSONFormatter, UniformDim) {
     n = vals;
     EXPECT_EQ("[3.5,-1.25,4.75]", format_json(n).as<string>());
     // Variable-sized dimension
-    n = parse_json("VarDim, string", "[\"testing\", \"one\", \"two\"] ");
+    n = parse_json("Var, string", "[\"testing\", \"one\", \"two\"] ");
     EXPECT_EQ("[\"testing\",\"one\",\"two\"]", format_json(n).as<string>());
     // Fixed dimension
     n = parse_json("3, string", "[\"testing\", \"one\", \"two\"] ");

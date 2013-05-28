@@ -393,7 +393,7 @@ static dtype parse_rhs_expression(const char *&begin, const char *end, map<strin
         } else {
             if ('0' <= n[0] && n[0] <= '9') {
                 shape.push_back(atoi(n.c_str()));
-            } else if (n == "VarDim") { // TODO: This isn't in the Blaze datashape grammar
+            } else if (n == "Var") { // TODO: This isn't in the Blaze datashape grammar
                 // Use -1 to signal a variable-length dimension
                 shape.push_back(-1);
             } else if (reserved_typenames.find(n) == reserved_typenames.end() &&
