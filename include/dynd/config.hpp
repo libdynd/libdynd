@@ -54,16 +54,15 @@ inline bool DYND_ISNAN(long double x) {
 # define DYND_ISNAN(x) isnan(x)
 
 // Check for __float128 (added in gcc 4.6)
-#if __GNUC__ > 4 || \
-                (__GNUC__ == 4 && (__GNUC_MINOR__ >= 6))
-#include <iostream>
-#define DYND_HAS_FLOAT128
-typedef __float128 dynd_float128;
-inline std::ostream& operator<<(std::ostream& o, const __float128&)
-{
-    return (o << "<unimplemented float128 printing>");
-}
-#endif
+// #if __GNUC__ > 4 || (__GNUC__ == 4 && (__GNUC_MINOR__ >= 6))
+// #include <iostream>
+// #define DYND_HAS_FLOAT128
+// typedef __float128 dynd_float128;
+// inline std::ostream& operator<<(std::ostream& o, const __float128&)
+// {
+//     return (o << "<unimplemented float128 printing>");
+// }
+// #endif
 
 #elif defined(_MSC_VER)
 
