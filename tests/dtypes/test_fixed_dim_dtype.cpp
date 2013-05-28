@@ -18,7 +18,7 @@
 using namespace std;
 using namespace dynd;
 
-TEST(FixedArrayDType, Create) {
+TEST(FixedDimDType, Create) {
     dtype d;
     const fixed_dim_dtype *fad;
 
@@ -51,7 +51,7 @@ TEST(FixedArrayDType, Create) {
     EXPECT_EQ(1u, fad->get_fixed_dim_size());
 }
 
-TEST(FixedArrayDType, CreateCOrder) {
+TEST(FixedDimDType, CreateCOrder) {
     intptr_t shape[3] = {2, 3, 4};
     dtype d = make_fixed_dim_dtype(3, shape, make_dtype<int16_t>(), NULL);
     EXPECT_EQ(fixed_dim_type_id, d.get_type_id());
@@ -67,7 +67,7 @@ TEST(FixedArrayDType, CreateCOrder) {
     EXPECT_EQ(2, static_cast<const fixed_dim_dtype *>(d.at(0,0).extended())->get_fixed_stride());
 }
 
-TEST(FixedArrayDType, CreateFOrder) {
+TEST(FixedDimDType, CreateFOrder) {
     int axis_perm[3] = {0, 1, 2};
     intptr_t shape[3] = {2, 3, 4};
     dtype d = make_fixed_dim_dtype(3, shape, make_dtype<int16_t>(), axis_perm);
@@ -85,7 +85,7 @@ TEST(FixedArrayDType, CreateFOrder) {
     EXPECT_EQ(12, static_cast<const fixed_dim_dtype *>(d.at(0,0).extended())->get_fixed_stride());
 }
 
-TEST(FixedArrayDType, Basic) {
+TEST(FixedDimDType, Basic) {
     ndobject a;
     float vals[3] = {1.5f, 2.5f, -1.5f};
 
@@ -108,7 +108,7 @@ TEST(FixedArrayDType, Basic) {
 }
 
 
-TEST(FixedArrayDType, AssignKernel) {
+TEST(FixedDimDType, AssignKernel) {
     ndobject a, b;
     assignment_kernel k;
 
@@ -151,7 +151,7 @@ TEST(FixedArrayDType, AssignKernel) {
                 broadcast_error);
 }
 
-TEST(FixedArrayDType, AssignFixedStridedKernel) {
+TEST(FixedDimDType, AssignFixedStridedKernel) {
     ndobject a, b;
     assignment_kernel k;
     int vals_int[] = {3,5,7};

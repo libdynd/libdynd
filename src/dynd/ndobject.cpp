@@ -298,6 +298,10 @@ ndobject::ndobject(long long value)
     : m_memblock(make_immutable_builtin_scalar_ndobject(value))
 {
 }
+ndobject::ndobject(const dynd_int128& value)
+    : m_memblock(make_immutable_builtin_scalar_ndobject(value))
+{
+}
 ndobject::ndobject(unsigned char value)
     : m_memblock(make_immutable_builtin_scalar_ndobject(value))
 {
@@ -318,11 +322,23 @@ ndobject::ndobject(unsigned long long value)
     : m_memblock(make_immutable_builtin_scalar_ndobject(value))
 {
 }
+ndobject::ndobject(const dynd_uint128& value)
+    : m_memblock(make_immutable_builtin_scalar_ndobject(value))
+{
+}
+ndobject::ndobject(dynd_float16 value)
+    : m_memblock(make_immutable_builtin_scalar_ndobject(value))
+{
+}
 ndobject::ndobject(float value)
     : m_memblock(make_immutable_builtin_scalar_ndobject(value))
 {
 }
 ndobject::ndobject(double value)
+    : m_memblock(make_immutable_builtin_scalar_ndobject(value))
+{
+}
+ndobject::ndobject(const dynd_float128& value)
     : m_memblock(make_immutable_builtin_scalar_ndobject(value))
 {
 }

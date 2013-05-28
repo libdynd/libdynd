@@ -12,6 +12,7 @@
 #include <dynd/dtypes/base_dtype.hpp>
 #include <dynd/dtypes/base_expression_dtype.hpp>
 #include <dynd/dtypes/base_string_dtype.hpp>
+#include <dynd/dtypes/dynd_float16.hpp>
 #include <dynd/eval/eval_context.hpp>
 #include <dynd/exceptions.hpp>
 
@@ -360,6 +361,16 @@ public:
         } else {
             return m_extended->get_type_id();
         }
+    }
+
+    /**
+     * For when it is known that the type is a builtin type,
+     * to simply retrieve that type id.
+     *
+     * WARNING: Normally just use get_type_id().
+     */
+    type_id_t unchecked_get_builtin_type_id() const {
+        return static_cast<type_id_t>(reinterpret_cast<intptr_t>(m_extended));
     }
 
     /** The 'kind' of the dtype (int, uint, float, etc) */

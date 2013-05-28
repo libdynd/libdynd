@@ -54,12 +54,16 @@ static binary_single_predicate_t compare_kernel_table[builtin_type_id_count-2][b
         INNER_LEVEL(src0_type, int16_t), \
         INNER_LEVEL(src0_type, int32_t), \
         INNER_LEVEL(src0_type, int64_t), \
+        INNER_LEVEL(src0_type, dynd_int128), \
         INNER_LEVEL(src0_type, uint8_t), \
         INNER_LEVEL(src0_type, uint16_t), \
         INNER_LEVEL(src0_type, uint32_t), \
         INNER_LEVEL(src0_type, uint64_t), \
+        INNER_LEVEL(src0_type, dynd_uint128), \
+        INNER_LEVEL(src0_type, dynd_float16), \
         INNER_LEVEL(src0_type, float), \
         INNER_LEVEL(src0_type, double), \
+        INNER_LEVEL(src0_type, dynd_float128), \
         INNER_LEVEL(src0_type, complex<float>), \
         INNER_LEVEL(src0_type, complex<double>) \
     }
@@ -69,12 +73,16 @@ static binary_single_predicate_t compare_kernel_table[builtin_type_id_count-2][b
     SRC0_TYPE_LEVEL(int16_t),
     SRC0_TYPE_LEVEL(int32_t),
     SRC0_TYPE_LEVEL(int64_t),
+    SRC0_TYPE_LEVEL(dynd_int128),
     SRC0_TYPE_LEVEL(uint8_t),
     SRC0_TYPE_LEVEL(uint16_t),
     SRC0_TYPE_LEVEL(uint32_t),
     SRC0_TYPE_LEVEL(uint64_t),
+    SRC0_TYPE_LEVEL(dynd_uint128),
+    SRC0_TYPE_LEVEL(dynd_float16),
     SRC0_TYPE_LEVEL(float),
     SRC0_TYPE_LEVEL(double),
+    SRC0_TYPE_LEVEL(dynd_float128),
     SRC0_TYPE_LEVEL(complex<float>),
     SRC0_TYPE_LEVEL(complex<double>)
 #undef SRC0_TYPE_LEVEL

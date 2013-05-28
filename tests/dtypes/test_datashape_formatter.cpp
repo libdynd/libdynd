@@ -26,10 +26,13 @@ TEST(DataShapeFormatter, NDObjectBuiltinAtoms) {
     EXPECT_EQ("int16", format_datashape(ndobject((int16_t)0), "", false));
     EXPECT_EQ("int32", format_datashape(ndobject((int32_t)0), "", false));
     EXPECT_EQ("int64", format_datashape(ndobject((int64_t)0), "", false));
+    EXPECT_EQ("int128", format_datashape(ndobject(dynd_int128(0)), "", false));
     EXPECT_EQ("uint8", format_datashape(ndobject((uint8_t)0), "", false));
     EXPECT_EQ("uint16", format_datashape(ndobject((uint16_t)0), "", false));
     EXPECT_EQ("uint32", format_datashape(ndobject((uint32_t)0), "", false));
     EXPECT_EQ("uint64", format_datashape(ndobject((uint64_t)0), "", false));
+    EXPECT_EQ("uint128", format_datashape(ndobject(dynd_uint128(0)), "", false));
+    EXPECT_EQ("float16", format_datashape(ndobject(dynd_float16(0.f, assign_error_none)), "", false));
     EXPECT_EQ("float32", format_datashape(ndobject(0.f), "", false));
     EXPECT_EQ("float64", format_datashape(ndobject(0.), "", false));
     EXPECT_EQ("cfloat32", format_datashape(ndobject(complex<float>(0.f)), "", false));

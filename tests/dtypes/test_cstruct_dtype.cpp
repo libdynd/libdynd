@@ -55,7 +55,7 @@ TEST(CStructType, Align) {
             " f10: int8; f64_:  float64;  f11: int8; cf32_: cfloat32;"
             " f12: int8; cf64_: cfloat64; f13: int8}");
     EXPECT_EQ(sizeof(align_test_struct), asdt.get_data_size());
-    EXPECT_EQ(dtype_align_of<align_test_struct>::value, asdt.get_alignment());
+    EXPECT_EQ((size_t)scalar_align_of<align_test_struct>::value, asdt.get_alignment());
     const cstruct_dtype *cd = static_cast<const cstruct_dtype *>(asdt.extended());
     const size_t *data_offsets = cd->get_data_offsets();
     align_test_struct ats;

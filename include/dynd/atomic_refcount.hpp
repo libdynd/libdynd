@@ -61,6 +61,14 @@ namespace dynd {
         {
             return static_cast<const volatile int32_t&>(m_refcount);
         }
+
+        bool operator!=(int32_t rhs) const {
+            return static_cast<const volatile int32_t&>(m_refcount) != rhs;
+        }
+
+        bool operator<=(int32_t rhs) const {
+            return static_cast<const volatile int32_t&>(m_refcount) <= rhs;
+        }
     };
 } // namespace dynd
 #else

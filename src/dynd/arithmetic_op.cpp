@@ -165,19 +165,43 @@ namespace {
     };
 } // anonymous namespace
 
+#ifdef DYND_HAS_INT128
+#define DYND_INT128_BINARY_OP_PAIR(operation) \
+    {&binary_single_kernel<operation<dynd_int128> >::func, &binary_strided_kernel<operation<dynd_int128> >::func}
+#else
+#define DYND_INT128_BINARY_OP_PAIR(operation) {NULL, NULL}
+#endif
+
+#ifdef DYND_HAS_UINT128
+#define DYND_UINT128_BINARY_OP_PAIR(operation) \
+    {&binary_single_kernel<operation<dynd_uint128> >::func, &binary_strided_kernel<operation<dynd_uint128> >::func}
+#else
+#define DYND_UINT128_BINARY_OP_PAIR(operation) {NULL, NULL}
+#endif
+
+#ifdef DYND_HAS_FLOAT128
+#define DYND_FLOAT128_BINARY_OP_PAIR(operation) \
+    {&binary_single_kernel<operation<dynd_float128> >::func, &binary_strided_kernel<operation<dynd_float128> >::func}
+#else
+#define DYND_FLOAT128_BINARY_OP_PAIR(operation) {NULL, NULL}
+#endif
+
 #define DYND_BUILTIN_DTYPE_BINARY_OP_TABLE(operation) { \
     {&binary_single_kernel<operation<int32_t> >::func, &binary_strided_kernel<operation<int32_t> >::func}, \
     {&binary_single_kernel<operation<int64_t> >::func, &binary_strided_kernel<operation<int64_t> >::func}, \
+    DYND_INT128_BINARY_OP_PAIR(operation), \
     {&binary_single_kernel<operation<int32_t> >::func, &binary_strided_kernel<operation<uint32_t> >::func}, \
     {&binary_single_kernel<operation<uint64_t> >::func, &binary_strided_kernel<operation<uint64_t> >::func}, \
+    DYND_UINT128_BINARY_OP_PAIR(operation), \
     {&binary_single_kernel<operation<float> >::func, &binary_strided_kernel<operation<float> >::func}, \
     {&binary_single_kernel<operation<double> >::func, &binary_strided_kernel<operation<double> >::func}, \
+    DYND_FLOAT128_BINARY_OP_PAIR(operation), \
     {&binary_single_kernel<operation<complex<float> > >::func, &binary_strided_kernel<operation<complex<float> > >::func}, \
     {&binary_single_kernel<operation<complex<double> > >::func, &binary_strided_kernel<operation<complex<double> > >::func} \
     }
 
 #define DYND_BUILTIN_DTYPE_BINARY_OP_TABLE_DEFS(operation) \
-    static const expr_operation_pair operation##_table[8] = \
+    static const expr_operation_pair operation##_table[11] = \
                 DYND_BUILTIN_DTYPE_BINARY_OP_TABLE(operation);
 
 DYND_BUILTIN_DTYPE_BINARY_OP_TABLE_DEFS(addition);
@@ -193,12 +217,27 @@ ndobject apply_operator(const ndobject *ops,
 {
     // Get the promoted dtype
     dtype dt = promote_dtypes_arithmetic(ops[0].get_udtype(), ops[1].get_udtype());
-    static int compress_type_id[builtin_type_id_count] = {-1, -1, -1, -1, 0, 1, -1, -1, 2, 3, 4, 5, 6, 7, -1};
+    static int compress_type_id[builtin_type_id_count] = {
+                    -1, -1, // uninitialized, bool
+                    -1, -1, 0, 1,// int8, ..., int64
+                    2, // int128
+                    -1, -1, 3, 4, // uint8, ..., uint64,
+                    5, // uint128
+                    -1, 6, 7, // float16, ..., float64
+                    8, // float128
+                    9, 10, // complex<float32>, complex<float64>
+                    -1};
     int table_index = -1;
     if (dt.is_builtin()) {
         table_index = compress_type_id[dt.get_type_id()];
     }
     if (table_index < 0) {
+        stringstream ss;
+        ss << "Operator " << name << " is not supported for dynd type " << dt;
+        throw runtime_error(ss.str());
+    }
+    const expr_operation_pair& func_ptr = table[table_index];
+    if (func_ptr.single == NULL) {
         stringstream ss;
         ss << "Operator " << name << " is not supported for dynd type " << dt;
         throw runtime_error(ss.str());
@@ -236,7 +275,7 @@ ndobject apply_operator(const ndobject *ops,
     // we can swap it in as the dtype
     dtype edt = make_expr_dtype(result_vdt,
                     result.get_dtype(),
-                    new arithmetic_op_kernel_generator(dt.get_type_id(), table[table_index], name));
+                    new arithmetic_op_kernel_generator(dt.get_type_id(), func_ptr, name));
     edt.swap(result.get_ndo()->m_dtype);
     return result;
 }

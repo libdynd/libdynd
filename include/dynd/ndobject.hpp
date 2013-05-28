@@ -63,13 +63,17 @@ public:
     ndobject(int value);
     ndobject(long value);
     ndobject(long long value);
+    ndobject(const dynd_int128& value);
     ndobject(unsigned char value);
     ndobject(unsigned short value);
     ndobject(unsigned int value);
     ndobject(unsigned long value);
     ndobject(unsigned long long value);
+    ndobject(const dynd_uint128& value);
+    ndobject(dynd_float16 value);
     ndobject(float value);
     ndobject(double value);
+    ndobject(const dynd_float128& value);
     ndobject(std::complex<float> value);
     ndobject(std::complex<double> value);
     ndobject(const std::string& value);

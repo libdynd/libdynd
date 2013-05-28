@@ -91,9 +91,8 @@ memory_block_ptr dynd::make_ndobject_memory_block(const dtype& dt, size_t ndim, 
     if (dt.is_builtin()) {
         preamble->m_dtype = reinterpret_cast<base_dtype *>(dt.get_type_id());
     } else {
-        preamble->m_dtype = dt.extended();
-        base_dtype_incref(preamble->m_dtype);
-        dt.extended()->metadata_default_construct(reinterpret_cast<char *>(preamble + 1), ndim, shape);
+        preamble->m_dtype = dtype(dt).release();
+        preamble->m_dtype->metadata_default_construct(reinterpret_cast<char *>(preamble + 1), ndim, shape);
     }
     preamble->m_data_pointer = data_ptr;
     preamble->m_data_reference = NULL;

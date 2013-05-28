@@ -12,13 +12,63 @@ using namespace std;
 
 namespace dynd {
 
+    // Bigger type metaprogram
+    template<class S, class T, bool Sbigger>
+    struct big_type_helper {
+        typedef typename T type;
+    };
+    template<class S, class T>
+    struct big_type_helper<S, T, true> {
+        typedef typename S type;
+    };
+#define DYND_FORCE_BIG_TYPE(orig, forced) \
+    template<class S> \
+    struct big_type_helper<S, orig, true> { \
+        typedef forced type; \
+    }; \
+    template<class S> \
+    struct big_type_helper<S, orig, false> { \
+        typedef forced type; \
+    }; \
+    template<class T> \
+    struct big_type_helper<orig, T, true> { \
+        typedef forced type; \
+    }; \
+    template<class T> \
+    struct big_type_helper<orig, T, false> { \
+        typedef forced type; \
+    }; \
+    template<> \
+    struct big_type_helper<orig, orig, true> { \
+        typedef orig type; \
+    }; \
+    template<> \
+    struct big_type_helper<orig, orig, false> { \
+        typedef orig type; \
+    }
+DYND_FORCE_BIG_TYPE(dynd_float16, double);
+DYND_FORCE_BIG_TYPE(dynd_float128, dynd_float128);
+    template<>
+    struct big_type_helper<dynd_float16, dynd_float128, false> {
+        typedef dynd_float128 type;
+    };
+    template<>
+    struct big_type_helper<dynd_float128, dynd_float16, true> {
+        typedef dynd_float128 type;
+    };
+    template<class S, class T>
+    struct big_type {
+        typedef typename big_type_helper<S, T, (sizeof(S) > sizeof(T))>::type type;
+    };
+
     // Base classes for comparisons
     template<class src0_type, class src1_type, dtype_kind_t src0_kind,
                     dtype_kind_t src1_kind, bool src0_bigger, bool src1_bigger>
     struct op_sort_lt {
         inline static bool f(const src0_type& v0, const src1_type& v1)
         {
-            return v0 < v1;
+            typedef typename big_type<src0_type,src1_type>::type BT;
+            return BT(v0) < BT(v1);
         }
     };
     template<class src0_type, class src1_type, dtype_kind_t src0_kind,
@@ -26,7 +76,8 @@ namespace dynd {
     struct op_lt {
         inline static bool f(const src0_type& v0, const src1_type& v1)
         {
-            return v0 < v1;
+            typedef typename big_type<src0_type,src1_type>::type BT;
+            return BT(v0) < BT(v1);
         }
     };
     template<class src0_type, class src1_type, dtype_kind_t src0_kind,
@@ -34,7 +85,8 @@ namespace dynd {
     struct op_le {
         inline static bool f(const src0_type& v0, const src1_type& v1)
         {
-            return v0 <= v1;
+            typedef typename big_type<src0_type,src1_type>::type BT;
+            return BT(v0) <= BT(v1);
         }
     };
     template<class src0_type, class src1_type, dtype_kind_t src0_kind,
@@ -42,7 +94,8 @@ namespace dynd {
     struct op_eq {
         inline static bool f(const src0_type& v0, const src1_type& v1)
         {
-            return v0 == v1;
+            typedef typename big_type<src0_type,src1_type>::type BT;
+            return BT(v0) == BT(v1);
         }
     };
     template<class src0_type, class src1_type, dtype_kind_t src0_kind,
@@ -50,7 +103,8 @@ namespace dynd {
     struct op_ne {
         inline static bool f(const src0_type& v0, const src1_type& v1)
         {
-            return v0 != v1;
+            typedef typename big_type<src0_type,src1_type>::type BT;
+            return BT(v0) != BT(v1);
         }
     };
     template<class src0_type, class src1_type, dtype_kind_t src0_kind,
@@ -58,7 +112,8 @@ namespace dynd {
     struct op_ge {
         inline static bool f(const src0_type& v0, const src1_type& v1)
         {
-            return v0 >= v1;
+            typedef typename big_type<src0_type,src1_type>::type BT;
+            return BT(v0) >= BT(v1);
         }
     };
     template<class src0_type, class src1_type, dtype_kind_t src0_kind,
@@ -66,7 +121,8 @@ namespace dynd {
     struct op_gt {
         inline static bool f(const src0_type& v0, const src1_type& v1)
         {
-            return v0 > v1;
+            typedef typename big_type<src0_type,src1_type>::type BT;
+            return BT(v0) > BT(v1);
         }
     };
 
@@ -75,7 +131,7 @@ namespace dynd {
     struct op_sort_lt<src0_type, src1_type, int_kind, uint_kind, false, src1_bigger> {
         inline static bool f(const src0_type& v0, const src1_type& v1)
         {
-            return v0 < 0 || static_cast<src1_type>(v0) < v1;
+            return v0 < src0_type(0) || static_cast<src1_type>(v0) < v1;
         }
     };
     //
@@ -87,7 +143,7 @@ namespace dynd {
     struct op_le<src0_type, src1_type, int_kind, uint_kind, false, src1_bigger> {
         inline static bool f(const src0_type& v0, const src1_type& v1)
         {
-            return v0 <= 0 || static_cast<src1_type>(v0) <= v1;
+            return v0 <= src0_type(0) || static_cast<src1_type>(v0) <= v1;
         }
     };
     //
@@ -95,7 +151,7 @@ namespace dynd {
     struct op_eq<src0_type, src1_type, int_kind, uint_kind, false, src1_bigger> {
         inline static bool f(const src0_type& v0, const src1_type& v1)
         {
-            return v0 >= 0 && static_cast<src1_type>(v0) == v1;
+            return v0 >= src0_type(0) && static_cast<src1_type>(v0) == v1;
         }
     };
     //
@@ -103,7 +159,7 @@ namespace dynd {
     struct op_ne<src0_type, src1_type, int_kind, uint_kind, false, src1_bigger> {
         inline static bool f(const src0_type& v0, const src1_type& v1)
         {
-            return v0 < 0 || static_cast<src1_type>(v0) != v1;
+            return v0 < src0_type(0) || static_cast<src1_type>(v0) != v1;
         }
     };
     //
@@ -111,7 +167,7 @@ namespace dynd {
     struct op_ge<src0_type, src1_type, int_kind, uint_kind, false, src1_bigger> {
         inline static bool f(const src0_type& v0, const src1_type& v1)
         {
-            return v0 >= 0 && static_cast<src1_type>(v0) >= v1;
+            return v0 >= src0_type(0) && static_cast<src1_type>(v0) >= v1;
         }
     };
     //
@@ -119,7 +175,7 @@ namespace dynd {
     struct op_gt<src0_type, src1_type, int_kind, uint_kind, false, src1_bigger> {
         inline static bool f(const src0_type& v0, const src1_type& v1)
         {
-            return v0 > 0 && static_cast<src1_type>(v0) > v1;
+            return v0 > src0_type(0) && static_cast<src1_type>(v0) > v1;
         }
     };
 
@@ -128,7 +184,7 @@ namespace dynd {
     struct op_sort_lt<src0_type, src1_type, uint_kind, int_kind, src0_bigger, false> {
         inline static bool f(const src0_type& v0, const src1_type& v1)
         {
-            return v1 > 0 && v0 < static_cast<src0_type>(v1);
+            return v1 > src1_type(0) && v0 < static_cast<src0_type>(v1);
         }
     };
     //
@@ -140,7 +196,7 @@ namespace dynd {
     struct op_le<src0_type, src1_type, uint_kind, int_kind, src0_bigger, false> {
         inline static bool f(const src0_type& v0, const src1_type& v1)
         {
-            return v1 >= 0 && v0 <= static_cast<src0_type>(v1);
+            return v1 >= src1_type(0) && v0 <= static_cast<src0_type>(v1);
         }
     };
     //
@@ -148,7 +204,7 @@ namespace dynd {
     struct op_eq<src0_type, src1_type, uint_kind, int_kind, src0_bigger, false> {
         inline static bool f(const src0_type& v0, const src1_type& v1)
         {
-            return v1 >= 0 && v0 == static_cast<src0_type>(v1);
+            return v1 >= src1_type(0) && v0 == static_cast<src0_type>(v1);
         }
     };
     //
@@ -156,7 +212,7 @@ namespace dynd {
     struct op_ne<src0_type, src1_type, uint_kind, int_kind, src0_bigger, false> {
         inline static bool f(const src0_type& v0, const src1_type& v1)
         {
-            return v1 < 0 || v0 != static_cast<src0_type>(v1);
+            return v1 < src1_type(0) || v0 != static_cast<src0_type>(v1);
         }
     };
     //
@@ -164,7 +220,7 @@ namespace dynd {
     struct op_ge<src0_type, src1_type, uint_kind, int_kind, src0_bigger, false> {
         inline static bool f(const src0_type& v0, const src1_type& v1)
         {
-            return v1 <= 0 || v0 >= static_cast<src0_type>(v1);
+            return v1 <= src1_type(0) || v0 >= static_cast<src0_type>(v1);
         }
     };
     //
@@ -172,7 +228,7 @@ namespace dynd {
     struct op_gt<src0_type, src1_type, uint_kind, int_kind, src0_bigger, false> {
         inline static bool f(const src0_type& v0, const src1_type& v1)
         {
-            return v1 < 0 || v0 > static_cast<src0_type>(v1);
+            return v1 < src1_type(0) || v0 > static_cast<src0_type>(v1);
         }
     };
 
@@ -244,8 +300,9 @@ namespace dynd {
     struct op_sort_lt<src0_type, src1_type, real_kind, real_kind, src0_bigger, src1_bigger> {
         inline static bool f(const src0_type& v0, const src1_type& v1)
         {
+            typedef typename big_type<src0_type,src1_type>::type BT;
             // This puts NaNs at the end
-            return v0 < v1 || (v1 != v1 && v0 == v0);
+            return BT(v0) < BT(v1) || (v1 != v1 && v0 == v0);
         }
     };
 
@@ -260,6 +317,16 @@ namespace dynd {
                 static_cast<src1_type>(v0) == v1;
         }
     };
+    template<class src0_type,
+                    bool src0_bigger, bool src1_bigger>
+    struct op_eq<src0_type, dynd_float16, int_kind, real_kind, src0_bigger, src1_bigger> {
+        inline static bool f(const src0_type& v0, const dynd_float16& v1)
+        {
+            // Slower, but more rigorous test
+            return v0 == static_cast<src0_type>(double(v1)) &&
+                double(v0) == v1;
+        }
+    };
     template<class src0_type, class src1_type,
                     bool src0_bigger, bool src1_bigger>
     struct op_ne<src0_type, src1_type, int_kind, real_kind, src0_bigger, src1_bigger> {
@@ -268,6 +335,16 @@ namespace dynd {
             // Slower, but more rigorous test
             return v0 != static_cast<src0_type>(v1) ||
                 static_cast<src1_type>(v0) != v1;
+        }
+    };
+    template<class src0_type,
+                    bool src0_bigger, bool src1_bigger>
+    struct op_ne<src0_type, dynd_float16, int_kind, real_kind, src0_bigger, src1_bigger> {
+        inline static bool f(const src0_type& v0, const dynd_float16& v1)
+        {
+            // Slower, but more rigorous test
+            return v0 != static_cast<src0_type>(double(v1)) ||
+                double(v0) != v1;
         }
     };
     template<class src0_type, class src1_type,
@@ -359,8 +436,9 @@ namespace dynd {
     struct op_sort_lt<src0_type, complex<src1_real_type>, src0_kind, complex_kind, src0_bigger, src1_bigger> {
         inline static bool f(const src0_type& v0, const complex<src1_real_type>& v1)
         {
-            return v0 < v1.real() ||
-                (v0 == v1.real() && 0 < v1.imag());
+            typedef typename big_type<src0_type,src1_real_type>::type BT;
+            return BT(v0) < BT(v1.real()) ||
+                (BT(v0) == BT(v1.real()) && 0 < v1.imag());
         }
     };
     template<class src0_real_type, class src1_type, dtype_kind_t src1_kind,
@@ -368,8 +446,9 @@ namespace dynd {
     struct op_sort_lt<complex<src0_real_type>, src1_type, complex_kind, src1_kind, src0_bigger, src1_bigger> {
         inline static bool f(const complex<src0_real_type>& v0, const src1_type& v1)
         {
-            return v0.real() < v1 ||
-                (v0.real() == v1 && v0.imag() < 0);
+            typedef typename big_type<src0_real_type,src1_type>::type BT;
+            return BT(v0.real()) < BT(v1) ||
+                (BT(v0.real()) == BT(v1) && v0.imag() < 0);
         }
     };
     template<class src0_type, class src1_real_type,
@@ -435,7 +514,8 @@ namespace dynd {
     struct op_eq<src0_type, complex<src1_real_type>, real_kind, complex_kind, src0_bigger, src1_bigger> {
         inline static bool f(const src0_type& v0, const complex<src1_real_type>& v1)
         {
-            return v1.imag() == 0 && v0 == v1.real();
+            typedef typename big_type<src0_type,src1_real_type>::type BT;
+            return v1.imag() == 0 && BT(v0) == BT(v1.real());
         }
     };
 
@@ -463,7 +543,8 @@ namespace dynd {
     struct op_eq<complex<src0_real_type>, src1_type, complex_kind, real_kind, src0_bigger, src1_bigger> {
         inline static bool f(const complex<src0_real_type>& v0, const src1_type& v1)
         {
-            return v0.imag() == 0 && v0.real() == v1;
+            typedef typename big_type<src0_real_type,src1_type>::type BT;
+            return v0.imag() == 0 && BT(v0.real()) == BT(v1);
         }
     };
 
@@ -491,7 +572,8 @@ namespace dynd {
     struct op_ne<src0_type, complex<src1_real_type>, real_kind, complex_kind, src0_bigger, src1_bigger> {
         inline static bool f(const src0_type& v0, const complex<src1_real_type>& v1)
         {
-            return v1.imag() != 0 || v0 != v1.real();
+            typedef typename big_type<src0_type,src1_real_type>::type BT;
+            return v1.imag() != 0 || BT(v0) != BT(v1.real());
         }
     };
 
@@ -519,7 +601,8 @@ namespace dynd {
     struct op_ne<complex<src0_real_type>, src1_type, complex_kind, real_kind, src0_bigger, src1_bigger> {
         inline static bool f(const complex<src0_real_type>& v0, const src1_type& v1)
         {
-            return v0.imag() != 0 || v0.real() != v1;
+            typedef typename big_type<src0_real_type,src1_type>::type BT;
+            return v0.imag() != 0 || BT(v0.real()) != BT(v1);
         }
     };
 

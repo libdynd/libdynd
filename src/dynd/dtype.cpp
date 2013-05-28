@@ -43,12 +43,16 @@ const dtype dynd::static_builtin_dtypes[builtin_type_id_count] = {
     dtype(int16_type_id),
     dtype(int32_type_id),
     dtype(int64_type_id),
+    dtype(int128_type_id),
     dtype(uint8_type_id),
     dtype(uint16_type_id),
     dtype(uint32_type_id),
     dtype(uint64_type_id),
+    dtype(uint128_type_id),
+    dtype(float16_type_id),
     dtype(float32_type_id),
     dtype(float64_type_id),
+    dtype(float128_type_id),
     dtype(complex_float32_type_id),
     dtype(complex_float64_type_id),
     dtype(void_type_id)
@@ -61,10 +65,14 @@ uint8_t dtype::builtin_kinds[builtin_type_id_count] = {
         int_kind,
         int_kind,
         int_kind,
+        int_kind,
         uint_kind,
         uint_kind,
         uint_kind,
         uint_kind,
+        uint_kind,
+        real_kind,
+        real_kind,
         real_kind,
         real_kind,
         complex_kind,
@@ -73,36 +81,44 @@ uint8_t dtype::builtin_kinds[builtin_type_id_count] = {
     };
 uint8_t dtype::builtin_data_sizes[builtin_type_id_count] = {
         0,
-        1,
-        1,
-        2,
-        4,
-        8,
-        1,
-        2,
-        4,
-        8,
-        4,
-        8,
-        8,
-        16,
+        sizeof(dynd_bool),
+        sizeof(int8_t),
+        sizeof(int16_t),
+        sizeof(int32_t),
+        sizeof(int64_t),
+        sizeof(dynd_int128),
+        sizeof(uint8_t),
+        sizeof(uint16_t),
+        sizeof(uint32_t),
+        sizeof(uint64_t),
+        sizeof(dynd_uint128),
+        sizeof(dynd_float16),
+        sizeof(float),
+        sizeof(double),
+        sizeof(dynd_float128),
+        sizeof(complex<float>),
+        sizeof(complex<double>),
         0
     };
 uint8_t dtype::builtin_data_alignments[builtin_type_id_count] = {
         1,
         1,
         1,
-        dtype_align_of<int16_t>::value,
-        dtype_align_of<int32_t>::value,
-        dtype_align_of<int64_t>::value,
+        scalar_align_of<int16_t>::value,
+        scalar_align_of<int32_t>::value,
+        scalar_align_of<int64_t>::value,
+        scalar_align_of<dynd_int128>::value,
         1,
-        dtype_align_of<uint16_t>::value,
-        dtype_align_of<uint32_t>::value,
-        dtype_align_of<uint64_t>::value,
-        dtype_align_of<float>::value,
-        dtype_align_of<double>::value,
-        dtype_align_of<float>::value,
-        dtype_align_of<double>::value,
+        scalar_align_of<uint16_t>::value,
+        scalar_align_of<uint32_t>::value,
+        scalar_align_of<uint64_t>::value,
+        scalar_align_of<dynd_uint128>::value,
+        scalar_align_of<dynd_float16>::value,
+        scalar_align_of<float>::value,
+        scalar_align_of<double>::value,
+        scalar_align_of<dynd_float128>::value,
+        scalar_align_of<complex<float> >::value,
+        scalar_align_of<complex<double> >::value,
         1
     };
 
@@ -353,6 +369,9 @@ std::ostream& dynd::operator<<(std::ostream& o, const dtype& rhs)
         case int64_type_id:
             o << "int64";
             break;
+        case int128_type_id:
+            o << "int128";
+            break;
         case uint8_type_id:
             o << "uint8";
             break;
@@ -365,11 +384,20 @@ std::ostream& dynd::operator<<(std::ostream& o, const dtype& rhs)
         case uint64_type_id:
             o << "uint64";
             break;
+        case uint128_type_id:
+            o << "uint128";
+            break;
+        case float16_type_id:
+            o << "float16";
+            break;
         case float32_type_id:
             o << "float32";
             break;
         case float64_type_id:
             o << "float64";
+            break;
+        case float128_type_id:
+            o << "float128";
             break;
         case complex_float32_type_id:
             o << "complex<float32>";
@@ -471,6 +499,9 @@ void dynd::print_builtin_scalar(type_id_t type_id, std::ostream& o, const char *
         case int64_type_id:
             print_as<int64_t, int64_t>(o, data);
             break;
+        case int128_type_id:
+            print_as<dynd_int128, dynd_int128>(o, data);
+            break;
         case uint8_type_id:
             print_as<uint8_t, uint32_t>(o, data);
             break;
@@ -483,11 +514,20 @@ void dynd::print_builtin_scalar(type_id_t type_id, std::ostream& o, const char *
         case uint64_type_id:
             print_as<uint64_t, uint64_t>(o, data);
             break;
+        case uint128_type_id:
+            print_as<dynd_uint128, dynd_uint128>(o, data);
+            break;
+        case float16_type_id:
+            print_as<dynd_float16, float>(o, data);
+            break;
         case float32_type_id:
             print_as<float, float>(o, data);
             break;
         case float64_type_id:
             print_as<double, double>(o, data);
+            break;
+        case float128_type_id:
+            print_as<dynd_float128, dynd_float128>(o, data);
             break;
         case complex_float32_type_id:
             print_as<complex<float>, complex<float> >(o, data);

@@ -53,6 +53,18 @@ inline bool DYND_ISNAN(long double x) {
 
 # define DYND_ISNAN(x) isnan(x)
 
+// Check for __float128, __int128 (added in gcc 4.6)
+#if __GNUC__ > 4 || \
+                (__GNUC__ == 4 && (__GNUC_MINOR__ >= 6))
+#define DYND_HAS_FLOAT128
+typedef __float128 dynd_float128;
+#define DYND_HAS_INT128
+typedef __int128 dynd_int128;
+#define DYND_HAS_UINT128
+typedef unsigned __int128 dynd_uint128;
+#endif
+// Check for __int128
+
 #elif defined(_MSC_VER)
 
 // If set, uses the FP status registers.
@@ -202,5 +214,15 @@ namespace dynd {
     extern const char dynd_git_sha1[];
     extern const char dynd_version_string[];
 } // namespace dynd
+
+// Check endian: define DYND_BIG_ENDIAN if big endian, otherwise assume little
+#if defined(__GLIBC__)
+#include <endian.h>
+#if __BYTE_ORDER == __BIG_ENDIAN
+#define DYND_BIG_ENDIAN
+#elif __BYTE_ORDER != __LITTLE_ENDIAN
+#error Unrecognized endianness from endian.h.
+#endif
+#endif
 
 #endif // _DYND__CONFIG_HPP_

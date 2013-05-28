@@ -59,6 +59,8 @@ std::ostream& dynd::operator<<(std::ostream& o, type_id_t tid)
             return (o << "int32");
         case int64_type_id:
             return (o << "int64");
+        case int128_type_id:
+            return (o << "int128");
         case uint8_type_id:
             return (o << "uint8");
         case uint16_type_id:
@@ -67,10 +69,16 @@ std::ostream& dynd::operator<<(std::ostream& o, type_id_t tid)
             return (o << "uint32");
         case uint64_type_id:
             return (o << "uint64");
+        case uint128_type_id:
+            return (o << "uint128");
+        case float16_type_id:
+            return (o << "float16");
         case float32_type_id:
             return (o << "float32");
         case float64_type_id:
             return (o << "float64");
+        case float128_type_id:
+            return (o << "float128");
         case complex_float32_type_id:
             return (o << "complex_float32");
         case complex_float64_type_id:

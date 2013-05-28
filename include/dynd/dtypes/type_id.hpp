@@ -10,6 +10,10 @@
 #include <complex>
 
 #include <dynd/config.hpp>
+#include <dynd/dtypes/dynd_int128.hpp>
+#include <dynd/dtypes/dynd_uint128.hpp>
+#include <dynd/dtypes/dynd_float16.hpp>
+#include <dynd/dtypes/dynd_float128.hpp>
 
 namespace dynd {
 
@@ -48,14 +52,18 @@ enum type_id_t {
     int16_type_id,
     int32_type_id,
     int64_type_id,
+    int128_type_id,
     // Unsigned integer types
     uint8_type_id,
     uint16_type_id,
     uint32_type_id,
     uint64_type_id,
+    uint128_type_id,
     // Floating point types
+    float16_type_id,
     float32_type_id,
     float64_type_id,
+    float128_type_id,
     // Complex floating-point types
     complex_float32_type_id,
     complex_float64_type_id,
@@ -119,7 +127,7 @@ enum type_id_t {
     dtype_type_id,
 
     // The number of built-in, atomic types (including uninitialized and void)
-    builtin_type_id_count = 15
+    builtin_type_id_count = 19
 };
 
 enum dtype_flags_t {
@@ -193,8 +201,8 @@ std::ostream& operator<<(std::ostream& o, type_id_t tid);
 std::ostream& operator<<(std::ostream& o, kernel_request_t kernreq);
 
 enum {
-    /** A mask within which alll the built-in type ids are guaranteed to fit */
-    builtin_type_id_mask = 0x1f
+    /** A mask within which all the built-in type ids are guaranteed to fit */
+    builtin_type_id_mask = 0x3f
 };
 
 // Forward declaration so we can make the is_builtin_dtype function here
@@ -255,6 +263,7 @@ template <> struct type_id_of<long> {
     enum {value = int8_type_id + detail::log2_x<sizeof(long)>::value};
 };
 template <> struct type_id_of<long long> {enum {value = int64_type_id};};
+template <> struct type_id_of<dynd_int128> {enum {value = int128_type_id};};
 template <> struct type_id_of<uint8_t> {enum {value = uint8_type_id};};
 template <> struct type_id_of<uint16_t> {enum {value = uint16_type_id};};
 template <> struct type_id_of<unsigned int> {enum {value = uint32_type_id};};
@@ -262,21 +271,14 @@ template <> struct type_id_of<unsigned long> {
     enum {value = uint8_type_id + detail::log2_x<sizeof(unsigned long)>::value};
 };
 template <> struct type_id_of<unsigned long long>{enum {value = uint64_type_id};};
+template <> struct type_id_of<dynd_uint128> {enum {value = uint128_type_id};};
+template <> struct type_id_of<dynd_float16> {enum {value = float16_type_id};};
 template <> struct type_id_of<float> {enum {value = float32_type_id};};
 template <> struct type_id_of<double> {enum {value = float64_type_id};};
+template <> struct type_id_of<dynd_float128> {enum {value = float128_type_id};};
 template <> struct type_id_of<std::complex<float> > {enum {value = complex_float32_type_id};};
 template <> struct type_id_of<std::complex<double> > {enum {value = complex_float64_type_id};};
 template <> struct type_id_of<void> {enum {value = void_type_id};};
-
-// Type trait for the alignment
-template <typename T> struct dtype_align_of {
-    struct align_helper {
-        char x;
-        T t;
-    };
-    enum {value = sizeof(align_helper) - sizeof(T)};
-};
-
 
 // Type trait for the kind
 template <typename T> struct dtype_kind_of;
@@ -292,13 +294,17 @@ template <> struct dtype_kind_of<short> {static const dtype_kind_t value = int_k
 template <> struct dtype_kind_of<int> {static const dtype_kind_t value = int_kind;};
 template <> struct dtype_kind_of<long> {static const dtype_kind_t value = int_kind;};
 template <> struct dtype_kind_of<long long> {static const dtype_kind_t value = int_kind;};
+template <> struct dtype_kind_of<dynd_int128> {static const dtype_kind_t value = int_kind;};
 template <> struct dtype_kind_of<uint8_t> {static const dtype_kind_t value = uint_kind;};
 template <> struct dtype_kind_of<uint16_t> {static const dtype_kind_t value = uint_kind;};
 template <> struct dtype_kind_of<unsigned int> {static const dtype_kind_t value = uint_kind;};
 template <> struct dtype_kind_of<unsigned long> {static const dtype_kind_t value = uint_kind;};
 template <> struct dtype_kind_of<unsigned long long>{static const dtype_kind_t value = uint_kind;};
+template <> struct dtype_kind_of<dynd_uint128> {static const dtype_kind_t value = uint_kind;};
+template <> struct dtype_kind_of<dynd_float16> {static const dtype_kind_t value = real_kind;};
 template <> struct dtype_kind_of<float> {static const dtype_kind_t value = real_kind;};
 template <> struct dtype_kind_of<double> {static const dtype_kind_t value = real_kind;};
+template <> struct dtype_kind_of<dynd_float128> {static const dtype_kind_t value = real_kind;};
 template <typename T> struct dtype_kind_of<std::complex<T> > {static const dtype_kind_t value = complex_kind;};
 
 // Metaprogram for determining if a type is a valid C++ scalar
@@ -311,34 +317,28 @@ template <> struct is_dtype_scalar<short> {enum {value = true};};
 template <> struct is_dtype_scalar<int> {enum {value = true};};
 template <> struct is_dtype_scalar<long> {enum {value = true};};
 template <> struct is_dtype_scalar<long long> {enum {value = true};};
+template <> struct is_dtype_scalar<dynd_int128> {enum {value = true};};
 template <> struct is_dtype_scalar<unsigned char> {enum {value = true};};
 template <> struct is_dtype_scalar<unsigned short> {enum {value = true};};
 template <> struct is_dtype_scalar<unsigned int> {enum {value = true};};
 template <> struct is_dtype_scalar<unsigned long> {enum {value = true};};
 template <> struct is_dtype_scalar<unsigned long long> {enum {value = true};};
+template <> struct is_dtype_scalar<dynd_uint128> {enum {value = true};};
+template <> struct is_dtype_scalar<dynd_float16> {enum {value = true};};
 template <> struct is_dtype_scalar<float> {enum {value = true};};
 template <> struct is_dtype_scalar<double> {enum {value = true};};
+template <> struct is_dtype_scalar<dynd_float128> {enum {value = true};};
 template <> struct is_dtype_scalar<std::complex<float> > {enum {value = true};};
 template <> struct is_dtype_scalar<std::complex<double> > {enum {value = true};};
 
 // Metaprogram for determining scalar alignment
-template<typename T> struct scalar_align_of;
-template <> struct scalar_align_of<dynd_bool> {enum {value = 1};};
-template <> struct scalar_align_of<char> {enum {value = 1};};
-template <> struct scalar_align_of<signed char> {enum {value = 1};};
-template <> struct scalar_align_of<short> {enum {value = sizeof(short)};};
-template <> struct scalar_align_of<int> {enum {value = sizeof(int)};};
-template <> struct scalar_align_of<long> {enum {value = sizeof(long)};};
-template <> struct scalar_align_of<long long> {enum {value = sizeof(long long)};};
-template <> struct scalar_align_of<unsigned char> {enum {value = 1};};
-template <> struct scalar_align_of<unsigned short> {enum {value = sizeof(unsigned short)};};
-template <> struct scalar_align_of<unsigned int> {enum {value = sizeof(unsigned int)};};
-template <> struct scalar_align_of<unsigned long> {enum {value = sizeof(unsigned long)};};
-template <> struct scalar_align_of<unsigned long long> {enum {value = sizeof(unsigned long long)};};
-template <> struct scalar_align_of<float> {enum {value = sizeof(float)};};
-template <> struct scalar_align_of<double> {enum {value = sizeof(double)};};
-template <> struct scalar_align_of<std::complex<float> > {enum {value = sizeof(long)};};
-template <> struct scalar_align_of<std::complex<double> > {enum {value = sizeof(double)};};
+template <typename T> struct scalar_align_of {
+    struct align_helper {
+        char x;
+        T t;
+    };
+    enum {value = sizeof(align_helper) - sizeof(T)};
+};
 
 // Metaprogram for determining if a type is the C++ "bool" or not
 template<typename T> struct is_type_bool {enum {value = false};};

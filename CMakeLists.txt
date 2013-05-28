@@ -131,6 +131,10 @@ set(libdynd_SRC
     src/dynd/dtypes/datashape_parser.cpp
     src/dynd/dtypes/date_dtype.cpp
     src/dynd/dtypes/dtype_dtype.cpp
+    src/dynd/dtypes/dynd_float16.cpp
+    src/dynd/dtypes/dynd_float128.cpp
+    src/dynd/dtypes/dynd_int128.cpp
+    src/dynd/dtypes/dynd_uint128.cpp
     src/dynd/dtypes/expr_dtype.cpp
     src/dynd/dtypes/property_dtype.cpp
     src/dynd/dtypes/dtype_alignment.cpp
@@ -166,6 +170,10 @@ set(libdynd_SRC
     include/dynd/dtypes/datashape_parser.hpp
     include/dynd/dtypes/date_dtype.hpp
     include/dynd/dtypes/dtype_dtype.hpp
+    include/dynd/dtypes/dynd_float16.hpp
+    include/dynd/dtypes/dynd_float128.hpp
+    include/dynd/dtypes/dynd_int128.hpp
+    include/dynd/dtypes/dynd_uint128.hpp
     include/dynd/dtypes/expr_dtype.hpp
     include/dynd/dtypes/property_dtype.hpp
     include/dynd/dtypes/dtype_alignment.hpp
@@ -232,6 +240,10 @@ set(libdynd_SRC
     src/dynd/kernels/struct_comparison_kernels.cpp
     src/dynd/kernels/kernels_for_disassembly.cpp
     src/dynd/kernels/single_assigner_builtin.hpp
+    src/dynd/kernels/single_assigner_builtin_int128.hpp
+    src/dynd/kernels/single_assigner_builtin_uint128.hpp
+    src/dynd/kernels/single_assigner_builtin_float16.hpp
+    src/dynd/kernels/single_assigner_builtin_float128.hpp
     src/dynd/kernels/single_comparer_builtin.hpp
     include/dynd/kernels/assignment_kernels.hpp
     include/dynd/kernels/var_dim_assignment_kernels.hpp

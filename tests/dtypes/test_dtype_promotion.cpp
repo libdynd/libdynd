@@ -15,8 +15,9 @@ using namespace dynd;
 
 template<class S, class T, class U>
 void dtype_promotion_matches_cxx_test(S, T, U) {
-    //cout << "S: " << make_dtype<S>() << ", T: " << make_dtype<T>() << ", U: " << make_dtype<U>() << "\n";
-    EXPECT_EQ(promote_dtypes_arithmetic(make_dtype<S>(), make_dtype<T>()), make_dtype<U>());
+    EXPECT_EQ(make_dtype<U>(), promote_dtypes_arithmetic(make_dtype<S>(), make_dtype<T>()));
+    if (make_dtype<U>() != promote_dtypes_arithmetic(make_dtype<S>(), make_dtype<T>()))
+        cout << "S: " << make_dtype<S>() << ", T: " << make_dtype<T>() << ", U: " << make_dtype<U>() << "\n";
 }
 
 template<class S, class T>
