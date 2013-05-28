@@ -38,29 +38,6 @@ template <> struct dcs_size_of<const base_dtype *> {enum {value = sizeof(const b
 template <> struct dcs_size_of<string_dtype_data> {enum {value = sizeof(string_dtype_data)};};
 template <typename T, int N> struct dcs_size_of<T[N]> {enum {value = N * sizeof(T)};};
 
-// Metaprogram for determining alignment
-template<typename T> struct dcs_align_of;
-template <> struct dcs_align_of<dynd_bool> {enum {value = 1};};
-template <> struct dcs_align_of<char> {enum {value = 1};};
-template <> struct dcs_align_of<signed char> {enum {value = 1};};
-template <> struct dcs_align_of<short> {enum {value = sizeof(short)};};
-template <> struct dcs_align_of<int> {enum {value = sizeof(int)};};
-template <> struct dcs_align_of<long> {enum {value = sizeof(long)};};
-template <> struct dcs_align_of<long long> {enum {value = sizeof(long long)};};
-template <> struct dcs_align_of<unsigned char> {enum {value = 1};};
-template <> struct dcs_align_of<unsigned short> {enum {value = sizeof(unsigned short)};};
-template <> struct dcs_align_of<unsigned int> {enum {value = sizeof(unsigned int)};};
-template <> struct dcs_align_of<unsigned long> {enum {value = sizeof(unsigned long)};};
-template <> struct dcs_align_of<unsigned long long> {enum {value = sizeof(unsigned long long)};};
-template <> struct dcs_align_of<float> {enum {value = sizeof(long)};};
-template <> struct dcs_align_of<double> {enum {value = sizeof(double)};};
-template <> struct dcs_align_of<std::complex<float> > {enum {value = sizeof(long)};};
-template <> struct dcs_align_of<std::complex<double> > {enum {value = sizeof(double)};};
-template <> struct dcs_align_of<ndobject_preamble *> {enum {value = sizeof(ndobject_preamble *)};};
-template <> struct dcs_align_of<const base_dtype *> {enum {value = sizeof(const base_dtype *)};};
-template <> struct dcs_align_of<string_dtype_data> {enum {value = sizeof(const char *)};};
-template <typename T, int N> struct dcs_align_of<T[N]> {enum {value = sizeof(T)};};
-
 /**
  * Metaprogram which returns the field offset of the last field in the
  * template argument list.
@@ -68,7 +45,7 @@ template <typename T, int N> struct dcs_align_of<T[N]> {enum {value = sizeof(T)}
 template <typename T0, typename T1 = void, typename T2 = void, typename T3 = void, typename T4 = void>
 struct dcs_offset_of {
     enum {partial_offset = dcs_offset_of<T0, T1, T2, T3, void>::value + dcs_size_of<T3>::value};
-    enum {field_align = dcs_align_of<T4>::value};
+    enum {field_align = scalar_align_of<T4>::value};
 
     // The offset to the T4 value
     enum {value = partial_offset + (((partial_offset & (field_align-1)) == 0) ? 0 : (field_align - (partial_offset & (field_align-1))))};
@@ -77,7 +54,7 @@ struct dcs_offset_of {
 template <typename T0, typename T1, typename T2, typename T3>
 struct dcs_offset_of<T0, T1, T2, T3, void> {
     enum {partial_offset = dcs_offset_of<T0, T1, T2, void, void>::value + dcs_size_of<T2>::value};
-    enum {field_align = dcs_align_of<T3>::value};
+    enum {field_align = scalar_align_of<T3>::value};
 
     // The offset to the T3 value
     enum {value = partial_offset + (((partial_offset & (field_align-1)) == 0) ? 0 : (field_align - (partial_offset & (field_align-1))))};
@@ -86,7 +63,7 @@ struct dcs_offset_of<T0, T1, T2, T3, void> {
 template <typename T0, typename T1, typename T2>
 struct dcs_offset_of<T0, T1, T2, void, void> {
     enum {partial_offset = dcs_offset_of<T0, T1, void, void, void>::value + dcs_size_of<T1>::value};
-    enum {field_align = dcs_align_of<T2>::value};
+    enum {field_align = scalar_align_of<T2>::value};
 
     // The offset to the T2 value
     enum {value = partial_offset + (((partial_offset & (field_align-1)) == 0) ? 0 : (field_align - (partial_offset & (field_align-1))))};
@@ -95,7 +72,7 @@ struct dcs_offset_of<T0, T1, T2, void, void> {
 template <typename T0, typename T1>
 struct dcs_offset_of<T0, T1, void, void, void> {
     enum {partial_offset = dcs_offset_of<T0, void, void, void, void>::value + dcs_size_of<T0>::value};
-    enum {field_align = dcs_align_of<T1>::value};
+    enum {field_align = scalar_align_of<T1>::value};
 
     // The offset to the T1 value
     enum {value = partial_offset + (((partial_offset & (field_align-1)) == 0) ? 0 : (field_align - (partial_offset & (field_align-1))))};

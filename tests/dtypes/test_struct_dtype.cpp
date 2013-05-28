@@ -45,6 +45,11 @@ TEST(StructDType, CreateOneField) {
     EXPECT_EQ("x", tdt->get_field_names()[0]);
 }
 
+struct two_field_struct {
+    int64_t a;
+    int32_t b;
+};
+
 TEST(StructDType, CreateTwoField) {
     dtype dt;
     const struct_dtype *tdt;
@@ -53,8 +58,8 @@ TEST(StructDType, CreateTwoField) {
     dt = make_struct_dtype(make_dtype<int64_t>(), "a", make_dtype<int32_t>(), "b");
     EXPECT_EQ(struct_type_id, dt.get_type_id());
     EXPECT_EQ(0u, dt.get_data_size());
-    EXPECT_EQ(16u, dt.extended()->get_default_data_size(0, NULL));
-    EXPECT_EQ(8u, dt.get_alignment());
+    EXPECT_EQ(sizeof(two_field_struct), dt.extended()->get_default_data_size(0, NULL));
+    EXPECT_EQ((size_t)scalar_align_of<two_field_struct>::value, dt.get_alignment());
     EXPECT_FALSE(dt.is_pod());
     EXPECT_EQ(0u, (dt.get_flags()&(dtype_flag_blockref|dtype_flag_destructor)));
     tdt = static_cast<const struct_dtype *>(dt.extended());
@@ -64,6 +69,12 @@ TEST(StructDType, CreateTwoField) {
     EXPECT_EQ("a", tdt->get_field_names()[0]);
     EXPECT_EQ("b", tdt->get_field_names()[1]);
 }
+
+struct three_field_struct {
+    int64_t x;
+    int32_t y;
+    char z[5];
+};
 
 TEST(StructDType, CreateThreeField) {
     dtype dt;
@@ -76,8 +87,8 @@ TEST(StructDType, CreateThreeField) {
     dt = make_struct_dtype(d1, "x", d2, "y", d3, "z");
     EXPECT_EQ(struct_type_id, dt.get_type_id());
     EXPECT_EQ(0u, dt.get_data_size());
-    EXPECT_EQ(24u, dt.extended()->get_default_data_size(0, NULL));
-    EXPECT_EQ(8u, dt.get_alignment());
+    EXPECT_EQ(sizeof(three_field_struct), dt.extended()->get_default_data_size(0, NULL));
+    EXPECT_EQ((size_t)scalar_align_of<two_field_struct>::value, dt.get_alignment());
     EXPECT_FALSE(dt.is_pod());
     EXPECT_EQ(0u, (dt.get_flags()&(dtype_flag_blockref|dtype_flag_destructor)));
     tdt = static_cast<const struct_dtype *>(dt.extended());

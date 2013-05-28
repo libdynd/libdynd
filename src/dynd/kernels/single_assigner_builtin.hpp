@@ -1181,4 +1181,3 @@ struct single_assigner_builtin<same_type, same_type, errmode>
 };
 
 } // namespace dynd
-

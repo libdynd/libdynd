@@ -94,6 +94,11 @@ TEST(CStructDType, CreateOneField) {
     EXPECT_EQ("x", tdt->get_field_names()[0]);
 }
 
+struct two_field_struct {
+    int64_t a;
+    int32_t b;
+};
+
 TEST(CStructDType, CreateTwoField) {
     dtype dt;
     const cstruct_dtype *tdt;
@@ -101,8 +106,8 @@ TEST(CStructDType, CreateTwoField) {
     // Struct with two fields
     dt = make_cstruct_dtype(make_dtype<int64_t>(), "a", make_dtype<int32_t>(), "b");
     EXPECT_EQ(cstruct_type_id, dt.get_type_id());
-    EXPECT_EQ(16u, dt.get_data_size());
-    EXPECT_EQ(16u, dt.extended()->get_default_data_size(0, NULL));
+    EXPECT_EQ(sizeof(two_field_struct), dt.get_data_size());
+    EXPECT_EQ(sizeof(two_field_struct), dt.extended()->get_default_data_size(0, NULL));
     EXPECT_EQ(make_dtype<int64_t>().get_alignment(), dt.get_alignment());
     EXPECT_TRUE(dt.is_pod());
     tdt = static_cast<const cstruct_dtype *>(dt.extended());
@@ -115,6 +120,12 @@ TEST(CStructDType, CreateTwoField) {
     EXPECT_EQ("b", tdt->get_field_names()[1]);
 }
 
+struct three_field_struct {
+    int64_t x;
+    int32_t y;
+    char z[5];
+};
+
 TEST(CStructDType, CreateThreeField) {
     dtype dt;
     const cstruct_dtype *tdt;
@@ -125,8 +136,8 @@ TEST(CStructDType, CreateThreeField) {
     dtype d3 = make_fixedstring_dtype(5, string_encoding_utf_8);
     dt = make_cstruct_dtype(d1, "x", d2, "y", d3, "z");
     EXPECT_EQ(cstruct_type_id, dt.get_type_id());
-    EXPECT_EQ(24u, dt.get_data_size());
-    EXPECT_EQ(24u, dt.extended()->get_default_data_size(0, NULL));
+    EXPECT_EQ(sizeof(three_field_struct), dt.get_data_size());
+    EXPECT_EQ(sizeof(three_field_struct), dt.extended()->get_default_data_size(0, NULL));
     EXPECT_EQ(d1.get_alignment(), dt.get_alignment());
     EXPECT_TRUE(dt.is_pod());
     tdt = static_cast<const cstruct_dtype *>(dt.extended());
