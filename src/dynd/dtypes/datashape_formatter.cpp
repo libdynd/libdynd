@@ -127,58 +127,14 @@ static void format_uniform_dim_datashape(std::ostream& o,
     }
 }
 
-static void format_string_encoding(std::ostream& o, string_encoding_t enc)
-{
-    switch (enc) {
-        case string_encoding_ascii:
-            o << "'A'";
-            break;
-        case string_encoding_utf_8:
-            o << "'U8'";
-            break;
-        case string_encoding_ucs_2:
-            o << "'ucs2'";
-            break;
-        case string_encoding_utf_16:
-            o << "'U16'";
-            break;
-        case string_encoding_utf_32:
-            o << "'U32'";
-            break;
-        default: {
-            stringstream ss;
-            ss << "unrecognized string encoding " << enc << " while formatting datashape";
-            throw runtime_error(ss.str());
-        }
-    }
-}
-
 static void format_string_datashape(std::ostream& o, const dtype& dt)
 {
     switch (dt.get_type_id()) {
-        case string_type_id: {
-            const string_dtype *sd = static_cast<const string_dtype *>(dt.extended());
+        case string_type_id:
+        case fixedstring_type_id:
+            // data shape only has one kind of string
             o << "string";
-            string_encoding_t enc = sd->get_encoding();
-            if (enc != string_encoding_utf_8) {
-                o << "(";
-                format_string_encoding(o, enc);
-                o << ")";
-            }
             break;
-        }
-        case fixedstring_type_id: {
-            const fixedstring_dtype *fsd = static_cast<const fixedstring_dtype *>(dt.extended());
-            o << "string(";
-            o << fsd->get_data_size() / fsd->get_alignment();
-            string_encoding_t enc = fsd->get_encoding();
-            if (enc != string_encoding_utf_8) {
-                o << ",";
-                format_string_encoding(o, enc);
-            }
-            o << ")";
-            break;
-        }
         case json_type_id: {
             o << "json";
             break;

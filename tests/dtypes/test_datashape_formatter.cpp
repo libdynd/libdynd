@@ -59,25 +59,25 @@ TEST(DataShapeFormatter, NDObjectStringAtoms) {
     EXPECT_EQ("string", format_datashape(ndobject("test"), "", false));
     EXPECT_EQ("string", format_datashape(
                     empty(make_string_dtype(string_encoding_utf_8)), "", false));
-    EXPECT_EQ("string('A')", format_datashape(
+    EXPECT_EQ("string", format_datashape(
                     empty(make_string_dtype(string_encoding_ascii)), "", false));
-    EXPECT_EQ("string('U16')", format_datashape(
+    EXPECT_EQ("string", format_datashape(
                     empty(make_string_dtype(string_encoding_utf_16)), "", false));
-    EXPECT_EQ("string('U32')", format_datashape(
+    EXPECT_EQ("string", format_datashape(
                     empty(make_string_dtype(string_encoding_utf_32)), "", false));
-    EXPECT_EQ("string('ucs2')", format_datashape(
+    EXPECT_EQ("string", format_datashape(
                     empty(make_string_dtype(string_encoding_ucs_2)), "", false));
-    EXPECT_EQ("string(1)", format_datashape(
+    EXPECT_EQ("string", format_datashape(
                     empty(make_fixedstring_dtype(1, string_encoding_utf_8)), "", false));
-    EXPECT_EQ("string(10)", format_datashape(
+    EXPECT_EQ("string", format_datashape(
                     empty(make_fixedstring_dtype(10, string_encoding_utf_8)), "", false));
-    EXPECT_EQ("string(10,'A')", format_datashape(
+    EXPECT_EQ("string", format_datashape(
                     empty(make_fixedstring_dtype(10, string_encoding_ascii)), "", false));
-    EXPECT_EQ("string(10,'U16')", format_datashape(
+    EXPECT_EQ("string", format_datashape(
                     empty(make_fixedstring_dtype(10, string_encoding_utf_16)), "", false));
-    EXPECT_EQ("string(10,'U32')", format_datashape(
+    EXPECT_EQ("string", format_datashape(
                     empty(make_fixedstring_dtype(10, string_encoding_utf_32)), "", false));
-    EXPECT_EQ("string(10,'ucs2')", format_datashape(
+    EXPECT_EQ("string", format_datashape(
                     empty(make_fixedstring_dtype(10, string_encoding_ucs_2)), "", false));
 }
 
@@ -85,25 +85,25 @@ TEST(DataShapeFormatter, DTypeStringAtoms) {
     EXPECT_EQ("string", format_datashape(make_string_dtype(), "", false));
     EXPECT_EQ("string", format_datashape(
                     make_string_dtype(string_encoding_utf_8), "", false));
-    EXPECT_EQ("string('A')", format_datashape(
+    EXPECT_EQ("string", format_datashape(
                     make_string_dtype(string_encoding_ascii), "", false));
-    EXPECT_EQ("string('U16')", format_datashape(
+    EXPECT_EQ("string", format_datashape(
                     make_string_dtype(string_encoding_utf_16), "", false));
-    EXPECT_EQ("string('U32')", format_datashape(
+    EXPECT_EQ("string", format_datashape(
                     make_string_dtype(string_encoding_utf_32), "", false));
-    EXPECT_EQ("string('ucs2')", format_datashape(
+    EXPECT_EQ("string", format_datashape(
                     make_string_dtype(string_encoding_ucs_2), "", false));
-    EXPECT_EQ("string(1)", format_datashape(
+    EXPECT_EQ("string", format_datashape(
                     make_fixedstring_dtype(1, string_encoding_utf_8), "", false));
-    EXPECT_EQ("string(10)", format_datashape(
+    EXPECT_EQ("string", format_datashape(
                     make_fixedstring_dtype(10, string_encoding_utf_8), "", false));
-    EXPECT_EQ("string(10,'A')", format_datashape(
+    EXPECT_EQ("string", format_datashape(
                     make_fixedstring_dtype(10, string_encoding_ascii), "", false));
-    EXPECT_EQ("string(10,'U16')", format_datashape(
+    EXPECT_EQ("string", format_datashape(
                     make_fixedstring_dtype(10, string_encoding_utf_16), "", false));
-    EXPECT_EQ("string(10,'U32')", format_datashape(
+    EXPECT_EQ("string", format_datashape(
                     make_fixedstring_dtype(10, string_encoding_utf_32), "", false));
-    EXPECT_EQ("string(10,'ucs2')", format_datashape(
+    EXPECT_EQ("string", format_datashape(
                     make_fixedstring_dtype(10, string_encoding_ucs_2), "", false));
 }
 
