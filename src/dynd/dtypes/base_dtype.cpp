@@ -98,7 +98,9 @@ dtype base_dtype::get_dtype_at_dimension(char **DYND_UNUSED(inout_metadata), siz
     }
 }
 
-void base_dtype::get_shape(size_t ndim, size_t i, intptr_t *out_shape, const char *metadata) const
+void base_dtype::get_shape(size_t DYND_UNUSED(ndim), size_t DYND_UNUSED(i),
+                intptr_t *DYND_UNUSED(out_shape),
+                const char *DYND_UNUSED(metadata)) const
 {
     // Default to scalar behavior
     stringstream ss;

@@ -72,7 +72,8 @@ dtype bytes_dtype::get_canonical_dtype() const
 }
 
 
-void bytes_dtype::get_shape(size_t ndim, size_t i, intptr_t *out_shape, const char *metadata) const
+void bytes_dtype::get_shape(size_t ndim, size_t i,
+                intptr_t *out_shape, const char *DYND_UNUSED(metadata)) const
 {
     out_shape[i] = -1;
     if (i+1 < ndim) {
