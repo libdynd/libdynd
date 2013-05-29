@@ -57,6 +57,18 @@ void convert_dtype::print_dtype(std::ostream& o) const
     o << ">";
 }
 
+void convert_dtype::get_shape(size_t ndim, size_t i, intptr_t *out_shape, const char *metadata) const
+{
+    // Get the shape from the operand type
+    if (!m_operand_dtype.is_builtin()) {
+        m_operand_dtype.extended()->get_shape(ndim, i, out_shape, metadata);
+    } else {
+        stringstream ss;
+        ss << "requested too many dimensions from type " << dtype(this, true);
+        throw runtime_error(ss.str());
+    }
+}
+
 bool convert_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const
 {
     // Treat this dtype as the value dtype for whether assignment is always lossless
