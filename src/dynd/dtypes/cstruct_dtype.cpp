@@ -305,30 +305,6 @@ dtype cstruct_dtype::at_single(intptr_t i0,
     return m_field_types[i0];
 }
 
-void cstruct_dtype::get_shape(size_t i, intptr_t *out_shape) const
-{
-    // Adjust the current shape if necessary
-    switch (out_shape[i]) {
-        case shape_signal_uninitialized:
-            out_shape[i] = m_field_types.size();
-            break;
-        case shape_signal_varying:
-            break;
-        default:
-            if ((size_t)out_shape[i] != m_field_types.size()) {
-                out_shape[i] = shape_signal_varying;
-            }
-            break;
-    }
-
-    // Process the later shape values
-    for (size_t j = 0; j < m_field_types.size(); ++j) {
-        if (!m_field_types[j].is_builtin()) {
-            m_field_types[j].extended()->get_shape(i+1, out_shape);
-        }
-    }
-}
-
 bool cstruct_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const
 {
     if (dst_dt.extended() == this) {

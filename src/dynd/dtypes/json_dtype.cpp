@@ -94,16 +94,6 @@ dtype json_dtype::get_canonical_dtype() const
 }
 
 
-void json_dtype::get_shape(size_t DYND_UNUSED(i),
-                intptr_t *DYND_UNUSED(out_shape)) const
-{
-}
-
-void json_dtype::get_shape(size_t DYND_UNUSED(i),
-                intptr_t *DYND_UNUSED(out_shape), const char *DYND_UNUSED(metadata)) const
-{
-}
-
 bool json_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const
 {
     if (dst_dt.extended() == this) {

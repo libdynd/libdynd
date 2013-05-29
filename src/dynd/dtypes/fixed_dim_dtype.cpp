@@ -274,23 +274,19 @@ intptr_t fixed_dim_dtype::get_dim_size(const char *DYND_UNUSED(metadata), const 
     return m_dim_size;
 }
 
-void fixed_dim_dtype::get_shape(size_t i, intptr_t *out_shape) const
+void fixed_dim_dtype::get_shape(size_t ndim, size_t i, intptr_t *out_shape, const char *metadata) const
 {
     out_shape[i] = m_dim_size;
 
     // Process the later shape values
-    if (!m_element_dtype.is_builtin()) {
-        m_element_dtype.extended()->get_shape(i+1, out_shape);
-    }
-}
-
-void fixed_dim_dtype::get_shape(size_t i, intptr_t *out_shape, const char *metadata) const
-{
-    out_shape[i] = m_dim_size;
-
-    // Process the later shape values
-    if (!m_element_dtype.is_builtin()) {
-        m_element_dtype.extended()->get_shape(i+1, out_shape, metadata);
+    if (i+1 < ndim) {
+        if (!m_element_dtype.is_builtin()) {
+            m_element_dtype.extended()->get_shape(ndim, i+1, out_shape, metadata);
+        } else {
+            stringstream ss;
+            ss << "requested too many dimensions from type " << dtype(this, true);
+            throw runtime_error(ss.str());
+        }
     }
 }
 

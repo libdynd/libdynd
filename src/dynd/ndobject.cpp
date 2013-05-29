@@ -1176,7 +1176,7 @@ ndobject dynd::eval_raw_copy(const dtype& dt, const char *metadata, const char *
     ndobject result;
     if (undim > 0) {
         dimvector shape(undim);
-        dt.extended()->get_shape(0, shape.get(), metadata);
+        dt.extended()->get_shape(undim, 0, shape.get(), metadata);
         result.set(make_ndobject_memory_block(cdt, undim, shape.get()));
         // Reorder strides of output strided dimensions in a KEEPORDER fashion
         if (dt.get_type_id() == strided_dim_type_id) {

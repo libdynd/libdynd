@@ -147,38 +147,13 @@ intptr_t expr_dtype::apply_linear_index(size_t nindices, const irange *indices, 
     }
 }
 
-void expr_dtype::get_shape(size_t i, intptr_t *out_shape) const
+void expr_dtype::get_shape(size_t ndim, size_t i, intptr_t *out_shape, const char *metadata) const
 {
     size_t undim = get_undim();
     // Initialize the shape to all ones
-    out_shape += i;
+    dimvector bcast_shape(undim);
     for (size_t j = 0; j != undim; ++j) {
-        out_shape[j] = 1;
-    }
-
-    // Get each operand shape, and broadcast them together
-    dimvector shape(undim);
-    const cstruct_dtype *fsd = static_cast<const cstruct_dtype *>(m_operand_dtype.extended());
-    size_t field_count = fsd->get_field_count();
-    for (size_t fi = 0; fi != field_count; ++fi) {
-        const dtype& dt = fsd->get_field_types()[fi];
-        size_t field_undim = dt.get_undim();
-        if (field_undim > 0) {
-            dt.extended()->get_shape(0, shape.get());
-            incremental_broadcast(undim, out_shape, field_undim, shape.get());
-        }
-    }
-}
-
-void expr_dtype::get_shape(size_t i,
-                intptr_t *out_shape,
-                const char *metadata) const
-{
-    size_t undim = get_undim();
-    // Initialize the shape to all ones
-    out_shape += i;
-    for (size_t j = 0; j != undim; ++j) {
-        out_shape[j] = 1;
+        bcast_shape[j] = 1;
     }
 
     // Get each operand shape, and broadcast them together
@@ -190,8 +165,24 @@ void expr_dtype::get_shape(size_t i,
         const dtype& dt = fsd->get_field_types()[fi];
         size_t field_undim = dt.get_undim();
         if (field_undim > 0) {
-            dt.extended()->get_shape(0, shape.get(), metadata + metadata_offsets[fi]);
-            incremental_broadcast(undim, out_shape, field_undim, shape.get());
+            dt.extended()->get_shape(field_undim, 0, shape.get(),
+                            metadata ? (metadata + metadata_offsets[fi]) : NULL);
+            incremental_broadcast(undim, bcast_shape.get(), field_undim, shape.get());
+        }
+    }
+
+    // Copy this shape to the output
+    memcpy(out_shape + i, bcast_shape.get(), min(undim, ndim - i) * sizeof(intptr_t));
+
+    // If more shape is requested, get it from the value dtype
+    if (ndim - i > undim) {
+        const dtype& dt = m_value_dtype.get_udtype();
+        if (!dt.is_builtin()) {
+            dt.extended()->get_shape(ndim, i + undim, out_shape, NULL);
+        } else {
+            stringstream ss;
+            ss << "requested too many dimensions from type " << dtype(this, true);
+            throw runtime_error(ss.str());
         }
     }
 }

@@ -45,7 +45,7 @@ public:
 
     void print_dtype(std::ostream& o) const;
 
-    void get_shape(size_t i, intptr_t *out_shape) const;
+    void get_shape(size_t ndim, size_t i, intptr_t *out_shape, const char *metadata) const;
 
     size_t get_category_count() const {
         return (size_t)reinterpret_cast<const strided_dim_dtype_metadata *>(m_categories.get_ndo_meta())->size;

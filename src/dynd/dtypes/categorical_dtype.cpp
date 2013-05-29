@@ -320,10 +320,15 @@ void categorical_dtype::print_dtype(std::ostream& o) const
     o << "]>";
 }
 
-void dynd::categorical_dtype::get_shape(size_t i, intptr_t *out_shape) const
+void dynd::categorical_dtype::get_shape(size_t ndim, size_t i, intptr_t *out_shape, const char *DYND_UNUSED(metadata)) const
 {
-    if (!m_category_dtype.is_builtin()) {
-        m_category_dtype.extended()->get_shape(i, out_shape);
+    const dtype& cd = get_category_dtype();
+    if (!cd.is_builtin()) {
+        cd.extended()->get_shape(ndim, i, out_shape, get_category_metadata());
+    } else {
+        stringstream ss;
+        ss << "requested too many dimensions from type " << dtype(this, true);
+        throw runtime_error(ss.str());
     }
 }
 

@@ -367,25 +367,20 @@ intptr_t var_dim_dtype::get_dim_size(const char *DYND_UNUSED(metadata), const ch
     }
 }
 
-void var_dim_dtype::get_shape(size_t i, intptr_t *out_shape) const
+void var_dim_dtype::get_shape(size_t ndim, size_t i, intptr_t *out_shape, const char *metadata) const
 {
-    // Adjust the current shape if necessary
-    out_shape[i] = shape_signal_varying;
+    out_shape[i] = -1;
 
     // Process the later shape values
-    if (!m_element_dtype.is_builtin()) {
-        m_element_dtype.extended()->get_shape(i+1, out_shape);
-    }
-}
-
-void var_dim_dtype::get_shape(size_t i, intptr_t *out_shape, const char *metadata) const
-{
-    // Adjust the current shape if necessary
-    out_shape[i] = shape_signal_varying;
-
-    // Process the later shape values
-    if (!m_element_dtype.is_builtin()) {
-        m_element_dtype.extended()->get_shape(i+1, out_shape, metadata + sizeof(var_dim_dtype_metadata));
+    if (i+1 < ndim) {
+        if (!m_element_dtype.is_builtin()) {
+            m_element_dtype.extended()->get_shape(ndim, i+1, out_shape,
+                            metadata ? (metadata + sizeof(var_dim_dtype_metadata)) : NULL);
+        } else {
+            stringstream ss;
+            ss << "requested too many dimensions from type " << dtype(this, true);
+            throw runtime_error(ss.str());
+        }
     }
 }
 

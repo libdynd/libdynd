@@ -257,8 +257,8 @@ public:
         return result;
     }
     inline void get_shape(intptr_t *out_shape) const {
-        if (!get_ndo()->is_builtin_dtype()) {
-            get_ndo()->m_dtype->get_shape(0, out_shape, get_ndo_meta());
+        if (!get_ndo()->is_builtin_dtype() && get_ndo()->m_dtype->get_undim() > 0) {
+            get_ndo()->m_dtype->get_shape(get_ndo()->m_dtype->get_undim(), 0, out_shape, get_ndo_meta());
         }
     }
 

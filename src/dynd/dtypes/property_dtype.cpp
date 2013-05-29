@@ -106,10 +106,14 @@ void property_dtype::print_dtype(std::ostream& o) const
     }
 }
 
-void property_dtype::get_shape(size_t i, intptr_t *out_shape) const
+void property_dtype::get_shape(size_t ndim, size_t i, intptr_t *out_shape, const char *DYND_UNUSED(metadata)) const
 {
     if (!m_value_dtype.is_builtin()) {
-        m_value_dtype.extended()->get_shape(i, out_shape);
+        m_value_dtype.extended()->get_shape(ndim, i, out_shape, NULL);
+    } else {
+        stringstream ss;
+        ss << "requested too many dimensions from type " << m_value_dtype;
+        throw runtime_error(ss.str());
     }
 }
 

@@ -187,17 +187,15 @@ dtype pointer_dtype::get_dtype_at_dimension(char **inout_metadata, size_t i, siz
     }
 }
 
-void pointer_dtype::get_shape(size_t i, intptr_t *out_shape) const
+void pointer_dtype::get_shape(size_t ndim, size_t i, intptr_t *out_shape, const char *metadata) const
 {
     if (!m_target_dtype.is_builtin()) {
-        m_target_dtype.extended()->get_shape(i, out_shape);
-    }
-}
-
-void pointer_dtype::get_shape(size_t i, intptr_t *out_shape, const char *metadata) const
-{
-    if (get_undim() > 0) {
-        m_target_dtype.extended()->get_shape(i, out_shape, metadata + sizeof(pointer_dtype_metadata));
+        m_target_dtype.extended()->get_shape(ndim, i, out_shape,
+                        metadata ? (metadata + sizeof(pointer_dtype_metadata)) : NULL);
+    } else {
+        stringstream ss;
+        ss << "requested too many dimensions from type " << m_target_dtype;
+        throw runtime_error(ss.str());
     }
 }
 

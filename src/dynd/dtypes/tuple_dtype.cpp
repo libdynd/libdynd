@@ -156,30 +156,6 @@ void dynd::tuple_dtype::print_dtype(std::ostream& o) const
     }
 }
 
-void dynd::tuple_dtype::get_shape(size_t i, intptr_t *out_shape) const
-{
-    // Adjust the current shape if necessary
-    switch (out_shape[i]) {
-        case shape_signal_uninitialized:
-            out_shape[i] = m_fields.size();
-            break;
-        case shape_signal_varying:
-            break;
-        default:
-            if ((size_t)out_shape[i] != m_fields.size()) {
-                out_shape[i] = shape_signal_varying;
-            }
-            break;
-    }
-
-    // Process the later shape values
-    for (size_t j = 0; j < m_fields.size(); ++j) {
-        if (!m_fields[j].is_builtin()) {
-            m_fields[j].extended()->get_shape(i+1, out_shape);
-        }
-    }
-}
-
 bool dynd::tuple_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const
 {
     if (dst_dt.extended() == this) {

@@ -24,16 +24,6 @@ void void_pointer_dtype::print_dtype(std::ostream& o) const {
     o << "pointer<void>";
 }
 
-void void_pointer_dtype::get_shape(size_t DYND_UNUSED(i),
-                intptr_t *DYND_UNUSED(out_shape)) const
-{
-}
-
-void void_pointer_dtype::get_shape(size_t DYND_UNUSED(i),
-                intptr_t *DYND_UNUSED(out_shape), const char *DYND_UNUSED(metadata)) const
-{
-}
-
 bool void_pointer_dtype::is_lossless_assignment(const dtype& DYND_UNUSED(dst_dt), const dtype& DYND_UNUSED(src_dt)) const
 {
     return false;

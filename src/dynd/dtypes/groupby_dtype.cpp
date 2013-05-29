@@ -74,25 +74,23 @@ void groupby_dtype::print_dtype(std::ostream& o) const
     o << ", by=" << get_by_values_dtype() << ">";
 }
 
-void groupby_dtype::get_shape(size_t i, intptr_t *out_shape) const
-{
-    if (!m_value_dtype.is_builtin()) {
-        m_value_dtype.extended()->get_shape(i + 2, out_shape);
-    }
-}
-
-void groupby_dtype::get_shape(size_t i, intptr_t *out_shape, const char *metadata) const
+void groupby_dtype::get_shape(size_t ndim, size_t i,
+                intptr_t *out_shape, const char *metadata) const
 {
     // The first dimension is the groups, the second variable-sized
-    out_shape[i] = reinterpret_cast<const categorical_dtype *>(m_groups_dtype.extended())->get_category_count();
-    out_shape[i+1] = -1;
+    out_shape[i] = reinterpret_cast<const categorical_dtype *>(
+                    m_groups_dtype.extended())->get_category_count();
+    if (i + 1 < ndim) {
+        out_shape[i+1] = -1;
+    }
+
     // Get the rest of the shape if necessary
-    if (get_undim() > 2) {
+    if (i + 2 < ndim) {
         // Get the dtype for a single data_value element, and its corresponding metadata
-        dtype data_values_dtype = m_operand_dtype.at_single(0, &metadata);
-        data_values_dtype.at_single(0, &metadata);
+        dtype data_values_dtype = m_operand_dtype.at_single(0, metadata ? &metadata : NULL);
+        data_values_dtype = data_values_dtype.at_single(0, metadata ? &metadata : NULL);
         // Use this to get the rest of the shape
-        data_values_dtype.extended()->get_shape(i + 2, out_shape, metadata);
+        data_values_dtype.extended()->get_shape(ndim, i + 2, out_shape, metadata);
     }
 }
 

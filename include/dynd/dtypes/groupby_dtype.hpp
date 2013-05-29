@@ -91,8 +91,7 @@ public:
         return reinterpret_cast<pointer_dtype_metadata *>(metadata);
     }
 
-    void get_shape(size_t i, intptr_t *out_shape) const;
-    void get_shape(size_t i, intptr_t *out_shape, const char *metadata) const;
+    void get_shape(size_t ndim, size_t i, intptr_t *out_shape, const char *metadata) const;
 
     bool is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const;
 

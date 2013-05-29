@@ -6,12 +6,47 @@
 #include <dynd/dtype.hpp>
 #include <dynd/dtypes/base_struct_dtype.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
+#include <dynd/shortvector.hpp>
 
 using namespace std;
 using namespace dynd;
 
 
 base_struct_dtype::~base_struct_dtype() {
+}
+
+void base_struct_dtype::get_shape(size_t ndim, size_t i, intptr_t *out_shape, const char *metadata) const
+{
+    out_shape[i] = m_field_count;
+    if (i < ndim-1) {
+        const dtype *field_types = get_field_types();
+        const size_t *metadata_offsets = get_metadata_offsets();
+        dimvector tmpshape(ndim);
+        // Accumulate the shape from all the field shapes
+        for (size_t fi = 0; fi != m_field_count; ++fi) {
+            const dtype& ft = field_types[i];
+            if (!ft.is_builtin()) {
+                ft.extended()->get_shape(ndim, i+1, tmpshape.get(),
+                                metadata ? (metadata + metadata_offsets[fi]) : NULL);
+            } else {
+                stringstream ss;
+                ss << "requested too many dimensions from type " << ft;
+                throw runtime_error(ss.str());
+            }
+            if (fi == 0) {
+                // Copy the shape from the first field
+                memcpy(out_shape + i + 1, tmpshape.get() + i + 1, (ndim - i - 1) * sizeof(intptr_t));
+            } else {
+                // Merge the shape from the rest
+                for (size_t k = i + 1; k <ndim; ++k) {
+                    // If we see different sizes, make the output -1
+                    if (out_shape[k] != -1 && out_shape[k] != tmpshape[k]) {
+                        out_shape[k] = -1;
+                    }
+                }
+            }
+        }
+    }
 }
 
 size_t base_struct_dtype::get_elwise_property_index(const std::string& property_name) const

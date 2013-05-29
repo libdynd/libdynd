@@ -98,15 +98,12 @@ dtype base_dtype::get_dtype_at_dimension(char **DYND_UNUSED(inout_metadata), siz
     }
 }
 
-void base_dtype::get_shape(size_t DYND_UNUSED(i), intptr_t *DYND_UNUSED(out_shape)) const
+void base_dtype::get_shape(size_t ndim, size_t i, intptr_t *out_shape, const char *metadata) const
 {
     // Default to scalar behavior
-}
-
-void base_dtype::get_shape(size_t DYND_UNUSED(i), intptr_t *DYND_UNUSED(out_shape),
-                    const char *DYND_UNUSED(metadata)) const
-{
-    // Default to scalar behavior
+    stringstream ss;
+    ss << "requested too many dimensions from type " << dtype(this, true);
+    throw runtime_error(ss.str());
 }
 
 void base_dtype::get_strides(size_t DYND_UNUSED(i),

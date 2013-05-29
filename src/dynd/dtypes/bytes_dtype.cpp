@@ -72,15 +72,14 @@ dtype bytes_dtype::get_canonical_dtype() const
 }
 
 
-void bytes_dtype::get_shape(size_t DYND_UNUSED(i),
-                intptr_t *DYND_UNUSED(out_shape)) const
+void bytes_dtype::get_shape(size_t ndim, size_t i, intptr_t *out_shape, const char *metadata) const
 {
-}
-
-void bytes_dtype::get_shape(size_t DYND_UNUSED(i),
-                intptr_t *DYND_UNUSED(out_shape),
-                const char *DYND_UNUSED(metadata)) const
-{
+    out_shape[i] = -1;
+    if (i+1 < ndim) {
+        stringstream ss;
+        ss << "requested too many dimensions from type " << dtype(this, true);
+        throw runtime_error(ss.str());
+    }
 }
 
 bool bytes_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const

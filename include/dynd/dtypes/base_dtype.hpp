@@ -325,21 +325,16 @@ public:
     virtual dtype get_dtype_at_dimension(char **inout_metadata, size_t i, size_t total_ndim = 0) const;
 
     /**
-     * Retrieves the shape of the dtype, expanding the vector as needed. For dimensions with
-     * unknown or variable shape, -1 is returned.
-     *
-     * The output must be pre-initialized to have get_undim() elements.
-     */
-    virtual void get_shape(size_t i, intptr_t *out_shape) const;
-
-    /**
      * Retrieves the shape of the dtype ndobject instance,
-     expanding the vector as needed. For dimensions with
-     * variable shape, -1 is returned.
+     * populating up to 'ndim' elements of out_shape. For dimensions with
+     * variable or unknown shape, -1 is returned.
      *
-     * The output must be pre-initialized to have get_undim() elements.
+     * The 'metadata' may be NULL, in which case -1 should be used when
+     * the shape cannot be determined.
+     *
+     * The output must be pre-initialized to have 'ndim' elements.
      */
-    virtual void get_shape(size_t i, intptr_t *out_shape, const char *metadata) const;
+    virtual void get_shape(size_t ndim, size_t i, intptr_t *out_shape, const char *metadata) const;
 
     /**
      * Retrieves the strides of the dtype ndobject instance,

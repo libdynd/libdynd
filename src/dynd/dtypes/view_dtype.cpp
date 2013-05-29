@@ -11,7 +11,7 @@
 using namespace std;
 using namespace dynd;
 
-dynd::view_dtype::view_dtype(const dtype& value_dtype, const dtype& operand_dtype)
+view_dtype::view_dtype(const dtype& value_dtype, const dtype& operand_dtype)
     : base_expression_dtype(view_type_id, expression_kind, operand_dtype.get_data_size(),
                     operand_dtype.get_alignment(),
                     inherited_flags(value_dtype.get_flags(), operand_dtype.get_flags()),
@@ -32,7 +32,7 @@ view_dtype::~view_dtype()
 {
 }
 
-void dynd::view_dtype::print_data(std::ostream& o, const char *metadata, const char *data) const
+void view_dtype::print_data(std::ostream& o, const char *metadata, const char *data) const
 {
     // Allow calling print_data in the special case that the view
     // is being used just to align the data
@@ -74,7 +74,7 @@ void dynd::view_dtype::print_data(std::ostream& o, const char *metadata, const c
     throw runtime_error("internal error: view_dtype::print_data isn't supposed to be called");
 }
 
-void dynd::view_dtype::print_dtype(std::ostream& o) const
+void view_dtype::print_dtype(std::ostream& o) const
 {
     // Special case printing of alignment to make it more human-readable
     if (m_value_dtype.get_alignment() != 1 && m_operand_dtype.get_type_id() == fixedbytes_type_id &&
@@ -85,14 +85,18 @@ void dynd::view_dtype::print_dtype(std::ostream& o) const
     }
 }
 
-void dynd::view_dtype::get_shape(size_t i, intptr_t *out_shape) const
+void view_dtype::get_shape(size_t ndim, size_t i, intptr_t *out_shape, const char *metadata) const
 {
     if (!m_value_dtype.is_builtin()) {
-        m_value_dtype.extended()->get_shape(i, out_shape);
+        m_value_dtype.extended()->get_shape(ndim, i, out_shape, NULL);
+    } else {
+        stringstream ss;
+        ss << "requested too many dimensions from type " << m_value_dtype;
+        throw runtime_error(ss.str());
     }
 }
 
-bool dynd::view_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const
+bool view_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const
 {
     // Treat this dtype as the value dtype for whether assignment is always lossless
     if (src_dt.extended() == this) {
@@ -102,7 +106,7 @@ bool dynd::view_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& 
     }
 }
 
-bool dynd::view_dtype::operator==(const base_dtype& rhs) const
+bool view_dtype::operator==(const base_dtype& rhs) const
 {
     if (this == &rhs) {
         return true;
@@ -114,7 +118,7 @@ bool dynd::view_dtype::operator==(const base_dtype& rhs) const
     }
 }
 
-dtype dynd::view_dtype::with_replaced_storage_dtype(const dtype& replacement_dtype) const
+dtype view_dtype::with_replaced_storage_dtype(const dtype& replacement_dtype) const
 {
     if (m_operand_dtype.get_kind() == expression_kind) {
         return dtype(new view_dtype(m_value_dtype,

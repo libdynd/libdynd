@@ -127,14 +127,14 @@ dtype string_dtype::get_canonical_dtype() const
     return dtype(this, true);
 }
 
-void string_dtype::get_shape(size_t DYND_UNUSED(i),
-                intptr_t *DYND_UNUSED(out_shape)) const
+void string_dtype::get_shape(size_t ndim, size_t i, intptr_t *out_shape, const char *DYND_UNUSED(metadata)) const
 {
-}
-
-void string_dtype::get_shape(size_t DYND_UNUSED(i),
-                intptr_t *DYND_UNUSED(out_shape), const char *DYND_UNUSED(metadata)) const
-{
+    out_shape[i] = -1;
+    if (i+1 < ndim) {
+        stringstream ss;
+        ss << "requested too many dimensions from type " << dtype(this, true);
+        throw runtime_error(ss.str());
+    }
 }
 
 bool string_dtype::is_lossless_assignment(

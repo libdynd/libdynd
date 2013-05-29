@@ -44,7 +44,7 @@ class ndobject_iter<1, 0> {
             m_iterindex.init(m_iter_ndim);
             memset(m_iterindex.get(), 0, sizeof(intptr_t) * m_iter_ndim);
             m_itershape.init(m_iter_ndim);
-            m_array_dtype.extended()->get_shape(0, m_itershape.get(), metadata0);
+            m_array_dtype.extended()->get_shape(m_iter_ndim, 0, m_itershape.get(), metadata0);
 
             size_t iterdata_size = m_array_dtype.extended()->get_iterdata_size(m_iter_ndim);
             m_iterdata = reinterpret_cast<iterdata_common *>(malloc(iterdata_size));
@@ -136,7 +136,7 @@ class ndobject_iter<0, 1> {
             m_iterindex.init(m_iter_ndim);
             memset(m_iterindex.get(), 0, sizeof(intptr_t) * m_iter_ndim);
             m_itershape.init(m_iter_ndim);
-            m_array_dtype.extended()->get_shape(0, m_itershape.get(), metadata0);
+            m_array_dtype.extended()->get_shape(m_iter_ndim, 0, m_itershape.get(), metadata0);
 
             size_t iterdata_size = m_array_dtype.extended()->get_iterdata_size(m_iter_ndim);
             m_iterdata = reinterpret_cast<iterdata_common *>(malloc(iterdata_size));
@@ -233,14 +233,14 @@ class ndobject_iter<1, 1> {
         m_iter_ndim[0] = m_array_dtype[0].get_undim();
         m_itershape.init(m_iter_ndim[0]);
         if (m_iter_ndim[0] > 0) {
-            m_array_dtype[0].extended()->get_shape(0, m_itershape.get(), metadata0);
+            m_array_dtype[0].extended()->get_shape(m_iter_ndim[0], 0, m_itershape.get(), metadata0);
         }
         // The source shape
         dimvector src_shape;
         m_iter_ndim[1] = m_array_dtype[1].get_undim();
         src_shape.init(m_iter_ndim[1]);
         if (m_iter_ndim[1] > 0) {
-            m_array_dtype[1].extended()->get_shape(0, src_shape.get(), metadata1);
+            m_array_dtype[1].extended()->get_shape(m_iter_ndim[1], 0, src_shape.get(), metadata1);
         }
         // Check that the source shape broadcasts ok
         if (!shape_can_broadcast(m_iter_ndim[0], m_itershape.get(),

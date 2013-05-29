@@ -51,6 +51,8 @@ public:
      */
     virtual intptr_t get_field_index(const std::string& field_name) const = 0;
 
+    void get_shape(size_t ndim, size_t i, intptr_t *out_shape, const char *metadata) const;
+
     size_t get_elwise_property_index(const std::string& property_name) const;
     dtype get_elwise_property_dtype(size_t elwise_property_index,
                     bool& out_readable, bool& out_writable) const;
