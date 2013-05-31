@@ -376,7 +376,7 @@ void dynd::print_shape(std::ostream& o, size_t ndim, const intptr_t *shape)
         if (size >= 0) {
             o << size;
         } else {
-            o << "Var";
+            o << "var";
         }
         if (i != ndim - 1) {
             o << ", ";
