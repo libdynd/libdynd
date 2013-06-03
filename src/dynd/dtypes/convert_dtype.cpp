@@ -11,7 +11,7 @@ using namespace dynd;
 
 convert_dtype::convert_dtype(const dtype& value_dtype, const dtype& operand_dtype, assign_error_mode errmode)
     : base_expression_dtype(convert_type_id, expression_kind, operand_dtype.get_data_size(),
-                        operand_dtype.get_alignment(),
+                        operand_dtype.get_data_alignment(),
                         inherited_flags(value_dtype.get_flags(), operand_dtype.get_flags()),
                         operand_dtype.get_metadata_size(),
                         value_dtype.get_undim()),

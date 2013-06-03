@@ -371,7 +371,7 @@ static void parse_var_dim_json(const dtype& dt, const char *metadata, char *out_
     memory_block_pod_allocator_api *allocator = get_memory_block_pod_allocator_api(md->blockref);
     intptr_t size = 0, allocated_size = 8;
     allocator->allocate(md->blockref, allocated_size * stride,
-                    element_dtype.get_alignment(), &out->begin, &out_end);
+                    element_dtype.get_data_alignment(), &out->begin, &out_end);
 
     if (!parse_token(begin, end, "[")) {
         throw json_parse_error(begin, "expected array starting with '['", dt);

@@ -55,7 +55,7 @@ TEST(CStructType, Align) {
             " f10: int8; f64_:  float64;  f11: int8; cf32_: cfloat32;"
             " f12: int8; cf64_: cfloat64; f13: int8}");
     EXPECT_EQ(sizeof(align_test_struct), asdt.get_data_size());
-    EXPECT_EQ((size_t)scalar_align_of<align_test_struct>::value, asdt.get_alignment());
+    EXPECT_EQ((size_t)scalar_align_of<align_test_struct>::value, asdt.get_data_alignment());
     const cstruct_dtype *cd = static_cast<const cstruct_dtype *>(asdt.extended());
     const size_t *data_offsets = cd->get_data_offsets();
     align_test_struct ats;
@@ -85,7 +85,7 @@ TEST(CStructDType, CreateOneField) {
     EXPECT_EQ(cstruct_type_id, dt.get_type_id());
     EXPECT_EQ(4u, dt.get_data_size());
     EXPECT_EQ(4u, dt.extended()->get_default_data_size(0, NULL));
-    EXPECT_EQ(make_dtype<int32_t>().get_alignment(), dt.get_alignment());
+    EXPECT_EQ(make_dtype<int32_t>().get_data_alignment(), dt.get_data_alignment());
     EXPECT_TRUE(dt.is_pod());
     tdt = static_cast<const cstruct_dtype *>(dt.extended());
     EXPECT_EQ(1u, tdt->get_field_count());
@@ -108,7 +108,7 @@ TEST(CStructDType, CreateTwoField) {
     EXPECT_EQ(cstruct_type_id, dt.get_type_id());
     EXPECT_EQ(sizeof(two_field_struct), dt.get_data_size());
     EXPECT_EQ(sizeof(two_field_struct), dt.extended()->get_default_data_size(0, NULL));
-    EXPECT_EQ(make_dtype<int64_t>().get_alignment(), dt.get_alignment());
+    EXPECT_EQ(make_dtype<int64_t>().get_data_alignment(), dt.get_data_alignment());
     EXPECT_TRUE(dt.is_pod());
     tdt = static_cast<const cstruct_dtype *>(dt.extended());
     EXPECT_EQ(2u, tdt->get_field_count());
@@ -138,7 +138,7 @@ TEST(CStructDType, CreateThreeField) {
     EXPECT_EQ(cstruct_type_id, dt.get_type_id());
     EXPECT_EQ(sizeof(three_field_struct), dt.get_data_size());
     EXPECT_EQ(sizeof(three_field_struct), dt.extended()->get_default_data_size(0, NULL));
-    EXPECT_EQ(d1.get_alignment(), dt.get_alignment());
+    EXPECT_EQ(d1.get_data_alignment(), dt.get_data_alignment());
     EXPECT_TRUE(dt.is_pod());
     tdt = static_cast<const cstruct_dtype *>(dt.extended());
     EXPECT_EQ(3u, tdt->get_field_count());

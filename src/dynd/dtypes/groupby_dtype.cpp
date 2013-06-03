@@ -192,7 +192,7 @@ namespace {
             memory_block_pod_allocator_api *allocator = get_memory_block_pod_allocator_api(vad_md->blockref);
             char *out_begin = NULL, *out_end = NULL;
             allocator->allocate(vad_md->blockref, by_values_size * vad_stride,
-                            vad->get_element_dtype().get_alignment(), &out_begin, &out_end);
+                            vad->get_element_dtype().get_data_alignment(), &out_begin, &out_end);
             vector<char *> cat_pointers(cat_sizes.size());
             for (size_t i = 0, i_end = cat_pointers.size(); i != i_end; ++i) {
                 cat_pointers[i] = out_begin;

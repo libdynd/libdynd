@@ -131,7 +131,7 @@ ndarray_node_ptr dynd::eval::evaluate_groupby_elwise_reduce(ndarray_node *node, 
     char *result_originptr = NULL;
     intptr_t result_stride = result_dt.get_data_size();
     memory_block_ptr result_memblock = make_fixed_size_pod_memory_block(result_stride * num_groups,
-                    result_dt.get_alignment(), &result_originptr,
+                    result_dt.get_data_alignment(), &result_originptr,
                     NULL, NULL);
     ndarray_node_ptr result;
     result = make_strided_ndarray_node(result_dt, 1,

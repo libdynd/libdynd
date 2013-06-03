@@ -81,7 +81,7 @@ memory_block_ptr dynd::make_ndobject_memory_block(const dtype& dt, size_t ndim, 
     }
 
     char *data_ptr = NULL;
-    memory_block_ptr result = make_ndobject_memory_block(metadata_size, data_size, dt.get_alignment(), &data_ptr);
+    memory_block_ptr result = make_ndobject_memory_block(metadata_size, data_size, dt.get_data_alignment(), &data_ptr);
 
     if (dt.get_flags()&dtype_flag_zeroinit) {
         memset(data_ptr, 0, data_size);

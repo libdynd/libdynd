@@ -15,7 +15,7 @@ using namespace dynd;
 property_dtype::property_dtype(const dtype& operand_dtype, const std::string& property_name,
                 size_t property_index)
     : base_expression_dtype(property_type_id, expression_kind,
-                    operand_dtype.get_data_size(), operand_dtype.get_alignment(), dtype_flag_none,
+                    operand_dtype.get_data_size(), operand_dtype.get_data_alignment(), dtype_flag_none,
                     operand_dtype.get_metadata_size()),
             m_value_dtype(), m_operand_dtype(operand_dtype),
             m_readable(false), m_writable(false),
@@ -46,7 +46,7 @@ property_dtype::property_dtype(const dtype& operand_dtype, const std::string& pr
 property_dtype::property_dtype(const dtype& value_dtype, const dtype& operand_dtype,
                 const std::string& property_name, size_t property_index)
     : base_expression_dtype(property_type_id, expression_kind,
-                    operand_dtype.get_data_size(), operand_dtype.get_alignment(), dtype_flag_none,
+                    operand_dtype.get_data_size(), operand_dtype.get_data_alignment(), dtype_flag_none,
                     operand_dtype.get_metadata_size()),
             m_value_dtype(value_dtype), m_operand_dtype(operand_dtype),
             m_readable(false), m_writable(false),

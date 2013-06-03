@@ -610,7 +610,7 @@ static size_t make_elwise_strided_or_var_to_var_dimension_expr_kernel_for_N(
     e->dst_memblock = dst_md->blockref;
     e->dst_stride = dst_md->stride;
     e->dst_offset = dst_md->offset;
-    e->dst_target_alignment = dst_vdd->get_data_alignment();
+    e->dst_target_alignment = dst_vdd->get_target_alignment();
     dst_child_metadata = dst_metadata + sizeof(var_dim_dtype_metadata);
     dst_child_dt = dst_vdd->get_element_dtype();
 

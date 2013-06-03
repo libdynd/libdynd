@@ -277,7 +277,7 @@ categorical_dtype::categorical_dtype(const ndobject& categories, bool presorted)
         m_category_int_dtype = make_dtype<uint32_t>();
     }
     m_members.data_size = m_category_int_dtype.get_data_size();
-    m_members.alignment = (uint8_t)m_category_int_dtype.get_alignment();
+    m_members.data_alignment = (uint8_t)m_category_int_dtype.get_data_alignment();
 }
 
 void categorical_dtype::print_data(std::ostream& o, const char *metadata, const char *data) const
@@ -413,7 +413,7 @@ size_t categorical_dtype::make_assignment_kernel(
         if (this == src_dt.extended()) {
             // When assigning identical types, just use a POD copy
             return make_pod_dtype_assignment_kernel(out, offset_out,
-                            get_data_size(), get_alignment(), kernreq);
+                            get_data_size(), get_data_alignment(), kernreq);
         }
         // try to assign from another categorical dtype if it can be mapped
         else if (src_dt.get_type_id() == categorical_type_id) {

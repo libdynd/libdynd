@@ -117,7 +117,7 @@ size_t dynd::make_assignment_kernel(
 
             if (dst_dt.extended() == src_dt.extended()) {
                 return make_pod_dtype_assignment_kernel(out, offset_out,
-                                dst_dt.get_data_size(), dst_dt.get_alignment(),
+                                dst_dt.get_data_size(), dst_dt.get_data_alignment(),
                                 kernreq);
             } else {
                 return make_builtin_dtype_assignment_kernel(out, offset_out,

@@ -13,7 +13,7 @@ using namespace dynd;
 
 view_dtype::view_dtype(const dtype& value_dtype, const dtype& operand_dtype)
     : base_expression_dtype(view_type_id, expression_kind, operand_dtype.get_data_size(),
-                    operand_dtype.get_alignment(),
+                    operand_dtype.get_data_alignment(),
                     inherited_flags(value_dtype.get_flags(), operand_dtype.get_flags()),
                     operand_dtype.get_metadata_size()),
             m_value_dtype(value_dtype), m_operand_dtype(operand_dtype)
@@ -60,10 +60,10 @@ void view_dtype::print_data(std::ostream& o, const char *metadata, const char *d
                 return;
             }
             default: {
-                vector<char> storage(m_value_dtype.get_data_size() + m_value_dtype.get_alignment());
+                vector<char> storage(m_value_dtype.get_data_size() + m_value_dtype.get_data_alignment());
                 char *buffer = &storage[0];
                 // Make the storage aligned as needed
-                buffer = (char *)(((uintptr_t)buffer + (uintptr_t)m_value_dtype.get_alignment() - 1) & (m_value_dtype.get_alignment() - 1));
+                buffer = (char *)(((uintptr_t)buffer + (uintptr_t)m_value_dtype.get_data_alignment() - 1) & (m_value_dtype.get_data_alignment() - 1));
                 memcpy(buffer, data, m_value_dtype.get_data_size());
                 m_value_dtype.print_data(o, metadata, reinterpret_cast<const char *>(&buffer));
                 return;
@@ -77,8 +77,8 @@ void view_dtype::print_data(std::ostream& o, const char *metadata, const char *d
 void view_dtype::print_dtype(std::ostream& o) const
 {
     // Special case printing of alignment to make it more human-readable
-    if (m_value_dtype.get_alignment() != 1 && m_operand_dtype.get_type_id() == fixedbytes_type_id &&
-                    m_operand_dtype.get_alignment() == 1) {
+    if (m_value_dtype.get_data_alignment() != 1 && m_operand_dtype.get_type_id() == fixedbytes_type_id &&
+                    m_operand_dtype.get_data_alignment() == 1) {
         o << "unaligned<" << m_value_dtype << ">";
     } else {
         o << "view<as=" << m_value_dtype << ", original=" << m_operand_dtype << ">";
@@ -142,7 +142,7 @@ size_t view_dtype::make_operand_to_value_assignment_kernel(
 {
     return ::make_pod_dtype_assignment_kernel(out, offset_out,
                     m_value_dtype.get_data_size(),
-                    std::min(m_value_dtype.get_alignment(), m_operand_dtype.get_alignment()),
+                    std::min(m_value_dtype.get_data_alignment(), m_operand_dtype.get_data_alignment()),
                     kernreq);
 }
 
@@ -153,6 +153,6 @@ size_t view_dtype::make_value_to_operand_assignment_kernel(
 {
     return ::make_pod_dtype_assignment_kernel(out, offset_out,
                     m_value_dtype.get_data_size(),
-                    std::min(m_value_dtype.get_alignment(), m_operand_dtype.get_alignment()),
+                    std::min(m_value_dtype.get_data_alignment(), m_operand_dtype.get_data_alignment()),
                     kernreq);
 }

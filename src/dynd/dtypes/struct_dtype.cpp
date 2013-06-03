@@ -25,12 +25,12 @@ struct_dtype::struct_dtype(const std::vector<dtype>& field_types, const std::vec
 
     // Calculate the needed element alignment
     size_t metadata_offset = field_types.size() * sizeof(size_t);
-    m_members.alignment = 1;
+    m_members.data_alignment = 1;
     for (size_t i = 0, i_end = field_types.size(); i != i_end; ++i) {
-        size_t field_alignment = field_types[i].get_alignment();
+        size_t field_alignment = field_types[i].get_data_alignment();
         // Accumulate the biggest field alignment as the dtype alignment
-        if (field_alignment > m_members.alignment) {
-            m_members.alignment = (uint8_t)field_alignment;
+        if (field_alignment > m_members.data_alignment) {
+            m_members.data_alignment = (uint8_t)field_alignment;
         }
         // Inherit any operand flags from the fields
         m_members.flags |= (field_types[i].get_flags()&dtype_flags_operand_inherited);
@@ -63,14 +63,14 @@ size_t struct_dtype::get_default_data_size(size_t ndim, const intptr_t *shape) c
     // Default layout is to match the field order - could reorder the elements for more efficient packing
     size_t s = 0;
     for (size_t i = 0, i_end = m_field_types.size(); i != i_end; ++i) {
-        s = inc_to_alignment(s, m_field_types[i].get_alignment());
+        s = inc_to_alignment(s, m_field_types[i].get_data_alignment());
         if (!m_field_types[i].is_builtin()) {
             s += m_field_types[i].extended()->get_default_data_size(ndim, shape);
         } else {
             s += m_field_types[i].get_data_size();
         }
     }
-    s = inc_to_alignment(s, m_members.alignment);
+    s = inc_to_alignment(s, m_members.data_alignment);
     return s;
 }
 
@@ -316,7 +316,7 @@ bool struct_dtype::operator==(const base_dtype& rhs) const
         return false;
     } else {
         const struct_dtype *dt = static_cast<const struct_dtype*>(&rhs);
-        return get_alignment() == dt->get_alignment() &&
+        return get_data_alignment() == dt->get_data_alignment() &&
                 m_field_types == dt->m_field_types &&
                 m_field_names == dt->m_field_names;
     }
@@ -338,7 +338,7 @@ void struct_dtype::metadata_default_construct(char *metadata, size_t ndim, const
     size_t offs = 0;
     for (size_t i = 0; i < m_field_types.size(); ++i) {
         const dtype& field_dt = m_field_types[i];
-        offs = inc_to_alignment(offs, field_dt.get_alignment());
+        offs = inc_to_alignment(offs, field_dt.get_data_alignment());
         offsets[i] = offs;
         if (!field_dt.is_builtin()) {
             try {

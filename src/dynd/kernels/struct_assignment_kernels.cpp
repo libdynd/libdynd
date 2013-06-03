@@ -84,7 +84,7 @@ size_t dynd::make_struct_identical_assignment_kernel(
     if (val_struct_dt.is_pod()) {
         // For POD structs, get a trivial memory copy kernel
         return make_pod_dtype_assignment_kernel(out, offset_out,
-                        val_struct_dt.get_data_size(), val_struct_dt.get_alignment(),
+                        val_struct_dt.get_data_size(), val_struct_dt.get_data_alignment(),
                         kernreq);
     }
 

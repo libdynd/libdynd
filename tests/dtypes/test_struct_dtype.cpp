@@ -36,7 +36,7 @@ TEST(StructDType, CreateOneField) {
     EXPECT_EQ(struct_type_id, dt.get_type_id());
     EXPECT_EQ(0u, dt.get_data_size()); // No size
     EXPECT_EQ(4u, dt.extended()->get_default_data_size(0, NULL));
-    EXPECT_EQ(4u, dt.get_alignment());
+    EXPECT_EQ(4u, dt.get_data_alignment());
     EXPECT_FALSE(dt.is_pod());
     EXPECT_EQ(0u, (dt.get_flags()&(dtype_flag_blockref|dtype_flag_destructor)));
     tdt = static_cast<const struct_dtype *>(dt.extended());
@@ -59,7 +59,7 @@ TEST(StructDType, CreateTwoField) {
     EXPECT_EQ(struct_type_id, dt.get_type_id());
     EXPECT_EQ(0u, dt.get_data_size());
     EXPECT_EQ(sizeof(two_field_struct), dt.extended()->get_default_data_size(0, NULL));
-    EXPECT_EQ((size_t)scalar_align_of<two_field_struct>::value, dt.get_alignment());
+    EXPECT_EQ((size_t)scalar_align_of<two_field_struct>::value, dt.get_data_alignment());
     EXPECT_FALSE(dt.is_pod());
     EXPECT_EQ(0u, (dt.get_flags()&(dtype_flag_blockref|dtype_flag_destructor)));
     tdt = static_cast<const struct_dtype *>(dt.extended());
@@ -88,7 +88,7 @@ TEST(StructDType, CreateThreeField) {
     EXPECT_EQ(struct_type_id, dt.get_type_id());
     EXPECT_EQ(0u, dt.get_data_size());
     EXPECT_EQ(sizeof(three_field_struct), dt.extended()->get_default_data_size(0, NULL));
-    EXPECT_EQ((size_t)scalar_align_of<two_field_struct>::value, dt.get_alignment());
+    EXPECT_EQ((size_t)scalar_align_of<two_field_struct>::value, dt.get_data_alignment());
     EXPECT_FALSE(dt.is_pod());
     EXPECT_EQ(0u, (dt.get_flags()&(dtype_flag_blockref|dtype_flag_destructor)));
     tdt = static_cast<const struct_dtype *>(dt.extended());

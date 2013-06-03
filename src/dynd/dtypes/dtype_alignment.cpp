@@ -14,7 +14,7 @@ using namespace dynd;
 
 dtype dynd::make_unaligned_dtype(const dtype& value_dtype)
 {
-    if (value_dtype.get_alignment() > 1) {
+    if (value_dtype.get_data_alignment() > 1) {
         // Only do something if it requires alignment
         if (value_dtype.get_kind() != expression_kind) {
             return make_view_dtype(value_dtype, make_fixedbytes_dtype(value_dtype.get_data_size(), 1));

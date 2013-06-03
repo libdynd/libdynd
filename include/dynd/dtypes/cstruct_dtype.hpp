@@ -239,13 +239,13 @@ inline bool is_cstruct_compatible_offsets(size_t field_count,
 {
     size_t offset = 0, max_alignment = 1;
     for (size_t i = 0; i != field_count; ++i) {
-        size_t field_alignment = field_types[i].get_alignment();
+        size_t field_data_alignment = field_types[i].get_data_alignment();
         size_t field_data_size = field_types[i].get_data_size();
-        offset = inc_to_alignment(offset, field_alignment);
+        offset = inc_to_alignment(offset, field_data_alignment);
         if (field_offsets[i] != offset || field_data_size == 0) {
             return false;
         }
-        max_alignment = (field_alignment > max_alignment) ? field_alignment : max_alignment;
+        max_alignment = (field_data_alignment > max_alignment) ? field_data_alignment : max_alignment;
         offset += field_data_size;
     }
     offset = inc_to_alignment(offset, max_alignment);

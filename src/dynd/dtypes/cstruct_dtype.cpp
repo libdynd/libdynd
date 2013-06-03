@@ -26,17 +26,17 @@ cstruct_dtype::cstruct_dtype(size_t field_count, const dtype *field_types,
 {
     // Calculate all the resulting struct data
     size_t metadata_offset = 0, data_offset = 0;
-    m_members.alignment = 1;
+    m_members.data_alignment = 1;
     for (size_t i = 0; i != field_count; ++i) {
-        size_t field_alignment = field_types[i].get_alignment();
+        size_t field_alignment = field_types[i].get_data_alignment();
         // Accumulate the biggest field alignment as the dtype alignment
-        if (field_alignment > m_members.alignment) {
-            m_members.alignment = (uint8_t)field_alignment;
+        if (field_alignment > m_members.data_alignment) {
+            m_members.data_alignment = (uint8_t)field_alignment;
         }
         // Inherit any operand flags from the fields
         m_members.flags |= (field_types[i].get_flags()&dtype_flags_operand_inherited);
         // Calculate the data offsets
-        data_offset = inc_to_alignment(data_offset, field_types[i].get_alignment());
+        data_offset = inc_to_alignment(data_offset, field_types[i].get_data_alignment());
         m_data_offsets[i] = data_offset;
         size_t field_element_size = field_types[i].get_data_size();
         if (field_element_size == 0) {
@@ -51,7 +51,7 @@ cstruct_dtype::cstruct_dtype(size_t field_count, const dtype *field_types,
         metadata_offset += m_field_types[i].is_builtin() ? 0 : m_field_types[i].extended()->get_metadata_size();
     }
     m_members.metadata_size = metadata_offset;
-    m_members.data_size = inc_to_alignment(data_offset, m_members.alignment);
+    m_members.data_size = inc_to_alignment(data_offset, m_members.data_alignment);
 
     create_ndobject_properties();
 }
@@ -380,7 +380,7 @@ bool cstruct_dtype::operator==(const base_dtype& rhs) const
         return false;
     } else {
         const cstruct_dtype *dt = static_cast<const cstruct_dtype*>(&rhs);
-        return get_alignment() == dt->get_alignment() &&
+        return get_data_alignment() == dt->get_data_alignment() &&
                 m_field_types == dt->m_field_types &&
                 m_field_names == dt->m_field_names;
     }
@@ -537,7 +537,7 @@ cstruct_dtype::cstruct_dtype(int, int)
     m_metadata_offsets.push_back(0);
     // Inherit any operand flags from the fields
     m_members.flags |= (m_field_types[0].get_flags()&dtype_flags_operand_inherited);
-    m_members.alignment = (uint8_t)m_field_types[0].get_alignment();
+    m_members.data_alignment = (uint8_t)m_field_types[0].get_data_alignment();
     m_members.metadata_size = m_field_types[0].get_metadata_size();
     m_members.data_size = m_field_types[0].get_data_size();
     // Leave m_ndobject_properties so there is no reference loop

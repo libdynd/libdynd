@@ -25,7 +25,7 @@ TEST(AlignDType, Create) {
     // The storage is bytes with alignment 1
     EXPECT_EQ(d.storage_dtype(), make_fixedbytes_dtype(4, 1));
     // The alignment of the dtype is 1
-    EXPECT_EQ(1u, d.get_alignment());
+    EXPECT_EQ(1u, d.get_data_alignment());
     EXPECT_TRUE(d.is_expression());
 
     // TODO: Make sure it raises if an object dtype is attempted

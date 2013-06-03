@@ -78,7 +78,7 @@ ndobject dynd::make_strided_ndobject(const dtype& uniform_dtype, size_t ndim, co
     // Allocate the ndobject metadata and data in one memory block
     char *data_ptr = NULL;
     memory_block_ptr result = make_ndobject_memory_block(array_dtype.extended()->get_metadata_size(),
-                    data_size, uniform_dtype.get_alignment(), &data_ptr);
+                    data_size, uniform_dtype.get_data_alignment(), &data_ptr);
 
     if (array_dtype.get_flags()&dtype_flag_zeroinit) {
         memset(data_ptr, 0, data_size);
@@ -187,7 +187,7 @@ ndobject dynd::make_pod_ndobject(const dtype& pod_dt, const void *data)
 
     // Allocate the ndobject metadata and data in one memory block
     char *data_ptr = NULL;
-    memory_block_ptr result = make_ndobject_memory_block(0, size, pod_dt.get_alignment(), &data_ptr);
+    memory_block_ptr result = make_ndobject_memory_block(0, size, pod_dt.get_data_alignment(), &data_ptr);
 
     // Fill in the preamble metadata
     ndobject_preamble *ndo = reinterpret_cast<ndobject_preamble *>(result.get());
@@ -211,7 +211,7 @@ ndobject dynd::make_string_ndobject(const char *str, size_t len, string_encoding
     char *data_ptr = NULL, *string_ptr;
     dtype dt = make_string_dtype(encoding);
     ndobject result(make_ndobject_memory_block(dt.extended()->get_metadata_size(),
-                        dt.get_data_size() + len, dt.get_alignment(), &data_ptr));
+                        dt.get_data_size() + len, dt.get_data_alignment(), &data_ptr));
     // Set the string extents
     string_ptr = data_ptr + dt.get_data_size();
     ((char **)data_ptr)[0] = string_ptr;
@@ -380,7 +380,7 @@ ndobject dynd::detail::make_from_vec<dtype>::make(const std::vector<dtype>& vec)
     char *data_ptr = NULL;
     ndobject result(make_ndobject_memory_block(dt.extended()->get_metadata_size(),
                     sizeof(dtype_dtype_data) * vec.size(),
-                    dt.get_alignment(), &data_ptr));
+                    dt.get_data_alignment(), &data_ptr));
     // The main ndobject metadata
     ndobject_preamble *preamble = result.get_ndo();
     preamble->m_data_pointer = data_ptr;
@@ -414,7 +414,7 @@ ndobject dynd::detail::make_from_vec<std::string>::make(const std::vector<std::s
     // the string data
     ndobject result(make_ndobject_memory_block(dt.extended()->get_metadata_size(),
                     sizeof(string_dtype_data) * vec.size() + total_string_size,
-                    dt.get_alignment(), &data_ptr));
+                    dt.get_data_alignment(), &data_ptr));
     char *string_ptr = data_ptr + sizeof(string_dtype_data) * vec.size();
     // The main ndobject metadata
     ndobject_preamble *preamble = result.get_ndo();
@@ -451,11 +451,11 @@ namespace {
             const dtype& storage_dt = dt.storage_dtype();
             if (storage_dt.is_builtin()) {
                 out_transformed_dtype = make_fixedbytes_dtype(storage_dt.get_data_size(),
-                                storage_dt.get_alignment());
+                                storage_dt.get_data_alignment());
                 out_was_transformed = true;
             } else if (storage_dt.is_pod() && storage_dt.extended()->get_metadata_size() == 0) {
                 out_transformed_dtype = make_fixedbytes_dtype(storage_dt.get_data_size(),
-                                storage_dt.get_alignment());
+                                storage_dt.get_data_alignment());
                 out_was_transformed = true;
             } else if (storage_dt.get_type_id() == string_type_id) {
                 out_transformed_dtype = make_bytes_dtype(static_cast<const string_dtype *>(
@@ -1004,7 +1004,7 @@ namespace {
                             case bytes_type_id:
                                 // All these dtypes have the same data/metadata layout,
                                 // allow a view whenever the alignment allows it
-                                if (e->get_alignment() <= dt.get_alignment()) {
+                                if (e->get_data_alignment() <= dt.get_data_alignment()) {
                                     out_transformed_dtype = *e;
                                     out_was_transformed = true;
                                     return;
@@ -1055,7 +1055,7 @@ ndobject ndobject::view_scalars(const dtype& scalar_dtype) const
             // Create the result array, adjusting the dtype if the data isn't aligned correctly
             char *data_ptr = get_ndo()->m_data_pointer;
             dtype result_dtype;
-            if ((((uintptr_t)data_ptr)&(scalar_dtype.get_alignment()-1)) == 0) {
+            if ((((uintptr_t)data_ptr)&(scalar_dtype.get_data_alignment()-1)) == 0) {
                 result_dtype = make_strided_dim_dtype(scalar_dtype);
             } else {
                 result_dtype = make_strided_dim_dtype(make_unaligned_dtype(scalar_dtype));
@@ -1394,7 +1394,7 @@ ndobject dynd::groupby(const dynd::ndobject& data_values, const dynd::ndobject& 
     char *data_ptr = NULL;
 
     ndobject result(make_ndobject_memory_block(gbdt.extended()->get_metadata_size(),
-                    gbdt.extended()->get_data_size(), gbdt.extended()->get_alignment(), &data_ptr));
+                    gbdt.extended()->get_data_size(), gbdt.extended()->get_data_alignment(), &data_ptr));
 
     // Set the metadata for the data values
     pointer_dtype_metadata *pmeta;
@@ -1455,7 +1455,7 @@ ndobject dynd::combine_into_struct(size_t field_count, const std::string *field_
 
     ndobject result(make_ndobject_memory_block(fsd->get_metadata_size(),
                     fsd->get_data_size(),
-                    fsd->get_alignment(), &data_ptr));
+                    fsd->get_data_alignment(), &data_ptr));
     // Set the ndobject properties
     result.get_ndo()->m_dtype = result_type.release();
     result.get_ndo()->m_data_pointer = data_ptr;

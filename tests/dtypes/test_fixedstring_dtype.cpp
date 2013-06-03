@@ -23,32 +23,32 @@ TEST(FixedstringDType, Create) {
     d = make_fixedstring_dtype(3, string_encoding_utf_8);
     EXPECT_EQ(fixedstring_type_id, d.get_type_id());
     EXPECT_EQ(string_kind, d.get_kind());
-    EXPECT_EQ(1u, d.get_alignment());
+    EXPECT_EQ(1u, d.get_data_alignment());
     EXPECT_EQ(3u, d.get_data_size());
     EXPECT_FALSE(d.is_expression());
 
     d = make_fixedstring_dtype(129, string_encoding_utf_8);
     EXPECT_EQ(fixedstring_type_id, d.get_type_id());
     EXPECT_EQ(string_kind, d.get_kind());
-    EXPECT_EQ(1u, d.get_alignment());
+    EXPECT_EQ(1u, d.get_data_alignment());
     EXPECT_EQ(129u, d.get_data_size());
 
     d = make_fixedstring_dtype(129, string_encoding_ascii);
     EXPECT_EQ(fixedstring_type_id, d.get_type_id());
     EXPECT_EQ(string_kind, d.get_kind());
-    EXPECT_EQ(1u, d.get_alignment());
+    EXPECT_EQ(1u, d.get_data_alignment());
     EXPECT_EQ(129u, d.get_data_size());
 
     d = make_fixedstring_dtype(129, string_encoding_utf_16);
     EXPECT_EQ(fixedstring_type_id, d.get_type_id());
     EXPECT_EQ(string_kind, d.get_kind());
-    EXPECT_EQ(2u, d.get_alignment());
+    EXPECT_EQ(2u, d.get_data_alignment());
     EXPECT_EQ(2u*129u, d.get_data_size());
 
     d = make_fixedstring_dtype(129, string_encoding_utf_32);
     EXPECT_EQ(fixedstring_type_id, d.get_type_id());
     EXPECT_EQ(string_kind, d.get_kind());
-    EXPECT_EQ(4u, d.get_alignment());
+    EXPECT_EQ(4u, d.get_data_alignment());
     EXPECT_EQ(4u*129u, d.get_data_size());
 }
 

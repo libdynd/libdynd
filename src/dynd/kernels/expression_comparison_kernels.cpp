@@ -175,12 +175,12 @@ size_t dynd::make_expression_comparison_kernel(
     }
     // Allocate the data for the buffers
     if (e->buf[0].kernel_offset != 0) {
-        current_offset = inc_to_alignment(current_offset, src0_dt.get_alignment());
+        current_offset = inc_to_alignment(current_offset, src0_dt.get_data_alignment());
         e->buf[0].data_offset = current_offset - offset_out;
         current_offset += e->buf[0].data_size;
     }
     if (e->buf[1].kernel_offset != 0) {
-        current_offset = inc_to_alignment(current_offset, src1_dt.get_alignment());
+        current_offset = inc_to_alignment(current_offset, src1_dt.get_data_alignment());
         e->buf[1].data_offset = current_offset - offset_out;
         current_offset += e->buf[1].data_size;
     }

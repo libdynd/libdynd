@@ -190,7 +190,7 @@ size_t dynd::make_expression_assignment_kernel(
                                 out, offset_out + e->first_kernel_offset,
                                 e->buffer_metadata, src_metadata, kernreq, ectx);
                 // Allocate the buffer data
-                buffer_data_offset = inc_to_alignment(buffer_data_offset, buffer_dt.get_alignment());
+                buffer_data_offset = inc_to_alignment(buffer_data_offset, buffer_dt.get_data_alignment());
                 out->ensure_capacity(offset_out + buffer_data_offset + buffer_data_size);
                 // This may have invalidated the 'e' pointer, so get it again!
                 e = out->get_at<buffered_kernel_extra>(offset_out);
@@ -225,7 +225,7 @@ size_t dynd::make_expression_assignment_kernel(
                             src_dt, src_metadata,
                             kernreq, errmode, ectx);
             // Allocate the buffer data
-            buffer_data_offset = inc_to_alignment(buffer_data_offset, buffer_dt.get_alignment());
+            buffer_data_offset = inc_to_alignment(buffer_data_offset, buffer_dt.get_data_alignment());
             out->ensure_capacity(offset_out + buffer_data_offset + buffer_data_size);
             // This may have invalidated the 'e' pointer, so get it again!
             e = out->get_at<buffered_kernel_extra>(offset_out);
@@ -262,7 +262,7 @@ size_t dynd::make_expression_assignment_kernel(
                                 opdt, src_metadata,
                                 kernreq, errmode, ectx);
                 // Allocate the buffer data
-                buffer_data_offset = inc_to_alignment(buffer_data_offset, buffer_dt.get_alignment());
+                buffer_data_offset = inc_to_alignment(buffer_data_offset, buffer_dt.get_data_alignment());
                 out->ensure_capacity(offset_out + buffer_data_offset + buffer_data_size);
                 // This may have invalidated the 'e' pointer, so get it again!
                 e = out->get_at<buffered_kernel_extra>(offset_out);
@@ -289,7 +289,7 @@ size_t dynd::make_expression_assignment_kernel(
                             src_dt, src_metadata,
                             kernreq, errmode, ectx);
             // Allocate the buffer data
-            buffer_data_offset = inc_to_alignment(buffer_data_offset, buffer_dt.get_alignment());
+            buffer_data_offset = inc_to_alignment(buffer_data_offset, buffer_dt.get_data_alignment());
             out->ensure_capacity(offset_out + buffer_data_offset + buffer_data_size);
             // This may have invalidated the 'e' pointer, so get it again!
             e = out->get_at<buffered_kernel_extra>(offset_out);

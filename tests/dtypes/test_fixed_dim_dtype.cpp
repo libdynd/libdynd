@@ -26,7 +26,7 @@ TEST(FixedDimDType, Create) {
     d = make_fixed_dim_dtype(3, make_dtype<int32_t>());
     EXPECT_EQ(fixed_dim_type_id, d.get_type_id());
     EXPECT_EQ(uniform_dim_kind, d.get_kind());
-    EXPECT_EQ(4u, d.get_alignment());
+    EXPECT_EQ(4u, d.get_data_alignment());
     EXPECT_EQ(12u, d.get_data_size());
     EXPECT_FALSE(d.is_expression());
     EXPECT_EQ(make_dtype<int32_t>(), d.p("element_dtype").as<dtype>());
@@ -43,7 +43,7 @@ TEST(FixedDimDType, Create) {
     d = make_fixed_dim_dtype(1, make_dtype<int32_t>());
     EXPECT_EQ(fixed_dim_type_id, d.get_type_id());
     EXPECT_EQ(uniform_dim_kind, d.get_kind());
-    EXPECT_EQ(4u, d.get_alignment());
+    EXPECT_EQ(4u, d.get_data_alignment());
     EXPECT_EQ(4u, d.get_data_size());
     EXPECT_FALSE(d.is_expression());
     fad = static_cast<const fixed_dim_dtype *>(d.extended());

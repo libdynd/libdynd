@@ -52,7 +52,7 @@ static ndarray_node_ptr make_elwise_reduce_result(const dtype& result_dt, uint32
     // Allocate the memoryblock for the data
     char *originptr = NULL;
     memory_block_ptr memblock = make_fixed_size_pod_memory_block(result_dt.get_data_size() * num_elements,
-                    result_dt.get_alignment(), &originptr,
+                    result_dt.get_data_alignment(), &originptr,
                     NULL, NULL);
 
     ndarray_node_ptr result;

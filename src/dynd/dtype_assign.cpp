@@ -187,8 +187,8 @@ void dynd::dtype_assign(const dtype& dst_dt, const char *dst_metadata, char *dst
                 const dtype& src_dt, const char *src_metadata, const char *src_data,
                 assign_error_mode errmode, const eval::eval_context *ectx)
 {
-    DYND_ASSERT_ALIGNED(dst, 0, dst_dt.get_alignment(), "dst dtype: " << dst_dt << ", src dtype: " << src_dt);
-    DYND_ASSERT_ALIGNED(src, 0, src_dt.get_alignment(), "src dtype: " << src_dt << ", dst dtype: " << dst_dt);
+    DYND_ASSERT_ALIGNED(dst, 0, dst_dt.get_data_alignment(), "dst dtype: " << dst_dt << ", src dtype: " << src_dt);
+    DYND_ASSERT_ALIGNED(src, 0, src_dt.get_data_alignment(), "src dtype: " << src_dt << ", dst dtype: " << dst_dt);
 
     if (errmode == assign_error_default) {
         if (ectx != NULL) {

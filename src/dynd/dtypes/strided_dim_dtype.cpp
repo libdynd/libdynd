@@ -16,7 +16,7 @@ using namespace std;
 using namespace dynd;
 
 strided_dim_dtype::strided_dim_dtype(const dtype& element_dtype)
-    : base_uniform_dim_dtype(strided_dim_type_id, element_dtype, 0, element_dtype.get_alignment(),
+    : base_uniform_dim_dtype(strided_dim_type_id, element_dtype, 0, element_dtype.get_data_alignment(),
                     sizeof(strided_dim_dtype_metadata), dtype_flag_none)
 {
     // Propagate the operand flags from the element

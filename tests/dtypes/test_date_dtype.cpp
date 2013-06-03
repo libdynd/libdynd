@@ -28,7 +28,7 @@ TEST(DateDType, Create) {
 
     d = make_date_dtype();
     EXPECT_EQ(4u, d.get_data_size());
-    EXPECT_EQ(4u, d.get_alignment());
+    EXPECT_EQ(4u, d.get_data_alignment());
     EXPECT_EQ(make_date_dtype(), make_date_dtype());
 }
 

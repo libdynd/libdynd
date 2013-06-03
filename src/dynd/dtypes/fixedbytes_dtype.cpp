@@ -13,23 +13,26 @@
 using namespace std;
 using namespace dynd;
 
-fixedbytes_dtype::fixedbytes_dtype(intptr_t data_size, intptr_t alignment)
+fixedbytes_dtype::fixedbytes_dtype(intptr_t data_size, intptr_t data_alignment)
     : base_bytes_dtype(fixedbytes_type_id, bytes_kind, data_size,
-                    alignment, dtype_flag_scalar, 0)
+                    data_alignment, dtype_flag_scalar, 0)
 {
-    if (alignment > data_size) {
+    if (data_alignment > data_size) {
         std::stringstream ss;
-        ss << "Cannot make a fixedbytes<" << data_size << "," << alignment << "> dtype, its alignment is greater than its size";
+        ss << "Cannot make a fixedbytes<" << data_size << ",";
+        ss << data_alignment << "> dtype, its alignment is greater than its size";
         throw std::runtime_error(ss.str());
     }
-    if (alignment != 1 && alignment != 2 && alignment != 4 && alignment != 8 && alignment != 16) {
+    if (data_alignment != 1 && data_alignment != 2 && data_alignment != 4 && data_alignment != 8 && data_alignment != 16) {
         std::stringstream ss;
-        ss << "Cannot make a fixedbytes<" << data_size << "," << alignment << "> dtype, its alignment is not a small power of two";
+        ss << "Cannot make a fixedbytes<" << data_size << ",";
+        ss << data_alignment << "> dtype, its alignment is not a small power of two";
         throw std::runtime_error(ss.str());
     }
-    if ((data_size&(alignment-1)) != 0) {
+    if ((data_size&(data_alignment-1)) != 0) {
         std::stringstream ss;
-        ss << "Cannot make a fixedbytes<" << data_size << "," << alignment << "> dtype, its alignment does not divide into its element size";
+        ss << "Cannot make a fixedbytes<" << data_size << ",";
+        ss<< data_alignment << "> dtype, its alignment does not divide into its element size";
         throw std::runtime_error(ss.str());
     }
 }
@@ -53,7 +56,7 @@ void fixedbytes_dtype::print_data(std::ostream& o, const char *DYND_UNUSED(metad
 
 void fixedbytes_dtype::print_dtype(std::ostream& o) const
 {
-    o << "fixedbytes<" << get_data_size() << "," << get_alignment() << ">";
+    o << "fixedbytes<" << get_data_size() << "," << get_data_alignment() << ">";
 }
 
 bool fixedbytes_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const
@@ -80,7 +83,7 @@ bool fixedbytes_dtype::operator==(const base_dtype& rhs) const
         return false;
     } else {
         const fixedbytes_dtype *dt = static_cast<const fixedbytes_dtype*>(&rhs);
-        return get_data_size() == dt->get_data_size() && get_alignment() == dt->get_alignment();
+        return get_data_size() == dt->get_data_size() && get_data_alignment() == dt->get_data_alignment();
     }
 }
 
@@ -99,7 +102,7 @@ size_t fixedbytes_dtype::make_assignment_kernel(
                     throw runtime_error("cannot assign to a fixedbytes dtype of a different size");
                 }
                 return ::make_pod_dtype_assignment_kernel(out, offset_out,
-                                get_data_size(), std::min(get_alignment(), src_fs->get_alignment()),
+                                get_data_size(), std::min(get_data_alignment(), src_fs->get_data_alignment()),
                                 kernreq);
             }
             default: {

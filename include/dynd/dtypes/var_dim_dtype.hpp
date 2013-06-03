@@ -42,8 +42,8 @@ public:
 
 
     /** Alignment of the data being pointed to. */
-    size_t get_data_alignment() const {
-        return m_element_dtype.get_alignment();
+    size_t get_target_alignment() const {
+        return m_element_dtype.get_data_alignment();
     }
 
     void print_data(std::ostream& o, const char *metadata, const char *data) const;

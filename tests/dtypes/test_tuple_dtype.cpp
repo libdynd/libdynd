@@ -23,7 +23,7 @@ TEST(TupleDType, CreateOneField) {
     dt = make_tuple_dtype(make_dtype<int32_t>());
     EXPECT_EQ(tuple_type_id, dt.get_type_id());
     EXPECT_EQ(4u, dt.get_data_size());
-    EXPECT_EQ(4u, dt.get_alignment());
+    EXPECT_EQ(4u, dt.get_data_alignment());
     EXPECT_TRUE(dt.is_pod());
     EXPECT_EQ(0u, (dt.get_flags()&(dtype_flag_blockref|dtype_flag_destructor)));
     tdt = static_cast<const tuple_dtype *>(dt.extended());

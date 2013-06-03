@@ -383,11 +383,11 @@ public:
     }
 
     /** The alignment of the dtype */
-    inline size_t get_alignment() const {
+    inline size_t get_data_alignment() const {
         if (is_builtin()) {
             return static_cast<size_t>(dtype::builtin_data_alignments[reinterpret_cast<intptr_t>(m_extended)]);
         } else {
-            return m_extended->get_alignment();
+            return m_extended->get_data_alignment();
         }
     }
 

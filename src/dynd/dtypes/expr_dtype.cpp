@@ -15,7 +15,7 @@ using namespace dynd;
 expr_dtype::expr_dtype(const dtype& value_dtype, const dtype& operand_dtype,
                 const expr_kernel_generator *kgen)
     : base_expression_dtype(expr_type_id, expression_kind,
-                        operand_dtype.get_data_size(), operand_dtype.get_alignment(),
+                        operand_dtype.get_data_size(), operand_dtype.get_data_alignment(),
                         inherited_flags(value_dtype.get_flags(), operand_dtype.get_flags()),
                         operand_dtype.get_metadata_size(), value_dtype.get_undim()),
                     m_value_dtype(value_dtype), m_operand_dtype(operand_dtype),

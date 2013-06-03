@@ -17,7 +17,7 @@ using namespace std;
 using namespace dynd;
 
 fixed_dim_dtype::fixed_dim_dtype(size_t dimension_size, const dtype& element_dtype)
-    : base_uniform_dim_dtype(fixed_dim_type_id, element_dtype, 0, element_dtype.get_alignment(),
+    : base_uniform_dim_dtype(fixed_dim_type_id, element_dtype, 0, element_dtype.get_data_alignment(),
                     0, dtype_flag_none),
             m_dim_size(dimension_size)
 {
@@ -38,7 +38,7 @@ fixed_dim_dtype::fixed_dim_dtype(size_t dimension_size, const dtype& element_dty
 }
 
 fixed_dim_dtype::fixed_dim_dtype(size_t dimension_size, const dtype& element_dtype, intptr_t stride)
-    : base_uniform_dim_dtype(fixed_dim_type_id, element_dtype, 0, element_dtype.get_alignment(),
+    : base_uniform_dim_dtype(fixed_dim_type_id, element_dtype, 0, element_dtype.get_data_alignment(),
                     0, dtype_flag_none),
             m_stride(stride), m_dim_size(dimension_size)
 {

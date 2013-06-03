@@ -25,7 +25,7 @@ TEST(DTypeDType, Create) {
     EXPECT_EQ(dtype_type_id, d.get_type_id());
     EXPECT_EQ(custom_kind, d.get_kind());
     EXPECT_EQ(dtype("dtype"), d);
-    EXPECT_EQ(sizeof(const base_dtype *), d.get_alignment());
+    EXPECT_EQ(sizeof(const base_dtype *), d.get_data_alignment());
     EXPECT_EQ(sizeof(const base_dtype *), d.get_data_size());
     EXPECT_FALSE(d.is_expression());
 }

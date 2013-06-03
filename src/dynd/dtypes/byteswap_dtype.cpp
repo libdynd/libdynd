@@ -13,9 +13,9 @@ using namespace dynd;
 
 byteswap_dtype::byteswap_dtype(const dtype& value_dtype)
     : base_expression_dtype(byteswap_type_id, expression_kind, value_dtype.get_data_size(),
-                            value_dtype.get_alignment(), dtype_flag_scalar, 0),
+                            value_dtype.get_data_alignment(), dtype_flag_scalar, 0),
                     m_value_dtype(value_dtype),
-                    m_operand_dtype(make_fixedbytes_dtype(value_dtype.get_data_size(), value_dtype.get_alignment()))
+                    m_operand_dtype(make_fixedbytes_dtype(value_dtype.get_data_size(), value_dtype.get_data_alignment()))
 {
     if (!value_dtype.is_builtin()) {
         throw std::runtime_error("byteswap_dtype: Only built-in dtypes are supported presently");
@@ -24,7 +24,7 @@ byteswap_dtype::byteswap_dtype(const dtype& value_dtype)
 
 byteswap_dtype::byteswap_dtype(const dtype& value_dtype, const dtype& operand_dtype)
     : base_expression_dtype(byteswap_type_id, expression_kind, operand_dtype.get_data_size(),
-                    operand_dtype.get_alignment(), dtype_flag_scalar, 0),
+                    operand_dtype.get_data_alignment(), dtype_flag_scalar, 0),
             m_value_dtype(value_dtype), m_operand_dtype(operand_dtype)
 {
     // Only a bytes dtype be the operand to the byteswap
@@ -34,8 +34,9 @@ byteswap_dtype::byteswap_dtype(const dtype& value_dtype, const dtype& operand_dt
         throw std::runtime_error(ss.str());
     }
     // Automatically realign if needed
-    if (operand_dtype.value_dtype().get_alignment() < value_dtype.get_alignment()) {
-        m_operand_dtype = make_view_dtype(operand_dtype, make_fixedbytes_dtype(operand_dtype.get_data_size(), value_dtype.get_alignment()));
+    if (operand_dtype.value_dtype().get_data_alignment() < value_dtype.get_data_alignment()) {
+        m_operand_dtype = make_view_dtype(operand_dtype,
+                        make_fixedbytes_dtype(operand_dtype.get_data_size(), value_dtype.get_data_alignment()));
     }
 }
 
@@ -98,11 +99,11 @@ size_t byteswap_dtype::make_operand_to_value_assignment_kernel(
 {
     if(m_value_dtype.get_kind() != complex_kind) {
         return make_byteswap_assignment_function(out, offset_out,
-                        m_value_dtype.get_data_size(), m_value_dtype.get_alignment(),
+                        m_value_dtype.get_data_size(), m_value_dtype.get_data_alignment(),
                         kernreq);
     } else {
         return make_pairwise_byteswap_assignment_function(out, offset_out,
-                        m_value_dtype.get_data_size(), m_value_dtype.get_alignment(),
+                        m_value_dtype.get_data_size(), m_value_dtype.get_data_alignment(),
                         kernreq);
     }
 }
@@ -114,11 +115,11 @@ size_t byteswap_dtype::make_value_to_operand_assignment_kernel(
 {
     if(m_value_dtype.get_kind() != complex_kind) {
         return make_byteswap_assignment_function(out, offset_out,
-                        m_value_dtype.get_data_size(), m_value_dtype.get_alignment(),
+                        m_value_dtype.get_data_size(), m_value_dtype.get_data_alignment(),
                         kernreq);
     } else {
         return make_pairwise_byteswap_assignment_function(out, offset_out,
-                        m_value_dtype.get_data_size(), m_value_dtype.get_alignment(),
+                        m_value_dtype.get_data_size(), m_value_dtype.get_data_alignment(),
                         kernreq);
     }
 }

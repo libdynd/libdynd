@@ -74,7 +74,7 @@ struct base_dtype_members {
     /** The dtype's kind (dtype_kind_t is the enum) */
     uint8_t kind;
     /** The dtype's data alignment */
-    uint8_t alignment;
+    uint8_t data_alignment;
     /** The dtype's flags */
     flags_type flags;
     /** The size of one instance of the dtype, or 0 if there is not one fixed size. */
@@ -84,9 +84,9 @@ struct base_dtype_members {
     /** The number of uniform dimensions this dtype has */
     uint8_t undim;
 
-    base_dtype_members(uint16_t type_id_, uint8_t kind_, uint8_t alignment_,
+    base_dtype_members(uint16_t type_id_, uint8_t kind_, uint8_t data_alignment_,
                     flags_type flags_, size_t data_size_, size_t metadata_size_, uint8_t undim_)
-        : type_id(type_id_), kind(kind_), alignment(alignment_), flags(flags_),
+        : type_id(type_id_), kind(kind_), data_alignment(data_alignment_), flags(flags_),
                 data_size(data_size_), metadata_size(metadata_size_), undim(undim_)
     {}
 };
@@ -148,8 +148,8 @@ public:
         return m_members.data_size;
     }
     /** The dtype's data alignment. Every data pointer for this dtype _must_ be aligned. */
-    inline size_t get_alignment() const {
-        return m_members.alignment;
+    inline size_t get_data_alignment() const {
+        return m_members.data_alignment;
     }
     /** The number of uniform dimensions this dtype has */
     inline size_t get_undim() const {

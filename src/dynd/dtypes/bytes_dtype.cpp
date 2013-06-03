@@ -107,14 +107,14 @@ size_t bytes_dtype::make_assignment_kernel(
         switch (src_dt.get_type_id()) {
             case bytes_type_id: {
                 return make_blockref_bytes_assignment_kernel(out, offset_out,
-                                get_alignment(), dst_metadata,
-                                src_dt.get_alignment(), src_metadata,
+                                get_data_alignment(), dst_metadata,
+                                src_dt.get_data_alignment(), src_metadata,
                                 kernreq, ectx);
             }
             case fixedbytes_type_id: {
                 return make_fixedbytes_to_blockref_bytes_assignment_kernel(out, offset_out,
-                                get_alignment(), dst_metadata,
-                                src_dt.get_data_size(), src_dt.get_alignment(),
+                                get_data_alignment(), dst_metadata,
+                                src_dt.get_data_size(), src_dt.get_data_alignment(),
                                 kernreq, ectx);
             }
             default: {
