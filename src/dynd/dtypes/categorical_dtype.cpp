@@ -271,7 +271,7 @@ categorical_dtype::categorical_dtype(const ndobject& categories, bool presorted)
     // Use the number of categories to set which underlying integer storage to use
     if (category_count <= 256) {
         m_storage_dtype = make_dtype<uint8_t>();
-    } else if (category_count <= 32768) {
+    } else if (category_count <= 65536) {
         m_storage_dtype = make_dtype<uint16_t>();
     } else {
         m_storage_dtype = make_dtype<uint32_t>();
@@ -569,15 +569,15 @@ dtype dynd::factor_categorical_dtype(const ndobject& values)
     return dtype(new categorical_dtype(categories, true), false);
 }
 
-static ndobject property_ndo_get_category_ints(const ndobject& n) {
+static ndobject property_ndo_get_ints(const ndobject& n) {
     dtype udt = n.get_udtype().value_dtype();
     const categorical_dtype *cd = static_cast<const categorical_dtype *>(udt.extended());
     return n.view_scalars(cd->get_storage_dtype());
 }
 
 static pair<string, gfunc::callable> categorical_ndobject_properties[] = {
-    pair<string, gfunc::callable>("category_ints",
-                    gfunc::make_callable(&property_ndo_get_category_ints, "self"))
+    pair<string, gfunc::callable>("ints",
+                    gfunc::make_callable(&property_ndo_get_ints, "self"))
 };
 
 void categorical_dtype::get_dynamic_ndobject_properties(
@@ -593,12 +593,12 @@ static ndobject property_dtype_get_categories(const dtype& d) {
     return cd->get_categories();
 }
 
-static dtype property_dtype_get_storage_dtype(const dtype& d) {
+static dtype property_dtype_get_storage_type(const dtype& d) {
     const categorical_dtype *cd = static_cast<const categorical_dtype *>(d.extended());
     return cd->get_storage_dtype();
 }
 
-static dtype property_dtype_get_category_dtype(const dtype& d) {
+static dtype property_dtype_get_category_type(const dtype& d) {
     const categorical_dtype *cd = static_cast<const categorical_dtype *>(d.extended());
     return cd->get_category_dtype();
 }
@@ -606,10 +606,10 @@ static dtype property_dtype_get_category_dtype(const dtype& d) {
 static pair<string, gfunc::callable> categorical_dtype_properties[] = {
     pair<string, gfunc::callable>("categories",
                     gfunc::make_callable(&property_dtype_get_categories, "self")),
-    pair<string, gfunc::callable>("storage_dtype",
-                    gfunc::make_callable(&property_dtype_get_storage_dtype, "self")),
-    pair<string, gfunc::callable>("category_dtype",
-                    gfunc::make_callable(&property_dtype_get_category_dtype, "self"))
+    pair<string, gfunc::callable>("storage_type",
+                    gfunc::make_callable(&property_dtype_get_storage_type, "self")),
+    pair<string, gfunc::callable>("category_type",
+                    gfunc::make_callable(&property_dtype_get_category_type, "self"))
 };
 
 void categorical_dtype::get_dynamic_dtype_properties(

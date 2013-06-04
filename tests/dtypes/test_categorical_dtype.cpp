@@ -30,28 +30,36 @@ TEST(CategoricalDType, Create) {
     EXPECT_EQ(1u, d.get_data_alignment());
     EXPECT_EQ(1u, d.get_data_size());
     EXPECT_FALSE(d.is_expression());
+    EXPECT_EQ(make_dtype<uint8_t>(), d.p("storage_type").as<dtype>());
+    EXPECT_EQ(a.get_udtype(), d.p("category_type").as<dtype>());
 
-    // With < 256 categories, storage is a uint8
+    // With <= 256 categories, storage is a uint8
     a = arange(256);
     d = make_categorical_dtype(a);
     EXPECT_EQ(1u, d.get_data_alignment());
     EXPECT_EQ(1u, d.get_data_size());
+    EXPECT_EQ(make_dtype<uint8_t>(), d.p("storage_type").as<dtype>());
+    EXPECT_EQ(make_dtype<int32_t>(), d.p("category_type").as<dtype>());
 
-    // With < 32768 categories, storage is a uint16
+    // With <= 65536 categories, storage is a uint16
     a = arange(257);
     d = make_categorical_dtype(a);
     EXPECT_EQ(2u, d.get_data_alignment());
     EXPECT_EQ(2u, d.get_data_size());
-    a = arange(32768);
+    a = arange(65536);
     d = make_categorical_dtype(a);
     EXPECT_EQ(2u, d.get_data_alignment());
     EXPECT_EQ(2u, d.get_data_size());
+    EXPECT_EQ(make_dtype<uint16_t>(), d.p("storage_type").as<dtype>());
+    EXPECT_EQ(make_dtype<int32_t>(), d.p("category_type").as<dtype>());
 
     // Otherwise, storage is a uint32
-    a = arange(32769);
+    a = arange(65537);
     d = make_categorical_dtype(a);
     EXPECT_EQ(4u, d.get_data_alignment());
     EXPECT_EQ(4u, d.get_data_size());
+    EXPECT_EQ(make_dtype<uint32_t>(), d.p("storage_type").as<dtype>());
+    EXPECT_EQ(make_dtype<int32_t>(), d.p("category_type").as<dtype>());
 }
 
 TEST(CategoricalDType, Convert) {
@@ -183,7 +191,7 @@ TEST(CategoricalDType, ValuesLonger) {
 
     dtype dt = make_categorical_dtype(cats_vals);
     ndobject a = ndobject(a_vals).ucast(dt).eval();
-    ndobject a_view = a.p("category_ints");
+    ndobject a_view = a.p("ints");
 
     // Check that the categories got the right values
     for (int i = 0; i < cats_count; ++i) {
