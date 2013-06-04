@@ -270,20 +270,20 @@ categorical_dtype::categorical_dtype(const ndobject& categories, bool presorted)
 
     // Use the number of categories to set which underlying integer storage to use
     if (category_count <= 256) {
-        m_category_int_dtype = make_dtype<uint8_t>();
+        m_storage_dtype = make_dtype<uint8_t>();
     } else if (category_count <= 32768) {
-        m_category_int_dtype = make_dtype<uint16_t>();
+        m_storage_dtype = make_dtype<uint16_t>();
     } else {
-        m_category_int_dtype = make_dtype<uint32_t>();
+        m_storage_dtype = make_dtype<uint32_t>();
     }
-    m_members.data_size = m_category_int_dtype.get_data_size();
-    m_members.data_alignment = (uint8_t)m_category_int_dtype.get_data_alignment();
+    m_members.data_size = m_storage_dtype.get_data_size();
+    m_members.data_alignment = (uint8_t)m_storage_dtype.get_data_alignment();
 }
 
 void categorical_dtype::print_data(std::ostream& o, const char *metadata, const char *data) const
 {
     uint32_t value;
-    switch (m_category_int_dtype.get_type_id()) {
+    switch (m_storage_dtype.get_type_id()) {
         case uint8_type_id:
             value = *reinterpret_cast<const uint8_t*>(data);
             break;
@@ -427,7 +427,7 @@ size_t categorical_dtype::make_assignment_kernel(
             out->ensure_capacity_leaf(offset_out + sizeof(category_to_categorical_kernel_extra));
             category_to_categorical_kernel_extra *e =
                             out->get_at<category_to_categorical_kernel_extra>(offset_out);
-            switch (m_category_int_dtype.get_type_id()) {
+            switch (m_storage_dtype.get_type_id()) {
                 case uint8_type_id:
                     e->base.set_function<unary_single_operation_t>(
                                     &category_to_categorical_kernel_extra::single_uint8);
@@ -469,7 +469,7 @@ size_t categorical_dtype::make_assignment_kernel(
             offset_out = make_kernreq_to_single_kernel_adapter(out, offset_out, kernreq);
             out->ensure_capacity(offset_out + sizeof(categorical_to_other_kernel_extra));
             categorical_to_other_kernel_extra *e = out->get_at<categorical_to_other_kernel_extra>(offset_out);
-            switch (m_category_int_dtype.get_type_id()) {
+            switch (m_storage_dtype.get_type_id()) {
                 case uint8_type_id:
                     e->base.set_function<unary_single_operation_t>(&categorical_to_other_kernel_extra::single_uint8);
                     break;
@@ -572,7 +572,7 @@ dtype dynd::factor_categorical_dtype(const ndobject& values)
 static ndobject property_ndo_get_category_ints(const ndobject& n) {
     dtype udt = n.get_udtype().value_dtype();
     const categorical_dtype *cd = static_cast<const categorical_dtype *>(udt.extended());
-    return n.view_scalars(cd->get_category_int_dtype());
+    return n.view_scalars(cd->get_storage_dtype());
 }
 
 static pair<string, gfunc::callable> categorical_ndobject_properties[] = {
@@ -593,9 +593,23 @@ static ndobject property_dtype_get_categories(const dtype& d) {
     return cd->get_categories();
 }
 
+static dtype property_dtype_get_storage_dtype(const dtype& d) {
+    const categorical_dtype *cd = static_cast<const categorical_dtype *>(d.extended());
+    return cd->get_storage_dtype();
+}
+
+static dtype property_dtype_get_category_dtype(const dtype& d) {
+    const categorical_dtype *cd = static_cast<const categorical_dtype *>(d.extended());
+    return cd->get_category_dtype();
+}
+
 static pair<string, gfunc::callable> categorical_dtype_properties[] = {
     pair<string, gfunc::callable>("categories",
-                    gfunc::make_callable(&property_dtype_get_categories, "self"))
+                    gfunc::make_callable(&property_dtype_get_categories, "self")),
+    pair<string, gfunc::callable>("storage_dtype",
+                    gfunc::make_callable(&property_dtype_get_storage_dtype, "self")),
+    pair<string, gfunc::callable>("category_dtype",
+                    gfunc::make_callable(&property_dtype_get_category_dtype, "self"))
 };
 
 void categorical_dtype::get_dynamic_dtype_properties(

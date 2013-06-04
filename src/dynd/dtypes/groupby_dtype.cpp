@@ -254,7 +254,7 @@ size_t groupby_dtype::make_operand_to_value_assignment_kernel(
     out->ensure_capacity(offset_out + sizeof(groupby_to_value_assign_extra));
     groupby_to_value_assign_extra *e = out->get_at<groupby_to_value_assign_extra>(offset_out);
     const categorical_dtype *cd = static_cast<const categorical_dtype *>(m_groups_dtype.extended());
-    switch (cd->get_category_int_dtype().get_type_id()) {
+    switch (cd->get_storage_dtype().get_type_id()) {
         case uint8_type_id:
             e->base.set_function<unary_single_operation_t>(&groupby_to_value_assign_extra::single_uint8);
             break;

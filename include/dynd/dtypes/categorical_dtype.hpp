@@ -27,7 +27,7 @@ class categorical_dtype : public base_dtype {
     // The data type of the category
     dtype m_category_dtype;
     // The integer type used for storage
-    dtype m_category_int_dtype;
+    dtype m_storage_dtype;
     // list of categories, in sorted order
     ndobject m_categories;
     // mapping from category indices to values
@@ -62,8 +62,8 @@ public:
      * Return the dtype of the underlying integer used
      * to index the category list.
      */
-    const dtype& get_category_int_dtype() const {
-        return m_category_int_dtype;
+    const dtype& get_storage_dtype() const {
+        return m_storage_dtype;
     }
 
     uint32_t get_value_from_category(const char *category_metadata, const char *category_data) const;
