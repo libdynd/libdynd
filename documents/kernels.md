@@ -32,7 +32,16 @@ A DyND kernel is a block of memory which contains at its start
 a kernel function pointer and a destructor. The class defining
 these members is 'kernel_data_prefix', and the class which
 manages the memory for creating such a kernel is
-'hierarchical_kernel'.
+'hierarchical_kernel'. Here's the kernel_data_prefix structure:
+
+```cpp
+struct kernel_data_prefix {
+    typedef void (*destructor_fn_t)(kernel_data_prefix *);
+
+    void *function;
+    destructor_fn_t destructor;
+}
+```
 
 The most basic kernel is the single assignment kernel, which
 assigns one element of data from input data to output data.
