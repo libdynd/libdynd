@@ -40,7 +40,7 @@ struct kernel_data_prefix {
 
     void *function;
     destructor_fn_t destructor;
-}
+};
 ```
 
 The most basic kernel is the single assignment kernel, which
