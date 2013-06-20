@@ -459,7 +459,7 @@ namespace {
                 out_was_transformed = true;
             } else if (storage_dt.get_type_id() == string_type_id) {
                 out_transformed_dtype = make_bytes_dtype(static_cast<const string_dtype *>(
-                                storage_dt.extended())->get_data_alignment());
+                                storage_dt.extended())->get_target_alignment());
                 out_was_transformed = true;
             } else {
                 if (dt.get_kind() == expression_kind) {
