@@ -42,7 +42,7 @@ public:
     }
 
     /** Alignment of the string data being pointed to. */
-    size_t get_data_alignment() const {
+    size_t get_target_alignment() const {
         return string_encoding_char_size_table[m_encoding];
     }
 

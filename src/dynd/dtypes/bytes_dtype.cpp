@@ -8,6 +8,7 @@
 #include <dynd/kernels/bytes_assignment_kernels.hpp>
 #include <dynd/dtypes/fixedbytes_dtype.hpp>
 #include <dynd/exceptions.hpp>
+#include <dynd/gfunc/make_callable.hpp>
 
 #include <algorithm>
 
@@ -195,4 +196,21 @@ void bytes_dtype::metadata_debug_print(const char *metadata, std::ostream& o, co
     const bytes_dtype_metadata *md = reinterpret_cast<const bytes_dtype_metadata *>(metadata);
     o << indent << "bytes metadata\n";
     memory_block_debug_print(md->blockref, o, indent + " ");
+}
+
+static size_t property_get_target_alignment(const dtype& dt) {
+    const bytes_dtype *pd = static_cast<const bytes_dtype *>(dt.extended());
+    return pd->get_target_alignment();
+}
+
+static pair<string, gfunc::callable> dtype_properties[] = {
+    pair<string, gfunc::callable>("target_alignment", gfunc::make_callable(&property_get_target_alignment, "self"))
+};
+
+void bytes_dtype::get_dynamic_dtype_properties(
+                const std::pair<std::string, gfunc::callable> **out_properties,
+                size_t *out_count) const
+{
+    *out_properties = dtype_properties;
+    *out_count = sizeof(dtype_properties) / sizeof(dtype_properties[0]);
 }

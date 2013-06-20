@@ -27,7 +27,8 @@ TEST(BytesDType, Create) {
     EXPECT_EQ(bytes_kind, d.get_kind());
     EXPECT_EQ(sizeof(void *), d.get_data_alignment());
     EXPECT_EQ(2*sizeof(void *), d.get_data_size());
-    EXPECT_EQ(1u, static_cast<const bytes_dtype *>(d.extended())->get_data_alignment());
+    EXPECT_EQ(1u, static_cast<const bytes_dtype *>(d.extended())->get_target_alignment());
+    EXPECT_EQ(1u, d.p("target_alignment").as<size_t>());
     EXPECT_FALSE(d.is_expression());
 
     d = make_bytes_dtype(2);
@@ -35,27 +36,31 @@ TEST(BytesDType, Create) {
     EXPECT_EQ(bytes_kind, d.get_kind());
     EXPECT_EQ(sizeof(void *), d.get_data_alignment());
     EXPECT_EQ(2*sizeof(void *), d.get_data_size());
-    EXPECT_EQ(2u, static_cast<const bytes_dtype *>(d.extended())->get_data_alignment());
+    EXPECT_EQ(2u, static_cast<const bytes_dtype *>(d.extended())->get_target_alignment());
+    EXPECT_EQ(2u, d.p("target_alignment").as<size_t>());
 
     d = make_bytes_dtype(4);
     EXPECT_EQ(bytes_type_id, d.get_type_id());
     EXPECT_EQ(bytes_kind, d.get_kind());
     EXPECT_EQ(sizeof(void *), d.get_data_alignment());
     EXPECT_EQ(2*sizeof(void *), d.get_data_size());
-    EXPECT_EQ(4u, static_cast<const bytes_dtype *>(d.extended())->get_data_alignment());
+    EXPECT_EQ(4u, static_cast<const bytes_dtype *>(d.extended())->get_target_alignment());
+    EXPECT_EQ(4u, d.p("target_alignment").as<size_t>());
 
     d = make_bytes_dtype(8);
     EXPECT_EQ(bytes_type_id, d.get_type_id());
     EXPECT_EQ(bytes_kind, d.get_kind());
     EXPECT_EQ(sizeof(void *), d.get_data_alignment());
     EXPECT_EQ(2*sizeof(void *), d.get_data_size());
-    EXPECT_EQ(8u, static_cast<const bytes_dtype *>(d.extended())->get_data_alignment());
+    EXPECT_EQ(8u, static_cast<const bytes_dtype *>(d.extended())->get_target_alignment());
+    EXPECT_EQ(8u, d.p("target_alignment").as<size_t>());
 
     d = make_bytes_dtype(16);
     EXPECT_EQ(bytes_type_id, d.get_type_id());
     EXPECT_EQ(bytes_kind, d.get_kind());
     EXPECT_EQ(sizeof(void *), d.get_data_alignment());
-    EXPECT_EQ(16u, static_cast<const bytes_dtype *>(d.extended())->get_data_alignment());
+    EXPECT_EQ(16u, static_cast<const bytes_dtype *>(d.extended())->get_target_alignment());
+    EXPECT_EQ(16u, d.p("target_alignment").as<size_t>());
 }
 
 TEST(BytesDType, Assign) {

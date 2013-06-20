@@ -39,7 +39,7 @@ public:
     virtual ~bytes_dtype();
 
     /** Alignment of the bytes data being pointed to. */
-    size_t get_data_alignment() const {
+    size_t get_target_alignment() const {
         return m_alignment;
     }
 
@@ -71,6 +71,10 @@ public:
                     const dtype& src_dt, const char *src_metadata,
                     kernel_request_t kernreq, assign_error_mode errmode,
                     const eval::eval_context *ectx) const;
+
+    void get_dynamic_dtype_properties(
+                    const std::pair<std::string, gfunc::callable> **out_properties,
+                    size_t *out_count) const;
 };
 
 inline dtype make_bytes_dtype(size_t alignment) {
