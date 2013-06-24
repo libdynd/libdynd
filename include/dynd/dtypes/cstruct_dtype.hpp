@@ -219,6 +219,54 @@ inline dtype make_cstruct_dtype(const dtype& dt0, const std::string& name0,
     return make_cstruct_dtype(5, field_types, field_names);
 }
 
+/** Makes a struct dtype with the specified fields */
+inline dtype make_cstruct_dtype(const dtype& dt0, const std::string& name0,
+                const dtype& dt1, const std::string& name1, const dtype& dt2, const std::string& name2,
+                const dtype& dt3, const std::string& name3, const dtype& dt4, const std::string& name4,
+                const dtype& dt5, const std::string& name5)
+{
+    dtype field_types[6];
+    std::string field_names[6];
+    field_types[0] = dt0;
+    field_types[1] = dt1;
+    field_types[2] = dt2;
+    field_types[3] = dt3;
+    field_types[4] = dt4;
+    field_types[5] = dt5;
+    field_names[0] = name0;
+    field_names[1] = name1;
+    field_names[2] = name2;
+    field_names[3] = name3;
+    field_names[4] = name4;
+    field_names[5] = name5;
+    return make_cstruct_dtype(6, field_types, field_names);
+}
+
+/** Makes a struct dtype with the specified fields */
+inline dtype make_cstruct_dtype(const dtype& dt0, const std::string& name0,
+                const dtype& dt1, const std::string& name1, const dtype& dt2, const std::string& name2,
+                const dtype& dt3, const std::string& name3, const dtype& dt4, const std::string& name4,
+                const dtype& dt5, const std::string& name5, const dtype& dt6, const std::string& name6)
+{
+    dtype field_types[7];
+    std::string field_names[7];
+    field_types[0] = dt0;
+    field_types[1] = dt1;
+    field_types[2] = dt2;
+    field_types[3] = dt3;
+    field_types[4] = dt4;
+    field_types[5] = dt5;
+    field_types[6] = dt6;
+    field_names[0] = name0;
+    field_names[1] = name1;
+    field_names[2] = name2;
+    field_names[3] = name3;
+    field_names[4] = name4;
+    field_names[5] = name5;
+    field_names[6] = name6;
+    return make_cstruct_dtype(7, field_types, field_names);
+}
+
 /**
  * \brief Checks whether a set of offsets can be used for cstruct.
  *

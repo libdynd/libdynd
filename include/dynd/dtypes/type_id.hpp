@@ -89,6 +89,8 @@ enum type_id_t {
     categorical_type_id,
     // A 32-bit date type
     date_type_id,
+    // A 64-bit datetime type
+    datetime_type_id,
     // A 32-bit date type limited to business days
     busdate_type_id,
     // A UTF-8 encoded string type for holding JSON

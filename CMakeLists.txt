@@ -130,6 +130,7 @@ set(libdynd_SRC
     src/dynd/dtypes/datashape_formatter.cpp
     src/dynd/dtypes/datashape_parser.cpp
     src/dynd/dtypes/date_dtype.cpp
+    src/dynd/dtypes/datetime_dtype.cpp
     src/dynd/dtypes/dtype_dtype.cpp
     src/dynd/dtypes/dynd_float16.cpp
     src/dynd/dtypes/dynd_float128.cpp
@@ -169,6 +170,7 @@ set(libdynd_SRC
     include/dynd/dtypes/datashape_formatter.hpp
     include/dynd/dtypes/datashape_parser.hpp
     include/dynd/dtypes/date_dtype.hpp
+    include/dynd/dtypes/datetime_dtype.hpp
     include/dynd/dtypes/dtype_dtype.hpp
     include/dynd/dtypes/dynd_float16.hpp
     include/dynd/dtypes/dynd_float128.hpp

@@ -28,7 +28,7 @@ using namespace std;
 using namespace dynd;
 
 date_dtype::date_dtype()
-    : base_dtype(date_type_id, datetime_kind, 4, 4, dtype_flag_scalar, 0, 0)
+    : base_dtype(date_type_id, datetime_kind, 4, scalar_align_of<int32_t>::value, dtype_flag_scalar, 0, 0)
 {
 }
 
@@ -309,7 +309,7 @@ void date_dtype::get_dynamic_ndobject_functions(const std::pair<std::string, gfu
     *out_count = sizeof(date_ndobject_functions) / sizeof(date_ndobject_functions[0]);
 }
 
-///////// property accessor kernels (used by date_property_dtype)
+///////// property accessor kernels (used by property_dtype)
 
 namespace {
     void get_property_kernel_year_single(char *dst, const char *src,
@@ -406,7 +406,6 @@ namespace {
 
 size_t date_dtype::get_elwise_property_index(const std::string& property_name) const
 {
-    // TODO: Use an enum here
     if (property_name == "year") {
         return dateprop_year;
     } else if (property_name == "month") {
@@ -462,7 +461,6 @@ size_t date_dtype::make_elwise_property_getter_kernel(
 {
     offset_out = make_kernreq_to_single_kernel_adapter(out, offset_out, kernreq);
     kernel_data_prefix *e = out->get_at<kernel_data_prefix>(offset_out);
-    // TODO: Use an enum for the property index
     switch (src_property_index) {
         case dateprop_year:
             e->set_function<unary_single_operation_t>(&get_property_kernel_year_single);
@@ -497,7 +495,6 @@ size_t date_dtype::make_elwise_property_setter_kernel(
 {
     offset_out = make_kernreq_to_single_kernel_adapter(out, offset_out, kernreq);
     kernel_data_prefix *e = out->get_at<kernel_data_prefix>(offset_out);
-    // TODO: Use an enum for the property index
     switch (dst_property_index) {
         case dateprop_days_after_1970_int64:
             e->set_function<unary_single_operation_t>(&set_property_kernel_days_after_1970_int64_single);
