@@ -3,8 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__DATE_DTYPE_HPP_
-#define _DYND__DATE_DTYPE_HPP_
+#ifndef _DYND__DATETIME_DTYPE_HPP_
+#define _DYND__DATETIME_DTYPE_HPP_
 
 #include <dynd/dtype.hpp>
 #include <dynd/dtype_assign.hpp>
@@ -124,4 +124,4 @@ inline dtype make_datetime_dtype(datetime_unit_t unit, datetime_tz_t timezone) {
 
 } // namespace dynd
 
-#endif // _DYND__DATE_DTYPE_HPP_
+#endif // _DYND__DATETIME_DTYPE_HPP_

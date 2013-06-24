@@ -83,7 +83,7 @@ namespace {
      * datetime unit.
      */
     const dtype& get_default_struct_dtype(datetime_unit_t unit) {
-        if ((int32_t)unit > 0 && (int32_t)unit < 6) {
+        if ((int32_t)unit >= 0 && (int32_t)unit < 6) {
             return datetime_default_structs[unit];
         } else {
             stringstream ss;

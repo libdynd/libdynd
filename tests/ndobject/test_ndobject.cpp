@@ -157,31 +157,31 @@ TEST(NDObject, IntScalarConstructor) {
     EXPECT_TRUE(a.is_scalar());
     EXPECT_EQ(make_dtype<int>(), a.get_dtype());
     ss.str(""); ss << a;
-    EXPECT_EQ("ndobject(3, int32)", ss.str());
+    EXPECT_EQ("array(3, int32)", ss.str());
 
     a = (int8_t)1;
     EXPECT_TRUE(a.is_scalar());
     EXPECT_EQ(make_dtype<int8_t>(), a.get_dtype());
     ss.str(""); ss << a;
-    EXPECT_EQ("ndobject(1, int8)", ss.str());
+    EXPECT_EQ("array(1, int8)", ss.str());
 
     a = (int16_t)2;
     EXPECT_TRUE(a.is_scalar());
     EXPECT_EQ(make_dtype<int16_t>(), a.get_dtype());
     ss.str(""); ss << a;
-    EXPECT_EQ("ndobject(2, int16)", ss.str());
+    EXPECT_EQ("array(2, int16)", ss.str());
 
     a = (int32_t)3;
     EXPECT_TRUE(a.is_scalar());
     EXPECT_EQ(make_dtype<int32_t>(), a.get_dtype());
     ss.str(""); ss << a;
-    EXPECT_EQ("ndobject(3, int32)", ss.str());
+    EXPECT_EQ("array(3, int32)", ss.str());
 
     a = (int64_t)4;
     EXPECT_TRUE(a.is_scalar());
     EXPECT_EQ(make_dtype<int64_t>(), a.get_dtype());
     ss.str(""); ss << a;
-    EXPECT_EQ("ndobject(4, int64)", ss.str());
+    EXPECT_EQ("array(4, int64)", ss.str());
 }
 
 TEST(NDObject, UIntScalarConstructor) {
@@ -191,25 +191,25 @@ TEST(NDObject, UIntScalarConstructor) {
     EXPECT_TRUE(a.is_scalar());
     EXPECT_EQ(make_dtype<uint8_t>(), a.get_dtype());
     ss.str(""); ss << a;
-    EXPECT_EQ("ndobject(5, uint8)", ss.str());
+    EXPECT_EQ("array(5, uint8)", ss.str());
 
     a = (uint16_t)6;
     EXPECT_TRUE(a.is_scalar());
     EXPECT_EQ(make_dtype<uint16_t>(), a.get_dtype());
     ss.str(""); ss << a;
-    EXPECT_EQ("ndobject(6, uint16)", ss.str());
+    EXPECT_EQ("array(6, uint16)", ss.str());
 
     a = (uint32_t)7;
     EXPECT_TRUE(a.is_scalar());
     EXPECT_EQ(make_dtype<uint32_t>(), a.get_dtype());
     ss.str(""); ss << a;
-    EXPECT_EQ("ndobject(7, uint32)", ss.str());
+    EXPECT_EQ("array(7, uint32)", ss.str());
 
     a = (uint64_t)8;
     EXPECT_TRUE(a.is_scalar());
     EXPECT_EQ(make_dtype<uint64_t>(), a.get_dtype());
     ss.str(""); ss << a;
-    EXPECT_EQ("ndobject(8, uint64)", ss.str());
+    EXPECT_EQ("array(8, uint64)", ss.str());
 }
 
 TEST(NDObject, FloatScalarConstructor) {
@@ -219,13 +219,13 @@ TEST(NDObject, FloatScalarConstructor) {
     EXPECT_TRUE(a.is_scalar());
     EXPECT_EQ(make_dtype<float>(), a.get_dtype());
     ss.str(""); ss << a;
-    EXPECT_EQ("ndobject(3.25, float32)", ss.str());
+    EXPECT_EQ("array(3.25, float32)", ss.str());
 
     a = 3.5;
     EXPECT_TRUE(a.is_scalar());
     EXPECT_EQ(make_dtype<double>(), a.get_dtype());
     ss.str(""); ss << a;
-    EXPECT_EQ("ndobject(3.5, float64)", ss.str());
+    EXPECT_EQ("array(3.5, float64)", ss.str());
 
     a = complex<float>(3.14f, 1.0f);
     EXPECT_TRUE(a.is_scalar());

@@ -15,6 +15,7 @@
 #include <dynd/dtypes/fixedstring_dtype.hpp>
 #include <dynd/dtypes/json_dtype.hpp>
 #include <dynd/dtypes/date_dtype.hpp>
+#include <dynd/dtypes/datetime_dtype.hpp>
 #include <dynd/dtypes/bytes_dtype.hpp>
 #include <dynd/dtypes/dtype_dtype.hpp>
 
@@ -77,6 +78,7 @@ namespace {
                 reserved_typenames.insert(i->first);
             }
             reserved_typenames.insert("string");
+            reserved_typenames.insert("datetime");
         }
     };
     static init_bit builtin_types_initializer;
@@ -317,6 +319,59 @@ static dtype parse_string_parameters(const char *&begin, const char *end)
     }
 }
 
+// datetime_type : datetime('unit') |
+//               datetime('unit','timezone')
+// This is called after 'datetime' is already matched
+static dtype parse_datetime_parameters(const char *&begin, const char *end)
+{
+    if (parse_token(begin, end, '(')) {
+        datetime_unit_t unit;
+        datetime_tz_t timezone = tz_abstract;
+        string unit_str;
+        const char *saved_begin = begin;
+        if (!parse_quoted_string(begin, end, unit_str)) {
+            throw datashape_parse_error(begin, "expected a datetime unit string");
+        }
+        if (unit_str == "hour") {
+            unit = datetime_unit_hour;
+        } else if (unit_str == "min") {
+            unit = datetime_unit_minute;
+        } else if (unit_str == "sec") {
+            unit = datetime_unit_second;
+        } else if (unit_str == "msec") {
+            unit = datetime_unit_msecond;
+        } else if (unit_str == "usec") {
+            unit = datetime_unit_usecond;
+        } else if (unit_str == "nsec") {
+            unit = datetime_unit_nsecond;
+        } else {
+            throw datashape_parse_error(saved_begin, "invalid datetime unit");
+        }
+        // Parse the timezone
+        if (parse_token(begin, end, ',')) {
+            string timezone_str;
+            saved_begin = begin;
+            if (!parse_quoted_string(begin, end, timezone_str)) {
+                throw datashape_parse_error(begin, "expected a datetime timezone string");
+            }
+            if (timezone_str == "abstract") {
+                timezone = tz_abstract;
+            } else if (timezone_str == "UTC" || timezone_str == "utc") {
+                timezone = tz_utc;
+            } else {
+                throw datashape_parse_error(saved_begin, "invalid datetime timezone");
+            }
+        }
+        if (!parse_token(begin, end, ')')) {
+            throw datashape_parse_error(begin, "expected closing ')'");
+        }
+         
+        return make_datetime_dtype(unit, timezone);
+    } else {
+        throw datashape_parse_error(begin, "expected datetime parameters opening '('");
+    }
+}
+
 // record_item : NAME COLON rhs_expression
 static bool parse_record_item(const char *&begin, const char *end, map<string, dtype>& symtable,
                 string& out_field_name, dtype& out_field_type)
@@ -420,6 +475,8 @@ static dtype parse_rhs_expression(const char *&begin, const char *end, map<strin
             }
         } else if (n == "string") {
             result = parse_string_parameters(begin, end);
+        } else if (n == "datetime") {
+            result = parse_datetime_parameters(begin, end);
         } else {
             map<string,dtype>::const_iterator i = builtin_types.find(n);
             if (i != builtin_types.end()) {
