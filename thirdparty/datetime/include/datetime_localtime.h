@@ -6,23 +6,6 @@
 namespace datetime {
 
 /**
- * Converts a datetimestruct in UTC to a datetimestruct in local time,
- * also returning the timezone offset applied.
- *
- * Throws an exception on failure.
- */
-void convert_utc_to_local(datetime_fields *out_dtf_local,
-                const datetime_fields *dtf_utc, int *out_timezone_offset);
-
-/**
- * Converts a datetimestruct in local time to a datetimestruct in UTC.
- *
- * Throws an exception on failure.
- */
-void convert_local_to_utc(datetime_fields *out_dtf_utc,
-                const datetime_fields *dtf_local);
-
-/**
  * Fills in the year, month, and day fields with the
  * current date in local time.
  */

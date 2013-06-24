@@ -13,7 +13,7 @@
 #include <dynd/dtypes/cstruct_dtype.hpp>
 #include <dynd/dtypes/string_dtype.hpp>
 #include <dynd/dtypes/unary_expr_dtype.hpp>
-#include <dynd/kernels/date_assignment_kernels.hpp>
+#include <dynd/kernels/datetime_assignment_kernels.hpp>
 #include <dynd/kernels/date_expr_kernels.hpp>
 #include <dynd/kernels/string_assignment_kernels.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
@@ -93,7 +93,7 @@ namespace {
         }
     }
 
-    datetime::datetime_unit_t dynd_unit_to_datetime_unit(datetime_unit_t unit) {
+    static datetime::datetime_unit_t dynd_unit_to_datetime_unit(datetime_unit_t unit) {
         switch (unit) {
             case datetime_unit_hour:
                 return datetime::datetime_unit_hour;
@@ -212,7 +212,8 @@ void datetime_dtype::set_utf8_string(const char *DYND_UNUSED(metadata),
     }
     // TODO: Parsing adjustments/error handling based on the timezone
     *reinterpret_cast<int64_t *>(data) = datetime::parse_iso_8601_datetime(
-                            utf8_str, dynd_unit_to_datetime_unit(m_unit), casting);
+                            utf8_str, dynd_unit_to_datetime_unit(m_unit),
+                            m_timezone == tz_abstract, casting);
 }
 
 
@@ -241,7 +242,7 @@ void datetime_dtype::print_data(std::ostream& o, const char *DYND_UNUSED(metadat
                     dynd_unit_to_datetime_unit(m_unit));
     // TODO: Handle distiction between printing abstract and UTC units
     o << datetime::make_iso_8601_datetime(&fields,
-                    false, dynd_unit_to_datetime_unit(m_unit));
+                    dynd_unit_to_datetime_unit(m_unit), m_timezone == tz_abstract);
 }
 
 void datetime_dtype::print_dtype(std::ostream& o) const
@@ -303,7 +304,8 @@ size_t datetime_dtype::make_assignment_kernel(
                             get_data_size(), get_data_alignment(), kernreq);
         } else if (src_dt.get_kind() == string_kind) {
             // Assignment from strings
-            return make_string_to_date_assignment_kernel(out, offset_out,
+            return make_string_to_datetime_assignment_kernel(out, offset_out,
+                            dst_dt, dst_metadata,
                             src_dt, src_metadata,
                             kernreq, errmode, ectx);
         } else if (src_dt.get_kind() == struct_kind) {
@@ -321,8 +323,9 @@ size_t datetime_dtype::make_assignment_kernel(
     } else {
         if (dst_dt.get_kind() == string_kind) {
             // Assignment to strings
-            return make_date_to_string_assignment_kernel(out, offset_out,
+            return make_datetime_to_string_assignment_kernel(out, offset_out,
                             dst_dt, dst_metadata,
+                            src_dt, src_metadata,
                             kernreq, errmode, ectx);
         } else if (dst_dt.get_kind() == struct_kind) {
             // Convert to struct using the "struct" property

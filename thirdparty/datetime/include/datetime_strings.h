@@ -33,42 +33,39 @@ namespace datetime {
  * + Doesn't (yet) handle the "YYYY-DDD" or "YYYY-Www" formats.
  * + Doesn't handle leap seconds (seconds value has 60 in these cases).
  * + Doesn't handle 24:00:00 as synonym for midnight (00:00:00) tomorrow
- * + Accepts special values "NaT" (not a time), "Today", (current
- *   day according to local time) and "Now" (current time in UTC).
+ * + Accepts special values "", "NA", "NaT" (not a time), "null" as
+ *   missing value tokens.
  *
  * 'str' must be a NULL-terminated string, and 'len' must be its length.
  * 'unit' should contain -1 if the unit is unknown, or the unit
  *      which will be used if it is.
+ * 'is_abstract' should be true if no timezone specification is
+ *      desired, false otherwise.
  * 'casting' controls how the detected unit from the string is allowed
  *           to be cast to the 'unit' parameter.
  *
  * 'out' gets filled with the parsed date-time.
- * 'out_local' gets set to 1 if the parsed time was in local time,
- *      to 0 otherwise. The values 'now' and 'today' don't get counted
- *      as local, and neither do UTC +/-#### timezone offsets, because
- *      they aren't using the computer's local timezone offset.
  * 'out_bestunit' gives a suggested unit based on the amount of
- *      resolution provided in the string, or -1 for NaT.
- * 'out_special' gets set to 1 if the parsed time was 'today',
- *      'now', or ''/'NaT'. For 'today', the unit recommended is
- *      'D', for 'now', the unit recommended is 's', and for 'NaT'
- *      the unit recommended is 'Y'.
+ *      resolution provided in the string, or -1 for NA.
+ * 'out_missing' gets set to 1 if the parsed value was "NA" or another
+ *      missing value token. If the argument provided is NULL, raises
+ *      an exception on a missing value.
  *
  * Returns 0 on success, -1 on failure.
  */
 void parse_iso_8601_datetime(const char *str, size_t len,
                     datetime_unit_t unit,
+                    bool is_abstract,
                     datetime_conversion_rule_t casting,
                     datetime_fields *out,
-                    bool *out_local,
                     datetime_unit_t *out_bestunit,
-                    bool *out_special);
+                    bool *out_missing=NULL);
 
 /*
  * Provides a string length to use for converting datetime
  * objects with the given local and unit settings.
  */
-int get_datetime_iso_8601_strlen(bool local, datetime_unit_t base);
+int get_datetime_iso_8601_strlen(datetime_unit_t unit, bool is_abstract, int tzoffset);
 
 /**
  * Simplified interface to date parsing.
@@ -81,8 +78,9 @@ inline date_val_t parse_iso_8601_date(const std::string& str, datetime_unit_t un
                     datetime_conversion_rule_t casting)
 {
     datetime_fields fld;
-    parse_iso_8601_datetime(str.c_str(), str.length(), unit, casting,
-                    &fld, NULL, NULL, NULL);
+    bool out_missing = false;
+    parse_iso_8601_datetime(str.c_str(), str.length(), unit, true, casting,
+                    &fld, NULL, &out_missing);
     return fld.as_date_val(unit);
 }
 
@@ -94,47 +92,57 @@ inline date_val_t parse_iso_8601_date(const std::string& str, datetime_unit_t un
  * \param casting  The casting rule to apply to the parsing.
  */
 inline datetime_val_t parse_iso_8601_datetime(const std::string& str, datetime_unit_t unit,
-                    datetime_conversion_rule_t casting)
+                    bool is_abstract, datetime_conversion_rule_t casting)
 {
     datetime_fields fld;
-    parse_iso_8601_datetime(str.c_str(), str.length(), unit, casting,
-                    &fld, NULL, NULL, NULL);
+    bool out_missing = false;
+    parse_iso_8601_datetime(str.c_str(), str.length(), unit, is_abstract, casting,
+                    &fld, NULL, &out_missing);
     return fld.as_datetime_val(unit);
 }
 
 /*
- * Converts an npy_datetimestruct to an (almost) ISO 8601
- * NULL-terminated string.
+ * Converts an datetime_fields to an (almost) ISO 8601
+ * NULL-terminated string. If the string fits in the space exactly,
+ * it leaves out the NULL terminator and returns success.
  *
- * If 'local' is non-zero, it produces a string in local time with
- * a +-#### timezone offset, otherwise it uses timezone Z (UTC).
+ * The differences from ISO 8601 are the 'NA' missing value string, and
+ * the number of year digits is >= 4 instead of strictly 4.
  *
  * 'unit' restricts the output to that unit. Set 'unit' to
- * -1 to auto-detect a base after which all the values are zero.
+ * datetime_unit_unspecified to auto-detect a unit after which
+ * all the values are zero.
  *
- *  'tzoffset' is used if 'local' is enabled, and 'tzoffset' is
+ * If 'is_abstract' is true, produces a string with no 'Z' or
+ * timezone offset at the end.
+ *
+ *  'tzoffset' is used if 'is_abstract' is false, and 'tzoffset' is
  *  set to a value other than -1. This is a manual override for
  *  the local time zone to use, as an offset in minutes.
  *
  *  'casting' controls whether data loss is allowed by truncating
- *  the data to a coarser unit. This interacts with 'local', slightly,
- *  in order to form a date unit string as a local time, the casting
- *  must be unsafe.
+ *  the data to a coarser unit.
  *
- *  Returns the length of the string populated in outstr.
+ *  Throws an exception on error.
  */
-size_t make_iso_8601_datetime(const datetime_fields *dtf, char *outstr, size_t outlen,
-                    bool local = false, datetime_unit_t unit = datetime_unit_unspecified, int tzoffset = -1,
-                    datetime_conversion_rule_t casting = datetime_conversion_strict);
+size_t make_iso_8601_datetime(const datetime_fields *dts, char *outstr, size_t outlen,
+                    datetime_unit_t unit, bool is_abstract, int tzoffset,
+                    datetime_conversion_rule_t casting);
 
 std::string make_iso_8601_datetime(const datetime_fields *dtf,
-                    bool local = false, datetime_unit_t unit = datetime_unit_unspecified, int tzoffset = -1,
-                    datetime_conversion_rule_t casting = datetime_conversion_strict);
+                    datetime_unit_t unit = datetime_unit_unspecified, bool is_abstract = true,
+                    int tzoffset = -1, datetime_conversion_rule_t casting = datetime_conversion_strict);
+
+inline std::string make_iso_8601_datetime(datetime_val_t datetime, datetime_unit_t unit, bool is_abstract) {
+    datetime_fields dtf;
+    dtf.set_from_datetime_val(datetime, unit);
+    return make_iso_8601_datetime(&dtf, unit, is_abstract);
+}
 
 inline std::string make_iso_8601_date(date_val_t date, datetime_unit_t unit = datetime_unit_day) {
     datetime_fields dtf;
     dtf.set_from_date_val(date, unit);
-    return make_iso_8601_datetime(&dtf, false, unit);
+    return make_iso_8601_datetime(&dtf, unit, true);
 }
 
 } // namespace datetime

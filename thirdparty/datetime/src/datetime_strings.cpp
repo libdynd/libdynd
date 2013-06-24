@@ -33,8 +33,8 @@ using namespace datetime;
  * + Doesn't (yet) handle the "YYYY-DDD" or "YYYY-Www" formats.
  * + Doesn't handle leap seconds (seconds value has 60 in these cases).
  * + Doesn't handle 24:00:00 as synonym for midnight (00:00:00) tomorrow
- * + Accepts special values "NaT" (not a time), "Today", (current
- *   day according to local time) and "Now" (current time in UTC).
+ * + Accepts special values "", "NA", "NaT" (not a time), "null" as
+ *   missing value tokens.
  *
  * 'str' must be a NULL-terminated string, and 'len' must be its length.
  * 'unit' should contain -1 if the unit is unknown, or the unit
@@ -43,26 +43,22 @@ using namespace datetime;
  *           to be cast to the 'unit' parameter.
  *
  * 'out' gets filled with the parsed date-time.
- * 'out_local' gets set to 1 if the parsed time was in local time,
- *      to 0 otherwise. The values 'now' and 'today' don't get counted
- *      as local, and neither do UTC +/-#### timezone offsets, because
- *      they aren't using the computer's local timezone offset.
+ * 'out_abstract' gets set to 1 if the parsed time had no timezone information.
  * 'out_bestunit' gives a suggested unit based on the amount of
- *      resolution provided in the string, or -1 for NaT.
- * 'out_special' gets set to 1 if the parsed time was 'today',
- *      'now', or ''/'NaT'. For 'today', the unit recommended is
- *      'D', for 'now', the unit recommended is 's', and for 'NaT'
- *      the unit recommended is 'Y'.
+ *      resolution provided in the string, or -1 for NA.
+ * 'out_missing' gets set to 1 if the parsed value was "NA" or another
+ *      missing value token. If the argument provided is NULL, raises
+ *      an exception on a missing value.
  *
  * Returns 0 on success, -1 on failure.
  */
 void datetime::parse_iso_8601_datetime(const char *str, size_t len,
                     datetime_unit_t unit,
+                    bool is_abstract,
                     datetime_conversion_rule_t casting,
                     datetime_fields *out,
-                    bool *out_local,
                     datetime_unit_t *out_bestunit,
-                    bool *out_special)
+                    bool *out_missing)
 {
     int year_leap = 0;
     int i, numdigits;
@@ -74,10 +70,11 @@ void datetime::parse_iso_8601_datetime(const char *str, size_t len,
     memset(out, 0, sizeof(datetime_fields));
     out->month = 1;
     out->day = 1;
-
+    
     /*
      * Convert the empty string, case-variants of "NaT",
-     * and case-variants of "NA" to not-a-time.
+     * case-variants of "NA", case-variants of "null",
+     * and case-variants of "none" to not-a-time.
      */
     if (len <= 0 || (len == 3 &&
                         tolower(str[0]) == 'n' &&
@@ -85,62 +82,33 @@ void datetime::parse_iso_8601_datetime(const char *str, size_t len,
                         tolower(str[2]) == 't') ||
                     (len == 2 &&
                         tolower(str[0]) == 'n' &&
-                        tolower(str[1]) == 'a')) {
+                        tolower(str[1]) == 'a') ||
+                    (len == 4 && tolower(str[0]) == 'n' &&
+                        tolower(str[1]) == 'u' &&
+                        tolower(str[2]) == 'l' &&
+                        tolower(str[3]) == 'l') ||
+                    (len == 4 && tolower(str[0]) == 'n' &&
+                        tolower(str[1]) == 'o' &&
+                        tolower(str[2]) == 'n' &&
+                        tolower(str[3]) == 'e')) {
         out->year = DATETIME_DATETIME_NAT;
 
-        /*
-         * Indicate that this was a special value, and
-         * that no unit can be recommended.
-         */
-        if (out_local != NULL) {
-            *out_local = false;
-        }
         if (out_bestunit != NULL) {
             *out_bestunit = datetime_unit_unspecified;
         }
-        if (out_special != NULL) {
-            *out_special = true;
-        }
-        return;
-    }
-
-    /* The string "now" resolves to the current UTC time */
-    if (len == 3 && tolower(str[0]) == 'n' &&
-                    tolower(str[1]) == 'o' &&
-                    tolower(str[2]) == 'w') {
-        datetime_val_t rawtime = get_current_utc_datetime_seconds();
-
-        bestunit = datetime_unit_second;
-
-        /*
-         * Indicate that this was a special value.
-         */
-        if (out_local != NULL) {
-            *out_local = false;
-        }
-        if (out_bestunit != NULL) {
-            *out_bestunit = bestunit;
-        }
-        if (out_special != NULL) {
-            *out_special = true;
-        }
-
-        /* Check the casting rule */
-        if (unit != datetime_unit_unspecified &&
-                    !satisfies_conversion_rule(unit, bestunit, casting)) {
+        if (out_missing != NULL) {
+            *out_missing = true;
+        } else {
             std::stringstream ss;
-            ss << "cannot parse \"" << str << "\" as a datetime with unit ";
-            ss << unit << " and " << casting << " casting";
+            ss << "cannot parse \"" << str << "\" as a datetime without missing value support";
             throw std::runtime_error(ss.str());
         }
-
-        out->set_from_datetime_val(rawtime, bestunit);
         return;
     }
 
-    /* Anything else isn't a special value */
-    if (out_special != NULL) {
-        *out_special = false;
+    /* Anything else isn't a missing value */
+    if (out_missing != NULL) {
+        *out_missing = false;
     }
 
     substr = str;
@@ -179,9 +147,6 @@ void datetime::parse_iso_8601_datetime(const char *str, size_t len,
 
     /* Next character must be a '-' or the end of the string */
     if (sublen == 0) {
-        if (out_local != NULL) {
-            *out_local = false;
-        }
         bestunit = datetime_unit_year;
         goto finish;
     }
@@ -216,9 +181,6 @@ void datetime::parse_iso_8601_datetime(const char *str, size_t len,
 
     /* Next character must be a '-' or the end of the string */
     if (sublen == 0) {
-        if (out_local != NULL) {
-            *out_local = false;
-        }
         bestunit = datetime_unit_month;
         goto finish;
     }
@@ -253,9 +215,6 @@ void datetime::parse_iso_8601_datetime(const char *str, size_t len,
 
     /* Next character must be a 'T', ' ', or end of string */
     if (sublen == 0) {
-        if (out_local != NULL) {
-            *out_local = false;
-        }
         bestunit = datetime_unit_day;
         goto finish;
     }
@@ -420,21 +379,25 @@ void datetime::parse_iso_8601_datetime(const char *str, size_t len,
 
 parse_timezone:
     if (sublen == 0) {
-        convert_local_to_utc(out, out);
-
-        /* Since neither "Z" nor a time-zone was specified, it's local */
-        if (out_local != NULL) {
-            *out_local = true;
+        // If there's no timezone, make sure the abstract timezone
+        // was requested
+        if (!is_abstract && casting != datetime_conversion_relaxed) {
+            std::stringstream ss;
+            ss << "cannot parse \"" << str << "\" as a datetime with timezone using rule \"" << casting << "\"";
+            ss << ", because no timezone was present in the string";
+            throw std::runtime_error(ss.str());
         }
-
         goto finish;
     }
 
     /* UTC specifier */
     if (*substr == 'Z') {
         /* "Z" means not local */
-        if (out_local != NULL) {
-            *out_local = false;
+        if (is_abstract && casting != datetime_conversion_relaxed) {
+            std::stringstream ss;
+            ss << "cannot parse \"" << str << "\" as an abstract datetime using rule \"" << casting << "\"";
+            ss << ", because a timezone was present in the string";
+            throw std::runtime_error(ss.str());
         }
 
         if (sublen == 1) {
@@ -449,12 +412,12 @@ parse_timezone:
     else if (*substr == '-' || *substr == '+') {
         int offset_neg = 0, offset_hour = 0, offset_minute = 0;
 
-        /*
-         * Since "local" means local with respect to the current
-         * machine, we say this is non-local.
-         */
-        if (out_local != NULL) {
-            *out_local = false;
+        // A time zone offset means it isn't abstract
+        if (is_abstract && casting != datetime_conversion_relaxed) {
+            std::stringstream ss;
+            ss << "cannot parse \"" << str << "\" as an abstract datetime using rule \"" << casting << "\"";
+            ss << ", because a timezone was present in the string";
+            throw std::runtime_error(ss.str());
         }
 
         if (*substr == '-') {
@@ -502,12 +465,15 @@ parse_timezone:
             }
         }
 
-        /* Apply the time zone offset */
-        if (offset_neg) {
-            offset_hour = -offset_hour;
-            offset_minute = -offset_minute;
+        // Apply the timezone offset unless we're parsing
+        // for an abstract timezone, in which case we throw it away
+        if (!is_abstract) {
+            if (offset_neg) {
+                offset_hour = -offset_hour;
+                offset_minute = -offset_minute;
+            }
+            out->add_minutes(-60 * offset_hour - offset_minute);
         }
-        out->add_minutes(-60 * offset_hour - offset_minute);
     }
 
     /* Skip trailing whitespace */
@@ -547,7 +513,7 @@ parse_error:
  * Provides a string length to use for converting datetime
  * objects with the given local and unit settings.
  */
-int datetime::get_datetime_iso_8601_strlen(bool local, datetime_unit_t unit)
+int datetime::get_datetime_iso_8601_strlen(datetime_unit_t unit, bool is_abstract, int tzoffset)
 {
     int len = 0;
 
@@ -587,8 +553,8 @@ int datetime::get_datetime_iso_8601_strlen(bool local, datetime_unit_t unit)
             throw runtime_error("Unrecognized datetime unit");
     }
 
-    if (unit >= datetime_unit_hour) {
-        if (local) {
+    if (unit >= datetime_unit_hour && !is_abstract) {
+        if (tzoffset != -1) {
             len += 5;  /* "+####" or "-####" */
         }
         else {
@@ -650,29 +616,27 @@ static datetime_unit_t lossless_unit_from_datetime_fields(const datetime_fields 
  * NULL-terminated string. If the string fits in the space exactly,
  * it leaves out the NULL terminator and returns success.
  *
- * The differences from ISO 8601 are the 'NaT' string, and
+ * The differences from ISO 8601 are the 'NA' missing value string, and
  * the number of year digits is >= 4 instead of strictly 4.
- *
- * If 'local' is non-zero, it produces a string in local time with
- * a +-#### timezone offset, otherwise it uses timezone Z (UTC).
  *
  * 'unit' restricts the output to that unit. Set 'unit' to
  * datetime_unit_unspecified to auto-detect a unit after which
  * all the values are zero.
  *
- *  'tzoffset' is used if 'local' is enabled, and 'tzoffset' is
+ * If 'is_abstract' is true, produces a string with no 'Z' or
+ * timezone offset at the end.
+ *
+ *  'tzoffset' is used if 'is_abstract' is false, and 'tzoffset' is
  *  set to a value other than -1. This is a manual override for
  *  the local time zone to use, as an offset in minutes.
  *
  *  'casting' controls whether data loss is allowed by truncating
- *  the data to a coarser unit. This interacts with 'local', slightly,
- *  in order to form a date unit string as a local time, the casting
- *  must be unsafe.
+ *  the data to a coarser unit.
  *
  *  Throws an exception on error.
  */
 size_t datetime::make_iso_8601_datetime(const datetime_fields *dts, char *outstr, size_t outlen,
-                    bool local, datetime_unit_t unit, int tzoffset,
+                    datetime_unit_t unit, bool is_abstract, int tzoffset,
                     datetime_conversion_rule_t casting)
 {
     datetime_fields dtf_local;
@@ -696,21 +660,6 @@ size_t datetime::make_iso_8601_datetime(const datetime_fields *dts, char *outstr
         return 2;
     }
 
-    /*
-     * Only do local time within a reasonable year range. The years
-     * earlier than 1970 are not made local, because the Windows API
-     * raises an error when they are attempted. For consistency, this
-     * restriction is applied to all platforms.
-     *
-     * Note that this only affects how the datetime becomes a string.
-     * The result is still completely unambiguous, it only means
-     * that datetimes outside this range will not include a time zone
-     * when they are printed.
-     */
-    if ((dts->year < 1970 || dts->year >= 10000) && tzoffset == -1) {
-        local = 0;
-    }
-
     /* Automatically detect a good unit */
     if (unit == -1) {
         unit = lossless_unit_from_datetime_fields(dts);
@@ -718,7 +667,7 @@ size_t datetime::make_iso_8601_datetime(const datetime_fields *dts, char *outstr
          * If there's a timezone, use at least minutes precision,
          * and never split up hours and minutes by default
          */
-        if ((unit < datetime_unit_minute && local) || unit == datetime_unit_hour) {
+        if ((unit < datetime_unit_minute && !is_abstract) || unit == datetime_unit_hour) {
             unit = datetime_unit_minute;
         }
         /* Don't split up dates by default */
@@ -736,15 +685,8 @@ size_t datetime::make_iso_8601_datetime(const datetime_fields *dts, char *outstr
         unit = datetime_unit_day;
     }
 
-    /* Use the C API to convert from UTC to local time */
-    if (local && tzoffset == -1) {
-        convert_utc_to_local(&dtf_local, dts, &timezone_offset);
-
-        /* Set dts to point to our local time instead of the UTC time */
-        dts = &dtf_local;
-    }
-    /* Use the manually provided tzoffset */
-    else if (local) {
+    // Use the manually provided tzoffset if applicable
+    if (!is_abstract && tzoffset != -1) {
         /* Make a copy of the datetime_fields we can modify */
         dtf_local = *dts;
 
@@ -761,21 +703,14 @@ size_t datetime::make_iso_8601_datetime(const datetime_fields *dts, char *outstr
      * is being cast according to the casting rule.
      */
     if (casting != datetime_conversion_relaxed) {
-        /* Producing a date as a local time is always 'unsafe' */
-        if (unit <= datetime_unit_day && local) {
-            throw std::runtime_error("cannot create a local timezone-based date string in strict conversion mode");
-        }
-        /* Only 'relaxed' allows data loss */
-        else {
-            datetime_unit_t unitprec;
+        datetime_unit_t unitprec;
 
-            unitprec = lossless_unit_from_datetime_fields(dts);
-            if (unitprec > unit) {
-                std::stringstream ss;
-                ss << "cannot create a string with unit precision " << unit;
-                ss << " which has data at precision " << unitprec;
-                throw std::runtime_error(ss.str());
-            }
+        unitprec = lossless_unit_from_datetime_fields(dts);
+        if (unitprec > unit) {
+            std::stringstream ss;
+            ss << "cannot create a string with unit precision " << unit;
+            ss << " which has data at precision " << unitprec;
+            throw std::runtime_error(ss.str());
         }
     }
 
@@ -1041,49 +976,51 @@ size_t datetime::make_iso_8601_datetime(const datetime_fields *dts, char *outstr
     sublen -= 3;
 
 add_time_zone:
-    if (local) {
-        /* Add the +/- sign */
-        if (sublen < 1) {
-            goto string_too_short;
-        }
-        if (timezone_offset < 0) {
-            substr[0] = '-';
-            timezone_offset = -timezone_offset;
-        }
-        else {
-            substr[0] = '+';
-        }
-        substr += 1;
-        sublen -= 1;
+    if (!is_abstract) {
+        if (tzoffset != -1) {
+            /* Add the +/- sign */
+            if (sublen < 1) {
+                goto string_too_short;
+            }
+            if (timezone_offset < 0) {
+                substr[0] = '-';
+                timezone_offset = -timezone_offset;
+            }
+            else {
+                substr[0] = '+';
+            }
+            substr += 1;
+            sublen -= 1;
 
-        /* Add the timezone offset */
-        if (sublen < 1 ) {
-            goto string_too_short;
+            /* Add the timezone offset */
+            if (sublen < 1 ) {
+                goto string_too_short;
+            }
+            substr[0] = (char)((timezone_offset / (10*60)) % 10 + '0');
+            if (sublen < 2 ) {
+                goto string_too_short;
+            }
+            substr[1] = (char)((timezone_offset / 60) % 10 + '0');
+            if (sublen < 3 ) {
+                goto string_too_short;
+            }
+            substr[2] = (char)(((timezone_offset % 60) / 10) % 10 + '0');
+            if (sublen < 4 ) {
+                goto string_too_short;
+            }
+            substr[3] = (char)((timezone_offset % 60) % 10 + '0');
+            substr += 4;
+            sublen -= 4;
         }
-        substr[0] = (char)((timezone_offset / (10*60)) % 10 + '0');
-        if (sublen < 2 ) {
-            goto string_too_short;
+        /* UTC "Zulu" time */
+        else {
+            if (sublen < 1) {
+                goto string_too_short;
+            }
+            substr[0] = 'Z';
+            substr += 1;
+            sublen -= 1;
         }
-        substr[1] = (char)((timezone_offset / 60) % 10 + '0');
-        if (sublen < 3 ) {
-            goto string_too_short;
-        }
-        substr[2] = (char)(((timezone_offset % 60) / 10) % 10 + '0');
-        if (sublen < 4 ) {
-            goto string_too_short;
-        }
-        substr[3] = (char)((timezone_offset % 60) % 10 + '0');
-        substr += 4;
-        sublen -= 4;
-    }
-    /* UTC "Zulu" time */
-    else {
-        if (sublen < 1) {
-            goto string_too_short;
-        }
-        substr[0] = 'Z';
-        substr += 1;
-        sublen -= 1;
     }
 
     /* Add a NULL terminator, and return */
@@ -1100,13 +1037,13 @@ string_too_short:
     throw std::runtime_error(ss.str());
 }
 
-std::string datetime::make_iso_8601_datetime(const datetime_fields *dts,
-                    bool local, datetime_unit_t unit, int tzoffset,
-                    datetime_conversion_rule_t casting)
+std::string datetime::make_iso_8601_datetime(const datetime_fields *dtf,
+                    datetime_unit_t unit, bool is_abstract,
+                    int tzoffset, datetime_conversion_rule_t casting)
 {
-    size_t result_size = get_datetime_iso_8601_strlen(local, unit);
+    size_t result_size = get_datetime_iso_8601_strlen(unit, is_abstract, tzoffset);
     std::string result(result_size, '\0');
-    result.resize(make_iso_8601_datetime(dts,
-                &result[0], result_size, local, unit, tzoffset, casting));
+    result.resize(make_iso_8601_datetime(dtf,
+                &result[0], result_size, unit, is_abstract, tzoffset, casting));
     return result;
 }
