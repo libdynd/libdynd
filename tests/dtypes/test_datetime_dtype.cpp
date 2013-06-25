@@ -98,7 +98,7 @@ TEST(DateTimeDType, CreateFromString) {
     EXPECT_EQ(tz_utc, dd->get_timezone());
 }
 
-TEST(DateDType, ValueCreationAbstractMinutes) {
+TEST(DateTimeDType, ValueCreationAbstractMinutes) {
     dtype d = make_datetime_dtype(datetime_unit_minute, tz_abstract), di = make_dtype<int64_t>();
 
     EXPECT_EQ(((1600-1970)*365 - (1972-1600)/4 + 3 - 365) * 1440LL + 4 * 60 + 16,
@@ -122,7 +122,7 @@ TEST(DateDType, ValueCreationAbstractMinutes) {
 }
 
 
-TEST(DateDType, ValueCreationUTCMinutes) {
+TEST(DateTimeDType, ValueCreationUTCMinutes) {
     dtype d = make_datetime_dtype(datetime_unit_minute, tz_utc), di = make_dtype<int64_t>();
 
     EXPECT_EQ(((1600-1970)*365 - (1972-1600)/4 + 3 - 365) * 1440LL + 4 * 60 + 16,
@@ -133,7 +133,7 @@ TEST(DateDType, ValueCreationUTCMinutes) {
                     ndobject("1601-01-01T00Z").ucast(d).view_scalars(di).as<int64_t>());
 }
 
-TEST(DateDType, ConvertToString) {
+TEST(DateTimeDType, ConvertToString) {
     EXPECT_EQ("2013-02-16T12",
                     ndobject("2013-02-16T12").cast(dtype("datetime('hour')")).as<string>());
     EXPECT_EQ("2013-02-16T12Z",
@@ -163,4 +163,17 @@ TEST(DateDType, ConvertToString) {
                     ndobject("2013-02-16T12:13:19.012345678").cast(dtype("datetime('nsec')")).as<string>());
     EXPECT_EQ("2013-02-16T12:13:19.012345678Z",
                     ndobject("2013-02-16T12:13:19.012345678Z").cast(dtype("datetime('nsec','UTC')")).as<string>());
+}
+
+TEST(DateTimeDType, Properties) {
+    ndobject n;
+
+    n = ndobject("1963-02-28T16:12:14.123654").cast(dtype("datetime('usec')")).eval();
+    EXPECT_EQ(1963, n.p("year").as<int32_t>());
+    EXPECT_EQ(2, n.p("month").as<int32_t>());
+    EXPECT_EQ(28, n.p("day").as<int32_t>());
+    EXPECT_EQ(16, n.p("hour").as<int32_t>());
+    EXPECT_EQ(12, n.p("minute").as<int32_t>());
+    EXPECT_EQ(14, n.p("second").as<int32_t>());
+    EXPECT_EQ(123654, n.p("microsecond").as<int32_t>());
 }

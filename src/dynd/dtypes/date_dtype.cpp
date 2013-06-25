@@ -178,6 +178,27 @@ size_t date_dtype::make_assignment_kernel(
     throw runtime_error(ss.str());
 }
 
+size_t date_dtype::make_comparison_kernel(
+                hierarchical_kernel *out, size_t offset_out,
+                const dtype& src0_dt, const char *src0_metadata,
+                const dtype& src1_dt, const char *src1_metadata,
+                comparison_type_t comptype,
+                const eval::eval_context *ectx) const
+{
+    if (this == src0_dt.extended()) {
+        if (*this == *src1_dt.extended()) {
+            return make_builtin_dtype_comparison_kernel(out, offset_out,
+                            int32_type_id, int32_type_id, comptype);
+        } else if (!src1_dt.is_builtin()) {
+            return src1_dt.extended()->make_comparison_kernel(out, offset_out,
+                            src0_dt, src0_metadata,
+                            src1_dt, src1_metadata,
+                            comptype, ectx);
+        }
+    }
+
+    throw not_comparable_error(src0_dt, src1_dt, comptype);
+}
 
 ///////// properties on the dtype
 

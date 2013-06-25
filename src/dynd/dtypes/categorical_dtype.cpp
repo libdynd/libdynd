@@ -543,7 +543,9 @@ void categorical_dtype::metadata_debug_print(const char *DYND_UNUSED(metadata),
 
 dtype dynd::factor_categorical_dtype(const ndobject& values)
 {
-    ndobject_iter<0, 1> iter(values);
+    // Do the factor operation on a concrete version of the values
+    // TODO: Some cases where we don't want to do this?
+    ndobject_iter<0, 1> iter(values.eval());
 
     comparison_kernel k;
     ::make_comparison_kernel(&k, 0,

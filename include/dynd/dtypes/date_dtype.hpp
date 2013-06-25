@@ -56,6 +56,13 @@ public:
                     kernel_request_t kernreq, assign_error_mode errmode,
                     const eval::eval_context *ectx) const;
 
+    size_t make_comparison_kernel(
+                    hierarchical_kernel *out, size_t offset_out,
+                    const dtype& src0_dt, const char *src0_metadata,
+                    const dtype& src1_dt, const char *src1_metadata,
+                    comparison_type_t comptype,
+                    const eval::eval_context *ectx) const;
+
     void get_dynamic_dtype_properties(const std::pair<std::string, gfunc::callable> **out_properties, size_t *out_count) const;
     void get_dynamic_dtype_functions(const std::pair<std::string, gfunc::callable> **out_functions, size_t *out_count) const;
     void get_dynamic_ndobject_properties(const std::pair<std::string, gfunc::callable> **out_properties, size_t *out_count) const;

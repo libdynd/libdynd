@@ -414,6 +414,10 @@ void datetime_dtype::get_dynamic_dtype_functions(const std::pair<std::string, gf
 
 ///////// properties on the ndobject
 
+static ndobject property_ndo_get_date(const ndobject& n) {
+    return n.replace_udtype(make_property_dtype(n.get_udtype(), "date"));
+}
+
 static ndobject property_ndo_get_year(const ndobject& n) {
     return n.replace_udtype(make_property_dtype(n.get_udtype(), "year"));
 }
@@ -426,10 +430,31 @@ static ndobject property_ndo_get_day(const ndobject& n) {
     return n.replace_udtype(make_property_dtype(n.get_udtype(), "day"));
 }
 
+static ndobject property_ndo_get_hour(const ndobject& n) {
+    return n.replace_udtype(make_property_dtype(n.get_udtype(), "hour"));
+}
+
+static ndobject property_ndo_get_minute(const ndobject& n) {
+    return n.replace_udtype(make_property_dtype(n.get_udtype(), "minute"));
+}
+
+static ndobject property_ndo_get_second(const ndobject& n) {
+    return n.replace_udtype(make_property_dtype(n.get_udtype(), "second"));
+}
+
+static ndobject property_ndo_get_microsecond(const ndobject& n) {
+    return n.replace_udtype(make_property_dtype(n.get_udtype(), "microsecond"));
+}
+
 static pair<string, gfunc::callable> date_ndobject_properties[] = {
+    pair<string, gfunc::callable>("date", gfunc::make_callable(&property_ndo_get_date, "self")),
     pair<string, gfunc::callable>("year", gfunc::make_callable(&property_ndo_get_year, "self")),
     pair<string, gfunc::callable>("month", gfunc::make_callable(&property_ndo_get_month, "self")),
-    pair<string, gfunc::callable>("day", gfunc::make_callable(&property_ndo_get_day, "self"))
+    pair<string, gfunc::callable>("day", gfunc::make_callable(&property_ndo_get_day, "self")),
+    pair<string, gfunc::callable>("hour", gfunc::make_callable(&property_ndo_get_hour, "self")),
+    pair<string, gfunc::callable>("minute", gfunc::make_callable(&property_ndo_get_minute, "self")),
+    pair<string, gfunc::callable>("second", gfunc::make_callable(&property_ndo_get_second, "self")),
+    pair<string, gfunc::callable>("microsecond", gfunc::make_callable(&property_ndo_get_microsecond, "self")),
 };
 
 void datetime_dtype::get_dynamic_ndobject_properties(const std::pair<std::string, gfunc::callable> **out_properties, size_t *out_count) const
@@ -467,6 +492,19 @@ void datetime_dtype::get_dynamic_ndobject_functions(const std::pair<std::string,
 ///////// property accessor kernels (used by property_dtype)
 
 namespace {
+    struct datetime_property_kernel_extra {
+        kernel_data_prefix base;
+        const datetime_dtype *datetime_dt;
+
+        typedef datetime_property_kernel_extra extra_type;
+
+        static void destruct(kernel_data_prefix *extra)
+        {
+            extra_type *e = reinterpret_cast<extra_type *>(extra);
+            base_dtype_xdecref(e->datetime_dt);
+        }
+    };
+
     void get_property_kernel_struct_single(char *DYND_UNUSED(dst), const char *DYND_UNUSED(src),
                     kernel_data_prefix *DYND_UNUSED(extra))
     {
@@ -479,64 +517,134 @@ namespace {
         throw runtime_error("TODO: set_property_kernel_struct_single");
     }
 
-    void get_property_kernel_date_single(char *DYND_UNUSED(dst), const char *DYND_UNUSED(src),
-                    kernel_data_prefix *DYND_UNUSED(extra))
+    void get_property_kernel_date_single(char *dst, const char *src,
+                    kernel_data_prefix *extra)
     {
-        throw runtime_error("TODO: get_property_kernel_struct_single");
+        const datetime_property_kernel_extra *e = reinterpret_cast<datetime_property_kernel_extra *>(extra);
+        const datetime_dtype *dd = e->datetime_dt;
+        datetime_tz_t tz = dd->get_timezone();
+        if (tz == tz_utc || tz == tz_abstract) {
+            // TODO: This conversion could be *much* faster by figuring out the correct division
+            //       factor and doing that divide instead of converting to/from a struct
+            datetime::datetime_fields df;
+            df.set_from_datetime_val(*reinterpret_cast<const int64_t *>(src),
+                            dynd_unit_to_datetime_unit(dd->get_unit()));
+            *reinterpret_cast<int32_t *>(dst) = datetime::ymd_to_days((int32_t)df.year, df.month, df.day);
+        } else {
+            throw runtime_error("datetime date property only implemented for UTC and abstract timezones");
+        }
     }
 
-    void get_property_kernel_year_single(char *DYND_UNUSED(dst), const char *DYND_UNUSED(src),
-                    kernel_data_prefix *DYND_UNUSED(extra))
+    void get_property_kernel_year_single(char *dst, const char *src,
+                    kernel_data_prefix *extra)
     {
-        throw runtime_error("TODO: get_property_kernel_year_single");
+        const datetime_property_kernel_extra *e = reinterpret_cast<datetime_property_kernel_extra *>(extra);
+        const datetime_dtype *dd = e->datetime_dt;
+        datetime_tz_t tz = dd->get_timezone();
+        if (tz == tz_utc || tz == tz_abstract) {
+            datetime::datetime_fields df;
+            df.set_from_datetime_val(*reinterpret_cast<const int64_t *>(src),
+                            dynd_unit_to_datetime_unit(dd->get_unit()));
+            *reinterpret_cast<int32_t *>(dst) = (int32_t)df.year;
+        } else {
+            throw runtime_error("datetime property access only implemented for UTC and abstract timezones");
+        }
     }
 
-    void get_property_kernel_month_single(char *DYND_UNUSED(dst), const char *DYND_UNUSED(src),
-                    kernel_data_prefix *DYND_UNUSED(extra))
+    void get_property_kernel_month_single(char *dst, const char *src,
+                    kernel_data_prefix *extra)
     {
-        throw runtime_error("TODO: get_property_kernel_month_single");
+        const datetime_property_kernel_extra *e = reinterpret_cast<datetime_property_kernel_extra *>(extra);
+        const datetime_dtype *dd = e->datetime_dt;
+        datetime_tz_t tz = dd->get_timezone();
+        if (tz == tz_utc || tz == tz_abstract) {
+            datetime::datetime_fields df;
+            df.set_from_datetime_val(*reinterpret_cast<const int64_t *>(src),
+                            dynd_unit_to_datetime_unit(dd->get_unit()));
+            *reinterpret_cast<int32_t *>(dst) = df.month;
+        } else {
+            throw runtime_error("datetime property access only implemented for UTC and abstract timezones");
+        }
     }
 
-    void get_property_kernel_day_single(char *DYND_UNUSED(dst), const char *DYND_UNUSED(src),
-                    kernel_data_prefix *DYND_UNUSED(extra))
+    void get_property_kernel_day_single(char *dst, const char *src,
+                    kernel_data_prefix *extra)
     {
-        throw runtime_error("TODO: get_property_kernel_day_single");
+        const datetime_property_kernel_extra *e = reinterpret_cast<datetime_property_kernel_extra *>(extra);
+        const datetime_dtype *dd = e->datetime_dt;
+        datetime_tz_t tz = dd->get_timezone();
+        if (tz == tz_utc || tz == tz_abstract) {
+            datetime::datetime_fields df;
+            df.set_from_datetime_val(*reinterpret_cast<const int64_t *>(src),
+                            dynd_unit_to_datetime_unit(dd->get_unit()));
+            *reinterpret_cast<int32_t *>(dst) = df.day;
+        } else {
+            throw runtime_error("datetime property access only implemented for UTC and abstract timezones");
+        }
     }
 
-    void get_property_kernel_hour_single(char *DYND_UNUSED(dst), const char *DYND_UNUSED(src),
-                    kernel_data_prefix *DYND_UNUSED(extra))
+    void get_property_kernel_hour_single(char *dst, const char *src,
+                    kernel_data_prefix *extra)
     {
-        throw runtime_error("TODO: get_property_kernel_hour_single");
+        const datetime_property_kernel_extra *e = reinterpret_cast<datetime_property_kernel_extra *>(extra);
+        const datetime_dtype *dd = e->datetime_dt;
+        datetime_tz_t tz = dd->get_timezone();
+        if (tz == tz_utc || tz == tz_abstract) {
+            datetime::datetime_fields df;
+            df.set_from_datetime_val(*reinterpret_cast<const int64_t *>(src),
+                            dynd_unit_to_datetime_unit(dd->get_unit()));
+            *reinterpret_cast<int32_t *>(dst) = df.hour;
+        } else {
+            throw runtime_error("datetime property access only implemented for UTC and abstract timezones");
+        }
     }
 
-    void get_property_kernel_minute_single(char *DYND_UNUSED(dst), const char *DYND_UNUSED(src),
-                    kernel_data_prefix *DYND_UNUSED(extra))
+    void get_property_kernel_minute_single(char *dst, const char *src,
+                    kernel_data_prefix *extra)
     {
-        throw runtime_error("TODO: get_property_kernel_minute_single");
+        const datetime_property_kernel_extra *e = reinterpret_cast<datetime_property_kernel_extra *>(extra);
+        const datetime_dtype *dd = e->datetime_dt;
+        datetime_tz_t tz = dd->get_timezone();
+        if (tz == tz_utc || tz == tz_abstract) {
+            datetime::datetime_fields df;
+            df.set_from_datetime_val(*reinterpret_cast<const int64_t *>(src),
+                            dynd_unit_to_datetime_unit(dd->get_unit()));
+            *reinterpret_cast<int32_t *>(dst) = df.min;
+        } else {
+            throw runtime_error("datetime property access only implemented for UTC and abstract timezones");
+        }
     }
 
-    void get_property_kernel_second_single(char *DYND_UNUSED(dst), const char *DYND_UNUSED(src),
-                    kernel_data_prefix *DYND_UNUSED(extra))
+    void get_property_kernel_second_single(char *dst, const char *src,
+                    kernel_data_prefix *extra)
     {
-        throw runtime_error("TODO: get_property_kernel_second_single");
+        const datetime_property_kernel_extra *e = reinterpret_cast<datetime_property_kernel_extra *>(extra);
+        const datetime_dtype *dd = e->datetime_dt;
+        datetime_tz_t tz = dd->get_timezone();
+        if (tz == tz_utc || tz == tz_abstract) {
+            datetime::datetime_fields df;
+            df.set_from_datetime_val(*reinterpret_cast<const int64_t *>(src),
+                            dynd_unit_to_datetime_unit(dd->get_unit()));
+            *reinterpret_cast<int32_t *>(dst) = df.sec;
+        } else {
+            throw runtime_error("datetime property access only implemented for UTC and abstract timezones");
+        }
     }
 
-    void get_property_kernel_msecond_single(char *DYND_UNUSED(dst), const char *DYND_UNUSED(src),
-                    kernel_data_prefix *DYND_UNUSED(extra))
+    void get_property_kernel_usecond_single(char *dst, const char *src,
+                    kernel_data_prefix *extra)
     {
-        throw runtime_error("TODO: get_property_kernel_msecond_single");
-    }
-
-    void get_property_kernel_usecond_single(char *DYND_UNUSED(dst), const char *DYND_UNUSED(src),
-                    kernel_data_prefix *DYND_UNUSED(extra))
-    {
-        throw runtime_error("TODO: get_property_kernel_usecond_single");
-    }
-
-    void get_property_kernel_nsecond_single(char *DYND_UNUSED(dst), const char *DYND_UNUSED(src),
-                    kernel_data_prefix *DYND_UNUSED(extra))
-    {
-        throw runtime_error("TODO: get_property_kernel_nsecond_single");
+        const datetime_property_kernel_extra *e = reinterpret_cast<datetime_property_kernel_extra *>(extra);
+        const datetime_dtype *dd = e->datetime_dt;
+        datetime_tz_t tz = dd->get_timezone();
+        if (tz == tz_utc || tz == tz_abstract) {
+            datetime::datetime_fields df;
+            df.set_from_datetime_val(*reinterpret_cast<const int64_t *>(src),
+                            dynd_unit_to_datetime_unit(dd->get_unit()));
+            *reinterpret_cast<int32_t *>(dst) = df.us;
+        } else {
+            throw runtime_error("datetime property access only implemented for UTC and abstract timezones");
+        }
     }
 } // anonymous namespace
 
@@ -550,9 +658,7 @@ namespace {
         datetimeprop_hour,
         datetimeprop_minute,
         datetimeprop_second,
-        datetimeprop_msecond,
-        datetimeprop_usecond,
-        datetimeprop_nsecond,
+        datetimeprop_microsecond,
     };
 }
 
@@ -575,12 +681,8 @@ size_t datetime_dtype::get_elwise_property_index(const std::string& property_nam
         return datetimeprop_minute;
     } else if (property_name == "second") {
         return datetimeprop_second;
-    } else if (property_name == "msecond") {
-        return datetimeprop_msecond;
-    } else if (property_name == "usecond") {
-        return datetimeprop_usecond;
-    } else if (property_name == "nsecond") {
-        return datetimeprop_nsecond;
+    } else if (property_name == "microsecond") {
+        return datetimeprop_microsecond;
     } else {
         stringstream ss;
         ss << "dynd type " << dtype(this, true) << " does not have a kernel for property " << property_name;
@@ -614,46 +716,43 @@ size_t datetime_dtype::make_elwise_property_getter_kernel(
                 kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx)) const
 {
     offset_out = make_kernreq_to_single_kernel_adapter(out, offset_out, kernreq);
-    kernel_data_prefix *e = out->get_at<kernel_data_prefix>(offset_out);
+    datetime_property_kernel_extra *e = out->get_at<datetime_property_kernel_extra>(offset_out);
     switch (src_property_index) {
         case datetimeprop_struct:
-            e->set_function<unary_single_operation_t>(&get_property_kernel_struct_single);
-            return offset_out + sizeof(kernel_data_prefix);
+            e->base.set_function<unary_single_operation_t>(&get_property_kernel_struct_single);
+            break;
         case datetimeprop_date:
-            e->set_function<unary_single_operation_t>(&get_property_kernel_date_single);
-            return offset_out + sizeof(kernel_data_prefix);
+            e->base.set_function<unary_single_operation_t>(&get_property_kernel_date_single);
+            break;
         case datetimeprop_year:
-            e->set_function<unary_single_operation_t>(&get_property_kernel_year_single);
-            return offset_out + sizeof(kernel_data_prefix);
+            e->base.set_function<unary_single_operation_t>(&get_property_kernel_year_single);
+            break;
         case datetimeprop_month:
-            e->set_function<unary_single_operation_t>(&get_property_kernel_month_single);
-            return offset_out + sizeof(kernel_data_prefix);
+            e->base.set_function<unary_single_operation_t>(&get_property_kernel_month_single);
+            break;
         case datetimeprop_day:
-            e->set_function<unary_single_operation_t>(&get_property_kernel_day_single);
-            return offset_out + sizeof(kernel_data_prefix);
+            e->base.set_function<unary_single_operation_t>(&get_property_kernel_day_single);
+            break;
         case datetimeprop_hour:
-            e->set_function<unary_single_operation_t>(&get_property_kernel_hour_single);
-            return offset_out + sizeof(kernel_data_prefix);
+            e->base.set_function<unary_single_operation_t>(&get_property_kernel_hour_single);
+            break;
         case datetimeprop_minute:
-            e->set_function<unary_single_operation_t>(&get_property_kernel_minute_single);
-            return offset_out + sizeof(kernel_data_prefix);
+            e->base.set_function<unary_single_operation_t>(&get_property_kernel_minute_single);
+            break;
         case datetimeprop_second:
-            e->set_function<unary_single_operation_t>(&get_property_kernel_second_single);
-            return offset_out + sizeof(kernel_data_prefix);
-        case datetimeprop_msecond:
-            e->set_function<unary_single_operation_t>(&get_property_kernel_msecond_single);
-            return offset_out + sizeof(kernel_data_prefix);
-        case datetimeprop_usecond:
-            e->set_function<unary_single_operation_t>(&get_property_kernel_usecond_single);
-            return offset_out + sizeof(kernel_data_prefix);
-        case datetimeprop_nsecond:
-            e->set_function<unary_single_operation_t>(&get_property_kernel_nsecond_single);
-            return offset_out + sizeof(kernel_data_prefix);
+            e->base.set_function<unary_single_operation_t>(&get_property_kernel_second_single);
+            break;
+        case datetimeprop_microsecond:
+            e->base.set_function<unary_single_operation_t>(&get_property_kernel_usecond_single);
+            break;
         default:
             stringstream ss;
             ss << "dynd date dtype given an invalid property index" << src_property_index;
             throw runtime_error(ss.str());
     }
+    e->base.destructor = &datetime_property_kernel_extra::destruct;
+    e->datetime_dt = static_cast<const datetime_dtype *>(dtype(this, true).release());
+    return offset_out + sizeof(datetime_property_kernel_extra);
 }
 
 size_t datetime_dtype::make_elwise_property_setter_kernel(
