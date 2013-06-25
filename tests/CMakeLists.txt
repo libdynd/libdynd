@@ -103,6 +103,11 @@ else()
         )
 endif()
 
+# If installation is requested, install the program
+if (DYND_INSTALL_LIB)
+    install(TARGETS test_libdynd
+        RUNTIME DESTINATION bin)
+endif()
 
 # Compile-time tests: test code that is supposed to produce compile errors
 # I couldn't find a properly specified way to do this, so hacked together

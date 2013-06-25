@@ -356,7 +356,7 @@ source_group("VM Source" REGULAR_EXPRESSION "src/dynd/vm/.*cpp")
 source_group("VM Headers" REGULAR_EXPRESSION "include/dynd/vm/.*hpp")
 source_group("Internal Headers" REGULAR_EXPRESSION "src/dynd/.*hpp")
 
-if ((NOT DYND_SHARED_LIB) AND DYND_INSTALL_LIB)
+if ((NOT DYND_SHARED_LIB) AND (DYND_INSTALL_LIB))
     # If we're making an installable static library,
     # include the sublibraries source directly because
     # including static libraries in other static libraries
@@ -472,10 +472,6 @@ if (DYND_INSTALL_LIB)
     else()
         install(PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/libdynd-config"
             DESTINATION "${CMAKE_INSTALL_PREFIX}/bin")
-    endif()
-    if(DYND_BUILD_TESTS)
-        install(TARGETS test_libdynd
-            RUNTIME DESTINATION bin)
     endif()
 endif()
 
