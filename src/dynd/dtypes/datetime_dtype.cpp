@@ -167,7 +167,7 @@ void datetime_dtype::set_cal(const char *metadata, char *data, assign_error_mode
                 int64_t frac;
                 switch (m_unit) {
                     case datetime_unit_msecond:
-                        frac = nsec % 1000000;
+                        frac = nsec / 1000000;
                         if (errmode != assign_error_none && frac * 1000000 != nsec) {
                             stringstream ss;
                             ss << "invalid input nanosecond " << nsec << " for " << dtype(this, true);
@@ -176,7 +176,7 @@ void datetime_dtype::set_cal(const char *metadata, char *data, assign_error_mode
                         result = result * 1000 + frac;
                         break;
                     case datetime_unit_usecond:
-                        frac = nsec % 1000;
+                        frac = nsec / 1000;
                         if (errmode != assign_error_none && frac * 1000 != nsec) {
                             stringstream ss;
                             ss << "invalid input nanosecond " << nsec << " for " << dtype(this, true);
@@ -299,7 +299,7 @@ size_t datetime_dtype::make_assignment_kernel(
                 const eval::eval_context *ectx) const
 {
     if (this == dst_dt.extended()) {
-        if (src_dt.get_type_id() == date_type_id) {
+        if (src_dt == dst_dt) {
             return make_pod_dtype_assignment_kernel(out, offset_out,
                             get_data_size(), get_data_alignment(), kernreq);
         } else if (src_dt.get_kind() == string_kind) {
