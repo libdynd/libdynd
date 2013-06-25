@@ -69,7 +69,7 @@ namespace {
 
 size_t dynd::make_string_to_datetime_assignment_kernel(
                 hierarchical_kernel *out, size_t offset_out,
-                const dtype& dst_datetime_dt, const char *dst_metadata,
+                const dtype& dst_datetime_dt, const char *DYND_UNUSED(dst_metadata),
                 const dtype& src_string_dt, const char *src_metadata,
                 kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *DYND_UNUSED(ectx))
@@ -138,7 +138,7 @@ namespace {
 size_t dynd::make_datetime_to_string_assignment_kernel(
                 hierarchical_kernel *out, size_t offset_out,
                 const dtype& dst_string_dt, const char *dst_metadata,
-                const dtype& src_datetime_dt, const char *src_metadata,
+                const dtype& src_datetime_dt, const char *DYND_UNUSED(src_metadata),
                 kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *DYND_UNUSED(ectx))
 {

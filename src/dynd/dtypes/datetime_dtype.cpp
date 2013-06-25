@@ -126,7 +126,8 @@ datetime_dtype::~datetime_dtype()
 {
 }
 
-void datetime_dtype::set_cal(const char *metadata, char *data, assign_error_mode errmode,
+void datetime_dtype::set_cal(const char *DYND_UNUSED(metadata), char *data,
+                assign_error_mode errmode,
                 int32_t year, int32_t month, int32_t day,
                 int32_t hour, int32_t min, int32_t sec, int32_t nsec) const
 {
@@ -234,9 +235,9 @@ void datetime_dtype::get_cal(const char *DYND_UNUSED(metadata), const char *data
     out_nsec = fields.us * 1000 + fields.ps / 1000;
 }
 
-void datetime_dtype::print_data(std::ostream& o, const char *DYND_UNUSED(metadata), const char *data) const
+void datetime_dtype::print_data(std::ostream& o,
+                const char *DYND_UNUSED(metadata), const char *data) const
 {
-    int64_t value = *reinterpret_cast<const int64_t *>(data);
     datetime::datetime_fields fields;
     fields.set_from_datetime_val(*reinterpret_cast<const int64_t *>(data),
                     dynd_unit_to_datetime_unit(m_unit));
@@ -367,7 +368,10 @@ static ndobject function_dtype_now(const dtype& dt) {
     return result;
 }
 
-static ndobject function_dtype_construct(const dtype& DYND_UNUSED(dt), const ndobject& year, const ndobject& month, const ndobject& day)
+static ndobject function_dtype_construct(const dtype& DYND_UNUSED(dt),
+                const ndobject& DYND_UNUSED(year),
+                const ndobject& DYND_UNUSED(month),
+                const ndobject& DYND_UNUSED(day))
 {
     throw runtime_error("dynd type datetime __construct__");
     /*
@@ -463,67 +467,73 @@ void datetime_dtype::get_dynamic_ndobject_functions(const std::pair<std::string,
 ///////// property accessor kernels (used by property_dtype)
 
 namespace {
-    void get_property_kernel_struct_single(char *dst, const char *src,
+    void get_property_kernel_struct_single(char *DYND_UNUSED(dst), const char *DYND_UNUSED(src),
                     kernel_data_prefix *DYND_UNUSED(extra))
     {
         throw runtime_error("TODO: get_property_kernel_struct_single");
     }
 
-    void set_property_kernel_struct_single(char *dst, const char *src,
+    void set_property_kernel_struct_single(char *DYND_UNUSED(dst), const char *DYND_UNUSED(src),
                     kernel_data_prefix *DYND_UNUSED(extra))
     {
         throw runtime_error("TODO: set_property_kernel_struct_single");
     }
 
-    void get_property_kernel_year_single(char *dst, const char *src,
+    void get_property_kernel_date_single(char *DYND_UNUSED(dst), const char *DYND_UNUSED(src),
+                    kernel_data_prefix *DYND_UNUSED(extra))
+    {
+        throw runtime_error("TODO: get_property_kernel_struct_single");
+    }
+
+    void get_property_kernel_year_single(char *DYND_UNUSED(dst), const char *DYND_UNUSED(src),
                     kernel_data_prefix *DYND_UNUSED(extra))
     {
         throw runtime_error("TODO: get_property_kernel_year_single");
     }
 
-    void get_property_kernel_month_single(char *dst, const char *src,
+    void get_property_kernel_month_single(char *DYND_UNUSED(dst), const char *DYND_UNUSED(src),
                     kernel_data_prefix *DYND_UNUSED(extra))
     {
         throw runtime_error("TODO: get_property_kernel_month_single");
     }
 
-    void get_property_kernel_day_single(char *dst, const char *src,
+    void get_property_kernel_day_single(char *DYND_UNUSED(dst), const char *DYND_UNUSED(src),
                     kernel_data_prefix *DYND_UNUSED(extra))
     {
         throw runtime_error("TODO: get_property_kernel_day_single");
     }
 
-    void get_property_kernel_hour_single(char *dst, const char *src,
+    void get_property_kernel_hour_single(char *DYND_UNUSED(dst), const char *DYND_UNUSED(src),
                     kernel_data_prefix *DYND_UNUSED(extra))
     {
         throw runtime_error("TODO: get_property_kernel_hour_single");
     }
 
-    void get_property_kernel_minute_single(char *dst, const char *src,
+    void get_property_kernel_minute_single(char *DYND_UNUSED(dst), const char *DYND_UNUSED(src),
                     kernel_data_prefix *DYND_UNUSED(extra))
     {
         throw runtime_error("TODO: get_property_kernel_minute_single");
     }
 
-    void get_property_kernel_second_single(char *dst, const char *src,
+    void get_property_kernel_second_single(char *DYND_UNUSED(dst), const char *DYND_UNUSED(src),
                     kernel_data_prefix *DYND_UNUSED(extra))
     {
         throw runtime_error("TODO: get_property_kernel_second_single");
     }
 
-    void get_property_kernel_msecond_single(char *dst, const char *src,
+    void get_property_kernel_msecond_single(char *DYND_UNUSED(dst), const char *DYND_UNUSED(src),
                     kernel_data_prefix *DYND_UNUSED(extra))
     {
         throw runtime_error("TODO: get_property_kernel_msecond_single");
     }
 
-    void get_property_kernel_usecond_single(char *dst, const char *src,
+    void get_property_kernel_usecond_single(char *DYND_UNUSED(dst), const char *DYND_UNUSED(src),
                     kernel_data_prefix *DYND_UNUSED(extra))
     {
         throw runtime_error("TODO: get_property_kernel_usecond_single");
     }
 
-    void get_property_kernel_nsecond_single(char *dst, const char *src,
+    void get_property_kernel_nsecond_single(char *DYND_UNUSED(dst), const char *DYND_UNUSED(src),
                     kernel_data_prefix *DYND_UNUSED(extra))
     {
         throw runtime_error("TODO: get_property_kernel_nsecond_single");
@@ -533,6 +543,7 @@ namespace {
 namespace {
     enum date_properties_t {
         datetimeprop_struct,
+        datetimeprop_date,
         datetimeprop_year,
         datetimeprop_month,
         datetimeprop_day,
@@ -550,6 +561,8 @@ size_t datetime_dtype::get_elwise_property_index(const std::string& property_nam
     if (property_name == "struct") {
         // A read/write property for accessing a datetime as a struct
         return datetimeprop_struct;
+    } else if (property_name == "date") {
+        return datetimeprop_date;
     } else if (property_name == "year") {
         return datetimeprop_year;
     } else if (property_name == "month") {
@@ -583,6 +596,10 @@ dtype datetime_dtype::get_elwise_property_dtype(size_t property_index,
             out_readable = true;
             out_writable = true;
             return get_default_struct_dtype();
+        case datetimeprop_date:
+            out_readable = true;
+            out_writable = false;
+            return make_date_dtype();
         default:
             out_readable = true;
             out_writable = false;
@@ -601,6 +618,9 @@ size_t datetime_dtype::make_elwise_property_getter_kernel(
     switch (src_property_index) {
         case datetimeprop_struct:
             e->set_function<unary_single_operation_t>(&get_property_kernel_struct_single);
+            return offset_out + sizeof(kernel_data_prefix);
+        case datetimeprop_date:
+            e->set_function<unary_single_operation_t>(&get_property_kernel_date_single);
             return offset_out + sizeof(kernel_data_prefix);
         case datetimeprop_year:
             e->set_function<unary_single_operation_t>(&get_property_kernel_year_single);
