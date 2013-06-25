@@ -20,7 +20,7 @@ if "%COMPILER_VERSION%" == "" exit /b 1
 REM Determine 32/64-bit based on the machine name, or allow it to be already
 REM be specified from the COMPILER_3264 variable
 if not "%COMPILER_3264%" == "" goto compiler_3264_done
-REM Check if '32' is a substring in COMPUTERNAME, by using search/replace
+REM Check if '32' or '64' is a substring in COMPUTERNAME, by using search/replace
 if not "%COMPUTERNAME:32=XX%" == "%COMPUTERNAME%" set COMPILER_3264=32
 if not "%COMPUTERNAME:64=XX%" == "%COMPUTERNAME%" set COMPILER_3264=64
 REM Require that COMPILER_3264 be selected
