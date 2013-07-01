@@ -142,14 +142,14 @@ TEST(NDObjectIndex, SteppedOneDimensionalRange) {
     ndobject a = i0, b;
 
     // different step
-    b = a.at(irange() / 2);
+    b = a.at(irange().by(2));
     EXPECT_EQ(3, b.get_shape()[0]);
     EXPECT_EQ(1, b.at(0).as<int>());
     EXPECT_EQ(3, b.at(1).as<int>());
     EXPECT_EQ(5, b.at(2).as<int>());
 
     // full reversed range
-    b = a.at(irange() / -1);
+    b = a.at(irange().by(-1));
     EXPECT_EQ(6, b.get_shape()[0]);
     EXPECT_EQ(6, b.at(0).as<int>());
     EXPECT_EQ(5, b.at(1).as<int>());
@@ -159,7 +159,7 @@ TEST(NDObjectIndex, SteppedOneDimensionalRange) {
     EXPECT_EQ(1, b.at(5).as<int>());
 
     // partial reversed range
-    b = a.at(3 >= irange() / -1 >= 0);
+    b = a.at(3 >= irange().by(-1) >= 0);
     EXPECT_EQ(4, b.get_shape()[0]);
     EXPECT_EQ(4, b.at(0).as<int>());
     EXPECT_EQ(3, b.at(1).as<int>());
@@ -167,13 +167,13 @@ TEST(NDObjectIndex, SteppedOneDimensionalRange) {
     EXPECT_EQ(1, b.at(3).as<int>());
 
     // reversed range with different step
-    b = a.at(irange() / -3);
+    b = a.at(irange().by(-3));
     EXPECT_EQ(2, b.get_shape()[0]);
     EXPECT_EQ(6, b.at(0).as<int>());
     EXPECT_EQ(3, b.at(1).as<int>());
 
     // partial reversed range with different step
-    b = a.at(2 >= irange() / -2);
+    b = a.at(2 >= irange().by(-2));
     EXPECT_EQ(2, b.get_shape()[0]);
     EXPECT_EQ(3, b.at(0).as<int>());
     EXPECT_EQ(1, b.at(1).as<int>());
@@ -183,7 +183,7 @@ TEST(NDObjectIndex, SteppedOneDimensionalRange) {
     EXPECT_EQ(0, b.get_shape()[0]);
 
     // applying two ranges, one after another
-    b = a.at(1 <= irange() <= 5).at(irange() / -2);
+    b = a.at(1 <= irange() <= 5).at(irange().by(-2));
     EXPECT_EQ(3, b.get_shape()[0]);
     EXPECT_EQ(6, b.at(0).as<int>());
     EXPECT_EQ(4, b.at(1).as<int>());

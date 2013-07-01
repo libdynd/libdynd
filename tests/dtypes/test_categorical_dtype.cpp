@@ -273,7 +273,7 @@ TEST(CategoricalDType, AssignRange) {
     b.val_assign(cat);
     ndobject c = a.at(3 <= irange() < 6 );
     c.val_assign(cat.at(0));
-    ndobject d = a.at(6 <= irange() / 2 < 9 );
+    ndobject d = a.at(6 <= irange().by(2) < 9 );
     d.val_assign(cat.at(1));
     a.at(7).vals() = cat.at(2);
 

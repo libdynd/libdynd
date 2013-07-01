@@ -338,7 +338,7 @@ TEST(StructDType, SingleCompareDifferentMetadata) {
     dtype sdt_reverse = make_struct_dtype(make_dtype<int64_t>(), "c",
                     make_dtype<float>(), "b", make_dtype<int32_t>(), "a");
     a = empty(sdt);
-    b = empty(sdt_reverse).at(irange() / -1);
+    b = empty(sdt_reverse).at(irange().by(-1));
 
     // Confirm that the metadata is different
     EXPECT_EQ(a.get_dtype(), b.get_dtype());

@@ -64,7 +64,7 @@ TEST(VarArrayDType, DTypeSubscriptSimpleSlice) {
 
     // Slicing collapses the leading dimension to a strided array
     EXPECT_EQ(make_strided_dim_dtype(make_dtype<int>()), n.at(irange()).get_dtype());
-    EXPECT_EQ(make_strided_dim_dtype(make_dtype<int>()), n.at(irange() / -1).get_dtype());
+    EXPECT_EQ(make_strided_dim_dtype(make_dtype<int>()), n.at(irange().by(-1)).get_dtype());
     EXPECT_EQ(make_strided_dim_dtype(make_dtype<int>()), n.at(1 <= irange() < 3).get_dtype());
     // In particular, indexing with a zero-sized index converts from var to strided
     EXPECT_EQ(make_strided_dim_dtype(make_dtype<int>()), n.at_array(0, NULL).get_dtype());
@@ -73,11 +73,11 @@ TEST(VarArrayDType, DTypeSubscriptSimpleSlice) {
     EXPECT_EQ(4, n.at(1 <= irange() < 3).at(0).as<int>());
     EXPECT_EQ(6, n.at(1 <= irange() < 3).at(1).as<int>());
 
-    EXPECT_EQ(4, n.at(irange() / -1).get_shape()[0]);
-    EXPECT_EQ(8, n.at(irange() / -1).at(0).as<int>());
-    EXPECT_EQ(6, n.at(irange() / -1).at(1).as<int>());
-    EXPECT_EQ(4, n.at(irange() / -1).at(2).as<int>());
-    EXPECT_EQ(2, n.at(irange() / -1).at(3).as<int>());
+    EXPECT_EQ(4, n.at(irange().by(-1)).get_shape()[0]);
+    EXPECT_EQ(8, n.at(irange().by(-1)).at(0).as<int>());
+    EXPECT_EQ(6, n.at(irange().by(-1)).at(1).as<int>());
+    EXPECT_EQ(4, n.at(irange().by(-1)).at(2).as<int>());
+    EXPECT_EQ(2, n.at(irange().by(-1)).at(3).as<int>());
 
     EXPECT_EQ(4, n.at_array(0, NULL).get_shape()[0]);
     EXPECT_EQ(2, n.at_array(0, NULL).at(0).as<int>());

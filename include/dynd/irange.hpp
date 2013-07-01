@@ -33,7 +33,7 @@ namespace dynd {
  * 3 <= irange()            // The index range [3, end)
  * 2 <= irange() < 10       // The index range [2, 10)
  * 1 < irange() < 5         // The index range [2, 5)
- * 3 <= irange() / 2 < 10   // The indices {3, 5, 7, 9}
+ * 3 <= irange().by(2) < 10   // The indices {3, 5, 7, 9}
  *
  * TODO: Should negative indices be supported with the meaning as in Python?
  */
@@ -85,10 +85,10 @@ public:
     }
 
     /**
-     * The notation "irange() / step" is a way to specify
-     * the step of the range. Think of it as the word "by".
+     * The notation "irange().by(step)" is a way to specify
+     * the step of the range.
      */
-    DYND_CONSTEXPR irange operator/(intptr_t step) const {
+    DYND_CONSTEXPR irange by(intptr_t step) const {
         return irange(m_start, m_finish, step);
     }
 
