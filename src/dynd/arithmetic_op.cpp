@@ -14,6 +14,7 @@
 #include <dynd/dtypes/strided_dim_dtype.hpp>
 #include <dynd/dtypes/var_dim_dtype.hpp>
 #include <dynd/dtypes/expr_dtype.hpp>
+#include <dynd/dtypes/string_dtype.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -68,13 +69,14 @@ namespace {
     };
 
     class arithmetic_op_kernel_generator : public expr_kernel_generator {
-        type_id_t m_tid;
+        dtype m_rdt, m_op1dt, m_op2dt;
         expr_operation_pair m_op_pair;
         const char *m_name;
     public:
-        arithmetic_op_kernel_generator(type_id_t tid, const expr_operation_pair& op_pair,
-                        const char *name)
-            : expr_kernel_generator(true), m_tid(tid), m_op_pair(op_pair), m_name(name)
+        arithmetic_op_kernel_generator(const dtype& rdt, const dtype& op1dt, const dtype& op2dt,
+                        const expr_operation_pair& op_pair, const char *name)
+            : expr_kernel_generator(true), m_rdt(rdt), m_op1dt(op1dt), m_op2dt(op2dt),
+                            m_op_pair(op_pair), m_name(name)
         {
         }
 
@@ -93,8 +95,8 @@ namespace {
                 ss << "received " << src_count;
                 throw runtime_error(ss.str());
             }
-            if (dst_dt.get_type_id() != m_tid || src_dt[0].get_type_id() != m_tid ||
-                            src_dt[1].get_type_id() != m_tid) {
+            if (dst_dt != m_rdt || src_dt[0] != m_op1dt ||
+                            src_dt[1] != m_op2dt) {
                 // If the dtypes don't match the ones for this generator,
                 // call the elementwise dimension handler to handle one dimension
                 // or handle input/output buffering, giving 'this' as the next
@@ -211,35 +213,27 @@ DYND_BUILTIN_DTYPE_BINARY_OP_TABLE_DEFS(division);
 
 // These operators are declared in ndobject.hpp
 
-ndobject apply_operator(const ndobject *ops,
-                const char *name,
-                const expr_operation_pair *table)
+// Get the table index by compressing the type_id's we do implement
+static int compress_builtin_type_id[builtin_type_id_count] = {
+                -1, -1, // uninitialized, bool
+                -1, -1, 0, 1,// int8, ..., int64
+                2, // int128
+                -1, -1, 3, 4, // uint8, ..., uint64,
+                5, // uint128
+                -1, 6, 7, // float16, ..., float64
+                8, // float128
+                9, 10, // complex<float32>, complex<float64>
+                -1};
+
+ndobject apply_binary_operator(const ndobject *ops,
+                const dtype& rdt, const dtype& op1dt, const dtype& op2dt,
+                expr_operation_pair expr_ops,
+                const char *name)
 {
-    // Get the promoted dtype
-    dtype dt = promote_dtypes_arithmetic(ops[0].get_udtype(), ops[1].get_udtype());
-    static int compress_type_id[builtin_type_id_count] = {
-                    -1, -1, // uninitialized, bool
-                    -1, -1, 0, 1,// int8, ..., int64
-                    2, // int128
-                    -1, -1, 3, 4, // uint8, ..., uint64,
-                    5, // uint128
-                    -1, 6, 7, // float16, ..., float64
-                    8, // float128
-                    9, 10, // complex<float32>, complex<float64>
-                    -1};
-    int table_index = -1;
-    if (dt.is_builtin()) {
-        table_index = compress_type_id[dt.get_type_id()];
-    }
-    if (table_index < 0) {
+    if (expr_ops.single == NULL) {
         stringstream ss;
-        ss << "Operator " << name << " is not supported for dynd type " << dt;
-        throw runtime_error(ss.str());
-    }
-    const expr_operation_pair& func_ptr = table[table_index];
-    if (func_ptr.single == NULL) {
-        stringstream ss;
-        ss << "Operator " << name << " is not supported for dynd type " << dt;
+        ss << "Operator " << name << " is not supported for dynd types ";
+        ss << op1dt << " and " << op2dt;
         throw runtime_error(ss.str());
     }
 
@@ -258,7 +252,7 @@ ndobject apply_operator(const ndobject *ops,
     }
 
     // Assemble the destination value dtype
-    dtype result_vdt = dt;
+    dtype result_vdt = rdt;
     for (size_t j = 0; j != undim; ++j) {
         if (result_shape[undim - j - 1] == -1) {
             result_vdt = make_var_dim_dtype(result_vdt);
@@ -269,37 +263,85 @@ ndobject apply_operator(const ndobject *ops,
 
     // Create the result
     string field_names[2] = {"arg0", "arg1"};
-    ndobject ops_as_dt[2] = {ops[0].ucast(dt), ops[1].ucast(dt)};
+    ndobject ops_as_dt[2] = {ops[0].ucast(op1dt), ops[1].ucast(op2dt)};
     ndobject result = combine_into_struct(2, field_names, ops_as_dt);
     // Because the expr dtype's operand is the result's dtype,
     // we can swap it in as the dtype
     dtype edt = make_expr_dtype(result_vdt,
                     result.get_dtype(),
-                    new arithmetic_op_kernel_generator(dt.get_type_id(), func_ptr, name));
+                    new arithmetic_op_kernel_generator(rdt, op1dt, op2dt, expr_ops, name));
     edt.swap(result.get_ndo()->m_dtype);
     return result;
 }
 
 ndobject dynd::operator+(const ndobject& op1, const ndobject& op2)
 {
+    dtype rdt;
+    expr_operation_pair func_ptr;
+    dtype op1dt = op1.get_udtype().value_dtype();
+    dtype op2dt = op2.get_udtype().value_dtype();
+    if (op1dt.is_builtin() && op1dt.is_builtin()) {
+        rdt = promote_dtypes_arithmetic(op1dt, op2dt);
+        int table_index = compress_builtin_type_id[rdt.get_type_id()];
+        if (table_index >= 0) {
+            func_ptr = addition_table[table_index];
+        }
+    }
+
     ndobject ops[2] = {op1, op2};
-    return apply_operator(ops, "addition", addition_table);
+    return apply_binary_operator(ops, rdt, op1dt, op2dt, func_ptr, "addition");
 }
 
 ndobject dynd::operator-(const ndobject& op1, const ndobject& op2)
 {
+    dtype rdt;
+    expr_operation_pair func_ptr;
+    dtype op1dt = op1.get_udtype().value_dtype();
+    dtype op2dt = op2.get_udtype().value_dtype();
+    if (op1dt.is_builtin() && op1dt.is_builtin()) {
+        rdt = promote_dtypes_arithmetic(op1dt, op2dt);
+        int table_index = compress_builtin_type_id[rdt.get_type_id()];
+        if (table_index >= 0) {
+            func_ptr = subtraction_table[table_index];
+        }
+    }
+
     ndobject ops[2] = {op1, op2};
-    return apply_operator(ops, "subtraction", subtraction_table);
+    return apply_binary_operator(ops, rdt, op1dt, op2dt, func_ptr, "subtraction");
 }
 
 ndobject dynd::operator*(const ndobject& op1, const ndobject& op2)
 {
+    dtype rdt;
+    expr_operation_pair func_ptr;
+    dtype op1dt = op1.get_udtype().value_dtype();
+    dtype op2dt = op2.get_udtype().value_dtype();
+    if (op1dt.is_builtin() && op1dt.is_builtin()) {
+        rdt = promote_dtypes_arithmetic(op1dt, op2dt);
+        int table_index = compress_builtin_type_id[rdt.get_type_id()];
+        if (table_index >= 0) {
+            func_ptr = multiplication_table[table_index];
+        }
+    }
+
     ndobject ops[2] = {op1, op2};
-    return apply_operator(ops, "multiplication", multiplication_table);
+    return apply_binary_operator(ops, rdt, op1dt, op2dt, func_ptr, "multiplication");
 }
 
 ndobject dynd::operator/(const ndobject& op1, const ndobject& op2)
 {
+    dtype rdt;
+    expr_operation_pair func_ptr;
+    dtype op1dt = op1.get_udtype().value_dtype();
+    dtype op2dt = op2.get_udtype().value_dtype();
+    if (op1dt.is_builtin() && op1dt.is_builtin()) {
+        rdt = promote_dtypes_arithmetic(op1dt, op2dt);
+        int table_index = compress_builtin_type_id[rdt.get_type_id()];
+        if (table_index >= 0) {
+            func_ptr = division_table[table_index];
+        }
+    }
+
     ndobject ops[2] = {op1, op2};
-    return apply_operator(ops, "division", division_table);
+    return apply_binary_operator(ops, rdt, op1dt, op2dt, func_ptr, "division");
 }
