@@ -68,6 +68,7 @@ namespace {
         expr_strided_operation_t strided;
     };
 
+    template<class extra_type>
     class arithmetic_op_kernel_generator : public expr_kernel_generator {
         dtype m_rdt, m_op1dt, m_op2dt;
         expr_operation_pair m_op_pair;
@@ -108,7 +109,7 @@ namespace {
                                 this);
             }
             // This is a leaf kernel, so no additional allocation is needed
-            kernel_data_prefix *e = out->get_at<kernel_data_prefix>(offset_out);
+            extra_type *e = out->get_at<extra_type>(offset_out);
             switch (kernreq) {
                 case kernel_request_single:
                     e->set_function<expr_single_operation_t>(m_op_pair.single);
@@ -118,11 +119,12 @@ namespace {
                     break;
                 default: {
                     stringstream ss;
-                    ss << "arithmetic_op_kernel_generator: unrecognized request " << (int)kernreq;
+                    ss << "generic_kernel_generator: unrecognized request " << (int)kernreq;
                     throw runtime_error(ss.str());
                 }
             }
-            return offset_out + sizeof(kernel_data_prefix);
+            e->init(2, dst_metadata, src_metadata);
+            return offset_out + sizeof(extra_type);
         }
 
 
@@ -269,7 +271,7 @@ ndobject apply_binary_operator(const ndobject *ops,
     // we can swap it in as the dtype
     dtype edt = make_expr_dtype(result_vdt,
                     result.get_dtype(),
-                    new arithmetic_op_kernel_generator(rdt, op1dt, op2dt, expr_ops, name));
+                    new arithmetic_op_kernel_generator<kernel_data_prefix>(rdt, op1dt, op2dt, expr_ops, name));
     edt.swap(result.get_ndo()->m_dtype);
     return result;
 }
@@ -286,6 +288,9 @@ ndobject dynd::operator+(const ndobject& op1, const ndobject& op2)
         if (table_index >= 0) {
             func_ptr = addition_table[table_index];
         }
+    } else if (op1dt.get_kind() == string_kind && op2dt.get_kind() == string_kind) {
+        rdt = make_string_dtype();
+
     }
 
     ndobject ops[2] = {op1, op2};

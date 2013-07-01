@@ -31,6 +31,10 @@ struct kernel_data_prefix {
     void set_function(T fnptr) {
         function = reinterpret_cast<void *>(fnptr);
     }
+
+    template<typename T, typename U, typename V>
+    void init(const T&, const U&, const V&) {
+    }
 };
 
 /**
