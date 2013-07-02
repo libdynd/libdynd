@@ -113,10 +113,10 @@ namespace {
             extra_type *e = out->get_at<extra_type>(offset_out);
             switch (kernreq) {
                 case kernel_request_single:
-                    e->base().set_function<expr_single_operation_t>(m_op_pair.single);
+                    e->base().set_function(m_op_pair.single);
                     break;
                 case kernel_request_strided:
-                    e->base().set_function<expr_strided_operation_t>(m_op_pair.strided);
+                    e->base().set_function(m_op_pair.strided);
                     break;
                 default: {
                     stringstream ss;
