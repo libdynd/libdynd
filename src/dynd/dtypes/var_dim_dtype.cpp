@@ -123,12 +123,7 @@ dtype var_dim_dtype::apply_linear_index(size_t nindices, const irange *indices,
                 size_t current_i, const dtype& root_dt, bool leading_dimension) const
 {
     if (nindices == 0) {
-        if (leading_dimension) {
-            // In leading dimensions, we convert var_dim to strided_dim
-            return dtype(new strided_dim_dtype(m_element_dtype), false);
-        } else {
-            return dtype(this, true);
-        }
+        return dtype(this, true);
     } else if (nindices == 1) {
         if (indices->step() == 0) {
             if (leading_dimension) {
@@ -195,29 +190,8 @@ intptr_t var_dim_dtype::apply_linear_index(size_t nindices, const irange *indice
                 memory_block_data **inout_dataref) const
 {
     if (nindices == 0) {
-        if (leading_dimension) {
-            // Copy the full var_dim into a strided_dim
-            const var_dim_dtype_metadata *md = reinterpret_cast<const var_dim_dtype_metadata *>(metadata);
-            const var_dim_dtype_data *d = reinterpret_cast<const var_dim_dtype_data *>(*inout_data);
-            strided_dim_dtype_metadata *out_md = reinterpret_cast<strided_dim_dtype_metadata *>(out_metadata);
-            out_md->size = d->size;
-            out_md->stride = md->stride;
-            *inout_data = d->begin + md->offset;
-            if (*inout_dataref) {
-                memory_block_decref(*inout_dataref);
-            }
-            *inout_dataref = md->blockref ? md->blockref : embedded_reference;
-            memory_block_incref(*inout_dataref);
-            if (!m_element_dtype.is_builtin()) {
-                m_element_dtype.extended()->metadata_copy_construct(
-                                out_metadata + sizeof(strided_dim_dtype_metadata),
-                                metadata + sizeof(var_dim_dtype_metadata),
-                                embedded_reference);
-            }
-        } else {
-            // If there are no more indices, copy the metadata verbatim
-            metadata_copy_construct(out_metadata, metadata, embedded_reference);
-        }
+        // If there are no more indices, copy the metadata verbatim
+        metadata_copy_construct(out_metadata, metadata, embedded_reference);
         return 0;
     } else {
         const var_dim_dtype_metadata *md = reinterpret_cast<const var_dim_dtype_metadata *>(metadata);

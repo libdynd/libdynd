@@ -66,8 +66,8 @@ TEST(VarArrayDType, DTypeSubscriptSimpleSlice) {
     EXPECT_EQ(make_strided_dim_dtype(make_dtype<int>()), n.at(irange()).get_dtype());
     EXPECT_EQ(make_strided_dim_dtype(make_dtype<int>()), n.at(irange().by(-1)).get_dtype());
     EXPECT_EQ(make_strided_dim_dtype(make_dtype<int>()), n.at(1 <= irange() < 3).get_dtype());
-    // In particular, indexing with a zero-sized index converts from var to strided
-    EXPECT_EQ(make_strided_dim_dtype(make_dtype<int>()), n.at_array(0, NULL).get_dtype());
+    // But, indexing with a zero-sized index does not collapse from var to strided
+    EXPECT_EQ(make_var_dim_dtype(make_dtype<int>()), n.at_array(0, NULL).get_dtype());
 
     EXPECT_EQ(2, n.at(1 <= irange() < 3).get_shape()[0]);
     EXPECT_EQ(4, n.at(1 <= irange() < 3).at(0).as<int>());
@@ -79,11 +79,11 @@ TEST(VarArrayDType, DTypeSubscriptSimpleSlice) {
     EXPECT_EQ(4, n.at(irange().by(-1)).at(2).as<int>());
     EXPECT_EQ(2, n.at(irange().by(-1)).at(3).as<int>());
 
-    EXPECT_EQ(4, n.at_array(0, NULL).get_shape()[0]);
-    EXPECT_EQ(2, n.at_array(0, NULL).at(0).as<int>());
-    EXPECT_EQ(4, n.at_array(0, NULL).at(1).as<int>());
-    EXPECT_EQ(6, n.at_array(0, NULL).at(2).as<int>());
-    EXPECT_EQ(8, n.at_array(0, NULL).at(3).as<int>());
+    EXPECT_EQ(4, n.at(irange()).get_shape()[0]);
+    EXPECT_EQ(2, n.at(0).as<int>());
+    EXPECT_EQ(4, n.at(1).as<int>());
+    EXPECT_EQ(6, n.at(2).as<int>());
+    EXPECT_EQ(8, n.at(3).as<int>());
 
     EXPECT_THROW(n.at(2 <= irange() <= 4), irange_out_of_bounds);
 }
@@ -92,17 +92,17 @@ TEST(VarArrayDType, DTypeSubscriptNested) {
     ndobject n = parse_json("var, var, int32",
                     "[[2,4,6,8], [1,3,5,7,9], [], [-1,-2,-3]]");
 
-    // Indexing with a zero-sized index converts the leading dim from var to strided
-    EXPECT_EQ(dtype("M, var, int32"), n.at_array(0, NULL).get_dtype());
-    // Indexing with a single index converts the next dim from var to strided
-    EXPECT_EQ(dtype("M, int32"), n.at(0).get_dtype());
+    // Indexing with a zero-sized index does not convert the leading dim from var to strided
+    EXPECT_EQ(dtype("var, var, int32"), n.at_array(0, NULL).get_dtype());
+    // Indexing with a single index does not convert the next dim from var to strided
+    EXPECT_EQ(dtype("var, int32"), n.at(0).get_dtype());
     EXPECT_EQ(dtype("int32"), n.at(0,0).get_dtype());
 
     // Validate the shapes after one level of indexing
-    EXPECT_EQ(4, n.at(0).get_shape()[0]);
-    EXPECT_EQ(5, n.at(1).get_shape()[0]);
-    EXPECT_EQ(0, n.at(2).get_shape()[0]);
-    EXPECT_EQ(3, n.at(3).get_shape()[0]);
+    EXPECT_EQ(4, n.at(0, irange()).get_shape()[0]);
+    EXPECT_EQ(5, n.at(1, irange()).get_shape()[0]);
+    EXPECT_EQ(0, n.at(2, irange()).get_shape()[0]);
+    EXPECT_EQ(3, n.at(3, irange()).get_shape()[0]);
 
     // Check the individual values with positive indexes
     EXPECT_EQ(2, n.at(0,0).as<int>());
@@ -148,32 +148,32 @@ TEST(VarArrayDType, DTypeSubscriptFixedVarNested) {
                     "[[2,4,6,8], [1,3,5,7,9], [], [-1,-2,-3]]");
 
     EXPECT_EQ(dtype("4, var, int32"), n.get_dtype());
-    EXPECT_EQ(dtype("M, int32"), n.at(0).get_dtype());
-    EXPECT_EQ(dtype("M, int32"), n.get_dtype().at(0));
+    EXPECT_EQ(dtype("var, int32"), n.at(0).get_dtype());
+    EXPECT_EQ(dtype("var, int32"), n.get_dtype().at(0));
     EXPECT_EQ(dtype("var, int32"), n.get_dtype().at_single(0));
 
     // Validate the shapes after one level of indexing
-    EXPECT_EQ(4, n.at(0).get_shape()[0]);
-    EXPECT_EQ(5, n.at(1).get_shape()[0]);
-    EXPECT_EQ(0, n.at(2).get_shape()[0]);
-    EXPECT_EQ(3, n.at(3).get_shape()[0]);
+    EXPECT_EQ(4, n.at(0, irange()).get_shape()[0]);
+    EXPECT_EQ(5, n.at(1, irange()).get_shape()[0]);
+    EXPECT_EQ(0, n.at(2, irange()).get_shape()[0]);
+    EXPECT_EQ(3, n.at(3, irange()).get_shape()[0]);
 }
 
 
 TEST(VarArrayDType, DTypeSubscriptStridedVarNested) {
     ndobject n = parse_json("var, var, int32",
                     "[[2,4,6,8], [1,3,5,7,9], [], [-1,-2,-3]]");
-    // By indexing with an empty index, switch the var dim to strided
-    n = n.at_array(0, NULL);
+    // By indexing with a no-op slice, switch the var dim to strided
+    n = n.at(irange());
 
     EXPECT_EQ(dtype("M, var, int32"), n.get_dtype());
-    EXPECT_EQ(dtype("M, int32"), n.at(0).get_dtype());
+    EXPECT_EQ(dtype("var, int32"), n.at(0).get_dtype());
 
     // Validate the shapes after one level of indexing
-    EXPECT_EQ(4, n.at(0).get_shape()[0]);
-    EXPECT_EQ(5, n.at(1).get_shape()[0]);
-    EXPECT_EQ(0, n.at(2).get_shape()[0]);
-    EXPECT_EQ(3, n.at(3).get_shape()[0]);
+    EXPECT_EQ(4, n.at(0, irange()).get_shape()[0]);
+    EXPECT_EQ(5, n.at(1, irange()).get_shape()[0]);
+    EXPECT_EQ(0, n.at(2, irange()).get_shape()[0]);
+    EXPECT_EQ(3, n.at(3, irange()).get_shape()[0]);
 }
 
 TEST(VarArrayDType, DTypeSubscriptFixedVarStruct) {
@@ -205,8 +205,8 @@ TEST(VarArrayDType, AccessCStructOfVar) {
     // but the second shouldn't
     ndobject n2 = n.p("b");
     EXPECT_EQ(dtype("M, var, int32"), n2.get_dtype());
-    EXPECT_EQ(5, n2.at(0).get_shape()[0]);
-    EXPECT_EQ(3, n2.at(1).get_shape()[0]);
+    ASSERT_EQ(5, n2.at(0, irange()).get_shape()[0]);
+    ASSERT_EQ(3, n2.at(1, irange()).get_shape()[0]);
 
     EXPECT_EQ(1, n2.at(0, 0).as<int>());
     EXPECT_EQ(2, n2.at(0, 1).as<int>());
@@ -231,7 +231,7 @@ TEST(VarArrayDType, AssignKernel) {
                     b.get_dtype(), b.get_ndo_meta(),
                     kernel_request_single, assign_error_default, &eval::default_eval_context);
     k(a.get_readwrite_originptr(), b.get_readonly_originptr());
-    EXPECT_EQ(1, a.at_array(0, NULL).get_shape()[0]);
+    ASSERT_EQ(1, a.at(irange()).get_shape()[0]);
     EXPECT_EQ(9, a.at(0).as<int>());
     k.reset();
 
@@ -244,7 +244,7 @@ TEST(VarArrayDType, AssignKernel) {
                     b.get_dtype(), b.get_ndo_meta(),
                     kernel_request_single, assign_error_default, &eval::default_eval_context);
     k(a.get_readwrite_originptr(), b.get_readonly_originptr());
-    EXPECT_EQ(3, a.at_array(0, NULL).get_shape()[0]);
+    ASSERT_EQ(3, a.at(irange()).get_shape()[0]);
     EXPECT_EQ(9, a.at(0).as<int>());
     EXPECT_EQ(9, a.at(1).as<int>());
     EXPECT_EQ(9, a.at(2).as<int>());
@@ -259,7 +259,7 @@ TEST(VarArrayDType, AssignKernel) {
                     b.get_dtype(), b.get_ndo_meta(),
                     kernel_request_single, assign_error_default, &eval::default_eval_context);
     k(a.get_readwrite_originptr(), b.get_readonly_originptr());
-    EXPECT_EQ(3, a.at_array(0, NULL).get_shape()[0]);
+    ASSERT_EQ(3, a.at(irange()).get_shape()[0]);
     EXPECT_EQ(3, a.at(0).as<int>());
     EXPECT_EQ(5, a.at(1).as<int>());
     EXPECT_EQ(7, a.at(2).as<int>());
@@ -275,7 +275,7 @@ TEST(VarArrayDType, AssignKernel) {
                     b.get_dtype(), b.get_ndo_meta(),
                     kernel_request_single, assign_error_default, &eval::default_eval_context);
     k(a.get_readwrite_originptr(), b.get_readonly_originptr());
-    EXPECT_EQ(3, a.at_array(0, NULL).get_shape()[0]);
+    ASSERT_EQ(3, a.at(irange()).get_shape()[0]);
     EXPECT_EQ(3, a.at(0).as<int>());
     EXPECT_EQ(5, a.at(1).as<int>());
     EXPECT_EQ(7, a.at(2).as<int>());
@@ -291,7 +291,7 @@ TEST(VarArrayDType, AssignKernel) {
                     b.get_dtype(), b.get_ndo_meta(),
                     kernel_request_single, assign_error_default, &eval::default_eval_context);
     k(a.get_readwrite_originptr(), b.get_readonly_originptr());
-    EXPECT_EQ(3, a.at_array(0, NULL).get_shape()[0]);
+    ASSERT_EQ(3, a.at(irange()).get_shape()[0]);
     EXPECT_EQ(9, a.at(0).as<int>());
     EXPECT_EQ(9, a.at(1).as<int>());
     EXPECT_EQ(9, a.at(2).as<int>());
@@ -347,7 +347,7 @@ TEST(VarArrayDType, AssignVarStridedKernel) {
                     b.get_dtype(), b.get_ndo_meta(),
                     kernel_request_single, assign_error_default, &eval::default_eval_context);
     k(a.get_readwrite_originptr(), b.get_readonly_originptr());
-    EXPECT_EQ(3, a.at_array(0, NULL).get_shape()[0]);
+    ASSERT_EQ(3, a.at(irange()).get_shape()[0]);
     EXPECT_EQ(3, a.at(0).as<int>());
     EXPECT_EQ(5, a.at(1).as<int>());
     EXPECT_EQ(7, a.at(2).as<int>());
@@ -363,7 +363,7 @@ TEST(VarArrayDType, AssignVarStridedKernel) {
                     b.get_dtype(), b.get_ndo_meta(),
                     kernel_request_single, assign_error_default, &eval::default_eval_context);
     k(a.get_readwrite_originptr(), b.get_readonly_originptr());
-    EXPECT_EQ(3, a.at_array(0, NULL).get_shape()[0]);
+    ASSERT_EQ(3, a.at(irange()).get_shape()[0]);
     EXPECT_EQ(3, a.at(0).as<int>());
     EXPECT_EQ(5, a.at(1).as<int>());
     EXPECT_EQ(7, a.at(2).as<int>());
@@ -440,7 +440,7 @@ TEST(VarArrayDType, AssignVarFixedKernel) {
                     b.get_dtype(), b.get_ndo_meta(),
                     kernel_request_single, assign_error_default, &eval::default_eval_context);
     k(a.get_readwrite_originptr(), b.get_readonly_originptr());
-    EXPECT_EQ(3, a.at_array(0, NULL).get_shape()[0]);
+    ASSERT_EQ(3, a.at(irange()).get_shape()[0]);
     EXPECT_EQ(3, a.at(0).as<int>());
     EXPECT_EQ(5, a.at(1).as<int>());
     EXPECT_EQ(7, a.at(2).as<int>());
@@ -456,7 +456,7 @@ TEST(VarArrayDType, AssignVarFixedKernel) {
                     b.get_dtype(), b.get_ndo_meta(),
                     kernel_request_single, assign_error_default, &eval::default_eval_context);
     k(a.get_readwrite_originptr(), b.get_readonly_originptr());
-    EXPECT_EQ(3, a.at_array(0, NULL).get_shape()[0]);
+    ASSERT_EQ(3, a.at(irange()).get_shape()[0]);
     EXPECT_EQ(3, a.at(0).as<int>());
     EXPECT_EQ(5, a.at(1).as<int>());
     EXPECT_EQ(7, a.at(2).as<int>());

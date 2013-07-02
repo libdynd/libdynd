@@ -31,8 +31,8 @@ TEST(GroupByDType, Basic) {
                             make_categorical_dtype(groups), make_dtype<int>()))),
                     g.get_dtype());
     g = g.eval();
-    EXPECT_EQ(1, g.at(0).get_shape()[0]);
-    EXPECT_EQ(2, g.at(1).get_shape()[0]);
+    EXPECT_EQ(1, g.at(0, irange()).get_shape()[0]);
+    EXPECT_EQ(2, g.at(1, irange()).get_shape()[0]);
     EXPECT_EQ(10, g.at(0,0).as<int>());
     EXPECT_EQ(20, g.at(1,0).as<int>());
     EXPECT_EQ(30, g.at(1,1).as<int>());
@@ -48,8 +48,8 @@ TEST(GroupByDType, BasicDeduceGroups) {
                             make_categorical_dtype(expected_groups), make_string_dtype()))),
                     g.get_dtype());
     g = g.eval();
-    EXPECT_EQ(2, g.at(0).get_shape()[0]);
-    EXPECT_EQ(3, g.at(1).get_shape()[0]);
+    EXPECT_EQ(2, g.at(0, irange()).get_shape()[0]);
+    EXPECT_EQ(3, g.at(1, irange()).get_shape()[0]);
     EXPECT_EQ("test",   g.at(0,0).as<string>());
     EXPECT_EQ("now",    g.at(0,1).as<string>());
     EXPECT_EQ("a",      g.at(1,0).as<string>());
@@ -83,12 +83,12 @@ TEST(GroupByDType, MediumDeduceGroups) {
     int group_15[] = {            50,     75        };
     int group_19[] = {            54,     79        };
     g = g.eval();
-    EXPECT_TRUE(ndobject(group_0).equals_exact(g.at(0).eval()));
-    EXPECT_TRUE(ndobject(group_6).equals_exact(g.at(6).eval()));
-    EXPECT_TRUE(ndobject(group_9).equals_exact(g.at(9).eval()));
-    EXPECT_TRUE(ndobject(group_10).equals_exact(g.at(10).eval()));
-    EXPECT_TRUE(ndobject(group_15).equals_exact(g.at(15).eval()));
-    EXPECT_TRUE(ndobject(group_19).equals_exact(g.at(19).eval()));
+    EXPECT_TRUE(ndobject(group_0).equals_exact(g.at(0, irange()).eval()));
+    EXPECT_TRUE(ndobject(group_6).equals_exact(g.at(6, irange()).eval()));
+    EXPECT_TRUE(ndobject(group_9).equals_exact(g.at(9, irange()).eval()));
+    EXPECT_TRUE(ndobject(group_10).equals_exact(g.at(10, irange()).eval()));
+    EXPECT_TRUE(ndobject(group_15).equals_exact(g.at(15, irange()).eval()));
+    EXPECT_TRUE(ndobject(group_19).equals_exact(g.at(19, irange()).eval()));
 }
 
 TEST(GroupByDType, Struct) {
@@ -116,8 +116,8 @@ TEST(GroupByDType, Struct) {
                     g.get_dtype());
     g = g.eval();
     EXPECT_EQ(2, g.at_array(0, NULL).get_shape()[0]);
-    EXPECT_EQ(3, g.at(0).get_shape()[0]);
-    EXPECT_EQ(2, g.at(1).get_shape()[0]);
+    EXPECT_EQ(3, g.at(0, irange()).get_shape()[0]);
+    EXPECT_EQ(2, g.at(1, irange()).get_shape()[0]);
     EXPECT_EQ("Jennifer",   g.at(0,0).p("name").as<string>());
     EXPECT_EQ("Louise",     g.at(0,1).p("name").as<string>());
     EXPECT_EQ("Anne",       g.at(0,2).p("name").as<string>());
@@ -150,8 +150,8 @@ TEST(GroupByDType, StructSubset) {
 
     g = g.eval();
     EXPECT_EQ(2, g.at_array(0, NULL).get_shape()[0]);
-    EXPECT_EQ(3, g.at(0).get_shape()[0]);
-    EXPECT_EQ(4, g.at(1).get_shape()[0]);
+    EXPECT_EQ(3, g.at(0, irange()).get_shape()[0]);
+    EXPECT_EQ(4, g.at(1, irange()).get_shape()[0]);
     EXPECT_EQ("Jennifer",   g.at(0,0).p("firstname").as<string>());
     EXPECT_EQ("Louise",     g.at(0,1).p("firstname").as<string>());
     EXPECT_EQ("Anne",       g.at(0,2).p("firstname").as<string>());
@@ -182,11 +182,11 @@ TEST(GroupByDType, StructSubset) {
 
     g = g.eval();
     EXPECT_EQ(5, g.at_array(0, NULL).get_shape()[0]);
-    EXPECT_EQ(2, g.at(0).get_shape()[0]);
-    EXPECT_EQ(2, g.at(1).get_shape()[0]);
-    EXPECT_EQ(1, g.at(2).get_shape()[0]);
-    EXPECT_EQ(1, g.at(3).get_shape()[0]);
-    EXPECT_EQ(1, g.at(4).get_shape()[0]);
+    EXPECT_EQ(2, g.at(0, irange()).get_shape()[0]);
+    EXPECT_EQ(2, g.at(1, irange()).get_shape()[0]);
+    EXPECT_EQ(1, g.at(2, irange()).get_shape()[0]);
+    EXPECT_EQ(1, g.at(3, irange()).get_shape()[0]);
+    EXPECT_EQ(1, g.at(4, irange()).get_shape()[0]);
     EXPECT_EQ("Jennifer",   g.at(0,0).p("firstname").as<string>());
     EXPECT_EQ("Anne",       g.at(0,1).p("firstname").as<string>());
     EXPECT_EQ("Jake",       g.at(1,0).p("firstname").as<string>());
@@ -229,8 +229,8 @@ TEST(GroupByDType, StructUnsortedCats) {
                     g.get_dtype());
     g = g.eval();
     EXPECT_EQ(2, g.at_array(0, NULL).get_shape()[0]);
-    EXPECT_EQ(2, g.at(0).get_shape()[0]);
-    EXPECT_EQ(3, g.at(1).get_shape()[0]);
+    EXPECT_EQ(2, g.at(0, irange()).get_shape()[0]);
+    EXPECT_EQ(3, g.at(1, irange()).get_shape()[0]);
     EXPECT_EQ("Paul",       g.at(0,0).p("name").as<string>());
     EXPECT_EQ("Frank",      g.at(0,1).p("name").as<string>());
     EXPECT_EQ("Jennifer",   g.at(1,0).p("name").as<string>());
