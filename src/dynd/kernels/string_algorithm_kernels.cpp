@@ -77,7 +77,7 @@ void kernels::string_concatenation_kernel::strided(
         string_dtype_data *d = reinterpret_cast<string_dtype_data *>(dst);
         const string_dtype_data * const *s = reinterpret_cast<const string_dtype_data * const *>(src_vec.get());
         concat_one_string(nop, d, s, allocator, e->m_dst_blockref);
-        d += dst_stride;
+        dst += dst_stride;
         for (size_t op = 0; op < nop; ++op) {
             src_vec[op] += src_stride[op];
         }

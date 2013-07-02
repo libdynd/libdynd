@@ -483,4 +483,16 @@ TEST(StringDType, Concatenation) {
     a = "first";
     b = "second";
     EXPECT_EQ("firstsecond", (a+b).as<string>());
+
+    const char *a_arr[3] = {"testing", "one", "two"};
+    const char *b_arr[3] = {"alpha", "beta", "gamma"};
+
+    a = a_arr;
+    b = b_arr;
+    ndobject c = (a + b).eval();
+    ASSERT_EQ(dtype("M, string"), c.get_dtype());
+    EXPECT_EQ(3, c.get_dim_size());
+    EXPECT_EQ("testingalpha", c.at(0).as<string>());
+    EXPECT_EQ("onebeta", c.at(1).as<string>());
+    EXPECT_EQ("twogamma", c.at(2).as<string>());
 }
