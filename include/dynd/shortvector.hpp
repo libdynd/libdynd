@@ -7,6 +7,7 @@
 #define _DYND__SHORTVECTOR_HPP_
 
 #include <algorithm>
+#include <dynd/config.hpp>
 
 namespace dynd {
 

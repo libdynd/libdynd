@@ -16,6 +16,10 @@ struct kernel_data_prefix {
     void *function;
     destructor_fn_t destructor;
 
+    kernel_data_prefix& base() {
+        return *this;
+    }
+
     /**
      * Call to get the kernel function pointer, whose type
      * must be known by the context.

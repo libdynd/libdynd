@@ -476,3 +476,11 @@ TEST(StringDType, Comparisons) {
     EXPECT_TRUE(b >= a);
     EXPECT_TRUE(b > a);
 }
+
+TEST(StringDType, Concatenation) {
+    ndobject a, b;
+
+    a = "first";
+    b = "second";
+    EXPECT_EQ("firstsecond", (a+b).as<string>());
+}

@@ -15,6 +15,7 @@
 #include <dynd/dtypes/var_dim_dtype.hpp>
 #include <dynd/dtypes/expr_dtype.hpp>
 #include <dynd/dtypes/string_dtype.hpp>
+#include <dynd/kernels/string_algorithm_kernels.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -112,10 +113,10 @@ namespace {
             extra_type *e = out->get_at<extra_type>(offset_out);
             switch (kernreq) {
                 case kernel_request_single:
-                    e->set_function<expr_single_operation_t>(m_op_pair.single);
+                    e->base().set_function<expr_single_operation_t>(m_op_pair.single);
                     break;
                 case kernel_request_strided:
-                    e->set_function<expr_strided_operation_t>(m_op_pair.strided);
+                    e->base().set_function<expr_strided_operation_t>(m_op_pair.strided);
                     break;
                 default: {
                     stringstream ss;
@@ -227,6 +228,7 @@ static int compress_builtin_type_id[builtin_type_id_count] = {
                 9, 10, // complex<float32>, complex<float64>
                 -1};
 
+template<class KD>
 ndobject apply_binary_operator(const ndobject *ops,
                 const dtype& rdt, const dtype& op1dt, const dtype& op2dt,
                 expr_operation_pair expr_ops,
@@ -271,30 +273,39 @@ ndobject apply_binary_operator(const ndobject *ops,
     // we can swap it in as the dtype
     dtype edt = make_expr_dtype(result_vdt,
                     result.get_dtype(),
-                    new arithmetic_op_kernel_generator<kernel_data_prefix>(rdt, op1dt, op2dt, expr_ops, name));
+                    new arithmetic_op_kernel_generator<KD>(rdt, op1dt, op2dt, expr_ops, name));
     edt.swap(result.get_ndo()->m_dtype);
     return result;
 }
 
 ndobject dynd::operator+(const ndobject& op1, const ndobject& op2)
 {
-    dtype rdt;
+    ndobject ops[2] = {op1, op2};
     expr_operation_pair func_ptr;
     dtype op1dt = op1.get_udtype().value_dtype();
     dtype op2dt = op2.get_udtype().value_dtype();
     if (op1dt.is_builtin() && op1dt.is_builtin()) {
-        rdt = promote_dtypes_arithmetic(op1dt, op2dt);
+        dtype rdt = promote_dtypes_arithmetic(op1dt, op2dt);
         int table_index = compress_builtin_type_id[rdt.get_type_id()];
         if (table_index >= 0) {
             func_ptr = addition_table[table_index];
         }
+
+        // The signature is (T, T) -> T, so we don't use the original types
+        return apply_binary_operator<kernel_data_prefix>(ops, rdt, rdt, rdt, func_ptr, "addition");
     } else if (op1dt.get_kind() == string_kind && op2dt.get_kind() == string_kind) {
-        rdt = make_string_dtype();
-
+        dtype rdt = make_string_dtype();
+        func_ptr.single = &kernels::string_concatenation_kernel::single;
+        func_ptr.strided = &kernels::string_concatenation_kernel::strided;
+        // The signature is (string, string) -> string, so we don't use the original types
+        // NOTE: Using a different name for string concatenation in the generated expression
+        return apply_binary_operator<kernels::string_concatenation_kernel>(ops, rdt, rdt, rdt, func_ptr, "string_concat");
+    } else {
+        stringstream ss;
+        ss << "Addition is not supported for dynd types ";
+        ss << op1dt << " and " << op2dt;
+        throw runtime_error(ss.str());
     }
-
-    ndobject ops[2] = {op1, op2};
-    return apply_binary_operator(ops, rdt, op1dt, op2dt, func_ptr, "addition");
 }
 
 ndobject dynd::operator-(const ndobject& op1, const ndobject& op2)
@@ -312,7 +323,7 @@ ndobject dynd::operator-(const ndobject& op1, const ndobject& op2)
     }
 
     ndobject ops[2] = {op1, op2};
-    return apply_binary_operator(ops, rdt, op1dt, op2dt, func_ptr, "subtraction");
+    return apply_binary_operator<kernel_data_prefix>(ops, rdt, rdt, rdt, func_ptr, "subtraction");
 }
 
 ndobject dynd::operator*(const ndobject& op1, const ndobject& op2)
@@ -330,7 +341,7 @@ ndobject dynd::operator*(const ndobject& op1, const ndobject& op2)
     }
 
     ndobject ops[2] = {op1, op2};
-    return apply_binary_operator(ops, rdt, op1dt, op2dt, func_ptr, "multiplication");
+    return apply_binary_operator<kernel_data_prefix>(ops, rdt, rdt, rdt, func_ptr, "multiplication");
 }
 
 ndobject dynd::operator/(const ndobject& op1, const ndobject& op2)
@@ -348,5 +359,5 @@ ndobject dynd::operator/(const ndobject& op1, const ndobject& op2)
     }
 
     ndobject ops[2] = {op1, op2};
-    return apply_binary_operator(ops, rdt, op1dt, op2dt, func_ptr, "division");
+    return apply_binary_operator<kernel_data_prefix>(ops, rdt, rdt, rdt, func_ptr, "division");
 }
