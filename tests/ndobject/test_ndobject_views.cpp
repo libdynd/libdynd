@@ -10,7 +10,7 @@
 #include <inc_gtest.hpp>
 
 #include <dynd/ndobject.hpp>
-#include <dynd/ndobject_arange.hpp>
+#include <dynd/ndobject_range.hpp>
 #include <dynd/dtypes/dtype_alignment.hpp>
 #include <dynd/dtypes/convert_dtype.hpp>
 #include <dynd/dtypes/view_dtype.hpp>

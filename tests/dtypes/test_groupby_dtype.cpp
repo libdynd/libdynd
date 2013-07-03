@@ -9,7 +9,7 @@
 #include "inc_gtest.hpp"
 
 #include <dynd/ndobject.hpp>
-#include <dynd/ndobject_arange.hpp>
+#include <dynd/ndobject_range.hpp>
 #include <dynd/dtypes/groupby_dtype.hpp>
 #include <dynd/dtypes/categorical_dtype.hpp>
 #include <dynd/dtypes/string_dtype.hpp>
@@ -58,22 +58,22 @@ TEST(GroupByDType, BasicDeduceGroups) {
 }
 
 TEST(GroupByDType, MediumDeduceGroups) {
-    ndobject data = arange(100);
+    ndobject data = nd::range(100);
     ndobject by = make_strided_ndobject(100, make_dtype<int>());
     // Since at this point dynd doesn't have a very sophisticated
     // calculation mechanism, construct by as a series of runs
-    by.at(0 <= irange() < 10).vals() = arange(10);
-    by.at(10 <= irange() < 25).vals() = arange(15);
-    by.at(25 <= irange() < 35).vals() = arange(10);
-    by.at(35 <= irange() < 55).vals() = arange(20);
-    by.at(55 <= irange() < 60).vals() = arange(5);
-    by.at(60 <= irange() < 80).vals() = arange(20);
-    by.at(80 <= irange() < 95).vals() = arange(15);
-    by.at(95 <= irange() < 100).vals() = arange(5);
+    by.at(0 <= irange() < 10).vals() = nd::range(10);
+    by.at(10 <= irange() < 25).vals() = nd::range(15);
+    by.at(25 <= irange() < 35).vals() = nd::range(10);
+    by.at(35 <= irange() < 55).vals() = nd::range(20);
+    by.at(55 <= irange() < 60).vals() = nd::range(5);
+    by.at(60 <= irange() < 80).vals() = nd::range(20);
+    by.at(80 <= irange() < 95).vals() = nd::range(15);
+    by.at(95 <= irange() < 100).vals() = nd::range(5);
     ndobject g = groupby(data, by);
     EXPECT_EQ(make_groupby_dtype(make_strided_dim_dtype(make_dtype<int>()),
                         make_strided_dim_dtype(make_convert_dtype(
-                            make_categorical_dtype(arange(20)), make_dtype<int>()))),
+                            make_categorical_dtype(nd::range(20)), make_dtype<int>()))),
                     g.get_dtype());
     EXPECT_EQ(g.get_shape()[0], 20);
     int group_0[] =  { 0, 10, 25, 35, 55, 60, 80, 95};

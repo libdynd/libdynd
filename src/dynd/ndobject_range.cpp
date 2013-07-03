@@ -7,7 +7,7 @@
 #include <sstream>
 
 #include <dynd/ndobject.hpp>
-#include <dynd/ndobject_arange.hpp>
+#include <dynd/ndobject_range.hpp>
 #include <dynd/dtype_promotion.hpp>
 
 using namespace std;
@@ -15,12 +15,12 @@ using namespace dynd;
 
 namespace {
     template<class T>
-    struct arange_specialization {
-        static void arange(const void *beginval, const void *stepval, ndobject& result) {
+    struct range_specialization {
+        static void range(const void *beginval, const void *stepval, ndobject& result) {
             T begin = *reinterpret_cast<const T *>(beginval);
             T step = *reinterpret_cast<const T *>(stepval);
             intptr_t count = result.get_shape()[0], stride = result.get_strides()[0];
-            //cout << "arange with count " << count << endl;
+            //cout << "range with count " << count << endl;
             char *dst = result.get_readwrite_originptr();
             for (intptr_t i = 0; i < count; ++i, dst += stride) {
                 *reinterpret_cast<T *>(dst) = static_cast<T>(begin + i * step);
@@ -29,12 +29,12 @@ namespace {
     };
 
     template<class T, dtype_kind_t kind>
-    struct arange_counter {
+    struct range_counter {
         static intptr_t count(const void *beginval, const void *endval, const void *stepval) {
             T begin = *reinterpret_cast<const T *>(beginval);
             T end = *reinterpret_cast<const T *>(endval);
             T step = *reinterpret_cast<const T *>(stepval);
-            //cout << "arange params " << begin << "  " << end << "  " << step << "\n";
+            //cout << "range params " << begin << "  " << end << "  " << step << "\n";
             if (step > 0) {
                 if (end <= begin) {
                     return 0;
@@ -47,36 +47,36 @@ namespace {
                 step = -step;
                 return ((intptr_t)begin - (intptr_t)end + (intptr_t)step - 1) / (intptr_t)step;
             } else {
-                throw std::runtime_error("arange cannot have a zero-sized step");
+                throw std::runtime_error("nd::range cannot have a zero-sized step");
             }
         }
     };
 
     template<class T>
-    struct arange_counter<T, uint_kind> {
+    struct range_counter<T, uint_kind> {
         static intptr_t count(const void *beginval, const void *endval, const void *stepval) {
             T begin = *reinterpret_cast<const T *>(beginval);
             T end = *reinterpret_cast<const T *>(endval);
             T step = *reinterpret_cast<const T *>(stepval);
-            //cout << "arange params " << begin << "  " << end << "  " << step << "\n";
+            //cout << "range params " << begin << "  " << end << "  " << step << "\n";
             if (step > 0) {
                 if (end <= begin) {
                     return 0;
                 }
                 return ((intptr_t)end - (intptr_t)begin + (intptr_t)step - 1) / (intptr_t)step;
             } else {
-                throw std::runtime_error("arange cannot have a zero-sized step");
+                throw std::runtime_error("nd::range cannot have a zero-sized step");
             }
         }
     };
 
     template<class T>
-    struct arange_counter<T, real_kind> {
+    struct range_counter<T, real_kind> {
         static intptr_t count(const void *beginval, const void *endval, const void *stepval) {
             T begin = *reinterpret_cast<const T *>(beginval);
             T end = *reinterpret_cast<const T *>(endval);
             T step = *reinterpret_cast<const T *>(stepval);
-            //cout << "arange params " << begin << "  " << end << "  " << step << "\n";
+            //cout << "nd::range params " << begin << "  " << end << "  " << step << "\n";
             if (step > 0) {
                 if (end <= begin) {
                     return 0;
@@ -92,20 +92,20 @@ namespace {
                 // that the range given is approximately a multiple of step
                 return (intptr_t)floor((end - begin + 0.5 * step) / step);
             } else {
-                throw std::runtime_error("arange cannot have a zero-sized step");
+                throw std::runtime_error("nd::range cannot have a zero-sized step");
             }
         }
     };
 } // anonymous namespace
 
-ndobject dynd::arange(const dtype& scalar_dtype, const void *beginval, const void *endval, const void *stepval)
+ndobject dynd::nd::range(const dtype& scalar_dtype, const void *beginval, const void *endval, const void *stepval)
 {
 #define ONE_ARANGE_SPECIALIZATION(type) \
     case type_id_of<type>::value: { \
-        intptr_t dim_size = arange_counter<type, dtype_kind_of<type>::value>::count(beginval, endval, stepval); \
+        intptr_t dim_size = range_counter<type, dtype_kind_of<type>::value>::count(beginval, endval, stepval); \
         ndobject result = \
                 make_strided_ndobject(dim_size, scalar_dtype); \
-        arange_specialization<type>::arange(beginval, stepval, result); \
+        range_specialization<type>::range(beginval, stepval, result); \
         return DYND_MOVE(result); \
     }
 
@@ -127,7 +127,7 @@ ndobject dynd::arange(const dtype& scalar_dtype, const void *beginval, const voi
 #undef ONE_ARANGE_SPECIALIZATION
 
     stringstream ss;
-    ss << "dynd arange doesn't support dtype " << scalar_dtype;
+    ss << "dynd nd::range doesn't support type " << scalar_dtype;
     throw runtime_error(ss.str());
 }
 
@@ -173,7 +173,7 @@ static void linspace_specialization(complex<double> start, complex<double> stop,
     }
 }
 
-ndobject dynd::linspace(const ndobject& start, const ndobject& stop, intptr_t count, const dtype& dt)
+ndobject dynd::nd::linspace(const ndobject& start, const ndobject& stop, intptr_t count, const dtype& dt)
 {
     ndobject start_cleaned = start.ucast(dt).eval();
     ndobject stop_cleaned = stop.ucast(dt).eval();
@@ -185,7 +185,7 @@ ndobject dynd::linspace(const ndobject& start, const ndobject& stop, intptr_t co
     }
 }
 
-ndobject dynd::linspace(const ndobject& start, const ndobject& stop, intptr_t count)
+ndobject dynd::nd::linspace(const ndobject& start, const ndobject& stop, intptr_t count)
 {
     dtype dt = promote_dtypes_arithmetic(start.get_udtype(), stop.get_udtype());
     // Make sure it's at least floating point
@@ -195,7 +195,7 @@ ndobject dynd::linspace(const ndobject& start, const ndobject& stop, intptr_t co
     return linspace(start, stop, count, dt);
 }
 
-ndobject dynd::linspace(const dtype& dt, const void *startval, const void *stopval, intptr_t count)
+ndobject dynd::nd::linspace(const dtype& dt, const void *startval, const void *stopval, intptr_t count)
 {
     if (count < 2) {
         throw runtime_error("linspace needs a count of at least 2");

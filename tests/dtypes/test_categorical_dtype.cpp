@@ -13,7 +13,7 @@
 #include <dynd/dtypes/fixedstring_dtype.hpp>
 #include <dynd/dtypes/string_dtype.hpp>
 #include <dynd/dtypes/convert_dtype.hpp>
-#include <dynd/ndobject_arange.hpp>
+#include <dynd/ndobject_range.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -34,7 +34,7 @@ TEST(CategoricalDType, Create) {
     EXPECT_EQ(a.get_udtype(), d.p("category_type").as<dtype>());
 
     // With <= 256 categories, storage is a uint8
-    a = arange(256);
+    a = nd::range(256);
     d = make_categorical_dtype(a);
     EXPECT_EQ(1u, d.get_data_alignment());
     EXPECT_EQ(1u, d.get_data_size());
@@ -42,11 +42,11 @@ TEST(CategoricalDType, Create) {
     EXPECT_EQ(make_dtype<int32_t>(), d.p("category_type").as<dtype>());
 
     // With <= 65536 categories, storage is a uint16
-    a = arange(257);
+    a = nd::range(257);
     d = make_categorical_dtype(a);
     EXPECT_EQ(2u, d.get_data_alignment());
     EXPECT_EQ(2u, d.get_data_size());
-    a = arange(65536);
+    a = nd::range(65536);
     d = make_categorical_dtype(a);
     EXPECT_EQ(2u, d.get_data_alignment());
     EXPECT_EQ(2u, d.get_data_size());
@@ -54,7 +54,7 @@ TEST(CategoricalDType, Create) {
     EXPECT_EQ(make_dtype<int32_t>(), d.p("category_type").as<dtype>());
 
     // Otherwise, storage is a uint32
-    a = arange(65537);
+    a = nd::range(65537);
     d = make_categorical_dtype(a);
     EXPECT_EQ(4u, d.get_data_alignment());
     EXPECT_EQ(4u, d.get_data_size());

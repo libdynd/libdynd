@@ -49,7 +49,7 @@ set(tests_SRC
     ndobject/test_json_formatter.cpp
     ndobject/test_json_parser.cpp
     ndobject/test_ndobject.cpp
-    ndobject/test_ndobject_arange.cpp
+    ndobject/test_ndobject_range.cpp
     ndobject/test_ndobject_assign.cpp
     ndobject/test_ndobject_at.cpp
     ndobject/test_ndobject_cast.cpp

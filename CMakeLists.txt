@@ -306,7 +306,7 @@ set(libdynd_SRC
     src/dynd/json_parser.cpp
     src/dynd/lowlevel_api.cpp
     src/dynd/ndobject.cpp
-    src/dynd/ndobject_arange.cpp
+    src/dynd/ndobject_range.cpp
     src/dynd/shape_tools.cpp
     src/dynd/string_encodings.cpp
     include/dynd/atomic_refcount.hpp
@@ -325,7 +325,7 @@ set(libdynd_SRC
     include/dynd/irange.hpp
     include/dynd/lowlevel_api.hpp
     include/dynd/ndobject.hpp
-    include/dynd/ndobject_arange.hpp
+    include/dynd/ndobject_range.hpp
     include/dynd/ndobject_iter.hpp
     include/dynd/shortvector.hpp
     include/dynd/shape_tools.hpp

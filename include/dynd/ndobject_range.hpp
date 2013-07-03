@@ -8,39 +8,39 @@
 
 #include <dynd/ndobject.hpp>
 
-namespace dynd {
+namespace dynd { namespace nd {
 
 /**
- * General version of arange, with raw pointers to the values. Returns
+ * General version of range, with raw pointers to the values. Returns
  * a one-dimensional array with the values {beginval, beginval + stepval, ...,
  * beginval + (k-1) * stepval} where the next value in the sequence would hit
  * or cross endval.
  */
-ndobject arange(const dtype& scalar_dtype, const void *beginval, const void *endval, const void *stepval);
+ndobject range(const dtype& scalar_dtype, const void *beginval, const void *endval, const void *stepval);
 
 /**
- * Version of arange templated for C++ scalar types.
+ * Version of range templated for C++ scalar types.
  */
 template<class T>
-typename enable_if<is_dtype_scalar<T>::value, ndobject>::type arange(T beginval, T endval,
+typename enable_if<is_dtype_scalar<T>::value, ndobject>::type range(T beginval, T endval,
                                                                     T stepval = T(1)) {
-    return arange(make_dtype<T>(), &beginval, &endval, &stepval);
+    return range(make_dtype<T>(), &beginval, &endval, &stepval);
 }
 
 /**
- * Version of arange templated for C++ scalar types, with just the end parameter.
+ * Version of range templated for C++ scalar types, with just the end parameter.
  */
 template<class T>
-typename enable_if<is_dtype_scalar<T>::value, ndobject>::type arange(T endval) {
+typename enable_if<is_dtype_scalar<T>::value, ndobject>::type range(T endval) {
     T beginval = T(0), stepval = T(1);
-    return arange(make_dtype<T>(), &beginval, &endval, &stepval);
+    return range(make_dtype<T>(), &beginval, &endval, &stepval);
 }
 
 /**
- * Version of arange based on an irange object.
+ * Version of range based on an irange object.
  */
-inline ndobject arange(const irange& i) {
-    return arange(make_dtype<intptr_t>(), &i.start(), &i.finish(), &i.step());
+inline ndobject range(const irange& i) {
+    return range(make_dtype<intptr_t>(), &i.start(), &i.finish(), &i.step());
 }
 
 /**
@@ -88,6 +88,6 @@ typename enable_if<dtype_kind_of<T>::value == int_kind ||
     return linspace((double)start, (double)stop, count);
 }
 
-} // namespace dynd
+}} // namespace dynd::nd
 
 #endif // _DYND__NDOBJECT_ARANGE_HPP_

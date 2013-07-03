@@ -11,7 +11,7 @@
 #define DYND_CLING
 
 #include <dynd/ndarray.hpp>
-#include <dynd/ndarray_arange.hpp>
+#include <dynd/ndarray_range.hpp>
 
 using namespace std;
 using namespace dynd;
