@@ -19,7 +19,7 @@ namespace dynd {
  * metadata after this structure is determined by the m_dtype
  * object.
  */
-struct ndobject_preamble {
+struct array_preamble {
     memory_block_data m_memblockdata;
     /**
      * m_dtype is overloaded - for builtin scalar dtypes, it
@@ -55,7 +55,7 @@ struct ndobject_preamble {
  *
  * The created object is uninitialized.
  */
-memory_block_ptr make_ndobject_memory_block(size_t metadata_size);
+memory_block_ptr make_array_memory_block(size_t metadata_size);
 
 /**
  * Creates a memory block for holding an ndobject (i.e. a container for ndobject metadata),
@@ -63,14 +63,14 @@ memory_block_ptr make_ndobject_memory_block(size_t metadata_size);
  *
  * The created object is uninitialized.
  */
-memory_block_ptr make_ndobject_memory_block(size_t metadata_size, size_t extra_size,
+memory_block_ptr make_array_memory_block(size_t metadata_size, size_t extra_size,
                     size_t extra_alignment, char **out_extra_ptr);
 
 /**
  * Creates an ndobject memory block, and default-constructs it for the dtype
  * and specified shape.
  */
-memory_block_ptr make_ndobject_memory_block(const dtype& dt, size_t ndim, const intptr_t *shape);
+memory_block_ptr make_array_memory_block(const dtype& dt, size_t ndim, const intptr_t *shape);
 
 /**
  * Makes a shallow copy of the ndobject memory block. In the copy, only the
@@ -78,9 +78,9 @@ memory_block_ptr make_ndobject_memory_block(const dtype& dt, size_t ndim, const 
  * references are swapped to point at the original ndobject memory block, as they
  * are a signal that the data was embedded in the same memory allocation.
  */
-memory_block_ptr shallow_copy_ndobject_memory_block(const memory_block_ptr& ndo);
+memory_block_ptr shallow_copy_array_memory_block(const memory_block_ptr& ndo);
 
-void ndobject_memory_block_debug_print(const memory_block_data *memblock, std::ostream& o, const std::string& indent);
+void array_memory_block_debug_print(const memory_block_data *memblock, std::ostream& o, const std::string& indent);
 
 } // namespace dynd
 

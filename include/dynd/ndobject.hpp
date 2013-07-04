@@ -18,11 +18,11 @@
 #include <dynd/irange.hpp>
 #include <dynd/memblock/ndobject_memory_block.hpp>
 
-namespace dynd {
+namespace dynd { namespace nd {
 
-class ndobject;
+class array;
 
-enum ndobject_access_flags {
+enum array_access_flags {
     /** If an ndarray node is readable */
     read_access_flag = 0x01,
     /** If an ndarray node is writeable */
@@ -32,96 +32,96 @@ enum ndobject_access_flags {
 };
 
 /** Stream printing function */
-std::ostream& operator<<(std::ostream& o, const ndobject& rhs);
+std::ostream& operator<<(std::ostream& o, const array& rhs);
 
-class ndobject_vals;
-class ndobject_vals_at;
+class array_vals;
+class array_vals_at;
 
 /**
  * This is the primary multi-dimensional array class.
  */
-class ndobject {
+class array {
     /**
-     * The ndobject class is a wrapper around an ndobject_memory_block, which
+     * The nd::array class is a wrapper around an array_memory_block, which
      * contains metadata as described by the dtype.
      */
     memory_block_ptr m_memblock;
 
     // Don't allow implicit construction from a raw pointer
-    ndobject(const void *);
+    array(const void *);
 public:
     /** Constructs an array with no buffer (NULL state) */
-    ndobject();
+    array();
     /**
      * Constructs a zero-dimensional scalar from a C++ scalar.
      *
      */
-    ndobject(dynd_bool value);
-    ndobject(bool value);
-    ndobject(signed char value);
-    ndobject(short value);
-    ndobject(int value);
-    ndobject(long value);
-    ndobject(long long value);
-    ndobject(const dynd_int128& value);
-    ndobject(unsigned char value);
-    ndobject(unsigned short value);
-    ndobject(unsigned int value);
-    ndobject(unsigned long value);
-    ndobject(unsigned long long value);
-    ndobject(const dynd_uint128& value);
-    ndobject(dynd_float16 value);
-    ndobject(float value);
-    ndobject(double value);
-    ndobject(const dynd_float128& value);
-    ndobject(std::complex<float> value);
-    ndobject(std::complex<double> value);
-    ndobject(const std::string& value);
+    array(dynd_bool value);
+    array(bool value);
+    array(signed char value);
+    array(short value);
+    array(int value);
+    array(long value);
+    array(long long value);
+    array(const dynd_int128& value);
+    array(unsigned char value);
+    array(unsigned short value);
+    array(unsigned int value);
+    array(unsigned long value);
+    array(unsigned long long value);
+    array(const dynd_uint128& value);
+    array(dynd_float16 value);
+    array(float value);
+    array(double value);
+    array(const dynd_float128& value);
+    array(std::complex<float> value);
+    array(std::complex<double> value);
+    array(const std::string& value);
     /** Construct a string from a NULL-terminated UTF8 string */
-    ndobject(const char *cstr);
+    array(const char *cstr);
     /** Construct a string from a UTF8 buffer and specified buffer size */
-    ndobject(const char *str, size_t size);
+    array(const char *str, size_t size);
     /**
      * Constructs a scalar with the 'dtype' dtype.
      * NOTE: Does NOT create a scalar of the provided dtype,
      *       use dynd::empty(dtype) for that!
      */
-    ndobject(const dtype& dt);
+    array(const dtype& dt);
 
     /**
      * Constructs an array from a multi-dimensional C-style array.
      */
     template<class T, int N>
-    ndobject(const T (&rhs)[N]);
+    array(const T (&rhs)[N]);
     /** Specialize to treat char arrays as strings */
     template<int N>
-    ndobject(const char (&rhs)[N]);
+    array(const char (&rhs)[N]);
     /** Specialize to create 1D arrays of strings */
     template<int N>
-    ndobject(const char *(&rhs)[N]);
+    array(const char *(&rhs)[N]);
 
     /**
      * Constructs an array from a std::vector.
      */
     template<class T>
-    ndobject(const std::vector<T>& vec);
+    array(const std::vector<T>& vec);
 
-    explicit ndobject(const memory_block_ptr& ndobj_memblock)
+    explicit array(const memory_block_ptr& ndobj_memblock)
         : m_memblock(ndobj_memblock)
     {
-        if (m_memblock.get()->m_type != ndobject_memory_block_type) {
-            throw std::runtime_error("ndobject can only be constructed from a memblock with ndobject type");
+        if (m_memblock.get()->m_type != array_memory_block_type) {
+            throw std::runtime_error("array can only be constructed from a memblock with array type");
         }
     }
 
-    explicit ndobject(ndobject_preamble *ndo, bool add_ref)
+    explicit array(array_preamble *ndo, bool add_ref)
         : m_memblock(&ndo->m_memblockdata, add_ref)
     {}
 
     void set(const memory_block_ptr& ndobj_memblock)
     {
-        if (ndobj_memblock.get()->m_type != ndobject_memory_block_type) {
-            throw std::runtime_error("ndobject can only be constructed from a memblock with ndobject type");
+        if (ndobj_memblock.get()->m_type != array_memory_block_type) {
+            throw std::runtime_error("array can only be constructed from a memblock with array type");
         }
         m_memblock = ndobj_memblock;
     }
@@ -129,8 +129,8 @@ public:
 #ifdef DYND_RVALUE_REFS
     void set(memory_block_ptr&& ndobj_memblock)
     {
-        if (ndobj_memblock.get()->m_type != ndobject_memory_block_type) {
-            throw std::runtime_error("ndobject can only be constructed from a memblock with ndobject type");
+        if (ndobj_memblock.get()->m_type != array_memory_block_type) {
+            throw std::runtime_error("array can only be constructed from a memblock with array type");
         }
         m_memblock = DYND_MOVE(ndobj_memblock);
     }
@@ -139,19 +139,19 @@ public:
     // TODO: Copy the initializer list mechanisms from ndarray
 
     /** Swap operation (should be "noexcept" in C++11) */
-    void swap(ndobject& rhs);
+    void swap(array& rhs);
 
     /**
      * Assignment operator (should be just "= default" in C++11).
      * Copies with reference semantics.
      */
-    inline ndobject& operator=(const ndobject& rhs) {
+    inline array& operator=(const array& rhs) {
         m_memblock = rhs.m_memblock;
         return *this;
     }
 #ifdef DYND_RVALUE_REFS
     /** Move assignment operator (should be just "= default" in C++11) */
-    inline ndobject& operator=(ndobject&& rhs) {
+    inline array& operator=(array&& rhs) {
         m_memblock = DYND_MOVE(rhs.m_memblock);
 
         return *this;
@@ -160,11 +160,11 @@ public:
 
     /**
      * This function releases the memory block reference, setting the
-     * ndobject to NULL. The caller takes explicit ownership of the
+     * array to NULL. The caller takes explicit ownership of the
      * reference.
      */
-    ndobject_preamble *release() {
-        return reinterpret_cast<ndobject_preamble *>(m_memblock.release());
+    array_preamble *release() {
+        return reinterpret_cast<array_preamble *>(m_memblock.release());
     }
 
     /** Low level access to the reference-counted memory */
@@ -172,22 +172,22 @@ public:
         return m_memblock;
     }
 
-    /** Low level access to the ndobject preamble */
-    inline ndobject_preamble *get_ndo() const {
-        return reinterpret_cast<ndobject_preamble *>(m_memblock.get());
+    /** Low level access to the array preamble */
+    inline array_preamble *get_ndo() const {
+        return reinterpret_cast<array_preamble *>(m_memblock.get());
     }
 
-    /** Low level access to the ndobject metadata */
+    /** Low level access to the array metadata */
     inline const char *get_ndo_meta() const {
         return reinterpret_cast<const char *>(get_ndo() + 1);
     }
 
-    /** Low level access to the ndobject metadata */
+    /** Low level access to the array metadata */
     inline char *get_ndo_meta() {
         return reinterpret_cast<char *>(get_ndo() + 1);
     }
 
-    /** Returns true if the ndobject is NULL */
+    /** Returns true if the array is NULL */
     inline bool is_empty() const {
         return m_memblock.get() == NULL;
     }
@@ -241,7 +241,7 @@ public:
     }
 
     /**
-     * If the caller has the only reference to this ndobject and its data,
+     * If the caller has the only reference to this array and its data,
      * makes the access flags into read-only and immutable.
      */
     void flag_as_immutable();
@@ -289,23 +289,23 @@ public:
     }
 
     /**
-     * Accesses a dynamic property of the ndobject.
+     * Accesses a dynamic property of the array.
      *
      * \param property_name  The property to access.
      */
-    ndobject p(const char *property_name) const;
+    array p(const char *property_name) const;
     /**
-     * Accesses a dynamic property of the ndobject.
+     * Accesses a dynamic property of the array.
      *
      * \param property_name  The property to access.
      */
-    ndobject p(const std::string& property_name) const;
+    array p(const std::string& property_name) const;
     /**
-     * Finds the dynamic function of the ndobject. Throws an
+     * Finds the dynamic function of the array. Throws an
      * exception if it does not exist. To call the function,
      * use ndobj.f("funcname").call(ndobj, ...). The reason
      * ndobj.f("funcname", ...) isn't used is due to a circular
-     * dependency between callable and ndobject. A resolution
+     * dependency between callable and array. A resolution
      * to this will make calling these functions much more
      * convenient.
      *
@@ -314,85 +314,85 @@ public:
     const gfunc::callable& find_dynamic_function(const char *function_name) const;
 
     /** Calls the dynamic function - #include <dynd/gfunc/call_callable.hpp> to use it */
-    ndobject f(const char *function_name);
+    array f(const char *function_name);
 
     /** Calls the dynamic function - #include <dynd/gfunc/call_callable.hpp> to use it */
     template<class T0>
-    ndobject f(const char *function_name, const T0& p0);
+    array f(const char *function_name, const T0& p0);
 
     /** Calls the dynamic function - #include <dynd/gfunc/call_callable.hpp> to use it */
     template<class T0, class T1>
-    ndobject f(const char *function_name, const T0& p0, const T1& p1);
+    array f(const char *function_name, const T0& p0, const T1& p1);
 
     /** Calls the dynamic function - #include <dynd/gfunc/call_callable.hpp> to use it */
     template<class T0, class T1, class T2>
-    ndobject f(const char *function_name, const T0& p0, const T1& p1, const T2& p2);
+    array f(const char *function_name, const T0& p0, const T1& p1, const T2& p2);
 
     /** Calls the dynamic function - #include <dynd/gfunc/call_callable.hpp> to use it */
     template<class T0, class T1, class T2, class T3>
-    ndobject f(const char *function_name, const T0& p0, const T1& p1, const T2& p2, const T3& p3);
+    array f(const char *function_name, const T0& p0, const T1& p1, const T2& p2, const T3& p3);
 
     /**
      * A helper for assigning to the values in 'this'. Normal assignment to
-     * an ndobject variable has reference semantics, the reference gets
+     * an array variable has reference semantics, the reference gets
      * overwritten to point to the new array. The 'vals' function provides
      * syntactic sugar for the 'val_assign' function, allowing for more
      * natural looking assignments.
      *
      * Example:
-     *      ndobject a(make_dtype<float>());
+     *      array a(make_dtype<float>());
      *      a.vals() = 100;
      */
-    ndobject_vals vals() const;
+    array_vals vals() const;
 
     /**
-     * A helper for assigning to the values indexed in an ndobject.
+     * A helper for assigning to the values indexed in an array.
      */
-    ndobject_vals_at vals_at(const irange& i0) const;
+    array_vals_at vals_at(const irange& i0) const;
 
     /**
-     * A helper for assigning to the values indexed in an ndobject.
+     * A helper for assigning to the values indexed in an array.
      */
-    ndobject_vals_at vals_at(const irange& i0, const irange& i1) const;
+    array_vals_at vals_at(const irange& i0, const irange& i1) const;
 
     /**
-     * A helper for assigning to the values indexed in an ndobject.
+     * A helper for assigning to the values indexed in an array.
      */
-    ndobject_vals_at vals_at(const irange& i0, const irange& i1, const irange& i2) const;
+    array_vals_at vals_at(const irange& i0, const irange& i1, const irange& i2) const;
 
     /**
-     * A helper for assigning to the values indexed in an ndobject.
+     * A helper for assigning to the values indexed in an array.
      */
-    ndobject_vals_at vals_at(const irange& i0, const irange& i1, const irange& i2, const irange& i3) const;
+    array_vals_at vals_at(const irange& i0, const irange& i1, const irange& i2, const irange& i3) const;
 
 
     /**
-     * Evaluates the ndobject, attempting to do the minimum work
-     * required. If the ndobject is not ane expression, simply
+     * Evaluates the array, attempting to do the minimum work
+     * required. If the array is not ane expression, simply
      * returns it as is, otherwise evaluates into a new copy.
      */
-    ndobject eval(const eval::eval_context *ectx = &eval::default_eval_context) const;
+    array eval(const eval::eval_context *ectx = &eval::default_eval_context) const;
 
     /**
-     * Evaluates the ndobject into an immutable strided array, or
+     * Evaluates the array into an immutable strided array, or
      * returns it untouched if it is already both immutable and strided.
      */
-    ndobject eval_immutable(const eval::eval_context *ectx = &eval::default_eval_context) const;
+    array eval_immutable(const eval::eval_context *ectx = &eval::default_eval_context) const;
 
     /**
-     * Evaluates the ndobject node into a newly allocated strided array,
+     * Evaluates the array node into a newly allocated strided array,
      * with the requested access flags.
      *
      * \param access_flags  The access flags for the result, default read and write.
      */
-    ndobject eval_copy(const eval::eval_context *ectx = &eval::default_eval_context,
+    array eval_copy(const eval::eval_context *ectx = &eval::default_eval_context,
                         uint32_t access_flags=read_access_flag|write_access_flag) const;
 
     /**
      * Returns a view of the array as bytes (for POD) or the storage dtype,
      * peeling away any expression dtypes or encodings.
      */
-    ndobject storage() const;
+    array storage() const;
 
     /**
      * General irange-based indexing operation.
@@ -405,35 +405,35 @@ public:
      *                          use true, if you want to write values, typically
      *                          use false.
      */
-    ndobject at_array(size_t nindices, const irange *indices, bool collapse_leading = true) const;
+    array at_array(size_t nindices, const irange *indices, bool collapse_leading = true) const;
 
     /**
      * The 'at' function is used for indexing. Overloading operator[] isn't
      * practical for multidimensional objects.
      */
-    ndobject at(const irange& i0) const {
+    array at(const irange& i0) const {
         return at_array(1, &i0);
     }
 
     /** Indexing with two index values */
-    ndobject at(const irange& i0, const irange& i1) const {
+    array at(const irange& i0, const irange& i1) const {
         irange i[2] = {i0, i1};
         return at_array(2, i);
     }
 
     /** Indexing with three index values */
-    ndobject at(const irange& i0, const irange& i1, const irange& i2) const {
+    array at(const irange& i0, const irange& i1, const irange& i2) const {
         irange i[3] = {i0, i1, i2};
         return at_array(3, i);
     }
     /** Indexing with four index values */
-    ndobject at(const irange& i0, const irange& i1, const irange& i2, const irange& i3) const {
+    array at(const irange& i0, const irange& i1, const irange& i2, const irange& i3) const {
         irange i[4] = {i0, i1, i2, i3};
         return at_array(4, i);
     }
 
     /** Does a value-assignment from the rhs array. */
-    void val_assign(const ndobject& rhs, assign_error_mode errmode = assign_error_default,
+    void val_assign(const array& rhs, assign_error_mode errmode = assign_error_default,
                         const eval::eval_context *ectx = &eval::default_eval_context) const;
     /** Does a value-assignment from the rhs raw scalar */
     void val_assign(const dtype& rhs_dt, const char *rhs_metadata, const char *rhs_data,
@@ -445,15 +445,15 @@ public:
      * This casts the entire dtype. If you want to cast the
      * uniform dtype, use 'ucast' instead.
      *
-     * \param dt  The dtype into which the ndobject should be cast.
+     * \param dt  The dtype into which the array should be cast.
      * \param errmode  Policy for dealing with errors.
      */
-    ndobject cast(const dtype& dt, assign_error_mode errmode = assign_error_default) const;
+    array cast(const dtype& dt, assign_error_mode errmode = assign_error_default) const;
 
     /**
      * Casts the uniform dtype of the array into the specified dtype.
      *
-     * \param uniform_dt  The dtype into which the ndobject's
+     * \param uniform_dt  The dtype into which the array's
      *                    uniform type should be cast.
      * \param replace_undim  The number of uniform dimensions of
      *                       this dtype which should be replaced.
@@ -462,7 +462,7 @@ public:
      *                       to the replacement uniform_dt.
      * \param errmode  Policy for dealing with errors.
      */
-    ndobject ucast(const dtype& uniform_dt,
+    array ucast(const dtype& uniform_dt,
                     size_t replace_undim = 0,
                     assign_error_mode errmode = assign_error_default) const;
 
@@ -471,7 +471,7 @@ public:
      * as the template parameter.
      */
     template<class T>
-    inline ndobject ucast(size_t replace_undim = 0,
+    inline array ucast(size_t replace_undim = 0,
                     assign_error_mode errmode = assign_error_default) const {
         return ucast(make_dtype<T>(), replace_undim, errmode);
     }
@@ -485,20 +485,20 @@ public:
      * \param replace_undim  The number of uniform dimensions to replace
      *                       in addition to the uniform dtype.
      */
-    ndobject replace_udtype(const dtype& new_udtype, size_t replace_undim = 0) const;
+    array replace_udtype(const dtype& new_udtype, size_t replace_undim = 0) const;
 
     /**
      * Views the array's memory as another dtype, where such an operation
      * makes sense. This is analogous to reinterpret_cast<>.
      */
-    ndobject view_scalars(const dtype& scalar_dtype) const;
+    array view_scalars(const dtype& scalar_dtype) const;
 
     /**
      * Views the array's memory as another dtype, where such an operation
      * makes sense. This is analogous to reinterpret_case<>.
      */
     template<class T>
-    ndobject view_scalars() const {
+    array view_scalars() const {
         return view_scalars(make_dtype<T>());
     }
 
@@ -512,66 +512,66 @@ public:
     template<class T>
     T as(assign_error_mode errmode = assign_error_default) const;
 
-    /** Sorting comparison between two ndobjects. (Returns a bool, does not broadcast) */
-    bool op_sorting_less(const ndobject& rhs) const;
-    /** Less than comparison between two ndobjects. (Returns a bool, does not broadcast) */
-    bool operator<(const ndobject& rhs) const;
-    /** Less equal comparison between two ndobjects. (Returns a bool, does not broadcast) */
-    bool operator<=(const ndobject& rhs) const;
-    /** Equality comparison between two ndobjects. (Returns a bool, does not broadcast) */
-    bool operator==(const ndobject& rhs) const;
-    /** Inequality comparison between two ndobjects. (Returns a bool, does not broadcast) */
-    bool operator!=(const ndobject& rhs) const;
-    /** Greator equal comparison between two ndobjects. (Returns a bool, does not broadcast) */
-    bool operator>=(const ndobject& rhs) const;
-    /** Greater than comparison between two ndobjects. (Returns a bool, does not broadcast) */
-    bool operator>(const ndobject& rhs) const;
+    /** Sorting comparison between two arrays. (Returns a bool, does not broadcast) */
+    bool op_sorting_less(const array& rhs) const;
+    /** Less than comparison between two arrays. (Returns a bool, does not broadcast) */
+    bool operator<(const array& rhs) const;
+    /** Less equal comparison between two arrays. (Returns a bool, does not broadcast) */
+    bool operator<=(const array& rhs) const;
+    /** Equality comparison between two arrays. (Returns a bool, does not broadcast) */
+    bool operator==(const array& rhs) const;
+    /** Inequality comparison between two arrays. (Returns a bool, does not broadcast) */
+    bool operator!=(const array& rhs) const;
+    /** Greator equal comparison between two arrays. (Returns a bool, does not broadcast) */
+    bool operator>=(const array& rhs) const;
+    /** Greater than comparison between two arrays. (Returns a bool, does not broadcast) */
+    bool operator>(const array& rhs) const;
 
-    bool equals_exact(const ndobject& rhs) const;
+    bool equals_exact(const array& rhs) const;
 
     void debug_print(std::ostream& o, const std::string& indent = "") const;
 
-    friend std::ostream& operator<<(std::ostream& o, const ndobject& rhs);
-    friend class ndobject_vals;
-    friend class ndobject_vals_at;
+    friend std::ostream& operator<<(std::ostream& o, const array& rhs);
+    friend class array_vals;
+    friend class array_vals_at;
 };
 
-ndobject operator+(const ndobject& op0, const ndobject& op1);
-ndobject operator-(const ndobject& op0, const ndobject& op1);
-ndobject operator/(const ndobject& op0, const ndobject& op1);
-ndobject operator*(const ndobject& op0, const ndobject& op1);
+array operator+(const array& op0, const array& op1);
+array operator-(const array& op0, const array& op1);
+array operator/(const array& op0, const array& op1);
+array operator*(const array& op0, const array& op1);
 
 /**
  * This is a helper class for dealing with value assignment and collapsing
- * a view-based ndobject into a strided array. Only the ndobject class itself
+ * a view-based array into a strided array. Only the array class itself
  * is permitted to construct this helper object, and it is non-copyable.
  *
  * All that can be done is assigning the values of the referenced array
  * to another array, or assigning values from another array into the elements
  * the referenced array.
  */
-class ndobject_vals {
-    const ndobject& m_arr;
-    ndobject_vals(const ndobject& arr)
+class array_vals {
+    const array& m_arr;
+    array_vals(const array& arr)
         : m_arr(arr) {
     }
 
     // Non-copyable, not default-constructable
-    ndobject_vals(const ndobject_vals&);
-    ndobject_vals& operator=(const ndobject_vals&);
+    array_vals(const array_vals&);
+    array_vals& operator=(const array_vals&);
 public:
     /**
      * Assigns values from an array to the internally referenced array.
      * this does a val_assign with the default assignment error mode.
      */
-    ndobject_vals& operator=(const ndobject& rhs) {
+    array_vals& operator=(const array& rhs) {
         m_arr.val_assign(rhs);
         return *this;
     }
 
     /** Does a value-assignment from the rhs C++ scalar. */
     template<class T>
-    typename enable_if<is_dtype_scalar<T>::value, ndobject_vals&>::type operator=(const T& rhs) {
+    typename enable_if<is_dtype_scalar<T>::value, array_vals&>::type operator=(const T& rhs) {
         m_arr.val_assign(make_dtype<T>(), NULL, (const char *)&rhs);
         return *this;
     }
@@ -584,7 +584,7 @@ public:
      * as would seem obvious.
      */
     template<class T>
-    typename enable_if<is_type_bool<T>::value, ndobject_vals&>::type  operator=(const T& rhs) {
+    typename enable_if<is_type_bool<T>::value, array_vals&>::type  operator=(const T& rhs) {
         dynd_bool v = rhs;
         m_arr.val_assign(make_dtype<dynd_bool>(), NULL, (const char *)&v);
         return *this;
@@ -592,43 +592,43 @@ public:
 
     // TODO: Could also do +=, -=, *=, etc.
 
-    friend class ndobject;
-    friend ndobject_vals ndobject::vals() const;
+    friend class array;
+    friend array_vals array::vals() const;
 };
 
 /**
- * This is a helper class like ndobject_vals, but it holds a reference
- * to the temporary ndobject. This is needed by vals_at.
+ * This is a helper class like array_vals, but it holds a reference
+ * to the temporary array. This is needed by vals_at.
  *
  */
-class ndobject_vals_at {
-    ndobject m_arr;
-    ndobject_vals_at(const ndobject& arr)
+class array_vals_at {
+    array m_arr;
+    array_vals_at(const array& arr)
         : m_arr(arr) {
     }
 
 #ifdef DYND_RVALUE_REFS
-    ndobject_vals_at(ndobject&& arr)
+    array_vals_at(array&& arr)
         : m_arr(DYND_MOVE(arr)) {
     }
 #endif
 
     // Non-copyable, not default-constructable
-    ndobject_vals_at(const ndobject_vals&);
-    ndobject_vals_at& operator=(const ndobject_vals_at&);
+    array_vals_at(const array_vals&);
+    array_vals_at& operator=(const array_vals_at&);
 public:
     /**
      * Assigns values from an array to the internally referenced array.
      * this does a val_assign with the default assignment error mode.
      */
-    ndobject_vals_at& operator=(const ndobject& rhs) {
+    array_vals_at& operator=(const array& rhs) {
         m_arr.val_assign(rhs);
         return *this;
     }
 
     /** Does a value-assignment from the rhs C++ scalar. */
     template<class T>
-    typename enable_if<is_dtype_scalar<T>::value, ndobject_vals&>::type operator=(const T& rhs) {
+    typename enable_if<is_dtype_scalar<T>::value, array_vals&>::type operator=(const T& rhs) {
         m_arr.val_assign(make_dtype<T>(), NULL, (const char *)&rhs);
         return *this;
     }
@@ -641,7 +641,7 @@ public:
      * as would seem obvious.
      */
     template<class T>
-    typename enable_if<is_type_bool<T>::value, ndobject_vals&>::type  operator=(const T& rhs) {
+    typename enable_if<is_type_bool<T>::value, array_vals&>::type  operator=(const T& rhs) {
         dynd_bool v = rhs;
         m_arr.val_assign(make_dtype<dynd_bool>(), NULL, (const char *)&v);
         return *this;
@@ -649,19 +649,19 @@ public:
 
     // TODO: Could also do +=, -=, *=, etc.
 
-    friend class ndobject;
-    friend ndobject_vals_at ndobject::vals_at(const irange&) const;
-    friend ndobject_vals_at ndobject::vals_at(const irange&, const irange&) const;
-    friend ndobject_vals_at ndobject::vals_at(const irange&, const irange&, const irange&) const;
-    friend ndobject_vals_at ndobject::vals_at(const irange&, const irange&, const irange&, const irange&) const;
+    friend class array;
+    friend array_vals_at array::vals_at(const irange&) const;
+    friend array_vals_at array::vals_at(const irange&, const irange&) const;
+    friend array_vals_at array::vals_at(const irange&, const irange&, const irange&) const;
+    friend array_vals_at array::vals_at(const irange&, const irange&, const irange&, const irange&) const;
 };
 
-/** Makes a strided ndobject with uninitialized data. If axis_perm is NULL, it is C-order */
-ndobject make_strided_ndobject(const dtype& uniform_dtype, size_t ndim, const intptr_t *shape,
+/** Makes a strided array with uninitialized data. If axis_perm is NULL, it is C-order */
+array make_strided_array(const dtype& uniform_dtype, size_t ndim, const intptr_t *shape,
                 int64_t access_flags = read_access_flag|write_access_flag, const int *axis_perm = NULL);
 
 /**
- * \brief Makes a strided ndobject pointing to existing data
+ * \brief Makes a strided array pointing to existing data
  *
  * \param uniform_dtype  The dtype of each element in the strided array.
  * \param ndim  The number of strided dimensions.
@@ -675,95 +675,95 @@ ndobject make_strided_ndobject(const dtype& uniform_dtype, size_t ndim, const in
  *                              metadata for the uniform_dtype. The caller must populate it
  *                              with valid data.
  *
- * \returns  The created ndobject.
+ * \returns  The created array.
  */
-ndobject make_strided_ndobject_from_data(const dtype& uniform_dtype, size_t ndim, const intptr_t *shape,
+array make_strided_array_from_data(const dtype& uniform_dtype, size_t ndim, const intptr_t *shape,
                 const intptr_t *strides, int64_t access_flags, char *data_ptr,
                 const memory_block_ptr& data_reference, char **out_uniform_metadata = NULL);
 
-/** Makes a POD (plain old data) ndobject with data initialized by the provided pointer */
-ndobject make_pod_ndobject(const dtype& pod_dt, const void *data);
+/** Makes a POD (plain old data) array with data initialized by the provided pointer */
+array make_pod_array(const dtype& pod_dt, const void *data);
 
-ndobject make_string_ndobject(const char *str, size_t len, string_encoding_t encoding);
-inline ndobject make_ascii_ndobject(const char *str, size_t len) {
-    return make_string_ndobject(str, len, string_encoding_ascii);
+array make_string_array(const char *str, size_t len, string_encoding_t encoding);
+inline array make_ascii_array(const char *str, size_t len) {
+    return make_string_array(str, len, string_encoding_ascii);
 }
-inline ndobject make_utf8_ndobject(const char *str, size_t len) {
-    return make_string_ndobject(str, len, string_encoding_utf_8);
+inline array make_utf8_array(const char *str, size_t len) {
+    return make_string_array(str, len, string_encoding_utf_8);
 }
-inline ndobject make_utf16_ndobject(const uint16_t *str, size_t len) {
-    return make_string_ndobject(reinterpret_cast<const char *>(str), len * sizeof(uint16_t), string_encoding_utf_16);
+inline array make_utf16_array(const uint16_t *str, size_t len) {
+    return make_string_array(reinterpret_cast<const char *>(str), len * sizeof(uint16_t), string_encoding_utf_16);
 }
-inline ndobject make_utf32_ndobject(const uint32_t *str, size_t len) {
-    return make_string_ndobject(reinterpret_cast<const char *>(str), len * sizeof(uint32_t), string_encoding_utf_32);
+inline array make_utf32_array(const uint32_t *str, size_t len) {
+    return make_string_array(reinterpret_cast<const char *>(str), len * sizeof(uint32_t), string_encoding_utf_32);
 }
 
 template<int N>
-inline ndobject make_ascii_ndobject(const char (&static_string)[N]) {
-    return make_ascii_ndobject(&static_string[0], N);
+inline array make_ascii_array(const char (&static_string)[N]) {
+    return make_ascii_array(&static_string[0], N);
 }
 template<int N>
-inline ndobject make_utf8_ndobject(const char (&static_string)[N]) {
-    return make_utf8_ndobject(&static_string[0], N);
+inline array make_utf8_array(const char (&static_string)[N]) {
+    return make_utf8_array(&static_string[0], N);
 }
 template<int N>
-inline ndobject make_utf8_ndobject(const unsigned char (&static_string)[N]) {
-    return make_utf8_ndobject(reinterpret_cast<const char *>(&static_string[0]), N);
+inline array make_utf8_array(const unsigned char (&static_string)[N]) {
+    return make_utf8_array(reinterpret_cast<const char *>(&static_string[0]), N);
 }
 template<int N>
-inline ndobject make_utf16_ndobject(const uint16_t (&static_string)[N]) {
-    return make_utf16_ndobject(&static_string[0], N);
+inline array make_utf16_array(const uint16_t (&static_string)[N]) {
+    return make_utf16_array(&static_string[0], N);
 }
 template<int N>
-inline ndobject make_utf32_ndobject(const uint32_t (&static_string)[N]) {
-    return make_utf32_ndobject(&static_string[0], N);
+inline array make_utf32_array(const uint32_t (&static_string)[N]) {
+    return make_utf32_array(&static_string[0], N);
 }
 
 /**
- * \brief Creates an ndobject array of strings.
+ * \brief Creates an array array of strings.
  *
  * \param cstr_array  An array of NULL-terminated UTF8 strings.
  * \param array_size  The number of elements in `cstr_array`.
  *
- * \returns  An ndobject of type strided_dim<string<utf_8>>.
+ * \returns  An array of type strided_dim<string<utf_8>>.
  */
-ndobject make_utf8_array_ndobject(const char **cstr_array, size_t array_size);
+array make_utf8_array_array(const char **cstr_array, size_t array_size);
 
-inline ndobject make_strided_ndobject(intptr_t shape0, const dtype& uniform_dtype) {
-    return make_strided_ndobject(uniform_dtype, 1, &shape0, read_access_flag|write_access_flag, NULL);
+inline array make_strided_array(intptr_t shape0, const dtype& uniform_dtype) {
+    return make_strided_array(uniform_dtype, 1, &shape0, read_access_flag|write_access_flag, NULL);
 }
-inline ndobject make_strided_ndobject(intptr_t shape0, intptr_t shape1, const dtype& uniform_dtype) {
+inline array make_strided_array(intptr_t shape0, intptr_t shape1, const dtype& uniform_dtype) {
     intptr_t shape[2] = {shape0, shape1};
-    return make_strided_ndobject(uniform_dtype, 2, shape, read_access_flag|write_access_flag, NULL);
+    return make_strided_array(uniform_dtype, 2, shape, read_access_flag|write_access_flag, NULL);
 }
-inline ndobject make_strided_ndobject(intptr_t shape0, intptr_t shape1, intptr_t shape2, const dtype& uniform_dtype) {
+inline array make_strided_array(intptr_t shape0, intptr_t shape1, intptr_t shape2, const dtype& uniform_dtype) {
     intptr_t shape[3] = {shape0, shape1, shape2};
-    return make_strided_ndobject(uniform_dtype, 3, shape, read_access_flag|write_access_flag, NULL);
+    return make_strided_array(uniform_dtype, 3, shape, read_access_flag|write_access_flag, NULL);
 }
 
-inline ndobject_vals ndobject::vals() const {
-    return ndobject_vals(*this);
+inline array_vals array::vals() const {
+    return array_vals(*this);
 }
 
-inline ndobject_vals_at ndobject::vals_at(const irange& i0) const {
-    return ndobject_vals_at(at_array(1, &i0, false));
+inline array_vals_at array::vals_at(const irange& i0) const {
+    return array_vals_at(at_array(1, &i0, false));
 }
 
-inline ndobject_vals_at ndobject::vals_at(const irange& i0, const irange& i1) const {
+inline array_vals_at array::vals_at(const irange& i0, const irange& i1) const {
     irange i[2] = {i0, i1};
-    return ndobject_vals_at(at_array(2, i, false));
+    return array_vals_at(at_array(2, i, false));
 }
 
-inline ndobject_vals_at ndobject::vals_at(const irange& i0, const irange& i1,
+inline array_vals_at array::vals_at(const irange& i0, const irange& i1,
                 const irange& i2) const {
     irange i[3] = {i0, i1, i2};
-    return ndobject_vals_at(at_array(3, i, false));
+    return array_vals_at(at_array(3, i, false));
 }
 
-inline ndobject_vals_at ndobject::vals_at(const irange& i0, const irange& i1,
+inline array_vals_at array::vals_at(const irange& i0, const irange& i1,
                 const irange& i2, const irange& i3) const {
     irange i[4] = {i0, i1, i2, i3};
-    return ndobject_vals_at(at_array(4, i, false));
+    return array_vals_at(at_array(4, i, false));
 }
 
 ///////////// Initializer list constructor implementation /////////////////////////
@@ -797,7 +797,7 @@ namespace detail {
         }
         static void validate(const intptr_t *shape, const std::initializer_list<T>& il) {
             if ((intptr_t)il.size() != shape[0]) {
-                throw std::runtime_error("initializer list for ndobject is ragged, must be "
+                throw std::runtime_error("initializer list for array is ragged, must be "
                                         "nested in a regular fashion");
             }
         }
@@ -826,7 +826,7 @@ namespace detail {
         static void validate(const intptr_t *shape,
                         const std::initializer_list<std::initializer_list<T> >& il) {
             if ((intptr_t)il.size() != shape[0]) {
-                throw std::runtime_error("initializer list for ndobject is ragged, must be "
+                throw std::runtime_error("initializer list for array is ragged, must be "
                                         "nested in a regular fashion");
             }
             // Validate the shape for the nested initializer lists
@@ -845,7 +845,7 @@ namespace detail {
 
 // Implementation of initializer list construction
 template<class T>
-dynd::ndobject::ndobject(std::initializer_list<T> il)
+dynd::array::array(std::initializer_list<T> il)
     : m_memblock()
 {
     intptr_t dim0 = il.size();
@@ -853,11 +853,11 @@ dynd::ndobject::ndobject(std::initializer_list<T> il)
     char *originptr = 0;
     memory_block_ptr memblock = make_fixed_size_pod_memory_block(sizeof(T) * dim0, sizeof(T), &originptr);
     DYND_MEMCPY(originptr, il.begin(), sizeof(T) * dim0);
-    make_strided_ndobject_node(make_dtype<T>(), 1, &dim0, &stride,
+    make_strided_array_node(make_dtype<T>(), 1, &dim0, &stride,
                             originptr, read_access_flag | write_access_flag, DYND_MOVE(memblock)).swap(m_memblock);
 }
 template<class T>
-dynd::ndobject::ndobject(std::initializer_list<std::initializer_list<T> > il)
+dynd::array::array(std::initializer_list<std::initializer_list<T> > il)
     : m_memblock()
 {
     typedef std::initializer_list<std::initializer_list<T> > S;
@@ -876,11 +876,11 @@ dynd::ndobject::ndobject(std::initializer_list<std::initializer_list<T> > il)
     memory_block_ptr memblock = make_fixed_size_pod_memory_block(sizeof(T) * num_elements, sizeof(T), &originptr);
     T *dataptr = reinterpret_cast<T *>(originptr);
     detail::initializer_list_shape<S>::copy_data(&dataptr, il);
-    make_strided_ndobject_node(make_dtype<T>(), 2, shape, strides,
+    make_strided_array_node(make_dtype<T>(), 2, shape, strides,
                         originptr, read_access_flag | write_access_flag, DYND_MOVE(memblock)).swap(m_memblock);
 }
 template<class T>
-dynd::ndobject::ndobject(std::initializer_list<std::initializer_list<std::initializer_list<T> > > il)
+dynd::array::array(std::initializer_list<std::initializer_list<std::initializer_list<T> > > il)
     : m_memblock()
 {
     typedef std::initializer_list<std::initializer_list<std::initializer_list<T> > > S;
@@ -899,7 +899,7 @@ dynd::ndobject::ndobject(std::initializer_list<std::initializer_list<std::initia
     memory_block_ptr memblock = make_fixed_size_pod_memory_block(sizeof(T) * num_elements, sizeof(T), &originptr);
     T *dataptr = reinterpret_cast<T *>(originptr);
     detail::initializer_list_shape<S>::copy_data(&dataptr, il);
-    make_strided_ndobject_node(make_dtype<T>(), 3, shape, strides,
+    make_strided_array_node(make_dtype<T>(), 3, shape, strides,
                     originptr, read_access_flag | write_access_flag, DYND_MOVE(memblock)).swap(m_memblock);
 }
 #endif // DYND_INIT_LIST
@@ -936,38 +936,38 @@ namespace detail {
 } // namespace detail
 
 template<class T, int N>
-dynd::ndobject::ndobject(const T (&rhs)[N])
+nd::array::array(const T (&rhs)[N])
     : m_memblock()
 {
     const int ndim = detail::ndim_from_array<T[N]>::value;
     intptr_t shape[ndim];
     size_t size = detail::fill_shape<T[N]>::fill(shape);
 
-    *this = make_strided_ndobject(dtype(static_cast<type_id_t>(detail::uniform_type_from_array<T>::type_id)),
+    *this = make_strided_array(dtype(static_cast<type_id_t>(detail::uniform_type_from_array<T>::type_id)),
                     ndim, shape, read_access_flag|write_access_flag, NULL);
     DYND_MEMCPY(get_ndo()->m_data_pointer, reinterpret_cast<const void *>(&rhs), size);
 }
 
 template<int N>
-inline dynd::ndobject::ndobject(const char (&rhs)[N])
+inline nd::array::array(const char (&rhs)[N])
 {
-    make_string_ndobject(rhs, N, string_encoding_utf_8).swap(*this);
+    make_string_array(rhs, N, string_encoding_utf_8).swap(*this);
 }
 
 template<int N>
-inline dynd::ndobject::ndobject(const char *(&rhs)[N])
+inline nd::array::array(const char *(&rhs)[N])
 {
-    make_utf8_array_ndobject(rhs, N).swap(*this);
+    make_utf8_array_array(rhs, N).swap(*this);
 }
 
 ///////////// std::vector constructor implementation /////////////////////////
 namespace detail {
     template <class T>
     struct make_from_vec {
-        inline static typename enable_if<is_dtype_scalar<T>::value, ndobject>::type
+        inline static typename enable_if<is_dtype_scalar<T>::value, array>::type
                         make(const std::vector<T>& vec)
         {
-            ndobject result = make_strided_ndobject(vec.size(), make_dtype<T>());
+            array result = make_strided_array(vec.size(), make_dtype<T>());
             if (!vec.empty()) {
                 memcpy(result.get_readwrite_originptr(), &vec[0], vec.size() * sizeof(T));
             }
@@ -977,31 +977,31 @@ namespace detail {
 
     template <>
     struct make_from_vec<dtype> {
-        static ndobject make(const std::vector<dtype>& vec);
+        static array make(const std::vector<dtype>& vec);
     };
 
     template <>
     struct make_from_vec<std::string> {
-        static ndobject make(const std::vector<std::string>& vec);
+        static array make(const std::vector<std::string>& vec);
     };
 } // namespace detail
 
 template<class T>
-ndobject::ndobject(const std::vector<T>& vec)
+array::array(const std::vector<T>& vec)
 {
    detail::make_from_vec<T>::make(vec).swap(*this);
 }
 
 
-///////////// The ndobject.as<type>() templated function /////////////////////////
+///////////// The array.as<type>() templated function /////////////////////////
 namespace detail {
     template <class T>
-    struct ndobject_as_helper {
-        static typename enable_if<is_dtype_scalar<T>::value, T>::type as(const ndobject& lhs,
+    struct array_as_helper {
+        static typename enable_if<is_dtype_scalar<T>::value, T>::type as(const array& lhs,
                                                                     assign_error_mode errmode) {
             T result;
             if (!lhs.is_scalar()) {
-                throw std::runtime_error("can only convert ndobjects with 0 dimensions to scalars");
+                throw std::runtime_error("can only convert arrays with 0 dimensions to scalars");
             }
             dtype_assign(make_dtype<T>(), NULL, (char *)&result,
                         lhs.get_dtype(), lhs.get_ndo_meta(), lhs.get_ndo()->m_data_pointer, errmode);
@@ -1010,26 +1010,26 @@ namespace detail {
     };
 
     template <>
-    struct ndobject_as_helper<bool> {
-        static bool as(const ndobject& lhs, assign_error_mode errmode) {
-            return ndobject_as_helper<dynd_bool>::as(lhs, errmode);
+    struct array_as_helper<bool> {
+        static bool as(const array& lhs, assign_error_mode errmode) {
+            return array_as_helper<dynd_bool>::as(lhs, errmode);
         }
     };
 
-    std::string ndobject_as_string(const ndobject& lhs, assign_error_mode errmode);
-    dtype ndobject_as_dtype(const ndobject& lhs, assign_error_mode errmode);
+    std::string array_as_string(const array& lhs, assign_error_mode errmode);
+    dtype array_as_dtype(const array& lhs, assign_error_mode errmode);
 
     template <>
-    struct ndobject_as_helper<std::string> {
-        static std::string as(const ndobject& lhs, assign_error_mode errmode) {
-            return ndobject_as_string(lhs, errmode);
+    struct array_as_helper<std::string> {
+        static std::string as(const array& lhs, assign_error_mode errmode) {
+            return array_as_string(lhs, errmode);
         }
     };
 
     template <>
-    struct ndobject_as_helper<dtype> {
-        static dtype as(const ndobject& lhs, assign_error_mode errmode) {
-            return ndobject_as_dtype(lhs, errmode);
+    struct array_as_helper<dtype> {
+        static dtype as(const array& lhs, assign_error_mode errmode) {
+            return array_as_dtype(lhs, errmode);
         }
     };
 
@@ -1037,128 +1037,128 @@ namespace detail {
 } // namespace detail;
 
 template<class T>
-T dynd::ndobject::as(assign_error_mode errmode) const {
-    return detail::ndobject_as_helper<T>::as(*this, errmode);
+T array::as(assign_error_mode errmode) const {
+    return detail::array_as_helper<T>::as(*this, errmode);
 }
 
 /** 
- * Given the dtype/metadata/data of an ndobject (or sub-component of an ndobject),
+ * Given the dtype/metadata/data of an array (or sub-component of an array),
  * evaluates a new copy of it as the canonical dtype.
  */
-ndobject eval_raw_copy(const dtype& dt, const char *metadata, const char *data);
+array eval_raw_copy(const dtype& dt, const char *metadata, const char *data);
 
 /**
- * Constructs an uninitialized ndobject of the given dtype.
+ * Constructs an uninitialized array of the given dtype.
  */
-ndobject empty(const dtype& dt);
+array empty(const dtype& dt);
 
 /**
- * Constructs an uninitialized ndobject of the given dtype,
+ * Constructs an uninitialized array of the given dtype,
  * specified as a string. This is a shortcut for expressions
  * like
  *
- *      ndobject a = empty("10, int32");
+ *      array a = nd::empty("10, int32");
  */
 template<int N>
-inline ndobject empty(const char (&dshape)[N]) {
+inline array empty(const char (&dshape)[N]) {
     return empty(dtype(dshape, dshape + N - 1));
 }
 
 /**
- * Constructs a writeable uninitialized ndobject of the specified dtype.
+ * Constructs a writeable uninitialized array of the specified dtype.
  * This dtype should be at least one dimensional, and is initialized
  * using the specified dimension size.
  */
-ndobject empty(intptr_t dim0, const dtype& dt);
+array empty(intptr_t dim0, const dtype& dt);
 
 /**
- * Constructs an uninitialized ndobject of the given dtype,
+ * Constructs an uninitialized array of the given dtype,
  * specified as a string. This is a shortcut for expressions
  * like
  *
- *      ndobject a = empty(10, "M, int32");
+ *      array a = nd::empty(10, "M, int32");
  */
 template<int N>
-inline ndobject empty(intptr_t dim0, const char (&dshape)[N]) {
+inline array empty(intptr_t dim0, const char (&dshape)[N]) {
     return empty(dim0, dtype(dshape, dshape + N - 1));
 }
 
 /**
- * Constructs a writeable uninitialized ndobject of the specified dtype.
+ * Constructs a writeable uninitialized array of the specified dtype.
  * This dtype should be at least two dimensional, and is initialized
  * using the specified dimension sizes.
  */
-ndobject empty(intptr_t dim0, intptr_t dim1, const dtype& dt);
+array empty(intptr_t dim0, intptr_t dim1, const dtype& dt);
 
 /**
- * Constructs an uninitialized ndobject of the given dtype,
+ * Constructs an uninitialized array of the given dtype,
  * specified as a string. This is a shortcut for expressions
  * like
  *
- *      ndobject a = empty(10, 10, "M, N, int32");
+ *      array a = nd::empty(10, 10, "M, N, int32");
  */
 template<int N>
-inline ndobject empty(intptr_t dim0, intptr_t dim1, const char (&dshape)[N]) {
+inline array empty(intptr_t dim0, intptr_t dim1, const char (&dshape)[N]) {
     return empty(dim0, dim1, dtype(dshape, dshape + N - 1));
 }
 
 /**
- * Constructs a writeable uninitialized ndobject of the specified dtype.
+ * Constructs a writeable uninitialized array of the specified dtype.
  * This dtype should be at least three dimensional, and is initialized
  * using the specified dimension sizes.
  */
-ndobject empty(intptr_t dim0, intptr_t dim1, intptr_t dim2, const dtype& dt);
+array empty(intptr_t dim0, intptr_t dim1, intptr_t dim2, const dtype& dt);
 
 /**
- * Constructs an uninitialized ndobject of the given dtype,
+ * Constructs an uninitialized array of the given dtype,
  * specified as a string. This is a shortcut for expressions
  * like
  *
- *      ndobject a = empty(10, 10, 10, "M, N, R, int32");
+ *      array a = nd::empty(10, 10, 10, "M, N, R, int32");
  */
 template<int N>
-inline ndobject empty(intptr_t dim0, intptr_t dim1, intptr_t dim2, const char (&dshape)[N]) {
+inline array empty(intptr_t dim0, intptr_t dim1, intptr_t dim2, const char (&dshape)[N]) {
     return empty(dim0, dim1, dim2, dtype(dshape, dshape + N - 1));
 }
 
 /**
- * Constructs an ndobject with the same shape and memory layout
+ * Constructs an array with the same shape and memory layout
  * of the one given, but replacing the
  *
  * \param rhs  The array whose shape and memory layout to emulate.
  * \param uniform_dtype   The uniform dtype of the new array.
  */
-ndobject empty_like(const ndobject& rhs, const dtype& uniform_dtype);
+array empty_like(const array& rhs, const dtype& uniform_dtype);
 
 /**
  * Constructs an empty array matching the parameters of 'rhs'
  *
  * \param rhs  The array whose shape, memory layout, and dtype to emulate.
  */
-ndobject empty_like(const ndobject& rhs);
+array empty_like(const array& rhs);
 
 /**
- * Performs a binary search of the first dimension of the ndobject, which
+ * Performs a binary search of the first dimension of the array, which
  * should be sorted. The data/metadata must correspond to the dtype n.get_dtype().at(0).
  *
  * \returns  The index of the found element, or -1 if not found.
  */
-intptr_t binary_search(const ndobject& n, const char *data, const char *metadata);
+intptr_t binary_search(const array& n, const char *data, const char *metadata);
 
-ndobject groupby(const dynd::ndobject& data_values, const dynd::ndobject& by,
-                const dynd::dtype& groups = dynd::dtype());
+array groupby(const array& data_values, const array& by,
+                const dtype& groups = dtype());
 
 /**
- * Creates a cstruct ndobject with the given field names and
+ * Creates a cstruct array with the given field names and
  * pointers to the provided field values.
  *
  * \param  field_count  The number of fields.
  * \param  field_names  The names of the fields.
  * \param  field_values  The values of the fields.
  */
-ndobject combine_into_struct(size_t field_count, const std::string *field_names,
-                    const ndobject *field_values);
+array combine_into_struct(size_t field_count, const std::string *field_names,
+                    const array *field_values);
 
-} // namespace dynd
+}} // namespace dynd::nd
 
 #endif // _DYND__NDOBJECT_HPP_

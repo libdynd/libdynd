@@ -22,10 +22,10 @@ namespace detail {
 }
 
 template<int Nwrite, int Nread>
-class ndobject_iter;
+class array_iter;
 
 template<>
-class ndobject_iter<1, 0> {
+class array_iter<1, 0> {
     intptr_t m_itersize;
     size_t m_iter_ndim;
     dimvector m_iterindex;
@@ -67,11 +67,11 @@ class ndobject_iter<1, 0> {
         }
     }
 public:
-    ndobject_iter(const ndobject& op0) {
+    array_iter(const nd::array& op0) {
         init(op0.get_dtype(), op0.get_ndo_meta(), op0.get_readwrite_originptr());
     }
 
-    ~ndobject_iter() {
+    ~array_iter() {
         if (m_iterdata) {
             m_array_dtype.extended()->iterdata_destruct(m_iterdata, m_iter_ndim);
             free(m_iterdata);
@@ -117,7 +117,7 @@ public:
 };
 
 template<>
-class ndobject_iter<0, 1> {
+class array_iter<0, 1> {
     intptr_t m_itersize;
     size_t m_iter_ndim;
     dimvector m_iterindex;
@@ -159,15 +159,15 @@ class ndobject_iter<0, 1> {
         }
     }
 public:
-    ndobject_iter(const dtype& dt0, const char *metadata0, const char *data0) {
+    array_iter(const dtype& dt0, const char *metadata0, const char *data0) {
         init(dt0, metadata0, data0);
     }
 
-    ndobject_iter(const ndobject& op0) {
+    array_iter(const nd::array& op0) {
         init(op0.get_dtype(), op0.get_ndo_meta(), op0.get_readonly_originptr());
     }
 
-    ~ndobject_iter() {
+    ~array_iter() {
         if (m_iterdata) {
             m_array_dtype.extended()->iterdata_destruct(m_iterdata, m_iter_ndim);
             free(m_iterdata);
@@ -213,7 +213,7 @@ public:
 };
 
 template<>
-class ndobject_iter<1, 1> {
+class array_iter<1, 1> {
     intptr_t m_itersize;
     size_t m_iter_ndim[2];
     dimvector m_iterindex;
@@ -289,16 +289,16 @@ class ndobject_iter<1, 1> {
         }
     }
 public:
-    ndobject_iter(const dtype& dt0, const char *metadata0, char *data0,
+    array_iter(const dtype& dt0, const char *metadata0, char *data0,
                     const dtype& dt1, const char *metadata1, const char *data1) {
         init(dt0, metadata0, data0, dt1, metadata1, data1);
     }
-    ndobject_iter(const ndobject& op0, const ndobject& op1) {
+    array_iter(const nd::array& op0, const nd::array& op1) {
         init(op0.get_dtype(), op0.get_ndo_meta(), op0.get_readwrite_originptr(),
                         op1.get_dtype(), op1.get_ndo_meta(), op1.get_readonly_originptr());
     }
 
-    ~ndobject_iter() {
+    ~array_iter() {
         if (m_iterdata[0]) {
             m_array_dtype[0].iterdata_destruct(m_iterdata[0], m_iter_ndim[0]);
             free(m_iterdata[0]);
@@ -363,7 +363,7 @@ public:
 };
 
 template<>
-class ndobject_iter<0, 2> {
+class array_iter<0, 2> {
     intptr_t m_itersize;
     size_t m_iter_ndim;
     dimvector m_iterindex;
@@ -373,8 +373,8 @@ class ndobject_iter<0, 2> {
     iterdata_common *m_iterdata[2];
     dtype m_array_dtype[2], m_uniform_dtype[2];
 public:
-    ndobject_iter(const ndobject& op0, const ndobject& op1) {
-        ndobject ops[2] = {op0, op1};
+    array_iter(const nd::array& op0, const nd::array& op1) {
+        nd::array ops[2] = {op0, op1};
         m_array_dtype[0] = op0.get_dtype();
         m_array_dtype[1] = op1.get_dtype();
         m_itersize = 1;
@@ -412,7 +412,7 @@ public:
         }
     }
 
-    ~ndobject_iter() {
+    ~array_iter() {
         for (size_t i = 0; i < 2; ++i) {
             if (m_iterdata[i]) {
                 m_array_dtype[i].iterdata_destruct(m_iterdata[i], m_array_dtype[i].get_undim());
@@ -468,7 +468,7 @@ public:
 };
 
 template<>
-class ndobject_iter<1, 3> {
+class array_iter<1, 3> {
     intptr_t m_itersize;
     size_t m_iter_ndim[4];
     dimvector m_iterindex;
@@ -479,9 +479,9 @@ class ndobject_iter<1, 3> {
     dtype m_array_dtype[4], m_uniform_dtype[4];
 public:
     // Constructor which creates the output based on the input's broadcast shape
-    ndobject_iter(const dtype& op0_dtype, ndobject& out_op0, const ndobject& op1, const ndobject& op2, const ndobject& op3) {
+    array_iter(const dtype& op0_dtype, nd::array& out_op0, const nd::array& op1, const nd::array& op2, const nd::array& op3) {
         create_broadcast_result(op0_dtype, op1, op2, op3, out_op0, m_iter_ndim[0], m_itershape);
-        ndobject ops[4] = {out_op0, op1, op2, op3};
+        nd::array ops[4] = {out_op0, op1, op2, op3};
         m_array_dtype[0] = out_op0.get_dtype();
         m_array_dtype[1] = op1.get_dtype();
         m_array_dtype[2] = op2.get_dtype();
@@ -531,7 +531,7 @@ public:
         }
     }
 
-    ~ndobject_iter() {
+    ~array_iter() {
         for (size_t i = 0; i < 4; ++i) {
             if (m_iterdata[i]) {
                 m_array_dtype[i].iterdata_destruct(m_iterdata[i], m_iter_ndim[i]);

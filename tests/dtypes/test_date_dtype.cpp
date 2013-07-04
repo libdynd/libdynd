@@ -36,101 +36,101 @@ TEST(DateDType, ValueCreation) {
     dtype d = make_date_dtype(), di = make_dtype<int32_t>();
 
     EXPECT_EQ((1600-1970)*365 - (1972-1600)/4 + 3 - 365,
-                    ndobject("1599-01-01").ucast(d).view_scalars(di).as<int32_t>());
+                    nd::array("1599-01-01").ucast(d).view_scalars(di).as<int32_t>());
     EXPECT_EQ((1600-1970)*365 - (1972-1600)/4 + 3,
-                    ndobject("1600-01-01").ucast(d).view_scalars(di).as<int32_t>());
+                    nd::array("1600-01-01").ucast(d).view_scalars(di).as<int32_t>());
     EXPECT_EQ((1600-1970)*365 - (1972-1600)/4 + 3 + 366,
-                    ndobject("1601-01-01").ucast(d).view_scalars(di).as<int32_t>());
+                    nd::array("1601-01-01").ucast(d).view_scalars(di).as<int32_t>());
 
     EXPECT_EQ((1900-1970)*365 - (1970-1900)/4,
-                    ndobject("1900-01-01").ucast(d).view_scalars(di).as<int32_t>());
+                    nd::array("1900-01-01").ucast(d).view_scalars(di).as<int32_t>());
     EXPECT_EQ((1900-1970)*365 - (1970-1900)/4 + 365,
-                    ndobject("1901-01-01").ucast(d).view_scalars(di).as<int32_t>());
+                    nd::array("1901-01-01").ucast(d).view_scalars(di).as<int32_t>());
 
     EXPECT_EQ(-3*365 - 1,
-                    ndobject("1967-01-01").ucast(d).view_scalars(di).as<int32_t>());
+                    nd::array("1967-01-01").ucast(d).view_scalars(di).as<int32_t>());
     EXPECT_EQ(-2*365 - 1,
-                    ndobject("1968-01-01").ucast(d).view_scalars(di).as<int32_t>());
+                    nd::array("1968-01-01").ucast(d).view_scalars(di).as<int32_t>());
     EXPECT_EQ(-1*365,
-                    ndobject("1969-01-01").ucast(d).view_scalars(di).as<int32_t>());
+                    nd::array("1969-01-01").ucast(d).view_scalars(di).as<int32_t>());
     EXPECT_EQ(0*365,
-                    ndobject("1970-01-01").ucast(d).view_scalars(di).as<int32_t>());
+                    nd::array("1970-01-01").ucast(d).view_scalars(di).as<int32_t>());
     EXPECT_EQ(1*365,
-                    ndobject("1971-01-01").ucast(d).view_scalars(di).as<int32_t>());
+                    nd::array("1971-01-01").ucast(d).view_scalars(di).as<int32_t>());
     EXPECT_EQ(2*365,
-                    ndobject("1972-01-01").ucast(d).view_scalars(di).as<int32_t>());
+                    nd::array("1972-01-01").ucast(d).view_scalars(di).as<int32_t>());
     EXPECT_EQ(3*365 + 1,
-                    ndobject("1973-01-01").ucast(d).view_scalars(di).as<int32_t>());
+                    nd::array("1973-01-01").ucast(d).view_scalars(di).as<int32_t>());
     EXPECT_EQ(4*365 + 1,
-                    ndobject("1974-01-01").ucast(d).view_scalars(di).as<int32_t>());
+                    nd::array("1974-01-01").ucast(d).view_scalars(di).as<int32_t>());
 
     EXPECT_EQ((2000 - 1970)*365 + (2000 - 1972)/4,
-                    ndobject("2000-01-01").ucast(d).view_scalars(di).as<int32_t>());
+                    nd::array("2000-01-01").ucast(d).view_scalars(di).as<int32_t>());
     EXPECT_EQ((2000 - 1970)*365 + (2000 - 1972)/4 + 366,
-                    ndobject("2001-01-01").ucast(d).view_scalars(di).as<int32_t>());
+                    nd::array("2001-01-01").ucast(d).view_scalars(di).as<int32_t>());
 
     EXPECT_EQ((2400 - 1970)*365 + (2400 - 1972)/4 - 3,
-                    ndobject("2400-01-01").ucast(d).view_scalars(di).as<int32_t>());
+                    nd::array("2400-01-01").ucast(d).view_scalars(di).as<int32_t>());
     EXPECT_EQ((2400 - 1970)*365 + (2400 - 1972)/4 - 3 + 366,
-                    ndobject("2401-01-01").ucast(d).view_scalars(di).as<int32_t>());
+                    nd::array("2401-01-01").ucast(d).view_scalars(di).as<int32_t>());
 
     EXPECT_EQ((1600-1970)*365 - (1972-1600)/4 + 3 + 31 + 28,
-                    ndobject("1600-02-29").ucast(d).view_scalars(di).as<int32_t>());
+                    nd::array("1600-02-29").ucast(d).view_scalars(di).as<int32_t>());
     EXPECT_EQ((1600-1970)*365 - (1972-1600)/4 + 3 + 31 + 29,
-                    ndobject("1600-03-01").ucast(d).view_scalars(di).as<int32_t>());
+                    nd::array("1600-03-01").ucast(d).view_scalars(di).as<int32_t>());
     EXPECT_EQ((2000 - 1970)*365 + (2000 - 1972)/4 + 31 + 28,
-                    ndobject("2000-02-29").ucast(d).view_scalars(di).as<int32_t>());
+                    nd::array("2000-02-29").ucast(d).view_scalars(di).as<int32_t>());
     EXPECT_EQ((2000 - 1970)*365 + (2000 - 1972)/4 + 31 + 29,
-                    ndobject("2000-03-01").ucast(d).view_scalars(di).as<int32_t>());
+                    nd::array("2000-03-01").ucast(d).view_scalars(di).as<int32_t>());
     EXPECT_EQ((2000 - 1970)*365 + (2000 - 1972)/4 + 366 + 31 + 28 + 21,
-                    ndobject("2001-03-22").ucast(d).view_scalars(di).as<int32_t>());
+                    nd::array("2001-03-22").ucast(d).view_scalars(di).as<int32_t>());
 }
 
 TEST(DateDType, BadInputStrings) {
     dtype d = make_date_dtype();
 
     // Arbitrary bad string
-    EXPECT_THROW(ndobject("badvalue").ucast(d).eval(), runtime_error);
+    EXPECT_THROW(nd::array("badvalue").ucast(d).eval(), runtime_error);
     // Character after year must be '-'
-    EXPECT_THROW(ndobject("1980X").ucast(d).eval(), runtime_error);
+    EXPECT_THROW(nd::array("1980X").ucast(d).eval(), runtime_error);
     // Cannot have trailing '-'
-    EXPECT_THROW(ndobject("1980-").ucast(d).eval(), runtime_error);
+    EXPECT_THROW(nd::array("1980-").ucast(d).eval(), runtime_error);
     // Month must be in range [1,12]
-    EXPECT_THROW(ndobject("1980-00").ucast(d).eval(), runtime_error);
-    EXPECT_THROW(ndobject("1980-13").ucast(d).eval(), runtime_error);
+    EXPECT_THROW(nd::array("1980-00").ucast(d).eval(), runtime_error);
+    EXPECT_THROW(nd::array("1980-13").ucast(d).eval(), runtime_error);
     // Month must have two digits
-    EXPECT_THROW(ndobject("1980-1").ucast(d).eval(), runtime_error);
-    EXPECT_THROW(ndobject("1980-1-02").ucast(d).eval(), runtime_error);
+    EXPECT_THROW(nd::array("1980-1").ucast(d).eval(), runtime_error);
+    EXPECT_THROW(nd::array("1980-1-02").ucast(d).eval(), runtime_error);
     // 'Mor' is not a valid month
-    EXPECT_THROW(ndobject("1980-Mor").ucast(d).eval(), runtime_error);
+    EXPECT_THROW(nd::array("1980-Mor").ucast(d).eval(), runtime_error);
     // Cannot have trailing '-'
-    EXPECT_THROW(ndobject("1980-01-").ucast(d).eval(), runtime_error);
+    EXPECT_THROW(nd::array("1980-01-").ucast(d).eval(), runtime_error);
     // Day must be in range [1,len(month)]
-    EXPECT_THROW(ndobject("1980-01-0").ucast(d).eval(), runtime_error);
-    EXPECT_THROW(ndobject("1980-01-00").ucast(d).eval(), runtime_error);
-    EXPECT_THROW(ndobject("1980-01-32").ucast(d).eval(), runtime_error);
-    EXPECT_THROW(ndobject("1979-02-29").ucast(d).eval(), runtime_error);
-    EXPECT_THROW(ndobject("1980-02-30").ucast(d).eval(), runtime_error);
-    EXPECT_THROW(ndobject("1980-03-32").ucast(d).eval(), runtime_error);
-    EXPECT_THROW(ndobject("1980-04-31").ucast(d).eval(), runtime_error);
-    EXPECT_THROW(ndobject("1980-05-32").ucast(d).eval(), runtime_error);
-    EXPECT_THROW(ndobject("1980-06-31").ucast(d).eval(), runtime_error);
-    EXPECT_THROW(ndobject("1980-07-32").ucast(d).eval(), runtime_error);
-    EXPECT_THROW(ndobject("1980-08-32").ucast(d).eval(), runtime_error);
-    EXPECT_THROW(ndobject("1980-09-31").ucast(d).eval(), runtime_error);
-    EXPECT_THROW(ndobject("1980-10-32").ucast(d).eval(), runtime_error);
-    EXPECT_THROW(ndobject("1980-11-31").ucast(d).eval(), runtime_error);
-    EXPECT_THROW(ndobject("1980-12-32").ucast(d).eval(), runtime_error);
+    EXPECT_THROW(nd::array("1980-01-0").ucast(d).eval(), runtime_error);
+    EXPECT_THROW(nd::array("1980-01-00").ucast(d).eval(), runtime_error);
+    EXPECT_THROW(nd::array("1980-01-32").ucast(d).eval(), runtime_error);
+    EXPECT_THROW(nd::array("1979-02-29").ucast(d).eval(), runtime_error);
+    EXPECT_THROW(nd::array("1980-02-30").ucast(d).eval(), runtime_error);
+    EXPECT_THROW(nd::array("1980-03-32").ucast(d).eval(), runtime_error);
+    EXPECT_THROW(nd::array("1980-04-31").ucast(d).eval(), runtime_error);
+    EXPECT_THROW(nd::array("1980-05-32").ucast(d).eval(), runtime_error);
+    EXPECT_THROW(nd::array("1980-06-31").ucast(d).eval(), runtime_error);
+    EXPECT_THROW(nd::array("1980-07-32").ucast(d).eval(), runtime_error);
+    EXPECT_THROW(nd::array("1980-08-32").ucast(d).eval(), runtime_error);
+    EXPECT_THROW(nd::array("1980-09-31").ucast(d).eval(), runtime_error);
+    EXPECT_THROW(nd::array("1980-10-32").ucast(d).eval(), runtime_error);
+    EXPECT_THROW(nd::array("1980-11-31").ucast(d).eval(), runtime_error);
+    EXPECT_THROW(nd::array("1980-12-32").ucast(d).eval(), runtime_error);
     // Cannot have trailing characters
-    EXPECT_THROW(ndobject("1980-02-03%").ucast(d).eval(), runtime_error);
-    EXPECT_THROW(ndobject("1980-02-03 q").ucast(d).eval(), runtime_error);
+    EXPECT_THROW(nd::array("1980-02-03%").ucast(d).eval(), runtime_error);
+    EXPECT_THROW(nd::array("1980-02-03 q").ucast(d).eval(), runtime_error);
 }
 
 TEST(DateDType, DateProperties) {
     dtype d = make_date_dtype();
-    ndobject a;
+    nd::array a;
 
-    a = ndobject("1955-03-13").ucast(d).eval();
+    a = nd::array("1955-03-13").ucast(d).eval();
     EXPECT_EQ(make_property_dtype(d, "year"), a.p("year").get_dtype());
     EXPECT_EQ(make_property_dtype(d, "month"), a.p("month").get_dtype());
     EXPECT_EQ(make_property_dtype(d, "day"), a.p("day").get_dtype());
@@ -139,7 +139,7 @@ TEST(DateDType, DateProperties) {
     EXPECT_EQ(13, a.p("day").as<int32_t>());
 
     const char *strs[] = {"1931-12-12", "2013-05-14", "2012-12-25"};
-    a = ndobject(strs).ucast(d).eval();
+    a = nd::array(strs).ucast(d).eval();
     EXPECT_EQ(1931, a.p("year").at(0).as<int32_t>());
     EXPECT_EQ(12, a.p("month").at(0).as<int32_t>());
     EXPECT_EQ(12, a.p("day").at(0).as<int32_t>());
@@ -152,9 +152,9 @@ TEST(DateDType, DateProperties) {
 }
 
 TEST(DateDType, DatePropertyConvertOfString) {
-    ndobject a, b, c;
+    nd::array a, b, c;
     const char *strs[] = {"1931-12-12", "2013-05-14", "2012-12-25"};
-    a = ndobject(strs).ucast(make_fixedstring_dtype(10, string_encoding_ascii)).eval();
+    a = nd::array(strs).ucast(make_fixedstring_dtype(10, string_encoding_ascii)).eval();
     b = a.ucast(make_date_dtype());
     EXPECT_EQ(make_strided_dim_dtype(
                     make_fixedstring_dtype(10, string_encoding_ascii)),
@@ -185,9 +185,9 @@ TEST(DateDType, DatePropertyConvertOfString) {
 
 TEST(DateDType, ToStructFunction) {
     dtype d = make_date_dtype();
-    ndobject a, b;
+    nd::array a, b;
 
-    a = ndobject("1955-03-13").ucast(d).eval();
+    a = nd::array("1955-03-13").ucast(d).eval();
     b = a.f("to_struct");
     EXPECT_EQ(make_property_dtype(d, "struct"),
                     b.get_dtype());
@@ -201,7 +201,7 @@ TEST(DateDType, ToStructFunction) {
     EXPECT_EQ(13, b.p("day").as<int32_t>());
 
     // Do it again, but now with a chain of expressions
-    a = ndobject("1955-03-13").ucast(d).f("to_struct");
+    a = nd::array("1955-03-13").ucast(d).f("to_struct");
     EXPECT_EQ(1955, a.p("year").as<int32_t>());
     EXPECT_EQ(3, a.p("month").as<int32_t>());
     EXPECT_EQ(13, a.p("day").as<int32_t>());
@@ -209,13 +209,13 @@ TEST(DateDType, ToStructFunction) {
 
 TEST(DateDType, ToStruct) {
     dtype d = make_date_dtype(), ds;
-    ndobject a, b;
+    nd::array a, b;
 
-    a = ndobject("1955-03-13").ucast(d).eval();
+    a = nd::array("1955-03-13").ucast(d).eval();
 
     // This is the default struct produced
     ds = make_cstruct_dtype(make_dtype<int32_t>(), "year", make_dtype<int8_t>(), "month", make_dtype<int8_t>(), "day");
-    b = empty(ds);
+    b = nd::empty(ds);
     b.vals() = a;
     EXPECT_EQ(1955, b.at(0).as<int32_t>());
     EXPECT_EQ(3, b.at(1).as<int8_t>());
@@ -223,7 +223,7 @@ TEST(DateDType, ToStruct) {
 
     // This should work too
     ds = make_cstruct_dtype(make_dtype<int16_t>(), "month", make_dtype<int16_t>(), "year", make_dtype<float>(), "day");
-    b = empty(ds);
+    b = nd::empty(ds);
     b.vals() = a;
     EXPECT_EQ(1955, b.at(1).as<int16_t>());
     EXPECT_EQ(3, b.at(0).as<int16_t>());
@@ -231,7 +231,7 @@ TEST(DateDType, ToStruct) {
 
     // This should work too
     ds = make_struct_dtype(make_dtype<int16_t>(), "month", make_dtype<int16_t>(), "year", make_dtype<float>(), "day");
-    b = empty(ds);
+    b = nd::empty(ds);
     b.vals() = a;
     EXPECT_EQ(1955, b.at(1).as<int16_t>());
     EXPECT_EQ(3, b.at(0).as<int16_t>());
@@ -240,15 +240,15 @@ TEST(DateDType, ToStruct) {
 
 TEST(DateDType, FromStruct) {
     dtype d = make_date_dtype(), ds;
-    ndobject a, b;
+    nd::array a, b;
 
     // This is the default struct accepted
     ds = make_cstruct_dtype(make_dtype<int32_t>(), "year", make_dtype<int8_t>(), "month", make_dtype<int8_t>(), "day");
-    a = empty(ds);
+    a = nd::empty(ds);
     a.at(0).vals() = 1955;
     a.at(1).vals() = 3;
     a.at(2).vals() = 13;
-    b = empty(d);
+    b = nd::empty(d);
     b.vals() = a;
     EXPECT_EQ(1955, b.p("year").as<int32_t>());
     EXPECT_EQ(3,    b.p("month").as<int32_t>());
@@ -256,11 +256,11 @@ TEST(DateDType, FromStruct) {
 
     // This should work too
     ds = make_cstruct_dtype(make_dtype<int16_t>(), "month", make_dtype<int16_t>(), "year", make_dtype<float>(), "day");
-    a = empty(ds);
+    a = nd::empty(ds);
     a.p("year").vals() = 1955;
     a.p("month").vals() = 3;
     a.p("day").vals() = 13;
-    b = empty(d);
+    b = nd::empty(d);
     b.vals() = a;
     EXPECT_EQ(1955, b.p("year").as<int32_t>());
     EXPECT_EQ(3,    b.p("month").as<int32_t>());
@@ -268,11 +268,11 @@ TEST(DateDType, FromStruct) {
 
     // This should work too
     ds = make_struct_dtype(make_dtype<int16_t>(), "month", make_dtype<int16_t>(), "year", make_dtype<float>(), "day");
-    a = empty(ds);
+    a = nd::empty(ds);
     a.p("year").vals() = 1955;
     a.p("month").vals() = 3;
     a.p("day").vals() = 13;
-    b = empty(d);
+    b = nd::empty(d);
     b.vals() = a;
     EXPECT_EQ(1955, b.p("year").as<int32_t>());
     EXPECT_EQ(3,    b.p("month").as<int32_t>());
@@ -281,9 +281,9 @@ TEST(DateDType, FromStruct) {
 
 TEST(DateDType, StrFTime) {
     dtype d = make_date_dtype(), ds;
-    ndobject a, b;
+    nd::array a, b;
 
-    a = ndobject("1955-03-13").ucast(d).eval();
+    a = nd::array("1955-03-13").ucast(d).eval();
 
     b = a.f("strftime", "%Y");
     EXPECT_EQ("1955", b.as<string>());
@@ -293,7 +293,7 @@ TEST(DateDType, StrFTime) {
     EXPECT_EQ("1955 and 072", b.as<string>());
 
     const char *strs[] = {"1931-12-12", "2013-05-14", "2012-12-25"};
-    a = ndobject(strs).ucast(d).eval();
+    a = nd::array(strs).ucast(d).eval();
 
     b = a.f("strftime", "%Y-%m-%d %j %U %w %W");
     EXPECT_EQ("1931-12-12 346 49 6 49", b.at(0).as<string>());
@@ -304,11 +304,11 @@ TEST(DateDType, StrFTime) {
 TEST(DateDType, StrFTimeOfConvert) {
     // First create a date array which is still a convert expression dtype
     const char *vals[] = {"1920-03-12", "2013-01-01", "2000-12-25"};
-    ndobject a = ndobject(vals).ucast(make_date_dtype());
+    nd::array a = nd::array(vals).ucast(make_date_dtype());
     EXPECT_EQ(make_strided_dim_dtype(make_convert_dtype(make_date_dtype(), make_string_dtype())),
                     a.get_dtype());
 
-    ndobject b = a.f("strftime", "%Y %m %d");
+    nd::array b = a.f("strftime", "%Y %m %d");
     EXPECT_EQ("1920 03 12", b.at(0).as<string>());
     EXPECT_EQ("2013 01 01", b.at(1).as<string>());
     EXPECT_EQ("2000 12 25", b.at(2).as<string>());
@@ -317,7 +317,7 @@ TEST(DateDType, StrFTimeOfConvert) {
 TEST(DateDType, StrFTimeOfMultiDim) {
     const char *vals_0[] = {"1920-03-12", "2013-01-01"};
     const char *vals_1[] = {"2000-12-25"};
-    ndobject a = make_strided_ndobject(2, -1, make_date_dtype());
+    nd::array a = nd::make_strided_array(2, -1, make_date_dtype());
     a.vals_at(0) = vals_0;
     a.vals_at(1) = vals_1;
 
@@ -332,9 +332,9 @@ TEST(DateDType, StrFTimeOfMultiDim) {
 // writing our own strftime format parser.
 TEST(DateDType, StrFTimeBadFormat) {
     dtype d = make_date_dtype();
-    ndobject a;
+    nd::array a;
 
-    a = ndobject("1955-03-13").ucast(d).eval();
+    a = nd::array("1955-03-13").ucast(d).eval();
     // Invalid format string should raise an error.
     EXPECT_THROW(a.f("strftime", "%Y %x %s").eval(), runtime_error);
 }
@@ -342,19 +342,19 @@ TEST(DateDType, StrFTimeBadFormat) {
 
 TEST(DateDType, WeekDay) {
     dtype d = make_date_dtype();
-    ndobject a;
+    nd::array a;
 
-    a = ndobject("1955-03-13").ucast(d).eval();
+    a = nd::array("1955-03-13").ucast(d).eval();
     EXPECT_EQ(6, a.f("weekday").as<int32_t>());
-    a = ndobject("2002-12-04").ucast(d).eval();
+    a = nd::array("2002-12-04").ucast(d).eval();
     EXPECT_EQ(2, a.f("weekday").as<int32_t>());
 }
 
 TEST(DateDType, Replace) {
     dtype d = make_date_dtype();
-    ndobject a;
+    nd::array a;
 
-    a = ndobject("1955-03-13").ucast(d).eval();
+    a = nd::array("1955-03-13").ucast(d).eval();
     EXPECT_EQ("2013-03-13", a.f("replace", 2013).as<string>());
     EXPECT_EQ("2012-12-13", a.f("replace", 2012, 12).as<string>());
     EXPECT_EQ("2012-12-15", a.f("replace", 2012, 12, 15).as<string>());
@@ -363,7 +363,7 @@ TEST(DateDType, Replace) {
     EXPECT_EQ("2012-05-31", a.f("replace", 2012, -8, -1).as<string>());
     // The C++ call interface doesn't let you skip arguments (yet, there is no keyword argument mechanism),
     // so test this manually
-    ndobject param = a.find_dynamic_function("replace").get_default_parameters().eval_copy();
+    nd::array param = a.find_dynamic_function("replace").get_default_parameters().eval_copy();
     *reinterpret_cast<void **>(param.at(0).get_readwrite_originptr()) = (void*)a.get_ndo();
     param.at(2).vals() = 7;
     EXPECT_EQ("1955-07-13", a.find_dynamic_function("replace").call_generic(param).as<string>());
@@ -387,10 +387,10 @@ TEST(DateDType, Replace) {
 }
 
 TEST(DateDType, ReplaceOfConvert) {
-    ndobject a;
+    nd::array a;
 
     // Make an expression dtype with value type 'date'
-    a = ndobject("1955-03-13").ucast(make_date_dtype());
+    a = nd::array("1955-03-13").ucast(make_date_dtype());
     EXPECT_EQ(make_convert_dtype(make_date_dtype(), make_string_dtype()),
                     a.get_dtype());
     // Call replace on it
@@ -400,8 +400,8 @@ TEST(DateDType, ReplaceOfConvert) {
 TEST(DateDType, NumPyCompatibleProperty) {
     int64_t vals64[] = {-16730, 0, 11001, numeric_limits<int64_t>::min()};
 
-    ndobject a = vals64;
-    ndobject a_date = a.view_scalars(make_reversed_property_dtype(make_date_dtype(),
+    nd::array a = vals64;
+    nd::array a_date = a.view_scalars(make_reversed_property_dtype(make_date_dtype(),
                     make_dtype<int64_t>(), "days_after_1970_int64"));
     // Reading from the 'int64 as date' view
     EXPECT_EQ("1924-03-13", a_date.at(0).as<string>());

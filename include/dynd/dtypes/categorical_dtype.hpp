@@ -29,14 +29,14 @@ class categorical_dtype : public base_dtype {
     // The integer type used for storage
     dtype m_storage_dtype;
     // list of categories, in sorted order
-    ndobject m_categories;
+    nd::array m_categories;
     // mapping from category indices to values
     std::vector<intptr_t> m_category_index_to_value;
     // mapping from values to category indices
     std::vector<intptr_t> m_value_to_category_index;
 
 public:
-    categorical_dtype(const ndobject& categories, bool presorted=false);
+    categorical_dtype(const nd::array& categories, bool presorted=false);
 
     virtual ~categorical_dtype() {
     }
@@ -67,7 +67,7 @@ public:
     }
 
     uint32_t get_value_from_category(const char *category_metadata, const char *category_data) const;
-    uint32_t get_value_from_category(const ndobject& category) const;
+    uint32_t get_value_from_category(const nd::array& category) const;
 
     const char *get_category_data_from_value(size_t value) const {
         if (value >= get_category_count()) {
@@ -79,8 +79,8 @@ public:
     /** Returns the metadata corresponding to data from get_category_data_from_value */
     const char *get_category_metadata() const;
 
-    /** Returns the categories as an immutable ndobject */
-    ndobject get_categories() const;
+    /** Returns the categories as an immutable nd::array */
+    nd::array get_categories() const;
 
     bool is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const;
 
@@ -98,7 +98,7 @@ public:
                     kernel_request_t kernreq, assign_error_mode errmode,
                     const eval::eval_context *ectx) const;
 
-    void get_dynamic_ndobject_properties(
+    void get_dynamic_array_properties(
                     const std::pair<std::string, gfunc::callable> **out_properties,
                     size_t *out_count) const;
     void get_dynamic_dtype_properties(
@@ -110,12 +110,12 @@ public:
     friend struct assign_from_commensurate_category_type;
 };
 
-inline dtype make_categorical_dtype(const ndobject& values) {
+inline dtype make_categorical_dtype(const nd::array& values) {
     return dtype(new categorical_dtype(values), false);
 }
 
 
-dtype factor_categorical_dtype(const ndobject& values);
+dtype factor_categorical_dtype(const nd::array& values);
 
 
 } // namespace dynd

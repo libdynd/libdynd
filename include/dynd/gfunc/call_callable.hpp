@@ -40,11 +40,11 @@ namespace detail {
     };
 
     template<>
-    struct callable_argument_setter<ndobject> {
-        static void set(const dtype& paramtype, char *metadata, char *data, const ndobject& value) {
+    struct callable_argument_setter<nd::array> {
+        static void set(const dtype& paramtype, char *metadata, char *data, const nd::array& value) {
             if (paramtype.get_type_id() == void_pointer_type_id) {
-                // TODO: switch to a better mechanism for passing ndobject references
-                *reinterpret_cast<const ndobject_preamble **>(data) = value.get_ndo();
+                // TODO: switch to a better mechanism for passing nd::array references
+                *reinterpret_cast<const array_preamble **>(data) = value.get_ndo();
             } else {
                 dtype_assign(paramtype, metadata, data, value.get_dtype(), value.get_ndo_meta(), value.get_ndo()->m_data_pointer);
             }
@@ -83,11 +83,11 @@ namespace detail {
     struct callable_argument_setter<char[N]> : public callable_argument_setter<const char[N]> {};
 } // namespace detail
 
-inline ndobject callable::call() const
+inline nd::array callable::call() const
 {
     const cstruct_dtype *fsdt = static_cast<const cstruct_dtype *>(m_parameters_dtype.extended());
     size_t parameter_count = fsdt->get_field_count();
-    ndobject params = empty(m_parameters_dtype);
+    nd::array params = nd::empty(m_parameters_dtype);
     if (parameter_count != 0) {
         if (m_first_default_parameter <= 0) {
             // Fill the missing parameters with their defaults, if available
@@ -110,11 +110,11 @@ inline ndobject callable::call() const
 }
 
 template<class T>
-inline ndobject callable::call(const T& p0) const
+inline nd::array callable::call(const T& p0) const
 {
     const cstruct_dtype *fsdt = static_cast<const cstruct_dtype *>(m_parameters_dtype.extended());
     size_t parameter_count = fsdt->get_field_count();
-    ndobject params = empty(m_parameters_dtype);
+    nd::array params = nd::empty(m_parameters_dtype);
     if (parameter_count != 1) {
         if (parameter_count > 1 && m_first_default_parameter <= 1) {
             // Fill the missing parameters with their defaults, if available
@@ -141,11 +141,11 @@ inline ndobject callable::call(const T& p0) const
 }
 
 template<class T0, class T1>
-inline ndobject callable::call(const T0& p0, const T1& p1) const
+inline nd::array callable::call(const T0& p0, const T1& p1) const
 {
     const cstruct_dtype *fsdt = static_cast<const cstruct_dtype *>(m_parameters_dtype.extended());
     size_t parameter_count = fsdt->get_field_count();
-    ndobject params = empty(m_parameters_dtype);
+    nd::array params = nd::empty(m_parameters_dtype);
     if (fsdt->get_field_count() != 2) {
         if (parameter_count > 2 && m_first_default_parameter <= 2) {
             // Fill the missing parameters with their defaults, if available
@@ -176,11 +176,11 @@ inline ndobject callable::call(const T0& p0, const T1& p1) const
 }
 
 template<class T0, class T1, class T2>
-inline ndobject callable::call(const T0& p0, const T1& p1, const T2& p2) const
+inline nd::array callable::call(const T0& p0, const T1& p1, const T2& p2) const
 {
     const cstruct_dtype *fsdt = static_cast<const cstruct_dtype *>(m_parameters_dtype.extended());
     size_t parameter_count = fsdt->get_field_count();
-    ndobject params = empty(m_parameters_dtype);
+    nd::array params = nd::empty(m_parameters_dtype);
     if (fsdt->get_field_count() != 3) {
         if (parameter_count > 3 && m_first_default_parameter <= 3) {
             // Fill the missing parameters with their defaults, if available
@@ -215,11 +215,11 @@ inline ndobject callable::call(const T0& p0, const T1& p1, const T2& p2) const
 }
 
 template<class T0, class T1, class T2, class T3>
-inline ndobject callable::call(const T0& p0, const T1& p1, const T2& p2, const T3& p3) const
+inline nd::array callable::call(const T0& p0, const T1& p1, const T2& p2, const T3& p3) const
 {
     const cstruct_dtype *fsdt = static_cast<const cstruct_dtype *>(m_parameters_dtype.extended());
     size_t parameter_count = fsdt->get_field_count();
-    ndobject params = empty(m_parameters_dtype);
+    nd::array params = nd::empty(m_parameters_dtype);
     if (fsdt->get_field_count() != 4) {
         if (parameter_count > 4 && m_first_default_parameter <= 4) {
             // Fill the missing parameters with their defaults, if available
@@ -258,11 +258,11 @@ inline ndobject callable::call(const T0& p0, const T1& p1, const T2& p2, const T
 }
 
 template<class T0, class T1, class T2, class T3, class T4>
-inline ndobject callable::call(const T0& p0, const T1& p1, const T2& p2, const T3& p3, const T4& p4) const
+inline nd::array callable::call(const T0& p0, const T1& p1, const T2& p2, const T3& p3, const T4& p4) const
 {
     const cstruct_dtype *fsdt = static_cast<const cstruct_dtype *>(m_parameters_dtype.extended());
     size_t parameter_count = fsdt->get_field_count();
-    ndobject params = empty(m_parameters_dtype);
+    nd::array params = nd::empty(m_parameters_dtype);
     if (fsdt->get_field_count() != 5) {
         if (parameter_count > 5 && m_first_default_parameter <= 5) {
             // Fill the missing parameters with their defaults, if available
@@ -307,34 +307,34 @@ inline ndobject callable::call(const T0& p0, const T1& p1, const T2& p2, const T
 } // namespace gfunc
 
 //////////////////////////////////////////
-// Some functions from ndobject that use callable.call
+// Some functions from nd::array that use callable.call
 
 /** Calls the dynamic function - #include <dynd/gfunc/call_callable.hpp> to use it */
-inline ndobject ndobject::f(const char *function_name) {
+inline nd::array nd::array::f(const char *function_name) {
     return find_dynamic_function(function_name).call(*this);
 }
 
 /** Calls the dynamic function - #include <dynd/gfunc/call_callable.hpp> to use it */
 template<class T0>
-inline ndobject ndobject::f(const char *function_name, const T0& p0) {
+inline nd::array nd::array::f(const char *function_name, const T0& p0) {
     return find_dynamic_function(function_name).call(*this, p0);
 }
 
 /** Calls the dynamic function - #include <dynd/gfunc/call_callable.hpp> to use it */
 template<class T0, class T1>
-inline ndobject ndobject::f(const char *function_name, const T0& p0, const T1& p1) {
+inline nd::array nd::array::f(const char *function_name, const T0& p0, const T1& p1) {
     return find_dynamic_function(function_name).call(*this, p0, p1);
 }
 
 /** Calls the dynamic function - #include <dynd/gfunc/call_callable.hpp> to use it */
 template<class T0, class T1, class T2>
-inline ndobject ndobject::f(const char *function_name, const T0& p0, const T1& p1, const T2& p2) {
+inline nd::array nd::array::f(const char *function_name, const T0& p0, const T1& p1, const T2& p2) {
     return find_dynamic_function(function_name).call(*this, p0, p1, p2);
 }
 
 /** Calls the dynamic function - #include <dynd/gfunc/call_callable.hpp> to use it */
 template<class T0, class T1, class T2, class T3>
-inline ndobject ndobject::f(const char *function_name, const T0& p0, const T1& p1, const T2& p2, const T3& p3) {
+inline nd::array nd::array::f(const char *function_name, const T0& p0, const T1& p1, const T2& p2, const T3& p3) {
     return find_dynamic_function(function_name).call(*this, p0, p1, p2, p3);
 }
 

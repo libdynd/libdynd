@@ -302,10 +302,10 @@ static void format_json(output_data& out, const dtype& dt, const char *metadata,
     }
 }
 
-ndobject dynd::format_json(const ndobject& n)
+nd::array dynd::format_json(const nd::array& n)
 {
     // Create a UTF-8 string
-    ndobject result = empty(make_string_dtype());
+    nd::array result = nd::empty(make_string_dtype());
 
     // Initialize the output with some memory
     output_data out;
@@ -317,7 +317,7 @@ ndobject dynd::format_json(const ndobject& n)
     if (!n.get_dtype().is_expression()) {
         ::format_json(out, n.get_dtype(), n.get_ndo_meta(), n.get_readonly_originptr());
     } else {
-        ndobject tmp = n.eval();
+        nd::array tmp = n.eval();
         ::format_json(out, tmp.get_dtype(), tmp.get_ndo_meta(), tmp.get_readonly_originptr());
     }
 

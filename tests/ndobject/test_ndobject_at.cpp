@@ -16,8 +16,8 @@ using namespace dynd;
 
 TEST(NDObjectIndex, BasicInteger) {
     int i0[3][2] = {{1,2},{3,4},{5,6}};
-    ndobject a = i0;
-    ndobject b, c;
+    nd::array a = i0;
+    nd::array b, c;
 
     // Indexing in two steps
     b = a.at(0);
@@ -103,7 +103,7 @@ TEST(NDObjectIndex, BasicInteger) {
 
 TEST(NDObjectIndex, SimpleOneDimensionalRange) {
     int i0[] = {1,2,3,4,5,6};
-    ndobject a = i0, b;
+    nd::array a = i0, b;
 
     // full range
     b = a.at(irange());
@@ -139,7 +139,7 @@ TEST(NDObjectIndex, SimpleOneDimensionalRange) {
 
 TEST(NDObjectIndex, SteppedOneDimensionalRange) {
     int i0[] = {1,2,3,4,5,6};
-    ndobject a = i0, b;
+    nd::array a = i0, b;
 
     // different step
     b = a.at(irange().by(2));
@@ -192,7 +192,7 @@ TEST(NDObjectIndex, SteppedOneDimensionalRange) {
 
 TEST(NDObjectIndex, ExceptionsOneDimensionalRange) {
     int i0[] = {1,2,3,4,5,6};
-    ndobject a = i0, b;
+    nd::array a = i0, b;
 
     // exceptions for out-of-bounds ranges
     EXPECT_THROW(a.at(-7 <= irange()), irange_out_of_bounds);

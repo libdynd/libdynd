@@ -214,7 +214,7 @@ DYND_BUILTIN_DTYPE_BINARY_OP_TABLE_DEFS(subtraction);
 DYND_BUILTIN_DTYPE_BINARY_OP_TABLE_DEFS(multiplication);
 DYND_BUILTIN_DTYPE_BINARY_OP_TABLE_DEFS(division);
 
-// These operators are declared in ndobject.hpp
+// These operators are declared in nd::array.hpp
 
 // Get the table index by compressing the type_id's we do implement
 static int compress_builtin_type_id[builtin_type_id_count] = {
@@ -229,7 +229,7 @@ static int compress_builtin_type_id[builtin_type_id_count] = {
                 -1};
 
 template<class KD>
-ndobject apply_binary_operator(const ndobject *ops,
+nd::array apply_binary_operator(const nd::array *ops,
                 const dtype& rdt, const dtype& op1dt, const dtype& op2dt,
                 expr_operation_pair expr_ops,
                 const char *name)
@@ -267,8 +267,8 @@ ndobject apply_binary_operator(const ndobject *ops,
 
     // Create the result
     string field_names[2] = {"arg0", "arg1"};
-    ndobject ops_as_dt[2] = {ops[0].ucast(op1dt), ops[1].ucast(op2dt)};
-    ndobject result = combine_into_struct(2, field_names, ops_as_dt);
+    nd::array ops_as_dt[2] = {ops[0].ucast(op1dt), ops[1].ucast(op2dt)};
+    nd::array result = combine_into_struct(2, field_names, ops_as_dt);
     // Because the expr dtype's operand is the result's dtype,
     // we can swap it in as the dtype
     dtype edt = make_expr_dtype(result_vdt,
@@ -278,9 +278,9 @@ ndobject apply_binary_operator(const ndobject *ops,
     return result;
 }
 
-ndobject dynd::operator+(const ndobject& op1, const ndobject& op2)
+nd::array nd::operator+(const nd::array& op1, const nd::array& op2)
 {
-    ndobject ops[2] = {op1, op2};
+    nd::array ops[2] = {op1, op2};
     expr_operation_pair func_ptr;
     dtype op1dt = op1.get_udtype().value_dtype();
     dtype op2dt = op2.get_udtype().value_dtype();
@@ -308,7 +308,7 @@ ndobject dynd::operator+(const ndobject& op1, const ndobject& op2)
     }
 }
 
-ndobject dynd::operator-(const ndobject& op1, const ndobject& op2)
+nd::array nd::operator-(const nd::array& op1, const nd::array& op2)
 {
     dtype rdt;
     expr_operation_pair func_ptr;
@@ -322,11 +322,11 @@ ndobject dynd::operator-(const ndobject& op1, const ndobject& op2)
         }
     }
 
-    ndobject ops[2] = {op1, op2};
+    nd::array ops[2] = {op1, op2};
     return apply_binary_operator<kernel_data_prefix>(ops, rdt, rdt, rdt, func_ptr, "subtraction");
 }
 
-ndobject dynd::operator*(const ndobject& op1, const ndobject& op2)
+nd::array nd::operator*(const nd::array& op1, const nd::array& op2)
 {
     dtype rdt;
     expr_operation_pair func_ptr;
@@ -340,11 +340,11 @@ ndobject dynd::operator*(const ndobject& op1, const ndobject& op2)
         }
     }
 
-    ndobject ops[2] = {op1, op2};
+    nd::array ops[2] = {op1, op2};
     return apply_binary_operator<kernel_data_prefix>(ops, rdt, rdt, rdt, func_ptr, "multiplication");
 }
 
-ndobject dynd::operator/(const ndobject& op1, const ndobject& op2)
+nd::array nd::operator/(const nd::array& op1, const nd::array& op2)
 {
     dtype rdt;
     expr_operation_pair func_ptr;
@@ -358,6 +358,6 @@ ndobject dynd::operator/(const ndobject& op1, const ndobject& op2)
         }
     }
 
-    ndobject ops[2] = {op1, op2};
+    nd::array ops[2] = {op1, op2};
     return apply_binary_operator<kernel_data_prefix>(ops, rdt, rdt, rdt, func_ptr, "division");
 }

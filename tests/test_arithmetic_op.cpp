@@ -15,7 +15,7 @@ using namespace std;
 using namespace dynd;
 
 TEST(ArithmeticOp, SimpleBroadcast) {
-    ndobject a, b, c;
+    nd::array a, b, c;
 
     // Two arrays with broadcasting
     const int v0[] = {1,2,3};
@@ -58,7 +58,7 @@ TEST(ArithmeticOp, SimpleBroadcast) {
 }
 
 TEST(ArithmeticOp, StridedScalarBroadcast) {
-    ndobject a, b, c;
+    nd::array a, b, c;
 
     // Two arrays with broadcasting
     const int v0[] = {2,4,6};
@@ -103,7 +103,7 @@ TEST(ArithmeticOp, StridedScalarBroadcast) {
 }
 
 TEST(ArithmeticOp, VarToStridedBroadcast) {
-    ndobject a, b, c;
+    nd::array a, b, c;
 
     a = parse_json("2, var, int32",
                     "[[1, 2, 3], [4]]");
@@ -136,7 +136,7 @@ TEST(ArithmeticOp, VarToStridedBroadcast) {
 }
 
 TEST(ArithmeticOp, VarToVarBroadcast) {
-    ndobject a, b, c;
+    nd::array a, b, c;
 
     a = parse_json("2, var, int32",
                     "[[1, 2, 3], [4]]");
@@ -178,7 +178,7 @@ TEST(ArithmeticOp, VarToVarBroadcast) {
 }
 
 TEST(ArithmeticOp, ScalarOnTheRight) {
-    ndobject a, b, c;
+    nd::array a, b, c;
 
     const int v0[] = {1,2,3};
     a = v0;
@@ -203,7 +203,7 @@ TEST(ArithmeticOp, ScalarOnTheRight) {
 }
 
 TEST(ArithmeticOp, ScalarOnTheLeft) {
-    ndobject a, b, c;
+    nd::array a, b, c;
 
     const int v0[] = {1,2,3};
     a = v0;
@@ -230,7 +230,7 @@ TEST(ArithmeticOp, ScalarOnTheLeft) {
 TEST(ArithmeticOp, ComplexScalar) {
     return;
 
-    ndobject a, c;
+    nd::array a, c;
 
     // Two arrays with broadcasting
     int v0[] = {1,2,3};
@@ -249,7 +249,7 @@ TEST(ArithmeticOp, ComplexScalar) {
 }
 
 TEST(ArithmeticOp, MatchingDTypes_View) {
-    ndobject a, b, c, d;
+    nd::array a, b, c, d;
 
     // Two arrays with broadcasting
     int v0[] = {1,2,3};
@@ -268,7 +268,7 @@ TEST(ArithmeticOp, MatchingDTypes_View) {
     // Note: 'c' contains an expression tree with an 'add' node,
     // so editing the values of 'a' or 'b' changes the values of 'c'
     int v2[] = {6,4,2};
-    a.val_assign(ndobject(v2));
+    a.val_assign(nd::array(v2));
     EXPECT_EQ(6, c.at(0,0).as<int>());
     EXPECT_EQ(5, c.at(0,1).as<int>());
     EXPECT_EQ(3, c.at(0,2).as<int>());
@@ -280,12 +280,12 @@ TEST(ArithmeticOp, MatchingDTypes_View) {
     d = c.at(0);
     EXPECT_EQ(1u, d.get_undim());
     EXPECT_EQ(3, d.get_shape()[0]);
-    a.val_assign(ndobject(v0));
+    a.val_assign(nd::array(v0));
     EXPECT_EQ(1, d.at(0).as<int>());
     EXPECT_EQ(3, d.at(1).as<int>());
     EXPECT_EQ(4, d.at(2).as<int>());
     d = c.at(1);
-    a.val_assign(ndobject(v2));
+    a.val_assign(nd::array(v2));
     EXPECT_EQ(8, d.at(0).as<int>());
     EXPECT_EQ(9, d.at(1).as<int>());
     EXPECT_EQ(-8, d.at(2).as<int>());
@@ -293,10 +293,10 @@ TEST(ArithmeticOp, MatchingDTypes_View) {
 
 /*
 TEST(ArithmeticOp, Buffered) {
-    ndobject a;
+    nd::array a;
 
     // Basic case with no buffering
-    a = ndobject(2) * ndobject(3);
+    a = nd::array(2) * nd::array(3);
     EXPECT_EQ(elwise_node_category, a.get_node()->get_category());
     EXPECT_EQ(make_dtype<int>(), a.get_node()->get_dtype());
     EXPECT_EQ(make_dtype<int>(), a.get_node()->get_opnode(0)->get_dtype());
@@ -304,7 +304,7 @@ TEST(ArithmeticOp, Buffered) {
     EXPECT_EQ(6, a.as<int>());
 
     // Buffering the first operand
-    a = ndobject(2) * ndobject(3.f);
+    a = nd::array(2) * nd::array(3.f);
     EXPECT_EQ(elwise_node_category, a.get_node()->get_category());
     EXPECT_EQ(make_dtype<float>(), a.get_node()->get_dtype());
     EXPECT_EQ((make_convert_dtype<float, int>()), a.get_node()->get_opnode(0)->get_dtype());
@@ -312,7 +312,7 @@ TEST(ArithmeticOp, Buffered) {
     EXPECT_EQ(6, a.as<float>());
 
     // Buffering the second operand
-    a = ndobject(2.) * ndobject(3);
+    a = nd::array(2.) * nd::array(3);
     EXPECT_EQ(elwise_node_category, a.get_node()->get_category());
     EXPECT_EQ(make_dtype<double>(), a.get_node()->get_dtype());
     EXPECT_EQ(make_dtype<double>(), a.get_node()->get_opnode(0)->get_dtype());
@@ -320,7 +320,7 @@ TEST(ArithmeticOp, Buffered) {
     EXPECT_EQ(6, a.as<float>());
 
     // Buffering the output
-    a = (ndobject(2) * ndobject(3)).as_dtype<float>();
+    a = (nd::array(2) * nd::array(3)).as_dtype<float>();
     EXPECT_EQ(elwise_node_category, a.get_node()->get_category());
     EXPECT_EQ((make_convert_dtype<float, int>()), a.get_node()->get_dtype());
     EXPECT_EQ(make_dtype<int>(), a.get_node()->get_opnode(0)->get_dtype());
@@ -328,7 +328,7 @@ TEST(ArithmeticOp, Buffered) {
     EXPECT_EQ(6, a.as<float>());
 
     // Buffering both operands
-    a = ndobject(2) * ndobject(3u).as_dtype<float>();
+    a = nd::array(2) * nd::array(3u).as_dtype<float>();
     EXPECT_EQ(elwise_node_category, a.get_node()->get_category());
     EXPECT_EQ(make_dtype<float>(), a.get_node()->get_dtype());
     EXPECT_EQ((make_convert_dtype<float, int>()), a.get_node()->get_opnode(0)->get_dtype());
@@ -336,7 +336,7 @@ TEST(ArithmeticOp, Buffered) {
     EXPECT_EQ(6, a.as<float>());
 
     // Buffering the first operand and the output
-    a = (ndobject(2) * ndobject(3.f)).as_dtype<double>();
+    a = (nd::array(2) * nd::array(3.f)).as_dtype<double>();
     EXPECT_EQ(elwise_node_category, a.get_node()->get_category());
     EXPECT_EQ((make_convert_dtype<double, float>()), a.get_node()->get_dtype());
     EXPECT_EQ((make_convert_dtype<float, int>()), a.get_node()->get_opnode(0)->get_dtype());
@@ -344,7 +344,7 @@ TEST(ArithmeticOp, Buffered) {
     EXPECT_EQ(6, a.as<double>());
 
     // Buffering the second operand and the output
-    a = (ndobject(2.f) * ndobject(3)).as_dtype<double>();
+    a = (nd::array(2.f) * nd::array(3)).as_dtype<double>();
     EXPECT_EQ(elwise_node_category, a.get_node()->get_category());
     EXPECT_EQ((make_convert_dtype<double, float>()), a.get_node()->get_dtype());
     EXPECT_EQ(make_dtype<float>(), a.get_node()->get_opnode(0)->get_dtype());
@@ -352,7 +352,7 @@ TEST(ArithmeticOp, Buffered) {
     EXPECT_EQ(6, a.as<double>());
 
     // Buffering both operands and the output
-    a = (ndobject(2) * ndobject(3u).as_dtype<float>()).as_dtype<double>();
+    a = (nd::array(2) * nd::array(3u).as_dtype<float>()).as_dtype<double>();
     EXPECT_EQ(elwise_node_category, a.get_node()->get_category());
     EXPECT_EQ((make_convert_dtype<double, float>()), a.get_node()->get_dtype());
     EXPECT_EQ((make_convert_dtype<float, int>()), a.get_node()->get_opnode(0)->get_dtype());

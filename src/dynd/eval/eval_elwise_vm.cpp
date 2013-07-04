@@ -10,7 +10,7 @@
 using namespace std;
 using namespace dynd;
 
-ndobject dynd::eval::evaluate_elwise_vm(const vm::elwise_program& ep, std::vector<ndobject> DYND_UNUSED(inputs),
+nd::array dynd::eval::evaluate_elwise_vm(const vm::elwise_program& ep, std::vector<nd::array> DYND_UNUSED(inputs),
                     const eval::eval_context *DYND_UNUSED(ectx))
 {
     // Allocate contiguous registers for the VM
@@ -23,5 +23,5 @@ ndobject dynd::eval::evaluate_elwise_vm(const vm::elwise_program& ep, std::vecto
 
 
     
-    return ndobject();
+    return nd::array();
 }

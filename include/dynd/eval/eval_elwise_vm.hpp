@@ -14,7 +14,7 @@
 
 namespace dynd { namespace eval {
 
-ndobject evaluate_elwise_vm(const vm::elwise_program& ep, std::vector<ndobject> inputs,
+nd::array evaluate_elwise_vm(const vm::elwise_program& ep, std::vector<nd::array> inputs,
                     const eval::eval_context *ectx = &eval::default_eval_context);
 
 }} // namespace dynd::eval

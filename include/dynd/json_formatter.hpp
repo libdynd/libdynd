@@ -15,7 +15,7 @@ namespace dynd {
  *
  * \param n  The object to format as JSON.
  */
-ndobject format_json(const ndobject& n);
+nd::array format_json(const nd::array& n);
 
 } // namespace dynd
 

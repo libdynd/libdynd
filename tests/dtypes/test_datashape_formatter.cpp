@@ -21,22 +21,22 @@ using namespace std;
 using namespace dynd;
 
 TEST(DataShapeFormatter, NDObjectBuiltinAtoms) {
-    EXPECT_EQ("bool", format_datashape(ndobject(true), "", false));
-    EXPECT_EQ("int8", format_datashape(ndobject((int8_t)0), "", false));
-    EXPECT_EQ("int16", format_datashape(ndobject((int16_t)0), "", false));
-    EXPECT_EQ("int32", format_datashape(ndobject((int32_t)0), "", false));
-    EXPECT_EQ("int64", format_datashape(ndobject((int64_t)0), "", false));
-    EXPECT_EQ("int128", format_datashape(ndobject(dynd_int128(0)), "", false));
-    EXPECT_EQ("uint8", format_datashape(ndobject((uint8_t)0), "", false));
-    EXPECT_EQ("uint16", format_datashape(ndobject((uint16_t)0), "", false));
-    EXPECT_EQ("uint32", format_datashape(ndobject((uint32_t)0), "", false));
-    EXPECT_EQ("uint64", format_datashape(ndobject((uint64_t)0), "", false));
-    EXPECT_EQ("uint128", format_datashape(ndobject(dynd_uint128(0)), "", false));
-    EXPECT_EQ("float16", format_datashape(ndobject(dynd_float16(0.f, assign_error_none)), "", false));
-    EXPECT_EQ("float32", format_datashape(ndobject(0.f), "", false));
-    EXPECT_EQ("float64", format_datashape(ndobject(0.), "", false));
-    EXPECT_EQ("cfloat32", format_datashape(ndobject(complex<float>(0.f)), "", false));
-    EXPECT_EQ("cfloat64", format_datashape(ndobject(complex<double>(0.)), "", false));
+    EXPECT_EQ("bool", format_datashape(nd::array(true), "", false));
+    EXPECT_EQ("int8", format_datashape(nd::array((int8_t)0), "", false));
+    EXPECT_EQ("int16", format_datashape(nd::array((int16_t)0), "", false));
+    EXPECT_EQ("int32", format_datashape(nd::array((int32_t)0), "", false));
+    EXPECT_EQ("int64", format_datashape(nd::array((int64_t)0), "", false));
+    EXPECT_EQ("int128", format_datashape(nd::array(dynd_int128(0)), "", false));
+    EXPECT_EQ("uint8", format_datashape(nd::array((uint8_t)0), "", false));
+    EXPECT_EQ("uint16", format_datashape(nd::array((uint16_t)0), "", false));
+    EXPECT_EQ("uint32", format_datashape(nd::array((uint32_t)0), "", false));
+    EXPECT_EQ("uint64", format_datashape(nd::array((uint64_t)0), "", false));
+    EXPECT_EQ("uint128", format_datashape(nd::array(dynd_uint128(0)), "", false));
+    EXPECT_EQ("float16", format_datashape(nd::array(dynd_float16(0.f, assign_error_none)), "", false));
+    EXPECT_EQ("float32", format_datashape(nd::array(0.f), "", false));
+    EXPECT_EQ("float64", format_datashape(nd::array(0.), "", false));
+    EXPECT_EQ("cfloat32", format_datashape(nd::array(complex<float>(0.f)), "", false));
+    EXPECT_EQ("cfloat64", format_datashape(nd::array(complex<double>(0.)), "", false));
 }
 
 TEST(DataShapeFormatter, DTypeBuiltinAtoms) {
@@ -56,29 +56,29 @@ TEST(DataShapeFormatter, DTypeBuiltinAtoms) {
 }
 
 TEST(DataShapeFormatter, NDObjectStringAtoms) {
-    EXPECT_EQ("string", format_datashape(ndobject("test"), "", false));
+    EXPECT_EQ("string", format_datashape(nd::array("test"), "", false));
     EXPECT_EQ("string", format_datashape(
-                    empty(make_string_dtype(string_encoding_utf_8)), "", false));
+                    nd::empty(make_string_dtype(string_encoding_utf_8)), "", false));
     EXPECT_EQ("string", format_datashape(
-                    empty(make_string_dtype(string_encoding_ascii)), "", false));
+                    nd::empty(make_string_dtype(string_encoding_ascii)), "", false));
     EXPECT_EQ("string", format_datashape(
-                    empty(make_string_dtype(string_encoding_utf_16)), "", false));
+                    nd::empty(make_string_dtype(string_encoding_utf_16)), "", false));
     EXPECT_EQ("string", format_datashape(
-                    empty(make_string_dtype(string_encoding_utf_32)), "", false));
+                    nd::empty(make_string_dtype(string_encoding_utf_32)), "", false));
     EXPECT_EQ("string", format_datashape(
-                    empty(make_string_dtype(string_encoding_ucs_2)), "", false));
+                    nd::empty(make_string_dtype(string_encoding_ucs_2)), "", false));
     EXPECT_EQ("string", format_datashape(
-                    empty(make_fixedstring_dtype(1, string_encoding_utf_8)), "", false));
+                    nd::empty(make_fixedstring_dtype(1, string_encoding_utf_8)), "", false));
     EXPECT_EQ("string", format_datashape(
-                    empty(make_fixedstring_dtype(10, string_encoding_utf_8)), "", false));
+                    nd::empty(make_fixedstring_dtype(10, string_encoding_utf_8)), "", false));
     EXPECT_EQ("string", format_datashape(
-                    empty(make_fixedstring_dtype(10, string_encoding_ascii)), "", false));
+                    nd::empty(make_fixedstring_dtype(10, string_encoding_ascii)), "", false));
     EXPECT_EQ("string", format_datashape(
-                    empty(make_fixedstring_dtype(10, string_encoding_utf_16)), "", false));
+                    nd::empty(make_fixedstring_dtype(10, string_encoding_utf_16)), "", false));
     EXPECT_EQ("string", format_datashape(
-                    empty(make_fixedstring_dtype(10, string_encoding_utf_32)), "", false));
+                    nd::empty(make_fixedstring_dtype(10, string_encoding_utf_32)), "", false));
     EXPECT_EQ("string", format_datashape(
-                    empty(make_fixedstring_dtype(10, string_encoding_ucs_2)), "", false));
+                    nd::empty(make_fixedstring_dtype(10, string_encoding_ucs_2)), "", false));
 }
 
 TEST(DataShapeFormatter, DTypeStringAtoms) {
@@ -109,11 +109,11 @@ TEST(DataShapeFormatter, DTypeStringAtoms) {
 
 TEST(DataShapeFormatter, NDObjectUniformArrays) {
     EXPECT_EQ("3, int32", format_datashape(
-                    make_strided_ndobject(3, make_dtype<int32_t>()), "", false));
+                    nd::make_strided_array(3, make_dtype<int32_t>()), "", false));
     EXPECT_EQ("var, int32", format_datashape(
-                    empty(make_var_dim_dtype(make_dtype<int32_t>())), "", false));
+                    nd::empty(make_var_dim_dtype(make_dtype<int32_t>())), "", false));
     EXPECT_EQ("var, 3, int32", format_datashape(
-                    empty(make_var_dim_dtype(
+                    nd::empty(make_var_dim_dtype(
                         make_fixed_dim_dtype(3, make_dtype<int32_t>()))), "", false));
 }
 
@@ -132,11 +132,11 @@ TEST(DataShapeFormatter, DTypeUniformArrays) {
 
 TEST(DataShapeFormatter, NDObjectStructs) {
     EXPECT_EQ("{x: int32; y: float64}", format_datashape(
-                    empty(make_cstruct_dtype(
+                    nd::empty(make_cstruct_dtype(
                                     make_dtype<int32_t>(), "x",
                                     make_dtype<double>(), "y")), "", false));
     EXPECT_EQ("{x: var, {a: int32; b: int8}; y: 5, var, uint8}",
-                    format_datashape(empty(make_struct_dtype(
+                    format_datashape(nd::empty(make_struct_dtype(
                                     make_var_dim_dtype(make_cstruct_dtype(
                                         make_dtype<int32_t>(), "a",
                                         make_dtype<int8_t>(), "b")), "x",

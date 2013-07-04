@@ -53,7 +53,7 @@ cstruct_dtype::cstruct_dtype(size_t field_count, const dtype *field_types,
     m_members.metadata_size = metadata_offset;
     m_members.data_size = inc_to_alignment(data_offset, m_members.data_alignment);
 
-    create_ndobject_properties();
+    create_array_properties();
 }
 
 cstruct_dtype::~cstruct_dtype()
@@ -487,28 +487,28 @@ void cstruct_dtype::foreach_leading(char *data, const char *metadata, foreach_fn
 
 ///////// properties on the dtype
 
-static ndobject property_get_field_names(const dtype& dt) {
+static nd::array property_get_field_names(const dtype& dt) {
     const cstruct_dtype *d = static_cast<const cstruct_dtype *>(dt.extended());
-    // TODO: This property should be an immutable ndobject, which we would just return.
-    return ndobject(d->get_field_names_vector());
+    // TODO: This property should be an immutable nd::array, which we would just return.
+    return nd::array(d->get_field_names_vector());
 }
 
-static ndobject property_get_field_types(const dtype& dt) {
+static nd::array property_get_field_types(const dtype& dt) {
     const cstruct_dtype *d = static_cast<const cstruct_dtype *>(dt.extended());
-    // TODO: This property should be an immutable ndobject, which we would just return.
-    return ndobject(d->get_field_types_vector());
+    // TODO: This property should be an immutable nd::array, which we would just return.
+    return nd::array(d->get_field_types_vector());
 }
 
-static ndobject property_get_data_offsets(const dtype& dt) {
+static nd::array property_get_data_offsets(const dtype& dt) {
     const cstruct_dtype *d = static_cast<const cstruct_dtype *>(dt.extended());
-    // TODO: This property should be an immutable ndobject, which we would just return.
-    return ndobject(d->get_data_offsets_vector());
+    // TODO: This property should be an immutable nd::array, which we would just return.
+    return nd::array(d->get_data_offsets_vector());
 }
 
-static ndobject property_get_metadata_offsets(const dtype& dt) {
+static nd::array property_get_metadata_offsets(const dtype& dt) {
     const cstruct_dtype *d = static_cast<const cstruct_dtype *>(dt.extended());
-    // TODO: This property should be an immutable ndobject, which we would just return.
-    return ndobject(d->get_metadata_offsets_vector());
+    // TODO: This property should be an immutable nd::array, which we would just return.
+    return nd::array(d->get_metadata_offsets_vector());
 }
 
 static pair<string, gfunc::callable> dtype_properties[] = {
@@ -524,13 +524,13 @@ void cstruct_dtype::get_dynamic_dtype_properties(const std::pair<std::string, gf
     *out_count = sizeof(dtype_properties) / sizeof(dtype_properties[0]);
 }
 
-///////// properties on the ndobject
+///////// properties on the nd::array
 
 cstruct_dtype::cstruct_dtype(int, int)
     : base_struct_dtype(cstruct_type_id, 0, 1, 1, dtype_flag_none, 0)
 {
     // Equivalent to make_cstruct_dtype(dtype(new void_pointer_dtype, false), "self");
-    // but hardcoded to break the dependency of cstruct_dtype::ndobject_parameters_dtype
+    // but hardcoded to break the dependency of cstruct_dtype::array_parameters_dtype
     m_field_types.push_back(dtype(new void_pointer_dtype, 0));
     m_field_names.push_back("self");
     m_data_offsets.push_back(0);
@@ -540,13 +540,13 @@ cstruct_dtype::cstruct_dtype(int, int)
     m_members.data_alignment = (uint8_t)m_field_types[0].get_data_alignment();
     m_members.metadata_size = m_field_types[0].get_metadata_size();
     m_members.data_size = m_field_types[0].get_data_size();
-    // Leave m_ndobject_properties so there is no reference loop
+    // Leave m_array_properties so there is no reference loop
 }
 
-static ndobject_preamble *property_get_ndobject_field(const ndobject_preamble *params, void *extra)
+static array_preamble *property_get_array_field(const array_preamble *params, void *extra)
 {
-    // Get the ndobject 'self' parameter
-    ndobject n = ndobject(*(ndobject_preamble **)params->m_data_pointer, true);
+    // Get the nd::array 'self' parameter
+    nd::array n = nd::array(*(array_preamble **)params->m_data_pointer, true);
     intptr_t i = reinterpret_cast<intptr_t>(extra);
     size_t undim = n.get_undim();
     dtype udt = n.get_udtype();
@@ -565,20 +565,20 @@ static ndobject_preamble *property_get_ndobject_field(const ndobject_preamble *p
     }
 }
 
-void cstruct_dtype::create_ndobject_properties()
+void cstruct_dtype::create_array_properties()
 {
-    dtype ndobject_parameters_dtype(new cstruct_dtype(0, 0), false);
+    dtype array_parameters_dtype(new cstruct_dtype(0, 0), false);
 
-    m_ndobject_properties.resize(m_field_types.size());
+    m_array_properties.resize(m_field_types.size());
     for (size_t i = 0, i_end = m_field_types.size(); i != i_end; ++i) {
         // TODO: Transform the name into a valid Python symbol?
-        m_ndobject_properties[i].first = m_field_names[i];
-        m_ndobject_properties[i].second.set(ndobject_parameters_dtype, &property_get_ndobject_field, (void *)i);
+        m_array_properties[i].first = m_field_names[i];
+        m_array_properties[i].second.set(array_parameters_dtype, &property_get_array_field, (void *)i);
     }
 }
 
-void cstruct_dtype::get_dynamic_ndobject_properties(const std::pair<std::string, gfunc::callable> **out_properties, size_t *out_count) const
+void cstruct_dtype::get_dynamic_array_properties(const std::pair<std::string, gfunc::callable> **out_properties, size_t *out_count) const
 {
-    *out_properties = m_ndobject_properties.empty() ? NULL : &m_ndobject_properties[0];
-    *out_count = (int)m_ndobject_properties.size();
+    *out_properties = m_array_properties.empty() ? NULL : &m_array_properties[0];
+    *out_count = (int)m_array_properties.size();
 }

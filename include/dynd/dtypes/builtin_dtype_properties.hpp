@@ -11,7 +11,7 @@
 
 namespace dynd {
 
-void get_builtin_dtype_dynamic_ndobject_properties(
+void get_builtin_dtype_dynamic_array_properties(
                 type_id_t builtin_type_id,
                 const std::pair<std::string, gfunc::callable> **out_properties,
                 size_t *out_count);

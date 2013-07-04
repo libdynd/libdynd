@@ -32,45 +32,45 @@ void validate_json(const char *json_begin, const char *json_end);
  * \param json_begin  The beginning of the UTF-8 buffer containing the JSON.
  * \param json_end  One past the end of the UTF-8 buffer containing the JSON.
  */
-ndobject parse_json(const dtype& dt, const char *json_begin, const char *json_end);
+nd::array parse_json(const dtype& dt, const char *json_begin, const char *json_end);
 
 /**
  * Same as the version given a dtype, but parses the JSON into an uninitialized
- * dynd ndobject.
+ * dynd array.
  */
-void parse_json(ndobject& out, const char *json_begin, const char *json_end);
+void parse_json(nd::array& out, const char *json_begin, const char *json_end);
 
 /**
  * Parses the input json as the requested dtype. The input can be a string or a
- * bytes ndobject. If the input is bytes, the parser assumes it is UTF-8 data.
+ * bytes array. If the input is bytes, the parser assumes it is UTF-8 data.
  */
-ndobject parse_json(const dtype& dt, const ndobject& json);
+nd::array parse_json(const dtype& dt, const nd::array& json);
 
 /**
  * Same as the version given a dtype, but parses the JSON into an uninitialized
- * dynd ndobject.
+ * dynd array.
  */
-void parse_json(ndobject& out, const ndobject& json);
+void parse_json(nd::array& out, const nd::array& json);
 
-inline ndobject parse_json(const dtype& dt, const std::string& json) {
+inline nd::array parse_json(const dtype& dt, const std::string& json) {
     return parse_json(dt, json.data(), json.data() + json.size());
 }
 
-inline void parse_json(ndobject& out, const std::string& json) {
+inline void parse_json(nd::array& out, const std::string& json) {
     parse_json(out, json.data(), json.data() + json.size());
 }
 
-inline ndobject parse_json(const dtype& dt, const char *json) {
+inline nd::array parse_json(const dtype& dt, const char *json) {
     return parse_json(dt, json, json + strlen(json));
 }
 
-inline void parse_json(ndobject& out, const char *json) {
+inline void parse_json(nd::array& out, const char *json) {
     return parse_json(out, json, json + strlen(json));
 }
 
 /** Interface to the JSON parser for an input of two string literals */
 template<int M, int N>
-inline ndobject parse_json(const char (&dt)[M], const char (&json)[N]) {
+inline nd::array parse_json(const char (&dt)[M], const char (&json)[N]) {
     return parse_json(dtype(dt, dt+M-1), json, json+N-1);
 }
 

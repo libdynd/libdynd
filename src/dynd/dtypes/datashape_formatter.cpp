@@ -196,7 +196,7 @@ void dynd::format_datashape(std::ostream& o, const dtype& dt, const char *metada
     ::format_datashape(o, dt, metadata, data, "", multiline, identifier);
 }
 
-string dynd::format_datashape(const ndobject& n,
+string dynd::format_datashape(const nd::array& n,
                 const std::string& prefix, bool multiline)
 {
     stringstream ss;

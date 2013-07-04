@@ -646,13 +646,13 @@ void var_dim_dtype::get_dynamic_dtype_properties(
     *out_count = sizeof(fixed_dim_dtype_properties) / sizeof(fixed_dim_dtype_properties[0]);
 }
 
-void var_dim_dtype::get_dynamic_ndobject_properties(const std::pair<std::string, gfunc::callable> **out_properties, size_t *out_count) const
+void var_dim_dtype::get_dynamic_array_properties(const std::pair<std::string, gfunc::callable> **out_properties, size_t *out_count) const
 {
     *out_properties = m_ndobject_properties.empty() ? NULL : &m_ndobject_properties[0];
     *out_count = (int)m_ndobject_properties.size();
 }
 
-void var_dim_dtype::get_dynamic_ndobject_functions(const std::pair<std::string, gfunc::callable> **out_functions, size_t *out_count) const
+void var_dim_dtype::get_dynamic_array_functions(const std::pair<std::string, gfunc::callable> **out_functions, size_t *out_count) const
 {
     *out_functions = m_ndobject_functions.empty() ? NULL : &m_ndobject_functions[0];
     *out_count = (int)m_ndobject_functions.size();

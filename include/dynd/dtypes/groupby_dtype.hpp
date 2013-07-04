@@ -108,7 +108,7 @@ public:
                     const char *dst_metadata, const char *src_metadata,
                     kernel_request_t kernreq, const eval::eval_context *ectx) const;
 
-    void get_dynamic_ndobject_properties(const std::pair<std::string, gfunc::callable> **out_properties, size_t *out_count) const;
+    void get_dynamic_array_properties(const std::pair<std::string, gfunc::callable> **out_properties, size_t *out_count) const;
 };
 
 /**

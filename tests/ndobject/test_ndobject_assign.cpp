@@ -16,10 +16,10 @@ using namespace std;
 using namespace dynd;
 
 TEST(NDObjectAssign, ScalarAssignment_Bool) {
-    ndobject a;
+    nd::array a;
 
     // assignment to a bool scalar
-    a = empty(make_dtype<dynd_bool>());
+    a = nd::empty(make_dtype<dynd_bool>());
     const dynd_bool *ptr_b = (const dynd_bool *)a.get_ndo()->m_data_pointer;
     a.val_assign(true);
     EXPECT_TRUE(*ptr_b);
@@ -48,11 +48,11 @@ TEST(NDObjectAssign, ScalarAssignment_Bool) {
 }
 
 TEST(NDObjectAssign, ScalarAssignment_Int8) {
-    ndobject a;
+    nd::array a;
     const int8_t *ptr_i8;
 
     // Assignment to an int8_t scalar
-    a = empty(make_dtype<int8_t>());
+    a = nd::empty(make_dtype<int8_t>());
     ptr_i8 = (const int8_t *)a.get_ndo()->m_data_pointer;
     a.val_assign(true);
     EXPECT_EQ(1, *ptr_i8);
@@ -84,11 +84,11 @@ TEST(NDObjectAssign, ScalarAssignment_Int8) {
 }
 
 TEST(NDObjectAssign, ScalarAssignment_UInt16) {
-    ndobject a;
+    nd::array a;
     const uint16_t *ptr_u16;
 
     // Assignment to a uint16_t scalar
-    a = empty(make_dtype<uint16_t>());
+    a = nd::empty(make_dtype<uint16_t>());
     ptr_u16 = (const uint16_t *)a.get_ndo()->m_data_pointer;
     a.val_assign(true);
     EXPECT_EQ(1, *ptr_u16);
@@ -105,11 +105,11 @@ TEST(NDObjectAssign, ScalarAssignment_UInt16) {
 }
 
 TEST(NDObjectAssign, ScalarAssignment_Float32) {
-    ndobject a;
+    nd::array a;
     const float *ptr_f32;
 
     // Assignment to a float scalar
-    a = empty(make_dtype<float>());
+    a = nd::empty(make_dtype<float>());
     ptr_f32 = (const float *)a.get_ndo()->m_data_pointer;
     a.val_assign(true);
     EXPECT_EQ(1, *ptr_f32);
@@ -133,11 +133,11 @@ TEST(NDObjectAssign, ScalarAssignment_Float32) {
 }
 
 TEST(NDObjectAssign, ScalarAssignment_Float64) {
-    ndobject a;
+    nd::array a;
     const double *ptr_f64;
 
     // Assignment to a double scalar
-    a = empty(make_dtype<double>());
+    a = nd::empty(make_dtype<double>());
     ptr_f64 = (const double *)a.get_ndo()->m_data_pointer;
     a.val_assign(true);
     EXPECT_EQ(1, *ptr_f64);
@@ -156,11 +156,11 @@ TEST(NDObjectAssign, ScalarAssignment_Float64) {
 }
 
 TEST(NDObjectAssign, ScalarAssignment_Uint64) {
-    ndobject a;
+    nd::array a;
     const uint64_t *ptr_u64;
 
     // Assignment to a double scalar
-    a = empty(make_dtype<uint64_t>());
+    a = nd::empty(make_dtype<uint64_t>());
     ptr_u64 = (const uint64_t *)a.get_ndo()->m_data_pointer;
     a.val_assign(true);
     EXPECT_EQ(1u, *ptr_u64);
@@ -176,11 +176,11 @@ TEST(NDObjectAssign, ScalarAssignment_Uint64) {
 #if !(defined(_WIN32) && !defined(_M_X64)) // TODO: How to mark as expected failures in googletest?
 
 TEST(NDObjectAssign, ScalarAssignment_Uint64_LargeNumbers) {
-    ndobject a;
+    nd::array a;
     const uint64_t *ptr_u64;
 
     // Assignment to a double scalar
-    a = empty(make_dtype<uint64_t>());
+    a = nd::empty(make_dtype<uint64_t>());
     ptr_u64 = (const uint64_t *)a.get_ndo()->m_data_pointer;
     // Assign some values that don't fit in signed 64-bits
     a.val_assign(13835058055282163712.f);
@@ -195,11 +195,11 @@ TEST(NDObjectAssign, ScalarAssignment_Uint64_LargeNumbers) {
 #endif
 
 TEST(NDObjectAssign, ScalarAssignment_Complex_Float32) {
-    ndobject a;
+    nd::array a;
     const complex<float> *ptr_cf32;
 
     // Assignment to a complex float scalar
-    a = empty(make_dtype<complex<float> >());
+    a = nd::empty(make_dtype<complex<float> >());
     ptr_cf32 = (const complex<float> *)a.get_ndo()->m_data_pointer;
     a.val_assign(true);
     EXPECT_EQ(complex<float>(1), *ptr_cf32);
@@ -224,11 +224,11 @@ TEST(NDObjectAssign, ScalarAssignment_Complex_Float32) {
 }
 
 TEST(NDObjectAssign, ScalarAssignment_Complex_Float64) {
-    ndobject a;
+    nd::array a;
     const complex<double> *ptr_cf64;
 
     // Assignment to a complex float scalar
-    a = empty(make_dtype<complex<double> >());
+    a = nd::empty(make_dtype<complex<double> >());
     ptr_cf64 = (const complex<double> *)a.get_ndo()->m_data_pointer;
     a.val_assign(true);
     EXPECT_EQ(complex<double>(1), *ptr_cf64);
@@ -254,9 +254,9 @@ TEST(NDObjectAssign, ScalarAssignment_Complex_Float64) {
 }
 
 TEST(NDObjectAssign, BroadcastAssign) {
-    ndobject a = make_strided_ndobject(2, 3, 4, make_dtype<float>());
+    nd::array a = nd::make_strided_array(2, 3, 4, make_dtype<float>());
     int v0[4] = {3,4,5,6};
-    ndobject b = v0;
+    nd::array b = v0;
 
     // Broadcasts the 4-vector by a factor of 6,
     // converting the dtype
@@ -302,7 +302,7 @@ TEST(NDObjectAssign, BroadcastAssign) {
 
 TEST(NDObjectAssign, Casting) {
     float v0[4] = {3.5, 1.0, 0, 1000};
-    ndobject a = v0, b;
+    nd::array a = v0, b;
 
     b = a.ucast(make_dtype<int>());
     // This triggers the conversion from float to int,
@@ -342,7 +342,7 @@ TEST(NDObjectAssign, Casting) {
 
 TEST(NDObjectAssign, Overflow) {
     int v0[4] = {0,1,2,3};
-    ndobject a = v0;
+    nd::array a = v0;
 
     EXPECT_THROW(a.val_assign(1e25, assign_error_overflow), runtime_error);
     EXPECT_THROW(a.val_assign(1e25f, assign_error_overflow), runtime_error);
@@ -353,7 +353,7 @@ TEST(NDObjectAssign, Overflow) {
 
 TEST(NDObjectAssign, ChainedCastingRead) {
     float v0[5] = {3.5f, 1.3f, -2.4999f, -2.999f, 1000.50001f};
-    ndobject a = v0, b;
+    nd::array a = v0, b;
 
     b = a.ucast<int>(0, assign_error_overflow);
     b = b.ucast<float>(0, assign_error_inexact);
@@ -406,7 +406,7 @@ TEST(NDObjectAssign, ChainedCastingRead) {
 
 TEST(NDObjectAssign, ChainedCastingWrite) {
     float v0[3] = {0, 0, 0};
-    ndobject a = v0, b;
+    nd::array a = v0, b;
 
     b = a.ucast<int>(0, assign_error_inexact);
     b = b.ucast<float>(0, assign_error_overflow);
@@ -430,11 +430,11 @@ TEST(NDObjectAssign, ChainedCastingWrite) {
 TEST(NDObjectAssign, ChainedCastingReadWrite) {
     float v0[3] = {0.5f, -1000.f, -2.2f};
     int16_t v1[3] = {0, 0, 0};
-    ndobject a = v0, b = v1;
+    nd::array a = v0, b = v1;
 
     // First test with a single expression in both src and dst
-    ndobject aview = a.ucast<double>();
-    ndobject bview = b.ucast<int32_t>();
+    nd::array aview = a.ucast<double>();
+    nd::array bview = b.ucast<int32_t>();
 
     bview.val_assign(aview, assign_error_overflow);
     EXPECT_EQ(0, b.at(0).as<int>());
@@ -455,18 +455,18 @@ TEST(NDObjectAssign, ChainedCastingReadWrite) {
 }
 
 TEST(NDObjectAssign, ZeroSizedAssign) {
-    ndobject a = empty(0, "M, float64"), b = empty(0, "M, float32");
+    nd::array a = nd::empty(0, "M, float64"), b = nd::empty(0, "M, float32");
     EXPECT_EQ(1u, a.get_shape().size());
     EXPECT_EQ(0, a.get_shape()[0]);
     // Should be able to assign zero-sized array to zero-sized array
     a.vals() = b;
     b.vals() = a;
     // Should be able to assign zero-sized input to a vardim output
-    a = empty("var, float64");
+    a = nd::empty("var, float64");
     a.vals() = b;
     EXPECT_EQ(0, a.get_dim_size());
     // With a struct
-    a = empty("var, {a:int32; b:string}");
-    b = empty(0, "M, {a:int32; b:string}");
+    a = nd::empty("var, {a:int32; b:string}");
+    b = nd::empty(0, "M, {a:int32; b:string}");
     a.vals() = b;
 }

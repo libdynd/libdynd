@@ -87,7 +87,7 @@ TEST(StridedArrayDType, IsExpression) {
 }
 
 TEST(StridedArrayDType, AssignKernel) {
-    ndobject a, b;
+    nd::array a, b;
     assignment_kernel k;
     int vals_int[] = {3,5,7};
 
@@ -105,7 +105,7 @@ TEST(StridedArrayDType, AssignKernel) {
     k.reset();
 
     // Assignment strided array -> strided array
-    a = make_strided_ndobject(3, make_dtype<float>());
+    a = nd::make_strided_array(3, make_dtype<float>());
     a.vals() = 0;
     b = vals_int;
     EXPECT_EQ(strided_dim_type_id, a.get_dtype().get_type_id());

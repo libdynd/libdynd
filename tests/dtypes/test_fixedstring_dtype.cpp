@@ -53,7 +53,7 @@ TEST(FixedstringDType, Create) {
 }
 
 TEST(FixedstringDType, Basic) {
-    ndobject a;
+    nd::array a;
 
     // Trivial string going in and out of the system
     a = "abcdefg";
@@ -73,9 +73,9 @@ TEST(FixedstringDType, Basic) {
 }
 
 TEST(FixedstringDType, Casting) {
-    ndobject a;
+    nd::array a;
 
-    a = empty(make_fixedstring_dtype(16, string_encoding_utf_16));
+    a = nd::empty(make_fixedstring_dtype(16, string_encoding_utf_16));
     // Fill up the string with values
     a.vals() = "0123456789012345";
     EXPECT_EQ("0123456789012345", a.as<std::string>());
@@ -85,7 +85,7 @@ TEST(FixedstringDType, Casting) {
 }
 
 TEST(FixedstringDType, SingleCompare) {
-    ndobject a = make_strided_ndobject(2,
+    nd::array a = nd::make_strided_array(2,
                     make_fixedstring_dtype(7, string_encoding_utf_8));
 
     a.at(0).vals() = "abc";

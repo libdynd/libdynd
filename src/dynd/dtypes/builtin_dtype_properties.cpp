@@ -11,20 +11,20 @@
 using namespace std;
 using namespace dynd;
 
-static ndobject property_complex_real(const ndobject& n) {
+static nd::array property_complex_real(const nd::array& n) {
     return n.replace_udtype(make_property_dtype(n.get_udtype(), "real"));
 }
 
-static ndobject property_complex_imag(const ndobject& n) {
+static nd::array property_complex_imag(const nd::array& n) {
     return n.replace_udtype(make_property_dtype(n.get_udtype(), "imag"));
 }
 
-static pair<string, gfunc::callable> complex_ndobject_properties[] = {
+static pair<string, gfunc::callable> complex_array_properties[] = {
     pair<string, gfunc::callable>("real", gfunc::make_callable(&property_complex_real, "self")),
     pair<string, gfunc::callable>("imag", gfunc::make_callable(&property_complex_imag, "self")),
 };
 
-void dynd::get_builtin_dtype_dynamic_ndobject_properties(
+void dynd::get_builtin_dtype_dynamic_array_properties(
                 type_id_t builtin_type_id,
                 const std::pair<std::string, gfunc::callable> **out_properties,
                 size_t *out_count)
@@ -32,9 +32,9 @@ void dynd::get_builtin_dtype_dynamic_ndobject_properties(
     switch (builtin_type_id) {
         case complex_float32_type_id:
         case complex_float64_type_id:
-            *out_properties = complex_ndobject_properties;
-            *out_count = sizeof(complex_ndobject_properties) /
-                            sizeof(complex_ndobject_properties[0]);
+            *out_properties = complex_array_properties;
+            *out_count = sizeof(complex_array_properties) /
+                            sizeof(complex_array_properties[0]);
             break;
         default:
             *out_properties = NULL;

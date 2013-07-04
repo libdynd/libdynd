@@ -15,7 +15,7 @@
 using namespace std;
 using namespace dynd;
 
-dynd::busdate_dtype::busdate_dtype(busdate_roll_t roll, const bool *weekmask, const ndobject& holidays)
+dynd::busdate_dtype::busdate_dtype(busdate_roll_t roll, const bool *weekmask, const nd::array& holidays)
     : base_dtype(busdate_type_id, datetime_kind, 4, 4, dtype_flag_scalar, 0, 0), m_roll(roll)
 {
     memcpy(m_workweek, weekmask, sizeof(m_workweek));
@@ -24,7 +24,7 @@ dynd::busdate_dtype::busdate_dtype(busdate_roll_t roll, const bool *weekmask, co
         m_busdays_in_weekmask += weekmask[i] ? 1 : 0;
     }
     if (!holidays.is_empty()) {
-        ndobject hol = holidays.ucast(make_date_dtype()).eval_immutable();
+        nd::array hol = holidays.ucast(make_date_dtype()).eval_immutable();
         // TODO: Make sure hol is contiguous and one-dimensional
         m_holidays = hol;
     }

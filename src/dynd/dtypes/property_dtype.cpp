@@ -269,23 +269,23 @@ dtype property_dtype::with_replaced_storage_dtype(const dtype& replacement_dtype
     }
 }
 
-void property_dtype::get_dynamic_ndobject_properties(const std::pair<std::string, gfunc::callable> **out_properties,
+void property_dtype::get_dynamic_array_properties(const std::pair<std::string, gfunc::callable> **out_properties,
                 size_t *out_count) const
 {
     const dtype& udt = m_value_dtype.get_udtype();
     if (!udt.is_builtin()) {
-        udt.extended()->get_dynamic_ndobject_properties(out_properties, out_count);
+        udt.extended()->get_dynamic_array_properties(out_properties, out_count);
     } else {
-        get_builtin_dtype_dynamic_ndobject_properties(udt.get_type_id(), out_properties, out_count);
+        get_builtin_dtype_dynamic_array_properties(udt.get_type_id(), out_properties, out_count);
     }
 }
 
-void property_dtype::get_dynamic_ndobject_functions(const std::pair<std::string, gfunc::callable> **out_functions,
+void property_dtype::get_dynamic_array_functions(const std::pair<std::string, gfunc::callable> **out_functions,
                 size_t *out_count) const
 {
     const dtype& udt = m_value_dtype.get_udtype();
     if (!udt.is_builtin()) {
-        udt.extended()->get_dynamic_ndobject_functions(out_functions, out_count);
+        udt.extended()->get_dynamic_array_functions(out_functions, out_count);
     } else {
         //get_builtin_dtype_dynamic_ndobject_functions(udt.get_type_id(), out_functions, out_count);
     }

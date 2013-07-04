@@ -102,23 +102,23 @@ TEST(DateTimeDType, ValueCreationAbstractMinutes) {
     dtype d = make_datetime_dtype(datetime_unit_minute, tz_abstract), di = make_dtype<int64_t>();
 
     EXPECT_EQ(((1600-1970)*365 - (1972-1600)/4 + 3 - 365) * 1440LL + 4 * 60 + 16,
-                    ndobject("1599-01-01T04:16").ucast(d).view_scalars(di).as<int64_t>());
+                    nd::array("1599-01-01T04:16").ucast(d).view_scalars(di).as<int64_t>());
     EXPECT_EQ(((1600-1970)*365 - (1972-1600)/4 + 3) * 1440LL + 15 * 60 + 45,
-                    ndobject("1600-01-01 15:45").ucast(d).view_scalars(di).as<int64_t>());
+                    nd::array("1600-01-01 15:45").ucast(d).view_scalars(di).as<int64_t>());
     EXPECT_EQ(((1600-1970)*365 - (1972-1600)/4 + 3 + 366) * 1440LL,
-                    ndobject("1601-01-01T00").ucast(d).view_scalars(di).as<int64_t>());
+                    nd::array("1601-01-01T00").ucast(d).view_scalars(di).as<int64_t>());
 
     // Parsing Zulu timezone as abstract raises an error
-    EXPECT_THROW(ndobject("2000-01-01T03:00Z").ucast(d).eval(), runtime_error);
+    EXPECT_THROW(nd::array("2000-01-01T03:00Z").ucast(d).eval(), runtime_error);
     // Parsing specified timezone as abstract raises an error
-    EXPECT_THROW(ndobject("2000-01-01T03:00+0300").ucast(d).eval(), runtime_error);
+    EXPECT_THROW(nd::array("2000-01-01T03:00+0300").ucast(d).eval(), runtime_error);
 
     // Parsing Zulu timezone as abstract with no error checking works though
     EXPECT_EQ(((1600-1970)*365 - (1972-1600)/4 + 3) * 1440LL + 15 * 60 + 45,
-                    ndobject("1600-01-01 15:45Z").ucast(d, 0, assign_error_none).view_scalars(di).as<int64_t>());
+                    nd::array("1600-01-01 15:45Z").ucast(d, 0, assign_error_none).view_scalars(di).as<int64_t>());
     // Parsing specified timezone as abstract with no error checking throws away the time zone
     EXPECT_EQ(((1600-1970)*365 - (1972-1600)/4 + 3) * 1440LL + 15 * 60 + 45,
-                    ndobject("1600-01-01 15:45+0600").ucast(d, 0, assign_error_none).view_scalars(di).as<int64_t>());
+                    nd::array("1600-01-01 15:45+0600").ucast(d, 0, assign_error_none).view_scalars(di).as<int64_t>());
 }
 
 
@@ -126,49 +126,49 @@ TEST(DateTimeDType, ValueCreationUTCMinutes) {
     dtype d = make_datetime_dtype(datetime_unit_minute, tz_utc), di = make_dtype<int64_t>();
 
     EXPECT_EQ(((1600-1970)*365 - (1972-1600)/4 + 3 - 365) * 1440LL + 4 * 60 + 16,
-                    ndobject("1599-01-01T04:16Z").ucast(d).view_scalars(di).as<int64_t>());
+                    nd::array("1599-01-01T04:16Z").ucast(d).view_scalars(di).as<int64_t>());
     EXPECT_EQ(((1600-1970)*365 - (1972-1600)/4 + 3) * 1440LL + 15 * 60 + 45,
-                    ndobject("1600-01-01 14:45-0100").ucast(d).view_scalars(di).as<int64_t>());
+                    nd::array("1600-01-01 14:45-0100").ucast(d).view_scalars(di).as<int64_t>());
     EXPECT_EQ(((1600-1970)*365 - (1972-1600)/4 + 3 + 366) * 1440LL,
-                    ndobject("1601-01-01T00Z").ucast(d).view_scalars(di).as<int64_t>());
+                    nd::array("1601-01-01T00Z").ucast(d).view_scalars(di).as<int64_t>());
 }
 
 TEST(DateTimeDType, ConvertToString) {
     EXPECT_EQ("2013-02-16T12",
-                    ndobject("2013-02-16T12").cast(dtype("datetime('hour')")).as<string>());
+                    nd::array("2013-02-16T12").cast(dtype("datetime('hour')")).as<string>());
     EXPECT_EQ("2013-02-16T12Z",
-                    ndobject("2013-02-16T12Z").cast(dtype("datetime('hour','UTC')")).as<string>());
+                    nd::array("2013-02-16T12Z").cast(dtype("datetime('hour','UTC')")).as<string>());
 
     EXPECT_EQ("2013-02-16T12:13",
-                    ndobject("2013-02-16T12:13").cast(dtype("datetime('min')")).as<string>());
+                    nd::array("2013-02-16T12:13").cast(dtype("datetime('min')")).as<string>());
     EXPECT_EQ("2013-02-16T12:13Z",
-                    ndobject("2013-02-16T12:13Z").cast(dtype("datetime('min','UTC')")).as<string>());
+                    nd::array("2013-02-16T12:13Z").cast(dtype("datetime('min','UTC')")).as<string>());
 
     EXPECT_EQ("2013-02-16T12:13:19",
-                    ndobject("2013-02-16T12:13:19").cast(dtype("datetime('sec')")).as<string>());
+                    nd::array("2013-02-16T12:13:19").cast(dtype("datetime('sec')")).as<string>());
     EXPECT_EQ("2013-02-16T12:13:19Z",
-                    ndobject("2013-02-16T12:13:19Z").cast(dtype("datetime('sec','UTC')")).as<string>());
+                    nd::array("2013-02-16T12:13:19Z").cast(dtype("datetime('sec','UTC')")).as<string>());
 
     EXPECT_EQ("2013-02-16T12:13:19.012",
-                    ndobject("2013-02-16T12:13:19.012").cast(dtype("datetime('msec')")).as<string>());
+                    nd::array("2013-02-16T12:13:19.012").cast(dtype("datetime('msec')")).as<string>());
     EXPECT_EQ("2013-02-16T12:13:19.012Z",
-                    ndobject("2013-02-16T12:13:19.012Z").cast(dtype("datetime('msec','UTC')")).as<string>());
+                    nd::array("2013-02-16T12:13:19.012Z").cast(dtype("datetime('msec','UTC')")).as<string>());
 
     EXPECT_EQ("2013-02-16T12:13:19.012345",
-                    ndobject("2013-02-16T12:13:19.012345").cast(dtype("datetime('usec')")).as<string>());
+                    nd::array("2013-02-16T12:13:19.012345").cast(dtype("datetime('usec')")).as<string>());
     EXPECT_EQ("2013-02-16T12:13:19.012345Z",
-                    ndobject("2013-02-16T12:13:19.012345Z").cast(dtype("datetime('usec','UTC')")).as<string>());
+                    nd::array("2013-02-16T12:13:19.012345Z").cast(dtype("datetime('usec','UTC')")).as<string>());
 
     EXPECT_EQ("2013-02-16T12:13:19.012345678",
-                    ndobject("2013-02-16T12:13:19.012345678").cast(dtype("datetime('nsec')")).as<string>());
+                    nd::array("2013-02-16T12:13:19.012345678").cast(dtype("datetime('nsec')")).as<string>());
     EXPECT_EQ("2013-02-16T12:13:19.012345678Z",
-                    ndobject("2013-02-16T12:13:19.012345678Z").cast(dtype("datetime('nsec','UTC')")).as<string>());
+                    nd::array("2013-02-16T12:13:19.012345678Z").cast(dtype("datetime('nsec','UTC')")).as<string>());
 }
 
 TEST(DateTimeDType, Properties) {
-    ndobject n;
+    nd::array n;
 
-    n = ndobject("1963-02-28T16:12:14.123654").cast(dtype("datetime('usec')")).eval();
+    n = nd::array("1963-02-28T16:12:14.123654").cast(dtype("datetime('usec')")).eval();
     EXPECT_EQ(1963, n.p("year").as<int32_t>());
     EXPECT_EQ(2, n.p("month").as<int32_t>());
     EXPECT_EQ(28, n.p("day").as<int32_t>());

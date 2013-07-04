@@ -132,7 +132,7 @@ namespace {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             const groupby_dtype *gd = e->src_groupby_dt;
 
-            // Get the data_values raw ndobject
+            // Get the data_values raw nd::array
             dtype data_values_dt = gd->get_operand_dtype();
             const char *data_values_metadata = e->src_metadata, *data_values_data = src;
             data_values_dt = data_values_dt.extended()->at_single(0, &data_values_metadata, &data_values_data);
@@ -140,7 +140,7 @@ namespace {
             data_values_metadata += sizeof(pointer_dtype_metadata);
             data_values_data = *reinterpret_cast<const char * const *>(data_values_data);
 
-            // Get the by_values raw ndobject
+            // Get the by_values raw nd::array
             dtype by_values_dt = gd->get_operand_dtype();
             const char *by_values_metadata = e->src_metadata, *by_values_data = src;
             by_values_dt = by_values_dt.extended()->at_single(1, &by_values_metadata, &by_values_data);
@@ -149,9 +149,9 @@ namespace {
             by_values_data = *reinterpret_cast<const char * const *>(by_values_data);
 
             // If by_values is an expression, evaluate it since we're doing two passes through them
-            ndobject by_values_tmp;
+            nd::array by_values_tmp;
             if (by_values_dt.is_expression() || !by_values_dt.extended()->is_strided()) {
-                by_values_tmp = eval_raw_copy(by_values_dt, by_values_metadata, by_values_data);
+                by_values_tmp = nd::eval_raw_copy(by_values_dt, by_values_metadata, by_values_data);
                 by_values_dt = by_values_tmp.get_dtype();
                 by_values_metadata = by_values_tmp.get_ndo_meta();
                 by_values_data = by_values_tmp.get_readonly_originptr();
@@ -206,7 +206,7 @@ namespace {
             // copying the data to the right place in the output
             kernel_data_prefix *echild = &(e + 1)->base;
             unary_single_operation_t opchild = echild->get_function<unary_single_operation_t>();
-            ndobject_iter<0, 1> iter(data_values_dt, data_values_metadata, data_values_data);
+            array_iter<0, 1> iter(data_values_dt, data_values_metadata, data_values_data);
             if (!iter.empty()) {
                 by_values_ptr = by_values_origin;
                 do {
@@ -307,9 +307,9 @@ dtype groupby_dtype::with_replaced_storage_dtype(const dtype& DYND_UNUSED(replac
     throw runtime_error("TODO: implement groupby_dtype::with_replaced_storage_dtype");
 }
 
-///////// properties on the ndobject
+///////// properties on the nd::array
 
-static ndobject property_ndo_get_groups(const ndobject& n) {
+static nd::array property_ndo_get_groups(const nd::array& n) {
     dtype d = n.get_dtype();
     while (d.get_type_id() != groupby_type_id) {
         d = d.at_single(0);
@@ -318,12 +318,12 @@ static ndobject property_ndo_get_groups(const ndobject& n) {
     return gd->get_groups_dtype().p("categories");
 }
 
-static pair<string, gfunc::callable> groupby_ndobject_properties[] = {
+static pair<string, gfunc::callable> groupby_array_properties[] = {
     pair<string, gfunc::callable>("groups", gfunc::make_callable(&property_ndo_get_groups, "self")),
 };
 
-void groupby_dtype::get_dynamic_ndobject_properties(const std::pair<std::string, gfunc::callable> **out_properties, size_t *out_count) const
+void groupby_dtype::get_dynamic_array_properties(const std::pair<std::string, gfunc::callable> **out_properties, size_t *out_count) const
 {
-    *out_properties = groupby_ndobject_properties;
-    *out_count = sizeof(groupby_ndobject_properties) / sizeof(groupby_ndobject_properties[0]);
+    *out_properties = groupby_array_properties;
+    *out_count = sizeof(groupby_array_properties) / sizeof(groupby_array_properties[0]);
 }

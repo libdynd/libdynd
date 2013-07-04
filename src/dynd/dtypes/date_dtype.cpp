@@ -213,25 +213,26 @@ void date_dtype::get_dynamic_dtype_properties(const std::pair<std::string, gfunc
 
 ///////// functions on the dtype
 
-static ndobject function_dtype_today(const dtype& dt) {
+static nd::array function_dtype_today(const dtype& dt) {
     datetime::date_ymd ymd;
     datetime::fill_current_local_date(&ymd);
-    ndobject result = empty(dt);
+    nd::array result = nd::empty(dt);
     *reinterpret_cast<int32_t *>(result.get_readwrite_originptr()) = datetime::ymd_to_days(ymd);
     // Make the result immutable (we own the only reference to the data at this point)
     result.flag_as_immutable();
     return result;
 }
 
-static ndobject function_dtype_construct(const dtype& DYND_UNUSED(dt), const ndobject& year, const ndobject& month, const ndobject& day)
+static nd::array function_dtype_construct(const dtype& DYND_UNUSED(dt),
+                const nd::array& year, const nd::array& month, const nd::array& day)
 {
     // TODO proper buffering
-    ndobject year_as_int = year.ucast(make_dtype<int32_t>()).eval();
-    ndobject month_as_int = month.ucast(make_dtype<int32_t>()).eval();
-    ndobject day_as_int = day.ucast(make_dtype<int32_t>()).eval();
-    ndobject result;
+    nd::array year_as_int = year.ucast(make_dtype<int32_t>()).eval();
+    nd::array month_as_int = month.ucast(make_dtype<int32_t>()).eval();
+    nd::array day_as_int = day.ucast(make_dtype<int32_t>()).eval();
+    nd::array result;
 
-    ndobject_iter<1,3> iter(make_date_dtype(), result, year_as_int, month_as_int, day_as_int);
+    array_iter<1,3> iter(make_date_dtype(), result, year_as_int, month_as_int, day_as_int);
     if (!iter.empty()) {
         datetime::date_ymd ymd;
         do {
@@ -261,39 +262,39 @@ void date_dtype::get_dynamic_dtype_functions(const std::pair<std::string, gfunc:
     *out_count = sizeof(date_dtype_functions) / sizeof(date_dtype_functions[0]);
 }
 
-///////// properties on the ndobject
+///////// properties on the nd::array
 
-static ndobject property_ndo_get_year(const ndobject& n) {
+static nd::array property_ndo_get_year(const nd::array& n) {
     return n.replace_udtype(make_property_dtype(n.get_udtype(), "year"));
 }
 
-static ndobject property_ndo_get_month(const ndobject& n) {
+static nd::array property_ndo_get_month(const nd::array& n) {
     return n.replace_udtype(make_property_dtype(n.get_udtype(), "month"));
 }
 
-static ndobject property_ndo_get_day(const ndobject& n) {
+static nd::array property_ndo_get_day(const nd::array& n) {
     return n.replace_udtype(make_property_dtype(n.get_udtype(), "day"));
 }
 
-static pair<string, gfunc::callable> date_ndobject_properties[] = {
+static pair<string, gfunc::callable> date_array_properties[] = {
     pair<string, gfunc::callable>("year", gfunc::make_callable(&property_ndo_get_year, "self")),
     pair<string, gfunc::callable>("month", gfunc::make_callable(&property_ndo_get_month, "self")),
     pair<string, gfunc::callable>("day", gfunc::make_callable(&property_ndo_get_day, "self"))
 };
 
-void date_dtype::get_dynamic_ndobject_properties(const std::pair<std::string, gfunc::callable> **out_properties, size_t *out_count) const
+void date_dtype::get_dynamic_array_properties(const std::pair<std::string, gfunc::callable> **out_properties, size_t *out_count) const
 {
-    *out_properties = date_ndobject_properties;
-    *out_count = sizeof(date_ndobject_properties) / sizeof(date_ndobject_properties[0]);
+    *out_properties = date_array_properties;
+    *out_count = sizeof(date_array_properties) / sizeof(date_array_properties[0]);
 }
 
-///////// functions on the ndobject
+///////// functions on the nd::array
 
-static ndobject function_ndo_to_struct(const ndobject& n) {
+static nd::array function_ndo_to_struct(const nd::array& n) {
     return n.replace_udtype(make_property_dtype(n.get_udtype(), "struct"));
 }
 
-static ndobject function_ndo_strftime(const ndobject& n, const std::string& format) {
+static nd::array function_ndo_strftime(const nd::array& n, const std::string& format) {
     // TODO: Allow 'format' itself to be an array, with broadcasting, etc.
     if (format.empty()) {
         throw runtime_error("format string for strftime should not be empty");
@@ -302,11 +303,11 @@ static ndobject function_ndo_strftime(const ndobject& n, const std::string& form
                     make_strftime_kernelgen(format)));
 }
 
-static ndobject function_ndo_weekday(const ndobject& n) {
+static nd::array function_ndo_weekday(const nd::array& n) {
     return n.replace_udtype(make_property_dtype(n.get_udtype(), "weekday"));
 }
 
-static ndobject function_ndo_replace(const ndobject& n, int32_t year, int32_t month, int32_t day) {
+static nd::array function_ndo_replace(const nd::array& n, int32_t year, int32_t month, int32_t day) {
     // TODO: Allow 'year', 'month', and 'day' to be arrays, with broadcasting, etc.
     if (year == numeric_limits<int32_t>::max() && month == numeric_limits<int32_t>::max() &&
                     day == numeric_limits<int32_t>::max()) {
@@ -316,7 +317,7 @@ static ndobject function_ndo_replace(const ndobject& n, int32_t year, int32_t mo
                     make_replace_kernelgen(year, month, day)));
 }
 
-static pair<string, gfunc::callable> date_ndobject_functions[] = {
+static pair<string, gfunc::callable> date_array_functions[] = {
     pair<string, gfunc::callable>("to_struct", gfunc::make_callable(&function_ndo_to_struct, "self")),
     pair<string, gfunc::callable>("strftime", gfunc::make_callable(&function_ndo_strftime, "self", "format")),
     pair<string, gfunc::callable>("weekday", gfunc::make_callable(&function_ndo_weekday, "self")),
@@ -324,10 +325,10 @@ static pair<string, gfunc::callable> date_ndobject_functions[] = {
                     numeric_limits<int32_t>::max(), numeric_limits<int32_t>::max(), numeric_limits<int32_t>::max()))
 };
 
-void date_dtype::get_dynamic_ndobject_functions(const std::pair<std::string, gfunc::callable> **out_functions, size_t *out_count) const
+void date_dtype::get_dynamic_array_functions(const std::pair<std::string, gfunc::callable> **out_functions, size_t *out_count) const
 {
-    *out_functions = date_ndobject_functions;
-    *out_count = sizeof(date_ndobject_functions) / sizeof(date_ndobject_functions[0]);
+    *out_functions = date_array_functions;
+    *out_count = sizeof(date_array_functions) / sizeof(date_array_functions[0]);
 }
 
 ///////// property accessor kernels (used by property_dtype)

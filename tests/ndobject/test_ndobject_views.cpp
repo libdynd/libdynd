@@ -21,12 +21,12 @@ using namespace std;
 using namespace dynd;
 
 TEST(NDObjectViews, OneDimensionalRawMemory) {
-    ndobject a, b;
+    nd::array a, b;
     signed char c_values[8];
     uint64_t u8_value;
 
     // Make an 8 byte aligned array of 80 chars
-    a = make_strided_ndobject(10, make_dtype<uint64_t>());
+    a = nd::make_strided_array(10, make_dtype<uint64_t>());
     a = a.view_scalars(make_dtype<char>());
 
     // Initialize the char values from a uint64_t,
@@ -56,7 +56,7 @@ TEST(NDObjectViews, OneDimensionalRawMemory) {
 }
 
 TEST(NDObjectViews, MultiDimensionalRawMemory) {
-    ndobject a, b;
+    nd::array a, b;
     uint32_t values[2][3] = {{1,2,3}, {0xffffffff, 0x80000000, 0}};
 
     a = values;
@@ -79,7 +79,7 @@ TEST(NDObjectViews, MultiDimensionalRawMemory) {
 }
 
 TEST(NDObjectViews, ExpressionDType) {
-    ndobject a, a_u2, b;
+    nd::array a, a_u2, b;
     uint32_t values[2][3] = {{1,2,3}, {0xffff, 0x8000, 0}};
 
     // Create a conversion from uint32_t -> uint16_t, followed by a

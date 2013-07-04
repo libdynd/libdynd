@@ -33,7 +33,7 @@ template <> struct dcs_size_of<float> {enum {value = sizeof(long)};};
 template <> struct dcs_size_of<double> {enum {value = sizeof(double)};};
 template <> struct dcs_size_of<std::complex<float> > {enum {value = sizeof(std::complex<float>)};};
 template <> struct dcs_size_of<std::complex<double> > {enum {value = sizeof(std::complex<double>)};};
-template <> struct dcs_size_of<ndobject_preamble *> {enum {value = sizeof(ndobject_preamble *)};};
+template <> struct dcs_size_of<array_preamble *> {enum {value = sizeof(array_preamble *)};};
 template <> struct dcs_size_of<const base_dtype *> {enum {value = sizeof(const base_dtype *)};};
 template <> struct dcs_size_of<string_dtype_data> {enum {value = sizeof(string_dtype_data)};};
 template <typename T, int N> struct dcs_size_of<T[N]> {enum {value = N * sizeof(T)};};
@@ -102,7 +102,7 @@ template <> struct parameter_type_of<unsigned long long> {typedef unsigned long 
 template <> struct parameter_type_of<float> {typedef float type;};
 template <> struct parameter_type_of<double> {typedef double type;};
 template <typename T> struct parameter_type_of<std::complex<T> > {typedef std::complex<T> type;};
-template <> struct parameter_type_of<ndobject> {typedef ndobject_preamble *type;};
+template <> struct parameter_type_of<nd::array> {typedef array_preamble *type;};
 template <> struct parameter_type_of<dtype> {typedef const base_dtype *type;};
 template <> struct parameter_type_of<std::string> {typedef string_dtype_data type;};
 
@@ -114,10 +114,10 @@ template <typename T> struct make_parameter_dtype<const T> : public make_paramet
 template <typename T, int N> struct make_parameter_dtype<T[N]> {inline static dtype make() {
         return make_fixed_dim_dtype(N, make_dtype<T>());
     }};
-// Use void* to pass ndobject and dtype as parameters, correctness currently will
+// Use void* to pass nd::array and dtype as parameters, correctness currently will
 // rely on using them in the right context. To pass these properly will require
 // dynd to grow the ability to manage object memory.
-template <> struct make_parameter_dtype<ndobject> {inline static dtype make() {
+template <> struct make_parameter_dtype<nd::array> {inline static dtype make() {
         return dtype(new void_pointer_dtype, false);
     }};
 template <> struct make_parameter_dtype<dtype> {inline static dtype make() {
@@ -128,26 +128,26 @@ template <> struct make_parameter_dtype<std::string> {inline static dtype make()
     }};
 
 template <typename T> struct box_result {
-    inline static typename enable_if<is_dtype_scalar<T>::value, ndobject_preamble *>::type box(const T& v) {
-        return ndobject(v).release();
+    inline static typename enable_if<is_dtype_scalar<T>::value, array_preamble *>::type box(const T& v) {
+        return nd::array(v).release();
     }
 };
 template <typename T> struct box_result<T &> : public box_result<T> {};
 template <typename T> struct box_result<const T> : public box_result<T> {};
-template <> struct box_result<ndobject> {
-    inline static ndobject_preamble *box(const ndobject& v) {
+template <> struct box_result<nd::array> {
+    inline static array_preamble *box(const nd::array& v) {
         // Throwing away v's value is ok here, for the limited use of this function
-        return const_cast<ndobject&>(v).release();
+        return const_cast<nd::array&>(v).release();
     }
 };
 template <> struct box_result<dtype> {
-    inline static ndobject_preamble *box(const dtype& v) {
-        return ndobject(v).release();
+    inline static array_preamble *box(const dtype& v) {
+        return nd::array(v).release();
     }
 };
 template <> struct box_result<std::string> {
-    inline static ndobject_preamble *box(const std::string& v) {
-        return ndobject(v).release();
+    inline static array_preamble *box(const std::string& v) {
+        return nd::array(v).release();
     }
 };
 
@@ -170,9 +170,9 @@ template <typename T, int N> struct unbox_param<T[N]> {
         return *reinterpret_cast<result_type_ptr>(v);
     }
 };
-template <> struct unbox_param<ndobject> {
-    inline static ndobject unbox(char *v) {
-        return ndobject(*reinterpret_cast<ndobject_preamble **>(v), true);
+template <> struct unbox_param<nd::array> {
+    inline static nd::array unbox(char *v) {
+        return nd::array(*reinterpret_cast<array_preamble **>(v), true);
     }
 };
 template <> struct unbox_param<dtype> {
@@ -197,7 +197,7 @@ namespace detail {
     struct callable_maker<R (*)(P0)> {
         typedef R (*function_pointer_t)(P0);
         typedef typename parameter_type_of<P0>::type T0;
-        static ndobject_preamble *wrapper(const ndobject_preamble *params, void *extra) {
+        static array_preamble *wrapper(const array_preamble *params, void *extra) {
             char *p = params->m_data_pointer;
             function_pointer_t f = reinterpret_cast<function_pointer_t>(extra);
             return box_result<R>::box(f(unbox_param<P0>::unbox(p + dcs_offset_of<T0>::value)));
@@ -213,7 +213,7 @@ namespace detail {
         typedef R (*function_pointer_t)(P0, P1);
         typedef typename parameter_type_of<P0>::type T0;
         typedef typename parameter_type_of<P1>::type T1;
-        static ndobject_preamble *wrapper(const ndobject_preamble *params, void *extra) {
+        static array_preamble *wrapper(const array_preamble *params, void *extra) {
             char *p = params->m_data_pointer;
             function_pointer_t f = reinterpret_cast<function_pointer_t>(extra);
             return box_result<R>::box(f(
@@ -233,7 +233,7 @@ namespace detail {
         typedef typename parameter_type_of<P0>::type T0;
         typedef typename parameter_type_of<P1>::type T1;
         typedef typename parameter_type_of<P2>::type T2;
-        static ndobject_preamble *wrapper(const ndobject_preamble *params, void *extra) {
+        static array_preamble *wrapper(const array_preamble *params, void *extra) {
             char *p = params->m_data_pointer;
             function_pointer_t f = reinterpret_cast<function_pointer_t>(extra);
             return box_result<R>::box(f(
@@ -256,7 +256,7 @@ namespace detail {
         typedef typename parameter_type_of<P1>::type T1;
         typedef typename parameter_type_of<P2>::type T2;
         typedef typename parameter_type_of<P3>::type T3;
-        static ndobject_preamble *wrapper(const ndobject_preamble *params, void *extra) {
+        static array_preamble *wrapper(const array_preamble *params, void *extra) {
             char *p = params->m_data_pointer;
             function_pointer_t f = reinterpret_cast<function_pointer_t>(extra);
             return box_result<R>::box(f(
@@ -289,7 +289,7 @@ namespace detail {
         typedef typename parameter_type_of<P2>::type T2;
         typedef typename parameter_type_of<P3>::type T3;
         typedef typename parameter_type_of<P4>::type T4;
-        static ndobject_preamble *wrapper(const ndobject_preamble *params, void *extra) {
+        static array_preamble *wrapper(const array_preamble *params, void *extra) {
             char *p = params->m_data_pointer;
             function_pointer_t f = reinterpret_cast<function_pointer_t>(extra);
             return box_result<R>::box(f(
@@ -330,7 +330,7 @@ inline callable make_callable(FN *f, const char *name0) {
 template<typename FN, typename D0>
 inline callable make_callable_with_default(FN *f, const char *name0, const D0& default0) {
     dtype pdt = detail::callable_maker<FN *>::make_parameters_dtype(name0);
-    ndobject defaults = empty(pdt);
+    nd::array defaults = nd::empty(pdt);
     defaults.at(0).vals() = default0;
     // Make defaults immutable (which is ok, because we have the only reference to it)
     defaults.flag_as_immutable();
@@ -352,7 +352,7 @@ inline callable make_callable(FN *f, const char *name0, const char *name1) {
 template<typename FN, typename D1>
 inline callable make_callable_with_default(FN *f, const char *name0, const char *name1, const D1& default1) {
     dtype pdt = detail::callable_maker<FN *>::make_parameters_dtype(name0, name1);
-    ndobject defaults = empty(pdt);
+    nd::array defaults = nd::empty(pdt);
     defaults.at(1).vals() = default1;
     // Make defaults immutable (which is ok, because we have the only reference to it)
     defaults.flag_as_immutable();
@@ -366,7 +366,7 @@ inline callable make_callable_with_default(FN *f, const char *name0, const char 
 template<typename FN, typename D0, typename D1>
 inline callable make_callable_with_default(FN *f, const char *name0, const char *name1, const D0& default0, const D1& default1) {
     dtype pdt = detail::callable_maker<FN *>::make_parameters_dtype(name0, name1);
-    ndobject defaults = empty(pdt);
+    nd::array defaults = nd::empty(pdt);
     defaults.at(0).vals() = default0;
     defaults.at(1).vals() = default1;
     // Make defaults immutable (which is ok, because we have the only reference to it)
@@ -389,7 +389,7 @@ inline callable make_callable(FN *f, const char *name0, const char *name1, const
 template<typename FN, typename D2>
 inline callable make_callable_with_default(FN *f, const char *name0, const char *name1, const char *name2, const D2& default2) {
     dtype pdt = detail::callable_maker<FN *>::make_parameters_dtype(name0, name1, name2);
-    ndobject defaults = empty(pdt);
+    nd::array defaults = nd::empty(pdt);
     defaults.at(2).vals() = default2;
     // Make defaults immutable (which is ok, because we have the only reference to it)
     defaults.flag_as_immutable();
@@ -403,7 +403,7 @@ inline callable make_callable_with_default(FN *f, const char *name0, const char 
 template<typename FN, typename D1, typename D2>
 inline callable make_callable_with_default(FN *f, const char *name0, const char *name1, const char *name2, const D1& default1, const D2& default2) {
     dtype pdt = detail::callable_maker<FN *>::make_parameters_dtype(name0, name1, name2);
-    ndobject defaults = empty(pdt);
+    nd::array defaults = nd::empty(pdt);
     defaults.at(1).vals() = default1;
     defaults.at(2).vals() = default2;
     // Make defaults immutable (which is ok, because we have the only reference to it)
@@ -418,7 +418,7 @@ inline callable make_callable_with_default(FN *f, const char *name0, const char 
 template<typename FN, typename D0, typename D1, typename D2>
 inline callable make_callable_with_default(FN *f, const char *name0, const char *name1, const char *name2, const D0& default0, const D1& default1, const D2& default2) {
     dtype pdt = detail::callable_maker<FN *>::make_parameters_dtype(name0, name1, name2);
-    ndobject defaults = empty(pdt);
+    nd::array defaults = nd::empty(pdt);
     defaults.at(0).vals() = default0;
     defaults.at(1).vals() = default1;
     defaults.at(2).vals() = default2;
@@ -443,7 +443,7 @@ template<typename FN, typename D3>
 inline callable make_callable_with_default(FN *f, const char *name0, const char *name1, const char *name2,
                 const char *name3, const D3& default3) {
     dtype pdt = detail::callable_maker<FN *>::make_parameters_dtype(name0, name1, name2, name3);
-    ndobject defaults = empty(pdt);
+    nd::array defaults = nd::empty(pdt);
     defaults.at(3).vals() = default3;
     // Make defaults immutable (which is ok, because we have the only reference to it)
     defaults.flag_as_immutable();
@@ -458,7 +458,7 @@ template<typename FN, typename D2, typename D3>
 inline callable make_callable_with_default(FN *f, const char *name0, const char *name1, const char *name2,
                 const char *name3, const D2& default2, const D3& default3) {
     dtype pdt = detail::callable_maker<FN *>::make_parameters_dtype(name0, name1, name2, name3);
-    ndobject defaults = empty(pdt);
+    nd::array defaults = nd::empty(pdt);
     defaults.at(2).vals() = default2;
     defaults.at(3).vals() = default3;
     // Make defaults immutable (which is ok, because we have the only reference to it)
@@ -474,7 +474,7 @@ template<typename FN, typename D1, typename D2, typename D3>
 inline callable make_callable_with_default(FN *f, const char *name0, const char *name1, const char *name2,
                 const char *name3, const D1& default1, const D2& default2, const D3& default3) {
     dtype pdt = detail::callable_maker<FN *>::make_parameters_dtype(name0, name1, name2, name3);
-    ndobject defaults = empty(pdt);
+    nd::array defaults = nd::empty(pdt);
     defaults.at(1).vals() = default1;
     defaults.at(2).vals() = default2;
     defaults.at(3).vals() = default3;
@@ -491,7 +491,7 @@ template<typename FN, typename D0, typename D1, typename D2, typename D3>
 inline callable make_callable_with_default(FN *f, const char *name0, const char *name1, const char *name2,
                 const char *name3, const D0& default0, const D1& default1, const D2& default2, const D3& default3) {
     dtype pdt = detail::callable_maker<FN *>::make_parameters_dtype(name0, name1, name2, name3);
-    ndobject defaults = empty(pdt);
+    nd::array defaults = nd::empty(pdt);
     defaults.at(0).vals() = default0;
     defaults.at(1).vals() = default1;
     defaults.at(2).vals() = default2;

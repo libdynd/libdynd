@@ -23,7 +23,7 @@ using namespace std;
 using namespace dynd;
 
 TEST(JSONFormatter, Builtins) {
-    ndobject n;
+    nd::array n;
     n = true;
     EXPECT_EQ("true", format_json(n).as<string>());
     n = false;
@@ -51,25 +51,25 @@ TEST(JSONFormatter, Builtins) {
 }
 
 TEST(JSONFormatter, String) {
-    ndobject n;
+    nd::array n;
     n = "testing string";
     EXPECT_EQ("\"testing string\"", format_json(n).as<string>());
     n = " \" \\ / \b \f \n \r \t ";
     EXPECT_EQ("\" \\\" \\\\ \\/ \\b \\f \\n \\r \\t \"", format_json(n).as<string>());
-    n = ndobject("testing string").ucast(make_string_dtype(string_encoding_utf_16)).eval();
+    n = nd::array("testing string").ucast(make_string_dtype(string_encoding_utf_16)).eval();
     EXPECT_EQ("\"testing string\"", format_json(n).as<string>());
-    n = ndobject("testing string").ucast(make_string_dtype(string_encoding_utf_32)).eval();
+    n = nd::array("testing string").ucast(make_string_dtype(string_encoding_utf_32)).eval();
     EXPECT_EQ("\"testing string\"", format_json(n).as<string>());
 }
 
 TEST(JSONFormatter, JSON) {
-    ndobject n;
-    n = ndobject("[ 1, 3, 5] ").ucast(make_json_dtype());
+    nd::array n;
+    n = nd::array("[ 1, 3, 5] ").ucast(make_json_dtype());
     EXPECT_EQ("[ 1, 3, 5] ", format_json(n).as<string>());
 }
 
 TEST(JSONFormatter, Struct) {
-    ndobject n = parse_json("{ a: int32; b: string; c: json }",
+    nd::array n = parse_json("{ a: int32; b: string; c: json }",
                     "{ \"b\": \"testing\",  \"a\":    100,\n"
                     "\"c\": [   {\"first\":true, \"second\":3}, null,\n \"test\"]  }");
     EXPECT_EQ("{\"a\":100,\"b\":\"testing\","
@@ -78,7 +78,7 @@ TEST(JSONFormatter, Struct) {
 }
 
 TEST(JSONFormatter, UniformDim) {
-    ndobject n;
+    nd::array n;
     float vals[] = {3.5f, -1.25f, 4.75f};
     // Strided dimension
     n = vals;

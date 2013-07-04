@@ -21,85 +21,85 @@ using namespace dynd;
 
 TEST(NDObjectCompare, Bool) {
     // Equality
-    EXPECT_TRUE(ndobject(true) == ndobject(true));
-    EXPECT_TRUE(ndobject(false) == ndobject(false));
-    EXPECT_FALSE(ndobject(true) == ndobject(false));
-    EXPECT_FALSE(ndobject(false) == ndobject(true));
+    EXPECT_TRUE(nd::array(true) == nd::array(true));
+    EXPECT_TRUE(nd::array(false) == nd::array(false));
+    EXPECT_FALSE(nd::array(true) == nd::array(false));
+    EXPECT_FALSE(nd::array(false) == nd::array(true));
     // Inequality
-    EXPECT_FALSE(ndobject(true) != ndobject(true));
-    EXPECT_FALSE(ndobject(false) != ndobject(false));
-    EXPECT_TRUE(ndobject(true) != ndobject(false));
-    EXPECT_TRUE(ndobject(false) != ndobject(true));
+    EXPECT_FALSE(nd::array(true) != nd::array(true));
+    EXPECT_FALSE(nd::array(false) != nd::array(false));
+    EXPECT_TRUE(nd::array(true) != nd::array(false));
+    EXPECT_TRUE(nd::array(false) != nd::array(true));
     // Comparison for sorting
-    EXPECT_TRUE(ndobject(false).op_sorting_less(ndobject(true)));
-    EXPECT_FALSE(ndobject(false).op_sorting_less(ndobject(false)));
-    EXPECT_FALSE(ndobject(true).op_sorting_less(ndobject(true)));
-    EXPECT_FALSE(ndobject(true).op_sorting_less(ndobject(false)));
+    EXPECT_TRUE(nd::array(false).op_sorting_less(nd::array(true)));
+    EXPECT_FALSE(nd::array(false).op_sorting_less(nd::array(false)));
+    EXPECT_FALSE(nd::array(true).op_sorting_less(nd::array(true)));
+    EXPECT_FALSE(nd::array(true).op_sorting_less(nd::array(false)));
     // Other comparisons are not permitted
-    EXPECT_THROW((ndobject(false) < ndobject(true)), not_comparable_error);
-    EXPECT_THROW((ndobject(false) <= ndobject(true)), not_comparable_error);
-    EXPECT_THROW((ndobject(false) >= ndobject(true)), not_comparable_error);
-    EXPECT_THROW((ndobject(false) > ndobject(true)), not_comparable_error);
+    EXPECT_THROW((nd::array(false) < nd::array(true)), not_comparable_error);
+    EXPECT_THROW((nd::array(false) <= nd::array(true)), not_comparable_error);
+    EXPECT_THROW((nd::array(false) >= nd::array(true)), not_comparable_error);
+    EXPECT_THROW((nd::array(false) > nd::array(true)), not_comparable_error);
     // Compare Bool with other types
-    EXPECT_TRUE(ndobject(true) == ndobject(1));
-    EXPECT_TRUE(ndobject(true) == ndobject(1.f));
-    EXPECT_TRUE(ndobject(true) == ndobject(1.0));
-    EXPECT_TRUE(ndobject(true) == ndobject(complex<double>(1.0)));
-    EXPECT_TRUE(ndobject(false) == ndobject(0));
-    EXPECT_TRUE(ndobject(false) == ndobject(0.f));
-    EXPECT_TRUE(ndobject(false) == ndobject(0.0));
-    EXPECT_TRUE(ndobject(false) == ndobject(complex<double>()));
-    EXPECT_TRUE(ndobject(true) != ndobject(2));
-    EXPECT_TRUE(ndobject(true) != ndobject(2.f));
-    EXPECT_TRUE(ndobject(true) != ndobject(2.0));
-    EXPECT_TRUE(ndobject(true) != ndobject(complex<double>(1,1)));
-    EXPECT_TRUE(ndobject(false) != ndobject(-1));
-    EXPECT_TRUE(ndobject(false) != ndobject(-1.f));
-    EXPECT_TRUE(ndobject(false) != ndobject(-1.0));
-    EXPECT_TRUE(ndobject(false) != ndobject(complex<double>(0,1)));
+    EXPECT_TRUE(nd::array(true) == nd::array(1));
+    EXPECT_TRUE(nd::array(true) == nd::array(1.f));
+    EXPECT_TRUE(nd::array(true) == nd::array(1.0));
+    EXPECT_TRUE(nd::array(true) == nd::array(complex<double>(1.0)));
+    EXPECT_TRUE(nd::array(false) == nd::array(0));
+    EXPECT_TRUE(nd::array(false) == nd::array(0.f));
+    EXPECT_TRUE(nd::array(false) == nd::array(0.0));
+    EXPECT_TRUE(nd::array(false) == nd::array(complex<double>()));
+    EXPECT_TRUE(nd::array(true) != nd::array(2));
+    EXPECT_TRUE(nd::array(true) != nd::array(2.f));
+    EXPECT_TRUE(nd::array(true) != nd::array(2.0));
+    EXPECT_TRUE(nd::array(true) != nd::array(complex<double>(1,1)));
+    EXPECT_TRUE(nd::array(false) != nd::array(-1));
+    EXPECT_TRUE(nd::array(false) != nd::array(-1.f));
+    EXPECT_TRUE(nd::array(false) != nd::array(-1.0));
+    EXPECT_TRUE(nd::array(false) != nd::array(complex<double>(0,1)));
 }
 
 TEST(NDObjectCompare, EqualityIntUInt) {
     // Equality
-    EXPECT_TRUE(ndobject((uint8_t)127) == ndobject((int8_t)127));
-    EXPECT_TRUE(ndobject((int8_t)127) == ndobject((uint8_t)127));
-    EXPECT_TRUE(ndobject((uint16_t)32767) == ndobject((int16_t)32767));
-    EXPECT_TRUE(ndobject((int16_t)32767) == ndobject((uint16_t)32767));
-    EXPECT_TRUE(ndobject((uint32_t)2147483647) == ndobject((int32_t)2147483647));
-    EXPECT_TRUE(ndobject((int32_t)2147483647) == ndobject((uint32_t)2147483647));
-    EXPECT_TRUE(ndobject((uint64_t)9223372036854775807LL) == ndobject((int64_t)9223372036854775807LL));
-    EXPECT_TRUE(ndobject((int64_t)9223372036854775807LL) == ndobject((uint64_t)9223372036854775807LL));
+    EXPECT_TRUE(nd::array((uint8_t)127) == nd::array((int8_t)127));
+    EXPECT_TRUE(nd::array((int8_t)127) == nd::array((uint8_t)127));
+    EXPECT_TRUE(nd::array((uint16_t)32767) == nd::array((int16_t)32767));
+    EXPECT_TRUE(nd::array((int16_t)32767) == nd::array((uint16_t)32767));
+    EXPECT_TRUE(nd::array((uint32_t)2147483647) == nd::array((int32_t)2147483647));
+    EXPECT_TRUE(nd::array((int32_t)2147483647) == nd::array((uint32_t)2147483647));
+    EXPECT_TRUE(nd::array((uint64_t)9223372036854775807LL) == nd::array((int64_t)9223372036854775807LL));
+    EXPECT_TRUE(nd::array((int64_t)9223372036854775807LL) == nd::array((uint64_t)9223372036854775807LL));
     // Inequality
-    EXPECT_FALSE(ndobject((uint8_t)127) != ndobject((int16_t)127));
-    EXPECT_FALSE(ndobject((int8_t)127) != ndobject((uint16_t)127));
-    EXPECT_FALSE(ndobject((uint16_t)32767) != ndobject((int16_t)32767));
-    EXPECT_FALSE(ndobject((int16_t)32767) != ndobject((uint16_t)32767));
-    EXPECT_FALSE(ndobject((uint32_t)2147483647) != ndobject((int32_t)2147483647));
-    EXPECT_FALSE(ndobject((int32_t)2147483647) != ndobject((uint32_t)2147483647));
-    EXPECT_FALSE(ndobject((uint64_t)9223372036854775807LL) != ndobject((int64_t)9223372036854775807LL));
-    EXPECT_FALSE(ndobject((int64_t)9223372036854775807LL) != ndobject((uint64_t)9223372036854775807LL));
+    EXPECT_FALSE(nd::array((uint8_t)127) != nd::array((int16_t)127));
+    EXPECT_FALSE(nd::array((int8_t)127) != nd::array((uint16_t)127));
+    EXPECT_FALSE(nd::array((uint16_t)32767) != nd::array((int16_t)32767));
+    EXPECT_FALSE(nd::array((int16_t)32767) != nd::array((uint16_t)32767));
+    EXPECT_FALSE(nd::array((uint32_t)2147483647) != nd::array((int32_t)2147483647));
+    EXPECT_FALSE(nd::array((int32_t)2147483647) != nd::array((uint32_t)2147483647));
+    EXPECT_FALSE(nd::array((uint64_t)9223372036854775807LL) != nd::array((int64_t)9223372036854775807LL));
+    EXPECT_FALSE(nd::array((int64_t)9223372036854775807LL) != nd::array((uint64_t)9223372036854775807LL));
     // Equality with same bits
-    EXPECT_FALSE(ndobject((uint8_t)255) == ndobject((int8_t)-1));
-    EXPECT_FALSE(ndobject((int8_t)-1) == ndobject((uint8_t)255));
-    EXPECT_FALSE(ndobject((uint16_t)65535) == ndobject((int16_t)-1));
-    EXPECT_FALSE(ndobject((int16_t)-1) == ndobject((uint16_t)65535));
-    EXPECT_FALSE(ndobject((uint32_t)4294967295u) == ndobject((int32_t)-1));
-    EXPECT_FALSE(ndobject((int32_t)-1) == ndobject((uint32_t)4294967295u));
-    EXPECT_FALSE(ndobject((uint64_t)18446744073709551615ULL) == ndobject((int64_t)-1));
-    EXPECT_FALSE(ndobject((int64_t)-1) == ndobject((uint64_t)18446744073709551615ULL));
+    EXPECT_FALSE(nd::array((uint8_t)255) == nd::array((int8_t)-1));
+    EXPECT_FALSE(nd::array((int8_t)-1) == nd::array((uint8_t)255));
+    EXPECT_FALSE(nd::array((uint16_t)65535) == nd::array((int16_t)-1));
+    EXPECT_FALSE(nd::array((int16_t)-1) == nd::array((uint16_t)65535));
+    EXPECT_FALSE(nd::array((uint32_t)4294967295u) == nd::array((int32_t)-1));
+    EXPECT_FALSE(nd::array((int32_t)-1) == nd::array((uint32_t)4294967295u));
+    EXPECT_FALSE(nd::array((uint64_t)18446744073709551615ULL) == nd::array((int64_t)-1));
+    EXPECT_FALSE(nd::array((int64_t)-1) == nd::array((uint64_t)18446744073709551615ULL));
     // Inequality with same bits
-    EXPECT_TRUE(ndobject((uint8_t)255) != ndobject((int8_t)-1));
-    EXPECT_TRUE(ndobject((int8_t)-1) != ndobject((uint8_t)255));
-    EXPECT_TRUE(ndobject((uint16_t)65535) != ndobject((int16_t)-1));
-    EXPECT_TRUE(ndobject((int16_t)-1) != ndobject((uint16_t)65535));
-    EXPECT_TRUE(ndobject((uint32_t)4294967295u) != ndobject((int32_t)-1));
-    EXPECT_TRUE(ndobject((int32_t)-1) != ndobject((uint32_t)4294967295u));
-    EXPECT_TRUE(ndobject((uint64_t)18446744073709551615ULL) != ndobject((int64_t)-1));
-    EXPECT_TRUE(ndobject((int64_t)-1) != ndobject((uint64_t)18446744073709551615ULL));
+    EXPECT_TRUE(nd::array((uint8_t)255) != nd::array((int8_t)-1));
+    EXPECT_TRUE(nd::array((int8_t)-1) != nd::array((uint8_t)255));
+    EXPECT_TRUE(nd::array((uint16_t)65535) != nd::array((int16_t)-1));
+    EXPECT_TRUE(nd::array((int16_t)-1) != nd::array((uint16_t)65535));
+    EXPECT_TRUE(nd::array((uint32_t)4294967295u) != nd::array((int32_t)-1));
+    EXPECT_TRUE(nd::array((int32_t)-1) != nd::array((uint32_t)4294967295u));
+    EXPECT_TRUE(nd::array((uint64_t)18446744073709551615ULL) != nd::array((int64_t)-1));
+    EXPECT_TRUE(nd::array((int64_t)-1) != nd::array((uint64_t)18446744073709551615ULL));
 }
 
 TEST(NDObjectCompare, InequalityInt8UInt8) {
-    ndobject a, b;
+    nd::array a, b;
 
     a = (int8_t)-1;
     b = (uint8_t)0;
@@ -169,7 +169,7 @@ TEST(NDObjectCompare, InequalityInt8UInt8) {
 }
 
 TEST(NDObjectCompare, InequalityInt64UInt64) {
-    ndobject a, b;
+    nd::array a, b;
 
     a = (int64_t)-1;
     b = (uint64_t)0;
@@ -251,7 +251,7 @@ TEST(NDObjectCompare, InequalityInt64UInt64) {
 }
 
 TEST(NDObjectCompare, EqualityIntFloat) {
-    ndobject a, b;
+    nd::array a, b;
 
     // 2**24 is the end of the consecutive float32 integers
     a = 16777216;
@@ -314,7 +314,7 @@ TEST(NDObjectCompare, EqualityIntFloat) {
 }
 
 TEST(NDObjectCompare, EqualityUIntFloat) {
-    ndobject a, b;
+    nd::array a, b;
 
     // 2**24 is the end of the consecutive float32 integers
     a = (uint32_t)16777216;
@@ -377,9 +377,9 @@ TEST(NDObjectCompare, EqualityUIntFloat) {
 }
 
 TEST(NDObjectCompare, NaNFloat32) {
-    ndobject a, b;
-    ndobject nan = ndobject("nan").ucast<float>().eval();
-    ndobject pinf = ndobject("inf").ucast<float>().eval();
+    nd::array a, b;
+    nd::array nan = nd::array("nan").ucast<float>().eval();
+    nd::array pinf = nd::array("inf").ucast<float>().eval();
 
     // A NaN, compared against itself
     a = nan;
@@ -433,9 +433,9 @@ TEST(NDObjectCompare, NaNFloat32) {
 }
 
 TEST(NDObjectCompare, NaNFloat64) {
-    ndobject a, b;
-    ndobject nan = ndobject("nan").ucast<double>().eval();
-    ndobject pinf = ndobject("inf").ucast<double>().eval();
+    nd::array a, b;
+    nd::array nan = nd::array("nan").ucast<double>().eval();
+    nd::array pinf = nd::array("inf").ucast<double>().eval();
 
     // A NaN, compared against itself
     a = nan;
@@ -489,7 +489,7 @@ TEST(NDObjectCompare, NaNFloat64) {
 }
 
 TEST(NDObjectCompare, ComplexFloat32) {
-    ndobject a, b;
+    nd::array a, b;
     // For complex, op_sorting_less is lexicographic,
     // and other inequalities raise exceptions.
 
@@ -549,7 +549,7 @@ TEST(NDObjectCompare, ComplexFloat32) {
 }
 
 TEST(NDObjectCompare, ComplexFloat64) {
-    ndobject a, b;
+    nd::array a, b;
     // For complex, op_sorting_less is lexicographic,
     // and other inequalities raise exceptions.
 
@@ -613,10 +613,10 @@ TEST(NDObjectCompare, NaNComplexFloat32) {
     // on clang, complex<float>(0.f, nan) was creating (nan, nan)
     // instead of the requested complex.
     float cval[2];
-    ndobject a, b;
-    a = empty(make_dtype<complex<float> >());
-    b = empty(make_dtype<complex<float> >());
-    float nan = ndobject("nan").ucast<float>().as<float>();
+    nd::array a, b;
+    a = nd::empty(make_dtype<complex<float> >());
+    b = nd::empty(make_dtype<complex<float> >());
+    float nan = nd::array("nan").ucast<float>().as<float>();
 
     // real component NaN, compared against itself
     cval[0] = nan;
@@ -834,10 +834,10 @@ TEST(NDObjectCompare, NaNComplexFloat32) {
 }
 
 TEST(NDObjectCompare, ExpressionDType) {
-    ndobject a, b;
+    nd::array a, b;
     // One expression operand
-    a = ndobject(3).ucast<float>();
-    b = ndobject(4.0);
+    a = nd::array(3).ucast<float>();
+    b = nd::array(4.0);
     EXPECT_TRUE(a.op_sorting_less(b));
     EXPECT_TRUE(a < b);
     EXPECT_TRUE(a <= b);
@@ -854,8 +854,8 @@ TEST(NDObjectCompare, ExpressionDType) {
     EXPECT_TRUE(b > a);
 
     // Two expression operand
-    a = ndobject(3).ucast<float>();
-    b = ndobject("2012-03-04").ucast(make_date_dtype()).p("day");
+    a = nd::array(3).ucast<float>();
+    b = nd::array("2012-03-04").ucast(make_date_dtype()).p("day");
     EXPECT_TRUE(a.op_sorting_less(b));
     EXPECT_TRUE(a < b);
     EXPECT_TRUE(a <= b);
@@ -872,7 +872,7 @@ TEST(NDObjectCompare, ExpressionDType) {
     EXPECT_TRUE(b > a);
 
     // Non-comparable operands should raise
-    a = ndobject(3).ucast<complex<float> >();
-    b = ndobject(4.0);
+    a = nd::array(3).ucast<complex<float> >();
+    b = nd::array(4.0);
     EXPECT_THROW((a < b), not_comparable_error);
 }

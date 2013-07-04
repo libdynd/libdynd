@@ -18,7 +18,7 @@ namespace dynd {
  */
 enum memory_block_type_t {
     /** An ndobject containing the metadata specified by the dtype */
-    ndobject_memory_block_type,
+    array_memory_block_type,
     /** Memory from outside the dnd library */
     external_memory_block_type,
     /** For when the data is POD and its size is fully known ahead of time */

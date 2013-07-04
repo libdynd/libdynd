@@ -168,10 +168,10 @@ namespace {
 
 } // anoymous namespace
 
-/** This function converts the set of char* pointers into a strided immutable ndobject of the categories */
-static ndobject make_sorted_categories(const set<const char *, cmp>& uniques, const dtype& udtype, const char *metadata)
+/** This function converts the set of char* pointers into a strided immutable nd::array of the categories */
+static nd::array make_sorted_categories(const set<const char *, cmp>& uniques, const dtype& udtype, const char *metadata)
 {
-    ndobject categories = make_strided_ndobject(uniques.size(), udtype);
+    nd::array categories = nd::make_strided_array(uniques.size(), udtype);
     assignment_kernel k;
     make_assignment_kernel(&k, 0,
                     udtype, categories.get_ndo_meta() + sizeof(strided_dim_dtype_metadata),
@@ -191,7 +191,7 @@ static ndobject make_sorted_categories(const set<const char *, cmp>& uniques, co
     return categories;
 }
 
-categorical_dtype::categorical_dtype(const ndobject& categories, bool presorted)
+categorical_dtype::categorical_dtype(const nd::array& categories, bool presorted)
     : base_dtype(categorical_type_id, custom_kind, 4, 4, dtype_flag_scalar, 0, 0)
 {
     intptr_t category_count;
@@ -334,7 +334,7 @@ void dynd::categorical_dtype::get_shape(size_t ndim, size_t i, intptr_t *out_sha
 
 uint32_t categorical_dtype::get_value_from_category(const char *category_metadata, const char *category_data) const
 {
-    intptr_t i = dynd::binary_search(m_categories, category_metadata, category_data);
+    intptr_t i = nd::binary_search(m_categories, category_metadata, category_data);
     if (i < 0) {
         stringstream ss;
         ss << "Unrecognized category value ";
@@ -346,14 +346,14 @@ uint32_t categorical_dtype::get_value_from_category(const char *category_metadat
     }
 }
 
-uint32_t categorical_dtype::get_value_from_category(const ndobject& category) const
+uint32_t categorical_dtype::get_value_from_category(const nd::array& category) const
 {
     if (category.get_dtype() == m_category_dtype) {
         // If the dtype is right, get the category value directly
         return get_value_from_category(category.get_ndo_meta(), category.get_readonly_originptr());
     } else {
         // Otherwise convert to the correct dtype, then get the category value
-        ndobject c = empty(m_category_dtype);
+        nd::array c = nd::empty(m_category_dtype);
         c.val_assign(category);
         return get_value_from_category(c.get_ndo_meta(), c.get_readonly_originptr());
     }
@@ -366,12 +366,12 @@ const char *categorical_dtype::get_category_metadata() const
     return metadata;
 }
 
-ndobject categorical_dtype::get_categories() const
+nd::array categorical_dtype::get_categories() const
 {
     // TODO: store categories in their original order
     //       so this is simply "return m_categories".
-    ndobject categories = make_strided_ndobject(get_category_count(), m_category_dtype);
-    ndobject_iter<1,0> iter(categories);
+    nd::array categories = nd::make_strided_array(get_category_count(), m_category_dtype);
+    array_iter<1,0> iter(categories);
     assignment_kernel k;
     ::make_assignment_kernel(&k, 0, iter.get_uniform_dtype(), iter.metadata(),
                     m_category_dtype, get_category_metadata(),
@@ -541,11 +541,11 @@ void categorical_dtype::metadata_debug_print(const char *DYND_UNUSED(metadata),
     // Data is stored as uint##, no metadata to process
 }
 
-dtype dynd::factor_categorical_dtype(const ndobject& values)
+dtype dynd::factor_categorical_dtype(const nd::array& values)
 {
     // Do the factor operation on a concrete version of the values
     // TODO: Some cases where we don't want to do this?
-    ndobject_iter<0, 1> iter(values.eval());
+    array_iter<0, 1> iter(values.eval());
 
     comparison_kernel k;
     ::make_comparison_kernel(&k, 0,
@@ -564,33 +564,33 @@ dtype dynd::factor_categorical_dtype(const ndobject& values)
         } while (iter.next());
     }
 
-    // Copy the values (now sorted and unique) into a new ndobject
-    ndobject categories = make_sorted_categories(uniques,
+    // Copy the values (now sorted and unique) into a new nd::array
+    nd::array categories = make_sorted_categories(uniques,
                     iter.get_uniform_dtype(), iter.metadata());
 
     return dtype(new categorical_dtype(categories, true), false);
 }
 
-static ndobject property_ndo_get_ints(const ndobject& n) {
+static nd::array property_ndo_get_ints(const nd::array& n) {
     dtype udt = n.get_udtype().value_dtype();
     const categorical_dtype *cd = static_cast<const categorical_dtype *>(udt.extended());
     return n.view_scalars(cd->get_storage_dtype());
 }
 
-static pair<string, gfunc::callable> categorical_ndobject_properties[] = {
+static pair<string, gfunc::callable> categorical_array_properties[] = {
     pair<string, gfunc::callable>("ints",
                     gfunc::make_callable(&property_ndo_get_ints, "self"))
 };
 
-void categorical_dtype::get_dynamic_ndobject_properties(
+void categorical_dtype::get_dynamic_array_properties(
                 const std::pair<std::string, gfunc::callable> **out_properties,
                 size_t *out_count) const
 {
-    *out_properties = categorical_ndobject_properties;
-    *out_count = sizeof(categorical_ndobject_properties) / sizeof(categorical_ndobject_properties[0]);
+    *out_properties = categorical_array_properties;
+    *out_count = sizeof(categorical_array_properties) / sizeof(categorical_array_properties[0]);
 }
 
-static ndobject property_dtype_get_categories(const dtype& d) {
+static nd::array property_dtype_get_categories(const dtype& d) {
     const categorical_dtype *cd = static_cast<const categorical_dtype *>(d.extended());
     return cd->get_categories();
 }

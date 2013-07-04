@@ -32,7 +32,7 @@ public:
     bool m_commutative;
     dtype m_returntype;
     std::vector<dynd::dtype> m_paramtypes;
-    dynd::ndobject m_identity;
+    dynd::nd::array m_identity;
     /**
      * Does dst <- operation(dst, src), use when iterating from index 0 to N-1.
      */

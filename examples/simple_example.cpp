@@ -35,15 +35,16 @@ int main()
         intptr_t shape[] = {2,3,4};
         int axisperm[] = {0,2,1};
 
-        ndobject a = make_strided_ndobject(make_dtype<int>(), 3, shape, read_access_flag|write_access_flag, axisperm);
+        nd::array a = nd::make_strided_array(make_dtype<int>(), 3, shape,
+                        nd::read_access_flag|nd::write_access_flag, axisperm);
 
         a.debug_print(cout);
 
-        ndobject b = empty_like(a);
+        nd::array b = empty_like(a);
 
         b.debug_print(cout);
 
-        ndobject c = empty_like(a, make_dtype<double>());
+        nd::array c = empty_like(a, make_dtype<double>());
 
         c.debug_print(cout);
 

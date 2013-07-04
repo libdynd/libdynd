@@ -19,12 +19,12 @@ class struct_dtype : public base_struct_dtype {
     std::vector<dtype> m_field_types;
     std::vector<std::string> m_field_names;
     std::vector<size_t> m_metadata_offsets;
-    std::vector<std::pair<std::string, gfunc::callable> > m_ndobject_properties;
+    std::vector<std::pair<std::string, gfunc::callable> > m_array_properties;
 
-    void create_ndobject_properties();
+    void create_array_properties();
 
-    // Used as the parameters dtype for the ndobject properties callables
-    static dtype ndobject_parameters_dtype;
+    // Used as the parameters dtype for the nd::array properties callables
+    static dtype array_parameters_dtype;
 public:
     struct_dtype(const std::vector<dtype>& fields, const std::vector<std::string>& field_names);
 
@@ -106,7 +106,7 @@ public:
     void foreach_leading(char *data, const char *metadata, foreach_fn_t callback, void *callback_data) const;
 
     void get_dynamic_dtype_properties(const std::pair<std::string, gfunc::callable> **out_properties, size_t *out_count) const;
-    void get_dynamic_ndobject_properties(const std::pair<std::string, gfunc::callable> **out_properties, size_t *out_count) const;
+    void get_dynamic_array_properties(const std::pair<std::string, gfunc::callable> **out_properties, size_t *out_count) const;
 }; // class struct_dtype
 
 /** Makes a tuple dtype with the specified fields, using the standard layout */

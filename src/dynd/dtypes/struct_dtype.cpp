@@ -40,7 +40,7 @@ struct_dtype::struct_dtype(const std::vector<dtype>& field_types, const std::vec
     }
     m_members.metadata_size = metadata_offset;
 
-    create_ndobject_properties();
+    create_array_properties();
 }
 
 struct_dtype::~struct_dtype()
@@ -438,22 +438,22 @@ void struct_dtype::foreach_leading(char *data, const char *metadata, foreach_fn_
     }
 }
 
-static ndobject property_get_field_names(const dtype& dt) {
+static nd::array property_get_field_names(const dtype& dt) {
     const struct_dtype *d = static_cast<const struct_dtype *>(dt.extended());
-    // TODO: This property could be an immutable ndobject, which we would just return.
-    return ndobject(d->get_field_names_vector());
+    // TODO: This property could be an immutable nd::array, which we would just return.
+    return nd::array(d->get_field_names_vector());
 }
 
-static ndobject property_get_field_types(const dtype& dt) {
+static nd::array property_get_field_types(const dtype& dt) {
     const cstruct_dtype *d = static_cast<const cstruct_dtype *>(dt.extended());
-    // TODO: This property should be an immutable ndobject, which we would just return.
-    return ndobject(d->get_field_types_vector());
+    // TODO: This property should be an immutable nd::array, which we would just return.
+    return nd::array(d->get_field_types_vector());
 }
 
-static ndobject property_get_metadata_offsets(const dtype& dt) {
+static nd::array property_get_metadata_offsets(const dtype& dt) {
     const struct_dtype *d = static_cast<const struct_dtype *>(dt.extended());
-    // TODO: This property could be an immutable ndobject, which we would just return.
-    return ndobject(d->get_metadata_offsets_vector());
+    // TODO: This property could be an immutable nd::array, which we would just return.
+    return nd::array(d->get_metadata_offsets_vector());
 }
 
 static pair<string, gfunc::callable> dtype_properties[] = {
@@ -468,12 +468,12 @@ void struct_dtype::get_dynamic_dtype_properties(const std::pair<std::string, gfu
     *out_count = sizeof(dtype_properties) / sizeof(dtype_properties[0]);
 }
 
-dtype struct_dtype::ndobject_parameters_dtype = make_cstruct_dtype(dtype(new void_pointer_dtype, false), "self");
+dtype struct_dtype::array_parameters_dtype = make_cstruct_dtype(dtype(new void_pointer_dtype, false), "self");
 
-static ndobject_preamble *property_get_ndobject_field(const ndobject_preamble *params, void *extra)
+static array_preamble *property_get_array_field(const array_preamble *params, void *extra)
 {
-    // Get the ndobject 'self' parameter
-    ndobject n = ndobject(*(ndobject_preamble **)params->m_data_pointer, true);
+    // Get the nd::array 'self' parameter
+    nd::array n = nd::array(*(array_preamble **)params->m_data_pointer, true);
     intptr_t i = reinterpret_cast<intptr_t>(extra);
     size_t undim = n.get_undim();
     dtype udt = n.get_udtype();
@@ -492,18 +492,18 @@ static ndobject_preamble *property_get_ndobject_field(const ndobject_preamble *p
     }
 }
 
-void struct_dtype::create_ndobject_properties()
+void struct_dtype::create_array_properties()
 {
-    m_ndobject_properties.resize(m_field_types.size());
+    m_array_properties.resize(m_field_types.size());
     for (size_t i = 0, i_end = m_field_types.size(); i != i_end; ++i) {
         // TODO: Transform the name into a valid Python symbol?
-        m_ndobject_properties[i].first = m_field_names[i];
-        m_ndobject_properties[i].second.set(ndobject_parameters_dtype, &property_get_ndobject_field, (void *)i);
+        m_array_properties[i].first = m_field_names[i];
+        m_array_properties[i].second.set(array_parameters_dtype, &property_get_array_field, (void *)i);
     }
 }
 
-void struct_dtype::get_dynamic_ndobject_properties(const std::pair<std::string, gfunc::callable> **out_properties, size_t *out_count) const
+void struct_dtype::get_dynamic_array_properties(const std::pair<std::string, gfunc::callable> **out_properties, size_t *out_count) const
 {
-    *out_properties = m_ndobject_properties.empty() ? NULL : &m_ndobject_properties[0];
-    *out_count = (int)m_ndobject_properties.size();
+    *out_properties = m_array_properties.empty() ? NULL : &m_array_properties[0];
+    *out_count = (int)m_array_properties.size();
 }

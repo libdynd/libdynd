@@ -31,7 +31,7 @@ TEST(DTypeDType, Create) {
 }
 
 TEST(DTypeDType, BasicNDobject) {
-    ndobject a;
+    nd::array a;
 
     a = dtype("int32");
     EXPECT_EQ(dtype_type_id, a.get_dtype().get_type_id());
@@ -39,9 +39,9 @@ TEST(DTypeDType, BasicNDobject) {
 }
 
 TEST(DTypeDType, StringCasting) {
-    ndobject a;
+    nd::array a;
 
-    a = ndobject("int32").ucast(make_dtype_dtype());
+    a = nd::array("int32").ucast(make_dtype_dtype());
     a = a.eval();
     EXPECT_EQ(dtype_type_id, a.get_dtype().get_type_id());
     EXPECT_EQ(make_dtype<int32_t>(), a.as<dtype>());
@@ -49,11 +49,11 @@ TEST(DTypeDType, StringCasting) {
 }
 
 TEST(DTypeDType, ScalarRefCount) {
-    ndobject a;
+    nd::array a;
     dtype d, d2;
     d = make_strided_dim_dtype(make_dtype<int>());
 
-    a = empty(make_dtype_dtype());
+    a = nd::empty(make_dtype_dtype());
     EXPECT_EQ(1, d.extended()->get_use_count());
     a.vals() = d;
     EXPECT_EQ(2, d.extended()->get_use_count());
@@ -61,7 +61,7 @@ TEST(DTypeDType, ScalarRefCount) {
     EXPECT_EQ(3, d.extended()->get_use_count());
     d2 = dtype();
     EXPECT_EQ(2, d.extended()->get_use_count());
-    // Assigning a new value in the ndobject should free the reference in 'a'
+    // Assigning a new value in the nd::array should free the reference in 'a'
     a.vals() = dtype();
     EXPECT_EQ(1, d.extended()->get_use_count());
     a.vals() = d;
@@ -73,12 +73,12 @@ TEST(DTypeDType, ScalarRefCount) {
 }
 
 TEST(DTypeDType, StridedArrayRefCount) {
-    ndobject a;
+    nd::array a;
     dtype d;
     d = make_strided_dim_dtype(make_dtype<int>());
 
     // 1D Strided Array
-    a = empty(10, make_strided_dim_dtype(make_dtype_dtype()));
+    a = nd::empty(10, make_strided_dim_dtype(make_dtype_dtype()));
     EXPECT_EQ(1, d.extended()->get_use_count());
     a.vals() = d;
     EXPECT_EQ(11, d.extended()->get_use_count());
@@ -96,7 +96,7 @@ TEST(DTypeDType, StridedArrayRefCount) {
     EXPECT_EQ(1, d.extended()->get_use_count());
 
     // 2D Strided Array
-    a = empty(3, 3, dtype("M, N, dtype"));
+    a = nd::empty(3, 3, dtype("M, N, dtype"));
     EXPECT_EQ(strided_dim_type_id, a.get_dtype().get_type_id());
     EXPECT_EQ(1, d.extended()->get_use_count());
     a.vals() = d;
@@ -120,12 +120,12 @@ TEST(DTypeDType, StridedArrayRefCount) {
 
 
 TEST(DTypeDType, FixedArrayRefCount) {
-    ndobject a;
+    nd::array a;
     dtype d;
     d = make_strided_dim_dtype(make_dtype<int>());
 
     // 1D Fixed Array
-    a = empty(make_fixed_dim_dtype(10, make_dtype_dtype()));
+    a = nd::empty(make_fixed_dim_dtype(10, make_dtype_dtype()));
     EXPECT_EQ(1, d.extended()->get_use_count());
     a.vals() = d;
     EXPECT_EQ(11, d.extended()->get_use_count());
@@ -143,7 +143,7 @@ TEST(DTypeDType, FixedArrayRefCount) {
     EXPECT_EQ(1, d.extended()->get_use_count());
 
     // 2D Fixed Array
-    a = empty(dtype("3, 3, dtype"));
+    a = nd::empty(dtype("3, 3, dtype"));
     EXPECT_EQ(fixed_dim_type_id, a.get_dtype().get_type_id());
     EXPECT_EQ(1, d.extended()->get_use_count());
     a.vals() = d;
@@ -166,17 +166,17 @@ TEST(DTypeDType, FixedArrayRefCount) {
 }
 
 TEST(DTypeDType, VarArrayRefCount) {
-    ndobject a;
+    nd::array a;
     dtype d;
     d = make_strided_dim_dtype(make_dtype<int>());
 
     // 1D Var Array
-    a = empty(make_var_dim_dtype(make_dtype_dtype()));
+    a = nd::empty(make_var_dim_dtype(make_dtype_dtype()));
     // It should have an objectarray memory block type
     EXPECT_EQ((uint32_t)objectarray_memory_block_type,
                     reinterpret_cast<const var_dim_dtype_metadata *>(
                         a.get_ndo_meta())->blockref->m_type);
-    a.vals() = empty("10, dtype");
+    a.vals() = nd::empty("10, dtype");
     EXPECT_EQ(1, d.extended()->get_use_count());
     a.vals() = d;
     EXPECT_EQ(11, d.extended()->get_use_count());
@@ -194,10 +194,10 @@ TEST(DTypeDType, VarArrayRefCount) {
     EXPECT_EQ(1, d.extended()->get_use_count());
 
     // 2D Strided + Var Array
-    a = empty(3, make_strided_dim_dtype(make_var_dim_dtype(make_dtype_dtype())));
-    a.vals_at(0) = empty("2, dtype");
-    a.vals_at(1) = empty("3, dtype");
-    a.vals_at(2) = empty("4, dtype");
+    a = nd::empty(3, make_strided_dim_dtype(make_var_dim_dtype(make_dtype_dtype())));
+    a.vals_at(0) = nd::empty("2, dtype");
+    a.vals_at(1) = nd::empty("3, dtype");
+    a.vals_at(2) = nd::empty("4, dtype");
     EXPECT_EQ(1, d.extended()->get_use_count());
     a.vals() = d;
     EXPECT_EQ(10, d.extended()->get_use_count());
@@ -219,12 +219,12 @@ TEST(DTypeDType, VarArrayRefCount) {
 }
 
 TEST(DTypeDType, CStructRefCount) {
-    ndobject a;
+    nd::array a;
     dtype d;
     d = make_strided_dim_dtype(make_dtype<int>());
 
     // Single CStruct Instance
-    a = empty("{dt: dtype; more: {a: int32; b: dtype}; other: string}");
+    a = nd::empty("{dt: dtype; more: {a: int32; b: dtype}; other: string}");
     EXPECT_EQ(cstruct_type_id, a.get_dtype().get_type_id());
     EXPECT_EQ(1, d.extended()->get_use_count());
     a.p("dt").vals() = d;
@@ -246,7 +246,7 @@ TEST(DTypeDType, CStructRefCount) {
     EXPECT_EQ(1, d.extended()->get_use_count());
 
     // Array of CStruct Instance
-    a = empty(10, "M, {dt: dtype; more: {a: int32; b: dtype}; other: string}");
+    a = nd::empty(10, "M, {dt: dtype; more: {a: int32; b: dtype}; other: string}");
     EXPECT_EQ(cstruct_type_id, a.at(0).get_dtype().get_type_id());
     EXPECT_EQ(1, d.extended()->get_use_count());
     a.p("dt").vals() = d;
@@ -269,12 +269,12 @@ TEST(DTypeDType, CStructRefCount) {
 
 
 TEST(DTypeDType, StructRefCount) {
-    ndobject a;
+    nd::array a;
     dtype d;
     d = make_strided_dim_dtype(make_dtype<int>());
 
     // Single CStruct Instance
-    a = empty("{dt: dtype; more: {a: int32; b: dtype}; other: string}").at(0 <= irange() < 2);
+    a = nd::empty("{dt: dtype; more: {a: int32; b: dtype}; other: string}").at(0 <= irange() < 2);
     EXPECT_EQ(struct_type_id, a.get_dtype().get_type_id());
     EXPECT_EQ(1, d.extended()->get_use_count());
     a.p("dt").vals() = d;
@@ -296,7 +296,7 @@ TEST(DTypeDType, StructRefCount) {
     EXPECT_EQ(1, d.extended()->get_use_count());
 
     // Array of Struct Instance
-    a = empty(10, "M, {dt: dtype; more: {a: int32; b: dtype}; other: string}").at(irange(), 0 <= irange() < 2);
+    a = nd::empty(10, "M, {dt: dtype; more: {a: int32; b: dtype}; other: string}").at(irange(), 0 <= irange() < 2);
     EXPECT_EQ(struct_type_id, a.at(0).get_dtype().get_type_id());
     EXPECT_EQ(1, d.extended()->get_use_count());
     a.p("dt").vals() = d;

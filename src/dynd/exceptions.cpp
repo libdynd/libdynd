@@ -41,12 +41,12 @@ broadcast_error::broadcast_error(size_t dst_ndim, const intptr_t *dst_shape,
 {
 }
 
-inline string broadcast_error_message(const ndobject& dst, const ndobject& src)
+inline string broadcast_error_message(const nd::array& dst, const nd::array& src)
 {
     vector<intptr_t> dst_shape = dst.get_shape(), src_shape = src.get_shape();
     stringstream ss;
 
-    ss << "cannot broadcast ndobject with dtype ";
+    ss << "cannot broadcast nd::array with dtype ";
     ss << src.get_dtype() << " and shape ";
     print_shape(ss, src_shape);
     ss << " to dtype " << dst.get_dtype() << " and shape ";
@@ -55,12 +55,12 @@ inline string broadcast_error_message(const ndobject& dst, const ndobject& src)
     return ss.str();
 }
 
-broadcast_error::broadcast_error(const ndobject& dst, const ndobject& src)
+broadcast_error::broadcast_error(const nd::array& dst, const nd::array& src)
     : dynd_exception("broadcast error", broadcast_error_message(dst, src))
 {
 }
 
-inline string broadcast_error_message(size_t ninputs, const ndobject* inputs)
+inline string broadcast_error_message(size_t ninputs, const nd::array* inputs)
 {
     stringstream ss;
 
@@ -78,7 +78,7 @@ inline string broadcast_error_message(size_t ninputs, const ndobject* inputs)
     return ss.str();
 }
 
-broadcast_error::broadcast_error(size_t ninputs, const ndobject *inputs)
+broadcast_error::broadcast_error(size_t ninputs, const nd::array *inputs)
     : dynd_exception("broadcast error", broadcast_error_message(ninputs, inputs))
 {
 }

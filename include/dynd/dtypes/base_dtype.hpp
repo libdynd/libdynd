@@ -498,7 +498,7 @@ public:
      *       be able to handle the case where they are the first non-uniform dtype in an array type, not
      *       just strictly of the non-uniform dtype.
      */
-    virtual void get_dynamic_ndobject_properties(
+    virtual void get_dynamic_array_properties(
                     const std::pair<std::string, gfunc::callable> **out_properties,
                     size_t *out_count) const;
 
@@ -509,7 +509,7 @@ public:
      *       be able to handle the case where they are the first non-uniform dtype in an array type, not
      *       just strictly of the non-uniform dtype.
      */
-    virtual void get_dynamic_ndobject_functions(
+    virtual void get_dynamic_array_functions(
                     const std::pair<std::string, gfunc::callable> **out_functions,
                     size_t *out_count) const;
 

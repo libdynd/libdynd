@@ -30,8 +30,8 @@ TEST(GFuncCallable, OneParameter) {
             c.get_parameters_dtype());
 
     // Call it with the generic interface and see that it gave what we want
-    ndobject a, r;
-    a = empty(c.get_parameters_dtype());
+    nd::array a, r;
+    a = nd::empty(c.get_parameters_dtype());
 
     a.at(0).val_assign(12);
     r = c.call_generic(a);
@@ -76,8 +76,8 @@ TEST(GFuncCallable, TwoParameters) {
             c.get_parameters_dtype());
 
     // Call it and see that it gave what we want
-    ndobject a, r;
-    a = empty(c.get_parameters_dtype());
+    nd::array a, r;
+    a = nd::empty(c.get_parameters_dtype());
 
     a.at(0).val_assign(2.25);
     a.at(1).val_assign(3);
@@ -136,8 +136,8 @@ TEST(GFuncCallable, ThreeParameters) {
             c.get_parameters_dtype());
 
     // Call it and see that it gave what we want
-    ndobject a, r;
-    a = empty(c.get_parameters_dtype());
+    nd::array a, r;
+    a = nd::empty(c.get_parameters_dtype());
 
     a.at(0).val_assign(true);
     a.at(1).val_assign(3);
@@ -219,8 +219,8 @@ TEST(GFuncCallable, FourParameters) {
             c.get_parameters_dtype());
 
     // Call it and see that it gave what we want
-    ndobject a, r;
-    a = empty(c.get_parameters_dtype());
+    nd::array a, r;
+    a = nd::empty(c.get_parameters_dtype());
 
     a.at(0).val_assign(-1);
     a.at(1).val_assign(7);
@@ -324,8 +324,8 @@ TEST(GFuncCallable, FiveParameters) {
             c.get_parameters_dtype());
 
     // Call it and see that it gave what we want
-    ndobject a, r;
-    a = empty(c.get_parameters_dtype());
+    nd::array a, r;
+    a = nd::empty(c.get_parameters_dtype());
 
     float f0[3] = {1, 2, 3};
     double d0[3] = {1.5, 2.5, 3.5};
@@ -339,8 +339,8 @@ TEST(GFuncCallable, FiveParameters) {
     EXPECT_EQ(86, r.as<double>());
 }
 
-static ndobject ndobject_return(int a, int b, int c) {
-    ndobject result = make_strided_ndobject(3, make_dtype<int>());
+static nd::array array_return(int a, int b, int c) {
+    nd::array result = nd::make_strided_array(3, make_dtype<int>());
     result.at(0).vals() = a;
     result.at(1).vals() = b;
     result.at(2).vals() = c;
@@ -349,11 +349,11 @@ static ndobject ndobject_return(int a, int b, int c) {
 
 TEST(GFuncCallable, NDObjectReturn) {
     // Create the callable
-    gfunc::callable c = gfunc::make_callable(&ndobject_return, "a", "b", "c");
+    gfunc::callable c = gfunc::make_callable(&array_return, "a", "b", "c");
 
     // Call it and see that it gave what we want
-    ndobject a, r;
-    a = empty(c.get_parameters_dtype());
+    nd::array a, r;
+    a = nd::empty(c.get_parameters_dtype());
 
     a.at(0).val_assign(-10);
     a.at(1).val_assign(20);
@@ -365,20 +365,20 @@ TEST(GFuncCallable, NDObjectReturn) {
     EXPECT_EQ(1000, r.at(2).as<int>());
 }
 
-static size_t ndobject_param(const ndobject& n) {
+static size_t array_param(const nd::array& n) {
     return n.get_dtype().get_undim();
 }
 
 TEST(GFuncCallable, NDObjectParam) {
     // Create the callable
-    gfunc::callable c = gfunc::make_callable(&ndobject_param, "n");
+    gfunc::callable c = gfunc::make_callable(&array_param, "n");
 
     // Call it and see that it gave what we want
-    ndobject tmp;
-    ndobject a, r;
-    a = empty(c.get_parameters_dtype());
+    nd::array tmp;
+    nd::array a, r;
+    a = nd::empty(c.get_parameters_dtype());
 
-    tmp = make_strided_ndobject(2, 3, 1, make_dtype<int>());
+    tmp = nd::make_strided_array(2, 3, 1, make_dtype<int>());
     *(void**)a.get_ndo()->m_data_pointer = tmp.get_ndo();
     r = c.call_generic(a);
     EXPECT_EQ(make_dtype<size_t>(), r.get_dtype());
@@ -395,8 +395,8 @@ TEST(GFuncCallable, DTypeParam) {
 
     // Call it and see that it gave what we want
     dtype tmp;
-    ndobject a, r;
-    a = empty(c.get_parameters_dtype());
+    nd::array a, r;
+    a = nd::empty(c.get_parameters_dtype());
 
     // With an base_dtype
     tmp = make_cstruct_dtype(make_dtype<complex<float> >(), "A", make_dtype<int8_t>(), "B");
@@ -424,8 +424,8 @@ TEST(GFuncCallable, StringReturn) {
     gfunc::callable c = gfunc::make_callable(&string_return, "a", "b", "c");
 
     // Call it and see that it gave what we want
-    ndobject a, r;
-    a = empty(c.get_parameters_dtype());
+    nd::array a, r;
+    a = nd::empty(c.get_parameters_dtype());
 
     a.at(0).val_assign(-10);
     a.at(1).val_assign(20);

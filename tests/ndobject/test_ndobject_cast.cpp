@@ -15,6 +15,6 @@ using namespace std;
 using namespace dynd;
 
 TEST(NDObjectCast, BasicCast) {
-    ndobject n = 3.5;
+    nd::array n = 3.5;
     EXPECT_EQ(3.5f, n.cast(make_dtype<float>()).as<float>());
 }

@@ -14,7 +14,7 @@ using namespace std;
 using namespace dynd;
 
 TEST(ComplexDType, Create) {
-    ndobject n;
+    nd::array n;
     
     n = complex<float>(1.5f, 2.0f);
     EXPECT_EQ(n.get_dtype(), make_dtype<complex<float> >());
@@ -26,7 +26,7 @@ TEST(ComplexDType, Create) {
 }
 
 TEST(ComplexDType, Properties) {
-    ndobject n;
+    nd::array n;
     
     n = complex<float>(1.5f, 2.0f);
     EXPECT_EQ(1.5f, n.p("real").as<float>());

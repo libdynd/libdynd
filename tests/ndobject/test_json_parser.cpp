@@ -22,7 +22,7 @@ using namespace std;
 using namespace dynd;
 
 TEST(JSONParser, BuiltinsFromBool) {
-    ndobject n;
+    nd::array n;
 
     n = parse_json(make_dtype<dynd_bool>(), "true");
     EXPECT_EQ(make_dtype<dynd_bool>(), n.get_dtype());
@@ -38,7 +38,7 @@ TEST(JSONParser, BuiltinsFromBool) {
 }
 
 TEST(JSONParser, BuiltinsFromInteger) {
-    ndobject n;
+    nd::array n;
 
     n = parse_json(make_dtype<int8_t>(), "123");
     EXPECT_EQ(make_dtype<int8_t>(), n.get_dtype());
@@ -68,7 +68,7 @@ TEST(JSONParser, BuiltinsFromInteger) {
 }
 
 TEST(JSONParser, BuiltinsFromFloat) {
-    ndobject n;
+    nd::array n;
 
     n = parse_json(make_dtype<float>(), "123");
     EXPECT_EQ(make_dtype<float>(), n.get_dtype());
@@ -92,7 +92,7 @@ TEST(JSONParser, BuiltinsFromFloat) {
 }
 
 TEST(JSONParser, String) {
-    ndobject n;
+    nd::array n;
 
     n = parse_json(make_string_dtype(string_encoding_utf_8), "\"testing one two three\"");
     EXPECT_EQ(make_string_dtype(string_encoding_utf_8), n.get_dtype());
@@ -112,7 +112,7 @@ TEST(JSONParser, String) {
 }
 
 TEST(JSONParser, ListBools) {
-    ndobject n;
+    nd::array n;
 
     n = parse_json(make_var_dim_dtype(make_dtype<dynd_bool>()),
                     "  [true, true, false, null]  ");
@@ -145,7 +145,7 @@ TEST(JSONParser, ListBools) {
 }
 
 TEST(JSONParser, NestedListInts) {
-    ndobject n;
+    nd::array n;
 
     n = parse_json(make_fixed_dim_dtype(3, make_var_dim_dtype(make_dtype<int>())),
                     "  [[1,2,3], [4,5], [6,7,-10,1000] ]  ");
@@ -172,7 +172,7 @@ TEST(JSONParser, NestedListInts) {
 }
 
 TEST(JSONParser, Struct) {
-    ndobject n;
+    nd::array n;
     dtype sdt = make_cstruct_dtype(make_dtype<int>(), "id", make_dtype<double>(), "amount",
                     make_string_dtype(), "name", make_date_dtype(), "when");
 
@@ -201,7 +201,7 @@ TEST(JSONParser, Struct) {
 }
 
 TEST(JSONParser, NestedStruct) {
-    ndobject n;
+    nd::array n;
     dtype sdt = make_cstruct_dtype(make_fixed_dim_dtype(3, make_dtype<float>()), "position",
                     make_dtype<double>(), "amount",
                     make_cstruct_dtype(make_string_dtype(), "name", make_date_dtype(), "when"), "data");
@@ -233,7 +233,7 @@ TEST(JSONParser, NestedStruct) {
 }
 
 TEST(JSONParser, ListOfStruct) {
-    ndobject n;
+    nd::array n;
     dtype sdt = make_var_dim_dtype(make_cstruct_dtype(make_fixed_dim_dtype(3, make_dtype<float>()), "position",
                     make_dtype<double>(), "amount",
                     make_cstruct_dtype(make_string_dtype(), "name", make_date_dtype(), "when"), "data"));
@@ -264,7 +264,7 @@ TEST(JSONParser, ListOfStruct) {
 }
 
 TEST(JSONParser, JSONDType) {
-    ndobject n;
+    nd::array n;
 
     // Parsing JSON with the output being just a json string
     n = parse_json("json", "{\"a\":3.14}");

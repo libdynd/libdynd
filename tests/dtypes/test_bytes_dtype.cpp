@@ -64,12 +64,12 @@ TEST(BytesDType, Create) {
 }
 
 TEST(BytesDType, Assign) {
-    ndobject a, b, c;
+    nd::array a, b, c;
 
     // Round-trip a string through a bytes assignment
-    a = ndobject("testing").view_scalars(make_bytes_dtype(1));
+    a = nd::array("testing").view_scalars(make_bytes_dtype(1));
     EXPECT_EQ(a.get_dtype(), make_bytes_dtype(1));
-    b = empty(make_bytes_dtype(1));
+    b = nd::empty(make_bytes_dtype(1));
     b.vals() = a;
     c = b.view_scalars(make_string_dtype());
     EXPECT_EQ(c.get_dtype(), make_string_dtype());

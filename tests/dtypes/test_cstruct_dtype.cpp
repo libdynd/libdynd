@@ -212,7 +212,7 @@ TEST(CStructDType, IsExpression) {
 
 TEST(CStructDType, PropertyAccess) {
     dtype dt = make_cstruct_dtype(make_dtype<int>(), "x", make_dtype<double>(), "y", make_dtype<short>(), "z");
-    ndobject a = empty(dt);
+    nd::array a = nd::empty(dt);
     a.at(0).vals() = 3;
     a.at(1).vals() = 4.25;
     a.at(2).vals() = 5;
@@ -224,7 +224,7 @@ TEST(CStructDType, PropertyAccess) {
 
 TEST(CStructDType, EqualDTypeAssign) {
     dtype dt = make_cstruct_dtype(make_dtype<int>(), "x", make_dtype<double>(), "y", make_dtype<short>(), "z");
-    ndobject a = make_strided_ndobject(2, dt);
+    nd::array a = nd::make_strided_array(2, dt);
     a.at(0,0).vals() = 3;
     a.at(0,1).vals() = 4.25;
     a.at(0,2).vals() = 5;
@@ -232,7 +232,7 @@ TEST(CStructDType, EqualDTypeAssign) {
     a.at(1,1).vals() = 7.25;
     a.at(1,2).vals() = 8;
 
-    ndobject b = make_strided_ndobject(2, dt);
+    nd::array b = nd::make_strided_array(2, dt);
     b.val_assign(a);
     EXPECT_EQ(3,    a.at(0,0).as<int>());
     EXPECT_EQ(4.25, a.at(0,1).as<double>());
@@ -244,7 +244,7 @@ TEST(CStructDType, EqualDTypeAssign) {
 
 TEST(CStructDType, DifferentDTypeAssign) {
     dtype dt = make_cstruct_dtype(make_dtype<int>(), "x", make_dtype<double>(), "y", make_dtype<short>(), "z");
-    ndobject a = make_strided_ndobject(2, dt);
+    nd::array a = nd::make_strided_array(2, dt);
     a.at(0,0).vals() = 3;
     a.at(0,1).vals() = 4.25;
     a.at(0,2).vals() = 5;
@@ -253,7 +253,7 @@ TEST(CStructDType, DifferentDTypeAssign) {
     a.at(1,2).vals() = 8;
 
     dtype dt2 = make_cstruct_dtype(make_dtype<float>(), "y", make_dtype<int>(), "z", make_dtype<uint8_t>(), "x");
-    ndobject b = make_strided_ndobject(2, dt2);
+    nd::array b = nd::make_strided_array(2, dt2);
     b.val_assign(a);
     EXPECT_EQ(3,    b.at(0,2).as<int>());
     EXPECT_EQ(4.25, b.at(0,0).as<double>());
@@ -265,7 +265,7 @@ TEST(CStructDType, DifferentDTypeAssign) {
 
 TEST(CStructDType, FromStructAssign) {
     dtype dt = make_struct_dtype(make_dtype<int>(), "x", make_dtype<double>(), "y", make_dtype<short>(), "z");
-    ndobject a = make_strided_ndobject(2, dt);
+    nd::array a = nd::make_strided_array(2, dt);
     a.at(0,0).vals() = 3;
     a.at(0,1).vals() = 4.25;
     a.at(0,2).vals() = 5;
@@ -274,7 +274,7 @@ TEST(CStructDType, FromStructAssign) {
     a.at(1,2).vals() = 8;
 
     dtype dt2 = make_cstruct_dtype(make_dtype<float>(), "y", make_dtype<int>(), "z", make_dtype<uint8_t>(), "x");
-    ndobject b = make_strided_ndobject(2, dt2);
+    nd::array b = nd::make_strided_array(2, dt2);
     b.val_assign(a);
     EXPECT_EQ(3,    b.at(0,2).as<int>());
     EXPECT_EQ(4.25, b.at(0,0).as<double>());
@@ -285,11 +285,11 @@ TEST(CStructDType, FromStructAssign) {
 }
 
 TEST(CStructDType, SingleCompare) {
-    ndobject a, b;
+    nd::array a, b;
     dtype sdt = make_cstruct_dtype(make_dtype<int32_t>(), "a",
                     make_dtype<float>(), "b", make_dtype<int64_t>(), "c");
-    a = empty(sdt);
-    b = empty(sdt);
+    a = nd::empty(sdt);
+    b = nd::empty(sdt);
 
     // Test lexicographic sorting
 

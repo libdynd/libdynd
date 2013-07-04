@@ -70,8 +70,8 @@ struct iterdata_broadcasting_terminator {
 char *iterdata_broadcasting_terminator_incr(iterdata_common *iterdata, size_t level);
 char *iterdata_broadcasting_terminator_reset(iterdata_common *iterdata, char *data, size_t level);
 
-// Forward declaration of the ndobject
-class ndobject;
+// Forward declaration of the nd::array
+class nd::array;
 
 /**
  * This class represents a data type.
@@ -286,13 +286,13 @@ public:
      *
      * \param property_name  The property to access.
      */
-    ndobject p(const char *property_name) const;
+    nd::array p(const char *property_name) const;
     /**
      * Accesses a dynamic property of the dtype.
      *
      * \param property_name  The property to access.
      */
-    ndobject p(const std::string& property_name) const;
+    nd::array p(const std::string& property_name) const;
 
     /**
      * Indexes into the dtype, intended for recursive calls from the extended-dtype version. See
@@ -411,7 +411,7 @@ public:
     /**
      * Returns true if the data layout (both data and metadata)
      * is compatible with that of 'rhs'. If this returns true,
-     * the dtypes can be substituted for each other in an ndobject.
+     * the dtypes can be substituted for each other in an nd::array.
      */
     bool data_layout_compatible_with(const dtype& rhs) const;
 
@@ -616,7 +616,7 @@ public:
      *
      * \param o         the std::ostream to print to
      * \param data      pointer to the data element to print
-     * \param metadata  pointer to the ndobject metadata for the data element
+     * \param metadata  pointer to the nd::array metadata for the data element
      */
     void print_data(std::ostream& o, const char *metadata, const char *data) const;
 

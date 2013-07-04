@@ -66,7 +66,7 @@ void dynd::broadcast_to_shape(size_t dst_ndim, const intptr_t *dst_shape,
     //cout << "\n";
 }
 
-void dynd::broadcast_input_shapes(size_t ninputs, const ndobject* inputs,
+void dynd::broadcast_input_shapes(size_t ninputs, const nd::array* inputs,
                         size_t& out_undim, dimvector& out_shape, shortvector<int>& out_axis_perm)
 {
     // Get the number of broadcast dimensions
@@ -131,16 +131,16 @@ void dynd::broadcast_input_shapes(size_t ninputs, const ndobject* inputs,
 }
 
 void dynd::create_broadcast_result(const dtype& result_inner_dt,
-                const ndobject& op0, const ndobject& op1, const ndobject& op2,
-                ndobject &out, size_t& out_ndim, dimvector& out_shape)
+                const nd::array& op0, const nd::array& op1, const nd::array& op2,
+                nd::array &out, size_t& out_ndim, dimvector& out_shape)
 {
     // Get the shape of the result
     shortvector<int> axis_perm;
-    ndobject ops[3] = {op0, op1, op2};
+    nd::array ops[3] = {op0, op1, op2};
     broadcast_input_shapes(3, ops, out_ndim, out_shape, axis_perm);
 
-    out = make_strided_ndobject(result_inner_dt, out_ndim, out_shape.get(),
-                    read_access_flag|write_access_flag, axis_perm.get());
+    out = nd::make_strided_array(result_inner_dt, out_ndim, out_shape.get(),
+                    nd::read_access_flag|nd::write_access_flag, axis_perm.get());
 }
 
 void dynd::incremental_broadcast(size_t out_undim, intptr_t *out_shape,

@@ -16,7 +16,7 @@ using namespace dynd;
 namespace {
     template<class T>
     struct range_specialization {
-        static void range(const void *beginval, const void *stepval, ndobject& result) {
+        static void range(const void *beginval, const void *stepval, nd::array& result) {
             T begin = *reinterpret_cast<const T *>(beginval);
             T step = *reinterpret_cast<const T *>(stepval);
             intptr_t count = result.get_shape()[0], stride = result.get_strides()[0];
@@ -98,13 +98,13 @@ namespace {
     };
 } // anonymous namespace
 
-ndobject dynd::nd::range(const dtype& scalar_dtype, const void *beginval, const void *endval, const void *stepval)
+nd::array dynd::nd::range(const dtype& scalar_dtype, const void *beginval, const void *endval, const void *stepval)
 {
 #define ONE_ARANGE_SPECIALIZATION(type) \
     case type_id_of<type>::value: { \
         intptr_t dim_size = range_counter<type, dtype_kind_of<type>::value>::count(beginval, endval, stepval); \
-        ndobject result = \
-                make_strided_ndobject(dim_size, scalar_dtype); \
+        nd::array result = \
+                nd::make_strided_array(dim_size, scalar_dtype); \
         range_specialization<type>::range(beginval, stepval, result); \
         return DYND_MOVE(result); \
     }
@@ -131,7 +131,7 @@ ndobject dynd::nd::range(const dtype& scalar_dtype, const void *beginval, const 
     throw runtime_error(ss.str());
 }
 
-static void linspace_specialization(float start, float stop, intptr_t count, ndobject& result)
+static void linspace_specialization(float start, float stop, intptr_t count, nd::array& result)
 {
     intptr_t stride = result.get_strides()[0];
     char *dst = result.get_readwrite_originptr();
@@ -141,7 +141,7 @@ static void linspace_specialization(float start, float stop, intptr_t count, ndo
     }
 }
 
-static void linspace_specialization(double start, double stop, intptr_t count, ndobject& result)
+static void linspace_specialization(double start, double stop, intptr_t count, nd::array& result)
 {
     intptr_t stride = result.get_strides()[0];
     char *dst = result.get_readwrite_originptr();
@@ -151,7 +151,7 @@ static void linspace_specialization(double start, double stop, intptr_t count, n
     }
 }
 
-static void linspace_specialization(complex<float> start, complex<float> stop, intptr_t count, ndobject& result)
+static void linspace_specialization(complex<float> start, complex<float> stop, intptr_t count, nd::array& result)
 {
     intptr_t stride = result.get_strides()[0];
     char *dst = result.get_readwrite_originptr();
@@ -162,7 +162,7 @@ static void linspace_specialization(complex<float> start, complex<float> stop, i
     }
 }
 
-static void linspace_specialization(complex<double> start, complex<double> stop, intptr_t count, ndobject& result)
+static void linspace_specialization(complex<double> start, complex<double> stop, intptr_t count, nd::array& result)
 {
     intptr_t stride = result.get_strides()[0];
     char *dst = result.get_readwrite_originptr();
@@ -173,10 +173,10 @@ static void linspace_specialization(complex<double> start, complex<double> stop,
     }
 }
 
-ndobject dynd::nd::linspace(const ndobject& start, const ndobject& stop, intptr_t count, const dtype& dt)
+nd::array dynd::nd::linspace(const nd::array& start, const nd::array& stop, intptr_t count, const dtype& dt)
 {
-    ndobject start_cleaned = start.ucast(dt).eval();
-    ndobject stop_cleaned = stop.ucast(dt).eval();
+    nd::array start_cleaned = start.ucast(dt).eval();
+    nd::array stop_cleaned = stop.ucast(dt).eval();
 
     if (start_cleaned.is_scalar() && stop_cleaned.is_scalar()) {
         return linspace(dt, start_cleaned.get_readonly_originptr(), stop_cleaned.get_readonly_originptr(), count);
@@ -185,7 +185,7 @@ ndobject dynd::nd::linspace(const ndobject& start, const ndobject& stop, intptr_
     }
 }
 
-ndobject dynd::nd::linspace(const ndobject& start, const ndobject& stop, intptr_t count)
+nd::array dynd::nd::linspace(const nd::array& start, const nd::array& stop, intptr_t count)
 {
     dtype dt = promote_dtypes_arithmetic(start.get_udtype(), stop.get_udtype());
     // Make sure it's at least floating point
@@ -195,7 +195,7 @@ ndobject dynd::nd::linspace(const ndobject& start, const ndobject& stop, intptr_
     return linspace(start, stop, count, dt);
 }
 
-ndobject dynd::nd::linspace(const dtype& dt, const void *startval, const void *stopval, intptr_t count)
+nd::array dynd::nd::linspace(const dtype& dt, const void *startval, const void *stopval, intptr_t count)
 {
     if (count < 2) {
         throw runtime_error("linspace needs a count of at least 2");
@@ -203,25 +203,25 @@ ndobject dynd::nd::linspace(const dtype& dt, const void *startval, const void *s
 
     switch (dt.get_type_id()) {
         case float32_type_id: {
-            ndobject result = make_strided_ndobject(count, dt);
+            nd::array result = nd::make_strided_array(count, dt);
             linspace_specialization(*reinterpret_cast<const float *>(startval),
                             *reinterpret_cast<const float *>(stopval), count, result);
             return DYND_MOVE(result);
         }
         case float64_type_id: {
-            ndobject result = make_strided_ndobject(count, dt);
+            nd::array result = nd::make_strided_array(count, dt);
             linspace_specialization(*reinterpret_cast<const double *>(startval),
                             *reinterpret_cast<const double *>(stopval), count, result);
             return DYND_MOVE(result);
         }
         case complex_float32_type_id: {
-            ndobject result = make_strided_ndobject(count, dt);
+            nd::array result = nd::make_strided_array(count, dt);
             linspace_specialization(*reinterpret_cast<const complex<float> *>(startval),
                             *reinterpret_cast<const complex<float> *>(stopval), count, result);
             return DYND_MOVE(result);
         }
         case complex_float64_type_id: {
-            ndobject result = make_strided_ndobject(count, dt);
+            nd::array result = nd::make_strided_array(count, dt);
             linspace_specialization(*reinterpret_cast<const complex<double> *>(startval),
                             *reinterpret_cast<const complex<double> *>(stopval), count, result);
             return DYND_MOVE(result);

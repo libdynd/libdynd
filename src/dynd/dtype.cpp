@@ -150,7 +150,7 @@ dtype dtype::at_array(int nindices, const irange *indices) const
     }
 }
 
-ndobject dtype::p(const char *property_name) const
+nd::array dtype::p(const char *property_name) const
 {
     if (!is_builtin()) {
         const std::pair<std::string, gfunc::callable> *properties;
@@ -171,7 +171,7 @@ ndobject dtype::p(const char *property_name) const
     throw runtime_error(ss.str());
 }
 
-ndobject dtype::p(const std::string& property_name) const
+nd::array dtype::p(const std::string& property_name) const
 {
     if (!is_builtin()) {
         const std::pair<std::string, gfunc::callable> *properties;
@@ -280,7 +280,7 @@ intptr_t dtype::get_dim_size(const char *metadata, const char *data) const {
         return shape[0];
     } else {
         std::stringstream ss;
-        ss << "Cannot get the leading dimension size of ndobject with dtype " << *this;
+        ss << "Cannot get the leading dimension size of nd::array with dtype " << *this;
         throw std::runtime_error(ss.str());
     }
 }

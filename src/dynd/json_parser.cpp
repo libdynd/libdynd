@@ -39,7 +39,7 @@ namespace {
     };
 } // anonymous namespace
 
-static void json_as_buffer(const ndobject& json, ndobject& out_tmp_ref, const char *&begin, const char *&end)
+static void json_as_buffer(const nd::array& json, nd::array& out_tmp_ref, const char *&begin, const char *&end)
 {
     // Check the dtype of 'json', and get pointers to the begin/end of a UTF-8 buffer
     dtype json_dtype = json.get_dtype().value_dtype();
@@ -83,18 +83,18 @@ static void json_as_buffer(const ndobject& json, ndobject& out_tmp_ref, const ch
     }
 }
 
-void dynd::parse_json(ndobject& out, const ndobject& json)
+void dynd::parse_json(nd::array& out, const nd::array& json)
 {
     const char *json_begin = NULL, *json_end = NULL;
-    ndobject tmp_ref;
+    nd::array tmp_ref;
     json_as_buffer(json, tmp_ref, json_begin, json_end);
     parse_json(out, json_begin, json_end);
 }
 
-ndobject dynd::parse_json(const dtype& dt, const ndobject& json)
+nd::array dynd::parse_json(const dtype& dt, const nd::array& json)
 {
     const char *json_begin = NULL, *json_end = NULL;
-    ndobject tmp_ref;
+    nd::array tmp_ref;
     json_as_buffer(json, tmp_ref, json_begin, json_end);
     return parse_json(dt, json_begin, json_end);
 }
@@ -721,7 +721,7 @@ void dynd::validate_json(const char *json_begin, const char *json_end)
     }
 }
 
-void dynd::parse_json(ndobject& out, const char *json_begin, const char *json_end)
+void dynd::parse_json(nd::array& out, const char *json_begin, const char *json_end)
 {
     try {
         const char *begin = json_begin, *end = json_end;
@@ -747,11 +747,11 @@ void dynd::parse_json(ndobject& out, const char *json_begin, const char *json_en
     }
 }
 
-ndobject dynd::parse_json(const dtype& dt, const char *json_begin, const char *json_end)
+nd::array dynd::parse_json(const dtype& dt, const char *json_begin, const char *json_end)
 {
-    ndobject result;
+    nd::array result;
     if (dt.get_data_size() != 0) {
-        result = empty(dt);
+        result = nd::empty(dt);
         parse_json(result, json_begin, json_end);
         if (!dt.is_builtin()) {
             dt.extended()->metadata_finalize_buffers(result.get_ndo_meta());

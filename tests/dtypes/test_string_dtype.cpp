@@ -56,7 +56,7 @@ TEST(StringDType, Create) {
 }
 
 TEST(StringDType, NDObjectCreation) {
-    ndobject a;
+    nd::array a;
 
     // A C-style string literal
     a = "testing string construction";
@@ -88,7 +88,7 @@ TEST(StringDType, NDObjectCreation) {
 }
 
 TEST(StringDType, Basic) {
-    ndobject a, b;
+    nd::array a, b;
 
     // std::string goes in as a utf8 string
     a = std::string("abcdefg");
@@ -139,11 +139,11 @@ TEST(StringDType, Basic) {
 }
 
 TEST(StringDType, AccessFlags) {
-    ndobject a, b;
+    nd::array a, b;
 
     // Default construction from a string produces an immutable fixedstring
     a = std::string("testing one two three testing one two three four five testing one two three four five six seven");
-    EXPECT_EQ(read_access_flag | immutable_access_flag, (int)a.get_access_flags());
+    EXPECT_EQ(nd::read_access_flag | nd::immutable_access_flag, (int)a.get_access_flags());
     // Turn it into a fixedstring dtype for this test
     a = a.ucast(make_fixedstring_dtype(95, string_encoding_utf_8)).eval();
     EXPECT_EQ(make_fixedstring_dtype(95, string_encoding_utf_8), a.get_dtype());
@@ -151,7 +151,7 @@ TEST(StringDType, AccessFlags) {
     // Converting to a blockref string of the same encoding produces a reference
     // into the fixedstring value
     b = a.ucast(make_string_dtype(string_encoding_utf_8)).eval();
-    EXPECT_EQ(read_access_flag | write_access_flag, (int)b.get_access_flags());
+    EXPECT_EQ(nd::read_access_flag | nd::write_access_flag, (int)b.get_access_flags());
     EXPECT_EQ(make_string_dtype(string_encoding_utf_8), b.get_dtype());
     // The data array for 'a' matches the referenced data for 'b' (TODO: Restore this property)
 //    EXPECT_EQ(a.get_readonly_originptr(), reinterpret_cast<const char * const *>(b.get_readonly_originptr())[0]);
@@ -159,7 +159,7 @@ TEST(StringDType, AccessFlags) {
     // Converting to a blockref string of a different encoding makes a new
     // copy, so gets read write access
     b = a.ucast(make_string_dtype(string_encoding_utf_16)).eval();
-    EXPECT_EQ(read_access_flag | write_access_flag, (int)b.get_access_flags());
+    EXPECT_EQ(nd::read_access_flag | nd::write_access_flag, (int)b.get_access_flags());
     EXPECT_EQ(make_string_dtype(string_encoding_utf_16), b.get_dtype());
 }
 
@@ -212,10 +212,10 @@ TEST(StringDType, Unicode) {
             0xf0, 0x90, 0x80, 0x80, // Smallest utf8 4-character code point
             0xf4, 0x8f, 0xbf, 0xbf // Largest code point
             };
-    ndobject x;
-    ndobject a(make_utf32_ndobject(utf32_string));
-    ndobject b(make_utf16_ndobject(utf16_string));
-    ndobject c(make_utf8_ndobject(utf8_string));
+    nd::array x;
+    nd::array a(nd::make_utf32_array(utf32_string));
+    nd::array b(nd::make_utf16_array(utf16_string));
+    nd::array c(nd::make_utf8_array(utf8_string));
 
     // Convert all to utf32 and compare with the reference
     x = a.ucast(make_string_dtype(string_encoding_utf_32)).eval();
@@ -274,7 +274,7 @@ TEST(StringDType, CanonicalDType) {
 }
 
 TEST(StringDType, Storage) {
-    ndobject a;
+    nd::array a;
 
     a = "testing";
     EXPECT_EQ(make_bytes_dtype(1), a.storage().get_dtype());
@@ -295,136 +295,136 @@ TEST(StringDType, EncodingSizes) {
 }
 
 TEST(StringDType, StringToBool) {
-    EXPECT_TRUE(ndobject("true").ucast<dynd_bool>().as<bool>());
-    EXPECT_TRUE(ndobject(" True").ucast<dynd_bool>().as<bool>());
-    EXPECT_TRUE(ndobject("TRUE ").ucast<dynd_bool>().as<bool>());
-    EXPECT_TRUE(ndobject("T").ucast<dynd_bool>().as<bool>());
-    EXPECT_TRUE(ndobject("yes  ").ucast<dynd_bool>().as<bool>());
-    EXPECT_TRUE(ndobject("Yes").ucast<dynd_bool>().as<bool>());
-    EXPECT_TRUE(ndobject("Y").ucast<dynd_bool>().as<bool>());
-    EXPECT_TRUE(ndobject(" on").ucast<dynd_bool>().as<bool>());
-    EXPECT_TRUE(ndobject("On").ucast<dynd_bool>().as<bool>());
-    EXPECT_TRUE(ndobject("1").ucast<dynd_bool>().as<bool>());
+    EXPECT_TRUE(nd::array("true").ucast<dynd_bool>().as<bool>());
+    EXPECT_TRUE(nd::array(" True").ucast<dynd_bool>().as<bool>());
+    EXPECT_TRUE(nd::array("TRUE ").ucast<dynd_bool>().as<bool>());
+    EXPECT_TRUE(nd::array("T").ucast<dynd_bool>().as<bool>());
+    EXPECT_TRUE(nd::array("yes  ").ucast<dynd_bool>().as<bool>());
+    EXPECT_TRUE(nd::array("Yes").ucast<dynd_bool>().as<bool>());
+    EXPECT_TRUE(nd::array("Y").ucast<dynd_bool>().as<bool>());
+    EXPECT_TRUE(nd::array(" on").ucast<dynd_bool>().as<bool>());
+    EXPECT_TRUE(nd::array("On").ucast<dynd_bool>().as<bool>());
+    EXPECT_TRUE(nd::array("1").ucast<dynd_bool>().as<bool>());
 
-    EXPECT_FALSE(ndobject("false").ucast<dynd_bool>().as<bool>());
-    EXPECT_FALSE(ndobject("False").ucast<dynd_bool>().as<bool>());
-    EXPECT_FALSE(ndobject("FALSE ").ucast<dynd_bool>().as<bool>());
-    EXPECT_FALSE(ndobject("F ").ucast<dynd_bool>().as<bool>());
-    EXPECT_FALSE(ndobject(" no").ucast<dynd_bool>().as<bool>());
-    EXPECT_FALSE(ndobject("No").ucast<dynd_bool>().as<bool>());
-    EXPECT_FALSE(ndobject("N").ucast<dynd_bool>().as<bool>());
-    EXPECT_FALSE(ndobject("off ").ucast<dynd_bool>().as<bool>());
-    EXPECT_FALSE(ndobject("Off").ucast<dynd_bool>().as<bool>());
-    EXPECT_FALSE(ndobject("0 ").ucast<dynd_bool>().as<bool>());
+    EXPECT_FALSE(nd::array("false").ucast<dynd_bool>().as<bool>());
+    EXPECT_FALSE(nd::array("False").ucast<dynd_bool>().as<bool>());
+    EXPECT_FALSE(nd::array("FALSE ").ucast<dynd_bool>().as<bool>());
+    EXPECT_FALSE(nd::array("F ").ucast<dynd_bool>().as<bool>());
+    EXPECT_FALSE(nd::array(" no").ucast<dynd_bool>().as<bool>());
+    EXPECT_FALSE(nd::array("No").ucast<dynd_bool>().as<bool>());
+    EXPECT_FALSE(nd::array("N").ucast<dynd_bool>().as<bool>());
+    EXPECT_FALSE(nd::array("off ").ucast<dynd_bool>().as<bool>());
+    EXPECT_FALSE(nd::array("Off").ucast<dynd_bool>().as<bool>());
+    EXPECT_FALSE(nd::array("0 ").ucast<dynd_bool>().as<bool>());
 
     // By default, conversion to bool is not permissive
-    EXPECT_THROW(ndobject(ndobject("").ucast<dynd_bool>().eval()), runtime_error);
-    EXPECT_THROW(ndobject(ndobject("2").ucast<dynd_bool>().eval()), runtime_error);
-    EXPECT_THROW(ndobject(ndobject("flase").ucast<dynd_bool>().eval()), runtime_error);
+    EXPECT_THROW(nd::array(nd::array("").ucast<dynd_bool>().eval()), runtime_error);
+    EXPECT_THROW(nd::array(nd::array("2").ucast<dynd_bool>().eval()), runtime_error);
+    EXPECT_THROW(nd::array(nd::array("flase").ucast<dynd_bool>().eval()), runtime_error);
 
     // In "none" mode, it's a bit more permissive
-    EXPECT_FALSE(ndobject(ndobject("").ucast<dynd_bool>(0, assign_error_none).eval()).as<bool>());
-    EXPECT_TRUE(ndobject(ndobject("2").ucast<dynd_bool>(0, assign_error_none).eval()).as<bool>());
-    EXPECT_TRUE(ndobject(ndobject("flase").ucast<dynd_bool>(0, assign_error_none).eval()).as<bool>());
+    EXPECT_FALSE(nd::array(nd::array("").ucast<dynd_bool>(0, assign_error_none).eval()).as<bool>());
+    EXPECT_TRUE(nd::array(nd::array("2").ucast<dynd_bool>(0, assign_error_none).eval()).as<bool>());
+    EXPECT_TRUE(nd::array(nd::array("flase").ucast<dynd_bool>(0, assign_error_none).eval()).as<bool>());
 }
 
 TEST(StringDType, StringToInteger) {
     // Test the boundary cases of the various integers
-    EXPECT_EQ(-128, ndobject("-128").ucast<int8_t>().as<int8_t>());
-    EXPECT_EQ(127, ndobject("127").ucast<int8_t>().as<int8_t>());
-    EXPECT_THROW(ndobject("-129").ucast<int8_t>().eval(), runtime_error);
-    EXPECT_THROW(ndobject("128").ucast<int8_t>().eval(), runtime_error);
+    EXPECT_EQ(-128, nd::array("-128").ucast<int8_t>().as<int8_t>());
+    EXPECT_EQ(127, nd::array("127").ucast<int8_t>().as<int8_t>());
+    EXPECT_THROW(nd::array("-129").ucast<int8_t>().eval(), runtime_error);
+    EXPECT_THROW(nd::array("128").ucast<int8_t>().eval(), runtime_error);
 
-    EXPECT_EQ(-32768, ndobject("-32768").ucast<int16_t>().as<int16_t>());
-    EXPECT_EQ(32767, ndobject("32767").ucast<int16_t>().as<int16_t>());
-    EXPECT_THROW(ndobject("-32769").ucast<int16_t>().eval(), runtime_error);
-    EXPECT_THROW(ndobject("32768").ucast<int16_t>().eval(), runtime_error);
+    EXPECT_EQ(-32768, nd::array("-32768").ucast<int16_t>().as<int16_t>());
+    EXPECT_EQ(32767, nd::array("32767").ucast<int16_t>().as<int16_t>());
+    EXPECT_THROW(nd::array("-32769").ucast<int16_t>().eval(), runtime_error);
+    EXPECT_THROW(nd::array("32768").ucast<int16_t>().eval(), runtime_error);
 
-    EXPECT_EQ(-2147483648LL, ndobject("-2147483648").ucast<int32_t>().as<int32_t>());
-    EXPECT_EQ(2147483647, ndobject("2147483647").ucast<int32_t>().as<int32_t>());
-    EXPECT_THROW(ndobject(ndobject("-2147483649").ucast<int32_t>().eval()), runtime_error);
-    EXPECT_THROW(ndobject(ndobject("2147483648").ucast<int32_t>().eval()), runtime_error);
+    EXPECT_EQ(-2147483648LL, nd::array("-2147483648").ucast<int32_t>().as<int32_t>());
+    EXPECT_EQ(2147483647, nd::array("2147483647").ucast<int32_t>().as<int32_t>());
+    EXPECT_THROW(nd::array(nd::array("-2147483649").ucast<int32_t>().eval()), runtime_error);
+    EXPECT_THROW(nd::array(nd::array("2147483648").ucast<int32_t>().eval()), runtime_error);
 
-    EXPECT_EQ(-9223372036854775807LL - 1, ndobject("-9223372036854775808").ucast<int64_t>().as<int64_t>());
-    EXPECT_EQ(9223372036854775807LL, ndobject("9223372036854775807").ucast<int64_t>().as<int64_t>());
-    EXPECT_THROW(ndobject("-9223372036854775809").ucast<int64_t>().eval(), runtime_error);
-    EXPECT_THROW(ndobject("9223372036854775808").ucast<int64_t>().eval(), runtime_error);
+    EXPECT_EQ(-9223372036854775807LL - 1, nd::array("-9223372036854775808").ucast<int64_t>().as<int64_t>());
+    EXPECT_EQ(9223372036854775807LL, nd::array("9223372036854775807").ucast<int64_t>().as<int64_t>());
+    EXPECT_THROW(nd::array("-9223372036854775809").ucast<int64_t>().eval(), runtime_error);
+    EXPECT_THROW(nd::array("9223372036854775808").ucast<int64_t>().eval(), runtime_error);
 
-    EXPECT_EQ(0u, ndobject("0").ucast<uint8_t>().as<uint8_t>());
-    EXPECT_EQ(255u, ndobject("255").ucast<uint8_t>().as<uint8_t>());
-    EXPECT_THROW(ndobject("-1").ucast<uint8_t>().eval(), runtime_error);
-    EXPECT_THROW(ndobject("256").ucast<uint8_t>().eval(), runtime_error);
+    EXPECT_EQ(0u, nd::array("0").ucast<uint8_t>().as<uint8_t>());
+    EXPECT_EQ(255u, nd::array("255").ucast<uint8_t>().as<uint8_t>());
+    EXPECT_THROW(nd::array("-1").ucast<uint8_t>().eval(), runtime_error);
+    EXPECT_THROW(nd::array("256").ucast<uint8_t>().eval(), runtime_error);
 
-    EXPECT_EQ(0u, ndobject("0").ucast<uint16_t>().as<uint16_t>());
-    EXPECT_EQ(65535u, ndobject("65535").ucast<uint16_t>().as<uint16_t>());
-    EXPECT_THROW(ndobject("-1").ucast<uint16_t>().eval(), runtime_error);
-    EXPECT_THROW(ndobject("65536").ucast<uint16_t>().eval(), runtime_error);
+    EXPECT_EQ(0u, nd::array("0").ucast<uint16_t>().as<uint16_t>());
+    EXPECT_EQ(65535u, nd::array("65535").ucast<uint16_t>().as<uint16_t>());
+    EXPECT_THROW(nd::array("-1").ucast<uint16_t>().eval(), runtime_error);
+    EXPECT_THROW(nd::array("65536").ucast<uint16_t>().eval(), runtime_error);
 
-    EXPECT_EQ(0u, ndobject("0").ucast<uint32_t>().as<uint32_t>());
-    EXPECT_EQ(4294967295ULL, ndobject("4294967295").ucast<uint32_t>().as<uint32_t>());
-    EXPECT_THROW(ndobject("-1").ucast<uint32_t>().eval(), runtime_error);
-    EXPECT_THROW(ndobject("4294967296").ucast<uint32_t>().eval(), runtime_error);
+    EXPECT_EQ(0u, nd::array("0").ucast<uint32_t>().as<uint32_t>());
+    EXPECT_EQ(4294967295ULL, nd::array("4294967295").ucast<uint32_t>().as<uint32_t>());
+    EXPECT_THROW(nd::array("-1").ucast<uint32_t>().eval(), runtime_error);
+    EXPECT_THROW(nd::array("4294967296").ucast<uint32_t>().eval(), runtime_error);
 
-    EXPECT_EQ(0u, ndobject("0").ucast<uint64_t>().as<uint64_t>());
-    EXPECT_EQ(18446744073709551615ULL, ndobject("18446744073709551615").ucast<uint64_t>().as<uint64_t>());
-    EXPECT_THROW(ndobject("-1").ucast<uint64_t>().eval(), runtime_error);
-    EXPECT_THROW(ndobject("18446744073709551616").ucast<uint64_t>().eval(), runtime_error);
+    EXPECT_EQ(0u, nd::array("0").ucast<uint64_t>().as<uint64_t>());
+    EXPECT_EQ(18446744073709551615ULL, nd::array("18446744073709551615").ucast<uint64_t>().as<uint64_t>());
+    EXPECT_THROW(nd::array("-1").ucast<uint64_t>().eval(), runtime_error);
+    EXPECT_THROW(nd::array("18446744073709551616").ucast<uint64_t>().eval(), runtime_error);
 }
 
 TEST(StringDType, StringToFloat32SpecialValues) {
     // +NaN with default payload
-    EXPECT_EQ(0x7fc00000u, ndobject("NaN").ucast<float>().view_scalars<uint32_t>().as<uint32_t>());
-    EXPECT_EQ(0x7fc00000u, ndobject("nan").ucast<float>().view_scalars<uint32_t>().as<uint32_t>());
-    EXPECT_EQ(0x7fc00000u, ndobject("1.#QNAN").ucast<float>().view_scalars<uint32_t>().as<uint32_t>());
+    EXPECT_EQ(0x7fc00000u, nd::array("NaN").ucast<float>().view_scalars<uint32_t>().as<uint32_t>());
+    EXPECT_EQ(0x7fc00000u, nd::array("nan").ucast<float>().view_scalars<uint32_t>().as<uint32_t>());
+    EXPECT_EQ(0x7fc00000u, nd::array("1.#QNAN").ucast<float>().view_scalars<uint32_t>().as<uint32_t>());
     // -NaN with default payload
-    EXPECT_EQ(0xffc00000u, ndobject("-NaN").ucast<float>().view_scalars<uint32_t>().as<uint32_t>());
-    EXPECT_EQ(0xffc00000u, ndobject("-nan").ucast<float>().view_scalars<uint32_t>().as<uint32_t>());
-    EXPECT_EQ(0xffc00000u, ndobject("-1.#IND").ucast<float>().view_scalars<uint32_t>().as<uint32_t>());
+    EXPECT_EQ(0xffc00000u, nd::array("-NaN").ucast<float>().view_scalars<uint32_t>().as<uint32_t>());
+    EXPECT_EQ(0xffc00000u, nd::array("-nan").ucast<float>().view_scalars<uint32_t>().as<uint32_t>());
+    EXPECT_EQ(0xffc00000u, nd::array("-1.#IND").ucast<float>().view_scalars<uint32_t>().as<uint32_t>());
     // +Inf
-    EXPECT_EQ(0x7f800000u, ndobject("Inf").ucast<float>().view_scalars<uint32_t>().as<uint32_t>());
-    EXPECT_EQ(0x7f800000u, ndobject("inf").ucast<float>().view_scalars<uint32_t>().as<uint32_t>());
-    EXPECT_EQ(0x7f800000u, ndobject("Infinity").ucast<float>().view_scalars<uint32_t>().as<uint32_t>());
-    EXPECT_EQ(0x7f800000u, ndobject("1.#INF").ucast<float>().view_scalars<uint32_t>().as<uint32_t>());
+    EXPECT_EQ(0x7f800000u, nd::array("Inf").ucast<float>().view_scalars<uint32_t>().as<uint32_t>());
+    EXPECT_EQ(0x7f800000u, nd::array("inf").ucast<float>().view_scalars<uint32_t>().as<uint32_t>());
+    EXPECT_EQ(0x7f800000u, nd::array("Infinity").ucast<float>().view_scalars<uint32_t>().as<uint32_t>());
+    EXPECT_EQ(0x7f800000u, nd::array("1.#INF").ucast<float>().view_scalars<uint32_t>().as<uint32_t>());
     // -Inf
-    EXPECT_EQ(0xff800000u, ndobject("-Inf").ucast<float>().view_scalars<uint32_t>().as<uint32_t>());
-    EXPECT_EQ(0xff800000u, ndobject("-inf").ucast<float>().view_scalars<uint32_t>().as<uint32_t>());
-    EXPECT_EQ(0xff800000u, ndobject("-Infinity").ucast<float>().view_scalars<uint32_t>().as<uint32_t>());
-    EXPECT_EQ(0xff800000u, ndobject("-1.#INF").ucast<float>().view_scalars<uint32_t>().as<uint32_t>());
+    EXPECT_EQ(0xff800000u, nd::array("-Inf").ucast<float>().view_scalars<uint32_t>().as<uint32_t>());
+    EXPECT_EQ(0xff800000u, nd::array("-inf").ucast<float>().view_scalars<uint32_t>().as<uint32_t>());
+    EXPECT_EQ(0xff800000u, nd::array("-Infinity").ucast<float>().view_scalars<uint32_t>().as<uint32_t>());
+    EXPECT_EQ(0xff800000u, nd::array("-1.#INF").ucast<float>().view_scalars<uint32_t>().as<uint32_t>());
 }
 
 TEST(StringDType, StringToFloat64SpecialValues) {
     // +NaN with default payload
-    EXPECT_EQ(0x7ff8000000000000ULL, ndobject("NaN").ucast<double>().view_scalars<uint64_t>().as<uint64_t>());
-    EXPECT_EQ(0x7ff8000000000000ULL, ndobject("nan").ucast<double>().view_scalars<uint64_t>().as<uint64_t>());
-    EXPECT_EQ(0x7ff8000000000000ULL, ndobject("1.#QNAN").ucast<double>().view_scalars<uint64_t>().as<uint64_t>());
+    EXPECT_EQ(0x7ff8000000000000ULL, nd::array("NaN").ucast<double>().view_scalars<uint64_t>().as<uint64_t>());
+    EXPECT_EQ(0x7ff8000000000000ULL, nd::array("nan").ucast<double>().view_scalars<uint64_t>().as<uint64_t>());
+    EXPECT_EQ(0x7ff8000000000000ULL, nd::array("1.#QNAN").ucast<double>().view_scalars<uint64_t>().as<uint64_t>());
     // -NaN with default payload
-    EXPECT_EQ(0xfff8000000000000ULL, ndobject("-NaN").ucast<double>().view_scalars<uint64_t>().as<uint64_t>());
-    EXPECT_EQ(0xfff8000000000000ULL, ndobject("-nan").ucast<double>().view_scalars<uint64_t>().as<uint64_t>());
-    EXPECT_EQ(0xfff8000000000000ULL, ndobject("-1.#IND").ucast<double>().view_scalars<uint64_t>().as<uint64_t>());
+    EXPECT_EQ(0xfff8000000000000ULL, nd::array("-NaN").ucast<double>().view_scalars<uint64_t>().as<uint64_t>());
+    EXPECT_EQ(0xfff8000000000000ULL, nd::array("-nan").ucast<double>().view_scalars<uint64_t>().as<uint64_t>());
+    EXPECT_EQ(0xfff8000000000000ULL, nd::array("-1.#IND").ucast<double>().view_scalars<uint64_t>().as<uint64_t>());
     // +Inf
-    EXPECT_EQ(0x7ff0000000000000ULL, ndobject("Inf").ucast<double>().view_scalars<uint64_t>().as<uint64_t>());
-    EXPECT_EQ(0x7ff0000000000000ULL, ndobject("inf").ucast<double>().view_scalars<uint64_t>().as<uint64_t>());
-    EXPECT_EQ(0x7ff0000000000000ULL, ndobject("Infinity").ucast<double>().view_scalars<uint64_t>().as<uint64_t>());
-    EXPECT_EQ(0x7ff0000000000000ULL, ndobject("1.#INF").ucast<double>().view_scalars<uint64_t>().as<uint64_t>());
+    EXPECT_EQ(0x7ff0000000000000ULL, nd::array("Inf").ucast<double>().view_scalars<uint64_t>().as<uint64_t>());
+    EXPECT_EQ(0x7ff0000000000000ULL, nd::array("inf").ucast<double>().view_scalars<uint64_t>().as<uint64_t>());
+    EXPECT_EQ(0x7ff0000000000000ULL, nd::array("Infinity").ucast<double>().view_scalars<uint64_t>().as<uint64_t>());
+    EXPECT_EQ(0x7ff0000000000000ULL, nd::array("1.#INF").ucast<double>().view_scalars<uint64_t>().as<uint64_t>());
     // -Inf
-    EXPECT_EQ(0xfff0000000000000ULL, ndobject("-Inf").ucast<double>().view_scalars<uint64_t>().as<uint64_t>());
-    EXPECT_EQ(0xfff0000000000000ULL, ndobject("-inf").ucast<double>().view_scalars<uint64_t>().as<uint64_t>());
-    EXPECT_EQ(0xfff0000000000000ULL, ndobject("-Infinity").ucast<double>().view_scalars<uint64_t>().as<uint64_t>());
-    EXPECT_EQ(0xfff0000000000000ULL, ndobject("-1.#INF").ucast<double>().view_scalars<uint64_t>().as<uint64_t>());
+    EXPECT_EQ(0xfff0000000000000ULL, nd::array("-Inf").ucast<double>().view_scalars<uint64_t>().as<uint64_t>());
+    EXPECT_EQ(0xfff0000000000000ULL, nd::array("-inf").ucast<double>().view_scalars<uint64_t>().as<uint64_t>());
+    EXPECT_EQ(0xfff0000000000000ULL, nd::array("-Infinity").ucast<double>().view_scalars<uint64_t>().as<uint64_t>());
+    EXPECT_EQ(0xfff0000000000000ULL, nd::array("-1.#INF").ucast<double>().view_scalars<uint64_t>().as<uint64_t>());
 }
 
 TEST(StringDType, StringEncodeError) {
-    ndobject a = parse_json("string", "\"\\uc548\\ub155\""), b;
+    nd::array a = parse_json("string", "\"\\uc548\\ub155\""), b;
     EXPECT_THROW(a.ucast(make_string_dtype(string_encoding_ascii)).eval(),
                     string_encode_error);
 }
 
 TEST(StringDType, Comparisons) {
-    ndobject a, b;
+    nd::array a, b;
 
     // Basic test
-    a = ndobject("abc");
-    b = ndobject("abd");
+    a = nd::array("abc");
+    b = nd::array("abd");
     EXPECT_TRUE(a.op_sorting_less(b));
     EXPECT_TRUE(a < b);
     EXPECT_TRUE(a <= b);
@@ -441,8 +441,8 @@ TEST(StringDType, Comparisons) {
     EXPECT_TRUE(b > a);
 
     // Different sizes
-    a = ndobject("abcd");
-    b = ndobject("abcde");
+    a = nd::array("abcd");
+    b = nd::array("abcde");
     EXPECT_TRUE(a.op_sorting_less(b));
     EXPECT_TRUE(a < b);
     EXPECT_TRUE(a <= b);
@@ -459,8 +459,8 @@ TEST(StringDType, Comparisons) {
     EXPECT_TRUE(b > a);
 
     // Expression and different encodings
-    a = ndobject("abcd").ucast(make_string_dtype(string_encoding_ucs_2));
-    b = ndobject("abcde").ucast(make_string_dtype(string_encoding_utf_32)).eval();
+    a = nd::array("abcd").ucast(make_string_dtype(string_encoding_ucs_2));
+    b = nd::array("abcde").ucast(make_string_dtype(string_encoding_utf_32)).eval();
     EXPECT_TRUE(a.op_sorting_less(b));
     EXPECT_TRUE(a < b);
     EXPECT_TRUE(a <= b);
@@ -478,7 +478,7 @@ TEST(StringDType, Comparisons) {
 }
 
 TEST(StringDType, Concatenation) {
-    ndobject a, b;
+    nd::array a, b;
 
     a = "first";
     b = "second";
@@ -489,7 +489,7 @@ TEST(StringDType, Concatenation) {
 
     a = a_arr;
     b = b_arr;
-    ndobject c = (a + b).eval();
+    nd::array c = (a + b).eval();
     ASSERT_EQ(dtype("M, string"), c.get_dtype());
     EXPECT_EQ(3, c.get_dim_size());
     EXPECT_EQ("testingalpha", c.at(0).as<string>());

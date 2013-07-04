@@ -18,7 +18,7 @@ namespace dynd {
  * \param prefix  Prepends the datashape with this string
  * \param multiline  If true, split the datashape across multiple lines.
  */
-std::string format_datashape(const ndobject& n,
+std::string format_datashape(const nd::array& n,
                 const std::string& prefix = "",
                 bool multiline = true);
 

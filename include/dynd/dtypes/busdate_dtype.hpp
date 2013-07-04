@@ -39,10 +39,10 @@ class busdate_dtype : public base_dtype {
      * If non-NULL, a one-dimensional contiguous array of day unit date_dtype
      * which has no duplicates or holidays falling on a weekend.
      */
-    ndobject m_holidays;
+    nd::array m_holidays;
 
 public:
-    busdate_dtype(busdate_roll_t roll, const bool *weekmask, const ndobject& holidays);
+    busdate_dtype(busdate_roll_t roll, const bool *weekmask, const nd::array& holidays);
 
     virtual ~busdate_dtype();
 
@@ -58,7 +58,7 @@ public:
         return m_busdays_in_weekmask;
     }
 
-    ndobject get_holidays() const {
+    nd::array get_holidays() const {
         return m_holidays;
     }
 
@@ -88,7 +88,8 @@ public:
     }
 };
 
-inline dtype make_busdate_dtype(busdate_roll_t roll = busdate_roll_following, const bool *weekmask = NULL, const ndobject& holidays = ndobject()) {
+inline dtype make_busdate_dtype(busdate_roll_t roll = busdate_roll_following,
+                const bool *weekmask = NULL, const nd::array& holidays = nd::array()) {
     return dtype(new busdate_dtype(roll, weekmask, holidays), false);
 }
 

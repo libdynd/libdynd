@@ -33,12 +33,12 @@ class cstruct_dtype : public base_struct_dtype {
     std::vector<std::string> m_field_names;
     std::vector<size_t> m_data_offsets;
     std::vector<size_t> m_metadata_offsets;
-    std::vector<std::pair<std::string, gfunc::callable> > m_ndobject_properties;
+    std::vector<std::pair<std::string, gfunc::callable> > m_array_properties;
 
-    void create_ndobject_properties();
+    void create_array_properties();
 
     // Special constructor to break the property parameter cycle in
-    // create_ndobject_properties
+    // create_array_properties
     cstruct_dtype(int, int);
 public:
     cstruct_dtype(size_t field_count, const dtype *field_types,
@@ -138,7 +138,7 @@ public:
     void get_dynamic_dtype_properties(
                     const std::pair<std::string, gfunc::callable> **out_properties,
                     size_t *out_count) const;
-    void get_dynamic_ndobject_properties(
+    void get_dynamic_array_properties(
                     const std::pair<std::string, gfunc::callable> **out_properties,
                     size_t *out_count) const;
 }; // class cstruct_dtype

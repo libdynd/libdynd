@@ -16,7 +16,7 @@ using namespace std;
 using namespace dynd;
 
 TEST(NDObjectRange, Basic) {
-    ndobject a;
+    nd::array a;
 
     a = nd::range(1, 10);
     EXPECT_EQ(make_dtype<int32_t>(), a.get_dtype().get_udtype());
@@ -49,7 +49,7 @@ TEST(NDObjectRange, Basic) {
 }
 
 TEST(NDObjectRange, CastScalars) {
-    ndobject a;
+    nd::array a;
 
     a = nd::range(4).ucast(make_dtype<int32_t>());
     a = a.eval();

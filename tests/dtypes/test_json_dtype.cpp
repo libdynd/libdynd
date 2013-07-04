@@ -28,11 +28,11 @@ TEST(JSONDType, Create) {
 }
 
 TEST(JSONDType, Validation) {
-    ndobject a;
+    nd::array a;
 
-    a = ndobject("[1,2,3]").ucast(make_json_dtype()).eval();
+    a = nd::array("[1,2,3]").ucast(make_json_dtype()).eval();
     EXPECT_EQ(make_json_dtype(), a.get_dtype());
     EXPECT_EQ("[1,2,3]", a.as<string>());
 
-    EXPECT_THROW(ndobject("[1,2,3]#").ucast(make_json_dtype()).eval(), runtime_error);
+    EXPECT_THROW(nd::array("[1,2,3]#").ucast(make_json_dtype()).eval(), runtime_error);
 }

@@ -275,15 +275,15 @@ void base_dtype::get_nonuniform_ndobject_properties_and_functions(
     size_t properties_count = 0, functions_count = 0;
     const std::pair<std::string, gfunc::callable> *properties = NULL, *functions = NULL;
     if (ndim == 0) {
-        get_dynamic_ndobject_properties(&properties, &properties_count);
-        get_dynamic_ndobject_functions(&functions, &functions_count);
+        get_dynamic_array_properties(&properties, &properties_count);
+        get_dynamic_array_functions(&functions, &functions_count);
     } else {
         dtype dt = get_dtype_at_dimension(NULL, ndim);
         if (!dt.is_builtin()) {
-            dt.extended()->get_dynamic_ndobject_properties(&properties, &properties_count);
-            dt.extended()->get_dynamic_ndobject_functions(&functions, &functions_count);
+            dt.extended()->get_dynamic_array_properties(&properties, &properties_count);
+            dt.extended()->get_dynamic_array_functions(&functions, &functions_count);
         } else {
-            get_builtin_dtype_dynamic_ndobject_properties(dt.get_type_id(), &properties, &properties_count);
+            get_builtin_dtype_dynamic_array_properties(dt.get_type_id(), &properties, &properties_count);
         }
     }
     out_properties.resize(properties_count);
@@ -310,14 +310,14 @@ void base_dtype::get_dynamic_dtype_functions(const std::pair<std::string, gfunc:
     *out_count = 0;
 }
 
-void base_dtype::get_dynamic_ndobject_properties(const std::pair<std::string, gfunc::callable> **out_properties, size_t *out_count) const
+void base_dtype::get_dynamic_array_properties(const std::pair<std::string, gfunc::callable> **out_properties, size_t *out_count) const
 {
     // Default to no properties
     *out_properties = NULL;
     *out_count = 0;
 }
 
-void base_dtype::get_dynamic_ndobject_functions(const std::pair<std::string, gfunc::callable> **out_functions, size_t *out_count) const
+void base_dtype::get_dynamic_array_functions(const std::pair<std::string, gfunc::callable> **out_functions, size_t *out_count) const
 {
     // Default to no functions
     *out_functions = NULL;

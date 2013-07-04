@@ -47,7 +47,7 @@ void broadcast_to_shape(size_t ndim, const intptr_t *shape,
                 intptr_t *out_strides);
 
 /**
- * This function broadcasts the input ndobject's shapes together,
+ * This function broadcasts the input array's shapes together,
  * producing a broadcast shape as the result. For any dimension in
  * an input with a variable-sized shape, the output shape is set
  * to a negative value.
@@ -58,7 +58,7 @@ void broadcast_to_shape(size_t ndim, const intptr_t *shape,
  * \param out_shape  This is filled with the broadcast shape.
  * \param out_axis_perm  A permutation of the axis for the output to use to match the input's memory ordering.
  */
-void broadcast_input_shapes(size_t ninputs, const ndobject* inputs,
+void broadcast_input_shapes(size_t ninputs, const nd::array* inputs,
                         size_t& out_undim, dimvector& out_shape, shortvector<int>& out_axis_perm);
 
 /**
@@ -87,13 +87,13 @@ void incremental_broadcast(size_t out_undim, intptr_t *out_shape,
  * \param op0  The first operand to broadcast.
  * \param op1  The second operand to broadcast.
  * \param op2  The third operand to broadcast.
- * \param out  This is populated with the created ndobject.
+ * \param out  This is populated with the created array.
  * \param out_ndim  This is populated with the broadcast ndim.
  * \param out_shape  This is populated with the broadcast shape.
  */
 void create_broadcast_result(const dtype& result_inner_dt,
-                const ndobject& op0, const ndobject& op1, const ndobject& op2,
-                ndobject &out, size_t& out_ndim, dimvector& out_shape);
+                const nd::array& op0, const nd::array& op1, const nd::array& op2,
+                nd::array &out, size_t& out_ndim, dimvector& out_shape);
 
 /**
  * This function creates a permutation based on one ndarray's strides.

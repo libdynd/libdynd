@@ -18,7 +18,9 @@ namespace dynd {
 
 // Forward declaration of object class, for broadcast_error
 class dtype;
-class ndobject;
+namespace nd {
+    class array;
+} // namespace nd
 
 class dynd_exception : public std::exception {
 protected:
@@ -56,13 +58,13 @@ public:
     /**
      * An exception for when 'src' doesn't broadcast to 'dst'
      */
-    broadcast_error(const ndobject& dst, const ndobject& src);
+    broadcast_error(const nd::array& dst, const nd::array& src);
 
     /**
      * An exception for when a number of input operands can't be broadcast
      * together.
      */
-    broadcast_error(size_t ninputs, const ndobject *inputs);
+    broadcast_error(size_t ninputs, const nd::array *inputs);
 
     broadcast_error(const dtype& dst_dt, const char *dst_metadata,
                     const dtype& src_dt, const char *src_metadata);

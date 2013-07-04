@@ -42,10 +42,10 @@ void free_zeroinit_memory_block(memory_block_data *memblock);
  */
 void free_executable_memory_block(memory_block_data *memblock);
 /**
- * INTERNAL: Frees a memory_block created by make_ndobject_memory_block.
+ * INTERNAL: Frees a memory_block created by make_array_memory_block.
  * This should only be called by the memory_block decref code.
  */
-void free_ndobject_memory_block(memory_block_data *memblock);
+void free_array_memory_block(memory_block_data *memblock);
 /**
  * INTERNAL: Frees a memory_block created by make_objectarray_memory_block.
  * This should only be called by the memory_block decref code.
@@ -96,8 +96,8 @@ void dynd::detail::memory_block_free(memory_block_data *memblock)
         case executable_memory_block_type:
             free_executable_memory_block(memblock);
             return;
-        case ndobject_memory_block_type:
-            free_ndobject_memory_block(memblock);
+        case array_memory_block_type:
+            free_array_memory_block(memblock);
             return;
     }
 
@@ -127,7 +127,7 @@ std::ostream& dynd::operator<<(std::ostream& o, memory_block_type_t mbt)
         case executable_memory_block_type:
             o << "executable";
             break;
-        case ndobject_memory_block_type:
+        case array_memory_block_type:
             o << "ndobject";
             break;
         default:
@@ -161,8 +161,8 @@ void dynd::memory_block_debug_print(const memory_block_data *memblock, std::ostr
             case executable_memory_block_type:
                 executable_memory_block_debug_print(memblock, o, indent);
                 break;
-            case ndobject_memory_block_type:
-                ndobject_memory_block_debug_print(memblock, o, indent);
+            case array_memory_block_type:
+                array_memory_block_debug_print(memblock, o, indent);
                 break;
         }
         o << indent << "------" << endl;
