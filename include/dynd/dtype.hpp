@@ -71,7 +71,9 @@ char *iterdata_broadcasting_terminator_incr(iterdata_common *iterdata, size_t le
 char *iterdata_broadcasting_terminator_reset(iterdata_common *iterdata, char *data, size_t level);
 
 // Forward declaration of the nd::array
-class nd::array;
+namespace nd {
+    class array;
+} // namespace nd
 
 /**
  * This class represents a data type.
