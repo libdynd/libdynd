@@ -164,19 +164,9 @@ dtype fixed_dim_dtype::apply_linear_index(size_t nindices, const irange *indices
         return dtype(this, true);
     } else if (nindices == 1) {
         if (indices->step() == 0) {
-            if (leading_dimension && !m_element_dtype.is_builtin()) {
-                // For leading dimensions, need to give the next dtype a chance
-                // to collapse itself even though indexing doesn't continue further.
-                return m_element_dtype.extended()->apply_linear_index(0, NULL, current_i, root_dt, true);
-            } else {
-                return m_element_dtype;
-            }
+            return m_element_dtype;
         } else {
-            if (indices->is_nop()) {
-                return dtype(this, true);
-            } else {
-                return dtype(new strided_dim_dtype(m_element_dtype), false);
-            }
+            return dtype(new strided_dim_dtype(m_element_dtype), false);
         }
     } else {
         if (indices->step() == 0) {
@@ -196,10 +186,8 @@ intptr_t fixed_dim_dtype::apply_linear_index(size_t nindices, const irange *indi
                 bool leading_dimension, char **inout_data,
                 memory_block_data **inout_dataref) const
 {
-    if (nindices == 0 || result_dtype.get_type_id() == fixed_dim_type_id) {
-        // If there are no more indices, or the operation is a no-op
-        // as signaled by retaining the fixed array dtype,
-        // copy the metadata verbatim
+    if (nindices == 0) {
+        // If there are no more indices, copy the metadata verbatim
         metadata_copy_construct(out_metadata, metadata, embedded_reference);
         return 0;
     } else {

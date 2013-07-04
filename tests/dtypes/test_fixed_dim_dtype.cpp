@@ -107,6 +107,31 @@ TEST(FixedDimDType, Basic) {
     EXPECT_THROW(a(3), index_out_of_bounds);
 }
 
+TEST(FixedDimDType, SimpleIndex) {
+    nd::array a = parse_json("2, 3, int16", "[[1, 2, 3], [4, 5, 6]]");
+    ASSERT_EQ(make_fixed_dim_dtype(2,
+                    make_fixed_dim_dtype(3, make_dtype<int16_t>())),
+                a.get_dtype());
+
+    nd::array b;
+
+    b = a(0);
+    ASSERT_EQ(make_fixed_dim_dtype(3, make_dtype<int16_t>()),
+                b.get_dtype());
+    EXPECT_EQ(1, b(0).as<int16_t>());
+    EXPECT_EQ(2, b(1).as<int16_t>());
+    EXPECT_EQ(3, b(2).as<int16_t>());
+
+    b = a(1);
+    ASSERT_EQ(make_fixed_dim_dtype(3, make_dtype<int16_t>()),
+                b.get_dtype());
+    EXPECT_EQ(4, b(0).as<int16_t>());
+    EXPECT_EQ(5, b(1).as<int16_t>());
+    EXPECT_EQ(6, b(2).as<int16_t>());
+
+    EXPECT_THROW(a(2), index_out_of_bounds);
+    EXPECT_THROW(a(-3), index_out_of_bounds);
+}
 
 TEST(FixedDimDType, AssignKernel_ScalarToFixed) {
     nd::array a, b;
