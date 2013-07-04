@@ -8,7 +8,7 @@
 #include <stdexcept>
 #include "inc_gtest.hpp"
 
-#include <dynd/ndobject.hpp>
+#include <dynd/array.hpp>
 #include <dynd/ndobject_range.hpp>
 #include <dynd/dtypes/groupby_dtype.hpp>
 #include <dynd/dtypes/categorical_dtype.hpp>

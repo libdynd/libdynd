@@ -347,7 +347,7 @@ static nd::array array_return(int a, int b, int c) {
     return result;
 }
 
-TEST(GFuncCallable, NDObjectReturn) {
+TEST(GFuncCallable, ArrayReturn) {
     // Create the callable
     gfunc::callable c = gfunc::make_callable(&array_return, "a", "b", "c");
 
@@ -369,7 +369,7 @@ static size_t array_param(const nd::array& n) {
     return n.get_dtype().get_undim();
 }
 
-TEST(GFuncCallable, NDObjectParam) {
+TEST(GFuncCallable, ArrayParam) {
     // Create the callable
     gfunc::callable c = gfunc::make_callable(&array_param, "n");
 

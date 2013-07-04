@@ -3,7 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <dynd/ndobject.hpp>
+#include <dynd/array.hpp>
 #include <dynd/dtypes/pointer_dtype.hpp>
 #include <dynd/memblock/pod_memory_block.hpp>
 #include <dynd/kernels/string_assignment_kernels.hpp>

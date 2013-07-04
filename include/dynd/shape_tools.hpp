@@ -10,7 +10,7 @@
 
 #include <dynd/dtype.hpp>
 #include <dynd/shortvector.hpp>
-#include <dynd/ndobject.hpp>
+#include <dynd/array.hpp>
 
 namespace dynd {
 

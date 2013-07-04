@@ -5,7 +5,7 @@
 
 #include <iostream>
 
-#include <dynd/ndobject.hpp>
+#include <dynd/array.hpp>
 #include <dynd/dtypes/convert_dtype.hpp>
 #include <dynd/dtypes/fixedstring_dtype.hpp>
 #include <dynd/dtypes/string_dtype.hpp>

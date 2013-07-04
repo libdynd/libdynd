@@ -9,7 +9,7 @@
 #include "inc_gtest.hpp"
 
 #include <dynd/dtypes/pointer_dtype.hpp>
-#include <dynd/ndobject.hpp>
+#include <dynd/array.hpp>
 
 using namespace std;
 using namespace dynd;

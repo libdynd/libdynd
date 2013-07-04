@@ -8,7 +8,7 @@
 #include <cmath>
 #include <inc_gtest.hpp>
 
-#include <dynd/ndobject.hpp>
+#include <dynd/array.hpp>
 #include <dynd/json_parser.hpp>
 
 using namespace std;

@@ -46,15 +46,15 @@ set(tests_SRC
     dtypes/test_tuple_dtype.cpp
     dtypes/test_var_dim_dtype.cpp
     gfunc/test_callable.cpp
-    ndobject/test_json_formatter.cpp
-    ndobject/test_json_parser.cpp
-    ndobject/test_ndobject.cpp
-    ndobject/test_ndobject_range.cpp
-    ndobject/test_ndobject_assign.cpp
-    ndobject/test_ndobject_at.cpp
-    ndobject/test_ndobject_cast.cpp
-    ndobject/test_ndobject_compare.cpp
-    ndobject/test_ndobject_views.cpp
+    array/test_json_formatter.cpp
+    array/test_json_parser.cpp
+    array/test_array.cpp
+    array/test_array_range.cpp
+    array/test_array_assign.cpp
+    array/test_array_at.cpp
+    array/test_array_cast.cpp
+    array/test_array_compare.cpp
+    array/test_array_views.cpp
     vm/test_elwise_program.cpp
     test_arithmetic_op.cpp
     test_shape_tools.cpp
@@ -69,8 +69,7 @@ include_directories(
     )
 
 source_group("Other Tests" REGULAR_EXPRESSION "\\/test_[^\\/]*\\.cpp$")
-source_group("NDArray Tests" REGULAR_EXPRESSION "\\/ndarray\\/test_[^\\/]*\\.cpp$")
-source_group("NDObject Tests" REGULAR_EXPRESSION "\\/ndobject\\/test_[^\\/]*\\.cpp$")
+source_group("Array Tests" REGULAR_EXPRESSION "\\/array\\/test_[^\\/]*\\.cpp$")
 source_group("CodeGen Tests" REGULAR_EXPRESSION "\\/codegen\\/test_[^\\/]*\\.cpp$")
 source_group("DTypes Tests" REGULAR_EXPRESSION "\\/dtypes\\/test_[^\\/]*\\.cpp$")
 source_group("GFunc Tests" REGULAR_EXPRESSION "\\/gfunc\\/test_[^\\/]*\\.cpp$")

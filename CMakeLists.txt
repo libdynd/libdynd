@@ -278,7 +278,7 @@ set(libdynd_SRC
     src/dynd/memblock/external_memory_block.cpp
     src/dynd/memblock/fixed_size_pod_memory_block.cpp
     src/dynd/memblock/pod_memory_block.cpp
-    src/dynd/memblock/ndobject_memory_block.cpp
+    src/dynd/memblock/array_memory_block.cpp
     src/dynd/memblock/objectarray_memory_block.cpp
     src/dynd/memblock/zeroinit_memory_block.cpp
     include/dynd/memblock/memory_block.hpp
@@ -286,7 +286,7 @@ set(libdynd_SRC
     include/dynd/memblock/external_memory_block.hpp
     include/dynd/memblock/fixed_size_pod_memory_block.hpp
     include/dynd/memblock/pod_memory_block.hpp
-    include/dynd/memblock/ndobject_memory_block.hpp
+    include/dynd/memblock/array_memory_block.hpp
     include/dynd/memblock/objectarray_memory_block.hpp
     include/dynd/memblock/zeroinit_memory_block.hpp
     # VM
@@ -305,8 +305,8 @@ set(libdynd_SRC
     src/dynd/json_formatter.cpp
     src/dynd/json_parser.cpp
     src/dynd/lowlevel_api.cpp
-    src/dynd/ndobject.cpp
-    src/dynd/ndobject_range.cpp
+    src/dynd/array.cpp
+    src/dynd/array_range.cpp
     src/dynd/shape_tools.cpp
     src/dynd/string_encodings.cpp
     include/dynd/atomic_refcount.hpp
@@ -324,9 +324,9 @@ set(libdynd_SRC
     include/dynd/json_parser.hpp
     include/dynd/irange.hpp
     include/dynd/lowlevel_api.hpp
-    include/dynd/ndobject.hpp
-    include/dynd/ndobject_range.hpp
-    include/dynd/ndobject_iter.hpp
+    include/dynd/array.hpp
+    include/dynd/array_range.hpp
+    include/dynd/array_iter.hpp
     include/dynd/shortvector.hpp
     include/dynd/shape_tools.hpp
     include/dynd/string_encodings.hpp

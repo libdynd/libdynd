@@ -8,7 +8,7 @@
 #include <stdexcept>
 #include "inc_gtest.hpp"
 
-#include <dynd/ndobject.hpp>
+#include <dynd/array.hpp>
 #include <dynd/dtypes/cstruct_dtype.hpp>
 #include <dynd/dtypes/struct_dtype.hpp>
 #include <dynd/dtypes/fixedstring_dtype.hpp>

@@ -8,7 +8,7 @@
 #include <stdexcept>
 #include "inc_gtest.hpp"
 
-#include <dynd/ndobject.hpp>
+#include <dynd/array.hpp>
 #include <dynd/dtypes/json_dtype.hpp>
 #include <dynd/dtypes/string_dtype.hpp>
 

@@ -20,7 +20,7 @@
 using namespace std;
 using namespace dynd;
 
-TEST(DataShapeFormatter, NDObjectBuiltinAtoms) {
+TEST(DataShapeFormatter, ArrayBuiltinAtoms) {
     EXPECT_EQ("bool", format_datashape(nd::array(true), "", false));
     EXPECT_EQ("int8", format_datashape(nd::array((int8_t)0), "", false));
     EXPECT_EQ("int16", format_datashape(nd::array((int16_t)0), "", false));
@@ -55,7 +55,7 @@ TEST(DataShapeFormatter, DTypeBuiltinAtoms) {
     EXPECT_EQ("cfloat64", format_datashape(make_dtype<complex<double> >(), "", false));
 }
 
-TEST(DataShapeFormatter, NDObjectStringAtoms) {
+TEST(DataShapeFormatter, ArrayStringAtoms) {
     EXPECT_EQ("string", format_datashape(nd::array("test"), "", false));
     EXPECT_EQ("string", format_datashape(
                     nd::empty(make_string_dtype(string_encoding_utf_8)), "", false));
@@ -107,7 +107,7 @@ TEST(DataShapeFormatter, DTypeStringAtoms) {
                     make_fixedstring_dtype(10, string_encoding_ucs_2), "", false));
 }
 
-TEST(DataShapeFormatter, NDObjectUniformArrays) {
+TEST(DataShapeFormatter, ArrayUniformArrays) {
     EXPECT_EQ("3, int32", format_datashape(
                     nd::make_strided_array(3, make_dtype<int32_t>()), "", false));
     EXPECT_EQ("var, int32", format_datashape(
@@ -130,7 +130,7 @@ TEST(DataShapeFormatter, DTypeUniformArrays) {
                         make_strided_dim_dtype(make_dtype<int32_t>())), "", false));
 }
 
-TEST(DataShapeFormatter, NDObjectStructs) {
+TEST(DataShapeFormatter, ArrayStructs) {
     EXPECT_EQ("{x: int32; y: float64}", format_datashape(
                     nd::empty(make_cstruct_dtype(
                                     make_dtype<int32_t>(), "x",

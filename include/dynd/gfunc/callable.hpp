@@ -6,7 +6,7 @@
 #ifndef _DYND__CALLABLE_HPP_
 #define _DYND__CALLABLE_HPP_
 
-#include <dynd/ndobject.hpp>
+#include <dynd/array.hpp>
 
 namespace dynd { namespace gfunc {
 

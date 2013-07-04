@@ -10,7 +10,7 @@
 #include <deque>
 #include <vector>
 
-#include <dynd/ndobject.hpp>
+#include <dynd/array.hpp>
 
 namespace dynd { namespace gfunc {
 
@@ -18,13 +18,13 @@ namespace dynd { namespace gfunc {
  * Serializes the ndobject into a blosc-compressed bytes
  * and a metadata storage string.
  */
-ndobject serialize(const ndobject& val);
+nd::array serialize(const nd::array& val);
 
 /**
  * Deserializes the results of serialize() back into
  * an ndobject.
  */
-ndobject deserialize(const ndobject& data);
+nd::array deserialize(const nd::array& data);
 
 }} // namespace dynd::gfunc
 

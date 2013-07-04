@@ -8,7 +8,7 @@
 #include <stdexcept>
 #include "inc_gtest.hpp"
 
-#include <dynd/ndobject.hpp>
+#include <dynd/array.hpp>
 
 using namespace std;
 using namespace dynd;

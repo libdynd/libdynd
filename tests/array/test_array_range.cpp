@@ -9,13 +9,13 @@
 #include <cmath>
 #include <inc_gtest.hpp>
 
-#include <dynd/ndobject.hpp>
+#include <dynd/array.hpp>
 #include <dynd/ndobject_range.hpp>
 
 using namespace std;
 using namespace dynd;
 
-TEST(NDObjectRange, Basic) {
+TEST(ArrayRange, Basic) {
     nd::array a;
 
     a = nd::range(1, 10);
@@ -48,7 +48,7 @@ TEST(NDObjectRange, Basic) {
     }
 }
 
-TEST(NDObjectRange, CastScalars) {
+TEST(ArrayRange, CastScalars) {
     nd::array a;
 
     a = nd::range(4).ucast(make_dtype<int32_t>());

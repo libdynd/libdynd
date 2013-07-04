@@ -3,7 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <dynd/memblock/ndobject_memory_block.hpp>
+#include <dynd/memblock/array_memory_block.hpp>
 #include <dynd/array.hpp>
 
 using namespace std;

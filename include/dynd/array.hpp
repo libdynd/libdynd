@@ -16,7 +16,7 @@
 #include <dynd/dtype_assign.hpp>
 #include <dynd/shortvector.hpp>
 #include <dynd/irange.hpp>
-#include <dynd/memblock/ndobject_memory_block.hpp>
+#include <dynd/memblock/array_memory_block.hpp>
 
 namespace dynd { namespace nd {
 

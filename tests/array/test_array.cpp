@@ -10,7 +10,7 @@
 
 #include "inc_gtest.hpp"
 
-#include <dynd/ndobject.hpp>
+#include <dynd/array.hpp>
 #include <dynd/dtypes/strided_dim_dtype.hpp>
 #include <dynd/dtypes/fixedbytes_dtype.hpp>
 #include <dynd/dtypes/string_dtype.hpp>
@@ -18,7 +18,7 @@
 using namespace std;
 using namespace dynd;
 
-TEST(NDObject, NullConstructor) {
+TEST(Array, NullConstructor) {
     nd::array a;
 
     // Default-constructed nd::array is NULL and will crash if access is attempted
@@ -26,14 +26,14 @@ TEST(NDObject, NullConstructor) {
 }
 
 
-TEST(NDObject, ScalarConstructor) {
+TEST(Array, ScalarConstructor) {
     // Scalar nd::array
     nd::array a = nd::empty(make_dtype<float>());
     EXPECT_EQ(make_dtype<float>(), a.get_dtype());
     EXPECT_TRUE(a.is_scalar());
 }
 
-TEST(NDObject, OneDimConstructor) {
+TEST(Array, OneDimConstructor) {
     // One-dimensional strided nd::array with one element
     nd::array a = nd::empty(1, make_strided_dim_dtype(make_dtype<float>()));
     EXPECT_EQ(make_strided_dim_dtype(make_dtype<float>()), a.get_dtype());
@@ -53,7 +53,7 @@ TEST(NDObject, OneDimConstructor) {
     EXPECT_EQ(sizeof(float), (unsigned)a.get_strides()[0]);
 }
 
-TEST(NDObject, TwoDimConstructor) {
+TEST(Array, TwoDimConstructor) {
     // Two-dimensional nd::array with a size-one dimension
     nd::array a = nd::empty(3, 1, make_strided_dim_dtype(make_strided_dim_dtype(make_dtype<float>())));
     EXPECT_EQ(make_strided_dim_dtype(make_strided_dim_dtype(make_dtype<float>())), a.get_dtype());
@@ -88,7 +88,7 @@ TEST(NDObject, TwoDimConstructor) {
     EXPECT_EQ(sizeof(float), (unsigned)a.get_strides()[1]);
 }
 
-TEST(NDObject, ThreeDimConstructor) {
+TEST(Array, ThreeDimConstructor) {
     // Three-dimensional nd::array with size-one dimension
     nd::array a = nd::empty(1, 5, 4, make_strided_dim_dtype(
                     make_strided_dim_dtype(
@@ -150,7 +150,7 @@ TEST(NDObject, ThreeDimConstructor) {
     EXPECT_EQ(sizeof(float), (unsigned)a.get_strides()[2]);
 }
 
-TEST(NDObject, IntScalarConstructor) {
+TEST(Array, IntScalarConstructor) {
     stringstream ss;
 
     nd::array a = 3;
@@ -184,7 +184,7 @@ TEST(NDObject, IntScalarConstructor) {
     EXPECT_EQ("array(4, int64)", ss.str());
 }
 
-TEST(NDObject, UIntScalarConstructor) {
+TEST(Array, UIntScalarConstructor) {
     stringstream ss;
 
     nd::array a = (uint8_t)5;
@@ -212,7 +212,7 @@ TEST(NDObject, UIntScalarConstructor) {
     EXPECT_EQ("array(8, uint64)", ss.str());
 }
 
-TEST(NDObject, FloatScalarConstructor) {
+TEST(Array, FloatScalarConstructor) {
     stringstream ss;
 
     nd::array a = 3.25f;
@@ -236,7 +236,7 @@ TEST(NDObject, FloatScalarConstructor) {
     EXPECT_EQ(make_dtype<complex<double> >(), a.get_dtype());
 }
 
-TEST(NDObject, StdVectorConstructor) {
+TEST(Array, StdVectorConstructor) {
     nd::array a;
     std::vector<float> v;
 
@@ -265,7 +265,7 @@ TEST(NDObject, StdVectorConstructor) {
     }
 }
 
-TEST(NDObject, StdVectorStringConstructor) {
+TEST(Array, StdVectorStringConstructor) {
     nd::array a;
     std::vector<std::string> v;
 
@@ -296,7 +296,7 @@ TEST(NDObject, StdVectorStringConstructor) {
     }
 }
 
-TEST(NDObject, AsScalar) {
+TEST(Array, AsScalar) {
     nd::array a;
 
     a = nd::empty(make_dtype<float>());
@@ -319,7 +319,7 @@ TEST(NDObject, AsScalar) {
     EXPECT_EQ(3.141592653589f, a.as<float>());
 }
 
-TEST(NDObject, ConstructorMemoryLayouts) {
+TEST(Array, ConstructorMemoryLayouts) {
     nd::array a, b;
     dtype dt(int16_type_id), dt2(int32_type_id);
     intptr_t shape[6];
@@ -381,7 +381,7 @@ TEST(NDObject, ConstructorMemoryLayouts) {
 }
 
 #if 0
-TEST(NDObject, CharArrayConstructor) {
+TEST(Array, CharArrayConstructor) {
     nd::array a;
     char values[8] = {1,2,3,4,5,6,7,8};
 
@@ -414,7 +414,7 @@ TEST(NDObject, CharArrayConstructor) {
 }
 
 #ifdef DYND_INIT_LIST
-TEST(NDObject, InitializerLists) {
+TEST(Array, InitializerLists) {
     nd::array a = {1, 2, 3, 4, 5};
     EXPECT_EQ(5, a.get_num_elements());
     EXPECT_EQ(make_dtype<int>(), a.get_dtype());
@@ -473,7 +473,7 @@ TEST(NDObject, InitializerLists) {
 
 #endif
 
-TEST(NDObject, InitFromNestedCArray) {
+TEST(Array, InitFromNestedCArray) {
     int i0[2][3] = {{1,2,3}, {4,5,6}};
     nd::array a = i0;
     EXPECT_EQ(make_strided_dim_dtype(make_strided_dim_dtype(make_dtype<int>())), a.get_dtype());
@@ -515,7 +515,7 @@ TEST(NDObject, InitFromNestedCArray) {
     EXPECT_EQ(7, ptr_f[11]);
 }
 
-TEST(NDObject, Storage) {
+TEST(Array, Storage) {
     int i0[2][3] = {{1,2,3}, {4,5,6}};
     nd::array a = i0;
 

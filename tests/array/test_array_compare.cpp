@@ -10,7 +10,7 @@
 
 #include "inc_gtest.hpp"
 
-#include <dynd/ndobject.hpp>
+#include <dynd/array.hpp>
 #include <dynd/dtypes/strided_dim_dtype.hpp>
 #include <dynd/dtypes/fixedbytes_dtype.hpp>
 #include <dynd/dtypes/string_dtype.hpp>
@@ -19,7 +19,7 @@
 using namespace std;
 using namespace dynd;
 
-TEST(NDObjectCompare, Bool) {
+TEST(ArrayCompare, Bool) {
     // Equality
     EXPECT_TRUE(nd::array(true) == nd::array(true));
     EXPECT_TRUE(nd::array(false) == nd::array(false));
@@ -59,7 +59,7 @@ TEST(NDObjectCompare, Bool) {
     EXPECT_TRUE(nd::array(false) != nd::array(complex<double>(0,1)));
 }
 
-TEST(NDObjectCompare, EqualityIntUInt) {
+TEST(ArrayCompare, EqualityIntUInt) {
     // Equality
     EXPECT_TRUE(nd::array((uint8_t)127) == nd::array((int8_t)127));
     EXPECT_TRUE(nd::array((int8_t)127) == nd::array((uint8_t)127));
@@ -98,7 +98,7 @@ TEST(NDObjectCompare, EqualityIntUInt) {
     EXPECT_TRUE(nd::array((int64_t)-1) != nd::array((uint64_t)18446744073709551615ULL));
 }
 
-TEST(NDObjectCompare, InequalityInt8UInt8) {
+TEST(ArrayCompare, InequalityInt8UInt8) {
     nd::array a, b;
 
     a = (int8_t)-1;
@@ -168,7 +168,7 @@ TEST(NDObjectCompare, InequalityInt8UInt8) {
     EXPECT_TRUE(b > a);
 }
 
-TEST(NDObjectCompare, InequalityInt64UInt64) {
+TEST(ArrayCompare, InequalityInt64UInt64) {
     nd::array a, b;
 
     a = (int64_t)-1;
@@ -250,7 +250,7 @@ TEST(NDObjectCompare, InequalityInt64UInt64) {
     EXPECT_TRUE(b > a);
 }
 
-TEST(NDObjectCompare, EqualityIntFloat) {
+TEST(ArrayCompare, EqualityIntFloat) {
     nd::array a, b;
 
     // 2**24 is the end of the consecutive float32 integers
@@ -313,7 +313,7 @@ TEST(NDObjectCompare, EqualityIntFloat) {
     EXPECT_TRUE(b > a);
 }
 
-TEST(NDObjectCompare, EqualityUIntFloat) {
+TEST(ArrayCompare, EqualityUIntFloat) {
     nd::array a, b;
 
     // 2**24 is the end of the consecutive float32 integers
@@ -376,7 +376,7 @@ TEST(NDObjectCompare, EqualityUIntFloat) {
     EXPECT_TRUE(b > a);
 }
 
-TEST(NDObjectCompare, NaNFloat32) {
+TEST(ArrayCompare, NaNFloat32) {
     nd::array a, b;
     nd::array nan = nd::array("nan").ucast<float>().eval();
     nd::array pinf = nd::array("inf").ucast<float>().eval();
@@ -432,7 +432,7 @@ TEST(NDObjectCompare, NaNFloat32) {
     EXPECT_FALSE(b > a);
 }
 
-TEST(NDObjectCompare, NaNFloat64) {
+TEST(ArrayCompare, NaNFloat64) {
     nd::array a, b;
     nd::array nan = nd::array("nan").ucast<double>().eval();
     nd::array pinf = nd::array("inf").ucast<double>().eval();
@@ -488,7 +488,7 @@ TEST(NDObjectCompare, NaNFloat64) {
     EXPECT_FALSE(b > a);
 }
 
-TEST(NDObjectCompare, ComplexFloat32) {
+TEST(ArrayCompare, ComplexFloat32) {
     nd::array a, b;
     // For complex, op_sorting_less is lexicographic,
     // and other inequalities raise exceptions.
@@ -548,7 +548,7 @@ TEST(NDObjectCompare, ComplexFloat32) {
     EXPECT_THROW((b > a), not_comparable_error);
 }
 
-TEST(NDObjectCompare, ComplexFloat64) {
+TEST(ArrayCompare, ComplexFloat64) {
     nd::array a, b;
     // For complex, op_sorting_less is lexicographic,
     // and other inequalities raise exceptions.
@@ -608,7 +608,7 @@ TEST(NDObjectCompare, ComplexFloat64) {
     EXPECT_THROW((b > a), not_comparable_error);
 }
 
-TEST(NDObjectCompare, NaNComplexFloat32) {
+TEST(ArrayCompare, NaNComplexFloat32) {
     // The strange way to assign complex values is because
     // on clang, complex<float>(0.f, nan) was creating (nan, nan)
     // instead of the requested complex.
@@ -833,7 +833,7 @@ TEST(NDObjectCompare, NaNComplexFloat32) {
     EXPECT_THROW((b > a), not_comparable_error);
 }
 
-TEST(NDObjectCompare, ExpressionDType) {
+TEST(ArrayCompare, ExpressionDType) {
     nd::array a, b;
     // One expression operand
     a = nd::array(3).ucast<float>();

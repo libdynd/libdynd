@@ -8,13 +8,13 @@
 #include <cmath>
 #include "inc_gtest.hpp"
 
-#include "dynd/ndobject.hpp"
+#include "dynd/array.hpp"
 #include "dynd/exceptions.hpp"
 
 using namespace std;
 using namespace dynd;
 
-TEST(NDObjectIndex, BasicInteger) {
+TEST(ArrayIndex, BasicInteger) {
     int i0[3][2] = {{1,2},{3,4},{5,6}};
     nd::array a = i0;
     nd::array b, c;
@@ -101,7 +101,7 @@ TEST(NDObjectIndex, BasicInteger) {
     EXPECT_THROW(a.at(0,0,0,0), too_many_indices);
 }
 
-TEST(NDObjectIndex, SimpleOneDimensionalRange) {
+TEST(ArrayIndex, SimpleOneDimensionalRange) {
     int i0[] = {1,2,3,4,5,6};
     nd::array a = i0, b;
 
@@ -137,7 +137,7 @@ TEST(NDObjectIndex, SimpleOneDimensionalRange) {
     EXPECT_EQ(3, b.at(2).as<int>());
 }
 
-TEST(NDObjectIndex, SteppedOneDimensionalRange) {
+TEST(ArrayIndex, SteppedOneDimensionalRange) {
     int i0[] = {1,2,3,4,5,6};
     nd::array a = i0, b;
 
@@ -190,7 +190,7 @@ TEST(NDObjectIndex, SteppedOneDimensionalRange) {
     EXPECT_EQ(2, b.at(2).as<int>());
 }
 
-TEST(NDObjectIndex, ExceptionsOneDimensionalRange) {
+TEST(ArrayIndex, ExceptionsOneDimensionalRange) {
     int i0[] = {1,2,3,4,5,6};
     nd::array a = i0, b;
 

@@ -9,7 +9,7 @@
 #include <cmath>
 #include <inc_gtest.hpp>
 
-#include <dynd/ndobject.hpp>
+#include <dynd/array.hpp>
 #include <dynd/ndobject_range.hpp>
 #include <dynd/dtypes/dtype_alignment.hpp>
 #include <dynd/dtypes/convert_dtype.hpp>
@@ -20,7 +20,7 @@
 using namespace std;
 using namespace dynd;
 
-TEST(NDObjectViews, OneDimensionalRawMemory) {
+TEST(ArrayViews, OneDimensionalRawMemory) {
     nd::array a, b;
     signed char c_values[8];
     uint64_t u8_value;
@@ -55,7 +55,7 @@ TEST(NDObjectViews, OneDimensionalRawMemory) {
     EXPECT_EQ(u8_value, b.at(0).as<uint64_t>());
 }
 
-TEST(NDObjectViews, MultiDimensionalRawMemory) {
+TEST(ArrayViews, MultiDimensionalRawMemory) {
     nd::array a, b;
     uint32_t values[2][3] = {{1,2,3}, {0xffffffff, 0x80000000, 0}};
 
@@ -78,7 +78,7 @@ TEST(NDObjectViews, MultiDimensionalRawMemory) {
     EXPECT_EQ(0, b.at(1, 2).as<int32_t>());
 }
 
-TEST(NDObjectViews, ExpressionDType) {
+TEST(ArrayViews, ExpressionDType) {
     nd::array a, a_u2, b;
     uint32_t values[2][3] = {{1,2,3}, {0xffff, 0x8000, 0}};
 

@@ -11,7 +11,7 @@
 #include <vector>
 
 #include <dynd/dtype.hpp>
-#include <dynd/ndobject.hpp>
+#include <dynd/array.hpp>
 #include <dynd/dtypes/strided_dim_dtype.hpp>
 
 

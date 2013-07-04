@@ -13,7 +13,7 @@
 #include <dynd/dtypes/strided_dim_dtype.hpp>
 #include <dynd/dtypes/convert_dtype.hpp>
 #include <dynd/exceptions.hpp>
-#include <dynd/ndobject.hpp>
+#include <dynd/array.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 
 using namespace std;

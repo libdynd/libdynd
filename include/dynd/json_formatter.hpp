@@ -6,7 +6,7 @@
 #ifndef _DYND__JSON_FORMATTER_HPP_
 #define _DYND__JSON_FORMATTER_HPP_
 
-#include <dynd/ndobject.hpp>
+#include <dynd/array.hpp>
 
 namespace dynd {
 

@@ -8,13 +8,13 @@
 #include <cmath>
 #include "inc_gtest.hpp"
 
-#include "dynd/ndobject.hpp"
+#include "dynd/array.hpp"
 #include "dynd/exceptions.hpp"
 
 using namespace std;
 using namespace dynd;
 
-TEST(NDObjectCast, BasicCast) {
+TEST(ArrayCast, BasicCast) {
     nd::array n = 3.5;
     EXPECT_EQ(3.5f, n.cast(make_dtype<float>()).as<float>());
 }

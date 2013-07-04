@@ -7,7 +7,7 @@
 #define _DYND__BUSDATE_DTYPE_HPP_
 
 #include <dynd/dtype.hpp>
-#include <dynd/ndobject.hpp>
+#include <dynd/array.hpp>
 
 namespace dynd {
 

@@ -8,7 +8,7 @@
 #include <stdexcept>
 #include "inc_gtest.hpp"
 
-#include <dynd/ndobject.hpp>
+#include <dynd/array.hpp>
 #include <dynd/dtypes/string_dtype.hpp>
 #include <dynd/dtypes/bytes_dtype.hpp>
 #include <dynd/dtypes/strided_dim_dtype.hpp>
@@ -55,7 +55,7 @@ TEST(StringDType, Create) {
     EXPECT_EQ(2*sizeof(void *), d.get_data_size());
 }
 
-TEST(StringDType, NDObjectCreation) {
+TEST(StringDType, ArrayCreation) {
     nd::array a;
 
     // A C-style string literal

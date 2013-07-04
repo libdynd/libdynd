@@ -11,7 +11,7 @@
 using namespace std;
 using namespace dynd;
 
-ndobject dynd::gfunc::serialize(const ndobject& val)
+nd::array dynd::gfunc::serialize(const nd::array& val)
 {
     // To start, we're only supporting simple one-dimensional arrays of primitives
     const dtype& dt = val.get_dtype();
@@ -31,7 +31,7 @@ ndobject dynd::gfunc::serialize(const ndobject& val)
     throw runtime_error("dynd::gfunc::serialize is not implemented yet");
 }
 
-ndobject dynd::gfunc::deserialize(const ndobject& /*data*/)
+nd::array dynd::gfunc::deserialize(const nd::array& /*data*/)
 {
     throw runtime_error("dynd::gfunc::deserialize is not implemented yet");
 }

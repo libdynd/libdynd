@@ -5,7 +5,7 @@
 
 #include <sstream>
 
-#include <dynd/ndobject.hpp>
+#include <dynd/array.hpp>
 #include <dynd/ndobject_iter.hpp>
 #include <dynd/dtype_promotion.hpp>
 #include <dynd/kernels/expr_kernel_generator.hpp>

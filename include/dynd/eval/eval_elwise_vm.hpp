@@ -7,7 +7,7 @@
 #define _DYND__EVAL_ELWISE_VM_HPP_
 
 #include <dynd/config.hpp>
-#include <dynd/ndobject.hpp>
+#include <dynd/array.hpp>
 #include <dynd/memblock/memory_block.hpp>
 #include <dynd/vm/elwise_program.hpp>
 #include <dynd/eval/eval_context.hpp>
