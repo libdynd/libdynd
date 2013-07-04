@@ -261,7 +261,7 @@ TEST(Array, StdVectorConstructor) {
     EXPECT_EQ(1u, a.get_strides().size());
     EXPECT_EQ((int)sizeof(float), a.get_strides()[0]);
     for (int i = 0; i < 10; ++i) {
-        EXPECT_EQ(i/0.5f, a.at(i).as<float>());
+        EXPECT_EQ(i/0.5f, a(i).as<float>());
     }
 }
 
@@ -292,7 +292,7 @@ TEST(Array, StdVectorStringConstructor) {
     EXPECT_EQ(1u, a.get_strides().size());
     EXPECT_EQ((intptr_t)a.get_dtype().at(0).get_data_size(), a.get_strides()[0]);
     for (int i = 0; i < 5; ++i) {
-        EXPECT_EQ(v[i], a.at(i).as<string>());
+        EXPECT_EQ(v[i], a(i).as<string>());
     }
 }
 

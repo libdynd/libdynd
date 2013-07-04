@@ -331,7 +331,7 @@ template<typename FN, typename D0>
 inline callable make_callable_with_default(FN *f, const char *name0, const D0& default0) {
     dtype pdt = detail::callable_maker<FN *>::make_parameters_dtype(name0);
     nd::array defaults = nd::empty(pdt);
-    defaults.at(0).vals() = default0;
+    defaults(0).vals() = default0;
     // Make defaults immutable (which is ok, because we have the only reference to it)
     defaults.flag_as_immutable();
     return callable(pdt,
@@ -353,7 +353,7 @@ template<typename FN, typename D1>
 inline callable make_callable_with_default(FN *f, const char *name0, const char *name1, const D1& default1) {
     dtype pdt = detail::callable_maker<FN *>::make_parameters_dtype(name0, name1);
     nd::array defaults = nd::empty(pdt);
-    defaults.at(1).vals() = default1;
+    defaults(1).vals() = default1;
     // Make defaults immutable (which is ok, because we have the only reference to it)
     defaults.flag_as_immutable();
     return callable(pdt,
@@ -367,8 +367,8 @@ template<typename FN, typename D0, typename D1>
 inline callable make_callable_with_default(FN *f, const char *name0, const char *name1, const D0& default0, const D1& default1) {
     dtype pdt = detail::callable_maker<FN *>::make_parameters_dtype(name0, name1);
     nd::array defaults = nd::empty(pdt);
-    defaults.at(0).vals() = default0;
-    defaults.at(1).vals() = default1;
+    defaults(0).vals() = default0;
+    defaults(1).vals() = default1;
     // Make defaults immutable (which is ok, because we have the only reference to it)
     defaults.flag_as_immutable();
     return callable(pdt,
@@ -390,7 +390,7 @@ template<typename FN, typename D2>
 inline callable make_callable_with_default(FN *f, const char *name0, const char *name1, const char *name2, const D2& default2) {
     dtype pdt = detail::callable_maker<FN *>::make_parameters_dtype(name0, name1, name2);
     nd::array defaults = nd::empty(pdt);
-    defaults.at(2).vals() = default2;
+    defaults(2).vals() = default2;
     // Make defaults immutable (which is ok, because we have the only reference to it)
     defaults.flag_as_immutable();
     return callable(pdt,
@@ -404,8 +404,8 @@ template<typename FN, typename D1, typename D2>
 inline callable make_callable_with_default(FN *f, const char *name0, const char *name1, const char *name2, const D1& default1, const D2& default2) {
     dtype pdt = detail::callable_maker<FN *>::make_parameters_dtype(name0, name1, name2);
     nd::array defaults = nd::empty(pdt);
-    defaults.at(1).vals() = default1;
-    defaults.at(2).vals() = default2;
+    defaults(1).vals() = default1;
+    defaults(2).vals() = default2;
     // Make defaults immutable (which is ok, because we have the only reference to it)
     defaults.flag_as_immutable();
     return callable(pdt,
@@ -419,9 +419,9 @@ template<typename FN, typename D0, typename D1, typename D2>
 inline callable make_callable_with_default(FN *f, const char *name0, const char *name1, const char *name2, const D0& default0, const D1& default1, const D2& default2) {
     dtype pdt = detail::callable_maker<FN *>::make_parameters_dtype(name0, name1, name2);
     nd::array defaults = nd::empty(pdt);
-    defaults.at(0).vals() = default0;
-    defaults.at(1).vals() = default1;
-    defaults.at(2).vals() = default2;
+    defaults(0).vals() = default0;
+    defaults(1).vals() = default1;
+    defaults(2).vals() = default2;
     // Make defaults immutable (which is ok, because we have the only reference to it)
     defaults.flag_as_immutable();
     return callable(pdt,
@@ -444,7 +444,7 @@ inline callable make_callable_with_default(FN *f, const char *name0, const char 
                 const char *name3, const D3& default3) {
     dtype pdt = detail::callable_maker<FN *>::make_parameters_dtype(name0, name1, name2, name3);
     nd::array defaults = nd::empty(pdt);
-    defaults.at(3).vals() = default3;
+    defaults(3).vals() = default3;
     // Make defaults immutable (which is ok, because we have the only reference to it)
     defaults.flag_as_immutable();
     return callable(pdt,
@@ -459,8 +459,8 @@ inline callable make_callable_with_default(FN *f, const char *name0, const char 
                 const char *name3, const D2& default2, const D3& default3) {
     dtype pdt = detail::callable_maker<FN *>::make_parameters_dtype(name0, name1, name2, name3);
     nd::array defaults = nd::empty(pdt);
-    defaults.at(2).vals() = default2;
-    defaults.at(3).vals() = default3;
+    defaults(2).vals() = default2;
+    defaults(3).vals() = default3;
     // Make defaults immutable (which is ok, because we have the only reference to it)
     defaults.flag_as_immutable();
     return callable(pdt,
@@ -475,9 +475,9 @@ inline callable make_callable_with_default(FN *f, const char *name0, const char 
                 const char *name3, const D1& default1, const D2& default2, const D3& default3) {
     dtype pdt = detail::callable_maker<FN *>::make_parameters_dtype(name0, name1, name2, name3);
     nd::array defaults = nd::empty(pdt);
-    defaults.at(1).vals() = default1;
-    defaults.at(2).vals() = default2;
-    defaults.at(3).vals() = default3;
+    defaults(1).vals() = default1;
+    defaults(2).vals() = default2;
+    defaults(3).vals() = default3;
     // Make defaults immutable (which is ok, because we have the only reference to it)
     defaults.flag_as_immutable();
     return callable(pdt,
@@ -492,10 +492,10 @@ inline callable make_callable_with_default(FN *f, const char *name0, const char 
                 const char *name3, const D0& default0, const D1& default1, const D2& default2, const D3& default3) {
     dtype pdt = detail::callable_maker<FN *>::make_parameters_dtype(name0, name1, name2, name3);
     nd::array defaults = nd::empty(pdt);
-    defaults.at(0).vals() = default0;
-    defaults.at(1).vals() = default1;
-    defaults.at(2).vals() = default2;
-    defaults.at(3).vals() = default3;
+    defaults(0).vals() = default0;
+    defaults(1).vals() = default1;
+    defaults(2).vals() = default2;
+    defaults(3).vals() = default3;
     // Make defaults immutable (which is ok, because we have the only reference to it)
     defaults.flag_as_immutable();
     return callable(pdt,

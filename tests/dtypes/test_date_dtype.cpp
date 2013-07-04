@@ -140,15 +140,15 @@ TEST(DateDType, DateProperties) {
 
     const char *strs[] = {"1931-12-12", "2013-05-14", "2012-12-25"};
     a = nd::array(strs).ucast(d).eval();
-    EXPECT_EQ(1931, a.p("year").at(0).as<int32_t>());
-    EXPECT_EQ(12, a.p("month").at(0).as<int32_t>());
-    EXPECT_EQ(12, a.p("day").at(0).as<int32_t>());
-    EXPECT_EQ(2013, a.p("year").at(1).as<int32_t>());
-    EXPECT_EQ(5, a.p("month").at(1).as<int32_t>());
-    EXPECT_EQ(14, a.p("day").at(1).as<int32_t>());
-    EXPECT_EQ(2012, a.p("year").at(2).as<int32_t>());
-    EXPECT_EQ(12, a.p("month").at(2).as<int32_t>());
-    EXPECT_EQ(25, a.p("day").at(2).as<int32_t>());
+    EXPECT_EQ(1931, a.p("year")(0).as<int32_t>());
+    EXPECT_EQ(12, a.p("month")(0).as<int32_t>());
+    EXPECT_EQ(12, a.p("day")(0).as<int32_t>());
+    EXPECT_EQ(2013, a.p("year")(1).as<int32_t>());
+    EXPECT_EQ(5, a.p("month")(1).as<int32_t>());
+    EXPECT_EQ(14, a.p("day")(1).as<int32_t>());
+    EXPECT_EQ(2012, a.p("year")(2).as<int32_t>());
+    EXPECT_EQ(12, a.p("month")(2).as<int32_t>());
+    EXPECT_EQ(25, a.p("day")(2).as<int32_t>());
 }
 
 TEST(DateDType, DatePropertyConvertOfString) {
@@ -169,18 +169,18 @@ TEST(DateDType, DatePropertyConvertOfString) {
     EXPECT_EQ(property_type_id, c.get_udtype().get_type_id());
     c = c.eval();
     EXPECT_EQ(make_strided_dim_dtype(make_dtype<int>()), c.get_dtype());
-    EXPECT_EQ(1931, c.at(0).as<int>());
-    EXPECT_EQ(2013, c.at(1).as<int>());
-    EXPECT_EQ(2012, c.at(2).as<int>());
+    EXPECT_EQ(1931, c(0).as<int>());
+    EXPECT_EQ(2013, c(1).as<int>());
+    EXPECT_EQ(2012, c(2).as<int>());
 
     // weekday function
     c = b.f("weekday");
     EXPECT_EQ(property_type_id, c.get_udtype().get_type_id());
     c = c.eval();
     EXPECT_EQ(make_strided_dim_dtype(make_dtype<int>()), c.get_dtype());
-    EXPECT_EQ(5, c.at(0).as<int>());
-    EXPECT_EQ(1, c.at(1).as<int>());
-    EXPECT_EQ(1, c.at(2).as<int>());
+    EXPECT_EQ(5, c(0).as<int>());
+    EXPECT_EQ(1, c(1).as<int>());
+    EXPECT_EQ(1, c(2).as<int>());
 }
 
 TEST(DateDType, ToStructFunction) {
@@ -217,25 +217,25 @@ TEST(DateDType, ToStruct) {
     ds = make_cstruct_dtype(make_dtype<int32_t>(), "year", make_dtype<int8_t>(), "month", make_dtype<int8_t>(), "day");
     b = nd::empty(ds);
     b.vals() = a;
-    EXPECT_EQ(1955, b.at(0).as<int32_t>());
-    EXPECT_EQ(3, b.at(1).as<int8_t>());
-    EXPECT_EQ(13, b.at(2).as<int8_t>());
+    EXPECT_EQ(1955, b(0).as<int32_t>());
+    EXPECT_EQ(3, b(1).as<int8_t>());
+    EXPECT_EQ(13, b(2).as<int8_t>());
 
     // This should work too
     ds = make_cstruct_dtype(make_dtype<int16_t>(), "month", make_dtype<int16_t>(), "year", make_dtype<float>(), "day");
     b = nd::empty(ds);
     b.vals() = a;
-    EXPECT_EQ(1955, b.at(1).as<int16_t>());
-    EXPECT_EQ(3, b.at(0).as<int16_t>());
-    EXPECT_EQ(13, b.at(2).as<float>());
+    EXPECT_EQ(1955, b(1).as<int16_t>());
+    EXPECT_EQ(3, b(0).as<int16_t>());
+    EXPECT_EQ(13, b(2).as<float>());
 
     // This should work too
     ds = make_struct_dtype(make_dtype<int16_t>(), "month", make_dtype<int16_t>(), "year", make_dtype<float>(), "day");
     b = nd::empty(ds);
     b.vals() = a;
-    EXPECT_EQ(1955, b.at(1).as<int16_t>());
-    EXPECT_EQ(3, b.at(0).as<int16_t>());
-    EXPECT_EQ(13, b.at(2).as<float>());
+    EXPECT_EQ(1955, b(1).as<int16_t>());
+    EXPECT_EQ(3, b(0).as<int16_t>());
+    EXPECT_EQ(13, b(2).as<float>());
 }
 
 TEST(DateDType, FromStruct) {
@@ -245,9 +245,9 @@ TEST(DateDType, FromStruct) {
     // This is the default struct accepted
     ds = make_cstruct_dtype(make_dtype<int32_t>(), "year", make_dtype<int8_t>(), "month", make_dtype<int8_t>(), "day");
     a = nd::empty(ds);
-    a.at(0).vals() = 1955;
-    a.at(1).vals() = 3;
-    a.at(2).vals() = 13;
+    a(0).vals() = 1955;
+    a(1).vals() = 3;
+    a(2).vals() = 13;
     b = nd::empty(d);
     b.vals() = a;
     EXPECT_EQ(1955, b.p("year").as<int32_t>());
@@ -296,9 +296,9 @@ TEST(DateDType, StrFTime) {
     a = nd::array(strs).ucast(d).eval();
 
     b = a.f("strftime", "%Y-%m-%d %j %U %w %W");
-    EXPECT_EQ("1931-12-12 346 49 6 49", b.at(0).as<string>());
-    EXPECT_EQ("2013-05-14 134 19 2 19", b.at(1).as<string>());
-    EXPECT_EQ("2012-12-25 360 52 2 52", b.at(2).as<string>());
+    EXPECT_EQ("1931-12-12 346 49 6 49", b(0).as<string>());
+    EXPECT_EQ("2013-05-14 134 19 2 19", b(1).as<string>());
+    EXPECT_EQ("2012-12-25 360 52 2 52", b(2).as<string>());
 }
 
 TEST(DateDType, StrFTimeOfConvert) {
@@ -309,9 +309,9 @@ TEST(DateDType, StrFTimeOfConvert) {
                     a.get_dtype());
 
     nd::array b = a.f("strftime", "%Y %m %d");
-    EXPECT_EQ("1920 03 12", b.at(0).as<string>());
-    EXPECT_EQ("2013 01 01", b.at(1).as<string>());
-    EXPECT_EQ("2000 12 25", b.at(2).as<string>());
+    EXPECT_EQ("1920 03 12", b(0).as<string>());
+    EXPECT_EQ("2013 01 01", b(1).as<string>());
+    EXPECT_EQ("2000 12 25", b(2).as<string>());
 }
 
 TEST(DateDType, StrFTimeOfMultiDim) {
@@ -322,9 +322,9 @@ TEST(DateDType, StrFTimeOfMultiDim) {
     a.vals_at(1) = vals_1;
 
     a = a.f("strftime", "%d/%m/%Y");
-    EXPECT_EQ("12/03/1920", a.at(0, 0).as<string>());
-    EXPECT_EQ("01/01/2013", a.at(0, 1).as<string>());
-    EXPECT_EQ("25/12/2000", a.at(1, 0).as<string>());
+    EXPECT_EQ("12/03/1920", a(0, 0).as<string>());
+    EXPECT_EQ("01/01/2013", a(0, 1).as<string>());
+    EXPECT_EQ("25/12/2000", a(1, 0).as<string>());
 }
 
 #if defined(_MSC_VER)
@@ -364,14 +364,14 @@ TEST(DateDType, Replace) {
     // The C++ call interface doesn't let you skip arguments (yet, there is no keyword argument mechanism),
     // so test this manually
     nd::array param = a.find_dynamic_function("replace").get_default_parameters().eval_copy();
-    *reinterpret_cast<void **>(param.at(0).get_readwrite_originptr()) = (void*)a.get_ndo();
-    param.at(2).vals() = 7;
+    *reinterpret_cast<void **>(param(0).get_readwrite_originptr()) = (void*)a.get_ndo();
+    param(2).vals() = 7;
     EXPECT_EQ("1955-07-13", a.find_dynamic_function("replace").call_generic(param).as<string>());
-    param.at(3).vals() = -1;
+    param(3).vals() = -1;
     EXPECT_EQ("1955-07-31", a.find_dynamic_function("replace").call_generic(param).as<string>());
-    param.at(2).vals() = 2;
+    param(2).vals() = 2;
     EXPECT_EQ("1955-02-28", a.find_dynamic_function("replace").call_generic(param).as<string>());
-    param.at(1).vals() = 2012;
+    param(1).vals() = 2012;
     EXPECT_EQ("2012-02-29", a.find_dynamic_function("replace").call_generic(param).as<string>());
     // Should throw an exception when no arguments or out of bounds arguments are provided
     EXPECT_THROW(a.f("replace").eval(), runtime_error);
@@ -404,14 +404,14 @@ TEST(DateDType, NumPyCompatibleProperty) {
     nd::array a_date = a.view_scalars(make_reversed_property_dtype(make_date_dtype(),
                     make_dtype<int64_t>(), "days_after_1970_int64"));
     // Reading from the 'int64 as date' view
-    EXPECT_EQ("1924-03-13", a_date.at(0).as<string>());
-    EXPECT_EQ("1970-01-01", a_date.at(1).as<string>());
-    EXPECT_EQ("2000-02-14", a_date.at(2).as<string>());
-    EXPECT_EQ("NA",         a_date.at(3).as<string>());
+    EXPECT_EQ("1924-03-13", a_date(0).as<string>());
+    EXPECT_EQ("1970-01-01", a_date(1).as<string>());
+    EXPECT_EQ("2000-02-14", a_date(2).as<string>());
+    EXPECT_EQ("NA",         a_date(3).as<string>());
 
     // Writing to the 'int64 as date' view
-    a_date.at(0).vals() = "1975-01-30";
-    EXPECT_EQ(1855, a.at(0).as<int64_t>());
-    a_date.at(0).vals() = "NA";
-    EXPECT_EQ(numeric_limits<int64_t>::min(), a.at(0).as<int64_t>());
+    a_date(0).vals() = "1975-01-30";
+    EXPECT_EQ(1855, a(0).as<int64_t>());
+    a_date(0).vals() = "NA";
+    EXPECT_EQ(numeric_limits<int64_t>::min(), a(0).as<int64_t>());
 }

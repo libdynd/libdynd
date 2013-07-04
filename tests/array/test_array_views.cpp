@@ -33,26 +33,26 @@ TEST(ArrayViews, OneDimensionalRawMemory) {
     // to avoid having to know the endianness
     u8_value = 0x102030405060708ULL;
     memcpy(c_values, &u8_value, 8);
-    a.at(irange() < 8).vals() = c_values;
+    a(irange() < 8).vals() = c_values;
     b = a.view_scalars<uint64_t>();
     EXPECT_EQ(make_strided_dim_dtype(make_dtype<uint64_t>()), b.get_dtype());
     EXPECT_EQ(1u, b.get_shape().size());
     EXPECT_EQ(10, b.get_shape()[0]);
     EXPECT_EQ(a.get_readonly_originptr(), b.get_readonly_originptr());
-    EXPECT_EQ(u8_value, b.at(0).as<uint64_t>());
-    b.at(0).vals() = 0x0505050505050505ULL;
-    EXPECT_EQ(5, a.at(0).as<char>());
+    EXPECT_EQ(u8_value, b(0).as<uint64_t>());
+    b(0).vals() = 0x0505050505050505ULL;
+    EXPECT_EQ(5, a(0).as<char>());
 
     // The system should automatically apply unaligned<>
     // where necessary
-    a.at(1 <= irange() < 9).vals() = c_values;
-    b = a.at(1 <= irange() < 73).view_scalars<uint64_t>();
+    a(1 <= irange() < 9).vals() = c_values;
+    b = a(1 <= irange() < 73).view_scalars<uint64_t>();
     EXPECT_EQ(make_strided_dim_dtype(make_view_dtype(make_dtype<uint64_t>(), make_fixedbytes_dtype(8, 1))),
                     b.get_dtype());
     EXPECT_EQ(1u, b.get_shape().size());
     EXPECT_EQ(9, b.get_shape()[0]);
     EXPECT_EQ(a.get_readonly_originptr() + 1, b.get_readonly_originptr());
-    EXPECT_EQ(u8_value, b.at(0).as<uint64_t>());
+    EXPECT_EQ(u8_value, b(0).as<uint64_t>());
 }
 
 TEST(ArrayViews, MultiDimensionalRawMemory) {
@@ -70,12 +70,12 @@ TEST(ArrayViews, MultiDimensionalRawMemory) {
     EXPECT_EQ(2, b.get_shape()[0]);
     EXPECT_EQ(3, b.get_shape()[1]);
     EXPECT_EQ(a.get_readonly_originptr(), b.get_readonly_originptr());
-    EXPECT_EQ(1, b.at(0, 0).as<int32_t>());
-    EXPECT_EQ(2, b.at(0, 1).as<int32_t>());
-    EXPECT_EQ(3, b.at(0, 2).as<int32_t>());
-    EXPECT_EQ(-1, b.at(1, 0).as<int32_t>());
-    EXPECT_EQ(std::numeric_limits<int32_t>::min(), b.at(1, 1).as<int32_t>());
-    EXPECT_EQ(0, b.at(1, 2).as<int32_t>());
+    EXPECT_EQ(1, b(0, 0).as<int32_t>());
+    EXPECT_EQ(2, b(0, 1).as<int32_t>());
+    EXPECT_EQ(3, b(0, 2).as<int32_t>());
+    EXPECT_EQ(-1, b(1, 0).as<int32_t>());
+    EXPECT_EQ(std::numeric_limits<int32_t>::min(), b(1, 1).as<int32_t>());
+    EXPECT_EQ(0, b(1, 2).as<int32_t>());
 }
 
 TEST(ArrayViews, ExpressionDType) {
@@ -98,10 +98,10 @@ TEST(ArrayViews, ExpressionDType) {
     EXPECT_EQ(2, b.get_shape()[0]);
     EXPECT_EQ(3, b.get_shape()[1]);
     EXPECT_EQ(a.get_readonly_originptr(), b.get_readonly_originptr());
-    EXPECT_EQ(1, b.at(0, 0).as<int16_t>());
-    EXPECT_EQ(2, b.at(0, 1).as<int16_t>());
-    EXPECT_EQ(3, b.at(0, 2).as<int16_t>());
-    EXPECT_EQ(-1, b.at(1, 0).as<int16_t>());
-    EXPECT_EQ(std::numeric_limits<int16_t>::min(), b.at(1, 1).as<int16_t>());
-    EXPECT_EQ(0, b.at(1, 2).as<int16_t>());
+    EXPECT_EQ(1, b(0, 0).as<int16_t>());
+    EXPECT_EQ(2, b(0, 1).as<int16_t>());
+    EXPECT_EQ(3, b(0, 2).as<int16_t>());
+    EXPECT_EQ(-1, b(1, 0).as<int16_t>());
+    EXPECT_EQ(std::numeric_limits<int16_t>::min(), b(1, 1).as<int16_t>());
+    EXPECT_EQ(0, b(1, 2).as<int16_t>());
 }

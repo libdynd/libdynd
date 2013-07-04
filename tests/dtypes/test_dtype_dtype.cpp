@@ -181,7 +181,7 @@ TEST(DTypeDType, VarArrayRefCount) {
     a.vals() = d;
     EXPECT_EQ(11, d.extended()->get_use_count());
     // Assigning one value should free one reference count
-    a.at(0).vals() = make_dtype<float>();
+    a(0).vals() = make_dtype<float>();
     EXPECT_EQ(10, d.extended()->get_use_count());
     // Assigning all values should free all the reference counts
     a.vals() = make_dtype<int>();
@@ -202,7 +202,7 @@ TEST(DTypeDType, VarArrayRefCount) {
     a.vals() = d;
     EXPECT_EQ(10, d.extended()->get_use_count());
     // Assigning one value should free one reference count
-    a.at(0,1).vals() = make_dtype<float>();
+    a(0,1).vals() = make_dtype<float>();
     EXPECT_EQ(9, d.extended()->get_use_count());
     // Assigning all values should free all the reference counts
     a.vals() = make_dtype<int>();
@@ -247,7 +247,7 @@ TEST(DTypeDType, CStructRefCount) {
 
     // Array of CStruct Instance
     a = nd::empty(10, "M, {dt: dtype; more: {a: int32; b: dtype}; other: string}");
-    EXPECT_EQ(cstruct_type_id, a.at(0).get_dtype().get_type_id());
+    EXPECT_EQ(cstruct_type_id, a(0).get_dtype().get_type_id());
     EXPECT_EQ(1, d.extended()->get_use_count());
     a.p("dt").vals() = d;
     EXPECT_EQ(11, d.extended()->get_use_count());
@@ -259,7 +259,7 @@ TEST(DTypeDType, CStructRefCount) {
     a.vals_at(-1,1,1) = make_dtype<int>();
     EXPECT_EQ(19, d.extended()->get_use_count());
     // Assigning one slice should free several reference counts
-    a.at(3 <= irange() < 6).p("dt").vals() = dtype();
+    a(3 <= irange() < 6).p("dt").vals() = dtype();
     EXPECT_EQ(16, d.extended()->get_use_count());
     // Assigning a new reference to 'a' should free the references when
     // destructing the existing 'a'
@@ -274,7 +274,7 @@ TEST(DTypeDType, StructRefCount) {
     d = make_strided_dim_dtype(make_dtype<int>());
 
     // Single CStruct Instance
-    a = nd::empty("{dt: dtype; more: {a: int32; b: dtype}; other: string}").at(0 <= irange() < 2);
+    a = nd::empty("{dt: dtype; more: {a: int32; b: dtype}; other: string}")(0 <= irange() < 2);
     EXPECT_EQ(struct_type_id, a.get_dtype().get_type_id());
     EXPECT_EQ(1, d.extended()->get_use_count());
     a.p("dt").vals() = d;
@@ -296,8 +296,8 @@ TEST(DTypeDType, StructRefCount) {
     EXPECT_EQ(1, d.extended()->get_use_count());
 
     // Array of Struct Instance
-    a = nd::empty(10, "M, {dt: dtype; more: {a: int32; b: dtype}; other: string}").at(irange(), 0 <= irange() < 2);
-    EXPECT_EQ(struct_type_id, a.at(0).get_dtype().get_type_id());
+    a = nd::empty(10, "M, {dt: dtype; more: {a: int32; b: dtype}; other: string}")(irange(), 0 <= irange() < 2);
+    EXPECT_EQ(struct_type_id, a(0).get_dtype().get_type_id());
     EXPECT_EQ(1, d.extended()->get_use_count());
     a.p("dt").vals() = d;
     EXPECT_EQ(11, d.extended()->get_use_count());
@@ -309,7 +309,7 @@ TEST(DTypeDType, StructRefCount) {
     a.vals_at(-1,1,1) = make_dtype<int>();
     EXPECT_EQ(19, d.extended()->get_use_count());
     // Assigning one slice should free several reference counts
-    a.at(3 <= irange() < 6).p("dt").vals() = dtype();
+    a(3 <= irange() < 6).p("dt").vals() = dtype();
     EXPECT_EQ(16, d.extended()->get_use_count());
     // Assigning a new reference to 'a' should free the references when
     // destructing the existing 'a'

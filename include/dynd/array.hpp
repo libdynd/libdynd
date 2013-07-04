@@ -408,26 +408,26 @@ public:
     array at_array(size_t nindices, const irange *indices, bool collapse_leading = true) const;
 
     /**
-     * The 'at' function is used for indexing. Overloading operator[] isn't
+     * The function call operator is used for indexing. Overloading operator[] isn't
      * practical for multidimensional objects.
      */
-    array at(const irange& i0) const {
+    array operator()(const irange& i0) const {
         return at_array(1, &i0);
     }
 
     /** Indexing with two index values */
-    array at(const irange& i0, const irange& i1) const {
+    array operator()(const irange& i0, const irange& i1) const {
         irange i[2] = {i0, i1};
         return at_array(2, i);
     }
 
     /** Indexing with three index values */
-    array at(const irange& i0, const irange& i1, const irange& i2) const {
+    array operator()(const irange& i0, const irange& i1, const irange& i2) const {
         irange i[3] = {i0, i1, i2};
         return at_array(3, i);
     }
     /** Indexing with four index values */
-    array at(const irange& i0, const irange& i1, const irange& i2, const irange& i3) const {
+    array operator()(const irange& i0, const irange& i1, const irange& i2, const irange& i3) const {
         irange i[4] = {i0, i1, i2, i3};
         return at_array(4, i);
     }

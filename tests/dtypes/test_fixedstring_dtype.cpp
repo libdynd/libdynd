@@ -88,61 +88,61 @@ TEST(FixedstringDType, SingleCompare) {
     nd::array a = nd::make_strided_array(2,
                     make_fixedstring_dtype(7, string_encoding_utf_8));
 
-    a.at(0).vals() = "abc";
-    a.at(1).vals() = "abd";
+    a(0).vals() = "abc";
+    a(1).vals() = "abd";
 
     // test ascii kernel
     a = a.eval();
-    EXPECT_TRUE(a.at(0).op_sorting_less(a.at(1)));
-    EXPECT_TRUE(a.at(0) < a.at(1));
-    EXPECT_TRUE(a.at(0) <= a.at(1));
-    EXPECT_FALSE(a.at(0) == a.at(1));
-    EXPECT_TRUE(a.at(0) != a.at(1));
-    EXPECT_FALSE(a.at(0) >= a.at(1));
-    EXPECT_FALSE(a.at(0) > a.at(1));
-    EXPECT_FALSE(a.at(0).equals_exact(a.at(1)));
-    EXPECT_TRUE(a.at(0).equals_exact(a.at(0)));
+    EXPECT_TRUE(a(0).op_sorting_less(a(1)));
+    EXPECT_TRUE(a(0) < a(1));
+    EXPECT_TRUE(a(0) <= a(1));
+    EXPECT_FALSE(a(0) == a(1));
+    EXPECT_TRUE(a(0) != a(1));
+    EXPECT_FALSE(a(0) >= a(1));
+    EXPECT_FALSE(a(0) > a(1));
+    EXPECT_FALSE(a(0).equals_exact(a(1)));
+    EXPECT_TRUE(a(0).equals_exact(a(0)));
 
     // TODO: means for not hardcoding expected results in utf string comparison tests
 
     // test utf8 kernel
     a = a.ucast(make_fixedstring_dtype(7, string_encoding_utf_8));
     a = a.eval();
-    EXPECT_TRUE(a.at(0).op_sorting_less(a.at(1)));
-    EXPECT_TRUE(a.at(0) < a.at(1));
-    EXPECT_TRUE(a.at(0) <= a.at(1));
-    EXPECT_FALSE(a.at(0) == a.at(1));
-    EXPECT_TRUE(a.at(0) != a.at(1));
-    EXPECT_FALSE(a.at(0) >= a.at(1));
-    EXPECT_FALSE(a.at(0) > a.at(1));
-    EXPECT_FALSE(a.at(0).equals_exact(a.at(1)));
-    EXPECT_TRUE(a.at(0).equals_exact(a.at(0)));
+    EXPECT_TRUE(a(0).op_sorting_less(a(1)));
+    EXPECT_TRUE(a(0) < a(1));
+    EXPECT_TRUE(a(0) <= a(1));
+    EXPECT_FALSE(a(0) == a(1));
+    EXPECT_TRUE(a(0) != a(1));
+    EXPECT_FALSE(a(0) >= a(1));
+    EXPECT_FALSE(a(0) > a(1));
+    EXPECT_FALSE(a(0).equals_exact(a(1)));
+    EXPECT_TRUE(a(0).equals_exact(a(0)));
 
     // test utf16 kernel
     a = a.ucast(make_fixedstring_dtype(7, string_encoding_utf_16));
     a = a.eval();
-    EXPECT_TRUE(a.at(0).op_sorting_less(a.at(1)));
-    EXPECT_TRUE(a.at(0) < a.at(1));
-    EXPECT_TRUE(a.at(0) <= a.at(1));
-    EXPECT_FALSE(a.at(0) == a.at(1));
-    EXPECT_TRUE(a.at(0) != a.at(1));
-    EXPECT_FALSE(a.at(0) >= a.at(1));
-    EXPECT_FALSE(a.at(0) > a.at(1));
-    EXPECT_FALSE(a.at(0).equals_exact(a.at(1)));
-    EXPECT_TRUE(a.at(0).equals_exact(a.at(0)));
+    EXPECT_TRUE(a(0).op_sorting_less(a(1)));
+    EXPECT_TRUE(a(0) < a(1));
+    EXPECT_TRUE(a(0) <= a(1));
+    EXPECT_FALSE(a(0) == a(1));
+    EXPECT_TRUE(a(0) != a(1));
+    EXPECT_FALSE(a(0) >= a(1));
+    EXPECT_FALSE(a(0) > a(1));
+    EXPECT_FALSE(a(0).equals_exact(a(1)));
+    EXPECT_TRUE(a(0).equals_exact(a(0)));
 
     // test utf32 kernel
     a = a.ucast(make_fixedstring_dtype(7, string_encoding_utf_32));
     a = a.eval();
-    EXPECT_TRUE(a.at(0).op_sorting_less(a.at(1)));
-    EXPECT_TRUE(a.at(0) < a.at(1));
-    EXPECT_TRUE(a.at(0) <= a.at(1));
-    EXPECT_FALSE(a.at(0) == a.at(1));
-    EXPECT_TRUE(a.at(0) != a.at(1));
-    EXPECT_FALSE(a.at(0) >= a.at(1));
-    EXPECT_FALSE(a.at(0) > a.at(1));
-    EXPECT_FALSE(a.at(0).equals_exact(a.at(1)));
-    EXPECT_TRUE(a.at(0).equals_exact(a.at(0)));
+    EXPECT_TRUE(a(0).op_sorting_less(a(1)));
+    EXPECT_TRUE(a(0) < a(1));
+    EXPECT_TRUE(a(0) <= a(1));
+    EXPECT_FALSE(a(0) == a(1));
+    EXPECT_TRUE(a(0) != a(1));
+    EXPECT_FALSE(a(0) >= a(1));
+    EXPECT_FALSE(a(0) > a(1));
+    EXPECT_FALSE(a(0).equals_exact(a(1)));
+    EXPECT_TRUE(a(0).equals_exact(a(0)));
 }
 
 TEST(FixedstringDType, CanonicalDType) {

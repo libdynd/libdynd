@@ -25,36 +25,36 @@ TEST(ArithmeticOp, SimpleBroadcast) {
 
     c = (a + b).eval();
     EXPECT_EQ(make_dtype<int>(), c.get_udtype());
-    EXPECT_EQ(1, c.at(0,0).as<int>());
-    EXPECT_EQ(3, c.at(0,1).as<int>());
-    EXPECT_EQ(4, c.at(0,2).as<int>());
-    EXPECT_EQ(3, c.at(1,0).as<int>());
-    EXPECT_EQ(7, c.at(1,1).as<int>());
-    EXPECT_EQ(-7, c.at(1,2).as<int>());
+    EXPECT_EQ(1, c(0,0).as<int>());
+    EXPECT_EQ(3, c(0,1).as<int>());
+    EXPECT_EQ(4, c(0,2).as<int>());
+    EXPECT_EQ(3, c(1,0).as<int>());
+    EXPECT_EQ(7, c(1,1).as<int>());
+    EXPECT_EQ(-7, c(1,2).as<int>());
     c = (a - b).eval();
     EXPECT_EQ(make_dtype<int>(), c.get_udtype());
-    EXPECT_EQ(1, c.at(0,0).as<int>());
-    EXPECT_EQ(1, c.at(0,1).as<int>());
-    EXPECT_EQ(2, c.at(0,2).as<int>());
-    EXPECT_EQ(-1, c.at(1,0).as<int>());
-    EXPECT_EQ(-3, c.at(1,1).as<int>());
-    EXPECT_EQ(13, c.at(1,2).as<int>());
+    EXPECT_EQ(1, c(0,0).as<int>());
+    EXPECT_EQ(1, c(0,1).as<int>());
+    EXPECT_EQ(2, c(0,2).as<int>());
+    EXPECT_EQ(-1, c(1,0).as<int>());
+    EXPECT_EQ(-3, c(1,1).as<int>());
+    EXPECT_EQ(13, c(1,2).as<int>());
     c = (b * a).eval();
     EXPECT_EQ(make_dtype<int>(), c.get_udtype());
-    EXPECT_EQ(0, c.at(0,0).as<int>());
-    EXPECT_EQ(2, c.at(0,1).as<int>());
-    EXPECT_EQ(3, c.at(0,2).as<int>());
-    EXPECT_EQ(2, c.at(1,0).as<int>());
-    EXPECT_EQ(10, c.at(1,1).as<int>());
-    EXPECT_EQ(-30, c.at(1,2).as<int>());
+    EXPECT_EQ(0, c(0,0).as<int>());
+    EXPECT_EQ(2, c(0,1).as<int>());
+    EXPECT_EQ(3, c(0,2).as<int>());
+    EXPECT_EQ(2, c(1,0).as<int>());
+    EXPECT_EQ(10, c(1,1).as<int>());
+    EXPECT_EQ(-30, c(1,2).as<int>());
     c = (b / a).eval();
     EXPECT_EQ(make_dtype<int>(), c.get_udtype());
-    EXPECT_EQ(0, c.at(0,0).as<int>());
-    EXPECT_EQ(0, c.at(0,1).as<int>());
-    EXPECT_EQ(0, c.at(0,2).as<int>());
-    EXPECT_EQ(2, c.at(1,0).as<int>());
-    EXPECT_EQ(2, c.at(1,1).as<int>());
-    EXPECT_EQ(-3, c.at(1,2).as<int>());
+    EXPECT_EQ(0, c(0,0).as<int>());
+    EXPECT_EQ(0, c(0,1).as<int>());
+    EXPECT_EQ(0, c(0,2).as<int>());
+    EXPECT_EQ(2, c(1,0).as<int>());
+    EXPECT_EQ(2, c(1,1).as<int>());
+    EXPECT_EQ(-3, c(1,2).as<int>());
 }
 
 TEST(ArithmeticOp, StridedScalarBroadcast) {
@@ -67,39 +67,39 @@ TEST(ArithmeticOp, StridedScalarBroadcast) {
 
     c = (a + b).eval();
     EXPECT_EQ(make_dtype<int>(), c.get_udtype());
-    EXPECT_EQ(4, c.at(0).as<int>());
-    EXPECT_EQ(6, c.at(1).as<int>());
-    EXPECT_EQ(8, c.at(2).as<int>());
+    EXPECT_EQ(4, c(0).as<int>());
+    EXPECT_EQ(6, c(1).as<int>());
+    EXPECT_EQ(8, c(2).as<int>());
     c = (b + a).eval();
     EXPECT_EQ(make_dtype<int>(), c.get_udtype());
-    EXPECT_EQ(4, c.at(0).as<int>());
-    EXPECT_EQ(6, c.at(1).as<int>());
-    EXPECT_EQ(8, c.at(2).as<int>());
+    EXPECT_EQ(4, c(0).as<int>());
+    EXPECT_EQ(6, c(1).as<int>());
+    EXPECT_EQ(8, c(2).as<int>());
     c = (a - b).eval();
     EXPECT_EQ(make_dtype<int>(), c.get_udtype());
-    EXPECT_EQ(0, c.at(0).as<int>());
-    EXPECT_EQ(2, c.at(1).as<int>());
-    EXPECT_EQ(4, c.at(2).as<int>());
+    EXPECT_EQ(0, c(0).as<int>());
+    EXPECT_EQ(2, c(1).as<int>());
+    EXPECT_EQ(4, c(2).as<int>());
     c = (b - a).eval();
     EXPECT_EQ(make_dtype<int>(), c.get_udtype());
-    EXPECT_EQ(0, c.at(0).as<int>());
-    EXPECT_EQ(-2, c.at(1).as<int>());
-    EXPECT_EQ(-4, c.at(2).as<int>());
+    EXPECT_EQ(0, c(0).as<int>());
+    EXPECT_EQ(-2, c(1).as<int>());
+    EXPECT_EQ(-4, c(2).as<int>());
     c = (a * b).eval();
     EXPECT_EQ(make_dtype<int>(), c.get_udtype());
-    EXPECT_EQ(4, c.at(0).as<int>());
-    EXPECT_EQ(8, c.at(1).as<int>());
-    EXPECT_EQ(12, c.at(2).as<int>());
+    EXPECT_EQ(4, c(0).as<int>());
+    EXPECT_EQ(8, c(1).as<int>());
+    EXPECT_EQ(12, c(2).as<int>());
     c = (b * a).eval();
     EXPECT_EQ(make_dtype<int>(), c.get_udtype());
-    EXPECT_EQ(4, c.at(0).as<int>());
-    EXPECT_EQ(8, c.at(1).as<int>());
-    EXPECT_EQ(12, c.at(2).as<int>());
+    EXPECT_EQ(4, c(0).as<int>());
+    EXPECT_EQ(8, c(1).as<int>());
+    EXPECT_EQ(12, c(2).as<int>());
     c = (a / b).eval();
     EXPECT_EQ(make_dtype<int>(), c.get_udtype());
-    EXPECT_EQ(1, c.at(0).as<int>());
-    EXPECT_EQ(2, c.at(1).as<int>());
-    EXPECT_EQ(3, c.at(2).as<int>());
+    EXPECT_EQ(1, c(0).as<int>());
+    EXPECT_EQ(2, c(1).as<int>());
+    EXPECT_EQ(3, c(2).as<int>());
 }
 
 TEST(ArithmeticOp, VarToStridedBroadcast) {
@@ -115,24 +115,24 @@ TEST(ArithmeticOp, VarToStridedBroadcast) {
     ASSERT_EQ(dtype("M, N, int32"), c.get_dtype());
     ASSERT_EQ(2, c.get_shape()[0]);
     ASSERT_EQ(3, c.get_shape()[1]);
-    EXPECT_EQ(6, c.at(0,0).as<int>());
-    EXPECT_EQ(8, c.at(0,1).as<int>());
-    EXPECT_EQ(10, c.at(0,2).as<int>());
-    EXPECT_EQ(12, c.at(1,0).as<int>());
-    EXPECT_EQ(13, c.at(1,1).as<int>());
-    EXPECT_EQ(14, c.at(1,2).as<int>());
+    EXPECT_EQ(6, c(0,0).as<int>());
+    EXPECT_EQ(8, c(0,1).as<int>());
+    EXPECT_EQ(10, c(0,2).as<int>());
+    EXPECT_EQ(12, c(1,0).as<int>());
+    EXPECT_EQ(13, c(1,1).as<int>());
+    EXPECT_EQ(14, c(1,2).as<int>());
 
     // VarDim in the second operand
     c = (b - a).eval();
     ASSERT_EQ(dtype("M, N, int32"), c.get_dtype());
     ASSERT_EQ(2, c.get_shape()[0]);
     ASSERT_EQ(3, c.get_shape()[1]);
-    EXPECT_EQ(4, c.at(0,0).as<int>());
-    EXPECT_EQ(4, c.at(0,1).as<int>());
-    EXPECT_EQ(4, c.at(0,2).as<int>());
-    EXPECT_EQ(4, c.at(1,0).as<int>());
-    EXPECT_EQ(5, c.at(1,1).as<int>());
-    EXPECT_EQ(6, c.at(1,2).as<int>());
+    EXPECT_EQ(4, c(0,0).as<int>());
+    EXPECT_EQ(4, c(0,1).as<int>());
+    EXPECT_EQ(4, c(0,2).as<int>());
+    EXPECT_EQ(4, c(1,0).as<int>());
+    EXPECT_EQ(5, c(1,1).as<int>());
+    EXPECT_EQ(6, c(1,2).as<int>());
 }
 
 TEST(ArithmeticOp, VarToVarBroadcast) {
@@ -147,11 +147,11 @@ TEST(ArithmeticOp, VarToVarBroadcast) {
     c = (a + b).eval();
     ASSERT_EQ(dtype("M, var, int32"), c.get_dtype());
     ASSERT_EQ(2, c.get_shape()[0]);
-    EXPECT_EQ(6, c.at(0,0).as<int>());
-    EXPECT_EQ(7, c.at(0,1).as<int>());
-    EXPECT_EQ(8, c.at(0,2).as<int>());
-    EXPECT_EQ(10, c.at(1,0).as<int>());
-    EXPECT_EQ(11, c.at(1,1).as<int>());
+    EXPECT_EQ(6, c(0,0).as<int>());
+    EXPECT_EQ(7, c(0,1).as<int>());
+    EXPECT_EQ(8, c(0,2).as<int>());
+    EXPECT_EQ(10, c(1,0).as<int>());
+    EXPECT_EQ(11, c(1,1).as<int>());
 
     a = parse_json("2, var, int32",
                     "[[1, 2, 3], [4]]");
@@ -162,19 +162,19 @@ TEST(ArithmeticOp, VarToVarBroadcast) {
     ASSERT_EQ(dtype("M, var, int32"), c.get_dtype());
     c = (a + b).eval();
     ASSERT_EQ(2, c.get_shape()[0]);
-    EXPECT_EQ(6, c.at(0,0).as<int>());
-    EXPECT_EQ(7, c.at(0,1).as<int>());
-    EXPECT_EQ(8, c.at(0,2).as<int>());
-    EXPECT_EQ(10, c.at(1,0).as<int>());
+    EXPECT_EQ(6, c(0,0).as<int>());
+    EXPECT_EQ(7, c(0,1).as<int>());
+    EXPECT_EQ(8, c(0,2).as<int>());
+    EXPECT_EQ(10, c(1,0).as<int>());
 
     // Strided of size 1 in the first operand, VarDim in second
     c = (b - a).eval();
     ASSERT_EQ(dtype("M, var, int32"), c.get_dtype());
     ASSERT_EQ(2, c.get_shape()[0]);
-    EXPECT_EQ(4, c.at(0,0).as<int>());
-    EXPECT_EQ(3, c.at(0,1).as<int>());
-    EXPECT_EQ(2, c.at(0,2).as<int>());
-    EXPECT_EQ(2, c.at(1,0).as<int>());
+    EXPECT_EQ(4, c(0,0).as<int>());
+    EXPECT_EQ(3, c(0,1).as<int>());
+    EXPECT_EQ(2, c(0,2).as<int>());
+    EXPECT_EQ(2, c(1,0).as<int>());
 }
 
 TEST(ArithmeticOp, ScalarOnTheRight) {
@@ -185,21 +185,21 @@ TEST(ArithmeticOp, ScalarOnTheRight) {
 
     // A scalar on the right
     c = (a + 12).eval();
-    EXPECT_EQ(13, c.at(0).as<int>());
-    EXPECT_EQ(14, c.at(1).as<int>());
-    EXPECT_EQ(15, c.at(2).as<int>());
+    EXPECT_EQ(13, c(0).as<int>());
+    EXPECT_EQ(14, c(1).as<int>());
+    EXPECT_EQ(15, c(2).as<int>());
     c = (a - 12).eval();
-    EXPECT_EQ(-11, c.at(0).as<int>());
-    EXPECT_EQ(-10, c.at(1).as<int>());
-    EXPECT_EQ(-9, c.at(2).as<int>());
+    EXPECT_EQ(-11, c(0).as<int>());
+    EXPECT_EQ(-10, c(1).as<int>());
+    EXPECT_EQ(-9, c(2).as<int>());
     c = (a * 3).eval();
-    EXPECT_EQ(3, c.at(0).as<int>());
-    EXPECT_EQ(6, c.at(1).as<int>());
-    EXPECT_EQ(9, c.at(2).as<int>());
+    EXPECT_EQ(3, c(0).as<int>());
+    EXPECT_EQ(6, c(1).as<int>());
+    EXPECT_EQ(9, c(2).as<int>());
     c = (a / 2).eval();
-    EXPECT_EQ(0, c.at(0).as<int>());
-    EXPECT_EQ(1, c.at(1).as<int>());
-    EXPECT_EQ(1, c.at(2).as<int>());
+    EXPECT_EQ(0, c(0).as<int>());
+    EXPECT_EQ(1, c(1).as<int>());
+    EXPECT_EQ(1, c(2).as<int>());
 }
 
 TEST(ArithmeticOp, ScalarOnTheLeft) {
@@ -210,21 +210,21 @@ TEST(ArithmeticOp, ScalarOnTheLeft) {
 
     // A scalar on the left
     c = ((-1) + a).eval();
-    EXPECT_EQ(0, c.at(0).as<int>());
-    EXPECT_EQ(1, c.at(1).as<int>());
-    EXPECT_EQ(2, c.at(2).as<int>());
+    EXPECT_EQ(0, c(0).as<int>());
+    EXPECT_EQ(1, c(1).as<int>());
+    EXPECT_EQ(2, c(2).as<int>());
     c = ((-1) - a).eval();
-    EXPECT_EQ(-2, c.at(0).as<int>());
-    EXPECT_EQ(-3, c.at(1).as<int>());
-    EXPECT_EQ(-4, c.at(2).as<int>());
+    EXPECT_EQ(-2, c(0).as<int>());
+    EXPECT_EQ(-3, c(1).as<int>());
+    EXPECT_EQ(-4, c(2).as<int>());
     c = (5 * a).eval();
-    EXPECT_EQ(5, c.at(0).as<int>());
-    EXPECT_EQ(10, c.at(1).as<int>());
-    EXPECT_EQ(15, c.at(2).as<int>());
+    EXPECT_EQ(5, c(0).as<int>());
+    EXPECT_EQ(10, c(1).as<int>());
+    EXPECT_EQ(15, c(2).as<int>());
     c = (-6 / a).eval();
-    EXPECT_EQ(-6, c.at(0).as<int>());
-    EXPECT_EQ(-3, c.at(1).as<int>());
-    EXPECT_EQ(-2, c.at(2).as<int>());
+    EXPECT_EQ(-6, c(0).as<int>());
+    EXPECT_EQ(-3, c(1).as<int>());
+    EXPECT_EQ(-2, c(2).as<int>());
 }
 
 TEST(ArithmeticOp, ComplexScalar) {
@@ -239,13 +239,13 @@ TEST(ArithmeticOp, ComplexScalar) {
     // A complex scalar
     (a + complex<float>(1, 2)).debug_print(cout);
     c = (a + complex<float>(1, 2)).eval();
-    EXPECT_EQ(complex<float>(2,2), c.at(0).as<complex<float> >());
-    EXPECT_EQ(complex<float>(3,2), c.at(1).as<complex<float> >());
-    EXPECT_EQ(complex<float>(4,2), c.at(2).as<complex<float> >());
+    EXPECT_EQ(complex<float>(2,2), c(0).as<complex<float> >());
+    EXPECT_EQ(complex<float>(3,2), c(1).as<complex<float> >());
+    EXPECT_EQ(complex<float>(4,2), c(2).as<complex<float> >());
     c = (complex<float>(0, -1) * a).eval();
-    EXPECT_EQ(complex<float>(0,-1), c.at(0).as<complex<float> >());
-    EXPECT_EQ(complex<float>(0,-2), c.at(1).as<complex<float> >());
-    EXPECT_EQ(complex<float>(0,-3), c.at(2).as<complex<float> >());
+    EXPECT_EQ(complex<float>(0,-1), c(0).as<complex<float> >());
+    EXPECT_EQ(complex<float>(0,-2), c(1).as<complex<float> >());
+    EXPECT_EQ(complex<float>(0,-3), c(2).as<complex<float> >());
 }
 
 TEST(ArithmeticOp, MatchingDTypes_View) {
@@ -258,37 +258,37 @@ TEST(ArithmeticOp, MatchingDTypes_View) {
     b = v1;
 
     c = a + b;
-    EXPECT_EQ(1, c.at(0,0).as<int>());
-    EXPECT_EQ(3, c.at(0,1).as<int>());
-    EXPECT_EQ(4, c.at(0,2).as<int>());
-    EXPECT_EQ(3, c.at(1,0).as<int>());
-    EXPECT_EQ(7, c.at(1,1).as<int>());
-    EXPECT_EQ(-7, c.at(1,2).as<int>());
+    EXPECT_EQ(1, c(0,0).as<int>());
+    EXPECT_EQ(3, c(0,1).as<int>());
+    EXPECT_EQ(4, c(0,2).as<int>());
+    EXPECT_EQ(3, c(1,0).as<int>());
+    EXPECT_EQ(7, c(1,1).as<int>());
+    EXPECT_EQ(-7, c(1,2).as<int>());
 
     // Note: 'c' contains an expression tree with an 'add' node,
     // so editing the values of 'a' or 'b' changes the values of 'c'
     int v2[] = {6,4,2};
     a.val_assign(nd::array(v2));
-    EXPECT_EQ(6, c.at(0,0).as<int>());
-    EXPECT_EQ(5, c.at(0,1).as<int>());
-    EXPECT_EQ(3, c.at(0,2).as<int>());
-    EXPECT_EQ(8, c.at(1,0).as<int>());
-    EXPECT_EQ(9, c.at(1,1).as<int>());
-    EXPECT_EQ(-8, c.at(1,2).as<int>());
+    EXPECT_EQ(6, c(0,0).as<int>());
+    EXPECT_EQ(5, c(0,1).as<int>());
+    EXPECT_EQ(3, c(0,2).as<int>());
+    EXPECT_EQ(8, c(1,0).as<int>());
+    EXPECT_EQ(9, c(1,1).as<int>());
+    EXPECT_EQ(-8, c(1,2).as<int>());
 
     // Check also partial indexing through another temporary
-    d = c.at(0);
+    d = c(0);
     EXPECT_EQ(1u, d.get_undim());
     EXPECT_EQ(3, d.get_shape()[0]);
     a.val_assign(nd::array(v0));
-    EXPECT_EQ(1, d.at(0).as<int>());
-    EXPECT_EQ(3, d.at(1).as<int>());
-    EXPECT_EQ(4, d.at(2).as<int>());
-    d = c.at(1);
+    EXPECT_EQ(1, d(0).as<int>());
+    EXPECT_EQ(3, d(1).as<int>());
+    EXPECT_EQ(4, d(2).as<int>());
+    d = c(1);
     a.val_assign(nd::array(v2));
-    EXPECT_EQ(8, d.at(0).as<int>());
-    EXPECT_EQ(9, d.at(1).as<int>());
-    EXPECT_EQ(-8, d.at(2).as<int>());
+    EXPECT_EQ(8, d(0).as<int>());
+    EXPECT_EQ(9, d(1).as<int>());
+    EXPECT_EQ(-8, d(2).as<int>());
 }
 
 /*

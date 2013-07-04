@@ -213,9 +213,9 @@ TEST(CStructDType, IsExpression) {
 TEST(CStructDType, PropertyAccess) {
     dtype dt = make_cstruct_dtype(make_dtype<int>(), "x", make_dtype<double>(), "y", make_dtype<short>(), "z");
     nd::array a = nd::empty(dt);
-    a.at(0).vals() = 3;
-    a.at(1).vals() = 4.25;
-    a.at(2).vals() = 5;
+    a(0).vals() = 3;
+    a(1).vals() = 4.25;
+    a(2).vals() = 5;
     EXPECT_EQ(3, a.p("x").as<int>());
     EXPECT_EQ(4.25, a.p("y").as<double>());
     EXPECT_EQ(5, a.p("z").as<short>());
@@ -225,63 +225,63 @@ TEST(CStructDType, PropertyAccess) {
 TEST(CStructDType, EqualDTypeAssign) {
     dtype dt = make_cstruct_dtype(make_dtype<int>(), "x", make_dtype<double>(), "y", make_dtype<short>(), "z");
     nd::array a = nd::make_strided_array(2, dt);
-    a.at(0,0).vals() = 3;
-    a.at(0,1).vals() = 4.25;
-    a.at(0,2).vals() = 5;
-    a.at(1,0).vals() = 6;
-    a.at(1,1).vals() = 7.25;
-    a.at(1,2).vals() = 8;
+    a(0,0).vals() = 3;
+    a(0,1).vals() = 4.25;
+    a(0,2).vals() = 5;
+    a(1,0).vals() = 6;
+    a(1,1).vals() = 7.25;
+    a(1,2).vals() = 8;
 
     nd::array b = nd::make_strided_array(2, dt);
     b.val_assign(a);
-    EXPECT_EQ(3,    a.at(0,0).as<int>());
-    EXPECT_EQ(4.25, a.at(0,1).as<double>());
-    EXPECT_EQ(5,    a.at(0,2).as<short>());
-    EXPECT_EQ(6,    a.at(1,0).as<int>());
-    EXPECT_EQ(7.25, a.at(1,1).as<double>());
-    EXPECT_EQ(8,    a.at(1,2).as<short>());
+    EXPECT_EQ(3,    a(0,0).as<int>());
+    EXPECT_EQ(4.25, a(0,1).as<double>());
+    EXPECT_EQ(5,    a(0,2).as<short>());
+    EXPECT_EQ(6,    a(1,0).as<int>());
+    EXPECT_EQ(7.25, a(1,1).as<double>());
+    EXPECT_EQ(8,    a(1,2).as<short>());
 }
 
 TEST(CStructDType, DifferentDTypeAssign) {
     dtype dt = make_cstruct_dtype(make_dtype<int>(), "x", make_dtype<double>(), "y", make_dtype<short>(), "z");
     nd::array a = nd::make_strided_array(2, dt);
-    a.at(0,0).vals() = 3;
-    a.at(0,1).vals() = 4.25;
-    a.at(0,2).vals() = 5;
-    a.at(1,0).vals() = 6;
-    a.at(1,1).vals() = 7.25;
-    a.at(1,2).vals() = 8;
+    a(0,0).vals() = 3;
+    a(0,1).vals() = 4.25;
+    a(0,2).vals() = 5;
+    a(1,0).vals() = 6;
+    a(1,1).vals() = 7.25;
+    a(1,2).vals() = 8;
 
     dtype dt2 = make_cstruct_dtype(make_dtype<float>(), "y", make_dtype<int>(), "z", make_dtype<uint8_t>(), "x");
     nd::array b = nd::make_strided_array(2, dt2);
     b.val_assign(a);
-    EXPECT_EQ(3,    b.at(0,2).as<int>());
-    EXPECT_EQ(4.25, b.at(0,0).as<double>());
-    EXPECT_EQ(5,    b.at(0,1).as<short>());
-    EXPECT_EQ(6,    b.at(1,2).as<int>());
-    EXPECT_EQ(7.25, b.at(1,0).as<double>());
-    EXPECT_EQ(8,    b.at(1,1).as<short>());
+    EXPECT_EQ(3,    b(0,2).as<int>());
+    EXPECT_EQ(4.25, b(0,0).as<double>());
+    EXPECT_EQ(5,    b(0,1).as<short>());
+    EXPECT_EQ(6,    b(1,2).as<int>());
+    EXPECT_EQ(7.25, b(1,0).as<double>());
+    EXPECT_EQ(8,    b(1,1).as<short>());
 }
 
 TEST(CStructDType, FromStructAssign) {
     dtype dt = make_struct_dtype(make_dtype<int>(), "x", make_dtype<double>(), "y", make_dtype<short>(), "z");
     nd::array a = nd::make_strided_array(2, dt);
-    a.at(0,0).vals() = 3;
-    a.at(0,1).vals() = 4.25;
-    a.at(0,2).vals() = 5;
-    a.at(1,0).vals() = 6;
-    a.at(1,1).vals() = 7.25;
-    a.at(1,2).vals() = 8;
+    a(0,0).vals() = 3;
+    a(0,1).vals() = 4.25;
+    a(0,2).vals() = 5;
+    a(1,0).vals() = 6;
+    a(1,1).vals() = 7.25;
+    a(1,2).vals() = 8;
 
     dtype dt2 = make_cstruct_dtype(make_dtype<float>(), "y", make_dtype<int>(), "z", make_dtype<uint8_t>(), "x");
     nd::array b = nd::make_strided_array(2, dt2);
     b.val_assign(a);
-    EXPECT_EQ(3,    b.at(0,2).as<int>());
-    EXPECT_EQ(4.25, b.at(0,0).as<double>());
-    EXPECT_EQ(5,    b.at(0,1).as<short>());
-    EXPECT_EQ(6,    b.at(1,2).as<int>());
-    EXPECT_EQ(7.25, b.at(1,0).as<double>());
-    EXPECT_EQ(8,    b.at(1,1).as<short>());
+    EXPECT_EQ(3,    b(0,2).as<int>());
+    EXPECT_EQ(4.25, b(0,0).as<double>());
+    EXPECT_EQ(5,    b(0,1).as<short>());
+    EXPECT_EQ(6,    b(1,2).as<int>());
+    EXPECT_EQ(7.25, b(1,0).as<double>());
+    EXPECT_EQ(8,    b(1,1).as<short>());
 }
 
 TEST(CStructDType, SingleCompare) {

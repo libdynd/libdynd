@@ -80,11 +80,11 @@ TEST(StringDType, ArrayCreation) {
     a = i0;
     EXPECT_EQ(make_strided_dim_dtype(make_string_dtype(string_encoding_utf_8)), a.get_dtype());
     EXPECT_EQ(a.get_shape()[0], 5);
-    EXPECT_EQ("this", a.at(0).as<string>());
-    EXPECT_EQ("is", a.at(1).as<string>());
-    EXPECT_EQ("a", a.at(2).as<string>());
-    EXPECT_EQ("test", a.at(3).as<string>());
-    EXPECT_EQ("of strings that are various sizes", a.at(4).as<string>());
+    EXPECT_EQ("this", a(0).as<string>());
+    EXPECT_EQ("is", a(1).as<string>());
+    EXPECT_EQ("a", a(2).as<string>());
+    EXPECT_EQ("test", a(3).as<string>());
+    EXPECT_EQ("of strings that are various sizes", a(4).as<string>());
 }
 
 TEST(StringDType, Basic) {
@@ -492,7 +492,7 @@ TEST(StringDType, Concatenation) {
     nd::array c = (a + b).eval();
     ASSERT_EQ(dtype("M, string"), c.get_dtype());
     EXPECT_EQ(3, c.get_dim_size());
-    EXPECT_EQ("testingalpha", c.at(0).as<string>());
-    EXPECT_EQ("onebeta", c.at(1).as<string>());
-    EXPECT_EQ("twogamma", c.at(2).as<string>());
+    EXPECT_EQ("testingalpha", c(0).as<string>());
+    EXPECT_EQ("onebeta", c(1).as<string>());
+    EXPECT_EQ("twogamma", c(2).as<string>());
 }

@@ -33,12 +33,12 @@ TEST(GFuncCallable, OneParameter) {
     nd::array a, r;
     a = nd::empty(c.get_parameters_dtype());
 
-    a.at(0).val_assign(12);
+    a(0).val_assign(12);
     r = c.call_generic(a);
     EXPECT_EQ(make_dtype<int>(), r.get_dtype());
     EXPECT_EQ(36, r.as<int>());
 
-    a.at(0).val_assign(3);
+    a(0).val_assign(3);
     r = c.call_generic(a);
     EXPECT_EQ(make_dtype<int>(), r.get_dtype());
     EXPECT_EQ(9, r.as<int>());
@@ -79,14 +79,14 @@ TEST(GFuncCallable, TwoParameters) {
     nd::array a, r;
     a = nd::empty(c.get_parameters_dtype());
 
-    a.at(0).val_assign(2.25);
-    a.at(1).val_assign(3);
+    a(0).val_assign(2.25);
+    a(1).val_assign(3);
     r = c.call_generic(a);
     EXPECT_EQ(make_dtype<double>(), r.get_dtype());
     EXPECT_EQ(6.75, r.as<double>());
 
-    a.at(0).val_assign(-1.5);
-    a.at(1).val_assign(2);
+    a(0).val_assign(-1.5);
+    a(1).val_assign(2);
     r = c.call_generic(a);
     EXPECT_EQ(make_dtype<double>(), r.get_dtype());
     EXPECT_EQ(-3, r.as<double>());
@@ -139,16 +139,16 @@ TEST(GFuncCallable, ThreeParameters) {
     nd::array a, r;
     a = nd::empty(c.get_parameters_dtype());
 
-    a.at(0).val_assign(true);
-    a.at(1).val_assign(3);
-    a.at(2).val_assign(4);
+    a(0).val_assign(true);
+    a(1).val_assign(3);
+    a(2).val_assign(4);
     r = c.call_generic(a);
     EXPECT_EQ(make_dtype<complex<float> >(), r.get_dtype());
     EXPECT_EQ(complex<float>(3, 4), r.as<complex<float> >());
 
-    a.at(0).val_assign(false);
-    a.at(1).val_assign(5);
-    a.at(2).val_assign(6);
+    a(0).val_assign(false);
+    a(1).val_assign(5);
+    a(2).val_assign(6);
     r = c.call_generic(a);
     EXPECT_EQ(make_dtype<complex<float> >(), r.get_dtype());
     EXPECT_EQ(complex<float>(6, 5), r.as<complex<float> >());
@@ -222,18 +222,18 @@ TEST(GFuncCallable, FourParameters) {
     nd::array a, r;
     a = nd::empty(c.get_parameters_dtype());
 
-    a.at(0).val_assign(-1);
-    a.at(1).val_assign(7);
-    a.at(2).val_assign(0.25);
-    a.at(3).val_assign(3);
+    a(0).val_assign(-1);
+    a(1).val_assign(7);
+    a(2).val_assign(0.25);
+    a(3).val_assign(3);
     r = c.call_generic(a);
     EXPECT_EQ(make_dtype<uint8_t>(), r.get_dtype());
     EXPECT_EQ(4, r.as<uint8_t>());
 
-    a.at(0).val_assign(1);
-    a.at(1).val_assign(3);
-    a.at(2).val_assign(0.5);
-    a.at(3).val_assign(12);
+    a(0).val_assign(1);
+    a(1).val_assign(3);
+    a(2).val_assign(0.5);
+    a(3).val_assign(12);
     r = c.call_generic(a);
     EXPECT_EQ(make_dtype<uint8_t>(), r.get_dtype());
     EXPECT_EQ(14, r.as<uint8_t>());
@@ -329,11 +329,11 @@ TEST(GFuncCallable, FiveParameters) {
 
     float f0[3] = {1, 2, 3};
     double d0[3] = {1.5, 2.5, 3.5};
-    a.at(0).val_assign(f0);
-    a.at(1).val_assign(2);
-    a.at(2).val_assign(4);
-    a.at(3).val_assign(6);
-    a.at(4).val_assign(d0);
+    a(0).val_assign(f0);
+    a(1).val_assign(2);
+    a(2).val_assign(4);
+    a(3).val_assign(6);
+    a(4).val_assign(d0);
     r = c.call_generic(a);
     EXPECT_EQ(make_dtype<double>(), r.get_dtype());
     EXPECT_EQ(86, r.as<double>());
@@ -341,9 +341,9 @@ TEST(GFuncCallable, FiveParameters) {
 
 static nd::array array_return(int a, int b, int c) {
     nd::array result = nd::make_strided_array(3, make_dtype<int>());
-    result.at(0).vals() = a;
-    result.at(1).vals() = b;
-    result.at(2).vals() = c;
+    result(0).vals() = a;
+    result(1).vals() = b;
+    result(2).vals() = c;
     return result;
 }
 
@@ -355,14 +355,14 @@ TEST(GFuncCallable, ArrayReturn) {
     nd::array a, r;
     a = nd::empty(c.get_parameters_dtype());
 
-    a.at(0).val_assign(-10);
-    a.at(1).val_assign(20);
-    a.at(2).val_assign(1000);
+    a(0).val_assign(-10);
+    a(1).val_assign(20);
+    a(2).val_assign(1000);
     r = c.call_generic(a);
     EXPECT_EQ(make_strided_dim_dtype(make_dtype<int>()), r.get_dtype());
-    EXPECT_EQ(-10, r.at(0).as<int>());
-    EXPECT_EQ(20, r.at(1).as<int>());
-    EXPECT_EQ(1000, r.at(2).as<int>());
+    EXPECT_EQ(-10, r(0).as<int>());
+    EXPECT_EQ(20, r(1).as<int>());
+    EXPECT_EQ(1000, r(2).as<int>());
 }
 
 static size_t array_param(const nd::array& n) {
@@ -427,9 +427,9 @@ TEST(GFuncCallable, StringReturn) {
     nd::array a, r;
     a = nd::empty(c.get_parameters_dtype());
 
-    a.at(0).val_assign(-10);
-    a.at(1).val_assign(20);
-    a.at(2).val_assign(1000);
+    a(0).val_assign(-10);
+    a(1).val_assign(20);
+    a(2).val_assign(1000);
     r = c.call_generic(a);
     EXPECT_EQ(make_string_dtype(string_encoding_utf_8), r.get_dtype());
     EXPECT_EQ("-10, 20, 1000", r.as<string>());

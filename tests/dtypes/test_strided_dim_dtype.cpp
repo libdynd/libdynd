@@ -99,9 +99,9 @@ TEST(StridedArrayDType, AssignKernel) {
                     b.get_dtype(), b.get_ndo_meta(),
                     kernel_request_single, assign_error_default, &eval::default_eval_context);
     k(a.get_readwrite_originptr(), b.get_readonly_originptr());
-    EXPECT_EQ(9, a.at(0).as<int>());
-    EXPECT_EQ(9, a.at(1).as<int>());
-    EXPECT_EQ(9, a.at(2).as<int>());
+    EXPECT_EQ(9, a(0).as<int>());
+    EXPECT_EQ(9, a(1).as<int>());
+    EXPECT_EQ(9, a(2).as<int>());
     k.reset();
 
     // Assignment strided array -> strided array
@@ -114,9 +114,9 @@ TEST(StridedArrayDType, AssignKernel) {
                     b.get_dtype(), b.get_ndo_meta(),
                     kernel_request_single, assign_error_default, &eval::default_eval_context);
     k(a.get_readwrite_originptr(), b.get_readonly_originptr());
-    EXPECT_EQ(3, a.at(0).as<int>());
-    EXPECT_EQ(5, a.at(1).as<int>());
-    EXPECT_EQ(7, a.at(2).as<int>());
+    EXPECT_EQ(3, a(0).as<int>());
+    EXPECT_EQ(5, a(1).as<int>());
+    EXPECT_EQ(7, a(2).as<int>());
     k.reset();
 
     // Assignment strided array -> scalar

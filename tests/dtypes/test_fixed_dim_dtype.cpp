@@ -97,14 +97,14 @@ TEST(FixedDimDType, Basic) {
     EXPECT_EQ(3, a.get_shape()[0]);
     EXPECT_EQ(1u, a.get_strides().size());
     EXPECT_EQ(4, a.get_strides()[0]);
-    EXPECT_EQ(1.5f, a.at(-3).as<float>());
-    EXPECT_EQ(2.5f, a.at(-2).as<float>());
-    EXPECT_EQ(-1.5f, a.at(-1).as<float>());
-    EXPECT_EQ(1.5f, a.at(0).as<float>());
-    EXPECT_EQ(2.5f, a.at(1).as<float>());
-    EXPECT_EQ(-1.5f, a.at(2).as<float>());
-    EXPECT_THROW(a.at(-4), index_out_of_bounds);
-    EXPECT_THROW(a.at(3), index_out_of_bounds);
+    EXPECT_EQ(1.5f, a(-3).as<float>());
+    EXPECT_EQ(2.5f, a(-2).as<float>());
+    EXPECT_EQ(-1.5f, a(-1).as<float>());
+    EXPECT_EQ(1.5f, a(0).as<float>());
+    EXPECT_EQ(2.5f, a(1).as<float>());
+    EXPECT_EQ(-1.5f, a(2).as<float>());
+    EXPECT_THROW(a(-4), index_out_of_bounds);
+    EXPECT_THROW(a(3), index_out_of_bounds);
 }
 
 
@@ -121,9 +121,9 @@ TEST(FixedDimDType, AssignKernel_ScalarToFixed) {
                     b.get_dtype(), b.get_ndo_meta(),
                     kernel_request_single, assign_error_default, &eval::default_eval_context);
     k(a.get_readwrite_originptr(), b.get_readonly_originptr());
-    EXPECT_EQ(9, a.at(0).as<int>());
-    EXPECT_EQ(9, a.at(1).as<int>());
-    EXPECT_EQ(9, a.at(2).as<int>());
+    EXPECT_EQ(9, a(0).as<int>());
+    EXPECT_EQ(9, a(1).as<int>());
+    EXPECT_EQ(9, a(2).as<int>());
 }
 
 TEST(FixedDimDType, AssignKernel_FixedToFixed) {
@@ -140,9 +140,9 @@ TEST(FixedDimDType, AssignKernel_FixedToFixed) {
                     b.get_dtype(), b.get_ndo_meta(),
                     kernel_request_single, assign_error_default, &eval::default_eval_context);
     k(a.get_readwrite_originptr(), b.get_readonly_originptr());
-    EXPECT_EQ(3, a.at(0).as<int>());
-    EXPECT_EQ(5, a.at(1).as<int>());
-    EXPECT_EQ(7, a.at(2).as<int>());
+    EXPECT_EQ(3, a(0).as<int>());
+    EXPECT_EQ(5, a(1).as<int>());
+    EXPECT_EQ(7, a(2).as<int>());
 }
 
 TEST(FixedDimDType, AssignKernel_FixedToScalarError) {
@@ -175,9 +175,9 @@ TEST(FixedDimDType, AssignFixedStridedKernel) {
                     b.get_dtype(), b.get_ndo_meta(),
                     kernel_request_single, assign_error_default, &eval::default_eval_context);
     k(a.get_readwrite_originptr(), b.get_readonly_originptr());
-    EXPECT_EQ(3, a.at(0).as<int>());
-    EXPECT_EQ(5, a.at(1).as<int>());
-    EXPECT_EQ(7, a.at(2).as<int>());
+    EXPECT_EQ(3, a(0).as<int>());
+    EXPECT_EQ(5, a(1).as<int>());
+    EXPECT_EQ(7, a(2).as<int>());
     k.reset();
 
     // Broadcasting assignment strided array -> fixed array
@@ -190,9 +190,9 @@ TEST(FixedDimDType, AssignFixedStridedKernel) {
                     b.get_dtype(), b.get_ndo_meta(),
                     kernel_request_single, assign_error_default, &eval::default_eval_context);
     k(a.get_readwrite_originptr(), b.get_readonly_originptr());
-    EXPECT_EQ(9, a.at(0).as<int>());
-    EXPECT_EQ(9, a.at(1).as<int>());
-    EXPECT_EQ(9, a.at(2).as<int>());
+    EXPECT_EQ(9, a(0).as<int>());
+    EXPECT_EQ(9, a(1).as<int>());
+    EXPECT_EQ(9, a(2).as<int>());
     k.reset();
 
     // Assignment fixed array -> strided array
@@ -205,9 +205,9 @@ TEST(FixedDimDType, AssignFixedStridedKernel) {
                     b.get_dtype(), b.get_ndo_meta(),
                     kernel_request_single, assign_error_default, &eval::default_eval_context);
     k(a.get_readwrite_originptr(), b.get_readonly_originptr());
-    EXPECT_EQ(3, a.at(0).as<int>());
-    EXPECT_EQ(5, a.at(1).as<int>());
-    EXPECT_EQ(7, a.at(2).as<int>());
+    EXPECT_EQ(3, a(0).as<int>());
+    EXPECT_EQ(5, a(1).as<int>());
+    EXPECT_EQ(7, a(2).as<int>());
     k.reset();
 
     // Broadcasting assignment fixed array -> strided array
@@ -220,9 +220,9 @@ TEST(FixedDimDType, AssignFixedStridedKernel) {
                     b.get_dtype(), b.get_ndo_meta(),
                     kernel_request_single, assign_error_default, &eval::default_eval_context);
     k(a.get_readwrite_originptr(), b.get_readonly_originptr());
-    EXPECT_EQ(9, a.at(0).as<int>());
-    EXPECT_EQ(9, a.at(1).as<int>());
-    EXPECT_EQ(9, a.at(2).as<int>());
+    EXPECT_EQ(9, a(0).as<int>());
+    EXPECT_EQ(9, a(1).as<int>());
+    EXPECT_EQ(9, a(2).as<int>());
     k.reset();
 }
 

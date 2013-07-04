@@ -312,18 +312,18 @@ TEST(ArrayAssign, Casting) {
     // Allow truncation of fractional part
     b = a.ucast(make_dtype<int>(), 0, assign_error_overflow);
     b = b.eval();
-    EXPECT_EQ(3, b.at(0).as<int>());
-    EXPECT_EQ(1, b.at(1).as<int>());
-    EXPECT_EQ(0, b.at(2).as<int>());
-    EXPECT_EQ(1000, b.at(3).as<int>());
+    EXPECT_EQ(3, b(0).as<int>());
+    EXPECT_EQ(1, b(1).as<int>());
+    EXPECT_EQ(0, b(2).as<int>());
+    EXPECT_EQ(1000, b(3).as<int>());
 
     // cast_scalars<int>() should be equivalent to cast_scalars(make_dtype<int>())
     b = a.ucast<int>(0, assign_error_overflow);
     b = b.eval();
-    EXPECT_EQ(3, b.at(0).as<int>());
-    EXPECT_EQ(1, b.at(1).as<int>());
-    EXPECT_EQ(0, b.at(2).as<int>());
-    EXPECT_EQ(1000, b.at(3).as<int>());
+    EXPECT_EQ(3, b(0).as<int>());
+    EXPECT_EQ(1, b(1).as<int>());
+    EXPECT_EQ(0, b(2).as<int>());
+    EXPECT_EQ(1000, b(3).as<int>());
 
     b = a.ucast(make_dtype<int8_t>(), 0, assign_error_overflow);
     // This triggers conversion from float to int8,
@@ -332,12 +332,12 @@ TEST(ArrayAssign, Casting) {
 
     // Remove the overflowing value in 'a', so b.vals() no
     // longer triggers an overflow.
-    a.at(3).val_assign(-120);
+    a(3).val_assign(-120);
     b = b.eval();
-    EXPECT_EQ(3, b.at(0).as<int>());
-    EXPECT_EQ(1, b.at(1).as<int>());
-    EXPECT_EQ(0, b.at(2).as<int>());
-    EXPECT_EQ(-120, b.at(3).as<int>());
+    EXPECT_EQ(3, b(0).as<int>());
+    EXPECT_EQ(1, b(1).as<int>());
+    EXPECT_EQ(0, b(2).as<int>());
+    EXPECT_EQ(-120, b(3).as<int>());
 }
 
 TEST(ArrayAssign, Overflow) {
@@ -367,11 +367,11 @@ TEST(ArrayAssign, ChainedCastingRead) {
     b = b.eval();
     // Now it's just the value dtype, no chaining
     EXPECT_EQ(make_strided_dim_dtype(make_dtype<float>()), b.get_dtype());
-    EXPECT_EQ(3, b.at(0).as<float>());
-    EXPECT_EQ(1, b.at(1).as<float>());
-    EXPECT_EQ(-2, b.at(2).as<float>());
-    EXPECT_EQ(-2, b.at(3).as<float>());
-    EXPECT_EQ(1000, b.at(4).as<float>());
+    EXPECT_EQ(3, b(0).as<float>());
+    EXPECT_EQ(1, b(1).as<float>());
+    EXPECT_EQ(-2, b(2).as<float>());
+    EXPECT_EQ(-2, b(3).as<float>());
+    EXPECT_EQ(1000, b(4).as<float>());
 
     // Now try it with longer chaining through multiple element sizes
     b = a.ucast<int16_t>(0, assign_error_overflow);
@@ -397,11 +397,11 @@ TEST(ArrayAssign, ChainedCastingRead) {
             b.get_dtype());
     b = b.eval();
     EXPECT_EQ(make_strided_dim_dtype(make_dtype<int32_t>()), b.get_dtype());
-    EXPECT_EQ(3, b.at(0).as<int32_t>());
-    EXPECT_EQ(1, b.at(1).as<int32_t>());
-    EXPECT_EQ(-2, b.at(2).as<int32_t>());
-    EXPECT_EQ(-2, b.at(3).as<int32_t>());
-    EXPECT_EQ(1000, b.at(4).as<int32_t>());
+    EXPECT_EQ(3, b(0).as<int32_t>());
+    EXPECT_EQ(1, b(1).as<int32_t>());
+    EXPECT_EQ(-2, b(2).as<int32_t>());
+    EXPECT_EQ(-2, b(3).as<int32_t>());
+    EXPECT_EQ(1000, b(4).as<int32_t>());
 }
 
 TEST(ArrayAssign, ChainedCastingWrite) {
@@ -415,16 +415,16 @@ TEST(ArrayAssign, ChainedCastingWrite) {
                                     make_convert_dtype<int, float>(assign_error_inexact), assign_error_overflow)),
               b.get_dtype());
 
-    b.at(0).vals() = 6.8f;
-    b.at(1).vals() = -3.1;
-    b.at(2).vals() = 1000.5;
+    b(0).vals() = 6.8f;
+    b(1).vals() = -3.1;
+    b(2).vals() = 1000.5;
     // Assigning should trigger the overflow
-    EXPECT_THROW(b.at(2).vals() = 1e25f, runtime_error);
+    EXPECT_THROW(b(2).vals() = 1e25f, runtime_error);
 
     // Check that the values in a got assigned as expected
-    EXPECT_EQ(6, a.at(0).as<float>());
-    EXPECT_EQ(-3, a.at(1).as<float>());
-    EXPECT_EQ(1000, a.at(2).as<float>());
+    EXPECT_EQ(6, a(0).as<float>());
+    EXPECT_EQ(-3, a(1).as<float>());
+    EXPECT_EQ(1000, a(2).as<float>());
 }
 
 TEST(ArrayAssign, ChainedCastingReadWrite) {
@@ -437,9 +437,9 @@ TEST(ArrayAssign, ChainedCastingReadWrite) {
     nd::array bview = b.ucast<int32_t>();
 
     bview.val_assign(aview, assign_error_overflow);
-    EXPECT_EQ(0, b.at(0).as<int>());
-    EXPECT_EQ(-1000, b.at(1).as<int>());
-    EXPECT_EQ(-2, b.at(2).as<int>());
+    EXPECT_EQ(0, b(0).as<int>());
+    EXPECT_EQ(-1000, b(1).as<int>());
+    EXPECT_EQ(-2, b(2).as<int>());
 
     // Now test with longer chains
     b.vals() = 123;
@@ -448,9 +448,9 @@ TEST(ArrayAssign, ChainedCastingReadWrite) {
     bview = bview.ucast<int64_t>(0, assign_error_overflow);
 
     bview.vals() = aview;
-    EXPECT_EQ(0, b.at(0).as<int>());
-    EXPECT_EQ(-1000, b.at(1).as<int>());
-    EXPECT_EQ(-2, b.at(2).as<int>());
+    EXPECT_EQ(0, b(0).as<int>());
+    EXPECT_EQ(-1000, b(1).as<int>());
+    EXPECT_EQ(-2, b(2).as<int>());
 
 }
 

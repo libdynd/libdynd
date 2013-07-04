@@ -99,9 +99,9 @@ TEST(CategoricalDType, Compare) {
     EXPECT_NE(da, db);
 
     nd::array i = nd::make_strided_array(3, make_dtype<int32_t>());
-    i.at(0).vals() = 0;
-    i.at(1).vals() = 10;
-    i.at(2).vals() = 100;
+    i(0).vals() = 0;
+    i(1).vals() = 10;
+    i(2).vals() = 100;
 
     dtype di = make_categorical_dtype(i);
     EXPECT_FALSE(da == di);
@@ -170,9 +170,9 @@ TEST(CategoricalDType, Values) {
 
     dtype dt = make_categorical_dtype(a);
 
-    EXPECT_EQ(0u, static_cast<const categorical_dtype*>(dt.extended())->get_value_from_category(a.at(0)));
-    EXPECT_EQ(1u, static_cast<const categorical_dtype*>(dt.extended())->get_value_from_category(a.at(1)));
-    EXPECT_EQ(2u, static_cast<const categorical_dtype*>(dt.extended())->get_value_from_category(a.at(2)));
+    EXPECT_EQ(0u, static_cast<const categorical_dtype*>(dt.extended())->get_value_from_category(a(0)));
+    EXPECT_EQ(1u, static_cast<const categorical_dtype*>(dt.extended())->get_value_from_category(a(1)));
+    EXPECT_EQ(2u, static_cast<const categorical_dtype*>(dt.extended())->get_value_from_category(a(2)));
     EXPECT_EQ(0u, static_cast<const categorical_dtype*>(dt.extended())->get_value_from_category("foo"));
     EXPECT_EQ(1u, static_cast<const categorical_dtype*>(dt.extended())->get_value_from_category("bar"));
     EXPECT_EQ(2u, static_cast<const categorical_dtype*>(dt.extended())->get_value_from_category("baz"));
@@ -199,8 +199,8 @@ TEST(CategoricalDType, ValuesLonger) {
     }
     // Check that everything in 'a' is right
     for (int i = 0; i < a_count; ++i) {
-        EXPECT_EQ(a_vals[i], a.at(i).as<string>());
-        EXPECT_EQ(a_uints[i], a_view.at(i).as<uint32_t>());
+        EXPECT_EQ(a_vals[i], a(i).as<string>());
+        EXPECT_EQ(a_uints[i], a_view(i).as<uint32_t>());
     }
 }
 
@@ -213,24 +213,24 @@ TEST(CategoricalDType, AssignFixedString) {
 
     nd::array a = nd::make_strided_array(3, dt);
     a.val_assign(cat);
-    EXPECT_EQ("foo", a.at(0).as<string>());
-    EXPECT_EQ("bar", a.at(1).as<string>());
-    EXPECT_EQ("baz", a.at(2).as<string>());
-    a.at(0).vals() = cat.at(2);
-    EXPECT_EQ("baz", a.at(0).as<string>());
+    EXPECT_EQ("foo", a(0).as<string>());
+    EXPECT_EQ("bar", a(1).as<string>());
+    EXPECT_EQ("baz", a(2).as<string>());
+    a(0).vals() = cat(2);
+    EXPECT_EQ("baz", a(0).as<string>());
 
-    cat.at(0).vals() = "zzz";
-    EXPECT_THROW(a.at(0).vals() = cat.at(0), std::runtime_error);
+    cat(0).vals() = "zzz";
+    EXPECT_THROW(a(0).vals() = cat(0), std::runtime_error);
 
     nd::array tmp = nd::make_strided_array(3, cat.get_dtype().at(0));
     tmp.val_assign(a);
-    EXPECT_EQ("baz", tmp.at(0).as<string>());
-    EXPECT_EQ("bar", tmp.at(1).as<string>());
-    EXPECT_EQ("baz", tmp.at(2).as<string>());
-    tmp.at(0).vals() = a.at(1);
-    EXPECT_EQ("bar", tmp.at(0).as<string>());
-    tmp.at(0).vals() = "foo";
-    EXPECT_EQ("foo", tmp.at(0).as<string>());
+    EXPECT_EQ("baz", tmp(0).as<string>());
+    EXPECT_EQ("bar", tmp(1).as<string>());
+    EXPECT_EQ("baz", tmp(2).as<string>());
+    tmp(0).vals() = a(1);
+    EXPECT_EQ("bar", tmp(0).as<string>());
+    tmp(0).vals() = "foo";
+    EXPECT_EQ("foo", tmp(0).as<string>());
 }
 
 TEST(CategoricalDType, AssignInt) {
@@ -241,11 +241,11 @@ TEST(CategoricalDType, AssignInt) {
 
     nd::array a = nd::make_strided_array(3, dt);
     a.val_assign(cat);
-    EXPECT_EQ(10, a.at(0).as<int32_t>());
-    EXPECT_EQ(100, a.at(1).as<int32_t>());
-    EXPECT_EQ(1000, a.at(2).as<int32_t>());
-    a.at(0).vals() = cat.at(2);
-    EXPECT_EQ(1000, a.at(0).as<int32_t>());
+    EXPECT_EQ(10, a(0).as<int32_t>());
+    EXPECT_EQ(100, a(1).as<int32_t>());
+    EXPECT_EQ(1000, a(2).as<int32_t>());
+    a(0).vals() = cat(2);
+    EXPECT_EQ(1000, a(0).as<int32_t>());
 
     // TODO implicit conversion?
     //a(0).vals() = string("bar");
@@ -253,11 +253,11 @@ TEST(CategoricalDType, AssignInt) {
 
     nd::array tmp = nd::make_strided_array(3, cat.get_dtype().at(0));
     tmp.val_assign(a);
-    EXPECT_EQ(1000, tmp.at(0).as<int32_t>());
-    EXPECT_EQ(100, tmp.at(1).as<int32_t>());
-    EXPECT_EQ(1000, tmp.at(2).as<int32_t>());
-    tmp.at(0).vals() = a.at(1);
-    EXPECT_EQ(100, tmp.at(0).as<int32_t>());
+    EXPECT_EQ(1000, tmp(0).as<int32_t>());
+    EXPECT_EQ(100, tmp(1).as<int32_t>());
+    EXPECT_EQ(1000, tmp(2).as<int32_t>());
+    tmp(0).vals() = a(1);
+    EXPECT_EQ(100, tmp(0).as<int32_t>());
 
 }
 
@@ -269,23 +269,23 @@ TEST(CategoricalDType, AssignRange) {
     dtype dt = make_categorical_dtype(cat);
 
     nd::array a = nd::make_strided_array(9, dt);
-    nd::array b = a.at(0 <= irange() < 3);
+    nd::array b = a(0 <= irange() < 3);
     b.val_assign(cat);
-    nd::array c = a.at(3 <= irange() < 6 );
-    c.val_assign(cat.at(0));
-    nd::array d = a.at(6 <= irange().by(2) < 9 );
-    d.val_assign(cat.at(1));
-    a.at(7).vals() = cat.at(2);
+    nd::array c = a(3 <= irange() < 6 );
+    c.val_assign(cat(0));
+    nd::array d = a(6 <= irange().by(2) < 9 );
+    d.val_assign(cat(1));
+    a(7).vals() = cat(2);
 
-    EXPECT_EQ("foo", a.at(0).as<string>());
-    EXPECT_EQ("bar", a.at(1).as<string>());
-    EXPECT_EQ("baz", a.at(2).as<string>());
-    EXPECT_EQ("foo", a.at(3).as<string>());
-    EXPECT_EQ("foo", a.at(4).as<string>());
-    EXPECT_EQ("foo", a.at(5).as<string>());
-    EXPECT_EQ("bar", a.at(6).as<string>());
-    EXPECT_EQ("baz", a.at(7).as<string>());
-    EXPECT_EQ("bar", a.at(8).as<string>());
+    EXPECT_EQ("foo", a(0).as<string>());
+    EXPECT_EQ("bar", a(1).as<string>());
+    EXPECT_EQ("baz", a(2).as<string>());
+    EXPECT_EQ("foo", a(3).as<string>());
+    EXPECT_EQ("foo", a(4).as<string>());
+    EXPECT_EQ("foo", a(5).as<string>());
+    EXPECT_EQ("bar", a(6).as<string>());
+    EXPECT_EQ("baz", a(7).as<string>());
+    EXPECT_EQ("bar", a(8).as<string>());
 }
 
 TEST(CategoricalDType, CategoriesProperty) {
@@ -304,21 +304,21 @@ TEST(CategoricalDType, AssignFromOther) {
                     a.get_dtype());
     a = a.eval();
     EXPECT_EQ(make_strided_dim_dtype(cd), a.get_dtype());
-    EXPECT_EQ(6,    a.at(0).as<int>());
-    EXPECT_EQ(3,    a.at(1).as<int>());
-    EXPECT_EQ(100,  a.at(2).as<int>());
-    EXPECT_EQ(3,    a.at(3).as<int>());
-    EXPECT_EQ(1000, a.at(4).as<int>());
-    EXPECT_EQ(100,  a.at(5).as<int>());
-    EXPECT_EQ(6,    a.at(6).as<int>());
-    EXPECT_EQ(1000, a.at(7).as<int>());
+    EXPECT_EQ(6,    a(0).as<int>());
+    EXPECT_EQ(3,    a(1).as<int>());
+    EXPECT_EQ(100,  a(2).as<int>());
+    EXPECT_EQ(3,    a(3).as<int>());
+    EXPECT_EQ(1000, a(4).as<int>());
+    EXPECT_EQ(100,  a(5).as<int>());
+    EXPECT_EQ(6,    a(6).as<int>());
+    EXPECT_EQ(1000, a(7).as<int>());
 
     // Assignments from a few different input dtypes
-    a.at(3).vals() = "1000";
-    EXPECT_EQ(1000, a.at(3).as<int>());
-    a.at(4).vals() = 6.0;
-    EXPECT_EQ(6, a.at(4).as<int>());
-    a.at(5).vals() = (uint16_t)3;
-    EXPECT_EQ(3, a.at(5).as<int>());
+    a(3).vals() = "1000";
+    EXPECT_EQ(1000, a(3).as<int>());
+    a(4).vals() = 6.0;
+    EXPECT_EQ(6, a(4).as<int>());
+    a(5).vals() = (uint16_t)3;
+    EXPECT_EQ(3, a(5).as<int>());
 }
 

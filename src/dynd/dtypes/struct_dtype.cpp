@@ -483,7 +483,7 @@ static array_preamble *property_get_array_field(const array_preamble *params, vo
         return n.replace_udtype(make_property_dtype(udt, field_names[i], i)).release();
     } else {
         if (undim == 0) {
-            return n.at(i).release();
+            return n(i).release();
         } else {
             shortvector<irange> idx(undim + 1);
             idx[undim] = irange(i);
