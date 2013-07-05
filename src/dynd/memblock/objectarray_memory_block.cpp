@@ -114,6 +114,61 @@ static char *allocate(memory_block_data *self, size_t count)
     return result;
 }
 
+static char *resize(memory_block_data *self, char *previous_allocated, size_t count)
+{
+    objectarray_memory_block *emb = reinterpret_cast<objectarray_memory_block *>(self);
+    memory_chunk *mc = &emb->m_memory_handles.back();
+    size_t previous_index = (previous_allocated - mc->memory) / emb->m_stride;
+    size_t previous_count = mc->used_count - previous_index;
+    char *result = previous_allocated;
+
+    if (mc->capacity_count - previous_index < count) {
+        emb->append_memory(max(emb->m_total_allocated_count, count));
+        memory_chunk *new_mc = &emb->m_memory_handles.back();
+        // Move the old memory to the newly allocated block
+        if (previous_count > 0) {
+            // Subtract the previously used memory from the old chunk's count
+            mc->used_count -= previous_count;
+            memcpy(new_mc->memory, previous_allocated, previous_count);
+            // If the old memory only had the memory being resized,
+            // free it completely.
+            if (previous_allocated == mc->memory) {
+                free(mc->memory);
+                // Remove the second-last element of the vector
+                emb->m_memory_handles.erase(
+                            emb->m_memory_handles.begin() +
+                                emb->m_memory_handles.size() - 2);
+            }
+        }
+        mc = &emb->m_memory_handles.back();
+        result = mc->memory;
+        mc->used_count = count;
+    } else {
+        // Adjust the used count (this may mean to grow it or shrink it)
+        if (count >= previous_count) { 
+            mc->used_count += (count - previous_count);
+        } else {
+            // Call the destructor on the elements no longer used
+            emb->m_dt.extended()->data_destruct_strided(emb->m_metadata,
+                            previous_allocated + emb->m_stride * count, emb->m_stride, previous_count - count);
+            mc->used_count -= (previous_count - count);
+        }
+    }
+
+    if ((emb->m_dt.get_flags()&dtype_flag_zeroinit) != 0) {
+        // Zero-init the new memory
+        intptr_t new_count = count - (intptr_t)previous_count;
+        memset(mc->memory + emb->m_stride * previous_count, 0, emb->m_stride * new_count);
+    } else {
+        // TODO: Add a default data constructor to base_dtype
+        //       as well, with a flag for it
+        stringstream ss;
+        ss << "Expected objectarray data to be zeroinit, but is not with dtype " << emb->m_dt;
+        throw runtime_error(ss.str());
+    }
+    return result;
+}
+
 static void finalize(memory_block_data *self)
 {
     // Finalizes POD memory so there are no more allocations
@@ -148,6 +203,7 @@ static void reset(memory_block_data *self)
 
 memory_block_objectarray_allocator_api objectarray_memory_block_allocator_api = {
     &allocate,
+    &resize,
     &finalize,
     &reset
 };

@@ -104,11 +104,15 @@ struct memory_block_pod_allocator_api {
 struct memory_block_objectarray_allocator_api {
     /**
      * Allocates the requested amount of memory from the memory_block, returning
-     * a pointer pair.
+     * a pointer.
      *
      * Call this once per output variable.
      */
     char *(*allocate)(memory_block_data *self, size_t count);
+    /**
+     * Resizes the most recently allocated memory from the memory_block.
+     */
+    char *(*resize)(memory_block_data *self, char *previous_allocated, size_t count);
     /**
      * Finalizes the memory block so it can no longer be used to allocate more
      * memory.
