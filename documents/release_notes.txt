@@ -5,6 +5,19 @@ DyND is a C++ library for array programming with a dynamic
 type system. It is currently in a preview state, and nothing
 about the API or the ABI is guaranteed to stay the same.
 
+Version 0.4.1
+-------------
+
+- Switch indexing from a.at(...) to a(...) using operator()
+- Change how the step is specified in indexing, as irange().by(step)
+  instead of irange() / step.
+- Rename the "ndobject" to "nd::array", matching the change
+  in the Python bindings.
+- Rename "arange" to "nd::range", no need for the prefix "a".
+- Change indexing to only affect dimensions directly indexed,
+  collapsing leading "var" dims turned out to be problematic.
+- Add string concatenation via the + operator.
+
 Version 0.4.0
 -------------
 
