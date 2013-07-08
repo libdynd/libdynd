@@ -5,6 +5,7 @@
 
 #include <dynd/memblock/array_memory_block.hpp>
 #include <dynd/array.hpp>
+#include <dynd/shape_tools.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -71,6 +72,15 @@ memory_block_ptr dynd::make_array_memory_block(size_t metadata_size, size_t extr
 memory_block_ptr dynd::make_array_memory_block(const dtype& dt, size_t ndim, const intptr_t *shape)
 {
     size_t metadata_size, data_size;
+
+    // Make sure that there are not too many 
+    if (ndim > dt.get_undim()) {
+        stringstream ss;
+        ss << "Shape provided, ";
+        print_shape(ss, ndim, shape);
+        ss << ", has too many dimensions for type " << dt;
+        throw runtime_error(ss.str());
+    }
 
     if (dt.is_builtin()) {
         metadata_size = 0;

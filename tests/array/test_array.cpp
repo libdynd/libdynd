@@ -31,6 +31,8 @@ TEST(Array, ScalarConstructor) {
     nd::array a = nd::empty(make_dtype<float>());
     EXPECT_EQ(make_dtype<float>(), a.get_dtype());
     EXPECT_TRUE(a.is_scalar());
+    // Constructing an empty array with too many dimensions should raise an error
+    EXPECT_THROW(nd::empty(1, make_dtype<double>()), runtime_error);
 }
 
 TEST(Array, OneDimConstructor) {
