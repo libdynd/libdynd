@@ -933,7 +933,7 @@ nd::array nd::array::ucast(const ndt::type& scalar_dtype,
     }
 }
 
-nd::array nd::array::view(const ndt::type& dt) const
+nd::array nd::array::view(const ndt::type& DYND_UNUSED(dt)) const
 {
     // It appears that the way to fully support this operation is
     // similar to the two-pass indexing operation. This would

@@ -78,7 +78,7 @@ namespace // nameless
                 return ccrc_float_64bit;
             default: {
                 std::stringstream ss;
-                ss << "The binary_kernel_adapter does not support " << dtype(type_id) << " for the return type";
+                ss << "The binary_kernel_adapter does not support " << ndt::type(type_id) << " for the return type";
                 throw std::runtime_error(ss.str());
             }
         }
