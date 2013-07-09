@@ -10,39 +10,39 @@
 //       be added, which this dtype would use to
 //       do the actual swapping.
 //
-#ifndef _DYND__BYTESWAP_DTYPE_HPP_
-#define _DYND__BYTESWAP_DTYPE_HPP_
+#ifndef _DYND__BYTESWAP_TYPE_HPP_
+#define _DYND__BYTESWAP_TYPE_HPP_
 
-#include <dynd/dtype.hpp>
+#include <dynd/type.hpp>
 #include <dynd/dtype_assign.hpp>
 #include <dynd/dtypes/view_dtype.hpp>
 
 namespace dynd {
 
 class byteswap_dtype : public base_expression_dtype {
-    dtype m_value_dtype, m_operand_dtype;
+    ndt::type m_value_type, m_operand_type;
 
 public:
-    byteswap_dtype(const dtype& value_dtype);
-    byteswap_dtype(const dtype& value_dtype, const dtype& operand_dtype);
+    byteswap_dtype(const ndt::type& value_type);
+    byteswap_dtype(const ndt::type& value_type, const ndt::type& operand_type);
 
     virtual ~byteswap_dtype();
 
-    const dtype& get_value_dtype() const {
-        return m_value_dtype;
+    const ndt::type& get_value_type() const {
+        return m_value_type;
     }
-    const dtype& get_operand_dtype() const {
-        return m_operand_dtype;
+    const ndt::type& get_operand_type() const {
+        return m_operand_type;
     }
     void print_data(std::ostream& o, const char *metadata, const char *data) const;
 
     void print_dtype(std::ostream& o) const;
 
-    bool is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const;
+    bool is_lossless_assignment(const ndt::type& dst_dt, const ndt::type& src_dt) const;
 
     bool operator==(const base_dtype& rhs) const;
 
-    dtype with_replaced_storage_dtype(const dtype& replacement_dtype) const;
+    ndt::type with_replaced_storage_type(const ndt::type& replacement_type) const;
 
     size_t make_operand_to_value_assignment_kernel(
                     hierarchical_kernel *out, size_t offset_out,
@@ -57,19 +57,19 @@ public:
 /**
  * Makes a byteswapped dtype to view the given dtype with a swapped byte order.
  */
-inline dtype make_byteswap_dtype(const dtype& native_dtype) {
-    return dtype(new byteswap_dtype(native_dtype), false);
+inline ndt::type make_byteswap_dtype(const ndt::type& native_dtype) {
+    return ndt::type(new byteswap_dtype(native_dtype), false);
 }
 
-inline dtype make_byteswap_dtype(const dtype& native_dtype, const dtype& operand_dtype) {
-    return dtype(new byteswap_dtype(native_dtype, operand_dtype), false);
+inline ndt::type make_byteswap_dtype(const ndt::type& native_dtype, const ndt::type& operand_type) {
+    return ndt::type(new byteswap_dtype(native_dtype, operand_type), false);
 }
 
 template<typename Tnative>
-dtype make_byteswap_dtype() {
-    return dtype(new byteswap_dtype(make_dtype<Tnative>()), false);
+ndt::type make_byteswap_dtype() {
+    return ndt::type(new byteswap_dtype(ndt::make_dtype<Tnative>()), false);
 }
 
 } // namespace dynd
 
-#endif // _DYND__BYTESWAP_DTYPE_HPP_
+#endif // _DYND__BYTESWAP_TYPE_HPP_

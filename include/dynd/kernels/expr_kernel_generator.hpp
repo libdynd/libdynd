@@ -14,7 +14,9 @@
 
 namespace dynd {
 
-class dtype;
+namespace ndt {
+    class type;
+} // namespace ndt
 class expr_kernel_generator;
 
 typedef void (*expr_single_operation_t)(
@@ -48,8 +50,8 @@ public:
 
     virtual size_t make_expr_kernel(
                 hierarchical_kernel *out, size_t offset_out,
-                const dtype& dst_dt, const char *dst_metadata,
-                size_t src_count, const dtype *src_dt, const char **src_metadata,
+                const ndt::type& dst_dt, const char *dst_metadata,
+                size_t src_count, const ndt::type *src_dt, const char **src_metadata,
                 kernel_request_t kernreq, const eval::eval_context *ectx) const = 0;
 
     /** Used to print information about the kernel in the dtype */

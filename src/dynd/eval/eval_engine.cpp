@@ -20,7 +20,7 @@ using namespace dynd;
 static ndarray_node_ptr copy_strided_array(ndarray_node* node, uint32_t access_flags)
 {
     int ndim = node->get_ndim();
-    const dtype& dt = node->get_dtype();
+    const ndt::type& dt = node->get_dtype();
     dtype_memory_management_t mem_mgmt = dt.get_memory_management();
 
     // Default to readwrite if no flags were specified
@@ -113,8 +113,8 @@ void dynd::eval::process_access_flags(uint32_t &dst_access_flags, uint32_t src_a
 
 static ndarray_node_ptr evaluate_strided_array_expression_dtype(ndarray_node* node, const eval::eval_context *ectx, bool copy, uint32_t access_flags)
 {
-    const dtype& dt = node->get_dtype();
-    const dtype& value_dt = dt.value_dtype();
+    const ndt::type& dt = node->get_dtype();
+    const ndt::type& value_dt = dt.value_type();
     ndarray_node_ptr result;
     //int ndim = node->get_ndim();
 
@@ -134,7 +134,7 @@ static ndarray_node_ptr evaluate_binary_elwise_array(ndarray_node* node, const e
                 op2->get_category() == strided_array_node_category) {
         ndarray_node_ptr result;
         raw_ndarray_iter<1,2> iter(node->get_ndim(), node->get_shape(),
-                                    node->get_dtype().value_dtype(), result, access_flags,
+                                    node->get_dtype().value_type(), result, access_flags,
                                     op1, op2);
         //iter.debug_print(std::cout);
 

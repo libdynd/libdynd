@@ -16,7 +16,7 @@ namespace dynd { namespace nd {
  * beginval + (k-1) * stepval} where the next value in the sequence would hit
  * or cross endval.
  */
-nd::array range(const dtype& scalar_dtype, const void *beginval, const void *endval, const void *stepval);
+nd::array range(const ndt::type& scalar_dtype, const void *beginval, const void *endval, const void *stepval);
 
 /**
  * Version of range templated for C++ scalar types.
@@ -24,7 +24,7 @@ nd::array range(const dtype& scalar_dtype, const void *beginval, const void *end
 template<class T>
 typename enable_if<is_dtype_scalar<T>::value, nd::array>::type range(T beginval, T endval,
                                                                     T stepval = T(1)) {
-    return range(make_dtype<T>(), &beginval, &endval, &stepval);
+    return range(ndt::make_dtype<T>(), &beginval, &endval, &stepval);
 }
 
 /**
@@ -33,14 +33,14 @@ typename enable_if<is_dtype_scalar<T>::value, nd::array>::type range(T beginval,
 template<class T>
 typename enable_if<is_dtype_scalar<T>::value, nd::array>::type range(T endval) {
     T beginval = T(0), stepval = T(1);
-    return range(make_dtype<T>(), &beginval, &endval, &stepval);
+    return range(ndt::make_dtype<T>(), &beginval, &endval, &stepval);
 }
 
 /**
  * Version of range based on an irange object.
  */
 inline nd::array range(const irange& i) {
-    return range(make_dtype<intptr_t>(), &i.start(), &i.finish(), &i.step());
+    return range(ndt::make_dtype<intptr_t>(), &i.start(), &i.finish(), &i.step());
 }
 
 /**
@@ -52,7 +52,7 @@ inline nd::array range(const irange& i) {
  * \param count  The size of the result's first dimension.
  * \param dt  The required dtype of the output.
  */
-nd::array linspace(const nd::array& start, const nd::array& stop, intptr_t count, const dtype& dt);
+nd::array linspace(const nd::array& start, const nd::array& stop, intptr_t count, const ndt::type& dt);
 
 /**
  * Most general linspace function, creates an array of length 'count', linearly
@@ -71,14 +71,14 @@ nd::array linspace(const nd::array& start, const nd::array& stop, intptr_t count
  *
  * The only built-in types supported are float and double.
  */
-nd::array linspace(const dtype& dt, const void *startval, const void *stopval, intptr_t count);
+nd::array linspace(const ndt::type& dt, const void *startval, const void *stopval, intptr_t count);
 
 inline nd::array linspace(float start, float stop, intptr_t count = 50) {
-    return linspace(dtype(float32_type_id), &start, &stop, count);
+    return linspace(ndt::type(float32_type_id), &start, &stop, count);
 }
 
 inline nd::array linspace(double start, double stop, intptr_t count = 50) {
-    return linspace(dtype(float64_type_id), &start, &stop, count);
+    return linspace(ndt::type(float64_type_id), &start, &stop, count);
 }
 
 template <class T>

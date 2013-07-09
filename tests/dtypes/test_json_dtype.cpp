@@ -16,7 +16,7 @@ using namespace std;
 using namespace dynd;
 
 TEST(JSONDType, Create) {
-    dtype d;
+    ndt::type d;
 
     // Strings with various encodings
     d = make_json_dtype();

@@ -11,7 +11,7 @@
 #include <complex>
 #include <limits>
 
-#include <dynd/dtype.hpp>
+#include <dynd/type.hpp>
 #include <dynd/diagnostics.hpp>
 
 #if defined(_MSC_VER)
@@ -27,17 +27,17 @@ struct single_assigner_builtin_base_error {
         //DYND_TRACE_ASSIGNMENT(static_cast<float>(*src), float, *src, double);
 
         std::stringstream ss;
-        ss << "assignment from " << make_dtype<src_type>() << " to " << make_dtype<dst_type>();
+        ss << "assignment from " << ndt::make_dtype<src_type>() << " to " << ndt::make_dtype<dst_type>();
         ss << "with error mode " << errmode << " is not implemented";
         throw std::runtime_error(ss.str());
     }
 };
 
-template<class dst_type, class src_type, dtype_kind_t dst_kind, dtype_kind_t src_kind, assign_error_mode errmode>
+template<class dst_type, class src_type, type_kind_t dst_kind, type_kind_t src_kind, assign_error_mode errmode>
 struct single_assigner_builtin_base : public single_assigner_builtin_base_error<dst_type, src_type, errmode> {};
 
 // Any assignment with no error checking
-template<class dst_type, class src_type, dtype_kind_t dst_kind, dtype_kind_t src_kind>
+template<class dst_type, class src_type, type_kind_t dst_kind, type_kind_t src_kind>
 struct single_assigner_builtin_base<dst_type, src_type, dst_kind, src_kind, assign_error_none>
 {
     static void assign(dst_type *dst, const src_type *src, kernel_data_prefix *DYND_UNUSED(extra)) {
@@ -87,7 +87,7 @@ struct single_assigner_builtin_base<double, std::complex<src_real_type>, real_ki
 
 
 // Anything -> boolean with no checking
-template<class src_type, dtype_kind_t src_kind>
+template<class src_type, type_kind_t src_kind>
 struct single_assigner_builtin_base<dynd_bool, src_type, bool_kind, src_kind, assign_error_none>
 {
     static void assign(dynd_bool *dst, const src_type *src, kernel_data_prefix *DYND_UNUSED(extra)) {
@@ -98,7 +98,7 @@ struct single_assigner_builtin_base<dynd_bool, src_type, bool_kind, src_kind, as
 };
 
 // Anything -> boolean with overflow checking
-template<class src_type, dtype_kind_t src_kind>
+template<class src_type, type_kind_t src_kind>
 struct single_assigner_builtin_base<dynd_bool, src_type, bool_kind, src_kind, assign_error_overflow>
 {
     static void assign(dynd_bool *dst, const src_type *src, kernel_data_prefix *DYND_UNUSED(extra)) {
@@ -112,29 +112,29 @@ struct single_assigner_builtin_base<dynd_bool, src_type, bool_kind, src_kind, as
             *dst = true;
         } else {
             std::stringstream ss;
-            ss << "overflow while assigning " << make_dtype<src_type>() << " value ";
-            ss << s << " to " << make_dtype<dynd_bool>();
+            ss << "overflow while assigning " << ndt::make_dtype<src_type>() << " value ";
+            ss << s << " to " << ndt::make_dtype<dynd_bool>();
             throw std::overflow_error(ss.str());
         }
     }
 };
 
 // Anything -> boolean with other error checking
-template<class src_type, dtype_kind_t src_kind>
+template<class src_type, type_kind_t src_kind>
 struct single_assigner_builtin_base<dynd_bool, src_type, bool_kind, src_kind, assign_error_fractional>
     : public single_assigner_builtin_base<dynd_bool, src_type, bool_kind, src_kind, assign_error_overflow> {};
-template<class src_type, dtype_kind_t src_kind>
+template<class src_type, type_kind_t src_kind>
 struct single_assigner_builtin_base<dynd_bool, src_type, bool_kind, src_kind, assign_error_inexact>
     : public single_assigner_builtin_base<dynd_bool, src_type, bool_kind, src_kind, assign_error_overflow> {};
 
 // Boolean -> anything with other error checking
-template<class dst_type, dtype_kind_t dst_kind>
+template<class dst_type, type_kind_t dst_kind>
 struct single_assigner_builtin_base<dst_type, dynd_bool, dst_kind, bool_kind, assign_error_overflow>
     : public single_assigner_builtin_base<dst_type, dynd_bool, dst_kind, bool_kind, assign_error_none> {};
-template<class dst_type, dtype_kind_t dst_kind>
+template<class dst_type, type_kind_t dst_kind>
 struct single_assigner_builtin_base<dst_type, dynd_bool, dst_kind, bool_kind, assign_error_fractional>
     : public single_assigner_builtin_base<dst_type, dynd_bool, dst_kind, bool_kind, assign_error_none> {};
-template<class dst_type, dtype_kind_t dst_kind>
+template<class dst_type, type_kind_t dst_kind>
 struct single_assigner_builtin_base<dst_type, dynd_bool, dst_kind, bool_kind, assign_error_inexact>
     : public single_assigner_builtin_base<dst_type, dynd_bool, dst_kind, bool_kind, assign_error_none> {};
 
@@ -164,8 +164,8 @@ struct single_assigner_builtin_signed_to_signed_overflow_base<dst_type, src_type
         if (s < static_cast<src_type>(std::numeric_limits<dst_type>::min()) ||
                         s > static_cast<src_type>(std::numeric_limits<dst_type>::max())) {
             std::stringstream ss;
-            ss << "overflow while assigning " << make_dtype<src_type>() << " value ";
-            ss << s << " to " << make_dtype<dst_type>();
+            ss << "overflow while assigning " << ndt::make_dtype<src_type>() << " value ";
+            ss << s << " to " << ndt::make_dtype<dst_type>();
             throw std::overflow_error(ss.str());
         }
         *dst = static_cast<dst_type>(s);
@@ -199,8 +199,8 @@ struct single_assigner_builtin_unsigned_to_signed_overflow_base<dst_type, src_ty
 
         if (s > static_cast<src_type>(std::numeric_limits<dst_type>::max())) {
             std::stringstream ss;
-            ss << "overflow while assigning " << make_dtype<src_type>() << " value ";
-            ss << s << " to " << make_dtype<dst_type>();
+            ss << "overflow while assigning " << ndt::make_dtype<src_type>() << " value ";
+            ss << s << " to " << ndt::make_dtype<dst_type>();
             throw std::overflow_error(ss.str());
         }
         *dst = static_cast<dst_type>(s);
@@ -230,8 +230,8 @@ struct single_assigner_builtin_signed_to_unsigned_overflow_base
 
         if (s < src_type(0)) {
             std::stringstream ss;
-            ss << "overflow while assigning " << make_dtype<src_type>() << " value ";
-            ss << s << " to " << make_dtype<dst_type>();
+            ss << "overflow while assigning " << ndt::make_dtype<src_type>() << " value ";
+            ss << s << " to " << ndt::make_dtype<dst_type>();
             throw std::overflow_error(ss.str());
         }
         *dst = static_cast<dst_type>(s);
@@ -247,8 +247,8 @@ struct single_assigner_builtin_signed_to_unsigned_overflow_base<dst_type, src_ty
 
         if ((s < src_type(0)) || (static_cast<src_type>(std::numeric_limits<dst_type>::max()) < s)) {
             std::stringstream ss;
-            ss << "overflow while assigning " << make_dtype<src_type>() << " value ";
-            ss << s << " to " << make_dtype<dst_type>();
+            ss << "overflow while assigning " << ndt::make_dtype<src_type>() << " value ";
+            ss << s << " to " << ndt::make_dtype<dst_type>();
             throw std::overflow_error(ss.str());
         }
         *dst = static_cast<dst_type>(s);
@@ -283,8 +283,8 @@ struct single_assigner_builtin_unsigned_to_unsigned_overflow_base<dst_type, src_
 
         if (std::numeric_limits<dst_type>::max() < s) {
             std::stringstream ss;
-            ss << "overflow while assigning " << make_dtype<src_type>() << " value ";
-            ss << s << " to " << make_dtype<dst_type>();
+            ss << "overflow while assigning " << ndt::make_dtype<src_type>() << " value ";
+            ss << s << " to " << ndt::make_dtype<dst_type>();
             throw std::overflow_error(ss.str());
         }
         *dst = static_cast<dst_type>(s);
@@ -315,8 +315,8 @@ struct single_assigner_builtin_base<dst_type, src_type, real_kind, int_kind, ass
 
         if (static_cast<src_type>(d) != s) {
             std::stringstream ss;
-            ss << "inexact value while assigning " << make_dtype<src_type>() << " value ";
-            ss << s << " to " << make_dtype<dst_type>() << " value " << d;
+            ss << "inexact value while assigning " << ndt::make_dtype<src_type>() << " value ";
+            ss << s << " to " << ndt::make_dtype<dst_type>() << " value " << d;
             throw std::runtime_error(ss.str());
         }
         *dst = d;
@@ -354,8 +354,8 @@ struct single_assigner_builtin_base<std::complex<dst_real_type>, src_type, compl
 
         if (static_cast<src_type>(d) != s) {
             std::stringstream ss;
-            ss << "inexact value while assigning " << make_dtype<src_type>() << " value ";
-            ss << s << " to " << make_dtype<std::complex<dst_real_type> >() << " value " << d;
+            ss << "inexact value while assigning " << ndt::make_dtype<src_type>() << " value ";
+            ss << s << " to " << ndt::make_dtype<std::complex<dst_real_type> >() << " value " << d;
             throw std::runtime_error(ss.str());
         }
         *dst = d;
@@ -382,8 +382,8 @@ struct single_assigner_builtin_base<dst_type, src_type, real_kind, uint_kind, as
 
         if (static_cast<src_type>(d) != s) {
             std::stringstream ss;
-            ss << "inexact value while assigning " << make_dtype<src_type>() << " value ";
-            ss << s << " to " << make_dtype<dst_type>() << " value " << d;
+            ss << "inexact value while assigning " << ndt::make_dtype<src_type>() << " value ";
+            ss << s << " to " << ndt::make_dtype<dst_type>() << " value " << d;
             throw std::runtime_error(ss.str());
         }
         *dst = d;
@@ -421,8 +421,8 @@ struct single_assigner_builtin_base<std::complex<dst_real_type>, src_type, compl
 
         if (static_cast<src_type>(d) != s) {
             std::stringstream ss;
-            ss << "inexact value while assigning " << make_dtype<src_type>() << " value ";
-            ss << s << " to " << make_dtype<std::complex<dst_real_type> >() << " value " << d;
+            ss << "inexact value while assigning " << ndt::make_dtype<src_type>() << " value ";
+            ss << s << " to " << ndt::make_dtype<std::complex<dst_real_type> >() << " value " << d;
             throw std::runtime_error(ss.str());
         }
         *dst = d;
@@ -448,8 +448,8 @@ struct single_assigner_builtin_base<dst_type, src_type, int_kind, real_kind, ass
 
         if (s < std::numeric_limits<dst_type>::min() || std::numeric_limits<dst_type>::max() < s) {
             std::stringstream ss;
-            ss << "overflow while assigning " << make_dtype<src_type>() << " value ";
-            ss << s << " to " << make_dtype<dst_type>();
+            ss << "overflow while assigning " << ndt::make_dtype<src_type>() << " value ";
+            ss << s << " to " << ndt::make_dtype<dst_type>();
             throw std::overflow_error(ss.str());
         }
         *dst = static_cast<dst_type>(s);
@@ -467,15 +467,15 @@ struct single_assigner_builtin_base<dst_type, src_type, int_kind, real_kind, ass
 
         if (s < std::numeric_limits<dst_type>::min() || std::numeric_limits<dst_type>::max() < s) {
             std::stringstream ss;
-            ss << "overflow while assigning " << make_dtype<src_type>() << " value ";
-            ss << s << " to " << make_dtype<dst_type>();
+            ss << "overflow while assigning " << ndt::make_dtype<src_type>() << " value ";
+            ss << s << " to " << ndt::make_dtype<dst_type>();
             throw std::overflow_error(ss.str());
         }
 
         if (std::floor(s) != s) {
             std::stringstream ss;
-            ss << "fractional part lost while assigning " << make_dtype<src_type>() << " value ";
-            ss << s << " to " << make_dtype<dst_type>();
+            ss << "fractional part lost while assigning " << ndt::make_dtype<src_type>() << " value ";
+            ss << s << " to " << ndt::make_dtype<dst_type>();
             throw std::runtime_error(ss.str());
         }
         *dst = static_cast<dst_type>(s);
@@ -498,15 +498,15 @@ struct single_assigner_builtin_base<dst_type, std::complex<src_real_type>, int_k
 
         if (s.imag() != 0) {
             std::stringstream ss;
-            ss << "loss of imaginary component while assigning " << make_dtype<std::complex<src_real_type> >() << " value ";
-            ss << s << " to " << make_dtype<dst_type>();
+            ss << "loss of imaginary component while assigning " << ndt::make_dtype<std::complex<src_real_type> >() << " value ";
+            ss << s << " to " << ndt::make_dtype<dst_type>();
             throw std::runtime_error(ss.str());
         }
 
         if (s.real() < std::numeric_limits<dst_type>::min() || std::numeric_limits<dst_type>::max() < s.real()) {
             std::stringstream ss;
-            ss << "overflow while assigning " << make_dtype<std::complex<src_real_type> >() << " value ";
-            ss << s << " to " << make_dtype<dst_type>();
+            ss << "overflow while assigning " << ndt::make_dtype<std::complex<src_real_type> >() << " value ";
+            ss << s << " to " << ndt::make_dtype<dst_type>();
             throw std::overflow_error(ss.str());
         }
         *dst = static_cast<dst_type>(s.real());
@@ -524,22 +524,22 @@ struct single_assigner_builtin_base<dst_type, std::complex<src_real_type>, int_k
 
         if (s.imag() != 0) {
             std::stringstream ss;
-            ss << "loss of imaginary component while assigning " << make_dtype<std::complex<src_real_type> >() << " value ";
-            ss << s << " to " << make_dtype<dst_type>();
+            ss << "loss of imaginary component while assigning " << ndt::make_dtype<std::complex<src_real_type> >() << " value ";
+            ss << s << " to " << ndt::make_dtype<dst_type>();
             throw std::runtime_error(ss.str());
         }
 
         if (s.real() < std::numeric_limits<dst_type>::min() || std::numeric_limits<dst_type>::max() < s.real()) {
             std::stringstream ss;
-            ss << "overflow while assigning " << make_dtype<std::complex<src_real_type> >() << " value ";
-            ss << s << " to " << make_dtype<dst_type>();
+            ss << "overflow while assigning " << ndt::make_dtype<std::complex<src_real_type> >() << " value ";
+            ss << s << " to " << ndt::make_dtype<dst_type>();
             throw std::overflow_error(ss.str());
         }
 
         if (std::floor(s.real()) != s.real()) {
             std::stringstream ss;
-            ss << "fractional part lost while assigning " << make_dtype<std::complex<src_real_type> >() << " value ";
-            ss << s << " to " << make_dtype<dst_type>();
+            ss << "fractional part lost while assigning " << ndt::make_dtype<std::complex<src_real_type> >() << " value ";
+            ss << s << " to " << ndt::make_dtype<dst_type>();
             throw std::runtime_error(ss.str());
         }
         *dst = static_cast<dst_type>(s.real());
@@ -562,8 +562,8 @@ struct single_assigner_builtin_base<dst_type, src_type, uint_kind, real_kind, as
 
         if (s < 0 || std::numeric_limits<dst_type>::max() < s) {
             std::stringstream ss;
-            ss << "overflow while assigning " << make_dtype<src_type>() << " value ";
-            ss << s << " to " << make_dtype<dst_type>();
+            ss << "overflow while assigning " << ndt::make_dtype<src_type>() << " value ";
+            ss << s << " to " << ndt::make_dtype<dst_type>();
             throw std::overflow_error(ss.str());
         }
         *dst = static_cast<dst_type>(s);
@@ -581,15 +581,15 @@ struct single_assigner_builtin_base<dst_type, src_type, uint_kind, real_kind, as
 
         if (s < 0 || std::numeric_limits<dst_type>::max() < s) {
             std::stringstream ss;
-            ss << "overflow while assigning " << make_dtype<src_type>() << " value ";
-            ss << s << " to " << make_dtype<dst_type>();
+            ss << "overflow while assigning " << ndt::make_dtype<src_type>() << " value ";
+            ss << s << " to " << ndt::make_dtype<dst_type>();
             throw std::overflow_error(ss.str());
         }
 
         if (std::floor(s) != s) {
             std::stringstream ss;
-            ss << "fractional part lost while assigning " << make_dtype<src_type>() << " value ";
-            ss << s << " to " << make_dtype<dst_type>();
+            ss << "fractional part lost while assigning " << ndt::make_dtype<src_type>() << " value ";
+            ss << s << " to " << ndt::make_dtype<dst_type>();
             throw std::runtime_error(ss.str());
         }
         *dst = static_cast<dst_type>(s);
@@ -612,15 +612,15 @@ struct single_assigner_builtin_base<dst_type, std::complex<src_real_type>, uint_
 
         if (s.imag() != 0) {
             std::stringstream ss;
-            ss << "loss of imaginary component while assigning " << make_dtype<std::complex<src_real_type> >() << " value ";
-            ss << s << " to " << make_dtype<dst_type>();
+            ss << "loss of imaginary component while assigning " << ndt::make_dtype<std::complex<src_real_type> >() << " value ";
+            ss << s << " to " << ndt::make_dtype<dst_type>();
             throw std::runtime_error(ss.str());
         }
 
         if (s.real() < 0 || std::numeric_limits<dst_type>::max() < s.real()) {
             std::stringstream ss;
-            ss << "overflow while assigning " << make_dtype<std::complex<src_real_type> >() << " value ";
-            ss << s << " to " << make_dtype<dst_type>();
+            ss << "overflow while assigning " << ndt::make_dtype<std::complex<src_real_type> >() << " value ";
+            ss << s << " to " << ndt::make_dtype<dst_type>();
             throw std::overflow_error(ss.str());
         }
         *dst = static_cast<dst_type>(s.real());
@@ -638,22 +638,22 @@ struct single_assigner_builtin_base<dst_type, std::complex<src_real_type>, uint_
 
         if (s.imag() != 0) {
             std::stringstream ss;
-            ss << "loss of imaginary component while assigning " << make_dtype<std::complex<src_real_type> >() << " value ";
-            ss << s << " to " << make_dtype<dst_type>();
+            ss << "loss of imaginary component while assigning " << ndt::make_dtype<std::complex<src_real_type> >() << " value ";
+            ss << s << " to " << ndt::make_dtype<dst_type>();
             throw std::runtime_error(ss.str());
         }
 
         if (s.real() < 0 || std::numeric_limits<dst_type>::max() < s.real()) {
             std::stringstream ss;
-            ss << "overflow while assigning " << make_dtype<std::complex<src_real_type> >() << " value ";
-            ss << s << " to " << make_dtype<dst_type>();
+            ss << "overflow while assigning " << ndt::make_dtype<std::complex<src_real_type> >() << " value ";
+            ss << s << " to " << ndt::make_dtype<dst_type>();
             throw std::overflow_error(ss.str());
         }
 
         if (std::floor(s.real()) != s.real()) {
             std::stringstream ss;
-            ss << "fractional part lost while assigning " << make_dtype<std::complex<src_real_type> >() << " value ";
-            ss << s << " to " << make_dtype<dst_type>();
+            ss << "fractional part lost while assigning " << ndt::make_dtype<std::complex<src_real_type> >() << " value ";
+            ss << s << " to " << ndt::make_dtype<dst_type>();
             throw std::runtime_error(ss.str());
         }
         *dst = static_cast<dst_type>(s.real());
@@ -743,16 +743,16 @@ struct single_assigner_builtin_base<float, double, real_kind, real_kind, assign_
         *dst = static_cast<float>(*src);
         if (is_overflow_fp_status()) {
             std::stringstream ss;
-            ss << "overflow while assigning " << make_dtype<double>() << " value ";
-            ss << *src << " to " << make_dtype<float>();
+            ss << "overflow while assigning " << ndt::make_dtype<double>() << " value ";
+            ss << *src << " to " << ndt::make_dtype<float>();
             throw std::overflow_error(ss.str());
         }
 #else
         double s = *src;
         if (s < -std::numeric_limits<float>::max() || s > std::numeric_limits<float>::max()) {
             std::stringstream ss;
-            ss << "overflow while assigning " << make_dtype<double>() << " value ";
-            ss << *src << " to " << make_dtype<float>();
+            ss << "overflow while assigning " << ndt::make_dtype<double>() << " value ";
+            ss << *src << " to " << ndt::make_dtype<float>();
             throw std::overflow_error(ss.str());
         }
         *dst = static_cast<float>(s);
@@ -780,15 +780,15 @@ struct single_assigner_builtin_base<float, double, real_kind, real_kind, assign_
         d = static_cast<float>(s);
         if (is_overflow_fp_status()) {
             std::stringstream ss;
-            ss << "overflow while assigning " << make_dtype<double>() << " value ";
-            ss << *src << " to " << make_dtype<float>();
+            ss << "overflow while assigning " << ndt::make_dtype<double>() << " value ";
+            ss << *src << " to " << ndt::make_dtype<float>();
             throw std::overflow_error(ss.str());
         }
 #else
         if (s < -std::numeric_limits<float>::max() || s > std::numeric_limits<float>::max()) {
             std::stringstream ss;
-            ss << "overflow while assigning " << make_dtype<double>() << " value ";
-            ss << *src << " to " << make_dtype<float>();
+            ss << "overflow while assigning " << ndt::make_dtype<double>() << " value ";
+            ss << *src << " to " << ndt::make_dtype<float>();
             throw std::runtime_error(ss.str());
         }
         d = static_cast<float>(s);
@@ -800,8 +800,8 @@ struct single_assigner_builtin_base<float, double, real_kind, real_kind, assign_
         //}
         if (d != s) {
             std::stringstream ss;
-            ss << "inexact precision loss while assigning " << make_dtype<double>() << " value ";
-            ss << *src << " to " << make_dtype<float>();
+            ss << "inexact precision loss while assigning " << ndt::make_dtype<double>() << " value ";
+            ss << *src << " to " << ndt::make_dtype<float>();
             throw std::runtime_error(ss.str());
         }
         *dst = d;
@@ -821,8 +821,8 @@ struct single_assigner_builtin_base<std::complex<float>, std::complex<double>, c
         *dst = static_cast<std::complex<float> >(*src);
         if (is_overflow_fp_status()) {
             std::stringstream ss;
-            ss << "overflow while assigning " << make_dtype<std::complex<double> >() << " value ";
-            ss << *src << " to " << make_dtype<std::complex<float> >();
+            ss << "overflow while assigning " << ndt::make_dtype<std::complex<double> >() << " value ";
+            ss << *src << " to " << ndt::make_dtype<std::complex<float> >();
             throw std::overflow_error(ss.str());
         }
 #else
@@ -830,8 +830,8 @@ struct single_assigner_builtin_base<std::complex<float>, std::complex<double>, c
         if (s.real() < -std::numeric_limits<float>::max() || s.real() > std::numeric_limits<float>::max() ||
                     s.imag() < -std::numeric_limits<float>::max() || s.imag() > std::numeric_limits<float>::max()) {
             std::stringstream ss;
-            ss << "overflow while assigning " << make_dtype<std::complex<double> >() << " value ";
-            ss << *src << " to " << make_dtype<std::complex<float> >();
+            ss << "overflow while assigning " << ndt::make_dtype<std::complex<double> >() << " value ";
+            ss << *src << " to " << ndt::make_dtype<std::complex<float> >();
             throw std::overflow_error(ss.str());
         }
         *dst = static_cast<std::complex<float> >(s);
@@ -860,16 +860,16 @@ struct single_assigner_builtin_base<std::complex<float>, std::complex<double>, c
         d = static_cast<std::complex<float> >(s);
         if (is_overflow_fp_status()) {
             std::stringstream ss;
-            ss << "overflow while assigning " << make_dtype<std::complex<double> >() << " value ";
-            ss << *src << " to " << make_dtype<std::complex<float> >();
+            ss << "overflow while assigning " << ndt::make_dtype<std::complex<double> >() << " value ";
+            ss << *src << " to " << ndt::make_dtype<std::complex<float> >();
             throw std::overflow_error(ss.str());
         }
 #else
         if (s.real() < -std::numeric_limits<float>::max() || s.real() > std::numeric_limits<float>::max() ||
                     s.imag() < -std::numeric_limits<float>::max() || s.imag() > std::numeric_limits<float>::max()) {
             std::stringstream ss;
-            ss << "overflow while assigning " << make_dtype<std::complex<double> >() << " value ";
-            ss << *src << " to " << make_dtype<std::complex<float> >();
+            ss << "overflow while assigning " << ndt::make_dtype<std::complex<double> >() << " value ";
+            ss << *src << " to " << ndt::make_dtype<std::complex<float> >();
             throw std::overflow_error(ss.str());
         }
         d = static_cast<std::complex<float> >(s);
@@ -881,8 +881,8 @@ struct single_assigner_builtin_base<std::complex<float>, std::complex<double>, c
         //}
         if (d.real() != s.real() || d.imag() != s.imag()) {
             std::stringstream ss;
-            ss << "inexact precision loss while assigning " << make_dtype<std::complex<double> >() << " value ";
-            ss << *src << " to " << make_dtype<std::complex<float> >();
+            ss << "inexact precision loss while assigning " << ndt::make_dtype<std::complex<double> >() << " value ";
+            ss << *src << " to " << ndt::make_dtype<std::complex<float> >();
             throw std::runtime_error(ss.str());
         }
         *dst = d;
@@ -900,8 +900,8 @@ struct single_assigner_builtin_base<real_type, std::complex<real_type>, real_kin
 
         if (s.imag() != 0) {
             std::stringstream ss;
-            ss << "loss of imaginary component while assigning " << make_dtype<std::complex<real_type> >() << " value ";
-            ss << *src << " to " << make_dtype<real_type>();
+            ss << "loss of imaginary component while assigning " << ndt::make_dtype<std::complex<real_type> >() << " value ";
+            ss << *src << " to " << ndt::make_dtype<real_type>();
             throw std::runtime_error(ss.str());
         }
 
@@ -970,8 +970,8 @@ struct single_assigner_builtin_base<double, std::complex<float>, real_kind, comp
 
         if (s.imag() != 0) {
             std::stringstream ss;
-            ss << "loss of imaginary component while assigning " << make_dtype<std::complex<float> >() << " value ";
-            ss << *src << " to " << make_dtype<double>();
+            ss << "loss of imaginary component while assigning " << ndt::make_dtype<std::complex<float> >() << " value ";
+            ss << *src << " to " << ndt::make_dtype<double>();
             throw std::runtime_error(ss.str());
         }
 
@@ -1001,8 +1001,8 @@ struct single_assigner_builtin_base<float, std::complex<double>, real_kind, comp
 
         if (s.imag() != 0) {
             std::stringstream ss;
-            ss << "loss of imaginary component while assigning " << make_dtype<std::complex<double> >() << " value ";
-            ss << *src << " to " << make_dtype<float>();
+            ss << "loss of imaginary component while assigning " << ndt::make_dtype<std::complex<double> >() << " value ";
+            ss << *src << " to " << ndt::make_dtype<float>();
             throw std::runtime_error(ss.str());
         }
 
@@ -1011,15 +1011,15 @@ struct single_assigner_builtin_base<float, std::complex<double>, real_kind, comp
         d = static_cast<float>(s.real());
         if (is_overflow_fp_status()) {
             std::stringstream ss;
-            ss << "overflow while assigning " << make_dtype<std::complex<double> >() << " value ";
-            ss << *src << " to " << make_dtype<float>();
+            ss << "overflow while assigning " << ndt::make_dtype<std::complex<double> >() << " value ";
+            ss << *src << " to " << ndt::make_dtype<float>();
             throw std::overflow_error(ss.str());
         }
 #else
         if (s.real() < -std::numeric_limits<float>::max() || s.real() > std::numeric_limits<float>::max()) {
             std::stringstream ss;
-            ss << "overflow while assigning " << make_dtype<std::complex<double> >() << " value ";
-            ss << *src << " to " << make_dtype<float>();
+            ss << "overflow while assigning " << ndt::make_dtype<std::complex<double> >() << " value ";
+            ss << *src << " to " << ndt::make_dtype<float>();
             throw std::overflow_error(ss.str());
         }
         d = static_cast<float>(s.real());
@@ -1046,8 +1046,8 @@ struct single_assigner_builtin_base<float, std::complex<double>, real_kind, comp
 
         if (s.imag() != 0) {
             std::stringstream ss;
-            ss << "loss of imaginary component while assigning " << make_dtype<std::complex<double> >() << " value ";
-            ss << *src << " to " << make_dtype<float>();
+            ss << "loss of imaginary component while assigning " << ndt::make_dtype<std::complex<double> >() << " value ";
+            ss << *src << " to " << ndt::make_dtype<float>();
             throw std::runtime_error(ss.str());
         }
 
@@ -1056,15 +1056,15 @@ struct single_assigner_builtin_base<float, std::complex<double>, real_kind, comp
         d = static_cast<float>(s.real());
         if (is_overflow_fp_status()) {
             std::stringstream ss;
-            ss << "overflow while assigning " << make_dtype<std::complex<double> >() << " value ";
-            ss << s << " to " << make_dtype<float>();
+            ss << "overflow while assigning " << ndt::make_dtype<std::complex<double> >() << " value ";
+            ss << s << " to " << ndt::make_dtype<float>();
             throw std::overflow_error(ss.str());
         }
 #else
         if (s.real() < -std::numeric_limits<float>::max() || s.real() > std::numeric_limits<float>::max()) {
             std::stringstream ss;
-            ss << "overflow while assigning " << make_dtype<std::complex<double> >() << " value ";
-            ss << s << " to " << make_dtype<float>();
+            ss << "overflow while assigning " << ndt::make_dtype<std::complex<double> >() << " value ";
+            ss << s << " to " << ndt::make_dtype<float>();
             throw std::overflow_error(ss.str());
         }
         d = static_cast<float>(s.real());
@@ -1072,8 +1072,8 @@ struct single_assigner_builtin_base<float, std::complex<double>, real_kind, comp
 
         if (d != s.real()) {
             std::stringstream ss;
-            ss << "inexact precision loss while assigning " << make_dtype<std::complex<double> >() << " value ";
-            ss << *src << " to " << make_dtype<float>();
+            ss << "inexact precision loss while assigning " << ndt::make_dtype<std::complex<double> >() << " value ";
+            ss << *src << " to " << ndt::make_dtype<float>();
             throw std::runtime_error(ss.str());
         }
 
@@ -1096,15 +1096,15 @@ struct single_assigner_builtin_base<std::complex<float>, double, complex_kind, r
         d = static_cast<float>(s);
         if (is_overflow_fp_status()) {
             std::stringstream ss;
-            ss << "overflow while assigning " << make_dtype<double>() << " value ";
-            ss << s << " to " << make_dtype<std::complex<float> >();
+            ss << "overflow while assigning " << ndt::make_dtype<double>() << " value ";
+            ss << s << " to " << ndt::make_dtype<std::complex<float> >();
             throw std::overflow_error(ss.str());
         }
 #else
         if (s < -std::numeric_limits<float>::max() || s > std::numeric_limits<float>::max()) {
             std::stringstream ss;
-            ss << "overflow while assigning " << make_dtype<double>() << " value ";
-            ss << s << " to " << make_dtype<std::complex<float> >();
+            ss << "overflow while assigning " << ndt::make_dtype<double>() << " value ";
+            ss << s << " to " << ndt::make_dtype<std::complex<float> >();
             throw std::overflow_error(ss.str());
         }
         d = static_cast<float>(s);
@@ -1134,15 +1134,15 @@ struct single_assigner_builtin_base<std::complex<float>, double, complex_kind, r
         d = static_cast<float>(s);
         if (is_overflow_fp_status()) {
             std::stringstream ss;
-            ss << "overflow while assigning " << make_dtype<double>() << " value ";
-            ss << s << " to " << make_dtype<std::complex<float> >();
+            ss << "overflow while assigning " << ndt::make_dtype<double>() << " value ";
+            ss << s << " to " << ndt::make_dtype<std::complex<float> >();
             throw std::overflow_error(ss.str());
         }
 #else
         if (s < -std::numeric_limits<float>::max() || s > std::numeric_limits<float>::max()) {
             std::stringstream ss;
-            ss << "overflow while assigning " << make_dtype<double>() << " value ";
-            ss << s << " to " << make_dtype<std::complex<float> >();
+            ss << "overflow while assigning " << ndt::make_dtype<double>() << " value ";
+            ss << s << " to " << ndt::make_dtype<std::complex<float> >();
             throw std::overflow_error(ss.str());
         }
         d = static_cast<float>(s);
@@ -1150,8 +1150,8 @@ struct single_assigner_builtin_base<std::complex<float>, double, complex_kind, r
 
         if (d != s) {
             std::stringstream ss;
-            ss << "inexact precision loss while assigning " << make_dtype<double>() << " value ";
-            ss << s << " to " << make_dtype<std::complex<float> >();
+            ss << "inexact precision loss while assigning " << ndt::make_dtype<double>() << " value ";
+            ss << s << " to " << ndt::make_dtype<std::complex<float> >();
             throw std::runtime_error(ss.str());
         }
 

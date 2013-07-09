@@ -10,7 +10,7 @@
 #include <string>
 
 #include <dynd/memblock/memory_block.hpp>
-#include <dynd/dtype.hpp>
+#include <dynd/type.hpp>
 
 namespace dynd {
 
@@ -27,7 +27,7 @@ namespace dynd {
  *                get_default_data_size() corresponding to default-constructed metadata.
  * \param initial_count  The number of elements to allocate at the start.
  */
-memory_block_ptr make_objectarray_memory_block(const dtype& dt,
+memory_block_ptr make_objectarray_memory_block(const ndt::type& dt,
                 const char *metadata, intptr_t stride, intptr_t initial_count = 64);
 
 void objectarray_memory_block_debug_print(const memory_block_data *memblock,

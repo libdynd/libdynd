@@ -5,7 +5,7 @@
 
 // This file is an internal implementation detail of built-in value comparison
 
-#include <dynd/dtype.hpp>
+#include <dynd/type.hpp>
 #include <complex>
 
 using namespace std;
@@ -62,8 +62,8 @@ DYND_FORCE_BIG_TYPE(dynd_float128, dynd_float128);
     };
 
     // Base classes for comparisons
-    template<class src0_type, class src1_type, dtype_kind_t src0_kind,
-                    dtype_kind_t src1_kind, bool src0_bigger, bool src1_bigger>
+    template<class src0_type, class src1_type, type_kind_t src0_kind,
+                    type_kind_t src1_kind, bool src0_bigger, bool src1_bigger>
     struct op_sort_lt {
         inline static bool f(const src0_type& v0, const src1_type& v1)
         {
@@ -71,8 +71,8 @@ DYND_FORCE_BIG_TYPE(dynd_float128, dynd_float128);
             return BT(v0) < BT(v1);
         }
     };
-    template<class src0_type, class src1_type, dtype_kind_t src0_kind,
-                    dtype_kind_t src1_kind, bool src0_bigger, bool src1_bigger>
+    template<class src0_type, class src1_type, type_kind_t src0_kind,
+                    type_kind_t src1_kind, bool src0_bigger, bool src1_bigger>
     struct op_lt {
         inline static bool f(const src0_type& v0, const src1_type& v1)
         {
@@ -80,8 +80,8 @@ DYND_FORCE_BIG_TYPE(dynd_float128, dynd_float128);
             return BT(v0) < BT(v1);
         }
     };
-    template<class src0_type, class src1_type, dtype_kind_t src0_kind,
-                    dtype_kind_t src1_kind, bool src0_bigger, bool src1_bigger>
+    template<class src0_type, class src1_type, type_kind_t src0_kind,
+                    type_kind_t src1_kind, bool src0_bigger, bool src1_bigger>
     struct op_le {
         inline static bool f(const src0_type& v0, const src1_type& v1)
         {
@@ -89,8 +89,8 @@ DYND_FORCE_BIG_TYPE(dynd_float128, dynd_float128);
             return BT(v0) <= BT(v1);
         }
     };
-    template<class src0_type, class src1_type, dtype_kind_t src0_kind,
-                    dtype_kind_t src1_kind, bool src0_bigger, bool src1_bigger>
+    template<class src0_type, class src1_type, type_kind_t src0_kind,
+                    type_kind_t src1_kind, bool src0_bigger, bool src1_bigger>
     struct op_eq {
         inline static bool f(const src0_type& v0, const src1_type& v1)
         {
@@ -98,8 +98,8 @@ DYND_FORCE_BIG_TYPE(dynd_float128, dynd_float128);
             return BT(v0) == BT(v1);
         }
     };
-    template<class src0_type, class src1_type, dtype_kind_t src0_kind,
-                    dtype_kind_t src1_kind, bool src0_bigger, bool src1_bigger>
+    template<class src0_type, class src1_type, type_kind_t src0_kind,
+                    type_kind_t src1_kind, bool src0_bigger, bool src1_bigger>
     struct op_ne {
         inline static bool f(const src0_type& v0, const src1_type& v1)
         {
@@ -107,8 +107,8 @@ DYND_FORCE_BIG_TYPE(dynd_float128, dynd_float128);
             return BT(v0) != BT(v1);
         }
     };
-    template<class src0_type, class src1_type, dtype_kind_t src0_kind,
-                    dtype_kind_t src1_kind, bool src0_bigger, bool src1_bigger>
+    template<class src0_type, class src1_type, type_kind_t src0_kind,
+                    type_kind_t src1_kind, bool src0_bigger, bool src1_bigger>
     struct op_ge {
         inline static bool f(const src0_type& v0, const src1_type& v1)
         {
@@ -116,8 +116,8 @@ DYND_FORCE_BIG_TYPE(dynd_float128, dynd_float128);
             return BT(v0) >= BT(v1);
         }
     };
-    template<class src0_type, class src1_type, dtype_kind_t src0_kind,
-                    dtype_kind_t src1_kind, bool src0_bigger, bool src1_bigger>
+    template<class src0_type, class src1_type, type_kind_t src0_kind,
+                    type_kind_t src1_kind, bool src0_bigger, bool src1_bigger>
     struct op_gt {
         inline static bool f(const src0_type& v0, const src1_type& v1)
         {
@@ -236,34 +236,34 @@ DYND_FORCE_BIG_TYPE(dynd_float128, dynd_float128);
     struct op_cant_compare {
         inline static bool f(const src0_type& DYND_UNUSED(src0), const src1_type& DYND_UNUSED(src1))
         {
-            throw not_comparable_error(make_dtype<src0_type>(), make_dtype<src1_type>(), comptype);
+            throw not_comparable_error(ndt::make_dtype<src0_type>(), ndt::make_dtype<src1_type>(), comptype);
         }
     };
 
 #define NOT_ORDERABLE(nord_kind) \
-    template<class src0_type, class src1_type, dtype_kind_t src0_kind, bool src0_bigger, bool src1_bigger> \
+    template<class src0_type, class src1_type, type_kind_t src0_kind, bool src0_bigger, bool src1_bigger> \
     struct op_lt<src0_type, src1_type, src0_kind, nord_kind, src0_bigger, src1_bigger> \
         : public op_cant_compare<src0_type, src1_type, comparison_type_less> {}; \
-    template<class src0_type, class src1_type, dtype_kind_t src0_kind, bool src0_bigger, bool src1_bigger> \
+    template<class src0_type, class src1_type, type_kind_t src0_kind, bool src0_bigger, bool src1_bigger> \
     struct op_le<src0_type, src1_type, src0_kind, nord_kind, src0_bigger, src1_bigger> \
         : public op_cant_compare<src0_type, src1_type, comparison_type_less_equal> {}; \
-    template<class src0_type, class src1_type, dtype_kind_t src0_kind, bool src0_bigger, bool src1_bigger> \
+    template<class src0_type, class src1_type, type_kind_t src0_kind, bool src0_bigger, bool src1_bigger> \
     struct op_ge<src0_type, src1_type, src0_kind, nord_kind, src0_bigger, src1_bigger> \
         : public op_cant_compare<src0_type, src1_type, comparison_type_greater_equal> {}; \
-    template<class src0_type, class src1_type, dtype_kind_t src0_kind, bool src0_bigger, bool src1_bigger> \
+    template<class src0_type, class src1_type, type_kind_t src0_kind, bool src0_bigger, bool src1_bigger> \
     struct op_gt<src0_type, src1_type, src0_kind, nord_kind, src0_bigger, src1_bigger> \
         : public op_cant_compare<src0_type, src1_type, comparison_type_greater> {}; \
     \
-    template<class src0_type, class src1_type, dtype_kind_t src1_kind, bool src0_bigger, bool src1_bigger> \
+    template<class src0_type, class src1_type, type_kind_t src1_kind, bool src0_bigger, bool src1_bigger> \
     struct op_lt<src0_type, src1_type, nord_kind, src1_kind, src0_bigger, src1_bigger> \
         : public op_cant_compare<src0_type, src1_type, comparison_type_less> {}; \
-    template<class src0_type, class src1_type, dtype_kind_t src1_kind, bool src0_bigger, bool src1_bigger> \
+    template<class src0_type, class src1_type, type_kind_t src1_kind, bool src0_bigger, bool src1_bigger> \
     struct op_le<src0_type, src1_type, nord_kind, src1_kind, src0_bigger, src1_bigger> \
         : public op_cant_compare<src0_type, src1_type, comparison_type_less_equal> {}; \
-    template<class src0_type, class src1_type, dtype_kind_t src1_kind, bool src0_bigger, bool src1_bigger> \
+    template<class src0_type, class src1_type, type_kind_t src1_kind, bool src0_bigger, bool src1_bigger> \
     struct op_ge<src0_type, src1_type, nord_kind, src1_kind, src0_bigger, src1_bigger> \
         : public op_cant_compare<src0_type, src1_type, comparison_type_greater_equal> {}; \
-    template<class src0_type, class src1_type, dtype_kind_t src1_kind, bool src0_bigger, bool src1_bigger> \
+    template<class src0_type, class src1_type, type_kind_t src1_kind, bool src0_bigger, bool src1_bigger> \
     struct op_gt<src0_type, src1_type, nord_kind, src1_kind, src0_bigger, src1_bigger> \
         : public op_cant_compare<src0_type, src1_type, comparison_type_greater> {}; \
     \
@@ -431,7 +431,7 @@ DYND_FORCE_BIG_TYPE(dynd_float128, dynd_float128);
             }
         }
     };
-    template<class src0_type, class src1_real_type, dtype_kind_t src0_kind,
+    template<class src0_type, class src1_real_type, type_kind_t src0_kind,
                     bool src0_bigger, bool src1_bigger>
     struct op_sort_lt<src0_type, complex<src1_real_type>, src0_kind, complex_kind, src0_bigger, src1_bigger> {
         inline static bool f(const src0_type& v0, const complex<src1_real_type>& v1)
@@ -441,7 +441,7 @@ DYND_FORCE_BIG_TYPE(dynd_float128, dynd_float128);
                 (BT(v0) == BT(v1.real()) && 0 < v1.imag());
         }
     };
-    template<class src0_real_type, class src1_type, dtype_kind_t src1_kind,
+    template<class src0_real_type, class src1_type, type_kind_t src1_kind,
                     bool src0_bigger, bool src1_bigger>
     struct op_sort_lt<complex<src0_real_type>, src1_type, complex_kind, src1_kind, src0_bigger, src1_bigger> {
         inline static bool f(const complex<src0_real_type>& v0, const src1_type& v1)
@@ -612,7 +612,7 @@ DYND_FORCE_BIG_TYPE(dynd_float128, dynd_float128);
     NOT_ORDERABLE_PAIR(complex_kind, bool_kind);
 
     // Bool sorting comparison
-    template<class src0_type, class src1_type, dtype_kind_t src1_kind,
+    template<class src0_type, class src1_type, type_kind_t src1_kind,
                     bool src0_bigger, bool src1_bigger>
     struct op_sort_lt<src0_type, src1_type, bool_kind, src1_kind, src0_bigger, src1_bigger> {
         inline static bool f(const src0_type& v0, const src1_type& v1)
@@ -620,7 +620,7 @@ DYND_FORCE_BIG_TYPE(dynd_float128, dynd_float128);
             return static_cast<src1_type>(v0) < v1;
         }
     };
-    template<class src0_type, class src1_type, dtype_kind_t src0_kind,
+    template<class src0_type, class src1_type, type_kind_t src0_kind,
                     bool src0_bigger, bool src1_bigger>
     struct op_sort_lt<src0_type, src1_type, src0_kind, bool_kind, src0_bigger, src1_bigger> {
         inline static bool f(const src0_type& v0, const src1_type& v1)
@@ -638,7 +638,7 @@ DYND_FORCE_BIG_TYPE(dynd_float128, dynd_float128);
     };
 
     // Bool equality comparison
-    template<class src0_type, class src1_type, dtype_kind_t src1_kind,
+    template<class src0_type, class src1_type, type_kind_t src1_kind,
                     bool src0_bigger, bool src1_bigger>
     struct op_eq<src0_type, src1_type, bool_kind, src1_kind, src0_bigger, src1_bigger> {
         inline static bool f(const src0_type& v0, const src1_type& v1)
@@ -646,7 +646,7 @@ DYND_FORCE_BIG_TYPE(dynd_float128, dynd_float128);
             return static_cast<src1_type>(v0) == v1;
         }
     };
-    template<class src0_type, class src1_type, dtype_kind_t src0_kind,
+    template<class src0_type, class src1_type, type_kind_t src0_kind,
                     bool src0_bigger, bool src1_bigger>
     struct op_eq<src0_type, src1_type, src0_kind, bool_kind, src0_bigger, src1_bigger> {
         inline static bool f(const src0_type& v0, const src1_type& v1)
@@ -664,7 +664,7 @@ DYND_FORCE_BIG_TYPE(dynd_float128, dynd_float128);
     };
 
     // Bool inequality comparison
-    template<class src0_type, class src1_type, dtype_kind_t src1_kind,
+    template<class src0_type, class src1_type, type_kind_t src1_kind,
                     bool src0_bigger, bool src1_bigger>
     struct op_ne<src0_type, src1_type, bool_kind, src1_kind, src0_bigger, src1_bigger> {
         inline static bool f(const src0_type& v0, const src1_type& v1)
@@ -672,7 +672,7 @@ DYND_FORCE_BIG_TYPE(dynd_float128, dynd_float128);
             return static_cast<src1_type>(v0) != v1;
         }
     };
-    template<class src0_type, class src1_type, dtype_kind_t src0_kind,
+    template<class src0_type, class src1_type, type_kind_t src0_kind,
                     bool src0_bigger, bool src1_bigger>
     struct op_ne<src0_type, src1_type, src0_kind, bool_kind, src0_bigger, src1_bigger> {
         inline static bool f(const src0_type& v0, const src1_type& v1)

@@ -6,7 +6,7 @@
 #ifndef _DYND__BUFFER_STORAGE_HPP_
 #define _DYND__BUFFER_STORAGE_HPP_
 
-#include <dynd/dtype.hpp>
+#include <dynd/type.hpp>
 
 namespace dynd {
 
@@ -14,7 +14,7 @@ template<size_t N = 128>
 class buffer_storage {
     char *m_storage;
     char *m_metadata;
-    dtype m_dtype;
+    ndt::type m_dtype;
     intptr_t m_stride;
 
     // Non-assignable
@@ -48,7 +48,7 @@ public:
     {
         internal_allocate();
     }
-    inline buffer_storage(const dtype& dt)
+    inline buffer_storage(const ndt::type& dt)
         : m_storage(NULL), m_metadata(NULL), m_dtype(dt)
     {
         internal_allocate();
@@ -62,7 +62,7 @@ public:
         }
     }
 
-    void allocate(const dtype& dt) {
+    void allocate(const ndt::type& dt) {
         delete[] m_storage;
         m_storage = 0;
         if (m_metadata) {
@@ -78,7 +78,7 @@ public:
         return m_stride;
     }
 
-    inline const dtype& get_dtype() const {
+    inline const ndt::type& get_dtype() const {
         return m_dtype;
     }
 

@@ -3,10 +3,10 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__DTYPE_DTYPE_HPP_
-#define _DYND__DTYPE_DTYPE_HPP_
+#ifndef _DYND__DTYPE_TYPE_HPP_
+#define _DYND__DTYPE_TYPE_HPP_
 
-#include <dynd/dtype.hpp>
+#include <dynd/type.hpp>
 #include <dynd/dtype_assign.hpp>
 
 namespace dynd {
@@ -43,16 +43,16 @@ public:
 
     size_t make_assignment_kernel(
                     hierarchical_kernel *out, size_t offset_out,
-                    const dtype& dst_dt, const char *dst_metadata,
-                    const dtype& src_dt, const char *src_metadata,
+                    const ndt::type& dst_dt, const char *dst_metadata,
+                    const ndt::type& src_dt, const char *src_metadata,
                     kernel_request_t kernreq, assign_error_mode errmode,
                     const eval::eval_context *ectx) const;
 };
 
-inline dtype make_dtype_dtype() {
-    return dtype(new dtype_dtype(), false);
+inline ndt::type make_dtype_dtype() {
+    return ndt::type(new dtype_dtype(), false);
 }
 
 } // namespace dynd
 
-#endif // _DYND__DTYPE_DTYPE_HPP_
+#endif // _DYND__DTYPE_TYPE_HPP_

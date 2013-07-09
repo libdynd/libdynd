@@ -6,7 +6,7 @@
 #ifndef _DYND__UNARY_KERNEL_ADAPTER_CODEGEN_HPP_
 #define _DYND__UNARY_KERNEL_ADAPTER_CODEGEN_HPP_
 
-#include <dynd/dtype.hpp>
+#include <dynd/type.hpp>
 #include <dynd/kernels/kernel_instance.hpp>
 #include <dynd/memblock/memory_block.hpp>
 #include <dynd/codegen/calling_conventions.hpp>
@@ -32,8 +32,8 @@ struct unary_function_adapter_auxdata {
  * If two sets of inputs produce the same unique ID, they would also
  * produce the same generated code.
  */
-uint64_t get_unary_function_adapter_unique_id(const dtype& restype,
-                    const dtype& arg0type, calling_convention_t callconv);
+uint64_t get_unary_function_adapter_unique_id(const ndt::type& restype,
+                    const ndt::type& arg0type, calling_convention_t callconv);
 
 /**
  * Gets the unique integer ID in a string form, hopefully in human
@@ -53,8 +53,8 @@ std::string get_unary_function_adapter_unique_id_string(uint64_t unique_id);
  *
  * @return A pair of unary operation pointers.
  */
-//unary_operation_pair_t codegen_unary_function_adapter(const memory_block_ptr& exec_memblock, const dtype& restype,
-//                    const dtype& arg0type, calling_convention_t callconv);
+//unary_operation_pair_t codegen_unary_function_adapter(const memory_block_ptr& exec_memblock, const ndt::type& restype,
+//                    const ndt::type& arg0type, calling_convention_t callconv);
 
 } // namespace dynd
 

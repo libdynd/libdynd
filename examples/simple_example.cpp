@@ -35,7 +35,7 @@ int main()
         intptr_t shape[] = {2,3,4};
         int axisperm[] = {0,2,1};
 
-        nd::array a = nd::make_strided_array(make_dtype<int>(), 3, shape,
+        nd::array a = nd::make_strided_array(ndt::make_dtype<int>(), 3, shape,
                         nd::read_access_flag|nd::write_access_flag, axisperm);
 
         a.debug_print(cout);
@@ -44,7 +44,7 @@ int main()
 
         b.debug_print(cout);
 
-        nd::array c = empty_like(a, make_dtype<double>());
+        nd::array c = empty_like(a, ndt::make_dtype<double>());
 
         c.debug_print(cout);
 

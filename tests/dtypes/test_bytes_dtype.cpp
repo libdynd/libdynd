@@ -19,7 +19,7 @@ using namespace std;
 using namespace dynd;
 
 TEST(BytesDType, Create) {
-    dtype d;
+    ndt::type d;
 
     // Strings with various alignments
     d = make_bytes_dtype(1);

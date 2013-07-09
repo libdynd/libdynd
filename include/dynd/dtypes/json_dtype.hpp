@@ -3,8 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__JSON_DTYPE_HPP_
-#define _DYND__JSON_DTYPE_HPP_
+#ifndef _DYND__JSON_TYPE_HPP_
+#define _DYND__JSON_TYPE_HPP_
 
 #include <dynd/dtypes/string_dtype.hpp>
 
@@ -34,9 +34,9 @@ public:
     void print_dtype(std::ostream& o) const;
 
     bool is_unique_data_owner(const char *metadata) const;
-    dtype get_canonical_dtype() const;
+    ndt::type get_canonical_type() const;
 
-    bool is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const;
+    bool is_lossless_assignment(const ndt::type& dst_dt, const ndt::type& src_dt) const;
 
     bool operator==(const base_dtype& rhs) const;
 
@@ -49,17 +49,17 @@ public:
 
     size_t make_assignment_kernel(
                     hierarchical_kernel *out, size_t offset_out,
-                    const dtype& dst_dt, const char *dst_metadata,
-                    const dtype& src_dt, const char *src_metadata,
+                    const ndt::type& dst_dt, const char *dst_metadata,
+                    const ndt::type& src_dt, const char *src_metadata,
                     kernel_request_t kernreq, assign_error_mode errmode,
                     const eval::eval_context *ectx) const;
 };
 
-inline dtype make_json_dtype() {
-    return dtype(new json_dtype(), false);
+inline ndt::type make_json_dtype() {
+    return ndt::type(new json_dtype(), false);
 }
 
 } // namespace dynd
 
-#endif // _DYND__JSON_DTYPE_HPP_
+#endif // _DYND__JSON_TYPE_HPP_
 

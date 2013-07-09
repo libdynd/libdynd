@@ -8,7 +8,7 @@
 
 #include <vector>
 
-#include <dynd/dtype.hpp>
+#include <dynd/type.hpp>
 
 namespace dynd { namespace vm {
 
@@ -38,7 +38,7 @@ extern const opcode_info_t opcode_info[opcode_count];
 int validate_elwise_program(int input_count, int reg_count, size_t program_size, const int *program);
 
 class elwise_program {
-    std::vector<dtype> m_regtypes;
+    std::vector<ndt::type> m_regtypes;
     std::vector<int> m_program;
     int m_input_count, m_instruction_count;
 
@@ -49,7 +49,7 @@ public:
     }
 
     /** Constructs an elementwise VM program, stealing the internal values of regtypes and program */
-    elwise_program(int input_count, std::vector<dtype>& regtypes, std::vector<int>& program)
+    elwise_program(int input_count, std::vector<ndt::type>& regtypes, std::vector<int>& program)
         : m_input_count(input_count)
     {
         m_instruction_count = validate_elwise_program(input_count, (int)regtypes.size(), (int)program.size(), &program[0]);
@@ -58,7 +58,7 @@ public:
     }
 
     /** Sets the values of the elementwise VM program, stealing the internal values of regtypes and program */
-    void set(int input_count, std::vector<dtype>& regtypes, std::vector<int>& program)
+    void set(int input_count, std::vector<ndt::type>& regtypes, std::vector<int>& program)
     {
         m_instruction_count = validate_elwise_program(input_count, (int)regtypes.size(), (int)program.size(), &program[0]);
         m_regtypes.swap(regtypes);
@@ -70,7 +70,7 @@ public:
     void debug_print(std::ostream& o, const std::string& indent = "") const;
 
     /** Returns a const reference to the vector of register dtypes */
-    const std::vector<dtype>& get_register_types() const {
+    const std::vector<ndt::type>& get_register_types() const {
         return m_regtypes;
     }
 

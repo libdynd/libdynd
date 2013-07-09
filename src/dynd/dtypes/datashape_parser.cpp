@@ -44,36 +44,36 @@ namespace {
 // Simple recursive descent parser for a subset of the Blaze datashape grammar.
 // (Blaze grammar modified slightly to work this way)
 
-static dtype parse_rhs_expression(const char *&begin, const char *end, map<string, dtype>& symtable);
+static ndt::type parse_rhs_expression(const char *&begin, const char *end, map<string, ndt::type>& symtable);
 
-static map<string, dtype> builtin_types;
+static map<string, ndt::type> builtin_types;
 static set<string> reserved_typenames;
 namespace {
     struct init_bit {
         init_bit() {
-            builtin_types["void"] = make_dtype<void>();
-            builtin_types["bool"] = make_dtype<dynd_bool>();
-            builtin_types["int8"] = make_dtype<int8_t>();
-            builtin_types["int16"] = make_dtype<int16_t>();
-            builtin_types["int32"] = make_dtype<int32_t>();
-            builtin_types["int64"] = make_dtype<int64_t>();
-            builtin_types["int128"] = make_dtype<dynd_int128>();
-            builtin_types["uint8"] = make_dtype<uint8_t>();
-            builtin_types["uint16"] = make_dtype<uint16_t>();
-            builtin_types["uint32"] = make_dtype<uint32_t>();
-            builtin_types["uint64"] = make_dtype<uint64_t>();
-            builtin_types["uint128"] = make_dtype<dynd_uint128>();
-            builtin_types["float16"] = make_dtype<dynd_float16>();
-            builtin_types["float32"] = make_dtype<float>();
-            builtin_types["float64"] = make_dtype<double>();
-            builtin_types["float128"] = make_dtype<dynd_float128>();
-            builtin_types["cfloat32"] = builtin_types["complex64"] = make_dtype<complex<float> >();
-            builtin_types["cfloat64"] = builtin_types["complex128"] = make_dtype<complex<double> >();
+            builtin_types["void"] = ndt::make_dtype<void>();
+            builtin_types["bool"] = ndt::make_dtype<dynd_bool>();
+            builtin_types["int8"] = ndt::make_dtype<int8_t>();
+            builtin_types["int16"] = ndt::make_dtype<int16_t>();
+            builtin_types["int32"] = ndt::make_dtype<int32_t>();
+            builtin_types["int64"] = ndt::make_dtype<int64_t>();
+            builtin_types["int128"] = ndt::make_dtype<dynd_int128>();
+            builtin_types["uint8"] = ndt::make_dtype<uint8_t>();
+            builtin_types["uint16"] = ndt::make_dtype<uint16_t>();
+            builtin_types["uint32"] = ndt::make_dtype<uint32_t>();
+            builtin_types["uint64"] = ndt::make_dtype<uint64_t>();
+            builtin_types["uint128"] = ndt::make_dtype<dynd_uint128>();
+            builtin_types["float16"] = ndt::make_dtype<dynd_float16>();
+            builtin_types["float32"] = ndt::make_dtype<float>();
+            builtin_types["float64"] = ndt::make_dtype<double>();
+            builtin_types["float128"] = ndt::make_dtype<dynd_float128>();
+            builtin_types["cfloat32"] = builtin_types["complex64"] = ndt::make_dtype<complex<float> >();
+            builtin_types["cfloat64"] = builtin_types["complex128"] = ndt::make_dtype<complex<double> >();
             builtin_types["json"] = make_json_dtype();
             builtin_types["date"] = make_date_dtype();
             builtin_types["bytes"] = make_bytes_dtype(1);
-            builtin_types["dtype"] = make_dtype_dtype();
-            for (map<string, dtype>::iterator i = builtin_types.begin();
+            builtin_types["type"] = make_dtype_dtype();
+            for (map<string, ndt::type>::iterator i = builtin_types.begin();
                             i != builtin_types.end(); ++i) {
                 reserved_typenames.insert(i->first);
             }
@@ -280,7 +280,7 @@ static string_encoding_t string_to_encoding(const char *error_begin, const strin
 //               string(NUMBER) |
 //               string(NUMBER,'encoding')
 // This is called after 'string' is already matched
-static dtype parse_string_parameters(const char *&begin, const char *end)
+static ndt::type parse_string_parameters(const char *&begin, const char *end)
 {
     if (parse_token(begin, end, '(')) {
         const char *saved_begin = begin;
@@ -322,7 +322,7 @@ static dtype parse_string_parameters(const char *&begin, const char *end)
 // datetime_type : datetime('unit') |
 //               datetime('unit','timezone')
 // This is called after 'datetime' is already matched
-static dtype parse_datetime_parameters(const char *&begin, const char *end)
+static ndt::type parse_datetime_parameters(const char *&begin, const char *end)
 {
     if (parse_token(begin, end, '(')) {
         datetime_unit_t unit;
@@ -373,8 +373,8 @@ static dtype parse_datetime_parameters(const char *&begin, const char *end)
 }
 
 // record_item : NAME COLON rhs_expression
-static bool parse_record_item(const char *&begin, const char *end, map<string, dtype>& symtable,
-                string& out_field_name, dtype& out_field_type)
+static bool parse_record_item(const char *&begin, const char *end, map<string, ndt::type>& symtable,
+                string& out_field_name, ndt::type& out_field_type)
 {
     out_field_name = parse_name(begin, end);
     if (out_field_name.empty()) {
@@ -399,15 +399,15 @@ static bool parse_record_item(const char *&begin, const char *end, map<string, d
 }
 
 // record : LBRACE record_item record_item* RBRACE
-static dtype parse_record(const char *&begin, const char *end, map<string, dtype>& symtable)
+static ndt::type parse_record(const char *&begin, const char *end, map<string, ndt::type>& symtable)
 {
     vector<string> field_name_list;
-    vector<dtype> field_type_list;
+    vector<ndt::type> field_type_list;
     string field_name;
-    dtype field_type;
+    ndt::type field_type;
 
     if (!parse_token(begin, end, '{')) {
-        return dtype(uninitialized_type_id);
+        return ndt::type(uninitialized_type_id);
     }
     for (;;) {
         if (parse_record_item(begin, end, symtable, field_name, field_type)) {
@@ -432,9 +432,9 @@ static dtype parse_record(const char *&begin, const char *end, map<string, dtype
                     &field_type_list[0], &field_name_list[0]);
 }
 
-static dtype parse_rhs_expression(const char *&begin, const char *end, map<string, dtype>& symtable)
+static ndt::type parse_rhs_expression(const char *&begin, const char *end, map<string, ndt::type>& symtable)
 {
-    dtype result;
+    ndt::type result;
     vector<intptr_t> shape;
     // rhs_expression : ((NAME | NUMBER) COMMA)* (record | NAME LPAREN rhs_expression RPAREN | NAME)
     for (;;) {
@@ -469,7 +469,7 @@ static dtype parse_rhs_expression(const char *&begin, const char *end, map<strin
         string n = parse_name(begin, end);
         if (n.empty()) {
             if (shape.empty()) {
-                return dtype(uninitialized_type_id);
+                return ndt::type(uninitialized_type_id);
             } else {
                 throw datashape_parse_error(begin, "expected data type");
             }
@@ -478,7 +478,7 @@ static dtype parse_rhs_expression(const char *&begin, const char *end, map<strin
         } else if (n == "datetime") {
             result = parse_datetime_parameters(begin, end);
         } else {
-            map<string,dtype>::const_iterator i = builtin_types.find(n);
+            map<string, ndt::type>::const_iterator i = builtin_types.find(n);
             if (i != builtin_types.end()) {
                 result = i->second;
             } else {
@@ -517,7 +517,7 @@ static dtype parse_rhs_expression(const char *&begin, const char *end, map<strin
     return result;
 }
 
-static dtype parse_stmt(const char *&begin, const char *end, map<string, dtype>& symtable)
+static ndt::type parse_stmt(const char *&begin, const char *end, map<string, ndt::type>& symtable)
 {
     // stmt : TYPE name EQUALS rhs_expression
     // NOTE that this doesn't support parameterized lhs_expression, this is subset of Blaze datashape
@@ -525,12 +525,17 @@ static dtype parse_stmt(const char *&begin, const char *end, map<string, dtype>&
         const char *saved_begin = begin;
         string tname = parse_name(begin, end);
         if (tname.empty()) {
-            throw datashape_parse_error(begin, "expected an identifier for a type name");
+            if (skip_whitespace(begin, end) == end) {
+                // If it's only "type" by itself, return the "type" type
+                return builtin_types["type"];
+            } else {
+                throw datashape_parse_error(begin, "expected an identifier for a type name");
+            }
         }
         if (!parse_token(begin, end, '=')) {
             throw datashape_parse_error(begin, "expected an '='");
         }
-        dtype result = parse_rhs_expression(begin, end, symtable);
+        ndt::type result = parse_rhs_expression(begin, end, symtable);
         if (result.get_type_id() == uninitialized_type_id) {
             throw datashape_parse_error(begin, "expected a data type");
         }
@@ -551,14 +556,14 @@ static dtype parse_stmt(const char *&begin, const char *end, map<string, dtype>&
 }
 
 // top : stmt stmt*
-static dtype parse_top(const char *&begin, const char *end, map<string, dtype>& symtable)
+static ndt::type parse_top(const char *&begin, const char *end, map<string, ndt::type>& symtable)
 {
-    dtype result = parse_stmt(begin, end, symtable);
+    ndt::type result = parse_stmt(begin, end, symtable);
     if (result.get_type_id() == uninitialized_type_id) {
         throw datashape_parse_error(begin, "expected a datashape statement");
     }
     for (;;) {
-        dtype next = parse_stmt(begin, end, symtable);
+        ndt::type next = parse_stmt(begin, end, symtable);
         if (next.get_type_id() == uninitialized_type_id) {
             begin = skip_whitespace(begin, end);
             if (begin != end) {
@@ -604,12 +609,12 @@ static void get_error_line_column(const char *begin, const char *end, const char
     throw runtime_error("Cannot get line number of error, its position is out of range");
 }
 
-dtype dynd::dtype_from_datashape(const char *datashape_begin, const char *datashape_end)
+ndt::type dynd::type_from_datashape(const char *datashape_begin, const char *datashape_end)
 {
     try {
         // Symbol table for intermediate types declared in the datashape
-        map<string, dtype> symtable;
-        // Parse the datashape and construct the dtype
+        map<string, ndt::type> symtable;
+        // Parse the datashape and construct the type
         const char *begin = datashape_begin, *end = datashape_end;
         return parse_top(begin, end, symtable);
     } catch (const datashape_parse_error& e) {

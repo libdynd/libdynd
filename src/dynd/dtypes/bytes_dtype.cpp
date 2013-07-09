@@ -17,7 +17,7 @@ using namespace dynd;
 
 bytes_dtype::bytes_dtype(size_t alignment)
     : base_bytes_dtype(bytes_type_id, bytes_kind, sizeof(bytes_dtype_data),
-                    sizeof(const char *), dtype_flag_scalar|dtype_flag_zeroinit|dtype_flag_blockref,
+                    sizeof(const char *), type_flag_scalar|type_flag_zeroinit|type_flag_blockref,
                     sizeof(bytes_dtype_metadata)), m_alignment(alignment)
 {
     if (alignment != 1 && alignment != 2 && alignment != 4 && alignment != 8 && alignment != 16) {
@@ -67,9 +67,9 @@ bool bytes_dtype::is_unique_data_owner(const char *metadata) const
     return true;
 }
 
-dtype bytes_dtype::get_canonical_dtype() const
+ndt::type bytes_dtype::get_canonical_type() const
 {
-    return dtype(this, true);
+    return ndt::type(this, true);
 }
 
 
@@ -79,12 +79,12 @@ void bytes_dtype::get_shape(size_t ndim, size_t i,
     out_shape[i] = -1;
     if (i+1 < ndim) {
         stringstream ss;
-        ss << "requested too many dimensions from type " << dtype(this, true);
+        ss << "requested too many dimensions from type " << ndt::type(this, true);
         throw runtime_error(ss.str());
     }
 }
 
-bool bytes_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const
+bool bytes_dtype::is_lossless_assignment(const ndt::type& dst_dt, const ndt::type& src_dt) const
 {
     if (dst_dt.extended() == this) {
         if (src_dt.get_kind() == bytes_kind) {
@@ -99,8 +99,8 @@ bool bytes_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_d
 
 size_t bytes_dtype::make_assignment_kernel(
                 hierarchical_kernel *out, size_t offset_out,
-                const dtype& dst_dt, const char *dst_metadata,
-                const dtype& src_dt, const char *src_metadata,
+                const ndt::type& dst_dt, const char *dst_metadata,
+                const ndt::type& src_dt, const char *src_metadata,
                 kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *ectx) const
 {
@@ -198,7 +198,7 @@ void bytes_dtype::metadata_debug_print(const char *metadata, std::ostream& o, co
     memory_block_debug_print(md->blockref, o, indent + " ");
 }
 
-static size_t property_get_target_alignment(const dtype& dt) {
+static size_t property_get_target_alignment(const ndt::type& dt) {
     const bytes_dtype *pd = static_cast<const bytes_dtype *>(dt.extended());
     return pd->get_target_alignment();
 }

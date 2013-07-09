@@ -30,11 +30,11 @@ TEST(UnaryKernelAdapter, BasicOperations) {
     kernel_instance<unary_operation_pair_t> op_int_float, op_float_float, op_float_double;
     // NOTE: Cannot cast directly to <void*>, because of a compile error on MSVC:
     //         "Context does not allow for disambiguation of overloaded function"
-    cgcache.codegen_unary_function_adapter(make_dtype<int>(), make_dtype<float>(), cdecl_callconv,
+    cgcache.codegen_unary_function_adapter(ndt::make_dtype<int>(), ndt::make_dtype<float>(), cdecl_callconv,
                     (void*)static_cast<int (*)(float)>(&double_value<int, float>), NULL, op_int_float);
-    cgcache.codegen_unary_function_adapter(make_dtype<float>(), make_dtype<float>(), cdecl_callconv,
+    cgcache.codegen_unary_function_adapter(ndt::make_dtype<float>(), ndt::make_dtype<float>(), cdecl_callconv,
                     (void*)static_cast<float (*)(float)>(&double_value<float, float>), NULL, op_float_float);
-    cgcache.codegen_unary_function_adapter(make_dtype<float>(), make_dtype<double>(), cdecl_callconv,
+    cgcache.codegen_unary_function_adapter(ndt::make_dtype<float>(), ndt::make_dtype<double>(), cdecl_callconv,
                     (void*)static_cast<float (*)(double)>(&double_value<float, double>), NULL, op_float_double);
 
     int int_vals[3];
@@ -89,8 +89,8 @@ static int raise_if_negative(int value) {
 TEST(UnaryKernelAdapter, UnwindException) {
     codegen_cache cgcache;
     kernel_instance<unary_operation_pair_t> rin;
-    cgcache.codegen_unary_function_adapter(make_dtype<int>(),
-                                           make_dtype<int>(),
+    cgcache.codegen_unary_function_adapter(ndt::make_dtype<int>(),
+                                           ndt::make_dtype<int>(),
                                            cdecl_callconv,
                                            reinterpret_cast<void*>(&raise_if_negative),
                                            NULL,

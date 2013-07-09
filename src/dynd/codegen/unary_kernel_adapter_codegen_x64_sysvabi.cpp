@@ -15,7 +15,7 @@
 #include <dynd/codegen/unary_kernel_adapter_codegen.hpp>
 #include <dynd/memblock/executable_memory_block.hpp>
 #include <dynd/memblock/memory_block.hpp>
-#include <dynd/dtype.hpp>
+#include <dynd/type.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -241,8 +241,8 @@ namespace
     
 }
 
-uint64_t dynd::get_unary_function_adapter_unique_id(const dtype& restype,
-                                               const dtype& arg0type,
+uint64_t dynd::get_unary_function_adapter_unique_id(const ndt::type& restype,
+                                               const ndt::type& arg0type,
                                                calling_convention_t DYND_UNUSED(callconv)
                                               )
 {
@@ -388,8 +388,8 @@ namespace // nameless
     
 
 unary_operation_pair_t dynd::codegen_unary_function_adapter(const memory_block_ptr& exec_mem_block,
-                                                  const dtype& restype,
-                                                  const dtype& arg0type,
+                                                  const ndt::type& restype,
+                                                  const ndt::type& arg0type,
                                                   calling_convention_t DYND_UNUSED(callconv)
                                                  )
 {

@@ -7,7 +7,7 @@
 #include <sstream>
 
 #include <dynd/shortvector.hpp>
-#include <dynd/dtype.hpp>
+#include <dynd/type.hpp>
 #include <dynd/diagnostics.hpp>
 #include <dynd/kernels/string_algorithm_kernels.hpp>
 #include <dynd/dtypes/string_dtype.hpp>

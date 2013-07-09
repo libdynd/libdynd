@@ -380,9 +380,9 @@ namespace // nameless
 } // anonymous namespace
 
 
-uint64_t dynd::get_binary_function_adapter_unique_id(const dtype& restype
-                                               , const dtype& arg0type
-                                               , const dtype& arg1type
+uint64_t dynd::get_binary_function_adapter_unique_id(const ndt::type& restype
+                                               , const ndt::type& arg0type
+                                               , const ndt::type& arg1type
                                                , calling_convention_t DYND_UNUSED(callconv)
                                                )
 {
@@ -475,9 +475,9 @@ namespace // nameless
 } // anonymous namespace
 
 dynd::binary_operation_pair_t dynd::codegen_binary_function_adapter(const memory_block_ptr& exec_memblock
-                                                        , const dtype& restype
-                                                        , const dtype& arg0type
-                                                        , const dtype& arg1type
+                                                        , const ndt::type& restype
+                                                        , const ndt::type& arg0type
+                                                        , const ndt::type& arg1type
                                                         , calling_convention_t DYND_UNUSED(callconv)
                                                         )
 {

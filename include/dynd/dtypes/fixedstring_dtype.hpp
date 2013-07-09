@@ -6,10 +6,10 @@
 // a particular encoding, stored in a fixed-size
 // buffer.
 //
-#ifndef _DYND__FIXEDSTRING_DTYPE_HPP_
-#define _DYND__FIXEDSTRING_DTYPE_HPP_
+#ifndef _DYND__FIXEDSTRING_TYPE_HPP_
+#define _DYND__FIXEDSTRING_TYPE_HPP_
 
-#include <dynd/dtype.hpp>
+#include <dynd/type.hpp>
 #include <dynd/dtype_assign.hpp>
 #include <dynd/dtypes/view_dtype.hpp>
 #include <dynd/string_encodings.hpp>
@@ -37,9 +37,9 @@ public:
 
     void print_dtype(std::ostream& o) const;
 
-    dtype get_canonical_dtype() const;
+    ndt::type get_canonical_type() const;
 
-    bool is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const;
+    bool is_lossless_assignment(const ndt::type& dst_dt, const ndt::type& src_dt) const;
 
     bool operator==(const base_dtype& rhs) const;
 
@@ -54,24 +54,24 @@ public:
 
     size_t make_assignment_kernel(
                     hierarchical_kernel *out, size_t offset_out,
-                    const dtype& dst_dt, const char *dst_metadata,
-                    const dtype& src_dt, const char *src_metadata,
+                    const ndt::type& dst_dt, const char *dst_metadata,
+                    const ndt::type& src_dt, const char *src_metadata,
                     kernel_request_t kernreq, assign_error_mode errmode,
                     const eval::eval_context *ectx) const;
 
     size_t make_comparison_kernel(
                     hierarchical_kernel *out, size_t offset_out,
-                    const dtype& src0_dt, const char *src0_metadata,
-                    const dtype& src1_dt, const char *src1_metadata,
+                    const ndt::type& src0_dt, const char *src0_metadata,
+                    const ndt::type& src1_dt, const char *src1_metadata,
                     comparison_type_t comptype,
                     const eval::eval_context *ectx) const;
 };
 
-inline dtype make_fixedstring_dtype(intptr_t stringsize,
+inline ndt::type make_fixedstring_dtype(intptr_t stringsize,
                 string_encoding_t encoding = string_encoding_utf_8) {
-    return dtype(new fixedstring_dtype(stringsize, encoding), false);
+    return ndt::type(new fixedstring_dtype(stringsize, encoding), false);
 }
 
 } // namespace dynd
 
-#endif // _DYND__FIXEDSTRING_DTYPE_HPP_
+#endif // _DYND__FIXEDSTRING_TYPE_HPP_

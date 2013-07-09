@@ -39,8 +39,8 @@ static unsigned int get_arg_id_from_type_id(type_id_t type_id)
     }
 }
 
-uint64_t dynd::get_unary_function_adapter_unique_id(const dtype& restype,
-                    const dtype& arg0type, calling_convention_t DYND_UNUSED(callconv))
+uint64_t dynd::get_unary_function_adapter_unique_id(const ndt::type& restype,
+                    const ndt::type& arg0type, calling_convention_t DYND_UNUSED(callconv))
 {
     // Bits 0..2 for the result type
     uint64_t result = get_arg_id_from_type_id(restype.get_type_id());
@@ -63,8 +63,8 @@ std::string dynd::get_unary_function_adapter_unique_id_string(uint64_t unique_id
     return ss.str();
 }
 
-unary_operation_pair_t dynd::codegen_unary_function_adapter(const memory_block_ptr& exec_memblock, const dtype& restype,
-                    const dtype& arg0type, calling_convention_t DYND_UNUSED(callconv))
+unary_operation_pair_t dynd::codegen_unary_function_adapter(const memory_block_ptr& exec_memblock, const ndt::type& restype,
+                    const ndt::type& arg0type, calling_convention_t DYND_UNUSED(callconv))
 {
     // This code generation always uses the same prolog structure,
     // so the unwind_info is fixed.

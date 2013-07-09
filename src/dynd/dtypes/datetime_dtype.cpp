@@ -50,39 +50,39 @@ std::ostream& dynd::operator<<(std::ostream& o, datetime_unit_t unit)
 }
 
 namespace {
-    static dtype datetime_default_structs[6] = {
+    static ndt::type datetime_default_structs[6] = {
         make_cstruct_dtype(
-            make_dtype<int32_t>(), "year", make_dtype<int16_t>(), "month",
-            make_dtype<int16_t>(), "day", make_dtype<int16_t>(), "hour"),
+            ndt::make_dtype<int32_t>(), "year", ndt::make_dtype<int16_t>(), "month",
+            ndt::make_dtype<int16_t>(), "day", ndt::make_dtype<int16_t>(), "hour"),
         make_cstruct_dtype(
-            make_dtype<int32_t>(), "year", make_dtype<int16_t>(), "month",
-            make_dtype<int16_t>(), "day", make_dtype<int16_t>(), "hour",
-            make_dtype<int16_t>(), "min"),
+            ndt::make_dtype<int32_t>(), "year", ndt::make_dtype<int16_t>(), "month",
+            ndt::make_dtype<int16_t>(), "day", ndt::make_dtype<int16_t>(), "hour",
+            ndt::make_dtype<int16_t>(), "min"),
         make_cstruct_dtype(
-            make_dtype<int32_t>(), "year", make_dtype<int16_t>(), "month",
-            make_dtype<int16_t>(), "day", make_dtype<int16_t>(), "hour",
-            make_dtype<int16_t>(), "min", make_dtype<int16_t>(), "sec"),
+            ndt::make_dtype<int32_t>(), "year", ndt::make_dtype<int16_t>(), "month",
+            ndt::make_dtype<int16_t>(), "day", ndt::make_dtype<int16_t>(), "hour",
+            ndt::make_dtype<int16_t>(), "min", ndt::make_dtype<int16_t>(), "sec"),
         make_cstruct_dtype(
-            make_dtype<int32_t>(), "year", make_dtype<int16_t>(), "month",
-            make_dtype<int16_t>(), "day", make_dtype<int16_t>(), "hour",
-            make_dtype<int16_t>(), "min", make_dtype<int16_t>(), "sec",
-            make_dtype<int16_t>(), "msec"),
+            ndt::make_dtype<int32_t>(), "year", ndt::make_dtype<int16_t>(), "month",
+            ndt::make_dtype<int16_t>(), "day", ndt::make_dtype<int16_t>(), "hour",
+            ndt::make_dtype<int16_t>(), "min", ndt::make_dtype<int16_t>(), "sec",
+            ndt::make_dtype<int16_t>(), "msec"),
         make_cstruct_dtype(
-            make_dtype<int32_t>(), "year", make_dtype<int16_t>(), "month",
-            make_dtype<int16_t>(), "day", make_dtype<int16_t>(), "hour",
-            make_dtype<int16_t>(), "min", make_dtype<int16_t>(), "sec",
-            make_dtype<int32_t>(), "usec"),
+            ndt::make_dtype<int32_t>(), "year", ndt::make_dtype<int16_t>(), "month",
+            ndt::make_dtype<int16_t>(), "day", ndt::make_dtype<int16_t>(), "hour",
+            ndt::make_dtype<int16_t>(), "min", ndt::make_dtype<int16_t>(), "sec",
+            ndt::make_dtype<int32_t>(), "usec"),
         make_cstruct_dtype(
-            make_dtype<int32_t>(), "year", make_dtype<int16_t>(), "month",
-            make_dtype<int16_t>(), "day", make_dtype<int16_t>(), "hour",
-            make_dtype<int16_t>(), "min", make_dtype<int16_t>(), "sec",
-            make_dtype<int32_t>(), "nsec")
+            ndt::make_dtype<int32_t>(), "year", ndt::make_dtype<int16_t>(), "month",
+            ndt::make_dtype<int16_t>(), "day", ndt::make_dtype<int16_t>(), "hour",
+            ndt::make_dtype<int16_t>(), "min", ndt::make_dtype<int16_t>(), "sec",
+            ndt::make_dtype<int32_t>(), "nsec")
     };
     /**
      * Returns a reference to a static struct for the given
      * datetime unit.
      */
-    const dtype& get_default_struct_dtype(datetime_unit_t unit) {
+    const ndt::type& get_default_struct_dtype(datetime_unit_t unit) {
         if ((int32_t)unit >= 0 && (int32_t)unit < 6) {
             return datetime_default_structs[unit];
         } else {
@@ -116,7 +116,7 @@ namespace {
 } // anonymous namespace
 
 datetime_dtype::datetime_dtype(datetime_unit_t unit, datetime_tz_t timezone)
-    : base_dtype(datetime_type_id, datetime_kind, 8, scalar_align_of<int64_t>::value, dtype_flag_scalar, 0, 0),
+    : base_dtype(datetime_type_id, datetime_kind, 8, scalar_align_of<int64_t>::value, type_flag_scalar, 0, 0),
         m_default_struct_dtype(::get_default_struct_dtype(unit)), m_unit(unit),
         m_timezone(timezone)
 {
@@ -139,22 +139,22 @@ void datetime_dtype::set_cal(const char *DYND_UNUSED(metadata), char *data,
         }
         if (hour < 0 || hour >= 24) {
             stringstream ss;
-            ss << "invalid input hour " << hour << " for " << dtype(this, true);
+            ss << "invalid input hour " << hour << " for " << ndt::type(this, true);
             throw runtime_error(ss.str());
         }
         if (min < 0 || min >= 60 || (min != 0 && m_unit < datetime_unit_minute)) {
             stringstream ss;
-            ss << "invalid input minute " << min << " for " << dtype(this, true);
+            ss << "invalid input minute " << min << " for " << ndt::type(this, true);
             throw runtime_error(ss.str());
         }
         if (sec < 0 || sec >= 60 || (sec != 0 && m_unit < datetime_unit_second)) {
             stringstream ss;
-            ss << "invalid input second " << sec << " for " << dtype(this, true);
+            ss << "invalid input second " << sec << " for " << ndt::type(this, true);
             throw runtime_error(ss.str());
         }
         if (nsec < 0 || nsec >= 1000000000) {
             stringstream ss;
-            ss << "invalid input nanosecond " << nsec << " for " << dtype(this, true);
+            ss << "invalid input nanosecond " << nsec << " for " << ndt::type(this, true);
             throw runtime_error(ss.str());
         }
     }
@@ -171,7 +171,7 @@ void datetime_dtype::set_cal(const char *DYND_UNUSED(metadata), char *data,
                         frac = nsec / 1000000;
                         if (errmode != assign_error_none && frac * 1000000 != nsec) {
                             stringstream ss;
-                            ss << "invalid input nanosecond " << nsec << " for " << dtype(this, true);
+                            ss << "invalid input nanosecond " << nsec << " for " << ndt::type(this, true);
                             throw runtime_error(ss.str());
                         }
                         result = result * 1000 + frac;
@@ -180,7 +180,7 @@ void datetime_dtype::set_cal(const char *DYND_UNUSED(metadata), char *data,
                         frac = nsec / 1000;
                         if (errmode != assign_error_none && frac * 1000 != nsec) {
                             stringstream ss;
-                            ss << "invalid input nanosecond " << nsec << " for " << dtype(this, true);
+                            ss << "invalid input nanosecond " << nsec << " for " << ndt::type(this, true);
                             throw runtime_error(ss.str());
                         }
                         result = result * 1000000 + frac;
@@ -263,7 +263,7 @@ void datetime_dtype::print_dtype(std::ostream& o) const
     o << ">";
 }
 
-bool datetime_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const
+bool datetime_dtype::is_lossless_assignment(const ndt::type& dst_dt, const ndt::type& src_dt) const
 {
     if (dst_dt.extended() == this) {
         if (src_dt.extended() == this) {
@@ -294,8 +294,8 @@ bool datetime_dtype::operator==(const base_dtype& rhs) const
 
 size_t datetime_dtype::make_assignment_kernel(
                 hierarchical_kernel *out, size_t offset_out,
-                const dtype& dst_dt, const char *dst_metadata,
-                const dtype& src_dt, const char *src_metadata,
+                const ndt::type& dst_dt, const char *dst_metadata,
+                const ndt::type& src_dt, const char *src_metadata,
                 kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *ectx) const
 {
@@ -357,7 +357,7 @@ void datetime_dtype::get_dynamic_dtype_properties(const std::pair<std::string, g
 
 ///////// functions on the dtype
 
-static nd::array function_dtype_now(const dtype& dt) {
+static nd::array function_dtype_now(const ndt::type& dt) {
     throw runtime_error("TODO: implement datetime.now function");
     datetime::datetime_fields fields;
     //datetime::fill_current_local_datetime(&fields);
@@ -368,7 +368,7 @@ static nd::array function_dtype_now(const dtype& dt) {
     return result;
 }
 
-static nd::array function_dtype_construct(const dtype& DYND_UNUSED(dt),
+static nd::array function_dtype_construct(const ndt::type& DYND_UNUSED(dt),
                 const nd::array& DYND_UNUSED(year),
                 const nd::array& DYND_UNUSED(month),
                 const nd::array& DYND_UNUSED(day))
@@ -376,9 +376,9 @@ static nd::array function_dtype_construct(const dtype& DYND_UNUSED(dt),
     throw runtime_error("dynd type datetime __construct__");
     /*
     // TODO proper buffering
-    nd::array year_as_int = year.ucast(make_dtype<int32_t>()).eval();
-    nd::array month_as_int = month.ucast(make_dtype<int32_t>()).eval();
-    nd::array day_as_int = day.ucast(make_dtype<int32_t>()).eval();
+    nd::array year_as_int = year.ucast(ndt::make_dtype<int32_t>()).eval();
+    nd::array month_as_int = month.ucast(ndt::make_dtype<int32_t>()).eval();
+    nd::array day_as_int = day.ucast(ndt::make_dtype<int32_t>()).eval();
     nd::array result;
 
     array_iter<1,3> iter(make_datetime_dtype(), result, year_as_int, month_as_int, day_as_int);
@@ -685,12 +685,12 @@ size_t datetime_dtype::get_elwise_property_index(const std::string& property_nam
         return datetimeprop_microsecond;
     } else {
         stringstream ss;
-        ss << "dynd type " << dtype(this, true) << " does not have a kernel for property " << property_name;
+        ss << "dynd type " << ndt::type(this, true) << " does not have a kernel for property " << property_name;
         throw runtime_error(ss.str());
     }
 }
 
-dtype datetime_dtype::get_elwise_property_dtype(size_t property_index,
+ndt::type datetime_dtype::get_elwise_property_dtype(size_t property_index,
             bool& out_readable, bool& out_writable) const
 {
     switch (property_index) {
@@ -705,7 +705,7 @@ dtype datetime_dtype::get_elwise_property_dtype(size_t property_index,
         default:
             out_readable = true;
             out_writable = false;
-            return make_dtype<int32_t>();
+            return ndt::make_dtype<int32_t>();
     }
 }
 
@@ -751,7 +751,7 @@ size_t datetime_dtype::make_elwise_property_getter_kernel(
             throw runtime_error(ss.str());
     }
     e->base.destructor = &datetime_property_kernel_extra::destruct;
-    e->datetime_dt = static_cast<const datetime_dtype *>(dtype(this, true).release());
+    e->datetime_dt = static_cast<const datetime_dtype *>(ndt::type(this, true).release());
     return offset_out + sizeof(datetime_property_kernel_extra);
 }
 
@@ -769,7 +769,7 @@ size_t datetime_dtype::make_elwise_property_setter_kernel(
             return offset_out + sizeof(kernel_data_prefix);
         default:
             stringstream ss;
-            ss << "dynd date dtype given an invalid property index" << dst_property_index;
+            ss << "dynd date type given an invalid property index" << dst_property_index;
             throw runtime_error(ss.str());
     }
 }

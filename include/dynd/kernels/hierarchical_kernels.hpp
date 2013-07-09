@@ -85,7 +85,7 @@ inline void free_dynamic_kernel_instance(dynamic_kernel_instance& dki)
 
 /**
  * Function pointers + data for a hierarchical
- * kernel which operates on dtype/metadata in
+ * kernel which operates on type/metadata in
  * some configuration. Individual kernel types
  * are handled by the classes assignment_kernel, etc.
  *

@@ -38,7 +38,7 @@ static unsigned int get_arg_id_from_type_id(type_id_t type_id)
     }
 }
 
-uint64_t dynd::get_binary_reduce_function_adapter_unique_id(const dtype& reduce_type, calling_convention_t DYND_UNUSED(callconv))
+uint64_t dynd::get_binary_reduce_function_adapter_unique_id(const ndt::type& reduce_type, calling_convention_t DYND_UNUSED(callconv))
 {
     uint64_t result = get_arg_id_from_type_id(reduce_type.get_type_id());
 
@@ -107,7 +107,7 @@ namespace {
 } // anonymous namespace
 
 unary_operation_pair_t dynd::codegen_left_associative_binary_reduce_function_adapter(
-                    const dtype& reduce_type, calling_convention_t DYND_UNUSED(callconv))
+                    const ndt::type& reduce_type, calling_convention_t DYND_UNUSED(callconv))
 {
     // TODO: If there's a platform where there are differences in the calling convention
     //       between the equated types, this will have to change.
@@ -144,7 +144,7 @@ unary_operation_pair_t dynd::codegen_left_associative_binary_reduce_function_ada
 }
 
 unary_operation_pair_t dynd::codegen_right_associative_binary_reduce_function_adapter(
-                    const dtype& reduce_type, calling_convention_t DYND_UNUSED(callconv))
+                    const ndt::type& reduce_type, calling_convention_t DYND_UNUSED(callconv))
 {
     // TODO: If there's a platform where there are differences in the calling convention
     //       between the equated types, this will have to change.

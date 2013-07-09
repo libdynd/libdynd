@@ -12,7 +12,9 @@
 
 namespace dynd {
 
-class dtype;
+namespace ndt {
+    class type;
+} // namespace ndt
 
 enum comparison_type_t {
     /**
@@ -41,8 +43,8 @@ typedef int (*binary_single_predicate_t)(const char *src0, const char *src1,
  * used.
  *
  * This kernel type is for kernels which perform
- * a comparison between one dtype/metadata value
- * and a different dtype/metadata value.
+ * a comparison between one type/metadata value
+ * and a different type/metadata value.
  */
 class comparison_kernel : public hierarchical_kernel {
 public:
@@ -64,13 +66,13 @@ public:
 };
 
 /**
- * Creates a comparison kernel for two dtype/metadata
+ * Creates a comparison kernel for two type/metadata
  * pairs. This adds the kernel at the 'out_offset' position
  * in 'out's data, as part of a hierarchy matching the
- * dtype's hierarchy.
+ * type's hierarchy.
  *
  * This function should always be called with this == src0_dt first,
- * and dtypes which don't support the particular assignment should
+ * and types which don't support the particular assignment should
  * then call the corresponding function with this == src1_dt.
  *
  * \param out  The hierarchical assignment kernel being constructed.
@@ -87,15 +89,15 @@ public:
  */
 size_t make_comparison_kernel(
                 hierarchical_kernel *out, size_t offset_out,
-                const dtype& src0_dt, const char *src0_metadata,
-                const dtype& src1_dt, const char *src1_metadata,
+                const ndt::type& src0_dt, const char *src0_metadata,
+                const ndt::type& src1_dt, const char *src1_metadata,
                 comparison_type_t comptype,
                 const eval::eval_context *ectx);
 
 
 /**
  * Creates a comparison kernel that compares the two builtin
- * dtypes.
+ * types.
  *
  * \param out  The hierarchical assignment kernel being constructed.
  * \param offset_out  The offset within 'out'.

@@ -3,7 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <dynd/dtype.hpp>
+#include <dynd/type.hpp>
 #include <dynd/kernels/comparison_kernels.hpp>
 #include "single_comparer_builtin.hpp"
 
@@ -13,8 +13,8 @@ using namespace dynd;
 
 size_t dynd::make_comparison_kernel(
                 hierarchical_kernel *out, size_t offset_out,
-                const dtype& src0_dt, const char *src0_metadata,
-                const dtype& src1_dt, const char *src1_metadata,
+                const ndt::type& src0_dt, const char *src0_metadata,
+                const ndt::type& src1_dt, const char *src1_metadata,
                 comparison_type_t comptype,
                 const eval::eval_context *ectx)
 {
@@ -105,6 +105,6 @@ size_t dynd::make_builtin_dtype_comparison_kernel(
                                         [src1_type_id-bool_type_id][comptype]);
         return offset_out + sizeof(kernel_data_prefix);
     } else {
-        throw not_comparable_error(dtype(src0_type_id), dtype(src1_type_id), comptype);
+        throw not_comparable_error(ndt::type(src0_type_id), ndt::type(src1_type_id), comptype);
     }
 }

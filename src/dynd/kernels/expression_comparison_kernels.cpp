@@ -3,7 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <dynd/dtype.hpp>
+#include <dynd/type.hpp>
 #include <dynd/dtypes/base_expression_dtype.hpp>
 #include <dynd/kernels/expression_comparison_kernels.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
@@ -30,10 +30,10 @@ namespace {
 
         // Initializes the dtype and metadata for one of the two buffers
         // NOTE: This does NOT initialize buf[i].data_offset or buf[i].kernel_offset
-        void init_buffer(int i, const dtype& buffer_dt_) {
+        void init_buffer(int i, const ndt::type& buffer_dt_) {
             single_buffer& b = buf[i];
             // The kernel data owns a reference in buffer_dt
-            b.dt = dtype(buffer_dt_).release();
+            b.dt = ndt::type(buffer_dt_).release();
             if (!buffer_dt_.is_builtin()) {
                 size_t buffer_metadata_size = buffer_dt_.extended()->get_metadata_size();
                 if (buffer_metadata_size > 0) {
@@ -58,7 +58,7 @@ namespace {
             char *dst = eraw + b.data_offset;
 
             // If the type needs it, initialize the buffer data to zero
-            if (!is_builtin_dtype(b.dt) && (b.dt->get_flags()&dtype_flag_zeroinit) != 0) {
+            if (!is_builtin_type(b.dt) && (b.dt->get_flags()&type_flag_zeroinit) != 0) {
                 memset(dst, 0, b.data_size);
             }
 
@@ -112,7 +112,7 @@ namespace {
             for (int i = 0; i < 2; ++i) {
                 single_buffer& b = e->buf[i];
 
-                dtype dt(b.dt, false);
+                ndt::type dt(b.dt, false);
                 // Steal the buffer0_dt reference count into a dtype
                 char *metadata = b.metadata;
                 // Destruct and free the metadata for the buffer
@@ -142,8 +142,8 @@ namespace {
 
 size_t dynd::make_expression_comparison_kernel(
                 hierarchical_kernel *out, size_t offset_out,
-                const dtype& src0_dt, const char *src0_metadata,
-                const dtype& src1_dt, const char *src1_metadata,
+                const ndt::type& src0_dt, const char *src0_metadata,
+                const ndt::type& src1_dt, const char *src1_metadata,
                 comparison_type_t comptype,
                 const eval::eval_context *ectx)
 {
@@ -154,20 +154,20 @@ size_t dynd::make_expression_comparison_kernel(
     e->base.destructor = &buffered_kernel_extra::destruct;
     // Initialize the information for buffering the operands
     if (src0_dt.get_kind() == expression_kind) {
-        e->init_buffer(0, src0_dt.value_dtype());
+        e->init_buffer(0, src0_dt.value_type());
         e->buf[0].kernel_offset = current_offset - offset_out;
         current_offset = make_assignment_kernel(out, current_offset,
-                        src0_dt.value_dtype(), e->buf[0].metadata,
+                        src0_dt.value_type(), e->buf[0].metadata,
                         src0_dt, src0_metadata,
                         kernel_request_single, assign_error_none, ectx);
         // Have to re-retrieve 'e', because creating another kernel may invalidate it
         e = out->get_at<buffered_kernel_extra>(offset_out);
     }
     if (src1_dt.get_kind() == expression_kind) {
-        e->init_buffer(1, src1_dt.value_dtype());
+        e->init_buffer(1, src1_dt.value_type());
         e->buf[1].kernel_offset = current_offset - offset_out;
         current_offset = make_assignment_kernel(out, current_offset,
-                        src1_dt.value_dtype(), e->buf[1].metadata,
+                        src1_dt.value_type(), e->buf[1].metadata,
                         src1_dt, src1_metadata,
                         kernel_request_single, assign_error_none, ectx);
         // Have to re-retrieve 'e', because creating another kernel may invalidate it
@@ -189,9 +189,9 @@ size_t dynd::make_expression_comparison_kernel(
     e = out->get_at<buffered_kernel_extra>(offset_out);
     e->cmp_kernel_offset = current_offset - offset_out;
     return make_comparison_kernel(out, current_offset,
-                    src0_dt.value_dtype(),
+                    src0_dt.value_type(),
                     (e->buf[0].kernel_offset != 0) ? e->buf[0].metadata : src0_metadata,
-                    src1_dt.value_dtype(),
+                    src1_dt.value_type(),
                     (e->buf[1].kernel_offset != 0) ? e->buf[1].metadata : src1_metadata,
                     comptype, ectx);
 }

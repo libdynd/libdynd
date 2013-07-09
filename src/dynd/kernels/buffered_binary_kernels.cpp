@@ -5,7 +5,7 @@
 
 #if 0 // TODO reenable
 
-#include <dynd/dtype.hpp>
+#include <dynd/type.hpp>
 #include <dynd/kernels/buffered_binary_kernels.hpp>
 
 using namespace std;

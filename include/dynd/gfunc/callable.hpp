@@ -26,26 +26,26 @@ typedef array_preamble *(*callable_function_t)(const array_preamble *params, voi
  */
 class callable {
     /** DType for the parameters, must be a cstruct dtype */
-    dtype m_parameters_dtype;
+    ndt::type m_parameters_type;
     callable_function_t m_function;
     void *m_extra;
     int m_first_default_parameter;
     nd::array m_default_parameters;
 public:
     inline callable()
-        : m_parameters_dtype(), m_function(), m_extra()
+        : m_parameters_type(), m_function(), m_extra()
     {}
 
-    inline callable(const dtype& parameters_dtype, callable_function_t function, void *extra = NULL,
+    inline callable(const ndt::type& parameters_dtype, callable_function_t function, void *extra = NULL,
                     int first_default_parameter = std::numeric_limits<int>::max(), const nd::array& default_parameters = nd::array())
-        : m_parameters_dtype(parameters_dtype), m_function(function), m_extra(extra),
+        : m_parameters_type(parameters_dtype), m_function(function), m_extra(extra),
             m_first_default_parameter(first_default_parameter),
             m_default_parameters(default_parameters)
 
     {
         if (!m_default_parameters.is_empty()) {
             // Make sure the default parameter values have the correct dtype
-            if (m_default_parameters.get_dtype() != m_parameters_dtype) {
+            if (m_default_parameters.get_dtype() != m_parameters_type) {
                 throw std::runtime_error("dynd callable's default arguments have a different type than the parameters");
             }
             // Make sure the default parameter values are immutable
@@ -55,7 +55,7 @@ public:
         }
     }
 
-    inline void set(const dtype& parameters_dtype, callable_function_t function, void *extra = NULL,
+    inline void set(const ndt::type& parameters_dtype, callable_function_t function, void *extra = NULL,
                     int first_default_parameter = std::numeric_limits<int>::max(), const nd::array& default_parameters = nd::array())
     {
         if (!default_parameters.is_empty()) {
@@ -72,14 +72,14 @@ public:
         } else {
             m_default_parameters = nd::array();
         }
-        m_parameters_dtype = parameters_dtype;
+        m_parameters_type = parameters_dtype;
         m_function = function;
         m_extra = extra;
         m_first_default_parameter = first_default_parameter;
     }
 
-    inline const dtype& get_parameters_dtype() const {
-        return m_parameters_dtype;
+    inline const ndt::type& get_parameters_type() const {
+        return m_parameters_type;
     }
     
     inline void *get_extra() const {

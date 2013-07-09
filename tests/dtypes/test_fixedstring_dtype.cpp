@@ -17,7 +17,7 @@ using namespace std;
 using namespace dynd;
 
 TEST(FixedstringDType, Create) {
-    dtype d;
+    ndt::type d;
 
     // Strings with various encodings and sizes
     d = make_fixedstring_dtype(3, string_encoding_utf_8);
@@ -147,11 +147,11 @@ TEST(FixedstringDType, SingleCompare) {
 
 TEST(FixedstringDType, CanonicalDType) {
     EXPECT_EQ((make_fixedstring_dtype(12, string_encoding_ascii)),
-                (make_fixedstring_dtype(12, string_encoding_ascii).get_canonical_dtype()));
+                (make_fixedstring_dtype(12, string_encoding_ascii).get_canonical_type()));
     EXPECT_EQ((make_fixedstring_dtype(14, string_encoding_utf_8)),
-                (make_fixedstring_dtype(14, string_encoding_utf_8).get_canonical_dtype()));
+                (make_fixedstring_dtype(14, string_encoding_utf_8).get_canonical_type()));
     EXPECT_EQ((make_fixedstring_dtype(17, string_encoding_utf_16)),
-                (make_fixedstring_dtype(17, string_encoding_utf_16).get_canonical_dtype()));
+                (make_fixedstring_dtype(17, string_encoding_utf_16).get_canonical_type()));
     EXPECT_EQ((make_fixedstring_dtype(21, string_encoding_utf_32)),
-                (make_fixedstring_dtype(21, string_encoding_utf_32).get_canonical_dtype()));
+                (make_fixedstring_dtype(21, string_encoding_utf_32).get_canonical_type()));
 }

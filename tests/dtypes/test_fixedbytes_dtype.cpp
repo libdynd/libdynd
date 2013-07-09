@@ -15,7 +15,7 @@ using namespace std;
 using namespace dynd;
 
 TEST(FixedBytesDType, Create) {
-    dtype d;
+    ndt::type d;
 
     // Strings with various encodings and sizes
     d = make_fixedbytes_dtype(7, 1);

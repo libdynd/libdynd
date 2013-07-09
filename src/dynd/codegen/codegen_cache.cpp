@@ -22,8 +22,8 @@ dynd::codegen_cache::codegen_cache()
 {
 }
 
-void dynd::codegen_cache::codegen_unary_function_adapter(const dtype& restype,
-                const dtype& arg0type, calling_convention_t callconv,
+void dynd::codegen_cache::codegen_unary_function_adapter(const ndt::type& restype,
+                const ndt::type& arg0type, calling_convention_t callconv,
                 void *function_pointer,
                 memory_block_data *function_pointer_owner,
                 kernel_instance<unary_operation_pair_t>& out_kernel)
@@ -47,8 +47,8 @@ void dynd::codegen_cache::codegen_unary_function_adapter(const dtype& restype,
     ad.adaptee_memblock = function_pointer_owner;
 }
 
-void dynd::codegen_cache::codegen_binary_function_adapter(const dtype& restype,
-                const dtype& arg0type, const dtype& arg1type,
+void dynd::codegen_cache::codegen_binary_function_adapter(const ndt::type& restype,
+                const ndt::type& arg0type, const ndt::type& arg1type,
                 calling_convention_t callconv,
                 void *function_pointer,
                 memory_block_data *function_pointer_owner,
@@ -74,7 +74,7 @@ void dynd::codegen_cache::codegen_binary_function_adapter(const dtype& restype,
 }
 
 void dynd::codegen_cache::codegen_left_associative_binary_reduce_function_adapter(
-                const dtype& reduce_type,calling_convention_t callconv,
+                const ndt::type& reduce_type,calling_convention_t callconv,
                 void *function_pointer,
                 memory_block_data *function_pointer_owner,
                 kernel_instance<unary_operation_pair_t>& out_kernel)
@@ -92,7 +92,7 @@ void dynd::codegen_cache::codegen_left_associative_binary_reduce_function_adapte
 }
 
 void dynd::codegen_cache::codegen_right_associative_binary_reduce_function_adapter(
-                const dtype& reduce_type,calling_convention_t callconv,
+                const ndt::type& reduce_type,calling_convention_t callconv,
                 void *function_pointer,
                 memory_block_data *function_pointer_owner,
                 kernel_instance<unary_operation_pair_t>& out_kernel)

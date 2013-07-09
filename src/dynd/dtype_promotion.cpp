@@ -12,7 +12,7 @@ using namespace std;
 using namespace dynd;
 
 /*
-static intptr_t min_strlen_for_builtin_kind(dtype_kind_t kind)
+static intptr_t min_strlen_for_builtin_kind(type_kind_t kind)
 {
     switch (kind) {
         case bool_kind:
@@ -30,11 +30,11 @@ static intptr_t min_strlen_for_builtin_kind(dtype_kind_t kind)
 }
 */
 
-dtype dynd::promote_dtypes_arithmetic(const dtype& dt0, const dtype& dt1)
+ndt::type dynd::promote_dtypes_arithmetic(const ndt::type& dt0, const ndt::type& dt1)
 {
     // Use the value dtypes
-    const dtype& dt0_val = dt0.value_dtype();
-    const dtype& dt1_val = dt1.value_dtype();
+    const ndt::type& dt0_val = dt0.value_type();
+    const ndt::type& dt1_val = dt1.value_type();
 
     //cout << "Doing type promotion with value types " << dt0_val << " and " << dt1_val << endl;
 
@@ -44,18 +44,18 @@ dtype dynd::promote_dtypes_arithmetic(const dtype& dt0, const dtype& dt1)
             case bool_kind:
                 switch (dt1_val.get_kind()) {
                     case bool_kind:
-                        return make_dtype<int>();
+                        return ndt::make_dtype<int>();
                     case int_kind:
                     case uint_kind:
                         return (dt1_val.get_data_size() >= int_size) ? dt1_val
-                                                               : make_dtype<int>();
+                                                               : ndt::make_dtype<int>();
                     case void_kind:
                         return dt0_val;
                     case real_kind:
                         // The bool type doesn't affect float type sizes, except
                         // require at least float32
                         return dt1_val.unchecked_get_builtin_type_id() != float16_type_id
-                                        ? dt1_val : make_dtype<float>();
+                                        ? dt1_val : ndt::make_dtype<float>();
                     default:
                         return dt1_val;
                 }
@@ -63,17 +63,17 @@ dtype dynd::promote_dtypes_arithmetic(const dtype& dt0, const dtype& dt1)
                 switch (dt1_val.get_kind()) {
                     case bool_kind:
                         return (dt0_val.get_data_size() >= int_size) ? dt0_val
-                                                               : make_dtype<int>();
+                                                               : ndt::make_dtype<int>();
                     case int_kind:
                         if (dt0_val.get_data_size() < int_size && dt1_val.get_data_size() < int_size) {
-                            return make_dtype<int>();
+                            return ndt::make_dtype<int>();
                         } else {
                             return (dt0_val.get_data_size() >= dt1_val.get_data_size()) ? dt0_val
                                                                               : dt1_val;
                         }
                     case uint_kind:
                         if (dt0_val.get_data_size() < int_size && dt1_val.get_data_size() < int_size) {
-                            return make_dtype<int>();
+                            return ndt::make_dtype<int>();
                         } else {
                             // When the element_sizes are equal, the uint kind wins
                             return (dt0_val.get_data_size() > dt1_val.get_data_size()) ? dt0_val
@@ -83,7 +83,7 @@ dtype dynd::promote_dtypes_arithmetic(const dtype& dt0, const dtype& dt1)
                         // Integer type sizes don't affect float type sizes, except
                         // require at least float32
                         return dt1_val.unchecked_get_builtin_type_id() != float16_type_id
-                                        ? dt1_val : make_dtype<float>();
+                                        ? dt1_val : ndt::make_dtype<float>();
                     case complex_kind:
                         // Integer type sizes don't affect complex type sizes
                         return dt1_val;
@@ -97,10 +97,10 @@ dtype dynd::promote_dtypes_arithmetic(const dtype& dt0, const dtype& dt1)
                 switch (dt1_val.get_kind()) {
                     case bool_kind:
                         return (dt0_val.get_data_size() >= int_size) ? dt0_val
-                                                               : make_dtype<int>();
+                                                               : ndt::make_dtype<int>();
                     case int_kind:
                         if (dt0_val.get_data_size() < int_size && dt1_val.get_data_size() < int_size) {
-                            return make_dtype<int>();
+                            return ndt::make_dtype<int>();
                         } else {
                             // When the element_sizes are equal, the uint kind wins
                             return (dt0_val.get_data_size() >= dt1_val.get_data_size()) ? dt0_val
@@ -108,7 +108,7 @@ dtype dynd::promote_dtypes_arithmetic(const dtype& dt0, const dtype& dt1)
                         }
                     case uint_kind:
                         if (dt0_val.get_data_size() < int_size && dt1_val.get_data_size() < int_size) {
-                            return make_dtype<int>();
+                            return ndt::make_dtype<int>();
                         } else {
                             return (dt0_val.get_data_size() >= dt1_val.get_data_size()) ? dt0_val
                                                                               : dt1_val;
@@ -117,7 +117,7 @@ dtype dynd::promote_dtypes_arithmetic(const dtype& dt0, const dtype& dt1)
                         // Integer type sizes don't affect float type sizes, except
                         // require at least float32
                         return dt1_val.unchecked_get_builtin_type_id() != float16_type_id
-                                        ? dt1_val : make_dtype<float>();
+                                        ? dt1_val : ndt::make_dtype<float>();
                     case complex_kind:
                         // Integer type sizes don't affect complex type sizes
                         return dt1_val;
@@ -135,11 +135,11 @@ dtype dynd::promote_dtypes_arithmetic(const dtype& dt0, const dtype& dt1)
                     case uint_kind:
                         return dt0_val;
                     case real_kind:
-                        return dtype(max(max(dt0_val.unchecked_get_builtin_type_id(),
+                        return ndt::type(max(max(dt0_val.unchecked_get_builtin_type_id(),
                                         dt1_val.unchecked_get_builtin_type_id()), float32_type_id));
                     case complex_kind:
                         if (dt0_val.get_type_id() == float64_type_id && dt1_val.get_type_id() == complex_float32_type_id) {
-                            return dtype(complex_float64_type_id);
+                            return ndt::type(complex_float64_type_id);
                         } else {
                             return dt1_val;
                         }
@@ -158,7 +158,7 @@ dtype dynd::promote_dtypes_arithmetic(const dtype& dt0, const dtype& dt1)
                     case real_kind:
                         if (dt0_val.unchecked_get_builtin_type_id() == complex_float32_type_id &&
                                         dt1_val.unchecked_get_builtin_type_id() == float64_type_id) {
-                            return dtype(complex_float64_type_id);
+                            return ndt::type(complex_float64_type_id);
                         } else {
                             return dt0_val;
                         }

@@ -6,7 +6,7 @@
 #include <stdexcept>
 #include <sstream>
 
-#include <dynd/dtype.hpp>
+#include <dynd/type.hpp>
 #include <dynd/diagnostics.hpp>
 #include <dynd/kernels/bytes_assignment_kernels.hpp>
 #include <dynd/dtypes/bytes_dtype.hpp>

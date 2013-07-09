@@ -3,7 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <dynd/dtype.hpp>
+#include <dynd/type.hpp>
 #include <dynd/gfunc/make_callable.hpp>
 
 using namespace std;
@@ -26,7 +26,7 @@ size_t base_string_dtype::get_iterdata_size(size_t DYND_UNUSED(ndim)) const
     return 0;
 }
 
-static string get_extended_string_encoding(const dtype& dt) {
+static string get_extended_string_encoding(const ndt::type& dt) {
     const base_string_dtype *d = static_cast<const base_string_dtype *>(dt.extended());
     stringstream ss;
     ss << d->get_encoding();

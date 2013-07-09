@@ -296,7 +296,7 @@ set(libdynd_SRC
     include/dynd/vm/register_allocation.hpp
     # Main
     src/dynd/arithmetic_op.cpp
-    src/dynd/dtype.cpp
+    src/dynd/type.cpp
     src/dynd/dtype_assign.cpp
     src/dynd/dtype_promotion.cpp
     src/dynd/exceptions.cpp
@@ -315,7 +315,7 @@ set(libdynd_SRC
     include/dynd/config.hpp
     include/dynd/cling_all.hpp
     include/dynd/diagnostics.hpp
-    include/dynd/dtype.hpp
+    include/dynd/type.hpp
     include/dynd/dtype_assign.hpp
     include/dynd/dtype_promotion.hpp
     include/dynd/exceptions.hpp

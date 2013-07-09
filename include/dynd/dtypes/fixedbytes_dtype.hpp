@@ -3,10 +3,10 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__FIXEDBYTES_DTYPE_HPP_
-#define _DYND__FIXEDBYTES_DTYPE_HPP_
+#ifndef _DYND__FIXEDBYTES_TYPE_HPP_
+#define _DYND__FIXEDBYTES_TYPE_HPP_
 
-#include <dynd/dtype.hpp>
+#include <dynd/type.hpp>
 #include <dynd/dtype_assign.hpp>
 #include <dynd/dtypes/base_bytes_dtype.hpp>
 #include <dynd/dtypes/view_dtype.hpp>
@@ -25,7 +25,7 @@ public:
 
     void get_bytes_range(const char **out_begin, const char**out_end, const char *metadata, const char *data) const;
 
-    bool is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const;
+    bool is_lossless_assignment(const ndt::type& dst_dt, const ndt::type& src_dt) const;
 
     bool operator==(const base_dtype& rhs) const;
 
@@ -40,8 +40,8 @@ public:
 
     size_t make_assignment_kernel(
                     hierarchical_kernel *out, size_t offset_out,
-                    const dtype& dst_dt, const char *dst_metadata,
-                    const dtype& src_dt, const char *src_metadata,
+                    const ndt::type& dst_dt, const char *dst_metadata,
+                    const ndt::type& src_dt, const char *src_metadata,
                     kernel_request_t kernreq, assign_error_mode errmode,
                     const eval::eval_context *ectx) const;
 };
@@ -50,10 +50,10 @@ public:
  * Creates a bytes<size, alignment> dtype, for representing
  * raw, uninterpreted bytes.
  */
-inline dtype make_fixedbytes_dtype(intptr_t element_size, intptr_t alignment) {
-    return dtype(new fixedbytes_dtype(element_size, alignment), false);
+inline ndt::type make_fixedbytes_dtype(intptr_t element_size, intptr_t alignment) {
+    return ndt::type(new fixedbytes_dtype(element_size, alignment), false);
 }
 
 } // namespace dynd
 
-#endif // _DYND__FIXEDBYTES_DTYPE_HPP_
+#endif // _DYND__FIXEDBYTES_TYPE_HPP_

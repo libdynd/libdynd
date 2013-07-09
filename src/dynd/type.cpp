@@ -3,7 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <dynd/dtype.hpp>
+#include <dynd/type.hpp>
 #include <dynd/dtypes/base_uniform_dim_dtype.hpp>
 #include <dynd/exceptions.hpp>
 #include <dynd/dtype_assign.hpp>
@@ -36,29 +36,29 @@ char *dynd::iterdata_broadcasting_terminator_reset(iterdata_common *iterdata, ch
     return data;
 }
 
-const dtype dynd::static_builtin_dtypes[builtin_type_id_count] = {
-    dtype(uninitialized_type_id),
-    dtype(bool_type_id),
-    dtype(int8_type_id),
-    dtype(int16_type_id),
-    dtype(int32_type_id),
-    dtype(int64_type_id),
-    dtype(int128_type_id),
-    dtype(uint8_type_id),
-    dtype(uint16_type_id),
-    dtype(uint32_type_id),
-    dtype(uint64_type_id),
-    dtype(uint128_type_id),
-    dtype(float16_type_id),
-    dtype(float32_type_id),
-    dtype(float64_type_id),
-    dtype(float128_type_id),
-    dtype(complex_float32_type_id),
-    dtype(complex_float64_type_id),
-    dtype(void_type_id)
+const ndt::type ndt::static_builtin_types[builtin_type_id_count] = {
+    ndt::type(uninitialized_type_id),
+    ndt::type(bool_type_id),
+    ndt::type(int8_type_id),
+    ndt::type(int16_type_id),
+    ndt::type(int32_type_id),
+    ndt::type(int64_type_id),
+    ndt::type(int128_type_id),
+    ndt::type(uint8_type_id),
+    ndt::type(uint16_type_id),
+    ndt::type(uint32_type_id),
+    ndt::type(uint64_type_id),
+    ndt::type(uint128_type_id),
+    ndt::type(float16_type_id),
+    ndt::type(float32_type_id),
+    ndt::type(float64_type_id),
+    ndt::type(float128_type_id),
+    ndt::type(complex_float32_type_id),
+    ndt::type(complex_float64_type_id),
+    ndt::type(void_type_id)
 };
 
-uint8_t dtype::builtin_kinds[builtin_type_id_count] = {
+uint8_t ndt::type::builtin_kinds[builtin_type_id_count] = {
         void_kind,
         bool_kind,
         int_kind,
@@ -79,7 +79,7 @@ uint8_t dtype::builtin_kinds[builtin_type_id_count] = {
         complex_kind,
         void_kind
     };
-uint8_t dtype::builtin_data_sizes[builtin_type_id_count] = {
+uint8_t ndt::type::builtin_data_sizes[builtin_type_id_count] = {
         0,
         sizeof(dynd_bool),
         sizeof(int8_t),
@@ -100,7 +100,7 @@ uint8_t dtype::builtin_data_sizes[builtin_type_id_count] = {
         sizeof(complex<double>),
         0
     };
-uint8_t dtype::builtin_data_alignments[builtin_type_id_count] = {
+uint8_t ndt::type::builtin_data_alignments[builtin_type_id_count] = {
         1,
         1,
         1,
@@ -124,20 +124,20 @@ uint8_t dtype::builtin_data_alignments[builtin_type_id_count] = {
 
 
 
-dtype::dtype(const std::string& rep)
+ndt::type::type(const std::string& rep)
     : m_extended(NULL)
 {
-    dtype_from_datashape(rep).swap(*this);
+    type_from_datashape(rep).swap(*this);
 }
 
-dtype::dtype(const char *rep_begin, const char *rep_end)
+ndt::type::type(const char *rep_begin, const char *rep_end)
     : m_extended(NULL)
 {
-    dtype_from_datashape(rep_begin, rep_end).swap(*this);
+    type_from_datashape(rep_begin, rep_end).swap(*this);
 }
 
 
-dtype dtype::at_array(int nindices, const irange *indices) const
+ndt::type ndt::type::at_array(int nindices, const irange *indices) const
 {
     if (this->is_builtin()) {
         if (nindices == 0) {
@@ -150,7 +150,7 @@ dtype dtype::at_array(int nindices, const irange *indices) const
     }
 }
 
-nd::array dtype::p(const char *property_name) const
+nd::array ndt::type::p(const char *property_name) const
 {
     if (!is_builtin()) {
         const std::pair<std::string, gfunc::callable> *properties;
@@ -167,11 +167,11 @@ nd::array dtype::p(const char *property_name) const
     }
 
     stringstream ss;
-    ss << "dynd dtype does not have property " << property_name;
+    ss << "dynd type does not have property " << property_name;
     throw runtime_error(ss.str());
 }
 
-nd::array dtype::p(const std::string& property_name) const
+nd::array ndt::type::p(const std::string& property_name) const
 {
     if (!is_builtin()) {
         const std::pair<std::string, gfunc::callable> *properties;
@@ -188,12 +188,12 @@ nd::array dtype::p(const std::string& property_name) const
     }
 
     stringstream ss;
-    ss << "dynd dtype does not have property " << property_name;
+    ss << "dynd type does not have property " << property_name;
     throw runtime_error(ss.str());
 }
 
-dtype dtype::apply_linear_index(size_t nindices, const irange *indices,
-                size_t current_i, const dtype& root_dt, bool leading_dimension) const
+ndt::type ndt::type::apply_linear_index(size_t nindices, const irange *indices,
+                size_t current_i, const ndt::type& root_dt, bool leading_dimension) const
 {
     if (is_builtin()) {
         if (nindices == 0) {
@@ -208,29 +208,29 @@ dtype dtype::apply_linear_index(size_t nindices, const irange *indices,
 
 namespace {
     struct replace_scalar_type_extra {
-        replace_scalar_type_extra(const dtype& dt, assign_error_mode em)
+        replace_scalar_type_extra(const ndt::type& dt, assign_error_mode em)
             : scalar_dtype(dt), errmode(em)
         {
         }
-        const dtype& scalar_dtype;
+        const ndt::type& scalar_dtype;
         assign_error_mode errmode;
     };
-    static void replace_scalar_types(const dtype& dt, void *extra,
-                dtype& out_transformed_dtype, bool& out_was_transformed)
+    static void replace_scalar_types(const ndt::type& dt, void *extra,
+                ndt::type& out_transformed_dtype, bool& out_was_transformed)
     {
         const replace_scalar_type_extra *e = reinterpret_cast<const replace_scalar_type_extra *>(extra);
         if (dt.is_scalar()) {
             out_transformed_dtype = make_convert_dtype(e->scalar_dtype, dt, e->errmode);
             out_was_transformed = true;
         } else {
-            dt.extended()->transform_child_dtypes(&replace_scalar_types, extra, out_transformed_dtype, out_was_transformed);
+            dt.extended()->transform_child_types(&replace_scalar_types, extra, out_transformed_dtype, out_was_transformed);
         }
     }
 } // anonymous namespace
 
-dtype dtype::with_replaced_scalar_types(const dtype& scalar_dtype, assign_error_mode errmode) const
+ndt::type ndt::type::with_replaced_scalar_types(const ndt::type& scalar_dtype, assign_error_mode errmode) const
 {
-    dtype result;
+    ndt::type result;
     bool was_transformed;
     replace_scalar_type_extra extra(scalar_dtype, errmode);
     replace_scalar_types(*this, &extra, result, was_transformed);
@@ -239,36 +239,36 @@ dtype dtype::with_replaced_scalar_types(const dtype& scalar_dtype, assign_error_
 
 namespace {
     struct replace_udtype_extra {
-        replace_udtype_extra(const dtype& udtype_, size_t replace_undim_)
+        replace_udtype_extra(const ndt::type& udtype_, size_t replace_undim_)
             : udtype(udtype_), replace_undim(replace_undim_)
         {
         }
-        const dtype& udtype;
+        const ndt::type& udtype;
         size_t replace_undim;
     };
-    static void replace_udtype(const dtype& dt, void *extra,
-                dtype& out_transformed_dtype, bool& out_was_transformed)
+    static void replace_udtype(const ndt::type& dt, void *extra,
+                ndt::type& out_transformed_dtype, bool& out_was_transformed)
     {
         const replace_udtype_extra *e = reinterpret_cast<const replace_udtype_extra *>(extra);
         if (dt.get_undim() == e->replace_undim) {
             out_transformed_dtype = e->udtype;
             out_was_transformed = true;
         } else {
-            dt.extended()->transform_child_dtypes(&replace_udtype, extra, out_transformed_dtype, out_was_transformed);
+            dt.extended()->transform_child_types(&replace_udtype, extra, out_transformed_dtype, out_was_transformed);
         }
     }
 } // anonymous namespace
 
-dtype dtype::with_replaced_udtype(const dtype& udtype, size_t replace_undim) const
+ndt::type ndt::type::with_replaced_udtype(const ndt::type& udtype, size_t replace_undim) const
 {
-    dtype result;
+    ndt::type result;
     bool was_transformed;
     replace_udtype_extra extra(udtype, replace_undim);
     replace_udtype(*this, &extra, result, was_transformed);
     return result;
 }
 
-intptr_t dtype::get_dim_size(const char *metadata, const char *data) const {
+intptr_t ndt::type::get_dim_size(const char *metadata, const char *data) const {
     if (get_kind() == uniform_dim_kind) {
         return static_cast<const base_uniform_dim_dtype *>(m_extended)->get_dim_size(metadata, data);
     } else if (get_kind() == struct_kind) {
@@ -285,7 +285,7 @@ intptr_t dtype::get_dim_size(const char *metadata, const char *data) const {
     }
 }
 
-bool dtype::data_layout_compatible_with(const dtype& rhs) const
+bool ndt::type::data_layout_compatible_with(const ndt::type& rhs) const
 {
     if (extended() == rhs.extended()) {
         // If they're trivially identical, quickly return true
@@ -301,9 +301,9 @@ bool dtype::data_layout_compatible_with(const dtype& rhs) const
         return true;
     }
     if (get_kind() == expression_kind || rhs.get_kind() == expression_kind) {
-        // If either is an expression dtype, check compatibility with
+        // If either is an expression type, check compatibility with
         // the storage dtypes
-        return storage_dtype().data_layout_compatible_with(rhs.storage_dtype());
+        return storage_type().data_layout_compatible_with(rhs.storage_type());
     }
     // Rules for the rest of the types
     switch (get_type_id()) {
@@ -328,8 +328,8 @@ bool dtype::data_layout_compatible_with(const dtype& rhs) const
                 const fixed_dim_dtype *rhs_fdd = static_cast<const fixed_dim_dtype *>(rhs.extended());
                 return fdd->get_fixed_dim_size() == rhs_fdd->get_fixed_dim_size() &&
                     fdd->get_fixed_stride() == rhs_fdd->get_fixed_stride() &&
-                    fdd->get_element_dtype().data_layout_compatible_with(
-                                    rhs_fdd->get_element_dtype());
+                    fdd->get_element_type().data_layout_compatible_with(
+                                    rhs_fdd->get_element_type());
             }
             break;
         case strided_dim_type_id:
@@ -339,8 +339,8 @@ bool dtype::data_layout_compatible_with(const dtype& rhs) const
             if (rhs.get_type_id() == get_type_id()) {
                 const base_uniform_dim_dtype *budd = static_cast<const base_uniform_dim_dtype *>(extended());
                 const base_uniform_dim_dtype *rhs_budd = static_cast<const base_uniform_dim_dtype *>(rhs.extended());
-                return budd->get_element_dtype().data_layout_compatible_with(
-                                    rhs_budd->get_element_dtype());
+                return budd->get_element_type().data_layout_compatible_with(
+                                    rhs_budd->get_element_type());
             }
             break;
         default:
@@ -349,7 +349,7 @@ bool dtype::data_layout_compatible_with(const dtype& rhs) const
     return false;
 }
 
-std::ostream& dynd::operator<<(std::ostream& o, const dtype& rhs)
+std::ostream& dynd::ndt::operator<<(std::ostream& o, const ndt::type& rhs)
 {
     switch (rhs.get_type_id()) {
         case uninitialized_type_id:
@@ -546,7 +546,7 @@ void dynd::print_builtin_scalar(type_id_t type_id, std::ostream& o, const char *
     }
 }
 
-void dtype::print_data(std::ostream& o, const char *metadata, const char *data) const
+void ndt::type::print_data(std::ostream& o, const char *metadata, const char *data) const
 {
     if (is_builtin()) {
         print_builtin_scalar(get_type_id(), o, data);

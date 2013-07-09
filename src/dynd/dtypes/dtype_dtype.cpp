@@ -17,7 +17,7 @@ using namespace dynd;
 dtype_dtype::dtype_dtype()
     : base_dtype(dtype_type_id, custom_kind, sizeof(const base_dtype *),
                     sizeof(const base_dtype *),
-                    dtype_flag_scalar|dtype_flag_zeroinit|dtype_flag_destructor,
+                    type_flag_scalar|type_flag_zeroinit|type_flag_destructor,
                     0, 0)
 {
 }
@@ -32,8 +32,8 @@ void dtype_dtype::print_data(std::ostream& o,
     const dtype_dtype_data *ddd = reinterpret_cast<const dtype_dtype_data *>(data);
     // This tests avoids the atomic increment/decrement of
     // always constructing a dtype object
-    if (is_builtin_dtype(ddd->dt)) {
-        o << dtype(ddd->dt, true);
+    if (is_builtin_type(ddd->dt)) {
+        o << ndt::type(ddd->dt, true);
     } else {
         ddd->dt->print_dtype(o);
     }
@@ -41,7 +41,7 @@ void dtype_dtype::print_data(std::ostream& o,
 
 void dtype_dtype::print_dtype(std::ostream& o) const
 {
-    o << "dtype";
+    o << "type";
 }
 
 bool dtype_dtype::operator==(const base_dtype& rhs) const
@@ -74,7 +74,7 @@ void dtype_dtype::metadata_destruct(char *DYND_UNUSED(metadata)) const
 void dtype_dtype::data_destruct(const char *DYND_UNUSED(metadata), char *data) const
 {
     const base_dtype *bd = reinterpret_cast<dtype_dtype_data *>(data)->dt;
-    if (!is_builtin_dtype(bd)) {
+    if (!is_builtin_type(bd)) {
         base_dtype_decref(bd);
     }
 }
@@ -84,7 +84,7 @@ void dtype_dtype::data_destruct_strided(const char *DYND_UNUSED(metadata), char 
 {
     for (size_t i = 0; i != count; ++i, data += stride) {
         const base_dtype *bd = reinterpret_cast<dtype_dtype_data *>(data)->dt;
-        if (!is_builtin_dtype(bd)) {
+        if (!is_builtin_type(bd)) {
             base_dtype_decref(bd);
         }
     }
@@ -114,7 +114,7 @@ namespace {
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             const string& s = e->src_string_dt->get_utf8_string(e->src_metadata, src, e->errmode);
-            dtype(s).swap(reinterpret_cast<dtype_dtype_data *>(dst)->dt);
+            ndt::type(s).swap(reinterpret_cast<dtype_dtype_data *>(dst)->dt);
         }
 
         static void destruct(kernel_data_prefix *extra)
@@ -137,8 +137,8 @@ namespace {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             const base_dtype *bd = reinterpret_cast<const dtype_dtype_data *>(src)->dt;
             stringstream ss;
-            if (is_builtin_dtype(bd)) {
-                ss << dtype(bd, true);
+            if (is_builtin_type(bd)) {
+                ss << ndt::type(bd, true);
             } else {
                 bd->print_dtype(ss);
             }
@@ -158,8 +158,8 @@ namespace {
 
 size_t dtype_dtype::make_assignment_kernel(
                 hierarchical_kernel *out, size_t offset_out,
-                const dtype& dst_dt, const char *dst_metadata,
-                const dtype& src_dt, const char *src_metadata,
+                const ndt::type& dst_dt, const char *dst_metadata,
+                const ndt::type& src_dt, const char *src_metadata,
                 kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *ectx) const
 {
@@ -177,7 +177,7 @@ size_t dtype_dtype::make_assignment_kernel(
             e->base.set_function<unary_single_operation_t>(&string_to_dtype_kernel_extra::single);
             e->base.destructor = &string_to_dtype_kernel_extra::destruct;
             // The kernel data owns a reference to this dtype
-            e->src_string_dt = static_cast<const base_string_dtype *>(dtype(src_dt).release());
+            e->src_string_dt = static_cast<const base_string_dtype *>(ndt::type(src_dt).release());
             e->src_metadata = src_metadata;
             e->errmode = errmode;
             return offset_out + sizeof(string_to_dtype_kernel_extra);
@@ -195,7 +195,7 @@ size_t dtype_dtype::make_assignment_kernel(
             e->base.set_function<unary_single_operation_t>(&dtype_to_string_kernel_extra::single);
             e->base.destructor = &dtype_to_string_kernel_extra::destruct;
             // The kernel data owns a reference to this dtype
-            e->dst_string_dt = static_cast<const base_string_dtype *>(dtype(dst_dt).release());
+            e->dst_string_dt = static_cast<const base_string_dtype *>(ndt::type(dst_dt).release());
             e->dst_metadata = dst_metadata;
             e->errmode = errmode;
             return offset_out + sizeof(dtype_to_string_kernel_extra);

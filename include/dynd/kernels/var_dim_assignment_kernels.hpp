@@ -6,7 +6,7 @@
 #ifndef _DYND__VAR_DIM_ASSIGNMENT_KERNELS_HPP_
 #define _DYND__VAR_DIM_ASSIGNMENT_KERNELS_HPP_
 
-#include <dynd/dtype.hpp>
+#include <dynd/type.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 
 namespace dynd {
@@ -16,8 +16,8 @@ namespace dynd {
  */
 size_t make_broadcast_to_var_dim_assignment_kernel(
                 hierarchical_kernel *out, size_t offset_out,
-                const dtype& dst_var_dim_dt, const char *dst_metadata,
-                const dtype& src_dt, const char *src_metadata,
+                const ndt::type& dst_var_dim_dt, const char *dst_metadata,
+                const ndt::type& src_dt, const char *src_metadata,
                 kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *ectx);
 
@@ -26,8 +26,8 @@ size_t make_broadcast_to_var_dim_assignment_kernel(
  */
 size_t make_var_dim_assignment_kernel(
                 hierarchical_kernel *out, size_t offset_out,
-                const dtype& dst_var_dim_dt, const char *dst_metadata,
-                const dtype& src_var_dim_dt, const char *src_metadata,
+                const ndt::type& dst_var_dim_dt, const char *dst_metadata,
+                const ndt::type& src_var_dim_dt, const char *src_metadata,
                 kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *ectx);
 
@@ -36,8 +36,8 @@ size_t make_var_dim_assignment_kernel(
  */
 size_t make_strided_to_var_dim_assignment_kernel(
                 hierarchical_kernel *out, size_t offset_out,
-                const dtype& dst_var_dim_dt, const char *dst_metadata,
-                const dtype& src_strided_dim_dt, const char *src_metadata,
+                const ndt::type& dst_var_dim_dt, const char *dst_metadata,
+                const ndt::type& src_strided_dim_dt, const char *src_metadata,
                 kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *ectx);
 
@@ -46,8 +46,8 @@ size_t make_strided_to_var_dim_assignment_kernel(
  */
 size_t make_var_to_strided_dim_assignment_kernel(
                 hierarchical_kernel *out, size_t offset_out,
-                const dtype& dst_strided_dim_dt, const char *dst_metadata,
-                const dtype& src_var_dim_dt, const char *src_metadata,
+                const ndt::type& dst_strided_dim_dt, const char *dst_metadata,
+                const ndt::type& src_var_dim_dt, const char *src_metadata,
                 kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *ectx);
 

@@ -16,13 +16,13 @@ using namespace std;
 using namespace dynd;
 
 // Static instance of a void pointer to use as the storage of pointer dtypes
-dtype pointer_dtype::m_void_pointer_dtype(new void_pointer_dtype(), false);
+ndt::type pointer_dtype::m_void_pointer_dtype(new void_pointer_dtype(), false);
 
 
-pointer_dtype::pointer_dtype(const dtype& target_dtype)
+pointer_dtype::pointer_dtype(const ndt::type& target_dtype)
     : base_expression_dtype(pointer_type_id, expression_kind, sizeof(void *),
                     sizeof(void *),
-                    inherited_flags(target_dtype.get_flags(), dtype_flag_zeroinit|dtype_flag_blockref),
+                    inherited_flags(target_dtype.get_flags(), type_flag_zeroinit|type_flag_blockref),
                     sizeof(pointer_dtype_metadata) + target_dtype.get_metadata_size(),
                     target_dtype.get_undim()),
                     m_target_dtype(target_dtype)
@@ -32,7 +32,7 @@ pointer_dtype::pointer_dtype(const dtype& target_dtype)
     // when we want to actually do something with them.
     if (target_dtype.get_kind() == expression_kind && target_dtype.get_type_id() != pointer_type_id) {
         stringstream ss;
-        ss << "A pointer dtype's target cannot be the expression dtype ";
+        ss << "A pointer dtype's target cannot be the expression type ";
         ss << target_dtype;
         throw runtime_error(ss.str());
     }
@@ -73,54 +73,54 @@ bool pointer_dtype::is_unique_data_owner(const char *metadata) const
     return true;
 }
 
-void pointer_dtype::transform_child_dtypes(dtype_transform_fn_t transform_fn, void *extra,
-                dtype& out_transformed_dtype, bool& out_was_transformed) const
+void pointer_dtype::transform_child_types(type_transform_fn_t transform_fn, void *extra,
+                ndt::type& out_transformed_dtype, bool& out_was_transformed) const
 {
-    dtype tmp_dtype;
+    ndt::type tmp_dtype;
     bool was_transformed = false;
     transform_fn(m_target_dtype, extra, tmp_dtype, was_transformed);
     if (was_transformed) {
-        out_transformed_dtype = dtype(new pointer_dtype(tmp_dtype), false);
+        out_transformed_dtype = ndt::type(new pointer_dtype(tmp_dtype), false);
         out_was_transformed = true;
     } else {
-        out_transformed_dtype = dtype(this, true);
+        out_transformed_dtype = ndt::type(this, true);
     }
 }
 
 
-dtype pointer_dtype::get_canonical_dtype() const
+ndt::type pointer_dtype::get_canonical_type() const
 {
     // The canonical version doesn't include the pointer
     return m_target_dtype;
 }
 
-dtype pointer_dtype::apply_linear_index(size_t nindices, const irange *indices,
-                size_t current_i, const dtype& root_dt, bool leading_dimension) const
+ndt::type pointer_dtype::apply_linear_index(size_t nindices, const irange *indices,
+                size_t current_i, const ndt::type& root_dt, bool leading_dimension) const
 {
     if (nindices == 0) {
         if (leading_dimension) {
             // Even with 0 indices, throw away the pointer when it's a leading dimension
             return m_target_dtype.apply_linear_index(0, NULL, current_i, root_dt, true);
         } else {
-            return dtype(this, true);
+            return ndt::type(this, true);
         }
     } else {
-        dtype dt = m_target_dtype.apply_linear_index(nindices, indices, current_i, root_dt, leading_dimension);
+        ndt::type dt = m_target_dtype.apply_linear_index(nindices, indices, current_i, root_dt, leading_dimension);
         if (leading_dimension) {
             // If it's a leading dimension, throw away the pointer
             return dt;
         } else if (dt == m_target_dtype) {
-            return dtype(this, true);
+            return ndt::type(this, true);
         } else {
-            return dtype(new pointer_dtype(dt), false);
+            return ndt::type(new pointer_dtype(dt), false);
         }
     }
 }
 
 intptr_t pointer_dtype::apply_linear_index(size_t nindices, const irange *indices, const char *metadata,
-                const dtype& result_dtype, char *out_metadata,
+                const ndt::type& result_dtype, char *out_metadata,
                 memory_block_data *embedded_reference,
-                size_t current_i, const dtype& root_dt,
+                size_t current_i, const ndt::type& root_dt,
                 bool leading_dimension, char **inout_data,
                 memory_block_data **inout_dataref) const
 {
@@ -162,7 +162,7 @@ intptr_t pointer_dtype::apply_linear_index(size_t nindices, const irange *indice
     }
 }
 
-dtype pointer_dtype::at_single(intptr_t i0, const char **inout_metadata, const char **inout_data) const
+ndt::type pointer_dtype::at_single(intptr_t i0, const char **inout_metadata, const char **inout_data) const
 {
     // If metadata/data is provided, follow the pointer and call the target dtype's at_single
     if (inout_metadata) {
@@ -177,13 +177,13 @@ dtype pointer_dtype::at_single(intptr_t i0, const char **inout_metadata, const c
     return m_target_dtype.at_single(i0, inout_metadata, inout_data);
 }
 
-dtype pointer_dtype::get_dtype_at_dimension(char **inout_metadata, size_t i, size_t total_ndim) const
+ndt::type pointer_dtype::get_type_at_dimension(char **inout_metadata, size_t i, size_t total_ndim) const
 {
     if (i == 0) {
-        return dtype(this, true);
+        return ndt::type(this, true);
     } else {
         *inout_metadata += sizeof(pointer_dtype_metadata);
-        return m_target_dtype.get_dtype_at_dimension(inout_metadata, i, total_ndim);
+        return m_target_dtype.get_type_at_dimension(inout_metadata, i, total_ndim);
     }
 }
 
@@ -210,7 +210,7 @@ axis_order_classification_t pointer_dtype::classify_axis_order(const char *metad
     }
 }
 
-bool pointer_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const
+bool pointer_dtype::is_lossless_assignment(const ndt::type& dst_dt, const ndt::type& src_dt) const
 {
     if (dst_dt.extended() == this) {
         return ::is_lossless_assignment(m_target_dtype, src_dt);
@@ -231,9 +231,9 @@ bool pointer_dtype::operator==(const base_dtype& rhs) const
     }
 }
 
-dtype pointer_dtype::with_replaced_storage_dtype(const dtype& /*replacement_dtype*/) const
+ndt::type pointer_dtype::with_replaced_storage_type(const ndt::type& /*replacement_type*/) const
 {
-    throw runtime_error("TODO: implement pointer_dtype::with_replaced_storage_dtype");
+    throw runtime_error("TODO: implement pointer_dtype::with_replaced_storage_type");
 }
 
 void pointer_dtype::metadata_default_construct(char *metadata, size_t ndim, const intptr_t* shape) const
@@ -305,7 +305,7 @@ void pointer_dtype::metadata_debug_print(const char *metadata, std::ostream& o, 
     }
 }
 
-static dtype property_get_target_dtype(const dtype& dt) {
+static ndt::type property_get_target_dtype(const ndt::type& dt) {
     const pointer_dtype *pd = static_cast<const pointer_dtype *>(dt.extended());
     return pd->get_target_dtype();
 }

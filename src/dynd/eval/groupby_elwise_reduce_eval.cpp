@@ -22,7 +22,7 @@ static void groupby_elwise_reduce_loop(char *result_originptr, intptr_t result_s
                 const char *by_ptr, intptr_t by_stride,
                 intptr_t size, int32_t num_groups,
                 const kernel_instance<unary_operation_t>& reduce_operation,
-                const dtype& groups_dt)
+                const ndt::type& groups_dt)
 {
     for (intptr_t i = 0; i < size; ++i) {
         int32_t group = *reinterpret_cast<const int32_t *>(by_ptr);
@@ -47,7 +47,7 @@ static void groupby_elwise_reduce_loop_no_identity(char *result_originptr, intpt
                 unary_operation_t copy_one_data_func,
                 const AuxDataBase *copy_one_data_auxdata,
                 const kernel_instance<unary_operation_t>& reduce_operation,
-                const dtype& groups_dt)
+                const ndt::type& groups_dt)
 {
     for (intptr_t i = 0; i < size; ++i) {
         int32_t group = *reinterpret_cast<const int32_t *>(by_ptr);
@@ -78,8 +78,8 @@ ndarray_node_ptr dynd::eval::evaluate_groupby_elwise_reduce(ndarray_node *node, 
     ndarray_node *data_strided_node = gnode->get_data_node();
     ndarray_node *by_strided_node = gnode->get_by_node();
 
-    const dtype& result_dt = rnode->get_dtype().value_dtype();
-    const dtype& groups_dt = gnode->get_groups();
+    const ndt::type& result_dt = rnode->get_dtype().value_type();
+    const ndt::type& groups_dt = gnode->get_groups();
     const categorical_dtype *groups = static_cast<const categorical_dtype *>(groups_dt.extended());
     intptr_t num_groups = groups->get_category_count();
 

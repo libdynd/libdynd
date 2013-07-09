@@ -26,9 +26,9 @@ TEST(GroupByDType, Basic) {
     int by[] = {15,16,16};
     int groups[] = {15,16};
     nd::array g = nd::groupby(data, by, make_categorical_dtype(groups));
-    EXPECT_EQ(make_groupby_dtype(make_strided_dim_dtype(make_dtype<int>()),
+    EXPECT_EQ(make_groupby_dtype(make_strided_dim_dtype(ndt::make_dtype<int>()),
                         make_strided_dim_dtype(make_convert_dtype(
-                            make_categorical_dtype(groups), make_dtype<int>()))),
+                            make_categorical_dtype(groups), ndt::make_dtype<int>()))),
                     g.get_dtype());
     g = g.eval();
     EXPECT_EQ(1, g(0, irange()).get_shape()[0]);
@@ -59,7 +59,7 @@ TEST(GroupByDType, BasicDeduceGroups) {
 
 TEST(GroupByDType, MediumDeduceGroups) {
     nd::array data = nd::range(100);
-    nd::array by = nd::make_strided_array(100, make_dtype<int>());
+    nd::array by = nd::make_strided_array(100, ndt::make_dtype<int>());
     // Since at this point dynd doesn't have a very sophisticated
     // calculation mechanism, construct by as a series of runs
     by(0 <= irange() < 10).vals() = nd::range(10);
@@ -71,9 +71,9 @@ TEST(GroupByDType, MediumDeduceGroups) {
     by(80 <= irange() < 95).vals() = nd::range(15);
     by(95 <= irange() < 100).vals() = nd::range(5);
     nd::array g = nd::groupby(data, by);
-    EXPECT_EQ(make_groupby_dtype(make_strided_dim_dtype(make_dtype<int>()),
+    EXPECT_EQ(make_groupby_dtype(make_strided_dim_dtype(ndt::make_dtype<int>()),
                         make_strided_dim_dtype(make_convert_dtype(
-                            make_categorical_dtype(nd::range(20)), make_dtype<int>()))),
+                            make_categorical_dtype(nd::range(20)), ndt::make_dtype<int>()))),
                     g.get_dtype());
     EXPECT_EQ(g.get_shape()[0], 20);
     int group_0[] =  { 0, 10, 25, 35, 55, 60, 80, 95};
@@ -97,7 +97,7 @@ TEST(GroupByDType, Struct) {
                     make_fixedstring_dtype(1, string_encoding_ascii)).eval();
 
     // Create a simple structured array
-    dtype d = make_cstruct_dtype(make_string_dtype(), "name", make_dtype<float>(), "height",
+    ndt::type d = make_cstruct_dtype(make_string_dtype(), "name", ndt::make_dtype<float>(), "height",
                     make_fixedstring_dtype(1, string_encoding_ascii), "gender");
     nd::array a = nd::make_strided_array(5, d);
     const char *name_vals[] = {"Paul", "Jennifer", "Frank", "Louise", "Anne"};
@@ -132,7 +132,7 @@ TEST(GroupByDType, Struct) {
 
 TEST(GroupByDType, StructSubset) {
     // Create a simple structured array
-    dtype d = make_cstruct_dtype(make_string_dtype(), "lastname",
+    ndt::type d = make_cstruct_dtype(make_string_dtype(), "lastname",
                     make_string_dtype(), "firstname",
                     make_fixedstring_dtype(1, string_encoding_ascii), "gender");
     nd::array a = nd::make_strided_array(7, d);
@@ -210,7 +210,7 @@ TEST(GroupByDType, StructUnsortedCats) {
     nd::array gender_cats = nd::array(gender_cats_vals);
 
     // Create a simple structured array
-    dtype d = make_cstruct_dtype(make_string_dtype(), "name", make_dtype<float>(), "height",
+    ndt::type d = make_cstruct_dtype(make_string_dtype(), "name", ndt::make_dtype<float>(), "height",
                     make_fixedstring_dtype(1, string_encoding_ascii), "gender");
     nd::array a = nd::make_strided_array(5, d);
     const char *name_vals[] = {"Paul", "Jennifer", "Frank", "Louise", "Anne"};

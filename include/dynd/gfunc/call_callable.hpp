@@ -18,30 +18,30 @@ namespace dynd { namespace gfunc {
 namespace detail {
     template<class T>
     struct callable_argument_setter {
-        static typename enable_if<is_dtype_scalar<T>::value, void>::type set(const dtype& paramtype, char *metadata, char *data, const T& value) {
+        static typename enable_if<is_dtype_scalar<T>::value, void>::type set(const ndt::type& paramtype, char *metadata, char *data, const T& value) {
             if (paramtype.get_type_id() == static_cast<type_id_t>(type_id_of<T>::value)) {
                 *reinterpret_cast<T *>(data) = value;
             } else {
-                dtype_assign(paramtype, metadata, data, make_dtype<T>(), NULL, reinterpret_cast<const char *>(&value));
+                dtype_assign(paramtype, metadata, data, ndt::make_dtype<T>(), NULL, reinterpret_cast<const char *>(&value));
             }
         }
     };
 
     template<>
     struct callable_argument_setter<bool> {
-        static void set(const dtype& paramtype, char *metadata, char *data, bool value) {
+        static void set(const ndt::type& paramtype, char *metadata, char *data, bool value) {
             if (paramtype.get_type_id() == bool_type_id) {
                *data = (value ? 1 : 0);
             } else {
                 dynd_bool tmp = value;
-                dtype_assign(paramtype, metadata, data, make_dtype<dynd_bool>(), NULL, reinterpret_cast<const char *>(&tmp));
+                dtype_assign(paramtype, metadata, data, ndt::make_dtype<dynd_bool>(), NULL, reinterpret_cast<const char *>(&tmp));
             }
         }
     };
 
     template<>
     struct callable_argument_setter<nd::array> {
-        static void set(const dtype& paramtype, char *metadata, char *data, const nd::array& value) {
+        static void set(const ndt::type& paramtype, char *metadata, char *data, const nd::array& value) {
             if (paramtype.get_type_id() == void_pointer_type_id) {
                 // TODO: switch to a better mechanism for passing nd::array references
                 *reinterpret_cast<const array_preamble **>(data) = value.get_ndo();
@@ -52,10 +52,10 @@ namespace detail {
     };
 
     template<>
-    struct callable_argument_setter<dtype> {
-        static void set(const dtype& paramtype, char *DYND_UNUSED(metadata), char *data, const dtype& value) {
+    struct callable_argument_setter<ndt::type> {
+        static void set(const ndt::type& paramtype, char *DYND_UNUSED(metadata), char *data, const ndt::type& value) {
             if (paramtype.get_type_id() == dtype_type_id) {
-                reinterpret_cast<dtype_dtype_data *>(data)->dt = dtype(value).release();
+                reinterpret_cast<dtype_dtype_data *>(data)->dt = ndt::type(value).release();
             } else {
                 std::stringstream ss;
                 ss << "cannot pass a dtype as a parameter to dynd callable parameter of type " << paramtype;
@@ -66,7 +66,7 @@ namespace detail {
 
     template<int N>
     struct callable_argument_setter<const char[N]> {
-        static void set(const dtype& paramtype, char *metadata, char *data, const char (&value)[N]) {
+        static void set(const ndt::type& paramtype, char *metadata, char *data, const char (&value)[N]) {
             // Setting from a known-sized character string array
             if (paramtype.get_type_id() == string_type_id &&
                     static_cast<const string_dtype *>(paramtype.extended())->get_encoding() == string_encoding_utf_8) {
@@ -85,9 +85,9 @@ namespace detail {
 
 inline nd::array callable::call() const
 {
-    const cstruct_dtype *fsdt = static_cast<const cstruct_dtype *>(m_parameters_dtype.extended());
+    const cstruct_dtype *fsdt = static_cast<const cstruct_dtype *>(m_parameters_type.extended());
     size_t parameter_count = fsdt->get_field_count();
-    nd::array params = nd::empty(m_parameters_dtype);
+    nd::array params = nd::empty(m_parameters_type);
     if (parameter_count != 0) {
         if (m_first_default_parameter <= 0) {
             // Fill the missing parameters with their defaults, if available
@@ -102,7 +102,7 @@ inline nd::array callable::call() const
             }
         } else {
             std::stringstream ss;
-            ss << "incorrect number of arguments (received 0) for dynd callable with parameters " << m_parameters_dtype;
+            ss << "incorrect number of arguments (received 0) for dynd callable with parameters " << m_parameters_type;
             throw std::runtime_error(ss.str());
         }
     }
@@ -112,9 +112,9 @@ inline nd::array callable::call() const
 template<class T>
 inline nd::array callable::call(const T& p0) const
 {
-    const cstruct_dtype *fsdt = static_cast<const cstruct_dtype *>(m_parameters_dtype.extended());
+    const cstruct_dtype *fsdt = static_cast<const cstruct_dtype *>(m_parameters_type.extended());
     size_t parameter_count = fsdt->get_field_count();
-    nd::array params = nd::empty(m_parameters_dtype);
+    nd::array params = nd::empty(m_parameters_type);
     if (parameter_count != 1) {
         if (parameter_count > 1 && m_first_default_parameter <= 1) {
             // Fill the missing parameters with their defaults, if available
@@ -129,7 +129,7 @@ inline nd::array callable::call(const T& p0) const
             }
         } else {
             std::stringstream ss;
-            ss << "incorrect number of arguments (received 1) for dynd callable with parameters " << m_parameters_dtype;
+            ss << "incorrect number of arguments (received 1) for dynd callable with parameters " << m_parameters_type;
             throw std::runtime_error(ss.str());
         }
     }
@@ -143,9 +143,9 @@ inline nd::array callable::call(const T& p0) const
 template<class T0, class T1>
 inline nd::array callable::call(const T0& p0, const T1& p1) const
 {
-    const cstruct_dtype *fsdt = static_cast<const cstruct_dtype *>(m_parameters_dtype.extended());
+    const cstruct_dtype *fsdt = static_cast<const cstruct_dtype *>(m_parameters_type.extended());
     size_t parameter_count = fsdt->get_field_count();
-    nd::array params = nd::empty(m_parameters_dtype);
+    nd::array params = nd::empty(m_parameters_type);
     if (fsdt->get_field_count() != 2) {
         if (parameter_count > 2 && m_first_default_parameter <= 2) {
             // Fill the missing parameters with their defaults, if available
@@ -160,7 +160,7 @@ inline nd::array callable::call(const T0& p0, const T1& p1) const
             }
         } else {
             std::stringstream ss;
-            ss << "incorrect number of arguments (received 2) for dynd callable with parameters " << m_parameters_dtype;
+            ss << "incorrect number of arguments (received 2) for dynd callable with parameters " << m_parameters_type;
             throw std::runtime_error(ss.str());
         }
     }
@@ -178,9 +178,9 @@ inline nd::array callable::call(const T0& p0, const T1& p1) const
 template<class T0, class T1, class T2>
 inline nd::array callable::call(const T0& p0, const T1& p1, const T2& p2) const
 {
-    const cstruct_dtype *fsdt = static_cast<const cstruct_dtype *>(m_parameters_dtype.extended());
+    const cstruct_dtype *fsdt = static_cast<const cstruct_dtype *>(m_parameters_type.extended());
     size_t parameter_count = fsdt->get_field_count();
-    nd::array params = nd::empty(m_parameters_dtype);
+    nd::array params = nd::empty(m_parameters_type);
     if (fsdt->get_field_count() != 3) {
         if (parameter_count > 3 && m_first_default_parameter <= 3) {
             // Fill the missing parameters with their defaults, if available
@@ -195,7 +195,7 @@ inline nd::array callable::call(const T0& p0, const T1& p1, const T2& p2) const
             }
         } else {
             std::stringstream ss;
-            ss << "incorrect number of arguments (received 3) for dynd callable with parameters " << m_parameters_dtype;
+            ss << "incorrect number of arguments (received 3) for dynd callable with parameters " << m_parameters_type;
             throw std::runtime_error(ss.str());
         }
     }
@@ -217,9 +217,9 @@ inline nd::array callable::call(const T0& p0, const T1& p1, const T2& p2) const
 template<class T0, class T1, class T2, class T3>
 inline nd::array callable::call(const T0& p0, const T1& p1, const T2& p2, const T3& p3) const
 {
-    const cstruct_dtype *fsdt = static_cast<const cstruct_dtype *>(m_parameters_dtype.extended());
+    const cstruct_dtype *fsdt = static_cast<const cstruct_dtype *>(m_parameters_type.extended());
     size_t parameter_count = fsdt->get_field_count();
-    nd::array params = nd::empty(m_parameters_dtype);
+    nd::array params = nd::empty(m_parameters_type);
     if (fsdt->get_field_count() != 4) {
         if (parameter_count > 4 && m_first_default_parameter <= 4) {
             // Fill the missing parameters with their defaults, if available
@@ -234,7 +234,7 @@ inline nd::array callable::call(const T0& p0, const T1& p1, const T2& p2, const 
             }
         } else {
             std::stringstream ss;
-            ss << "incorrect number of arguments (received 4) for dynd callable with parameters " << m_parameters_dtype;
+            ss << "incorrect number of arguments (received 4) for dynd callable with parameters " << m_parameters_type;
             throw std::runtime_error(ss.str());
         }
     }
@@ -260,9 +260,9 @@ inline nd::array callable::call(const T0& p0, const T1& p1, const T2& p2, const 
 template<class T0, class T1, class T2, class T3, class T4>
 inline nd::array callable::call(const T0& p0, const T1& p1, const T2& p2, const T3& p3, const T4& p4) const
 {
-    const cstruct_dtype *fsdt = static_cast<const cstruct_dtype *>(m_parameters_dtype.extended());
+    const cstruct_dtype *fsdt = static_cast<const cstruct_dtype *>(m_parameters_type.extended());
     size_t parameter_count = fsdt->get_field_count();
-    nd::array params = nd::empty(m_parameters_dtype);
+    nd::array params = nd::empty(m_parameters_type);
     if (fsdt->get_field_count() != 5) {
         if (parameter_count > 5 && m_first_default_parameter <= 5) {
             // Fill the missing parameters with their defaults, if available
@@ -277,7 +277,7 @@ inline nd::array callable::call(const T0& p0, const T1& p1, const T2& p2, const 
             }
         } else {
             std::stringstream ss;
-            ss << "incorrect number of arguments (received 5) for dynd callable with parameters " << m_parameters_dtype;
+            ss << "incorrect number of arguments (received 5) for dynd callable with parameters " << m_parameters_type;
             throw std::runtime_error(ss.str());
         }
     }

@@ -3,8 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__BASE_STRUCT_DTYPE_HPP_
-#define _DYND__BASE_STRUCT_DTYPE_HPP_
+#ifndef _DYND__BASE_STRUCT_TYPE_HPP_
+#define _DYND__BASE_STRUCT_TYPE_HPP_
 
 #include <dynd/dtypes/base_dtype.hpp>
 
@@ -33,7 +33,7 @@ public:
         return m_field_count;
     }
     /** The array of the field types */
-    virtual const dtype *get_field_types() const = 0;
+    virtual const ndt::type *get_field_types() const = 0;
     /** The array of the field names */
     virtual const std::string *get_field_names() const = 0;
     /** The array of the field data offsets */
@@ -54,7 +54,7 @@ public:
     void get_shape(size_t ndim, size_t i, intptr_t *out_shape, const char *metadata) const;
 
     size_t get_elwise_property_index(const std::string& property_name) const;
-    dtype get_elwise_property_dtype(size_t elwise_property_index,
+    ndt::type get_elwise_property_dtype(size_t elwise_property_index,
                     bool& out_readable, bool& out_writable) const;
     size_t make_elwise_property_getter_kernel(
                     hierarchical_kernel *out, size_t offset_out,
@@ -75,4 +75,4 @@ public:
 
 } // namespace dynd
 
-#endif // _DYND__BASE_STRUCT_DTYPE_HPP_
+#endif // _DYND__BASE_STRUCT_TYPE_HPP_

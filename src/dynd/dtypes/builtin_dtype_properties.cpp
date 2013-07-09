@@ -60,12 +60,12 @@ size_t dynd::get_builtin_dtype_elwise_property_index(
     }
 
     std::stringstream ss;
-    ss << "the dtype " << dtype(builtin_type_id);
+    ss << "the dtype " << ndt::type(builtin_type_id);
     ss << " doesn't have a property \"" << property_name << "\"";
     throw std::runtime_error(ss.str());
 }
 
-dtype dynd::get_builtin_dtype_elwise_property_dtype(
+ndt::type dynd::get_builtin_dtype_elwise_property_dtype(
                 type_id_t builtin_type_id,
                 size_t DYND_UNUSED(elwise_property_index),
                 bool& out_readable, bool& out_writable)
@@ -74,15 +74,15 @@ dtype dynd::get_builtin_dtype_elwise_property_dtype(
         case complex_float32_type_id:
             out_readable = true;
             out_writable = false;
-            return dtype(float32_type_id);
+            return ndt::type(float32_type_id);
         case complex_float64_type_id:
             out_readable = true;
             out_writable = false;
-            return dtype(float64_type_id);
+            return ndt::type(float64_type_id);
         default:
             out_readable = false;
             out_writable = false;
-            return dtype();
+            return ndt::type();
     }
 }
 
@@ -155,7 +155,7 @@ size_t dynd::make_builtin_dtype_elwise_property_getter_kernel(
             break;
     }
     stringstream ss;
-    ss << "dtype " << dtype(builtin_type_id) << " given an invalid property index " << src_elwise_property_index;
+    ss << "dtype " << ndt::type(builtin_type_id) << " given an invalid property index " << src_elwise_property_index;
     throw runtime_error(ss.str());
 }
 
@@ -167,6 +167,6 @@ size_t dynd::make_builtin_dtype_elwise_property_setter_kernel(
                 kernel_request_t DYND_UNUSED(kernreq), const eval::eval_context *DYND_UNUSED(ectx))
 {
     stringstream ss;
-    ss << "dtype " << dtype(builtin_type_id) << " given an invalid property index " << dst_elwise_property_index;
+    ss << "dtype " << ndt::type(builtin_type_id) << " given an invalid property index " << dst_elwise_property_index;
     throw runtime_error(ss.str());
 }

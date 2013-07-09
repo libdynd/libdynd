@@ -18,7 +18,7 @@ using namespace dynd;
 
 string_dtype::string_dtype(string_encoding_t encoding)
     : base_string_dtype(string_type_id, sizeof(string_dtype_data),
-                    sizeof(const char *), dtype_flag_scalar|dtype_flag_zeroinit|dtype_flag_blockref,
+                    sizeof(const char *), type_flag_scalar|type_flag_zeroinit|type_flag_blockref,
                     sizeof(string_dtype_metadata)),
             m_encoding(encoding)
 {
@@ -122,9 +122,9 @@ bool string_dtype::is_unique_data_owner(const char *metadata) const
     return true;
 }
 
-dtype string_dtype::get_canonical_dtype() const
+ndt::type string_dtype::get_canonical_type() const
 {
-    return dtype(this, true);
+    return ndt::type(this, true);
 }
 
 void string_dtype::get_shape(size_t ndim, size_t i, intptr_t *out_shape, const char *DYND_UNUSED(metadata)) const
@@ -132,14 +132,14 @@ void string_dtype::get_shape(size_t ndim, size_t i, intptr_t *out_shape, const c
     out_shape[i] = -1;
     if (i+1 < ndim) {
         stringstream ss;
-        ss << "requested too many dimensions from type " << dtype(this, true);
+        ss << "requested too many dimensions from type " << ndt::type(this, true);
         throw runtime_error(ss.str());
     }
 }
 
 bool string_dtype::is_lossless_assignment(
-                const dtype& DYND_UNUSED(dst_dt),
-                const dtype& DYND_UNUSED(src_dt)) const
+                const ndt::type& DYND_UNUSED(dst_dt),
+                const ndt::type& DYND_UNUSED(src_dt)) const
 {
     // Don't shortcut anything to 'none' error checking, so that
     // decoding errors get caught appropriately.
@@ -217,8 +217,8 @@ void string_dtype::metadata_debug_print(const char *metadata, std::ostream& o, c
 
 size_t string_dtype::make_assignment_kernel(
                 hierarchical_kernel *out, size_t offset_out,
-                const dtype& dst_dt, const char *dst_metadata,
-                const dtype& src_dt, const char *src_metadata,
+                const ndt::type& dst_dt, const char *dst_metadata,
+                const ndt::type& src_dt, const char *src_metadata,
                 kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *ectx) const
 {
@@ -267,8 +267,8 @@ size_t string_dtype::make_assignment_kernel(
 
 size_t string_dtype::make_comparison_kernel(
                 hierarchical_kernel *out, size_t offset_out,
-                const dtype& src0_dt, const char *src0_metadata,
-                const dtype& src1_dt, const char *src1_metadata,
+                const ndt::type& src0_dt, const char *src0_metadata,
+                const ndt::type& src1_dt, const char *src1_metadata,
                 comparison_type_t comptype,
                 const eval::eval_context *ectx) const
 {

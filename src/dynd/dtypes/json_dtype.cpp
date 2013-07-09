@@ -19,7 +19,7 @@ using namespace dynd;
 
 json_dtype::json_dtype()
     : base_string_dtype(json_type_id, sizeof(json_dtype_data),
-                    sizeof(const char *), dtype_flag_scalar|dtype_flag_zeroinit|dtype_flag_blockref,
+                    sizeof(const char *), type_flag_scalar|type_flag_zeroinit|type_flag_blockref,
                     sizeof(json_dtype_metadata))
 {
 }
@@ -88,13 +88,13 @@ bool json_dtype::is_unique_data_owner(const char *metadata) const
     return true;
 }
 
-dtype json_dtype::get_canonical_dtype() const
+ndt::type json_dtype::get_canonical_type() const
 {
-    return dtype(this, true);
+    return ndt::type(this, true);
 }
 
 
-bool json_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const
+bool json_dtype::is_lossless_assignment(const ndt::type& dst_dt, const ndt::type& src_dt) const
 {
     if (dst_dt.extended() == this) {
         if (src_dt.get_type_id() == json_type_id) {
@@ -216,8 +216,8 @@ namespace {
 
 size_t json_dtype::make_assignment_kernel(
                 hierarchical_kernel *out, size_t offset_out,
-                const dtype& dst_dt, const char *dst_metadata,
-                const dtype& src_dt, const char *src_metadata,
+                const ndt::type& dst_dt, const char *dst_metadata,
+                const ndt::type& src_dt, const char *src_metadata,
                 kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *ectx) const
 {

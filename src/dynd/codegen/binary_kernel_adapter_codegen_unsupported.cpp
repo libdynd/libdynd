@@ -21,9 +21,9 @@ namespace
     }
 }
 uint64_t
-get_binary_function_adapter_unique_id( const dtype& DYND_UNUSED(restype)
-                                      , const dtype& DYND_UNUSED(arg0type)
-                                      , const dtype& DYND_UNUSED(arg1type)
+get_binary_function_adapter_unique_id( const ndt::type& DYND_UNUSED(restype)
+                                      , const ndt::type& DYND_UNUSED(arg0type)
+                                      , const ndt::type& DYND_UNUSED(arg1type)
                                       , calling_convention_t DYND_UNUSED(callconv))
 {
     unimplemented();
@@ -38,8 +38,8 @@ get_binary_function_adapter_unique_id_string(uint64_t DYND_UNUSED(unique_id))
 }
     
 binary_operation_pair_t codegen_binary_function_adapter(
-                const memory_block_ptr& DYND_UNUSED(exec_memblock), const dtype& DYND_UNUSED(restype),
-                const dtype& DYND_UNUSED(arg0type), const dtype& DYND_UNUSED(arg1type), calling_convention_t DYND_UNUSED(callconv))
+                const memory_block_ptr& DYND_UNUSED(exec_memblock), const ndt::type& DYND_UNUSED(restype),
+                const ndt::type& DYND_UNUSED(arg0type), const ndt::type& DYND_UNUSED(arg1type), calling_convention_t DYND_UNUSED(callconv))
 {
     unimplemented();
     return binary_operation_pair_t();

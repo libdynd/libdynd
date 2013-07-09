@@ -8,7 +8,7 @@
 using namespace std;
 using namespace dynd;
 
-dynd::vm::register_allocation::register_allocation(const std::vector<dtype>& regtypes,
+dynd::vm::register_allocation::register_allocation(const std::vector<ndt::type>& regtypes,
                         intptr_t max_element_count, intptr_t max_byte_count)
     : m_regtypes(regtypes), m_registers(m_regtypes.size()), m_blockrefs(m_regtypes.size()), m_allocated_memory(NULL)
 {
@@ -39,7 +39,7 @@ dynd::vm::register_allocation::register_allocation(const std::vector<dtype>& reg
     // Create pointers to the individual register data
     size_t offset = 0;
     for (size_t i = 0; i < regtypes.size(); ++i) {
-        const dtype& d = regtypes[i];
+        const ndt::type& d = regtypes[i];
         // Align the pointer
         offset = inc_to_alignment(offset, d.get_data_alignment());
         m_registers[i] = m_allocated_memory + offset;

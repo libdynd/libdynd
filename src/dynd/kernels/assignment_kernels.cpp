@@ -3,7 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <dynd/dtype.hpp>
+#include <dynd/type.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include "single_assigner_builtin.hpp"
 
@@ -99,8 +99,8 @@ static void unaligned_copy_strided(char *dst, intptr_t dst_stride,
 
 size_t dynd::make_assignment_kernel(
                 hierarchical_kernel *out, size_t offset_out,
-                const dtype& dst_dt, const char *dst_metadata,
-                const dtype& src_dt, const char *src_metadata,
+                const ndt::type& dst_dt, const char *dst_metadata,
+                const ndt::type& src_dt, const char *src_metadata,
                 kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *ectx)
 {
@@ -412,7 +412,7 @@ size_t dynd::make_builtin_dtype_assignment_kernel(
         return offset_out + sizeof(kernel_data_prefix);
     } else {
         stringstream ss;
-        ss << "Cannot assign from " << dtype(src_type_id) << " to " << dtype(dst_type_id);
+        ss << "Cannot assign from " << ndt::type(src_type_id) << " to " << ndt::type(dst_type_id);
         throw runtime_error(ss.str());
     }
 }

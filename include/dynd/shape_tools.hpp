@@ -8,7 +8,7 @@
 
 #include <iostream>
 
-#include <dynd/dtype.hpp>
+#include <dynd/type.hpp>
 #include <dynd/shortvector.hpp>
 #include <dynd/array.hpp>
 
@@ -91,7 +91,7 @@ void incremental_broadcast(size_t out_undim, intptr_t *out_shape,
  * \param out_ndim  This is populated with the broadcast ndim.
  * \param out_shape  This is populated with the broadcast shape.
  */
-void create_broadcast_result(const dtype& result_inner_dt,
+void create_broadcast_result(const ndt::type& result_inner_dt,
                 const nd::array& op0, const nd::array& op1, const nd::array& op2,
                 nd::array &out, size_t& out_ndim, dimvector& out_shape);
 
@@ -156,7 +156,7 @@ inline void print_shape(std::ostream& o, const std::vector<intptr_t>& shape) {
  * \param out_index_stride  The index stride of the resolved indexing.
  * \param out_dimension_size  The size of the resulting dimension from the resolved indexing.
  */
-void apply_single_linear_index(const irange& idx, intptr_t dimension_size, size_t error_i, const dtype* error_dt,
+void apply_single_linear_index(const irange& idx, intptr_t dimension_size, size_t error_i, const ndt::type* error_dt,
         bool& out_remove_dimension, intptr_t& out_start_index, intptr_t& out_index_stride, intptr_t& out_dimension_size);
 
 /**
@@ -168,7 +168,7 @@ void apply_single_linear_index(const irange& idx, intptr_t dimension_size, size_
  *
  * \returns  An index value in the range [0, dimension_size).
  */
-inline intptr_t apply_single_index(intptr_t i0, intptr_t dimension_size, const dtype* error_dt) {
+inline intptr_t apply_single_index(intptr_t i0, intptr_t dimension_size, const ndt::type* error_dt) {
     if (i0 >= 0) {
         if (i0 < dimension_size) {
             return i0;
@@ -248,7 +248,7 @@ inline bool strides_are_f_contiguous(size_t ndim, intptr_t element_size, const i
  * \param element_metadata  The metadata of the elements.
  */
 axis_order_classification_t classify_strided_axis_order(size_t current_stride,
-                const dtype& element_dt, const char *element_metadata);
+                const ndt::type& element_dt, const char *element_metadata);
 
 enum shape_signal_t {
     /** Shape value that has never been initialized */

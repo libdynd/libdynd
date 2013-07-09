@@ -8,7 +8,7 @@
 using namespace std;
 using namespace dynd;
 
-std::ostream& dynd::operator<<(std::ostream& o, dtype_kind_t kind)
+std::ostream& dynd::operator<<(std::ostream& o, type_kind_t kind)
 {
     switch (kind) {
         case bool_kind:

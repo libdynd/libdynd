@@ -3,26 +3,26 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__BASE_UNIFORM_DIM_DTYPE_HPP_
-#define _DYND__BASE_UNIFORM_DIM_DTYPE_HPP_
+#ifndef _DYND__BASE_UNIFORM_DIM_TYPE_HPP_
+#define _DYND__BASE_UNIFORM_DIM_TYPE_HPP_
 
 #include <dynd/dtypes/base_dtype.hpp>
-#include <dynd/dtype.hpp>
+#include <dynd/type.hpp>
 
 namespace dynd {
 
 
 /**
- * Base class for all uniform dimension dtypes. If a dtype
+ * Base class for all array dimension dtypes. If a dtype
  * has kind uniform_dim_kind, it must be a subclass of
  * base_uniform_dim_dtype.
  */
 class base_uniform_dim_dtype : public base_dtype {
 protected:
-    dtype m_element_dtype;
+    ndt::type m_element_dtype;
     size_t m_element_metadata_offset;
 public:
-    inline base_uniform_dim_dtype(type_id_t type_id, const dtype& element_dtype, size_t data_size,
+    inline base_uniform_dim_dtype(type_id_t type_id, const ndt::type& element_dtype, size_t data_size,
                     size_t alignment, size_t element_metadata_offset,
                     flags_type flags)
         : base_dtype(type_id, uniform_dim_kind, data_size,
@@ -35,7 +35,7 @@ public:
     virtual ~base_uniform_dim_dtype();
 
     /** The element dtype. */
-    inline const dtype& get_element_dtype() const {
+    inline const ndt::type& get_element_type() const {
         return m_element_dtype;
     }
 
@@ -52,7 +52,7 @@ public:
      * from the information given.
      *
      * \param metadata  A metadata instance for the dtype, or NULL.
-     * \param data  A data instance for the dtype/metadata, or NULL.
+     * \param data  A data instance for the type/metadata, or NULL.
      *
      * \returns  The size of the dimension, or -1.
      */
@@ -77,4 +77,4 @@ public:
 
 } // namespace dynd
 
-#endif // _DYND__BASE_UNIFORM_DIM_DTYPE_HPP_
+#endif // _DYND__BASE_UNIFORM_DIM_TYPE_HPP_

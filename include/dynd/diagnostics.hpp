@@ -16,7 +16,7 @@
 #if DYND_ALIGNMENT_ASSERTIONS
 #include <iostream>
 #include <sstream>
-#include <dynd/dtype.hpp>
+#include <dynd/type.hpp>
 
 # define DYND_ASSERT_ALIGNED(ptr, stride, alignment, extra_info) { \
         /*std::cout << "checking alignment for  " << __FILE__ << ": " << __LINE__ << "\n";*/ \
@@ -36,7 +36,7 @@
 
 #if DYND_ASSIGNMENT_TRACING
 #include <iostream>
-#include <dynd/dtype.hpp>
+#include <dynd/type.hpp>
 
 # define DYND_TRACE_ASSIGNMENT(dst_value, dst_type, src_value, src_type) { \
         std::cerr << "Assigning value " << src_value << " to value " << dst_value << " from " \

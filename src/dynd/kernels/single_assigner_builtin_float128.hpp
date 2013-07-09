@@ -30,9 +30,9 @@ struct single_assigner_builtin_base<dynd_bool, dynd_float128, bool_kind, real_ki
             *dst = 1;
         } else {
             std::stringstream ss;
-            ss << "overflow while assigning " << make_dtype<dynd_float128>();
+            ss << "overflow while assigning " << ndt::make_dtype<dynd_float128>();
             // TODO: ss << " value " << s;
-            ss << " to " << make_dtype<dynd_bool>();
+            ss << " to " << ndt::make_dtype<dynd_bool>();
             throw std::runtime_error(ss.str());
         }
     }

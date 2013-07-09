@@ -24,7 +24,7 @@ void void_pointer_dtype::print_dtype(std::ostream& o) const {
     o << "pointer<void>";
 }
 
-bool void_pointer_dtype::is_lossless_assignment(const dtype& DYND_UNUSED(dst_dt), const dtype& DYND_UNUSED(src_dt)) const
+bool void_pointer_dtype::is_lossless_assignment(const ndt::type& DYND_UNUSED(dst_dt), const ndt::type& DYND_UNUSED(src_dt)) const
 {
     return false;
 }
@@ -36,8 +36,8 @@ bool void_pointer_dtype::operator==(const base_dtype& rhs) const
 
 size_t void_pointer_dtype::make_assignment_kernel(
                 hierarchical_kernel *out, size_t offset_out,
-                const dtype& dst_dt, const char *dst_metadata,
-                const dtype& src_dt, const char *src_metadata,
+                const ndt::type& dst_dt, const char *dst_metadata,
+                const ndt::type& src_dt, const char *src_metadata,
                 kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *ectx) const
 {

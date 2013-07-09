@@ -40,19 +40,19 @@ TEST(DataShapeFormatter, ArrayBuiltinAtoms) {
 }
 
 TEST(DataShapeFormatter, DTypeBuiltinAtoms) {
-    EXPECT_EQ("bool", format_datashape(make_dtype<dynd_bool>(), "", false));
-    EXPECT_EQ("int8", format_datashape(make_dtype<int8_t>(), "", false));
-    EXPECT_EQ("int16", format_datashape(make_dtype<int16_t>(), "", false));
-    EXPECT_EQ("int32", format_datashape(make_dtype<int32_t>(), "", false));
-    EXPECT_EQ("int64", format_datashape(make_dtype<int64_t>(), "", false));
-    EXPECT_EQ("uint8", format_datashape(make_dtype<uint8_t>(), "", false));
-    EXPECT_EQ("uint16", format_datashape(make_dtype<uint16_t>(), "", false));
-    EXPECT_EQ("uint32", format_datashape(make_dtype<uint32_t>(), "", false));
-    EXPECT_EQ("uint64", format_datashape(make_dtype<uint64_t>(), "", false));
-    EXPECT_EQ("float32", format_datashape(make_dtype<float>(), "", false));
-    EXPECT_EQ("float64", format_datashape(make_dtype<double>(), "", false));
-    EXPECT_EQ("cfloat32", format_datashape(make_dtype<complex<float> >(), "", false));
-    EXPECT_EQ("cfloat64", format_datashape(make_dtype<complex<double> >(), "", false));
+    EXPECT_EQ("bool", format_datashape(ndt::make_dtype<dynd_bool>(), "", false));
+    EXPECT_EQ("int8", format_datashape(ndt::make_dtype<int8_t>(), "", false));
+    EXPECT_EQ("int16", format_datashape(ndt::make_dtype<int16_t>(), "", false));
+    EXPECT_EQ("int32", format_datashape(ndt::make_dtype<int32_t>(), "", false));
+    EXPECT_EQ("int64", format_datashape(ndt::make_dtype<int64_t>(), "", false));
+    EXPECT_EQ("uint8", format_datashape(ndt::make_dtype<uint8_t>(), "", false));
+    EXPECT_EQ("uint16", format_datashape(ndt::make_dtype<uint16_t>(), "", false));
+    EXPECT_EQ("uint32", format_datashape(ndt::make_dtype<uint32_t>(), "", false));
+    EXPECT_EQ("uint64", format_datashape(ndt::make_dtype<uint64_t>(), "", false));
+    EXPECT_EQ("float32", format_datashape(ndt::make_dtype<float>(), "", false));
+    EXPECT_EQ("float64", format_datashape(ndt::make_dtype<double>(), "", false));
+    EXPECT_EQ("cfloat32", format_datashape(ndt::make_dtype<complex<float> >(), "", false));
+    EXPECT_EQ("cfloat64", format_datashape(ndt::make_dtype<complex<double> >(), "", false));
 }
 
 TEST(DataShapeFormatter, ArrayStringAtoms) {
@@ -109,58 +109,58 @@ TEST(DataShapeFormatter, DTypeStringAtoms) {
 
 TEST(DataShapeFormatter, ArrayUniformArrays) {
     EXPECT_EQ("3, int32", format_datashape(
-                    nd::make_strided_array(3, make_dtype<int32_t>()), "", false));
+                    nd::make_strided_array(3, ndt::make_dtype<int32_t>()), "", false));
     EXPECT_EQ("var, int32", format_datashape(
-                    nd::empty(make_var_dim_dtype(make_dtype<int32_t>())), "", false));
+                    nd::empty(make_var_dim_dtype(ndt::make_dtype<int32_t>())), "", false));
     EXPECT_EQ("var, 3, int32", format_datashape(
                     nd::empty(make_var_dim_dtype(
-                        make_fixed_dim_dtype(3, make_dtype<int32_t>()))), "", false));
+                        make_fixed_dim_dtype(3, ndt::make_dtype<int32_t>()))), "", false));
 }
 
 TEST(DataShapeFormatter, DTypeUniformArrays) {
     EXPECT_EQ("A, B, C, int32", format_datashape(
-                    make_strided_dim_dtype(make_dtype<int32_t>(), 3), "", false));
+                    make_strided_dim_dtype(ndt::make_dtype<int32_t>(), 3), "", false));
     EXPECT_EQ("var, int32", format_datashape(
-                    make_var_dim_dtype(make_dtype<int32_t>()), "", false));
+                    make_var_dim_dtype(ndt::make_dtype<int32_t>()), "", false));
     EXPECT_EQ("var, 3, int32", format_datashape(
                     make_var_dim_dtype(
-                        make_fixed_dim_dtype(3, make_dtype<int32_t>())), "", false));
+                        make_fixed_dim_dtype(3, ndt::make_dtype<int32_t>())), "", false));
     EXPECT_EQ("var, A, int32", format_datashape(
                     make_var_dim_dtype(
-                        make_strided_dim_dtype(make_dtype<int32_t>())), "", false));
+                        make_strided_dim_dtype(ndt::make_dtype<int32_t>())), "", false));
 }
 
 TEST(DataShapeFormatter, ArrayStructs) {
     EXPECT_EQ("{x: int32; y: float64}", format_datashape(
                     nd::empty(make_cstruct_dtype(
-                                    make_dtype<int32_t>(), "x",
-                                    make_dtype<double>(), "y")), "", false));
+                                    ndt::make_dtype<int32_t>(), "x",
+                                    ndt::make_dtype<double>(), "y")), "", false));
     EXPECT_EQ("{x: var, {a: int32; b: int8}; y: 5, var, uint8}",
                     format_datashape(nd::empty(make_struct_dtype(
                                     make_var_dim_dtype(make_cstruct_dtype(
-                                        make_dtype<int32_t>(), "a",
-                                        make_dtype<int8_t>(), "b")), "x",
+                                        ndt::make_dtype<int32_t>(), "a",
+                                        ndt::make_dtype<int8_t>(), "b")), "x",
                                     make_fixed_dim_dtype(5, make_var_dim_dtype(
-                                        make_dtype<uint8_t>())), "y")), "", false));
+                                        ndt::make_dtype<uint8_t>())), "y")), "", false));
 }
 
 TEST(DataShapeFormatter, DTypeStructs) {
     EXPECT_EQ("{x: int32; y: float64}", format_datashape(
                     make_cstruct_dtype(
-                                    make_dtype<int32_t>(), "x",
-                                    make_dtype<double>(), "y"), "", false));
+                                    ndt::make_dtype<int32_t>(), "x",
+                                    ndt::make_dtype<double>(), "y"), "", false));
     EXPECT_EQ("{x: var, {a: int32; b: int8}; y: 5, var, uint8}",
                     format_datashape(make_struct_dtype(
                                     make_var_dim_dtype(make_cstruct_dtype(
-                                        make_dtype<int32_t>(), "a",
-                                        make_dtype<int8_t>(), "b")), "x",
+                                        ndt::make_dtype<int32_t>(), "a",
+                                        ndt::make_dtype<int8_t>(), "b")), "x",
                                     make_fixed_dim_dtype(5, make_var_dim_dtype(
-                                        make_dtype<uint8_t>())), "y"), "", false));
+                                        ndt::make_dtype<uint8_t>())), "y"), "", false));
     EXPECT_EQ("{x: A, {a: int32; b: int8}; y: var, B, uint8}",
                     format_datashape(make_struct_dtype(
                                     make_strided_dim_dtype(make_cstruct_dtype(
-                                        make_dtype<int32_t>(), "a",
-                                        make_dtype<int8_t>(), "b")), "x",
+                                        ndt::make_dtype<int32_t>(), "a",
+                                        ndt::make_dtype<int8_t>(), "b")), "x",
                                     make_var_dim_dtype(make_strided_dim_dtype(
-                                        make_dtype<uint8_t>())), "y"), "", false));
+                                        ndt::make_dtype<uint8_t>())), "y"), "", false));
 }

@@ -7,7 +7,7 @@
 #include <sstream>
 #include <algorithm>
 
-#include <dynd/dtype.hpp>
+#include <dynd/type.hpp>
 #include <dynd/diagnostics.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/kernels/struct_assignment_kernels.hpp>
@@ -71,7 +71,7 @@ namespace {
 
 size_t dynd::make_struct_identical_assignment_kernel(
                 hierarchical_kernel *out, size_t offset_out,
-                const dtype& val_struct_dt,
+                const ndt::type& val_struct_dt,
                 const char *dst_metadata, const char *src_metadata,
                 kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *ectx)
@@ -128,8 +128,8 @@ size_t dynd::make_struct_identical_assignment_kernel(
 
 size_t dynd::make_struct_assignment_kernel(
                 hierarchical_kernel *out, size_t offset_out,
-                const dtype& dst_struct_dt, const char *dst_metadata,
-                const dtype& src_struct_dt, const char *src_metadata,
+                const ndt::type& dst_struct_dt, const char *dst_metadata,
+                const ndt::type& src_struct_dt, const char *src_metadata,
                 kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *ectx)
 {
@@ -181,8 +181,8 @@ size_t dynd::make_struct_assignment_kernel(
         field_reorder[i] = it - src_field_names;
     }
 
-    const dtype *src_field_types = src_sd->get_field_types();
-    const dtype *dst_field_types = dst_sd->get_field_types();
+    const ndt::type *src_field_types = src_sd->get_field_types();
+    const ndt::type *dst_field_types = dst_sd->get_field_types();
     const size_t *src_data_offsets = src_sd->get_data_offsets(src_metadata);
     const size_t *dst_data_offsets = dst_sd->get_data_offsets(dst_metadata);
     const size_t *src_metadata_offsets = src_sd->get_metadata_offsets();

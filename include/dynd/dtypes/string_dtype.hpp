@@ -5,10 +5,10 @@
 // The string dtype uses memory_block references to store
 // arbitrarily sized strings.
 //
-#ifndef _DYND__STRING_DTYPE_HPP_
-#define _DYND__STRING_DTYPE_HPP_
+#ifndef _DYND__STRING_TYPE_HPP_
+#define _DYND__STRING_TYPE_HPP_
 
-#include <dynd/dtype.hpp>
+#include <dynd/type.hpp>
 #include <dynd/dtype_assign.hpp>
 #include <dynd/dtypes/view_dtype.hpp>
 #include <dynd/string_encodings.hpp>
@@ -55,11 +55,11 @@ public:
     void print_dtype(std::ostream& o) const;
 
     bool is_unique_data_owner(const char *metadata) const;
-    dtype get_canonical_dtype() const;
+    ndt::type get_canonical_type() const;
 
     void get_shape(size_t ndim, size_t i, intptr_t *out_shape, const char *metadata) const;
 
-    bool is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const;
+    bool is_lossless_assignment(const ndt::type& dst_dt, const ndt::type& src_dt) const;
 
     bool operator==(const base_dtype& rhs) const;
 
@@ -72,23 +72,23 @@ public:
 
     size_t make_assignment_kernel(
                     hierarchical_kernel *out, size_t offset_out,
-                    const dtype& dst_dt, const char *dst_metadata,
-                    const dtype& src_dt, const char *src_metadata,
+                    const ndt::type& dst_dt, const char *dst_metadata,
+                    const ndt::type& src_dt, const char *src_metadata,
                     kernel_request_t kernreq, assign_error_mode errmode,
                     const eval::eval_context *ectx) const;
 
     size_t make_comparison_kernel(
                     hierarchical_kernel *out, size_t offset_out,
-                    const dtype& src0_dt, const char *src0_metadata,
-                    const dtype& src1_dt, const char *src1_metadata,
+                    const ndt::type& src0_dt, const char *src0_metadata,
+                    const ndt::type& src1_dt, const char *src1_metadata,
                     comparison_type_t comptype,
                     const eval::eval_context *ectx) const;
 };
 
-inline dtype make_string_dtype(string_encoding_t encoding = string_encoding_utf_8) {
-    return dtype(new string_dtype(encoding), false);
+inline ndt::type make_string_dtype(string_encoding_t encoding = string_encoding_utf_8) {
+    return ndt::type(new string_dtype(encoding), false);
 }
 
 } // namespace dynd
 
-#endif // _DYND__STRING_DTYPE_HPP_
+#endif // _DYND__STRING_TYPE_HPP_

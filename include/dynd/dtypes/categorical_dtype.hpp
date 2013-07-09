@@ -4,13 +4,13 @@
 //
 // The categorical dtype always represents categorical data
 //
-#ifndef _DYND__CATEGORICAL_DTYPE_HPP_
-#define _DYND__CATEGORICAL_DTYPE_HPP_
+#ifndef _DYND__CATEGORICAL_TYPE_HPP_
+#define _DYND__CATEGORICAL_TYPE_HPP_
 
 #include <map>
 #include <vector>
 
-#include <dynd/dtype.hpp>
+#include <dynd/type.hpp>
 #include <dynd/array.hpp>
 #include <dynd/dtypes/strided_dim_dtype.hpp>
 
@@ -25,9 +25,9 @@ namespace dynd {
 
 class categorical_dtype : public base_dtype {
     // The data type of the category
-    dtype m_category_dtype;
+    ndt::type m_category_type;
     // The integer type used for storage
-    dtype m_storage_dtype;
+    ndt::type m_storage_type;
     // list of categories, in sorted order
     nd::array m_categories;
     // mapping from category indices to values
@@ -54,16 +54,16 @@ public:
     /**
      * Returns the dtype of the category values.
      */
-    const dtype& get_category_dtype() const {
-        return m_category_dtype;
+    const ndt::type& get_category_type() const {
+        return m_category_type;
     }
 
     /**
      * Return the dtype of the underlying integer used
      * to index the category list.
      */
-    const dtype& get_storage_dtype() const {
-        return m_storage_dtype;
+    const ndt::type& get_storage_type() const {
+        return m_storage_type;
     }
 
     uint32_t get_value_from_category(const char *category_metadata, const char *category_data) const;
@@ -82,7 +82,7 @@ public:
     /** Returns the categories as an immutable nd::array */
     nd::array get_categories() const;
 
-    bool is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const;
+    bool is_lossless_assignment(const ndt::type& dst_dt, const ndt::type& src_dt) const;
 
     bool operator==(const base_dtype& rhs) const;
 
@@ -93,8 +93,8 @@ public:
 
     size_t make_assignment_kernel(
                     hierarchical_kernel *out, size_t offset_out,
-                    const dtype& dst_dt, const char *dst_metadata,
-                    const dtype& src_dt, const char *src_metadata,
+                    const ndt::type& dst_dt, const char *dst_metadata,
+                    const ndt::type& src_dt, const char *src_metadata,
                     kernel_request_t kernreq, assign_error_mode errmode,
                     const eval::eval_context *ectx) const;
 
@@ -110,14 +110,14 @@ public:
     friend struct assign_from_commensurate_category_type;
 };
 
-inline dtype make_categorical_dtype(const nd::array& values) {
-    return dtype(new categorical_dtype(values), false);
+inline ndt::type make_categorical_dtype(const nd::array& values) {
+    return ndt::type(new categorical_dtype(values), false);
 }
 
 
-dtype factor_categorical_dtype(const nd::array& values);
+ndt::type factor_categorical_dtype(const nd::array& values);
 
 
 } // namespace dynd
 
-#endif // _DYND__CATEGORICAL_DTYPE_HPP_
+#endif // _DYND__CATEGORICAL_TYPE_HPP_

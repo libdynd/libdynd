@@ -3,8 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__BASE_STRING_DTYPE_HPP_
-#define _DYND__BASE_STRING_DTYPE_HPP_
+#ifndef _DYND__BASE_STRING_TYPE_HPP_
+#define _DYND__BASE_STRING_TYPE_HPP_
 
 #include <dynd/dtypes/base_dtype.hpp>
 #include <dynd/string_encodings.hpp>
@@ -52,4 +52,4 @@ public:
 
 } // namespace dynd
 
-#endif // _DYND__BASE_STRING_DTYPE_HPP_
+#endif // _DYND__BASE_STRING_TYPE_HPP_

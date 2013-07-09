@@ -16,15 +16,15 @@ using namespace std;
 using namespace dynd;
 
 TEST(ConvertDType, ExpressionInValue) {
-    // When given an expression dtype as the destination, making a conversion dtype chains
+    // When given an expression type as the destination, making a conversion dtype chains
     // the value dtype of the operand into the storage dtype of the desired result value
-    dtype d = make_convert_dtype(make_convert_dtype(make_dtype<float>(), make_dtype<int>()), make_dtype<float>());
-    EXPECT_EQ(make_convert_dtype(make_dtype<float>(), make_convert_dtype<int, float>()), d);
+    ndt::type d = make_convert_dtype(make_convert_dtype(ndt::make_dtype<float>(), ndt::make_dtype<int>()), ndt::make_dtype<float>());
+    EXPECT_EQ(make_convert_dtype(ndt::make_dtype<float>(), make_convert_dtype<int, float>()), d);
     EXPECT_TRUE(d.is_expression());
 }
 
 TEST(ConvertDType, CanonicalDType) {
-    // The canonical dtype of a convert dtype is always the value
-    EXPECT_EQ((make_dtype<float>()), (make_convert_dtype<float, int>().get_canonical_dtype()));
+    // The canonical type of a convert dtype is always the value
+    EXPECT_EQ((ndt::make_dtype<float>()), (make_convert_dtype<float, int>().get_canonical_type()));
 }
 

@@ -28,7 +28,7 @@ using namespace std;
 using namespace dynd;
 
 date_dtype::date_dtype()
-    : base_dtype(date_type_id, datetime_kind, 4, scalar_align_of<int32_t>::value, dtype_flag_scalar, 0, 0)
+    : base_dtype(date_type_id, datetime_kind, 4, scalar_align_of<int32_t>::value, type_flag_scalar, 0, 0)
 {
 }
 
@@ -36,11 +36,11 @@ date_dtype::~date_dtype()
 {
 }
 
-const dtype date_dtype::default_struct_dtype =
+const ndt::type date_dtype::default_struct_dtype =
         make_cstruct_dtype(
-            make_dtype<int32_t>(), "year",
-            make_dtype<int16_t>(), "month",
-            make_dtype<int16_t>(), "day");
+            ndt::make_dtype<int32_t>(), "year",
+            ndt::make_dtype<int16_t>(), "month",
+            ndt::make_dtype<int16_t>(), "day");
 namespace {
     struct default_date_struct_t {
         int32_t year;
@@ -101,7 +101,7 @@ void date_dtype::print_dtype(std::ostream& o) const
     o << "date";
 }
 
-bool date_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const
+bool date_dtype::is_lossless_assignment(const ndt::type& dst_dt, const ndt::type& src_dt) const
 {
     if (dst_dt.extended() == this) {
         if (src_dt.extended() == this) {
@@ -131,8 +131,8 @@ bool date_dtype::operator==(const base_dtype& rhs) const
 
 size_t date_dtype::make_assignment_kernel(
                 hierarchical_kernel *out, size_t offset_out,
-                const dtype& dst_dt, const char *dst_metadata,
-                const dtype& src_dt, const char *src_metadata,
+                const ndt::type& dst_dt, const char *dst_metadata,
+                const ndt::type& src_dt, const char *src_metadata,
                 kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *ectx) const
 {
@@ -180,8 +180,8 @@ size_t date_dtype::make_assignment_kernel(
 
 size_t date_dtype::make_comparison_kernel(
                 hierarchical_kernel *out, size_t offset_out,
-                const dtype& src0_dt, const char *src0_metadata,
-                const dtype& src1_dt, const char *src1_metadata,
+                const ndt::type& src0_dt, const char *src0_metadata,
+                const ndt::type& src1_dt, const char *src1_metadata,
                 comparison_type_t comptype,
                 const eval::eval_context *ectx) const
 {
@@ -213,7 +213,7 @@ void date_dtype::get_dynamic_dtype_properties(const std::pair<std::string, gfunc
 
 ///////// functions on the dtype
 
-static nd::array function_dtype_today(const dtype& dt) {
+static nd::array function_dtype_today(const ndt::type& dt) {
     datetime::date_ymd ymd;
     datetime::fill_current_local_date(&ymd);
     nd::array result = nd::empty(dt);
@@ -223,13 +223,13 @@ static nd::array function_dtype_today(const dtype& dt) {
     return result;
 }
 
-static nd::array function_dtype_construct(const dtype& DYND_UNUSED(dt),
+static nd::array function_dtype_construct(const ndt::type& DYND_UNUSED(dt),
                 const nd::array& year, const nd::array& month, const nd::array& day)
 {
     // TODO proper buffering
-    nd::array year_as_int = year.ucast(make_dtype<int32_t>()).eval();
-    nd::array month_as_int = month.ucast(make_dtype<int32_t>()).eval();
-    nd::array day_as_int = day.ucast(make_dtype<int32_t>()).eval();
+    nd::array year_as_int = year.ucast(ndt::make_dtype<int32_t>()).eval();
+    nd::array month_as_int = month.ucast(ndt::make_dtype<int32_t>()).eval();
+    nd::array day_as_int = day.ucast(ndt::make_dtype<int32_t>()).eval();
     nd::array result;
 
     array_iter<1,3> iter(make_date_dtype(), result, year_as_int, month_as_int, day_as_int);
@@ -449,7 +449,7 @@ size_t date_dtype::get_elwise_property_index(const std::string& property_name) c
     }
 }
 
-dtype date_dtype::get_elwise_property_dtype(size_t property_index,
+ndt::type date_dtype::get_elwise_property_dtype(size_t property_index,
             bool& out_readable, bool& out_writable) const
 {
     switch (property_index) {
@@ -459,11 +459,11 @@ dtype date_dtype::get_elwise_property_dtype(size_t property_index,
         case dateprop_weekday:
             out_readable = true;
             out_writable = false;
-            return make_dtype<int32_t>();
+            return ndt::make_dtype<int32_t>();
         case dateprop_days_after_1970_int64:
             out_readable = true;
             out_writable = true;
-            return make_dtype<int64_t>();
+            return ndt::make_dtype<int64_t>();
         case dateprop_struct:
             out_readable = true;
             out_writable = true;
@@ -471,7 +471,7 @@ dtype date_dtype::get_elwise_property_dtype(size_t property_index,
         default:
             out_readable = false;
             out_writable = false;
-            return make_dtype<void>();
+            return ndt::make_dtype<void>();
     }
 }
 

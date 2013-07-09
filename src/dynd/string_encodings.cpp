@@ -5,7 +5,7 @@
 
 #include <sstream>
 
-#include <dynd/dtype.hpp>
+#include <dynd/type.hpp>
 #include <dynd/string_encodings.hpp>
 
 #include <utf8.h>

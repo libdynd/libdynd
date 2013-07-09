@@ -3,10 +3,10 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__BUSDATE_DTYPE_HPP_
-#define _DYND__BUSDATE_DTYPE_HPP_
+#ifndef _DYND__BUSDATE_TYPE_HPP_
+#define _DYND__BUSDATE_TYPE_HPP_
 
-#include <dynd/dtype.hpp>
+#include <dynd/type.hpp>
 #include <dynd/array.hpp>
 
 namespace dynd {
@@ -74,7 +74,7 @@ public:
 
     void print_dtype(std::ostream& o) const;
 
-    bool is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const;
+    bool is_lossless_assignment(const ndt::type& dst_dt, const ndt::type& src_dt) const;
 
     bool operator==(const base_dtype& rhs) const;
 
@@ -88,11 +88,11 @@ public:
     }
 };
 
-inline dtype make_busdate_dtype(busdate_roll_t roll = busdate_roll_following,
+inline ndt::type make_busdate_dtype(busdate_roll_t roll = busdate_roll_following,
                 const bool *weekmask = NULL, const nd::array& holidays = nd::array()) {
-    return dtype(new busdate_dtype(roll, weekmask, holidays), false);
+    return ndt::type(new busdate_dtype(roll, weekmask, holidays), false);
 }
 
 } // namespace dynd
 
-#endif // _DYND__BUSDATE_DTYPE_HPP_
+#endif // _DYND__BUSDATE_TYPE_HPP_

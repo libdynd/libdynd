@@ -14,14 +14,14 @@ using namespace dynd;
 nd::array dynd::gfunc::serialize(const nd::array& val)
 {
     // To start, we're only supporting simple one-dimensional arrays of primitives
-    const dtype& dt = val.get_dtype();
+    const ndt::type& dt = val.get_dtype();
     if (dt.get_type_id() != strided_dim_type_id) {
         stringstream ss;
         ss << "dynd::gfunc::serialize is currently only a prototype, does not support dtype " << dt;
         throw runtime_error(ss.str());
     }
     const strided_dim_dtype *sad = static_cast<const strided_dim_dtype *>(dt.extended());
-    const dtype& et = sad->get_element_dtype();
+    const ndt::type& et = sad->get_element_type();
     if (!et.is_builtin()) {
         stringstream ss;
         ss << "dynd::gfunc::serialize is currently only a prototype, does not support dtype " << dt;

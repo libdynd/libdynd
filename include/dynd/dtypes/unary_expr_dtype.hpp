@@ -3,10 +3,10 @@
 // BSD 2-Clause License, see LICENSE.txt
 
 
-#ifndef _DYND__UNARY_EXPR_DTYPE_HPP_
-#define _DYND__UNARY_EXPR_DTYPE_HPP_
+#ifndef _DYND__UNARY_EXPR_TYPE_HPP_
+#define _DYND__UNARY_EXPR_TYPE_HPP_
 
-#include <dynd/dtype.hpp>
+#include <dynd/type.hpp>
 #include <dynd/kernels/expr_kernel_generator.hpp>
 
 namespace dynd {
@@ -21,44 +21,44 @@ namespace dynd {
  *    expr dtype.
  *  - Elementwise unary expr dtypes are applied at the
  *    element level, so it can efficiently interoperate
- *    with other elementwise expression dtypes such as
+ *    with other elementwise expression types such as
  *    type conversion, byte swapping, etc.
  */
 class unary_expr_dtype : public base_expression_dtype {
-    dtype m_value_dtype, m_operand_dtype;
+    ndt::type m_value_type, m_operand_type;
     const expr_kernel_generator *m_kgen;
 
 public:
-    unary_expr_dtype(const dtype& value_dtype, const dtype& operand_dtype,
+    unary_expr_dtype(const ndt::type& value_type, const ndt::type& operand_type,
                     const expr_kernel_generator *kgen);
 
     virtual ~unary_expr_dtype();
 
-    const dtype& get_value_dtype() const {
-        return m_value_dtype;
+    const ndt::type& get_value_type() const {
+        return m_value_type;
     }
-    const dtype& get_operand_dtype() const {
-        return m_operand_dtype;
+    const ndt::type& get_operand_type() const {
+        return m_operand_type;
     }
 
     void print_data(std::ostream& o, const char *metadata, const char *data) const;
 
     void print_dtype(std::ostream& o) const;
 
-    dtype apply_linear_index(size_t nindices, const irange *indices,
-                size_t current_i, const dtype& root_dt, bool leading_dimension) const;
+    ndt::type apply_linear_index(size_t nindices, const irange *indices,
+                size_t current_i, const ndt::type& root_dt, bool leading_dimension) const;
     intptr_t apply_linear_index(size_t nindices, const irange *indices, const char *metadata,
-                    const dtype& result_dtype, char *out_metadata,
+                    const ndt::type& result_dtype, char *out_metadata,
                     memory_block_data *embedded_reference,
-                    size_t current_i, const dtype& root_dt,
+                    size_t current_i, const ndt::type& root_dt,
                     bool leading_dimension, char **inout_data,
                     memory_block_data **inout_dataref) const;
 
-    bool is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const;
+    bool is_lossless_assignment(const ndt::type& dst_dt, const ndt::type& src_dt) const;
 
     bool operator==(const base_dtype& rhs) const;
 
-    dtype with_replaced_storage_dtype(const dtype& replacement_dtype) const;
+    ndt::type with_replaced_storage_type(const ndt::type& replacement_type) const;
 
     size_t make_operand_to_value_assignment_kernel(
                     hierarchical_kernel *out, size_t offset_out,
@@ -78,13 +78,13 @@ public:
 /**
  * Makes a unary expr dtype.
  */
-inline dtype make_unary_expr_dtype(const dtype& value_dtype,
-                const dtype& operand_dtype,
+inline ndt::type make_unary_expr_dtype(const ndt::type& value_type,
+                const ndt::type& operand_type,
                 const expr_kernel_generator *kgen)
 {
-    return dtype(new unary_expr_dtype(value_dtype, operand_dtype, kgen), false);
+    return ndt::type(new unary_expr_dtype(value_type, operand_type, kgen), false);
 }
 
 } // namespace dynd
 
-#endif // _DYND__UNARY_EXPR_DTYPE_HPP_
+#endif // _DYND__UNARY_EXPR_TYPE_HPP_

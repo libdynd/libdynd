@@ -17,7 +17,7 @@
 
 namespace dynd {
 
-enum dtype_kind_t {
+enum type_kind_t {
     bool_kind,
     int_kind,
     uint_kind,
@@ -32,8 +32,8 @@ enum dtype_kind_t {
     uniform_dim_kind,
     // For struct_type_id and cstruct_type_id
     struct_kind,
-    // For dtypes whose value_dtype != the dtype, signals
-    // that calculations should look at the value_dtype for
+    // For dtypes whose value_type != the dtype, signals
+    // that calculations should look at the value_type for
     // type promotion, etc.
     expression_kind,
     // For pattern-matching dtypes
@@ -120,7 +120,7 @@ enum type_id_t {
     // A type for property access
     property_type_id,
 
-    // Advanced expression dtypes
+    // Advanced expression types
     expr_type_id,
     unary_expr_type_id,
     groupby_type_id,
@@ -134,17 +134,17 @@ enum type_id_t {
 
 enum dtype_flags_t {
     // A symbolic name instead of just "0"
-    dtype_flag_none = 0x00000000,
+    type_flag_none = 0x00000000,
     // The dtype should be considered as a scalar
-    dtype_flag_scalar = 0x00000001,
+    type_flag_scalar = 0x00000001,
     // Memory of this dtype should be zero-initialized
-    dtype_flag_zeroinit = 0x00000002,
+    type_flag_zeroinit = 0x00000002,
     // Instances of this dtype point into other memory
     // blocks, e.g. string_dtype, var_dim_dtype.
-    dtype_flag_blockref = 0x00000004,
+    type_flag_blockref = 0x00000004,
     // Memory of this type must be destroyed,
     // e.g. it might hold a reference count or similar state
-    dtype_flag_destructor = 0x00000008
+    type_flag_destructor = 0x00000008
 };
 
 enum axis_order_classification_t {
@@ -163,16 +163,16 @@ enum axis_order_classification_t {
 };
 
 enum {
-    // These are the flags expression dtypes should inherit
+    // These are the flags expression types should inherit
     // from their operand type
     dtype_flags_operand_inherited =
-                    dtype_flag_zeroinit|
-                    dtype_flag_blockref|
-                    dtype_flag_destructor,
-    // These are the flags expression dtypes should inherit
+                    type_flag_zeroinit|
+                    type_flag_blockref|
+                    type_flag_destructor,
+    // These are the flags expression types should inherit
     // from their value type
     dtype_flags_value_inherited =
-                    dtype_flag_scalar
+                    type_flag_scalar
 };
 
 enum kernel_request_t {
@@ -198,7 +198,7 @@ enum kernel_request_t {
 //    kernel_request_strided_multistride
 };
 
-std::ostream& operator<<(std::ostream& o, dtype_kind_t kind);
+std::ostream& operator<<(std::ostream& o, type_kind_t kind);
 std::ostream& operator<<(std::ostream& o, type_id_t tid);
 std::ostream& operator<<(std::ostream& o, kernel_request_t kernreq);
 
@@ -207,10 +207,10 @@ enum {
     builtin_type_id_mask = 0x3f
 };
 
-// Forward declaration so we can make the is_builtin_dtype function here
+// Forward declaration so we can make the is_builtin_type function here
 class base_dtype;
 
-inline bool is_builtin_dtype(const base_dtype *dt) {
+inline bool is_builtin_type(const base_dtype *dt) {
     return (reinterpret_cast<uintptr_t>(dt)&(~static_cast<uintptr_t>(builtin_type_id_mask))) == 0;
 }
 
@@ -285,29 +285,29 @@ template <> struct type_id_of<void> {enum {value = void_type_id};};
 // Type trait for the kind
 template <typename T> struct dtype_kind_of;
 
-template <> struct dtype_kind_of<void> {static const dtype_kind_t value = void_kind;};
+template <> struct dtype_kind_of<void> {static const type_kind_t value = void_kind;};
 // Can't use bool, because it doesn't have a guaranteed sizeof
-template <> struct dtype_kind_of<dynd_bool> {static const dtype_kind_t value = bool_kind;};
+template <> struct dtype_kind_of<dynd_bool> {static const type_kind_t value = bool_kind;};
 template <> struct dtype_kind_of<char> {
-    static const dtype_kind_t value = ((char)-1) < 0 ? int_kind : uint_kind;
+    static const type_kind_t value = ((char)-1) < 0 ? int_kind : uint_kind;
 };
-template <> struct dtype_kind_of<signed char> {static const dtype_kind_t value = int_kind;};
-template <> struct dtype_kind_of<short> {static const dtype_kind_t value = int_kind;};
-template <> struct dtype_kind_of<int> {static const dtype_kind_t value = int_kind;};
-template <> struct dtype_kind_of<long> {static const dtype_kind_t value = int_kind;};
-template <> struct dtype_kind_of<long long> {static const dtype_kind_t value = int_kind;};
-template <> struct dtype_kind_of<dynd_int128> {static const dtype_kind_t value = int_kind;};
-template <> struct dtype_kind_of<uint8_t> {static const dtype_kind_t value = uint_kind;};
-template <> struct dtype_kind_of<uint16_t> {static const dtype_kind_t value = uint_kind;};
-template <> struct dtype_kind_of<unsigned int> {static const dtype_kind_t value = uint_kind;};
-template <> struct dtype_kind_of<unsigned long> {static const dtype_kind_t value = uint_kind;};
-template <> struct dtype_kind_of<unsigned long long>{static const dtype_kind_t value = uint_kind;};
-template <> struct dtype_kind_of<dynd_uint128> {static const dtype_kind_t value = uint_kind;};
-template <> struct dtype_kind_of<dynd_float16> {static const dtype_kind_t value = real_kind;};
-template <> struct dtype_kind_of<float> {static const dtype_kind_t value = real_kind;};
-template <> struct dtype_kind_of<double> {static const dtype_kind_t value = real_kind;};
-template <> struct dtype_kind_of<dynd_float128> {static const dtype_kind_t value = real_kind;};
-template <typename T> struct dtype_kind_of<std::complex<T> > {static const dtype_kind_t value = complex_kind;};
+template <> struct dtype_kind_of<signed char> {static const type_kind_t value = int_kind;};
+template <> struct dtype_kind_of<short> {static const type_kind_t value = int_kind;};
+template <> struct dtype_kind_of<int> {static const type_kind_t value = int_kind;};
+template <> struct dtype_kind_of<long> {static const type_kind_t value = int_kind;};
+template <> struct dtype_kind_of<long long> {static const type_kind_t value = int_kind;};
+template <> struct dtype_kind_of<dynd_int128> {static const type_kind_t value = int_kind;};
+template <> struct dtype_kind_of<uint8_t> {static const type_kind_t value = uint_kind;};
+template <> struct dtype_kind_of<uint16_t> {static const type_kind_t value = uint_kind;};
+template <> struct dtype_kind_of<unsigned int> {static const type_kind_t value = uint_kind;};
+template <> struct dtype_kind_of<unsigned long> {static const type_kind_t value = uint_kind;};
+template <> struct dtype_kind_of<unsigned long long>{static const type_kind_t value = uint_kind;};
+template <> struct dtype_kind_of<dynd_uint128> {static const type_kind_t value = uint_kind;};
+template <> struct dtype_kind_of<dynd_float16> {static const type_kind_t value = real_kind;};
+template <> struct dtype_kind_of<float> {static const type_kind_t value = real_kind;};
+template <> struct dtype_kind_of<double> {static const type_kind_t value = real_kind;};
+template <> struct dtype_kind_of<dynd_float128> {static const type_kind_t value = real_kind;};
+template <typename T> struct dtype_kind_of<std::complex<T> > {static const type_kind_t value = complex_kind;};
 
 // Metaprogram for determining if a type is a valid C++ scalar
 // of a particular dtype.

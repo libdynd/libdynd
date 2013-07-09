@@ -10,7 +10,7 @@
 #include <deque>
 #include <vector>
 
-#include <dynd/dtype.hpp>
+#include <dynd/type.hpp>
 #include <dynd/array.hpp>
 #include <dynd/kernels/kernel_instance.hpp>
 #include <dynd/codegen/codegen_cache.hpp>
@@ -30,8 +30,8 @@ public:
      * kernel is provided.
      */
     bool m_commutative;
-    dtype m_returntype;
-    std::vector<dynd::dtype> m_paramtypes;
+    ndt::type m_returntype;
+    std::vector<dynd::ndt::type> m_paramtypes;
     dynd::nd::array m_identity;
     /**
      * Does dst <- operation(dst, src), use when iterating from index 0 to N-1.
@@ -74,7 +74,7 @@ public:
     /**
      * Searches for a kernel which matches all the parameter types.
      */
-    const elwise_reduce_kernel *find_matching_kernel(const std::vector<dtype>& paramtypes) const;
+    const elwise_reduce_kernel *find_matching_kernel(const std::vector<ndt::type>& paramtypes) const;
 
     /**
      * Adds the provided kernel to the gfunc. This swaps it out of the provided

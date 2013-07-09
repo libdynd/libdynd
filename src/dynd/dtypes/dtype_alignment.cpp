@@ -12,17 +12,17 @@
 using namespace std;
 using namespace dynd;
 
-dtype dynd::make_unaligned_dtype(const dtype& value_dtype)
+ndt::type ndt::make_unaligned_dtype(const ndt::type& value_type)
 {
-    if (value_dtype.get_data_alignment() > 1) {
+    if (value_type.get_data_alignment() > 1) {
         // Only do something if it requires alignment
-        if (value_dtype.get_kind() != expression_kind) {
-            return make_view_dtype(value_dtype, make_fixedbytes_dtype(value_dtype.get_data_size(), 1));
+        if (value_type.get_kind() != expression_kind) {
+            return make_view_dtype(value_type, make_fixedbytes_dtype(value_type.get_data_size(), 1));
         } else {
-            const dtype& sdt = value_dtype.storage_dtype();
-            return dtype(static_cast<const base_expression_dtype *>(value_dtype.extended())->with_replaced_storage_dtype(make_view_dtype(sdt, make_fixedbytes_dtype(sdt.get_data_size(), 1))));
+            const ndt::type& sdt = value_type.storage_type();
+            return ndt::type(static_cast<const base_expression_dtype *>(value_type.extended())->with_replaced_storage_type(make_view_dtype(sdt, make_fixedbytes_dtype(sdt.get_data_size(), 1))));
         }
     } else {
-        return value_dtype;
+        return value_type;
     }
 }

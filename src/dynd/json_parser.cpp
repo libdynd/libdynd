@@ -20,9 +20,9 @@ namespace {
     class json_parse_error {
         const char *m_position;
         string m_message;
-        dtype m_dtype;
+        ndt::type m_dtype;
     public:
-        json_parse_error(const char *position, const std::string& message, const dtype& dt)
+        json_parse_error(const char *position, const std::string& message, const ndt::type& dt)
             : m_position(position), m_message(message), m_dtype(dt) {
         }
         virtual ~json_parse_error() {
@@ -33,7 +33,7 @@ namespace {
         const char *get_message() const {
             return m_message.c_str();
         }
-        const dtype& get_dtype() const {
+        const ndt::type& get_dtype() const {
             return m_dtype;
         }
     };
@@ -42,7 +42,7 @@ namespace {
 static void json_as_buffer(const nd::array& json, nd::array& out_tmp_ref, const char *&begin, const char *&end)
 {
     // Check the dtype of 'json', and get pointers to the begin/end of a UTF-8 buffer
-    dtype json_dtype = json.get_dtype().value_dtype();
+    ndt::type json_dtype = json.get_dtype().value_type();
     switch (json_dtype.get_kind()) {
         case string_kind: {
             const base_string_dtype *sdt = static_cast<const base_string_dtype *>(json_dtype.extended());
@@ -56,7 +56,7 @@ static void json_as_buffer(const nd::array& json, nd::array& out_tmp_ref, const 
                     break;
                 default: {
                     // The data needs to be converted to UTF-8 before parsing
-                    dtype utf8_dt = make_string_dtype(string_encoding_utf_8);
+                    ndt::type utf8_dt = make_string_dtype(string_encoding_utf_8);
                     out_tmp_ref = json.ucast(utf8_dt).eval();
                     sdt = static_cast<const base_string_dtype *>(utf8_dt.extended());
                     sdt->get_string_range(&begin, &end,
@@ -91,7 +91,7 @@ void dynd::parse_json(nd::array& out, const nd::array& json)
     parse_json(out, json_begin, json_end);
 }
 
-nd::array dynd::parse_json(const dtype& dt, const nd::array& json)
+nd::array dynd::parse_json(const ndt::type& dt, const nd::array& json)
 {
     const char *json_begin = NULL, *json_end = NULL;
     nd::array tmp_ref;
@@ -99,7 +99,7 @@ nd::array dynd::parse_json(const dtype& dt, const nd::array& json)
     return parse_json(dt, json_begin, json_end);
 }
 
-static void parse_json(const dtype& dt, const char *metadata, char *out_data,
+static void parse_json(const ndt::type& dt, const char *metadata, char *out_data,
                 const char *&json_begin, const char *json_end);
 
 static const char *skip_whitespace(const char *begin, const char *end)
@@ -132,12 +132,12 @@ static bool parse_json_string(const char *&begin, const char *end, string& out_v
     }
     for (;;) {
         if (begin == end) {
-            throw json_parse_error(skip_whitespace(saved_begin, end), "string has no ending quote", dtype());
+            throw json_parse_error(skip_whitespace(saved_begin, end), "string has no ending quote", ndt::type());
         }
         char c = *begin++;
         if (c == '\\') {
             if (begin == end) {
-                throw json_parse_error(skip_whitespace(saved_begin, end), "string has no ending quote", dtype());
+                throw json_parse_error(skip_whitespace(saved_begin, end), "string has no ending quote", ndt::type());
             }
             c = *begin++;
             switch (c) {
@@ -163,7 +163,7 @@ static bool parse_json_string(const char *&begin, const char *end, string& out_v
                     break;
                 case 'u': {
                     if (end - begin < 4) {
-                        throw json_parse_error(begin-2, "invalid unicode escape sequence in string", dtype());
+                        throw json_parse_error(begin-2, "invalid unicode escape sequence in string", ndt::type());
                     }
                     uint32_t cp = 0;
                     for (int i = 0; i < 4; ++i) {
@@ -176,14 +176,14 @@ static bool parse_json_string(const char *&begin, const char *end, string& out_v
                         } else if ('a' <= c && c <= 'f') {
                             cp += c - 'a' + 10;
                         } else {
-                            throw json_parse_error(begin-1, "invalid unicode escape sequence in string", dtype());
+                            throw json_parse_error(begin-1, "invalid unicode escape sequence in string", ndt::type());
                         }
                     }
                     append_utf8_codepoint(cp, out_val);
                     break;
                 }
                 default:
-                    throw json_parse_error(begin-2, "invalid escape sequence in string", dtype());
+                    throw json_parse_error(begin-2, "invalid escape sequence in string", ndt::type());
             }
         } else if (c != '"') {
             out_val += c;
@@ -261,7 +261,7 @@ static void skip_json_value(const char *&begin, const char *end)
 {
     begin = skip_whitespace(begin, end);
     if (begin == end) {
-        throw json_parse_error(begin, "malformed JSON, expecting an element", dtype());
+        throw json_parse_error(begin, "malformed JSON, expecting an element", ndt::type());
     }
     char c = *begin;
     switch (c) {
@@ -272,10 +272,10 @@ static void skip_json_value(const char *&begin, const char *end)
                 for (;;) {
                     string name;
                     if (!parse_json_string(begin, end, name)) {
-                        throw json_parse_error(begin, "expected string for name in object dict", dtype());
+                        throw json_parse_error(begin, "expected string for name in object dict", ndt::type());
                     }
                     if (!parse_token(begin, end, ":")) {
-                        throw json_parse_error(begin, "expected ':' separating name from value in object dict", dtype());
+                        throw json_parse_error(begin, "expected ':' separating name from value in object dict", ndt::type());
                     }
                     skip_json_value(begin, end);
                     if (!parse_token(begin, end, ",")) {
@@ -283,7 +283,7 @@ static void skip_json_value(const char *&begin, const char *end)
                     }
                 }
                 if (!parse_token(begin, end, "}")) {
-                    throw json_parse_error(begin, "expected object separator ',' or terminator '}'", dtype());
+                    throw json_parse_error(begin, "expected object separator ',' or terminator '}'", ndt::type());
                 }
             }
             break;
@@ -298,45 +298,45 @@ static void skip_json_value(const char *&begin, const char *end)
                     }
                 }
                 if (!parse_token(begin, end, "]")) {
-                    throw json_parse_error(begin, "expected array separator ',' or terminator ']'", dtype());
+                    throw json_parse_error(begin, "expected array separator ',' or terminator ']'", ndt::type());
                 }
             }
             break;
         case '"': {
             string s;
             if (!parse_json_string(begin, end, s)) {
-                throw json_parse_error(begin, "invalid string", dtype());
+                throw json_parse_error(begin, "invalid string", ndt::type());
             }
             break;
         }
         case 't':
             if (!parse_token(begin, end, "true")) {
-                throw json_parse_error(begin, "invalid json value", dtype());
+                throw json_parse_error(begin, "invalid json value", ndt::type());
             }
             break;
         case 'f':
             if (!parse_token(begin, end, "false")) {
-                throw json_parse_error(begin, "invalid json value", dtype());
+                throw json_parse_error(begin, "invalid json value", ndt::type());
             }
             break;
         case 'n':
             if (!parse_token(begin, end, "null")) {
-                throw json_parse_error(begin, "invalid json value", dtype());
+                throw json_parse_error(begin, "invalid json value", ndt::type());
             }
             break;
         default:
             if (c == '-' || ('0' <= c && c <= '9')) {
                 const char *nbegin = NULL, *nend = NULL;
                 if (!parse_json_number(begin, end, nbegin, nend)) {
-                    throw json_parse_error(begin, "invalid number", dtype());
+                    throw json_parse_error(begin, "invalid number", ndt::type());
                 }
             } else {
-                throw json_parse_error(begin, "invalid json value", dtype());
+                throw json_parse_error(begin, "invalid json value", ndt::type());
             }
     }
 }
 
-static void parse_fixed_dim_json(const dtype& dt, const char *metadata, char *out_data,
+static void parse_fixed_dim_json(const ndt::type& dt, const char *metadata, char *out_data,
                 const char *&begin, const char *end)
 {
     const fixed_dim_dtype *fad = static_cast<const fixed_dim_dtype *>(dt.extended());
@@ -347,7 +347,7 @@ static void parse_fixed_dim_json(const dtype& dt, const char *metadata, char *ou
         throw json_parse_error(begin, "expected list starting with '['", dt);
     }
     for (intptr_t i = 0; i < size; ++i) {
-        parse_json(fad->get_element_dtype(), metadata, out_data + i * stride, begin, end);
+        parse_json(fad->get_element_type(), metadata, out_data + i * stride, begin, end);
         if (i < size-1 && !parse_token(begin, end, ",")) {
             throw json_parse_error(begin, "array is too short, expected ',' list item separator", dt);
         }
@@ -357,13 +357,13 @@ static void parse_fixed_dim_json(const dtype& dt, const char *metadata, char *ou
     }
 }
 
-static void parse_var_dim_json(const dtype& dt, const char *metadata, char *out_data,
+static void parse_var_dim_json(const ndt::type& dt, const char *metadata, char *out_data,
                 const char *&begin, const char *end)
 {
     const var_dim_dtype *vad = static_cast<const var_dim_dtype *>(dt.extended());
     const var_dim_dtype_metadata *md = reinterpret_cast<const var_dim_dtype_metadata *>(metadata);
     intptr_t stride = md->stride;
-    const dtype& element_dtype = vad->get_element_dtype();
+    const ndt::type& element_dtype = vad->get_element_type();
 
     var_dim_dtype_data *out = reinterpret_cast<var_dim_dtype_data *>(out_data);
     char *out_end = NULL;
@@ -402,13 +402,13 @@ static void parse_var_dim_json(const dtype& dt, const char *metadata, char *out_
     out->size = size;
 }
 
-static void parse_struct_json(const dtype& dt, const char *metadata, char *out_data,
+static void parse_struct_json(const ndt::type& dt, const char *metadata, char *out_data,
                 const char *&begin, const char *end)
 {
     const base_struct_dtype *fsd = static_cast<const base_struct_dtype *>(dt.extended());
     size_t field_count = fsd->get_field_count();
     const string *field_names = fsd->get_field_names();
-    const dtype *field_types = fsd->get_field_types();
+    const ndt::type *field_types = fsd->get_field_types();
     const size_t *data_offsets = fsd->get_data_offsets(metadata);
     const size_t *metadata_offsets = fsd->get_metadata_offsets();
 
@@ -459,7 +459,7 @@ static void parse_struct_json(const dtype& dt, const char *metadata, char *out_d
     }
 }
 
-static void parse_bool_json(const dtype& dt, const char *metadata, char *out_data,
+static void parse_bool_json(const ndt::type& dt, const char *metadata, char *out_data,
                 const char *&begin, const char *end)
 {
     char value;
@@ -478,11 +478,11 @@ static void parse_bool_json(const dtype& dt, const char *metadata, char *out_dat
     if (dt.get_type_id() == bool_type_id) {
         *out_data = value;
     } else {
-        dtype_assign(dt, metadata, out_data, make_dtype<dynd_bool>(), NULL, &value);
+        dtype_assign(dt, metadata, out_data, ndt::make_dtype<dynd_bool>(), NULL, &value);
     }
 }
 
-static void parse_dynd_builtin_json(const dtype& dt, const char *DYND_UNUSED(metadata), char *out_data,
+static void parse_dynd_builtin_json(const ndt::type& dt, const char *DYND_UNUSED(metadata), char *out_data,
                 const char *&begin, const char *end)
 {
     const char *saved_begin = begin;
@@ -505,28 +505,28 @@ static void parse_dynd_builtin_json(const dtype& dt, const char *DYND_UNUSED(met
     }
 }
 
-static void parse_integer_json(const dtype& dt, const char *metadata, char *out_data,
+static void parse_integer_json(const ndt::type& dt, const char *metadata, char *out_data,
                 const char *&begin, const char *end)
 {
     // TODO: Parsing policy for how to handle integers
     parse_dynd_builtin_json(dt, metadata, out_data, begin, end);
 }
 
-static void parse_real_json(const dtype& dt, const char *metadata, char *out_data,
+static void parse_real_json(const ndt::type& dt, const char *metadata, char *out_data,
                 const char *&begin, const char *end)
 {
     // TODO: Parsing policy for how to handle reals
     parse_dynd_builtin_json(dt, metadata, out_data, begin, end);
 }
 
-static void parse_complex_json(const dtype& dt, const char *metadata, char *out_data,
+static void parse_complex_json(const ndt::type& dt, const char *metadata, char *out_data,
                 const char *&begin, const char *end)
 {
     // TODO: Parsing policy for how to handle complex
     parse_dynd_builtin_json(dt, metadata, out_data, begin, end);
 }
 
-static void parse_jsonstring_json(const dtype& dt, const char *metadata, char *out_data,
+static void parse_jsonstring_json(const ndt::type& dt, const char *metadata, char *out_data,
                 const char *&begin, const char *end)
 {
     const char *saved_begin = skip_whitespace(begin, end);
@@ -537,7 +537,7 @@ static void parse_jsonstring_json(const dtype& dt, const char *metadata, char *o
             saved_begin, begin);
 }
 
-static void parse_string_json(const dtype& dt, const char *metadata, char *out_data,
+static void parse_string_json(const ndt::type& dt, const char *metadata, char *out_data,
                 const char *&begin, const char *end)
 {
     const char *saved_begin = begin;
@@ -554,7 +554,7 @@ static void parse_string_json(const dtype& dt, const char *metadata, char *out_d
     }
 }
 
-static void parse_datetime_json(const dtype& dt, const char *metadata, char *out_data,
+static void parse_datetime_json(const ndt::type& dt, const char *metadata, char *out_data,
                 const char *&begin, const char *end)
 {
     const char *saved_begin = begin;
@@ -573,7 +573,7 @@ static void parse_datetime_json(const dtype& dt, const char *metadata, char *out
     }
 }
 
-static void parse_uniform_dim_json(const dtype& dt, const char *metadata, char *out_data,
+static void parse_uniform_dim_json(const ndt::type& dt, const char *metadata, char *out_data,
                 const char *&begin, const char *end)
 {
     switch (dt.get_type_id()) {
@@ -591,7 +591,7 @@ static void parse_uniform_dim_json(const dtype& dt, const char *metadata, char *
     }
 }
 
-static void parse_json(const dtype& dt, const char *metadata, char *out_data,
+static void parse_json(const ndt::type& dt, const char *metadata, char *out_data,
                 const char *&json_begin, const char *json_end)
 {
     switch (dt.get_kind()) {
@@ -706,7 +706,7 @@ void dynd::validate_json(const char *json_begin, const char *json_end)
         ::skip_json_value(begin, end);
         begin = skip_whitespace(begin, end);
         if (begin != end) {
-            throw json_parse_error(begin, "unexpected trailing JSON text", dtype());
+            throw json_parse_error(begin, "unexpected trailing JSON text", ndt::type());
         }
     } catch (const json_parse_error& e) {
         stringstream ss;
@@ -725,7 +725,7 @@ void dynd::parse_json(nd::array& out, const char *json_begin, const char *json_e
 {
     try {
         const char *begin = json_begin, *end = json_end;
-        dtype dt = out.get_dtype();
+        ndt::type dt = out.get_dtype();
         ::parse_json(dt, out.get_ndo_meta(), out.get_readwrite_originptr(), begin, end);
         begin = skip_whitespace(begin, end);
         if (begin != end) {
@@ -747,7 +747,7 @@ void dynd::parse_json(nd::array& out, const char *json_begin, const char *json_e
     }
 }
 
-nd::array dynd::parse_json(const dtype& dt, const char *json_begin, const char *json_end)
+nd::array dynd::parse_json(const ndt::type& dt, const char *json_begin, const char *json_end)
 {
     nd::array result;
     if (dt.get_data_size() != 0) {

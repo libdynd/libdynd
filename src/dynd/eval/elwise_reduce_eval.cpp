@@ -21,7 +21,7 @@ using namespace dynd;
  * Creates a result array for an elementwise
  * reduce operation.
  */
-static ndarray_node_ptr make_elwise_reduce_result(const dtype& result_dt, uint32_t access_flags, bool keepdims,
+static ndarray_node_ptr make_elwise_reduce_result(const ndt::type& result_dt, uint32_t access_flags, bool keepdims,
                             int ndim, const dynd_bool *reduce_axes, const intptr_t *src_shape, const int *src_axis_perm,
                             char *&result_originptr, intptr_t *result_strides)
 {
@@ -88,7 +88,7 @@ ndarray_node_ptr dynd::eval::evaluate_elwise_reduce_array(ndarray_node* node,
     elwise_reduce_kernel_node *rnode = static_cast<elwise_reduce_kernel_node*>(node);
     ndarray_node *strided_node = rnode->get_opnode(0);
 
-    const dtype& result_dt = rnode->get_dtype().value_dtype();
+    const ndt::type& result_dt = rnode->get_dtype().value_type();
 
     if (result_dt.get_memory_management() == blockref_memory_management) {
         throw runtime_error("blockref memory management isn't supported for elwise reduce gfuncs yet");
@@ -198,7 +198,7 @@ ndarray_node_ptr dynd::eval::evaluate_elwise_reduce_array(ndarray_node* node,
         intptr_t dst_stride = iter.innerstride<0>();
         intptr_t src0_stride = iter.innerstride<1>();
         unary_specialization_t uspec = get_unary_specialization(dst_stride, result_dt.get_data_size(),
-                                                    src0_stride, strided_node->get_dtype().storage_dtype().get_data_size());
+                                                    src0_stride, strided_node->get_dtype().storage_type().get_data_size());
         unary_operation_t copy_op = copy_kernel.specializations[uspec];
         if (innersize > 0) {
             do {
@@ -227,7 +227,7 @@ ndarray_node_ptr dynd::eval::evaluate_elwise_reduce_array(ndarray_node* node,
     intptr_t dst_stride = iter.innerstride<0>();
     intptr_t src0_stride = iter.innerstride<1>();
     unary_specialization_t uspec = get_unary_specialization(dst_stride, result_dt.get_data_size(),
-                                                src0_stride, strided_node->get_dtype().storage_dtype().get_data_size());
+                                                src0_stride, strided_node->get_dtype().storage_type().get_data_size());
 
     // Create the reduction kernel
     rnode->get_unary_operation(dst_stride, src0_stride, reduce_operation);

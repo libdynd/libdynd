@@ -16,7 +16,7 @@ using namespace std;
 using namespace dynd;
 
 dynd::busdate_dtype::busdate_dtype(busdate_roll_t roll, const bool *weekmask, const nd::array& holidays)
-    : base_dtype(busdate_type_id, datetime_kind, 4, 4, dtype_flag_scalar, 0, 0), m_roll(roll)
+    : base_dtype(busdate_type_id, datetime_kind, 4, 4, type_flag_scalar, 0, 0), m_roll(roll)
 {
     memcpy(m_workweek, weekmask, sizeof(m_workweek));
     m_busdays_in_weekmask = 0;
@@ -83,7 +83,7 @@ void dynd::busdate_dtype::print_dtype(std::ostream& o) const
     }
 }
 
-bool dynd::busdate_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const
+bool dynd::busdate_dtype::is_lossless_assignment(const ndt::type& dst_dt, const ndt::type& src_dt) const
 {
     if (dst_dt.extended() == this) {
         if (src_dt.extended() == this) {

@@ -23,23 +23,23 @@ TEST(CategoricalDType, Create) {
     nd::array a = nd::make_strided_array(3, make_fixedstring_dtype(3, string_encoding_ascii));
     a.vals() = a_vals;
 
-    dtype d;
+    ndt::type d;
     d = make_categorical_dtype(a);
     EXPECT_EQ(categorical_type_id, d.get_type_id());
     EXPECT_EQ(custom_kind, d.get_kind());
     EXPECT_EQ(1u, d.get_data_alignment());
     EXPECT_EQ(1u, d.get_data_size());
     EXPECT_FALSE(d.is_expression());
-    EXPECT_EQ(make_dtype<uint8_t>(), d.p("storage_type").as<dtype>());
-    EXPECT_EQ(a.get_udtype(), d.p("category_type").as<dtype>());
+    EXPECT_EQ(ndt::make_dtype<uint8_t>(), d.p("storage_type").as<ndt::type>());
+    EXPECT_EQ(a.get_udtype(), d.p("category_type").as<ndt::type>());
 
     // With <= 256 categories, storage is a uint8
     a = nd::range(256);
     d = make_categorical_dtype(a);
     EXPECT_EQ(1u, d.get_data_alignment());
     EXPECT_EQ(1u, d.get_data_size());
-    EXPECT_EQ(make_dtype<uint8_t>(), d.p("storage_type").as<dtype>());
-    EXPECT_EQ(make_dtype<int32_t>(), d.p("category_type").as<dtype>());
+    EXPECT_EQ(ndt::make_dtype<uint8_t>(), d.p("storage_type").as<ndt::type>());
+    EXPECT_EQ(ndt::make_dtype<int32_t>(), d.p("category_type").as<ndt::type>());
 
     // With <= 65536 categories, storage is a uint16
     a = nd::range(257);
@@ -50,16 +50,16 @@ TEST(CategoricalDType, Create) {
     d = make_categorical_dtype(a);
     EXPECT_EQ(2u, d.get_data_alignment());
     EXPECT_EQ(2u, d.get_data_size());
-    EXPECT_EQ(make_dtype<uint16_t>(), d.p("storage_type").as<dtype>());
-    EXPECT_EQ(make_dtype<int32_t>(), d.p("category_type").as<dtype>());
+    EXPECT_EQ(ndt::make_dtype<uint16_t>(), d.p("storage_type").as<ndt::type>());
+    EXPECT_EQ(ndt::make_dtype<int32_t>(), d.p("category_type").as<ndt::type>());
 
     // Otherwise, storage is a uint32
     a = nd::range(65537);
     d = make_categorical_dtype(a);
     EXPECT_EQ(4u, d.get_data_alignment());
     EXPECT_EQ(4u, d.get_data_size());
-    EXPECT_EQ(make_dtype<uint32_t>(), d.p("storage_type").as<dtype>());
-    EXPECT_EQ(make_dtype<int32_t>(), d.p("category_type").as<dtype>());
+    EXPECT_EQ(ndt::make_dtype<uint32_t>(), d.p("storage_type").as<ndt::type>());
+    EXPECT_EQ(ndt::make_dtype<int32_t>(), d.p("category_type").as<ndt::type>());
 }
 
 TEST(CategoricalDType, Convert) {
@@ -67,8 +67,8 @@ TEST(CategoricalDType, Convert) {
     nd::array a = nd::make_strided_array(3, make_fixedstring_dtype(3, string_encoding_ascii));
     a.vals() = a_vals;
 
-    dtype cd = make_categorical_dtype(a);
-    dtype sd = make_string_dtype(string_encoding_utf_8);
+    ndt::type cd = make_categorical_dtype(a);
+    ndt::type sd = make_string_dtype(string_encoding_utf_8);
 
     // String conversions report false, so that assignments encodings
     // get validated on assignment
@@ -76,9 +76,9 @@ TEST(CategoricalDType, Convert) {
     EXPECT_FALSE(is_lossless_assignment(cd, sd));
 
     // This operation was crashing, hence the test
-    dtype cvt = make_convert_dtype(sd, cd);
-    EXPECT_EQ(cd, cvt.operand_dtype());
-    EXPECT_EQ(sd, cvt.value_dtype());
+    ndt::type cvt = make_convert_dtype(sd, cd);
+    EXPECT_EQ(cd, cvt.operand_type());
+    EXPECT_EQ(sd, cvt.value_type());
 }
 
 TEST(CategoricalDType, Compare) {
@@ -90,20 +90,20 @@ TEST(CategoricalDType, Compare) {
     nd::array b = nd::make_strided_array(2, make_fixedstring_dtype(3, string_encoding_ascii));
     b.vals() = b_vals;
 
-    dtype da = make_categorical_dtype(a);
-    dtype da2 = make_categorical_dtype(a);
-    dtype db = make_categorical_dtype(b);
+    ndt::type da = make_categorical_dtype(a);
+    ndt::type da2 = make_categorical_dtype(a);
+    ndt::type db = make_categorical_dtype(b);
 
     EXPECT_EQ(da, da);
     EXPECT_EQ(da, da2);
     EXPECT_NE(da, db);
 
-    nd::array i = nd::make_strided_array(3, make_dtype<int32_t>());
+    nd::array i = nd::make_strided_array(3, ndt::make_dtype<int32_t>());
     i(0).vals() = 0;
     i(1).vals() = 10;
     i(2).vals() = 100;
 
-    dtype di = make_categorical_dtype(i);
+    ndt::type di = make_categorical_dtype(i);
     EXPECT_FALSE(da == di);
 }
 
@@ -129,7 +129,7 @@ TEST(CategoricalDType, FactorFixedString) {
     nd::array a = nd::make_strided_array(3, make_fixedstring_dtype(3, string_encoding_ascii));
     a.vals() = a_vals;
 
-    dtype da = factor_categorical_dtype(a);
+    ndt::type da = factor_categorical_dtype(a);
     EXPECT_EQ(make_categorical_dtype(string_cats), da);
 }
 
@@ -138,7 +138,7 @@ TEST(CategoricalDType, FactorString) {
     const char *a_vals[] = {"foo", "bar", "foot", "foo", "bar"};
     nd::array cats = cats_vals, a = a_vals;
 
-    dtype da = factor_categorical_dtype(a);
+    ndt::type da = factor_categorical_dtype(a);
     EXPECT_EQ(make_categorical_dtype(cats), da);
 }
 
@@ -146,20 +146,20 @@ TEST(CategoricalDType, FactorStringLonger) {
     const char *cats_vals[] = {"a", "abcdefghijklmnopqrstuvwxyz", "bar", "foo", "foot", "z"};
     const char *a_vals[] = {"foo", "bar", "foot", "foo", "bar", "abcdefghijklmnopqrstuvwxyz",
                     "foot", "foo", "z", "a", "abcdefghijklmnopqrstuvwxyz"};
-    dtype da = factor_categorical_dtype(a_vals);
+    ndt::type da = factor_categorical_dtype(a_vals);
     EXPECT_EQ(make_categorical_dtype(cats_vals), da);
 }
 
 TEST(CategoricalDType, FactorInt) {
     int int_cats_vals[] = {0, 10};
-    nd::array int_cats = nd::make_strided_array(2, make_dtype<int32_t>());
+    nd::array int_cats = nd::make_strided_array(2, ndt::make_dtype<int32_t>());
     int_cats.vals() = int_cats_vals;
 
     int i_vals[] = {10, 10, 0};
-    nd::array i = nd::make_strided_array(3, make_dtype<int32_t>());
+    nd::array i = nd::make_strided_array(3, ndt::make_dtype<int32_t>());
     i.vals() = i_vals;
 
-    dtype di = factor_categorical_dtype(i);
+    ndt::type di = factor_categorical_dtype(i);
     EXPECT_EQ(make_categorical_dtype(int_cats), di);
 }
 
@@ -168,7 +168,7 @@ TEST(CategoricalDType, Values) {
     nd::array a = nd::make_strided_array(3, make_fixedstring_dtype(3, string_encoding_ascii));
     a.vals() = a_vals;
 
-    dtype dt = make_categorical_dtype(a);
+    ndt::type dt = make_categorical_dtype(a);
 
     EXPECT_EQ(0u, static_cast<const categorical_dtype*>(dt.extended())->get_value_from_category(a(0)));
     EXPECT_EQ(1u, static_cast<const categorical_dtype*>(dt.extended())->get_value_from_category(a(1)));
@@ -189,7 +189,7 @@ TEST(CategoricalDType, ValuesLonger) {
     int cats_count = sizeof(cats_vals) / sizeof(cats_vals[0]);
     int a_count = sizeof(a_uints) / sizeof(a_uints[0]);
 
-    dtype dt = make_categorical_dtype(cats_vals);
+    ndt::type dt = make_categorical_dtype(cats_vals);
     nd::array a = nd::array(a_vals).ucast(dt).eval();
     nd::array a_view = a.p("ints");
 
@@ -209,7 +209,7 @@ TEST(CategoricalDType, AssignFixedString) {
     nd::array cat = nd::make_strided_array(3, make_fixedstring_dtype(3, string_encoding_ascii));
     cat.vals() = cat_vals;
 
-    dtype dt = make_categorical_dtype(cat);
+    ndt::type dt = make_categorical_dtype(cat);
 
     nd::array a = nd::make_strided_array(3, dt);
     a.val_assign(cat);
@@ -237,7 +237,7 @@ TEST(CategoricalDType, AssignInt) {
     int32_t cat_vals[] = {10, 100, 1000};
     nd::array cat = cat_vals;
 
-    dtype dt = make_categorical_dtype(cat);
+    ndt::type dt = make_categorical_dtype(cat);
 
     nd::array a = nd::make_strided_array(3, dt);
     a.val_assign(cat);
@@ -266,7 +266,7 @@ TEST(CategoricalDType, AssignRange) {
     nd::array cat = nd::make_strided_array(3, make_fixedstring_dtype(3, string_encoding_ascii));
     cat.vals() = cat_vals;
 
-    dtype dt = make_categorical_dtype(cat);
+    ndt::type dt = make_categorical_dtype(cat);
 
     nd::array a = nd::make_strided_array(9, dt);
     nd::array b = a(0 <= irange() < 3);
@@ -291,16 +291,16 @@ TEST(CategoricalDType, AssignRange) {
 TEST(CategoricalDType, CategoriesProperty) {
     const char *cats_vals[] = {"this", "is", "a", "test"};
     nd::array cats = cats_vals;
-    dtype cd = make_categorical_dtype(cats_vals);
+    ndt::type cd = make_categorical_dtype(cats_vals);
     EXPECT_TRUE(cats.equals_exact(cd.p("categories")));
 }
 
 TEST(CategoricalDType, AssignFromOther) {
     int cats_values[] = {3, 6, 100, 1000};
-    dtype cd = make_categorical_dtype(cats_values);
+    ndt::type cd = make_categorical_dtype(cats_values);
     int16_t a_values[] = {6, 3, 100, 3, 1000, 100, 6, 1000};
     nd::array a = nd::array(a_values).ucast(cd);
-    EXPECT_EQ(make_strided_dim_dtype(make_convert_dtype(cd, make_dtype<int16_t>())),
+    EXPECT_EQ(make_strided_dim_dtype(make_convert_dtype(cd, ndt::make_dtype<int16_t>())),
                     a.get_dtype());
     a = a.eval();
     EXPECT_EQ(make_strided_dim_dtype(cd), a.get_dtype());

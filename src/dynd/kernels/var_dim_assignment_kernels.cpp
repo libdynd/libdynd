@@ -6,7 +6,7 @@
 #include <stdexcept>
 #include <sstream>
 
-#include <dynd/dtype.hpp>
+#include <dynd/type.hpp>
 #include <dynd/diagnostics.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/kernels/var_dim_assignment_kernels.hpp>
@@ -79,8 +79,8 @@ namespace {
 
 size_t dynd::make_broadcast_to_var_dim_assignment_kernel(
                 hierarchical_kernel *out, size_t offset_out,
-                const dtype& dst_var_dim_dt, const char *dst_metadata,
-                const dtype& src_dt, const char *src_metadata,
+                const ndt::type& dst_var_dim_dt, const char *dst_metadata,
+                const ndt::type& src_dt, const char *src_metadata,
                 kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *ectx)
 {
@@ -101,7 +101,7 @@ size_t dynd::make_broadcast_to_var_dim_assignment_kernel(
     e->dst_target_alignment = dst_vad->get_target_alignment();
     e->dst_md = dst_md;
     return ::make_assignment_kernel(out, offset_out + sizeof(broadcast_to_var_assign_kernel_extra),
-                    dst_vad->get_element_dtype(), dst_metadata + sizeof(var_dim_dtype_metadata),
+                    dst_vad->get_element_type(), dst_metadata + sizeof(var_dim_dtype_metadata),
                     src_dt, src_metadata,
                     kernel_request_strided, errmode, ectx);
 }
@@ -191,8 +191,8 @@ namespace {
 
 size_t dynd::make_var_dim_assignment_kernel(
                 hierarchical_kernel *out, size_t offset_out,
-                const dtype& dst_var_dim_dt, const char *dst_metadata,
-                const dtype& src_var_dim_dt, const char *src_metadata,
+                const ndt::type& dst_var_dim_dt, const char *dst_metadata,
+                const ndt::type& src_var_dim_dt, const char *src_metadata,
                 kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *ectx)
 {
@@ -222,8 +222,8 @@ size_t dynd::make_var_dim_assignment_kernel(
     e->dst_md = dst_md;
     e->src_md = src_md;
     return ::make_assignment_kernel(out, offset_out + sizeof(var_assign_kernel_extra),
-                    dst_vad->get_element_dtype(), dst_metadata + sizeof(var_dim_dtype_metadata),
-                    src_vad->get_element_dtype(), src_metadata + sizeof(var_dim_dtype_metadata),
+                    dst_vad->get_element_type(), dst_metadata + sizeof(var_dim_dtype_metadata),
+                    src_vad->get_element_type(), src_metadata + sizeof(var_dim_dtype_metadata),
                     kernel_request_strided, errmode, ectx);
 }
 
@@ -302,8 +302,8 @@ namespace {
 
 size_t dynd::make_strided_to_var_dim_assignment_kernel(
                 hierarchical_kernel *out, size_t offset_out,
-                const dtype& dst_var_dim_dt, const char *dst_metadata,
-                const dtype& src_strided_dim_dt, const char *src_metadata,
+                const ndt::type& dst_var_dim_dt, const char *dst_metadata,
+                const ndt::type& src_strided_dim_dt, const char *src_metadata,
                 kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *ectx)
 {
@@ -324,7 +324,7 @@ size_t dynd::make_strided_to_var_dim_assignment_kernel(
     e->dst_target_alignment = dst_vad->get_target_alignment();
     e->dst_md = dst_md;
 
-    dtype src_element_dt;
+    ndt::type src_element_dt;
     const char *src_element_metadata;
     if (src_strided_dim_dt.get_type_id() == strided_dim_type_id) {
         const strided_dim_dtype *src_sad = static_cast<const strided_dim_dtype *>(src_strided_dim_dt.extended());
@@ -332,13 +332,13 @@ size_t dynd::make_strided_to_var_dim_assignment_kernel(
                         reinterpret_cast<const strided_dim_dtype_metadata *>(src_metadata);
         e->src_stride = src_md->stride;
         e->src_dim_size = src_md->size;
-        src_element_dt = src_sad->get_element_dtype();
+        src_element_dt = src_sad->get_element_type();
         src_element_metadata = src_metadata + sizeof(strided_dim_dtype_metadata);
     } else if (src_strided_dim_dt.get_type_id() == fixed_dim_type_id) {
         const fixed_dim_dtype *src_fad = static_cast<const fixed_dim_dtype *>(src_strided_dim_dt.extended());
         e->src_stride = src_fad->get_fixed_stride();
         e->src_dim_size = src_fad->get_fixed_dim_size();
-        src_element_dt = src_fad->get_element_dtype();
+        src_element_dt = src_fad->get_element_type();
         src_element_metadata = src_metadata;
     } else {
         stringstream ss;
@@ -347,7 +347,7 @@ size_t dynd::make_strided_to_var_dim_assignment_kernel(
     }
 
     return ::make_assignment_kernel(out, offset_out + sizeof(strided_to_var_assign_kernel_extra),
-                    dst_vad->get_element_dtype(), dst_metadata + sizeof(var_dim_dtype_metadata),
+                    dst_vad->get_element_type(), dst_metadata + sizeof(var_dim_dtype_metadata),
                     src_element_dt, src_element_metadata,
                     kernel_request_strided, errmode, ectx);
 }
@@ -401,8 +401,8 @@ namespace {
 
 size_t dynd::make_var_to_strided_dim_assignment_kernel(
                 hierarchical_kernel *out, size_t offset_out,
-                const dtype& dst_strided_dim_dt, const char *dst_metadata,
-                const dtype& src_var_dim_dt, const char *src_metadata,
+                const ndt::type& dst_strided_dim_dt, const char *dst_metadata,
+                const ndt::type& src_var_dim_dt, const char *src_metadata,
                 kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *ectx)
 {
@@ -421,7 +421,7 @@ size_t dynd::make_var_to_strided_dim_assignment_kernel(
     e->base.set_function<unary_single_operation_t>(&var_to_strided_assign_kernel_extra::single);
     e->base.destructor = &var_to_strided_assign_kernel_extra::destruct;
 
-    dtype dst_element_dt;
+    ndt::type dst_element_dt;
     const char *dst_element_metadata;
     if (dst_strided_dim_dt.get_type_id() == strided_dim_type_id) {
         const strided_dim_dtype *dst_sad = static_cast<const strided_dim_dtype *>(dst_strided_dim_dt.extended());
@@ -429,13 +429,13 @@ size_t dynd::make_var_to_strided_dim_assignment_kernel(
                         reinterpret_cast<const strided_dim_dtype_metadata *>(dst_metadata);
         e->dst_stride = dst_md->stride;
         e->dst_dim_size = dst_md->size;
-        dst_element_dt = dst_sad->get_element_dtype();
+        dst_element_dt = dst_sad->get_element_type();
         dst_element_metadata = dst_metadata + sizeof(strided_dim_dtype_metadata);
     } else if (dst_strided_dim_dt.get_type_id() == fixed_dim_type_id) {
         const fixed_dim_dtype *dst_fad = static_cast<const fixed_dim_dtype *>(dst_strided_dim_dt.extended());
         e->dst_stride = dst_fad->get_fixed_stride();
         e->dst_dim_size = dst_fad->get_fixed_dim_size();
-        dst_element_dt = dst_fad->get_element_dtype();
+        dst_element_dt = dst_fad->get_element_type();
         dst_element_metadata = dst_metadata;
     } else {
         stringstream ss;
@@ -446,6 +446,6 @@ size_t dynd::make_var_to_strided_dim_assignment_kernel(
     e->src_md = src_md;
     return ::make_assignment_kernel(out, offset_out + sizeof(var_to_strided_assign_kernel_extra),
                     dst_element_dt, dst_element_metadata,
-                    src_vad->get_element_dtype(), src_metadata + sizeof(var_dim_dtype_metadata),
+                    src_vad->get_element_type(), src_metadata + sizeof(var_dim_dtype_metadata),
                     kernel_request_strided, errmode, ectx);
 }

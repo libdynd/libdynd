@@ -130,7 +130,7 @@ void dynd::broadcast_input_shapes(size_t ninputs, const nd::array* inputs,
     }
 }
 
-void dynd::create_broadcast_result(const dtype& result_inner_dt,
+void dynd::create_broadcast_result(const ndt::type& result_inner_dt,
                 const nd::array& op0, const nd::array& op1, const nd::array& op2,
                 nd::array &out, size_t& out_ndim, dimvector& out_shape)
 {
@@ -385,7 +385,7 @@ void dynd::print_shape(std::ostream& o, size_t ndim, const intptr_t *shape)
     o << ")";
 }
 
-void dynd::apply_single_linear_index(const irange& irnge, intptr_t dimension_size, size_t error_i, const dtype* error_dt,
+void dynd::apply_single_linear_index(const irange& irnge, intptr_t dimension_size, size_t error_i, const ndt::type* error_dt,
         bool& out_remove_dimension, intptr_t& out_start_index, intptr_t& out_index_stride, intptr_t& out_dimension_size)
 {
     intptr_t step = irnge.step();
@@ -594,7 +594,7 @@ void dynd::apply_single_linear_index(const irange& irnge, intptr_t dimension_siz
 }
 
 axis_order_classification_t dynd::classify_strided_axis_order(size_t current_stride,
-                const dtype& element_dt, const char *element_metadata)
+                const ndt::type& element_dt, const char *element_metadata)
 {
     switch (element_dt.get_type_id()) {
         case fixed_dim_type_id: {
@@ -605,7 +605,7 @@ axis_order_classification_t dynd::classify_strided_axis_order(size_t current_str
                 // Get the classification from the next dimension onward
                 if (edt->get_undim() > 1) {
                     aoc = classify_strided_axis_order(current_stride,
-                                edt->get_element_dtype(),
+                                edt->get_element_type(),
                                 element_metadata);
                 } else {
                     aoc = axis_order_none;
@@ -623,7 +623,7 @@ axis_order_classification_t dynd::classify_strided_axis_order(size_t current_str
                 // Skip the zero-stride dimensions (DyND requires that the stride
                 // be zero when the dimension size is one)
                 return classify_strided_axis_order(current_stride,
-                                edt->get_element_dtype(),
+                                edt->get_element_type(),
                                 element_metadata);
             } else {
                 // There was only one dimension with a nonzero stride
@@ -639,7 +639,7 @@ axis_order_classification_t dynd::classify_strided_axis_order(size_t current_str
                 // Get the classification from the next dimension onward
                 if (edt->get_undim() > 1) {
                     aoc = classify_strided_axis_order(current_stride,
-                                edt->get_element_dtype(),
+                                edt->get_element_type(),
                                 element_metadata + sizeof(strided_dim_dtype_metadata));
                 } else {
                     aoc = axis_order_none;
@@ -657,7 +657,7 @@ axis_order_classification_t dynd::classify_strided_axis_order(size_t current_str
                 // Skip the zero-stride dimensions (DyND requires that the stride
                 // be zero when the dimension size is one)
                 return classify_strided_axis_order(current_stride,
-                                edt->get_element_dtype(),
+                                edt->get_element_type(),
                                 element_metadata + sizeof(strided_dim_dtype_metadata));
             } else {
                 // There was only one dimension with a nonzero stride

@@ -3,10 +3,10 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__BYTES_DTYPE_HPP_
-#define _DYND__BYTES_DTYPE_HPP_
+#ifndef _DYND__BYTES_TYPE_HPP_
+#define _DYND__BYTES_TYPE_HPP_
 
-#include <dynd/dtype.hpp>
+#include <dynd/type.hpp>
 #include <dynd/dtypes/base_bytes_dtype.hpp>
 #include <dynd/dtype_assign.hpp>
 
@@ -50,11 +50,11 @@ public:
     void get_bytes_range(const char **out_begin, const char**out_end, const char *metadata, const char *data) const;
 
     bool is_unique_data_owner(const char *metadata) const;
-    dtype get_canonical_dtype() const;
+    ndt::type get_canonical_type() const;
 
     void get_shape(size_t ndim, size_t i, intptr_t *out_shape, const char *metadata) const;
 
-    bool is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const;
+    bool is_lossless_assignment(const ndt::type& dst_dt, const ndt::type& src_dt) const;
 
     bool operator==(const base_dtype& rhs) const;
 
@@ -67,8 +67,8 @@ public:
 
     size_t make_assignment_kernel(
                     hierarchical_kernel *out, size_t offset_out,
-                    const dtype& dst_dt, const char *dst_metadata,
-                    const dtype& src_dt, const char *src_metadata,
+                    const ndt::type& dst_dt, const char *dst_metadata,
+                    const ndt::type& src_dt, const char *src_metadata,
                     kernel_request_t kernreq, assign_error_mode errmode,
                     const eval::eval_context *ectx) const;
 
@@ -77,10 +77,10 @@ public:
                     size_t *out_count) const;
 };
 
-inline dtype make_bytes_dtype(size_t alignment) {
-    return dtype(new bytes_dtype(alignment), false);
+inline ndt::type make_bytes_dtype(size_t alignment) {
+    return ndt::type(new bytes_dtype(alignment), false);
 }
 
 } // namespace dynd
 
-#endif // _DYND__BYTES_DTYPE_HPP_
+#endif // _DYND__BYTES_TYPE_HPP_

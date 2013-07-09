@@ -614,14 +614,14 @@ TEST(ArrayCompare, NaNComplexFloat32) {
     // instead of the requested complex.
     float cval[2];
     nd::array a, b;
-    a = nd::empty(make_dtype<complex<float> >());
-    b = nd::empty(make_dtype<complex<float> >());
+    a = nd::empty(ndt::make_dtype<complex<float> >());
+    b = nd::empty(ndt::make_dtype<complex<float> >());
     float nan = nd::array("nan").ucast<float>().as<float>();
 
     // real component NaN, compared against itself
     cval[0] = nan;
     cval[1] = 0.f;
-    a.val_assign(make_dtype<complex<float> >(), NULL, reinterpret_cast<const char *>(&cval[0]));
+    a.val_assign(ndt::make_dtype<complex<float> >(), NULL, reinterpret_cast<const char *>(&cval[0]));
     EXPECT_TRUE(DYND_ISNAN(a.p("real").as<float>()));
     EXPECT_FALSE(DYND_ISNAN(a.p("imag").as<float>()));
     EXPECT_FALSE(a.op_sorting_less(a));
@@ -635,7 +635,7 @@ TEST(ArrayCompare, NaNComplexFloat32) {
     // imaginary component NaN, compared against itself
     cval[0] = 0.f;
     cval[1] = nan;
-    a.val_assign(make_dtype<complex<float> >(), NULL, reinterpret_cast<const char *>(&cval[0]));
+    a.val_assign(ndt::make_dtype<complex<float> >(), NULL, reinterpret_cast<const char *>(&cval[0]));
     EXPECT_FALSE(DYND_ISNAN(a.p("real").as<float>()));
     EXPECT_TRUE(DYND_ISNAN(a.p("imag").as<float>()));
     EXPECT_FALSE(a.op_sorting_less(a));
@@ -649,7 +649,7 @@ TEST(ArrayCompare, NaNComplexFloat32) {
     // both components NaN, compared against itself
     cval[0] = nan;
     cval[1] = nan;
-    a.val_assign(make_dtype<complex<float> >(), NULL, reinterpret_cast<const char *>(&cval[0]));
+    a.val_assign(ndt::make_dtype<complex<float> >(), NULL, reinterpret_cast<const char *>(&cval[0]));
     EXPECT_TRUE(DYND_ISNAN(a.p("real").as<float>()));
     EXPECT_TRUE(DYND_ISNAN(a.p("imag").as<float>()));
     EXPECT_FALSE(a.op_sorting_less(a));
@@ -663,10 +663,10 @@ TEST(ArrayCompare, NaNComplexFloat32) {
     // NaNs compared against non-NaNs
     cval[0] = nan;
     cval[1] = 0.f;
-    a.val_assign(make_dtype<complex<float> >(), NULL, reinterpret_cast<const char *>(&cval[0]));
+    a.val_assign(ndt::make_dtype<complex<float> >(), NULL, reinterpret_cast<const char *>(&cval[0]));
     cval[0] = 0.f;
     cval[1] = 1.f;
-    b.val_assign(make_dtype<complex<float> >(), NULL, reinterpret_cast<const char *>(&cval[0]));
+    b.val_assign(ndt::make_dtype<complex<float> >(), NULL, reinterpret_cast<const char *>(&cval[0]));
     EXPECT_FALSE(a.op_sorting_less(b));
     EXPECT_THROW((a < b), not_comparable_error);
     EXPECT_THROW((a <= b), not_comparable_error);
@@ -684,10 +684,10 @@ TEST(ArrayCompare, NaNComplexFloat32) {
 
     cval[0] = 0.f;
     cval[1] = nan;
-    a.val_assign(make_dtype<complex<float> >(), NULL, reinterpret_cast<const char *>(&cval[0]));
+    a.val_assign(ndt::make_dtype<complex<float> >(), NULL, reinterpret_cast<const char *>(&cval[0]));
     cval[0] = 1.f;
     cval[1] = 1.f;
-    b.val_assign(make_dtype<complex<float> >(), NULL, reinterpret_cast<const char *>(&cval[0]));
+    b.val_assign(ndt::make_dtype<complex<float> >(), NULL, reinterpret_cast<const char *>(&cval[0]));
     EXPECT_FALSE(a.op_sorting_less(b));
     EXPECT_THROW((a < b), not_comparable_error);
     EXPECT_THROW((a <= b), not_comparable_error);
@@ -705,10 +705,10 @@ TEST(ArrayCompare, NaNComplexFloat32) {
 
     cval[0] = nan;
     cval[1] = nan;
-    a.val_assign(make_dtype<complex<float> >(), NULL, reinterpret_cast<const char *>(&cval[0]));
+    a.val_assign(ndt::make_dtype<complex<float> >(), NULL, reinterpret_cast<const char *>(&cval[0]));
     cval[0] = 1.f;
     cval[1] = 1.f;
-    b.val_assign(make_dtype<complex<float> >(), NULL, reinterpret_cast<const char *>(&cval[0]));
+    b.val_assign(ndt::make_dtype<complex<float> >(), NULL, reinterpret_cast<const char *>(&cval[0]));
     EXPECT_FALSE(a.op_sorting_less(b));
     EXPECT_THROW((a < b), not_comparable_error);
     EXPECT_THROW((a <= b), not_comparable_error);
@@ -727,10 +727,10 @@ TEST(ArrayCompare, NaNComplexFloat32) {
     // NaNs compared against NaNs
     cval[0] = nan;
     cval[1] = 0.f;
-    a.val_assign(make_dtype<complex<float> >(), NULL, reinterpret_cast<const char *>(&cval[0]));
+    a.val_assign(ndt::make_dtype<complex<float> >(), NULL, reinterpret_cast<const char *>(&cval[0]));
     cval[0] = nan;
     cval[1] = 1.f;
-    b.val_assign(make_dtype<complex<float> >(), NULL, reinterpret_cast<const char *>(&cval[0]));
+    b.val_assign(ndt::make_dtype<complex<float> >(), NULL, reinterpret_cast<const char *>(&cval[0]));
     EXPECT_TRUE(a.op_sorting_less(b));
     EXPECT_THROW((a < b), not_comparable_error);
     EXPECT_THROW((a <= b), not_comparable_error);
@@ -748,10 +748,10 @@ TEST(ArrayCompare, NaNComplexFloat32) {
 
     cval[0] = 0.f;
     cval[1] = nan;
-    a.val_assign(make_dtype<complex<float> >(), NULL, reinterpret_cast<const char *>(&cval[0]));
+    a.val_assign(ndt::make_dtype<complex<float> >(), NULL, reinterpret_cast<const char *>(&cval[0]));
     cval[0] = nan;
     cval[1] = 1.f;
-    b.val_assign(make_dtype<complex<float> >(), NULL, reinterpret_cast<const char *>(&cval[0]));
+    b.val_assign(ndt::make_dtype<complex<float> >(), NULL, reinterpret_cast<const char *>(&cval[0]));
     EXPECT_FALSE(DYND_ISNAN(a.p("real").as<float>()));
     EXPECT_TRUE(DYND_ISNAN(a.p("imag").as<float>()));
     EXPECT_TRUE(a.op_sorting_less(b));
@@ -771,10 +771,10 @@ TEST(ArrayCompare, NaNComplexFloat32) {
 
     cval[0] = nan;
     cval[1] = nan;
-    a.val_assign(make_dtype<complex<float> >(), NULL, reinterpret_cast<const char *>(&cval[0]));
+    a.val_assign(ndt::make_dtype<complex<float> >(), NULL, reinterpret_cast<const char *>(&cval[0]));
     cval[0] = nan;
     cval[1] = 1.f;
-    b.val_assign(make_dtype<complex<float> >(), NULL, reinterpret_cast<const char *>(&cval[0]));
+    b.val_assign(ndt::make_dtype<complex<float> >(), NULL, reinterpret_cast<const char *>(&cval[0]));
     EXPECT_FALSE(a.op_sorting_less(b));
     EXPECT_THROW((a < b), not_comparable_error);
     EXPECT_THROW((a <= b), not_comparable_error);
@@ -792,10 +792,10 @@ TEST(ArrayCompare, NaNComplexFloat32) {
 
     cval[0] = 0.f;
     cval[1] = nan;
-    a.val_assign(make_dtype<complex<float> >(), NULL, reinterpret_cast<const char *>(&cval[0]));
+    a.val_assign(ndt::make_dtype<complex<float> >(), NULL, reinterpret_cast<const char *>(&cval[0]));
     cval[0] = 1.f;
     cval[1] = nan;
-    b.val_assign(make_dtype<complex<float> >(), NULL, reinterpret_cast<const char *>(&cval[0]));
+    b.val_assign(ndt::make_dtype<complex<float> >(), NULL, reinterpret_cast<const char *>(&cval[0]));
     EXPECT_TRUE(a.op_sorting_less(b));
     EXPECT_THROW((a < b), not_comparable_error);
     EXPECT_THROW((a <= b), not_comparable_error);
@@ -813,10 +813,10 @@ TEST(ArrayCompare, NaNComplexFloat32) {
 
     cval[0] = nan;
     cval[1] = nan;
-    a.val_assign(make_dtype<complex<float> >(), NULL, reinterpret_cast<const char *>(&cval[0]));
+    a.val_assign(ndt::make_dtype<complex<float> >(), NULL, reinterpret_cast<const char *>(&cval[0]));
     cval[0] = 0.f;
     cval[1] = nan;
-    b.val_assign(make_dtype<complex<float> >(), NULL, reinterpret_cast<const char *>(&cval[0]));
+    b.val_assign(ndt::make_dtype<complex<float> >(), NULL, reinterpret_cast<const char *>(&cval[0]));
     EXPECT_FALSE(a.op_sorting_less(b));
     EXPECT_THROW((a < b), not_comparable_error);
     EXPECT_THROW((a <= b), not_comparable_error);

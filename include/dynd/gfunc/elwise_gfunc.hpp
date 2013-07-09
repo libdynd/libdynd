@@ -10,7 +10,7 @@
 #include <deque>
 #include <vector>
 
-#include <dynd/dtype.hpp>
+#include <dynd/type.hpp>
 #include <dynd/kernels/kernel_instance.hpp>
 #include <dynd/codegen/codegen_cache.hpp>
 
@@ -18,8 +18,8 @@ namespace dynd { namespace gfunc {
 
 class elwise_kernel {
 public:
-    dtype m_returntype;
-    std::vector<dynd::dtype> m_paramtypes;
+    ndt::type m_returntype;
+    std::vector<dynd::ndt::type> m_paramtypes;
     //dynd::kernel_instance<unary_operation_pair_t> m_unary_kernel;
     dynd::kernel_instance<dynd::binary_operation_pair_t> m_binary_kernel;
 
@@ -52,7 +52,7 @@ public:
     /**
      * Searches for a kernel which matches all the parameter types.
      */
-    const elwise_kernel *find_matching_kernel(const std::vector<dtype>& paramtypes) const;
+    const elwise_kernel *find_matching_kernel(const std::vector<ndt::type>& paramtypes) const;
 
     /**
      * Adds the provided kernel to the gfunc. This swaps it out of the provided

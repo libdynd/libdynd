@@ -3,30 +3,30 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__TUPLE_DTYPE_HPP_
-#define _DYND__TUPLE_DTYPE_HPP_
+#ifndef _DYND__TUPLE_TYPE_HPP_
+#define _DYND__TUPLE_TYPE_HPP_
 
 #include <vector>
 
-#include <dynd/dtype.hpp>
+#include <dynd/type.hpp>
 
 namespace dynd {
 
 class tuple_dtype : public base_dtype {
-    std::vector<dtype> m_fields;
+    std::vector<ndt::type> m_fields;
     std::vector<size_t> m_offsets;
     std::vector<size_t> m_metadata_offsets;
     bool m_is_standard_layout;
 
     bool compute_is_standard_layout() const;
 public:
-    tuple_dtype(const std::vector<dtype>& fields);
-    tuple_dtype(const std::vector<dtype>& fields, const std::vector<size_t> offsets,
+    tuple_dtype(const std::vector<ndt::type>& fields);
+    tuple_dtype(const std::vector<ndt::type>& fields, const std::vector<size_t> offsets,
                         size_t data_size, size_t alignment);
 
     virtual ~tuple_dtype();
 
-    const std::vector<dtype>& get_fields() const {
+    const std::vector<ndt::type>& get_fields() const {
         return m_fields;
     }
 
@@ -46,44 +46,44 @@ public:
 
     void print_dtype(std::ostream& o) const;
 
-    bool is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const;
+    bool is_lossless_assignment(const ndt::type& dst_dt, const ndt::type& src_dt) const;
 
     bool operator==(const base_dtype& rhs) const;
 }; // class tuple_dtype
 
 /** Makes a tuple dtype with the specified fields, using the standard layout */
-inline dtype make_tuple_dtype(const std::vector<dtype>& fields) {
-    return dtype(new tuple_dtype(fields), false);
+inline ndt::type make_tuple_dtype(const std::vector<ndt::type>& fields) {
+    return ndt::type(new tuple_dtype(fields), false);
 }
 
 /** Makes a tuple dtype with the specified fields and layout */
-inline dtype make_tuple_dtype(const std::vector<dtype>& fields, const std::vector<size_t> offsets,
+inline ndt::type make_tuple_dtype(const std::vector<ndt::type>& fields, const std::vector<size_t> offsets,
                 size_t data_size, size_t alignment)
 {
-    return dtype(new tuple_dtype(fields, offsets, data_size, alignment), false);
+    return ndt::type(new tuple_dtype(fields, offsets, data_size, alignment), false);
 }
 
 /** Makes a tuple dtype with the specified fields, using the standard layout */
-inline dtype make_tuple_dtype(const dtype& dt0)
+inline ndt::type make_tuple_dtype(const ndt::type& dt0)
 {
-    std::vector<dtype> fields;
+    std::vector<ndt::type> fields;
     fields.push_back(dt0);
     return make_tuple_dtype(fields);
 }
 
 /** Makes a tuple dtype with the specified fields, using the standard layout */
-inline dtype make_tuple_dtype(const dtype& dt0, const dtype& dt1)
+inline ndt::type make_tuple_dtype(const ndt::type& dt0, const ndt::type& dt1)
 {
-    std::vector<dtype> fields;
+    std::vector<ndt::type> fields;
     fields.push_back(dt0);
     fields.push_back(dt1);
     return make_tuple_dtype(fields);
 }
 
 /** Makes a tuple dtype with the specified fields, using the standard layout */
-inline dtype make_tuple_dtype(const dtype& dt0, const dtype& dt1, const dtype& dt2)
+inline ndt::type make_tuple_dtype(const ndt::type& dt0, const ndt::type& dt1, const ndt::type& dt2)
 {
-    std::vector<dtype> fields;
+    std::vector<ndt::type> fields;
     fields.push_back(dt0);
     fields.push_back(dt1);
     fields.push_back(dt2);
@@ -91,9 +91,9 @@ inline dtype make_tuple_dtype(const dtype& dt0, const dtype& dt1, const dtype& d
 }
 
 /** Makes a tuple dtype with the specified fields, using the standard layout */
-inline dtype make_tuple_dtype(const dtype& dt0, const dtype& dt1, const dtype& dt2, const dtype& dt3)
+inline ndt::type make_tuple_dtype(const ndt::type& dt0, const ndt::type& dt1, const ndt::type& dt2, const ndt::type& dt3)
 {
-    std::vector<dtype> fields;
+    std::vector<ndt::type> fields;
     fields.push_back(dt0);
     fields.push_back(dt1);
     fields.push_back(dt2);
@@ -103,4 +103,4 @@ inline dtype make_tuple_dtype(const dtype& dt0, const dtype& dt1, const dtype& d
 
 } // namespace dynd
 
-#endif // _DYND__TUPLE_DTYPE_HPP_
+#endif // _DYND__TUPLE_TYPE_HPP_

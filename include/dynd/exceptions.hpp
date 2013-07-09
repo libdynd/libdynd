@@ -17,7 +17,9 @@
 namespace dynd {
 
 // Forward declaration of object class, for broadcast_error
-class dtype;
+namespace ndt {
+    class type;
+} // namespace ndt
 namespace nd {
     class array;
 } // namespace nd
@@ -66,10 +68,10 @@ public:
      */
     broadcast_error(size_t ninputs, const nd::array *inputs);
 
-    broadcast_error(const dtype& dst_dt, const char *dst_metadata,
-                    const dtype& src_dt, const char *src_metadata);
+    broadcast_error(const ndt::type& dst_dt, const char *dst_metadata,
+                    const ndt::type& src_dt, const char *src_metadata);
 
-    broadcast_error(const dtype& dst_dt, const char *dst_metadata,
+    broadcast_error(const ndt::type& dst_dt, const char *dst_metadata,
                     const char *src_name);
 
     /**
@@ -93,7 +95,7 @@ public:
      * An exception for when too many indices are provided in
      * an indexing operation (nindex > ndim).
      */
-    too_many_indices(const dtype& dt, size_t nindices, size_t ndim);
+    too_many_indices(const ndt::type& dt, size_t nindices, size_t ndim);
 
     virtual ~too_many_indices() throw() {
     }
@@ -202,7 +204,7 @@ public:
  */
 class not_comparable_error : public dynd_exception {
 public:
-    not_comparable_error(const dtype& lhs, const dtype& rhs,
+    not_comparable_error(const ndt::type& lhs, const ndt::type& rhs,
                     comparison_type_t comptype);
 
     virtual ~not_comparable_error() throw() {

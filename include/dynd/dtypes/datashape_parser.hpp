@@ -6,7 +6,7 @@
 #ifndef _DYND__DATASHAPE_PARSER_HPP_
 #define _DYND__DATASHAPE_PARSER_HPP_
 
-#include <dynd/dtype.hpp>
+#include <dynd/type.hpp>
 
 namespace dynd {
 
@@ -20,22 +20,22 @@ namespace dynd {
  * \param datashape_begin  The start of the buffer containing the datashape.
  * \param datashape_end    The end of the buffer containing the datashape.
  */
-dtype dtype_from_datashape(const char *datashape_begin, const char *datashape_end);
+ndt::type type_from_datashape(const char *datashape_begin, const char *datashape_end);
 
-inline dtype dtype_from_datashape(const std::string& datashape)
+inline ndt::type type_from_datashape(const std::string& datashape)
 {
-    return dtype_from_datashape(datashape.data(), datashape.data() + datashape.size());
+    return type_from_datashape(datashape.data(), datashape.data() + datashape.size());
 }
 
-inline dtype dtype_from_datashape(const char *datashape)
+inline ndt::type type_from_datashape(const char *datashape)
 {
-    return dtype_from_datashape(datashape, datashape + strlen(datashape));
+    return type_from_datashape(datashape, datashape + strlen(datashape));
 }
 
 template<int N>
-inline dtype dtype_from_datashape(const char (&datashape)[N])
+inline ndt::type type_from_datashape(const char (&datashape)[N])
 {
-    return dtype_from_datashape(datashape, datashape + N - 1);
+    return type_from_datashape(datashape, datashape + N - 1);
 }
 
 } // namespace dynd

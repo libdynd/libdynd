@@ -3,7 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <dynd/dtype.hpp>
+#include <dynd/type.hpp>
 #include <dynd/dtypes/base_expression_dtype.hpp>
 #include <dynd/kernels/expression_assignment_kernels.hpp>
 
@@ -27,7 +27,7 @@ namespace {
         // Initializes the dtype and metadata for the buffer
         // NOTE: This does NOT initialize the buffer_data_offset,
         //       just the buffer_data_size.
-        void init(const dtype& buffer_dt_, kernel_request_t kernreq) {
+        void init(const ndt::type& buffer_dt_, kernel_request_t kernreq) {
             size_t element_count = 1;
             switch (kernreq) {
                 case kernel_request_single:
@@ -45,7 +45,7 @@ namespace {
             }
             base.destructor = &destruct;
             // The kernel data owns a reference in buffer_dt
-            buffer_dt = dtype(buffer_dt_).release();
+            buffer_dt = ndt::type(buffer_dt_).release();
             if (!buffer_dt_.is_builtin()) {
                 size_t buffer_metadata_size = buffer_dt_.extended()->get_metadata_size();
                 if (buffer_metadata_size > 0) {
@@ -80,7 +80,7 @@ namespace {
             echild_second = reinterpret_cast<kernel_data_prefix *>(eraw + e->second_kernel_offset);
 
             // If the type needs it, initialize the buffer data to zero
-            if (!is_builtin_dtype(buffer_dt) && (buffer_dt->get_flags()&dtype_flag_zeroinit) != 0) {
+            if (!is_builtin_type(buffer_dt) && (buffer_dt->get_flags()&type_flag_zeroinit) != 0) {
                 memset(buffer_data_ptr, 0, e->buffer_data_size);
             }
             // First kernel (src -> buffer)
@@ -114,7 +114,7 @@ namespace {
             while (count > 0) {
                 size_t chunk_size = min(DYND_BUFFER_CHUNK_SIZE, count);
                 // If the type needs it, initialize the buffer data to zero
-                if (!is_builtin_dtype(buffer_dt) && (buffer_dt->get_flags()&dtype_flag_zeroinit) != 0) {
+                if (!is_builtin_type(buffer_dt) && (buffer_dt->get_flags()&type_flag_zeroinit) != 0) {
                     memset(buffer_data_ptr, 0, chunk_size * e->buffer_stride);
                 }
                 // First kernel (src -> buffer)
@@ -133,7 +133,7 @@ namespace {
             char *eraw = reinterpret_cast<char *>(extra);
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             // Steal the buffer_dt reference count into a dtype
-            dtype buffer_dt(e->buffer_dt, false);
+            ndt::type buffer_dt(e->buffer_dt, false);
             char *buffer_metadata = e->buffer_metadata;
             // Destruct and free the metadata for the buffer
             if (buffer_metadata != NULL) {
@@ -161,24 +161,24 @@ namespace {
 
 size_t dynd::make_expression_assignment_kernel(
                 hierarchical_kernel *out, size_t offset_out,
-                const dtype& dst_dt, const char *dst_metadata,
-                const dtype& src_dt, const char *src_metadata,
+                const ndt::type& dst_dt, const char *dst_metadata,
+                const ndt::type& src_dt, const char *src_metadata,
                 kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *ectx)
 {
     if (dst_dt.get_kind() == expression_kind) {
         const base_expression_dtype *dst_bed = static_cast<const base_expression_dtype *>(dst_dt.extended());
-        if (src_dt == dst_bed->get_value_dtype()) {
+        if (src_dt == dst_bed->get_value_type()) {
             // In this case, it's just a chain of value -> operand on the dst side
-            const dtype& opdt = dst_bed->get_operand_dtype();
+            const ndt::type& opdt = dst_bed->get_operand_type();
             if (opdt.get_kind() != expression_kind) {
                 // Leaf case, just a single value -> operand kernel
                 return dst_bed->make_value_to_operand_assignment_kernel(out, offset_out,
                                 dst_metadata, src_metadata, kernreq, ectx);
             } else {
                 // Chain case, buffer one segment of the chain
-                const dtype& buffer_dt = static_cast<const base_expression_dtype *>(
-                                    opdt.extended())->get_value_dtype();
+                const ndt::type& buffer_dt = static_cast<const base_expression_dtype *>(
+                                    opdt.extended())->get_value_type();
                 out->ensure_capacity(offset_out + sizeof(buffered_kernel_extra));
                 buffered_kernel_extra *e = out->get_at<buffered_kernel_extra>(offset_out);
                 e->init(buffer_dt, kernreq);
@@ -203,15 +203,15 @@ size_t dynd::make_expression_assignment_kernel(
                                 kernreq, errmode, ectx);
             }
         } else {
-            dtype buffer_dt;
+            ndt::type buffer_dt;
             if (src_dt.get_kind() != expression_kind) {
-                // In this case, need a data converting assignment to dst_dt.value_dtype(),
+                // In this case, need a data converting assignment to dst_dt.value_type(),
                 // then the dst_dt expression chain
-                buffer_dt = dst_bed->get_value_dtype();
+                buffer_dt = dst_bed->get_value_type();
             } else {
-                // Both src and dst are expression dtypes, use the src expression chain, and
+                // Both src and dst are expression types, use the src expression chain, and
                 // the src value dtype to dst dtype as the two segments to buffer together
-                buffer_dt = src_dt.value_dtype();
+                buffer_dt = src_dt.value_type();
             }
             out->ensure_capacity(offset_out + sizeof(buffered_kernel_extra));
             buffered_kernel_extra *e = out->get_at<buffered_kernel_extra>(offset_out);
@@ -239,17 +239,17 @@ size_t dynd::make_expression_assignment_kernel(
         }
     } else {
         const base_expression_dtype *src_bed = static_cast<const base_expression_dtype *>(src_dt.extended());
-        if (dst_dt == src_bed->get_value_dtype()) {
+        if (dst_dt == src_bed->get_value_type()) {
             // In this case, it's just a chain of operand -> value on the src side
-            const dtype& opdt = src_bed->get_operand_dtype();
+            const ndt::type& opdt = src_bed->get_operand_type();
             if (opdt.get_kind() != expression_kind) {
                 // Leaf case, just a single value -> operand kernel
                 return src_bed->make_operand_to_value_assignment_kernel(out, offset_out,
                                 dst_metadata, src_metadata, kernreq, ectx);
             } else {
                 // Chain case, buffer one segment of the chain
-                const dtype& buffer_dt = static_cast<const base_expression_dtype *>(
-                                opdt.extended())->get_value_dtype();
+                const ndt::type& buffer_dt = static_cast<const base_expression_dtype *>(
+                                opdt.extended())->get_value_type();
                 out->ensure_capacity(offset_out + sizeof(buffered_kernel_extra));
                 buffered_kernel_extra *e = out->get_at<buffered_kernel_extra>(offset_out);
                 e->init(buffer_dt, kernreq);
@@ -276,7 +276,7 @@ size_t dynd::make_expression_assignment_kernel(
         } else {
             // Put together the src expression chain and the src value dtype
             // to dst value dtype conversion
-            const dtype& buffer_dt = src_dt.value_dtype();
+            const ndt::type& buffer_dt = src_dt.value_type();
             out->ensure_capacity(offset_out + sizeof(buffered_kernel_extra));
             buffered_kernel_extra *e = out->get_at<buffered_kernel_extra>(offset_out);
             e->init(buffer_dt, kernreq);

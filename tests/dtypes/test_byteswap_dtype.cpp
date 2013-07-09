@@ -17,20 +17,20 @@ using namespace std;
 using namespace dynd;
 
 TEST(ByteswapDType, Create) {
-    dtype d;
+    ndt::type d;
 
     d = make_byteswap_dtype<float>();
     // The value has the native byte-order dtype
-    EXPECT_EQ(d.value_dtype(), make_dtype<float>());
+    EXPECT_EQ(d.value_type(), ndt::make_dtype<float>());
     // The storage is the a bytes dtype with matching storage and alignment
-    EXPECT_EQ(d.storage_dtype(), make_fixedbytes_dtype(4, 4));
+    EXPECT_EQ(d.storage_type(), make_fixedbytes_dtype(4, 4));
     EXPECT_TRUE(d.is_expression());
 
     d = make_byteswap_dtype<complex<double> >();
     // The value has the native byte-order dtype
-    EXPECT_EQ(d.value_dtype(), make_dtype<complex<double> >());
+    EXPECT_EQ(d.value_type(), ndt::make_dtype<complex<double> >());
     // The storage is the a bytes dtype with matching storage and alignment
-    EXPECT_EQ(d.storage_dtype(), make_fixedbytes_dtype(16, scalar_align_of<complex<double> >::value));
+    EXPECT_EQ(d.storage_type(), make_fixedbytes_dtype(16, scalar_align_of<complex<double> >::value));
 
     // Only basic built-in dtypes can be used to make a byteswap dtype
     EXPECT_THROW(d = make_byteswap_dtype(make_convert_dtype<int, float>()), runtime_error);
@@ -71,7 +71,7 @@ TEST(ByteswapDType, Basic) {
 }
 
 TEST(ByteswapDType, CanonicalDType) {
-    // The canonical dtype of a byteswap dtype is always the non-swapped version
-    EXPECT_EQ((make_dtype<float>()), (make_byteswap_dtype<float>().get_canonical_dtype()));
+    // The canonical type of a byteswap dtype is always the non-swapped version
+    EXPECT_EQ((ndt::make_dtype<float>()), (make_byteswap_dtype<float>().get_canonical_type()));
 }
 

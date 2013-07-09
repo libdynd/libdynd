@@ -12,27 +12,27 @@
 using namespace std;
 using namespace dynd;
 
-expr_dtype::expr_dtype(const dtype& value_dtype, const dtype& operand_dtype,
+expr_dtype::expr_dtype(const ndt::type& value_type, const ndt::type& operand_type,
                 const expr_kernel_generator *kgen)
     : base_expression_dtype(expr_type_id, expression_kind,
-                        operand_dtype.get_data_size(), operand_dtype.get_data_alignment(),
-                        inherited_flags(value_dtype.get_flags(), operand_dtype.get_flags()),
-                        operand_dtype.get_metadata_size(), value_dtype.get_undim()),
-                    m_value_dtype(value_dtype), m_operand_dtype(operand_dtype),
+                        operand_type.get_data_size(), operand_type.get_data_alignment(),
+                        inherited_flags(value_type.get_flags(), operand_type.get_flags()),
+                        operand_type.get_metadata_size(), value_type.get_undim()),
+                    m_value_type(value_type), m_operand_type(operand_type),
                     m_kgen(kgen)
 {
-    if (operand_dtype.get_type_id() != cstruct_type_id) {
+    if (operand_type.get_type_id() != cstruct_type_id) {
         stringstream ss;
         ss << "expr_dtype can only be constructed with a cstruct as its operand, given ";
-        ss << operand_dtype;
+        ss << operand_type;
         throw runtime_error(ss.str());
     }
-    const cstruct_dtype *fsd = static_cast<const cstruct_dtype *>(operand_dtype.extended());
+    const cstruct_dtype *fsd = static_cast<const cstruct_dtype *>(operand_type.extended());
     size_t field_count = fsd->get_field_count();
     if (field_count == 1) {
         throw runtime_error("expr_dtype is for 2 or more operands, use unary_expr_dtype for 1 operand");
     }
-    const dtype *field_types = fsd->get_field_types();
+    const ndt::type *field_types = fsd->get_field_types();
     for (size_t i = 0; i != field_count; ++i) {
         if (field_types[i].get_type_id() != pointer_type_id) {
             stringstream ss;
@@ -56,11 +56,11 @@ void expr_dtype::print_data(std::ostream& DYND_UNUSED(o),
 
 void expr_dtype::print_dtype(std::ostream& o) const
 {
-    const cstruct_dtype *fsd = static_cast<const cstruct_dtype *>(m_operand_dtype.extended());
+    const cstruct_dtype *fsd = static_cast<const cstruct_dtype *>(m_operand_type.extended());
     size_t field_count = fsd->get_field_count();
-    const dtype *field_types = fsd->get_field_types();
+    const ndt::type *field_types = fsd->get_field_types();
     o << "expr<";
-    o << m_value_dtype;
+    o << m_value_type;
     for (size_t i = 0; i != field_count; ++i) {
         const pointer_dtype *pd = static_cast<const pointer_dtype *>(field_types[i].extended());
         o << ", op" << i << "=" << pd->get_target_dtype();
@@ -70,21 +70,21 @@ void expr_dtype::print_dtype(std::ostream& o) const
     o << ">";
 }
 
-dtype expr_dtype::apply_linear_index(size_t nindices, const irange *indices,
-            size_t current_i, const dtype& root_dt, bool DYND_UNUSED(leading_dimension)) const
+ndt::type expr_dtype::apply_linear_index(size_t nindices, const irange *indices,
+            size_t current_i, const ndt::type& root_dt, bool DYND_UNUSED(leading_dimension)) const
 {
     if (m_kgen->is_elwise()) {
         size_t undim = get_undim();
-        const cstruct_dtype *fsd = static_cast<const cstruct_dtype *>(m_operand_dtype.extended());
+        const cstruct_dtype *fsd = static_cast<const cstruct_dtype *>(m_operand_type.extended());
         size_t field_count = fsd->get_field_count();
-        const dtype *field_types = fsd->get_field_types();
+        const ndt::type *field_types = fsd->get_field_types();
 
-        dtype result_value_dt = m_value_dtype.apply_linear_index(nindices, indices,
+        ndt::type result_value_dt = m_value_type.apply_linear_index(nindices, indices,
                         current_i, root_dt, true);
-        vector<dtype> result_src_dt(field_count);
+        vector<ndt::type> result_src_dt(field_count);
         // Apply the portion of the indexing to each of the src operand types
         for (size_t i = 0; i != field_count; ++i) {
-            const dtype& dt = field_types[i];
+            const ndt::type& dt = field_types[i];
             size_t field_undim = dt.get_undim();
             if (nindices + field_undim <= undim) {
                 result_src_dt[i] = dt;
@@ -95,32 +95,32 @@ dtype expr_dtype::apply_linear_index(size_t nindices, const irange *indices,
                                                 current_i, root_dt, false);
             }
         }
-        dtype result_operand_dtype = make_cstruct_dtype(field_count, &result_src_dt[0],
+        ndt::type result_operand_type = make_cstruct_dtype(field_count, &result_src_dt[0],
                         fsd->get_field_names());
         expr_kernel_generator_incref(m_kgen);
-        return make_expr_dtype(result_value_dt, result_operand_dtype, m_kgen);
+        return make_expr_dtype(result_value_dt, result_operand_type, m_kgen);
     } else {
         throw runtime_error("expr_dtype::apply_linear_index is only implemented for elwise kernel generators");
     }
 }
 
 intptr_t expr_dtype::apply_linear_index(size_t nindices, const irange *indices, const char *metadata,
-                const dtype& result_dtype, char *out_metadata,
+                const ndt::type& result_dtype, char *out_metadata,
                 memory_block_data *embedded_reference,
-                size_t current_i, const dtype& root_dt,
+                size_t current_i, const ndt::type& root_dt,
                 bool DYND_UNUSED(leading_dimension), char **DYND_UNUSED(inout_data),
                 memory_block_data **DYND_UNUSED(inout_dataref)) const
 {
     if (m_kgen->is_elwise()) {
         size_t undim = get_undim();
         const expr_dtype *out_ed = static_cast<const expr_dtype *>(result_dtype.extended());
-        const cstruct_dtype *fsd = static_cast<const cstruct_dtype *>(m_operand_dtype.extended());
-        const cstruct_dtype *out_fsd = static_cast<const cstruct_dtype *>(out_ed->m_operand_dtype.extended());
+        const cstruct_dtype *fsd = static_cast<const cstruct_dtype *>(m_operand_type.extended());
+        const cstruct_dtype *out_fsd = static_cast<const cstruct_dtype *>(out_ed->m_operand_type.extended());
         const size_t *metadata_offsets = fsd->get_metadata_offsets();
         const size_t *out_metadata_offsets = out_fsd->get_metadata_offsets();
         size_t field_count = fsd->get_field_count();
-        const dtype *field_types = fsd->get_field_types();
-        const dtype *out_field_types = out_fsd->get_field_types();
+        const ndt::type *field_types = fsd->get_field_types();
+        const ndt::type *out_field_types = out_fsd->get_field_types();
         // Apply the portion of the indexing to each of the src operand types
         for (size_t i = 0; i != field_count; ++i) {
             const pointer_dtype *pd = static_cast<const pointer_dtype *>(field_types[i].extended());
@@ -158,11 +158,11 @@ void expr_dtype::get_shape(size_t ndim, size_t i, intptr_t *out_shape, const cha
 
     // Get each operand shape, and broadcast them together
     dimvector shape(undim);
-    const cstruct_dtype *fsd = static_cast<const cstruct_dtype *>(m_operand_dtype.extended());
+    const cstruct_dtype *fsd = static_cast<const cstruct_dtype *>(m_operand_type.extended());
     const size_t *metadata_offsets = fsd->get_metadata_offsets();
     size_t field_count = fsd->get_field_count();
     for (size_t fi = 0; fi != field_count; ++fi) {
-        const dtype& dt = fsd->get_field_types()[fi];
+        const ndt::type& dt = fsd->get_field_types()[fi];
         size_t field_undim = dt.get_undim();
         if (field_undim > 0) {
             dt.extended()->get_shape(field_undim, 0, shape.get(),
@@ -176,20 +176,20 @@ void expr_dtype::get_shape(size_t ndim, size_t i, intptr_t *out_shape, const cha
 
     // If more shape is requested, get it from the value dtype
     if (ndim - i > undim) {
-        const dtype& dt = m_value_dtype.get_udtype();
+        const ndt::type& dt = m_value_type.get_udtype();
         if (!dt.is_builtin()) {
             dt.extended()->get_shape(ndim, i + undim, out_shape, NULL);
         } else {
             stringstream ss;
-            ss << "requested too many dimensions from type " << dtype(this, true);
+            ss << "requested too many dimensions from type " << ndt::type(this, true);
             throw runtime_error(ss.str());
         }
     }
 }
 
 bool expr_dtype::is_lossless_assignment(
-                const dtype& DYND_UNUSED(dst_dt),
-                const dtype& DYND_UNUSED(src_dt)) const
+                const ndt::type& DYND_UNUSED(dst_dt),
+                const ndt::type& DYND_UNUSED(src_dt)) const
 {
     return false;
 }
@@ -202,8 +202,8 @@ bool expr_dtype::operator==(const base_dtype& rhs) const
         return false;
     } else {
         const expr_dtype *dt = static_cast<const expr_dtype*>(&rhs);
-        return m_value_dtype == dt->m_value_dtype &&
-                        m_operand_dtype == dt->m_operand_dtype &&
+        return m_value_type == dt->m_value_type &&
+                        m_operand_type == dt->m_operand_type &&
                         m_kgen == dt->m_kgen;
     }
 }
@@ -332,7 +332,7 @@ size_t expr_dtype::make_operand_to_value_assignment_kernel(
                 const char *dst_metadata, const char *src_metadata,
                 kernel_request_t kernreq, const eval::eval_context *ectx) const
 {
-    const cstruct_dtype *fsd = static_cast<const cstruct_dtype *>(m_operand_dtype.extended());
+    const cstruct_dtype *fsd = static_cast<const cstruct_dtype *>(m_operand_type.extended());
 
     offset_out = make_kernreq_to_single_kernel_adapter(out, offset_out, kernreq);
     size_t input_count = fsd->get_field_count();
@@ -341,8 +341,8 @@ size_t expr_dtype::make_operand_to_value_assignment_kernel(
     dimvector src_data_offsets(input_count);
     bool nonzero_offsets = false;
 
-    const dtype *src_ptr_dt = fsd->get_field_types();
-    vector<dtype> src_dt(input_count);
+    const ndt::type *src_ptr_dt = fsd->get_field_types();
+    vector<ndt::type> src_dt(input_count);
     for (size_t i = 0; i != input_count; ++i) {
         const pointer_dtype *pd = static_cast<const pointer_dtype *>(src_ptr_dt[i].extended());
         src_dt[i] = pd->get_target_dtype();
@@ -363,7 +363,7 @@ size_t expr_dtype::make_operand_to_value_assignment_kernel(
                         input_count, src_data_offsets.get());
     }
     return m_kgen->make_expr_kernel(out, offset_out,
-                    m_value_dtype, dst_metadata,
+                    m_value_type, dst_metadata,
                     input_count, &src_dt[0],
                     src_metadata_array.get(),
                     kernel_request_single, ectx);
@@ -377,15 +377,15 @@ size_t expr_dtype::make_value_to_operand_assignment_kernel(
     throw runtime_error("Cannot assign to a dynd expr object value");
 }
 
-dtype expr_dtype::with_replaced_storage_dtype(const dtype& DYND_UNUSED(replacement_dtype)) const
+ndt::type expr_dtype::with_replaced_storage_type(const ndt::type& DYND_UNUSED(replacement_type)) const
 {
-    throw runtime_error("TODO: implement expr_dtype::with_replaced_storage_dtype");
+    throw runtime_error("TODO: implement expr_dtype::with_replaced_storage_type");
 }
 
 void expr_dtype::get_dynamic_array_properties(const std::pair<std::string, gfunc::callable> **out_properties,
                 size_t *out_count) const
 {
-    const dtype& udt = m_value_dtype.get_udtype();
+    const ndt::type& udt = m_value_type.get_udtype();
     if (!udt.is_builtin()) {
         udt.extended()->get_dynamic_array_properties(out_properties, out_count);
     } else {
@@ -396,7 +396,7 @@ void expr_dtype::get_dynamic_array_properties(const std::pair<std::string, gfunc
 void expr_dtype::get_dynamic_array_functions(const std::pair<std::string, gfunc::callable> **out_functions,
                 size_t *out_count) const
 {
-    const dtype& udt = m_value_dtype.get_udtype();
+    const ndt::type& udt = m_value_type.get_udtype();
     if (!udt.is_builtin()) {
         udt.extended()->get_dynamic_array_functions(out_functions, out_count);
     } else {

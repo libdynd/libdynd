@@ -20,13 +20,13 @@ void free_array_memory_block(memory_block_data *memblock)
     // Call the data destructor if necessary (i.e. the ndobject owns
     // the data memory, and the dtype has a data destructor)
     if (preamble->m_data_reference == NULL &&
-                    !preamble->is_builtin_dtype() &&
-                    (preamble->m_dtype->get_flags()&dtype_flag_destructor) != 0) {
+                    !preamble->is_builtin_type() &&
+                    (preamble->m_dtype->get_flags()&type_flag_destructor) != 0) {
         preamble->m_dtype->data_destruct(metadata, preamble->m_data_pointer);
     }
 
     // Free the references contained in the metadata
-    if (!preamble->is_builtin_dtype()) {
+    if (!preamble->is_builtin_type()) {
         preamble->m_dtype->metadata_destruct(metadata);
         base_dtype_decref(preamble->m_dtype);
     }
@@ -69,7 +69,7 @@ memory_block_ptr dynd::make_array_memory_block(size_t metadata_size, size_t extr
     return memory_block_ptr(new (result) memory_block_data(1, array_memory_block_type), false);
 }
 
-memory_block_ptr dynd::make_array_memory_block(const dtype& dt, size_t ndim, const intptr_t *shape)
+memory_block_ptr dynd::make_array_memory_block(const ndt::type& dt, size_t ndim, const intptr_t *shape)
 {
     size_t metadata_size, data_size;
 
@@ -93,7 +93,7 @@ memory_block_ptr dynd::make_array_memory_block(const dtype& dt, size_t ndim, con
     char *data_ptr = NULL;
     memory_block_ptr result = make_array_memory_block(metadata_size, data_size, dt.get_data_alignment(), &data_ptr);
 
-    if (dt.get_flags()&dtype_flag_zeroinit) {
+    if (dt.get_flags()&type_flag_zeroinit) {
         memset(data_ptr, 0, data_size);
     }
 
@@ -101,7 +101,7 @@ memory_block_ptr dynd::make_array_memory_block(const dtype& dt, size_t ndim, con
     if (dt.is_builtin()) {
         preamble->m_dtype = reinterpret_cast<base_dtype *>(dt.get_type_id());
     } else {
-        preamble->m_dtype = dtype(dt).release();
+        preamble->m_dtype = ndt::type(dt).release();
         preamble->m_dtype->metadata_default_construct(reinterpret_cast<char *>(preamble + 1), ndim, shape);
     }
     preamble->m_data_pointer = data_ptr;
@@ -115,7 +115,7 @@ memory_block_ptr dynd::shallow_copy_array_memory_block(const memory_block_ptr& n
     // Allocate the new memory block.
     const array_preamble *preamble = reinterpret_cast<const array_preamble *>(ndo.get());
     size_t metadata_size = 0;
-    if (!preamble->is_builtin_dtype()) {
+    if (!preamble->is_builtin_type()) {
         metadata_size = preamble->m_dtype->get_metadata_size();
     }
     memory_block_ptr result = make_array_memory_block(metadata_size);
@@ -134,7 +134,7 @@ memory_block_ptr dynd::shallow_copy_array_memory_block(const memory_block_ptr& n
 
     // Clone the dtype
     result_preamble->m_dtype = preamble->m_dtype;
-    if (!preamble->is_builtin_dtype()) {
+    if (!preamble->is_builtin_type()) {
         base_dtype_incref(preamble->m_dtype);
         preamble->m_dtype->metadata_copy_construct(reinterpret_cast<char *>(result.get()) + sizeof(array_preamble),
                         reinterpret_cast<const char *>(ndo.get()) + sizeof(array_preamble), ndo.get());
@@ -147,8 +147,8 @@ void dynd::array_memory_block_debug_print(const memory_block_data *memblock, std
 {
     const array_preamble *preamble = reinterpret_cast<const array_preamble *>(memblock);
     if (preamble->m_dtype != NULL) {
-        dtype dt = preamble->is_builtin_dtype() ? dtype(preamble->get_type_id())
-                        : dtype(preamble->m_dtype, true);
+        ndt::type dt = preamble->is_builtin_type() ? ndt::type(preamble->get_type_id())
+                        : ndt::type(preamble->m_dtype, true);
         o << indent << " dtype: " << dt << "\n";
     } else {
         o << indent << " uninitialized ndobject\n";

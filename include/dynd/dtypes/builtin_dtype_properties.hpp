@@ -20,7 +20,7 @@ size_t get_builtin_dtype_elwise_property_index(
                 type_id_t builtin_type_id,
                 const std::string& property_name);
 
-dtype get_builtin_dtype_elwise_property_dtype(
+ndt::type get_builtin_dtype_elwise_property_dtype(
                 type_id_t builtin_type_id,
                 size_t elwise_property_index,
                 bool& out_readable, bool& out_writable);

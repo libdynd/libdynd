@@ -28,7 +28,7 @@ namespace {
         }
     };
 
-    template<class T, dtype_kind_t kind>
+    template<class T, type_kind_t kind>
     struct range_counter {
         static intptr_t count(const void *beginval, const void *endval, const void *stepval) {
             T begin = *reinterpret_cast<const T *>(beginval);
@@ -98,7 +98,7 @@ namespace {
     };
 } // anonymous namespace
 
-nd::array dynd::nd::range(const dtype& scalar_dtype, const void *beginval, const void *endval, const void *stepval)
+nd::array dynd::nd::range(const ndt::type& scalar_dtype, const void *beginval, const void *endval, const void *stepval)
 {
 #define ONE_ARANGE_SPECIALIZATION(type) \
     case type_id_of<type>::value: { \
@@ -173,7 +173,7 @@ static void linspace_specialization(complex<double> start, complex<double> stop,
     }
 }
 
-nd::array dynd::nd::linspace(const nd::array& start, const nd::array& stop, intptr_t count, const dtype& dt)
+nd::array dynd::nd::linspace(const nd::array& start, const nd::array& stop, intptr_t count, const ndt::type& dt)
 {
     nd::array start_cleaned = start.ucast(dt).eval();
     nd::array stop_cleaned = stop.ucast(dt).eval();
@@ -187,15 +187,15 @@ nd::array dynd::nd::linspace(const nd::array& start, const nd::array& stop, intp
 
 nd::array dynd::nd::linspace(const nd::array& start, const nd::array& stop, intptr_t count)
 {
-    dtype dt = promote_dtypes_arithmetic(start.get_udtype(), stop.get_udtype());
+    ndt::type dt = promote_dtypes_arithmetic(start.get_udtype(), stop.get_udtype());
     // Make sure it's at least floating point
     if (dt.get_kind() == bool_kind || dt.get_kind() == int_kind || dt.get_kind() == uint_kind) {
-        dt = make_dtype<double>();
+        dt = ndt::make_dtype<double>();
     }
     return linspace(start, stop, count, dt);
 }
 
-nd::array dynd::nd::linspace(const dtype& dt, const void *startval, const void *stopval, intptr_t count)
+nd::array dynd::nd::linspace(const ndt::type& dt, const void *startval, const void *stopval, intptr_t count)
 {
     if (count < 2) {
         throw runtime_error("linspace needs a count of at least 2");

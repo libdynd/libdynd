@@ -33,14 +33,14 @@ static unsigned int get_arg_id_from_type_id(type_id_t type_id)
             return 5;
         default: {
             stringstream ss;
-            ss << "The unary_kernel_adapter does not support " << dtype(type_id) << " for the return type";
+            ss << "The unary_kernel_adapter does not support " << ndt::type(type_id) << " for the return type";
             throw runtime_error(ss.str());
         }
     }
 }
 
-uint64_t dynd::get_binary_function_adapter_unique_id(const dtype& restype,
-                    const dtype& arg0type, const dtype& arg1type, calling_convention_t DYND_UNUSED(callconv))
+uint64_t dynd::get_binary_function_adapter_unique_id(const ndt::type& restype,
+                    const ndt::type& arg0type, const ndt::type& arg1type, calling_convention_t DYND_UNUSED(callconv))
 {
     // Bits 0..2 for the result type
     uint64_t result = get_arg_id_from_type_id(restype.get_type_id());
@@ -67,8 +67,8 @@ std::string dynd::get_binary_function_adapter_unique_id_string(uint64_t unique_i
     return ss.str();
 }
 
-binary_operation_pair_t dynd::codegen_binary_function_adapter(const memory_block_ptr& exec_memblock, const dtype& restype,
-                    const dtype& arg0type, const dtype& arg1type, calling_convention_t DYND_UNUSED(callconv))
+binary_operation_pair_t dynd::codegen_binary_function_adapter(const memory_block_ptr& exec_memblock, const ndt::type& restype,
+                    const ndt::type& arg0type, const ndt::type& arg1type, calling_convention_t DYND_UNUSED(callconv))
 {
     // This code generation always uses the same prolog structure,
     // so the unwind_info is fixed.

@@ -19,7 +19,7 @@ TEST(ArrayAssign, ScalarAssignment_Bool) {
     nd::array a;
 
     // assignment to a bool scalar
-    a = nd::empty(make_dtype<dynd_bool>());
+    a = nd::empty(ndt::make_dtype<dynd_bool>());
     const dynd_bool *ptr_b = (const dynd_bool *)a.get_ndo()->m_data_pointer;
     a.val_assign(true);
     EXPECT_TRUE(*ptr_b);
@@ -52,7 +52,7 @@ TEST(ArrayAssign, ScalarAssignment_Int8) {
     const int8_t *ptr_i8;
 
     // Assignment to an int8_t scalar
-    a = nd::empty(make_dtype<int8_t>());
+    a = nd::empty(ndt::make_dtype<int8_t>());
     ptr_i8 = (const int8_t *)a.get_ndo()->m_data_pointer;
     a.val_assign(true);
     EXPECT_EQ(1, *ptr_i8);
@@ -88,7 +88,7 @@ TEST(ArrayAssign, ScalarAssignment_UInt16) {
     const uint16_t *ptr_u16;
 
     // Assignment to a uint16_t scalar
-    a = nd::empty(make_dtype<uint16_t>());
+    a = nd::empty(ndt::make_dtype<uint16_t>());
     ptr_u16 = (const uint16_t *)a.get_ndo()->m_data_pointer;
     a.val_assign(true);
     EXPECT_EQ(1, *ptr_u16);
@@ -109,7 +109,7 @@ TEST(ArrayAssign, ScalarAssignment_Float32) {
     const float *ptr_f32;
 
     // Assignment to a float scalar
-    a = nd::empty(make_dtype<float>());
+    a = nd::empty(ndt::make_dtype<float>());
     ptr_f32 = (const float *)a.get_ndo()->m_data_pointer;
     a.val_assign(true);
     EXPECT_EQ(1, *ptr_f32);
@@ -137,7 +137,7 @@ TEST(ArrayAssign, ScalarAssignment_Float64) {
     const double *ptr_f64;
 
     // Assignment to a double scalar
-    a = nd::empty(make_dtype<double>());
+    a = nd::empty(ndt::make_dtype<double>());
     ptr_f64 = (const double *)a.get_ndo()->m_data_pointer;
     a.val_assign(true);
     EXPECT_EQ(1, *ptr_f64);
@@ -160,7 +160,7 @@ TEST(ArrayAssign, ScalarAssignment_Uint64) {
     const uint64_t *ptr_u64;
 
     // Assignment to a double scalar
-    a = nd::empty(make_dtype<uint64_t>());
+    a = nd::empty(ndt::make_dtype<uint64_t>());
     ptr_u64 = (const uint64_t *)a.get_ndo()->m_data_pointer;
     a.val_assign(true);
     EXPECT_EQ(1u, *ptr_u64);
@@ -180,7 +180,7 @@ TEST(ArrayAssign, ScalarAssignment_Uint64_LargeNumbers) {
     const uint64_t *ptr_u64;
 
     // Assignment to a double scalar
-    a = nd::empty(make_dtype<uint64_t>());
+    a = nd::empty(ndt::make_dtype<uint64_t>());
     ptr_u64 = (const uint64_t *)a.get_ndo()->m_data_pointer;
     // Assign some values that don't fit in signed 64-bits
     a.val_assign(13835058055282163712.f);
@@ -199,7 +199,7 @@ TEST(ArrayAssign, ScalarAssignment_Complex_Float32) {
     const complex<float> *ptr_cf32;
 
     // Assignment to a complex float scalar
-    a = nd::empty(make_dtype<complex<float> >());
+    a = nd::empty(ndt::make_dtype<complex<float> >());
     ptr_cf32 = (const complex<float> *)a.get_ndo()->m_data_pointer;
     a.val_assign(true);
     EXPECT_EQ(complex<float>(1), *ptr_cf32);
@@ -228,7 +228,7 @@ TEST(ArrayAssign, ScalarAssignment_Complex_Float64) {
     const complex<double> *ptr_cf64;
 
     // Assignment to a complex float scalar
-    a = nd::empty(make_dtype<complex<double> >());
+    a = nd::empty(ndt::make_dtype<complex<double> >());
     ptr_cf64 = (const complex<double> *)a.get_ndo()->m_data_pointer;
     a.val_assign(true);
     EXPECT_EQ(complex<double>(1), *ptr_cf64);
@@ -254,7 +254,7 @@ TEST(ArrayAssign, ScalarAssignment_Complex_Float64) {
 }
 
 TEST(ArrayAssign, BroadcastAssign) {
-    nd::array a = nd::make_strided_array(2, 3, 4, make_dtype<float>());
+    nd::array a = nd::make_strided_array(2, 3, 4, ndt::make_dtype<float>());
     int v0[4] = {3,4,5,6};
     nd::array b = v0;
 
@@ -304,20 +304,20 @@ TEST(ArrayAssign, Casting) {
     float v0[4] = {3.5, 1.0, 0, 1000};
     nd::array a = v0, b;
 
-    b = a.ucast(make_dtype<int>());
+    b = a.ucast(ndt::make_dtype<int>());
     // This triggers the conversion from float to int,
     // but the default assign policy is 'fractional'
     EXPECT_THROW(b.eval(), runtime_error);
 
     // Allow truncation of fractional part
-    b = a.ucast(make_dtype<int>(), 0, assign_error_overflow);
+    b = a.ucast(ndt::make_dtype<int>(), 0, assign_error_overflow);
     b = b.eval();
     EXPECT_EQ(3, b(0).as<int>());
     EXPECT_EQ(1, b(1).as<int>());
     EXPECT_EQ(0, b(2).as<int>());
     EXPECT_EQ(1000, b(3).as<int>());
 
-    // cast_scalars<int>() should be equivalent to cast_scalars(make_dtype<int>())
+    // cast_scalars<int>() should be equivalent to cast_scalars(ndt::make_dtype<int>())
     b = a.ucast<int>(0, assign_error_overflow);
     b = b.eval();
     EXPECT_EQ(3, b(0).as<int>());
@@ -325,7 +325,7 @@ TEST(ArrayAssign, Casting) {
     EXPECT_EQ(0, b(2).as<int>());
     EXPECT_EQ(1000, b(3).as<int>());
 
-    b = a.ucast(make_dtype<int8_t>(), 0, assign_error_overflow);
+    b = a.ucast(ndt::make_dtype<int8_t>(), 0, assign_error_overflow);
     // This triggers conversion from float to int8,
     // which overflows
     EXPECT_THROW(b.eval(), runtime_error);
@@ -359,14 +359,14 @@ TEST(ArrayAssign, ChainedCastingRead) {
     b = b.ucast<float>(0, assign_error_inexact);
     // Multiple cast_scalars operations should make a chained conversion dtype
     EXPECT_EQ(make_strided_dim_dtype(
-                    make_convert_dtype(make_dtype<float>(),
+                    make_convert_dtype(ndt::make_dtype<float>(),
                                     make_convert_dtype<int, float>(assign_error_overflow), assign_error_inexact)),
               b.get_dtype());
 
     // Evaluating the values should truncate them to integers
     b = b.eval();
     // Now it's just the value dtype, no chaining
-    EXPECT_EQ(make_strided_dim_dtype(make_dtype<float>()), b.get_dtype());
+    EXPECT_EQ(make_strided_dim_dtype(ndt::make_dtype<float>()), b.get_dtype());
     EXPECT_EQ(3, b(0).as<float>());
     EXPECT_EQ(1, b(1).as<float>());
     EXPECT_EQ(-2, b(2).as<float>());
@@ -382,11 +382,11 @@ TEST(ArrayAssign, ChainedCastingRead) {
     b = b.ucast<int32_t>(0, assign_error_overflow);
 
     EXPECT_EQ(make_strided_dim_dtype(
-                make_convert_dtype(make_dtype<int32_t>(),
-                    make_convert_dtype(make_dtype<float>(),
-                        make_convert_dtype(make_dtype<int64_t>(),
-                            make_convert_dtype(make_dtype<int16_t>(),
-                                make_convert_dtype(make_dtype<int32_t>(),
+                make_convert_dtype(ndt::make_dtype<int32_t>(),
+                    make_convert_dtype(ndt::make_dtype<float>(),
+                        make_convert_dtype(ndt::make_dtype<int64_t>(),
+                            make_convert_dtype(ndt::make_dtype<int16_t>(),
+                                make_convert_dtype(ndt::make_dtype<int32_t>(),
                                     make_convert_dtype<int16_t, float>(
                                     assign_error_overflow),
                                 assign_error_overflow),
@@ -396,7 +396,7 @@ TEST(ArrayAssign, ChainedCastingRead) {
                 assign_error_overflow)),
             b.get_dtype());
     b = b.eval();
-    EXPECT_EQ(make_strided_dim_dtype(make_dtype<int32_t>()), b.get_dtype());
+    EXPECT_EQ(make_strided_dim_dtype(ndt::make_dtype<int32_t>()), b.get_dtype());
     EXPECT_EQ(3, b(0).as<int32_t>());
     EXPECT_EQ(1, b(1).as<int32_t>());
     EXPECT_EQ(-2, b(2).as<int32_t>());
@@ -411,7 +411,7 @@ TEST(ArrayAssign, ChainedCastingWrite) {
     b = a.ucast<int>(0, assign_error_inexact);
     b = b.ucast<float>(0, assign_error_overflow);
     // Multiple cast_scalars operations should make a chained conversion dtype
-    EXPECT_EQ(make_strided_dim_dtype(make_convert_dtype(make_dtype<float>(),
+    EXPECT_EQ(make_strided_dim_dtype(make_convert_dtype(ndt::make_dtype<float>(),
                                     make_convert_dtype<int, float>(assign_error_inexact), assign_error_overflow)),
               b.get_dtype());
 

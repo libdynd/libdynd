@@ -15,7 +15,7 @@ using namespace dynd;
 
 fixedbytes_dtype::fixedbytes_dtype(intptr_t data_size, intptr_t data_alignment)
     : base_bytes_dtype(fixedbytes_type_id, bytes_kind, data_size,
-                    data_alignment, dtype_flag_scalar, 0)
+                    data_alignment, type_flag_scalar, 0)
 {
     if (data_alignment > data_size) {
         std::stringstream ss;
@@ -59,7 +59,7 @@ void fixedbytes_dtype::print_dtype(std::ostream& o) const
     o << "fixedbytes<" << get_data_size() << "," << get_data_alignment() << ">";
 }
 
-bool fixedbytes_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const
+bool fixedbytes_dtype::is_lossless_assignment(const ndt::type& dst_dt, const ndt::type& src_dt) const
 {
     if (dst_dt.extended() == this) {
         if (src_dt.extended() == this) {
@@ -89,8 +89,8 @@ bool fixedbytes_dtype::operator==(const base_dtype& rhs) const
 
 size_t fixedbytes_dtype::make_assignment_kernel(
                 hierarchical_kernel *out, size_t offset_out,
-                const dtype& dst_dt, const char *dst_metadata,
-                const dtype& src_dt, const char *src_metadata,
+                const ndt::type& dst_dt, const char *dst_metadata,
+                const ndt::type& src_dt, const char *src_metadata,
                 kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *ectx) const
 {

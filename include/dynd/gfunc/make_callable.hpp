@@ -103,27 +103,27 @@ template <> struct parameter_type_of<float> {typedef float type;};
 template <> struct parameter_type_of<double> {typedef double type;};
 template <typename T> struct parameter_type_of<std::complex<T> > {typedef std::complex<T> type;};
 template <> struct parameter_type_of<nd::array> {typedef array_preamble *type;};
-template <> struct parameter_type_of<dtype> {typedef const base_dtype *type;};
+template <> struct parameter_type_of<ndt::type> {typedef const base_dtype *type;};
 template <> struct parameter_type_of<std::string> {typedef string_dtype_data type;};
 
-template <typename T> struct make_parameter_dtype {inline static dtype make() {
-        return make_dtype<typename parameter_type_of<T>::type>();
+template <typename T> struct make_parameter_dtype {inline static ndt::type make() {
+        return ndt::make_dtype<typename parameter_type_of<T>::type>();
     }};
 template <typename T> struct make_parameter_dtype<T &> : public make_parameter_dtype<T> {};
 template <typename T> struct make_parameter_dtype<const T> : public make_parameter_dtype<T> {};
-template <typename T, int N> struct make_parameter_dtype<T[N]> {inline static dtype make() {
-        return make_fixed_dim_dtype(N, make_dtype<T>());
+template <typename T, int N> struct make_parameter_dtype<T[N]> {inline static ndt::type make() {
+        return make_fixed_dim_dtype(N, ndt::make_dtype<T>());
     }};
-// Use void* to pass nd::array and dtype as parameters, correctness currently will
+// Use void* to pass nd::array as a parameter, correctness currently will
 // rely on using them in the right context. To pass these properly will require
 // dynd to grow the ability to manage object memory.
-template <> struct make_parameter_dtype<nd::array> {inline static dtype make() {
-        return dtype(new void_pointer_dtype, false);
+template <> struct make_parameter_dtype<nd::array> {inline static ndt::type make() {
+        return ndt::type(new void_pointer_dtype, false);
     }};
-template <> struct make_parameter_dtype<dtype> {inline static dtype make() {
+template <> struct make_parameter_dtype<ndt::type> {inline static ndt::type make() {
         return make_dtype_dtype();
     }};
-template <> struct make_parameter_dtype<std::string> {inline static dtype make() {
+template <> struct make_parameter_dtype<std::string> {inline static ndt::type make() {
         return make_string_dtype(string_encoding_utf_8);
     }};
 
@@ -140,8 +140,8 @@ template <> struct box_result<nd::array> {
         return const_cast<nd::array&>(v).release();
     }
 };
-template <> struct box_result<dtype> {
-    inline static array_preamble *box(const dtype& v) {
+template <> struct box_result<ndt::type> {
+    inline static array_preamble *box(const ndt::type& v) {
         return nd::array(v).release();
     }
 };
@@ -175,9 +175,9 @@ template <> struct unbox_param<nd::array> {
         return nd::array(*reinterpret_cast<array_preamble **>(v), true);
     }
 };
-template <> struct unbox_param<dtype> {
-    inline static dtype unbox(char *v) {
-        return dtype(*reinterpret_cast<base_dtype **>(v), true);
+template <> struct unbox_param<ndt::type> {
+    inline static ndt::type unbox(char *v) {
+        return ndt::type(*reinterpret_cast<base_dtype **>(v), true);
     }
 };
 template <> struct unbox_param<std::string> {
@@ -202,7 +202,7 @@ namespace detail {
             function_pointer_t f = reinterpret_cast<function_pointer_t>(extra);
             return box_result<R>::box(f(unbox_param<P0>::unbox(p + dcs_offset_of<T0>::value)));
         }
-        static dtype make_parameters_dtype(const char *name0) {
+        static ndt::type make_parameters_type(const char *name0) {
             return make_cstruct_dtype(make_parameter_dtype<P0>::make(), name0);
         }
     };
@@ -220,7 +220,7 @@ namespace detail {
                             unbox_param<P0>::unbox(p + dcs_offset_of<T0>::value),
                             unbox_param<P1>::unbox(p + dcs_offset_of<T0, T1>::value)));
         }
-        static dtype make_parameters_dtype(const char *name0, const char *name1) {
+        static ndt::type make_parameters_type(const char *name0, const char *name1) {
             return make_cstruct_dtype(make_parameter_dtype<P0>::make(), name0,
                             make_parameter_dtype<P1>::make(), name1);
         }
@@ -241,7 +241,7 @@ namespace detail {
                             unbox_param<P1>::unbox(p + dcs_offset_of<T0, T1>::value),
                             unbox_param<P2>::unbox(p + dcs_offset_of<T0, T1, T2>::value)));
         }
-        static dtype make_parameters_dtype(const char *name0, const char *name1, const char *name2) {
+        static ndt::type make_parameters_type(const char *name0, const char *name1, const char *name2) {
             return make_cstruct_dtype(make_parameter_dtype<P0>::make(), name0,
                             make_parameter_dtype<P1>::make(), name1,
                             make_parameter_dtype<P2>::make(), name2);
@@ -265,8 +265,8 @@ namespace detail {
                             unbox_param<P2>::unbox(p + dcs_offset_of<T0, T1, T2>::value),
                             unbox_param<P3>::unbox(p + dcs_offset_of<T0, T1, T2, T3>::value)));
         }
-        static dtype make_parameters_dtype(const char *name0, const char *name1, const char *name2, const char *name3) {
-            dtype field_types[4];
+        static ndt::type make_parameters_type(const char *name0, const char *name1, const char *name2, const char *name3) {
+            ndt::type field_types[4];
             std::string field_names[4];
             field_types[0] = make_parameter_dtype<P0>::make();
             field_types[1] = make_parameter_dtype<P1>::make();
@@ -299,9 +299,9 @@ namespace detail {
                             unbox_param<P3>::unbox(p + dcs_offset_of<T0, T1, T2, T3>::value),
                             unbox_param<P4>::unbox(p + dcs_offset_of<T0, T1, T2, T3, T4>::value)));
         }
-        static dtype make_parameters_dtype(const char *name0, const char *name1, const char *name2,
+        static ndt::type make_parameters_type(const char *name0, const char *name1, const char *name2,
                         const char *name3, const char *name4) {
-            dtype field_types[5];
+            ndt::type field_types[5];
             std::string field_names[5];
             field_types[0] = make_parameter_dtype<P0>::make();
             field_types[1] = make_parameter_dtype<P1>::make();
@@ -321,7 +321,7 @@ namespace detail {
 // One parameter, no defaults
 template<typename FN>
 inline callable make_callable(FN *f, const char *name0) {
-    return callable(detail::callable_maker<FN *>::make_parameters_dtype(name0),
+    return callable(detail::callable_maker<FN *>::make_parameters_type(name0),
                 &detail::callable_maker<FN *>::wrapper,
                 reinterpret_cast<void *>(f));
 }
@@ -329,7 +329,7 @@ inline callable make_callable(FN *f, const char *name0) {
 // One parameter, one default
 template<typename FN, typename D0>
 inline callable make_callable_with_default(FN *f, const char *name0, const D0& default0) {
-    dtype pdt = detail::callable_maker<FN *>::make_parameters_dtype(name0);
+    ndt::type pdt = detail::callable_maker<FN *>::make_parameters_type(name0);
     nd::array defaults = nd::empty(pdt);
     defaults(0).vals() = default0;
     // Make defaults immutable (which is ok, because we have the only reference to it)
@@ -343,7 +343,7 @@ inline callable make_callable_with_default(FN *f, const char *name0, const D0& d
 // Two parameters, no defaults
 template<typename FN>
 inline callable make_callable(FN *f, const char *name0, const char *name1) {
-    return callable(detail::callable_maker<FN *>::make_parameters_dtype(name0, name1),
+    return callable(detail::callable_maker<FN *>::make_parameters_type(name0, name1),
                 &detail::callable_maker<FN *>::wrapper,
                 reinterpret_cast<void *>(f));
 }
@@ -351,7 +351,7 @@ inline callable make_callable(FN *f, const char *name0, const char *name1) {
 // Two parameters, one default
 template<typename FN, typename D1>
 inline callable make_callable_with_default(FN *f, const char *name0, const char *name1, const D1& default1) {
-    dtype pdt = detail::callable_maker<FN *>::make_parameters_dtype(name0, name1);
+    ndt::type pdt = detail::callable_maker<FN *>::make_parameters_type(name0, name1);
     nd::array defaults = nd::empty(pdt);
     defaults(1).vals() = default1;
     // Make defaults immutable (which is ok, because we have the only reference to it)
@@ -365,7 +365,7 @@ inline callable make_callable_with_default(FN *f, const char *name0, const char 
 // Two parameters, two defaults
 template<typename FN, typename D0, typename D1>
 inline callable make_callable_with_default(FN *f, const char *name0, const char *name1, const D0& default0, const D1& default1) {
-    dtype pdt = detail::callable_maker<FN *>::make_parameters_dtype(name0, name1);
+    ndt::type pdt = detail::callable_maker<FN *>::make_parameters_type(name0, name1);
     nd::array defaults = nd::empty(pdt);
     defaults(0).vals() = default0;
     defaults(1).vals() = default1;
@@ -380,7 +380,7 @@ inline callable make_callable_with_default(FN *f, const char *name0, const char 
 // Three parameters, no defaults
 template<typename FN>
 inline callable make_callable(FN *f, const char *name0, const char *name1, const char *name2) {
-    return callable(detail::callable_maker<FN *>::make_parameters_dtype(name0, name1, name2),
+    return callable(detail::callable_maker<FN *>::make_parameters_type(name0, name1, name2),
                 &detail::callable_maker<FN *>::wrapper,
                 reinterpret_cast<void *>(f));
 }
@@ -388,7 +388,7 @@ inline callable make_callable(FN *f, const char *name0, const char *name1, const
 // Three parameters, one default
 template<typename FN, typename D2>
 inline callable make_callable_with_default(FN *f, const char *name0, const char *name1, const char *name2, const D2& default2) {
-    dtype pdt = detail::callable_maker<FN *>::make_parameters_dtype(name0, name1, name2);
+    ndt::type pdt = detail::callable_maker<FN *>::make_parameters_type(name0, name1, name2);
     nd::array defaults = nd::empty(pdt);
     defaults(2).vals() = default2;
     // Make defaults immutable (which is ok, because we have the only reference to it)
@@ -402,7 +402,7 @@ inline callable make_callable_with_default(FN *f, const char *name0, const char 
 // Three parameters, two defaults
 template<typename FN, typename D1, typename D2>
 inline callable make_callable_with_default(FN *f, const char *name0, const char *name1, const char *name2, const D1& default1, const D2& default2) {
-    dtype pdt = detail::callable_maker<FN *>::make_parameters_dtype(name0, name1, name2);
+    ndt::type pdt = detail::callable_maker<FN *>::make_parameters_type(name0, name1, name2);
     nd::array defaults = nd::empty(pdt);
     defaults(1).vals() = default1;
     defaults(2).vals() = default2;
@@ -417,7 +417,7 @@ inline callable make_callable_with_default(FN *f, const char *name0, const char 
 // Three parameters, three defaults
 template<typename FN, typename D0, typename D1, typename D2>
 inline callable make_callable_with_default(FN *f, const char *name0, const char *name1, const char *name2, const D0& default0, const D1& default1, const D2& default2) {
-    dtype pdt = detail::callable_maker<FN *>::make_parameters_dtype(name0, name1, name2);
+    ndt::type pdt = detail::callable_maker<FN *>::make_parameters_type(name0, name1, name2);
     nd::array defaults = nd::empty(pdt);
     defaults(0).vals() = default0;
     defaults(1).vals() = default1;
@@ -433,7 +433,7 @@ inline callable make_callable_with_default(FN *f, const char *name0, const char 
 // Four parameters, no defaults
 template<typename FN>
 inline callable make_callable(FN *f, const char *name0, const char *name1, const char *name2, const char *name3) {
-    return callable(detail::callable_maker<FN *>::make_parameters_dtype(name0, name1, name2, name3),
+    return callable(detail::callable_maker<FN *>::make_parameters_type(name0, name1, name2, name3),
                 &detail::callable_maker<FN *>::wrapper,
                 reinterpret_cast<void *>(f));
 }
@@ -442,7 +442,7 @@ inline callable make_callable(FN *f, const char *name0, const char *name1, const
 template<typename FN, typename D3>
 inline callable make_callable_with_default(FN *f, const char *name0, const char *name1, const char *name2,
                 const char *name3, const D3& default3) {
-    dtype pdt = detail::callable_maker<FN *>::make_parameters_dtype(name0, name1, name2, name3);
+    ndt::type pdt = detail::callable_maker<FN *>::make_parameters_type(name0, name1, name2, name3);
     nd::array defaults = nd::empty(pdt);
     defaults(3).vals() = default3;
     // Make defaults immutable (which is ok, because we have the only reference to it)
@@ -457,7 +457,7 @@ inline callable make_callable_with_default(FN *f, const char *name0, const char 
 template<typename FN, typename D2, typename D3>
 inline callable make_callable_with_default(FN *f, const char *name0, const char *name1, const char *name2,
                 const char *name3, const D2& default2, const D3& default3) {
-    dtype pdt = detail::callable_maker<FN *>::make_parameters_dtype(name0, name1, name2, name3);
+    ndt::type pdt = detail::callable_maker<FN *>::make_parameters_type(name0, name1, name2, name3);
     nd::array defaults = nd::empty(pdt);
     defaults(2).vals() = default2;
     defaults(3).vals() = default3;
@@ -473,7 +473,7 @@ inline callable make_callable_with_default(FN *f, const char *name0, const char 
 template<typename FN, typename D1, typename D2, typename D3>
 inline callable make_callable_with_default(FN *f, const char *name0, const char *name1, const char *name2,
                 const char *name3, const D1& default1, const D2& default2, const D3& default3) {
-    dtype pdt = detail::callable_maker<FN *>::make_parameters_dtype(name0, name1, name2, name3);
+    ndt::type pdt = detail::callable_maker<FN *>::make_parameters_type(name0, name1, name2, name3);
     nd::array defaults = nd::empty(pdt);
     defaults(1).vals() = default1;
     defaults(2).vals() = default2;
@@ -490,7 +490,7 @@ inline callable make_callable_with_default(FN *f, const char *name0, const char 
 template<typename FN, typename D0, typename D1, typename D2, typename D3>
 inline callable make_callable_with_default(FN *f, const char *name0, const char *name1, const char *name2,
                 const char *name3, const D0& default0, const D1& default1, const D2& default2, const D3& default3) {
-    dtype pdt = detail::callable_maker<FN *>::make_parameters_dtype(name0, name1, name2, name3);
+    ndt::type pdt = detail::callable_maker<FN *>::make_parameters_type(name0, name1, name2, name3);
     nd::array defaults = nd::empty(pdt);
     defaults(0).vals() = default0;
     defaults(1).vals() = default1;
@@ -507,7 +507,7 @@ inline callable make_callable_with_default(FN *f, const char *name0, const char 
 template<typename FN>
 inline callable make_callable(FN *f, const char *name0, const char *name1, const char *name2,
                 const char *name3, const char *name4) {
-    return callable(detail::callable_maker<FN *>::make_parameters_dtype(name0, name1, name2, name3, name4),
+    return callable(detail::callable_maker<FN *>::make_parameters_type(name0, name1, name2, name3, name4),
                 &detail::callable_maker<FN *>::wrapper,
                 reinterpret_cast<void *>(f));
 }

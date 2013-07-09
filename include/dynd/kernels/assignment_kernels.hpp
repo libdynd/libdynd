@@ -6,7 +6,7 @@
 #ifndef _DYND__ASSIGNMENT_KERNELS_HPP_
 #define _DYND__ASSIGNMENT_KERNELS_HPP_
 
-#include <dynd/dtype.hpp>
+#include <dynd/type.hpp>
 #include <dynd/dtype_assign.hpp>
 #include <dynd/kernels/hierarchical_kernels.hpp>
 #include <dynd/eval/eval_context.hpp>
@@ -33,8 +33,8 @@ typedef void (*unary_strided_operation_t)(
  * used.
  *
  * This kernel type is for kernels which assign one
- * data value from one dtype/metadata source to
- * a different dtype/metadata destination.
+ * data value from one type/metadata source to
+ * a different type/metadata destination.
  */
 class assignment_kernel : public hierarchical_kernel {
 public:
@@ -57,7 +57,7 @@ public:
 
 /**
  * Creates an assignment kernel for one data value from the
- * src dtype/metadata to the dst dtype/metadata. This adds the
+ * src type/metadata to the dst type/metadata. This adds the
  * kernel at the 'out_offset' position in 'out's data, as part
  * of a hierarchy matching the dtype's hierarchy.
  *
@@ -80,8 +80,8 @@ public:
  */
 size_t make_assignment_kernel(
                 hierarchical_kernel *out, size_t offset_out,
-                const dtype& dst_dt, const char *dst_metadata,
-                const dtype& src_dt, const char *src_metadata,
+                const ndt::type& dst_dt, const char *dst_metadata,
+                const ndt::type& src_dt, const char *src_metadata,
                 kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *ectx);
 

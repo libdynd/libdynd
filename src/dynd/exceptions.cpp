@@ -83,8 +83,8 @@ broadcast_error::broadcast_error(size_t ninputs, const nd::array *inputs)
 {
 }
 
-inline string broadcast_error_message(const dtype& dst_dt, const char *dst_metadata,
-                const dtype& src_dt, const char *src_metadata)
+inline string broadcast_error_message(const ndt::type& dst_dt, const char *dst_metadata,
+                const ndt::type& src_dt, const char *src_metadata)
 {
     stringstream ss;
     ss << "cannot broadcast input datashape '";
@@ -95,14 +95,14 @@ inline string broadcast_error_message(const dtype& dst_dt, const char *dst_metad
     return ss.str();
 }
 
-broadcast_error::broadcast_error(const dtype& dst_dt, const char *dst_metadata,
-                const dtype& src_dt, const char *src_metadata)
+broadcast_error::broadcast_error(const ndt::type& dst_dt, const char *dst_metadata,
+                const ndt::type& src_dt, const char *src_metadata)
     : dynd_exception("broadcast error", broadcast_error_message(
                     dst_dt, dst_metadata, src_dt, src_metadata))
 {
 }
 
-inline string broadcast_error_message(const dtype& dst_dt, const char *dst_metadata,
+inline string broadcast_error_message(const ndt::type& dst_dt, const char *dst_metadata,
                 const char *src_name)
 {
     stringstream ss;
@@ -112,7 +112,7 @@ inline string broadcast_error_message(const dtype& dst_dt, const char *dst_metad
     return ss.str();
 }
 
-broadcast_error::broadcast_error(const dtype& dst_dt, const char *dst_metadata,
+broadcast_error::broadcast_error(const ndt::type& dst_dt, const char *dst_metadata,
                 const char *src_name)
     : dynd_exception("broadcast error", broadcast_error_message(
                     dst_dt, dst_metadata, src_name))
@@ -135,17 +135,17 @@ broadcast_error::broadcast_error(intptr_t dst_size, intptr_t src_size,
 {
 }
 
-inline string too_many_indices_message(const dtype& dt, size_t nindices, size_t ndim)
+inline string too_many_indices_message(const ndt::type& dt, size_t nindices, size_t ndim)
 {
     std::stringstream ss;
 
-    ss << "provided " << nindices << " indices to dynd dtype " << dt << ", but only ";
+    ss << "provided " << nindices << " indices to dynd type " << dt << ", but only ";
     ss << ndim << " dimensions available";
 
     return ss.str();
 }
 
-dynd::too_many_indices::too_many_indices(const dtype& dt, size_t nindices, size_t ndim)
+dynd::too_many_indices::too_many_indices(const ndt::type& dt, size_t nindices, size_t ndim)
     : dynd_exception("too many indices", too_many_indices_message(dt, nindices, ndim))
 {
     //cout << "throwing too_many_indices\n";
@@ -315,7 +315,7 @@ string_encode_error::string_encode_error(uint32_t cp, string_encoding_t encoding
 {
 }
 
-inline string not_comparable_error_message(const dtype& lhs, const dtype& rhs,
+inline string not_comparable_error_message(const ndt::type& lhs, const ndt::type& rhs,
                 comparison_type_t comptype)
 {
     stringstream ss;
@@ -347,7 +347,7 @@ inline string not_comparable_error_message(const dtype& lhs, const dtype& rhs,
     return ss.str();
 }
 
-not_comparable_error::not_comparable_error(const dtype& lhs, const dtype& rhs,
+not_comparable_error::not_comparable_error(const ndt::type& lhs, const ndt::type& rhs,
                 comparison_type_t comptype)
     : dynd_exception("not comparable error",
                     not_comparable_error_message(lhs, rhs, comptype))

@@ -3,10 +3,10 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__DATETIME_DTYPE_HPP_
-#define _DYND__DATETIME_DTYPE_HPP_
+#ifndef _DYND__DATETIME_TYPE_HPP_
+#define _DYND__DATETIME_TYPE_HPP_
 
-#include <dynd/dtype.hpp>
+#include <dynd/type.hpp>
 #include <dynd/dtype_assign.hpp>
 #include <dynd/dtypes/view_dtype.hpp>
 #include <dynd/string_encodings.hpp>
@@ -43,7 +43,7 @@ std::ostream& operator<<(std::ostream& o, datetime_unit_t unit);
 
 class datetime_dtype : public base_dtype {
     // A const reference to the struct dtype used by default for this datetime
-    const dtype& m_default_struct_dtype;
+    const ndt::type& m_default_struct_dtype;
 
     datetime_unit_t m_unit;
     datetime_tz_t m_timezone;
@@ -61,7 +61,7 @@ public:
         return m_timezone;
     }
 
-    inline const dtype& get_default_struct_dtype() const {
+    inline const ndt::type& get_default_struct_dtype() const {
         return m_default_struct_dtype;
     }
 
@@ -78,7 +78,7 @@ public:
 
     void print_dtype(std::ostream& o) const;
 
-    bool is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const;
+    bool is_lossless_assignment(const ndt::type& dst_dt, const ndt::type& src_dt) const;
 
     bool operator==(const base_dtype& rhs) const;
 
@@ -93,8 +93,8 @@ public:
 
     size_t make_assignment_kernel(
                     hierarchical_kernel *out, size_t offset_out,
-                    const dtype& dst_dt, const char *dst_metadata,
-                    const dtype& src_dt, const char *src_metadata,
+                    const ndt::type& dst_dt, const char *dst_metadata,
+                    const ndt::type& src_dt, const char *src_metadata,
                     kernel_request_t kernreq, assign_error_mode errmode,
                     const eval::eval_context *ectx) const;
 
@@ -104,7 +104,7 @@ public:
     void get_dynamic_array_functions(const std::pair<std::string, gfunc::callable> **out_functions, size_t *out_count) const;
 
     size_t get_elwise_property_index(const std::string& property_name) const;
-    dtype get_elwise_property_dtype(size_t elwise_property_index,
+    ndt::type get_elwise_property_dtype(size_t elwise_property_index,
                     bool& out_readable, bool& out_writable) const;
     size_t make_elwise_property_getter_kernel(
                     hierarchical_kernel *out, size_t offset_out,
@@ -118,10 +118,10 @@ public:
                     kernel_request_t kernreq, const eval::eval_context *ectx) const;
 };
 
-inline dtype make_datetime_dtype(datetime_unit_t unit, datetime_tz_t timezone) {
-    return dtype(new datetime_dtype(unit, timezone), false);
+inline ndt::type make_datetime_dtype(datetime_unit_t unit, datetime_tz_t timezone) {
+    return ndt::type(new datetime_dtype(unit, timezone), false);
 }
 
 } // namespace dynd
 
-#endif // _DYND__DATETIME_DTYPE_HPP_
+#endif // _DYND__DATETIME_TYPE_HPP_

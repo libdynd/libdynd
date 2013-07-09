@@ -20,32 +20,32 @@ using namespace std;
 using namespace dynd;
 
 TEST(StridedArrayDType, Basic) {
-    dtype d = make_strided_dim_dtype(make_dtype<int32_t>());
+    ndt::type d = make_strided_dim_dtype(ndt::make_dtype<int32_t>());
 
-    EXPECT_EQ(make_dtype<int32_t>(), d.p("element_dtype").as<dtype>());
+    EXPECT_EQ(ndt::make_dtype<int32_t>(), d.p("element_type").as<ndt::type>());
 }
 
 TEST(StridedArrayDType, ReplaceScalarTypes) {
-    dtype dafloat, dadouble, daint32;
-    dafloat = make_strided_dim_dtype(make_dtype<float>());
-    dadouble = make_strided_dim_dtype(make_dtype<double>());
+    ndt::type dafloat, dadouble, daint32;
+    dafloat = make_strided_dim_dtype(ndt::make_dtype<float>());
+    dadouble = make_strided_dim_dtype(ndt::make_dtype<double>());
 
     EXPECT_EQ(make_strided_dim_dtype(make_convert_dtype<float, double>()),
-            dadouble.with_replaced_scalar_types(make_dtype<float>()));
+            dadouble.with_replaced_scalar_types(ndt::make_dtype<float>()));
 
     // Two dimensional array
     dafloat = make_strided_dim_dtype(dafloat);
     dadouble = make_strided_dim_dtype(dadouble);
 
     EXPECT_EQ(make_strided_dim_dtype(make_strided_dim_dtype(make_convert_dtype<double, float>())),
-            dafloat.with_replaced_scalar_types(make_dtype<double>()));
+            dafloat.with_replaced_scalar_types(ndt::make_dtype<double>()));
 }
 
 TEST(StridedArrayDType, DTypeAt) {
-    dtype dfloat = make_dtype<float>();
-    dtype darr1 = make_strided_dim_dtype(dfloat);
-    dtype darr2 = make_strided_dim_dtype(darr1);
-    dtype dtest;
+    ndt::type dfloat = ndt::make_dtype<float>();
+    ndt::type darr1 = make_strided_dim_dtype(dfloat);
+    ndt::type darr2 = make_strided_dim_dtype(darr1);
+    ndt::type dtest;
 
     // indexing into a dtype with a slice produces another
     // strided array, so the dtype is unchanged.
@@ -71,14 +71,14 @@ TEST(StridedArrayDType, DTypeAt) {
 }
 
 TEST(StridedArrayDType, IsExpression) {
-    dtype dfloat = make_dtype<float>();
-    dtype darr1 = make_strided_dim_dtype(dfloat);
-    dtype darr2 = make_strided_dim_dtype(darr1);
+    ndt::type dfloat = ndt::make_dtype<float>();
+    ndt::type darr1 = make_strided_dim_dtype(dfloat);
+    ndt::type darr2 = make_strided_dim_dtype(darr1);
 
     EXPECT_FALSE(darr1.is_expression());
     EXPECT_FALSE(darr2.is_expression());
 
-    dfloat = make_convert_dtype(make_dtype<double>(), dfloat);
+    dfloat = make_convert_dtype(ndt::make_dtype<double>(), dfloat);
     darr1 = make_strided_dim_dtype(dfloat);
     darr2 = make_strided_dim_dtype(darr1);
 
@@ -105,7 +105,7 @@ TEST(StridedArrayDType, AssignKernel) {
     k.reset();
 
     // Assignment strided array -> strided array
-    a = nd::make_strided_array(3, make_dtype<float>());
+    a = nd::make_strided_array(3, ndt::make_dtype<float>());
     a.vals() = 0;
     b = vals_int;
     EXPECT_EQ(strided_dim_type_id, a.get_dtype().get_type_id());

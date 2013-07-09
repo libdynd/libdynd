@@ -11,7 +11,10 @@
 
 namespace dynd {
 
-class dtype;
+namespace ndt {
+    class type;
+} // namespace ndt
+
 namespace eval {
     struct eval_context;
     extern const eval_context default_eval_context;
@@ -36,7 +39,7 @@ enum assign_error_mode {
 std::ostream& operator<<(std::ostream& o, assign_error_mode errmode);
 
 /** If 'src' can always be cast to 'dst' with no loss of information */
-bool is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt);
+bool is_lossless_assignment(const ndt::type& dst_dt, const ndt::type& src_dt);
 
 /**
  * Copies a value from one location to another, where the dtypes of the source
@@ -48,7 +51,7 @@ bool is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt);
  * \param src_metadata  The metadata of the source.
  * \param src_data  The data where the source element is stored.
  */
-void dtype_copy(const dtype& dt, const char *dst_metadata, char *dst_data,
+void dtype_copy(const ndt::type& dt, const char *dst_metadata, char *dst_data,
                 const char *src_metadata, const char *src_data);
 
 /** 
@@ -56,8 +59,8 @@ void dtype_copy(const dtype& dt, const char *dst_metadata, char *dst_data,
  * Requires that the data be aligned. To assign unaligned data,
  * use make_unaligned_dtype().
  */
-void dtype_assign(const dtype& dst_dt, const char *dst_metadata, char *dst_data,
-                const dtype& src_dt, const char *src_metadata, const char *src_data,
+void dtype_assign(const ndt::type& dst_dt, const char *dst_metadata, char *dst_data,
+                const ndt::type& src_dt, const char *src_metadata, const char *src_data,
                 assign_error_mode errmode = assign_error_fractional,
                 const eval::eval_context *ectx = &eval::default_eval_context);
 

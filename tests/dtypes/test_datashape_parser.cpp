@@ -22,124 +22,124 @@ using namespace std;
 using namespace dynd;
 
 TEST(DataShapeParser, Basic) {
-    EXPECT_EQ(make_dtype<void>(), dtype_from_datashape("void"));
-    EXPECT_EQ(make_dtype<dynd_bool>(), dtype_from_datashape("bool"));
-    EXPECT_EQ(make_dtype<int8_t>(), dtype_from_datashape("int8"));
-    EXPECT_EQ(make_dtype<int16_t>(), dtype_from_datashape("int16"));
-    EXPECT_EQ(make_dtype<int32_t>(), dtype_from_datashape("int32"));
-    EXPECT_EQ(make_dtype<int64_t>(), dtype_from_datashape("int64"));
-    EXPECT_EQ(make_dtype<dynd_int128>(), dtype_from_datashape("int128"));
-    EXPECT_EQ(make_dtype<uint8_t>(), dtype_from_datashape("uint8"));
-    EXPECT_EQ(make_dtype<uint16_t>(), dtype_from_datashape("uint16"));
-    EXPECT_EQ(make_dtype<uint32_t>(), dtype_from_datashape("uint32"));
-    EXPECT_EQ(make_dtype<uint64_t>(), dtype_from_datashape("uint64"));
-    EXPECT_EQ(make_dtype<dynd_uint128>(), dtype_from_datashape("uint128"));
-    EXPECT_EQ(make_dtype<dynd_float16>(), dtype_from_datashape("float16"));
-    EXPECT_EQ(make_dtype<float>(), dtype_from_datashape("float32"));
-    EXPECT_EQ(make_dtype<double>(), dtype_from_datashape("float64"));
-    EXPECT_EQ(make_dtype<dynd_float128>(), dtype_from_datashape("float128"));
-    EXPECT_EQ(make_dtype<complex<float> >(), dtype_from_datashape("complex64"));
-    EXPECT_EQ(make_dtype<complex<double> >(), dtype_from_datashape("complex128"));
-    EXPECT_EQ(make_dtype<complex<float> >(), dtype_from_datashape("cfloat32"));
-    EXPECT_EQ(make_dtype<complex<double> >(), dtype_from_datashape("cfloat64"));
-    EXPECT_EQ(make_json_dtype(), dtype_from_datashape("json"));
-    EXPECT_EQ(make_date_dtype(), dtype_from_datashape("date"));
+    EXPECT_EQ(ndt::make_dtype<void>(), type_from_datashape("void"));
+    EXPECT_EQ(ndt::make_dtype<dynd_bool>(), type_from_datashape("bool"));
+    EXPECT_EQ(ndt::make_dtype<int8_t>(), type_from_datashape("int8"));
+    EXPECT_EQ(ndt::make_dtype<int16_t>(), type_from_datashape("int16"));
+    EXPECT_EQ(ndt::make_dtype<int32_t>(), type_from_datashape("int32"));
+    EXPECT_EQ(ndt::make_dtype<int64_t>(), type_from_datashape("int64"));
+    EXPECT_EQ(ndt::make_dtype<dynd_int128>(), type_from_datashape("int128"));
+    EXPECT_EQ(ndt::make_dtype<uint8_t>(), type_from_datashape("uint8"));
+    EXPECT_EQ(ndt::make_dtype<uint16_t>(), type_from_datashape("uint16"));
+    EXPECT_EQ(ndt::make_dtype<uint32_t>(), type_from_datashape("uint32"));
+    EXPECT_EQ(ndt::make_dtype<uint64_t>(), type_from_datashape("uint64"));
+    EXPECT_EQ(ndt::make_dtype<dynd_uint128>(), type_from_datashape("uint128"));
+    EXPECT_EQ(ndt::make_dtype<dynd_float16>(), type_from_datashape("float16"));
+    EXPECT_EQ(ndt::make_dtype<float>(), type_from_datashape("float32"));
+    EXPECT_EQ(ndt::make_dtype<double>(), type_from_datashape("float64"));
+    EXPECT_EQ(ndt::make_dtype<dynd_float128>(), type_from_datashape("float128"));
+    EXPECT_EQ(ndt::make_dtype<complex<float> >(), type_from_datashape("complex64"));
+    EXPECT_EQ(ndt::make_dtype<complex<double> >(), type_from_datashape("complex128"));
+    EXPECT_EQ(ndt::make_dtype<complex<float> >(), type_from_datashape("cfloat32"));
+    EXPECT_EQ(ndt::make_dtype<complex<double> >(), type_from_datashape("cfloat64"));
+    EXPECT_EQ(make_json_dtype(), type_from_datashape("json"));
+    EXPECT_EQ(make_date_dtype(), type_from_datashape("date"));
 }
 
 TEST(DataShapeParser, BasicThrow) {
-    EXPECT_THROW(dtype_from_datashape("boot"), runtime_error);
-    EXPECT_THROW(dtype_from_datashape("int33"), runtime_error);
+    EXPECT_THROW(type_from_datashape("boot"), runtime_error);
+    EXPECT_THROW(type_from_datashape("int33"), runtime_error);
 }
 
 TEST(DataShapeParser, StringAtoms) {
     // Default string
     EXPECT_EQ(make_string_dtype(string_encoding_utf_8),
-                    dtype_from_datashape("string"));
+                    type_from_datashape("string"));
     // String with encoding
     EXPECT_EQ(make_string_dtype(string_encoding_ascii),
-                    dtype_from_datashape("string('A')"));
+                    type_from_datashape("string('A')"));
     EXPECT_EQ(make_string_dtype(string_encoding_ascii),
-                    dtype_from_datashape("string('ascii')"));
+                    type_from_datashape("string('ascii')"));
     EXPECT_EQ(make_string_dtype(string_encoding_utf_8),
-                    dtype_from_datashape("string('U8')"));
+                    type_from_datashape("string('U8')"));
     EXPECT_EQ(make_string_dtype(string_encoding_utf_8),
-                    dtype_from_datashape("string('utf8')"));
+                    type_from_datashape("string('utf8')"));
     EXPECT_EQ(make_string_dtype(string_encoding_utf_8),
-                    dtype_from_datashape("string('utf-8')"));
+                    type_from_datashape("string('utf-8')"));
     EXPECT_EQ(make_string_dtype(string_encoding_utf_16),
-                    dtype_from_datashape("string('U16')"));
+                    type_from_datashape("string('U16')"));
     EXPECT_EQ(make_string_dtype(string_encoding_utf_16),
-                    dtype_from_datashape("string('utf16')"));
+                    type_from_datashape("string('utf16')"));
     EXPECT_EQ(make_string_dtype(string_encoding_utf_16),
-                    dtype_from_datashape("string('utf-16')"));
+                    type_from_datashape("string('utf-16')"));
     EXPECT_EQ(make_string_dtype(string_encoding_utf_32),
-                    dtype_from_datashape("string('U32')"));
+                    type_from_datashape("string('U32')"));
     EXPECT_EQ(make_string_dtype(string_encoding_utf_32),
-                    dtype_from_datashape("string('utf32')"));
+                    type_from_datashape("string('utf32')"));
     EXPECT_EQ(make_string_dtype(string_encoding_utf_32),
-                    dtype_from_datashape("string('utf-32')"));
+                    type_from_datashape("string('utf-32')"));
     EXPECT_EQ(make_string_dtype(string_encoding_ucs_2),
-                    dtype_from_datashape("string('ucs2')"));
+                    type_from_datashape("string('ucs2')"));
     EXPECT_EQ(make_string_dtype(string_encoding_ucs_2),
-                    dtype_from_datashape("string('ucs-2')"));
+                    type_from_datashape("string('ucs-2')"));
     // String with size
     EXPECT_EQ(make_fixedstring_dtype(1, string_encoding_utf_8),
-                    dtype_from_datashape("string(1)"));
+                    type_from_datashape("string(1)"));
     EXPECT_EQ(make_fixedstring_dtype(100, string_encoding_utf_8),
-                    dtype_from_datashape("string(100)"));
+                    type_from_datashape("string(100)"));
     // String with size and encoding
     EXPECT_EQ(make_fixedstring_dtype(1, string_encoding_ascii),
-                    dtype_from_datashape("string(1, 'A')"));
+                    type_from_datashape("string(1, 'A')"));
     EXPECT_EQ(make_fixedstring_dtype(10, string_encoding_utf_8),
-                    dtype_from_datashape("string(10, 'U8')"));
+                    type_from_datashape("string(10, 'U8')"));
     EXPECT_EQ(make_fixedstring_dtype(1000, string_encoding_utf_16),
-                    dtype_from_datashape("string(1000,'U16')"));
+                    type_from_datashape("string(1000,'U16')"));
 }
 
 TEST(DataShapeParser, StridedDim) {
-    EXPECT_EQ(make_strided_dim_dtype(make_dtype<dynd_bool>()),
-                    dtype_from_datashape("M, bool"));
-    EXPECT_EQ(make_strided_dim_dtype(make_dtype<float>(), 2),
-                    dtype_from_datashape("M, N, float32"));
+    EXPECT_EQ(make_strided_dim_dtype(ndt::make_dtype<dynd_bool>()),
+                    type_from_datashape("M, bool"));
+    EXPECT_EQ(make_strided_dim_dtype(ndt::make_dtype<float>(), 2),
+                    type_from_datashape("M, N, float32"));
 }
 
 TEST(DataShapeParser, FixedDim) {
-    EXPECT_EQ(make_fixed_dim_dtype(3, make_dtype<dynd_bool>()), dtype_from_datashape("3, bool"));
-    EXPECT_EQ(make_fixed_dim_dtype(4, make_fixed_dim_dtype(3, make_dtype<float>())),
-                    dtype_from_datashape("4, 3, float32"));
+    EXPECT_EQ(make_fixed_dim_dtype(3, ndt::make_dtype<dynd_bool>()), type_from_datashape("3, bool"));
+    EXPECT_EQ(make_fixed_dim_dtype(4, make_fixed_dim_dtype(3, ndt::make_dtype<float>())),
+                    type_from_datashape("4, 3, float32"));
 }
 
 TEST(DataShapeParser, VarDim) {
-    EXPECT_EQ(make_var_dim_dtype(make_dtype<dynd_bool>()), dtype_from_datashape("var, bool"));
-    EXPECT_EQ(make_var_dim_dtype(make_var_dim_dtype(make_dtype<float>())),
-                    dtype_from_datashape("var, var, float32"));
+    EXPECT_EQ(make_var_dim_dtype(ndt::make_dtype<dynd_bool>()), type_from_datashape("var, bool"));
+    EXPECT_EQ(make_var_dim_dtype(make_var_dim_dtype(ndt::make_dtype<float>())),
+                    type_from_datashape("var, var, float32"));
 }
 
 TEST(DataShapeParser, StridedFixedDim) {
-    EXPECT_EQ(make_strided_dim_dtype(make_fixed_dim_dtype(3, make_dtype<float>())),
-                    dtype_from_datashape("M, 3, float32"));
+    EXPECT_EQ(make_strided_dim_dtype(make_fixed_dim_dtype(3, ndt::make_dtype<float>())),
+                    type_from_datashape("M, 3, float32"));
 }
 
 TEST(DataShapeParser, StridedVarFixedDim) {
-    EXPECT_EQ(make_strided_dim_dtype(make_var_dim_dtype(make_fixed_dim_dtype(3, make_dtype<float>()))),
-                    dtype_from_datashape("M, var, 3, float32"));
+    EXPECT_EQ(make_strided_dim_dtype(make_var_dim_dtype(make_fixed_dim_dtype(3, ndt::make_dtype<float>()))),
+                    type_from_datashape("M, var, 3, float32"));
 }
 
 TEST(DataShapeParser, RecordOneField) {
-    EXPECT_EQ(make_cstruct_dtype(make_dtype<float>(), "val"),
-                    dtype_from_datashape("{ val : float32 }"));
-    EXPECT_EQ(make_cstruct_dtype(make_dtype<float>(), "val"),
-                    dtype_from_datashape("{ val : float32 ; }"));
+    EXPECT_EQ(make_cstruct_dtype(ndt::make_dtype<float>(), "val"),
+                    type_from_datashape("{ val : float32 }"));
+    EXPECT_EQ(make_cstruct_dtype(ndt::make_dtype<float>(), "val"),
+                    type_from_datashape("{ val : float32 ; }"));
 }
 
 TEST(DataShapeParser, RecordTwoFields) {
-    EXPECT_EQ(make_cstruct_dtype(make_dtype<float>(), "val", make_dtype<int64_t>(), "id"),
-                    dtype_from_datashape("{\n"
+    EXPECT_EQ(make_cstruct_dtype(ndt::make_dtype<float>(), "val", ndt::make_dtype<int64_t>(), "id"),
+                    type_from_datashape("{\n"
                         "    val: float32;\n"
                         "    id: int64\n"
                         "}\n"));
-    EXPECT_EQ(make_cstruct_dtype(make_dtype<float>(), "val", make_dtype<int64_t>(), "id"),
-                    dtype_from_datashape("{\n"
+    EXPECT_EQ(make_cstruct_dtype(ndt::make_dtype<float>(), "val", ndt::make_dtype<int64_t>(), "id"),
+                    type_from_datashape("{\n"
                         "    val: float32;\n"
                         "    id: int64;\n"
                         "}\n"));
@@ -147,7 +147,7 @@ TEST(DataShapeParser, RecordTwoFields) {
 
 TEST(DataShapeParser, ErrorBasic) {
     try {
-        dtype_from_datashape("float65");
+        type_from_datashape("float65");
         EXPECT_TRUE(false);
     } catch (const runtime_error& e) {
         string msg = e.what();
@@ -155,7 +155,7 @@ TEST(DataShapeParser, ErrorBasic) {
         EXPECT_TRUE(msg.find("unrecognized data type") != string::npos);
     }
     try {
-        dtype_from_datashape("float64+");
+        type_from_datashape("float64+");
         EXPECT_TRUE(false);
     } catch (const runtime_error& e) {
         string msg = e.what();
@@ -163,7 +163,7 @@ TEST(DataShapeParser, ErrorBasic) {
         EXPECT_TRUE(msg.find("unexpected token") != string::npos);
     }
     try {
-        dtype_from_datashape("3, int32, float64");
+        type_from_datashape("3, int32, float64");
         EXPECT_TRUE(false);
     } catch (const runtime_error& e) {
         string msg = e.what();
@@ -174,7 +174,7 @@ TEST(DataShapeParser, ErrorBasic) {
 
 TEST(DataShapeParser, ErrorString) {
     try {
-        dtype_from_datashape("string(");
+        type_from_datashape("string(");
         EXPECT_TRUE(false);
     } catch (const runtime_error& e) {
         string msg = e.what();
@@ -182,7 +182,7 @@ TEST(DataShapeParser, ErrorString) {
         EXPECT_TRUE(msg.find("expected a size integer or string encoding") != string::npos);
     }
     try {
-        dtype_from_datashape("string(0)");
+        type_from_datashape("string(0)");
         EXPECT_TRUE(false);
     } catch (const runtime_error& e) {
         string msg = e.what();
@@ -190,7 +190,7 @@ TEST(DataShapeParser, ErrorString) {
         EXPECT_TRUE(msg.find("string size cannot be zero") != string::npos);
     }
     try {
-        dtype_from_datashape("string('badencoding')");
+        type_from_datashape("string('badencoding')");
         EXPECT_TRUE(false);
     } catch (const runtime_error& e) {
         string msg = e.what();
@@ -198,7 +198,7 @@ TEST(DataShapeParser, ErrorString) {
         EXPECT_TRUE(msg.find("unrecognized string encoding") != string::npos);
     }
     try {
-        dtype_from_datashape("string('U8',)");
+        type_from_datashape("string('U8',)");
         EXPECT_TRUE(false);
     } catch (const runtime_error& e) {
         string msg = e.what();
@@ -206,7 +206,7 @@ TEST(DataShapeParser, ErrorString) {
         EXPECT_TRUE(msg.find("expected closing ')'") != string::npos);
     }
     try {
-        dtype_from_datashape("string(3,'U8',10)");
+        type_from_datashape("string(3,'U8',10)");
         EXPECT_TRUE(false);
     } catch (const runtime_error& e) {
         string msg = e.what();
@@ -214,7 +214,7 @@ TEST(DataShapeParser, ErrorString) {
         EXPECT_TRUE(msg.find("expected closing ')'") != string::npos);
     }
     try {
-        dtype_from_datashape("string(3,3)");
+        type_from_datashape("string(3,3)");
         EXPECT_TRUE(false);
     } catch (const runtime_error& e) {
         string msg = e.what();
@@ -225,7 +225,7 @@ TEST(DataShapeParser, ErrorString) {
 
 TEST(DataShapeParser, ErrorRecord) {
     try {
-        dtype_from_datashape("{\n"
+        type_from_datashape("{\n"
             "}\n");
         EXPECT_TRUE(false);
     } catch (const runtime_error& e) {
@@ -234,7 +234,7 @@ TEST(DataShapeParser, ErrorRecord) {
         EXPECT_TRUE(msg.find("expected a record item") != string::npos);
     }
     try {
-        dtype_from_datashape("{\n"
+        type_from_datashape("{\n"
             "   id: int64\n"
             "   name: string\n"
             "   amount: invalidtype\n"
@@ -246,7 +246,7 @@ TEST(DataShapeParser, ErrorRecord) {
         EXPECT_TRUE(msg.find("expected ';' or '}'") != string::npos);
     }
     try {
-        dtype_from_datashape("{\n"
+        type_from_datashape("{\n"
             "   id: int64;\n"
             "   name: string;\n"
             "   amount: invalidtype;\n"
@@ -258,7 +258,7 @@ TEST(DataShapeParser, ErrorRecord) {
         EXPECT_TRUE(msg.find("unrecognized data type") != string::npos);
     }
     try {
-        dtype_from_datashape("{\n"
+        type_from_datashape("{\n"
             "   id: int64;\n"
             "   name: string;\n"
             "   amount: %;\n"
@@ -270,7 +270,7 @@ TEST(DataShapeParser, ErrorRecord) {
         EXPECT_TRUE(msg.find("expected a data type") != string::npos);
     }
     try {
-        dtype_from_datashape("{\n"
+        type_from_datashape("{\n"
             "   id: int64;\n"
             "   name: string;\n"
             "   amount+ float32;\n"
@@ -282,7 +282,7 @@ TEST(DataShapeParser, ErrorRecord) {
         EXPECT_TRUE(msg.find("expected ':'") != string::npos);
     }
     try {
-        dtype_from_datashape("{\n"
+        type_from_datashape("{\n"
             "   id: int64;\n"
             "   name: (3, string;\n"
             "   amount: float32;\n"
@@ -297,7 +297,7 @@ TEST(DataShapeParser, ErrorRecord) {
 
 TEST(DataShapeParser, ErrorTypeAlias) {
     try {
-        dtype_from_datashape("\n"
+        type_from_datashape("\n"
             "type MyInt = int32\n"
             "MyInt, int32\n");
         EXPECT_TRUE(false);
@@ -307,7 +307,7 @@ TEST(DataShapeParser, ErrorTypeAlias) {
         EXPECT_TRUE(msg.find("only free variables") != string::npos);
     }
     try {
-        dtype_from_datashape("\n"
+        type_from_datashape("\n"
             "type 33 = int32\n"
             "2, int32\n");
         EXPECT_TRUE(false);
@@ -317,7 +317,7 @@ TEST(DataShapeParser, ErrorTypeAlias) {
         EXPECT_TRUE(msg.find("expected an identifier") != string::npos);
     }
     try {
-        dtype_from_datashape("\n"
+        type_from_datashape("\n"
             "type MyInt - int32\n"
             "2, MyInt\n");
         EXPECT_TRUE(false);
@@ -327,7 +327,7 @@ TEST(DataShapeParser, ErrorTypeAlias) {
         EXPECT_TRUE(msg.find("expected an '='") != string::npos);
     }
     try {
-        dtype_from_datashape("\n"
+        type_from_datashape("\n"
             "type MyInt = &\n"
             "2, MyInt\n");
         EXPECT_TRUE(false);
@@ -337,7 +337,7 @@ TEST(DataShapeParser, ErrorTypeAlias) {
         EXPECT_TRUE(msg.find("expected a data type") != string::npos);
     }
     try {
-        dtype_from_datashape("\n"
+        type_from_datashape("\n"
             "type int32 = int64\n"
             "2, int32\n");
         EXPECT_TRUE(false);
@@ -347,7 +347,7 @@ TEST(DataShapeParser, ErrorTypeAlias) {
         EXPECT_TRUE(msg.find("cannot redefine") != string::npos);
     }
     try {
-        dtype_from_datashape("\n"
+        type_from_datashape("\n"
             "type MyInt = int64\n"
             "type MyInt = int32\n"
             "2, MyInt\n");
@@ -442,6 +442,6 @@ TEST(DataShapeParser, KivaLoanDataShape) {
         "        bulkEntries: int64;\n"
         "    }\n"
         "}\n";
-    dtype d = dtype_from_datashape(klds);
+    ndt::type d = type_from_datashape(klds);
     EXPECT_EQ(cstruct_type_id, d.get_type_id());
 }

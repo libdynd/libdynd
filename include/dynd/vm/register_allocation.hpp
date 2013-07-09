@@ -13,15 +13,15 @@
 namespace dynd { namespace vm {
 
 class register_allocation {
-    const std::vector<dtype>& m_regtypes;
+    const std::vector<ndt::type>& m_regtypes;
     std::vector<char *> m_registers;
     std::vector<memory_block_ptr> m_blockrefs;
     char *m_allocated_memory;
 public:
-    register_allocation(const std::vector<dtype>& regtypes, intptr_t max_element_count, intptr_t max_byte_count);
+    register_allocation(const std::vector<ndt::type>& regtypes, intptr_t max_element_count, intptr_t max_byte_count);
     ~register_allocation();
 
-    const std::vector<dtype>& get_regtypes() const {
+    const std::vector<ndt::type>& get_regtypes() const {
         return m_regtypes;
     }
 

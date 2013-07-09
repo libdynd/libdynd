@@ -19,7 +19,7 @@ using namespace dynd;
 
 
 template<class KernelType>
-static ndarray_node_ptr initialize_dst_memblock(bool copy, const dtype& dst_dt, int ndim, const intptr_t *shape,
+static ndarray_node_ptr initialize_dst_memblock(bool copy, const ndt::type& dst_dt, int ndim, const intptr_t *shape,
                     const int *axis_perm, uint32_t access_flags,
                     KernelType& operation,
                     const memory_block_ptr& src_data_memblock,
@@ -62,7 +62,7 @@ ndarray_node *dynd::eval::push_front_node_unary_kernels(ndarray_node* node,
                     std::deque<kernel_instance<unary_operation_pair_t>>& out_kernels,
                     std::deque<intptr_t>& out_element_sizes)
 {
-    const dtype& dt = node->get_dtype();
+    const ndt::type& dt = node->get_dtype();
 
     switch (node->get_category()) {
         case strided_array_node_category:
@@ -77,10 +77,10 @@ ndarray_node *dynd::eval::push_front_node_unary_kernels(ndarray_node* node,
                 if (dt.get_kind() == expression_kind) {
                     push_front_dtype_storage_to_value_kernels(dt, ectx, out_kernels, out_element_sizes);
                 } else if (out_kernels.empty()) {
-                    out_element_sizes.push_front(node->get_opnode(0)->get_dtype().value_dtype().get_data_size());
+                    out_element_sizes.push_front(node->get_opnode(0)->get_dtype().value_type().get_data_size());
                 }
                 // The node's kernel
-                out_element_sizes.push_front(dt.storage_dtype().get_data_size());
+                out_element_sizes.push_front(dt.storage_type().get_data_size());
                 out_kernels.push_front(kernel_instance<unary_operation_pair_t>());
                 node->get_unary_specialization_operation(out_kernels.front());
                 // The kernels from the operand
@@ -104,9 +104,9 @@ ndarray_node *dynd::eval::push_front_node_unary_kernels(ndarray_node* node,
 
 ndarray_node_ptr dynd::eval::evaluate_strided_with_unary_kernel(ndarray_node *node, const eval::eval_context *DYND_UNUSED(ectx),
                                 bool copy, uint32_t access_flags,
-                                const dtype& dst_dt, kernel_instance<unary_operation_pair_t>& operation)
+                                const ndt::type& dst_dt, kernel_instance<unary_operation_pair_t>& operation)
 {
-    const dtype& src_dt = node->get_dtype();
+    const ndt::type& src_dt = node->get_dtype();
     ndarray_node_ptr result;
     int ndim = node->get_ndim();
 
@@ -165,7 +165,7 @@ ndarray_node_ptr dynd::eval::evaluate_unary_elwise_array(ndarray_node* node, con
     kernel_instance<unary_operation_pair_t> operation;
     make_buffered_chain_unary_kernel(kernels, element_sizes, operation);
 
-    return evaluate_strided_with_unary_kernel(strided_node, ectx, copy, access_flags, node->get_dtype().value_dtype(), operation);
+    return evaluate_strided_with_unary_kernel(strided_node, ectx, copy, access_flags, node->get_dtype().value_type(), operation);
 }
 
 #endif // TODO reenable?

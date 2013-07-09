@@ -6,7 +6,7 @@
 #include <stdexcept>
 #include <sstream>
 
-#include <dynd/dtype.hpp>
+#include <dynd/type.hpp>
 #include <dynd/diagnostics.hpp>
 #include <dynd/kernels/struct_comparison_kernels.hpp>
 #include <dynd/dtypes/base_struct_dtype.hpp>
@@ -199,7 +199,7 @@ namespace {
 
 size_t dynd::make_struct_comparison_kernel(
                 hierarchical_kernel *out, size_t offset_out,
-                const dtype& src_dt,
+                const ndt::type& src_dt,
                 const char *src0_metadata, const char *src1_metadata,
                 comparison_type_t comptype,
                 const eval::eval_context *ectx)
@@ -224,7 +224,7 @@ size_t dynd::make_struct_comparison_kernel(
             e->src_data_offsets = bsd->get_data_offsets(src0_metadata);
             size_t *field_kernel_offsets;
             const size_t *metadata_offsets = bsd->get_metadata_offsets();
-            const dtype *field_types = bsd->get_field_types();
+            const ndt::type *field_types = bsd->get_field_types();
             for (size_t i = 0; i != field_count; ++i) {
                 // Reserve space for the child, and save the offset to this
                 // field comparison kernel. Have to re-get
@@ -257,7 +257,7 @@ size_t dynd::make_struct_comparison_kernel(
             e->src1_data_offsets = bsd->get_data_offsets(src1_metadata);
             size_t *field_kernel_offsets;
             const size_t *metadata_offsets = bsd->get_metadata_offsets();
-            const dtype *field_types = bsd->get_field_types();
+            const ndt::type *field_types = bsd->get_field_types();
             for (size_t i = 0; i != field_count; ++i) {
                 // Reserve space for the child, and save the offset to this
                 // field comparison kernel. Have to re-get
@@ -303,7 +303,7 @@ size_t dynd::make_struct_comparison_kernel(
         e->src1_data_offsets = bsd->get_data_offsets(src1_metadata);
         size_t *field_kernel_offsets;
         const size_t *metadata_offsets = bsd->get_metadata_offsets();
-        const dtype *field_types = bsd->get_field_types();
+        const ndt::type *field_types = bsd->get_field_types();
         for (size_t i = 0; i != field_count; ++i) {
             // Reserve space for the child, and save the offset to this
             // field comparison kernel. Have to re-get
@@ -327,8 +327,8 @@ size_t dynd::make_struct_comparison_kernel(
 
 size_t dynd::make_general_struct_comparison_kernel(
                 hierarchical_kernel *DYND_UNUSED(out), size_t DYND_UNUSED(offset_out),
-                const dtype& DYND_UNUSED(src0_dt), const char *DYND_UNUSED(src0_metadata),
-                const dtype& DYND_UNUSED(src1_dt), const char *DYND_UNUSED(src1_metadata),
+                const ndt::type& DYND_UNUSED(src0_dt), const char *DYND_UNUSED(src0_metadata),
+                const ndt::type& DYND_UNUSED(src1_dt), const char *DYND_UNUSED(src1_metadata),
                 comparison_type_t DYND_UNUSED(comptype),
                 const eval::eval_context *DYND_UNUSED(ectx))
 {

@@ -6,7 +6,7 @@
 #ifndef _DYND__BINARY_REDUCE_KERNEL_ADAPTER_CODEGEN_HPP_
 #define _DYND__BINARY_REDUCE_KERNEL_ADAPTER_CODEGEN_HPP_
 
-#include <dynd/dtype.hpp>
+#include <dynd/type.hpp>
 #include <dynd/kernels/kernel_instance.hpp>
 #include <dynd/memblock/memory_block.hpp>
 #include <dynd/codegen/calling_conventions.hpp>
@@ -39,7 +39,7 @@ struct binary_reduce_function_adapter_auxdata {
  * If two sets of inputs produce the same unique ID, they would also
  * produce the same generated code.
  */
-uint64_t get_binary_reduce_function_adapter_unique_id(const dtype& reduce_type, calling_convention_t callconv);
+uint64_t get_binary_reduce_function_adapter_unique_id(const ndt::type& reduce_type, calling_convention_t callconv);
 
 /**
  * Gets the unique integer ID in a string form, hopefully in human
@@ -60,7 +60,7 @@ std::string get_binary_reduce_function_adapter_unique_id_string(uint64_t unique_
  * @return A pointer to the binary adapter kernel.
  */
 unary_operation_pair_t codegen_left_associative_binary_reduce_function_adapter(
-                    const dtype& reduce_type,calling_convention_t callconv);
+                    const ndt::type& reduce_type,calling_convention_t callconv);
 
 /**
  * Gets a kernel for adapting a binary function pointer of the given
@@ -75,7 +75,7 @@ unary_operation_pair_t codegen_left_associative_binary_reduce_function_adapter(
  * @return A pointer to the binary adapter kernel.
  */
 unary_operation_pair_t codegen_right_associative_binary_reduce_function_adapter(
-                    const dtype& reduce_type,calling_convention_t callconv);
+                    const ndt::type& reduce_type,calling_convention_t callconv);
 
 } // namespace dynd
 

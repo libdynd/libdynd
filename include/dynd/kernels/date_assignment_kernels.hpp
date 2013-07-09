@@ -16,7 +16,7 @@ namespace dynd {
  */
 size_t make_string_to_date_assignment_kernel(
                 hierarchical_kernel *out, size_t offset_out,
-                const dtype& src_string_dt, const char *src_metadata,
+                const ndt::type& src_string_dt, const char *src_metadata,
                 kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *ectx);
 
@@ -25,7 +25,7 @@ size_t make_string_to_date_assignment_kernel(
  */
 size_t make_date_to_string_assignment_kernel(
                 hierarchical_kernel *out, size_t offset_out,
-                const dtype& dst_string_dt, const char *dst_metadata,
+                const ndt::type& dst_string_dt, const char *dst_metadata,
                 kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *ectx);
 

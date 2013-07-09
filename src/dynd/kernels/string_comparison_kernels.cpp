@@ -6,7 +6,7 @@
 #include <stdexcept>
 #include <sstream>
 
-#include <dynd/dtype.hpp>
+#include <dynd/type.hpp>
 #include <dynd/diagnostics.hpp>
 #include <dynd/kernels/string_comparison_kernels.hpp>
 #include <dynd/dtypes/fixedstring_dtype.hpp>
@@ -309,13 +309,13 @@ size_t dynd::make_string_comparison_kernel(
 
 size_t dynd::make_general_string_comparison_kernel(
                 hierarchical_kernel *out, size_t offset_out,
-                const dtype& src0_dt, const char *src0_metadata,
-                const dtype& src1_dt, const char *src1_metadata,
+                const ndt::type& src0_dt, const char *src0_metadata,
+                const ndt::type& src1_dt, const char *src1_metadata,
                 comparison_type_t comptype,
                 const eval::eval_context *ectx)
 {
     // TODO: Make more efficient, direct comparison kernels
-    dtype sdt = make_string_dtype();
+    ndt::type sdt = make_string_dtype();
     return make_comparison_kernel(out, offset_out,
                     make_convert_dtype(sdt, src0_dt), src0_metadata,
                     make_convert_dtype(sdt, src1_dt), src1_metadata,

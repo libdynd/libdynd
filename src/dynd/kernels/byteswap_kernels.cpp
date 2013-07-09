@@ -18,16 +18,16 @@ namespace {
         static void single(char *dst, const char *src,
                         kernel_data_prefix *DYND_UNUSED(extra))
         {
-            DYND_ASSERT_ALIGNED(dst, 0, sizeof(T), "type: " << dynd::dtype(dynd::type_id_of<T>::value));
-            DYND_ASSERT_ALIGNED(src, 0, sizeof(T), "type: " << dynd::dtype(dynd::type_id_of<T>::value));
+            DYND_ASSERT_ALIGNED(dst, 0, sizeof(T), "type: " << ndt::type(dynd::type_id_of<T>::value));
+            DYND_ASSERT_ALIGNED(src, 0, sizeof(T), "type: " << ndt::type(dynd::type_id_of<T>::value));
             *(T *)dst = byteswap_value(*(T *)src);
         }
         static void strided(char *dst, intptr_t dst_stride,
                         const char *src, intptr_t src_stride,
                         size_t count, kernel_data_prefix *DYND_UNUSED(extra))
         {
-            DYND_ASSERT_ALIGNED(dst, dst_stride, sizeof(T), "type: " << dynd::dtype(dynd::type_id_of<T>::value));
-            DYND_ASSERT_ALIGNED(src, src_stride, sizeof(T), "type: " << dynd::dtype(dynd::type_id_of<T>::value));
+            DYND_ASSERT_ALIGNED(dst, dst_stride, sizeof(T), "type: " << ndt::type(dynd::type_id_of<T>::value));
+            DYND_ASSERT_ALIGNED(src, src_stride, sizeof(T), "type: " << ndt::type(dynd::type_id_of<T>::value));
             for (size_t i = 0; i != count; ++i,
                             dst += dst_stride, src += src_stride) {
                 *(T *)dst = byteswap_value(*(T *)src);
@@ -40,8 +40,8 @@ namespace {
         static void single(char *dst, const char *src,
                         kernel_data_prefix *DYND_UNUSED(extra))
         {
-            DYND_ASSERT_ALIGNED(dst, 0, sizeof(T), "type: " << dynd::dtype(dynd::type_id_of<T>::value));
-            DYND_ASSERT_ALIGNED(src, 0, sizeof(T), "type: " << dynd::dtype(dynd::type_id_of<T>::value));
+            DYND_ASSERT_ALIGNED(dst, 0, sizeof(T), "type: " << ndt::type(dynd::type_id_of<T>::value));
+            DYND_ASSERT_ALIGNED(src, 0, sizeof(T), "type: " << ndt::type(dynd::type_id_of<T>::value));
             *(T *)dst = byteswap_value(*(T *)src);
             *((T *)dst + 1) = byteswap_value(*((T *)src + 1));
         }
@@ -49,8 +49,8 @@ namespace {
                         const char *src, intptr_t src_stride,
                         size_t count, kernel_data_prefix *DYND_UNUSED(extra))
         {
-            DYND_ASSERT_ALIGNED(dst, dst_stride, sizeof(T), "type: " << dynd::dtype(dynd::type_id_of<T>::value));
-            DYND_ASSERT_ALIGNED(src, src_stride, sizeof(T), "type: " << dynd::dtype(dynd::type_id_of<T>::value));
+            DYND_ASSERT_ALIGNED(dst, dst_stride, sizeof(T), "type: " << ndt::type(dynd::type_id_of<T>::value));
+            DYND_ASSERT_ALIGNED(src, src_stride, sizeof(T), "type: " << ndt::type(dynd::type_id_of<T>::value));
             for (size_t i = 0; i != count; ++i,
                             dst += dst_stride, src += src_stride) {
                 *(T *)dst = byteswap_value(*(T *)src);

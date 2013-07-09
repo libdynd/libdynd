@@ -18,32 +18,32 @@
 using namespace std;
 using namespace dynd;
 
-groupby_dtype::groupby_dtype(const dtype& data_values_dtype,
-                const dtype& by_values_dtype)
+groupby_dtype::groupby_dtype(const ndt::type& data_values_dtype,
+                const ndt::type& by_values_dtype)
     : base_expression_dtype(groupby_type_id, expression_kind,
-                    sizeof(groupby_dtype_data), sizeof(void *), dtype_flag_none,
+                    sizeof(groupby_dtype_data), sizeof(void *), type_flag_none,
                     0, 1 + data_values_dtype.get_undim())
 {
-    m_groups_dtype = by_values_dtype.at_single(0).value_dtype();
-    if (m_groups_dtype.get_type_id() != categorical_type_id) {
+    m_groups_type = by_values_dtype.at_single(0).value_type();
+    if (m_groups_type.get_type_id() != categorical_type_id) {
         stringstream ss;
         ss << "to construct a groupby dtype, the by dtype, " << by_values_dtype.at_single(0);
         ss << ", must have a categorical value type";
         throw runtime_error(ss.str());
     }
     if (data_values_dtype.get_undim() < 1) {
-        throw runtime_error("to construct a groupby dtype, its values dtype must have at least one uniform dimension");
+        throw runtime_error("to construct a groupby dtype, its values dtype must have at least one array dimension");
     }
     if (by_values_dtype.get_undim() < 1) {
-        throw runtime_error("to construct a groupby dtype, its values dtype must have at least one uniform dimension");
+        throw runtime_error("to construct a groupby dtype, its values dtype must have at least one array dimension");
     }
-    m_operand_dtype = make_cstruct_dtype(make_pointer_dtype(data_values_dtype), "data",
+    m_operand_type = make_cstruct_dtype(make_pointer_dtype(data_values_dtype), "data",
                     make_pointer_dtype(by_values_dtype), "by");
-    m_members.metadata_size = m_operand_dtype.get_metadata_size();
-    const categorical_dtype *cd = static_cast<const categorical_dtype *>(m_groups_dtype.extended());
-    m_value_dtype = make_fixed_dim_dtype(cd->get_category_count(),
+    m_members.metadata_size = m_operand_type.get_metadata_size();
+    const categorical_dtype *cd = static_cast<const categorical_dtype *>(m_groups_type.extended());
+    m_value_type = make_fixed_dim_dtype(cd->get_category_count(),
                     make_var_dim_dtype(data_values_dtype.at_single(0)));
-    m_members.flags = inherited_flags(m_value_dtype.get_flags(), m_operand_dtype.get_flags());
+    m_members.flags = inherited_flags(m_value_type.get_flags(), m_operand_type.get_flags());
 }
 
 groupby_dtype::~groupby_dtype()
@@ -56,22 +56,22 @@ void groupby_dtype::print_data(std::ostream& DYND_UNUSED(o),
     throw runtime_error("internal error: groupby_dtype::print_data isn't supposed to be called");
 }
 
-dtype groupby_dtype::get_data_values_dtype() const
+ndt::type groupby_dtype::get_data_values_type() const
 {
-    const pointer_dtype *pd = static_cast<const pointer_dtype *>(m_operand_dtype.at_single(0).extended());
+    const pointer_dtype *pd = static_cast<const pointer_dtype *>(m_operand_type.at_single(0).extended());
     return pd->get_target_dtype();
 }
 
-dtype groupby_dtype::get_by_values_dtype() const
+ndt::type groupby_dtype::get_by_values_type() const
 {
-    const pointer_dtype *pd = static_cast<const pointer_dtype *>(m_operand_dtype.at_single(1).extended());
+    const pointer_dtype *pd = static_cast<const pointer_dtype *>(m_operand_type.at_single(1).extended());
     return pd->get_target_dtype();
 }
 
 void groupby_dtype::print_dtype(std::ostream& o) const
 {
-    o << "groupby<values=" << get_data_values_dtype();
-    o << ", by=" << get_by_values_dtype() << ">";
+    o << "groupby<values=" << get_data_values_type();
+    o << ", by=" << get_by_values_type() << ">";
 }
 
 void groupby_dtype::get_shape(size_t ndim, size_t i,
@@ -79,7 +79,7 @@ void groupby_dtype::get_shape(size_t ndim, size_t i,
 {
     // The first dimension is the groups, the second variable-sized
     out_shape[i] = reinterpret_cast<const categorical_dtype *>(
-                    m_groups_dtype.extended())->get_category_count();
+                    m_groups_type.extended())->get_category_count();
     if (i + 1 < ndim) {
         out_shape[i+1] = -1;
     }
@@ -87,20 +87,20 @@ void groupby_dtype::get_shape(size_t ndim, size_t i,
     // Get the rest of the shape if necessary
     if (i + 2 < ndim) {
         // Get the dtype for a single data_value element, and its corresponding metadata
-        dtype data_values_dtype = m_operand_dtype.at_single(0, metadata ? &metadata : NULL);
+        ndt::type data_values_dtype = m_operand_type.at_single(0, metadata ? &metadata : NULL);
         data_values_dtype = data_values_dtype.at_single(0, metadata ? &metadata : NULL);
         // Use this to get the rest of the shape
         data_values_dtype.extended()->get_shape(ndim, i + 2, out_shape, metadata);
     }
 }
 
-bool groupby_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const
+bool groupby_dtype::is_lossless_assignment(const ndt::type& dst_dt, const ndt::type& src_dt) const
 {
     // Treat this dtype as the value dtype for whether assignment is always lossless
     if (src_dt.extended() == this) {
-        return ::dynd::is_lossless_assignment(dst_dt, m_value_dtype);
+        return ::dynd::is_lossless_assignment(dst_dt, m_value_type);
     } else {
-        return ::dynd::is_lossless_assignment(m_value_dtype, src_dt);
+        return ::dynd::is_lossless_assignment(m_value_type, src_dt);
     }
 }
 
@@ -112,7 +112,7 @@ bool groupby_dtype::operator==(const base_dtype& rhs) const
         return false;
     } else {
         const groupby_dtype *dt = static_cast<const groupby_dtype*>(&rhs);
-        return m_value_dtype == dt->m_value_dtype && m_operand_dtype == dt->m_operand_dtype;
+        return m_value_type == dt->m_value_type && m_operand_type == dt->m_operand_type;
     }
 }
 
@@ -133,7 +133,7 @@ namespace {
             const groupby_dtype *gd = e->src_groupby_dt;
 
             // Get the data_values raw nd::array
-            dtype data_values_dt = gd->get_operand_dtype();
+            ndt::type data_values_dt = gd->get_operand_type();
             const char *data_values_metadata = e->src_metadata, *data_values_data = src;
             data_values_dt = data_values_dt.extended()->at_single(0, &data_values_metadata, &data_values_data);
             data_values_dt = static_cast<const pointer_dtype *>(data_values_dt.extended())->get_target_dtype();
@@ -141,7 +141,7 @@ namespace {
             data_values_data = *reinterpret_cast<const char * const *>(data_values_data);
 
             // Get the by_values raw nd::array
-            dtype by_values_dt = gd->get_operand_dtype();
+            ndt::type by_values_dt = gd->get_operand_type();
             const char *by_values_metadata = e->src_metadata, *by_values_data = src;
             by_values_dt = by_values_dt.extended()->at_single(1, &by_values_metadata, &by_values_data);
             by_values_dt = static_cast<const pointer_dtype *>(by_values_dt.extended())->get_target_dtype();
@@ -163,10 +163,10 @@ namespace {
             by_values_dt.extended()->process_strided(by_values_metadata, by_values_data,
                             by_values_dt, by_values_origin, by_values_stride, by_values_size);
 
-            const dtype& result_dt = gd->get_value_dtype();
+            const ndt::type& result_dt = gd->get_value_type();
             const fixed_dim_dtype *fad = static_cast<const fixed_dim_dtype *>(result_dt.extended());
             intptr_t fad_stride = fad->get_fixed_stride();
-            const var_dim_dtype *vad = static_cast<const var_dim_dtype *>(fad->get_element_dtype().extended());
+            const var_dim_dtype *vad = static_cast<const var_dim_dtype *>(fad->get_element_type().extended());
             const var_dim_dtype_metadata *vad_md = reinterpret_cast<const var_dim_dtype_metadata *>(e->dst_metadata);
             if (vad_md->offset != 0) {
                 throw runtime_error("dynd groupby: destination var_dim offset must be zero to allocate output");
@@ -192,7 +192,7 @@ namespace {
             memory_block_pod_allocator_api *allocator = get_memory_block_pod_allocator_api(vad_md->blockref);
             char *out_begin = NULL, *out_end = NULL;
             allocator->allocate(vad_md->blockref, by_values_size * vad_stride,
-                            vad->get_element_dtype().get_data_alignment(), &out_begin, &out_end);
+                            vad->get_element_type().get_data_alignment(), &out_begin, &out_end);
             vector<char *> cat_pointers(cat_sizes.size());
             for (size_t i = 0, i_end = cat_pointers.size(); i != i_end; ++i) {
                 cat_pointers[i] = out_begin;
@@ -253,8 +253,8 @@ size_t groupby_dtype::make_operand_to_value_assignment_kernel(
     offset_out = make_kernreq_to_single_kernel_adapter(out, offset_out, kernreq);
     out->ensure_capacity(offset_out + sizeof(groupby_to_value_assign_extra));
     groupby_to_value_assign_extra *e = out->get_at<groupby_to_value_assign_extra>(offset_out);
-    const categorical_dtype *cd = static_cast<const categorical_dtype *>(m_groups_dtype.extended());
-    switch (cd->get_storage_dtype().get_type_id()) {
+    const categorical_dtype *cd = static_cast<const categorical_dtype *>(m_groups_type.extended());
+    switch (cd->get_storage_type().get_type_id()) {
         case uint8_type_id:
             e->base.set_function<unary_single_operation_t>(&groupby_to_value_assign_extra::single_uint8);
             break;
@@ -276,12 +276,12 @@ size_t groupby_dtype::make_operand_to_value_assignment_kernel(
 
     // The following is the setup for copying a single 'data' value to the output
     // The destination element type and metadata
-    const dtype& dst_element_dtype = static_cast<const var_dim_dtype *>(
-                    static_cast<const fixed_dim_dtype *>(m_value_dtype.extended())->get_element_dtype().extended()
-                    )->get_element_dtype();
+    const ndt::type& dst_element_dtype = static_cast<const var_dim_dtype *>(
+                    static_cast<const fixed_dim_dtype *>(m_value_type.extended())->get_element_type().extended()
+                    )->get_element_type();
     const char *dst_element_metadata = dst_metadata + 0 + sizeof(var_dim_dtype_metadata);
     // Get source element type and metadata
-    dtype src_element_dtype = m_operand_dtype;
+    ndt::type src_element_dtype = m_operand_type;
     const char *src_element_metadata = e->src_metadata;
     src_element_dtype = src_element_dtype.extended()->at_single(0, &src_element_metadata, NULL);
     src_element_dtype = static_cast<const pointer_dtype *>(src_element_dtype.extended())->get_target_dtype();
@@ -302,20 +302,20 @@ size_t groupby_dtype::make_value_to_operand_assignment_kernel(
     throw runtime_error("Cannot assign to a dynd groupby object value");
 }
 
-dtype groupby_dtype::with_replaced_storage_dtype(const dtype& DYND_UNUSED(replacement_dtype)) const
+ndt::type groupby_dtype::with_replaced_storage_type(const ndt::type& DYND_UNUSED(replacement_type)) const
 {
-    throw runtime_error("TODO: implement groupby_dtype::with_replaced_storage_dtype");
+    throw runtime_error("TODO: implement groupby_dtype::with_replaced_storage_type");
 }
 
 ///////// properties on the nd::array
 
 static nd::array property_ndo_get_groups(const nd::array& n) {
-    dtype d = n.get_dtype();
+    ndt::type d = n.get_dtype();
     while (d.get_type_id() != groupby_type_id) {
         d = d.at_single(0);
     }
     const groupby_dtype *gd = static_cast<const groupby_dtype *>(d.extended());
-    return gd->get_groups_dtype().p("categories");
+    return gd->get_groups_type().p("categories");
 }
 
 static pair<string, gfunc::callable> groupby_array_properties[] = {

@@ -6,13 +6,13 @@
 /**
  * The void pointer dtype serves as the storage for a
  * pointer dtype, breaking the chaining of pointers
- * as expression dtypes.
+ * as expression types.
  */
 
-#ifndef _DYND__VOID_POINTER_DTYPE_HPP_
-#define _DYND__VOID_POINTER_DTYPE_HPP_
+#ifndef _DYND__VOID_POINTER_TYPE_HPP_
+#define _DYND__VOID_POINTER_TYPE_HPP_
 
-#include <dynd/dtype.hpp>
+#include <dynd/type.hpp>
 
 namespace dynd {
 
@@ -20,7 +20,7 @@ class void_pointer_dtype : public base_dtype {
 public:
     void_pointer_dtype()
         : base_dtype(void_pointer_type_id, void_kind, sizeof(void *),
-                        sizeof(void *), dtype_flag_scalar|dtype_flag_zeroinit|dtype_flag_blockref,
+                        sizeof(void *), type_flag_scalar|type_flag_zeroinit|type_flag_blockref,
                         0, 0)
     {}
 
@@ -28,7 +28,7 @@ public:
 
     void print_dtype(std::ostream& o) const;
 
-    bool is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const;
+    bool is_lossless_assignment(const ndt::type& dst_dt, const ndt::type& src_dt) const;
 
     bool operator==(const base_dtype& rhs) const;
 
@@ -43,12 +43,12 @@ public:
 
     size_t make_assignment_kernel(
                     hierarchical_kernel *out, size_t offset_out,
-                    const dtype& dst_dt, const char *dst_metadata,
-                    const dtype& src_dt, const char *src_metadata,
+                    const ndt::type& dst_dt, const char *dst_metadata,
+                    const ndt::type& src_dt, const char *src_metadata,
                     kernel_request_t kernreq, assign_error_mode errmode,
                     const eval::eval_context *ectx) const;
 };
 
 } // namespace dynd
 
-#endif // _DYND__VOID_POINTER_DTYPE_HPP_
+#endif // _DYND__VOID_POINTER_TYPE_HPP_

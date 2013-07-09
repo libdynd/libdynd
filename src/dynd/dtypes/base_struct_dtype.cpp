@@ -3,7 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <dynd/dtype.hpp>
+#include <dynd/type.hpp>
 #include <dynd/dtypes/base_struct_dtype.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/shortvector.hpp>
@@ -19,12 +19,12 @@ void base_struct_dtype::get_shape(size_t ndim, size_t i, intptr_t *out_shape, co
 {
     out_shape[i] = m_field_count;
     if (i < ndim-1) {
-        const dtype *field_types = get_field_types();
+        const ndt::type *field_types = get_field_types();
         const size_t *metadata_offsets = get_metadata_offsets();
         dimvector tmpshape(ndim);
         // Accumulate the shape from all the field shapes
         for (size_t fi = 0; fi != m_field_count; ++fi) {
-            const dtype& ft = field_types[i];
+            const ndt::type& ft = field_types[i];
             if (!ft.is_builtin()) {
                 ft.extended()->get_shape(ndim, i+1, tmpshape.get(),
                                 metadata ? (metadata + metadata_offsets[fi]) : NULL);
@@ -60,20 +60,20 @@ size_t base_struct_dtype::get_elwise_property_index(const std::string& property_
     }
 
     stringstream ss;
-    ss << "dtype " << dtype(this, true) << " does not have a kernel for property " << property_name;
+    ss << "dtype " << ndt::type(this, true) << " does not have a kernel for property " << property_name;
     throw runtime_error(ss.str());
 }
 
-dtype base_struct_dtype::get_elwise_property_dtype(size_t elwise_property_index,
+ndt::type base_struct_dtype::get_elwise_property_dtype(size_t elwise_property_index,
                 bool& out_readable, bool& out_writable) const
 {
     size_t field_count = get_field_count();
     if (elwise_property_index < field_count) {
         out_readable = true;
         out_writable = false;
-        return get_field_types()[elwise_property_index].value_dtype();
+        return get_field_types()[elwise_property_index].value_type();
     } else {
-        return make_dtype<void>();
+        return ndt::make_dtype<void>();
     }
 }
 
@@ -121,7 +121,7 @@ size_t base_struct_dtype::make_elwise_property_getter_kernel(
     size_t field_count = get_field_count();
     if (src_elwise_property_index < field_count) {
         const size_t *metadata_offsets = get_metadata_offsets();
-        const dtype& field_type = get_field_types()[src_elwise_property_index];
+        const ndt::type& field_type = get_field_types()[src_elwise_property_index];
         out->ensure_capacity(offset_out + sizeof(struct_property_getter_extra));
         struct_property_getter_extra *e = out->get_at<struct_property_getter_extra>(offset_out);
         switch (kernreq) {
@@ -141,12 +141,12 @@ size_t base_struct_dtype::make_elwise_property_getter_kernel(
         e->base.destructor = &struct_property_getter_extra::destruct;
         e->field_offset = get_data_offsets(src_metadata)[src_elwise_property_index];
         return ::make_assignment_kernel(out, offset_out + sizeof(struct_property_getter_extra),
-                        field_type.value_dtype(), dst_metadata,
+                        field_type.value_type(), dst_metadata,
                         field_type, src_metadata + metadata_offsets[src_elwise_property_index],
                         kernreq, assign_error_none, ectx);
     } else {
         stringstream ss;
-        ss << "dynd dtype " << dtype(this, true);
+        ss << "dynd type " << ndt::type(this, true);
         ss << " given an invalid property index" << src_elwise_property_index;
         throw runtime_error(ss.str());
     }
@@ -160,20 +160,20 @@ size_t base_struct_dtype::make_elwise_property_setter_kernel(
 {
     // No writable properties
     stringstream ss;
-    ss << "dynd dtype " << dtype(this, true);
+    ss << "dynd type " << ndt::type(this, true);
     ss << " given an invalid property index" << dst_elwise_property_index;
     throw runtime_error(ss.str());
 }
 
 void base_struct_dtype::data_destruct(const char *metadata, char *data) const
 {
-    const dtype *field_types = get_field_types();
+    const ndt::type *field_types = get_field_types();
     const size_t *metadata_offsets = get_metadata_offsets();
     const size_t *data_offsets = get_data_offsets(metadata);
     size_t field_count = get_field_count();
     for (size_t i = 0; i != field_count; ++i) {
-        const dtype& dt = field_types[i];
-        if (dt.get_flags()&dtype_flag_destructor) {
+        const ndt::type& dt = field_types[i];
+        if (dt.get_flags()&type_flag_destructor) {
             dt.extended()->data_destruct(
                             metadata + metadata_offsets[i],
                             data + data_offsets[i]);
@@ -184,7 +184,7 @@ void base_struct_dtype::data_destruct(const char *metadata, char *data) const
 void base_struct_dtype::data_destruct_strided(const char *metadata, char *data,
                 intptr_t stride, size_t count) const
 {
-    const dtype *field_types = get_field_types();
+    const ndt::type *field_types = get_field_types();
     const size_t *metadata_offsets = get_metadata_offsets();
     const size_t *data_offsets = get_data_offsets(metadata);
     size_t field_count = get_field_count();
@@ -193,8 +193,8 @@ void base_struct_dtype::data_destruct_strided(const char *metadata, char *data,
     while (count > 0) {
         size_t chunk_size = min(count, DYND_BUFFER_CHUNK_SIZE);
         for (size_t i = 0; i != field_count; ++i) {
-            const dtype& dt = field_types[i];
-            if (dt.get_flags()&dtype_flag_destructor) {
+            const ndt::type& dt = field_types[i];
+            if (dt.get_flags()&type_flag_destructor) {
                 dt.extended()->data_destruct_strided(
                                 metadata + metadata_offsets[i],
                                 data + data_offsets[i],

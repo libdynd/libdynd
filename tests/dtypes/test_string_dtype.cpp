@@ -20,7 +20,7 @@ using namespace std;
 using namespace dynd;
 
 TEST(StringDType, Create) {
-    dtype d;
+    ndt::type d;
 
     // Strings with various encodings
     d = make_string_dtype(string_encoding_utf_8);
@@ -262,15 +262,15 @@ TEST(StringDType, Unicode) {
 
 
 TEST(StringDType, CanonicalDType) {
-    // The canonical dtype of a string dtype is the same type
+    // The canonical type of a string dtype is the same type
     EXPECT_EQ((make_string_dtype(string_encoding_ascii)),
-                (make_string_dtype(string_encoding_ascii).get_canonical_dtype()));
+                (make_string_dtype(string_encoding_ascii).get_canonical_type()));
     EXPECT_EQ((make_string_dtype(string_encoding_utf_8)),
-                (make_string_dtype(string_encoding_utf_8).get_canonical_dtype()));
+                (make_string_dtype(string_encoding_utf_8).get_canonical_type()));
     EXPECT_EQ((make_string_dtype(string_encoding_utf_16)),
-                (make_string_dtype(string_encoding_utf_16).get_canonical_dtype()));
+                (make_string_dtype(string_encoding_utf_16).get_canonical_type()));
     EXPECT_EQ((make_string_dtype(string_encoding_utf_32)),
-                (make_string_dtype(string_encoding_utf_32).get_canonical_dtype()));
+                (make_string_dtype(string_encoding_utf_32).get_canonical_type()));
 }
 
 TEST(StringDType, Storage) {
@@ -490,7 +490,7 @@ TEST(StringDType, Concatenation) {
     a = a_arr;
     b = b_arr;
     nd::array c = (a + b).eval();
-    ASSERT_EQ(dtype("M, string"), c.get_dtype());
+    ASSERT_EQ(ndt::type("M, string"), c.get_dtype());
     EXPECT_EQ(3, c.get_dim_size());
     EXPECT_EQ("testingalpha", c(0).as<string>());
     EXPECT_EQ("onebeta", c(1).as<string>());

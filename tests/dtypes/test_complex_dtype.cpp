@@ -17,11 +17,11 @@ TEST(ComplexDType, Create) {
     nd::array n;
     
     n = complex<float>(1.5f, 2.0f);
-    EXPECT_EQ(n.get_dtype(), make_dtype<complex<float> >());
+    EXPECT_EQ(n.get_dtype(), ndt::make_dtype<complex<float> >());
     EXPECT_EQ(complex<float>(1.5f, 2.0f), n.as<complex<float> >());
 
     n = complex<double>(2.5, 3.0);
-    EXPECT_EQ(n.get_dtype(), make_dtype<complex<double> >());
+    EXPECT_EQ(n.get_dtype(), ndt::make_dtype<complex<double> >());
     EXPECT_EQ(complex<double>(2.5, 3.0), n.as<complex<double> >());
 }
 

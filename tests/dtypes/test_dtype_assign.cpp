@@ -10,7 +10,7 @@
 #include <cmath>
 #include "inc_gtest.hpp"
 
-#include "dynd/dtype.hpp"
+#include "dynd/type.hpp"
 
 using namespace std;
 using namespace dynd;
@@ -30,15 +30,15 @@ TEST(DTypeAssign, FixedSizeTestsNoExcept) {
     complex<float> v_cf32;
     complex<double> v_cf64;
 
-    dtype s_dt, d_dt;
+    ndt::type s_dt, d_dt;
     char *s_ptr;
 
     // Test bool -> each builtin type
-    s_dt = dtype(bool_type_id);
+    s_dt = ndt::type(bool_type_id);
     s_ptr = (char *)&v_b;
     v_b = true;
 #define ONE_TEST(tid, v, m) \
-            dtype_assign(dtype(tid), NULL, (char *)&v, s_dt, NULL, s_ptr, assign_error_none); \
+            dtype_assign(ndt::type(tid), NULL, (char *)&v, s_dt, NULL, s_ptr, assign_error_none); \
             EXPECT_EQ(m, v)
     ONE_TEST(int8_type_id, v_i8, 1);
     ONE_TEST(int16_type_id, v_i16, 1);
@@ -55,11 +55,11 @@ TEST(DTypeAssign, FixedSizeTestsNoExcept) {
 #undef ONE_TEST
 
     // Test int8 -> each builtin type
-    s_dt = dtype(int8_type_id);
+    s_dt = ndt::type(int8_type_id);
     s_ptr = (char *)&v_i8;
     v_i8 = 127;
 #define ONE_TEST(tid, v, m) \
-            dtype_assign(dtype(tid), NULL, (char *)&v, s_dt, NULL, s_ptr, assign_error_none); \
+            dtype_assign(ndt::type(tid), NULL, (char *)&v, s_dt, NULL, s_ptr, assign_error_none); \
             EXPECT_EQ(m, v)
     ONE_TEST(bool_type_id, v_b, true);
     ONE_TEST(int16_type_id, v_i16, 127);
@@ -76,11 +76,11 @@ TEST(DTypeAssign, FixedSizeTestsNoExcept) {
 #undef ONE_TEST
 
     // Test float64 -> each builtin type
-    s_dt = dtype(float64_type_id);
+    s_dt = ndt::type(float64_type_id);
     s_ptr = (char *)&v_f64;
     v_f64 = -10.25;
 #define ONE_TEST(tid, v, m) \
-            dtype_assign(dtype(tid), NULL, (char *)&v, s_dt, NULL, s_ptr, assign_error_none); \
+            dtype_assign(ndt::type(tid), NULL, (char *)&v, s_dt, NULL, s_ptr, assign_error_none); \
             EXPECT_EQ(m, v)
     ONE_TEST(bool_type_id, v_b, true);
     ONE_TEST(int8_type_id, v_i8, -10);
@@ -101,11 +101,11 @@ TEST(DTypeAssign, FixedSizeTestsNoExcept) {
 #undef ONE_TEST
 
     // Test complex<float64> -> each builtin type
-    s_dt = dtype(complex_float64_type_id);
+    s_dt = ndt::type(complex_float64_type_id);
     s_ptr = (char *)&v_cf64;
     v_cf64 = complex<double>(-10.25, 1.5);
 #define ONE_TEST(tid, v, m) \
-            dtype_assign(dtype(tid), NULL, (char *)&v, s_dt, NULL, s_ptr, assign_error_none); \
+            dtype_assign(ndt::type(tid), NULL, (char *)&v, s_dt, NULL, s_ptr, assign_error_none); \
             EXPECT_EQ(m, v)
     ONE_TEST(bool_type_id, v_b, true);
     ONE_TEST(int8_type_id, v_i8, -10);
@@ -141,15 +141,15 @@ TEST(DTypeAssign, FixedSizeTests_Bool) {
     complex<float> v_cf32;
     complex<double> v_cf64;
 
-    dtype s_dt, d_dt;
+    ndt::type s_dt, d_dt;
     char *s_ptr;
 
     // Test bool -> each type
-    s_dt = dtype(bool_type_id);
+    s_dt = ndt::type(bool_type_id);
     s_ptr = (char *)&v_b;
     v_b = true;
 #define ONE_TEST(tid, v, m) \
-            dtype_assign(dtype(tid), NULL, (char *)&v, s_dt, NULL, s_ptr); \
+            dtype_assign(ndt::type(tid), NULL, (char *)&v, s_dt, NULL, s_ptr); \
             EXPECT_EQ(m, v)
     ONE_TEST(int8_type_id, v_i8, 1);
     ONE_TEST(int16_type_id, v_i16, 1);
@@ -181,17 +181,17 @@ TEST(DTypeAssign, FixedSizeTests_Int8) {
     complex<float> v_cf32;
     complex<double> v_cf64;
 
-    dtype s_dt, d_dt;
+    ndt::type s_dt, d_dt;
     char *s_ptr;
 
     // Test int8 -> types with success
-    s_dt = dtype(int8_type_id);
+    s_dt = ndt::type(int8_type_id);
     s_ptr = (char *)&v_i8;
     v_i8 = 127;
 #define ONE_TEST(tid, v, m) \
-            dtype_assign(dtype(tid), NULL, (char *)&v, s_dt, NULL, s_ptr); \
+            dtype_assign(ndt::type(tid), NULL, (char *)&v, s_dt, NULL, s_ptr); \
             EXPECT_EQ(m, v)
-    EXPECT_THROW(dtype_assign(dtype(bool_type_id), NULL, (char *)&v_b, s_dt, NULL, s_ptr), runtime_error);
+    EXPECT_THROW(dtype_assign(ndt::type(bool_type_id), NULL, (char *)&v_b, s_dt, NULL, s_ptr), runtime_error);
     ONE_TEST(int16_type_id, v_i16, 127);
     ONE_TEST(int32_type_id, v_i32, 127);
     ONE_TEST(int64_type_id, v_i64, 127);
@@ -207,17 +207,17 @@ TEST(DTypeAssign, FixedSizeTests_Int8) {
 
     // Test int8 -> bool variants
     v_i8 = -33;
-    EXPECT_THROW(dtype_assign(dtype(bool_type_id), NULL, (char *)&v_b, s_dt, NULL, s_ptr), runtime_error);
+    EXPECT_THROW(dtype_assign(ndt::type(bool_type_id), NULL, (char *)&v_b, s_dt, NULL, s_ptr), runtime_error);
     v_i8 = -1;
-    EXPECT_THROW(dtype_assign(dtype(bool_type_id), NULL, (char *)&v_b, s_dt, NULL, s_ptr), runtime_error);
-    EXPECT_THROW(dtype_assign(dtype(uint8_type_id), NULL, (char *)&v_u8, s_dt, NULL, s_ptr), runtime_error);
+    EXPECT_THROW(dtype_assign(ndt::type(bool_type_id), NULL, (char *)&v_b, s_dt, NULL, s_ptr), runtime_error);
+    EXPECT_THROW(dtype_assign(ndt::type(uint8_type_id), NULL, (char *)&v_u8, s_dt, NULL, s_ptr), runtime_error);
     v_i8 = 2;
-    EXPECT_THROW(dtype_assign(dtype(bool_type_id), NULL, (char *)&v_b, s_dt, NULL, s_ptr), runtime_error);
+    EXPECT_THROW(dtype_assign(ndt::type(bool_type_id), NULL, (char *)&v_b, s_dt, NULL, s_ptr), runtime_error);
     v_i8 = 0;
-    dtype_assign(dtype(bool_type_id), NULL, (char *)&v_b, s_dt, NULL, s_ptr);
+    dtype_assign(ndt::type(bool_type_id), NULL, (char *)&v_b, s_dt, NULL, s_ptr);
     EXPECT_FALSE(v_b);
     v_i8 = 1;
-    dtype_assign(dtype(bool_type_id), NULL, (char *)&v_b, s_dt, NULL, s_ptr);
+    dtype_assign(ndt::type(bool_type_id), NULL, (char *)&v_b, s_dt, NULL, s_ptr);
     EXPECT_TRUE(v_b);
 }
 
@@ -236,20 +236,20 @@ TEST(DTypeAssign, FixedSizeTests_Float64) {
     complex<float> v_cf32;
     complex<double> v_cf64;
 
-    dtype s_dt, d_dt;
+    ndt::type s_dt, d_dt;
     const char *s_ptr;
 
-    s_dt = dtype(float64_type_id);
+    s_dt = ndt::type(float64_type_id);
     s_ptr = reinterpret_cast<char *>(&v_f64);
     v_f64 = -10.25;
 #define ONE_TEST(tid, v, m) \
-            dtype_assign(dtype(tid), NULL, (char *)&v, s_dt, NULL, s_ptr); \
+            dtype_assign(ndt::type(tid), NULL, (char *)&v, s_dt, NULL, s_ptr); \
             EXPECT_EQ(m, v)
 #define ONE_TEST_THROW(tid, v) \
-            EXPECT_THROW(dtype_assign(dtype(tid), NULL, (char *)&v, s_dt, NULL, s_ptr), runtime_error);
-//            EXPECT_THROW(dtype_assign(dtype(tid), (char *)&v, s_dt, s_ptr, assign_error_overflow), runtime_error);
-//            EXPECT_THROW(dtype_assign(dtype(tid), (char *)&v, s_dt, s_ptr, assign_error_fractional), runtime_error);
-//            EXPECT_THROW(dtype_assign(dtype(tid), (char *)&v, s_dt, s_ptr, assign_error_inexact), runtime_error)
+            EXPECT_THROW(dtype_assign(ndt::type(tid), NULL, (char *)&v, s_dt, NULL, s_ptr), runtime_error);
+//            EXPECT_THROW(dtype_assign(ndt::type(tid), (char *)&v, s_dt, s_ptr, assign_error_overflow), runtime_error);
+//            EXPECT_THROW(dtype_assign(ndt::type(tid), (char *)&v, s_dt, s_ptr, assign_error_fractional), runtime_error);
+//            EXPECT_THROW(dtype_assign(ndt::type(tid), (char *)&v, s_dt, s_ptr, assign_error_inexact), runtime_error)
     ONE_TEST_THROW(bool_type_id, v_b);
     ONE_TEST_THROW(int8_type_id, v_i8);
     ONE_TEST_THROW(int16_type_id, v_i16);
@@ -268,37 +268,37 @@ TEST(DTypeAssign, FixedSizeTests_Float64) {
     // dtype_assign checks that the float64 -> float32value gets converted exactly
     // when using the assign_error_inexact mode
     v_f64 = 1 / 3.0;
-    EXPECT_THROW(dtype_assign(dtype(float32_type_id), NULL, (char *)&v_f32, s_dt, NULL, s_ptr, assign_error_inexact),
+    EXPECT_THROW(dtype_assign(ndt::type(float32_type_id), NULL, (char *)&v_f32, s_dt, NULL, s_ptr, assign_error_inexact),
                                                                                 runtime_error);
-    EXPECT_THROW(dtype_assign(dtype(complex_float32_type_id), NULL, (char *)&v_cf32, s_dt, NULL, s_ptr, assign_error_inexact),
+    EXPECT_THROW(dtype_assign(ndt::type(complex_float32_type_id), NULL, (char *)&v_cf32, s_dt, NULL, s_ptr, assign_error_inexact),
                                                                                 runtime_error);
-    dtype_assign(dtype(float32_type_id), NULL, (char *)&v_f32, s_dt, NULL, s_ptr, assign_error_fractional);
+    dtype_assign(ndt::type(float32_type_id), NULL, (char *)&v_f32, s_dt, NULL, s_ptr, assign_error_fractional);
     EXPECT_EQ((float)v_f64, v_f32);
-    dtype_assign(dtype(complex_float32_type_id), NULL, (char *)&v_cf32, s_dt, NULL, s_ptr, assign_error_fractional);
+    dtype_assign(ndt::type(complex_float32_type_id), NULL, (char *)&v_cf32, s_dt, NULL, s_ptr, assign_error_fractional);
     EXPECT_EQ(complex<float>((float)v_f64), v_cf32);
 
     // Since this is a float -> double conversion, it should be exact coming back to float
     v_f64 = 1 / 3.0f;
-    dtype_assign(dtype(float32_type_id), NULL, (char *)&v_f32, s_dt, NULL, s_ptr, assign_error_inexact);
+    dtype_assign(ndt::type(float32_type_id), NULL, (char *)&v_f32, s_dt, NULL, s_ptr, assign_error_inexact);
     EXPECT_EQ(v_f64, v_f32);
-    dtype_assign(dtype(complex_float32_type_id), NULL, (char *)&v_cf32, s_dt, NULL, s_ptr, assign_error_inexact);
+    dtype_assign(ndt::type(complex_float32_type_id), NULL, (char *)&v_cf32, s_dt, NULL, s_ptr, assign_error_inexact);
     EXPECT_EQ(complex<double>(v_f64), complex<double>(v_cf32));
 
     // This should overflow converting to float
     v_f64 = -1.5e250;
-    EXPECT_THROW(dtype_assign(dtype(float32_type_id), NULL, (char *)&v_f32, s_dt, NULL, s_ptr, assign_error_inexact),
+    EXPECT_THROW(dtype_assign(ndt::type(float32_type_id), NULL, (char *)&v_f32, s_dt, NULL, s_ptr, assign_error_inexact),
                                                                                 runtime_error);
-    EXPECT_THROW(dtype_assign(dtype(float32_type_id), NULL, (char *)&v_f32, s_dt, NULL, s_ptr, assign_error_fractional),
+    EXPECT_THROW(dtype_assign(ndt::type(float32_type_id), NULL, (char *)&v_f32, s_dt, NULL, s_ptr, assign_error_fractional),
                                                                                 runtime_error);
-    EXPECT_THROW(dtype_assign(dtype(float32_type_id), NULL, (char *)&v_f32, s_dt, NULL, s_ptr, assign_error_overflow),
+    EXPECT_THROW(dtype_assign(ndt::type(float32_type_id), NULL, (char *)&v_f32, s_dt, NULL, s_ptr, assign_error_overflow),
                                                                                 runtime_error);
-    EXPECT_THROW(dtype_assign(dtype(complex_float32_type_id), NULL, (char *)&v_cf32, s_dt, NULL, s_ptr, assign_error_inexact),
+    EXPECT_THROW(dtype_assign(ndt::type(complex_float32_type_id), NULL, (char *)&v_cf32, s_dt, NULL, s_ptr, assign_error_inexact),
                                                                                 runtime_error);
-    EXPECT_THROW(dtype_assign(dtype(complex_float32_type_id), NULL, (char *)&v_cf32, s_dt, NULL, s_ptr, assign_error_fractional),
+    EXPECT_THROW(dtype_assign(ndt::type(complex_float32_type_id), NULL, (char *)&v_cf32, s_dt, NULL, s_ptr, assign_error_fractional),
                                                                                 runtime_error);
-    EXPECT_THROW(dtype_assign(dtype(complex_float32_type_id), NULL, (char *)&v_cf32, s_dt, NULL, s_ptr, assign_error_overflow),
+    EXPECT_THROW(dtype_assign(ndt::type(complex_float32_type_id), NULL, (char *)&v_cf32, s_dt, NULL, s_ptr, assign_error_overflow),
                                                                                 runtime_error);
-    dtype_assign(dtype(float32_type_id), NULL, (char *)&v_f32, s_dt, NULL, s_ptr, assign_error_none);
+    dtype_assign(ndt::type(float32_type_id), NULL, (char *)&v_f32, s_dt, NULL, s_ptr, assign_error_none);
 #ifdef _WIN32
     EXPECT_TRUE(_fpclass(v_f32) == _FPCLASS_NINF);
 #else
@@ -323,18 +323,18 @@ TEST(DTypeAssign, FixedSizeTests_Complex_Float32) {
     complex<double> v_cf64;
 
     complex<float> v_ref;
-    dtype s_dt, d_dt;
+    ndt::type s_dt, d_dt;
     const char *s_ptr;
 
-    s_dt = dtype(complex_float32_type_id);
+    s_dt = ndt::type(complex_float32_type_id);
     s_ptr = reinterpret_cast<char *>(&v_ref);
 
     // Test the value 0.0
     v_ref = 0.f;
 #define ONE_TEST(tid, v, m) \
-            dtype_assign(dtype(tid), NULL, (char *)&v, s_dt, NULL, s_ptr); \
+            dtype_assign(ndt::type(tid), NULL, (char *)&v, s_dt, NULL, s_ptr); \
             EXPECT_EQ(m, v)
-    dtype_assign(dtype(bool_type_id), NULL, (char *)&v_b, s_dt, NULL, s_ptr);
+    dtype_assign(ndt::type(bool_type_id), NULL, (char *)&v_b, s_dt, NULL, s_ptr);
     EXPECT_FALSE(v_b);
     ONE_TEST(int8_type_id, v_i8, 0);
     ONE_TEST(int16_type_id, v_i16, 0);
@@ -353,9 +353,9 @@ TEST(DTypeAssign, FixedSizeTests_Complex_Float32) {
     // Test the value 1.0
     v_ref = 1.f;
 #define ONE_TEST(tid, v, m) \
-            dtype_assign(dtype(tid), NULL, (char *)&v, s_dt, NULL, s_ptr); \
+            dtype_assign(ndt::type(tid), NULL, (char *)&v, s_dt, NULL, s_ptr); \
             EXPECT_EQ(m, v)
-    dtype_assign(dtype(bool_type_id), NULL, (char *)&v_b, s_dt, NULL, s_ptr);
+    dtype_assign(ndt::type(bool_type_id), NULL, (char *)&v_b, s_dt, NULL, s_ptr);
     EXPECT_TRUE(v_b);
     ONE_TEST(int8_type_id, v_i8, 1);
     ONE_TEST(int16_type_id, v_i16, 1);
@@ -374,13 +374,13 @@ TEST(DTypeAssign, FixedSizeTests_Complex_Float32) {
     // Test the value 2.0
     v_ref = 2.f;
 #define ONE_TEST(tid, v, m) \
-            dtype_assign(dtype(tid), NULL, (char *)&v, s_dt, NULL, s_ptr); \
+            dtype_assign(ndt::type(tid), NULL, (char *)&v, s_dt, NULL, s_ptr); \
             EXPECT_EQ(m, v)
 #define ONE_TEST_THROW(tid, v) \
-            EXPECT_THROW(dtype_assign(dtype(tid), NULL, (char *)&v, s_dt, NULL, s_ptr), runtime_error);
-//            EXPECT_THROW(dtype_assign(dtype(tid), &v, s_dt, s_ptr, assign_error_overflow), runtime_error);
-//            EXPECT_THROW(dtype_assign(dtype(tid), &v, s_dt, s_ptr, assign_error_fractional), runtime_error);
-//            EXPECT_THROW(dtype_assign(dtype(tid), &v, s_dt, s_ptr, assign_error_inexact), runtime_error)
+            EXPECT_THROW(dtype_assign(ndt::type(tid), NULL, (char *)&v, s_dt, NULL, s_ptr), runtime_error);
+//            EXPECT_THROW(dtype_assign(ndt::type(tid), &v, s_dt, s_ptr, assign_error_overflow), runtime_error);
+//            EXPECT_THROW(dtype_assign(ndt::type(tid), &v, s_dt, s_ptr, assign_error_fractional), runtime_error);
+//            EXPECT_THROW(dtype_assign(ndt::type(tid), &v, s_dt, s_ptr, assign_error_inexact), runtime_error)
     ONE_TEST_THROW(bool_type_id, v_b);
     ONE_TEST(int8_type_id, v_i8, 2);
     ONE_TEST(int16_type_id, v_i16, 2);
@@ -400,13 +400,13 @@ TEST(DTypeAssign, FixedSizeTests_Complex_Float32) {
     // Test the value -1.0
     v_ref = -1.f;
 #define ONE_TEST(tid, v, m) \
-            dtype_assign(dtype(tid), NULL, (char *)&v, s_dt, NULL, s_ptr); \
+            dtype_assign(ndt::type(tid), NULL, (char *)&v, s_dt, NULL, s_ptr); \
             EXPECT_EQ(m, v)
 #define ONE_TEST_THROW(tid, v) \
-            EXPECT_THROW(dtype_assign(dtype(tid), NULL, (char *)&v, s_dt, NULL, s_ptr), runtime_error);
-//            EXPECT_THROW(dtype_assign(dtype(tid), &v, s_dt, s_ptr, assign_error_overflow), runtime_error);
-//            EXPECT_THROW(dtype_assign(dtype(tid), &v, s_dt, s_ptr, assign_error_fractional), runtime_error);
-//            EXPECT_THROW(dtype_assign(dtype(tid), &v, s_dt, s_ptr, assign_error_inexact), runtime_error)
+            EXPECT_THROW(dtype_assign(ndt::type(tid), NULL, (char *)&v, s_dt, NULL, s_ptr), runtime_error);
+//            EXPECT_THROW(dtype_assign(ndt::type(tid), &v, s_dt, s_ptr, assign_error_overflow), runtime_error);
+//            EXPECT_THROW(dtype_assign(ndt::type(tid), &v, s_dt, s_ptr, assign_error_fractional), runtime_error);
+//            EXPECT_THROW(dtype_assign(ndt::type(tid), &v, s_dt, s_ptr, assign_error_inexact), runtime_error)
     ONE_TEST_THROW(bool_type_id, v_b);
     ONE_TEST(int8_type_id, v_i8, -1);
     ONE_TEST(int16_type_id, v_i16, -1);
@@ -426,13 +426,13 @@ TEST(DTypeAssign, FixedSizeTests_Complex_Float32) {
     // Test a real value stored in complex
     v_ref = -10.25f;
 #define ONE_TEST(tid, v, m) \
-            dtype_assign(dtype(tid), NULL, (char *)&v, s_dt, NULL, s_ptr); \
+            dtype_assign(ndt::type(tid), NULL, (char *)&v, s_dt, NULL, s_ptr); \
             EXPECT_EQ(m, v)
 #define ONE_TEST_THROW(tid, v) \
-            EXPECT_THROW(dtype_assign(dtype(tid), NULL, (char *)&v, s_dt, NULL, s_ptr), runtime_error);
-//            EXPECT_THROW(dtype_assign(dtype(tid), &v, s_dt, s_ptr, assign_error_overflow), runtime_error);
-//            EXPECT_THROW(dtype_assign(dtype(tid), &v, s_dt, s_ptr, assign_error_fractional), runtime_error);
-//            EXPECT_THROW(dtype_assign(dtype(tid), &v, s_dt, s_ptr, assign_error_inexact), runtime_error)
+            EXPECT_THROW(dtype_assign(ndt::type(tid), NULL, (char *)&v, s_dt, NULL, s_ptr), runtime_error);
+//            EXPECT_THROW(dtype_assign(ndt::type(tid), &v, s_dt, s_ptr, assign_error_overflow), runtime_error);
+//            EXPECT_THROW(dtype_assign(ndt::type(tid), &v, s_dt, s_ptr, assign_error_fractional), runtime_error);
+//            EXPECT_THROW(dtype_assign(ndt::type(tid), &v, s_dt, s_ptr, assign_error_inexact), runtime_error)
     ONE_TEST_THROW(bool_type_id, v_b);
     ONE_TEST_THROW(int8_type_id, v_i8);
     ONE_TEST_THROW(int16_type_id, v_i16);
@@ -452,13 +452,13 @@ TEST(DTypeAssign, FixedSizeTests_Complex_Float32) {
     // Test a large integer value stored in complex
     v_ref = 1e21f;
 #define ONE_TEST(tid, v, m) \
-            dtype_assign(dtype(tid), NULL, (char *)&v, s_dt, NULL, s_ptr); \
+            dtype_assign(ndt::type(tid), NULL, (char *)&v, s_dt, NULL, s_ptr); \
             EXPECT_EQ(m, v)
 #define ONE_TEST_THROW(tid, v) \
-            EXPECT_THROW(dtype_assign(dtype(tid), NULL, (char *)&v, s_dt, NULL, s_ptr), runtime_error);
-//            EXPECT_THROW(dtype_assign(dtype(tid), &v, s_dt, s_ptr, assign_error_overflow), runtime_error);
-//            EXPECT_THROW(dtype_assign(dtype(tid), &v, s_dt, s_ptr, assign_error_fractional), runtime_error);
-//            EXPECT_THROW(dtype_assign(dtype(tid), &v, s_dt, s_ptr, assign_error_inexact), runtime_error)
+            EXPECT_THROW(dtype_assign(ndt::type(tid), NULL, (char *)&v, s_dt, NULL, s_ptr), runtime_error);
+//            EXPECT_THROW(dtype_assign(ndt::type(tid), &v, s_dt, s_ptr, assign_error_overflow), runtime_error);
+//            EXPECT_THROW(dtype_assign(ndt::type(tid), &v, s_dt, s_ptr, assign_error_fractional), runtime_error);
+//            EXPECT_THROW(dtype_assign(ndt::type(tid), &v, s_dt, s_ptr, assign_error_inexact), runtime_error)
     ONE_TEST_THROW(bool_type_id, v_b);
     ONE_TEST_THROW(int8_type_id, v_i8);
     ONE_TEST_THROW(int16_type_id, v_i16);
@@ -478,13 +478,13 @@ TEST(DTypeAssign, FixedSizeTests_Complex_Float32) {
     // Test a complex value with imaginary component
     v_ref = complex<float>(-10.25f, 0.125f);
 #define ONE_TEST(tid, v, m) \
-            dtype_assign(dtype(tid), NULL, (char *)&v, s_dt, NULL, s_ptr); \
+            dtype_assign(ndt::type(tid), NULL, (char *)&v, s_dt, NULL, s_ptr); \
             EXPECT_EQ(m, v)
 #define ONE_TEST_THROW(tid, v) \
-            EXPECT_THROW(dtype_assign(dtype(tid), NULL, (char *)&v, s_dt, NULL, s_ptr), runtime_error);
-//            EXPECT_THROW(dtype_assign(dtype(tid), &v, s_dt, s_ptr, assign_error_overflow), runtime_error);
-//            EXPECT_THROW(dtype_assign(dtype(tid), &v, s_dt, s_ptr, assign_error_fractional), runtime_error);
-//            EXPECT_THROW(dtype_assign(dtype(tid), &v, s_dt, s_ptr, assign_error_inexact), runtime_error)
+            EXPECT_THROW(dtype_assign(ndt::type(tid), NULL, (char *)&v, s_dt, NULL, s_ptr), runtime_error);
+//            EXPECT_THROW(dtype_assign(ndt::type(tid), &v, s_dt, s_ptr, assign_error_overflow), runtime_error);
+//            EXPECT_THROW(dtype_assign(ndt::type(tid), &v, s_dt, s_ptr, assign_error_fractional), runtime_error);
+//            EXPECT_THROW(dtype_assign(ndt::type(tid), &v, s_dt, s_ptr, assign_error_inexact), runtime_error)
     ONE_TEST_THROW(bool_type_id, v_b);
     ONE_TEST_THROW(int8_type_id, v_i8);
     ONE_TEST_THROW(int16_type_id, v_i16);
@@ -518,18 +518,18 @@ TEST(DTypeAssign, FixedSizeTests_Complex_Float64) {
     complex<double> v_cf64;
 
     complex<double> v_ref;
-    dtype s_dt, d_dt;
+    ndt::type s_dt, d_dt;
     const char *s_ptr;
 
-    s_dt = dtype(complex_float64_type_id);
+    s_dt = ndt::type(complex_float64_type_id);
     s_ptr = reinterpret_cast<char *>(&v_ref);
 
     // Test the value 0.0
     v_ref = 0.;
 #define ONE_TEST(tid, v, m) \
-            dtype_assign(dtype(tid), NULL, (char *)&v, s_dt, NULL, s_ptr); \
+            dtype_assign(ndt::type(tid), NULL, (char *)&v, s_dt, NULL, s_ptr); \
             EXPECT_EQ(m, v)
-    dtype_assign(dtype(bool_type_id), NULL, (char *)&v_b, s_dt, NULL, s_ptr);
+    dtype_assign(ndt::type(bool_type_id), NULL, (char *)&v_b, s_dt, NULL, s_ptr);
     EXPECT_FALSE(v_b);
     ONE_TEST(int8_type_id, v_i8, 0);
     ONE_TEST(int16_type_id, v_i16, 0);
@@ -548,9 +548,9 @@ TEST(DTypeAssign, FixedSizeTests_Complex_Float64) {
     // Test the value 1.0
     v_ref = 1.;
 #define ONE_TEST(tid, v, m) \
-            dtype_assign(dtype(tid), NULL, (char *)&v, s_dt, NULL, s_ptr); \
+            dtype_assign(ndt::type(tid), NULL, (char *)&v, s_dt, NULL, s_ptr); \
             EXPECT_EQ(m, v)
-    dtype_assign(dtype(bool_type_id), NULL, (char *)&v_b, s_dt, NULL, s_ptr);
+    dtype_assign(ndt::type(bool_type_id), NULL, (char *)&v_b, s_dt, NULL, s_ptr);
     EXPECT_TRUE(v_b);
     ONE_TEST(int8_type_id, v_i8, 1);
     ONE_TEST(int16_type_id, v_i16, 1);
@@ -569,13 +569,13 @@ TEST(DTypeAssign, FixedSizeTests_Complex_Float64) {
     // Test the value 2.0
     v_ref = 2.;
 #define ONE_TEST(tid, v, m) \
-            dtype_assign(dtype(tid), NULL, (char *)&v, s_dt, NULL, s_ptr); \
+            dtype_assign(ndt::type(tid), NULL, (char *)&v, s_dt, NULL, s_ptr); \
             EXPECT_EQ(m, v)
 #define ONE_TEST_THROW(tid, v) \
-            EXPECT_THROW(dtype_assign(dtype(tid), NULL, (char *)&v, s_dt, NULL, s_ptr), runtime_error);
-//            EXPECT_THROW(dtype_assign(dtype(tid), (char *)&v, s_dt, s_ptr, assign_error_overflow), runtime_error);
-//            EXPECT_THROW(dtype_assign(dtype(tid), (char *)&v, s_dt, s_ptr, assign_error_fractional), runtime_error);
-//            EXPECT_THROW(dtype_assign(dtype(tid), (char *)&v, s_dt, s_ptr, assign_error_inexact), runtime_error)
+            EXPECT_THROW(dtype_assign(ndt::type(tid), NULL, (char *)&v, s_dt, NULL, s_ptr), runtime_error);
+//            EXPECT_THROW(dtype_assign(ndt::type(tid), (char *)&v, s_dt, s_ptr, assign_error_overflow), runtime_error);
+//            EXPECT_THROW(dtype_assign(ndt::type(tid), (char *)&v, s_dt, s_ptr, assign_error_fractional), runtime_error);
+//            EXPECT_THROW(dtype_assign(ndt::type(tid), (char *)&v, s_dt, s_ptr, assign_error_inexact), runtime_error)
     ONE_TEST_THROW(bool_type_id, v_b);
     ONE_TEST(int8_type_id, v_i8, 2);
     ONE_TEST(int16_type_id, v_i16, 2);
@@ -595,13 +595,13 @@ TEST(DTypeAssign, FixedSizeTests_Complex_Float64) {
     // Test the value -1.0
     v_ref = -1.;
 #define ONE_TEST(tid, v, m) \
-            dtype_assign(dtype(tid), NULL, (char *)&v, s_dt, NULL, s_ptr); \
+            dtype_assign(ndt::type(tid), NULL, (char *)&v, s_dt, NULL, s_ptr); \
             EXPECT_EQ(m, v)
 #define ONE_TEST_THROW(tid, v) \
-            EXPECT_THROW(dtype_assign(dtype(tid), NULL, (char *)&v, s_dt, NULL, s_ptr), runtime_error);
-//            EXPECT_THROW(dtype_assign(dtype(tid), (char *)&v, s_dt, s_ptr, assign_error_overflow), runtime_error);
-//            EXPECT_THROW(dtype_assign(dtype(tid), (char *)&v, s_dt, s_ptr, assign_error_fractional), runtime_error);
-//            EXPECT_THROW(dtype_assign(dtype(tid), (char *)&v, s_dt, s_ptr, assign_error_inexact), runtime_error)
+            EXPECT_THROW(dtype_assign(ndt::type(tid), NULL, (char *)&v, s_dt, NULL, s_ptr), runtime_error);
+//            EXPECT_THROW(dtype_assign(ndt::type(tid), (char *)&v, s_dt, s_ptr, assign_error_overflow), runtime_error);
+//            EXPECT_THROW(dtype_assign(ndt::type(tid), (char *)&v, s_dt, s_ptr, assign_error_fractional), runtime_error);
+//            EXPECT_THROW(dtype_assign(ndt::type(tid), (char *)&v, s_dt, s_ptr, assign_error_inexact), runtime_error)
     ONE_TEST_THROW(bool_type_id, v_b);
     ONE_TEST(int8_type_id, v_i8, -1);
     ONE_TEST(int16_type_id, v_i16, -1);
@@ -621,13 +621,13 @@ TEST(DTypeAssign, FixedSizeTests_Complex_Float64) {
     // Test a real value stored in complex
     v_ref = -10.25;
 #define ONE_TEST(tid, v, m) \
-            dtype_assign(dtype(tid), NULL, (char *)&v, s_dt, NULL, s_ptr); \
+            dtype_assign(ndt::type(tid), NULL, (char *)&v, s_dt, NULL, s_ptr); \
             EXPECT_EQ(m, v)
 #define ONE_TEST_THROW(tid, v) \
-            EXPECT_THROW(dtype_assign(dtype(tid), NULL, (char *)&v, s_dt, NULL, s_ptr), runtime_error);
-//            EXPECT_THROW(dtype_assign(dtype(tid), (char *)&v, s_dt, s_ptr, assign_error_overflow), runtime_error);
-//            EXPECT_THROW(dtype_assign(dtype(tid), (char *)&v, s_dt, s_ptr, assign_error_fractional), runtime_error);
-//            EXPECT_THROW(dtype_assign(dtype(tid), (char *)&v, s_dt, s_ptr, assign_error_inexact), runtime_error)
+            EXPECT_THROW(dtype_assign(ndt::type(tid), NULL, (char *)&v, s_dt, NULL, s_ptr), runtime_error);
+//            EXPECT_THROW(dtype_assign(ndt::type(tid), (char *)&v, s_dt, s_ptr, assign_error_overflow), runtime_error);
+//            EXPECT_THROW(dtype_assign(ndt::type(tid), (char *)&v, s_dt, s_ptr, assign_error_fractional), runtime_error);
+//            EXPECT_THROW(dtype_assign(ndt::type(tid), (char *)&v, s_dt, s_ptr, assign_error_inexact), runtime_error)
     ONE_TEST_THROW(bool_type_id, v_b);
     ONE_TEST_THROW(int8_type_id, v_i8);
     ONE_TEST_THROW(int16_type_id, v_i16);
@@ -647,13 +647,13 @@ TEST(DTypeAssign, FixedSizeTests_Complex_Float64) {
     // Test a large integer value stored in complex
     v_ref = 1e21;
 #define ONE_TEST(tid, v, m) \
-            dtype_assign(dtype(tid), NULL, (char *)&v, s_dt, NULL, s_ptr); \
+            dtype_assign(ndt::type(tid), NULL, (char *)&v, s_dt, NULL, s_ptr); \
             EXPECT_EQ(m, v)
 #define ONE_TEST_THROW(tid, v) \
-            EXPECT_THROW(dtype_assign(dtype(tid), NULL, (char *)&v, s_dt, NULL, s_ptr), runtime_error);
-//            EXPECT_THROW(dtype_assign(dtype(tid), (char *)&v, s_dt, s_ptr, assign_error_overflow), runtime_error);
-//            EXPECT_THROW(dtype_assign(dtype(tid), (char *)&v, s_dt, s_ptr, assign_error_fractional), runtime_error);
-//            EXPECT_THROW(dtype_assign(dtype(tid), (char *)&v, s_dt, s_ptr, assign_error_inexact), runtime_error)
+            EXPECT_THROW(dtype_assign(ndt::type(tid), NULL, (char *)&v, s_dt, NULL, s_ptr), runtime_error);
+//            EXPECT_THROW(dtype_assign(ndt::type(tid), (char *)&v, s_dt, s_ptr, assign_error_overflow), runtime_error);
+//            EXPECT_THROW(dtype_assign(ndt::type(tid), (char *)&v, s_dt, s_ptr, assign_error_fractional), runtime_error);
+//            EXPECT_THROW(dtype_assign(ndt::type(tid), (char *)&v, s_dt, s_ptr, assign_error_inexact), runtime_error)
     ONE_TEST_THROW(bool_type_id, v_b);
     ONE_TEST_THROW(int8_type_id, v_i8);
     ONE_TEST_THROW(int16_type_id, v_i16);
@@ -673,13 +673,13 @@ TEST(DTypeAssign, FixedSizeTests_Complex_Float64) {
     // Test a complex value with imaginary component
     v_ref = complex<double>(-10.25, 0.125);
 #define ONE_TEST(tid, v, m) \
-            dtype_assign(dtype(tid), NULL, (char *)&v, s_dt, NULL, s_ptr); \
+            dtype_assign(ndt::type(tid), NULL, (char *)&v, s_dt, NULL, s_ptr); \
             EXPECT_EQ(m, v)
 #define ONE_TEST_THROW(tid, v) \
-            EXPECT_THROW(dtype_assign(dtype(tid), NULL, (char *)&v, s_dt, NULL, s_ptr), runtime_error);
-//            EXPECT_THROW(dtype_assign(dtype(tid), (char *)&v, s_dt, s_ptr, assign_error_overflow), runtime_error);
-//            EXPECT_THROW(dtype_assign(dtype(tid), (char *)&v, s_dt, s_ptr, assign_error_fractional), runtime_error);
-//            EXPECT_THROW(dtype_assign(dtype(tid), (char *)&v, s_dt, s_ptr, assign_error_inexact), runtime_error)
+            EXPECT_THROW(dtype_assign(ndt::type(tid), NULL, (char *)&v, s_dt, NULL, s_ptr), runtime_error);
+//            EXPECT_THROW(dtype_assign(ndt::type(tid), (char *)&v, s_dt, s_ptr, assign_error_overflow), runtime_error);
+//            EXPECT_THROW(dtype_assign(ndt::type(tid), (char *)&v, s_dt, s_ptr, assign_error_fractional), runtime_error);
+//            EXPECT_THROW(dtype_assign(ndt::type(tid), (char *)&v, s_dt, s_ptr, assign_error_inexact), runtime_error)
     ONE_TEST_THROW(bool_type_id, v_b);
     ONE_TEST_THROW(int8_type_id, v_i8);
     ONE_TEST_THROW(int16_type_id, v_i16);
@@ -700,38 +700,38 @@ TEST(DTypeAssign, FixedSizeTests_Complex_Float64) {
     // when using the assign_error_inexact mode
     v_cf64 = 1 / 3.0;
     v_f32 = 0.f;
-    EXPECT_THROW(dtype_assign(dtype(float32_type_id), NULL, (char *)&v_f32, dtype(complex_float64_type_id), NULL, (char *)&v_cf64, assign_error_inexact),
+    EXPECT_THROW(dtype_assign(ndt::type(float32_type_id), NULL, (char *)&v_f32, ndt::type(complex_float64_type_id), NULL, (char *)&v_cf64, assign_error_inexact),
                                                                                 runtime_error);
     v_cf32 = 0.f;
-    EXPECT_THROW(dtype_assign(dtype(complex_float32_type_id), NULL, (char *)&v_cf32, dtype(complex_float64_type_id), NULL, (char *)&v_cf64, assign_error_inexact),
+    EXPECT_THROW(dtype_assign(ndt::type(complex_float32_type_id), NULL, (char *)&v_cf32, ndt::type(complex_float64_type_id), NULL, (char *)&v_cf64, assign_error_inexact),
                                                                                 runtime_error);
-    dtype_assign(dtype(float32_type_id), NULL, (char *)&v_f32, dtype(complex_float64_type_id), NULL, (char *)&v_cf64, assign_error_fractional);
+    dtype_assign(ndt::type(float32_type_id), NULL, (char *)&v_f32, ndt::type(complex_float64_type_id), NULL, (char *)&v_cf64, assign_error_fractional);
     EXPECT_EQ((float)v_cf64.real(), v_f32);
-    dtype_assign(dtype(complex_float32_type_id), NULL, (char *)&v_cf32, dtype(complex_float64_type_id), NULL, (char *)&v_cf64, assign_error_fractional);
+    dtype_assign(ndt::type(complex_float32_type_id), NULL, (char *)&v_cf32, ndt::type(complex_float64_type_id), NULL, (char *)&v_cf64, assign_error_fractional);
     EXPECT_EQ(complex<float>((float)v_cf64.real()), v_cf32);
 
     // Since this is a float -> double conversion, it should be exact coming back to float
     v_cf64 = 1 / 3.0f;
-    dtype_assign(dtype(float32_type_id), NULL, (char *)&v_f32, dtype(complex_float64_type_id), NULL, (char *)&v_cf64, assign_error_inexact);
+    dtype_assign(ndt::type(float32_type_id), NULL, (char *)&v_f32, ndt::type(complex_float64_type_id), NULL, (char *)&v_cf64, assign_error_inexact);
     EXPECT_EQ(v_cf64, complex<double>(v_f32));
-    dtype_assign(dtype(complex_float32_type_id), NULL, (char *)&v_cf32, dtype(complex_float64_type_id), NULL, (char *)&v_cf64, assign_error_inexact);
+    dtype_assign(ndt::type(complex_float32_type_id), NULL, (char *)&v_cf32, ndt::type(complex_float64_type_id), NULL, (char *)&v_cf64, assign_error_inexact);
     EXPECT_EQ(v_cf64, complex<double>(v_cf32));
 
     // This should overflow converting to float
     v_cf64 = -1.5e250;
-    EXPECT_THROW(dtype_assign(dtype(float32_type_id), NULL, (char *)&v_f32, dtype(complex_float64_type_id), NULL, (char *)&v_cf64, assign_error_inexact),
+    EXPECT_THROW(dtype_assign(ndt::type(float32_type_id), NULL, (char *)&v_f32, ndt::type(complex_float64_type_id), NULL, (char *)&v_cf64, assign_error_inexact),
                                                                                 runtime_error);
-    EXPECT_THROW(dtype_assign(dtype(float32_type_id), NULL, (char *)&v_f32, dtype(complex_float64_type_id), NULL, (char *)&v_cf64, assign_error_fractional),
+    EXPECT_THROW(dtype_assign(ndt::type(float32_type_id), NULL, (char *)&v_f32, ndt::type(complex_float64_type_id), NULL, (char *)&v_cf64, assign_error_fractional),
                                                                                 runtime_error);
-    EXPECT_THROW(dtype_assign(dtype(float32_type_id), NULL, (char *)&v_f32, dtype(complex_float64_type_id), NULL, (char *)&v_cf64, assign_error_overflow),
+    EXPECT_THROW(dtype_assign(ndt::type(float32_type_id), NULL, (char *)&v_f32, ndt::type(complex_float64_type_id), NULL, (char *)&v_cf64, assign_error_overflow),
                                                                                 runtime_error);
-    EXPECT_THROW(dtype_assign(dtype(complex_float32_type_id), NULL, (char *)&v_cf32, dtype(complex_float64_type_id), NULL, (char *)&v_cf64, assign_error_inexact),
+    EXPECT_THROW(dtype_assign(ndt::type(complex_float32_type_id), NULL, (char *)&v_cf32, ndt::type(complex_float64_type_id), NULL, (char *)&v_cf64, assign_error_inexact),
                                                                                 runtime_error);
-    EXPECT_THROW(dtype_assign(dtype(complex_float32_type_id), NULL, (char *)&v_cf32, dtype(complex_float64_type_id), NULL, (char *)&v_cf64, assign_error_fractional),
+    EXPECT_THROW(dtype_assign(ndt::type(complex_float32_type_id), NULL, (char *)&v_cf32, ndt::type(complex_float64_type_id), NULL, (char *)&v_cf64, assign_error_fractional),
                                                                                 runtime_error);
-    EXPECT_THROW(dtype_assign(dtype(complex_float32_type_id), NULL, (char *)&v_cf32, dtype(complex_float64_type_id), NULL, (char *)&v_cf64, assign_error_overflow),
+    EXPECT_THROW(dtype_assign(ndt::type(complex_float32_type_id), NULL, (char *)&v_cf32, ndt::type(complex_float64_type_id), NULL, (char *)&v_cf64, assign_error_overflow),
                                                                                 runtime_error);
-    dtype_assign(dtype(float32_type_id), NULL, (char *)&v_f32, dtype(complex_float64_type_id), NULL, (char *)&v_cf64, assign_error_none);
+    dtype_assign(ndt::type(float32_type_id), NULL, (char *)&v_f32, ndt::type(complex_float64_type_id), NULL, (char *)&v_cf64, assign_error_none);
 #ifdef _WIN32
     EXPECT_TRUE(_fpclass(v_f32) == _FPCLASS_NINF);
 #else

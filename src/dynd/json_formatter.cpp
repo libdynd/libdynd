@@ -62,15 +62,15 @@ struct output_data {
     }
 };
 
-static void format_json(output_data& out, const dtype& dt, const char *metadata, const char *data);
+static void format_json(output_data& out, const ndt::type& dt, const char *metadata, const char *data);
 
-static void format_json_bool(output_data& out, const dtype& dt, const char *metadata, const char *data)
+static void format_json_bool(output_data& out, const ndt::type& dt, const char *metadata, const char *data)
 {
     dynd_bool value = false;
     if (dt.get_type_id() == bool_type_id) {
         value = (*data != 0);
     } else {
-        dtype_assign(make_dtype<dynd_bool>(), NULL, reinterpret_cast<char *>(&value), dt, metadata, data);
+        dtype_assign(ndt::make_dtype<dynd_bool>(), NULL, reinterpret_cast<char *>(&value), dt, metadata, data);
     }
     if (value) {
         out.write("true");
@@ -79,7 +79,7 @@ static void format_json_bool(output_data& out, const dtype& dt, const char *meta
     }
 }
 
-static void format_json_number(output_data& out, const dtype& dt, const char *metadata, const char *data)
+static void format_json_number(output_data& out, const ndt::type& dt, const char *metadata, const char *data)
 {
     stringstream ss;
     dt.print_data(ss, metadata, data);
@@ -160,7 +160,7 @@ static void format_json_encoded_string(output_data& out, const char *begin, cons
     out.write('\"');
 }
 
-static void format_json_string(output_data& out, const dtype& dt, const char *metadata, const char *data)
+static void format_json_string(output_data& out, const ndt::type& dt, const char *metadata, const char *data)
 {
     if (dt.get_type_id() == json_type_id) {
         // Copy the JSON data directly
@@ -175,7 +175,7 @@ static void format_json_string(output_data& out, const dtype& dt, const char *me
     }
 }
 
-static void format_json_datetime(output_data& out, const dtype& dt, const char *metadata, const char *data)
+static void format_json_datetime(output_data& out, const ndt::type& dt, const char *metadata, const char *data)
 {
     switch (dt.get_type_id()) {
         case date_type_id: {
@@ -193,12 +193,12 @@ static void format_json_datetime(output_data& out, const dtype& dt, const char *
     }
 }
 
-static void format_json_struct(output_data& out, const dtype& dt, const char *metadata, const char *data)
+static void format_json_struct(output_data& out, const ndt::type& dt, const char *metadata, const char *data)
 {
     const base_struct_dtype *bsd = static_cast<const base_struct_dtype *>(dt.extended());
     size_t field_count = bsd->get_field_count();
     const string *field_names = bsd->get_field_names();
-    const dtype *field_types = bsd->get_field_types();
+    const ndt::type *field_types = bsd->get_field_types();
     const size_t *data_offsets = bsd->get_data_offsets(metadata);
     const size_t *metadata_offsets = bsd->get_metadata_offsets();
 
@@ -215,14 +215,14 @@ static void format_json_struct(output_data& out, const dtype& dt, const char *me
     out.write('}');
 }
 
-static void format_json_uniform_dim(output_data& out, const dtype& dt, const char *metadata, const char *data)
+static void format_json_uniform_dim(output_data& out, const ndt::type& dt, const char *metadata, const char *data)
 {
     out.write('[');
     switch (dt.get_type_id()) {
         case strided_dim_type_id: {
             const strided_dim_dtype *sad = static_cast<const strided_dim_dtype *>(dt.extended());
             const strided_dim_dtype_metadata *md = reinterpret_cast<const strided_dim_dtype_metadata *>(metadata);
-            dtype element_dtype = sad->get_element_dtype();
+            ndt::type element_dtype = sad->get_element_type();
             intptr_t size = md->size, stride = md->stride;
             metadata += sizeof(strided_dim_dtype_metadata);
             for (intptr_t i = 0; i < size; ++i) {
@@ -235,7 +235,7 @@ static void format_json_uniform_dim(output_data& out, const dtype& dt, const cha
         }
         case fixed_dim_type_id: {
             const fixed_dim_dtype *fad = static_cast<const fixed_dim_dtype *>(dt.extended());
-            dtype element_dtype = fad->get_element_dtype();
+            ndt::type element_dtype = fad->get_element_type();
             intptr_t size = (intptr_t)fad->get_fixed_dim_size(), stride = fad->get_fixed_stride();
             for (intptr_t i = 0; i < size; ++i) {
                 ::format_json(out, element_dtype, metadata, data + i * stride);
@@ -249,7 +249,7 @@ static void format_json_uniform_dim(output_data& out, const dtype& dt, const cha
             const var_dim_dtype *vad = static_cast<const var_dim_dtype *>(dt.extended());
             const var_dim_dtype_metadata *md = reinterpret_cast<const var_dim_dtype_metadata *>(metadata);
             const var_dim_dtype_data *d = reinterpret_cast<const var_dim_dtype_data *>(data);
-            dtype element_dtype = vad->get_element_dtype();
+            ndt::type element_dtype = vad->get_element_type();
             intptr_t size = d->size, stride = md->stride;
             const char *begin = d->begin + md->offset;
             metadata += sizeof(var_dim_dtype_metadata);
@@ -270,7 +270,7 @@ static void format_json_uniform_dim(output_data& out, const dtype& dt, const cha
     out.write(']');
 }
 
-static void format_json(output_data& out, const dtype& dt, const char *metadata, const char *data)
+static void format_json(output_data& out, const ndt::type& dt, const char *metadata, const char *data)
 {
     switch (dt.get_kind()) {
         case bool_kind:

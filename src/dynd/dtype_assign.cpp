@@ -48,7 +48,7 @@ std::ostream& dynd::operator<<(ostream& o, assign_error_mode errmode)
 // of the source dtype, false otherwise. This is used, for example,
 // to skip any overflow checks when doing value assignments between differing
 // types.
-bool dynd::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt)
+bool dynd::is_lossless_assignment(const ndt::type& dst_dt, const ndt::type& src_dt)
 {
     if (dst_dt.is_builtin() && src_dt.is_builtin()) {
         switch (src_dt.get_kind()) {
@@ -166,7 +166,7 @@ bool dynd::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt)
     }
 }
 
-void dynd::dtype_copy(const dtype& dt,
+void dynd::dtype_copy(const ndt::type& dt,
                 const char *dst_metadata, char *dst_data,
                 const char *src_metadata, const char *src_data)
 {
@@ -183,8 +183,8 @@ void dynd::dtype_copy(const dtype& dt,
     }
 }
 
-void dynd::dtype_assign(const dtype& dst_dt, const char *dst_metadata, char *dst_data,
-                const dtype& src_dt, const char *src_metadata, const char *src_data,
+void dynd::dtype_assign(const ndt::type& dst_dt, const char *dst_metadata, char *dst_data,
+                const ndt::type& src_dt, const char *src_metadata, const char *src_data,
                 assign_error_mode errmode, const eval::eval_context *ectx)
 {
     DYND_ASSERT_ALIGNED(dst, 0, dst_dt.get_data_alignment(), "dst dtype: " << dst_dt << ", src dtype: " << src_dt);

@@ -9,7 +9,7 @@
 #include <iostream>
 #include <string>
 
-#include <dynd/dtype.hpp>
+#include <dynd/type.hpp>
 #include <dynd/memblock/memory_block.hpp>
 
 namespace dynd {
@@ -32,17 +32,17 @@ struct array_preamble {
     memory_block_data *m_data_reference;
 
     /** Returns true if the dtype is builtin */
-    inline bool is_builtin_dtype() const {
+    inline bool is_builtin_type() const {
         return (reinterpret_cast<uintptr_t>(m_dtype)&(~builtin_type_id_mask)) == 0;
     }
 
-    /** Should only be called if is_builtin_dtype() returns true */
+    /** Should only be called if is_builtin_type() returns true */
     inline type_id_t get_builtin_type_id() const {
         return static_cast<type_id_t>(reinterpret_cast<uintptr_t>(m_dtype));
     }
 
     inline type_id_t get_type_id() const {
-        if (is_builtin_dtype()) {
+        if (is_builtin_type()) {
             return get_builtin_type_id();
         } else {
             return m_dtype->get_type_id();
@@ -70,7 +70,7 @@ memory_block_ptr make_array_memory_block(size_t metadata_size, size_t extra_size
  * Creates an ndobject memory block, and default-constructs it for the dtype
  * and specified shape.
  */
-memory_block_ptr make_array_memory_block(const dtype& dt, size_t ndim, const intptr_t *shape);
+memory_block_ptr make_array_memory_block(const ndt::type& dt, size_t ndim, const intptr_t *shape);
 
 /**
  * Makes a shallow copy of the ndobject memory block. In the copy, only the

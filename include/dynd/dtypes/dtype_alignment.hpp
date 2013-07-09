@@ -5,28 +5,28 @@
 // The realign dtype applies a more
 // stringent alignment to a bytes dtype.
 //
-#ifndef _DYND__REALIGN_DTYPE_HPP_
-#define _DYND__REALIGN_DTYPE_HPP_
+#ifndef _DYND__REALIGN_TYPE_HPP_
+#define _DYND__REALIGN_TYPE_HPP_
 
-#include <dynd/dtype.hpp>
+#include <dynd/type.hpp>
 
-namespace dynd {
+namespace dynd { namespace ndt {
 
 /**
- * Uses an appropriate view<..., bytes<>> dtype
- * to put the dtype on top of unaligned storage.
+ * Uses an appropriate view<..., bytes<>> type
+ * to put the type on top of unaligned storage.
  */
-dtype make_unaligned_dtype(const dtype& value_dtype);
+ndt::type make_unaligned_dtype(const ndt::type& value_type);
 
 /**
- * Reduces a dtype's alignment requirements to 1.
+ * Reduces a type's alignment requirements to 1.
  */
 template<typename T>
-dtype make_unaligned_dtype()
+ndt::type make_unaligned_dtype()
 {
-    return make_unaligned_dtype(make_dtype<T>());
+    return make_unaligned_dtype(ndt::make_dtype<T>());
 }
 
-} // namespace dynd
+}} // namespace dynd::ndt
 
-#endif // _DYND__REALIGN_DTYPE_HPP_
+#endif // _DYND__REALIGN_TYPE_HPP_

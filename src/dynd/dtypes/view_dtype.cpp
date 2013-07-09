@@ -11,19 +11,19 @@
 using namespace std;
 using namespace dynd;
 
-view_dtype::view_dtype(const dtype& value_dtype, const dtype& operand_dtype)
-    : base_expression_dtype(view_type_id, expression_kind, operand_dtype.get_data_size(),
-                    operand_dtype.get_data_alignment(),
-                    inherited_flags(value_dtype.get_flags(), operand_dtype.get_flags()),
-                    operand_dtype.get_metadata_size()),
-            m_value_dtype(value_dtype), m_operand_dtype(operand_dtype)
+view_dtype::view_dtype(const ndt::type& value_type, const ndt::type& operand_type)
+    : base_expression_dtype(view_type_id, expression_kind, operand_type.get_data_size(),
+                    operand_type.get_data_alignment(),
+                    inherited_flags(value_type.get_flags(), operand_type.get_flags()),
+                    operand_type.get_metadata_size()),
+            m_value_type(value_type), m_operand_type(operand_type)
 {
-    if (value_dtype.get_data_size() != operand_dtype.value_dtype().get_data_size()) {
+    if (value_type.get_data_size() != operand_type.value_type().get_data_size()) {
         std::stringstream ss;
-        ss << "view_dtype: Cannot view " << operand_dtype.value_dtype() << " as " << value_dtype << " because they have different sizes";
+        ss << "view_dtype: Cannot view " << operand_type.value_type() << " as " << value_type << " because they have different sizes";
         throw std::runtime_error(ss.str());
     }
-    if (!value_dtype.is_pod()) {
+    if (!value_type.is_pod()) {
         throw std::runtime_error("view_dtype: Only POD dtypes are supported");
     }
 }
@@ -36,36 +36,36 @@ void view_dtype::print_data(std::ostream& o, const char *metadata, const char *d
 {
     // Allow calling print_data in the special case that the view
     // is being used just to align the data
-    if (m_operand_dtype.get_type_id() == fixedbytes_type_id) {
-        switch (m_operand_dtype.get_data_size()) {
+    if (m_operand_type.get_type_id() == fixedbytes_type_id) {
+        switch (m_operand_type.get_data_size()) {
             case 1:
-                m_value_dtype.print_data(o, metadata, data);
+                m_value_type.print_data(o, metadata, data);
                 return;
             case 2: {
                 uint16_t tmp;
                 memcpy(&tmp, data, sizeof(tmp));
-                m_value_dtype.print_data(o, metadata, reinterpret_cast<const char *>(&tmp));
+                m_value_type.print_data(o, metadata, reinterpret_cast<const char *>(&tmp));
                 return;
             }
             case 4: {
                 uint32_t tmp;
                 memcpy(&tmp, data, sizeof(tmp));
-                m_value_dtype.print_data(o, metadata, reinterpret_cast<const char *>(&tmp));
+                m_value_type.print_data(o, metadata, reinterpret_cast<const char *>(&tmp));
                 return;
             }
             case 8: {
                 uint64_t tmp;
                 memcpy(&tmp, data, sizeof(tmp));
-                m_value_dtype.print_data(o, metadata, reinterpret_cast<const char *>(&tmp));
+                m_value_type.print_data(o, metadata, reinterpret_cast<const char *>(&tmp));
                 return;
             }
             default: {
-                vector<char> storage(m_value_dtype.get_data_size() + m_value_dtype.get_data_alignment());
+                vector<char> storage(m_value_type.get_data_size() + m_value_type.get_data_alignment());
                 char *buffer = &storage[0];
                 // Make the storage aligned as needed
-                buffer = (char *)(((uintptr_t)buffer + (uintptr_t)m_value_dtype.get_data_alignment() - 1) & (m_value_dtype.get_data_alignment() - 1));
-                memcpy(buffer, data, m_value_dtype.get_data_size());
-                m_value_dtype.print_data(o, metadata, reinterpret_cast<const char *>(&buffer));
+                buffer = (char *)(((uintptr_t)buffer + (uintptr_t)m_value_type.get_data_alignment() - 1) & (m_value_type.get_data_alignment() - 1));
+                memcpy(buffer, data, m_value_type.get_data_size());
+                m_value_type.print_data(o, metadata, reinterpret_cast<const char *>(&buffer));
                 return;
             }
         }
@@ -77,33 +77,33 @@ void view_dtype::print_data(std::ostream& o, const char *metadata, const char *d
 void view_dtype::print_dtype(std::ostream& o) const
 {
     // Special case printing of alignment to make it more human-readable
-    if (m_value_dtype.get_data_alignment() != 1 && m_operand_dtype.get_type_id() == fixedbytes_type_id &&
-                    m_operand_dtype.get_data_alignment() == 1) {
-        o << "unaligned<" << m_value_dtype << ">";
+    if (m_value_type.get_data_alignment() != 1 && m_operand_type.get_type_id() == fixedbytes_type_id &&
+                    m_operand_type.get_data_alignment() == 1) {
+        o << "unaligned<" << m_value_type << ">";
     } else {
-        o << "view<as=" << m_value_dtype << ", original=" << m_operand_dtype << ">";
+        o << "view<as=" << m_value_type << ", original=" << m_operand_type << ">";
     }
 }
 
 void view_dtype::get_shape(size_t ndim, size_t i,
                 intptr_t *out_shape, const char *DYND_UNUSED(metadata)) const
 {
-    if (!m_value_dtype.is_builtin()) {
-        m_value_dtype.extended()->get_shape(ndim, i, out_shape, NULL);
+    if (!m_value_type.is_builtin()) {
+        m_value_type.extended()->get_shape(ndim, i, out_shape, NULL);
     } else {
         stringstream ss;
-        ss << "requested too many dimensions from type " << m_value_dtype;
+        ss << "requested too many dimensions from type " << m_value_type;
         throw runtime_error(ss.str());
     }
 }
 
-bool view_dtype::is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const
+bool view_dtype::is_lossless_assignment(const ndt::type& dst_dt, const ndt::type& src_dt) const
 {
     // Treat this dtype as the value dtype for whether assignment is always lossless
     if (src_dt.extended() == this) {
-        return ::dynd::is_lossless_assignment(dst_dt, m_value_dtype);
+        return ::dynd::is_lossless_assignment(dst_dt, m_value_type);
     } else {
-        return ::dynd::is_lossless_assignment(m_value_dtype, src_dt);
+        return ::dynd::is_lossless_assignment(m_value_type, src_dt);
     }
 }
 
@@ -115,23 +115,23 @@ bool view_dtype::operator==(const base_dtype& rhs) const
         return false;
     } else {
         const view_dtype *dt = static_cast<const view_dtype*>(&rhs);
-        return m_value_dtype == dt->m_value_dtype;
+        return m_value_type == dt->m_value_type;
     }
 }
 
-dtype view_dtype::with_replaced_storage_dtype(const dtype& replacement_dtype) const
+ndt::type view_dtype::with_replaced_storage_type(const ndt::type& replacement_type) const
 {
-    if (m_operand_dtype.get_kind() == expression_kind) {
-        return dtype(new view_dtype(m_value_dtype,
-                        static_cast<const base_expression_dtype *>(m_operand_dtype.extended())->with_replaced_storage_dtype(replacement_dtype)), false);
+    if (m_operand_type.get_kind() == expression_kind) {
+        return ndt::type(new view_dtype(m_value_type,
+                        static_cast<const base_expression_dtype *>(m_operand_type.extended())->with_replaced_storage_type(replacement_type)), false);
     } else {
-        if (m_operand_dtype != replacement_dtype.value_dtype()) {
+        if (m_operand_type != replacement_type.value_type()) {
             std::stringstream ss;
-            ss << "Cannot chain dtypes, because the view's storage dtype, " << m_operand_dtype;
-            ss << ", does not match the replacement's value dtype, " << replacement_dtype.value_dtype();
+            ss << "Cannot chain dtypes, because the view's storage dtype, " << m_operand_type;
+            ss << ", does not match the replacement's value dtype, " << replacement_type.value_type();
             throw std::runtime_error(ss.str());
         }
-        return dtype(new view_dtype(m_value_dtype, replacement_dtype), false);
+        return ndt::type(new view_dtype(m_value_type, replacement_type), false);
     }
 }
 
@@ -141,8 +141,8 @@ size_t view_dtype::make_operand_to_value_assignment_kernel(
                 kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx)) const
 {
     return ::make_pod_dtype_assignment_kernel(out, offset_out,
-                    m_value_dtype.get_data_size(),
-                    std::min(m_value_dtype.get_data_alignment(), m_operand_dtype.get_data_alignment()),
+                    m_value_type.get_data_size(),
+                    std::min(m_value_type.get_data_alignment(), m_operand_type.get_data_alignment()),
                     kernreq);
 }
 
@@ -152,7 +152,7 @@ size_t view_dtype::make_value_to_operand_assignment_kernel(
                 kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx)) const
 {
     return ::make_pod_dtype_assignment_kernel(out, offset_out,
-                    m_value_dtype.get_data_size(),
-                    std::min(m_value_dtype.get_data_alignment(), m_operand_dtype.get_data_alignment()),
+                    m_value_type.get_data_size(),
+                    std::min(m_value_type.get_data_alignment(), m_operand_type.get_data_alignment()),
                     kernreq);
 }

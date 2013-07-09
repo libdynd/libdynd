@@ -71,11 +71,11 @@ namespace {
 
     template<class extra_type>
     class arithmetic_op_kernel_generator : public expr_kernel_generator {
-        dtype m_rdt, m_op1dt, m_op2dt;
+        ndt::type m_rdt, m_op1dt, m_op2dt;
         expr_operation_pair m_op_pair;
         const char *m_name;
     public:
-        arithmetic_op_kernel_generator(const dtype& rdt, const dtype& op1dt, const dtype& op2dt,
+        arithmetic_op_kernel_generator(const ndt::type& rdt, const ndt::type& op1dt, const ndt::type& op2dt,
                         const expr_operation_pair& op_pair, const char *name)
             : expr_kernel_generator(true), m_rdt(rdt), m_op1dt(op1dt), m_op2dt(op2dt),
                             m_op_pair(op_pair), m_name(name)
@@ -87,8 +87,8 @@ namespace {
 
         size_t make_expr_kernel(
                     hierarchical_kernel *out, size_t offset_out,
-                    const dtype& dst_dt, const char *dst_metadata,
-                    size_t src_count, const dtype *src_dt, const char **src_metadata,
+                    const ndt::type& dst_dt, const char *dst_metadata,
+                    size_t src_count, const ndt::type *src_dt, const char **src_metadata,
                     kernel_request_t kernreq, const eval::eval_context *ectx) const
         {
             if (src_count != 2) {
@@ -230,7 +230,7 @@ static int compress_builtin_type_id[builtin_type_id_count] = {
 
 template<class KD>
 nd::array apply_binary_operator(const nd::array *ops,
-                const dtype& rdt, const dtype& op1dt, const dtype& op2dt,
+                const ndt::type& rdt, const ndt::type& op1dt, const ndt::type& op2dt,
                 expr_operation_pair expr_ops,
                 const char *name)
 {
@@ -256,7 +256,7 @@ nd::array apply_binary_operator(const nd::array *ops,
     }
 
     // Assemble the destination value dtype
-    dtype result_vdt = rdt;
+    ndt::type result_vdt = rdt;
     for (size_t j = 0; j != undim; ++j) {
         if (result_shape[undim - j - 1] == -1) {
             result_vdt = make_var_dim_dtype(result_vdt);
@@ -271,7 +271,7 @@ nd::array apply_binary_operator(const nd::array *ops,
     nd::array result = combine_into_struct(2, field_names, ops_as_dt);
     // Because the expr dtype's operand is the result's dtype,
     // we can swap it in as the dtype
-    dtype edt = make_expr_dtype(result_vdt,
+    ndt::type edt = make_expr_dtype(result_vdt,
                     result.get_dtype(),
                     new arithmetic_op_kernel_generator<KD>(rdt, op1dt, op2dt, expr_ops, name));
     edt.swap(result.get_ndo()->m_dtype);
@@ -282,10 +282,10 @@ nd::array nd::operator+(const nd::array& op1, const nd::array& op2)
 {
     nd::array ops[2] = {op1, op2};
     expr_operation_pair func_ptr;
-    dtype op1dt = op1.get_udtype().value_dtype();
-    dtype op2dt = op2.get_udtype().value_dtype();
+    ndt::type op1dt = op1.get_udtype().value_type();
+    ndt::type op2dt = op2.get_udtype().value_type();
     if (op1dt.is_builtin() && op1dt.is_builtin()) {
-        dtype rdt = promote_dtypes_arithmetic(op1dt, op2dt);
+        ndt::type rdt = promote_dtypes_arithmetic(op1dt, op2dt);
         int table_index = compress_builtin_type_id[rdt.get_type_id()];
         if (table_index >= 0) {
             func_ptr = addition_table[table_index];
@@ -294,7 +294,7 @@ nd::array nd::operator+(const nd::array& op1, const nd::array& op2)
         // The signature is (T, T) -> T, so we don't use the original types
         return apply_binary_operator<kernel_data_prefix>(ops, rdt, rdt, rdt, func_ptr, "addition");
     } else if (op1dt.get_kind() == string_kind && op2dt.get_kind() == string_kind) {
-        dtype rdt = make_string_dtype();
+        ndt::type rdt = make_string_dtype();
         func_ptr.single = &kernels::string_concatenation_kernel::single;
         func_ptr.strided = &kernels::string_concatenation_kernel::strided;
         // The signature is (string, string) -> string, so we don't use the original types
@@ -310,10 +310,10 @@ nd::array nd::operator+(const nd::array& op1, const nd::array& op2)
 
 nd::array nd::operator-(const nd::array& op1, const nd::array& op2)
 {
-    dtype rdt;
+    ndt::type rdt;
     expr_operation_pair func_ptr;
-    dtype op1dt = op1.get_udtype().value_dtype();
-    dtype op2dt = op2.get_udtype().value_dtype();
+    ndt::type op1dt = op1.get_udtype().value_type();
+    ndt::type op2dt = op2.get_udtype().value_type();
     if (op1dt.is_builtin() && op1dt.is_builtin()) {
         rdt = promote_dtypes_arithmetic(op1dt, op2dt);
         int table_index = compress_builtin_type_id[rdt.get_type_id()];
@@ -328,10 +328,10 @@ nd::array nd::operator-(const nd::array& op1, const nd::array& op2)
 
 nd::array nd::operator*(const nd::array& op1, const nd::array& op2)
 {
-    dtype rdt;
+    ndt::type rdt;
     expr_operation_pair func_ptr;
-    dtype op1dt = op1.get_udtype().value_dtype();
-    dtype op2dt = op2.get_udtype().value_dtype();
+    ndt::type op1dt = op1.get_udtype().value_type();
+    ndt::type op2dt = op2.get_udtype().value_type();
     if (op1dt.is_builtin() && op1dt.is_builtin()) {
         rdt = promote_dtypes_arithmetic(op1dt, op2dt);
         int table_index = compress_builtin_type_id[rdt.get_type_id()];
@@ -346,10 +346,10 @@ nd::array nd::operator*(const nd::array& op1, const nd::array& op2)
 
 nd::array nd::operator/(const nd::array& op1, const nd::array& op2)
 {
-    dtype rdt;
+    ndt::type rdt;
     expr_operation_pair func_ptr;
-    dtype op1dt = op1.get_udtype().value_dtype();
-    dtype op2dt = op2.get_udtype().value_dtype();
+    ndt::type op1dt = op1.get_udtype().value_type();
+    ndt::type op2dt = op2.get_udtype().value_type();
     if (op1dt.is_builtin() && op1dt.is_builtin()) {
         rdt = promote_dtypes_arithmetic(op1dt, op2dt);
         int table_index = compress_builtin_type_id[rdt.get_type_id()];

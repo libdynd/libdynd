@@ -17,7 +17,7 @@ using namespace std;
 using namespace dynd;
 
 fixedstring_dtype::fixedstring_dtype(intptr_t stringsize, string_encoding_t encoding)
-    : base_string_dtype(fixedstring_type_id, 0, 1, dtype_flag_scalar, 0),
+    : base_string_dtype(fixedstring_type_id, 0, 1, type_flag_scalar, 0),
             m_stringsize(stringsize), m_encoding(encoding)
 {
     switch (encoding) {
@@ -132,14 +132,14 @@ void fixedstring_dtype::print_dtype(std::ostream& o) const
     o << ">";
 }
 
-dtype fixedstring_dtype::get_canonical_dtype() const
+ndt::type fixedstring_dtype::get_canonical_type() const
 {
-    return dtype(this, true);
+    return ndt::type(this, true);
 }
 
 bool fixedstring_dtype::is_lossless_assignment(
-                const dtype& DYND_UNUSED(dst_dt),
-                const dtype& DYND_UNUSED(src_dt)) const
+                const ndt::type& DYND_UNUSED(dst_dt),
+                const ndt::type& DYND_UNUSED(src_dt)) const
 {
     // Don't shortcut anything to 'none' error checking, so that
     // decoding errors get caught appropriately.
@@ -160,8 +160,8 @@ bool fixedstring_dtype::operator==(const base_dtype& rhs) const
 
 size_t fixedstring_dtype::make_assignment_kernel(
                 hierarchical_kernel *out, size_t offset_out,
-                const dtype& dst_dt, const char *dst_metadata,
-                const dtype& src_dt, const char *src_metadata,
+                const ndt::type& dst_dt, const char *dst_metadata,
+                const ndt::type& src_dt, const char *src_metadata,
                 kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *ectx) const
 {
@@ -209,8 +209,8 @@ size_t fixedstring_dtype::make_assignment_kernel(
 
 size_t fixedstring_dtype::make_comparison_kernel(
                 hierarchical_kernel *out, size_t offset_out,
-                const dtype& src0_dt, const char *src0_metadata,
-                const dtype& src1_dt, const char *src1_metadata,
+                const ndt::type& src0_dt, const char *src0_metadata,
+                const ndt::type& src1_dt, const char *src1_metadata,
                 comparison_type_t comptype,
                 const eval::eval_context *ectx) const
 {

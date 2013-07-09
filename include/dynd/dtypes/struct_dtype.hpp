@@ -3,20 +3,20 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__STRUCT_DTYPE_HPP_
-#define _DYND__STRUCT_DTYPE_HPP_
+#ifndef _DYND__STRUCT_TYPE_HPP_
+#define _DYND__STRUCT_TYPE_HPP_
 
 #include <vector>
 #include <string>
 
-#include <dynd/dtype.hpp>
+#include <dynd/type.hpp>
 #include <dynd/dtypes/base_struct_dtype.hpp>
 #include <dynd/memblock/memory_block.hpp>
 
 namespace dynd {
 
 class struct_dtype : public base_struct_dtype {
-    std::vector<dtype> m_field_types;
+    std::vector<ndt::type> m_field_types;
     std::vector<std::string> m_field_names;
     std::vector<size_t> m_metadata_offsets;
     std::vector<std::pair<std::string, gfunc::callable> > m_array_properties;
@@ -24,15 +24,15 @@ class struct_dtype : public base_struct_dtype {
     void create_array_properties();
 
     // Used as the parameters dtype for the nd::array properties callables
-    static dtype array_parameters_dtype;
+    static ndt::type array_parameters_dtype;
 public:
-    struct_dtype(const std::vector<dtype>& fields, const std::vector<std::string>& field_names);
+    struct_dtype(const std::vector<ndt::type>& fields, const std::vector<std::string>& field_names);
 
     virtual ~struct_dtype();
 
     size_t get_default_data_size(size_t ndim, const intptr_t *shape) const;
 
-    const dtype *get_field_types() const {
+    const ndt::type *get_field_types() const {
         return &m_field_types[0];
     }
 
@@ -64,20 +64,20 @@ public:
 
     bool is_expression() const;
     bool is_unique_data_owner(const char *metadata) const;
-    void transform_child_dtypes(dtype_transform_fn_t transform_fn, void *extra,
-                    dtype& out_transformed_dtype, bool& out_was_transformed) const;
-    dtype get_canonical_dtype() const;
+    void transform_child_types(type_transform_fn_t transform_fn, void *extra,
+                    ndt::type& out_transformed_dtype, bool& out_was_transformed) const;
+    ndt::type get_canonical_type() const;
 
-    dtype apply_linear_index(size_t nindices, const irange *indices,
-                size_t current_i, const dtype& root_dt, bool leading_dimension) const;
+    ndt::type apply_linear_index(size_t nindices, const irange *indices,
+                size_t current_i, const ndt::type& root_dt, bool leading_dimension) const;
     intptr_t apply_linear_index(size_t nindices, const irange *indices, const char *metadata,
-                    const dtype& result_dtype, char *out_metadata,
+                    const ndt::type& result_dtype, char *out_metadata,
                     memory_block_data *embedded_reference,
-                    size_t current_i, const dtype& root_dt,
+                    size_t current_i, const ndt::type& root_dt,
                     bool leading_dimension, char **inout_data,
                     memory_block_data **inout_dataref) const;
 
-    bool is_lossless_assignment(const dtype& dst_dt, const dtype& src_dt) const;
+    bool is_lossless_assignment(const ndt::type& dst_dt, const ndt::type& src_dt) const;
 
     bool operator==(const base_dtype& rhs) const;
 
@@ -91,15 +91,15 @@ public:
 
     size_t make_assignment_kernel(
                     hierarchical_kernel *out, size_t offset_out,
-                    const dtype& dst_dt, const char *dst_metadata,
-                    const dtype& src_dt, const char *src_metadata,
+                    const ndt::type& dst_dt, const char *dst_metadata,
+                    const ndt::type& src_dt, const char *src_metadata,
                     kernel_request_t kernreq, assign_error_mode errmode,
                     const eval::eval_context *ectx) const;
 
     size_t make_comparison_kernel(
                     hierarchical_kernel *out, size_t offset_out,
-                    const dtype& src0_dt, const char *src0_metadata,
-                    const dtype& src1_dt, const char *src1_metadata,
+                    const ndt::type& src0_dt, const char *src0_metadata,
+                    const ndt::type& src1_dt, const char *src1_metadata,
                     comparison_type_t comptype,
                     const eval::eval_context *ectx) const;
 
@@ -110,14 +110,14 @@ public:
 }; // class struct_dtype
 
 /** Makes a tuple dtype with the specified fields, using the standard layout */
-inline dtype make_struct_dtype(const std::vector<dtype>& fields, const std::vector<std::string>& field_names) {
-    return dtype(new struct_dtype(fields, field_names), false);
+inline ndt::type make_struct_dtype(const std::vector<ndt::type>& fields, const std::vector<std::string>& field_names) {
+    return ndt::type(new struct_dtype(fields, field_names), false);
 }
 
 /** Makes a tuple dtype with the specified fields, using the standard layout */
-inline dtype make_struct_dtype(const dtype& dt0, const std::string& name0)
+inline ndt::type make_struct_dtype(const ndt::type& dt0, const std::string& name0)
 {
-    std::vector<dtype> fields;
+    std::vector<ndt::type> fields;
     std::vector<std::string> field_names;
     fields.push_back(dt0);
     field_names.push_back(name0);
@@ -125,9 +125,9 @@ inline dtype make_struct_dtype(const dtype& dt0, const std::string& name0)
 }
 
 /** Makes a tuple dtype with the specified fields, using the standard layout */
-inline dtype make_struct_dtype(const dtype& dt0, const std::string& name0, const dtype& dt1, const std::string& name1)
+inline ndt::type make_struct_dtype(const ndt::type& dt0, const std::string& name0, const ndt::type& dt1, const std::string& name1)
 {
-    std::vector<dtype> fields;
+    std::vector<ndt::type> fields;
     std::vector<std::string> field_names;
     fields.push_back(dt0);
     fields.push_back(dt1);
@@ -137,9 +137,9 @@ inline dtype make_struct_dtype(const dtype& dt0, const std::string& name0, const
 }
 
 /** Makes a tuple dtype with the specified fields, using the standard layout */
-inline dtype make_struct_dtype(const dtype& dt0, const std::string& name0, const dtype& dt1, const std::string& name1, const dtype& dt2, const std::string& name2)
+inline ndt::type make_struct_dtype(const ndt::type& dt0, const std::string& name0, const ndt::type& dt1, const std::string& name1, const ndt::type& dt2, const std::string& name2)
 {
-    std::vector<dtype> fields;
+    std::vector<ndt::type> fields;
     std::vector<std::string> field_names;
     fields.push_back(dt0);
     fields.push_back(dt1);
@@ -152,4 +152,4 @@ inline dtype make_struct_dtype(const dtype& dt0, const std::string& name0, const
 
 } // namespace dynd
 
-#endif // _DYND__STRUCT_DTYPE_HPP_
+#endif // _DYND__STRUCT_TYPE_HPP_

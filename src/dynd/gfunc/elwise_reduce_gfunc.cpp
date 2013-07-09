@@ -14,10 +14,10 @@ using namespace std;
 using namespace dynd;
 
 const dynd::gfunc::elwise_reduce_kernel *
-dynd::gfunc::elwise_reduce::find_matching_kernel(const std::vector<dtype>& paramtypes) const
+dynd::gfunc::elwise_reduce::find_matching_kernel(const std::vector<ndt::type>& paramtypes) const
 {
     for(size_t i = 0, i_end = m_kernels.size(); i != i_end; ++i) {
-        const std::vector<dtype>& kparamtypes = m_kernels[i].m_paramtypes;
+        const std::vector<ndt::type>& kparamtypes = m_kernels[i].m_paramtypes;
         if (kparamtypes == paramtypes) {
             return &m_kernels[i];
         }

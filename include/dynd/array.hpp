@@ -12,7 +12,7 @@
 
 #include <dynd/config.hpp>
 
-#include <dynd/dtype.hpp>
+#include <dynd/type.hpp>
 #include <dynd/dtype_assign.hpp>
 #include <dynd/shortvector.hpp>
 #include <dynd/irange.hpp>
@@ -86,7 +86,7 @@ public:
      * NOTE: Does NOT create a scalar of the provided dtype,
      *       use dynd::empty(dtype) for that!
      */
-    array(const dtype& dt);
+    array(const ndt::type& dt);
 
     /**
      * Constructs an array from a multi-dimensional C-style array.
@@ -214,28 +214,28 @@ public:
     }
 
     /** The dtype */
-    inline const dtype& get_dtype() const {
-        return *reinterpret_cast<const dtype *>(&get_ndo()->m_dtype);
+    inline const ndt::type& get_dtype() const {
+        return *reinterpret_cast<const ndt::type *>(&get_ndo()->m_dtype);
     }
 
     inline size_t get_undim() const {
-        if (get_ndo()->is_builtin_dtype()) {
+        if (get_ndo()->is_builtin_type()) {
             return 0;
         } else {
             return get_ndo()->m_dtype->get_undim();
         }
     }
 
-    /** The uniform dtype (Most similar to numpy ndarray.dtype property) */
-    inline dtype get_udtype() const {
-        if (get_ndo()->is_builtin_dtype()) {
-            return dtype(get_ndo()->get_builtin_type_id());
+    /** The array data type (Most similar to numpy ndarray.dtype property) */
+    inline ndt::type get_udtype() const {
+        if (get_ndo()->is_builtin_type()) {
+            return ndt::type(get_ndo()->get_builtin_type_id());
         } else {
             size_t undim = get_ndo()->m_dtype->get_undim();
             if (undim == 0) {
-                return dtype(get_ndo()->m_dtype, true);
+                return ndt::type(get_ndo()->m_dtype, true);
             } else {
-                return get_ndo()->m_dtype->get_dtype_at_dimension(NULL, undim);
+                return get_ndo()->m_dtype->get_type_at_dimension(NULL, undim);
             }
         }
     }
@@ -257,7 +257,7 @@ public:
         return result;
     }
     inline void get_shape(intptr_t *out_shape) const {
-        if (!get_ndo()->is_builtin_dtype() && get_ndo()->m_dtype->get_undim() > 0) {
+        if (!get_ndo()->is_builtin_type() && get_ndo()->m_dtype->get_undim() > 0) {
             get_ndo()->m_dtype->get_shape(get_ndo()->m_dtype->get_undim(), 0, out_shape, get_ndo_meta());
         }
     }
@@ -275,7 +275,7 @@ public:
         return result;
     }
     inline void get_strides(intptr_t *out_strides) const {
-        if (!get_ndo()->is_builtin_dtype()) {
+        if (!get_ndo()->is_builtin_type()) {
             get_ndo()->m_dtype->get_strides(0, out_strides, get_ndo_meta());
         }
     }
@@ -340,7 +340,7 @@ public:
      * natural looking assignments.
      *
      * Example:
-     *      array a(make_dtype<float>());
+     *      array a(ndt::make_dtype<float>());
      *      a.vals() = 100;
      */
     array_vals vals() const;
@@ -390,7 +390,7 @@ public:
 
     /**
      * Returns a view of the array as bytes (for POD) or the storage dtype,
-     * peeling away any expression dtypes or encodings.
+     * peeling away any expression types or encodings.
      */
     array storage() const;
 
@@ -436,62 +436,81 @@ public:
     void val_assign(const array& rhs, assign_error_mode errmode = assign_error_default,
                         const eval::eval_context *ectx = &eval::default_eval_context) const;
     /** Does a value-assignment from the rhs raw scalar */
-    void val_assign(const dtype& rhs_dt, const char *rhs_metadata, const char *rhs_data,
+    void val_assign(const ndt::type& rhs_dt, const char *rhs_metadata, const char *rhs_data,
                         assign_error_mode errmode = assign_error_default,
                         const eval::eval_context *ectx = &eval::default_eval_context) const;
 
     /**
      * Casts the dtype of the array into the specified dtype.
      * This casts the entire dtype. If you want to cast the
-     * uniform dtype, use 'ucast' instead.
+     * array data type, use 'ucast' instead.
      *
      * \param dt  The dtype into which the array should be cast.
      * \param errmode  Policy for dealing with errors.
      */
-    array cast(const dtype& dt, assign_error_mode errmode = assign_error_default) const;
+    array cast(const ndt::type& dt, assign_error_mode errmode = assign_error_default) const;
 
     /**
-     * Casts the uniform dtype of the array into the specified dtype.
+     * Casts the array data type of the array into the specified dtype.
      *
      * \param uniform_dt  The dtype into which the array's
      *                    uniform type should be cast.
-     * \param replace_undim  The number of uniform dimensions of
+     * \param replace_undim  The number of array dimensions of
      *                       this dtype which should be replaced.
      *                       E.g. the value 1 could cast the last
-     *                       uniform dimension and the uniform dtype
+     *                       array dimension and the array data type
      *                       to the replacement uniform_dt.
      * \param errmode  Policy for dealing with errors.
      */
-    array ucast(const dtype& uniform_dt,
+    array ucast(const ndt::type& uniform_dt,
                     size_t replace_undim = 0,
                     assign_error_mode errmode = assign_error_default) const;
 
     /**
-     * Casts the uniform dtype of the array into the type specified
+     * Casts the array data type of the array into the type specified
      * as the template parameter.
      */
     template<class T>
     inline array ucast(size_t replace_undim = 0,
                     assign_error_mode errmode = assign_error_default) const {
-        return ucast(make_dtype<T>(), replace_undim, errmode);
+        return ucast(ndt::make_dtype<T>(), replace_undim, errmode);
     }
 
     /**
-     * Replaces the uniform dtype with a new one, returning a view to
+     * Attempts to view the data of the array as a new dynd type,
+     * raising an error if it cannot be done.
+     *
+     * \param dt  The dynd type to view the entire data as.
+     */
+    array view(const ndt::type& dt) const;
+
+    /**
+     * Attempts to view the uniform type-level of the array as a
+     * new dynd type, raising an error if it cannot be done.
+     *
+     * \param uniform_dt  The dynd type to view the uniform data as.
+     * \param replace_undim  The number of array dimensions to swallow
+     *                       into the viewed uniform_dt.
+     */
+    array uview(const ndt::type& uniform_dt, size_t replace_undim) const;
+
+    /**
+     * DEPRECATED
+     * Views the array's memory as another dtype, where such an operation
+     * makes sense. This is analogous to reinterpret_cast<>.
+     */
+    array view_scalars(const ndt::type& scalar_dtype) const;
+
+    /**
+     * Replaces the array data type with a new one, returning a view to
      * the result. The new dtype must have the same storage as the
      * existing dtype.
      *
      * \param new_udtype  The replacement dtype.
-     * \param replace_undim  The number of uniform dimensions to replace
-     *                       in addition to the uniform dtype.
+     * \param replace_undim  The number of array dimensions to replace
+     *                       in addition to the array data type.
      */
-    array replace_udtype(const dtype& new_udtype, size_t replace_undim = 0) const;
-
-    /**
-     * Views the array's memory as another dtype, where such an operation
-     * makes sense. This is analogous to reinterpret_cast<>.
-     */
-    array view_scalars(const dtype& scalar_dtype) const;
+    array replace_udtype(const ndt::type& new_udtype, size_t replace_undim = 0) const;
 
     /**
      * Views the array's memory as another dtype, where such an operation
@@ -499,7 +518,7 @@ public:
      */
     template<class T>
     array view_scalars() const {
-        return view_scalars(make_dtype<T>());
+        return view_scalars(ndt::make_dtype<T>());
     }
 
     /**
@@ -572,7 +591,7 @@ public:
     /** Does a value-assignment from the rhs C++ scalar. */
     template<class T>
     typename enable_if<is_dtype_scalar<T>::value, array_vals&>::type operator=(const T& rhs) {
-        m_arr.val_assign(make_dtype<T>(), NULL, (const char *)&rhs);
+        m_arr.val_assign(ndt::make_dtype<T>(), NULL, (const char *)&rhs);
         return *this;
     }
     /**
@@ -586,7 +605,7 @@ public:
     template<class T>
     typename enable_if<is_type_bool<T>::value, array_vals&>::type  operator=(const T& rhs) {
         dynd_bool v = rhs;
-        m_arr.val_assign(make_dtype<dynd_bool>(), NULL, (const char *)&v);
+        m_arr.val_assign(ndt::make_dtype<dynd_bool>(), NULL, (const char *)&v);
         return *this;
     }
 
@@ -629,7 +648,7 @@ public:
     /** Does a value-assignment from the rhs C++ scalar. */
     template<class T>
     typename enable_if<is_dtype_scalar<T>::value, array_vals&>::type operator=(const T& rhs) {
-        m_arr.val_assign(make_dtype<T>(), NULL, (const char *)&rhs);
+        m_arr.val_assign(ndt::make_dtype<T>(), NULL, (const char *)&rhs);
         return *this;
     }
     /**
@@ -643,7 +662,7 @@ public:
     template<class T>
     typename enable_if<is_type_bool<T>::value, array_vals&>::type  operator=(const T& rhs) {
         dynd_bool v = rhs;
-        m_arr.val_assign(make_dtype<dynd_bool>(), NULL, (const char *)&v);
+        m_arr.val_assign(ndt::make_dtype<dynd_bool>(), NULL, (const char *)&v);
         return *this;
     }
 
@@ -657,7 +676,7 @@ public:
 };
 
 /** Makes a strided array with uninitialized data. If axis_perm is NULL, it is C-order */
-array make_strided_array(const dtype& uniform_dtype, size_t ndim, const intptr_t *shape,
+array make_strided_array(const ndt::type& uniform_dtype, size_t ndim, const intptr_t *shape,
                 int64_t access_flags = read_access_flag|write_access_flag, const int *axis_perm = NULL);
 
 /**
@@ -677,12 +696,12 @@ array make_strided_array(const dtype& uniform_dtype, size_t ndim, const intptr_t
  *
  * \returns  The created array.
  */
-array make_strided_array_from_data(const dtype& uniform_dtype, size_t ndim, const intptr_t *shape,
+array make_strided_array_from_data(const ndt::type& uniform_dtype, size_t ndim, const intptr_t *shape,
                 const intptr_t *strides, int64_t access_flags, char *data_ptr,
                 const memory_block_ptr& data_reference, char **out_uniform_metadata = NULL);
 
 /** Makes a POD (plain old data) array with data initialized by the provided pointer */
-array make_pod_array(const dtype& pod_dt, const void *data);
+array make_pod_array(const ndt::type& pod_dt, const void *data);
 
 array make_string_array(const char *str, size_t len, string_encoding_t encoding);
 inline array make_ascii_array(const char *str, size_t len) {
@@ -729,14 +748,14 @@ inline array make_utf32_array(const uint32_t (&static_string)[N]) {
  */
 array make_utf8_array_array(const char **cstr_array, size_t array_size);
 
-inline array make_strided_array(intptr_t shape0, const dtype& uniform_dtype) {
+inline array make_strided_array(intptr_t shape0, const ndt::type& uniform_dtype) {
     return make_strided_array(uniform_dtype, 1, &shape0, read_access_flag|write_access_flag, NULL);
 }
-inline array make_strided_array(intptr_t shape0, intptr_t shape1, const dtype& uniform_dtype) {
+inline array make_strided_array(intptr_t shape0, intptr_t shape1, const ndt::type& uniform_dtype) {
     intptr_t shape[2] = {shape0, shape1};
     return make_strided_array(uniform_dtype, 2, shape, read_access_flag|write_access_flag, NULL);
 }
-inline array make_strided_array(intptr_t shape0, intptr_t shape1, intptr_t shape2, const dtype& uniform_dtype) {
+inline array make_strided_array(intptr_t shape0, intptr_t shape1, intptr_t shape2, const ndt::type& uniform_dtype) {
     intptr_t shape[3] = {shape0, shape1, shape2};
     return make_strided_array(uniform_dtype, 3, shape, read_access_flag|write_access_flag, NULL);
 }
@@ -853,7 +872,7 @@ dynd::array::array(std::initializer_list<T> il)
     char *originptr = 0;
     memory_block_ptr memblock = make_fixed_size_pod_memory_block(sizeof(T) * dim0, sizeof(T), &originptr);
     DYND_MEMCPY(originptr, il.begin(), sizeof(T) * dim0);
-    make_strided_array_node(make_dtype<T>(), 1, &dim0, &stride,
+    make_strided_array_node(ndt::make_dtype<T>(), 1, &dim0, &stride,
                             originptr, read_access_flag | write_access_flag, DYND_MOVE(memblock)).swap(m_memblock);
 }
 template<class T>
@@ -876,7 +895,7 @@ dynd::array::array(std::initializer_list<std::initializer_list<T> > il)
     memory_block_ptr memblock = make_fixed_size_pod_memory_block(sizeof(T) * num_elements, sizeof(T), &originptr);
     T *dataptr = reinterpret_cast<T *>(originptr);
     detail::initializer_list_shape<S>::copy_data(&dataptr, il);
-    make_strided_array_node(make_dtype<T>(), 2, shape, strides,
+    make_strided_array_node(ndt::make_dtype<T>(), 2, shape, strides,
                         originptr, read_access_flag | write_access_flag, DYND_MOVE(memblock)).swap(m_memblock);
 }
 template<class T>
@@ -899,7 +918,7 @@ dynd::array::array(std::initializer_list<std::initializer_list<std::initializer_
     memory_block_ptr memblock = make_fixed_size_pod_memory_block(sizeof(T) * num_elements, sizeof(T), &originptr);
     T *dataptr = reinterpret_cast<T *>(originptr);
     detail::initializer_list_shape<S>::copy_data(&dataptr, il);
-    make_strided_array_node(make_dtype<T>(), 3, shape, strides,
+    make_strided_array_node(ndt::make_dtype<T>(), 3, shape, strides,
                     originptr, read_access_flag | write_access_flag, DYND_MOVE(memblock)).swap(m_memblock);
 }
 #endif // DYND_INIT_LIST
@@ -943,7 +962,7 @@ nd::array::array(const T (&rhs)[N])
     intptr_t shape[ndim];
     size_t size = detail::fill_shape<T[N]>::fill(shape);
 
-    *this = make_strided_array(dtype(static_cast<type_id_t>(detail::uniform_type_from_array<T>::type_id)),
+    *this = make_strided_array(ndt::type(static_cast<type_id_t>(detail::uniform_type_from_array<T>::type_id)),
                     ndim, shape, read_access_flag|write_access_flag, NULL);
     DYND_MEMCPY(get_ndo()->m_data_pointer, reinterpret_cast<const void *>(&rhs), size);
 }
@@ -967,7 +986,7 @@ namespace detail {
         inline static typename enable_if<is_dtype_scalar<T>::value, array>::type
                         make(const std::vector<T>& vec)
         {
-            array result = make_strided_array(vec.size(), make_dtype<T>());
+            array result = make_strided_array(vec.size(), ndt::make_dtype<T>());
             if (!vec.empty()) {
                 memcpy(result.get_readwrite_originptr(), &vec[0], vec.size() * sizeof(T));
             }
@@ -976,8 +995,8 @@ namespace detail {
     };
 
     template <>
-    struct make_from_vec<dtype> {
-        static array make(const std::vector<dtype>& vec);
+    struct make_from_vec<ndt::type> {
+        static array make(const std::vector<ndt::type>& vec);
     };
 
     template <>
@@ -1003,7 +1022,7 @@ namespace detail {
             if (!lhs.is_scalar()) {
                 throw std::runtime_error("can only convert arrays with 0 dimensions to scalars");
             }
-            dtype_assign(make_dtype<T>(), NULL, (char *)&result,
+            dtype_assign(ndt::make_dtype<T>(), NULL, (char *)&result,
                         lhs.get_dtype(), lhs.get_ndo_meta(), lhs.get_ndo()->m_data_pointer, errmode);
             return result;
         }
@@ -1017,7 +1036,7 @@ namespace detail {
     };
 
     std::string array_as_string(const array& lhs, assign_error_mode errmode);
-    dtype array_as_dtype(const array& lhs, assign_error_mode errmode);
+    ndt::type array_as_type(const array& lhs, assign_error_mode errmode);
 
     template <>
     struct array_as_helper<std::string> {
@@ -1027,9 +1046,9 @@ namespace detail {
     };
 
     template <>
-    struct array_as_helper<dtype> {
-        static dtype as(const array& lhs, assign_error_mode errmode) {
-            return array_as_dtype(lhs, errmode);
+    struct array_as_helper<ndt::type> {
+        static ndt::type as(const array& lhs, assign_error_mode errmode) {
+            return array_as_type(lhs, errmode);
         }
     };
 
@@ -1042,18 +1061,18 @@ T array::as(assign_error_mode errmode) const {
 }
 
 /** 
- * Given the dtype/metadata/data of an array (or sub-component of an array),
- * evaluates a new copy of it as the canonical dtype.
+ * Given the type/metadata/data of an array (or sub-component of an array),
+ * evaluates a new copy of it as the canonical type.
  */
-array eval_raw_copy(const dtype& dt, const char *metadata, const char *data);
+array eval_raw_copy(const ndt::type& dt, const char *metadata, const char *data);
 
 /**
- * Constructs an uninitialized array of the given dtype.
+ * Constructs an uninitialized array of the given type.
  */
-array empty(const dtype& dt);
+array empty(const ndt::type& dt);
 
 /**
- * Constructs an uninitialized array of the given dtype,
+ * Constructs an uninitialized array of the given type,
  * specified as a string. This is a shortcut for expressions
  * like
  *
@@ -1061,7 +1080,7 @@ array empty(const dtype& dt);
  */
 template<int N>
 inline array empty(const char (&dshape)[N]) {
-    return empty(dtype(dshape, dshape + N - 1));
+    return empty(ndt::type(dshape, dshape + N - 1));
 }
 
 /**
@@ -1069,7 +1088,7 @@ inline array empty(const char (&dshape)[N]) {
  * This dtype should be at least one dimensional, and is initialized
  * using the specified dimension size.
  */
-array empty(intptr_t dim0, const dtype& dt);
+array empty(intptr_t dim0, const ndt::type& dt);
 
 /**
  * Constructs an uninitialized array of the given dtype,
@@ -1080,7 +1099,7 @@ array empty(intptr_t dim0, const dtype& dt);
  */
 template<int N>
 inline array empty(intptr_t dim0, const char (&dshape)[N]) {
-    return empty(dim0, dtype(dshape, dshape + N - 1));
+    return empty(dim0, ndt::type(dshape, dshape + N - 1));
 }
 
 /**
@@ -1088,7 +1107,7 @@ inline array empty(intptr_t dim0, const char (&dshape)[N]) {
  * This dtype should be at least two dimensional, and is initialized
  * using the specified dimension sizes.
  */
-array empty(intptr_t dim0, intptr_t dim1, const dtype& dt);
+array empty(intptr_t dim0, intptr_t dim1, const ndt::type& dt);
 
 /**
  * Constructs an uninitialized array of the given dtype,
@@ -1107,7 +1126,7 @@ inline array empty(intptr_t dim0, intptr_t dim1, const char (&dshape)[N]) {
  * This dtype should be at least three dimensional, and is initialized
  * using the specified dimension sizes.
  */
-array empty(intptr_t dim0, intptr_t dim1, intptr_t dim2, const dtype& dt);
+array empty(intptr_t dim0, intptr_t dim1, intptr_t dim2, const ndt::type& dt);
 
 /**
  * Constructs an uninitialized array of the given dtype,
@@ -1126,9 +1145,9 @@ inline array empty(intptr_t dim0, intptr_t dim1, intptr_t dim2, const char (&dsh
  * of the one given, but replacing the
  *
  * \param rhs  The array whose shape and memory layout to emulate.
- * \param uniform_dtype   The uniform dtype of the new array.
+ * \param uniform_dtype   The array data type of the new array.
  */
-array empty_like(const array& rhs, const dtype& uniform_dtype);
+array empty_like(const array& rhs, const ndt::type& uniform_dtype);
 
 /**
  * Constructs an empty array matching the parameters of 'rhs'
@@ -1146,7 +1165,7 @@ array empty_like(const array& rhs);
 intptr_t binary_search(const array& n, const char *data, const char *metadata);
 
 array groupby(const array& data_values, const array& by,
-                const dtype& groups = dtype());
+                const ndt::type& groups = ndt::type());
 
 /**
  * Creates a cstruct array with the given field names and
