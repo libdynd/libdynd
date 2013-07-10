@@ -545,7 +545,8 @@ ndt::type dynd::factor_categorical_dtype(const nd::array& values)
 {
     // Do the factor operation on a concrete version of the values
     // TODO: Some cases where we don't want to do this?
-    array_iter<0, 1> iter(values.eval());
+    nd::array values_eval = values.eval();
+    array_iter<0, 1> iter(values_eval);
 
     comparison_kernel k;
     ::make_comparison_kernel(&k, 0,
