@@ -60,7 +60,7 @@ size_t base_struct_dtype::get_elwise_property_index(const std::string& property_
     }
 
     stringstream ss;
-    ss << "dtype " << ndt::type(this, true) << " does not have a kernel for property " << property_name;
+    ss << "dynd type " << ndt::type(this, true) << " does not have a kernel for property " << property_name;
     throw runtime_error(ss.str());
 }
 
