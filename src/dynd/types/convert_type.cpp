@@ -48,7 +48,7 @@ void convert_type::print_data(std::ostream& DYND_UNUSED(o), const char *DYND_UNU
     throw runtime_error("internal error: convert_type::print_data isn't supposed to be called");
 }
 
-void convert_type::print_dtype(std::ostream& o) const
+void convert_type::print_type(std::ostream& o) const
 {
     o << "convert<to=" << m_value_type << ", from=" << m_operand_type;
     if (m_errmode != assign_error_default) {

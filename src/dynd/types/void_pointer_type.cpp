@@ -19,7 +19,7 @@ void void_pointer_type::print_data(std::ostream& o, const char *DYND_UNUSED(meta
     hexadecimal_print(o, target_ptr);
 }
 
-void void_pointer_type::print_dtype(std::ostream& o) const {
+void void_pointer_type::print_type(std::ostream& o) const {
 
     o << "pointer<void>";
 }

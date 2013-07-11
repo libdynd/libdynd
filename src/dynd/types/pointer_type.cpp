@@ -49,7 +49,7 @@ void pointer_type::print_data(std::ostream& o, const char *metadata, const char 
     m_target_dtype.print_data(o, metadata + sizeof(pointer_type_metadata), target_data);
 }
 
-void pointer_type::print_dtype(std::ostream& o) const
+void pointer_type::print_type(std::ostream& o) const
 {
     o << "pointer<" << m_target_dtype << ">";
 }

@@ -103,7 +103,7 @@ void string_type::print_data(std::ostream& o, const char *DYND_UNUSED(metadata),
     o << "\"";
 }
 
-void string_type::print_dtype(std::ostream& o) const {
+void string_type::print_type(std::ostream& o) const {
 
     o << "string";
     if (m_encoding != string_encoding_utf_8) {

@@ -48,7 +48,7 @@ void bytes_type::print_data(std::ostream& o, const char *DYND_UNUSED(metadata), 
     hexadecimal_print(o, begin, end - begin);
 }
 
-void bytes_type::print_dtype(std::ostream& o) const
+void bytes_type::print_type(std::ostream& o) const
 {
     o << "bytes";
     if (m_alignment != 1) {

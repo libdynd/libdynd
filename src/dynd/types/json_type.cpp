@@ -72,7 +72,7 @@ void json_type::print_data(std::ostream& o, const char *DYND_UNUSED(metadata), c
     o << "\"";
 }
 
-void json_type::print_dtype(std::ostream& o) const {
+void json_type::print_type(std::ostream& o) const {
 
     o << "json";
 }

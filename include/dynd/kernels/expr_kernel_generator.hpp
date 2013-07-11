@@ -55,7 +55,7 @@ public:
                 kernel_request_t kernreq, const eval::eval_context *ectx) const = 0;
 
     /** Used to print information about the kernel in the dtype */
-    virtual void print_dtype(std::ostream& o) const = 0;
+    virtual void print_type(std::ostream& o) const = 0;
 
     friend void expr_kernel_generator_incref(const expr_kernel_generator *ed);
     friend void expr_kernel_generator_decref(const expr_kernel_generator *ed);

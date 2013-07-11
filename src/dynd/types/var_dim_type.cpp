@@ -56,7 +56,7 @@ void var_dim_type::print_data(std::ostream& o, const char *metadata, const char 
     o << "]";
 }
 
-void var_dim_type::print_dtype(std::ostream& o) const
+void var_dim_type::print_type(std::ostream& o) const
 {
     o << "var_dim<" << m_element_dtype << ">";
 }

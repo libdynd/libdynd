@@ -35,7 +35,7 @@ public:
 
     void print_data(std::ostream& o, const char *metadata, const char *data) const;
 
-    void print_dtype(std::ostream& o) const;
+    void print_type(std::ostream& o) const;
 
     ndt::type get_canonical_type() const;
 

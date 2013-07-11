@@ -129,7 +129,7 @@ namespace {
         }
 
 
-        void print_dtype(std::ostream& o) const
+        void print_type(std::ostream& o) const
         {
             o << m_name << "(op0, op1)";
         }

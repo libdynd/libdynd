@@ -86,7 +86,7 @@ void fixed_dim_type::print_data(std::ostream& o, const char *metadata, const cha
     o << "]";
 }
 
-void fixed_dim_type::print_dtype(std::ostream& o) const
+void fixed_dim_type::print_type(std::ostream& o) const
 {
     o << "fixed_dim<";
     o << m_dim_size;

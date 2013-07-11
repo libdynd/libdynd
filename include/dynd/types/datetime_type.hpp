@@ -76,7 +76,7 @@ public:
 
     void print_data(std::ostream& o, const char *metadata, const char *data) const;
 
-    void print_dtype(std::ostream& o) const;
+    void print_type(std::ostream& o) const;
 
     bool is_lossless_assignment(const ndt::type& dst_dt, const ndt::type& src_dt) const;
 

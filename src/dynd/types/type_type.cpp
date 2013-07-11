@@ -35,11 +35,11 @@ void type_type::print_data(std::ostream& o,
     if (is_builtin_type(ddd->dt)) {
         o << ndt::type(ddd->dt, true);
     } else {
-        ddd->dt->print_dtype(o);
+        ddd->dt->print_type(o);
     }
 }
 
-void type_type::print_dtype(std::ostream& o) const
+void type_type::print_type(std::ostream& o) const
 {
     o << "type";
 }
@@ -140,7 +140,7 @@ namespace {
             if (is_builtin_type(bd)) {
                 ss << ndt::type(bd, true);
             } else {
-                bd->print_dtype(ss);
+                bd->print_type(ss);
             }
             e->dst_string_dt->set_utf8_string(e->dst_metadata, dst, e->errmode,
                             ss.str());

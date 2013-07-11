@@ -74,7 +74,7 @@ void view_type::print_data(std::ostream& o, const char *metadata, const char *da
     throw runtime_error("internal error: view_type::print_data isn't supposed to be called");
 }
 
-void view_type::print_dtype(std::ostream& o) const
+void view_type::print_type(std::ostream& o) const
 {
     // Special case printing of alignment to make it more human-readable
     if (m_value_type.get_data_alignment() != 1 && m_operand_type.get_type_id() == fixedbytes_type_id &&

@@ -54,7 +54,7 @@ void expr_type::print_data(std::ostream& DYND_UNUSED(o),
     throw runtime_error("internal error: expr_type::print_data isn't supposed to be called");
 }
 
-void expr_type::print_dtype(std::ostream& o) const
+void expr_type::print_type(std::ostream& o) const
 {
     const cstruct_type *fsd = static_cast<const cstruct_type *>(m_operand_type.extended());
     size_t field_count = fsd->get_field_count();
@@ -66,7 +66,7 @@ void expr_type::print_dtype(std::ostream& o) const
         o << ", op" << i << "=" << pd->get_target_dtype();
     }
     o << ", expr=";
-    m_kgen->print_dtype(o);
+    m_kgen->print_type(o);
     o << ">";
 }
 

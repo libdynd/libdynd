@@ -95,7 +95,7 @@ void property_type::print_data(std::ostream& DYND_UNUSED(o), const char *DYND_UN
     throw runtime_error("internal error: property_type::print_data isn't supposed to be called");
 }
 
-void property_type::print_dtype(std::ostream& o) const
+void property_type::print_type(std::ostream& o) const
 {
     if (!m_reversed_property) {
         o << "property<name=" << m_property_name << ", operand=" << m_operand_type << ">";

@@ -62,7 +62,7 @@ void strided_dim_type::print_data(std::ostream& o, const char *metadata, const c
     o << "]";
 }
 
-void strided_dim_type::print_dtype(std::ostream& o) const
+void strided_dim_type::print_type(std::ostream& o) const
 {
     o << "strided_dim<" << m_element_dtype << ">";
 }

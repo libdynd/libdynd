@@ -410,7 +410,7 @@ std::ostream& dynd::ndt::operator<<(std::ostream& o, const ndt::type& rhs)
             o << "void";
             break;
         default:
-            rhs.extended()->print_dtype(o);
+            rhs.extended()->print_type(o);
             break;
     }
 

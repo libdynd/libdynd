@@ -177,7 +177,7 @@ public:
      *
      * \param o  The std::ostream to print to.
      */
-    virtual void print_dtype(std::ostream& o) const = 0;
+    virtual void print_type(std::ostream& o) const = 0;
 
     /**
      * Returns true if the type is a scalar.
@@ -589,7 +589,7 @@ public:
  */
 inline void base_type_incref(const base_type *bd)
 {
-    //std::cout << "dtype " << (void *)ed << " inc: " << ed->m_use_count + 1 << "\t"; ed->print_dtype(std::cout); std::cout << std::endl;
+    //std::cout << "dtype " << (void *)ed << " inc: " << ed->m_use_count + 1 << "\t"; ed->print_type(std::cout); std::cout << std::endl;
     ++bd->m_use_count;
 }
 
@@ -610,7 +610,7 @@ inline void base_type_xincref(const base_type *bd)
  */
 inline void base_type_decref(const base_type *bd)
 {
-    //std::cout << "dtype " << (void *)ed << " dec: " << ed->m_use_count - 1 << "\t"; ed->print_dtype(std::cout); std::cout << std::endl;
+    //std::cout << "dtype " << (void *)ed << " dec: " << ed->m_use_count - 1 << "\t"; ed->print_type(std::cout); std::cout << std::endl;
     if (--bd->m_use_count == 0) {
         delete bd;
     }

@@ -88,7 +88,7 @@ void struct_type::print_data(std::ostream& o, const char *metadata, const char *
     o << "]";
 }
 
-void struct_type::print_dtype(std::ostream& o) const
+void struct_type::print_type(std::ostream& o) const
 {
     o << "struct<";
     for (size_t i = 0, i_end = m_field_types.size(); i != i_end; ++i) {

@@ -21,7 +21,7 @@ public:
 
     void print_data(std::ostream& o, const char *metadata, const char *data) const;
 
-    void print_dtype(std::ostream& o) const;
+    void print_type(std::ostream& o) const;
 
     void get_bytes_range(const char **out_begin, const char**out_end, const char *metadata, const char *data) const;
 

@@ -176,7 +176,7 @@ public:
         return offset_out + extra_size;
     }
 
-    void print_dtype(std::ostream& o) const
+    void print_type(std::ostream& o) const
     {
         o << "strftime(op0, ";
         print_escaped_utf8_string(o, m_format);
@@ -323,7 +323,7 @@ public:
         return offset_out + extra_size;
     }
 
-    void print_dtype(std::ostream& o) const
+    void print_type(std::ostream& o) const
     {
         o << "replace(op0";
         if (m_year != numeric_limits<int32_t>::max()) {

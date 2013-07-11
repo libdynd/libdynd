@@ -96,7 +96,7 @@ void date_type::print_data(std::ostream& o, const char *DYND_UNUSED(metadata), c
     o << datetime::make_iso_8601_date(value, datetime::datetime_unit_day);
 }
 
-void date_type::print_dtype(std::ostream& o) const
+void date_type::print_type(std::ostream& o) const
 {
     o << "date";
 }

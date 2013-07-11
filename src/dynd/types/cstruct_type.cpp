@@ -103,7 +103,7 @@ static bool is_simple_identifier_name(const string& s)
     }
 }
 
-void cstruct_type::print_dtype(std::ostream& o) const
+void cstruct_type::print_type(std::ostream& o) const
 {
     o << "cstruct<";
     for (size_t i = 0, i_end = m_field_types.size(); i != i_end; ++i) {

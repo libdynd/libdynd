@@ -54,7 +54,7 @@ void fixedbytes_type::print_data(std::ostream& o, const char *DYND_UNUSED(metada
     hexadecimal_print(o, data, get_data_size());
 }
 
-void fixedbytes_type::print_dtype(std::ostream& o) const
+void fixedbytes_type::print_type(std::ostream& o) const
 {
     o << "fixedbytes<" << get_data_size() << "," << get_data_alignment() << ">";
 }

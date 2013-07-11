@@ -53,7 +53,7 @@ public:
 
     void print_data(std::ostream& o, const char *metadata, const char *data) const;
 
-    void print_dtype(std::ostream& o) const;
+    void print_type(std::ostream& o) const;
 
     ndt::type apply_linear_index(size_t nindices, const irange *indices,
                 size_t current_i, const ndt::type& root_dt, bool leading_dimension) const;

@@ -122,7 +122,7 @@ void dynd::tuple_type::print_data(std::ostream& o, const char *metadata, const c
     o << "]";
 }
 
-void dynd::tuple_type::print_dtype(std::ostream& o) const
+void dynd::tuple_type::print_type(std::ostream& o) const
 {
     if (is_standard_layout()) {
         o << "tuple<";

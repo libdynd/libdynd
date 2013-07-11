@@ -49,7 +49,7 @@ void byteswap_type::print_data(std::ostream& DYND_UNUSED(o), const char *DYND_UN
     throw runtime_error("internal error: byteswap_type::print_data isn't supposed to be called");
 }
 
-void byteswap_type::print_dtype(std::ostream& o) const
+void byteswap_type::print_type(std::ostream& o) const
 {
     o << "byteswap<" << m_value_type;
     if (m_operand_type.get_type_id() != fixedbytes_type_id) {

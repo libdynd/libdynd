@@ -33,13 +33,13 @@ void unary_expr_type::print_data(std::ostream& DYND_UNUSED(o),
     throw runtime_error("internal error: unary_expr_type::print_data isn't supposed to be called");
 }
 
-void unary_expr_type::print_dtype(std::ostream& o) const
+void unary_expr_type::print_type(std::ostream& o) const
 {
     o << "expr<";
     o << m_value_type;
     o << ", op0=" << m_operand_type;
     o << ", expr=";
-    m_kgen->print_dtype(o);
+    m_kgen->print_type(o);
     o << ">";
 }
 

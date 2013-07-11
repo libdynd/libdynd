@@ -246,7 +246,7 @@ void datetime_type::print_data(std::ostream& o,
                     dynd_unit_to_datetime_unit(m_unit), m_timezone == tz_abstract);
 }
 
-void datetime_type::print_dtype(std::ostream& o) const
+void datetime_type::print_type(std::ostream& o) const
 {
     o << "datetime<unit=" << m_unit << ",tz=";
     switch (m_timezone) {

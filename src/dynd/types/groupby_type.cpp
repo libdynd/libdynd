@@ -68,7 +68,7 @@ ndt::type groupby_type::get_by_values_type() const
     return pd->get_target_dtype();
 }
 
-void groupby_type::print_dtype(std::ostream& o) const
+void groupby_type::print_type(std::ostream& o) const
 {
     o << "groupby<values=" << get_data_values_type();
     o << ", by=" << get_by_values_type() << ">";
