@@ -37,7 +37,7 @@ static pair<string, gfunc::callable> base_string_type_properties[] = {
     pair<string, gfunc::callable>("encoding", gfunc::make_callable(&get_extended_string_encoding, "self"))
 };
 
-void base_string_type::get_dynamic_dtype_properties(const std::pair<std::string, gfunc::callable> **out_properties, size_t *out_count) const
+void base_string_type::get_dynamic_type_properties(const std::pair<std::string, gfunc::callable> **out_properties, size_t *out_count) const
 {
     *out_properties = base_string_type_properties;
     *out_count = sizeof(base_string_type_properties) / sizeof(base_string_type_properties[0]);

@@ -310,15 +310,15 @@ static ndt::type property_get_target_dtype(const ndt::type& dt) {
     return pd->get_target_dtype();
 }
 
-static pair<string, gfunc::callable> dtype_properties[] = {
+static pair<string, gfunc::callable> type_properties[] = {
     pair<string, gfunc::callable>("target_dtype", gfunc::make_callable(&property_get_target_dtype, "self"))
 };
 
-void pointer_type::get_dynamic_dtype_properties(
+void pointer_type::get_dynamic_type_properties(
                 const std::pair<std::string, gfunc::callable> **out_properties,
                 size_t *out_count) const
 {
-    *out_properties = dtype_properties;
-    *out_count = sizeof(dtype_properties) / sizeof(dtype_properties[0]);
+    *out_properties = type_properties;
+    *out_count = sizeof(type_properties) / sizeof(type_properties[0]);
 }
 

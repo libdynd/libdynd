@@ -615,7 +615,7 @@ static pair<string, gfunc::callable> categorical_type_properties[] = {
                     gfunc::make_callable(&property_type_get_category_type, "self"))
 };
 
-void categorical_type::get_dynamic_dtype_properties(
+void categorical_type::get_dynamic_type_properties(
                 const std::pair<std::string, gfunc::callable> **out_properties,
                 size_t *out_count) const
 {

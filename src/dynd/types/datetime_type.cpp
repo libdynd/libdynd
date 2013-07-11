@@ -349,7 +349,7 @@ size_t datetime_type::make_assignment_kernel(
 //static pair<string, gfunc::callable> datetime_type_properties[] = {
 //};
 
-void datetime_type::get_dynamic_dtype_properties(const std::pair<std::string, gfunc::callable> **out_properties, size_t *out_count) const
+void datetime_type::get_dynamic_type_properties(const std::pair<std::string, gfunc::callable> **out_properties, size_t *out_count) const
 {
     *out_properties = NULL; //datetime_type_properties;
     *out_count = 0; //sizeof(datetime_type_properties) / sizeof(datetime_type_properties[0]);
@@ -406,7 +406,7 @@ static pair<string, gfunc::callable> datetime_type_functions[] = {
     pair<string, gfunc::callable>("__construct__", gfunc::make_callable(&function_dtype_construct, "self", "year", "month", "day"))
 };
 
-void datetime_type::get_dynamic_dtype_functions(const std::pair<std::string, gfunc::callable> **out_functions, size_t *out_count) const
+void datetime_type::get_dynamic_type_functions(const std::pair<std::string, gfunc::callable> **out_functions, size_t *out_count) const
 {
     *out_functions = datetime_type_functions;
     *out_count = sizeof(datetime_type_functions) / sizeof(datetime_type_functions[0]);

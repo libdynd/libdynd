@@ -46,7 +46,7 @@ public:
     // TODO: Maybe it should be more flexible?
     size_t get_iterdata_size(size_t ndim) const;
 
-    void get_dynamic_dtype_properties(const std::pair<std::string, gfunc::callable> **out_properties, size_t *out_count) const;
+    void get_dynamic_type_properties(const std::pair<std::string, gfunc::callable> **out_properties, size_t *out_count) const;
 };
 
 

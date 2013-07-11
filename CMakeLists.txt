@@ -114,7 +114,7 @@ set(libdynd_SRC
     include/dynd/codegen/binary_reduce_kernel_adapter_codegen.hpp
     include/dynd/codegen/calling_conventions.hpp
     include/dynd/codegen/codegen_cache.hpp
-    # DTypes
+    # Types
     src/dynd/types/base_bytes_type.cpp
     src/dynd/types/base_type.cpp
     src/dynd/types/base_expression_type.cpp
@@ -342,8 +342,8 @@ source_group("Main Source" REGULAR_EXPRESSION "src/dynd/.*cpp")
 source_group("Main Headers" REGULAR_EXPRESSION "include/dynd/.*hpp")
 source_group("CodeGen Source" REGULAR_EXPRESSION "src/dynd/codegen/.*cpp")
 source_group("CodeGen Headers" REGULAR_EXPRESSION "include/dynd/codegen/.*hpp")
-source_group("DTypes Source" REGULAR_EXPRESSION "src/dynd/types/.*cpp")
-source_group("DTypes Headers" REGULAR_EXPRESSION "include/dynd/types/.*hpp")
+source_group("Types Source" REGULAR_EXPRESSION "src/dynd/types/.*cpp")
+source_group("Types Headers" REGULAR_EXPRESSION "include/dynd/types/.*hpp")
 source_group("Eval Source" REGULAR_EXPRESSION "src/dynd/eval/.*cpp")
 source_group("Eval Headers" REGULAR_EXPRESSION "include/dynd/eval/.*hpp")
 source_group("GFunc Source" REGULAR_EXPRESSION "src/dynd/gfunc/.*cpp")

@@ -155,7 +155,7 @@ nd::array ndt::type::p(const char *property_name) const
     if (!is_builtin()) {
         const std::pair<std::string, gfunc::callable> *properties;
         size_t count;
-        extended()->get_dynamic_dtype_properties(&properties, &count);
+        extended()->get_dynamic_type_properties(&properties, &count);
         // TODO: We probably want to make some kind of acceleration structure for the name lookup
         if (count > 0) {
             for (size_t i = 0; i < count; ++i) {
@@ -176,7 +176,7 @@ nd::array ndt::type::p(const std::string& property_name) const
     if (!is_builtin()) {
         const std::pair<std::string, gfunc::callable> *properties;
         size_t count;
-        extended()->get_dynamic_dtype_properties(&properties, &count);
+        extended()->get_dynamic_type_properties(&properties, &count);
         // TODO: We probably want to make some kind of acceleration structure for the name lookup
         if (count > 0) {
             for (size_t i = 0; i < count; ++i) {

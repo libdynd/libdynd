@@ -296,14 +296,14 @@ void base_type::get_scalar_properties_and_functions(
     }
 }
 
-void base_type::get_dynamic_dtype_properties(const std::pair<std::string, gfunc::callable> **out_properties, size_t *out_count) const
+void base_type::get_dynamic_type_properties(const std::pair<std::string, gfunc::callable> **out_properties, size_t *out_count) const
 {
     // Default to no properties
     *out_properties = NULL;
     *out_count = 0;
 }
 
-void base_type::get_dynamic_dtype_functions(const std::pair<std::string, gfunc::callable> **out_functions, size_t *out_count) const
+void base_type::get_dynamic_type_functions(const std::pair<std::string, gfunc::callable> **out_functions, size_t *out_count) const
 {
     // Default to no functions
     *out_functions = NULL;

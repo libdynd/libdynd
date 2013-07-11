@@ -456,16 +456,16 @@ static nd::array property_get_metadata_offsets(const ndt::type& dt) {
     return nd::array(d->get_metadata_offsets_vector());
 }
 
-static pair<string, gfunc::callable> dtype_properties[] = {
+static pair<string, gfunc::callable> type_properties[] = {
     pair<string, gfunc::callable>("field_names", gfunc::make_callable(&property_get_field_names, "self")),
     pair<string, gfunc::callable>("field_types", gfunc::make_callable(&property_get_field_types, "self")),
     pair<string, gfunc::callable>("metadata_offsets", gfunc::make_callable(&property_get_metadata_offsets, "self"))
 };
 
-void struct_type::get_dynamic_dtype_properties(const std::pair<std::string, gfunc::callable> **out_properties, size_t *out_count) const
+void struct_type::get_dynamic_type_properties(const std::pair<std::string, gfunc::callable> **out_properties, size_t *out_count) const
 {
-    *out_properties = dtype_properties;
-    *out_count = sizeof(dtype_properties) / sizeof(dtype_properties[0]);
+    *out_properties = type_properties;
+    *out_count = sizeof(type_properties) / sizeof(type_properties[0]);
 }
 
 ndt::type struct_type::array_parameters_dtype = ndt::make_cstruct(ndt::type(new void_pointer_type, false), "self");

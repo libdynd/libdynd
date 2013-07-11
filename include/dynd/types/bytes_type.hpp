@@ -72,7 +72,7 @@ public:
                     kernel_request_t kernreq, assign_error_mode errmode,
                     const eval::eval_context *ectx) const;
 
-    void get_dynamic_dtype_properties(
+    void get_dynamic_type_properties(
                     const std::pair<std::string, gfunc::callable> **out_properties,
                     size_t *out_count) const;
 };

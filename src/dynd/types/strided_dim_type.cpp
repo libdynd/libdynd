@@ -721,7 +721,7 @@ static pair<string, gfunc::callable> strided_dim_type_properties[] = {
     pair<string, gfunc::callable>("element_type", gfunc::make_callable(&get_element_type, "self"))
 };
 
-void strided_dim_type::get_dynamic_dtype_properties(
+void strided_dim_type::get_dynamic_type_properties(
                 const std::pair<std::string, gfunc::callable> **out_properties,
                 size_t *out_count) const
 {

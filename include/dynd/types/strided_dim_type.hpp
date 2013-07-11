@@ -108,7 +108,7 @@ public:
                     char *dst_metadata,
                     const ndt::type& src_dt, const char *src_metadata) const;
 
-    void get_dynamic_dtype_properties(
+    void get_dynamic_type_properties(
                     const std::pair<std::string, gfunc::callable> **out_properties,
                     size_t *out_count) const;
     void get_dynamic_array_properties(
