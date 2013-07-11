@@ -28,7 +28,7 @@ enum busdate_roll_t {
     busdate_roll_throw
 };
 
-class busdate_dtype : public base_type {
+class busdate_type : public base_type {
     /** Strategy for handling dates that are not business dates */
     busdate_roll_t m_roll;
     /** Which days of the week are work days vs weekend */
@@ -36,15 +36,15 @@ class busdate_dtype : public base_type {
     /** Cache of the non-weekend day count in the weekmask */
     int m_busdays_in_weekmask;
     /**
-     * If non-NULL, a one-dimensional contiguous array of day unit date_dtype
+     * If non-NULL, a one-dimensional contiguous array of day unit date_type
      * which has no duplicates or holidays falling on a weekend.
      */
     nd::array m_holidays;
 
 public:
-    busdate_dtype(busdate_roll_t roll, const bool *weekmask, const nd::array& holidays);
+    busdate_type(busdate_roll_t roll, const bool *weekmask, const nd::array& holidays);
 
-    virtual ~busdate_dtype();
+    virtual ~busdate_type();
 
     busdate_roll_t get_roll() const {
         return m_roll;
@@ -88,9 +88,9 @@ public:
     }
 };
 
-inline ndt::type make_busdate_dtype(busdate_roll_t roll = busdate_roll_following,
+inline ndt::type make_busdate_type(busdate_roll_t roll = busdate_roll_following,
                 const bool *weekmask = NULL, const nd::array& holidays = nd::array()) {
-    return ndt::type(new busdate_dtype(roll, weekmask, holidays), false);
+    return ndt::type(new busdate_type(roll, weekmask, holidays), false);
 }
 
 } // namespace dynd

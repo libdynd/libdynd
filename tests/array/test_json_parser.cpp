@@ -14,7 +14,7 @@
 #include <dynd/dtypes/var_dim_type.hpp>
 #include <dynd/dtypes/fixed_dim_type.hpp>
 #include <dynd/dtypes/cstruct_type.hpp>
-#include <dynd/dtypes/date_dtype.hpp>
+#include <dynd/dtypes/date_type.hpp>
 #include <dynd/dtypes/string_type.hpp>
 #include <dynd/dtypes/json_dtype.hpp>
 
@@ -174,7 +174,7 @@ TEST(JSONParser, NestedListInts) {
 TEST(JSONParser, Struct) {
     nd::array n;
     ndt::type sdt = make_cstruct_type(ndt::make_dtype<int>(), "id", ndt::make_dtype<double>(), "amount",
-                    make_string_type(), "name", make_date_dtype(), "when");
+                    make_string_type(), "name", make_date_type(), "when");
 
     // A straightforward struct
     n = parse_json(sdt, "{\"amount\":3.75,\"id\":24601,"
@@ -204,7 +204,7 @@ TEST(JSONParser, NestedStruct) {
     nd::array n;
     ndt::type sdt = make_cstruct_type(make_fixed_dim_type(3, ndt::make_dtype<float>()), "position",
                     ndt::make_dtype<double>(), "amount",
-                    make_cstruct_type(make_string_type(), "name", make_date_dtype(), "when"), "data");
+                    make_cstruct_type(make_string_type(), "name", make_date_type(), "when"), "data");
 
     n = parse_json(sdt, "{\"data\":{\"name\":\"Harvey\", \"when\":\"1970-02-13\"}, "
                     "\"amount\": 10.5, \"position\": [3.5,1.0,1e10] }");
@@ -236,7 +236,7 @@ TEST(JSONParser, ListOfStruct) {
     nd::array n;
     ndt::type sdt = make_var_dim_type(make_cstruct_type(make_fixed_dim_type(3, ndt::make_dtype<float>()), "position",
                     ndt::make_dtype<double>(), "amount",
-                    make_cstruct_type(make_string_type(), "name", make_date_dtype(), "when"), "data"));
+                    make_cstruct_type(make_string_type(), "name", make_date_type(), "when"), "data"));
 
     n = parse_json(sdt, "[{\"data\":{\"name\":\"Harvey\", \"when\":\"1970-02-13\"}, \n"
                     "\"amount\": 10.5, \"position\": [3.5,1.0,1e10] },\n"

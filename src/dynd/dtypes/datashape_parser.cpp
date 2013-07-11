@@ -14,7 +14,7 @@
 #include <dynd/dtypes/string_type.hpp>
 #include <dynd/dtypes/fixedstring_type.hpp>
 #include <dynd/dtypes/json_dtype.hpp>
-#include <dynd/dtypes/date_dtype.hpp>
+#include <dynd/dtypes/date_type.hpp>
 #include <dynd/dtypes/datetime_dtype.hpp>
 #include <dynd/dtypes/bytes_dtype.hpp>
 #include <dynd/dtypes/dtype_dtype.hpp>
@@ -70,7 +70,7 @@ namespace {
             builtin_types["cfloat32"] = builtin_types["complex64"] = ndt::make_dtype<complex<float> >();
             builtin_types["cfloat64"] = builtin_types["complex128"] = ndt::make_dtype<complex<double> >();
             builtin_types["json"] = make_json_dtype();
-            builtin_types["date"] = make_date_dtype();
+            builtin_types["date"] = make_date_type();
             builtin_types["bytes"] = make_bytes_dtype(1);
             builtin_types["type"] = make_dtype_dtype();
             for (map<string, ndt::type>::iterator i = builtin_types.begin();

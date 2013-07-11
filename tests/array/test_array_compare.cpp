@@ -14,7 +14,7 @@
 #include <dynd/dtypes/strided_dim_type.hpp>
 #include <dynd/dtypes/fixedbytes_dtype.hpp>
 #include <dynd/dtypes/string_type.hpp>
-#include <dynd/dtypes/date_dtype.hpp>
+#include <dynd/dtypes/date_type.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -855,7 +855,7 @@ TEST(ArrayCompare, ExpressionDType) {
 
     // Two expression operand
     a = nd::array(3).ucast<float>();
-    b = nd::array("2012-03-04").ucast(make_date_dtype()).p("day");
+    b = nd::array("2012-03-04").ucast(make_date_type()).p("day");
     EXPECT_TRUE(a.op_sorting_less(b));
     EXPECT_TRUE(a < b);
     EXPECT_TRUE(a <= b);

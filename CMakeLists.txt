@@ -121,7 +121,7 @@ set(libdynd_SRC
     src/dynd/dtypes/base_string_type.cpp
     src/dynd/dtypes/base_struct_type.cpp
     src/dynd/dtypes/base_uniform_dim_type.cpp
-    src/dynd/dtypes/busdate_dtype.cpp
+    src/dynd/dtypes/busdate_type.cpp
     src/dynd/dtypes/builtin_dtype_properties.cpp
     src/dynd/dtypes/bytes_dtype.cpp
     src/dynd/dtypes/byteswap_dtype.cpp
@@ -129,7 +129,7 @@ set(libdynd_SRC
     src/dynd/dtypes/convert_dtype.cpp
     src/dynd/dtypes/datashape_formatter.cpp
     src/dynd/dtypes/datashape_parser.cpp
-    src/dynd/dtypes/date_dtype.cpp
+    src/dynd/dtypes/date_type.cpp
     src/dynd/dtypes/datetime_dtype.cpp
     src/dynd/dtypes/dtype_dtype.cpp
     src/dynd/dtypes/dynd_float16.cpp
@@ -161,7 +161,7 @@ set(libdynd_SRC
     include/dynd/dtypes/base_string_type.hpp
     include/dynd/dtypes/base_struct_type.hpp
     include/dynd/dtypes/base_uniform_dim_type.hpp
-    include/dynd/dtypes/busdate_dtype.hpp
+    include/dynd/dtypes/busdate_type.hpp
     include/dynd/dtypes/builtin_dtype_properties.hpp
     include/dynd/dtypes/bytes_dtype.hpp
     include/dynd/dtypes/byteswap_dtype.hpp
@@ -169,7 +169,7 @@ set(libdynd_SRC
     include/dynd/dtypes/convert_dtype.hpp
     include/dynd/dtypes/datashape_formatter.hpp
     include/dynd/dtypes/datashape_parser.hpp
-    include/dynd/dtypes/date_dtype.hpp
+    include/dynd/dtypes/date_type.hpp
     include/dynd/dtypes/datetime_dtype.hpp
     include/dynd/dtypes/dtype_dtype.hpp
     include/dynd/dtypes/dynd_float16.hpp

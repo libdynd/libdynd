@@ -701,7 +701,7 @@ ndt::type datetime_dtype::get_elwise_property_dtype(size_t property_index,
         case datetimeprop_date:
             out_readable = true;
             out_writable = false;
-            return make_date_dtype();
+            return make_date_type();
         default:
             out_readable = true;
             out_writable = false;

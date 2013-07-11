@@ -5,8 +5,8 @@
 
 #include <algorithm>
 
-#include <dynd/dtypes/busdate_dtype.hpp>
-#include <dynd/dtypes/date_dtype.hpp>
+#include <dynd/dtypes/busdate_type.hpp>
+#include <dynd/dtypes/date_type.hpp>
 #include <dynd/kernels/string_assignment_kernels.hpp>
 #include <dynd/exceptions.hpp>
 
@@ -15,7 +15,7 @@
 using namespace std;
 using namespace dynd;
 
-dynd::busdate_dtype::busdate_dtype(busdate_roll_t roll, const bool *weekmask, const nd::array& holidays)
+dynd::busdate_type::busdate_type(busdate_roll_t roll, const bool *weekmask, const nd::array& holidays)
     : base_type(busdate_type_id, datetime_kind, 4, 4, type_flag_scalar, 0, 0), m_roll(roll)
 {
     memcpy(m_workweek, weekmask, sizeof(m_workweek));
@@ -24,17 +24,17 @@ dynd::busdate_dtype::busdate_dtype(busdate_roll_t roll, const bool *weekmask, co
         m_busdays_in_weekmask += weekmask[i] ? 1 : 0;
     }
     if (!holidays.is_empty()) {
-        nd::array hol = holidays.ucast(make_date_dtype()).eval_immutable();
+        nd::array hol = holidays.ucast(make_date_type()).eval_immutable();
         // TODO: Make sure hol is contiguous and one-dimensional
         m_holidays = hol;
     }
 }
 
-busdate_dtype::~busdate_dtype()
+busdate_type::~busdate_type()
 {
 }
 
-void dynd::busdate_dtype::print_workweek(std::ostream& o) const
+void dynd::busdate_type::print_workweek(std::ostream& o) const
 {
     if (m_workweek[0]) o << "Mo";
     if (m_workweek[1]) o << "Tu";
@@ -45,18 +45,18 @@ void dynd::busdate_dtype::print_workweek(std::ostream& o) const
     if (m_workweek[6]) o << "Su";
 }
 
-void dynd::busdate_dtype::print_holidays(std::ostream& /*o*/) const
+void dynd::busdate_type::print_holidays(std::ostream& /*o*/) const
 {
-    throw std::runtime_error("busdate_dtype::print_holidays to be implemented");
+    throw std::runtime_error("busdate_type::print_holidays to be implemented");
 }
 
-void dynd::busdate_dtype::print_data(std::ostream& o, const char *DYND_UNUSED(metadata), const char *data) const
+void dynd::busdate_type::print_data(std::ostream& o, const char *DYND_UNUSED(metadata), const char *data) const
 {
     int32_t value = *reinterpret_cast<const int32_t *>(data);
     o << datetime::make_iso_8601_date(value, datetime::datetime_unit_day);
 }
 
-void dynd::busdate_dtype::print_dtype(std::ostream& o) const
+void dynd::busdate_type::print_dtype(std::ostream& o) const
 {
     if (m_roll == busdate_roll_following && is_default_workweek() && m_holidays.is_empty()) {
         o << "busdate";
@@ -83,13 +83,13 @@ void dynd::busdate_dtype::print_dtype(std::ostream& o) const
     }
 }
 
-bool dynd::busdate_dtype::is_lossless_assignment(const ndt::type& dst_dt, const ndt::type& src_dt) const
+bool dynd::busdate_type::is_lossless_assignment(const ndt::type& dst_dt, const ndt::type& src_dt) const
 {
     if (dst_dt.extended() == this) {
         if (src_dt.extended() == this) {
             return true;
         } else if (src_dt.get_type_id() == date_type_id) {
-            const busdate_dtype *src_fs = static_cast<const busdate_dtype*>(src_dt.extended());
+            const busdate_type *src_fs = static_cast<const busdate_type*>(src_dt.extended());
             // No need to compare the roll policy, just the weekmask and holidays determine this
             return memcmp(m_workweek, src_fs->m_workweek, sizeof(m_workweek)) == 0 &&
                     m_holidays.equals_exact(src_fs->m_holidays);
@@ -101,14 +101,14 @@ bool dynd::busdate_dtype::is_lossless_assignment(const ndt::type& dst_dt, const 
     }
 }
 
-bool dynd::busdate_dtype::operator==(const base_type& rhs) const
+bool dynd::busdate_type::operator==(const base_type& rhs) const
 {
     if (this == &rhs) {
         return true;
     } else if (rhs.get_type_id() != busdate_type_id) {
         return false;
     } else {
-        const busdate_dtype *dt = static_cast<const busdate_dtype*>(&rhs);
+        const busdate_type *dt = static_cast<const busdate_type*>(&rhs);
         return m_roll == dt->m_roll && memcmp(m_workweek, dt->m_workweek, sizeof(m_workweek)) == 0 &&
                 m_holidays.equals_exact(dt->m_holidays);
     }

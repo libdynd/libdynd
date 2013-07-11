@@ -13,7 +13,7 @@
 #include <dynd/dtypes/fixed_dim_type.hpp>
 #include <dynd/dtypes/var_dim_type.hpp>
 #include <dynd/dtypes/cstruct_type.hpp>
-#include <dynd/dtypes/date_dtype.hpp>
+#include <dynd/dtypes/date_type.hpp>
 #include <dynd/dtypes/string_type.hpp>
 #include <dynd/dtypes/fixedstring_type.hpp>
 #include <dynd/dtypes/json_dtype.hpp>
@@ -43,7 +43,7 @@ TEST(DataShapeParser, Basic) {
     EXPECT_EQ(ndt::make_dtype<complex<float> >(), type_from_datashape("cfloat32"));
     EXPECT_EQ(ndt::make_dtype<complex<double> >(), type_from_datashape("cfloat64"));
     EXPECT_EQ(make_json_dtype(), type_from_datashape("json"));
-    EXPECT_EQ(make_date_dtype(), type_from_datashape("date"));
+    EXPECT_EQ(make_date_type(), type_from_datashape("date"));
 }
 
 TEST(DataShapeParser, BasicThrow) {

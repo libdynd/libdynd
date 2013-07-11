@@ -16,11 +16,11 @@ namespace dynd {
 #define DYND_DATE_NA (std::numeric_limits<int32_t>::min())
 
 
-class date_dtype : public base_type {
+class date_type : public base_type {
 public:
-    date_dtype();
+    date_type();
 
-    virtual ~date_dtype();
+    virtual ~date_type();
 
     // A static instance of a struct dtype used by default for a date
     static const ndt::type default_struct_type;
@@ -83,8 +83,8 @@ public:
                     kernel_request_t kernreq, const eval::eval_context *ectx) const;
 };
 
-inline ndt::type make_date_dtype() {
-    return ndt::type(new date_dtype(), false);
+inline ndt::type make_date_type() {
+    return ndt::type(new date_type(), false);
 }
 
 } // namespace dynd

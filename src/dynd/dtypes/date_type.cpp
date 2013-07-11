@@ -8,7 +8,7 @@
 #include <cerrno>
 #include <algorithm>
 
-#include <dynd/dtypes/date_dtype.hpp>
+#include <dynd/dtypes/date_type.hpp>
 #include <dynd/dtypes/property_dtype.hpp>
 #include <dynd/dtypes/cstruct_type.hpp>
 #include <dynd/dtypes/string_type.hpp>
@@ -27,16 +27,16 @@
 using namespace std;
 using namespace dynd;
 
-date_dtype::date_dtype()
+date_type::date_type()
     : base_type(date_type_id, datetime_kind, 4, scalar_align_of<int32_t>::value, type_flag_scalar, 0, 0)
 {
 }
 
-date_dtype::~date_dtype()
+date_type::~date_type()
 {
 }
 
-const ndt::type date_dtype::default_struct_type =
+const ndt::type date_type::default_struct_type =
         make_cstruct_type(
             ndt::make_dtype<int32_t>(), "year",
             ndt::make_dtype<int16_t>(), "month",
@@ -50,7 +50,7 @@ namespace {
 }
 
 
-void date_dtype::set_ymd(const char *DYND_UNUSED(metadata), char *data,
+void date_type::set_ymd(const char *DYND_UNUSED(metadata), char *data,
                 assign_error_mode errmode, int32_t year, int32_t month, int32_t day) const
 {
     if (errmode != assign_error_none && !datetime::is_valid_ymd(year, month, day)) {
@@ -62,7 +62,7 @@ void date_dtype::set_ymd(const char *DYND_UNUSED(metadata), char *data,
     *reinterpret_cast<int32_t *>(data) = datetime::ymd_to_days(year, month, day);
 }
 
-void date_dtype::set_utf8_string(const char *DYND_UNUSED(metadata),
+void date_type::set_utf8_string(const char *DYND_UNUSED(metadata),
                 char *data, assign_error_mode errmode, const std::string& utf8_str) const
 {
     datetime::datetime_conversion_rule_t casting;
@@ -80,7 +80,7 @@ void date_dtype::set_utf8_string(const char *DYND_UNUSED(metadata),
 }
 
 
-void date_dtype::get_ymd(const char *DYND_UNUSED(metadata), const char *data,
+void date_type::get_ymd(const char *DYND_UNUSED(metadata), const char *data,
                 int32_t &out_year, int32_t &out_month, int32_t &out_day) const
 {
     datetime::date_ymd ymd;
@@ -90,18 +90,18 @@ void date_dtype::get_ymd(const char *DYND_UNUSED(metadata), const char *data,
     out_day = ymd.day;
 }
 
-void date_dtype::print_data(std::ostream& o, const char *DYND_UNUSED(metadata), const char *data) const
+void date_type::print_data(std::ostream& o, const char *DYND_UNUSED(metadata), const char *data) const
 {
     int32_t value = *reinterpret_cast<const int32_t *>(data);
     o << datetime::make_iso_8601_date(value, datetime::datetime_unit_day);
 }
 
-void date_dtype::print_dtype(std::ostream& o) const
+void date_type::print_dtype(std::ostream& o) const
 {
     o << "date";
 }
 
-bool date_dtype::is_lossless_assignment(const ndt::type& dst_dt, const ndt::type& src_dt) const
+bool date_type::is_lossless_assignment(const ndt::type& dst_dt, const ndt::type& src_dt) const
 {
     if (dst_dt.extended() == this) {
         if (src_dt.extended() == this) {
@@ -117,7 +117,7 @@ bool date_dtype::is_lossless_assignment(const ndt::type& dst_dt, const ndt::type
     }
 }
 
-bool date_dtype::operator==(const base_type& rhs) const
+bool date_type::operator==(const base_type& rhs) const
 {
     if (this == &rhs) {
         return true;
@@ -129,7 +129,7 @@ bool date_dtype::operator==(const base_type& rhs) const
     }
 }
 
-size_t date_dtype::make_assignment_kernel(
+size_t date_type::make_assignment_kernel(
                 hierarchical_kernel *out, size_t offset_out,
                 const ndt::type& dst_dt, const char *dst_metadata,
                 const ndt::type& src_dt, const char *src_metadata,
@@ -178,7 +178,7 @@ size_t date_dtype::make_assignment_kernel(
     throw runtime_error(ss.str());
 }
 
-size_t date_dtype::make_comparison_kernel(
+size_t date_type::make_comparison_kernel(
                 hierarchical_kernel *out, size_t offset_out,
                 const ndt::type& src0_dt, const char *src0_metadata,
                 const ndt::type& src1_dt, const char *src1_metadata,
@@ -202,13 +202,13 @@ size_t date_dtype::make_comparison_kernel(
 
 ///////// properties on the dtype
 
-//static pair<string, gfunc::callable> date_dtype_properties[] = {
+//static pair<string, gfunc::callable> date_type_properties[] = {
 //};
 
-void date_dtype::get_dynamic_dtype_properties(const std::pair<std::string, gfunc::callable> **out_properties, size_t *out_count) const
+void date_type::get_dynamic_dtype_properties(const std::pair<std::string, gfunc::callable> **out_properties, size_t *out_count) const
 {
-    *out_properties = NULL; //date_dtype_properties;
-    *out_count = 0; //sizeof(date_dtype_properties) / sizeof(date_dtype_properties[0]);
+    *out_properties = NULL; //date_type_properties;
+    *out_count = 0; //sizeof(date_type_properties) / sizeof(date_type_properties[0]);
 }
 
 ///////// functions on the dtype
@@ -232,7 +232,7 @@ static nd::array function_dtype_construct(const ndt::type& DYND_UNUSED(dt),
     nd::array day_as_int = day.ucast(ndt::make_dtype<int32_t>()).eval();
     nd::array result;
 
-    array_iter<1,3> iter(make_date_dtype(), result, year_as_int, month_as_int, day_as_int);
+    array_iter<1,3> iter(make_date_type(), result, year_as_int, month_as_int, day_as_int);
     if (!iter.empty()) {
         datetime::date_ymd ymd;
         do {
@@ -251,15 +251,15 @@ static nd::array function_dtype_construct(const ndt::type& DYND_UNUSED(dt),
     return result;
 }
 
-static pair<string, gfunc::callable> date_dtype_functions[] = {
+static pair<string, gfunc::callable> date_type_functions[] = {
     pair<string, gfunc::callable>("today", gfunc::make_callable(&function_dtype_today, "self")),
     pair<string, gfunc::callable>("__construct__", gfunc::make_callable(&function_dtype_construct, "self", "year", "month", "day"))
 };
 
-void date_dtype::get_dynamic_dtype_functions(const std::pair<std::string, gfunc::callable> **out_functions, size_t *out_count) const
+void date_type::get_dynamic_dtype_functions(const std::pair<std::string, gfunc::callable> **out_functions, size_t *out_count) const
 {
-    *out_functions = date_dtype_functions;
-    *out_count = sizeof(date_dtype_functions) / sizeof(date_dtype_functions[0]);
+    *out_functions = date_type_functions;
+    *out_count = sizeof(date_type_functions) / sizeof(date_type_functions[0]);
 }
 
 ///////// properties on the nd::array
@@ -282,7 +282,7 @@ static pair<string, gfunc::callable> date_array_properties[] = {
     pair<string, gfunc::callable>("day", gfunc::make_callable(&property_ndo_get_day, "self"))
 };
 
-void date_dtype::get_dynamic_array_properties(const std::pair<std::string, gfunc::callable> **out_properties, size_t *out_count) const
+void date_type::get_dynamic_array_properties(const std::pair<std::string, gfunc::callable> **out_properties, size_t *out_count) const
 {
     *out_properties = date_array_properties;
     *out_count = sizeof(date_array_properties) / sizeof(date_array_properties[0]);
@@ -313,7 +313,7 @@ static nd::array function_ndo_replace(const nd::array& n, int32_t year, int32_t 
                     day == numeric_limits<int32_t>::max()) {
         throw std::runtime_error("no parameters provided to date.replace, should provide at least one");
     }
-    return n.replace_udtype(make_unary_expr_dtype(make_date_dtype(), n.get_udtype(),
+    return n.replace_udtype(make_unary_expr_dtype(make_date_type(), n.get_udtype(),
                     make_replace_kernelgen(year, month, day)));
 }
 
@@ -325,7 +325,7 @@ static pair<string, gfunc::callable> date_array_functions[] = {
                     numeric_limits<int32_t>::max(), numeric_limits<int32_t>::max(), numeric_limits<int32_t>::max()))
 };
 
-void date_dtype::get_dynamic_array_functions(const std::pair<std::string, gfunc::callable> **out_functions, size_t *out_count) const
+void date_type::get_dynamic_array_functions(const std::pair<std::string, gfunc::callable> **out_functions, size_t *out_count) const
 {
     *out_functions = date_array_functions;
     *out_count = sizeof(date_array_functions) / sizeof(date_array_functions[0]);
@@ -426,7 +426,7 @@ namespace {
     };
 }
 
-size_t date_dtype::get_elwise_property_index(const std::string& property_name) const
+size_t date_type::get_elwise_property_index(const std::string& property_name) const
 {
     if (property_name == "year") {
         return dateprop_year;
@@ -449,7 +449,7 @@ size_t date_dtype::get_elwise_property_index(const std::string& property_name) c
     }
 }
 
-ndt::type date_dtype::get_elwise_property_dtype(size_t property_index,
+ndt::type date_type::get_elwise_property_dtype(size_t property_index,
             bool& out_readable, bool& out_writable) const
 {
     switch (property_index) {
@@ -467,7 +467,7 @@ ndt::type date_dtype::get_elwise_property_dtype(size_t property_index,
         case dateprop_struct:
             out_readable = true;
             out_writable = true;
-            return date_dtype::default_struct_type;
+            return date_type::default_struct_type;
         default:
             out_readable = false;
             out_writable = false;
@@ -475,7 +475,7 @@ ndt::type date_dtype::get_elwise_property_dtype(size_t property_index,
     }
 }
 
-size_t date_dtype::make_elwise_property_getter_kernel(
+size_t date_type::make_elwise_property_getter_kernel(
                 hierarchical_kernel *out, size_t offset_out,
                 const char *DYND_UNUSED(dst_metadata),
                 const char *DYND_UNUSED(src_metadata), size_t src_property_index,
@@ -509,7 +509,7 @@ size_t date_dtype::make_elwise_property_getter_kernel(
     }
 }
 
-size_t date_dtype::make_elwise_property_setter_kernel(
+size_t date_type::make_elwise_property_setter_kernel(
                 hierarchical_kernel *out, size_t offset_out,
                 const char *DYND_UNUSED(dst_metadata), size_t dst_property_index,
                 const char *DYND_UNUSED(src_metadata),

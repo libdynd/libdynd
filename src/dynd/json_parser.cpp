@@ -10,7 +10,7 @@
 #include <dynd/dtypes/fixed_dim_type.hpp>
 #include <dynd/dtypes/var_dim_type.hpp>
 #include <dynd/dtypes/cstruct_type.hpp>
-#include <dynd/dtypes/date_dtype.hpp>
+#include <dynd/dtypes/date_type.hpp>
 #include <dynd/kernels/string_numeric_assignment_kernels.hpp>
 
 using namespace std;
@@ -561,7 +561,7 @@ static void parse_datetime_json(const ndt::type& dt, const char *metadata, char 
     string val;
     if (parse_json_string(begin, end, val)) {
         if (dt.get_type_id() == date_type_id) {
-            const date_dtype *dd = static_cast<const date_dtype *>(dt.extended());
+            const date_type *dd = static_cast<const date_type *>(dt.extended());
             try {
                 dd->set_utf8_string(metadata, out_data, assign_error_fractional, val);
             } catch (const std::exception& e) {

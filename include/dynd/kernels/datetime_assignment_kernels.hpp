@@ -7,7 +7,7 @@
 #define _DYND__DATETIME_ASSIGNMENT_KERNELS_HPP_
 
 #include <dynd/kernels/assignment_kernels.hpp>
-#include <dynd/dtypes/date_dtype.hpp>
+#include <dynd/dtypes/date_type.hpp>
 
 namespace dynd {
 
