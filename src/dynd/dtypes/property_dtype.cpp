@@ -14,7 +14,7 @@ using namespace dynd;
 
 property_dtype::property_dtype(const ndt::type& operand_type, const std::string& property_name,
                 size_t property_index)
-    : base_expression_dtype(property_type_id, expression_kind,
+    : base_expression_type(property_type_id, expression_kind,
                     operand_type.get_data_size(), operand_type.get_data_alignment(), type_flag_none,
                     operand_type.get_metadata_size()),
             m_value_type(), m_operand_type(operand_type),
@@ -45,7 +45,7 @@ property_dtype::property_dtype(const ndt::type& operand_type, const std::string&
 
 property_dtype::property_dtype(const ndt::type& value_type, const ndt::type& operand_type,
                 const std::string& property_name, size_t property_index)
-    : base_expression_dtype(property_type_id, expression_kind,
+    : base_expression_type(property_type_id, expression_kind,
                     operand_type.get_data_size(), operand_type.get_data_alignment(), type_flag_none,
                     operand_type.get_metadata_size()),
             m_value_type(value_type), m_operand_type(operand_type),
@@ -252,7 +252,7 @@ ndt::type property_dtype::with_replaced_storage_type(const ndt::type& replacemen
 {
     if (m_operand_type.get_kind() == expression_kind) {
         return ndt::type(new property_dtype(
-                        static_cast<const base_expression_dtype *>(m_operand_type.extended())->with_replaced_storage_type(replacement_type),
+                        static_cast<const base_expression_type *>(m_operand_type.extended())->with_replaced_storage_type(replacement_type),
                         m_property_name), false);
     } else {
         if (m_operand_type != replacement_type.value_type()) {

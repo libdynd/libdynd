@@ -34,7 +34,7 @@ namespace dynd {
  *       +, -, *, /. The operand dtype defines the metadata, though,
  *       so a special dtype just for this purpose may be required.
  */
-class expr_dtype : public base_expression_dtype {
+class expr_dtype : public base_expression_type {
     ndt::type m_value_type, m_operand_type;
     const expr_kernel_generator *m_kgen;
 

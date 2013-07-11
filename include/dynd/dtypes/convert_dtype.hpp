@@ -17,7 +17,7 @@
 
 namespace dynd {
 
-class convert_dtype : public base_expression_dtype {
+class convert_dtype : public base_expression_type {
     ndt::type m_value_type, m_operand_type;
     assign_error_mode m_errmode;
     // These error modes may be set to assign_error_none if the
@@ -87,11 +87,11 @@ inline ndt::type make_convert_dtype(const ndt::type& value_type, const ndt::type
             return ndt::type(new convert_dtype(value_type, operand_type, errmode), false);
         } else if (value_type.storage_type() == operand_type.value_type()) {
             // No conversion required at the connection
-            return static_cast<const base_expression_dtype *>(
+            return static_cast<const base_expression_type *>(
                             value_type.extended())->with_replaced_storage_type(operand_type);
         } else {
             // A conversion required at the connection
-            return static_cast<const base_expression_dtype *>(
+            return static_cast<const base_expression_type *>(
                             value_type.extended())->with_replaced_storage_type(
                                 ndt::type(new convert_dtype(
                                     value_type.storage_type(), operand_type, errmode), false));

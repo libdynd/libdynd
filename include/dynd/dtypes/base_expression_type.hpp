@@ -13,14 +13,14 @@ namespace dynd {
 /**
  * Base class for all dtypes of expression_kind, and for the pointer_dtype.
  */
-class base_expression_dtype : public base_type {
+class base_expression_type : public base_type {
 public:
-    inline base_expression_dtype(type_id_t type_id, type_kind_t kind,
+    inline base_expression_type(type_id_t type_id, type_kind_t kind,
                     size_t data_size, size_t alignment, flags_type flags, size_t metadata_size, size_t undim=0)
         : base_type(type_id, kind, data_size, alignment, flags, metadata_size, undim)
     {}
 
-    virtual ~base_expression_dtype();
+    virtual ~base_expression_type();
 
     /**
      * Should return a reference to the dtype representing the value which

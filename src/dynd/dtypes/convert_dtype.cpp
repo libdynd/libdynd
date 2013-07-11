@@ -10,7 +10,7 @@ using namespace std;
 using namespace dynd;
 
 convert_dtype::convert_dtype(const ndt::type& value_type, const ndt::type& operand_type, assign_error_mode errmode)
-    : base_expression_dtype(convert_type_id, expression_kind, operand_type.get_data_size(),
+    : base_expression_type(convert_type_id, expression_kind, operand_type.get_data_size(),
                         operand_type.get_data_alignment(),
                         inherited_flags(value_type.get_flags(), operand_type.get_flags()),
                         operand_type.get_metadata_size(),
@@ -97,7 +97,7 @@ ndt::type convert_dtype::with_replaced_storage_type(const ndt::type& replacement
 {
     if (m_operand_type.get_kind() == expression_kind) {
         return ndt::type(new convert_dtype(m_value_type,
-                        static_cast<const base_expression_dtype *>(m_operand_type.extended())->with_replaced_storage_type(replacement_type),
+                        static_cast<const base_expression_type *>(m_operand_type.extended())->with_replaced_storage_type(replacement_type),
                         m_errmode), false);
     } else {
         if (m_operand_type != replacement_type.value_type()) {

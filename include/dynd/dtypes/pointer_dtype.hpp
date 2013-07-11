@@ -30,7 +30,7 @@ struct pointer_dtype_metadata {
     intptr_t offset;
 };
 
-class pointer_dtype : public base_expression_dtype {
+class pointer_dtype : public base_expression_type {
     ndt::type m_target_dtype;
     static ndt::type m_void_pointer_dtype;
 

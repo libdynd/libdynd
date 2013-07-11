@@ -12,7 +12,7 @@ using namespace std;
 using namespace dynd;
 
 byteswap_dtype::byteswap_dtype(const ndt::type& value_type)
-    : base_expression_dtype(byteswap_type_id, expression_kind, value_type.get_data_size(),
+    : base_expression_type(byteswap_type_id, expression_kind, value_type.get_data_size(),
                             value_type.get_data_alignment(), type_flag_scalar, 0),
                     m_value_type(value_type),
                     m_operand_type(make_fixedbytes_dtype(value_type.get_data_size(), value_type.get_data_alignment()))
@@ -23,7 +23,7 @@ byteswap_dtype::byteswap_dtype(const ndt::type& value_type)
 }
 
 byteswap_dtype::byteswap_dtype(const ndt::type& value_type, const ndt::type& operand_type)
-    : base_expression_dtype(byteswap_type_id, expression_kind, operand_type.get_data_size(),
+    : base_expression_type(byteswap_type_id, expression_kind, operand_type.get_data_size(),
                     operand_type.get_data_alignment(), type_flag_scalar, 0),
             m_value_type(value_type), m_operand_type(operand_type)
 {
@@ -88,7 +88,7 @@ ndt::type byteswap_dtype::with_replaced_storage_type(const ndt::type& replacemen
     } else {
         // With an expression operand, replace it farther down the chain
         return ndt::type(new byteswap_dtype(m_value_type,
-                reinterpret_cast<const base_expression_dtype *>(replacement_type.extended())->with_replaced_storage_type(replacement_type)), false);
+                reinterpret_cast<const base_expression_type *>(replacement_type.extended())->with_replaced_storage_type(replacement_type)), false);
     }
 }
 

@@ -11,7 +11,7 @@
 
 namespace dynd {
 
-class property_dtype : public base_expression_dtype {
+class property_dtype : public base_expression_type {
     ndt::type m_value_type, m_operand_type;
     bool m_readable, m_writable;
     // If this is true, the property is actually on

@@ -10,7 +10,7 @@
 #include <stdexcept>
 
 #include <dynd/dtypes/base_type.hpp>
-#include <dynd/dtypes/base_expression_dtype.hpp>
+#include <dynd/dtypes/base_expression_type.hpp>
 #include <dynd/dtypes/base_string_dtype.hpp>
 #include <dynd/dtypes/dynd_float16.hpp>
 #include <dynd/eval/eval_context.hpp>
@@ -316,7 +316,7 @@ public:
             return *this;
         } else {
             // All chaining happens in the operand_type
-            return static_cast<const base_expression_dtype *>(m_extended)->get_value_type();
+            return static_cast<const base_expression_type *>(m_extended)->get_value_type();
         }
     }
 
@@ -330,7 +330,7 @@ public:
         if (is_builtin() || m_extended->get_kind() != expression_kind) {
             return *this;
         } else {
-            return static_cast<const base_expression_dtype *>(m_extended)->get_operand_type();
+            return static_cast<const base_expression_type *>(m_extended)->get_operand_type();
         }
     }
 
@@ -345,9 +345,9 @@ public:
             return *this;
         } else {
             // Follow the operand type chain to get the storage type
-            const type* dt = &static_cast<const base_expression_dtype *>(m_extended)->get_operand_type();
+            const type* dt = &static_cast<const base_expression_type *>(m_extended)->get_operand_type();
             while (dt->get_kind() == expression_kind) {
-                dt = &static_cast<const base_expression_dtype *>(dt->m_extended)->get_operand_type();
+                dt = &static_cast<const base_expression_type *>(dt->m_extended)->get_operand_type();
             }
             return *dt;
         }

@@ -25,7 +25,7 @@ struct groupby_dtype_data {
  * array whose rows are the groups as specified by a categorical
  * type.
  */
-class groupby_dtype : public base_expression_dtype {
+class groupby_dtype : public base_expression_type {
     ndt::type m_value_type, m_operand_type, m_groups_type;
 
 public:

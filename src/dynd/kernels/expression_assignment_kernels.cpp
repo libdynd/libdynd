@@ -4,7 +4,7 @@
 //
 
 #include <dynd/type.hpp>
-#include <dynd/dtypes/base_expression_dtype.hpp>
+#include <dynd/dtypes/base_expression_type.hpp>
 #include <dynd/kernels/expression_assignment_kernels.hpp>
 
 using namespace std;
@@ -167,7 +167,7 @@ size_t dynd::make_expression_assignment_kernel(
                 const eval::eval_context *ectx)
 {
     if (dst_dt.get_kind() == expression_kind) {
-        const base_expression_dtype *dst_bed = static_cast<const base_expression_dtype *>(dst_dt.extended());
+        const base_expression_type *dst_bed = static_cast<const base_expression_type *>(dst_dt.extended());
         if (src_dt == dst_bed->get_value_type()) {
             // In this case, it's just a chain of value -> operand on the dst side
             const ndt::type& opdt = dst_bed->get_operand_type();
@@ -177,7 +177,7 @@ size_t dynd::make_expression_assignment_kernel(
                                 dst_metadata, src_metadata, kernreq, ectx);
             } else {
                 // Chain case, buffer one segment of the chain
-                const ndt::type& buffer_dt = static_cast<const base_expression_dtype *>(
+                const ndt::type& buffer_dt = static_cast<const base_expression_type *>(
                                     opdt.extended())->get_value_type();
                 out->ensure_capacity(offset_out + sizeof(buffered_kernel_extra));
                 buffered_kernel_extra *e = out->get_at<buffered_kernel_extra>(offset_out);
@@ -238,7 +238,7 @@ size_t dynd::make_expression_assignment_kernel(
                             kernreq, errmode, ectx);
         }
     } else {
-        const base_expression_dtype *src_bed = static_cast<const base_expression_dtype *>(src_dt.extended());
+        const base_expression_type *src_bed = static_cast<const base_expression_type *>(src_dt.extended());
         if (dst_dt == src_bed->get_value_type()) {
             // In this case, it's just a chain of operand -> value on the src side
             const ndt::type& opdt = src_bed->get_operand_type();
@@ -248,7 +248,7 @@ size_t dynd::make_expression_assignment_kernel(
                                 dst_metadata, src_metadata, kernreq, ectx);
             } else {
                 // Chain case, buffer one segment of the chain
-                const ndt::type& buffer_dt = static_cast<const base_expression_dtype *>(
+                const ndt::type& buffer_dt = static_cast<const base_expression_type *>(
                                 opdt.extended())->get_value_type();
                 out->ensure_capacity(offset_out + sizeof(buffered_kernel_extra));
                 buffered_kernel_extra *e = out->get_at<buffered_kernel_extra>(offset_out);

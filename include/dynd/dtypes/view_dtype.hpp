@@ -12,7 +12,7 @@
 
 namespace dynd {
 
-class view_dtype : public base_expression_dtype {
+class view_dtype : public base_expression_type {
     ndt::type m_value_type, m_operand_type;
 
 public:
@@ -74,7 +74,7 @@ inline ndt::type make_view_dtype(const ndt::type& value_type, const ndt::type& o
     } else {
         // When the value type has an expression_kind, we need to chain things together
         // so that the view operation happens just at the primitive level.
-        return static_cast<const base_expression_dtype *>(value_type.extended())->with_replaced_storage_type(
+        return static_cast<const base_expression_type *>(value_type.extended())->with_replaced_storage_type(
             ndt::type(new view_dtype(value_type.storage_type(), operand_type), false));
     }
 }

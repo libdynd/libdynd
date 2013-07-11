@@ -40,7 +40,7 @@ TEST(PointerDType, PointerToBuiltIn) {
     EXPECT_EQ(make_pointer_dtype<void>(), d.operand_type());
     EXPECT_EQ(make_pointer_dtype<void>(), d.storage_type());
     // As a special case, the pointer_dtype says it isn't an expression type,
-    // even though it is derived from base_expression_dtype
+    // even though it is derived from base_expression_type
     EXPECT_FALSE(d.is_expression());
 }
 

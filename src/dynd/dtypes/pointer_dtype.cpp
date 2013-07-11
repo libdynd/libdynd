@@ -20,7 +20,7 @@ ndt::type pointer_dtype::m_void_pointer_dtype(new void_pointer_dtype(), false);
 
 
 pointer_dtype::pointer_dtype(const ndt::type& target_dtype)
-    : base_expression_dtype(pointer_type_id, expression_kind, sizeof(void *),
+    : base_expression_type(pointer_type_id, expression_kind, sizeof(void *),
                     sizeof(void *),
                     inherited_flags(target_dtype.get_flags(), type_flag_zeroinit|type_flag_blockref),
                     sizeof(pointer_dtype_metadata) + target_dtype.get_metadata_size(),
@@ -56,7 +56,7 @@ void pointer_dtype::print_dtype(std::ostream& o) const
 
 bool pointer_dtype::is_expression() const
 {
-    // Even though the pointer is an instance of an base_expression_dtype,
+    // Even though the pointer is an instance of an base_expression_type,
     // we'll only call it an expression if the target is.
     return m_target_dtype.is_expression();
 }
