@@ -12,7 +12,7 @@
 using namespace std;
 using namespace dynd;
 
-ndt::type ndt::make_unaligned_dtype(const ndt::type& value_type)
+ndt::type ndt::make_unaligned_type(const ndt::type& value_type)
 {
     if (value_type.get_data_alignment() > 1) {
         // Only do something if it requires alignment

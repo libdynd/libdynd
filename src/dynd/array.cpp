@@ -1075,7 +1075,7 @@ nd::array nd::array::view_scalars(const ndt::type& scalar_dtype) const
             if ((((uintptr_t)data_ptr)&(scalar_dtype.get_data_alignment()-1)) == 0) {
                 result_dtype = make_strided_dim_type(scalar_dtype);
             } else {
-                result_dtype = make_strided_dim_type(make_unaligned_dtype(scalar_dtype));
+                result_dtype = make_strided_dim_type(make_unaligned_type(scalar_dtype));
             }
             array result(make_array_memory_block(result_dtype.extended()->get_metadata_size()));
             // Copy all the array metadata fields
