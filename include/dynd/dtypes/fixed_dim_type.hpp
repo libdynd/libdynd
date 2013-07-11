@@ -9,27 +9,27 @@
 #include <dynd/type.hpp>
 #include <dynd/dtype_assign.hpp>
 #include <dynd/dtypes/view_dtype.hpp>
-#include <dynd/dtypes/base_uniform_dim_dtype.hpp>
+#include <dynd/dtypes/base_uniform_dim_type.hpp>
 
 namespace dynd {
 
-struct fixed_dim_dtype_iterdata {
+struct fixed_dim_type_iterdata {
     iterdata_common common;
     char *data;
     intptr_t stride;
 };
 
-class fixed_dim_dtype : public base_uniform_dim_dtype {
+class fixed_dim_type : public base_uniform_dim_type {
     intptr_t m_stride;
     size_t m_dim_size;
     std::vector<std::pair<std::string, gfunc::callable> > m_array_properties, m_array_functions;
 
     void create_ndobject_properties();
 public:
-    fixed_dim_dtype(size_t dimension_size, const ndt::type& element_dtype);
-    fixed_dim_dtype(size_t dimension_size, const ndt::type& element_dtype, intptr_t stride);
+    fixed_dim_type(size_t dimension_size, const ndt::type& element_dtype);
+    fixed_dim_type(size_t dimension_size, const ndt::type& element_dtype, intptr_t stride);
 
-    virtual ~fixed_dim_dtype();
+    virtual ~fixed_dim_type();
 
     size_t get_default_data_size(size_t DYND_UNUSED(ndim), const intptr_t *DYND_UNUSED(shape)) const {
         return get_data_size();
@@ -116,15 +116,15 @@ public:
                     size_t *out_count) const;
 };
 
-inline ndt::type make_fixed_dim_dtype(size_t size, const ndt::type& element_dtype) {
-    return ndt::type(new fixed_dim_dtype(size, element_dtype), false);
+inline ndt::type make_fixed_dim_type(size_t size, const ndt::type& element_dtype) {
+    return ndt::type(new fixed_dim_type(size, element_dtype), false);
 }
 
-inline ndt::type make_fixed_dim_dtype(size_t size, const ndt::type& element_dtype, intptr_t stride) {
-    return ndt::type(new fixed_dim_dtype(size, element_dtype, stride), false);
+inline ndt::type make_fixed_dim_type(size_t size, const ndt::type& element_dtype, intptr_t stride) {
+    return ndt::type(new fixed_dim_type(size, element_dtype, stride), false);
 }
 
-ndt::type make_fixed_dim_dtype(size_t ndim, const intptr_t *shape, const ndt::type& uniform_dtype, const int *axis_perm);
+ndt::type make_fixed_dim_type(size_t ndim, const intptr_t *shape, const ndt::type& uniform_dtype, const int *axis_perm);
 
 } // namespace dynd
 

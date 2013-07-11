@@ -15,14 +15,14 @@ namespace dynd {
 /**
  * Base class for all array dimension dtypes. If a dtype
  * has kind uniform_dim_kind, it must be a subclass of
- * base_uniform_dim_dtype.
+ * base_uniform_dim_type.
  */
-class base_uniform_dim_dtype : public base_type {
+class base_uniform_dim_type : public base_type {
 protected:
     ndt::type m_element_dtype;
     size_t m_element_metadata_offset;
 public:
-    inline base_uniform_dim_dtype(type_id_t type_id, const ndt::type& element_dtype, size_t data_size,
+    inline base_uniform_dim_type(type_id_t type_id, const ndt::type& element_dtype, size_t data_size,
                     size_t alignment, size_t element_metadata_offset,
                     flags_type flags)
         : base_type(type_id, uniform_dim_kind, data_size,
@@ -32,7 +32,7 @@ public:
     {
     }
 
-    virtual ~base_uniform_dim_dtype();
+    virtual ~base_uniform_dim_type();
 
     /** The element dtype. */
     inline const ndt::type& get_element_type() const {

@@ -8,7 +8,7 @@
 
 #include <dynd/gfunc/callable.hpp>
 #include <dynd/dtypes/cstruct_type.hpp>
-#include <dynd/dtypes/fixed_dim_dtype.hpp>
+#include <dynd/dtypes/fixed_dim_type.hpp>
 #include <dynd/dtypes/void_pointer_dtype.hpp>
 #include <dynd/dtypes/string_type.hpp>
 #include <dynd/dtypes/dtype_dtype.hpp>
@@ -112,7 +112,7 @@ template <typename T> struct make_parameter_dtype {inline static ndt::type make(
 template <typename T> struct make_parameter_dtype<T &> : public make_parameter_dtype<T> {};
 template <typename T> struct make_parameter_dtype<const T> : public make_parameter_dtype<T> {};
 template <typename T, int N> struct make_parameter_dtype<T[N]> {inline static ndt::type make() {
-        return make_fixed_dim_dtype(N, ndt::make_dtype<T>());
+        return make_fixed_dim_type(N, ndt::make_dtype<T>());
     }};
 // Use void* to pass nd::array as a parameter, correctness currently will
 // rely on using them in the right context. To pass these properly will require

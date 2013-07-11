@@ -4,7 +4,7 @@
 //
 
 #include <dynd/gfunc/serialize.hpp>
-#include <dynd/dtypes/strided_dim_dtype.hpp>
+#include <dynd/dtypes/strided_dim_type.hpp>
 
 #include <blosc.h>
 
@@ -20,7 +20,7 @@ nd::array dynd::gfunc::serialize(const nd::array& val)
         ss << "dynd::gfunc::serialize is currently only a prototype, does not support dtype " << dt;
         throw runtime_error(ss.str());
     }
-    const strided_dim_dtype *sad = static_cast<const strided_dim_dtype *>(dt.extended());
+    const strided_dim_type *sad = static_cast<const strided_dim_type *>(dt.extended());
     const ndt::type& et = sad->get_element_type();
     if (!et.is_builtin()) {
         stringstream ss;

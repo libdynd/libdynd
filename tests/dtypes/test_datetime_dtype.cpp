@@ -11,7 +11,7 @@
 #include <dynd/array.hpp>
 #include <dynd/dtypes/datetime_dtype.hpp>
 #include <dynd/dtypes/property_dtype.hpp>
-#include <dynd/dtypes/strided_dim_dtype.hpp>
+#include <dynd/dtypes/strided_dim_type.hpp>
 #include <dynd/dtypes/fixedstring_type.hpp>
 #include <dynd/dtypes/string_type.hpp>
 #include <dynd/dtypes/convert_dtype.hpp>

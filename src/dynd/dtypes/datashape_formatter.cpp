@@ -5,9 +5,9 @@
 
 #include <dynd/dtypes/datashape_formatter.hpp>
 #include <dynd/dtypes/base_struct_type.hpp>
-#include <dynd/dtypes/strided_dim_dtype.hpp>
-#include <dynd/dtypes/fixed_dim_dtype.hpp>
-#include <dynd/dtypes/var_dim_dtype.hpp>
+#include <dynd/dtypes/strided_dim_type.hpp>
+#include <dynd/dtypes/fixed_dim_type.hpp>
+#include <dynd/dtypes/var_dim_type.hpp>
 #include <dynd/dtypes/string_type.hpp>
 #include <dynd/dtypes/fixedstring_type.hpp>
 
@@ -69,18 +69,18 @@ static void format_uniform_dim_datashape(std::ostream& o,
 {
     switch (dt.get_type_id()) {
         case strided_dim_type_id: {
-            const strided_dim_dtype *sad = static_cast<const strided_dim_dtype *>(dt.extended());
+            const strided_dim_type *sad = static_cast<const strided_dim_type *>(dt.extended());
             if (metadata) {
                 // If metadata is provided, use the actual dimension size
-                const strided_dim_dtype_metadata *md =
-                                reinterpret_cast<const strided_dim_dtype_metadata *>(metadata);
+                const strided_dim_type_metadata *md =
+                                reinterpret_cast<const strided_dim_type_metadata *>(metadata);
                 o << md->size << ", ";
                 // Allow data to keep going only if the dimension size is 1
                 if (md->size != 1) {
                     data = NULL;
                 }
                 format_datashape(o, sad->get_element_type(),
-                                metadata + sizeof(strided_dim_dtype_metadata), data,
+                                metadata + sizeof(strided_dim_type_metadata), data,
                                 indent, multiline, identifier);
             } else {
                 // If no metadata, use a symbol
@@ -92,7 +92,7 @@ static void format_uniform_dim_datashape(std::ostream& o,
             break;
         }
         case fixed_dim_type_id: {
-            const fixed_dim_dtype *fad = static_cast<const fixed_dim_dtype *>(dt.extended());
+            const fixed_dim_type *fad = static_cast<const fixed_dim_type *>(dt.extended());
             size_t dim_size = fad->get_fixed_dim_size();
             o << dim_size << ", ";
             // Allow data to keep going only if the dimension size is 1
@@ -103,11 +103,11 @@ static void format_uniform_dim_datashape(std::ostream& o,
             break;
         }
         case var_dim_type_id: {
-            const var_dim_dtype *vad = static_cast<const var_dim_dtype *>(dt.extended());
+            const var_dim_type *vad = static_cast<const var_dim_type *>(dt.extended());
             if (data == NULL) {
                 o << "var, ";
             } else {
-                const var_dim_dtype_data *d = reinterpret_cast<const var_dim_dtype_data *>(data);
+                const var_dim_type_data *d = reinterpret_cast<const var_dim_type_data *>(data);
                 if (d->begin == NULL) {
                     o << "var, ";
                 } else {
@@ -115,7 +115,7 @@ static void format_uniform_dim_datashape(std::ostream& o,
                 }
             }
             format_datashape(o, vad->get_element_type(),
-                            metadata ? (metadata + sizeof(var_dim_dtype_metadata)) : NULL, NULL,
+                            metadata ? (metadata + sizeof(var_dim_type_metadata)) : NULL, NULL,
                             indent, multiline, identifier);
             break;
         }

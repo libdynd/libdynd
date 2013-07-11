@@ -7,9 +7,9 @@
 #include <set>
 
 #include <dynd/dtypes/datashape_parser.hpp>
-#include <dynd/dtypes/strided_dim_dtype.hpp>
-#include <dynd/dtypes/var_dim_dtype.hpp>
-#include <dynd/dtypes/fixed_dim_dtype.hpp>
+#include <dynd/dtypes/strided_dim_type.hpp>
+#include <dynd/dtypes/var_dim_type.hpp>
+#include <dynd/dtypes/fixed_dim_type.hpp>
 #include <dynd/dtypes/cstruct_type.hpp>
 #include <dynd/dtypes/string_type.hpp>
 #include <dynd/dtypes/fixedstring_type.hpp>
@@ -505,11 +505,11 @@ static ndt::type parse_rhs_expression(const char *&begin, const char *end, map<s
         if (!shape.empty()) {
             for (ptrdiff_t i = (ptrdiff_t)shape.size() - 1; i >= 0; --i) {
                 if (shape[i] == -2) {
-                    result = make_strided_dim_dtype(result);
+                    result = make_strided_dim_type(result);
                 } else if (shape[i] == -1) {
-                    result = make_var_dim_dtype(result);
+                    result = make_var_dim_type(result);
                 } else {
-                    result = make_fixed_dim_dtype(shape[i], result);
+                    result = make_fixed_dim_type(shape[i], result);
                 }
             }
         }

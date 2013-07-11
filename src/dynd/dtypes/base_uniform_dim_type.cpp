@@ -4,11 +4,11 @@
 //
 
 #include <dynd/type.hpp>
-#include <dynd/dtypes/base_uniform_dim_dtype.hpp>
+#include <dynd/dtypes/base_uniform_dim_type.hpp>
 
 using namespace std;
 using namespace dynd;
 
 
-base_uniform_dim_dtype::~base_uniform_dim_dtype() {
+base_uniform_dim_type::~base_uniform_dim_type() {
 }

@@ -12,7 +12,7 @@
 
 #include <dynd/type.hpp>
 #include <dynd/array.hpp>
-#include <dynd/dtypes/strided_dim_dtype.hpp>
+#include <dynd/dtypes/strided_dim_type.hpp>
 
 
 namespace {
@@ -48,7 +48,7 @@ public:
     void get_shape(size_t ndim, size_t i, intptr_t *out_shape, const char *metadata) const;
 
     size_t get_category_count() const {
-        return (size_t)reinterpret_cast<const strided_dim_dtype_metadata *>(m_categories.get_ndo_meta())->size;
+        return (size_t)reinterpret_cast<const strided_dim_type_metadata *>(m_categories.get_ndo_meta())->size;
     }
 
     /**
@@ -74,7 +74,7 @@ public:
             throw std::runtime_error("category value is out of bounds");
         }
         return m_categories.get_readonly_originptr() +
-                    m_value_to_category_index[value] * reinterpret_cast<const strided_dim_dtype_metadata *>(m_categories.get_ndo_meta())->stride;
+                    m_value_to_category_index[value] * reinterpret_cast<const strided_dim_type_metadata *>(m_categories.get_ndo_meta())->stride;
     }
     /** Returns the metadata corresponding to data from get_category_data_from_value */
     const char *get_category_metadata() const;

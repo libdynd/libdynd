@@ -11,8 +11,8 @@
 #include <dynd/kernels/expr_kernel_generator.hpp>
 #include <dynd/kernels/elwise_expr_kernels.hpp>
 #include <dynd/shape_tools.hpp>
-#include <dynd/dtypes/strided_dim_dtype.hpp>
-#include <dynd/dtypes/var_dim_dtype.hpp>
+#include <dynd/dtypes/strided_dim_type.hpp>
+#include <dynd/dtypes/var_dim_type.hpp>
 #include <dynd/dtypes/expr_dtype.hpp>
 #include <dynd/dtypes/string_type.hpp>
 #include <dynd/kernels/string_algorithm_kernels.hpp>
@@ -259,9 +259,9 @@ nd::array apply_binary_operator(const nd::array *ops,
     ndt::type result_vdt = rdt;
     for (size_t j = 0; j != undim; ++j) {
         if (result_shape[undim - j - 1] == -1) {
-            result_vdt = make_var_dim_dtype(result_vdt);
+            result_vdt = make_var_dim_type(result_vdt);
         } else {
-            result_vdt = make_strided_dim_dtype(result_vdt);
+            result_vdt = make_strided_dim_type(result_vdt);
         }
     }
 

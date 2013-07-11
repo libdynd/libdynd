@@ -7,8 +7,8 @@
 
 #include <dynd/shape_tools.hpp>
 #include <dynd/exceptions.hpp>
-#include <dynd/dtypes/strided_dim_dtype.hpp>
-#include <dynd/dtypes/fixed_dim_dtype.hpp>
+#include <dynd/dtypes/strided_dim_type.hpp>
+#include <dynd/dtypes/fixed_dim_type.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -598,7 +598,7 @@ axis_order_classification_t dynd::classify_strided_axis_order(size_t current_str
 {
     switch (element_dt.get_type_id()) {
         case fixed_dim_type_id: {
-            const fixed_dim_dtype *edt = static_cast<const fixed_dim_dtype *>(element_dt.extended());
+            const fixed_dim_type *edt = static_cast<const fixed_dim_type *>(element_dt.extended());
             size_t estride = intptr_abs(edt->get_fixed_stride());
             if (estride != 0) {
                 axis_order_classification_t aoc;
@@ -631,8 +631,8 @@ axis_order_classification_t dynd::classify_strided_axis_order(size_t current_str
             }
         }
         case strided_dim_type_id: {
-            const strided_dim_dtype *edt = static_cast<const strided_dim_dtype *>(element_dt.extended());
-            const strided_dim_dtype_metadata *emd = reinterpret_cast<const strided_dim_dtype_metadata *>(element_metadata);
+            const strided_dim_type *edt = static_cast<const strided_dim_type *>(element_dt.extended());
+            const strided_dim_type_metadata *emd = reinterpret_cast<const strided_dim_type_metadata *>(element_metadata);
             size_t estride = intptr_abs(emd->stride);
             if (estride != 0) {
                 axis_order_classification_t aoc;
@@ -640,7 +640,7 @@ axis_order_classification_t dynd::classify_strided_axis_order(size_t current_str
                 if (edt->get_undim() > 1) {
                     aoc = classify_strided_axis_order(current_stride,
                                 edt->get_element_type(),
-                                element_metadata + sizeof(strided_dim_dtype_metadata));
+                                element_metadata + sizeof(strided_dim_type_metadata));
                 } else {
                     aoc = axis_order_none;
                 }
@@ -658,7 +658,7 @@ axis_order_classification_t dynd::classify_strided_axis_order(size_t current_str
                 // be zero when the dimension size is one)
                 return classify_strided_axis_order(current_stride,
                                 edt->get_element_type(),
-                                element_metadata + sizeof(strided_dim_dtype_metadata));
+                                element_metadata + sizeof(strided_dim_type_metadata));
             } else {
                 // There was only one dimension with a nonzero stride
                 return axis_order_none;

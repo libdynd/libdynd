@@ -5,9 +5,9 @@
 
 #include <dynd/array.hpp>
 #include <dynd/ndobject_iter.hpp>
-#include <dynd/dtypes/strided_dim_dtype.hpp>
-#include <dynd/dtypes/var_dim_dtype.hpp>
-#include <dynd/dtypes/fixed_dim_dtype.hpp>
+#include <dynd/dtypes/strided_dim_type.hpp>
+#include <dynd/dtypes/var_dim_type.hpp>
+#include <dynd/dtypes/fixed_dim_type.hpp>
 #include <dynd/dtypes/dtype_alignment.hpp>
 #include <dynd/dtypes/view_dtype.hpp>
 #include <dynd/dtypes/string_type.hpp>
@@ -60,9 +60,9 @@ nd::array nd::make_strided_array(const ndt::type& uniform_dtype, size_t ndim, co
     bool any_variable_dims = false;
     for (intptr_t i = ndim-1; i >= 0; --i) {
         if (shape[i] >= 0) {
-            array_type = make_strided_dim_dtype(array_type);
+            array_type = make_strided_dim_type(array_type);
         } else {
-            array_type = make_var_dim_dtype(array_type);
+            array_type = make_var_dim_type(array_type);
             any_variable_dims = true;
         }
     }
@@ -93,7 +93,7 @@ nd::array nd::make_strided_array(const ndt::type& uniform_dtype, size_t ndim, co
 
     if (!any_variable_dims) {
         // Fill in the array metadata with strides and sizes
-        strided_dim_dtype_metadata *meta = reinterpret_cast<strided_dim_dtype_metadata *>(ndo + 1);
+        strided_dim_type_metadata *meta = reinterpret_cast<strided_dim_type_metadata *>(ndo + 1);
         // Use the default construction to handle the uniform_dtype's metadata
         intptr_t stride = uniform_dtype.get_data_size();
         if (stride == 0) {
@@ -142,7 +142,7 @@ nd::array nd::make_strided_array_from_data(const ndt::type& uniform_dtype, size_
         throw runtime_error(ss.str());
     }
 
-    ndt::type array_type = make_strided_dim_dtype(uniform_dtype, ndim);
+    ndt::type array_type = make_strided_dim_type(uniform_dtype, ndim);
 
     // Allocate the array metadata and data in one memory block
     memory_block_ptr result = make_array_memory_block(array_type.extended()->get_metadata_size());
@@ -156,7 +156,7 @@ nd::array nd::make_strided_array_from_data(const ndt::type& uniform_dtype, size_
     ndo->m_flags = access_flags;
 
     // Fill in the array metadata with the shape and strides
-    strided_dim_dtype_metadata *meta = reinterpret_cast<strided_dim_dtype_metadata *>(ndo + 1);
+    strided_dim_type_metadata *meta = reinterpret_cast<strided_dim_type_metadata *>(ndo + 1);
     for (size_t i = 0; i < ndim; ++i) {
         intptr_t dim_size = shape[i];
         meta[i].stride = dim_size > 1 ? strides[i] : 0;
@@ -235,7 +235,7 @@ nd::array nd::make_utf8_array_array(const char **cstr_array, size_t array_size)
     ndt::type dt = make_string_type(string_encoding_utf_8);
     nd::array result = nd::make_strided_array(array_size, dt);
     // Get the allocator for the output string dtype
-    const string_type_metadata *md = reinterpret_cast<const string_type_metadata *>(result.get_ndo_meta() + sizeof(strided_dim_dtype_metadata));
+    const string_type_metadata *md = reinterpret_cast<const string_type_metadata *>(result.get_ndo_meta() + sizeof(strided_dim_type_metadata));
     memory_block_data *dst_memblock = md->blockref;
     memory_block_pod_allocator_api *allocator = get_memory_block_pod_allocator_api(dst_memblock);
     char **out_data = reinterpret_cast<char **>(result.get_ndo()->m_data_pointer);
@@ -376,7 +376,7 @@ nd::array::array(const ndt::type& dt)
 
 nd::array nd::detail::make_from_vec<ndt::type>::make(const std::vector<ndt::type>& vec)
 {
-    ndt::type dt = make_strided_dim_dtype(make_dtype_dtype());
+    ndt::type dt = make_strided_dim_type(make_dtype_dtype());
     char *data_ptr = NULL;
     array result(make_array_memory_block(dt.extended()->get_metadata_size(),
                     sizeof(dtype_dtype_data) * vec.size(),
@@ -388,7 +388,7 @@ nd::array nd::detail::make_from_vec<ndt::type>::make(const std::vector<ndt::type
     preamble->m_dtype = dt.release();
     preamble->m_flags = read_access_flag | immutable_access_flag;
     // The metadata for the strided and string parts of the dtype
-    strided_dim_dtype_metadata *sa_md = reinterpret_cast<strided_dim_dtype_metadata *>(
+    strided_dim_type_metadata *sa_md = reinterpret_cast<strided_dim_type_metadata *>(
                                             result.get_ndo_meta());
     sa_md->size = vec.size();
     sa_md->stride = vec.empty() ? 0 : sizeof(dtype_dtype_data);
@@ -408,7 +408,7 @@ nd::array nd::detail::make_from_vec<std::string>::make(const std::vector<std::st
         total_string_size += vec[i].size();
     }
 
-    ndt::type dt = make_strided_dim_dtype(make_string_type(string_encoding_utf_8));
+    ndt::type dt = make_strided_dim_type(make_string_type(string_encoding_utf_8));
     char *data_ptr = NULL;
     // Make an array memory block which contains both the string pointers and
     // the string data
@@ -423,7 +423,7 @@ nd::array nd::detail::make_from_vec<std::string>::make(const std::vector<std::st
     preamble->m_dtype = dt.release();
     preamble->m_flags = read_access_flag | immutable_access_flag;
     // The metadata for the strided and string parts of the dtype
-    strided_dim_dtype_metadata *sa_md = reinterpret_cast<strided_dim_dtype_metadata *>(
+    strided_dim_type_metadata *sa_md = reinterpret_cast<strided_dim_type_metadata *>(
                                             result.get_ndo_meta());
     sa_md->size = vec.size();
     sa_md->stride = vec.empty() ? 0 : sizeof(string_type_data);
@@ -671,7 +671,7 @@ nd::array nd::array::eval(const eval::eval_context *ectx) const
         array result(make_array_memory_block(dt, ndim, shape.get()));
         if (dt.get_type_id() == strided_dim_type_id) {
             // Reorder strides of output strided dimensions in a KEEPORDER fashion
-            static_cast<const strided_dim_dtype *>(
+            static_cast<const strided_dim_type *>(
                             dt.extended())->reorder_default_constructed_strides(
                                             result.get_ndo_meta(), get_dtype(), get_ndo_meta());
         }
@@ -695,7 +695,7 @@ nd::array nd::array::eval_immutable(const eval::eval_context *ectx) const
         array result(make_array_memory_block(dt, ndim, shape.get()));
         if (dt.get_type_id() == strided_dim_type_id) {
             // Reorder strides of output strided dimensions in a KEEPORDER fashion
-            static_cast<const strided_dim_dtype *>(
+            static_cast<const strided_dim_type *>(
                             dt.extended())->reorder_default_constructed_strides(
                                             result.get_ndo_meta(), get_dtype(), get_ndo_meta());
         }
@@ -716,7 +716,7 @@ nd::array nd::array::eval_copy(const eval::eval_context *ectx,
     array result(make_array_memory_block(dt, ndim, shape.get()));
     if (dt.get_type_id() == strided_dim_type_id) {
         // Reorder strides of output strided dimensions in a KEEPORDER fashion
-        static_cast<const strided_dim_dtype *>(
+        static_cast<const strided_dim_type *>(
                         dt.extended())->reorder_default_constructed_strides(
                                         result.get_ndo_meta(), get_dtype(), get_ndo_meta());
     }
@@ -872,8 +872,8 @@ namespace {
                     ndt::type child_dt, child_replacement_dt;
                     switch (dt.get_type_id()) {
                         case fixed_dim_type_id: {
-                            const fixed_dim_dtype *dt_fdd = static_cast<const fixed_dim_dtype *>(dt.extended());
-                            const fixed_dim_dtype *r_fdd = static_cast<const fixed_dim_dtype *>(e->replacement_dt.extended());
+                            const fixed_dim_type *dt_fdd = static_cast<const fixed_dim_type *>(dt.extended());
+                            const fixed_dim_type *r_fdd = static_cast<const fixed_dim_type *>(e->replacement_dt.extended());
                             if (dt_fdd->get_fixed_dim_size() == r_fdd->get_fixed_dim_size() &&
                                     dt_fdd->get_fixed_stride() == r_fdd->get_fixed_stride()) {
                                 can_keep_dim = true;
@@ -884,10 +884,10 @@ namespace {
                         }
                         case strided_dim_type_id:
                         case var_dim_type_id: {
-                            const base_uniform_dim_dtype *dt_budd =
-                                            static_cast<const base_uniform_dim_dtype *>(dt.extended());
-                            const base_uniform_dim_dtype *r_budd =
-                                            static_cast<const base_uniform_dim_dtype *>(e->replacement_dt.extended());
+                            const base_uniform_dim_type *dt_budd =
+                                            static_cast<const base_uniform_dim_type *>(dt.extended());
+                            const base_uniform_dim_type *r_budd =
+                                            static_cast<const base_uniform_dim_type *>(e->replacement_dt.extended());
                             can_keep_dim = true;
                             child_dt = dt_budd->get_element_type();
                             child_replacement_dt = r_budd->get_element_type();
@@ -1055,8 +1055,8 @@ nd::array nd::array::view_scalars(const ndt::type& scalar_dtype) const
     // First check if we're dealing with a simple one dimensional block of memory we can reinterpret
     // at will.
     if (uniform_ndim == 1 && array_type.get_type_id() == strided_dim_type_id) {
-        const strided_dim_dtype *sad = static_cast<const strided_dim_dtype *>(array_type.extended());
-        const strided_dim_dtype_metadata *md = reinterpret_cast<const strided_dim_dtype_metadata *>(get_ndo_meta());
+        const strided_dim_type *sad = static_cast<const strided_dim_type *>(array_type.extended());
+        const strided_dim_type_metadata *md = reinterpret_cast<const strided_dim_type_metadata *>(get_ndo_meta());
         const ndt::type& edt = sad->get_element_type();
         if (edt.is_pod() && (intptr_t)edt.get_data_size() == md->stride &&
                     sad->get_element_type().get_kind() != expression_kind) {
@@ -1073,9 +1073,9 @@ nd::array nd::array::view_scalars(const ndt::type& scalar_dtype) const
             char *data_ptr = get_ndo()->m_data_pointer;
             ndt::type result_dtype;
             if ((((uintptr_t)data_ptr)&(scalar_dtype.get_data_alignment()-1)) == 0) {
-                result_dtype = make_strided_dim_dtype(scalar_dtype);
+                result_dtype = make_strided_dim_type(scalar_dtype);
             } else {
-                result_dtype = make_strided_dim_dtype(make_unaligned_dtype(scalar_dtype));
+                result_dtype = make_strided_dim_type(make_unaligned_dtype(scalar_dtype));
             }
             array result(make_array_memory_block(result_dtype.extended()->get_metadata_size()));
             // Copy all the array metadata fields
@@ -1089,7 +1089,7 @@ nd::array nd::array::view_scalars(const ndt::type& scalar_dtype) const
             result.get_ndo()->m_dtype = result_dtype.release();
             result.get_ndo()->m_flags = get_ndo()->m_flags;
             // The result has one strided ndarray field
-            strided_dim_dtype_metadata *result_md = reinterpret_cast<strided_dim_dtype_metadata *>(result.get_ndo_meta());
+            strided_dim_type_metadata *result_md = reinterpret_cast<strided_dim_type_metadata *>(result.get_ndo_meta());
             result_md->size = nbytes / scalar_dtype.get_data_size();
             result_md->stride = scalar_dtype.get_data_size();
             return result;
@@ -1197,7 +1197,7 @@ nd::array nd::eval_raw_copy(const ndt::type& dt, const char *metadata, const cha
         result.set(make_array_memory_block(cdt, undim, shape.get()));
         // Reorder strides of output strided dimensions in a KEEPORDER fashion
         if (dt.get_type_id() == strided_dim_type_id) {
-            static_cast<const strided_dim_dtype *>(
+            static_cast<const strided_dim_type *>(
                         cdt.extended())->reorder_default_constructed_strides(result.get_ndo_meta(),
                                     dt, metadata);
         }
@@ -1245,7 +1245,7 @@ nd::array nd::empty_like(const nd::array& rhs, const ndt::type& uniform_dtype)
         array result(make_strided_array(uniform_dtype, undim, shape.get()));
         // Reorder strides of output strided dimensions in a KEEPORDER fashion
         if (result.get_dtype().get_type_id() == strided_dim_type_id) {
-            static_cast<const strided_dim_dtype *>(
+            static_cast<const strided_dim_type *>(
                         result.get_dtype().extended())->reorder_default_constructed_strides(
                                         result.get_ndo_meta(),
                                         rhs.get_dtype(), rhs.get_ndo_meta());
@@ -1272,7 +1272,7 @@ nd::array nd::empty_like(const nd::array& rhs)
         nd::array result(make_strided_array(dt.get_udtype(), undim, shape.get()));
         // Reorder strides of output strided dimensions in a KEEPORDER fashion
         if (result.get_dtype().get_type_id() == strided_dim_type_id) {
-            static_cast<const strided_dim_dtype *>(
+            static_cast<const strided_dim_type *>(
                         result.get_dtype().extended())->reorder_default_constructed_strides(
                                         result.get_ndo_meta(),
                                         rhs.get_dtype(), rhs.get_ndo_meta());
@@ -1309,7 +1309,7 @@ intptr_t nd::binary_search(const nd::array& n, const char *metadata, const char 
         }
 
         const char *n_data = n.get_readonly_originptr();
-        intptr_t n_stride = reinterpret_cast<const strided_dim_dtype_metadata *>(n.get_ndo_meta())->stride;
+        intptr_t n_stride = reinterpret_cast<const strided_dim_type_metadata *>(n.get_ndo_meta())->stride;
         intptr_t first = 0, last = n.get_dim_size();
         while (first < last) {
             intptr_t trial = first + (last - first) / 2;
@@ -1351,7 +1351,7 @@ intptr_t nd::binary_search(const nd::array& n, const char *metadata, const char 
         }
 
         const char *n_data = n.get_readonly_originptr();
-        intptr_t n_stride = reinterpret_cast<const strided_dim_dtype_metadata *>(n.get_ndo_meta())->stride;
+        intptr_t n_stride = reinterpret_cast<const strided_dim_type_metadata *>(n.get_ndo_meta())->stride;
         intptr_t first = 0, last = n.get_dim_size();
         while (first < last) {
             intptr_t trial = first + (last - first) / 2;

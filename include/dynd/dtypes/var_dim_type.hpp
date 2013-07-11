@@ -7,14 +7,14 @@
 #define _DYND__VAR_DIM_TYPE_HPP_
 
 #include <dynd/type.hpp>
-#include <dynd/dtypes/base_uniform_dim_dtype.hpp>
+#include <dynd/dtypes/base_uniform_dim_type.hpp>
 #include <dynd/dtype_assign.hpp>
 #include <dynd/dtypes/view_dtype.hpp>
 #include <dynd/string_encodings.hpp>
 
 namespace dynd {
 
-struct var_dim_dtype_metadata {
+struct var_dim_type_metadata {
     /**
      * A reference to the memory block which contains the array's data.
      */
@@ -24,20 +24,20 @@ struct var_dim_dtype_metadata {
     intptr_t offset;
 };
 
-struct var_dim_dtype_data {
+struct var_dim_type_data {
     char *begin;
     size_t size;
 };
 
-class var_dim_dtype : public base_uniform_dim_dtype {
+class var_dim_type : public base_uniform_dim_type {
     std::vector<std::pair<std::string, gfunc::callable> > m_array_properties, m_array_functions;
 public:
-    var_dim_dtype(const ndt::type& element_dtype);
+    var_dim_type(const ndt::type& element_dtype);
 
-    virtual ~var_dim_dtype();
+    virtual ~var_dim_type();
 
     size_t get_default_data_size(size_t DYND_UNUSED(ndim), const intptr_t *DYND_UNUSED(shape)) const {
-        return sizeof(var_dim_dtype_data);
+        return sizeof(var_dim_type_data);
     }
 
 
@@ -115,8 +115,8 @@ public:
                     size_t *out_count) const;
 };
 
-inline ndt::type make_var_dim_dtype(const ndt::type& element_dtype) {
-    return ndt::type(new var_dim_dtype(element_dtype), false);
+inline ndt::type make_var_dim_type(const ndt::type& element_dtype) {
+    return ndt::type(new var_dim_type(element_dtype), false);
 }
 
 } // namespace dynd

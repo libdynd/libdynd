@@ -11,7 +11,7 @@
 #include <dynd/array.hpp>
 #include <dynd/dtypes/string_type.hpp>
 #include <dynd/dtypes/bytes_dtype.hpp>
-#include <dynd/dtypes/strided_dim_dtype.hpp>
+#include <dynd/dtypes/strided_dim_type.hpp>
 #include <dynd/dtypes/fixedstring_type.hpp>
 #include <dynd/dtypes/convert_dtype.hpp>
 #include <dynd/json_parser.hpp>
@@ -78,7 +78,7 @@ TEST(StringDType, ArrayCreation) {
     // An array of UTF8 strings
     const char *i0[5] = {"this", "is", "a", "test", "of strings that are various sizes"};
     a = i0;
-    EXPECT_EQ(make_strided_dim_dtype(make_string_type(string_encoding_utf_8)), a.get_dtype());
+    EXPECT_EQ(make_strided_dim_type(make_string_type(string_encoding_utf_8)), a.get_dtype());
     EXPECT_EQ(a.get_shape()[0], 5);
     EXPECT_EQ("this", a(0).as<string>());
     EXPECT_EQ("is", a(1).as<string>());

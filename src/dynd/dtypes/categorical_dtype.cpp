@@ -11,7 +11,7 @@
 #include <dynd/dtypes/categorical_dtype.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/kernels/comparison_kernels.hpp>
-#include <dynd/dtypes/strided_dim_dtype.hpp>
+#include <dynd/dtypes/strided_dim_type.hpp>
 #include <dynd/dtypes/convert_dtype.hpp>
 #include <dynd/gfunc/make_callable.hpp>
 
@@ -174,12 +174,12 @@ static nd::array make_sorted_categories(const set<const char *, cmp>& uniques, c
     nd::array categories = nd::make_strided_array(uniques.size(), udtype);
     assignment_kernel k;
     make_assignment_kernel(&k, 0,
-                    udtype, categories.get_ndo_meta() + sizeof(strided_dim_dtype_metadata),
+                    udtype, categories.get_ndo_meta() + sizeof(strided_dim_type_metadata),
                     udtype, metadata,
                     kernel_request_single, assign_error_default,
                     &eval::default_eval_context);
 
-    intptr_t stride = reinterpret_cast<const strided_dim_dtype_metadata *>(categories.get_ndo_meta())->stride;
+    intptr_t stride = reinterpret_cast<const strided_dim_type_metadata *>(categories.get_ndo_meta())->stride;
     char *dst_ptr = categories.get_readwrite_originptr();
     for (set<const char *, cmp>::const_iterator it = uniques.begin(); it != uniques.end(); ++it) {
         k(dst_ptr, *it);
@@ -222,9 +222,9 @@ categorical_dtype::categorical_dtype(const nd::array& categories, bool presorted
         }
 
         category_count = categories.get_dim_size();
-        intptr_t categories_stride = reinterpret_cast<const strided_dim_dtype_metadata *>(categories.get_ndo_meta())->stride;
+        intptr_t categories_stride = reinterpret_cast<const strided_dim_type_metadata *>(categories.get_ndo_meta())->stride;
 
-        const char *categories_element_metadata = categories.get_ndo_meta() + sizeof(strided_dim_dtype_metadata);
+        const char *categories_element_metadata = categories.get_ndo_meta() + sizeof(strided_dim_type_metadata);
         comparison_kernel k;
         ::make_comparison_kernel(&k, 0,
                         m_category_type, categories_element_metadata,
@@ -308,7 +308,7 @@ void categorical_dtype::print_data(std::ostream& o, const char *metadata, const 
 void categorical_dtype::print_dtype(std::ostream& o) const
 {
     size_t category_count = get_category_count();
-    const char *metadata = m_categories.get_ndo_meta() + sizeof(strided_dim_dtype_metadata);
+    const char *metadata = m_categories.get_ndo_meta() + sizeof(strided_dim_type_metadata);
 
     o << "categorical<" << m_category_type;
     o << ", [";

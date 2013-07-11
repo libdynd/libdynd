@@ -140,7 +140,7 @@ enum dtype_flags_t {
     // Memory of this dtype should be zero-initialized
     type_flag_zeroinit = 0x00000002,
     // Instances of this dtype point into other memory
-    // blocks, e.g. string_type, var_dim_dtype.
+    // blocks, e.g. string_type, var_dim_type.
     type_flag_blockref = 0x00000004,
     // Memory of this type must be destroyed,
     // e.g. it might hold a reference count or similar state

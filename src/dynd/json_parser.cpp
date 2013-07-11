@@ -7,8 +7,8 @@
 #include <dynd/dtypes/base_bytes_type.hpp>
 #include <dynd/dtypes/string_type.hpp>
 #include <dynd/dtypes/json_dtype.hpp>
-#include <dynd/dtypes/fixed_dim_dtype.hpp>
-#include <dynd/dtypes/var_dim_dtype.hpp>
+#include <dynd/dtypes/fixed_dim_type.hpp>
+#include <dynd/dtypes/var_dim_type.hpp>
 #include <dynd/dtypes/cstruct_type.hpp>
 #include <dynd/dtypes/date_dtype.hpp>
 #include <dynd/kernels/string_numeric_assignment_kernels.hpp>
@@ -339,7 +339,7 @@ static void skip_json_value(const char *&begin, const char *end)
 static void parse_fixed_dim_json(const ndt::type& dt, const char *metadata, char *out_data,
                 const char *&begin, const char *end)
 {
-    const fixed_dim_dtype *fad = static_cast<const fixed_dim_dtype *>(dt.extended());
+    const fixed_dim_type *fad = static_cast<const fixed_dim_type *>(dt.extended());
     intptr_t size = fad->get_fixed_dim_size();
     intptr_t stride = fad->get_fixed_stride();
 
@@ -360,12 +360,12 @@ static void parse_fixed_dim_json(const ndt::type& dt, const char *metadata, char
 static void parse_var_dim_json(const ndt::type& dt, const char *metadata, char *out_data,
                 const char *&begin, const char *end)
 {
-    const var_dim_dtype *vad = static_cast<const var_dim_dtype *>(dt.extended());
-    const var_dim_dtype_metadata *md = reinterpret_cast<const var_dim_dtype_metadata *>(metadata);
+    const var_dim_type *vad = static_cast<const var_dim_type *>(dt.extended());
+    const var_dim_type_metadata *md = reinterpret_cast<const var_dim_type_metadata *>(metadata);
     intptr_t stride = md->stride;
     const ndt::type& element_dtype = vad->get_element_type();
 
-    var_dim_dtype_data *out = reinterpret_cast<var_dim_dtype_data *>(out_data);
+    var_dim_type_data *out = reinterpret_cast<var_dim_type_data *>(out_data);
     char *out_end = NULL;
 
     memory_block_pod_allocator_api *allocator = get_memory_block_pod_allocator_api(md->blockref);
@@ -386,7 +386,7 @@ static void parse_var_dim_json(const ndt::type& dt, const char *metadata, char *
             }
             ++size;
             out->size = size;
-            parse_json(element_dtype, metadata + sizeof(var_dim_dtype_metadata),
+            parse_json(element_dtype, metadata + sizeof(var_dim_type_metadata),
                             out->begin + (size-1) * stride, begin, end);
             if (!parse_token(begin, end, ",")) {
                 break;

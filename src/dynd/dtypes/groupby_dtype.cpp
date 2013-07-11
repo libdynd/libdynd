@@ -9,8 +9,8 @@
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/dtypes/cstruct_type.hpp>
 #include <dynd/dtypes/pointer_dtype.hpp>
-#include <dynd/dtypes/fixed_dim_dtype.hpp>
-#include <dynd/dtypes/var_dim_dtype.hpp>
+#include <dynd/dtypes/fixed_dim_type.hpp>
+#include <dynd/dtypes/var_dim_type.hpp>
 #include <dynd/dtypes/categorical_dtype.hpp>
 #include <dynd/ndobject_iter.hpp>
 #include <dynd/gfunc/make_callable.hpp>
@@ -41,8 +41,8 @@ groupby_dtype::groupby_dtype(const ndt::type& data_values_dtype,
                     make_pointer_dtype(by_values_dtype), "by");
     m_members.metadata_size = m_operand_type.get_metadata_size();
     const categorical_dtype *cd = static_cast<const categorical_dtype *>(m_groups_type.extended());
-    m_value_type = make_fixed_dim_dtype(cd->get_category_count(),
-                    make_var_dim_dtype(data_values_dtype.at_single(0)));
+    m_value_type = make_fixed_dim_type(cd->get_category_count(),
+                    make_var_dim_type(data_values_dtype.at_single(0)));
     m_members.flags = inherited_flags(m_value_type.get_flags(), m_operand_type.get_flags());
 }
 
@@ -164,10 +164,10 @@ namespace {
                             by_values_dt, by_values_origin, by_values_stride, by_values_size);
 
             const ndt::type& result_dt = gd->get_value_type();
-            const fixed_dim_dtype *fad = static_cast<const fixed_dim_dtype *>(result_dt.extended());
+            const fixed_dim_type *fad = static_cast<const fixed_dim_type *>(result_dt.extended());
             intptr_t fad_stride = fad->get_fixed_stride();
-            const var_dim_dtype *vad = static_cast<const var_dim_dtype *>(fad->get_element_type().extended());
-            const var_dim_dtype_metadata *vad_md = reinterpret_cast<const var_dim_dtype_metadata *>(e->dst_metadata);
+            const var_dim_type *vad = static_cast<const var_dim_type *>(fad->get_element_type().extended());
+            const var_dim_type_metadata *vad_md = reinterpret_cast<const var_dim_type_metadata *>(e->dst_metadata);
             if (vad_md->offset != 0) {
                 throw runtime_error("dynd groupby: destination var_dim offset must be zero to allocate output");
             }
@@ -196,9 +196,9 @@ namespace {
             vector<char *> cat_pointers(cat_sizes.size());
             for (size_t i = 0, i_end = cat_pointers.size(); i != i_end; ++i) {
                 cat_pointers[i] = out_begin;
-                reinterpret_cast<var_dim_dtype_data *>(dst + i * fad_stride)->begin = out_begin;
+                reinterpret_cast<var_dim_type_data *>(dst + i * fad_stride)->begin = out_begin;
                 size_t csize = cat_sizes[i];
-                reinterpret_cast<var_dim_dtype_data *>(dst + i * fad_stride)->size = csize;
+                reinterpret_cast<var_dim_type_data *>(dst + i * fad_stride)->size = csize;
                 out_begin += csize * vad_stride;
             }
 
@@ -276,10 +276,10 @@ size_t groupby_dtype::make_operand_to_value_assignment_kernel(
 
     // The following is the setup for copying a single 'data' value to the output
     // The destination element type and metadata
-    const ndt::type& dst_element_dtype = static_cast<const var_dim_dtype *>(
-                    static_cast<const fixed_dim_dtype *>(m_value_type.extended())->get_element_type().extended()
+    const ndt::type& dst_element_dtype = static_cast<const var_dim_type *>(
+                    static_cast<const fixed_dim_type *>(m_value_type.extended())->get_element_type().extended()
                     )->get_element_type();
-    const char *dst_element_metadata = dst_metadata + 0 + sizeof(var_dim_dtype_metadata);
+    const char *dst_element_metadata = dst_metadata + 0 + sizeof(var_dim_type_metadata);
     // Get source element type and metadata
     ndt::type src_element_dtype = m_operand_type;
     const char *src_element_metadata = e->src_metadata;

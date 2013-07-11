@@ -11,8 +11,8 @@
 #include "inc_gtest.hpp"
 
 #include <dynd/json_parser.hpp>
-#include <dynd/dtypes/var_dim_dtype.hpp>
-#include <dynd/dtypes/fixed_dim_dtype.hpp>
+#include <dynd/dtypes/var_dim_type.hpp>
+#include <dynd/dtypes/fixed_dim_type.hpp>
 #include <dynd/dtypes/cstruct_type.hpp>
 #include <dynd/dtypes/date_dtype.hpp>
 #include <dynd/dtypes/string_type.hpp>
@@ -114,32 +114,32 @@ TEST(JSONParser, String) {
 TEST(JSONParser, ListBools) {
     nd::array n;
 
-    n = parse_json(make_var_dim_dtype(ndt::make_dtype<dynd_bool>()),
+    n = parse_json(make_var_dim_type(ndt::make_dtype<dynd_bool>()),
                     "  [true, true, false, null]  ");
-    EXPECT_EQ(make_var_dim_dtype(ndt::make_dtype<dynd_bool>()), n.get_dtype());
+    EXPECT_EQ(make_var_dim_type(ndt::make_dtype<dynd_bool>()), n.get_dtype());
     EXPECT_TRUE(n(0).as<bool>());
     EXPECT_TRUE(n(1).as<bool>());
     EXPECT_FALSE(n(2).as<bool>());
     EXPECT_FALSE(n(3).as<bool>());
 
-    n = parse_json(make_fixed_dim_dtype(4, ndt::make_dtype<dynd_bool>()),
+    n = parse_json(make_fixed_dim_type(4, ndt::make_dtype<dynd_bool>()),
                     "  [true, true, false, null]  ");
-    EXPECT_EQ(make_fixed_dim_dtype(4, ndt::make_dtype<dynd_bool>()), n.get_dtype());
+    EXPECT_EQ(make_fixed_dim_type(4, ndt::make_dtype<dynd_bool>()), n.get_dtype());
     EXPECT_TRUE(n(0).as<bool>());
     EXPECT_TRUE(n(1).as<bool>());
     EXPECT_FALSE(n(2).as<bool>());
     EXPECT_FALSE(n(3).as<bool>());
 
-    EXPECT_THROW(parse_json(make_var_dim_dtype(ndt::make_dtype<dynd_bool>()),
+    EXPECT_THROW(parse_json(make_var_dim_type(ndt::make_dtype<dynd_bool>()),
                     "[true, true, false, null] 3.5"),
                     runtime_error);
-    EXPECT_THROW(parse_json(make_fixed_dim_dtype(4, ndt::make_dtype<dynd_bool>()),
+    EXPECT_THROW(parse_json(make_fixed_dim_type(4, ndt::make_dtype<dynd_bool>()),
                     "[true, true, false, null] 3.5"),
                     runtime_error);
-    EXPECT_THROW(parse_json(make_fixed_dim_dtype(3, ndt::make_dtype<dynd_bool>()),
+    EXPECT_THROW(parse_json(make_fixed_dim_type(3, ndt::make_dtype<dynd_bool>()),
                     "[true, true, false, null]"),
                     runtime_error);
-    EXPECT_THROW(parse_json(make_fixed_dim_dtype(5, ndt::make_dtype<dynd_bool>()),
+    EXPECT_THROW(parse_json(make_fixed_dim_type(5, ndt::make_dtype<dynd_bool>()),
                     "[true, true, false, null]"),
                     runtime_error);
 }
@@ -147,9 +147,9 @@ TEST(JSONParser, ListBools) {
 TEST(JSONParser, NestedListInts) {
     nd::array n;
 
-    n = parse_json(make_fixed_dim_dtype(3, make_var_dim_dtype(ndt::make_dtype<int>())),
+    n = parse_json(make_fixed_dim_type(3, make_var_dim_type(ndt::make_dtype<int>())),
                     "  [[1,2,3], [4,5], [6,7,-10,1000] ]  ");
-    EXPECT_EQ(make_fixed_dim_dtype(3, make_var_dim_dtype(ndt::make_dtype<int>())), n.get_dtype());
+    EXPECT_EQ(make_fixed_dim_type(3, make_var_dim_type(ndt::make_dtype<int>())), n.get_dtype());
     EXPECT_EQ(1, n(0,0).as<int>());
     EXPECT_EQ(2, n(0,1).as<int>());
     EXPECT_EQ(3, n(0,2).as<int>());
@@ -160,9 +160,9 @@ TEST(JSONParser, NestedListInts) {
     EXPECT_EQ(-10, n(2,2).as<int>());
     EXPECT_EQ(1000, n(2,3).as<int>());
 
-    n = parse_json(make_var_dim_dtype(make_fixed_dim_dtype(3, ndt::make_dtype<int>())),
+    n = parse_json(make_var_dim_type(make_fixed_dim_type(3, ndt::make_dtype<int>())),
                     "  [[1,2,3], [4,5,2] ]  ");
-    EXPECT_EQ(make_var_dim_dtype(make_fixed_dim_dtype(3, ndt::make_dtype<int>())), n.get_dtype());
+    EXPECT_EQ(make_var_dim_type(make_fixed_dim_type(3, ndt::make_dtype<int>())), n.get_dtype());
     EXPECT_EQ(1, n(0,0).as<int>());
     EXPECT_EQ(2, n(0,1).as<int>());
     EXPECT_EQ(3, n(0,2).as<int>());
@@ -202,7 +202,7 @@ TEST(JSONParser, Struct) {
 
 TEST(JSONParser, NestedStruct) {
     nd::array n;
-    ndt::type sdt = make_cstruct_type(make_fixed_dim_dtype(3, ndt::make_dtype<float>()), "position",
+    ndt::type sdt = make_cstruct_type(make_fixed_dim_type(3, ndt::make_dtype<float>()), "position",
                     ndt::make_dtype<double>(), "amount",
                     make_cstruct_type(make_string_type(), "name", make_date_dtype(), "when"), "data");
 
@@ -234,7 +234,7 @@ TEST(JSONParser, NestedStruct) {
 
 TEST(JSONParser, ListOfStruct) {
     nd::array n;
-    ndt::type sdt = make_var_dim_dtype(make_cstruct_type(make_fixed_dim_dtype(3, ndt::make_dtype<float>()), "position",
+    ndt::type sdt = make_var_dim_type(make_cstruct_type(make_fixed_dim_type(3, ndt::make_dtype<float>()), "position",
                     ndt::make_dtype<double>(), "amount",
                     make_cstruct_type(make_string_type(), "name", make_date_dtype(), "when"), "data"));
 

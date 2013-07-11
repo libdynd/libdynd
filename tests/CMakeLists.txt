@@ -34,17 +34,17 @@ set(tests_SRC
     dtypes/test_dtype_casting.cpp
     dtypes/test_dtype_promotion.cpp
     dtypes/test_fixedbytes_dtype.cpp
-    dtypes/test_fixed_dim_dtype.cpp
+    dtypes/test_fixed_dim_type.cpp
     dtypes/test_fixedstring_type.cpp
     dtypes/test_cstruct_type.cpp
     dtypes/test_groupby_dtype.cpp
     dtypes/test_json_dtype.cpp
     dtypes/test_pointer_dtype.cpp
-    dtypes/test_strided_dim_dtype.cpp
+    dtypes/test_strided_dim_type.cpp
     dtypes/test_string_type.cpp
     dtypes/test_struct_type.cpp
     dtypes/test_tuple_dtype.cpp
-    dtypes/test_var_dim_dtype.cpp
+    dtypes/test_var_dim_type.cpp
     gfunc/test_callable.cpp
     array/test_json_formatter.cpp
     array/test_json_parser.cpp

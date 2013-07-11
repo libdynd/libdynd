@@ -13,7 +13,7 @@
 #include <dynd/gfunc/callable.hpp>
 #include <dynd/gfunc/make_callable.hpp>
 #include <dynd/gfunc/call_callable.hpp>
-#include <dynd/dtypes/strided_dim_dtype.hpp>
+#include <dynd/dtypes/strided_dim_type.hpp>
 #include <dynd/dtypes/string_type.hpp>
 
 using namespace std;
@@ -318,9 +318,9 @@ static double five_parameters(float (&x)[3], uint16_t a1, uint32_t a2, uint64_t 
 TEST(GFuncCallable, FiveParameters) {
     // Create the callable
     gfunc::callable c = gfunc::make_callable(&five_parameters, "x", "a1", "a2", "a3", "y");
-    EXPECT_EQ(make_cstruct_type(make_fixed_dim_dtype(3, ndt::make_dtype<float>()), "x", ndt::make_dtype<uint16_t>(), "a1",
+    EXPECT_EQ(make_cstruct_type(make_fixed_dim_type(3, ndt::make_dtype<float>()), "x", ndt::make_dtype<uint16_t>(), "a1",
                     ndt::make_dtype<uint32_t>(), "a2", ndt::make_dtype<uint64_t>(), "a3",
-                    make_fixed_dim_dtype(3, ndt::make_dtype<double>()), "y"),
+                    make_fixed_dim_type(3, ndt::make_dtype<double>()), "y"),
             c.get_parameters_type());
 
     // Call it and see that it gave what we want
@@ -359,7 +359,7 @@ TEST(GFuncCallable, ArrayReturn) {
     a(1).val_assign(20);
     a(2).val_assign(1000);
     r = c.call_generic(a);
-    EXPECT_EQ(make_strided_dim_dtype(ndt::make_dtype<int>()), r.get_dtype());
+    EXPECT_EQ(make_strided_dim_type(ndt::make_dtype<int>()), r.get_dtype());
     EXPECT_EQ(-10, r(0).as<int>());
     EXPECT_EQ(20, r(1).as<int>());
     EXPECT_EQ(1000, r(2).as<int>());

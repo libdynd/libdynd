@@ -7,29 +7,29 @@
 #define _DYND__STRIDED_ARRAY_TYPE_HPP_
 
 #include <dynd/type.hpp>
-#include <dynd/dtypes/base_uniform_dim_dtype.hpp>
+#include <dynd/dtypes/base_uniform_dim_type.hpp>
 #include <dynd/dtype_assign.hpp>
 #include <dynd/dtypes/view_dtype.hpp>
 
 namespace dynd {
 
-struct strided_dim_dtype_metadata {
+struct strided_dim_type_metadata {
     intptr_t size;
     intptr_t stride;
 };
 
-struct strided_dim_dtype_iterdata {
+struct strided_dim_type_iterdata {
     iterdata_common common;
     char *data;
     intptr_t stride;
 };
 
-class strided_dim_dtype : public base_uniform_dim_dtype {
+class strided_dim_type : public base_uniform_dim_type {
     std::vector<std::pair<std::string, gfunc::callable> > m_array_properties, m_array_functions;
 public:
-    strided_dim_dtype(const ndt::type& element_dtype);
+    strided_dim_type(const ndt::type& element_dtype);
 
-    virtual ~strided_dim_dtype();
+    virtual ~strided_dim_type();
 
     size_t get_default_data_size(size_t ndim, const intptr_t *shape) const;
 
@@ -119,14 +119,14 @@ public:
                     size_t *out_count) const;
 };
 
-inline ndt::type make_strided_dim_dtype(const ndt::type& element_dtype) {
-    return ndt::type(new strided_dim_dtype(element_dtype), false);
+inline ndt::type make_strided_dim_type(const ndt::type& element_dtype) {
+    return ndt::type(new strided_dim_type(element_dtype), false);
 }
 
-inline ndt::type make_strided_dim_dtype(const ndt::type& uniform_dtype, size_t ndim) {
+inline ndt::type make_strided_dim_type(const ndt::type& uniform_dtype, size_t ndim) {
     ndt::type result = uniform_dtype;
     for (size_t i = 0; i < ndim; ++i) {
-        result = make_strided_dim_dtype(result);
+        result = make_strided_dim_type(result);
     }
     return result;
 }
