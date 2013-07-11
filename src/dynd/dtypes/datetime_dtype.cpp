@@ -11,7 +11,7 @@
 #include <dynd/dtypes/datetime_dtype.hpp>
 #include <dynd/dtypes/property_dtype.hpp>
 #include <dynd/dtypes/cstruct_dtype.hpp>
-#include <dynd/dtypes/string_dtype.hpp>
+#include <dynd/dtypes/string_type.hpp>
 #include <dynd/dtypes/unary_expr_dtype.hpp>
 #include <dynd/kernels/datetime_assignment_kernels.hpp>
 #include <dynd/kernels/date_expr_kernels.hpp>
@@ -474,7 +474,7 @@ static nd::array function_ndo_strftime(const nd::array& n, const std::string& fo
     if (format.empty()) {
         throw runtime_error("format string for strftime should not be empty");
     }
-    return n.replace_udtype(make_unary_expr_dtype(make_string_dtype(), n.get_udtype(),
+    return n.replace_udtype(make_unary_expr_dtype(make_string_type(), n.get_udtype(),
                     make_strftime_kernelgen(format)));
 }
 

@@ -7,8 +7,8 @@
 
 #include <dynd/array.hpp>
 #include <dynd/dtypes/convert_dtype.hpp>
-#include <dynd/dtypes/fixedstring_dtype.hpp>
-#include <dynd/dtypes/string_dtype.hpp>
+#include <dynd/dtypes/fixedstring_type.hpp>
+#include <dynd/dtypes/string_type.hpp>
 #include <dynd/dtypes/byteswap_dtype.hpp>
 #include <dynd/ndobject_range.hpp>
 #include <dynd/codegen/codegen_cache.hpp>

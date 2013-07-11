@@ -11,7 +11,7 @@
 
 #include <dynd/dtypes/base_type.hpp>
 #include <dynd/dtypes/base_expression_type.hpp>
-#include <dynd/dtypes/base_string_dtype.hpp>
+#include <dynd/dtypes/base_string_type.hpp>
 #include <dynd/dtypes/dynd_float16.hpp>
 #include <dynd/eval/eval_context.hpp>
 #include <dynd/exceptions.hpp>

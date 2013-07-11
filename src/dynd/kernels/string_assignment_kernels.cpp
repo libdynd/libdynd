@@ -9,7 +9,7 @@
 #include <dynd/type.hpp>
 #include <dynd/diagnostics.hpp>
 #include <dynd/kernels/string_assignment_kernels.hpp>
-#include <dynd/dtypes/string_dtype.hpp>
+#include <dynd/dtypes/string_type.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -89,16 +89,16 @@ namespace {
         string_encoding_t dst_encoding, src_encoding;
         next_unicode_codepoint_t next_fn;
         append_unicode_codepoint_t append_fn;
-        const string_dtype_metadata *dst_metadata, *src_metadata;
+        const string_type_metadata *dst_metadata, *src_metadata;
 
         static void single(char *dst, const char *src,
                         kernel_data_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
-            const string_dtype_metadata *dst_md = e->dst_metadata;
-            const string_dtype_metadata *src_md = e->src_metadata;
-            string_dtype_data *dst_d = reinterpret_cast<string_dtype_data *>(dst);
-            const string_dtype_data *src_d = reinterpret_cast<const string_dtype_data *>(src);
+            const string_type_metadata *dst_md = e->dst_metadata;
+            const string_type_metadata *src_md = e->src_metadata;
+            string_type_data *dst_d = reinterpret_cast<string_type_data *>(dst);
+            const string_type_data *src_d = reinterpret_cast<const string_type_data *>(src);
             intptr_t src_charsize = string_encoding_char_size_table[e->src_encoding];
             intptr_t dst_charsize = string_encoding_char_size_table[e->dst_encoding];
 
@@ -172,8 +172,8 @@ size_t dynd::make_blockref_string_assignment_kernel(
     e->src_encoding = src_encoding;
     e->next_fn = get_next_unicode_codepoint_function(src_encoding, errmode);
     e->append_fn = get_append_unicode_codepoint_function(dst_encoding, errmode);
-    e->dst_metadata = reinterpret_cast<const string_dtype_metadata *>(dst_metadata);
-    e->src_metadata = reinterpret_cast<const string_dtype_metadata *>(src_metadata);
+    e->dst_metadata = reinterpret_cast<const string_type_metadata *>(dst_metadata);
+    e->src_metadata = reinterpret_cast<const string_type_metadata *>(src_metadata);
     return offset_out + sizeof(blockref_string_assign_kernel_extra);
 }
 
@@ -189,14 +189,14 @@ namespace {
         intptr_t src_element_size;
         next_unicode_codepoint_t next_fn;
         append_unicode_codepoint_t append_fn;
-        const string_dtype_metadata *dst_metadata;
+        const string_type_metadata *dst_metadata;
 
         static void single(char *dst, const char *src,
                         kernel_data_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
-            const string_dtype_metadata *dst_md = e->dst_metadata;
-            string_dtype_data *dst_d = reinterpret_cast<string_dtype_data *>(dst);
+            const string_type_metadata *dst_md = e->dst_metadata;
+            string_type_data *dst_d = reinterpret_cast<string_type_data *>(dst);
             intptr_t src_charsize = string_encoding_char_size_table[e->src_encoding];
             intptr_t dst_charsize = string_encoding_char_size_table[e->dst_encoding];
 
@@ -264,7 +264,7 @@ size_t dynd::make_fixedstring_to_blockref_string_assignment_kernel(
     e->src_element_size = src_element_size;
     e->next_fn = get_next_unicode_codepoint_function(src_encoding, errmode);
     e->append_fn = get_append_unicode_codepoint_function(dst_encoding, errmode);
-    e->dst_metadata = reinterpret_cast<const string_dtype_metadata *>(dst_metadata);
+    e->dst_metadata = reinterpret_cast<const string_type_metadata *>(dst_metadata);
     return offset_out + sizeof(blockref_string_assign_kernel_extra);
 }
 
@@ -286,7 +286,7 @@ namespace {
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             char *dst_end = dst + e->dst_data_size;
-            const string_dtype_data *src_d = reinterpret_cast<const string_dtype_data *>(src);
+            const string_type_data *src_d = reinterpret_cast<const string_type_data *>(src);
             const char *src_begin = src_d->begin;
             const char *src_end = src_d->end;
             next_unicode_codepoint_t next_fn = e->next_fn;

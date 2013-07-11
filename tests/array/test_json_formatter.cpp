@@ -16,7 +16,7 @@
 #include <dynd/dtypes/fixed_dim_dtype.hpp>
 #include <dynd/dtypes/cstruct_dtype.hpp>
 #include <dynd/dtypes/date_dtype.hpp>
-#include <dynd/dtypes/string_dtype.hpp>
+#include <dynd/dtypes/string_type.hpp>
 #include <dynd/dtypes/json_dtype.hpp>
 
 using namespace std;
@@ -56,9 +56,9 @@ TEST(JSONFormatter, String) {
     EXPECT_EQ("\"testing string\"", format_json(n).as<string>());
     n = " \" \\ / \b \f \n \r \t ";
     EXPECT_EQ("\" \\\" \\\\ \\/ \\b \\f \\n \\r \\t \"", format_json(n).as<string>());
-    n = nd::array("testing string").ucast(make_string_dtype(string_encoding_utf_16)).eval();
+    n = nd::array("testing string").ucast(make_string_type(string_encoding_utf_16)).eval();
     EXPECT_EQ("\"testing string\"", format_json(n).as<string>());
-    n = nd::array("testing string").ucast(make_string_dtype(string_encoding_utf_32)).eval();
+    n = nd::array("testing string").ucast(make_string_type(string_encoding_utf_32)).eval();
     EXPECT_EQ("\"testing string\"", format_json(n).as<string>());
 }
 

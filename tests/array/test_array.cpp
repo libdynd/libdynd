@@ -13,7 +13,7 @@
 #include <dynd/array.hpp>
 #include <dynd/dtypes/strided_dim_dtype.hpp>
 #include <dynd/dtypes/fixedbytes_dtype.hpp>
-#include <dynd/dtypes/string_dtype.hpp>
+#include <dynd/dtypes/string_type.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -273,7 +273,7 @@ TEST(Array, StdVectorStringConstructor) {
 
     // Empty vector
     a = v;
-    EXPECT_EQ(make_strided_dim_dtype(make_string_dtype(string_encoding_utf_8)), a.get_dtype());
+    EXPECT_EQ(make_strided_dim_dtype(make_string_type(string_encoding_utf_8)), a.get_dtype());
     EXPECT_EQ(1u, a.get_dtype().get_undim());
     EXPECT_EQ(1u, a.get_shape().size());
     EXPECT_EQ(0, a.get_shape()[0]);
@@ -287,7 +287,7 @@ TEST(Array, StdVectorStringConstructor) {
     v.push_back("vectors");
     v.push_back("testing testing testing testing testing testing testing testing testing");
     a = v;
-    EXPECT_EQ(make_strided_dim_dtype(make_string_dtype(string_encoding_utf_8)), a.get_dtype());
+    EXPECT_EQ(make_strided_dim_dtype(make_string_type(string_encoding_utf_8)), a.get_dtype());
     EXPECT_EQ(1u, a.get_dtype().get_undim());
     EXPECT_EQ(1u, a.get_shape().size());
     EXPECT_EQ(5, a.get_shape()[0]);

@@ -10,7 +10,7 @@
 #include <dynd/dtypes/fixed_dim_dtype.hpp>
 #include <dynd/dtypes/dtype_alignment.hpp>
 #include <dynd/dtypes/view_dtype.hpp>
-#include <dynd/dtypes/string_dtype.hpp>
+#include <dynd/dtypes/string_type.hpp>
 #include <dynd/dtypes/bytes_dtype.hpp>
 #include <dynd/dtypes/fixedbytes_dtype.hpp>
 #include <dynd/dtypes/dtype_dtype.hpp>
@@ -209,7 +209,7 @@ nd::array nd::make_pod_array(const ndt::type& pod_dt, const void *data)
 nd::array nd::make_string_array(const char *str, size_t len, string_encoding_t encoding)
 {
     char *data_ptr = NULL, *string_ptr;
-    ndt::type dt = make_string_dtype(encoding);
+    ndt::type dt = make_string_type(encoding);
     nd::array result(make_array_memory_block(dt.extended()->get_metadata_size(),
                         dt.get_data_size() + len, dt.get_data_alignment(), &data_ptr));
     // Set the string extents
@@ -225,17 +225,17 @@ nd::array nd::make_string_array(const char *str, size_t len, string_encoding_t e
     ndo->m_data_reference = NULL;
     ndo->m_flags = nd::read_access_flag | nd::immutable_access_flag;
     // Set the string metadata, telling the system that the string data was embedded in the array memory
-    string_dtype_metadata *ndo_meta = reinterpret_cast<string_dtype_metadata *>(result.get_ndo_meta());
+    string_type_metadata *ndo_meta = reinterpret_cast<string_type_metadata *>(result.get_ndo_meta());
     ndo_meta->blockref = NULL;
     return result;
 }
 
 nd::array nd::make_utf8_array_array(const char **cstr_array, size_t array_size)
 {
-    ndt::type dt = make_string_dtype(string_encoding_utf_8);
+    ndt::type dt = make_string_type(string_encoding_utf_8);
     nd::array result = nd::make_strided_array(array_size, dt);
     // Get the allocator for the output string dtype
-    const string_dtype_metadata *md = reinterpret_cast<const string_dtype_metadata *>(result.get_ndo_meta() + sizeof(strided_dim_dtype_metadata));
+    const string_type_metadata *md = reinterpret_cast<const string_type_metadata *>(result.get_ndo_meta() + sizeof(strided_dim_dtype_metadata));
     memory_block_data *dst_memblock = md->blockref;
     memory_block_pod_allocator_api *allocator = get_memory_block_pod_allocator_api(dst_memblock);
     char **out_data = reinterpret_cast<char **>(result.get_ndo()->m_data_pointer);
@@ -408,14 +408,14 @@ nd::array nd::detail::make_from_vec<std::string>::make(const std::vector<std::st
         total_string_size += vec[i].size();
     }
 
-    ndt::type dt = make_strided_dim_dtype(make_string_dtype(string_encoding_utf_8));
+    ndt::type dt = make_strided_dim_dtype(make_string_type(string_encoding_utf_8));
     char *data_ptr = NULL;
     // Make an array memory block which contains both the string pointers and
     // the string data
     array result(make_array_memory_block(dt.extended()->get_metadata_size(),
-                    sizeof(string_dtype_data) * vec.size() + total_string_size,
+                    sizeof(string_type_data) * vec.size() + total_string_size,
                     dt.get_data_alignment(), &data_ptr));
-    char *string_ptr = data_ptr + sizeof(string_dtype_data) * vec.size();
+    char *string_ptr = data_ptr + sizeof(string_type_data) * vec.size();
     // The main array metadata
     array_preamble *preamble = result.get_ndo();
     preamble->m_data_pointer = data_ptr;
@@ -426,11 +426,11 @@ nd::array nd::detail::make_from_vec<std::string>::make(const std::vector<std::st
     strided_dim_dtype_metadata *sa_md = reinterpret_cast<strided_dim_dtype_metadata *>(
                                             result.get_ndo_meta());
     sa_md->size = vec.size();
-    sa_md->stride = vec.empty() ? 0 : sizeof(string_dtype_data);
-    string_dtype_metadata *s_md = reinterpret_cast<string_dtype_metadata *>(sa_md + 1);
+    sa_md->stride = vec.empty() ? 0 : sizeof(string_type_data);
+    string_type_metadata *s_md = reinterpret_cast<string_type_metadata *>(sa_md + 1);
     s_md->blockref = NULL;
     // The string pointers and data
-    string_dtype_data *data = reinterpret_cast<string_dtype_data *>(data_ptr);
+    string_type_data *data = reinterpret_cast<string_type_data *>(data_ptr);
     for (size_t i = 0, i_end = vec.size(); i != i_end; ++i) {
         size_t size = vec[i].size();
         memcpy(string_ptr, vec[i].data(), size);
@@ -458,7 +458,7 @@ namespace {
                                 storage_dt.get_data_alignment());
                 out_was_transformed = true;
             } else if (storage_dt.get_type_id() == string_type_id) {
-                out_transformed_dtype = make_bytes_dtype(static_cast<const string_dtype *>(
+                out_transformed_dtype = make_bytes_dtype(static_cast<const string_type *>(
                                 storage_dt.extended())->get_target_alignment());
                 out_was_transformed = true;
             } else {
@@ -1111,10 +1111,10 @@ std::string nd::detail::array_as_string(const nd::array& lhs, assign_error_mode 
 
     nd::array temp = lhs;
     if (temp.get_dtype().get_kind() != string_kind) {
-        temp = temp.ucast(make_string_dtype(string_encoding_utf_8)).eval();
+        temp = temp.ucast(make_string_type(string_encoding_utf_8)).eval();
     }
-    const base_string_dtype *esd =
-                    static_cast<const base_string_dtype *>(temp.get_dtype().extended());
+    const base_string_type *esd =
+                    static_cast<const base_string_type *>(temp.get_dtype().extended());
     return esd->get_utf8_string(temp.get_ndo_meta(), temp.get_ndo()->m_data_pointer, errmode);
 }
 

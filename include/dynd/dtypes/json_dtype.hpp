@@ -6,16 +6,16 @@
 #ifndef _DYND__JSON_TYPE_HPP_
 #define _DYND__JSON_TYPE_HPP_
 
-#include <dynd/dtypes/string_dtype.hpp>
+#include <dynd/dtypes/string_type.hpp>
 
 namespace dynd {
 
 // The json dtype is stored as a string, but limited to
 // UTF-8 and is supposed to contain JSON data.
-typedef string_dtype_metadata json_dtype_metadata;
-typedef string_dtype_data json_dtype_data;
+typedef string_type_metadata json_dtype_metadata;
+typedef string_type_data json_dtype_data;
 
-class json_dtype : public base_string_dtype {
+class json_dtype : public base_string_type {
 public:
     json_dtype();
 

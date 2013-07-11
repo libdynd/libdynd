@@ -8,7 +8,7 @@
 
 #include <dynd/kernels/date_expr_kernels.hpp>
 #include <dynd/kernels/elwise_expr_kernels.hpp>
-#include <dynd/dtypes/string_dtype.hpp>
+#include <dynd/dtypes/string_type.hpp>
 #include <datetime_strings.h>
 
 using namespace std;
@@ -24,13 +24,13 @@ namespace {
         kernel_data_prefix base;
         size_t format_size;
         const char *format;
-        const string_dtype_metadata *dst_metadata;
+        const string_type_metadata *dst_metadata;
 
         static void single_unary(char *dst, const char *src,
                         kernel_data_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
-            const string_dtype_metadata *dst_md = e->dst_metadata;
+            const string_type_metadata *dst_md = e->dst_metadata;
 
             struct tm tm_val;
             int32_t date = *reinterpret_cast<const int32_t *>(src);
@@ -41,7 +41,7 @@ namespace {
             // parameter handler is installed.
             disable_invalid_parameter_handler raii;
 #endif
-            string_dtype_data *dst_d = reinterpret_cast<string_dtype_data *>(dst);
+            string_type_data *dst_d = reinterpret_cast<string_type_data *>(dst);
             memory_block_pod_allocator_api *allocator = get_memory_block_pod_allocator_api(dst_md->blockref);
 
             // Call strftime, growing the string buffer if needed so it fits
@@ -74,7 +74,7 @@ namespace {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             size_t format_size = e->format_size;
             const char *format = e->format;
-            const string_dtype_metadata *dst_md = e->dst_metadata;
+            const string_type_metadata *dst_md = e->dst_metadata;
 
             struct tm tm_val;
 #ifdef _MSC_VER
@@ -85,7 +85,7 @@ namespace {
             memory_block_pod_allocator_api *allocator = get_memory_block_pod_allocator_api(dst_md->blockref);
 
             for (size_t i = 0; i != count; ++i, dst += dst_stride, src += src_stride) {
-                string_dtype_data *dst_d = reinterpret_cast<string_dtype_data *>(dst);
+                string_type_data *dst_d = reinterpret_cast<string_type_data *>(dst);
                 int32_t date = *reinterpret_cast<const int32_t *>(src);
                 // Convert the date to a 'struct tm'
                 datetime::date_to_struct_tm(date, datetime::datetime_unit_day, tm_val);
@@ -172,7 +172,7 @@ public:
         // so we can point at data in the kernel generator
         e->format_size = m_format.size();
         e->format = m_format.c_str();
-        e->dst_metadata = reinterpret_cast<const string_dtype_metadata *>(dst_metadata);
+        e->dst_metadata = reinterpret_cast<const string_type_metadata *>(dst_metadata);
         return offset_out + extra_size;
     }
 

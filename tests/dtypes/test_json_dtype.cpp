@@ -10,7 +10,7 @@
 
 #include <dynd/array.hpp>
 #include <dynd/dtypes/json_dtype.hpp>
-#include <dynd/dtypes/string_dtype.hpp>
+#include <dynd/dtypes/string_type.hpp>
 
 using namespace std;
 using namespace dynd;

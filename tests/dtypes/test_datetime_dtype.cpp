@@ -12,8 +12,8 @@
 #include <dynd/dtypes/datetime_dtype.hpp>
 #include <dynd/dtypes/property_dtype.hpp>
 #include <dynd/dtypes/strided_dim_dtype.hpp>
-#include <dynd/dtypes/fixedstring_dtype.hpp>
-#include <dynd/dtypes/string_dtype.hpp>
+#include <dynd/dtypes/fixedstring_type.hpp>
+#include <dynd/dtypes/string_type.hpp>
 #include <dynd/dtypes/convert_dtype.hpp>
 #include <dynd/dtypes/cstruct_dtype.hpp>
 #include <dynd/dtypes/struct_dtype.hpp>

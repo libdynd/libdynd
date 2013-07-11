@@ -16,14 +16,14 @@
 
 namespace dynd {
 
-class fixedstring_dtype : public base_string_dtype {
+class fixedstring_type : public base_string_type {
     intptr_t m_stringsize;
     string_encoding_t m_encoding;
 
 public:
-    fixedstring_dtype(intptr_t stringsize, string_encoding_t encoding);
+    fixedstring_type(intptr_t stringsize, string_encoding_t encoding);
 
-    virtual ~fixedstring_dtype();
+    virtual ~fixedstring_type();
 
     string_encoding_t get_encoding() const {
         return m_encoding;
@@ -67,9 +67,9 @@ public:
                     const eval::eval_context *ectx) const;
 };
 
-inline ndt::type make_fixedstring_dtype(intptr_t stringsize,
+inline ndt::type make_fixedstring_type(intptr_t stringsize,
                 string_encoding_t encoding = string_encoding_utf_8) {
-    return ndt::type(new fixedstring_dtype(stringsize, encoding), false);
+    return ndt::type(new fixedstring_type(stringsize, encoding), false);
 }
 
 } // namespace dynd

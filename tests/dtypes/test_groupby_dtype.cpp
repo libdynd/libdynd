@@ -12,8 +12,8 @@
 #include <dynd/ndobject_range.hpp>
 #include <dynd/dtypes/groupby_dtype.hpp>
 #include <dynd/dtypes/categorical_dtype.hpp>
-#include <dynd/dtypes/string_dtype.hpp>
-#include <dynd/dtypes/fixedstring_dtype.hpp>
+#include <dynd/dtypes/string_type.hpp>
+#include <dynd/dtypes/fixedstring_type.hpp>
 #include <dynd/dtypes/convert_dtype.hpp>
 #include <dynd/dtypes/struct_dtype.hpp>
 #include <dynd/dtypes/cstruct_dtype.hpp>
@@ -43,9 +43,9 @@ TEST(GroupByDType, BasicDeduceGroups) {
     const char *by[] = {"beta", "alpha", "beta", "beta", "alpha"};
     nd::array g = nd::groupby(data, by);
     const char *expected_groups[] = {"alpha", "beta"};
-    EXPECT_EQ(make_groupby_dtype(make_strided_dim_dtype(make_string_dtype()),
+    EXPECT_EQ(make_groupby_dtype(make_strided_dim_dtype(make_string_type()),
                         make_strided_dim_dtype(make_convert_dtype(
-                            make_categorical_dtype(expected_groups), make_string_dtype()))),
+                            make_categorical_dtype(expected_groups), make_string_type()))),
                     g.get_dtype());
     g = g.eval();
     EXPECT_EQ(2, g(0, irange()).get_shape()[0]);
@@ -94,11 +94,11 @@ TEST(GroupByDType, MediumDeduceGroups) {
 TEST(GroupByDType, Struct) {
     const char *gender_cats_vals[] = {"F", "M"};
     nd::array gender_cats = nd::array(gender_cats_vals).ucast(
-                    make_fixedstring_dtype(1, string_encoding_ascii)).eval();
+                    make_fixedstring_type(1, string_encoding_ascii)).eval();
 
     // Create a simple structured array
-    ndt::type d = make_cstruct_dtype(make_string_dtype(), "name", ndt::make_dtype<float>(), "height",
-                    make_fixedstring_dtype(1, string_encoding_ascii), "gender");
+    ndt::type d = make_cstruct_dtype(make_string_type(), "name", ndt::make_dtype<float>(), "height",
+                    make_fixedstring_type(1, string_encoding_ascii), "gender");
     nd::array a = nd::make_strided_array(5, d);
     const char *name_vals[] = {"Paul", "Jennifer", "Frank", "Louise", "Anne"};
     float height_vals[] = {171.5f, 156.25f, 177.0f, 164.75f, 170.5f};
@@ -132,9 +132,9 @@ TEST(GroupByDType, Struct) {
 
 TEST(GroupByDType, StructSubset) {
     // Create a simple structured array
-    ndt::type d = make_cstruct_dtype(make_string_dtype(), "lastname",
-                    make_string_dtype(), "firstname",
-                    make_fixedstring_dtype(1, string_encoding_ascii), "gender");
+    ndt::type d = make_cstruct_dtype(make_string_type(), "lastname",
+                    make_string_type(), "firstname",
+                    make_fixedstring_type(1, string_encoding_ascii), "gender");
     nd::array a = nd::make_strided_array(7, d);
     const char *lastname_vals[] = {"Wiebe", "Friesen", "Klippenstein", "Wiebe", "Friesen",
                     "Friesen", "Friesen"};
@@ -165,8 +165,8 @@ TEST(GroupByDType, StructSubset) {
 
     // Validate the list of groups it produced
     nd::array groups_list = g.p("groups");
-    EXPECT_EQ(make_strided_dim_dtype(make_struct_dtype(make_string_dtype(), "lastname",
-                    make_fixedstring_dtype(1, string_encoding_ascii), "gender")),
+    EXPECT_EQ(make_strided_dim_dtype(make_struct_dtype(make_string_type(), "lastname",
+                    make_fixedstring_type(1, string_encoding_ascii), "gender")),
                         groups_list.get_dtype());
     EXPECT_EQ(5, groups_list.get_shape()[0]);
     EXPECT_EQ("Friesen",      groups_list(0,0).as<string>());
@@ -210,8 +210,8 @@ TEST(GroupByDType, StructUnsortedCats) {
     nd::array gender_cats = nd::array(gender_cats_vals);
 
     // Create a simple structured array
-    ndt::type d = make_cstruct_dtype(make_string_dtype(), "name", ndt::make_dtype<float>(), "height",
-                    make_fixedstring_dtype(1, string_encoding_ascii), "gender");
+    ndt::type d = make_cstruct_dtype(make_string_type(), "name", ndt::make_dtype<float>(), "height",
+                    make_fixedstring_type(1, string_encoding_ascii), "gender");
     nd::array a = nd::make_strided_array(5, d);
     const char *name_vals[] = {"Paul", "Jennifer", "Frank", "Louise", "Anne"};
     float height_vals[] = {171.5f, 156.25f, 177.0f, 164.75f, 170.5f};

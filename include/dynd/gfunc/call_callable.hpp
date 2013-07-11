@@ -8,8 +8,8 @@
 
 #include <dynd/gfunc/callable.hpp>
 #include <dynd/dtypes/cstruct_dtype.hpp>
-#include <dynd/dtypes/string_dtype.hpp>
-#include <dynd/dtypes/fixedstring_dtype.hpp>
+#include <dynd/dtypes/string_type.hpp>
+#include <dynd/dtypes/fixedstring_type.hpp>
 #include <dynd/dtypes/dtype_dtype.hpp>
 #include <dynd/dtype_assign.hpp>
 
@@ -69,11 +69,11 @@ namespace detail {
         static void set(const ndt::type& paramtype, char *metadata, char *data, const char (&value)[N]) {
             // Setting from a known-sized character string array
             if (paramtype.get_type_id() == string_type_id &&
-                    static_cast<const string_dtype *>(paramtype.extended())->get_encoding() == string_encoding_utf_8) {
-                reinterpret_cast<string_dtype_data*>(data)->begin = const_cast<char *>(value);
-                reinterpret_cast<string_dtype_data*>(data)->end = const_cast<char *>(value + N - 1);
+                    static_cast<const string_type *>(paramtype.extended())->get_encoding() == string_encoding_utf_8) {
+                reinterpret_cast<string_type_data*>(data)->begin = const_cast<char *>(value);
+                reinterpret_cast<string_type_data*>(data)->end = const_cast<char *>(value + N - 1);
             } else {
-                dtype_assign(paramtype, metadata, data, make_fixedstring_dtype(N, string_encoding_utf_8),
+                dtype_assign(paramtype, metadata, data, make_fixedstring_type(N, string_encoding_utf_8),
                         NULL, value);
             }
         }

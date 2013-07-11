@@ -13,7 +13,7 @@
 #include <dynd/dtypes/strided_dim_dtype.hpp>
 #include <dynd/dtypes/fixedbytes_dtype.hpp>
 #include <dynd/dtypes/convert_dtype.hpp>
-#include <dynd/dtypes/string_dtype.hpp>
+#include <dynd/dtypes/string_type.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -71,8 +71,8 @@ TEST(BytesDType, Assign) {
     EXPECT_EQ(a.get_dtype(), make_bytes_dtype(1));
     b = nd::empty(make_bytes_dtype(1));
     b.vals() = a;
-    c = b.view_scalars(make_string_dtype());
-    EXPECT_EQ(c.get_dtype(), make_string_dtype());
+    c = b.view_scalars(make_string_type());
+    EXPECT_EQ(c.get_dtype(), make_string_type());
     EXPECT_EQ("testing", c.as<string>());
 }
 

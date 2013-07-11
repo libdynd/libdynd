@@ -12,8 +12,8 @@
 #include <dynd/dtypes/date_dtype.hpp>
 #include <dynd/dtypes/property_dtype.hpp>
 #include <dynd/dtypes/strided_dim_dtype.hpp>
-#include <dynd/dtypes/fixedstring_dtype.hpp>
-#include <dynd/dtypes/string_dtype.hpp>
+#include <dynd/dtypes/fixedstring_type.hpp>
+#include <dynd/dtypes/string_type.hpp>
 #include <dynd/dtypes/convert_dtype.hpp>
 #include <dynd/dtypes/cstruct_dtype.hpp>
 #include <dynd/dtypes/struct_dtype.hpp>
@@ -154,14 +154,14 @@ TEST(DateDType, DateProperties) {
 TEST(DateDType, DatePropertyConvertOfString) {
     nd::array a, b, c;
     const char *strs[] = {"1931-12-12", "2013-05-14", "2012-12-25"};
-    a = nd::array(strs).ucast(make_fixedstring_dtype(10, string_encoding_ascii)).eval();
+    a = nd::array(strs).ucast(make_fixedstring_type(10, string_encoding_ascii)).eval();
     b = a.ucast(make_date_dtype());
     EXPECT_EQ(make_strided_dim_dtype(
-                    make_fixedstring_dtype(10, string_encoding_ascii)),
+                    make_fixedstring_type(10, string_encoding_ascii)),
                     a.get_dtype());
     EXPECT_EQ(make_strided_dim_dtype(
                     make_convert_dtype(make_date_dtype(),
-                        make_fixedstring_dtype(10, string_encoding_ascii))),
+                        make_fixedstring_type(10, string_encoding_ascii))),
                     b.get_dtype());
 
     // year property
@@ -305,7 +305,7 @@ TEST(DateDType, StrFTimeOfConvert) {
     // First create a date array which is still a convert expression type
     const char *vals[] = {"1920-03-12", "2013-01-01", "2000-12-25"};
     nd::array a = nd::array(vals).ucast(make_date_dtype());
-    EXPECT_EQ(make_strided_dim_dtype(make_convert_dtype(make_date_dtype(), make_string_dtype())),
+    EXPECT_EQ(make_strided_dim_dtype(make_convert_dtype(make_date_dtype(), make_string_type())),
                     a.get_dtype());
 
     nd::array b = a.f("strftime", "%Y %m %d");
@@ -391,7 +391,7 @@ TEST(DateDType, ReplaceOfConvert) {
 
     // Make an expression type with value type 'date'
     a = nd::array("1955-03-13").ucast(make_date_dtype());
-    EXPECT_EQ(make_convert_dtype(make_date_dtype(), make_string_dtype()),
+    EXPECT_EQ(make_convert_dtype(make_date_dtype(), make_string_type()),
                     a.get_dtype());
     // Call replace on it
     EXPECT_EQ("2013-03-13", a.f("replace", 2013).as<string>());

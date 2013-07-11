@@ -106,7 +106,7 @@ namespace {
         typedef string_to_dtype_kernel_extra extra_type;
 
         kernel_data_prefix base;
-        const base_string_dtype *src_string_dt;
+        const base_string_type *src_string_dt;
         const char *src_metadata;
         assign_error_mode errmode;
 
@@ -128,7 +128,7 @@ namespace {
         typedef dtype_to_string_kernel_extra extra_type;
 
         kernel_data_prefix base;
-        const base_string_dtype *dst_string_dt;
+        const base_string_type *dst_string_dt;
         const char *dst_metadata;
         assign_error_mode errmode;
 
@@ -177,7 +177,7 @@ size_t dtype_dtype::make_assignment_kernel(
             e->base.set_function<unary_single_operation_t>(&string_to_dtype_kernel_extra::single);
             e->base.destructor = &string_to_dtype_kernel_extra::destruct;
             // The kernel data owns a reference to this dtype
-            e->src_string_dt = static_cast<const base_string_dtype *>(ndt::type(src_dt).release());
+            e->src_string_dt = static_cast<const base_string_type *>(ndt::type(src_dt).release());
             e->src_metadata = src_metadata;
             e->errmode = errmode;
             return offset_out + sizeof(string_to_dtype_kernel_extra);
@@ -195,7 +195,7 @@ size_t dtype_dtype::make_assignment_kernel(
             e->base.set_function<unary_single_operation_t>(&dtype_to_string_kernel_extra::single);
             e->base.destructor = &dtype_to_string_kernel_extra::destruct;
             // The kernel data owns a reference to this dtype
-            e->dst_string_dt = static_cast<const base_string_dtype *>(ndt::type(dst_dt).release());
+            e->dst_string_dt = static_cast<const base_string_type *>(ndt::type(dst_dt).release());
             e->dst_metadata = dst_metadata;
             e->errmode = errmode;
             return offset_out + sizeof(dtype_to_string_kernel_extra);

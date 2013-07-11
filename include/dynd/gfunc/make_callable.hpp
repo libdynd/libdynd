@@ -10,7 +10,7 @@
 #include <dynd/dtypes/cstruct_dtype.hpp>
 #include <dynd/dtypes/fixed_dim_dtype.hpp>
 #include <dynd/dtypes/void_pointer_dtype.hpp>
-#include <dynd/dtypes/string_dtype.hpp>
+#include <dynd/dtypes/string_type.hpp>
 #include <dynd/dtypes/dtype_dtype.hpp>
 
 namespace dynd { namespace gfunc {
@@ -35,7 +35,7 @@ template <> struct dcs_size_of<std::complex<float> > {enum {value = sizeof(std::
 template <> struct dcs_size_of<std::complex<double> > {enum {value = sizeof(std::complex<double>)};};
 template <> struct dcs_size_of<array_preamble *> {enum {value = sizeof(array_preamble *)};};
 template <> struct dcs_size_of<const base_type *> {enum {value = sizeof(const base_type *)};};
-template <> struct dcs_size_of<string_dtype_data> {enum {value = sizeof(string_dtype_data)};};
+template <> struct dcs_size_of<string_type_data> {enum {value = sizeof(string_type_data)};};
 template <typename T, int N> struct dcs_size_of<T[N]> {enum {value = N * sizeof(T)};};
 
 /**
@@ -104,7 +104,7 @@ template <> struct parameter_type_of<double> {typedef double type;};
 template <typename T> struct parameter_type_of<std::complex<T> > {typedef std::complex<T> type;};
 template <> struct parameter_type_of<nd::array> {typedef array_preamble *type;};
 template <> struct parameter_type_of<ndt::type> {typedef const base_type *type;};
-template <> struct parameter_type_of<std::string> {typedef string_dtype_data type;};
+template <> struct parameter_type_of<std::string> {typedef string_type_data type;};
 
 template <typename T> struct make_parameter_dtype {inline static ndt::type make() {
         return ndt::make_dtype<typename parameter_type_of<T>::type>();
@@ -124,7 +124,7 @@ template <> struct make_parameter_dtype<ndt::type> {inline static ndt::type make
         return make_dtype_dtype();
     }};
 template <> struct make_parameter_dtype<std::string> {inline static ndt::type make() {
-        return make_string_dtype(string_encoding_utf_8);
+        return make_string_type(string_encoding_utf_8);
     }};
 
 template <typename T> struct box_result {
@@ -182,7 +182,7 @@ template <> struct unbox_param<ndt::type> {
 };
 template <> struct unbox_param<std::string> {
     inline static std::string unbox(char *v) {
-        string_dtype_data *p = reinterpret_cast<string_dtype_data *>(v);
+        string_type_data *p = reinterpret_cast<string_type_data *>(v);
         return std::string(p->begin, p->end);
     }
 };

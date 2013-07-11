@@ -14,7 +14,7 @@
 #include <dynd/dtypes/strided_dim_dtype.hpp>
 #include <dynd/dtypes/var_dim_dtype.hpp>
 #include <dynd/dtypes/expr_dtype.hpp>
-#include <dynd/dtypes/string_dtype.hpp>
+#include <dynd/dtypes/string_type.hpp>
 #include <dynd/kernels/string_algorithm_kernels.hpp>
 
 using namespace std;
@@ -294,7 +294,7 @@ nd::array nd::operator+(const nd::array& op1, const nd::array& op2)
         // The signature is (T, T) -> T, so we don't use the original types
         return apply_binary_operator<kernel_data_prefix>(ops, rdt, rdt, rdt, func_ptr, "addition");
     } else if (op1dt.get_kind() == string_kind && op2dt.get_kind() == string_kind) {
-        ndt::type rdt = make_string_dtype();
+        ndt::type rdt = make_string_type();
         func_ptr.single = &kernels::string_concatenation_kernel::single;
         func_ptr.strided = &kernels::string_concatenation_kernel::strided;
         // The signature is (string, string) -> string, so we don't use the original types

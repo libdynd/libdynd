@@ -8,7 +8,7 @@
 #include <cctype>
 
 #include <dynd/type.hpp>
-#include <dynd/dtypes/string_dtype.hpp>
+#include <dynd/dtypes/string_type.hpp>
 #include <dynd/diagnostics.hpp>
 #include <dynd/kernels/string_numeric_assignment_kernels.hpp>
 #include "single_assigner_builtin.hpp"
@@ -88,7 +88,7 @@ namespace {
         typedef string_to_builtin_kernel_extra extra_type;
 
         kernel_data_prefix base;
-        const base_string_dtype *src_string_dt;
+        const base_string_type *src_string_dt;
         assign_error_mode errmode;
         const char *src_metadata;
 
@@ -444,7 +444,7 @@ size_t dynd::make_string_to_builtin_assignment_kernel(
         e->base.set_function<unary_single_operation_t>(static_string_to_builtin_kernels[dst_type_id-bool_type_id]);
         e->base.destructor = string_to_builtin_kernel_extra::destruct;
         // The kernel data owns this reference
-        e->src_string_dt = static_cast<const base_string_dtype *>(ndt::type(src_string_dt).release());
+        e->src_string_dt = static_cast<const base_string_type *>(ndt::type(src_string_dt).release());
         e->errmode = errmode;
         e->src_metadata = src_metadata;
         return offset_out + sizeof(string_to_builtin_kernel_extra);
@@ -463,7 +463,7 @@ namespace {
         typedef builtin_to_string_kernel_extra extra_type;
 
         kernel_data_prefix base;
-        const base_string_dtype *dst_string_dt;
+        const base_string_type *dst_string_dt;
         type_id_t src_type_id;
         assign_error_mode errmode;
         const char *dst_metadata;
@@ -512,7 +512,7 @@ size_t dynd::make_builtin_to_string_assignment_kernel(
         e->base.set_function<unary_single_operation_t>(builtin_to_string_kernel_extra::single);
         e->base.destructor = builtin_to_string_kernel_extra::destruct;
         // The kernel data owns this reference
-        e->dst_string_dt = static_cast<const base_string_dtype *>(ndt::type(dst_string_dt).release());
+        e->dst_string_dt = static_cast<const base_string_type *>(ndt::type(dst_string_dt).release());
         e->src_type_id = src_type_id;
         e->errmode = errmode;
         e->dst_metadata = dst_metadata;
@@ -528,9 +528,9 @@ size_t dynd::make_builtin_to_string_assignment_kernel(
 void dynd::assign_utf8_string_to_builtin(type_id_t dst_type_id, char *dst,
                 const char *str_begin, const char *str_end, assign_error_mode errmode)
 {
-    ndt::type dt = make_string_dtype(string_encoding_utf_8);
-    string_dtype_data d;
-    string_dtype_metadata md;
+    ndt::type dt = make_string_type(string_encoding_utf_8);
+    string_type_data d;
+    string_type_metadata md;
     d.begin = const_cast<char *>(str_begin);
     d.end = const_cast<char *>(str_end);
     md.blockref = NULL;

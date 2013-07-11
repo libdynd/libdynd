@@ -19,7 +19,7 @@ namespace {
         typedef string_to_date_kernel_extra extra_type;
 
         kernel_data_prefix base;
-        const base_string_dtype *src_string_dt;
+        const base_string_type *src_string_dt;
         const char *src_metadata;
         assign_error_mode errmode;
         datetime::datetime_conversion_rule_t casting;
@@ -58,7 +58,7 @@ size_t dynd::make_string_to_date_assignment_kernel(
     e->base.set_function<unary_single_operation_t>(&string_to_date_kernel_extra::single);
     e->base.destructor = &string_to_date_kernel_extra::destruct;
     // The kernel data owns a reference to this dtype
-    e->src_string_dt = static_cast<const base_string_dtype *>(ndt::type(src_string_dt).release());
+    e->src_string_dt = static_cast<const base_string_type *>(ndt::type(src_string_dt).release());
     e->src_metadata = src_metadata;
     e->errmode = errmode;
     switch (errmode) {
@@ -80,7 +80,7 @@ namespace {
         typedef date_to_string_kernel_extra extra_type;
 
         kernel_data_prefix base;
-        const base_string_dtype *dst_string_dt;
+        const base_string_type *dst_string_dt;
         const char *dst_metadata;
         assign_error_mode errmode;
 
@@ -118,7 +118,7 @@ size_t dynd::make_date_to_string_assignment_kernel(
     e->base.set_function<unary_single_operation_t>(&date_to_string_kernel_extra::single);
     e->base.destructor = &date_to_string_kernel_extra::destruct;
     // The kernel data owns a reference to this dtype
-    e->dst_string_dt = static_cast<const base_string_dtype *>(ndt::type(dst_string_dt).release());
+    e->dst_string_dt = static_cast<const base_string_type *>(ndt::type(dst_string_dt).release());
     e->dst_metadata = dst_metadata;
     e->errmode = errmode;
     return offset_out + sizeof(date_to_string_kernel_extra);

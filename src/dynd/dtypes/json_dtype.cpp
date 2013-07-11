@@ -8,7 +8,7 @@
 #include <dynd/kernels/string_assignment_kernels.hpp>
 #include <dynd/kernels/string_comparison_kernels.hpp>
 #include <dynd/kernels/string_numeric_assignment_kernels.hpp>
-#include <dynd/dtypes/fixedstring_dtype.hpp>
+#include <dynd/dtypes/fixedstring_type.hpp>
 #include <dynd/json_parser.hpp>
 #include <dynd/exceptions.hpp>
 
@@ -18,7 +18,7 @@ using namespace std;
 using namespace dynd;
 
 json_dtype::json_dtype()
-    : base_string_dtype(json_type_id, sizeof(json_dtype_data),
+    : base_string_type(json_type_id, sizeof(json_dtype_data),
                     sizeof(const char *), type_flag_scalar|type_flag_zeroinit|type_flag_blockref,
                     sizeof(json_dtype_metadata))
 {
@@ -244,14 +244,14 @@ size_t json_dtype::make_assignment_kernel(
                                     out, offset_out + sizeof(string_to_json_kernel_extra),
                                     dst_metadata, string_encoding_utf_8,
                                     src_metadata,
-                                    static_cast<const base_string_dtype *>(src_dt.extended())->get_encoding(),
+                                    static_cast<const base_string_type *>(src_dt.extended())->get_encoding(),
                                     kernel_request_single, errmode, ectx);
                 } else {
                     return make_fixedstring_to_blockref_string_assignment_kernel(
                                     out, offset_out + sizeof(string_to_json_kernel_extra),
                                     dst_metadata, string_encoding_utf_8,
                                     src_dt.get_data_size(),
-                                    static_cast<const base_string_dtype *>(src_dt.extended())->get_encoding(),
+                                    static_cast<const base_string_type *>(src_dt.extended())->get_encoding(),
                                     kernel_request_single, errmode, ectx);
                 }
             }

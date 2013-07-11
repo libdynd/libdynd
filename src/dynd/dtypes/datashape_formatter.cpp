@@ -8,8 +8,8 @@
 #include <dynd/dtypes/strided_dim_dtype.hpp>
 #include <dynd/dtypes/fixed_dim_dtype.hpp>
 #include <dynd/dtypes/var_dim_dtype.hpp>
-#include <dynd/dtypes/string_dtype.hpp>
-#include <dynd/dtypes/fixedstring_dtype.hpp>
+#include <dynd/dtypes/string_type.hpp>
+#include <dynd/dtypes/fixedstring_type.hpp>
 
 using namespace std;
 using namespace dynd;

@@ -9,8 +9,8 @@
 #include <dynd/type.hpp>
 #include <dynd/diagnostics.hpp>
 #include <dynd/kernels/string_comparison_kernels.hpp>
-#include <dynd/dtypes/fixedstring_dtype.hpp>
-#include <dynd/dtypes/string_dtype.hpp>
+#include <dynd/dtypes/fixedstring_type.hpp>
+#include <dynd/dtypes/string_type.hpp>
 #include <dynd/dtypes/convert_dtype.hpp>
 
 using namespace std;
@@ -223,46 +223,46 @@ namespace {
     template<typename T>
     struct string_compare_kernel {
         static int less(const char *a, const char *b, kernel_data_prefix *DYND_UNUSED(extra)) {
-            const string_dtype_data *da = reinterpret_cast<const string_dtype_data *>(a);
-            const string_dtype_data *db = reinterpret_cast<const string_dtype_data *>(b);
+            const string_type_data *da = reinterpret_cast<const string_type_data *>(a);
+            const string_type_data *db = reinterpret_cast<const string_type_data *>(b);
             return lexicographical_compare(
                 reinterpret_cast<const T *>(da->begin), reinterpret_cast<const T *>(da->end),
                 reinterpret_cast<const T *>(db->begin), reinterpret_cast<const T *>(db->end));
         }
 
         static int less_equal(const char *a, const char *b, kernel_data_prefix *DYND_UNUSED(extra)) {
-            const string_dtype_data *da = reinterpret_cast<const string_dtype_data *>(a);
-            const string_dtype_data *db = reinterpret_cast<const string_dtype_data *>(b);
+            const string_type_data *da = reinterpret_cast<const string_type_data *>(a);
+            const string_type_data *db = reinterpret_cast<const string_type_data *>(b);
             return !lexicographical_compare(
                 reinterpret_cast<const T *>(db->begin), reinterpret_cast<const T *>(db->end),
                 reinterpret_cast<const T *>(da->begin), reinterpret_cast<const T *>(da->end));
         }
 
         static int equal(const char *a, const char *b, kernel_data_prefix *DYND_UNUSED(extra)) {
-            const string_dtype_data *da = reinterpret_cast<const string_dtype_data *>(a);
-            const string_dtype_data *db = reinterpret_cast<const string_dtype_data *>(b);
+            const string_type_data *da = reinterpret_cast<const string_type_data *>(a);
+            const string_type_data *db = reinterpret_cast<const string_type_data *>(b);
             return (da->end - da->begin == db->end - db->begin) &&
                     memcmp(da->begin, db->begin, da->end - da->begin) == 0;
         }
 
         static int not_equal(const char *a, const char *b, kernel_data_prefix *DYND_UNUSED(extra)) {
-            const string_dtype_data *da = reinterpret_cast<const string_dtype_data *>(a);
-            const string_dtype_data *db = reinterpret_cast<const string_dtype_data *>(b);
+            const string_type_data *da = reinterpret_cast<const string_type_data *>(a);
+            const string_type_data *db = reinterpret_cast<const string_type_data *>(b);
             return (da->end - da->begin != db->end - db->begin) ||
                     memcmp(da->begin, db->begin, da->end - da->begin) != 0;
         }
 
         static int greater_equal(const char *a, const char *b, kernel_data_prefix *DYND_UNUSED(extra)) {
-            const string_dtype_data *da = reinterpret_cast<const string_dtype_data *>(a);
-            const string_dtype_data *db = reinterpret_cast<const string_dtype_data *>(b);
+            const string_type_data *da = reinterpret_cast<const string_type_data *>(a);
+            const string_type_data *db = reinterpret_cast<const string_type_data *>(b);
             return !lexicographical_compare(
                 reinterpret_cast<const T *>(da->begin), reinterpret_cast<const T *>(da->end),
                 reinterpret_cast<const T *>(db->begin), reinterpret_cast<const T *>(db->end));
         }
 
         static int greater(const char *a, const char *b, kernel_data_prefix *DYND_UNUSED(extra)) {
-            const string_dtype_data *da = reinterpret_cast<const string_dtype_data *>(a);
-            const string_dtype_data *db = reinterpret_cast<const string_dtype_data *>(b);
+            const string_type_data *da = reinterpret_cast<const string_type_data *>(a);
+            const string_type_data *db = reinterpret_cast<const string_type_data *>(b);
             return lexicographical_compare(
                 reinterpret_cast<const T *>(db->begin), reinterpret_cast<const T *>(db->end),
                 reinterpret_cast<const T *>(da->begin), reinterpret_cast<const T *>(da->end));
@@ -315,7 +315,7 @@ size_t dynd::make_general_string_comparison_kernel(
                 const eval::eval_context *ectx)
 {
     // TODO: Make more efficient, direct comparison kernels
-    ndt::type sdt = make_string_dtype();
+    ndt::type sdt = make_string_type();
     return make_comparison_kernel(out, offset_out,
                     make_convert_dtype(sdt, src0_dt), src0_metadata,
                     make_convert_dtype(sdt, src1_dt), src1_metadata,

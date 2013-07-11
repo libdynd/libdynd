@@ -14,7 +14,7 @@
 #include <dynd/gfunc/make_callable.hpp>
 #include <dynd/gfunc/call_callable.hpp>
 #include <dynd/dtypes/strided_dim_dtype.hpp>
-#include <dynd/dtypes/string_dtype.hpp>
+#include <dynd/dtypes/string_type.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -431,6 +431,6 @@ TEST(GFuncCallable, StringReturn) {
     a(1).val_assign(20);
     a(2).val_assign(1000);
     r = c.call_generic(a);
-    EXPECT_EQ(make_string_dtype(string_encoding_utf_8), r.get_dtype());
+    EXPECT_EQ(make_string_type(string_encoding_utf_8), r.get_dtype());
     EXPECT_EQ("-10, 20, 1000", r.as<string>());
 }

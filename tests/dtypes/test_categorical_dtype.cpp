@@ -10,8 +10,8 @@
 
 #include <dynd/array.hpp>
 #include <dynd/dtypes/categorical_dtype.hpp>
-#include <dynd/dtypes/fixedstring_dtype.hpp>
-#include <dynd/dtypes/string_dtype.hpp>
+#include <dynd/dtypes/fixedstring_type.hpp>
+#include <dynd/dtypes/string_type.hpp>
 #include <dynd/dtypes/convert_dtype.hpp>
 #include <dynd/ndobject_range.hpp>
 
@@ -20,7 +20,7 @@ using namespace dynd;
 
 TEST(CategoricalDType, Create) {
     const char *a_vals[] = {"foo", "bar", "baz"};
-    nd::array a = nd::make_strided_array(3, make_fixedstring_dtype(3, string_encoding_ascii));
+    nd::array a = nd::make_strided_array(3, make_fixedstring_type(3, string_encoding_ascii));
     a.vals() = a_vals;
 
     ndt::type d;
@@ -64,11 +64,11 @@ TEST(CategoricalDType, Create) {
 
 TEST(CategoricalDType, Convert) {
     const char *a_vals[] = {"foo", "bar", "baz"};
-    nd::array a = nd::make_strided_array(3, make_fixedstring_dtype(3, string_encoding_ascii));
+    nd::array a = nd::make_strided_array(3, make_fixedstring_type(3, string_encoding_ascii));
     a.vals() = a_vals;
 
     ndt::type cd = make_categorical_dtype(a);
-    ndt::type sd = make_string_dtype(string_encoding_utf_8);
+    ndt::type sd = make_string_type(string_encoding_utf_8);
 
     // String conversions report false, so that assignments encodings
     // get validated on assignment
@@ -83,11 +83,11 @@ TEST(CategoricalDType, Convert) {
 
 TEST(CategoricalDType, Compare) {
     const char *a_vals[] = {"foo", "bar", "baz"};
-    nd::array a = nd::make_strided_array(3, make_fixedstring_dtype(3, string_encoding_ascii));
+    nd::array a = nd::make_strided_array(3, make_fixedstring_type(3, string_encoding_ascii));
     a.vals() = a_vals;
 
     const char *b_vals[] = {"foo", "bar"};
-    nd::array b = nd::make_strided_array(2, make_fixedstring_dtype(3, string_encoding_ascii));
+    nd::array b = nd::make_strided_array(2, make_fixedstring_type(3, string_encoding_ascii));
     b.vals() = b_vals;
 
     ndt::type da = make_categorical_dtype(a);
@@ -109,7 +109,7 @@ TEST(CategoricalDType, Compare) {
 
 TEST(CategoricalDType, Unique) {
     const char *a_vals[] = {"foo", "bar", "foo"};
-    nd::array a = nd::make_strided_array(3, make_fixedstring_dtype(3, string_encoding_ascii));
+    nd::array a = nd::make_strided_array(3, make_fixedstring_type(3, string_encoding_ascii));
     a.vals() = a_vals;
 
     EXPECT_THROW(make_categorical_dtype(a), std::runtime_error);
@@ -122,11 +122,11 @@ TEST(CategoricalDType, Unique) {
 
 TEST(CategoricalDType, FactorFixedString) {
     const char *string_cats_vals[] = {"bar", "foo"};
-    nd::array string_cats = nd::make_strided_array(2, make_fixedstring_dtype(3, string_encoding_ascii));
+    nd::array string_cats = nd::make_strided_array(2, make_fixedstring_type(3, string_encoding_ascii));
     string_cats.vals() = string_cats_vals;
 
     const char *a_vals[] = {"foo", "bar", "foo"};
-    nd::array a = nd::make_strided_array(3, make_fixedstring_dtype(3, string_encoding_ascii));
+    nd::array a = nd::make_strided_array(3, make_fixedstring_type(3, string_encoding_ascii));
     a.vals() = a_vals;
 
     ndt::type da = factor_categorical_dtype(a);
@@ -165,7 +165,7 @@ TEST(CategoricalDType, FactorInt) {
 
 TEST(CategoricalDType, Values) {
     const char *a_vals[] = {"foo", "bar", "baz"};
-    nd::array a = nd::make_strided_array(3, make_fixedstring_dtype(3, string_encoding_ascii));
+    nd::array a = nd::make_strided_array(3, make_fixedstring_type(3, string_encoding_ascii));
     a.vals() = a_vals;
 
     ndt::type dt = make_categorical_dtype(a);
@@ -206,7 +206,7 @@ TEST(CategoricalDType, ValuesLonger) {
 
 TEST(CategoricalDType, AssignFixedString) {
     const char *cat_vals[] = {"foo", "bar", "baz"};
-    nd::array cat = nd::make_strided_array(3, make_fixedstring_dtype(3, string_encoding_ascii));
+    nd::array cat = nd::make_strided_array(3, make_fixedstring_type(3, string_encoding_ascii));
     cat.vals() = cat_vals;
 
     ndt::type dt = make_categorical_dtype(cat);
@@ -263,7 +263,7 @@ TEST(CategoricalDType, AssignInt) {
 
 TEST(CategoricalDType, AssignRange) {
     const char *cat_vals[] = {"foo", "bar", "baz"};
-    nd::array cat = nd::make_strided_array(3, make_fixedstring_dtype(3, string_encoding_ascii));
+    nd::array cat = nd::make_strided_array(3, make_fixedstring_type(3, string_encoding_ascii));
     cat.vals() = cat_vals;
 
     ndt::type dt = make_categorical_dtype(cat);

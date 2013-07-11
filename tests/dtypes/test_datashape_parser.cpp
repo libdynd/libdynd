@@ -14,8 +14,8 @@
 #include <dynd/dtypes/var_dim_dtype.hpp>
 #include <dynd/dtypes/cstruct_dtype.hpp>
 #include <dynd/dtypes/date_dtype.hpp>
-#include <dynd/dtypes/string_dtype.hpp>
-#include <dynd/dtypes/fixedstring_dtype.hpp>
+#include <dynd/dtypes/string_type.hpp>
+#include <dynd/dtypes/fixedstring_type.hpp>
 #include <dynd/dtypes/json_dtype.hpp>
 
 using namespace std;
@@ -53,46 +53,46 @@ TEST(DataShapeParser, BasicThrow) {
 
 TEST(DataShapeParser, StringAtoms) {
     // Default string
-    EXPECT_EQ(make_string_dtype(string_encoding_utf_8),
+    EXPECT_EQ(make_string_type(string_encoding_utf_8),
                     type_from_datashape("string"));
     // String with encoding
-    EXPECT_EQ(make_string_dtype(string_encoding_ascii),
+    EXPECT_EQ(make_string_type(string_encoding_ascii),
                     type_from_datashape("string('A')"));
-    EXPECT_EQ(make_string_dtype(string_encoding_ascii),
+    EXPECT_EQ(make_string_type(string_encoding_ascii),
                     type_from_datashape("string('ascii')"));
-    EXPECT_EQ(make_string_dtype(string_encoding_utf_8),
+    EXPECT_EQ(make_string_type(string_encoding_utf_8),
                     type_from_datashape("string('U8')"));
-    EXPECT_EQ(make_string_dtype(string_encoding_utf_8),
+    EXPECT_EQ(make_string_type(string_encoding_utf_8),
                     type_from_datashape("string('utf8')"));
-    EXPECT_EQ(make_string_dtype(string_encoding_utf_8),
+    EXPECT_EQ(make_string_type(string_encoding_utf_8),
                     type_from_datashape("string('utf-8')"));
-    EXPECT_EQ(make_string_dtype(string_encoding_utf_16),
+    EXPECT_EQ(make_string_type(string_encoding_utf_16),
                     type_from_datashape("string('U16')"));
-    EXPECT_EQ(make_string_dtype(string_encoding_utf_16),
+    EXPECT_EQ(make_string_type(string_encoding_utf_16),
                     type_from_datashape("string('utf16')"));
-    EXPECT_EQ(make_string_dtype(string_encoding_utf_16),
+    EXPECT_EQ(make_string_type(string_encoding_utf_16),
                     type_from_datashape("string('utf-16')"));
-    EXPECT_EQ(make_string_dtype(string_encoding_utf_32),
+    EXPECT_EQ(make_string_type(string_encoding_utf_32),
                     type_from_datashape("string('U32')"));
-    EXPECT_EQ(make_string_dtype(string_encoding_utf_32),
+    EXPECT_EQ(make_string_type(string_encoding_utf_32),
                     type_from_datashape("string('utf32')"));
-    EXPECT_EQ(make_string_dtype(string_encoding_utf_32),
+    EXPECT_EQ(make_string_type(string_encoding_utf_32),
                     type_from_datashape("string('utf-32')"));
-    EXPECT_EQ(make_string_dtype(string_encoding_ucs_2),
+    EXPECT_EQ(make_string_type(string_encoding_ucs_2),
                     type_from_datashape("string('ucs2')"));
-    EXPECT_EQ(make_string_dtype(string_encoding_ucs_2),
+    EXPECT_EQ(make_string_type(string_encoding_ucs_2),
                     type_from_datashape("string('ucs-2')"));
     // String with size
-    EXPECT_EQ(make_fixedstring_dtype(1, string_encoding_utf_8),
+    EXPECT_EQ(make_fixedstring_type(1, string_encoding_utf_8),
                     type_from_datashape("string(1)"));
-    EXPECT_EQ(make_fixedstring_dtype(100, string_encoding_utf_8),
+    EXPECT_EQ(make_fixedstring_type(100, string_encoding_utf_8),
                     type_from_datashape("string(100)"));
     // String with size and encoding
-    EXPECT_EQ(make_fixedstring_dtype(1, string_encoding_ascii),
+    EXPECT_EQ(make_fixedstring_type(1, string_encoding_ascii),
                     type_from_datashape("string(1, 'A')"));
-    EXPECT_EQ(make_fixedstring_dtype(10, string_encoding_utf_8),
+    EXPECT_EQ(make_fixedstring_type(10, string_encoding_utf_8),
                     type_from_datashape("string(10, 'U8')"));
-    EXPECT_EQ(make_fixedstring_dtype(1000, string_encoding_utf_16),
+    EXPECT_EQ(make_fixedstring_type(1000, string_encoding_utf_16),
                     type_from_datashape("string(1000,'U16')"));
 }
 

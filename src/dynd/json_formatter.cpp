@@ -4,7 +4,7 @@
 //
 
 #include <dynd/json_formatter.hpp>
-#include <dynd/dtypes/string_dtype.hpp>
+#include <dynd/dtypes/string_type.hpp>
 #include <dynd/dtypes/json_dtype.hpp>
 #include <dynd/dtypes/date_dtype.hpp>
 #include <dynd/dtypes/base_struct_dtype.hpp>
@@ -167,7 +167,7 @@ static void format_json_string(output_data& out, const ndt::type& dt, const char
         const json_dtype_data *d = reinterpret_cast<const json_dtype_data *>(data);
         out.write(d->begin, d->end);
     } else {
-        const base_string_dtype *bsd = static_cast<const base_string_dtype *>(dt.extended());
+        const base_string_type *bsd = static_cast<const base_string_type *>(dt.extended());
         string_encoding_t encoding = bsd->get_encoding();
         const char *begin = NULL, *end = NULL;
         bsd->get_string_range(&begin, &end, metadata, data);
@@ -305,11 +305,11 @@ static void format_json(output_data& out, const ndt::type& dt, const char *metad
 nd::array dynd::format_json(const nd::array& n)
 {
     // Create a UTF-8 string
-    nd::array result = nd::empty(make_string_dtype());
+    nd::array result = nd::empty(make_string_type());
 
     // Initialize the output with some memory
     output_data out;
-    out.blockref = reinterpret_cast<const string_dtype_metadata *>(result.get_ndo_meta())->blockref;
+    out.blockref = reinterpret_cast<const string_type_metadata *>(result.get_ndo_meta())->blockref;
     out.api = get_memory_block_pod_allocator_api(out.blockref);
     out.api->allocate(out.blockref, 1024, 1, &out.out_begin, &out.out_capacity_end);
     out.out_end = out.out_begin;
@@ -322,7 +322,7 @@ nd::array dynd::format_json(const nd::array& n)
     }
 
     // Shrink the memory to fit, and set the pointers in the output
-    string_dtype_data *d = reinterpret_cast<string_dtype_data *>(result.get_readwrite_originptr());
+    string_type_data *d = reinterpret_cast<string_type_data *>(result.get_readwrite_originptr());
     d->begin = out.out_begin;
     d->end = out.out_capacity_end;
     out.api->resize(out.blockref, out.out_end - out.out_begin, &d->begin, &d->end);

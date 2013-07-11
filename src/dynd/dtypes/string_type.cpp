@@ -3,12 +3,12 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <dynd/dtypes/string_dtype.hpp>
+#include <dynd/dtypes/string_type.hpp>
 #include <dynd/memblock/pod_memory_block.hpp>
 #include <dynd/kernels/string_assignment_kernels.hpp>
 #include <dynd/kernels/string_comparison_kernels.hpp>
 #include <dynd/kernels/string_numeric_assignment_kernels.hpp>
-#include <dynd/dtypes/fixedstring_dtype.hpp>
+#include <dynd/dtypes/fixedstring_type.hpp>
 #include <dynd/exceptions.hpp>
 
 #include <algorithm>
@@ -16,10 +16,10 @@
 using namespace std;
 using namespace dynd;
 
-string_dtype::string_dtype(string_encoding_t encoding)
-    : base_string_dtype(string_type_id, sizeof(string_dtype_data),
+string_type::string_type(string_encoding_t encoding)
+    : base_string_type(string_type_id, sizeof(string_type_data),
                     sizeof(const char *), type_flag_scalar|type_flag_zeroinit|type_flag_blockref,
-                    sizeof(string_dtype_metadata)),
+                    sizeof(string_type_metadata)),
             m_encoding(encoding)
 {
     switch (encoding) {
@@ -34,21 +34,21 @@ string_dtype::string_dtype(string_encoding_t encoding)
     }
 }
 
-string_dtype::~string_dtype()
+string_type::~string_type()
 {
 }
 
-void string_dtype::get_string_range(const char **out_begin, const char**out_end,
+void string_type::get_string_range(const char **out_begin, const char**out_end,
                 const char *DYND_UNUSED(metadata), const char *data) const
 {
-    *out_begin = reinterpret_cast<const string_dtype_data *>(data)->begin;
-    *out_end = reinterpret_cast<const string_dtype_data *>(data)->end;
+    *out_begin = reinterpret_cast<const string_type_data *>(data)->begin;
+    *out_end = reinterpret_cast<const string_type_data *>(data)->end;
 }
 
-void string_dtype::set_utf8_string(const char *data_metadata, char *data,
+void string_type::set_utf8_string(const char *data_metadata, char *data,
                 assign_error_mode errmode, const char* utf8_begin, const char *utf8_end) const
 {
-    const string_dtype_metadata *data_md = reinterpret_cast<const string_dtype_metadata *>(data_metadata);
+    const string_type_metadata *data_md = reinterpret_cast<const string_type_metadata *>(data_metadata);
     const intptr_t src_charsize = 1;
     intptr_t dst_charsize = string_encoding_char_size_table[m_encoding];
     char *dst_begin = NULL, *dst_current, *dst_end = NULL;
@@ -82,17 +82,17 @@ void string_dtype::set_utf8_string(const char *data_metadata, char *data,
     allocator->resize(data_md->blockref, dst_current - dst_begin, &dst_begin, &dst_end);
 
     // Set the output
-    reinterpret_cast<string_dtype_data *>(data)->begin = dst_begin;
-    reinterpret_cast<string_dtype_data*>(data)->end = dst_end;
+    reinterpret_cast<string_type_data *>(data)->begin = dst_begin;
+    reinterpret_cast<string_type_data*>(data)->end = dst_end;
 }
 
-void string_dtype::print_data(std::ostream& o, const char *DYND_UNUSED(metadata), const char *data) const
+void string_type::print_data(std::ostream& o, const char *DYND_UNUSED(metadata), const char *data) const
 {
     uint32_t cp;
     next_unicode_codepoint_t next_fn;
     next_fn = get_next_unicode_codepoint_function(m_encoding, assign_error_none);
-    const char *begin = reinterpret_cast<const string_dtype_data *>(data)->begin;
-    const char *end = reinterpret_cast<const string_dtype_data *>(data)->end;
+    const char *begin = reinterpret_cast<const string_type_data *>(data)->begin;
+    const char *end = reinterpret_cast<const string_type_data *>(data)->end;
 
     // Print as an escaped string
     o << "\"";
@@ -103,7 +103,7 @@ void string_dtype::print_data(std::ostream& o, const char *DYND_UNUSED(metadata)
     o << "\"";
 }
 
-void string_dtype::print_dtype(std::ostream& o) const {
+void string_type::print_dtype(std::ostream& o) const {
 
     o << "string";
     if (m_encoding != string_encoding_utf_8) {
@@ -111,9 +111,9 @@ void string_dtype::print_dtype(std::ostream& o) const {
     }
 }
 
-bool string_dtype::is_unique_data_owner(const char *metadata) const
+bool string_type::is_unique_data_owner(const char *metadata) const
 {
-    const string_dtype_metadata *md = reinterpret_cast<const string_dtype_metadata *>(metadata);
+    const string_type_metadata *md = reinterpret_cast<const string_type_metadata *>(metadata);
     if (md->blockref != NULL &&
             (md->blockref->m_use_count != 1 ||
              md->blockref->m_type != pod_memory_block_type)) {
@@ -122,12 +122,12 @@ bool string_dtype::is_unique_data_owner(const char *metadata) const
     return true;
 }
 
-ndt::type string_dtype::get_canonical_type() const
+ndt::type string_type::get_canonical_type() const
 {
     return ndt::type(this, true);
 }
 
-void string_dtype::get_shape(size_t ndim, size_t i, intptr_t *out_shape, const char *DYND_UNUSED(metadata)) const
+void string_type::get_shape(size_t ndim, size_t i, intptr_t *out_shape, const char *DYND_UNUSED(metadata)) const
 {
     out_shape[i] = -1;
     if (i+1 < ndim) {
@@ -137,7 +137,7 @@ void string_dtype::get_shape(size_t ndim, size_t i, intptr_t *out_shape, const c
     }
 }
 
-bool string_dtype::is_lossless_assignment(
+bool string_type::is_lossless_assignment(
                 const ndt::type& DYND_UNUSED(dst_dt),
                 const ndt::type& DYND_UNUSED(src_dt)) const
 {
@@ -146,39 +146,39 @@ bool string_dtype::is_lossless_assignment(
     return false;
 }
 
-bool string_dtype::operator==(const base_type& rhs) const
+bool string_type::operator==(const base_type& rhs) const
 {
     if (this == &rhs) {
         return true;
     } else if (rhs.get_type_id() != string_type_id) {
         return false;
     } else {
-        const string_dtype *dt = static_cast<const string_dtype*>(&rhs);
+        const string_type *dt = static_cast<const string_type*>(&rhs);
         return m_encoding == dt->m_encoding;
     }
 }
 
-void string_dtype::metadata_default_construct(char *metadata, size_t DYND_UNUSED(ndim), const intptr_t* DYND_UNUSED(shape)) const
+void string_type::metadata_default_construct(char *metadata, size_t DYND_UNUSED(ndim), const intptr_t* DYND_UNUSED(shape)) const
 {
     // Simply allocate a POD memory block
-    string_dtype_metadata *md = reinterpret_cast<string_dtype_metadata *>(metadata);
+    string_type_metadata *md = reinterpret_cast<string_type_metadata *>(metadata);
     md->blockref = make_pod_memory_block().release();
 }
 
-void string_dtype::metadata_copy_construct(char *dst_metadata, const char *src_metadata, memory_block_data *embedded_reference) const
+void string_type::metadata_copy_construct(char *dst_metadata, const char *src_metadata, memory_block_data *embedded_reference) const
 {
     // Copy the blockref, switching it to the embedded_reference if necessary
-    const string_dtype_metadata *src_md = reinterpret_cast<const string_dtype_metadata *>(src_metadata);
-    string_dtype_metadata *dst_md = reinterpret_cast<string_dtype_metadata *>(dst_metadata);
+    const string_type_metadata *src_md = reinterpret_cast<const string_type_metadata *>(src_metadata);
+    string_type_metadata *dst_md = reinterpret_cast<string_type_metadata *>(dst_metadata);
     dst_md->blockref = src_md->blockref ? src_md->blockref : embedded_reference;
     if (dst_md->blockref) {
         memory_block_incref(dst_md->blockref);
     }
 }
 
-void string_dtype::metadata_reset_buffers(char *metadata) const
+void string_type::metadata_reset_buffers(char *metadata) const
 {
-    const string_dtype_metadata *md = reinterpret_cast<const string_dtype_metadata *>(metadata);
+    const string_type_metadata *md = reinterpret_cast<const string_type_metadata *>(metadata);
     if (md->blockref != NULL && md->blockref->m_type == pod_memory_block_type) {
         memory_block_pod_allocator_api *allocator = get_memory_block_pod_allocator_api(md->blockref);
         allocator->reset(md->blockref);
@@ -188,9 +188,9 @@ void string_dtype::metadata_reset_buffers(char *metadata) const
     }
 }
 
-void string_dtype::metadata_finalize_buffers(char *metadata) const
+void string_type::metadata_finalize_buffers(char *metadata) const
 {
-    string_dtype_metadata *md = reinterpret_cast<string_dtype_metadata *>(metadata);
+    string_type_metadata *md = reinterpret_cast<string_type_metadata *>(metadata);
     if (md->blockref != NULL) {
         // Finalize the memory block
         memory_block_pod_allocator_api *allocator = get_memory_block_pod_allocator_api(md->blockref);
@@ -200,22 +200,22 @@ void string_dtype::metadata_finalize_buffers(char *metadata) const
     }
 }
 
-void string_dtype::metadata_destruct(char *metadata) const
+void string_type::metadata_destruct(char *metadata) const
 {
-    string_dtype_metadata *md = reinterpret_cast<string_dtype_metadata *>(metadata);
+    string_type_metadata *md = reinterpret_cast<string_type_metadata *>(metadata);
     if (md->blockref) {
         memory_block_decref(md->blockref);
     }
 }
 
-void string_dtype::metadata_debug_print(const char *metadata, std::ostream& o, const std::string& indent) const
+void string_type::metadata_debug_print(const char *metadata, std::ostream& o, const std::string& indent) const
 {
-    const string_dtype_metadata *md = reinterpret_cast<const string_dtype_metadata *>(metadata);
+    const string_type_metadata *md = reinterpret_cast<const string_type_metadata *>(metadata);
     o << indent << "string metadata\n";
     memory_block_debug_print(md->blockref, o, indent + " ");
 }
 
-size_t string_dtype::make_assignment_kernel(
+size_t string_type::make_assignment_kernel(
                 hierarchical_kernel *out, size_t offset_out,
                 const ndt::type& dst_dt, const char *dst_metadata,
                 const ndt::type& src_dt, const char *src_metadata,
@@ -227,14 +227,14 @@ size_t string_dtype::make_assignment_kernel(
             case string_type_id: {
                 return make_blockref_string_assignment_kernel(out, offset_out,
                                 dst_metadata, get_encoding(),
-                                src_metadata, static_cast<const base_string_dtype *>(src_dt.extended())->get_encoding(),
+                                src_metadata, static_cast<const base_string_type *>(src_dt.extended())->get_encoding(),
                                 kernreq, errmode, ectx);
             }
             case fixedstring_type_id: {
                 return make_fixedstring_to_blockref_string_assignment_kernel(out, offset_out,
                                 dst_metadata, get_encoding(),
                                 src_dt.get_data_size(),
-                                static_cast<const base_string_dtype *>(src_dt.extended())->get_encoding(),
+                                static_cast<const base_string_type *>(src_dt.extended())->get_encoding(),
                                 kernreq, errmode, ectx);
             }
             default: {
@@ -265,7 +265,7 @@ size_t string_dtype::make_assignment_kernel(
     }
 }
 
-size_t string_dtype::make_comparison_kernel(
+size_t string_type::make_comparison_kernel(
                 hierarchical_kernel *out, size_t offset_out,
                 const ndt::type& src0_dt, const char *src0_metadata,
                 const ndt::type& src1_dt, const char *src1_metadata,

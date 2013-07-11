@@ -118,7 +118,7 @@ set(libdynd_SRC
     src/dynd/dtypes/base_bytes_type.cpp
     src/dynd/dtypes/base_type.cpp
     src/dynd/dtypes/base_expression_type.cpp
-    src/dynd/dtypes/base_string_dtype.cpp
+    src/dynd/dtypes/base_string_type.cpp
     src/dynd/dtypes/base_struct_dtype.cpp
     src/dynd/dtypes/base_uniform_dim_dtype.cpp
     src/dynd/dtypes/busdate_dtype.cpp
@@ -141,13 +141,13 @@ set(libdynd_SRC
     src/dynd/dtypes/dtype_alignment.cpp
     src/dynd/dtypes/fixed_dim_dtype.cpp
     src/dynd/dtypes/fixedbytes_dtype.cpp
-    src/dynd/dtypes/fixedstring_dtype.cpp
+    src/dynd/dtypes/fixedstring_type.cpp
     src/dynd/dtypes/cstruct_dtype.cpp
     src/dynd/dtypes/groupby_dtype.cpp
     src/dynd/dtypes/json_dtype.cpp
     src/dynd/dtypes/pointer_dtype.cpp
     src/dynd/dtypes/strided_dim_dtype.cpp
-    src/dynd/dtypes/string_dtype.cpp
+    src/dynd/dtypes/string_type.cpp
     src/dynd/dtypes/struct_dtype.cpp
     src/dynd/dtypes/tuple_dtype.cpp
     src/dynd/dtypes/type_id.cpp
@@ -158,7 +158,7 @@ set(libdynd_SRC
     include/dynd/dtypes/base_bytes_type.hpp
     include/dynd/dtypes/base_type.hpp
     include/dynd/dtypes/base_expression_type.hpp
-    include/dynd/dtypes/base_string_dtype.hpp
+    include/dynd/dtypes/base_string_type.hpp
     include/dynd/dtypes/base_struct_dtype.hpp
     include/dynd/dtypes/base_uniform_dim_dtype.hpp
     include/dynd/dtypes/busdate_dtype.hpp
@@ -181,13 +181,13 @@ set(libdynd_SRC
     include/dynd/dtypes/dtype_alignment.hpp
     include/dynd/dtypes/fixed_dim_dtype.hpp
     include/dynd/dtypes/fixedbytes_dtype.hpp
-    include/dynd/dtypes/fixedstring_dtype.hpp
+    include/dynd/dtypes/fixedstring_type.hpp
     include/dynd/dtypes/cstruct_dtype.hpp
     include/dynd/dtypes/groupby_dtype.hpp
     include/dynd/dtypes/json_dtype.hpp
     include/dynd/dtypes/pointer_dtype.hpp
     include/dynd/dtypes/strided_dim_dtype.hpp
-    include/dynd/dtypes/string_dtype.hpp
+    include/dynd/dtypes/string_type.hpp
     include/dynd/dtypes/struct_dtype.hpp
     include/dynd/dtypes/cstruct_dtype.hpp
     include/dynd/dtypes/tuple_dtype.hpp

@@ -5,8 +5,8 @@
 
 #include <algorithm>
 
-#include <dynd/dtypes/fixedstring_dtype.hpp>
-#include <dynd/dtypes/string_dtype.hpp>
+#include <dynd/dtypes/fixedstring_type.hpp>
+#include <dynd/dtypes/string_type.hpp>
 #include <dynd/kernels/string_assignment_kernels.hpp>
 #include <dynd/kernels/string_comparison_kernels.hpp>
 #include <dynd/kernels/string_numeric_assignment_kernels.hpp>
@@ -16,8 +16,8 @@
 using namespace std;
 using namespace dynd;
 
-fixedstring_dtype::fixedstring_dtype(intptr_t stringsize, string_encoding_t encoding)
-    : base_string_dtype(fixedstring_type_id, 0, 1, type_flag_scalar, 0),
+fixedstring_type::fixedstring_type(intptr_t stringsize, string_encoding_t encoding)
+    : base_string_type(fixedstring_type_id, 0, 1, type_flag_scalar, 0),
             m_stringsize(stringsize), m_encoding(encoding)
 {
     switch (encoding) {
@@ -40,11 +40,11 @@ fixedstring_dtype::fixedstring_dtype(intptr_t stringsize, string_encoding_t enco
     }
 }
 
-fixedstring_dtype::~fixedstring_dtype()
+fixedstring_type::~fixedstring_type()
 {
 }
 
-void fixedstring_dtype::get_string_range(const char **out_begin, const char**out_end,
+void fixedstring_type::get_string_range(const char **out_begin, const char**out_end,
                 const char *DYND_UNUSED(metadata), const char *data) const
 {
     // Beginning of the string
@@ -81,7 +81,7 @@ void fixedstring_dtype::get_string_range(const char **out_begin, const char**out
     }
 }
 
-void fixedstring_dtype::set_utf8_string(const char *DYND_UNUSED(metadata), char *dst,
+void fixedstring_type::set_utf8_string(const char *DYND_UNUSED(metadata), char *dst,
                 assign_error_mode errmode,
                 const char* utf8_begin, const char *utf8_end) const
 {
@@ -103,7 +103,7 @@ void fixedstring_dtype::set_utf8_string(const char *DYND_UNUSED(metadata), char 
     }
 }
 
-void fixedstring_dtype::print_data(std::ostream& o, const char *DYND_UNUSED(metadata), const char *data) const
+void fixedstring_type::print_data(std::ostream& o, const char *DYND_UNUSED(metadata), const char *data) const
 {
     uint32_t cp;
     next_unicode_codepoint_t next_fn;
@@ -123,7 +123,7 @@ void fixedstring_dtype::print_data(std::ostream& o, const char *DYND_UNUSED(meta
     o << "\"";
 }
 
-void fixedstring_dtype::print_dtype(std::ostream& o) const
+void fixedstring_type::print_dtype(std::ostream& o) const
 {
     o << "string<" << m_stringsize;
     if (m_encoding != string_encoding_utf_8) {
@@ -132,12 +132,12 @@ void fixedstring_dtype::print_dtype(std::ostream& o) const
     o << ">";
 }
 
-ndt::type fixedstring_dtype::get_canonical_type() const
+ndt::type fixedstring_type::get_canonical_type() const
 {
     return ndt::type(this, true);
 }
 
-bool fixedstring_dtype::is_lossless_assignment(
+bool fixedstring_type::is_lossless_assignment(
                 const ndt::type& DYND_UNUSED(dst_dt),
                 const ndt::type& DYND_UNUSED(src_dt)) const
 {
@@ -146,19 +146,19 @@ bool fixedstring_dtype::is_lossless_assignment(
     return false;
 }
 
-bool fixedstring_dtype::operator==(const base_type& rhs) const
+bool fixedstring_type::operator==(const base_type& rhs) const
 {
     if (this == &rhs) {
         return true;
     } else if (rhs.get_type_id() != fixedstring_type_id) {
         return false;
     } else {
-        const fixedstring_dtype *dt = static_cast<const fixedstring_dtype*>(&rhs);
+        const fixedstring_type *dt = static_cast<const fixedstring_type*>(&rhs);
         return m_encoding == dt->m_encoding && m_stringsize == dt->m_stringsize;
     }
 }
 
-size_t fixedstring_dtype::make_assignment_kernel(
+size_t fixedstring_type::make_assignment_kernel(
                 hierarchical_kernel *out, size_t offset_out,
                 const ndt::type& dst_dt, const char *dst_metadata,
                 const ndt::type& src_dt, const char *src_metadata,
@@ -168,13 +168,13 @@ size_t fixedstring_dtype::make_assignment_kernel(
     if (this == dst_dt.extended()) {
         switch (src_dt.get_type_id()) {
             case fixedstring_type_id: {
-                const fixedstring_dtype *src_fs = static_cast<const fixedstring_dtype *>(src_dt.extended());
+                const fixedstring_type *src_fs = static_cast<const fixedstring_type *>(src_dt.extended());
                 return make_fixedstring_assignment_kernel(out, offset_out,
                                 get_data_size(), m_encoding, src_fs->get_data_size(), src_fs->m_encoding,
                                 kernreq, errmode, ectx);
             }
             case string_type_id: {
-                const base_string_dtype *src_fs = static_cast<const base_string_dtype *>(src_dt.extended());
+                const base_string_type *src_fs = static_cast<const base_string_type *>(src_dt.extended());
                 return make_blockref_string_to_fixedstring_assignment_kernel(out, offset_out,
                                 get_data_size(), m_encoding, src_fs->get_encoding(),
                                 kernreq, errmode, ectx);
@@ -207,7 +207,7 @@ size_t fixedstring_dtype::make_assignment_kernel(
     }
 }
 
-size_t fixedstring_dtype::make_comparison_kernel(
+size_t fixedstring_type::make_comparison_kernel(
                 hierarchical_kernel *out, size_t offset_out,
                 const ndt::type& src0_dt, const char *src0_metadata,
                 const ndt::type& src1_dt, const char *src1_metadata,

@@ -10,7 +10,7 @@
 
 #include <dynd/array.hpp>
 #include <dynd/dtypes/tuple_dtype.hpp>
-#include <dynd/dtypes/fixedstring_dtype.hpp>
+#include <dynd/dtypes/fixedstring_type.hpp>
 
 using namespace std;
 using namespace dynd;

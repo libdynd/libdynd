@@ -15,7 +15,7 @@ namespace dynd {
 struct bytes_dtype_metadata {
     /**
      * A reference to the memory block which contains the byte's data.
-     * NOTE: This is identical to string_dtype_metadata, by design. Maybe
+     * NOTE: This is identical to string_type_metadata, by design. Maybe
      *       both should become a typedef to a common class?
      */
     memory_block_data *blockref;

@@ -5,7 +5,7 @@
 
 #include <dynd/json_parser.hpp>
 #include <dynd/dtypes/base_bytes_type.hpp>
-#include <dynd/dtypes/string_dtype.hpp>
+#include <dynd/dtypes/string_type.hpp>
 #include <dynd/dtypes/json_dtype.hpp>
 #include <dynd/dtypes/fixed_dim_dtype.hpp>
 #include <dynd/dtypes/var_dim_dtype.hpp>
@@ -45,7 +45,7 @@ static void json_as_buffer(const nd::array& json, nd::array& out_tmp_ref, const 
     ndt::type json_dtype = json.get_dtype().value_type();
     switch (json_dtype.get_kind()) {
         case string_kind: {
-            const base_string_dtype *sdt = static_cast<const base_string_dtype *>(json_dtype.extended());
+            const base_string_type *sdt = static_cast<const base_string_type *>(json_dtype.extended());
             switch (sdt->get_encoding()) {
                 case string_encoding_ascii:
                 case string_encoding_utf_8:
@@ -56,9 +56,9 @@ static void json_as_buffer(const nd::array& json, nd::array& out_tmp_ref, const 
                     break;
                 default: {
                     // The data needs to be converted to UTF-8 before parsing
-                    ndt::type utf8_dt = make_string_dtype(string_encoding_utf_8);
+                    ndt::type utf8_dt = make_string_type(string_encoding_utf_8);
                     out_tmp_ref = json.ucast(utf8_dt).eval();
-                    sdt = static_cast<const base_string_dtype *>(utf8_dt.extended());
+                    sdt = static_cast<const base_string_type *>(utf8_dt.extended());
                     sdt->get_string_range(&begin, &end,
                                     out_tmp_ref.get_ndo_meta(), out_tmp_ref.get_readonly_originptr());
                     break;
@@ -531,7 +531,7 @@ static void parse_jsonstring_json(const ndt::type& dt, const char *metadata, cha
 {
     const char *saved_begin = skip_whitespace(begin, end);
     skip_json_value(begin, end);
-    const base_string_dtype *bsd = static_cast<const base_string_dtype *>(dt.extended());
+    const base_string_type *bsd = static_cast<const base_string_type *>(dt.extended());
     // The skipped JSON value gets copied verbatim into the json string
     bsd->set_utf8_string(metadata, out_data, assign_error_none,
             saved_begin, begin);
@@ -543,7 +543,7 @@ static void parse_string_json(const ndt::type& dt, const char *metadata, char *o
     const char *saved_begin = begin;
     string val;
     if (parse_json_string(begin, end, val)) {
-        const base_string_dtype *bsd = static_cast<const base_string_dtype *>(dt.extended());
+        const base_string_type *bsd = static_cast<const base_string_type *>(dt.extended());
         try {
             bsd->set_utf8_string(metadata, out_data, assign_error_fractional, val);
         } catch (const std::exception& e) {

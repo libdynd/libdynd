@@ -15,16 +15,16 @@ namespace dynd {
 /**
  * Base class for all string dtypes. If a dtype
  * has kind string_kind, it must be a subclass of
- * base_string_dtype.
+ * base_string_type.
  */
-class base_string_dtype : public base_type {
+class base_string_type : public base_type {
 public:
-    inline base_string_dtype(type_id_t type_id, size_t data_size,
+    inline base_string_type(type_id_t type_id, size_t data_size,
                     size_t alignment, flags_type flags, size_t metadata_size)
         : base_type(type_id, string_kind, data_size, alignment, flags, metadata_size, 0)
     {}
 
-    virtual ~base_string_dtype();
+    virtual ~base_string_type();
     /** The encoding used by the string */
     virtual string_encoding_t get_encoding() const = 0;
 

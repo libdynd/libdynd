@@ -15,7 +15,7 @@
 
 namespace dynd {
 
-struct string_dtype_metadata {
+struct string_type_metadata {
     /**
      * A reference to the memory block which contains the string's data.
      * NOTE: This is identical to bytes_dtype_metadata, by design. Maybe
@@ -24,18 +24,18 @@ struct string_dtype_metadata {
     memory_block_data *blockref;
 };
 
-struct string_dtype_data {
+struct string_type_data {
     char *begin;
     char *end;
 };
 
-class string_dtype : public base_string_dtype {
+class string_type : public base_string_type {
     string_encoding_t m_encoding;
 
 public:
-    string_dtype(string_encoding_t encoding);
+    string_type(string_encoding_t encoding);
 
-    virtual ~string_dtype();
+    virtual ~string_type();
 
     string_encoding_t get_encoding() const {
         return m_encoding;
@@ -85,8 +85,8 @@ public:
                     const eval::eval_context *ectx) const;
 };
 
-inline ndt::type make_string_dtype(string_encoding_t encoding = string_encoding_utf_8) {
-    return ndt::type(new string_dtype(encoding), false);
+inline ndt::type make_string_type(string_encoding_t encoding = string_encoding_utf_8) {
+    return ndt::type(new string_type(encoding), false);
 }
 
 } // namespace dynd

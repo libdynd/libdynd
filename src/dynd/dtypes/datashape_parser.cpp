@@ -11,8 +11,8 @@
 #include <dynd/dtypes/var_dim_dtype.hpp>
 #include <dynd/dtypes/fixed_dim_dtype.hpp>
 #include <dynd/dtypes/cstruct_dtype.hpp>
-#include <dynd/dtypes/string_dtype.hpp>
-#include <dynd/dtypes/fixedstring_dtype.hpp>
+#include <dynd/dtypes/string_type.hpp>
+#include <dynd/dtypes/fixedstring_type.hpp>
 #include <dynd/dtypes/json_dtype.hpp>
 #include <dynd/dtypes/date_dtype.hpp>
 #include <dynd/dtypes/datetime_dtype.hpp>
@@ -310,12 +310,12 @@ static ndt::type parse_string_parameters(const char *&begin, const char *end)
             throw datashape_parse_error(begin, "expected closing ')'");
         }
         if (string_size != 0) {
-            return make_fixedstring_dtype(string_size, encoding);
+            return make_fixedstring_type(string_size, encoding);
         } else {
-            return make_string_dtype(encoding);
+            return make_string_type(encoding);
         }
     } else {
-        return make_string_dtype(string_encoding_utf_8);
+        return make_string_type(string_encoding_utf_8);
     }
 }
 
