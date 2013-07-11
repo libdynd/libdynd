@@ -58,7 +58,7 @@ TEST(FixedstringDType, Basic) {
     // Trivial string going in and out of the system
     a = "abcdefg";
     EXPECT_EQ(ndt::make_string(string_encoding_utf_8), a.get_type());
-    // Convert to a fixedstring dtype for testing
+    // Convert to a fixedstring type for testing
     a = a.ucast(ndt::make_fixedstring(7, string_encoding_utf_8)).eval();
     EXPECT_EQ("abcdefg", a.as<string>());
 

@@ -16,14 +16,14 @@ using namespace dynd;
 TEST(DType, BasicConstructor) {
     ndt::type d;
 
-    // Default-constructed dtype properties
+    // Default-constructed type properties
     EXPECT_EQ(uninitialized_type_id, d.get_type_id());
     EXPECT_EQ(void_kind, d.get_kind());
     EXPECT_EQ(1u, d.get_data_alignment());
     EXPECT_EQ(0u, d.get_data_size());
     EXPECT_TRUE(d.is_builtin());
 
-    // void dtype
+    // void type
     d = ndt::type(void_type_id);
     EXPECT_EQ(void_type_id, d.get_type_id());
     EXPECT_EQ(void_kind, d.get_kind());
@@ -31,7 +31,7 @@ TEST(DType, BasicConstructor) {
     EXPECT_EQ(0u, d.get_data_size());
     EXPECT_TRUE(d.is_builtin());
 
-    // bool dtype
+    // bool type
     d = ndt::type(bool_type_id);
     EXPECT_EQ(bool_type_id, d.get_type_id());
     EXPECT_EQ(bool_kind, d.get_kind());
@@ -39,7 +39,7 @@ TEST(DType, BasicConstructor) {
     EXPECT_EQ(1u, d.get_data_size());
     EXPECT_TRUE(d.is_builtin());
 
-    // int8 dtype
+    // int8 type
     d = ndt::type(int8_type_id);
     EXPECT_EQ(int8_type_id, d.get_type_id());
     EXPECT_EQ(int_kind, d.get_kind());
@@ -47,14 +47,14 @@ TEST(DType, BasicConstructor) {
     EXPECT_EQ(1u, d.get_data_size());
     EXPECT_TRUE(d.is_builtin());
 
-    // int16 dtype
+    // int16 type
     d = ndt::type(int16_type_id);
     EXPECT_EQ(int_kind, d.get_kind());
     EXPECT_EQ(2u, d.get_data_alignment());
     EXPECT_EQ(2u, d.get_data_size());
     EXPECT_TRUE(d.is_builtin());
 
-    // int32 dtype
+    // int32 type
     d = ndt::type(int32_type_id);
     EXPECT_EQ(int32_type_id, d.get_type_id());
     EXPECT_EQ(int_kind, d.get_kind());

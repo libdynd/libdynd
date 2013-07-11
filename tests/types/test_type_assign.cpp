@@ -2,7 +2,7 @@
 // Copyright (C) 2011-13 Mark Wiebe, DyND Developers
 // BSD 2-Clause License, see LICENSE.txt
 //
-// This tests the raw-memory dtype assignment functions.
+// This tests the raw-memory typed data assignment functions.
 //
 
 #include <iostream>
