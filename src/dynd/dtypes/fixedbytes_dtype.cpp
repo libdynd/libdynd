@@ -14,7 +14,7 @@ using namespace std;
 using namespace dynd;
 
 fixedbytes_dtype::fixedbytes_dtype(intptr_t data_size, intptr_t data_alignment)
-    : base_bytes_dtype(fixedbytes_type_id, bytes_kind, data_size,
+    : base_bytes_type(fixedbytes_type_id, bytes_kind, data_size,
                     data_alignment, type_flag_scalar, 0)
 {
     if (data_alignment > data_size) {

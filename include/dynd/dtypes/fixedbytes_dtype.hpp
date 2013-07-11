@@ -8,12 +8,12 @@
 
 #include <dynd/type.hpp>
 #include <dynd/dtype_assign.hpp>
-#include <dynd/dtypes/base_bytes_dtype.hpp>
+#include <dynd/dtypes/base_bytes_type.hpp>
 #include <dynd/dtypes/view_dtype.hpp>
 
 namespace dynd {
 
-class fixedbytes_dtype : public base_bytes_dtype {
+class fixedbytes_dtype : public base_bytes_type {
 public:
     fixedbytes_dtype(intptr_t element_size, intptr_t alignment);
 

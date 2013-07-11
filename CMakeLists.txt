@@ -115,7 +115,7 @@ set(libdynd_SRC
     include/dynd/codegen/calling_conventions.hpp
     include/dynd/codegen/codegen_cache.hpp
     # DTypes
-    src/dynd/dtypes/base_bytes_dtype.cpp
+    src/dynd/dtypes/base_bytes_type.cpp
     src/dynd/dtypes/base_type.cpp
     src/dynd/dtypes/base_expression_dtype.cpp
     src/dynd/dtypes/base_string_dtype.cpp
@@ -155,7 +155,7 @@ set(libdynd_SRC
     src/dynd/dtypes/var_dim_dtype.cpp
     src/dynd/dtypes/view_dtype.cpp
     src/dynd/dtypes/void_pointer_dtype.cpp
-    include/dynd/dtypes/base_bytes_dtype.hpp
+    include/dynd/dtypes/base_bytes_type.hpp
     include/dynd/dtypes/base_type.hpp
     include/dynd/dtypes/base_expression_dtype.hpp
     include/dynd/dtypes/base_string_dtype.hpp

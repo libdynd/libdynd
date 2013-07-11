@@ -16,7 +16,7 @@ using namespace std;
 using namespace dynd;
 
 bytes_dtype::bytes_dtype(size_t alignment)
-    : base_bytes_dtype(bytes_type_id, bytes_kind, sizeof(bytes_dtype_data),
+    : base_bytes_type(bytes_type_id, bytes_kind, sizeof(bytes_dtype_data),
                     sizeof(const char *), type_flag_scalar|type_flag_zeroinit|type_flag_blockref,
                     sizeof(bytes_dtype_metadata)), m_alignment(alignment)
 {

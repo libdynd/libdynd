@@ -7,7 +7,7 @@
 #define _DYND__BYTES_TYPE_HPP_
 
 #include <dynd/type.hpp>
-#include <dynd/dtypes/base_bytes_dtype.hpp>
+#include <dynd/dtypes/base_bytes_type.hpp>
 #include <dynd/dtype_assign.hpp>
 
 namespace dynd {
@@ -30,7 +30,7 @@ struct bytes_dtype_data {
  * The bytes dtype uses memory_block references to store
  * arbitrarily sized runs of bytes.
  */
-class bytes_dtype : public base_bytes_dtype {
+class bytes_dtype : public base_bytes_type {
     size_t m_alignment;
 
 public:

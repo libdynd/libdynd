@@ -4,7 +4,7 @@
 //
 
 #include <dynd/json_parser.hpp>
-#include <dynd/dtypes/base_bytes_dtype.hpp>
+#include <dynd/dtypes/base_bytes_type.hpp>
 #include <dynd/dtypes/string_dtype.hpp>
 #include <dynd/dtypes/json_dtype.hpp>
 #include <dynd/dtypes/fixed_dim_dtype.hpp>
@@ -68,7 +68,7 @@ static void json_as_buffer(const nd::array& json, nd::array& out_tmp_ref, const 
         }
         case bytes_kind: {
             out_tmp_ref = json.eval();
-            const base_bytes_dtype *bdt = static_cast<const base_bytes_dtype *>(json_dtype.extended());
+            const base_bytes_type *bdt = static_cast<const base_bytes_type *>(json_dtype.extended());
             bdt->get_bytes_range(&begin, &end,
                             out_tmp_ref.get_ndo_meta(), out_tmp_ref.get_readonly_originptr());
             break;
