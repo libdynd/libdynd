@@ -298,7 +298,7 @@ set(libdynd_SRC
     src/dynd/arithmetic_op.cpp
     src/dynd/type.cpp
     src/dynd/typed_data_assign.cpp
-    src/dynd/dtype_promotion.cpp
+    src/dynd/type_promotion.cpp
     src/dynd/exceptions.cpp
     src/dynd/git_version.cpp.in # Included here for ease of editing in IDEs
     ${CMAKE_CURRENT_BINARY_DIR}/src/dynd/git_version.cpp
@@ -317,7 +317,7 @@ set(libdynd_SRC
     include/dynd/diagnostics.hpp
     include/dynd/type.hpp
     include/dynd/typed_data_assign.hpp
-    include/dynd/dtype_promotion.hpp
+    include/dynd/type_promotion.hpp
     include/dynd/exceptions.hpp
     include/dynd/fpstatus.hpp
     include/dynd/json_formatter.hpp

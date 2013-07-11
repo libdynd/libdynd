@@ -5,7 +5,7 @@
 
 #include <stdexcept>
 
-#include <dynd/dtype_promotion.hpp>
+#include <dynd/type_promotion.hpp>
 #include <dynd/types/string_type.hpp>
 
 using namespace std;
@@ -30,7 +30,7 @@ static intptr_t min_strlen_for_builtin_kind(type_kind_t kind)
 }
 */
 
-ndt::type dynd::promote_dtypes_arithmetic(const ndt::type& dt0, const ndt::type& dt1)
+ndt::type dynd::promote_types_arithmetic(const ndt::type& dt0, const ndt::type& dt1)
 {
     // Use the value dtypes
     const ndt::type& dt0_val = dt0.value_type();

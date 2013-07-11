@@ -12,6 +12,7 @@
 #include <dynd/types/type_alignment.hpp>
 #include <dynd/types/byteswap_type.hpp>
 #include <dynd/types/fixedbytes_type.hpp>
+#include <dynd/types/type_type.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -20,16 +21,16 @@ TEST(AlignDType, Create) {
     ndt::type d;
 
     d = ndt::make_unaligned<float>();
-    // The value has the native byte-order dtype
+    // The value has the native byte-order type
     EXPECT_EQ(d.value_type(), ndt::make_type<float>());
     // The storage is bytes with alignment 1
     EXPECT_EQ(d.storage_type(), ndt::make_fixedbytes(4, 1));
-    // The alignment of the dtype is 1
+    // The alignment of the type is 1
     EXPECT_EQ(1u, d.get_data_alignment());
     EXPECT_TRUE(d.is_expression());
 
-    // TODO: Make sure it raises if an object dtype is attempted
-    //EXPECT_THROW(d = make_unaligned([[some object dtype]]), runtime_error);
+    // The "type" type is an object type, it should throw in this case
+    EXPECT_THROW(d = make_unaligned(ndt::make_type()), runtime_error);
 }
 
 TEST(AlignDType, Basic) {
@@ -57,8 +58,8 @@ TEST(AlignDType, Basic) {
 }
 
 TEST(AlignDType, Chained) {
-    // The unaligned dtype can give back an expression type as the value dtype,
-    // make sure that is handled properly at the dtype object level.
+    // The unaligned type can give back an expression type as the value type,
+    // make sure that is handled properly at the type object level.
     ndt::type dt = make_unaligned(ndt::make_byteswap<int>());
     EXPECT_EQ(ndt::make_byteswap(ndt::make_type<int>(), ndt::make_view(ndt::make_fixedbytes(4, 4), ndt::make_fixedbytes(4, 1))), dt);
     EXPECT_EQ(ndt::make_fixedbytes(4, 1), dt.storage_type());
@@ -66,7 +67,7 @@ TEST(AlignDType, Chained) {
 }
 
 TEST(AlignDType, CanonicalDType) {
-    // The canonical type of an alignment result is always the aligned dtype
+    // The canonical type of an alignment result is always the aligned type
     EXPECT_EQ((ndt::make_type<float>()), (ndt::make_unaligned<float>().get_canonical_type()));
 }
 

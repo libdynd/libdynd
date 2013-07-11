@@ -7,7 +7,7 @@
 
 #include <dynd/array.hpp>
 #include <dynd/array_iter.hpp>
-#include <dynd/dtype_promotion.hpp>
+#include <dynd/type_promotion.hpp>
 #include <dynd/kernels/expr_kernel_generator.hpp>
 #include <dynd/kernels/elwise_expr_kernels.hpp>
 #include <dynd/shape_tools.hpp>
@@ -285,7 +285,7 @@ nd::array nd::operator+(const nd::array& op1, const nd::array& op2)
     ndt::type op1dt = op1.get_udtype().value_type();
     ndt::type op2dt = op2.get_udtype().value_type();
     if (op1dt.is_builtin() && op1dt.is_builtin()) {
-        ndt::type rdt = promote_dtypes_arithmetic(op1dt, op2dt);
+        ndt::type rdt = promote_types_arithmetic(op1dt, op2dt);
         int table_index = compress_builtin_type_id[rdt.get_type_id()];
         if (table_index >= 0) {
             func_ptr = addition_table[table_index];
@@ -315,7 +315,7 @@ nd::array nd::operator-(const nd::array& op1, const nd::array& op2)
     ndt::type op1dt = op1.get_udtype().value_type();
     ndt::type op2dt = op2.get_udtype().value_type();
     if (op1dt.is_builtin() && op1dt.is_builtin()) {
-        rdt = promote_dtypes_arithmetic(op1dt, op2dt);
+        rdt = promote_types_arithmetic(op1dt, op2dt);
         int table_index = compress_builtin_type_id[rdt.get_type_id()];
         if (table_index >= 0) {
             func_ptr = subtraction_table[table_index];
@@ -333,7 +333,7 @@ nd::array nd::operator*(const nd::array& op1, const nd::array& op2)
     ndt::type op1dt = op1.get_udtype().value_type();
     ndt::type op2dt = op2.get_udtype().value_type();
     if (op1dt.is_builtin() && op1dt.is_builtin()) {
-        rdt = promote_dtypes_arithmetic(op1dt, op2dt);
+        rdt = promote_types_arithmetic(op1dt, op2dt);
         int table_index = compress_builtin_type_id[rdt.get_type_id()];
         if (table_index >= 0) {
             func_ptr = multiplication_table[table_index];
@@ -351,7 +351,7 @@ nd::array nd::operator/(const nd::array& op1, const nd::array& op2)
     ndt::type op1dt = op1.get_udtype().value_type();
     ndt::type op2dt = op2.get_udtype().value_type();
     if (op1dt.is_builtin() && op1dt.is_builtin()) {
-        rdt = promote_dtypes_arithmetic(op1dt, op2dt);
+        rdt = promote_types_arithmetic(op1dt, op2dt);
         int table_index = compress_builtin_type_id[rdt.get_type_id()];
         if (table_index >= 0) {
             func_ptr = division_table[table_index];

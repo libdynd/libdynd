@@ -21,7 +21,7 @@ namespace dynd {
  * be in NBO. If the inputs are not, the output may or may not
  * be in NBO, the function makes no effort to follow a convention.
  */
-ndt::type promote_dtypes_arithmetic(const ndt::type& dt0, const ndt::type& dt1);
+ndt::type promote_types_arithmetic(const ndt::type& dt0, const ndt::type& dt1);
 
 } // namespace dynd
 

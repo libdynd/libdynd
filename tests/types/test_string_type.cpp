@@ -97,7 +97,7 @@ TEST(StringDType, Basic) {
     // Make it a fixedstring for this test
     a = a.ucast(ndt::make_fixedstring(7, string_encoding_utf_8)).eval();
 
-    // Convert to a blockref string dtype with the same utf8 codec
+    // Convert to a blockref string type with the same utf8 codec
     b = a.ucast(ndt::make_string(string_encoding_utf_8));
     EXPECT_EQ(ndt::make_convert(ndt::make_string(string_encoding_utf_8),
                     ndt::make_fixedstring(7, string_encoding_utf_8)),
@@ -107,7 +107,7 @@ TEST(StringDType, Basic) {
                     b.get_type());
     EXPECT_EQ(std::string("abcdefg"), b.as<std::string>());
 
-    // Convert to a blockref string dtype with the utf16 codec
+    // Convert to a blockref string type with the utf16 codec
     b = a.ucast(ndt::make_string(string_encoding_utf_16));
     EXPECT_EQ(ndt::make_convert(ndt::make_string(string_encoding_utf_16),
                     ndt::make_fixedstring(7, string_encoding_utf_8)),
@@ -117,7 +117,7 @@ TEST(StringDType, Basic) {
                     b.get_type());
     EXPECT_EQ(std::string("abcdefg"), b.as<std::string>());
 
-    // Convert to a blockref string dtype with the utf32 codec
+    // Convert to a blockref string type with the utf32 codec
     b = a.ucast(ndt::make_string(string_encoding_utf_32));
     EXPECT_EQ(ndt::make_convert(ndt::make_string(string_encoding_utf_32),
                     ndt::make_fixedstring(7, string_encoding_utf_8)),
@@ -127,7 +127,7 @@ TEST(StringDType, Basic) {
                     b.get_type());
     EXPECT_EQ(std::string("abcdefg"), b.as<std::string>());
 
-    // Convert to a blockref string dtype with the ascii codec
+    // Convert to a blockref string type with the ascii codec
     b = a.ucast(ndt::make_string(string_encoding_ascii));
     EXPECT_EQ(ndt::make_convert(ndt::make_string(string_encoding_ascii),
                     ndt::make_fixedstring(7, string_encoding_utf_8)),
@@ -144,7 +144,7 @@ TEST(StringDType, AccessFlags) {
     // Default construction from a string produces an immutable fixedstring
     a = std::string("testing one two three testing one two three four five testing one two three four five six seven");
     EXPECT_EQ(nd::read_access_flag | nd::immutable_access_flag, (int)a.get_access_flags());
-    // Turn it into a fixedstring dtype for this test
+    // Turn it into a fixedstring type for this test
     a = a.ucast(ndt::make_fixedstring(95, string_encoding_utf_8)).eval();
     EXPECT_EQ(ndt::make_fixedstring(95, string_encoding_utf_8), a.get_type());
 
@@ -262,7 +262,7 @@ TEST(StringDType, Unicode) {
 
 
 TEST(StringDType, CanonicalDType) {
-    // The canonical type of a string dtype is the same type
+    // The canonical type of a string type is the same type
     EXPECT_EQ((ndt::make_string(string_encoding_ascii)),
                 (ndt::make_string(string_encoding_ascii).get_canonical_type()));
     EXPECT_EQ((ndt::make_string(string_encoding_utf_8)),

@@ -61,7 +61,7 @@ TEST(ArrayViews, MultiDimensionalRawMemory) {
 
     a = values;
 
-    // Should throw if the view dtype is the wrong size
+    // Should throw if the view type is the wrong size
     EXPECT_THROW(b = a.view_scalars<int16_t>(), runtime_error);
 
     b = a.view_scalars<int32_t>();

@@ -313,7 +313,7 @@ TEST(CategoricalDType, AssignFromOther) {
     EXPECT_EQ(6,    a(6).as<int>());
     EXPECT_EQ(1000, a(7).as<int>());
 
-    // Assignments from a few different input dtypes
+    // Assignments from a few different input types
     a(3).vals() = "1000";
     EXPECT_EQ(1000, a(3).as<int>());
     a(4).vals() = 6.0;

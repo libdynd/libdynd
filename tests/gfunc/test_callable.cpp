@@ -385,13 +385,13 @@ TEST(GFuncCallable, ArrayParam) {
     EXPECT_EQ(3, r.as<int>());
 }
 
-static size_t dtype_param(const ndt::type& d) {
+static size_t ndt_type_param(const ndt::type& d) {
     return d.get_data_size();
 }
 
 TEST(GFuncCallable, DTypeParam) {
     // Create the callable
-    gfunc::callable c = gfunc::make_callable(&dtype_param, "d");
+    gfunc::callable c = gfunc::make_callable(&ndt_type_param, "d");
 
     // Call it and see that it gave what we want
     ndt::type tmp;
@@ -405,7 +405,7 @@ TEST(GFuncCallable, DTypeParam) {
     EXPECT_EQ(ndt::make_type<size_t>(), r.get_type());
     EXPECT_EQ(12u, r.as<size_t>());
 
-    // With a builtin dtype
+    // With a builtin type
     tmp = ndt::make_type<uint64_t>();
     *(void**)a.get_ndo()->m_data_pointer = (void *)tmp.get_type_id();
     r = c.call_generic(a);

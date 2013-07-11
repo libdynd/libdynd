@@ -259,7 +259,7 @@ TEST(ArrayAssign, BroadcastAssign) {
     nd::array b = v0;
 
     // Broadcasts the 4-vector by a factor of 6,
-    // converting the dtype
+    // converting the type
     a.val_assign(b);
     const float *ptr_f = (const float *)a.get_readonly_originptr();
     for (int i = 0; i < 6; ++i) {
@@ -273,7 +273,7 @@ TEST(ArrayAssign, BroadcastAssign) {
     b = v1;
 
     // Broadcasts the 4-vector by a factor of 6,
-    // doesn't convert the dtype
+    // doesn't convert the type
     a.val_assign(b);
     ptr_f = (const float *)a.get_readonly_originptr();
     for (int i = 0; i < 6; ++i) {
@@ -286,7 +286,7 @@ TEST(ArrayAssign, BroadcastAssign) {
     double v2[3][1] = {{1.5}, {3.125}, {7.5}};
     b = v2;
     // Broadcasts the (3,1)-array by a factor of 8,
-    // converting the dtype
+    // converting the type
     a.val_assign(b);
     ptr_f = (const float *)a.get_readonly_originptr();
     for (int i = 0; i < 2; ++i) {
@@ -357,7 +357,7 @@ TEST(ArrayAssign, ChainedCastingRead) {
 
     b = a.ucast<int>(0, assign_error_overflow);
     b = b.ucast<float>(0, assign_error_inexact);
-    // Multiple cast_scalars operations should make a chained conversion dtype
+    // Multiple cast_scalars operations should make a chained conversion type
     EXPECT_EQ(ndt::make_strided_dim(
                     ndt::make_convert(ndt::make_type<float>(),
                                     ndt::make_convert<int, float>(assign_error_overflow), assign_error_inexact)),
@@ -365,7 +365,7 @@ TEST(ArrayAssign, ChainedCastingRead) {
 
     // Evaluating the values should truncate them to integers
     b = b.eval();
-    // Now it's just the value dtype, no chaining
+    // Now it's just the value type, no chaining
     EXPECT_EQ(ndt::make_strided_dim(ndt::make_type<float>()), b.get_type());
     EXPECT_EQ(3, b(0).as<float>());
     EXPECT_EQ(1, b(1).as<float>());
@@ -410,7 +410,7 @@ TEST(ArrayAssign, ChainedCastingWrite) {
 
     b = a.ucast<int>(0, assign_error_inexact);
     b = b.ucast<float>(0, assign_error_overflow);
-    // Multiple cast_scalars operations should make a chained conversion dtype
+    // Multiple cast_scalars operations should make a chained conversion type
     EXPECT_EQ(ndt::make_strided_dim(ndt::make_convert(ndt::make_type<float>(),
                                     ndt::make_convert<int, float>(assign_error_inexact), assign_error_overflow)),
               b.get_type());
