@@ -65,24 +65,26 @@ public:
     }
 };
 
-/**
- * Makes an unaligned dtype to view the given dtype without alignment requirements.
- */
-inline ndt::type make_view_type(const ndt::type& value_type, const ndt::type& operand_type) {
-    if (value_type.get_kind() != expression_kind) {
-        return ndt::type(new view_type(value_type, operand_type), false);
-    } else {
-        // When the value type has an expression_kind, we need to chain things together
-        // so that the view operation happens just at the primitive level.
-        return static_cast<const base_expression_type *>(value_type.extended())->with_replaced_storage_type(
-            ndt::type(new view_type(value_type.storage_type(), operand_type), false));
+namespace ndt {
+    /**
+     * Makes an unaligned dtype to view the given dtype without alignment requirements.
+     */
+    inline ndt::type make_view(const ndt::type& value_type, const ndt::type& operand_type) {
+        if (value_type.get_kind() != expression_kind) {
+            return ndt::type(new view_type(value_type, operand_type), false);
+        } else {
+            // When the value type has an expression_kind, we need to chain things together
+            // so that the view operation happens just at the primitive level.
+            return static_cast<const base_expression_type *>(value_type.extended())->with_replaced_storage_type(
+                ndt::type(new view_type(value_type.storage_type(), operand_type), false));
+        }
     }
-}
 
-template<typename Tvalue, typename Toperand>
-ndt::type make_view_type() {
-    return ndt::type(new view_type(ndt::make_dtype<Tvalue>()), false);
-}
+    template<typename Tvalue, typename Toperand>
+    ndt::type make_view() {
+        return ndt::type(new view_type(ndt::make_dtype<Tvalue>()), false);
+    }
+} // namespace ndt
 
 } // namespace dynd
 

@@ -56,7 +56,7 @@ static void json_as_buffer(const nd::array& json, nd::array& out_tmp_ref, const 
                     break;
                 default: {
                     // The data needs to be converted to UTF-8 before parsing
-                    ndt::type utf8_dt = make_string_type(string_encoding_utf_8);
+                    ndt::type utf8_dt = ndt::make_string(string_encoding_utf_8);
                     out_tmp_ref = json.ucast(utf8_dt).eval();
                     sdt = static_cast<const base_string_type *>(utf8_dt.extended());
                     sdt->get_string_range(&begin, &end,

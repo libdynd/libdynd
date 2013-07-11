@@ -37,12 +37,12 @@ groupby_type::groupby_type(const ndt::type& data_values_dtype,
     if (by_values_dtype.get_undim() < 1) {
         throw runtime_error("to construct a groupby dtype, its values dtype must have at least one array dimension");
     }
-    m_operand_type = make_cstruct_type(make_pointer_type(data_values_dtype), "data",
-                    make_pointer_type(by_values_dtype), "by");
+    m_operand_type = ndt::make_cstruct(ndt::make_pointer(data_values_dtype), "data",
+                    ndt::make_pointer(by_values_dtype), "by");
     m_members.metadata_size = m_operand_type.get_metadata_size();
     const categorical_type *cd = static_cast<const categorical_type *>(m_groups_type.extended());
-    m_value_type = make_fixed_dim_type(cd->get_category_count(),
-                    make_var_dim_type(data_values_dtype.at_single(0)));
+    m_value_type = ndt::make_fixed_dim(cd->get_category_count(),
+                    ndt::make_var_dim(data_values_dtype.at_single(0)));
     m_members.flags = inherited_flags(m_value_type.get_flags(), m_operand_type.get_flags());
 }
 

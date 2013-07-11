@@ -56,15 +56,15 @@ TEST(JSONFormatter, String) {
     EXPECT_EQ("\"testing string\"", format_json(n).as<string>());
     n = " \" \\ / \b \f \n \r \t ";
     EXPECT_EQ("\" \\\" \\\\ \\/ \\b \\f \\n \\r \\t \"", format_json(n).as<string>());
-    n = nd::array("testing string").ucast(make_string_type(string_encoding_utf_16)).eval();
+    n = nd::array("testing string").ucast(ndt::make_string(string_encoding_utf_16)).eval();
     EXPECT_EQ("\"testing string\"", format_json(n).as<string>());
-    n = nd::array("testing string").ucast(make_string_type(string_encoding_utf_32)).eval();
+    n = nd::array("testing string").ucast(ndt::make_string(string_encoding_utf_32)).eval();
     EXPECT_EQ("\"testing string\"", format_json(n).as<string>());
 }
 
 TEST(JSONFormatter, JSON) {
     nd::array n;
-    n = nd::array("[ 1, 3, 5] ").ucast(make_json_type());
+    n = nd::array("[ 1, 3, 5] ").ucast(ndt::make_json());
     EXPECT_EQ("[ 1, 3, 5] ", format_json(n).as<string>());
 }
 

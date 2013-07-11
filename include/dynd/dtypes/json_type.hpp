@@ -55,9 +55,11 @@ public:
                     const eval::eval_context *ectx) const;
 };
 
-inline ndt::type make_json_type() {
-    return ndt::type(new json_type(), false);
-}
+namespace ndt {
+    inline ndt::type make_json() {
+        return ndt::type(new json_type(), false);
+    }
+} // namespace ndt
 
 } // namespace dynd
 

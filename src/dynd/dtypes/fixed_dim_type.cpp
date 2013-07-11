@@ -585,14 +585,14 @@ void fixed_dim_type::foreach_leading(char *data, const char *metadata, foreach_f
     }
 }
 
-ndt::type dynd::make_fixed_dim_type(size_t ndim, const intptr_t *shape,
+ndt::type dynd::ndt::make_fixed_dim(size_t ndim, const intptr_t *shape,
                 const ndt::type& uniform_dtype, const int *axis_perm)
 {
     if (axis_perm == NULL) {
         // Build a C-order fixed array dtype
         ndt::type result = uniform_dtype;
         for (ptrdiff_t i = (ptrdiff_t)ndim-1; i >= 0; --i) {
-            result = make_fixed_dim_type(shape[i], result);
+            result = ndt::make_fixed_dim(shape[i], result);
         }
         return result;
     } else {
@@ -608,7 +608,7 @@ ndt::type dynd::make_fixed_dim_type(size_t ndim, const intptr_t *shape,
         // Build the fixed array dtype
         ndt::type result = uniform_dtype;
         for (ptrdiff_t i = (ptrdiff_t)ndim-1; i >= 0; --i) {
-            result = make_fixed_dim_type(shape[i], result, strides[i]);
+            result = ndt::make_fixed_dim(shape[i], result, strides[i]);
         }
         return result;
     }

@@ -77,9 +77,11 @@ public:
                     size_t *out_count) const;
 };
 
-inline ndt::type make_bytes_type(size_t alignment) {
-    return ndt::type(new bytes_type(alignment), false);
-}
+namespace ndt {
+    inline ndt::type make_bytes(size_t alignment) {
+        return ndt::type(new bytes_type(alignment), false);
+    }
+} // namespace ndt
 
 } // namespace dynd
 

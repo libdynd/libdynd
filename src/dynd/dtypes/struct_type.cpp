@@ -468,7 +468,7 @@ void struct_type::get_dynamic_dtype_properties(const std::pair<std::string, gfun
     *out_count = sizeof(dtype_properties) / sizeof(dtype_properties[0]);
 }
 
-ndt::type struct_type::array_parameters_dtype = make_cstruct_type(ndt::type(new void_pointer_type, false), "self");
+ndt::type struct_type::array_parameters_dtype = ndt::make_cstruct(ndt::type(new void_pointer_type, false), "self");
 
 static array_preamble *property_get_array_field(const array_preamble *params, void *extra)
 {
@@ -480,7 +480,7 @@ static array_preamble *property_get_array_field(const array_preamble *params, vo
     if (udt.get_kind() == expression_kind) {
         const string *field_names = static_cast<const struct_type *>(
                         udt.value_type().extended())->get_field_names();
-        return n.replace_udtype(make_property_type(udt, field_names[i], i)).release();
+        return n.replace_udtype(ndt::make_property(udt, field_names[i], i)).release();
     } else {
         if (undim == 0) {
             return n(i).release();

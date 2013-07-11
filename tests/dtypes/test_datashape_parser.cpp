@@ -42,8 +42,8 @@ TEST(DataShapeParser, Basic) {
     EXPECT_EQ(ndt::make_dtype<complex<double> >(), type_from_datashape("complex128"));
     EXPECT_EQ(ndt::make_dtype<complex<float> >(), type_from_datashape("cfloat32"));
     EXPECT_EQ(ndt::make_dtype<complex<double> >(), type_from_datashape("cfloat64"));
-    EXPECT_EQ(make_json_type(), type_from_datashape("json"));
-    EXPECT_EQ(make_date_type(), type_from_datashape("date"));
+    EXPECT_EQ(ndt::make_json(), type_from_datashape("json"));
+    EXPECT_EQ(ndt::make_date(), type_from_datashape("date"));
 }
 
 TEST(DataShapeParser, BasicThrow) {
@@ -53,92 +53,92 @@ TEST(DataShapeParser, BasicThrow) {
 
 TEST(DataShapeParser, StringAtoms) {
     // Default string
-    EXPECT_EQ(make_string_type(string_encoding_utf_8),
+    EXPECT_EQ(ndt::make_string(string_encoding_utf_8),
                     type_from_datashape("string"));
     // String with encoding
-    EXPECT_EQ(make_string_type(string_encoding_ascii),
+    EXPECT_EQ(ndt::make_string(string_encoding_ascii),
                     type_from_datashape("string('A')"));
-    EXPECT_EQ(make_string_type(string_encoding_ascii),
+    EXPECT_EQ(ndt::make_string(string_encoding_ascii),
                     type_from_datashape("string('ascii')"));
-    EXPECT_EQ(make_string_type(string_encoding_utf_8),
+    EXPECT_EQ(ndt::make_string(string_encoding_utf_8),
                     type_from_datashape("string('U8')"));
-    EXPECT_EQ(make_string_type(string_encoding_utf_8),
+    EXPECT_EQ(ndt::make_string(string_encoding_utf_8),
                     type_from_datashape("string('utf8')"));
-    EXPECT_EQ(make_string_type(string_encoding_utf_8),
+    EXPECT_EQ(ndt::make_string(string_encoding_utf_8),
                     type_from_datashape("string('utf-8')"));
-    EXPECT_EQ(make_string_type(string_encoding_utf_16),
+    EXPECT_EQ(ndt::make_string(string_encoding_utf_16),
                     type_from_datashape("string('U16')"));
-    EXPECT_EQ(make_string_type(string_encoding_utf_16),
+    EXPECT_EQ(ndt::make_string(string_encoding_utf_16),
                     type_from_datashape("string('utf16')"));
-    EXPECT_EQ(make_string_type(string_encoding_utf_16),
+    EXPECT_EQ(ndt::make_string(string_encoding_utf_16),
                     type_from_datashape("string('utf-16')"));
-    EXPECT_EQ(make_string_type(string_encoding_utf_32),
+    EXPECT_EQ(ndt::make_string(string_encoding_utf_32),
                     type_from_datashape("string('U32')"));
-    EXPECT_EQ(make_string_type(string_encoding_utf_32),
+    EXPECT_EQ(ndt::make_string(string_encoding_utf_32),
                     type_from_datashape("string('utf32')"));
-    EXPECT_EQ(make_string_type(string_encoding_utf_32),
+    EXPECT_EQ(ndt::make_string(string_encoding_utf_32),
                     type_from_datashape("string('utf-32')"));
-    EXPECT_EQ(make_string_type(string_encoding_ucs_2),
+    EXPECT_EQ(ndt::make_string(string_encoding_ucs_2),
                     type_from_datashape("string('ucs2')"));
-    EXPECT_EQ(make_string_type(string_encoding_ucs_2),
+    EXPECT_EQ(ndt::make_string(string_encoding_ucs_2),
                     type_from_datashape("string('ucs-2')"));
     // String with size
-    EXPECT_EQ(make_fixedstring_type(1, string_encoding_utf_8),
+    EXPECT_EQ(ndt::make_fixedstring(1, string_encoding_utf_8),
                     type_from_datashape("string(1)"));
-    EXPECT_EQ(make_fixedstring_type(100, string_encoding_utf_8),
+    EXPECT_EQ(ndt::make_fixedstring(100, string_encoding_utf_8),
                     type_from_datashape("string(100)"));
     // String with size and encoding
-    EXPECT_EQ(make_fixedstring_type(1, string_encoding_ascii),
+    EXPECT_EQ(ndt::make_fixedstring(1, string_encoding_ascii),
                     type_from_datashape("string(1, 'A')"));
-    EXPECT_EQ(make_fixedstring_type(10, string_encoding_utf_8),
+    EXPECT_EQ(ndt::make_fixedstring(10, string_encoding_utf_8),
                     type_from_datashape("string(10, 'U8')"));
-    EXPECT_EQ(make_fixedstring_type(1000, string_encoding_utf_16),
+    EXPECT_EQ(ndt::make_fixedstring(1000, string_encoding_utf_16),
                     type_from_datashape("string(1000,'U16')"));
 }
 
 TEST(DataShapeParser, StridedDim) {
-    EXPECT_EQ(make_strided_dim_type(ndt::make_dtype<dynd_bool>()),
+    EXPECT_EQ(ndt::make_strided_dim(ndt::make_dtype<dynd_bool>()),
                     type_from_datashape("M, bool"));
-    EXPECT_EQ(make_strided_dim_type(ndt::make_dtype<float>(), 2),
+    EXPECT_EQ(ndt::make_strided_dim(ndt::make_dtype<float>(), 2),
                     type_from_datashape("M, N, float32"));
 }
 
 TEST(DataShapeParser, FixedDim) {
-    EXPECT_EQ(make_fixed_dim_type(3, ndt::make_dtype<dynd_bool>()), type_from_datashape("3, bool"));
-    EXPECT_EQ(make_fixed_dim_type(4, make_fixed_dim_type(3, ndt::make_dtype<float>())),
+    EXPECT_EQ(ndt::make_fixed_dim(3, ndt::make_dtype<dynd_bool>()), type_from_datashape("3, bool"));
+    EXPECT_EQ(ndt::make_fixed_dim(4, ndt::make_fixed_dim(3, ndt::make_dtype<float>())),
                     type_from_datashape("4, 3, float32"));
 }
 
 TEST(DataShapeParser, VarDim) {
-    EXPECT_EQ(make_var_dim_type(ndt::make_dtype<dynd_bool>()), type_from_datashape("var, bool"));
-    EXPECT_EQ(make_var_dim_type(make_var_dim_type(ndt::make_dtype<float>())),
+    EXPECT_EQ(ndt::make_var_dim(ndt::make_dtype<dynd_bool>()), type_from_datashape("var, bool"));
+    EXPECT_EQ(ndt::make_var_dim(ndt::make_var_dim(ndt::make_dtype<float>())),
                     type_from_datashape("var, var, float32"));
 }
 
 TEST(DataShapeParser, StridedFixedDim) {
-    EXPECT_EQ(make_strided_dim_type(make_fixed_dim_type(3, ndt::make_dtype<float>())),
+    EXPECT_EQ(ndt::make_strided_dim(ndt::make_fixed_dim(3, ndt::make_dtype<float>())),
                     type_from_datashape("M, 3, float32"));
 }
 
 TEST(DataShapeParser, StridedVarFixedDim) {
-    EXPECT_EQ(make_strided_dim_type(make_var_dim_type(make_fixed_dim_type(3, ndt::make_dtype<float>()))),
+    EXPECT_EQ(ndt::make_strided_dim(ndt::make_var_dim(ndt::make_fixed_dim(3, ndt::make_dtype<float>()))),
                     type_from_datashape("M, var, 3, float32"));
 }
 
 TEST(DataShapeParser, RecordOneField) {
-    EXPECT_EQ(make_cstruct_type(ndt::make_dtype<float>(), "val"),
+    EXPECT_EQ(ndt::make_cstruct(ndt::make_dtype<float>(), "val"),
                     type_from_datashape("{ val : float32 }"));
-    EXPECT_EQ(make_cstruct_type(ndt::make_dtype<float>(), "val"),
+    EXPECT_EQ(ndt::make_cstruct(ndt::make_dtype<float>(), "val"),
                     type_from_datashape("{ val : float32 ; }"));
 }
 
 TEST(DataShapeParser, RecordTwoFields) {
-    EXPECT_EQ(make_cstruct_type(ndt::make_dtype<float>(), "val", ndt::make_dtype<int64_t>(), "id"),
+    EXPECT_EQ(ndt::make_cstruct(ndt::make_dtype<float>(), "val", ndt::make_dtype<int64_t>(), "id"),
                     type_from_datashape("{\n"
                         "    val: float32;\n"
                         "    id: int64\n"
                         "}\n"));
-    EXPECT_EQ(make_cstruct_type(ndt::make_dtype<float>(), "val", ndt::make_dtype<int64_t>(), "id"),
+    EXPECT_EQ(ndt::make_cstruct(ndt::make_dtype<float>(), "val", ndt::make_dtype<int64_t>(), "id"),
                     type_from_datashape("{\n"
                         "    val: float32;\n"
                         "    id: int64;\n"

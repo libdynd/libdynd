@@ -115,9 +115,11 @@ public:
                     size_t *out_count) const;
 };
 
-inline ndt::type make_var_dim_type(const ndt::type& element_dtype) {
-    return ndt::type(new var_dim_type(element_dtype), false);
-}
+namespace ndt {
+    inline ndt::type make_var_dim(const ndt::type& element_dtype) {
+        return ndt::type(new var_dim_type(element_dtype), false);
+    }
+} // namespace ndt
 
 } // namespace dynd
 

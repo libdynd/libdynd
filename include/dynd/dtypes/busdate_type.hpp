@@ -88,10 +88,12 @@ public:
     }
 };
 
-inline ndt::type make_busdate_type(busdate_roll_t roll = busdate_roll_following,
-                const bool *weekmask = NULL, const nd::array& holidays = nd::array()) {
-    return ndt::type(new busdate_type(roll, weekmask, holidays), false);
-}
+namespace ndt {
+    inline ndt::type make_busdate(busdate_roll_t roll = busdate_roll_following,
+                    const bool *weekmask = NULL, const nd::array& holidays = nd::array()) {
+        return ndt::type(new busdate_type(roll, weekmask, holidays), false);
+    }
+} // namespace ndt
 
 } // namespace dynd
 

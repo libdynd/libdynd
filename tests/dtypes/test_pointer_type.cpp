@@ -17,7 +17,7 @@ using namespace dynd;
 TEST(PointerDType, VoidPointer) {
     ndt::type d;
 
-    d = make_pointer_type<void>();
+    d = ndt::make_pointer<void>();
     EXPECT_EQ(void_pointer_type_id, d.get_type_id());
     EXPECT_EQ(void_kind, d.get_kind());
     EXPECT_EQ(sizeof(void *), d.get_data_size());
@@ -29,7 +29,7 @@ TEST(PointerDType, VoidPointer) {
 TEST(PointerDType, PointerToBuiltIn) {
     ndt::type d;
 
-    d = make_pointer_type<char>();
+    d = ndt::make_pointer<char>();
     EXPECT_EQ(pointer_type_id, d.get_type_id());
     EXPECT_EQ(expression_kind, d.get_kind());
     EXPECT_EQ(sizeof(void *), d.get_data_size());
@@ -37,8 +37,8 @@ TEST(PointerDType, PointerToBuiltIn) {
     EXPECT_NE(0u, d.get_flags()&type_flag_blockref);
     EXPECT_EQ(ndt::make_dtype<char>(), d.value_type());
     EXPECT_EQ(ndt::make_dtype<char>(), d.p("target_dtype").as<ndt::type>());
-    EXPECT_EQ(make_pointer_type<void>(), d.operand_type());
-    EXPECT_EQ(make_pointer_type<void>(), d.storage_type());
+    EXPECT_EQ(ndt::make_pointer<void>(), d.operand_type());
+    EXPECT_EQ(ndt::make_pointer<void>(), d.storage_type());
     // As a special case, the pointer_type says it isn't an expression type,
     // even though it is derived from base_expression_type
     EXPECT_FALSE(d.is_expression());

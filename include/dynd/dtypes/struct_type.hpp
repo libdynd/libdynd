@@ -109,46 +109,48 @@ public:
     void get_dynamic_array_properties(const std::pair<std::string, gfunc::callable> **out_properties, size_t *out_count) const;
 }; // class struct_type
 
-/** Makes a tuple dtype with the specified fields, using the standard layout */
-inline ndt::type make_struct_type(const std::vector<ndt::type>& fields, const std::vector<std::string>& field_names) {
-    return ndt::type(new struct_type(fields, field_names), false);
-}
+namespace ndt {
+    /** Makes a tuple dtype with the specified fields, using the standard layout */
+    inline ndt::type make_struct(const std::vector<ndt::type>& fields, const std::vector<std::string>& field_names) {
+        return ndt::type(new struct_type(fields, field_names), false);
+    }
 
-/** Makes a tuple dtype with the specified fields, using the standard layout */
-inline ndt::type make_struct_type(const ndt::type& dt0, const std::string& name0)
-{
-    std::vector<ndt::type> fields;
-    std::vector<std::string> field_names;
-    fields.push_back(dt0);
-    field_names.push_back(name0);
-    return make_struct_type(fields, field_names);
-}
+    /** Makes a tuple dtype with the specified fields, using the standard layout */
+    inline ndt::type make_struct(const ndt::type& dt0, const std::string& name0)
+    {
+        std::vector<ndt::type> fields;
+        std::vector<std::string> field_names;
+        fields.push_back(dt0);
+        field_names.push_back(name0);
+        return make_struct(fields, field_names);
+    }
 
-/** Makes a tuple dtype with the specified fields, using the standard layout */
-inline ndt::type make_struct_type(const ndt::type& dt0, const std::string& name0, const ndt::type& dt1, const std::string& name1)
-{
-    std::vector<ndt::type> fields;
-    std::vector<std::string> field_names;
-    fields.push_back(dt0);
-    fields.push_back(dt1);
-    field_names.push_back(name0);
-    field_names.push_back(name1);
-    return make_struct_type(fields, field_names);
-}
+    /** Makes a tuple dtype with the specified fields, using the standard layout */
+    inline ndt::type make_struct(const ndt::type& dt0, const std::string& name0, const ndt::type& dt1, const std::string& name1)
+    {
+        std::vector<ndt::type> fields;
+        std::vector<std::string> field_names;
+        fields.push_back(dt0);
+        fields.push_back(dt1);
+        field_names.push_back(name0);
+        field_names.push_back(name1);
+        return make_struct(fields, field_names);
+    }
 
-/** Makes a tuple dtype with the specified fields, using the standard layout */
-inline ndt::type make_struct_type(const ndt::type& dt0, const std::string& name0, const ndt::type& dt1, const std::string& name1, const ndt::type& dt2, const std::string& name2)
-{
-    std::vector<ndt::type> fields;
-    std::vector<std::string> field_names;
-    fields.push_back(dt0);
-    fields.push_back(dt1);
-    fields.push_back(dt2);
-    field_names.push_back(name0);
-    field_names.push_back(name1);
-    field_names.push_back(name2);
-    return make_struct_type(fields, field_names);
-}
+    /** Makes a tuple dtype with the specified fields, using the standard layout */
+    inline ndt::type make_struct(const ndt::type& dt0, const std::string& name0, const ndt::type& dt1, const std::string& name1, const ndt::type& dt2, const std::string& name2)
+    {
+        std::vector<ndt::type> fields;
+        std::vector<std::string> field_names;
+        fields.push_back(dt0);
+        fields.push_back(dt1);
+        fields.push_back(dt2);
+        field_names.push_back(name0);
+        field_names.push_back(name1);
+        field_names.push_back(name2);
+        return make_struct(fields, field_names);
+    }
+} // namespace ndt
 
 } // namespace dynd
 

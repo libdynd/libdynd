@@ -72,16 +72,16 @@ TEST(DTypeCasting, IsLosslessAssignment) {
     // String casting
     // String conversions report false, so that assignments encodings
     // get validated on assignment
-    EXPECT_FALSE(is_lossless_assignment(make_fixedstring_type(16, string_encoding_utf_16),
-                            make_fixedstring_type(16, string_encoding_utf_16)));
-    EXPECT_FALSE(is_lossless_assignment(make_fixedstring_type(16, string_encoding_utf_8),
-                            make_fixedstring_type(12, string_encoding_utf_8)));
-    EXPECT_FALSE(is_lossless_assignment(make_fixedstring_type(12, string_encoding_utf_32),
-                            make_fixedstring_type(16, string_encoding_utf_32)));
-    EXPECT_FALSE(is_lossless_assignment(make_fixedstring_type(16, string_encoding_utf_16),
-                            make_fixedstring_type(16, string_encoding_utf_32)));
-    EXPECT_FALSE(is_lossless_assignment(make_fixedstring_type(16, string_encoding_utf_8),
-                            make_fixedstring_type(16, string_encoding_utf_16)));
+    EXPECT_FALSE(is_lossless_assignment(ndt::make_fixedstring(16, string_encoding_utf_16),
+                            ndt::make_fixedstring(16, string_encoding_utf_16)));
+    EXPECT_FALSE(is_lossless_assignment(ndt::make_fixedstring(16, string_encoding_utf_8),
+                            ndt::make_fixedstring(12, string_encoding_utf_8)));
+    EXPECT_FALSE(is_lossless_assignment(ndt::make_fixedstring(12, string_encoding_utf_32),
+                            ndt::make_fixedstring(16, string_encoding_utf_32)));
+    EXPECT_FALSE(is_lossless_assignment(ndt::make_fixedstring(16, string_encoding_utf_16),
+                            ndt::make_fixedstring(16, string_encoding_utf_32)));
+    EXPECT_FALSE(is_lossless_assignment(ndt::make_fixedstring(16, string_encoding_utf_8),
+                            ndt::make_fixedstring(16, string_encoding_utf_16)));
 
     // Int -> UInt casting
     EXPECT_FALSE(is_lossless_assignment(ndt::type(uint64_type_id), ndt::type(int8_type_id)));

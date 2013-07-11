@@ -111,15 +111,17 @@ public:
     void get_dynamic_array_properties(const std::pair<std::string, gfunc::callable> **out_properties, size_t *out_count) const;
 };
 
-/**
- * Makes a groupby type.
- */
-inline ndt::type make_groupby_type(const ndt::type& data_values_type,
-                const ndt::type& by_values_type)
-{
-    return ndt::type(new groupby_type(data_values_type,
-                    by_values_type), false);
-}
+namespace ndt {
+    /**
+     * Makes a groupby type.
+     */
+    inline ndt::type make_groupby(const ndt::type& data_values_type,
+                    const ndt::type& by_values_type)
+    {
+        return ndt::type(new groupby_type(data_values_type,
+                        by_values_type), false);
+    }
+} // namespace ndt
 
 } // namespace dynd
 

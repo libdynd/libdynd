@@ -67,10 +67,12 @@ public:
                     const eval::eval_context *ectx) const;
 };
 
-inline ndt::type make_fixedstring_type(intptr_t stringsize,
-                string_encoding_t encoding = string_encoding_utf_8) {
-    return ndt::type(new fixedstring_type(stringsize, encoding), false);
-}
+namespace ndt {
+    inline ndt::type make_fixedstring(intptr_t stringsize,
+                    string_encoding_t encoding = string_encoding_utf_8) {
+        return ndt::type(new fixedstring_type(stringsize, encoding), false);
+    }
+} // namespace ndt
 
 } // namespace dynd
 

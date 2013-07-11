@@ -451,7 +451,7 @@ size_t categorical_type::make_assignment_kernel(
         } else if (src_dt.value_type() != m_category_type &&
                         src_dt.value_type().get_type_id() != categorical_type_id) {
             // Make a convert dtype to the category dtype, and have it do the chaining
-            ndt::type src_cvt_dt = make_convert_type(m_category_type, src_dt);
+            ndt::type src_cvt_dt = ndt::make_convert(m_category_type, src_dt);
             return src_cvt_dt.extended()->make_assignment_kernel(out, offset_out,
                             dst_dt, dst_metadata,
                             src_cvt_dt, src_metadata,
@@ -541,7 +541,7 @@ void categorical_type::metadata_debug_print(const char *DYND_UNUSED(metadata),
     // Data is stored as uint##, no metadata to process
 }
 
-ndt::type dynd::factor_categorical_type(const nd::array& values)
+ndt::type dynd::ndt::factor_categorical(const nd::array& values)
 {
     // Do the factor operation on a concrete version of the values
     // TODO: Some cases where we don't want to do this?

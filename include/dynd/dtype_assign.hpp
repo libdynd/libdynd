@@ -57,7 +57,7 @@ void dtype_copy(const ndt::type& dt, const char *dst_metadata, char *dst_data,
 /** 
  * Assign one element where src and dst may have different dtypes.
  * Requires that the data be aligned. To assign unaligned data,
- * use make_unaligned_type().
+ * use make_unaligned().
  */
 void dtype_assign(const ndt::type& dst_dt, const char *dst_metadata, char *dst_data,
                 const ndt::type& src_dt, const char *src_metadata, const char *src_data,

@@ -12,15 +12,15 @@
 using namespace std;
 using namespace dynd;
 
-ndt::type ndt::make_unaligned_type(const ndt::type& value_type)
+ndt::type ndt::make_unaligned(const ndt::type& value_type)
 {
     if (value_type.get_data_alignment() > 1) {
         // Only do something if it requires alignment
         if (value_type.get_kind() != expression_kind) {
-            return make_view_type(value_type, make_fixedbytes_type(value_type.get_data_size(), 1));
+            return ndt::make_view(value_type, ndt::make_fixedbytes(value_type.get_data_size(), 1));
         } else {
             const ndt::type& sdt = value_type.storage_type();
-            return ndt::type(static_cast<const base_expression_type *>(value_type.extended())->with_replaced_storage_type(make_view_type(sdt, make_fixedbytes_type(sdt.get_data_size(), 1))));
+            return ndt::type(static_cast<const base_expression_type *>(value_type.extended())->with_replaced_storage_type(ndt::make_view(sdt, ndt::make_fixedbytes(sdt.get_data_size(), 1))));
         }
     } else {
         return value_type;

@@ -15,7 +15,7 @@ byteswap_type::byteswap_type(const ndt::type& value_type)
     : base_expression_type(byteswap_type_id, expression_kind, value_type.get_data_size(),
                             value_type.get_data_alignment(), type_flag_scalar, 0),
                     m_value_type(value_type),
-                    m_operand_type(make_fixedbytes_type(value_type.get_data_size(), value_type.get_data_alignment()))
+                    m_operand_type(ndt::make_fixedbytes(value_type.get_data_size(), value_type.get_data_alignment()))
 {
     if (!value_type.is_builtin()) {
         throw std::runtime_error("byteswap_type: Only built-in dtypes are supported presently");
@@ -35,8 +35,8 @@ byteswap_type::byteswap_type(const ndt::type& value_type, const ndt::type& opera
     }
     // Automatically realign if needed
     if (operand_type.value_type().get_data_alignment() < value_type.get_data_alignment()) {
-        m_operand_type = make_view_type(operand_type,
-                        make_fixedbytes_type(operand_type.get_data_size(), value_type.get_data_alignment()));
+        m_operand_type = ndt::make_view(operand_type,
+                        ndt::make_fixedbytes(operand_type.get_data_size(), value_type.get_data_alignment()));
     }
 }
 

@@ -16,15 +16,15 @@ namespace dynd { namespace ndt {
  * Uses an appropriate view<..., bytes<>> type
  * to put the type on top of unaligned storage.
  */
-ndt::type make_unaligned_type(const ndt::type& value_type);
+ndt::type make_unaligned(const ndt::type& value_type);
 
 /**
  * Reduces a type's alignment requirements to 1.
  */
 template<typename T>
-ndt::type make_unaligned_type()
+ndt::type make_unaligned()
 {
-    return make_unaligned_type(ndt::make_dtype<T>());
+    return make_unaligned(ndt::make_dtype<T>());
 }
 
 }} // namespace dynd::ndt

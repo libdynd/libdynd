@@ -54,21 +54,23 @@ public:
                     kernel_request_t kernreq, const eval::eval_context *ectx) const;
 };
 
-/**
- * Makes a byteswapped dtype to view the given dtype with a swapped byte order.
- */
-inline ndt::type make_byteswap_type(const ndt::type& native_dtype) {
-    return ndt::type(new byteswap_type(native_dtype), false);
-}
+namespace ndt {
+    /**
+     * Makes a byteswapped dtype to view the given dtype with a swapped byte order.
+     */
+    inline ndt::type make_byteswap(const ndt::type& native_dtype) {
+        return ndt::type(new byteswap_type(native_dtype), false);
+    }
 
-inline ndt::type make_byteswap_type(const ndt::type& native_dtype, const ndt::type& operand_type) {
-    return ndt::type(new byteswap_type(native_dtype, operand_type), false);
-}
+    inline ndt::type make_byteswap(const ndt::type& native_dtype, const ndt::type& operand_type) {
+        return ndt::type(new byteswap_type(native_dtype, operand_type), false);
+    }
 
-template<typename Tnative>
-ndt::type make_byteswap_type() {
-    return ndt::type(new byteswap_type(ndt::make_dtype<Tnative>()), false);
-}
+    template<typename Tnative>
+    ndt::type make_byteswap() {
+        return ndt::type(new byteswap_type(ndt::make_dtype<Tnative>()), false);
+    }
+} // namespace ndt
 
 } // namespace dynd
 

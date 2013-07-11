@@ -69,10 +69,10 @@ namespace {
             builtin_types["float128"] = ndt::make_dtype<dynd_float128>();
             builtin_types["cfloat32"] = builtin_types["complex64"] = ndt::make_dtype<complex<float> >();
             builtin_types["cfloat64"] = builtin_types["complex128"] = ndt::make_dtype<complex<double> >();
-            builtin_types["json"] = make_json_type();
-            builtin_types["date"] = make_date_type();
-            builtin_types["bytes"] = make_bytes_type(1);
-            builtin_types["type"] = make_type_type();
+            builtin_types["json"] = ndt::make_json();
+            builtin_types["date"] = ndt::make_date();
+            builtin_types["bytes"] = ndt::make_bytes(1);
+            builtin_types["type"] = ndt::make_type();
             for (map<string, ndt::type>::iterator i = builtin_types.begin();
                             i != builtin_types.end(); ++i) {
                 reserved_typenames.insert(i->first);
@@ -310,12 +310,12 @@ static ndt::type parse_string_parameters(const char *&begin, const char *end)
             throw datashape_parse_error(begin, "expected closing ')'");
         }
         if (string_size != 0) {
-            return make_fixedstring_type(string_size, encoding);
+            return ndt::make_fixedstring(string_size, encoding);
         } else {
-            return make_string_type(encoding);
+            return ndt::make_string(encoding);
         }
     } else {
-        return make_string_type(string_encoding_utf_8);
+        return ndt::make_string(string_encoding_utf_8);
     }
 }
 
@@ -366,7 +366,7 @@ static ndt::type parse_datetime_parameters(const char *&begin, const char *end)
             throw datashape_parse_error(begin, "expected closing ')'");
         }
          
-        return make_datetime_type(unit, timezone);
+        return ndt::make_datetime(unit, timezone);
     } else {
         throw datashape_parse_error(begin, "expected datetime parameters opening '('");
     }
@@ -428,7 +428,7 @@ static ndt::type parse_record(const char *&begin, const char *end, map<string, n
         }
     }
 
-    return make_cstruct_type(field_type_list.size(),
+    return ndt::make_cstruct(field_type_list.size(),
                     &field_type_list[0], &field_name_list[0]);
 }
 
@@ -505,11 +505,11 @@ static ndt::type parse_rhs_expression(const char *&begin, const char *end, map<s
         if (!shape.empty()) {
             for (ptrdiff_t i = (ptrdiff_t)shape.size() - 1; i >= 0; --i) {
                 if (shape[i] == -2) {
-                    result = make_strided_dim_type(result);
+                    result = ndt::make_strided_dim(result);
                 } else if (shape[i] == -1) {
-                    result = make_var_dim_type(result);
+                    result = ndt::make_var_dim(result);
                 } else {
-                    result = make_fixed_dim_type(shape[i], result);
+                    result = ndt::make_fixed_dim(shape[i], result);
                 }
             }
         }

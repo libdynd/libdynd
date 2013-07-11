@@ -46,13 +46,15 @@ public:
                     const eval::eval_context *ectx) const;
 };
 
-/**
- * Creates a bytes<size, alignment> dtype, for representing
- * raw, uninterpreted bytes.
- */
-inline ndt::type make_fixedbytes_type(intptr_t element_size, intptr_t alignment) {
-    return ndt::type(new fixedbytes_type(element_size, alignment), false);
-}
+namespace ndt {
+    /**
+     * Creates a bytes<size, alignment> dtype, for representing
+     * raw, uninterpreted bytes.
+     */
+    inline ndt::type make_fixedbytes(intptr_t element_size, intptr_t alignment) {
+        return ndt::type(new fixedbytes_type(element_size, alignment), false);
+    }
+} // namespace ndt
 
 } // namespace dynd
 

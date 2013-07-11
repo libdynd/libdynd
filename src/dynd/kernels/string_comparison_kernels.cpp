@@ -315,9 +315,9 @@ size_t dynd::make_general_string_comparison_kernel(
                 const eval::eval_context *ectx)
 {
     // TODO: Make more efficient, direct comparison kernels
-    ndt::type sdt = make_string_type();
+    ndt::type sdt = ndt::make_string();
     return make_comparison_kernel(out, offset_out,
-                    make_convert_type(sdt, src0_dt), src0_metadata,
-                    make_convert_type(sdt, src1_dt), src1_metadata,
+                    ndt::make_convert(sdt, src0_dt), src0_metadata,
+                    ndt::make_convert(sdt, src1_dt), src1_metadata,
                     comptype, ectx);
 }

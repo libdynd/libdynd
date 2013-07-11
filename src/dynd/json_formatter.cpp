@@ -305,7 +305,7 @@ static void format_json(output_data& out, const ndt::type& dt, const char *metad
 nd::array dynd::format_json(const nd::array& n)
 {
     // Create a UTF-8 string
-    nd::array result = nd::empty(make_string_type());
+    nd::array result = nd::empty(ndt::make_string());
 
     // Initialize the output with some memory
     output_data out;

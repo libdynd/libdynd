@@ -19,7 +19,7 @@ TEST(JSONDType, Create) {
     ndt::type d;
 
     // Strings with various encodings
-    d = make_json_type();
+    d = ndt::make_json();
     EXPECT_EQ(json_type_id, d.get_type_id());
     EXPECT_EQ(string_kind, d.get_kind());
     EXPECT_EQ(sizeof(void *), d.get_data_alignment());
@@ -30,9 +30,9 @@ TEST(JSONDType, Create) {
 TEST(JSONDType, Validation) {
     nd::array a;
 
-    a = nd::array("[1,2,3]").ucast(make_json_type()).eval();
-    EXPECT_EQ(make_json_type(), a.get_dtype());
+    a = nd::array("[1,2,3]").ucast(ndt::make_json()).eval();
+    EXPECT_EQ(ndt::make_json(), a.get_dtype());
     EXPECT_EQ("[1,2,3]", a.as<string>());
 
-    EXPECT_THROW(nd::array("[1,2,3]#").ucast(make_json_type()).eval(), runtime_error);
+    EXPECT_THROW(nd::array("[1,2,3]#").ucast(ndt::make_json()).eval(), runtime_error);
 }

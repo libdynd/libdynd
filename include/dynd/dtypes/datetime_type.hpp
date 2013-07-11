@@ -118,9 +118,11 @@ public:
                     kernel_request_t kernreq, const eval::eval_context *ectx) const;
 };
 
-inline ndt::type make_datetime_type(datetime_unit_t unit, datetime_tz_t timezone) {
-    return ndt::type(new datetime_type(unit, timezone), false);
-}
+namespace ndt {
+    inline ndt::type make_datetime(datetime_unit_t unit, datetime_tz_t timezone) {
+        return ndt::type(new datetime_type(unit, timezone), false);
+    }
+} // namespace ndt
 
 } // namespace dynd
 

@@ -37,8 +37,8 @@ TEST(Array, ScalarConstructor) {
 
 TEST(Array, OneDimConstructor) {
     // One-dimensional strided nd::array with one element
-    nd::array a = nd::empty(1, make_strided_dim_type(ndt::make_dtype<float>()));
-    EXPECT_EQ(make_strided_dim_type(ndt::make_dtype<float>()), a.get_dtype());
+    nd::array a = nd::empty(1, ndt::make_strided_dim(ndt::make_dtype<float>()));
+    EXPECT_EQ(ndt::make_strided_dim(ndt::make_dtype<float>()), a.get_dtype());
     EXPECT_FALSE(a.is_scalar());
     EXPECT_EQ(1u, a.get_shape().size());
     EXPECT_EQ(1, a.get_shape()[0]);
@@ -46,8 +46,8 @@ TEST(Array, OneDimConstructor) {
     EXPECT_EQ(0, a.get_strides()[0]);
 
     // One-dimensional nd::array
-    a = nd::empty(3, make_strided_dim_type(ndt::make_dtype<float>()));
-    EXPECT_EQ(make_strided_dim_type(ndt::make_dtype<float>()), a.get_dtype());
+    a = nd::empty(3, ndt::make_strided_dim(ndt::make_dtype<float>()));
+    EXPECT_EQ(ndt::make_strided_dim(ndt::make_dtype<float>()), a.get_dtype());
     EXPECT_FALSE(a.is_scalar());
     EXPECT_EQ(1u, a.get_shape().size());
     EXPECT_EQ(3, a.get_shape()[0]);
@@ -57,8 +57,8 @@ TEST(Array, OneDimConstructor) {
 
 TEST(Array, TwoDimConstructor) {
     // Two-dimensional nd::array with a size-one dimension
-    nd::array a = nd::empty(3, 1, make_strided_dim_type(make_strided_dim_type(ndt::make_dtype<float>())));
-    EXPECT_EQ(make_strided_dim_type(make_strided_dim_type(ndt::make_dtype<float>())), a.get_dtype());
+    nd::array a = nd::empty(3, 1, ndt::make_strided_dim(ndt::make_strided_dim(ndt::make_dtype<float>())));
+    EXPECT_EQ(ndt::make_strided_dim(ndt::make_strided_dim(ndt::make_dtype<float>())), a.get_dtype());
     EXPECT_FALSE(a.is_scalar());
     EXPECT_EQ(2u, a.get_shape().size());
     EXPECT_EQ(3, a.get_shape()[0]);
@@ -68,8 +68,8 @@ TEST(Array, TwoDimConstructor) {
     EXPECT_EQ(0, a.get_strides()[1]);
 
     // Two-dimensional nd::array with a size-one dimension
-    a = nd::empty(1, 3, make_strided_dim_type(make_strided_dim_type(ndt::make_dtype<float>())));
-    EXPECT_EQ(make_strided_dim_type(make_strided_dim_type(ndt::make_dtype<float>())), a.get_dtype());
+    a = nd::empty(1, 3, ndt::make_strided_dim(ndt::make_strided_dim(ndt::make_dtype<float>())));
+    EXPECT_EQ(ndt::make_strided_dim(ndt::make_strided_dim(ndt::make_dtype<float>())), a.get_dtype());
     EXPECT_FALSE(a.is_scalar());
     EXPECT_EQ(2u, a.get_shape().size());
     EXPECT_EQ(1, a.get_shape()[0]);
@@ -79,8 +79,8 @@ TEST(Array, TwoDimConstructor) {
     EXPECT_EQ(sizeof(float), (unsigned)a.get_strides()[1]);
 
     // Two-dimensional nd::array
-    a = nd::empty(3, 5, make_strided_dim_type(make_strided_dim_type(ndt::make_dtype<float>())));
-    EXPECT_EQ(make_strided_dim_type(make_strided_dim_type(ndt::make_dtype<float>())), a.get_dtype());
+    a = nd::empty(3, 5, ndt::make_strided_dim(ndt::make_strided_dim(ndt::make_dtype<float>())));
+    EXPECT_EQ(ndt::make_strided_dim(ndt::make_strided_dim(ndt::make_dtype<float>())), a.get_dtype());
     EXPECT_FALSE(a.is_scalar());
     EXPECT_EQ(2u, a.get_shape().size());
     EXPECT_EQ(3, a.get_shape()[0]);
@@ -92,10 +92,10 @@ TEST(Array, TwoDimConstructor) {
 
 TEST(Array, ThreeDimConstructor) {
     // Three-dimensional nd::array with size-one dimension
-    nd::array a = nd::empty(1, 5, 4, make_strided_dim_type(
-                    make_strided_dim_type(
-                        make_strided_dim_type(ndt::make_dtype<float>()))));
-    EXPECT_EQ(make_strided_dim_type(make_strided_dim_type(make_strided_dim_type(ndt::make_dtype<float>()))), a.get_dtype());
+    nd::array a = nd::empty(1, 5, 4, ndt::make_strided_dim(
+                    ndt::make_strided_dim(
+                        ndt::make_strided_dim(ndt::make_dtype<float>()))));
+    EXPECT_EQ(ndt::make_strided_dim(ndt::make_strided_dim(ndt::make_strided_dim(ndt::make_dtype<float>()))), a.get_dtype());
     EXPECT_FALSE(a.is_scalar());
     EXPECT_EQ(3u, a.get_shape().size());
     EXPECT_EQ(1, a.get_shape()[0]);
@@ -107,10 +107,10 @@ TEST(Array, ThreeDimConstructor) {
     EXPECT_EQ(sizeof(float), (unsigned)a.get_strides()[2]);
 
     // Three-dimensional nd::array with size-one dimension
-    a = nd::empty(3, 1, 4, make_strided_dim_type(
-                    make_strided_dim_type(
-                        make_strided_dim_type(ndt::make_dtype<float>()))));
-    EXPECT_EQ(make_strided_dim_type(make_strided_dim_type(make_strided_dim_type(ndt::make_dtype<float>()))), a.get_dtype());
+    a = nd::empty(3, 1, 4, ndt::make_strided_dim(
+                    ndt::make_strided_dim(
+                        ndt::make_strided_dim(ndt::make_dtype<float>()))));
+    EXPECT_EQ(ndt::make_strided_dim(ndt::make_strided_dim(ndt::make_strided_dim(ndt::make_dtype<float>()))), a.get_dtype());
     EXPECT_FALSE(a.is_scalar());
     EXPECT_EQ(3u, a.get_shape().size());
     EXPECT_EQ(3, a.get_shape()[0]);
@@ -122,10 +122,10 @@ TEST(Array, ThreeDimConstructor) {
     EXPECT_EQ(sizeof(float), (unsigned)a.get_strides()[2]);
 
     // Three-dimensional nd::array with size-one dimension
-    a = nd::empty(3, 5, 1, make_strided_dim_type(
-                    make_strided_dim_type(
-                        make_strided_dim_type(ndt::make_dtype<float>()))));
-    EXPECT_EQ(make_strided_dim_type(make_strided_dim_type(make_strided_dim_type(ndt::make_dtype<float>()))), a.get_dtype());
+    a = nd::empty(3, 5, 1, ndt::make_strided_dim(
+                    ndt::make_strided_dim(
+                        ndt::make_strided_dim(ndt::make_dtype<float>()))));
+    EXPECT_EQ(ndt::make_strided_dim(ndt::make_strided_dim(ndt::make_strided_dim(ndt::make_dtype<float>()))), a.get_dtype());
     EXPECT_FALSE(a.is_scalar());
     EXPECT_EQ(3u, a.get_shape().size());
     EXPECT_EQ(3, a.get_shape()[0]);
@@ -137,10 +137,10 @@ TEST(Array, ThreeDimConstructor) {
     EXPECT_EQ(0, a.get_strides()[2]);
 
     // Three-dimensional nd::array
-    a = nd::empty(3, 5, 4, make_strided_dim_type(
-                    make_strided_dim_type(
-                        make_strided_dim_type(ndt::make_dtype<float>()))));
-    EXPECT_EQ(make_strided_dim_type(make_strided_dim_type(make_strided_dim_type(ndt::make_dtype<float>()))), a.get_dtype());
+    a = nd::empty(3, 5, 4, ndt::make_strided_dim(
+                    ndt::make_strided_dim(
+                        ndt::make_strided_dim(ndt::make_dtype<float>()))));
+    EXPECT_EQ(ndt::make_strided_dim(ndt::make_strided_dim(ndt::make_strided_dim(ndt::make_dtype<float>()))), a.get_dtype());
     EXPECT_FALSE(a.is_scalar());
     EXPECT_EQ(3u, a.get_shape().size());
     EXPECT_EQ(3, a.get_shape()[0]);
@@ -244,7 +244,7 @@ TEST(Array, StdVectorConstructor) {
 
     // Empty vector
     a = v;
-    EXPECT_EQ(make_strided_dim_type(ndt::make_dtype<float>()), a.get_dtype());
+    EXPECT_EQ(ndt::make_strided_dim(ndt::make_dtype<float>()), a.get_dtype());
     EXPECT_EQ(1u, a.get_dtype().get_undim());
     EXPECT_EQ(1u, a.get_shape().size());
     EXPECT_EQ(0, a.get_shape()[0]);
@@ -256,7 +256,7 @@ TEST(Array, StdVectorConstructor) {
         v.push_back(i/0.5f);
     }
     a = v;
-    EXPECT_EQ(make_strided_dim_type(ndt::make_dtype<float>()), a.get_dtype());
+    EXPECT_EQ(ndt::make_strided_dim(ndt::make_dtype<float>()), a.get_dtype());
     EXPECT_EQ(1u, a.get_dtype().get_undim());
     EXPECT_EQ(1u, a.get_shape().size());
     EXPECT_EQ(10, a.get_shape()[0]);
@@ -273,7 +273,7 @@ TEST(Array, StdVectorStringConstructor) {
 
     // Empty vector
     a = v;
-    EXPECT_EQ(make_strided_dim_type(make_string_type(string_encoding_utf_8)), a.get_dtype());
+    EXPECT_EQ(ndt::make_strided_dim(ndt::make_string(string_encoding_utf_8)), a.get_dtype());
     EXPECT_EQ(1u, a.get_dtype().get_undim());
     EXPECT_EQ(1u, a.get_shape().size());
     EXPECT_EQ(0, a.get_shape()[0]);
@@ -287,7 +287,7 @@ TEST(Array, StdVectorStringConstructor) {
     v.push_back("vectors");
     v.push_back("testing testing testing testing testing testing testing testing testing");
     a = v;
-    EXPECT_EQ(make_strided_dim_type(make_string_type(string_encoding_utf_8)), a.get_dtype());
+    EXPECT_EQ(ndt::make_strided_dim(ndt::make_string(string_encoding_utf_8)), a.get_dtype());
     EXPECT_EQ(1u, a.get_dtype().get_undim());
     EXPECT_EQ(1u, a.get_shape().size());
     EXPECT_EQ(5, a.get_shape()[0]);
@@ -478,7 +478,7 @@ TEST(Array, InitializerLists) {
 TEST(Array, InitFromNestedCArray) {
     int i0[2][3] = {{1,2,3}, {4,5,6}};
     nd::array a = i0;
-    EXPECT_EQ(make_strided_dim_type(make_strided_dim_type(ndt::make_dtype<int>())), a.get_dtype());
+    EXPECT_EQ(ndt::make_strided_dim(ndt::make_strided_dim(ndt::make_dtype<int>())), a.get_dtype());
     EXPECT_EQ(2u, a.get_shape().size());
     EXPECT_EQ(2, a.get_shape()[0]);
     EXPECT_EQ(3, a.get_shape()[1]);
@@ -494,7 +494,7 @@ TEST(Array, InitFromNestedCArray) {
 
     float i1[2][2][3] = {{{1,2,3}, {1.5f, 2.5f, 3.5f}}, {{-10, 0, -3.1f}, {9,8,7}}};
     a = i1;
-    EXPECT_EQ(make_strided_dim_type(make_strided_dim_type(make_strided_dim_type(ndt::make_dtype<float>()))), a.get_dtype());
+    EXPECT_EQ(ndt::make_strided_dim(ndt::make_strided_dim(ndt::make_strided_dim(ndt::make_dtype<float>()))), a.get_dtype());
     EXPECT_EQ(3u, a.get_shape().size());
     EXPECT_EQ(2, a.get_shape()[0]);
     EXPECT_EQ(2, a.get_shape()[1]);
@@ -522,8 +522,8 @@ TEST(Array, Storage) {
     nd::array a = i0;
 
     nd::array b = a.storage();
-    EXPECT_EQ(make_strided_dim_type(make_strided_dim_type(ndt::make_dtype<int>())), a.get_dtype());
-    EXPECT_EQ(make_strided_dim_type(make_strided_dim_type(make_fixedbytes_type(4, 4))), b.get_dtype());
+    EXPECT_EQ(ndt::make_strided_dim(ndt::make_strided_dim(ndt::make_dtype<int>())), a.get_dtype());
+    EXPECT_EQ(ndt::make_strided_dim(ndt::make_strided_dim(ndt::make_fixedbytes(4, 4))), b.get_dtype());
     EXPECT_EQ(a.get_readonly_originptr(), b.get_readonly_originptr());
     EXPECT_EQ(a.get_shape(), b.get_shape());
     EXPECT_EQ(a.get_strides(), b.get_strides());

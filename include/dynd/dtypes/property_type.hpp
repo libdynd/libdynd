@@ -89,24 +89,26 @@ public:
                     size_t *out_count) const;
 };
 
-/**
- * Makes a property dtype for accessing a named element-wise property
- * of the provided operand dtype.
- */
-inline ndt::type make_property_type(const ndt::type& operand_type, const std::string& property_name,
-                size_t property_index = std::numeric_limits<size_t>::max()) {
-    return ndt::type(new property_type(operand_type, property_name, property_index), false);
-}
+namespace ndt {
+    /**
+     * Makes a property dtype for accessing a named element-wise property
+     * of the provided operand dtype.
+     */
+    inline ndt::type make_property(const ndt::type& operand_type, const std::string& property_name,
+                    size_t property_index = std::numeric_limits<size_t>::max()) {
+        return ndt::type(new property_type(operand_type, property_name, property_index), false);
+    }
 
-/**
- * Makes a reversed property dtype for viewing the operand as the output
- * of a property of value_type (with its getters/setters exchanged).
- */
-inline ndt::type make_reversed_property_type(const ndt::type& value_type,
-                const ndt::type& operand_type, const std::string& property_name,
-                size_t property_index = std::numeric_limits<size_t>::max()) {
-    return ndt::type(new property_type(value_type, operand_type, property_name, property_index), false);
-}
+    /**
+     * Makes a reversed property dtype for viewing the operand as the output
+     * of a property of value_type (with its getters/setters exchanged).
+     */
+    inline ndt::type make_reversed_property(const ndt::type& value_type,
+                    const ndt::type& operand_type, const std::string& property_name,
+                    size_t property_index = std::numeric_limits<size_t>::max()) {
+        return ndt::type(new property_type(value_type, operand_type, property_name, property_index), false);
+    }
+} // namespace ndt
 
 } // namespace dynd
 

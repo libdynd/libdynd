@@ -21,7 +21,7 @@ TEST(DTypeDType, Create) {
     ndt::type d;
 
     // Strings with various encodings and sizes
-    d = make_type_type();
+    d = ndt::make_type();
     EXPECT_EQ(dtype_type_id, d.get_type_id());
     EXPECT_EQ(custom_kind, d.get_kind());
     EXPECT_EQ(ndt::type("type"), d);
@@ -41,7 +41,7 @@ TEST(DTypeDType, BasicNDobject) {
 TEST(DTypeDType, StringCasting) {
     nd::array a;
 
-    a = nd::array("int32").ucast(make_type_type());
+    a = nd::array("int32").ucast(ndt::make_type());
     a = a.eval();
     EXPECT_EQ(dtype_type_id, a.get_dtype().get_type_id());
     EXPECT_EQ(ndt::make_dtype<int32_t>(), a.as<ndt::type>());
@@ -51,9 +51,9 @@ TEST(DTypeDType, StringCasting) {
 TEST(DTypeDType, ScalarRefCount) {
     nd::array a;
     ndt::type d, d2;
-    d = make_strided_dim_type(ndt::make_dtype<int>());
+    d = ndt::make_strided_dim(ndt::make_dtype<int>());
 
-    a = nd::empty(make_type_type());
+    a = nd::empty(ndt::make_type());
     EXPECT_EQ(1, d.extended()->get_use_count());
     a.vals() = d;
     EXPECT_EQ(2, d.extended()->get_use_count());
@@ -75,10 +75,10 @@ TEST(DTypeDType, ScalarRefCount) {
 TEST(DTypeDType, StridedArrayRefCount) {
     nd::array a;
     ndt::type d;
-    d = make_strided_dim_type(ndt::make_dtype<int>());
+    d = ndt::make_strided_dim(ndt::make_dtype<int>());
 
     // 1D Strided Array
-    a = nd::empty(10, make_strided_dim_type(make_type_type()));
+    a = nd::empty(10, ndt::make_strided_dim(ndt::make_type()));
     EXPECT_EQ(1, d.extended()->get_use_count());
     a.vals() = d;
     EXPECT_EQ(11, d.extended()->get_use_count());
@@ -122,10 +122,10 @@ TEST(DTypeDType, StridedArrayRefCount) {
 TEST(DTypeDType, FixedArrayRefCount) {
     nd::array a;
     ndt::type d;
-    d = make_strided_dim_type(ndt::make_dtype<int>());
+    d = ndt::make_strided_dim(ndt::make_dtype<int>());
 
     // 1D Fixed Array
-    a = nd::empty(make_fixed_dim_type(10, make_type_type()));
+    a = nd::empty(ndt::make_fixed_dim(10, ndt::make_type()));
     EXPECT_EQ(1, d.extended()->get_use_count());
     a.vals() = d;
     EXPECT_EQ(11, d.extended()->get_use_count());
@@ -168,10 +168,10 @@ TEST(DTypeDType, FixedArrayRefCount) {
 TEST(DTypeDType, VarArrayRefCount) {
     nd::array a;
     ndt::type d;
-    d = make_strided_dim_type(ndt::make_dtype<int>());
+    d = ndt::make_strided_dim(ndt::make_dtype<int>());
 
     // 1D Var Array
-    a = nd::empty(make_var_dim_type(make_type_type()));
+    a = nd::empty(ndt::make_var_dim(ndt::make_type()));
     // It should have an objectarray memory block type
     EXPECT_EQ((uint32_t)objectarray_memory_block_type,
                     reinterpret_cast<const var_dim_type_metadata *>(
@@ -194,7 +194,7 @@ TEST(DTypeDType, VarArrayRefCount) {
     EXPECT_EQ(1, d.extended()->get_use_count());
 
     // 2D Strided + Var Array
-    a = nd::empty(3, make_strided_dim_type(make_var_dim_type(make_type_type())));
+    a = nd::empty(3, ndt::make_strided_dim(ndt::make_var_dim(ndt::make_type())));
     a.vals_at(0) = nd::empty("2, type");
     a.vals_at(1) = nd::empty("3, type");
     a.vals_at(2) = nd::empty("4, type");
@@ -221,7 +221,7 @@ TEST(DTypeDType, VarArrayRefCount) {
 TEST(DTypeDType, CStructRefCount) {
     nd::array a;
     ndt::type d;
-    d = make_strided_dim_type(ndt::make_dtype<int>());
+    d = ndt::make_strided_dim(ndt::make_dtype<int>());
 
     // Single CStruct Instance
     a = nd::empty("{dt: type; more: {a: int32; b: type}; other: string}");
@@ -271,7 +271,7 @@ TEST(DTypeDType, CStructRefCount) {
 TEST(DTypeDType, StructRefCount) {
     nd::array a;
     ndt::type d;
-    d = make_strided_dim_type(ndt::make_dtype<int>());
+    d = ndt::make_strided_dim(ndt::make_dtype<int>());
 
     // Single CStruct Instance
     a = nd::empty("{dt: type; more: {a: int32; b: type}; other: string}")(0 <= irange() < 2);

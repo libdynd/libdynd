@@ -87,15 +87,17 @@ public:
                     size_t *out_count) const;
 };
 
-/**
- * Makes an expr dtype.
- */
-inline ndt::type make_expr_type(const ndt::type& value_type,
-                const ndt::type& operand_type,
-                const expr_kernel_generator *kgen)
-{
-    return ndt::type(new expr_type(value_type, operand_type, kgen), false);
-}
+namespace ndt {
+    /**
+     * Makes an expr dtype.
+     */
+    inline ndt::type make_expr(const ndt::type& value_type,
+                    const ndt::type& operand_type,
+                    const expr_kernel_generator *kgen)
+    {
+        return ndt::type(new expr_type(value_type, operand_type, kgen), false);
+    }
+} // namespace ndt
 
 } // namespace dynd
 

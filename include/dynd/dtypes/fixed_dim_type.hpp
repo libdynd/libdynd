@@ -116,15 +116,17 @@ public:
                     size_t *out_count) const;
 };
 
-inline ndt::type make_fixed_dim_type(size_t size, const ndt::type& element_dtype) {
-    return ndt::type(new fixed_dim_type(size, element_dtype), false);
-}
+namespace ndt {
+    inline ndt::type make_fixed_dim(size_t size, const ndt::type& element_dtype) {
+        return ndt::type(new fixed_dim_type(size, element_dtype), false);
+    }
 
-inline ndt::type make_fixed_dim_type(size_t size, const ndt::type& element_dtype, intptr_t stride) {
-    return ndt::type(new fixed_dim_type(size, element_dtype, stride), false);
-}
+    inline ndt::type make_fixed_dim(size_t size, const ndt::type& element_dtype, intptr_t stride) {
+        return ndt::type(new fixed_dim_type(size, element_dtype, stride), false);
+    }
 
-ndt::type make_fixed_dim_type(size_t ndim, const intptr_t *shape, const ndt::type& uniform_dtype, const int *axis_perm);
+    ndt::type make_fixed_dim(size_t ndim, const intptr_t *shape, const ndt::type& uniform_dtype, const int *axis_perm);
+} // namespace ndt
 
 } // namespace dynd
 

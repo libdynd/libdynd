@@ -51,28 +51,28 @@ std::ostream& dynd::operator<<(std::ostream& o, datetime_unit_t unit)
 
 namespace {
     static ndt::type datetime_default_structs[6] = {
-        make_cstruct_type(
+        ndt::make_cstruct(
             ndt::make_dtype<int32_t>(), "year", ndt::make_dtype<int16_t>(), "month",
             ndt::make_dtype<int16_t>(), "day", ndt::make_dtype<int16_t>(), "hour"),
-        make_cstruct_type(
+        ndt::make_cstruct(
             ndt::make_dtype<int32_t>(), "year", ndt::make_dtype<int16_t>(), "month",
             ndt::make_dtype<int16_t>(), "day", ndt::make_dtype<int16_t>(), "hour",
             ndt::make_dtype<int16_t>(), "min"),
-        make_cstruct_type(
+        ndt::make_cstruct(
             ndt::make_dtype<int32_t>(), "year", ndt::make_dtype<int16_t>(), "month",
             ndt::make_dtype<int16_t>(), "day", ndt::make_dtype<int16_t>(), "hour",
             ndt::make_dtype<int16_t>(), "min", ndt::make_dtype<int16_t>(), "sec"),
-        make_cstruct_type(
+        ndt::make_cstruct(
             ndt::make_dtype<int32_t>(), "year", ndt::make_dtype<int16_t>(), "month",
             ndt::make_dtype<int16_t>(), "day", ndt::make_dtype<int16_t>(), "hour",
             ndt::make_dtype<int16_t>(), "min", ndt::make_dtype<int16_t>(), "sec",
             ndt::make_dtype<int16_t>(), "msec"),
-        make_cstruct_type(
+        ndt::make_cstruct(
             ndt::make_dtype<int32_t>(), "year", ndt::make_dtype<int16_t>(), "month",
             ndt::make_dtype<int16_t>(), "day", ndt::make_dtype<int16_t>(), "hour",
             ndt::make_dtype<int16_t>(), "min", ndt::make_dtype<int16_t>(), "sec",
             ndt::make_dtype<int32_t>(), "usec"),
-        make_cstruct_type(
+        ndt::make_cstruct(
             ndt::make_dtype<int32_t>(), "year", ndt::make_dtype<int16_t>(), "month",
             ndt::make_dtype<int16_t>(), "day", ndt::make_dtype<int16_t>(), "hour",
             ndt::make_dtype<int16_t>(), "min", ndt::make_dtype<int16_t>(), "sec",
@@ -312,7 +312,7 @@ size_t datetime_type::make_assignment_kernel(
         } else if (src_dt.get_kind() == struct_kind) {
             // Convert to struct using the "struct" property
             return ::make_assignment_kernel(out, offset_out,
-                make_property_type(dst_dt, "struct"), dst_metadata,
+                ndt::make_property(dst_dt, "struct"), dst_metadata,
                 src_dt, src_metadata,
                 kernreq, errmode, ectx);
         } else if (!src_dt.is_builtin()) {
@@ -332,7 +332,7 @@ size_t datetime_type::make_assignment_kernel(
             // Convert to struct using the "struct" property
             return ::make_assignment_kernel(out, offset_out,
                 dst_dt, dst_metadata,
-                make_property_type(src_dt, "struct"), src_metadata,
+                ndt::make_property(src_dt, "struct"), src_metadata,
                 kernreq, errmode, ectx);
         }
         // TODO
@@ -381,7 +381,7 @@ static nd::array function_dtype_construct(const ndt::type& DYND_UNUSED(dt),
     nd::array day_as_int = day.ucast(ndt::make_dtype<int32_t>()).eval();
     nd::array result;
 
-    array_iter<1,3> iter(make_datetime_type(), result, year_as_int, month_as_int, day_as_int);
+    array_iter<1,3> iter(ndt::make_datetime(), result, year_as_int, month_as_int, day_as_int);
     if (!iter.empty()) {
         datetime::date_ymd ymd;
         do {
@@ -415,35 +415,35 @@ void datetime_type::get_dynamic_dtype_functions(const std::pair<std::string, gfu
 ///////// properties on the nd::array
 
 static nd::array property_ndo_get_date(const nd::array& n) {
-    return n.replace_udtype(make_property_type(n.get_udtype(), "date"));
+    return n.replace_udtype(ndt::make_property(n.get_udtype(), "date"));
 }
 
 static nd::array property_ndo_get_year(const nd::array& n) {
-    return n.replace_udtype(make_property_type(n.get_udtype(), "year"));
+    return n.replace_udtype(ndt::make_property(n.get_udtype(), "year"));
 }
 
 static nd::array property_ndo_get_month(const nd::array& n) {
-    return n.replace_udtype(make_property_type(n.get_udtype(), "month"));
+    return n.replace_udtype(ndt::make_property(n.get_udtype(), "month"));
 }
 
 static nd::array property_ndo_get_day(const nd::array& n) {
-    return n.replace_udtype(make_property_type(n.get_udtype(), "day"));
+    return n.replace_udtype(ndt::make_property(n.get_udtype(), "day"));
 }
 
 static nd::array property_ndo_get_hour(const nd::array& n) {
-    return n.replace_udtype(make_property_type(n.get_udtype(), "hour"));
+    return n.replace_udtype(ndt::make_property(n.get_udtype(), "hour"));
 }
 
 static nd::array property_ndo_get_minute(const nd::array& n) {
-    return n.replace_udtype(make_property_type(n.get_udtype(), "minute"));
+    return n.replace_udtype(ndt::make_property(n.get_udtype(), "minute"));
 }
 
 static nd::array property_ndo_get_second(const nd::array& n) {
-    return n.replace_udtype(make_property_type(n.get_udtype(), "second"));
+    return n.replace_udtype(ndt::make_property(n.get_udtype(), "second"));
 }
 
 static nd::array property_ndo_get_microsecond(const nd::array& n) {
-    return n.replace_udtype(make_property_type(n.get_udtype(), "microsecond"));
+    return n.replace_udtype(ndt::make_property(n.get_udtype(), "microsecond"));
 }
 
 static pair<string, gfunc::callable> date_array_properties[] = {
@@ -466,7 +466,7 @@ void datetime_type::get_dynamic_array_properties(const std::pair<std::string, gf
 ///////// functions on the nd::array
 
 static nd::array function_ndo_to_struct(const nd::array& n) {
-    return n.replace_udtype(make_property_type(n.get_udtype(), "struct"));
+    return n.replace_udtype(ndt::make_property(n.get_udtype(), "struct"));
 }
 
 static nd::array function_ndo_strftime(const nd::array& n, const std::string& format) {
@@ -474,7 +474,7 @@ static nd::array function_ndo_strftime(const nd::array& n, const std::string& fo
     if (format.empty()) {
         throw runtime_error("format string for strftime should not be empty");
     }
-    return n.replace_udtype(make_unary_expr_type(make_string_type(), n.get_udtype(),
+    return n.replace_udtype(ndt::make_unary_expr(ndt::make_string(), n.get_udtype(),
                     make_strftime_kernelgen(format)));
 }
 
@@ -701,7 +701,7 @@ ndt::type datetime_type::get_elwise_property_type(size_t property_index,
         case datetimeprop_date:
             out_readable = true;
             out_writable = false;
-            return make_date_type();
+            return ndt::make_date();
         default:
             out_readable = true;
             out_writable = false;

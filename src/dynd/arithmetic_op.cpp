@@ -259,9 +259,9 @@ nd::array apply_binary_operator(const nd::array *ops,
     ndt::type result_vdt = rdt;
     for (size_t j = 0; j != undim; ++j) {
         if (result_shape[undim - j - 1] == -1) {
-            result_vdt = make_var_dim_type(result_vdt);
+            result_vdt = ndt::make_var_dim(result_vdt);
         } else {
-            result_vdt = make_strided_dim_type(result_vdt);
+            result_vdt = ndt::make_strided_dim(result_vdt);
         }
     }
 
@@ -271,7 +271,7 @@ nd::array apply_binary_operator(const nd::array *ops,
     nd::array result = combine_into_struct(2, field_names, ops_as_dt);
     // Because the expr dtype's operand is the result's dtype,
     // we can swap it in as the dtype
-    ndt::type edt = make_expr_type(result_vdt,
+    ndt::type edt = ndt::make_expr(result_vdt,
                     result.get_dtype(),
                     new arithmetic_op_kernel_generator<KD>(rdt, op1dt, op2dt, expr_ops, name));
     edt.swap(result.get_ndo()->m_dtype);
@@ -294,7 +294,7 @@ nd::array nd::operator+(const nd::array& op1, const nd::array& op2)
         // The signature is (T, T) -> T, so we don't use the original types
         return apply_binary_operator<kernel_data_prefix>(ops, rdt, rdt, rdt, func_ptr, "addition");
     } else if (op1dt.get_kind() == string_kind && op2dt.get_kind() == string_kind) {
-        ndt::type rdt = make_string_type();
+        ndt::type rdt = ndt::make_string();
         func_ptr.single = &kernels::string_concatenation_kernel::single;
         func_ptr.strided = &kernels::string_concatenation_kernel::strided;
         // The signature is (string, string) -> string, so we don't use the original types

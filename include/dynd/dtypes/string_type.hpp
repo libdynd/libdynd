@@ -85,9 +85,11 @@ public:
                     const eval::eval_context *ectx) const;
 };
 
-inline ndt::type make_string_type(string_encoding_t encoding = string_encoding_utf_8) {
-    return ndt::type(new string_type(encoding), false);
-}
+namespace ndt {
+    inline ndt::type make_string(string_encoding_t encoding = string_encoding_utf_8) {
+        return ndt::type(new string_type(encoding), false);
+    }
+} // namespace ndt
 
 } // namespace dynd
 

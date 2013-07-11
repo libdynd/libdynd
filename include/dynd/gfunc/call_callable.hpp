@@ -73,7 +73,7 @@ namespace detail {
                 reinterpret_cast<string_type_data*>(data)->begin = const_cast<char *>(value);
                 reinterpret_cast<string_type_data*>(data)->end = const_cast<char *>(value + N - 1);
             } else {
-                dtype_assign(paramtype, metadata, data, make_fixedstring_type(N, string_encoding_utf_8),
+                dtype_assign(paramtype, metadata, data, ndt::make_fixedstring(N, string_encoding_utf_8),
                         NULL, value);
             }
         }

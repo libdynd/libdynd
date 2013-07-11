@@ -98,18 +98,20 @@ public:
                     size_t *out_count) const;
 };
 
-inline ndt::type make_pointer_type(const ndt::type& target_dtype) {
-    if (target_dtype.get_type_id() != void_type_id) {
-        return ndt::type(new pointer_type(target_dtype), false);
-    } else {
-        return ndt::type(new void_pointer_type(), false);
+namespace ndt {
+    inline ndt::type make_pointer(const ndt::type& target_dtype) {
+        if (target_dtype.get_type_id() != void_type_id) {
+            return ndt::type(new pointer_type(target_dtype), false);
+        } else {
+            return ndt::type(new void_pointer_type(), false);
+        }
     }
-}
 
-template<typename Tnative>
-ndt::type make_pointer_type() {
-    return make_pointer_type(ndt::make_dtype<Tnative>());
-}
+    template<typename Tnative>
+    ndt::type make_pointer() {
+        return make_pointer(ndt::make_dtype<Tnative>());
+    }
+} // namespace ndt
 
 } // namespace dynd
 

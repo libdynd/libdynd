@@ -20,7 +20,7 @@ TEST(TupleDType, CreateOneField) {
     const tuple_type *tdt;
 
     // Tuple with one field
-    dt = make_tuple_type(ndt::make_dtype<int32_t>());
+    dt = ndt::make_tuple(ndt::make_dtype<int32_t>());
     EXPECT_EQ(tuple_type_id, dt.get_type_id());
     EXPECT_EQ(4u, dt.get_data_size());
     EXPECT_EQ(4u, dt.get_data_alignment());

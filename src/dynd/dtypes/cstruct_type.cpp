@@ -529,7 +529,7 @@ void cstruct_type::get_dynamic_dtype_properties(const std::pair<std::string, gfu
 cstruct_type::cstruct_type(int, int)
     : base_struct_type(cstruct_type_id, 0, 1, 1, type_flag_none, 0)
 {
-    // Equivalent to make_cstruct_type(ndt::type(new void_pointer_type, false), "self");
+    // Equivalent to ndt::make_cstruct(ndt::type(new void_pointer_type, false), "self");
     // but hardcoded to break the dependency of cstruct_type::array_parameters_dtype
     m_field_types.push_back(ndt::type(new void_pointer_type, 0));
     m_field_names.push_back("self");
@@ -553,7 +553,7 @@ static array_preamble *property_get_array_field(const array_preamble *params, vo
     if (udt.get_kind() == expression_kind) {
         const string *field_names = static_cast<const cstruct_type *>(
                         udt.value_type().extended())->get_field_names();
-        return n.replace_udtype(make_property_type(udt, field_names[i], i)).release();
+        return n.replace_udtype(ndt::make_property(udt, field_names[i], i)).release();
     } else {
         if (undim == 0) {
             return n(i).release();

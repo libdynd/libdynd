@@ -220,7 +220,7 @@ namespace {
     {
         const replace_scalar_type_extra *e = reinterpret_cast<const replace_scalar_type_extra *>(extra);
         if (dt.is_scalar()) {
-            out_transformed_dtype = make_convert_type(e->scalar_dtype, dt, e->errmode);
+            out_transformed_dtype = ndt::make_convert(e->scalar_dtype, dt, e->errmode);
             out_was_transformed = true;
         } else {
             dt.extended()->transform_child_types(&replace_scalar_types, extra, out_transformed_dtype, out_was_transformed);

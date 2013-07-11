@@ -18,7 +18,7 @@ TEST(FixedBytesDType, Create) {
     ndt::type d;
 
     // Strings with various encodings and sizes
-    d = make_fixedbytes_type(7, 1);
+    d = ndt::make_fixedbytes(7, 1);
     EXPECT_EQ(fixedbytes_type_id, d.get_type_id());
     EXPECT_EQ(bytes_kind, d.get_kind());
     EXPECT_EQ(1u, d.get_data_alignment());
@@ -26,7 +26,7 @@ TEST(FixedBytesDType, Create) {
     EXPECT_FALSE(d.is_expression());
 
     // Strings with various encodings and sizes
-    d = make_fixedbytes_type(12, 4);
+    d = ndt::make_fixedbytes(12, 4);
     EXPECT_EQ(fixedbytes_type_id, d.get_type_id());
     EXPECT_EQ(bytes_kind, d.get_kind());
     EXPECT_EQ(4u, d.get_data_alignment());
@@ -34,12 +34,12 @@ TEST(FixedBytesDType, Create) {
     EXPECT_FALSE(d.is_expression());
 
     // Larger element than data size
-    EXPECT_THROW(make_fixedbytes_type(1, 2), runtime_error);
+    EXPECT_THROW(ndt::make_fixedbytes(1, 2), runtime_error);
     // Invalid alignment
-    EXPECT_THROW(make_fixedbytes_type(6, 3), runtime_error);
-    EXPECT_THROW(make_fixedbytes_type(10, 5), runtime_error);
+    EXPECT_THROW(ndt::make_fixedbytes(6, 3), runtime_error);
+    EXPECT_THROW(ndt::make_fixedbytes(10, 5), runtime_error);
     // Alignment must divide size
-    EXPECT_THROW(make_fixedbytes_type(9, 4), runtime_error);
+    EXPECT_THROW(ndt::make_fixedbytes(9, 4), runtime_error);
 }
 
 TEST(FixedBytesDType, Assign) {
@@ -47,15 +47,15 @@ TEST(FixedBytesDType, Assign) {
     char b[3] = {1, 2, 3};
 
     // Assignment with fixedbytes
-    dtype_assign(make_fixedbytes_type(3, 1), NULL, a,
-                 make_fixedbytes_type(3, 1), NULL, b);
+    dtype_assign(ndt::make_fixedbytes(3, 1), NULL, a,
+                 ndt::make_fixedbytes(3, 1), NULL, b);
     EXPECT_EQ(1, a[0]);
     EXPECT_EQ(2, a[1]);
     EXPECT_EQ(3, a[2]);
 
     // Must be the same size
-    EXPECT_THROW(dtype_assign(make_fixedbytes_type(2, 1), NULL, a,
-                 make_fixedbytes_type(3, 1), NULL, b),
+    EXPECT_THROW(dtype_assign(ndt::make_fixedbytes(2, 1), NULL, a,
+                 ndt::make_fixedbytes(3, 1), NULL, b),
                     runtime_error);
 }
 

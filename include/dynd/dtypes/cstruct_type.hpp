@@ -143,162 +143,165 @@ public:
                     size_t *out_count) const;
 }; // class cstruct_type
 
-/** Makes a struct dtype with the specified fields */
-inline ndt::type make_cstruct_type(size_t field_count, const ndt::type *field_types,
-                const std::string *field_names) {
-    return ndt::type(new cstruct_type(field_count, field_types, field_names), false);
-}
-
-/** Makes a struct dtype with the specified fields */
-inline ndt::type make_cstruct_type(const ndt::type& dt0, const std::string& name0)
-{
-    return make_cstruct_type(1, &dt0, &name0);
-}
-
-/** Makes a struct dtype with the specified fields */
-inline ndt::type make_cstruct_type(const ndt::type& dt0, const std::string& name0, const ndt::type& dt1, const std::string& name1)
-{
-    ndt::type field_types[2];
-    std::string field_names[2];
-    field_types[0] = dt0;
-    field_types[1] = dt1;
-    field_names[0] = name0;
-    field_names[1] = name1;
-    return make_cstruct_type(2, field_types, field_names);
-}
-
-/** Makes a struct dtype with the specified fields */
-inline ndt::type make_cstruct_type(const ndt::type& dt0, const std::string& name0, const ndt::type& dt1, const std::string& name1, const ndt::type& dt2, const std::string& name2)
-{
-    ndt::type field_types[3];
-    std::string field_names[3];
-    field_types[0] = dt0;
-    field_types[1] = dt1;
-    field_types[2] = dt2;
-    field_names[0] = name0;
-    field_names[1] = name1;
-    field_names[2] = name2;
-    return make_cstruct_type(3, field_types, field_names);
-}
-
-/** Makes a struct dtype with the specified fields */
-inline ndt::type make_cstruct_type(const ndt::type& dt0, const std::string& name0,
-                const ndt::type& dt1, const std::string& name1, const ndt::type& dt2, const std::string& name2,
-                const ndt::type& dt3, const std::string& name3)
-{
-    ndt::type field_types[4];
-    std::string field_names[4];
-    field_types[0] = dt0;
-    field_types[1] = dt1;
-    field_types[2] = dt2;
-    field_types[3] = dt3;
-    field_names[0] = name0;
-    field_names[1] = name1;
-    field_names[2] = name2;
-    field_names[3] = name3;
-    return make_cstruct_type(4, field_types, field_names);
-}
-
-/** Makes a struct dtype with the specified fields */
-inline ndt::type make_cstruct_type(const ndt::type& dt0, const std::string& name0,
-                const ndt::type& dt1, const std::string& name1, const ndt::type& dt2, const std::string& name2,
-                const ndt::type& dt3, const std::string& name3, const ndt::type& dt4, const std::string& name4)
-{
-    ndt::type field_types[5];
-    std::string field_names[5];
-    field_types[0] = dt0;
-    field_types[1] = dt1;
-    field_types[2] = dt2;
-    field_types[3] = dt3;
-    field_types[4] = dt4;
-    field_names[0] = name0;
-    field_names[1] = name1;
-    field_names[2] = name2;
-    field_names[3] = name3;
-    field_names[4] = name4;
-    return make_cstruct_type(5, field_types, field_names);
-}
-
-/** Makes a struct dtype with the specified fields */
-inline ndt::type make_cstruct_type(const ndt::type& dt0, const std::string& name0,
-                const ndt::type& dt1, const std::string& name1, const ndt::type& dt2, const std::string& name2,
-                const ndt::type& dt3, const std::string& name3, const ndt::type& dt4, const std::string& name4,
-                const ndt::type& dt5, const std::string& name5)
-{
-    ndt::type field_types[6];
-    std::string field_names[6];
-    field_types[0] = dt0;
-    field_types[1] = dt1;
-    field_types[2] = dt2;
-    field_types[3] = dt3;
-    field_types[4] = dt4;
-    field_types[5] = dt5;
-    field_names[0] = name0;
-    field_names[1] = name1;
-    field_names[2] = name2;
-    field_names[3] = name3;
-    field_names[4] = name4;
-    field_names[5] = name5;
-    return make_cstruct_type(6, field_types, field_names);
-}
-
-/** Makes a struct dtype with the specified fields */
-inline ndt::type make_cstruct_type(const ndt::type& dt0, const std::string& name0,
-                const ndt::type& dt1, const std::string& name1, const ndt::type& dt2, const std::string& name2,
-                const ndt::type& dt3, const std::string& name3, const ndt::type& dt4, const std::string& name4,
-                const ndt::type& dt5, const std::string& name5, const ndt::type& dt6, const std::string& name6)
-{
-    ndt::type field_types[7];
-    std::string field_names[7];
-    field_types[0] = dt0;
-    field_types[1] = dt1;
-    field_types[2] = dt2;
-    field_types[3] = dt3;
-    field_types[4] = dt4;
-    field_types[5] = dt5;
-    field_types[6] = dt6;
-    field_names[0] = name0;
-    field_names[1] = name1;
-    field_names[2] = name2;
-    field_names[3] = name3;
-    field_names[4] = name4;
-    field_names[5] = name5;
-    field_names[6] = name6;
-    return make_cstruct_type(7, field_types, field_names);
-}
-
-/**
- * \brief Checks whether a set of offsets can be used for cstruct.
- *
- * Because cstruct does not support customizable offset (use struct for
- * that), this function can be used to check that offsets are compatible with
- * cstruct.
- *
- * \param field_count  The number of array entries in `field_types` and `field_offsets`
- * \param field_types  An array of the field dtypes.
- * \param field_offsets  The offsets corresponding to the types.
- * \param total_size  The total size of the struct in bytes.
- *
- * \returns  True if constructing a cstruct with the same dtypes and field offsets will
- *           produce the provided offsets.
- */
-inline bool is_cstruct_compatible_offsets(size_t field_count,
-                const ndt::type *field_types, const size_t *field_offsets, size_t total_size)
-{
-    size_t offset = 0, max_alignment = 1;
-    for (size_t i = 0; i != field_count; ++i) {
-        size_t field_data_alignment = field_types[i].get_data_alignment();
-        size_t field_data_size = field_types[i].get_data_size();
-        offset = inc_to_alignment(offset, field_data_alignment);
-        if (field_offsets[i] != offset || field_data_size == 0) {
-            return false;
-        }
-        max_alignment = (field_data_alignment > max_alignment) ? field_data_alignment : max_alignment;
-        offset += field_data_size;
+namespace ndt {
+    /** Makes a struct dtype with the specified fields */
+    inline ndt::type make_cstruct(size_t field_count, const ndt::type *field_types,
+                    const std::string *field_names) {
+        return ndt::type(new cstruct_type(field_count, field_types, field_names), false);
     }
-    offset = inc_to_alignment(offset, max_alignment);
-    return total_size == offset;
-}
+
+    /** Makes a struct dtype with the specified fields */
+    inline ndt::type make_cstruct(const ndt::type& dt0, const std::string& name0)
+    {
+        return ndt::make_cstruct(1, &dt0, &name0);
+    }
+
+    /** Makes a struct dtype with the specified fields */
+    inline ndt::type make_cstruct(const ndt::type& dt0, const std::string& name0, const ndt::type& dt1, const std::string& name1)
+    {
+        ndt::type field_types[2];
+        std::string field_names[2];
+        field_types[0] = dt0;
+        field_types[1] = dt1;
+        field_names[0] = name0;
+        field_names[1] = name1;
+        return ndt::make_cstruct(2, field_types, field_names);
+    }
+
+    /** Makes a struct dtype with the specified fields */
+    inline ndt::type make_cstruct(const ndt::type& dt0, const std::string& name0, const ndt::type& dt1, const std::string& name1, const ndt::type& dt2, const std::string& name2)
+    {
+        ndt::type field_types[3];
+        std::string field_names[3];
+        field_types[0] = dt0;
+        field_types[1] = dt1;
+        field_types[2] = dt2;
+        field_names[0] = name0;
+        field_names[1] = name1;
+        field_names[2] = name2;
+        return ndt::make_cstruct(3, field_types, field_names);
+    }
+
+    /** Makes a struct dtype with the specified fields */
+    inline ndt::type make_cstruct(const ndt::type& dt0, const std::string& name0,
+                    const ndt::type& dt1, const std::string& name1, const ndt::type& dt2, const std::string& name2,
+                    const ndt::type& dt3, const std::string& name3)
+    {
+        ndt::type field_types[4];
+        std::string field_names[4];
+        field_types[0] = dt0;
+        field_types[1] = dt1;
+        field_types[2] = dt2;
+        field_types[3] = dt3;
+        field_names[0] = name0;
+        field_names[1] = name1;
+        field_names[2] = name2;
+        field_names[3] = name3;
+        return ndt::make_cstruct(4, field_types, field_names);
+    }
+
+    /** Makes a struct dtype with the specified fields */
+    inline ndt::type make_cstruct(const ndt::type& dt0, const std::string& name0,
+                    const ndt::type& dt1, const std::string& name1, const ndt::type& dt2, const std::string& name2,
+                    const ndt::type& dt3, const std::string& name3, const ndt::type& dt4, const std::string& name4)
+    {
+        ndt::type field_types[5];
+        std::string field_names[5];
+        field_types[0] = dt0;
+        field_types[1] = dt1;
+        field_types[2] = dt2;
+        field_types[3] = dt3;
+        field_types[4] = dt4;
+        field_names[0] = name0;
+        field_names[1] = name1;
+        field_names[2] = name2;
+        field_names[3] = name3;
+        field_names[4] = name4;
+        return ndt::make_cstruct(5, field_types, field_names);
+    }
+
+    /** Makes a struct dtype with the specified fields */
+    inline ndt::type make_cstruct(const ndt::type& dt0, const std::string& name0,
+                    const ndt::type& dt1, const std::string& name1, const ndt::type& dt2, const std::string& name2,
+                    const ndt::type& dt3, const std::string& name3, const ndt::type& dt4, const std::string& name4,
+                    const ndt::type& dt5, const std::string& name5)
+    {
+        ndt::type field_types[6];
+        std::string field_names[6];
+        field_types[0] = dt0;
+        field_types[1] = dt1;
+        field_types[2] = dt2;
+        field_types[3] = dt3;
+        field_types[4] = dt4;
+        field_types[5] = dt5;
+        field_names[0] = name0;
+        field_names[1] = name1;
+        field_names[2] = name2;
+        field_names[3] = name3;
+        field_names[4] = name4;
+        field_names[5] = name5;
+        return ndt::make_cstruct(6, field_types, field_names);
+    }
+
+    /** Makes a struct dtype with the specified fields */
+    inline ndt::type make_cstruct(const ndt::type& dt0, const std::string& name0,
+                    const ndt::type& dt1, const std::string& name1, const ndt::type& dt2, const std::string& name2,
+                    const ndt::type& dt3, const std::string& name3, const ndt::type& dt4, const std::string& name4,
+                    const ndt::type& dt5, const std::string& name5, const ndt::type& dt6, const std::string& name6)
+    {
+        ndt::type field_types[7];
+        std::string field_names[7];
+        field_types[0] = dt0;
+        field_types[1] = dt1;
+        field_types[2] = dt2;
+        field_types[3] = dt3;
+        field_types[4] = dt4;
+        field_types[5] = dt5;
+        field_types[6] = dt6;
+        field_names[0] = name0;
+        field_names[1] = name1;
+        field_names[2] = name2;
+        field_names[3] = name3;
+        field_names[4] = name4;
+        field_names[5] = name5;
+        field_names[6] = name6;
+        return ndt::make_cstruct(7, field_types, field_names);
+    }
+
+    /**
+     * \brief Checks whether a set of offsets can be used for cstruct.
+     *
+     * Because cstruct does not support customizable offset (use struct for
+     * that), this function can be used to check that offsets are compatible with
+     * cstruct.
+     *
+     * \param field_count  The number of array entries in `field_types` and `field_offsets`
+     * \param field_types  An array of the field dtypes.
+     * \param field_offsets  The offsets corresponding to the types.
+     * \param total_size  The total size of the struct in bytes.
+     *
+     * \returns  True if constructing a cstruct with the same dtypes and field offsets will
+     *           produce the provided offsets.
+     */
+    inline bool is_cstruct_compatible_offsets(size_t field_count,
+                    const ndt::type *field_types, const size_t *field_offsets, size_t total_size)
+    {
+        size_t offset = 0, max_alignment = 1;
+        for (size_t i = 0; i != field_count; ++i) {
+            size_t field_data_alignment = field_types[i].get_data_alignment();
+            size_t field_data_size = field_types[i].get_data_size();
+            offset = inc_to_alignment(offset, field_data_alignment);
+            if (field_offsets[i] != offset || field_data_size == 0) {
+                return false;
+            }
+            max_alignment = (field_data_alignment > max_alignment) ? field_data_alignment : max_alignment;
+            offset += field_data_size;
+        }
+        offset = inc_to_alignment(offset, max_alignment);
+        return total_size == offset;
+    }
+
+} // namespace ndt
 
 } // namespace dynd
 

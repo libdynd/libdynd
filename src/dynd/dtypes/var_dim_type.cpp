@@ -134,7 +134,7 @@ ndt::type var_dim_type::apply_linear_index(size_t nindices, const irange *indice
                 }
             } else {
                 // TODO: This is incorrect, but is here as a stopgap to be replaced by a sliced<> dtype
-                return make_pointer_type(m_element_dtype);
+                return ndt::make_pointer(m_element_dtype);
             }
         } else {
             if (leading_dimension) {
@@ -157,7 +157,7 @@ ndt::type var_dim_type::apply_linear_index(size_t nindices, const irange *indice
                                 current_i+1, root_dt, true);
             } else {
                 // TODO: This is incorrect, but is here as a stopgap to be replaced by a sliced<> dtype
-                return make_pointer_type(m_element_dtype.apply_linear_index(nindices-1, indices+1,
+                return ndt::make_pointer(m_element_dtype.apply_linear_index(nindices-1, indices+1,
                                 current_i+1, root_dt, false));
             }
         } else {

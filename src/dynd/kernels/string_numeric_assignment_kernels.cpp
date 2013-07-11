@@ -528,7 +528,7 @@ size_t dynd::make_builtin_to_string_assignment_kernel(
 void dynd::assign_utf8_string_to_builtin(type_id_t dst_type_id, char *dst,
                 const char *str_begin, const char *str_end, assign_error_mode errmode)
 {
-    ndt::type dt = make_string_type(string_encoding_utf_8);
+    ndt::type dt = ndt::make_string(string_encoding_utf_8);
     string_type_data d;
     string_type_metadata md;
     d.begin = const_cast<char *>(str_begin);

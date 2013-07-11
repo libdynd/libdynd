@@ -119,17 +119,19 @@ public:
                     size_t *out_count) const;
 };
 
-inline ndt::type make_strided_dim_type(const ndt::type& element_dtype) {
-    return ndt::type(new strided_dim_type(element_dtype), false);
-}
-
-inline ndt::type make_strided_dim_type(const ndt::type& uniform_dtype, size_t ndim) {
-    ndt::type result = uniform_dtype;
-    for (size_t i = 0; i < ndim; ++i) {
-        result = make_strided_dim_type(result);
+namespace ndt {
+    inline ndt::type make_strided_dim(const ndt::type& element_dtype) {
+        return ndt::type(new strided_dim_type(element_dtype), false);
     }
-    return result;
-}
+
+    inline ndt::type make_strided_dim(const ndt::type& uniform_dtype, size_t ndim) {
+        ndt::type result = uniform_dtype;
+        for (size_t i = 0; i < ndim; ++i) {
+            result = make_strided_dim(result);
+        }
+        return result;
+    }
+} // namespace ndt
 
 } // namespace dynd
 

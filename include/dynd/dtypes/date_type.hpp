@@ -83,9 +83,11 @@ public:
                     kernel_request_t kernreq, const eval::eval_context *ectx) const;
 };
 
-inline ndt::type make_date_type() {
-    return ndt::type(new date_type(), false);
-}
+namespace ndt {
+    inline ndt::type make_date() {
+        return ndt::type(new date_type(), false);
+    }
+} // namespace ndt
 
 } // namespace dynd
 

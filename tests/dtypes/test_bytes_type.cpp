@@ -22,7 +22,7 @@ TEST(BytesDType, Create) {
     ndt::type d;
 
     // Strings with various alignments
-    d = make_bytes_type(1);
+    d = ndt::make_bytes(1);
     EXPECT_EQ(bytes_type_id, d.get_type_id());
     EXPECT_EQ(bytes_kind, d.get_kind());
     EXPECT_EQ(sizeof(void *), d.get_data_alignment());
@@ -31,7 +31,7 @@ TEST(BytesDType, Create) {
     EXPECT_EQ(1u, d.p("target_alignment").as<size_t>());
     EXPECT_FALSE(d.is_expression());
 
-    d = make_bytes_type(2);
+    d = ndt::make_bytes(2);
     EXPECT_EQ(bytes_type_id, d.get_type_id());
     EXPECT_EQ(bytes_kind, d.get_kind());
     EXPECT_EQ(sizeof(void *), d.get_data_alignment());
@@ -39,7 +39,7 @@ TEST(BytesDType, Create) {
     EXPECT_EQ(2u, static_cast<const bytes_type *>(d.extended())->get_target_alignment());
     EXPECT_EQ(2u, d.p("target_alignment").as<size_t>());
 
-    d = make_bytes_type(4);
+    d = ndt::make_bytes(4);
     EXPECT_EQ(bytes_type_id, d.get_type_id());
     EXPECT_EQ(bytes_kind, d.get_kind());
     EXPECT_EQ(sizeof(void *), d.get_data_alignment());
@@ -47,7 +47,7 @@ TEST(BytesDType, Create) {
     EXPECT_EQ(4u, static_cast<const bytes_type *>(d.extended())->get_target_alignment());
     EXPECT_EQ(4u, d.p("target_alignment").as<size_t>());
 
-    d = make_bytes_type(8);
+    d = ndt::make_bytes(8);
     EXPECT_EQ(bytes_type_id, d.get_type_id());
     EXPECT_EQ(bytes_kind, d.get_kind());
     EXPECT_EQ(sizeof(void *), d.get_data_alignment());
@@ -55,7 +55,7 @@ TEST(BytesDType, Create) {
     EXPECT_EQ(8u, static_cast<const bytes_type *>(d.extended())->get_target_alignment());
     EXPECT_EQ(8u, d.p("target_alignment").as<size_t>());
 
-    d = make_bytes_type(16);
+    d = ndt::make_bytes(16);
     EXPECT_EQ(bytes_type_id, d.get_type_id());
     EXPECT_EQ(bytes_kind, d.get_kind());
     EXPECT_EQ(sizeof(void *), d.get_data_alignment());
@@ -67,12 +67,12 @@ TEST(BytesDType, Assign) {
     nd::array a, b, c;
 
     // Round-trip a string through a bytes assignment
-    a = nd::array("testing").view_scalars(make_bytes_type(1));
-    EXPECT_EQ(a.get_dtype(), make_bytes_type(1));
-    b = nd::empty(make_bytes_type(1));
+    a = nd::array("testing").view_scalars(ndt::make_bytes(1));
+    EXPECT_EQ(a.get_dtype(), ndt::make_bytes(1));
+    b = nd::empty(ndt::make_bytes(1));
     b.vals() = a;
-    c = b.view_scalars(make_string_type());
-    EXPECT_EQ(c.get_dtype(), make_string_type());
+    c = b.view_scalars(ndt::make_string());
+    EXPECT_EQ(c.get_dtype(), ndt::make_string());
     EXPECT_EQ("testing", c.as<string>());
 }
 

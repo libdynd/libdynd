@@ -49,9 +49,11 @@ public:
                     const eval::eval_context *ectx) const;
 };
 
-inline ndt::type make_type_type() {
-    return ndt::type(new type_type(), false);
-}
+namespace ndt {
+    inline ndt::type make_type() {
+        return ndt::type(new type_type(), false);
+    }
+} // namespace ndt
 
 } // namespace dynd
 

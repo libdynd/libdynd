@@ -37,7 +37,7 @@ date_type::~date_type()
 }
 
 const ndt::type date_type::default_struct_type =
-        make_cstruct_type(
+        ndt::make_cstruct(
             ndt::make_dtype<int32_t>(), "year",
             ndt::make_dtype<int16_t>(), "month",
             ndt::make_dtype<int16_t>(), "day");
@@ -148,7 +148,7 @@ size_t date_type::make_assignment_kernel(
         } else if (src_dt.get_kind() == struct_kind) {
             // Convert to struct using the "struct" property
             return ::make_assignment_kernel(out, offset_out,
-                make_property_type(dst_dt, "struct"), dst_metadata,
+                ndt::make_property(dst_dt, "struct"), dst_metadata,
                 src_dt, src_metadata,
                 kernreq, errmode, ectx);
         } else if (!src_dt.is_builtin()) {
@@ -167,7 +167,7 @@ size_t date_type::make_assignment_kernel(
             // Convert to struct using the "struct" property
             return ::make_assignment_kernel(out, offset_out,
                 dst_dt, dst_metadata,
-                make_property_type(src_dt, "struct"), src_metadata,
+                ndt::make_property(src_dt, "struct"), src_metadata,
                 kernreq, errmode, ectx);
         }
         // TODO
@@ -232,7 +232,7 @@ static nd::array function_dtype_construct(const ndt::type& DYND_UNUSED(dt),
     nd::array day_as_int = day.ucast(ndt::make_dtype<int32_t>()).eval();
     nd::array result;
 
-    array_iter<1,3> iter(make_date_type(), result, year_as_int, month_as_int, day_as_int);
+    array_iter<1,3> iter(ndt::make_date(), result, year_as_int, month_as_int, day_as_int);
     if (!iter.empty()) {
         datetime::date_ymd ymd;
         do {
@@ -265,15 +265,15 @@ void date_type::get_dynamic_dtype_functions(const std::pair<std::string, gfunc::
 ///////// properties on the nd::array
 
 static nd::array property_ndo_get_year(const nd::array& n) {
-    return n.replace_udtype(make_property_type(n.get_udtype(), "year"));
+    return n.replace_udtype(ndt::make_property(n.get_udtype(), "year"));
 }
 
 static nd::array property_ndo_get_month(const nd::array& n) {
-    return n.replace_udtype(make_property_type(n.get_udtype(), "month"));
+    return n.replace_udtype(ndt::make_property(n.get_udtype(), "month"));
 }
 
 static nd::array property_ndo_get_day(const nd::array& n) {
-    return n.replace_udtype(make_property_type(n.get_udtype(), "day"));
+    return n.replace_udtype(ndt::make_property(n.get_udtype(), "day"));
 }
 
 static pair<string, gfunc::callable> date_array_properties[] = {
@@ -291,7 +291,7 @@ void date_type::get_dynamic_array_properties(const std::pair<std::string, gfunc:
 ///////// functions on the nd::array
 
 static nd::array function_ndo_to_struct(const nd::array& n) {
-    return n.replace_udtype(make_property_type(n.get_udtype(), "struct"));
+    return n.replace_udtype(ndt::make_property(n.get_udtype(), "struct"));
 }
 
 static nd::array function_ndo_strftime(const nd::array& n, const std::string& format) {
@@ -299,12 +299,12 @@ static nd::array function_ndo_strftime(const nd::array& n, const std::string& fo
     if (format.empty()) {
         throw runtime_error("format string for strftime should not be empty");
     }
-    return n.replace_udtype(make_unary_expr_type(make_string_type(), n.get_udtype(),
+    return n.replace_udtype(ndt::make_unary_expr(ndt::make_string(), n.get_udtype(),
                     make_strftime_kernelgen(format)));
 }
 
 static nd::array function_ndo_weekday(const nd::array& n) {
-    return n.replace_udtype(make_property_type(n.get_udtype(), "weekday"));
+    return n.replace_udtype(ndt::make_property(n.get_udtype(), "weekday"));
 }
 
 static nd::array function_ndo_replace(const nd::array& n, int32_t year, int32_t month, int32_t day) {
@@ -313,7 +313,7 @@ static nd::array function_ndo_replace(const nd::array& n, int32_t year, int32_t 
                     day == numeric_limits<int32_t>::max()) {
         throw std::runtime_error("no parameters provided to date.replace, should provide at least one");
     }
-    return n.replace_udtype(make_unary_expr_type(make_date_type(), n.get_udtype(),
+    return n.replace_udtype(ndt::make_unary_expr(ndt::make_date(), n.get_udtype(),
                     make_replace_kernelgen(year, month, day)));
 }
 

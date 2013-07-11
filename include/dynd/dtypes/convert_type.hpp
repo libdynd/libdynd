@@ -74,37 +74,39 @@ public:
     }
 };
 
-/**
- * Makes a conversion dtype to convert from the operand_type to the value_type.
- * If the value_type has expression_kind, it chains operand_type.value_type()
- * into value_type.storage_type().
- */
-inline ndt::type make_convert_type(const ndt::type& value_type, const ndt::type& operand_type,
-                assign_error_mode errmode = assign_error_default) {
-    if (operand_type.value_type() != value_type) {
-        if (value_type.get_kind() != expression_kind) {
-            // Create a conversion dtype when the value kind is different
-            return ndt::type(new convert_type(value_type, operand_type, errmode), false);
-        } else if (value_type.storage_type() == operand_type.value_type()) {
-            // No conversion required at the connection
-            return static_cast<const base_expression_type *>(
-                            value_type.extended())->with_replaced_storage_type(operand_type);
+namespace ndt {
+    /**
+     * Makes a conversion dtype to convert from the operand_type to the value_type.
+     * If the value_type has expression_kind, it chains operand_type.value_type()
+     * into value_type.storage_type().
+     */
+    inline ndt::type make_convert(const ndt::type& value_type, const ndt::type& operand_type,
+                    assign_error_mode errmode = assign_error_default) {
+        if (operand_type.value_type() != value_type) {
+            if (value_type.get_kind() != expression_kind) {
+                // Create a conversion dtype when the value kind is different
+                return ndt::type(new convert_type(value_type, operand_type, errmode), false);
+            } else if (value_type.storage_type() == operand_type.value_type()) {
+                // No conversion required at the connection
+                return static_cast<const base_expression_type *>(
+                                value_type.extended())->with_replaced_storage_type(operand_type);
+            } else {
+                // A conversion required at the connection
+                return static_cast<const base_expression_type *>(
+                                value_type.extended())->with_replaced_storage_type(
+                                    ndt::type(new convert_type(
+                                        value_type.storage_type(), operand_type, errmode), false));
+            }
         } else {
-            // A conversion required at the connection
-            return static_cast<const base_expression_type *>(
-                            value_type.extended())->with_replaced_storage_type(
-                                ndt::type(new convert_type(
-                                    value_type.storage_type(), operand_type, errmode), false));
+            return operand_type;
         }
-    } else {
-        return operand_type;
     }
-}
 
-template<typename Tvalue, typename Tstorage>
-ndt::type make_convert_type(assign_error_mode errmode = assign_error_default) {
-    return ndt::type(new convert_type(ndt::make_dtype<Tvalue>(), ndt::make_dtype<Tstorage>(), errmode), false);
-}
+    template<typename Tvalue, typename Tstorage>
+    ndt::type make_convert(assign_error_mode errmode = assign_error_default) {
+        return ndt::type(new convert_type(ndt::make_dtype<Tvalue>(), ndt::make_dtype<Tstorage>(), errmode), false);
+    }
+} // namespace ndt
 
 } // namespace dynd
 

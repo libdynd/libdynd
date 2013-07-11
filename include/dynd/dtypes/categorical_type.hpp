@@ -110,13 +110,13 @@ public:
     friend struct assign_from_commensurate_category_type;
 };
 
-inline ndt::type make_categorical_type(const nd::array& values) {
-    return ndt::type(new categorical_type(values), false);
-}
+namespace ndt {
+    inline ndt::type make_categorical(const nd::array& values) {
+        return ndt::type(new categorical_type(values), false);
+    }
 
-
-ndt::type factor_categorical_type(const nd::array& values);
-
+    ndt::type factor_categorical(const nd::array& values);
+} // namespace ndt
 
 } // namespace dynd
 

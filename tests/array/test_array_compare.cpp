@@ -855,7 +855,7 @@ TEST(ArrayCompare, ExpressionDType) {
 
     // Two expression operand
     a = nd::array(3).ucast<float>();
-    b = nd::array("2012-03-04").ucast(make_date_type()).p("day");
+    b = nd::array("2012-03-04").ucast(ndt::make_date()).p("day");
     EXPECT_TRUE(a.op_sorting_less(b));
     EXPECT_TRUE(a < b);
     EXPECT_TRUE(a <= b);

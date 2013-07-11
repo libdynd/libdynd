@@ -75,14 +75,16 @@ public:
                     size_t *out_count) const;
 };
 
-/**
- * Makes a unary expr dtype.
- */
-inline ndt::type make_unary_expr_type(const ndt::type& value_type,
-                const ndt::type& operand_type,
-                const expr_kernel_generator *kgen)
-{
-    return ndt::type(new unary_expr_type(value_type, operand_type, kgen), false);
+namespace ndt {
+    /**
+     * Makes a unary expr dtype.
+     */
+    inline ndt::type make_unary_expr(const ndt::type& value_type,
+                    const ndt::type& operand_type,
+                    const expr_kernel_generator *kgen)
+    {
+        return ndt::type(new unary_expr_type(value_type, operand_type, kgen), false);
+    }
 }
 
 } // namespace dynd

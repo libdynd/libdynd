@@ -189,7 +189,7 @@ ndt::type dynd::promote_dtypes_arithmetic(const ndt::type& dt0, const ndt::type&
                 (dt1_val.get_type_id() == string_type_id ||
                     dt1_val.get_type_id() == fixedstring_type_id)) {
         // Always promote to the default utf-8 string (for now, maybe return encoding, etc later?)
-        return make_string_type();
+        return ndt::make_string();
     }
 
     // dtype, string -> dtype

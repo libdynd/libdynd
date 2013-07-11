@@ -95,10 +95,10 @@ ndt::type expr_type::apply_linear_index(size_t nindices, const irange *indices,
                                                 current_i, root_dt, false);
             }
         }
-        ndt::type result_operand_type = make_cstruct_type(field_count, &result_src_dt[0],
+        ndt::type result_operand_type = ndt::make_cstruct(field_count, &result_src_dt[0],
                         fsd->get_field_names());
         expr_kernel_generator_incref(m_kgen);
-        return make_expr_type(result_value_dt, result_operand_type, m_kgen);
+        return ndt::make_expr(result_value_dt, result_operand_type, m_kgen);
     } else {
         throw runtime_error("expr_type::apply_linear_index is only implemented for elwise kernel generators");
     }

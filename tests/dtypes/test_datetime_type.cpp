@@ -27,18 +27,18 @@ TEST(DateTimeDType, Create) {
     ndt::type d;
     const datetime_type *dd;
 
-    d = make_datetime_type(datetime_unit_minute, tz_abstract);
+    d = ndt::make_datetime(datetime_unit_minute, tz_abstract);
     ASSERT_EQ(datetime_type_id, d.get_type_id());
     dd = static_cast<const datetime_type *>(d.extended());
     EXPECT_EQ(8u, d.get_data_size());
     EXPECT_EQ((size_t)scalar_align_of<int64_t>::value, d.get_data_alignment());
-    EXPECT_EQ(d, make_datetime_type(datetime_unit_minute, tz_abstract));
+    EXPECT_EQ(d, ndt::make_datetime(datetime_unit_minute, tz_abstract));
     EXPECT_EQ(datetime_unit_minute, dd->get_unit());
     EXPECT_EQ(tz_abstract, dd->get_timezone());
 
-    d = make_datetime_type(datetime_unit_msecond, tz_utc);
+    d = ndt::make_datetime(datetime_unit_msecond, tz_utc);
     dd = static_cast<const datetime_type *>(d.extended());
-    EXPECT_EQ(d, make_datetime_type(datetime_unit_msecond, tz_utc));
+    EXPECT_EQ(d, ndt::make_datetime(datetime_unit_msecond, tz_utc));
     EXPECT_EQ(datetime_unit_msecond, dd->get_unit());
     EXPECT_EQ(tz_utc, dd->get_timezone());
 }
@@ -99,7 +99,7 @@ TEST(DateTimeDType, CreateFromString) {
 }
 
 TEST(DateTimeDType, ValueCreationAbstractMinutes) {
-    ndt::type d = make_datetime_type(datetime_unit_minute, tz_abstract), di = ndt::make_dtype<int64_t>();
+    ndt::type d = ndt::make_datetime(datetime_unit_minute, tz_abstract), di = ndt::make_dtype<int64_t>();
 
     EXPECT_EQ(((1600-1970)*365 - (1972-1600)/4 + 3 - 365) * 1440LL + 4 * 60 + 16,
                     nd::array("1599-01-01T04:16").ucast(d).view_scalars(di).as<int64_t>());
@@ -123,7 +123,7 @@ TEST(DateTimeDType, ValueCreationAbstractMinutes) {
 
 
 TEST(DateTimeDType, ValueCreationUTCMinutes) {
-    ndt::type d = make_datetime_type(datetime_unit_minute, tz_utc), di = ndt::make_dtype<int64_t>();
+    ndt::type d = ndt::make_datetime(datetime_unit_minute, tz_utc), di = ndt::make_dtype<int64_t>();
 
     EXPECT_EQ(((1600-1970)*365 - (1972-1600)/4 + 3 - 365) * 1440LL + 4 * 60 + 16,
                     nd::array("1599-01-01T04:16Z").ucast(d).view_scalars(di).as<int64_t>());

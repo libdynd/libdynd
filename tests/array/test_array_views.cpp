@@ -35,7 +35,7 @@ TEST(ArrayViews, OneDimensionalRawMemory) {
     memcpy(c_values, &u8_value, 8);
     a(irange() < 8).vals() = c_values;
     b = a.view_scalars<uint64_t>();
-    EXPECT_EQ(make_strided_dim_type(ndt::make_dtype<uint64_t>()), b.get_dtype());
+    EXPECT_EQ(ndt::make_strided_dim(ndt::make_dtype<uint64_t>()), b.get_dtype());
     EXPECT_EQ(1u, b.get_shape().size());
     EXPECT_EQ(10, b.get_shape()[0]);
     EXPECT_EQ(a.get_readonly_originptr(), b.get_readonly_originptr());
@@ -47,7 +47,7 @@ TEST(ArrayViews, OneDimensionalRawMemory) {
     // where necessary
     a(1 <= irange() < 9).vals() = c_values;
     b = a(1 <= irange() < 73).view_scalars<uint64_t>();
-    EXPECT_EQ(make_strided_dim_type(make_view_type(ndt::make_dtype<uint64_t>(), make_fixedbytes_type(8, 1))),
+    EXPECT_EQ(ndt::make_strided_dim(ndt::make_view(ndt::make_dtype<uint64_t>(), ndt::make_fixedbytes(8, 1))),
                     b.get_dtype());
     EXPECT_EQ(1u, b.get_shape().size());
     EXPECT_EQ(9, b.get_shape()[0]);
@@ -65,7 +65,7 @@ TEST(ArrayViews, MultiDimensionalRawMemory) {
     EXPECT_THROW(b = a.view_scalars<int16_t>(), runtime_error);
 
     b = a.view_scalars<int32_t>();
-    EXPECT_EQ(make_strided_dim_type(ndt::make_dtype<int32_t>(), 2), b.get_dtype());
+    EXPECT_EQ(ndt::make_strided_dim(ndt::make_dtype<int32_t>(), 2), b.get_dtype());
     EXPECT_EQ(2u, b.get_shape().size());
     EXPECT_EQ(2, b.get_shape()[0]);
     EXPECT_EQ(3, b.get_shape()[1]);
@@ -86,13 +86,13 @@ TEST(ArrayViews, ExpressionDType) {
     // view uint16_t -> int16_t
     a = values;
     a_u2 = a.ucast<uint16_t>();
-    EXPECT_EQ(make_strided_dim_type(make_convert_type<uint16_t, uint32_t>(), 2), a_u2.get_dtype());
+    EXPECT_EQ(ndt::make_strided_dim(ndt::make_convert<uint16_t, uint32_t>(), 2), a_u2.get_dtype());
 
     // Wrong size, so should throw
     EXPECT_THROW(b = a_u2.view_scalars<int32_t>(), runtime_error);
 
     b = a_u2.view_scalars<int16_t>();
-    EXPECT_EQ(make_strided_dim_type(make_view_type(ndt::make_dtype<int16_t>(), make_convert_type<uint16_t, uint32_t>()), 2),
+    EXPECT_EQ(ndt::make_strided_dim(ndt::make_view(ndt::make_dtype<int16_t>(), ndt::make_convert<uint16_t, uint32_t>()), 2),
                     b.get_dtype());
     EXPECT_EQ(2u, b.get_shape().size());
     EXPECT_EQ(2, b.get_shape()[0]);
