@@ -8,7 +8,7 @@
 #include <stdexcept>
 #include "inc_gtest.hpp"
 
-#include <dynd/dtype_assign.hpp>
+#include <dynd/typed_data_assign.hpp>
 #include <dynd/types/tuple_type.hpp>
 #include <dynd/types/strided_dim_type.hpp>
 #include <dynd/types/convert_type.hpp>

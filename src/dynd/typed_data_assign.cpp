@@ -10,7 +10,7 @@
 #include <cstring>
 #include <limits>
 
-#include <dynd/dtype_assign.hpp>
+#include <dynd/typed_data_assign.hpp>
 #include <dynd/types/convert_type.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/diagnostics.hpp>
@@ -166,7 +166,7 @@ bool dynd::is_lossless_assignment(const ndt::type& dst_dt, const ndt::type& src_
     }
 }
 
-void dynd::dtype_copy(const ndt::type& dt,
+void dynd::typed_data_copy(const ndt::type& dt,
                 const char *dst_metadata, char *dst_data,
                 const char *src_metadata, const char *src_data)
 {
@@ -183,7 +183,7 @@ void dynd::dtype_copy(const ndt::type& dt,
     }
 }
 
-void dynd::dtype_assign(const ndt::type& dst_dt, const char *dst_metadata, char *dst_data,
+void dynd::typed_data_assign(const ndt::type& dst_dt, const char *dst_metadata, char *dst_data,
                 const ndt::type& src_dt, const char *src_metadata, const char *src_data,
                 assign_error_mode errmode, const eval::eval_context *ectx)
 {

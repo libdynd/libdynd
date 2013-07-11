@@ -101,7 +101,7 @@ size_t fixedbytes_type::make_assignment_kernel(
                 if (get_data_size() != src_fs->get_data_size()) {
                     throw runtime_error("cannot assign to a fixedbytes dtype of a different size");
                 }
-                return ::make_pod_dtype_assignment_kernel(out, offset_out,
+                return ::make_pod_typed_data_assignment_kernel(out, offset_out,
                                 get_data_size(), std::min(get_data_alignment(), src_fs->get_data_alignment()),
                                 kernreq);
             }

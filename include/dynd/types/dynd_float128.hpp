@@ -7,7 +7,7 @@
 #define _DYND__FLOAT128_H__
 
 #include <dynd/config.hpp>
-#include <dynd/dtype_assign.hpp>
+#include <dynd/typed_data_assign.hpp>
 
 #include <iostream>
 #include <stdexcept>

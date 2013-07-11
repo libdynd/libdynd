@@ -7,7 +7,7 @@
 #define _DYND__FLOAT16_H__
 
 #include <dynd/config.hpp>
-#include <dynd/dtype_assign.hpp>
+#include <dynd/typed_data_assign.hpp>
 
 // Half-precision constants, in bits form
 #define DYND_FLOAT16_ZERO   (0x0000u)

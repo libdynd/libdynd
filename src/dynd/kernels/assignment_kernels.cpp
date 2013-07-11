@@ -116,7 +116,7 @@ size_t dynd::make_assignment_kernel(
             }
 
             if (dst_dt.extended() == src_dt.extended()) {
-                return make_pod_dtype_assignment_kernel(out, offset_out,
+                return make_pod_typed_data_assignment_kernel(out, offset_out,
                                 dst_dt.get_data_size(), dst_dt.get_data_alignment(),
                                 kernreq);
             } else {
@@ -139,7 +139,7 @@ size_t dynd::make_assignment_kernel(
     }
 }
 
-size_t dynd::make_pod_dtype_assignment_kernel(
+size_t dynd::make_pod_typed_data_assignment_kernel(
                 hierarchical_kernel *out, size_t offset_out,
                 size_t data_size, size_t data_alignment,
                 kernel_request_t kernreq)
@@ -147,7 +147,7 @@ size_t dynd::make_pod_dtype_assignment_kernel(
     bool single = (kernreq == kernel_request_single);
     if (!single && kernreq != kernel_request_strided) {
         stringstream ss;
-        ss << "make_pod_dtype_assignment_kernel: unrecognized request " << (int)kernreq;
+        ss << "make_pod_typed_data_assignment_kernel: unrecognized request " << (int)kernreq;
         throw runtime_error(ss.str());
     }
     kernel_data_prefix *result = NULL;

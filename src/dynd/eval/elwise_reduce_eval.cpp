@@ -152,7 +152,7 @@ ndarray_node_ptr dynd::eval::evaluate_elwise_reduce_array(ndarray_node* node,
             result_count *= result_shape[i];
         }
         kernel_instance<unary_operation_pair_t> copy_kernel;
-        get_dtype_assignment_kernel(result_dt, copy_kernel);
+        get_typed_data_assignment_kernel(result_dt, copy_kernel);
         unary_operation_t copy_op = copy_kernel.specializations[scalar_to_contiguous_unary_specialization];
         copy_op(const_cast<char *>(result->get_readonly_originptr()), result_dt.get_data_size(),
                         rnode->get_identity()->get_readonly_originptr(), 0,
@@ -162,7 +162,7 @@ ndarray_node_ptr dynd::eval::evaluate_elwise_reduce_array(ndarray_node* node,
         kernel_instance<unary_operation_pair_t> copy_kernel;
         if (kernels.empty()) {
             // Straightforward copy kernel
-            get_dtype_assignment_kernel(result_dt, copy_kernel);
+            get_typed_data_assignment_kernel(result_dt, copy_kernel);
         } else {
             // Borrow all the kernels so we can make a copy kernel for this part
             deque<kernel_instance<unary_operation_pair_t>> borrowed_kernels(kernels.size());

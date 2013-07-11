@@ -7,7 +7,7 @@
 #define _DYND__PROPERTY_TYPE_HPP_
 
 #include <dynd/type.hpp>
-#include <dynd/dtype_assign.hpp>
+#include <dynd/typed_data_assign.hpp>
 
 namespace dynd {
 

@@ -6,7 +6,7 @@
 #include <dynd/type.hpp>
 #include <dynd/types/base_uniform_dim_type.hpp>
 #include <dynd/exceptions.hpp>
-#include <dynd/dtype_assign.hpp>
+#include <dynd/typed_data_assign.hpp>
 #include <dynd/buffer_storage.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/gfunc/make_callable.hpp>

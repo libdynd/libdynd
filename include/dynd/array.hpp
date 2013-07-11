@@ -13,7 +13,7 @@
 #include <dynd/config.hpp>
 
 #include <dynd/type.hpp>
-#include <dynd/dtype_assign.hpp>
+#include <dynd/typed_data_assign.hpp>
 #include <dynd/shortvector.hpp>
 #include <dynd/irange.hpp>
 #include <dynd/memblock/array_memory_block.hpp>
@@ -1022,7 +1022,7 @@ namespace detail {
             if (!lhs.is_scalar()) {
                 throw std::runtime_error("can only convert arrays with 0 dimensions to scalars");
             }
-            dtype_assign(ndt::make_type<T>(), NULL, (char *)&result,
+            typed_data_assign(ndt::make_type<T>(), NULL, (char *)&result,
                         lhs.get_type(), lhs.get_ndo_meta(), lhs.get_ndo()->m_data_pointer, errmode);
             return result;
         }

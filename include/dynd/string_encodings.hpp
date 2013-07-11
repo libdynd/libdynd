@@ -10,7 +10,7 @@
 #include <string>
 
 #include <dynd/config.hpp>
-#include <dynd/dtype_assign.hpp>
+#include <dynd/typed_data_assign.hpp>
 
 namespace dynd {
 

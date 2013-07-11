@@ -7,7 +7,7 @@
 #define _DYND__BYTES_ASSIGNMENT_KERNELS_HPP_
 
 #include <dynd/kernels/assignment_kernels.hpp>
-#include <dynd/dtype_assign.hpp>
+#include <dynd/typed_data_assign.hpp>
 
 namespace dynd {
 

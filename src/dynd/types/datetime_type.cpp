@@ -301,7 +301,7 @@ size_t datetime_type::make_assignment_kernel(
 {
     if (this == dst_dt.extended()) {
         if (src_dt == dst_dt) {
-            return make_pod_dtype_assignment_kernel(out, offset_out,
+            return make_pod_typed_data_assignment_kernel(out, offset_out,
                             get_data_size(), get_data_alignment(), kernreq);
         } else if (src_dt.get_kind() == string_kind) {
             // Assignment from strings

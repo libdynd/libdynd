@@ -126,7 +126,7 @@ enum type_id_t {
     groupby_type_id,
 
     // Instances of this dtype are themselves dtypes
-    dtype_type_id,
+    type_type_id,
 
     // The number of built-in, atomic types (including uninitialized and void)
     builtin_type_id_count = 19

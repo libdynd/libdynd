@@ -193,11 +193,11 @@ ndt::type dynd::promote_dtypes_arithmetic(const ndt::type& dt0, const ndt::type&
     }
 
     // dtype, string -> dtype
-    if (dt0_val.get_type_id() == dtype_type_id && dt1_val.get_kind() == string_kind) {
+    if (dt0_val.get_type_id() == type_type_id && dt1_val.get_kind() == string_kind) {
         return dt0_val;
     }
     // string, dtype -> dtype
-    if (dt0_val.get_kind() == string_kind && dt1_val.get_type_id() == dtype_type_id) {
+    if (dt0_val.get_kind() == string_kind && dt1_val.get_type_id() == type_type_id) {
         return dt1_val;
     }
 

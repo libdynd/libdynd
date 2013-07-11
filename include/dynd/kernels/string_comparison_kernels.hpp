@@ -7,7 +7,7 @@
 #define _DYND__STRING_COMPARISON_KERNELS_HPP_
 
 #include <dynd/kernels/comparison_kernels.hpp>
-#include <dynd/dtype_assign.hpp>
+#include <dynd/typed_data_assign.hpp>
 #include <dynd/string_encodings.hpp>
 
 namespace dynd {

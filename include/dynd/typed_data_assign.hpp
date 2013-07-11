@@ -51,7 +51,7 @@ bool is_lossless_assignment(const ndt::type& dst_dt, const ndt::type& src_dt);
  * \param src_metadata  The metadata of the source.
  * \param src_data  The data where the source element is stored.
  */
-void dtype_copy(const ndt::type& dt, const char *dst_metadata, char *dst_data,
+void typed_data_copy(const ndt::type& dt, const char *dst_metadata, char *dst_data,
                 const char *src_metadata, const char *src_data);
 
 /** 
@@ -59,7 +59,7 @@ void dtype_copy(const ndt::type& dt, const char *dst_metadata, char *dst_data,
  * Requires that the data be aligned. To assign unaligned data,
  * use make_unaligned().
  */
-void dtype_assign(const ndt::type& dst_dt, const char *dst_metadata, char *dst_data,
+void typed_data_assign(const ndt::type& dst_dt, const char *dst_metadata, char *dst_data,
                 const ndt::type& src_dt, const char *src_metadata, const char *src_data,
                 assign_error_mode errmode = assign_error_fractional,
                 const eval::eval_context *ectx = &eval::default_eval_context);

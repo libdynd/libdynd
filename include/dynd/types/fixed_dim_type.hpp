@@ -7,7 +7,7 @@
 #define _DYND__FIXEDARRAY_TYPE_HPP_
 
 #include <dynd/type.hpp>
-#include <dynd/dtype_assign.hpp>
+#include <dynd/typed_data_assign.hpp>
 #include <dynd/types/view_type.hpp>
 #include <dynd/types/base_uniform_dim_type.hpp>
 

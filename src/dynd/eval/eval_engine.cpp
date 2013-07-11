@@ -50,7 +50,7 @@ static ndarray_node_ptr copy_strided_array(ndarray_node* node, uint32_t access_f
 
     // Get the kernel copy operation
     kernel_instance<unary_operation_pair_t> kernel;
-    get_dtype_assignment_kernel(dt, kernel);
+    get_typed_data_assignment_kernel(dt, kernel);
     if (mem_mgmt == blockref_memory_management) {
         // Set up the destination memory block for the blockref copy kernel
         auxdata_kernel_api *api = static_cast<AuxDataBase *>(kernel.auxdata)->kernel_api;
@@ -119,7 +119,7 @@ static ndarray_node_ptr evaluate_strided_array_expression_dtype(ndarray_node* no
     //int ndim = node->get_ndim();
 
     kernel_instance<unary_operation_pair_t> operation;
-    get_dtype_assignment_kernel(value_dt, dt, assign_error_none, ectx, operation);
+    get_typed_data_assignment_kernel(value_dt, dt, assign_error_none, ectx, operation);
 
     return evaluate_strided_with_unary_kernel(node, ectx, copy, access_flags, value_dt, operation);
 }

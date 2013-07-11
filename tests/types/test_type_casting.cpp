@@ -7,7 +7,7 @@
 #include <stdexcept>
 #include "inc_gtest.hpp"
 
-#include <dynd/dtype_assign.hpp>
+#include <dynd/typed_data_assign.hpp>
 #include <dynd/types/fixedstring_type.hpp>
 
 using namespace std;

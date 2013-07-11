@@ -535,7 +535,7 @@ void nd::array::val_assign(const array& rhs, assign_error_mode errmode,
         throw runtime_error("tried to read from a dynd array that is not readable");
     }
 
-    dtype_assign(get_type(), get_ndo_meta(), get_readwrite_originptr(),
+    typed_data_assign(get_type(), get_ndo_meta(), get_readwrite_originptr(),
                     rhs.get_type(), rhs.get_ndo_meta(), rhs.get_readonly_originptr(),
                     errmode, ectx);
 }
@@ -543,7 +543,7 @@ void nd::array::val_assign(const array& rhs, assign_error_mode errmode,
 void nd::array::val_assign(const ndt::type& rhs_dt, const char *rhs_metadata, const char *rhs_data,
                     assign_error_mode errmode, const eval::eval_context *ectx) const
 {
-    dtype_assign(get_type(), get_ndo_meta(), get_readwrite_originptr(),
+    typed_data_assign(get_type(), get_ndo_meta(), get_readwrite_originptr(),
                     rhs_dt, rhs_metadata, rhs_data,
                     errmode, ectx);
 }
@@ -1125,7 +1125,7 @@ ndt::type nd::detail::array_as_type(const nd::array& lhs, assign_error_mode errm
     }
 
     nd::array temp = lhs;
-    if (temp.get_type().get_type_id() != dtype_type_id) {
+    if (temp.get_type().get_type_id() != type_type_id) {
         temp = temp.ucast(ndt::make_type(), 0, errmode).eval();
     }
     return ndt::type(reinterpret_cast<const type_type_data *>(temp.get_readonly_originptr())->dt, true);
@@ -1205,7 +1205,7 @@ nd::array nd::eval_raw_copy(const ndt::type& dt, const char *metadata, const cha
         result.set(make_array_memory_block(cdt, 0, NULL));
     }
 
-    dtype_assign(cdt, result.get_ndo_meta(), result.get_readwrite_originptr(),
+    typed_data_assign(cdt, result.get_ndo_meta(), result.get_readwrite_originptr(),
                     dt, metadata, data,
                     assign_error_default, &eval::default_eval_context);
 

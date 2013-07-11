@@ -43,7 +43,7 @@ size_t void_pointer_type::make_assignment_kernel(
 {
     if (this == dst_dt.extended()) {
         if (src_dt.get_type_id() == void_pointer_type_id) {
-            return ::make_pod_dtype_assignment_kernel(out, offset_out,
+            return ::make_pod_typed_data_assignment_kernel(out, offset_out,
                     get_data_size(), get_data_alignment(),
                     kernreq);
         } else if (!src_dt.is_builtin()) {

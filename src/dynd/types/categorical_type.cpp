@@ -412,7 +412,7 @@ size_t categorical_type::make_assignment_kernel(
     if (this == dst_dt.extended()) {
         if (this == src_dt.extended()) {
             // When assigning identical types, just use a POD copy
-            return make_pod_dtype_assignment_kernel(out, offset_out,
+            return make_pod_typed_data_assignment_kernel(out, offset_out,
                             get_data_size(), get_data_alignment(), kernreq);
         }
         // try to assign from another categorical dtype if it can be mapped

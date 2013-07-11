@@ -7,7 +7,7 @@
 #define _DYND__DATETIME_TYPE_HPP_
 
 #include <dynd/type.hpp>
-#include <dynd/dtype_assign.hpp>
+#include <dynd/typed_data_assign.hpp>
 #include <dynd/types/view_type.hpp>
 #include <dynd/string_encodings.hpp>
 

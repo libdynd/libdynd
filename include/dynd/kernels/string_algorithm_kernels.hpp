@@ -10,7 +10,7 @@
 
 #include <dynd/kernels/kernel_instance.hpp>
 #include <dynd/kernels/hierarchical_kernels.hpp>
-#include <dynd/dtype_assign.hpp>
+#include <dynd/typed_data_assign.hpp>
 #include <dynd/string_encodings.hpp>
 
 namespace dynd { namespace kernels {

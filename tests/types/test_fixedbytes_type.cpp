@@ -47,14 +47,14 @@ TEST(FixedBytesDType, Assign) {
     char b[3] = {1, 2, 3};
 
     // Assignment with fixedbytes
-    dtype_assign(ndt::make_fixedbytes(3, 1), NULL, a,
+    typed_data_assign(ndt::make_fixedbytes(3, 1), NULL, a,
                  ndt::make_fixedbytes(3, 1), NULL, b);
     EXPECT_EQ(1, a[0]);
     EXPECT_EQ(2, a[1]);
     EXPECT_EQ(3, a[2]);
 
     // Must be the same size
-    EXPECT_THROW(dtype_assign(ndt::make_fixedbytes(2, 1), NULL, a,
+    EXPECT_THROW(typed_data_assign(ndt::make_fixedbytes(2, 1), NULL, a,
                  ndt::make_fixedbytes(3, 1), NULL, b),
                     runtime_error);
 }

@@ -70,7 +70,7 @@ static void format_json_bool(output_data& out, const ndt::type& dt, const char *
     if (dt.get_type_id() == bool_type_id) {
         value = (*data != 0);
     } else {
-        dtype_assign(ndt::make_type<dynd_bool>(), NULL, reinterpret_cast<char *>(&value), dt, metadata, data);
+        typed_data_assign(ndt::make_type<dynd_bool>(), NULL, reinterpret_cast<char *>(&value), dt, metadata, data);
     }
     if (value) {
         out.write("true");

@@ -7,10 +7,10 @@
 #define _DYND__ASSIGNMENT_KERNELS_HPP_
 
 #include <dynd/type.hpp>
-#include <dynd/dtype_assign.hpp>
+#include <dynd/typed_data_assign.hpp>
 #include <dynd/kernels/hierarchical_kernels.hpp>
 #include <dynd/eval/eval_context.hpp>
-#include <dynd/dtype_assign.hpp>
+#include <dynd/typed_data_assign.hpp>
 #include <dynd/types/type_id.hpp>
 
 /** The number of elements buffered when chaining expressions */
@@ -95,7 +95,7 @@ size_t make_assignment_kernel(
  * \param data_alignment  The alignment of the data being assigned.
  * \param kernreq  What kind of kernel must be placed in 'out'.
  */
-size_t make_pod_dtype_assignment_kernel(
+size_t make_pod_typed_data_assignment_kernel(
                 hierarchical_kernel *out, size_t offset_out,
                 size_t data_size, size_t data_alignment,
                 kernel_request_t kernreq);

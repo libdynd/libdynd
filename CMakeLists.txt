@@ -297,7 +297,7 @@ set(libdynd_SRC
     # Main
     src/dynd/arithmetic_op.cpp
     src/dynd/type.cpp
-    src/dynd/dtype_assign.cpp
+    src/dynd/typed_data_assign.cpp
     src/dynd/dtype_promotion.cpp
     src/dynd/exceptions.cpp
     src/dynd/git_version.cpp.in # Included here for ease of editing in IDEs
@@ -316,7 +316,7 @@ set(libdynd_SRC
     include/dynd/cling_all.hpp
     include/dynd/diagnostics.hpp
     include/dynd/type.hpp
-    include/dynd/dtype_assign.hpp
+    include/dynd/typed_data_assign.hpp
     include/dynd/dtype_promotion.hpp
     include/dynd/exceptions.hpp
     include/dynd/fpstatus.hpp

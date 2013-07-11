@@ -15,7 +15,7 @@ using namespace std;
 using namespace dynd;
 
 type_type::type_type()
-    : base_type(dtype_type_id, custom_kind, sizeof(const base_type *),
+    : base_type(type_type_id, custom_kind, sizeof(const base_type *),
                     sizeof(const base_type *),
                     type_flag_scalar|type_flag_zeroinit|type_flag_destructor,
                     0, 0)
@@ -46,7 +46,7 @@ void type_type::print_dtype(std::ostream& o) const
 
 bool type_type::operator==(const base_type& rhs) const
 {
-    return this == &rhs || rhs.get_type_id() == dtype_type_id;
+    return this == &rhs || rhs.get_type_id() == type_type_id;
 }
 
 void type_type::metadata_default_construct(char *DYND_UNUSED(metadata),
@@ -90,7 +90,7 @@ void type_type::data_destruct_strided(const char *DYND_UNUSED(metadata), char *d
     }
 }
 
-static void dtype_assignment_kernel_single(char *dst, const char *src,
+static void typed_data_assignment_kernel_single(char *dst, const char *src,
                 kernel_data_prefix *DYND_UNUSED(extra))
 {
     // Free the destination reference
@@ -166,9 +166,9 @@ size_t type_type::make_assignment_kernel(
     offset_out = make_kernreq_to_single_kernel_adapter(out, offset_out, kernreq);
 
     if (this == dst_dt.extended()) {
-        if (src_dt.get_type_id() == dtype_type_id) {
+        if (src_dt.get_type_id() == type_type_id) {
             kernel_data_prefix *e = out->get_at<kernel_data_prefix>(offset_out);
-            e->set_function<unary_single_operation_t>(dtype_assignment_kernel_single);
+            e->set_function<unary_single_operation_t>(typed_data_assignment_kernel_single);
             return offset_out + sizeof(kernel_data_prefix);
         } else if (src_dt.get_kind() == string_kind) {
             // String to dtype

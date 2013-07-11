@@ -22,7 +22,7 @@ TEST(DTypeDType, Create) {
 
     // Strings with various encodings and sizes
     d = ndt::make_type();
-    EXPECT_EQ(dtype_type_id, d.get_type_id());
+    EXPECT_EQ(type_type_id, d.get_type_id());
     EXPECT_EQ(custom_kind, d.get_kind());
     EXPECT_EQ(ndt::type("type"), d);
     EXPECT_EQ(sizeof(const base_type *), d.get_data_alignment());
@@ -34,7 +34,7 @@ TEST(DTypeDType, BasicNDobject) {
     nd::array a;
 
     a = ndt::type("int32");
-    EXPECT_EQ(dtype_type_id, a.get_type().get_type_id());
+    EXPECT_EQ(type_type_id, a.get_type().get_type_id());
     EXPECT_EQ(ndt::make_type<int32_t>(), a.as<ndt::type>());
 }
 
@@ -43,7 +43,7 @@ TEST(DTypeDType, StringCasting) {
 
     a = nd::array("int32").ucast(ndt::make_type());
     a = a.eval();
-    EXPECT_EQ(dtype_type_id, a.get_type().get_type_id());
+    EXPECT_EQ(type_type_id, a.get_type().get_type_id());
     EXPECT_EQ(ndt::make_type<int32_t>(), a.as<ndt::type>());
     EXPECT_EQ("int32", a.as<string>());
 }

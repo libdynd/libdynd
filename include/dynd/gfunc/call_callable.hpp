@@ -11,7 +11,7 @@
 #include <dynd/types/string_type.hpp>
 #include <dynd/types/fixedstring_type.hpp>
 #include <dynd/types/type_type.hpp>
-#include <dynd/dtype_assign.hpp>
+#include <dynd/typed_data_assign.hpp>
 
 namespace dynd { namespace gfunc {
 
@@ -22,7 +22,7 @@ namespace detail {
             if (paramtype.get_type_id() == static_cast<type_id_t>(type_id_of<T>::value)) {
                 *reinterpret_cast<T *>(data) = value;
             } else {
-                dtype_assign(paramtype, metadata, data, ndt::make_type<T>(), NULL, reinterpret_cast<const char *>(&value));
+                typed_data_assign(paramtype, metadata, data, ndt::make_type<T>(), NULL, reinterpret_cast<const char *>(&value));
             }
         }
     };
@@ -34,7 +34,7 @@ namespace detail {
                *data = (value ? 1 : 0);
             } else {
                 dynd_bool tmp = value;
-                dtype_assign(paramtype, metadata, data, ndt::make_type<dynd_bool>(), NULL, reinterpret_cast<const char *>(&tmp));
+                typed_data_assign(paramtype, metadata, data, ndt::make_type<dynd_bool>(), NULL, reinterpret_cast<const char *>(&tmp));
             }
         }
     };
@@ -46,7 +46,7 @@ namespace detail {
                 // TODO: switch to a better mechanism for passing nd::array references
                 *reinterpret_cast<const array_preamble **>(data) = value.get_ndo();
             } else {
-                dtype_assign(paramtype, metadata, data, value.get_type(), value.get_ndo_meta(), value.get_ndo()->m_data_pointer);
+                typed_data_assign(paramtype, metadata, data, value.get_type(), value.get_ndo_meta(), value.get_ndo()->m_data_pointer);
             }
         }
     };
@@ -54,7 +54,7 @@ namespace detail {
     template<>
     struct callable_argument_setter<ndt::type> {
         static void set(const ndt::type& paramtype, char *DYND_UNUSED(metadata), char *data, const ndt::type& value) {
-            if (paramtype.get_type_id() == dtype_type_id) {
+            if (paramtype.get_type_id() == type_type_id) {
                 reinterpret_cast<type_type_data *>(data)->dt = ndt::type(value).release();
             } else {
                 std::stringstream ss;
@@ -73,7 +73,7 @@ namespace detail {
                 reinterpret_cast<string_type_data*>(data)->begin = const_cast<char *>(value);
                 reinterpret_cast<string_type_data*>(data)->end = const_cast<char *>(value + N - 1);
             } else {
-                dtype_assign(paramtype, metadata, data, ndt::make_fixedstring(N, string_encoding_utf_8),
+                typed_data_assign(paramtype, metadata, data, ndt::make_fixedstring(N, string_encoding_utf_8),
                         NULL, value);
             }
         }
@@ -94,7 +94,7 @@ inline nd::array callable::call() const
             for (size_t i = 0; i < parameter_count; ++i) {
                 size_t metadata_offset = fsdt->get_metadata_offsets()[i];
                 size_t data_offset = fsdt->get_data_offsets_vector()[i];
-                dtype_copy(fsdt->get_field_types()[i],
+                typed_data_copy(fsdt->get_field_types()[i],
                                 params.get_ndo_meta() + metadata_offset,
                                 params.get_ndo()->m_data_pointer + data_offset,
                                 m_default_parameters.get_ndo_meta() + metadata_offset,
@@ -121,7 +121,7 @@ inline nd::array callable::call(const T& p0) const
             for (size_t i = 1; i < parameter_count; ++i) {
                 size_t metadata_offset = fsdt->get_metadata_offsets()[i];
                 size_t data_offset = fsdt->get_data_offsets_vector()[i];
-                dtype_copy(fsdt->get_field_types()[i],
+                typed_data_copy(fsdt->get_field_types()[i],
                                 params.get_ndo_meta() + metadata_offset,
                                 params.get_ndo()->m_data_pointer + data_offset,
                                 m_default_parameters.get_ndo_meta() + metadata_offset,
@@ -152,7 +152,7 @@ inline nd::array callable::call(const T0& p0, const T1& p1) const
             for (size_t i = 2; i < parameter_count; ++i) {
                 size_t metadata_offset = fsdt->get_metadata_offsets()[i];
                 size_t data_offset = fsdt->get_data_offsets_vector()[i];
-                dtype_copy(fsdt->get_field_types()[i],
+                typed_data_copy(fsdt->get_field_types()[i],
                                 params.get_ndo_meta() + metadata_offset,
                                 params.get_ndo()->m_data_pointer + data_offset,
                                 m_default_parameters.get_ndo_meta() + metadata_offset,
@@ -187,7 +187,7 @@ inline nd::array callable::call(const T0& p0, const T1& p1, const T2& p2) const
             for (size_t i = 3; i < parameter_count; ++i) {
                 size_t metadata_offset = fsdt->get_metadata_offsets()[i];
                 size_t data_offset = fsdt->get_data_offsets_vector()[i];
-                dtype_copy(fsdt->get_field_types()[i],
+                typed_data_copy(fsdt->get_field_types()[i],
                                 params.get_ndo_meta() + metadata_offset,
                                 params.get_ndo()->m_data_pointer + data_offset,
                                 m_default_parameters.get_ndo_meta() + metadata_offset,
@@ -226,7 +226,7 @@ inline nd::array callable::call(const T0& p0, const T1& p1, const T2& p2, const 
             for (size_t i = 4; i < parameter_count; ++i) {
                 size_t metadata_offset = fsdt->get_metadata_offsets()[i];
                 size_t data_offset = fsdt->get_data_offsets_vector()[i];
-                dtype_copy(fsdt->get_field_types()[i],
+                typed_data_copy(fsdt->get_field_types()[i],
                                 params.get_ndo_meta() + metadata_offset,
                                 params.get_ndo()->m_data_pointer + data_offset,
                                 m_default_parameters.get_ndo_meta() + metadata_offset,
@@ -269,7 +269,7 @@ inline nd::array callable::call(const T0& p0, const T1& p1, const T2& p2, const 
             for (size_t i = 5; i < parameter_count; ++i) {
                 size_t metadata_offset = fsdt->get_metadata_offsets()[i];
                 size_t data_offset = fsdt->get_data_offsets_vector()[i];
-                dtype_copy(fsdt->get_field_types()[i],
+                typed_data_copy(fsdt->get_field_types()[i],
                                 params.get_ndo_meta() + metadata_offset,
                                 params.get_ndo()->m_data_pointer + data_offset,
                                 m_default_parameters.get_ndo_meta() + metadata_offset,

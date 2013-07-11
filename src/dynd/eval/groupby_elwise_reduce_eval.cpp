@@ -252,7 +252,7 @@ ndarray_node_ptr dynd::eval::evaluate_groupby_elwise_reduce(ndarray_node *node, 
         // we copy it from the data array. This sets up the copy operation.
         kernel_instance<unary_operation_pair_t> data_operation;
         if (data_kernels.empty()) {
-            get_dtype_assignment_kernel(result_dt, data_operation);
+            get_typed_data_assignment_kernel(result_dt, data_operation);
         } else {
             make_buffered_chain_unary_kernel(data_kernels, data_element_sizes, data_operation);
         }

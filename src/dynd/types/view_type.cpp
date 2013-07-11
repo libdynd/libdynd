@@ -140,7 +140,7 @@ size_t view_type::make_operand_to_value_assignment_kernel(
                 const char *DYND_UNUSED(dst_metadata), const char *DYND_UNUSED(src_metadata),
                 kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx)) const
 {
-    return ::make_pod_dtype_assignment_kernel(out, offset_out,
+    return ::make_pod_typed_data_assignment_kernel(out, offset_out,
                     m_value_type.get_data_size(),
                     std::min(m_value_type.get_data_alignment(), m_operand_type.get_data_alignment()),
                     kernreq);
@@ -151,7 +151,7 @@ size_t view_type::make_value_to_operand_assignment_kernel(
                 const char *DYND_UNUSED(dst_metadata), const char *DYND_UNUSED(src_metadata),
                 kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx)) const
 {
-    return ::make_pod_dtype_assignment_kernel(out, offset_out,
+    return ::make_pod_typed_data_assignment_kernel(out, offset_out,
                     m_value_type.get_data_size(),
                     std::min(m_value_type.get_data_alignment(), m_operand_type.get_data_alignment()),
                     kernreq);
