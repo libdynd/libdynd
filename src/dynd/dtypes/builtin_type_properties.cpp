@@ -3,7 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <dynd/dtypes/builtin_dtype_properties.hpp>
+#include <dynd/dtypes/builtin_type_properties.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/dtypes/property_dtype.hpp>
 #include <dynd/gfunc/make_callable.hpp>
@@ -24,7 +24,7 @@ static pair<string, gfunc::callable> complex_array_properties[] = {
     pair<string, gfunc::callable>("imag", gfunc::make_callable(&property_complex_imag, "self")),
 };
 
-void dynd::get_builtin_dtype_dynamic_array_properties(
+void dynd::get_builtin_type_dynamic_array_properties(
                 type_id_t builtin_type_id,
                 const std::pair<std::string, gfunc::callable> **out_properties,
                 size_t *out_count)
@@ -43,7 +43,7 @@ void dynd::get_builtin_dtype_dynamic_array_properties(
     }
 }
 
-size_t dynd::get_builtin_dtype_elwise_property_index(
+size_t dynd::get_builtin_type_elwise_property_index(
                 type_id_t builtin_type_id,
                 const std::string& property_name)
 {
@@ -65,7 +65,7 @@ size_t dynd::get_builtin_dtype_elwise_property_index(
     throw std::runtime_error(ss.str());
 }
 
-ndt::type dynd::get_builtin_dtype_elwise_property_dtype(
+ndt::type dynd::get_builtin_type_elwise_property_dtype(
                 type_id_t builtin_type_id,
                 size_t DYND_UNUSED(elwise_property_index),
                 bool& out_readable, bool& out_writable)
@@ -110,7 +110,7 @@ static void get_property_kernel_complex_float64_imag(char *dst, const char *src,
     *reinterpret_cast<uint64_t *>(dst) = reinterpret_cast<const uint64_t *>(src)[1];
 }
 
-size_t dynd::make_builtin_dtype_elwise_property_getter_kernel(
+size_t dynd::make_builtin_type_elwise_property_getter_kernel(
                 hierarchical_kernel *out, size_t offset_out,
                 type_id_t builtin_type_id,
                 const char *DYND_UNUSED(dst_metadata),
@@ -159,7 +159,7 @@ size_t dynd::make_builtin_dtype_elwise_property_getter_kernel(
     throw runtime_error(ss.str());
 }
 
-size_t dynd::make_builtin_dtype_elwise_property_setter_kernel(
+size_t dynd::make_builtin_type_elwise_property_setter_kernel(
                 hierarchical_kernel *DYND_UNUSED(out), size_t DYND_UNUSED(offset_out),
                 type_id_t builtin_type_id,
                 const char *DYND_UNUSED(dst_metadata), size_t dst_elwise_property_index,

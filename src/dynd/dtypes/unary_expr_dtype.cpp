@@ -5,7 +5,7 @@
 
 #include <dynd/dtypes/unary_expr_dtype.hpp>
 #include <dynd/shortvector.hpp>
-#include <dynd/dtypes/builtin_dtype_properties.hpp>
+#include <dynd/dtypes/builtin_type_properties.hpp>
 #include <dynd/shape_tools.hpp>
 
 using namespace std;
@@ -137,7 +137,7 @@ void unary_expr_dtype::get_dynamic_array_properties(const std::pair<std::string,
     if (!udt.is_builtin()) {
         udt.extended()->get_dynamic_array_properties(out_properties, out_count);
     } else {
-        get_builtin_dtype_dynamic_array_properties(udt.get_type_id(), out_properties, out_count);
+        get_builtin_type_dynamic_array_properties(udt.get_type_id(), out_properties, out_count);
     }
 }
 
@@ -148,6 +148,6 @@ void unary_expr_dtype::get_dynamic_array_functions(const std::pair<std::string, 
     if (!udt.is_builtin()) {
         udt.extended()->get_dynamic_array_functions(out_functions, out_count);
     } else {
-        //get_builtin_dtype_dynamic_ndobject_functions(udt.get_type_id(), out_functions, out_count);
+        //get_builtin_type_dynamic_ndobject_functions(udt.get_type_id(), out_functions, out_count);
     }
 }

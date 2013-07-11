@@ -6,7 +6,7 @@
 #include <dynd/dtypes/property_dtype.hpp>
 #include <dynd/dtypes/convert_dtype.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
-#include <dynd/dtypes/builtin_dtype_properties.hpp>
+#include <dynd/dtypes/builtin_type_properties.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -32,11 +32,11 @@ property_dtype::property_dtype(const ndt::type& operand_type, const std::string&
                         m_property_index, m_readable, m_writable);
     } else {
         if (property_index == numeric_limits<size_t>::max()) {
-            m_property_index = get_builtin_dtype_elwise_property_index(
+            m_property_index = get_builtin_type_elwise_property_index(
                             operand_type.value_type().get_type_id(),
                             property_name);
         }
-        m_value_type = get_builtin_dtype_elwise_property_dtype(
+        m_value_type = get_builtin_type_elwise_property_dtype(
                         operand_type.value_type().get_type_id(),
                         m_property_index, m_readable, m_writable);
     }
@@ -71,10 +71,10 @@ property_dtype::property_dtype(const ndt::type& value_type, const ndt::type& ope
                         m_property_index, m_writable, m_readable);
     } else {
         if (property_index == numeric_limits<size_t>::max()) {
-            m_property_index = get_builtin_dtype_elwise_property_index(
+            m_property_index = get_builtin_type_elwise_property_index(
                             value_type.get_type_id(), property_name);
         }
-        property_dt = get_builtin_dtype_elwise_property_dtype(
+        property_dt = get_builtin_type_elwise_property_dtype(
                         value_type.get_type_id(), m_property_index,
                             m_writable, m_readable);
     }
@@ -157,7 +157,7 @@ size_t property_dtype::make_operand_to_value_assignment_kernel(
                                 src_metadata, m_property_index,
                                 kernreq, ectx);
             } else {
-                return make_builtin_dtype_elwise_property_getter_kernel(
+                return make_builtin_type_elwise_property_getter_kernel(
                                 out, offset_out,
                                 ovdt.get_type_id(),
                                 dst_metadata,
@@ -179,7 +179,7 @@ size_t property_dtype::make_operand_to_value_assignment_kernel(
                                 src_metadata,
                                 kernreq, ectx);
             } else {
-                return make_builtin_dtype_elwise_property_setter_kernel(
+                return make_builtin_type_elwise_property_setter_kernel(
                                 out, offset_out,
                                 m_value_type.get_type_id(),
                                 dst_metadata, m_property_index,
@@ -210,7 +210,7 @@ size_t property_dtype::make_value_to_operand_assignment_kernel(
                                 src_metadata,
                                 kernreq, ectx);
             } else {
-                return make_builtin_dtype_elwise_property_setter_kernel(
+                return make_builtin_type_elwise_property_setter_kernel(
                                 out, offset_out,
                                 ovdt.get_type_id(),
                                 dst_metadata, m_property_index,
@@ -232,7 +232,7 @@ size_t property_dtype::make_value_to_operand_assignment_kernel(
                                 src_metadata, m_property_index,
                                 kernreq, ectx);
             } else {
-                return make_builtin_dtype_elwise_property_getter_kernel(
+                return make_builtin_type_elwise_property_getter_kernel(
                                 out, offset_out,
                                 m_value_type.get_type_id(),
                                 dst_metadata,
@@ -276,7 +276,7 @@ void property_dtype::get_dynamic_array_properties(const std::pair<std::string, g
     if (!udt.is_builtin()) {
         udt.extended()->get_dynamic_array_properties(out_properties, out_count);
     } else {
-        get_builtin_dtype_dynamic_array_properties(udt.get_type_id(), out_properties, out_count);
+        get_builtin_type_dynamic_array_properties(udt.get_type_id(), out_properties, out_count);
     }
 }
 
@@ -287,6 +287,6 @@ void property_dtype::get_dynamic_array_functions(const std::pair<std::string, gf
     if (!udt.is_builtin()) {
         udt.extended()->get_dynamic_array_functions(out_functions, out_count);
     } else {
-        //get_builtin_dtype_dynamic_ndobject_functions(udt.get_type_id(), out_functions, out_count);
+        //get_builtin_type_dynamic_ndobject_functions(udt.get_type_id(), out_functions, out_count);
     }
 }

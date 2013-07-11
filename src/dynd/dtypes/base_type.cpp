@@ -5,7 +5,7 @@
 
 #include <dynd/type.hpp>
 #include <dynd/gfunc/callable.hpp>
-#include <dynd/dtypes/builtin_dtype_properties.hpp>
+#include <dynd/dtypes/builtin_type_properties.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -283,7 +283,7 @@ void base_type::get_scalar_properties_and_functions(
             dt.extended()->get_dynamic_array_properties(&properties, &properties_count);
             dt.extended()->get_dynamic_array_functions(&functions, &functions_count);
         } else {
-            get_builtin_dtype_dynamic_array_properties(dt.get_type_id(), &properties, &properties_count);
+            get_builtin_type_dynamic_array_properties(dt.get_type_id(), &properties, &properties_count);
         }
     }
     out_properties.resize(properties_count);

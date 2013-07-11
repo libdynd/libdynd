@@ -22,7 +22,7 @@
 #include <dynd/gfunc/call_callable.hpp>
 #include <dynd/dtypes/groupby_dtype.hpp>
 #include <dynd/dtypes/categorical_dtype.hpp>
-#include <dynd/dtypes/builtin_dtype_properties.hpp>
+#include <dynd/dtypes/builtin_type_properties.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -595,7 +595,7 @@ nd::array nd::array::p(const char *property_name) const
     if (!dt.is_builtin()) {
         dt.extended()->get_dynamic_array_properties(&properties, &count);
     } else {
-        get_builtin_dtype_dynamic_array_properties(dt.get_type_id(), &properties, &count);
+        get_builtin_type_dynamic_array_properties(dt.get_type_id(), &properties, &count);
     }
     // TODO: We probably want to make some kind of acceleration structure for the name lookup
     if (count > 0) {
@@ -619,7 +619,7 @@ nd::array nd::array::p(const std::string& property_name) const
     if (!dt.is_builtin()) {
         dt.extended()->get_dynamic_array_properties(&properties, &count);
     } else {
-        get_builtin_dtype_dynamic_array_properties(dt.get_type_id(), &properties, &count);
+        get_builtin_type_dynamic_array_properties(dt.get_type_id(), &properties, &count);
     }
     // TODO: We probably want to make some kind of acceleration structure for the name lookup
     if (count > 0) {

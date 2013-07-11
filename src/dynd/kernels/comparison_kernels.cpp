@@ -20,7 +20,7 @@ size_t dynd::make_comparison_kernel(
 {
     if (src0_dt.is_builtin()) {
         if (src1_dt.is_builtin()) {
-            return make_builtin_dtype_comparison_kernel(out, offset_out,
+            return make_builtin_type_comparison_kernel(out, offset_out,
                             src0_dt.get_type_id(), src1_dt.get_type_id(),
                             comptype);
         } else {
@@ -89,7 +89,7 @@ static binary_single_predicate_t compare_kernel_table[builtin_type_id_count-2][b
 #undef INNER_LEVEL
 };
 
-size_t dynd::make_builtin_dtype_comparison_kernel(
+size_t dynd::make_builtin_type_comparison_kernel(
                 hierarchical_kernel *out, size_t offset_out,
                 type_id_t src0_type_id, type_id_t src1_type_id,
                 comparison_type_t comptype)

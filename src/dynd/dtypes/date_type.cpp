@@ -187,7 +187,7 @@ size_t date_type::make_comparison_kernel(
 {
     if (this == src0_dt.extended()) {
         if (*this == *src1_dt.extended()) {
-            return make_builtin_dtype_comparison_kernel(out, offset_out,
+            return make_builtin_type_comparison_kernel(out, offset_out,
                             int32_type_id, int32_type_id, comptype);
         } else if (!src1_dt.is_builtin()) {
             return src1_dt.extended()->make_comparison_kernel(out, offset_out,

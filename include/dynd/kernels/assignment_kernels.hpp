@@ -111,7 +111,7 @@ size_t make_pod_dtype_assignment_kernel(
  * \param kernreq  What kind of kernel must be placed in 'out'.
  * \param errmode  The error mode to use for assignments.
  */
-size_t make_builtin_dtype_assignment_kernel(
+size_t make_builtin_type_assignment_kernel(
                 hierarchical_kernel *out, size_t offset_out,
                 type_id_t dst_type_id, type_id_t src_type_id,
                 kernel_request_t kernreq, assign_error_mode errmode);

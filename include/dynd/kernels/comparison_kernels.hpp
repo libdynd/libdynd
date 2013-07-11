@@ -105,7 +105,7 @@ size_t make_comparison_kernel(
  * \param src1_type_id  The second dynd type id.
  * \param comptype  The type of comparison to do.
  */
-size_t make_builtin_dtype_comparison_kernel(
+size_t make_builtin_type_comparison_kernel(
                 hierarchical_kernel *out, size_t offset_out,
                 type_id_t src0_type_id, type_id_t src1_type_id,
                 comparison_type_t comptype);
