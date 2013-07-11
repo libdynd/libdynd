@@ -9,7 +9,7 @@
 #include <dynd/type.hpp>
 #include <dynd/diagnostics.hpp>
 #include <dynd/kernels/struct_comparison_kernels.hpp>
-#include <dynd/dtypes/base_struct_dtype.hpp>
+#include <dynd/dtypes/base_struct_type.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -204,7 +204,7 @@ size_t dynd::make_struct_comparison_kernel(
                 comparison_type_t comptype,
                 const eval::eval_context *ectx)
 {
-    const base_struct_dtype *bsd = static_cast<const base_struct_dtype *>(src_dt.extended());
+    const base_struct_type *bsd = static_cast<const base_struct_type *>(src_dt.extended());
     size_t field_count = bsd->get_field_count();
     if (comptype == comparison_type_sorting_less) {
         if (src0_metadata == src1_metadata ||

@@ -12,7 +12,7 @@
 #include <dynd/dtypes/strided_dim_dtype.hpp>
 #include <dynd/dtypes/fixed_dim_dtype.hpp>
 #include <dynd/dtypes/var_dim_dtype.hpp>
-#include <dynd/dtypes/cstruct_dtype.hpp>
+#include <dynd/dtypes/cstruct_type.hpp>
 #include <dynd/dtypes/date_dtype.hpp>
 #include <dynd/dtypes/string_type.hpp>
 #include <dynd/dtypes/fixedstring_type.hpp>
@@ -126,19 +126,19 @@ TEST(DataShapeParser, StridedVarFixedDim) {
 }
 
 TEST(DataShapeParser, RecordOneField) {
-    EXPECT_EQ(make_cstruct_dtype(ndt::make_dtype<float>(), "val"),
+    EXPECT_EQ(make_cstruct_type(ndt::make_dtype<float>(), "val"),
                     type_from_datashape("{ val : float32 }"));
-    EXPECT_EQ(make_cstruct_dtype(ndt::make_dtype<float>(), "val"),
+    EXPECT_EQ(make_cstruct_type(ndt::make_dtype<float>(), "val"),
                     type_from_datashape("{ val : float32 ; }"));
 }
 
 TEST(DataShapeParser, RecordTwoFields) {
-    EXPECT_EQ(make_cstruct_dtype(ndt::make_dtype<float>(), "val", ndt::make_dtype<int64_t>(), "id"),
+    EXPECT_EQ(make_cstruct_type(ndt::make_dtype<float>(), "val", ndt::make_dtype<int64_t>(), "id"),
                     type_from_datashape("{\n"
                         "    val: float32;\n"
                         "    id: int64\n"
                         "}\n"));
-    EXPECT_EQ(make_cstruct_dtype(ndt::make_dtype<float>(), "val", ndt::make_dtype<int64_t>(), "id"),
+    EXPECT_EQ(make_cstruct_type(ndt::make_dtype<float>(), "val", ndt::make_dtype<int64_t>(), "id"),
                     type_from_datashape("{\n"
                         "    val: float32;\n"
                         "    id: int64;\n"

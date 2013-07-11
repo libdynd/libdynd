@@ -10,7 +10,7 @@
 
 #include <dynd/dtypes/datetime_dtype.hpp>
 #include <dynd/dtypes/property_dtype.hpp>
-#include <dynd/dtypes/cstruct_dtype.hpp>
+#include <dynd/dtypes/cstruct_type.hpp>
 #include <dynd/dtypes/string_type.hpp>
 #include <dynd/dtypes/unary_expr_dtype.hpp>
 #include <dynd/kernels/datetime_assignment_kernels.hpp>
@@ -51,28 +51,28 @@ std::ostream& dynd::operator<<(std::ostream& o, datetime_unit_t unit)
 
 namespace {
     static ndt::type datetime_default_structs[6] = {
-        make_cstruct_dtype(
+        make_cstruct_type(
             ndt::make_dtype<int32_t>(), "year", ndt::make_dtype<int16_t>(), "month",
             ndt::make_dtype<int16_t>(), "day", ndt::make_dtype<int16_t>(), "hour"),
-        make_cstruct_dtype(
+        make_cstruct_type(
             ndt::make_dtype<int32_t>(), "year", ndt::make_dtype<int16_t>(), "month",
             ndt::make_dtype<int16_t>(), "day", ndt::make_dtype<int16_t>(), "hour",
             ndt::make_dtype<int16_t>(), "min"),
-        make_cstruct_dtype(
+        make_cstruct_type(
             ndt::make_dtype<int32_t>(), "year", ndt::make_dtype<int16_t>(), "month",
             ndt::make_dtype<int16_t>(), "day", ndt::make_dtype<int16_t>(), "hour",
             ndt::make_dtype<int16_t>(), "min", ndt::make_dtype<int16_t>(), "sec"),
-        make_cstruct_dtype(
+        make_cstruct_type(
             ndt::make_dtype<int32_t>(), "year", ndt::make_dtype<int16_t>(), "month",
             ndt::make_dtype<int16_t>(), "day", ndt::make_dtype<int16_t>(), "hour",
             ndt::make_dtype<int16_t>(), "min", ndt::make_dtype<int16_t>(), "sec",
             ndt::make_dtype<int16_t>(), "msec"),
-        make_cstruct_dtype(
+        make_cstruct_type(
             ndt::make_dtype<int32_t>(), "year", ndt::make_dtype<int16_t>(), "month",
             ndt::make_dtype<int16_t>(), "day", ndt::make_dtype<int16_t>(), "hour",
             ndt::make_dtype<int16_t>(), "min", ndt::make_dtype<int16_t>(), "sec",
             ndt::make_dtype<int32_t>(), "usec"),
-        make_cstruct_dtype(
+        make_cstruct_type(
             ndt::make_dtype<int32_t>(), "year", ndt::make_dtype<int16_t>(), "month",
             ndt::make_dtype<int16_t>(), "day", ndt::make_dtype<int16_t>(), "hour",
             ndt::make_dtype<int16_t>(), "min", ndt::make_dtype<int16_t>(), "sec",
@@ -82,7 +82,7 @@ namespace {
      * Returns a reference to a static struct for the given
      * datetime unit.
      */
-    const ndt::type& get_default_struct_dtype(datetime_unit_t unit) {
+    const ndt::type& get_default_struct_type(datetime_unit_t unit) {
         if ((int32_t)unit >= 0 && (int32_t)unit < 6) {
             return datetime_default_structs[unit];
         } else {
@@ -117,7 +117,7 @@ namespace {
 
 datetime_dtype::datetime_dtype(datetime_unit_t unit, datetime_tz_t timezone)
     : base_type(datetime_type_id, datetime_kind, 8, scalar_align_of<int64_t>::value, type_flag_scalar, 0, 0),
-        m_default_struct_dtype(::get_default_struct_dtype(unit)), m_unit(unit),
+        m_default_struct_type(::get_default_struct_type(unit)), m_unit(unit),
         m_timezone(timezone)
 {
 }
@@ -697,7 +697,7 @@ ndt::type datetime_dtype::get_elwise_property_dtype(size_t property_index,
         case datetimeprop_struct:
             out_readable = true;
             out_writable = true;
-            return get_default_struct_dtype();
+            return get_default_struct_type();
         case datetimeprop_date:
             out_readable = true;
             out_writable = false;

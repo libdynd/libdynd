@@ -4,7 +4,7 @@
 //
 
 #include <dynd/type.hpp>
-#include <dynd/dtypes/base_struct_dtype.hpp>
+#include <dynd/dtypes/base_struct_type.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/shortvector.hpp>
 
@@ -12,10 +12,10 @@ using namespace std;
 using namespace dynd;
 
 
-base_struct_dtype::~base_struct_dtype() {
+base_struct_type::~base_struct_type() {
 }
 
-void base_struct_dtype::get_shape(size_t ndim, size_t i, intptr_t *out_shape, const char *metadata) const
+void base_struct_type::get_shape(size_t ndim, size_t i, intptr_t *out_shape, const char *metadata) const
 {
     out_shape[i] = m_field_count;
     if (i < ndim-1) {
@@ -49,7 +49,7 @@ void base_struct_dtype::get_shape(size_t ndim, size_t i, intptr_t *out_shape, co
     }
 }
 
-size_t base_struct_dtype::get_elwise_property_index(const std::string& property_name) const
+size_t base_struct_type::get_elwise_property_index(const std::string& property_name) const
 {
     size_t field_count = get_field_count();
     const string *field_names = get_field_names();
@@ -64,7 +64,7 @@ size_t base_struct_dtype::get_elwise_property_index(const std::string& property_
     throw runtime_error(ss.str());
 }
 
-ndt::type base_struct_dtype::get_elwise_property_dtype(size_t elwise_property_index,
+ndt::type base_struct_type::get_elwise_property_dtype(size_t elwise_property_index,
                 bool& out_readable, bool& out_writable) const
 {
     size_t field_count = get_field_count();
@@ -112,7 +112,7 @@ namespace {
     };
 } // anonymous namespace
 
-size_t base_struct_dtype::make_elwise_property_getter_kernel(
+size_t base_struct_type::make_elwise_property_getter_kernel(
                 hierarchical_kernel *out, size_t offset_out,
                 const char *dst_metadata,
                 const char *src_metadata, size_t src_elwise_property_index,
@@ -133,7 +133,7 @@ size_t base_struct_dtype::make_elwise_property_getter_kernel(
                 break;
             default: {
                 stringstream ss;
-                ss << "base_struct_dtype::make_elwise_property_getter_kernel: ";
+                ss << "base_struct_type::make_elwise_property_getter_kernel: ";
                 ss << "unrecognized request " << (int)kernreq;
                 throw runtime_error(ss.str());
             }   
@@ -152,7 +152,7 @@ size_t base_struct_dtype::make_elwise_property_getter_kernel(
     }
 }
 
-size_t base_struct_dtype::make_elwise_property_setter_kernel(
+size_t base_struct_type::make_elwise_property_setter_kernel(
                 hierarchical_kernel *DYND_UNUSED(out), size_t DYND_UNUSED(offset_out),
                 const char *DYND_UNUSED(dst_metadata), size_t dst_elwise_property_index,
                 const char *DYND_UNUSED(src_metadata),
@@ -165,7 +165,7 @@ size_t base_struct_dtype::make_elwise_property_setter_kernel(
     throw runtime_error(ss.str());
 }
 
-void base_struct_dtype::data_destruct(const char *metadata, char *data) const
+void base_struct_type::data_destruct(const char *metadata, char *data) const
 {
     const ndt::type *field_types = get_field_types();
     const size_t *metadata_offsets = get_metadata_offsets();
@@ -181,7 +181,7 @@ void base_struct_dtype::data_destruct(const char *metadata, char *data) const
     }
 }
 
-void base_struct_dtype::data_destruct_strided(const char *metadata, char *data,
+void base_struct_type::data_destruct_strided(const char *metadata, char *data,
                 intptr_t stride, size_t count) const
 {
     const ndt::type *field_types = get_field_types();

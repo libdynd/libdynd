@@ -7,7 +7,7 @@
 #include <dynd/dtypes/string_type.hpp>
 #include <dynd/dtypes/json_dtype.hpp>
 #include <dynd/dtypes/date_dtype.hpp>
-#include <dynd/dtypes/base_struct_dtype.hpp>
+#include <dynd/dtypes/base_struct_type.hpp>
 #include <dynd/dtypes/strided_dim_dtype.hpp>
 #include <dynd/dtypes/fixed_dim_dtype.hpp>
 #include <dynd/dtypes/var_dim_dtype.hpp>
@@ -195,7 +195,7 @@ static void format_json_datetime(output_data& out, const ndt::type& dt, const ch
 
 static void format_json_struct(output_data& out, const ndt::type& dt, const char *metadata, const char *data)
 {
-    const base_struct_dtype *bsd = static_cast<const base_struct_dtype *>(dt.extended());
+    const base_struct_type *bsd = static_cast<const base_struct_type *>(dt.extended());
     size_t field_count = bsd->get_field_count();
     const string *field_names = bsd->get_field_names();
     const ndt::type *field_types = bsd->get_field_types();

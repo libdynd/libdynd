@@ -14,19 +14,19 @@ namespace dynd {
 /**
  * Base class for all struct dtypes. If a dtype
  * has kind struct_kind, it must be a subclass of
- * base_struct_dtype.
+ * base_struct_type.
  */
-class base_struct_dtype : public base_type {
+class base_struct_type : public base_type {
 protected:
     size_t m_field_count;
 public:
-    inline base_struct_dtype(type_id_t type_id, size_t data_size,
+    inline base_struct_type(type_id_t type_id, size_t data_size,
                     size_t alignment, size_t field_count, flags_type flags, size_t metadata_size)
         : base_type(type_id, struct_kind, data_size, alignment, flags, metadata_size, 0),
             m_field_count(field_count)
     {}
 
-    virtual ~base_struct_dtype();
+    virtual ~base_struct_type();
 
     /** The number of fields in the struct. This is the size of the other arrays. */
     inline size_t get_field_count() const {

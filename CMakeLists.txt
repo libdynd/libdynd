@@ -119,7 +119,7 @@ set(libdynd_SRC
     src/dynd/dtypes/base_type.cpp
     src/dynd/dtypes/base_expression_type.cpp
     src/dynd/dtypes/base_string_type.cpp
-    src/dynd/dtypes/base_struct_dtype.cpp
+    src/dynd/dtypes/base_struct_type.cpp
     src/dynd/dtypes/base_uniform_dim_dtype.cpp
     src/dynd/dtypes/busdate_dtype.cpp
     src/dynd/dtypes/builtin_dtype_properties.cpp
@@ -142,13 +142,13 @@ set(libdynd_SRC
     src/dynd/dtypes/fixed_dim_dtype.cpp
     src/dynd/dtypes/fixedbytes_dtype.cpp
     src/dynd/dtypes/fixedstring_type.cpp
-    src/dynd/dtypes/cstruct_dtype.cpp
+    src/dynd/dtypes/cstruct_type.cpp
     src/dynd/dtypes/groupby_dtype.cpp
     src/dynd/dtypes/json_dtype.cpp
     src/dynd/dtypes/pointer_dtype.cpp
     src/dynd/dtypes/strided_dim_dtype.cpp
     src/dynd/dtypes/string_type.cpp
-    src/dynd/dtypes/struct_dtype.cpp
+    src/dynd/dtypes/struct_type.cpp
     src/dynd/dtypes/tuple_dtype.cpp
     src/dynd/dtypes/type_id.cpp
     src/dynd/dtypes/unary_expr_dtype.cpp
@@ -159,7 +159,7 @@ set(libdynd_SRC
     include/dynd/dtypes/base_type.hpp
     include/dynd/dtypes/base_expression_type.hpp
     include/dynd/dtypes/base_string_type.hpp
-    include/dynd/dtypes/base_struct_dtype.hpp
+    include/dynd/dtypes/base_struct_type.hpp
     include/dynd/dtypes/base_uniform_dim_dtype.hpp
     include/dynd/dtypes/busdate_dtype.hpp
     include/dynd/dtypes/builtin_dtype_properties.hpp
@@ -182,14 +182,14 @@ set(libdynd_SRC
     include/dynd/dtypes/fixed_dim_dtype.hpp
     include/dynd/dtypes/fixedbytes_dtype.hpp
     include/dynd/dtypes/fixedstring_type.hpp
-    include/dynd/dtypes/cstruct_dtype.hpp
+    include/dynd/dtypes/cstruct_type.hpp
     include/dynd/dtypes/groupby_dtype.hpp
     include/dynd/dtypes/json_dtype.hpp
     include/dynd/dtypes/pointer_dtype.hpp
     include/dynd/dtypes/strided_dim_dtype.hpp
     include/dynd/dtypes/string_type.hpp
-    include/dynd/dtypes/struct_dtype.hpp
-    include/dynd/dtypes/cstruct_dtype.hpp
+    include/dynd/dtypes/struct_type.hpp
+    include/dynd/dtypes/cstruct_type.hpp
     include/dynd/dtypes/tuple_dtype.hpp
     include/dynd/dtypes/type_id.hpp
     include/dynd/dtypes/unary_expr_dtype.hpp

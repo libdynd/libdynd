@@ -9,7 +9,7 @@
 #include <dynd/dtypes/json_dtype.hpp>
 #include <dynd/dtypes/fixed_dim_dtype.hpp>
 #include <dynd/dtypes/var_dim_dtype.hpp>
-#include <dynd/dtypes/cstruct_dtype.hpp>
+#include <dynd/dtypes/cstruct_type.hpp>
 #include <dynd/dtypes/date_dtype.hpp>
 #include <dynd/kernels/string_numeric_assignment_kernels.hpp>
 
@@ -405,7 +405,7 @@ static void parse_var_dim_json(const ndt::type& dt, const char *metadata, char *
 static void parse_struct_json(const ndt::type& dt, const char *metadata, char *out_data,
                 const char *&begin, const char *end)
 {
-    const base_struct_dtype *fsd = static_cast<const base_struct_dtype *>(dt.extended());
+    const base_struct_type *fsd = static_cast<const base_struct_type *>(dt.extended());
     size_t field_count = fsd->get_field_count();
     const string *field_names = fsd->get_field_names();
     const ndt::type *field_types = fsd->get_field_types();

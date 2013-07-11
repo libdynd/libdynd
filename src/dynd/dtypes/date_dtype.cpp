@@ -10,7 +10,7 @@
 
 #include <dynd/dtypes/date_dtype.hpp>
 #include <dynd/dtypes/property_dtype.hpp>
-#include <dynd/dtypes/cstruct_dtype.hpp>
+#include <dynd/dtypes/cstruct_type.hpp>
 #include <dynd/dtypes/string_type.hpp>
 #include <dynd/dtypes/unary_expr_dtype.hpp>
 #include <dynd/kernels/date_assignment_kernels.hpp>
@@ -36,8 +36,8 @@ date_dtype::~date_dtype()
 {
 }
 
-const ndt::type date_dtype::default_struct_dtype =
-        make_cstruct_dtype(
+const ndt::type date_dtype::default_struct_type =
+        make_cstruct_type(
             ndt::make_dtype<int32_t>(), "year",
             ndt::make_dtype<int16_t>(), "month",
             ndt::make_dtype<int16_t>(), "day");
@@ -467,7 +467,7 @@ ndt::type date_dtype::get_elwise_property_dtype(size_t property_index,
         case dateprop_struct:
             out_readable = true;
             out_writable = true;
-            return date_dtype::default_struct_dtype;
+            return date_dtype::default_struct_type;
         default:
             out_readable = false;
             out_writable = false;

@@ -4,7 +4,7 @@
 //
 
 #include <dynd/dtypes/datashape_formatter.hpp>
-#include <dynd/dtypes/base_struct_dtype.hpp>
+#include <dynd/dtypes/base_struct_type.hpp>
 #include <dynd/dtypes/strided_dim_dtype.hpp>
 #include <dynd/dtypes/fixed_dim_dtype.hpp>
 #include <dynd/dtypes/var_dim_dtype.hpp>
@@ -36,7 +36,7 @@ static void format_struct_datashape(std::ostream& o, const ndt::type& dt, const 
     if (metadata == NULL) {
         data = NULL;
     }
-    const base_struct_dtype *bsd = static_cast<const base_struct_dtype *>(dt.extended());
+    const base_struct_type *bsd = static_cast<const base_struct_type *>(dt.extended());
     size_t field_count = bsd->get_field_count();
     const string *field_names = bsd->get_field_names();
     const ndt::type *field_types = bsd->get_field_types();

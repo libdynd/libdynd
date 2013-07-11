@@ -23,7 +23,7 @@ public:
     virtual ~date_dtype();
 
     // A static instance of a struct dtype used by default for a date
-    static const ndt::type default_struct_dtype;
+    static const ndt::type default_struct_type;
 
     void set_ymd(const char *metadata, char *data, assign_error_mode errmode,
                     int32_t year, int32_t month, int32_t day) const;

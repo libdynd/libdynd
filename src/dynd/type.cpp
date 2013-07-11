@@ -272,7 +272,7 @@ intptr_t ndt::type::get_dim_size(const char *metadata, const char *data) const {
     if (get_kind() == uniform_dim_kind) {
         return static_cast<const base_uniform_dim_dtype *>(m_extended)->get_dim_size(metadata, data);
     } else if (get_kind() == struct_kind) {
-        return static_cast<const base_struct_dtype *>(m_extended)->get_field_count();
+        return static_cast<const base_struct_type *>(m_extended)->get_field_count();
     } else if (get_undim() > 0) {
         size_t undim = get_undim();
         dimvector shape(undim);

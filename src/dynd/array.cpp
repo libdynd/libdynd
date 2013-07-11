@@ -1466,8 +1466,8 @@ nd::array nd::combine_into_struct(size_t field_count, const std::string *field_n
         flags &= field_values[i].get_flags();
     }
 
-    ndt::type result_type = make_cstruct_dtype(field_count, &field_types[0], field_names);
-    const cstruct_dtype *fsd = static_cast<const cstruct_dtype *>(result_type.extended());
+    ndt::type result_type = make_cstruct_type(field_count, &field_types[0], field_names);
+    const cstruct_type *fsd = static_cast<const cstruct_type *>(result_type.extended());
     char *data_ptr = NULL;
 
     array result(make_array_memory_block(fsd->get_metadata_size(),

@@ -43,7 +43,7 @@ std::ostream& operator<<(std::ostream& o, datetime_unit_t unit);
 
 class datetime_dtype : public base_type {
     // A const reference to the struct dtype used by default for this datetime
-    const ndt::type& m_default_struct_dtype;
+    const ndt::type& m_default_struct_type;
 
     datetime_unit_t m_unit;
     datetime_tz_t m_timezone;
@@ -61,8 +61,8 @@ public:
         return m_timezone;
     }
 
-    inline const ndt::type& get_default_struct_dtype() const {
-        return m_default_struct_dtype;
+    inline const ndt::type& get_default_struct_type() const {
+        return m_default_struct_type;
     }
 
     void set_cal(const char *metadata, char *data, assign_error_mode errmode,

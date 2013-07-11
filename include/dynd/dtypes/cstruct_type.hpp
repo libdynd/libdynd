@@ -10,7 +10,7 @@
 #include <string>
 
 #include <dynd/type.hpp>
-#include <dynd/dtypes/base_struct_dtype.hpp>
+#include <dynd/dtypes/base_struct_type.hpp>
 #include <dynd/memblock/memory_block.hpp>
 
 namespace dynd {
@@ -28,7 +28,7 @@ namespace dynd {
  * for example, so there isn't a way to match 100% of all
  * C structs.
  */
-class cstruct_dtype : public base_struct_dtype {
+class cstruct_type : public base_struct_type {
     std::vector<ndt::type> m_field_types;
     std::vector<std::string> m_field_names;
     std::vector<size_t> m_data_offsets;
@@ -39,12 +39,12 @@ class cstruct_dtype : public base_struct_dtype {
 
     // Special constructor to break the property parameter cycle in
     // create_array_properties
-    cstruct_dtype(int, int);
+    cstruct_type(int, int);
 public:
-    cstruct_dtype(size_t field_count, const ndt::type *field_types,
+    cstruct_type(size_t field_count, const ndt::type *field_types,
                     const std::string *field_names);
 
-    virtual ~cstruct_dtype();
+    virtual ~cstruct_type();
 
     size_t get_default_data_size(size_t DYND_UNUSED(ndim), const intptr_t *DYND_UNUSED(shape)) const {
         return get_data_size();
@@ -141,22 +141,22 @@ public:
     void get_dynamic_array_properties(
                     const std::pair<std::string, gfunc::callable> **out_properties,
                     size_t *out_count) const;
-}; // class cstruct_dtype
+}; // class cstruct_type
 
 /** Makes a struct dtype with the specified fields */
-inline ndt::type make_cstruct_dtype(size_t field_count, const ndt::type *field_types,
+inline ndt::type make_cstruct_type(size_t field_count, const ndt::type *field_types,
                 const std::string *field_names) {
-    return ndt::type(new cstruct_dtype(field_count, field_types, field_names), false);
+    return ndt::type(new cstruct_type(field_count, field_types, field_names), false);
 }
 
 /** Makes a struct dtype with the specified fields */
-inline ndt::type make_cstruct_dtype(const ndt::type& dt0, const std::string& name0)
+inline ndt::type make_cstruct_type(const ndt::type& dt0, const std::string& name0)
 {
-    return make_cstruct_dtype(1, &dt0, &name0);
+    return make_cstruct_type(1, &dt0, &name0);
 }
 
 /** Makes a struct dtype with the specified fields */
-inline ndt::type make_cstruct_dtype(const ndt::type& dt0, const std::string& name0, const ndt::type& dt1, const std::string& name1)
+inline ndt::type make_cstruct_type(const ndt::type& dt0, const std::string& name0, const ndt::type& dt1, const std::string& name1)
 {
     ndt::type field_types[2];
     std::string field_names[2];
@@ -164,11 +164,11 @@ inline ndt::type make_cstruct_dtype(const ndt::type& dt0, const std::string& nam
     field_types[1] = dt1;
     field_names[0] = name0;
     field_names[1] = name1;
-    return make_cstruct_dtype(2, field_types, field_names);
+    return make_cstruct_type(2, field_types, field_names);
 }
 
 /** Makes a struct dtype with the specified fields */
-inline ndt::type make_cstruct_dtype(const ndt::type& dt0, const std::string& name0, const ndt::type& dt1, const std::string& name1, const ndt::type& dt2, const std::string& name2)
+inline ndt::type make_cstruct_type(const ndt::type& dt0, const std::string& name0, const ndt::type& dt1, const std::string& name1, const ndt::type& dt2, const std::string& name2)
 {
     ndt::type field_types[3];
     std::string field_names[3];
@@ -178,11 +178,11 @@ inline ndt::type make_cstruct_dtype(const ndt::type& dt0, const std::string& nam
     field_names[0] = name0;
     field_names[1] = name1;
     field_names[2] = name2;
-    return make_cstruct_dtype(3, field_types, field_names);
+    return make_cstruct_type(3, field_types, field_names);
 }
 
 /** Makes a struct dtype with the specified fields */
-inline ndt::type make_cstruct_dtype(const ndt::type& dt0, const std::string& name0,
+inline ndt::type make_cstruct_type(const ndt::type& dt0, const std::string& name0,
                 const ndt::type& dt1, const std::string& name1, const ndt::type& dt2, const std::string& name2,
                 const ndt::type& dt3, const std::string& name3)
 {
@@ -196,11 +196,11 @@ inline ndt::type make_cstruct_dtype(const ndt::type& dt0, const std::string& nam
     field_names[1] = name1;
     field_names[2] = name2;
     field_names[3] = name3;
-    return make_cstruct_dtype(4, field_types, field_names);
+    return make_cstruct_type(4, field_types, field_names);
 }
 
 /** Makes a struct dtype with the specified fields */
-inline ndt::type make_cstruct_dtype(const ndt::type& dt0, const std::string& name0,
+inline ndt::type make_cstruct_type(const ndt::type& dt0, const std::string& name0,
                 const ndt::type& dt1, const std::string& name1, const ndt::type& dt2, const std::string& name2,
                 const ndt::type& dt3, const std::string& name3, const ndt::type& dt4, const std::string& name4)
 {
@@ -216,11 +216,11 @@ inline ndt::type make_cstruct_dtype(const ndt::type& dt0, const std::string& nam
     field_names[2] = name2;
     field_names[3] = name3;
     field_names[4] = name4;
-    return make_cstruct_dtype(5, field_types, field_names);
+    return make_cstruct_type(5, field_types, field_names);
 }
 
 /** Makes a struct dtype with the specified fields */
-inline ndt::type make_cstruct_dtype(const ndt::type& dt0, const std::string& name0,
+inline ndt::type make_cstruct_type(const ndt::type& dt0, const std::string& name0,
                 const ndt::type& dt1, const std::string& name1, const ndt::type& dt2, const std::string& name2,
                 const ndt::type& dt3, const std::string& name3, const ndt::type& dt4, const std::string& name4,
                 const ndt::type& dt5, const std::string& name5)
@@ -239,11 +239,11 @@ inline ndt::type make_cstruct_dtype(const ndt::type& dt0, const std::string& nam
     field_names[3] = name3;
     field_names[4] = name4;
     field_names[5] = name5;
-    return make_cstruct_dtype(6, field_types, field_names);
+    return make_cstruct_type(6, field_types, field_names);
 }
 
 /** Makes a struct dtype with the specified fields */
-inline ndt::type make_cstruct_dtype(const ndt::type& dt0, const std::string& name0,
+inline ndt::type make_cstruct_type(const ndt::type& dt0, const std::string& name0,
                 const ndt::type& dt1, const std::string& name1, const ndt::type& dt2, const std::string& name2,
                 const ndt::type& dt3, const std::string& name3, const ndt::type& dt4, const std::string& name4,
                 const ndt::type& dt5, const std::string& name5, const ndt::type& dt6, const std::string& name6)
@@ -264,7 +264,7 @@ inline ndt::type make_cstruct_dtype(const ndt::type& dt0, const std::string& nam
     field_names[4] = name4;
     field_names[5] = name5;
     field_names[6] = name6;
-    return make_cstruct_dtype(7, field_types, field_names);
+    return make_cstruct_type(7, field_types, field_names);
 }
 
 /**

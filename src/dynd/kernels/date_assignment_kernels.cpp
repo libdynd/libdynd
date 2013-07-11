@@ -5,7 +5,7 @@
 
 #include <dynd/kernels/date_assignment_kernels.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
-#include <dynd/dtypes/cstruct_dtype.hpp>
+#include <dynd/dtypes/cstruct_type.hpp>
 #include <datetime_strings.h>
 
 using namespace std;

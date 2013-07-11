@@ -7,7 +7,7 @@
 
 #include <dynd/dtypes/groupby_dtype.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
-#include <dynd/dtypes/cstruct_dtype.hpp>
+#include <dynd/dtypes/cstruct_type.hpp>
 #include <dynd/dtypes/pointer_dtype.hpp>
 #include <dynd/dtypes/fixed_dim_dtype.hpp>
 #include <dynd/dtypes/var_dim_dtype.hpp>
@@ -37,7 +37,7 @@ groupby_dtype::groupby_dtype(const ndt::type& data_values_dtype,
     if (by_values_dtype.get_undim() < 1) {
         throw runtime_error("to construct a groupby dtype, its values dtype must have at least one array dimension");
     }
-    m_operand_type = make_cstruct_dtype(make_pointer_dtype(data_values_dtype), "data",
+    m_operand_type = make_cstruct_type(make_pointer_dtype(data_values_dtype), "data",
                     make_pointer_dtype(by_values_dtype), "by");
     m_members.metadata_size = m_operand_type.get_metadata_size();
     const categorical_dtype *cd = static_cast<const categorical_dtype *>(m_groups_type.extended());

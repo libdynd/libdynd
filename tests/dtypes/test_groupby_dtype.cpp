@@ -15,8 +15,8 @@
 #include <dynd/dtypes/string_type.hpp>
 #include <dynd/dtypes/fixedstring_type.hpp>
 #include <dynd/dtypes/convert_dtype.hpp>
-#include <dynd/dtypes/struct_dtype.hpp>
-#include <dynd/dtypes/cstruct_dtype.hpp>
+#include <dynd/dtypes/struct_type.hpp>
+#include <dynd/dtypes/cstruct_type.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -97,7 +97,7 @@ TEST(GroupByDType, Struct) {
                     make_fixedstring_type(1, string_encoding_ascii)).eval();
 
     // Create a simple structured array
-    ndt::type d = make_cstruct_dtype(make_string_type(), "name", ndt::make_dtype<float>(), "height",
+    ndt::type d = make_cstruct_type(make_string_type(), "name", ndt::make_dtype<float>(), "height",
                     make_fixedstring_type(1, string_encoding_ascii), "gender");
     nd::array a = nd::make_strided_array(5, d);
     const char *name_vals[] = {"Paul", "Jennifer", "Frank", "Louise", "Anne"};
@@ -132,7 +132,7 @@ TEST(GroupByDType, Struct) {
 
 TEST(GroupByDType, StructSubset) {
     // Create a simple structured array
-    ndt::type d = make_cstruct_dtype(make_string_type(), "lastname",
+    ndt::type d = make_cstruct_type(make_string_type(), "lastname",
                     make_string_type(), "firstname",
                     make_fixedstring_type(1, string_encoding_ascii), "gender");
     nd::array a = nd::make_strided_array(7, d);
@@ -165,7 +165,7 @@ TEST(GroupByDType, StructSubset) {
 
     // Validate the list of groups it produced
     nd::array groups_list = g.p("groups");
-    EXPECT_EQ(make_strided_dim_dtype(make_struct_dtype(make_string_type(), "lastname",
+    EXPECT_EQ(make_strided_dim_dtype(make_struct_type(make_string_type(), "lastname",
                     make_fixedstring_type(1, string_encoding_ascii), "gender")),
                         groups_list.get_dtype());
     EXPECT_EQ(5, groups_list.get_shape()[0]);
@@ -210,7 +210,7 @@ TEST(GroupByDType, StructUnsortedCats) {
     nd::array gender_cats = nd::array(gender_cats_vals);
 
     // Create a simple structured array
-    ndt::type d = make_cstruct_dtype(make_string_type(), "name", ndt::make_dtype<float>(), "height",
+    ndt::type d = make_cstruct_type(make_string_type(), "name", ndt::make_dtype<float>(), "height",
                     make_fixedstring_type(1, string_encoding_ascii), "gender");
     nd::array a = nd::make_strided_array(5, d);
     const char *name_vals[] = {"Paul", "Jennifer", "Frank", "Louise", "Anne"};

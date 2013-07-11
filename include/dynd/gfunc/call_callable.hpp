@@ -7,7 +7,7 @@
 #define _DYND__CALL_CALLABLE_HPP_
 
 #include <dynd/gfunc/callable.hpp>
-#include <dynd/dtypes/cstruct_dtype.hpp>
+#include <dynd/dtypes/cstruct_type.hpp>
 #include <dynd/dtypes/string_type.hpp>
 #include <dynd/dtypes/fixedstring_type.hpp>
 #include <dynd/dtypes/dtype_dtype.hpp>
@@ -85,7 +85,7 @@ namespace detail {
 
 inline nd::array callable::call() const
 {
-    const cstruct_dtype *fsdt = static_cast<const cstruct_dtype *>(m_parameters_type.extended());
+    const cstruct_type *fsdt = static_cast<const cstruct_type *>(m_parameters_type.extended());
     size_t parameter_count = fsdt->get_field_count();
     nd::array params = nd::empty(m_parameters_type);
     if (parameter_count != 0) {
@@ -112,7 +112,7 @@ inline nd::array callable::call() const
 template<class T>
 inline nd::array callable::call(const T& p0) const
 {
-    const cstruct_dtype *fsdt = static_cast<const cstruct_dtype *>(m_parameters_type.extended());
+    const cstruct_type *fsdt = static_cast<const cstruct_type *>(m_parameters_type.extended());
     size_t parameter_count = fsdt->get_field_count();
     nd::array params = nd::empty(m_parameters_type);
     if (parameter_count != 1) {
@@ -143,7 +143,7 @@ inline nd::array callable::call(const T& p0) const
 template<class T0, class T1>
 inline nd::array callable::call(const T0& p0, const T1& p1) const
 {
-    const cstruct_dtype *fsdt = static_cast<const cstruct_dtype *>(m_parameters_type.extended());
+    const cstruct_type *fsdt = static_cast<const cstruct_type *>(m_parameters_type.extended());
     size_t parameter_count = fsdt->get_field_count();
     nd::array params = nd::empty(m_parameters_type);
     if (fsdt->get_field_count() != 2) {
@@ -178,7 +178,7 @@ inline nd::array callable::call(const T0& p0, const T1& p1) const
 template<class T0, class T1, class T2>
 inline nd::array callable::call(const T0& p0, const T1& p1, const T2& p2) const
 {
-    const cstruct_dtype *fsdt = static_cast<const cstruct_dtype *>(m_parameters_type.extended());
+    const cstruct_type *fsdt = static_cast<const cstruct_type *>(m_parameters_type.extended());
     size_t parameter_count = fsdt->get_field_count();
     nd::array params = nd::empty(m_parameters_type);
     if (fsdt->get_field_count() != 3) {
@@ -217,7 +217,7 @@ inline nd::array callable::call(const T0& p0, const T1& p1, const T2& p2) const
 template<class T0, class T1, class T2, class T3>
 inline nd::array callable::call(const T0& p0, const T1& p1, const T2& p2, const T3& p3) const
 {
-    const cstruct_dtype *fsdt = static_cast<const cstruct_dtype *>(m_parameters_type.extended());
+    const cstruct_type *fsdt = static_cast<const cstruct_type *>(m_parameters_type.extended());
     size_t parameter_count = fsdt->get_field_count();
     nd::array params = nd::empty(m_parameters_type);
     if (fsdt->get_field_count() != 4) {
@@ -260,7 +260,7 @@ inline nd::array callable::call(const T0& p0, const T1& p1, const T2& p2, const 
 template<class T0, class T1, class T2, class T3, class T4>
 inline nd::array callable::call(const T0& p0, const T1& p1, const T2& p2, const T3& p3, const T4& p4) const
 {
-    const cstruct_dtype *fsdt = static_cast<const cstruct_dtype *>(m_parameters_type.extended());
+    const cstruct_type *fsdt = static_cast<const cstruct_type *>(m_parameters_type.extended());
     size_t parameter_count = fsdt->get_field_count();
     nd::array params = nd::empty(m_parameters_type);
     if (fsdt->get_field_count() != 5) {

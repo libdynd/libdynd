@@ -15,8 +15,8 @@
 #include <dynd/dtypes/fixedstring_type.hpp>
 #include <dynd/dtypes/string_type.hpp>
 #include <dynd/dtypes/convert_dtype.hpp>
-#include <dynd/dtypes/cstruct_dtype.hpp>
-#include <dynd/dtypes/struct_dtype.hpp>
+#include <dynd/dtypes/cstruct_type.hpp>
+#include <dynd/dtypes/struct_type.hpp>
 #include <dynd/gfunc/callable.hpp>
 #include <dynd/gfunc/call_callable.hpp>
 
