@@ -15,8 +15,8 @@ using namespace std;
 using namespace dynd;
 
 dtype_dtype::dtype_dtype()
-    : base_dtype(dtype_type_id, custom_kind, sizeof(const base_dtype *),
-                    sizeof(const base_dtype *),
+    : base_type(dtype_type_id, custom_kind, sizeof(const base_type *),
+                    sizeof(const base_type *),
                     type_flag_scalar|type_flag_zeroinit|type_flag_destructor,
                     0, 0)
 {
@@ -44,7 +44,7 @@ void dtype_dtype::print_dtype(std::ostream& o) const
     o << "type";
 }
 
-bool dtype_dtype::operator==(const base_dtype& rhs) const
+bool dtype_dtype::operator==(const base_type& rhs) const
 {
     return this == &rhs || rhs.get_type_id() == dtype_type_id;
 }
@@ -73,9 +73,9 @@ void dtype_dtype::metadata_destruct(char *DYND_UNUSED(metadata)) const
 
 void dtype_dtype::data_destruct(const char *DYND_UNUSED(metadata), char *data) const
 {
-    const base_dtype *bd = reinterpret_cast<dtype_dtype_data *>(data)->dt;
+    const base_type *bd = reinterpret_cast<dtype_dtype_data *>(data)->dt;
     if (!is_builtin_type(bd)) {
-        base_dtype_decref(bd);
+        base_type_decref(bd);
     }
 }
 
@@ -83,9 +83,9 @@ void dtype_dtype::data_destruct_strided(const char *DYND_UNUSED(metadata), char 
                 intptr_t stride, size_t count) const
 {
     for (size_t i = 0; i != count; ++i, data += stride) {
-        const base_dtype *bd = reinterpret_cast<dtype_dtype_data *>(data)->dt;
+        const base_type *bd = reinterpret_cast<dtype_dtype_data *>(data)->dt;
         if (!is_builtin_type(bd)) {
-            base_dtype_decref(bd);
+            base_type_decref(bd);
         }
     }
 }
@@ -94,11 +94,11 @@ static void dtype_assignment_kernel_single(char *dst, const char *src,
                 kernel_data_prefix *DYND_UNUSED(extra))
 {
     // Free the destination reference
-    base_dtype_xdecref(reinterpret_cast<const dtype_dtype_data *>(dst)->dt);
+    base_type_xdecref(reinterpret_cast<const dtype_dtype_data *>(dst)->dt);
     // Copy the pointer and count the reference
-    const base_dtype *bd = reinterpret_cast<const dtype_dtype_data *>(src)->dt;
+    const base_type *bd = reinterpret_cast<const dtype_dtype_data *>(src)->dt;
     reinterpret_cast<dtype_dtype_data *>(dst)->dt = bd;
-    base_dtype_xincref(bd);
+    base_type_xincref(bd);
 }
 
 namespace {
@@ -120,7 +120,7 @@ namespace {
         static void destruct(kernel_data_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
-            base_dtype_xdecref(e->src_string_dt);
+            base_type_xdecref(e->src_string_dt);
         }
     };
 
@@ -135,7 +135,7 @@ namespace {
         static void single(char *dst, const char *src, kernel_data_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
-            const base_dtype *bd = reinterpret_cast<const dtype_dtype_data *>(src)->dt;
+            const base_type *bd = reinterpret_cast<const dtype_dtype_data *>(src)->dt;
             stringstream ss;
             if (is_builtin_type(bd)) {
                 ss << ndt::type(bd, true);
@@ -149,7 +149,7 @@ namespace {
         static void destruct(kernel_data_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
-            base_dtype_xdecref(e->dst_string_dt);
+            base_type_xdecref(e->dst_string_dt);
         }
     };
 } // anonymous namespace

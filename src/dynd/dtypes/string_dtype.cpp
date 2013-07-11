@@ -146,7 +146,7 @@ bool string_dtype::is_lossless_assignment(
     return false;
 }
 
-bool string_dtype::operator==(const base_dtype& rhs) const
+bool string_dtype::operator==(const base_type& rhs) const
 {
     if (this == &rhs) {
         return true;

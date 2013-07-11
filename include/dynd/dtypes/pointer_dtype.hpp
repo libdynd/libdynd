@@ -82,7 +82,7 @@ public:
 
     bool is_lossless_assignment(const ndt::type& dst_dt, const ndt::type& src_dt) const;
 
-    bool operator==(const base_dtype& rhs) const;
+    bool operator==(const base_type& rhs) const;
 
     ndt::type with_replaced_storage_type(const ndt::type& replacement_type) const;
 

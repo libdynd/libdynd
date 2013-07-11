@@ -398,7 +398,7 @@ TEST(GFuncCallable, DTypeParam) {
     nd::array a, r;
     a = nd::empty(c.get_parameters_type());
 
-    // With an base_dtype
+    // With an base_type
     tmp = make_cstruct_dtype(ndt::make_dtype<complex<float> >(), "A", ndt::make_dtype<int8_t>(), "B");
     *(const void**)a.get_ndo()->m_data_pointer = tmp.extended();
     r = c.call_generic(a);

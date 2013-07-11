@@ -29,7 +29,7 @@ bool void_pointer_dtype::is_lossless_assignment(const ndt::type& DYND_UNUSED(dst
     return false;
 }
 
-bool void_pointer_dtype::operator==(const base_dtype& rhs) const
+bool void_pointer_dtype::operator==(const base_type& rhs) const
 {
     return rhs.get_type_id() == void_pointer_type_id;
 }

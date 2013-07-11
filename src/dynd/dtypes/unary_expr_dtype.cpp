@@ -88,7 +88,7 @@ bool unary_expr_dtype::is_lossless_assignment(
     return false;
 }
 
-bool unary_expr_dtype::operator==(const base_dtype& rhs) const
+bool unary_expr_dtype::operator==(const base_type& rhs) const
 {
     if (this == &rhs) {
         return true;

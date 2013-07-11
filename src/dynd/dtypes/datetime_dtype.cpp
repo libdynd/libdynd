@@ -116,7 +116,7 @@ namespace {
 } // anonymous namespace
 
 datetime_dtype::datetime_dtype(datetime_unit_t unit, datetime_tz_t timezone)
-    : base_dtype(datetime_type_id, datetime_kind, 8, scalar_align_of<int64_t>::value, type_flag_scalar, 0, 0),
+    : base_type(datetime_type_id, datetime_kind, 8, scalar_align_of<int64_t>::value, type_flag_scalar, 0, 0),
         m_default_struct_dtype(::get_default_struct_dtype(unit)), m_unit(unit),
         m_timezone(timezone)
 {
@@ -279,7 +279,7 @@ bool datetime_dtype::is_lossless_assignment(const ndt::type& dst_dt, const ndt::
     }
 }
 
-bool datetime_dtype::operator==(const base_dtype& rhs) const
+bool datetime_dtype::operator==(const base_type& rhs) const
 {
     if (this == &rhs) {
         return true;
@@ -501,7 +501,7 @@ namespace {
         static void destruct(kernel_data_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
-            base_dtype_xdecref(e->datetime_dt);
+            base_type_xdecref(e->datetime_dt);
         }
     };
 

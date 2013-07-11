@@ -6,7 +6,7 @@
 #ifndef _DYND__BASE_STRUCT_TYPE_HPP_
 #define _DYND__BASE_STRUCT_TYPE_HPP_
 
-#include <dynd/dtypes/base_dtype.hpp>
+#include <dynd/dtypes/base_type.hpp>
 
 namespace dynd {
 
@@ -16,13 +16,13 @@ namespace dynd {
  * has kind struct_kind, it must be a subclass of
  * base_struct_dtype.
  */
-class base_struct_dtype : public base_dtype {
+class base_struct_dtype : public base_type {
 protected:
     size_t m_field_count;
 public:
     inline base_struct_dtype(type_id_t type_id, size_t data_size,
                     size_t alignment, size_t field_count, flags_type flags, size_t metadata_size)
-        : base_dtype(type_id, struct_kind, data_size, alignment, flags, metadata_size, 0),
+        : base_type(type_id, struct_kind, data_size, alignment, flags, metadata_size, 0),
             m_field_count(field_count)
     {}
 

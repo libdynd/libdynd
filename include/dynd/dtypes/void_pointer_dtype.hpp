@@ -16,10 +16,10 @@
 
 namespace dynd {
 
-class void_pointer_dtype : public base_dtype {
+class void_pointer_dtype : public base_type {
 public:
     void_pointer_dtype()
-        : base_dtype(void_pointer_type_id, void_kind, sizeof(void *),
+        : base_type(void_pointer_type_id, void_kind, sizeof(void *),
                         sizeof(void *), type_flag_scalar|type_flag_zeroinit|type_flag_blockref,
                         0, 0)
     {}
@@ -30,7 +30,7 @@ public:
 
     bool is_lossless_assignment(const ndt::type& dst_dt, const ndt::type& src_dt) const;
 
-    bool operator==(const base_dtype& rhs) const;
+    bool operator==(const base_type& rhs) const;
 
     void metadata_default_construct(char *DYND_UNUSED(metadata), size_t DYND_UNUSED(ndim), const intptr_t* DYND_UNUSED(shape)) const {
     }

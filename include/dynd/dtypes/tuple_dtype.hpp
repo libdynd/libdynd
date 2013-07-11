@@ -12,7 +12,7 @@
 
 namespace dynd {
 
-class tuple_dtype : public base_dtype {
+class tuple_dtype : public base_type {
     std::vector<ndt::type> m_fields;
     std::vector<size_t> m_offsets;
     std::vector<size_t> m_metadata_offsets;
@@ -48,7 +48,7 @@ public:
 
     bool is_lossless_assignment(const ndt::type& dst_dt, const ndt::type& src_dt) const;
 
-    bool operator==(const base_dtype& rhs) const;
+    bool operator==(const base_type& rhs) const;
 }; // class tuple_dtype
 
 /** Makes a tuple dtype with the specified fields, using the standard layout */

@@ -396,7 +396,7 @@ bool var_dim_dtype::is_lossless_assignment(const ndt::type& dst_dt, const ndt::t
     return false;
 }
 
-bool var_dim_dtype::operator==(const base_dtype& rhs) const
+bool var_dim_dtype::operator==(const base_type& rhs) const
 {
     if (this == &rhs) {
         return true;
@@ -417,7 +417,7 @@ void var_dim_dtype::metadata_default_construct(char *metadata, size_t ndim, cons
     md->stride = element_size;
     md->offset = 0;
     // Allocate a memory block
-    base_dtype::flags_type flags = m_element_dtype.get_flags();
+    base_type::flags_type flags = m_element_dtype.get_flags();
     if (flags&type_flag_destructor) {
         md->blockref = make_objectarray_memory_block(m_element_dtype, metadata, element_size).release();
     } else if (flags&type_flag_zeroinit) {

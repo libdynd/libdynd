@@ -136,7 +136,7 @@ size_t bytes_dtype::make_assignment_kernel(
 }
 
 
-bool bytes_dtype::operator==(const base_dtype& rhs) const
+bool bytes_dtype::operator==(const base_type& rhs) const
 {
     if (this == &rhs) {
         return true;

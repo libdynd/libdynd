@@ -105,7 +105,7 @@ static char *allocate(memory_block_data *self, size_t count)
     if ((emb->m_dt.get_flags()&type_flag_zeroinit) != 0) {
         memset(result, 0, emb->m_stride * count);
     } else {
-        // TODO: Add a default data constructor to base_dtype
+        // TODO: Add a default data constructor to base_type
         //       as well, with a flag for it
         stringstream ss;
         ss << "Expected objectarray data to be zeroinit, but is not with dtype " << emb->m_dt;
@@ -160,7 +160,7 @@ static char *resize(memory_block_data *self, char *previous_allocated, size_t co
         intptr_t new_count = count - (intptr_t)previous_count;
         memset(mc->memory + emb->m_stride * previous_count, 0, emb->m_stride * new_count);
     } else {
-        // TODO: Add a default data constructor to base_dtype
+        // TODO: Add a default data constructor to base_type
         //       as well, with a flag for it
         stringstream ss;
         ss << "Expected objectarray data to be zeroinit, but is not with dtype " << emb->m_dt;

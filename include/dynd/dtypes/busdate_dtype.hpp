@@ -28,7 +28,7 @@ enum busdate_roll_t {
     busdate_roll_throw
 };
 
-class busdate_dtype : public base_dtype {
+class busdate_dtype : public base_type {
     /** Strategy for handling dates that are not business dates */
     busdate_roll_t m_roll;
     /** Which days of the week are work days vs weekend */
@@ -76,7 +76,7 @@ public:
 
     bool is_lossless_assignment(const ndt::type& dst_dt, const ndt::type& src_dt) const;
 
-    bool operator==(const base_dtype& rhs) const;
+    bool operator==(const base_type& rhs) const;
 
     void metadata_default_construct(char *DYND_UNUSED(metadata), size_t DYND_UNUSED(ndim), const intptr_t* DYND_UNUSED(shape)) const {
     }

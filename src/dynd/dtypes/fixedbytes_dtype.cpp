@@ -75,7 +75,7 @@ bool fixedbytes_dtype::is_lossless_assignment(const ndt::type& dst_dt, const ndt
     }
 }
 
-bool fixedbytes_dtype::operator==(const base_dtype& rhs) const
+bool fixedbytes_dtype::operator==(const base_type& rhs) const
 {
     if (this == &rhs) {
         return true;

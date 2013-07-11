@@ -7,7 +7,7 @@
 #define _DYND__LOWLEVEL_API_HPP_
 
 #include <dynd/memblock/memory_block.hpp>
-#include <dynd/dtypes/base_dtype.hpp>
+#include <dynd/dtypes/base_type.hpp>
 
 namespace dynd {
 
@@ -28,10 +28,10 @@ struct lowlevel_api_t {
     // you're using it correctly, use the incref/decref instead.
     void (*memory_block_free)(memory_block_data *mbd);
     // Reference counting primitives for dtypes
-    void (*base_dtype_incref)(const base_dtype *bd);
-    void (*base_dtype_decref)(const base_dtype *bd);
-    // Get the base_dtype_members struct from a base dtype
-    const base_dtype_members *(*get_base_dtype_members)(const base_dtype *bd);
+    void (*base_type_incref)(const base_type *bd);
+    void (*base_type_decref)(const base_type *bd);
+    // Get the base_type_members struct from a base dtype
+    const base_type_members *(*get_base_type_members)(const base_type *bd);
 };
 
 } // namespace dynd

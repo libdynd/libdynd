@@ -19,7 +19,7 @@ namespace {
         // Offsets, from the start of &base, to the kernels
         // before and after the buffer
         size_t first_kernel_offset, second_kernel_offset;
-        const base_dtype *buffer_dt;
+        const base_type *buffer_dt;
         char *buffer_metadata;
         size_t buffer_data_offset, buffer_data_size;
         intptr_t buffer_stride;
@@ -73,7 +73,7 @@ namespace {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             kernel_data_prefix *echild_first, *echild_second;
             unary_single_operation_t opchild;
-            const base_dtype *buffer_dt = e->buffer_dt;
+            const base_type *buffer_dt = e->buffer_dt;
             char *buffer_metadata = e->buffer_metadata;
             char *buffer_data_ptr = eraw + e->buffer_data_offset;
             echild_first = reinterpret_cast<kernel_data_prefix *>(eraw + e->first_kernel_offset);
@@ -102,7 +102,7 @@ namespace {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             kernel_data_prefix *echild_first, *echild_second;
             unary_strided_operation_t opchild_first, opchild_second;
-            const base_dtype *buffer_dt = e->buffer_dt;
+            const base_type *buffer_dt = e->buffer_dt;
             char *buffer_metadata = e->buffer_metadata;
             char *buffer_data_ptr = eraw + e->buffer_data_offset;
             size_t buffer_stride = e->buffer_stride;

@@ -45,7 +45,7 @@ make_immutable_builtin_scalar_array(const T& value)
     memory_block_ptr result = make_array_memory_block(0, sizeof(T), scalar_align_of<T>::value, &data_ptr);
     *reinterpret_cast<T *>(data_ptr) = value;
     array_preamble *ndo = reinterpret_cast<array_preamble *>(result.get());
-    ndo->m_dtype = reinterpret_cast<base_dtype *>(type_id_of<T>::value);
+    ndo->m_dtype = reinterpret_cast<base_type *>(type_id_of<T>::value);
     ndo->m_data_pointer = data_ptr;
     ndo->m_data_reference = NULL;
     ndo->m_flags = nd::read_access_flag | nd::immutable_access_flag;
@@ -192,10 +192,10 @@ nd::array nd::make_pod_array(const ndt::type& pod_dt, const void *data)
     // Fill in the preamble metadata
     array_preamble *ndo = reinterpret_cast<array_preamble *>(result.get());
     if (pod_dt.is_builtin()) {
-        ndo->m_dtype = reinterpret_cast<const base_dtype *>(pod_dt.get_type_id());
+        ndo->m_dtype = reinterpret_cast<const base_type *>(pod_dt.get_type_id());
     } else {
         ndo->m_dtype = pod_dt.extended();
-        base_dtype_incref(ndo->m_dtype);
+        base_type_incref(ndo->m_dtype);
     }
     ndo->m_data_pointer = data_ptr;
     ndo->m_data_reference = NULL;
@@ -259,11 +259,11 @@ static nd::array make_array_clone_with_new_dtype(const nd::array& n, const ndt::
     array_preamble *preamble = result.get_ndo();
     // Swap in the dtype
     if (!preamble->is_builtin_type()) {
-        base_dtype_decref(preamble->m_dtype);
+        base_type_decref(preamble->m_dtype);
     }
     preamble->m_dtype = new_dt.extended();
     if(!new_dt.is_builtin()) {
-        base_dtype_incref(preamble->m_dtype);
+        base_type_incref(preamble->m_dtype);
     }
     return result;
 }
@@ -503,10 +503,10 @@ nd::array nd::array::at_array(size_t nindices, const irange *indices, bool colla
         if (!dt.is_builtin()) {
             result.set(make_array_memory_block(dt.extended()->get_metadata_size()));
             result.get_ndo()->m_dtype = dt.extended();
-            base_dtype_incref(result.get_ndo()->m_dtype);
+            base_type_incref(result.get_ndo()->m_dtype);
         } else {
             result.set(make_array_memory_block(0));
-            result.get_ndo()->m_dtype = reinterpret_cast<const base_dtype *>(dt.get_type_id());
+            result.get_ndo()->m_dtype = reinterpret_cast<const base_type *>(dt.get_type_id());
         }
         result.get_ndo()->m_data_pointer = get_ndo()->m_data_pointer;
         if (get_ndo()->m_data_reference) {

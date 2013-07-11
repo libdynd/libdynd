@@ -15,7 +15,7 @@ namespace {
     struct single_buffer {
         // Offset, from the start of &base, to the kernel for buffering
         size_t kernel_offset;
-        const base_dtype *dt;
+        const base_type *dt;
         char *metadata;
         size_t data_offset, data_size;
     };

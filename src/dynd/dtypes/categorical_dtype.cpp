@@ -80,7 +80,7 @@ namespace {
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             if (e->src_cat_dt != NULL) {
-                base_dtype_decref(e->src_cat_dt);
+                base_type_decref(e->src_cat_dt);
             }
             kernel_data_prefix *echild = &(e + 1)->base;
             if (echild->destructor) {
@@ -120,7 +120,7 @@ namespace {
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             if (e->dst_cat_dt != NULL) {
-                base_dtype_decref(e->dst_cat_dt);
+                base_type_decref(e->dst_cat_dt);
             }
         }
     };
@@ -192,7 +192,7 @@ static nd::array make_sorted_categories(const set<const char *, cmp>& uniques, c
 }
 
 categorical_dtype::categorical_dtype(const nd::array& categories, bool presorted)
-    : base_dtype(categorical_type_id, custom_kind, 4, 4, type_flag_scalar, 0, 0)
+    : base_type(categorical_type_id, custom_kind, 4, 4, type_flag_scalar, 0, 0)
 {
     intptr_t category_count;
     if (presorted) {
@@ -500,7 +500,7 @@ size_t categorical_dtype::make_assignment_kernel(
 
 }
 
-bool categorical_dtype::operator==(const base_dtype& rhs) const
+bool categorical_dtype::operator==(const base_type& rhs) const
 {
     if (this == &rhs)
         return true;

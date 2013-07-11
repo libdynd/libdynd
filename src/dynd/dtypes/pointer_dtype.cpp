@@ -219,7 +219,7 @@ bool pointer_dtype::is_lossless_assignment(const ndt::type& dst_dt, const ndt::t
     }
 }
 
-bool pointer_dtype::operator==(const base_dtype& rhs) const
+bool pointer_dtype::operator==(const base_type& rhs) const
 {
     if (this == &rhs) {
         return true;

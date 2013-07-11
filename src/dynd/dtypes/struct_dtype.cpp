@@ -308,7 +308,7 @@ size_t struct_dtype::make_comparison_kernel(
     throw not_comparable_error(src0_dt, src1_dt, comptype);
 }
 
-bool struct_dtype::operator==(const base_dtype& rhs) const
+bool struct_dtype::operator==(const base_type& rhs) const
 {
     if (this == &rhs) {
         return true;

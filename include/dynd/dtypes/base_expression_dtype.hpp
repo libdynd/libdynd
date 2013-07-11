@@ -6,18 +6,18 @@
 #ifndef _DYND__BASE_EXPRESSION_TYPE_HPP_
 #define _DYND__BASE_EXPRESSION_TYPE_HPP_
 
-#include <dynd/dtypes/base_dtype.hpp>
+#include <dynd/dtypes/base_type.hpp>
 
 namespace dynd {
 
 /**
  * Base class for all dtypes of expression_kind, and for the pointer_dtype.
  */
-class base_expression_dtype : public base_dtype {
+class base_expression_dtype : public base_type {
 public:
     inline base_expression_dtype(type_id_t type_id, type_kind_t kind,
                     size_t data_size, size_t alignment, flags_type flags, size_t metadata_size, size_t undim=0)
-        : base_dtype(type_id, kind, data_size, alignment, flags, metadata_size, undim)
+        : base_type(type_id, kind, data_size, alignment, flags, metadata_size, undim)
     {}
 
     virtual ~base_expression_dtype();

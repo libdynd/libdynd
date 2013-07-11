@@ -9,10 +9,10 @@ using namespace std;
 using namespace dynd;
 
 namespace {
-    // TODO: Return a static instance of base_dtype_members for the builtin types
-    const base_dtype_members *get_base_dtype_members(const dynd::base_dtype *bd)
+    // TODO: Return a static instance of base_type_members for the builtin types
+    const base_type_members *get_base_type_members(const dynd::base_type *bd)
     {
-        return &bd->get_base_dtype_members();
+        return &bd->get_base_type_members();
     }
 
     const lowlevel_api_t lowlevel_api = {
@@ -20,9 +20,9 @@ namespace {
         &memory_block_incref,
         &memory_block_decref,
         &detail::memory_block_free,
-        &base_dtype_incref,
-        &base_dtype_decref,
-        &get_base_dtype_members,
+        &base_type_incref,
+        &base_type_decref,
+        &get_base_type_members,
     };
 } // anonymous namespace
 

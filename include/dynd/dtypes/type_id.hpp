@@ -208,9 +208,9 @@ enum {
 };
 
 // Forward declaration so we can make the is_builtin_type function here
-class base_dtype;
+class base_type;
 
-inline bool is_builtin_type(const base_dtype *dt) {
+inline bool is_builtin_type(const base_type *dt) {
     return (reinterpret_cast<uintptr_t>(dt)&(~static_cast<uintptr_t>(builtin_type_id_mask))) == 0;
 }
 

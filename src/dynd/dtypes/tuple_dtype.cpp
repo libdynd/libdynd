@@ -12,7 +12,7 @@ using namespace std;
 using namespace dynd;
 
 dynd::tuple_dtype::tuple_dtype(const std::vector<ndt::type>& field_types)
-    : base_dtype(tuple_type_id, struct_kind, 0, 1, type_flag_none, 0, 0),
+    : base_type(tuple_type_id, struct_kind, 0, 1, type_flag_none, 0, 0),
             m_fields(field_types), m_offsets(field_types.size()), m_metadata_offsets(field_types.size())
 {
     // TODO: tuple_dtype should probably not have kind struct_kind?
@@ -50,7 +50,7 @@ tuple_dtype::~tuple_dtype()
 
 dynd::tuple_dtype::tuple_dtype(const std::vector<ndt::type>& field_types, const std::vector<size_t> offsets,
                     size_t data_size, size_t alignment)
-    : base_dtype(tuple_type_id, struct_kind, data_size, alignment, type_flag_none, 0, 0),
+    : base_type(tuple_type_id, struct_kind, data_size, alignment, type_flag_none, 0, 0),
             m_fields(field_types), m_offsets(offsets), m_metadata_offsets(field_types.size())
 {
     if (!offset_is_aligned(data_size, alignment)) {
@@ -169,7 +169,7 @@ bool dynd::tuple_dtype::is_lossless_assignment(const ndt::type& dst_dt, const nd
     return false;
 }
 
-bool dynd::tuple_dtype::operator==(const base_dtype& rhs) const
+bool dynd::tuple_dtype::operator==(const base_type& rhs) const
 {
     if (this == &rhs) {
         return true;

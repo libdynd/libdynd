@@ -23,7 +23,7 @@ struct assign_to_same_category_type;
 
 namespace dynd {
 
-class categorical_dtype : public base_dtype {
+class categorical_dtype : public base_type {
     // The data type of the category
     ndt::type m_category_type;
     // The integer type used for storage
@@ -84,7 +84,7 @@ public:
 
     bool is_lossless_assignment(const ndt::type& dst_dt, const ndt::type& src_dt) const;
 
-    bool operator==(const base_dtype& rhs) const;
+    bool operator==(const base_type& rhs) const;
 
     void metadata_default_construct(char *metadata, size_t ndim, const intptr_t* shape) const;
     void metadata_copy_construct(char *dst_metadata, const char *src_metadata, memory_block_data *embedded_reference) const;

@@ -9,7 +9,7 @@
 #include <iostream>
 #include <stdexcept>
 
-#include <dynd/dtypes/base_dtype.hpp>
+#include <dynd/dtypes/base_type.hpp>
 #include <dynd/dtypes/base_expression_dtype.hpp>
 #include <dynd/dtypes/base_string_dtype.hpp>
 #include <dynd/dtypes/dynd_float16.hpp>
@@ -84,7 +84,7 @@ namespace ndt {
  * of elements in ndarrays. The class stores a number of common
  * properties, like a type id, a kind, an alignment, a byte-swapped
  * flag, and an element_size. Some data types have additional data
- * which is stored as a dynamically allocated base_dtype object.
+ * which is stored as a dynamically allocated base_type object.
  *
  * For the simple built-in dtypes, no extended data is needed, in
  * which case this is entirely a value type with no allocated memory.
@@ -92,20 +92,20 @@ namespace ndt {
  */
 class type {
 private:
-    const base_dtype *m_extended;
+    const base_type *m_extended;
 
     /**
      * Validates that the given type ID is a proper ID and casts to
-     * an base_dtype pointer if it is. Throws
+     * an base_type pointer if it is. Throws
      * an exception if not.
      *
      * \param type_id  The type id to validate.
      */
-    static inline const base_dtype *validate_builtin_type_id(type_id_t type_id)
+    static inline const base_type *validate_builtin_type_id(type_id_t type_id)
     {
         // 0 <= type_id < builtin_type_id_count
         if ((unsigned int)type_id < builtin_type_id_count) {
-            return reinterpret_cast<const base_dtype *>(type_id);
+            return reinterpret_cast<const base_type *>(type_id);
         } else {
             throw invalid_type_id((int)type_id);
         }
@@ -117,14 +117,14 @@ private:
 public:
     /** Constructor */
     type()
-        : m_extended(reinterpret_cast<const base_dtype *>(uninitialized_type_id))
+        : m_extended(reinterpret_cast<const base_type *>(uninitialized_type_id))
     {}
-    /** Constructor from an base_dtype. This claims ownership of the 'extended' reference by default, be careful! */
-    inline explicit type(const base_dtype *extended, bool incref)
+    /** Constructor from an base_type. This claims ownership of the 'extended' reference by default, be careful! */
+    inline explicit type(const base_type *extended, bool incref)
         : m_extended(extended)
     {
         if (incref && !is_builtin_type(extended)) {
-            base_dtype_incref(m_extended);
+            base_type_incref(m_extended);
         }
     }
     /** Copy constructor (should be "= default" in C++11) */
@@ -132,17 +132,17 @@ public:
         : m_extended(rhs.m_extended)
     {
         if (!is_builtin_type(m_extended)) {
-            base_dtype_incref(m_extended);
+            base_type_incref(m_extended);
         }
     }
     /** Assignment operator (should be "= default" in C++11) */
     type& operator=(const type& rhs) {
         if (!is_builtin_type(m_extended)) {
-            base_dtype_decref(m_extended);
+            base_type_decref(m_extended);
         }
         m_extended = rhs.m_extended;
         if (!is_builtin_type(m_extended)) {
-            base_dtype_incref(m_extended);
+            base_type_incref(m_extended);
         }
         return *this;
     }
@@ -151,15 +151,15 @@ public:
     type(type&& rhs)
         : m_extended(rhs.m_extended)
     {
-        rhs.m_extended = reinterpret_cast<const base_dtype *>(uninitialized_type_id);
+        rhs.m_extended = reinterpret_cast<const base_type *>(uninitialized_type_id);
     }
     /** Move assignment operator */
     type& operator=(type&& rhs) {
         if (!is_builtin_type(m_extended)) {
-            base_dtype_decref(m_extended);
+            base_type_decref(m_extended);
         }
         m_extended = rhs.m_extended;
-        rhs.m_extended = reinterpret_cast<const base_dtype *>(uninitialized_type_id);
+        rhs.m_extended = reinterpret_cast<const base_type *>(uninitialized_type_id);
         return *this;
     }
 #endif // DYND_RVALUE_REFS
@@ -177,19 +177,19 @@ public:
 
     ~type() {
         if (!is_builtin()) {
-            base_dtype_decref(m_extended);
+            base_type_decref(m_extended);
         }
     }
 
     /**
      * The type class operates as a smart pointer for dynamically
-     * allocated base_dtype instances, with raw storage of type id
+     * allocated base_type instances, with raw storage of type id
      * for the built-in types. This function gives away the held
      * reference, leaving behind a void type.
      */
-    const base_dtype *release() {
-        const base_dtype *result = m_extended;
-        m_extended = reinterpret_cast<const base_dtype *>(uninitialized_type_id);
+    const base_type *release() {
+        const base_type *result = m_extended;
+        m_extended = reinterpret_cast<const base_type *>(uninitialized_type_id);
         return result;
     }
 
@@ -197,7 +197,7 @@ public:
         std::swap(m_extended, rhs.m_extended);
     }
 
-    void swap(const base_dtype *&rhs) {
+    void swap(const base_type *&rhs) {
         std::swap(m_extended, rhs);
     }
 
@@ -300,7 +300,7 @@ public:
 
     /**
      * Indexes into the type, intended for recursive calls from the extended-type version. See
-     * the function in base_dtype with the same name for more details.
+     * the function in base_type with the same name for more details.
      */
     type apply_linear_index(size_t nindices, const irange *indices,
                 size_t current_i, const type& root_dt, bool leading_dimension) const;
@@ -486,7 +486,7 @@ public:
         }
     }
 
-    inline base_dtype::flags_type get_flags() const {
+    inline base_type::flags_type get_flags() const {
         if (is_builtin()) {
             return type_flag_scalar;
         } else {
@@ -539,12 +539,12 @@ public:
 
 
     /**
-     * Returns a const pointer to the base_dtype object which
+     * Returns a const pointer to the base_type object which
      * contains information about the type, or NULL if no extended
      * type information exists. The returned pointer is only valid during
      * the lifetime of the type.
      */
-    inline const base_dtype* extended() const {
+    inline const base_type* extended() const {
         return m_extended;
     }
 

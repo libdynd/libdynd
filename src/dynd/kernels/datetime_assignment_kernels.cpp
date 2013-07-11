@@ -61,8 +61,8 @@ namespace {
         static void destruct(kernel_data_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
-            base_dtype_xdecref(e->dst_datetime_dt);
-            base_dtype_xdecref(e->src_string_dt);
+            base_type_xdecref(e->dst_datetime_dt);
+            base_type_xdecref(e->src_string_dt);
         }
     };
 } // anonymous namespace
@@ -129,8 +129,8 @@ namespace {
         static void destruct(kernel_data_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
-            base_dtype_xdecref(e->dst_string_dt);
-            base_dtype_xdecref(e->src_datetime_dt);
+            base_type_xdecref(e->dst_string_dt);
+            base_type_xdecref(e->src_datetime_dt);
         }
     };
 } // anonymous namespace

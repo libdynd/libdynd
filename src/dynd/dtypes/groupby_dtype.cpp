@@ -104,7 +104,7 @@ bool groupby_dtype::is_lossless_assignment(const ndt::type& dst_dt, const ndt::t
     }
 }
 
-bool groupby_dtype::operator==(const base_dtype& rhs) const
+bool groupby_dtype::operator==(const base_type& rhs) const
 {
     if (this == &rhs) {
         return true;
@@ -235,7 +235,7 @@ namespace {
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             if (e->src_groupby_dt != NULL) {
-                base_dtype_decref(e->src_groupby_dt);
+                base_type_decref(e->src_groupby_dt);
             }
             kernel_data_prefix *echild = &(e + 1)->base;
             if (echild->destructor) {
@@ -270,7 +270,7 @@ size_t groupby_dtype::make_operand_to_value_assignment_kernel(
     e->base.destructor = &groupby_to_value_assign_extra::destruct;
     // The kernel dtype owns a reference to this dtype
     e->src_groupby_dt = this;
-    base_dtype_incref(e->src_groupby_dt);
+    base_type_incref(e->src_groupby_dt);
     e->src_metadata = src_metadata;
     e->dst_metadata = dst_metadata;
 

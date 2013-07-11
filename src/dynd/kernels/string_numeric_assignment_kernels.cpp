@@ -96,7 +96,7 @@ namespace {
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             if (e->src_string_dt) {
-                base_dtype_decref(e->src_string_dt);
+                base_type_decref(e->src_string_dt);
             }
         }
     };
@@ -486,7 +486,7 @@ namespace {
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             if (e->dst_string_dt) {
-                base_dtype_decref(e->dst_string_dt);
+                base_type_decref(e->dst_string_dt);
             }
         }
     };

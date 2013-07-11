@@ -28,12 +28,12 @@ namespace ndt {
     class type;
 } // namespace ndt
 
-class base_dtype;
+class base_type;
 class assignment_kernel;
 
 struct iterdata_common;
 
-/** This is the callback function type used by the base_dtype::foreach function */
+/** This is the callback function type used by the base_type::foreach function */
 typedef void (*foreach_fn_t)(const ndt::type &dt, char *data, const char *metadata, void *callback_data);
 
 /**
@@ -51,7 +51,7 @@ typedef char * (*iterdata_reset_fn_t)(iterdata_common *iterdata, char *data, siz
 /**
  * This is a generic function which applies a transformation to a type.
  * Usage of the function pointer is typically paired with the
- * base_dtype::transform_child_types virtual function on the type
+ * base_type::transform_child_types virtual function on the type
  *
  * An implementation of this function should either copy 'dt' into
  * 'out_transformed_dtype', and leave 'out_was_transformed' alone, or it
@@ -69,7 +69,7 @@ struct iterdata_common {
     iterdata_reset_fn_t reset;
 };
 
-struct base_dtype_members {
+struct base_type_members {
     typedef uint32_t flags_type;
 
     /** The type id (type_id_t is the enum) */
@@ -87,7 +87,7 @@ struct base_dtype_members {
     /** The number of array dimensions this type has */
     uint8_t undim;
 
-    base_dtype_members(uint16_t type_id_, uint8_t kind_, uint8_t data_alignment_,
+    base_type_members(uint16_t type_id_, uint8_t kind_, uint8_t data_alignment_,
                     flags_type flags_, size_t data_size_, size_t metadata_size_, uint8_t undim_)
         : type_id(type_id_), kind(kind_), data_alignment(data_alignment_), flags(flags_),
                 data_size(data_size_), metadata_size(metadata_size_), undim(undim_)
@@ -97,18 +97,18 @@ struct base_dtype_members {
 /**
  * This is the virtual base class for defining new types which are not so basic
  * that we want them in the small list of builtin types. This is a reference
- * counted class, and is immutable, so once an base_dtype instance is constructed,
+ * counted class, and is immutable, so once an base_type instance is constructed,
  * it should never be modified.
  *
- * Typically, the base_dtype is used by manipulating a type instance, which acts
- * as a smart pointer to base_dtype, which special handling for the builtin types.
+ * Typically, the base_type is used by manipulating a type instance, which acts
+ * as a smart pointer to base_type, which special handling for the builtin types.
  */
-class base_dtype {
+class base_type {
     /** Embedded reference counting */
     mutable atomic_refcount m_use_count;
 protected:
     /// Standard dtype data
-    base_dtype_members m_members;
+    base_type_members m_members;
     
 
 protected:
@@ -117,16 +117,16 @@ protected:
                     std::vector<std::pair<std::string, gfunc::callable> >& out_properties,
                     std::vector<std::pair<std::string, gfunc::callable> >& out_functions) const;
 public:
-    typedef base_dtype_members::flags_type flags_type;
+    typedef base_type_members::flags_type flags_type;
 
     /** Starts off the extended type instance with a use count of 1. */
-    inline base_dtype(type_id_t type_id, type_kind_t kind, size_t data_size,
+    inline base_type(type_id_t type_id, type_kind_t kind, size_t data_size,
                     size_t alignment, flags_type flags, size_t metadata_size, size_t undim)
         : m_use_count(1), m_members(static_cast<uint16_t>(type_id), static_cast<uint8_t>(kind),
                 static_cast<uint8_t>(alignment), flags, data_size, metadata_size, static_cast<uint8_t>(undim))
     {}
 
-    virtual ~base_dtype();
+    virtual ~base_type();
 
     /** For debugging purposes, the type's use count */
     inline int32_t get_use_count() const {
@@ -134,7 +134,7 @@ public:
     }
 
     /** Returns the struct of data common to all types. */
-    inline const base_dtype_members& get_base_dtype_members() const {
+    inline const base_type_members& get_base_type_members() const {
         return m_members;
     }
 
@@ -158,7 +158,7 @@ public:
     inline size_t get_undim() const {
         return m_members.undim;
     }
-    inline base_dtype_members::flags_type get_flags() const {
+    inline base_type_members::flags_type get_flags() const {
         return m_members.flags;
     }
     virtual size_t get_default_data_size(size_t ndim, const intptr_t *shape) const;
@@ -360,7 +360,7 @@ public:
      */
     virtual bool is_lossless_assignment(const ndt::type& dst_dt, const ndt::type& src_dt) const;
 
-    virtual bool operator==(const base_dtype& rhs) const = 0;
+    virtual bool operator==(const base_type& rhs) const = 0;
 
     /** The size of the ndobject metadata for this type */
     inline size_t get_metadata_size() const {
@@ -580,14 +580,14 @@ public:
                     const char *src_metadata,
                     kernel_request_t kernreq, const eval::eval_context *ectx) const;
 
-    friend void base_dtype_incref(const base_dtype *ed);
-    friend void base_dtype_decref(const base_dtype *ed);
+    friend void base_type_incref(const base_type *ed);
+    friend void base_type_decref(const base_type *ed);
 };
 
 /**
  * Increments the reference count of the type
  */
-inline void base_dtype_incref(const base_dtype *bd)
+inline void base_type_incref(const base_type *bd)
 {
     //std::cout << "dtype " << (void *)ed << " inc: " << ed->m_use_count + 1 << "\t"; ed->print_dtype(std::cout); std::cout << std::endl;
     ++bd->m_use_count;
@@ -597,10 +597,10 @@ inline void base_dtype_incref(const base_dtype *bd)
  * Checks if the type is builtin or not, and if not,
  * increments the reference count of the type.
  */
-inline void base_dtype_xincref(const base_dtype *bd)
+inline void base_type_xincref(const base_type *bd)
 {
     if (!is_builtin_type(bd)) {
-        base_dtype_incref(bd);
+        base_type_incref(bd);
     }
 }
 
@@ -608,7 +608,7 @@ inline void base_dtype_xincref(const base_dtype *bd)
  * Decrements the reference count of the type,
  * freeing it if the count reaches zero.
  */
-inline void base_dtype_decref(const base_dtype *bd)
+inline void base_type_decref(const base_type *bd)
 {
     //std::cout << "dtype " << (void *)ed << " dec: " << ed->m_use_count - 1 << "\t"; ed->print_dtype(std::cout); std::cout << std::endl;
     if (--bd->m_use_count == 0) {
@@ -621,10 +621,10 @@ inline void base_dtype_decref(const base_dtype *bd)
  * decrements the reference count of the type,
  * freeing it if the count reaches zero.
  */
-inline void base_dtype_xdecref(const base_dtype *bd)
+inline void base_type_xdecref(const base_type *bd)
 {
     if (!is_builtin_type(bd)) {
-        base_dtype_decref(bd);
+        base_type_decref(bd);
     }
 }
 

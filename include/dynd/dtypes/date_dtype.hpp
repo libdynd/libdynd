@@ -16,7 +16,7 @@ namespace dynd {
 #define DYND_DATE_NA (std::numeric_limits<int32_t>::min())
 
 
-class date_dtype : public base_dtype {
+class date_dtype : public base_type {
 public:
     date_dtype();
 
@@ -38,7 +38,7 @@ public:
 
     bool is_lossless_assignment(const ndt::type& dst_dt, const ndt::type& src_dt) const;
 
-    bool operator==(const base_dtype& rhs) const;
+    bool operator==(const base_type& rhs) const;
 
     void metadata_default_construct(char *DYND_UNUSED(metadata), size_t DYND_UNUSED(ndim), const intptr_t* DYND_UNUSED(shape)) const {
     }

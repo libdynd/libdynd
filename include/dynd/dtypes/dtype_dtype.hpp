@@ -12,14 +12,14 @@
 namespace dynd {
 
 struct dtype_dtype_data {
-    const base_dtype *dt;
+    const base_type *dt;
 };
 
 /**
  * A dynd type whose ndobject instances themselves contain
  * dynd types.
  */
-class dtype_dtype : public base_dtype {
+class dtype_dtype : public base_type {
 public:
     dtype_dtype();
 
@@ -29,7 +29,7 @@ public:
 
     void print_dtype(std::ostream& o) const;
 
-    bool operator==(const base_dtype& rhs) const;
+    bool operator==(const base_type& rhs) const;
 
     void metadata_default_construct(char *metadata, size_t ndim, const intptr_t* shape) const;
     void metadata_copy_construct(char *dst_metadata, const char *src_metadata, memory_block_data *embedded_reference) const;

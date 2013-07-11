@@ -68,7 +68,7 @@ bool byteswap_dtype::is_lossless_assignment(const ndt::type& dst_dt, const ndt::
     }
 }
 
-bool byteswap_dtype::operator==(const base_dtype& rhs) const
+bool byteswap_dtype::operator==(const base_type& rhs) const
 {
     if (this == &rhs) {
         return true;

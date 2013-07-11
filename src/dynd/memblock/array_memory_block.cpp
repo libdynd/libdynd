@@ -28,7 +28,7 @@ void free_array_memory_block(memory_block_data *memblock)
     // Free the references contained in the metadata
     if (!preamble->is_builtin_type()) {
         preamble->m_dtype->metadata_destruct(metadata);
-        base_dtype_decref(preamble->m_dtype);
+        base_type_decref(preamble->m_dtype);
     }
 
     // Free the reference to the ndobject data
@@ -99,7 +99,7 @@ memory_block_ptr dynd::make_array_memory_block(const ndt::type& dt, size_t ndim,
 
     array_preamble *preamble = reinterpret_cast<array_preamble *>(result.get());
     if (dt.is_builtin()) {
-        preamble->m_dtype = reinterpret_cast<base_dtype *>(dt.get_type_id());
+        preamble->m_dtype = reinterpret_cast<base_type *>(dt.get_type_id());
     } else {
         preamble->m_dtype = ndt::type(dt).release();
         preamble->m_dtype->metadata_default_construct(reinterpret_cast<char *>(preamble + 1), ndim, shape);
@@ -135,7 +135,7 @@ memory_block_ptr dynd::shallow_copy_array_memory_block(const memory_block_ptr& n
     // Clone the dtype
     result_preamble->m_dtype = preamble->m_dtype;
     if (!preamble->is_builtin_type()) {
-        base_dtype_incref(preamble->m_dtype);
+        base_type_incref(preamble->m_dtype);
         preamble->m_dtype->metadata_copy_construct(reinterpret_cast<char *>(result.get()) + sizeof(array_preamble),
                         reinterpret_cast<const char *>(ndo.get()) + sizeof(array_preamble), ndo.get());
     }

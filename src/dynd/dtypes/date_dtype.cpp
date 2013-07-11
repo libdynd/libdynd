@@ -28,7 +28,7 @@ using namespace std;
 using namespace dynd;
 
 date_dtype::date_dtype()
-    : base_dtype(date_type_id, datetime_kind, 4, scalar_align_of<int32_t>::value, type_flag_scalar, 0, 0)
+    : base_type(date_type_id, datetime_kind, 4, scalar_align_of<int32_t>::value, type_flag_scalar, 0, 0)
 {
 }
 
@@ -117,7 +117,7 @@ bool date_dtype::is_lossless_assignment(const ndt::type& dst_dt, const ndt::type
     }
 }
 
-bool date_dtype::operator==(const base_dtype& rhs) const
+bool date_dtype::operator==(const base_type& rhs) const
 {
     if (this == &rhs) {
         return true;
