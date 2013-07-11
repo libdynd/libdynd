@@ -12,7 +12,7 @@
 
 #include <dynd/array.hpp>
 #include <dynd/dtypes/strided_dim_type.hpp>
-#include <dynd/dtypes/fixedbytes_dtype.hpp>
+#include <dynd/dtypes/fixedbytes_type.hpp>
 #include <dynd/dtypes/string_type.hpp>
 
 using namespace std;
@@ -523,7 +523,7 @@ TEST(Array, Storage) {
 
     nd::array b = a.storage();
     EXPECT_EQ(make_strided_dim_type(make_strided_dim_type(ndt::make_dtype<int>())), a.get_dtype());
-    EXPECT_EQ(make_strided_dim_type(make_strided_dim_type(make_fixedbytes_dtype(4, 4))), b.get_dtype());
+    EXPECT_EQ(make_strided_dim_type(make_strided_dim_type(make_fixedbytes_type(4, 4))), b.get_dtype());
     EXPECT_EQ(a.get_readonly_originptr(), b.get_readonly_originptr());
     EXPECT_EQ(a.get_shape(), b.get_shape());
     EXPECT_EQ(a.get_strides(), b.get_strides());

@@ -123,38 +123,38 @@ set(libdynd_SRC
     src/dynd/dtypes/base_uniform_dim_type.cpp
     src/dynd/dtypes/busdate_type.cpp
     src/dynd/dtypes/builtin_type_properties.cpp
-    src/dynd/dtypes/bytes_dtype.cpp
-    src/dynd/dtypes/byteswap_dtype.cpp
-    src/dynd/dtypes/categorical_dtype.cpp
-    src/dynd/dtypes/convert_dtype.cpp
+    src/dynd/dtypes/bytes_type.cpp
+    src/dynd/dtypes/byteswap_type.cpp
+    src/dynd/dtypes/categorical_type.cpp
+    src/dynd/dtypes/convert_type.cpp
     src/dynd/dtypes/datashape_formatter.cpp
     src/dynd/dtypes/datashape_parser.cpp
     src/dynd/dtypes/date_type.cpp
-    src/dynd/dtypes/datetime_dtype.cpp
-    src/dynd/dtypes/dtype_dtype.cpp
+    src/dynd/dtypes/datetime_type.cpp
+    src/dynd/dtypes/type_type.cpp
     src/dynd/dtypes/dynd_float16.cpp
     src/dynd/dtypes/dynd_float128.cpp
     src/dynd/dtypes/dynd_int128.cpp
     src/dynd/dtypes/dynd_uint128.cpp
-    src/dynd/dtypes/expr_dtype.cpp
-    src/dynd/dtypes/property_dtype.cpp
-    src/dynd/dtypes/dtype_alignment.cpp
+    src/dynd/dtypes/expr_type.cpp
+    src/dynd/dtypes/property_type.cpp
+    src/dynd/dtypes/type_alignment.cpp
     src/dynd/dtypes/fixed_dim_type.cpp
-    src/dynd/dtypes/fixedbytes_dtype.cpp
+    src/dynd/dtypes/fixedbytes_type.cpp
     src/dynd/dtypes/fixedstring_type.cpp
     src/dynd/dtypes/cstruct_type.cpp
-    src/dynd/dtypes/groupby_dtype.cpp
-    src/dynd/dtypes/json_dtype.cpp
-    src/dynd/dtypes/pointer_dtype.cpp
+    src/dynd/dtypes/groupby_type.cpp
+    src/dynd/dtypes/json_type.cpp
+    src/dynd/dtypes/pointer_type.cpp
     src/dynd/dtypes/strided_dim_type.cpp
     src/dynd/dtypes/string_type.cpp
     src/dynd/dtypes/struct_type.cpp
-    src/dynd/dtypes/tuple_dtype.cpp
+    src/dynd/dtypes/tuple_type.cpp
     src/dynd/dtypes/type_id.cpp
-    src/dynd/dtypes/unary_expr_dtype.cpp
+    src/dynd/dtypes/unary_expr_type.cpp
     src/dynd/dtypes/var_dim_type.cpp
-    src/dynd/dtypes/view_dtype.cpp
-    src/dynd/dtypes/void_pointer_dtype.cpp
+    src/dynd/dtypes/view_type.cpp
+    src/dynd/dtypes/void_pointer_type.cpp
     include/dynd/dtypes/base_bytes_type.hpp
     include/dynd/dtypes/base_type.hpp
     include/dynd/dtypes/base_expression_type.hpp
@@ -163,39 +163,39 @@ set(libdynd_SRC
     include/dynd/dtypes/base_uniform_dim_type.hpp
     include/dynd/dtypes/busdate_type.hpp
     include/dynd/dtypes/builtin_type_properties.hpp
-    include/dynd/dtypes/bytes_dtype.hpp
-    include/dynd/dtypes/byteswap_dtype.hpp
-    include/dynd/dtypes/categorical_dtype.hpp
-    include/dynd/dtypes/convert_dtype.hpp
+    include/dynd/dtypes/bytes_type.hpp
+    include/dynd/dtypes/byteswap_type.hpp
+    include/dynd/dtypes/categorical_type.hpp
+    include/dynd/dtypes/convert_type.hpp
     include/dynd/dtypes/datashape_formatter.hpp
     include/dynd/dtypes/datashape_parser.hpp
     include/dynd/dtypes/date_type.hpp
-    include/dynd/dtypes/datetime_dtype.hpp
-    include/dynd/dtypes/dtype_dtype.hpp
+    include/dynd/dtypes/datetime_type.hpp
+    include/dynd/dtypes/type_type.hpp
     include/dynd/dtypes/dynd_float16.hpp
     include/dynd/dtypes/dynd_float128.hpp
     include/dynd/dtypes/dynd_int128.hpp
     include/dynd/dtypes/dynd_uint128.hpp
-    include/dynd/dtypes/expr_dtype.hpp
-    include/dynd/dtypes/property_dtype.hpp
-    include/dynd/dtypes/dtype_alignment.hpp
+    include/dynd/dtypes/expr_type.hpp
+    include/dynd/dtypes/property_type.hpp
+    include/dynd/dtypes/type_alignment.hpp
     include/dynd/dtypes/fixed_dim_type.hpp
-    include/dynd/dtypes/fixedbytes_dtype.hpp
+    include/dynd/dtypes/fixedbytes_type.hpp
     include/dynd/dtypes/fixedstring_type.hpp
     include/dynd/dtypes/cstruct_type.hpp
-    include/dynd/dtypes/groupby_dtype.hpp
-    include/dynd/dtypes/json_dtype.hpp
-    include/dynd/dtypes/pointer_dtype.hpp
+    include/dynd/dtypes/groupby_type.hpp
+    include/dynd/dtypes/json_type.hpp
+    include/dynd/dtypes/pointer_type.hpp
     include/dynd/dtypes/strided_dim_type.hpp
     include/dynd/dtypes/string_type.hpp
     include/dynd/dtypes/struct_type.hpp
     include/dynd/dtypes/cstruct_type.hpp
-    include/dynd/dtypes/tuple_dtype.hpp
+    include/dynd/dtypes/tuple_type.hpp
     include/dynd/dtypes/type_id.hpp
-    include/dynd/dtypes/unary_expr_dtype.hpp
+    include/dynd/dtypes/unary_expr_type.hpp
     include/dynd/dtypes/var_dim_type.hpp
-    include/dynd/dtypes/view_dtype.hpp
-    include/dynd/dtypes/void_pointer_dtype.hpp
+    include/dynd/dtypes/view_type.hpp
+    include/dynd/dtypes/void_pointer_type.hpp
     # Eval
     src/dynd/eval/eval_context.cpp
     src/dynd/eval/eval_elwise_vm.cpp

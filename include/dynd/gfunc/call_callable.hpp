@@ -10,7 +10,7 @@
 #include <dynd/dtypes/cstruct_type.hpp>
 #include <dynd/dtypes/string_type.hpp>
 #include <dynd/dtypes/fixedstring_type.hpp>
-#include <dynd/dtypes/dtype_dtype.hpp>
+#include <dynd/dtypes/type_type.hpp>
 #include <dynd/dtype_assign.hpp>
 
 namespace dynd { namespace gfunc {
@@ -55,7 +55,7 @@ namespace detail {
     struct callable_argument_setter<ndt::type> {
         static void set(const ndt::type& paramtype, char *DYND_UNUSED(metadata), char *data, const ndt::type& value) {
             if (paramtype.get_type_id() == dtype_type_id) {
-                reinterpret_cast<dtype_dtype_data *>(data)->dt = ndt::type(value).release();
+                reinterpret_cast<type_type_data *>(data)->dt = ndt::type(value).release();
             } else {
                 std::stringstream ss;
                 ss << "cannot pass a dtype as a parameter to dynd callable parameter of type " << paramtype;

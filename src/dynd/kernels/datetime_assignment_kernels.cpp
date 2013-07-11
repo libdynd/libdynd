@@ -6,7 +6,7 @@
 #include <dynd/kernels/datetime_assignment_kernels.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/dtypes/cstruct_type.hpp>
-#include <dynd/dtypes/datetime_dtype.hpp>
+#include <dynd/dtypes/datetime_type.hpp>
 #include <datetime_strings.h>
 
 using namespace std;
@@ -42,7 +42,7 @@ namespace {
         typedef string_to_datetime_kernel_extra extra_type;
 
         kernel_data_prefix base;
-        const datetime_dtype *dst_datetime_dt;
+        const datetime_type *dst_datetime_dt;
         const base_string_type *src_string_dt;
         const char *src_metadata;
         assign_error_mode errmode;
@@ -86,7 +86,7 @@ size_t dynd::make_string_to_datetime_assignment_kernel(
     e->base.set_function<unary_single_operation_t>(&string_to_datetime_kernel_extra::single);
     e->base.destructor = &string_to_datetime_kernel_extra::destruct;
     // The kernel data owns a reference to this dtype
-    e->dst_datetime_dt = static_cast<const datetime_dtype *>(ndt::type(dst_datetime_dt).release());
+    e->dst_datetime_dt = static_cast<const datetime_type *>(ndt::type(dst_datetime_dt).release());
     // The kernel data owns a reference to this dtype
     e->src_string_dt = static_cast<const base_string_type *>(ndt::type(src_string_dt).release());
     e->src_metadata = src_metadata;
@@ -112,7 +112,7 @@ namespace {
 
         kernel_data_prefix base;
         const base_string_type *dst_string_dt;
-        const datetime_dtype *src_datetime_dt;
+        const datetime_type *src_datetime_dt;
         const char *dst_metadata;
         assign_error_mode errmode;
         datetime::datetime_unit_t unit;
@@ -156,7 +156,7 @@ size_t dynd::make_datetime_to_string_assignment_kernel(
     // The kernel data owns a reference to this dtype
     e->dst_string_dt = static_cast<const base_string_type *>(ndt::type(dst_string_dt).release());
     // The kernel data owns a reference to this dtype
-    e->src_datetime_dt = static_cast<const datetime_dtype *>(ndt::type(src_datetime_dt).release());
+    e->src_datetime_dt = static_cast<const datetime_type *>(ndt::type(src_datetime_dt).release());
     e->dst_metadata = dst_metadata;
     e->unit = dynd_unit_to_datetime_unit(e->src_datetime_dt->get_unit());
     e->errmode = errmode;

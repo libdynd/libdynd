@@ -10,7 +10,7 @@
 
 #include <dynd/type.hpp>
 #include <dynd/dtype_assign.hpp>
-#include <dynd/dtypes/view_dtype.hpp>
+#include <dynd/dtypes/view_type.hpp>
 #include <dynd/string_encodings.hpp>
 
 namespace dynd {
@@ -18,7 +18,7 @@ namespace dynd {
 struct string_type_metadata {
     /**
      * A reference to the memory block which contains the string's data.
-     * NOTE: This is identical to bytes_dtype_metadata, by design. Maybe
+     * NOTE: This is identical to bytes_type_metadata, by design. Maybe
      *       both should become a typedef to a common class?
      */
     memory_block_data *blockref;

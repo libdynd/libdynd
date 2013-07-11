@@ -332,10 +332,10 @@ size_t base_type::get_elwise_property_index(const std::string& property_name) co
     throw std::runtime_error(ss.str());
 }
 
-ndt::type base_type::get_elwise_property_dtype(size_t DYND_UNUSED(elwise_property_index),
+ndt::type base_type::get_elwise_property_type(size_t DYND_UNUSED(elwise_property_index),
             bool& DYND_UNUSED(out_readable), bool& DYND_UNUSED(out_writable)) const
 {
-    throw std::runtime_error("get_elwise_property_dtype: this dtype does not have any properties");
+    throw std::runtime_error("get_elwise_property_type: this dtype does not have any properties");
 }
 
 size_t base_type::make_elwise_property_getter_kernel(

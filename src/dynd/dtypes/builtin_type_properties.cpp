@@ -5,18 +5,18 @@
 
 #include <dynd/dtypes/builtin_type_properties.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
-#include <dynd/dtypes/property_dtype.hpp>
+#include <dynd/dtypes/property_type.hpp>
 #include <dynd/gfunc/make_callable.hpp>
 
 using namespace std;
 using namespace dynd;
 
 static nd::array property_complex_real(const nd::array& n) {
-    return n.replace_udtype(make_property_dtype(n.get_udtype(), "real"));
+    return n.replace_udtype(make_property_type(n.get_udtype(), "real"));
 }
 
 static nd::array property_complex_imag(const nd::array& n) {
-    return n.replace_udtype(make_property_dtype(n.get_udtype(), "imag"));
+    return n.replace_udtype(make_property_type(n.get_udtype(), "imag"));
 }
 
 static pair<string, gfunc::callable> complex_array_properties[] = {
@@ -65,7 +65,7 @@ size_t dynd::get_builtin_type_elwise_property_index(
     throw std::runtime_error(ss.str());
 }
 
-ndt::type dynd::get_builtin_type_elwise_property_dtype(
+ndt::type dynd::get_builtin_type_elwise_property_type(
                 type_id_t builtin_type_id,
                 size_t DYND_UNUSED(elwise_property_index),
                 bool& out_readable, bool& out_writable)

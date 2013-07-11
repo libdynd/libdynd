@@ -11,7 +11,7 @@
 #include <dynd/array.hpp>
 #include <dynd/dtypes/fixedstring_type.hpp>
 #include <dynd/dtypes/string_type.hpp>
-#include <dynd/dtypes/convert_dtype.hpp>
+#include <dynd/dtypes/convert_type.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -63,7 +63,7 @@ TEST(FixedstringDType, Basic) {
     EXPECT_EQ("abcdefg", a.as<string>());
 
     a = a.ucast(make_fixedstring_type(7, string_encoding_utf_16));
-    EXPECT_EQ(make_convert_dtype(make_fixedstring_type(7, string_encoding_utf_16),
+    EXPECT_EQ(make_convert_type(make_fixedstring_type(7, string_encoding_utf_16),
                     make_fixedstring_type(7, string_encoding_utf_8)),
                 a.get_dtype());
     a = a.eval();

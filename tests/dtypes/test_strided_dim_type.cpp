@@ -9,9 +9,9 @@
 #include "inc_gtest.hpp"
 
 #include <dynd/dtype_assign.hpp>
-#include <dynd/dtypes/tuple_dtype.hpp>
+#include <dynd/dtypes/tuple_type.hpp>
 #include <dynd/dtypes/strided_dim_type.hpp>
-#include <dynd/dtypes/convert_dtype.hpp>
+#include <dynd/dtypes/convert_type.hpp>
 #include <dynd/exceptions.hpp>
 #include <dynd/array.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
@@ -30,14 +30,14 @@ TEST(StridedArrayDType, ReplaceScalarTypes) {
     dafloat = make_strided_dim_type(ndt::make_dtype<float>());
     dadouble = make_strided_dim_type(ndt::make_dtype<double>());
 
-    EXPECT_EQ(make_strided_dim_type(make_convert_dtype<float, double>()),
+    EXPECT_EQ(make_strided_dim_type(make_convert_type<float, double>()),
             dadouble.with_replaced_scalar_types(ndt::make_dtype<float>()));
 
     // Two dimensional array
     dafloat = make_strided_dim_type(dafloat);
     dadouble = make_strided_dim_type(dadouble);
 
-    EXPECT_EQ(make_strided_dim_type(make_strided_dim_type(make_convert_dtype<double, float>())),
+    EXPECT_EQ(make_strided_dim_type(make_strided_dim_type(make_convert_type<double, float>())),
             dafloat.with_replaced_scalar_types(ndt::make_dtype<double>()));
 }
 
@@ -78,7 +78,7 @@ TEST(StridedArrayDType, IsExpression) {
     EXPECT_FALSE(darr1.is_expression());
     EXPECT_FALSE(darr2.is_expression());
 
-    dfloat = make_convert_dtype(ndt::make_dtype<double>(), dfloat);
+    dfloat = make_convert_type(ndt::make_dtype<double>(), dfloat);
     darr1 = make_strided_dim_type(dfloat);
     darr2 = make_strided_dim_type(darr1);
 

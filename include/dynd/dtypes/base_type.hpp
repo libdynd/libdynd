@@ -538,7 +538,7 @@ public:
      *
      * \returns  The type of the property.
      */
-    virtual ndt::type get_elwise_property_dtype(size_t elwise_property_index,
+    virtual ndt::type get_elwise_property_type(size_t elwise_property_index,
             bool& out_readable, bool& out_writable) const;
 
     /**

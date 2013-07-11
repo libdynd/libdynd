@@ -8,7 +8,7 @@
 
 #include <dynd/type.hpp>
 #include <dynd/dtype_assign.hpp>
-#include <dynd/dtypes/view_dtype.hpp>
+#include <dynd/dtypes/view_type.hpp>
 #include <dynd/dtypes/base_uniform_dim_type.hpp>
 
 namespace dynd {

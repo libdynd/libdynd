@@ -9,7 +9,7 @@
 #include "inc_gtest.hpp"
 
 #include <dynd/array.hpp>
-#include <dynd/dtypes/convert_dtype.hpp>
+#include <dynd/dtypes/convert_type.hpp>
 #include <dynd/dtypes/strided_dim_type.hpp>
 
 using namespace std;
@@ -359,8 +359,8 @@ TEST(ArrayAssign, ChainedCastingRead) {
     b = b.ucast<float>(0, assign_error_inexact);
     // Multiple cast_scalars operations should make a chained conversion dtype
     EXPECT_EQ(make_strided_dim_type(
-                    make_convert_dtype(ndt::make_dtype<float>(),
-                                    make_convert_dtype<int, float>(assign_error_overflow), assign_error_inexact)),
+                    make_convert_type(ndt::make_dtype<float>(),
+                                    make_convert_type<int, float>(assign_error_overflow), assign_error_inexact)),
               b.get_dtype());
 
     // Evaluating the values should truncate them to integers
@@ -382,12 +382,12 @@ TEST(ArrayAssign, ChainedCastingRead) {
     b = b.ucast<int32_t>(0, assign_error_overflow);
 
     EXPECT_EQ(make_strided_dim_type(
-                make_convert_dtype(ndt::make_dtype<int32_t>(),
-                    make_convert_dtype(ndt::make_dtype<float>(),
-                        make_convert_dtype(ndt::make_dtype<int64_t>(),
-                            make_convert_dtype(ndt::make_dtype<int16_t>(),
-                                make_convert_dtype(ndt::make_dtype<int32_t>(),
-                                    make_convert_dtype<int16_t, float>(
+                make_convert_type(ndt::make_dtype<int32_t>(),
+                    make_convert_type(ndt::make_dtype<float>(),
+                        make_convert_type(ndt::make_dtype<int64_t>(),
+                            make_convert_type(ndt::make_dtype<int16_t>(),
+                                make_convert_type(ndt::make_dtype<int32_t>(),
+                                    make_convert_type<int16_t, float>(
                                     assign_error_overflow),
                                 assign_error_overflow),
                             assign_error_overflow),
@@ -411,8 +411,8 @@ TEST(ArrayAssign, ChainedCastingWrite) {
     b = a.ucast<int>(0, assign_error_inexact);
     b = b.ucast<float>(0, assign_error_overflow);
     // Multiple cast_scalars operations should make a chained conversion dtype
-    EXPECT_EQ(make_strided_dim_type(make_convert_dtype(ndt::make_dtype<float>(),
-                                    make_convert_dtype<int, float>(assign_error_inexact), assign_error_overflow)),
+    EXPECT_EQ(make_strided_dim_type(make_convert_type(ndt::make_dtype<float>(),
+                                    make_convert_type<int, float>(assign_error_inexact), assign_error_overflow)),
               b.get_dtype());
 
     b(0).vals() = 6.8f;

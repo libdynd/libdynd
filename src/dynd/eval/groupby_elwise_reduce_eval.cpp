@@ -6,7 +6,7 @@
 #if 0 // TODO reenable?
 
 #include <dynd/shape_tools.hpp>
-#include <dynd/dtypes/categorical_dtype.hpp>
+#include <dynd/dtypes/categorical_type.hpp>
 #include <dynd/eval/groupby_elwise_reduce_eval.hpp>
 #include <dynd/eval/unary_elwise_eval.hpp>
 #include <dynd/kernels/buffered_unary_kernels.hpp>
@@ -80,7 +80,7 @@ ndarray_node_ptr dynd::eval::evaluate_groupby_elwise_reduce(ndarray_node *node, 
 
     const ndt::type& result_dt = rnode->get_dtype().value_type();
     const ndt::type& groups_dt = gnode->get_groups();
-    const categorical_dtype *groups = static_cast<const categorical_dtype *>(groups_dt.extended());
+    const categorical_type *groups = static_cast<const categorical_type *>(groups_dt.extended());
     intptr_t num_groups = groups->get_category_count();
 
 

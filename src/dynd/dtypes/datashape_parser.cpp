@@ -13,11 +13,11 @@
 #include <dynd/dtypes/cstruct_type.hpp>
 #include <dynd/dtypes/string_type.hpp>
 #include <dynd/dtypes/fixedstring_type.hpp>
-#include <dynd/dtypes/json_dtype.hpp>
+#include <dynd/dtypes/json_type.hpp>
 #include <dynd/dtypes/date_type.hpp>
-#include <dynd/dtypes/datetime_dtype.hpp>
-#include <dynd/dtypes/bytes_dtype.hpp>
-#include <dynd/dtypes/dtype_dtype.hpp>
+#include <dynd/dtypes/datetime_type.hpp>
+#include <dynd/dtypes/bytes_type.hpp>
+#include <dynd/dtypes/type_type.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -69,10 +69,10 @@ namespace {
             builtin_types["float128"] = ndt::make_dtype<dynd_float128>();
             builtin_types["cfloat32"] = builtin_types["complex64"] = ndt::make_dtype<complex<float> >();
             builtin_types["cfloat64"] = builtin_types["complex128"] = ndt::make_dtype<complex<double> >();
-            builtin_types["json"] = make_json_dtype();
+            builtin_types["json"] = make_json_type();
             builtin_types["date"] = make_date_type();
-            builtin_types["bytes"] = make_bytes_dtype(1);
-            builtin_types["type"] = make_dtype_dtype();
+            builtin_types["bytes"] = make_bytes_type(1);
+            builtin_types["type"] = make_type_type();
             for (map<string, ndt::type>::iterator i = builtin_types.begin();
                             i != builtin_types.end(); ++i) {
                 reserved_typenames.insert(i->first);
@@ -366,7 +366,7 @@ static ndt::type parse_datetime_parameters(const char *&begin, const char *end)
             throw datashape_parse_error(begin, "expected closing ')'");
         }
          
-        return make_datetime_dtype(unit, timezone);
+        return make_datetime_type(unit, timezone);
     } else {
         throw datashape_parse_error(begin, "expected datetime parameters opening '('");
     }

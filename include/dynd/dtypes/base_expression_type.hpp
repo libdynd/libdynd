@@ -11,7 +11,7 @@
 namespace dynd {
 
 /**
- * Base class for all dtypes of expression_kind, and for the pointer_dtype.
+ * Base class for all dtypes of expression_kind, and for the pointer_type.
  */
 class base_expression_type : public base_type {
 public:

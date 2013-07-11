@@ -17,7 +17,7 @@
 #include <dynd/dtypes/cstruct_type.hpp>
 #include <dynd/dtypes/date_type.hpp>
 #include <dynd/dtypes/string_type.hpp>
-#include <dynd/dtypes/json_dtype.hpp>
+#include <dynd/dtypes/json_type.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -64,7 +64,7 @@ TEST(JSONFormatter, String) {
 
 TEST(JSONFormatter, JSON) {
     nd::array n;
-    n = nd::array("[ 1, 3, 5] ").ucast(make_json_dtype());
+    n = nd::array("[ 1, 3, 5] ").ucast(make_json_type());
     EXPECT_EQ("[ 1, 3, 5] ", format_json(n).as<string>());
 }
 

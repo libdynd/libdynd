@@ -11,7 +11,7 @@
 #include <dynd/kernels/string_comparison_kernels.hpp>
 #include <dynd/dtypes/fixedstring_type.hpp>
 #include <dynd/dtypes/string_type.hpp>
-#include <dynd/dtypes/convert_dtype.hpp>
+#include <dynd/dtypes/convert_type.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -317,7 +317,7 @@ size_t dynd::make_general_string_comparison_kernel(
     // TODO: Make more efficient, direct comparison kernels
     ndt::type sdt = make_string_type();
     return make_comparison_kernel(out, offset_out,
-                    make_convert_dtype(sdt, src0_dt), src0_metadata,
-                    make_convert_dtype(sdt, src1_dt), src1_metadata,
+                    make_convert_type(sdt, src0_dt), src0_metadata,
+                    make_convert_type(sdt, src1_dt), src1_metadata,
                     comptype, ectx);
 }

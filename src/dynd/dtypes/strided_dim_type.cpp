@@ -5,7 +5,7 @@
 
 #include <dynd/dtypes/strided_dim_type.hpp>
 #include <dynd/dtypes/fixed_dim_type.hpp>
-#include <dynd/dtypes/dtype_alignment.hpp>
+#include <dynd/dtypes/type_alignment.hpp>
 #include <dynd/shape_tools.hpp>
 #include <dynd/exceptions.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>

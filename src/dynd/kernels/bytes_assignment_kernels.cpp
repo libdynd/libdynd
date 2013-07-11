@@ -9,7 +9,7 @@
 #include <dynd/type.hpp>
 #include <dynd/diagnostics.hpp>
 #include <dynd/kernels/bytes_assignment_kernels.hpp>
-#include <dynd/dtypes/bytes_dtype.hpp>
+#include <dynd/dtypes/bytes_type.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -23,16 +23,16 @@ namespace {
 
         kernel_data_prefix base;
         size_t dst_alignment, src_alignment;
-        const bytes_dtype_metadata *dst_metadata, *src_metadata;
+        const bytes_type_metadata *dst_metadata, *src_metadata;
 
         /** Does a single blockref-string copy */
         static void single(char *dst, const char *src, kernel_data_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
-            const bytes_dtype_metadata *dst_md = e->dst_metadata;
-            const bytes_dtype_metadata *src_md = e->src_metadata;
-            bytes_dtype_data *dst_d = reinterpret_cast<bytes_dtype_data *>(dst);
-            const bytes_dtype_data *src_d = reinterpret_cast<const bytes_dtype_data *>(src);
+            const bytes_type_metadata *dst_md = e->dst_metadata;
+            const bytes_type_metadata *src_md = e->src_metadata;
+            bytes_type_data *dst_d = reinterpret_cast<bytes_type_data *>(dst);
+            const bytes_type_data *src_d = reinterpret_cast<const bytes_type_data *>(src);
 
             if (dst_d->begin != NULL) {
                 throw runtime_error("Cannot assign to an already initialized dynd string");
@@ -79,8 +79,8 @@ size_t dynd::make_blockref_bytes_assignment_kernel(
     e->base.set_function<unary_single_operation_t>(&blockref_bytes_kernel_extra::single);
     e->dst_alignment = dst_alignment;
     e->src_alignment = src_alignment;
-    e->dst_metadata = reinterpret_cast<const bytes_dtype_metadata *>(dst_metadata);
-    e->src_metadata = reinterpret_cast<const bytes_dtype_metadata *>(src_metadata);
+    e->dst_metadata = reinterpret_cast<const bytes_type_metadata *>(dst_metadata);
+    e->src_metadata = reinterpret_cast<const bytes_type_metadata *>(src_metadata);
     return offset_out + sizeof(blockref_bytes_kernel_extra);
 }
 
@@ -95,19 +95,19 @@ namespace {
         size_t dst_alignment;
         intptr_t src_data_size;
         size_t src_alignment;
-        const bytes_dtype_metadata *dst_metadata;
+        const bytes_type_metadata *dst_metadata;
 
         /** Does a single fixed-bytes copy */
         static void single(char *dst, const char *src, kernel_data_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
-            const bytes_dtype_metadata *dst_md = e->dst_metadata;
+            const bytes_type_metadata *dst_md = e->dst_metadata;
             // TODO: With some additional mechanism to track the source memory block, could
             //       avoid copying the bytes data.
             char *dst_begin = NULL, *dst_end = NULL;
             const char *src_begin = src;
             const char *src_end = src + e->src_data_size;
-            bytes_dtype_data *dst_d = reinterpret_cast<bytes_dtype_data *>(dst);
+            bytes_type_data *dst_d = reinterpret_cast<bytes_type_data *>(dst);
 
             if (dst_d->begin != NULL) {
                 throw runtime_error("Cannot assign to an already initialized dynd string");
@@ -140,6 +140,6 @@ size_t dynd::make_fixedbytes_to_blockref_bytes_assignment_kernel(
     e->dst_alignment = dst_alignment;
     e->src_data_size = src_data_size;
     e->src_alignment = src_alignment;
-    e->dst_metadata = reinterpret_cast<const bytes_dtype_metadata *>(dst_metadata);
+    e->dst_metadata = reinterpret_cast<const bytes_type_metadata *>(dst_metadata);
     return offset_out + sizeof(fixedbytes_to_blockref_bytes_kernel_extra);
 }

@@ -5,7 +5,7 @@
 
 #include <dynd/json_formatter.hpp>
 #include <dynd/dtypes/string_type.hpp>
-#include <dynd/dtypes/json_dtype.hpp>
+#include <dynd/dtypes/json_type.hpp>
 #include <dynd/dtypes/date_type.hpp>
 #include <dynd/dtypes/base_struct_type.hpp>
 #include <dynd/dtypes/strided_dim_type.hpp>
@@ -164,7 +164,7 @@ static void format_json_string(output_data& out, const ndt::type& dt, const char
 {
     if (dt.get_type_id() == json_type_id) {
         // Copy the JSON data directly
-        const json_dtype_data *d = reinterpret_cast<const json_dtype_data *>(data);
+        const json_type_data *d = reinterpret_cast<const json_type_data *>(data);
         out.write(d->begin, d->end);
     } else {
         const base_string_type *bsd = static_cast<const base_string_type *>(dt.extended());

@@ -6,8 +6,8 @@
 #include <dynd/dtypes/var_dim_type.hpp>
 #include <dynd/dtypes/strided_dim_type.hpp>
 #include <dynd/dtypes/fixed_dim_type.hpp>
-#include <dynd/dtypes/dtype_alignment.hpp>
-#include <dynd/dtypes/pointer_dtype.hpp>
+#include <dynd/dtypes/type_alignment.hpp>
+#include <dynd/dtypes/pointer_type.hpp>
 #include <dynd/memblock/pod_memory_block.hpp>
 #include <dynd/memblock/zeroinit_memory_block.hpp>
 #include <dynd/memblock/objectarray_memory_block.hpp>
@@ -134,7 +134,7 @@ ndt::type var_dim_type::apply_linear_index(size_t nindices, const irange *indice
                 }
             } else {
                 // TODO: This is incorrect, but is here as a stopgap to be replaced by a sliced<> dtype
-                return make_pointer_dtype(m_element_dtype);
+                return make_pointer_type(m_element_dtype);
             }
         } else {
             if (leading_dimension) {
@@ -157,7 +157,7 @@ ndt::type var_dim_type::apply_linear_index(size_t nindices, const irange *indice
                                 current_i+1, root_dt, true);
             } else {
                 // TODO: This is incorrect, but is here as a stopgap to be replaced by a sliced<> dtype
-                return make_pointer_dtype(m_element_dtype.apply_linear_index(nindices-1, indices+1,
+                return make_pointer_type(m_element_dtype.apply_linear_index(nindices-1, indices+1,
                                 current_i+1, root_dt, false));
             }
         } else {
@@ -262,16 +262,16 @@ intptr_t var_dim_type::apply_linear_index(size_t nindices, const irange *indices
         } else {
             if (indices->step() == 0) {
                 // TODO: This is incorrect, but is here as a stopgap to be replaced by a sliced<> dtype
-                pointer_dtype_metadata *out_md = reinterpret_cast<pointer_dtype_metadata *>(out_metadata);
+                pointer_type_metadata *out_md = reinterpret_cast<pointer_type_metadata *>(out_metadata);
                 out_md->blockref = md->blockref ? md->blockref : embedded_reference;
                 memory_block_incref(out_md->blockref);
                 out_md->offset = indices->start() * md->stride;
                 if (!m_element_dtype.is_builtin()) {
-                    const pointer_dtype *result_edtype = static_cast<const pointer_dtype *>(result_dtype.extended());
+                    const pointer_type *result_edtype = static_cast<const pointer_type *>(result_dtype.extended());
                     out_md->offset += m_element_dtype.extended()->apply_linear_index(
                                     nindices - 1, indices + 1,
                                     metadata + sizeof(var_dim_type_metadata),
-                                    result_edtype->get_target_dtype(), out_metadata + sizeof(pointer_dtype_metadata),
+                                    result_edtype->get_target_dtype(), out_metadata + sizeof(pointer_type_metadata),
                                     embedded_reference, current_i + 1, root_dt,
                                     false, NULL, NULL);
                 }

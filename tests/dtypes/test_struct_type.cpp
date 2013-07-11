@@ -12,8 +12,8 @@
 #include <dynd/dtypes/struct_type.hpp>
 #include <dynd/dtypes/fixedstring_type.hpp>
 #include <dynd/dtypes/string_type.hpp>
-#include <dynd/dtypes/convert_dtype.hpp>
-#include <dynd/dtypes/byteswap_dtype.hpp>
+#include <dynd/dtypes/convert_type.hpp>
+#include <dynd/dtypes/byteswap_type.hpp>
 #include <dynd/dtypes/cstruct_type.hpp>
 #include <dynd/json_parser.hpp>
 
@@ -111,9 +111,9 @@ TEST(StructDType, ReplaceScalarTypes) {
     dt = make_struct_type(d1, "x", d2, "y", d3, "z");
     dt2 = dt.with_replaced_scalar_types(ndt::make_dtype<int16_t>());
     EXPECT_EQ(make_struct_type(
-                make_convert_dtype(ndt::make_dtype<int16_t>(), d1), "x",
-                make_convert_dtype(ndt::make_dtype<int16_t>(), d2), "y",
-                make_convert_dtype(ndt::make_dtype<int16_t>(), d3), "z"),
+                make_convert_type(ndt::make_dtype<int16_t>(), d1), "x",
+                make_convert_type(ndt::make_dtype<int16_t>(), d2), "y",
+                make_convert_type(ndt::make_dtype<int16_t>(), d3), "z"),
         dt2);
 }
 
@@ -137,8 +137,8 @@ TEST(StructDType, CanonicalDType) {
     ndt::type dt, dt2;
 
     // Struct with three fields
-    ndt::type d1 = make_convert_dtype<std::complex<double>, float>();
-    ndt::type d2 = make_byteswap_dtype<int32_t>();
+    ndt::type d1 = make_convert_type<std::complex<double>, float>();
+    ndt::type d2 = make_byteswap_type<int32_t>();
     ndt::type d3 = make_fixedstring_type(5, string_encoding_utf_32);
     dt = make_struct_type(d1, "x", d2, "y", d3, "z");
     EXPECT_EQ(make_struct_type(ndt::make_dtype<std::complex<double> >(), "x",
@@ -149,7 +149,7 @@ TEST(StructDType, CanonicalDType) {
 
 TEST(StructDType, IsExpression) {
     ndt::type d1 = ndt::make_dtype<float>();
-    ndt::type d2 = make_byteswap_dtype<int32_t>();
+    ndt::type d2 = make_byteswap_type<int32_t>();
     ndt::type d3 = make_fixedstring_type(5, string_encoding_utf_32);
     ndt::type d = make_struct_type(d1, "x", d2, "y", d3, "z");
 

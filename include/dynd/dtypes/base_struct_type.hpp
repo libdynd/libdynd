@@ -54,7 +54,7 @@ public:
     void get_shape(size_t ndim, size_t i, intptr_t *out_shape, const char *metadata) const;
 
     size_t get_elwise_property_index(const std::string& property_name) const;
-    ndt::type get_elwise_property_dtype(size_t elwise_property_index,
+    ndt::type get_elwise_property_type(size_t elwise_property_index,
                     bool& out_readable, bool& out_writable) const;
     size_t make_elwise_property_getter_kernel(
                     hierarchical_kernel *out, size_t offset_out,

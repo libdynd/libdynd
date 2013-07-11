@@ -8,7 +8,7 @@
 
 #include <dynd/type.hpp>
 #include <dynd/dtype_assign.hpp>
-#include <dynd/dtypes/view_dtype.hpp>
+#include <dynd/dtypes/view_type.hpp>
 #include <dynd/string_encodings.hpp>
 
 namespace dynd {
@@ -69,7 +69,7 @@ public:
     void get_dynamic_array_functions(const std::pair<std::string, gfunc::callable> **out_functions, size_t *out_count) const;
 
     size_t get_elwise_property_index(const std::string& property_name) const;
-    ndt::type get_elwise_property_dtype(size_t elwise_property_index,
+    ndt::type get_elwise_property_type(size_t elwise_property_index,
                     bool& out_readable, bool& out_writable) const;
     size_t make_elwise_property_getter_kernel(
                     hierarchical_kernel *out, size_t offset_out,

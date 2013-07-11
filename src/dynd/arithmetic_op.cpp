@@ -13,7 +13,7 @@
 #include <dynd/shape_tools.hpp>
 #include <dynd/dtypes/strided_dim_type.hpp>
 #include <dynd/dtypes/var_dim_type.hpp>
-#include <dynd/dtypes/expr_dtype.hpp>
+#include <dynd/dtypes/expr_type.hpp>
 #include <dynd/dtypes/string_type.hpp>
 #include <dynd/kernels/string_algorithm_kernels.hpp>
 
@@ -271,7 +271,7 @@ nd::array apply_binary_operator(const nd::array *ops,
     nd::array result = combine_into_struct(2, field_names, ops_as_dt);
     // Because the expr dtype's operand is the result's dtype,
     // we can swap it in as the dtype
-    ndt::type edt = make_expr_dtype(result_vdt,
+    ndt::type edt = make_expr_type(result_vdt,
                     result.get_dtype(),
                     new arithmetic_op_kernel_generator<KD>(rdt, op1dt, op2dt, expr_ops, name));
     edt.swap(result.get_ndo()->m_dtype);

@@ -11,7 +11,7 @@
 
 #include <dynd/type.hpp>
 #include <dynd/dtype_assign.hpp>
-#include <dynd/dtypes/view_dtype.hpp>
+#include <dynd/dtypes/view_type.hpp>
 #include <dynd/string_encodings.hpp>
 
 namespace dynd {

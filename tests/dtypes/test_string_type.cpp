@@ -10,10 +10,10 @@
 
 #include <dynd/array.hpp>
 #include <dynd/dtypes/string_type.hpp>
-#include <dynd/dtypes/bytes_dtype.hpp>
+#include <dynd/dtypes/bytes_type.hpp>
 #include <dynd/dtypes/strided_dim_type.hpp>
 #include <dynd/dtypes/fixedstring_type.hpp>
-#include <dynd/dtypes/convert_dtype.hpp>
+#include <dynd/dtypes/convert_type.hpp>
 #include <dynd/json_parser.hpp>
 
 using namespace std;
@@ -99,7 +99,7 @@ TEST(StringDType, Basic) {
 
     // Convert to a blockref string dtype with the same utf8 codec
     b = a.ucast(make_string_type(string_encoding_utf_8));
-    EXPECT_EQ(make_convert_dtype(make_string_type(string_encoding_utf_8),
+    EXPECT_EQ(make_convert_type(make_string_type(string_encoding_utf_8),
                     make_fixedstring_type(7, string_encoding_utf_8)),
                 b.get_dtype());
     b = b.eval();
@@ -109,7 +109,7 @@ TEST(StringDType, Basic) {
 
     // Convert to a blockref string dtype with the utf16 codec
     b = a.ucast(make_string_type(string_encoding_utf_16));
-    EXPECT_EQ(make_convert_dtype(make_string_type(string_encoding_utf_16),
+    EXPECT_EQ(make_convert_type(make_string_type(string_encoding_utf_16),
                     make_fixedstring_type(7, string_encoding_utf_8)),
                 b.get_dtype());
     b = b.eval();
@@ -119,7 +119,7 @@ TEST(StringDType, Basic) {
 
     // Convert to a blockref string dtype with the utf32 codec
     b = a.ucast(make_string_type(string_encoding_utf_32));
-    EXPECT_EQ(make_convert_dtype(make_string_type(string_encoding_utf_32),
+    EXPECT_EQ(make_convert_type(make_string_type(string_encoding_utf_32),
                     make_fixedstring_type(7, string_encoding_utf_8)),
                 b.get_dtype());
     b = b.eval();
@@ -129,7 +129,7 @@ TEST(StringDType, Basic) {
 
     // Convert to a blockref string dtype with the ascii codec
     b = a.ucast(make_string_type(string_encoding_ascii));
-    EXPECT_EQ(make_convert_dtype(make_string_type(string_encoding_ascii),
+    EXPECT_EQ(make_convert_type(make_string_type(string_encoding_ascii),
                     make_fixedstring_type(7, string_encoding_utf_8)),
                 b.get_dtype());
     b = b.eval();
@@ -277,13 +277,13 @@ TEST(StringDType, Storage) {
     nd::array a;
 
     a = "testing";
-    EXPECT_EQ(make_bytes_dtype(1), a.storage().get_dtype());
+    EXPECT_EQ(make_bytes_type(1), a.storage().get_dtype());
 
     a = a.ucast(make_string_type(string_encoding_utf_16)).eval();
-    EXPECT_EQ(make_bytes_dtype(2), a.storage().get_dtype());
+    EXPECT_EQ(make_bytes_type(2), a.storage().get_dtype());
 
     a = a.ucast(make_string_type(string_encoding_utf_32)).eval();
-    EXPECT_EQ(make_bytes_dtype(4), a.storage().get_dtype());
+    EXPECT_EQ(make_bytes_type(4), a.storage().get_dtype());
 }
 
 TEST(StringDType, EncodingSizes) {

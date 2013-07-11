@@ -64,7 +64,7 @@ size_t base_struct_type::get_elwise_property_index(const std::string& property_n
     throw runtime_error(ss.str());
 }
 
-ndt::type base_struct_type::get_elwise_property_dtype(size_t elwise_property_index,
+ndt::type base_struct_type::get_elwise_property_type(size_t elwise_property_index,
                 bool& out_readable, bool& out_writable) const
 {
     size_t field_count = get_field_count();

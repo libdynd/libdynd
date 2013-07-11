@@ -9,9 +9,9 @@
 #include <dynd/gfunc/callable.hpp>
 #include <dynd/dtypes/cstruct_type.hpp>
 #include <dynd/dtypes/fixed_dim_type.hpp>
-#include <dynd/dtypes/void_pointer_dtype.hpp>
+#include <dynd/dtypes/void_pointer_type.hpp>
 #include <dynd/dtypes/string_type.hpp>
-#include <dynd/dtypes/dtype_dtype.hpp>
+#include <dynd/dtypes/type_type.hpp>
 
 namespace dynd { namespace gfunc {
 
@@ -118,10 +118,10 @@ template <typename T, int N> struct make_parameter_dtype<T[N]> {inline static nd
 // rely on using them in the right context. To pass these properly will require
 // dynd to grow the ability to manage object memory.
 template <> struct make_parameter_dtype<nd::array> {inline static ndt::type make() {
-        return ndt::type(new void_pointer_dtype, false);
+        return ndt::type(new void_pointer_type, false);
     }};
 template <> struct make_parameter_dtype<ndt::type> {inline static ndt::type make() {
-        return make_dtype_dtype();
+        return make_type_type();
     }};
 template <> struct make_parameter_dtype<std::string> {inline static ndt::type make() {
         return make_string_type(string_encoding_utf_8);

@@ -16,7 +16,7 @@
 #include <dynd/dtypes/cstruct_type.hpp>
 #include <dynd/dtypes/date_type.hpp>
 #include <dynd/dtypes/string_type.hpp>
-#include <dynd/dtypes/json_dtype.hpp>
+#include <dynd/dtypes/json_type.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -268,13 +268,13 @@ TEST(JSONParser, JSONDType) {
 
     // Parsing JSON with the output being just a json string
     n = parse_json("json", "{\"a\":3.14}");
-    EXPECT_EQ(make_json_dtype(), n.get_dtype());
+    EXPECT_EQ(make_json_type(), n.get_dtype());
     EXPECT_EQ("{\"a\":3.14}", n.as<string>());
 
     // Parsing JSON with a piece of it being a json string
     n = parse_json("{a: json; b: int32; c: string}",
                     "{\"c\": \"testing string\", \"a\": [3.1, {\"X\":2}, [1,2]], \"b\":12}");
-    EXPECT_EQ(make_cstruct_type(make_json_dtype(), "a", ndt::make_dtype<int32_t>(), "b", make_string_type(), "c"),
+    EXPECT_EQ(make_cstruct_type(make_json_type(), "a", ndt::make_dtype<int32_t>(), "b", make_string_type(), "c"),
                     n.get_dtype());
     EXPECT_EQ("[3.1, {\"X\":2}, [1,2]]", n(0).as<string>());
     EXPECT_EQ(12, n(1).as<int>());

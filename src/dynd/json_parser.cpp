@@ -6,7 +6,7 @@
 #include <dynd/json_parser.hpp>
 #include <dynd/dtypes/base_bytes_type.hpp>
 #include <dynd/dtypes/string_type.hpp>
-#include <dynd/dtypes/json_dtype.hpp>
+#include <dynd/dtypes/json_type.hpp>
 #include <dynd/dtypes/fixed_dim_type.hpp>
 #include <dynd/dtypes/var_dim_type.hpp>
 #include <dynd/dtypes/cstruct_type.hpp>
@@ -42,10 +42,10 @@ namespace {
 static void json_as_buffer(const nd::array& json, nd::array& out_tmp_ref, const char *&begin, const char *&end)
 {
     // Check the dtype of 'json', and get pointers to the begin/end of a UTF-8 buffer
-    ndt::type json_dtype = json.get_dtype().value_type();
-    switch (json_dtype.get_kind()) {
+    ndt::type json_type = json.get_dtype().value_type();
+    switch (json_type.get_kind()) {
         case string_kind: {
-            const base_string_type *sdt = static_cast<const base_string_type *>(json_dtype.extended());
+            const base_string_type *sdt = static_cast<const base_string_type *>(json_type.extended());
             switch (sdt->get_encoding()) {
                 case string_encoding_ascii:
                 case string_encoding_utf_8:
@@ -68,7 +68,7 @@ static void json_as_buffer(const nd::array& json, nd::array& out_tmp_ref, const 
         }
         case bytes_kind: {
             out_tmp_ref = json.eval();
-            const base_bytes_type *bdt = static_cast<const base_bytes_type *>(json_dtype.extended());
+            const base_bytes_type *bdt = static_cast<const base_bytes_type *>(json_type.extended());
             bdt->get_bytes_range(&begin, &end,
                             out_tmp_ref.get_ndo_meta(), out_tmp_ref.get_readonly_originptr());
             break;
@@ -76,7 +76,7 @@ static void json_as_buffer(const nd::array& json, nd::array& out_tmp_ref, const 
         default: {
             stringstream ss;
             ss << "Input for JSON parsing must be either bytes (interpreted as UTF-8) or a string, not ";
-            ss << json_dtype;
+            ss << json_type;
             throw runtime_error(ss.str());
             break;
         }
