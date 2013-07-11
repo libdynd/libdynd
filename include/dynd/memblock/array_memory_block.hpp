@@ -16,36 +16,36 @@ namespace dynd {
 
 /**
  * This structure is the start of any ndobject metadata. The
- * metadata after this structure is determined by the m_dtype
+ * metadata after this structure is determined by the m_type
  * object.
  */
 struct array_preamble {
     memory_block_data m_memblockdata;
     /**
-     * m_dtype is overloaded - for builtin scalar dtypes, it
-     * simply contains the type id. If (m_dtype&~builtin_type_id_mask)
+     * m_type is overloaded - for builtin scalar types, it
+     * simply contains the type id. If (m_type&~builtin_type_id_mask)
      * is 0, its a builtin type.
      */
-    const base_type *m_dtype;
+    const base_type *m_type;
     char *m_data_pointer;
     uint64_t m_flags;
     memory_block_data *m_data_reference;
 
-    /** Returns true if the dtype is builtin */
+    /** Returns true if the type is builtin */
     inline bool is_builtin_type() const {
-        return (reinterpret_cast<uintptr_t>(m_dtype)&(~builtin_type_id_mask)) == 0;
+        return (reinterpret_cast<uintptr_t>(m_type)&(~builtin_type_id_mask)) == 0;
     }
 
     /** Should only be called if is_builtin_type() returns true */
     inline type_id_t get_builtin_type_id() const {
-        return static_cast<type_id_t>(reinterpret_cast<uintptr_t>(m_dtype));
+        return static_cast<type_id_t>(reinterpret_cast<uintptr_t>(m_type));
     }
 
     inline type_id_t get_type_id() const {
         if (is_builtin_type()) {
             return get_builtin_type_id();
         } else {
-            return m_dtype->get_type_id();
+            return m_type->get_type_id();
         }
     }
 };
@@ -67,7 +67,7 @@ memory_block_ptr make_array_memory_block(size_t metadata_size, size_t extra_size
                     size_t extra_alignment, char **out_extra_ptr);
 
 /**
- * Creates an ndobject memory block, and default-constructs it for the dtype
+ * Creates an ndobject memory block, and default-constructs it for the type
  * and specified shape.
  */
 memory_block_ptr make_array_memory_block(const ndt::type& dt, size_t ndim, const intptr_t *shape);

@@ -68,11 +68,11 @@ TEST(BytesDType, Assign) {
 
     // Round-trip a string through a bytes assignment
     a = nd::array("testing").view_scalars(ndt::make_bytes(1));
-    EXPECT_EQ(a.get_dtype(), ndt::make_bytes(1));
+    EXPECT_EQ(a.get_type(), ndt::make_bytes(1));
     b = nd::empty(ndt::make_bytes(1));
     b.vals() = a;
     c = b.view_scalars(ndt::make_string());
-    EXPECT_EQ(c.get_dtype(), ndt::make_string());
+    EXPECT_EQ(c.get_type(), ndt::make_string());
     EXPECT_EQ("testing", c.as<string>());
 }
 

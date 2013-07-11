@@ -60,25 +60,25 @@ TEST(StringDType, ArrayCreation) {
 
     // A C-style string literal
     a = "testing string construction";
-    EXPECT_EQ(ndt::make_string(string_encoding_utf_8), a.get_dtype());
+    EXPECT_EQ(ndt::make_string(string_encoding_utf_8), a.get_type());
     EXPECT_EQ("testing string construction", a.as<string>());
 
     // A C-style char array variable
     const char carr[] = "string construction";
     a = carr;
-    EXPECT_EQ(ndt::make_string(string_encoding_utf_8), a.get_dtype());
+    EXPECT_EQ(ndt::make_string(string_encoding_utf_8), a.get_type());
     EXPECT_EQ("string construction", a.as<string>());
 
     // A C-style char pointer variable
     const char *cptr = "construction";
     a = cptr;
-    EXPECT_EQ(ndt::make_string(string_encoding_utf_8), a.get_dtype());
+    EXPECT_EQ(ndt::make_string(string_encoding_utf_8), a.get_type());
     EXPECT_EQ("construction", a.as<string>());
 
     // An array of UTF8 strings
     const char *i0[5] = {"this", "is", "a", "test", "of strings that are various sizes"};
     a = i0;
-    EXPECT_EQ(ndt::make_strided_dim(ndt::make_string(string_encoding_utf_8)), a.get_dtype());
+    EXPECT_EQ(ndt::make_strided_dim(ndt::make_string(string_encoding_utf_8)), a.get_type());
     EXPECT_EQ(a.get_shape()[0], 5);
     EXPECT_EQ("this", a(0).as<string>());
     EXPECT_EQ("is", a(1).as<string>());
@@ -92,7 +92,7 @@ TEST(StringDType, Basic) {
 
     // std::string goes in as a utf8 string
     a = std::string("abcdefg");
-    EXPECT_EQ(ndt::make_string(string_encoding_utf_8), a.get_dtype());
+    EXPECT_EQ(ndt::make_string(string_encoding_utf_8), a.get_type());
     EXPECT_EQ(std::string("abcdefg"), a.as<std::string>());
     // Make it a fixedstring for this test
     a = a.ucast(ndt::make_fixedstring(7, string_encoding_utf_8)).eval();
@@ -101,40 +101,40 @@ TEST(StringDType, Basic) {
     b = a.ucast(ndt::make_string(string_encoding_utf_8));
     EXPECT_EQ(ndt::make_convert(ndt::make_string(string_encoding_utf_8),
                     ndt::make_fixedstring(7, string_encoding_utf_8)),
-                b.get_dtype());
+                b.get_type());
     b = b.eval();
     EXPECT_EQ(ndt::make_string(string_encoding_utf_8),
-                    b.get_dtype());
+                    b.get_type());
     EXPECT_EQ(std::string("abcdefg"), b.as<std::string>());
 
     // Convert to a blockref string dtype with the utf16 codec
     b = a.ucast(ndt::make_string(string_encoding_utf_16));
     EXPECT_EQ(ndt::make_convert(ndt::make_string(string_encoding_utf_16),
                     ndt::make_fixedstring(7, string_encoding_utf_8)),
-                b.get_dtype());
+                b.get_type());
     b = b.eval();
     EXPECT_EQ(ndt::make_string(string_encoding_utf_16),
-                    b.get_dtype());
+                    b.get_type());
     EXPECT_EQ(std::string("abcdefg"), b.as<std::string>());
 
     // Convert to a blockref string dtype with the utf32 codec
     b = a.ucast(ndt::make_string(string_encoding_utf_32));
     EXPECT_EQ(ndt::make_convert(ndt::make_string(string_encoding_utf_32),
                     ndt::make_fixedstring(7, string_encoding_utf_8)),
-                b.get_dtype());
+                b.get_type());
     b = b.eval();
     EXPECT_EQ(ndt::make_string(string_encoding_utf_32),
-                    b.get_dtype());
+                    b.get_type());
     EXPECT_EQ(std::string("abcdefg"), b.as<std::string>());
 
     // Convert to a blockref string dtype with the ascii codec
     b = a.ucast(ndt::make_string(string_encoding_ascii));
     EXPECT_EQ(ndt::make_convert(ndt::make_string(string_encoding_ascii),
                     ndt::make_fixedstring(7, string_encoding_utf_8)),
-                b.get_dtype());
+                b.get_type());
     b = b.eval();
     EXPECT_EQ(ndt::make_string(string_encoding_ascii),
-                    b.get_dtype());
+                    b.get_type());
     EXPECT_EQ(std::string("abcdefg"), b.as<std::string>());
 }
 
@@ -146,13 +146,13 @@ TEST(StringDType, AccessFlags) {
     EXPECT_EQ(nd::read_access_flag | nd::immutable_access_flag, (int)a.get_access_flags());
     // Turn it into a fixedstring dtype for this test
     a = a.ucast(ndt::make_fixedstring(95, string_encoding_utf_8)).eval();
-    EXPECT_EQ(ndt::make_fixedstring(95, string_encoding_utf_8), a.get_dtype());
+    EXPECT_EQ(ndt::make_fixedstring(95, string_encoding_utf_8), a.get_type());
 
     // Converting to a blockref string of the same encoding produces a reference
     // into the fixedstring value
     b = a.ucast(ndt::make_string(string_encoding_utf_8)).eval();
     EXPECT_EQ(nd::read_access_flag | nd::write_access_flag, (int)b.get_access_flags());
-    EXPECT_EQ(ndt::make_string(string_encoding_utf_8), b.get_dtype());
+    EXPECT_EQ(ndt::make_string(string_encoding_utf_8), b.get_type());
     // The data array for 'a' matches the referenced data for 'b' (TODO: Restore this property)
 //    EXPECT_EQ(a.get_readonly_originptr(), reinterpret_cast<const char * const *>(b.get_readonly_originptr())[0]);
 
@@ -160,7 +160,7 @@ TEST(StringDType, AccessFlags) {
     // copy, so gets read write access
     b = a.ucast(ndt::make_string(string_encoding_utf_16)).eval();
     EXPECT_EQ(nd::read_access_flag | nd::write_access_flag, (int)b.get_access_flags());
-    EXPECT_EQ(ndt::make_string(string_encoding_utf_16), b.get_dtype());
+    EXPECT_EQ(ndt::make_string(string_encoding_utf_16), b.get_type());
 }
 
 TEST(StringDType, Unicode) {
@@ -277,13 +277,13 @@ TEST(StringDType, Storage) {
     nd::array a;
 
     a = "testing";
-    EXPECT_EQ(ndt::make_bytes(1), a.storage().get_dtype());
+    EXPECT_EQ(ndt::make_bytes(1), a.storage().get_type());
 
     a = a.ucast(ndt::make_string(string_encoding_utf_16)).eval();
-    EXPECT_EQ(ndt::make_bytes(2), a.storage().get_dtype());
+    EXPECT_EQ(ndt::make_bytes(2), a.storage().get_type());
 
     a = a.ucast(ndt::make_string(string_encoding_utf_32)).eval();
-    EXPECT_EQ(ndt::make_bytes(4), a.storage().get_dtype());
+    EXPECT_EQ(ndt::make_bytes(4), a.storage().get_type());
 }
 
 TEST(StringDType, EncodingSizes) {
@@ -490,7 +490,7 @@ TEST(StringDType, Concatenation) {
     a = a_arr;
     b = b_arr;
     nd::array c = (a + b).eval();
-    ASSERT_EQ(ndt::type("M, string"), c.get_dtype());
+    ASSERT_EQ(ndt::type("M, string"), c.get_type());
     EXPECT_EQ(3, c.get_dim_size());
     EXPECT_EQ("testingalpha", c(0).as<string>());
     EXPECT_EQ("onebeta", c(1).as<string>());

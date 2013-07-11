@@ -341,9 +341,9 @@ TEST(StructDType, SingleCompareDifferentMetadata) {
     b = nd::empty(sdt_reverse)(irange().by(-1));
 
     // Confirm that the metadata is different
-    EXPECT_EQ(a.get_dtype(), b.get_dtype());
-    const struct_type *a_sdt = static_cast<const struct_type *>(a.get_dtype().extended());
-    const struct_type *b_sdt = static_cast<const struct_type *>(b.get_dtype().extended());
+    EXPECT_EQ(a.get_type(), b.get_type());
+    const struct_type *a_sdt = static_cast<const struct_type *>(a.get_type().extended());
+    const struct_type *b_sdt = static_cast<const struct_type *>(b.get_type().extended());
     EXPECT_NE(a_sdt->get_data_offsets(a.get_ndo_meta())[0],
                     b_sdt->get_data_offsets(b.get_ndo_meta())[0]);
     EXPECT_NE(a_sdt->get_data_offsets(a.get_ndo_meta())[1],

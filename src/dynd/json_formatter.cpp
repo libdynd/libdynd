@@ -314,11 +314,11 @@ nd::array dynd::format_json(const nd::array& n)
     out.api->allocate(out.blockref, 1024, 1, &out.out_begin, &out.out_capacity_end);
     out.out_end = out.out_begin;
 
-    if (!n.get_dtype().is_expression()) {
-        ::format_json(out, n.get_dtype(), n.get_ndo_meta(), n.get_readonly_originptr());
+    if (!n.get_type().is_expression()) {
+        ::format_json(out, n.get_type(), n.get_ndo_meta(), n.get_readonly_originptr());
     } else {
         nd::array tmp = n.eval();
-        ::format_json(out, tmp.get_dtype(), tmp.get_ndo_meta(), tmp.get_readonly_originptr());
+        ::format_json(out, tmp.get_type(), tmp.get_ndo_meta(), tmp.get_readonly_originptr());
     }
 
     // Shrink the memory to fit, and set the pointers in the output
@@ -328,7 +328,7 @@ nd::array dynd::format_json(const nd::array& n)
     out.api->resize(out.blockref, out.out_end - out.out_begin, &d->begin, &d->end);
 
     // Finalize processing and mark the result as immutable
-    result.get_dtype().extended()->metadata_finalize_buffers(result.get_ndo_meta());
+    result.get_type().extended()->metadata_finalize_buffers(result.get_ndo_meta());
     result.flag_as_immutable();
 
     return result;

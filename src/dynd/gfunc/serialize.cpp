@@ -14,7 +14,7 @@ using namespace dynd;
 nd::array dynd::gfunc::serialize(const nd::array& val)
 {
     // To start, we're only supporting simple one-dimensional arrays of primitives
-    const ndt::type& dt = val.get_dtype();
+    const ndt::type& dt = val.get_type();
     if (dt.get_type_id() != strided_dim_type_id) {
         stringstream ss;
         ss << "dynd::gfunc::serialize is currently only a prototype, does not support dtype " << dt;

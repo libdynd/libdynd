@@ -7,7 +7,7 @@
 #include <set>
 
 #include <dynd/auxiliary_data.hpp>
-#include <dynd/ndobject_iter.hpp>
+#include <dynd/array_iter.hpp>
 #include <dynd/dtypes/categorical_type.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/kernels/comparison_kernels.hpp>
@@ -185,7 +185,7 @@ static nd::array make_sorted_categories(const set<const char *, cmp>& uniques, c
         k(dst_ptr, *it);
         dst_ptr += stride;
     }
-    categories.get_dtype().extended()->metadata_finalize_buffers(categories.get_ndo_meta());
+    categories.get_type().extended()->metadata_finalize_buffers(categories.get_ndo_meta());
     categories.flag_as_immutable();
 
     return categories;
@@ -200,7 +200,7 @@ categorical_type::categorical_type(const nd::array& categories, bool presorted)
         // sorted. No validation of this is done, the caller should have ensured it
         // was correct already, typically by construction.
         m_categories = categories.eval_immutable();
-        m_category_type = m_categories.get_dtype().at(0);
+        m_category_type = m_categories.get_type().at(0);
 
         category_count = categories.get_dim_size();
         m_value_to_category_index.resize(category_count);
@@ -212,11 +212,11 @@ categorical_type::categorical_type(const nd::array& categories, bool presorted)
 
     } else {
         // Process the categories array to make sure it's valid
-        const ndt::type& cdt = categories.get_dtype();
+        const ndt::type& cdt = categories.get_type();
         if (cdt.get_type_id() != strided_dim_type_id) {
             throw runtime_error("categorical_type only supports construction from a strided array of categories");
         }
-        m_category_type = categories.get_dtype().at(0);
+        m_category_type = categories.get_type().at(0);
         if (!m_category_type.is_scalar()) {
             throw runtime_error("categorical_type only supports construction from a 1-dimensional strided array of categories");
         }
@@ -348,7 +348,7 @@ uint32_t categorical_type::get_value_from_category(const char *category_metadata
 
 uint32_t categorical_type::get_value_from_category(const nd::array& category) const
 {
-    if (category.get_dtype() == m_category_type) {
+    if (category.get_type() == m_category_type) {
         // If the dtype is right, get the category value directly
         return get_value_from_category(category.get_ndo_meta(), category.get_readonly_originptr());
     } else {
@@ -362,7 +362,7 @@ uint32_t categorical_type::get_value_from_category(const nd::array& category) co
 const char *categorical_type::get_category_metadata() const
 {
     const char *metadata = m_categories.get_ndo_meta();
-    m_categories.get_dtype().extended()->at_single(0, &metadata, NULL);
+    m_categories.get_type().extended()->at_single(0, &metadata, NULL);
     return metadata;
 }
 

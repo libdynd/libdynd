@@ -45,7 +45,7 @@ public:
     {
         if (!m_default_parameters.is_empty()) {
             // Make sure the default parameter values have the correct dtype
-            if (m_default_parameters.get_dtype() != m_parameters_type) {
+            if (m_default_parameters.get_type() != m_parameters_type) {
                 throw std::runtime_error("dynd callable's default arguments have a different type than the parameters");
             }
             // Make sure the default parameter values are immutable
@@ -60,7 +60,7 @@ public:
     {
         if (!default_parameters.is_empty()) {
             // Make sure the default parameter values have the correct dtype
-            if (default_parameters.get_dtype() != parameters_dtype) {
+            if (default_parameters.get_type() != parameters_dtype) {
                 throw std::runtime_error("dynd callable's default arguments have a different type than the parameters");
             }
             // Make sure the default parameter values are immutable

@@ -68,7 +68,7 @@ class array_iter<1, 0> {
     }
 public:
     array_iter(const nd::array& op0) {
-        init(op0.get_dtype(), op0.get_ndo_meta(), op0.get_readwrite_originptr());
+        init(op0.get_type(), op0.get_ndo_meta(), op0.get_readwrite_originptr());
     }
 
     ~array_iter() {
@@ -164,7 +164,7 @@ public:
     }
 
     array_iter(const nd::array& op0) {
-        init(op0.get_dtype(), op0.get_ndo_meta(), op0.get_readonly_originptr());
+        init(op0.get_type(), op0.get_ndo_meta(), op0.get_readonly_originptr());
     }
 
     ~array_iter() {
@@ -294,8 +294,8 @@ public:
         init(dt0, metadata0, data0, dt1, metadata1, data1);
     }
     array_iter(const nd::array& op0, const nd::array& op1) {
-        init(op0.get_dtype(), op0.get_ndo_meta(), op0.get_readwrite_originptr(),
-                        op1.get_dtype(), op1.get_ndo_meta(), op1.get_readonly_originptr());
+        init(op0.get_type(), op0.get_ndo_meta(), op0.get_readwrite_originptr(),
+                        op1.get_type(), op1.get_ndo_meta(), op1.get_readonly_originptr());
     }
 
     ~array_iter() {
@@ -375,8 +375,8 @@ class array_iter<0, 2> {
 public:
     array_iter(const nd::array& op0, const nd::array& op1) {
         nd::array ops[2] = {op0, op1};
-        m_array_type[0] = op0.get_dtype();
-        m_array_type[1] = op1.get_dtype();
+        m_array_type[0] = op0.get_type();
+        m_array_type[1] = op1.get_type();
         m_itersize = 1;
         shortvector<int> axis_perm; // TODO: Use this to affect the iteration order
         broadcast_input_shapes(2, ops, m_iter_ndim, m_itershape, axis_perm);
@@ -482,10 +482,10 @@ public:
     array_iter(const ndt::type& op0_dtype, nd::array& out_op0, const nd::array& op1, const nd::array& op2, const nd::array& op3) {
         create_broadcast_result(op0_dtype, op1, op2, op3, out_op0, m_iter_ndim[0], m_itershape);
         nd::array ops[4] = {out_op0, op1, op2, op3};
-        m_array_type[0] = out_op0.get_dtype();
-        m_array_type[1] = op1.get_dtype();
-        m_array_type[2] = op2.get_dtype();
-        m_array_type[3] = op3.get_dtype();
+        m_array_type[0] = out_op0.get_type();
+        m_array_type[1] = op1.get_type();
+        m_array_type[2] = op2.get_type();
+        m_array_type[3] = op3.get_type();
         m_itersize = 1;
         m_iter_ndim[1] = m_array_type[1].get_undim();
         m_iter_ndim[2] = m_array_type[2].get_undim();

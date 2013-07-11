@@ -47,9 +47,9 @@ inline string broadcast_error_message(const nd::array& dst, const nd::array& src
     stringstream ss;
 
     ss << "cannot broadcast nd::array with dtype ";
-    ss << src.get_dtype() << " and shape ";
+    ss << src.get_type() << " and shape ";
     print_shape(ss, src_shape);
-    ss << " to dtype " << dst.get_dtype() << " and shape ";
+    ss << " to dtype " << dst.get_type() << " and shape ";
     print_shape(ss, dst_shape);
 
     return ss.str();

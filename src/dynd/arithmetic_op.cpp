@@ -6,7 +6,7 @@
 #include <sstream>
 
 #include <dynd/array.hpp>
-#include <dynd/ndobject_iter.hpp>
+#include <dynd/array_iter.hpp>
 #include <dynd/dtype_promotion.hpp>
 #include <dynd/kernels/expr_kernel_generator.hpp>
 #include <dynd/kernels/elwise_expr_kernels.hpp>
@@ -272,9 +272,9 @@ nd::array apply_binary_operator(const nd::array *ops,
     // Because the expr dtype's operand is the result's dtype,
     // we can swap it in as the dtype
     ndt::type edt = ndt::make_expr(result_vdt,
-                    result.get_dtype(),
+                    result.get_type(),
                     new arithmetic_op_kernel_generator<KD>(rdt, op1dt, op2dt, expr_ops, name));
-    edt.swap(result.get_ndo()->m_dtype);
+    edt.swap(result.get_ndo()->m_type);
     return result;
 }
 

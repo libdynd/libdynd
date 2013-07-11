@@ -31,7 +31,7 @@ TEST(JSONDType, Validation) {
     nd::array a;
 
     a = nd::array("[1,2,3]").ucast(ndt::make_json()).eval();
-    EXPECT_EQ(ndt::make_json(), a.get_dtype());
+    EXPECT_EQ(ndt::make_json(), a.get_type());
     EXPECT_EQ("[1,2,3]", a.as<string>());
 
     EXPECT_THROW(nd::array("[1,2,3]#").ucast(ndt::make_json()).eval(), runtime_error);

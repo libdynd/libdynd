@@ -20,10 +20,10 @@ namespace {
     class json_parse_error {
         const char *m_position;
         string m_message;
-        ndt::type m_dtype;
+        ndt::type m_type;
     public:
         json_parse_error(const char *position, const std::string& message, const ndt::type& dt)
-            : m_position(position), m_message(message), m_dtype(dt) {
+            : m_position(position), m_message(message), m_type(dt) {
         }
         virtual ~json_parse_error() {
         }
@@ -33,8 +33,8 @@ namespace {
         const char *get_message() const {
             return m_message.c_str();
         }
-        const ndt::type& get_dtype() const {
-            return m_dtype;
+        const ndt::type& get_type() const {
+            return m_type;
         }
     };
 } // anonymous namespace
@@ -42,7 +42,7 @@ namespace {
 static void json_as_buffer(const nd::array& json, nd::array& out_tmp_ref, const char *&begin, const char *&end)
 {
     // Check the dtype of 'json', and get pointers to the begin/end of a UTF-8 buffer
-    ndt::type json_type = json.get_dtype().value_type();
+    ndt::type json_type = json.get_type().value_type();
     switch (json_type.get_kind()) {
         case string_kind: {
             const base_string_type *sdt = static_cast<const base_string_type *>(json_type.extended());
@@ -725,7 +725,7 @@ void dynd::parse_json(nd::array& out, const char *json_begin, const char *json_e
 {
     try {
         const char *begin = json_begin, *end = json_end;
-        ndt::type dt = out.get_dtype();
+        ndt::type dt = out.get_type();
         ::parse_json(dt, out.get_ndo_meta(), out.get_readwrite_originptr(), begin, end);
         begin = skip_whitespace(begin, end);
         if (begin != end) {
@@ -738,8 +738,8 @@ void dynd::parse_json(nd::array& out, const char *json_begin, const char *json_e
         get_error_line_column(json_begin, json_end, e.get_position(),
                         line_prev, line_cur, line, column);
         ss << "Error parsing JSON at line " << line << ", column " << column << "\n";
-        if (e.get_dtype().get_type_id() != uninitialized_type_id) {
-            ss << "DType: " << e.get_dtype() << "\n";
+        if (e.get_type().get_type_id() != uninitialized_type_id) {
+            ss << "DType: " << e.get_type() << "\n";
         }
         ss << "Message: " << e.get_message() << "\n";
         print_json_parse_error_marker(ss, line_prev, line_cur, line, column);

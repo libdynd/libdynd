@@ -361,12 +361,12 @@ TEST(ArrayAssign, ChainedCastingRead) {
     EXPECT_EQ(ndt::make_strided_dim(
                     ndt::make_convert(ndt::make_type<float>(),
                                     ndt::make_convert<int, float>(assign_error_overflow), assign_error_inexact)),
-              b.get_dtype());
+              b.get_type());
 
     // Evaluating the values should truncate them to integers
     b = b.eval();
     // Now it's just the value dtype, no chaining
-    EXPECT_EQ(ndt::make_strided_dim(ndt::make_type<float>()), b.get_dtype());
+    EXPECT_EQ(ndt::make_strided_dim(ndt::make_type<float>()), b.get_type());
     EXPECT_EQ(3, b(0).as<float>());
     EXPECT_EQ(1, b(1).as<float>());
     EXPECT_EQ(-2, b(2).as<float>());
@@ -394,9 +394,9 @@ TEST(ArrayAssign, ChainedCastingRead) {
                         assign_error_overflow),
                     assign_error_overflow),
                 assign_error_overflow)),
-            b.get_dtype());
+            b.get_type());
     b = b.eval();
-    EXPECT_EQ(ndt::make_strided_dim(ndt::make_type<int32_t>()), b.get_dtype());
+    EXPECT_EQ(ndt::make_strided_dim(ndt::make_type<int32_t>()), b.get_type());
     EXPECT_EQ(3, b(0).as<int32_t>());
     EXPECT_EQ(1, b(1).as<int32_t>());
     EXPECT_EQ(-2, b(2).as<int32_t>());
@@ -413,7 +413,7 @@ TEST(ArrayAssign, ChainedCastingWrite) {
     // Multiple cast_scalars operations should make a chained conversion dtype
     EXPECT_EQ(ndt::make_strided_dim(ndt::make_convert(ndt::make_type<float>(),
                                     ndt::make_convert<int, float>(assign_error_inexact), assign_error_overflow)),
-              b.get_dtype());
+              b.get_type());
 
     b(0).vals() = 6.8f;
     b(1).vals() = -3.1;

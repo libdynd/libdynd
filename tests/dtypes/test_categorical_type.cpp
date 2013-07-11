@@ -222,7 +222,7 @@ TEST(CategoricalDType, AssignFixedString) {
     cat(0).vals() = "zzz";
     EXPECT_THROW(a(0).vals() = cat(0), std::runtime_error);
 
-    nd::array tmp = nd::make_strided_array(3, cat.get_dtype().at(0));
+    nd::array tmp = nd::make_strided_array(3, cat.get_type().at(0));
     tmp.val_assign(a);
     EXPECT_EQ("baz", tmp(0).as<string>());
     EXPECT_EQ("bar", tmp(1).as<string>());
@@ -251,7 +251,7 @@ TEST(CategoricalDType, AssignInt) {
     //a(0).vals() = string("bar");
     //cout << a << endl;
 
-    nd::array tmp = nd::make_strided_array(3, cat.get_dtype().at(0));
+    nd::array tmp = nd::make_strided_array(3, cat.get_type().at(0));
     tmp.val_assign(a);
     EXPECT_EQ(1000, tmp(0).as<int32_t>());
     EXPECT_EQ(100, tmp(1).as<int32_t>());
@@ -301,9 +301,9 @@ TEST(CategoricalDType, AssignFromOther) {
     int16_t a_values[] = {6, 3, 100, 3, 1000, 100, 6, 1000};
     nd::array a = nd::array(a_values).ucast(cd);
     EXPECT_EQ(ndt::make_strided_dim(ndt::make_convert(cd, ndt::make_type<int16_t>())),
-                    a.get_dtype());
+                    a.get_type());
     a = a.eval();
-    EXPECT_EQ(ndt::make_strided_dim(cd), a.get_dtype());
+    EXPECT_EQ(ndt::make_strided_dim(cd), a.get_type());
     EXPECT_EQ(6,    a(0).as<int>());
     EXPECT_EQ(3,    a(1).as<int>());
     EXPECT_EQ(100,  a(2).as<int>());

@@ -210,19 +210,19 @@ public:
 
     /** Returns true if the object is a scalar */
     inline bool is_scalar() const {
-        return get_dtype().is_scalar();
+        return get_type().is_scalar();
     }
 
     /** The dtype */
-    inline const ndt::type& get_dtype() const {
-        return *reinterpret_cast<const ndt::type *>(&get_ndo()->m_dtype);
+    inline const ndt::type& get_type() const {
+        return *reinterpret_cast<const ndt::type *>(&get_ndo()->m_type);
     }
 
     inline size_t get_undim() const {
         if (get_ndo()->is_builtin_type()) {
             return 0;
         } else {
-            return get_ndo()->m_dtype->get_undim();
+            return get_ndo()->m_type->get_undim();
         }
     }
 
@@ -231,11 +231,11 @@ public:
         if (get_ndo()->is_builtin_type()) {
             return ndt::type(get_ndo()->get_builtin_type_id());
         } else {
-            size_t undim = get_ndo()->m_dtype->get_undim();
+            size_t undim = get_ndo()->m_type->get_undim();
             if (undim == 0) {
-                return ndt::type(get_ndo()->m_dtype, true);
+                return ndt::type(get_ndo()->m_type, true);
             } else {
-                return get_ndo()->m_dtype->get_type_at_dimension(NULL, undim);
+                return get_ndo()->m_type->get_type_at_dimension(NULL, undim);
             }
         }
     }
@@ -257,8 +257,8 @@ public:
         return result;
     }
     inline void get_shape(intptr_t *out_shape) const {
-        if (!get_ndo()->is_builtin_type() && get_ndo()->m_dtype->get_undim() > 0) {
-            get_ndo()->m_dtype->get_shape(get_ndo()->m_dtype->get_undim(), 0, out_shape, get_ndo_meta());
+        if (!get_ndo()->is_builtin_type() && get_ndo()->m_type->get_undim() > 0) {
+            get_ndo()->m_type->get_shape(get_ndo()->m_type->get_undim(), 0, out_shape, get_ndo_meta());
         }
     }
 
@@ -266,7 +266,7 @@ public:
      * Returns the size of the leading (leftmost) dimension.
      */
     inline intptr_t get_dim_size() const {
-        return get_dtype().get_dim_size(get_ndo_meta(), get_ndo()->m_data_pointer);
+        return get_type().get_dim_size(get_ndo_meta(), get_ndo()->m_data_pointer);
     }
 
     std::vector<intptr_t> get_strides() const {
@@ -276,7 +276,7 @@ public:
     }
     inline void get_strides(intptr_t *out_strides) const {
         if (!get_ndo()->is_builtin_type()) {
-            get_ndo()->m_dtype->get_strides(0, out_strides, get_ndo_meta());
+            get_ndo()->m_type->get_strides(0, out_strides, get_ndo_meta());
         }
     }
 
@@ -1023,7 +1023,7 @@ namespace detail {
                 throw std::runtime_error("can only convert arrays with 0 dimensions to scalars");
             }
             dtype_assign(ndt::make_type<T>(), NULL, (char *)&result,
-                        lhs.get_dtype(), lhs.get_ndo_meta(), lhs.get_ndo()->m_data_pointer, errmode);
+                        lhs.get_type(), lhs.get_ndo_meta(), lhs.get_ndo()->m_data_pointer, errmode);
             return result;
         }
     };
@@ -1158,7 +1158,7 @@ array empty_like(const array& rhs);
 
 /**
  * Performs a binary search of the first dimension of the array, which
- * should be sorted. The data/metadata must correspond to the dtype n.get_dtype().at(0).
+ * should be sorted. The data/metadata must correspond to the dtype n.get_type().at(0).
  *
  * \returns  The index of the found element, or -1 if not found.
  */

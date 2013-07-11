@@ -92,7 +92,7 @@ TEST(FixedDimDType, Basic) {
     a = nd::empty(ndt::make_fixed_dim(3, ndt::make_type<float>()));
     a.vals() = vals;
 
-    EXPECT_EQ(ndt::make_fixed_dim(3, ndt::make_type<float>()), a.get_dtype());
+    EXPECT_EQ(ndt::make_fixed_dim(3, ndt::make_type<float>()), a.get_type());
     EXPECT_EQ(1u, a.get_shape().size());
     EXPECT_EQ(3, a.get_shape()[0]);
     EXPECT_EQ(1u, a.get_strides().size());
@@ -111,20 +111,20 @@ TEST(FixedDimDType, SimpleIndex) {
     nd::array a = parse_json("2, 3, int16", "[[1, 2, 3], [4, 5, 6]]");
     ASSERT_EQ(ndt::make_fixed_dim(2,
                     ndt::make_fixed_dim(3, ndt::make_type<int16_t>())),
-                a.get_dtype());
+                a.get_type());
 
     nd::array b;
 
     b = a(0);
     ASSERT_EQ(ndt::make_fixed_dim(3, ndt::make_type<int16_t>()),
-                b.get_dtype());
+                b.get_type());
     EXPECT_EQ(1, b(0).as<int16_t>());
     EXPECT_EQ(2, b(1).as<int16_t>());
     EXPECT_EQ(3, b(2).as<int16_t>());
 
     b = a(1);
     ASSERT_EQ(ndt::make_fixed_dim(3, ndt::make_type<int16_t>()),
-                b.get_dtype());
+                b.get_type());
     EXPECT_EQ(4, b(0).as<int16_t>());
     EXPECT_EQ(5, b(1).as<int16_t>());
     EXPECT_EQ(6, b(2).as<int16_t>());
@@ -141,9 +141,9 @@ TEST(FixedDimDType, AssignKernel_ScalarToFixed) {
     a = nd::empty(ndt::make_fixed_dim(3, ndt::make_type<int>()));
     a.vals() = 0;
     b = 9.0;
-    EXPECT_EQ(fixed_dim_type_id, a.get_dtype().get_type_id());
-    make_assignment_kernel(&k, 0, a.get_dtype(), a.get_ndo_meta(),
-                    b.get_dtype(), b.get_ndo_meta(),
+    EXPECT_EQ(fixed_dim_type_id, a.get_type().get_type_id());
+    make_assignment_kernel(&k, 0, a.get_type(), a.get_ndo_meta(),
+                    b.get_type(), b.get_ndo_meta(),
                     kernel_request_single, assign_error_default, &eval::default_eval_context);
     k(a.get_readwrite_originptr(), b.get_readonly_originptr());
     EXPECT_EQ(9, a(0).as<int>());
@@ -159,10 +159,10 @@ TEST(FixedDimDType, AssignKernel_FixedToFixed) {
     a = nd::empty(ndt::make_fixed_dim(3, ndt::make_type<int>()));
     a.vals() = 0;
     b = parse_json("3, int32", "[3, 5, 7]");
-    EXPECT_EQ(fixed_dim_type_id, a.get_dtype().get_type_id());
-    EXPECT_EQ(fixed_dim_type_id, b.get_dtype().get_type_id());
-    make_assignment_kernel(&k, 0, a.get_dtype(), a.get_ndo_meta(),
-                    b.get_dtype(), b.get_ndo_meta(),
+    EXPECT_EQ(fixed_dim_type_id, a.get_type().get_type_id());
+    EXPECT_EQ(fixed_dim_type_id, b.get_type().get_type_id());
+    make_assignment_kernel(&k, 0, a.get_type(), a.get_ndo_meta(),
+                    b.get_type(), b.get_ndo_meta(),
                     kernel_request_single, assign_error_default, &eval::default_eval_context);
     k(a.get_readwrite_originptr(), b.get_readonly_originptr());
     EXPECT_EQ(3, a(0).as<int>());
@@ -177,9 +177,9 @@ TEST(FixedDimDType, AssignKernel_FixedToScalarError) {
     // Assignment fixed array -> scalar
     a = 9.0;
     b = parse_json("3, int32", "[3, 5, 7]");
-    EXPECT_EQ(fixed_dim_type_id, b.get_dtype().get_type_id());
-    EXPECT_THROW(make_assignment_kernel(&k, 0, a.get_dtype(), a.get_ndo_meta(),
-                    b.get_dtype(), b.get_ndo_meta(),
+    EXPECT_EQ(fixed_dim_type_id, b.get_type().get_type_id());
+    EXPECT_THROW(make_assignment_kernel(&k, 0, a.get_type(), a.get_ndo_meta(),
+                    b.get_type(), b.get_ndo_meta(),
                     kernel_request_single, assign_error_default, &eval::default_eval_context),
                 broadcast_error);
 }
@@ -194,10 +194,10 @@ TEST(FixedDimDType, AssignFixedStridedKernel) {
     a = nd::empty(ndt::make_fixed_dim(3, ndt::make_type<int>()));
     a.vals() = 0;
     b = vals_int;
-    EXPECT_EQ(fixed_dim_type_id, a.get_dtype().get_type_id());
-    EXPECT_EQ(strided_dim_type_id, b.get_dtype().get_type_id());
-    make_assignment_kernel(&k, 0, a.get_dtype(), a.get_ndo_meta(),
-                    b.get_dtype(), b.get_ndo_meta(),
+    EXPECT_EQ(fixed_dim_type_id, a.get_type().get_type_id());
+    EXPECT_EQ(strided_dim_type_id, b.get_type().get_type_id());
+    make_assignment_kernel(&k, 0, a.get_type(), a.get_ndo_meta(),
+                    b.get_type(), b.get_ndo_meta(),
                     kernel_request_single, assign_error_default, &eval::default_eval_context);
     k(a.get_readwrite_originptr(), b.get_readonly_originptr());
     EXPECT_EQ(3, a(0).as<int>());
@@ -209,10 +209,10 @@ TEST(FixedDimDType, AssignFixedStridedKernel) {
     a = nd::empty(ndt::make_fixed_dim(3, ndt::make_type<int>()));
     a.vals() = 0;
     b = vals_int_single;
-    EXPECT_EQ(fixed_dim_type_id, a.get_dtype().get_type_id());
-    EXPECT_EQ(strided_dim_type_id, b.get_dtype().get_type_id());
-    make_assignment_kernel(&k, 0, a.get_dtype(), a.get_ndo_meta(),
-                    b.get_dtype(), b.get_ndo_meta(),
+    EXPECT_EQ(fixed_dim_type_id, a.get_type().get_type_id());
+    EXPECT_EQ(strided_dim_type_id, b.get_type().get_type_id());
+    make_assignment_kernel(&k, 0, a.get_type(), a.get_ndo_meta(),
+                    b.get_type(), b.get_ndo_meta(),
                     kernel_request_single, assign_error_default, &eval::default_eval_context);
     k(a.get_readwrite_originptr(), b.get_readonly_originptr());
     EXPECT_EQ(9, a(0).as<int>());
@@ -224,10 +224,10 @@ TEST(FixedDimDType, AssignFixedStridedKernel) {
     a = nd::make_strided_array(3, ndt::make_type<float>());
     a.vals() = 0;
     b = parse_json("3, int32", "[3, 5, 7]");
-    EXPECT_EQ(strided_dim_type_id, a.get_dtype().get_type_id());
-    EXPECT_EQ(fixed_dim_type_id, b.get_dtype().get_type_id());
-    make_assignment_kernel(&k, 0, a.get_dtype(), a.get_ndo_meta(),
-                    b.get_dtype(), b.get_ndo_meta(),
+    EXPECT_EQ(strided_dim_type_id, a.get_type().get_type_id());
+    EXPECT_EQ(fixed_dim_type_id, b.get_type().get_type_id());
+    make_assignment_kernel(&k, 0, a.get_type(), a.get_ndo_meta(),
+                    b.get_type(), b.get_ndo_meta(),
                     kernel_request_single, assign_error_default, &eval::default_eval_context);
     k(a.get_readwrite_originptr(), b.get_readonly_originptr());
     EXPECT_EQ(3, a(0).as<int>());
@@ -239,10 +239,10 @@ TEST(FixedDimDType, AssignFixedStridedKernel) {
     a = nd::make_strided_array(3, ndt::make_type<float>());
     a.vals() = 0;
     b = parse_json("1, int32", "[9]");
-    EXPECT_EQ(strided_dim_type_id, a.get_dtype().get_type_id());
-    EXPECT_EQ(fixed_dim_type_id, b.get_dtype().get_type_id());
-    make_assignment_kernel(&k, 0, a.get_dtype(), a.get_ndo_meta(),
-                    b.get_dtype(), b.get_ndo_meta(),
+    EXPECT_EQ(strided_dim_type_id, a.get_type().get_type_id());
+    EXPECT_EQ(fixed_dim_type_id, b.get_type().get_type_id());
+    make_assignment_kernel(&k, 0, a.get_type(), a.get_ndo_meta(),
+                    b.get_type(), b.get_ndo_meta(),
                     kernel_request_single, assign_error_default, &eval::default_eval_context);
     k(a.get_readwrite_originptr(), b.get_readonly_originptr());
     EXPECT_EQ(9, a(0).as<int>());

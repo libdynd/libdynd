@@ -4,7 +4,7 @@
 //
 
 #include <dynd/array.hpp>
-#include <dynd/ndobject_iter.hpp>
+#include <dynd/array_iter.hpp>
 #include <dynd/dtypes/strided_dim_type.hpp>
 #include <dynd/dtypes/var_dim_type.hpp>
 #include <dynd/dtypes/fixed_dim_type.hpp>
@@ -45,7 +45,7 @@ make_immutable_builtin_scalar_array(const T& value)
     memory_block_ptr result = make_array_memory_block(0, sizeof(T), scalar_align_of<T>::value, &data_ptr);
     *reinterpret_cast<T *>(data_ptr) = value;
     array_preamble *ndo = reinterpret_cast<array_preamble *>(result.get());
-    ndo->m_dtype = reinterpret_cast<base_type *>(type_id_of<T>::value);
+    ndo->m_type = reinterpret_cast<base_type *>(type_id_of<T>::value);
     ndo->m_data_pointer = data_ptr;
     ndo->m_data_reference = NULL;
     ndo->m_flags = nd::read_access_flag | nd::immutable_access_flag;
@@ -86,7 +86,7 @@ nd::array nd::make_strided_array(const ndt::type& uniform_dtype, size_t ndim, co
 
     // Fill in the preamble metadata
     array_preamble *ndo = reinterpret_cast<array_preamble *>(result.get());
-    ndo->m_dtype = array_type.release();
+    ndo->m_type = array_type.release();
     ndo->m_data_pointer = data_ptr;
     ndo->m_data_reference = NULL;
     ndo->m_flags = access_flags;
@@ -126,7 +126,7 @@ nd::array nd::make_strided_array(const ndt::type& uniform_dtype, size_t ndim, co
         }
         // Fill in the array metadata with strides and sizes
         char *meta = reinterpret_cast<char *>(ndo + 1);
-        ndo->m_dtype->metadata_default_construct(meta, ndim, shape);
+        ndo->m_type->metadata_default_construct(meta, ndim, shape);
     }
 
     return array(result);
@@ -149,7 +149,7 @@ nd::array nd::make_strided_array_from_data(const ndt::type& uniform_dtype, size_
 
     // Fill in the preamble metadata
     array_preamble *ndo = reinterpret_cast<array_preamble *>(result.get());
-    ndo->m_dtype = array_type.release();
+    ndo->m_type = array_type.release();
     ndo->m_data_pointer = data_ptr;
     ndo->m_data_reference = data_reference.get();
     memory_block_incref(ndo->m_data_reference);
@@ -192,10 +192,10 @@ nd::array nd::make_pod_array(const ndt::type& pod_dt, const void *data)
     // Fill in the preamble metadata
     array_preamble *ndo = reinterpret_cast<array_preamble *>(result.get());
     if (pod_dt.is_builtin()) {
-        ndo->m_dtype = reinterpret_cast<const base_type *>(pod_dt.get_type_id());
+        ndo->m_type = reinterpret_cast<const base_type *>(pod_dt.get_type_id());
     } else {
-        ndo->m_dtype = pod_dt.extended();
-        base_type_incref(ndo->m_dtype);
+        ndo->m_type = pod_dt.extended();
+        base_type_incref(ndo->m_type);
     }
     ndo->m_data_pointer = data_ptr;
     ndo->m_data_reference = NULL;
@@ -220,7 +220,7 @@ nd::array nd::make_string_array(const char *str, size_t len, string_encoding_t e
     memcpy(string_ptr, str, len);
     // Set the array metadata
     array_preamble *ndo = result.get_ndo();
-    ndo->m_dtype = dt.release();
+    ndo->m_type = dt.release();
     ndo->m_data_pointer = data_ptr;
     ndo->m_data_reference = NULL;
     ndo->m_flags = nd::read_access_flag | nd::immutable_access_flag;
@@ -259,11 +259,11 @@ static nd::array make_array_clone_with_new_dtype(const nd::array& n, const ndt::
     array_preamble *preamble = result.get_ndo();
     // Swap in the dtype
     if (!preamble->is_builtin_type()) {
-        base_type_decref(preamble->m_dtype);
+        base_type_decref(preamble->m_type);
     }
-    preamble->m_dtype = new_dt.extended();
+    preamble->m_type = new_dt.extended();
     if(!new_dt.is_builtin()) {
-        base_type_incref(preamble->m_dtype);
+        base_type_incref(preamble->m_type);
     }
     return result;
 }
@@ -385,7 +385,7 @@ nd::array nd::detail::make_from_vec<ndt::type>::make(const std::vector<ndt::type
     array_preamble *preamble = result.get_ndo();
     preamble->m_data_pointer = data_ptr;
     preamble->m_data_reference = NULL;
-    preamble->m_dtype = dt.release();
+    preamble->m_type = dt.release();
     preamble->m_flags = read_access_flag | immutable_access_flag;
     // The metadata for the strided and string parts of the dtype
     strided_dim_type_metadata *sa_md = reinterpret_cast<strided_dim_type_metadata *>(
@@ -420,7 +420,7 @@ nd::array nd::detail::make_from_vec<std::string>::make(const std::vector<std::st
     array_preamble *preamble = result.get_ndo();
     preamble->m_data_pointer = data_ptr;
     preamble->m_data_reference = NULL;
-    preamble->m_dtype = dt.release();
+    preamble->m_type = dt.release();
     preamble->m_flags = read_access_flag | immutable_access_flag;
     // The metadata for the strided and string parts of the dtype
     strided_dim_type_metadata *sa_md = reinterpret_cast<strided_dim_type_metadata *>(
@@ -478,9 +478,9 @@ namespace {
 
 nd::array nd::array::storage() const
 {
-    ndt::type storage_dt = get_dtype();
+    ndt::type storage_dt = get_type();
     bool was_transformed = false;
-    as_storage_type(get_dtype(), NULL, storage_dt, was_transformed);
+    as_storage_type(get_type(), NULL, storage_dt, was_transformed);
     if (was_transformed) {
         return make_array_clone_with_new_dtype(*this, storage_dt);
     } else {
@@ -492,21 +492,21 @@ nd::array nd::array::at_array(size_t nindices, const irange *indices, bool colla
 {
     if (is_scalar()) {
         if (nindices != 0) {
-            throw too_many_indices(get_dtype(), nindices, 0);
+            throw too_many_indices(get_type(), nindices, 0);
         }
         return *this;
     } else {
-        ndt::type this_dt(get_ndo()->m_dtype, true);
-        ndt::type dt = get_ndo()->m_dtype->apply_linear_index(nindices, indices,
+        ndt::type this_dt(get_ndo()->m_type, true);
+        ndt::type dt = get_ndo()->m_type->apply_linear_index(nindices, indices,
                         0, this_dt, collapse_leading);
         array result;
         if (!dt.is_builtin()) {
             result.set(make_array_memory_block(dt.extended()->get_metadata_size()));
-            result.get_ndo()->m_dtype = dt.extended();
-            base_type_incref(result.get_ndo()->m_dtype);
+            result.get_ndo()->m_type = dt.extended();
+            base_type_incref(result.get_ndo()->m_type);
         } else {
             result.set(make_array_memory_block(0));
-            result.get_ndo()->m_dtype = reinterpret_cast<const base_type *>(dt.get_type_id());
+            result.get_ndo()->m_type = reinterpret_cast<const base_type *>(dt.get_type_id());
         }
         result.get_ndo()->m_data_pointer = get_ndo()->m_data_pointer;
         if (get_ndo()->m_data_reference) {
@@ -516,7 +516,7 @@ nd::array nd::array::at_array(size_t nindices, const irange *indices, bool colla
             result.get_ndo()->m_data_reference = m_memblock.get();
         }
         memory_block_incref(result.get_ndo()->m_data_reference);
-        intptr_t offset = get_ndo()->m_dtype->apply_linear_index(nindices, indices,
+        intptr_t offset = get_ndo()->m_type->apply_linear_index(nindices, indices,
                         get_ndo_meta(), dt, result.get_ndo_meta(),
                         m_memblock.get(), 0, this_dt,
                         collapse_leading,
@@ -535,15 +535,15 @@ void nd::array::val_assign(const array& rhs, assign_error_mode errmode,
         throw runtime_error("tried to read from a dynd array that is not readable");
     }
 
-    dtype_assign(get_dtype(), get_ndo_meta(), get_readwrite_originptr(),
-                    rhs.get_dtype(), rhs.get_ndo_meta(), rhs.get_readonly_originptr(),
+    dtype_assign(get_type(), get_ndo_meta(), get_readwrite_originptr(),
+                    rhs.get_type(), rhs.get_ndo_meta(), rhs.get_readonly_originptr(),
                     errmode, ectx);
 }
 
 void nd::array::val_assign(const ndt::type& rhs_dt, const char *rhs_metadata, const char *rhs_data,
                     assign_error_mode errmode, const eval::eval_context *ectx) const
 {
-    dtype_assign(get_dtype(), get_ndo_meta(), get_readwrite_originptr(),
+    dtype_assign(get_type(), get_ndo_meta(), get_readwrite_originptr(),
                     rhs_dt, rhs_metadata, rhs_data,
                     errmode, ectx);
 }
@@ -568,20 +568,20 @@ void nd::array::flag_as_immutable()
         // other than a memblock owning its data, such as an external memblock.
         ok = false;
     } else if (!get_ndo()->is_builtin_type() &&
-            !get_ndo()->m_dtype->is_unique_data_owner(get_ndo_meta())) {
+            !get_ndo()->m_type->is_unique_data_owner(get_ndo_meta())) {
         ok = false;
     }
 
     if (ok) {
         // Finalize any allocated data in the metadata
-        if (!is_builtin_type(get_ndo()->m_dtype)) {
-            get_ndo()->m_dtype->metadata_finalize_buffers(get_ndo_meta());
+        if (!is_builtin_type(get_ndo()->m_type)) {
+            get_ndo()->m_type->metadata_finalize_buffers(get_ndo_meta());
         }
         // Clear the write flag, and set the immutable flag
         get_ndo()->m_flags = (get_ndo()->m_flags&~(uint64_t)write_access_flag)|immutable_access_flag;
     } else {
         stringstream ss;
-        ss << "Unable to flag array of dtype " << get_dtype() << " as immutable, because ";
+        ss << "Unable to flag array of dtype " << get_type() << " as immutable, because ";
         ss << "it does not uniquely own all of its data";
         throw runtime_error(ss.str());
     }
@@ -589,7 +589,7 @@ void nd::array::flag_as_immutable()
 
 nd::array nd::array::p(const char *property_name) const
 {
-    ndt::type dt = get_dtype();
+    ndt::type dt = get_type();
     const std::pair<std::string, gfunc::callable> *properties;
     size_t count;
     if (!dt.is_builtin()) {
@@ -613,7 +613,7 @@ nd::array nd::array::p(const char *property_name) const
 
 nd::array nd::array::p(const std::string& property_name) const
 {
-    ndt::type dt = get_dtype();
+    ndt::type dt = get_type();
     const std::pair<std::string, gfunc::callable> *properties;
     size_t count;
     if (!dt.is_builtin()) {
@@ -637,7 +637,7 @@ nd::array nd::array::p(const std::string& property_name) const
 
 const gfunc::callable& nd::array::find_dynamic_function(const char *function_name) const
 {
-    ndt::type dt = get_dtype();
+    ndt::type dt = get_type();
     if (!dt.is_builtin()) {
         const std::pair<std::string, gfunc::callable> *properties;
         size_t count;
@@ -659,7 +659,7 @@ const gfunc::callable& nd::array::find_dynamic_function(const char *function_nam
 
 nd::array nd::array::eval(const eval::eval_context *ectx) const
 {
-    const ndt::type& current_dtype = get_dtype();
+    const ndt::type& current_dtype = get_type();
     if (!current_dtype.is_expression()) {
         return *this;
     } else {
@@ -673,7 +673,7 @@ nd::array nd::array::eval(const eval::eval_context *ectx) const
             // Reorder strides of output strided dimensions in a KEEPORDER fashion
             static_cast<const strided_dim_type *>(
                             dt.extended())->reorder_default_constructed_strides(
-                                            result.get_ndo_meta(), get_dtype(), get_ndo_meta());
+                                            result.get_ndo_meta(), get_type(), get_ndo_meta());
         }
         result.val_assign(*this, assign_error_default, ectx);
         return result;
@@ -682,7 +682,7 @@ nd::array nd::array::eval(const eval::eval_context *ectx) const
 
 nd::array nd::array::eval_immutable(const eval::eval_context *ectx) const
 {
-    const ndt::type& current_dtype = get_dtype();
+    const ndt::type& current_dtype = get_type();
     if ((get_access_flags()&immutable_access_flag) &&
                     !current_dtype.is_expression()) {
         return *this;
@@ -697,7 +697,7 @@ nd::array nd::array::eval_immutable(const eval::eval_context *ectx) const
             // Reorder strides of output strided dimensions in a KEEPORDER fashion
             static_cast<const strided_dim_type *>(
                             dt.extended())->reorder_default_constructed_strides(
-                                            result.get_ndo_meta(), get_dtype(), get_ndo_meta());
+                                            result.get_ndo_meta(), get_type(), get_ndo_meta());
         }
         result.val_assign(*this, assign_error_default, ectx);
         result.get_ndo()->m_flags = immutable_access_flag|read_access_flag;
@@ -708,7 +708,7 @@ nd::array nd::array::eval_immutable(const eval::eval_context *ectx) const
 nd::array nd::array::eval_copy(const eval::eval_context *ectx,
                     uint32_t access_flags) const
 {
-    const ndt::type& current_dtype = get_dtype();
+    const ndt::type& current_dtype = get_type();
     const ndt::type& dt = current_dtype.get_canonical_type();
     size_t ndim = current_dtype.get_undim();
     dimvector shape(ndim);
@@ -718,7 +718,7 @@ nd::array nd::array::eval_copy(const eval::eval_context *ectx,
         // Reorder strides of output strided dimensions in a KEEPORDER fashion
         static_cast<const strided_dim_type *>(
                         dt.extended())->reorder_default_constructed_strides(
-                                        result.get_ndo_meta(), get_dtype(), get_ndo_meta());
+                                        result.get_ndo_meta(), get_type(), get_ndo_meta());
     }
     result.val_assign(*this, assign_error_default, ectx);
     result.get_ndo()->m_flags = access_flags;
@@ -728,8 +728,8 @@ nd::array nd::array::eval_copy(const eval::eval_context *ectx,
 bool nd::array::op_sorting_less(const array& rhs) const
 {
     comparison_kernel k;
-    make_comparison_kernel(&k, 0, get_dtype(), get_ndo_meta(),
-                    rhs.get_dtype(), rhs.get_ndo_meta(),
+    make_comparison_kernel(&k, 0, get_type(), get_ndo_meta(),
+                    rhs.get_type(), rhs.get_ndo_meta(),
                     comparison_type_sorting_less,
                     &eval::default_eval_context);
     return k(get_readonly_originptr(), rhs.get_readonly_originptr());
@@ -738,8 +738,8 @@ bool nd::array::op_sorting_less(const array& rhs) const
 bool nd::array::operator<(const array& rhs) const
 {
     comparison_kernel k;
-    make_comparison_kernel(&k, 0, get_dtype(), get_ndo_meta(),
-                    rhs.get_dtype(), rhs.get_ndo_meta(),
+    make_comparison_kernel(&k, 0, get_type(), get_ndo_meta(),
+                    rhs.get_type(), rhs.get_ndo_meta(),
                     comparison_type_less,
                     &eval::default_eval_context);
     return k(get_readonly_originptr(), rhs.get_readonly_originptr());
@@ -748,8 +748,8 @@ bool nd::array::operator<(const array& rhs) const
 bool nd::array::operator<=(const array& rhs) const
 {
     comparison_kernel k;
-    make_comparison_kernel(&k, 0, get_dtype(), get_ndo_meta(),
-                    rhs.get_dtype(), rhs.get_ndo_meta(),
+    make_comparison_kernel(&k, 0, get_type(), get_ndo_meta(),
+                    rhs.get_type(), rhs.get_ndo_meta(),
                     comparison_type_less_equal,
                     &eval::default_eval_context);
     return k(get_readonly_originptr(), rhs.get_readonly_originptr());
@@ -758,8 +758,8 @@ bool nd::array::operator<=(const array& rhs) const
 bool nd::array::operator==(const array& rhs) const
 {
     comparison_kernel k;
-    make_comparison_kernel(&k, 0, get_dtype(), get_ndo_meta(),
-                    rhs.get_dtype(), rhs.get_ndo_meta(),
+    make_comparison_kernel(&k, 0, get_type(), get_ndo_meta(),
+                    rhs.get_type(), rhs.get_ndo_meta(),
                     comparison_type_equal,
                     &eval::default_eval_context);
     return k(get_readonly_originptr(), rhs.get_readonly_originptr());
@@ -768,8 +768,8 @@ bool nd::array::operator==(const array& rhs) const
 bool nd::array::operator!=(const array& rhs) const
 {
     comparison_kernel k;
-    make_comparison_kernel(&k, 0, get_dtype(), get_ndo_meta(),
-                    rhs.get_dtype(), rhs.get_ndo_meta(),
+    make_comparison_kernel(&k, 0, get_type(), get_ndo_meta(),
+                    rhs.get_type(), rhs.get_ndo_meta(),
                     comparison_type_not_equal,
                     &eval::default_eval_context);
     return k(get_readonly_originptr(), rhs.get_readonly_originptr());
@@ -778,8 +778,8 @@ bool nd::array::operator!=(const array& rhs) const
 bool nd::array::operator>=(const array& rhs) const
 {
     comparison_kernel k;
-    make_comparison_kernel(&k, 0, get_dtype(), get_ndo_meta(),
-                    rhs.get_dtype(), rhs.get_ndo_meta(),
+    make_comparison_kernel(&k, 0, get_type(), get_ndo_meta(),
+                    rhs.get_type(), rhs.get_ndo_meta(),
                     comparison_type_greater_equal,
                     &eval::default_eval_context);
     return k(get_readonly_originptr(), rhs.get_readonly_originptr());
@@ -788,8 +788,8 @@ bool nd::array::operator>=(const array& rhs) const
 bool nd::array::operator>(const array& rhs) const
 {
     comparison_kernel k;
-    make_comparison_kernel(&k, 0, get_dtype(), get_ndo_meta(),
-                    rhs.get_dtype(), rhs.get_ndo_meta(),
+    make_comparison_kernel(&k, 0, get_type(), get_ndo_meta(),
+                    rhs.get_type(), rhs.get_ndo_meta(),
                     comparison_type_greater,
                     &eval::default_eval_context);
     return k(get_readonly_originptr(), rhs.get_readonly_originptr());
@@ -799,13 +799,13 @@ bool nd::array::equals_exact(const array& rhs) const
 {
     if (get_ndo() == rhs.get_ndo()) {
         return true;
-    } else if (get_dtype() != rhs.get_dtype()) {
+    } else if (get_type() != rhs.get_type()) {
         return false;
     } else if (get_undim() == 0) {
         comparison_kernel k;
         make_comparison_kernel(&k, 0,
-                        get_dtype(), get_ndo_meta(),
-                        rhs.get_dtype(), rhs.get_ndo_meta(),
+                        get_type(), get_ndo_meta(),
+                        rhs.get_type(), rhs.get_ndo_meta(),
                         comparison_type_equal, &eval::default_eval_context);
         return k(get_readonly_originptr(), rhs.get_readonly_originptr());
     } else {
@@ -842,7 +842,7 @@ bool nd::array::equals_exact(const array& rhs) const
 nd::array nd::array::cast(const ndt::type& dt, assign_error_mode errmode) const
 {
     // Use the ucast function specifying to replace all dimensions
-    return ucast(dt, get_dtype().get_undim(), errmode);
+    return ucast(dt, get_type().get_undim(), errmode);
 }
 
 namespace {
@@ -925,7 +925,7 @@ nd::array nd::array::ucast(const ndt::type& scalar_dtype,
     ndt::type replaced_dtype;
     bool was_transformed = false;
     cast_udtype_extra extra(scalar_dtype, replace_undim, errmode);
-    cast_udtype(get_dtype(), &extra, replaced_dtype, was_transformed);
+    cast_udtype(get_type(), &extra, replaced_dtype, was_transformed);
     if (was_transformed) {
         return make_array_clone_with_new_dtype(*this, replaced_dtype);
     } else {
@@ -947,7 +947,7 @@ nd::array nd::array::view(const ndt::type& DYND_UNUSED(dt)) const
 nd::array nd::array::uview(const ndt::type& uniform_dt, size_t replace_undim) const
 {
     // Use the view function specifying to replace all dimensions
-    return view(get_dtype().with_replaced_udtype(uniform_dt, replace_undim));
+    return view(get_type().with_replaced_udtype(uniform_dt, replace_undim));
 }
 
 namespace {
@@ -992,7 +992,7 @@ nd::array nd::array::replace_udtype(const ndt::type& new_udtype, size_t replace_
     ndt::type replaced_dtype;
     bool was_transformed = false;
     replace_compatible_udtype_extra extra(new_udtype, replace_undim);
-    replace_compatible_udtype(get_dtype(), &extra,
+    replace_compatible_udtype(get_type(), &extra,
                     replaced_dtype, was_transformed);
     if (was_transformed) {
         return make_array_clone_with_new_dtype(*this, replaced_dtype);
@@ -1050,7 +1050,7 @@ namespace {
 
 nd::array nd::array::view_scalars(const ndt::type& scalar_dtype) const
 {
-    const ndt::type& array_type = get_dtype();
+    const ndt::type& array_type = get_type();
     size_t uniform_ndim = array_type.get_undim();
     // First check if we're dealing with a simple one dimensional block of memory we can reinterpret
     // at will.
@@ -1086,7 +1086,7 @@ nd::array nd::array::view_scalars(const ndt::type& scalar_dtype) const
                 result.get_ndo()->m_data_reference = m_memblock.get();
             }
             memory_block_incref(result.get_ndo()->m_data_reference);
-            result.get_ndo()->m_dtype = result_dtype.release();
+            result.get_ndo()->m_type = result_dtype.release();
             result.get_ndo()->m_flags = get_ndo()->m_flags;
             // The result has one strided ndarray field
             strided_dim_type_metadata *result_md = reinterpret_cast<strided_dim_type_metadata *>(result.get_ndo_meta());
@@ -1099,7 +1099,7 @@ nd::array nd::array::view_scalars(const ndt::type& scalar_dtype) const
     // Transform the scalars into view dtypes
     ndt::type viewed_dtype;
     bool was_transformed;
-    view_scalar_types(get_dtype(), const_cast<void *>(reinterpret_cast<const void *>(&scalar_dtype)), viewed_dtype, was_transformed);
+    view_scalar_types(get_type(), const_cast<void *>(reinterpret_cast<const void *>(&scalar_dtype)), viewed_dtype, was_transformed);
     return make_array_clone_with_new_dtype(*this, viewed_dtype);
 }
 
@@ -1110,11 +1110,11 @@ std::string nd::detail::array_as_string(const nd::array& lhs, assign_error_mode 
     }
 
     nd::array temp = lhs;
-    if (temp.get_dtype().get_kind() != string_kind) {
+    if (temp.get_type().get_kind() != string_kind) {
         temp = temp.ucast(ndt::make_string(string_encoding_utf_8)).eval();
     }
     const base_string_type *esd =
-                    static_cast<const base_string_type *>(temp.get_dtype().extended());
+                    static_cast<const base_string_type *>(temp.get_type().extended());
     return esd->get_utf8_string(temp.get_ndo_meta(), temp.get_ndo()->m_data_pointer, errmode);
 }
 
@@ -1125,7 +1125,7 @@ ndt::type nd::detail::array_as_type(const nd::array& lhs, assign_error_mode errm
     }
 
     nd::array temp = lhs;
-    if (temp.get_dtype().get_type_id() != dtype_type_id) {
+    if (temp.get_type().get_type_id() != dtype_type_id) {
         temp = temp.ucast(ndt::make_type(), 0, errmode).eval();
     }
     return ndt::type(reinterpret_cast<const type_type_data *>(temp.get_readonly_originptr())->dt, true);
@@ -1139,8 +1139,8 @@ void nd::array::debug_print(std::ostream& o, const std::string& indent) const
         o << " address: " << (void *)m_memblock.get() << "\n";
         o << " refcount: " << ndo->m_memblockdata.m_use_count << "\n";
         o << " type:\n";
-        o << "  pointer: " << (void *)ndo->m_dtype << "\n";
-        o << "  type: " << get_dtype() << "\n";
+        o << "  pointer: " << (void *)ndo->m_type << "\n";
+        o << "  type: " << get_type() << "\n";
         o << " metadata:\n";
         o << "  flags: " << ndo->m_flags << " (";
         if (ndo->m_flags & read_access_flag) o << "read_access ";
@@ -1149,7 +1149,7 @@ void nd::array::debug_print(std::ostream& o, const std::string& indent) const
         o << ")\n";
         if (!ndo->is_builtin_type()) {
             o << "  type-specific metadata:\n";
-            ndo->m_dtype->metadata_debug_print(get_ndo_meta(), o, indent + "   ");
+            ndo->m_type->metadata_debug_print(get_ndo_meta(), o, indent + "   ");
         }
         o << " data:\n";
         o << "   pointer: " << (void *)ndo->m_data_pointer << "\n";
@@ -1176,9 +1176,9 @@ std::ostream& nd::operator<<(std::ostream& o, const array& rhs)
         if (v.get_ndo()->is_builtin_type()) {
             print_builtin_scalar(v.get_ndo()->get_builtin_type_id(), o, v.get_ndo()->m_data_pointer);
         } else {
-            v.get_ndo()->m_dtype->print_data(o, v.get_ndo_meta(), v.get_ndo()->m_data_pointer);
+            v.get_ndo()->m_type->print_data(o, v.get_ndo_meta(), v.get_ndo()->m_data_pointer);
         }
-        o << ", " << rhs.get_dtype() << ")";
+        o << ", " << rhs.get_type() << ")";
     } else {
         o << "array()";
     }
@@ -1239,16 +1239,16 @@ nd::array nd::empty_like(const nd::array& rhs, const ndt::type& uniform_dtype)
     if (rhs.get_undim() == 0) {
         return nd::empty(uniform_dtype);
     } else {
-        size_t undim = rhs.get_dtype().extended()->get_undim();
+        size_t undim = rhs.get_type().extended()->get_undim();
         dimvector shape(undim);
         rhs.get_shape(shape.get());
         array result(make_strided_array(uniform_dtype, undim, shape.get()));
         // Reorder strides of output strided dimensions in a KEEPORDER fashion
-        if (result.get_dtype().get_type_id() == strided_dim_type_id) {
+        if (result.get_type().get_type_id() == strided_dim_type_id) {
             static_cast<const strided_dim_type *>(
-                        result.get_dtype().extended())->reorder_default_constructed_strides(
+                        result.get_type().extended())->reorder_default_constructed_strides(
                                         result.get_ndo_meta(),
-                                        rhs.get_dtype(), rhs.get_ndo_meta());
+                                        rhs.get_type(), rhs.get_ndo_meta());
         }
         return result;
     }
@@ -1260,7 +1260,7 @@ nd::array nd::empty_like(const nd::array& rhs)
     if (rhs.get_ndo()->is_builtin_type()) {
         dt = ndt::type(rhs.get_ndo()->get_builtin_type_id());
     } else {
-        dt = rhs.get_ndo()->m_dtype->get_canonical_type();
+        dt = rhs.get_ndo()->m_type->get_canonical_type();
     }
 
     if (rhs.is_scalar()) {
@@ -1271,11 +1271,11 @@ nd::array nd::empty_like(const nd::array& rhs)
         rhs.get_shape(shape.get());
         nd::array result(make_strided_array(dt.get_udtype(), undim, shape.get()));
         // Reorder strides of output strided dimensions in a KEEPORDER fashion
-        if (result.get_dtype().get_type_id() == strided_dim_type_id) {
+        if (result.get_type().get_type_id() == strided_dim_type_id) {
             static_cast<const strided_dim_type *>(
-                        result.get_dtype().extended())->reorder_default_constructed_strides(
+                        result.get_type().extended())->reorder_default_constructed_strides(
                                         result.get_ndo_meta(),
-                                        rhs.get_dtype(), rhs.get_ndo_meta());
+                                        rhs.get_type(), rhs.get_ndo_meta());
         }
         return result;
     }
@@ -1285,11 +1285,11 @@ intptr_t nd::binary_search(const nd::array& n, const char *metadata, const char 
 {
     if (n.get_undim() == 0) {
         stringstream ss;
-        ss << "cannot do a dynd binary_search on array with dtype " << n.get_dtype() << " without a leading array dimension";
+        ss << "cannot do a dynd binary_search on array with dtype " << n.get_type() << " without a leading array dimension";
         throw runtime_error(ss.str());
     }
     const char *n_metadata = n.get_ndo_meta();
-    ndt::type element_dtype = n.get_dtype().at_single(0, &n_metadata);
+    ndt::type element_dtype = n.get_type().at_single(0, &n_metadata);
     if (element_dtype.get_metadata_size() == 0 || n_metadata == metadata ||
                     memcmp(n_metadata, metadata, element_dtype.get_metadata_size()) == 0) {
         // First, a version where the metadata is identical, so we can
@@ -1302,9 +1302,9 @@ intptr_t nd::binary_search(const nd::array& n, const char *metadata, const char 
                         &eval::default_eval_context);
 
         // TODO: support any type of array dimension
-        if (n.get_dtype().get_type_id() != strided_dim_type_id) {
+        if (n.get_type().get_type_id() != strided_dim_type_id) {
             stringstream ss;
-            ss << "TODO: binary_search on array with dtype " << n.get_dtype() << " is not implemented";
+            ss << "TODO: binary_search on array with dtype " << n.get_type() << " is not implemented";
             throw runtime_error(ss.str());
         }
 
@@ -1344,9 +1344,9 @@ intptr_t nd::binary_search(const nd::array& n, const char *metadata, const char 
                         &eval::default_eval_context);
 
         // TODO: support any type of array dimension
-        if (n.get_dtype().get_type_id() != strided_dim_type_id) {
+        if (n.get_type().get_type_id() != strided_dim_type_id) {
             stringstream ss;
-            ss << "TODO: binary_search on array with dtype " << n.get_dtype() << " is not implemented";
+            ss << "TODO: binary_search on array with dtype " << n.get_type() << " is not implemented";
             throw runtime_error(ss.str());
         }
 
@@ -1406,7 +1406,7 @@ nd::array nd::groupby(const nd::array& data_values, const nd::array& by_values, 
     // Make sure the 'by' values have the 'groups' dtype
     array by_values_as_groups = by_values.ucast(groups_final);
 
-    ndt::type gbdt = ndt::make_groupby(data_values.get_dtype(), by_values_as_groups.get_dtype());
+    ndt::type gbdt = ndt::make_groupby(data_values.get_type(), by_values_as_groups.get_type());
     const groupby_type *gbdt_ext = static_cast<const groupby_type *>(gbdt.extended());
     char *data_ptr = NULL;
 
@@ -1421,7 +1421,7 @@ nd::array nd::groupby(const nd::array& data_values, const nd::array& by_values, 
                     ? data_values.get_ndo()->m_data_reference
                     : &data_values.get_ndo()->m_memblockdata;
     memory_block_incref(pmeta->blockref);
-    data_values.get_dtype().extended()->metadata_copy_construct(reinterpret_cast<char *>(pmeta + 1),
+    data_values.get_type().extended()->metadata_copy_construct(reinterpret_cast<char *>(pmeta + 1),
                     data_values.get_ndo_meta(), &data_values.get_ndo()->m_memblockdata);
 
     // Set the metadata for the by values
@@ -1431,7 +1431,7 @@ nd::array nd::groupby(const nd::array& data_values, const nd::array& by_values, 
                     ? by_values_as_groups.get_ndo()->m_data_reference
                     : &by_values_as_groups.get_ndo()->m_memblockdata;
     memory_block_incref(pmeta->blockref);
-    by_values_as_groups.get_dtype().extended()->metadata_copy_construct(reinterpret_cast<char *>(pmeta + 1),
+    by_values_as_groups.get_type().extended()->metadata_copy_construct(reinterpret_cast<char *>(pmeta + 1),
                     by_values_as_groups.get_ndo_meta(), &by_values_as_groups.get_ndo()->m_memblockdata);
 
     // Set the pointers to the data and by values data
@@ -1440,7 +1440,7 @@ nd::array nd::groupby(const nd::array& data_values, const nd::array& by_values, 
     groupby_data_ptr->by_values_pointer = by_values_as_groups.get_readonly_originptr();
 
     // Set the array properties
-    result.get_ndo()->m_dtype = gbdt.release();
+    result.get_ndo()->m_type = gbdt.release();
     result.get_ndo()->m_data_pointer = data_ptr;
     result.get_ndo()->m_data_reference = NULL;
     result.get_ndo()->m_flags = read_access_flag;
@@ -1458,7 +1458,7 @@ nd::array nd::combine_into_struct(size_t field_count, const std::string *field_n
     // Make the pointer types
     vector<ndt::type> field_types(field_count);
     for (size_t i = 0; i != field_count; ++i) {
-        field_types[i] = ndt::make_pointer(field_values[i].get_dtype());
+        field_types[i] = ndt::make_pointer(field_values[i].get_type());
     }
     // The flags are the intersection of all the input flags
     uint64_t flags = field_values[0].get_flags();
@@ -1474,7 +1474,7 @@ nd::array nd::combine_into_struct(size_t field_count, const std::string *field_n
                     fsd->get_data_size(),
                     fsd->get_data_alignment(), &data_ptr));
     // Set the array properties
-    result.get_ndo()->m_dtype = result_type.release();
+    result.get_ndo()->m_type = result_type.release();
     result.get_ndo()->m_data_pointer = data_ptr;
     result.get_ndo()->m_data_reference = NULL;
     result.get_ndo()->m_flags = flags;
@@ -1490,7 +1490,7 @@ nd::array nd::combine_into_struct(size_t field_count, const std::string *field_n
                         : &field_values[i].get_ndo()->m_memblockdata;
         memory_block_incref(pmeta->blockref);
 
-        const ndt::type& field_dt = field_values[i].get_dtype();
+        const ndt::type& field_dt = field_values[i].get_type();
         if (field_dt.get_metadata_size() > 0) {
             field_dt.extended()->metadata_copy_construct(
                             reinterpret_cast<char *>(pmeta + 1),
@@ -1511,7 +1511,7 @@ nd::array nd::combine_into_struct(size_t field_count, const std::string *field_n
 static array follow_array_pointers(const array& n)
 {
     // Follow the pointers to eliminate them
-    ndt::type dt = n.get_dtype();
+    ndt::type dt = n.get_type();
     const char *metadata = n.get_ndo_meta();
     char *data = n.get_ndo()->m_data_pointer;
     memory_block_data *dataref = NULL;
@@ -1529,7 +1529,7 @@ static array follow_array_pointers(const array& n)
     if (!dt.is_builtin()) {
         dt.extended()->metadata_copy_construct(result.get_ndo_meta(), metadata, &n.get_ndo()->m_memblockdata);
     }
-    result.get_ndo()->m_dtype = dt.release();
+    result.get_ndo()->m_type = dt.release();
     result.get_ndo()->m_data_pointer = data;
     result.get_ndo()->m_data_reference = dataref ? dataref : &n.get_ndo()->m_memblockdata;
     memory_block_incref(result.get_ndo()->m_data_reference);

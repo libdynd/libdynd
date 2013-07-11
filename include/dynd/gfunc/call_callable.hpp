@@ -46,7 +46,7 @@ namespace detail {
                 // TODO: switch to a better mechanism for passing nd::array references
                 *reinterpret_cast<const array_preamble **>(data) = value.get_ndo();
             } else {
-                dtype_assign(paramtype, metadata, data, value.get_dtype(), value.get_ndo_meta(), value.get_ndo()->m_data_pointer);
+                dtype_assign(paramtype, metadata, data, value.get_type(), value.get_ndo_meta(), value.get_ndo()->m_data_pointer);
             }
         }
     };

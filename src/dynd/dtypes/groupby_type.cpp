@@ -12,7 +12,7 @@
 #include <dynd/dtypes/fixed_dim_type.hpp>
 #include <dynd/dtypes/var_dim_type.hpp>
 #include <dynd/dtypes/categorical_type.hpp>
-#include <dynd/ndobject_iter.hpp>
+#include <dynd/array_iter.hpp>
 #include <dynd/gfunc/make_callable.hpp>
 
 using namespace std;
@@ -152,7 +152,7 @@ namespace {
             nd::array by_values_tmp;
             if (by_values_dt.is_expression() || !by_values_dt.extended()->is_strided()) {
                 by_values_tmp = nd::eval_raw_copy(by_values_dt, by_values_metadata, by_values_data);
-                by_values_dt = by_values_tmp.get_dtype();
+                by_values_dt = by_values_tmp.get_type();
                 by_values_metadata = by_values_tmp.get_ndo_meta();
                 by_values_data = by_values_tmp.get_readonly_originptr();
             }
@@ -310,7 +310,7 @@ ndt::type groupby_type::with_replaced_storage_type(const ndt::type& DYND_UNUSED(
 ///////// properties on the nd::array
 
 static nd::array property_ndo_get_groups(const nd::array& n) {
-    ndt::type d = n.get_dtype();
+    ndt::type d = n.get_type();
     while (d.get_type_id() != groupby_type_id) {
         d = d.at_single(0);
     }
