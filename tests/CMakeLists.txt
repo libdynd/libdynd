@@ -18,33 +18,33 @@ set(tests_SRC
     codegen/test_unary_kernel_adapter.cpp
     codegen/test_binary_kernel_adapter.cpp
 #    codegen/assembly_samples/asm_tests.cpp
-    dtypes/test_bytes_type.cpp
-    dtypes/test_byteswap_type.cpp
-    dtypes/test_categorical_type.cpp
-    dtypes/test_complex_type.cpp
-    dtypes/test_convert_type.cpp
-    dtypes/test_align_type.cpp
-    dtypes/test_datashape_formatter.cpp
-    dtypes/test_datashape_parser.cpp
-    dtypes/test_date_type.cpp
-    dtypes/test_datetime_type.cpp
-    dtypes/test_type.cpp
-    dtypes/test_type_type.cpp
-    dtypes/test_type_assign.cpp
-    dtypes/test_type_casting.cpp
-    dtypes/test_type_promotion.cpp
-    dtypes/test_fixedbytes_type.cpp
-    dtypes/test_fixed_dim_type.cpp
-    dtypes/test_fixedstring_type.cpp
-    dtypes/test_cstruct_type.cpp
-    dtypes/test_groupby_type.cpp
-    dtypes/test_json_type.cpp
-    dtypes/test_pointer_type.cpp
-    dtypes/test_strided_dim_type.cpp
-    dtypes/test_string_type.cpp
-    dtypes/test_struct_type.cpp
-    dtypes/test_tuple_type.cpp
-    dtypes/test_var_dim_type.cpp
+    types/test_bytes_type.cpp
+    types/test_byteswap_type.cpp
+    types/test_categorical_type.cpp
+    types/test_complex_type.cpp
+    types/test_convert_type.cpp
+    types/test_align_type.cpp
+    types/test_datashape_formatter.cpp
+    types/test_datashape_parser.cpp
+    types/test_date_type.cpp
+    types/test_datetime_type.cpp
+    types/test_type.cpp
+    types/test_type_type.cpp
+    types/test_type_assign.cpp
+    types/test_type_casting.cpp
+    types/test_type_promotion.cpp
+    types/test_fixedbytes_type.cpp
+    types/test_fixed_dim_type.cpp
+    types/test_fixedstring_type.cpp
+    types/test_cstruct_type.cpp
+    types/test_groupby_type.cpp
+    types/test_json_type.cpp
+    types/test_pointer_type.cpp
+    types/test_strided_dim_type.cpp
+    types/test_string_type.cpp
+    types/test_struct_type.cpp
+    types/test_tuple_type.cpp
+    types/test_var_dim_type.cpp
     gfunc/test_callable.cpp
     array/test_json_formatter.cpp
     array/test_json_parser.cpp

@@ -6,7 +6,7 @@
 #include <stdexcept>
 
 #include <dynd/dtype_promotion.hpp>
-#include <dynd/dtypes/string_type.hpp>
+#include <dynd/types/string_type.hpp>
 
 using namespace std;
 using namespace dynd;

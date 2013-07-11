@@ -9,7 +9,7 @@
 #include <dynd/exceptions.hpp>
 #include <dynd/array.hpp>
 #include <dynd/shape_tools.hpp>
-#include <dynd/dtypes/datashape_formatter.hpp>
+#include <dynd/types/datashape_formatter.hpp>
 #include <dynd/kernels/comparison_kernels.hpp>
 
 #include <utf8.h>

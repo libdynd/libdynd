@@ -8,7 +8,7 @@
 
 #include <dynd/kernels/date_expr_kernels.hpp>
 #include <dynd/kernels/elwise_expr_kernels.hpp>
-#include <dynd/dtypes/string_type.hpp>
+#include <dynd/types/string_type.hpp>
 #include <datetime_strings.h>
 
 using namespace std;

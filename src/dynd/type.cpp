@@ -4,7 +4,7 @@
 //
 
 #include <dynd/type.hpp>
-#include <dynd/dtypes/base_uniform_dim_type.hpp>
+#include <dynd/types/base_uniform_dim_type.hpp>
 #include <dynd/exceptions.hpp>
 #include <dynd/dtype_assign.hpp>
 #include <dynd/buffer_storage.hpp>
@@ -12,8 +12,8 @@
 #include <dynd/gfunc/make_callable.hpp>
 #include <dynd/gfunc/call_callable.hpp>
 
-#include <dynd/dtypes/convert_type.hpp>
-#include <dynd/dtypes/datashape_parser.hpp>
+#include <dynd/types/convert_type.hpp>
+#include <dynd/types/datashape_parser.hpp>
 
 #include <sstream>
 #include <cstring>

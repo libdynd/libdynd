@@ -4,7 +4,7 @@
 //
 
 #include <dynd/gfunc/serialize.hpp>
-#include <dynd/dtypes/strided_dim_type.hpp>
+#include <dynd/types/strided_dim_type.hpp>
 
 #include <blosc.h>
 

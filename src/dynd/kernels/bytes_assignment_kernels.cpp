@@ -9,7 +9,7 @@
 #include <dynd/type.hpp>
 #include <dynd/diagnostics.hpp>
 #include <dynd/kernels/bytes_assignment_kernels.hpp>
-#include <dynd/dtypes/bytes_type.hpp>
+#include <dynd/types/bytes_type.hpp>
 
 using namespace std;
 using namespace dynd;

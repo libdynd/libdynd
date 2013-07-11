@@ -6,7 +6,7 @@
 #if 0 // TODO reenable?
 
 #include <dynd/shape_tools.hpp>
-#include <dynd/dtypes/categorical_type.hpp>
+#include <dynd/types/categorical_type.hpp>
 #include <dynd/eval/groupby_elwise_reduce_eval.hpp>
 #include <dynd/eval/unary_elwise_eval.hpp>
 #include <dynd/kernels/buffered_unary_kernels.hpp>

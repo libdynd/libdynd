@@ -6,8 +6,8 @@
 #ifndef _DYND__STRUCT_ASSIGNMENT_KERNELS_HPP_
 #define _DYND__STRUCT_ASSIGNMENT_KERNELS_HPP_
 
-#include <dynd/dtypes/struct_type.hpp>
-#include <dynd/dtypes/cstruct_type.hpp>
+#include <dynd/types/struct_type.hpp>
+#include <dynd/types/cstruct_type.hpp>
 
 namespace dynd {
 

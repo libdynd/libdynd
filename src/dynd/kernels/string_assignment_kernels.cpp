@@ -9,7 +9,7 @@
 #include <dynd/type.hpp>
 #include <dynd/diagnostics.hpp>
 #include <dynd/kernels/string_assignment_kernels.hpp>
-#include <dynd/dtypes/string_type.hpp>
+#include <dynd/types/string_type.hpp>
 
 using namespace std;
 using namespace dynd;

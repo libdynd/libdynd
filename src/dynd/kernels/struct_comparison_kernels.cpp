@@ -9,7 +9,7 @@
 #include <dynd/type.hpp>
 #include <dynd/diagnostics.hpp>
 #include <dynd/kernels/struct_comparison_kernels.hpp>
-#include <dynd/dtypes/base_struct_type.hpp>
+#include <dynd/types/base_struct_type.hpp>
 
 using namespace std;
 using namespace dynd;

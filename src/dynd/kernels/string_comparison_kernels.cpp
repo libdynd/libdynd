@@ -9,9 +9,9 @@
 #include <dynd/type.hpp>
 #include <dynd/diagnostics.hpp>
 #include <dynd/kernels/string_comparison_kernels.hpp>
-#include <dynd/dtypes/fixedstring_type.hpp>
-#include <dynd/dtypes/string_type.hpp>
-#include <dynd/dtypes/convert_type.hpp>
+#include <dynd/types/fixedstring_type.hpp>
+#include <dynd/types/string_type.hpp>
+#include <dynd/types/convert_type.hpp>
 
 using namespace std;
 using namespace dynd;

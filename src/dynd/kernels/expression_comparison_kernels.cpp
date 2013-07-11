@@ -4,7 +4,7 @@
 //
 
 #include <dynd/type.hpp>
-#include <dynd/dtypes/base_expression_type.hpp>
+#include <dynd/types/base_expression_type.hpp>
 #include <dynd/kernels/expression_comparison_kernels.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 

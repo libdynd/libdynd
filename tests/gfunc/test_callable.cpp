@@ -13,8 +13,8 @@
 #include <dynd/gfunc/callable.hpp>
 #include <dynd/gfunc/make_callable.hpp>
 #include <dynd/gfunc/call_callable.hpp>
-#include <dynd/dtypes/strided_dim_type.hpp>
-#include <dynd/dtypes/string_type.hpp>
+#include <dynd/types/strided_dim_type.hpp>
+#include <dynd/types/string_type.hpp>
 
 using namespace std;
 using namespace dynd;

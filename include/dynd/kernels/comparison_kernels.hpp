@@ -6,7 +6,7 @@
 #ifndef _DYND__COMPARISON_KERNELS_HPP_
 #define _DYND__COMPARISON_KERNELS_HPP_
 
-#include <dynd/dtypes/type_id.hpp>
+#include <dynd/types/type_id.hpp>
 #include <dynd/kernels/hierarchical_kernels.hpp>
 #include <dynd/eval/eval_context.hpp>
 

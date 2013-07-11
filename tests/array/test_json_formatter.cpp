@@ -12,12 +12,12 @@
 
 #include <dynd/json_formatter.hpp>
 #include <dynd/json_parser.hpp>
-#include <dynd/dtypes/var_dim_type.hpp>
-#include <dynd/dtypes/fixed_dim_type.hpp>
-#include <dynd/dtypes/cstruct_type.hpp>
-#include <dynd/dtypes/date_type.hpp>
-#include <dynd/dtypes/string_type.hpp>
-#include <dynd/dtypes/json_type.hpp>
+#include <dynd/types/var_dim_type.hpp>
+#include <dynd/types/fixed_dim_type.hpp>
+#include <dynd/types/cstruct_type.hpp>
+#include <dynd/types/date_type.hpp>
+#include <dynd/types/string_type.hpp>
+#include <dynd/types/json_type.hpp>
 
 using namespace std;
 using namespace dynd;

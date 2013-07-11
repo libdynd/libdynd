@@ -11,7 +11,7 @@
 #include <limits>
 
 #include <dynd/dtype_assign.hpp>
-#include <dynd/dtypes/convert_type.hpp>
+#include <dynd/types/convert_type.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/diagnostics.hpp>
 

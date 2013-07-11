@@ -11,11 +11,11 @@
 
 #include <dynd/array.hpp>
 #include <dynd/array_range.hpp>
-#include <dynd/dtypes/type_alignment.hpp>
-#include <dynd/dtypes/convert_type.hpp>
-#include <dynd/dtypes/view_type.hpp>
-#include <dynd/dtypes/fixedbytes_type.hpp>
-#include <dynd/dtypes/strided_dim_type.hpp>
+#include <dynd/types/type_alignment.hpp>
+#include <dynd/types/convert_type.hpp>
+#include <dynd/types/view_type.hpp>
+#include <dynd/types/fixedbytes_type.hpp>
+#include <dynd/types/strided_dim_type.hpp>
 
 using namespace std;
 using namespace dynd;

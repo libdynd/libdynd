@@ -8,7 +8,7 @@
 #include <cctype>
 
 #include <dynd/type.hpp>
-#include <dynd/dtypes/string_type.hpp>
+#include <dynd/types/string_type.hpp>
 #include <dynd/diagnostics.hpp>
 #include <dynd/kernels/string_numeric_assignment_kernels.hpp>
 #include "single_assigner_builtin.hpp"

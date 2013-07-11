@@ -7,11 +7,11 @@
 #define _DYND__MAKE_CALLABLE_HPP_
 
 #include <dynd/gfunc/callable.hpp>
-#include <dynd/dtypes/cstruct_type.hpp>
-#include <dynd/dtypes/fixed_dim_type.hpp>
-#include <dynd/dtypes/void_pointer_type.hpp>
-#include <dynd/dtypes/string_type.hpp>
-#include <dynd/dtypes/type_type.hpp>
+#include <dynd/types/cstruct_type.hpp>
+#include <dynd/types/fixed_dim_type.hpp>
+#include <dynd/types/void_pointer_type.hpp>
+#include <dynd/types/string_type.hpp>
+#include <dynd/types/type_type.hpp>
 
 namespace dynd { namespace gfunc {
 

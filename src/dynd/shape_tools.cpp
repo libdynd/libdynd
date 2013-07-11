@@ -7,8 +7,8 @@
 
 #include <dynd/shape_tools.hpp>
 #include <dynd/exceptions.hpp>
-#include <dynd/dtypes/strided_dim_type.hpp>
-#include <dynd/dtypes/fixed_dim_type.hpp>
+#include <dynd/types/strided_dim_type.hpp>
+#include <dynd/types/fixed_dim_type.hpp>
 
 using namespace std;
 using namespace dynd;

@@ -7,7 +7,7 @@
 #define _DYND__LOWLEVEL_API_HPP_
 
 #include <dynd/memblock/memory_block.hpp>
-#include <dynd/dtypes/base_type.hpp>
+#include <dynd/types/base_type.hpp>
 
 namespace dynd {
 

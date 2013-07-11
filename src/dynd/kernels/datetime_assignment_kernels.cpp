@@ -5,8 +5,8 @@
 
 #include <dynd/kernels/datetime_assignment_kernels.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
-#include <dynd/dtypes/cstruct_type.hpp>
-#include <dynd/dtypes/datetime_type.hpp>
+#include <dynd/types/cstruct_type.hpp>
+#include <dynd/types/datetime_type.hpp>
 #include <datetime_strings.h>
 
 using namespace std;

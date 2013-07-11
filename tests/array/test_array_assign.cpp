@@ -9,8 +9,8 @@
 #include "inc_gtest.hpp"
 
 #include <dynd/array.hpp>
-#include <dynd/dtypes/convert_type.hpp>
-#include <dynd/dtypes/strided_dim_type.hpp>
+#include <dynd/types/convert_type.hpp>
+#include <dynd/types/strided_dim_type.hpp>
 
 using namespace std;
 using namespace dynd;

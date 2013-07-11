@@ -8,7 +8,7 @@
 
 #include <dynd/config.hpp>
 #include <dynd/atomic_refcount.hpp>
-#include <dynd/dtypes/type_id.hpp>
+#include <dynd/types/type_id.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/eval/eval_context.hpp>
 
