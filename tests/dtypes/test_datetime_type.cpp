@@ -99,7 +99,7 @@ TEST(DateTimeDType, CreateFromString) {
 }
 
 TEST(DateTimeDType, ValueCreationAbstractMinutes) {
-    ndt::type d = ndt::make_datetime(datetime_unit_minute, tz_abstract), di = ndt::make_dtype<int64_t>();
+    ndt::type d = ndt::make_datetime(datetime_unit_minute, tz_abstract), di = ndt::make_type<int64_t>();
 
     EXPECT_EQ(((1600-1970)*365 - (1972-1600)/4 + 3 - 365) * 1440LL + 4 * 60 + 16,
                     nd::array("1599-01-01T04:16").ucast(d).view_scalars(di).as<int64_t>());
@@ -123,7 +123,7 @@ TEST(DateTimeDType, ValueCreationAbstractMinutes) {
 
 
 TEST(DateTimeDType, ValueCreationUTCMinutes) {
-    ndt::type d = ndt::make_datetime(datetime_unit_minute, tz_utc), di = ndt::make_dtype<int64_t>();
+    ndt::type d = ndt::make_datetime(datetime_unit_minute, tz_utc), di = ndt::make_type<int64_t>();
 
     EXPECT_EQ(((1600-1970)*365 - (1972-1600)/4 + 3 - 365) * 1440LL + 4 * 60 + 16,
                     nd::array("1599-01-01T04:16Z").ucast(d).view_scalars(di).as<int64_t>());

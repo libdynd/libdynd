@@ -21,14 +21,14 @@ TEST(ByteswapDType, Create) {
 
     d = ndt::make_byteswap<float>();
     // The value has the native byte-order dtype
-    EXPECT_EQ(d.value_type(), ndt::make_dtype<float>());
+    EXPECT_EQ(d.value_type(), ndt::make_type<float>());
     // The storage is the a bytes dtype with matching storage and alignment
     EXPECT_EQ(d.storage_type(), ndt::make_fixedbytes(4, 4));
     EXPECT_TRUE(d.is_expression());
 
     d = ndt::make_byteswap<complex<double> >();
     // The value has the native byte-order dtype
-    EXPECT_EQ(d.value_type(), ndt::make_dtype<complex<double> >());
+    EXPECT_EQ(d.value_type(), ndt::make_type<complex<double> >());
     // The storage is the a bytes dtype with matching storage and alignment
     EXPECT_EQ(d.storage_type(), ndt::make_fixedbytes(16, scalar_align_of<complex<double> >::value));
 
@@ -72,6 +72,6 @@ TEST(ByteswapDType, Basic) {
 
 TEST(ByteswapDType, CanonicalDType) {
     // The canonical type of a byteswap dtype is always the non-swapped version
-    EXPECT_EQ((ndt::make_dtype<float>()), (ndt::make_byteswap<float>().get_canonical_type()));
+    EXPECT_EQ((ndt::make_type<float>()), (ndt::make_byteswap<float>().get_canonical_type()));
 }
 

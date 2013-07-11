@@ -270,11 +270,11 @@ categorical_type::categorical_type(const nd::array& categories, bool presorted)
 
     // Use the number of categories to set which underlying integer storage to use
     if (category_count <= 256) {
-        m_storage_type = ndt::make_dtype<uint8_t>();
+        m_storage_type = ndt::make_type<uint8_t>();
     } else if (category_count <= 65536) {
-        m_storage_type = ndt::make_dtype<uint16_t>();
+        m_storage_type = ndt::make_type<uint16_t>();
     } else {
-        m_storage_type = ndt::make_dtype<uint32_t>();
+        m_storage_type = ndt::make_type<uint32_t>();
     }
     m_members.data_size = m_storage_type.get_data_size();
     m_members.data_alignment = (uint8_t)m_storage_type.get_data_alignment();

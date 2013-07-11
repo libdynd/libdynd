@@ -340,7 +340,7 @@ public:
      * natural looking assignments.
      *
      * Example:
-     *      array a(ndt::make_dtype<float>());
+     *      array a(ndt::make_type<float>());
      *      a.vals() = 100;
      */
     array_vals vals() const;
@@ -473,7 +473,7 @@ public:
     template<class T>
     inline array ucast(size_t replace_undim = 0,
                     assign_error_mode errmode = assign_error_default) const {
-        return ucast(ndt::make_dtype<T>(), replace_undim, errmode);
+        return ucast(ndt::make_type<T>(), replace_undim, errmode);
     }
 
     /**
@@ -518,7 +518,7 @@ public:
      */
     template<class T>
     array view_scalars() const {
-        return view_scalars(ndt::make_dtype<T>());
+        return view_scalars(ndt::make_type<T>());
     }
 
     /**
@@ -591,7 +591,7 @@ public:
     /** Does a value-assignment from the rhs C++ scalar. */
     template<class T>
     typename enable_if<is_dtype_scalar<T>::value, array_vals&>::type operator=(const T& rhs) {
-        m_arr.val_assign(ndt::make_dtype<T>(), NULL, (const char *)&rhs);
+        m_arr.val_assign(ndt::make_type<T>(), NULL, (const char *)&rhs);
         return *this;
     }
     /**
@@ -605,7 +605,7 @@ public:
     template<class T>
     typename enable_if<is_type_bool<T>::value, array_vals&>::type  operator=(const T& rhs) {
         dynd_bool v = rhs;
-        m_arr.val_assign(ndt::make_dtype<dynd_bool>(), NULL, (const char *)&v);
+        m_arr.val_assign(ndt::make_type<dynd_bool>(), NULL, (const char *)&v);
         return *this;
     }
 
@@ -648,7 +648,7 @@ public:
     /** Does a value-assignment from the rhs C++ scalar. */
     template<class T>
     typename enable_if<is_dtype_scalar<T>::value, array_vals&>::type operator=(const T& rhs) {
-        m_arr.val_assign(ndt::make_dtype<T>(), NULL, (const char *)&rhs);
+        m_arr.val_assign(ndt::make_type<T>(), NULL, (const char *)&rhs);
         return *this;
     }
     /**
@@ -662,7 +662,7 @@ public:
     template<class T>
     typename enable_if<is_type_bool<T>::value, array_vals&>::type  operator=(const T& rhs) {
         dynd_bool v = rhs;
-        m_arr.val_assign(ndt::make_dtype<dynd_bool>(), NULL, (const char *)&v);
+        m_arr.val_assign(ndt::make_type<dynd_bool>(), NULL, (const char *)&v);
         return *this;
     }
 
@@ -872,7 +872,7 @@ dynd::array::array(std::initializer_list<T> il)
     char *originptr = 0;
     memory_block_ptr memblock = make_fixed_size_pod_memory_block(sizeof(T) * dim0, sizeof(T), &originptr);
     DYND_MEMCPY(originptr, il.begin(), sizeof(T) * dim0);
-    make_strided_array_node(ndt::make_dtype<T>(), 1, &dim0, &stride,
+    make_strided_array_node(ndt::make_type<T>(), 1, &dim0, &stride,
                             originptr, read_access_flag | write_access_flag, DYND_MOVE(memblock)).swap(m_memblock);
 }
 template<class T>
@@ -895,7 +895,7 @@ dynd::array::array(std::initializer_list<std::initializer_list<T> > il)
     memory_block_ptr memblock = make_fixed_size_pod_memory_block(sizeof(T) * num_elements, sizeof(T), &originptr);
     T *dataptr = reinterpret_cast<T *>(originptr);
     detail::initializer_list_shape<S>::copy_data(&dataptr, il);
-    make_strided_array_node(ndt::make_dtype<T>(), 2, shape, strides,
+    make_strided_array_node(ndt::make_type<T>(), 2, shape, strides,
                         originptr, read_access_flag | write_access_flag, DYND_MOVE(memblock)).swap(m_memblock);
 }
 template<class T>
@@ -918,7 +918,7 @@ dynd::array::array(std::initializer_list<std::initializer_list<std::initializer_
     memory_block_ptr memblock = make_fixed_size_pod_memory_block(sizeof(T) * num_elements, sizeof(T), &originptr);
     T *dataptr = reinterpret_cast<T *>(originptr);
     detail::initializer_list_shape<S>::copy_data(&dataptr, il);
-    make_strided_array_node(ndt::make_dtype<T>(), 3, shape, strides,
+    make_strided_array_node(ndt::make_type<T>(), 3, shape, strides,
                     originptr, read_access_flag | write_access_flag, DYND_MOVE(memblock)).swap(m_memblock);
 }
 #endif // DYND_INIT_LIST
@@ -986,7 +986,7 @@ namespace detail {
         inline static typename enable_if<is_dtype_scalar<T>::value, array>::type
                         make(const std::vector<T>& vec)
         {
-            array result = make_strided_array(vec.size(), ndt::make_dtype<T>());
+            array result = make_strided_array(vec.size(), ndt::make_type<T>());
             if (!vec.empty()) {
                 memcpy(result.get_readwrite_originptr(), &vec[0], vec.size() * sizeof(T));
             }
@@ -1022,7 +1022,7 @@ namespace detail {
             if (!lhs.is_scalar()) {
                 throw std::runtime_error("can only convert arrays with 0 dimensions to scalars");
             }
-            dtype_assign(ndt::make_dtype<T>(), NULL, (char *)&result,
+            dtype_assign(ndt::make_type<T>(), NULL, (char *)&result,
                         lhs.get_dtype(), lhs.get_ndo_meta(), lhs.get_ndo()->m_data_pointer, errmode);
             return result;
         }

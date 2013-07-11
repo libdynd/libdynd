@@ -20,7 +20,7 @@ TEST(TupleDType, CreateOneField) {
     const tuple_type *tdt;
 
     // Tuple with one field
-    dt = ndt::make_tuple(ndt::make_dtype<int32_t>());
+    dt = ndt::make_tuple(ndt::make_type<int32_t>());
     EXPECT_EQ(tuple_type_id, dt.get_type_id());
     EXPECT_EQ(4u, dt.get_data_size());
     EXPECT_EQ(4u, dt.get_data_alignment());
@@ -30,7 +30,7 @@ TEST(TupleDType, CreateOneField) {
     EXPECT_TRUE(tdt->is_standard_layout());
     EXPECT_EQ(1u, tdt->get_fields().size());
     EXPECT_EQ(1u, tdt->get_offsets().size());
-    EXPECT_EQ(ndt::make_dtype<int32_t>(), tdt->get_fields()[0]);
+    EXPECT_EQ(ndt::make_type<int32_t>(), tdt->get_fields()[0]);
     EXPECT_EQ(0u, tdt->get_offsets()[0]);
 }
 

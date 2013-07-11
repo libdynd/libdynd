@@ -52,31 +52,31 @@ std::ostream& dynd::operator<<(std::ostream& o, datetime_unit_t unit)
 namespace {
     static ndt::type datetime_default_structs[6] = {
         ndt::make_cstruct(
-            ndt::make_dtype<int32_t>(), "year", ndt::make_dtype<int16_t>(), "month",
-            ndt::make_dtype<int16_t>(), "day", ndt::make_dtype<int16_t>(), "hour"),
+            ndt::make_type<int32_t>(), "year", ndt::make_type<int16_t>(), "month",
+            ndt::make_type<int16_t>(), "day", ndt::make_type<int16_t>(), "hour"),
         ndt::make_cstruct(
-            ndt::make_dtype<int32_t>(), "year", ndt::make_dtype<int16_t>(), "month",
-            ndt::make_dtype<int16_t>(), "day", ndt::make_dtype<int16_t>(), "hour",
-            ndt::make_dtype<int16_t>(), "min"),
+            ndt::make_type<int32_t>(), "year", ndt::make_type<int16_t>(), "month",
+            ndt::make_type<int16_t>(), "day", ndt::make_type<int16_t>(), "hour",
+            ndt::make_type<int16_t>(), "min"),
         ndt::make_cstruct(
-            ndt::make_dtype<int32_t>(), "year", ndt::make_dtype<int16_t>(), "month",
-            ndt::make_dtype<int16_t>(), "day", ndt::make_dtype<int16_t>(), "hour",
-            ndt::make_dtype<int16_t>(), "min", ndt::make_dtype<int16_t>(), "sec"),
+            ndt::make_type<int32_t>(), "year", ndt::make_type<int16_t>(), "month",
+            ndt::make_type<int16_t>(), "day", ndt::make_type<int16_t>(), "hour",
+            ndt::make_type<int16_t>(), "min", ndt::make_type<int16_t>(), "sec"),
         ndt::make_cstruct(
-            ndt::make_dtype<int32_t>(), "year", ndt::make_dtype<int16_t>(), "month",
-            ndt::make_dtype<int16_t>(), "day", ndt::make_dtype<int16_t>(), "hour",
-            ndt::make_dtype<int16_t>(), "min", ndt::make_dtype<int16_t>(), "sec",
-            ndt::make_dtype<int16_t>(), "msec"),
+            ndt::make_type<int32_t>(), "year", ndt::make_type<int16_t>(), "month",
+            ndt::make_type<int16_t>(), "day", ndt::make_type<int16_t>(), "hour",
+            ndt::make_type<int16_t>(), "min", ndt::make_type<int16_t>(), "sec",
+            ndt::make_type<int16_t>(), "msec"),
         ndt::make_cstruct(
-            ndt::make_dtype<int32_t>(), "year", ndt::make_dtype<int16_t>(), "month",
-            ndt::make_dtype<int16_t>(), "day", ndt::make_dtype<int16_t>(), "hour",
-            ndt::make_dtype<int16_t>(), "min", ndt::make_dtype<int16_t>(), "sec",
-            ndt::make_dtype<int32_t>(), "usec"),
+            ndt::make_type<int32_t>(), "year", ndt::make_type<int16_t>(), "month",
+            ndt::make_type<int16_t>(), "day", ndt::make_type<int16_t>(), "hour",
+            ndt::make_type<int16_t>(), "min", ndt::make_type<int16_t>(), "sec",
+            ndt::make_type<int32_t>(), "usec"),
         ndt::make_cstruct(
-            ndt::make_dtype<int32_t>(), "year", ndt::make_dtype<int16_t>(), "month",
-            ndt::make_dtype<int16_t>(), "day", ndt::make_dtype<int16_t>(), "hour",
-            ndt::make_dtype<int16_t>(), "min", ndt::make_dtype<int16_t>(), "sec",
-            ndt::make_dtype<int32_t>(), "nsec")
+            ndt::make_type<int32_t>(), "year", ndt::make_type<int16_t>(), "month",
+            ndt::make_type<int16_t>(), "day", ndt::make_type<int16_t>(), "hour",
+            ndt::make_type<int16_t>(), "min", ndt::make_type<int16_t>(), "sec",
+            ndt::make_type<int32_t>(), "nsec")
     };
     /**
      * Returns a reference to a static struct for the given
@@ -376,9 +376,9 @@ static nd::array function_dtype_construct(const ndt::type& DYND_UNUSED(dt),
     throw runtime_error("dynd type datetime __construct__");
     /*
     // TODO proper buffering
-    nd::array year_as_int = year.ucast(ndt::make_dtype<int32_t>()).eval();
-    nd::array month_as_int = month.ucast(ndt::make_dtype<int32_t>()).eval();
-    nd::array day_as_int = day.ucast(ndt::make_dtype<int32_t>()).eval();
+    nd::array year_as_int = year.ucast(ndt::make_type<int32_t>()).eval();
+    nd::array month_as_int = month.ucast(ndt::make_type<int32_t>()).eval();
+    nd::array day_as_int = day.ucast(ndt::make_type<int32_t>()).eval();
     nd::array result;
 
     array_iter<1,3> iter(ndt::make_datetime(), result, year_as_int, month_as_int, day_as_int);
@@ -705,7 +705,7 @@ ndt::type datetime_type::get_elwise_property_type(size_t property_index,
         default:
             out_readable = true;
             out_writable = false;
-            return ndt::make_dtype<int32_t>();
+            return ndt::make_type<int32_t>();
     }
 }
 

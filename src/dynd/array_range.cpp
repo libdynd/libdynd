@@ -7,7 +7,7 @@
 #include <sstream>
 
 #include <dynd/array.hpp>
-#include <dynd/ndobject_range.hpp>
+#include <dynd/array_range.hpp>
 #include <dynd/dtype_promotion.hpp>
 
 using namespace std;
@@ -190,7 +190,7 @@ nd::array dynd::nd::linspace(const nd::array& start, const nd::array& stop, intp
     ndt::type dt = promote_dtypes_arithmetic(start.get_udtype(), stop.get_udtype());
     // Make sure it's at least floating point
     if (dt.get_kind() == bool_kind || dt.get_kind() == int_kind || dt.get_kind() == uint_kind) {
-        dt = ndt::make_dtype<double>();
+        dt = ndt::make_type<double>();
     }
     return linspace(start, stop, count, dt);
 }

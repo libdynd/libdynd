@@ -30,15 +30,15 @@ TEST(CodeGenCache, UnaryCaching) {
     codegen_cache cgcache;
     kernel_instance<unary_operation_pair_t> op_int_float1, op_int_float2;
     // Generate two adapted functions with different function pointers
-    cgcache.codegen_unary_function_adapter(ndt::make_dtype<int>(),
-                                           ndt::make_dtype<float>(),
+    cgcache.codegen_unary_function_adapter(ndt::make_type<int>(),
+                                           ndt::make_type<float>(),
                                            cdecl_callconv,
                                            reinterpret_cast<void*>(&int_float_fn1),
                                            NULL,
                                            op_int_float1);
     
-    cgcache.codegen_unary_function_adapter(ndt::make_dtype<int>(),
-                                           ndt::make_dtype<float>(),
+    cgcache.codegen_unary_function_adapter(ndt::make_type<int>(),
+                                           ndt::make_type<float>(),
                                            cdecl_callconv,
                                            reinterpret_cast<void*>(&int_float_fn2),
                                            NULL,
@@ -48,8 +48,8 @@ TEST(CodeGenCache, UnaryCaching) {
     EXPECT_EQ(op_int_float1.specializations[0], op_int_float2.specializations[0]);
 
     kernel_instance<unary_operation_pair_t> op_uint_float1;
-    cgcache.codegen_unary_function_adapter(ndt::make_dtype<unsigned int>(),
-                                           ndt::make_dtype<float>(),
+    cgcache.codegen_unary_function_adapter(ndt::make_type<unsigned int>(),
+                                           ndt::make_type<float>(),
                                            cdecl_callconv,
                                            reinterpret_cast<void*>(&uint_float_fn1),
                                            NULL,

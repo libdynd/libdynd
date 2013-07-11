@@ -16,5 +16,5 @@ using namespace dynd;
 
 TEST(ArrayCast, BasicCast) {
     nd::array n = 3.5;
-    EXPECT_EQ(3.5f, n.cast(ndt::make_dtype<float>()).as<float>());
+    EXPECT_EQ(3.5f, n.cast(ndt::make_type<float>()).as<float>());
 }

@@ -10,7 +10,7 @@
 #include <dynd/dtypes/fixedstring_type.hpp>
 #include <dynd/dtypes/string_type.hpp>
 #include <dynd/dtypes/byteswap_type.hpp>
-#include <dynd/ndobject_range.hpp>
+#include <dynd/array_range.hpp>
 #include <dynd/codegen/codegen_cache.hpp>
 #include <dynd/codegen/unary_kernel_adapter_codegen.hpp>
 
@@ -35,7 +35,7 @@ int main()
         intptr_t shape[] = {2,3,4};
         int axisperm[] = {0,2,1};
 
-        nd::array a = nd::make_strided_array(ndt::make_dtype<int>(), 3, shape,
+        nd::array a = nd::make_strided_array(ndt::make_type<int>(), 3, shape,
                         nd::read_access_flag|nd::write_access_flag, axisperm);
 
         a.debug_print(cout);
@@ -44,7 +44,7 @@ int main()
 
         b.debug_print(cout);
 
-        nd::array c = empty_like(a, ndt::make_dtype<double>());
+        nd::array c = empty_like(a, ndt::make_type<double>());
 
         c.debug_print(cout);
 

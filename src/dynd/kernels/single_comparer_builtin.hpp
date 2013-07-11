@@ -236,7 +236,7 @@ DYND_FORCE_BIG_TYPE(dynd_float128, dynd_float128);
     struct op_cant_compare {
         inline static bool f(const src0_type& DYND_UNUSED(src0), const src1_type& DYND_UNUSED(src1))
         {
-            throw not_comparable_error(ndt::make_dtype<src0_type>(), ndt::make_dtype<src1_type>(), comptype);
+            throw not_comparable_error(ndt::make_type<src0_type>(), ndt::make_type<src1_type>(), comptype);
         }
     };
 

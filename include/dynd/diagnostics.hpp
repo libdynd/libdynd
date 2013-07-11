@@ -40,7 +40,7 @@
 
 # define DYND_TRACE_ASSIGNMENT(dst_value, dst_type, src_value, src_type) { \
         std::cerr << "Assigning value " << src_value << " to value " << dst_value << " from " \
-                << dynd::make_dtype<src_type>() << " to " << dynd::make_dtype<dst_type>() << std::endl; \
+                << dynd::make_type<src_type>() << " to " << dynd::make_type<dst_type>() << std::endl; \
     }
 #else
 # define DYND_TRACE_ASSIGNMENT(dst_value, dst_type, src_value, src_type) {}

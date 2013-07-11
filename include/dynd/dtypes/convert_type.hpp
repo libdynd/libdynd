@@ -104,7 +104,7 @@ namespace ndt {
 
     template<typename Tvalue, typename Tstorage>
     ndt::type make_convert(assign_error_mode errmode = assign_error_default) {
-        return ndt::type(new convert_type(ndt::make_dtype<Tvalue>(), ndt::make_dtype<Tstorage>(), errmode), false);
+        return ndt::type(new convert_type(ndt::make_type<Tvalue>(), ndt::make_type<Tstorage>(), errmode), false);
     }
 } // namespace ndt
 

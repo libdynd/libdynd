@@ -109,7 +109,7 @@ namespace ndt {
 
     template<typename Tnative>
     ndt::type make_pointer() {
-        return make_pointer(ndt::make_dtype<Tnative>());
+        return make_pointer(ndt::make_type<Tnative>());
     }
 } // namespace ndt
 

@@ -629,7 +629,7 @@ public:
 
 // Convenience function which makes a type object from a template parameter
 template<class T>
-type make_dtype()
+type make_type()
 {
     return type(static_cast<type_id_t>(type_id_of<T>::value));
 }

@@ -82,7 +82,7 @@ namespace ndt {
 
     template<typename Tvalue, typename Toperand>
     ndt::type make_view() {
-        return ndt::type(new view_type(ndt::make_dtype<Tvalue>()), false);
+        return ndt::type(new view_type(ndt::make_type<Tvalue>()), false);
     }
 } // namespace ndt
 

@@ -107,12 +107,12 @@ template <> struct parameter_type_of<ndt::type> {typedef const base_type *type;}
 template <> struct parameter_type_of<std::string> {typedef string_type_data type;};
 
 template <typename T> struct make_parameter_dtype {inline static ndt::type make() {
-        return ndt::make_dtype<typename parameter_type_of<T>::type>();
+        return ndt::make_type<typename parameter_type_of<T>::type>();
     }};
 template <typename T> struct make_parameter_dtype<T &> : public make_parameter_dtype<T> {};
 template <typename T> struct make_parameter_dtype<const T> : public make_parameter_dtype<T> {};
 template <typename T, int N> struct make_parameter_dtype<T[N]> {inline static ndt::type make() {
-        return ndt::make_fixed_dim(N, ndt::make_dtype<T>());
+        return ndt::make_fixed_dim(N, ndt::make_type<T>());
     }};
 // Use void* to pass nd::array as a parameter, correctness currently will
 // rely on using them in the right context. To pass these properly will require

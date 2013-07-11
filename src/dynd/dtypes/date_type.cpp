@@ -38,9 +38,9 @@ date_type::~date_type()
 
 const ndt::type date_type::default_struct_type =
         ndt::make_cstruct(
-            ndt::make_dtype<int32_t>(), "year",
-            ndt::make_dtype<int16_t>(), "month",
-            ndt::make_dtype<int16_t>(), "day");
+            ndt::make_type<int32_t>(), "year",
+            ndt::make_type<int16_t>(), "month",
+            ndt::make_type<int16_t>(), "day");
 namespace {
     struct default_date_struct_t {
         int32_t year;
@@ -227,9 +227,9 @@ static nd::array function_dtype_construct(const ndt::type& DYND_UNUSED(dt),
                 const nd::array& year, const nd::array& month, const nd::array& day)
 {
     // TODO proper buffering
-    nd::array year_as_int = year.ucast(ndt::make_dtype<int32_t>()).eval();
-    nd::array month_as_int = month.ucast(ndt::make_dtype<int32_t>()).eval();
-    nd::array day_as_int = day.ucast(ndt::make_dtype<int32_t>()).eval();
+    nd::array year_as_int = year.ucast(ndt::make_type<int32_t>()).eval();
+    nd::array month_as_int = month.ucast(ndt::make_type<int32_t>()).eval();
+    nd::array day_as_int = day.ucast(ndt::make_type<int32_t>()).eval();
     nd::array result;
 
     array_iter<1,3> iter(ndt::make_date(), result, year_as_int, month_as_int, day_as_int);
@@ -459,11 +459,11 @@ ndt::type date_type::get_elwise_property_type(size_t property_index,
         case dateprop_weekday:
             out_readable = true;
             out_writable = false;
-            return ndt::make_dtype<int32_t>();
+            return ndt::make_type<int32_t>();
         case dateprop_days_after_1970_int64:
             out_readable = true;
             out_writable = true;
-            return ndt::make_dtype<int64_t>();
+            return ndt::make_type<int64_t>();
         case dateprop_struct:
             out_readable = true;
             out_writable = true;
@@ -471,7 +471,7 @@ ndt::type date_type::get_elwise_property_type(size_t property_index,
         default:
             out_readable = false;
             out_writable = false;
-            return ndt::make_dtype<void>();
+            return ndt::make_type<void>();
     }
 }
 

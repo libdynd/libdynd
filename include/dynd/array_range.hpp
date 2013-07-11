@@ -24,7 +24,7 @@ nd::array range(const ndt::type& scalar_dtype, const void *beginval, const void 
 template<class T>
 typename enable_if<is_dtype_scalar<T>::value, nd::array>::type range(T beginval, T endval,
                                                                     T stepval = T(1)) {
-    return range(ndt::make_dtype<T>(), &beginval, &endval, &stepval);
+    return range(ndt::make_type<T>(), &beginval, &endval, &stepval);
 }
 
 /**
@@ -33,14 +33,14 @@ typename enable_if<is_dtype_scalar<T>::value, nd::array>::type range(T beginval,
 template<class T>
 typename enable_if<is_dtype_scalar<T>::value, nd::array>::type range(T endval) {
     T beginval = T(0), stepval = T(1);
-    return range(ndt::make_dtype<T>(), &beginval, &endval, &stepval);
+    return range(ndt::make_type<T>(), &beginval, &endval, &stepval);
 }
 
 /**
  * Version of range based on an irange object.
  */
 inline nd::array range(const irange& i) {
-    return range(ndt::make_dtype<intptr_t>(), &i.start(), &i.finish(), &i.step());
+    return range(ndt::make_type<intptr_t>(), &i.start(), &i.finish(), &i.step());
 }
 
 /**

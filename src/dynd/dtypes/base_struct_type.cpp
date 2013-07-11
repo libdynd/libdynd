@@ -73,7 +73,7 @@ ndt::type base_struct_type::get_elwise_property_type(size_t elwise_property_inde
         out_writable = false;
         return get_field_types()[elwise_property_index].value_type();
     } else {
-        return ndt::make_dtype<void>();
+        return ndt::make_type<void>();
     }
 }
 

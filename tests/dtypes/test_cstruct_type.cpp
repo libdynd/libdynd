@@ -20,10 +20,10 @@ using namespace std;
 using namespace dynd;
 
 TEST(CStructDType, Basic) {
-    EXPECT_NE(ndt::make_cstruct(ndt::make_dtype<int>(), "x"),
-                    ndt::make_cstruct(ndt::make_dtype<int>(), "y"));
-    EXPECT_NE(ndt::make_cstruct(ndt::make_dtype<float>(), "x"),
-                    ndt::make_cstruct(ndt::make_dtype<int>(), "x"));
+    EXPECT_NE(ndt::make_cstruct(ndt::make_type<int>(), "x"),
+                    ndt::make_cstruct(ndt::make_type<int>(), "y"));
+    EXPECT_NE(ndt::make_cstruct(ndt::make_type<float>(), "x"),
+                    ndt::make_cstruct(ndt::make_type<int>(), "x"));
     EXPECT_NE(ndt::type("{x: int32}"), ndt::type("{y: int32}"));
     EXPECT_NE(ndt::type("{x: float32}"), ndt::type("{x: int32}"));
 }
@@ -81,15 +81,15 @@ TEST(CStructDType, CreateOneField) {
     const cstruct_type *tdt;
 
     // Struct with one field
-    dt = ndt::make_cstruct(ndt::make_dtype<int32_t>(), "x");
+    dt = ndt::make_cstruct(ndt::make_type<int32_t>(), "x");
     EXPECT_EQ(cstruct_type_id, dt.get_type_id());
     EXPECT_EQ(4u, dt.get_data_size());
     EXPECT_EQ(4u, dt.extended()->get_default_data_size(0, NULL));
-    EXPECT_EQ(ndt::make_dtype<int32_t>().get_data_alignment(), dt.get_data_alignment());
+    EXPECT_EQ(ndt::make_type<int32_t>().get_data_alignment(), dt.get_data_alignment());
     EXPECT_TRUE(dt.is_pod());
     tdt = static_cast<const cstruct_type *>(dt.extended());
     EXPECT_EQ(1u, tdt->get_field_count());
-    EXPECT_EQ(ndt::make_dtype<int32_t>(), tdt->get_field_types()[0]);
+    EXPECT_EQ(ndt::make_type<int32_t>(), tdt->get_field_types()[0]);
     EXPECT_EQ(0u, tdt->get_data_offsets_vector()[0]);
     EXPECT_EQ("x", tdt->get_field_names()[0]);
 }
@@ -104,16 +104,16 @@ TEST(CStructDType, CreateTwoField) {
     const cstruct_type *tdt;
 
     // Struct with two fields
-    dt = ndt::make_cstruct(ndt::make_dtype<int64_t>(), "a", ndt::make_dtype<int32_t>(), "b");
+    dt = ndt::make_cstruct(ndt::make_type<int64_t>(), "a", ndt::make_type<int32_t>(), "b");
     EXPECT_EQ(cstruct_type_id, dt.get_type_id());
     EXPECT_EQ(sizeof(two_field_struct), dt.get_data_size());
     EXPECT_EQ(sizeof(two_field_struct), dt.extended()->get_default_data_size(0, NULL));
-    EXPECT_EQ(ndt::make_dtype<int64_t>().get_data_alignment(), dt.get_data_alignment());
+    EXPECT_EQ(ndt::make_type<int64_t>().get_data_alignment(), dt.get_data_alignment());
     EXPECT_TRUE(dt.is_pod());
     tdt = static_cast<const cstruct_type *>(dt.extended());
     EXPECT_EQ(2u, tdt->get_field_count());
-    EXPECT_EQ(ndt::make_dtype<int64_t>(), tdt->get_field_types()[0]);
-    EXPECT_EQ(ndt::make_dtype<int32_t>(), tdt->get_field_types()[1]);
+    EXPECT_EQ(ndt::make_type<int64_t>(), tdt->get_field_types()[0]);
+    EXPECT_EQ(ndt::make_type<int32_t>(), tdt->get_field_types()[1]);
     EXPECT_EQ(0u, tdt->get_data_offsets_vector()[0]);
     EXPECT_EQ(8u, tdt->get_data_offsets_vector()[1]);
     EXPECT_EQ("a", tdt->get_field_names()[0]);
@@ -131,8 +131,8 @@ TEST(CStructDType, CreateThreeField) {
     const cstruct_type *tdt;
 
     // Struct with three fields
-    ndt::type d1 = ndt::make_dtype<int64_t>();
-    ndt::type d2 = ndt::make_dtype<int32_t>();
+    ndt::type d1 = ndt::make_type<int64_t>();
+    ndt::type d2 = ndt::make_type<int32_t>();
     ndt::type d3 = ndt::make_fixedstring(5, string_encoding_utf_8);
     dt = ndt::make_cstruct(d1, "x", d2, "y", d3, "z");
     EXPECT_EQ(cstruct_type_id, dt.get_type_id());
@@ -142,8 +142,8 @@ TEST(CStructDType, CreateThreeField) {
     EXPECT_TRUE(dt.is_pod());
     tdt = static_cast<const cstruct_type *>(dt.extended());
     EXPECT_EQ(3u, tdt->get_field_count());
-    EXPECT_EQ(ndt::make_dtype<int64_t>(), tdt->get_field_types()[0]);
-    EXPECT_EQ(ndt::make_dtype<int32_t>(), tdt->get_field_types()[1]);
+    EXPECT_EQ(ndt::make_type<int64_t>(), tdt->get_field_types()[0]);
+    EXPECT_EQ(ndt::make_type<int32_t>(), tdt->get_field_types()[1]);
     EXPECT_EQ(ndt::make_fixedstring(5, string_encoding_utf_8),
                     tdt->get_field_types()[2]);
     EXPECT_EQ(0u, tdt->get_data_offsets_vector()[0]);
@@ -158,15 +158,15 @@ TEST(CStructDType, ReplaceScalarTypes) {
     ndt::type dt, dt2;
 
     // Struct with three fields
-    ndt::type d1 = ndt::make_dtype<std::complex<double> >();
-    ndt::type d2 = ndt::make_dtype<int32_t>();
+    ndt::type d1 = ndt::make_type<std::complex<double> >();
+    ndt::type d2 = ndt::make_type<int32_t>();
     ndt::type d3 = ndt::make_fixedstring(5, string_encoding_utf_8);
     dt = ndt::make_cstruct(d1, "x", d2, "y", d3, "z");
-    dt2 = dt.with_replaced_scalar_types(ndt::make_dtype<int16_t>());
+    dt2 = dt.with_replaced_scalar_types(ndt::make_type<int16_t>());
     EXPECT_EQ(ndt::make_cstruct(
-                ndt::make_convert(ndt::make_dtype<int16_t>(), d1), "x",
-                ndt::make_convert(ndt::make_dtype<int16_t>(), d2), "y",
-                ndt::make_convert(ndt::make_dtype<int16_t>(), d3), "z"),
+                ndt::make_convert(ndt::make_type<int16_t>(), d1), "x",
+                ndt::make_convert(ndt::make_type<int16_t>(), d2), "y",
+                ndt::make_convert(ndt::make_type<int16_t>(), d3), "z"),
         dt2);
 }
 
@@ -174,8 +174,8 @@ TEST(CStructDType, DTypeAt) {
     ndt::type dt, dt2;
 
     // Struct with three fields
-    ndt::type d1 = ndt::make_dtype<std::complex<double> >();
-    ndt::type d2 = ndt::make_dtype<int32_t>();
+    ndt::type d1 = ndt::make_type<std::complex<double> >();
+    ndt::type d2 = ndt::make_type<int32_t>();
     ndt::type d3 = ndt::make_fixedstring(5, string_encoding_utf_8);
     dt = ndt::make_cstruct(d1, "x", d2, "y", d3, "z");
 
@@ -194,14 +194,14 @@ TEST(CStructDType, CanonicalDType) {
     ndt::type d2 = ndt::make_byteswap<int32_t>();
     ndt::type d3 = ndt::make_fixedstring(5, string_encoding_utf_32);
     dt = ndt::make_cstruct(d1, "x", d2, "y", d3, "z");
-    EXPECT_EQ(ndt::make_cstruct(ndt::make_dtype<std::complex<double> >(), "x",
-                                ndt::make_dtype<int32_t>(), "y",
+    EXPECT_EQ(ndt::make_cstruct(ndt::make_type<std::complex<double> >(), "x",
+                                ndt::make_type<int32_t>(), "y",
                                 d3, "z"),
             dt.get_canonical_type());
 }
 
 TEST(CStructDType, IsExpression) {
-    ndt::type d1 = ndt::make_dtype<float>();
+    ndt::type d1 = ndt::make_type<float>();
     ndt::type d2 = ndt::make_byteswap<int32_t>();
     ndt::type d3 = ndt::make_fixedstring(5, string_encoding_utf_32);
     ndt::type d = ndt::make_cstruct(d1, "x", d2, "y", d3, "z");
@@ -211,7 +211,7 @@ TEST(CStructDType, IsExpression) {
 }
 
 TEST(CStructDType, PropertyAccess) {
-    ndt::type dt = ndt::make_cstruct(ndt::make_dtype<int>(), "x", ndt::make_dtype<double>(), "y", ndt::make_dtype<short>(), "z");
+    ndt::type dt = ndt::make_cstruct(ndt::make_type<int>(), "x", ndt::make_type<double>(), "y", ndt::make_type<short>(), "z");
     nd::array a = nd::empty(dt);
     a(0).vals() = 3;
     a(1).vals() = 4.25;
@@ -223,7 +223,7 @@ TEST(CStructDType, PropertyAccess) {
 }
 
 TEST(CStructDType, EqualDTypeAssign) {
-    ndt::type dt = ndt::make_cstruct(ndt::make_dtype<int>(), "x", ndt::make_dtype<double>(), "y", ndt::make_dtype<short>(), "z");
+    ndt::type dt = ndt::make_cstruct(ndt::make_type<int>(), "x", ndt::make_type<double>(), "y", ndt::make_type<short>(), "z");
     nd::array a = nd::make_strided_array(2, dt);
     a(0,0).vals() = 3;
     a(0,1).vals() = 4.25;
@@ -243,7 +243,7 @@ TEST(CStructDType, EqualDTypeAssign) {
 }
 
 TEST(CStructDType, DifferentDTypeAssign) {
-    ndt::type dt = ndt::make_cstruct(ndt::make_dtype<int>(), "x", ndt::make_dtype<double>(), "y", ndt::make_dtype<short>(), "z");
+    ndt::type dt = ndt::make_cstruct(ndt::make_type<int>(), "x", ndt::make_type<double>(), "y", ndt::make_type<short>(), "z");
     nd::array a = nd::make_strided_array(2, dt);
     a(0,0).vals() = 3;
     a(0,1).vals() = 4.25;
@@ -252,7 +252,7 @@ TEST(CStructDType, DifferentDTypeAssign) {
     a(1,1).vals() = 7.25;
     a(1,2).vals() = 8;
 
-    ndt::type dt2 = ndt::make_cstruct(ndt::make_dtype<float>(), "y", ndt::make_dtype<int>(), "z", ndt::make_dtype<uint8_t>(), "x");
+    ndt::type dt2 = ndt::make_cstruct(ndt::make_type<float>(), "y", ndt::make_type<int>(), "z", ndt::make_type<uint8_t>(), "x");
     nd::array b = nd::make_strided_array(2, dt2);
     b.val_assign(a);
     EXPECT_EQ(3,    b(0,2).as<int>());
@@ -264,7 +264,7 @@ TEST(CStructDType, DifferentDTypeAssign) {
 }
 
 TEST(CStructDType, FromStructAssign) {
-    ndt::type dt = ndt::make_struct(ndt::make_dtype<int>(), "x", ndt::make_dtype<double>(), "y", ndt::make_dtype<short>(), "z");
+    ndt::type dt = ndt::make_struct(ndt::make_type<int>(), "x", ndt::make_type<double>(), "y", ndt::make_type<short>(), "z");
     nd::array a = nd::make_strided_array(2, dt);
     a(0,0).vals() = 3;
     a(0,1).vals() = 4.25;
@@ -273,7 +273,7 @@ TEST(CStructDType, FromStructAssign) {
     a(1,1).vals() = 7.25;
     a(1,2).vals() = 8;
 
-    ndt::type dt2 = ndt::make_cstruct(ndt::make_dtype<float>(), "y", ndt::make_dtype<int>(), "z", ndt::make_dtype<uint8_t>(), "x");
+    ndt::type dt2 = ndt::make_cstruct(ndt::make_type<float>(), "y", ndt::make_type<int>(), "z", ndt::make_type<uint8_t>(), "x");
     nd::array b = nd::make_strided_array(2, dt2);
     b.val_assign(a);
     EXPECT_EQ(3,    b(0,2).as<int>());
@@ -286,8 +286,8 @@ TEST(CStructDType, FromStructAssign) {
 
 TEST(CStructDType, SingleCompare) {
     nd::array a, b;
-    ndt::type sdt = ndt::make_cstruct(ndt::make_dtype<int32_t>(), "a",
-                    ndt::make_dtype<float>(), "b", ndt::make_dtype<int64_t>(), "c");
+    ndt::type sdt = ndt::make_cstruct(ndt::make_type<int32_t>(), "a",
+                    ndt::make_type<float>(), "b", ndt::make_type<int64_t>(), "c");
     a = nd::empty(sdt);
     b = nd::empty(sdt);
 

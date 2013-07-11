@@ -143,7 +143,7 @@ static void string_to_bool_single(char *dst, const char *src,
         } else if (s == "1" || s == "true" || s == "yes" || s == "on" || s == "t" || s == "y") {
             *dst = 1;
         } else {
-            raise_string_cast_error(ndt::make_dtype<dynd_bool>(), ndt::type(e->src_string_dt, true), e->src_metadata, src);
+            raise_string_cast_error(ndt::make_type<dynd_bool>(), ndt::type(e->src_string_dt, true), e->src_metadata, src);
         }
     }
 }
@@ -231,9 +231,9 @@ namespace { template<typename T> struct string_to_int {
             bool overflow = false, badparse = false;
             uint64_t value = parse_uint64(s, overflow, badparse);
             if (badparse) {
-                raise_string_cast_error(ndt::make_dtype<T>(), ndt::type(e->src_string_dt, true), e->src_metadata, src);
+                raise_string_cast_error(ndt::make_type<T>(), ndt::type(e->src_string_dt, true), e->src_metadata, src);
             } else if (overflow || overflow_check<T>::is_overflow(value, negative)) {
-                raise_string_cast_overflow_error(ndt::make_dtype<T>(), ndt::type(e->src_string_dt, true), e->src_metadata, src);
+                raise_string_cast_overflow_error(ndt::make_type<T>(), ndt::type(e->src_string_dt, true), e->src_metadata, src);
             }
             result = negative ? static_cast<T>(-static_cast<int64_t>(value)) : static_cast<T>(value);
         }
@@ -261,9 +261,9 @@ namespace { template<typename T> struct string_to_uint {
             bool overflow = false, badparse = false;
             uint64_t value = parse_uint64(s, overflow, badparse);
             if (badparse) {
-                raise_string_cast_error(ndt::make_dtype<T>(), ndt::type(e->src_string_dt, true), e->src_metadata, src);
+                raise_string_cast_error(ndt::make_type<T>(), ndt::type(e->src_string_dt, true), e->src_metadata, src);
             } else if (negative || overflow || overflow_check<T>::is_overflow(value)) {
-                raise_string_cast_overflow_error(ndt::make_dtype<T>(), ndt::type(e->src_string_dt, true), e->src_metadata, src);
+                raise_string_cast_overflow_error(ndt::make_type<T>(), ndt::type(e->src_string_dt, true), e->src_metadata, src);
             }
             result = static_cast<T>(value);
         }
@@ -313,7 +313,7 @@ static void string_to_float32_single(char *dst, const char *src,
     // TODO: use a different parsing code that's guaranteed to round correctly in a cross-platform fashion
     double value = strtod(s.c_str(), &end_ptr);
     if (e->errmode != assign_error_none && (size_t)(end_ptr - s.c_str()) != s.size()) {
-        raise_string_cast_error(ndt::make_dtype<float>(), ndt::type(e->src_string_dt, true), e->src_metadata, src);
+        raise_string_cast_error(ndt::make_type<float>(), ndt::type(e->src_string_dt, true), e->src_metadata, src);
     } else {
         // Assign double -> float according to the error mode
         switch (e->errmode) {
@@ -371,7 +371,7 @@ static void string_to_float64_single(char *dst, const char *src,
     // TODO: use a different parsing code that's guaranteed to round correctly in a cross-platform fashion
     double value = strtod(s.c_str(), &end_ptr);
     if (e->errmode != assign_error_none && (size_t)(end_ptr - s.c_str()) != s.size()) {
-        raise_string_cast_error(ndt::make_dtype<double>(), ndt::type(e->src_string_dt, true), e->src_metadata, src);
+        raise_string_cast_error(ndt::make_type<double>(), ndt::type(e->src_string_dt, true), e->src_metadata, src);
     } else {
         *reinterpret_cast<double *>(dst) = value;
     }

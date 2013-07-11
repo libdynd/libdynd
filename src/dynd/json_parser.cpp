@@ -478,7 +478,7 @@ static void parse_bool_json(const ndt::type& dt, const char *metadata, char *out
     if (dt.get_type_id() == bool_type_id) {
         *out_data = value;
     } else {
-        dtype_assign(dt, metadata, out_data, ndt::make_dtype<dynd_bool>(), NULL, &value);
+        dtype_assign(dt, metadata, out_data, ndt::make_type<dynd_bool>(), NULL, &value);
     }
 }
 
