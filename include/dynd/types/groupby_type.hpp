@@ -93,7 +93,7 @@ public:
 
     void get_shape(size_t ndim, size_t i, intptr_t *out_shape, const char *metadata) const;
 
-    bool is_lossless_assignment(const ndt::type& dst_dt, const ndt::type& src_dt) const;
+    bool is_lossless_assignment(const ndt::type& dst_tp, const ndt::type& src_tp) const;
 
     bool operator==(const base_type& rhs) const;
 

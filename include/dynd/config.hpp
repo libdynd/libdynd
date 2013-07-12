@@ -177,7 +177,7 @@ namespace dynd {
 
 /**
  * This preprocessor symbol enables or disables tracing
- * of individual builtin dtype assignment operations.
+ * of individual builtin type assignment operations.
  *
  * See diagnostics.hpp for the macros which use this.
  */

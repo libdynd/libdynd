@@ -63,7 +63,7 @@ void expr_type::print_type(std::ostream& o) const
     o << m_value_type;
     for (size_t i = 0; i != field_count; ++i) {
         const pointer_type *pd = static_cast<const pointer_type *>(field_types[i].extended());
-        o << ", op" << i << "=" << pd->get_target_dtype();
+        o << ", op" << i << "=" << pd->get_target_type();
     }
     o << ", expr=";
     m_kgen->print_type(o);
@@ -71,7 +71,7 @@ void expr_type::print_type(std::ostream& o) const
 }
 
 ndt::type expr_type::apply_linear_index(size_t nindices, const irange *indices,
-            size_t current_i, const ndt::type& root_dt, bool DYND_UNUSED(leading_dimension)) const
+            size_t current_i, const ndt::type& root_tp, bool DYND_UNUSED(leading_dimension)) const
 {
     if (m_kgen->is_elwise()) {
         size_t undim = get_undim();
@@ -80,7 +80,7 @@ ndt::type expr_type::apply_linear_index(size_t nindices, const irange *indices,
         const ndt::type *field_types = fsd->get_field_types();
 
         ndt::type result_value_dt = m_value_type.apply_linear_index(nindices, indices,
-                        current_i, root_dt, true);
+                        current_i, root_tp, true);
         vector<ndt::type> result_src_dt(field_count);
         // Apply the portion of the indexing to each of the src operand types
         for (size_t i = 0; i != field_count; ++i) {
@@ -92,7 +92,7 @@ ndt::type expr_type::apply_linear_index(size_t nindices, const irange *indices,
                 size_t index_offset = undim - field_undim;
                 result_src_dt[i] = dt.apply_linear_index(
                                                 nindices - index_offset, indices + index_offset,
-                                                current_i, root_dt, false);
+                                                current_i, root_tp, false);
             }
         }
         ndt::type result_operand_type = ndt::make_cstruct(field_count, &result_src_dt[0],
@@ -105,15 +105,15 @@ ndt::type expr_type::apply_linear_index(size_t nindices, const irange *indices,
 }
 
 intptr_t expr_type::apply_linear_index(size_t nindices, const irange *indices, const char *metadata,
-                const ndt::type& result_dtype, char *out_metadata,
+                const ndt::type& result_tp, char *out_metadata,
                 memory_block_data *embedded_reference,
-                size_t current_i, const ndt::type& root_dt,
+                size_t current_i, const ndt::type& root_tp,
                 bool DYND_UNUSED(leading_dimension), char **DYND_UNUSED(inout_data),
                 memory_block_data **DYND_UNUSED(inout_dataref)) const
 {
     if (m_kgen->is_elwise()) {
         size_t undim = get_undim();
-        const expr_type *out_ed = static_cast<const expr_type *>(result_dtype.extended());
+        const expr_type *out_ed = static_cast<const expr_type *>(result_tp.extended());
         const cstruct_type *fsd = static_cast<const cstruct_type *>(m_operand_type.extended());
         const cstruct_type *out_fsd = static_cast<const cstruct_type *>(out_ed->m_operand_type.extended());
         const size_t *metadata_offsets = fsd->get_metadata_offsets();
@@ -134,7 +134,7 @@ intptr_t expr_type::apply_linear_index(size_t nindices, const irange *indices, c
                 intptr_t offset = pd->apply_linear_index(nindices - index_offset, indices + index_offset,
                                 metadata + metadata_offsets[i],
                                 out_field_types[i], out_metadata + out_metadata_offsets[i],
-                                embedded_reference, current_i, root_dt, false, NULL, NULL);
+                                embedded_reference, current_i, root_tp, false, NULL, NULL);
                 if (offset != 0) {
                     throw runtime_error("internal error: expr_type::apply_linear_index"
                                     " expected 0 offset from pointer_type::apply_linear_index");
@@ -174,7 +174,7 @@ void expr_type::get_shape(size_t ndim, size_t i, intptr_t *out_shape, const char
     // Copy this shape to the output
     memcpy(out_shape + i, bcast_shape.get(), min(undim, ndim - i) * sizeof(intptr_t));
 
-    // If more shape is requested, get it from the value dtype
+    // If more shape is requested, get it from the value type
     if (ndim - i > undim) {
         const ndt::type& dt = m_value_type.get_udtype();
         if (!dt.is_builtin()) {
@@ -188,8 +188,8 @@ void expr_type::get_shape(size_t ndim, size_t i, intptr_t *out_shape, const char
 }
 
 bool expr_type::is_lossless_assignment(
-                const ndt::type& DYND_UNUSED(dst_dt),
-                const ndt::type& DYND_UNUSED(src_dt)) const
+                const ndt::type& DYND_UNUSED(dst_tp),
+                const ndt::type& DYND_UNUSED(src_tp)) const
 {
     return false;
 }
@@ -285,7 +285,7 @@ static size_t make_expr_type_offset_applier(
                 size_t src_count, const intptr_t *src_data_offsets)
 {
     // A few specializations with fixed size, and a general case version
-    // NOTE: src_count == 1 must never happen here, it is handled by the unary_expr dtype
+    // NOTE: src_count == 1 must never happen here, it is handled by the unary_expr type
     switch (src_count) {
         case 2: {
             out->ensure_capacity(offset_out + sizeof(expr_type_offset_applier_extra<2>));
@@ -345,7 +345,7 @@ size_t expr_type::make_operand_to_value_assignment_kernel(
     vector<ndt::type> src_dt(input_count);
     for (size_t i = 0; i != input_count; ++i) {
         const pointer_type *pd = static_cast<const pointer_type *>(src_ptr_dt[i].extended());
-        src_dt[i] = pd->get_target_dtype();
+        src_dt[i] = pd->get_target_type();
     }
     for (size_t i = 0; i != input_count; ++i) {
         const char *ptr_metadata = src_metadata + metadata_offsets[i];

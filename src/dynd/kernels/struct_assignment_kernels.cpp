@@ -71,26 +71,26 @@ namespace {
 
 size_t dynd::make_struct_identical_assignment_kernel(
                 hierarchical_kernel *out, size_t offset_out,
-                const ndt::type& val_struct_dt,
+                const ndt::type& val_struct_tp,
                 const char *dst_metadata, const char *src_metadata,
                 kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *ectx)
 {
-    if (val_struct_dt.get_kind() != struct_kind) {
+    if (val_struct_tp.get_kind() != struct_kind) {
         stringstream ss;
-        ss << "make_struct_identical_assignment_kernel: provided dtype " << val_struct_dt << " is not of struct kind";
+        ss << "make_struct_identical_assignment_kernel: provided type " << val_struct_tp << " is not of struct kind";
         throw runtime_error(ss.str());
     }
-    if (val_struct_dt.is_pod()) {
+    if (val_struct_tp.is_pod()) {
         // For POD structs, get a trivial memory copy kernel
         return make_pod_typed_data_assignment_kernel(out, offset_out,
-                        val_struct_dt.get_data_size(), val_struct_dt.get_data_alignment(),
+                        val_struct_tp.get_data_size(), val_struct_tp.get_data_alignment(),
                         kernreq);
     }
 
     offset_out = make_kernreq_to_single_kernel_adapter(out, offset_out, kernreq);
 
-    const base_struct_type *sd = static_cast<const base_struct_type *>(val_struct_dt.extended());
+    const base_struct_type *sd = static_cast<const base_struct_type *>(val_struct_tp.extended());
     size_t field_count = sd->get_field_count();
 
     size_t extra_size = sizeof(struct_kernel_extra) +
@@ -128,28 +128,28 @@ size_t dynd::make_struct_identical_assignment_kernel(
 
 size_t dynd::make_struct_assignment_kernel(
                 hierarchical_kernel *out, size_t offset_out,
-                const ndt::type& dst_struct_dt, const char *dst_metadata,
-                const ndt::type& src_struct_dt, const char *src_metadata,
+                const ndt::type& dst_struct_tp, const char *dst_metadata,
+                const ndt::type& src_struct_tp, const char *src_metadata,
                 kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *ectx)
 {
-    if (src_struct_dt.get_kind() != struct_kind) {
+    if (src_struct_tp.get_kind() != struct_kind) {
         stringstream ss;
-        ss << "make_struct_assignment_kernel: provided source dtype " << src_struct_dt << " is not of struct kind";
+        ss << "make_struct_assignment_kernel: provided source type " << src_struct_tp << " is not of struct kind";
         throw runtime_error(ss.str());
     }
-    if (dst_struct_dt.get_kind() != struct_kind) {
+    if (dst_struct_tp.get_kind() != struct_kind) {
         stringstream ss;
-        ss << "make_struct_assignment_kernel: provided destination dtype " << dst_struct_dt << " is not of struct kind";
+        ss << "make_struct_assignment_kernel: provided destination type " << dst_struct_tp << " is not of struct kind";
         throw runtime_error(ss.str());
     }
-    const base_struct_type *dst_sd = static_cast<const base_struct_type *>(dst_struct_dt.extended());
-    const base_struct_type *src_sd = static_cast<const base_struct_type *>(src_struct_dt.extended());
+    const base_struct_type *dst_sd = static_cast<const base_struct_type *>(dst_struct_tp.extended());
+    const base_struct_type *src_sd = static_cast<const base_struct_type *>(src_struct_tp.extended());
     size_t field_count = dst_sd->get_field_count();
 
     if (field_count != src_sd->get_field_count()) {
         stringstream ss;
-        ss << "cannot assign dynd struct " << src_struct_dt << " to " << dst_struct_dt;
+        ss << "cannot assign dynd struct " << src_struct_tp << " to " << dst_struct_tp;
         ss << " because they have different numbers of fields";
         throw runtime_error(ss.str());
     }
@@ -174,7 +174,7 @@ size_t dynd::make_struct_assignment_kernel(
         const string *it = std::find(src_field_names, src_field_names + field_count, dst_name);
         if (it == src_field_names + field_count) {
             stringstream ss;
-            ss << "cannot assign dynd struct " << src_struct_dt << " to " << dst_struct_dt;
+            ss << "cannot assign dynd struct " << src_struct_tp << " to " << dst_struct_tp;
             ss << " because they have different field names";
             throw runtime_error(ss.str());
         }

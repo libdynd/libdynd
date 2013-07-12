@@ -698,8 +698,8 @@ DYND_FORCE_BIG_TYPE(dynd_float128, dynd_float128);
             src0_type v0 = *reinterpret_cast<const src0_type *>(src0);
             src1_type v1 = *reinterpret_cast<const src1_type *>(src1);
             return op_sort_lt<src0_type, src1_type,
-                            dtype_kind_of<src0_type>::value,
-                            dtype_kind_of<src1_type>::value,
+                            dynd_kind_of<src0_type>::value,
+                            dynd_kind_of<src1_type>::value,
                             (sizeof(src0_type) > sizeof(src1_type)),
                             (sizeof(src0_type) < sizeof(src1_type))>::f(v0, v1);
         }
@@ -709,8 +709,8 @@ DYND_FORCE_BIG_TYPE(dynd_float128, dynd_float128);
             src0_type v0 = *reinterpret_cast<const src0_type *>(src0);
             src1_type v1 = *reinterpret_cast<const src1_type *>(src1);
             return op_lt<src0_type, src1_type,
-                            dtype_kind_of<src0_type>::value,
-                            dtype_kind_of<src1_type>::value,
+                            dynd_kind_of<src0_type>::value,
+                            dynd_kind_of<src1_type>::value,
                             (sizeof(src0_type) > sizeof(src1_type)),
                             (sizeof(src0_type) < sizeof(src1_type))>::f(v0, v1);
         }
@@ -720,8 +720,8 @@ DYND_FORCE_BIG_TYPE(dynd_float128, dynd_float128);
             src0_type v0 = *reinterpret_cast<const src0_type *>(src0);
             src1_type v1 = *reinterpret_cast<const src1_type *>(src1);
             return op_le<src0_type, src1_type,
-                            dtype_kind_of<src0_type>::value,
-                            dtype_kind_of<src1_type>::value,
+                            dynd_kind_of<src0_type>::value,
+                            dynd_kind_of<src1_type>::value,
                             (sizeof(src0_type) > sizeof(src1_type)),
                             (sizeof(src0_type) < sizeof(src1_type))>::f(v0, v1);
         }
@@ -731,8 +731,8 @@ DYND_FORCE_BIG_TYPE(dynd_float128, dynd_float128);
             src0_type v0 = *reinterpret_cast<const src0_type *>(src0);
             src1_type v1 = *reinterpret_cast<const src1_type *>(src1);
             return op_eq<src0_type, src1_type,
-                            dtype_kind_of<src0_type>::value,
-                            dtype_kind_of<src1_type>::value,
+                            dynd_kind_of<src0_type>::value,
+                            dynd_kind_of<src1_type>::value,
                             (sizeof(src0_type) > sizeof(src1_type)),
                             (sizeof(src0_type) < sizeof(src1_type))>::f(v0, v1);
         }
@@ -742,8 +742,8 @@ DYND_FORCE_BIG_TYPE(dynd_float128, dynd_float128);
             src0_type v0 = *reinterpret_cast<const src0_type *>(src0);
             src1_type v1 = *reinterpret_cast<const src1_type *>(src1);
             return op_ne<src0_type, src1_type,
-                            dtype_kind_of<src0_type>::value,
-                            dtype_kind_of<src1_type>::value,
+                            dynd_kind_of<src0_type>::value,
+                            dynd_kind_of<src1_type>::value,
                             (sizeof(src0_type) > sizeof(src1_type)),
                             (sizeof(src0_type) < sizeof(src1_type))>::f(v0, v1);
         }
@@ -753,8 +753,8 @@ DYND_FORCE_BIG_TYPE(dynd_float128, dynd_float128);
             src0_type v0 = *reinterpret_cast<const src0_type *>(src0);
             src1_type v1 = *reinterpret_cast<const src1_type *>(src1);
             return op_ge<src0_type, src1_type,
-                            dtype_kind_of<src0_type>::value,
-                            dtype_kind_of<src1_type>::value,
+                            dynd_kind_of<src0_type>::value,
+                            dynd_kind_of<src1_type>::value,
                             (sizeof(src0_type) > sizeof(src1_type)),
                             (sizeof(src0_type) < sizeof(src1_type))>::f(v0, v1);
         }
@@ -764,8 +764,8 @@ DYND_FORCE_BIG_TYPE(dynd_float128, dynd_float128);
             src0_type v0 = *reinterpret_cast<const src0_type *>(src0);
             src1_type v1 = *reinterpret_cast<const src1_type *>(src1);
             return op_gt<src0_type, src1_type,
-                            dtype_kind_of<src0_type>::value,
-                            dtype_kind_of<src1_type>::value,
+                            dynd_kind_of<src0_type>::value,
+                            dynd_kind_of<src1_type>::value,
                             (sizeof(src0_type) > sizeof(src1_type)),
                             (sizeof(src0_type) < sizeof(src1_type))>::f(v0, v1);
         }

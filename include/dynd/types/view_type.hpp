@@ -2,8 +2,8 @@
 // Copyright (C) 2011-13 Mark Wiebe, DyND Developers
 // BSD 2-Clause License, see LICENSE.txt
 //
-// The view dtype reinterprets the bytes of
-// one dtype as another.
+// The view type reinterprets the bytes of
+// one type as another.
 //
 #ifndef _DYND__VIEW_TYPE_HPP_
 #define _DYND__VIEW_TYPE_HPP_
@@ -31,7 +31,7 @@ public:
     void print_type(std::ostream& o) const;
     void get_shape(size_t ndim, size_t i, intptr_t *out_shape, const char *metadata) const;
 
-    bool is_lossless_assignment(const ndt::type& dst_dt, const ndt::type& src_dt) const;
+    bool is_lossless_assignment(const ndt::type& dst_tp, const ndt::type& src_tp) const;
 
     bool operator==(const base_type& rhs) const;
 
@@ -46,7 +46,7 @@ public:
                     const char *dst_metadata, const char *src_metadata,
                     kernel_request_t kernreq, const eval::eval_context *ectx) const;
 
-    // Propagate properties and functions from the value dtype
+    // Propagate properties and functions from the value type
     void get_dynamic_array_properties(
                     const std::pair<std::string, gfunc::callable> **out_properties,
                     size_t *out_count) const
@@ -67,7 +67,7 @@ public:
 
 namespace ndt {
     /**
-     * Makes an unaligned dtype to view the given dtype without alignment requirements.
+     * Makes an unaligned type to view the given type without alignment requirements.
      */
     inline ndt::type make_view(const ndt::type& value_type, const ndt::type& operand_type) {
         if (value_type.get_kind() != expression_kind) {

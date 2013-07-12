@@ -13,7 +13,7 @@
 namespace dynd {
 
 /**
- * The expr dtype represents an expression on
+ * The expr type represents an expression on
  * an arbitrary number of operands. It stores
  * its operands as a structure of pointer types.
  *
@@ -31,8 +31,8 @@ namespace dynd {
  * TODO: It would be nice to put the expr_kernel_generator
  *       into the metadata, so that static expr_type instances
  *       could be shared between different operations like
- *       +, -, *, /. The operand dtype defines the metadata, though,
- *       so a special dtype just for this purpose may be required.
+ *       +, -, *, /. The operand type defines the metadata, though,
+ *       so a special type just for this purpose may be required.
  */
 class expr_type : public base_expression_type {
     ndt::type m_value_type, m_operand_type;
@@ -56,17 +56,17 @@ public:
     void print_type(std::ostream& o) const;
 
     ndt::type apply_linear_index(size_t nindices, const irange *indices,
-                size_t current_i, const ndt::type& root_dt, bool leading_dimension) const;
+                size_t current_i, const ndt::type& root_tp, bool leading_dimension) const;
     intptr_t apply_linear_index(size_t nindices, const irange *indices, const char *metadata,
-                    const ndt::type& result_dtype, char *out_metadata,
+                    const ndt::type& result_tp, char *out_metadata,
                     memory_block_data *embedded_reference,
-                    size_t current_i, const ndt::type& root_dt,
+                    size_t current_i, const ndt::type& root_tp,
                     bool leading_dimension, char **inout_data,
                     memory_block_data **inout_dataref) const;
 
     void get_shape(size_t ndim, size_t i, intptr_t *out_shape, const char *metadata) const;
 
-    bool is_lossless_assignment(const ndt::type& dst_dt, const ndt::type& src_dt) const;
+    bool is_lossless_assignment(const ndt::type& dst_tp, const ndt::type& src_tp) const;
 
     bool operator==(const base_type& rhs) const;
 
@@ -89,7 +89,7 @@ public:
 
 namespace ndt {
     /**
-     * Makes an expr dtype.
+     * Makes an expr type.
      */
     inline ndt::type make_expr(const ndt::type& value_type,
                     const ndt::type& operand_type,

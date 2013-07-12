@@ -15,7 +15,7 @@ namespace dynd {
 
 /**
  * Creates a memory block which can be used to allocate zero-initialized
- * POD output memory for blockref dtypes.
+ * POD output memory for blockref types.
  *
  * The initial capacity can be set if a good estimate is known.
  */

@@ -44,7 +44,7 @@ void unary_expr_type::print_type(std::ostream& o) const
 }
 
 ndt::type unary_expr_type::apply_linear_index(size_t nindices, const irange *DYND_UNUSED(indices),
-            size_t current_i, const ndt::type& DYND_UNUSED(root_dt), bool DYND_UNUSED(leading_dimension)) const
+            size_t current_i, const ndt::type& DYND_UNUSED(root_tp), bool DYND_UNUSED(leading_dimension)) const
 {
     if (m_kgen->is_elwise()) {
         // Scalar behavior
@@ -59,9 +59,9 @@ ndt::type unary_expr_type::apply_linear_index(size_t nindices, const irange *DYN
 }
 
 intptr_t unary_expr_type::apply_linear_index(size_t nindices, const irange *DYND_UNUSED(indices), const char *metadata,
-                const ndt::type& DYND_UNUSED(result_dtype), char *out_metadata,
+                const ndt::type& DYND_UNUSED(result_tp), char *out_metadata,
                 memory_block_data *embedded_reference,
-                size_t current_i, const ndt::type& DYND_UNUSED(root_dt),
+                size_t current_i, const ndt::type& DYND_UNUSED(root_tp),
                 bool DYND_UNUSED(leading_dimension), char **DYND_UNUSED(inout_data),
                 memory_block_data **DYND_UNUSED(inout_dataref)) const
 {
@@ -82,8 +82,8 @@ intptr_t unary_expr_type::apply_linear_index(size_t nindices, const irange *DYND
 }
 
 bool unary_expr_type::is_lossless_assignment(
-                const ndt::type& DYND_UNUSED(dst_dt),
-                const ndt::type& DYND_UNUSED(src_dt)) const
+                const ndt::type& DYND_UNUSED(dst_tp),
+                const ndt::type& DYND_UNUSED(src_tp)) const
 {
     return false;
 }

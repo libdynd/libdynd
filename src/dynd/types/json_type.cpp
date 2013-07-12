@@ -94,10 +94,10 @@ ndt::type json_type::get_canonical_type() const
 }
 
 
-bool json_type::is_lossless_assignment(const ndt::type& dst_dt, const ndt::type& src_dt) const
+bool json_type::is_lossless_assignment(const ndt::type& dst_tp, const ndt::type& src_tp) const
 {
-    if (dst_dt.extended() == this) {
-        if (src_dt.get_type_id() == json_type_id) {
+    if (dst_tp.extended() == this) {
+        if (src_tp.get_type_id() == json_type_id) {
             return true;
         } else {
             return false;
@@ -142,7 +142,7 @@ void json_type::metadata_reset_buffers(char *metadata) const
         allocator->reset(md->blockref);
     } else {
         throw runtime_error("can only reset the buffers of a dynd json string "
-                        "dtype if the memory block reference was constructed by default");
+                        "type if the memory block reference was constructed by default");
     }
 }
 
@@ -216,13 +216,13 @@ namespace {
 
 size_t json_type::make_assignment_kernel(
                 hierarchical_kernel *out, size_t offset_out,
-                const ndt::type& dst_dt, const char *dst_metadata,
-                const ndt::type& src_dt, const char *src_metadata,
+                const ndt::type& dst_tp, const char *dst_metadata,
+                const ndt::type& src_tp, const char *src_metadata,
                 kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *ectx) const
 {
-    if (this == dst_dt.extended()) {
-        switch (src_dt.get_type_id()) {
+    if (this == dst_tp.extended()) {
+        switch (src_tp.get_type_id()) {
             case json_type_id: {
                 // Assume the input is valid JSON when copying from json to json types
                 return make_blockref_string_assignment_kernel(out, offset_out,
@@ -239,45 +239,45 @@ size_t json_type::make_assignment_kernel(
                 e->base.destructor = &string_to_json_kernel_extra::destruct;
                 e->dst_metadata = dst_metadata;
                 e->validate = (errmode != assign_error_none);
-                if (src_dt.get_type_id() == string_type_id) {
+                if (src_tp.get_type_id() == string_type_id) {
                     return make_blockref_string_assignment_kernel(
                                     out, offset_out + sizeof(string_to_json_kernel_extra),
                                     dst_metadata, string_encoding_utf_8,
                                     src_metadata,
-                                    static_cast<const base_string_type *>(src_dt.extended())->get_encoding(),
+                                    static_cast<const base_string_type *>(src_tp.extended())->get_encoding(),
                                     kernel_request_single, errmode, ectx);
                 } else {
                     return make_fixedstring_to_blockref_string_assignment_kernel(
                                     out, offset_out + sizeof(string_to_json_kernel_extra),
                                     dst_metadata, string_encoding_utf_8,
-                                    src_dt.get_data_size(),
-                                    static_cast<const base_string_type *>(src_dt.extended())->get_encoding(),
+                                    src_tp.get_data_size(),
+                                    static_cast<const base_string_type *>(src_tp.extended())->get_encoding(),
                                     kernel_request_single, errmode, ectx);
                 }
             }
             default: {
-                if (!src_dt.is_builtin()) {
-                    return src_dt.extended()->make_assignment_kernel(out, offset_out,
-                                    dst_dt, dst_metadata,
-                                    src_dt, src_metadata,
+                if (!src_tp.is_builtin()) {
+                    return src_tp.extended()->make_assignment_kernel(out, offset_out,
+                                    dst_tp, dst_metadata,
+                                    src_tp, src_metadata,
                                     kernreq, errmode, ectx);
                 } else {
                     return make_builtin_to_string_assignment_kernel(out, offset_out,
-                                dst_dt, dst_metadata,
-                                src_dt.get_type_id(),
+                                dst_tp, dst_metadata,
+                                src_tp.get_type_id(),
                                 kernreq, errmode, ectx);
                 }
             }
         }
     } else {
-        if (dst_dt.is_builtin()) {
+        if (dst_tp.is_builtin()) {
             return make_string_to_builtin_assignment_kernel(out, offset_out,
-                            dst_dt.get_type_id(),
-                            src_dt, src_metadata,
+                            dst_tp.get_type_id(),
+                            src_tp, src_metadata,
                             kernreq, errmode, ectx);
         } else {
             stringstream ss;
-            ss << "Cannot assign from " << src_dt << " to " << dst_dt;
+            ss << "Cannot assign from " << src_tp << " to " << dst_tp;
             throw runtime_error(ss.str());
         }
     }

@@ -59,7 +59,7 @@ inline bool offset_is_aligned(size_t offset, size_t alignment) {
     return (offset&(alignment - 1)) == 0;
 }
 
-/** Prints a single scalar of a builtin dtype to the stream */
+/** Prints a single scalar of a builtin type to the stream */
 void print_builtin_scalar(type_id_t type_id, std::ostream& o, const char *data);
 
 /** Special iterdata which broadcasts to any number of additional dimensions */
@@ -86,7 +86,7 @@ namespace ndt {
  * flag, and an element_size. Some data types have additional data
  * which is stored as a dynamically allocated base_type object.
  *
- * For the simple built-in dtypes, no extended data is needed, in
+ * For the simple built-in types, no extended data is needed, in
  * which case this is entirely a value type with no allocated memory.
  *
  */
@@ -303,7 +303,7 @@ public:
      * the function in base_type with the same name for more details.
      */
     type apply_linear_index(size_t nindices, const irange *indices,
-                size_t current_i, const type& root_dt, bool leading_dimension) const;
+                size_t current_i, const type& root_tp, bool leading_dimension) const;
 
     /**
      * Returns the non-expression type that this
@@ -311,7 +311,7 @@ public:
      * printing, etc.
      */
     const type& value_type() const {
-        // Only expression_kind dtypes have different value_type
+        // Only expression_kind types have different value_type
         if (is_builtin() || m_extended->get_kind() != expression_kind) {
             return *this;
         } else {
@@ -321,12 +321,12 @@ public:
     }
 
     /**
-     * For expression types, returns the operand dtype,
-     * which is the source dtype of this dtype's expression.
+     * For expression types, returns the operand type,
+     * which is the source type of this type's expression.
      * This is one link down the expression chain.
      */
     const type& operand_type() const {
-        // Only expression_kind dtypes have different operand_type
+        // Only expression_kind types have different operand_type
         if (is_builtin() || m_extended->get_kind() != expression_kind) {
             return *this;
         } else {
@@ -598,16 +598,16 @@ public:
      *                        This is modified in place to become the metadata for the array data type.
      * \param ndim      Number of iteration dimensions.
      * \param shape     The iteration shape.
-     * \param out_uniform_dtype  This is populated with the type of each iterated element
+     * \param out_uniform_tp  This is populated with the type of each iterated element
      */
     inline void broadcasted_iterdata_construct(iterdata_common *iterdata, const char **inout_metadata,
-                    size_t ndim, const intptr_t* shape, type& out_uniform_dtype) const
+                    size_t ndim, const intptr_t* shape, type& out_uniform_tp) const
     {
         size_t size;
         if (is_builtin()) {
             size = 0;
         } else {
-            size = m_extended->iterdata_construct(iterdata, inout_metadata, ndim, shape, out_uniform_dtype);
+            size = m_extended->iterdata_construct(iterdata, inout_metadata, ndim, shape, out_uniform_tp);
         }
         iterdata_broadcasting_terminator *id = reinterpret_cast<iterdata_broadcasting_terminator *>(
                         reinterpret_cast<char *>(iterdata) + size);

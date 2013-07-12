@@ -199,17 +199,17 @@ namespace {
 
 size_t dynd::make_struct_comparison_kernel(
                 hierarchical_kernel *out, size_t offset_out,
-                const ndt::type& src_dt,
+                const ndt::type& src_tp,
                 const char *src0_metadata, const char *src1_metadata,
                 comparison_type_t comptype,
                 const eval::eval_context *ectx)
 {
-    const base_struct_type *bsd = static_cast<const base_struct_type *>(src_dt.extended());
+    const base_struct_type *bsd = static_cast<const base_struct_type *>(src_tp.extended());
     size_t field_count = bsd->get_field_count();
     if (comptype == comparison_type_sorting_less) {
         if (src0_metadata == src1_metadata ||
-                        src_dt.get_metadata_size() == 0 ||
-                        memcmp(src0_metadata, src1_metadata, src_dt.get_metadata_size()) == 0) {
+                        src_tp.get_metadata_size() == 0 ||
+                        memcmp(src0_metadata, src1_metadata, src_tp.get_metadata_size()) == 0) {
             // The metadata is identical, so can use a more specialized comparison function
             size_t field_kernel_offset = offset_out +
                             sizeof(struct_compare_sorting_less_matching_metadata_kernel) +
@@ -321,7 +321,7 @@ size_t dynd::make_struct_comparison_kernel(
         }
         return field_kernel_offset;
     } else {
-        throw not_comparable_error(src_dt, src_dt, comptype);
+        throw not_comparable_error(src_tp, src_tp, comptype);
     }
 }
 

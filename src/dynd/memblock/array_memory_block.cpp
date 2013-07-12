@@ -18,7 +18,7 @@ void free_array_memory_block(memory_block_data *memblock)
     char *metadata = reinterpret_cast<char *>(preamble + 1);
 
     // Call the data destructor if necessary (i.e. the ndobject owns
-    // the data memory, and the dtype has a data destructor)
+    // the data memory, and the type has a data destructor)
     if (preamble->m_data_reference == NULL &&
                     !preamble->is_builtin_type() &&
                     (preamble->m_type->get_flags()&type_flag_destructor) != 0) {
@@ -132,7 +132,7 @@ memory_block_ptr dynd::shallow_copy_array_memory_block(const memory_block_ptr& n
     // Copy the flags
     result_preamble->m_flags = preamble->m_flags;
 
-    // Clone the dtype
+    // Clone the type
     result_preamble->m_type = preamble->m_type;
     if (!preamble->is_builtin_type()) {
         base_type_incref(preamble->m_type);
@@ -149,7 +149,7 @@ void dynd::array_memory_block_debug_print(const memory_block_data *memblock, std
     if (preamble->m_type != NULL) {
         ndt::type dt = preamble->is_builtin_type() ? ndt::type(preamble->get_type_id())
                         : ndt::type(preamble->m_type, true);
-        o << indent << " dtype: " << dt << "\n";
+        o << indent << " type: " << dt << "\n";
     } else {
         o << indent << " uninitialized ndobject\n";
     }

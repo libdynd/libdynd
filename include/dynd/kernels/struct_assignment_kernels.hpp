@@ -12,13 +12,13 @@
 namespace dynd {
 
 /**
- * Gets a kernel which copies values of the same struct dtype.
+ * Gets a kernel which copies values of the same struct type.
  *
- * \param val_struct_dt  The struct-kind dtype of both source and destination values.
+ * \param val_struct_tp  The struct-kind type of both source and destination values.
  */
 size_t make_struct_identical_assignment_kernel(
                 hierarchical_kernel *out, size_t offset_out,
-                const ndt::type& val_struct_dt,
+                const ndt::type& val_struct_tp,
                 const char *dst_metadata, const char *src_metadata,
                 kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *ectx);
@@ -26,14 +26,14 @@ size_t make_struct_identical_assignment_kernel(
 /**
  * Gets a kernel which converts from one struct to another.
  *
- * \param dst_struct_dt  The struct-kind dtype of the destination.
- * \param src_struct_dt  The struct-kind dtype of the source.
+ * \param dst_struct_tp  The struct-kind dtype of the destination.
+ * \param src_struct_tp  The struct-kind dtype of the source.
  * \param errmode  The error handling mode of the assignment.
  */
 size_t make_struct_assignment_kernel(
                 hierarchical_kernel *out, size_t offset_out,
-                const ndt::type& dst_struct_dt, const char *dst_metadata,
-                const ndt::type& src_struct_dt, const char *src_metadata,
+                const ndt::type& dst_struct_tp, const char *dst_metadata,
+                const ndt::type& src_struct_tp, const char *src_metadata,
                 kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *ectx);
 

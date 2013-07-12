@@ -11,7 +11,7 @@
 namespace dynd {
 
 /**
- * Parses a Blaze datashape, producing the canonical DyND dtype for
+ * Parses a blaze datashape, producing the canonical dynd type for
  * it. The datashape string should be provided as a begin/end pointer
  * pair.
  *

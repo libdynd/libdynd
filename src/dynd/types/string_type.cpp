@@ -30,7 +30,7 @@ string_type::string_type(string_encoding_t encoding)
         case string_encoding_utf_32:
             break;
         default:
-            throw runtime_error("Unrecognized string encoding in string dtype constructor");
+            throw runtime_error("Unrecognized string encoding in string type constructor");
     }
 }
 
@@ -138,8 +138,8 @@ void string_type::get_shape(size_t ndim, size_t i, intptr_t *out_shape, const ch
 }
 
 bool string_type::is_lossless_assignment(
-                const ndt::type& DYND_UNUSED(dst_dt),
-                const ndt::type& DYND_UNUSED(src_dt)) const
+                const ndt::type& DYND_UNUSED(dst_tp),
+                const ndt::type& DYND_UNUSED(src_tp)) const
 {
     // Don't shortcut anything to 'none' error checking, so that
     // decoding errors get caught appropriately.
@@ -184,7 +184,7 @@ void string_type::metadata_reset_buffers(char *metadata) const
         allocator->reset(md->blockref);
     } else {
         throw runtime_error("can only reset the buffers of a dynd string "
-                        "dtype if the memory block reference was constructed by default");
+                        "type if the memory block reference was constructed by default");
     }
 }
 
@@ -217,49 +217,49 @@ void string_type::metadata_debug_print(const char *metadata, std::ostream& o, co
 
 size_t string_type::make_assignment_kernel(
                 hierarchical_kernel *out, size_t offset_out,
-                const ndt::type& dst_dt, const char *dst_metadata,
-                const ndt::type& src_dt, const char *src_metadata,
+                const ndt::type& dst_tp, const char *dst_metadata,
+                const ndt::type& src_tp, const char *src_metadata,
                 kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *ectx) const
 {
-    if (this == dst_dt.extended()) {
-        switch (src_dt.get_type_id()) {
+    if (this == dst_tp.extended()) {
+        switch (src_tp.get_type_id()) {
             case string_type_id: {
                 return make_blockref_string_assignment_kernel(out, offset_out,
                                 dst_metadata, get_encoding(),
-                                src_metadata, static_cast<const base_string_type *>(src_dt.extended())->get_encoding(),
+                                src_metadata, static_cast<const base_string_type *>(src_tp.extended())->get_encoding(),
                                 kernreq, errmode, ectx);
             }
             case fixedstring_type_id: {
                 return make_fixedstring_to_blockref_string_assignment_kernel(out, offset_out,
                                 dst_metadata, get_encoding(),
-                                src_dt.get_data_size(),
-                                static_cast<const base_string_type *>(src_dt.extended())->get_encoding(),
+                                src_tp.get_data_size(),
+                                static_cast<const base_string_type *>(src_tp.extended())->get_encoding(),
                                 kernreq, errmode, ectx);
             }
             default: {
-                if (!src_dt.is_builtin()) {
-                    return src_dt.extended()->make_assignment_kernel(out, offset_out,
-                                    dst_dt, dst_metadata,
-                                    src_dt, src_metadata,
+                if (!src_tp.is_builtin()) {
+                    return src_tp.extended()->make_assignment_kernel(out, offset_out,
+                                    dst_tp, dst_metadata,
+                                    src_tp, src_metadata,
                                     kernreq, errmode, ectx);
                 } else {
                     return make_builtin_to_string_assignment_kernel(out, offset_out,
-                                dst_dt, dst_metadata,
-                                src_dt.get_type_id(),
+                                dst_tp, dst_metadata,
+                                src_tp.get_type_id(),
                                 kernreq, errmode, ectx);
                 }
             }
         }
     } else {
-        if (dst_dt.is_builtin()) {
+        if (dst_tp.is_builtin()) {
             return make_string_to_builtin_assignment_kernel(out, offset_out,
-                            dst_dt.get_type_id(),
-                            src_dt, src_metadata,
+                            dst_tp.get_type_id(),
+                            src_tp, src_metadata,
                             kernreq, errmode, ectx);
         } else {
             stringstream ss;
-            ss << "Cannot assign from " << src_dt << " to " << dst_dt;
+            ss << "Cannot assign from " << src_tp << " to " << dst_tp;
             throw runtime_error(ss.str());
         }
     }

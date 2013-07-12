@@ -121,7 +121,7 @@ static void format_uniform_dim_datashape(std::ostream& o,
         }
         default: {
             stringstream ss;
-            ss << "Datashape formatting for dtype " << dt << " is not yet implemented";
+            ss << "Datashape formatting for dynd type " << dt << " is not yet implemented";
             throw runtime_error(ss.str());
         }
     }

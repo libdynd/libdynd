@@ -27,7 +27,7 @@ struct bytes_type_data {
 };
 
 /**
- * The bytes dtype uses memory_block references to store
+ * The bytes type uses memory_block references to store
  * arbitrarily sized runs of bytes.
  */
 class bytes_type : public base_bytes_type {
@@ -54,7 +54,7 @@ public:
 
     void get_shape(size_t ndim, size_t i, intptr_t *out_shape, const char *metadata) const;
 
-    bool is_lossless_assignment(const ndt::type& dst_dt, const ndt::type& src_dt) const;
+    bool is_lossless_assignment(const ndt::type& dst_tp, const ndt::type& src_tp) const;
 
     bool operator==(const base_type& rhs) const;
 
@@ -67,8 +67,8 @@ public:
 
     size_t make_assignment_kernel(
                     hierarchical_kernel *out, size_t offset_out,
-                    const ndt::type& dst_dt, const char *dst_metadata,
-                    const ndt::type& src_dt, const char *src_metadata,
+                    const ndt::type& dst_tp, const char *dst_metadata,
+                    const ndt::type& src_tp, const char *src_metadata,
                     kernel_request_t kernreq, assign_error_mode errmode,
                     const eval::eval_context *ectx) const;
 

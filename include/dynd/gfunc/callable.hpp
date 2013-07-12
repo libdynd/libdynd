@@ -14,7 +14,7 @@ namespace dynd { namespace gfunc {
  * Generic prototype for a dynd callable object.
  *
  * \param params  The packed parameters for the function call.
- *                This corresponds to a particular cstruct parameters_pack dtype.
+ *                This corresponds to a particular cstruct parameters_pack type.
  * \param extra  Some static memory to help. TODO: switch to auxdata.
  *
  * \returns  A reference to an nd::array.
@@ -25,7 +25,7 @@ typedef array_preamble *(*callable_function_t)(const array_preamble *params, voi
  * Object that provides a dynd-based parameter passing mechanism
  */
 class callable {
-    /** DType for the parameters, must be a cstruct dtype */
+    /** Type for the parameters, must be a cstruct type */
     ndt::type m_parameters_type;
     callable_function_t m_function;
     void *m_extra;
@@ -36,15 +36,15 @@ public:
         : m_parameters_type(), m_function(), m_extra()
     {}
 
-    inline callable(const ndt::type& parameters_dtype, callable_function_t function, void *extra = NULL,
+    inline callable(const ndt::type& parameters_tp, callable_function_t function, void *extra = NULL,
                     int first_default_parameter = std::numeric_limits<int>::max(), const nd::array& default_parameters = nd::array())
-        : m_parameters_type(parameters_dtype), m_function(function), m_extra(extra),
+        : m_parameters_type(parameters_tp), m_function(function), m_extra(extra),
             m_first_default_parameter(first_default_parameter),
             m_default_parameters(default_parameters)
 
     {
         if (!m_default_parameters.is_empty()) {
-            // Make sure the default parameter values have the correct dtype
+            // Make sure the default parameter values have the correct type
             if (m_default_parameters.get_type() != m_parameters_type) {
                 throw std::runtime_error("dynd callable's default arguments have a different type than the parameters");
             }
@@ -55,12 +55,12 @@ public:
         }
     }
 
-    inline void set(const ndt::type& parameters_dtype, callable_function_t function, void *extra = NULL,
+    inline void set(const ndt::type& parameters_tp, callable_function_t function, void *extra = NULL,
                     int first_default_parameter = std::numeric_limits<int>::max(), const nd::array& default_parameters = nd::array())
     {
         if (!default_parameters.is_empty()) {
-            // Make sure the default parameter values have the correct dtype
-            if (default_parameters.get_type() != parameters_dtype) {
+            // Make sure the default parameter values have the correct type
+            if (default_parameters.get_type() != parameters_tp) {
                 throw std::runtime_error("dynd callable's default arguments have a different type than the parameters");
             }
             // Make sure the default parameter values are immutable
@@ -72,7 +72,7 @@ public:
         } else {
             m_default_parameters = nd::array();
         }
-        m_parameters_type = parameters_dtype;
+        m_parameters_type = parameters_tp;
         m_function = function;
         m_extra = extra;
         m_first_default_parameter = first_default_parameter;

@@ -55,7 +55,7 @@ namespace {
         {
             if ((dt.get_flags()&type_flag_destructor) == 0) {
                 stringstream ss;
-                ss << "Cannot create objectarray memory block with dtype " << dt;
+                ss << "Cannot create objectarray memory block with dynd type " << dt;
                 ss << " because it does not have a destructor, use a POD memory block instead";
                 throw runtime_error(ss.str());
             }
@@ -108,7 +108,7 @@ static char *allocate(memory_block_data *self, size_t count)
         // TODO: Add a default data constructor to base_type
         //       as well, with a flag for it
         stringstream ss;
-        ss << "Expected objectarray data to be zeroinit, but is not with dtype " << emb->m_dt;
+        ss << "Expected objectarray data to be zeroinit, but is not with dynd type " << emb->m_dt;
         throw runtime_error(ss.str());
     }
     return result;
@@ -163,7 +163,7 @@ static char *resize(memory_block_data *self, char *previous_allocated, size_t co
         // TODO: Add a default data constructor to base_type
         //       as well, with a flag for it
         stringstream ss;
-        ss << "Expected objectarray data to be zeroinit, but is not with dtype " << emb->m_dt;
+        ss << "Expected objectarray data to be zeroinit, but is not with dynd type " << emb->m_dt;
         throw runtime_error(ss.str());
     }
     return result;
@@ -213,7 +213,7 @@ memory_block_objectarray_allocator_api objectarray_memory_block_allocator_api = 
 void dynd::objectarray_memory_block_debug_print(const memory_block_data *memblock, std::ostream& o, const std::string& indent)
 {
     const objectarray_memory_block *emb = reinterpret_cast<const objectarray_memory_block *>(memblock);
-    o << " dtype: " << emb->m_dt << "\n";
+    o << " type: " << emb->m_dt << "\n";
     o << " stride: " << emb->m_stride << "\n";
     if (!emb->m_finalized) {
         o << indent << " allocated count: " << emb->m_total_allocated_count << "\n";

@@ -59,17 +59,17 @@ public:
  * Creates an assignment kernel for one data value from the
  * src type/metadata to the dst type/metadata. This adds the
  * kernel at the 'out_offset' position in 'out's data, as part
- * of a hierarchy matching the dtype's hierarchy.
+ * of a hierarchy matching the dynd type's hierarchy.
  *
- * This function should always be called with this == dst_dt first,
- * and dtypes which don't support the particular assignment should
+ * This function should always be called with this == dst_tp first,
+ * and types which don't support the particular assignment should
  * then call the corresponding function with this == src_dt.
  *
  * \param out  The hierarchical assignment kernel being constructed.
  * \param offset_out  The offset within 'out'.
- * \param dst_dt  The destination dynd type.
+ * \param dst_tp  The destination dynd type.
  * \param dst_metadata  Metadata for the destination data.
- * \param src_dt  The source dynd type.
+ * \param src_tp  The source dynd type.
  * \param src_metadata  Metadata for the source data
  * \param kernreq  What kind of kernel must be placed in 'out'.
  * \param errmode  The error mode to use for assignments.
@@ -80,8 +80,8 @@ public:
  */
 size_t make_assignment_kernel(
                 hierarchical_kernel *out, size_t offset_out,
-                const ndt::type& dst_dt, const char *dst_metadata,
-                const ndt::type& src_dt, const char *src_metadata,
+                const ndt::type& dst_tp, const char *dst_metadata,
+                const ndt::type& src_tp, const char *src_metadata,
                 kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *ectx);
 

@@ -94,7 +94,7 @@ size_t dynd::make_builtin_type_comparison_kernel(
                 type_id_t src0_type_id, type_id_t src1_type_id,
                 comparison_type_t comptype)
 {
-    // Do a table lookup for the built-in range of dtypes
+    // Do a table lookup for the built-in range of dynd types
     if (src0_type_id >= bool_type_id && src0_type_id <= complex_float64_type_id &&
                     src1_type_id >= bool_type_id && src1_type_id <= complex_float64_type_id &&
                     comptype >= 0 && comptype <= comparison_type_greater) {

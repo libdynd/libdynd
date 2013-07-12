@@ -12,7 +12,7 @@ namespace dynd {
 
 
 /**
- * Base class for all struct dtypes. If a dtype
+ * Base class for all struct types. If a type
  * has kind struct_kind, it must be a subclass of
  * base_struct_type.
  */

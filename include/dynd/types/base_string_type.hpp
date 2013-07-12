@@ -13,7 +13,7 @@ namespace dynd {
 
 
 /**
- * Base class for all string dtypes. If a dtype
+ * Base class for all string types. If a type
  * has kind string_kind, it must be a subclass of
  * base_string_type.
  */
@@ -42,7 +42,7 @@ public:
         set_utf8_string(metadata, data, errmode, utf8_str.data(), utf8_str.data() + utf8_str.size());
     }
 
-    // String dtypes stop the iterdata chain
+    // String types stop the iterdata chain
     // TODO: Maybe it should be more flexible?
     size_t get_iterdata_size(size_t ndim) const;
 

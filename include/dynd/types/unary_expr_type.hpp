@@ -12,14 +12,14 @@
 namespace dynd {
 
 /**
- * The unary_expr dtype is like the expr dtype, but
+ * The unary_expr type is like the expr type, but
  * special-cased for unary operations. These specializations
  * are:
  *
  *  - The operand type is just the single operand, instead
  *    of being a pointer to the operand as is done in the
- *    expr dtype.
- *  - Elementwise unary expr dtypes are applied at the
+ *    expr type.
+ *  - Elementwise unary expr types are applied at the
  *    element level, so it can efficiently interoperate
  *    with other elementwise expression types such as
  *    type conversion, byte swapping, etc.
@@ -46,15 +46,15 @@ public:
     void print_type(std::ostream& o) const;
 
     ndt::type apply_linear_index(size_t nindices, const irange *indices,
-                size_t current_i, const ndt::type& root_dt, bool leading_dimension) const;
+                size_t current_i, const ndt::type& root_tp, bool leading_dimension) const;
     intptr_t apply_linear_index(size_t nindices, const irange *indices, const char *metadata,
-                    const ndt::type& result_dtype, char *out_metadata,
+                    const ndt::type& result_tp, char *out_metadata,
                     memory_block_data *embedded_reference,
-                    size_t current_i, const ndt::type& root_dt,
+                    size_t current_i, const ndt::type& root_tp,
                     bool leading_dimension, char **inout_data,
                     memory_block_data **inout_dataref) const;
 
-    bool is_lossless_assignment(const ndt::type& dst_dt, const ndt::type& src_dt) const;
+    bool is_lossless_assignment(const ndt::type& dst_tp, const ndt::type& src_tp) const;
 
     bool operator==(const base_type& rhs) const;
 
@@ -77,13 +77,13 @@ public:
 
 namespace ndt {
     /**
-     * Makes a unary expr dtype.
+     * Makes a unary expr type.
      */
-    inline ndt::type make_unary_expr(const ndt::type& value_type,
-                    const ndt::type& operand_type,
+    inline ndt::type make_unary_expr(const ndt::type& value_tp,
+                    const ndt::type& operand_tp,
                     const expr_kernel_generator *kgen)
     {
-        return ndt::type(new unary_expr_type(value_type, operand_type, kgen), false);
+        return ndt::type(new unary_expr_type(value_tp, operand_tp, kgen), false);
     }
 }
 

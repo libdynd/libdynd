@@ -33,27 +33,27 @@ class array_iter<1, 0> {
     char *m_data;
     const char *m_metadata;
     iterdata_common *m_iterdata;
-    ndt::type m_array_type, m_uniform_dtype;
+    ndt::type m_array_tp, m_uniform_tp;
 
-    inline void init(const ndt::type& dt0, const char *metadata0, char *data0)
+    inline void init(const ndt::type& tp0, const char *metadata0, char *data0)
     {
-        m_array_type = dt0;
-        m_iter_ndim = m_array_type.get_undim();
+        m_array_tp = tp0;
+        m_iter_ndim = m_array_tp.get_undim();
         m_itersize = 1;
         if (m_iter_ndim != 0) {
             m_iterindex.init(m_iter_ndim);
             memset(m_iterindex.get(), 0, sizeof(intptr_t) * m_iter_ndim);
             m_itershape.init(m_iter_ndim);
-            m_array_type.extended()->get_shape(m_iter_ndim, 0, m_itershape.get(), metadata0);
+            m_array_tp.extended()->get_shape(m_iter_ndim, 0, m_itershape.get(), metadata0);
 
-            size_t iterdata_size = m_array_type.extended()->get_iterdata_size(m_iter_ndim);
+            size_t iterdata_size = m_array_tp.extended()->get_iterdata_size(m_iter_ndim);
             m_iterdata = reinterpret_cast<iterdata_common *>(malloc(iterdata_size));
             if (!m_iterdata) {
                 throw std::bad_alloc();
             }
             m_metadata = metadata0;
-            m_array_type.iterdata_construct(m_iterdata,
-                            &m_metadata, m_iter_ndim, m_itershape.get(), m_uniform_dtype);
+            m_array_tp.iterdata_construct(m_iterdata,
+                            &m_metadata, m_iter_ndim, m_itershape.get(), m_uniform_tp);
             m_data = m_iterdata->reset(m_iterdata, data0, m_iter_ndim);
 
             for (size_t i = 0, i_end = m_iter_ndim; i != i_end; ++i) {
@@ -61,7 +61,7 @@ class array_iter<1, 0> {
             }
         } else {
             m_iterdata = NULL;
-            m_uniform_dtype = m_array_type;
+            m_uniform_tp = m_array_tp;
             m_data = data0;
             m_metadata = metadata0;
         }
@@ -73,7 +73,7 @@ public:
 
     ~array_iter() {
         if (m_iterdata) {
-            m_array_type.extended()->iterdata_destruct(m_iterdata, m_iter_ndim);
+            m_array_tp.extended()->iterdata_destruct(m_iterdata, m_iter_ndim);
             free(m_iterdata);
         }
     }
@@ -112,7 +112,7 @@ public:
     }
 
     const ndt::type& get_uniform_dtype() const {
-        return m_uniform_dtype;
+        return m_uniform_tp;
     }
 };
 
@@ -125,27 +125,27 @@ class array_iter<0, 1> {
     const char *m_data;
     const char *m_metadata;
     iterdata_common *m_iterdata;
-    ndt::type m_array_type, m_uniform_dtype;
+    ndt::type m_array_tp, m_uniform_tp;
 
-    inline void init(const ndt::type& dt0, const char *metadata0, const char *data0)
+    inline void init(const ndt::type& tp0, const char *metadata0, const char *data0)
     {
-        m_array_type = dt0;
-        m_iter_ndim = m_array_type.get_undim();
+        m_array_tp = tp0;
+        m_iter_ndim = m_array_tp.get_undim();
         m_itersize = 1;
         if (m_iter_ndim != 0) {
             m_iterindex.init(m_iter_ndim);
             memset(m_iterindex.get(), 0, sizeof(intptr_t) * m_iter_ndim);
             m_itershape.init(m_iter_ndim);
-            m_array_type.extended()->get_shape(m_iter_ndim, 0, m_itershape.get(), metadata0);
+            m_array_tp.extended()->get_shape(m_iter_ndim, 0, m_itershape.get(), metadata0);
 
-            size_t iterdata_size = m_array_type.extended()->get_iterdata_size(m_iter_ndim);
+            size_t iterdata_size = m_array_tp.extended()->get_iterdata_size(m_iter_ndim);
             m_iterdata = reinterpret_cast<iterdata_common *>(malloc(iterdata_size));
             if (!m_iterdata) {
                 throw std::bad_alloc();
             }
             m_metadata = metadata0;
-            m_array_type.iterdata_construct(m_iterdata,
-                            &m_metadata, m_iter_ndim, m_itershape.get(), m_uniform_dtype);
+            m_array_tp.iterdata_construct(m_iterdata,
+                            &m_metadata, m_iter_ndim, m_itershape.get(), m_uniform_tp);
             m_data = m_iterdata->reset(m_iterdata, const_cast<char *>(data0), m_iter_ndim);
 
             for (size_t i = 0, i_end = m_iter_ndim; i != i_end; ++i) {
@@ -153,14 +153,14 @@ class array_iter<0, 1> {
             }
         } else {
             m_iterdata = NULL;
-            m_uniform_dtype = m_array_type;
+            m_uniform_tp = m_array_tp;
             m_data = data0;
             m_metadata = metadata0;
         }
     }
 public:
-    array_iter(const ndt::type& dt0, const char *metadata0, const char *data0) {
-        init(dt0, metadata0, data0);
+    array_iter(const ndt::type& tp0, const char *metadata0, const char *data0) {
+        init(tp0, metadata0, data0);
     }
 
     array_iter(const nd::array& op0) {
@@ -169,7 +169,7 @@ public:
 
     ~array_iter() {
         if (m_iterdata) {
-            m_array_type.extended()->iterdata_destruct(m_iterdata, m_iter_ndim);
+            m_array_tp.extended()->iterdata_destruct(m_iterdata, m_iter_ndim);
             free(m_iterdata);
         }
     }
@@ -208,7 +208,7 @@ public:
     }
 
     const ndt::type& get_uniform_dtype() const {
-        return m_uniform_dtype;
+        return m_uniform_tp;
     }
 };
 
@@ -221,26 +221,26 @@ class array_iter<1, 1> {
     char *m_data[2];
     const char *m_metadata[2];
     iterdata_common *m_iterdata[2];
-    ndt::type m_array_type[2], m_uniform_dtype[2];
+    ndt::type m_array_tp[2], m_uniform_tp[2];
 
-    inline void init(const ndt::type& dt0, const char *metadata0, char *data0,
-                    const ndt::type& dt1, const char *metadata1, const char *data1)
+    inline void init(const ndt::type& tp0, const char *metadata0, char *data0,
+                    const ndt::type& tp1, const char *metadata1, const char *data1)
     {
-        m_array_type[0] = dt0;
-        m_array_type[1] = dt1;
+        m_array_tp[0] = tp0;
+        m_array_tp[1] = tp1;
         m_itersize = 1;
         // The destination shape
-        m_iter_ndim[0] = m_array_type[0].get_undim();
+        m_iter_ndim[0] = m_array_tp[0].get_undim();
         m_itershape.init(m_iter_ndim[0]);
         if (m_iter_ndim[0] > 0) {
-            m_array_type[0].extended()->get_shape(m_iter_ndim[0], 0, m_itershape.get(), metadata0);
+            m_array_tp[0].extended()->get_shape(m_iter_ndim[0], 0, m_itershape.get(), metadata0);
         }
         // The source shape
         dimvector src_shape;
-        m_iter_ndim[1] = m_array_type[1].get_undim();
+        m_iter_ndim[1] = m_array_tp[1].get_undim();
         src_shape.init(m_iter_ndim[1]);
         if (m_iter_ndim[1] > 0) {
-            m_array_type[1].extended()->get_shape(m_iter_ndim[1], 0, src_shape.get(), metadata1);
+            m_array_tp[1].extended()->get_shape(m_iter_ndim[1], 0, src_shape.get(), metadata1);
         }
         // Check that the source shape broadcasts ok
         if (!shape_can_broadcast(m_iter_ndim[0], m_itershape.get(),
@@ -253,25 +253,25 @@ class array_iter<1, 1> {
             m_iterindex.init(m_iter_ndim[0]);
             memset(m_iterindex.get(), 0, sizeof(intptr_t) * m_iter_ndim[0]);
             // The destination iterdata
-            size_t iterdata_size = m_array_type[0].get_iterdata_size(m_iter_ndim[0]);
+            size_t iterdata_size = m_array_tp[0].get_iterdata_size(m_iter_ndim[0]);
             m_iterdata[0] = reinterpret_cast<iterdata_common *>(malloc(iterdata_size));
             if (!m_iterdata[0]) {
                 throw std::bad_alloc();
             }
             m_metadata[0] = metadata0;
-            m_array_type[0].iterdata_construct(m_iterdata[0],
-                            &m_metadata[0], m_iter_ndim[0], m_itershape.get(), m_uniform_dtype[0]);
+            m_array_tp[0].iterdata_construct(m_iterdata[0],
+                            &m_metadata[0], m_iter_ndim[0], m_itershape.get(), m_uniform_tp[0]);
             m_data[0] = m_iterdata[0]->reset(m_iterdata[0], data0, m_iter_ndim[0]);
             // The source iterdata
-            iterdata_size = m_array_type[1].get_broadcasted_iterdata_size(m_iter_ndim[1]);
+            iterdata_size = m_array_tp[1].get_broadcasted_iterdata_size(m_iter_ndim[1]);
             m_iterdata[1] = reinterpret_cast<iterdata_common *>(malloc(iterdata_size));
             if (!m_iterdata[1]) {
                 throw std::bad_alloc();
             }
             m_metadata[1] = metadata1;
-            m_array_type[1].broadcasted_iterdata_construct(m_iterdata[1],
+            m_array_tp[1].broadcasted_iterdata_construct(m_iterdata[1],
                             &m_metadata[1], m_iter_ndim[1],
-                            m_itershape.get() + (m_iter_ndim[0] - m_iter_ndim[1]), m_uniform_dtype[1]);
+                            m_itershape.get() + (m_iter_ndim[0] - m_iter_ndim[1]), m_uniform_tp[1]);
             m_data[1] = m_iterdata[1]->reset(m_iterdata[1], const_cast<char *>(data1), m_iter_ndim[0]);
 
             for (size_t i = 0, i_end = m_iter_ndim[0]; i != i_end; ++i) {
@@ -280,8 +280,8 @@ class array_iter<1, 1> {
         } else {
             m_iterdata[0] = NULL;
             m_iterdata[1] = NULL;
-            m_uniform_dtype[0] = m_array_type[0];
-            m_uniform_dtype[1] = m_array_type[1];
+            m_uniform_tp[0] = m_array_tp[0];
+            m_uniform_tp[1] = m_array_tp[1];
             m_data[0] = data0;
             m_data[1] = const_cast<char *>(data1);
             m_metadata[0] = metadata0;
@@ -289,9 +289,9 @@ class array_iter<1, 1> {
         }
     }
 public:
-    array_iter(const ndt::type& dt0, const char *metadata0, char *data0,
-                    const ndt::type& dt1, const char *metadata1, const char *data1) {
-        init(dt0, metadata0, data0, dt1, metadata1, data1);
+    array_iter(const ndt::type& tp0, const char *metadata0, char *data0,
+                    const ndt::type& tp1, const char *metadata1, const char *data1) {
+        init(tp0, metadata0, data0, tp1, metadata1, data1);
     }
     array_iter(const nd::array& op0, const nd::array& op1) {
         init(op0.get_type(), op0.get_ndo_meta(), op0.get_readwrite_originptr(),
@@ -300,11 +300,11 @@ public:
 
     ~array_iter() {
         if (m_iterdata[0]) {
-            m_array_type[0].iterdata_destruct(m_iterdata[0], m_iter_ndim[0]);
+            m_array_tp[0].iterdata_destruct(m_iterdata[0], m_iter_ndim[0]);
             free(m_iterdata[0]);
         }
         if (m_iterdata[1]) {
-            m_array_type[1].iterdata_destruct(m_iterdata[1], m_iter_ndim[1]);
+            m_array_tp[1].iterdata_destruct(m_iterdata[1], m_iter_ndim[1]);
             free(m_iterdata[1]);
         }
     }
@@ -358,7 +358,7 @@ public:
 
     template<int K>
     inline typename enable_if<detail::is_value_within_bounds<K, 0, 2>::value, const ndt::type&>::type get_uniform_dtype() const {
-        return m_uniform_dtype[K];
+        return m_uniform_tp[K];
     }
 };
 
@@ -371,12 +371,12 @@ class array_iter<0, 2> {
     char *m_data[2];
     const char *m_metadata[2];
     iterdata_common *m_iterdata[2];
-    ndt::type m_array_type[2], m_uniform_dtype[2];
+    ndt::type m_array_tp[2], m_uniform_tp[2];
 public:
     array_iter(const nd::array& op0, const nd::array& op1) {
         nd::array ops[2] = {op0, op1};
-        m_array_type[0] = op0.get_type();
-        m_array_type[1] = op1.get_type();
+        m_array_tp[0] = op0.get_type();
+        m_array_tp[1] = op1.get_type();
         m_itersize = 1;
         shortvector<int> axis_perm; // TODO: Use this to affect the iteration order
         broadcast_input_shapes(2, ops, m_iter_ndim, m_itershape, axis_perm);
@@ -386,16 +386,16 @@ public:
             memset(m_iterindex.get(), 0, sizeof(intptr_t) * m_iter_ndim);
             // The op iterdata
             for (int i = 0; i < 2; ++i) {
-                size_t iter_ndim_i = m_array_type[i].get_undim();
-                size_t iterdata_size = m_array_type[i].get_broadcasted_iterdata_size(iter_ndim_i);
+                size_t iter_ndim_i = m_array_tp[i].get_undim();
+                size_t iterdata_size = m_array_tp[i].get_broadcasted_iterdata_size(iter_ndim_i);
                 m_iterdata[i] = reinterpret_cast<iterdata_common *>(malloc(iterdata_size));
                 if (!m_iterdata[i]) {
                     throw std::bad_alloc();
                 }
                 m_metadata[i] = ops[i].get_ndo_meta();
-                m_array_type[i].broadcasted_iterdata_construct(m_iterdata[i],
+                m_array_tp[i].broadcasted_iterdata_construct(m_iterdata[i],
                                 &m_metadata[i], iter_ndim_i,
-                                m_itershape.get() + (m_iter_ndim - iter_ndim_i), m_uniform_dtype[i]);
+                                m_itershape.get() + (m_iter_ndim - iter_ndim_i), m_uniform_tp[i]);
                 m_data[i] = m_iterdata[i]->reset(m_iterdata[i], ops[i].get_ndo()->m_data_pointer, m_iter_ndim);
             }
 
@@ -405,7 +405,7 @@ public:
         } else {
             for (size_t i = 0; i < 2; ++i) {
                 m_iterdata[i] = NULL;
-                m_uniform_dtype[i] = m_array_type[i];
+                m_uniform_tp[i] = m_array_tp[i];
                 m_data[i] = ops[i].get_ndo()->m_data_pointer;
                 m_metadata[i] = ops[i].get_ndo_meta();
             }
@@ -415,7 +415,7 @@ public:
     ~array_iter() {
         for (size_t i = 0; i < 2; ++i) {
             if (m_iterdata[i]) {
-                m_array_type[i].iterdata_destruct(m_iterdata[i], m_array_type[i].get_undim());
+                m_array_tp[i].iterdata_destruct(m_iterdata[i], m_array_tp[i].get_undim());
                 free(m_iterdata[i]);
             }
         }
@@ -463,7 +463,7 @@ public:
 
     template<int K>
     inline typename enable_if<detail::is_value_within_bounds<K, 0, 2>::value, const ndt::type&>::type get_uniform_dtype() const {
-        return m_uniform_dtype[K];
+        return m_uniform_tp[K];
     }
 };
 
@@ -476,45 +476,45 @@ class array_iter<1, 3> {
     char *m_data[4];
     const char *m_metadata[4];
     iterdata_common *m_iterdata[4];
-    ndt::type m_array_type[4], m_uniform_dtype[4];
+    ndt::type m_array_tp[4], m_uniform_tp[4];
 public:
     // Constructor which creates the output based on the input's broadcast shape
     array_iter(const ndt::type& op0_dtype, nd::array& out_op0, const nd::array& op1, const nd::array& op2, const nd::array& op3) {
         create_broadcast_result(op0_dtype, op1, op2, op3, out_op0, m_iter_ndim[0], m_itershape);
         nd::array ops[4] = {out_op0, op1, op2, op3};
-        m_array_type[0] = out_op0.get_type();
-        m_array_type[1] = op1.get_type();
-        m_array_type[2] = op2.get_type();
-        m_array_type[3] = op3.get_type();
+        m_array_tp[0] = out_op0.get_type();
+        m_array_tp[1] = op1.get_type();
+        m_array_tp[2] = op2.get_type();
+        m_array_tp[3] = op3.get_type();
         m_itersize = 1;
-        m_iter_ndim[1] = m_array_type[1].get_undim();
-        m_iter_ndim[2] = m_array_type[2].get_undim();
-        m_iter_ndim[3] = m_array_type[3].get_undim();
+        m_iter_ndim[1] = m_array_tp[1].get_undim();
+        m_iter_ndim[2] = m_array_tp[2].get_undim();
+        m_iter_ndim[3] = m_array_tp[3].get_undim();
         // Allocate and initialize the iterdata
         if (m_iter_ndim[0] != 0) {
             m_iterindex.init(m_iter_ndim[0]);
             memset(m_iterindex.get(), 0, sizeof(intptr_t) * m_iter_ndim[0]);
             // The destination iterdata
-            size_t iterdata_size = m_array_type[0].get_iterdata_size(m_iter_ndim[0]);
+            size_t iterdata_size = m_array_tp[0].get_iterdata_size(m_iter_ndim[0]);
             m_iterdata[0] = reinterpret_cast<iterdata_common *>(malloc(iterdata_size));
             if (!m_iterdata[0]) {
                 throw std::bad_alloc();
             }
             m_metadata[0] = out_op0.get_ndo_meta();
-            m_array_type[0].iterdata_construct(m_iterdata[0],
-                            &m_metadata[0], m_iter_ndim[0], m_itershape.get(), m_uniform_dtype[0]);
+            m_array_tp[0].iterdata_construct(m_iterdata[0],
+                            &m_metadata[0], m_iter_ndim[0], m_itershape.get(), m_uniform_tp[0]);
             m_data[0] = m_iterdata[0]->reset(m_iterdata[0], out_op0.get_readwrite_originptr(), m_iter_ndim[0]);
             // The op iterdata
             for (int i = 1; i < 4; ++i) {
-                iterdata_size = m_array_type[i].get_broadcasted_iterdata_size(m_iter_ndim[i]);
+                iterdata_size = m_array_tp[i].get_broadcasted_iterdata_size(m_iter_ndim[i]);
                 m_iterdata[i] = reinterpret_cast<iterdata_common *>(malloc(iterdata_size));
                 if (!m_iterdata[i]) {
                     throw std::bad_alloc();
                 }
                 m_metadata[i] = ops[i].get_ndo_meta();
-                m_array_type[i].broadcasted_iterdata_construct(m_iterdata[i],
+                m_array_tp[i].broadcasted_iterdata_construct(m_iterdata[i],
                                 &m_metadata[i], m_iter_ndim[i],
-                                m_itershape.get() + (m_iter_ndim[0] - m_iter_ndim[i]), m_uniform_dtype[i]);
+                                m_itershape.get() + (m_iter_ndim[0] - m_iter_ndim[i]), m_uniform_tp[i]);
                 m_data[i] = m_iterdata[i]->reset(m_iterdata[i], ops[i].get_ndo()->m_data_pointer, m_iter_ndim[0]);
             }
 
@@ -524,7 +524,7 @@ public:
         } else {
             for (size_t i = 0; i < 4; ++i) {
                 m_iterdata[i] = NULL;
-                m_uniform_dtype[i] = m_array_type[i];
+                m_uniform_tp[i] = m_array_tp[i];
                 m_data[i] = ops[i].get_ndo()->m_data_pointer;
                 m_metadata[i] = ops[i].get_ndo_meta();
             }
@@ -534,7 +534,7 @@ public:
     ~array_iter() {
         for (size_t i = 0; i < 4; ++i) {
             if (m_iterdata[i]) {
-                m_array_type[i].iterdata_destruct(m_iterdata[i], m_iter_ndim[i]);
+                m_array_tp[i].iterdata_destruct(m_iterdata[i], m_iter_ndim[i]);
                 free(m_iterdata[i]);
             }
         }
@@ -590,7 +590,7 @@ public:
 
     template<int K>
     inline typename enable_if<detail::is_value_within_bounds<K, 0, 4>::value, const ndt::type&>::type get_uniform_dtype() const {
-        return m_uniform_dtype[K];
+        return m_uniform_tp[K];
     }
 };
 

@@ -298,65 +298,65 @@ TEST(ArithmeticOp, Buffered) {
     // Basic case with no buffering
     a = nd::array(2) * nd::array(3);
     EXPECT_EQ(elwise_node_category, a.get_node()->get_category());
-    EXPECT_EQ(ndt::make_type<int>(), a.get_node()->get_dtype());
-    EXPECT_EQ(ndt::make_type<int>(), a.get_node()->get_opnode(0)->get_dtype());
-    EXPECT_EQ(ndt::make_type<int>(), a.get_node()->get_opnode(1)->get_dtype());
+    EXPECT_EQ(ndt::make_type<int>(), a.get_node()->get_type());
+    EXPECT_EQ(ndt::make_type<int>(), a.get_node()->get_opnode(0)->get_type());
+    EXPECT_EQ(ndt::make_type<int>(), a.get_node()->get_opnode(1)->get_type());
     EXPECT_EQ(6, a.as<int>());
 
     // Buffering the first operand
     a = nd::array(2) * nd::array(3.f);
     EXPECT_EQ(elwise_node_category, a.get_node()->get_category());
-    EXPECT_EQ(ndt::make_type<float>(), a.get_node()->get_dtype());
-    EXPECT_EQ((ndt::make_convert<float, int>()), a.get_node()->get_opnode(0)->get_dtype());
-    EXPECT_EQ(ndt::make_type<float>(), a.get_node()->get_opnode(1)->get_dtype());
+    EXPECT_EQ(ndt::make_type<float>(), a.get_node()->get_type());
+    EXPECT_EQ((ndt::make_convert<float, int>()), a.get_node()->get_opnode(0)->get_type());
+    EXPECT_EQ(ndt::make_type<float>(), a.get_node()->get_opnode(1)->get_type());
     EXPECT_EQ(6, a.as<float>());
 
     // Buffering the second operand
     a = nd::array(2.) * nd::array(3);
     EXPECT_EQ(elwise_node_category, a.get_node()->get_category());
-    EXPECT_EQ(ndt::make_type<double>(), a.get_node()->get_dtype());
-    EXPECT_EQ(ndt::make_type<double>(), a.get_node()->get_opnode(0)->get_dtype());
-    EXPECT_EQ((ndt::make_convert<double, int>()), a.get_node()->get_opnode(1)->get_dtype());
+    EXPECT_EQ(ndt::make_type<double>(), a.get_node()->get_type());
+    EXPECT_EQ(ndt::make_type<double>(), a.get_node()->get_opnode(0)->get_type());
+    EXPECT_EQ((ndt::make_convert<double, int>()), a.get_node()->get_opnode(1)->get_type());
     EXPECT_EQ(6, a.as<float>());
 
     // Buffering the output
-    a = (nd::array(2) * nd::array(3)).as_dtype<float>();
+    a = (nd::array(2) * nd::array(3)).as<float>();
     EXPECT_EQ(elwise_node_category, a.get_node()->get_category());
-    EXPECT_EQ((ndt::make_convert<float, int>()), a.get_node()->get_dtype());
-    EXPECT_EQ(ndt::make_type<int>(), a.get_node()->get_opnode(0)->get_dtype());
-    EXPECT_EQ(ndt::make_type<int>(), a.get_node()->get_opnode(1)->get_dtype());
+    EXPECT_EQ((ndt::make_convert<float, int>()), a.get_node()->get_type());
+    EXPECT_EQ(ndt::make_type<int>(), a.get_node()->get_opnode(0)->get_type());
+    EXPECT_EQ(ndt::make_type<int>(), a.get_node()->get_opnode(1)->get_type());
     EXPECT_EQ(6, a.as<float>());
 
     // Buffering both operands
-    a = nd::array(2) * nd::array(3u).as_dtype<float>();
+    a = nd::array(2) * nd::array(3u).as<float>();
     EXPECT_EQ(elwise_node_category, a.get_node()->get_category());
-    EXPECT_EQ(ndt::make_type<float>(), a.get_node()->get_dtype());
-    EXPECT_EQ((ndt::make_convert<float, int>()), a.get_node()->get_opnode(0)->get_dtype());
-    EXPECT_EQ((ndt::make_convert<float, unsigned int>()), a.get_node()->get_opnode(1)->get_dtype());
+    EXPECT_EQ(ndt::make_type<float>(), a.get_node()->get_type());
+    EXPECT_EQ((ndt::make_convert<float, int>()), a.get_node()->get_opnode(0)->get_type());
+    EXPECT_EQ((ndt::make_convert<float, unsigned int>()), a.get_node()->get_opnode(1)->get_type());
     EXPECT_EQ(6, a.as<float>());
 
     // Buffering the first operand and the output
-    a = (nd::array(2) * nd::array(3.f)).as_dtype<double>();
+    a = (nd::array(2) * nd::array(3.f)).as<double>();
     EXPECT_EQ(elwise_node_category, a.get_node()->get_category());
-    EXPECT_EQ((ndt::make_convert<double, float>()), a.get_node()->get_dtype());
-    EXPECT_EQ((ndt::make_convert<float, int>()), a.get_node()->get_opnode(0)->get_dtype());
-    EXPECT_EQ(ndt::make_type<float>(), a.get_node()->get_opnode(1)->get_dtype());
+    EXPECT_EQ((ndt::make_convert<double, float>()), a.get_node()->get_type());
+    EXPECT_EQ((ndt::make_convert<float, int>()), a.get_node()->get_opnode(0)->get_type());
+    EXPECT_EQ(ndt::make_type<float>(), a.get_node()->get_opnode(1)->get_type());
     EXPECT_EQ(6, a.as<double>());
 
     // Buffering the second operand and the output
-    a = (nd::array(2.f) * nd::array(3)).as_dtype<double>();
+    a = (nd::array(2.f) * nd::array(3)).as<double>();
     EXPECT_EQ(elwise_node_category, a.get_node()->get_category());
-    EXPECT_EQ((ndt::make_convert<double, float>()), a.get_node()->get_dtype());
-    EXPECT_EQ(ndt::make_type<float>(), a.get_node()->get_opnode(0)->get_dtype());
-    EXPECT_EQ((ndt::make_convert<float, int>()), a.get_node()->get_opnode(1)->get_dtype());
+    EXPECT_EQ((ndt::make_convert<double, float>()), a.get_node()->get_type());
+    EXPECT_EQ(ndt::make_type<float>(), a.get_node()->get_opnode(0)->get_type());
+    EXPECT_EQ((ndt::make_convert<float, int>()), a.get_node()->get_opnode(1)->get_type());
     EXPECT_EQ(6, a.as<double>());
 
     // Buffering both operands and the output
-    a = (nd::array(2) * nd::array(3u).as_dtype<float>()).as_dtype<double>();
+    a = (nd::array(2) * nd::array(3u).as<float>()).as<double>();
     EXPECT_EQ(elwise_node_category, a.get_node()->get_category());
-    EXPECT_EQ((ndt::make_convert<double, float>()), a.get_node()->get_dtype());
-    EXPECT_EQ((ndt::make_convert<float, int>()), a.get_node()->get_opnode(0)->get_dtype());
-    EXPECT_EQ((ndt::make_convert<float, unsigned int>()), a.get_node()->get_opnode(1)->get_dtype());
+    EXPECT_EQ((ndt::make_convert<double, float>()), a.get_node()->get_type());
+    EXPECT_EQ((ndt::make_convert<float, int>()), a.get_node()->get_opnode(0)->get_type());
+    EXPECT_EQ((ndt::make_convert<float, unsigned int>()), a.get_node()->get_opnode(1)->get_type());
     EXPECT_EQ(6, a.as<double>());
 }
 */

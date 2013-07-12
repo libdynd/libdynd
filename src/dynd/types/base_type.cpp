@@ -10,7 +10,7 @@
 using namespace std;
 using namespace dynd;
 
-// Default destructor for the extended dtype does nothing
+// Default destructor for the extended type does nothing
 base_type::~base_type()
 {
 }
@@ -43,18 +43,18 @@ bool base_type::is_unique_data_owner(const char *DYND_UNUSED(metadata)) const
 void base_type::transform_child_types(type_transform_fn_t DYND_UNUSED(transform_fn), void *DYND_UNUSED(extra),
                 ndt::type& out_transformed_type, bool& DYND_UNUSED(out_was_transformed)) const
 {
-    // Default to behavior with no child dtypes
+    // Default to behavior with no child types
     out_transformed_type = ndt::type(this, true);
 }
 
 ndt::type base_type::get_canonical_type() const
 {
-    // Default to no transformation of the dtype
+    // Default to no transformation of the type
     return ndt::type(this, true);
 }
 
 ndt::type base_type::apply_linear_index(size_t nindices, const irange *DYND_UNUSED(indices),
-                size_t current_i, const ndt::type& DYND_UNUSED(root_dt), bool DYND_UNUSED(leading_dimension)) const
+                size_t current_i, const ndt::type& DYND_UNUSED(root_tp), bool DYND_UNUSED(leading_dimension)) const
 {
     // Default to scalar behavior
     if (nindices == 0) {
@@ -65,9 +65,9 @@ ndt::type base_type::apply_linear_index(size_t nindices, const irange *DYND_UNUS
 }
 
 intptr_t base_type::apply_linear_index(size_t nindices, const irange *DYND_UNUSED(indices), const char *metadata,
-                const ndt::type& DYND_UNUSED(result_dtype), char *out_metadata,
+                const ndt::type& DYND_UNUSED(result_tp), char *out_metadata,
                 memory_block_data *embedded_reference,
-                size_t current_i, const ndt::type& DYND_UNUSED(root_dt),
+                size_t current_i, const ndt::type& DYND_UNUSED(root_tp),
                 bool DYND_UNUSED(leading_dimension), char **DYND_UNUSED(inout_data),
                 memory_block_data **DYND_UNUSED(inout_dataref)) const
 {
@@ -123,11 +123,11 @@ axis_order_classification_t base_type::classify_axis_order(
 }
 
 
-bool base_type::is_lossless_assignment(const ndt::type& dst_dt,
-                const ndt::type& src_dt) const
+bool base_type::is_lossless_assignment(const ndt::type& dst_tp,
+                const ndt::type& src_tp) const
 {
     // Default to just an equality check
-    return dst_dt == src_dt;
+    return dst_tp == src_tp;
 }
 
 size_t base_type::get_default_data_size(size_t DYND_UNUSED(ndim),
@@ -206,7 +206,7 @@ size_t base_type::get_iterdata_size(size_t DYND_UNUSED(ndim)) const
 }
 
 size_t base_type::iterdata_construct(iterdata_common *DYND_UNUSED(iterdata), const char **DYND_UNUSED(inout_metadata),
-                size_t DYND_UNUSED(ndim), const intptr_t* DYND_UNUSED(shape), ndt::type& DYND_UNUSED(out_uniform_dtype)) const
+                size_t DYND_UNUSED(ndim), const intptr_t* DYND_UNUSED(shape), ndt::type& DYND_UNUSED(out_uniform_tp)) const
 {
     stringstream ss;
     ss << "iterdata_default_construct: dynd type " << ndt::type(this, true) << " is not uniformly iterable";
@@ -222,17 +222,17 @@ size_t base_type::iterdata_destruct(iterdata_common *DYND_UNUSED(iterdata), size
 
 size_t base_type::make_assignment_kernel(
                 hierarchical_kernel *DYND_UNUSED(out), size_t DYND_UNUSED(offset_out),
-                const ndt::type& dst_dt, const char *DYND_UNUSED(dst_metadata),
-                const ndt::type& src_dt, const char *DYND_UNUSED(src_metadata),
+                const ndt::type& dst_tp, const char *DYND_UNUSED(dst_metadata),
+                const ndt::type& src_tp, const char *DYND_UNUSED(src_metadata),
                 kernel_request_t DYND_UNUSED(kernreq), assign_error_mode DYND_UNUSED(errmode),
                 const eval::eval_context *DYND_UNUSED(ectx)) const
 {
     stringstream ss;
     ss << "make_assignment_kernel has not been implemented for ";
-    if (this == dst_dt.extended()) {
-        ss << dst_dt;
+    if (this == dst_tp.extended()) {
+        ss << dst_tp;
     } else {
-        ss << src_dt;
+        ss << src_tp;
     }
     throw std::runtime_error(ss.str());
 }
@@ -327,7 +327,7 @@ void base_type::get_dynamic_array_functions(const std::pair<std::string, gfunc::
 size_t base_type::get_elwise_property_index(const std::string& property_name) const
 {
     std::stringstream ss;
-    ss << "the dtype " << ndt::type(this, true);
+    ss << "the dynd type " << ndt::type(this, true);
     ss << " doesn't have a property \"" << property_name << "\"";
     throw std::runtime_error(ss.str());
 }
@@ -335,7 +335,7 @@ size_t base_type::get_elwise_property_index(const std::string& property_name) co
 ndt::type base_type::get_elwise_property_type(size_t DYND_UNUSED(elwise_property_index),
             bool& DYND_UNUSED(out_readable), bool& DYND_UNUSED(out_writable)) const
 {
-    throw std::runtime_error("get_elwise_property_type: this dtype does not have any properties");
+    throw std::runtime_error("get_elwise_property_type: this dynd type does not have any properties");
 }
 
 size_t base_type::make_elwise_property_getter_kernel(
@@ -346,7 +346,7 @@ size_t base_type::make_elwise_property_getter_kernel(
                 kernel_request_t DYND_UNUSED(kernreq), const eval::eval_context *DYND_UNUSED(ectx)) const
 {
     std::stringstream ss;
-    ss << "the dtype " << ndt::type(this, true);
+    ss << "the dynd type " << ndt::type(this, true);
     ss << " doesn't have any readable properties";
     throw std::runtime_error(ss.str());
 }
@@ -359,7 +359,7 @@ size_t base_type::make_elwise_property_setter_kernel(
                 kernel_request_t DYND_UNUSED(kernreq), const eval::eval_context *DYND_UNUSED(ectx)) const
 {
     std::stringstream ss;
-    ss << "the dtype " << ndt::type(this, true);
+    ss << "the dynd type " << ndt::type(this, true);
     ss << " doesn't have any writable properties";
     throw std::runtime_error(ss.str());
 }

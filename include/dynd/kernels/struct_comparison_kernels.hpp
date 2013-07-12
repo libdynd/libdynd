@@ -17,7 +17,7 @@ namespace dynd {
  */
 size_t make_struct_comparison_kernel(
                 hierarchical_kernel *out, size_t offset_out,
-                const ndt::type& src_dt,
+                const ndt::type& src_tp,
                 const char *src0_metadata, const char *src1_metadata,
                 comparison_type_t comptype,
                 const eval::eval_context *ectx);

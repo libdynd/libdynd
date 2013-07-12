@@ -13,7 +13,7 @@ namespace dynd {
 /**
  * Makes a kernel which does a comparison when
  * at least one of src0_dt and src1_dt is an
- * expression_kind dtype.
+ * expression_kind type.
  */
 size_t make_expression_comparison_kernel(
                 hierarchical_kernel *out, size_t offset_out,

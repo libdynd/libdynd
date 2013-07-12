@@ -11,7 +11,7 @@
 namespace dynd {
 
 /**
- * Given two dtypes, this function produces the dtype with which
+ * Given two types, this function produces the type with which
  * to do arithmetic calculations for both (i.e. float + int -> float)
  *
  * For the built-in types, this is generally following the
@@ -21,7 +21,7 @@ namespace dynd {
  * be in NBO. If the inputs are not, the output may or may not
  * be in NBO, the function makes no effort to follow a convention.
  */
-ndt::type promote_types_arithmetic(const ndt::type& dt0, const ndt::type& dt1);
+ndt::type promote_types_arithmetic(const ndt::type& tp0, const ndt::type& tp1);
 
 } // namespace dynd
 

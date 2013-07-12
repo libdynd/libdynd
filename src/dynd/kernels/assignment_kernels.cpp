@@ -99,8 +99,8 @@ static void unaligned_copy_strided(char *dst, intptr_t dst_stride,
 
 size_t dynd::make_assignment_kernel(
                 hierarchical_kernel *out, size_t offset_out,
-                const ndt::type& dst_dt, const char *dst_metadata,
-                const ndt::type& src_dt, const char *src_metadata,
+                const ndt::type& dst_tp, const char *dst_metadata,
+                const ndt::type& src_tp, const char *src_metadata,
                 kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *ectx)
 {
@@ -108,33 +108,33 @@ size_t dynd::make_assignment_kernel(
         errmode = ectx->default_assign_error_mode;
     }
 
-    if (dst_dt.is_builtin()) {
-        if (src_dt.is_builtin()) {
+    if (dst_tp.is_builtin()) {
+        if (src_tp.is_builtin()) {
             // If the casting can be done losslessly, disable the error check to find faster code paths
-            if (errmode != assign_error_none && is_lossless_assignment(dst_dt, src_dt)) {
+            if (errmode != assign_error_none && is_lossless_assignment(dst_tp, src_tp)) {
                 errmode = assign_error_none;
             }
 
-            if (dst_dt.extended() == src_dt.extended()) {
+            if (dst_tp.extended() == src_tp.extended()) {
                 return make_pod_typed_data_assignment_kernel(out, offset_out,
-                                dst_dt.get_data_size(), dst_dt.get_data_alignment(),
+                                dst_tp.get_data_size(), dst_tp.get_data_alignment(),
                                 kernreq);
             } else {
                 return make_builtin_type_assignment_kernel(out, offset_out,
-                                dst_dt.get_type_id(), src_dt.get_type_id(),
+                                dst_tp.get_type_id(), src_tp.get_type_id(),
                                 kernreq, errmode);
             }
 
         } else {
-            return src_dt.extended()->make_assignment_kernel(out, offset_out,
-                            dst_dt, dst_metadata,
-                            src_dt, src_metadata,
+            return src_tp.extended()->make_assignment_kernel(out, offset_out,
+                            dst_tp, dst_metadata,
+                            src_tp, src_metadata,
                             kernreq, errmode, ectx);
         }
     } else {
-        return dst_dt.extended()->make_assignment_kernel(out, offset_out,
-                        dst_dt, dst_metadata,
-                        src_dt, src_metadata,
+        return dst_tp.extended()->make_assignment_kernel(out, offset_out,
+                        dst_tp, dst_metadata,
+                        src_tp, src_metadata,
                         kernreq, errmode, ectx);
     }
 }
@@ -386,7 +386,7 @@ size_t dynd::make_builtin_type_assignment_kernel(
                 type_id_t dst_type_id, type_id_t src_type_id,
                 kernel_request_t kernreq, assign_error_mode errmode)
 {
-    // Do a table lookup for the built-in range of dtypes
+    // Do a table lookup for the built-in range of dynd types
     if (dst_type_id >= bool_type_id && dst_type_id <= complex_float64_type_id &&
                     src_type_id >= bool_type_id && src_type_id <= complex_float64_type_id &&
                     errmode != assign_error_default) {

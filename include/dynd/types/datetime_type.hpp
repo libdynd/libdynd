@@ -42,7 +42,7 @@ enum datetime_unit_t {
 std::ostream& operator<<(std::ostream& o, datetime_unit_t unit);
 
 class datetime_type : public base_type {
-    // A const reference to the struct dtype used by default for this datetime
+    // A const reference to the struct type used by default for this datetime
     const ndt::type& m_default_struct_type;
 
     datetime_unit_t m_unit;
@@ -78,7 +78,7 @@ public:
 
     void print_type(std::ostream& o) const;
 
-    bool is_lossless_assignment(const ndt::type& dst_dt, const ndt::type& src_dt) const;
+    bool is_lossless_assignment(const ndt::type& dst_tp, const ndt::type& src_tp) const;
 
     bool operator==(const base_type& rhs) const;
 
@@ -93,8 +93,8 @@ public:
 
     size_t make_assignment_kernel(
                     hierarchical_kernel *out, size_t offset_out,
-                    const ndt::type& dst_dt, const char *dst_metadata,
-                    const ndt::type& src_dt, const char *src_metadata,
+                    const ndt::type& dst_tp, const char *dst_metadata,
+                    const ndt::type& src_tp, const char *src_metadata,
                     kernel_request_t kernreq, assign_error_mode errmode,
                     const eval::eval_context *ectx) const;
 

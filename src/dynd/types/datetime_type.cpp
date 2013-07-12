@@ -263,13 +263,13 @@ void datetime_type::print_type(std::ostream& o) const
     o << ">";
 }
 
-bool datetime_type::is_lossless_assignment(const ndt::type& dst_dt, const ndt::type& src_dt) const
+bool datetime_type::is_lossless_assignment(const ndt::type& dst_tp, const ndt::type& src_tp) const
 {
-    if (dst_dt.extended() == this) {
-        if (src_dt.extended() == this) {
+    if (dst_tp.extended() == this) {
+        if (src_tp.extended() == this) {
             return true;
-        } else if (src_dt.get_type_id() == date_type_id) {
-            // There is only one possibility for the date dtype (TODO: timezones!)
+        } else if (src_tp.get_type_id() == date_type_id) {
+            // There is only one possibility for the date type (TODO: timezones!)
             return true;
         } else {
             return false;
@@ -294,57 +294,57 @@ bool datetime_type::operator==(const base_type& rhs) const
 
 size_t datetime_type::make_assignment_kernel(
                 hierarchical_kernel *out, size_t offset_out,
-                const ndt::type& dst_dt, const char *dst_metadata,
-                const ndt::type& src_dt, const char *src_metadata,
+                const ndt::type& dst_tp, const char *dst_metadata,
+                const ndt::type& src_tp, const char *src_metadata,
                 kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *ectx) const
 {
-    if (this == dst_dt.extended()) {
-        if (src_dt == dst_dt) {
+    if (this == dst_tp.extended()) {
+        if (src_tp == dst_tp) {
             return make_pod_typed_data_assignment_kernel(out, offset_out,
                             get_data_size(), get_data_alignment(), kernreq);
-        } else if (src_dt.get_kind() == string_kind) {
+        } else if (src_tp.get_kind() == string_kind) {
             // Assignment from strings
             return make_string_to_datetime_assignment_kernel(out, offset_out,
-                            dst_dt, dst_metadata,
-                            src_dt, src_metadata,
+                            dst_tp, dst_metadata,
+                            src_tp, src_metadata,
                             kernreq, errmode, ectx);
-        } else if (src_dt.get_kind() == struct_kind) {
+        } else if (src_tp.get_kind() == struct_kind) {
             // Convert to struct using the "struct" property
             return ::make_assignment_kernel(out, offset_out,
-                ndt::make_property(dst_dt, "struct"), dst_metadata,
-                src_dt, src_metadata,
+                ndt::make_property(dst_tp, "struct"), dst_metadata,
+                src_tp, src_metadata,
                 kernreq, errmode, ectx);
-        } else if (!src_dt.is_builtin()) {
-            return src_dt.extended()->make_assignment_kernel(out, offset_out,
-                            dst_dt, dst_metadata,
-                            src_dt, src_metadata,
+        } else if (!src_tp.is_builtin()) {
+            return src_tp.extended()->make_assignment_kernel(out, offset_out,
+                            dst_tp, dst_metadata,
+                            src_tp, src_metadata,
                             kernreq, errmode, ectx);
         }
     } else {
-        if (dst_dt.get_kind() == string_kind) {
+        if (dst_tp.get_kind() == string_kind) {
             // Assignment to strings
             return make_datetime_to_string_assignment_kernel(out, offset_out,
-                            dst_dt, dst_metadata,
-                            src_dt, src_metadata,
+                            dst_tp, dst_metadata,
+                            src_tp, src_metadata,
                             kernreq, errmode, ectx);
-        } else if (dst_dt.get_kind() == struct_kind) {
+        } else if (dst_tp.get_kind() == struct_kind) {
             // Convert to struct using the "struct" property
             return ::make_assignment_kernel(out, offset_out,
-                dst_dt, dst_metadata,
-                ndt::make_property(src_dt, "struct"), src_metadata,
+                dst_tp, dst_metadata,
+                ndt::make_property(src_tp, "struct"), src_metadata,
                 kernreq, errmode, ectx);
         }
         // TODO
     }
 
     stringstream ss;
-    ss << "Cannot assign from " << src_dt << " to " << dst_dt;
+    ss << "Cannot assign from " << src_tp << " to " << dst_tp;
     throw runtime_error(ss.str());
 }
 
 
-///////// properties on the dtype
+///////// properties on the type
 
 //static pair<string, gfunc::callable> datetime_type_properties[] = {
 //};
@@ -355,9 +355,9 @@ void datetime_type::get_dynamic_type_properties(const std::pair<std::string, gfu
     *out_count = 0; //sizeof(datetime_type_properties) / sizeof(datetime_type_properties[0]);
 }
 
-///////// functions on the dtype
+///////// functions on the type
 
-static nd::array function_dtype_now(const ndt::type& dt) {
+static nd::array function_type_now(const ndt::type& dt) {
     throw runtime_error("TODO: implement datetime.now function");
     datetime::datetime_fields fields;
     //datetime::fill_current_local_datetime(&fields);
@@ -368,7 +368,7 @@ static nd::array function_dtype_now(const ndt::type& dt) {
     return result;
 }
 
-static nd::array function_dtype_construct(const ndt::type& DYND_UNUSED(dt),
+static nd::array function_type_construct(const ndt::type& DYND_UNUSED(dt),
                 const nd::array& DYND_UNUSED(year),
                 const nd::array& DYND_UNUSED(month),
                 const nd::array& DYND_UNUSED(day))
@@ -402,8 +402,8 @@ static nd::array function_dtype_construct(const ndt::type& DYND_UNUSED(dt),
 }
 
 static pair<string, gfunc::callable> datetime_type_functions[] = {
-    pair<string, gfunc::callable>("now", gfunc::make_callable(&function_dtype_now, "self")),
-    pair<string, gfunc::callable>("__construct__", gfunc::make_callable(&function_dtype_construct, "self", "year", "month", "day"))
+    pair<string, gfunc::callable>("now", gfunc::make_callable(&function_type_now, "self")),
+    pair<string, gfunc::callable>("__construct__", gfunc::make_callable(&function_type_construct, "self", "year", "month", "day"))
 };
 
 void datetime_type::get_dynamic_type_functions(const std::pair<std::string, gfunc::callable> **out_functions, size_t *out_count) const
@@ -494,14 +494,14 @@ void datetime_type::get_dynamic_array_functions(const std::pair<std::string, gfu
 namespace {
     struct datetime_property_kernel_extra {
         kernel_data_prefix base;
-        const datetime_type *datetime_dt;
+        const datetime_type *datetime_tp;
 
         typedef datetime_property_kernel_extra extra_type;
 
         static void destruct(kernel_data_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
-            base_type_xdecref(e->datetime_dt);
+            base_type_xdecref(e->datetime_tp);
         }
     };
 
@@ -521,7 +521,7 @@ namespace {
                     kernel_data_prefix *extra)
     {
         const datetime_property_kernel_extra *e = reinterpret_cast<datetime_property_kernel_extra *>(extra);
-        const datetime_type *dd = e->datetime_dt;
+        const datetime_type *dd = e->datetime_tp;
         datetime_tz_t tz = dd->get_timezone();
         if (tz == tz_utc || tz == tz_abstract) {
             // TODO: This conversion could be *much* faster by figuring out the correct division
@@ -539,7 +539,7 @@ namespace {
                     kernel_data_prefix *extra)
     {
         const datetime_property_kernel_extra *e = reinterpret_cast<datetime_property_kernel_extra *>(extra);
-        const datetime_type *dd = e->datetime_dt;
+        const datetime_type *dd = e->datetime_tp;
         datetime_tz_t tz = dd->get_timezone();
         if (tz == tz_utc || tz == tz_abstract) {
             datetime::datetime_fields df;
@@ -555,7 +555,7 @@ namespace {
                     kernel_data_prefix *extra)
     {
         const datetime_property_kernel_extra *e = reinterpret_cast<datetime_property_kernel_extra *>(extra);
-        const datetime_type *dd = e->datetime_dt;
+        const datetime_type *dd = e->datetime_tp;
         datetime_tz_t tz = dd->get_timezone();
         if (tz == tz_utc || tz == tz_abstract) {
             datetime::datetime_fields df;
@@ -571,7 +571,7 @@ namespace {
                     kernel_data_prefix *extra)
     {
         const datetime_property_kernel_extra *e = reinterpret_cast<datetime_property_kernel_extra *>(extra);
-        const datetime_type *dd = e->datetime_dt;
+        const datetime_type *dd = e->datetime_tp;
         datetime_tz_t tz = dd->get_timezone();
         if (tz == tz_utc || tz == tz_abstract) {
             datetime::datetime_fields df;
@@ -587,7 +587,7 @@ namespace {
                     kernel_data_prefix *extra)
     {
         const datetime_property_kernel_extra *e = reinterpret_cast<datetime_property_kernel_extra *>(extra);
-        const datetime_type *dd = e->datetime_dt;
+        const datetime_type *dd = e->datetime_tp;
         datetime_tz_t tz = dd->get_timezone();
         if (tz == tz_utc || tz == tz_abstract) {
             datetime::datetime_fields df;
@@ -603,7 +603,7 @@ namespace {
                     kernel_data_prefix *extra)
     {
         const datetime_property_kernel_extra *e = reinterpret_cast<datetime_property_kernel_extra *>(extra);
-        const datetime_type *dd = e->datetime_dt;
+        const datetime_type *dd = e->datetime_tp;
         datetime_tz_t tz = dd->get_timezone();
         if (tz == tz_utc || tz == tz_abstract) {
             datetime::datetime_fields df;
@@ -619,7 +619,7 @@ namespace {
                     kernel_data_prefix *extra)
     {
         const datetime_property_kernel_extra *e = reinterpret_cast<datetime_property_kernel_extra *>(extra);
-        const datetime_type *dd = e->datetime_dt;
+        const datetime_type *dd = e->datetime_tp;
         datetime_tz_t tz = dd->get_timezone();
         if (tz == tz_utc || tz == tz_abstract) {
             datetime::datetime_fields df;
@@ -635,7 +635,7 @@ namespace {
                     kernel_data_prefix *extra)
     {
         const datetime_property_kernel_extra *e = reinterpret_cast<datetime_property_kernel_extra *>(extra);
-        const datetime_type *dd = e->datetime_dt;
+        const datetime_type *dd = e->datetime_tp;
         datetime_tz_t tz = dd->get_timezone();
         if (tz == tz_utc || tz == tz_abstract) {
             datetime::datetime_fields df;
@@ -747,11 +747,11 @@ size_t datetime_type::make_elwise_property_getter_kernel(
             break;
         default:
             stringstream ss;
-            ss << "dynd date dtype given an invalid property index" << src_property_index;
+            ss << "dynd date type given an invalid property index" << src_property_index;
             throw runtime_error(ss.str());
     }
     e->base.destructor = &datetime_property_kernel_extra::destruct;
-    e->datetime_dt = static_cast<const datetime_type *>(ndt::type(this, true).release());
+    e->datetime_tp = static_cast<const datetime_type *>(ndt::type(this, true).release());
     return offset_out + sizeof(datetime_property_kernel_extra);
 }
 

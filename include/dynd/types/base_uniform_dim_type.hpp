@@ -13,35 +13,35 @@ namespace dynd {
 
 
 /**
- * Base class for all array dimension dtypes. If a dtype
+ * Base class for all array dimension types. If a type
  * has kind uniform_dim_kind, it must be a subclass of
  * base_uniform_dim_type.
  */
 class base_uniform_dim_type : public base_type {
 protected:
-    ndt::type m_element_dtype;
+    ndt::type m_element_tp;
     size_t m_element_metadata_offset;
 public:
-    inline base_uniform_dim_type(type_id_t type_id, const ndt::type& element_dtype, size_t data_size,
+    inline base_uniform_dim_type(type_id_t type_id, const ndt::type& element_tp, size_t data_size,
                     size_t alignment, size_t element_metadata_offset,
                     flags_type flags)
         : base_type(type_id, uniform_dim_kind, data_size,
-                        alignment, flags, element_metadata_offset + element_dtype.get_metadata_size(),
-                        1 + element_dtype.get_undim()),
-            m_element_dtype(element_dtype), m_element_metadata_offset(element_metadata_offset)
+                        alignment, flags, element_metadata_offset + element_tp.get_metadata_size(),
+                        1 + element_tp.get_undim()),
+            m_element_tp(element_tp), m_element_metadata_offset(element_metadata_offset)
     {
     }
 
     virtual ~base_uniform_dim_type();
 
-    /** The element dtype. */
+    /** The element type. */
     inline const ndt::type& get_element_type() const {
-        return m_element_dtype;
+        return m_element_tp;
     }
 
     /**
      * The offset to add to the metadata to get to the
-     * element_dtype's metadata.
+     * element type's metadata.
      */
     inline size_t get_element_metadata_offset() const {
         return m_element_metadata_offset;
@@ -51,7 +51,7 @@ public:
      * The dimension size, or -1 if it can't be determined
      * from the information given.
      *
-     * \param metadata  A metadata instance for the dtype, or NULL.
+     * \param metadata  A metadata instance for the type, or NULL.
      * \param data  A data instance for the type/metadata, or NULL.
      *
      * \returns  The size of the dimension, or -1.
@@ -59,7 +59,7 @@ public:
     virtual intptr_t get_dim_size(const char *metadata = NULL, const char *data = NULL) const = 0;
 
     /**
-     * Constructs the ndobject metadata for one dimension of this dtype, leaving
+     * Constructs the ndobject metadata for one dimension of this type, leaving
      * the metadata for deeper dimensions uninitialized. Returns the size of
      * the metadata that was copied.
      *

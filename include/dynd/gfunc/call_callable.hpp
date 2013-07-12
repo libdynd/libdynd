@@ -18,7 +18,7 @@ namespace dynd { namespace gfunc {
 namespace detail {
     template<class T>
     struct callable_argument_setter {
-        static typename enable_if<is_dtype_scalar<T>::value, void>::type set(const ndt::type& paramtype, char *metadata, char *data, const T& value) {
+        static typename enable_if<is_dynd_scalar<T>::value, void>::type set(const ndt::type& paramtype, char *metadata, char *data, const T& value) {
             if (paramtype.get_type_id() == static_cast<type_id_t>(type_id_of<T>::value)) {
                 *reinterpret_cast<T *>(data) = value;
             } else {
@@ -58,7 +58,7 @@ namespace detail {
                 reinterpret_cast<type_type_data *>(data)->dt = ndt::type(value).release();
             } else {
                 std::stringstream ss;
-                ss << "cannot pass a dtype as a parameter to dynd callable parameter of type " << paramtype;
+                ss << "cannot pass a dynd type as a parameter to dynd callable parameter of type " << paramtype;
                 throw std::runtime_error(ss.str());
             }
         }

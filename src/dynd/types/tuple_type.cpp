@@ -22,12 +22,12 @@ dynd::tuple_type::tuple_type(const std::vector<ndt::type>& field_types)
     m_members.data_alignment = 1;
     for (size_t i = 0, i_end = field_types.size(); i != i_end; ++i) {
         size_t field_alignment = field_types[i].get_data_alignment();
-        // Accumulate the biggest field alignment as the dtype alignment
+        // Accumulate the biggest field alignment as the type alignment
         if (field_alignment > m_members.data_alignment) {
             m_members.data_alignment = (uint8_t)field_alignment;
         }
         // Inherit any operand flags from the fields
-        m_members.flags |= (field_types[i].get_flags()&dtype_flags_operand_inherited);
+        m_members.flags |= (field_types[i].get_flags()&type_flags_operand_inherited);
         // Add padding bytes as necessary
         offset = inc_to_alignment(offset, field_alignment);
         // Save the offset
@@ -78,7 +78,7 @@ dynd::tuple_type::tuple_type(const std::vector<ndt::type>& field_types, const st
             throw runtime_error(ss.str());
         }
         // Inherit any operand flags from the fields
-        m_members.flags |= (field_types[i].get_flags()&dtype_flags_operand_inherited);
+        m_members.flags |= (field_types[i].get_flags()&type_flags_operand_inherited);
         // Calculate the metadata offsets
         m_metadata_offsets[i] = metadata_offset;
         metadata_offset += m_fields[i].is_builtin() ? 0 : m_fields[i].extended()->get_metadata_size();
@@ -93,7 +93,7 @@ bool dynd::tuple_type::compute_is_standard_layout() const
     size_t standard_offset = 0, standard_alignment = 1;
     for (size_t i = 0, i_end = m_fields.size(); i != i_end; ++i) {
         size_t field_alignment = m_fields[i].get_data_alignment();
-        // Accumulate the biggest field alignment as the dtype alignment
+        // Accumulate the biggest field alignment as the type alignment
         if (field_alignment > standard_alignment) {
             standard_alignment = field_alignment;
         }
@@ -156,13 +156,13 @@ void dynd::tuple_type::print_type(std::ostream& o) const
     }
 }
 
-bool dynd::tuple_type::is_lossless_assignment(const ndt::type& dst_dt, const ndt::type& src_dt) const
+bool dynd::tuple_type::is_lossless_assignment(const ndt::type& dst_tp, const ndt::type& src_tp) const
 {
-    if (dst_dt.extended() == this) {
-        if (src_dt.extended() == this) {
+    if (dst_tp.extended() == this) {
+        if (src_tp.extended() == this) {
             return true;
-        } else if (src_dt.get_type_id() == tuple_type_id) {
-            return *dst_dt.extended() == *src_dt.extended();
+        } else if (src_tp.get_type_id() == tuple_type_id) {
+            return *dst_tp.extended() == *src_tp.extended();
         }
     }
 

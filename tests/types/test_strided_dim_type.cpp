@@ -47,8 +47,8 @@ TEST(StridedArrayDType, DTypeAt) {
     ndt::type darr2 = ndt::make_strided_dim(darr1);
     ndt::type dtest;
 
-    // indexing into a dtype with a slice produces another
-    // strided array, so the dtype is unchanged.
+    // indexing into a type with a slice produces another
+    // strided array, so the type is unchanged.
     EXPECT_EQ(darr1, darr1.at(1 <= irange() < 3));
     EXPECT_EQ(darr2, darr2.at(1 <= irange() < 3));
     EXPECT_EQ(darr2, darr2.at(1 <= irange() < 3, irange() < 2));

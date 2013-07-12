@@ -16,11 +16,11 @@
 namespace dynd {
 
 /**
- * This defines a C-style structure dtype, which follows
+ * This defines a C-style structure type, which follows
  * C rules for the field layout. For the various builtin
- * types, a cstruct dtype should have a layout which matches
- * the equivalent in C/C++. This dtype works together with
- * the struct dtype, whose field layout is defined in the
+ * types, a cstruct type should have a layout which matches
+ * the equivalent in C/C++. This type works together with
+ * the struct type, whose field layout is defined in the
  * metadata and hence supports viewing existing structs
  * with reordered and missing fields.
  *
@@ -95,20 +95,20 @@ public:
     bool is_expression() const;
     bool is_unique_data_owner(const char *metadata) const;
     void transform_child_types(type_transform_fn_t transform_fn, void *extra,
-                    ndt::type& out_transformed_dtype, bool& out_was_transformed) const;
+                    ndt::type& out_transformed_tp, bool& out_was_transformed) const;
     ndt::type get_canonical_type() const;
 
     ndt::type apply_linear_index(size_t nindices, const irange *indices,
-                size_t current_i, const ndt::type& root_dt, bool leading_dimension) const;
+                size_t current_i, const ndt::type& root_tp, bool leading_dimension) const;
     intptr_t apply_linear_index(size_t nindices, const irange *indices, const char *metadata,
-                    const ndt::type& result_dtype, char *out_metadata,
+                    const ndt::type& result_tp, char *out_metadata,
                     memory_block_data *embedded_reference,
-                    size_t current_i, const ndt::type& root_dt,
+                    size_t current_i, const ndt::type& root_tp,
                     bool leading_dimension, char **inout_data,
                     memory_block_data **inout_dataref) const;
     ndt::type at_single(intptr_t i0, const char **inout_metadata, const char **inout_data) const;
 
-    bool is_lossless_assignment(const ndt::type& dst_dt, const ndt::type& src_dt) const;
+    bool is_lossless_assignment(const ndt::type& dst_tp, const ndt::type& src_tp) const;
 
     bool operator==(const base_type& rhs) const;
 
@@ -121,8 +121,8 @@ public:
 
     size_t make_assignment_kernel(
                     hierarchical_kernel *out, size_t offset_out,
-                    const ndt::type& dst_dt, const char *dst_metadata,
-                    const ndt::type& src_dt, const char *src_metadata,
+                    const ndt::type& dst_tp, const char *dst_metadata,
+                    const ndt::type& src_tp, const char *src_metadata,
                     kernel_request_t kernreq, assign_error_mode errmode,
                     const eval::eval_context *ectx) const;
 
@@ -144,55 +144,55 @@ public:
 }; // class cstruct_type
 
 namespace ndt {
-    /** Makes a struct dtype with the specified fields */
+    /** Makes a struct type with the specified fields */
     inline ndt::type make_cstruct(size_t field_count, const ndt::type *field_types,
                     const std::string *field_names) {
         return ndt::type(new cstruct_type(field_count, field_types, field_names), false);
     }
 
-    /** Makes a struct dtype with the specified fields */
-    inline ndt::type make_cstruct(const ndt::type& dt0, const std::string& name0)
+    /** Makes a struct type with the specified fields */
+    inline ndt::type make_cstruct(const ndt::type& tp0, const std::string& name0)
     {
-        return ndt::make_cstruct(1, &dt0, &name0);
+        return ndt::make_cstruct(1, &tp0, &name0);
     }
 
-    /** Makes a struct dtype with the specified fields */
-    inline ndt::type make_cstruct(const ndt::type& dt0, const std::string& name0, const ndt::type& dt1, const std::string& name1)
+    /** Makes a struct type with the specified fields */
+    inline ndt::type make_cstruct(const ndt::type& tp0, const std::string& name0, const ndt::type& tp1, const std::string& name1)
     {
         ndt::type field_types[2];
         std::string field_names[2];
-        field_types[0] = dt0;
-        field_types[1] = dt1;
+        field_types[0] = tp0;
+        field_types[1] = tp1;
         field_names[0] = name0;
         field_names[1] = name1;
         return ndt::make_cstruct(2, field_types, field_names);
     }
 
-    /** Makes a struct dtype with the specified fields */
-    inline ndt::type make_cstruct(const ndt::type& dt0, const std::string& name0, const ndt::type& dt1, const std::string& name1, const ndt::type& dt2, const std::string& name2)
+    /** Makes a struct type with the specified fields */
+    inline ndt::type make_cstruct(const ndt::type& tp0, const std::string& name0, const ndt::type& tp1, const std::string& name1, const ndt::type& tp2, const std::string& name2)
     {
         ndt::type field_types[3];
         std::string field_names[3];
-        field_types[0] = dt0;
-        field_types[1] = dt1;
-        field_types[2] = dt2;
+        field_types[0] = tp0;
+        field_types[1] = tp1;
+        field_types[2] = tp2;
         field_names[0] = name0;
         field_names[1] = name1;
         field_names[2] = name2;
         return ndt::make_cstruct(3, field_types, field_names);
     }
 
-    /** Makes a struct dtype with the specified fields */
-    inline ndt::type make_cstruct(const ndt::type& dt0, const std::string& name0,
-                    const ndt::type& dt1, const std::string& name1, const ndt::type& dt2, const std::string& name2,
-                    const ndt::type& dt3, const std::string& name3)
+    /** Makes a struct type with the specified fields */
+    inline ndt::type make_cstruct(const ndt::type& tp0, const std::string& name0,
+                    const ndt::type& tp1, const std::string& name1, const ndt::type& tp2, const std::string& name2,
+                    const ndt::type& tp3, const std::string& name3)
     {
         ndt::type field_types[4];
         std::string field_names[4];
-        field_types[0] = dt0;
-        field_types[1] = dt1;
-        field_types[2] = dt2;
-        field_types[3] = dt3;
+        field_types[0] = tp0;
+        field_types[1] = tp1;
+        field_types[2] = tp2;
+        field_types[3] = tp3;
         field_names[0] = name0;
         field_names[1] = name1;
         field_names[2] = name2;
@@ -200,18 +200,18 @@ namespace ndt {
         return ndt::make_cstruct(4, field_types, field_names);
     }
 
-    /** Makes a struct dtype with the specified fields */
-    inline ndt::type make_cstruct(const ndt::type& dt0, const std::string& name0,
-                    const ndt::type& dt1, const std::string& name1, const ndt::type& dt2, const std::string& name2,
-                    const ndt::type& dt3, const std::string& name3, const ndt::type& dt4, const std::string& name4)
+    /** Makes a struct type with the specified fields */
+    inline ndt::type make_cstruct(const ndt::type& tp0, const std::string& name0,
+                    const ndt::type& tp1, const std::string& name1, const ndt::type& tp2, const std::string& name2,
+                    const ndt::type& tp3, const std::string& name3, const ndt::type& tp4, const std::string& name4)
     {
         ndt::type field_types[5];
         std::string field_names[5];
-        field_types[0] = dt0;
-        field_types[1] = dt1;
-        field_types[2] = dt2;
-        field_types[3] = dt3;
-        field_types[4] = dt4;
+        field_types[0] = tp0;
+        field_types[1] = tp1;
+        field_types[2] = tp2;
+        field_types[3] = tp3;
+        field_types[4] = tp4;
         field_names[0] = name0;
         field_names[1] = name1;
         field_names[2] = name2;
@@ -220,20 +220,20 @@ namespace ndt {
         return ndt::make_cstruct(5, field_types, field_names);
     }
 
-    /** Makes a struct dtype with the specified fields */
-    inline ndt::type make_cstruct(const ndt::type& dt0, const std::string& name0,
-                    const ndt::type& dt1, const std::string& name1, const ndt::type& dt2, const std::string& name2,
-                    const ndt::type& dt3, const std::string& name3, const ndt::type& dt4, const std::string& name4,
-                    const ndt::type& dt5, const std::string& name5)
+    /** Makes a struct type with the specified fields */
+    inline ndt::type make_cstruct(const ndt::type& tp0, const std::string& name0,
+                    const ndt::type& tp1, const std::string& name1, const ndt::type& tp2, const std::string& name2,
+                    const ndt::type& tp3, const std::string& name3, const ndt::type& tp4, const std::string& name4,
+                    const ndt::type& tp5, const std::string& name5)
     {
         ndt::type field_types[6];
         std::string field_names[6];
-        field_types[0] = dt0;
-        field_types[1] = dt1;
-        field_types[2] = dt2;
-        field_types[3] = dt3;
-        field_types[4] = dt4;
-        field_types[5] = dt5;
+        field_types[0] = tp0;
+        field_types[1] = tp1;
+        field_types[2] = tp2;
+        field_types[3] = tp3;
+        field_types[4] = tp4;
+        field_types[5] = tp5;
         field_names[0] = name0;
         field_names[1] = name1;
         field_names[2] = name2;
@@ -243,21 +243,21 @@ namespace ndt {
         return ndt::make_cstruct(6, field_types, field_names);
     }
 
-    /** Makes a struct dtype with the specified fields */
-    inline ndt::type make_cstruct(const ndt::type& dt0, const std::string& name0,
-                    const ndt::type& dt1, const std::string& name1, const ndt::type& dt2, const std::string& name2,
-                    const ndt::type& dt3, const std::string& name3, const ndt::type& dt4, const std::string& name4,
-                    const ndt::type& dt5, const std::string& name5, const ndt::type& dt6, const std::string& name6)
+    /** Makes a struct type with the specified fields */
+    inline ndt::type make_cstruct(const ndt::type& tp0, const std::string& name0,
+                    const ndt::type& tp1, const std::string& name1, const ndt::type& tp2, const std::string& name2,
+                    const ndt::type& tp3, const std::string& name3, const ndt::type& tp4, const std::string& name4,
+                    const ndt::type& tp5, const std::string& name5, const ndt::type& tp6, const std::string& name6)
     {
         ndt::type field_types[7];
         std::string field_names[7];
-        field_types[0] = dt0;
-        field_types[1] = dt1;
-        field_types[2] = dt2;
-        field_types[3] = dt3;
-        field_types[4] = dt4;
-        field_types[5] = dt5;
-        field_types[6] = dt6;
+        field_types[0] = tp0;
+        field_types[1] = tp1;
+        field_types[2] = tp2;
+        field_types[3] = tp3;
+        field_types[4] = tp4;
+        field_types[5] = tp5;
+        field_types[6] = tp6;
         field_names[0] = name0;
         field_names[1] = name1;
         field_names[2] = name2;
@@ -276,11 +276,11 @@ namespace ndt {
      * cstruct.
      *
      * \param field_count  The number of array entries in `field_types` and `field_offsets`
-     * \param field_types  An array of the field dtypes.
+     * \param field_types  An array of the field types.
      * \param field_offsets  The offsets corresponding to the types.
      * \param total_size  The total size of the struct in bytes.
      *
-     * \returns  True if constructing a cstruct with the same dtypes and field offsets will
+     * \returns  True if constructing a cstruct with the same types and field offsets will
      *           produce the provided offsets.
      */
     inline bool is_cstruct_compatible_offsets(size_t field_count,

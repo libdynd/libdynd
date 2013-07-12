@@ -24,7 +24,7 @@ view_type::view_type(const ndt::type& value_type, const ndt::type& operand_type)
         throw std::runtime_error(ss.str());
     }
     if (!value_type.is_pod()) {
-        throw std::runtime_error("view_type: Only POD dtypes are supported");
+        throw std::runtime_error("view_type: Only POD types are supported");
     }
 }
 
@@ -97,13 +97,13 @@ void view_type::get_shape(size_t ndim, size_t i,
     }
 }
 
-bool view_type::is_lossless_assignment(const ndt::type& dst_dt, const ndt::type& src_dt) const
+bool view_type::is_lossless_assignment(const ndt::type& dst_tp, const ndt::type& src_tp) const
 {
-    // Treat this dtype as the value dtype for whether assignment is always lossless
-    if (src_dt.extended() == this) {
-        return ::dynd::is_lossless_assignment(dst_dt, m_value_type);
+    // Treat this type as the value type for whether assignment is always lossless
+    if (src_tp.extended() == this) {
+        return ::dynd::is_lossless_assignment(dst_tp, m_value_type);
     } else {
-        return ::dynd::is_lossless_assignment(m_value_type, src_dt);
+        return ::dynd::is_lossless_assignment(m_value_type, src_tp);
     }
 }
 
@@ -127,8 +127,8 @@ ndt::type view_type::with_replaced_storage_type(const ndt::type& replacement_typ
     } else {
         if (m_operand_type != replacement_type.value_type()) {
             std::stringstream ss;
-            ss << "Cannot chain dtypes, because the view's storage dtype, " << m_operand_type;
-            ss << ", does not match the replacement's value dtype, " << replacement_type.value_type();
+            ss << "Cannot chain types, because the view's storage type, " << m_operand_type;
+            ss << ", does not match the replacement's value type, " << replacement_type.value_type();
             throw std::runtime_error(ss.str());
         }
         return ndt::type(new view_type(m_value_type, replacement_type), false);

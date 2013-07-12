@@ -76,7 +76,7 @@ size_t dynd::make_string_to_datetime_assignment_kernel(
 {
     if (src_string_dt.get_kind() != string_kind) {
         stringstream ss;
-        ss << "make_string_to_datetime_assignment_kernel: source dtype " << src_string_dt << " is not a string dtype";
+        ss << "make_string_to_datetime_assignment_kernel: source type " << src_string_dt << " is not a string type";
         throw runtime_error(ss.str());
     }
 
@@ -85,9 +85,9 @@ size_t dynd::make_string_to_datetime_assignment_kernel(
     string_to_datetime_kernel_extra *e = out->get_at<string_to_datetime_kernel_extra>(offset_out);
     e->base.set_function<unary_single_operation_t>(&string_to_datetime_kernel_extra::single);
     e->base.destructor = &string_to_datetime_kernel_extra::destruct;
-    // The kernel data owns a reference to this dtype
+    // The kernel data owns a reference to this type
     e->dst_datetime_dt = static_cast<const datetime_type *>(ndt::type(dst_datetime_dt).release());
-    // The kernel data owns a reference to this dtype
+    // The kernel data owns a reference to this type
     e->src_string_dt = static_cast<const base_string_type *>(ndt::type(src_string_dt).release());
     e->src_metadata = src_metadata;
     e->errmode = errmode;
@@ -144,7 +144,7 @@ size_t dynd::make_datetime_to_string_assignment_kernel(
 {
     if (dst_string_dt.get_kind() != string_kind) {
         stringstream ss;
-        ss << "get_datetime_to_string_assignment_kernel: dest dtype " << dst_string_dt << " is not a string dtype";
+        ss << "get_datetime_to_string_assignment_kernel: dest type " << dst_string_dt << " is not a string type";
         throw runtime_error(ss.str());
     }
 
@@ -153,9 +153,9 @@ size_t dynd::make_datetime_to_string_assignment_kernel(
     datetime_to_string_kernel_extra *e = out->get_at<datetime_to_string_kernel_extra>(offset_out);
     e->base.set_function<unary_single_operation_t>(&datetime_to_string_kernel_extra::single);
     e->base.destructor = &datetime_to_string_kernel_extra::destruct;
-    // The kernel data owns a reference to this dtype
+    // The kernel data owns a reference to this type
     e->dst_string_dt = static_cast<const base_string_type *>(ndt::type(dst_string_dt).release());
-    // The kernel data owns a reference to this dtype
+    // The kernel data owns a reference to this type
     e->src_datetime_dt = static_cast<const datetime_type *>(ndt::type(src_datetime_dt).release());
     e->dst_metadata = dst_metadata;
     e->unit = dynd_unit_to_datetime_unit(e->src_datetime_dt->get_unit());

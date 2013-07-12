@@ -11,7 +11,7 @@
 namespace dynd {
 
 /**
- * Base class for all dtypes of expression_kind, and for the pointer_type.
+ * Base class for all types of expression_kind, and for the pointer_type.
  */
 class base_expression_type : public base_type {
 public:
@@ -23,32 +23,32 @@ public:
     virtual ~base_expression_type();
 
     /**
-     * Should return a reference to the dtype representing the value which
+     * Should return a reference to the type representing the value which
      * is for calculation. This should never be an expression type.
      */
     virtual const ndt::type& get_value_type() const = 0;
     /**
-     * Should return a reference to a dtype representing the data this dtype
+     * Should return a reference to a type representing the data this type
      * uses to produce the value.
      */
     virtual const ndt::type& get_operand_type() const = 0;
 
     /**
      * Returns a flags value which inherits the appropriate flags from
-     * the value and operand dtypes.
+     * the value and operand types.
      */
     static inline flags_type inherited_flags(flags_type value_flags,
                     flags_type operand_flags)
     {
-        return (value_flags&dtype_flags_value_inherited)|
-                        (operand_flags&dtype_flags_operand_inherited);
+        return (value_flags&type_flags_value_inherited)|
+                        (operand_flags&type_flags_operand_inherited);
     }
 
     /**
      * This method is for expression types, and is a way to substitute
-     * the storage dtype (deepest operand dtype) of an existing dtype.
+     * the storage type (deepest operand type) of an existing type.
      *
-     * The value_type of the replacement should match the storage dtype
+     * The value_type of the replacement should match the storage type
      * of this instance. Implementations of this should raise an exception
      * when this is not true.
      */
@@ -57,10 +57,10 @@ public:
     // Always return true for expression types
     bool is_expression() const;
 
-    // The canonical type for expression types is always the value dtype
+    // The canonical type for expression types is always the value type
     ndt::type get_canonical_type() const;
 
-    // Expression types use the values from their operand dtype.
+    // Expression types use the values from their operand type.
     void metadata_default_construct(char *metadata, size_t ndim, const intptr_t* shape) const;
     void metadata_copy_construct(char *dst_metadata, const char *src_metadata, memory_block_data *embedded_reference) const;
     void metadata_destruct(char *metadata) const;
@@ -84,8 +84,8 @@ public:
 
     size_t make_assignment_kernel(
                     hierarchical_kernel *out, size_t offset_out,
-                    const ndt::type& dst_dt, const char *dst_metadata,
-                    const ndt::type& src_dt, const char *src_metadata,
+                    const ndt::type& dst_tp, const char *dst_metadata,
+                    const ndt::type& src_tp, const char *src_metadata,
                     kernel_request_t kernreq, assign_error_mode errmode,
                     const eval::eval_context *ectx) const;
 

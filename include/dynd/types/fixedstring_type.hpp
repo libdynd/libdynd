@@ -2,7 +2,7 @@
 // Copyright (C) 2011-13 Mark Wiebe, DyND Developers
 // BSD 2-Clause License, see LICENSE.txt
 //
-// The fixedstring dtype represents a string with
+// The fixedstring type represents a string with
 // a particular encoding, stored in a fixed-size
 // buffer.
 //
@@ -39,7 +39,7 @@ public:
 
     ndt::type get_canonical_type() const;
 
-    bool is_lossless_assignment(const ndt::type& dst_dt, const ndt::type& src_dt) const;
+    bool is_lossless_assignment(const ndt::type& dst_tp, const ndt::type& src_tp) const;
 
     bool operator==(const base_type& rhs) const;
 
@@ -54,8 +54,8 @@ public:
 
     size_t make_assignment_kernel(
                     hierarchical_kernel *out, size_t offset_out,
-                    const ndt::type& dst_dt, const char *dst_metadata,
-                    const ndt::type& src_dt, const char *src_metadata,
+                    const ndt::type& dst_tp, const char *dst_metadata,
+                    const ndt::type& src_tp, const char *src_metadata,
                     kernel_request_t kernreq, assign_error_mode errmode,
                     const eval::eval_context *ectx) const;
 

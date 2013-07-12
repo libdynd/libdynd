@@ -17,7 +17,7 @@ namespace dynd {
  * These are all the types of memory blocks supported by the dnd library.
  */
 enum memory_block_type_t {
-    /** An ndobject containing the metadata specified by the dtype */
+    /** A dynd array containing the metadata specified by the type */
     array_memory_block_type,
     /** Memory from outside the dnd library */
     external_memory_block_type,
@@ -98,7 +98,7 @@ struct memory_block_pod_allocator_api {
 
 /**
  * This is a struct of function pointers for allocating
- * object data (of dtypes with a destructor) within a
+ * object data (of types with a destructor) within a
  * memory_block that supports it.
  */
 struct memory_block_objectarray_allocator_api {

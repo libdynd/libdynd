@@ -2,7 +2,7 @@
 // Copyright (C) 2011-13 Mark Wiebe, DyND Developers
 // BSD 2-Clause License, see LICENSE.txt
 //
-// The categorical dtype always represents categorical data
+// The categorical type always represents categorical data
 //
 #ifndef _DYND__CATEGORICAL_TYPE_HPP_
 #define _DYND__CATEGORICAL_TYPE_HPP_
@@ -25,7 +25,7 @@ namespace dynd {
 
 class categorical_type : public base_type {
     // The data type of the category
-    ndt::type m_category_type;
+    ndt::type m_category_tp;
     // The integer type used for storage
     ndt::type m_storage_type;
     // list of categories, in sorted order
@@ -52,14 +52,14 @@ public:
     }
 
     /**
-     * Returns the dtype of the category values.
+     * Returns the type of the category values.
      */
     const ndt::type& get_category_type() const {
-        return m_category_type;
+        return m_category_tp;
     }
 
     /**
-     * Return the dtype of the underlying integer used
+     * Return the type of the underlying integer used
      * to index the category list.
      */
     const ndt::type& get_storage_type() const {
@@ -82,7 +82,7 @@ public:
     /** Returns the categories as an immutable nd::array */
     nd::array get_categories() const;
 
-    bool is_lossless_assignment(const ndt::type& dst_dt, const ndt::type& src_dt) const;
+    bool is_lossless_assignment(const ndt::type& dst_tp, const ndt::type& src_tp) const;
 
     bool operator==(const base_type& rhs) const;
 
@@ -93,8 +93,8 @@ public:
 
     size_t make_assignment_kernel(
                     hierarchical_kernel *out, size_t offset_out,
-                    const ndt::type& dst_dt, const char *dst_metadata,
-                    const ndt::type& src_dt, const char *src_metadata,
+                    const ndt::type& dst_tp, const char *dst_metadata,
+                    const ndt::type& src_tp, const char *src_metadata,
                     kernel_request_t kernreq, assign_error_mode errmode,
                     const eval::eval_context *ectx) const;
 

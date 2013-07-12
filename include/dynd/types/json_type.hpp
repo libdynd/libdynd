@@ -10,7 +10,7 @@
 
 namespace dynd {
 
-// The json dtype is stored as a string, but limited to
+// The json type is stored as a string, but limited to
 // UTF-8 and is supposed to contain JSON data.
 typedef string_type_metadata json_type_metadata;
 typedef string_type_data json_type_data;
@@ -36,7 +36,7 @@ public:
     bool is_unique_data_owner(const char *metadata) const;
     ndt::type get_canonical_type() const;
 
-    bool is_lossless_assignment(const ndt::type& dst_dt, const ndt::type& src_dt) const;
+    bool is_lossless_assignment(const ndt::type& dst_tp, const ndt::type& src_tp) const;
 
     bool operator==(const base_type& rhs) const;
 
@@ -49,8 +49,8 @@ public:
 
     size_t make_assignment_kernel(
                     hierarchical_kernel *out, size_t offset_out,
-                    const ndt::type& dst_dt, const char *dst_metadata,
-                    const ndt::type& src_dt, const char *src_metadata,
+                    const ndt::type& dst_tp, const char *dst_metadata,
+                    const ndt::type& src_tp, const char *src_metadata,
                     kernel_request_t kernreq, assign_error_mode errmode,
                     const eval::eval_context *ectx) const;
 };

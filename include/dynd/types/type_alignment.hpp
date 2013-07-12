@@ -2,11 +2,9 @@
 // Copyright (C) 2011-13 Mark Wiebe, DyND Developers
 // BSD 2-Clause License, see LICENSE.txt
 //
-// The realign dtype applies a more
-// stringent alignment to a bytes dtype.
-//
-#ifndef _DYND__REALIGN_TYPE_HPP_
-#define _DYND__REALIGN_TYPE_HPP_
+
+#ifndef _DYND__TYPE_ALIGNMENT_HPP_
+#define _DYND__TYPE_ALIGNMENT_HPP_
 
 #include <dynd/type.hpp>
 
@@ -29,4 +27,4 @@ ndt::type make_unaligned()
 
 }} // namespace dynd::ndt
 
-#endif // _DYND__REALIGN_TYPE_HPP_
+#endif // _DYND__TYPE_ALIGNMENT_HPP_

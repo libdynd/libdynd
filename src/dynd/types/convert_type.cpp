@@ -69,13 +69,13 @@ void convert_type::get_shape(size_t ndim, size_t i, intptr_t *out_shape, const c
     }
 }
 
-bool convert_type::is_lossless_assignment(const ndt::type& dst_dt, const ndt::type& src_dt) const
+bool convert_type::is_lossless_assignment(const ndt::type& dst_tp, const ndt::type& src_tp) const
 {
-    // Treat this dtype as the value type for whether assignment is always lossless
-    if (src_dt.extended() == this) {
-        return dynd::is_lossless_assignment(dst_dt, m_value_type);
+    // Treat this type as the value type for whether assignment is always lossless
+    if (src_tp.extended() == this) {
+        return dynd::is_lossless_assignment(dst_tp, m_value_type);
     } else {
-        return dynd::is_lossless_assignment(m_value_type, src_dt);
+        return dynd::is_lossless_assignment(m_value_type, src_tp);
     }
 }
 

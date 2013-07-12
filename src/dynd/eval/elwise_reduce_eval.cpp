@@ -88,7 +88,7 @@ ndarray_node_ptr dynd::eval::evaluate_elwise_reduce_array(ndarray_node* node,
     elwise_reduce_kernel_node *rnode = static_cast<elwise_reduce_kernel_node*>(node);
     ndarray_node *strided_node = rnode->get_opnode(0);
 
-    const ndt::type& result_dt = rnode->get_dtype().value_type();
+    const ndt::type& result_dt = rnode->get_type().value_type();
 
     if (result_dt.get_memory_management() == blockref_memory_management) {
         throw runtime_error("blockref memory management isn't supported for elwise reduce gfuncs yet");
@@ -99,7 +99,7 @@ ndarray_node_ptr dynd::eval::evaluate_elwise_reduce_array(ndarray_node* node,
     deque<intptr_t> element_sizes;
 
     if (strided_node->get_category() != strided_array_node_category ||
-                    strided_node->get_dtype().get_kind() == expression_kind) {
+                    strided_node->get_type().get_kind() == expression_kind) {
         // If the next node is a groupby, call the special groupby reduction code
         if (strided_node->get_category() == groupby_node_category) {
             return evaluate_groupby_elwise_reduce(node, ectx, copy, access_flags);
@@ -198,7 +198,7 @@ ndarray_node_ptr dynd::eval::evaluate_elwise_reduce_array(ndarray_node* node,
         intptr_t dst_stride = iter.innerstride<0>();
         intptr_t src0_stride = iter.innerstride<1>();
         unary_specialization_t uspec = get_unary_specialization(dst_stride, result_dt.get_data_size(),
-                                                    src0_stride, strided_node->get_dtype().storage_type().get_data_size());
+                                                    src0_stride, strided_node->get_type().storage_type().get_data_size());
         unary_operation_t copy_op = copy_kernel.specializations[uspec];
         if (innersize > 0) {
             do {
@@ -227,13 +227,13 @@ ndarray_node_ptr dynd::eval::evaluate_elwise_reduce_array(ndarray_node* node,
     intptr_t dst_stride = iter.innerstride<0>();
     intptr_t src0_stride = iter.innerstride<1>();
     unary_specialization_t uspec = get_unary_specialization(dst_stride, result_dt.get_data_size(),
-                                                src0_stride, strided_node->get_dtype().storage_type().get_data_size());
+                                                src0_stride, strided_node->get_type().storage_type().get_data_size());
 
     // Create the reduction kernel
     rnode->get_unary_operation(dst_stride, src0_stride, reduce_operation);
     if (!kernels.empty()) {
         // Create a unary specialization kernel by replicating the general kernel
-        element_sizes.push_back(node->get_dtype().get_data_size());
+        element_sizes.push_back(node->get_type().get_data_size());
         reduce_op_duped[0] = reduce_operation.kernel;
         reduce_op_duped[1] = reduce_operation.kernel;
         reduce_op_duped[2] = reduce_operation.kernel;

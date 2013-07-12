@@ -126,8 +126,8 @@ TEST(StructDType, DTypeAt) {
     ndt::type d3 = ndt::make_fixedstring(5, string_encoding_utf_8);
     dt = ndt::make_struct(d1, "x", d2, "y", d3, "z");
 
-    // indexing into a dtype with a slice produces another
-    // struct dtype with the subset of fields.
+    // indexing into a type with a slice produces another
+    // struct type with the subset of fields.
     EXPECT_EQ(ndt::make_struct(d1, "x", d2, "y"), dt.at(irange() < 2));
     EXPECT_EQ(ndt::make_struct(d1, "x", d3, "z"), dt.at(irange(0, 3, 2)));
     EXPECT_EQ(ndt::make_struct(d3, "z", d2, "y"), dt.at(irange(2, 0, -1)));

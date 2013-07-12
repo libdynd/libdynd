@@ -87,8 +87,8 @@ namespace {
 
         size_t make_expr_kernel(
                     hierarchical_kernel *out, size_t offset_out,
-                    const ndt::type& dst_dt, const char *dst_metadata,
-                    size_t src_count, const ndt::type *src_dt, const char **src_metadata,
+                    const ndt::type& dst_tp, const char *dst_metadata,
+                    size_t src_count, const ndt::type *src_tp, const char **src_metadata,
                     kernel_request_t kernreq, const eval::eval_context *ectx) const
         {
             if (src_count != 2) {
@@ -97,15 +97,15 @@ namespace {
                 ss << "received " << src_count;
                 throw runtime_error(ss.str());
             }
-            if (dst_dt != m_rdt || src_dt[0] != m_op1dt ||
-                            src_dt[1] != m_op2dt) {
-                // If the dtypes don't match the ones for this generator,
+            if (dst_tp != m_rdt || src_tp[0] != m_op1dt ||
+                            src_tp[1] != m_op2dt) {
+                // If the types don't match the ones for this generator,
                 // call the elementwise dimension handler to handle one dimension
                 // or handle input/output buffering, giving 'this' as the next
                 // kernel generator to call
                 return make_elwise_dimension_expr_kernel(out, offset_out,
-                                dst_dt, dst_metadata,
-                                src_count, src_dt, src_metadata,
+                                dst_tp, dst_metadata,
+                                src_count, src_tp, src_metadata,
                                 kernreq, ectx,
                                 this);
             }
@@ -255,7 +255,7 @@ nd::array apply_binary_operator(const nd::array *ops,
         }
     }
 
-    // Assemble the destination value dtype
+    // Assemble the destination value type
     ndt::type result_vdt = rdt;
     for (size_t j = 0; j != undim; ++j) {
         if (result_shape[undim - j - 1] == -1) {
@@ -269,8 +269,8 @@ nd::array apply_binary_operator(const nd::array *ops,
     string field_names[2] = {"arg0", "arg1"};
     nd::array ops_as_dt[2] = {ops[0].ucast(op1dt), ops[1].ucast(op2dt)};
     nd::array result = combine_into_struct(2, field_names, ops_as_dt);
-    // Because the expr dtype's operand is the result's dtype,
-    // we can swap it in as the dtype
+    // Because the expr type's operand is the result's type,
+    // we can swap it in as the type
     ndt::type edt = ndt::make_expr(result_vdt,
                     result.get_type(),
                     new arithmetic_op_kernel_generator<KD>(rdt, op1dt, op2dt, expr_ops, name));

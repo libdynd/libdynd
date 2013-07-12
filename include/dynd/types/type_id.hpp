@@ -28,22 +28,22 @@ enum type_kind_t {
     bytes_kind,
     void_kind,
     datetime_kind,
-    // For any dimension dtypes which have elements of all the same type
+    // For any dimension types which have elements of all the same type
     uniform_dim_kind,
     // For struct_type_id and cstruct_type_id
     struct_kind,
-    // For dtypes whose value_type != the dtype, signals
+    // For types whose value_type != the type, signals
     // that calculations should look at the value_type for
     // type promotion, etc.
     expression_kind,
-    // For pattern-matching dtypes
+    // For pattern-matching types
     pattern_kind,
-    // For use when it becomes possible to register custom dtypes
+    // For use when it becomes possible to register custom types
     custom_kind
 };
 
 enum type_id_t {
-    // The value zero is reserved for an uninitialized dtype.
+    // The value zero is reserved for an uninitialized type.
     uninitialized_type_id,
     // A 1-byte boolean type
     bool_type_id,
@@ -75,7 +75,7 @@ enum type_id_t {
     // A pointer type
     pointer_type_id,
 
-    // blockref primitive dtypes
+    // blockref primitive types
     bytes_type_id,
     // A bytes buffer of a fixed size
     fixedbytes_type_id,
@@ -112,7 +112,7 @@ enum type_id_t {
     tuple_type_id,
     ndobject_type_id,
 
-    // Adapter dtypes
+    // Adapter types
     convert_type_id,
     byteswap_type_id,
     view_type_id,
@@ -125,21 +125,21 @@ enum type_id_t {
     unary_expr_type_id,
     groupby_type_id,
 
-    // Instances of this dtype are themselves dtypes
+    // Instances of this type are themselves types
     type_type_id,
 
     // The number of built-in, atomic types (including uninitialized and void)
     builtin_type_id_count = 19
 };
 
-enum dtype_flags_t {
+enum type_flags_t {
     // A symbolic name instead of just "0"
     type_flag_none = 0x00000000,
-    // The dtype should be considered as a scalar
+    // The type should be considered as a scalar
     type_flag_scalar = 0x00000001,
-    // Memory of this dtype should be zero-initialized
+    // Memory of this type should be zero-initialized
     type_flag_zeroinit = 0x00000002,
-    // Instances of this dtype point into other memory
+    // Instances of this type point into other memory
     // blocks, e.g. string_type, var_dim_type.
     type_flag_blockref = 0x00000004,
     // Memory of this type must be destroyed,
@@ -165,13 +165,13 @@ enum axis_order_classification_t {
 enum {
     // These are the flags expression types should inherit
     // from their operand type
-    dtype_flags_operand_inherited =
+    type_flags_operand_inherited =
                     type_flag_zeroinit|
                     type_flag_blockref|
                     type_flag_destructor,
     // These are the flags expression types should inherit
     // from their value type
-    dtype_flags_value_inherited =
+    type_flags_value_inherited =
                     type_flag_scalar
 };
 
@@ -283,55 +283,55 @@ template <> struct type_id_of<std::complex<double> > {enum {value = complex_floa
 template <> struct type_id_of<void> {enum {value = void_type_id};};
 
 // Type trait for the kind
-template <typename T> struct dtype_kind_of;
+template <typename T> struct dynd_kind_of;
 
-template <> struct dtype_kind_of<void> {static const type_kind_t value = void_kind;};
+template <> struct dynd_kind_of<void> {static const type_kind_t value = void_kind;};
 // Can't use bool, because it doesn't have a guaranteed sizeof
-template <> struct dtype_kind_of<dynd_bool> {static const type_kind_t value = bool_kind;};
-template <> struct dtype_kind_of<char> {
+template <> struct dynd_kind_of<dynd_bool> {static const type_kind_t value = bool_kind;};
+template <> struct dynd_kind_of<char> {
     static const type_kind_t value = ((char)-1) < 0 ? int_kind : uint_kind;
 };
-template <> struct dtype_kind_of<signed char> {static const type_kind_t value = int_kind;};
-template <> struct dtype_kind_of<short> {static const type_kind_t value = int_kind;};
-template <> struct dtype_kind_of<int> {static const type_kind_t value = int_kind;};
-template <> struct dtype_kind_of<long> {static const type_kind_t value = int_kind;};
-template <> struct dtype_kind_of<long long> {static const type_kind_t value = int_kind;};
-template <> struct dtype_kind_of<dynd_int128> {static const type_kind_t value = int_kind;};
-template <> struct dtype_kind_of<uint8_t> {static const type_kind_t value = uint_kind;};
-template <> struct dtype_kind_of<uint16_t> {static const type_kind_t value = uint_kind;};
-template <> struct dtype_kind_of<unsigned int> {static const type_kind_t value = uint_kind;};
-template <> struct dtype_kind_of<unsigned long> {static const type_kind_t value = uint_kind;};
-template <> struct dtype_kind_of<unsigned long long>{static const type_kind_t value = uint_kind;};
-template <> struct dtype_kind_of<dynd_uint128> {static const type_kind_t value = uint_kind;};
-template <> struct dtype_kind_of<dynd_float16> {static const type_kind_t value = real_kind;};
-template <> struct dtype_kind_of<float> {static const type_kind_t value = real_kind;};
-template <> struct dtype_kind_of<double> {static const type_kind_t value = real_kind;};
-template <> struct dtype_kind_of<dynd_float128> {static const type_kind_t value = real_kind;};
-template <typename T> struct dtype_kind_of<std::complex<T> > {static const type_kind_t value = complex_kind;};
+template <> struct dynd_kind_of<signed char> {static const type_kind_t value = int_kind;};
+template <> struct dynd_kind_of<short> {static const type_kind_t value = int_kind;};
+template <> struct dynd_kind_of<int> {static const type_kind_t value = int_kind;};
+template <> struct dynd_kind_of<long> {static const type_kind_t value = int_kind;};
+template <> struct dynd_kind_of<long long> {static const type_kind_t value = int_kind;};
+template <> struct dynd_kind_of<dynd_int128> {static const type_kind_t value = int_kind;};
+template <> struct dynd_kind_of<uint8_t> {static const type_kind_t value = uint_kind;};
+template <> struct dynd_kind_of<uint16_t> {static const type_kind_t value = uint_kind;};
+template <> struct dynd_kind_of<unsigned int> {static const type_kind_t value = uint_kind;};
+template <> struct dynd_kind_of<unsigned long> {static const type_kind_t value = uint_kind;};
+template <> struct dynd_kind_of<unsigned long long>{static const type_kind_t value = uint_kind;};
+template <> struct dynd_kind_of<dynd_uint128> {static const type_kind_t value = uint_kind;};
+template <> struct dynd_kind_of<dynd_float16> {static const type_kind_t value = real_kind;};
+template <> struct dynd_kind_of<float> {static const type_kind_t value = real_kind;};
+template <> struct dynd_kind_of<double> {static const type_kind_t value = real_kind;};
+template <> struct dynd_kind_of<dynd_float128> {static const type_kind_t value = real_kind;};
+template <typename T> struct dynd_kind_of<std::complex<T> > {static const type_kind_t value = complex_kind;};
 
 // Metaprogram for determining if a type is a valid C++ scalar
-// of a particular dtype.
-template<typename T> struct is_dtype_scalar {enum {value = false};};
-template <> struct is_dtype_scalar<dynd_bool> {enum {value = true};};
-template <> struct is_dtype_scalar<char> {enum {value = true};};
-template <> struct is_dtype_scalar<signed char> {enum {value = true};};
-template <> struct is_dtype_scalar<short> {enum {value = true};};
-template <> struct is_dtype_scalar<int> {enum {value = true};};
-template <> struct is_dtype_scalar<long> {enum {value = true};};
-template <> struct is_dtype_scalar<long long> {enum {value = true};};
-template <> struct is_dtype_scalar<dynd_int128> {enum {value = true};};
-template <> struct is_dtype_scalar<unsigned char> {enum {value = true};};
-template <> struct is_dtype_scalar<unsigned short> {enum {value = true};};
-template <> struct is_dtype_scalar<unsigned int> {enum {value = true};};
-template <> struct is_dtype_scalar<unsigned long> {enum {value = true};};
-template <> struct is_dtype_scalar<unsigned long long> {enum {value = true};};
-template <> struct is_dtype_scalar<dynd_uint128> {enum {value = true};};
-template <> struct is_dtype_scalar<dynd_float16> {enum {value = true};};
-template <> struct is_dtype_scalar<float> {enum {value = true};};
-template <> struct is_dtype_scalar<double> {enum {value = true};};
-template <> struct is_dtype_scalar<dynd_float128> {enum {value = true};};
-template <> struct is_dtype_scalar<std::complex<float> > {enum {value = true};};
-template <> struct is_dtype_scalar<std::complex<double> > {enum {value = true};};
+// of a particular type.
+template<typename T> struct is_dynd_scalar {enum {value = false};};
+template <> struct is_dynd_scalar<dynd_bool> {enum {value = true};};
+template <> struct is_dynd_scalar<char> {enum {value = true};};
+template <> struct is_dynd_scalar<signed char> {enum {value = true};};
+template <> struct is_dynd_scalar<short> {enum {value = true};};
+template <> struct is_dynd_scalar<int> {enum {value = true};};
+template <> struct is_dynd_scalar<long> {enum {value = true};};
+template <> struct is_dynd_scalar<long long> {enum {value = true};};
+template <> struct is_dynd_scalar<dynd_int128> {enum {value = true};};
+template <> struct is_dynd_scalar<unsigned char> {enum {value = true};};
+template <> struct is_dynd_scalar<unsigned short> {enum {value = true};};
+template <> struct is_dynd_scalar<unsigned int> {enum {value = true};};
+template <> struct is_dynd_scalar<unsigned long> {enum {value = true};};
+template <> struct is_dynd_scalar<unsigned long long> {enum {value = true};};
+template <> struct is_dynd_scalar<dynd_uint128> {enum {value = true};};
+template <> struct is_dynd_scalar<dynd_float16> {enum {value = true};};
+template <> struct is_dynd_scalar<float> {enum {value = true};};
+template <> struct is_dynd_scalar<double> {enum {value = true};};
+template <> struct is_dynd_scalar<dynd_float128> {enum {value = true};};
+template <> struct is_dynd_scalar<std::complex<float> > {enum {value = true};};
+template <> struct is_dynd_scalar<std::complex<double> > {enum {value = true};};
 
 // Metaprogram for determining scalar alignment
 template <typename T> struct scalar_align_of {

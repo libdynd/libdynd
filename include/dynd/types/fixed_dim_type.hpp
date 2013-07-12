@@ -26,8 +26,8 @@ class fixed_dim_type : public base_uniform_dim_type {
 
     void create_ndobject_properties();
 public:
-    fixed_dim_type(size_t dimension_size, const ndt::type& element_dtype);
-    fixed_dim_type(size_t dimension_size, const ndt::type& element_dtype, intptr_t stride);
+    fixed_dim_type(size_t dimension_size, const ndt::type& element_tp);
+    fixed_dim_type(size_t dimension_size, const ndt::type& element_tp, intptr_t stride);
 
     virtual ~fixed_dim_type();
 
@@ -50,7 +50,7 @@ public:
     bool is_expression() const;
     bool is_unique_data_owner(const char *metadata) const;
     void transform_child_types(type_transform_fn_t transform_fn, void *extra,
-                    ndt::type& out_transformed_dtype, bool& out_was_transformed) const;
+                    ndt::type& out_transformed_tp, bool& out_was_transformed) const;
     ndt::type get_canonical_type() const;
     bool is_strided() const;
     void process_strided(const char *metadata, const char *data,
@@ -58,11 +58,11 @@ public:
                     intptr_t& out_stride, intptr_t& out_dim_size) const;
 
     ndt::type apply_linear_index(size_t nindices, const irange *indices,
-                size_t current_i, const ndt::type& root_dt, bool leading_dimension) const;
+                size_t current_i, const ndt::type& root_tp, bool leading_dimension) const;
     intptr_t apply_linear_index(size_t nindices, const irange *indices, const char *metadata,
-                    const ndt::type& result_dtype, char *out_metadata,
+                    const ndt::type& result_tp, char *out_metadata,
                     memory_block_data *embedded_reference,
-                    size_t current_i, const ndt::type& root_dt,
+                    size_t current_i, const ndt::type& root_tp,
                     bool leading_dimension, char **inout_data,
                     memory_block_data **inout_dataref) const;
     ndt::type at_single(intptr_t i0, const char **inout_metadata, const char **inout_data) const;
@@ -75,7 +75,7 @@ public:
 
     axis_order_classification_t classify_axis_order(const char *metadata) const;
 
-    bool is_lossless_assignment(const ndt::type& dst_dt, const ndt::type& src_dt) const;
+    bool is_lossless_assignment(const ndt::type& dst_tp, const ndt::type& src_tp) const;
 
     bool operator==(const base_type& rhs) const;
 
@@ -89,7 +89,7 @@ public:
                     memory_block_data *embedded_reference) const;
 
     size_t get_iterdata_size(size_t ndim) const;
-    size_t iterdata_construct(iterdata_common *iterdata, const char **inout_metadata, size_t ndim, const intptr_t* shape, ndt::type& out_uniform_dtype) const;
+    size_t iterdata_construct(iterdata_common *iterdata, const char **inout_metadata, size_t ndim, const intptr_t* shape, ndt::type& out_uniform_tp) const;
     size_t iterdata_destruct(iterdata_common *iterdata, size_t ndim) const;
 
     void data_destruct(const char *metadata, char *data) const;
@@ -98,8 +98,8 @@ public:
 
     size_t make_assignment_kernel(
                     hierarchical_kernel *out, size_t offset_out,
-                    const ndt::type& dst_dt, const char *dst_metadata,
-                    const ndt::type& src_dt, const char *src_metadata,
+                    const ndt::type& dst_tp, const char *dst_metadata,
+                    const ndt::type& src_tp, const char *src_metadata,
                     kernel_request_t kernreq, assign_error_mode errmode,
                     const eval::eval_context *ectx) const;
 
@@ -117,15 +117,15 @@ public:
 };
 
 namespace ndt {
-    inline ndt::type make_fixed_dim(size_t size, const ndt::type& element_dtype) {
-        return ndt::type(new fixed_dim_type(size, element_dtype), false);
+    inline ndt::type make_fixed_dim(size_t size, const ndt::type& element_tp) {
+        return ndt::type(new fixed_dim_type(size, element_tp), false);
     }
 
-    inline ndt::type make_fixed_dim(size_t size, const ndt::type& element_dtype, intptr_t stride) {
-        return ndt::type(new fixed_dim_type(size, element_dtype, stride), false);
+    inline ndt::type make_fixed_dim(size_t size, const ndt::type& element_tp, intptr_t stride) {
+        return ndt::type(new fixed_dim_type(size, element_tp, stride), false);
     }
 
-    ndt::type make_fixed_dim(size_t ndim, const intptr_t *shape, const ndt::type& uniform_dtype, const int *axis_perm);
+    ndt::type make_fixed_dim(size_t ndim, const intptr_t *shape, const ndt::type& uniform_tp, const int *axis_perm);
 } // namespace ndt
 
 } // namespace dynd

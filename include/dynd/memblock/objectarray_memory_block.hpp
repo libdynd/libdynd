@@ -16,7 +16,7 @@ namespace dynd {
 
 /**
  * Creates a memory block which can be used to allocate zero-initialized
- * object dtype output memory for blockref dtypes.
+ * object type output memory for blockref types.
  *
  * The initial count of elements can be set if a good estimate is known.
  *

@@ -2,11 +2,11 @@
 // Copyright (C) 2011-13 Mark Wiebe, DyND Developers
 // BSD 2-Clause License, see LICENSE.txt
 //
-// The conversion dtype represents one dtype viewed
+// The conversion type represents one type viewed
 // as another buffering based on the casting mechanism.
 //
-// This dtype takes on the characteristics of its storage dtype
-// through the dtype interface, except for the "kind" which
+// This type takes on the characteristics of its storage type
+// through the type interface, except for the "kind" which
 // is expression_kind to signal that the value_type must be examined.
 //
 #ifndef _DYND__CONVERT_TYPE_HPP_
@@ -40,7 +40,7 @@ public:
 
     void get_shape(size_t ndim, size_t i, intptr_t *out_shape, const char *metadata) const;
 
-    bool is_lossless_assignment(const ndt::type& dst_dt, const ndt::type& src_dt) const;
+    bool is_lossless_assignment(const ndt::type& dst_tp, const ndt::type& src_tp) const;
 
     bool operator==(const base_type& rhs) const;
 
@@ -55,7 +55,7 @@ public:
                     const char *dst_metadata, const char *src_metadata,
                     kernel_request_t kernreq, const eval::eval_context *ectx) const;
 
-    // Propagate properties and functions from the value dtype
+    // Propagate properties and functions from the value type
     void get_dynamic_array_properties(
                     const std::pair<std::string, gfunc::callable> **out_properties,
                     size_t *out_count) const
@@ -76,7 +76,7 @@ public:
 
 namespace ndt {
     /**
-     * Makes a conversion dtype to convert from the operand_type to the value_type.
+     * Makes a conversion type to convert from the operand_type to the value_type.
      * If the value_type has expression_kind, it chains operand_type.value_type()
      * into value_type.storage_type().
      */
@@ -84,7 +84,7 @@ namespace ndt {
                     assign_error_mode errmode = assign_error_default) {
         if (operand_type.value_type() != value_type) {
             if (value_type.get_kind() != expression_kind) {
-                // Create a conversion dtype when the value kind is different
+                // Create a conversion type when the value kind is different
                 return ndt::type(new convert_type(value_type, operand_type, errmode), false);
             } else if (value_type.storage_type() == operand_type.value_type()) {
                 // No conversion required at the connection

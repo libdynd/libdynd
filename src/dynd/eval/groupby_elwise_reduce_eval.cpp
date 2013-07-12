@@ -31,7 +31,7 @@ static void groupby_elwise_reduce_loop(char *result_originptr, intptr_t result_s
                             data_ptr, 0, 1, reduce_operation.auxdata);
         } else {
             stringstream ss;
-            ss << "invalid value " << group << " for categorical dtype " << groups_dt;
+            ss << "invalid value " << group << " for categorical type " << groups_dt;
             throw runtime_error(ss.str());
         }
         by_ptr += by_stride;
@@ -62,7 +62,7 @@ static void groupby_elwise_reduce_loop_no_identity(char *result_originptr, intpt
             }
         } else {
             stringstream ss;
-            ss << "invalid value " << group << " for categorical dtype " << groups_dt;
+            ss << "invalid value " << group << " for categorical type " << groups_dt;
             throw runtime_error(ss.str());
         }
         by_ptr += by_stride;
@@ -78,7 +78,7 @@ ndarray_node_ptr dynd::eval::evaluate_groupby_elwise_reduce(ndarray_node *node, 
     ndarray_node *data_strided_node = gnode->get_data_node();
     ndarray_node *by_strided_node = gnode->get_by_node();
 
-    const ndt::type& result_dt = rnode->get_dtype().value_type();
+    const ndt::type& result_dt = rnode->get_type().value_type();
     const ndt::type& groups_dt = gnode->get_groups();
     const categorical_type *groups = static_cast<const categorical_type *>(groups_dt.extended());
     intptr_t num_groups = groups->get_category_count();
@@ -101,12 +101,12 @@ ndarray_node_ptr dynd::eval::evaluate_groupby_elwise_reduce(ndarray_node *node, 
     deque<intptr_t> data_element_sizes, by_element_sizes;
 
     if (data_strided_node->get_category() != strided_array_node_category ||
-                    data_strided_node->get_dtype().get_kind() == expression_kind) {
+                    data_strided_node->get_type().get_kind() == expression_kind) {
         data_strided_node = push_front_node_unary_kernels(data_strided_node, ectx, data_kernels, data_element_sizes);
     }
 
     if (by_strided_node->get_category() != strided_array_node_category ||
-                    by_strided_node->get_dtype().get_kind() == expression_kind) {
+                    by_strided_node->get_type().get_kind() == expression_kind) {
         by_strided_node = push_front_node_unary_kernels(by_strided_node, ectx, by_kernels, by_element_sizes);
     }
 

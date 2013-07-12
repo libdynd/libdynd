@@ -36,7 +36,7 @@ fixedstring_type::fixedstring_type(intptr_t stringsize, string_encoding_t encodi
             m_members.data_alignment = 4;
             break;
         default:
-            throw runtime_error("Unrecognized string encoding in fixedstring dtype constructor");
+            throw runtime_error("Unrecognized string encoding in dynd fixedstring type constructor");
     }
 }
 
@@ -138,8 +138,8 @@ ndt::type fixedstring_type::get_canonical_type() const
 }
 
 bool fixedstring_type::is_lossless_assignment(
-                const ndt::type& DYND_UNUSED(dst_dt),
-                const ndt::type& DYND_UNUSED(src_dt)) const
+                const ndt::type& DYND_UNUSED(dst_tp),
+                const ndt::type& DYND_UNUSED(src_tp)) const
 {
     // Don't shortcut anything to 'none' error checking, so that
     // decoding errors get caught appropriately.
@@ -160,48 +160,48 @@ bool fixedstring_type::operator==(const base_type& rhs) const
 
 size_t fixedstring_type::make_assignment_kernel(
                 hierarchical_kernel *out, size_t offset_out,
-                const ndt::type& dst_dt, const char *dst_metadata,
-                const ndt::type& src_dt, const char *src_metadata,
+                const ndt::type& dst_tp, const char *dst_metadata,
+                const ndt::type& src_tp, const char *src_metadata,
                 kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *ectx) const
 {
-    if (this == dst_dt.extended()) {
-        switch (src_dt.get_type_id()) {
+    if (this == dst_tp.extended()) {
+        switch (src_tp.get_type_id()) {
             case fixedstring_type_id: {
-                const fixedstring_type *src_fs = static_cast<const fixedstring_type *>(src_dt.extended());
+                const fixedstring_type *src_fs = static_cast<const fixedstring_type *>(src_tp.extended());
                 return make_fixedstring_assignment_kernel(out, offset_out,
                                 get_data_size(), m_encoding, src_fs->get_data_size(), src_fs->m_encoding,
                                 kernreq, errmode, ectx);
             }
             case string_type_id: {
-                const base_string_type *src_fs = static_cast<const base_string_type *>(src_dt.extended());
+                const base_string_type *src_fs = static_cast<const base_string_type *>(src_tp.extended());
                 return make_blockref_string_to_fixedstring_assignment_kernel(out, offset_out,
                                 get_data_size(), m_encoding, src_fs->get_encoding(),
                                 kernreq, errmode, ectx);
             }
             default: {
-                if (!src_dt.is_builtin()) {
-                    return src_dt.extended()->make_assignment_kernel(out, offset_out,
-                                    dst_dt, dst_metadata,
-                                    src_dt, src_metadata,
+                if (!src_tp.is_builtin()) {
+                    return src_tp.extended()->make_assignment_kernel(out, offset_out,
+                                    dst_tp, dst_metadata,
+                                    src_tp, src_metadata,
                                     kernreq, errmode, ectx);
                 } else {
                     return make_builtin_to_string_assignment_kernel(out, offset_out,
-                                dst_dt, dst_metadata,
-                                src_dt.get_type_id(),
+                                dst_tp, dst_metadata,
+                                src_tp.get_type_id(),
                                 kernreq, errmode, ectx);
                 }
             }
         }
     } else {
-        if (dst_dt.is_builtin()) {
+        if (dst_tp.is_builtin()) {
             return make_string_to_builtin_assignment_kernel(out, offset_out,
-                            dst_dt.get_type_id(),
-                            src_dt, src_metadata,
+                            dst_tp.get_type_id(),
+                            src_tp, src_metadata,
                             kernreq, errmode, ectx);
         } else {
             stringstream ss;
-            ss << "Cannot assign from " << src_dt << " to " << dst_dt;
+            ss << "Cannot assign from " << src_tp << " to " << dst_tp;
             throw runtime_error(ss.str());
         }
     }

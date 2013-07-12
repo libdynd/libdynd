@@ -98,18 +98,18 @@ namespace {
     };
 } // anonymous namespace
 
-nd::array dynd::nd::range(const ndt::type& scalar_dtype, const void *beginval, const void *endval, const void *stepval)
+nd::array dynd::nd::range(const ndt::type& scalar_tp, const void *beginval, const void *endval, const void *stepval)
 {
 #define ONE_ARANGE_SPECIALIZATION(type) \
     case type_id_of<type>::value: { \
-        intptr_t dim_size = range_counter<type, dtype_kind_of<type>::value>::count(beginval, endval, stepval); \
+        intptr_t dim_size = range_counter<type, dynd_kind_of<type>::value>::count(beginval, endval, stepval); \
         nd::array result = \
-                nd::make_strided_array(dim_size, scalar_dtype); \
+                nd::make_strided_array(dim_size, scalar_tp); \
         range_specialization<type>::range(beginval, stepval, result); \
         return DYND_MOVE(result); \
     }
 
-    switch (scalar_dtype.get_type_id()) {
+    switch (scalar_tp.get_type_id()) {
         ONE_ARANGE_SPECIALIZATION(int8_t);
         ONE_ARANGE_SPECIALIZATION(int16_t);
         ONE_ARANGE_SPECIALIZATION(int32_t);
@@ -127,7 +127,7 @@ nd::array dynd::nd::range(const ndt::type& scalar_dtype, const void *beginval, c
 #undef ONE_ARANGE_SPECIALIZATION
 
     stringstream ss;
-    ss << "dynd nd::range doesn't support type " << scalar_dtype;
+    ss << "dynd nd::range doesn't support type " << scalar_tp;
     throw runtime_error(ss.str());
 }
 
@@ -231,6 +231,6 @@ nd::array dynd::nd::linspace(const ndt::type& dt, const void *startval, const vo
     }
 
     stringstream ss;
-    ss << "dynd linspace doesn't support dtype " << dt;
+    ss << "dynd linspace doesn't support type " << dt;
     throw runtime_error(ss.str());
 }

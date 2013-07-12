@@ -46,10 +46,10 @@ inline string broadcast_error_message(const nd::array& dst, const nd::array& src
     vector<intptr_t> dst_shape = dst.get_shape(), src_shape = src.get_shape();
     stringstream ss;
 
-    ss << "cannot broadcast nd::array with dtype ";
+    ss << "cannot broadcast dynd array with type ";
     ss << src.get_type() << " and shape ";
     print_shape(ss, src_shape);
-    ss << " to dtype " << dst.get_type() << " and shape ";
+    ss << " to type " << dst.get_type() << " and shape ";
     print_shape(ss, dst_shape);
 
     return ss.str();
@@ -83,39 +83,39 @@ broadcast_error::broadcast_error(size_t ninputs, const nd::array *inputs)
 {
 }
 
-inline string broadcast_error_message(const ndt::type& dst_dt, const char *dst_metadata,
-                const ndt::type& src_dt, const char *src_metadata)
+inline string broadcast_error_message(const ndt::type& dst_tp, const char *dst_metadata,
+                const ndt::type& src_tp, const char *src_metadata)
 {
     stringstream ss;
     ss << "cannot broadcast input datashape '";
-    format_datashape(ss, src_dt, src_metadata, NULL, false);
+    format_datashape(ss, src_tp, src_metadata, NULL, false);
     ss << "' into datashape '";
-    format_datashape(ss, dst_dt, dst_metadata, NULL, false);
+    format_datashape(ss, dst_tp, dst_metadata, NULL, false);
     ss << "'";
     return ss.str();
 }
 
-broadcast_error::broadcast_error(const ndt::type& dst_dt, const char *dst_metadata,
-                const ndt::type& src_dt, const char *src_metadata)
+broadcast_error::broadcast_error(const ndt::type& dst_tp, const char *dst_metadata,
+                const ndt::type& src_tp, const char *src_metadata)
     : dynd_exception("broadcast error", broadcast_error_message(
-                    dst_dt, dst_metadata, src_dt, src_metadata))
+                    dst_tp, dst_metadata, src_tp, src_metadata))
 {
 }
 
-inline string broadcast_error_message(const ndt::type& dst_dt, const char *dst_metadata,
+inline string broadcast_error_message(const ndt::type& dst_tp, const char *dst_metadata,
                 const char *src_name)
 {
     stringstream ss;
     ss << "cannot broadcast input " << src_name << " into datashape '";
-    format_datashape(ss, dst_dt, dst_metadata, NULL, false);
+    format_datashape(ss, dst_tp, dst_metadata, NULL, false);
     ss << "'";
     return ss.str();
 }
 
-broadcast_error::broadcast_error(const ndt::type& dst_dt, const char *dst_metadata,
+broadcast_error::broadcast_error(const ndt::type& dst_tp, const char *dst_metadata,
                 const char *src_name)
     : dynd_exception("broadcast error", broadcast_error_message(
-                    dst_dt, dst_metadata, src_name))
+                    dst_tp, dst_metadata, src_name))
 {
 }
 

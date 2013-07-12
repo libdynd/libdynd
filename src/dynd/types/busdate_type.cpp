@@ -83,13 +83,13 @@ void dynd::busdate_type::print_type(std::ostream& o) const
     }
 }
 
-bool dynd::busdate_type::is_lossless_assignment(const ndt::type& dst_dt, const ndt::type& src_dt) const
+bool dynd::busdate_type::is_lossless_assignment(const ndt::type& dst_tp, const ndt::type& src_tp) const
 {
-    if (dst_dt.extended() == this) {
-        if (src_dt.extended() == this) {
+    if (dst_tp.extended() == this) {
+        if (src_tp.extended() == this) {
             return true;
-        } else if (src_dt.get_type_id() == date_type_id) {
-            const busdate_type *src_fs = static_cast<const busdate_type*>(src_dt.extended());
+        } else if (src_tp.get_type_id() == date_type_id) {
+            const busdate_type *src_fs = static_cast<const busdate_type*>(src_tp.extended());
             // No need to compare the roll policy, just the weekmask and holidays determine this
             return memcmp(m_workweek, src_fs->m_workweek, sizeof(m_workweek)) == 0 &&
                     m_holidays.equals_exact(src_fs->m_holidays);

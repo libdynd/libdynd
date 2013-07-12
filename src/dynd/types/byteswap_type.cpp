@@ -18,7 +18,7 @@ byteswap_type::byteswap_type(const ndt::type& value_type)
                     m_operand_type(ndt::make_fixedbytes(value_type.get_data_size(), value_type.get_data_alignment()))
 {
     if (!value_type.is_builtin()) {
-        throw std::runtime_error("byteswap_type: Only built-in dtypes are supported presently");
+        throw std::runtime_error("byteswap_type: Only built-in types are supported presently");
     }
 }
 
@@ -27,10 +27,10 @@ byteswap_type::byteswap_type(const ndt::type& value_type, const ndt::type& opera
                     operand_type.get_data_alignment(), type_flag_scalar, 0),
             m_value_type(value_type), m_operand_type(operand_type)
 {
-    // Only a bytes dtype be the operand to the byteswap
+    // Only a bytes type be the operand to the byteswap
     if (operand_type.value_type().get_type_id() != fixedbytes_type_id) {
         std::stringstream ss;
-        ss << "byteswap_type: The operand to the dtype must have a value dtype of bytes, not " << operand_type.value_type();
+        ss << "byteswap_type: The operand to the type must have a value type of bytes, not " << operand_type.value_type();
         throw std::runtime_error(ss.str());
     }
     // Automatically realign if needed
@@ -58,13 +58,13 @@ void byteswap_type::print_type(std::ostream& o) const
     o << ">";
 }
 
-bool byteswap_type::is_lossless_assignment(const ndt::type& dst_dt, const ndt::type& src_dt) const
+bool byteswap_type::is_lossless_assignment(const ndt::type& dst_tp, const ndt::type& src_tp) const
 {
-    // Treat this dtype as the value dtype for whether assignment is always lossless
-    if (src_dt.extended() == this) {
-        return ::dynd::is_lossless_assignment(dst_dt, m_value_type);
+    // Treat this type as the value type for whether assignment is always lossless
+    if (src_tp.extended() == this) {
+        return ::dynd::is_lossless_assignment(dst_tp, m_value_type);
     } else {
-        return ::dynd::is_lossless_assignment(m_value_type, src_dt);
+        return ::dynd::is_lossless_assignment(m_value_type, src_tp);
     }
 }
 

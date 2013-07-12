@@ -23,8 +23,8 @@ class struct_type : public base_struct_type {
 
     void create_array_properties();
 
-    // Used as the parameters dtype for the nd::array properties callables
-    static ndt::type array_parameters_dtype;
+    // Used as the parameters type for the nd::array properties callables
+    static ndt::type array_parameters_type;
 public:
     struct_type(const std::vector<ndt::type>& fields, const std::vector<std::string>& field_names);
 
@@ -65,19 +65,19 @@ public:
     bool is_expression() const;
     bool is_unique_data_owner(const char *metadata) const;
     void transform_child_types(type_transform_fn_t transform_fn, void *extra,
-                    ndt::type& out_transformed_dtype, bool& out_was_transformed) const;
+                    ndt::type& out_transformed_tp, bool& out_was_transformed) const;
     ndt::type get_canonical_type() const;
 
     ndt::type apply_linear_index(size_t nindices, const irange *indices,
-                size_t current_i, const ndt::type& root_dt, bool leading_dimension) const;
+                size_t current_i, const ndt::type& root_tp, bool leading_dimension) const;
     intptr_t apply_linear_index(size_t nindices, const irange *indices, const char *metadata,
-                    const ndt::type& result_dtype, char *out_metadata,
+                    const ndt::type& result_tp, char *out_metadata,
                     memory_block_data *embedded_reference,
-                    size_t current_i, const ndt::type& root_dt,
+                    size_t current_i, const ndt::type& root_tp,
                     bool leading_dimension, char **inout_data,
                     memory_block_data **inout_dataref) const;
 
-    bool is_lossless_assignment(const ndt::type& dst_dt, const ndt::type& src_dt) const;
+    bool is_lossless_assignment(const ndt::type& dst_tp, const ndt::type& src_tp) const;
 
     bool operator==(const base_type& rhs) const;
 
@@ -91,8 +91,8 @@ public:
 
     size_t make_assignment_kernel(
                     hierarchical_kernel *out, size_t offset_out,
-                    const ndt::type& dst_dt, const char *dst_metadata,
-                    const ndt::type& src_dt, const char *src_metadata,
+                    const ndt::type& dst_tp, const char *dst_metadata,
+                    const ndt::type& src_tp, const char *src_metadata,
                     kernel_request_t kernreq, assign_error_mode errmode,
                     const eval::eval_context *ectx) const;
 
@@ -110,41 +110,41 @@ public:
 }; // class struct_type
 
 namespace ndt {
-    /** Makes a tuple dtype with the specified fields, using the standard layout */
+    /** Makes a struct type with the specified fields, using the standard layout */
     inline ndt::type make_struct(const std::vector<ndt::type>& fields, const std::vector<std::string>& field_names) {
         return ndt::type(new struct_type(fields, field_names), false);
     }
 
-    /** Makes a tuple dtype with the specified fields, using the standard layout */
-    inline ndt::type make_struct(const ndt::type& dt0, const std::string& name0)
+    /** Makes a struct type with the specified fields, using the standard layout */
+    inline ndt::type make_struct(const ndt::type& tp0, const std::string& name0)
     {
         std::vector<ndt::type> fields;
         std::vector<std::string> field_names;
-        fields.push_back(dt0);
+        fields.push_back(tp0);
         field_names.push_back(name0);
         return make_struct(fields, field_names);
     }
 
-    /** Makes a tuple dtype with the specified fields, using the standard layout */
-    inline ndt::type make_struct(const ndt::type& dt0, const std::string& name0, const ndt::type& dt1, const std::string& name1)
+    /** Makes a struct type with the specified fields, using the standard layout */
+    inline ndt::type make_struct(const ndt::type& tp0, const std::string& name0, const ndt::type& tp1, const std::string& name1)
     {
         std::vector<ndt::type> fields;
         std::vector<std::string> field_names;
-        fields.push_back(dt0);
-        fields.push_back(dt1);
+        fields.push_back(tp0);
+        fields.push_back(tp1);
         field_names.push_back(name0);
         field_names.push_back(name1);
         return make_struct(fields, field_names);
     }
 
-    /** Makes a tuple dtype with the specified fields, using the standard layout */
-    inline ndt::type make_struct(const ndt::type& dt0, const std::string& name0, const ndt::type& dt1, const std::string& name1, const ndt::type& dt2, const std::string& name2)
+    /** Makes a struct type with the specified fields, using the standard layout */
+    inline ndt::type make_struct(const ndt::type& tp0, const std::string& name0, const ndt::type& tp1, const std::string& name1, const ndt::type& tp2, const std::string& name2)
     {
         std::vector<ndt::type> fields;
         std::vector<std::string> field_names;
-        fields.push_back(dt0);
-        fields.push_back(dt1);
-        fields.push_back(dt2);
+        fields.push_back(tp0);
+        fields.push_back(tp1);
+        fields.push_back(tp2);
         field_names.push_back(name0);
         field_names.push_back(name1);
         field_names.push_back(name2);

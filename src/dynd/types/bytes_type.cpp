@@ -22,7 +22,7 @@ bytes_type::bytes_type(size_t alignment)
 {
     if (alignment != 1 && alignment != 2 && alignment != 4 && alignment != 8 && alignment != 16) {
         std::stringstream ss;
-        ss << "Cannot make a bytes dtype with alignment " << alignment << ", it must be a small power of two";
+        ss << "Cannot make a dynd bytes type with alignment " << alignment << ", it must be a small power of two";
         throw std::runtime_error(ss.str());
     }
 }
@@ -84,10 +84,10 @@ void bytes_type::get_shape(size_t ndim, size_t i,
     }
 }
 
-bool bytes_type::is_lossless_assignment(const ndt::type& dst_dt, const ndt::type& src_dt) const
+bool bytes_type::is_lossless_assignment(const ndt::type& dst_tp, const ndt::type& src_tp) const
 {
-    if (dst_dt.extended() == this) {
-        if (src_dt.get_kind() == bytes_kind) {
+    if (dst_tp.extended() == this) {
+        if (src_tp.get_kind() == bytes_kind) {
             return true;
         } else {
             return false;
@@ -99,30 +99,30 @@ bool bytes_type::is_lossless_assignment(const ndt::type& dst_dt, const ndt::type
 
 size_t bytes_type::make_assignment_kernel(
                 hierarchical_kernel *out, size_t offset_out,
-                const ndt::type& dst_dt, const char *dst_metadata,
-                const ndt::type& src_dt, const char *src_metadata,
+                const ndt::type& dst_tp, const char *dst_metadata,
+                const ndt::type& src_tp, const char *src_metadata,
                 kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *ectx) const
 {
-    if (this == dst_dt.extended()) {
-        switch (src_dt.get_type_id()) {
+    if (this == dst_tp.extended()) {
+        switch (src_tp.get_type_id()) {
             case bytes_type_id: {
                 return make_blockref_bytes_assignment_kernel(out, offset_out,
                                 get_data_alignment(), dst_metadata,
-                                src_dt.get_data_alignment(), src_metadata,
+                                src_tp.get_data_alignment(), src_metadata,
                                 kernreq, ectx);
             }
             case fixedbytes_type_id: {
                 return make_fixedbytes_to_blockref_bytes_assignment_kernel(out, offset_out,
                                 get_data_alignment(), dst_metadata,
-                                src_dt.get_data_size(), src_dt.get_data_alignment(),
+                                src_tp.get_data_size(), src_tp.get_data_alignment(),
                                 kernreq, ectx);
             }
             default: {
-                if (!src_dt.is_builtin()) {
-                    src_dt.extended()->make_assignment_kernel(out, offset_out,
-                                    dst_dt, dst_metadata,
-                                    src_dt, src_metadata,
+                if (!src_tp.is_builtin()) {
+                    src_tp.extended()->make_assignment_kernel(out, offset_out,
+                                    dst_tp, dst_metadata,
+                                    src_tp, src_metadata,
                                     kernreq, errmode, ectx);
                 }
                 break;
@@ -131,7 +131,7 @@ size_t bytes_type::make_assignment_kernel(
     }
 
     stringstream ss;
-    ss << "Cannot assign from " << src_dt << " to " << dst_dt;
+    ss << "Cannot assign from " << src_tp << " to " << dst_tp;
     throw runtime_error(ss.str());
 }
 

@@ -129,8 +129,8 @@ public:
 
     size_t make_expr_kernel(
                 hierarchical_kernel *out, size_t offset_out,
-                const ndt::type& dst_dt, const char *dst_metadata,
-                size_t src_count, const ndt::type *src_dt, const char **src_metadata,
+                const ndt::type& dst_tp, const char *dst_metadata,
+                size_t src_count, const ndt::type *src_tp, const char **src_metadata,
                 kernel_request_t kernreq, const eval::eval_context *ectx) const
     {
         if (src_count != 1) {
@@ -139,15 +139,15 @@ public:
             ss << "received " << src_count;
             throw runtime_error(ss.str());
         }
-        bool require_elwise = dst_dt.get_type_id() != string_type_id ||
-                        src_dt[0].get_type_id() != date_type_id;
-        // If the dtypes don't match the ones for this generator,
+        bool require_elwise = dst_tp.get_type_id() != string_type_id ||
+                        src_tp[0].get_type_id() != date_type_id;
+        // If the types don't match the ones for this generator,
         // call the elementwise dimension handler to handle one dimension,
         // giving 'this' as the next kernel generator to call
         if (require_elwise) {
             return make_elwise_dimension_expr_kernel(out, offset_out,
-                            dst_dt, dst_metadata,
-                            src_count, src_dt, src_metadata,
+                            dst_tp, dst_metadata,
+                            src_count, src_tp, src_metadata,
                             kernreq, ectx,
                             this);
         }
@@ -278,8 +278,8 @@ public:
 
     size_t make_expr_kernel(
                 hierarchical_kernel *out, size_t offset_out,
-                const ndt::type& dst_dt, const char *dst_metadata,
-                size_t src_count, const ndt::type *src_dt, const char **src_metadata,
+                const ndt::type& dst_tp, const char *dst_metadata,
+                size_t src_count, const ndt::type *src_tp, const char **src_metadata,
                 kernel_request_t kernreq, const eval::eval_context *ectx) const
     {
         if (src_count != 1) {
@@ -288,15 +288,15 @@ public:
             ss << "received " << src_count;
             throw runtime_error(ss.str());
         }
-        bool require_elwise = dst_dt.get_type_id() != date_type_id ||
-                        src_dt[0].get_type_id() != date_type_id;
-        // If the dtypes don't match the ones for this generator,
+        bool require_elwise = dst_tp.get_type_id() != date_type_id ||
+                        src_tp[0].get_type_id() != date_type_id;
+        // If the types don't match the ones for this generator,
         // call the elementwise dimension handler to handle one dimension,
         // giving 'this' as the next kernel generator to call
         if (require_elwise) {
             return make_elwise_dimension_expr_kernel(out, offset_out,
-                            dst_dt, dst_metadata,
-                            src_count, src_dt, src_metadata,
+                            dst_tp, dst_metadata,
+                            src_count, src_tp, src_metadata,
                             kernreq, ectx,
                             this);
         }

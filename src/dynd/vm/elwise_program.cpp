@@ -89,7 +89,7 @@ static void print_register(std::ostream& o, int reg)
 
 void dynd::vm::elwise_program::debug_print(std::ostream& o, const std::string& indent) const
 {
-    // Print all the register dtypes
+    // Print all the register types
     o << indent << "output register (0):\n";
     o << indent << "  " << m_regtypes[0] << "\n";
     if (m_input_count == 0) {

@@ -12,7 +12,7 @@ namespace dynd {
 
 
 /**
- * Base class for all bytes dtypes. If a dtype
+ * Base class for all bytes types. If a type
  * has kind bytes_kind, it must be a subclass of
  * base_bytes_type.
  */
@@ -28,7 +28,7 @@ public:
     /** Retrieves the data range in which a bytes object is stored */
     virtual void get_bytes_range(const char **out_begin, const char**out_end, const char *metadata, const char *data) const = 0;
 
-    // Bytes dtypes stop the iterdata chain
+    // Bytes types stop the iterdata chain
     // TODO: Maybe it should be more flexible?
     size_t get_iterdata_size(size_t ndim) const;
 };

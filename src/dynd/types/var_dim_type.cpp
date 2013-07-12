@@ -21,13 +21,13 @@
 using namespace std;
 using namespace dynd;
 
-var_dim_type::var_dim_type(const ndt::type& element_dtype)
-    : base_uniform_dim_type(var_dim_type_id, element_dtype, sizeof(var_dim_type_data),
+var_dim_type::var_dim_type(const ndt::type& element_tp)
+    : base_uniform_dim_type(var_dim_type_id, element_tp, sizeof(var_dim_type_data),
                     sizeof(const char *), sizeof(var_dim_type_metadata),
                     type_flag_zeroinit|type_flag_blockref)
 {
-    // NOTE: The element dtype may have type_flag_destructor set. In this case,
-    //       the var_dim dtype does NOT need to also set it, because the lifetime
+    // NOTE: The element type may have type_flag_destructor set. In this case,
+    //       the var_dim type does NOT need to also set it, because the lifetime
     //       of the elements it allocates is owned by the objectarray_memory_block,
     //       not by the var_dim elements.
 
@@ -48,7 +48,7 @@ void var_dim_type::print_data(std::ostream& o, const char *metadata, const char 
     metadata += sizeof(var_dim_type_metadata);
     o << "[";
     for (size_t i = 0, i_end = d->size; i != i_end; ++i, element_data += stride) {
-        m_element_dtype.print_data(o, metadata, element_data);
+        m_element_tp.print_data(o, metadata, element_data);
         if (i != i_end - 1) {
             o << ", ";
         }
@@ -58,12 +58,12 @@ void var_dim_type::print_data(std::ostream& o, const char *metadata, const char 
 
 void var_dim_type::print_type(std::ostream& o) const
 {
-    o << "var_dim<" << m_element_dtype << ">";
+    o << "var_dim<" << m_element_tp << ">";
 }
 
 bool var_dim_type::is_expression() const
 {
-    return m_element_dtype.is_expression();
+    return m_element_tp.is_expression();
 }
 
 bool var_dim_type::is_unique_data_owner(const char *metadata) const
@@ -76,30 +76,30 @@ bool var_dim_type::is_unique_data_owner(const char *metadata) const
               md->blockref->m_type != objectarray_memory_block_type))) {
         return false;
     }
-    if (m_element_dtype.is_builtin()) {
+    if (m_element_tp.is_builtin()) {
         return true;
     } else {
-        return m_element_dtype.extended()->is_unique_data_owner(metadata + sizeof(var_dim_type_metadata));
+        return m_element_tp.extended()->is_unique_data_owner(metadata + sizeof(var_dim_type_metadata));
     }
 }
 
 void var_dim_type::transform_child_types(type_transform_fn_t transform_fn, void *extra,
-                ndt::type& out_transformed_dtype, bool& out_was_transformed) const
+                ndt::type& out_transformed_tp, bool& out_was_transformed) const
 {
-    ndt::type tmp_dtype;
+    ndt::type tmp_tp;
     bool was_transformed = false;
-    transform_fn(m_element_dtype, extra, tmp_dtype, was_transformed);
+    transform_fn(m_element_tp, extra, tmp_tp, was_transformed);
     if (was_transformed) {
-        out_transformed_dtype = ndt::type(new var_dim_type(tmp_dtype), false);
+        out_transformed_tp = ndt::type(new var_dim_type(tmp_tp), false);
         out_was_transformed = true;
     } else {
-        out_transformed_dtype = ndt::type(this, true);
+        out_transformed_tp = ndt::type(this, true);
     }
 }
 
 ndt::type var_dim_type::get_canonical_type() const
 {
-    return ndt::type(new var_dim_type(m_element_dtype.get_canonical_type()), false);
+    return ndt::type(new var_dim_type(m_element_tp.get_canonical_type()), false);
 }
 
 bool var_dim_type::is_strided() const
@@ -113,33 +113,33 @@ void var_dim_type::process_strided(const char *metadata, const char *data,
 {
     const var_dim_type_metadata *md = reinterpret_cast<const var_dim_type_metadata *>(metadata);
     const var_dim_type_data *d = reinterpret_cast<const var_dim_type_data *>(data);
-    out_dt = m_element_dtype;
+    out_dt = m_element_tp;
     out_origin = d->begin;
     out_stride = md->stride;
     out_dim_size = d->size;
 }
 
 ndt::type var_dim_type::apply_linear_index(size_t nindices, const irange *indices,
-                size_t current_i, const ndt::type& root_dt, bool leading_dimension) const
+                size_t current_i, const ndt::type& root_tp, bool leading_dimension) const
 {
     if (nindices == 0) {
         return ndt::type(this, true);
     } else if (nindices == 1) {
         if (indices->step() == 0) {
             if (leading_dimension) {
-                if (m_element_dtype.is_builtin()) {
-                    return m_element_dtype;
+                if (m_element_tp.is_builtin()) {
+                    return m_element_tp;
                 } else {
-                    return m_element_dtype.apply_linear_index(0, NULL, current_i, root_dt, true);
+                    return m_element_tp.apply_linear_index(0, NULL, current_i, root_tp, true);
                 }
             } else {
-                // TODO: This is incorrect, but is here as a stopgap to be replaced by a sliced<> dtype
-                return ndt::make_pointer(m_element_dtype);
+                // TODO: This is incorrect, but is here as a stopgap to be replaced by a sliced<> type
+                return ndt::make_pointer(m_element_tp);
             }
         } else {
             if (leading_dimension) {
                 // In leading dimensions, we convert var_dim to strided_dim
-                return ndt::type(new strided_dim_type(m_element_dtype), false);
+                return ndt::type(new strided_dim_type(m_element_tp), false);
             } else {
                 if (indices->is_nop()) {
                     // If the indexing operation does nothing, then leave things unchanged
@@ -153,29 +153,29 @@ ndt::type var_dim_type::apply_linear_index(size_t nindices, const irange *indice
     } else {
         if (indices->step() == 0) {
             if (leading_dimension) {
-                return m_element_dtype.apply_linear_index(nindices-1, indices+1,
-                                current_i+1, root_dt, true);
+                return m_element_tp.apply_linear_index(nindices-1, indices+1,
+                                current_i+1, root_tp, true);
             } else {
-                // TODO: This is incorrect, but is here as a stopgap to be replaced by a sliced<> dtype
-                return ndt::make_pointer(m_element_dtype.apply_linear_index(nindices-1, indices+1,
-                                current_i+1, root_dt, false));
+                // TODO: This is incorrect, but is here as a stopgap to be replaced by a sliced<> type
+                return ndt::make_pointer(m_element_tp.apply_linear_index(nindices-1, indices+1,
+                                current_i+1, root_tp, false));
             }
         } else {
             if (leading_dimension) {
                 // In leading dimensions, we convert var_dim to strided_dim
-                ndt::type edt = m_element_dtype.apply_linear_index(nindices-1, indices+1,
-                                current_i+1, root_dt, false);
+                ndt::type edt = m_element_tp.apply_linear_index(nindices-1, indices+1,
+                                current_i+1, root_tp, false);
                 return ndt::type(new strided_dim_type(edt), false);
             } else {
                 if (indices->is_nop()) {
                     // If the indexing operation does nothing, then leave things unchanged
-                    ndt::type edt = m_element_dtype.apply_linear_index(nindices-1, indices+1,
-                                    current_i+1, root_dt, false);
+                    ndt::type edt = m_element_tp.apply_linear_index(nindices-1, indices+1,
+                                    current_i+1, root_tp, false);
                     return ndt::type(new var_dim_type(edt), false);
                 } else {
                     // TODO: sliced_var_dim_type
                     throw runtime_error("TODO: implement var_dim_type::apply_linear_index for general slices");
-                    //return ndt::type(new var_dim_type(m_element_dtype.apply_linear_index(nindices-1, indices+1, current_i+1, root_dt)), false);
+                    //return ndt::type(new var_dim_type(m_element_tp.apply_linear_index(nindices-1, indices+1, current_i+1, root_tp)), false);
                 }
             }
         }
@@ -183,9 +183,9 @@ ndt::type var_dim_type::apply_linear_index(size_t nindices, const irange *indice
 }
 
 intptr_t var_dim_type::apply_linear_index(size_t nindices, const irange *indices, const char *metadata,
-                const ndt::type& result_dtype, char *out_metadata,
+                const ndt::type& result_tp, char *out_metadata,
                 memory_block_data *embedded_reference,
-                size_t current_i, const ndt::type& root_dt,
+                size_t current_i, const ndt::type& root_tp,
                 bool leading_dimension, char **inout_data,
                 memory_block_data **inout_dataref) const
 {
@@ -199,7 +199,7 @@ intptr_t var_dim_type::apply_linear_index(size_t nindices, const irange *indices
             const var_dim_type_data *d = reinterpret_cast<const var_dim_type_data *>(*inout_data);
             bool remove_dimension;
             intptr_t start_index, index_stride, dimension_size;
-            apply_single_linear_index(*indices, d->size, current_i, &root_dt,
+            apply_single_linear_index(*indices, d->size, current_i, &root_tp,
                             remove_dimension, start_index, index_stride, dimension_size);
             if (remove_dimension) {
                 // First dereference to point at the actual element
@@ -212,12 +212,12 @@ intptr_t var_dim_type::apply_linear_index(size_t nindices, const irange *indices
                 *inout_dataref = md->blockref ? md->blockref : embedded_reference;
                 memory_block_incref(*inout_dataref);
                 // Then apply a 0-sized index to the element type
-                if (!m_element_dtype.is_builtin()) {
-                    return m_element_dtype.extended()->apply_linear_index(
+                if (!m_element_tp.is_builtin()) {
+                    return m_element_tp.extended()->apply_linear_index(
                                     nindices - 1, indices + 1,
                                     metadata + sizeof(var_dim_type_metadata),
-                                    result_dtype, out_metadata, embedded_reference,
-                                    current_i, root_dt,
+                                    result_tp, out_metadata, embedded_reference,
+                                    current_i, root_tp,
                                     true, inout_data, inout_dataref);
                 } else {
                     return 0;
@@ -236,43 +236,43 @@ intptr_t var_dim_type::apply_linear_index(size_t nindices, const irange *indices
                 memory_block_incref(*inout_dataref);
                 if (nindices == 0) {
                     // Copy the rest of the metadata verbatim, because that part of
-                    // the dtype didn't change
-                    if (!m_element_dtype.is_builtin()) {
-                        m_element_dtype.extended()->metadata_copy_construct(
+                    // the type didn't change
+                    if (!m_element_tp.is_builtin()) {
+                        m_element_tp.extended()->metadata_copy_construct(
                                         out_metadata + sizeof(strided_dim_type_metadata),
                                         metadata + sizeof(var_dim_type_metadata),
                                         embedded_reference);
                     }
                     return 0;
                 } else {
-                    if (m_element_dtype.is_builtin()) {
+                    if (m_element_tp.is_builtin()) {
                         return 0;
                     } else {
-                        const strided_dim_type *sad = static_cast<const strided_dim_type *>(result_dtype.extended());
-                        return m_element_dtype.extended()->apply_linear_index(
+                        const strided_dim_type *sad = static_cast<const strided_dim_type *>(result_tp.extended());
+                        return m_element_tp.extended()->apply_linear_index(
                                         nindices - 1, indices + 1,
                                         metadata + sizeof(var_dim_type_metadata),
                                         sad->get_element_type(),
                                         out_metadata + sizeof(strided_dim_type_metadata), embedded_reference,
-                                        current_i, root_dt,
+                                        current_i, root_tp,
                                         false, NULL, NULL);
                     }
                 }
             }
         } else {
             if (indices->step() == 0) {
-                // TODO: This is incorrect, but is here as a stopgap to be replaced by a sliced<> dtype
+                // TODO: This is incorrect, but is here as a stopgap to be replaced by a sliced<> type
                 pointer_type_metadata *out_md = reinterpret_cast<pointer_type_metadata *>(out_metadata);
                 out_md->blockref = md->blockref ? md->blockref : embedded_reference;
                 memory_block_incref(out_md->blockref);
                 out_md->offset = indices->start() * md->stride;
-                if (!m_element_dtype.is_builtin()) {
-                    const pointer_type *result_edtype = static_cast<const pointer_type *>(result_dtype.extended());
-                    out_md->offset += m_element_dtype.extended()->apply_linear_index(
+                if (!m_element_tp.is_builtin()) {
+                    const pointer_type *result_etp = static_cast<const pointer_type *>(result_tp.extended());
+                    out_md->offset += m_element_tp.extended()->apply_linear_index(
                                     nindices - 1, indices + 1,
                                     metadata + sizeof(var_dim_type_metadata),
-                                    result_edtype->get_target_dtype(), out_metadata + sizeof(pointer_type_metadata),
-                                    embedded_reference, current_i + 1, root_dt,
+                                    result_etp->get_target_type(), out_metadata + sizeof(pointer_type_metadata),
+                                    embedded_reference, current_i + 1, root_tp,
                                     false, NULL, NULL);
                 }
                 return 0;
@@ -283,14 +283,14 @@ intptr_t var_dim_type::apply_linear_index(size_t nindices, const irange *indices
                 memory_block_incref(out_md->blockref);
                 out_md->stride = md->stride;
                 out_md->offset = md->offset;
-                if (!m_element_dtype.is_builtin()) {
-                    const var_dim_type *vad = static_cast<const var_dim_type *>(result_dtype.extended());
-                    out_md->offset += m_element_dtype.extended()->apply_linear_index(
+                if (!m_element_tp.is_builtin()) {
+                    const var_dim_type *vad = static_cast<const var_dim_type *>(result_tp.extended());
+                    out_md->offset += m_element_tp.extended()->apply_linear_index(
                                     nindices - 1, indices + 1,
                                     metadata + sizeof(var_dim_type_metadata),
                                     vad->get_element_type(),
                                     out_metadata + sizeof(var_dim_type_metadata), embedded_reference,
-                                    current_i, root_dt,
+                                    current_i, root_tp,
                                     false, NULL, NULL);
                 }
                 return 0;
@@ -317,7 +317,7 @@ ndt::type var_dim_type::at_single(intptr_t i0, const char **inout_metadata, cons
             *inout_data = d->begin + md->offset + i0 * md->stride;
         }
     }
-    return m_element_dtype;
+    return m_element_tp;
 }
 
 ndt::type var_dim_type::get_type_at_dimension(char **inout_metadata, size_t i, size_t total_ndim) const
@@ -328,7 +328,7 @@ ndt::type var_dim_type::get_type_at_dimension(char **inout_metadata, size_t i, s
         if (inout_metadata) {
             *inout_metadata += sizeof(var_dim_type_metadata);
         }
-        return m_element_dtype.get_type_at_dimension(inout_metadata, i - 1, total_ndim + 1);
+        return m_element_tp.get_type_at_dimension(inout_metadata, i - 1, total_ndim + 1);
     }
 }
 
@@ -347,8 +347,8 @@ void var_dim_type::get_shape(size_t ndim, size_t i, intptr_t *out_shape, const c
 
     // Process the later shape values
     if (i+1 < ndim) {
-        if (!m_element_dtype.is_builtin()) {
-            m_element_dtype.extended()->get_shape(ndim, i+1, out_shape,
+        if (!m_element_tp.is_builtin()) {
+            m_element_tp.extended()->get_shape(ndim, i+1, out_shape,
                             metadata ? (metadata + sizeof(var_dim_type_metadata)) : NULL);
         } else {
             stringstream ss;
@@ -365,16 +365,16 @@ void var_dim_type::get_strides(size_t i, intptr_t *out_strides, const char *meta
     out_strides[i] = md->stride;
 
     // Process the later shape values
-    if (!m_element_dtype.is_builtin()) {
-        m_element_dtype.extended()->get_strides(i+1, out_strides, metadata + sizeof(var_dim_type_metadata));
+    if (!m_element_tp.is_builtin()) {
+        m_element_tp.extended()->get_strides(i+1, out_strides, metadata + sizeof(var_dim_type_metadata));
     }
 }
 
 axis_order_classification_t var_dim_type::classify_axis_order(const char *metadata) const
 {
-    // Treat the var_dim dtype as C-order
-    if (m_element_dtype.get_undim() > 1) {
-        axis_order_classification_t aoc = m_element_dtype.extended()->classify_axis_order(
+    // Treat the var_dim type as C-order
+    if (m_element_tp.get_undim() > 1) {
+        axis_order_classification_t aoc = m_element_tp.extended()->classify_axis_order(
                         metadata + sizeof(var_dim_type_metadata));
         return (aoc == axis_order_none || aoc == axis_order_c)
                         ? axis_order_c : axis_order_neither;
@@ -383,13 +383,13 @@ axis_order_classification_t var_dim_type::classify_axis_order(const char *metada
     }
 }
 
-bool var_dim_type::is_lossless_assignment(const ndt::type& dst_dt, const ndt::type& src_dt) const
+bool var_dim_type::is_lossless_assignment(const ndt::type& dst_tp, const ndt::type& src_tp) const
 {
-    if (dst_dt.extended() == this) {
-        if (src_dt.extended() == this) {
+    if (dst_tp.extended() == this) {
+        if (src_tp.extended() == this) {
             return true;
-        } else if (src_dt.get_type_id() == var_dim_type_id) {
-            return *dst_dt.extended() == *src_dt.extended();
+        } else if (src_tp.get_type_id() == var_dim_type_id) {
+            return *dst_tp.extended() == *src_tp.extended();
         }
     }
 
@@ -404,29 +404,29 @@ bool var_dim_type::operator==(const base_type& rhs) const
         return false;
     } else {
         const var_dim_type *dt = static_cast<const var_dim_type*>(&rhs);
-        return m_element_dtype == dt->m_element_dtype;
+        return m_element_tp == dt->m_element_tp;
     }
 }
 
 void var_dim_type::metadata_default_construct(char *metadata, size_t ndim, const intptr_t* shape) const
 {
-    size_t element_size = m_element_dtype.is_builtin() ? m_element_dtype.get_data_size()
-                    : m_element_dtype.extended()->get_default_data_size(ndim-1, shape+1);
+    size_t element_size = m_element_tp.is_builtin() ? m_element_tp.get_data_size()
+                    : m_element_tp.extended()->get_default_data_size(ndim-1, shape+1);
 
     var_dim_type_metadata *md = reinterpret_cast<var_dim_type_metadata *>(metadata);
     md->stride = element_size;
     md->offset = 0;
     // Allocate a memory block
-    base_type::flags_type flags = m_element_dtype.get_flags();
+    base_type::flags_type flags = m_element_tp.get_flags();
     if (flags&type_flag_destructor) {
-        md->blockref = make_objectarray_memory_block(m_element_dtype, metadata, element_size).release();
+        md->blockref = make_objectarray_memory_block(m_element_tp, metadata, element_size).release();
     } else if (flags&type_flag_zeroinit) {
         md->blockref = make_zeroinit_memory_block().release();
     } else {
         md->blockref = make_pod_memory_block().release();
     }
-    if (!m_element_dtype.is_builtin()) {
-        m_element_dtype.extended()->metadata_default_construct(
+    if (!m_element_tp.is_builtin()) {
+        m_element_tp.extended()->metadata_default_construct(
                         metadata + sizeof(var_dim_type_metadata), ndim ? (ndim-1) : 0, shape+1);
     }
 }
@@ -441,8 +441,8 @@ void var_dim_type::metadata_copy_construct(char *dst_metadata, const char *src_m
     if (dst_md->blockref) {
         memory_block_incref(dst_md->blockref);
     }
-    if (!m_element_dtype.is_builtin()) {
-        m_element_dtype.extended()->metadata_copy_construct(dst_metadata + sizeof(var_dim_type_metadata),
+    if (!m_element_tp.is_builtin()) {
+        m_element_tp.extended()->metadata_copy_construct(dst_metadata + sizeof(var_dim_type_metadata),
                         src_metadata + sizeof(var_dim_type_metadata), embedded_reference);
     }
 }
@@ -465,8 +465,8 @@ void var_dim_type::metadata_reset_buffers(char *metadata) const
 {
     const var_dim_type_metadata *md = reinterpret_cast<const var_dim_type_metadata *>(metadata);
 
-    if (m_element_dtype.get_metadata_size() > 0) {
-        m_element_dtype.extended()->metadata_reset_buffers(
+    if (m_element_tp.get_metadata_size() > 0) {
+        m_element_tp.extended()->metadata_reset_buffers(
                         metadata + sizeof(var_dim_type_metadata));
     }
 
@@ -486,7 +486,7 @@ void var_dim_type::metadata_reset_buffers(char *metadata) const
     }
 
     stringstream ss;
-    ss << "can only reset the buffers of a var_dim dtype ";
+    ss << "can only reset the buffers of a var_dim type ";
     ss << "if it was default-constructed. Its blockref is ";
     if (md->blockref == NULL) {
         ss << "NULL";
@@ -499,15 +499,15 @@ void var_dim_type::metadata_reset_buffers(char *metadata) const
 void var_dim_type::metadata_finalize_buffers(char *metadata) const
 {
     // Finalize any child metadata
-    if (!m_element_dtype.is_builtin()) {
-        m_element_dtype.extended()->metadata_finalize_buffers(metadata + sizeof(var_dim_type_metadata));
+    if (!m_element_tp.is_builtin()) {
+        m_element_tp.extended()->metadata_finalize_buffers(metadata + sizeof(var_dim_type_metadata));
     }
 
     // Finalize the blockref buffer we own
     var_dim_type_metadata *md = reinterpret_cast<var_dim_type_metadata *>(metadata);
     if (md->blockref != NULL) {
         // Finalize the memory block
-        if (m_element_dtype.get_flags()&type_flag_destructor) {
+        if (m_element_tp.get_flags()&type_flag_destructor) {
             memory_block_objectarray_allocator_api *allocator =
                             get_memory_block_objectarray_allocator_api(md->blockref);
             if (allocator != NULL) {
@@ -529,8 +529,8 @@ void var_dim_type::metadata_destruct(char *metadata) const
     if (md->blockref) {
         memory_block_decref(md->blockref);
     }
-    if (!m_element_dtype.is_builtin()) {
-        m_element_dtype.extended()->metadata_destruct(metadata + sizeof(var_dim_type_metadata));
+    if (!m_element_tp.is_builtin()) {
+        m_element_tp.extended()->metadata_destruct(metadata + sizeof(var_dim_type_metadata));
     }
 }
 
@@ -541,8 +541,8 @@ void var_dim_type::metadata_debug_print(const char *metadata, std::ostream& o, c
     o << indent << " stride: " << md->stride << "\n";
     o << indent << " offset: " << md->offset << "\n";
     memory_block_debug_print(md->blockref, o, indent + " ");
-    if (!m_element_dtype.is_builtin()) {
-        m_element_dtype.extended()->metadata_debug_print(metadata + sizeof(var_dim_type_metadata), o, indent + "  ");
+    if (!m_element_tp.is_builtin()) {
+        m_element_tp.extended()->metadata_debug_print(metadata + sizeof(var_dim_type_metadata), o, indent + "  ");
     }
 }
 
@@ -551,7 +551,7 @@ size_t var_dim_type::get_iterdata_size(size_t DYND_UNUSED(ndim)) const
     throw runtime_error("TODO: implement var_dim_type::get_iterdata_size");
 }
 
-size_t var_dim_type::iterdata_construct(iterdata_common *DYND_UNUSED(iterdata), const char **DYND_UNUSED(inout_metadata), size_t DYND_UNUSED(ndim), const intptr_t* DYND_UNUSED(shape), ndt::type& DYND_UNUSED(out_uniform_dtype)) const
+size_t var_dim_type::iterdata_construct(iterdata_common *DYND_UNUSED(iterdata), const char **DYND_UNUSED(inout_metadata), size_t DYND_UNUSED(ndim), const intptr_t* DYND_UNUSED(shape), ndt::type& DYND_UNUSED(out_uniform_tp)) const
 {
     throw runtime_error("TODO: implement var_dim_type::iterdata_construct");
 }
@@ -563,55 +563,55 @@ size_t var_dim_type::iterdata_destruct(iterdata_common *DYND_UNUSED(iterdata), s
 
 size_t var_dim_type::make_assignment_kernel(
                 hierarchical_kernel *out, size_t offset_out,
-                const ndt::type& dst_dt, const char *dst_metadata,
-                const ndt::type& src_dt, const char *src_metadata,
+                const ndt::type& dst_tp, const char *dst_metadata,
+                const ndt::type& src_tp, const char *src_metadata,
                 kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *ectx) const
 {
-    if (this == dst_dt.extended()) {
-        if (src_dt.get_undim() < dst_dt.get_undim()) {
+    if (this == dst_tp.extended()) {
+        if (src_tp.get_undim() < dst_tp.get_undim()) {
             // If the src has fewer dimensions, broadcast it across this one
             return make_broadcast_to_var_dim_assignment_kernel(out, offset_out,
-                            dst_dt, dst_metadata,
-                            src_dt, src_metadata,
+                            dst_tp, dst_metadata,
+                            src_tp, src_metadata,
                             kernreq, errmode, ectx);
-        } else if (src_dt.get_type_id() == var_dim_type_id) {
+        } else if (src_tp.get_type_id() == var_dim_type_id) {
             // var_dim to var_dim
             return make_var_dim_assignment_kernel(out, offset_out,
-                            dst_dt, dst_metadata,
-                            src_dt, src_metadata,
+                            dst_tp, dst_metadata,
+                            src_tp, src_metadata,
                             kernreq, errmode, ectx);
-        } else if (src_dt.get_type_id() == strided_dim_type_id ||
-                        src_dt.get_type_id() == fixed_dim_type_id) {
+        } else if (src_tp.get_type_id() == strided_dim_type_id ||
+                        src_tp.get_type_id() == fixed_dim_type_id) {
             // strided_dim to var_dim
             return make_strided_to_var_dim_assignment_kernel(out, offset_out,
-                            dst_dt, dst_metadata,
-                            src_dt, src_metadata,
+                            dst_tp, dst_metadata,
+                            src_tp, src_metadata,
                             kernreq, errmode, ectx);
-        } else if (!src_dt.is_builtin()) {
-            // Give the src dtype a chance to make a kernel
-            return src_dt.extended()->make_assignment_kernel(out, offset_out,
-                            dst_dt, dst_metadata,
-                            src_dt, src_metadata,
+        } else if (!src_tp.is_builtin()) {
+            // Give the src type a chance to make a kernel
+            return src_tp.extended()->make_assignment_kernel(out, offset_out,
+                            dst_tp, dst_metadata,
+                            src_tp, src_metadata,
                             kernreq, errmode, ectx);
         } else {
             stringstream ss;
-            ss << "Cannot assign from " << src_dt << " to " << dst_dt;
+            ss << "Cannot assign from " << src_tp << " to " << dst_tp;
             throw runtime_error(ss.str());
         }
-    } else if (dst_dt.get_undim() < src_dt.get_undim()) {
-        throw broadcast_error(dst_dt, dst_metadata, src_dt, src_metadata);
+    } else if (dst_tp.get_undim() < src_tp.get_undim()) {
+        throw broadcast_error(dst_tp, dst_metadata, src_tp, src_metadata);
     } else {
-        if (dst_dt.get_type_id() == strided_dim_type_id ||
-                        dst_dt.get_type_id() == fixed_dim_type_id) {
+        if (dst_tp.get_type_id() == strided_dim_type_id ||
+                        dst_tp.get_type_id() == fixed_dim_type_id) {
             // var_dim to strided_dim
             return make_var_to_strided_dim_assignment_kernel(out, offset_out,
-                            dst_dt, dst_metadata,
-                            src_dt, src_metadata,
+                            dst_tp, dst_metadata,
+                            src_tp, src_metadata,
                             kernreq, errmode, ectx);
         } else {
             stringstream ss;
-            ss << "Cannot assign from " << src_dt << " to " << dst_dt;
+            ss << "Cannot assign from " << src_tp << " to " << dst_tp;
             throw runtime_error(ss.str());
         }
     }
@@ -625,7 +625,7 @@ void var_dim_type::foreach_leading(char *data, const char *metadata, foreach_fn_
     data = d->begin + md->offset;
     intptr_t stride = md->stride;
     for (intptr_t i = 0, i_end = d->size; i < i_end; ++i, data += stride) {
-        callback(m_element_dtype, data, child_metadata, callback_data);
+        callback(m_element_tp, data, child_metadata, callback_data);
     }
 }
 

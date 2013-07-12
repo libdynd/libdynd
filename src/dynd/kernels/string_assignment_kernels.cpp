@@ -39,7 +39,7 @@ namespace {
 
             while (src < src_end && dst < dst_end) {
                 cp = next_fn(src, src_end);
-                // The fixedstring dtype uses null-terminated strings
+                // The fixedstring type uses null-terminated strings
                 if (cp == 0) {
                     // Null-terminate the destination string, and we're done
                     memset(dst, 0, dst_end - dst);

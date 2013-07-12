@@ -30,185 +30,185 @@ static intptr_t min_strlen_for_builtin_kind(type_kind_t kind)
 }
 */
 
-ndt::type dynd::promote_types_arithmetic(const ndt::type& dt0, const ndt::type& dt1)
+ndt::type dynd::promote_types_arithmetic(const ndt::type& tp0, const ndt::type& tp1)
 {
-    // Use the value dtypes
-    const ndt::type& dt0_val = dt0.value_type();
-    const ndt::type& dt1_val = dt1.value_type();
+    // Use the value types
+    const ndt::type& tp0_val = tp0.value_type();
+    const ndt::type& tp1_val = tp1.value_type();
 
-    //cout << "Doing type promotion with value types " << dt0_val << " and " << dt1_val << endl;
+    //cout << "Doing type promotion with value types " << tp0_val << " and " << tp1_val << endl;
 
-    if (dt0_val.is_builtin() && dt1_val.is_builtin()) {
+    if (tp0_val.is_builtin() && tp1_val.is_builtin()) {
         const size_t int_size = sizeof(int);
-        switch (dt0_val.get_kind()) {
+        switch (tp0_val.get_kind()) {
             case bool_kind:
-                switch (dt1_val.get_kind()) {
+                switch (tp1_val.get_kind()) {
                     case bool_kind:
                         return ndt::make_type<int>();
                     case int_kind:
                     case uint_kind:
-                        return (dt1_val.get_data_size() >= int_size) ? dt1_val
+                        return (tp1_val.get_data_size() >= int_size) ? tp1_val
                                                                : ndt::make_type<int>();
                     case void_kind:
-                        return dt0_val;
+                        return tp0_val;
                     case real_kind:
                         // The bool type doesn't affect float type sizes, except
                         // require at least float32
-                        return dt1_val.unchecked_get_builtin_type_id() != float16_type_id
-                                        ? dt1_val : ndt::make_type<float>();
+                        return tp1_val.unchecked_get_builtin_type_id() != float16_type_id
+                                        ? tp1_val : ndt::make_type<float>();
                     default:
-                        return dt1_val;
+                        return tp1_val;
                 }
             case int_kind:
-                switch (dt1_val.get_kind()) {
+                switch (tp1_val.get_kind()) {
                     case bool_kind:
-                        return (dt0_val.get_data_size() >= int_size) ? dt0_val
+                        return (tp0_val.get_data_size() >= int_size) ? tp0_val
                                                                : ndt::make_type<int>();
                     case int_kind:
-                        if (dt0_val.get_data_size() < int_size && dt1_val.get_data_size() < int_size) {
+                        if (tp0_val.get_data_size() < int_size && tp1_val.get_data_size() < int_size) {
                             return ndt::make_type<int>();
                         } else {
-                            return (dt0_val.get_data_size() >= dt1_val.get_data_size()) ? dt0_val
-                                                                              : dt1_val;
+                            return (tp0_val.get_data_size() >= tp1_val.get_data_size()) ? tp0_val
+                                                                              : tp1_val;
                         }
                     case uint_kind:
-                        if (dt0_val.get_data_size() < int_size && dt1_val.get_data_size() < int_size) {
+                        if (tp0_val.get_data_size() < int_size && tp1_val.get_data_size() < int_size) {
                             return ndt::make_type<int>();
                         } else {
                             // When the element_sizes are equal, the uint kind wins
-                            return (dt0_val.get_data_size() > dt1_val.get_data_size()) ? dt0_val
-                                                                             : dt1_val;
+                            return (tp0_val.get_data_size() > tp1_val.get_data_size()) ? tp0_val
+                                                                             : tp1_val;
                         }
                     case real_kind:
                         // Integer type sizes don't affect float type sizes, except
                         // require at least float32
-                        return dt1_val.unchecked_get_builtin_type_id() != float16_type_id
-                                        ? dt1_val : ndt::make_type<float>();
+                        return tp1_val.unchecked_get_builtin_type_id() != float16_type_id
+                                        ? tp1_val : ndt::make_type<float>();
                     case complex_kind:
                         // Integer type sizes don't affect complex type sizes
-                        return dt1_val;
+                        return tp1_val;
                     case void_kind:
-                        return dt0_val;
+                        return tp0_val;
                     default:
                         break;
                 }
                 break;
             case uint_kind:
-                switch (dt1_val.get_kind()) {
+                switch (tp1_val.get_kind()) {
                     case bool_kind:
-                        return (dt0_val.get_data_size() >= int_size) ? dt0_val
+                        return (tp0_val.get_data_size() >= int_size) ? tp0_val
                                                                : ndt::make_type<int>();
                     case int_kind:
-                        if (dt0_val.get_data_size() < int_size && dt1_val.get_data_size() < int_size) {
+                        if (tp0_val.get_data_size() < int_size && tp1_val.get_data_size() < int_size) {
                             return ndt::make_type<int>();
                         } else {
                             // When the element_sizes are equal, the uint kind wins
-                            return (dt0_val.get_data_size() >= dt1_val.get_data_size()) ? dt0_val
-                                                                              : dt1_val;
+                            return (tp0_val.get_data_size() >= tp1_val.get_data_size()) ? tp0_val
+                                                                              : tp1_val;
                         }
                     case uint_kind:
-                        if (dt0_val.get_data_size() < int_size && dt1_val.get_data_size() < int_size) {
+                        if (tp0_val.get_data_size() < int_size && tp1_val.get_data_size() < int_size) {
                             return ndt::make_type<int>();
                         } else {
-                            return (dt0_val.get_data_size() >= dt1_val.get_data_size()) ? dt0_val
-                                                                              : dt1_val;
+                            return (tp0_val.get_data_size() >= tp1_val.get_data_size()) ? tp0_val
+                                                                              : tp1_val;
                         }
                     case real_kind:
                         // Integer type sizes don't affect float type sizes, except
                         // require at least float32
-                        return dt1_val.unchecked_get_builtin_type_id() != float16_type_id
-                                        ? dt1_val : ndt::make_type<float>();
+                        return tp1_val.unchecked_get_builtin_type_id() != float16_type_id
+                                        ? tp1_val : ndt::make_type<float>();
                     case complex_kind:
                         // Integer type sizes don't affect complex type sizes
-                        return dt1_val;
+                        return tp1_val;
                     case void_kind:
-                        return dt0_val;
+                        return tp0_val;
                     default:
                         break;
                 }
                 break;
             case real_kind:
-                switch (dt1_val.get_kind()) {
+                switch (tp1_val.get_kind()) {
                     // Integer type sizes don't affect float type sizes
                     case bool_kind:
                     case int_kind:
                     case uint_kind:
-                        return dt0_val;
+                        return tp0_val;
                     case real_kind:
-                        return ndt::type(max(max(dt0_val.unchecked_get_builtin_type_id(),
-                                        dt1_val.unchecked_get_builtin_type_id()), float32_type_id));
+                        return ndt::type(max(max(tp0_val.unchecked_get_builtin_type_id(),
+                                        tp1_val.unchecked_get_builtin_type_id()), float32_type_id));
                     case complex_kind:
-                        if (dt0_val.get_type_id() == float64_type_id && dt1_val.get_type_id() == complex_float32_type_id) {
+                        if (tp0_val.get_type_id() == float64_type_id && tp1_val.get_type_id() == complex_float32_type_id) {
                             return ndt::type(complex_float64_type_id);
                         } else {
-                            return dt1_val;
+                            return tp1_val;
                         }
                     case void_kind:
-                        return dt0_val;
+                        return tp0_val;
                     default:
                         break;
                 }
                 break;
             case complex_kind:
-                switch (dt1_val.get_kind()) {
+                switch (tp1_val.get_kind()) {
                     // Integer and float type sizes don't affect complex type sizes
                     case bool_kind:
                     case int_kind:
                     case uint_kind:
                     case real_kind:
-                        if (dt0_val.unchecked_get_builtin_type_id() == complex_float32_type_id &&
-                                        dt1_val.unchecked_get_builtin_type_id() == float64_type_id) {
+                        if (tp0_val.unchecked_get_builtin_type_id() == complex_float32_type_id &&
+                                        tp1_val.unchecked_get_builtin_type_id() == float64_type_id) {
                             return ndt::type(complex_float64_type_id);
                         } else {
-                            return dt0_val;
+                            return tp0_val;
                         }
                     case complex_kind:
-                        return (dt0_val.get_data_size() >= dt1_val.get_data_size()) ? dt0_val
-                                                                          : dt1_val;
+                        return (tp0_val.get_data_size() >= tp1_val.get_data_size()) ? tp0_val
+                                                                          : tp1_val;
                     case void_kind:
-                        return dt0_val;
+                        return tp0_val;
                     default:
                         break;
                 }
                 break;
             case void_kind:
-                return dt1_val;
+                return tp1_val;
             default:
                 break;
         }
 
         stringstream ss;
-        ss << "internal error in built-in dtype promotion of " << dt0_val << " and " << dt1_val;
+        ss << "internal error in built-in dynd type promotion of " << tp0_val << " and " << tp1_val;
         throw std::runtime_error(ss.str());
     }
 
-    // HACK for getting simple string dtype promotions.
+    // HACK for getting simple string type promotions.
     // TODO: Do this properly in a pluggable manner.
-    if ((dt0_val.get_type_id() == string_type_id ||
-                    dt0_val.get_type_id() == fixedstring_type_id) &&
-                (dt1_val.get_type_id() == string_type_id ||
-                    dt1_val.get_type_id() == fixedstring_type_id)) {
+    if ((tp0_val.get_type_id() == string_type_id ||
+                    tp0_val.get_type_id() == fixedstring_type_id) &&
+                (tp1_val.get_type_id() == string_type_id ||
+                    tp1_val.get_type_id() == fixedstring_type_id)) {
         // Always promote to the default utf-8 string (for now, maybe return encoding, etc later?)
         return ndt::make_string();
     }
 
-    // dtype, string -> dtype
-    if (dt0_val.get_type_id() == type_type_id && dt1_val.get_kind() == string_kind) {
-        return dt0_val;
+    // type, string -> type
+    if (tp0_val.get_type_id() == type_type_id && tp1_val.get_kind() == string_kind) {
+        return tp0_val;
     }
-    // string, dtype -> dtype
-    if (dt0_val.get_kind() == string_kind && dt1_val.get_type_id() == type_type_id) {
-        return dt1_val;
+    // string, type -> type
+    if (tp0_val.get_kind() == string_kind && tp1_val.get_type_id() == type_type_id) {
+        return tp1_val;
     }
 
     // In general, if one type is void, just return the other type
-    if (dt0_val.get_type_id() == void_type_id) {
-        return dt1_val;
-    } else if (dt1_val.get_type_id() == void_type_id) {
-        return dt0_val;
+    if (tp0_val.get_type_id() == void_type_id) {
+        return tp1_val;
+    } else if (tp1_val.get_type_id() == void_type_id) {
+        return tp0_val;
     }
 
     stringstream ss;
-    ss << "type promotion of " << dt0 << " and " << dt1 << " is not yet supported";
+    ss << "type promotion of " << tp0 << " and " << tp1 << " is not yet supported";
     throw std::runtime_error(ss.str());
 }

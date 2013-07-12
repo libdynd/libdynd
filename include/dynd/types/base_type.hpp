@@ -54,7 +54,7 @@ typedef char * (*iterdata_reset_fn_t)(iterdata_common *iterdata, char *data, siz
  * base_type::transform_child_types virtual function on the type
  *
  * An implementation of this function should either copy 'dt' into
- * 'out_transformed_dtype', and leave 'out_was_transformed' alone, or it
+ * 'out_transformed_tp', and leave 'out_was_transformed' alone, or it
  * should place a different type in 'out_transformed_type', then set
  * 'out_was_transformed' to true.
  */
@@ -107,7 +107,7 @@ class base_type {
     /** Embedded reference counting */
     mutable atomic_refcount m_use_count;
 protected:
-    /// Standard dtype data
+    /// Standard dynd type data
     base_type_members m_members;
     
 
@@ -244,14 +244,14 @@ public:
      * \param nindices     The number of elements in the 'indices' array. This is shrunk by one for each recursive call.
      * \param indices      The indices to apply. This is incremented by one for each recursive call.
      * \param current_i    The current index position. Used for error messages.
-     * \param root_dt      The data type in the first call, before any recursion. Used for error messages.
+     * \param root_tp      The data type in the first call, before any recursion. Used for error messages.
      * \param leading_dimension  If this is true, the current dimension is one for which there is only a single
      *                           data instance, and the type can do operations relying on the data. An example
      *                           of this is a pointer data throwing away the pointer part, so the result
      *                           doesn't contain that indirection.
      */
     virtual ndt::type apply_linear_index(size_t nindices, const irange *indices,
-                size_t current_i, const ndt::type& root_dt, bool leading_dimension) const;
+                size_t current_i, const ndt::type& root_tp, bool leading_dimension) const;
 
     /**
      * Indexes into an ndobject using the provided linear index, and a type and freshly allocated output
@@ -268,7 +268,7 @@ public:
      *                            when putting it in a new ndobject, need to hold a reference to
      *                            that memory.
      * \param current_i    The current index position. Used for error messages.
-     * \param root_dt      The data type in the first call, before any recursion.
+     * \param root_tp      The data type in the first call, before any recursion.
      *                     Used for error messages.
      * \param leading_dimension  If this is true, the current dimension is one for
      *                           which there is only a single data instance, and
@@ -292,7 +292,7 @@ public:
     virtual intptr_t apply_linear_index(size_t nindices, const irange *indices, const char *metadata,
                     const ndt::type& result_type, char *out_metadata,
                     memory_block_data *embedded_reference,
-                    size_t current_i, const ndt::type& root_dt,
+                    size_t current_i, const ndt::type& root_tp,
                     bool leading_dimension, char **inout_data,
                     memory_block_data **inout_dataref) const;
 
@@ -356,9 +356,9 @@ public:
     virtual axis_order_classification_t classify_axis_order(const char *metadata) const;
 
     /**
-     * Called by ::dynd::is_lossless_assignment, with (this == dst_dt->extended()).
+     * Called by ::dynd::is_lossless_assignment, with (this == dst_tp->extended()).
      */
-    virtual bool is_lossless_assignment(const ndt::type& dst_dt, const ndt::type& src_dt) const;
+    virtual bool is_lossless_assignment(const ndt::type& dst_tp, const ndt::type& src_tp) const;
 
     virtual bool operator==(const base_type& rhs) const = 0;
 
@@ -423,7 +423,7 @@ public:
      */
     virtual size_t iterdata_construct(iterdata_common *iterdata,
                     const char **inout_metadata, size_t ndim,
-                    const intptr_t* shape, ndt::type& out_uniform_dtype) const;
+                    const intptr_t* shape, ndt::type& out_uniform_tp) const;
     /** Destructs any references or other state contained in the iterdata */
     virtual size_t iterdata_destruct(iterdata_common *iterdata, size_t ndim) const;
 
@@ -433,7 +433,7 @@ public:
      * kernel at the 'out_offset' position in 'out's data, as part
      * of a hierarchy matching the type's hierarchy.
      *
-     * This function should always be called with this == dst_dt first,
+     * This function should always be called with this == dst_tp first,
      * and types which don't support the particular assignment should
      * then call the corresponding function with this == src_dt.
      *
@@ -442,8 +442,8 @@ public:
      */
     virtual size_t make_assignment_kernel(
                     hierarchical_kernel *out, size_t offset_out,
-                    const ndt::type& dst_dt, const char *dst_metadata,
-                    const ndt::type& src_dt, const char *src_metadata,
+                    const ndt::type& dst_tp, const char *dst_metadata,
+                    const ndt::type& src_tp, const char *src_metadata,
                     kernel_request_t kernreq, assign_error_mode errmode,
                     const eval::eval_context *ectx) const;
 
@@ -589,7 +589,7 @@ public:
  */
 inline void base_type_incref(const base_type *bd)
 {
-    //std::cout << "dtype " << (void *)ed << " inc: " << ed->m_use_count + 1 << "\t"; ed->print_type(std::cout); std::cout << std::endl;
+    //std::cout << "dynd type " << (void *)ed << " inc: " << ed->m_use_count + 1 << "\t"; ed->print_type(std::cout); std::cout << std::endl;
     ++bd->m_use_count;
 }
 
@@ -610,7 +610,7 @@ inline void base_type_xincref(const base_type *bd)
  */
 inline void base_type_decref(const base_type *bd)
 {
-    //std::cout << "dtype " << (void *)ed << " dec: " << ed->m_use_count - 1 << "\t"; ed->print_type(std::cout); std::cout << std::endl;
+    //std::cout << "dynd type " << (void *)ed << " dec: " << ed->m_use_count - 1 << "\t"; ed->print_type(std::cout); std::cout << std::endl;
     if (--bd->m_use_count == 0) {
         delete bd;
     }

@@ -1170,7 +1170,7 @@ struct single_assigner_builtin_base<std::complex<float>, double, complex_kind, r
 template <class dst_type, class src_type, assign_error_mode errmode>
 struct single_assigner_builtin
     : public single_assigner_builtin_base<dst_type, src_type,
-                        dtype_kind_of<dst_type>::value, dtype_kind_of<src_type>::value, errmode>
+                        dynd_kind_of<dst_type>::value, dynd_kind_of<src_type>::value, errmode>
 {};
 template <class same_type, assign_error_mode errmode>
 struct single_assigner_builtin<same_type, same_type, errmode>

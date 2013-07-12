@@ -80,10 +80,10 @@ void incremental_broadcast(size_t out_undim, intptr_t *out_shape,
 
 /**
  * This function broadcasts the three operands together to create an output
- * with the broadcast result, swapping in the provided dtype for the uniform
+ * with the broadcast result, swapping in the provided type for the uniform
  * dimension.
  *
- * \param result_inner_dt  The dtype that the output should have after the broadcast uniform dims.
+ * \param result_inner_tp  The type that the output should have after the broadcast uniform dims.
  * \param op0  The first operand to broadcast.
  * \param op1  The second operand to broadcast.
  * \param op2  The third operand to broadcast.
@@ -91,7 +91,7 @@ void incremental_broadcast(size_t out_undim, intptr_t *out_shape,
  * \param out_ndim  This is populated with the broadcast ndim.
  * \param out_shape  This is populated with the broadcast shape.
  */
-void create_broadcast_result(const ndt::type& result_inner_dt,
+void create_broadcast_result(const ndt::type& result_inner_tp,
                 const nd::array& op0, const nd::array& op1, const nd::array& op2,
                 nd::array &out, size_t& out_ndim, dimvector& out_shape);
 
@@ -150,13 +150,13 @@ inline void print_shape(std::ostream& o, const std::vector<intptr_t>& shape) {
  * \param idx  The irange indexing object.
  * \param dimension_size  The size of the dimension to which the idx is being applied.
  * \param error_i  The position in the shape where the indexing is being applied.
- * \param error_dt The dtype to which the indexing is being applied, or NULL.
+ * \param error_tp The type to which the indexing is being applied, or NULL.
  * \param out_remove_dimension  Is set to true if the dimension should be removed
  * \param out_start_index  The start index of the resolved indexing.
  * \param out_index_stride  The index stride of the resolved indexing.
  * \param out_dimension_size  The size of the resulting dimension from the resolved indexing.
  */
-void apply_single_linear_index(const irange& idx, intptr_t dimension_size, size_t error_i, const ndt::type* error_dt,
+void apply_single_linear_index(const irange& idx, intptr_t dimension_size, size_t error_i, const ndt::type* error_tp,
         bool& out_remove_dimension, intptr_t& out_start_index, intptr_t& out_index_stride, intptr_t& out_dimension_size);
 
 /**
@@ -164,19 +164,19 @@ void apply_single_linear_index(const irange& idx, intptr_t dimension_size, size_
  *
  * \param i0  The integer index.
  * \param dimension_size  The size of the dimension being indexed.
- * \param error_dt  If non-NULL, a dtype used for error messages.
+ * \param error_tp  If non-NULL, a type used for error messages.
  *
  * \returns  An index value in the range [0, dimension_size).
  */
-inline intptr_t apply_single_index(intptr_t i0, intptr_t dimension_size, const ndt::type* error_dt) {
+inline intptr_t apply_single_index(intptr_t i0, intptr_t dimension_size, const ndt::type* error_tp) {
     if (i0 >= 0) {
         if (i0 < dimension_size) {
             return i0;
         } else {
-            if (error_dt) {
-                size_t ndim = error_dt->extended()->get_undim();
+            if (error_tp) {
+                size_t ndim = error_tp->extended()->get_undim();
                 dimvector shape(ndim);
-                error_dt->extended()->get_shape(ndim, 0, shape.get(), NULL);
+                error_tp->extended()->get_shape(ndim, 0, shape.get(), NULL);
                 throw index_out_of_bounds(i0, 0, ndim, shape.get());
             } else {
                 throw index_out_of_bounds(i0, dimension_size);
@@ -185,10 +185,10 @@ inline intptr_t apply_single_index(intptr_t i0, intptr_t dimension_size, const n
     } else if (i0 >= -dimension_size) {
         return i0 + dimension_size;
     } else {
-        if (error_dt) {
-            size_t ndim = error_dt->extended()->get_undim();
+        if (error_tp) {
+            size_t ndim = error_tp->extended()->get_undim();
             dimvector shape(ndim);
-            error_dt->extended()->get_shape(ndim, 0, shape.get(), NULL);
+            error_tp->extended()->get_shape(ndim, 0, shape.get(), NULL);
             throw index_out_of_bounds(i0, 0, ndim, shape.get());
         } else {
             throw index_out_of_bounds(i0, dimension_size);
@@ -239,16 +239,16 @@ inline bool strides_are_f_contiguous(size_t ndim, intptr_t element_size, const i
 }
 
 /**
- * Classifies the axis order of the dtype, where current_stride is
+ * Classifies the axis order of the type, where current_stride is
  * the absolute value of the stride for the current dimension,
- * and element_dt/element_metadata are for the element.
+ * and element_tp/element_metadata are for the element.
  *
  * \param current_stride  The stride of the current dimension It must be nonzero.
- * \param element_dt  The dtype of the elements. It must have undim > 0.
+ * \param element_tp  The type of the elements. It must have undim > 0.
  * \param element_metadata  The metadata of the elements.
  */
 axis_order_classification_t classify_strided_axis_order(size_t current_stride,
-                const ndt::type& element_dt, const char *element_metadata);
+                const ndt::type& element_tp, const char *element_metadata);
 
 enum shape_signal_t {
     /** Shape value that has never been initialized */

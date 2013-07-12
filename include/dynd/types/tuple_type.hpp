@@ -46,59 +46,59 @@ public:
 
     void print_type(std::ostream& o) const;
 
-    bool is_lossless_assignment(const ndt::type& dst_dt, const ndt::type& src_dt) const;
+    bool is_lossless_assignment(const ndt::type& dst_tp, const ndt::type& src_tp) const;
 
     bool operator==(const base_type& rhs) const;
 }; // class tuple_type
 
 namespace ndt {
-    /** Makes a tuple dtype with the specified fields, using the standard layout */
+    /** Makes a tuple type with the specified fields, using the standard layout */
     inline ndt::type make_tuple(const std::vector<ndt::type>& fields) {
         return ndt::type(new tuple_type(fields), false);
     }
 
-    /** Makes a tuple dtype with the specified fields and layout */
+    /** Makes a tuple type with the specified fields and layout */
     inline ndt::type make_tuple(const std::vector<ndt::type>& fields, const std::vector<size_t> offsets,
                     size_t data_size, size_t alignment)
     {
         return ndt::type(new tuple_type(fields, offsets, data_size, alignment), false);
     }
 
-    /** Makes a tuple dtype with the specified fields, using the standard layout */
-    inline ndt::type make_tuple(const ndt::type& dt0)
+    /** Makes a tuple type with the specified fields, using the standard layout */
+    inline ndt::type make_tuple(const ndt::type& tp0)
     {
         std::vector<ndt::type> fields;
-        fields.push_back(dt0);
+        fields.push_back(tp0);
         return make_tuple(fields);
     }
 
-    /** Makes a tuple dtype with the specified fields, using the standard layout */
-    inline ndt::type make_tuple(const ndt::type& dt0, const ndt::type& dt1)
+    /** Makes a tuple type with the specified fields, using the standard layout */
+    inline ndt::type make_tuple(const ndt::type& tp0, const ndt::type& tp1)
     {
         std::vector<ndt::type> fields;
-        fields.push_back(dt0);
-        fields.push_back(dt1);
+        fields.push_back(tp0);
+        fields.push_back(tp1);
         return make_tuple(fields);
     }
 
-    /** Makes a tuple dtype with the specified fields, using the standard layout */
-    inline ndt::type make_tuple(const ndt::type& dt0, const ndt::type& dt1, const ndt::type& dt2)
+    /** Makes a tuple type with the specified fields, using the standard layout */
+    inline ndt::type make_tuple(const ndt::type& tp0, const ndt::type& tp1, const ndt::type& tp2)
     {
         std::vector<ndt::type> fields;
-        fields.push_back(dt0);
-        fields.push_back(dt1);
-        fields.push_back(dt2);
+        fields.push_back(tp0);
+        fields.push_back(tp1);
+        fields.push_back(tp2);
         return make_tuple(fields);
     }
 
-    /** Makes a tuple dtype with the specified fields, using the standard layout */
-    inline ndt::type make_tuple(const ndt::type& dt0, const ndt::type& dt1, const ndt::type& dt2, const ndt::type& dt3)
+    /** Makes a tuple type with the specified fields, using the standard layout */
+    inline ndt::type make_tuple(const ndt::type& tp0, const ndt::type& tp1, const ndt::type& tp2, const ndt::type& tp3)
     {
         std::vector<ndt::type> fields;
-        fields.push_back(dt0);
-        fields.push_back(dt1);
-        fields.push_back(dt2);
-        fields.push_back(dt3);
+        fields.push_back(tp0);
+        fields.push_back(tp1);
+        fields.push_back(tp2);
+        fields.push_back(tp3);
         return make_tuple(fields);
     }
 } // namespace ndt

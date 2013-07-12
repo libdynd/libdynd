@@ -60,7 +60,7 @@ size_t dynd::get_builtin_type_elwise_property_index(
     }
 
     std::stringstream ss;
-    ss << "the dtype " << ndt::type(builtin_type_id);
+    ss << "the dynd type " << ndt::type(builtin_type_id);
     ss << " doesn't have a property \"" << property_name << "\"";
     throw std::runtime_error(ss.str());
 }
@@ -155,7 +155,7 @@ size_t dynd::make_builtin_type_elwise_property_getter_kernel(
             break;
     }
     stringstream ss;
-    ss << "dtype " << ndt::type(builtin_type_id) << " given an invalid property index " << src_elwise_property_index;
+    ss << "dynd type " << ndt::type(builtin_type_id) << " given an invalid property index " << src_elwise_property_index;
     throw runtime_error(ss.str());
 }
 
@@ -167,6 +167,6 @@ size_t dynd::make_builtin_type_elwise_property_setter_kernel(
                 kernel_request_t DYND_UNUSED(kernreq), const eval::eval_context *DYND_UNUSED(ectx))
 {
     stringstream ss;
-    ss << "dtype " << ndt::type(builtin_type_id) << " given an invalid property index " << dst_elwise_property_index;
+    ss << "dynd type " << ndt::type(builtin_type_id) << " given an invalid property index " << dst_elwise_property_index;
     throw runtime_error(ss.str());
 }

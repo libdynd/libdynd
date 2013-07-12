@@ -69,7 +69,7 @@ public:
     /** Debug printing of the elwise program */
     void debug_print(std::ostream& o, const std::string& indent = "") const;
 
-    /** Returns a const reference to the vector of register dtypes */
+    /** Returns a const reference to the vector of register types */
     const std::vector<ndt::type>& get_register_types() const {
         return m_regtypes;
     }

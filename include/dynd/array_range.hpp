@@ -16,13 +16,13 @@ namespace dynd { namespace nd {
  * beginval + (k-1) * stepval} where the next value in the sequence would hit
  * or cross endval.
  */
-nd::array range(const ndt::type& scalar_dtype, const void *beginval, const void *endval, const void *stepval);
+nd::array range(const ndt::type& scalar_tp, const void *beginval, const void *endval, const void *stepval);
 
 /**
  * Version of range templated for C++ scalar types.
  */
 template<class T>
-typename enable_if<is_dtype_scalar<T>::value, nd::array>::type range(T beginval, T endval,
+typename enable_if<is_dynd_scalar<T>::value, nd::array>::type range(T beginval, T endval,
                                                                     T stepval = T(1)) {
     return range(ndt::make_type<T>(), &beginval, &endval, &stepval);
 }
@@ -31,7 +31,7 @@ typename enable_if<is_dtype_scalar<T>::value, nd::array>::type range(T beginval,
  * Version of range templated for C++ scalar types, with just the end parameter.
  */
 template<class T>
-typename enable_if<is_dtype_scalar<T>::value, nd::array>::type range(T endval) {
+typename enable_if<is_dynd_scalar<T>::value, nd::array>::type range(T endval) {
     T beginval = T(0), stepval = T(1);
     return range(ndt::make_type<T>(), &beginval, &endval, &stepval);
 }
@@ -52,12 +52,12 @@ inline nd::array range(const irange& i) {
  * \param count  The size of the result's first dimension.
  * \param dt  The required dtype of the output.
  */
-nd::array linspace(const nd::array& start, const nd::array& stop, intptr_t count, const ndt::type& dt);
+nd::array linspace(const nd::array& start, const nd::array& stop, intptr_t count, const ndt::type& tp);
 
 /**
  * Most general linspace function, creates an array of length 'count', linearly
  * interpolating from the value 'start' to the value 'stop'. This version
- * figures out the dtype from that of 'start' and 'stop'.
+ * figures out the type from that of 'start' and 'stop'.
  *
  * \param start  The value placed at index 0 of the result.
  * \param stop  The value placed at index count-1 of the result.
@@ -82,8 +82,8 @@ inline nd::array linspace(double start, double stop, intptr_t count = 50) {
 }
 
 template <class T>
-typename enable_if<dtype_kind_of<T>::value == int_kind ||
-                dtype_kind_of<T>::value == uint_kind, nd::array>::type linspace(
+typename enable_if<dynd_kind_of<T>::value == int_kind ||
+                dynd_kind_of<T>::value == uint_kind, nd::array>::type linspace(
                                                     T start, T stop, intptr_t count = 50) {
     return linspace((double)start, (double)stop, count);
 }

@@ -2,12 +2,12 @@
 // Copyright (C) 2011-13 Mark Wiebe, DyND Developers
 // BSD 2-Clause License, see LICENSE.txt
 //
-// The byteswap dtype represents one of the
-// built-in dtypes stored in non-native byte order.
+// The byteswap type represents one of the
+// built-in types stored in non-native byte order.
 //
 // TODO: When needed, a mechanism for non built-in
-//       dtypes to expose a byteswap interface should
-//       be added, which this dtype would use to
+//       types to expose a byteswap interface should
+//       be added, which this type would use to
 //       do the actual swapping.
 //
 #ifndef _DYND__BYTESWAP_TYPE_HPP_
@@ -38,7 +38,7 @@ public:
 
     void print_type(std::ostream& o) const;
 
-    bool is_lossless_assignment(const ndt::type& dst_dt, const ndt::type& src_dt) const;
+    bool is_lossless_assignment(const ndt::type& dst_tp, const ndt::type& src_tp) const;
 
     bool operator==(const base_type& rhs) const;
 
@@ -56,14 +56,14 @@ public:
 
 namespace ndt {
     /**
-     * Makes a byteswapped dtype to view the given dtype with a swapped byte order.
+     * Makes a byteswapped type to view the given type with a swapped byte order.
      */
-    inline ndt::type make_byteswap(const ndt::type& native_dtype) {
-        return ndt::type(new byteswap_type(native_dtype), false);
+    inline ndt::type make_byteswap(const ndt::type& native_tp) {
+        return ndt::type(new byteswap_type(native_tp), false);
     }
 
-    inline ndt::type make_byteswap(const ndt::type& native_dtype, const ndt::type& operand_type) {
-        return ndt::type(new byteswap_type(native_dtype, operand_type), false);
+    inline ndt::type make_byteswap(const ndt::type& native_tp, const ndt::type& operand_type) {
+        return ndt::type(new byteswap_type(native_tp, operand_type), false);
     }
 
     template<typename Tnative>

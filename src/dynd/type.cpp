@@ -193,7 +193,7 @@ nd::array ndt::type::p(const std::string& property_name) const
 }
 
 ndt::type ndt::type::apply_linear_index(size_t nindices, const irange *indices,
-                size_t current_i, const ndt::type& root_dt, bool leading_dimension) const
+                size_t current_i, const ndt::type& root_tp, bool leading_dimension) const
 {
     if (is_builtin()) {
         if (nindices == 0) {
@@ -202,37 +202,37 @@ ndt::type ndt::type::apply_linear_index(size_t nindices, const irange *indices,
             throw too_many_indices(*this, nindices + current_i, current_i);
         }
     } else {
-        return m_extended->apply_linear_index(nindices, indices, current_i, root_dt, leading_dimension);
+        return m_extended->apply_linear_index(nindices, indices, current_i, root_tp, leading_dimension);
     }
 }
 
 namespace {
     struct replace_scalar_type_extra {
         replace_scalar_type_extra(const ndt::type& dt, assign_error_mode em)
-            : scalar_dtype(dt), errmode(em)
+            : scalar_tp(dt), errmode(em)
         {
         }
-        const ndt::type& scalar_dtype;
+        const ndt::type& scalar_tp;
         assign_error_mode errmode;
     };
     static void replace_scalar_types(const ndt::type& dt, void *extra,
-                ndt::type& out_transformed_dtype, bool& out_was_transformed)
+                ndt::type& out_transformed_tp, bool& out_was_transformed)
     {
         const replace_scalar_type_extra *e = reinterpret_cast<const replace_scalar_type_extra *>(extra);
         if (dt.is_scalar()) {
-            out_transformed_dtype = ndt::make_convert(e->scalar_dtype, dt, e->errmode);
+            out_transformed_tp = ndt::make_convert(e->scalar_tp, dt, e->errmode);
             out_was_transformed = true;
         } else {
-            dt.extended()->transform_child_types(&replace_scalar_types, extra, out_transformed_dtype, out_was_transformed);
+            dt.extended()->transform_child_types(&replace_scalar_types, extra, out_transformed_tp, out_was_transformed);
         }
     }
 } // anonymous namespace
 
-ndt::type ndt::type::with_replaced_scalar_types(const ndt::type& scalar_dtype, assign_error_mode errmode) const
+ndt::type ndt::type::with_replaced_scalar_types(const ndt::type& scalar_tp, assign_error_mode errmode) const
 {
     ndt::type result;
     bool was_transformed;
-    replace_scalar_type_extra extra(scalar_dtype, errmode);
+    replace_scalar_type_extra extra(scalar_tp, errmode);
     replace_scalar_types(*this, &extra, result, was_transformed);
     return result;
 }
@@ -247,14 +247,14 @@ namespace {
         size_t replace_undim;
     };
     static void replace_udtype(const ndt::type& dt, void *extra,
-                ndt::type& out_transformed_dtype, bool& out_was_transformed)
+                ndt::type& out_transformed_tp, bool& out_was_transformed)
     {
         const replace_udtype_extra *e = reinterpret_cast<const replace_udtype_extra *>(extra);
         if (dt.get_undim() == e->replace_undim) {
-            out_transformed_dtype = e->udtype;
+            out_transformed_tp = e->udtype;
             out_was_transformed = true;
         } else {
-            dt.extended()->transform_child_types(&replace_udtype, extra, out_transformed_dtype, out_was_transformed);
+            dt.extended()->transform_child_types(&replace_udtype, extra, out_transformed_tp, out_was_transformed);
         }
     }
 } // anonymous namespace
@@ -280,7 +280,7 @@ intptr_t ndt::type::get_dim_size(const char *metadata, const char *data) const {
         return shape[0];
     } else {
         std::stringstream ss;
-        ss << "Cannot get the leading dimension size of nd::array with dtype " << *this;
+        ss << "Cannot get the leading dimension size of dynd array with type " << *this;
         throw std::runtime_error(ss.str());
     }
 }
@@ -302,7 +302,7 @@ bool ndt::type::data_layout_compatible_with(const ndt::type& rhs) const
     }
     if (get_kind() == expression_kind || rhs.get_kind() == expression_kind) {
         // If either is an expression type, check compatibility with
-        // the storage dtypes
+        // the storage types
         return storage_type().data_layout_compatible_with(rhs.storage_type());
     }
     // Rules for the rest of the types

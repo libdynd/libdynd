@@ -43,7 +43,7 @@ class array_vals_at;
 class array {
     /**
      * The nd::array class is a wrapper around an array_memory_block, which
-     * contains metadata as described by the dtype.
+     * contains metadata as described by the type.
      */
     memory_block_ptr m_memblock;
 
@@ -82,9 +82,9 @@ public:
     /** Construct a string from a UTF8 buffer and specified buffer size */
     array(const char *str, size_t size);
     /**
-     * Constructs a scalar with the 'dtype' dtype.
-     * NOTE: Does NOT create a scalar of the provided dtype,
-     *       use dynd::empty(dtype) for that!
+     * Constructs a scalar with the 'type' type.
+     * NOTE: Does NOT create a scalar of the provided type,
+     *       use dynd::empty(type) for that!
      */
     array(const ndt::type& dt);
 
@@ -213,7 +213,7 @@ public:
         return get_type().is_scalar();
     }
 
-    /** The dtype */
+    /** The type */
     inline const ndt::type& get_type() const {
         return *reinterpret_cast<const ndt::type *>(&get_ndo()->m_type);
     }
@@ -226,7 +226,7 @@ public:
         }
     }
 
-    /** The array data type (Most similar to numpy ndarray.dtype property) */
+    /** The array data type (Similar to numpy's ndarray.type property) */
     inline ndt::type get_udtype() const {
         if (get_ndo()->is_builtin_type()) {
             return ndt::type(get_ndo()->get_builtin_type_id());
@@ -389,7 +389,7 @@ public:
                         uint32_t access_flags=read_access_flag|write_access_flag) const;
 
     /**
-     * Returns a view of the array as bytes (for POD) or the storage dtype,
+     * Returns a view of the array as bytes (for POD) or the storage type,
      * peeling away any expression types or encodings.
      */
     array storage() const;
@@ -400,7 +400,7 @@ public:
      * \param nindices  The number of 'irange' indices.
      * \param indices  The array of indices to apply.
      * \param collapse_leading  If true, collapses the leading dimension
-     *                          to simpler dtypes where possible. If false,
+     *                          to simpler types where possible. If false,
      *                          does not. If you want to read values, typically
      *                          use true, if you want to write values, typically
      *                          use false.
@@ -441,22 +441,22 @@ public:
                         const eval::eval_context *ectx = &eval::default_eval_context) const;
 
     /**
-     * Casts the dtype of the array into the specified dtype.
-     * This casts the entire dtype. If you want to cast the
+     * Casts the type of the array into the specified type.
+     * This casts the entire type. If you want to cast the
      * array data type, use 'ucast' instead.
      *
-     * \param dt  The dtype into which the array should be cast.
+     * \param dt  The type into which the array should be cast.
      * \param errmode  Policy for dealing with errors.
      */
-    array cast(const ndt::type& dt, assign_error_mode errmode = assign_error_default) const;
+    array cast(const ndt::type& tp, assign_error_mode errmode = assign_error_default) const;
 
     /**
-     * Casts the array data type of the array into the specified dtype.
+     * Casts the array data type of the array into the specified type.
      *
-     * \param uniform_dt  The dtype into which the array's
-     *                    uniform type should be cast.
+     * \param uniform_dt  The type into which the array's
+     *                    dtype should be cast.
      * \param replace_undim  The number of array dimensions of
-     *                       this dtype which should be replaced.
+     *                       this type which should be replaced.
      *                       E.g. the value 1 could cast the last
      *                       array dimension and the array data type
      *                       to the replacement uniform_dt.
@@ -496,24 +496,24 @@ public:
 
     /**
      * DEPRECATED
-     * Views the array's memory as another dtype, where such an operation
+     * Views the array's memory as another type, where such an operation
      * makes sense. This is analogous to reinterpret_cast<>.
      */
-    array view_scalars(const ndt::type& scalar_dtype) const;
+    array view_scalars(const ndt::type& scalar_tp) const;
 
     /**
      * Replaces the array data type with a new one, returning a view to
-     * the result. The new dtype must have the same storage as the
-     * existing dtype.
+     * the result. The new type must have the same storage as the
+     * existing type.
      *
-     * \param new_udtype  The replacement dtype.
+     * \param new_udtype  The replacement type.
      * \param replace_undim  The number of array dimensions to replace
      *                       in addition to the array data type.
      */
     array replace_udtype(const ndt::type& new_udtype, size_t replace_undim = 0) const;
 
     /**
-     * Views the array's memory as another dtype, where such an operation
+     * Views the array's memory as another type, where such an operation
      * makes sense. This is analogous to reinterpret_case<>.
      */
     template<class T>
@@ -590,7 +590,7 @@ public:
 
     /** Does a value-assignment from the rhs C++ scalar. */
     template<class T>
-    typename enable_if<is_dtype_scalar<T>::value, array_vals&>::type operator=(const T& rhs) {
+    typename enable_if<is_dynd_scalar<T>::value, array_vals&>::type operator=(const T& rhs) {
         m_arr.val_assign(ndt::make_type<T>(), NULL, (const char *)&rhs);
         return *this;
     }
@@ -647,7 +647,7 @@ public:
 
     /** Does a value-assignment from the rhs C++ scalar. */
     template<class T>
-    typename enable_if<is_dtype_scalar<T>::value, array_vals&>::type operator=(const T& rhs) {
+    typename enable_if<is_dynd_scalar<T>::value, array_vals&>::type operator=(const T& rhs) {
         m_arr.val_assign(ndt::make_type<T>(), NULL, (const char *)&rhs);
         return *this;
     }
@@ -682,7 +682,7 @@ array make_strided_array(const ndt::type& uniform_dtype, size_t ndim, const intp
 /**
  * \brief Makes a strided array pointing to existing data
  *
- * \param uniform_dtype  The dtype of each element in the strided array.
+ * \param uniform_dtype  The type of each element in the strided array.
  * \param ndim  The number of strided dimensions.
  * \param shape  The shape of the strided dimensions.
  * \param strides  The strides of the strided dimensions.
@@ -796,12 +796,12 @@ namespace detail {
         static const int value = initializer_list_ndim<T>::value + 1;
     };
 
-    // Computes the array dtype of a nested initializer list constructor
+    // Computes the array type of a nested initializer list constructor
     template<class T>
-    struct initializer_list_dtype {typedef T type;};
+    struct initializer_list_type {typedef T type;};
     template<class T>
-    struct initializer_list_dtype<std::initializer_list<T> > {
-        typedef typename initializer_list_dtype<T>::type type;
+    struct initializer_list_type<std::initializer_list<T> > {
+        typedef typename initializer_list_type<T>::type type;
     };
 
     // Gets the shape of the nested initializer list constructor, and validates that
@@ -853,7 +853,7 @@ namespace detail {
                 initializer_list_shape<std::initializer_list<T> >::validate(shape + 1, *i);
             }
         }
-        static void copy_data(typename initializer_list_dtype<T>::type **dataptr,
+        static void copy_data(typename initializer_list_type<T>::type **dataptr,
                         const std::initializer_list<std::initializer_list<T> >& il) {
             for (auto i = il.begin(); i != il.end(); ++i) {
                 initializer_list_shape<std::initializer_list<T> >::copy_data(dataptr, *i);
@@ -983,7 +983,7 @@ inline nd::array::array(const char *(&rhs)[N])
 namespace detail {
     template <class T>
     struct make_from_vec {
-        inline static typename enable_if<is_dtype_scalar<T>::value, array>::type
+        inline static typename enable_if<is_dynd_scalar<T>::value, array>::type
                         make(const std::vector<T>& vec)
         {
             array result = make_strided_array(vec.size(), ndt::make_type<T>());
@@ -1016,7 +1016,7 @@ array::array(const std::vector<T>& vec)
 namespace detail {
     template <class T>
     struct array_as_helper {
-        static typename enable_if<is_dtype_scalar<T>::value, T>::type as(const array& lhs,
+        static typename enable_if<is_dynd_scalar<T>::value, T>::type as(const array& lhs,
                                                                     assign_error_mode errmode) {
             T result;
             if (!lhs.is_scalar()) {
@@ -1069,7 +1069,7 @@ array eval_raw_copy(const ndt::type& dt, const char *metadata, const char *data)
 /**
  * Constructs an uninitialized array of the given type.
  */
-array empty(const ndt::type& dt);
+array empty(const ndt::type& tp);
 
 /**
  * Constructs an uninitialized array of the given type,
@@ -1084,14 +1084,14 @@ inline array empty(const char (&dshape)[N]) {
 }
 
 /**
- * Constructs a writeable uninitialized array of the specified dtype.
- * This dtype should be at least one dimensional, and is initialized
+ * Constructs a writeable uninitialized array of the specified type.
+ * This type should be at least one dimensional, and is initialized
  * using the specified dimension size.
  */
-array empty(intptr_t dim0, const ndt::type& dt);
+array empty(intptr_t dim0, const ndt::type& tp);
 
 /**
- * Constructs an uninitialized array of the given dtype,
+ * Constructs an uninitialized array of the given type,
  * specified as a string. This is a shortcut for expressions
  * like
  *
@@ -1103,14 +1103,14 @@ inline array empty(intptr_t dim0, const char (&dshape)[N]) {
 }
 
 /**
- * Constructs a writeable uninitialized array of the specified dtype.
- * This dtype should be at least two dimensional, and is initialized
+ * Constructs a writeable uninitialized array of the specified type.
+ * This type should be at least two dimensional, and is initialized
  * using the specified dimension sizes.
  */
-array empty(intptr_t dim0, intptr_t dim1, const ndt::type& dt);
+array empty(intptr_t dim0, intptr_t dim1, const ndt::type& tp);
 
 /**
- * Constructs an uninitialized array of the given dtype,
+ * Constructs an uninitialized array of the given type,
  * specified as a string. This is a shortcut for expressions
  * like
  *
@@ -1118,18 +1118,18 @@ array empty(intptr_t dim0, intptr_t dim1, const ndt::type& dt);
  */
 template<int N>
 inline array empty(intptr_t dim0, intptr_t dim1, const char (&dshape)[N]) {
-    return empty(dim0, dim1, dtype(dshape, dshape + N - 1));
+    return empty(dim0, dim1, ndt::type(dshape, dshape + N - 1));
 }
 
 /**
- * Constructs a writeable uninitialized array of the specified dtype.
- * This dtype should be at least three dimensional, and is initialized
+ * Constructs a writeable uninitialized array of the specified type.
+ * This type should be at least three dimensional, and is initialized
  * using the specified dimension sizes.
  */
-array empty(intptr_t dim0, intptr_t dim1, intptr_t dim2, const ndt::type& dt);
+array empty(intptr_t dim0, intptr_t dim1, intptr_t dim2, const ndt::type& tp);
 
 /**
- * Constructs an uninitialized array of the given dtype,
+ * Constructs an uninitialized array of the given type,
  * specified as a string. This is a shortcut for expressions
  * like
  *
@@ -1137,7 +1137,7 @@ array empty(intptr_t dim0, intptr_t dim1, intptr_t dim2, const ndt::type& dt);
  */
 template<int N>
 inline array empty(intptr_t dim0, intptr_t dim1, intptr_t dim2, const char (&dshape)[N]) {
-    return empty(dim0, dim1, dim2, dtype(dshape, dshape + N - 1));
+    return empty(dim0, dim1, dim2, ndt::type(dshape, dshape + N - 1));
 }
 
 /**
@@ -1158,7 +1158,7 @@ array empty_like(const array& rhs);
 
 /**
  * Performs a binary search of the first dimension of the array, which
- * should be sorted. The data/metadata must correspond to the dtype n.get_type().at(0).
+ * should be sorted. The data/metadata must correspond to the type n.get_type().at(0).
  *
  * \returns  The index of the found element, or -1 if not found.
  */

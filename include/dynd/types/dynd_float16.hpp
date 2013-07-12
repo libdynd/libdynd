@@ -197,7 +197,7 @@ public:
 };
 
 // Metaprogram for determining if a type is a valid C++ scalar
-// of a particular dtype.
+// of a particular type.
 template<typename T> struct is_float16_scalar {enum {value = false};};
 template <> struct is_float16_scalar<char> {enum {value = true};};
 template <> struct is_float16_scalar<signed char> {enum {value = true};};

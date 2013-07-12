@@ -31,7 +31,7 @@ void type_type::print_data(std::ostream& o,
 {
     const type_type_data *ddd = reinterpret_cast<const type_type_data *>(data);
     // This tests avoids the atomic increment/decrement of
-    // always constructing a dtype object
+    // always constructing a type object
     if (is_builtin_type(ddd->dt)) {
         o << ndt::type(ddd->dt, true);
     } else {
@@ -102,8 +102,8 @@ static void typed_data_assignment_kernel_single(char *dst, const char *src,
 }
 
 namespace {
-    struct string_to_dtype_kernel_extra {
-        typedef string_to_dtype_kernel_extra extra_type;
+    struct string_to_type_kernel_extra {
+        typedef string_to_type_kernel_extra extra_type;
 
         kernel_data_prefix base;
         const base_string_type *src_string_dt;
@@ -124,8 +124,8 @@ namespace {
         }
     };
 
-    struct dtype_to_string_kernel_extra {
-        typedef dtype_to_string_kernel_extra extra_type;
+    struct type_to_string_kernel_extra {
+        typedef type_to_string_kernel_extra extra_type;
 
         kernel_data_prefix base;
         const base_string_type *dst_string_dt;
@@ -158,51 +158,51 @@ namespace {
 
 size_t type_type::make_assignment_kernel(
                 hierarchical_kernel *out, size_t offset_out,
-                const ndt::type& dst_dt, const char *dst_metadata,
-                const ndt::type& src_dt, const char *src_metadata,
+                const ndt::type& dst_tp, const char *dst_metadata,
+                const ndt::type& src_tp, const char *src_metadata,
                 kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *ectx) const
 {
     offset_out = make_kernreq_to_single_kernel_adapter(out, offset_out, kernreq);
 
-    if (this == dst_dt.extended()) {
-        if (src_dt.get_type_id() == type_type_id) {
+    if (this == dst_tp.extended()) {
+        if (src_tp.get_type_id() == type_type_id) {
             kernel_data_prefix *e = out->get_at<kernel_data_prefix>(offset_out);
             e->set_function<unary_single_operation_t>(typed_data_assignment_kernel_single);
             return offset_out + sizeof(kernel_data_prefix);
-        } else if (src_dt.get_kind() == string_kind) {
-            // String to dtype
-            out->ensure_capacity(offset_out + sizeof(string_to_dtype_kernel_extra));
-            string_to_dtype_kernel_extra *e = out->get_at<string_to_dtype_kernel_extra>(offset_out);
-            e->base.set_function<unary_single_operation_t>(&string_to_dtype_kernel_extra::single);
-            e->base.destructor = &string_to_dtype_kernel_extra::destruct;
-            // The kernel data owns a reference to this dtype
-            e->src_string_dt = static_cast<const base_string_type *>(ndt::type(src_dt).release());
+        } else if (src_tp.get_kind() == string_kind) {
+            // String to type
+            out->ensure_capacity(offset_out + sizeof(string_to_type_kernel_extra));
+            string_to_type_kernel_extra *e = out->get_at<string_to_type_kernel_extra>(offset_out);
+            e->base.set_function<unary_single_operation_t>(&string_to_type_kernel_extra::single);
+            e->base.destructor = &string_to_type_kernel_extra::destruct;
+            // The kernel data owns a reference to this type
+            e->src_string_dt = static_cast<const base_string_type *>(ndt::type(src_tp).release());
             e->src_metadata = src_metadata;
             e->errmode = errmode;
-            return offset_out + sizeof(string_to_dtype_kernel_extra);
-        } else if (!src_dt.is_builtin()) {
-            return src_dt.extended()->make_assignment_kernel(out, offset_out,
-                            dst_dt, dst_metadata,
-                            src_dt, src_metadata,
+            return offset_out + sizeof(string_to_type_kernel_extra);
+        } else if (!src_tp.is_builtin()) {
+            return src_tp.extended()->make_assignment_kernel(out, offset_out,
+                            dst_tp, dst_metadata,
+                            src_tp, src_metadata,
                             kernreq, errmode, ectx);
         }
     } else {
-        if (dst_dt.get_kind() == string_kind) {
-            // Dtype to string
-            out->ensure_capacity(offset_out + sizeof(dtype_to_string_kernel_extra));
-            dtype_to_string_kernel_extra *e = out->get_at<dtype_to_string_kernel_extra>(offset_out);
-            e->base.set_function<unary_single_operation_t>(&dtype_to_string_kernel_extra::single);
-            e->base.destructor = &dtype_to_string_kernel_extra::destruct;
-            // The kernel data owns a reference to this dtype
-            e->dst_string_dt = static_cast<const base_string_type *>(ndt::type(dst_dt).release());
+        if (dst_tp.get_kind() == string_kind) {
+            // Type to string
+            out->ensure_capacity(offset_out + sizeof(type_to_string_kernel_extra));
+            type_to_string_kernel_extra *e = out->get_at<type_to_string_kernel_extra>(offset_out);
+            e->base.set_function<unary_single_operation_t>(&type_to_string_kernel_extra::single);
+            e->base.destructor = &type_to_string_kernel_extra::destruct;
+            // The kernel data owns a reference to this type
+            e->dst_string_dt = static_cast<const base_string_type *>(ndt::type(dst_tp).release());
             e->dst_metadata = dst_metadata;
             e->errmode = errmode;
-            return offset_out + sizeof(dtype_to_string_kernel_extra);
+            return offset_out + sizeof(type_to_string_kernel_extra);
         }
     }
 
     stringstream ss;
-    ss << "Cannot assign from " << src_dt << " to " << dst_dt;
+    ss << "Cannot assign from " << src_tp << " to " << dst_tp;
     throw runtime_error(ss.str());
 }

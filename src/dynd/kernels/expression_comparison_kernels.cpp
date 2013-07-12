@@ -15,7 +15,7 @@ namespace {
     struct single_buffer {
         // Offset, from the start of &base, to the kernel for buffering
         size_t kernel_offset;
-        const base_type *dt;
+        const base_type *tp;
         char *metadata;
         size_t data_offset, data_size;
     };
@@ -28,12 +28,12 @@ namespace {
         size_t cmp_kernel_offset;
         single_buffer buf[2];
 
-        // Initializes the dtype and metadata for one of the two buffers
+        // Initializes the type and metadata for one of the two buffers
         // NOTE: This does NOT initialize buf[i].data_offset or buf[i].kernel_offset
         void init_buffer(int i, const ndt::type& buffer_dt_) {
             single_buffer& b = buf[i];
             // The kernel data owns a reference in buffer_dt
-            b.dt = ndt::type(buffer_dt_).release();
+            b.tp = ndt::type(buffer_dt_).release();
             if (!buffer_dt_.is_builtin()) {
                 size_t buffer_metadata_size = buffer_dt_.extended()->get_metadata_size();
                 if (buffer_metadata_size > 0) {
@@ -41,10 +41,10 @@ namespace {
                     if (b.metadata == NULL) {
                         throw bad_alloc();
                     }
-                    b.dt->metadata_default_construct(b.metadata, 0, NULL);
+                    b.tp->metadata_default_construct(b.metadata, 0, NULL);
                 }
                 // Make sure the buffer data size is pointer size-aligned
-                b.data_size = inc_to_alignment(b.dt->get_default_data_size(0, NULL),
+                b.data_size = inc_to_alignment(b.tp->get_default_data_size(0, NULL),
                                 sizeof(void *));
             } else {
                 // Make sure the buffer data size is pointer size-aligned
@@ -58,7 +58,7 @@ namespace {
             char *dst = eraw + b.data_offset;
 
             // If the type needs it, initialize the buffer data to zero
-            if (!is_builtin_type(b.dt) && (b.dt->get_flags()&type_flag_zeroinit) != 0) {
+            if (!is_builtin_type(b.tp) && (b.tp->get_flags()&type_flag_zeroinit) != 0) {
                 memset(dst, 0, b.data_size);
             }
 
@@ -94,10 +94,10 @@ namespace {
 
             // Clear the buffer data if necessary
             if (e->buf[0].metadata != NULL) {
-                e->buf[0].dt->metadata_reset_buffers(e->buf[0].metadata);
+                e->buf[0].tp->metadata_reset_buffers(e->buf[0].metadata);
             }
             if (e->buf[1].metadata != NULL) {
-                e->buf[1].dt->metadata_reset_buffers(e->buf[1].metadata);
+                e->buf[1].tp->metadata_reset_buffers(e->buf[1].metadata);
             }
 
             return result;
@@ -112,8 +112,8 @@ namespace {
             for (int i = 0; i < 2; ++i) {
                 single_buffer& b = e->buf[i];
 
-                ndt::type dt(b.dt, false);
-                // Steal the buffer0_dt reference count into a dtype
+                ndt::type dt(b.tp, false);
+                // Steal the buffer0_tp reference count into an ndt::type
                 char *metadata = b.metadata;
                 // Destruct and free the metadata for the buffer
                 if (metadata != NULL) {

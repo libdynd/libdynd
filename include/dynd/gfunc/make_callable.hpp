@@ -106,29 +106,29 @@ template <> struct parameter_type_of<nd::array> {typedef array_preamble *type;};
 template <> struct parameter_type_of<ndt::type> {typedef const base_type *type;};
 template <> struct parameter_type_of<std::string> {typedef string_type_data type;};
 
-template <typename T> struct make_parameter_dtype {inline static ndt::type make() {
+template <typename T> struct make_parameter_type {inline static ndt::type make() {
         return ndt::make_type<typename parameter_type_of<T>::type>();
     }};
-template <typename T> struct make_parameter_dtype<T &> : public make_parameter_dtype<T> {};
-template <typename T> struct make_parameter_dtype<const T> : public make_parameter_dtype<T> {};
-template <typename T, int N> struct make_parameter_dtype<T[N]> {inline static ndt::type make() {
+template <typename T> struct make_parameter_type<T &> : public make_parameter_type<T> {};
+template <typename T> struct make_parameter_type<const T> : public make_parameter_type<T> {};
+template <typename T, int N> struct make_parameter_type<T[N]> {inline static ndt::type make() {
         return ndt::make_fixed_dim(N, ndt::make_type<T>());
     }};
 // Use void* to pass nd::array as a parameter, correctness currently will
 // rely on using them in the right context. To pass these properly will require
 // dynd to grow the ability to manage object memory.
-template <> struct make_parameter_dtype<nd::array> {inline static ndt::type make() {
+template <> struct make_parameter_type<nd::array> {inline static ndt::type make() {
         return ndt::type(new void_pointer_type, false);
     }};
-template <> struct make_parameter_dtype<ndt::type> {inline static ndt::type make() {
+template <> struct make_parameter_type<ndt::type> {inline static ndt::type make() {
         return ndt::make_type();
     }};
-template <> struct make_parameter_dtype<std::string> {inline static ndt::type make() {
+template <> struct make_parameter_type<std::string> {inline static ndt::type make() {
         return ndt::make_string(string_encoding_utf_8);
     }};
 
 template <typename T> struct box_result {
-    inline static typename enable_if<is_dtype_scalar<T>::value, array_preamble *>::type box(const T& v) {
+    inline static typename enable_if<is_dynd_scalar<T>::value, array_preamble *>::type box(const T& v) {
         return nd::array(v).release();
     }
 };
@@ -152,7 +152,7 @@ template <> struct box_result<std::string> {
 };
 
 template <typename T> struct unbox_param {
-    inline static typename enable_if<is_dtype_scalar<T>::value, const T&>::type unbox(char *v) {
+    inline static typename enable_if<is_dynd_scalar<T>::value, const T&>::type unbox(char *v) {
         return *reinterpret_cast<T *>(v);
     }
 };
@@ -203,7 +203,7 @@ namespace detail {
             return box_result<R>::box(f(unbox_param<P0>::unbox(p + dcs_offset_of<T0>::value)));
         }
         static ndt::type make_parameters_type(const char *name0) {
-            return ndt::make_cstruct(make_parameter_dtype<P0>::make(), name0);
+            return ndt::make_cstruct(make_parameter_type<P0>::make(), name0);
         }
     };
 
@@ -221,8 +221,8 @@ namespace detail {
                             unbox_param<P1>::unbox(p + dcs_offset_of<T0, T1>::value)));
         }
         static ndt::type make_parameters_type(const char *name0, const char *name1) {
-            return ndt::make_cstruct(make_parameter_dtype<P0>::make(), name0,
-                            make_parameter_dtype<P1>::make(), name1);
+            return ndt::make_cstruct(make_parameter_type<P0>::make(), name0,
+                            make_parameter_type<P1>::make(), name1);
         }
     };
 
@@ -242,9 +242,9 @@ namespace detail {
                             unbox_param<P2>::unbox(p + dcs_offset_of<T0, T1, T2>::value)));
         }
         static ndt::type make_parameters_type(const char *name0, const char *name1, const char *name2) {
-            return ndt::make_cstruct(make_parameter_dtype<P0>::make(), name0,
-                            make_parameter_dtype<P1>::make(), name1,
-                            make_parameter_dtype<P2>::make(), name2);
+            return ndt::make_cstruct(make_parameter_type<P0>::make(), name0,
+                            make_parameter_type<P1>::make(), name1,
+                            make_parameter_type<P2>::make(), name2);
         }
     };
 
@@ -268,10 +268,10 @@ namespace detail {
         static ndt::type make_parameters_type(const char *name0, const char *name1, const char *name2, const char *name3) {
             ndt::type field_types[4];
             std::string field_names[4];
-            field_types[0] = make_parameter_dtype<P0>::make();
-            field_types[1] = make_parameter_dtype<P1>::make();
-            field_types[2] = make_parameter_dtype<P2>::make();
-            field_types[3] = make_parameter_dtype<P3>::make();
+            field_types[0] = make_parameter_type<P0>::make();
+            field_types[1] = make_parameter_type<P1>::make();
+            field_types[2] = make_parameter_type<P2>::make();
+            field_types[3] = make_parameter_type<P3>::make();
             field_names[0] = name0;
             field_names[1] = name1;
             field_names[2] = name2;
@@ -303,11 +303,11 @@ namespace detail {
                         const char *name3, const char *name4) {
             ndt::type field_types[5];
             std::string field_names[5];
-            field_types[0] = make_parameter_dtype<P0>::make();
-            field_types[1] = make_parameter_dtype<P1>::make();
-            field_types[2] = make_parameter_dtype<P2>::make();
-            field_types[3] = make_parameter_dtype<P3>::make();
-            field_types[4] = make_parameter_dtype<P4>::make();
+            field_types[0] = make_parameter_type<P0>::make();
+            field_types[1] = make_parameter_type<P1>::make();
+            field_types[2] = make_parameter_type<P2>::make();
+            field_types[3] = make_parameter_type<P3>::make();
+            field_types[4] = make_parameter_type<P4>::make();
             field_names[0] = name0;
             field_names[1] = name1;
             field_names[2] = name2;

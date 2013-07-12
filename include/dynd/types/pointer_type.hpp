@@ -4,11 +4,11 @@
 //
 
 /**
- * The pointer dtype contains C/C++ raw pointers
+ * The pointer type contains C/C++ raw pointers
  * pointing at data in other memory_blocks, using
  * blockrefs to manage the memory.
  *
- * This dtype operates in a "gather/scatter" fashion,
+ * This type operates in a "gather/scatter" fashion,
  * exposing itself as an expression type whose expression
  * copies the data to/from the pointer targets.
  */
@@ -31,27 +31,27 @@ struct pointer_type_metadata {
 };
 
 class pointer_type : public base_expression_type {
-    ndt::type m_target_dtype;
+    ndt::type m_target_tp;
     static ndt::type m_void_pointer_type;
 
 public:
-    pointer_type(const ndt::type& target_dtype);
+    pointer_type(const ndt::type& target_tp);
 
     virtual ~pointer_type();
 
     const ndt::type& get_value_type() const {
-        return m_target_dtype.value_type();
+        return m_target_tp.value_type();
     }
     const ndt::type& get_operand_type() const {
-        if (m_target_dtype.get_type_id() == pointer_type_id) {
-            return m_target_dtype;
+        if (m_target_tp.get_type_id() == pointer_type_id) {
+            return m_target_tp;
         } else {
             return m_void_pointer_type;
         }
     }
 
-    const ndt::type& get_target_dtype() const {
-        return m_target_dtype;
+    const ndt::type& get_target_type() const {
+        return m_target_tp;
     }
 
     void print_data(std::ostream& o, const char *metadata, const char *data) const;
@@ -61,15 +61,15 @@ public:
     bool is_expression() const;
     bool is_unique_data_owner(const char *metadata) const;
     void transform_child_types(type_transform_fn_t transform_fn, void *extra,
-                    ndt::type& out_transformed_dtype, bool& out_was_transformed) const;
+                    ndt::type& out_transformed_tp, bool& out_was_transformed) const;
     ndt::type get_canonical_type() const;
 
     ndt::type apply_linear_index(size_t nindices, const irange *indices,
-                size_t current_i, const ndt::type& root_dt, bool leading_dimension) const;
+                size_t current_i, const ndt::type& root_tp, bool leading_dimension) const;
     intptr_t apply_linear_index(size_t nindices, const irange *indices, const char *metadata,
-                    const ndt::type& result_dtype, char *out_metadata,
+                    const ndt::type& result_tp, char *out_metadata,
                     memory_block_data *embedded_reference,
-                    size_t current_i, const ndt::type& root_dt,
+                    size_t current_i, const ndt::type& root_tp,
                     bool leading_dimension, char **inout_data,
                     memory_block_data **inout_dataref) const;
     ndt::type at_single(intptr_t i0, const char **inout_metadata, const char **inout_data) const;
@@ -80,7 +80,7 @@ public:
 
     axis_order_classification_t classify_axis_order(const char *metadata) const;
 
-    bool is_lossless_assignment(const ndt::type& dst_dt, const ndt::type& src_dt) const;
+    bool is_lossless_assignment(const ndt::type& dst_tp, const ndt::type& src_tp) const;
 
     bool operator==(const base_type& rhs) const;
 
@@ -99,9 +99,9 @@ public:
 };
 
 namespace ndt {
-    inline ndt::type make_pointer(const ndt::type& target_dtype) {
-        if (target_dtype.get_type_id() != void_type_id) {
-            return ndt::type(new pointer_type(target_dtype), false);
+    inline ndt::type make_pointer(const ndt::type& target_tp) {
+        if (target_tp.get_type_id() != void_type_id) {
+            return ndt::type(new pointer_type(target_tp), false);
         } else {
             return ndt::type(new void_pointer_type(), false);
         }

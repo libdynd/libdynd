@@ -20,7 +20,7 @@ struct_type::struct_type(const std::vector<ndt::type>& field_types, const std::v
             m_field_types(field_types), m_field_names(field_names), m_metadata_offsets(field_types.size())
 {
     if (field_types.size() != field_names.size()) {
-        throw runtime_error("The field names for a struct dtypes must match the size of the field dtypes");
+        throw runtime_error("The field names for a dynd struct types must match the size of the field types");
     }
 
     // Calculate the needed element alignment
@@ -28,12 +28,12 @@ struct_type::struct_type(const std::vector<ndt::type>& field_types, const std::v
     m_members.data_alignment = 1;
     for (size_t i = 0, i_end = field_types.size(); i != i_end; ++i) {
         size_t field_alignment = field_types[i].get_data_alignment();
-        // Accumulate the biggest field alignment as the dtype alignment
+        // Accumulate the biggest field alignment as the type alignment
         if (field_alignment > m_members.data_alignment) {
             m_members.data_alignment = (uint8_t)field_alignment;
         }
         // Inherit any operand flags from the fields
-        m_members.flags |= (field_types[i].get_flags()&dtype_flags_operand_inherited);
+        m_members.flags |= (field_types[i].get_flags()&type_flags_operand_inherited);
         // Calculate the metadata offsets
         m_metadata_offsets[i] = metadata_offset;
         metadata_offset += m_field_types[i].is_builtin() ? 0 : m_field_types[i].extended()->get_metadata_size();
@@ -49,7 +49,7 @@ struct_type::~struct_type()
 
 intptr_t struct_type::get_field_index(const std::string& field_name) const
 {
-    // TODO: Put a map<> or unordered_map<> in the dtype to accelerate this lookup
+    // TODO: Put a map<> or unordered_map<> in the type to accelerate this lookup
     vector<string>::const_iterator i = find(m_field_names.begin(), m_field_names.end(), field_name);
     if (i != m_field_names.end()) {
         return i - m_field_names.begin();
@@ -122,7 +122,7 @@ bool struct_type::is_unique_data_owner(const char *metadata) const
 }
 
 void struct_type::transform_child_types(type_transform_fn_t transform_fn, void *extra,
-                ndt::type& out_transformed_dtype, bool& out_was_transformed) const
+                ndt::type& out_transformed_tp, bool& out_was_transformed) const
 {
     std::vector<ndt::type> tmp_field_types(m_field_types.size());
 
@@ -131,10 +131,10 @@ void struct_type::transform_child_types(type_transform_fn_t transform_fn, void *
         transform_fn(m_field_types[i], extra, tmp_field_types[i], was_transformed);
     }
     if (was_transformed) {
-        out_transformed_dtype = ndt::type(new struct_type(tmp_field_types, m_field_names), false);
+        out_transformed_tp = ndt::type(new struct_type(tmp_field_types, m_field_names), false);
         out_was_transformed = true;
     } else {
-        out_transformed_dtype = ndt::type(this, true);
+        out_transformed_tp = ndt::type(this, true);
     }
 }
 
@@ -150,21 +150,21 @@ ndt::type struct_type::get_canonical_type() const
 }
 
 ndt::type struct_type::apply_linear_index(size_t nindices, const irange *indices,
-                size_t current_i, const ndt::type& root_dt, bool leading_dimension) const
+                size_t current_i, const ndt::type& root_tp, bool leading_dimension) const
 {
     if (nindices == 0) {
         return ndt::type(this, true);
     } else {
         bool remove_dimension;
         intptr_t start_index, index_stride, dimension_size;
-        apply_single_linear_index(*indices, m_field_types.size(), current_i, &root_dt,
+        apply_single_linear_index(*indices, m_field_types.size(), current_i, &root_tp,
                         remove_dimension, start_index, index_stride, dimension_size);
         if (remove_dimension) {
             return m_field_types[start_index].apply_linear_index(nindices - 1, indices + 1,
-                            current_i + 1, root_dt, leading_dimension);
+                            current_i + 1, root_tp, leading_dimension);
         } else if (nindices == 1 && start_index == 0 && index_stride == 1 &&
                         (size_t)dimension_size == m_field_types.size()) {
-            // This is a do-nothing index, keep the same dtype
+            // This is a do-nothing index, keep the same type
             return ndt::type(this, true);
         } else {
             // Take the subset of the fixed fields in-place
@@ -174,7 +174,7 @@ ndt::type struct_type::apply_linear_index(size_t nindices, const irange *indices
             for (intptr_t i = 0; i < dimension_size; ++i) {
                 intptr_t idx = start_index + i * index_stride;
                 field_types[i] = m_field_types[idx].apply_linear_index(nindices-1, indices+1,
-                                current_i+1, root_dt, false);
+                                current_i+1, root_tp, false);
                 field_names[i] = m_field_names[idx];
             }
 
@@ -184,9 +184,9 @@ ndt::type struct_type::apply_linear_index(size_t nindices, const irange *indices
 }
 
 intptr_t struct_type::apply_linear_index(size_t nindices, const irange *indices, const char *metadata,
-                const ndt::type& result_dtype, char *out_metadata,
+                const ndt::type& result_tp, char *out_metadata,
                 memory_block_data *embedded_reference,
-                size_t current_i, const ndt::type& root_dt,
+                size_t current_i, const ndt::type& root_tp,
                 bool leading_dimension, char **inout_data,
                 memory_block_data **inout_dataref) const
 {
@@ -199,7 +199,7 @@ intptr_t struct_type::apply_linear_index(size_t nindices, const irange *indices,
         intptr_t *out_offsets = reinterpret_cast<intptr_t *>(out_metadata);
         bool remove_dimension;
         intptr_t start_index, index_stride, dimension_size;
-        apply_single_linear_index(*indices, m_field_types.size(), current_i, &root_dt,
+        apply_single_linear_index(*indices, m_field_types.size(), current_i, &root_tp,
                         remove_dimension, start_index, index_stride, dimension_size);
         if (remove_dimension) {
             const ndt::type& dt = m_field_types[start_index];
@@ -211,19 +211,19 @@ intptr_t struct_type::apply_linear_index(size_t nindices, const irange *indices,
                     // for the collapsing of leading dimensions to work correctly.
                     *inout_data += offset;
                     offset = dt.extended()->apply_linear_index(nindices - 1, indices + 1,
-                                    metadata + m_metadata_offsets[start_index], result_dtype,
-                                    out_metadata, embedded_reference, current_i + 1, root_dt,
+                                    metadata + m_metadata_offsets[start_index], result_tp,
+                                    out_metadata, embedded_reference, current_i + 1, root_tp,
                                     true, inout_data, inout_dataref);
                 } else {
                     offset += dt.extended()->apply_linear_index(nindices - 1, indices + 1,
-                                    metadata + m_metadata_offsets[start_index], result_dtype,
-                                    out_metadata, embedded_reference, current_i + 1, root_dt,
+                                    metadata + m_metadata_offsets[start_index], result_tp,
+                                    out_metadata, embedded_reference, current_i + 1, root_tp,
                                     false, NULL, NULL);
                 }
             }
             return offset;
         } else {
-            const struct_type *result_e_dt = static_cast<const struct_type *>(result_dtype.extended());
+            const struct_type *result_e_dt = static_cast<const struct_type *>(result_tp.extended());
             for (intptr_t i = 0; i < dimension_size; ++i) {
                 intptr_t idx = start_index + i * index_stride;
                 out_offsets[i] = offsets[idx];
@@ -232,7 +232,7 @@ intptr_t struct_type::apply_linear_index(size_t nindices, const irange *indices,
                     out_offsets[i] += dt.extended()->apply_linear_index(nindices - 1, indices + 1,
                                     metadata + m_metadata_offsets[idx], dt,
                                     out_metadata + result_e_dt->m_metadata_offsets[i],
-                                    embedded_reference, current_i + 1, root_dt,
+                                    embedded_reference, current_i + 1, root_tp,
                                     false, NULL, NULL);
                 }
             }
@@ -241,13 +241,13 @@ intptr_t struct_type::apply_linear_index(size_t nindices, const irange *indices,
     }
 }
 
-bool struct_type::is_lossless_assignment(const ndt::type& dst_dt, const ndt::type& src_dt) const
+bool struct_type::is_lossless_assignment(const ndt::type& dst_tp, const ndt::type& src_tp) const
 {
-    if (dst_dt.extended() == this) {
-        if (src_dt.extended() == this) {
+    if (dst_tp.extended() == this) {
+        if (src_tp.extended() == this) {
             return true;
-        } else if (src_dt.get_type_id() == struct_type_id) {
-            return *dst_dt.extended() == *src_dt.extended();
+        } else if (src_tp.get_type_id() == struct_type_id) {
+            return *dst_tp.extended() == *src_tp.extended();
         }
     }
 
@@ -256,32 +256,32 @@ bool struct_type::is_lossless_assignment(const ndt::type& dst_dt, const ndt::typ
 
 size_t struct_type::make_assignment_kernel(
                 hierarchical_kernel *out, size_t offset_out,
-                const ndt::type& dst_dt, const char *dst_metadata,
-                const ndt::type& src_dt, const char *src_metadata,
+                const ndt::type& dst_tp, const char *dst_metadata,
+                const ndt::type& src_tp, const char *src_metadata,
                 kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *ectx) const
 {
-    if (this == dst_dt.extended()) {
-        if (this == src_dt.extended()) {
+    if (this == dst_tp.extended()) {
+        if (this == src_tp.extended()) {
             return make_struct_identical_assignment_kernel(out, offset_out,
-                            dst_dt,
+                            dst_tp,
                             dst_metadata, src_metadata,
                             kernreq, errmode, ectx);
-        } else if (src_dt.get_kind() == struct_kind) {
+        } else if (src_tp.get_kind() == struct_kind) {
             return make_struct_assignment_kernel(out, offset_out,
-                            dst_dt, dst_metadata,
-                            src_dt, src_metadata,
+                            dst_tp, dst_metadata,
+                            src_tp, src_metadata,
                             kernreq, errmode, ectx);
-        } else if (!src_dt.is_builtin()) {
-            return src_dt.extended()->make_assignment_kernel(out, offset_out,
-                            dst_dt, dst_metadata,
-                            src_dt, src_metadata,
+        } else if (!src_tp.is_builtin()) {
+            return src_tp.extended()->make_assignment_kernel(out, offset_out,
+                            dst_tp, dst_metadata,
+                            src_tp, src_metadata,
                             kernreq, errmode, ectx);
         }
     }
 
     stringstream ss;
-    ss << "Cannot assign from " << src_dt << " to " << dst_dt;
+    ss << "Cannot assign from " << src_tp << " to " << dst_tp;
     throw runtime_error(ss.str());
 }
 
@@ -328,7 +328,7 @@ void struct_type::metadata_default_construct(char *metadata, size_t ndim, const 
     if (ndim > 0) {
         if (shape[0] >= 0 && shape[0] != (intptr_t)m_field_types.size()) {
             stringstream ss;
-            ss << "Cannot construct dynd object of dtype " << ndt::type(this, true);
+            ss << "Cannot construct dynd object of type " << ndt::type(this, true);
             ss << " with dimension size " << shape[0] << ", the size must be " << m_field_types.size();
             throw runtime_error(ss.str());
         }
@@ -468,7 +468,7 @@ void struct_type::get_dynamic_type_properties(const std::pair<std::string, gfunc
     *out_count = sizeof(type_properties) / sizeof(type_properties[0]);
 }
 
-ndt::type struct_type::array_parameters_dtype = ndt::make_cstruct(ndt::type(new void_pointer_type, false), "self");
+ndt::type struct_type::array_parameters_type = ndt::make_cstruct(ndt::type(new void_pointer_type, false), "self");
 
 static array_preamble *property_get_array_field(const array_preamble *params, void *extra)
 {
@@ -498,7 +498,7 @@ void struct_type::create_array_properties()
     for (size_t i = 0, i_end = m_field_types.size(); i != i_end; ++i) {
         // TODO: Transform the name into a valid Python symbol?
         m_array_properties[i].first = m_field_names[i];
-        m_array_properties[i].second.set(array_parameters_dtype, &property_get_array_field, (void *)i);
+        m_array_properties[i].second.set(array_parameters_type, &property_get_array_field, (void *)i);
     }
 }
 
