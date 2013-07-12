@@ -19,7 +19,7 @@ TEST(ArrayRange, Basic) {
     nd::array a;
 
     a = nd::range(1, 10);
-    EXPECT_EQ(ndt::make_type<int32_t>(), a.get_type().get_udtype());
+    EXPECT_EQ(ndt::make_type<int32_t>(), a.get_type().get_dtype());
     EXPECT_EQ(1u, a.get_shape().size());
     EXPECT_EQ(9, a.get_shape()[0]);
     for (int i = 0; i < 9; ++i) {
@@ -27,7 +27,7 @@ TEST(ArrayRange, Basic) {
     }
 
     a = nd::range(1., 10., 0.5);
-    EXPECT_EQ(ndt::make_type<double>(), a.get_type().get_udtype());
+    EXPECT_EQ(ndt::make_type<double>(), a.get_type().get_dtype());
     EXPECT_EQ(1u, a.get_shape().size());
     EXPECT_EQ(18, a.get_shape()[0]);
     for (int i = 0; i < 18; ++i) {
@@ -35,11 +35,11 @@ TEST(ArrayRange, Basic) {
     }
 
     a = nd::range(0., 1., 0.1);
-    EXPECT_EQ(ndt::make_type<double>(), a.get_type().get_udtype());
+    EXPECT_EQ(ndt::make_type<double>(), a.get_type().get_dtype());
     EXPECT_EQ(10, a.get_shape()[0]);
 
     a = nd::range(0.f,1.f,0.01f);
-    EXPECT_EQ(ndt::make_type<float>(), a.get_type().get_udtype());
+    EXPECT_EQ(ndt::make_type<float>(), a.get_type().get_dtype());
     EXPECT_EQ(100, a.get_shape()[0]);
 
     a = nd::range(3 <= irange() <= 20);

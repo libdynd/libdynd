@@ -31,7 +31,7 @@ TEST(CategoricalDType, Create) {
     EXPECT_EQ(1u, d.get_data_size());
     EXPECT_FALSE(d.is_expression());
     EXPECT_EQ(ndt::make_type<uint8_t>(), d.p("storage_type").as<ndt::type>());
-    EXPECT_EQ(a.get_udtype(), d.p("category_type").as<ndt::type>());
+    EXPECT_EQ(a.get_dtype(), d.p("category_type").as<ndt::type>());
 
     // With <= 256 categories, storage is a uint8
     a = nd::range(256);

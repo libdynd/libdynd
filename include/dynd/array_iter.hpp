@@ -38,7 +38,7 @@ class array_iter<1, 0> {
     inline void init(const ndt::type& tp0, const char *metadata0, char *data0)
     {
         m_array_tp = tp0;
-        m_iter_ndim = m_array_tp.get_undim();
+        m_iter_ndim = m_array_tp.get_ndim();
         m_itersize = 1;
         if (m_iter_ndim != 0) {
             m_iterindex.init(m_iter_ndim);
@@ -130,7 +130,7 @@ class array_iter<0, 1> {
     inline void init(const ndt::type& tp0, const char *metadata0, const char *data0)
     {
         m_array_tp = tp0;
-        m_iter_ndim = m_array_tp.get_undim();
+        m_iter_ndim = m_array_tp.get_ndim();
         m_itersize = 1;
         if (m_iter_ndim != 0) {
             m_iterindex.init(m_iter_ndim);
@@ -230,14 +230,14 @@ class array_iter<1, 1> {
         m_array_tp[1] = tp1;
         m_itersize = 1;
         // The destination shape
-        m_iter_ndim[0] = m_array_tp[0].get_undim();
+        m_iter_ndim[0] = m_array_tp[0].get_ndim();
         m_itershape.init(m_iter_ndim[0]);
         if (m_iter_ndim[0] > 0) {
             m_array_tp[0].extended()->get_shape(m_iter_ndim[0], 0, m_itershape.get(), metadata0);
         }
         // The source shape
         dimvector src_shape;
-        m_iter_ndim[1] = m_array_tp[1].get_undim();
+        m_iter_ndim[1] = m_array_tp[1].get_ndim();
         src_shape.init(m_iter_ndim[1]);
         if (m_iter_ndim[1] > 0) {
             m_array_tp[1].extended()->get_shape(m_iter_ndim[1], 0, src_shape.get(), metadata1);
@@ -386,7 +386,7 @@ public:
             memset(m_iterindex.get(), 0, sizeof(intptr_t) * m_iter_ndim);
             // The op iterdata
             for (int i = 0; i < 2; ++i) {
-                size_t iter_ndim_i = m_array_tp[i].get_undim();
+                size_t iter_ndim_i = m_array_tp[i].get_ndim();
                 size_t iterdata_size = m_array_tp[i].get_broadcasted_iterdata_size(iter_ndim_i);
                 m_iterdata[i] = reinterpret_cast<iterdata_common *>(malloc(iterdata_size));
                 if (!m_iterdata[i]) {
@@ -415,7 +415,7 @@ public:
     ~array_iter() {
         for (size_t i = 0; i < 2; ++i) {
             if (m_iterdata[i]) {
-                m_array_tp[i].iterdata_destruct(m_iterdata[i], m_array_tp[i].get_undim());
+                m_array_tp[i].iterdata_destruct(m_iterdata[i], m_array_tp[i].get_ndim());
                 free(m_iterdata[i]);
             }
         }
@@ -487,9 +487,9 @@ public:
         m_array_tp[2] = op2.get_type();
         m_array_tp[3] = op3.get_type();
         m_itersize = 1;
-        m_iter_ndim[1] = m_array_tp[1].get_undim();
-        m_iter_ndim[2] = m_array_tp[2].get_undim();
-        m_iter_ndim[3] = m_array_tp[3].get_undim();
+        m_iter_ndim[1] = m_array_tp[1].get_ndim();
+        m_iter_ndim[2] = m_array_tp[2].get_ndim();
+        m_iter_ndim[3] = m_array_tp[3].get_ndim();
         // Allocate and initialize the iterdata
         if (m_iter_ndim[0] != 0) {
             m_iterindex.init(m_iter_ndim[0]);

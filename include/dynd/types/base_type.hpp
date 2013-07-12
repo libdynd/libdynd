@@ -155,7 +155,7 @@ public:
         return m_members.data_alignment;
     }
     /** The number of array dimensions this type has */
-    inline size_t get_undim() const {
+    inline size_t get_ndim() const {
         return m_members.undim;
     }
     inline base_type_members::flags_type get_flags() const {
@@ -345,7 +345,7 @@ public:
      * there is not a simple stride (e.g. a tuple/struct type),
      * 0 is returned and the caller should handle this.
      *
-     * The output must be pre-initialized to have get_undim() elements.
+     * The output must be pre-initialized to have get_ndim() elements.
      */
     virtual void get_strides(size_t i, intptr_t *out_strides, const char *metadata) const;
 

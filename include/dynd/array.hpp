@@ -218,24 +218,55 @@ public:
         return *reinterpret_cast<const ndt::type *>(&get_ndo()->m_type);
     }
 
-    inline size_t get_undim() const {
+    inline size_t get_ndim() const {
         if (get_ndo()->is_builtin_type()) {
             return 0;
         } else {
-            return get_ndo()->m_type->get_undim();
+            return get_ndo()->m_type->get_ndim();
         }
     }
 
-    /** The array data type (Similar to numpy's ndarray.type property) */
-    inline ndt::type get_udtype() const {
+    /**
+     * The data type of the array. This is similar to numpy's
+     * ndarray.dtype property
+     */
+    inline ndt::type get_dtype() const {
         if (get_ndo()->is_builtin_type()) {
             return ndt::type(get_ndo()->get_builtin_type_id());
         } else {
-            size_t undim = get_ndo()->m_type->get_undim();
-            if (undim == 0) {
+            size_t ndim = get_ndo()->m_type->get_ndim();
+            if (ndim == 0) {
                 return ndt::type(get_ndo()->m_type, true);
             } else {
-                return get_ndo()->m_type->get_type_at_dimension(NULL, undim);
+                return get_ndo()->m_type->get_type_at_dimension(NULL, ndim);
+            }
+        }
+    }
+
+    /**
+     * The data type of the array. This is similar to numpy's
+     * ndarray.dtype property, but may include some array dimensions
+     * if requested.
+     *
+     * \param include_ndim  The number of array dimensions to include
+     *                   in the data type.
+     */
+    inline ndt::type get_dtype(size_t include_ndim) const {
+        if (get_ndo()->is_builtin_type()) {
+            if (include_ndim > 0) {
+                throw too_many_indices(get_type(), include_ndim, 0);
+            }
+            return ndt::type(get_ndo()->get_builtin_type_id());
+        } else {
+            size_t ndim = get_ndo()->m_type->get_ndim();
+            if (ndim < include_ndim) {
+                throw too_many_indices(get_type(), include_ndim, ndim);
+            }
+            ndim -= include_ndim;
+            if (ndim == 0) {
+                return ndt::type(get_ndo()->m_type, true);
+            } else {
+                return get_ndo()->m_type->get_type_at_dimension(NULL, ndim);
             }
         }
     }
@@ -252,13 +283,13 @@ public:
     }
 
     inline std::vector<intptr_t> get_shape() const {
-        std::vector<intptr_t> result(get_undim());
+        std::vector<intptr_t> result(get_ndim());
         get_shape(&result[0]);
         return result;
     }
     inline void get_shape(intptr_t *out_shape) const {
-        if (!get_ndo()->is_builtin_type() && get_ndo()->m_type->get_undim() > 0) {
-            get_ndo()->m_type->get_shape(get_ndo()->m_type->get_undim(), 0, out_shape, get_ndo_meta());
+        if (!get_ndo()->is_builtin_type() && get_ndo()->m_type->get_ndim() > 0) {
+            get_ndo()->m_type->get_shape(get_ndo()->m_type->get_ndim(), 0, out_shape, get_ndo_meta());
         }
     }
 
@@ -270,7 +301,7 @@ public:
     }
 
     std::vector<intptr_t> get_strides() const {
-        std::vector<intptr_t> result(get_undim());
+        std::vector<intptr_t> result(get_ndim());
         get_strides(&result[0]);
         return result;
     }
@@ -455,7 +486,7 @@ public:
      *
      * \param uniform_dt  The type into which the array's
      *                    dtype should be cast.
-     * \param replace_undim  The number of array dimensions of
+     * \param replace_ndim  The number of array dimensions of
      *                       this type which should be replaced.
      *                       E.g. the value 1 could cast the last
      *                       array dimension and the array data type
@@ -463,7 +494,7 @@ public:
      * \param errmode  Policy for dealing with errors.
      */
     array ucast(const ndt::type& uniform_dt,
-                    size_t replace_undim = 0,
+                    size_t replace_ndim = 0,
                     assign_error_mode errmode = assign_error_default) const;
 
     /**
@@ -471,9 +502,9 @@ public:
      * as the template parameter.
      */
     template<class T>
-    inline array ucast(size_t replace_undim = 0,
+    inline array ucast(size_t replace_ndim = 0,
                     assign_error_mode errmode = assign_error_default) const {
-        return ucast(ndt::make_type<T>(), replace_undim, errmode);
+        return ucast(ndt::make_type<T>(), replace_ndim, errmode);
     }
 
     /**
@@ -489,10 +520,10 @@ public:
      * new dynd type, raising an error if it cannot be done.
      *
      * \param uniform_dt  The dynd type to view the uniform data as.
-     * \param replace_undim  The number of array dimensions to swallow
+     * \param replace_ndim  The number of array dimensions to swallow
      *                       into the viewed uniform_dt.
      */
-    array uview(const ndt::type& uniform_dt, size_t replace_undim) const;
+    array uview(const ndt::type& uniform_dt, size_t replace_ndim) const;
 
     /**
      * DEPRECATED
@@ -506,11 +537,11 @@ public:
      * the result. The new type must have the same storage as the
      * existing type.
      *
-     * \param new_udtype  The replacement type.
-     * \param replace_undim  The number of array dimensions to replace
+     * \param replacement_tp  The replacement type.
+     * \param replace_ndim  The number of array dimensions to replace
      *                       in addition to the array data type.
      */
-    array replace_udtype(const ndt::type& new_udtype, size_t replace_undim = 0) const;
+    array replace_dtype(const ndt::type& replacement_tp, size_t replace_ndim = 0) const;
 
     /**
      * Views the array's memory as another type, where such an operation

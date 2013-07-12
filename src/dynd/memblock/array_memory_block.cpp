@@ -74,7 +74,7 @@ memory_block_ptr dynd::make_array_memory_block(const ndt::type& dt, size_t ndim,
     size_t metadata_size, data_size;
 
     // Make sure that there are not too many 
-    if (ndim > dt.get_undim()) {
+    if (ndim > dt.get_ndim()) {
         stringstream ss;
         ss << "Shape provided, ";
         print_shape(ss, ndim, shape);

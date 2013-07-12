@@ -265,15 +265,15 @@ void date_type::get_dynamic_type_functions(const std::pair<std::string, gfunc::c
 ///////// properties on the nd::array
 
 static nd::array property_ndo_get_year(const nd::array& n) {
-    return n.replace_udtype(ndt::make_property(n.get_udtype(), "year"));
+    return n.replace_dtype(ndt::make_property(n.get_dtype(), "year"));
 }
 
 static nd::array property_ndo_get_month(const nd::array& n) {
-    return n.replace_udtype(ndt::make_property(n.get_udtype(), "month"));
+    return n.replace_dtype(ndt::make_property(n.get_dtype(), "month"));
 }
 
 static nd::array property_ndo_get_day(const nd::array& n) {
-    return n.replace_udtype(ndt::make_property(n.get_udtype(), "day"));
+    return n.replace_dtype(ndt::make_property(n.get_dtype(), "day"));
 }
 
 static pair<string, gfunc::callable> date_array_properties[] = {
@@ -291,7 +291,7 @@ void date_type::get_dynamic_array_properties(const std::pair<std::string, gfunc:
 ///////// functions on the nd::array
 
 static nd::array function_ndo_to_struct(const nd::array& n) {
-    return n.replace_udtype(ndt::make_property(n.get_udtype(), "struct"));
+    return n.replace_dtype(ndt::make_property(n.get_dtype(), "struct"));
 }
 
 static nd::array function_ndo_strftime(const nd::array& n, const std::string& format) {
@@ -299,12 +299,12 @@ static nd::array function_ndo_strftime(const nd::array& n, const std::string& fo
     if (format.empty()) {
         throw runtime_error("format string for strftime should not be empty");
     }
-    return n.replace_udtype(ndt::make_unary_expr(ndt::make_string(), n.get_udtype(),
+    return n.replace_dtype(ndt::make_unary_expr(ndt::make_string(), n.get_dtype(),
                     make_strftime_kernelgen(format)));
 }
 
 static nd::array function_ndo_weekday(const nd::array& n) {
-    return n.replace_udtype(ndt::make_property(n.get_udtype(), "weekday"));
+    return n.replace_dtype(ndt::make_property(n.get_dtype(), "weekday"));
 }
 
 static nd::array function_ndo_replace(const nd::array& n, int32_t year, int32_t month, int32_t day) {
@@ -313,7 +313,7 @@ static nd::array function_ndo_replace(const nd::array& n, int32_t year, int32_t 
                     day == numeric_limits<int32_t>::max()) {
         throw std::runtime_error("no parameters provided to date.replace, should provide at least one");
     }
-    return n.replace_udtype(ndt::make_unary_expr(ndt::make_date(), n.get_udtype(),
+    return n.replace_dtype(ndt::make_unary_expr(ndt::make_date(), n.get_dtype(),
                     make_replace_kernelgen(year, month, day)));
 }
 

@@ -22,7 +22,7 @@ groupby_type::groupby_type(const ndt::type& data_values_tp,
                 const ndt::type& by_values_tp)
     : base_expression_type(groupby_type_id, expression_kind,
                     sizeof(groupby_type_data), sizeof(void *), type_flag_none,
-                    0, 1 + data_values_tp.get_undim())
+                    0, 1 + data_values_tp.get_ndim())
 {
     m_groups_type = by_values_tp.at_single(0).value_type();
     if (m_groups_type.get_type_id() != categorical_type_id) {
@@ -31,10 +31,10 @@ groupby_type::groupby_type(const ndt::type& data_values_tp,
         ss << ", must have a categorical value type";
         throw runtime_error(ss.str());
     }
-    if (data_values_tp.get_undim() < 1) {
+    if (data_values_tp.get_ndim() < 1) {
         throw runtime_error("to construct a groupby type, its values type must have at least one array dimension");
     }
-    if (by_values_tp.get_undim() < 1) {
+    if (by_values_tp.get_ndim() < 1) {
         throw runtime_error("to construct a groupby type, its values type must have at least one array dimension");
     }
     m_operand_type = ndt::make_cstruct(ndt::make_pointer(data_values_tp), "data",

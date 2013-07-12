@@ -112,7 +112,7 @@ TEST(GroupByDType, Struct) {
 
     EXPECT_EQ(ndt::make_groupby(ndt::make_strided_dim(d),
                         ndt::make_strided_dim(ndt::make_convert(
-                            ndt::make_categorical(gender_cats), gender_cats.get_udtype()))),
+                            ndt::make_categorical(gender_cats), gender_cats.get_dtype()))),
                     g.get_type());
     g = g.eval();
     EXPECT_EQ(2, g.at_array(0, NULL).get_shape()[0]);
@@ -225,7 +225,7 @@ TEST(GroupByDType, StructUnsortedCats) {
 
     EXPECT_EQ(ndt::make_groupby(ndt::make_strided_dim(d),
                         ndt::make_strided_dim(ndt::make_convert(
-                            ndt::make_categorical(gender_cats), a.p("gender").get_udtype()))),
+                            ndt::make_categorical(gender_cats), a.p("gender").get_dtype()))),
                     g.get_type());
     g = g.eval();
     EXPECT_EQ(2, g.at_array(0, NULL).get_shape()[0]);

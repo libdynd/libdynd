@@ -16,7 +16,7 @@ unary_expr_type::unary_expr_type(const ndt::type& value_type, const ndt::type& o
     : base_expression_type(unary_expr_type_id, expression_kind,
                         operand_type.get_data_size(), operand_type.get_data_alignment(),
                         inherited_flags(value_type.get_flags(), operand_type.get_flags()),
-                        operand_type.get_metadata_size(), value_type.get_undim()),
+                        operand_type.get_metadata_size(), value_type.get_ndim()),
                     m_value_type(value_type), m_operand_type(operand_type),
                     m_kgen(kgen)
 {
@@ -133,7 +133,7 @@ ndt::type unary_expr_type::with_replaced_storage_type(const ndt::type& DYND_UNUS
 void unary_expr_type::get_dynamic_array_properties(const std::pair<std::string, gfunc::callable> **out_properties,
                 size_t *out_count) const
 {
-    const ndt::type& udt = m_value_type.get_udtype();
+    const ndt::type& udt = m_value_type.get_dtype();
     if (!udt.is_builtin()) {
         udt.extended()->get_dynamic_array_properties(out_properties, out_count);
     } else {
@@ -144,7 +144,7 @@ void unary_expr_type::get_dynamic_array_properties(const std::pair<std::string, 
 void unary_expr_type::get_dynamic_array_functions(const std::pair<std::string, gfunc::callable> **out_functions,
                 size_t *out_count) const
 {
-    const ndt::type& udt = m_value_type.get_udtype();
+    const ndt::type& udt = m_value_type.get_dtype();
     if (!udt.is_builtin()) {
         udt.extended()->get_dynamic_array_functions(out_functions, out_count);
     } else {

@@ -24,7 +24,7 @@ TEST(ArithmeticOp, SimpleBroadcast) {
     b = v1;
 
     c = (a + b).eval();
-    EXPECT_EQ(ndt::make_type<int>(), c.get_udtype());
+    EXPECT_EQ(ndt::make_type<int>(), c.get_dtype());
     EXPECT_EQ(1, c(0,0).as<int>());
     EXPECT_EQ(3, c(0,1).as<int>());
     EXPECT_EQ(4, c(0,2).as<int>());
@@ -32,7 +32,7 @@ TEST(ArithmeticOp, SimpleBroadcast) {
     EXPECT_EQ(7, c(1,1).as<int>());
     EXPECT_EQ(-7, c(1,2).as<int>());
     c = (a - b).eval();
-    EXPECT_EQ(ndt::make_type<int>(), c.get_udtype());
+    EXPECT_EQ(ndt::make_type<int>(), c.get_dtype());
     EXPECT_EQ(1, c(0,0).as<int>());
     EXPECT_EQ(1, c(0,1).as<int>());
     EXPECT_EQ(2, c(0,2).as<int>());
@@ -40,7 +40,7 @@ TEST(ArithmeticOp, SimpleBroadcast) {
     EXPECT_EQ(-3, c(1,1).as<int>());
     EXPECT_EQ(13, c(1,2).as<int>());
     c = (b * a).eval();
-    EXPECT_EQ(ndt::make_type<int>(), c.get_udtype());
+    EXPECT_EQ(ndt::make_type<int>(), c.get_dtype());
     EXPECT_EQ(0, c(0,0).as<int>());
     EXPECT_EQ(2, c(0,1).as<int>());
     EXPECT_EQ(3, c(0,2).as<int>());
@@ -48,7 +48,7 @@ TEST(ArithmeticOp, SimpleBroadcast) {
     EXPECT_EQ(10, c(1,1).as<int>());
     EXPECT_EQ(-30, c(1,2).as<int>());
     c = (b / a).eval();
-    EXPECT_EQ(ndt::make_type<int>(), c.get_udtype());
+    EXPECT_EQ(ndt::make_type<int>(), c.get_dtype());
     EXPECT_EQ(0, c(0,0).as<int>());
     EXPECT_EQ(0, c(0,1).as<int>());
     EXPECT_EQ(0, c(0,2).as<int>());
@@ -66,37 +66,37 @@ TEST(ArithmeticOp, StridedScalarBroadcast) {
     b = 2;
 
     c = (a + b).eval();
-    EXPECT_EQ(ndt::make_type<int>(), c.get_udtype());
+    EXPECT_EQ(ndt::make_type<int>(), c.get_dtype());
     EXPECT_EQ(4, c(0).as<int>());
     EXPECT_EQ(6, c(1).as<int>());
     EXPECT_EQ(8, c(2).as<int>());
     c = (b + a).eval();
-    EXPECT_EQ(ndt::make_type<int>(), c.get_udtype());
+    EXPECT_EQ(ndt::make_type<int>(), c.get_dtype());
     EXPECT_EQ(4, c(0).as<int>());
     EXPECT_EQ(6, c(1).as<int>());
     EXPECT_EQ(8, c(2).as<int>());
     c = (a - b).eval();
-    EXPECT_EQ(ndt::make_type<int>(), c.get_udtype());
+    EXPECT_EQ(ndt::make_type<int>(), c.get_dtype());
     EXPECT_EQ(0, c(0).as<int>());
     EXPECT_EQ(2, c(1).as<int>());
     EXPECT_EQ(4, c(2).as<int>());
     c = (b - a).eval();
-    EXPECT_EQ(ndt::make_type<int>(), c.get_udtype());
+    EXPECT_EQ(ndt::make_type<int>(), c.get_dtype());
     EXPECT_EQ(0, c(0).as<int>());
     EXPECT_EQ(-2, c(1).as<int>());
     EXPECT_EQ(-4, c(2).as<int>());
     c = (a * b).eval();
-    EXPECT_EQ(ndt::make_type<int>(), c.get_udtype());
+    EXPECT_EQ(ndt::make_type<int>(), c.get_dtype());
     EXPECT_EQ(4, c(0).as<int>());
     EXPECT_EQ(8, c(1).as<int>());
     EXPECT_EQ(12, c(2).as<int>());
     c = (b * a).eval();
-    EXPECT_EQ(ndt::make_type<int>(), c.get_udtype());
+    EXPECT_EQ(ndt::make_type<int>(), c.get_dtype());
     EXPECT_EQ(4, c(0).as<int>());
     EXPECT_EQ(8, c(1).as<int>());
     EXPECT_EQ(12, c(2).as<int>());
     c = (a / b).eval();
-    EXPECT_EQ(ndt::make_type<int>(), c.get_udtype());
+    EXPECT_EQ(ndt::make_type<int>(), c.get_dtype());
     EXPECT_EQ(1, c(0).as<int>());
     EXPECT_EQ(2, c(1).as<int>());
     EXPECT_EQ(3, c(2).as<int>());
@@ -278,7 +278,7 @@ TEST(ArithmeticOp, MatchingDTypes_View) {
 
     // Check also partial indexing through another temporary
     d = c(0);
-    EXPECT_EQ(1u, d.get_undim());
+    EXPECT_EQ(1u, d.get_ndim());
     EXPECT_EQ(3, d.get_shape()[0]);
     a.val_assign(nd::array(v0));
     EXPECT_EQ(1, d(0).as<int>());

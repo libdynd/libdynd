@@ -366,7 +366,7 @@ TEST(GFuncCallable, ArrayReturn) {
 }
 
 static size_t array_param(const nd::array& n) {
-    return n.get_type().get_undim();
+    return n.get_type().get_ndim();
 }
 
 TEST(GFuncCallable, ArrayParam) {

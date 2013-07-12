@@ -12,11 +12,11 @@ using namespace std;
 using namespace dynd;
 
 static nd::array property_complex_real(const nd::array& n) {
-    return n.replace_udtype(ndt::make_property(n.get_udtype(), "real"));
+    return n.replace_dtype(ndt::make_property(n.get_dtype(), "real"));
 }
 
 static nd::array property_complex_imag(const nd::array& n) {
-    return n.replace_udtype(ndt::make_property(n.get_udtype(), "imag"));
+    return n.replace_dtype(ndt::make_property(n.get_dtype(), "imag"));
 }
 
 static pair<string, gfunc::callable> complex_array_properties[] = {

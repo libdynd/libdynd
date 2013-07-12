@@ -415,35 +415,35 @@ void datetime_type::get_dynamic_type_functions(const std::pair<std::string, gfun
 ///////// properties on the nd::array
 
 static nd::array property_ndo_get_date(const nd::array& n) {
-    return n.replace_udtype(ndt::make_property(n.get_udtype(), "date"));
+    return n.replace_dtype(ndt::make_property(n.get_dtype(), "date"));
 }
 
 static nd::array property_ndo_get_year(const nd::array& n) {
-    return n.replace_udtype(ndt::make_property(n.get_udtype(), "year"));
+    return n.replace_dtype(ndt::make_property(n.get_dtype(), "year"));
 }
 
 static nd::array property_ndo_get_month(const nd::array& n) {
-    return n.replace_udtype(ndt::make_property(n.get_udtype(), "month"));
+    return n.replace_dtype(ndt::make_property(n.get_dtype(), "month"));
 }
 
 static nd::array property_ndo_get_day(const nd::array& n) {
-    return n.replace_udtype(ndt::make_property(n.get_udtype(), "day"));
+    return n.replace_dtype(ndt::make_property(n.get_dtype(), "day"));
 }
 
 static nd::array property_ndo_get_hour(const nd::array& n) {
-    return n.replace_udtype(ndt::make_property(n.get_udtype(), "hour"));
+    return n.replace_dtype(ndt::make_property(n.get_dtype(), "hour"));
 }
 
 static nd::array property_ndo_get_minute(const nd::array& n) {
-    return n.replace_udtype(ndt::make_property(n.get_udtype(), "minute"));
+    return n.replace_dtype(ndt::make_property(n.get_dtype(), "minute"));
 }
 
 static nd::array property_ndo_get_second(const nd::array& n) {
-    return n.replace_udtype(ndt::make_property(n.get_udtype(), "second"));
+    return n.replace_dtype(ndt::make_property(n.get_dtype(), "second"));
 }
 
 static nd::array property_ndo_get_microsecond(const nd::array& n) {
-    return n.replace_udtype(ndt::make_property(n.get_udtype(), "microsecond"));
+    return n.replace_dtype(ndt::make_property(n.get_dtype(), "microsecond"));
 }
 
 static pair<string, gfunc::callable> date_array_properties[] = {
@@ -466,7 +466,7 @@ void datetime_type::get_dynamic_array_properties(const std::pair<std::string, gf
 ///////// functions on the nd::array
 
 static nd::array function_ndo_to_struct(const nd::array& n) {
-    return n.replace_udtype(ndt::make_property(n.get_udtype(), "struct"));
+    return n.replace_dtype(ndt::make_property(n.get_dtype(), "struct"));
 }
 
 static nd::array function_ndo_strftime(const nd::array& n, const std::string& format) {
@@ -474,7 +474,7 @@ static nd::array function_ndo_strftime(const nd::array& n, const std::string& fo
     if (format.empty()) {
         throw runtime_error("format string for strftime should not be empty");
     }
-    return n.replace_udtype(ndt::make_unary_expr(ndt::make_string(), n.get_udtype(),
+    return n.replace_dtype(ndt::make_unary_expr(ndt::make_string(), n.get_dtype(),
                     make_strftime_kernelgen(format)));
 }
 

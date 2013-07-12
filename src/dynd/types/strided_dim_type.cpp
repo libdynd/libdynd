@@ -279,7 +279,7 @@ void strided_dim_type::get_strides(size_t i, intptr_t *out_strides, const char *
 axis_order_classification_t strided_dim_type::classify_axis_order(const char *metadata) const
 {
     const strided_dim_type_metadata *md = reinterpret_cast<const strided_dim_type_metadata *>(metadata);
-    if (m_element_tp.get_undim() > 0) {
+    if (m_element_tp.get_ndim() > 0) {
         if (md->stride != 0) {
             // Call the helper function to do the classification
             return classify_strided_axis_order(md->stride >= 0 ? md->stride : -md->stride, m_element_tp,
@@ -513,7 +513,7 @@ size_t strided_dim_type::make_assignment_kernel(
             }
         }
         e->base.destructor = strided_assign_kernel_extra::destruct;
-        if (src_tp.get_undim() < dst_tp.get_undim()) {
+        if (src_tp.get_ndim() < dst_tp.get_ndim()) {
             // If the src has fewer dimensions, broadcast it across this one
             e->size = dst_md->size;
             e->dst_stride = dst_md->stride;
@@ -568,7 +568,7 @@ size_t strided_dim_type::make_assignment_kernel(
             ss << "Cannot assign from " << src_tp << " to " << dst_tp;
             throw runtime_error(ss.str());
         }
-    } else if (dst_tp.get_undim() < src_tp.get_undim()) {
+    } else if (dst_tp.get_ndim() < src_tp.get_ndim()) {
         throw broadcast_error(dst_tp, dst_metadata, src_tp, src_metadata);
     } else {
         stringstream ss;
@@ -595,7 +595,7 @@ void strided_dim_type::reorder_default_constructed_strides(char *dst_metadata,
         return;
     }
 
-    if (get_undim() > src_tp.get_undim()) {
+    if (get_ndim() > src_tp.get_ndim()) {
         // If the destination has more dimensions than the source,
         // do the reordering starting from where they match, to
         // follow the broadcasting rules.

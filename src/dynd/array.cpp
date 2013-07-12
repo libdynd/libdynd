@@ -665,7 +665,7 @@ nd::array nd::array::eval(const eval::eval_context *ectx) const
     } else {
         // Create a canonical type for the result
         const ndt::type& dt = current_tp.get_canonical_type();
-        size_t ndim = current_tp.get_undim();
+        size_t ndim = current_tp.get_ndim();
         dimvector shape(ndim);
         get_shape(shape.get());
         array result(make_array_memory_block(dt, ndim, shape.get()));
@@ -689,7 +689,7 @@ nd::array nd::array::eval_immutable(const eval::eval_context *ectx) const
     } else {
         // Create a canonical type for the result
         const ndt::type& dt = current_tp.get_canonical_type();
-        size_t ndim = current_tp.get_undim();
+        size_t ndim = current_tp.get_ndim();
         dimvector shape(ndim);
         get_shape(shape.get());
         array result(make_array_memory_block(dt, ndim, shape.get()));
@@ -710,7 +710,7 @@ nd::array nd::array::eval_copy(const eval::eval_context *ectx,
 {
     const ndt::type& current_tp = get_type();
     const ndt::type& dt = current_tp.get_canonical_type();
-    size_t ndim = current_tp.get_undim();
+    size_t ndim = current_tp.get_ndim();
     dimvector shape(ndim);
     get_shape(shape.get());
     array result(make_array_memory_block(dt, ndim, shape.get()));
@@ -801,7 +801,7 @@ bool nd::array::equals_exact(const array& rhs) const
         return true;
     } else if (get_type() != rhs.get_type()) {
         return false;
-    } else if (get_undim() == 0) {
+    } else if (get_ndim() == 0) {
         comparison_kernel k;
         make_comparison_kernel(&k, 0,
                         get_type(), get_ndo_meta(),
@@ -810,11 +810,11 @@ bool nd::array::equals_exact(const array& rhs) const
         return k(get_readonly_originptr(), rhs.get_readonly_originptr());
     } else {
         // First compare the shape, to avoid triggering an exception in common cases
-        size_t undim = get_undim();
-        dimvector shape0(undim), shape1(undim);
+        size_t ndim = get_ndim();
+        dimvector shape0(ndim), shape1(ndim);
         get_shape(shape0.get());
         rhs.get_shape(shape1.get());
-        if (memcmp(shape0.get(), shape1.get(), undim * sizeof(intptr_t)) != 0) {
+        if (memcmp(shape0.get(), shape1.get(), ndim * sizeof(intptr_t)) != 0) {
             return false;
         }
         try {
@@ -842,43 +842,43 @@ bool nd::array::equals_exact(const array& rhs) const
 nd::array nd::array::cast(const ndt::type& tp, assign_error_mode errmode) const
 {
     // Use the ucast function specifying to replace all dimensions
-    return ucast(tp, get_type().get_undim(), errmode);
+    return ucast(tp, get_type().get_ndim(), errmode);
 }
 
 namespace {
-    struct cast_udtype_extra {
-        cast_udtype_extra(const ndt::type& dt, size_t ru, assign_error_mode em)
-            : replacement_dt(dt), errmode(em), replace_undim(ru), out_can_view_data(true)
+    struct cast_dtype_extra {
+        cast_dtype_extra(const ndt::type& tp, size_t ru, assign_error_mode em)
+            : replacement_tp(tp), errmode(em), replace_ndim(ru), out_can_view_data(true)
         {
         }
-        const ndt::type& replacement_dt;
+        const ndt::type& replacement_tp;
         assign_error_mode errmode;
-        size_t replace_undim;
+        size_t replace_ndim;
         bool out_can_view_data;
     };
-    static void cast_udtype(const ndt::type& dt, void *extra,
+    static void cast_dtype(const ndt::type& dt, void *extra,
                 ndt::type& out_transformed_tp, bool& out_was_transformed)
     {
-        cast_udtype_extra *e = reinterpret_cast<cast_udtype_extra *>(extra);
-        size_t replace_undim = e->replace_undim;
-        if (dt.get_undim() > replace_undim) {
-            dt.extended()->transform_child_types(&cast_udtype, extra, out_transformed_tp, out_was_transformed);
+        cast_dtype_extra *e = reinterpret_cast<cast_dtype_extra *>(extra);
+        size_t replace_ndim = e->replace_ndim;
+        if (dt.get_ndim() > replace_ndim) {
+            dt.extended()->transform_child_types(&cast_dtype, extra, out_transformed_tp, out_was_transformed);
         } else {
-            if (replace_undim > 0) {
+            if (replace_ndim > 0) {
                 // If the dimension we're replacing doesn't change, then
                 // avoid creating the convert type at this level
-                if (dt.get_type_id() == e->replacement_dt.get_type_id()) {
+                if (dt.get_type_id() == e->replacement_tp.get_type_id()) {
                     bool can_keep_dim = false;
-                    ndt::type child_dt, child_replacement_dt;
+                    ndt::type child_dt, child_replacement_tp;
                     switch (dt.get_type_id()) {
                         case fixed_dim_type_id: {
                             const fixed_dim_type *dt_fdd = static_cast<const fixed_dim_type *>(dt.extended());
-                            const fixed_dim_type *r_fdd = static_cast<const fixed_dim_type *>(e->replacement_dt.extended());
+                            const fixed_dim_type *r_fdd = static_cast<const fixed_dim_type *>(e->replacement_tp.extended());
                             if (dt_fdd->get_fixed_dim_size() == r_fdd->get_fixed_dim_size() &&
                                     dt_fdd->get_fixed_stride() == r_fdd->get_fixed_stride()) {
                                 can_keep_dim = true;
                                 child_dt = dt_fdd->get_element_type();
-                                child_replacement_dt = r_fdd->get_element_type();
+                                child_replacement_tp = r_fdd->get_element_type();
                             }
                             break;
                         }
@@ -887,27 +887,27 @@ namespace {
                             const base_uniform_dim_type *dt_budd =
                                             static_cast<const base_uniform_dim_type *>(dt.extended());
                             const base_uniform_dim_type *r_budd =
-                                            static_cast<const base_uniform_dim_type *>(e->replacement_dt.extended());
+                                            static_cast<const base_uniform_dim_type *>(e->replacement_tp.extended());
                             can_keep_dim = true;
                             child_dt = dt_budd->get_element_type();
-                            child_replacement_dt = r_budd->get_element_type();
+                            child_replacement_tp = r_budd->get_element_type();
                             break;
                         }
                         default:
                             break;
                     }
                     if (can_keep_dim) {
-                        cast_udtype_extra extra_child(child_replacement_dt,
-                                    replace_undim - 1, e->errmode);
-                        dt.extended()->transform_child_types(&cast_udtype,
+                        cast_dtype_extra extra_child(child_replacement_tp,
+                                    replace_ndim - 1, e->errmode);
+                        dt.extended()->transform_child_types(&cast_dtype,
                                         &extra_child, out_transformed_tp, out_was_transformed);
                         return;
                     }
                 }
             }
-            out_transformed_tp = ndt::make_convert(e->replacement_dt, dt, e->errmode);
+            out_transformed_tp = ndt::make_convert(e->replacement_tp, dt, e->errmode);
             // Only flag the transformation if this actually created a convert type
-            if (out_transformed_tp.extended() != e->replacement_dt.extended()) {
+            if (out_transformed_tp.extended() != e->replacement_tp.extended()) {
                 out_was_transformed= true;
                 e->out_can_view_data = false;
             }
@@ -916,7 +916,7 @@ namespace {
 } // anonymous namespace
 
 nd::array nd::array::ucast(const ndt::type& scalar_tp,
-                size_t replace_undim,
+                size_t replace_ndim,
                 assign_error_mode errmode) const
 {
     // This creates a type which has a convert type for every scalar of different type.
@@ -924,8 +924,8 @@ nd::array nd::array::ucast(const ndt::type& scalar_tp,
     // type in a shallow copy.
     ndt::type replaced_tp;
     bool was_transformed = false;
-    cast_udtype_extra extra(scalar_tp, replace_undim, errmode);
-    cast_udtype(get_type(), &extra, replaced_tp, was_transformed);
+    cast_dtype_extra extra(scalar_tp, replace_ndim, errmode);
+    cast_dtype(get_type(), &extra, replaced_tp, was_transformed);
     if (was_transformed) {
         return make_array_clone_with_new_type(*this, replaced_tp);
     } else {
@@ -944,55 +944,55 @@ nd::array nd::array::view(const ndt::type& DYND_UNUSED(dt)) const
     throw runtime_error("TODO: Implement nd::array::view");
 }
 
-nd::array nd::array::uview(const ndt::type& uniform_dt, size_t replace_undim) const
+nd::array nd::array::uview(const ndt::type& uniform_dt, size_t replace_ndim) const
 {
     // Use the view function specifying to replace all dimensions
-    return view(get_type().with_replaced_udtype(uniform_dt, replace_undim));
+    return view(get_type().with_replaced_dtype(uniform_dt, replace_ndim));
 }
 
 namespace {
-    struct replace_compatible_udtype_extra {
-        replace_compatible_udtype_extra(const ndt::type& udtype_, size_t replace_undim_)
-            : udtype(udtype_), replace_undim(replace_undim_)
+    struct replace_compatible_dtype_extra {
+        replace_compatible_dtype_extra(const ndt::type& tp, size_t replace_ndim_)
+            : replacement_tp(tp), replace_ndim(replace_ndim_)
         {
         }
-        const ndt::type& udtype;
-        size_t replace_undim;
+        const ndt::type& replacement_tp;
+        size_t replace_ndim;
     };
-    static void replace_compatible_udtype(const ndt::type& dt, void *extra,
+    static void replace_compatible_dtype(const ndt::type& tp, void *extra,
                 ndt::type& out_transformed_tp, bool& out_was_transformed)
     {
-        const replace_compatible_udtype_extra *e =
-                        reinterpret_cast<const replace_compatible_udtype_extra *>(extra);
-        const ndt::type& udtype = e->udtype;
-        if (dt.get_undim() == e->replace_undim) {
-            if (dt != udtype) {
-                if (!dt.data_layout_compatible_with(udtype)) {
+        const replace_compatible_dtype_extra *e =
+                        reinterpret_cast<const replace_compatible_dtype_extra *>(extra);
+        const ndt::type& replacement_tp = e->replacement_tp;
+        if (tp.get_ndim() == e->replace_ndim) {
+            if (tp != replacement_tp) {
+                if (!tp.data_layout_compatible_with(replacement_tp)) {
                     stringstream ss;
-                    ss << "The dynd type " << dt << " is not ";
-                    ss << " data layout compatible with " << udtype;
+                    ss << "The dynd type " << tp << " is not ";
+                    ss << " data layout compatible with " << replacement_tp;
                     ss << ", so a substitution cannot be made.";
                     throw runtime_error(ss.str());
                 }
-                out_transformed_tp = udtype;
+                out_transformed_tp = replacement_tp;
                 out_was_transformed= true;
             }
         } else {
-            dt.extended()->transform_child_types(&replace_compatible_udtype,
+            tp.extended()->transform_child_types(&replace_compatible_dtype,
                             extra, out_transformed_tp, out_was_transformed);
         }
     }
 } // anonymous namespace
 
-nd::array nd::array::replace_udtype(const ndt::type& new_udtype, size_t replace_undim) const
+nd::array nd::array::replace_dtype(const ndt::type& replacement_tp, size_t replace_ndim) const
 {
-    // This creates a type which swaps in the new udtype for
+    // This creates a type which swaps in the new dtype for
     // the existing one. It raises an error if the data layout
     // is incompatible
     ndt::type replaced_tp;
     bool was_transformed = false;
-    replace_compatible_udtype_extra extra(new_udtype, replace_undim);
-    replace_compatible_udtype(get_type(), &extra,
+    replace_compatible_dtype_extra extra(replacement_tp, replace_ndim);
+    replace_compatible_dtype(get_type(), &extra,
                     replaced_tp, was_transformed);
     if (was_transformed) {
         return make_array_clone_with_new_type(*this, replaced_tp);
@@ -1051,7 +1051,7 @@ namespace {
 nd::array nd::array::view_scalars(const ndt::type& scalar_tp) const
 {
     const ndt::type& array_type = get_type();
-    size_t uniform_ndim = array_type.get_undim();
+    size_t uniform_ndim = array_type.get_ndim();
     // First check if we're dealing with a simple one dimensional block of memory we can reinterpret
     // at will.
     if (uniform_ndim == 1 && array_type.get_type_id() == strided_dim_type_id) {
@@ -1189,12 +1189,12 @@ nd::array nd::eval_raw_copy(const ndt::type& dt, const char *metadata, const cha
 {
     // Allocate an output array with the canonical version of the type
     ndt::type cdt = dt.get_canonical_type();
-    size_t undim = dt.get_undim();
+    size_t ndim = dt.get_ndim();
     array result;
-    if (undim > 0) {
-        dimvector shape(undim);
-        dt.extended()->get_shape(undim, 0, shape.get(), metadata);
-        result.set(make_array_memory_block(cdt, undim, shape.get()));
+    if (ndim > 0) {
+        dimvector shape(ndim);
+        dt.extended()->get_shape(ndim, 0, shape.get(), metadata);
+        result.set(make_array_memory_block(cdt, ndim, shape.get()));
         // Reorder strides of output strided dimensions in a KEEPORDER fashion
         if (dt.get_type_id() == strided_dim_type_id) {
             static_cast<const strided_dim_type *>(
@@ -1236,13 +1236,13 @@ nd::array nd::empty(intptr_t dim0, intptr_t dim1, intptr_t dim2, const ndt::type
 
 nd::array nd::empty_like(const nd::array& rhs, const ndt::type& uniform_tp)
 {
-    if (rhs.get_undim() == 0) {
+    if (rhs.get_ndim() == 0) {
         return nd::empty(uniform_tp);
     } else {
-        size_t undim = rhs.get_type().extended()->get_undim();
-        dimvector shape(undim);
+        size_t ndim = rhs.get_type().extended()->get_ndim();
+        dimvector shape(ndim);
         rhs.get_shape(shape.get());
-        array result(make_strided_array(uniform_tp, undim, shape.get()));
+        array result(make_strided_array(uniform_tp, ndim, shape.get()));
         // Reorder strides of output strided dimensions in a KEEPORDER fashion
         if (result.get_type().get_type_id() == strided_dim_type_id) {
             static_cast<const strided_dim_type *>(
@@ -1266,10 +1266,10 @@ nd::array nd::empty_like(const nd::array& rhs)
     if (rhs.is_scalar()) {
         return nd::empty(dt);
     } else {
-        size_t undim = dt.extended()->get_undim();
-        dimvector shape(undim);
+        size_t ndim = dt.extended()->get_ndim();
+        dimvector shape(ndim);
         rhs.get_shape(shape.get());
-        nd::array result(make_strided_array(dt.get_udtype(), undim, shape.get()));
+        nd::array result(make_strided_array(dt.get_dtype(), ndim, shape.get()));
         // Reorder strides of output strided dimensions in a KEEPORDER fashion
         if (result.get_type().get_type_id() == strided_dim_type_id) {
             static_cast<const strided_dim_type *>(
@@ -1283,7 +1283,7 @@ nd::array nd::empty_like(const nd::array& rhs)
 
 intptr_t nd::binary_search(const nd::array& n, const char *metadata, const char *data)
 {
-    if (n.get_undim() == 0) {
+    if (n.get_ndim() == 0) {
         stringstream ss;
         ss << "cannot do a dynd binary_search on array with type " << n.get_type() << " without a leading array dimension";
         throw runtime_error(ss.str());
@@ -1375,10 +1375,10 @@ intptr_t nd::binary_search(const nd::array& n, const char *metadata, const char 
 
 nd::array nd::groupby(const nd::array& data_values, const nd::array& by_values, const dynd::ndt::type& groups)
 {
-    if (data_values.get_undim() == 0) {
+    if (data_values.get_ndim() == 0) {
         throw runtime_error("'data' values provided to dynd groupby must have at least one dimension");
     }
-    if (by_values.get_undim() == 0) {
+    if (by_values.get_ndim() == 0) {
         throw runtime_error("'by' values provided to dynd groupby must have at least one dimension");
     }
     if (data_values.get_dim_size() != by_values.get_dim_size()) {
@@ -1391,7 +1391,7 @@ nd::array nd::groupby(const nd::array& data_values, const nd::array& by_values, 
     // If no groups type is specified, determine one from 'by'
     ndt::type groups_final;
     if (groups.get_type_id() == uninitialized_type_id) {
-        ndt::type by_dt = by_values.get_udtype();
+        ndt::type by_dt = by_values.get_dtype();
         if (by_dt.value_type().get_type_id() == categorical_type_id) {
             // If 'by' already has a categorical type, use that
             groups_final = by_dt.value_type();

@@ -242,13 +242,13 @@ nd::array apply_binary_operator(const nd::array *ops,
     }
 
     // Get the broadcasted shape
-    size_t undim = max(ops[0].get_undim(), ops[1].get_undim());
+    size_t undim = max(ops[0].get_ndim(), ops[1].get_ndim());
     dimvector result_shape(undim), tmp_shape(undim);
     for (size_t j = 0; j != undim; ++j) {
         result_shape[j] = 1;
     }
     for (size_t i = 0; i != 2; ++i) {
-        size_t undim_i = ops[i].get_undim();
+        size_t undim_i = ops[i].get_ndim();
         if (undim_i > 0) {
             ops[i].get_shape(tmp_shape.get());
             incremental_broadcast(undim, result_shape.get(), undim_i, tmp_shape.get());
@@ -282,8 +282,8 @@ nd::array nd::operator+(const nd::array& op1, const nd::array& op2)
 {
     nd::array ops[2] = {op1, op2};
     expr_operation_pair func_ptr;
-    ndt::type op1dt = op1.get_udtype().value_type();
-    ndt::type op2dt = op2.get_udtype().value_type();
+    ndt::type op1dt = op1.get_dtype().value_type();
+    ndt::type op2dt = op2.get_dtype().value_type();
     if (op1dt.is_builtin() && op1dt.is_builtin()) {
         ndt::type rdt = promote_types_arithmetic(op1dt, op2dt);
         int table_index = compress_builtin_type_id[rdt.get_type_id()];
@@ -312,8 +312,8 @@ nd::array nd::operator-(const nd::array& op1, const nd::array& op2)
 {
     ndt::type rdt;
     expr_operation_pair func_ptr;
-    ndt::type op1dt = op1.get_udtype().value_type();
-    ndt::type op2dt = op2.get_udtype().value_type();
+    ndt::type op1dt = op1.get_dtype().value_type();
+    ndt::type op2dt = op2.get_dtype().value_type();
     if (op1dt.is_builtin() && op1dt.is_builtin()) {
         rdt = promote_types_arithmetic(op1dt, op2dt);
         int table_index = compress_builtin_type_id[rdt.get_type_id()];
@@ -330,8 +330,8 @@ nd::array nd::operator*(const nd::array& op1, const nd::array& op2)
 {
     ndt::type rdt;
     expr_operation_pair func_ptr;
-    ndt::type op1dt = op1.get_udtype().value_type();
-    ndt::type op2dt = op2.get_udtype().value_type();
+    ndt::type op1dt = op1.get_dtype().value_type();
+    ndt::type op2dt = op2.get_dtype().value_type();
     if (op1dt.is_builtin() && op1dt.is_builtin()) {
         rdt = promote_types_arithmetic(op1dt, op2dt);
         int table_index = compress_builtin_type_id[rdt.get_type_id()];
@@ -348,8 +348,8 @@ nd::array nd::operator/(const nd::array& op1, const nd::array& op2)
 {
     ndt::type rdt;
     expr_operation_pair func_ptr;
-    ndt::type op1dt = op1.get_udtype().value_type();
-    ndt::type op2dt = op2.get_udtype().value_type();
+    ndt::type op1dt = op1.get_dtype().value_type();
+    ndt::type op2dt = op2.get_dtype().value_type();
     if (op1dt.is_builtin() && op1dt.is_builtin()) {
         rdt = promote_types_arithmetic(op1dt, op2dt);
         int table_index = compress_builtin_type_id[rdt.get_type_id()];

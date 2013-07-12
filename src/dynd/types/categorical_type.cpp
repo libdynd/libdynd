@@ -169,13 +169,14 @@ namespace {
 } // anoymous namespace
 
 /** This function converts the set of char* pointers into a strided immutable nd::array of the categories */
-static nd::array make_sorted_categories(const set<const char *, cmp>& uniques, const ndt::type& udtype, const char *metadata)
+static nd::array make_sorted_categories(const set<const char *, cmp>& uniques,
+                const ndt::type& element_tp, const char *metadata)
 {
-    nd::array categories = nd::make_strided_array(uniques.size(), udtype);
+    nd::array categories = nd::make_strided_array(uniques.size(), element_tp);
     assignment_kernel k;
     make_assignment_kernel(&k, 0,
-                    udtype, categories.get_ndo_meta() + sizeof(strided_dim_type_metadata),
-                    udtype, metadata,
+                    element_tp, categories.get_ndo_meta() + sizeof(strided_dim_type_metadata),
+                    element_tp, metadata,
                     kernel_request_single, assign_error_default,
                     &eval::default_eval_context);
 
@@ -573,7 +574,7 @@ ndt::type dynd::ndt::factor_categorical(const nd::array& values)
 }
 
 static nd::array property_ndo_get_ints(const nd::array& n) {
-    ndt::type udt = n.get_udtype().value_type();
+    ndt::type udt = n.get_dtype().value_type();
     const categorical_type *cd = static_cast<const categorical_type *>(udt.extended());
     return n.view_scalars(cd->get_storage_type());
 }

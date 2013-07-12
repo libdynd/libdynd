@@ -24,7 +24,7 @@ pointer_type::pointer_type(const ndt::type& target_tp)
                     sizeof(void *),
                     inherited_flags(target_tp.get_flags(), type_flag_zeroinit|type_flag_blockref),
                     sizeof(pointer_type_metadata) + target_tp.get_metadata_size(),
-                    target_tp.get_undim()),
+                    target_tp.get_ndim()),
                     m_target_tp(target_tp)
 {
     // I'm not 100% sure how blockref pointer types should interact with
@@ -202,7 +202,7 @@ void pointer_type::get_shape(size_t ndim, size_t i, intptr_t *out_shape, const c
 axis_order_classification_t pointer_type::classify_axis_order(const char *metadata) const
 {
     // Return the classification of the target type
-    if (m_target_tp.get_undim() > 1) {
+    if (m_target_tp.get_ndim() > 1) {
         return m_target_tp.extended()->classify_axis_order(
                         metadata + sizeof(pointer_type_metadata));
     } else {

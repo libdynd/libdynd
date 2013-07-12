@@ -187,7 +187,7 @@ nd::array dynd::nd::linspace(const nd::array& start, const nd::array& stop, intp
 
 nd::array dynd::nd::linspace(const nd::array& start, const nd::array& stop, intptr_t count)
 {
-    ndt::type dt = promote_types_arithmetic(start.get_udtype(), stop.get_udtype());
+    ndt::type dt = promote_types_arithmetic(start.get_dtype(), stop.get_dtype());
     // Make sure it's at least floating point
     if (dt.get_kind() == bool_kind || dt.get_kind() == int_kind || dt.get_kind() == uint_kind) {
         dt = ndt::make_type<double>();

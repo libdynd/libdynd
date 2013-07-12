@@ -75,7 +75,7 @@ static size_t make_elwise_strided_dimension_expr_kernel_for_N(
                 kernel_request_t kernreq, const eval::eval_context *ectx,
                 const expr_kernel_generator *elwise_handler)
 {
-    size_t undim = dst_tp.get_undim();
+    size_t undim = dst_tp.get_ndim();
     const char *dst_child_metadata;
     const char *src_child_metadata[N];
     ndt::type dst_child_dt;
@@ -115,7 +115,7 @@ static size_t make_elwise_strided_dimension_expr_kernel_for_N(
     }
     for (int i = 0; i < N; ++i) {
         // The src[i] strided parameters
-        if (src_tp[i].get_undim() < undim) {
+        if (src_tp[i].get_ndim() < undim) {
             // This src value is getting broadcasted
             e->src_stride[i] = 0;
             src_child_metadata[i] = src_metadata[i];
@@ -289,7 +289,7 @@ static size_t make_elwise_strided_or_var_to_strided_dimension_expr_kernel_for_N(
                 kernel_request_t kernreq, const eval::eval_context *ectx,
                 const expr_kernel_generator *elwise_handler)
 {
-    size_t undim = dst_tp.get_undim();
+    size_t undim = dst_tp.get_ndim();
     const char *dst_child_metadata;
     const char *src_child_metadata[N];
     ndt::type dst_child_dt;
@@ -330,7 +330,7 @@ static size_t make_elwise_strided_or_var_to_strided_dimension_expr_kernel_for_N(
     }
     for (int i = 0; i < N; ++i) {
         // The src[i] strided parameters
-        if (src_tp[i].get_undim() < undim) {
+        if (src_tp[i].get_ndim() < undim) {
             // This src value is getting broadcasted
             e->src_stride[i] = 0;
             e->src_offset[i] = 0;
@@ -578,7 +578,7 @@ static size_t make_elwise_strided_or_var_to_var_dimension_expr_kernel_for_N(
                 kernel_request_t kernreq, const eval::eval_context *ectx,
                 const expr_kernel_generator *elwise_handler)
 {
-    size_t undim = dst_tp.get_undim();
+    size_t undim = dst_tp.get_ndim();
     const char *dst_child_metadata;
     const char *src_child_metadata[N];
     ndt::type dst_child_dt;
@@ -616,7 +616,7 @@ static size_t make_elwise_strided_or_var_to_var_dimension_expr_kernel_for_N(
 
     for (int i = 0; i < N; ++i) {
         // The src[i] strided parameters
-        if (src_tp[i].get_undim() < undim) {
+        if (src_tp[i].get_ndim() < undim) {
             // This src value is getting broadcasted
             e->src_stride[i] = 0;
             e->src_offset[i] = 0;
@@ -745,7 +745,7 @@ size_t dynd::make_elwise_dimension_expr_kernel(hierarchical_kernel *out, size_t 
             default:
                 // If it's a scalar, allow it to broadcast like
                 // a strided dimension
-                if (src_tp[i].get_undim() > 0) {
+                if (src_tp[i].get_ndim() > 0) {
                     src_all_strided_or_var = false;
                 }
                 break;

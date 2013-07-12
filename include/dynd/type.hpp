@@ -464,13 +464,13 @@ public:
                     assign_error_mode errmode = assign_error_default) const;
 
     /**
-     * Replaces the udtype of the this type with the provided one.
+     * Replaces the data type of the this type with the provided one.
      *
-     * \param udtype  The udtype to substitute for the existing one.
-     * \param replace_undim  The number of array dimensions to replace
-     *                       in addition to the array data type.
+     * \param replacement_tp  The type to substitute for the existing one.
+     * \param replace_ndim  The number of array dimensions to include in
+     *                      the data type which is replaced.
      */
-    type with_replaced_udtype(const type& udtype, size_t replace_undim = 0) const;
+    type with_replaced_dtype(const type& replacement_tp, size_t replace_ndim = 0) const;
 
     /**
      * Returns a modified type with all expression types replaced with
@@ -497,30 +497,30 @@ public:
     /**
      * Gets the number of array dimensions in the type.
      */
-    inline size_t get_undim() const {
+    inline size_t get_ndim() const {
         if (is_builtin()) {
             return 0;
         } else {
-            return m_extended->get_undim();
+            return m_extended->get_ndim();
         }
     }
 
     /**
      * Gets the type with array dimensions stripped away.
      *
-     * \param keep_undim  The number of array dimensions to keep
+     * \param include_ndim  The number of array dimensions to keep
      */
-    inline type get_udtype(size_t keep_undim = 0) const {
-        size_t undim = get_undim();
-        if (undim == keep_undim) {
+    inline type get_dtype(size_t include_ndim = 0) const {
+        size_t ndim = get_ndim();
+        if (ndim == include_ndim) {
             return *this;
-        } else if (undim > keep_undim) {
-            return m_extended->get_type_at_dimension(NULL, undim - keep_undim);
+        } else if (ndim > include_ndim) {
+            return m_extended->get_type_at_dimension(NULL, ndim - include_ndim);
         } else {
             std::stringstream ss;
-            ss << "Cannot keep " << keep_undim << " uniform ";
+            ss << "Cannot use " << include_ndim << " array ";
             ss << "dimensions from dynd type " << *this;
-            ss << ", it only has " << undim;
+            ss << ", it only has " << ndim;
             throw std::runtime_error(ss.str());
         }
     }

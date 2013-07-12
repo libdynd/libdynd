@@ -238,33 +238,33 @@ ndt::type ndt::type::with_replaced_scalar_types(const ndt::type& scalar_tp, assi
 }
 
 namespace {
-    struct replace_udtype_extra {
-        replace_udtype_extra(const ndt::type& udtype_, size_t replace_undim_)
-            : udtype(udtype_), replace_undim(replace_undim_)
+    struct replace_dtype_extra {
+        replace_dtype_extra(const ndt::type& replacement_tp, size_t replace_ndim)
+            : m_replacement_tp(replacement_tp), m_replace_ndim(replace_ndim)
         {
         }
-        const ndt::type& udtype;
-        size_t replace_undim;
+        const ndt::type& m_replacement_tp;
+        size_t m_replace_ndim;
     };
-    static void replace_udtype(const ndt::type& dt, void *extra,
+    static void replace_dtype(const ndt::type& tp, void *extra,
                 ndt::type& out_transformed_tp, bool& out_was_transformed)
     {
-        const replace_udtype_extra *e = reinterpret_cast<const replace_udtype_extra *>(extra);
-        if (dt.get_undim() == e->replace_undim) {
-            out_transformed_tp = e->udtype;
+        const replace_dtype_extra *e = reinterpret_cast<const replace_dtype_extra *>(extra);
+        if (tp.get_ndim() == e->m_replace_ndim) {
+            out_transformed_tp = e->m_replacement_tp;
             out_was_transformed = true;
         } else {
-            dt.extended()->transform_child_types(&replace_udtype, extra, out_transformed_tp, out_was_transformed);
+            tp.extended()->transform_child_types(&replace_dtype, extra, out_transformed_tp, out_was_transformed);
         }
     }
 } // anonymous namespace
 
-ndt::type ndt::type::with_replaced_udtype(const ndt::type& udtype, size_t replace_undim) const
+ndt::type ndt::type::with_replaced_dtype(const ndt::type& replacement_tp, size_t replace_ndim) const
 {
     ndt::type result;
     bool was_transformed;
-    replace_udtype_extra extra(udtype, replace_undim);
-    replace_udtype(*this, &extra, result, was_transformed);
+    replace_dtype_extra extra(replacement_tp, replace_ndim);
+    replace_dtype(*this, &extra, result, was_transformed);
     return result;
 }
 
@@ -273,10 +273,10 @@ intptr_t ndt::type::get_dim_size(const char *metadata, const char *data) const {
         return static_cast<const base_uniform_dim_type *>(m_extended)->get_dim_size(metadata, data);
     } else if (get_kind() == struct_kind) {
         return static_cast<const base_struct_type *>(m_extended)->get_field_count();
-    } else if (get_undim() > 0) {
-        size_t undim = get_undim();
-        dimvector shape(undim);
-        m_extended->get_shape(undim, 0, shape.get(), metadata);
+    } else if (get_ndim() > 0) {
+        size_t ndim = get_ndim();
+        dimvector shape(ndim);
+        m_extended->get_shape(ndim, 0, shape.get(), metadata);
         return shape[0];
     } else {
         std::stringstream ss;

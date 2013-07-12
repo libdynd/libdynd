@@ -14,7 +14,7 @@ convert_type::convert_type(const ndt::type& value_type, const ndt::type& operand
                         operand_type.get_data_alignment(),
                         inherited_flags(value_type.get_flags(), operand_type.get_flags()),
                         operand_type.get_metadata_size(),
-                        value_type.get_undim()),
+                        value_type.get_ndim()),
                 m_value_type(value_type), m_operand_type(operand_type), m_errmode(errmode)
 {
     // An alternative to this error would be to use value_type.value_type(), cutting

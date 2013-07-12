@@ -475,12 +475,12 @@ static array_preamble *property_get_array_field(const array_preamble *params, vo
     // Get the nd::array 'self' parameter
     nd::array n = nd::array(*(array_preamble **)params->m_data_pointer, true);
     intptr_t i = reinterpret_cast<intptr_t>(extra);
-    size_t undim = n.get_undim();
-    ndt::type udt = n.get_udtype();
+    size_t undim = n.get_ndim();
+    ndt::type udt = n.get_dtype();
     if (udt.get_kind() == expression_kind) {
         const string *field_names = static_cast<const struct_type *>(
                         udt.value_type().extended())->get_field_names();
-        return n.replace_udtype(ndt::make_property(udt, field_names[i], i)).release();
+        return n.replace_dtype(ndt::make_property(udt, field_names[i], i)).release();
     } else {
         if (undim == 0) {
             return n(i).release();

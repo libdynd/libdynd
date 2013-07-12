@@ -174,7 +174,7 @@ inline intptr_t apply_single_index(intptr_t i0, intptr_t dimension_size, const n
             return i0;
         } else {
             if (error_tp) {
-                size_t ndim = error_tp->extended()->get_undim();
+                size_t ndim = error_tp->extended()->get_ndim();
                 dimvector shape(ndim);
                 error_tp->extended()->get_shape(ndim, 0, shape.get(), NULL);
                 throw index_out_of_bounds(i0, 0, ndim, shape.get());
@@ -186,7 +186,7 @@ inline intptr_t apply_single_index(intptr_t i0, intptr_t dimension_size, const n
         return i0 + dimension_size;
     } else {
         if (error_tp) {
-            size_t ndim = error_tp->extended()->get_undim();
+            size_t ndim = error_tp->extended()->get_ndim();
             dimvector shape(ndim);
             error_tp->extended()->get_shape(ndim, 0, shape.get(), NULL);
             throw index_out_of_bounds(i0, 0, ndim, shape.get());

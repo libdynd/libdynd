@@ -70,9 +70,9 @@ void dynd::broadcast_input_shapes(size_t ninputs, const nd::array* inputs,
                         size_t& out_undim, dimvector& out_shape, shortvector<int>& out_axis_perm)
 {
     // Get the number of broadcast dimensions
-    size_t undim = inputs[0].get_undim();
+    size_t undim = inputs[0].get_ndim();
     for (size_t i = 0; i < ninputs; ++i) {
-        size_t candidate_undim = inputs[i].get_undim();
+        size_t candidate_undim = inputs[i].get_ndim();
         if (candidate_undim > undim) {
             undim = candidate_undim;
         }
@@ -89,7 +89,7 @@ void dynd::broadcast_input_shapes(size_t ninputs, const nd::array* inputs,
     }
     dimvector tmpshape(undim);
     for (size_t i = 0; i < ninputs; ++i) {
-        size_t input_undim = inputs[i].get_undim();
+        size_t input_undim = inputs[i].get_ndim();
         inputs[i].get_shape(tmpshape.get());
         size_t dimdelta = undim - input_undim;
         for (size_t k = dimdelta; k < undim; ++k) {
@@ -400,7 +400,7 @@ void dynd::apply_single_linear_index(const irange& irnge, intptr_t dimension_siz
                 out_dimension_size = 1;
             } else {
                 if (error_tp) {
-                    size_t ndim = error_tp->extended()->get_undim();
+                    size_t ndim = error_tp->extended()->get_ndim();
                     dimvector shape(ndim);
                     error_tp->extended()->get_shape(ndim, 0, shape.get(), NULL);
                     throw index_out_of_bounds(idx, error_i, ndim, shape.get());
@@ -414,7 +414,7 @@ void dynd::apply_single_linear_index(const irange& irnge, intptr_t dimension_siz
             out_dimension_size = 1;
         } else {
             if (error_tp) {
-                size_t ndim = error_tp->get_undim();
+                size_t ndim = error_tp->get_ndim();
                 dimvector shape(ndim);
                 error_tp->extended()->get_shape(ndim, 0, shape.get(), NULL);
                 throw index_out_of_bounds(idx, error_i, ndim, shape.get());
@@ -430,7 +430,7 @@ void dynd::apply_single_linear_index(const irange& irnge, intptr_t dimension_siz
                 // Starts with a positive index
             } else {
                 if (error_tp) {
-                    size_t ndim = error_tp->get_undim();
+                    size_t ndim = error_tp->get_ndim();
                     dimvector shape(ndim);
                     error_tp->extended()->get_shape(ndim, 0, shape.get(), NULL);
                     throw irange_out_of_bounds(irnge, error_i, ndim, shape.get());
@@ -446,7 +446,7 @@ void dynd::apply_single_linear_index(const irange& irnge, intptr_t dimension_siz
             start = 0;
         } else {
             if (error_tp) {
-                size_t ndim = error_tp->get_undim();
+                size_t ndim = error_tp->get_ndim();
                 dimvector shape(ndim);
                 error_tp->extended()->get_shape(ndim, 0, shape.get(), NULL);
                 throw irange_out_of_bounds(irnge, error_i, ndim, shape.get());
@@ -464,7 +464,7 @@ void dynd::apply_single_linear_index(const irange& irnge, intptr_t dimension_siz
                 end = dimension_size;
             } else {
                 if (error_tp) {
-                    size_t ndim = error_tp->get_undim();
+                    size_t ndim = error_tp->get_ndim();
                     dimvector shape(ndim);
                     error_tp->extended()->get_shape(ndim, 0, shape.get(), NULL);
                     throw irange_out_of_bounds(irnge, error_i, ndim, shape.get());
@@ -477,7 +477,7 @@ void dynd::apply_single_linear_index(const irange& irnge, intptr_t dimension_siz
             end += dimension_size;
         } else {
             if (error_tp) {
-                size_t ndim = error_tp->get_undim();
+                size_t ndim = error_tp->get_ndim();
                 dimvector shape(ndim);
                 error_tp->extended()->get_shape(ndim, 0, shape.get(), NULL);
                 throw irange_out_of_bounds(irnge, error_i, ndim, shape.get());
@@ -514,7 +514,7 @@ void dynd::apply_single_linear_index(const irange& irnge, intptr_t dimension_siz
                 // Starts with a positive index
             } else {
                 if (error_tp) {
-                    size_t ndim = error_tp->get_undim();
+                    size_t ndim = error_tp->get_ndim();
                     dimvector shape(ndim);
                     error_tp->extended()->get_shape(ndim, 0, shape.get(), NULL);
                     throw irange_out_of_bounds(irnge, error_i, ndim, shape.get());
@@ -530,7 +530,7 @@ void dynd::apply_single_linear_index(const irange& irnge, intptr_t dimension_siz
             start = dimension_size - 1;
         } else {
             if (error_tp) {
-                size_t ndim = error_tp->get_undim();
+                size_t ndim = error_tp->get_ndim();
                 dimvector shape(ndim);
                 error_tp->extended()->get_shape(ndim, 0, shape.get(), NULL);
                 throw irange_out_of_bounds(irnge, error_i, ndim, shape.get());
@@ -548,7 +548,7 @@ void dynd::apply_single_linear_index(const irange& irnge, intptr_t dimension_siz
                 end = -1;
             } else {
                 if (error_tp) {
-                    size_t ndim = error_tp->get_undim();
+                    size_t ndim = error_tp->get_ndim();
                     dimvector shape(ndim);
                     error_tp->extended()->get_shape(ndim, 0, shape.get(), NULL);
                     throw irange_out_of_bounds(irnge, error_i, ndim, shape.get());
@@ -561,7 +561,7 @@ void dynd::apply_single_linear_index(const irange& irnge, intptr_t dimension_siz
             end += dimension_size;
         } else {
             if (error_tp) {
-                size_t ndim = error_tp->get_undim();
+                size_t ndim = error_tp->get_ndim();
                 dimvector shape(ndim);
                 error_tp->extended()->get_shape(ndim, 0, shape.get(), NULL);
                 throw irange_out_of_bounds(irnge, error_i, ndim, shape.get());
@@ -603,7 +603,7 @@ axis_order_classification_t dynd::classify_strided_axis_order(size_t current_str
             if (estride != 0) {
                 axis_order_classification_t aoc;
                 // Get the classification from the next dimension onward
-                if (edt->get_undim() > 1) {
+                if (edt->get_ndim() > 1) {
                     aoc = classify_strided_axis_order(current_stride,
                                 edt->get_element_type(),
                                 element_metadata);
@@ -619,7 +619,7 @@ axis_order_classification_t dynd::classify_strided_axis_order(size_t current_str
                     return (aoc == axis_order_none || aoc == axis_order_f)
                                     ? axis_order_f : axis_order_neither;
                 }
-            } else if (element_tp.get_undim() > 1) {
+            } else if (element_tp.get_ndim() > 1) {
                 // Skip the zero-stride dimensions (DyND requires that the stride
                 // be zero when the dimension size is one)
                 return classify_strided_axis_order(current_stride,
@@ -637,7 +637,7 @@ axis_order_classification_t dynd::classify_strided_axis_order(size_t current_str
             if (estride != 0) {
                 axis_order_classification_t aoc;
                 // Get the classification from the next dimension onward
-                if (edt->get_undim() > 1) {
+                if (edt->get_ndim() > 1) {
                     aoc = classify_strided_axis_order(current_stride,
                                 edt->get_element_type(),
                                 element_metadata + sizeof(strided_dim_type_metadata));
@@ -653,7 +653,7 @@ axis_order_classification_t dynd::classify_strided_axis_order(size_t current_str
                     return (aoc == axis_order_none || aoc == axis_order_f)
                                     ? axis_order_f : axis_order_neither;
                 }
-            } else if (element_tp.get_undim() > 1) {
+            } else if (element_tp.get_ndim() > 1) {
                 // Skip the zero-stride dimensions (DyND requires that the stride
                 // be zero when the dimension size is one)
                 return classify_strided_axis_order(current_stride,

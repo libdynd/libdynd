@@ -17,7 +17,7 @@ expr_type::expr_type(const ndt::type& value_type, const ndt::type& operand_type,
     : base_expression_type(expr_type_id, expression_kind,
                         operand_type.get_data_size(), operand_type.get_data_alignment(),
                         inherited_flags(value_type.get_flags(), operand_type.get_flags()),
-                        operand_type.get_metadata_size(), value_type.get_undim()),
+                        operand_type.get_metadata_size(), value_type.get_ndim()),
                     m_value_type(value_type), m_operand_type(operand_type),
                     m_kgen(kgen)
 {
@@ -74,7 +74,7 @@ ndt::type expr_type::apply_linear_index(size_t nindices, const irange *indices,
             size_t current_i, const ndt::type& root_tp, bool DYND_UNUSED(leading_dimension)) const
 {
     if (m_kgen->is_elwise()) {
-        size_t undim = get_undim();
+        size_t undim = get_ndim();
         const cstruct_type *fsd = static_cast<const cstruct_type *>(m_operand_type.extended());
         size_t field_count = fsd->get_field_count();
         const ndt::type *field_types = fsd->get_field_types();
@@ -85,7 +85,7 @@ ndt::type expr_type::apply_linear_index(size_t nindices, const irange *indices,
         // Apply the portion of the indexing to each of the src operand types
         for (size_t i = 0; i != field_count; ++i) {
             const ndt::type& dt = field_types[i];
-            size_t field_undim = dt.get_undim();
+            size_t field_undim = dt.get_ndim();
             if (nindices + field_undim <= undim) {
                 result_src_dt[i] = dt;
             } else {
@@ -112,7 +112,7 @@ intptr_t expr_type::apply_linear_index(size_t nindices, const irange *indices, c
                 memory_block_data **DYND_UNUSED(inout_dataref)) const
 {
     if (m_kgen->is_elwise()) {
-        size_t undim = get_undim();
+        size_t undim = get_ndim();
         const expr_type *out_ed = static_cast<const expr_type *>(result_tp.extended());
         const cstruct_type *fsd = static_cast<const cstruct_type *>(m_operand_type.extended());
         const cstruct_type *out_fsd = static_cast<const cstruct_type *>(out_ed->m_operand_type.extended());
@@ -124,7 +124,7 @@ intptr_t expr_type::apply_linear_index(size_t nindices, const irange *indices, c
         // Apply the portion of the indexing to each of the src operand types
         for (size_t i = 0; i != field_count; ++i) {
             const pointer_type *pd = static_cast<const pointer_type *>(field_types[i].extended());
-            size_t field_undim = pd->get_undim();
+            size_t field_undim = pd->get_ndim();
             if (nindices + field_undim <= undim) {
                 pd->metadata_copy_construct(out_metadata + out_metadata_offsets[i],
                                 metadata + metadata_offsets[i],
@@ -149,7 +149,7 @@ intptr_t expr_type::apply_linear_index(size_t nindices, const irange *indices, c
 
 void expr_type::get_shape(size_t ndim, size_t i, intptr_t *out_shape, const char *metadata) const
 {
-    size_t undim = get_undim();
+    size_t undim = get_ndim();
     // Initialize the shape to all ones
     dimvector bcast_shape(undim);
     for (size_t j = 0; j != undim; ++j) {
@@ -163,7 +163,7 @@ void expr_type::get_shape(size_t ndim, size_t i, intptr_t *out_shape, const char
     size_t field_count = fsd->get_field_count();
     for (size_t fi = 0; fi != field_count; ++fi) {
         const ndt::type& dt = fsd->get_field_types()[fi];
-        size_t field_undim = dt.get_undim();
+        size_t field_undim = dt.get_ndim();
         if (field_undim > 0) {
             dt.extended()->get_shape(field_undim, 0, shape.get(),
                             metadata ? (metadata + metadata_offsets[fi]) : NULL);
@@ -176,7 +176,7 @@ void expr_type::get_shape(size_t ndim, size_t i, intptr_t *out_shape, const char
 
     // If more shape is requested, get it from the value type
     if (ndim - i > undim) {
-        const ndt::type& dt = m_value_type.get_udtype();
+        const ndt::type& dt = m_value_type.get_dtype();
         if (!dt.is_builtin()) {
             dt.extended()->get_shape(ndim, i + undim, out_shape, NULL);
         } else {
@@ -385,7 +385,7 @@ ndt::type expr_type::with_replaced_storage_type(const ndt::type& DYND_UNUSED(rep
 void expr_type::get_dynamic_array_properties(const std::pair<std::string, gfunc::callable> **out_properties,
                 size_t *out_count) const
 {
-    const ndt::type& udt = m_value_type.get_udtype();
+    const ndt::type& udt = m_value_type.get_dtype();
     if (!udt.is_builtin()) {
         udt.extended()->get_dynamic_array_properties(out_properties, out_count);
     } else {
@@ -396,7 +396,7 @@ void expr_type::get_dynamic_array_properties(const std::pair<std::string, gfunc:
 void expr_type::get_dynamic_array_functions(const std::pair<std::string, gfunc::callable> **out_functions,
                 size_t *out_count) const
 {
-    const ndt::type& udt = m_value_type.get_udtype();
+    const ndt::type& udt = m_value_type.get_dtype();
     if (!udt.is_builtin()) {
         udt.extended()->get_dynamic_array_functions(out_functions, out_count);
     } else {

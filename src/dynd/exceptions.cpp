@@ -66,7 +66,7 @@ inline string broadcast_error_message(size_t ninputs, const nd::array* inputs)
 
     ss << "cannot broadcast input dynd operands with shapes ";
     for (size_t i = 0; i < ninputs; ++i) {
-        size_t undim = inputs[i].get_undim();
+        size_t undim = inputs[i].get_ndim();
         dimvector shape(undim);
         inputs[i].get_shape(shape.get());
         print_shape(ss, undim, shape.get());

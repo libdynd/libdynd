@@ -373,7 +373,7 @@ void var_dim_type::get_strides(size_t i, intptr_t *out_strides, const char *meta
 axis_order_classification_t var_dim_type::classify_axis_order(const char *metadata) const
 {
     // Treat the var_dim type as C-order
-    if (m_element_tp.get_undim() > 1) {
+    if (m_element_tp.get_ndim() > 1) {
         axis_order_classification_t aoc = m_element_tp.extended()->classify_axis_order(
                         metadata + sizeof(var_dim_type_metadata));
         return (aoc == axis_order_none || aoc == axis_order_c)
@@ -569,7 +569,7 @@ size_t var_dim_type::make_assignment_kernel(
                 const eval::eval_context *ectx) const
 {
     if (this == dst_tp.extended()) {
-        if (src_tp.get_undim() < dst_tp.get_undim()) {
+        if (src_tp.get_ndim() < dst_tp.get_ndim()) {
             // If the src has fewer dimensions, broadcast it across this one
             return make_broadcast_to_var_dim_assignment_kernel(out, offset_out,
                             dst_tp, dst_metadata,
@@ -599,7 +599,7 @@ size_t var_dim_type::make_assignment_kernel(
             ss << "Cannot assign from " << src_tp << " to " << dst_tp;
             throw runtime_error(ss.str());
         }
-    } else if (dst_tp.get_undim() < src_tp.get_undim()) {
+    } else if (dst_tp.get_ndim() < src_tp.get_ndim()) {
         throw broadcast_error(dst_tp, dst_metadata, src_tp, src_metadata);
     } else {
         if (dst_tp.get_type_id() == strided_dim_type_id ||

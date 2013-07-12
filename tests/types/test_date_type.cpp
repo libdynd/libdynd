@@ -166,7 +166,7 @@ TEST(DateDType, DatePropertyConvertOfString) {
 
     // year property
     c = b.p("year");
-    EXPECT_EQ(property_type_id, c.get_udtype().get_type_id());
+    EXPECT_EQ(property_type_id, c.get_dtype().get_type_id());
     c = c.eval();
     EXPECT_EQ(ndt::make_strided_dim(ndt::make_type<int>()), c.get_type());
     EXPECT_EQ(1931, c(0).as<int>());
@@ -175,7 +175,7 @@ TEST(DateDType, DatePropertyConvertOfString) {
 
     // weekday function
     c = b.f("weekday");
-    EXPECT_EQ(property_type_id, c.get_udtype().get_type_id());
+    EXPECT_EQ(property_type_id, c.get_dtype().get_type_id());
     c = c.eval();
     EXPECT_EQ(ndt::make_strided_dim(ndt::make_type<int>()), c.get_type());
     EXPECT_EQ(5, c(0).as<int>());

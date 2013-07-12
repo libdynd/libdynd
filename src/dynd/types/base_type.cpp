@@ -271,7 +271,7 @@ void base_type::get_scalar_properties_and_functions(
     // the requested vectors. It is for use by array data types, which by convention
     // expose the properties from the first non-array data types, and possibly add
     // additional properties of their own.
-    size_t ndim = get_undim();
+    size_t ndim = get_ndim();
     size_t properties_count = 0, functions_count = 0;
     const std::pair<std::string, gfunc::callable> *properties = NULL, *functions = NULL;
     if (ndim == 0) {

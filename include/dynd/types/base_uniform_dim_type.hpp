@@ -27,7 +27,7 @@ public:
                     flags_type flags)
         : base_type(type_id, uniform_dim_kind, data_size,
                         alignment, flags, element_metadata_offset + element_tp.get_metadata_size(),
-                        1 + element_tp.get_undim()),
+                        1 + element_tp.get_ndim()),
             m_element_tp(element_tp), m_element_metadata_offset(element_metadata_offset)
     {
     }

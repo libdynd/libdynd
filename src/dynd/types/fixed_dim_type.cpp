@@ -290,7 +290,7 @@ void fixed_dim_type::get_strides(size_t i, intptr_t *out_strides, const char *me
 
 axis_order_classification_t fixed_dim_type::classify_axis_order(const char *metadata) const
 {
-    if (m_element_tp.get_undim() > 0) {
+    if (m_element_tp.get_ndim() > 0) {
         if (m_stride != 0) {
             // Call the helper function to do the classification
             return classify_strided_axis_order(m_stride, m_element_tp,
@@ -511,7 +511,7 @@ size_t fixed_dim_type::make_assignment_kernel(
             }
         }
         e->base.destructor = strided_assign_kernel_extra::destruct;
-        if (src_tp.get_undim() < dst_tp.get_undim()) {
+        if (src_tp.get_ndim() < dst_tp.get_ndim()) {
             // If the src has fewer dimensions, broadcast it across this one
             e->size = get_fixed_dim_size();
             e->dst_stride = get_fixed_stride();
@@ -568,7 +568,7 @@ size_t fixed_dim_type::make_assignment_kernel(
             ss << "Cannot assign from " << src_tp << " to " << dst_tp;
             throw runtime_error(ss.str());
         }
-    } else if (dst_tp.get_undim() < src_tp.get_undim()) {
+    } else if (dst_tp.get_ndim() < src_tp.get_ndim()) {
         throw broadcast_error(dst_tp, dst_metadata, src_tp, src_metadata);
     } else {
         stringstream ss;

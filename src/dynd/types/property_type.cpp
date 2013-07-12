@@ -272,7 +272,7 @@ ndt::type property_type::with_replaced_storage_type(const ndt::type& replacement
 void property_type::get_dynamic_array_properties(const std::pair<std::string, gfunc::callable> **out_properties,
                 size_t *out_count) const
 {
-    const ndt::type& udt = m_value_tp.get_udtype();
+    const ndt::type& udt = m_value_tp.get_dtype();
     if (!udt.is_builtin()) {
         udt.extended()->get_dynamic_array_properties(out_properties, out_count);
     } else {
@@ -283,7 +283,7 @@ void property_type::get_dynamic_array_properties(const std::pair<std::string, gf
 void property_type::get_dynamic_array_functions(const std::pair<std::string, gfunc::callable> **out_functions,
                 size_t *out_count) const
 {
-    const ndt::type& udt = m_value_tp.get_udtype();
+    const ndt::type& udt = m_value_tp.get_dtype();
     if (!udt.is_builtin()) {
         udt.extended()->get_dynamic_array_functions(out_functions, out_count);
     } else {
