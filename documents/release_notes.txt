@@ -5,6 +5,19 @@ DyND is a C++ library for array programming with a dynamic
 type system. It is currently in a preview state, and nothing
 about the API or the ABI is guaranteed to stay the same.
 
+Version 0.4.2
+-------------
+
+- Rename "dtype" to "ndt::type". Usage is now that "type"
+  refers to the full array type, while "dtype" refers
+  to the data type, after stripping away some or all of
+  the array dimensions.
+- Move many of the type related functions into the ndt::
+  namespace, making the C++ interface align better with
+  the Python one.
+- Add a simple implementation of string.find, modeled after
+  the Python string's find method.
+
 Version 0.4.1
 -------------
 
