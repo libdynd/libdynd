@@ -627,12 +627,27 @@ public:
     friend std::ostream& operator<<(std::ostream& o, const type& rhs);
 };
 
-// Convenience function which makes a type object from a template parameter
+/**
+ * Convenience function which makes an ndt::type
+ * object from a template parameter.
+ */
 template<class T>
 type make_type()
 {
     return type(static_cast<type_id_t>(type_id_of<T>::value));
 }
+
+/**
+ * Constructs an array type from a shape and
+ * a data type. Each dimension >= 0 is made
+ * using a strided_dim type, and each dimension == -1
+ * is made using a var_dim type.
+ *
+ * \param ndim   The number of dimensions in the shape
+ * \param shape  The shape of the array type to create.
+ * \param dtype  The data type of each array element.
+ */
+type make_type(size_t ndim, intptr_t *shape, const ndt::type& dtype);
 
 /**
  * A static array of the builtin types and void.

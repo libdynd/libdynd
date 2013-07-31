@@ -15,6 +15,7 @@
 #include <dynd/types/fixedstring_type.hpp>
 #include <dynd/types/convert_type.hpp>
 #include <dynd/json_parser.hpp>
+#include <dynd/gfunc/call_callable.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -495,4 +496,38 @@ TEST(StringDType, Concatenation) {
     EXPECT_EQ("testingalpha", c(0).as<string>());
     EXPECT_EQ("onebeta", c(1).as<string>());
     EXPECT_EQ("twogamma", c(2).as<string>());
+}
+
+TEST(StringDType, Find1) {
+    nd::array a, b, c;
+
+    const char *a_arr[4] = {"abc", "ababc", "ababab", "abd"};
+    a = a_arr;
+    b = "abc";
+
+    c = a.f("find", b).eval();
+    ASSERT_EQ(ndt::make_strided_dim(ndt::make_type<intptr_t>()), c.get_type());
+    ASSERT_EQ(4, c.get_shape()[0]);
+    EXPECT_EQ(0, c(0).as<intptr_t>());
+    EXPECT_EQ(2, c(1).as<intptr_t>());
+    EXPECT_EQ(-1, c(2).as<intptr_t>());
+    EXPECT_EQ(-1, c(3).as<intptr_t>());
+}
+
+TEST(StringDType, Find2) {
+    nd::array a, b, c;
+
+    const char *b_arr[6] = {"a", "b", "c", "bc", "d", "cd"};
+    a = "abc";
+    b = b_arr;
+
+    c = a.f("find", b).eval();
+    ASSERT_EQ(ndt::make_strided_dim(ndt::make_type<intptr_t>()), c.get_type());
+    ASSERT_EQ(6, c.get_shape()[0]);
+    EXPECT_EQ(0, c(0).as<intptr_t>());
+    EXPECT_EQ(1, c(1).as<intptr_t>());
+    EXPECT_EQ(2, c(2).as<intptr_t>());
+    EXPECT_EQ(1, c(3).as<intptr_t>());
+    EXPECT_EQ(-1, c(4).as<intptr_t>());
+    EXPECT_EQ(-1, c(5).as<intptr_t>());
 }

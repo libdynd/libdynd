@@ -64,11 +64,6 @@ namespace {
         }
     };
 
-    struct expr_operation_pair {
-        expr_single_operation_t single;
-        expr_strided_operation_t strided;
-    };
-
     template<class extra_type>
     class arithmetic_op_kernel_generator : public expr_kernel_generator {
         ndt::type m_rdt, m_op1dt, m_op2dt;
@@ -242,28 +237,21 @@ nd::array apply_binary_operator(const nd::array *ops,
     }
 
     // Get the broadcasted shape
-    size_t undim = max(ops[0].get_ndim(), ops[1].get_ndim());
-    dimvector result_shape(undim), tmp_shape(undim);
-    for (size_t j = 0; j != undim; ++j) {
+    size_t ndim = max(ops[0].get_ndim(), ops[1].get_ndim());
+    dimvector result_shape(ndim), tmp_shape(ndim);
+    for (size_t j = 0; j != ndim; ++j) {
         result_shape[j] = 1;
     }
     for (size_t i = 0; i != 2; ++i) {
-        size_t undim_i = ops[i].get_ndim();
-        if (undim_i > 0) {
+        size_t ndim_i = ops[i].get_ndim();
+        if (ndim_i > 0) {
             ops[i].get_shape(tmp_shape.get());
-            incremental_broadcast(undim, result_shape.get(), undim_i, tmp_shape.get());
+            incremental_broadcast(ndim, result_shape.get(), ndim_i, tmp_shape.get());
         }
     }
 
     // Assemble the destination value type
-    ndt::type result_vdt = rdt;
-    for (size_t j = 0; j != undim; ++j) {
-        if (result_shape[undim - j - 1] == -1) {
-            result_vdt = ndt::make_var_dim(result_vdt);
-        } else {
-            result_vdt = ndt::make_strided_dim(result_vdt);
-        }
-    }
+    ndt::type result_vdt = ndt::make_type(ndim, result_shape.get(), rdt);
 
     // Create the result
     string field_names[2] = {"arg0", "arg1"};

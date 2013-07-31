@@ -27,6 +27,10 @@ typedef void (*expr_strided_operation_t)(
                 const char * const *src, const intptr_t *src_stride,
                 size_t count, kernel_data_prefix *extra);
 
+struct expr_operation_pair {
+    expr_single_operation_t single;
+    expr_strided_operation_t strided;
+};
 
 /**
  * This is the memory structure for an object which

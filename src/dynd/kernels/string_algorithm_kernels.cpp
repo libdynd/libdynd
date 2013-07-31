@@ -15,6 +15,9 @@
 using namespace std;
 using namespace dynd;
 
+/////////////////////////////////////////////
+// String concatenation kernel
+
 void kernels::string_concatenation_kernel::init(
                 size_t nop,
                 const char *dst_metadata,
@@ -81,5 +84,125 @@ void kernels::string_concatenation_kernel::strided(
         for (size_t op = 0; op < nop; ++op) {
             src_vec[op] += src_stride[op];
         }
+    }
+}
+
+/////////////////////////////////////////////
+// String find kernel
+
+void kernels::string_find_kernel::init(const ndt::type* src_tp, const char **src_metadata)
+{
+    if (src_tp[0].get_kind() != string_kind) {
+        stringstream ss;
+        ss << "Expected a string type for the string find kernel, not " << src_tp[0];
+        throw runtime_error(ss.str());
+    }
+    if (src_tp[1].get_kind() != string_kind) {
+        stringstream ss;
+        ss << "Expected a string type for the string find kernel, not " << src_tp[1];
+        throw runtime_error(ss.str());
+    }
+    m_base.destructor = &kernels::string_find_kernel::destruct;
+    m_str_type = static_cast<const base_string_type *>(ndt::type(src_tp[0]).release());
+    m_str_metadata = src_metadata[0];
+    m_sub_type = static_cast<const base_string_type *>(ndt::type(src_tp[1]).release());
+    m_sub_metadata = src_metadata[1];
+
+}
+
+void kernels::string_find_kernel::destruct(kernel_data_prefix *extra)
+{
+    extra_type *e = reinterpret_cast<extra_type *>(extra);
+    base_type_xdecref(e->m_str_type);
+    base_type_xdecref(e->m_sub_type);
+}
+
+inline void find_one_string(
+                intptr_t *d,
+                const char *str_begin, const char *str_end,
+                const char *sub_begin, const char *sub_end,
+                next_unicode_codepoint_t str_next_fn,
+                next_unicode_codepoint_t sub_next_fn)
+{
+    int32_t sub_first = sub_next_fn(sub_begin, sub_end);
+    // TODO: This algorithm is slow and naive, should use fast algorithms...
+    intptr_t pos = 0;
+    while (str_begin < str_end) {
+        int32_t str_cp = str_next_fn(str_begin, str_end);
+        if (str_cp == sub_first) {
+            // If the first character matched, try the rest
+            const char *sub_match_begin = sub_begin, *str_match_begin = str_begin;
+            bool matched = true;
+            while (sub_match_begin < sub_end) {
+                if (str_match_begin == str_end) {
+                    // End of the string
+                    matched = false;
+                    break;
+                }
+                int32_t sub_cp = str_next_fn(sub_match_begin, sub_end);
+                str_cp = str_next_fn(str_match_begin, str_end);
+                if (sub_cp != str_cp) {
+                    // Mismatched character
+                    matched = false;
+                    break;
+                }
+            }
+            if (matched) {
+                *d = pos;
+                return;
+            }
+        }
+        ++pos;
+    }
+
+    *d = -1;
+}
+
+void kernels::string_find_kernel::single(
+                char *dst, const char * const *src,
+                kernel_data_prefix *extra)
+{
+    const extra_type *e = reinterpret_cast<const extra_type *>(extra);
+    string_encoding_t str_encoding = e->m_str_type->get_encoding();
+    string_encoding_t sub_encoding = e->m_sub_type->get_encoding();
+    // TODO: Get the error mode from the evaluation context
+    next_unicode_codepoint_t str_next_fn = get_next_unicode_codepoint_function(str_encoding, assign_error_none);
+    next_unicode_codepoint_t sub_next_fn = get_next_unicode_codepoint_function(sub_encoding, assign_error_none);
+
+    intptr_t *d = reinterpret_cast<intptr_t *>(dst);
+    // Get the extents of the string and substring
+    const char *str_begin, *str_end;
+    e->m_str_type->get_string_range(&str_begin, &str_end, e->m_str_metadata, src[0]);
+    const char *sub_begin, *sub_end;
+    e->m_sub_type->get_string_range(&sub_begin, &sub_end, e->m_sub_metadata, src[1]);
+    find_one_string(d, str_begin, str_end, sub_begin, sub_end, str_next_fn, sub_next_fn);
+}
+
+
+void kernels::string_find_kernel::strided(
+                char *dst, intptr_t dst_stride,
+                const char * const *src, const intptr_t *src_stride,
+                size_t count, kernel_data_prefix *extra)
+{
+    const extra_type *e = reinterpret_cast<const extra_type *>(extra);
+    string_encoding_t str_encoding = e->m_str_type->get_encoding();
+    string_encoding_t sub_encoding = e->m_sub_type->get_encoding();
+    // TODO: Get the error mode from the evaluation context
+    next_unicode_codepoint_t str_next_fn = get_next_unicode_codepoint_function(str_encoding, assign_error_none);
+    next_unicode_codepoint_t sub_next_fn = get_next_unicode_codepoint_function(sub_encoding, assign_error_none);
+
+    const char *src_str = src[0], *src_sub = src[1];
+    for (size_t i = 0; i != count; ++i) {
+        intptr_t *d = reinterpret_cast<intptr_t *>(dst);
+        // Get the extents of the string and substring
+        const char *str_begin, *str_end;
+        e->m_str_type->get_string_range(&str_begin, &str_end, e->m_str_metadata, src_str);
+        const char *sub_begin, *sub_end;
+        e->m_sub_type->get_string_range(&sub_begin, &sub_end, e->m_sub_metadata, src_sub);
+        find_one_string(d, str_begin, str_end, sub_begin, sub_end, str_next_fn, sub_next_fn);
+
+        dst += dst_stride;
+        src_str += src_stride[0];
+        src_sub += src_stride[1];
     }
 }

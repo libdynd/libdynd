@@ -5,6 +5,8 @@
 
 #include <dynd/type.hpp>
 #include <dynd/types/base_uniform_dim_type.hpp>
+#include <dynd/types/strided_dim_type.hpp>
+#include <dynd/types/var_dim_type.hpp>
 #include <dynd/exceptions.hpp>
 #include <dynd/typed_data_assign.hpp>
 #include <dynd/buffer_storage.hpp>
@@ -416,6 +418,26 @@ std::ostream& dynd::ndt::operator<<(std::ostream& o, const ndt::type& rhs)
 
     return o;
 }
+
+ndt::type ndt::make_type(size_t ndim, intptr_t *shape, const ndt::type& dtype)
+{
+    if (ndim > 0) {
+        ndt::type result_tp = shape[ndim-1] >= 0
+                        ? ndt::make_strided_dim(dtype)
+                        : ndt::make_var_dim(dtype);
+        for (intptr_t i = ndim-2; i >= 0; --i) {
+            if (shape[i] >= 0) {
+                result_tp = ndt::make_strided_dim(result_tp);
+            } else {
+                result_tp = ndt::make_var_dim(result_tp);
+            }
+        }
+        return result_tp;
+    } else {
+        return dtype;
+    }
+}
+
 
 template<class T, class Tas>
 static void print_as(std::ostream& o, const char *data)
