@@ -277,6 +277,9 @@ nd::array nd::operator+(const nd::array& op1, const nd::array& op2)
         int table_index = compress_builtin_type_id[rdt.get_type_id()];
         if (table_index >= 0) {
             func_ptr = addition_table[table_index];
+        } else {
+            func_ptr.single = NULL;
+            func_ptr.strided = NULL;
         }
 
         // The signature is (T, T) -> T, so we don't use the original types
