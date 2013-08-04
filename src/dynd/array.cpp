@@ -199,12 +199,37 @@ nd::array nd::make_pod_array(const ndt::type& pod_dt, const void *data)
     }
     ndo->m_data_pointer = data_ptr;
     ndo->m_data_reference = NULL;
-    ndo->m_flags = nd::immutable_access_flag | nd::read_access_flag;
+    ndo->m_flags = nd::default_access_flags;
 
     memcpy(data_ptr, data, size);
 
     return nd::array(result);
 }
+
+nd::array nd::make_bytes_array(const char *data, size_t len, size_t alignment)
+{
+    char *data_ptr = NULL, *bytes_data_ptr;
+    ndt::type dt = ndt::make_bytes(alignment);
+    nd::array result(make_array_memory_block(dt.extended()->get_metadata_size(),
+                        dt.get_data_size() + len, dt.get_data_alignment(), &data_ptr));
+    // Set the string extents
+    bytes_data_ptr = data_ptr + dt.get_data_size();
+    ((char **)data_ptr)[0] = bytes_data_ptr;
+    ((char **)data_ptr)[1] = bytes_data_ptr + len;
+    // Copy the string data
+    memcpy(bytes_data_ptr, data, len);
+    // Set the array metadata
+    array_preamble *ndo = result.get_ndo();
+    ndo->m_type = dt.release();
+    ndo->m_data_pointer = data_ptr;
+    ndo->m_data_reference = NULL;
+    ndo->m_flags = nd::default_access_flags;
+    // Set the bytes metadata, telling the system that the bytes data was embedded in the array memory
+    string_type_metadata *ndo_meta = reinterpret_cast<string_type_metadata *>(result.get_ndo_meta());
+    ndo_meta->blockref = NULL;
+    return result;
+}
+
 
 nd::array nd::make_string_array(const char *str, size_t len, string_encoding_t encoding)
 {
@@ -223,7 +248,7 @@ nd::array nd::make_string_array(const char *str, size_t len, string_encoding_t e
     ndo->m_type = dt.release();
     ndo->m_data_pointer = data_ptr;
     ndo->m_data_reference = NULL;
-    ndo->m_flags = nd::read_access_flag | nd::immutable_access_flag;
+    ndo->m_flags = nd::default_access_flags;
     // Set the string metadata, telling the system that the string data was embedded in the array memory
     string_type_metadata *ndo_meta = reinterpret_cast<string_type_metadata *>(result.get_ndo_meta());
     ndo_meta->blockref = NULL;
@@ -705,8 +730,7 @@ nd::array nd::array::eval_immutable(const eval::eval_context *ectx) const
     }
 }
 
-nd::array nd::array::eval_copy(const eval::eval_context *ectx,
-                    uint32_t access_flags) const
+nd::array nd::array::eval_copy(uint32_t access_flags, const eval::eval_context *ectx) const
 {
     const ndt::type& current_tp = get_type();
     const ndt::type& dt = current_tp.get_canonical_type();
@@ -721,7 +745,8 @@ nd::array nd::array::eval_copy(const eval::eval_context *ectx,
                                         result.get_ndo_meta(), get_type(), get_ndo_meta());
     }
     result.val_assign(*this, assign_error_default, ectx);
-    result.get_ndo()->m_flags = access_flags;
+    // If the access_flags are 0, use the defaults
+    result.get_ndo()->m_flags = access_flags ? access_flags : nd::default_access_flags;
     return result;
 }
 

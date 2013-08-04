@@ -363,7 +363,7 @@ TEST(DateDType, Replace) {
     EXPECT_EQ("2012-05-31", a.f("replace", 2012, -8, -1).as<string>());
     // The C++ call interface doesn't let you skip arguments (yet, there is no keyword argument mechanism),
     // so test this manually
-    nd::array param = a.find_dynamic_function("replace").get_default_parameters().eval_copy();
+    nd::array param = a.find_dynamic_function("replace").get_default_parameters().eval_copy(nd::readwrite_access_flags);
     *reinterpret_cast<void **>(param(0).get_readwrite_originptr()) = (void*)a.get_ndo();
     param(2).vals() = 7;
     EXPECT_EQ("1955-07-13", a.find_dynamic_function("replace").call_generic(param).as<string>());

@@ -23,12 +23,18 @@ namespace dynd { namespace nd {
 class array;
 
 enum array_access_flags {
-    /** If an ndarray node is readable */
+    /** If an array is readable */
     read_access_flag = 0x01,
-    /** If an ndarray node is writeable */
+    /** If an array is writable */
     write_access_flag = 0x02,
-    /** If an ndarray node will not be written to by anyone else either */
+    /** If an array will not be written to by anyone else either */
     immutable_access_flag = 0x04
+};
+
+// Some additional access flags combinations for convenience
+enum {
+    readwrite_access_flags = read_access_flag|write_access_flag,
+    default_access_flags = read_access_flag|immutable_access_flag,
 };
 
 /** Stream printing function */
@@ -196,7 +202,7 @@ public:
         if (get_ndo()->m_flags & write_access_flag) {
             return get_ndo()->m_data_pointer;
         } else {
-            throw std::runtime_error("tried to write to a dynd array that is not writeable");
+            throw std::runtime_error("tried to write to a dynd array that is not writable");
         }
     }
 
@@ -414,10 +420,10 @@ public:
      * Evaluates the array node into a newly allocated strided array,
      * with the requested access flags.
      *
-     * \param access_flags  The access flags for the result, default read and write.
+     * \param access_flags  The access flags for the result, default immutable.
+     * \param ectx  The evaluation context
      */
-    array eval_copy(const eval::eval_context *ectx = &eval::default_eval_context,
-                        uint32_t access_flags=read_access_flag|write_access_flag) const;
+    array eval_copy(uint32_t access_flags = 0, const eval::eval_context *ectx = &eval::default_eval_context) const;
 
     /**
      * Returns a view of the array as bytes (for POD) or the storage type,
@@ -733,6 +739,9 @@ array make_strided_array_from_data(const ndt::type& uniform_dtype, size_t ndim, 
 
 /** Makes a POD (plain old data) array with data initialized by the provided pointer */
 array make_pod_array(const ndt::type& pod_dt, const void *data);
+
+/** Makes an array of 'bytes' type from the data */
+array make_bytes_array(const char *data, size_t len, size_t alignment=1);
 
 array make_string_array(const char *str, size_t len, string_encoding_t encoding);
 inline array make_ascii_array(const char *str, size_t len) {
@@ -1115,7 +1124,7 @@ inline array empty(const char (&dshape)[N]) {
 }
 
 /**
- * Constructs a writeable uninitialized array of the specified type.
+ * Constructs a writable uninitialized array of the specified type.
  * This type should be at least one dimensional, and is initialized
  * using the specified dimension size.
  */
@@ -1134,7 +1143,7 @@ inline array empty(intptr_t dim0, const char (&dshape)[N]) {
 }
 
 /**
- * Constructs a writeable uninitialized array of the specified type.
+ * Constructs a writable uninitialized array of the specified type.
  * This type should be at least two dimensional, and is initialized
  * using the specified dimension sizes.
  */
@@ -1153,7 +1162,7 @@ inline array empty(intptr_t dim0, intptr_t dim1, const char (&dshape)[N]) {
 }
 
 /**
- * Constructs a writeable uninitialized array of the specified type.
+ * Constructs a writable uninitialized array of the specified type.
  * This type should be at least three dimensional, and is initialized
  * using the specified dimension sizes.
  */

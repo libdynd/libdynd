@@ -106,6 +106,7 @@ memory_block_ptr dynd::make_array_memory_block(const ndt::type& dt, size_t ndim,
     }
     preamble->m_data_pointer = data_ptr;
     preamble->m_data_reference = NULL;
+    // This is an uninitialized allocation, so should be read/write by default, not immutable
     preamble->m_flags = nd::read_access_flag|nd::write_access_flag;
     return result;
 }

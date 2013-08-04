@@ -58,7 +58,7 @@ void bytes_type::print_type(std::ostream& o) const
 
 bool bytes_type::is_unique_data_owner(const char *metadata) const
 {
-    const bytes_type_metadata *md = reinterpret_cast<const bytes_type_metadata *>(*metadata);
+    const bytes_type_metadata *md = reinterpret_cast<const bytes_type_metadata *>(metadata);
     if (md->blockref != NULL &&
             (md->blockref->m_use_count != 1 ||
              md->blockref->m_type != pod_memory_block_type)) {
