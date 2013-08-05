@@ -746,7 +746,10 @@ nd::array nd::array::eval_copy(uint32_t access_flags, const eval::eval_context *
     }
     result.val_assign(*this, assign_error_default, ectx);
     // If the access_flags are 0, use the defaults
-    result.get_ndo()->m_flags = access_flags ? access_flags : nd::default_access_flags;
+    access_flags = access_flags ? access_flags : nd::default_access_flags;
+    // If the access_flags are just readonly, add immutable because we just created a unique instance
+    access_flags = (access_flags == nd::read_access_flag) ? (nd::read_access_flag|nd::immutable_access_flag) : access_flags;
+    result.get_ndo()->m_flags = access_flags;
     return result;
 }
 
