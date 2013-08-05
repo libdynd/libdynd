@@ -742,13 +742,18 @@ nd::array nd::array::eval_copy(uint32_t access_flags, const eval::eval_context *
         // Reorder strides of output strided dimensions in a KEEPORDER fashion
         static_cast<const strided_dim_type *>(
                         dt.extended())->reorder_default_constructed_strides(
-                                        result.get_ndo_meta(), get_type(), get_ndo_meta());
+                                        result.get_ndo_meta(),
+                                        get_type(), get_ndo_meta());
     }
     result.val_assign(*this, assign_error_default, ectx);
     // If the access_flags are 0, use the defaults
-    access_flags = access_flags ? access_flags : nd::default_access_flags;
-    // If the access_flags are just readonly, add immutable because we just created a unique instance
-    access_flags = (access_flags == nd::read_access_flag) ? (nd::read_access_flag|nd::immutable_access_flag) : access_flags;
+    access_flags = access_flags ? access_flags
+                                : (int32_t)nd::default_access_flags;
+    // If the access_flags are just readonly, add immutable
+    // because we just created a unique instance
+    access_flags = (access_flags != nd::read_access_flag)
+                    ? access_flags
+                    : (nd::read_access_flag|nd::immutable_access_flag);
     result.get_ndo()->m_flags = access_flags;
     return result;
 }
