@@ -382,46 +382,11 @@ TEST(Array, ConstructorMemoryLayouts) {
     }
 }
 
-#if 0
-TEST(Array, CharArrayConstructor) {
-    nd::array a;
-    char values[8] = {1,2,3,4,5,6,7,8};
-
-    // Constructor assignment
-    a = values;
-    EXPECT_EQ(1, a.get_ndim());
-    EXPECT_EQ(8, a.get_shape()[0]);
-    EXPECT_EQ(ndt::make_type<char>(), a.get_type());
-    EXPECT_EQ(1, a(0).as<char>());
-    EXPECT_EQ(2, a(1).as<char>());
-    EXPECT_EQ(3, a(2).as<char>());
-    EXPECT_EQ(4, a(3).as<char>());
-    EXPECT_EQ(5, a(4).as<char>());
-    EXPECT_EQ(6, a(5).as<char>());
-    EXPECT_EQ(7, a(6).as<char>());
-    EXPECT_EQ(8, a(7).as<char>());
-
-    // Value assignment
-    a.vals() = 0;
-    EXPECT_EQ(0, a(0).as<char>());
-    a.vals() = values;
-    EXPECT_EQ(1, a(0).as<char>());
-    EXPECT_EQ(2, a(1).as<char>());
-    EXPECT_EQ(3, a(2).as<char>());
-    EXPECT_EQ(4, a(3).as<char>());
-    EXPECT_EQ(5, a(4).as<char>());
-    EXPECT_EQ(6, a(5).as<char>());
-    EXPECT_EQ(7, a(6).as<char>());
-    EXPECT_EQ(8, a(7).as<char>());
-}
-
-#ifdef DYND_INIT_LIST
-TEST(Array, InitializerLists) {
+TEST(Array, InitFromInitializerLists) {
     nd::array a = {1, 2, 3, 4, 5};
-    EXPECT_EQ(5, a.get_num_elements());
-    EXPECT_EQ(ndt::make_type<int>(), a.get_type());
-    EXPECT_EQ(1, a.get_ndim());
-    EXPECT_EQ(5, a.get_shape()[0]);
+    EXPECT_EQ(ndt::make_type<int>(), a.get_dtype());
+    ASSERT_EQ(1u, a.get_ndim());
+    ASSERT_EQ(5, a.get_shape()[0]);
     EXPECT_EQ((int)sizeof(int), a.get_strides()[0]);
     const int *ptr_i = (const int *)a.get_readonly_originptr();
     EXPECT_EQ(1, ptr_i[0]);
@@ -431,11 +396,10 @@ TEST(Array, InitializerLists) {
     EXPECT_EQ(5, ptr_i[4]);
 
     nd::array b = {{1., 2., 3.}, {4., 5., 6.25}};
-    EXPECT_EQ(6, b.get_num_elements());
-    EXPECT_EQ(ndt::make_type<double>(), b.get_type());
-    EXPECT_EQ(2, b.get_ndim());
-    EXPECT_EQ(2, b.get_shape()[0]);
-    EXPECT_EQ(3, b.get_shape()[1]);
+    EXPECT_EQ(ndt::make_type<double>(), b.get_dtype());
+    ASSERT_EQ(2u, b.get_ndim());
+    ASSERT_EQ(2, b.get_shape()[0]);
+    ASSERT_EQ(3, b.get_shape()[1]);
     EXPECT_EQ(3*(int)sizeof(double), b.get_strides()[0]);
     EXPECT_EQ((int)sizeof(double), b.get_strides()[1]);
     const double *ptr_d = (const double *)b.get_readonly_originptr();
@@ -448,12 +412,11 @@ TEST(Array, InitializerLists) {
 
     // Testing assignment operator with initializer list (and 3D nested list)
     a = {{{1LL, 2LL}, {-1LL, -2LL}}, {{4LL, 5LL}, {6LL, 1LL}}};
-    EXPECT_EQ(8, a.get_num_elements());
-    EXPECT_EQ(ndt::make_type<long long>(), a.get_type());
-    EXPECT_EQ(3, a.get_ndim());
-    EXPECT_EQ(2, a.get_shape()[0]);
-    EXPECT_EQ(2, a.get_shape()[1]);
-    EXPECT_EQ(2, a.get_shape()[2]);
+    EXPECT_EQ(ndt::make_type<long long>(), a.get_dtype());
+    ASSERT_EQ(3u, a.get_ndim());
+    ASSERT_EQ(2, a.get_shape()[0]);
+    ASSERT_EQ(2, a.get_shape()[1]);
+    ASSERT_EQ(2, a.get_shape()[2]);
     EXPECT_EQ(4*(int)sizeof(long long), a.get_strides()[0]);
     EXPECT_EQ(2*(int)sizeof(long long), a.get_strides()[1]);
     EXPECT_EQ((int)sizeof(long long), a.get_strides()[2]);
@@ -471,9 +434,6 @@ TEST(Array, InitializerLists) {
     EXPECT_THROW((a = {{1,2,3}, {1,2}}), runtime_error);
     EXPECT_THROW((a = {{{1},{2},{3}}, {{1},{2},{3, 4}}}), runtime_error);
 }
-#endif // DYND_INIT_LIST
-
-#endif
 
 TEST(Array, InitFromNestedCArray) {
     int i0[2][3] = {{1,2,3}, {4,5,6}};

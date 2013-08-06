@@ -46,12 +46,13 @@ inline bool DYND_ISNAN(long double x) {
 #  define DYND_CONSTEXPR constexpr
 // Use rvalue references on gcc >= 4.7
 #  define DYND_RVALUE_REFS
+#  define DYND_ISNAN(x) (std::isnan(x))
 #else
 // Don't use constexpr on gcc < 4.7
 #  define DYND_CONSTEXPR
+#  define DYND_ISNAN(x) isnan(x)
 #endif
 
-# define DYND_ISNAN(x) isnan(x)
 
 // Check for __float128 (added in gcc 4.6)
 // #if __GNUC__ > 4 || (__GNUC__ == 4 && (__GNUC_MINOR__ >= 6))

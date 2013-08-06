@@ -69,7 +69,7 @@ namespace ndt {
     {
         std::vector<ndt::type> fields;
         fields.push_back(tp0);
-        return make_tuple(fields);
+        return ndt::make_tuple(fields);
     }
 
     /** Makes a tuple type with the specified fields, using the standard layout */
@@ -78,7 +78,7 @@ namespace ndt {
         std::vector<ndt::type> fields;
         fields.push_back(tp0);
         fields.push_back(tp1);
-        return make_tuple(fields);
+        return ndt::make_tuple(fields);
     }
 
     /** Makes a tuple type with the specified fields, using the standard layout */
@@ -88,7 +88,7 @@ namespace ndt {
         fields.push_back(tp0);
         fields.push_back(tp1);
         fields.push_back(tp2);
-        return make_tuple(fields);
+        return ndt::make_tuple(fields);
     }
 
     /** Makes a tuple type with the specified fields, using the standard layout */
@@ -99,7 +99,7 @@ namespace ndt {
         fields.push_back(tp1);
         fields.push_back(tp2);
         fields.push_back(tp3);
-        return make_tuple(fields);
+        return ndt::make_tuple(fields);
     }
 } // namespace ndt
 

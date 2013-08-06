@@ -58,6 +58,12 @@ class array {
 public:
     /** Constructs an array with no buffer (NULL state) */
     array();
+
+    /** Copy constructs an array */
+    inline array(const array& rhs)
+        : m_memblock(rhs.m_memblock)
+    {}
+
     /**
      * Constructs a zero-dimensional scalar from a C++ scalar.
      *
@@ -105,6 +111,19 @@ public:
     /** Specialize to create 1D arrays of strings */
     template<int N>
     array(const char *(&rhs)[N]);
+
+#ifdef DYND_INIT_LIST
+    /** Constructs an array from a 1D initializer list */
+    template<class T>
+    array(std::initializer_list<T> il);
+    /** Constructs an array from a 2D initializer list */
+    template<class T>
+    array(std::initializer_list<std::initializer_list<T> > il);
+    /** Constructs an array from a 3D initializer list */
+    template<class T>
+    array(std::initializer_list<std::initializer_list<std::initializer_list<T> > > il);
+#endif // DYND_INIT_LIST
+
 
     /**
      * Constructs an array from a std::vector.
@@ -442,11 +461,12 @@ public:
      *                          use true, if you want to write values, typically
      *                          use false.
      */
-    array at_array(size_t nindices, const irange *indices, bool collapse_leading = true) const;
+    array at_array(size_t nindices, const irange *indices,
+                    bool collapse_leading = true) const;
 
     /**
-     * The function call operator is used for indexing. Overloading operator[] isn't
-     * practical for multidimensional objects.
+     * The function call operator is used for indexing. Overloading
+     * operator[] isn't practical for multidimensional objects.
      */
     array operator()(const irange& i0) const {
         return at_array(1, &i0);
@@ -904,62 +924,42 @@ namespace detail {
 
 // Implementation of initializer list construction
 template<class T>
-dynd::array::array(std::initializer_list<T> il)
+dynd::nd::array::array(std::initializer_list<T> il)
     : m_memblock()
 {
     intptr_t dim0 = il.size();
-    intptr_t stride = (dim0 == 1) ? 0 : sizeof(T);
-    char *originptr = 0;
-    memory_block_ptr memblock = make_fixed_size_pod_memory_block(sizeof(T) * dim0, sizeof(T), &originptr);
-    DYND_MEMCPY(originptr, il.begin(), sizeof(T) * dim0);
-    make_strided_array_node(ndt::make_type<T>(), 1, &dim0, &stride,
-                            originptr, read_access_flag | write_access_flag, DYND_MOVE(memblock)).swap(m_memblock);
+    *this = make_strided_array(ndt::make_type<T>(),
+                    1, &dim0, nd::default_access_flags, NULL);
+    DYND_MEMCPY(get_ndo()->m_data_pointer, il.begin(), sizeof(T) * dim0);
 }
 template<class T>
-dynd::array::array(std::initializer_list<std::initializer_list<T> > il)
+dynd::nd::array::array(std::initializer_list<std::initializer_list<T> > il)
     : m_memblock()
 {
     typedef std::initializer_list<std::initializer_list<T> > S;
-    intptr_t shape[2], strides[2];
+    intptr_t shape[2];
 
     // Get and validate that the shape is regular
     detail::initializer_list_shape<S>::compute(shape, il);
-    // Compute the number of elements in the array, and the strides at the same time
-    intptr_t num_elements = 1, stride = sizeof(T);
-    for (int i = 1; i >= 0; --i) {
-        strides[i] = (shape[i] == 1) ? 0 : stride;
-        num_elements *= shape[i];
-        stride *= shape[i];
-    }
-    char *originptr = 0;
-    memory_block_ptr memblock = make_fixed_size_pod_memory_block(sizeof(T) * num_elements, sizeof(T), &originptr);
-    T *dataptr = reinterpret_cast<T *>(originptr);
+    *this = make_strided_array(ndt::make_type<T>(),
+                    2, shape, nd::default_access_flags, NULL);
+    T *dataptr = reinterpret_cast<T *>(get_ndo()->m_data_pointer);
     detail::initializer_list_shape<S>::copy_data(&dataptr, il);
-    make_strided_array_node(ndt::make_type<T>(), 2, shape, strides,
-                        originptr, read_access_flag | write_access_flag, DYND_MOVE(memblock)).swap(m_memblock);
 }
 template<class T>
-dynd::array::array(std::initializer_list<std::initializer_list<std::initializer_list<T> > > il)
+dynd::nd::array::array(std::initializer_list<std::initializer_list<std::initializer_list<T> > > il)
     : m_memblock()
 {
-    typedef std::initializer_list<std::initializer_list<std::initializer_list<T> > > S;
-    intptr_t shape[3], strides[3];
+    typedef std::initializer_list<std::initializer_list<
+                    std::initializer_list<T> > > S;
+    intptr_t shape[3];
 
     // Get and validate that the shape is regular
     detail::initializer_list_shape<S>::compute(shape, il);
-    // Compute the number of elements in the array, and the strides at the same time
-    intptr_t num_elements = 1, stride = sizeof(T);
-    for (int i = 2; i >= 0; --i) {
-        strides[i] = (shape[i] == 1) ? 0 : stride;
-        num_elements *= shape[i];
-        stride *= shape[i];
-    }
-    char *originptr = 0;
-    memory_block_ptr memblock = make_fixed_size_pod_memory_block(sizeof(T) * num_elements, sizeof(T), &originptr);
-    T *dataptr = reinterpret_cast<T *>(originptr);
+    *this = make_strided_array(ndt::make_type<T>(),
+                    3, shape, nd::default_access_flags, NULL);
+    T *dataptr = reinterpret_cast<T *>(get_ndo()->m_data_pointer);
     detail::initializer_list_shape<S>::copy_data(&dataptr, il);
-    make_strided_array_node(ndt::make_type<T>(), 3, shape, strides,
-                    originptr, read_access_flag | write_access_flag, DYND_MOVE(memblock)).swap(m_memblock);
 }
 #endif // DYND_INIT_LIST
 
@@ -1002,7 +1002,8 @@ nd::array::array(const T (&rhs)[N])
     intptr_t shape[ndim];
     size_t size = detail::fill_shape<T[N]>::fill(shape);
 
-    *this = make_strided_array(ndt::type(static_cast<type_id_t>(detail::uniform_type_from_array<T>::type_id)),
+    *this = make_strided_array(
+                    ndt::type(static_cast<type_id_t>(detail::uniform_type_from_array<T>::type_id)),
                     ndim, shape, read_access_flag|write_access_flag, NULL);
     DYND_MEMCPY(get_ndo()->m_data_pointer, reinterpret_cast<const void *>(&rhs), size);
 }

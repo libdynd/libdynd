@@ -426,7 +426,7 @@ DYND_FORCE_BIG_TYPE(dynd_float128, dynd_float128);
                 return DYND_ISNAN(v1.imag()) && !DYND_ISNAN(v0.imag());
             } else if (v0.real() == v1.real() || (DYND_ISNAN(v0.real()) && DYND_ISNAN(v1.real()))) {
                 return v0.imag() < v1.imag() || (DYND_ISNAN(v1.imag()) && !DYND_ISNAN(v0.imag()));
-            }  else {
+            } else {
                 return DYND_ISNAN(v1.real());
             }
         }
